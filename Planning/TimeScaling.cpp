@@ -31,6 +31,10 @@ using namespace Optimization;
 #define SAVE_CONTROL_POINTS 0
 #define SAVE_COLLOCATION_POINTS 0
 
+#define SPLINE_INTERPOLATE_FUNC MonotonicInterpolate
+//#define SPLINE_INTERPOLATE_FUNC SplineInterpolate
+
+
 //The program will warn if the path velocity exceeds vWarningThreshold or
 //the acceleration exceeds aWarningThreshold (this usually indicates some
 //interpolation error)
@@ -2719,13 +2723,11 @@ void CustomTimeScaling::SetPath(const MultiPath& path,const vector<Real>& paramD
   for(size_t i=0;i<smoothPaths.size();i++) {
     Assert(!path.HasVelocity(i));
     if(path.HasTiming(i)) {
-      //MonotonicInterpolate(path.sections[i].milestones,path.sections[i].times,smoothPaths[i],&cspace,&manifold);
-      SplineInterpolate(path.sections[i].milestones,path.sections[i].times,smoothPaths[i],&cspace,&manifold);
+      SPLINE_INTERPOLATE_FUNC(path.sections[i].milestones,path.sections[i].times,smoothPaths[i],&cspace,&manifold);
     }
     else {
       //MonotonicAccelInterpolate(path.sections[i].milestones,smoothPaths[i],&cspace,&manifold);
-      //MonotonicInterpolate(path.sections[i].milestones,smoothPaths[i],&cspace,&manifold);
-      SplineInterpolate(path.sections[i].milestones,smoothPaths[i],&cspace,&manifold);
+      SPLINE_INTERPOLATE_FUNC(path.sections[i].milestones,smoothPaths[i],&cspace,&manifold);
     }
   }
 

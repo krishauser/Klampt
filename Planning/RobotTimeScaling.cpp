@@ -17,8 +17,8 @@
 #define SAVE_INTERPOLATING_CURVES 0
 #define SAVE_LORES_INTERPOLATING_CURVES 0
 
-//#define SPLINE_INTERPOLATE_FUNC MonotonicInterpolate
-#define SPLINE_INTERPOLATE_FUNC SplineInterpolate
+#define SPLINE_INTERPOLATE_FUNC MonotonicInterpolate
+//#define SPLINE_INTERPOLATE_FUNC SplineInterpolate
 
 //f-tolerances are set to a scaling of the x-tolerances by this amount
 const static Real gConstraintToleranceScale = 1e-2;
@@ -355,7 +355,6 @@ bool InterpolateConstrainedMultiPath(Robot& robot,const MultiPath& path,vector<G
       RobotGeodesicManifold manifold(robot);
       paths.resize(path.sections.size());
       for(size_t i=0;i<path.sections.size();i++) {
-	/** TEMP */
 	if(path.sections[i].times.empty()) {
 	  SPLINE_INTERPOLATE_FUNC(path.sections[i].milestones,paths[i].segments,
 			       &space,&manifold);

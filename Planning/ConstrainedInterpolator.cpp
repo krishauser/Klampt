@@ -6,11 +6,66 @@
 #include <queue>
 using namespace Math3D;
 
+//optional flags to reduce curvature of the path by adjusting tangent vectors
+
+//this alters the initial tangents, so it breaks C1 continuity when
+//interpolating through multiple points, but might improve smoothness
+//if you are interpolating only two configs. (not recommended by default)
 #define CONDITION_INITIAL_TANGENTS 0
+//this conditions the bisected tangent and should always improve smoothness (recommended by default)
 #define CONDITION_MIDDLE_TANGENTS 0
+//this conditions the leaf tangents to minimize curvature. Breaks
+//C1 continuity  (not recommended by default)
+#define CONDITION_LEAF_TANGENTS 0
+
+//this doesn't work at the moment due to unequal durations
 #define OPTIMIZE_TANGENTS 0
 
+//if this is on, conditioning doesn't consider floating base joint elements
+//0-5
+#define FLOATING_BASE 1
+
+//if turned on, prints out debug information when interpolating constrained
+//splines
+#define DEBUG_ACCELS 0
+
+//if turned on, checks velocities and accelerations of the projected
+//curve and warns if they exceed the following thresholds
+#define DEBUG_PROJECTED_CURVES 1
+const static Real vWarningThreshold = 100, aWarningThreshold = 1000;
+
+//Choose which method is used for MultiSmoothInterpolate's first step.
+//MonotonicInterpolate avoids overshoots, but SplineInterpolate may lead to
+//paths with lower curvature
+#define SPLINE_INTERPOLATE_FUNC MonotonicInterpolate
+//#define SPLINE_INTERPOLATE_FUNC SplineInterpolate
+
+
 const static int verbose = 0;
+
+int DebugCurve(const GeneralizedCubicBezierCurve& c,Real duration)
+{
+  Vector vmin,vmax,amin,amax;
+  c.GetDerivBounds(vmin,vmax,amin,amax);
+
+  vmin /= duration;
+  vmax /= duration;
+  amin /= Sqr(duration);
+  amax /= Sqr(duration);
+  for(size_t j=0;j<vmin.n;j++) {
+    if(vmin[j] < -vWarningThreshold || vmax[j] > vWarningThreshold || amin[j] < -aWarningThreshold || amax[j] > aWarningThreshold ) {
+      printf("Projected deriv bounds seem odd on entry %d\n",j);
+      printf("x0 %g, x1 %g, x2 %g, x3 %g\n",c.x0[j],c.x1[j],c.x2[j],c.x3[j]);
+      printf("duration %g\n",duration);
+      printf("Deriv bounds %g %g, accel bounds %g %g\n",vmin[j],vmax[j],amin[j],amax[j]);
+
+      printf("Press enter to continue\n");
+      getchar();
+      return j;
+    }
+  }
+  return -1;
+}
 
 //scales the tangents ta and tb so that curvature is minimized
 //a = -2(qb-qa) + ta + tb
@@ -66,59 +121,86 @@ void ConditionMiddleTangent(GeneralizedCubicBezierCurve& c1,GeneralizedCubicBezi
 {
   /*
   Vector a;
-  c1.Accel(0,a);
+  c1.Accel(0,a); for(int i=0;i<6;i++) a(i)=0;
   Real oldAccelStart = a.norm();
-  c1.Accel(1,a);
+  c1.Accel(1,a); for(int i=0;i<6;i++) a(i)=0;
   Real oldAccelMid = a.norm();
-  c2.Accel(0,a);
+  c2.Accel(0,a); for(int i=0;i<6;i++) a(i)=0;
   Real oldAccelMid2 = a.norm();
-  c2.Accel(1,a);
+  c2.Accel(1,a); for(int i=0;i<6;i++) a(i)=0;
   Real oldAccelEnd = a.norm();
   */
-
   Vector t20;
   c1.Deriv(1,t20);
+
+#if FLOATING_BASE
+  //HACK: ignore floating base joints
+  Vector temp = t20;
+  for(int i=0;i<6;i++) temp(i) = 0;
+  swap(temp,t20);
+#else 
+  Vector temp;
+  temp.setRef(t20);
+#endif //FLOATING_BASE
+
+  if(temp.normSquared() < 1e-6) return;
   /*
-  //HACK -- measure only for non-free floating robot joints
-  for(int i=0;i<6;i++) t20(i) = 0;
-  */
-  if(t20.normSquared() < 1e-6) return;
-  Vector topt1,topt2;
+  Vector topt1,topt2,corr1,corr2;
   if(c1.manifold) {
     c1.manifold->InterpolateDeriv(c1.x1,c1.x3,1.0,topt1);
     c2.manifold->InterpolateDeriv(c2.x0,c2.x2,0.0,topt2);
+    c1.manifold->InterpolateDeriv(c1.x1,c1.x0,0.0,corr1);
+    c2.manifold->InterpolateDeriv(c2.x3,c2.x2,1.0,corr2);
+    corr1 /= 3.0;
+    corr2 /= 3.0;
   }
   else {
     topt1 = (c1.x3-c1.x1);
     topt2 = (c2.x2-c2.x0);
+    corr1 = (c1.x0-c1.x1)/3.0;
+    corr2 = (c2.x3-c2.x2)/3.0;
   }
-  Vector v = (topt2+topt1)*0.25;
-  Real c = v.dot(t20)/dot(t20,t20);
-  if(c < 0.1 || c > 0.5) {
-    cout<<"Middle tangent scale (ideal 1/3): "<<c<<endl;
-    getchar();
+  topt1 += corr1;
+  topt2 -= corr2;
+  topt1 *= 0.5;
+  topt2 *= 0.5;
+  Vector v = (topt1+topt2)*0.5;
+  */
+  Vector v1,v2;
+  if(c1.manifold) {
+    c1.manifold->InterpolateDeriv(c1.x1,c2.x2,0.5,v1);
+    c2.manifold->InterpolateDeriv(c1.x0,c2.x3,0.5,v2);
   }
+  else {
+    v1 = (c1.x2-c1.x1);
+    v2 = (c2.x3-c1.x0);
+  }
+  Vector v = 0.4*v1 - 0.1*v2;
+  //v is now the optimal tangent
+
+  Real c = v.dot(temp)/dot(temp,temp);
   if(c1.manifold)
     c1.manifold->Integrate(c1.x3,t20*(-c),c1.x2);
   else
     c1.x2 = c1.x3 - c*t20;
   if(c2.manifold)
-    c2.manifold->Integrate(c2.x0,t20*(-c),c2.x1);
+    c2.manifold->Integrate(c2.x0,t20*c,c2.x1);
   else
     c2.x1 = c2.x0 + c*t20;
 
   /*
-  c1.Accel(0,a);
+  c1.Accel(0,a); for(int i=0;i<6;i++) a(i)=0;
   Real newAccelStart = a.norm();
-  c1.Accel(1,a);
+  c1.Accel(1,a); for(int i=0;i<6;i++) a(i)=0;
   Real newAccelMid = a.norm();
-  c2.Accel(0,a);
+  c2.Accel(0,a); for(int i=0;i<6;i++) a(i)=0;
   Real newAccelMid2 = a.norm();
-  c2.Accel(1,a);
+  c2.Accel(1,a); for(int i=0;i<6;i++) a(i)=0;
   Real newAccelEnd = a.norm();
+  printf("Tangent scaling %g\n",c);
+  printf("Accel change: %g %g %g %g -> %g %g %g %g\n",oldAccelStart,oldAccelMid,oldAccelMid2,oldAccelEnd,newAccelStart,newAccelMid,newAccelMid2,newAccelEnd);
+  getchar();
   */
-  //printf("Accel change: %g %g %g %g -> %g %g %g %g\n",oldAccelStart,oldAccelMid,oldAccelMid2,oldAccelEnd,newAccelStart,newAccelMid,newAccelMid2,newAccelEnd);
-  //getchar();
 }
 
 ConstrainedInterpolator::ConstrainedInterpolator(CSpace* _space,VectorFieldFunction* _constraint)
@@ -364,7 +446,7 @@ bool SmoothConstrainedInterpolator::Make(const Config& qa,const Vector& da,const
     //getchar(); 
 
 #if OPTIMIZE_TANGENTS
-    if(manifold) FatalError("Can't optimize tangents with a manifold");
+    //if(manifold) FatalError("Can't optimize tangents with a manifold");
     //scale the tangents of the curve so that the midpoint gets closer to x
     //xmid = (x0/8+3/8 x1 + 3/8 x2 + x3/8) + 3/8 (alpha (x1-x0) - beta (x3-x2))
     //Solve least squares
@@ -404,8 +486,18 @@ bool SmoothConstrainedInterpolator::Make(const Config& qa,const Vector& da,const
 
     if(checkConstraints && !space->IsFeasible(x)) return false;
 
+    //Between the following three methods, there's really no major difference
+    //in the results
+    //1. non-specialized derivative
     //c->first.Deriv(0.5,v);
-    c->first.MidpointDeriv(v);
+
+    //2. specialized midpoint derivative
+    //c->first.MidpointDeriv(v);
+
+    //3. no derivative, use differencing
+    manifold->InterpolateDeriv(c->first.x0,c->first.x3,0.5,v);
+
+    //project the velocity to the manifold
     ProjectVelocity(x,v);
 
     //subdivide, insert the split segments into the queue
@@ -497,12 +589,54 @@ bool SmoothConstrainedInterpolator::Make(const Config& qa,const Vector& da,const
       return false;
     }
 
+#if DEBUG_PROJECTED_CURVES
+    int debugIndex = DebugCurve(c1,0.5*c->second);
+    debugIndex = DebugCurve(c2,0.5*c->second);
+#endif //DEBUG_PROJECTED_CURVES
+
     //need to scale previous and next durations by 0.5
     Real origDuration = c->second;
     c->first = c1;
     c->second = 0.5*origDuration;
     list<pair<GeneralizedCubicBezierCurve,double> >::iterator m=lpath.insert(n,pair<GeneralizedCubicBezierCurve,double>(c2,0.5*origDuration));
-
+    /*
+    Assert(c->second == m->second);
+    m--;
+    Assert(m==c);
+    m++;
+    if(n != lpath.end()) {
+      Vector vp,vn;
+      n->first.Deriv(0,vn);
+      vn /= n->second;
+      m->first.Deriv(1,vp);
+      vp /= m->second;
+      if(!vn.isEqual(vp,1e-2)) {
+	printf("Next derivative inequality!\n");
+	cout<<"End: "<<vp<<endl;
+	cout<<"Duration "<<m->second<<endl;
+	cout<<"Start of next: "<<vn<<endl;
+	cout<<"Duration "<<n->second<<endl;
+	getchar();
+      }
+    }
+    n = c;
+    n--;
+    if(n != lpath.end()) {
+      Vector vp,vn;
+      c->first.Deriv(0,vn);
+      vn /= c->second;
+      n->first.Deriv(1,vp);
+      vp /= n->second;
+      if(!vn.isEqual(vp,1e-2)) {
+	printf("Prev derivative inequality!\n");
+	cout<<"End: "<<vp<<endl;
+	cout<<"Duration "<<n->second<<endl;
+	cout<<"Start of next: "<<vn<<endl;
+	cout<<"Duration "<<c->second<<endl;
+	getchar();
+      }
+    }
+    */
     s.prev = c;
     s.length = l1;
     if(s.length > xtol) q.push(s);
@@ -512,6 +646,12 @@ bool SmoothConstrainedInterpolator::Make(const Config& qa,const Vector& da,const
     if(s.length > xtol) q.push(s);
   }
 
+#if CONDITION_LEAF_TANGENTS
+  for(list<pair<GeneralizedCubicBezierCurve,double> >::iterator i=lpath.begin();i!=lpath.end();i++) {
+    ConditionTangents(i->first);
+  }
+#endif
+
   //read out the path
   path.segments.resize(lpath.size());
   path.durations.resize(lpath.size());
@@ -520,6 +660,28 @@ bool SmoothConstrainedInterpolator::Make(const Config& qa,const Vector& da,const
     path.segments[k] = i->first;
     path.durations[k] = i->second;
   }
+  /*
+  for(size_t i=0;i+1<path.segments.size();i++) {
+    Vector vp,vn;
+    path.segments[i].Deriv(1,vp);
+    vp /= path.durations[i];
+    path.segments[i+1].Deriv(0,vn);
+    vn /= path.durations[i+1];
+
+    if(!vn.isEqual(vp,1e-2)) {
+      printf("Derivative inequality!\n");
+      cout<<"End: "<<vp<<endl;
+      cout<<"Duration "<<path.durations[i]<<endl;
+      cout<<"Start of next: "<<vn<<endl;
+      cout<<"Duration "<<path.durations[i+1]<<endl;
+      getchar();
+    }
+    else {
+      if(path.durations[i] != path.durations[i+1])
+	cout<<"Different durations work!"<<endl;
+    }
+  }
+  */
   return true;
 }
 
@@ -585,8 +747,7 @@ bool MultiSmoothInterpolate(SmoothConstrainedInterpolator& interp,const vector<V
   Vector temp;
   GeneralizedCubicBezierSpline cpath;
   vector<GeneralizedCubicBezierCurve> pathSegs;
-  MonotonicInterpolate(pts,pathSegs,interp.space,interp.manifold);
-  //SplineInterpolate(pts,pathSegs,interp.space,interp.manifold);
+  SPLINE_INTERPOLATE_FUNC(pts,pathSegs,interp.space,interp.manifold);
   Assert(pathSegs.size()+1==pts.size());
   vector<Vector> derivs(pts.size());
   pathSegs[0].Deriv(0,derivs[0]);
@@ -634,8 +795,7 @@ bool MultiSmoothInterpolate(SmoothConstrainedInterpolator& interp,const vector<V
   Vector temp;
   GeneralizedCubicBezierSpline cpath;
   vector<GeneralizedCubicBezierCurve> pathSegs;
-  MonotonicInterpolate(pts,pathSegs,interp.space,interp.manifold);
-  //SplineInterpolate(pts,pathSegs,interp.space,interp.manifold);
+  SPLINE_INTERPOLATE_FUNC(pts,pathSegs,interp.space,interp.manifold);
   vector<Vector> derivs(pts.size());
   derivs[0] = dq0;
   for(size_t i=0;i+1<pts.size();i++) 
@@ -666,7 +826,25 @@ bool MultiSmoothInterpolate(SmoothConstrainedInterpolator& interp,const vector<V
       printf("Could not make path between point %d and %d\n",i,i+1);
       return false;
     }
+#if DEBUG_ACCELS
+    Real maxAcc = 0;
+    Real avgAcc = 0;
+    Vector a;
+    for(size_t j=0;j<cpath.segments.size();j++) {
+      cpath.segments[j].Accel(0,a);
+      Real anorm=a.norm()/Sqr(cpath.durations[j]);
+      if(anorm > maxAcc) maxAcc = anorm;
+      avgAcc += anorm;
+      cpath.segments[j].Accel(1,a);
+      anorm=a.norm()/Sqr(cpath.durations[j]);
+      if(anorm > maxAcc) maxAcc = anorm;
+      avgAcc += anorm;
+    }
+    pathSegs[i].Accel(0.5,a);
+    printf("Accel interpolating from point %d -> %d: max %g, avg %g, orig %g\n",i,i+1,maxAcc,avgAcc/(2*cpath.segments.size()),a.norm());
+#endif
     //cout<<"Actual initial velocity: "<<3.0*(cpath.front().x1-cpath.front().x0)/cdurations.front()<<", terminal velocity: "<<3.0*(cpath.back().x3-cpath.back().x2)/cdurations.back()<<endl;
+    //cout<<"Interp segment "<<i<<" duration "<<cpath.TotalTime()<<endl;
     path.Concat(cpath);
   }
   return true;

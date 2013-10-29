@@ -92,7 +92,7 @@ public:
     settings["flatContactTolerance"] = 0.001;
     settings["cleanContactsNTol"] = 0.01;
     settings["cleanContactsXTol"] = 0.01;
-    settings["pathOptimize"]["contactTol"] = 0.1;
+    settings["pathOptimize"]["contactTol"] = 0.05;
     settings["pathOptimize"]["outputResolution"] = 0.01;
     settings["linkCOMRadius"] = 0.01;
     settings["linkFrameSize"] = 0.2;
