@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<world>
+	<robot name="huboplus" file="data/huboplus/huboplus_col.rob" />
+	<terrain file="data/terrains/block.tri" />
+	<terrain file="DRC_Common/ladder_tri/ladder-75-0.30.tri" scale="1 1 1" translation = "0.219615 0.32 0" rotateZ = "3.14159"/>
+</world>

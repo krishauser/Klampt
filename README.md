@@ -1,4 +1,4 @@
-Klampt
-======
+Klamp't
+========
 
-Kris' Locomotion and Manipulation Planning Toolkit
+A robot simulation, planning, and control package from Indiana University

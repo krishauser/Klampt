@@ -1,0 +1,46 @@
+### a 2d monoped (moves in 3D but with a fat foot to stay stable) ###
+TParent 1 0 0   0 1 0   0 0 1   0 0 0  \
+	1 0 0   0 1 0   0 0 1   0 0 0  \
+	1 0 0   0 1 0   0 0 1   0 0 0  \
+	1 0 0   0 1 0   0 0 1   0 0 0  \
+	1 0 0   0 1 0   0 0 1   0 0 0  \
+	1 0 0   0 1 0   0 0 1   0 0 0  \
+	1 0 0   0 1 0   0 0 1   0 -0.1 0  \
+	1 0 0   0 1 0   0 0 1   0.5 0 0  \
+	1 0 0   0 1 0   0 0 1   0.5 0 -0.01  
+parents -1 0 1 2 3 4 \
+	5 6 7 
+axis 1 0 0  0 1 0  0 0 1   0 0 1	0 1 0	1 0 0 \
+	0 1 0	0 1 0	0 1 0
+jointtype p p p r r r \
+	r r r
+q	0 0 1.03 0 0 0 \
+	1.570796 0 -1.570796
+qMin -inf -inf -inf 0 0 0  \
+	-1.2 0 -2.2  
+qMax inf inf inf 6.2831853 6.2831853 6.2831853 \
+	2.3 2.8 -0.5 
+geometry   "" "" "" "" "" "../objects/centeredcube.tri" "../objects/paddle_cube.tri" "../objects/paddle_cube.tri" "../objects/flat_foot.tri"
+geomscale 0 0 0 0 0 0.2 0.5 0.5 1 
+mass       0 0 0 0 0 1 0.2 0.2 0.05 
+automass
+torqueMax  0 0 0 0 0 0 10 10 10 
+accMax     inf inf inf inf inf inf 20 20 20 
+velMax     inf inf inf inf inf inf 10 10 10 
+
+joint floating 5 -1
+joint normal 6
+joint normal 7
+joint normal 8
+
+driver normal 6
+driver normal 7
+driver normal 8
+
+servoP 200 200 200 
+servoI 20 20 20 
+servoD 10 10 10 
+#servoP 0 0 
+#servoI 0 0
+#servoD 0 0
+dryFriction 0.0 0.0 0.0

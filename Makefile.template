@@ -1,0 +1,45 @@
+####  define some variables before including this file ####
+####  SRCS                                             ####
+
+#This defines variables FLAGS INCDIRS DEFINES
+include ../Makefile.config
+
+FLAGS = $(CPPFLAGS) $(addprefix -I, $(INCDIRS)) $(addprefix -D, $(DEFINES))
+
+OBJDIR= objs
+DEPDIR= deps
+vpath %.d $(DEPDIR)
+vpath %.o $(OBJDIR)
+
+OBJS= $(SRCS:.cpp=.o)
+DEPENDS= $(addprefix $(DEPDIR)/,$(SRCS:.cpp=.d))
+
+#################### Start the action #########################
+default: $(OBJS)
+	echo done
+
+.PHONY: clean deps
+
+clean:
+	rm -f $(DEPDIR)/*.d $(OBJDIR)/*.o
+	rmdir $(DEPDIR) $(OBJDIR)
+
+-include $(DEPENDS)
+
+deps: $(DEPENDS)
+	;
+
+$(DEPDIR)/%.d: %.cpp
+	echo $@ $<;
+	mkdir -p $(DEPDIR);
+	$(SHELL) -ec '$(CC) -MM $(FLAGS) $< | sed "s/$*.o/& $*.d/g" > $@'
+
+%.o: %.cpp
+	mkdir -p $(OBJDIR);
+	$(CC) $(FLAGS) -c $*.cpp -o $(OBJDIR)/$*.o
+
+
+
+
+
+
