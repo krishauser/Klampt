@@ -4,27 +4,7 @@
 
 ##################################################
 # Edit the following to suit your configuration
-# GLUI,GLUT,PQP,LPSOLVE,ODE,KRISLIB
 ##################################################
-
-CC = g++
-
-
-uname := $(shell sh -c 'uname 2>/dev/null || echo not')
-uname_O := $(shell sh -c 'uname -o 2>/dev/null || echo not')
-
-CYGWIN = 0
-LINUX = 0
-MAC_OS_X = 0
-ifeq ($(uname_O),Cygwin)
-	CYGWIN = 1
-endif
-ifeq ($(uname),Linux)
-	LINUX = 1
-endif
-ifeq (OSTYPE,MacOSX)
-	MAC_OS_X = 1
-endif
 
 ## Default Settings
 TINYXML = Library/tinyxml
@@ -54,6 +34,24 @@ ASSIMP=Library/assimp--3.0.1270-sdk
 # Probably don't have to modify the following,
 # but can if needed
 ##################################################
+
+CC = g++
+
+uname := $(shell sh -c 'uname 2>/dev/null || echo not')
+uname_O := $(shell sh -c 'uname -o 2>/dev/null || echo not')
+
+CYGWIN = 0
+LINUX = 0
+MAC_OS_X = 0
+ifeq ($(uname_O),Cygwin)
+	CYGWIN = 1
+endif
+ifeq ($(uname),Linux)
+	LINUX = 1
+endif
+ifeq (OSTYPE,MacOSX)
+	MAC_OS_X = 1
+endif
 
 ifeq ($(MAC_OS_X),1)
  DEFINES += MAC_OS_X

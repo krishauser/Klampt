@@ -14,8 +14,12 @@ LIBKLAMPT = -L$(LIBDIR) -lKlampt
 default: RobotTest 
 .PHONY: RobotTest SimTest SimUtil PosMeasure URDFtoRob UserTrials UserTrialsMT deps lib
 
+unpack-deps:
+	cd Library; git clone https://github.com/krishauser/KrisLibrary
+	cd Library; tar xvzf ode-0.11.1.tar.gz
+	cd Library; tar xvzf glui-2.36.tgz
+
 deps: dep-KrisLibrary dep-tinyxml dep-glui dep-ode
-	;
 
 dep-KrisLibrary:
 	cd Library/KrisLibrary; make KrisLibrary
@@ -30,10 +34,8 @@ dep-ode:
 	cd Library/ode-0.11.1; ./configure $(ODECONFIG)
 	cd Library/ode-0.11.1; make
 
-unpack-deps:
-	cd Library; git clone https://github.com/krishauser/KrisLibrary
-	cd Library; tar xvzf ode-0.11.1.tar.gz
-	cd Library; tar xvzf glui-2.36.tgz
+docs:
+	doxygen doxygen.conf
 
 lib:
 	cd Modeling; make

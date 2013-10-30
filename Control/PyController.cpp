@@ -408,7 +408,7 @@ bool PyController::SendCommand(const string& name,const string& str)
 PyController::PyController(Robot& robot)
   :RobotController(robot)
 {
-  fprintf(stderr,"PyController: Python not enabled\n");
+  fprintf(stderr,"Python not enabled, cannot instantiate PyControllers\n");
 }
 
 bool PyController::Load(const string& _moduleName) { return false; }

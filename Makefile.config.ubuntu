@@ -4,7 +4,6 @@
 
 ##################################################
 # Edit the following to suit your configuration
-# GLUI,GLUT,PQP,LPSOLVE,ODE,KRISLIB
 ##################################################
 
 CC=g++
@@ -12,10 +11,10 @@ CC=g++
 BUILDNAME=linux
 
 ## Default Settings
-TINYXML=/usr/include
+TINYXML=Library/tinyxml
 GLUT=/usr
 GLUI=/usr
-ODE=/usr/local
+ODE=Library/ode-0.11.1
 KRISLIB=Library/KrisLibrary
 FREEGLUT=1
 ODEDOUBLE=1
@@ -74,15 +73,10 @@ KRISLIBDIR=$(KRISLIB)/lib
 
 #defines for Makefile and Makefile.template
 
-ifeq ($(MAC_OS_X),1)
-	INCDIRS=.. ../$(KRISLIBINCLUDE) $(GLUTINCLUDE) $(ODE)/include ../$(TINYXML)
-	LIBDIRS= $(GLUTLIBDIR) $(GLPK) $(KRISLIBDIR) $(ODELIBDIR) $(TINYXMLLIBDIR)
-else
-	INCDIRS=/usr/include .. ../$(KRISLIBINCLUDE) $(GLUTINCLUDE) ../$(ODE)/include ../$(TINYXML)
-	LIBDIRS=/usr/lib $(GLUTLIBDIR) $(GLPK)/src $(KRISLIBDIR) $(ODELIBDIR) $(TINYXMLLIBDIR)
-endif
+INCDIRS=/usr/include .. ../$(KRISLIBINCLUDE) ../$(GLUTINCLUDE) ../$(ODE)/include ../$(TINYXML)
+LIBDIRS=/usr/lib $(GLUTLIBDIR) $(GLPK)/src $(KRISLIBDIR) $(ODELIBDIR) $(TINYXMLLIBDIR)
 
-LIBS=KrisLibrary $(GLUTLIBS) ode tinyxml 
+LIBS=KrisLibrary $(GLUTLIBS) ode tinyxml glpk
 
 ifeq ($(HAVE_ASSIMP),1)
 	ASSIMPLIBDIR=$(ASSIMP)/lib
