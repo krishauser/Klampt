@@ -1,5 +1,5 @@
-from robot import *
-from robot.glprogram import *
+from klampt import *
+from klampt.glprogram import *
 import numpy as np
 
 class GLTest(GLRealtimeProgram):

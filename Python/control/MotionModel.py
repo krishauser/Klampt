@@ -1,5 +1,5 @@
 from scipy import sparse
-from robot import vectorops
+from klampt import vectorops
 import math
 import numpy as np
 from leastsq_bounds import leastsq_bounds

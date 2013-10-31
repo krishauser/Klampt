@@ -1,5 +1,5 @@
-from robot import *
-from geometry.glprogram import *
+from klampt import *
+from klampt.glprogram import *
 import numpy as np
 
 class GLTest(GLRealtimeProgram):
@@ -23,8 +23,11 @@ class GLTest(GLRealtimeProgram):
         pass
 
 if __name__ == "__main__":
+    print """mousetest.py: A simple program where the mouse motion, when
+    shift-clicking, gets translated into joint values for an animated robot."""
+
     world = WorldModel()
-    res = world.readFile("../tx90_files/tx90blocks.xml")
+    res = world.readFile("../data/tx90blocks.xml")
     if not res:
         raise RuntimeError("Unable to load world")
     #set a custom initial configuration of the world

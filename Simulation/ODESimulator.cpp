@@ -118,11 +118,11 @@ struct ODEObject
     if(!gODEInitialized) {
       #ifdef dDOUBLE
       if(dCheckConfiguration("ODE_double_precision")!=1) {
-	FatalError("ODE is compiled with single precision, either reconfigure ODE with --enable-double-precision or recompile RobotSim with dDOUBLE");
+	FatalError("ODE is compiled with single precision but Klamp't is compiled with double, either reconfigure ODE with --enable-double-precision or recompile Klamp't with dDOUBLE");
       }
       #else
       if(dCheckConfiguration("ODE_single_precision")!=1) {
-	FatalError("ODE is compiled with double precision, either reconfigure ODE without --enable-double-precision or recompile RobotSim with dSINGLE");
+	FatalError("ODE is compiled with double precision but Klamp't is compiled with single, either reconfigure ODE without --enable-double-precision or recompile Klamp't with dSINGLE");
       }
       #endif
 

@@ -73,6 +73,8 @@ class Geometry3D
   void setPointCloud(const PointCloud&);
   void translate(const double t[3]);
   void transform(const double R[9],const double t[3]);
+  void setCollisionMargin(double margin);
+  double getCollisionMargin();
 
   int world;
   int id;

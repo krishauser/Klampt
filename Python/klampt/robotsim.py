@@ -511,6 +511,14 @@ class Geometry3D(_object):
         """transform(Geometry3D self, double const [9] R, double const [3] t)"""
         return _robotsim.Geometry3D_transform(self, *args)
 
+    def setCollisionMargin(self, *args):
+        """setCollisionMargin(Geometry3D self, double margin)"""
+        return _robotsim.Geometry3D_setCollisionMargin(self, *args)
+
+    def getCollisionMargin(self):
+        """getCollisionMargin(Geometry3D self) -> double"""
+        return _robotsim.Geometry3D_getCollisionMargin(self)
+
     __swig_setmethods__["world"] = _robotsim.Geometry3D_world_set
     __swig_getmethods__["world"] = _robotsim.Geometry3D_world_get
     if _newclass:world = _swig_property(_robotsim.Geometry3D_world_get, _robotsim.Geometry3D_world_set)

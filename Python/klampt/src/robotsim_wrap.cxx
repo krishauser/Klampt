@@ -13612,6 +13612,82 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_Geometry3D_setCollisionMargin(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Geometry3D *arg1 = (Geometry3D *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:Geometry3D_setCollisionMargin",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Geometry3D, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Geometry3D_setCollisionMargin" "', argument " "1"" of type '" "Geometry3D *""'"); 
+  }
+  arg1 = reinterpret_cast< Geometry3D * >(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Geometry3D_setCollisionMargin" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = static_cast< double >(val2);
+  {
+    try {
+      (arg1)->setCollisionMargin(arg2);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Geometry3D_getCollisionMargin(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Geometry3D *arg1 = (Geometry3D *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  double result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:Geometry3D_getCollisionMargin",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Geometry3D, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Geometry3D_getCollisionMargin" "', argument " "1"" of type '" "Geometry3D *""'"); 
+  }
+  arg1 = reinterpret_cast< Geometry3D * >(argp1);
+  {
+    try {
+      result = (double)(arg1)->getCollisionMargin();
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_Geometry3D_world_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   Geometry3D *arg1 = (Geometry3D *) 0 ;
@@ -28607,6 +28683,8 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"Geometry3D_setPointCloud", _wrap_Geometry3D_setPointCloud, METH_VARARGS, (char *)"Geometry3D_setPointCloud(Geometry3D self, PointCloud arg2)"},
 	 { (char *)"Geometry3D_translate", _wrap_Geometry3D_translate, METH_VARARGS, (char *)"Geometry3D_translate(Geometry3D self, double const [3] t)"},
 	 { (char *)"Geometry3D_transform", _wrap_Geometry3D_transform, METH_VARARGS, (char *)"Geometry3D_transform(Geometry3D self, double const [9] R, double const [3] t)"},
+	 { (char *)"Geometry3D_setCollisionMargin", _wrap_Geometry3D_setCollisionMargin, METH_VARARGS, (char *)"Geometry3D_setCollisionMargin(Geometry3D self, double margin)"},
+	 { (char *)"Geometry3D_getCollisionMargin", _wrap_Geometry3D_getCollisionMargin, METH_VARARGS, (char *)"Geometry3D_getCollisionMargin(Geometry3D self) -> double"},
 	 { (char *)"Geometry3D_world_set", _wrap_Geometry3D_world_set, METH_VARARGS, (char *)"Geometry3D_world_set(Geometry3D self, int world)"},
 	 { (char *)"Geometry3D_world_get", _wrap_Geometry3D_world_get, METH_VARARGS, (char *)"Geometry3D_world_get(Geometry3D self) -> int"},
 	 { (char *)"Geometry3D_id_set", _wrap_Geometry3D_id_set, METH_VARARGS, (char *)"Geometry3D_id_set(Geometry3D self, int id)"},

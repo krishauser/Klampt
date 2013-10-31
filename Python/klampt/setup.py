@@ -8,18 +8,22 @@ import glob
 #these probably do not need to be changed
 klamptDir = '../..'
 krisLibraryDir = 'Library/KrisLibrary'
-odedir = 'Library/ode-0.11'
+odedir = 'Library/ode-0.11.1'
 #odedir = 'Library/ode-0.12'
 gluidir = 'Library/glui-2.36'
 #optional
 assimpDir='Library/assimp--3.0.1270-sdk'
+haveassimp = os.path.isdir(assimpDir)
 tinyxmlDir = 'Library/tinyxml'
+#if ODE_DOUBLE is set to true, turn this to true
+odedouble = False
 
 includeDirs = [klamptDir,krisLibraryDir,tinyxmlDir,odedir+'/include','/usr/include','.']
 
 tinyxmlLibDir = tinyxmlDir
-#odelibdir = odedir+'/ode/src/.libs'
-odelibdir = '/usr/local/lib'
+odelibdir = odedir+'/ode/src/.libs'
+#uncomment this if you used "make install" for ODE
+#odelibdir = '/usr/local/lib'
 gluilibdir = gluidir+'/src/lib'
 assimpLibDir = assimpDir+'/lib'
 
@@ -35,6 +39,13 @@ mpsourcefiles = commonfiles + ['motionplanning.cpp','motionplanning_wrap.cxx']
 cosourcefiles = commonfiles + ['collide.cpp','collide_wrap.cxx']
 rfsourcefiles = commonfiles + ['rootfind.cpp','pyvectorfield.cpp','rootfind_wrap.cxx']
 
+#compilation defines
+rsdefines = [('TIXML_USE_STL',None)]
+if odedouble:
+    rsdefines.append(('dDOUBLE',None))
+else:
+    rsdefines.append(('dSINGLE',None))
+
 #needed for KrisLibrary to link
 kllibs = ['KrisLibrary','tinyxml','glpk','glui','GL']
 if on_cygwin:
@@ -46,8 +57,9 @@ kllibs += ['gsl']
 
 #needed for Klampt to link
 libs = ['Klampt']+kllibs+['ode']
-#switch to this if assimp support is desired
-#libs = ['RobotSim']+kllibs+['ode','assimp']
+#link to assimp if assimp support is desired
+if haveassimp:
+    libs.append('assimp')
 
 setup(name='RobotSim',
       version='0.2',
@@ -58,7 +70,7 @@ setup(name='RobotSim',
       ext_modules=[Extension('_robotsim',
                              [os.path.join('src',f) for f in rssourcefiles],
                              include_dirs=includeDirs,
-                             define_macros=[('TIXML_USE_STL',None),('dDOUBLE',None)],
+                             define_macros=rsdefines,
                              library_dirs=libdirs,
                              libraries=libs,
                              language='c++'),

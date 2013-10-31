@@ -4,7 +4,7 @@ import collide
 import se3
 
 
-def makeGeom(trimesh):
+def makeTrimeshGeom(trimesh):
     if len(trimesh.indices)==0:
         return None
     inds = collide.intArray(len(trimesh.indices))
@@ -16,6 +16,36 @@ def makeGeom(trimesh):
     gindex = collide.newGeom()
     collide.makeTriMeshGeom(gindex,verts,inds,len(trimesh.vertices)/3,len(trimesh.indices)/3)
     return gindex
+
+def makePointCloudGeom(pc,radius=0):
+    if len(pc.vertices)==0:
+        return None
+    #make individual points / spheres
+    verts = []
+    for v in len(pc.vertices)/3:
+        vert = [pc.vertices[v*3],pc.vertices[v*3+1],pc.vertices[v*3+2]]
+        verts.append(collide.newGeom())
+        if radius == 0:
+            collide.makePointGeom(verts[-1],vert)
+        else:
+            collide.makeSphereGeom(verts[-1],vert,radius)
+    #make a collision group
+    res = collide.newGeom()
+    vertArray = collide.intArray(len(verts))
+    for index,v in enumerate(verts):
+        vertArray[index] = v
+    collide.makeGroupGeom(res,vertArray,len(verts))
+    return res
+
+def makeGeom(geometry):
+    s = geometry.type()
+    if s=='TriangleMesh':
+        return makeTrimeshGeom(geometry.getTriangleMesh())
+    elif s=='PointCloud':
+        return makePointCloudGeom(geometry.getPointCloud(),geometry.getCollisionMargin())
+    else:
+        print "Geometries of type %s not supported"%(s,)
+        return None
 
 class WorldCollider:
     """
@@ -62,7 +92,7 @@ class WorldCollider:
         
         for i in xrange(world.numTerrains()):
             t = world.terrain(i)
-            g = makeGeom(t.getMesh())
+            g = makeGeom(t.getGeometry())
             if g != None:
                 self.terrains.append(len(self.geomList))
                 self.geomList.append((t,g))
@@ -70,7 +100,7 @@ class WorldCollider:
                 self.terrains.append(-1)
         for i in xrange(world.numRigidObjects()):
             o = world.rigidObject(i)
-            g = makeGeom(o.getMesh())
+            g = makeGeom(o.getGeometry())
             if g != None:
                 self.rigidObjects.append(len(self.geomList))
                 self.geomList.append((o,g))
@@ -81,7 +111,7 @@ class WorldCollider:
             self.robots.append([])
             for j in xrange(r.numLinks()):
                 l = r.getLink(j)
-                g = makeGeom(l.getMesh())
+                g = makeGeom(l.getGeometry())
                 if g != None:
                     self.robots[-1].append(len(self.geomList))
                     self.geomList.append((l,g))

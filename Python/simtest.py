@@ -1,10 +1,9 @@
 #!/usr/bin/python
 import os
 import sys
-import robot
-from robot import *
-from robot.glprogram import *
-from robot import collide
+from klampt import *
+from klampt.glprogram import *
+from klampt import collide
 from control import trajectory_controller
 import importlib
 

@@ -308,6 +308,18 @@ void Geometry3D::transform(const double R[9],const double t[3])
   world.GetGeometry(id).Transform(T);  
 }
 
+void Geometry3D::setCollisionMargin(double margin)
+{
+  RobotWorld& world=worlds[this->world]->world;
+  world.GetGeometry(id).margin = margin;
+}
+
+double Geometry3D::getCollisionMargin()
+{
+  RobotWorld& world=worlds[this->world]->world;
+  return world.GetGeometry(id).margin;
+}
+
 
 void copy(const Vector& vec,vector<double>& v)
 {

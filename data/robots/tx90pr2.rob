@@ -18,7 +18,7 @@ velMaxDeg  0    400    400      430    540    475    760
 #velMaxDeg  0    200    200      215    270    235    380
 accMaxDeg  0    400    400      400    400     400    400
 geometry   "tx90l/part6.tri" "tx90l/part5.tri" "tx90l/part4.tri" "tx90l/part3.tri" "tx90l/part2.tri" "tx90l/part1.tri" ""
-mass       20 10 10 5 5 1 0.1
+mass       20 10 10 5 5 1 0
 automass
 torqueMax  0 800 600 400 200 200 100
 

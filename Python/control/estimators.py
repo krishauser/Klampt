@@ -1,4 +1,4 @@
-from robot import vectorops
+from klampt import vectorops
 from controller import BaseController,LambdaController
 from MotionModel import AdaptiveMotionModel
 

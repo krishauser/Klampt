@@ -1,7 +1,7 @@
 """A test script that does some assorted testing of the robot module"""
 
-from robot import *
-from robot import rootfind
+from klampt import *
+from klampt import rootfind
 import time
 
 world = WorldModel()

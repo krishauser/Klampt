@@ -6,8 +6,8 @@ or reverse a path, and concatenate multiple MultiPaths together.
 """
 
 from hold import *
-from robot import *
-from robot.loader import *
+from loader import *
+import vectorops
 import xml.etree.ElementTree as ET
 from xml.sax.saxutils import escape
 from xml.dom import minidom
