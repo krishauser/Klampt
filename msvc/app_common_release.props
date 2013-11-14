@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ImportGroup Label="PropertySheets" />
   <PropertyGroup Label="UserMacros" />
@@ -10,7 +10,7 @@
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>..\..\Library;..\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>opengl32.lib;glut32.lib;glui32.lib;tinyxml_STL.lib;RobotSim.lib;KrisLibrary.lib;ode_double.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;glut32.lib;glui32.lib;tinyxml_STL.lib;Klampt.lib;KrisLibrary.lib;ode_double.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup />
