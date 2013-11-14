@@ -594,26 +594,13 @@ class MotorCalibrateSettings : public AnyCollection
 {
 public:
   MotorCalibrateSettings() {
-    (*this)["robot"]=string();
-    (*this)["numIters"]=1000;
-    (*this)["maxMilestones"]=gMaxMilestones;
-    (*this)["dt"]=gDefaultTimestep;
-    (*this)["velocityErrorWeight"]=gDefaultVelocityWeight;
-    (*this)["drivers"]=vector<int>();
-    (*this)["fixedLinks"]=vector<int>();
-    (*this)["commandedPaths"]=vector<string>();
-    (*this)["sensedPaths"]=vector<string>();
   }
   bool read(const char* fn) {
     ifstream in(fn,ios::in);
     if(!in) return false;
     AnyCollection newEntries;
     if(!newEntries.read(in)) return false;
-    newEntries.write(cout);
-    cout<<endl;
     merge(newEntries);
-    AnyCollection::write(cout);
-    cout<<endl;
     return true;
   }
   bool write(const char* fn) {
@@ -632,6 +619,15 @@ int main(int argc,const char** argv)
   //return 0;
 
   MotorCalibrateSettings settings;
+  settings["robot"]=string();
+  settings["numIters"]=1000;
+  settings["maxMilestones"]=gMaxMilestones;
+  settings["dt"]=gDefaultTimestep;
+  settings["velocityErrorWeight"]=gDefaultVelocityWeight;
+  settings["drivers"]=vector<int>();
+  settings["fixedLinks"]=vector<int>();
+  settings["commandedPaths"]=vector<string>();
+  settings["sensedPaths"]=vector<string>();
   if(argc <= 1) {
     printf("Usage: MotorCalibrate settings_file\n");
     printf("Writing default settings to motorcalibrate_default.settings");
