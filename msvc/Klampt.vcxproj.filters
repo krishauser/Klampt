@@ -1,0 +1,603 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Header Files\Contact">
+      <UniqueIdentifier>{505b7df5-ded7-4700-8463-c77418ec4fe8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Contact">
+      <UniqueIdentifier>{584b4bb9-4dab-4f9a-971d-70c45ec60a10}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Control">
+      <UniqueIdentifier>{54313921-00e1-417e-8965-c65129e3ef34}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Control">
+      <UniqueIdentifier>{3334bffe-0e18-4211-b35b-2a6aca099baf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\IO">
+      <UniqueIdentifier>{d56ab8e0-3524-475c-8566-749528fed44b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\IO">
+      <UniqueIdentifier>{946cf11f-a146-4d36-880c-441f63675bbd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Modeling">
+      <UniqueIdentifier>{b18b7077-cc42-4c94-9ccd-23edf0a8bf4c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Modeling">
+      <UniqueIdentifier>{a66b56cb-e0bd-4f67-a247-7b500f17857f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Planning">
+      <UniqueIdentifier>{c72c34c7-8ea6-494b-96e3-67c793abeed0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Planning">
+      <UniqueIdentifier>{0d4903dc-3a04-45e4-9185-fe919e5e1111}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Simulation">
+      <UniqueIdentifier>{afc0474b-bcfe-4c8d-860b-ebe8072560eb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Simulation">
+      <UniqueIdentifier>{bed2de52-d87c-4b73-be59-974b7d54cd60}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\View">
+      <UniqueIdentifier>{1fd8c7a7-7ed3-4913-9127-fbeb018168bb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\View">
+      <UniqueIdentifier>{11ce2a39-82ea-4c64-b6f2-a911e78ad232}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\Contact\Utils.h">
+      <Filter>Header Files\Contact</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Contact\ContactDistance.h">
+      <Filter>Header Files\Contact</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Contact\ContactFeature.h">
+      <Filter>Header Files\Contact</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Contact\ContactFeatureMapping.h">
+      <Filter>Header Files\Contact</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Contact\Grasp.h">
+      <Filter>Header Files\Contact</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Contact\Hold.h">
+      <Filter>Header Files\Contact</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Contact\HoldReader.h">
+      <Filter>Header Files\Contact</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Contact\LineReader.h">
+      <Filter>Header Files\Contact</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Contact\Polygon2DSampler.h">
+      <Filter>Header Files\Contact</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Contact\Stance.h">
+      <Filter>Header Files\Contact</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Contact\TriangleSampler.h">
+      <Filter>Header Files\Contact</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Control\Command.h">
+      <Filter>Header Files\Control</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Control\TabulatedController.h">
+      <Filter>Header Files\Control</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Control\Controller.h">
+      <Filter>Header Files\Control</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Control\FeedforwardController.h">
+      <Filter>Header Files\Control</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Control\JointTrackingController.h">
+      <Filter>Header Files\Control</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Control\LoggingController.h">
+      <Filter>Header Files\Control</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Control\OperationalSpaceController.h">
+      <Filter>Header Files\Control</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Control\PathController.h">
+      <Filter>Header Files\Control</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Control\Sensor.h">
+      <Filter>Header Files\Control</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Control\StateEstimator.h">
+      <Filter>Header Files\Control</Filter>
+    </ClInclude>
+    <ClInclude Include="..\IO\Constants.h">
+      <Filter>Header Files\IO</Filter>
+    </ClInclude>
+    <ClInclude Include="..\IO\exception.h">
+      <Filter>Header Files\IO</Filter>
+    </ClInclude>
+    <ClInclude Include="..\IO\XmlWorld.h">
+      <Filter>Header Files\IO</Filter>
+    </ClInclude>
+    <ClInclude Include="..\IO\orXmlEnvironment.h">
+      <Filter>Header Files\IO</Filter>
+    </ClInclude>
+    <ClInclude Include="..\IO\orXmlTags.h">
+      <Filter>Header Files\IO</Filter>
+    </ClInclude>
+    <ClInclude Include="..\IO\PrimitiveShape.h">
+      <Filter>Header Files\IO</Filter>
+    </ClInclude>
+    <ClInclude Include="..\IO\urdf_parser.h">
+      <Filter>Header Files\IO</Filter>
+    </ClInclude>
+    <ClInclude Include="..\IO\URDFConverter.h">
+      <Filter>Header Files\IO</Filter>
+    </ClInclude>
+    <ClInclude Include="..\IO\URDFWorld.h">
+      <Filter>Header Files\IO</Filter>
+    </ClInclude>
+    <ClInclude Include="..\IO\XmlODE.h">
+      <Filter>Header Files\IO</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Modeling\Config.h">
+      <Filter>Header Files\Modeling</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Modeling\World.h">
+      <Filter>Header Files\Modeling</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Modeling\Conversions.h">
+      <Filter>Header Files\Modeling</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Modeling\DynamicPath.h">
+      <Filter>Header Files\Modeling</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Modeling\Environment.h">
+      <Filter>Header Files\Modeling</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Modeling\Interpolate.h">
+      <Filter>Header Files\Modeling</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Modeling\Mass.h">
+      <Filter>Header Files\Modeling</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Modeling\MultiPath.h">
+      <Filter>Header Files\Modeling</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Modeling\ParabolicRamp.h">
+      <Filter>Header Files\Modeling</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Modeling\PumaIK.h">
+      <Filter>Header Files\Modeling</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Modeling\RandomizedSelfCollisions.h">
+      <Filter>Header Files\Modeling</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Modeling\Resources.h">
+      <Filter>Header Files\Modeling</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Modeling\RigidObject.h">
+      <Filter>Header Files\Modeling</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Modeling\Robot.h">
+      <Filter>Header Files\Modeling</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Modeling\SplineInterpolate.h">
+      <Filter>Header Files\Modeling</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Planning\ConfigFixer.h">
+      <Filter>Header Files\Planning</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Planning\TimeScaling.h">
+      <Filter>Header Files\Planning</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Planning\ConstrainedInterpolator.h">
+      <Filter>Header Files\Planning</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Planning\ConstraintChecker.h">
+      <Filter>Header Files\Planning</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Planning\ContactCSpace.h">
+      <Filter>Header Files\Planning</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Planning\ContactTimeScaling.h">
+      <Filter>Header Files\Planning</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Planning\DistanceQuery.h">
+      <Filter>Header Files\Planning</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Planning\NumericalConstraint.h">
+      <Filter>Header Files\Planning</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Planning\ParameterizedVectorField.h">
+      <Filter>Header Files\Planning</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Planning\PlannerObjective.h">
+      <Filter>Header Files\Planning</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Planning\PlannerSettings.h">
+      <Filter>Header Files\Planning</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Planning\RampCSpace.h">
+      <Filter>Header Files\Planning</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Planning\RealTimeIKPlanner.h">
+      <Filter>Header Files\Planning</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Planning\RealTimePlanner.h">
+      <Filter>Header Files\Planning</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Planning\RealTimeRRTPlanner.h">
+      <Filter>Header Files\Planning</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Planning\RobotConstrainedInterpolator.h">
+      <Filter>Header Files\Planning</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Planning\RobotCSpace.h">
+      <Filter>Header Files\Planning</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Planning\RobotTimeScaling.h">
+      <Filter>Header Files\Planning</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Planning\SelfTest.h">
+      <Filter>Header Files\Planning</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Planning\StanceCSpace.h">
+      <Filter>Header Files\Planning</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Simulation\WorldSimulation.h">
+      <Filter>Header Files\Simulation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Simulation\ControlledSimulator.h">
+      <Filter>Header Files\Simulation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Simulation\ODECommon.h">
+      <Filter>Header Files\Simulation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Simulation\ODERigidObject.h">
+      <Filter>Header Files\Simulation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Simulation\ODERobot.h">
+      <Filter>Header Files\Simulation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Simulation\ODESimulator.h">
+      <Filter>Header Files\Simulation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Simulation\ODESurface.h">
+      <Filter>Header Files\Simulation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Simulation\Settings.h">
+      <Filter>Header Files\Simulation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\View\Callbacks.h">
+      <Filter>Header Files\View</Filter>
+    </ClInclude>
+    <ClInclude Include="..\View\ViewTextures.h">
+      <Filter>Header Files\View</Filter>
+    </ClInclude>
+    <ClInclude Include="..\View\RobotPoseWidget.h">
+      <Filter>Header Files\View</Filter>
+    </ClInclude>
+    <ClInclude Include="..\View\ViewEnvironment.h">
+      <Filter>Header Files\View</Filter>
+    </ClInclude>
+    <ClInclude Include="..\View\ViewGrasp.h">
+      <Filter>Header Files\View</Filter>
+    </ClInclude>
+    <ClInclude Include="..\View\ViewHold.h">
+      <Filter>Header Files\View</Filter>
+    </ClInclude>
+    <ClInclude Include="..\View\ViewIK.h">
+      <Filter>Header Files\View</Filter>
+    </ClInclude>
+    <ClInclude Include="..\View\ViewPlot.h">
+      <Filter>Header Files\View</Filter>
+    </ClInclude>
+    <ClInclude Include="..\View\ViewResource.h">
+      <Filter>Header Files\View</Filter>
+    </ClInclude>
+    <ClInclude Include="..\View\ViewRigidObject.h">
+      <Filter>Header Files\View</Filter>
+    </ClInclude>
+    <ClInclude Include="..\View\ViewRobot.h">
+      <Filter>Header Files\View</Filter>
+    </ClInclude>
+    <ClInclude Include="..\View\ViewStance.h">
+      <Filter>Header Files\View</Filter>
+    </ClInclude>
+    <ClInclude Include="..\IO\urdf_color.h">
+      <Filter>Header Files\IO</Filter>
+    </ClInclude>
+    <ClInclude Include="..\IO\urdf_world.h">
+      <Filter>Header Files\IO</Filter>
+    </ClInclude>
+    <ClInclude Include="..\IO\urdf_exception.h">
+      <Filter>Header Files\IO</Filter>
+    </ClInclude>
+    <ClInclude Include="..\IO\urdf_joint.h">
+      <Filter>Header Files\IO</Filter>
+    </ClInclude>
+    <ClInclude Include="..\IO\urdf_link.h">
+      <Filter>Header Files\IO</Filter>
+    </ClInclude>
+    <ClInclude Include="..\IO\urdf_model.h">
+      <Filter>Header Files\IO</Filter>
+    </ClInclude>
+    <ClInclude Include="..\IO\urdf_model_state.h">
+      <Filter>Header Files\IO</Filter>
+    </ClInclude>
+    <ClInclude Include="..\IO\urdf_pose.h">
+      <Filter>Header Files\IO</Filter>
+    </ClInclude>
+    <ClInclude Include="..\IO\urdf_sensor.h">
+      <Filter>Header Files\IO</Filter>
+    </ClInclude>
+    <ClInclude Include="..\IO\urdf_twist.h">
+      <Filter>Header Files\IO</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Simulation\ODECustomGeometry.h">
+      <Filter>Header Files\Simulation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Simulation\ODEGeometry.h">
+      <Filter>Header Files\Simulation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Control\PyController.h">
+      <Filter>Header Files\Control</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\Contact\ContactDistance.cpp">
+      <Filter>Source Files\Contact</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Contact\TriangleSampler.cpp">
+      <Filter>Source Files\Contact</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Contact\ContactFeature.cpp">
+      <Filter>Source Files\Contact</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Contact\ContactFeatureMapping.cpp">
+      <Filter>Source Files\Contact</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Contact\Grasp.cpp">
+      <Filter>Source Files\Contact</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Contact\Hold.cpp">
+      <Filter>Source Files\Contact</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Contact\LineReader.cpp">
+      <Filter>Source Files\Contact</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Contact\Polygon2DSampler.cpp">
+      <Filter>Source Files\Contact</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Contact\Stance.cpp">
+      <Filter>Source Files\Contact</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Contact\Utils.cpp">
+      <Filter>Source Files\Control</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Control\Command.cpp">
+      <Filter>Source Files\Control</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Control\Controller.cpp">
+      <Filter>Source Files\Control</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Control\FeedforwardController.cpp">
+      <Filter>Source Files\Control</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Control\JointTrackingController.cpp">
+      <Filter>Source Files\Control</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Control\LoggingController.cpp">
+      <Filter>Source Files\Control</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Control\OperationalSpaceController.cpp">
+      <Filter>Source Files\Control</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Control\PathController.cpp">
+      <Filter>Source Files\Control</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Control\Sensor.cpp">
+      <Filter>Source Files\Control</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Control\StateEstimator.cpp">
+      <Filter>Source Files\Control</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Control\TabulatedController.cpp">
+      <Filter>Source Files\Control</Filter>
+    </ClCompile>
+    <ClCompile Include="..\IO\Constants.cpp">
+      <Filter>Source Files\IO</Filter>
+    </ClCompile>
+    <ClCompile Include="..\IO\XmlWorld.cpp">
+      <Filter>Source Files\IO</Filter>
+    </ClCompile>
+    <ClCompile Include="..\IO\orXmlEnvironment.cpp">
+      <Filter>Source Files\IO</Filter>
+    </ClCompile>
+    <ClCompile Include="..\IO\orXmlTags.cpp">
+      <Filter>Source Files\IO</Filter>
+    </ClCompile>
+    <ClCompile Include="..\IO\PrimitiveShape.cpp">
+      <Filter>Source Files\IO</Filter>
+    </ClCompile>
+    <ClCompile Include="..\IO\XmlODE.cpp">
+      <Filter>Source Files\IO</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Modeling\DynamicPath.cpp">
+      <Filter>Source Files\Modeling</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Modeling\World.cpp">
+      <Filter>Source Files\Modeling</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Modeling\Environment.cpp">
+      <Filter>Source Files\Modeling</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Modeling\Interpolate.cpp">
+      <Filter>Source Files\Modeling</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Modeling\Mass.cpp">
+      <Filter>Source Files\Modeling</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Modeling\MultiPath.cpp">
+      <Filter>Source Files\Modeling</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Modeling\ParabolicRamp.cpp">
+      <Filter>Source Files\Modeling</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Modeling\RandomizedSelfCollisions.cpp">
+      <Filter>Source Files\Modeling</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Modeling\Resources.cpp">
+      <Filter>Source Files\Modeling</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Modeling\RigidObject.cpp">
+      <Filter>Source Files\Modeling</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Modeling\Robot.cpp">
+      <Filter>Source Files\Modeling</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Modeling\SplineInterpolate.cpp">
+      <Filter>Source Files\Modeling</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Planning\ConstrainedInterpolator.cpp">
+      <Filter>Source Files\Planning</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Planning\TimeScaling.cpp">
+      <Filter>Source Files\Planning</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Planning\ConstraintChecker.cpp">
+      <Filter>Source Files\Planning</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Planning\ContactCSpace.cpp">
+      <Filter>Source Files\Planning</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Planning\DistanceQuery.cpp">
+      <Filter>Source Files\Planning</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Planning\NumericalConstraint.cpp">
+      <Filter>Source Files\Planning</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Planning\PlannerObjective.cpp">
+      <Filter>Source Files\Planning</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Planning\PlannerSettings.cpp">
+      <Filter>Source Files\Planning</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Planning\RampCSpace.cpp">
+      <Filter>Source Files\Planning</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Planning\RealTimePlanner.cpp">
+      <Filter>Source Files\Planning</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Planning\RobotConstrainedInterpolator.cpp">
+      <Filter>Source Files\Planning</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Planning\RobotCSpace.cpp">
+      <Filter>Source Files\Planning</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Planning\RobotTimeScaling.cpp">
+      <Filter>Source Files\Planning</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Planning\SelfTest.cpp">
+      <Filter>Source Files\Planning</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Planning\StanceCSpace.cpp">
+      <Filter>Source Files\Planning</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Simulation\ControlledSimulator.cpp">
+      <Filter>Source Files\Simulation</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Simulation\WorldSimulation.cpp">
+      <Filter>Source Files\Simulation</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Simulation\ODERigidObject.cpp">
+      <Filter>Source Files\Simulation</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Simulation\ODERobot.cpp">
+      <Filter>Source Files\Simulation</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Simulation\ODESimulator.cpp">
+      <Filter>Source Files\Simulation</Filter>
+    </ClCompile>
+    <ClCompile Include="..\View\RobotPoseWidget.cpp">
+      <Filter>Source Files\View</Filter>
+    </ClCompile>
+    <ClCompile Include="..\View\ViewTextures.cpp">
+      <Filter>Source Files\View</Filter>
+    </ClCompile>
+    <ClCompile Include="..\View\ViewEnvironment.cpp">
+      <Filter>Source Files\View</Filter>
+    </ClCompile>
+    <ClCompile Include="..\View\ViewGrasp.cpp">
+      <Filter>Source Files\View</Filter>
+    </ClCompile>
+    <ClCompile Include="..\View\ViewHold.cpp">
+      <Filter>Source Files\View</Filter>
+    </ClCompile>
+    <ClCompile Include="..\View\ViewIK.cpp">
+      <Filter>Source Files\View</Filter>
+    </ClCompile>
+    <ClCompile Include="..\View\ViewPlot.cpp">
+      <Filter>Source Files\View</Filter>
+    </ClCompile>
+    <ClCompile Include="..\View\ViewResource.cpp">
+      <Filter>Source Files\View</Filter>
+    </ClCompile>
+    <ClCompile Include="..\View\ViewRigidObject.cpp">
+      <Filter>Source Files\View</Filter>
+    </ClCompile>
+    <ClCompile Include="..\View\ViewRobot.cpp">
+      <Filter>Source Files\View</Filter>
+    </ClCompile>
+    <ClCompile Include="..\View\ViewStance.cpp">
+      <Filter>Source Files\View</Filter>
+    </ClCompile>
+    <ClCompile Include="..\IO\urdf_model_state.cpp">
+      <Filter>Source Files\IO</Filter>
+    </ClCompile>
+    <ClCompile Include="..\IO\urdf_sensor.cpp">
+      <Filter>Source Files\IO</Filter>
+    </ClCompile>
+    <ClCompile Include="..\IO\URDFConverter.cpp">
+      <Filter>Source Files\IO</Filter>
+    </ClCompile>
+    <ClCompile Include="..\IO\urdf_joint.cpp">
+      <Filter>Source Files\IO</Filter>
+    </ClCompile>
+    <ClCompile Include="..\IO\urdf_world.cpp">
+      <Filter>Source Files\IO</Filter>
+    </ClCompile>
+    <ClCompile Include="..\IO\urdf_link.cpp">
+      <Filter>Source Files\IO</Filter>
+    </ClCompile>
+    <ClCompile Include="..\IO\urdf_model.cpp">
+      <Filter>Source Files\IO</Filter>
+    </ClCompile>
+    <ClCompile Include="..\IO\urdf_pose.cpp">
+      <Filter>Source Files\IO</Filter>
+    </ClCompile>
+    <ClCompile Include="..\IO\urdf_twist.cpp">
+      <Filter>Source Files\IO</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Simulation\ODECustomGeometry.cpp">
+      <Filter>Source Files\Simulation</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Simulation\ODEGeometry.cpp">
+      <Filter>Source Files\Simulation</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Control\PyController.cpp">
+      <Filter>Source Files\Control</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>
