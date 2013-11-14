@@ -1,5 +1,5 @@
-"""This controller accepts ROS JointTrajectory messages
-from the ROS topic '/[robot_name]/joint_trajectory' and writes out
+"""This controller accepts ROS JointCommands messages (from DRCSim)
+from the ROS topic '/[robot_name]/joint_commands' and writes out
 JointState messages to the ROS topic '/[robot_name]/joint_state'.
 
 It also acts as a ROS clock server.
@@ -7,8 +7,7 @@ It also acts as a ROS clock server.
 
 import controller
 import rospy
-from klampt.trajectory import Trajectory
-from trajectory_msgs.msg import JointTrajectory
+from osrf_msgs.msg import JointCommands
 from sensor_msgs.msg import JointState
 from rosgraph_msgs.msg import Clock
 
@@ -24,7 +23,7 @@ class Clock:
     def __init__(self):
         self.clock = Time()
 
-class JointTrajectory:
+class JointCommands:
     def __init__(self):
         pass
 
@@ -64,8 +63,8 @@ rospy = RospyProxy()
 """
 
 class RosRobotController(controller.BaseController):
-    """A controller that reads JointTrajectory from the ROS topic
-    '/[robot_name]/joint_trajectory' and writes JointState to the ROS topic
+    """A controller that reads JointCommands from the ROS topic
+    '/[robot_name]/joint_commands' and writes JointState to the ROS topic
     '/[robot_name]/joint_state'.
 
     Uses PID control with feedforward torques.
@@ -97,87 +96,63 @@ class RosRobotController(controller.BaseController):
         self.pub = rospy.Publisher("/%s/joint_states"%(robot_name,), JointState)
         
         # set up the command subscriber
-        self.firstJointTrajectory = False
-        self.currentJointTrajectoryMsg = None
-        rospy.Subscriber('/%s/joint_trajectory'%(robot_name), JointTrajectory,self.jointTrajectoryCallback)
-
-        # these are parsed in from the trajectory message
-        self.currentTrajectoryStart = 0
-        self.currentTrajectoryNames = []
-        self.currentPositionTrajectory = None
-        self.currentVelocityTrajectory = None
-        self.currentEffortTrajectory = None
+        self.firstJointCommand = False
+        self.newJointCommand = False
+        self.currentJointCommand = JointCommands()
+        self.currentJointCommand.name = self.state.name
+        rospy.Subscriber('/%s/joint_commands'%(robot_name), JointCommands,self.jointCommandCallback)
         return
 
-    def jointTrajectoryCallback(self,msg):
-        self.currentJointTrajectoryMsg = msg
+    def jointCommandCallback(self,msg):
+        if self.firstJointCommand:
+            print "Warning, got ROS joint command without reading from simulator yet, ignoring."
+            return
+        
+        #copy elements of msg to the current joint command
+        elements = ['position','velocity','effort','kp_position','ki_position','kd_position','kp_velocity','i_effort_min','i_effort_max']
+        for i,n in enumerate(msg.name):
+            index = self.nameToIndex[n]
+            for e in elements:
+                emsg = getattr(msg,e)
+                if len(emsg) > 0:
+                    ecmd = getattr(self.currentJointCommand,e)
+                    ecmd[index] = emsg[i]
+        self.newJointCommand = True
         return
 
-    def output(self,**inputs):       
+    def output(self,**inputs):
+        if self.firstJointCommand:
+            self.firstJointCommand = False
+            #fill out currentJointCommand from the simulator properties
+            n = self.robot.numLinks()
+            self.currentJointCommand.position = inputs['qcmd']
+            self.currentJointCommand.velocity = inputs['dqcmd']
+            self.currentJointCommand.effort = [0.0]*n
+            self.currentJointCommand.kp_position = [0.0]*n
+            self.currentJointCommand.ki_position = [0.0]*n
+            self.currentJointCommand.kd_position = [0.0]*n
+            self.currentJointCommand.kp_velocity = [0.0]*n
+            self.currentJointCommand.i_effort_min = [0.0]*n
+            self.currentJointCommand.i_effort_max = [0.0]*n
+        
         res = {}
-        if self.currentJointTrajectoryMsg != None:
-            #parse in the message -- are positions, velocities, efforts specified?
-            self.currentTrajectoryStart = inputs['t']
-            self.currentTrajectoryNames = self.currentJointTrajectoryMsg.joint_names
-            times = [p.time_from_start for p in self.currentJointTrajectoryMsg.points]
-            milestones = [p.positions for p in self.currentJointTrajectoryMsg.points]
-            velocities = [p.velocities for p in self.currentJointTrajectoryMsg.points]
-            efforts = [p.velocities for p in self.currentJointTrajectoryMsg.points]
-            if all(len(x) != 0 for x in milestones):
-                self.currentPositionTrajectory = Trajectory(times,milestones)
-            else:
-                self.currentPositionTrajectory = None
-            if all(len(x) != 0 for x in velocities):
-                self.currentVelocityTrajectory = Trajectory(times,velocities)
-            else:
-                self.currentVelocityTrajectory = None
-            if all(len(x) != 0 for x in efforts):
-                self.currentEffortTrajectory = Trajectory(times,efforts)
-            else:
-                self.currentEffortTrajectory = None
-            self.currentJointTrajectoryMsg = None
-            
-        #evaluate the trajectory and send it to controller's output
-        t = inputs['t']-self.currentTrajectoryStart
-        if self.currentPositionTrajectory != None:
-            qcmd = self.currentPositionTrajectory.eval(t,'halt')
-            self.map_output(qcmd,self.currentTrajectoryNames,res,'qcmd')
-        if self.currentVelocityTrajectory != None:
-            dqcmd = self.currentVelocityTrajectory.deriv(t,'halt')
-            self.map_output(dqcmd,self.currentTrajectoryNames,res,'dqcmd')
-        elif self.currentPositionTrajectory != None:
-            #automatic differentiation
-            dqcmd = self.currentPositionTrajectory.deriv(t,'halt')
-            self.map_output(dqcmd,self.currentTrajectoryNames,res,'dqcmd')
-        if self.currentEffortTrajectory != None:
-            torquecmd = self.currentEffortTrajectory.eval(t,'halt')
-            self.map_output(torquecmd,self.currentTrajectoryNames,res,'torquecmd')
+        #read in the joint command, and send it to output
+        if self.newJointCommand:
+            self.newJointCommand = False
+            res['qcmd'] = self.currentJointCommand.position
+            res['dqcmd'] = self.currentJointCommand.velocity
+            res['torquecmd'] = self.currentJointCommand.effort
 
         #sense the configuration and velocity, possibly the effort
-        self.state.header.stamp = rospy.get_rostime()
         if 'q' in inputs:
             self.state.position = inputs['q']
         if 'dq' in inputs:
             self.state.velocity = inputs['dq']
         if 'torque' in inputs:
             self.state.effort = inputs['torque']
+        self.state.header.stamp = rospy.get_rostime()
         self.pub.publish(self.state)
         return res
-
-    def map_output(self,vector,names,output_map,output_name):
-        """Maps a partial vector to output_map[output_name].
-        If output_name exists in output_map, then only the named values
-        are overwritten.  Otherwise, the missing values are set to zero.
-        """
-        val = []
-        if output_name in output_map:
-            val = output_map[output_name]
-        else:
-            val = [0.0]*len(self.robot.numLinks())
-        for n,v in zip(names,vector):
-            val[self.nameToIndex[n]] = v
-        output_map[output_name] = val
-        return
 
 class RosTimeController(controller.BaseController):
     """A controller that simply publishes the simulation time to ROS.
