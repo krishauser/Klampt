@@ -3,6 +3,7 @@
 #include <statistics/OLS.h>
 //#include "Environment.h"
 #include <utils/SimpleParser.h>
+#include <string>
 
 bool Stance::remove(int link)
 {

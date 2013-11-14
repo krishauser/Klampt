@@ -1439,7 +1439,7 @@ public:
   void DoLogging()
   {
     ofstream out("simtest_log.csv",ios::app);
-    if(out.tellp()==0) {
+    if((int)out.tellp()==0) {
       cout<<"Saving to simtest_log.csv"<<endl;
       out<<"time,";
       for(size_t i=0;i<world->robots.size();i++) {
