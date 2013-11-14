@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ImportGroup Label="PropertySheets" />
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup />
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <AdditionalIncludeDirectories>..\..\;..\..\Library\glui-2.36\src\include\GL;..\..\Library\ode-0.11.1\include;..\..\Library\KrisLibrary;..\..\Library\tinyxml;C:\cygwin\home\hauser\Win32Code\boost_1_54_0;</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_MBCS;TIXML_USE_STL;NOMINMAX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>opengl32.lib;glut32.lib;glui32d.lib;tinyxmld_STL.lib;RobotSim.lib;KrisLibraryd.lib;ode_doubled.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>..\..\Library;..\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup />
+</Project>
