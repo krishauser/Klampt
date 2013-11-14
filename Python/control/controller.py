@@ -64,6 +64,7 @@ class MultiController(BaseController):
         """
         self.controllers = controllers[:]
         self.register = {}
+        self.outregister = {}
         self.inmap = [None for c in self.controllers]
         self.outmap = [None for c in self.controllers]
         self.myoutmap = None
@@ -129,21 +130,24 @@ class MultiController(BaseController):
         assert len(self.inmap)==len(self.controllers),"%d inmaps != %d controlers"%(len(self.inmap),len(self.controllers))
         assert len(self.outmap)==len(self.controllers),"%d outmaps != %d controlers"%(len(self.outmap),len(self.controllers))
         self.register.update(inputs)
+        self.outregister = {}
         for i,c in enumerate(self.controllers):
             cout = c.output_and_advance(**self.controller_inputs(i))
             if not cout: continue
             if self.outmap[i] == None:
                 self.register.update(cout)
+                self.outregister.update(cout)
             else:
                 for (k,v) in self.outmap[i].iteritems():
                     self.register[v] = cout[k]
+                    self.outregister[v] = cout[k]
         if self.myoutmap == None:
-            return self.register
+            return self.outregister
         else:
             res = {}
             for k,v in self.myoutmap.iteritems():
                 try:
-                    res[v] = self.register[k]
+                    res[v] = self.outregister[k]
                 except KeyError:
                     print "Warning, output item",k,"not present in register"
             return res
