@@ -162,6 +162,7 @@ class GLNavigationProgram(GLProgram):
         #HACK: I don't know why this seems to work!
         scale *= 0.925
         d = (u*scale,v*scale,-1.0)
+        d = vectorops.div(d,vectorops.norm(d))
         return (t,so3.apply(R,d))
     
     def prepare_GL(self):

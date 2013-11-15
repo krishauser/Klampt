@@ -132,14 +132,12 @@ class MyGLViewer(GLRealtimeProgram):
                 self.sim.updateWorld()
                 objs = self.click_world(x,y)
                 if len(objs) > 0:
-                    print [o.getName() for o in objs]
+                    print "Clicked:",[o[0].getName() for o in objs]
                     (s,d) = self.click_ray(x,y)
-                    print type(objs[0])
-                    print isinstance(objs[0],RobotModelLink)
-                    if isinstance(objs[0],RobotModelLink):
-                        print "Clicked, turning on force application mode",objs[0].getName()
+                    if isinstance(objs[0][0],RobotModelLink):
+                        print "Clicked, turning on force application mode",objs[0][0].getName()
                         self.forceApplicationMode = True
-                        self.addForceSpring(x,y,objs[0])
+                        self.addForceSpring(objs[0][0],objs[0][1])
                         return
             elif self.forceApplicationMode:
                 print "Turning off force application mode"
@@ -157,23 +155,14 @@ class MyGLViewer(GLRealtimeProgram):
     def moveForceSpring(self,x,y):
         self.sim.updateWorld()
         (s,d) = self.click_ray(x,y)
-        Ro,to = self.forceObject.getTransform()
-        wp = se3.apply((Ro,to),self.forceLocalPoint)
-        #minimize distance from s + du to wp by projecting
-        u = vectorops.dot(vectorops.sub(wp,s),d)
+        u = vectorops.dot(vectorops.sub(self.forceAnchorPoint,s),d)
         self.forceAnchorPoint = vectorops.madd(s,d,u)
 
-    def addForceSpring(self,x,y,obj):
+    def addForceSpring(self,obj,worldpt):
         self.sim.updateWorld()
         self.forceObject = obj
-        (s,d) = self.click_ray(x,y)
-        R,t = se3.inv(self.camera.matrix())
-        z = R[2],R[5],R[8]
         Ro,to = obj.getTransform()
-        dist = vectorops.dot(z,vectorops.sub(to,t))
-        #find u s.t. dot(d*u,z) = dist, set world point to s+d*u
-        u = dist / vectorops.dot(d,z)
-        self.forceAnchorPoint = vectorops.madd(s,d,u)
+        self.forceAnchorPoint = worldpt
         self.forceLocalPoint = se3.apply(se3.inv((Ro,to)),self.forceAnchorPoint)
 
     def simulateForceSpring(self,kP = 100.0):
@@ -211,8 +200,8 @@ class MyGLViewer(GLRealtimeProgram):
         glutPostRedisplay()
 
     def click_world(self,x,y):
-        """Helper: returns a list of world objects sorted in order of
-        increasing distance."""
+        """Helper: returns a list of (world object,clicked point) pairs,
+        sorted in order of increasing distance."""
         #get the viewport ray
         (s,d) = self.click_ray(x,y)
         
@@ -223,8 +212,8 @@ class MyGLViewer(GLRealtimeProgram):
             (hit,pt) = collide.rayCast(g[1],s,d)
             if hit:
                 dist = vectorops.dot(vectorops.sub(pt,s),d)
-                collided.append((dist,g[0]))
-        return [g[1] for g in sorted(collided)]
+                collided.append((dist,g[0],pt))
+        return [(g[1],g[2]) for g in sorted(collided)]
 
 
 if __name__ == "__main__":
