@@ -53,6 +53,8 @@ public:
 	static string primitive_mesh_path;
 	//Set this to true if visualization geometry should be used
 	static bool useVisGeom;
+	//Set this to true if the geometry Y-Z plane should be flipped
+	static bool flipYZ; 
 };
 
 #endif /* URDFCONVERTER_H_ */

@@ -14,10 +14,11 @@ using namespace PrimitiveShape;
 
 string URDFConverter::primitive_mesh_path("data/objects/urdf_primitives/");
 bool URDFConverter::useVisGeom = false;
+bool URDFConverter::flipYZ = false;
 
 int URDFConverter::GetLinkIndexfromName(string name, const vector<string> linknames){
 	int link_index = -1;
-	for (int i = 0; i < linknames.size(); i++) {
+	for (size_t i = 0; i < linknames.size(); i++) {
 		if ( strcmp(name.c_str(), linknames[i].c_str()) == 0) {
 			link_index = i;
 			break;
@@ -51,17 +52,17 @@ void URDFConverter::DFSLinkTree(URDFLinkNode& root, vector<URDFLinkNode>& linkNo
 	linkNodes.push_back( root);
 
 	//Parent has index
-	for (int i = 0; i < root.link->child_links.size(); i++) {
+	for (size_t i = 0; i < root.link->child_links.size(); i++) {
 		URDFLinkNode child( root.link->child_links[i], linkNodes.size(), root.index);
 		DFSLinkTree( child, linkNodes);
 	}
 }
 
 void URDFConverter::setJointforNodes(vector< boost::shared_ptr<urdf::Joint> >& joints, vector<URDFLinkNode>& linkNodes){
-	for(int i = 0; i < linkNodes.size(); i++){
+	for(size_t i = 0; i < linkNodes.size(); i++){
 		string linkname = linkNodes[i].link->name;
 		linkNodes[i].joint = 0;
-		for (int j = 0; j < joints.size(); j++) {
+		for (size_t j = 0; j < joints.size(); j++) {
 			boost::shared_ptr<urdf::Joint> joint = joints[j];
 			//find link index of the joint
 			string joint_name = joint->child_link_name;
@@ -251,6 +252,15 @@ void URDFConverter::processTParentTransformations(vector<URDFLinkNode>& linkNode
 		else {
 		  G0.mul(linkNodes[i].T_link_to_inertia_inverse, linkNodes[i].T_link_to_colgeom);
 		  G1.mul(linkNodes[i].T_link_to_colgeom, linkNodes[i].geomScale);
+		}
+		if(flipYZ) {
+		  RigidTransform Tyz; 
+		  Tyz.R.setZero();
+		  Tyz.t.setZero();
+		  Tyz.R(0,0) = 1;
+		  Tyz.R(1,2) = -1;
+		  Tyz.R(2,1) = 1;
+		  G1 = Tyz * G1;
 		}
 		linkNodes[i].geomScale.set(G1);
 	}

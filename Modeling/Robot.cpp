@@ -12,11 +12,9 @@
 #include <fstream>
 #include <sstream>
 #include <Timer.h>
-#include "IO/urdf_parser.h"
-#include "IO/urdf_joint.h"
-#include "IO/urdf_link.h"
 #include <boost/shared_ptr.hpp>
 #include "IO/URDFConverter.h"
+#include "IO/urdf_parser.h"
 //using namespace urdf;
 
 Real Radius(const Geometry::AnyGeometry3D& geom)
@@ -2044,16 +2042,37 @@ bool Robot::LoadURDF(const char* fn)
 	string path = GetFilePath(s);
 	//Get content from the Willow Garage parser
 	boost::shared_ptr<urdf::ModelInterface> parser = urdf::parseURDF(s);
-	//links_size: URDF 36, ROB 41 with 5 extra DOFS for base
-	int links_size = parser->links_.size() + 5;
-	//joints_size: URDF 35, ROB 36 with 1 extra for base
-	int joints_size = parser->joints_.size() + 1;
-	//drivers_size: should be joints_size - 1 in ROB file
-
-	if (joints_size != links_size - 5) {
-		cout << "joint size:" << joints_size << " and link size:" << links_size
-				<< " are Not match!" << endl;
+	boost::shared_ptr<urdf::Link> root_link = parser->root_link_;
+	if (!root_link) {
+		cout << "Root link is NULL!" << endl;
 		return false;
+	}
+
+	//fixed-base robots have the root link "world", floating-base robots
+	//do not.
+	bool floating = (root_link->name != "world");
+	int links_size, joints_size;
+	if(floating) {
+	  //links_size: URDF 36, ROB 41 with 5 extra DOFS for base
+	  links_size = (int)parser->links_.size() + 5;
+	  //joints_size: URDF 35, ROB 36 with 1 extra for base
+	  joints_size = (int)parser->joints_.size() + 1;
+	  //drivers_size: should be joints_size - 1 in ROB file
+
+	  if (joints_size != links_size - 5) {
+	    cout << "joint size:" << joints_size << " and link size:" << links_size
+		 << " do not match for floating-base robot!" << endl;
+	    return false;
+	  }
+	}
+	else {
+	  links_size = (int)parser->links_.size() - 1;
+	  joints_size = (int)parser->joints_.size();
+	  if(joints_size != links_size) {
+	    cout << "joint size:" << joints_size << " and link size:" << links_size
+		 << " do not match for fixed-base robot!" << endl;
+	    return false;
+	  }
 	}
 
 	cout << "Link size: " << links_size << endl;
@@ -2082,51 +2101,52 @@ bool Robot::LoadURDF(const char* fn)
 
 
 	//floating base, the first 6 degrees
-	for (int i = 0; i < 6; i++) {
-		this->parents[i] = i - 1;
-		stringstream ss;
-		ss << i;
-		string tmp;
-		ss >> tmp;
-		this->linkNames[i] = "base" + tmp;
+	if(floating) {
+	  for (int i = 0; i < 6; i++) {
+	    this->parents[i] = i - 1;
+	    stringstream ss;
+	    ss << i;
+	    string tmp;
+	    ss >> tmp;
+	    this->linkNames[i] = "base" + tmp;
+	    
+	    this->accMax[i] = Inf;
+	    this->qMax[i] = Inf;
+	    this->qMin[i] = -Inf;
+	    this->velMax[i] = Inf;
+	    this->velMin[i] = -Inf;
+	    this->torqueMax[i] = 0;
+	    this->powerMax[i] = Inf;
+	  }
+	  for (int i = 0; i < 3; i++)
+	    this->links[i].type = RobotLink3D::Prismatic;
+	  for (int i = 3; i < 6; i++)
+	    this->links[i].type = RobotLink3D::Revolute;
 
-		this->accMax[i] = Inf;
-		this->qMax[i] = Inf;
-		this->qMin[i] = -Inf;
-		this->velMax[i] = Inf;
-		this->velMin[i] = -Inf;
-		this->torqueMax[i] = 0;
-		this->powerMax[i] = Inf;
+	  //w: axis for the link movement in link's local frame
+	  this->links[0].w.set(1, 0, 0);
+	  this->links[1].w.set(0, 1, 0);
+	  this->links[2].w.set(0, 0, 1);
+	  this->links[3].w.set(0, 0, 1);
+	  this->links[4].w.set(0, 1, 0);
+	  this->links[5].w.set(1, 0, 0);
+	  for (int i = 0; i < 5; i++) {
+	    this->links[i].com.setZero();
+	    this->links[i].mass = 0;
+	    this->links[i].inertia.setZero();
+	    this->links[i].T0_Parent.setIdentity();
+	  }
+
+	  //floating base joint
+	  this->joints[0].type = RobotJoint::Floating;
+	  this->joints[0].linkIndex = 5;
+	  this->joints[0].baseIndex = -1;
 	}
-	for (int i = 0; i < 3; i++)
-		this->links[i].type = RobotLink3D::Prismatic;
-	for (int i = 3; i < 6; i++)
-		this->links[i].type = RobotLink3D::Revolute;
-
-	//w: axis for the link movement in link's local frame
-	this->links[0].w.set(1, 0, 0);
-	this->links[1].w.set(0, 1, 0);
-	this->links[2].w.set(0, 0, 1);
-	this->links[3].w.set(0, 0, 1);
-	this->links[4].w.set(0, 1, 0);
-	this->links[5].w.set(1, 0, 0);
-	for (int i = 0; i < 5; i++) {
-		this->links[i].com.setZero();
-		this->links[i].mass = 0;
-		this->links[i].inertia.setZero();
-		this->links[i].T0_Parent.setIdentity();
-	}
-
-	//floating base joint
-	this->joints.resize(1 + parser->joints_.size());
-	this->joints[0].type = RobotJoint::Floating;
-	this->joints[0].linkIndex = 5;
-	this->joints[0].baseIndex = -1;
-
-	boost::shared_ptr<urdf::Link> root_link = parser->root_link_;
-	if (!root_link) {
-		cout << "Root link is NULL!" << endl;
-		return false;
+	else {
+	  //fixed base
+	  this->joints[0].type =  RobotJoint::Weld;
+	  this->joints[0].linkIndex = 0;
+	  this->joints[0].baseIndex = -1;
 	}
 
 	URDFLinkNode rootLinkNode(root_link, 0, -1);
@@ -2145,20 +2165,30 @@ bool Robot::LoadURDF(const char* fn)
 	double default_mass = 0.001;
 	Matrix3 default_inertia; default_inertia.setIdentity(); default_inertia *= 0.00001;
 
-	for (size_t i = 0; i < linkNodes.size(); i++) {
+	size_t start = (floating ? 0 : 1);
+	for (size_t i = start; i < linkNodes.size(); i++) {
 		URDFLinkNode* linkNode = &linkNodes[i];
-		int link_index = linkNode->index + 5;
+		int link_index = linkNode->index;
+		int parent_index = linkNode->index_parent;
+		if(floating) {
+		  link_index += 5;
+		  parent_index += 5;
+		}
+		else {
+		  link_index -= 1;
+		  parent_index -= 1;
+		}
 
-		this->linkNames[link_index] = linkNode->link->name; //done
-		this->parents[link_index] = linkNode->index_parent + 5;
+		this->linkNames[link_index] = linkNode->link->name; 
+		this->parents[link_index] = parent_index;
 
 		this->links[link_index].type = RobotLink3D::Revolute; //Check correctness
 		this->links[link_index].T0_Parent.setIdentity();
-		if (link_index > 5)
-			this->links[link_index].w.set(linkNode->axis);
+		if (i > 0)
+		  this->links[link_index].w.set(linkNode->axis);
 		if(this->links[link_index].w.norm() < 0.1){
-			cout<<linkNames[link_index]<<";"<<this->links[link_index].w<<endl;
-			getchar();
+		  cout<<"Axis error: "<<linkNames[link_index]<<";"<<this->links[link_index].w<<endl;
+		  getchar();
 		}
 
 		//If have inertia specified, then, use the specified inertia
@@ -2188,7 +2218,8 @@ bool Robot::LoadURDF(const char* fn)
 		//set joint
 		urdf::Joint* joint = linkNode->joint;
 		if (joint) {
-			int joint_index = link_index - 5;
+		  int joint_index = link_index;
+		  if(floating) joint_index -= 5;
 			this->joints[joint_index].type = URDFConverter::jointType_URDF2ROB(
 					joint->type); //done. finish function
 			if (joint->type == urdf::Joint::PRISMATIC){
@@ -2208,6 +2239,10 @@ bool Robot::LoadURDF(const char* fn)
 			if(this->joints[joint_index].type == RobotJoint::Weld){
 				qMin[link_index] = 0;
 				qMax[link_index] = 0;
+				velMin[link_index] = 0;
+				velMax[link_index] = 0;
+				accMax[link_index] = 0;
+				torqueMax[link_index] = 0;
 			}
 			if (this->joints[joint_index].type == RobotJoint::Normal
 					|| this->joints[joint_index].type == RobotJoint::Spin) {
@@ -2239,9 +2274,11 @@ bool Robot::LoadURDF(const char* fn)
 	}
 	
 	UpdateFrames();
-	for (size_t i = 0; i < linkNodes.size(); i++) {
+	for (size_t i = start; i < linkNodes.size(); i++) {
 		URDFLinkNode* linkNode = &linkNodes[i];
-		int link_index = linkNode->index + 5;
+		int link_index = linkNode->index;
+		if(floating) link_index += 5;
+		else link_index -= 1;
 
 		//geometry
 		if (!linkNode->geomName.empty()) {

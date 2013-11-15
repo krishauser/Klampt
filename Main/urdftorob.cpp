@@ -38,6 +38,7 @@ int main(int argc, char** argv)
 {
 	ProgramSettings settings;
 	settings["useVisGeom"] = false;
+	settings["flipYZ"] = false;
 	settings["outputGeometryExtension"] = string("tri");
 	settings["outputGeometryPrefix"] = string("");
 	if(!settings.read("urdftorob.settings")) {
@@ -68,12 +69,14 @@ int main(int argc, char** argv)
 		Robot robot;
 
 		URDFConverter::useVisGeom = settings["useVisGeom"];
+		URDFConverter::flipYZ = settings["flipYZ"];
 		string geomPrefix,geomExtension;
 		settings["outputGeometryPrefix"].as(geomPrefix);
 		settings["outputGeometryExtension"].as(geomExtension);
 		robot.LoadURDF(argv[1]);
 		robot.Save(filename.c_str(), geomPrefix.c_str());
-		robot.SaveGeometry((path+geomPrefix).c_str(),geomExtension.c_str());
+		if(!geomExtension.empty()) 
+		  robot.SaveGeometry((path+geomPrefix).c_str(),geomExtension.c_str());
 	} else {
 		printf("Unknown file extension %s on file %s!\nOnly converts URDF to Rob", ext, argv[1]);
 		return 1;
