@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<world>
+  <robot name="2R robot" file="planar2.rob" config="2 1.57 0"/>
+</world>

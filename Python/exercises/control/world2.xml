@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<world>
+  <robot name="1R robot" file="planar1.rob" />
+
+  <rigidObject name="ball" file="../../../data/objects/sphere.obj"  position="0.8 0.025 5">
+  </rigidObject> 
+</world>
