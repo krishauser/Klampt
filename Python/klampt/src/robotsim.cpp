@@ -1094,7 +1094,7 @@ void RobotModel::drawGL(bool keepAppearance)
   }
   else {
     for(size_t i=0;i<robot->links.size();i++)
-      world.robots[index].view.DrawLink_World(i);
+      world.robots[index].view.DrawLink_World(i,false);
   }
 }
 

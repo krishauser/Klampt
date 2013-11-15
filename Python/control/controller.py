@@ -238,7 +238,7 @@ class ComposeController(BaseController):
     body, etc.
     
     Initializers:
-        - iteminidices: a dict from items to indices
+        - itemindices: a dict from items to indices
         - outitem: the name of the output
         - flatten: true if you want a list rather than a dict, in which case
           the indices are assumed to be all integers. Empty indices are

@@ -160,19 +160,22 @@ void ViewRobot::Draw()
   }
 }
 
-void ViewRobot::DrawLink_Local(int i)
+void ViewRobot::DrawLink_Local(int i,bool keepAppearance)
 {
   if(!robot) return;
-  linkAppearance[i].DrawGL();
+  if(keepAppearance)
+    linkAppearance[i].DrawGL();
+  else 
+    draw(robot->geometry[i]);
 }
 
-void ViewRobot::DrawLink_World(int i)
+void ViewRobot::DrawLink_World(int i,bool keepAppearance)
 {
   if(!robot) return;
   Matrix4 mat = robot->links[i].T_World;
   glPushMatrix();
   glMultMatrix(mat);
-  DrawLink_Local(i);
+  DrawLink_Local(i,keepAppearance);
   glPopMatrix();
 }
 
