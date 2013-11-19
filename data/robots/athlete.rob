@@ -1,3 +1,8 @@
+# NASA ATHLETE Robot.
+#
+# Joints manually tuned, not much time spent on it.
+#
+
 links  "hex x" "hex y" "hex z" "hex yaw" "hex roll" "hex pitch" \
 	"hip yaw 1" "hip pitch 1" "knee pitch 1" "knee roll 1" "ankle pitch 1" "ankle roll 1" \
 	"hip yaw 2" "hip pitch 2" "knee pitch 2" "knee roll 2" "ankle pitch 2" "ankle roll 2" \
