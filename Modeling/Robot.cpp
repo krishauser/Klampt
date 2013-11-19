@@ -12,9 +12,9 @@
 #include <fstream>
 #include <sstream>
 #include <Timer.h>
+#include "IO/urdf_parser.h"
 #include <boost/shared_ptr.hpp>
 #include "IO/URDFConverter.h"
-#include "IO/urdf_parser.h"
 //using namespace urdf;
 
 Real Radius(const Geometry::AnyGeometry3D& geom)
@@ -105,6 +105,19 @@ std::string Robot::LinkName(int i) const {
 		return linkNames[i];
 }
 
+int Robot::LinkIndex(const char* name) const
+{
+  if(IsValidInteger(name)) {
+    stringstream ss(name);
+    int res;
+    ss>>res;
+    return res;
+  }
+  for(size_t i=0;i<linkNames.size();i++)
+    if(linkNames[i] == name) return (int)i;
+  return -1;
+}
+
 bool Robot::Load(const char* fn) {
 	bool res = false;
 	const char* ext = FileExtension(fn);
@@ -137,9 +150,9 @@ bool Robot::LoadRob(const char* fn) {
 	vector<RigidTransform> TParent;
 	vector<Vector3> axes;
 	vector<int> jointType;
-	vector<int> collision, noCollision;
-	vector<pair<int, int> > selfCollision;
-	vector<pair<int, int> > noSelfCollision;
+	vector<string> collision, noCollision;
+	vector<pair<string, string> > selfCollision;
+	vector<pair<string, string> > noSelfCollision;
 	RigidTransform baseTransform;
 	baseTransform.setIdentity();
 	Real scale = 1.0;
@@ -345,18 +358,18 @@ bool Robot::LoadRob(const char* fn) {
 			while (ss >> ftemp)
 				geommargin.push_back(ftemp);
 		} else if (name == "collision") {
-			while (ss >> itemp)
-				collision.push_back(itemp);
+		  while (SafeInputString(ss,stemp))
+		    collision.push_back(stemp);
 		} else if (name == "nocollision") {
-			while (ss >> itemp)
-				noCollision.push_back(itemp);
+		  while (SafeInputString(ss,stemp))
+		    noCollision.push_back(stemp);
 		} else if (name == "selfcollision") {
-			pair<int, int> ptemp;
-			while (ss >> ptemp.first && ss >> ptemp.second)
+			pair<string, string> ptemp;
+			while (SafeInputString(ss,ptemp.first) && SafeInputString(ss,ptemp.second))
 				selfCollision.push_back(ptemp);
 		} else if (name == "noselfcollision") {
-			pair<int, int> ptemp;
-			while (ss >> ptemp.first && ss >> ptemp.second)
+			pair<string, string> ptemp;
+			while (SafeInputString(ss,ptemp.first) && SafeInputString(ss,ptemp.second))
 				noSelfCollision.push_back(ptemp);
 		} else if (name == "geomtransform") {
 			int tmpindex;
@@ -856,11 +869,12 @@ bool Robot::LoadRob(const char* fn) {
 		FatalError("So far, no mechanism to select environment collisions");
 	}
 	for (size_t i = 0; i < noCollision.size(); i++) {
-		if (noCollision[i] >= (int) links.size()) {
-			printf("   Error, invalid no-collision index %d\n", noCollision[i]);
-			return false;
-		}
-		FatalError("So far, no mechanism to turn off collisions");
+	  int link = LinkIndex(noCollision[i].c_str());
+	  if (link < 0 || link >= (int) links.size()) {
+	    printf("   Error, invalid no-collision index %s\n", noCollision[i].c_str());
+	    return false;
+	  }
+	  FatalError("So far, no mechanism to turn off collisions");
 	}
 
 	//Init standard stuff
@@ -1018,30 +1032,36 @@ bool Robot::LoadRob(const char* fn) {
 		InitAllSelfCollisions();
 	} else {
 		for (size_t i = 0; i < selfCollision.size(); i++) {
-			if (selfCollision[i].first >= (int) links.size()
-					|| selfCollision[i].second >= (int) links.size()) {
-				printf("   Error, nvalid self-collision index %d-%d\n",
-						selfCollision[i].first, selfCollision[i].second);
-				return false;
-			}
-			Assert(selfCollision[i].first < selfCollision[i].second);
-			InitSelfCollisionPair(selfCollision[i].first,
-					selfCollision[i].second);
+		  int link1,link2;
+		  link1 = LinkIndex(selfCollision[i].first.c_str());
+		  link2 = LinkIndex(selfCollision[i].second.c_str());
+		  if (link1 < 0 || link1 >= (int) links.size() ||
+		      link2 < 0 || link2 >= (int) links.size()) {
+		    printf("   Error, invalid self-collision index %s-%s\n",
+			   selfCollision[i].first.c_str(),selfCollision[i].second.c_str());
+		    return false;
+		  }
+		  if(link1 > link2) Swap(link1,link2);
+		  Assert(link1 < link2);
+		  InitSelfCollisionPair(link1,link2);
 		}
 	}
 
 	//Initialize self collisions -- these needs to be done after mounting
 	for (size_t i = 0; i < noSelfCollision.size(); i++) {
-		if (noSelfCollision[i].first >= (int) links.size()
-				|| noSelfCollision[i].second >= (int) links.size()) {
-			printf("  Error, invalid no-collision index %d-%d\n",
-					noSelfCollision[i].first, noSelfCollision[i].second);
+		  int link1,link2;
+		  link1 = LinkIndex(noSelfCollision[i].first.c_str());
+		  link2 = LinkIndex(noSelfCollision[i].second.c_str());
+		  if (link1 < 0 || link1 >= (int) links.size() ||
+		      link2 < 0 || link2 >= (int) links.size()) {
+
+			printf("  Error, invalid no-collision index %s-%s\n",
+			       noSelfCollision[i].first.c_str(), noSelfCollision[i].second.c_str());
 			return false;
 		}
-		Assert(noSelfCollision[i].first < noSelfCollision[i].second);
-		SafeDelete(
-				selfCollisions(noSelfCollision[i].first,
-						noSelfCollision[i].second));
+		  if(link1 > link2) Swap(link1,link2);
+		Assert(link1 < link2);
+		SafeDelete(selfCollisions(link1,link2));
 	}
 
 	printf("Done loading robot file.\n");
@@ -2162,8 +2182,9 @@ bool Robot::LoadURDF(const char* fn)
 	URDFConverter::setJointforNodes(urdfJoints, linkNodes);
 	URDFConverter::processTParentTransformations(linkNodes);
 
-	double default_mass = 0.001;
-	Matrix3 default_inertia; default_inertia.setIdentity(); default_inertia *= 0.00001;
+	//TODO: how do we tell if it's just a frame vs. a 
+	double default_mass = 0.0001;
+	Matrix3 default_inertia; default_inertia.setIdentity(); default_inertia *= 1e-8;
 
 	size_t start = (floating ? 0 : 1);
 	for (size_t i = start; i < linkNodes.size(); i++) {
@@ -2242,7 +2263,8 @@ bool Robot::LoadURDF(const char* fn)
 				velMin[link_index] = 0;
 				velMax[link_index] = 0;
 				accMax[link_index] = 0;
-				torqueMax[link_index] = 0;
+				//torque max will be infinite...
+				//torqueMax[link_index] = 0;
 			}
 			if (this->joints[joint_index].type == RobotJoint::Normal
 					|| this->joints[joint_index].type == RobotJoint::Spin) {
@@ -2283,15 +2305,17 @@ bool Robot::LoadURDF(const char* fn)
 		//geometry
 		if (!linkNode->geomName.empty()) {
 		  string fn;
-		  if(linkNode->geomPrimitive)
-		    fn = linkNode->geomName;
-		  else
-		    fn += path + linkNode->geomName;
-
+		  fn = linkNode->geomName;
 		  if (!LoadGeometry(link_index, fn.c_str())) {
-		    cout << "Failed loading geometry " << fn
-			 << " for link " << link_index << endl;
-		    return false;
+		    printf("Failed to load geometry directly, trying relative path...\n");
+		    fn = path + linkNode->geomName;
+		    if (!LoadGeometry(link_index, fn.c_str())) {
+		      cout << "Failed loading geometry " << fn
+			   << " for link " << link_index << endl;
+		      //TEMP
+		      cout<< "Temporarily ignoring error..."<<endl;
+		      //return false;
+		    }
 		  }
 
 		  this->geometry[link_index].Transform(linkNode->geomScale);

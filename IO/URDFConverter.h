@@ -47,10 +47,11 @@ public:
 	static void QuatToRotationMat(const Vector4& aa, Matrix3& mat);
 	static void processTParentTransformations(vector<URDFLinkNode>& linkNodes);
 	static void ConvertWrltoTri(string filename);
-//	static void ScalePrimitiveGeom(string infilename, string outfilename);
 
+	//The location for package:// directives
+	static string packageRootPath;
 	//The location of primitive_mesh must be provided.
-	static string primitive_mesh_path;
+	static string primitiveMeshPath;
 	//Set this to true if visualization geometry should be used
 	static bool useVisGeom;
 	//Set this to true if the geometry Y-Z plane should be flipped

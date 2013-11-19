@@ -41,6 +41,7 @@ int main(int argc, char** argv)
 	settings["flipYZ"] = false;
 	settings["outputGeometryExtension"] = string("tri");
 	settings["outputGeometryPrefix"] = string("");
+	settings["packageRootPath"] = string("");
 	if(!settings.read("urdftorob.settings")) {
 	  printf("Didn't read settings from urdftorob.settings\n");
 	  printf("Writing default settings to urdftorob_default.settings\n");
@@ -62,7 +63,7 @@ int main(int argc, char** argv)
 	else if(argc == 3)
 		filename.assign(argv[2]);
 	const char* ext = FileExtension(argv[1]);
-	string path = GetFilePath(argv[1]);
+	string path = GetFilePath(filename.c_str());
 
 
 	if (0 == strcmp(ext, "urdf")) {
@@ -70,6 +71,7 @@ int main(int argc, char** argv)
 
 		URDFConverter::useVisGeom = settings["useVisGeom"];
 		URDFConverter::flipYZ = settings["flipYZ"];
+		settings["packageRootPath"].as(URDFConverter::packageRootPath);
 		string geomPrefix,geomExtension;
 		settings["outputGeometryPrefix"].as(geomPrefix);
 		settings["outputGeometryExtension"].as(geomExtension);

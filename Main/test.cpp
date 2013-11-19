@@ -19,6 +19,7 @@ enum {
   DRIVER_VALUE_SPINNER_ID,
   IK_UPDATE_ID,
   DRAW_EXPANDED_CHECKBOX_ID,
+  PRINT_SELF_COLLISIONS_ID,
 };
 
 
@@ -131,6 +132,7 @@ public:
     glui->add_checkbox("Draw bboxes",&draw_bbs);
     glui->add_checkbox("Draw expanded",&draw_expanded,DRAW_EXPANDED_CHECKBOX_ID,ControlFunc);
     glui->add_checkbox("Draw collision tests",&draw_self_collision_tests);
+    glui->add_button("Print self colliding links",PRINT_SELF_COLLISIONS_ID,ControlFunc);
     UpdateDriverValueGUI();
     UpdateDriverInfoGUI();
     return true;
@@ -145,7 +147,7 @@ public:
       self_colliding[i]=false;
     robot->UpdateGeometry();
     for(size_t i=0;i<robot->links.size();i++) {
-      for(size_t j=0;j<robot->links.size();j++) {
+      for(size_t j=i+1;j<robot->links.size();j++) {
 	if(robot->SelfCollision(i,j)) {
 	  self_colliding[i]=self_colliding[j]=true;
 	}
@@ -374,6 +376,23 @@ public:
       break;
     case DRAW_EXPANDED_CHECKBOX_ID:
       ToggleDrawExpandedCheckbox();
+      break;
+    case PRINT_SELF_COLLISIONS_ID:
+      {
+	printf("Self-colliding:\n");
+	for(size_t i=0;i<robot->links.size();i++) {
+	  if(self_colliding[i]) {
+	    bool printed=false;
+	    for(size_t j=i;j<robot->links.size();j++) {
+	      if(self_colliding[j] && robot->SelfCollision(i,j)) {
+		printf("%d %d\t",i,j);
+		printed = true;
+	      }
+	    }
+	    if(printed) printf("\n");
+	  }
+	}
+      }
       break;
     }
   }

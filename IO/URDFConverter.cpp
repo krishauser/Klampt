@@ -12,7 +12,8 @@
 using namespace std;
 using namespace PrimitiveShape;
 
-string URDFConverter::primitive_mesh_path("data/objects/urdf_primitives/");
+string URDFConverter::packageRootPath("");
+string URDFConverter::primitiveMeshPath("data/objects/urdf_primitives/");
 bool URDFConverter::useVisGeom = false;
 bool URDFConverter::flipYZ = false;
 
@@ -121,7 +122,7 @@ void URDFLinkNode::GetGeometryProperty(bool useVisGeom){
 	if(geom){
 	  if(geom->type == urdf::Geometry::BOX){
 		  geomPrimitive = true;
-			geomName = URDFConverter::primitive_mesh_path + "box_ori_center.tri";
+			geomName = URDFConverter::primitiveMeshPath + "box_ori_center.tri";
 			boost::shared_ptr<urdf::Box> box = boost::static_pointer_cast<urdf::Box>(geom);
 			geomScale(0,0) = box->dim.x;
 			geomScale(1,1) = box->dim.y;
@@ -129,14 +130,14 @@ void URDFLinkNode::GetGeometryProperty(bool useVisGeom){
 
 		}else if(geom->type == urdf::Geometry::CYLINDER){
 		  geomPrimitive = true;
-			geomName = URDFConverter::primitive_mesh_path + "cylinder_ori_center.tri";
+			geomName = URDFConverter::primitiveMeshPath + "cylinder_ori_center.tri";
 			boost::shared_ptr<urdf::Cylinder> cylinder = boost::static_pointer_cast<urdf::Cylinder>(geom);
 			geomScale(0,0) = cylinder->radius;
 			geomScale(1,1) = cylinder->radius;
 			geomScale(2,2) = cylinder->length;
 		}else if(geom->type == urdf::Geometry::SPHERE){
 		  geomPrimitive = true;
-			geomName = URDFConverter::primitive_mesh_path + "sphere_ori_center.tri";
+			geomName = URDFConverter::primitiveMeshPath + "sphere_ori_center.tri";
 			boost::shared_ptr<urdf::Sphere> sphere = boost::static_pointer_cast<urdf::Sphere>(geom);
 			geomScale(0,0) = sphere->radius;
 			geomScale(1,1) = sphere->radius;
@@ -145,9 +146,22 @@ void URDFLinkNode::GetGeometryProperty(bool useVisGeom){
 	  else if(geom->type == urdf::Geometry::MESH){
 			boost::shared_ptr<urdf::Mesh> mesh = boost::static_pointer_cast<urdf::Mesh>(geom);
 			geomName = mesh->filename.c_str();
+			if(geomName.compare(0,10,"package://")==0) {
+			  //take off the first 10 characters
+			  geomName = URDFConverter::packageRootPath + "/" + geomName.substr(10,string::npos);
+			}
 			geomScale(0,0) = mesh->scale.x;
 			geomScale(1,1) = mesh->scale.y;
 			geomScale(2,2) = mesh->scale.z;
+			if(URDFConverter::flipYZ) {
+			  Matrix4 Ryz; 
+			  Ryz.setZero();
+			  Ryz(0,0) = 1;
+			  Ryz(1,2) = -1;
+			  Ryz(2,1) = 1;
+			  Ryz(3,3) = 1;
+			  geomScale = geomScale * Ryz;
+			}
 		}
 	}else{
 		geomName = "";
@@ -252,15 +266,6 @@ void URDFConverter::processTParentTransformations(vector<URDFLinkNode>& linkNode
 		else {
 		  G0.mul(linkNodes[i].T_link_to_inertia_inverse, linkNodes[i].T_link_to_colgeom);
 		  G1.mul(linkNodes[i].T_link_to_colgeom, linkNodes[i].geomScale);
-		}
-		if(flipYZ) {
-		  RigidTransform Tyz; 
-		  Tyz.R.setZero();
-		  Tyz.t.setZero();
-		  Tyz.R(0,0) = 1;
-		  Tyz.R(1,2) = -1;
-		  Tyz.R(2,1) = 1;
-		  G1 = Tyz * G1;
 		}
 		linkNodes[i].geomScale.set(G1);
 	}

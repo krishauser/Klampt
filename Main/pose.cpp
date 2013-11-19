@@ -222,11 +222,15 @@ public:
     for(size_t i=0;i<robot->links.size();i++) 
       self_colliding[i]=env_colliding[i]=false;
     robot->UpdateGeometry();
-    robot->InitMeshCollision(world->terrains[0].terrain->geometry);
+    if(!world->terrains.empty()) {
+      robot->InitMeshCollision(world->terrains[0].terrain->geometry);
+      for(size_t i=0;i<robot->links.size();i++) {
+	if(robot->MeshCollision(i))
+	  env_colliding[i] = true;
+      }
+    }
     for(size_t i=0;i<robot->links.size();i++) {
-      if(robot->MeshCollision(i))
-	env_colliding[i] = true;
-      for(size_t j=0;j<robot->links.size();j++) {
+      for(size_t j=i+1;j<robot->links.size();j++) {
 	if(robot->SelfCollision(i,j)) {
 	  self_colliding[i]=self_colliding[j]=true;
 	}
