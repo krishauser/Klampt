@@ -2,8 +2,8 @@
 #include "Control/FeedforwardController.h"
 #include "Control/LoggingController.h"
 #include "Simulation/WorldSimulation.h"
-#include "Xml/XmlWorld.h"
-#include "Xml/XmlODE.h"
+#include "IO/XmlWorld.h"
+#include "IO/XmlODE.h"
 #include <utils/stringutils.h>
 #include <robotics/IKFunctions.h>
 #include <fstream>
@@ -24,11 +24,32 @@ string ReadFileAsString(const char* fn)
   return s;
 }
 
-
-typedef MilestonePathController MyController;
-inline MyController* GetMilestoneController(RobotController* rc)
+typedef LoggingController MyController;
+typedef PolynomialPathController MyMilestoneController;
+inline RobotController* MakeDefaultController(Robot* robot)
 {
-  return dynamic_cast<MilestonePathController*>(dynamic_cast<LoggingController<FeedforwardController>* >(rc)->base);
+  PolynomialPathController* c = new PolynomialPathController(*robot);
+  FeedforwardController* fc = new FeedforwardController(*robot,c);
+  LoggingController* lc=new LoggingController(*robot,fc);
+  //defaults -- gravity compensation is better off with free-floating robots
+  if(robot->joints[0].type == RobotJoint::Floating)
+    fc->enableGravityCompensation=false;  //feedforward capability
+  else
+    fc->enableGravityCompensation=true;  //feedforward capability
+  fc->enableFeedforwardAcceleration=false;  //feedforward capability
+  lc->save = false;
+  return lc;
+}
+inline void MakeDefaultSensors(Robot* robot,RobotSensors& sensors)
+{
+  JointPositionSensor* jp = new JointPositionSensor;
+  JointVelocitySensor* jv = new JointVelocitySensor;
+  jp->name = "q";
+  jv->name = "dq";
+  jp->q.resize(robot->q.n,Zero);
+  jv->dq.resize(robot->q.n,Zero);
+  sensors.sensors.push_back(jp);
+  sensors.sensors.push_back(jv);
 }
 
 /*
@@ -77,7 +98,7 @@ bool SetupCommands(WorldSimulation& sim,const string& fn)
   if(fn.empty()) return true;
   if(0==strcmp(FileExtension(fn.c_str()),"log")) {
     Assert(sim.robotControllers.size()==1);
-    LoggingController<FeedforwardController>* c = dynamic_cast<LoggingController<FeedforwardController>* >(&*sim.robotControllers[0]);
+    LoggingController* c = dynamic_cast<LoggingController*>(&*sim.robotControllers[0]);
     if(!c->LoadLog(fn.c_str())) {
       fprintf(stderr,"Error reading commands from %s\n",fn.c_str());
       return false;
@@ -117,8 +138,22 @@ bool SetupCommands(WorldSimulation& sim,const string& fn)
     in.close();
 
     Assert(sim.robotControllers.size()==1);
-    MyController* c=GetMilestoneController(sim.robotControllers[0]);
-    c->SetPath(milestones,dmilestones);
+    for(size_t i=0;i<milestones.size();i++) {
+      stringstream ss;
+      ss<<milestones[i]<<"\t"<<dmilestones[i];
+      if(i==0) {
+	if(!sim.robotControllers[0]->SendCommand("set_qv",ss.str())) {
+	  fprintf(stderr,"set_qv command does not work with the robot's controller\n");
+	  return false;
+	}
+      }
+      else {
+	if(!sim.robotControllers[0]->SendCommand("append_qv",ss.str())) {
+	  fprintf(stderr,"append_qv command does not work with the robot's controller\n");
+	  return false;
+	}
+      }
+    }
   }
   return true;
 }
@@ -237,20 +272,10 @@ int main(int argc, char** argv)
 
   //setup controllers
   sim.robotControllers.resize(world.robots.size());
-  for(size_t i=0;i<sim.robotControllers.size();i++) {
+  for(size_t i=0;i<sim.robotControllers.size();i++) {    
     Robot* robot=world.robots[i].robot;
-    MilestonePathController* c = new MilestonePathController(*robot);
-    
-    LoggingController<FeedforwardController>* fc=new LoggingController<FeedforwardController>(*robot);
-    //defaults
-    fc->enableGravityCompensation=true;  //feedforward capability
-    fc->enableFeedforwardAcceleration=false;  //feedforward capability
-    fc->base = c;
-    fc->save = false;
-    sim.SetController(i,fc); 
-
-    sim.controlSimulators[i].sensors.hasJointPosition=true;
-    sim.controlSimulators[i].sensors.hasJointVelocity=true;
+    sim.SetController(i,MakeDefaultController(robot)); 
+    MakeDefaultSensors(robot,sim.controlSimulators[i].sensors);
   }
 
   //setup ODE settings, if any
