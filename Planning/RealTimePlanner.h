@@ -94,6 +94,9 @@ public:
 
   ///Should be called at the start to initialize the start configuration
   void SetConstantPath(const Config& q);
+  ///If the robot's path has changed for a reason outside of the planner's
+  ///control, call this before planning
+  void SetCurrentPath(Real tglobal,const ParabolicRamp::DynamicPath& path);
 
   /// Set the objective function.  Takes ownership of the pointer
   virtual void Reset(PlannerObjectiveBase* newgoal);
@@ -155,11 +158,14 @@ public:
   /// (e.g., the padding was too short)
   virtual void MarkSendFailure();
 
-  /// Users must set these members before calling 
+  /// Users must set these members before planning
   Robot* robot;
   WorldPlannerSettings* settings;
   SingleRobotCSpace* cspace;
+  /// Set the current path before planning, using SetConstantPath or SetCurrentPath
+  Real pathStartTime; 
   ParabolicRamp::DynamicPath currentPath;
+  /// Set objective before planning, using Reset()
   PlannerObjectiveBase* goal;
 
   /// Users should set this up to capture the outputted path

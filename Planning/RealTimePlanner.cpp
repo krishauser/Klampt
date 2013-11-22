@@ -79,6 +79,7 @@ RealTimePlannerBase::RealTimePlannerBase()
    //protocol(Constant),currentSplitTime(0.1),currentPadding(0.05)
    ///protocol(Constant),currentSplitTime(0.5),currentPadding(0.05)
 {
+  pathStartTime = 0;
   cognitiveMultiplier = 1.0;
   acceptTimeOverruns = false;
 }
@@ -122,13 +123,24 @@ void RealTimePlannerBase::Reset(PlannerObjectiveBase* newgoal)
 //returns true if the path changed and planTime < splitTime
 bool RealTimePlannerBase::PlanUpdate(Real tglobal,Real& splitTime,Real& planTime)
 {
+  assert(!currentPath.ramps.empty());
   if(currentSplitTime < currentPadding+currentExternalPadding+0.001)
     currentSplitTime=currentPadding+currentExternalPadding+0.001;
 
-  assert(!currentPath.ramps.empty());
+  //advance the current path time
+  ParabolicRamp::DynamicPath before,updatedPath;
+  if(tglobal > pathStartTime) {
+    currentPath.Split(tglobal-pathStartTime,before,updatedPath);
+    currentPath = updatedPath;
+    pathStartTime = tglobal;
+  }
+  else if(tglobal < pathStartTime) {
+    FatalError("RealTimePlannerBase::PlanUpdate: Time is not moving forward!");
+  }
+
   Timer timer;
   splitTime = currentSplitTime;
-  ParabolicRamp::DynamicPath before,after;
+  ParabolicRamp::DynamicPath after;
   currentPath.Split(splitTime,before,after);
   assert(FuzzyEquals(before.GetTotalTime(),splitTime));
   //printf("Split took time %g\n",timer.ElapsedTime());
@@ -236,7 +248,7 @@ bool RealTimePlannerBase::PlanUpdate(Real tglobal,Real& splitTime,Real& planTime
       }
     }
     else {
-      //No send callback, assuming path update is just done internally
+      //No send callback set, assuming path update should just be done internally
       currentPath = before;
       currentPath.Concat(after);
     }
@@ -497,6 +509,12 @@ void RealTimePlannerBase::SetConstantPath(const Config& q)
 {
   currentPath.ramps.resize(1);
   currentPath.ramps[0].SetConstant(q);
+}
+
+void RealTimePlannerBase::SetCurrentPath(Real tglobal,const ParabolicRamp::DynamicPath& path)
+{
+  pathStartTime = tglobal;
+  currentPath = path;
 }
 
 

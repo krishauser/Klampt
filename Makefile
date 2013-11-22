@@ -5,7 +5,7 @@ FLAGS = $(CPPFLAGS) $(addprefix -D, $(DEFINES))
 OBJDIR = objs
 LIBDIR = lib
 
-DIRS = Modeling View Control Planning Simulation IO Contact
+DIRS = Modeling View Control Planning Simulation IO Contact Interface
 OBJS= $(foreach dir,$(DIRS), $(dir)/$(OBJDIR)/*.o)
 LIB = $(addprefix -L, $(LIBDIRS))  $(addprefix -l, $(LIBS))
 LIBKLAMPT = -L$(LIBDIR) -lKlampt 
@@ -45,6 +45,7 @@ lib:
 	cd Control; make 
 	cd Planning; make
 	cd IO; make
+	cd Interface; make
 	mkdir -p $(LIBDIR)
 	ar rcs $(LIBDIR)/libKlampt.a $(foreach dir,$(DIRS),$(dir)/$(OBJDIR)/*.o)
 	ranlib $(LIBDIR)/libKlampt.a
@@ -58,6 +59,7 @@ clean:
 	cd Planning; make clean
 	cd IO; make clean
 	cd View; make clean
+	cd Interface; make
 	rm $(LIBDIR)/*.a
 
 RobotTest: lib
@@ -89,12 +91,12 @@ URDFtoRob:  lib
 	 $(CC) $(FLAGS) Main/$(OBJDIR)/urdftorob.o $(LIBKLAMPT) $(LIB) -o $@		
 UserTrials:  lib
 	cd Main; make usertrials.o
-	 $(CC) $(FLAGS) $(OBJS) Main/$(OBJDIR)/usertrials.o Input/$(OBJDIR)/*.o $(LIBKLAMPT) $(LIB) -o $@
+	 $(CC) $(FLAGS) $(OBJS) Main/$(OBJDIR)/usertrials.o $(LIBKLAMPT) $(LIB) -o $@
 
 UserTrialsMT:  lib
 	cd Main; make usertrials_multithread.o
 	cd Input; make
-	 $(CC) $(FLAGS)  Main/$(OBJDIR)/usertrials_multithread.o Input/$(OBJDIR)/*.o $(LIBKLAMPT) $(LIB) -o $@
+	 $(CC) $(FLAGS)  Main/$(OBJDIR)/usertrials_multithread.o $(LIBKLAMPT) $(LIB) -o $@
 
 python: lib
 	cd Python/klampt; make
