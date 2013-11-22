@@ -1,4 +1,10 @@
 ### Kinematics of the Robotiq 3-finger gripper ###
+# Built by Giulia Frainchi
+# Notes:
+# - Motor parameters not tuned
+# - Finger joints are independently controllable, which does not reflect the
+#   real robot's underactuated nature (one actuator per finger + scissor)
+#
 TParent  -1 0 0   0 0 1  0 1 0    0 0 0 \
           0 1 0    1 0 0   0 0 -1  -0.047 0.02 0.037 \
           0 1 0    1 0 0   0 0 -1  -0.047 0.02 -0.037
