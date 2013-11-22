@@ -4,6 +4,8 @@
 #include "RealTimePlanner.h"
 #include <planning/MotionPlanner.h>
 
+/** @brief Real time RRT planner -- not recently tested
+ */
 class RealTimeRRTPlanner : public RealTimePlannerBase
 {
 public:
@@ -35,6 +37,9 @@ public:
   Vector tempV;
 };
 
+/** @brief The preferred sampling-based planner.  Will alternate sampling-based
+* planning and smoothing via shortcutting.
+ */
 class RealTimeTreePlanner : public RealTimePlannerBase
 {
 public:

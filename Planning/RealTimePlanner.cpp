@@ -8,8 +8,6 @@
 #include <string.h>
 #include <typeinfo>
 
-//HACK: set this to true to allow updates after the alloted time has passed
-bool gOverrideTimeOverruns = true;
 
 //extracts IK problems from the plannerobjective
 void Extract(PlannerObjectiveBase* obj,Robot* robot,vector<IKGoal>& ikproblem,vector<pair<int,Real> >& joint_constraints)
@@ -82,11 +80,19 @@ RealTimePlannerBase::RealTimePlannerBase()
    ///protocol(Constant),currentSplitTime(0.5),currentPadding(0.05)
 {
   cognitiveMultiplier = 1.0;
+  acceptTimeOverruns = false;
 }
 
 RealTimePlannerBase::~RealTimePlannerBase()
 {
   SafeDelete(goal);
+}
+
+void RealTimePlannerBase::SetSpace(SingleRobotCSpace* space)
+{
+  cspace = space;
+  robot = space->GetRobot();
+  settings = space->settings;
 }
 
 void RealTimePlannerBase::Reset(PlannerObjectiveBase* newgoal)
@@ -114,7 +120,7 @@ void RealTimePlannerBase::Reset(PlannerObjectiveBase* newgoal)
 
 //default implementation: fix the split time, call PlanFrom
 //returns true if the path changed and planTime < splitTime
-bool RealTimePlannerBase::PlanUpdate(Real& splitTime,Real& planTime)
+bool RealTimePlannerBase::PlanUpdate(Real tglobal,Real& splitTime,Real& planTime)
 {
   if(currentSplitTime < currentPadding+currentExternalPadding+0.001)
     currentSplitTime=currentPadding+currentExternalPadding+0.001;
@@ -143,7 +149,7 @@ bool RealTimePlannerBase::PlanUpdate(Real& splitTime,Real& planTime)
   if(res==Success) {
     updatePath = true;
     //if the planning time exceeds the split time, disallow it
-    if(!gOverrideTimeOverruns && planTime > currentSplitTime-currentExternalPadding) {
+    if(!acceptTimeOverruns && planTime > currentSplitTime-currentExternalPadding) {
       updatePath = false;
     }
   }
@@ -151,7 +157,7 @@ bool RealTimePlannerBase::PlanUpdate(Real& splitTime,Real& planTime)
     //TEMP: RRT semantics indicate that a better path may have been found
     updatePath = true;
     //if the planning time exceeds the split time, disallow it
-    if(!gOverrideTimeOverruns && planTime > currentSplitTime-currentExternalPadding) {
+    if(!acceptTimeOverruns && planTime > currentSplitTime-currentExternalPadding) {
       updatePath = false;
     }
   }
@@ -201,6 +207,7 @@ bool RealTimePlannerBase::PlanUpdate(Real& splitTime,Real& planTime)
     for(size_t i=0;i<before.ramps.size();i++)
       Assert(before.ramps[i].IsValid());
 
+    //debugging path
     if(!Vector(after.ramps.front().x0).isEqual(Vector(before.ramps.back().x1),1e-5)) {
       cout<<Vector(before.ramps.back().x1)<<endl;
       cout<<Vector(after.ramps.front().x0)<<endl;
@@ -214,12 +221,25 @@ bool RealTimePlannerBase::PlanUpdate(Real& splitTime,Real& planTime)
       after.ramps.front().ramps[i].x0=after.ramps.front().x0[i];
       after.ramps.front().ramps[i].dx0=after.ramps.front().dx0[i];
     }
-    //update current path
-    currentPath = before;
-    currentPath.Concat(after);
-
     Assert(after.accMax == before.accMax);
     Assert(after.velMax == before.velMax);
+
+    //update current path
+    if(sendPathCallback) {
+      if(sendPathCallback->Send(tglobal,splitTime,after)) {
+	currentPath = before;
+	currentPath.Concat(after);
+      }
+      else {
+	//Send failed for some reason -- now expand the padding
+	MarkSendFailure();
+      }
+    }
+    else {
+      //No send callback, assuming path update is just done internally
+      currentPath = before;
+      currentPath.Concat(after);
+    }
     Assert(currentPath.IsValid());
     Assert(Vector(currentPath.ramps.back().dx1).isZero());
     return true;
@@ -228,7 +248,7 @@ bool RealTimePlannerBase::PlanUpdate(Real& splitTime,Real& planTime)
     return false;
 }
 
-void RealTimePlannerBase::MarkLastFailure()
+void RealTimePlannerBase::MarkSendFailure()
 {
   currentExternalPadding = currentExternalPadding*2.0;
 }
