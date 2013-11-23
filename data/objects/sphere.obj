@@ -1,6 +1,5 @@
 mesh "sphere.tri"
 geomscale 0.1 0.1 0.1
-geomtranslate -0.1 -0.1 -0.1
 mass 1
 autoMass
 kStiffness 10000
