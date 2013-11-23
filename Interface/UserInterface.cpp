@@ -284,8 +284,7 @@ string PlannerCommandInterface::UpdateEvent()
   double t = robotInterface->GetCurTime();
   lastPlanTime = t;
   if(ObjectiveChanged()) {
-    CartesianObjective* obj=GetCartesianObjective();
-    planner->Reset(obj);
+    planner->Reset(GetObjective());
   }
 
   //cout<<"Path advance "<<startPlanTime-lastPlanTime<<endl;

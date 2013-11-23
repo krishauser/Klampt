@@ -11,7 +11,7 @@ class RealTimeRRTPlanner : public RealTimePlannerBase
 public:
   RealTimeRRTPlanner();
   virtual ~RealTimeRRTPlanner() {  }
-  virtual void Reset(PlannerObjectiveBase* newgoal);
+  virtual void Reset(SmartPointer<PlannerObjectiveBase> newgoal);
   Vector& MakeState(const Config& q,const Config& dq);
   Vector& MakeState(const Config& q);
   RRTPlanner::Node* TryIKExtend(RRTPlanner::Node* node,bool search=true);
@@ -22,7 +22,7 @@ public:
   //deleted subtree
   bool CheckPath(RRTPlanner::Node* n,vector<RRTPlanner::Node*>& ndelete,Timer& timer,Real cutoff);
   virtual int PlanFrom(ParabolicRamp::DynamicPath& path,Real cutoff);
-  Real EvaluateNodePathCost(RRTPlanner::Node* n) const;
+  Real EvaluateNodePathCost(RRTPlanner::Node* n);
 
   //settings
   SmartPointer<RampCSpaceAdaptor> stateSpace;

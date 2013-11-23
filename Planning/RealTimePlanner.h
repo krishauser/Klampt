@@ -98,8 +98,8 @@ public:
   ///control, call this before planning
   void SetCurrentPath(Real tglobal,const ParabolicRamp::DynamicPath& path);
 
-  /// Set the objective function.  Takes ownership of the pointer
-  virtual void Reset(PlannerObjectiveBase* newgoal);
+  /// Set the objective function.
+  virtual void Reset(SmartPointer<PlannerObjectiveBase> newgoal);
 
   /** Performs planning, returns the splitting time and planning time.
    * tglobal is a global clock synchronized between the planning and
@@ -126,10 +126,10 @@ public:
   }
 
   ///Performs shortcutting up until the time limit
-  int Shortcut(ParabolicRamp::DynamicPath& path,Real timeLimit) const;
+  int Shortcut(ParabolicRamp::DynamicPath& path,Real timeLimit);
   ///Performs shortcuts that reduce the objective function, only on the 
   ///portion of the path after time tstart
-  int SmartShortcut(Real tstart,ParabolicRamp::DynamicPath& path,Real timeLimit) const;
+  int SmartShortcut(Real tstart,ParabolicRamp::DynamicPath& path,Real timeLimit);
 
   ///Helper
   bool GetMilestoneRamp(const Config& q0,const Vector& dq0,const Config& q1,ParabolicRamp::DynamicPath& ramp) const;
@@ -140,19 +140,19 @@ public:
   bool CheckMilestoneRamp(const ParabolicRamp::DynamicPath& curPath,const Config& q,ParabolicRamp::DynamicPath& ramp) const;
 
   ///returns the cost of going straight to q (assuming no collision detection)
-  Real EvaluateDestinationCost(const Config& q) const;
+  Real EvaluateDestinationCost(const Config& q);
 
   ///returns the cost of using the given path
-  Real EvaluatePathCost(const ParabolicRamp::DynamicPath& path,Real tStart=0.0) const;
+  Real EvaluatePathCost(const ParabolicRamp::DynamicPath& path,Real tStart=0.0);
 
   ///returns the current final destination
   const ParabolicRamp::Vector& CurrentDestination() const;
 
   ///returns the cost for the current destination
-  Real CurrentDestinationCost() const;
+  Real CurrentDestinationCost();
 
   ///returns the cost for the current path
-  Real CurrentPathCost() const;
+  Real CurrentPathCost();
 
   /// Called whenever the sendPathCallback returned false on a planned path
   /// (e.g., the padding was too short)
@@ -166,7 +166,7 @@ public:
   Real pathStartTime; 
   ParabolicRamp::DynamicPath currentPath;
   /// Set objective before planning, using Reset()
-  PlannerObjectiveBase* goal;
+  SmartPointer<PlannerObjectiveBase> goal;
 
   /// Users should set this up to capture the outputted path
   SmartPointer<SendPathCallbackBase> sendPathCallback;

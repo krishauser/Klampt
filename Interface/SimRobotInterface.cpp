@@ -74,7 +74,7 @@ MotionQueueInterface::MotionResult SimRobotInterface::SendPathImmediate(Real tbr
 {
   MyController* c=GetController(sim->robotControllers[index]);
   if(tbreak > sim->time) {
-    c->Cut(tbreak);
+    c->Cut(tbreak - sim->time);
     c->Append(path);
   }
   else 

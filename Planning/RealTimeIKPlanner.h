@@ -11,7 +11,7 @@
 class RealTimeIKPlanner : public RealTimePlannerBase
 {
 public:
-  virtual void Reset(PlannerObjectiveBase* newgoal);
+  virtual void Reset(SmartPointer<PlannerObjectiveBase> newgoal);
   virtual int PlanFrom(ParabolicRamp::DynamicPath& path,Real cutoff);
 };
 
@@ -22,7 +22,7 @@ class RealTimePerturbationPlanner : public RealTimePlannerBase
 {
 public:
   RealTimePerturbationPlanner();
-  virtual void Reset(PlannerObjectiveBase* newgoal);
+  virtual void Reset(SmartPointer<PlannerObjectiveBase> newgoal);
   virtual int PlanFrom(ParabolicRamp::DynamicPath& path,Real cutoff);
 
   //setting
@@ -41,7 +41,7 @@ class RealTimePerturbationIKPlanner : public RealTimePlannerBase
 {
 public:
   RealTimePerturbationIKPlanner();
-  virtual void Reset(PlannerObjectiveBase* newgoal);
+  virtual void Reset(SmartPointer<PlannerObjectiveBase> newgoal);
   virtual int PlanFrom(ParabolicRamp::DynamicPath& path,Real cutoff);
 
   //setting

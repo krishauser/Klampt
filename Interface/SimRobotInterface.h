@@ -4,6 +4,9 @@
 #include "RobotInterface.h"
 #include "Simulation/WorldSimulation.h"
 
+/** @brief A simulation mode RobotInterface.
+ * Currently only supports the SimViewProgram default controller.
+ */
 class SimRobotInterface : public MotionQueueInterface
 {
  public:

@@ -86,7 +86,6 @@ RealTimePlannerBase::RealTimePlannerBase()
 
 RealTimePlannerBase::~RealTimePlannerBase()
 {
-  SafeDelete(goal);
 }
 
 void RealTimePlannerBase::SetSpace(SingleRobotCSpace* space)
@@ -96,7 +95,7 @@ void RealTimePlannerBase::SetSpace(SingleRobotCSpace* space)
   settings = space->settings;
 }
 
-void RealTimePlannerBase::Reset(PlannerObjectiveBase* newgoal)
+void RealTimePlannerBase::Reset(SmartPointer<PlannerObjectiveBase> newgoal)
 {
   if(protocol == ExponentialBackoff) {
     if(goal && newgoal) {  //reduce timestep depending on the delta from the prior goal
@@ -115,7 +114,6 @@ void RealTimePlannerBase::Reset(PlannerObjectiveBase* newgoal)
       currentSplitTime = 0.1;
     }
   }
-  if(goal) delete goal;
   goal = newgoal;
 }
 
@@ -266,7 +264,7 @@ void RealTimePlannerBase::MarkSendFailure()
 }
 
 
-int RealTimePlannerBase::Shortcut(ParabolicRamp::DynamicPath& path,Real timeLimit) const
+int RealTimePlannerBase::Shortcut(ParabolicRamp::DynamicPath& path,Real timeLimit)
 {
   if(timeLimit <= 0) return 0;
   Timer timer;
@@ -294,7 +292,7 @@ inline bool InBounds(const vector<Real>& x,const vector<Real>& bmin,const vector
 }
 
 
-int RealTimePlannerBase::SmartShortcut(Real tstart,ParabolicRamp::DynamicPath& path,Real timeLimit) const
+int RealTimePlannerBase::SmartShortcut(Real tstart,ParabolicRamp::DynamicPath& path,Real timeLimit) 
 {
   if(goal->PathInvariant()) return Shortcut(path,timeLimit);
   if(timeLimit <= 0) return 0;
@@ -474,7 +472,7 @@ bool RealTimePlannerBase::CheckMilestoneRamp(const ParabolicRamp::DynamicPath& c
 }
 
 //returns the cost of going through q (assuming no collision detection)
-Real RealTimePlannerBase::EvaluateDestinationCost(const Config& q) const 
+Real RealTimePlannerBase::EvaluateDestinationCost(const Config& q) 
 {
   ParabolicRamp::DynamicPath ramp;
   if(!GetMilestoneRamp(currentPath,q,ramp)) return Inf;
@@ -482,7 +480,7 @@ Real RealTimePlannerBase::EvaluateDestinationCost(const Config& q) const
 }
 
 //returns the cost of using the given path
-Real RealTimePlannerBase::EvaluatePathCost(const ParabolicRamp::DynamicPath& path,Real tstart) const 
+Real RealTimePlannerBase::EvaluatePathCost(const ParabolicRamp::DynamicPath& path,Real tstart)
 {
   return goal->PathCost(path,tstart);
 }
@@ -494,13 +492,13 @@ const ParabolicRamp::Vector& RealTimePlannerBase::CurrentDestination() const
 }
 
 //returns the cost for the current destination
-Real RealTimePlannerBase::CurrentDestinationCost() const
+Real RealTimePlannerBase::CurrentDestinationCost() 
 {
   return EvaluateDestinationCost(currentPath.ramps.back().x1);
 }
 
 //returns the cost for the current path
-Real RealTimePlannerBase::CurrentPathCost() const
+Real RealTimePlannerBase::CurrentPathCost()
 {
   return EvaluatePathCost(currentPath);
 }
@@ -509,16 +507,24 @@ void RealTimePlannerBase::SetConstantPath(const Config& q)
 {
   currentPath.ramps.resize(1);
   currentPath.ramps[0].SetConstant(q);
+  if(currentPath.accMax.empty())
+    currentPath.accMax = robot->accMax;
+  if(currentPath.velMax.empty())
+    currentPath.velMax = robot->velMax;
 }
 
 void RealTimePlannerBase::SetCurrentPath(Real tglobal,const ParabolicRamp::DynamicPath& path)
 {
   pathStartTime = tglobal;
   currentPath = path;
+  if(currentPath.accMax.empty())
+    currentPath.accMax = robot->accMax;
+  if(currentPath.velMax.empty())
+    currentPath.velMax = robot->velMax;
 }
 
 
-void RealTimeIKPlanner::Reset(PlannerObjectiveBase* newgoal)
+void RealTimeIKPlanner::Reset(SmartPointer<PlannerObjectiveBase> newgoal)
 {
   RealTimePlannerBase::Reset(newgoal);
 }
@@ -554,7 +560,7 @@ RealTimePerturbationPlanner::RealTimePerturbationPlanner()
   : perturbationStep(0.01),perturbLimit(100)
 {}
 
-void RealTimePerturbationPlanner::Reset(PlannerObjectiveBase* newgoal)
+void RealTimePerturbationPlanner::Reset(SmartPointer<PlannerObjectiveBase> newgoal)
 {
   iteration = 0;
   RealTimePlannerBase::Reset(newgoal);
@@ -593,7 +599,7 @@ RealTimePerturbationIKPlanner::RealTimePerturbationIKPlanner()
   : perturbationStep(0.01),perturbLimit(100)
 {}
 
-void RealTimePerturbationIKPlanner::Reset(PlannerObjectiveBase* newgoal)
+void RealTimePerturbationIKPlanner::Reset(SmartPointer<PlannerObjectiveBase> newgoal)
 {
   iteration = 0;
   RealTimePlannerBase::Reset(newgoal);
@@ -641,7 +647,7 @@ RealTimeRRTPlanner::RealTimeRRTPlanner()
   : delta(0.3),smoothTime(0.5),ikSolveProbability(1.0)
 {}
 
-void RealTimeRRTPlanner::Reset(PlannerObjectiveBase* newgoal)
+void RealTimeRRTPlanner::Reset(SmartPointer<PlannerObjectiveBase> newgoal)
 {
   //reset
   iteration = 0;
@@ -713,7 +719,7 @@ RRTPlanner::Node* RealTimeRRTPlanner::TryIKExtend(RRTPlanner::Node* node,bool se
     return ((TreeRoadmapPlanner*)((RRTPlanner*)rrt))->Extend(node,x);
 }
 
-Real RealTimeRRTPlanner::EvaluateNodePathCost(RRTPlanner::Node* n) const
+Real RealTimeRRTPlanner::EvaluateNodePathCost(RRTPlanner::Node* n) 
 {
   Config q,dq;
   q.setRef(n->x,0,1,n->x.n/2);
@@ -1266,7 +1272,7 @@ RealTimeTreePlanner::Node* RealTimeTreePlanner::TryIKExtend(Node* node,bool sear
       //Assert(IsInf(node->getParent()->terminalCost));
       node = node->getParent();
     }
-    CartesianTrackingObjective* obj = dynamic_cast<CartesianTrackingObjective*>(goal);
+    CartesianTrackingObjective* obj = dynamic_cast<CartesianTrackingObjective*>(&*goal);
     assert(obj != NULL);
     //create an optimized parabolic path from node->q,node->dq,node->t,
     //straight path, and then ending with a braking trajectory

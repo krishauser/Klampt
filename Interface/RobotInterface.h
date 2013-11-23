@@ -7,7 +7,16 @@
 /** A unified interface to control either a simulated or real robot, which
  * operates in a motion queue mode.
  * 
- * In sim mode, currently only supports the SimViewProgram default controller.
+ * - GetCurTime returns the current absolute time
+ * - GetEndTime returns the absolute time of the end of the current motion 
+ *   queue
+ * - GetCurConfig/Velocity returns the current configuration/velocity
+ * - GetEndConfig/Velocity returns the configuration/velocity at the end
+ *   of the motion queue.
+ * - SendMilestone appends a milestone to the back of the queue
+ * - SendMilestoneImmediate breaks the motion queue at the current time and
+ *   appends a milestone.
+ * - SendPathImmediate breaks the current motion queue at absolute time tbreak.
  */
 class MotionQueueInterface
 {
