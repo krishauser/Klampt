@@ -13,9 +13,9 @@
 
 
 
-/** @brief An abstract base class for a user interface 
+/** @brief An abstract base class for a user interface.
  *
- * world, viewport, settings, and controller must be initialized
+ * world, viewport, settings, and robotInterface must be initialized
  * before using the class.
  */
 class RobotUserInterface 
