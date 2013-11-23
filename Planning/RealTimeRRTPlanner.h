@@ -61,7 +61,7 @@ public:
 
   RealTimeTreePlanner();
   virtual ~RealTimeTreePlanner() {  }
-  virtual void Reset(PlannerObjectiveBase* newgoal);
+  virtual void Reset(SmartPointer<PlannerObjectiveBase> newgoal);
   Node* AddChild(Node* node,const Config& q);
   Node* AddChild(Node* node,const ParabolicRamp::ParabolicRampND& ramp);
   Node* AddChild(Node* node,const ParabolicRamp::DynamicPath& path);

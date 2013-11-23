@@ -6,10 +6,11 @@
 #include <camera/viewport.h>
 #include "Planning/RobotCSpace.h"
 #include "Planning/PlannerSettings.h"
+#include "Planning/RealTimePlanner.h"
 #include "RobotInterface.h"
 #include "InputProcessor.h"
+#include <pthread.h>
 
-class RealTimePlannerBase;
 
 
 /** @brief An abstract base class for a user interface 
@@ -159,5 +160,88 @@ class RRTCommandInterface : public PlannerCommandInterface
 
   SmartPointer<SingleRobotCSpace> cspace;
 };
+
+
+/** @brief Shared data structure for a multithreaded real time planner.
+ * The planner must have a RealTimePlannerDataSender as a sendPathCallback.
+ */
+struct RealTimePlannerData
+{
+  pthread_mutex_t mutex;
+  RealTimePlannerBase* planner;
+  SmartPointer<PlannerObjectiveBase> objective;   //(in) the planning objective, can be NULL
+  bool active;             //(in) set this to false to quit
+  Real globalTime;         //(in) time measured in calling thread
+  Real startPlanTime;       //(out) time of planning
+
+  bool pathRefresh;         //(in/out) whether to refresh the path
+  Real tcut;                //(out) the path cut time, relative to startPlanTime
+  ParabolicRamp::DynamicPath path;  //(out) the path to splice in 
+  bool pathRefreshSuccess;  //(in) whether the execution thread read in the path successfully
+};
+
+/** @brief For use with a multithreaded RealTimePlannerBase
+ */
+class RealTimePlannerDataSender : public SendPathCallbackBase
+{
+public:
+  RealTimePlannerDataSender(RealTimePlannerData* data);
+  virtual bool Send(Real tplanstart,Real tcut,const ParabolicRamp::DynamicPath& path);
+  RealTimePlannerData* data;
+};
+
+/** @brief A base class for a multithreaded planning robot UI.
+ * Subclasses must fill out planner.
+ */
+class MTPlannerCommandInterface: public InputProcessingInterface
+{
+public:
+  //need the planner to point into the planningWorld
+  //the inputProcessor can point into the regular world
+  RobotWorld planningWorld;
+  RealTimePlannerBase* planner;
+  pthread_t planningThread;
+  RealTimePlannerData data;
+
+  MTPlannerCommandInterface();
+  virtual ~MTPlannerCommandInterface();
+  virtual string Name() const { return "UnnamedPlanner"; }
+  virtual string Description() const {  return "Unnamed planner interface";  }
+  virtual string Instructions() const {
+    return "Right-click and drag any point on the robot to the place you want it to be";
+  }
+  
+  virtual string ActivateEvent(bool enabled);
+  virtual string UpdateEvent();
+};
+
+class MTIKPlannerCommandInterface: public MTPlannerCommandInterface
+{
+ public:
+  virtual string Name() const { return "IKPointPoser"; }
+  virtual string Description() const { 	return "Smart point poser (MT)"; }
+  virtual string Instructions() const {
+    return "Right-click and drag any point on the robot to the place you want it to be";
+  }
+  virtual string ActivateEvent(bool enabled);
+
+  SmartPointer<SingleRobotCSpace> cspace;
+
+};
+
+class MTRRTCommandInterface: public MTPlannerCommandInterface
+{
+ public:
+  virtual string Name() const { return "RRTPointPoser"; }
+  virtual string Description() const {  return "Goal-based point poser (MT)"; }
+  virtual string Instructions() const {
+    return "Right-click and drag any point on the robot to the place you want it to be";
+  }
+  //sets up the planner
+  virtual string ActivateEvent(bool enabled);
+
+  SmartPointer<SingleRobotCSpace> cspace;
+};
+
 
 #endif

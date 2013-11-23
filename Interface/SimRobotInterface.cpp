@@ -77,7 +77,10 @@ MotionQueueInterface::MotionResult SimRobotInterface::SendPathImmediate(Real tbr
     c->Cut(tbreak - sim->time);
     c->Append(path);
   }
-  else 
+  else {
+    fprintf(stderr,"Warning, sending immediate path with time < current sim time\n");
+    return InvalidParams;
     c->SetPath(path);
+  }
   return Success;
 }

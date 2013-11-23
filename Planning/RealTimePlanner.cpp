@@ -1087,7 +1087,7 @@ RealTimeTreePlanner::RealTimeTreePlanner()
   : delta(0.3),smoothTime(0.5),ikSolveProbability(1.0)
 {}
 
-void RealTimeTreePlanner::Reset(PlannerObjectiveBase* newgoal)
+void RealTimeTreePlanner::Reset(SmartPointer<PlannerObjectiveBase> newgoal)
 {
   //reset
   iteration = 0;

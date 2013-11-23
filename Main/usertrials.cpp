@@ -102,11 +102,13 @@ public:
     drawUI = 1;
     drawContacts = 1;
 
-    uis.resize(4);
+    uis.resize(6);
     uis[0] = new JointCommandInterface;
     uis[1] = new IKCommandInterface;
     uis[2] = new IKPlannerCommandInterface;
     uis[3] = new RRTCommandInterface;
+    uis[4] = new MTIKPlannerCommandInterface;
+    uis[5] = new MTRRTCommandInterface;
     for(size_t i=0;i<uis.size();i++) {
       uis[i]->world = world;
       uis[i]->robotInterface = &robotInterface;
