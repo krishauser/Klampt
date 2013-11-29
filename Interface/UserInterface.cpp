@@ -4,7 +4,7 @@
 #include "Planning/RealTimeIKPlanner.h"
 #include <robotics/IKFunctions.h>
 #include <GLdraw/GL.h>
-#include <GLdraw/drawExtra.h>
+#include <GLdraw/drawextra.h>
 #include <sstream>
 
 /** @brief Adaptor for sending paths to PhysicalRobotInterface from a
