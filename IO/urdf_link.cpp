@@ -545,6 +545,7 @@ bool parseLink(Link &link, TiXmlElement* config)
     }
     link.collision = (*default_collision->begin());
   }
+  return true;
 }
 
 /* exports */

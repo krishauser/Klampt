@@ -566,10 +566,12 @@ void PolynomialPathController::GetPath(Spline::PiecewisePolynomialND& _path) con
 
 void PolynomialPathController::Cut(Real time,bool relative)
 {
-  if(relative) 
+  if(relative)  {
     path.TrimBack(pathOffset+time);
-  else
+  }
+  else {
     path.TrimBack(time);
+  }
 }
 
 Config PolynomialPathController::Endpoint() const

@@ -330,7 +330,6 @@ string PlannerCommandInterface::UpdateEvent()
 
 string IKPlannerCommandInterface::ActivateEvent(bool enabled)
 {
-  PlannerCommandInterface::ActivateEvent(enabled);
   if(!planner) {
     printf("IK planner activated\n");
     cspace = new SingleRobotCSpace(*world,0,settings);
@@ -341,12 +340,12 @@ string IKPlannerCommandInterface::ActivateEvent(bool enabled)
     planner->currentPadding=0.05;
     planner->SetSpace(cspace);
   }
+  PlannerCommandInterface::ActivateEvent(enabled);
   return "";
 }
 
 string RRTCommandInterface::ActivateEvent(bool enabled)
 {
-  PlannerCommandInterface::ActivateEvent(enabled);
   if(!planner) {
     cspace = new SingleRobotCSpace(*world,0,settings);
     
@@ -361,6 +360,7 @@ string RRTCommandInterface::ActivateEvent(bool enabled)
     //planner->currentPadding=0.01;
     planner->SetSpace(cspace);
   }
+  PlannerCommandInterface::ActivateEvent(enabled);
   return "";
 }
 
