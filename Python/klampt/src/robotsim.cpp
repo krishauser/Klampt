@@ -13,7 +13,9 @@
 #include <utils/stringutils.h>
 #include <ode/ode.h>
 #include <fstream>
+#ifndef WIN32
 #include <unistd.h>
+#endif //WIN32
 using namespace GLDraw;
 
 /// Internally used.
