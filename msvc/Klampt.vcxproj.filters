@@ -55,6 +55,12 @@
     <Filter Include="Source Files\View">
       <UniqueIdentifier>{11ce2a39-82ea-4c64-b6f2-a911e78ad232}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Interface">
+      <UniqueIdentifier>{ba674b0c-bddc-41bc-b564-1a5737d34bd9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Interface">
+      <UniqueIdentifier>{524db934-9a16-4f55-98da-957937647728}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Contact\Utils.h">
@@ -354,6 +360,18 @@
     <ClInclude Include="..\Control\PyController.h">
       <Filter>Header Files\Control</Filter>
     </ClInclude>
+    <ClInclude Include="..\Interface\InputProcessor.h">
+      <Filter>Header Files\Interface</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Interface\RobotInterface.h">
+      <Filter>Header Files\Interface</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Interface\SimRobotInterface.h">
+      <Filter>Header Files\Interface</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Interface\UserInterface.h">
+      <Filter>Header Files\Interface</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Contact\ContactDistance.cpp">
@@ -598,6 +616,15 @@
     </ClCompile>
     <ClCompile Include="..\Control\PyController.cpp">
       <Filter>Source Files\Control</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Interface\InputProcessor.cpp">
+      <Filter>Source Files\Interface</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Interface\SimRobotInterface.cpp">
+      <Filter>Source Files\Interface</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Interface\UserInterface.cpp">
+      <Filter>Source Files\Interface</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

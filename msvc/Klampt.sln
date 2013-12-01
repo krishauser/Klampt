@@ -18,6 +18,16 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "RobotPose", "RobotPose\Robo
 		{2E8C568C-15AB-4E20-9FF9-C614A92F86DD} = {2E8C568C-15AB-4E20-9FF9-C614A92F86DD}
 	EndProjectSection
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "UserTrials", "UserTrials\UserTrials.vcxproj", "{1D521E2A-A1D4-41D9-9AE9-79F6EE8A863F}"
+	ProjectSection(ProjectDependencies) = postProject
+		{2E8C568C-15AB-4E20-9FF9-C614A92F86DD} = {2E8C568C-15AB-4E20-9FF9-C614A92F86DD}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "URDFtoRob", "URDFtoRob\URDFtoRob.vcxproj", "{6FCA8398-BA3C-4E0E-BB70-4ECA1ED99AFF}"
+	ProjectSection(ProjectDependencies) = postProject
+		{2E8C568C-15AB-4E20-9FF9-C614A92F86DD} = {2E8C568C-15AB-4E20-9FF9-C614A92F86DD}
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -40,6 +50,14 @@ Global
 		{E5D42243-3E36-4EF6-8FF3-8CEB74972BB3}.Debug|Win32.Build.0 = Debug|Win32
 		{E5D42243-3E36-4EF6-8FF3-8CEB74972BB3}.Release|Win32.ActiveCfg = Release|Win32
 		{E5D42243-3E36-4EF6-8FF3-8CEB74972BB3}.Release|Win32.Build.0 = Release|Win32
+		{1D521E2A-A1D4-41D9-9AE9-79F6EE8A863F}.Debug|Win32.ActiveCfg = Debug|Win32
+		{1D521E2A-A1D4-41D9-9AE9-79F6EE8A863F}.Debug|Win32.Build.0 = Debug|Win32
+		{1D521E2A-A1D4-41D9-9AE9-79F6EE8A863F}.Release|Win32.ActiveCfg = Release|Win32
+		{1D521E2A-A1D4-41D9-9AE9-79F6EE8A863F}.Release|Win32.Build.0 = Release|Win32
+		{6FCA8398-BA3C-4E0E-BB70-4ECA1ED99AFF}.Debug|Win32.ActiveCfg = Debug|Win32
+		{6FCA8398-BA3C-4E0E-BB70-4ECA1ED99AFF}.Debug|Win32.Build.0 = Debug|Win32
+		{6FCA8398-BA3C-4E0E-BB70-4ECA1ED99AFF}.Release|Win32.ActiveCfg = Release|Win32
+		{6FCA8398-BA3C-4E0E-BB70-4ECA1ED99AFF}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

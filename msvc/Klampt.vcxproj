@@ -95,6 +95,10 @@
     <ClInclude Include="..\Control\Sensor.h" />
     <ClInclude Include="..\Control\StateEstimator.h" />
     <ClInclude Include="..\Control\TabulatedController.h" />
+    <ClInclude Include="..\Interface\InputProcessor.h" />
+    <ClInclude Include="..\Interface\RobotInterface.h" />
+    <ClInclude Include="..\Interface\SimRobotInterface.h" />
+    <ClInclude Include="..\Interface\UserInterface.h" />
     <ClInclude Include="..\IO\Constants.h" />
     <ClInclude Include="..\IO\exception.h" />
     <ClInclude Include="..\IO\orXmlEnvironment.h" />
@@ -195,6 +199,9 @@
     <ClCompile Include="..\Control\Sensor.cpp" />
     <ClCompile Include="..\Control\StateEstimator.cpp" />
     <ClCompile Include="..\Control\TabulatedController.cpp" />
+    <ClCompile Include="..\Interface\InputProcessor.cpp" />
+    <ClCompile Include="..\Interface\SimRobotInterface.cpp" />
+    <ClCompile Include="..\Interface\UserInterface.cpp" />
     <ClCompile Include="..\IO\Constants.cpp" />
     <ClCompile Include="..\IO\orXmlEnvironment.cpp" />
     <ClCompile Include="..\IO\orXmlTags.cpp" />
