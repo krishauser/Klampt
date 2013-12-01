@@ -1,6 +1,6 @@
-.PHONY: docs lib clean
+.PHONY: docs swig clean
 
-default: lib
+default: cpp-docs docs swig
 
 cpp-docs: 
 	cd src; doxygen doxygen.conf
@@ -20,14 +20,8 @@ swig:
 	cp src/rootfind.py .
 
 
-lib: swig
-	ln -sf ../../Library
-	python setup.py build_ext --inplace
-
 clean:
 	rm -f *.pyc
-	rm -f *.so
-	rm -f *.dll
 	rm -f doxygen_warnings.log
 	rm -rf docs
 
