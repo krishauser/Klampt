@@ -2,8 +2,11 @@
 subroutines."""
 
 import ik
-import numpy
 from robotsim import *
+try:
+	import numpy
+except ImportError:
+	pass
 
 def idToObject(world,ID):
     """Helper: takes a WorldModel ID and converts it into an object."""
