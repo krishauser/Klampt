@@ -368,7 +368,7 @@ string RRTCommandInterface::ActivateEvent(bool enabled)
 
 
 
-
+#ifndef WIN32
 RealTimePlannerDataSender::RealTimePlannerDataSender(RealTimePlannerData* _data)
   :data(_data)
 {}
@@ -546,3 +546,4 @@ string MTRRTCommandInterface::ActivateEvent(bool enabled)
   }
   return MTPlannerCommandInterface::ActivateEvent(enabled);
 }
+#endif //WIN32

@@ -598,7 +598,7 @@ bool SimViewProgram::SendLinearPath(const vector<Real>& times,const vector<Confi
 void SimViewProgram::DoLogging(const char* fn)
 {
   ofstream out(fn,ios::app);
-  if(out.tellp()==0) {
+  if(out.tellp()==std::streamoff(0)) {
     cout<<"Saving simulation state to "<<fn<<endl;
     out<<"time,";
     for(size_t i=0;i<world->robots.size();i++) {

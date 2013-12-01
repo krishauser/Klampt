@@ -102,13 +102,15 @@ public:
     drawUI = 1;
     drawContacts = 1;
 
-    uis.resize(6);
-    uis[0] = new JointCommandInterface;
-    uis[1] = new IKCommandInterface;
-    uis[2] = new IKPlannerCommandInterface;
-    uis[3] = new RRTCommandInterface;
-    uis[4] = new MTIKPlannerCommandInterface;
-    uis[5] = new MTRRTCommandInterface;
+    uis.resize(0);
+    uis.push_back(new JointCommandInterface);
+    uis.push_back(new IKCommandInterface);
+    uis.push_back(new IKPlannerCommandInterface);
+    uis.push_back(new RRTCommandInterface);
+#ifndef WIN32
+    uis.push_back(new MTIKPlannerCommandInterface);
+    uis.push_back(new MTRRTCommandInterface);
+#endif //WIN32
     for(size_t i=0;i<uis.size();i++) {
       uis[i]->world = world;
       uis[i]->robotInterface = &robotInterface;

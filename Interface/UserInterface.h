@@ -9,7 +9,9 @@
 #include "Planning/RealTimePlanner.h"
 #include "RobotInterface.h"
 #include "InputProcessor.h"
+#ifndef WIN32
 #include <pthread.h>
+#endif //WIN32
 
 
 
@@ -162,6 +164,9 @@ class RRTCommandInterface : public PlannerCommandInterface
 };
 
 
+#ifndef WIN32
+//Win32 doesn't have pthreads... should migrate to a cross platform threading library in the future
+
 /** @brief Shared data structure for a multithreaded real time planner.
  * The planner must have a RealTimePlannerDataSender as a sendPathCallback.
  */
@@ -242,6 +247,6 @@ class MTRRTCommandInterface: public MTPlannerCommandInterface
 
   SmartPointer<SingleRobotCSpace> cspace;
 };
-
+#endif //WIN32
 
 #endif
