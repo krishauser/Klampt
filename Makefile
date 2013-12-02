@@ -99,7 +99,7 @@ UserTrialsMT:  lib
 	 $(CC) $(FLAGS)  Main/$(OBJDIR)/usertrials_multithread.o $(LIBKLAMPT) $(LIB) -o $@
 
 python: lib
-	cd Python/klampt; make
+	cd Python; make
 
 python-docs:
-	cd Python/klampt; make docs
+	cd Python; make docs

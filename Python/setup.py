@@ -7,8 +7,13 @@ import glob
 
 
 on_win32 = (distutils.util.get_platform()=='win32')
+on_win64 = (distutils.util.get_platform() in ['win-amd64','win-ia64'])
 on_cygwin = distutils.util.get_platform().startswith('cygwin')
 
+on_win32, on_win64 = True,False
+
+if on_win64:
+	raise ValueError("Unable to compile on win64 yet")
 
 #these probably do not need to be changed
 klamptDir = '..'
@@ -21,7 +26,7 @@ assimpDir=klamptDir+'/'+'Library/assimp--3.0.1270-sdk'
 haveassimp = os.path.isdir(assimpDir)
 tinyxmlDir = klamptDir+'/'+'Library/tinyxml'
 #if ODE_DOUBLE is set to true, turn this to true
-odedouble = False
+odedouble = True
 
 includeDirs = [klamptDir,krisLibraryDir,tinyxmlDir,odedir+'/include','/usr/include','.']
 
@@ -68,12 +73,15 @@ if on_win32:
 
 #needed for Klampt to link
 libs = ['Klampt']+kllibs+['ode']
+extr_data = []
 #different naming on windows
 if on_win32:
 	libs[-1]='ode_double'
 #link to assimp if assimp support is desired
 if haveassimp:
     libs.append('assimp')
+    if on_win32:
+	    extra_data.append('Assimp32.dll')
 
 
 setup(name='Klampt',
@@ -82,28 +90,28 @@ setup(name='Klampt',
       author='Kris Hauser',
       author_email='hauserk@indiana.edu',
       url='https://github.com/krishauser/Klampt',
-      ext_modules=[Extension('_robotsim',
+      ext_modules=[Extension('klampt._robotsim',
                              [os.path.join('klampt/src',f) for f in rssourcefiles],
                              include_dirs=includeDirs,
                              define_macros=rsdefines,
                              library_dirs=libdirs,
                              libraries=libs,
                              language='c++'),
-                   Extension('_motionplanning',
+                   Extension('klampt._motionplanning',
                              [os.path.join('klampt/src',f) for f in mpsourcefiles],
                              include_dirs=includeDirs,
 							 define_macros=commondefines,
                              library_dirs=libdirs,
                              libraries=kllibs,
                              language='c++'),
-                   Extension('_collide',
+                   Extension('klampt._collide',
                              [os.path.join('klampt/src',f) for f in cosourcefiles],
                              include_dirs=includeDirs,
 							 define_macros=commondefines,
                              library_dirs=libdirs,
                              libraries=kllibs,
                              language='c++'),
-                   Extension('_rootfind',
+                   Extension('klampt._rootfind',
                              [os.path.join('klampt/src',f) for f in rfsourcefiles],
                              include_dirs=includeDirs,
 							 define_macros=commondefines,
@@ -111,6 +119,7 @@ setup(name='Klampt',
                              libraries=kllibs,
                              language='c++')],
       py_modules=['klampt.robotsim','klampt.motionplanning','klampt.collide','klampt.rootfind'],
-	  packages=['klampt']
+      packages=['klampt'],
+      package_data={'klampt':extra_data}
      )
 

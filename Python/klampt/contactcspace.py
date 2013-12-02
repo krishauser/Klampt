@@ -53,7 +53,7 @@ class ContactCSpace(AdaptiveCSpace):
         #adaptive checker
         self.addFeasibleTest(lambda(x): self.closedLoop())
 
-NOT DONE YET -- need collision testing and slice indexing
+        raise NotImplementedError("NOT DONE YET -- need collision testing and slice indexing")
 
     def sample():
         self.solver.sampleInitial()
@@ -75,6 +75,6 @@ NOT DONE YET -- need collision testing and slice indexing
     def closedLoop(self,tol=None):
         e = self.solver.getError()
         if tol==None: tol = self.tol
-        return max(abs(ei) for ei in e) <= tol:
+        return max(abs(ei) for ei in e) <= tol
 
 
