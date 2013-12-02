@@ -73,7 +73,7 @@ if on_win32:
 
 #needed for Klampt to link
 libs = ['Klampt']+kllibs+['ode']
-extr_data = []
+extra_data = []
 #different naming on windows
 if on_win32:
 	libs[-1]='ode_double'
