@@ -42,7 +42,8 @@ bool WriteFile(File& f,const string& s)
 {
   size_t n=s.length();
   if(!WriteFile(f,n)) return false;
-  if(!WriteArrayFile(f,&s[0],s.length())) return false;
+  if(n > 0)
+    if(!WriteArrayFile(f,&s[0],s.length())) return false;
   return true;
 }
 
@@ -51,7 +52,8 @@ bool ReadFile(File& f,string& s)
   size_t n;
   if(!ReadFile(f,n)) return false;
   s.resize(n);
-  if(!ReadArrayFile(f,&s[0],n)) return false;
+  if(n > 0)
+    if(!ReadArrayFile(f,&s[0],n)) return false;
   return true;
 }
 
@@ -59,7 +61,8 @@ template <class T>
 bool WriteFile(File& f,const vector<T>& v)
 {
   if(!WriteFile(f,v.size())) return false;
-  if(!WriteArrayFile(f,&v[0],v.size())) return false;
+  if(!v.empty())
+    if(!WriteArrayFile(f,&v[0],v.size())) return false;
   return true;
 }
 
@@ -69,7 +72,8 @@ bool ReadFile(File& f,vector<T>& v)
   size_t n;
   if(!ReadFile(f,n)) return false;
   v.resize(n);
-  if(!ReadArrayFile(f,&v[0],n)) return false;
+  if(n > 0)
+    if(!ReadArrayFile(f,&v[0],n)) return false;
   return true;
 }
 
