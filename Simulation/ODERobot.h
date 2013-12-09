@@ -4,6 +4,7 @@
 #include "Modeling/Robot.h"
 #include "ODEGeometry.h"
 #include "ODESurface.h"
+#include <utils/SmartPointer.h>
 #include <ode/common.h>
 #include <myfile.h>
 using namespace Math;
@@ -80,6 +81,7 @@ class ODERobot
   vector<dJointFeedback> jointFeedback;
   dJointGroupID jointGroupID;
   dSpaceID spaceID;
+  vector<SmartPointer<RobotWithGeometry::CollisionGeometry> > tempGeometries;
 };
 
 #endif

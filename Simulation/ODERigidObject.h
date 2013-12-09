@@ -17,7 +17,7 @@ class ODERigidObject
   static double defaultPadding;
   static ODESurfaceProperties defaultSurface;
 
-  ODERigidObject(const RigidObject& obj);
+  ODERigidObject(RigidObject& obj);
   ~ODERigidObject();
   void Create(dWorldID worldID,dSpaceID space,bool useBoundaryLayer=true);
   void Clear();
@@ -33,7 +33,7 @@ class ODERigidObject
   dSpaceID space() { return spaceID; }
   ODEGeometry* triMesh() { return geometry; }
 
-  const RigidObject& obj;
+  RigidObject& obj;
 
  private:
   dBodyID bodyID;

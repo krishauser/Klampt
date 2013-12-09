@@ -8,7 +8,7 @@
 double ODERigidObject::defaultPadding = gDefaultRigidObjectPadding;
 ODESurfaceProperties ODERigidObject::defaultSurface = {0.1,0.5,Inf,Inf};
 
-ODERigidObject::ODERigidObject(const RigidObject& _obj)
+ODERigidObject::ODERigidObject(RigidObject& _obj)
   :obj(_obj),bodyID(0),geometry(0),spaceID(0)
 {}
 
@@ -37,7 +37,7 @@ void ODERigidObject::Create(dWorldID worldID,dSpaceID space,bool useBoundaryLaye
   dBodySetMass(bodyID,&mass);
   
   geometry = new ODEGeometry;
-  geometry->Create(obj.geometry,spaceID,-obj.com,useBoundaryLayer);
+  geometry->Create(&obj.geometry,spaceID,-obj.com,useBoundaryLayer);
   dGeomSetBody(geometry->geom(),bodyID);
   dGeomSetData(geometry->geom(),(void*)-1);
   geometry->SetPadding(defaultPadding);

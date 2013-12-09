@@ -45,6 +45,7 @@ dGeomID dCreateCustomGeometry(AnyCollisionGeometry3D* geometry,Real outerMargin)
 
   data->geometry = geometry;
   data->outerMargin = outerMargin;
+  data->odeOffset.setZero();
   dGeomSetCategoryBits(geom,0xffffffff);
   dGeomSetCollideBits(geom,0xffffffff);
   dGeomEnable(geom);
@@ -496,6 +497,8 @@ int dCustomGeometryCollide (dGeomID o1, dGeomID o2, int flags,
   CopyVector(T1.t,dGeomGetPosition(o1));
   CopyMatrix(T2.R,dGeomGetRotation(o2));
   CopyVector(T2.t,dGeomGetPosition(o2));
+  T1.t += T1.R*d1->odeOffset;
+  T2.t += T2.R*d2->odeOffset;
   d1->geometry->SetTransform(T1);
   d2->geometry->SetTransform(T2);
 
@@ -594,6 +597,7 @@ void dCustomGeometryAABB(dGeomID o,dReal aabb[6])
   RigidTransform T;
   CopyMatrix(T.R,dGeomGetRotation(o));
   CopyVector(T.t,dGeomGetPosition(o));  
+  T.t += T.R*d->odeOffset;
   d->geometry->SetTransform(T);
   bb = d->geometry->GetAABB();
   bb.bmin -= Vector3(d->outerMargin,d->outerMargin,d->outerMargin);

@@ -9,7 +9,10 @@ using namespace Math3D;
 using namespace Geometry;
 
 /** @ingroup Simulation
- * @brief An ODE collision geometry
+ * @brief An ODE collision geometry.
+ *
+ * The pointer to the AnyCollisionGeometry3D passed into Create must live
+ * throughout the duration of the use of this geometry.
  */
 class ODEGeometry
 {
@@ -17,7 +20,7 @@ class ODEGeometry
   ODEGeometry();
   ~ODEGeometry();
 
-  void Create(const AnyCollisionGeometry3D& geom,dSpaceID space,Vector3 offset=Vector3(0.0),bool useCustomMesh = true);
+  void Create(AnyCollisionGeometry3D* geom,dSpaceID space,Vector3 offset=Vector3(0.0),bool useCustomMesh = true);
   void Clear();
   void DrawGL();
   void SetPadding(Real outerMargin);

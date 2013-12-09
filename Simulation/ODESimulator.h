@@ -115,9 +115,9 @@ class ODESimulator
   void SetERP(double erp);   //global error reduction  -- see ODE docs
   void SetCFM(double erp);   //global constraint force mixing -- see ODE docs
   ODESimulatorSettings& GetSettings() { return settings; }
-  void AddEnvironment(const Environment& env);
+  void AddEnvironment(Environment& env);
   void AddRobot(Robot& robot);
-  void AddObject(const RigidObject& object);
+  void AddObject(RigidObject& object);
   void Step(Real dt);
   void StepDynamics(Real dt);
   bool ReadState(File& f);

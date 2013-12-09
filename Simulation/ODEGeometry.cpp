@@ -10,7 +10,7 @@ using namespace Meshing;
 #define USING_GIMPACT 0
 
 ODEGeometry::ODEGeometry()
-  :triMeshDataID(0),geomID(0),verts(NULL),indices(NULL),normals(NULL),numVerts(0),numTris(0),collisionGeometry(0)
+  :triMeshDataID(0),geomID(0),verts(NULL),indices(NULL),normals(NULL),numVerts(0),numTris(0)
 {
   surface.kRestitution = 0;
   surface.kFriction = 0;
@@ -29,13 +29,13 @@ ODEGeometry::~ODEGeometry()
   Clear();
 }
 
-void ODEGeometry::Create(const AnyCollisionGeometry3D& geom,dSpaceID space,Vector3 offset,bool useCustomMesh)
+void ODEGeometry::Create(AnyCollisionGeometry3D* geom,dSpaceID space,Vector3 offset,bool useCustomMesh)
 {
   //printf("ODEGeometry: Collision detection method: %s\n",(useCustomMesh?"custom":"GIMPACT"));
   Clear();
   if(!useCustomMesh) {
-    Assert(geom.type == AnyGeometry3D::TriangleMesh);
-    const TriMesh& mesh = *AnyCast<TriMesh>(&geom.data);
+    Assert(geom->type == AnyGeometry3D::TriangleMesh);
+    const TriMesh& mesh = *AnyCast<TriMesh>(&geom->data);
     Assert(numVertComponents == 3 || numVertComponents == 4);
 #if USING_GIMPACT
     //GIMPACT needs this
@@ -107,13 +107,9 @@ void ODEGeometry::Create(const AnyCollisionGeometry3D& geom,dSpaceID space,Vecto
   }
   else {
     //add offsets
-    collisionGeometry = new AnyCollisionGeometry3D(geom);
-    RigidTransform T;
-    T.R.setIdentity();
-    T.t = offset;
-    collisionGeometry->Transform(T);
-    collisionGeometry->InitCollisions();
+    collisionGeometry = geom;
     geomID = dCreateCustomGeometry(collisionGeometry,0.0);
+    dGetCustomGeometryData(geomID)->odeOffset = offset;
     dSpaceAdd(space,geomID);
   }
 }
@@ -126,7 +122,7 @@ void ODEGeometry::Clear()
   SafeArrayDelete(indices);
   SafeArrayDelete(normals);
   numTris = numVerts = 0;
-  SafeDelete(collisionGeometry);
+  collisionGeometry = NULL;
 }
 
 void ODEGeometry::DrawGL()

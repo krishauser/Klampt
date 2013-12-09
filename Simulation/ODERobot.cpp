@@ -49,6 +49,7 @@ void ODERobot::Clear()
   geometry.resize(0);
   jointID.resize(0);
   jointFeedback.resize(0);
+  tempGeometries.resize(0);
 }
 
 
@@ -191,7 +192,7 @@ void ODERobot::Create(dWorldID worldID,bool useBoundaryLayer)
       bodyObjects[i].T.t = robot.links[baseLink].T_World * robot.links[baseLink].com; 
       if(!robot.geometry[baseLink].Empty()) {
 	bodyGeometry[i] = new ODEGeometry;
-	bodyGeometry[i]->Create(robot.geometry[baseLink],spaceID,-robot.links[baseLink].com,useBoundaryLayer);
+	bodyGeometry[i]->Create(&robot.geometry[baseLink],spaceID,-robot.links[baseLink].com,useBoundaryLayer);
       }
     }
     else {
@@ -224,11 +225,12 @@ void ODERobot::Create(dWorldID worldID,bool useBoundaryLayer)
       bodyObjects[i].T.R = robot.links[baseLink].T_World.R; 
       bodyObjects[i].T.t = robot.links[baseLink].T_World * bodyObjects[i].com; 
       
-      RobotWithGeometry::CollisionGeometry mesh;
-      mesh.Merge(meshes);
-      if(!mesh.Empty()) {
+      tempGeometries.resize(tempGeometries.size()+1);
+      tempGeometries.back() = new RobotWithGeometry::CollisionGeometry;
+      tempGeometries.back()->Merge(meshes);
+      if(!tempGeometries.back()->Empty()) {
 	bodyGeometry[i] = new ODEGeometry;
-	bodyGeometry[i]->Create(mesh,spaceID,-bodyObjects[i].com,useBoundaryLayer);
+	bodyGeometry[i]->Create(tempGeometries.back(),spaceID,-bodyObjects[i].com,useBoundaryLayer);
       }
     }
     if(bodyObjects[i].mass == 0.0) {

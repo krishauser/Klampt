@@ -203,12 +203,12 @@ ODESimulator::~ODESimulator()
   dWorldDestroy(worldID);
 }
 
-void ODESimulator::AddEnvironment(const Environment& env)
+void ODESimulator::AddEnvironment(Environment& env)
 {
   envs.push_back(&env);
   envGeoms.resize(envGeoms.size()+1);
   envGeoms.back() = new ODEGeometry;
-  envGeoms.back()->Create(env.geometry,envSpaceID,Vector3(Zero),settings.boundaryLayerCollisions);
+  envGeoms.back()->Create(&env.geometry,envSpaceID,Vector3(Zero),settings.boundaryLayerCollisions);
   envGeoms.back()->surf() = settings.defaultEnvSurface;
   envGeoms.back()->SetPadding(settings.defaultEnvPadding);
   if(!env.kFriction.empty())
@@ -238,7 +238,7 @@ void ODESimulator::AddRobot(Robot& robot)
     }
 }
 
-void ODESimulator::AddObject(const RigidObject& object)
+void ODESimulator::AddObject(RigidObject& object)
 {
   objects.push_back(new ODERigidObject(object));
   objects.back()->Create(worldID,envSpaceID,settings.boundaryLayerCollisions);
