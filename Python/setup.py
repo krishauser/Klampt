@@ -10,8 +10,6 @@ on_win32 = (distutils.util.get_platform()=='win32')
 on_win64 = (distutils.util.get_platform() in ['win-amd64','win-ia64'])
 on_cygwin = distutils.util.get_platform().startswith('cygwin')
 
-on_win32, on_win64 = True,False
-
 if on_win64:
 	raise ValueError("Unable to compile on win64 yet")
 
