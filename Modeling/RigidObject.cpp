@@ -30,7 +30,7 @@ bool RigidObject::Load(const char* fn)
       return false;
     }
     else {
-      fprintf(stderr,"Unable to load object %s\n",geomfn.c_str());
+      //fprintf(stderr,"Unable to load object %s\n",geomfn.c_str());
     }
     f.erase("mesh");
 
