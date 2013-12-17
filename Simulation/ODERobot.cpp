@@ -228,6 +228,7 @@ void ODERobot::Create(dWorldID worldID,bool useBoundaryLayer)
       tempGeometries.resize(tempGeometries.size()+1);
       tempGeometries.back() = new RobotWithGeometry::CollisionGeometry;
       tempGeometries.back()->Merge(meshes);
+      tempGeometries.back()->InitCollisions();
       if(!tempGeometries.back()->Empty()) {
 	bodyGeometry[i] = new ODEGeometry;
 	bodyGeometry[i]->Create(tempGeometries.back(),spaceID,-bodyObjects[i].com,useBoundaryLayer);
