@@ -196,3 +196,8 @@ void RigidObject::SetMassFromBB(Real totalMass)
   com = 0.5*(bb.bmin+bb.bmax);
   BoxInertiaMatrix(bb.bmax.x-bb.bmin.x,bb.bmax.y-bb.bmin.y,bb.bmax.z-bb.bmin.z,mass,inertia);
 }
+
+void RigidObject::UpdateGeometry()
+{
+  geometry.SetTransform(T);
+}

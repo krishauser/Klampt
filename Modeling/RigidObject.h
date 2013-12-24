@@ -13,6 +13,7 @@ struct RigidObject
   bool Save(const char* fn);
   void SetMassFromGeometry(Real totalMass);
   void SetMassFromBB(Real totalMass);
+  void UpdateGeometry(); ///< Call this before collision detection if the transform is changed
 
   Geometry::AnyCollisionGeometry3D geometry;
   RigidTransform T;    //current transform
