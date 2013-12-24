@@ -11,6 +11,7 @@
 #include <meshing/MarchingCubes.h>
 #include <GLdraw/GLLight.h>
 #include "View/RobotPoseWidget.h"
+#include "View/ObjectPoseWidget.h"
 //#include <GL/glut.h>
 #include <math/random.h>
 #include <fstream>
@@ -81,6 +82,8 @@ public:
   float driver_value;
   RobotPoseWidget poseWidget;
   int pose_ik;
+  vector<RigidObjectPoseWidget> objectWidgets;
+  WidgetSet allWidgets;
   int draw_geom,draw_com,draw_frame;
 
   RobotPoseProgram(RobotWorld* world)
@@ -134,6 +137,13 @@ public:
     }
 
     poseWidget.Set(world->robots[0].robot,&world->robots[0].view);
+    objectWidgets.resize(world->rigidObjects.size());
+    for(size_t i=0;i<world->rigidObjects.size();i++)
+      objectWidgets[i].Set(world->rigidObjects[i].object,&world->rigidObjects[i].view);
+    allWidgets.widgets.push_back(&poseWidget);
+    for(size_t i=0;i<world->rigidObjects.size();i++)
+      allWidgets.widgets.push_back(&objectWidgets[i]);
+
     cur_link=0;
     cur_driver=0;
     link_value = 0;
@@ -311,11 +321,11 @@ public:
 	else if((int)i == cur_link)
 	  viewRobot.SetColor(i,highlight); 
       }
-      poseWidget.DrawGL(viewport);
+      allWidgets.DrawGL(viewport);
       viewRobot.Draw();
     }
     else {
-      poseWidget.DrawGL(viewport);
+      allWidgets.DrawGL(viewport);
     }
 
     glEnable(GL_BLEND);
@@ -873,7 +883,21 @@ public:
       poseWidget.DeleteConstraint();
       break;
     case 'p':
-      cout<<robot->q<<endl;
+      {
+	cout<<"Robot pose:"<<endl;
+	cout<<robot->q<<endl;
+	for(size_t i=0;i<world->rigidObjects.size();i++) {
+	  cout<<endl;
+	  cout<<world->rigidObjects[i].name<<" pose:"<<endl; 
+	  cout<<world->rigidObjects[i].object->T<<endl;
+	  cout<<world->rigidObjects[i].name<<" translation:"<<endl; 
+	  cout<<world->rigidObjects[i].object->T.t<<endl;
+	  cout<<world->rigidObjects[i].name<<" RPY:"<<endl; 
+	  EulerAngleRotation ea;
+	  ea.setMatrixZYX(world->rigidObjects[i].object->T.R);
+	  cout<<ea.z<<" "<<ea.y<<" "<<ea.x<<endl;
+	}
+      }
       break;
     case 'v':
       {
@@ -895,7 +919,7 @@ public:
 	break;
       }
     default:
-      poseWidget.Keypress(key);
+      allWidgets.Keypress(key);
       break;
     }
     Refresh();
@@ -904,11 +928,11 @@ public:
   void Handle_Motion(int x, int y)
   {
     double d;
-    if(poseWidget.Hover(x,viewport.h-y,viewport,d))
-      poseWidget.SetHighlight(true);
+    if(allWidgets.Hover(x,viewport.h-y,viewport,d))
+      allWidgets.SetHighlight(true);
     else
-      poseWidget.SetHighlight(false);
-    if(poseWidget.requestRedraw) { Refresh(); poseWidget.requestRedraw=false; }
+      allWidgets.SetHighlight(false);
+    if(allWidgets.requestRedraw) { Refresh(); allWidgets.requestRedraw=false; }
   }
 
   virtual void BeginDrag(int x,int y,int button,int modifiers)
@@ -916,20 +940,20 @@ public:
     Robot* robot = world->robots[0].robot;
     if(button == GLUT_RIGHT_BUTTON) {
       double d;
-      if(poseWidget.BeginDrag(x,viewport.h-y,viewport,d))
-	poseWidget.SetFocus(true);
+      if(allWidgets.BeginDrag(x,viewport.h-y,viewport,d))
+	allWidgets.SetFocus(true);
       else
-	poseWidget.SetFocus(false);
-      if(poseWidget.requestRedraw) { Refresh(); poseWidget.requestRedraw=false; }
+	allWidgets.SetFocus(false);
+      if(allWidgets.requestRedraw) { Refresh(); allWidgets.requestRedraw=false; }
     }
   }
 
   virtual void EndDrag(int x,int y,int button,int modifiers)
   {
     if(button == GLUT_RIGHT_BUTTON) {
-      if(poseWidget.hasFocus) {
-	poseWidget.EndDrag();
-	poseWidget.SetFocus(false);
+      if(allWidgets.hasFocus) {
+	allWidgets.EndDrag();
+	allWidgets.SetFocus(false);
       }
     }
   }
@@ -939,10 +963,10 @@ public:
     Robot* robot = world->robots[0].robot;
     if(button == GLUT_LEFT_BUTTON)  DragRotate(dx,dy);
     else if(button == GLUT_RIGHT_BUTTON) {
-      if(poseWidget.hasFocus) {
-	poseWidget.Drag(dx,-dy,viewport);
-	if(poseWidget.requestRedraw) {
-	  poseWidget.requestRedraw = false;
+      if(allWidgets.hasFocus) {
+	allWidgets.Drag(dx,-dy,viewport);
+	if(allWidgets.requestRedraw) {
+	  allWidgets.requestRedraw = false;
 	  Refresh();
 	  UpdateConfig();
 	  UpdateLinkValueGUI();
