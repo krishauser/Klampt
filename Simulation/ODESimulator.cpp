@@ -710,7 +710,8 @@ void selfCollisionCallback(void *data, dGeomID o1, dGeomID o2)
     }
     numOk++;
   }
-  if(numOk > 0) printf("%d self collision contacts between links %d and %d\n",numOk,(int)link1,(int)link2);
+  //TEMP: printing self collisions
+  //if(numOk > 0) printf("%d self collision contacts between links %d and %d\n",numOk,(int)link1,(int)link2);
   vcontact.resize(numOk);
   
   if(kMergeContacts && numOk > 0) {

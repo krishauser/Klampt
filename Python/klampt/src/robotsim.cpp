@@ -1523,20 +1523,41 @@ void Simulator::enableContactFeedbackAll()
   //setup feedback
   RobotWorld& rworld=worlds[world.index]->world;
   //world-object
-  for(size_t i=0;i<rworld.rigidObjects.size();i++) 
-    for(size_t j=0;j<rworld.terrains.size();j++) 
-      sim->EnableContactFeedback(rworld.RigidObjectID(i),rworld.TerrainID(j));
-  //robot-object
-  for(size_t r=0;r<rworld.robots.size();r++) {
+  const ODESimulatorSettings& settings = sim->odesim.GetSettings();
+  if(settings.rigidObjectCollisions) {
     for(size_t i=0;i<rworld.rigidObjects.size();i++) {
-      for(size_t j=0;j<rworld.robots[r].robot->links.size();j++) {
-	sim->EnableContactFeedback(rworld.RigidObjectID(i),rworld.RobotLinkID(r,j));
-      }
+      int objid = rworld.RigidObjectID(i);
+      for(size_t j=0;j<rworld.terrains.size();j++) 
+	sim->EnableContactFeedback(objid,rworld.TerrainID(j));
     }
-    //robot-terrain
-    for(size_t i=0;i<rworld.terrains.size();i++) {
-      for(size_t j=0;j<rworld.robots[r].robot->links.size();j++) {
-	sim->EnableContactFeedback(rworld.TerrainID(i),rworld.RobotLinkID(r,j));
+  }
+  for(size_t r=0;r<rworld.robots.size();r++) {
+    for(size_t j=0;j<rworld.robots[r].robot->links.size();j++) {
+      int linkid = rworld.RobotLinkID(r,j);
+      //robot-world
+      for(size_t i=0;i<rworld.rigidObjects.size();i++) {
+	sim->EnableContactFeedback(rworld.RigidObjectID(i),linkid);
+      }
+      //robot-object
+      for(size_t i=0;i<rworld.terrains.size();i++) {
+	sim->EnableContactFeedback(rworld.TerrainID(i),linkid);
+      }
+      //robot-self
+      if(settings.robotSelfCollisions) {
+	for(size_t k=0;k<rworld.robots[r].robot->links.size();k++) {
+	  if(rworld.robots[r].robot->selfCollisions(j,k)) {
+	    sim->EnableContactFeedback(rworld.RobotLinkID(r,k),linkid);
+	  }
+	}
+      }
+      //robot-robot
+      if(settings.robotRobotCollisions) {
+	for(size_t i=0;i<rworld.robots.size();i++) {
+	  if(i==r) continue;
+	  for(size_t k=0;k<rworld.robots[i].robot->links.size();k++) {
+	    sim->EnableContactFeedback(rworld.RobotLinkID(i,k),linkid);
+	  }
+	}
       }
     }
   }
