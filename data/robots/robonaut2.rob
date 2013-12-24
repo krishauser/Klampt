@@ -12,7 +12,7 @@ axis	0 0 1	0 0 1	0 0 1	0 0 1	0 0 1	0 0 1	0 0 1	0 0 1	0 0 1	0 0 1	0 0 1	0 0 1	0 0
 
 jointtype	r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r r 
 
-Tparent	1 0 0	0 1 0	0 0 1	0 0 0 \
+Tparent	1 0 0	0 1 0	0 0 1	0 0 0.07 \
 0.000796327 -1 0	1 0.000796327 0	0 0 1	0 0 0 \
 -0.999999 -0.00159265 0	0.00159265 -0.999999 0	0 0 1	0 0 0.7 \
 0.999997 -0.00159265 -0.00159265	-0.00159265 -0.999999 2.53654e-06	-0.00159265 -1.29247e-23 -0.999999	0 0 0.02 \
