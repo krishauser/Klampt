@@ -174,7 +174,7 @@ bool XmlRigidObject::GetObject(RigidObject& obj)
       obj.kDamping = val;
   }
 
-  obj.geometry.SetTransform(obj.T);
+  obj.UpdateGeometry();
   return true;
 }
 

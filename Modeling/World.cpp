@@ -173,7 +173,7 @@ void RobotWorld::UpdateGeometry()
     robots[i].robot->UpdateGeometry();
   }
   for(size_t i=0;i<rigidObjects.size();i++) {
-    rigidObjects[i].object->geometry.SetTransform(rigidObjects[i].object->T);
+    rigidObjects[i].object->UpdateGeometry();
   }
 }
 
