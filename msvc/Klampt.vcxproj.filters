@@ -372,6 +372,9 @@
     <ClInclude Include="..\Interface\UserInterface.h">
       <Filter>Header Files\Interface</Filter>
     </ClInclude>
+    <ClInclude Include="..\View\ObjectPoseWidget.h">
+      <Filter>Header Files\View</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Contact\ContactDistance.cpp">
@@ -625,6 +628,9 @@
     </ClCompile>
     <ClCompile Include="..\Interface\UserInterface.cpp">
       <Filter>Source Files\Interface</Filter>
+    </ClCompile>
+    <ClCompile Include="..\View\ObjectPoseWidget.cpp">
+      <Filter>Source Files\View</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
