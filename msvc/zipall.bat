@@ -1,16 +1,16 @@
 mkdir ToZip
 
-REM cp Debug/*.exe Debug/*.lib Debug/*.dll ToZip
-REM if %errorlevel% neq 0 exit /b %errorlevel% 
-REM zip.vbs ToZip ..\Klampt-0.5.win32-vs2010d.zip
-REM if %errorlevel% neq 0 exit /b %errorlevel% 
-REM rm ToZip/*
+cp Debug/*.exe Debug/*.lib Debug/*.dll ToZip
+if %errorlevel% neq 0 exit /b %errorlevel% 
+zip.vbs ToZip ..\Klampt-0.5.win32-vs2010d.zip
+if %errorlevel% neq 0 exit /b %errorlevel% 
+rm ToZip/*
 
-REM cp Release/*.exe Release/*.lib Release/*.dll Release\ToZip
-REM if %errorlevel% neq 0 exit /b %errorlevel% 
-REM zip.vbs ToZip ..\Klampt-0.5.win32-vs2010.zip
-REM if %errorlevel% neq 0 exit /b %errorlevel% 
-REM rm ToZip/*
+cp Release/*.exe Release/*.lib Release/*.dll Release\ToZip
+if %errorlevel% neq 0 exit /b %errorlevel% 
+zip.vbs ToZip ..\Klampt-0.5.win32-vs2010.zip
+if %errorlevel% neq 0 exit /b %errorlevel% 
+rm ToZip/*
 
 cp ../Library/assimp--3.0.1270-sdk/lib/assimp_debug-dll_win32/* ToZip
 cp ../Library/Assimp32d.dll ToZip
