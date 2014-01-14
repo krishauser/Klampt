@@ -164,6 +164,7 @@
     <ClInclude Include="..\Simulation\Settings.h" />
     <ClInclude Include="..\Simulation\WorldSimulation.h" />
     <ClInclude Include="..\View\Callbacks.h" />
+    <ClInclude Include="..\View\ObjectPoseWidget.h" />
     <ClInclude Include="..\View\RobotPoseWidget.h" />
     <ClInclude Include="..\View\ViewEnvironment.h" />
     <ClInclude Include="..\View\ViewGrasp.h" />
@@ -250,6 +251,7 @@
     <ClCompile Include="..\Simulation\ODERobot.cpp" />
     <ClCompile Include="..\Simulation\ODESimulator.cpp" />
     <ClCompile Include="..\Simulation\WorldSimulation.cpp" />
+    <ClCompile Include="..\View\ObjectPoseWidget.cpp" />
     <ClCompile Include="..\View\RobotPoseWidget.cpp" />
     <ClCompile Include="..\View\ViewEnvironment.cpp" />
     <ClCompile Include="..\View\ViewGrasp.cpp" />
