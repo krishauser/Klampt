@@ -471,7 +471,7 @@ void ODERobot::GetConfig(Config& q) const
 	break;
       }
     default:
-      FatalError("TODO");
+      FatalError("TODO: affine and other joints");
       break;
     }
   }
@@ -644,7 +644,7 @@ void ODERobot::GetVelocities(Config& dq) const
       }
       break;
     default:
-      FatalError("TODO");
+      FatalError("TODO: affine and other joints");
       break;
     }
   }
