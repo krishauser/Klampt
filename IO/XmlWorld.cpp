@@ -109,6 +109,15 @@ bool XmlRigidObject::GetObject(RigidObject& obj)
   if(e->QueryValueAttribute("position",&position)==TIXML_SUCCESS) {
     obj.T.t = position;
   }
+  if(e->Attribute("rotateRPY")) {
+    stringstream ss(e->Attribute("rotateRPY"));
+    Vector3 xyz;
+    EulerAngleRotation ea;
+    ss>>xyz;
+    //switch roll pitch yaw to ZYX order
+    ea.set(xyz.z,xyz.y,xyz.x);
+    ea.getMatrixZYX(obj.T.R);
+  }
   Real val;
   if(e->QueryValueAttribute("rotateX",&val)==TIXML_SUCCESS) {
     Matrix3 R;
@@ -222,8 +231,11 @@ bool XmlTerrain::GetTerrain(Environment& env)
 
   if(e->Attribute("rotateRPY")) {
     stringstream ss(e->Attribute("rotateRPY"));
+    Vector3 xyz;
     EulerAngleRotation ea;
-    ss>>ea;
+    ss>>xyz;
+    //switch roll pitch yaw to ZYX order
+    ea.set(xyz.z,xyz.y,xyz.x);
     ea.getMatrixZYX(R);
     transform=true;
   }
