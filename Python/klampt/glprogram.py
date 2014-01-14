@@ -21,8 +21,12 @@ def _reshapefunc(w,h):
     return _currentObject.reshapefunc(w,h)
 def _keyboardfunc(c,x,y):
     return _currentObject.keyboardfunc(c,x,y)
+def _keyboardupfunc(c,x,y):
+    return _currentObject.keyboardupfunc(c,x,y)
 def _specialfunc(c,x,y):
     return _currentObject.specialfunc(c,x,y)
+def _specialupfunc(c,x,y):
+    return _currentObject.specialupfunc(c,x,y)
 def _motionfunc(x,y):
     return _currentObject.motionfunc(x,y)
 def _mousefunc(button,state,x,y):
@@ -57,7 +61,9 @@ class GLProgram:
         _currentObject = self
         glutReshapeFunc (_reshapefunc)
         glutKeyboardFunc (_keyboardfunc)
+        glutKeyboardUpFunc (_keyboardupfunc)
         glutSpecialFunc (_specialfunc)
+        glutSpecialUpFunc (_specialupfunc)
         glutMotionFunc (_motionfunc)
         glutMouseFunc (_mousefunc)
         glutDisplayFunc (_displayfunc)
@@ -71,7 +77,11 @@ class GLProgram:
         
     def keyboardfunc(self,c,x,y):
         pass
+    def keyboardupfunc(self,c,x,y):
+        pass
     def specialfunc(self,c,x,y):
+        pass
+    def specialupfunc(self,c,x,y):
         pass
     def motionfunc(self,x,y):
         pass
