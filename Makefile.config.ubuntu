@@ -13,7 +13,9 @@ BUILDNAME=linux
 ## Default Settings
 TINYXML=Library/tinyxml
 GLUT=/usr
-GLUI=/usr
+#if you installed GLUI on your system already using apt-get, set this line
+#GLUI = /usr
+GLUI=Library/glui-2.36/src
 ODE=Library/ode-0.11.1
 KRISLIB=Library/KrisLibrary
 FREEGLUT=1
@@ -54,7 +56,7 @@ endif
 #edit these flags if desired, they're passed to gcc
 CPPFLAGS= -g -O2 -Wall -Wno-uninitialized -fPIC
 
-GLUTLIBS=glui glut GL m GLU Xm Xi Xext Xmu X11
+GLUTLIBS=glui glut GL m GLU Xi Xext Xmu X11
 GLUTLIBDIR=$(GLUI)/lib $(GLUT)/lib/glut /usr/X11R6/lib /usr/X11R6/lib/modules/extensions
 
 #May have to add $(GLUT)/include to the following line
@@ -62,9 +64,9 @@ GLUTLIBDIR=$(GLUI)/lib $(GLUT)/lib/glut /usr/X11R6/lib /usr/X11R6/lib/modules/ex
 GLUTINCLUDE=$(GLUI)/include/GL
 PQPLIBDIR=$(PQP)/lib
 #Uncomment this if ODE was built using 'make' 
-#ODELIBDIR=$(ODE)/ode/src/.libs
+ODELIBDIR=$(ODE)/ode/src/.libs
 #uncomment this if ODE was built using 'make install'
-ODELIBDIR=/usr/local/lib
+#ODELIBDIR=/usr/local/lib
 TINYXMLLIBDIR=$(TINYXML)
 DEFINES+=TIXML_USE_STL
 
