@@ -101,6 +101,16 @@ bool XmlODESettings::GetSettings(ODESimulator& sim)
 	    return false;
 	  }
 	}
+	TiXmlElement *ev=c->FirstChildElement("velocity");
+	if(ev) {
+	  Vector3 v,w;
+	  if(ev->QueryValueAttribute("linear",&v) != TIXML_SUCCESS)
+	    v.setZero();
+	  if(ev->QueryValueAttribute("angular",&w) != TIXML_SUCCESS)
+	    w.setZero();
+	  cout<<"Setting velocity "<<w<<", "<<v<<endl;
+	  sim.object(index)->SetVelocity(w,v);
+	}
       }
       else {
 	fprintf(stderr,"Error reading object index from XML file\n");
