@@ -57,8 +57,6 @@ glutspecialmap = {
     GLUT_KEY_INSERT:'insert'
     }
 
-glutspecialinvmap = dict((v,k) for (k,v) in glutspecialmap.items())
-
 
 class MyGLViewer(GLRealtimeProgram):
     def __init__(self,world):
@@ -142,17 +140,16 @@ class MyGLViewer(GLRealtimeProgram):
 
     def specialfunc(self,c,x,y):
         #Put your keyboard special character handler here
-        if c in glutspecialinvmap:
-            name = glutspecialinvmap[c]
+        if c in glutspecialmap:
+            name = glutspecialmap[c]
             if name in self.keymap:
                 self.current_velocities[name]=self.keymap[name]
         pass
 
     def specialupfunc(self,c,x,y):
         #Put your keyboard special character handler here
-        print c,"unpressed"
-        if c in glutspecialinvmap:
-            name = glutspecialinvmap[c]
+        if c in glutspecialmap:
+            name = glutspecialmap[c]
             if name in self.current_velocities:
                 del self.current_velocities[name]
         pass
