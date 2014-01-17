@@ -1344,6 +1344,17 @@ void TerrainModel::drawGL(bool keepAppearance)
 
 Simulator::Simulator(const WorldModel& model)
 {
+#ifdef dDOUBLE
+  if(dCheckConfiguration("ODE_double_precision")!=1) {
+    FatalError("ODE is compiled with single precision but Klamp't Python API is compiled with double, please set odedouble=False in setup.py and recompile");
+  }
+#else
+  if(dCheckConfiguration("ODE_single_precision")!=1) {
+    FatalError("ODE is compiled with single precision but Klamp't Python API is compiled with double, please set odedouble=True in setup.py and recompile");
+  }
+#endif
+
+
   index = createSim();
   world = model;
   sim = &sims[index]->sim;
@@ -1606,7 +1617,10 @@ void SimBody::setVelocity(const double w[3],const double v[3])
 
 void SimBody::getVelocity(double out[3],double out2[3])
 {
-  if(!body) return;
+  if(!body) {
+    out[0] = out[1] = out[2] = out2[0] = out2[1] = out2[2] = 0;
+    return;
+  }
   const dReal* v=dBodyGetLinearVel(body);
   const dReal* w=dBodyGetAngularVel(body);
   for(int i=0;i<3;i++) out[i] = w[i];
@@ -1615,24 +1629,26 @@ void SimBody::getVelocity(double out[3],double out2[3])
 
 void SimBody::setTransform(const double R[9],double t[3])
 {
+  //out matrix is 3x3 column major, ODE matrices are 4x4 row major
   if(!body) return;
   dBodySetPosition(body,t[0],t[1],t[2]);
   dMatrix3 rot;
   for(int i=0;i<3;i++)
     for(int j=0;j<3;j++)
-      rot[i*4+j] = R[i*3+j];
+      rot[i*4+j] = R[i+j*3];
   dBodySetRotation(body,rot);
 }
 
 void SimBody::getTransform(double out[9],double out2[3])
 {
+  //out matrix is 3x3 column major, ODE matrices are 4x4 row major
   if(!body) return;
   const dReal* t=dBodyGetPosition(body);
   const dReal* R=dBodyGetRotation(body);
   for(int i=0;i<3;i++) out2[i] = t[i];
   for(int i=0;i<3;i++)
     for(int j=0;j<3;j++)
-      out[i*3+j] = R[i*4+j];
+      out[i+j*3] = R[i*4+j];
 }
 
 void SimBody::setCollisionPadding(double padding)
