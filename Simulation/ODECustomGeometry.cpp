@@ -482,6 +482,68 @@ int PointCloudMeshCollide(CollisionPointCloud& pc1,Real outerMargin1,CollisionMe
   return num;
 }
 
+int MeshPrimitiveCollide(CollisionMesh& m1,Real outerMargin1,GeometricPrimitive3D& g2,const RigidTransform& T2,Real outerMargin2,dContactGeom* contact,int maxcontacts)
+{
+  GeometricPrimitive3D gworld=g2;
+  gworld.Transform(T2);
+  Sphere3D s;
+  if(gworld.type != GeometricPrimitive3D::Point && gworld.type != GeometricPrimitive3D::Sphere) {
+    fprintf(stderr,"Distance computations between Triangles and %s not supported\n",gworld.TypeName());
+    return 0;
+  }
+  if(gworld.type == GeometricPrimitive3D::Point) {
+    s.center = *AnyCast<Point3D>(&gworld.data);
+    s.radius = 0;
+  }
+  else {
+    s = *AnyCast<Sphere3D>(&gworld.data);
+  }
+    
+  Real tol = outerMargin1 + outerMargin2;
+  Triangle3D tri;
+  vector<int> tris;
+  int k=0;
+  NearbyTriangles(m1,gworld,tol,tris,maxcontacts);
+  for(size_t j=0;j<tris.size();j++) {   
+    m1.GetTriangle(tris[j],tri);
+    tri.a = m1.currentTransform*tri.a;
+    tri.b = m1.currentTransform*tri.b;
+    tri.c = m1.currentTransform*tri.c;
+
+    Vector3 cp = tri.closestPoint(s.center);
+    Vector3 n = cp - s.center;
+    Real nlen = n.length();
+    Real d = nlen-s.radius;
+    Vector3 pw = s.center;
+    if(s.radius > 0)
+      //adjust pw to the sphere surface
+      pw += n*(s.radius/nlen);
+    if(d < gNormalFromGeometryTolerance) {  //compute normal from the geometry
+      Vector3 plocal;
+      m1.currentTransform.mulInverse(cp,plocal);
+      n = ContactNormal(m1,plocal,tris[j],pw);
+    }
+    else if(d > tol) {  //some penetration -- we can't trust the result of PQP
+      continue;
+    }
+    else n /= nlen;
+    //migrate the contact point to the center of the overlap region
+    CopyVector(contact[k].pos,0.5*(cp+pw) + ((outerMargin2 - outerMargin1)*0.5)*n);
+    CopyVector(contact[k].normal,n);
+    contact[k].depth = tol - d;
+    k++;
+    if(k == maxcontacts) break;
+  }
+  return k;
+}
+
+int PrimitiveMeshCollide(GeometricPrimitive3D& g1,const RigidTransform& T1,Real outerMargin1,CollisionMesh& m2,Real outerMargin2,dContactGeom* contact,int maxcontacts)
+{
+  int num = MeshPrimitiveCollide(m2,outerMargin2,g1,T1,outerMargin1,contact,maxcontacts);
+  for(int i=0;i<num;i++) ReverseContact(contact[i]);
+  return num;
+}
+
 
 int dCustomGeometryCollide (dGeomID o1, dGeomID o2, int flags,
 			   dContactGeom *contact, int skip)
@@ -510,7 +572,9 @@ int dCustomGeometryCollide (dGeomID o1, dGeomID o2, int flags,
       fprintf(stderr,"TODO: primitive-primitive collisions\n");
       break;
     case AnyGeometry3D::TriangleMesh:
-      fprintf(stderr,"TODO: primitive-triangle mesh collisions\n");
+      n = PrimitiveMeshCollide(d1->geometry->AsPrimitive(),d1->geometry->PrimitiveCollisionData(),d1->geometry->margin+d1->outerMargin,
+			  d2->geometry->TriangleMeshCollisionData(),d2->geometry->margin+d2->outerMargin,
+			  contact,m);
       break;
     case AnyGeometry3D::PointCloud:
       fprintf(stderr,"TODO: primitive-point cloud collisions\n");
@@ -523,7 +587,9 @@ int dCustomGeometryCollide (dGeomID o1, dGeomID o2, int flags,
   case AnyGeometry3D::TriangleMesh:
     switch(d2->geometry->type) {
     case AnyGeometry3D::Primitive:
-      fprintf(stderr,"TODO: triangle mesh-primitive collisions\n");
+      n = MeshPrimitiveCollide(d1->geometry->TriangleMeshCollisionData(),d1->geometry->margin+d1->outerMargin,
+			  d2->geometry->AsPrimitive(),d2->geometry->PrimitiveCollisionData(),d2->geometry->margin+d2->outerMargin,
+			  contact,m);
       break;
     case AnyGeometry3D::TriangleMesh:
       n = MeshMeshCollide(d1->geometry->TriangleMeshCollisionData(),d1->geometry->margin+d1->outerMargin,
