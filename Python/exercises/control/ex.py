@@ -82,17 +82,18 @@ class GLTest(GLRealtimeProgram):
 
 if __name__ == "__main__":
     world = WorldModel()
-    res = False
+    fn = ""
     if problem == "1a":
-        res = world.readFile("lab4_files/world1.xml")
+        fn = "world1.xml"
     elif problem == "1b":
-        res = world.readFile("lab4_files/world2.xml")
+        fn = "world2.xml"
     elif problem == "2a" or problem == "2b":
-        res = world.readFile("lab4_files/world3.xml")
+        fn = "world3.xml"
     elif problem == "3":
-        res = world.readFile("lab4_files/world4.xml")
+        fn = "world4.xml"
+    res = world.readFile(fn)
     if not res:
-        raise RuntimeError("Unable to load world")
+        raise RuntimeError("Unable to load world "+fn)
     sim = Simulator(world)
     if problem == "2b":
         m = world.robot(0).getLink(0).getMass()
