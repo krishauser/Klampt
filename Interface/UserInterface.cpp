@@ -6,6 +6,9 @@
 #include <GLdraw/GL.h>
 #include <GLdraw/drawextra.h>
 #include <sstream>
+#ifndef WIN32
+#include <unistd.h>
+#endif
 
 /** @brief Adaptor for sending paths to PhysicalRobotInterface from a
  * RealTimePlannerBase.

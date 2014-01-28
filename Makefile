@@ -22,6 +22,7 @@ unpack-deps:
 deps: dep-KrisLibrary dep-tinyxml dep-glui dep-ode
 
 dep-KrisLibrary:
+	cd Library/KrisLibrary; cp Makefile.config.klampt Makefile.config
 	cd Library/KrisLibrary; make KrisLibrary
 
 dep-tinyxml:
