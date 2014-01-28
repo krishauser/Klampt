@@ -68,7 +68,7 @@ class GLIKTest(GLRealtimeProgram):
         robot.setConfig(q)
     
 
-if __name__ == "__main__"
+if __name__ == "__main__":
     world = WorldModel()
     res = world.readFile("ex2_file.xml")
     if not res: raise RuntimeError("Unable to load world file")
