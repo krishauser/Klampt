@@ -90,12 +90,9 @@ class WorldCollider:
         self.rigidObjects = []
         self.robots = []
         
-        print "Constructor"
         for i in xrange(world.numTerrains()):
             t = world.terrain(i)
-            print "make terrain",i
             g = makeGeom(t.getGeometry())
-            print "done",i
             if g != None:
                 self.terrains.append(len(self.geomList))
                 self.geomList.append((t,g))
