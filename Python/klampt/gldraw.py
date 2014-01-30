@@ -15,7 +15,7 @@ def point(p):
     glEnd()
 
 def circle(center,radius,res=0.01):
-    numdivs = int(math.ceil(self.radius*math.pi*2/res))
+    numdivs = int(math.ceil(radius*math.pi*2/res))
     glNormal3f(0,0,1)
     glBegin(GL_TRIANGLE_FAN)
     glVertex2f(*center)
