@@ -2,6 +2,9 @@
 #include "Modeling/Conversions.h"
 #include <sstream>
 
+const static Real gJointLimitEpsilon = 1e-7;
+const static Real gVelocityLimitEpsilon = 1e-7;
+
 MilestonePathController::MilestonePathController(Robot& robot)
   :JointTrackingController(robot),pathParameter(0),
    velScale(1.0),accScale(1.0),modifySpeedByError(false),modifySpeedCoeff(50.0)
@@ -146,7 +149,8 @@ void MilestonePathController::SetMilestone(const Vector& x,const Vector& dx)
   for(int i=0;i<x.n;i++)
     if(x[i] != Clamp(x[i],robot.qMin[i],robot.qMax[i])) {
       printf("SetMilestone: Warning, clamping desired config %d to joint limits %g in [%g,%g]\n",i,x[i],robot.qMin[i],robot.qMax[i]);
-      milestones[1][i] = Clamp(x[i],robot.qMin[i],robot.qMax[i]);
+      Real shrink = gJointLimitEpsilon*(robot.qMax[i]-robot.qMin[i]);
+      milestones[1][i] = Clamp(x[i],robot.qMin[i]+shrink,robot.qMax[i]-shrink);
     }
 
   path.SetMilestones(milestones,dmilestones);
@@ -164,7 +168,9 @@ void MilestonePathController::SetMilestone(const Vector& x)
   for(int i=0;i<x.n;i++)
     if(x[i] != Clamp(x[i],robot.qMin[i],robot.qMax[i])) {
       printf("SetMilestone: Warning, clamping desired config %d to joint limits %g in [%g,%g]\n",i,x[i],robot.qMin[i],robot.qMax[i]);
-      milestones[1][i] = Clamp(x[i],robot.qMin[i],robot.qMax[i]);
+      Real shrink = gJointLimitEpsilon*(robot.qMax[i]-robot.qMin[i]);
+      milestones[1][i] = Clamp(x[i],robot.qMin[i]+shrink,robot.qMax[i]-shrink);
+
     }
 
   path.SetMilestones(milestones,dmilestones);
@@ -193,7 +199,8 @@ void MilestonePathController::SetMilestone(const Vector& x,Real minTime)
     for(int i=0;i<x.n;i++)
       if(x[i] != Clamp(x[i],robot.qMin[i],robot.qMax[i])) {
 	printf("SetMilestone: Warning, clamping desired config %d to joint limits %g in [%g,%g]\n",i,x[i],robot.qMin[i],robot.qMax[i]);
-	milestones[1][i] = Clamp(x[i],robot.qMin[i],robot.qMax[i]);
+	Real shrink = gJointLimitEpsilon*(robot.qMax[i]-robot.qMin[i]);
+	milestones[1][i] = Clamp(x[i],robot.qMin[i]+shrink,robot.qMax[i]-shrink);
       }
     path.SetMilestones(milestones,dmilestones);
   }
@@ -532,11 +539,13 @@ void PolynomialPathController::AppendRamp(const Config& x,const Vector& v)
   for(int i=0;i<x.n;i++) {
     if(x[i] != Clamp(x[i],robot.qMin[i],robot.qMax[i])) {
       printf("AppendRamp: Warning, clamping desired config %d to joint limits %g in [%g,%g]\n",i,x[i],robot.qMin[i],robot.qMax[i]);
-      milestones[1][i] = Clamp(x[i],robot.qMin[i],robot.qMax[i]);
+      Real shrink = gJointLimitEpsilon*(robot.qMax[i]-robot.qMin[i]);
+      milestones[1][i] = Clamp(x[i],robot.qMin[i]+shrink,robot.qMax[i]-shrink);
     }
     if(Abs(v[i]) > robot.velMax[i]) {
       printf("AppendRamp: Warning, clamping desired velocity %d to limits |%g|<=%g\n",i,v[i],robot.velMax[i]);
-      dmilestones[1][i] = Clamp(v[i],-robot.velMax[i],robot.velMax[i]);
+      Real shrink = gVelocityLimitEpsilon*robot.velMax[i]*2.0;
+      dmilestones[1][i] = Clamp(v[i],-robot.velMax[i]+shrink,robot.velMax[i]-shrink);
     }
   }
 
