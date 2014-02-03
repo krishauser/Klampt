@@ -6,9 +6,12 @@
 #include <GLdraw/GL.h>
 #include <GLdraw/drawextra.h>
 #include <sstream>
+#ifdef CYGWIN
+#undef WIN32
+#endif //CYGWIN
 #ifndef WIN32
 #include <unistd.h>
-#endif
+#endif //WIN32
 
 /** @brief Adaptor for sending paths to PhysicalRobotInterface from a
  * RealTimePlannerBase.
@@ -154,11 +157,14 @@ void InputProcessingInterface::SetProcessor(SmartPointer<InputProcessorBase>& pr
 string InputProcessingInterface::ActivateEvent(bool enabled)
 {
   if(!inputProcessor) {
-    inputProcessor = new StandardInputProcessor;
-    inputProcessor->world = world;
-    inputProcessor->viewport = viewport;
+    if(enabled) {
+      inputProcessor = new StandardInputProcessor;
+      inputProcessor->world = world;
+      inputProcessor->viewport = viewport;
+      inputProcessor->Activate(enabled);
+    }
   }
-  else inputProcessor->Reset();
+  else inputProcessor->Activate(enabled);
   return "";
 }
 
@@ -268,14 +274,15 @@ string PlannerCommandInterface::UpdateEvent()
   if(!planner) return "";
   if(planner->currentPath.ramps.empty()) {
     if(robotInterface->GetEndTime() <= robotInterface->GetCurTime()) { //done moving
-      printf("Planner initialized\n");
       Config q;
       robotInterface->GetCurConfig(q);
       planner->SetConstantPath(q);
     }
-    else
+    else {
+      printf("Waiting until robot stops...\n");
       //wait until done moving
       return "";
+    }
   }
 
   //wait until next planning step, otherwise try planning
@@ -334,7 +341,8 @@ string PlannerCommandInterface::UpdateEvent()
 string IKPlannerCommandInterface::ActivateEvent(bool enabled)
 {
   if(!planner) {
-    printf("IK planner activated\n");
+    printf("IK planner activated, 150ms loop\n");
+    assert(settings != NULL);
     cspace = new SingleRobotCSpace(*world,0,settings);
     
     planner = new RealTimeIKPlanner;
@@ -342,6 +350,7 @@ string IKPlannerCommandInterface::ActivateEvent(bool enabled)
     planner->currentSplitTime=0.1;
     planner->currentPadding=0.05;
     planner->SetSpace(cspace);
+    assert(planner->settings != NULL);
   }
   PlannerCommandInterface::ActivateEvent(enabled);
   return "";
@@ -483,6 +492,8 @@ string MTPlannerCommandInterface::UpdateEvent()
 {
   if (!planner)
     return "";
+
+  inputProcessor->SetGlobalTime(robotInterface->GetCurTime());
   
   //see if the planning thread has a plan update
   pthread_mutex_lock(&data.mutex);
@@ -526,9 +537,7 @@ string MTIKPlannerCommandInterface::ActivateEvent(bool enabled)
     planner->currentSplitTime = 0.05;
     planner->currentPadding = 0.025;
     planner->currentExternalPadding = 0.02;
-    planner->robot = planningWorld.robots[0].robot;
-    planner->settings = settings;
-    planner->cspace = cspace;
+    planner->SetSpace(cspace);
   }
   return MTPlannerCommandInterface::ActivateEvent(enabled);
 }
@@ -543,9 +552,7 @@ string MTRRTCommandInterface::ActivateEvent(bool enabled)
     RealTimeTreePlanner* p = new RealTimeTreePlanner;
     p->delta = 0.5;
     planner = p;
-    planner->robot = planningWorld.robots[0].robot;
-    planner->settings = settings;
-    planner->cspace = cspace;
+    planner->SetSpace(cspace);
   }
   return MTPlannerCommandInterface::ActivateEvent(enabled);
 }

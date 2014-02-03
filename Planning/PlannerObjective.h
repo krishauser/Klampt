@@ -262,5 +262,32 @@ class CartesianTrackingObjective : public PlannerObjectiveBase
   Matrix3 endPosMatWeight;
 };
 
+/** @brief Reads and constructs an objective from a JSON message of the form
+ * {type:[type],attr1:[value1],...,attrn:[valuen]}
+ * where [type] is an objective type and the attribute-value
+ * pairs are type-dependent.  If robot is provided, more error checking is
+ * performed.
+ *
+ * Currently supported objective types (and their attributes include:
+ * - config: sets a destination configuration.
+ *   * data: the destination configuration.
+ * - time: minimizes time.
+ * - term_time: penalizes absolute difference to an ending time
+ *   * data: the destination time.
+ * - velocity: sets a destination velocity.
+ *   * data: the destination velocity.
+ * - composite: a composite 
+ *   * norm (optional): the norm for weighting components (1, 2, or "inf")
+ *   * components: a list of component objective functions.
+ *   * weights (optional): a list of component weights.
+ * - cartesian: sets a destination position / orientation.
+ *   * link: link of the point on robot
+ *   * plocal: local coordinates of the point on robot
+ *   * pworld: target positions of the point on the world
+ * - ik: sets an IK objective
+ *   * data: serialized IKGoal.
+ */
+PlannerObjectiveBase* LoadPlannerObjective(istream& in,Robot* robot=NULL);
+
 #endif
 

@@ -3,15 +3,18 @@
 
 #include "Modeling/World.h"
 #include "Planning/PlannerObjective.h"
+#include "Utils/AsyncIO.h"
+#include <Timer.h>
 
 /** @brief An abstract base class for processing user input through a 2D
  * mouse driven gui into PlannerObjectives used for planning.
  */
-struct InputProcessorBase
+class InputProcessorBase
 {
+ public:
   InputProcessorBase();
   virtual ~InputProcessorBase() {}
-  virtual void Reset() {}
+  virtual void Activate(bool enabled) {}
   virtual bool HasUpdate() { return true; }
   virtual void Hover(int mx,int my) {}
   virtual void Drag(float dx,float dy) {}
@@ -32,10 +35,11 @@ struct InputProcessorBase
 
 /** @brief Translates click-and-drag input into an IKObjective.
  */
-struct StandardInputProcessor : public InputProcessorBase
+class StandardInputProcessor : public InputProcessorBase
 {
+ public:
   StandardInputProcessor();
-  virtual void Reset();
+  virtual void Activate(bool enabled);
   virtual bool HasUpdate() { return changed; }
   virtual void Hover(int mx,int my);
   virtual void Drag(float dx,float dy);
@@ -56,10 +60,11 @@ struct StandardInputProcessor : public InputProcessorBase
 /** @brief Translates input and extrapolated velocity into a 
  * CartesianTrackingObjective. 
  */
-struct PredictiveExtrapolationInputProcessor : public StandardInputProcessor
+class PredictiveExtrapolationInputProcessor : public StandardInputProcessor
 {
+ public:
   PredictiveExtrapolationInputProcessor();
-  virtual void Reset();
+  virtual void Activate(bool enabled);
   virtual bool HasUpdate() { return true; }
   virtual void Hover(int mx,int my);
   virtual void Drag(float mx,float my);
@@ -79,5 +84,72 @@ struct PredictiveExtrapolationInputProcessor : public StandardInputProcessor
 
 
 
+/** @brief Reads an objective function from a reader thread.
+ * 
+ * See LoadPlannerObjective in Planning/PlannerObjective.h for details on 
+ * the format that should be provided by the thread.
+ */
+class SerializedObjectiveProcessor : public InputProcessorBase
+{
+ public:
+  SerializedObjectiveProcessor(AsyncReaderThread* reader=NULL);
+  virtual void Activate(bool enabled);
+  virtual bool HasUpdate();
+  virtual PlannerObjectiveBase* MakeObjective(Robot* robot);
+
+  AsyncReaderThread* reader;
+};
+
+/** @brief Reads an objective function from a socket.
+ * 
+ * See LoadPlannerObjective in Planning/PlannerObjective.h for details on 
+ * the format that should be provided by the socket.
+ */
+class SocketObjectiveProcessor : public SerializedObjectiveProcessor
+{
+ public:
+  SocketObjectiveProcessor(const char* addr) 
+    :SerializedObjectiveProcessor(&socketReader),socketReader(addr)
+    {}
+  SocketReadWorker socketReader;
+};
+
+
+#if HAVE_ZMQ
+
+#include "zmq.hpp"
+
+///Lets you read the last message sent to this ZMQ subscriber.
+///If no read has occurred for 'timeout' seconds, then the thread will quit
+class ZMQSubWorker : public AsyncReaderThread
+{
+ public:
+  ZMQSubWorker(zmq::context_t& context,const char* addr,const char* filter=NULL,double timeout=Inf);
+  virtual bool Start();
+  virtual void Stop();
+  virtual const char* Callback();
+
+  zmq::context_t& context;
+  string addr;
+  string filter;
+  SmartPointer<zmq::socket_t> subscriber;
+  zmq::message_t update;
+};
+
+
+class ZMQObjectiveProcessor : public SerializedObjectiveProcessor
+{
+ public:
+  ZMQObjectiveProcessor(zmq::context_t& context,const char* addr,const char* filter=NULL);
+  void InitTimePublisher(const char* timepubaddr);
+  virtual void Activate(bool enabled);
+  virtual void SetGlobalTime(Real time);
+
+  ZMQSubWorker subworker;
+  zmq::socket_t timepub;
+  bool publishTime;
+};
+
+#endif //HAVE_ZMQ
 
 #endif

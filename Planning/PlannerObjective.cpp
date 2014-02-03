@@ -1,4 +1,5 @@
 #include "PlannerObjective.h"
+#include <utils/AnyCollection.h>
 #include <robotics/IKFunctions.h>
 #include <string.h>
 
@@ -598,4 +599,81 @@ void CartesianTrackingObjective::GetDifferentialCostFunction(Real t,Matrix3& A,V
     if (!weights.empty())  A *= weights[index];
   }
   else A = matWeights[index];
+}
+
+
+PlannerObjectiveBase* LoadPlannerObjective(AnyCollection& msg,Robot* robot)
+{
+  string type;
+  bool res = msg["type"].as<string>(type);
+  if(!res) {
+    fprintf(stderr,"LoadPlannerObjective: message didn't contain 'type' member\n");
+    return false;
+  }
+  if(type == "time") {
+    return new TimeObjective();
+  }
+  else if(type == "term_time") {
+    return new TerminalTimeObjective((Real)msg["data"]);
+  }
+  else if(type == "config") {
+    vector<Real> q;
+    if(!msg["data"].asvector(q)) {
+      fprintf(stderr,"LoadPlannerObjective: config message didn't contain 'data' member\n");
+      return NULL;
+    }
+    if(q.size() != robot->links.size()) {
+      fprintf(stderr,"LoadPlannerObjective: config message contains desired configuration of incorrect length %d vs %d\n",q.size(),robot->links.size());
+      return NULL;
+    }
+    return new ConfigObjective(Vector(q));
+  }
+  else if(type == "velocity") {
+    vector<Real> v;
+    if(!msg["data"].asvector(v)) {
+      fprintf(stderr,"LoadPlannerObjective: velocity  message didn't contain 'data' member\n");
+      return NULL;
+    }
+    if(v.size() != robot->links.size()) {
+      fprintf(stderr,"LoadPlannerObjective: velocity message contains desired velocity of incorrect length %d vs %d\n",v.size(),robot->links.size());
+      return NULL;
+    }
+    return new VelocityObjective(Vector(v));
+  }
+  else if(type == "composite") {
+    vector<SmartPointer<AnyCollection> > items;
+    AnyCollection msgcomp = msg["components"];
+    if(msgcomp.depth() == 0) {
+      fprintf(stderr,"LoadPlannerObjective: composite message didn't contain 'components' member\n");
+      return NULL;
+    }
+    msgcomp.enumerate(items);
+    vector<SmartPointer<PlannerObjectiveBase> > components;
+    for(size_t i=0;i<items.size();i++) {
+      components.push_back(LoadPlannerObjective(*items[i],robot));
+      if(components.back()==NULL) return NULL;
+    }
+    CompositeObjective* obj = new CompositeObjective;
+    if(msg["norm"].as<Real>(obj->norm)) {}
+    if(msg["weights"].asvector(obj->weights)) {}
+    else obj->weights.resize(components.size(),1);
+    obj->components=components;
+    return obj;
+  }
+  else {
+    fprintf(stderr,"LoadPlannerObjective: message of unknown type %s\n",type.c_str());
+    return NULL;
+  }
+}
+
+
+PlannerObjectiveBase* LoadPlannerObjective(istream& in,Robot* robot)
+{
+  AnyCollection msg;
+  in>>msg;
+  if(!in) {
+    fprintf(stderr,"LoadPlannerObjective: Unable to parse message\n");
+    return NULL;
+  }
+  return LoadPlannerObjective(msg,robot);
 }
