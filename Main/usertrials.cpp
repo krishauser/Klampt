@@ -2,7 +2,7 @@
 #include "Interface/SimRobotInterface.h"
 #include "SimViewProgram.h"
 #include <utils/StatCollector.h>
-#include <glui.h>
+#include <GL/glui.h>
 #include <fstream>
 using namespace Math3D;
 using namespace GLDraw;

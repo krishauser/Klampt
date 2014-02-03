@@ -3,8 +3,7 @@
 #include <utils/stringutils.h>
 #include <utils/AnyCollection.h>
 #include <robotics/IKFunctions.h>
-//#include <GL/glut.h>
-#include <glui.h>
+#include <GL/glui.h>
 #include <fstream>
 using namespace Math3D;
 using namespace GLDraw;
