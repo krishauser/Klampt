@@ -60,6 +60,7 @@ void RobotLinkPoseWidget::Drag(int dx,int dy,Camera::Viewport& viewport)
       robot->SetDriverValue(i,val);
     }
   poseConfig = robot->q;
+  Refresh();
 }
 
 void RobotLinkPoseWidget::DrawGL(Camera::Viewport& viewport) 
