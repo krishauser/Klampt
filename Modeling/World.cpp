@@ -461,6 +461,18 @@ int RobotWorld::LoadElement(const string& sfn)
     }
     return RobotID(res);
   }
+  else if(0==strcmp(ext,"obj")) {
+    int res=LoadRigidObject(fn);
+    if(res<0) {
+      if(Geometry::AnyGeometry3D::CanLoadExt(ext)) { //try loading as OBJ file
+	res = LoadTerrain(fn);
+	if(res >= 0) return TerrainID(res);
+      }
+      printf("Error loading rigid object file %s\n",fn);
+      return -1;
+    }
+    return RigidObjectID(res);
+  }
   else if(0==strcmp(ext,"env") || Geometry::AnyGeometry3D::CanLoadExt(ext)) {
     int res=LoadTerrain(fn);
     if(res < 0) {
@@ -468,14 +480,6 @@ int RobotWorld::LoadElement(const string& sfn)
       return -1;
     }
     return TerrainID(res);
-  }
-  else if(0==strcmp(ext,"obj")) {
-    int res=LoadRigidObject(fn);
-    if(res<0) {
-      printf("Error loading rigid object file %s\n",fn);
-      return -1;
-    }
-    return RigidObjectID(res);
   }
   else {
     printf("Unknown file extension %s on file %s\n",ext,fn);
