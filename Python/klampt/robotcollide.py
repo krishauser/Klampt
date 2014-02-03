@@ -8,11 +8,11 @@ def makeTrimeshGeom(trimesh):
     if len(trimesh.indices)==0:
         return None
     inds = collide.intArray(len(trimesh.indices))
-    for index,v in enumerate(trimesh.indices):
-        inds[index] = v
+    for index in range(len(trimesh.indices)):
+        inds[index] = trimesh.indices[index]
     verts = collide.doubleArray(len(trimesh.vertices))
-    for index,v in enumerate(trimesh.vertices):
-        verts[index] = v
+    for index in range(len(trimesh.vertices)):
+        verts[index] = trimesh.vertices[index]
     gindex = collide.newGeom()
     collide.makeTriMeshGeom(gindex,verts,inds,len(trimesh.vertices)/3,len(trimesh.indices)/3)
     return gindex
