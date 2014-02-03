@@ -23,15 +23,11 @@ automass
 torqueMax  0 800 600 400 200 200 100
 
 # simulation parameters
-servoP  80000 100000 50000 20000 10000 5000
-#servoI  16000 20000 10000 4000 2000 1000
-servoI  0 0 0 0 0 0
-servoD  500 500 200 40 20 10
-dryFriction 20 20 10 5 1 1
-#servoP  40000 30000 20000 20000 10000 5000
-#servoI  80000 60000 40000 20000 20000 10000
-#servoD  80 60 40 20 20 10
-#dryFriction 0.5 0.5 0.5 0.1 0.1 0.1
+servoP  40000 50000 20000 10000 2000 1000
+servoI  100 100 100 100 40 20
+servoD  1000 2000 700 400 50 20
+dryFriction 5 5 3 1 0.1 0.05
+viscousFriction 100 100 70 40 5 2
 
 mount 6 "pr2gripper.rob"  0 0 -1    0 1  0     1 0 0    0 0 0.025
 
