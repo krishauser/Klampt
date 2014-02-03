@@ -8,7 +8,7 @@
 #include <GLdraw/GL.h>
 #include <GLdraw/drawextra.h>
 #include <GLdraw/Widget.h>
-#include <glui.h>
+#include <GL/glui.h>
 using namespace Math3D;
 using namespace GLDraw;
 
