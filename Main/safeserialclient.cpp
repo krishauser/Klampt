@@ -1,11 +1,18 @@
+//#if !HAVE_ZMQ
+//#error "Must have ZeroMQ installed and enabled in Makefile.config"
+//#endif
+
 #include "Interface/UserInterface.h"
 #include "Interface/SimRobotInterface.h"
 #include "SimViewProgram.h"
-#include <utils/StatCollector.h>
+#include <utils/AnyCollection.h>
 #include <GL/glui.h>
 #include <fstream>
 using namespace Math3D;
 using namespace GLDraw;
+#ifdef CYGWIN
+#undef WIN32
+#endif // CYGWIN
 
 enum {
   SIMULATE_BUTTON_ID,
@@ -22,15 +29,16 @@ double timeCostCoeff = 0.0;
 
 
 
-class UserTrialProgram : public SimViewProgram
+class SafeSerialProgram : public SimViewProgram
 {
 public:
-  WorldPlannerSettings settings;
+  //zmq::context_t context;
+  WorldPlannerSettings plannerSettings;
   string initialState;
 
-  string logFile;
   SimRobotInterface robotInterface;
   vector<SmartPointer<RobotUserInterface> > uis;
+  SmartPointer<InputProcessorBase> zmqInputProcessor;
   int currentUI,oldUI;
 
   //GUI state
@@ -39,59 +47,37 @@ public:
 
   int drawDesired,drawPath,drawUI,drawContacts;
 
-  UserTrialProgram(RobotWorld* world)
-    :SimViewProgram(world),robotInterface(&sim)
+  SafeSerialProgram(RobotWorld* world)
+    :SimViewProgram(world),/*context(1),*/robotInterface(&sim)
   {
-    settings.InitializeDefault(*world);
-    logFile = "trial.log";
-  }
-
-  void LogBegin(string parameters="")
-  {
-    ofstream out(logFile.c_str(),ios::out | ios::app);
-    out<<"Begin "<<parameters<<endl;
-    out.close();
-  }
-
-  void LogActivate(string result)
-  {
-    ofstream out(logFile.c_str(),ios::out | ios::app);
-    out<<"Activate "<<uis[currentUI]->Name()<<" "<<sim.time<<" "<<result<<endl;
-    out.close();
-  }
-
-  void LogDeactivate(string result)
-  {
-    ofstream out(logFile.c_str(),ios::out | ios::app);
-    out<<"Deactivate "<<uis[currentUI]->Name()<<" "<<sim.time<<" "<<result<<endl;
-    out.close();
-  }
-
-  void LogUpdate(string result)
-  {
-    if(!result.empty()) {
-      ofstream out(logFile.c_str(),ios::out | ios::app);
-      out<<"Update "<<uis[currentUI]->Name()<<" "<<sim.time<<" "<<result<<endl;
-      out.close();
+    //setup the settings
+    AnyCollection settings;
+    ifstream in("safeserialclient.settings",ios::in);
+    bool readsettings = false;
+    if(in) {
+      in>>settings;
+      if(in) 
+	readsettings = true;
+      else
+	cerr<<"Error reading settings from safeserialclient.settings"<<endl;
     }
-  }
-
-  void LogMouseInput(string result)
-  {
-    if(!result.empty()) {
-      ofstream out(logFile.c_str(),ios::out | ios::app);
-      out<<"MouseInput "<<uis[currentUI]->Name()<<" "<<sim.time<<" "<<result<<endl;
-      out.close();
+    if(!readsettings) {
+      fprintf(stderr,"Need safeserialclient.settings file, copy and paste the following lines into the file.\n");
+      settings = AnyCollection();
+      settings["objective_address"]=string("tcp://localhost:3456");
+      settings["objective_filter"]=string("objective");
+      settings["time_publish_address"]=string("tcp://*:3457");
+      cerr<<settings<<endl;
+      exit(-1);
     }
-  }
-
-  void LogKeypress(string result)
-  {
-    if(!result.empty()) {
-      ofstream out(logFile.c_str(),ios::out | ios::app);
-      out<<"Keypress "<<uis[currentUI]->Name()<<" "<<sim.time<<" "<<result<<endl;
-      out.close();
-    }
+    string objsubaddr = settings["objective_address"];
+    string objfilter = settings["objective_filter"];
+    string timepubaddr = settings["time_publish_address"];
+    //ZMQObjectiveProcessor* processor = new ZMQObjectiveProcessor(context,objsubaddr.c_str(),(objfilter.empty()?NULL:objfilter.c_str()));
+    //if(!timepubaddr.empty())
+    //processor->InitTimePublisher(timepubaddr.c_str());
+    SocketObjectiveProcessor* processor = new SocketObjectiveProcessor(objsubaddr.c_str());
+    zmqInputProcessor = processor;
   }
 
 
@@ -102,9 +88,8 @@ public:
     drawUI = 1;
     drawContacts = 1;
 
+    plannerSettings.InitializeDefault(*world);
     uis.resize(0);
-    uis.push_back(new JointCommandInterface);
-    uis.push_back(new IKCommandInterface);
     uis.push_back(new IKPlannerCommandInterface);
     uis.push_back(new RRTCommandInterface);
 #ifndef WIN32
@@ -115,13 +100,13 @@ public:
       uis[i]->world = world;
       uis[i]->robotInterface = &robotInterface;
       uis[i]->viewport = &viewport;
-      uis[i]->settings = &settings;
+      uis[i]->settings = &plannerSettings;
+      dynamic_cast<InputProcessingInterface*>((RobotUserInterface*)uis[i])->SetProcessor(zmqInputProcessor);
     }
     currentUI = oldUI = 0;
 
     //activate current UI
     string res=uis[currentUI]->ActivateEvent(true);
-    LogActivate(res);
 
     if(!WorldViewProgram::Initialize()) return false;
 
@@ -268,9 +253,7 @@ public:
     case UI_LISTBOX_ID:
       {
 	string res=uis[oldUI]->ActivateEvent(false);
-	LogDeactivate(res);
 	res=uis[currentUI]->ActivateEvent(true);
-	LogActivate(res);
 	oldUI=currentUI;
       }
       break;
@@ -290,7 +273,6 @@ public:
   {
     if(button == GLUT_RIGHT_BUTTON) {
       string res=uis[currentUI]->MouseInputEvent(0,0,true);
-      LogMouseInput(res);
     }
   }
 
@@ -299,7 +281,6 @@ public:
     if(button == GLUT_LEFT_BUTTON)  DragRotate(dx,dy);
     else if(button == GLUT_RIGHT_BUTTON) {
       string res=uis[currentUI]->MouseInputEvent(dx,dy,true);
-      LogMouseInput(res);
     }
   }
 
@@ -321,14 +302,12 @@ public:
   virtual void Handle_Motion(int x,int y)
   {
     string res=uis[currentUI]->MouseInputEvent(x,y,false);
-    LogMouseInput(res);
     Refresh();
   }
 
   virtual void Handle_Keypress(unsigned char key,int x,int y)
   {
     string res=uis[currentUI]->KeypressEvent(key,x,y);
-    LogKeypress(res);
     Refresh();
   }
 
@@ -336,7 +315,6 @@ public:
     if(simulate) {
       Timer timer;
       string res=uis[currentUI]->UpdateEvent();
-      LogUpdate(res);
 
       sim.Advance(dt);
       Refresh();
@@ -348,10 +326,10 @@ public:
 };
 
 
-int main(int argc, char** argv)
+int main(int argc, const char** argv)
 {
   if(argc < 2) {
-    printf("USAGE: UserTrials XML_file [log file]\n");
+    printf("USAGE: SafeSerialClient XML_file\n");
     return 0;
   }
   RobotWorld world;
@@ -360,54 +338,7 @@ int main(int argc, char** argv)
   world.lights[0].setDirectionalLight(Vector3(0.2,-0.4,1));
   world.lights[0].setColor(GLColor(1,1,1));
 
-  XmlWorld xmlWorld;
-  char* logFile = NULL;
-  for(int i=1;i<argc;i++) {
-    const char* ext=FileExtension(argv[i]);
-    if(0==strcmp(ext,"rob")) {
-      if(world.LoadRobot(argv[i])<0) {
-	printf("Error loading robot file %s\n",argv[i]);
-	return 1;
-      }
-    }
-    else if(0==strcmp(ext,"env") || 0==strcmp(ext,"tri")) {
-      if(world.LoadTerrain(argv[i])<0) {
-	printf("Error loading terrain file %s\n",argv[i]);
-	return 1;
-      }
-    }
-    else if(0==strcmp(ext,"obj")) {
-      if(world.LoadRigidObject(argv[i])<0) {
-	printf("Error loading rigid object file %s\n",argv[i]);
-	return 1;
-      }
-    }
-    else if(0==strcmp(ext,"xml")) {
-      if(!xmlWorld.Load(argv[i])) {
-	printf("Error loading world file %s\n",argv[i]);
-	return 1;
-      }
-      if(!xmlWorld.GetWorld(world)) {
-	printf("Error loading world from %s\n",argv[i]);
-	return 1;
-      }
-    }
-    else if(0==strcmp(ext,"log")) {
-      logFile = argv[i];
-    }
-    else {
-      printf("Unknown file extension %s on file %s\n",ext,argv[i]);
-      return 1;
-    }
-  }
-
-  UserTrialProgram program(&world);
-  if(logFile) program.logFile = logFile;
-  program.InitSim();
-
-  stringstream params;
-  for(int i=1;i<argc;i++)
-    params<<argv[i]<<" ";
-  program.LogBegin(params.str());
+  SafeSerialProgram program(&world);
+  program.LoadAndInitSim(argc,argv);
   return program.Run();
 }

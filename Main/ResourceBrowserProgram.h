@@ -5,7 +5,7 @@
 #include "Modeling/Resources.h"
 #include "View/ViewResource.h"
 #include "IO/XmlWorld.h"
-#include <glui.h>
+#include <GL/glui.h>
 #include <sstream>
 using namespace Math3D;
 using namespace GLDraw;
