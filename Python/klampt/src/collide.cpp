@@ -3,6 +3,8 @@
 #include <vector>
 #include <list>
 #include <geometry/CollisionMesh.h>
+#include <geometry/AnyGeometry.h>
+#include <meshing/IO.h>
 #include <utils/AnyValue.h>
 #include <utils/SmartPointer.h>
 using namespace std;
@@ -43,6 +45,35 @@ void destroyGeom(int geom)
   geomsDeleteList.push_back(geom);
 }
 
+bool loadGeom(int geom,const char* fn)
+{
+  if(geom < 0 || geom >= (int)geoms.size()) 
+    throw PyException("Invalid geom index");
+  AnyGeometry3D anygeom;
+  if(!anygeom.Load(fn)) return false;
+  if(anygeom.type == AnyGeometry3D::Primitive) {
+    const GeometricPrimitive3D& prim = anygeom.AsPrimitive();
+    throw PyException("TODO: Create primitive geometries from file");    
+  }
+  else if(anygeom.type == AnyGeometry3D::TriangleMesh) {
+    const Meshing::TriMesh& mesh = anygeom.AsTriangleMesh();
+    makeTriMeshGeom(geom,&mesh.verts[0].x,&mesh.tris[0].a,mesh.verts.size(),mesh.tris.size());
+  }
+  else if(anygeom.type == AnyGeometry3D::PointCloud) {
+    Meshing::PointCloud3D& pc = anygeom.AsPointCloud();
+    vector<int> pointGeoms(pc.points.size());
+    for(size_t i=0;i<pc.points.size();i++) {
+      pointGeoms[i] = newGeom();
+      makePointGeom(pointGeoms[i],pc.points[i]);
+    }
+    makeGroupGeom(geom,&pointGeoms[0],pointGeoms.size());
+  }
+  else {
+    throw PyException("TODO: load volume grid geometries");    
+  }
+  return true;
+}
+
 void makeTriMeshGeom(int geom,const char* fn)
 {
   if(geom < 0 || geom >= (int)geoms.size()) 
@@ -50,8 +81,8 @@ void makeTriMeshGeom(int geom,const char* fn)
   geoms[geom] = CollisionMesh();
   CollisionMesh* mesh=AnyCast<CollisionMesh>(&geoms[geom]);
   assert(mesh!=NULL);
-  if(!LoadMultipleTriMeshes(fn,*mesh)) {
-    throw PyException("Unable to read tri mesh file");
+  if(!Meshing::Import(fn,*mesh)) {
+    throw PyException("Unable to read mesh file");
   }
   mesh->InitCollisions();
 }

@@ -8,10 +8,10 @@ def makeTrimeshGeom(trimesh):
     if len(trimesh.indices)==0:
         return None
     inds = collide.intArray(len(trimesh.indices))
-    for index in range(len(trimesh.indices)):
+    for index in xrange(len(trimesh.indices)):
         inds[index] = trimesh.indices[index]
     verts = collide.doubleArray(len(trimesh.vertices))
-    for index in range(len(trimesh.vertices)):
+    for index in xrange(len(trimesh.vertices)):
         verts[index] = trimesh.vertices[index]
     gindex = collide.newGeom()
     collide.makeTriMeshGeom(gindex,verts,inds,len(trimesh.vertices)/3,len(trimesh.indices)/3)
@@ -32,8 +32,8 @@ def makePointCloudGeom(pc,radius=0):
     #make a collision group
     res = collide.newGeom()
     vertArray = collide.intArray(len(verts))
-    for index,v in enumerate(verts):
-        vertArray[index] = v
+    for index in xrange(len(verts)):
+        vertArray[index] = verts[index]
     collide.makeGroupGeom(res,vertArray,len(verts))
     return res
 
