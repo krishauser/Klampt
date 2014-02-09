@@ -146,6 +146,42 @@ Samples an initial random configuration. ";
 %feature("docstring") GeomCollisionQuery "";
 
 
+// File: classGeometry3D.xml
+%feature("docstring") Geometry3D "
+
+A reference to a world item's three-D geometry.
+
+C++ includes: robotmodel.h ";
+
+%feature("docstring")  Geometry3D::Geometry3D "Geometry3D::Geometry3D() ";
+
+%feature("docstring")  Geometry3D::type "string Geometry3D::type() ";
+
+%feature("docstring")  Geometry3D::getTriangleMesh "TriangleMesh
+Geometry3D::getTriangleMesh() ";
+
+%feature("docstring")  Geometry3D::getPointCloud "PointCloud
+Geometry3D::getPointCloud() ";
+
+%feature("docstring")  Geometry3D::setTriangleMesh "void
+Geometry3D::setTriangleMesh(const TriangleMesh &) ";
+
+%feature("docstring")  Geometry3D::setPointCloud "void
+Geometry3D::setPointCloud(const PointCloud &) ";
+
+%feature("docstring")  Geometry3D::translate "void
+Geometry3D::translate(const double t[3]) ";
+
+%feature("docstring")  Geometry3D::transform "void
+Geometry3D::transform(const double R[9], const double t[3]) ";
+
+%feature("docstring")  Geometry3D::setCollisionMargin "void
+Geometry3D::setCollisionMargin(double margin) ";
+
+%feature("docstring")  Geometry3D::getCollisionMargin "double
+Geometry3D::getCollisionMargin() ";
+
+
 // File: classIKObjective.xml
 %feature("docstring") IKObjective "
 
@@ -422,6 +458,24 @@ PlannerInterface::getData(const char *setting) ";
 PlannerInterface::dump(const char *fn) ";
 
 
+// File: structPointCloud.xml
+%feature("docstring") PointCloud "
+
+A 3D point cloud class. vertices is a list of vertices, given as a
+list [x1, y1, z1, x2, y2, ... zn] properties is a list of vertex
+properties, given as a list [p11, p21, ..., pk1, p12, p22, ..., pk2,
+... , pn1, pn2, ..., pn2] where each vertex has k properties. The name
+of each property is given by the propertyNames member.
+
+C++ includes: robotmodel.h ";
+
+%feature("docstring")  PointCloud::translate "void
+PointCloud::translate(const double t[3]) ";
+
+%feature("docstring")  PointCloud::transform "void
+PointCloud::transform(const double R[9], const double t[3]) ";
+
+
 // File: classPyCSpace.xml
 %feature("docstring") PyCSpace "
 
@@ -501,11 +555,8 @@ RigidObjectModel::getID() ";
 %feature("docstring")  RigidObjectModel::getName "const char *
 RigidObjectModel::getName() ";
 
-%feature("docstring")  RigidObjectModel::getMesh "TriangleMesh
-RigidObjectModel::getMesh() ";
-
-%feature("docstring")  RigidObjectModel::setMesh "void
-RigidObjectModel::setMesh(const TriangleMesh &mesh) ";
+%feature("docstring")  RigidObjectModel::getGeometry "Geometry3D
+RigidObjectModel::getGeometry() ";
 
 %feature("docstring")  RigidObjectModel::getMass "Mass
 RigidObjectModel::getMass() ";
@@ -687,11 +738,8 @@ RobotModelLink::getParent() ";
 %feature("docstring")  RobotModelLink::setParent "void
 RobotModelLink::setParent(int p) ";
 
-%feature("docstring")  RobotModelLink::getMesh "TriangleMesh
-RobotModelLink::getMesh() ";
-
-%feature("docstring")  RobotModelLink::setMesh "void
-RobotModelLink::setMesh(const TriangleMesh &mesh) ";
+%feature("docstring")  RobotModelLink::getGeometry "Geometry3D
+RobotModelLink::getGeometry() ";
 
 %feature("docstring")  RobotModelLink::getMass "Mass
 RobotModelLink::getMass() ";
@@ -969,6 +1017,13 @@ const std::vector< double > &dqdes)
 
 Sets a PID command controller. ";
 
+%feature("docstring")  SimRobotController::setPIDCommand "void
+SimRobotController::setPIDCommand(const std::vector< double > &qdes,
+const std::vector< double > &dqdes, const std::vector< double >
+&tfeedforward)
+
+Sets a PID command controller with feedforward torques. ";
+
 %feature("docstring")  SimRobotController::setManualMode "void
 SimRobotController::setManualMode(bool enabled)
 
@@ -1195,11 +1250,8 @@ C++ includes: robotmodel.h ";
 %feature("docstring")  TerrainModel::getName "const char *
 TerrainModel::getName() ";
 
-%feature("docstring")  TerrainModel::getMesh "TriangleMesh
-TerrainModel::getMesh() ";
-
-%feature("docstring")  TerrainModel::setMesh "void
-TerrainModel::setMesh(const TriangleMesh &mesh) ";
+%feature("docstring")  TerrainModel::getGeometry "Geometry3D
+TerrainModel::getGeometry() ";
 
 %feature("docstring")  TerrainModel::setFriction "void
 TerrainModel::setFriction(double friction) ";
@@ -1331,9 +1383,6 @@ WorldModel::loadElement(const char *fn) ";
 // File: namespaceMath3D.xml
 
 
-// File: namespacePyPlanner.xml
-
-
 // File: namespacestd.xml
 
 
@@ -1343,62 +1392,121 @@ WorldModel::loadElement(const char *fn) ";
 %feature("docstring")  std::destroyGeom "void destroyGeom(int geom)
 ";
 
-%feature("docstring")  std::makeTriMeshGeom "void makeTriMeshGeom(int
-geom, const char *fn) ";
+%feature("docstring")  std::loadGeom "bool loadGeom(int geom, const
+char *fn)
+
+Loads a geometry from a file. Sets it to the correct type based on the
+file contents.
+
+Currently supported file extensions are Trimeshes: .tri, any other
+mesh files that Assimp may support (if Klamp't is built using Assimp
+support).
+
+Point clouds: .pcd
+
+Primitive geometries: .geom
+
+Returns False if there is a load error. Raises an exception if the ID
+is invalid. ";
 
 %feature("docstring")  std::makeTriMeshGeom "void makeTriMeshGeom(int
-geom, const double *verts, const int *inds, int nv, int nt) ";
+geom, const char *fn)
+
+Makes a geometry into a trimesh loaded from the file fn. ";
+
+%feature("docstring")  std::makeTriMeshGeom "void makeTriMeshGeom(int
+geom, const double *verts, const int *inds, int nv, int nt)
+
+Makes a geometry into a trimesh given the vertex and index data. verts
+is of length nv*3, and inds is of length nt*3.
+
+Note: in Python, must use doubleArray and intArray for the verts and
+inds objects. ";
 
 %feature("docstring")  std::setTriMeshTranslation "void
-setTriMeshTranslation(int geom, const double t[3]) ";
+setTriMeshTranslation(int geom, const double t[3])
+
+Sets the translation of a trimesh geom. ";
 
 %feature("docstring")  std::setTriMeshRotation "void
-setTriMeshRotation(int geom, const double r[9]) ";
+setTriMeshRotation(int geom, const double r[9])
+
+Sets the rotation of a trimesh geom. ";
 
 %feature("docstring")  std::getTriMeshTranslation "void
-getTriMeshTranslation(int geom, double t[3]) ";
+getTriMeshTranslation(int geom, double t[3])
+
+Gets the translation of a trimesh geom. ";
 
 %feature("docstring")  std::getTriMeshRotation "void
-getTriMeshRotation(int geom, double r[9]) ";
+getTriMeshRotation(int geom, double r[9])
+
+Gets the rotation of a trimesh geom. ";
 
 %feature("docstring")  std::getTriMeshBB "void getTriMeshBB(int geom,
-double bmin[3], double bmax[3]) ";
+double bmin[3], double bmax[3])
+
+Gets the bounding box of a trimesh geom. ";
 
 %feature("docstring")  std::getTriMeshNumVerts "int
-getTriMeshNumVerts(int geom) ";
+getTriMeshNumVerts(int geom)
+
+Gets the number of vertices of a trimesh geom. ";
 
 %feature("docstring")  std::getTriMeshNumTris "int
-getTriMeshNumTris(int geom) ";
+getTriMeshNumTris(int geom)
+
+Gets the number of triangles of a trimesh geom. ";
 
 %feature("docstring")  std::getTriMeshVerts "double*
-getTriMeshVerts(int geom) ";
+getTriMeshVerts(int geom)
+
+Gets the vertex data of a trimesh geom (length nv*3). ";
 
 %feature("docstring")  std::getTriMeshTris "int* getTriMeshTris(int
-geom) ";
+geom)
+
+Gets the index data of a trimesh geom (length nt*3). ";
 
 %feature("docstring")  std::makePointGeom "void makePointGeom(int
-geom, const double x[3]) ";
+geom, const double x[3])
+
+Makes a geom into a point x. ";
 
 %feature("docstring")  std::makeSphereGeom "void makeSphereGeom(int
-geom, const double c[3], double r) ";
+geom, const double c[3], double r)
+
+Makes a geom into a sphere centered at c with radius r. ";
 
 %feature("docstring")  std::makeRayGeom "void makeRayGeom(int geom,
-const double s[3], const double d[3]) ";
+const double s[3], const double d[3])
+
+Makes a geom into a ray with source s and direction d. ";
 
 %feature("docstring")  std::makeLineGeom "void makeLineGeom(int geom,
-const double s[3], const double d[3]) ";
+const double s[3], const double d[3])
+
+Makes a geom into a line with source s and direction d. ";
 
 %feature("docstring")  std::makeSegmentGeom "void makeSegmentGeom(int
-geom, const double a[3], const double b[3]) ";
+geom, const double a[3], const double b[3])
+
+Makes a geom into a segment with endpoints a, b. ";
 
 %feature("docstring")  std::makeAABBGeom "void makeAABBGeom(int geom,
-const double bmin[3], const double bmax[3]) ";
+const double bmin[3], const double bmax[3])
+
+Makes a geom into an axis-aligned bounding box with lower bound bmin
+and upper bound bmax. ";
 
 %feature("docstring")  std::checkCircularReference "bool
 checkCircularReference(int geom, int checkIndex) ";
 
 %feature("docstring")  std::makeGroupGeom "void makeGroupGeom(int
-geom, int *elements, int numelements) ";
+geom, int *elements, int numelements)
+
+Makes a geom into a group geom from an array of other geoms. Note: in
+Python, must use an intArray for geoms argument. ";
 
 %feature("docstring")  std::Collide "bool Collide(const Point3D &p1,
 const Point3D &p2) ";
@@ -1563,46 +1671,97 @@ int geom2) ";
 vector< int > &group, int geom2) ";
 
 %feature("docstring")  std::collide "bool collide(int geom1, int
-geom2) ";
+geom2)
+
+Tests whether the two geometries collide. ";
 
 %feature("docstring")  std::withinTolerance "bool withinTolerance(int
-geom1, int geom2, double tol) ";
+geom1, int geom2, double tol)
+
+Tests whether the two geometries are within the given tolerance. ";
 
 %feature("docstring")  std::distance "double distance(int geom1, int
-geom2, double relErr, double absErr) ";
+geom2, double relErr, double absErr)
+
+Returns the distance between the two geometries, possibly with an
+approximation error (useful to speed up mesh-mesh distance detection)
+
+Error of result is no more than D*relErr+absErr where D is the actual
+distance. Set relErr=absErr=0 to get exact distance.
+
+NOTE: Not yet implemented. ";
 
 %feature("docstring")  std::closestPoints "void closestPoints(int
-geom1, int geom2, double p1[3], double p2[3]) ";
+geom1, int geom2, double p1[3], double p2[3])
+
+Returns the closest points between the two geometries. These are given
+in world coordinates.
+
+NOTE: Not yet implemented. ";
 
 %feature("docstring")  std::rayCast "bool rayCast(int geom, const
-double s[3], const double d[3], double out[3]) ";
+double s[3], const double d[3], double out[3])
+
+Returns true if the geometry is hit by the given ray, and also returns
+the hit point (in world coordinates). ";
 
 %feature("docstring")  std::makeCollQuery "int makeCollQuery(int
-geom1, int geom2) ";
+geom1, int geom2)
+
+Creates a collision query object attachd to the two given geometries.
+For mesh-mesh collisions, on repeated calls, this may be somewhat
+faster than querying from scratch. ";
 
 %feature("docstring")  std::destroyCollQuery "void
-destroyCollQuery(int query) ";
+destroyCollQuery(int query)
+
+Deletes a collision query object. ";
 
 %feature("docstring")  std::queryCollide "bool queryCollide(int
-query) ";
+query)
+
+Checks if the two geoms associated with this query are colliding. ";
 
 %feature("docstring")  std::queryWithinTolerance "bool
-queryWithinTolerance(int query, double tol) ";
+queryWithinTolerance(int query, double tol)
+
+Checks if the two geoms associated with this query are within the
+given tolerance.
+
+See:   withinTolerance ";
 
 %feature("docstring")  std::queryDistance "double queryDistance(int
-query, double relErr, double absErr) ";
+query, double relErr, double absErr)
+
+Computes the distance betweeen the two geoms associated with this
+query.
+
+See:   distance ";
 
 %feature("docstring")  std::queryClosestPoints "void
-queryClosestPoints(int query, double p1[3], double p2[3]) ";
+queryClosestPoints(int query, double p1[3], double p2[3])
+
+Computes points that give rise to the closest distance betweeen the
+two geoms associated with this query.
+
+See:   closestPoints ";
 
 %feature("docstring")  std::queryTolerancePoints "void
-queryTolerancePoints(int query, double p1[3], double p2[3]) ";
+queryTolerancePoints(int query, double p1[3], double p2[3])
+
+If the two geoms associated with this query are within a given
+tolerance (from a previous queryWithinTolerance call), this produces
+the points on geom1 and geom2, respectively that are within that
+tolerance. ";
 
 %feature("docstring")  std::destroy "void destroy()
 
-destroys internal data structures
+Frees all memory allocated by the collide module. All existing
+geometry ids and collision query ids are invalidated.
 
-Performs cleanup of all created spaces and planners. ";
+Performs cleanup of all created spaces and planners.
+
+destroys internal data structures ";
 
 
 // File: collide_8h.xml
@@ -1610,95 +1769,204 @@ Performs cleanup of all created spaces and planners. ";
 
 %feature("docstring")  destroyGeom "void destroyGeom(int geom) ";
 
-%feature("docstring")  makeTriMeshGeom "void makeTriMeshGeom(int
-geom, const char *fn) ";
+%feature("docstring")  destroy "void destroy()
+
+Frees all memory allocated by the collide module. All existing
+geometry ids and collision query ids are invalidated. ";
+
+%feature("docstring")  loadGeom "bool loadGeom(int geom, const char
+*fn)
+
+Loads a geometry from a file. Sets it to the correct type based on the
+file contents.
+
+Currently supported file extensions are Trimeshes: .tri, any other
+mesh files that Assimp may support (if Klamp't is built using Assimp
+support).
+
+Point clouds: .pcd
+
+Primitive geometries: .geom
+
+Returns False if there is a load error. Raises an exception if the ID
+is invalid. ";
 
 %feature("docstring")  makeTriMeshGeom "void makeTriMeshGeom(int
-geom, const double *verts, const int *inds, int nv, int nt) ";
+geom, const char *fn)
+
+Makes a geometry into a trimesh loaded from the file fn. ";
+
+%feature("docstring")  makeTriMeshGeom "void makeTriMeshGeom(int
+geom, const double *verts, const int *inds, int nv, int nt)
+
+Makes a geometry into a trimesh given the vertex and index data. verts
+is of length nv*3, and inds is of length nt*3.
+
+Note: in Python, must use doubleArray and intArray for the verts and
+inds objects. ";
 
 %feature("docstring")  setTriMeshTranslation "void
-setTriMeshTranslation(int geom, const double t[3]) ";
+setTriMeshTranslation(int geom, const double t[3])
+
+Sets the translation of a trimesh geom. ";
 
 %feature("docstring")  setTriMeshRotation "void
-setTriMeshRotation(int geom, const double r[9]) ";
+setTriMeshRotation(int geom, const double r[9])
+
+Sets the rotation of a trimesh geom. ";
 
 %feature("docstring")  getTriMeshTranslation "void
-getTriMeshTranslation(int geom, double out[3]) ";
+getTriMeshTranslation(int geom, double out[3])
+
+Gets the translation of a trimesh geom. ";
 
 %feature("docstring")  getTriMeshRotation "void
-getTriMeshRotation(int geom, double out[9]) ";
+getTriMeshRotation(int geom, double out[9])
+
+Gets the rotation of a trimesh geom. ";
 
 %feature("docstring")  getTriMeshBB "void getTriMeshBB(int geom,
-double out[3], double out2[3]) ";
+double out[3], double out2[3])
+
+Gets the bounding box of a trimesh geom. ";
 
 %feature("docstring")  getTriMeshNumVerts "int getTriMeshNumVerts(int
-geom) ";
+geom)
+
+Gets the number of vertices of a trimesh geom. ";
 
 %feature("docstring")  getTriMeshNumTris "int getTriMeshNumTris(int
-geom) ";
+geom)
+
+Gets the number of triangles of a trimesh geom. ";
 
 %feature("docstring")  getTriMeshVerts "double* getTriMeshVerts(int
-geom) ";
+geom)
+
+Gets the vertex data of a trimesh geom (length nv*3). ";
 
 %feature("docstring")  getTriMeshTris "int* getTriMeshTris(int geom)
-";
+
+Gets the index data of a trimesh geom (length nt*3). ";
 
 %feature("docstring")  makePointGeom "void makePointGeom(int geom,
-const double x[3]) ";
+const double x[3])
+
+Makes a geom into a point x. ";
 
 %feature("docstring")  makeSphereGeom "void makeSphereGeom(int geom,
-const double c[3], double r) ";
+const double c[3], double r)
+
+Makes a geom into a sphere centered at c with radius r. ";
 
 %feature("docstring")  makeRayGeom "void makeRayGeom(int geom, const
-double s[3], const double d[3]) ";
+double s[3], const double d[3])
+
+Makes a geom into a ray with source s and direction d. ";
 
 %feature("docstring")  makeLineGeom "void makeLineGeom(int geom,
-const double s[3], const double d[3]) ";
+const double s[3], const double d[3])
+
+Makes a geom into a line with source s and direction d. ";
 
 %feature("docstring")  makeSegmentGeom "void makeSegmentGeom(int
-geom, const double a[3], const double b[3]) ";
+geom, const double a[3], const double b[3])
+
+Makes a geom into a segment with endpoints a, b. ";
 
 %feature("docstring")  makeAABBGeom "void makeAABBGeom(int geom,
-const double bmin[3], const double bmax[3]) ";
+const double bmin[3], const double bmax[3])
+
+Makes a geom into an axis-aligned bounding box with lower bound bmin
+and upper bound bmax. ";
 
 %feature("docstring")  makeGroupGeom "void makeGroupGeom(int geom,
-int *geoms, int numgeoms) ";
+int *geoms, int numgeoms)
 
-%feature("docstring")  collide "bool collide(int geom1, int geom2) ";
+Makes a geom into a group geom from an array of other geoms. Note: in
+Python, must use an intArray for geoms argument. ";
+
+%feature("docstring")  collide "bool collide(int geom1, int geom2)
+
+Tests whether the two geometries collide. ";
 
 %feature("docstring")  withinTolerance "bool withinTolerance(int
-geom1, int geom2, double tol) ";
+geom1, int geom2, double tol)
+
+Tests whether the two geometries are within the given tolerance. ";
 
 %feature("docstring")  distance "double distance(int geom1, int
-geom2, double relErr, double absErr) ";
+geom2, double relErr, double absErr)
+
+Returns the distance between the two geometries, possibly with an
+approximation error (useful to speed up mesh-mesh distance detection)
+
+Error of result is no more than D*relErr+absErr where D is the actual
+distance. Set relErr=absErr=0 to get exact distance.
+
+NOTE: Not yet implemented. ";
 
 %feature("docstring")  closestPoints "void closestPoints(int geom1,
-int geom2, double out[3], double out2[3]) ";
+int geom2, double out[3], double out2[3])
+
+Returns the closest points between the two geometries. These are given
+in world coordinates.
+
+NOTE: Not yet implemented. ";
 
 %feature("docstring")  rayCast "bool rayCast(int geom, const double
-s[3], const double d[3], double out[3]) ";
+s[3], const double d[3], double out[3])
+
+Returns true if the geometry is hit by the given ray, and also returns
+the hit point (in world coordinates). ";
 
 %feature("docstring")  makeCollQuery "int makeCollQuery(int geom1,
-int geom2) ";
+int geom2)
+
+Creates a collision query object attachd to the two given geometries.
+For mesh-mesh collisions, on repeated calls, this may be somewhat
+faster than querying from scratch. ";
 
 %feature("docstring")  destroyCollQuery "void destroyCollQuery(int
-query) ";
+query)
 
-%feature("docstring")  queryCollide "bool queryCollide(int query) ";
+Deletes a collision query object. ";
+
+%feature("docstring")  queryCollide "bool queryCollide(int query)
+
+Checks if the two geoms associated with this query are colliding. ";
 
 %feature("docstring")  queryWithinTolerance "bool
-queryWithinTolerance(int query, double tol) ";
+queryWithinTolerance(int query, double tol)
+
+Checks if the two geoms associated with this query are within the
+given tolerance.
+
+See:   withinTolerance ";
 
 %feature("docstring")  queryDistance "double queryDistance(int query,
-double relErr, double absErr) ";
+double relErr, double absErr)
+
+Computes the distance betweeen the two geoms associated with this
+query.
+
+See:   distance ";
 
 %feature("docstring")  queryClosestPoints "void
-queryClosestPoints(int query, double out[3], double out2[3]) ";
+queryClosestPoints(int query, double out[3], double out2[3])
+
+Computes points that give rise to the closest distance betweeen the
+two geoms associated with this query.
+
+See:   closestPoints ";
 
 %feature("docstring")  queryTolerancePoints "void
-queryTolerancePoints(int query, double out[3], double out2[3]) ";
+queryTolerancePoints(int query, double out[3], double out2[3])
 
-%feature("docstring")  destroy "void destroy() ";
+If the two geoms associated with this query are within a given
+tolerance (from a previous queryWithinTolerance call), this produces
+the points on geom1 and geom2, respectively that are within that
+tolerance. ";
 
 
 // File: motionplanning_8cpp.xml
@@ -1760,9 +2028,12 @@ used
 
 %feature("docstring")  destroy "void destroy()
 
-destroys internal data structures
+Frees all memory allocated by the collide module. All existing
+geometry ids and collision query ids are invalidated.
 
-Performs cleanup of all created spaces and planners. ";
+Performs cleanup of all created spaces and planners.
+
+destroys internal data structures ";
 
 
 // File: motionplanning_8h.xml
@@ -1806,7 +2077,11 @@ used
 
 %feature("docstring")  destroy "void destroy()
 
-Performs cleanup of all created spaces and planners. ";
+Performs cleanup of all created spaces and planners.
+
+Performs cleanup of all created spaces and planners.
+
+destroys internal data structures ";
 
 
 // File: robotik_8cpp.xml
@@ -1866,10 +2141,18 @@ MakeController(Robot *robot) ";
 *robot, RobotSensors &sensors) ";
 
 %feature("docstring")  GLDraw::GetMesh "void GetMesh(const
-Geometry::CollisionMesh &mesh, TriangleMesh &tmesh) ";
+Geometry::AnyCollisionGeometry3D &geom, TriangleMesh &tmesh) ";
 
 %feature("docstring")  GLDraw::GetMesh "void GetMesh(const
-TriangleMesh &tmesh, Geometry::CollisionMesh &mesh) ";
+TriangleMesh &tmesh, Geometry::AnyCollisionGeometry3D &geom) ";
+
+%feature("docstring")  GLDraw::GetPointCloud "void
+GetPointCloud(const Geometry::AnyCollisionGeometry3D &geom, PointCloud
+&pc) ";
+
+%feature("docstring")  GLDraw::GetPointCloud "void
+GetPointCloud(const PointCloud &pc, Geometry::AnyCollisionGeometry3D
+&geom) ";
 
 %feature("docstring")  GLDraw::copy "void copy(const Vector &vec,
 vector< double > &v) ";
@@ -1888,27 +2171,25 @@ vector< vector< double > > &v) ";
 
 
 // File: rootfind_8cpp.xml
-%feature("docstring")  PyPlanner::setFTolerance "void
-setFTolerance(double tolf)
+%feature("docstring")  setFTolerance "void setFTolerance(double tolf)
 
 Sets the termination threshold for the change in f. ";
 
-%feature("docstring")  PyPlanner::setXTolerance "void
-setXTolerance(double tolx)
+%feature("docstring")  setXTolerance "void setXTolerance(double tolx)
 
 Sets the termination threshold for the change in x. ";
 
-%feature("docstring")  PyPlanner::setVectorField "int
-setVectorField(PyObject *pVFObj)
+%feature("docstring")  setVectorField "int setVectorField(PyObject
+*pVFObj)
 
 Sets the vector field object, returns 0 if pVFObj = NULL, 1 otherwise.
 ";
 
-%feature("docstring")  PyPlanner::PyListFromVector "PyObject*
+%feature("docstring")  PyListFromVector "PyObject*
 PyListFromVector(const Vector &x) ";
 
-%feature("docstring")  PyPlanner::findRoots "PyObject*
-findRoots(PyObject *startVals, int iter)
+%feature("docstring")  findRoots "PyObject* findRoots(PyObject
+*startVals, int iter)
 
 Performs unconstrained root finding for up to iter iterations Return
 values is a tuple indicating (0,x,n) : convergence reached in x
@@ -1917,16 +2198,19 @@ degeneration of gradient (local extremum or saddle point) (4,x,n) :
 maximum iterations reached (5,x,n) : numerical error occurred where x
 is the final point and n is the number of iterations used ";
 
-%feature("docstring")  PyPlanner::findRootsBounded "PyObject*
+%feature("docstring")  findRootsBounded "PyObject*
 findRootsBounded(PyObject *startVals, PyObject *boundVals, int iter)
 
 Same as findRoots, but with given bounds (xmin,xmax) ";
 
-%feature("docstring")  PyPlanner::destroy "void destroy()
+%feature("docstring")  destroy "void destroy()
 
-destroys internal data structures
+Frees all memory allocated by the collide module. All existing
+geometry ids and collision query ids are invalidated.
 
-Performs cleanup of all created spaces and planners. ";
+Performs cleanup of all created spaces and planners.
+
+destroys internal data structures ";
 
 
 // File: rootfind_8h.xml
