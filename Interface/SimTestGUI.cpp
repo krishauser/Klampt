@@ -28,6 +28,7 @@ SimTestBackend::SimTestBackend(RobotWorld* world)
   settings["contact"]["pointSize"] = 5;
   settings["contact"]["normalLength"] = 0.05;
   settings["contact"]["forceScale"] = 0.01;
+  settings["dragForceMultiplier"] = 10.0;
 }
 
 void SimTestBackend::Start()
@@ -624,11 +625,11 @@ bool GLUISimTestGUI::Initialize()
   AddControl(save_movie_button,"");
   AddControl(glui->add_checkbox("Log simulation state"),"do_logging");
   GLUI_Panel* panel = glui->add_rollout("Input/output");
-  AddControl(glui->add_edittext_to_panel(panel,"File"),"load_file");
-  AddControl(glui->add_button_to_panel(panel,"Load"),"load_text");
+  AddControl(glui->add_edittext_to_panel(panel,"File"),"load_text");
+  AddControl(glui->add_button_to_panel(panel,"Load"),"load_file");
   AddControl(glui->add_button_to_panel(panel,"Save state"),"save_state");
 
-  AddControl(glui->add_checkbox_to_panel(panel,"Force application mode"),"force_application_mode");
+  AddControl(glui->add_checkbox("Force application mode"),"force_application_mode");
   GLUI_Checkbox* checkbox = glui->add_checkbox("Draw poser");
   checkbox->set_int_val(1);
   AddControl(checkbox,"draw_poser");
