@@ -39,6 +39,7 @@ class StandardInputProcessor : public InputProcessorBase
 {
  public:
   StandardInputProcessor();
+  virtual ~StandardInputProcessor() {}
   virtual void Activate(bool enabled);
   virtual bool HasUpdate() { return changed; }
   virtual void Hover(int mx,int my);
@@ -93,6 +94,7 @@ class SerializedObjectiveProcessor : public InputProcessorBase
 {
  public:
   SerializedObjectiveProcessor(AsyncReaderThread* reader=NULL);
+  virtual ~SerializedObjectiveProcessor() {}
   virtual void Activate(bool enabled);
   virtual bool HasUpdate();
   virtual PlannerObjectiveBase* MakeObjective(Robot* robot);
@@ -111,6 +113,7 @@ class SocketObjectiveProcessor : public SerializedObjectiveProcessor
   SocketObjectiveProcessor(const char* addr) 
     :SerializedObjectiveProcessor(&socketReader),socketReader(addr)
     {}
+  virtual ~SocketObjectiveProcessor() {}
   SocketReadWorker socketReader;
 };
 
