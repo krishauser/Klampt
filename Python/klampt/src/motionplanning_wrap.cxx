@@ -4447,35 +4447,182 @@ SWIGINTERN PyObject *PlannerInterface_swigregister(PyObject *SWIGUNUSEDPARM(self
 
 static PyMethodDef SwigMethods[] = {
 	 { (char *)"SWIG_PyInstanceMethod_New", (PyCFunction)SWIG_PyInstanceMethod_New, METH_O, NULL},
-	 { (char *)"setRandomSeed", _wrap_setRandomSeed, METH_VARARGS, NULL},
-	 { (char *)"setPlanType", _wrap_setPlanType, METH_VARARGS, NULL},
-	 { (char *)"setPlanSetting", _wrap_setPlanSetting, METH_VARARGS, NULL},
-	 { (char *)"destroy", _wrap_destroy, METH_VARARGS, NULL},
-	 { (char *)"new_CSpaceInterface", _wrap_new_CSpaceInterface, METH_VARARGS, NULL},
-	 { (char *)"delete_CSpaceInterface", _wrap_delete_CSpaceInterface, METH_VARARGS, NULL},
-	 { (char *)"CSpaceInterface_destroy", _wrap_CSpaceInterface_destroy, METH_VARARGS, NULL},
-	 { (char *)"CSpaceInterface_setFeasibility", _wrap_CSpaceInterface_setFeasibility, METH_VARARGS, NULL},
-	 { (char *)"CSpaceInterface_setVisibility", _wrap_CSpaceInterface_setVisibility, METH_VARARGS, NULL},
-	 { (char *)"CSpaceInterface_setVisibilityEpsilon", _wrap_CSpaceInterface_setVisibilityEpsilon, METH_VARARGS, NULL},
-	 { (char *)"CSpaceInterface_setSampler", _wrap_CSpaceInterface_setSampler, METH_VARARGS, NULL},
-	 { (char *)"CSpaceInterface_setNeighborhoodSampler", _wrap_CSpaceInterface_setNeighborhoodSampler, METH_VARARGS, NULL},
-	 { (char *)"CSpaceInterface_setDistance", _wrap_CSpaceInterface_setDistance, METH_VARARGS, NULL},
-	 { (char *)"CSpaceInterface_setInterpolate", _wrap_CSpaceInterface_setInterpolate, METH_VARARGS, NULL},
-	 { (char *)"CSpaceInterface_index_set", _wrap_CSpaceInterface_index_set, METH_VARARGS, NULL},
-	 { (char *)"CSpaceInterface_index_get", _wrap_CSpaceInterface_index_get, METH_VARARGS, NULL},
+	 { (char *)"setRandomSeed", _wrap_setRandomSeed, METH_VARARGS, (char *)"\n"
+		"setRandomSeed(int seed)\n"
+		"\n"
+		"void setRandomSeed(int seed)\n"
+		"\n"
+		"Sets the random seed used by the motion planner. \n"
+		""},
+	 { (char *)"setPlanType", _wrap_setPlanType, METH_VARARGS, (char *)"\n"
+		"setPlanType(char const * type)\n"
+		"\n"
+		"void setPlanType(const char\n"
+		"*type)\n"
+		"\n"
+		"Sets the planner type.\n"
+		"\n"
+		"Valid values are \"prm\": Probabilistic roadmap\n"
+		"\n"
+		"\"rrt\": Rapidly-exploring Random Trees\n"
+		"\n"
+		"\"sbl\": The SBL (single-query, bidirectional, lazy) planner \n"
+		""},
+	 { (char *)"setPlanSetting", _wrap_setPlanSetting, METH_VARARGS, (char *)"\n"
+		"setPlanSetting(char const * setting, double value)\n"
+		"\n"
+		"void setPlanSetting(const char\n"
+		"*setting, double value)\n"
+		"\n"
+		"Sets a setting for the planner.\n"
+		"\n"
+		"Valid values are \"knn\": k value for the k-nearest neighbor\n"
+		"connection strategy (only for PRM)\n"
+		"\n"
+		"\"connectionThreshold\": a milestone connection threshold\n"
+		"\n"
+		"\"perturbationRadius\": (only for RRT and SBL)\n"
+		"\n"
+		"\"bidirectional\": 1 if bidirectional planning is requested (only for\n"
+		"RRT)\n"
+		"\n"
+		"\"grid\": 1 if a point selection grid should be used (only for SBL)\n"
+		"\n"
+		"\"gridResolution\": resolution for the grid, if the grid should be\n"
+		"used\n"
+		"\n"
+		"\"randomizeFrequency\": a grid randomization frequency (only for SBL)\n"
+		"\n"
+		""},
+	 { (char *)"destroy", _wrap_destroy, METH_VARARGS, (char *)"\n"
+		"destroy()\n"
+		"\n"
+		"void destroy()\n"
+		"\n"
+		"destroys internal data structures \n"
+		""},
+	 { (char *)"new_CSpaceInterface", _wrap_new_CSpaceInterface, METH_VARARGS, (char *)"\n"
+		"CSpaceInterface()\n"
+		"new_CSpaceInterface(CSpaceInterface arg1) -> CSpaceInterface\n"
+		"\n"
+		"CSpaceInterface::CSpaceInterface(const CSpaceInterface &) \n"
+		""},
+	 { (char *)"delete_CSpaceInterface", _wrap_delete_CSpaceInterface, METH_VARARGS, (char *)"\n"
+		"delete_CSpaceInterface(CSpaceInterface self)\n"
+		"\n"
+		"CSpaceInterface::~CSpaceInterface() \n"
+		""},
+	 { (char *)"CSpaceInterface_destroy", _wrap_CSpaceInterface_destroy, METH_VARARGS, (char *)"\n"
+		"CSpaceInterface_destroy(CSpaceInterface self)\n"
+		"\n"
+		"void\n"
+		"CSpaceInterface::destroy() \n"
+		""},
+	 { (char *)"CSpaceInterface_setFeasibility", _wrap_CSpaceInterface_setFeasibility, METH_VARARGS, (char *)"\n"
+		"CSpaceInterface_setFeasibility(CSpaceInterface self, PyObject * pyFeas)\n"
+		"\n"
+		"void\n"
+		"CSpaceInterface::setFeasibility(PyObject *pyFeas) \n"
+		""},
+	 { (char *)"CSpaceInterface_setVisibility", _wrap_CSpaceInterface_setVisibility, METH_VARARGS, (char *)"\n"
+		"CSpaceInterface_setVisibility(CSpaceInterface self, PyObject * pyVisible)\n"
+		"\n"
+		"void\n"
+		"CSpaceInterface::setVisibility(PyObject *pyVisible) \n"
+		""},
+	 { (char *)"CSpaceInterface_setVisibilityEpsilon", _wrap_CSpaceInterface_setVisibilityEpsilon, METH_VARARGS, (char *)"\n"
+		"CSpaceInterface_setVisibilityEpsilon(CSpaceInterface self, double eps)\n"
+		"\n"
+		"void\n"
+		"CSpaceInterface::setVisibilityEpsilon(double eps) \n"
+		""},
+	 { (char *)"CSpaceInterface_setSampler", _wrap_CSpaceInterface_setSampler, METH_VARARGS, (char *)"\n"
+		"CSpaceInterface_setSampler(CSpaceInterface self, PyObject * pySamp)\n"
+		"\n"
+		"void\n"
+		"CSpaceInterface::setSampler(PyObject *pySamp) \n"
+		""},
+	 { (char *)"CSpaceInterface_setNeighborhoodSampler", _wrap_CSpaceInterface_setNeighborhoodSampler, METH_VARARGS, (char *)"\n"
+		"CSpaceInterface_setNeighborhoodSampler(CSpaceInterface self, PyObject * pySamp)\n"
+		"\n"
+		"void\n"
+		"CSpaceInterface::setNeighborhoodSampler(PyObject *pySamp) \n"
+		""},
+	 { (char *)"CSpaceInterface_setDistance", _wrap_CSpaceInterface_setDistance, METH_VARARGS, (char *)"\n"
+		"CSpaceInterface_setDistance(CSpaceInterface self, PyObject * pyDist)\n"
+		"\n"
+		"void\n"
+		"CSpaceInterface::setDistance(PyObject *pyDist) \n"
+		""},
+	 { (char *)"CSpaceInterface_setInterpolate", _wrap_CSpaceInterface_setInterpolate, METH_VARARGS, (char *)"\n"
+		"CSpaceInterface_setInterpolate(CSpaceInterface self, PyObject * pyInterp)\n"
+		"\n"
+		"void\n"
+		"CSpaceInterface::setInterpolate(PyObject *pyInterp) \n"
+		""},
+	 { (char *)"CSpaceInterface_index_set", _wrap_CSpaceInterface_index_set, METH_VARARGS, (char *)"CSpaceInterface_index_set(CSpaceInterface self, int index)"},
+	 { (char *)"CSpaceInterface_index_get", _wrap_CSpaceInterface_index_get, METH_VARARGS, (char *)"CSpaceInterface_index_get(CSpaceInterface self) -> int"},
 	 { (char *)"CSpaceInterface_swigregister", CSpaceInterface_swigregister, METH_VARARGS, NULL},
-	 { (char *)"new_PlannerInterface", _wrap_new_PlannerInterface, METH_VARARGS, NULL},
-	 { (char *)"delete_PlannerInterface", _wrap_delete_PlannerInterface, METH_VARARGS, NULL},
-	 { (char *)"PlannerInterface_destroy", _wrap_PlannerInterface_destroy, METH_VARARGS, NULL},
-	 { (char *)"PlannerInterface_setEndpoints", _wrap_PlannerInterface_setEndpoints, METH_VARARGS, NULL},
-	 { (char *)"PlannerInterface_addMilestone", _wrap_PlannerInterface_addMilestone, METH_VARARGS, NULL},
-	 { (char *)"PlannerInterface_planMore", _wrap_PlannerInterface_planMore, METH_VARARGS, NULL},
-	 { (char *)"PlannerInterface_getPathEndpoints", _wrap_PlannerInterface_getPathEndpoints, METH_VARARGS, NULL},
-	 { (char *)"PlannerInterface_getPath", _wrap_PlannerInterface_getPath, METH_VARARGS, NULL},
-	 { (char *)"PlannerInterface_getData", _wrap_PlannerInterface_getData, METH_VARARGS, NULL},
-	 { (char *)"PlannerInterface_dump", _wrap_PlannerInterface_dump, METH_VARARGS, NULL},
-	 { (char *)"PlannerInterface_index_set", _wrap_PlannerInterface_index_set, METH_VARARGS, NULL},
-	 { (char *)"PlannerInterface_index_get", _wrap_PlannerInterface_index_get, METH_VARARGS, NULL},
+	 { (char *)"new_PlannerInterface", _wrap_new_PlannerInterface, METH_VARARGS, (char *)"\n"
+		"new_PlannerInterface(CSpaceInterface cspace) -> PlannerInterface\n"
+		"\n"
+		"PlannerInterface::PlannerInterface(const CSpaceInterface &cspace) \n"
+		""},
+	 { (char *)"delete_PlannerInterface", _wrap_delete_PlannerInterface, METH_VARARGS, (char *)"\n"
+		"delete_PlannerInterface(PlannerInterface self)\n"
+		"\n"
+		"PlannerInterface::~PlannerInterface() \n"
+		""},
+	 { (char *)"PlannerInterface_destroy", _wrap_PlannerInterface_destroy, METH_VARARGS, (char *)"\n"
+		"PlannerInterface_destroy(PlannerInterface self)\n"
+		"\n"
+		"void\n"
+		"PlannerInterface::destroy() \n"
+		""},
+	 { (char *)"PlannerInterface_setEndpoints", _wrap_PlannerInterface_setEndpoints, METH_VARARGS, (char *)"\n"
+		"PlannerInterface_setEndpoints(PlannerInterface self, PyObject * start, PyObject * goal) -> bool\n"
+		"\n"
+		"bool\n"
+		"PlannerInterface::setEndpoints(PyObject *start, PyObject *goal) \n"
+		""},
+	 { (char *)"PlannerInterface_addMilestone", _wrap_PlannerInterface_addMilestone, METH_VARARGS, (char *)"\n"
+		"PlannerInterface_addMilestone(PlannerInterface self, PyObject * milestone) -> int\n"
+		"\n"
+		"int\n"
+		"PlannerInterface::addMilestone(PyObject *milestone) \n"
+		""},
+	 { (char *)"PlannerInterface_planMore", _wrap_PlannerInterface_planMore, METH_VARARGS, (char *)"\n"
+		"PlannerInterface_planMore(PlannerInterface self, int iterations)\n"
+		"\n"
+		"void\n"
+		"PlannerInterface::planMore(int iterations) \n"
+		""},
+	 { (char *)"PlannerInterface_getPathEndpoints", _wrap_PlannerInterface_getPathEndpoints, METH_VARARGS, (char *)"\n"
+		"PlannerInterface_getPathEndpoints(PlannerInterface self) -> PyObject *\n"
+		"\n"
+		"PyObject *\n"
+		"PlannerInterface::getPathEndpoints() \n"
+		""},
+	 { (char *)"PlannerInterface_getPath", _wrap_PlannerInterface_getPath, METH_VARARGS, (char *)"\n"
+		"PlannerInterface_getPath(PlannerInterface self, int milestone1, int milestone2) -> PyObject *\n"
+		"\n"
+		"PyObject *\n"
+		"PlannerInterface::getPath(int milestone1, int milestone2) \n"
+		""},
+	 { (char *)"PlannerInterface_getData", _wrap_PlannerInterface_getData, METH_VARARGS, (char *)"\n"
+		"PlannerInterface_getData(PlannerInterface self, char const * setting) -> double\n"
+		"\n"
+		"double\n"
+		"PlannerInterface::getData(const char *setting) \n"
+		""},
+	 { (char *)"PlannerInterface_dump", _wrap_PlannerInterface_dump, METH_VARARGS, (char *)"\n"
+		"PlannerInterface_dump(PlannerInterface self, char const * fn)\n"
+		"\n"
+		"void\n"
+		"PlannerInterface::dump(const char *fn) \n"
+		""},
+	 { (char *)"PlannerInterface_index_set", _wrap_PlannerInterface_index_set, METH_VARARGS, (char *)"PlannerInterface_index_set(PlannerInterface self, int index)"},
+	 { (char *)"PlannerInterface_index_get", _wrap_PlannerInterface_index_get, METH_VARARGS, (char *)"PlannerInterface_index_get(PlannerInterface self) -> int"},
 	 { (char *)"PlannerInterface_swigregister", PlannerInterface_swigregister, METH_VARARGS, NULL},
 	 { NULL, NULL, 0, NULL }
 };

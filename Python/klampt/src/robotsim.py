@@ -438,18 +438,36 @@ TriangleMesh_swigregister = _robotsim.TriangleMesh_swigregister
 TriangleMesh_swigregister(TriangleMesh)
 
 class PointCloud(_object):
-    """Proxy of C++ PointCloud class"""
+    """
+    A 3D point cloud class. vertices is a list of vertices, given as a
+    list [x1, y1, z1, x2, y2, ... zn] properties is a list of vertex
+    properties, given as a list [p11, p21, ..., pk1, p12, p22, ..., pk2,
+    ... , pn1, pn2, ..., pn2] where each vertex has k properties. The name
+    of each property is given by the propertyNames member.
+
+    C++ includes: robotmodel.h 
+    """
     __swig_setmethods__ = {}
     __setattr__ = lambda self, name, value: _swig_setattr(self, PointCloud, name, value)
     __swig_getmethods__ = {}
     __getattr__ = lambda self, name: _swig_getattr(self, PointCloud, name)
     __repr__ = _swig_repr
     def translate(self, *args):
-        """translate(PointCloud self, double const [3] t)"""
+        """
+        translate(PointCloud self, double const [3] t)
+
+        void
+        PointCloud::translate(const double t[3]) 
+        """
         return _robotsim.PointCloud_translate(self, *args)
 
     def transform(self, *args):
-        """transform(PointCloud self, double const [9] R, double const [3] t)"""
+        """
+        transform(PointCloud self, double const [9] R, double const [3] t)
+
+        void
+        PointCloud::transform(const double R[9], const double t[3]) 
+        """
         return _robotsim.PointCloud_transform(self, *args)
 
     __swig_setmethods__["vertices"] = _robotsim.PointCloud_vertices_set
@@ -462,7 +480,17 @@ class PointCloud(_object):
     __swig_getmethods__["properties"] = _robotsim.PointCloud_properties_get
     if _newclass:properties = _swig_property(_robotsim.PointCloud_properties_get, _robotsim.PointCloud_properties_set)
     def __init__(self): 
-        """__init__(PointCloud self) -> PointCloud"""
+        """
+        __init__(PointCloud self) -> PointCloud
+
+        A 3D point cloud class. vertices is a list of vertices, given as a
+        list [x1, y1, z1, x2, y2, ... zn] properties is a list of vertex
+        properties, given as a list [p11, p21, ..., pk1, p12, p22, ..., pk2,
+        ... , pn1, pn2, ..., pn2] where each vertex has k properties. The name
+        of each property is given by the propertyNames member.
+
+        C++ includes: robotmodel.h 
+        """
         this = _robotsim.new_PointCloud()
         try: self.this.append(this)
         except: self.this = this
@@ -472,51 +500,103 @@ PointCloud_swigregister = _robotsim.PointCloud_swigregister
 PointCloud_swigregister(PointCloud)
 
 class Geometry3D(_object):
-    """Proxy of C++ Geometry3D class"""
+    """
+    A reference to a world item's three-D geometry.
+
+    C++ includes: robotmodel.h 
+    """
     __swig_setmethods__ = {}
     __setattr__ = lambda self, name, value: _swig_setattr(self, Geometry3D, name, value)
     __swig_getmethods__ = {}
     __getattr__ = lambda self, name: _swig_getattr(self, Geometry3D, name)
     __repr__ = _swig_repr
     def __init__(self): 
-        """__init__(Geometry3D self) -> Geometry3D"""
+        """
+        __init__(Geometry3D self) -> Geometry3D
+
+        Geometry3D::Geometry3D() 
+        """
         this = _robotsim.new_Geometry3D()
         try: self.this.append(this)
         except: self.this = this
     def type(self):
-        """type(Geometry3D self) -> std::string"""
+        """
+        type(Geometry3D self) -> std::string
+
+        string Geometry3D::type() 
+        """
         return _robotsim.Geometry3D_type(self)
 
     def getTriangleMesh(self):
-        """getTriangleMesh(Geometry3D self) -> TriangleMesh"""
+        """
+        getTriangleMesh(Geometry3D self) -> TriangleMesh
+
+        TriangleMesh
+        Geometry3D::getTriangleMesh() 
+        """
         return _robotsim.Geometry3D_getTriangleMesh(self)
 
     def getPointCloud(self):
-        """getPointCloud(Geometry3D self) -> PointCloud"""
+        """
+        getPointCloud(Geometry3D self) -> PointCloud
+
+        PointCloud
+        Geometry3D::getPointCloud() 
+        """
         return _robotsim.Geometry3D_getPointCloud(self)
 
     def setTriangleMesh(self, *args):
-        """setTriangleMesh(Geometry3D self, TriangleMesh arg2)"""
+        """
+        setTriangleMesh(Geometry3D self, TriangleMesh arg2)
+
+        void
+        Geometry3D::setTriangleMesh(const TriangleMesh &) 
+        """
         return _robotsim.Geometry3D_setTriangleMesh(self, *args)
 
     def setPointCloud(self, *args):
-        """setPointCloud(Geometry3D self, PointCloud arg2)"""
+        """
+        setPointCloud(Geometry3D self, PointCloud arg2)
+
+        void
+        Geometry3D::setPointCloud(const PointCloud &) 
+        """
         return _robotsim.Geometry3D_setPointCloud(self, *args)
 
     def translate(self, *args):
-        """translate(Geometry3D self, double const [3] t)"""
+        """
+        translate(Geometry3D self, double const [3] t)
+
+        void
+        Geometry3D::translate(const double t[3]) 
+        """
         return _robotsim.Geometry3D_translate(self, *args)
 
     def transform(self, *args):
-        """transform(Geometry3D self, double const [9] R, double const [3] t)"""
+        """
+        transform(Geometry3D self, double const [9] R, double const [3] t)
+
+        void
+        Geometry3D::transform(const double R[9], const double t[3]) 
+        """
         return _robotsim.Geometry3D_transform(self, *args)
 
     def setCollisionMargin(self, *args):
-        """setCollisionMargin(Geometry3D self, double margin)"""
+        """
+        setCollisionMargin(Geometry3D self, double margin)
+
+        void
+        Geometry3D::setCollisionMargin(double margin) 
+        """
         return _robotsim.Geometry3D_setCollisionMargin(self, *args)
 
     def getCollisionMargin(self):
-        """getCollisionMargin(Geometry3D self) -> double"""
+        """
+        getCollisionMargin(Geometry3D self) -> double
+
+        double
+        Geometry3D::getCollisionMargin() 
+        """
         return _robotsim.Geometry3D_getCollisionMargin(self)
 
     __swig_setmethods__["world"] = _robotsim.Geometry3D_world_set
@@ -628,7 +708,12 @@ class RobotModelLink(_object):
         return _robotsim.RobotModelLink_setParent(self, *args)
 
     def getGeometry(self):
-        """getGeometry(RobotModelLink self) -> Geometry3D"""
+        """
+        getGeometry(RobotModelLink self) -> Geometry3D
+
+        Geometry3D
+        RobotModelLink::getGeometry() 
+        """
         return _robotsim.RobotModelLink_getGeometry(self)
 
     def getMass(self):
@@ -1253,7 +1338,12 @@ class RigidObjectModel(_object):
         return _robotsim.RigidObjectModel_getName(self)
 
     def getGeometry(self):
-        """getGeometry(RigidObjectModel self) -> Geometry3D"""
+        """
+        getGeometry(RigidObjectModel self) -> Geometry3D
+
+        Geometry3D
+        RigidObjectModel::getGeometry() 
+        """
         return _robotsim.RigidObjectModel_getGeometry(self)
 
     def getMass(self):
@@ -1374,7 +1464,12 @@ class TerrainModel(_object):
         return _robotsim.TerrainModel_getName(self)
 
     def getGeometry(self):
-        """getGeometry(TerrainModel self) -> Geometry3D"""
+        """
+        getGeometry(TerrainModel self) -> Geometry3D
+
+        Geometry3D
+        TerrainModel::getGeometry() 
+        """
         return _robotsim.TerrainModel_getGeometry(self)
 
     def setFriction(self, *args):
@@ -2435,9 +2530,10 @@ class SimRobotController(_object):
 
         void
         SimRobotController::setPIDCommand(const std::vector< double > &qdes,
-        const std::vector< double > &dqdes)
+        const std::vector< double > &dqdes, const std::vector< double >
+        &tfeedforward)
 
-        Sets a PID command controller. 
+        Sets a PID command controller with feedforward torques. 
         """
         return _robotsim.SimRobotController_setPIDCommand(self, *args)
 
