@@ -45,7 +45,7 @@ public:
   GLUI* glui;
   GLUI_Listbox* ui_listbox;
 
-  int drawDesired,drawPath,drawUI,drawContacts;
+  int drawCommanded,drawDesired,drawPath,drawUI,drawContacts;
 
   SafeSerialProgram(RobotWorld* world)
     :SimViewProgram(world),/*context(1),*/robotInterface(&sim)
@@ -83,6 +83,7 @@ public:
 
   virtual bool Initialize()
   {
+    drawCommanded = 0;
     drawDesired = 1;
     drawPath = 0;
     drawUI = 1;
@@ -121,6 +122,7 @@ public:
       ui_listbox->add_item(i,buf);
     }
 
+    glui->add_checkbox("Draw commanded",&drawCommanded);
     glui->add_checkbox("Draw desired",&drawDesired);
     glui->add_checkbox("Draw UI",&drawUI);
     glui->add_checkbox("Draw path",&drawPath);
@@ -138,12 +140,14 @@ public:
     SimViewProgram::RenderWorld();
 
     //draw current commanded configuration -- transparent
-    GLColor newColor(0,1,0,0.5);
-    world->robots[0].view.SetColors(newColor);
-    Config q;
-    sim.controlSimulators[0].GetCommandedConfig(q);
-    robot->UpdateConfig(q);
-    world->robots[0].view.Draw();
+    if(drawCommanded) {
+      GLColor newColor(0,1,0,0.5);
+      world->robots[0].view.SetColors(newColor);
+      Config q;
+      sim.controlSimulators[0].GetCommandedConfig(q);
+      robot->UpdateConfig(q);
+      world->robots[0].view.Draw();
+    }
 
     if(drawDesired) {
       Config curBest;
@@ -151,36 +155,30 @@ public:
       robot->UpdateConfig(curBest); 
       world->robots[0].view.SetColors(GLColor(1,1,0,0.5));
       world->robots[0].view.Draw();
-      /*
-      if(curGoal) {
-	glPointSize(5.0);
-	glDisable(GL_LIGHTING);
-	glColor3f(1,1,0);
-	glBegin(GL_POINTS);
-	glVertex3v(curGoal->ikGoal.endPosition);
-	glEnd();
 
-	//draw end effector path
-	glColor3f(1,0.5,0);
-	glBegin(GL_LINE_STRIP);
-	for(Real t=c->pathParameter;t<c->ramp.endTime;t+=0.05) {
-	  c->ramp.Evaluate(t,robot->q);
-	  robot->UpdateFrames();
-	  glVertex3v(robot->links[curGoal->ikGoal.link].T_World*curGoal->ikGoal.localPosition);
-	}
-	for(size_t i=0;i<c->path.ramps.size();i++) {
-	  for(Real t=0;t<c->path.ramps[i].endTime;t+=0.05) {
-	    c->path.ramps[i].Evaluate(t,robot->q);
-	    robot->UpdateFrames();
-	    glVertex3v(robot->links[curGoal->ikGoal.link].T_World*curGoal->ikGoal.localPosition);
-	  }
-	}
-	glEnd();
-	glEnable(GL_LIGHTING);
+      Real tstart = robotInterface.GetCurTime();
+      Real tend = robotInterface.GetEndTime();
+      Real dt = 0.05;
+      //draw end effector path
+      glColor3f(1,1,0);
+      glLineWidth(2.0);
+      glBegin(GL_LINES);
+      int istart=(int)Ceil(tstart/dt);
+      int iend=(int)Ceil(tend/dt);
+      for(int i=istart;i<iend;i++) {
+	Real t1=i*dt;
+	Real t2=t2+0.5*dt;
+	robotInterface.GetConfig(t1,robot->q);
+	robot->UpdateFrames();
+	glVertex3v(robot->links.back().T_World.t);
+	robotInterface.GetConfig(t2,robot->q);
+	robot->UpdateFrames();
+	glVertex3v(robot->links.back().T_World.t);
       }
-      */
+      glEnd();
     }
     if(drawUI) {
+      cout<<"DrawUI"<<endl;
       uis[currentUI]->DrawGL();
     }
 
