@@ -21,4 +21,8 @@
 	}
 }
 
+
+%feature("autodoc","1");
+%include "docs/docs.i"
+
 %include "motionplanning.h"

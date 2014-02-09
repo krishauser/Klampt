@@ -8,7 +8,8 @@
 %array_class(double, doubleArray);
 %array_class(int, intArray);
 
-%feature("autodoc", "1");
+%feature("autodoc","1");
+%include "docs/docs.i"
 
 %exception {
 	try {
