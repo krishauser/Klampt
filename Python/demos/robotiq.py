@@ -1,6 +1,39 @@
+"""Modules for emulating the RobotiQ 3-finger Adaptive Gripper in a simulation.
+
+The gripper is underactuated, with one motor per finger, so the individual
+links cannot be addressed directly.  Instead there is a complex, nonlinear
+relationship between motor command and link positions, which also depends on
+object collisions.
+
+The Emulator class provides functionality for simulating this complex behavior
+in Klampt.  It assumes objects do not roll or slide while touched.
+
+Not yet supported:
+- Finger contact state (1,1,0) (where each entry is 1 if the corresponding
+link is touched and 0 otherwise).
+- Scissor joint speed limiting, force limiting.
+
+Authors: Giulia Franchi, Kris Hauser
+
+"""
+
 import math
 
-def mymodel(th1,th2, th3, g, gob, in_contact):
+def quasistatic_model(th1,th2, th3, g, gob, in_contact):
+    """Returns the equilibrium configuration of a finger in contact.
+    Input:
+    - th1,th2,th3: proximal, medial, distal finger joint angles (in degrees)
+    - g: the command of the motor, in the range [0,255]
+    - gob: a collision angle of the proximal link 
+    - in_contact: a flag indicating whether the proximal link is in contact
+    Output:
+    - The resulting joint angles (th1,th2,th3)
+
+    TODO Giulia:
+    - Does not yet work with link 1 + link 2 contact.
+    - There seems to be a discontinuity on link 2, this should be investigated
+      and fixed.
+    """
     #g = int(raw_input("introdurre il valore di g: "))
     #gob = int(raw_input("introdurre il valore di gob: "))
 
@@ -111,6 +144,12 @@ def mymodel(th1,th2, th3, g, gob, in_contact):
     return th1, th2, th3
 
 class FingerEmulator:
+    """Emulates the behavior of a single finger, including speed, force
+    commands.
+
+    The motor stopping behavior is defined by the errorDeadband and kP values.
+    This isn't perfect but it gives some reasonably plausible behavior.
+    """
     def __init__(self):
         self.g = 0
         self.gobs = None
@@ -155,7 +194,7 @@ class FingerEmulator:
                 self.gobs = None
             #TODO: this doesn't work when link 1 and link 2 are in collision
             #and link 2 separates
-            return mymodel(q[0],q[1],q[2],self.g,self.gobs,trigger_gobs)
+            return quasistatic_model(q[0],q[1],q[2],self.g,self.gobs,trigger_gobs)
         else:
             #closing motion
             if self.gstop != None:
@@ -174,10 +213,15 @@ class FingerEmulator:
                 print "stopping finger"
                 self.gstop = self.g
                 return q
-            return mymodel(q[0],q[1],q[2],self.g,self.gobs,trigger_gobs)
+            return quasistatic_model(q[0],q[1],q[2],self.g,self.gobs,trigger_gobs)
 
 
 class Emulator:
+    """An emulator of the whole RobotiQ 3-finger hand in a Klamp't simulator.
+
+    It is based on the assumption that when an object is touched, it stays
+    in a fixed location.
+    """
     def __init__(self,sim,robotIndex = 0, handLinkIndex = 0):
         self.sim = sim
         # if you don't enable contact feedback, the contact feedback will not be
