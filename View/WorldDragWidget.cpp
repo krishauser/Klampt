@@ -57,6 +57,8 @@ bool WorldDragWidget::Hover(int x,int y,Camera::Viewport& viewport,double& dista
 bool WorldDragWidget::BeginDrag(int x,int y,Camera::Viewport& viewport,double& distance)
 {
   if(!Hover(x,y,viewport,distance)) return false;
+  dragging = true;
+  dragPt = hoverPt;
   return true;
 }
 
