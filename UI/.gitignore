@@ -1,0 +1,6 @@
+*.txt
+*.mpg
+*.ppm
+SimTest
+Makefile
+Simtest.pro.user
