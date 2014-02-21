@@ -33,7 +33,7 @@ class RobotUserInterface
   virtual string Name() const { return "Unnamed"; }
   virtual string Description() const { return "Unnamed"; }
   virtual string Instructions() const { return ""; }
-  virtual void DrawGL() {}
+  virtual void DrawGL() { }
   //
   //The following callbacks are called respectively upon
   //activation/deactivation;
