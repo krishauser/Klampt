@@ -57,6 +57,11 @@ void SimRobotInterface::GetEndVelocity(Config& dx)
   dx=GetController(sim->robotControllers[index])->EndpointVelocity();
 }
 
+void SimRobotInterface::GetConfig(Real t,Config& x)
+{
+  GetController(sim->robotControllers[index])->Eval(t - sim->time,x);
+}
+
 MotionQueueInterface::MotionResult SimRobotInterface::SendMilestone(const Config& x)
 {
   GetController(sim->robotControllers[index])->AppendRamp(x);
