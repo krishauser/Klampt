@@ -8,6 +8,9 @@
 
 /** @brief An abstract base class for processing user input through a 2D
  * mouse driven gui into PlannerObjectives used for planning.
+ *
+ * If a new objective is available, return true in HasUpdate(), and
+ * MakeObjective should return a new PlannerObjectiveBase object.
  */
 class InputProcessorBase
 {
