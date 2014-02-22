@@ -34,6 +34,7 @@ bool WorldDragWidget::Hover(int x,int y,Camera::Viewport& viewport,double& dista
       const Geometry::AnyCollisionGeometry3D& geom = world->GetGeometry(hoverID);
       Vector3 worldpt = geom.GetTransform()*localpt;
       bestD = worldpt.distance(r.source);
+      dragPt = worldpt;
     }
   }
   if(objectsActive) {
@@ -46,6 +47,7 @@ bool WorldDragWidget::Hover(int x,int y,Camera::Viewport& viewport,double& dista
 	bestD = d;
 	hoverPt = localpt;
 	hoverID = world->RigidObjectID(obj-&world->rigidObjects[0]);
+	dragPt = worldpt;
       }
     }
   }
@@ -58,7 +60,6 @@ bool WorldDragWidget::BeginDrag(int x,int y,Camera::Viewport& viewport,double& d
 {
   if(!Hover(x,y,viewport,distance)) return false;
   dragging = true;
-  dragPt = hoverPt;
   return true;
 }
 
@@ -76,7 +77,8 @@ void WorldDragWidget::EndDrag()
 
 void WorldDragWidget::DrawGL(Camera::Viewport& viewport)
 {
-  if(hasHighlight || hasFocus) {
+  if(hoverID < 0) return;
+  if(hasHighlight || hasFocus ) {
     world->GetAppearance(hoverID).faceColor.blend(world->GetAppearance(hoverID).faceColor,highlightColor,highlightColor.rgba[3]);
   }
   if(hasFocus) {
@@ -88,5 +90,6 @@ void WorldDragWidget::DrawGL(Camera::Viewport& viewport)
     glVertex3v(geom.GetTransform()*hoverPt);
     glVertex3v(dragPt);
     glEnd();
+    glLineWidth(1);
   }
 }
