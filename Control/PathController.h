@@ -91,7 +91,7 @@ class MilestonePathController : public JointTrackingController
 /** @ingroup Control
  * @brief A controller that uses a piecewise polynomial trajectory.
  *
- * Accepts commands set_q,append_q,set_tq,append_tq,set_qv,append_qv,brake
+ * Accepts commands set_q,append_q,set_tq,append_tq,set_qv,append_qv,brake.
  */
 class PolynomialPathController : public JointTrackingController
 {
@@ -109,6 +109,8 @@ class PolynomialPathController : public JointTrackingController
   void Cut(Real time,bool relative=true);
   Config Endpoint() const;
   Vector EndpointVelocity() const;
+  void Eval(Real time,Config& x,bool relative=true) const;
+  void Deriv(Real time,Config& dx,bool relative=true) const;
   bool Done() const;
   Real TimeRemaining() const;
 

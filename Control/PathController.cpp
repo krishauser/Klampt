@@ -583,6 +583,22 @@ void PolynomialPathController::Cut(Real time,bool relative)
   }
 }
 
+void PolynomialPathController::Eval(Real time,Config& x,bool relative) const
+{
+  if(relative)
+    x = path.Evaluate(time+pathOffset);
+  else
+    x = path.Evaluate(time);
+}
+
+void PolynomialPathController::Deriv(Real time,Config& dx,bool relative) const
+{
+  if(relative)
+    dx = path.Derivative(time+pathOffset);
+  else
+    dx = path.Derivative(time);
+}
+
 Config PolynomialPathController::Endpoint() const
 {
   return path.End();
