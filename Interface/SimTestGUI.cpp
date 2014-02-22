@@ -514,11 +514,11 @@ void SimTestBackend::SimStep(Real dt)
     ODEObjectID obj = sim.WorldToODEID(dragWidget.hoverID);
     dBodyID body;
     RigidTransform T;
-    if(obj.type == 1) {
+    if(obj.IsRigidObject()) {
       body = sim.odesim.object(obj.index)->body();
       sim.odesim.object(obj.index)->GetTransform(T);
     }
-    else {
+    else if(obj.IsRobot()) {
       body = sim.odesim.robot(obj.index)->baseBody(obj.bodyIndex);
       sim.odesim.robot(obj.index)->GetLinkTransform(obj.bodyIndex,T);
     }
