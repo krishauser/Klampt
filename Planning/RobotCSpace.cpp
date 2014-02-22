@@ -472,7 +472,10 @@ void ActiveRobotGeodesicManifold::Integrate(const Config& a,const Vector& da,Con
 
 SingleRobotCSpace::SingleRobotCSpace(RobotWorld& _world,int _index,WorldPlannerSettings* _settings)
   :world(_world),index(_index),settings(_settings),collisionPairsInitialized(false)
-{}
+{
+  Assert(settings != NULL);
+  Assert((int)settings->robotSettings.size() > _index);
+}
 
 SingleRobotCSpace::SingleRobotCSpace(const SingleRobotCSpace& space)
   :world(space.world),index(space.index),settings(space.settings),collisionPairsInitialized(false)
