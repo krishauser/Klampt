@@ -43,6 +43,12 @@ public:
   virtual vector<string> Commands() const { return vector<string>(); }
   virtual bool SendCommand(const string& name,const string& str) { return false; }
 
+  //convenience functions
+  void SetPIDCommand(const Config& qdes);
+  void SetPIDCommand(const Config& qdes,const Config& dqdes);
+  void SetFeedforwardPIDCommand(const Config& qdes,const Config& dqdes,const Vector&torques);
+  void SetTorqueCommand(const Vector& torques);
+
   Robot& robot;
   Real time;
 
