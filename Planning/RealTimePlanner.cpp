@@ -95,6 +95,11 @@ void RealTimePlannerBase::SetSpace(SingleRobotCSpace* space)
   settings = space->settings;
 }
 
+bool RealTimePlannerBase::StopPlanning()
+{
+  stopPlanning = true;
+}
+
 void RealTimePlannerBase::Reset(SmartPointer<PlannerObjectiveBase> newgoal)
 {
   if(protocol == ExponentialBackoff) {
@@ -136,8 +141,10 @@ bool RealTimePlannerBase::PlanUpdate(Real tglobal,Real& splitTime,Real& planTime
     FatalError("RealTimePlannerBase::PlanUpdate: Time is not moving forward!");
   }
 
+  //Here's where the planning takes place
   Timer timer;
   splitTime = currentSplitTime;
+  stopPlanning = false;
   ParabolicRamp::DynamicPath after;
   currentPath.Split(splitTime,before,after);
   assert(FuzzyEquals(before.GetTotalTime(),splitTime));
@@ -153,9 +160,8 @@ bool RealTimePlannerBase::PlanUpdate(Real tglobal,Real& splitTime,Real& planTime
   else if(res==Success) planSuccessTimeStats.collect(planTime);
   else if(res==Timeout) planTimeoutTimeStats.collect(planTime);
 
+  //now decide whether to update the path 
   bool updatePath = false;
-
-  //decide whether to update the path 
   if(res==Success) {
     updatePath = true;
     //if the planning time exceeds the split time, disallow it
@@ -273,7 +279,7 @@ int RealTimePlannerBase::Shortcut(ParabolicRamp::DynamicPath& path,Real timeLimi
   Real pathEpsilon = settings->robotSettings[0].collisionEpsilon;
   CSpaceFeasibilityChecker feas(cspace);
   ParabolicRamp::RampFeasibilityChecker checker(&feas,pathEpsilon);
-  while(timer.ElapsedTime() < timeLimit) {
+  while(timer.ElapsedTime() < timeLimit && !stopPlanning) {
     Real t1 = Sqr(Rand())*path.GetTotalTime();
     Real t2 = Sqr(Rand())*path.GetTotalTime();
     if(path.TryShortcut(t1,t2,checker))
@@ -325,6 +331,7 @@ int RealTimePlannerBase::SmartShortcut(Real tstart,ParabolicRamp::DynamicPath& p
   Real u1,u2;
   vector<Real> x0,x1,dx0,dx1;
   while(timer.ElapsedTime() < timeLimit) {
+    if(stopPlanning) return num;
     Real t1 = Sqr(Rand())*(startTimes.back()-startTimes.front());
     Real t2 = Sqr(Rand())*(startTimes.back()-startTimes.front());
     if(t1 > t2) swap(t1,t2);
@@ -551,6 +558,7 @@ int RealTimeIKPlanner::PlanFrom(ParabolicRamp::DynamicPath& path,Real cutoff)
 	return Success;
       }
     }
+    if(stopPlanning) return Timeout;
     q = (q + Vector(CurrentDestination()))*0.5;
   }
   return Failure;
@@ -586,6 +594,7 @@ int RealTimePerturbationPlanner::PlanFrom(ParabolicRamp::DynamicPath& path,Real 
       iteration=0;
       return Success;
     }
+    if(stopPlanning) return Timeout;
     ParabolicRamp::Vector temp;
     path.Evaluate(0,temp);
     cspace->Interpolate(temp,q,0.5,robot->q);
@@ -633,6 +642,7 @@ int RealTimePerturbationIKPlanner::PlanFrom(ParabolicRamp::DynamicPath& path,Rea
 	return Success;
       }
     }
+    if(stopPlanning) return Timeout;
     ParabolicRamp::Vector temp;
     path.Evaluate(0,temp);
     cspace->Interpolate(temp,q,0.5,robot->q);
@@ -852,6 +862,7 @@ int RealTimeRRTPlanner::PlanFrom(ParabolicRamp::DynamicPath& path,Real cutoff)
 	}
       }
     }
+    if(stopPlanning) return Timeout;
   }
   //sanity check
   for(size_t i=0;i<existingNodes.size();i++) {
@@ -873,6 +884,8 @@ int RealTimeRRTPlanner::PlanFrom(ParabolicRamp::DynamicPath& path,Real cutoff)
 
   if(bestPathCost < 1e-3) bestPathCost=0;
 
+  if(stopPlanning) return Timeout;
+
   Real planTimeLimit = (1.0-smoothTime)*cutoff;
   Real rrtCutoff = cutoff;
   Real currentPathTime = path.GetTotalTime();
@@ -883,6 +896,7 @@ int RealTimeRRTPlanner::PlanFrom(ParabolicRamp::DynamicPath& path,Real cutoff)
   printf("Starting RRT planning with %g seconds left\n",rrtCutoff-timer.ElapsedTime());
   while((t=timer.ElapsedTime()) < rrtCutoff) {
     //if(timer.ElapsedTime() > planTimeLimit) { //smooth only if an improvement has been made?
+    if(stopPlanning) return Timeout;
     if(bestNode && t > planTimeLimit) {
       //start smoothing
       break;
@@ -1061,6 +1075,7 @@ int RealTimeRRTPlanner::PlanFrom(ParabolicRamp::DynamicPath& path,Real cutoff)
     return Success;
   }
   printf("Devoting %g seconds to smoothing old path\n",cutoff-timer.ElapsedTime());
+  if(stopPlanning) return Timeout;
   Assert(path.IsValid());
   Shortcut(path,cutoff-timer.ElapsedTime());
   assert(path.IsValid());
@@ -1627,6 +1642,8 @@ int RealTimeTreePlanner::PlanFrom(ParabolicRamp::DynamicPath& path,Real cutoff)
   //extending path destinations
   Node* n = root;
   for(size_t i=0;i<path.ramps.size();i++) {
+    if(stopPlanning) return Timeout;
+
     n = AddChild(n,path.ramps[i]);
     if(!n) {
       printf("Warning, failure to add child for existing path\n");
@@ -1690,6 +1707,7 @@ int RealTimeTreePlanner::PlanFrom(ParabolicRamp::DynamicPath& path,Real cutoff)
   Real t=timer.ElapsedTime();
   if(rrtCutoff-t > 0) printf("Starting randomized planning with %gs left\n",rrtCutoff-t);
   while((t=timer.ElapsedTime()) < rrtCutoff) {
+    if(stopPlanning) return Timeout;
     //if(timer.ElapsedTime() > planTimeLimit) { //smooth only if an improvement has been made?
     if(bestNode && t > planTimeLimit) {
       //start smoothing
