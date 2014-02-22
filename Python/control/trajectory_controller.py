@@ -18,6 +18,9 @@ class TrajectoryController(BaseController):
             return {self.outputType:self.traj.eval(t)}
 
 def make(robot,file="mypath.path"):
-    l = trajectory.RobotTrajectory(robot)
+    if robot == None:
+        l = trajectory.Trajectory()
+    else:
+        l = trajectory.RobotTrajectory(robot)
     l.load(file)
     return TrajectoryController(l)
