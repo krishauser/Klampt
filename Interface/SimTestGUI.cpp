@@ -400,6 +400,10 @@ bool SimTestBackend::OnCommand(const string& cmd,const string& args)
     for(size_t i=0;i<robotWidgets.size();i++)
       robotWidgets[i].FixCurrent();
   }
+  else if(cmd=="constrain_link_point") {
+    for(size_t i=0;i<robotWidgets.size();i++)
+      robotWidgets[i].FixCurrentPoint();
+  }
   else if(cmd == "delete_constraint") {
     for(size_t i=0;i<robotWidgets.size();i++)
       robotWidgets[i].DeleteConstraint();
@@ -720,8 +724,11 @@ bool GLUISimTestGUI::Initialize()
 
   UpdateGUI();
 
-  const static int NR = 14;
+  const static int NR = 15;
   const static char* rules [NR*3]= {"{type:key_down,key:c}","constrain_link","",
+
+				    "{type:key_down,key:C}","constrain_link_point","",
+
 				    "{type:key_down,key:d}","delete_constraint","",
 				    "{type:key_down,key:p}","print_config","",
 				    "{type:key_down,key:a}","advance","",
