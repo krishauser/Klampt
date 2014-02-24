@@ -16,7 +16,8 @@ SOURCES += main.cpp\
     qtguibase.cpp \
     logoptions.cpp \
     driveredit.cpp \
-    controllersettings.cpp
+    controllersettings.cpp \
+    controllercommanddialog.cpp
 
 HEADERS  += mainwindow.h \
     qsimtestbackend.h \
@@ -24,12 +25,14 @@ HEADERS  += mainwindow.h \
     logoptions.h \
     driveredit.h \
     controllersettings.h \
-    GLScreenshotPlugin.h
+    GLScreenshotPlugin.h \
+    controllercommanddialog.h
 
 FORMS    += mainwindow.ui \
     logoptions.ui \
     driveredit.ui \
-    controllersettings.ui
+    controllersettings.ui \
+    controllercommanddialog.ui
 
 LIBS += -L../lib -lKlampt  -L/usr/lib -L../Library/glui-2.36/src/lib -L/usr/lib/glut -L/usr/X11R6/lib -L/usr/X11R6/lib/modules/extensions -L/src -L../Library/KrisLibrary/lib -L../Library/ode-0.11.1/ode/src/.libs -L../Library/tinyxml
 LIBS += -lKrisLibrary -lglut -lGL -lm -lGLU -lXm -lXi -lXext -lXmu -lX11 -lode -ltinyxml -lglpk
