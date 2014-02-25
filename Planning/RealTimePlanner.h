@@ -108,6 +108,13 @@ public:
    * Returns true if the path changed and planTime < splitTime */
   virtual bool PlanUpdate(Real tglobal,Real& splitTime,Real& planTime);
 
+  /** Tells the planner to stop.  Can be called from an external thread.
+   * 
+   * Subclasses should detect if stopPlanning is set to true and return
+   * Timeout.
+   */
+  bool StopPlanning();
+
   /** RealTimePlannerBase subclasses should override this. 
    * Plans from the start of 'path', and returns the result in 'path'.
    * The planning duration should not exceed 'cutoff', if possible.
@@ -170,6 +177,10 @@ public:
 
   /// Users should set this up to capture the outputted path
   SmartPointer<SendPathCallbackBase> sendPathCallback;
+
+  /// This flag should be set to true to tell a long planning cycle to stop.
+  /// Thread safe.  StopPlanning() can also be used. 
+  bool stopPlanning;
 
   /// Use only in simulation: multiplies the effective computational power
   /// of this machine (i.e., simulate a machine that's x times faster)

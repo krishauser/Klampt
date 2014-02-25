@@ -512,17 +512,17 @@ void SimTestBackend::DoFreeDrag(int dx,int dy,int button)
 
 void SimTestBackend::SimStep(Real dt) 
 {
-  if(allWidgets.activeWidget == &dragWidget) {
+  if(allWidgets.activeWidget == &dragWidget && dragWidget.dragging) {
     forceSpringActive = true;
     double dragForce = double(settings["dragForceMultiplier"]);
     ODEObjectID obj = sim.WorldToODEID(dragWidget.hoverID);
     dBodyID body;
     RigidTransform T;
-    if(obj.type == 1) {
+    if(obj.IsRigidObject()) {
       body = sim.odesim.object(obj.index)->body();
       sim.odesim.object(obj.index)->GetTransform(T);
     }
-    else {
+    else if(obj.IsRobot()) {
       body = sim.odesim.robot(obj.index)->baseBody(obj.bodyIndex);
       sim.odesim.robot(obj.index)->GetLinkTransform(obj.bodyIndex,T);
     }

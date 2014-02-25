@@ -1,6 +1,7 @@
 #include "InputProcessor.h"
 #include <GLdraw/GL.h>
 #include <GLdraw/drawextra.h>
+#include <utils/AnyCollection.h>
 #ifdef CYGWIN
 //Cygwin W32API OpenGL defines WIN32
 #undef WIN32
@@ -217,51 +218,10 @@ PlannerObjectiveBase* PredictiveExtrapolationInputProcessor::MakeObjective(Robot
 }
 
 void PredictiveExtrapolationInputProcessor::DrawGL() {
-  if(!lastObjective) return;
-  Robot* robot = GetRobot();
-  if(tracking) {
-    CartesianTrackingObjective* ptrack = dynamic_cast<CartesianTrackingObjective*>(lastObjective);
-    assert(ptrack != NULL);
-    glPointSize(5.0);
-    glEnable( GL_POINT_SMOOTH);
-    glDisable( GL_LIGHTING);
-    glBegin( GL_POINTS);
-    glColor3f(0, 1, 1);
-    glVertex3v(robot->links[ptrack->link].T_World
-	       * ptrack->localPosition);
-    glEnd();
-    glLineWidth(3.0);
-    glColor3f(0, 1, 0.5);
-    glBegin(GL_LINE_STRIP);
-    for(size_t i=0;i<ptrack->positions.size();i++) 
-      glVertex3v(ptrack->positions[i]);
-    glEnd();
-    glLineWidth(1.0);
-  }
-  else {
-    CartesianObjective* pgoal = dynamic_cast<CartesianObjective*>(lastObjective);
-    assert(pgoal != NULL);
-    const IKGoal& goal = pgoal->ikGoal;
-    glPointSize(5.0);
-    glEnable( GL_POINT_SMOOTH);
-    glDisable( GL_LIGHTING);
-    glBegin( GL_POINTS);
-    glColor3f(0, 1, 1);
-    glVertex3v(robot->links[goal.link].T_World
-	       * goal.localPosition);
-    glColor3f(0, 1, 0.5);
-    glVertex3v(goal.endPosition);
-    glEnd();
-  }
 }
 
 
 
-#ifndef WIN32
-#if HAVE_ZMQ
-
-
-#include <utils/AnyCollection.h>
 
 
 SerializedObjectiveProcessor::SerializedObjectiveProcessor(AsyncReaderThread* _reader)
@@ -292,6 +252,9 @@ PlannerObjectiveBase* SerializedObjectiveProcessor::MakeObjective(Robot* robot)
   stringstream ss(payload);
   return LoadPlannerObjective(ss,robot);
 }
+
+
+#if HAVE_ZMQ
 
 
 
@@ -364,4 +327,3 @@ void ZMQObjectiveProcessor::SetGlobalTime(Real time)
 } 
 
 #endif //HAVE_ZMQ
-#endif //WIN32

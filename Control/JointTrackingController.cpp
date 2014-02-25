@@ -21,18 +21,7 @@ void JointTrackingController::Update(Real dt)
 
   Config qdes(robot.links.size()),dqdes(robot.links.size());
   GetDesiredState(qdes,dqdes);
-  robot.NormalizeAngles(qdes);
-  for(size_t i=0;i<robot.drivers.size();i++) {
-    if(robot.drivers[i].type == RobotJointDriver::Normal) {
-      command->actuators[i].SetPID(qdes(robot.drivers[i].linkIndices[0]),dqdes(robot.drivers[i].linkIndices[0]),command->actuators[i].iterm);
-    }
-    else {
-      robot.q = qdes;
-      robot.dq = dqdes;
-      //printf("Desired affine driver value %g, vel %g\n",robot.GetDriverValue(i),robot.GetDriverVelocity(i));
-      command->actuators[i].SetPID(robot.GetDriverValue(i),robot.GetDriverVelocity(i),command->actuators[i].iterm);
-    }
-  }
+  SetPIDCommand(qdes,dqdes);
   RobotController::Update(dt);
 }
 

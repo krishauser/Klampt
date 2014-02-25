@@ -20,6 +20,7 @@ class SimRobotInterface : public MotionQueueInterface
   virtual Real GetEndTime();
   virtual void GetEndConfig(Config& x);
   virtual void GetEndVelocity(Config& dx);
+  virtual void GetConfig(Real t,Config& x);
   virtual MotionResult SendMilestone(const Config& x);
   virtual MotionResult SendMilestoneImmediate(const Config& x);
   virtual MotionResult SendPathImmediate(Real tbreak,const ParabolicRamp::DynamicPath& path);
