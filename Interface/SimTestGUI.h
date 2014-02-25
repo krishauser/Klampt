@@ -15,8 +15,6 @@
 using namespace Math3D;
 using namespace GLDraw;
 
-
-
 class ProgramSettings : public AnyCollection
 {
 public:
