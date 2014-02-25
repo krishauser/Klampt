@@ -49,7 +49,7 @@ void MainWindow::Initialize(int _argc,const char** _argv)
     ui->displaywidget->installEventFilter(this);
     ui->displaywidget->setFocusPolicy(Qt::WheelFocus);
 
-    SetMode(0);
+    DoFreeMode();
 }
 
 MainWindow::~MainWindow()
@@ -113,12 +113,18 @@ void MainWindow::SendMilestone(){
 void MainWindow::SetRecord(bool status){
     gui->SendCommand("record",status);
 }
-
+#include <QWidgetList>
 void MainWindow::SetMode(int option){
     gui->SendButtonToggle("pose_ik",(option==1));
     gui->SendButtonToggle("force_application_mode",(option==2));
+    ui->btn_free->setChecked(option==0);
+    ui->btn_ik->setChecked(option==1);
+    ui->lbl_ik->setVisible(option==1);
+    ui->line_ik->setVisible(option==1);
     ui->btn_constrain->setVisible(option==1);
+    ui->btn_constrain_point->setVisible(option==1);
     ui->btn_delete->setVisible(option==1);
+    ui->btn_force->setChecked(option==2);
     if(option==0) ui->displaywidget->setStatusTip("Free Drag Mode: drag to rotate, shift drag to zoom, ctrl drag to truck");
     else if(option==1) ui->displaywidget->setStatusTip("IK Mode: right drag to pose by IK, c=constrain, d=delete");
     else if(option==2) ui->displaywidget->setStatusTip("Force Application Mode: right drag to apply a force");
@@ -145,6 +151,10 @@ void MainWindow::ShowOptions(){
     gui->controller_settings->show();
 }
 
+void MainWindow::ShowCommand(){
+    gui->command_dialog->show();
+}
+
 void MainWindow::ShowPlotOptions(){
     gui->log_options->show();
 }
@@ -153,23 +163,33 @@ void MainWindow::IKConstrain(){
     gui->constrain_mode=1;
 }
 
+void MainWindow::IKConstrainPoint(){
+    gui->constrain_point_mode=1;
+}
+
 void MainWindow::IKDelete(){
     gui->delete_mode=1;
 }
 
 void MainWindow::Reset(){
+    /*
     refresh_timer->stop();
     //delete ui->displaywidget;
     QSimTestBackend *displaywidget=new QSimTestBackend();
     ui->verticalLayout_5->addWidget(displaywidget);
     ui->displaywidget=displaywidget;
+    QApplication::processEvents();
+    QTimer::singleShot(0,this,SLOT(Shrink()));
     ui->displaywidget->initializeGL();
-    Initialize(argc,argv);
+    */
+    delete this;
+    MainWindow w;
+    w.Initialize(argc,argv);
 }
 
 void MainWindow::ChangeRecordFile(){
     QString filter="MPG Video (*.mpg)";
-    QString recordfilename = QFileDialog::getSaveFileName(0,"Open File",QDir::home().absolutePath(),filter,&filter);
+    QString recordfilename = QFileDialog::getSaveFileName(0,"Recording Output",QDir::home().absolutePath(),filter,&filter);
     if(!recordfilename.isNull())
         gui->SendCommand("record_file",recordfilename.toStdString());
 }
@@ -184,7 +204,7 @@ void MainWindow::ChangeResolution(int w, int h)
 }
 
 void MainWindow::FlexibleResolution(){
-    ui->displaywidget->setMinimumSize(0,0);
+    ui->displaywidget->setMinimumSize(200,200);
     ui->displaywidget->setMaximumSize(16777215,16777215);
 }
 
@@ -197,7 +217,7 @@ void MainWindow::Encode(){
 }
 
 void MainWindow::DefaultViewport(){
-    gui->SendCommand("load_view","view.txt");
+    gui->SendCommand("load_view","defaultview.txt");
 }
 
 void MainWindow::LoadViewport(){
@@ -206,4 +226,13 @@ void MainWindow::LoadViewport(){
 
 void MainWindow::SaveViewport(){
     gui->SendCommand("save_view","view.txt");
+}
+
+void MainWindow::ShowHelp(){
+    gui->ShowHelp();
+}
+
+
+void MainWindow::ShowAbout(){
+    gui->ShowAbout();
 }

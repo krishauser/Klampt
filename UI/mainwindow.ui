@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>676</width>
+    <width>688</width>
     <height>600</height>
    </rect>
   </property>
@@ -30,6 +30,12 @@
             <verstretch>1</verstretch>
            </sizepolicy>
           </property>
+          <property name="minimumSize">
+           <size>
+            <width>200</width>
+            <height>200</height>
+           </size>
+          </property>
           <property name="maximumSize">
            <size>
             <width>16777215</width>
@@ -45,6 +51,19 @@
          <layout class="QHBoxLayout" name="horizontalLayout">
           <item>
            <spacer name="horizontalSpacer_3">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <spacer name="horizontalSpacer_6">
             <property name="orientation">
              <enum>Qt::Horizontal</enum>
             </property>
@@ -142,7 +161,23 @@
             <property name="text">
              <string>expanded</string>
             </property>
+            <property name="tristate">
+             <bool>false</bool>
+            </property>
            </widget>
+          </item>
+          <item>
+           <spacer name="horizontalSpacer_5">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
           </item>
           <item>
            <spacer name="horizontalSpacer_4">
@@ -160,6 +195,13 @@
          </layout>
         </item>
         <item>
+         <widget class="Line" name="line">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+         </widget>
+        </item>
+        <item>
          <layout class="QHBoxLayout" name="horizontalLayout_5">
           <item>
            <spacer name="horizontalSpacer">
@@ -175,6 +217,20 @@
            </spacer>
           </item>
           <item>
+           <widget class="Line" name="line_2">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="label_2">
+            <property name="text">
+             <string>Simulation</string>
+            </property>
+           </widget>
+          </item>
+          <item>
            <widget class="QPushButton" name="pushButton_4">
             <property name="toolTip">
              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Direct the simulation to move to the milestone&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
@@ -183,7 +239,11 @@
              <string>set a milestone for the robots to acheive</string>
             </property>
             <property name="text">
-             <string>Set Milestone</string>
+             <string/>
+            </property>
+            <property name="icon">
+             <iconset resource="icons.qrc">
+              <normaloff>:/Images/Images/yellowflag.gif</normaloff>:/Images/Images/yellowflag.gif</iconset>
             </property>
             <property name="shortcut">
              <string>Space</string>
@@ -199,7 +259,7 @@
              <string>start or stop the simulation</string>
             </property>
             <property name="text">
-             <string>Sim</string>
+             <string/>
             </property>
             <property name="icon">
              <iconset resource="icons.qrc">
@@ -242,25 +302,87 @@
            </widget>
           </item>
           <item>
-           <widget class="QComboBox" name="comboBox_3">
-            <property name="statusTip">
+           <widget class="Line" name="line_3">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="label">
+            <property name="text">
+             <string>Mode</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="btn_free">
+            <property name="text">
              <string/>
             </property>
-            <item>
-             <property name="text">
-              <string>Free Drag</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>IK Mode</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>Force</string>
-             </property>
-            </item>
+            <property name="icon">
+             <iconset resource="icons.qrc">
+              <normaloff>:/Images/Images/hand.gif</normaloff>:/Images/Images/hand.gif</iconset>
+            </property>
+            <property name="checkable">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="btn_ik">
+            <property name="text">
+             <string/>
+            </property>
+            <property name="icon">
+             <iconset resource="icons.qrc">
+              <normaloff>:/Images/Images/IK.gif</normaloff>:/Images/Images/IK.gif</iconset>
+            </property>
+            <property name="checkable">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="btn_force">
+            <property name="text">
+             <string/>
+            </property>
+            <property name="icon">
+             <iconset>
+              <normaloff>Images/spring.gif</normaloff>Images/spring.gif</iconset>
+            </property>
+            <property name="checkable">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="Line" name="line_ik">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="lbl_ik">
+            <property name="text">
+             <string>IK</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="btn_constrain_point">
+            <property name="statusTip">
+             <string>constrain a point</string>
+            </property>
+            <property name="text">
+             <string/>
+            </property>
+            <property name="icon">
+             <iconset>
+              <normaloff>Images/constrain.gif</normaloff>Images/constrain.gif</iconset>
+            </property>
            </widget>
           </item>
           <item>
@@ -269,7 +391,11 @@
              <string>click a robot link to constrain it</string>
             </property>
             <property name="text">
-             <string>C</string>
+             <string/>
+            </property>
+            <property name="icon">
+             <iconset resource="icons.qrc">
+              <normaloff>:/Images/Images/constrainpoint.gif</normaloff>:/Images/Images/constrainpoint.gif</iconset>
             </property>
            </widget>
           </item>
@@ -279,7 +405,11 @@
              <string>delete a robot constraint</string>
             </property>
             <property name="text">
-             <string>D</string>
+             <string/>
+            </property>
+            <property name="icon">
+             <iconset resource="icons.qrc">
+              <normaloff>:/Images/Images/dialog-cancel-3.png</normaloff>:/Images/Images/dialog-cancel-3.png</iconset>
             </property>
            </widget>
           </item>
@@ -309,7 +439,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>676</width>
+     <width>688</width>
      <height>25</height>
     </rect>
    </property>
@@ -341,6 +471,7 @@
     <addaction name="actionDrivers"/>
     <addaction name="actionSensor_Plot"/>
     <addaction name="actionOptions"/>
+    <addaction name="actionSend_Command"/>
    </widget>
    <widget class="QMenu" name="menuRecord">
     <property name="title">
@@ -362,10 +493,18 @@
     <addaction name="actionMultiple_Parts"/>
     <addaction name="actionEncode"/>
    </widget>
+   <widget class="QMenu" name="menuHelp">
+    <property name="title">
+     <string>Help</string>
+    </property>
+    <addaction name="actionHelp"/>
+    <addaction name="actionAbout"/>
+   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuPreferences"/>
    <addaction name="menuMilestones"/>
    <addaction name="menuRecord"/>
+   <addaction name="menuHelp"/>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
    <attribute name="toolBarArea">
@@ -530,6 +669,24 @@
     <string>Encode</string>
    </property>
   </action>
+  <action name="actionSend_Command">
+   <property name="text">
+    <string>Send Command</string>
+   </property>
+  </action>
+  <action name="actionHelp">
+   <property name="text">
+    <string>Help</string>
+   </property>
+   <property name="shortcut">
+    <string>F1</string>
+   </property>
+  </action>
+  <action name="actionAbout">
+   <property name="text">
+    <string>About</string>
+   </property>
+  </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>
@@ -581,28 +738,12 @@
    <slot>SetSimulate(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>275</x>
+     <x>231</x>
      <y>565</y>
     </hint>
     <hint type="destinationlabel">
      <x>333</x>
      <y>534</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>comboBox_3</sender>
-   <signal>currentIndexChanged(int)</signal>
-   <receiver>MainWindow</receiver>
-   <slot>SetMode(int)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>418</x>
-     <y>565</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>533</x>
-     <y>547</y>
     </hint>
    </hints>
   </connection>
@@ -613,8 +754,8 @@
    <slot>SendMilestone()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>177</x>
-     <y>555</y>
+     <x>187</x>
+     <y>565</y>
     </hint>
     <hint type="destinationlabel">
      <x>134</x>
@@ -629,7 +770,7 @@
    <slot>SetRecord(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>319</x>
+     <x>275</x>
      <y>565</y>
     </hint>
     <hint type="destinationlabel">
@@ -757,8 +898,8 @@
    <slot>SetExpanded(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>651</x>
-     <y>530</y>
+     <x>663</x>
+     <y>521</y>
     </hint>
     <hint type="destinationlabel">
      <x>637</x>
@@ -773,8 +914,8 @@
    <slot>SetWrenches(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>549</x>
-     <y>530</y>
+     <x>561</x>
+     <y>521</y>
     </hint>
     <hint type="destinationlabel">
      <x>636</x>
@@ -789,8 +930,8 @@
    <slot>SetBBoxes(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>183</x>
-     <y>530</y>
+     <x>195</x>
+     <y>521</y>
     </hint>
     <hint type="destinationlabel">
      <x>636</x>
@@ -805,8 +946,8 @@
    <slot>SetContacts(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>98</x>
-     <y>530</y>
+     <x>110</x>
+     <y>521</y>
     </hint>
     <hint type="destinationlabel">
      <x>636</x>
@@ -821,8 +962,8 @@
    <slot>SetDesired(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>269</x>
-     <y>530</y>
+     <x>281</x>
+     <y>521</y>
     </hint>
     <hint type="destinationlabel">
      <x>636</x>
@@ -837,8 +978,8 @@
    <slot>SetPoser(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>447</x>
-     <y>530</y>
+     <x>459</x>
+     <y>521</y>
     </hint>
     <hint type="destinationlabel">
      <x>636</x>
@@ -853,8 +994,8 @@
    <slot>SetEstimated(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>373</x>
-     <y>530</y>
+     <x>385</x>
+     <y>521</y>
     </hint>
     <hint type="destinationlabel">
      <x>636</x>
@@ -869,8 +1010,8 @@
    <slot>IKConstrain()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>495</x>
-     <y>558</y>
+     <x>579</x>
+     <y>565</y>
     </hint>
     <hint type="destinationlabel">
      <x>521</x>
@@ -885,8 +1026,8 @@
    <slot>IKDelete()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>588</x>
-     <y>558</y>
+     <x>623</x>
+     <y>565</y>
     </hint>
     <hint type="destinationlabel">
      <x>623</x>
@@ -1086,6 +1227,118 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>btn_constrain_point</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>IKConstrainPoint()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>535</x>
+     <y>565</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>619</x>
+     <y>571</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>btn_force</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>DoForceMode()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>461</x>
+     <y>565</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>528</x>
+     <y>567</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>btn_free</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>DoFreeMode()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>373</x>
+     <y>565</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>352</x>
+     <y>575</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>btn_ik</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>DoIKMode()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>417</x>
+     <y>565</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>223</x>
+     <y>575</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionSend_Command</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>ShowCommand()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>343</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionHelp</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>ShowHelp()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>343</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionAbout</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>ShowAbout()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>343</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>Reset()</slot>
@@ -1127,5 +1380,12 @@
   <slot>LoadViewport()</slot>
   <slot>SaveViewport()</slot>
   <slot>DefaultViewport()</slot>
+  <slot>IKConstrainPoint()</slot>
+  <slot>DoFreeMode()</slot>
+  <slot>DoIKMode()</slot>
+  <slot>DoForceMode()</slot>
+  <slot>ShowCommand()</slot>
+  <slot>ShowHelp()</slot>
+  <slot>ShowAbout()</slot>
  </slots>
 </ui>

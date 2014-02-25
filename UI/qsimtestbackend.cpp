@@ -44,12 +44,12 @@ void QSimTestBackend::paintGL(){
 
 bool QSimTestBackend::OnIdle(){
     MovieUpdate(sim.time);
-    SimTestBackend::OnIdle();
+    BaseT::OnIdle();
     return true;
 }
 
 bool QSimTestBackend::OnMouseMove(int mx, int my){
-    SimTestBackend::OnMouseMove(mx,my);
+    BaseT::OnMouseMove(mx,my);
 }
 
 bool QSimTestBackend::OnMouseWheel(int dwheel){
@@ -69,7 +69,7 @@ void QSimTestBackend::resizeGL(int w, int h){
 }
 
 bool QSimTestBackend::OnButtonToggle(const string &button, int checked){
-    SimTestBackend::OnButtonToggle(button,checked);
+    BaseT::OnButtonToggle(button,checked);
 }
 
 //GUI functionality: Possible new file

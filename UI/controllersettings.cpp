@@ -1,6 +1,8 @@
 #include "controllersettings.h"
 #include "ui_controllersettings.h"
 
+#include <iostream>
+
 ControllerSettings::ControllerSettings(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::ControllerSettings)
@@ -39,4 +41,5 @@ void ControllerSettings::OnApply(){
     BOOST_FOREACH(string str,edited){
         emit SendControllerSetting(str,settings[str]);
     }
+    edited.clear();
 }

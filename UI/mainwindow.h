@@ -48,6 +48,9 @@ public slots:
 
   void SendMilestone();
   void SetMode(int);
+  void DoFreeMode(){SetMode(0);}
+  void DoIKMode(){SetMode(1);}
+  void DoForceMode(){SetMode(2);}
   void LoadResource();
   void SaveScenario();
   void SaveLastScenario();
@@ -59,9 +62,13 @@ public slots:
   void ShowPlotOptions();
   void ShowDriverEdit();
   void ShowOptions();
+  void ShowCommand();
+  void ShowHelp();
+  void ShowAbout();
 
   //IK Mode
   void IKConstrain();
+  void IKConstrainPoint();
   void IKDelete();
 
   //reset

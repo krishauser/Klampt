@@ -9,9 +9,12 @@
 #include <QObject>
 #include <QTimer>
 #include <QFileDialog>
+#include <QMessageBox>
+
 #include <driveredit.h>
 #include <logoptions.h>
 #include <controllersettings.h>
+#include <controllercommanddialog.h>
 
 class QtGUIBase : public QObject,public GenericGUIBase
 {
@@ -24,9 +27,10 @@ public:
     DriverEdit *driver_tool;
     LogOptions *log_options;
     ControllerSettings *controller_settings;
+    ControllerCommandDialog *command_dialog;
     QtGUIBase(GenericBackendBase* _backend,RobotWorld* _world);
     QString old_filename;
-    int constrain_mode,delete_mode;
+    int constrain_mode,constrain_point_mode,delete_mode;
     bool OnCommand(const string &cmd, const string &args);
     void UpdateGUI();
     ~QtGUIBase();
@@ -34,6 +38,8 @@ public:
     void LoadFile(QString filename=QString());
     void SaveScenario(QString filename=QString());
     void SaveLastScenario();
+    void ShowHelp();
+    void ShowAbout();
 public slots:
     void SendMouseMove(QMouseEvent *e);
     void SendMouseWheel(QWheelEvent *e);
@@ -47,6 +53,8 @@ public slots:
     void HideSensor(int sensor);
     void SendMeasurement(int sensor, int measurement, bool status);
     void SendControllerSetting(string setting, string value);
+    void SendControllerCommand(string setting, string value);
+
 signals:
     void  EndDelete();
     void EndConstrain();

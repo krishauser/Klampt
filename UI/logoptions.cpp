@@ -1,11 +1,14 @@
+#include "stdio.h"
+#include <boost/foreach.hpp>
+
 #include "logoptions.h"
 #include "ui_logoptions.h"
+
 #include "QCheckBox"
 #include "QStandardItemModel"
 #include "QLabel"
 #include "QAction"
-#include "stdio.h"
-#include <boost/foreach.hpp>
+
 
 LogOptions::LogOptions(QWidget *parent) :
     QDialog(parent),

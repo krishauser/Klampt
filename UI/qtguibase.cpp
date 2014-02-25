@@ -36,6 +36,11 @@ QtGUIBase::QtGUIBase(GenericBackendBase *_backend, RobotWorld *_world) :
   controller_settings->Refresh();
   //controller_settings->show();
 
+  command_dialog=new ControllerCommandDialog();
+  command_dialog->commands=sim->robotControllers[0]->Commands();
+  connect(command_dialog,SIGNAL(ControllerCommand(string,string)),this,SLOT(SendControllerCommand(string,string)));
+  command_dialog->Refresh();
+
   UpdateGUI();
 
   const static int NR = 14;
@@ -61,7 +66,7 @@ QtGUIBase::QtGUIBase(GenericBackendBase *_backend, RobotWorld *_world) :
     AddCommandRule(c,rules[i*3+1],rules[i*3+2]);
   }
 
-  constrain_mode = delete_mode = 0;
+  constrain_mode = delete_mode = constrain_point_mode= 0;
 }
 
 QtGUIBase::~QtGUIBase(){
@@ -96,6 +101,12 @@ void QtGUIBase::SendMousePress(QMouseEvent *e){
         SendCommand("constrain_link");
         emit EndConstrain();
         constrain_mode=0;
+        return;
+    }
+    if(constrain_point_mode){
+        SendCommand("constrain_link_point");
+        emit EndConstrain();
+        constrain_point_mode=0;
         return;
     }
     if(delete_mode){
@@ -200,5 +211,35 @@ void QtGUIBase::SaveLastScenario(){
 }
 
 void QtGUIBase::SendControllerSetting(string setting, string value){
-    sim->robotControllers[0]->SetSetting(setting,value);
+    bool res = sim->robotControllers[0]->SetSetting(setting,value);
+    if(!res) printf("Failed to set setting %s\n",setting.c_str());
+}
+
+void QtGUIBase::SendControllerCommand(string setting,string value){
+    bool res = sim->robotControllers[0]->SendCommand(setting,value);
+    if(!res) printf("Failed to send command %s\n",setting.c_str());
+}
+
+void QtGUIBase::ShowHelp(){
+    QMessageBox *help = new QMessageBox();
+    QString text=      "Keyboard help:\n"
+      "[space]: sends the milestone to the controller\n"
+      "s: toggles simulation\n"
+      "a: advances the simulation one step\n"
+      "f: toggles force application mode (right click and drag)\n"
+      "c: in IK mode, constrains link rotation and position\n"
+      "d: in IK mode, deletes an ik constraint\n"
+      "v: save current viewport\n"
+      "V: load viewport\n";
+    help->setText(text);
+    help->show();
+}
+
+//should be made more informative
+void QtGUIBase::ShowAbout(){
+    QMessageBox *about = new QMessageBox();
+    QString text = "Klamp't\n"
+            "A robot simulation, planning, and control package from Indiana University";
+    about->setText(text);
+    about->show();
 }

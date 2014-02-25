@@ -39,6 +39,5 @@ int main(int argc, char *argv[])
           w.Initialize(argc,(const char**)argv);
       w.directory=directory;
     w.show();
-    
     return a.exec();
 }
