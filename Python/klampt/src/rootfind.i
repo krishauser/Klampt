@@ -21,6 +21,10 @@
 	}
 }
 
+
+%feature("autodoc","1");
+%include "docs/docs.i"
+
 void setFTolerance(double tolf);
 void setXTolerance(double tolx);
 int setVectorField(PyObject* pVFObj);

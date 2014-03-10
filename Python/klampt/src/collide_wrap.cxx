@@ -3856,6 +3856,80 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_destroy(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  
+  if (!PyArg_ParseTuple(args,(char *)":destroy")) SWIG_fail;
+  {
+    try {
+      destroy();
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      destroy();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      destroy();
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_loadGeom(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  int arg1 ;
+  char *arg2 = (char *) 0 ;
+  int val1 ;
+  int ecode1 = 0 ;
+  int res2 ;
+  char *buf2 = 0 ;
+  int alloc2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  bool result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:loadGeom",&obj0,&obj1)) SWIG_fail;
+  ecode1 = SWIG_AsVal_int(obj0, &val1);
+  if (!SWIG_IsOK(ecode1)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "loadGeom" "', argument " "1"" of type '" "int""'");
+  } 
+  arg1 = static_cast< int >(val1);
+  res2 = SWIG_AsCharPtrAndSize(obj1, &buf2, NULL, &alloc2);
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "loadGeom" "', argument " "2"" of type '" "char const *""'");
+  }
+  arg2 = reinterpret_cast< char * >(buf2);
+  {
+    try {
+      result = (bool)loadGeom(arg1,(char const *)arg2);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      destroy();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      destroy();
+      return NULL;
+    }
+  }
+  resultobj = SWIG_From_bool(static_cast< bool >(result));
+  if (alloc2 == SWIG_NEWOBJ) delete[] buf2;
+  return resultobj;
+fail:
+  if (alloc2 == SWIG_NEWOBJ) delete[] buf2;
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_makeTriMeshGeom__SWIG_0(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   int arg1 ;
@@ -5548,32 +5622,6 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_destroy(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  
-  if (!PyArg_ParseTuple(args,(char *)":destroy")) SWIG_fail;
-  {
-    try {
-      destroy();
-    }
-    catch(PyException& e) {
-      e.setPyErr();
-      destroy();
-      return NULL;
-    }
-    catch(std::exception& e) {
-      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
-      destroy();
-      return NULL;
-    }
-  }
-  resultobj = SWIG_Py_Void();
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
 static PyMethodDef SwigMethods[] = {
 	 { (char *)"SWIG_PyInstanceMethod_New", (PyCFunction)SWIG_PyInstanceMethod_New, METH_O, NULL},
 	 { (char *)"new_doubleArray", _wrap_new_doubleArray, METH_VARARGS, NULL},
@@ -5590,41 +5638,303 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"intArray_cast", _wrap_intArray_cast, METH_VARARGS, NULL},
 	 { (char *)"intArray_frompointer", _wrap_intArray_frompointer, METH_VARARGS, NULL},
 	 { (char *)"intArray_swigregister", intArray_swigregister, METH_VARARGS, NULL},
-	 { (char *)"newGeom", _wrap_newGeom, METH_VARARGS, (char *)"newGeom() -> int"},
-	 { (char *)"destroyGeom", _wrap_destroyGeom, METH_VARARGS, (char *)"destroyGeom(int geom)"},
+	 { (char *)"newGeom", _wrap_newGeom, METH_VARARGS, (char *)"\n"
+		"newGeom() -> int\n"
+		"\n"
+		"int newGeom() \n"
+		""},
+	 { (char *)"destroyGeom", _wrap_destroyGeom, METH_VARARGS, (char *)"\n"
+		"destroyGeom(int geom)\n"
+		"\n"
+		"void destroyGeom(int geom) \n"
+		""},
+	 { (char *)"destroy", _wrap_destroy, METH_VARARGS, (char *)"\n"
+		"destroy()\n"
+		"\n"
+		"void destroy()\n"
+		"\n"
+		"destroys internal data structures \n"
+		""},
+	 { (char *)"loadGeom", _wrap_loadGeom, METH_VARARGS, (char *)"\n"
+		"loadGeom(int geom, char const * fn) -> bool\n"
+		"\n"
+		"bool loadGeom(int geom, const char\n"
+		"*fn)\n"
+		"\n"
+		"Loads a geometry from a file. Sets it to the correct type based on the\n"
+		"file contents.\n"
+		"\n"
+		"Currently supported file extensions are Trimeshes: .tri, any other\n"
+		"mesh files that Assimp may support (if Klamp't is built using Assimp\n"
+		"support).\n"
+		"\n"
+		"Point clouds: .pcd\n"
+		"\n"
+		"Primitive geometries: .geom\n"
+		"\n"
+		"Returns False if there is a load error. Raises an exception if the ID\n"
+		"is invalid. \n"
+		""},
 	 { (char *)"makeTriMeshGeom", _wrap_makeTriMeshGeom, METH_VARARGS, (char *)"\n"
 		"makeTriMeshGeom(int geom, char const * fn)\n"
 		"makeTriMeshGeom(int geom, double const * verts, int const * inds, int nv, int nt)\n"
+		"\n"
+		"void makeTriMeshGeom(int\n"
+		"geom, const double *verts, const int *inds, int nv, int nt)\n"
+		"\n"
+		"Makes a geometry into a trimesh given the vertex and index data. verts\n"
+		"is of length nv*3, and inds is of length nt*3.\n"
+		"\n"
+		"Note: in Python, must use doubleArray and intArray for the verts and\n"
+		"inds objects. \n"
 		""},
-	 { (char *)"setTriMeshTranslation", _wrap_setTriMeshTranslation, METH_VARARGS, (char *)"setTriMeshTranslation(int geom, double const [3] t)"},
-	 { (char *)"setTriMeshRotation", _wrap_setTriMeshRotation, METH_VARARGS, (char *)"setTriMeshRotation(int geom, double const [9] r)"},
-	 { (char *)"getTriMeshTranslation", _wrap_getTriMeshTranslation, METH_VARARGS, (char *)"getTriMeshTranslation(int geom)"},
-	 { (char *)"getTriMeshRotation", _wrap_getTriMeshRotation, METH_VARARGS, (char *)"getTriMeshRotation(int geom)"},
-	 { (char *)"getTriMeshBB", _wrap_getTriMeshBB, METH_VARARGS, (char *)"getTriMeshBB(int geom)"},
-	 { (char *)"getTriMeshNumVerts", _wrap_getTriMeshNumVerts, METH_VARARGS, (char *)"getTriMeshNumVerts(int geom) -> int"},
-	 { (char *)"getTriMeshNumTris", _wrap_getTriMeshNumTris, METH_VARARGS, (char *)"getTriMeshNumTris(int geom) -> int"},
-	 { (char *)"getTriMeshVerts", _wrap_getTriMeshVerts, METH_VARARGS, (char *)"getTriMeshVerts(int geom) -> double *"},
-	 { (char *)"getTriMeshTris", _wrap_getTriMeshTris, METH_VARARGS, (char *)"getTriMeshTris(int geom) -> int *"},
-	 { (char *)"makePointGeom", _wrap_makePointGeom, METH_VARARGS, (char *)"makePointGeom(int geom, double const [3] x)"},
-	 { (char *)"makeSphereGeom", _wrap_makeSphereGeom, METH_VARARGS, (char *)"makeSphereGeom(int geom, double const [3] c, double r)"},
-	 { (char *)"makeRayGeom", _wrap_makeRayGeom, METH_VARARGS, (char *)"makeRayGeom(int geom, double const [3] s, double const [3] d)"},
-	 { (char *)"makeLineGeom", _wrap_makeLineGeom, METH_VARARGS, (char *)"makeLineGeom(int geom, double const [3] s, double const [3] d)"},
-	 { (char *)"makeSegmentGeom", _wrap_makeSegmentGeom, METH_VARARGS, (char *)"makeSegmentGeom(int geom, double const [3] a, double const [3] b)"},
-	 { (char *)"makeAABBGeom", _wrap_makeAABBGeom, METH_VARARGS, (char *)"makeAABBGeom(int geom, double const [3] bmin, double const [3] bmax)"},
-	 { (char *)"makeGroupGeom", _wrap_makeGroupGeom, METH_VARARGS, (char *)"makeGroupGeom(int geom, int * geoms, int numgeoms)"},
-	 { (char *)"collide", _wrap_collide, METH_VARARGS, (char *)"collide(int geom1, int geom2) -> bool"},
-	 { (char *)"withinTolerance", _wrap_withinTolerance, METH_VARARGS, (char *)"withinTolerance(int geom1, int geom2, double tol) -> bool"},
-	 { (char *)"distance", _wrap_distance, METH_VARARGS, (char *)"distance(int geom1, int geom2, double relErr, double absErr) -> double"},
-	 { (char *)"closestPoints", _wrap_closestPoints, METH_VARARGS, (char *)"closestPoints(int geom1, int geom2)"},
-	 { (char *)"rayCast", _wrap_rayCast, METH_VARARGS, (char *)"rayCast(int geom, double const [3] s, double const [3] d) -> bool"},
-	 { (char *)"makeCollQuery", _wrap_makeCollQuery, METH_VARARGS, (char *)"makeCollQuery(int geom1, int geom2) -> int"},
-	 { (char *)"destroyCollQuery", _wrap_destroyCollQuery, METH_VARARGS, (char *)"destroyCollQuery(int query)"},
-	 { (char *)"queryCollide", _wrap_queryCollide, METH_VARARGS, (char *)"queryCollide(int query) -> bool"},
-	 { (char *)"queryWithinTolerance", _wrap_queryWithinTolerance, METH_VARARGS, (char *)"queryWithinTolerance(int query, double tol) -> bool"},
-	 { (char *)"queryDistance", _wrap_queryDistance, METH_VARARGS, (char *)"queryDistance(int query, double relErr, double absErr) -> double"},
-	 { (char *)"queryClosestPoints", _wrap_queryClosestPoints, METH_VARARGS, (char *)"queryClosestPoints(int query)"},
-	 { (char *)"queryTolerancePoints", _wrap_queryTolerancePoints, METH_VARARGS, (char *)"queryTolerancePoints(int query)"},
-	 { (char *)"destroy", _wrap_destroy, METH_VARARGS, (char *)"destroy()"},
+	 { (char *)"setTriMeshTranslation", _wrap_setTriMeshTranslation, METH_VARARGS, (char *)"\n"
+		"setTriMeshTranslation(int geom, double const [3] t)\n"
+		"\n"
+		"void\n"
+		"setTriMeshTranslation(int geom, const double t[3])\n"
+		"\n"
+		"Sets the translation of a trimesh geom. \n"
+		""},
+	 { (char *)"setTriMeshRotation", _wrap_setTriMeshRotation, METH_VARARGS, (char *)"\n"
+		"setTriMeshRotation(int geom, double const [9] r)\n"
+		"\n"
+		"void\n"
+		"setTriMeshRotation(int geom, const double r[9])\n"
+		"\n"
+		"Sets the rotation of a trimesh geom. \n"
+		""},
+	 { (char *)"getTriMeshTranslation", _wrap_getTriMeshTranslation, METH_VARARGS, (char *)"\n"
+		"getTriMeshTranslation(int geom)\n"
+		"\n"
+		"void\n"
+		"getTriMeshTranslation(int geom, double out[3])\n"
+		"\n"
+		"Gets the translation of a trimesh geom. \n"
+		""},
+	 { (char *)"getTriMeshRotation", _wrap_getTriMeshRotation, METH_VARARGS, (char *)"\n"
+		"getTriMeshRotation(int geom)\n"
+		"\n"
+		"void\n"
+		"getTriMeshRotation(int geom, double out[9])\n"
+		"\n"
+		"Gets the rotation of a trimesh geom. \n"
+		""},
+	 { (char *)"getTriMeshBB", _wrap_getTriMeshBB, METH_VARARGS, (char *)"\n"
+		"getTriMeshBB(int geom)\n"
+		"\n"
+		"void getTriMeshBB(int geom,\n"
+		"double out[3], double out2[3])\n"
+		"\n"
+		"Gets the bounding box of a trimesh geom. \n"
+		""},
+	 { (char *)"getTriMeshNumVerts", _wrap_getTriMeshNumVerts, METH_VARARGS, (char *)"\n"
+		"getTriMeshNumVerts(int geom) -> int\n"
+		"\n"
+		"int getTriMeshNumVerts(int\n"
+		"geom)\n"
+		"\n"
+		"Gets the number of vertices of a trimesh geom. \n"
+		""},
+	 { (char *)"getTriMeshNumTris", _wrap_getTriMeshNumTris, METH_VARARGS, (char *)"\n"
+		"getTriMeshNumTris(int geom) -> int\n"
+		"\n"
+		"int getTriMeshNumTris(int\n"
+		"geom)\n"
+		"\n"
+		"Gets the number of triangles of a trimesh geom. \n"
+		""},
+	 { (char *)"getTriMeshVerts", _wrap_getTriMeshVerts, METH_VARARGS, (char *)"\n"
+		"getTriMeshVerts(int geom) -> double *\n"
+		"\n"
+		"double* getTriMeshVerts(int\n"
+		"geom)\n"
+		"\n"
+		"Gets the vertex data of a trimesh geom (length nv*3). \n"
+		""},
+	 { (char *)"getTriMeshTris", _wrap_getTriMeshTris, METH_VARARGS, (char *)"\n"
+		"getTriMeshTris(int geom) -> int *\n"
+		"\n"
+		"int* getTriMeshTris(int geom)\n"
+		"\n"
+		"Gets the index data of a trimesh geom (length nt*3). \n"
+		""},
+	 { (char *)"makePointGeom", _wrap_makePointGeom, METH_VARARGS, (char *)"\n"
+		"makePointGeom(int geom, double const [3] x)\n"
+		"\n"
+		"void makePointGeom(int geom,\n"
+		"const double x[3])\n"
+		"\n"
+		"Makes a geom into a point x. \n"
+		""},
+	 { (char *)"makeSphereGeom", _wrap_makeSphereGeom, METH_VARARGS, (char *)"\n"
+		"makeSphereGeom(int geom, double const [3] c, double r)\n"
+		"\n"
+		"void makeSphereGeom(int geom,\n"
+		"const double c[3], double r)\n"
+		"\n"
+		"Makes a geom into a sphere centered at c with radius r. \n"
+		""},
+	 { (char *)"makeRayGeom", _wrap_makeRayGeom, METH_VARARGS, (char *)"\n"
+		"makeRayGeom(int geom, double const [3] s, double const [3] d)\n"
+		"\n"
+		"void makeRayGeom(int geom, const\n"
+		"double s[3], const double d[3])\n"
+		"\n"
+		"Makes a geom into a ray with source s and direction d. \n"
+		""},
+	 { (char *)"makeLineGeom", _wrap_makeLineGeom, METH_VARARGS, (char *)"\n"
+		"makeLineGeom(int geom, double const [3] s, double const [3] d)\n"
+		"\n"
+		"void makeLineGeom(int geom,\n"
+		"const double s[3], const double d[3])\n"
+		"\n"
+		"Makes a geom into a line with source s and direction d. \n"
+		""},
+	 { (char *)"makeSegmentGeom", _wrap_makeSegmentGeom, METH_VARARGS, (char *)"\n"
+		"makeSegmentGeom(int geom, double const [3] a, double const [3] b)\n"
+		"\n"
+		"void makeSegmentGeom(int\n"
+		"geom, const double a[3], const double b[3])\n"
+		"\n"
+		"Makes a geom into a segment with endpoints a, b. \n"
+		""},
+	 { (char *)"makeAABBGeom", _wrap_makeAABBGeom, METH_VARARGS, (char *)"\n"
+		"makeAABBGeom(int geom, double const [3] bmin, double const [3] bmax)\n"
+		"\n"
+		"void makeAABBGeom(int geom,\n"
+		"const double bmin[3], const double bmax[3])\n"
+		"\n"
+		"Makes a geom into an axis-aligned bounding box with lower bound bmin\n"
+		"and upper bound bmax. \n"
+		""},
+	 { (char *)"makeGroupGeom", _wrap_makeGroupGeom, METH_VARARGS, (char *)"\n"
+		"makeGroupGeom(int geom, int * geoms, int numgeoms)\n"
+		"\n"
+		"void makeGroupGeom(int geom,\n"
+		"int *geoms, int numgeoms)\n"
+		"\n"
+		"Makes a geom into a group geom from an array of other geoms. Note: in\n"
+		"Python, must use an intArray for geoms argument. \n"
+		""},
+	 { (char *)"collide", _wrap_collide, METH_VARARGS, (char *)"\n"
+		"collide(int geom1, int geom2) -> bool\n"
+		"\n"
+		"bool collide(int geom1, int geom2)\n"
+		"\n"
+		"Tests whether the two geometries collide. \n"
+		""},
+	 { (char *)"withinTolerance", _wrap_withinTolerance, METH_VARARGS, (char *)"\n"
+		"withinTolerance(int geom1, int geom2, double tol) -> bool\n"
+		"\n"
+		"bool withinTolerance(int\n"
+		"geom1, int geom2, double tol)\n"
+		"\n"
+		"Tests whether the two geometries are within the given tolerance. \n"
+		""},
+	 { (char *)"distance", _wrap_distance, METH_VARARGS, (char *)"\n"
+		"distance(int geom1, int geom2, double relErr, double absErr) -> double\n"
+		"\n"
+		"double distance(int geom1, int\n"
+		"geom2, double relErr, double absErr)\n"
+		"\n"
+		"Returns the distance between the two geometries, possibly with an\n"
+		"approximation error (useful to speed up mesh-mesh distance detection)\n"
+		"\n"
+		"Error of result is no more than D*relErr+absErr where D is the actual\n"
+		"distance. Set relErr=absErr=0 to get exact distance.\n"
+		"\n"
+		"NOTE: Not yet implemented. \n"
+		""},
+	 { (char *)"closestPoints", _wrap_closestPoints, METH_VARARGS, (char *)"\n"
+		"closestPoints(int geom1, int geom2)\n"
+		"\n"
+		"void closestPoints(int geom1,\n"
+		"int geom2, double out[3], double out2[3])\n"
+		"\n"
+		"Returns the closest points between the two geometries. These are given\n"
+		"in world coordinates.\n"
+		"\n"
+		"NOTE: Not yet implemented. \n"
+		""},
+	 { (char *)"rayCast", _wrap_rayCast, METH_VARARGS, (char *)"\n"
+		"rayCast(int geom, double const [3] s, double const [3] d) -> bool\n"
+		"\n"
+		"bool rayCast(int geom, const double\n"
+		"s[3], const double d[3], double out[3])\n"
+		"\n"
+		"Returns true if the geometry is hit by the given ray, and also returns\n"
+		"the hit point (in world coordinates). \n"
+		""},
+	 { (char *)"makeCollQuery", _wrap_makeCollQuery, METH_VARARGS, (char *)"\n"
+		"makeCollQuery(int geom1, int geom2) -> int\n"
+		"\n"
+		"int makeCollQuery(int geom1,\n"
+		"int geom2)\n"
+		"\n"
+		"Creates a collision query object attachd to the two given geometries.\n"
+		"For mesh-mesh collisions, on repeated calls, this may be somewhat\n"
+		"faster than querying from scratch. \n"
+		""},
+	 { (char *)"destroyCollQuery", _wrap_destroyCollQuery, METH_VARARGS, (char *)"\n"
+		"destroyCollQuery(int query)\n"
+		"\n"
+		"void destroyCollQuery(int\n"
+		"query)\n"
+		"\n"
+		"Deletes a collision query object. \n"
+		""},
+	 { (char *)"queryCollide", _wrap_queryCollide, METH_VARARGS, (char *)"\n"
+		"queryCollide(int query) -> bool\n"
+		"\n"
+		"bool queryCollide(int query)\n"
+		"\n"
+		"Checks if the two geoms associated with this query are colliding. \n"
+		""},
+	 { (char *)"queryWithinTolerance", _wrap_queryWithinTolerance, METH_VARARGS, (char *)"\n"
+		"queryWithinTolerance(int query, double tol) -> bool\n"
+		"\n"
+		"bool\n"
+		"queryWithinTolerance(int query, double tol)\n"
+		"\n"
+		"Checks if the two geoms associated with this query are within the\n"
+		"given tolerance.\n"
+		"\n"
+		"See:   withinTolerance \n"
+		""},
+	 { (char *)"queryDistance", _wrap_queryDistance, METH_VARARGS, (char *)"\n"
+		"queryDistance(int query, double relErr, double absErr) -> double\n"
+		"\n"
+		"double queryDistance(int query,\n"
+		"double relErr, double absErr)\n"
+		"\n"
+		"Computes the distance betweeen the two geoms associated with this\n"
+		"query.\n"
+		"\n"
+		"See:   distance \n"
+		""},
+	 { (char *)"queryClosestPoints", _wrap_queryClosestPoints, METH_VARARGS, (char *)"\n"
+		"queryClosestPoints(int query)\n"
+		"\n"
+		"void\n"
+		"queryClosestPoints(int query, double out[3], double out2[3])\n"
+		"\n"
+		"Computes points that give rise to the closest distance betweeen the\n"
+		"two geoms associated with this query.\n"
+		"\n"
+		"See:   closestPoints \n"
+		""},
+	 { (char *)"queryTolerancePoints", _wrap_queryTolerancePoints, METH_VARARGS, (char *)"\n"
+		"queryTolerancePoints(int query)\n"
+		"\n"
+		"void\n"
+		"queryTolerancePoints(int query, double out[3], double out2[3])\n"
+		"\n"
+		"If the two geoms associated with this query are within a given\n"
+		"tolerance (from a previous queryWithinTolerance call), this produces\n"
+		"the points on geom1 and geom2, respectively that are within that\n"
+		"tolerance. \n"
+		""},
 	 { NULL, NULL, 0, NULL }
 };
 

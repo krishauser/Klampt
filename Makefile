@@ -60,8 +60,8 @@ clean:
 	cd Planning; make clean
 	cd IO; make clean
 	cd View; make clean
-	cd Interface; make
-	rm $(LIBDIR)/*.a
+	cd Interface; make clean
+	rm -f $(LIBDIR)/*.a
 
 RobotTest: lib
 	cd Main; make test.o

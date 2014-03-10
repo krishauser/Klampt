@@ -1,6 +1,9 @@
 #ifndef COLLIDE_H
 #define COLLIDE_H
 
+/** @file collide.h
+ * @brief C bindings for the collide module. */
+
 /* @brief Creates a new empty geometry ID.  When done, this ID should be
  * freed from memory using destroyGeom(id) or destroy().
  */ 

@@ -146,6 +146,8 @@ void QtGUIBase::SendMouseWheel(QWheelEvent *e){
 
 void QtGUIBase::SendKeyDown(QKeyEvent *e){
     int key = e->key();
+    if(key==Qt::Key_Shift || key==Qt::Key_Control){
+        return;}
     if(!(e->modifiers() & Qt::ShiftModifier))key=tolower(key);
     GenericGUIBase::SendKeyDown(string(1,key));
 }

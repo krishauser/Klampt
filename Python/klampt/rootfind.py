@@ -73,28 +73,73 @@ except AttributeError:
 
 
 def setFTolerance(*args):
+  """
+    setFTolerance(double tolf)
+
+    void setFTolerance(double tolf)
+
+    Sets the termination threshold for the change in f. 
+    """
   return _rootfind.setFTolerance(*args)
-setFTolerance = _rootfind.setFTolerance
 
 def setXTolerance(*args):
+  """
+    setXTolerance(double tolx)
+
+    void setXTolerance(double tolx)
+
+    Sets the termination threshold for the change in x. 
+    """
   return _rootfind.setXTolerance(*args)
-setXTolerance = _rootfind.setXTolerance
 
 def setVectorField(*args):
+  """
+    setVectorField(PyObject * pVFObj) -> int
+
+    int setVectorField(PyObject
+    *pVFObj)
+
+    Sets the vector field object, returns 0 if pVFObj = NULL, 1 otherwise.
+
+    """
   return _rootfind.setVectorField(*args)
-setVectorField = _rootfind.setVectorField
 
 def findRoots(*args):
+  """
+    findRoots(PyObject * startVals, int iter) -> PyObject *
+
+    PyObject* findRoots(PyObject
+    *startVals, int iter)
+
+    Performs unconstrained root finding for up to iter iterations Return
+    values is a tuple indicating (0,x,n) : convergence reached in x
+    (1,x,n) : convergence reached in f (2,x,n) : divergence (3,x,n) :
+    degeneration of gradient (local extremum or saddle point) (4,x,n) :
+    maximum iterations reached (5,x,n) : numerical error occurred where x
+    is the final point and n is the number of iterations used 
+    """
   return _rootfind.findRoots(*args)
-findRoots = _rootfind.findRoots
 
 def findRootsBounded(*args):
+  """
+    findRootsBounded(PyObject * startVals, PyObject * boundVals, int iter) -> PyObject *
+
+    PyObject*
+    findRootsBounded(PyObject *startVals, PyObject *boundVals, int iter)
+
+    Same as findRoots, but with given bounds (xmin,xmax) 
+    """
   return _rootfind.findRootsBounded(*args)
-findRootsBounded = _rootfind.findRootsBounded
 
 def destroy():
+  """
+    destroy()
+
+    void destroy()
+
+    destroys internal data structures 
+    """
   return _rootfind.destroy()
-destroy = _rootfind.destroy
 # This file is compatible with both classic and new-style classes.
 
 

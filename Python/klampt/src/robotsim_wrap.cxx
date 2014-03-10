@@ -28664,27 +28664,95 @@ static PyMethodDef SwigMethods[] = {
 		""},
 	 { (char *)"delete_TriangleMesh", _wrap_delete_TriangleMesh, METH_VARARGS, (char *)"delete_TriangleMesh(TriangleMesh self)"},
 	 { (char *)"TriangleMesh_swigregister", TriangleMesh_swigregister, METH_VARARGS, NULL},
-	 { (char *)"PointCloud_translate", _wrap_PointCloud_translate, METH_VARARGS, (char *)"PointCloud_translate(PointCloud self, double const [3] t)"},
-	 { (char *)"PointCloud_transform", _wrap_PointCloud_transform, METH_VARARGS, (char *)"PointCloud_transform(PointCloud self, double const [9] R, double const [3] t)"},
+	 { (char *)"PointCloud_translate", _wrap_PointCloud_translate, METH_VARARGS, (char *)"\n"
+		"PointCloud_translate(PointCloud self, double const [3] t)\n"
+		"\n"
+		"void\n"
+		"PointCloud::translate(const double t[3]) \n"
+		""},
+	 { (char *)"PointCloud_transform", _wrap_PointCloud_transform, METH_VARARGS, (char *)"\n"
+		"PointCloud_transform(PointCloud self, double const [9] R, double const [3] t)\n"
+		"\n"
+		"void\n"
+		"PointCloud::transform(const double R[9], const double t[3]) \n"
+		""},
 	 { (char *)"PointCloud_vertices_set", _wrap_PointCloud_vertices_set, METH_VARARGS, (char *)"PointCloud_vertices_set(PointCloud self, doubleVector vertices)"},
 	 { (char *)"PointCloud_vertices_get", _wrap_PointCloud_vertices_get, METH_VARARGS, (char *)"PointCloud_vertices_get(PointCloud self) -> doubleVector"},
 	 { (char *)"PointCloud_propertyNames_set", _wrap_PointCloud_propertyNames_set, METH_VARARGS, (char *)"PointCloud_propertyNames_set(PointCloud self, std::vector< std::string,std::allocator< std::string > > * propertyNames)"},
 	 { (char *)"PointCloud_propertyNames_get", _wrap_PointCloud_propertyNames_get, METH_VARARGS, (char *)"PointCloud_propertyNames_get(PointCloud self) -> std::vector< std::string,std::allocator< std::string > > *"},
 	 { (char *)"PointCloud_properties_set", _wrap_PointCloud_properties_set, METH_VARARGS, (char *)"PointCloud_properties_set(PointCloud self, doubleVector properties)"},
 	 { (char *)"PointCloud_properties_get", _wrap_PointCloud_properties_get, METH_VARARGS, (char *)"PointCloud_properties_get(PointCloud self) -> doubleVector"},
-	 { (char *)"new_PointCloud", _wrap_new_PointCloud, METH_VARARGS, (char *)"new_PointCloud() -> PointCloud"},
+	 { (char *)"new_PointCloud", _wrap_new_PointCloud, METH_VARARGS, (char *)"\n"
+		"new_PointCloud() -> PointCloud\n"
+		"\n"
+		"A 3D point cloud class. vertices is a list of vertices, given as a\n"
+		"list [x1, y1, z1, x2, y2, ... zn] properties is a list of vertex\n"
+		"properties, given as a list [p11, p21, ..., pk1, p12, p22, ..., pk2,\n"
+		"... , pn1, pn2, ..., pn2] where each vertex has k properties. The name\n"
+		"of each property is given by the propertyNames member.\n"
+		"\n"
+		"C++ includes: robotmodel.h \n"
+		""},
 	 { (char *)"delete_PointCloud", _wrap_delete_PointCloud, METH_VARARGS, (char *)"delete_PointCloud(PointCloud self)"},
 	 { (char *)"PointCloud_swigregister", PointCloud_swigregister, METH_VARARGS, NULL},
-	 { (char *)"new_Geometry3D", _wrap_new_Geometry3D, METH_VARARGS, (char *)"new_Geometry3D() -> Geometry3D"},
-	 { (char *)"Geometry3D_type", _wrap_Geometry3D_type, METH_VARARGS, (char *)"Geometry3D_type(Geometry3D self) -> std::string"},
-	 { (char *)"Geometry3D_getTriangleMesh", _wrap_Geometry3D_getTriangleMesh, METH_VARARGS, (char *)"Geometry3D_getTriangleMesh(Geometry3D self) -> TriangleMesh"},
-	 { (char *)"Geometry3D_getPointCloud", _wrap_Geometry3D_getPointCloud, METH_VARARGS, (char *)"Geometry3D_getPointCloud(Geometry3D self) -> PointCloud"},
-	 { (char *)"Geometry3D_setTriangleMesh", _wrap_Geometry3D_setTriangleMesh, METH_VARARGS, (char *)"Geometry3D_setTriangleMesh(Geometry3D self, TriangleMesh arg2)"},
-	 { (char *)"Geometry3D_setPointCloud", _wrap_Geometry3D_setPointCloud, METH_VARARGS, (char *)"Geometry3D_setPointCloud(Geometry3D self, PointCloud arg2)"},
-	 { (char *)"Geometry3D_translate", _wrap_Geometry3D_translate, METH_VARARGS, (char *)"Geometry3D_translate(Geometry3D self, double const [3] t)"},
-	 { (char *)"Geometry3D_transform", _wrap_Geometry3D_transform, METH_VARARGS, (char *)"Geometry3D_transform(Geometry3D self, double const [9] R, double const [3] t)"},
-	 { (char *)"Geometry3D_setCollisionMargin", _wrap_Geometry3D_setCollisionMargin, METH_VARARGS, (char *)"Geometry3D_setCollisionMargin(Geometry3D self, double margin)"},
-	 { (char *)"Geometry3D_getCollisionMargin", _wrap_Geometry3D_getCollisionMargin, METH_VARARGS, (char *)"Geometry3D_getCollisionMargin(Geometry3D self) -> double"},
+	 { (char *)"new_Geometry3D", _wrap_new_Geometry3D, METH_VARARGS, (char *)"\n"
+		"new_Geometry3D() -> Geometry3D\n"
+		"\n"
+		"Geometry3D::Geometry3D() \n"
+		""},
+	 { (char *)"Geometry3D_type", _wrap_Geometry3D_type, METH_VARARGS, (char *)"\n"
+		"Geometry3D_type(Geometry3D self) -> std::string\n"
+		"\n"
+		"string Geometry3D::type() \n"
+		""},
+	 { (char *)"Geometry3D_getTriangleMesh", _wrap_Geometry3D_getTriangleMesh, METH_VARARGS, (char *)"\n"
+		"Geometry3D_getTriangleMesh(Geometry3D self) -> TriangleMesh\n"
+		"\n"
+		"TriangleMesh\n"
+		"Geometry3D::getTriangleMesh() \n"
+		""},
+	 { (char *)"Geometry3D_getPointCloud", _wrap_Geometry3D_getPointCloud, METH_VARARGS, (char *)"\n"
+		"Geometry3D_getPointCloud(Geometry3D self) -> PointCloud\n"
+		"\n"
+		"PointCloud\n"
+		"Geometry3D::getPointCloud() \n"
+		""},
+	 { (char *)"Geometry3D_setTriangleMesh", _wrap_Geometry3D_setTriangleMesh, METH_VARARGS, (char *)"\n"
+		"Geometry3D_setTriangleMesh(Geometry3D self, TriangleMesh arg2)\n"
+		"\n"
+		"void\n"
+		"Geometry3D::setTriangleMesh(const TriangleMesh &) \n"
+		""},
+	 { (char *)"Geometry3D_setPointCloud", _wrap_Geometry3D_setPointCloud, METH_VARARGS, (char *)"\n"
+		"Geometry3D_setPointCloud(Geometry3D self, PointCloud arg2)\n"
+		"\n"
+		"void\n"
+		"Geometry3D::setPointCloud(const PointCloud &) \n"
+		""},
+	 { (char *)"Geometry3D_translate", _wrap_Geometry3D_translate, METH_VARARGS, (char *)"\n"
+		"Geometry3D_translate(Geometry3D self, double const [3] t)\n"
+		"\n"
+		"void\n"
+		"Geometry3D::translate(const double t[3]) \n"
+		""},
+	 { (char *)"Geometry3D_transform", _wrap_Geometry3D_transform, METH_VARARGS, (char *)"\n"
+		"Geometry3D_transform(Geometry3D self, double const [9] R, double const [3] t)\n"
+		"\n"
+		"void\n"
+		"Geometry3D::transform(const double R[9], const double t[3]) \n"
+		""},
+	 { (char *)"Geometry3D_setCollisionMargin", _wrap_Geometry3D_setCollisionMargin, METH_VARARGS, (char *)"\n"
+		"Geometry3D_setCollisionMargin(Geometry3D self, double margin)\n"
+		"\n"
+		"void\n"
+		"Geometry3D::setCollisionMargin(double margin) \n"
+		""},
+	 { (char *)"Geometry3D_getCollisionMargin", _wrap_Geometry3D_getCollisionMargin, METH_VARARGS, (char *)"\n"
+		"Geometry3D_getCollisionMargin(Geometry3D self) -> double\n"
+		"\n"
+		"double\n"
+		"Geometry3D::getCollisionMargin() \n"
+		""},
 	 { (char *)"Geometry3D_world_set", _wrap_Geometry3D_world_set, METH_VARARGS, (char *)"Geometry3D_world_set(Geometry3D self, int world)"},
 	 { (char *)"Geometry3D_world_get", _wrap_Geometry3D_world_get, METH_VARARGS, (char *)"Geometry3D_world_get(Geometry3D self) -> int"},
 	 { (char *)"Geometry3D_id_set", _wrap_Geometry3D_id_set, METH_VARARGS, (char *)"Geometry3D_id_set(Geometry3D self, int id)"},
@@ -28737,7 +28805,12 @@ static PyMethodDef SwigMethods[] = {
 		"void\n"
 		"RobotModelLink::setParent(int p) \n"
 		""},
-	 { (char *)"RobotModelLink_getGeometry", _wrap_RobotModelLink_getGeometry, METH_VARARGS, (char *)"RobotModelLink_getGeometry(RobotModelLink self) -> Geometry3D"},
+	 { (char *)"RobotModelLink_getGeometry", _wrap_RobotModelLink_getGeometry, METH_VARARGS, (char *)"\n"
+		"RobotModelLink_getGeometry(RobotModelLink self) -> Geometry3D\n"
+		"\n"
+		"Geometry3D\n"
+		"RobotModelLink::getGeometry() \n"
+		""},
 	 { (char *)"RobotModelLink_getMass", _wrap_RobotModelLink_getMass, METH_VARARGS, (char *)"\n"
 		"RobotModelLink_getMass(RobotModelLink self) -> Mass\n"
 		"\n"
@@ -29142,7 +29215,12 @@ static PyMethodDef SwigMethods[] = {
 		"const char *\n"
 		"RigidObjectModel::getName() \n"
 		""},
-	 { (char *)"RigidObjectModel_getGeometry", _wrap_RigidObjectModel_getGeometry, METH_VARARGS, (char *)"RigidObjectModel_getGeometry(RigidObjectModel self) -> Geometry3D"},
+	 { (char *)"RigidObjectModel_getGeometry", _wrap_RigidObjectModel_getGeometry, METH_VARARGS, (char *)"\n"
+		"RigidObjectModel_getGeometry(RigidObjectModel self) -> Geometry3D\n"
+		"\n"
+		"Geometry3D\n"
+		"RigidObjectModel::getGeometry() \n"
+		""},
 	 { (char *)"RigidObjectModel_getMass", _wrap_RigidObjectModel_getMass, METH_VARARGS, (char *)"\n"
 		"RigidObjectModel_getMass(RigidObjectModel self) -> Mass\n"
 		"\n"
@@ -29212,7 +29290,12 @@ static PyMethodDef SwigMethods[] = {
 		"const char *\n"
 		"TerrainModel::getName() \n"
 		""},
-	 { (char *)"TerrainModel_getGeometry", _wrap_TerrainModel_getGeometry, METH_VARARGS, (char *)"TerrainModel_getGeometry(TerrainModel self) -> Geometry3D"},
+	 { (char *)"TerrainModel_getGeometry", _wrap_TerrainModel_getGeometry, METH_VARARGS, (char *)"\n"
+		"TerrainModel_getGeometry(TerrainModel self) -> Geometry3D\n"
+		"\n"
+		"Geometry3D\n"
+		"TerrainModel::getGeometry() \n"
+		""},
 	 { (char *)"TerrainModel_setFriction", _wrap_TerrainModel_setFriction, METH_VARARGS, (char *)"\n"
 		"TerrainModel_setFriction(TerrainModel self, double friction)\n"
 		"\n"
@@ -29867,9 +29950,10 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"void\n"
 		"SimRobotController::setPIDCommand(const std::vector< double > &qdes,\n"
-		"const std::vector< double > &dqdes)\n"
+		"const std::vector< double > &dqdes, const std::vector< double >\n"
+		"&tfeedforward)\n"
 		"\n"
-		"Sets a PID command controller. \n"
+		"Sets a PID command controller with feedforward torques. \n"
 		""},
 	 { (char *)"SimRobotController_setManualMode", _wrap_SimRobotController_setManualMode, METH_VARARGS, (char *)"\n"
 		"SimRobotController_setManualMode(SimRobotController self, bool enabled)\n"

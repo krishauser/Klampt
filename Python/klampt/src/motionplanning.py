@@ -73,40 +73,166 @@ except AttributeError:
 
 
 def setRandomSeed(*args):
+  """
+    setRandomSeed(int seed)
+
+    void setRandomSeed(int seed)
+
+    Sets the random seed used by the motion planner. 
+    """
   return _motionplanning.setRandomSeed(*args)
-setRandomSeed = _motionplanning.setRandomSeed
 
 def setPlanType(*args):
+  """
+    setPlanType(char const * type)
+
+    void setPlanType(const char
+    *type)
+
+    Sets the planner type.
+
+    Valid values are "prm": Probabilistic roadmap
+
+    "rrt": Rapidly-exploring Random Trees
+
+    "sbl": The SBL (single-query, bidirectional, lazy) planner 
+    """
   return _motionplanning.setPlanType(*args)
-setPlanType = _motionplanning.setPlanType
 
 def setPlanSetting(*args):
+  """
+    setPlanSetting(char const * setting, double value)
+
+    void setPlanSetting(const char
+    *setting, double value)
+
+    Sets a setting for the planner.
+
+    Valid values are "knn": k value for the k-nearest neighbor
+    connection strategy (only for PRM)
+
+    "connectionThreshold": a milestone connection threshold
+
+    "perturbationRadius": (only for RRT and SBL)
+
+    "bidirectional": 1 if bidirectional planning is requested (only for
+    RRT)
+
+    "grid": 1 if a point selection grid should be used (only for SBL)
+
+    "gridResolution": resolution for the grid, if the grid should be
+    used
+
+    "randomizeFrequency": a grid randomization frequency (only for SBL)
+
+    """
   return _motionplanning.setPlanSetting(*args)
-setPlanSetting = _motionplanning.setPlanSetting
 
 def destroy():
+  """
+    destroy()
+
+    void destroy()
+
+    destroys internal data structures 
+    """
   return _motionplanning.destroy()
-destroy = _motionplanning.destroy
 class CSpaceInterface(_object):
+    """
+    A raw interface for a configuration space. The CSpace interface in
+    cspace.py is easier to use.
+
+    C++ includes: motionplanning.h 
+    """
     __swig_setmethods__ = {}
     __setattr__ = lambda self, name, value: _swig_setattr(self, CSpaceInterface, name, value)
     __swig_getmethods__ = {}
     __getattr__ = lambda self, name: _swig_getattr(self, CSpaceInterface, name)
     __repr__ = _swig_repr
     def __init__(self, *args): 
+        """
+        __init__(CSpaceInterface self) -> CSpaceInterface
+        __init__(CSpaceInterface self, CSpaceInterface arg2) -> CSpaceInterface
+
+        CSpaceInterface::CSpaceInterface(const CSpaceInterface &) 
+        """
         this = _motionplanning.new_CSpaceInterface(*args)
         try: self.this.append(this)
         except: self.this = this
     __swig_destroy__ = _motionplanning.delete_CSpaceInterface
     __del__ = lambda self : None;
-    def destroy(self): return _motionplanning.CSpaceInterface_destroy(self)
-    def setFeasibility(self, *args): return _motionplanning.CSpaceInterface_setFeasibility(self, *args)
-    def setVisibility(self, *args): return _motionplanning.CSpaceInterface_setVisibility(self, *args)
-    def setVisibilityEpsilon(self, *args): return _motionplanning.CSpaceInterface_setVisibilityEpsilon(self, *args)
-    def setSampler(self, *args): return _motionplanning.CSpaceInterface_setSampler(self, *args)
-    def setNeighborhoodSampler(self, *args): return _motionplanning.CSpaceInterface_setNeighborhoodSampler(self, *args)
-    def setDistance(self, *args): return _motionplanning.CSpaceInterface_setDistance(self, *args)
-    def setInterpolate(self, *args): return _motionplanning.CSpaceInterface_setInterpolate(self, *args)
+    def destroy(self):
+        """
+        destroy(CSpaceInterface self)
+
+        void
+        CSpaceInterface::destroy() 
+        """
+        return _motionplanning.CSpaceInterface_destroy(self)
+
+    def setFeasibility(self, *args):
+        """
+        setFeasibility(CSpaceInterface self, PyObject * pyFeas)
+
+        void
+        CSpaceInterface::setFeasibility(PyObject *pyFeas) 
+        """
+        return _motionplanning.CSpaceInterface_setFeasibility(self, *args)
+
+    def setVisibility(self, *args):
+        """
+        setVisibility(CSpaceInterface self, PyObject * pyVisible)
+
+        void
+        CSpaceInterface::setVisibility(PyObject *pyVisible) 
+        """
+        return _motionplanning.CSpaceInterface_setVisibility(self, *args)
+
+    def setVisibilityEpsilon(self, *args):
+        """
+        setVisibilityEpsilon(CSpaceInterface self, double eps)
+
+        void
+        CSpaceInterface::setVisibilityEpsilon(double eps) 
+        """
+        return _motionplanning.CSpaceInterface_setVisibilityEpsilon(self, *args)
+
+    def setSampler(self, *args):
+        """
+        setSampler(CSpaceInterface self, PyObject * pySamp)
+
+        void
+        CSpaceInterface::setSampler(PyObject *pySamp) 
+        """
+        return _motionplanning.CSpaceInterface_setSampler(self, *args)
+
+    def setNeighborhoodSampler(self, *args):
+        """
+        setNeighborhoodSampler(CSpaceInterface self, PyObject * pySamp)
+
+        void
+        CSpaceInterface::setNeighborhoodSampler(PyObject *pySamp) 
+        """
+        return _motionplanning.CSpaceInterface_setNeighborhoodSampler(self, *args)
+
+    def setDistance(self, *args):
+        """
+        setDistance(CSpaceInterface self, PyObject * pyDist)
+
+        void
+        CSpaceInterface::setDistance(PyObject *pyDist) 
+        """
+        return _motionplanning.CSpaceInterface_setDistance(self, *args)
+
+    def setInterpolate(self, *args):
+        """
+        setInterpolate(CSpaceInterface self, PyObject * pyInterp)
+
+        void
+        CSpaceInterface::setInterpolate(PyObject *pyInterp) 
+        """
+        return _motionplanning.CSpaceInterface_setInterpolate(self, *args)
+
     __swig_setmethods__["index"] = _motionplanning.CSpaceInterface_index_set
     __swig_getmethods__["index"] = _motionplanning.CSpaceInterface_index_get
     if _newclass:index = _swig_property(_motionplanning.CSpaceInterface_index_get, _motionplanning.CSpaceInterface_index_set)
@@ -114,25 +240,118 @@ CSpaceInterface_swigregister = _motionplanning.CSpaceInterface_swigregister
 CSpaceInterface_swigregister(CSpaceInterface)
 
 class PlannerInterface(_object):
+    """
+    An interface for a motion planner. The MotionPlanner interface in
+    cspace.py is somewhat easier to use.
+
+    On construction, uses the planner type specified by setPlanType and
+    the settings currently specified by calls to setPlanSetting.
+
+    Point-to-point planning is enabled using the setEndpoints method. This
+    is mandatory for RRT and SBL planners. The start and end milestones
+    are given by indices 0 and 1, respectively
+
+    PRM can be used in either point-to-point or multi-query mode. In
+    multi-query mode, you may call addMilestone(q) to add a new milestone.
+    addMilestone() returns the index of that milestone, which can be used
+    in later calls to getPath().
+
+    To plan, call planMore(iters) until getPath(0,1) returns non-NULL. The
+    return value is a list of configurations.
+
+    To get a roadmap dump, call dump(fn). This saves to a Trivial Graph
+    Format (TGF) format.
+
+    C++ includes: motionplanning.h 
+    """
     __swig_setmethods__ = {}
     __setattr__ = lambda self, name, value: _swig_setattr(self, PlannerInterface, name, value)
     __swig_getmethods__ = {}
     __getattr__ = lambda self, name: _swig_getattr(self, PlannerInterface, name)
     __repr__ = _swig_repr
     def __init__(self, *args): 
+        """
+        __init__(PlannerInterface self, CSpaceInterface cspace) -> PlannerInterface
+
+        PlannerInterface::PlannerInterface(const CSpaceInterface &cspace) 
+        """
         this = _motionplanning.new_PlannerInterface(*args)
         try: self.this.append(this)
         except: self.this = this
     __swig_destroy__ = _motionplanning.delete_PlannerInterface
     __del__ = lambda self : None;
-    def destroy(self): return _motionplanning.PlannerInterface_destroy(self)
-    def setEndpoints(self, *args): return _motionplanning.PlannerInterface_setEndpoints(self, *args)
-    def addMilestone(self, *args): return _motionplanning.PlannerInterface_addMilestone(self, *args)
-    def planMore(self, *args): return _motionplanning.PlannerInterface_planMore(self, *args)
-    def getPathEndpoints(self): return _motionplanning.PlannerInterface_getPathEndpoints(self)
-    def getPath(self, *args): return _motionplanning.PlannerInterface_getPath(self, *args)
-    def getData(self, *args): return _motionplanning.PlannerInterface_getData(self, *args)
-    def dump(self, *args): return _motionplanning.PlannerInterface_dump(self, *args)
+    def destroy(self):
+        """
+        destroy(PlannerInterface self)
+
+        void
+        PlannerInterface::destroy() 
+        """
+        return _motionplanning.PlannerInterface_destroy(self)
+
+    def setEndpoints(self, *args):
+        """
+        setEndpoints(PlannerInterface self, PyObject * start, PyObject * goal) -> bool
+
+        bool
+        PlannerInterface::setEndpoints(PyObject *start, PyObject *goal) 
+        """
+        return _motionplanning.PlannerInterface_setEndpoints(self, *args)
+
+    def addMilestone(self, *args):
+        """
+        addMilestone(PlannerInterface self, PyObject * milestone) -> int
+
+        int
+        PlannerInterface::addMilestone(PyObject *milestone) 
+        """
+        return _motionplanning.PlannerInterface_addMilestone(self, *args)
+
+    def planMore(self, *args):
+        """
+        planMore(PlannerInterface self, int iterations)
+
+        void
+        PlannerInterface::planMore(int iterations) 
+        """
+        return _motionplanning.PlannerInterface_planMore(self, *args)
+
+    def getPathEndpoints(self):
+        """
+        getPathEndpoints(PlannerInterface self) -> PyObject *
+
+        PyObject *
+        PlannerInterface::getPathEndpoints() 
+        """
+        return _motionplanning.PlannerInterface_getPathEndpoints(self)
+
+    def getPath(self, *args):
+        """
+        getPath(PlannerInterface self, int milestone1, int milestone2) -> PyObject *
+
+        PyObject *
+        PlannerInterface::getPath(int milestone1, int milestone2) 
+        """
+        return _motionplanning.PlannerInterface_getPath(self, *args)
+
+    def getData(self, *args):
+        """
+        getData(PlannerInterface self, char const * setting) -> double
+
+        double
+        PlannerInterface::getData(const char *setting) 
+        """
+        return _motionplanning.PlannerInterface_getData(self, *args)
+
+    def dump(self, *args):
+        """
+        dump(PlannerInterface self, char const * fn)
+
+        void
+        PlannerInterface::dump(const char *fn) 
+        """
+        return _motionplanning.PlannerInterface_dump(self, *args)
+
     __swig_setmethods__["index"] = _motionplanning.PlannerInterface_index_set
     __swig_getmethods__["index"] = _motionplanning.PlannerInterface_index_get
     if _newclass:index = _swig_property(_motionplanning.PlannerInterface_index_get, _motionplanning.PlannerInterface_index_set)

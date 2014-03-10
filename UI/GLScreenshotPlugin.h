@@ -45,7 +45,8 @@ public:
 
   void SaveScreenshot()
   {
-    GLSaveScreenshotPPM(screenshotFile.c_str());
+    const char* screenshotFilec=screenshotFile.c_str();
+    GLSaveScreenshotPPM(screenshotFilec);
     if(verbose) printf("Screenshot saved to %s\n",screenshotFile.c_str());
   }
 

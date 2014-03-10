@@ -78,6 +78,7 @@ if on_win32:
 #link to assimp if assimp support is desired
 if haveassimp:
     libs.append('assimp')
+    kllibs.append('assimp')
     if on_win32:
 	    extra_data.append('Assimp32.dll')
 

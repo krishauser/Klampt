@@ -3427,12 +3427,57 @@ fail:
 
 static PyMethodDef SwigMethods[] = {
 	 { (char *)"SWIG_PyInstanceMethod_New", (PyCFunction)SWIG_PyInstanceMethod_New, METH_O, NULL},
-	 { (char *)"setFTolerance", _wrap_setFTolerance, METH_VARARGS, NULL},
-	 { (char *)"setXTolerance", _wrap_setXTolerance, METH_VARARGS, NULL},
-	 { (char *)"setVectorField", _wrap_setVectorField, METH_VARARGS, NULL},
-	 { (char *)"findRoots", _wrap_findRoots, METH_VARARGS, NULL},
-	 { (char *)"findRootsBounded", _wrap_findRootsBounded, METH_VARARGS, NULL},
-	 { (char *)"destroy", _wrap_destroy, METH_VARARGS, NULL},
+	 { (char *)"setFTolerance", _wrap_setFTolerance, METH_VARARGS, (char *)"\n"
+		"setFTolerance(double tolf)\n"
+		"\n"
+		"void setFTolerance(double tolf)\n"
+		"\n"
+		"Sets the termination threshold for the change in f. \n"
+		""},
+	 { (char *)"setXTolerance", _wrap_setXTolerance, METH_VARARGS, (char *)"\n"
+		"setXTolerance(double tolx)\n"
+		"\n"
+		"void setXTolerance(double tolx)\n"
+		"\n"
+		"Sets the termination threshold for the change in x. \n"
+		""},
+	 { (char *)"setVectorField", _wrap_setVectorField, METH_VARARGS, (char *)"\n"
+		"setVectorField(PyObject * pVFObj) -> int\n"
+		"\n"
+		"int setVectorField(PyObject\n"
+		"*pVFObj)\n"
+		"\n"
+		"Sets the vector field object, returns 0 if pVFObj = NULL, 1 otherwise.\n"
+		"\n"
+		""},
+	 { (char *)"findRoots", _wrap_findRoots, METH_VARARGS, (char *)"\n"
+		"findRoots(PyObject * startVals, int iter) -> PyObject *\n"
+		"\n"
+		"PyObject* findRoots(PyObject\n"
+		"*startVals, int iter)\n"
+		"\n"
+		"Performs unconstrained root finding for up to iter iterations Return\n"
+		"values is a tuple indicating (0,x,n) : convergence reached in x\n"
+		"(1,x,n) : convergence reached in f (2,x,n) : divergence (3,x,n) :\n"
+		"degeneration of gradient (local extremum or saddle point) (4,x,n) :\n"
+		"maximum iterations reached (5,x,n) : numerical error occurred where x\n"
+		"is the final point and n is the number of iterations used \n"
+		""},
+	 { (char *)"findRootsBounded", _wrap_findRootsBounded, METH_VARARGS, (char *)"\n"
+		"findRootsBounded(PyObject * startVals, PyObject * boundVals, int iter) -> PyObject *\n"
+		"\n"
+		"PyObject*\n"
+		"findRootsBounded(PyObject *startVals, PyObject *boundVals, int iter)\n"
+		"\n"
+		"Same as findRoots, but with given bounds (xmin,xmax) \n"
+		""},
+	 { (char *)"destroy", _wrap_destroy, METH_VARARGS, (char *)"\n"
+		"destroy()\n"
+		"\n"
+		"void destroy()\n"
+		"\n"
+		"destroys internal data structures \n"
+		""},
 	 { NULL, NULL, 0, NULL }
 };
 
