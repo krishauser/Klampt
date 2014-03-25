@@ -12,6 +12,8 @@
 *.la
 *.a
 
+#compiled python libraries
+Python/build
 
 # Compiled source #
 ###################

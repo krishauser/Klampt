@@ -94,6 +94,11 @@ UserTrials:  lib
 	cd Main; make usertrials.o
 	 $(CC) $(FLAGS) $(OBJS) Main/$(OBJDIR)/usertrials.o $(LIBKLAMPT) $(LIB) -o $@
 
+MotorCalibrate: lib
+	cd Main; make motorcalibrate.o
+	 $(CC) $(FLAGS) $(OBJS) Main/$(OBJDIR)/motorcalibrate.o $(LIBKLAMPT) $(LIB) -o $@
+
+
 UserTrialsMT:  lib
 	cd Main; make usertrials_multithread.o
 	cd Input; make

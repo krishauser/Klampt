@@ -1,3 +1,4 @@
+#include "motorcalibrate.h"
 #include "Modeling/Resources.h"
 #include "Modeling/Robot.h"
 #include "Modeling/Interpolate.h"
@@ -7,17 +8,9 @@
 #include <optimization/Minimization.h>
 #include <utils/AnyCollection.h>
 #include <fstream>
-#include <timer.h>
+#include <Timer.h>
 using namespace std;
 using namespace Math;
-
-//set this to something small if you want this to be faster
-//const static size_t gMaxMilestones = 100;
-static size_t gMaxMilestones = 100000;
-
-static Vector3 gGravity(0,0,-9.8);
-static Real gDefaultTimestep = 1e-3;
-static Real gDefaultVelocityWeight = Sqr(0.005);
 
 /** @brief Simulates a single DOF under PD control and stick-slip friction.
  *
@@ -589,55 +582,7 @@ void test()
   ConstrainedForwardDynamics(robot,fixedLinks,fixedDofs,A,b);
 }
 
-
-class MotorCalibrateSettings : public AnyCollection
-{
-public:
-  MotorCalibrateSettings() {
-  }
-  bool read(const char* fn) {
-    ifstream in(fn,ios::in);
-    if(!in) return false;
-    AnyCollection newEntries;
-    if(!newEntries.read(in)) return false;
-    merge(newEntries);
-    return true;
-  }
-  bool write(const char* fn) {
-    ofstream out(fn,ios::out);
-    if(!out) return false;
-    AnyCollection::write(out);
-    out.close();
-    return true;
-  }
-};
-
-
-int main(int argc,const char** argv)
-{
-  //test();
-  //return 0;
-
-  MotorCalibrateSettings settings;
-  settings["robot"]=string();
-  settings["numIters"]=1000;
-  settings["maxMilestones"]=gMaxMilestones;
-  settings["dt"]=gDefaultTimestep;
-  settings["velocityErrorWeight"]=gDefaultVelocityWeight;
-  settings["drivers"]=vector<int>();
-  settings["fixedLinks"]=vector<int>();
-  settings["commandedPaths"]=vector<string>();
-  settings["sensedPaths"]=vector<string>();
-  if(argc <= 1) {
-    printf("Usage: MotorCalibrate settings_file\n");
-    printf("Writing default settings to motorcalibrate_default.settings");
-    settings.write("motorcalibrate_default.settings");
-    return 0;
-  }
-
-  for(int i=1;i<argc;i++)
-    settings.read(argv[i]);
-
+int motorcalibrate(AnyCollection settings){
   string robotfn;
   bool res=settings["robot"].as(robotfn); assert(res);
   int numIters = int(settings["numIters"]);
@@ -716,3 +661,36 @@ int main(int argc,const char** argv)
     printf("%g ",robot.drivers[i].viscousFriction);
   return 0;
 }
+
+int main_shell(int argc,const char** argv)
+{
+  //test();
+  //return 0;
+
+  MotorCalibrateSettings settings;
+  settings["robot"]=string();
+  settings["numIters"]=1000;
+  settings["maxMilestones"]=gMaxMilestones;
+  settings["dt"]=gDefaultTimestep;
+  settings["velocityErrorWeight"]=gDefaultVelocityWeight;
+  settings["drivers"]=vector<int>();
+  settings["fixedLinks"]=vector<int>();
+  settings["commandedPaths"]=vector<string>();
+  settings["sensedPaths"]=vector<string>();
+  if(argc <= 1) {
+    printf("Usage: MotorCalibrate settings_file\n");
+    printf("Writing default settings to motorcalibrate_default.settings");
+    settings.write("motorcalibrate_default.settings");
+    return 0;
+  }
+  for(int i=1;i<argc;i++)
+    settings.read(argv[i]);
+
+  motorcalibrate(settings);
+}
+
+#ifndef HAVE_QT
+int main(int argc,const char** argv){
+  main_shell(argc,argv);
+}
+#endif
