@@ -139,23 +139,7 @@ RobotGeodesicManifold::RobotGeodesicManifold(Robot& _robot)
 
 void RobotGeodesicManifold::InterpolateDeriv(const Config& a,const Config& b,Real u,Vector& dx)
 { 
-  if(u==0) ::InterpolateDerivative(robot,a,b,dx);
-  else if(u==1) {
-    ::InterpolateDerivative(robot,b,a,dx);
-    dx.inplaceNegative();
-  }
-  else {
-    Vector temp;
-    ::Interpolate(robot,a,b,u,temp);
-    if(u < 0.5) {
-      ::InterpolateDerivative(robot,temp,b,dx);
-      dx *= 1.0/(1.0-u);
-    }
-    else {
-      ::InterpolateDerivative(robot,temp,a,dx);
-      dx *= -1.0/u;
-    }
-  }
+  ::InterpolateDerivative(robot,a,b,u,dx);
 }
 
 void RobotGeodesicManifold::InterpolateDerivA(const Config& a,const Config& b,Real u,const Vector& da,Vector& dx) 
