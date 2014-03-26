@@ -1,5 +1,6 @@
-"""A socket that publishes variable-length messages such that the first 4
-bytes are the length of the message (in binary) and the remainder is the payload """
+"""An adaptor between python controllers and the Klamp't serial controller
+interface (SerialController).
+"""
 import asyncore,socket
 import json
 import time
@@ -20,8 +21,15 @@ def unpackStrlen(s):
     assert len(s)==headerlen
     return (ord(s[3])<<24)|(ord(s[2])<<16)|(ord(s[1])<<8)|ord(s[0])
 
-
 class JsonClient(asyncore.dispatcher):
+    """A publisher of JSON messages in the Klamp't simple serial interface.
+    Sends variable-length messages such that the first 4 bytes are
+    the length of the message (in binary) and the remainder is the payload.
+
+    Subclasses should override onMessage, which accepts with arbitrary
+    Python objects that can be serialized by the json module.
+    Subclasses should use sendMessage to send a message.
+    """
     def __init__(self, addr):
         asyncore.dispatcher.__init__(self)
         self.create_socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -29,26 +37,32 @@ class JsonClient(asyncore.dispatcher):
         self.buffer = ""
 
     def handle_connect(self):
+        """Called on socket connect.  May be overridden."""
         pass
 
     def handle_close(self):
+        """Called on socket close.  May be overridden."""
         self.close()
 
     def handle_read(self):
+        """Called on read.  Do not override; override onMessage instead."""
         lenstr = self.recv(headerlen)
         msglen = unpackStrlen(lenstr)
         msg = self.recv(msglen)
         self.onMessage(json.loads(msg))
 
     def writable(self):
+        """Called to determine whether there's any data left to be sent.
+        Do not override."""
         return (len(self.buffer) > 0)
 
     def handle_write(self):
+        """Called to send data when available.  Do not override."""
         sent = self.send(self.buffer)
         self.buffer = self.buffer[sent:]
 
     def onMessage(self,msg):
-        """Call this to parse an incoming message"""
+        """Override this to handle an incoming message"""
         pass
     
     def sendMessage(self,msg):
@@ -57,7 +71,8 @@ class JsonClient(asyncore.dispatcher):
         self.buffer = self.buffer + packStrlen(smsg) + smsg
 
 class ControllerClient(JsonClient):
-    """A client that connects a Python BaseController object to a SerialController.
+    """A client that relays Python BaseController object to a
+    SerialController.
     The interface simply translates messages back and forth using the standard
     BaseController messages."""
     
@@ -86,7 +101,7 @@ if __name__ == "__main__":
 
     if len(sys.argv)==1:
         print "Usage: %s [linear_path_file]\n"%(sys.argv[0],)
-        print "By default connects to 127.0.0.1:3456"
+        print "By default connects to localhost:3456"
         exit()
         
     #by default, runs a trajectory controller
