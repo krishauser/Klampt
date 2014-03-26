@@ -7,7 +7,6 @@ It also acts as a ROS clock server.
 
 import controller
 import rospy
-from klampt.trajectory import Trajectory
 from trajectory_msgs.msg import JointTrajectory
 from sensor_msgs.msg import JointState
 from rosgraph_msgs.msg import Clock
@@ -79,12 +78,10 @@ class RosRobotController(controller.BaseController):
         * Setting PID gain constants,
         * Setting PID integral term bounds.
     """
-    def __init__(self,klampt_robot_model):
-        self.robot = klampt_robot_model
-        
+    def __init__(self,robot_name,link_list):
         self.state = JointState()
-        n = self.robot.numLinks()
-        self.state.name = [self.robot.getLink(i).getName() for i in range(n)]
+        n = len(link_list)
+        self.state.name = link_list[:]
         self.state.position     = []
         self.state.velocity     = []
         self.state.effort       = []
@@ -93,7 +90,6 @@ class RosRobotController(controller.BaseController):
         self.nameToIndex = dict(zip(self.state.name,range(i)))
 
         # Setup publisher of robot states
-        robot_name = self.robot.getName()
         self.pub = rospy.Publisher("/%s/joint_states"%(robot_name,), JointState)
         
         # set up the command subscriber
@@ -112,6 +108,9 @@ class RosRobotController(controller.BaseController):
     def jointTrajectoryCallback(self,msg):
         self.currentJointTrajectoryMsg = msg
         return
+
+    def set_index(self,name,index):
+        self.nameToIndex[name] = index
 
     def output(self,**inputs):       
         res = {}
@@ -173,7 +172,7 @@ class RosRobotController(controller.BaseController):
         if output_name in output_map:
             val = output_map[output_name]
         else:
-            val = [0.0]*len(self.robot.numLinks())
+            val = [0.0]*len(self.state.name)
         for n,v in zip(names,vector):
             val[self.nameToIndex[n]] = v
         output_map[output_name] = val
@@ -199,7 +198,11 @@ class RosTimeController(controller.BaseController):
 ros_initialized = False
 
 def make(klampt_robot_model):
+    """Creates a ROS controller for the given model.
+    klampt_robot_model is a RobotModel instance."""
     global ros_initialized
+    robotName = klampt_robot_model.getName()
+    linkNames = [klampt_robot_model.getLink(i).getName() for i in range(klampt_robotmodel.numLinks())]
     if not ros_initialized:
         ros_initialized = True
         rospy.init_node('klampt_sim')
@@ -207,8 +210,8 @@ def make(klampt_robot_model):
         #the robot's controller
         c = controller.MultiController()
         c.launch(RosTimeController())
-        c.launch(RosRobotController(klampt_robot_model))
+        c.launch(RosRobotController(robotName,linkNames))
         return c
     #just launch the robot's controller, some other RosTimeController has been
     #launched before
-    return RosRobotController(klampt_robot_model)
+    return RosRobotController(robotName,linkNames)
