@@ -621,7 +621,7 @@ int main(int argc,const char** argv)
   MotorCalibrateSettings settings;
   settings["robot"]=string();
   settings["numIters"]=1000;
-  settings["maxMilestones"]=gMaxMilestones;
+  settings["maxMilestones"]=(int)gMaxMilestones;
   settings["dt"]=gDefaultTimestep;
   settings["velocityErrorWeight"]=gDefaultVelocityWeight;
   settings["drivers"]=vector<int>();
