@@ -1,7 +1,3 @@
-//#if !HAVE_ZMQ
-//#error "Must have ZeroMQ installed and enabled in Makefile.config"
-//#endif
-
 #include "Interface/UserInterface.h"
 #include "Interface/SimRobotInterface.h"
 #include "SimViewProgram.h"
@@ -32,13 +28,12 @@ double timeCostCoeff = 0.0;
 class SafeSerialProgram : public SimViewProgram
 {
 public:
-  //zmq::context_t context;
   WorldPlannerSettings plannerSettings;
   string initialState;
 
   SimRobotInterface robotInterface;
   vector<SmartPointer<RobotUserInterface> > uis;
-  SmartPointer<InputProcessorBase> zmqInputProcessor;
+  SmartPointer<InputProcessorBase> serialInputProcessor;
   int currentUI,oldUI;
 
   //GUI state
@@ -73,11 +68,8 @@ public:
     string objsubaddr = settings["objective_address"];
     string objfilter = settings["objective_filter"];
     string timepubaddr = settings["time_publish_address"];
-    //ZMQObjectiveProcessor* processor = new ZMQObjectiveProcessor(context,objsubaddr.c_str(),(objfilter.empty()?NULL:objfilter.c_str()));
-    //if(!timepubaddr.empty())
-    //processor->InitTimePublisher(timepubaddr.c_str());
     SocketObjectiveProcessor* processor = new SocketObjectiveProcessor(objsubaddr.c_str());
-    zmqInputProcessor = processor;
+    serialInputProcessor = processor;
   }
 
 
@@ -102,7 +94,7 @@ public:
       uis[i]->robotInterface = &robotInterface;
       uis[i]->viewport = &viewport;
       uis[i]->settings = &plannerSettings;
-      dynamic_cast<InputProcessingInterface*>((RobotUserInterface*)uis[i])->SetProcessor(zmqInputProcessor);
+      dynamic_cast<InputProcessingInterface*>((RobotUserInterface*)uis[i])->SetProcessor(serialInputProcessor);
     }
     currentUI = oldUI = 0;
 
