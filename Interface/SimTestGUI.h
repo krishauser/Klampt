@@ -93,6 +93,7 @@ public:
   int pose_ik,pose_objects;
   vector<RobotPoseWidget> robotWidgets;
   vector<RigidObjectPoseWidget> objectWidgets;
+  WidgetSet allObjectWidgets;
   WorldDragWidget dragWidget;
   WidgetSet allWidgets;
 
