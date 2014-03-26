@@ -3,7 +3,7 @@
 
 WorldDragWidget::WorldDragWidget(RobotWorld* _world)
   :world(_world),active(true),robotsActive(true),objectsActive(true),terrainsActive(false),
-   highlightColor(1,1,1,0.3),lineColor(1,0.5,0),lineWidth(5.0),dragging(false),hoverID(-1)
+   highlightColor(1,1,1,0.3),lineColor(1,0.5,0),lineWidth(5.0),dragging(false),hoverID(-1),highlightID(-1)
 {}
 
 void WorldDragWidget::Set(RobotWorld* _world)
@@ -14,6 +14,21 @@ void WorldDragWidget::Set(RobotWorld* _world)
 void WorldDragWidget::Enable(bool _active)
 {
   active = _active;
+}
+
+void WorldDragWidget::SetHighlight(bool value)
+{
+  hasHighlight = value;
+  if(hasHighlight && hoverID >= 0) {
+    //update the object's color
+    originalFaceColor = world->GetAppearance(hoverID).faceColor;
+    world->GetAppearance(hoverID).faceColor.blend(originalFaceColor,highlightColor,highlightColor.rgba[3]);
+    highlightID = hoverID;
+  }
+  else if(!hasHighlight && highlightID >= 0) {
+    //restore the object's color
+    world->GetAppearance(highlightID).faceColor = originalFaceColor;
+  }
 }
 
 bool WorldDragWidget::Hover(int x,int y,Camera::Viewport& viewport,double& distance)
@@ -52,7 +67,7 @@ bool WorldDragWidget::Hover(int x,int y,Camera::Viewport& viewport,double& dista
     }
   }
   hoverDistance = bestD;
-  if(hoverID >= 0) return true;
+  if(hoverID >= 0)  return true;
   return false;
 }
 
@@ -78,9 +93,6 @@ void WorldDragWidget::EndDrag()
 void WorldDragWidget::DrawGL(Camera::Viewport& viewport)
 {
   if(hoverID < 0) return;
-  if(hasHighlight || hasFocus ) {
-    world->GetAppearance(hoverID).faceColor.blend(world->GetAppearance(hoverID).faceColor,highlightColor,highlightColor.rgba[3]);
-  }
   if(hasFocus) {
     const Geometry::AnyCollisionGeometry3D& geom = world->GetGeometry(hoverID);
     glDisable(GL_LIGHTING);
