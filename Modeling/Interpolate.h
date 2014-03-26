@@ -3,14 +3,21 @@
 
 #include "Robot.h"
 
-/** @brief Interpolates between the two configurations.
+/** @brief Interpolates between the two configurations in geodesic fashion 
+ * on the robot's underlying configuration space.
  */
 void Interpolate(Robot& robot,const Config& x,const Config& y,Real u,Config& out);
 
-/** @brief Returns the velocity vector that will move the robot from the
- * current configuration to 'dest' in minimal time. 
+/** @brief Returns the velocity vector at a that will move the robot from 
+ * a to b in minimal time (i.e., derivative of the geodesic).
  */
 void InterpolateDerivative(Robot& robot,const Config& a,const Config& b,Vector& dq);
+
+/** @brief Returns the velocity vector that will move the robot from the
+ * configuration that is u fraction of the way from a to b to b in minimal time. 
+ */
+void InterpolateDerivative(Robot& robot,const Config& a,const Config& b,Real u,Vector& dq);
+
 
 /** @brief Integrates a velocity vector dq from q to obtain the configuration b
  */
