@@ -51,6 +51,8 @@ class WorldSimulation
 public:
   WorldSimulation();
   void Init(RobotWorld* world);
+  ///Updates the simulation with new items added to the world model.
+  void OnAddModel();
   ///Sets the robot's controller 
   void SetController(int robot,SmartPointer<RobotController> c);
   ///Advance simulation time by dt (may take multiple sub-steps)

@@ -249,6 +249,53 @@ void WorldSimulation::Init(RobotWorld* _world)
   }
 }
 
+void WorldSimulation::OnAddModel()
+{
+  for(size_t i=odesim.numEnvs();i<world->terrains.size();i++)
+    odesim.AddEnvironment(*world->terrains[i].terrain);
+  for(size_t i=0;i<world->rigidObjects.size();i++) 
+    odesim.AddObject(*world->rigidObjects[i].object);
+  for(size_t i=odesim.numRobots();i<world->robots.size();i++) {
+    odesim.AddRobot(*world->robots[i].robot);
+
+    //set up control simulator
+    controlSimulators.resize(i+1);
+    Robot* robot=world->robots[i].robot;
+    RobotMotorCommand& command=controlSimulators[i].command;
+    controlSimulators[i].Init(robot,odesim.robot(i),(i < robotControllers.size() ? robotControllers[i] : NULL));
+
+    //RobotController* c=controlSimulators[i].controller;
+
+    for(size_t j=0;j<robot->drivers.size();j++) {
+      //setup dry friction
+      if(robot->drivers[j].dryFriction != 0) {
+	for(size_t k=0;k<robot->drivers[j].linkIndices.size();k++) {
+	  int l=robot->drivers[j].linkIndices[k];
+	  controlSimulators[i].oderobot->SetLinkDryFriction(l,robot->drivers[j].dryFriction);
+	}
+      }
+
+      //printf("Setting up servo for joint %d\n",j);
+      //setup actuator parameters
+      if(robot->drivers[j].type == RobotJointDriver::Normal) {
+	int k=robot->drivers[j].linkIndices[0];
+	if(robot->links[k].type == RobotLink3D::Revolute) {
+	  //ODE has problems with joint angles > 2pi
+	  if(robot->qMax(k)-robot->qMin(k) >= TwoPi) {
+	    command.actuators[j].measureAngleAbsolute=false;
+	    printf("WorldSimulation: Link %d (%s) can make complete turn, using relative encoding\n",k,robot->LinkName(k).c_str());
+	  }
+	}
+      }
+      command.actuators[j].mode = ActuatorCommand::PID;
+      command.actuators[j].kP = robot->drivers[j].servoP;
+      command.actuators[j].kD = robot->drivers[j].servoD;
+      command.actuators[j].kI = robot->drivers[j].servoI;
+      command.actuators[j].qdes = robot->GetDriverValue(j);
+    }
+  }
+}
+
 void WorldSimulation::SetController(int index,SmartPointer<RobotController> c)
 {
   if(robotControllers.empty()) {
