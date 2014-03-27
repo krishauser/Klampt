@@ -2,8 +2,8 @@
 #include "ui_dialog.h"
 #include "Modeling/Robot.h"
 #include <utils/AnyCollection.h>
-
 #include <Main/motorcalibrate.h>
+#include "showtext.h"
 
 #include <boost/foreach.hpp>
 
@@ -12,11 +12,13 @@ Dialog::Dialog(QWidget *parent) :
     ui(new Ui::Dialog)
 {
     ui->setupUi(this);
+    popup=new ShowText();
 }
 
 Dialog::~Dialog()
 {
     delete ui;
+  delete popup;
 }
 
 int Dialog::LoadRobot(){
@@ -99,5 +101,8 @@ int Dialog::DoCalibrate(){
   settings["commandedPaths"]=commanded;
   settings["sensedPaths"]=sensed;
   cout<<settings;
-  motorcalibrate(settings);
+  QString newtext=QString::fromStdString(motorcalibrate(settings));
+  popup->SetText(newtext);
+  popup->rob=robotFilename;
+  popup->show();
 }

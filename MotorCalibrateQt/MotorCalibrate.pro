@@ -12,14 +12,17 @@ TEMPLATE = app
 
 SOURCES += main.cpp\
     dialog.cpp \
-    ../Main/motorcalibrate.cpp
+    ../Main/motorcalibrate.cpp \
+    showtext.cpp
 
 HEADERS  += \
     dialog.h \
-    ../Main/motorcalibrate.h
+    ../Main/motorcalibrate.h \
+    showtext.h
 
 FORMS    += \
-    dialog.ui
+    dialog.ui \
+    showtext.ui
 
 
 INCLUDEPATH += ../ ../Library/KrisLibrary

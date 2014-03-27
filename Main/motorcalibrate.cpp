@@ -206,7 +206,9 @@ void OptimizeDof(const vector<Real>& minvs,const vector<Real>& ds,const vector<R
       printf("%g, %g: x'' = %g*(PID(%g,%g) - %g*x' + %g*x + %g)\n",res[0],res[1],minvs[i],xDes[i],dxDes[i],ds[i],ks[i],cs[i]);
       if(!IsFinite(res[0]) || !IsFinite(res[1]) || Abs(res[1]) > 1e2) {
 	getchar();
-	break;
+
+    //removed for GUI version
+    //	break;
       }
     }
   }
@@ -582,7 +584,7 @@ void test()
   ConstrainedForwardDynamics(robot,fixedLinks,fixedDofs,A,b);
 }
 
-int motorcalibrate(AnyCollection settings){
+string motorcalibrate(AnyCollection settings){
   string robotfn;
   bool res=settings["robot"].as(robotfn); assert(res);
   int numIters = int(settings["numIters"]);
@@ -600,7 +602,7 @@ int motorcalibrate(AnyCollection settings){
   Robot robot;
   if(!robot.Load(robotfn.c_str())) {
     fprintf(stderr,"Failed to load robot\n");
-    return 1;
+    return NULL;
   }
 
   MotorCalibrationProblem problem;
@@ -625,11 +627,11 @@ int motorcalibrate(AnyCollection settings){
   for(size_t i=0;i<commandedPaths.size();i++) {
     if(!problem.commandedQ[i].Load(commandedPaths[i].c_str())) {
       fprintf(stderr,"Failed to load path %s\n",commandedPaths[i].c_str());
-      return 1;
+      return NULL;
     }
     if(!problem.sensedQ[i].Load(sensedPaths[i].c_str())) {
       fprintf(stderr,"Failed to load path %s\n",sensedPaths[i].c_str());
-      return 1;
+      return NULL;
     }
   }
   problem.commandedV.resize(problem.commandedQ.size());
@@ -640,29 +642,32 @@ int motorcalibrate(AnyCollection settings){
   }
 
   RunCalibrationInd(problem,numIters);
-  printf("servoP ");
+  stringstream ret_stream;
+  ret_stream<<"servoP ";
   for(size_t i=0;i<robot.drivers.size();i++)
-    printf("%g ",robot.drivers[i].servoP);
-  printf("\n");
-  printf("servoI ");
+    ret_stream<<robot.drivers[i].servoP<<" ";
+  ret_stream<<"\n";
+  ret_stream<<"servoI ";
   for(size_t i=0;i<robot.drivers.size();i++)
-    printf("%g ",robot.drivers[i].servoI);
-  printf("\n");
-  printf("servoD ");
+    ret_stream<<robot.drivers[i].servoI<<" ";
+  ret_stream<<"\n";
+  ret_stream<<"servoD ";
   for(size_t i=0;i<robot.drivers.size();i++)
-    printf("%g ",robot.drivers[i].servoD);
-  printf("\n");
-  printf("dryFriction ");
+    ret_stream<<robot.drivers[i].servoD<<" ";
+  ret_stream<<"\n";
+  ret_stream<<"dryFriction ";
   for(size_t i=0;i<robot.drivers.size();i++)
-    printf("%g ",robot.drivers[i].dryFriction);
-  printf("\n");
-  printf("viscousFriction ");
+    ret_stream<<robot.drivers[i].dryFriction<<" ";
+  ret_stream<<"\n";
+  ret_stream<<"viscousFriction ";
   for(size_t i=0;i<robot.drivers.size();i++)
-    printf("%g ",robot.drivers[i].viscousFriction);
-  return 0;
+    ret_stream<<robot.drivers[i].viscousFriction<<" ";
+  string output=ret_stream.str();
+  cout<<output;
+  return output;
 }
 
-int main_shell(int argc,const char** argv)
+int main_shell(int argc,char** argv)
 {
   //test();
   //return 0;
@@ -690,7 +695,7 @@ int main_shell(int argc,const char** argv)
 }
 
 #ifndef HAVE_QT
-int main(int argc,const char** argv){
+int main(int argc,char** argv){
   main_shell(argc,argv);
 }
 #endif

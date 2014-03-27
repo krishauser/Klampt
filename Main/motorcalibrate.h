@@ -43,7 +43,7 @@ public:
   }
 };
 
-int main_shell(int argc,const char** argv);
-int motorcalibrate(AnyCollection settings);
+int main_shell(int argc,char **argv);
+string motorcalibrate(AnyCollection settings);
 
 #endif

@@ -4,6 +4,7 @@
 #include <QDialog>
 #include <QFileDialog>
 #include <QListWidgetItem>
+#include "showtext.h"
 namespace Ui {
 class Dialog;
 }
@@ -26,6 +27,8 @@ private:
     Ui::Dialog *ui;
     QFileDialog f;
     QString robotFilename;
+    ShowText *popup;
+
 };
 
 #endif // DIALOG_H
