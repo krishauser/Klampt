@@ -1,0 +1,392 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>688</width>
+    <height>600</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>SimTest</string>
+  </property>
+  <property name="statusTip">
+   <string>start recording</string>
+  </property>
+  <widget class="QWidget" name="centralWidget">
+   <layout class="QGridLayout" name="gridLayout">
+    <item row="0" column="0">
+     <layout class="QHBoxLayout" name="horizontalLayout_2">
+      <item>
+       <layout class="QVBoxLayout" name="verticalLayout_5">
+        <item>
+         <widget class="QRobotTestBackend" name="displaywidget" native="true">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+            <horstretch>1</horstretch>
+            <verstretch>1</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>200</width>
+            <height>200</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>16777215</width>
+            <height>16777215</height>
+           </size>
+          </property>
+          <property name="toolTip">
+           <string>free mode</string>
+          </property>
+          <zorder>layoutWidget</zorder>
+         </widget>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout">
+          <item>
+           <spacer name="horizontalSpacer_3">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="checkBox">
+            <property name="text">
+             <string>geometry</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="checkBox_2">
+            <property name="text">
+             <string>COM</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="checkBox_3">
+            <property name="text">
+             <string>frame</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="chk_bboxes">
+            <property name="statusTip">
+             <string>draw bounding boxes</string>
+            </property>
+            <property name="text">
+             <string>bboxes</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="chk_expanded">
+            <property name="statusTip">
+             <string>draw expanded</string>
+            </property>
+            <property name="text">
+             <string>expanded</string>
+            </property>
+            <property name="tristate">
+             <bool>false</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="checkBox_4">
+            <property name="text">
+             <string>collisions</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="horizontalSpacer_4">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menuBar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>688</width>
+     <height>25</height>
+    </rect>
+   </property>
+   <property name="nativeMenuBar">
+    <bool>false</bool>
+   </property>
+  </widget>
+  <widget class="QToolBar" name="mainToolBar">
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+  </widget>
+  <widget class="QStatusBar" name="statusBar"/>
+  <action name="actionOpen">
+   <property name="text">
+    <string>Open</string>
+   </property>
+   <property name="statusTip">
+    <string>ctrl-o</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+O</string>
+   </property>
+  </action>
+  <action name="actionSave_State">
+   <property name="text">
+    <string>Save State</string>
+   </property>
+   <property name="toolTip">
+    <string>ctrl-s</string>
+   </property>
+   <property name="statusTip">
+    <string/>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+S</string>
+   </property>
+  </action>
+  <action name="actionLoad_MultiPath">
+   <property name="text">
+    <string>Load MultiPath</string>
+   </property>
+  </action>
+  <action name="actionReset">
+   <property name="text">
+    <string>Reset</string>
+   </property>
+  </action>
+  <action name="actionExit">
+   <property name="text">
+    <string>Exit</string>
+   </property>
+  </action>
+  <action name="actionSaveView">
+   <property name="text">
+    <string>Save View</string>
+   </property>
+   <property name="toolTip">
+    <string>v</string>
+   </property>
+  </action>
+  <action name="actionRevertView">
+   <property name="text">
+    <string>Revert</string>
+   </property>
+   <property name="toolTip">
+    <string>V</string>
+   </property>
+  </action>
+  <action name="actionDefaultView">
+   <property name="text">
+    <string>Default</string>
+   </property>
+  </action>
+  <action name="actionDrivers">
+   <property name="text">
+    <string>Drivers</string>
+   </property>
+   <property name="toolTip">
+    <string>ctrl-d</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+D</string>
+   </property>
+  </action>
+  <action name="actionSensor_Plot">
+   <property name="text">
+    <string>Sensor Plot</string>
+   </property>
+   <property name="toolTip">
+    <string>ctrl-p</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+P</string>
+   </property>
+  </action>
+  <action name="actionOptions">
+   <property name="text">
+    <string>Options</string>
+   </property>
+   <property name="toolTip">
+    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;ctrl-r&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+R</string>
+   </property>
+  </action>
+  <action name="actionSave_State_As">
+   <property name="text">
+    <string>Save State As</string>
+   </property>
+   <property name="toolTip">
+    <string>ctrl-shift-s</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+S</string>
+   </property>
+  </action>
+  <action name="actionRecordFile">
+   <property name="text">
+    <string>Change File</string>
+   </property>
+  </action>
+  <action name="actionMultiple_Parts">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Multiple Parts</string>
+   </property>
+   <property name="statusTip">
+    <string>Does not automatically encode when a recording ends.  Can record 2 parts consecutively into 1 video.</string>
+   </property>
+  </action>
+  <action name="action640x480">
+   <property name="text">
+    <string>640x480</string>
+   </property>
+  </action>
+  <action name="action800x600">
+   <property name="text">
+    <string>800x600</string>
+   </property>
+  </action>
+  <action name="action1920x1080_HD">
+   <property name="text">
+    <string>1920x1080 (HD)</string>
+   </property>
+  </action>
+  <action name="action1280x768">
+   <property name="text">
+    <string>1280x768</string>
+   </property>
+  </action>
+  <action name="actionResizable">
+   <property name="text">
+    <string>Resizable</string>
+   </property>
+  </action>
+  <action name="actionEncode">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Encode</string>
+   </property>
+  </action>
+  <action name="actionSend_Command">
+   <property name="text">
+    <string>Send Command</string>
+   </property>
+  </action>
+  <action name="actionHelp">
+   <property name="text">
+    <string>Help</string>
+   </property>
+   <property name="shortcut">
+    <string>F1</string>
+   </property>
+  </action>
+  <action name="actionAbout">
+   <property name="text">
+    <string>About</string>
+   </property>
+  </action>
+ </widget>
+ <layoutdefault spacing="6" margin="11"/>
+ <customwidgets>
+  <customwidget>
+   <class>QRobotTestBackend</class>
+   <extends>QWidget</extends>
+   <header>qrobottestbackend.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections/>
+ <slots>
+  <slot>Reset()</slot>
+  <slot>ShowPlotOptions()</slot>
+  <slot>ToggleIK(int)</slot>
+  <slot>LoadSelectedMultipath()</slot>
+  <slot>SetWrenches(bool)</slot>
+  <slot>SetSimSpeed(int)</slot>
+  <slot>ToggleMovie(bool)</slot>
+  <slot>SetPoser(bool)</slot>
+  <slot>SetDesired(bool)</slot>
+  <slot>SetEstimated(bool)</slot>
+  <slot>SetBBoxes(bool)</slot>
+  <slot>SetContacts(bool)</slot>
+  <slot>SetExpanded(bool)</slot>
+  <slot>SyncSensorMeasurements(int)</slot>
+  <slot>SetSensorPlot(bool)</slot>
+  <slot>SetLogCheck(bool)</slot>
+  <slot>SetSimulate(bool)</slot>
+  <slot>SetMode(int)</slot>
+  <slot>SendMilestone()</slot>
+  <slot>SetRecord(bool)</slot>
+  <slot>LoadResource()</slot>
+  <slot>ShowDriverEdit()</slot>
+  <slot>ShowOptions()</slot>
+  <slot>SaveScenario()</slot>
+  <slot>SaveLastScenario()</slot>
+  <slot>IKConstrain()</slot>
+  <slot>IKDelete()</slot>
+  <slot>ChangeRecordFile()</slot>
+  <slot>Resolution800x600()</slot>
+  <slot>Resolution1280x768()</slot>
+  <slot>Resolution1280x1024()</slot>
+  <slot>Resolution1920x1080()</slot>
+  <slot>Resolution640x480()</slot>
+  <slot>FlexibleResolution()</slot>
+  <slot>DoMultipleParts(bool)</slot>
+  <slot>Encode()</slot>
+  <slot>LoadViewport()</slot>
+  <slot>SaveViewport()</slot>
+  <slot>DefaultViewport()</slot>
+  <slot>IKConstrainPoint()</slot>
+  <slot>DoFreeMode()</slot>
+  <slot>DoIKMode()</slot>
+  <slot>DoForceMode()</slot>
+  <slot>ShowCommand()</slot>
+  <slot>ShowHelp()</slot>
+  <slot>ShowAbout()</slot>
+ </slots>
+</ui>
