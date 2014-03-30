@@ -1,6 +1,9 @@
 #ifndef _ROBOT_WORLD_H
 #define _ROBOT_WORLD_H
 
+/** @file robotmodel.h
+ * @brief C++ bindings for robot/world modeling. */
+
 //forward definitions for API objects
 class WorldModel;
 class RobotModel;

@@ -1,6 +1,9 @@
 #ifndef ROBOTSIM_H
 #define ROBOTSIM_H
 
+/** @file robotsim.h
+ * @brief C++ bindings for robot/world simulation. */
+
 #include <stddef.h>
 #include "robotmodel.h"
 #include <Simulation/ODESurface.h>

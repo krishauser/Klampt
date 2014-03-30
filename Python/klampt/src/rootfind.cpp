@@ -18,7 +18,7 @@ using std::endl;
 
 using std::exception;
 
-using namespace PyPlanner;
+using PyPlanner::PyVectorFieldFunction;
 	
 using Math::Vector;
 using Math::ConvergenceResult;
