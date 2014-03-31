@@ -315,3 +315,18 @@ class LinearController(BaseController):
         
 def make(robot):
     return BaseController()
+
+def launch(fn,robot):
+    """Launches a controller given by the given python module for the
+    given robot using the module's default make(robot) routine."""
+    import os
+    import importlib
+    path,base = os.path.split(fn)
+    mod_name,file_ext = os.path.splitext(base)
+    mod = importlib.import_module(path+"."+mod_name,fn)
+    try:
+        maker = mod.make
+    except AttributeError:
+        print "Module",mod.__name__,"must have a make() method"
+        raise
+    return maker(robot)
