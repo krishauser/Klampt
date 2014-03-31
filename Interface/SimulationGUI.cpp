@@ -145,6 +145,7 @@ void SimGUIBackend::ResetSim()
   if(!sim.ReadState(initialState)) {
     fprintf(stderr,"Warning, ReadState doesn't work\n");
   }
+  inContact.clear();
 }
 
 bool SimGUIBackend::LoadAndInitSim(const char* xmlFile)
@@ -688,4 +689,76 @@ void SimGUIBackend::DoLogging(const char* fn)
   }
   out<<endl;
   out.close();
+}
+
+void SimGUIBackend::DoCommandLogging_LinearPath(int robot,const char* fn)
+{
+  Assert(robot >= 0 && robot < (int)world->robots.size());
+  ofstream out(fn,ios::app);
+  out<<sim.time<<"\t";
+  Config q;
+  sim.controlSimulators[robot].GetCommandedConfig(q);
+  out<<q<<endl;
+  out.close();
+}
+
+void SimGUIBackend::DoSensorLogging_LinearPath(int robot,const char* fn)
+{
+  Assert(robot >= 0 && robot < (int)world->robots.size());
+  ofstream out(fn,ios::app);
+  out<<sim.time<<"\t";
+  Config q;
+  sim.controlSimulators[robot].GetSensedConfig(q);
+  out<<q<<endl;
+  out.close();
+}
+
+void SimGUIBackend::DoStateLogging_LinearPath(int robot,const char* fn)
+{
+  Assert(robot >= 0 && robot < (int)world->robots.size());
+  ofstream out(fn,ios::app);
+  out<<sim.time<<"\t";
+  Config q;
+  sim.controlSimulators[robot].GetSimulatedConfig(q);
+  out<<q<<endl;
+  out.close();
+}
+
+void SimGUIBackend::DoContactStateLogging(const char* fn)
+{
+  ofstream out(fn,ios::app);
+  if(out.tellp()==std::streamoff(0)) {
+    cout<<"Saving simulation contact state to "<<fn<<endl;
+    out<<"time,body1,body2,contact"<<endl;
+  }
+  for(WorldSimulation::ContactFeedbackMap::iterator i=sim.contactFeedback.begin();i!=sim.contactFeedback.end();i++) {
+    int aid = sim.ODEToWorldID(i->first.first);
+    int bid = sim.ODEToWorldID(i->first.second);
+    bool hadContact = sim.HadContact(aid,bid);
+    bool hadSeparation = sim.HadSeparation(aid,bid);
+    bool nowInContact = sim.InContact(aid,bid);
+    bool wasInContact = (inContact.count(pair<int,int>(aid,bid)) != 0);
+    if(wasInContact && nowInContact) {
+      if(hadSeparation) { //must have separated and contacted within the last time step
+	out<<sim.time<<","<<world->GetName(aid)<<","<<world->GetName(bid)<<","<<0<<endl;
+	out<<sim.time<<","<<world->GetName(aid)<<","<<world->GetName(bid)<<","<<1<<endl;
+      }
+    }
+    else if(!wasInContact && !nowInContact) {
+      if(hadContact) { //must have contacted and separated witihn the last time step
+	out<<sim.time<<","<<world->GetName(aid)<<","<<world->GetName(bid)<<","<<1<<endl;
+	out<<sim.time<<","<<world->GetName(aid)<<","<<world->GetName(bid)<<","<<0<<endl;
+      }
+    }
+    else if(wasInContact && !nowInContact) {
+      out<<sim.time<<","<<world->GetName(aid)<<","<<world->GetName(bid)<<","<<0<<endl;
+    }
+    else if(!wasInContact && nowInContact) {
+      out<<sim.time<<","<<world->GetName(aid)<<","<<world->GetName(bid)<<","<<1<<endl;
+    }
+    if(nowInContact)
+      inContact.insert(pair<int,int>(aid,bid));
+    else if(wasInContact)
+      inContact.erase(inContact.find(pair<int,int>(aid,bid)));
+  }
 }

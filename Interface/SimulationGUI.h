@@ -3,6 +3,7 @@
 
 #include "Simulation/WorldSimulation.h"
 #include "WorldGUI.h"
+#include <set>
 
 /** @brief Generic simulation program.
  *
@@ -30,6 +31,9 @@ public:
   int simulate;
   WorldSimulation sim;
   string initialState;
+
+  ///the contact state on the last DoContactStateLogging call
+  set<pair<int,int> > inContact;
 
   SimGUIBackend(RobotWorld* world)
     :WorldGUIBackend(world),simulate(0)
@@ -82,6 +86,18 @@ public:
 
   ///Logs the state of all objects in the world to the given CSV file
   void DoLogging(const char* fn="simtest_log.csv");
+
+  ///Logs the robot's commands to the given linear path file
+  void DoCommandLogging_LinearPath(int robot,const char* fn="simtest_command_log.path");
+
+  ///Logs the robot's sensed configuration to the given linear path file
+  void DoSensorLogging_LinearPath(int robot,const char* fn="simtest_sensed_log.path");
+
+  ///Logs the robot's simulation state to the given linear path file
+  void DoStateLogging_LinearPath(int robot,const char* fn="simtest_state_log.path");
+
+  ///Logs contact changes to the given CSV file
+  void DoContactStateLogging(const char* fn="simtest_contact_log.csv");
 };
 
 #endif
