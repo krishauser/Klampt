@@ -41,7 +41,10 @@ class GLTest(GLRealtimeProgram):
         t = self.ttotal
         #Problem 1: tune the values in this line
         if problem == "1a" or problem == "1b":
-            controller.setPIDGains([1],[1],[1])
+            kP = 1
+            kI = 1
+            kD = 1
+            controller.setPIDGains([kP],[kI],[kD])
         
         #Problem 2: use setTorque to implement a control loop with feedforward
         #torques
