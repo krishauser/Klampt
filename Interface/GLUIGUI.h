@@ -47,7 +47,8 @@ class GLUIGUI : public GenericGUIBase, public GLUIProgramBase
   ///Returns the GLUI ID of the control
   ///
   ///If name = NULL, then the button name is passed directly to the backend.
-  ///If name = "", then the signal is not sent to the backend (used to .
+  ///If name = "", then the signal is not sent to the backend (used to bind
+  ///controls to Handle_Control).
   int AddControl(GLUI_Control*,const char* name=NULL);
 
   virtual void Run();
