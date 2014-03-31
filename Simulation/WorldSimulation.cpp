@@ -87,6 +87,7 @@ void Reset(ContactFeedbackInfo& info)
 {
   info.hadContact = false;
   info.hadSeparation = false;
+  info.inContact = false;
   info.meanForce.setZero();
   info.meanPoint.setZero();
   info.times.clear();
@@ -172,6 +173,7 @@ bool WriteFile(File& f,const ContactFeedbackInfo& info)
   if(!WriteFile(f,info.accum)) return false;
   if(!WriteFile(f,info.hadContact)) return false;
   if(!WriteFile(f,info.hadSeparation)) return false;
+  if(!WriteFile(f,info.inContact)) return false;
   if(!WriteFile(f,info.meanForce)) return false;
   if(!WriteFile(f,info.meanPoint)) return false;
   if(!WriteFile(f,info.accumFull)) return false;
@@ -185,6 +187,7 @@ bool ReadFile(File& f,ContactFeedbackInfo& info)
   if(!ReadFile(f,info.accum)) return false;
   if(!ReadFile(f,info.hadContact)) return false;
   if(!ReadFile(f,info.hadSeparation)) return false;
+  if(!ReadFile(f,info.inContact)) return false;
   if(!ReadFile(f,info.meanForce)) return false;
   if(!ReadFile(f,info.meanPoint)) return false;
   if(!ReadFile(f,info.accumFull)) return false;
@@ -356,6 +359,7 @@ void WorldSimulation::Advance(Real dt)
 	if(i->second.accum) {
 	  if(list->forces.empty()) i->second.hadSeparation = true;
 	  else i->second.hadContact = true;
+	  i->second.inContact = !list->forces.empty();
 	  for(size_t k=0;k<list->forces.size();k++) {
 	    i->second.meanForce += list->forces[k];
 	    i->second.meanPoint += list->points[k].x*(1.0/list->forces.size());
@@ -552,6 +556,22 @@ ODEContactList* WorldSimulation::GetContactList(int aid,int bid)
 
 bool WorldSimulation::InContact(int aid,int bid)
 {
+  //try finding this in the feedback map
+  if(bid < 0) { 
+    ODEObjectID a=WorldToODEID(aid);
+    for(ContactFeedbackMap::iterator i=contactFeedback.begin();i!=contactFeedback.end();i++) {
+      if(i->first.first == a || i->first.second == a) {
+	if(i->second.inContact) return true;
+      }
+    }
+  }
+  else {
+    ContactFeedbackInfo* info=GetContactFeedback(aid,bid);
+    if(info) {
+      return info->inContact;
+    }
+  }
+
   ODEObjectID a=WorldToODEID(aid);
   if(bid < 0) return odesim.InContact(a);
   else {

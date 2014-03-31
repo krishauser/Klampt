@@ -20,6 +20,7 @@ struct ContactFeedbackInfo
   //summary information
   bool accum;      ///< set this to true if you want to accumulate summary feedback over sub-steps
   bool hadContact,hadSeparation; ///< true if contact was made or the object was separated at any point during the outer simulation interval.
+  bool inContact; ///< true if contact exist at the end of the outer simulation interval
   Vector3 meanForce,meanPoint;
 
   //full contact information over sub-steps
@@ -76,7 +77,10 @@ public:
   ///before most of the contact querying functions work.
   ///The exception is InContact, which works no matter what.
   void EnableContactFeedback(int aid,int bid,bool accum=true,bool accumFull=false);
-  ///Returns true if the objects were in contact on the prior time sub-step
+  ///Returns true if the objects were in contact on the prior time sub-step.
+  ///Warning: if contact feedback is not set up, this does not distinguish
+  ///between terrains.  That is, if either a is a terrain and b hits a
+  ///different terrain, this will return true.
   bool InContact(int aid,int bid=-1);
   ///Returns true if the objects had contact during past Advance call
   bool HadContact(int aid,int bid=-1);
