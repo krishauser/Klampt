@@ -1,3 +1,6 @@
+#ifndef ROBOTTESTGUI
+#define ROBOTTESTGUI
+
 #include "WorldGUI.h"
 #include "View/RobotPoseWidget.h"
 #include "View/ObjectPoseWidget.h"
@@ -95,4 +98,4 @@ class GLUIRobotTestGUI : public GLUIGUI
   void UpdateGUI();
 };
 #endif //HAVE_GLUI
-
+#endif //ROBOTTESTGUI

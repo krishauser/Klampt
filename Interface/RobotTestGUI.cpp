@@ -43,7 +43,7 @@ void RobotTestBackend::Start()
   UpdateConfig();
 
   MapButtonToggle("pose_ik",&pose_ik);
-  MapButtonToggle("draw_geometry",&draw_geom);
+  MapButtonToggle("draw_geom",&draw_geom);
   MapButtonToggle("draw_bbs",&draw_bbs);
   MapButtonToggle("draw_com",&draw_com);
   MapButtonToggle("draw_frame",&draw_frame);
@@ -187,6 +187,22 @@ bool RobotTestBackend::OnButtonPress(const string& button)
     }
     return true;
   }
+  else if(button=="request_self_collisions"){
+    stringstream ss;
+    for(size_t i=0;i<robot->links.size();i++) {
+      if(self_colliding[i]) {
+	bool printed=false;
+	for(size_t j=i;j<robot->links.size();j++) {
+	  if(self_colliding[j] && robot->SelfCollision(i,j)) {
+	    ss<<i<<" "<<j<<" ";
+	    printed = true;
+	  }
+	}
+	if(printed) ss<<"\n";
+      }
+    }
+    SendCommand("return_self_collisions",ss.str());
+  }
   else if(!GenericBackendBase::OnButtonPress(button)) {
     cout<<"RobotTestBackend: Unknown button: "<<button<<endl;
     return false;
@@ -210,6 +226,7 @@ bool RobotTestBackend::OnButtonToggle(const string& button,int checked)
 bool RobotTestBackend::OnCommand(const string& cmd,const string& args)
 {
   cout<<"Command: "<<cmd<<", args "<<args<<endl;
+  Robot* robot = world->robots[0].robot;
   stringstream ss(args);
   if(cmd=="set_link") {
     ss >> cur_link;
@@ -217,8 +234,13 @@ bool RobotTestBackend::OnCommand(const string& cmd,const string& args)
   else if(cmd=="set_link_value") {
     double value;
     ss>>value;
+    Vector q = robotWidgets[0].Pose();
+    q(cur_link)=value;
+    robotWidgets[0].SetPose(q);
     robot->q(cur_link)=value;
     robot->UpdateFrames();
+    SendRefresh();
+    //    UpdateConfig();
   }
   else if(cmd=="set_driver") {
     ss >> cur_driver;
@@ -226,7 +248,9 @@ bool RobotTestBackend::OnCommand(const string& cmd,const string& args)
   else if(cmd=="set_driver_value") {
     double driver_value;
     ss>>driver_value;
+    robot->UpdateConfig(robotWidgets[0].Pose());
     robot->SetDriverValue(cur_driver,driver_value);
+    robotWidgets[0].SetPose(robot->q);
     robot->UpdateFrames();
   }
   else if(cmd=="constrain_current_link") {
@@ -249,6 +273,7 @@ bool RobotTestBackend::OnCommand(const string& cmd,const string& args)
 
 void RobotTestBackend::DoPassiveMouseMove(int x, int y)
 {
+  
   for(size_t i=0;i<robotWidgets.size();i++)
     robotWidgets[i].poseIKMode = (pose_ik != 0);
   //for(size_t i=0;i<objectWidgets.size();i++)
@@ -260,6 +285,7 @@ void RobotTestBackend::DoPassiveMouseMove(int x, int y)
   else
     allWidgets.SetHighlight(false);
   if(allWidgets.requestRedraw) { SendRefresh(); allWidgets.requestRedraw=false; }
+  
 }
 
 void RobotTestBackend::BeginDrag(int x,int y,int button,int modifiers)

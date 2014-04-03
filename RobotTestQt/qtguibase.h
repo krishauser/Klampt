@@ -19,10 +19,10 @@ public:
     QTimer* idle_timer;
     QtGUIBase(GenericBackendBase* _backend,RobotWorld* _world);
     bool OnCommand(const string &cmd, const string &args);
-    void UpdateGUI();
     ~QtGUIBase();
     void ShowHelp();
     void ShowAbout();
+    virtual void UpdateGUI(){}
 public slots:
     void SendMouseMove(QMouseEvent *e);
     void SendMouseWheel(QWheelEvent *e);

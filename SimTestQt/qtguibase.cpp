@@ -197,7 +197,7 @@ void QtGUIBase::LoadFile(QString filename){
 void QtGUIBase::SaveScenario(QString filename){
   if(filename.isEmpty()){
     QFileDialog f;
-    QString filename = f.getSaveFileName(0,"Save Scenario",QDir::home().absolutePath(),"");
+    filename = f.getSaveFileName(0,"Save Scenario",QDir::home().absolutePath(),"");
   }
   if(!filename.isNull()){
       SendCommand("save_file",filename.toStdString());

@@ -22,9 +22,6 @@ bool QtGUIBase::OnCommand(const string &cmd, const string &args){
     else return GenericGUIBase::OnCommand(cmd,args);
 }
 
-void QtGUIBase::UpdateGUI(){
-}
-
 void QtGUIBase::SendMouseMove(QMouseEvent *e){
     GenericGUIBase::SendMouseMove(e->x(),e->y());
 }
