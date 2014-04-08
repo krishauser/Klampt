@@ -70,6 +70,7 @@ struct SensorPlot
  * - save_view(file): saves a view to a file (inherited from GLNavigationProgram)
  * - log_sim(file): saves simulation log to a given file, or "" to set no logging.
  * - log_contact_state(file): saves contact state log to a given file, or "" to set no logging.
+ * - log_contact_wrenches(file): saves contact wrench log to a given file, or "" to set no logging.
  *
  * button_toggle
  * - pose_ik
@@ -102,7 +103,7 @@ public:
   Vector3 forceSpringAnchor;
   int drawBBs,drawPoser,drawDesired,drawEstimated,drawContacts,drawWrenches,drawExpanded;
   string simLogFile;
-  string contactStateLogFile;
+  string contactStateLogFile, contactWrenchLogFile;
   map<int,string> robotCommandLogFiles, robotSensedLogFiles, robotStateLogFiles;
 
   vector<SensorPlot> sensorPlots;

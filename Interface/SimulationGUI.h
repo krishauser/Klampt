@@ -98,6 +98,9 @@ public:
 
   ///Logs contact changes to the given CSV file
   void DoContactStateLogging(const char* fn="simtest_contact_log.csv");
+
+  ///Logs contact wrenches to the given CSV file
+  void DoContactWrenchLogging(const char* fn="simtest_wrench_log.csv");
 };
 
 #endif

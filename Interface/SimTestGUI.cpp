@@ -431,6 +431,9 @@ bool SimTestBackend::OnCommand(const string& cmd,const string& args)
   else if(cmd=="log_contact_state") {
     contactStateLogFile = args;
   }
+  else if(cmd=="log_contact_wrenches") {
+    contactWrenchLogFile = args;
+  }
   else
     return BaseT::OnCommand(cmd,args);
   SendRefresh();
@@ -588,6 +591,7 @@ void SimTestBackend::SimStep(Real dt)
   //logging
   if(!simLogFile.empty()) DoLogging(simLogFile.c_str());
   if(!contactStateLogFile.empty()) DoContactStateLogging(contactStateLogFile.c_str());
+  if(!contactWrenchLogFile.empty()) DoContactWrenchLogging(contactWrenchLogFile.c_str());
   //TODO: robot linear path logging
 
   if(forceSpringActive)
@@ -689,7 +693,8 @@ bool GLUISimTestGUI::Initialize()
   save_movie_button = glui->add_button("Save movie");
   AddControl(save_movie_button,"");
   AddControl(glui->add_checkbox("Log simulation state"),"do_logging");
-  AddControl(glui->add_checkbox("Log contact state"),"do_contact_logging");
+  AddControl(glui->add_checkbox("Log contact state"),"do_contact_state_logging");
+  AddControl(glui->add_checkbox("Log contact wrenches"),"do_contact_wrench_logging");
   GLUI_Panel* panel = glui->add_rollout("Input/output");
   AddControl(glui->add_edittext_to_panel(panel,"File"),"load_text");
   AddControl(glui->add_button_to_panel(panel,"Load"),"load_file");
@@ -787,7 +792,7 @@ bool GLUISimTestGUI::Initialize()
 
   UpdateGUI();
 
-  const static int NR = 18;
+  const static int NR = 20;
   const static char* rules [NR*3]= {"{type:key_down,key:c}","constrain_link","",
 				    "{type:key_down,key:d}","delete_constraint","",
 				    "{type:key_down,key:p}","print_config","",
@@ -800,8 +805,10 @@ bool GLUISimTestGUI::Initialize()
 				    "{type:button_press,button:set_milestone}","command_pose","",
 				    "{type:button_toggle,button:do_logging,checked:1}","log_sim","simtest_log.csv",
 				    "{type:button_toggle,button:do_logging,checked:0}","log_sim","",
-				    "{type:button_toggle,button:do_contact_logging,checked:1}","log_contact_state","simtest_contact_log.csv",
-				    "{type:button_toggle,button:do_contact_logging,checked:0}","log_contact_state","",
+				    "{type:button_toggle,button:do_contact_state_logging,checked:1}","log_contact_state","simtest_contact_log.csv",
+				    "{type:button_toggle,button:do_contact_state_logging,checked:0}","log_contact_state","",
+				    "{type:button_toggle,button:do_contact_wrench_logging,checked:1}","log_contact_wrenches","simtest_wrench_log.csv",
+				    "{type:button_toggle,button:do_contact_wrench_logging,checked:0}","log_contact_wrenches","",
 				    "{type:widget_value,widget:link,value:_0}","set_link","_0",
 				    "{type:widget_value,widget:link_value,value:_0}","set_link_value","_0",
 				    "{type:widget_value,widget:driver,value:_0}","set_driver","_0",
