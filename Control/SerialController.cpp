@@ -33,7 +33,7 @@ void SerialController::Update(Real dt)
     PackSensorData(sensorData);
     stringstream ss;
     ss << sensorData;
-    if(controllerPipe) {
+    if(controllerPipe && controllerPipe->transport->WriteReady()) {
       controllerPipe->SendMessage(ss.str());
     }
   }
@@ -119,6 +119,12 @@ bool SerialController::GetSetting(const string& name,string& str) const
 {
   READ_CONTROLLER_SETTING(servAddr)
   READ_CONTROLLER_SETTING(writeRate)
+  if(name=="connected") {
+    if(controllerPipe)
+      str = "1";
+    else
+      str = "0";
+  }
   return false;
 }
 
