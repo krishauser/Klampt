@@ -8,8 +8,12 @@ class TrajectoryController(BaseController):
     def __init__(self,traj,type=('qcmd','dqcmd')):
         self.traj = traj
         self.outputType = type
+        self.startTime = None
     def output(self,**inputs):
         t = inputs['t']
+        if self.startTime == None:
+            self.startTime = t
+        t = t - self.startTime
         if isinstance(self.outputType,tuple):
             assert len(self.outputType)==2
             return {self.outputType[0]:self.traj.eval(t),
