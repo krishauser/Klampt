@@ -60,7 +60,7 @@ bool ReadFile(File& f,string& s)
 template <class T>
 bool WriteFile(File& f,const vector<T>& v)
 {
-  if(!WriteFile(f,v.size())) return false;
+  if(!WriteFile(f,(int)v.size())) return false;
   if(!v.empty())
     if(!WriteArrayFile(f,&v[0],v.size())) return false;
   return true;
@@ -69,12 +69,15 @@ bool WriteFile(File& f,const vector<T>& v)
 template <class T>
 bool ReadFile(File& f,vector<T>& v)
 {
-  size_t n;
+  int n;
   if(!ReadFile(f,n)) return false;
-  v.resize(n);
-  if(n > 0)
+  v.resize(0);
+  if(n > 0) {
+    v.resize(n);
     if(!ReadArrayFile(f,&v[0],n)) return false;
-  return true;
+    return true;
+  }
+  return false;
 }
 
 
@@ -170,6 +173,7 @@ void JointPositionSensor::GetMeasurements(std::vector<double>& values) const
 
 void JointPositionSensor::SetMeasurements(const std::vector<double>& values)
 {
+  q.resize(0);
   q = values;
 }
 
@@ -276,6 +280,7 @@ void JointVelocitySensor::GetMeasurements(std::vector<double>& values) const
 
 void JointVelocitySensor::SetMeasurements(const std::vector<double>& values)
 {
+  dq.resize(0);
   dq = values;
 }
 
@@ -381,6 +386,7 @@ void DriverTorqueSensor::GetMeasurements(std::vector<double>& values) const
 
 void DriverTorqueSensor::SetMeasurements(const std::vector<double>& values)
 {
+  t.resize(0);
   t = values;
 }
 
