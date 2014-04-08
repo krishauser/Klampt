@@ -20,6 +20,9 @@ class TrajectoryController(BaseController):
                     self.outputType[1]:self.traj.deriv(t)}
         else:
             return {self.outputType:self.traj.eval(t)}
+    def signal(self,type,**inputs):
+        if type=='reset':
+            self.startTime = None
 
 def make(robot,file="mypath.path"):
     if robot == None:
