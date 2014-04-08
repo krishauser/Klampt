@@ -19,9 +19,9 @@ struct ContactFeedbackInfo
 {
   //summary information
   bool accum;      ///< set this to true if you want to accumulate summary feedback over sub-steps
-  bool hadContact,hadSeparation; ///< true if contact was made or the object was separated at any point during the outer simulation interval.
-  bool inContact; ///< true if contact exist at the end of the outer simulation interval
-  Vector3 meanForce,meanPoint;
+  int contactCount,separationCount; ///< number of sub-steps in which contact was made / object was separated during the outer simulation interval.
+  bool inContact; ///< true if contact exists at the end of the outer simulation interval
+  Vector3 meanForce,meanTorque,meanPoint;
 
   //full contact information over sub-steps
   bool accumFull;  //set to true if all ODEContactLists should be stored

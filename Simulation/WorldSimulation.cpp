@@ -85,10 +85,11 @@ bool TestReadWrite(T& obj,const char* name="")
 
 void Reset(ContactFeedbackInfo& info)
 {
-  info.hadContact = false;
-  info.hadSeparation = false;
+  info.contactCount = 0;
+  info.separationCount = 0;
   info.inContact = false;
   info.meanForce.setZero();
+  info.meanTorque.setZero();
   info.meanPoint.setZero();
   info.times.clear();
   info.contactLists.clear();
@@ -97,7 +98,7 @@ void Reset(ContactFeedbackInfo& info)
 template <class T>
 bool WriteFile(File& f,const vector<T>& v)
 {
-  if(!WriteFile(f,v.size())) return false;
+  if(!WriteFile(f,int(v.size()))) return false;
   if(!v.empty()) 
 	if(!WriteArrayFile(f,&v[0],v.size())) return false;
   return true;
@@ -107,11 +108,12 @@ bool WriteFile(File& f,const vector<T>& v)
 template <class T>
 bool ReadFile(File& f,vector<T>& v)
 {
-  size_t n;
+  int n;
   if(!ReadFile(f,n)) return false;
+  if(n < 0) return false;
   v.resize(n);
   if(n != 0)
-	if(!ReadArrayFile(f,&v[0],n)) return false;
+    if(!ReadArrayFile(f,&v[0],n)) return false;
   return true;
 }
 
@@ -171,10 +173,11 @@ bool ReadFile(File& f,ODEContactList& list)
 bool WriteFile(File& f,const ContactFeedbackInfo& info)
 {
   if(!WriteFile(f,info.accum)) return false;
-  if(!WriteFile(f,info.hadContact)) return false;
-  if(!WriteFile(f,info.hadSeparation)) return false;
+  if(!WriteFile(f,info.contactCount)) return false;
+  if(!WriteFile(f,info.separationCount)) return false;
   if(!WriteFile(f,info.inContact)) return false;
   if(!WriteFile(f,info.meanForce)) return false;
+  if(!WriteFile(f,info.meanTorque)) return false;
   if(!WriteFile(f,info.meanPoint)) return false;
   if(!WriteFile(f,info.accumFull)) return false;
   if(!WriteFile(f,info.times)) return false;
@@ -185,10 +188,11 @@ bool WriteFile(File& f,const ContactFeedbackInfo& info)
 bool ReadFile(File& f,ContactFeedbackInfo& info)
 {
   if(!ReadFile(f,info.accum)) return false;
-  if(!ReadFile(f,info.hadContact)) return false;
-  if(!ReadFile(f,info.hadSeparation)) return false;
+  if(!ReadFile(f,info.contactCount)) return false;
+  if(!ReadFile(f,info.separationCount)) return false;
   if(!ReadFile(f,info.inContact)) return false;
   if(!ReadFile(f,info.meanForce)) return false;
+  if(!ReadFile(f,info.meanTorque)) return false;
   if(!ReadFile(f,info.meanPoint)) return false;
   if(!ReadFile(f,info.accumFull)) return false;
   if(!ReadFile(f,info.times)) return false;
@@ -355,15 +359,38 @@ void WorldSimulation::Advance(Real dt)
     for(ContactFeedbackMap::iterator i=contactFeedback.begin();i!=contactFeedback.end();i++) {
       if(i->second.accum || i->second.accumFull) {
 	ODEContactList* list = odesim.GetContactFeedback(i->first.first,i->first.second);
-	assert(list);
+	if(!list) continue;
 	if(i->second.accum) {
-	  if(list->forces.empty()) i->second.hadSeparation = true;
-	  else i->second.hadContact = true;
+	  if(list->forces.empty()) i->second.separationCount++;
+	  else i->second.contactCount++;
 	  i->second.inContact = !list->forces.empty();
-	  for(size_t k=0;k<list->forces.size();k++) {
-	    i->second.meanForce += list->forces[k];
-	    i->second.meanPoint += list->points[k].x*(1.0/list->forces.size());
+	  Vector3 meanPoint(Zero),meanForce(Zero),meanTorque(Zero);
+	  if(!list->forces.empty()) {
+	    Real wsum = 0;
+	    for(size_t k=0;k<list->forces.size();k++) {
+	      Real w = list->forces[k].dot(list->points[k].n);
+	      meanPoint += list->points[k].x*w;
+	      wsum += w;
+	    }
+	    if(wsum == 0) {
+	      meanPoint.setZero();
+	      for(size_t k=0;k<list->forces.size();k++) 
+		meanPoint += list->points[k].x;
+	      meanPoint /= list->forces.size();
+	    }
+	    else 
+	      meanPoint /= wsum;
+	      //update average;
+	    i->second.meanPoint += 1.0/i->second.contactCount*(meanPoint - i->second.meanPoint);
 	  }
+	  for(size_t k=0;k<list->forces.size();k++) {
+	    meanForce += list->forces[k];
+	    meanTorque += cross((list->points[k].x-meanPoint),list->forces[k]);
+	  }
+	  //update average
+
+	  i->second.meanForce += 1.0/numSteps*(meanForce - i->second.meanForce);
+	  i->second.meanTorque += 1.0/numSteps*(meanTorque - i->second.meanTorque);
 	}
 	if(i->second.accumFull) {
 	  i->second.times.push_back(time + accumTime);
@@ -375,13 +402,16 @@ void WorldSimulation::Advance(Real dt)
   time += dt;
   UpdateModel();
 
+  /*
   //convert sums to means
   for(ContactFeedbackMap::iterator i=contactFeedback.begin();i!=contactFeedback.end();i++) {
     if(i->second.accum) {
       i->second.meanForce /= numSteps;
       i->second.meanPoint /= numSteps;
+      i->second.meanTorque /= numSteps;
     }
   }
+  */
   //printf("WorldSimulation: Sim step %gs, real step %gs\n",dt,timer.ElapsedTime());
 }
 
@@ -465,8 +495,9 @@ bool WorldSimulation::ReadState(File& f)
       return false;
     }
   }
-  size_t n;
+  int n;
   if(!ReadFile(f,n)) return false;
+  if(n < 0) return false;
   contactFeedback.clear();
   for(size_t i=0;i<n;i++) {
     pair<ODEObjectID,ODEObjectID> key;
@@ -494,7 +525,7 @@ bool WorldSimulation::WriteState(File& f) const
       return false;
     }
   }
-  if(!WriteFile(f,contactFeedback.size())) return false;
+  if(!WriteFile(f,int(contactFeedback.size()))) return false;
   for(ContactFeedbackMap::const_iterator i=contactFeedback.begin();i!=contactFeedback.end();i++) {
     if(!WriteFile(f,i->first.first)) return false;
     if(!WriteFile(f,i->first.second)) return false;
@@ -586,7 +617,7 @@ bool WorldSimulation::HadContact(int aid,int bid)
     ODEObjectID a=WorldToODEID(aid);
     for(ContactFeedbackMap::iterator i=contactFeedback.begin();i!=contactFeedback.end();i++) {
       if(i->first.first == a || i->first.second == a) {
-	if(i->second.hadContact) return true;
+	if(i->second.contactCount>0) return true;
       }
     }
     return false;
@@ -594,7 +625,7 @@ bool WorldSimulation::HadContact(int aid,int bid)
   else {
     ContactFeedbackInfo* info=GetContactFeedback(aid,bid);
     if(!info) return false;
-    return info->hadContact;
+    return (info->contactCount>0);
   }
 }
 
@@ -604,7 +635,7 @@ bool WorldSimulation::HadSeparation(int aid,int bid)
     ODEObjectID a=WorldToODEID(aid);
     for(ContactFeedbackMap::iterator i=contactFeedback.begin();i!=contactFeedback.end();i++) {
       if(i->first.first == a || i->first.second == a) {
-	if(i->second.hadSeparation) return true;
+	if(i->second.separationCount>0) return true;
       }
     }
     return false;
@@ -612,7 +643,7 @@ bool WorldSimulation::HadSeparation(int aid,int bid)
   else {
     ContactFeedbackInfo* info=GetContactFeedback(aid,bid);
     if(!info) return false;
-    return info->hadSeparation;
+    return (info->separationCount>0);
   }
 }
 
