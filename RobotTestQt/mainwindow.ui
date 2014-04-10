@@ -345,7 +345,6 @@
     </item>
    </layout>
    <zorder>displaywidget</zorder>
-   <zorder></zorder>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">

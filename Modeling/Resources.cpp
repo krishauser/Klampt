@@ -43,6 +43,7 @@ void MakeRobotResourceLibrary(ResourceLibrary& library)
   library.AddLoader<WorldResource>("xml");
   library.AddLoader<LinearPathResource>("path");
   library.AddLoader<MultiPathResource>("xml");
+  library.AddLoader<MultiPathResource>("multipath");
   library.AddLoader<GraspResource>("xml");
 }
 

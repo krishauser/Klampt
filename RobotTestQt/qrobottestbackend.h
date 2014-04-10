@@ -7,8 +7,6 @@
 #include <Interface/RobotTestGUI.h>
 //#include <GLdraw/GLScreenshotProgram.h>
 
-#include <GLScreenshotPlugin.h>
-
 class QRobotTestBackend : public QGLWidget, public RobotTestBackend//, public GLScreenshotPlugin
 {
     Q_OBJECT
