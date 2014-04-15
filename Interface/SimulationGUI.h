@@ -82,7 +82,7 @@ public:
 
   ///Sends a linear path to the controller.  The path starts pathDelay
   ///seconds after the current time
-  bool SendLinearPath(const vector<Real>& times,const vector<Config>& milestones,Real pathDelay=0.5); 
+  bool SendLinearPath(const vector<Real>& times,const vector<Config>& milestones,Real pathDelay=0.1); 
 
   ///Logs the state of all objects in the world to the given CSV file
   void DoLogging(const char* fn="simtest_log.csv");

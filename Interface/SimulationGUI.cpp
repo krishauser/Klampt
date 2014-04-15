@@ -13,7 +13,7 @@
 #include <GLdraw/GLUTString.h>
 #include <utils/stringutils.h>
 #include <fstream>
-
+#include <iomanip>
 
 typedef LoggingController MyController;
 typedef PolynomialPathController MyMilestoneController;
@@ -609,7 +609,8 @@ bool SimGUIBackend::SendLinearPath(const vector<Real>& times,const vector<Config
   if(sim.time > 0) printf("SendLinearPath: simulation time offset %g\n",sim.time);
   for(size_t i=0;i<milestones.size();i++) {
     stringstream ss;
-    //TODO: why do you need to add dt to the simulation time?
+    ss<<fixed<<setprecision(5);
+    //TODO: why do you need to add a path delay to the simulation time?
     ss<<sim.time+pathDelay+times[i]<<"\t"<<milestones[i];
     if(i==0) {
       if(!sim.robotControllers[0]->SendCommand("set_tq",ss.str())) {
