@@ -2979,42 +2979,43 @@ SWIG_Python_NonDynamicSetAttr(PyObject *obj, PyObject *name, PyObject *value) {
 #define SWIGTYPE_p_RigidObjectModel swig_types[13]
 #define SWIGTYPE_p_Robot swig_types[14]
 #define SWIGTYPE_p_RobotModel swig_types[15]
-#define SWIGTYPE_p_RobotModelLink swig_types[16]
-#define SWIGTYPE_p_SensorBase swig_types[17]
-#define SWIGTYPE_p_SimBody swig_types[18]
-#define SWIGTYPE_p_SimRobotController swig_types[19]
-#define SWIGTYPE_p_SimRobotSensor swig_types[20]
-#define SWIGTYPE_p_Simulator swig_types[21]
-#define SWIGTYPE_p_TerrainModel swig_types[22]
-#define SWIGTYPE_p_TriangleMesh swig_types[23]
-#define SWIGTYPE_p_WorldModel swig_types[24]
-#define SWIGTYPE_p_WorldSimulation swig_types[25]
-#define SWIGTYPE_p__object swig_types[26]
-#define SWIGTYPE_p_allocator_type swig_types[27]
-#define SWIGTYPE_p_char swig_types[28]
-#define SWIGTYPE_p_difference_type swig_types[29]
-#define SWIGTYPE_p_double swig_types[30]
-#define SWIGTYPE_p_doubleArray swig_types[31]
-#define SWIGTYPE_p_dxBody swig_types[32]
-#define SWIGTYPE_p_int swig_types[33]
-#define SWIGTYPE_p_intArray swig_types[34]
-#define SWIGTYPE_p_p__object swig_types[35]
-#define SWIGTYPE_p_size_type swig_types[36]
-#define SWIGTYPE_p_std__allocatorT_double_t swig_types[37]
-#define SWIGTYPE_p_std__allocatorT_int_t swig_types[38]
-#define SWIGTYPE_p_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t swig_types[39]
-#define SWIGTYPE_p_std__invalid_argument swig_types[40]
-#define SWIGTYPE_p_std__vectorT_GeneralizedIKObjective_std__allocatorT_GeneralizedIKObjective_t_t swig_types[41]
-#define SWIGTYPE_p_std__vectorT_IKObjective_std__allocatorT_IKObjective_t_t swig_types[42]
-#define SWIGTYPE_p_std__vectorT__Tp__Alloc_t swig_types[43]
-#define SWIGTYPE_p_std__vectorT_double_std__allocatorT_double_t_t swig_types[44]
-#define SWIGTYPE_p_std__vectorT_int_std__allocatorT_int_t_t swig_types[45]
-#define SWIGTYPE_p_std__vectorT_std__string_std__allocatorT_std__string_t_t swig_types[46]
-#define SWIGTYPE_p_std__vectorT_std__vectorT_double_std__allocatorT_double_t_t_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t_t swig_types[47]
-#define SWIGTYPE_p_swig__SwigPyIterator swig_types[48]
-#define SWIGTYPE_p_value_type swig_types[49]
-static swig_type_info *swig_types[51];
-static swig_module_info swig_module = {swig_types, 50, 0, 0, 0, 0};
+#define SWIGTYPE_p_RobotModelDriver swig_types[16]
+#define SWIGTYPE_p_RobotModelLink swig_types[17]
+#define SWIGTYPE_p_SensorBase swig_types[18]
+#define SWIGTYPE_p_SimBody swig_types[19]
+#define SWIGTYPE_p_SimRobotController swig_types[20]
+#define SWIGTYPE_p_SimRobotSensor swig_types[21]
+#define SWIGTYPE_p_Simulator swig_types[22]
+#define SWIGTYPE_p_TerrainModel swig_types[23]
+#define SWIGTYPE_p_TriangleMesh swig_types[24]
+#define SWIGTYPE_p_WorldModel swig_types[25]
+#define SWIGTYPE_p_WorldSimulation swig_types[26]
+#define SWIGTYPE_p__object swig_types[27]
+#define SWIGTYPE_p_allocator_type swig_types[28]
+#define SWIGTYPE_p_char swig_types[29]
+#define SWIGTYPE_p_difference_type swig_types[30]
+#define SWIGTYPE_p_double swig_types[31]
+#define SWIGTYPE_p_doubleArray swig_types[32]
+#define SWIGTYPE_p_dxBody swig_types[33]
+#define SWIGTYPE_p_int swig_types[34]
+#define SWIGTYPE_p_intArray swig_types[35]
+#define SWIGTYPE_p_p__object swig_types[36]
+#define SWIGTYPE_p_size_type swig_types[37]
+#define SWIGTYPE_p_std__allocatorT_double_t swig_types[38]
+#define SWIGTYPE_p_std__allocatorT_int_t swig_types[39]
+#define SWIGTYPE_p_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t swig_types[40]
+#define SWIGTYPE_p_std__invalid_argument swig_types[41]
+#define SWIGTYPE_p_std__vectorT_GeneralizedIKObjective_std__allocatorT_GeneralizedIKObjective_t_t swig_types[42]
+#define SWIGTYPE_p_std__vectorT_IKObjective_std__allocatorT_IKObjective_t_t swig_types[43]
+#define SWIGTYPE_p_std__vectorT__Tp__Alloc_t swig_types[44]
+#define SWIGTYPE_p_std__vectorT_double_std__allocatorT_double_t_t swig_types[45]
+#define SWIGTYPE_p_std__vectorT_int_std__allocatorT_int_t_t swig_types[46]
+#define SWIGTYPE_p_std__vectorT_std__string_std__allocatorT_std__string_t_t swig_types[47]
+#define SWIGTYPE_p_std__vectorT_std__vectorT_double_std__allocatorT_double_t_t_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t_t swig_types[48]
+#define SWIGTYPE_p_swig__SwigPyIterator swig_types[49]
+#define SWIGTYPE_p_value_type swig_types[50]
+static swig_type_info *swig_types[52];
+static swig_module_info swig_module = {swig_types, 51, 0, 0, 0, 0};
 #define SWIG_TypeQuery(name) SWIG_TypeQueryModule(&swig_module, &swig_module, name)
 #define SWIG_MangledTypeQuery(name) SWIG_MangledTypeQueryModule(&swig_module, &swig_module, name)
 
@@ -15903,6 +15904,678 @@ SWIGINTERN PyObject *RobotModelLink_swigregister(PyObject *SWIGUNUSEDPARM(self),
   return SWIG_Py_Void();
 }
 
+SWIGINTERN PyObject *_wrap_new_RobotModelDriver(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  RobotModelDriver *result = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)":new_RobotModelDriver")) SWIG_fail;
+  {
+    try {
+      result = (RobotModelDriver *)new RobotModelDriver();
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_RobotModelDriver, SWIG_POINTER_NEW |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_RobotModelDriver_getName(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  RobotModelDriver *arg1 = (RobotModelDriver *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  char *result = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:RobotModelDriver_getName",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_RobotModelDriver, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "RobotModelDriver_getName" "', argument " "1"" of type '" "RobotModelDriver *""'"); 
+  }
+  arg1 = reinterpret_cast< RobotModelDriver * >(argp1);
+  {
+    try {
+      result = (char *)(arg1)->getName();
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_FromCharPtr((const char *)result);
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_RobotModelDriver_getRobot(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  RobotModelDriver *arg1 = (RobotModelDriver *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  RobotModel result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:RobotModelDriver_getRobot",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_RobotModelDriver, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "RobotModelDriver_getRobot" "', argument " "1"" of type '" "RobotModelDriver *""'"); 
+  }
+  arg1 = reinterpret_cast< RobotModelDriver * >(argp1);
+  {
+    try {
+      result = (arg1)->getRobot();
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_NewPointerObj((new RobotModel(static_cast< const RobotModel& >(result))), SWIGTYPE_p_RobotModel, SWIG_POINTER_OWN |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_RobotModelDriver_getType(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  RobotModelDriver *arg1 = (RobotModelDriver *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  char *result = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:RobotModelDriver_getType",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_RobotModelDriver, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "RobotModelDriver_getType" "', argument " "1"" of type '" "RobotModelDriver *""'"); 
+  }
+  arg1 = reinterpret_cast< RobotModelDriver * >(argp1);
+  {
+    try {
+      result = (char *)(arg1)->getType();
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_FromCharPtr((const char *)result);
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_RobotModelDriver_getAffectedLink(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  RobotModelDriver *arg1 = (RobotModelDriver *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  int result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:RobotModelDriver_getAffectedLink",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_RobotModelDriver, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "RobotModelDriver_getAffectedLink" "', argument " "1"" of type '" "RobotModelDriver *""'"); 
+  }
+  arg1 = reinterpret_cast< RobotModelDriver * >(argp1);
+  {
+    try {
+      result = (int)(arg1)->getAffectedLink();
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_From_int(static_cast< int >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_RobotModelDriver_getAffectedLinks(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  RobotModelDriver *arg1 = (RobotModelDriver *) 0 ;
+  std::vector< int,std::allocator< int > > *arg2 = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:RobotModelDriver_getAffectedLinks",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_RobotModelDriver, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "RobotModelDriver_getAffectedLinks" "', argument " "1"" of type '" "RobotModelDriver *""'"); 
+  }
+  arg1 = reinterpret_cast< RobotModelDriver * >(argp1);
+  res2 = SWIG_ConvertPtr(obj1, &argp2, SWIGTYPE_p_std__vectorT_int_std__allocatorT_int_t_t,  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "RobotModelDriver_getAffectedLinks" "', argument " "2"" of type '" "std::vector< int,std::allocator< int > > &""'"); 
+  }
+  if (!argp2) {
+    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "RobotModelDriver_getAffectedLinks" "', argument " "2"" of type '" "std::vector< int,std::allocator< int > > &""'"); 
+  }
+  arg2 = reinterpret_cast< std::vector< int,std::allocator< int > > * >(argp2);
+  {
+    try {
+      (arg1)->getAffectedLinks(*arg2);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_RobotModelDriver_getAffineCoeffs(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  RobotModelDriver *arg1 = (RobotModelDriver *) 0 ;
+  std::vector< double,std::allocator< double > > *arg2 = 0 ;
+  std::vector< double,std::allocator< double > > *arg3 = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  void *argp3 = 0 ;
+  int res3 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  PyObject * obj2 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OOO:RobotModelDriver_getAffineCoeffs",&obj0,&obj1,&obj2)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_RobotModelDriver, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "RobotModelDriver_getAffineCoeffs" "', argument " "1"" of type '" "RobotModelDriver *""'"); 
+  }
+  arg1 = reinterpret_cast< RobotModelDriver * >(argp1);
+  res2 = SWIG_ConvertPtr(obj1, &argp2, SWIGTYPE_p_std__vectorT_double_std__allocatorT_double_t_t,  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "RobotModelDriver_getAffineCoeffs" "', argument " "2"" of type '" "std::vector< double,std::allocator< double > > &""'"); 
+  }
+  if (!argp2) {
+    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "RobotModelDriver_getAffineCoeffs" "', argument " "2"" of type '" "std::vector< double,std::allocator< double > > &""'"); 
+  }
+  arg2 = reinterpret_cast< std::vector< double,std::allocator< double > > * >(argp2);
+  res3 = SWIG_ConvertPtr(obj2, &argp3, SWIGTYPE_p_std__vectorT_double_std__allocatorT_double_t_t,  0 );
+  if (!SWIG_IsOK(res3)) {
+    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "RobotModelDriver_getAffineCoeffs" "', argument " "3"" of type '" "std::vector< double,std::allocator< double > > &""'"); 
+  }
+  if (!argp3) {
+    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "RobotModelDriver_getAffineCoeffs" "', argument " "3"" of type '" "std::vector< double,std::allocator< double > > &""'"); 
+  }
+  arg3 = reinterpret_cast< std::vector< double,std::allocator< double > > * >(argp3);
+  {
+    try {
+      (arg1)->getAffineCoeffs(*arg2,*arg3);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_RobotModelDriver_setValue(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  RobotModelDriver *arg1 = (RobotModelDriver *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:RobotModelDriver_setValue",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_RobotModelDriver, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "RobotModelDriver_setValue" "', argument " "1"" of type '" "RobotModelDriver *""'"); 
+  }
+  arg1 = reinterpret_cast< RobotModelDriver * >(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "RobotModelDriver_setValue" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = static_cast< double >(val2);
+  {
+    try {
+      (arg1)->setValue(arg2);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_RobotModelDriver_getValue(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  RobotModelDriver *arg1 = (RobotModelDriver *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  double result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:RobotModelDriver_getValue",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_RobotModelDriver, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "RobotModelDriver_getValue" "', argument " "1"" of type '" "RobotModelDriver *""'"); 
+  }
+  arg1 = reinterpret_cast< RobotModelDriver * >(argp1);
+  {
+    try {
+      result = (double)(arg1)->getValue();
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_RobotModelDriver_setVelocity(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  RobotModelDriver *arg1 = (RobotModelDriver *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:RobotModelDriver_setVelocity",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_RobotModelDriver, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "RobotModelDriver_setVelocity" "', argument " "1"" of type '" "RobotModelDriver *""'"); 
+  }
+  arg1 = reinterpret_cast< RobotModelDriver * >(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "RobotModelDriver_setVelocity" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = static_cast< double >(val2);
+  {
+    try {
+      (arg1)->setVelocity(arg2);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_RobotModelDriver_getVelocity(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  RobotModelDriver *arg1 = (RobotModelDriver *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  double result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:RobotModelDriver_getVelocity",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_RobotModelDriver, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "RobotModelDriver_getVelocity" "', argument " "1"" of type '" "RobotModelDriver *""'"); 
+  }
+  arg1 = reinterpret_cast< RobotModelDriver * >(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "RobotModelDriver_getVelocity" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = static_cast< double >(val2);
+  {
+    try {
+      result = (double)(arg1)->getVelocity(arg2);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_RobotModelDriver_world_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  RobotModelDriver *arg1 = (RobotModelDriver *) 0 ;
+  int arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:RobotModelDriver_world_set",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_RobotModelDriver, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "RobotModelDriver_world_set" "', argument " "1"" of type '" "RobotModelDriver *""'"); 
+  }
+  arg1 = reinterpret_cast< RobotModelDriver * >(argp1);
+  ecode2 = SWIG_AsVal_int(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "RobotModelDriver_world_set" "', argument " "2"" of type '" "int""'");
+  } 
+  arg2 = static_cast< int >(val2);
+  if (arg1) (arg1)->world = arg2;
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_RobotModelDriver_world_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  RobotModelDriver *arg1 = (RobotModelDriver *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  int result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:RobotModelDriver_world_get",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_RobotModelDriver, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "RobotModelDriver_world_get" "', argument " "1"" of type '" "RobotModelDriver *""'"); 
+  }
+  arg1 = reinterpret_cast< RobotModelDriver * >(argp1);
+  result = (int) ((arg1)->world);
+  resultobj = SWIG_From_int(static_cast< int >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_RobotModelDriver_robotIndex_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  RobotModelDriver *arg1 = (RobotModelDriver *) 0 ;
+  int arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:RobotModelDriver_robotIndex_set",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_RobotModelDriver, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "RobotModelDriver_robotIndex_set" "', argument " "1"" of type '" "RobotModelDriver *""'"); 
+  }
+  arg1 = reinterpret_cast< RobotModelDriver * >(argp1);
+  ecode2 = SWIG_AsVal_int(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "RobotModelDriver_robotIndex_set" "', argument " "2"" of type '" "int""'");
+  } 
+  arg2 = static_cast< int >(val2);
+  if (arg1) (arg1)->robotIndex = arg2;
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_RobotModelDriver_robotIndex_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  RobotModelDriver *arg1 = (RobotModelDriver *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  int result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:RobotModelDriver_robotIndex_get",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_RobotModelDriver, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "RobotModelDriver_robotIndex_get" "', argument " "1"" of type '" "RobotModelDriver *""'"); 
+  }
+  arg1 = reinterpret_cast< RobotModelDriver * >(argp1);
+  result = (int) ((arg1)->robotIndex);
+  resultobj = SWIG_From_int(static_cast< int >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_RobotModelDriver_robot_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  RobotModelDriver *arg1 = (RobotModelDriver *) 0 ;
+  Robot *arg2 = (Robot *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:RobotModelDriver_robot_set",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_RobotModelDriver, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "RobotModelDriver_robot_set" "', argument " "1"" of type '" "RobotModelDriver *""'"); 
+  }
+  arg1 = reinterpret_cast< RobotModelDriver * >(argp1);
+  res2 = SWIG_ConvertPtr(obj1, &argp2,SWIGTYPE_p_Robot, SWIG_POINTER_DISOWN |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "RobotModelDriver_robot_set" "', argument " "2"" of type '" "Robot *""'"); 
+  }
+  arg2 = reinterpret_cast< Robot * >(argp2);
+  if (arg1) (arg1)->robot = arg2;
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_RobotModelDriver_robot_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  RobotModelDriver *arg1 = (RobotModelDriver *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  Robot *result = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:RobotModelDriver_robot_get",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_RobotModelDriver, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "RobotModelDriver_robot_get" "', argument " "1"" of type '" "RobotModelDriver *""'"); 
+  }
+  arg1 = reinterpret_cast< RobotModelDriver * >(argp1);
+  result = (Robot *) ((arg1)->robot);
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_Robot, 0 |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_RobotModelDriver_index_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  RobotModelDriver *arg1 = (RobotModelDriver *) 0 ;
+  int arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:RobotModelDriver_index_set",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_RobotModelDriver, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "RobotModelDriver_index_set" "', argument " "1"" of type '" "RobotModelDriver *""'"); 
+  }
+  arg1 = reinterpret_cast< RobotModelDriver * >(argp1);
+  ecode2 = SWIG_AsVal_int(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "RobotModelDriver_index_set" "', argument " "2"" of type '" "int""'");
+  } 
+  arg2 = static_cast< int >(val2);
+  if (arg1) (arg1)->index = arg2;
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_RobotModelDriver_index_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  RobotModelDriver *arg1 = (RobotModelDriver *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  int result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:RobotModelDriver_index_get",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_RobotModelDriver, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "RobotModelDriver_index_get" "', argument " "1"" of type '" "RobotModelDriver *""'"); 
+  }
+  arg1 = reinterpret_cast< RobotModelDriver * >(argp1);
+  result = (int) ((arg1)->index);
+  resultobj = SWIG_From_int(static_cast< int >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_delete_RobotModelDriver(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  RobotModelDriver *arg1 = (RobotModelDriver *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:delete_RobotModelDriver",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_RobotModelDriver, SWIG_POINTER_DISOWN |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "delete_RobotModelDriver" "', argument " "1"" of type '" "RobotModelDriver *""'"); 
+  }
+  arg1 = reinterpret_cast< RobotModelDriver * >(argp1);
+  {
+    try {
+      delete arg1;
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *RobotModelDriver_swigregister(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *obj;
+  if (!PyArg_ParseTuple(args,(char*)"O:swigregister", &obj)) return NULL;
+  SWIG_TypeNewClientData(SWIGTYPE_p_RobotModelDriver, SWIG_NewClientData(obj));
+  return SWIG_Py_Void();
+}
+
 SWIGINTERN PyObject *_wrap_new_RobotModel(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   RobotModel *result = 0 ;
@@ -16163,6 +16836,177 @@ fail:
     "  Possible C/C++ prototypes are:\n"
     "    RobotModel::getLink(int)\n"
     "    RobotModel::getLink(char const *)\n");
+  return 0;
+}
+
+
+SWIGINTERN PyObject *_wrap_RobotModel_numDrivers(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  RobotModel *arg1 = (RobotModel *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  int result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:RobotModel_numDrivers",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_RobotModel, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "RobotModel_numDrivers" "', argument " "1"" of type '" "RobotModel *""'"); 
+  }
+  arg1 = reinterpret_cast< RobotModel * >(argp1);
+  {
+    try {
+      result = (int)(arg1)->numDrivers();
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_From_int(static_cast< int >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_RobotModel_getDriver__SWIG_0(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  RobotModel *arg1 = (RobotModel *) 0 ;
+  int arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  RobotModelDriver result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:RobotModel_getDriver",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_RobotModel, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "RobotModel_getDriver" "', argument " "1"" of type '" "RobotModel *""'"); 
+  }
+  arg1 = reinterpret_cast< RobotModel * >(argp1);
+  ecode2 = SWIG_AsVal_int(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "RobotModel_getDriver" "', argument " "2"" of type '" "int""'");
+  } 
+  arg2 = static_cast< int >(val2);
+  {
+    try {
+      result = (arg1)->getDriver(arg2);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_NewPointerObj((new RobotModelDriver(static_cast< const RobotModelDriver& >(result))), SWIGTYPE_p_RobotModelDriver, SWIG_POINTER_OWN |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_RobotModel_getDriver__SWIG_1(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  RobotModel *arg1 = (RobotModel *) 0 ;
+  char *arg2 = (char *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int res2 ;
+  char *buf2 = 0 ;
+  int alloc2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  RobotModelDriver result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:RobotModel_getDriver",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_RobotModel, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "RobotModel_getDriver" "', argument " "1"" of type '" "RobotModel *""'"); 
+  }
+  arg1 = reinterpret_cast< RobotModel * >(argp1);
+  res2 = SWIG_AsCharPtrAndSize(obj1, &buf2, NULL, &alloc2);
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "RobotModel_getDriver" "', argument " "2"" of type '" "char const *""'");
+  }
+  arg2 = reinterpret_cast< char * >(buf2);
+  {
+    try {
+      result = (arg1)->getDriver((char const *)arg2);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_NewPointerObj((new RobotModelDriver(static_cast< const RobotModelDriver& >(result))), SWIGTYPE_p_RobotModelDriver, SWIG_POINTER_OWN |  0 );
+  if (alloc2 == SWIG_NEWOBJ) delete[] buf2;
+  return resultobj;
+fail:
+  if (alloc2 == SWIG_NEWOBJ) delete[] buf2;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_RobotModel_getDriver(PyObject *self, PyObject *args) {
+  int argc;
+  PyObject *argv[3];
+  int ii;
+  
+  if (!PyTuple_Check(args)) SWIG_fail;
+  argc = args ? (int)PyObject_Length(args) : 0;
+  for (ii = 0; (ii < 2) && (ii < argc); ii++) {
+    argv[ii] = PyTuple_GET_ITEM(args,ii);
+  }
+  if (argc == 2) {
+    int _v;
+    void *vptr = 0;
+    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_RobotModel, 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      {
+        int res = SWIG_AsVal_int(argv[1], NULL);
+        _v = SWIG_CheckState(res);
+      }
+      if (_v) {
+        return _wrap_RobotModel_getDriver__SWIG_0(self, args);
+      }
+    }
+  }
+  if (argc == 2) {
+    int _v;
+    void *vptr = 0;
+    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_RobotModel, 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      int res = SWIG_AsCharPtrAndSize(argv[1], 0, NULL, 0);
+      _v = SWIG_CheckState(res);
+      if (_v) {
+        return _wrap_RobotModel_getDriver__SWIG_1(self, args);
+      }
+    }
+  }
+  
+fail:
+  SWIG_SetErrorMsg(PyExc_NotImplementedError,"Wrong number or type of arguments for overloaded function 'RobotModel_getDriver'.\n"
+    "  Possible C/C++ prototypes are:\n"
+    "    RobotModel::getDriver(int)\n"
+    "    RobotModel::getDriver(char const *)\n");
   return 0;
 }
 
@@ -28985,6 +29829,27 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"RobotModelLink_index_get", _wrap_RobotModelLink_index_get, METH_VARARGS, (char *)"RobotModelLink_index_get(RobotModelLink self) -> int"},
 	 { (char *)"delete_RobotModelLink", _wrap_delete_RobotModelLink, METH_VARARGS, (char *)"delete_RobotModelLink(RobotModelLink self)"},
 	 { (char *)"RobotModelLink_swigregister", RobotModelLink_swigregister, METH_VARARGS, NULL},
+	 { (char *)"new_RobotModelDriver", _wrap_new_RobotModelDriver, METH_VARARGS, (char *)"new_RobotModelDriver() -> RobotModelDriver"},
+	 { (char *)"RobotModelDriver_getName", _wrap_RobotModelDriver_getName, METH_VARARGS, (char *)"RobotModelDriver_getName(RobotModelDriver self) -> char const *"},
+	 { (char *)"RobotModelDriver_getRobot", _wrap_RobotModelDriver_getRobot, METH_VARARGS, (char *)"RobotModelDriver_getRobot(RobotModelDriver self) -> RobotModel"},
+	 { (char *)"RobotModelDriver_getType", _wrap_RobotModelDriver_getType, METH_VARARGS, (char *)"RobotModelDriver_getType(RobotModelDriver self) -> char const *"},
+	 { (char *)"RobotModelDriver_getAffectedLink", _wrap_RobotModelDriver_getAffectedLink, METH_VARARGS, (char *)"RobotModelDriver_getAffectedLink(RobotModelDriver self) -> int"},
+	 { (char *)"RobotModelDriver_getAffectedLinks", _wrap_RobotModelDriver_getAffectedLinks, METH_VARARGS, (char *)"RobotModelDriver_getAffectedLinks(RobotModelDriver self, intVector links)"},
+	 { (char *)"RobotModelDriver_getAffineCoeffs", _wrap_RobotModelDriver_getAffineCoeffs, METH_VARARGS, (char *)"RobotModelDriver_getAffineCoeffs(RobotModelDriver self, doubleVector scale, doubleVector offset)"},
+	 { (char *)"RobotModelDriver_setValue", _wrap_RobotModelDriver_setValue, METH_VARARGS, (char *)"RobotModelDriver_setValue(RobotModelDriver self, double val)"},
+	 { (char *)"RobotModelDriver_getValue", _wrap_RobotModelDriver_getValue, METH_VARARGS, (char *)"RobotModelDriver_getValue(RobotModelDriver self) -> double"},
+	 { (char *)"RobotModelDriver_setVelocity", _wrap_RobotModelDriver_setVelocity, METH_VARARGS, (char *)"RobotModelDriver_setVelocity(RobotModelDriver self, double val)"},
+	 { (char *)"RobotModelDriver_getVelocity", _wrap_RobotModelDriver_getVelocity, METH_VARARGS, (char *)"RobotModelDriver_getVelocity(RobotModelDriver self, double val) -> double"},
+	 { (char *)"RobotModelDriver_world_set", _wrap_RobotModelDriver_world_set, METH_VARARGS, (char *)"RobotModelDriver_world_set(RobotModelDriver self, int world)"},
+	 { (char *)"RobotModelDriver_world_get", _wrap_RobotModelDriver_world_get, METH_VARARGS, (char *)"RobotModelDriver_world_get(RobotModelDriver self) -> int"},
+	 { (char *)"RobotModelDriver_robotIndex_set", _wrap_RobotModelDriver_robotIndex_set, METH_VARARGS, (char *)"RobotModelDriver_robotIndex_set(RobotModelDriver self, int robotIndex)"},
+	 { (char *)"RobotModelDriver_robotIndex_get", _wrap_RobotModelDriver_robotIndex_get, METH_VARARGS, (char *)"RobotModelDriver_robotIndex_get(RobotModelDriver self) -> int"},
+	 { (char *)"RobotModelDriver_robot_set", _wrap_RobotModelDriver_robot_set, METH_VARARGS, (char *)"RobotModelDriver_robot_set(RobotModelDriver self, Robot * robot)"},
+	 { (char *)"RobotModelDriver_robot_get", _wrap_RobotModelDriver_robot_get, METH_VARARGS, (char *)"RobotModelDriver_robot_get(RobotModelDriver self) -> Robot *"},
+	 { (char *)"RobotModelDriver_index_set", _wrap_RobotModelDriver_index_set, METH_VARARGS, (char *)"RobotModelDriver_index_set(RobotModelDriver self, int index)"},
+	 { (char *)"RobotModelDriver_index_get", _wrap_RobotModelDriver_index_get, METH_VARARGS, (char *)"RobotModelDriver_index_get(RobotModelDriver self) -> int"},
+	 { (char *)"delete_RobotModelDriver", _wrap_delete_RobotModelDriver, METH_VARARGS, (char *)"delete_RobotModelDriver(RobotModelDriver self)"},
+	 { (char *)"RobotModelDriver_swigregister", RobotModelDriver_swigregister, METH_VARARGS, NULL},
 	 { (char *)"new_RobotModel", _wrap_new_RobotModel, METH_VARARGS, (char *)"\n"
 		"new_RobotModel() -> RobotModel\n"
 		"\n"
@@ -29013,6 +29878,11 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"RobotModelLink\n"
 		"RobotModel::getLink(const char *name) \n"
+		""},
+	 { (char *)"RobotModel_numDrivers", _wrap_RobotModel_numDrivers, METH_VARARGS, (char *)"RobotModel_numDrivers(RobotModel self) -> int"},
+	 { (char *)"RobotModel_getDriver", _wrap_RobotModel_getDriver, METH_VARARGS, (char *)"\n"
+		"getDriver(int index) -> RobotModelDriver\n"
+		"RobotModel_getDriver(RobotModel self, char const * name) -> RobotModelDriver\n"
 		""},
 	 { (char *)"RobotModel_getConfig", _wrap_RobotModel_getConfig, METH_VARARGS, (char *)"\n"
 		"RobotModel_getConfig(RobotModel self)\n"
@@ -30324,6 +31194,7 @@ static swig_type_info _swigt__p_RigidObject = {"_p_RigidObject", "RigidObject *"
 static swig_type_info _swigt__p_RigidObjectModel = {"_p_RigidObjectModel", "RigidObjectModel *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_Robot = {"_p_Robot", "Robot *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_RobotModel = {"_p_RobotModel", "RobotModel *", 0, 0, (void*)0, 0};
+static swig_type_info _swigt__p_RobotModelDriver = {"_p_RobotModelDriver", "RobotModelDriver *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_RobotModelLink = {"_p_RobotModelLink", "RobotModelLink *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_SensorBase = {"_p_SensorBase", "SensorBase *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_SimBody = {"_p_SimBody", "SimBody *", 0, 0, (void*)0, 0};
@@ -30376,6 +31247,7 @@ static swig_type_info *swig_type_initial[] = {
   &_swigt__p_RigidObjectModel,
   &_swigt__p_Robot,
   &_swigt__p_RobotModel,
+  &_swigt__p_RobotModelDriver,
   &_swigt__p_RobotModelLink,
   &_swigt__p_SensorBase,
   &_swigt__p_SimBody,
@@ -30428,6 +31300,7 @@ static swig_cast_info _swigc__p_RigidObject[] = {  {&_swigt__p_RigidObject, 0, 0
 static swig_cast_info _swigc__p_RigidObjectModel[] = {  {&_swigt__p_RigidObjectModel, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_Robot[] = {  {&_swigt__p_Robot, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_RobotModel[] = {  {&_swigt__p_RobotModel, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_RobotModelDriver[] = {  {&_swigt__p_RobotModelDriver, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_RobotModelLink[] = {  {&_swigt__p_RobotModelLink, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_SensorBase[] = {  {&_swigt__p_SensorBase, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_SimBody[] = {  {&_swigt__p_SimBody, 0, 0, 0},{0, 0, 0, 0}};
@@ -30480,6 +31353,7 @@ static swig_cast_info *swig_cast_initial[] = {
   _swigc__p_RigidObjectModel,
   _swigc__p_Robot,
   _swigc__p_RobotModel,
+  _swigc__p_RobotModelDriver,
   _swigc__p_RobotModelLink,
   _swigc__p_SensorBase,
   _swigc__p_SimBody,
