@@ -119,6 +119,10 @@ public:
   vector<string> linkNames;
   vector<string> driverNames;
   Matrix lipschitzMatrix;
+
+  ///Set this to true if you want to disable loading of geometry -- saves time
+  ///for some utility programs.
+  static bool disableGeometryLoading;
 };
 
 #endif
