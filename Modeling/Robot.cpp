@@ -96,6 +96,8 @@ bool RobotJointDriver::Affects(int link) const {
 	return false;
 }
 
+bool Robot::disableGeometryLoading = false;
+
 std::string Robot::LinkName(int i) const {
 	if (linkNames.empty())
 		return RobotWithGeometry::LinkName(i);
@@ -348,7 +350,7 @@ bool Robot::LoadRob(const char* fn) {
 			ss >> autoTorque;
 		} else if (name == "geometry") {
 			while (SafeInputString(ss, stemp))
-				geomFn.push_back(stemp);
+			  geomFn.push_back((Robot::disableGeometryLoading ? "" : stemp));
 		} else if (name == "scale") {
 			ss >> scale;
 		} else if (name == "geomscale") {
@@ -2303,7 +2305,7 @@ bool Robot::LoadURDF(const char* fn)
 		else link_index -= 1;
 
 		//geometry
-		if (!linkNode->geomName.empty()) {
+		if (!linkNode->geomName.empty() && !Robot::disableGeometryLoading) {
 		  string fn;
 		  fn = linkNode->geomName;
 		  if (!LoadGeometry(link_index, fn.c_str())) {
