@@ -22,6 +22,9 @@
  * - save_state(file): saves a simulation state to file
  * - load_view(file): loads a previously saved view (inherited from GLNavigationProgram)
  * - save_view(file): saves a view to a file (inherited from GLNavigationProgram)
+ * - connect_serial_controller(robot,port,rate): connects a robot (index) to a SerialController on the given
+ *   port (listens for open TCP connections on localhost:port).  The controller will write at the indicated
+ *   rate (in Hz).
  *
  * In the current format, the world should not be changed after initialization.
  */
@@ -52,16 +55,22 @@ public:
 
   ///Initializes simulation default controllers, sensors, and contact feedback
   virtual void InitSim();
-  ///Initializes default controllers and sensors
-  virtual void InitController(int i);
+  ///Initializes default controllers and sensors for the indicated robot
+  virtual void InitController(int robot);
   ///Initializes all contact feedback
   virtual void InitContactFeedbackAll();
+
+  ///Connects a robot to a SerialController listening for new connections on the given port
+  void ConnectSerialController(int robot,int port=3456,Real writeRate=10);
 
   ///Returns the simulation to its initial state
   void ResetSim();
 
   ///Renders the state of the simulation
   virtual void RenderWorld();
+
+  ///Renders the simulation clock (when in screen mode)
+  void DrawClock(int x,int y);
 
   ///Draws contact points
   void DrawContacts(Real pointSize = 5.0, Real fscale = 0.01, Real nscale=0.05);
