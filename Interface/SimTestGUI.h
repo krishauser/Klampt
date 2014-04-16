@@ -66,6 +66,9 @@ struct SensorPlot
  * - save_state(file): saves a simulation state to file (inherited from SimGUIBackend)
  * - load_view(file): loads a previously saved view (inherited from GLNavigationProgram)
  * - save_view(file): saves a view to a file (inherited from GLNavigationProgram)
+ * - log_sim(file): saves simulation log to a given file, or "" to set no logging.
+ * - log_contact_state(file): saves contact state log to a given file, or "" to set no logging.
+ * - log_contact_wrenches(file): saves contact wrench log to a given file, or "" to set no logging.
  *
  * button_toggle
  * - pose_ik
@@ -75,7 +78,6 @@ struct SensorPlot
  * - draw_contacts
  * - draw_wrenches
  * - draw_expanded 
- * - do_logging
  * - force_application_mode
  *
  * Signals sent back to GUI are defined as follows:
@@ -91,13 +93,16 @@ public:
   int pose_ik,pose_objects;
   vector<RobotPoseWidget> robotWidgets;
   vector<RigidObjectPoseWidget> objectWidgets;
+  WidgetSet allObjectWidgets;
   WorldDragWidget dragWidget;
   WidgetSet allWidgets;
 
   int forceApplicationMode,forceSpringActive;
   Vector3 forceSpringAnchor;
   int drawBBs,drawPoser,drawDesired,drawEstimated,drawContacts,drawWrenches,drawExpanded;
-  int doLogging;
+  string simLogFile;
+  string contactStateLogFile, contactWrenchLogFile;
+  map<int,string> robotCommandLogFiles, robotSensedLogFiles, robotStateLogFiles;
 
   vector<SensorPlot> sensorPlots;
   vector<GeometryAppearance> originalAppearance,expandedAppearance;

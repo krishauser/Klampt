@@ -2,6 +2,8 @@
 #include <utils/AnyMapper.h>
 #include <fstream>
 
+#define DEBUG_GUI 0
+
 
 template <class T>
 size_t ReplaceValues(AnyCollection& coll,const T& val,const AnyValue& replacement)
@@ -118,7 +120,8 @@ bool GenericGUIBase::SendMessage(const AnyCollection& msg)
   for(size_t i=0;i<rules.size();i++) {
     AnyCollection outmsg;
     if(MatchAndFill(msg,rules[i].first,rules[i].second,outmsg)) {
-      cout<<"GUI->Backend "<<msg<<" matched rule "<<i<<", processed to "<<outmsg<<endl;
+      if(DEBUG_GUI)
+	cout<<"GUI->Backend "<<msg<<" matched rule "<<i<<", processed to "<<outmsg<<endl;
       if(!backend->ProcessMessage(outmsg)) {
 	cout<<"Message "<<outmsg<<" not processed"<<endl;
 	return false;
@@ -128,7 +131,7 @@ bool GenericGUIBase::SendMessage(const AnyCollection& msg)
   }
   //cout<<"GUI->Backend "<<msg<<endl;
   if(!backend->ProcessMessage(msg)) {
-    cout<<"Message "<<msg<<" not processed"<<endl;
+    cout<<"GUI->Backend Message "<<msg<<" not processed"<<endl;
     return false;
   }
   return true;

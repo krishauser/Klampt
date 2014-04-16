@@ -11,6 +11,7 @@ public:
   virtual ~WorldDragWidget() {}
   void Set(RobotWorld* world);
   void Enable(bool active);
+  virtual void SetHighlight(bool value);
   virtual bool Hover(int x,int y,Camera::Viewport& viewport,double& distance);
   virtual bool BeginDrag(int x,int y,Camera::Viewport& viewport,double& distance);
   virtual void EndDrag();
@@ -27,6 +28,9 @@ public:
   Vector3 hoverPt;
   Vector3 dragPt;
   Real hoverDistance;
+
+  int highlightID;
+  GLColor originalFaceColor;
 };
 
 #endif

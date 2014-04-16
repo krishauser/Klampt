@@ -297,7 +297,7 @@ string IKCommandInterface::UpdateEvent()
 
 
 PlannerCommandInterface::PlannerCommandInterface()
-  :planner(NULL),lastPlanTime(0),nextPlanTime(0)
+  :planner(NULL),lastPlanTime(0),nextPlanTime(0),startObjectiveThreshold(Inf),started(false)
 {}
 
 PlannerCommandInterface::~PlannerCommandInterface()
@@ -308,6 +308,7 @@ PlannerCommandInterface::~PlannerCommandInterface()
 string PlannerCommandInterface::ActivateEvent(bool enabled)
 {
   InputProcessingInterface::ActivateEvent(enabled);
+  started = false;
   if(planner) {
     planner->currentPath.ramps.resize(0);
     lastPlanTime = nextPlanTime = robotInterface->GetCurTime();
@@ -320,17 +321,38 @@ string PlannerCommandInterface::UpdateEvent()
 {
   InputProcessingInterface::UpdateEvent();
   if(!planner) return "";
-  if(planner->currentPath.ramps.empty()) {
-    if(robotInterface->GetEndTime() <= robotInterface->GetCurTime()) { //done moving
-      Config q;
-      robotInterface->GetCurConfig(q);
-      planner->SetConstantPath(q);
-    }
-    else {
-      printf("Waiting until robot stops...\n");
-      //wait until done moving
+  if(!started) {
+    //2 conditions must be met before start: robot is stopped, robot hits the
+    //startobjectivethreshold.
+
+    //robot still moving
+    if(robotInterface->GetEndTime() > robotInterface->GetCurTime()) {
+      printf("Waiting until the robot stops...\n");
       return "";
     }
+    if(IsInf(startObjectiveThreshold)) {
+      started=true;
+    }
+    else if(ObjectiveChanged()) {
+      SmartPointer<PlannerObjectiveBase> obj = GetObjective();
+      Config q,v;
+      robotInterface->GetEndConfig(q);
+      v.resize(q.n,Zero);
+      if(obj->TerminalCost(0,q,v) > startObjectiveThreshold) {
+	printf("Waiting until the objective gets below %g, currently %g...\n",startObjectiveThreshold,obj->TerminalCost(0,q,v));
+	return "";
+      }
+      else started=true;
+    } 
+    else {
+      printf("Waiting for an objective...\n");
+    }
+  }
+  if(!started) return "";
+  if(planner->currentPath.ramps.empty()) {
+    Config q;
+    robotInterface->GetEndConfig(q);
+    planner->SetConstantPath(q);
   }
 
   //wait until next planning step, otherwise try planning

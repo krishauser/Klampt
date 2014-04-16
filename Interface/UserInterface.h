@@ -129,6 +129,12 @@ class PlannerCommandInterface : public InputProcessingInterface
   RealTimePlannerBase* planner;
   double lastPlanTime;
   double nextPlanTime;
+
+  ///The planner will not be called until the objective function is set below
+  ///this threshold.  Infinity by default (i.e., the planner will start
+  ///instantly)
+  double startObjectiveThreshold;
+  bool started;
 };
 
 /** @brief An interface uses safe IK as the real-time planner class to achieve

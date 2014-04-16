@@ -118,7 +118,6 @@ SmartPointer<RobotController> RobotControllerFactory::Load(TiXmlElement* in,Robo
   }
   TiXmlAttribute* attr = in->FirstAttribute();
   while(attr != NULL) {
-    cout<<"Attribute: "<<attr->Name()<<endl;
     if(0==strcmp(attr->Name(),"type")) {
       attr = attr->Next();
       continue;
@@ -128,8 +127,6 @@ SmartPointer<RobotController> RobotControllerFactory::Load(TiXmlElement* in,Robo
       return NULL;
     }
     attr = attr->Next();
-    if(attr == NULL)
-      cout<<"End of attribute list"<<endl;
   }
   return c;
 }

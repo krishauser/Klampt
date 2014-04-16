@@ -3,6 +3,7 @@
 
 #include <math3d/Ray3D.h>
 #include "Modeling/World.h"
+#include "IO/XmlWorld.h"
 #include <GLdraw/GLUINavigationProgram.h>
 #include <GLdraw/GLScreenshotProgram.h>
 #include <GLdraw/GL.h>
@@ -18,6 +19,7 @@ public:
   WorldViewProgram(RobotWorld* world);
   virtual ~WorldViewProgram() {}
 
+  bool LoadCommandLine(int argc,const char** argv);
   virtual bool Initialize();
   virtual void SetWorldLights()
   {
@@ -57,6 +59,67 @@ public:
 
   RobotWorld* world;
 };
+
+
+bool WorldViewProgram::LoadCommandLine(int argc,const char** argv)
+{
+  XmlWorld xmlWorld;
+  vector<string> configs;
+  world->lights.resize(1);
+  world->lights[0].setColor(GLColor(1,1,1));
+  world->lights[0].setDirectionalLight(Vector3(0.2,-0.4,1));
+  world->lights[0].setColor(GLColor(1,1,1));
+
+  for(int i=1;i<argc;i++) {
+    if(argv[i][0] == '-') {
+      if(0==strcmp(argv[i],"-config")) {
+	configs.push_back(argv[i+1]);
+	i++;
+      }
+      else {
+	printf("Unknown option %s",argv[i]);
+	return false;
+      }
+    }
+    else {
+      const char* ext=FileExtension(argv[i]);
+      if(0==strcmp(ext,"xml")) {
+	if(!xmlWorld.Load(argv[i])) {
+	  printf("Error loading world file %s\n",argv[i]);
+	  return false;
+	}
+	if(!xmlWorld.GetWorld(*world)) {
+	  printf("Error loading world from %s\n",argv[i]);
+	  return false;
+	}
+      }
+      else {
+	if(world->LoadElement(argv[i]) < 0) {
+	  return false;
+	}
+      }
+    }
+  }
+
+  if(configs.size() > world->robots.size()) {
+    printf("Warning, too many configs specified\n");
+  }
+  for(size_t i=0;i<configs.size();i++) {
+    if(i >= world->robots.size()) break;
+    ifstream in(configs[i].c_str(),ios::in);
+    if(!in) printf("Could not open config file %s\n",configs[i].c_str());
+    Vector temp;
+    in >> temp;
+    if(!in) printf("Error reading config file %s\n",configs[i].c_str());
+    if(temp.n != (int)world->robots[i].robot->links.size()) {
+      printf("Incorrect number of DOFs in config %d\n",i);
+      continue;
+    }
+    world->robots[i].robot->UpdateConfig(temp);
+  }
+
+  return true;
+}
 
 
 class WorldViewWidget : public Widget
