@@ -60,8 +60,8 @@ clean:
 	cd Planning; make clean
 	cd IO; make clean
 	cd View; make clean
-	cd Interface; make
-	rm $(LIBDIR)/*.a
+	cd Interface; make clean
+	rm -f $(LIBDIR)/*.a
 
 RobotTest: lib
 	cd Main; make test.o
@@ -93,6 +93,11 @@ URDFtoRob:  lib
 UserTrials:  lib
 	cd Main; make usertrials.o
 	 $(CC) $(FLAGS) $(OBJS) Main/$(OBJDIR)/usertrials.o $(LIBKLAMPT) $(LIB) -o $@
+
+MotorCalibrate: lib
+	cd Main; make motorcalibrate.o
+	 $(CC) $(FLAGS) $(OBJS) Main/$(OBJDIR)/motorcalibrate.o $(LIBKLAMPT) $(LIB) -o $@
+
 
 UserTrialsMT:  lib
 	cd Main; make usertrials_multithread.o

@@ -126,6 +126,7 @@ class StanceResource : public ResourceBase
   virtual bool Save(TiXmlElement* out);
   virtual bool Load() { return ResourceBase::Load(); }
   virtual bool Save() { return ResourceBase::Save(); }
+  virtual bool Load(const std::string& fn) { return ResourceBase::Load(fn); }
   virtual const char* Type() const { return "Stance"; }
   virtual ResourceBase* Make() { return new StanceResource; }
 

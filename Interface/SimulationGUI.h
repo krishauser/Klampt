@@ -31,6 +31,7 @@
 class SimGUIBackend : public WorldGUIBackend
 {
 public:
+  typedef GLNavigationBackend BaseT;
   int simulate;
   WorldSimulation sim;
   string initialState;
