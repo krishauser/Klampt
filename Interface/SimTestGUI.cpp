@@ -273,6 +273,7 @@ void SimTestBackend::RenderWorld()
 
 void SimTestBackend::RenderScreen()
 {
+  //SimGUIBackend::DrawClock(20,40);
   for(size_t i=0;i<sensorPlots.size();i++)
     sensorPlots[i].view.DrawGL();
 }
@@ -713,6 +714,7 @@ bool GLUISimTestGUI::Initialize()
   checkbox = glui->add_checkbox("Draw contacts");
   AddControl(checkbox,"draw_contacts");
   checkbox = glui->add_checkbox("Draw wrenches");
+  checkbox->set_int_val(1);
   AddControl(checkbox,"draw_wrenches");
   checkbox = glui->add_checkbox("Draw expanded");
   AddControl(checkbox,"draw_expanded");
