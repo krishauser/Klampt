@@ -1672,7 +1672,7 @@ int RealTimeTreePlanner::PlanFrom(ParabolicRamp::DynamicPath& path,Real cutoff)
     else return Timeout;
   }
   else
-    printf("Optimization of current state failed **outright**\n");
+    printf("Optimization of current state failed\n");
   //extending path destinations
   Node* n = root;
   for(size_t i=0;i<path.ramps.size();i++) {
@@ -1720,7 +1720,7 @@ int RealTimeTreePlanner::PlanFrom(ParabolicRamp::DynamicPath& path,Real cutoff)
 	}
       }
       else {
-	printf("Optimization of path node %d failed **outright**\n",i);
+	printf("Optimization of path node %d failed\n",i);
       }
     }
   }
