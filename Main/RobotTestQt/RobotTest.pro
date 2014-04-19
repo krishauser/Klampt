@@ -14,13 +14,13 @@ TEMPLATE = app
 SOURCES += main.cpp\
         mainwindow.cpp \
     qrobottestbackend.cpp \
-    qtguibase.cpp \
+    ../KlamptQt/qtguibase.cpp \
     qrobottestguibase.cpp \
     collisionoutput.cpp
 
 HEADERS  += mainwindow.h \
     qrobottestbackend.h \
-    qtguibase.h \
+    ../KlamptQt/qtguibase.h \
     qrobottestguibase.h \
     collisionoutput.h
 
