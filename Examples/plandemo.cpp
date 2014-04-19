@@ -11,7 +11,7 @@
  * planning.
  *
  * The constraint specifications are given in WorldPlannerSettings. If you
- * have custom requirements, you will need to 
+ * have custom requirements, you will need to set them up.
  */
 bool SimplePlan(RobotWorld& world,int robot,const Config& qstart,const Config& qgoal,MilestonePath& path,int maxIters=1000)
 {
@@ -21,8 +21,8 @@ bool SimplePlan(RobotWorld& world,int robot,const Config& qstart,const Config& q
   //e.g., set collision margins, edge collision checking resolution, etc.
   SingleRobotCSpace cspace(world,robot,&settings); 
   MotionPlannerFactory factory;
-  //do more planner setup here if desired, e.g., change perturbation size,
-  //connection radius, etc
+  //do more planner setup here if desired, e.g., change planner type,
+  //perturbation size, connection radius, etc
   MotionPlannerInterface* planner = factory.Create(&cspace);
   int istart=planner->AddMilestone(qstart); //should be 0
   int igoal=planner->AddMilestone(qgoal); //should be 1
