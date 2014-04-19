@@ -24,7 +24,8 @@ bool RigidObject::Load(const char* fn)
     if(!f.CheckType("mesh",PrimitiveValue::String,fn)) return false;
 
     string fnPath = GetFilePath(fn);
-    string geomfn = fnPath + f["mesh"][0].AsString();
+    geomFile = f["mesh"][0].AsString();
+    string geomfn = fnPath + geomFile;
     if(!geometry.Load(geomfn.c_str())) {
       fprintf(stderr,"Error loading geometry file %s\n",geomfn.c_str());
       return false;
