@@ -10,6 +10,7 @@
 #include <GLdraw/drawextra.h>
 #include <GLdraw/Widget.h>
 #include <GL/glui.h>
+#include <fstream>
 using namespace Math3D;
 using namespace GLDraw;
 
