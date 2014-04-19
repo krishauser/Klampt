@@ -20,6 +20,9 @@ using namespace Math;
  * and frictional forces f* = min_f |x''| s.t. |f| <= mu_d + |x'|*mu_v
  * returns the ending x(T),x'(T)
  */
+
+//TODO create error dialogs for error prompts
+
 void SimulateDOF(Real minv,Real d,Real k,Real c,
 		 Real x0,Real dx0,
 		 Real xDes,Real dxDes,
@@ -205,7 +208,8 @@ void OptimizeDof(const vector<Real>& minvs,const vector<Real>& ds,const vector<R
       (*f.fs[i])(minProblem.x,res);
       printf("%g, %g: x'' = %g*(PID(%g,%g) - %g*x' + %g*x + %g)\n",res[0],res[1],minvs[i],xDes[i],dxDes[i],ds[i],ks[i],cs[i]);
       if(!IsFinite(res[0]) || !IsFinite(res[1]) || Abs(res[1]) > 1e2) {
-	getchar();
+	//removed for GUI
+	//getchar();
 
     //removed for GUI version
     //	break;
@@ -351,7 +355,8 @@ void RunCalibrationInd(MotorCalibrationProblem& problem,int numIters)
 	anydiff = true;
     if(!anydiff) {
       printf("Uhhh... mass matrix %s is a constant?!?!\n",problem.robot->linkNames[j].c_str());
-      getchar();
+      //removed for GUI
+      //getchar();
     }
     Real& kP = problem.robot->drivers[d].servoP;
     Real& kI = problem.robot->drivers[d].servoI;
