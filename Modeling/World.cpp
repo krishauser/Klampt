@@ -163,8 +163,60 @@ GLDraw::GeometryAppearance& RobotWorld::GetAppearance(int id)
   if(robotLink.first >= 0) {
     return robots[robotLink.first].view.linkAppearance[robotLink.second];
   }
-  FatalError("GetGeometry: Invalid ID: %d\n",id);
+  FatalError("GetApperance: Invalid ID: %d\n",id);
   return robots[0].view.linkAppearance[0];
+}
+
+RigidTransform RobotWorld::GetTransform(int id) const
+{
+  RigidTransform T;
+  int terrain = IsTerrain(id);
+  if(terrain >= 0) {
+    T.setIdentity();
+    return T;
+  }
+  int rigidObject = IsRigidObject(id);
+  if(rigidObject >= 0)
+    return rigidObjects[rigidObject].object->T;
+  pair<int,int> robotLink = IsRobotLink(id);
+  if(robotLink.first >= 0) {
+    return robots[robotLink.first].robot->links[robotLink.second].T_World;
+  }
+  FatalError("GetTransform: Invalid ID: %d\n",id);
+  return RigidTransform();
+}
+
+void RobotWorld::SetTransform(int id,const RigidTransform& T)
+{
+  int terrain = IsTerrain(id);
+  if(terrain >= 0) {
+    FatalError("SetTransform: cannot set transform of a terrain");
+    return;
+  }
+  int rigidObject = IsRigidObject(id);
+  if(rigidObject >= 0) {
+    rigidObjects[rigidObject].object->T = T;
+    return;
+  }
+  int robot = IsRobot(id);
+  if(robot >= 0) {
+    if(robots[robot].robot->joints[0].type == RobotJoint::Floating) 
+      robots[robot].robot->SetJointByTransform(0,5,T);
+    else 
+      robots[robot].robot->links[0].T0_Parent = T;
+    robots[robot].robot->UpdateFrames();
+    return;
+  }
+  pair<int,int> robotLink = IsRobotLink(id);
+  if(robotLink.first >= 0) {
+    if(robots[robotLink.first].robot->joints[0].type == RobotJoint::Floating) {
+      if(robotLink.second != 5) FatalError("SetTransform: cannot set transforms of arbitrary robot links");
+      robots[robotLink.first].robot->SetJointByTransform(0,robotLink.second,T);
+    }
+    else
+      FatalError("SetTransform: cannot set transforms of arbitrary robot links");
+  }
+  FatalError("SetTransform: Invalid ID: %d\n",id);
 }
 
 void RobotWorld::UpdateGeometry()
@@ -264,6 +316,8 @@ int RobotWorld::LoadTerrain(const string& fn)
     delete t;
     return -1;
   }
+  AABB3D bb = t->geometry.GetAABB();
+  //printf("Environment %s bounding box [%g,%g]x[%g,%g]x[%g,%g]\n",fn.c_str(),bb.bmin.x,bb.bmax.x,bb.bmin.y,bb.bmax.y,bb.bmin.z,bb.bmax.z);
   const char* justfn = GetFileName(fn.c_str());
   char* buf = new char[strlen(justfn)+1];
   strcpy(buf,justfn);
