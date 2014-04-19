@@ -91,6 +91,8 @@ velmax	inf inf inf inf inf inf 0 0 0 10 0 0 0 0 2.5 2.5 2.5 2.5 5 0 5 5 0 0 0 0 
 
 accmax	inf inf inf inf inf inf 0 0 0 10 0 0 0 0 2.5 2.5 2.5 2.5 5 0 5 5 0 0 0 0 0 0 0 0 0 0 2.5 2.5 2.5 2.5 5 0 5 5 0 0 0 0 0 0 0 0 0 
 
+#uncomment this and comment out the subsequent 6 "joint weld" statements
+#if you wish to simulate Baxter's base as a floating object
 #joint floating 5 -1
 joint weld 0
 joint weld 1
