@@ -1,14 +1,17 @@
 #
 # Baxter robot, converted from RethinkRobotics/baxter_common/urdf/baxter.urdf
-# on 11/19/2013. 
+# and calibrated
 #
-# Dummy links were manually edited to have mass properties set to 0.
-#
-# Some basic noselfcollision items manually added.  More could be added to
+# Initial import: 11/19/2013. 
+# -Dummy links were manually edited to have mass properties set to 0.
+# -Some basic noselfcollision items manually added.  More could be added to
 # optimize self-collision testing.
+# -Motor parameters are yet tuned extensively, but simulation is stable.
 #
-# Motor parameters are not yet tuned extensively, but simulation is stable.
-#
+# Motor tuning: 4/15/2014.
+# - Used data from Rethink, ran it through motorcalibrate program.
+# - Max RMSE 1.8 degrees on right_lower_shoulder.
+
 
 links	"base0" "base1" "base2" "base3" "base4" "base" "collision_head_link_1" "collision_head_link_2" "torso" "head" "dummyhead1" "head_camera" "screen" "left_arm_mount" "left_upper_shoulder" "left_lower_shoulder" "left_upper_elbow" "left_lower_elbow" "left_upper_forearm" "left_arm_itb" "left_lower_forearm" "left_wrist" "left_hand" "left_gripper" "left_hand_camera" "left_hand_camera_axis" "left_hand_range" "left_upper_forearm_visual" "left_upper_elbow_visual" "left_torso_itb" "pedestal" "right_arm_mount" "right_upper_shoulder" "right_lower_shoulder" "right_upper_elbow" "right_lower_elbow" "right_upper_forearm" "right_arm_itb" "right_lower_forearm" "right_wrist" "right_hand" "right_gripper" "right_hand_camera" "right_hand_camera_axis" "right_hand_range" "right_upper_forearm_visual" "right_upper_elbow_visual" "right_torso_itb" "sonar_ring" 
 
@@ -88,6 +91,8 @@ velmax	inf inf inf inf inf inf 0 0 0 10 0 0 0 0 2.5 2.5 2.5 2.5 5 0 5 5 0 0 0 0 
 
 accmax	inf inf inf inf inf inf 0 0 0 10 0 0 0 0 2.5 2.5 2.5 2.5 5 0 5 5 0 0 0 0 0 0 0 0 0 0 2.5 2.5 2.5 2.5 5 0 5 5 0 0 0 0 0 0 0 0 0 
 
+#uncomment this and comment out the subsequent 6 "joint weld" statements
+#if you wish to simulate Baxter's base as a floating object
 #joint floating 5 -1
 joint weld 0
 joint weld 1
@@ -158,12 +163,12 @@ driver normal 38
 driver normal 39
 
 
-servoP	100 1000 1000 700 700 500 200 200 1000 1000 700 700 500 200 200 
-servoI	0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
-servoD	10 10 10 10 10 10 10 10 10 10 10 10 10 10 10 
-
-dryFriction	0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
-viscousFriction	0.7  3 2 2 1 1 0.7 0.7 3 2 2 1 1 0.7 0.7
+#optimized parameters for arms
+servoP 100 100.005 211.05 614.593 290.896 253.255 234.675 14.0868 68.9507 173.329 354.532 262.324 215.815 224.095 17.9634
+servoI 0 35.6333 536.282 117.791 98.5704 15.691 0.324808 0.0577103 31.1433 305.257 104.457 152.985 19.649 1.15989 0.26173
+servoD 10 2.96389e-11 65.8053 8.33616 13.3679 27.3115 32.5663 5.18406e-17 1.33269e-17 17.6931 0.518039 25.5226 7.43228 1.26944e-16 6.75188e-17
+dryFriction 0 0.174925 2.03053 4.36969 1.33826e-10 2.09954 1.58853 0.0543274 4.90113e-10 0.376609 2.105e-10 0.229861 1.36261 7.84912e-10 0.0746194
+viscousFriction 0.7 17.4031 18.2773 119.66 53.628 7.83062 8.82857 0.474828 12.5372 22.5662 90.5022 49.3098 7.49643 11.2227 0.600708
 
 noselfcollision 6 7     6 12 \
 	7 12 \

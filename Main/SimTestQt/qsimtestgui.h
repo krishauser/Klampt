@@ -1,5 +1,7 @@
-#ifndef QTGUIBASE_H
-#define QTGUIBASE_H
+#ifndef QSIMTESTGUI_H
+#define QSIMTESTGUI_H
+
+#include "KlamptQt/qtguibase.h"
 
 #include <Interface/GenericGUI.h>
 #include "Modeling/World.h"
@@ -16,24 +18,22 @@
 #include <controllersettings.h>
 #include <controllercommanddialog.h>
 
-class QtGUIBase : public QObject,public GenericGUIBase
+class QSimTestGUI : public QtGUIBase
 {
     Q_OBJECT
 
 public:
-    RobotWorld *world;
     WorldSimulation* sim;
-    QTimer* idle_timer;
     DriverEdit *driver_tool;
     LogOptions *log_options;
     ControllerSettings *controller_settings;
     ControllerCommandDialog *command_dialog;
-    QtGUIBase(GenericBackendBase* _backend,RobotWorld* _world);
+    QSimTestGUI(GenericBackendBase* _backend,RobotWorld* _world);
     QString old_filename;
     int constrain_mode,constrain_point_mode,delete_mode;
     bool OnCommand(const string &cmd, const string &args);
     void UpdateGUI();
-    ~QtGUIBase();
+    ~QSimTestGUI();
     void UpdateMeasurements();
     void LoadFile(QString filename=QString());
     void SaveScenario(QString filename=QString());
@@ -41,13 +41,7 @@ public:
     void ShowHelp();
     void ShowAbout();
 public slots:
-    void SendMouseMove(QMouseEvent *e);
-    void SendMouseWheel(QWheelEvent *e);
     void SendMousePress(QMouseEvent *e);
-    void SendMouseRelease(QMouseEvent *e);
-    void SendKeyDown(QKeyEvent *e);
-    void SendKeyUp(QKeyEvent *e);
-    void SendIdle();
     void SendDriverValue(int index, float value);
     void ShowSensor(int sensor);
     void HideSensor(int sensor);

@@ -1,6 +1,100 @@
 #include "XmlWorld.h"
 #include <utils/stringutils.h>
 
+///reads a transformation matrix from attributes of an XML element
+bool ReadTransform(TiXmlElement* e,RigidTransform& xform)
+{
+  Matrix3 R;
+  R.setIdentity();
+  Vector3 pos(Zero);
+  bool transform=false;
+  if(e->QueryValueAttribute("translation",&pos)==TIXML_SUCCESS) 
+    transform=true;
+  else if(e->QueryValueAttribute("position",&pos)==TIXML_SUCCESS) 
+    transform=true;
+  else pos.setZero();
+
+  if(e->Attribute("rotateRPY")) {
+    stringstream ss(e->Attribute("rotateRPY"));
+    Vector3 xyz;
+    EulerAngleRotation ea;
+    ss>>xyz;
+    //switch roll pitch yaw to ZYX order
+    ea.set(xyz.z,xyz.y,xyz.x);
+    ea.getMatrixZYX(R);
+    transform=true;
+  }
+  if(e->Attribute("rotateMoment")) {
+    stringstream ss(e->Attribute("rotateMoment"));
+    MomentRotation m;
+    ss>>m;
+    m.getMatrix(R);
+    transform=true;
+  }
+  if(e->Attribute("rotateX")) {
+    Real val;
+    stringstream ss(e->Attribute("rotateX"));
+    ss >> val;
+    Matrix3 temp;
+    temp.setRotateX(val);
+    R = temp*R;
+    transform = true;
+  }
+  if(e->Attribute("rotateY")) {
+    Real val;
+    stringstream ss(e->Attribute("rotateY"));
+    ss >> val;
+    Matrix3 temp;
+    temp.setRotateY(val);
+    R = temp*R;
+    transform = true;
+  }
+  if(e->Attribute("rotateZ")) {
+    Real val;
+    stringstream ss(e->Attribute("rotateZ"));
+    ss >> val;
+    Matrix3 temp;
+    temp.setRotateZ(val);
+    R = temp*R;
+    transform = true;
+  }
+  if(transform) {
+    xform.set(R,pos);
+    return true;
+  }
+  xform.setIdentity();
+  return false;
+}
+
+///reads a transformaton matrix from attributes of an XML element.  Allows scaling
+bool ReadTransform(TiXmlElement* e,Matrix4& xform)
+{
+  //read the rigid transform
+  bool transform = false;
+  RigidTransform rigid;
+  transform = ReadTransform(e,rigid);
+
+  xform.set(rigid);
+  bool scale = false;
+  Real temp;
+  Vector3 s(1,1,1);
+  if(e->QueryValueAttribute("scale",&s) == TIXML_SUCCESS) {
+    scale = true;
+  }
+  else if(e->QueryValueAttribute("scale",&temp) == TIXML_SUCCESS) {
+    s.set(temp);
+    scale  = true;
+  }
+  if(scale) {
+    for(int i=0;i<3;i++)
+      for(int j=0;j<3;j++)
+	xform(i,j)*=s[j];
+    return true;
+  }
+  return transform;
+}
+
+
 XmlRobot::XmlRobot(TiXmlElement* _element,string _path)
   :e(_element),path(_path)
 {}
@@ -32,6 +126,15 @@ bool XmlRobot::GetRobot(Robot& robot)
     }
     robot.UpdateConfig(q);
   }
+
+  RigidTransform T;
+  if(ReadTransform(e,T)) {
+    for(size_t i=0;i<robot.links.size();i++)
+      if(robot.parents[i] == -1) 
+	robot.links[i].T0_Parent = T*robot.links[i].T0_Parent;
+    robot.UpdateFrames();
+  }
+
   return true;
 }
 
@@ -68,89 +171,35 @@ bool XmlRigidObject::GetObject(RigidObject& obj)
   if(geom) {
     const char* fn = geom->Attribute("mesh");
     if(fn) {
-      string sfn = path + string(fn);
+      obj.geomFile = fn;
+      string sfn = path + obj.geomFile;
       if(!obj.geometry.Load(sfn.c_str())) {
-	fprintf(stderr,"XmlRigidObject: error loading meshfile %s, trying absolute path\n",sfn.c_str());
 	if(!obj.geometry.Load(fn)) {
-	  fprintf(stderr,"XmlRigidObject: error loading meshfile %s\n",sfn.c_str());
+	  fprintf(stderr,"XmlRigidObject: error loading geom %s from both absolute and relative paths\n",sfn.c_str());
 	  return false;
 	}
-	else
-	  fprintf(stderr,"XmlRigidObject: absolute path succeeded\n");
       }
     }
     Matrix4 xform;
+    if(ReadTransform(geom,xform)) {
+      obj.geometry.Transform(xform);
+    }
     xform.setIdentity();
     Real temp;
-    Vector3 temp3;
-    if(geom->QueryValueAttribute("scale",&temp3) == TIXML_SUCCESS) {
-      temp3.get(xform(0,0),xform(1,1),xform(2,2));
-    }
-    else if(geom->QueryValueAttribute("scale",&temp) == TIXML_SUCCESS) {
-      xform(0,0)=xform(1,1)=xform(2,2)=temp;
-    }
-    //TODO rotations too
-    if(geom->QueryValueAttribute("translate",&temp3) == TIXML_SUCCESS) {
-      xform(0,3)=temp3.x;
-      xform(1,3)=temp3.y;
-      xform(2,3)=temp3.z;
-    }
     if(geom->QueryValueAttribute("margin",&temp) == TIXML_SUCCESS) {
       obj.geometry.margin = temp;
     }
-    obj.geometry.Transform(xform);
     obj.geometry.InitCollisions();
   }
   if(obj.geometry.Empty()) {
     fprintf(stderr,"XmlRigidObject: element does not contain geometry attribute\n");
     return false;
   }
-  Vector3 position;
-  if(e->QueryValueAttribute("position",&position)==TIXML_SUCCESS) {
-    obj.T.t = position;
+
+  RigidTransform xform;
+  if(ReadTransform(e,xform)) {
+    obj.T = xform;
   }
-  if(e->Attribute("rotateRPY")) {
-    stringstream ss(e->Attribute("rotateRPY"));
-    Vector3 xyz;
-    EulerAngleRotation ea;
-    ss>>xyz;
-    //switch roll pitch yaw to ZYX order
-    ea.set(xyz.z,xyz.y,xyz.x);
-    ea.getMatrixZYX(obj.T.R);
-  }
-  Real val;
-  if(e->QueryValueAttribute("rotateX",&val)==TIXML_SUCCESS) {
-    Matrix3 R;
-    R.setRotateX(val);
-    obj.T.R = R*obj.T.R;
-  }
-  if(e->QueryValueAttribute("rotateY",&val)==TIXML_SUCCESS) {
-    Matrix3 R;
-    R.setRotateY(val);
-    obj.T.R = R*obj.T.R;
-  }
-  if(e->QueryValueAttribute("rotateZ",&val)==TIXML_SUCCESS) {
-    Matrix3 R;
-    R.setRotateY(val);
-    obj.T.R = R*obj.T.R;
-  }
-  //TODO: more attributes
-  if(e->Attribute("rotationMoment")) {
-    MomentRotation pos;
-    stringstream ss(e->Attribute("rotationMoment"));
-    ss >> pos;
-    Matrix3 R;
-    pos.getMatrix(R);
-    obj.T.R = R*obj.T.R;
-  }
-  /*
-  if(e->Attribute("rotationAngleAxis")) {
-    AngleAxisRotation pos;
-    stringstream ss(e->Attribute("rotationAngleAxis"));
-    ss >> pos;
-    obj.T.t = pos;
-  }
-  */
 
   TiXmlElement* phys=e->FirstChildElement("physics");
   if(phys) {
@@ -214,66 +263,8 @@ bool XmlTerrain::GetTerrain(Environment& env)
     env.SetUniformFriction(kf);
   }
 
-  Matrix3 R;
-  R.setIdentity();
-  Vector3 s;
-  Vector3 pos(Zero);
-  bool transform=false;
-  if(e->QueryValueAttribute("scale",&s)==TIXML_SUCCESS) 
-    transform=true;
-  else s.set(1,1,1);
-
-  if(e->QueryValueAttribute("translation",&pos)==TIXML_SUCCESS) 
-    transform=true;
-  else if(e->QueryValueAttribute("position",&pos)==TIXML_SUCCESS) 
-    transform=true;
-  else pos.setZero();
-
-  if(e->Attribute("rotateRPY")) {
-    stringstream ss(e->Attribute("rotateRPY"));
-    Vector3 xyz;
-    EulerAngleRotation ea;
-    ss>>xyz;
-    //switch roll pitch yaw to ZYX order
-    ea.set(xyz.z,xyz.y,xyz.x);
-    ea.getMatrixZYX(R);
-    transform=true;
-  }
-  if(e->Attribute("rotateMoment")) {
-    stringstream ss(e->Attribute("rotateMoment"));
-    MomentRotation m;
-    ss>>m;
-    m.getMatrix(R);
-    transform=true;
-  }
-  if(e->Attribute("rotateX")) {
-    Real val;
-    stringstream ss(e->Attribute("rotateX"));
-    ss >> val;
-    R.setRotateX(val);
-    transform = true;
-  }
-  if(e->Attribute("rotateY")) {
-    Real val;
-    stringstream ss(e->Attribute("rotateY"));
-    ss >> val;
-    R.setRotateY(val);
-    transform = true;
-  }
-  if(e->Attribute("rotateZ")) {
-    Real val;
-    stringstream ss(e->Attribute("rotateZ"));
-    ss >> val;
-    R.setRotateZ(val);
-    transform = true;
-  }
-  if(transform) {
-    Matrix4 xform;
-    xform.setIdentity();
-    for(int i=0;i<3;i++)
-      for(int j=0;j<3;j++)
-	xform(i,j)=R(i,j)*s[j];
-    pos.get(xform(0,3),xform(1,3),xform(2,3));
+  Matrix4 xform;
+  if(ReadTransform(e,xform)) {
     env.geometry.Transform(xform);
     env.geometry.InitCollisions();
   }

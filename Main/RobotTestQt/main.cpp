@@ -27,16 +27,21 @@ int main(int argc, char *argv[])
 
     if(argc==1){
         QFileDialog f;
-        filename = f.getOpenFileName(0,"Open Robot","../data","*.rob");
+        filename = f.getOpenFileName(0,"Open Robot","../../data/robots","*.rob");
         if(filename.isNull()) return 0;
       }
       MainWindow w;
       if(argc==1){
-          const char* args[3] = {"RobotTest",filename.toStdString().c_str(),""};
+          //do not simplify the proceeding lines, this makes it work somehow
+          string s = filename.toStdString();
+          const char* c = s.c_str();
+          const char* args[3] = {"RobotTest",c,""};
           w.Initialize(2,(const char**)args);
       }
-      else
+      else{
+          string s = argv[1];
           w.Initialize(argc,(const char**)argv);
+      }
       w.directory=directory;
     w.show();
     return a.exec();

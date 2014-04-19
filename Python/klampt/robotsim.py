@@ -957,6 +957,75 @@ class RobotModelLink(_object):
 RobotModelLink_swigregister = _robotsim.RobotModelLink_swigregister
 RobotModelLink_swigregister(RobotModelLink)
 
+class RobotModelDriver(_object):
+    """Proxy of C++ RobotModelDriver class"""
+    __swig_setmethods__ = {}
+    __setattr__ = lambda self, name, value: _swig_setattr(self, RobotModelDriver, name, value)
+    __swig_getmethods__ = {}
+    __getattr__ = lambda self, name: _swig_getattr(self, RobotModelDriver, name)
+    __repr__ = _swig_repr
+    def __init__(self): 
+        """__init__(RobotModelDriver self) -> RobotModelDriver"""
+        this = _robotsim.new_RobotModelDriver()
+        try: self.this.append(this)
+        except: self.this = this
+    def getName(self):
+        """getName(RobotModelDriver self) -> char const *"""
+        return _robotsim.RobotModelDriver_getName(self)
+
+    def getRobot(self):
+        """getRobot(RobotModelDriver self) -> RobotModel"""
+        return _robotsim.RobotModelDriver_getRobot(self)
+
+    def getType(self):
+        """getType(RobotModelDriver self) -> char const *"""
+        return _robotsim.RobotModelDriver_getType(self)
+
+    def getAffectedLink(self):
+        """getAffectedLink(RobotModelDriver self) -> int"""
+        return _robotsim.RobotModelDriver_getAffectedLink(self)
+
+    def getAffectedLinks(self, *args):
+        """getAffectedLinks(RobotModelDriver self, intVector links)"""
+        return _robotsim.RobotModelDriver_getAffectedLinks(self, *args)
+
+    def getAffineCoeffs(self, *args):
+        """getAffineCoeffs(RobotModelDriver self, doubleVector scale, doubleVector offset)"""
+        return _robotsim.RobotModelDriver_getAffineCoeffs(self, *args)
+
+    def setValue(self, *args):
+        """setValue(RobotModelDriver self, double val)"""
+        return _robotsim.RobotModelDriver_setValue(self, *args)
+
+    def getValue(self):
+        """getValue(RobotModelDriver self) -> double"""
+        return _robotsim.RobotModelDriver_getValue(self)
+
+    def setVelocity(self, *args):
+        """setVelocity(RobotModelDriver self, double val)"""
+        return _robotsim.RobotModelDriver_setVelocity(self, *args)
+
+    def getVelocity(self, *args):
+        """getVelocity(RobotModelDriver self, double val) -> double"""
+        return _robotsim.RobotModelDriver_getVelocity(self, *args)
+
+    __swig_setmethods__["world"] = _robotsim.RobotModelDriver_world_set
+    __swig_getmethods__["world"] = _robotsim.RobotModelDriver_world_get
+    if _newclass:world = _swig_property(_robotsim.RobotModelDriver_world_get, _robotsim.RobotModelDriver_world_set)
+    __swig_setmethods__["robotIndex"] = _robotsim.RobotModelDriver_robotIndex_set
+    __swig_getmethods__["robotIndex"] = _robotsim.RobotModelDriver_robotIndex_get
+    if _newclass:robotIndex = _swig_property(_robotsim.RobotModelDriver_robotIndex_get, _robotsim.RobotModelDriver_robotIndex_set)
+    __swig_setmethods__["robot"] = _robotsim.RobotModelDriver_robot_set
+    __swig_getmethods__["robot"] = _robotsim.RobotModelDriver_robot_get
+    if _newclass:robot = _swig_property(_robotsim.RobotModelDriver_robot_get, _robotsim.RobotModelDriver_robot_set)
+    __swig_setmethods__["index"] = _robotsim.RobotModelDriver_index_set
+    __swig_getmethods__["index"] = _robotsim.RobotModelDriver_index_get
+    if _newclass:index = _swig_property(_robotsim.RobotModelDriver_index_get, _robotsim.RobotModelDriver_index_set)
+    __swig_destroy__ = _robotsim.delete_RobotModelDriver
+    __del__ = lambda self : None;
+RobotModelDriver_swigregister = _robotsim.RobotModelDriver_swigregister
+RobotModelDriver_swigregister(RobotModelDriver)
+
 class RobotModel(_object):
     """
     A model of a dynamic and kinematic robot.
@@ -1024,6 +1093,17 @@ class RobotModel(_object):
         RobotModel::getLink(const char *name) 
         """
         return _robotsim.RobotModel_getLink(self, *args)
+
+    def numDrivers(self):
+        """numDrivers(RobotModel self) -> int"""
+        return _robotsim.RobotModel_numDrivers(self)
+
+    def getDriver(self, *args):
+        """
+        getDriver(RobotModel self, int index) -> RobotModelDriver
+        getDriver(RobotModel self, char const * name) -> RobotModelDriver
+        """
+        return _robotsim.RobotModel_getDriver(self, *args)
 
     def getConfig(self):
         """

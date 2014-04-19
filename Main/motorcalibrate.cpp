@@ -3,6 +3,7 @@
 #include "Modeling/Robot.h"
 #include "Modeling/Interpolate.h"
 #include <robotics/ConstrainedDynamics.h>
+#include <robotics/NewtonEuler.h>
 #include <math/differentiation.h>
 #include <math/LDL.h>
 #include <optimization/Minimization.h>
@@ -26,8 +27,8 @@ using namespace Math;
 void SimulateDOF(Real minv,Real d,Real k,Real c,
 		 Real x0,Real dx0,
 		 Real xDes,Real dxDes,
-		 Real kP,Real kD,Real dryFriction,Real viscousFriction,
-		 Real T,Real timestep,
+		 Real kP,Real kD,Real Iterm,Real dryFriction,Real viscousFriction,
+		 Real T,Real timestep,Real torquemin,Real torquemax,
 		 Real& xT,Real& dxT)
 {
   xT=x0;
@@ -37,7 +38,8 @@ void SimulateDOF(Real minv,Real d,Real k,Real c,
   Real t=0;
   while(t < T) {
     //in absence of frictional forces, this is the acceleration
-    Real ddx0 = (kP*(xDes-xT)+kD*(dxDes-dxT) - d*dxT - k*xT - c)*minv;
+    Real tdes = kP*(xDes-xT)+kD*(dxDes-dxT)+Iterm;
+    Real ddx0 = (Clamp(tdes,torquemin,torquemax)-d*dxT - k*xT - c)*minv;
     Real kf = dryFriction + Abs(dxT)*viscousFriction;
     Real ddx = ddx0;
     Real dt = Min(timestep,T-t);
@@ -56,29 +58,57 @@ void SimulateDOF(Real minv,Real d,Real k,Real c,
       }
     }
     if(t + timestep > T) {
-      xT += dxT*dt + 0.5*ddx*Sqr(timestep);
+      xT += dxT*dt + 0.5*ddx*Sqr(dt);
       dxT += ddx*dt;
       //printf("(%g,%g) ",xT,dxT);
       //printf("\n");
       //getchar();
       return;
     }
-    xT += dxT*dt + 0.5*ddx*Sqr(timestep);
+    xT += dxT*dt + 0.5*ddx*Sqr(dt);
     dxT += ddx*dt;
     t += dt;
     //printf("(%g,%g) ",xT,dxT);
   }
 }
 
+///Rolls out a whole simulation trace
+void SimulateDOF(const vector<Real>& minvs,const vector<Real>& ds,const vector<Real>& ks,const vector<Real>& cs,
+		 Real x0,Real dx0,
+		 const vector<Real>& xDes,const vector<Real>& dxDes,
+		 Real kP,Real kD,Real Iterm,Real dryFriction,Real viscousFriction,
+		 
+		 const vector<Real>& durations,Real timestep,Real torquemin,Real torquemax,
+		 vector<Real>& xT,vector<Real>& dxT)
+{
+  Assert(minvs.size()==ds.size());
+  Assert(minvs.size()==ks.size());
+  Assert(minvs.size()==cs.size());
+  Assert(minvs.size()==xDes.size());
+  Assert(minvs.size()==dxDes.size());
+  Assert(minvs.size()==durations.size());
+  xT.resize(durations.size()+1);
+  dxT.resize(durations.size()+1);
+  xT[0] = x0;
+  dxT[0] = dx0;
+  for(size_t i=0;i<durations.size();i++) {
+    ::SimulateDOF(minvs[i],ds[i],ks[i],cs[i],
+		  xT[i],dxT[i],xDes[i],dxDes[i],
+		  kP,kD,Iterm,dryFriction,viscousFriction,
+		  durations[i],timestep,torquemin,torquemax,
+		  xT[i+1],dxT[i+1]);
+  }
+}
+
 class Simulate1DOFFunc : public VectorFieldFunction
 {
 public:
-  Real minv,d,k,c,I,x0,dx0,xDes,dxDes,T;
+  Real minv,d,k,c,I,x0,dx0,xDes,dxDes,T,torquemin,torquemax;
   Simulate1DOFFunc(Real _minv,Real _d,Real _k,Real _c,
 		   Real _I,Real _x0,Real _dx0,
 		   Real _xDes,Real _dxDes,
-		   Real _T)
-    :minv(_minv),d(_d),k(_k),c(_c),I(_I),x0(_x0),dx0(_dx0),xDes(_xDes),dxDes(_dxDes),T(_T)
+		   Real _T,Real _torquemin,Real _torquemax)
+    :minv(_minv),d(_d),k(_k),c(_c),I(_I),x0(_x0),dx0(_dx0),xDes(_xDes),dxDes(_dxDes),T(_T),torquemin(_torquemin),torquemax(_torquemax)
   {}
   virtual int NumDimensions() { return 2; }
   virtual void Eval(const Vector& params,Vector& out) {
@@ -88,12 +118,11 @@ public:
     Real kD = params(2);
     Real mu_d = params(3);
     Real mu_v = params(4);
-    Real cI = c - kI*I;
     Real xT,dxT;
-    SimulateDOF(minv,d,k,cI,x0,dx0,
+    SimulateDOF(minv,d,k,c,x0,dx0,
 		xDes,dxDes,
-		kP,kD,mu_d,mu_v,
-		T,gDefaultTimestep,
+		kP,kD,kI*I,mu_d,mu_v,
+		T,gDefaultTimestep,torquemin,torquemax,
 		xT,dxT);
     out.resize(2);
     out(0) = xT;
@@ -111,7 +140,7 @@ public:
 		      const vector<Real>& _x0s,const vector<Real>& _dx0s,
 		      const vector<Real>& _x1s,const vector<Real>& _dx1s,
 		      const vector<Real>& _xDes,const vector<Real>& _dxDes,
-		      const vector<Real>& _dts)
+		      const vector<Real>& _dts,Real torquemin,Real torquemax)
     :minvs(_minvs),ds(_ds),ks(_ks),cs(_cs),x0s(_x0s),dx0s(_dx0s),x1s(_x1s),dx1s(_dx1s),xDes(_xDes),dxDes(_dxDes),dts(_dts)
   {
     fs.resize(minvs.size());
@@ -119,7 +148,7 @@ public:
       fs[i] = new Simulate1DOFFunc(minvs[i],ds[i],ks[i],cs[i],
 				   0,x0s[i],dx0s[i],
 				   xDes[i],dxDes[i],
-				   dts[i]);
+				   dts[i],torquemin,torquemax);
     }
   }
   void PreEval(const Vector& params)
@@ -157,10 +186,10 @@ public:
   {
     Vector temp=params;
     Vector h(5);
-    h(0) = Max(1e-2*params(0),1e-3);
-    h(1) = Max(1e-2*params(1),1e-3);
-    h(2) = Max(1e-2*params(2),1e-3);
-    h(3) = 1e-3;
+    h(0) = Max(1e-2*params(0),1e-2);
+    h(1) = Max(1e-2*params(1),1e-2);
+    h(2) = Max(1e-2*params(2),1e-2);
+    h(3) = 1e-2;
     h(4) = 1e-2;
     grad.resize(5);
     GradientCenteredDifference(*this,temp,h,grad);
@@ -169,6 +198,7 @@ public:
 	printf("Warning, instability at parameter %d = %g\n",i,params(i));
 	grad[i] = 0;
       }
+    //cout<<"Parameter gradient"<<grad<<endl;
   }
 };
 
@@ -177,15 +207,19 @@ public:
 //with t = kP*(xDes[i]-x) + kD(dxDes[i]-x') + kI*int(xDes[i]-x)
 //and f given by dry and viscous friction terms
 //optimizes the kP, kD, kI, and friction terms using descent over numIters iters
-void OptimizeDof(const vector<Real>& minvs,const vector<Real>& ds,const vector<Real>& ks,const vector<Real>& cs,
+Real OptimizeDof(const vector<Real>& minvs,const vector<Real>& ds,const vector<Real>& ks,const vector<Real>& cs,
 		 const vector<Real>& x0s,const vector<Real>& dx0s,
 		 const vector<Real>& x1s,const vector<Real>& dx1s,
 		 const vector<Real>& xDes,const vector<Real>& dxDes,
-		 const vector<Real>& dts,
+		 const vector<Real>& dts,Real torquemin,Real torquemax,
 		 Real& kP,Real& kI,Real& kD,Real& dryFriction,Real& viscousFriction,
 		 int numIters)
 {
-  OptimizeDofFunction f(minvs,ds,ks,cs,x0s,dx0s,x1s,dx1s,xDes,dxDes,dts);  
+  OptimizeDofFunction f(minvs,ds,ks,cs,
+			x0s,dx0s,
+			x1s,dx1s,
+			xDes,dxDes,
+dts,torquemin,torquemax);  
   Optimization::BCMinimizationProblem  minProblem(&f);
   minProblem.bmin.resize(5,Zero);
   minProblem.bmax.resize(5,Inf);
@@ -200,6 +234,7 @@ void OptimizeDof(const vector<Real>& minvs,const vector<Real>& ds,const vector<R
   minProblem.x(4) = viscousFriction;
   Real fx = f(minProblem.x);
   cout<<"Initial RMSE "<<fx<<endl;
+  bool paused = false;
   if(!IsFinite(fx) || fx > 1e2) {
     cout<<"Initial instability? "<<endl;
     printf("%g, %g: x'' = %g*(PID(%g,%g) - %g*x' + %g*x + %g)\n",x0s[0],dx0s[0],minvs[0],xDes[0],dxDes[0],ds[0],ks[0],cs[0]);
@@ -207,30 +242,81 @@ void OptimizeDof(const vector<Real>& minvs,const vector<Real>& ds,const vector<R
     for(size_t i=0;i<f.fs.size();i++) { 
       (*f.fs[i])(minProblem.x,res);
       printf("%g, %g: x'' = %g*(PID(%g,%g) - %g*x' + %g*x + %g)\n",res[0],res[1],minvs[i],xDes[i],dxDes[i],ds[i],ks[i],cs[i]);
+      if((i+1)%100 == 0) getchar();
       if(!IsFinite(res[0]) || !IsFinite(res[1]) || Abs(res[1]) > 1e2) {
+	printf("Large error on step %d, this may require tuning initial parameters\n",i);
+	printf("Press enter to continue\n");
 	//removed for GUI
 	//getchar();
-
-    //removed for GUI version
-    //	break;
+	paused = true;
+	break;
       }
     }
   }
   int maxIters = numIters;
   ConvergenceResult res = minProblem.SolveSD(maxIters);
-  cout<<"SD result: "<<res<<" after "<<maxIters<<" iters, RMSE "<<f(minProblem.x)<<endl;
+  fx=f(minProblem.x);
+  cout<<"SD result: "<<res<<" after "<<maxIters<<" iters, RMSE "<<fx<<endl;
+  if(paused) {
+    printf("Press enter to continue\n");
+    getchar();
+  }
   kP = minProblem.x(0);
   kI = minProblem.x(1);
   kD = minProblem.x(2);
   dryFriction = minProblem.x(3);
   viscousFriction = minProblem.x(4);
+  return fx;
 }
+
+Real GOptimizeDof(const vector<Real>& minvs,const vector<Real>& ds,const vector<Real>& ks,const vector<Real>& cs,
+		 const vector<Real>& x0s,const vector<Real>& dx0s,
+		 const vector<Real>& x1s,const vector<Real>& dx1s,
+		 const vector<Real>& xDes,const vector<Real>& dxDes,
+		 const vector<Real>& dts,Real torquemin,Real torquemax,
+		 Real& kP,Real& kI,Real& kD,Real& dryFriction,Real& viscousFriction,
+		 int numIters)
+{
+  Real f0 = OptimizeDof(minvs,ds,ks,cs,x0s,dx0s,x1s,dx1s,xDes,dxDes,dts,torquemin,torquemax,kP,kI,kD,dryFriction,viscousFriction,numIters);
+  //try big changes
+  Vector params(5);
+  params[0] = kP;
+  params[1] = kI;
+  params[2] = kD;
+  params[3] = dryFriction;
+  params[4] = viscousFriction;
+  Vector best = params;
+  Vector bound = params*2.0;
+  for(int i=0;i<params.n;i++) 
+    if(bound[i] < 1) bound[i] = 1;
+  for(int iter=0;iter<numIters/100;iter++) {
+    for(int i=0;i<params.n;i++) 
+      params(i) = Rand(0,bound[i]);
+    Real f = OptimizeDof(minvs,ds,ks,cs,x0s,dx0s,x1s,dx1s,xDes,dxDes,dts,torquemin,torquemax,params[0],params[1],params[2],params[3],params[4],numIters);
+    if(f < f0) {
+      cout<<"Got a better solution with a hop, RMSE "<<f<<endl;
+      best = params;
+      bound = params*2.0;
+      for(int i=0;i<params.n;i++) 
+	if(bound[i] < 1) bound[i] = 1;
+      f0 = f;
+    }
+  }
+  params = best;
+  kP = params[0];
+  kI = params[1];
+  kD = params[2];
+  dryFriction = params[3];
+  viscousFriction = params[4];
+  return f0;
+}
+
+
 
 //given the current (q,dq) of the robot, computes linearized 1-d models of the
 //robot's dynamics
 //ddq = A * t + b
-//steady state torque is t = -A^-1 b
-//if we set one of its components to zero, 
+//Assume all other links use steady state torque t = -A^-1 b
 void LinearizeRobot(Robot& robot,const vector<int>& fixedLinks,
 		    Vector& minv,Vector& d,Vector& k,Vector& c)
 {
@@ -238,21 +324,38 @@ void LinearizeRobot(Robot& robot,const vector<int>& fixedLinks,
   d.resize(robot.links.size());
   k.resize(robot.links.size());
   c.resize(robot.links.size());
+  //Approximation: rather than linearize the gravity and coriolis terms, just assume constant
   d.setZero();
   k.setZero();
   Matrix A;
   Vector b;
   vector<int> fixedDofs;
   for(size_t i=0;i<robot.joints.size();i++)
-    if(robot.joints[i].type == RobotJoint::Weld)
+    if(robot.joints[i].type == RobotJoint::Weld) 
       fixedDofs.push_back(robot.joints[i].linkIndex);
-  bool res = ConstrainedForwardDynamics(robot,fixedLinks,fixedDofs,A,b);
-  Assert(res == true);
-  SVDecomposition<Real> svd;
-  svd.set(A);
+
   Vector tsteady;
-  svd.backSub(b,tsteady);
-  tsteady.inplaceNegative();
+  if(fixedLinks.empty()) {
+    //if only fixed dofs are included, do it unconstrained
+    NewtonEulerSolver ne(robot);
+    Vector ddqref;
+    ne.SetGravityWrenches(gGravity);
+    ne.CalcResidualAccel(ddqref);
+    ne.CalcKineticEnergyMatrixInverse(A);
+    ne.CalcResidualTorques(tsteady);
+    b = ddqref;
+  }
+  else {
+    bool res = ConstrainedForwardDynamics(robot,fixedLinks,fixedDofs,A,b);
+    Assert(res == true);
+    Vector zero(robot.links.size(),Zero);
+    res=ConstrainedCalcTorque(robot,fixedLinks,fixedDofs,zero,tsteady);
+    if(!res) {
+      NewtonEulerSolver ne(robot);
+      ne.SetGravityWrenches(gGravity);
+      ne.CalcResidualTorques(tsteady);
+    }
+  }
 
   A.getDiagCopy(0,minv);
   c = b;
@@ -262,7 +365,21 @@ void LinearizeRobot(Robot& robot,const vector<int>& fixedLinks,
     tsteady(i) = 0;
     c(i) += A.dotRow(i,tsteady);
     tsteady(i) = oldt;
-    c(i) /= minv(i);
+    if(FuzzyZero(minv(i))) {
+      c(i) = 0;
+    }
+    else c(i) /= minv(i);
+    if(robot.joints[i].type == RobotJoint::Weld) 
+      c(i) = 0;
+  }
+  if(c.maxAbsElement() > 1000) {
+    fprintf(stderr,"Warning, very high torques?\n");
+    cout<<c<<endl;
+    cout<<"Steady state torques: "<<tsteady<<endl;
+    cout<<"Linearized offset vector: "<<b<<endl;
+    cout<<"Mass matrix inverse diag"<<minv<<endl;
+    printf("Press enter to continue\n");
+    getchar();
   }
 }
 
@@ -278,6 +395,8 @@ struct MotorCalibrationProblem
   Real vErrorWeight;
   vector<int> fixedLinks;
   vector<int> estimateDrivers;
+  //true if want to: save info to disk, save pre-optimization paths to disk, save post-optimizaiton paths to disk
+  bool saveInfo,savePreOptimize,savePostOptimize;
 };
 
 void RunCalibrationInd(MotorCalibrationProblem& problem,int numIters)
@@ -296,6 +415,8 @@ void RunCalibrationInd(MotorCalibrationProblem& problem,int numIters)
   dx1s.resize(ndof);
   xcmds.resize(ndof);
   dxcmds.resize(ndof);
+  vector<int> pathIndex;
+  pathIndex.push_back(0);
   Timer timer;
   Vector minv,d,k,c;
   for(size_t trial=0;trial<problem.commandedQ.size();trial++) {
@@ -315,6 +436,7 @@ void RunCalibrationInd(MotorCalibrationProblem& problem,int numIters)
       dxcmds[j].resize(istart+n);
     }
     dts.resize(istart+n);
+    pathIndex.push_back(int(istart+n));
     printf("Linearizing trial %d\n",trial);
     timer.Reset();
     for(size_t i=0;i<n;i++) {
@@ -345,19 +467,80 @@ void RunCalibrationInd(MotorCalibrationProblem& problem,int numIters)
     }
     printf("Time: %g, time per milestone: %g\n",timer.ElapsedTime(),timer.ElapsedTime()/n);
   }
+
+  //save debug info to disk
+  if(problem.saveInfo) {
+    cout<<"Saving data to motorcalibrate.csv"<<endl;
+    ofstream out("motorcalibrate.csv",ios::out);
+    out<<"dt,";
+    for(size_t k=0;k<problem.estimateDrivers.size();k++) {
+      int d = problem.estimateDrivers[k];
+      int j = problem.robot->drivers[d].linkIndices[0];
+      out<<"m^-1["<<j<<"],d["<<j<<"],k["<<j<<"],c["<<j<<"],x0["<<j<<"],dx0["<<j<<"],x1["<<j<<"],dx1["<<j<<"],xcmd["<<j<<"],dxcmd["<<j<<"],";
+    }
+    out<<endl;
+    for(size_t i=0;i<dts.size();i++) {
+      out<<dts[i]<<",";
+      for(size_t k=0;k<problem.estimateDrivers.size();k++) {
+	int d = problem.estimateDrivers[k];
+	int j = problem.robot->drivers[d].linkIndices[0];
+	out<<minvs[j][i]<<","<<ds[j][i]<<","<<ks[j][i]<<","<<cs[j][i]<<","<<x0s[j][i]<<","<<dx0s[j][i]<<","<<x1s[j][i]<<","<<dx1s[j][i]<<","<<xcmds[j][i]<<","<<dxcmds[j][i]<<",";
+      }
+      out<<endl;
+    }
+  }
+
+  if(problem.savePreOptimize) {
+    for(size_t trial=0;trial<problem.commandedQ.size();trial++) {
+      LinearPathResource path;
+      path.times = problem.commandedQ[trial].times;
+      path.milestones = problem.commandedQ[trial].milestones;
+      for(size_t k=0;k<problem.estimateDrivers.size();k++) {
+	int d = problem.estimateDrivers[k];
+	int j = problem.robot->drivers[d].linkIndices[0];
+	Real& kP = problem.robot->drivers[d].servoP;
+	Real& kI = problem.robot->drivers[d].servoI;
+	Real& kD = problem.robot->drivers[d].servoD;
+	Real& dryFriction = problem.robot->drivers[d].dryFriction;
+	Real& viscousFriction = problem.robot->drivers[d].viscousFriction;
+	int s = pathIndex[trial];
+	int e = pathIndex[trial+1];
+	vector<Real> minv_path(minvs[j].begin()+s,minvs[j].begin()+e);
+	vector<Real> d_path(ds[j].begin()+s,ds[j].begin()+e);
+	vector<Real> k_path(ks[j].begin()+s,ks[j].begin()+e);
+	vector<Real> c_path(cs[j].begin()+s,cs[j].begin()+e);
+	vector<Real> xcmd_path(xcmds[j].begin()+s,xcmds[j].begin()+e);
+	vector<Real> dxcmd_path(dxcmds[j].begin()+s,dxcmds[j].begin()+e);
+	vector<Real> dts_path(dts.begin()+s,dts.begin()+e);
+	Real x0 = x0s[j][s];
+	Real dx0 = dx0s[j][s];
+	Real torquemin=problem.robot->drivers[d].tmin;
+	Real torquemax=problem.robot->drivers[d].tmax;
+	vector<Real> xtraj,dxtraj;
+	SimulateDOF(minv_path,d_path,k_path,c_path,
+		    x0,dx0,
+		    xcmd_path,dxcmd_path,
+		    kP,kI,kD,dryFriction,viscousFriction,
+		    dts_path,gDefaultTimestep,torquemin,torquemax,
+		    xtraj,dxtraj);
+	Assert(xtraj.size()==path.milestones.size());
+	for(size_t m=0;m<xtraj.size();m++)
+	  path.milestones[m][j] = xtraj[m];
+      }
+      stringstream ss;
+      ss<<"motorcalibrate_before_"<<trial<<".path";
+      cout<<"Saving pre-calibration path to "<<ss.str()<<endl;
+      path.Save(ss.str().c_str());
+    }
+  }
+
+  //do the estimation
+  vector<Real> rmsds(problem.estimateDrivers.size());
   for(size_t k=0;k<problem.estimateDrivers.size();k++) {
     int d = problem.estimateDrivers[k];
     Assert(problem.robot->drivers[d].type == RobotJointDriver::Normal);
     int j = problem.robot->drivers[d].linkIndices[0];
-    bool anydiff = false;
-    for(size_t i=0;i<minvs[j].size();i++)
-      if(minvs[j][i] != minvs[j][0])
-	anydiff = true;
-    if(!anydiff) {
-      printf("Uhhh... mass matrix %s is a constant?!?!\n",problem.robot->linkNames[j].c_str());
-      //removed for GUI
-      //getchar();
-    }
+
     Real& kP = problem.robot->drivers[d].servoP;
     Real& kI = problem.robot->drivers[d].servoI;
     Real& kD = problem.robot->drivers[d].servoD;
@@ -367,13 +550,75 @@ void RunCalibrationInd(MotorCalibrationProblem& problem,int numIters)
     printf("Initial kP: %g, kI: %g, kD: %g\n",kP,kI,kD);
     printf("Initial dry friction: %g, viscous friction: %g\n",dryFriction,viscousFriction);
     timer.Reset();
-    OptimizeDof(minvs[j],ds[j],ks[j],cs[j],
+    Real res = GOptimizeDof(minvs[j],ds[j],ks[j],cs[j],
 		x0s[j],dx0s[j],x1s[j],dx1s[j],xcmds[j],dxcmds[j],
-		dts,kP,kI,kD,dryFriction,viscousFriction,numIters);
+		dts,problem.robot->drivers[d].tmin,problem.robot->drivers[d].tmax,
+		kP,kI,kD,dryFriction,viscousFriction,numIters);   
     printf("Optimized kP: %g, kI: %g, kD: %g\n",kP,kI,kD);
     printf("Optimized dry friction: %g, viscous friction: %g\n",dryFriction,viscousFriction);
+    printf("Optimized RMSD: %g\n",res);
     printf("Time %g\n",timer.ElapsedTime());
+    printf("\n");
+    rmsds[k]=res;
+    //removed for GUI
+    //getchar();
   }
+
+  if(problem.savePostOptimize) {
+    for(size_t trial=0;trial<problem.commandedQ.size();trial++) {
+      LinearPathResource path;
+      path.times = problem.commandedQ[trial].times;
+      path.milestones = problem.commandedQ[trial].milestones;
+      for(size_t k=0;k<problem.estimateDrivers.size();k++) {
+	int d = problem.estimateDrivers[k];
+	int j = problem.robot->drivers[d].linkIndices[0];
+	Real& kP = problem.robot->drivers[d].servoP;
+	Real& kI = problem.robot->drivers[d].servoI;
+	Real& kD = problem.robot->drivers[d].servoD;
+	Real& dryFriction = problem.robot->drivers[d].dryFriction;
+	Real& viscousFriction = problem.robot->drivers[d].viscousFriction;
+	int s = pathIndex[trial];
+	int e = pathIndex[trial+1];
+	vector<Real> minv_path(minvs[j].begin()+s,minvs[j].begin()+e);
+	vector<Real> d_path(ds[j].begin()+s,ds[j].begin()+e);
+	vector<Real> k_path(ks[j].begin()+s,ks[j].begin()+e);
+	vector<Real> c_path(cs[j].begin()+s,cs[j].begin()+e);
+	vector<Real> xcmd_path(xcmds[j].begin()+s,xcmds[j].begin()+e);
+	vector<Real> dxcmd_path(dxcmds[j].begin()+s,dxcmds[j].begin()+e);
+	vector<Real> dts_path(dts.begin()+s,dts.begin()+e);
+	Real x0 = x0s[j][s];
+	Real dx0 = dx0s[j][s];
+	Real torquemin=problem.robot->drivers[d].tmin;
+	Real torquemax=problem.robot->drivers[d].tmax;
+	vector<Real> xtraj,dxtraj;
+	SimulateDOF(minv_path,d_path,k_path,c_path,
+		    x0,dx0,
+		    xcmd_path,dxcmd_path,
+		    kP,kI,kD,dryFriction,viscousFriction,
+		    dts_path,gDefaultTimestep,torquemin,torquemax,
+		    xtraj,dxtraj);
+	Assert(xtraj.size()==path.milestones.size());
+	for(size_t m=0;m<xtraj.size();m++)
+	  path.milestones[m][j] = xtraj[m];
+      }
+      stringstream ss;
+      ss<<"motorcalibrate_after_"<<trial<<".path";
+      cout<<"Saving post-calibration path to "<<ss.str()<<endl;
+      path.Save(ss.str().c_str());
+    }
+  }
+
+  printf("Final RMSDs:\n");
+  for(size_t k=0;k<problem.estimateDrivers.size();k++) {
+	int d = problem.estimateDrivers[k];
+	int j = problem.robot->drivers[d].linkIndices[0];
+    printf("driver %d (%s),",d,problem.robot->linkNames[j].c_str());
+  }
+  printf("\n");
+  for(size_t k=0;k<problem.estimateDrivers.size();k++) {
+    printf("%g,",rmsds[k]);
+  }
+  printf("\n");
 }
 
 
@@ -616,8 +861,13 @@ string motorcalibrate(AnyCollection settings){
   problem.vErrorWeight = gDefaultVelocityWeight;
   problem.motorInterpolates = true;
   problem.fixedLinks = fixedLinks;
+  problem.saveInfo = true;
+  problem.savePreOptimize = true;
+  problem.savePostOptimize = true;
   if(fixedLinks.empty()) {
-    printf("Warning, fixed links are empty: is this a fixed-base robot?\n");
+    for(size_t i=0;i<robot.joints.size();i++)
+      if(robot.joints[i].type == RobotJoint::Floating || robot.joints[i].type == RobotJoint::FloatingPlanar)
+	printf("Warning, fixed links are empty, and this is not a fixed-base robot?\n");
   }
   if(drivers.empty()) {
     problem.estimateDrivers.resize(robot.drivers.size());
@@ -644,6 +894,7 @@ string motorcalibrate(AnyCollection settings){
   for(size_t i=0;i<problem.commandedQ.size();i++) {
     Difference(robot,problem.commandedQ[i],problem.commandedV[i]);
     Difference(robot,problem.sensedQ[i],problem.sensedV[i]);
+    problem.commandedV[i].Save("test.path");
   }
 
   RunCalibrationInd(problem,numIters);
@@ -674,8 +925,7 @@ string motorcalibrate(AnyCollection settings){
 
 int main_shell(int argc,char** argv)
 {
-  //test();
-  //return 0;
+  Robot::disableGeometryLoading = true;
 
   MotorCalibrateSettings settings;
   settings["robot"]=string();

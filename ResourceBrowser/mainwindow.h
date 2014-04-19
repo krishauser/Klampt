@@ -11,6 +11,10 @@
 #include "resourcedockwidget.h"
 #include "qresourcetreeitem.h"
 
+namespace ResourceBrowser {
+class MainWindow;
+}
+
 namespace Ui {
 class MainWindow;
 }
@@ -27,6 +31,7 @@ public:
     QResourceTreeItem* selected;
 
     ~MainWindow();
+    void RobotPose();
 public slots:
     void OpenFile(QString filename);
     virtual void OpenFile(){OpenFile(QString());}

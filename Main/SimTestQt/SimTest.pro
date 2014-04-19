@@ -13,20 +13,22 @@ TEMPLATE = app
 SOURCES += main.cpp\
         mainwindow.cpp \
     qsimtestbackend.cpp \
-    qtguibase.cpp \
     logoptions.cpp \
     driveredit.cpp \
     controllersettings.cpp \
-    controllercommanddialog.cpp
+    controllercommanddialog.cpp \
+    ../KlamptQt/qtguibase.cpp \
+    qsimtestgui.cpp
 
 HEADERS  += mainwindow.h \
     qsimtestbackend.h \
-    qtguibase.h \
     logoptions.h \
     driveredit.h \
     controllersettings.h \
     GLScreenshotPlugin.h \
-    controllercommanddialog.h
+    controllercommanddialog.h \
+    ../KlamptQt/qtguibase.h \
+    qsimtestgui.h
 
 FORMS    += mainwindow.ui \
     logoptions.ui \
@@ -34,8 +36,10 @@ FORMS    += mainwindow.ui \
     controllersettings.ui \
     controllercommanddialog.ui
 
-LIBS += -L../lib -lKlampt  -L/usr/lib -L../Library/glui-2.36/src/lib -L/usr/lib/glut -L/usr/X11R6/lib -L/usr/X11R6/lib/modules/extensions -L/src -L../Library/KrisLibrary/lib -L../Library/ode-0.11.1/ode/src/.libs -L../Library/tinyxml
-LIBS += -lKrisLibrary -lglut -lGL -lm -lGLU -lXm -lXi -lXext -lXmu -lX11 -lode -ltinyxml -lglpk
+include(../KlamptQt/common.pri)
+
+
+LIBS += -lKlampt -lKrisLibrary -lglut -lGL -lm -lGLU -lXm -lXi -lXext -lXmu -lX11 -lode -ltinyxml -lglpk
 LIBS += -L../Library/glui-2.36/src/include -lglui -lGLU -lassimp
 INCLUDEPATH +=/usr/include ../ ../Library/KrisLibrary ../Library/glui-2.36/src/include ../Library/ode0.11.1/ode/src
 DEFINES += dDOUBLE

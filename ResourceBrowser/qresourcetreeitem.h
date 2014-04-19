@@ -4,6 +4,7 @@
 #include <QTreeWidgetItem>
 
 #include "Modeling/Resources.h"
+#include "RobotPoseTestQt/resourcemanager.h"
 
 #define NAMECOL 0
 #define TYPECOL 1
@@ -19,7 +20,8 @@ public:
     int show_togui;
     int show_expand;
 
-    ResourcePtr resource;
+    ResourceTracker* resource;
+    Math::VectorTemplate<double> *config;
 
     QString type;
 
@@ -31,7 +33,6 @@ public slots:
     virtual void ToGUI();
     virtual void FromGUI();
     virtual void DeleteItem();
-    virtual void Expand();
 
 };
 #endif // QRESOURCETREEITEM_H

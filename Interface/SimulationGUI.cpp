@@ -2,6 +2,7 @@
 #include "Control/PathController.h"
 #include "Control/FeedforwardController.h"
 #include "Control/LoggingController.h"
+#include "Control/SerialController.h"
 #include "Modeling/MultiPath.h"
 #include "IO/XmlWorld.h"
 #include "IO/XmlODE.h"
@@ -13,7 +14,7 @@
 #include <GLdraw/GLUTString.h>
 #include <utils/stringutils.h>
 #include <fstream>
-
+#include <iomanip>
 
 typedef LoggingController MyController;
 typedef PolynomialPathController MyMilestoneController;
@@ -89,6 +90,29 @@ bool SimGUIBackend::OnCommand(const string& cmd,const string& args)
       fprintf(stderr,"Couldn't load file %s\n",args.c_str());
     }
   }
+  else if(cmd=="connect_serial_controller") {
+    stringstream ss(args);
+    int robot,port;
+    Real rate;
+    ss>>robot>>port>>rate;
+    if(!ss) {
+      fprintf(stderr,"Couldn't parse arguments to connect_serial_controller\n");
+      return false;
+    }
+    if(robot < 0 || robot >= (int)world->robots.size()) {
+      fprintf(stderr,"Invalid robot argument to connect_serial_controller\n");
+      return false;
+    }
+    if(port < 0 || port > 0xffff) {
+      fprintf(stderr,"Invalid port argument to connect_serial_controller\n");
+      return false;
+    }
+    if(rate <= 0 || rate > 1000) {
+      fprintf(stderr,"Invalid rate argument to connect_serial_controller\n");
+      return false;
+    }
+    ConnectSerialController(robot,port,rate);
+  }
   else {
     return BaseT::OnCommand(cmd,args);
   }
@@ -125,6 +149,14 @@ void SimGUIBackend::InitContactFeedbackAll()
       sim.EnableContactFeedback(world->TerrainID(i),world->RobotLinkID(0,j));
     }
   }
+}
+
+void SimGUIBackend::ConnectSerialController(int i,int port,Real writeRate)
+{
+  Robot* robot=world->robots[i].robot;
+  stringstream ss;
+  ss<<"tcp://localhost:"<<port;
+  sim.SetController(i,new SerialController(*robot,ss.str(),writeRate));
 }
 
 void SimGUIBackend::InitSim()
@@ -281,6 +313,23 @@ bool SimGUIBackend::LoadAndInitSim(int argc,const char** argv)
 }
 
 
+void SimGUIBackend::DrawClock(int x,int y)
+{
+    void* fontface = GLUT_BITMAP_HELVETICA_18;
+    const int fontheight = 18;
+    const int lineSpacing = 36;
+    const int margin = 5;    
+
+    glColor3f(0,0,0);
+    glDisable(GL_LIGHTING);
+    glDisable(GL_DEPTH_TEST);
+
+    glRasterPos2i(x,y);
+    glutBitmapString(fontface,"Time: ");
+    glutBitmapFloat(fontface,sim.time);
+
+    glEnable(GL_DEPTH_TEST);
+}
 
 void SimGUIBackend::RenderWorld()
 {
@@ -609,7 +658,8 @@ bool SimGUIBackend::SendLinearPath(const vector<Real>& times,const vector<Config
   if(sim.time > 0) printf("SendLinearPath: simulation time offset %g\n",sim.time);
   for(size_t i=0;i<milestones.size();i++) {
     stringstream ss;
-    //TODO: why do you need to add dt to the simulation time?
+    ss<<fixed<<setprecision(5);
+    //TODO: why do you need to add a path delay to the simulation time?
     ss<<sim.time+pathDelay+times[i]<<"\t"<<milestones[i];
     if(i==0) {
       if(!sim.robotControllers[0]->SendCommand("set_tq",ss.str())) {

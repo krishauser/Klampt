@@ -15,6 +15,7 @@ struct RigidObject
   void SetMassFromBB(Real totalMass);
   void UpdateGeometry(); ///< Call this before collision detection if the transform is changed
 
+  std::string geomFile;
   Geometry::AnyCollisionGeometry3D geometry;
   RigidTransform T;    //current transform
   Real mass;           //mass

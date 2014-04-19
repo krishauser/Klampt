@@ -14,6 +14,10 @@ namespace Ui {
 class MainWindow;
 }
 
+namespace RobotTest {
+class MainWindow;
+}
+
 class MainWindow : public QMainWindow
 {
     Q_OBJECT

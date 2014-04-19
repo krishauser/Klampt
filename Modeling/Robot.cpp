@@ -96,6 +96,8 @@ bool RobotJointDriver::Affects(int link) const {
 	return false;
 }
 
+bool Robot::disableGeometryLoading = false;
+
 std::string Robot::LinkName(int i) const {
 	if (linkNames.empty())
 		return RobotWithGeometry::LinkName(i);
@@ -348,7 +350,7 @@ bool Robot::LoadRob(const char* fn) {
 			ss >> autoTorque;
 		} else if (name == "geometry") {
 			while (SafeInputString(ss, stemp))
-				geomFn.push_back(stemp);
+			  geomFn.push_back(stemp);
 		} else if (name == "scale") {
 			ss >> scale;
 		} else if (name == "geomscale") {
@@ -787,12 +789,15 @@ bool Robot::LoadRob(const char* fn) {
 		FatalError("Scale not done yet");
 	if (geomscale.size() == 1)
 		geomscale.resize(n, geomscale[0]);
+	geomFiles.resize(n);
 	string path = GetFilePath(fn);
 	for (size_t i = 0; i < geomFn.size(); i++) {
 		if (geomFn[i].empty()) {
 			continue;
 		}
+		geomFiles[i] = geomFn[i];
 		geomFn[i] = path + geomFn[i];
+		if(Robot::disableGeometryLoading) continue;
 		if (!LoadGeometry(i, geomFn[i].c_str())) {
 		  fprintf(stderr, "   Unable to load link %d geometry file %s\n", i,
 			  geomFn[i].c_str());
@@ -1108,22 +1113,29 @@ void Robot::InitStandardJoints() {
 	}
 }
 
-bool Robot::SaveGeometry(const char* geomPath,const char* geomExt) {
-	vector<string> geomFiles;
+void Robot::SetGeomFiles(const char* geomPath,const char* geomExt) {
 	geomFiles.resize(links.size());
 	for (size_t i = 0; i < links.size(); i++) {
 		stringstream ss;
 		ss << geomPath << linkNames[i] << "." << geomExt;
 		geomFiles[i] = ss.str();
 	}
-	return SaveGeometry(geomFiles);
 }
 
-bool Robot::SaveGeometry(const vector<string>& geomFiles) {
+void Robot::SetGeomFiles(const vector<string>& files)
+{
+  geomFiles = files;
+}
+
+bool Robot::SaveGeometry(const char* prefix) {
 	for (size_t i = 0; i < links.size(); i++) {
 		if (!geometry[i].Empty()) {
-		  if(!geometry[i].Save(geomFiles[i].c_str())) {
-		       cerr << "Unable to save to geometry file " << geomFiles[i] << endl;
+		  if(geomFiles[i].empty()) {
+		    cerr<<"Robot::SaveGeometry: warning, link "<<i<<" has empty file name"<<endl;
+		    continue;
+		  }
+		  if(!geometry[i].Save((string(prefix)+geomFiles[i]).c_str())) {
+		       cerr << "Robot::SaveGeometry: Unable to save to geometry file " << string(prefix)+geomFiles[i] << endl;
 		       return false;
 		     }
 		}
@@ -1131,18 +1143,7 @@ bool Robot::SaveGeometry(const vector<string>& geomFiles) {
 	return true;
 }
 
-bool Robot::Save(const char* fn, const char* geomPath,const char* geomExt) {
-	vector<string> geomFiles;
-	geomFiles.resize(links.size());
-	for (size_t i = 0; i < links.size(); i++) {
-		stringstream ss;
-		ss << geomPath << linkNames[i] << "." << geomExt;
-		geomFiles[i] = ss.str();
-	}
-	return Save(fn, geomFiles);
-}
-
-bool Robot::Save(const char* fn, const vector<string>& geomFiles) {
+bool Robot::Save(const char* fn) {
 	ofstream file;
 	file.open(fn, ios::out);
 	if (!file.is_open()) {
@@ -1538,6 +1539,7 @@ void Robot::Mount(int link, const Robot& subchain, const RigidTransform& T) {
 	concat(powerMax, subchain.powerMax);
 	concat(accMax, subchain.accMax);
 	ArrayUtils::concat(geometry, subchain.geometry);
+	ArrayUtils::concat(geomFiles, subchain.geomFiles);
 	InitCollisions();
 	concat(selfCollisions, subchain.selfCollisions);
 	//need to get the right self collision pointers
@@ -2106,6 +2108,7 @@ bool Robot::LoadURDF(const char* fn)
 	this->parents.resize(links_size);
 	this->linkNames.resize(links_size);
 	this->geometry.resize(links_size);
+	this->geomFiles.resize(links_size);
 	this->q.resize(links_size);
 	this->q.setZero();
 	this->qMin.resize(links_size);
@@ -2303,9 +2306,10 @@ bool Robot::LoadURDF(const char* fn)
 		else link_index -= 1;
 
 		//geometry
-		if (!linkNode->geomName.empty()) {
+		if (!linkNode->geomName.empty() && !Robot::disableGeometryLoading) {
 		  string fn;
 		  fn = linkNode->geomName;
+		  geomFiles[link_index] = fn;
 		  if (!LoadGeometry(link_index, fn.c_str())) {
 		    printf("Failed to load geometry directly, trying relative path...\n");
 		    fn = path + linkNode->geomName;
@@ -2404,4 +2408,49 @@ void Robot::ComputeLipschitzMatrix() {
 	}
 	printf("Done computing lipschitz constants, took %gs\n",
 			timer.ElapsedTime());
+}
+
+
+void Robot::Merge(const std::vector<Robot*>& robots)
+{
+  vector<RobotWithGeometry*> grobots(robots.size());
+  copy(robots.begin(),robots.end(),grobots.begin());
+  RobotWithGeometry::Merge(grobots);
+
+  size_t nl = 0, nj = 0, nd = 0;
+  vector<size_t> offset(robots.size());
+  vector<size_t> joffset(robots.size());
+  vector<size_t> doffset(robots.size());
+  for(size_t i=0;i<robots.size();i++) {
+    offset[i] = nl;
+    joffset[i] = nj;
+    doffset[i] = nd;
+    nl += robots[i]->links.size();
+    nj += robots[i]->joints.size();
+    nd += robots[i]->drivers.size();
+  }
+  
+  geomFiles.resize(nl);
+  accMax.resize(nl);
+  joints.resize(nj);
+  drivers.resize(nd);
+  linkNames.resize(nl);
+  driverNames.resize(nd);
+  for(size_t i=0;i<robots.size();i++) {
+    accMax.copySubVector(offset[i],robots[i]->accMax);
+    copy(robots[i]->geomFiles.begin(),robots[i]->geomFiles.end(),geomFiles.begin()+offset[i]);
+    copy(robots[i]->linkNames.begin(),robots[i]->linkNames.end(),linkNames.begin()+offset[i]);
+    for(size_t j=0;j<robots[i]->joints.size();j++) {
+      joints[j+joffset[i]] = robots[i]->joints[j];
+      joints[j+joffset[i]].linkIndex += offset[i];
+      if(joints[j+joffset[i]].baseIndex >= 0)
+	joints[j+joffset[i]].baseIndex += offset[i];
+    }
+    for(size_t j=0;j<robots[i]->drivers.size();j++) {
+      drivers[j+doffset[i]] = robots[i]->drivers[j];
+      for(size_t k=0;k<robots[i]->drivers[j].linkIndices.size();k++)
+	drivers[j+doffset[i]].linkIndices[k] += offset[i];
+    }
+    copy(robots[i]->driverNames.begin(),robots[i]->driverNames.end(),driverNames.begin()+doffset[i]);
+  }
 }

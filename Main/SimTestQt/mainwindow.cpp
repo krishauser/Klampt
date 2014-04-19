@@ -29,7 +29,7 @@ void MainWindow::Initialize(int _argc,const char** _argv)
     }
     printf("BACKEND LOADED\n");
 //    gui=new GenericGUIBase(ui->displaywidget);
-    gui=new QtGUIBase(ui->displaywidget,ui->displaywidget->world);
+    gui=new QSimTestGUI(ui->displaywidget,ui->displaywidget->world);
     ui->displaywidget->Start();
 
 

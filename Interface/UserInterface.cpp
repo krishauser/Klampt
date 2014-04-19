@@ -500,7 +500,7 @@ void* planner_thread_func(void * ptr)
       if(data->objective) {
 	data->planner->Reset(data->objective);      }
       else {
-	printf("NULL objective function set...\n");
+	printf("Planning thread: NULL objective function set...\n");
 	data->planner->Reset(NULL);
       }
     }

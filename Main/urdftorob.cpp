@@ -49,9 +49,12 @@ int URDFtoRob(AnyCollection settings,string infile,string outfile){
   settings["outputGeometryPrefix"].as(geomPrefix);
   settings["outputGeometryExtension"].as(geomExtension);
   robot.LoadURDF(infile.c_str());
-  robot.Save(outfile.c_str(), geomPrefix.c_str());
-  if(!geomExtension.empty()) 
-    robot.SaveGeometry((path+geomPrefix).c_str(),geomExtension.c_str());
+  robot.SetGeomFiles(geomPrefix.c_str(),geomExtension.c_str());
+  robot.Save(outfile.c_str());
+  if(!geomExtension.empty()) {
+    //save in absolute path
+    robot.SaveGeometry(path.c_str());
+  }
   return 1;
 }
 

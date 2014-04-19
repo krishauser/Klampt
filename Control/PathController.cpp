@@ -1,6 +1,7 @@
 #include "PathController.h"
 #include "Modeling/Conversions.h"
 #include <sstream>
+#include <fstream>
 
 const static Real gJointLimitEpsilon = 1e-7;
 const static Real gVelocityLimitEpsilon = 1e-7;
@@ -515,6 +516,7 @@ void PolynomialPathController::AppendLinear(const Config& config,Real dt)
   if(dt == 0 && config != Endpoint()) {
     //want a continuous jump?
     printf("PolynomialPathController::AppendLinear: Warning, discontinuous jump requested\n");
+    cout<<"Time "<<path.EndTime()<<" distance "<<config.distance(Endpoint())<<endl;
     path.Concat(Spline::Linear(config,config,0,0),true);    
   }
   else 

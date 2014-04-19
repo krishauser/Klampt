@@ -9,7 +9,8 @@
 
 RobotTestBackend::RobotTestBackend(RobotWorld* world)
   :WorldGUIBackend(world)
-{}
+{
+}
 
 void RobotTestBackend::Start()
 {

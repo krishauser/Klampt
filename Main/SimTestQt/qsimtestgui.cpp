@@ -1,7 +1,7 @@
-#include "qtguibase.h"
+#include "qsimtestgui.h"
 
-QtGUIBase::QtGUIBase(GenericBackendBase *_backend, RobotWorld *_world) :
-    world(_world),GenericGUIBase(_backend)
+QSimTestGUI::QSimTestGUI(GenericBackendBase *_backend, RobotWorld *_world) :
+  QtGUIBase(_backend,_world)
 {
   //BaseT::backend = _backend;
   //  BaseT::width = w;
@@ -11,9 +11,6 @@ QtGUIBase::QtGUIBase(GenericBackendBase *_backend, RobotWorld *_world) :
   Assert(sbackend != NULL);
   sim = &sbackend->sim;
   sbackend->gui = this;
-  idle_timer=new QTimer();
-  connect(idle_timer,SIGNAL(timeout()),this,SLOT(SendIdle()));
-  idle_timer->start(100);
 
   driver_tool=new DriverEdit(world);
   connect(driver_tool,SIGNAL(SetDriverValue(int,float)),this,SLOT(SendDriverValue(int,float)));
@@ -43,8 +40,9 @@ QtGUIBase::QtGUIBase(GenericBackendBase *_backend, RobotWorld *_world) :
 
   UpdateGUI();
 
-  const static int NR = 14;
+  const static int NR = 15;
   const static char* rules [NR*3]= {"{type:key_down,key:c}","constrain_link","",
+                    "{type:key_down,key:C}","constrain_link_point","",
 				    "{type:key_down,key:d}","delete_constraint","",
 				    "{type:key_down,key:p}","print_config","",
 				    "{type:key_down,key:a}","advance","",
@@ -69,34 +67,26 @@ QtGUIBase::QtGUIBase(GenericBackendBase *_backend, RobotWorld *_world) :
   constrain_mode = delete_mode = constrain_point_mode= 0;
 }
 
-QtGUIBase::~QtGUIBase(){
+QSimTestGUI::~QSimTestGUI(){
     delete log_options;
     delete driver_tool;
 }
 
-bool QtGUIBase::OnCommand(const string &cmd, const string &args){
-    if(cmd=="update_config"){
-        UpdateGUI();
-        return true;
-    }
-    else if(cmd=="update_sim_time"){
+bool QSimTestGUI::OnCommand(const string &cmd, const string &args){
+    if(cmd=="update_sim_time"){
         double time;
         return true;
     }
-    else return GenericGUIBase::OnCommand(cmd,args);
+    else return QtGUIBase::OnCommand(cmd,args);
 }
 
-void QtGUIBase::UpdateGUI(){
+void QSimTestGUI::UpdateGUI(){
     //Robot* robot=world->robots[0].robot;
     if(driver_tool->isVisible())
         driver_tool->RequestDriverValue();
 }
 
-void QtGUIBase::SendMouseMove(QMouseEvent *e){
-    GenericGUIBase::SendMouseMove(e->x(),e->y());
-}
-
-void QtGUIBase::SendMousePress(QMouseEvent *e){
+void QSimTestGUI::SendMousePress(QMouseEvent *e){
     if(constrain_mode){
         SendCommand("constrain_link");
         emit EndConstrain();
@@ -115,69 +105,25 @@ void QtGUIBase::SendMousePress(QMouseEvent *e){
         delete_mode=0;
         return;
     }
-    //    if(e->modifiers()&Qt::CTRL)
-//        SendKeyUp("control");
-    int button=e->button();
-    if(button==1) button=0;
-    GenericGUIBase::SendMouseClick(button,1,e->x(),e->y());
-    if(e->modifiers()&&Qt::CTRL)
-      GenericGUIBase::SendKeyDown("control");
-    else
-      GenericGUIBase::SendKeyUp("control");
-    if(e->modifiers()&&Qt::SHIFT)
-      GenericGUIBase::SendKeyDown("shift");
-    else
-      GenericGUIBase::SendKeyUp("shift");
-    if(e->modifiers()&&Qt::ALT)
-      GenericGUIBase::SendKeyDown("alt");
-    else
-      GenericGUIBase::SendKeyUp("alt");
+    QtGUIBase::SendMousePress(e);
 }
 
-void QtGUIBase::SendMouseRelease(QMouseEvent *e){
-    int button=e->button();
-    if(button==1) button=0;
-    GenericGUIBase::SendMouseClick(button,0,e->x(),e->y());
-}
-
-void QtGUIBase::SendMouseWheel(QWheelEvent *e){
-    GenericGUIBase::SendMouseWheel(e->delta());
-}
-
-void QtGUIBase::SendKeyDown(QKeyEvent *e){
-    int key = e->key();
-    if(key==Qt::Key_Shift || key==Qt::Key_Control){
-        return;}
-    if(!(e->modifiers() & Qt::ShiftModifier))key=tolower(key);
-    GenericGUIBase::SendKeyDown(string(1,key));
-}
-
-void QtGUIBase::SendKeyUp(QKeyEvent *e){
-    int key = e->key();
-    if(!(e->modifiers() & Qt::ShiftModifier))key=tolower(key);
-    GenericGUIBase::SendKeyUp(string(1,key));
-}
-
-void QtGUIBase::SendIdle(){
-    GenericGUIBase::SendIdle();
-}
-
-void QtGUIBase::SendDriverValue(int dr, float value){
+void QSimTestGUI::SendDriverValue(int dr, float value){
     SendCommand("set_driver",dr);
     SendCommand("set_driver_value",value);
 }
 
-void QtGUIBase::ShowSensor(int sensor){
+void QSimTestGUI::ShowSensor(int sensor){
     SendCommand("show_sensor",sensor);
     log_options->sensorDrawn[sensor]=true;
 }
 
-void QtGUIBase::HideSensor(int sensor){
+void QSimTestGUI::HideSensor(int sensor){
     SendCommand("hide_sensor",sensor);
     log_options->sensorDrawn[sensor]=false;
 }
 
-void QtGUIBase::SendMeasurement(int sensor,int measurement,bool status){
+void QSimTestGUI::SendMeasurement(int sensor,int measurement,bool status){
     if(status)
         SendCommand("show_sensor_measurement",sensor,measurement);
     else
@@ -185,7 +131,7 @@ void QtGUIBase::SendMeasurement(int sensor,int measurement,bool status){
 }
 
 
-void QtGUIBase::LoadFile(QString filename){
+void QSimTestGUI::LoadFile(QString filename){
   if(filename.isEmpty()){
     QFileDialog f;
     QString filename = f.getOpenFileName(0,"Open File",QDir::home().absolutePath(),"");
@@ -194,7 +140,7 @@ void QtGUIBase::LoadFile(QString filename){
     SendCommand("load_file",filename.toStdString());
 }
 
-void QtGUIBase::SaveScenario(QString filename){
+void QSimTestGUI::SaveScenario(QString filename){
   if(filename.isEmpty()){
     QFileDialog f;
     filename = f.getSaveFileName(0,"Save Scenario",QDir::home().absolutePath(),"");
@@ -205,24 +151,24 @@ void QtGUIBase::SaveScenario(QString filename){
   }
 }
 
-void QtGUIBase::SaveLastScenario(){
+void QSimTestGUI::SaveLastScenario(){
     if(old_filename.isNull())
         SaveScenario();
     else
         SaveScenario(old_filename);
 }
 
-void QtGUIBase::SendControllerSetting(string setting, string value){
+void QSimTestGUI::SendControllerSetting(string setting, string value){
     bool res = sim->robotControllers[0]->SetSetting(setting,value);
     if(!res) printf("Failed to set setting %s\n",setting.c_str());
 }
 
-void QtGUIBase::SendControllerCommand(string setting,string value){
+void QSimTestGUI::SendControllerCommand(string setting,string value){
     bool res = sim->robotControllers[0]->SendCommand(setting,value);
     if(!res) printf("Failed to send command %s\n",setting.c_str());
 }
 
-void QtGUIBase::ShowHelp(){
+void QSimTestGUI::ShowHelp(){
     QMessageBox *help = new QMessageBox();
     QString text=      "Keyboard help:\n"
       "[space]: sends the milestone to the controller\n"
@@ -238,7 +184,7 @@ void QtGUIBase::ShowHelp(){
 }
 
 //should be made more informative
-void QtGUIBase::ShowAbout(){
+void QSimTestGUI::ShowAbout(){
     QMessageBox *about = new QMessageBox();
     QString text = "Klamp't\n"
             "A robot simulation, planning, and control package from Indiana University";

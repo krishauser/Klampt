@@ -3,6 +3,8 @@
 #include <QFile>
 #include <QTextStream>
 #include <QMessageBox>
+#include <QDateTime>
+
 
 ShowText::ShowText(QWidget *parent) :
   QDialog(parent),
@@ -29,6 +31,7 @@ void ShowText::appendText(){
   QFile robfile(rob);
   if(robfile.open(QFile::Append|QFile::Text)){
   QTextStream out(&robfile);
+  out<<"\n#Added through MotorCalibrate on "<<QDateTime::currentDateTime().toString();
   out<<"\n"<<ui->textEdit->toPlainText();
   robfile.close();
   QMessageBox(QMessageBox::NoIcon,"Success","The Calibration data has been appended to "+rob).exec();

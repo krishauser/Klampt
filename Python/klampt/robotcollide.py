@@ -43,8 +43,10 @@ def makeGeom(geometry):
         return makeTrimeshGeom(geometry.getTriangleMesh())
     elif s=='PointCloud':
         return makePointCloudGeom(geometry.getPointCloud(),geometry.getCollisionMargin())
+    elif s=='':
+        return None
     else:
-        print "Geometries of type %s not supported"%(s,)
+        print "robotcollide.py: Warning, geometries of type %s not supported"%(s,)
         return None
 
 class WorldCollider:

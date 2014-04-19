@@ -65,6 +65,8 @@ class RobotWorld
   Geometry::AnyCollisionGeometry3D& GetGeometry(int id);
   const Geometry::AnyCollisionGeometry3D& GetGeometry(int id) const;
   GLDraw::GeometryAppearance& GetAppearance(int id);
+  RigidTransform GetTransform(int id) const;
+  void SetTransform(int id,const RigidTransform& T);
 
   int LoadRobot(const string& fn);
   int AddRobot(const string& name,Robot* robot=NULL);
@@ -104,17 +106,5 @@ class RobotWorld
 };
 
 void CopyWorld(const RobotWorld& a,RobotWorld& b);
-
-struct RobotWorldConfig
-{
-  RobotWorldConfig(RobotWorld& world);
-  void SetConfig(const Config& x) const;
-  void GetConfig(Config& x) const;
-  void SubConfigRef(int id,const Config& x,Config& subConfig) const;
-  void GetSubConfig(int id,Config& subConfig) const;
-  void SetSubConfig(int id,const Config& subConfig) const;
-
-  RobotWorld& world;
-};
 
 #endif

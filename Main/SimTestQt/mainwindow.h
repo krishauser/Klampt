@@ -6,7 +6,7 @@
 
 #include "Modeling/World.h"
 #include "Interface/SimTestGUI.h"
-#include "qtguibase.h"
+#include "qsimtestgui.h"
 
 namespace Ui {
 class MainWindow;
@@ -22,7 +22,7 @@ public:
     QDir directory;
     QString filename;
     RobotWorld *world;
-    QtGUIBase *gui;
+    QSimTestGUI *gui;
     QTimer* refresh_timer;
     int argc;
     const char** argv;

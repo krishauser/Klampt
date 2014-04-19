@@ -2,6 +2,8 @@
 #define ROBOT_CONTACT_CSPACE_H
 
 #include "RobotCSpace.h"
+#include "Modeling/GeneralizedRobot.h"
+#include "Contact/Stance.h"
 #include <robotics/IK.h>
 
 /** @brief A SingleRobotCSpace for a robot maintaining contact.
@@ -59,7 +61,6 @@ class MultiContactCSpace : public MultiRobotCSpace
   virtual void Sample(Config& x);
   virtual void SampleNeighborhood(const Config& c,Real r,Config& x);
   virtual bool IsFeasible(const Config&);
-
   virtual void Interpolate(const Config& x,const Config& y,Real u,Config& out);
   virtual void Midpoint(const Config& x,const Config& y,Config& out);
 
@@ -67,17 +68,10 @@ class MultiContactCSpace : public MultiRobotCSpace
   Real ContactDistance(const Config& x);
   bool CheckContact(const Config& x,Real dist=0);
 
-  void SplitRefs(const Config& x,vector<Config>& robotConfigs,vector<Config>& objectConfigs) const;
-  void SetWorldConfig(const Config& x);
-  void GetWorldConfig(Config& x);
-
   vector<ContactPair> contactPairs;
-  vector<int> activeIDs;  //IDs of robots/objects used in the aggregate robot
-  vector<bool> robotActive;   //true if the robot is active
-  vector<bool> objectActive;  //true if the object is active
-
-  RobotKinematics3D aggregateRobot;
+  Robot aggregateRobot;
   vector<IKGoal> closedChainConstraints;
+  Stance aggregateStance;
 };
 
 #endif
