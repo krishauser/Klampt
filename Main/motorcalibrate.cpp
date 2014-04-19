@@ -13,6 +13,10 @@
 using namespace std;
 using namespace Math;
 
+#ifdef HAVE_QT
+#define getchar() //do nothing
+#endif
+
 /** @brief Simulates a single DOF under PD control and stick-slip friction.
  *
  * Given a linearized model
@@ -246,8 +250,7 @@ dts,torquemin,torquemax);
       if(!IsFinite(res[0]) || !IsFinite(res[1]) || Abs(res[1]) > 1e2) {
 	printf("Large error on step %d, this may require tuning initial parameters\n",i);
 	printf("Press enter to continue\n");
-	//removed for GUI
-	//getchar();
+	getchar();
 	paused = true;
 	break;
       }
@@ -560,8 +563,7 @@ void RunCalibrationInd(MotorCalibrationProblem& problem,int numIters)
     printf("Time %g\n",timer.ElapsedTime());
     printf("\n");
     rmsds[k]=res;
-    //removed for GUI
-    //getchar();
+    getchar();
   }
 
   if(problem.savePostOptimize) {
