@@ -141,6 +141,27 @@ void InterpolateDerivative(Robot& robot,const Config& a,const Config& b,Vector& 
   }
 }
 
+void InterpolateDerivative(Robot& robot,const Config& a,const Config& b,Real u,Vector& dx)
+{
+  if(u==0) ::InterpolateDerivative(robot,a,b,dx);
+  else if(u==1) {
+    ::InterpolateDerivative(robot,b,a,dx);
+    dx.inplaceNegative();
+  }
+  else {
+    Vector temp;
+    ::Interpolate(robot,a,b,u,temp);
+    if(u < 0.5) {
+      ::InterpolateDerivative(robot,temp,b,dx);
+      dx *= 1.0/(1.0-u);
+    }
+    else {
+      ::InterpolateDerivative(robot,temp,a,dx);
+      dx *= -1.0/u;
+    }
+  }
+}
+
 void Integrate(Robot& robot,const Config& q,const Vector& dq,Config& b)
 {
   b = q+dq;

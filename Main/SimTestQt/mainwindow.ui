@@ -1,0 +1,1365 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>688</width>
+    <height>600</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>SimTest</string>
+  </property>
+  <property name="statusTip">
+   <string>start recording</string>
+  </property>
+  <widget class="QWidget" name="centralWidget">
+   <layout class="QHBoxLayout" name="horizontalLayout_3">
+    <item>
+     <layout class="QHBoxLayout" name="horizontalLayout_2">
+      <item>
+       <layout class="QVBoxLayout" name="verticalLayout_5">
+        <item>
+         <widget class="QSimTestBackend" name="displaywidget" native="true">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+            <horstretch>1</horstretch>
+            <verstretch>1</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>200</width>
+            <height>200</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>16777215</width>
+            <height>16777215</height>
+           </size>
+          </property>
+          <property name="toolTip">
+           <string>free mode</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout">
+          <item>
+           <spacer name="horizontalSpacer_6">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="chk_contacts">
+            <property name="statusTip">
+             <string>draw contacts</string>
+            </property>
+            <property name="text">
+             <string>contacts</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="chk_bboxes">
+            <property name="statusTip">
+             <string>draw bounding boxes</string>
+            </property>
+            <property name="text">
+             <string>bboxes</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="chk_desired">
+            <property name="statusTip">
+             <string>draw desired configuration</string>
+            </property>
+            <property name="text">
+             <string>desired</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="chk_estimated">
+            <property name="statusTip">
+             <string>draw estimated configuration</string>
+            </property>
+            <property name="text">
+             <string>estimated</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="chk_poser">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="statusTip">
+             <string>draw the poser widget</string>
+            </property>
+            <property name="text">
+             <string>poser</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="chk_wrenches">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="statusTip">
+             <string>draw wrenches</string>
+            </property>
+            <property name="text">
+             <string>Wrenches</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="chk_expanded">
+            <property name="statusTip">
+             <string>draw expanded</string>
+            </property>
+            <property name="text">
+             <string>expanded</string>
+            </property>
+            <property name="tristate">
+             <bool>false</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="horizontalSpacer_5">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <widget class="Line" name="line">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_5">
+          <item>
+           <spacer name="horizontalSpacer">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <widget class="Line" name="line_2">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="label_2">
+            <property name="text">
+             <string>Simulation</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="pushButton_4">
+            <property name="toolTip">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Direct the simulation to move to the milestone&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
+            <property name="statusTip">
+             <string>set a milestone for the robots to acheive</string>
+            </property>
+            <property name="text">
+             <string/>
+            </property>
+            <property name="icon">
+             <iconset resource="icons.qrc">
+              <normaloff>:/Images/Images/yellowflag.gif</normaloff>:/Images/Images/yellowflag.gif</iconset>
+            </property>
+            <property name="shortcut">
+             <string>Space</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="pushButton">
+            <property name="toolTip">
+             <string>Start the simulation</string>
+            </property>
+            <property name="statusTip">
+             <string>start or stop the simulation</string>
+            </property>
+            <property name="text">
+             <string/>
+            </property>
+            <property name="icon">
+             <iconset resource="icons.qrc">
+              <normaloff>:/Images/Images/media-playback-start.svg</normaloff>
+              <normalon>:/Images/Images/media-playback-pause.svg</normalon>
+              <activeon>:/Images/Images/media-playback-pause.svg</activeon>:/Images/Images/media-playback-start.svg</iconset>
+            </property>
+            <property name="shortcut">
+             <string>S</string>
+            </property>
+            <property name="checkable">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="pushButton_2">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="toolTip">
+             <string>Record the simulation</string>
+            </property>
+            <property name="text">
+             <string/>
+            </property>
+            <property name="icon">
+             <iconset resource="icons.qrc">
+              <normaloff>:/Images/Images/media-record.svg</normaloff>:/Images/Images/media-record.svg</iconset>
+            </property>
+            <property name="shortcut">
+             <string>R</string>
+            </property>
+            <property name="checkable">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="Line" name="line_3">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="label">
+            <property name="text">
+             <string>Mode</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="btn_free">
+            <property name="text">
+             <string/>
+            </property>
+            <property name="icon">
+             <iconset resource="icons.qrc">
+              <normaloff>:/Images/Images/hand.gif</normaloff>:/Images/Images/hand.gif</iconset>
+            </property>
+            <property name="checkable">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="btn_ik">
+            <property name="text">
+             <string/>
+            </property>
+            <property name="icon">
+             <iconset resource="icons.qrc">
+              <normaloff>:/Images/Images/IK.gif</normaloff>:/Images/Images/IK.gif</iconset>
+            </property>
+            <property name="checkable">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="btn_force">
+            <property name="text">
+             <string/>
+            </property>
+            <property name="icon">
+             <iconset>
+              <normaloff>Images/spring.gif</normaloff>Images/spring.gif</iconset>
+            </property>
+            <property name="checkable">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="Line" name="line_ik">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="lbl_ik">
+            <property name="text">
+             <string>IK</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="btn_constrain_point">
+            <property name="statusTip">
+             <string>constrain a point</string>
+            </property>
+            <property name="text">
+             <string/>
+            </property>
+            <property name="icon">
+             <iconset>
+              <normaloff>Images/constrain.gif</normaloff>Images/constrain.gif</iconset>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="btn_constrain">
+            <property name="statusTip">
+             <string>click a robot link to constrain it</string>
+            </property>
+            <property name="text">
+             <string/>
+            </property>
+            <property name="icon">
+             <iconset resource="icons.qrc">
+              <normaloff>:/Images/Images/constrainpoint.gif</normaloff>:/Images/Images/constrainpoint.gif</iconset>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="btn_delete">
+            <property name="statusTip">
+             <string>delete a robot constraint</string>
+            </property>
+            <property name="text">
+             <string/>
+            </property>
+            <property name="icon">
+             <iconset resource="icons.qrc">
+              <normaloff>:/Images/Images/dialog-cancel-3.png</normaloff>:/Images/Images/dialog-cancel-3.png</iconset>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="horizontalSpacer_2">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menuBar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>688</width>
+     <height>25</height>
+    </rect>
+   </property>
+   <property name="nativeMenuBar">
+    <bool>false</bool>
+   </property>
+   <widget class="QMenu" name="menuFile">
+    <property name="title">
+     <string>File</string>
+    </property>
+    <addaction name="actionOpen"/>
+    <addaction name="actionSave_State"/>
+    <addaction name="actionSave_State_As"/>
+    <addaction name="actionReset"/>
+    <addaction name="actionExit"/>
+   </widget>
+   <widget class="QMenu" name="menuMilestones">
+    <property name="title">
+     <string>View</string>
+    </property>
+    <addaction name="actionSaveView"/>
+    <addaction name="actionRevertView"/>
+    <addaction name="actionDefaultView"/>
+   </widget>
+   <widget class="QMenu" name="menuPreferences">
+    <property name="title">
+     <string>Windows</string>
+    </property>
+    <addaction name="actionDrivers"/>
+    <addaction name="actionSensor_Plot"/>
+    <addaction name="actionOptions"/>
+    <addaction name="actionSend_Command"/>
+   </widget>
+   <widget class="QMenu" name="menuRecord">
+    <property name="title">
+     <string>Record</string>
+    </property>
+    <widget class="QMenu" name="menuResolution">
+     <property name="title">
+      <string>Resolution</string>
+     </property>
+     <addaction name="action640x480"/>
+     <addaction name="action800x600"/>
+     <addaction name="action1280x768"/>
+     <addaction name="action1920x1080_HD"/>
+     <addaction name="separator"/>
+     <addaction name="actionResizable"/>
+    </widget>
+    <addaction name="actionRecordFile"/>
+    <addaction name="menuResolution"/>
+    <addaction name="actionMultiple_Parts"/>
+    <addaction name="actionEncode"/>
+   </widget>
+   <widget class="QMenu" name="menuHelp">
+    <property name="title">
+     <string>Help</string>
+    </property>
+    <addaction name="actionHelp"/>
+    <addaction name="actionAbout"/>
+   </widget>
+   <addaction name="menuFile"/>
+   <addaction name="menuPreferences"/>
+   <addaction name="menuMilestones"/>
+   <addaction name="menuRecord"/>
+   <addaction name="menuHelp"/>
+  </widget>
+  <widget class="QToolBar" name="mainToolBar">
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+  </widget>
+  <widget class="QStatusBar" name="statusBar"/>
+  <action name="actionOpen">
+   <property name="text">
+    <string>Open</string>
+   </property>
+   <property name="statusTip">
+    <string>ctrl-o</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+O</string>
+   </property>
+  </action>
+  <action name="actionSave_State">
+   <property name="text">
+    <string>Save State</string>
+   </property>
+   <property name="toolTip">
+    <string>ctrl-s</string>
+   </property>
+   <property name="statusTip">
+    <string/>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+S</string>
+   </property>
+  </action>
+  <action name="actionLoad_MultiPath">
+   <property name="text">
+    <string>Load MultiPath</string>
+   </property>
+  </action>
+  <action name="actionReset">
+   <property name="text">
+    <string>Reset</string>
+   </property>
+  </action>
+  <action name="actionExit">
+   <property name="text">
+    <string>Exit</string>
+   </property>
+  </action>
+  <action name="actionSaveView">
+   <property name="text">
+    <string>Save View</string>
+   </property>
+   <property name="toolTip">
+    <string>v</string>
+   </property>
+  </action>
+  <action name="actionRevertView">
+   <property name="text">
+    <string>Revert</string>
+   </property>
+   <property name="toolTip">
+    <string>V</string>
+   </property>
+  </action>
+  <action name="actionDefaultView">
+   <property name="text">
+    <string>Default</string>
+   </property>
+  </action>
+  <action name="actionDrivers">
+   <property name="text">
+    <string>Drivers</string>
+   </property>
+   <property name="toolTip">
+    <string>ctrl-d</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+D</string>
+   </property>
+  </action>
+  <action name="actionSensor_Plot">
+   <property name="text">
+    <string>Sensor Plot</string>
+   </property>
+   <property name="toolTip">
+    <string>ctrl-p</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+P</string>
+   </property>
+  </action>
+  <action name="actionOptions">
+   <property name="text">
+    <string>Options</string>
+   </property>
+   <property name="toolTip">
+    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;ctrl-r&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+R</string>
+   </property>
+  </action>
+  <action name="actionSave_State_As">
+   <property name="text">
+    <string>Save State As</string>
+   </property>
+   <property name="toolTip">
+    <string>ctrl-shift-s</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+S</string>
+   </property>
+  </action>
+  <action name="actionRecordFile">
+   <property name="text">
+    <string>Change File</string>
+   </property>
+  </action>
+  <action name="actionMultiple_Parts">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Multiple Parts</string>
+   </property>
+   <property name="statusTip">
+    <string>Does not automatically encode when a recording ends.  Can record 2 parts consecutively into 1 video.</string>
+   </property>
+  </action>
+  <action name="action640x480">
+   <property name="text">
+    <string>640x480</string>
+   </property>
+  </action>
+  <action name="action800x600">
+   <property name="text">
+    <string>800x600</string>
+   </property>
+  </action>
+  <action name="action1920x1080_HD">
+   <property name="text">
+    <string>1920x1080 (HD)</string>
+   </property>
+  </action>
+  <action name="action1280x768">
+   <property name="text">
+    <string>1280x768</string>
+   </property>
+  </action>
+  <action name="actionResizable">
+   <property name="text">
+    <string>Resizable</string>
+   </property>
+  </action>
+  <action name="actionEncode">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Encode</string>
+   </property>
+  </action>
+  <action name="actionSend_Command">
+   <property name="text">
+    <string>Send Command</string>
+   </property>
+  </action>
+  <action name="actionHelp">
+   <property name="text">
+    <string>Help</string>
+   </property>
+   <property name="shortcut">
+    <string>F1</string>
+   </property>
+  </action>
+  <action name="actionAbout">
+   <property name="text">
+    <string>About</string>
+   </property>
+  </action>
+ </widget>
+ <layoutdefault spacing="6" margin="11"/>
+ <customwidgets>
+  <customwidget>
+   <class>QSimTestBackend</class>
+   <extends>QWidget</extends>
+   <header>qsimtestbackend.h</header>
+   <container>1</container>
+   <slots>
+    <signal>AddSensor(QString)</signal>
+    <signal>AddMeasurement(QString)</signal>
+    <signal>ClearAllMeasurements()</signal>
+    <slot>Toggle_Simulation()</slot>
+    <slot>SetWrenches(bool)</slot>
+    <slot>SetSimSpeed(int)</slot>
+    <slot>ToggleMovie(bool)</slot>
+    <slot>SetPoser(bool)</slot>
+    <slot>SetDesired(bool)</slot>
+    <slot>SetEstimated(bool)</slot>
+    <slot>SetBBoxes(bool)</slot>
+    <slot>SetContacts(bool)</slot>
+    <slot>SetExpanded(bool)</slot>
+    <slot>SyncSensorMeasurements(int)</slot>
+    <slot>SetSensorPlot(bool)</slot>
+    <slot>SetLogCheck(bool)</slot>
+    <slot>Reset()</slot>
+    <slot>SetMilestone()</slot>
+    <slot>SetMode(int)</slot>
+    <slot>LoadState()</slot>
+    <slot>LoadMultiPath()</slot>
+    <slot>IsolateSensorMeasurementDraw()</slot>
+    <slot>SetSensorMeasurementSelectIndex(int)</slot>
+    <slot>ConstrainLink()</slot>
+    <slot>DeleteIKGoal()</slot>
+    <slot>LoadDefaultViewport()</slot>
+    <slot>LoadViewport()</slot>
+    <slot>SaveViewport()</slot>
+   </slots>
+  </customwidget>
+ </customwidgets>
+ <resources>
+  <include location="icons.qrc"/>
+ </resources>
+ <connections>
+  <connection>
+   <sender>pushButton</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>MainWindow</receiver>
+   <slot>SetSimulate(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>231</x>
+     <y>565</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>333</x>
+     <y>534</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>pushButton_4</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>SendMilestone()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>187</x>
+     <y>565</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>134</x>
+     <y>550</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>pushButton_2</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>MainWindow</receiver>
+   <slot>SetRecord(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>275</x>
+     <y>565</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>398</x>
+     <y>570</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionOpen</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>LoadResource()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>331</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionSave_State_As</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>SaveLastScenario()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>331</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionDrivers</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>ShowDriverEdit()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>331</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionOptions</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>ShowOptions()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>331</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionReset</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>Reset()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>331</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionExit</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>close()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>331</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionSensor_Plot</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>ShowPlotOptions()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>331</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>chk_expanded</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>MainWindow</receiver>
+   <slot>SetExpanded(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>663</x>
+     <y>521</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>637</x>
+     <y>273</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>chk_wrenches</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>MainWindow</receiver>
+   <slot>SetWrenches(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>561</x>
+     <y>521</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>636</x>
+     <y>310</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>chk_bboxes</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>MainWindow</receiver>
+   <slot>SetBBoxes(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>195</x>
+     <y>521</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>636</x>
+     <y>181</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>chk_contacts</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>MainWindow</receiver>
+   <slot>SetContacts(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>110</x>
+     <y>521</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>636</x>
+     <y>243</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>chk_desired</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>MainWindow</receiver>
+   <slot>SetDesired(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>281</x>
+     <y>521</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>636</x>
+     <y>121</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>chk_poser</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>MainWindow</receiver>
+   <slot>SetPoser(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>459</x>
+     <y>521</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>636</x>
+     <y>80</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>chk_estimated</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>MainWindow</receiver>
+   <slot>SetEstimated(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>385</x>
+     <y>521</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>636</x>
+     <y>148</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>btn_constrain</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>IKConstrain()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>579</x>
+     <y>565</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>521</x>
+     <y>572</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>btn_delete</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>IKDelete()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>623</x>
+     <y>565</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>623</x>
+     <y>577</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionRecordFile</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>ChangeRecordFile()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>337</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>action800x600</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>Resolution800x600()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>337</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>action1920x1080_HD</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>Resolution1920x1080()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>337</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>action640x480</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>Resolution640x480()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>337</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>action1280x768</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>Resolution1280x768()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>337</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionResizable</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>FlexibleResolution()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>337</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionMultiple_Parts</sender>
+   <signal>triggered(bool)</signal>
+   <receiver>MainWindow</receiver>
+   <slot>DoMultipleParts(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>337</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionEncode</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>Encode()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>337</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionMultiple_Parts</sender>
+   <signal>triggered(bool)</signal>
+   <receiver>actionEncode</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionSaveView</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>SaveViewport()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>337</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionRevertView</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>LoadViewport()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>337</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionDefaultView</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>DefaultViewport()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>337</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>btn_constrain_point</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>IKConstrainPoint()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>535</x>
+     <y>565</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>619</x>
+     <y>571</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>btn_force</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>DoForceMode()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>461</x>
+     <y>565</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>528</x>
+     <y>567</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>btn_free</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>DoFreeMode()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>373</x>
+     <y>565</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>352</x>
+     <y>575</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>btn_ik</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>DoIKMode()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>417</x>
+     <y>565</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>223</x>
+     <y>575</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionSend_Command</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>ShowCommand()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>343</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionHelp</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>ShowHelp()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>343</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionAbout</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>ShowAbout()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>343</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>Reset()</slot>
+  <slot>ShowPlotOptions()</slot>
+  <slot>ToggleIK(int)</slot>
+  <slot>LoadSelectedMultipath()</slot>
+  <slot>SetWrenches(bool)</slot>
+  <slot>SetSimSpeed(int)</slot>
+  <slot>ToggleMovie(bool)</slot>
+  <slot>SetPoser(bool)</slot>
+  <slot>SetDesired(bool)</slot>
+  <slot>SetEstimated(bool)</slot>
+  <slot>SetBBoxes(bool)</slot>
+  <slot>SetContacts(bool)</slot>
+  <slot>SetExpanded(bool)</slot>
+  <slot>SyncSensorMeasurements(int)</slot>
+  <slot>SetSensorPlot(bool)</slot>
+  <slot>SetLogCheck(bool)</slot>
+  <slot>SetSimulate(bool)</slot>
+  <slot>SetMode(int)</slot>
+  <slot>SendMilestone()</slot>
+  <slot>SetRecord(bool)</slot>
+  <slot>LoadResource()</slot>
+  <slot>ShowDriverEdit()</slot>
+  <slot>ShowOptions()</slot>
+  <slot>SaveScenario()</slot>
+  <slot>SaveLastScenario()</slot>
+  <slot>IKConstrain()</slot>
+  <slot>IKDelete()</slot>
+  <slot>ChangeRecordFile()</slot>
+  <slot>Resolution800x600()</slot>
+  <slot>Resolution1280x768()</slot>
+  <slot>Resolution1280x1024()</slot>
+  <slot>Resolution1920x1080()</slot>
+  <slot>Resolution640x480()</slot>
+  <slot>FlexibleResolution()</slot>
+  <slot>DoMultipleParts(bool)</slot>
+  <slot>Encode()</slot>
+  <slot>LoadViewport()</slot>
+  <slot>SaveViewport()</slot>
+  <slot>DefaultViewport()</slot>
+  <slot>IKConstrainPoint()</slot>
+  <slot>DoFreeMode()</slot>
+  <slot>DoIKMode()</slot>
+  <slot>DoForceMode()</slot>
+  <slot>ShowCommand()</slot>
+  <slot>ShowHelp()</slot>
+  <slot>ShowAbout()</slot>
+ </slots>
+</ui>

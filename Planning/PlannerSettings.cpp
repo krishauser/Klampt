@@ -50,11 +50,16 @@ void WorldPlannerSettings::InitializeDefault(RobotWorld& world)
     }
   }
 
+  terrainSettings.resize(world.terrains.size());
+  for(size_t i=0;i<terrainSettings.size();i++) {
+    terrainSettings[i].touchable = true;
+  }
+
   objectSettings.resize(world.rigidObjects.size());
   for(size_t i=0;i<objectSettings.size();i++) {
     objectSettings[i].worldBounds = bounds;
     objectSettings[i].touchable = true;
-    objectSettings[i].collisionEpsilon = 0.001;
+    objectSettings[i].collisionEpsilon = 0.005;
     objectSettings[i].translationWeight = 1.0;
     objectSettings[i].rotationWeight = Radius(world.rigidObjects[i].object->geometry);
   }

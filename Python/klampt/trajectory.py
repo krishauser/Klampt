@@ -70,7 +70,7 @@ class Trajectory:
 		i,u = self.getSegment(t,endBehavior)
 		if i<0: return [0.0]*len(self.milestones[0])
 		elif i>=len(self.milestones): return [0.0]*len(self.milestones[-1])
-		return vectorops.div(self.difference(self.milestones[i+1],self.milestones[i]),1.0/(self.times[i+1]-self.times[i]))
+		return vectorops.mul(self.difference(self.milestones[i+1],self.milestones[i]),1.0/(self.times[i+1]-self.times[i]))
 
 	def interpolate(self,a,b,u):
 		"""Can override this to implement non-cartesian spaces"""

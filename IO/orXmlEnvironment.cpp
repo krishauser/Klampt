@@ -2526,7 +2526,8 @@ void OrXmlRobot::Write2Rob(Robot& robot) {
 		}
 	}
 
-	bool res = robot.Save(filename.c_str(), geomFiles);
+	robot.SetGeomFiles(geomFiles);
+	bool res = robot.Save(filename.c_str());
 	assert(res==true);
 }
 

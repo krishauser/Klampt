@@ -12,6 +12,8 @@
 *.la
 *.a
 
+#compiled python libraries
+Python/build
 
 # Compiled source #
 ###################
@@ -54,3 +56,9 @@ Documentation/*.tags
 # platform specific configuration
 ######################
 Makefile.config
+
+# Qt meta objects
+######################
+*.pro.user
+moc_*.cpp
+ui_*.h

@@ -1292,6 +1292,7 @@ bool ODESimulator::ReadState(File& f)
       return false;
     }
   }
+  contactList.clear();
   return true;
 }
 

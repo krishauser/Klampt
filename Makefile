@@ -12,7 +12,7 @@ LIBKLAMPT = -L$(LIBDIR) -lKlampt
 
 ##################### Start the action #########################
 default: RobotTest 
-.PHONY: RobotTest SimTest SimUtil PosMeasure URDFtoRob UserTrials UserTrialsMT deps lib
+.PHONY: RobotTest SimTest SimUtil PlanDemo PosMeasure RealTimePlanning MotorCalibrate URDFtoRob RealTimePlanner UserTrials Pack Unpack Merge deps lib
 
 unpack-deps:
 	cd Library; git clone https://github.com/krishauser/KrisLibrary
@@ -60,20 +60,24 @@ clean:
 	cd Planning; make clean
 	cd IO; make clean
 	cd View; make clean
-	cd Interface; make
+	cd Interface; make clean
 	rm $(LIBDIR)/*.a
 
 RobotTest: lib
 	cd Main; make test.o
 	 $(CC) $(FLAGS) Main/$(OBJDIR)/test.o $(LIBKLAMPT) $(LIB) -o $@
 
+RobotTest2: lib
+	cd Main; make test2.o
+	 $(CC) $(FLAGS) Main/$(OBJDIR)/test2.o $(LIBKLAMPT) $(LIB) -o $@
+
 RobotPose: lib
 	cd Main; make pose.o
 	 $(CC) $(FLAGS) Main/$(OBJDIR)/pose.o $(LIBKLAMPT) $(LIB) -o $@
 
-Cartpole:  lib
-	cd Main; make cartpole.o
-	 $(CC) $(FLAGS) Main/$(OBJDIR)/cartpole.o $(LIBKLAMPT) $(LIB) -o $@
+MotorCalibrate:  lib
+	cd Main; make motorcalibrate.o
+	 $(CC) $(FLAGS) Main/$(OBJDIR)/motorcalibrate.o  $(LIBKLAMPT) $(LIB) -o $@
 
 PosMeasure:  lib
 	cd Main; make posmeasure.o
@@ -90,14 +94,44 @@ SimUtil:  lib
 URDFtoRob:  lib
 	cd Main; make urdftorob.o
 	 $(CC) $(FLAGS) Main/$(OBJDIR)/urdftorob.o $(LIBKLAMPT) $(LIB) -o $@		
+
+Pack:  lib
+	cd Main; make pack.o
+	 $(CC) $(FLAGS) Main/$(OBJDIR)/pack.o $(LIBKLAMPT) $(LIB) -o $@		
+
+Unpack:  lib
+	cd Main; make unpack.o
+	 $(CC) $(FLAGS) Main/$(OBJDIR)/unpack.o $(LIBKLAMPT) $(LIB) -o $@		
+
+Merge:  lib
+	cd Main; make merge.o
+	 $(CC) $(FLAGS) Main/$(OBJDIR)/merge.o $(LIBKLAMPT) $(LIB) -o $@		
+
 UserTrials:  lib
 	cd Main; make usertrials.o
 	 $(CC) $(FLAGS) $(OBJS) Main/$(OBJDIR)/usertrials.o $(LIBKLAMPT) $(LIB) -o $@
 
-UserTrialsMT:  lib
-	cd Main; make usertrials_multithread.o
-	cd Input; make
-	 $(CC) $(FLAGS)  Main/$(OBJDIR)/usertrials_multithread.o $(LIBKLAMPT) $(LIB) -o $@
+SafeSerialClient:  lib
+	cd Main; make safeserialclient.o
+	 $(CC) $(FLAGS)  Main/$(OBJDIR)/safeserialclient.o $(LIBKLAMPT) $(LIB) -o $@
+
+Val3SerialClient:  lib
+	cd Main; make val3serialclient.o
+	cd Val3; make
+	 $(CC) $(FLAGS)  Main/$(OBJDIR)/val3serialclient.o $(wildcard Val3/$(OBJDIR)/*.o) $(LIBKLAMPT) $(LIB) -o $@
+
+Cartpole:  lib
+	cd Examples; make cartpole.o
+	 $(CC) $(FLAGS) Examples/$(OBJDIR)/cartpole.o $(LIBKLAMPT) $(LIB) -o $@
+
+PlanDemo:  lib
+	cd Examples; make plandemo.o
+	 $(CC) $(FLAGS) $(OBJS) Examples/$(OBJDIR)/plandemo.o $(LIBKLAMPT) $(LIB) -o $@
+
+RealTimePlanning:  lib
+	cd Examples; make realtimeplanning.o
+	 $(CC) $(FLAGS) $(OBJS) Examples/$(OBJDIR)/realtimeplanning.o $(LIBKLAMPT) $(LIB) -o $@
+
 
 python: lib
 	cd Python; make

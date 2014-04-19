@@ -13,6 +13,8 @@
  * - GetCurConfig/Velocity returns the current configuration/velocity
  * - GetEndConfig/Velocity returns the configuration/velocity at the end
  *   of the motion queue.
+ * - GetConfig returns the configuration at some time >= current time.  If
+ *   unavailable, x should be set to an empty config.
  * - SendMilestone appends a milestone to the back of the queue
  * - SendMilestoneImmediate breaks the motion queue at the current time and
  *   appends a milestone.
@@ -30,6 +32,7 @@ class MotionQueueInterface
   virtual Real GetEndTime()=0;
   virtual void GetEndConfig(Config& x)=0;
   virtual void GetEndVelocity(Config& dx)=0;
+  virtual void GetConfig(Real t,Config& x)=0;
   virtual MotionResult SendMilestone(const Config& x)=0;
   virtual MotionResult SendMilestoneImmediate(const Config& x)=0;
   virtual MotionResult SendPathImmediate(Real tbreak,const ParabolicRamp::DynamicPath& path)=0;

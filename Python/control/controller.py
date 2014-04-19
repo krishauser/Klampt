@@ -6,7 +6,19 @@ class BaseController(object):
     def output(self,**inputs):
         """Computes the output of this controller given a dictionary of
         inputs.  The output is typically a dictionary but could also be a
-        list.  SimTest handles by default:
+        list.
+
+        A top-level controller that communicates with SerialController and
+        simtest.py will get the following values as input:
+        - t = time: simulation time
+        - dt = timestep: controller time step
+        - sensor1 = sensor1_values: measurements for sensor 1
+        - ...
+        - sensork = sensork_values: measurements for sensor k
+
+        A top-level controller that communicates with SerialController and
+        simtest.py should produce a dictionary containing one or more of
+        the following keys:
         - qcmd
         - dqcmd 
         - tcmd
@@ -303,3 +315,18 @@ class LinearController(BaseController):
         
 def make(robot):
     return BaseController()
+
+def launch(fn,robot):
+    """Launches a controller given by the given python module for the
+    given robot using the module's default make(robot) routine."""
+    import os
+    import importlib
+    path,base = os.path.split(fn)
+    mod_name,file_ext = os.path.splitext(base)
+    mod = importlib.import_module(path+"."+mod_name,fn)
+    try:
+        maker = mod.make
+    except AttributeError:
+        print "Module",mod.__name__,"must have a make() method"
+        raise
+    return maker(robot)

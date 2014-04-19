@@ -176,14 +176,19 @@ bool InputProcessingInterface::ObjectiveChanged()
 
 SmartPointer<PlannerObjectiveBase> InputProcessingInterface::GetObjective()
 {
-  if(!inputProcessor) return NULL;
-  PlannerObjectiveBase* obj = inputProcessor->MakeObjective(GetRobot());
-  return obj;
+  if(!inputProcessor) {
+    currentObjective = NULL;
+  }
+  else {
+    PlannerObjectiveBase* obj = inputProcessor->MakeObjective(GetRobot());
+    currentObjective = obj;
+  }
+  return currentObjective;
 }
 
 CartesianObjective* InputProcessingInterface::GetCartesianObjective()
 {
-  currentObjective = GetObjective();
+  GetObjective();
   if(!currentObjective) return NULL;
   CartesianObjective* pobj = dynamic_cast<CartesianObjective*>(&*currentObjective);
   assert(pobj != NULL);
@@ -193,6 +198,49 @@ CartesianObjective* InputProcessingInterface::GetCartesianObjective()
 void InputProcessingInterface::DrawGL()
 {
   if(inputProcessor) inputProcessor->DrawGL();
+  if(currentObjective) {
+    Robot* robot=GetRobot();
+    CartesianObjective* cobj = dynamic_cast<CartesianObjective*>(&*currentObjective);
+    if(cobj) {
+      glPointSize(5.0);
+      glEnable( GL_POINT_SMOOTH);
+      glDisable( GL_LIGHTING);
+      glBegin( GL_POINTS);
+      glColor3f(0, 1, 1);
+      glVertex3v(robot->links[cobj->ikGoal.link].T_World
+		 * cobj->ikGoal.localPosition);
+      glColor3f(0, 1, 0.5);
+      glVertex3v(cobj->ikGoal.endPosition);
+      glEnd();
+    }
+    ConfigObjective* qobj = dynamic_cast<ConfigObjective*>(&*currentObjective);
+    if(qobj) {
+      world->robots[0].view.SetColors(GLColor(1,0.5,0,0.5));
+      glEnable(GL_LIGHTING);
+      robot->UpdateConfig(qobj->qgoal);
+      world->robots[0].view.Draw();
+      glDisable(GL_LIGHTING);
+    }
+    CartesianTrackingObjective* ptrack = dynamic_cast<CartesianTrackingObjective*>(&*currentObjective);
+    if(ptrack) {
+      glPointSize(5.0);
+      glEnable( GL_POINT_SMOOTH);
+      glDisable( GL_LIGHTING);
+      glBegin( GL_POINTS);
+      glColor3f(0, 1, 1);
+      glVertex3v(robot->links[ptrack->link].T_World
+		 * ptrack->localPosition);
+      glEnd();
+      glLineWidth(3.0);
+      glColor3f(0, 1, 0.5);
+      glBegin(GL_LINE_STRIP);
+      for(size_t i=0;i<ptrack->positions.size();i++) 
+	glVertex3v(ptrack->positions[i]);
+      glEnd();
+      glLineWidth(1.0);
+    }
+    //TODO: others
+  }
 }
 
 string InputProcessingInterface::MouseInputEvent(int mx, int my, bool drag)
@@ -249,7 +297,7 @@ string IKCommandInterface::UpdateEvent()
 
 
 PlannerCommandInterface::PlannerCommandInterface()
-  :planner(NULL),lastPlanTime(0),nextPlanTime(0)
+  :planner(NULL),lastPlanTime(0),nextPlanTime(0),startObjectiveThreshold(Inf),started(false)
 {}
 
 PlannerCommandInterface::~PlannerCommandInterface()
@@ -260,6 +308,7 @@ PlannerCommandInterface::~PlannerCommandInterface()
 string PlannerCommandInterface::ActivateEvent(bool enabled)
 {
   InputProcessingInterface::ActivateEvent(enabled);
+  started = false;
   if(planner) {
     planner->currentPath.ramps.resize(0);
     lastPlanTime = nextPlanTime = robotInterface->GetCurTime();
@@ -272,17 +321,38 @@ string PlannerCommandInterface::UpdateEvent()
 {
   InputProcessingInterface::UpdateEvent();
   if(!planner) return "";
-  if(planner->currentPath.ramps.empty()) {
-    if(robotInterface->GetEndTime() <= robotInterface->GetCurTime()) { //done moving
-      Config q;
-      robotInterface->GetCurConfig(q);
-      planner->SetConstantPath(q);
-    }
-    else {
-      printf("Waiting until robot stops...\n");
-      //wait until done moving
+  if(!started) {
+    //2 conditions must be met before start: robot is stopped, robot hits the
+    //startobjectivethreshold.
+
+    //robot still moving
+    if(robotInterface->GetEndTime() > robotInterface->GetCurTime()) {
+      printf("Waiting until the robot stops...\n");
       return "";
     }
+    if(IsInf(startObjectiveThreshold)) {
+      started=true;
+    }
+    else if(ObjectiveChanged()) {
+      SmartPointer<PlannerObjectiveBase> obj = GetObjective();
+      Config q,v;
+      robotInterface->GetEndConfig(q);
+      v.resize(q.n,Zero);
+      if(obj->TerminalCost(0,q,v) > startObjectiveThreshold) {
+	printf("Waiting until the objective gets below %g, currently %g...\n",startObjectiveThreshold,obj->TerminalCost(0,q,v));
+	return "";
+      }
+      else started=true;
+    } 
+    else {
+      printf("Waiting for an objective...\n");
+    }
+  }
+  if(!started) return "";
+  if(planner->currentPath.ramps.empty()) {
+    Config q;
+    robotInterface->GetEndConfig(q);
+    planner->SetConstantPath(q);
   }
 
   //wait until next planning step, otherwise try planning
@@ -430,7 +500,7 @@ void* planner_thread_func(void * ptr)
       if(data->objective) {
 	data->planner->Reset(data->objective);      }
       else {
-	printf("NULL objective function set...\n");
+	printf("Planning thread: NULL objective function set...\n");
 	data->planner->Reset(NULL);
       }
     }
@@ -494,15 +564,26 @@ string MTPlannerCommandInterface::UpdateEvent()
     return "";
 
   inputProcessor->SetGlobalTime(robotInterface->GetCurTime());
-  
-  //see if the planning thread has a plan update
+
+  //tell the planner to stop if there's a new objective
+  if(ObjectiveChanged()) {
+    printf("\n");
+    printf("****** STOP PLANNING **********\n");
+    printf("\n");
+    planner->StopPlanning();
+  }
+
+  //now lock the planning thread's mutex
   pthread_mutex_lock(&data.mutex);
+
+  //update the objective function if necessary
   if(ObjectiveChanged()) {
     //set the objective function
     PlannerObjectiveBase* obj = inputProcessor->MakeObjective(planner->cspace->GetRobot());
     data.objective = obj;
   }
   
+  //see if the planning thread has a plan update
   if(data.pathRefresh) {
     //if so, mark that it's refreshed
     data.pathRefresh = false;
@@ -520,7 +601,7 @@ string MTPlannerCommandInterface::UpdateEvent()
   else {
     //printf("Sim thread: waiting for plan to complete\n");
   }
-  data.globalTime = robotInterface->GetCurTime();;
+  data.globalTime = robotInterface->GetCurTime();
   pthread_mutex_unlock(&data.mutex);
   return "";
 }

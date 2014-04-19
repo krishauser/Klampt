@@ -26,7 +26,7 @@ tinyxmlDir = klamptDir+'/'+'Library/tinyxml'
 #if ODE_DOUBLE is set to true, turn this to true
 odedouble = True
 
-includeDirs = [klamptDir,krisLibraryDir,tinyxmlDir,odedir+'/include','/usr/include','.']
+includeDirs = [klamptDir,krisLibraryDir,tinyxmlDir,odedir+'/include','/usr/local/include','/usr/include','.']
 
 tinyxmlLibDir = tinyxmlDir
 odelibdir = odedir+'/ode/src/.libs'
@@ -35,7 +35,7 @@ odelibdir = odedir+'/ode/src/.libs'
 gluilibdir = gluidir+'/src/lib'
 assimpLibDir = assimpDir+'/lib'
 
-libdirs = [klamptDir+'/lib',krisLibraryDir+'/lib',tinyxmlLibDir,odelibdir,gluilibdir,assimpLibDir,'/usr/lib']
+libdirs = [klamptDir+'/lib',krisLibraryDir+'/lib',tinyxmlLibDir,odelibdir,gluilibdir,assimpLibDir,'/usr/lib','/usr/local/lib']
 
 
 commonfiles = ['pyerr.cpp']

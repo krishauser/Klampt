@@ -33,7 +33,7 @@ class RobotUserInterface
   virtual string Name() const { return "Unnamed"; }
   virtual string Description() const { return "Unnamed"; }
   virtual string Instructions() const { return ""; }
-  virtual void DrawGL() {}
+  virtual void DrawGL() { }
   //
   //The following callbacks are called respectively upon
   //activation/deactivation;
@@ -129,6 +129,12 @@ class PlannerCommandInterface : public InputProcessingInterface
   RealTimePlannerBase* planner;
   double lastPlanTime;
   double nextPlanTime;
+
+  ///The planner will not be called until the objective function is set below
+  ///this threshold.  Infinity by default (i.e., the planner will start
+  ///instantly)
+  double startObjectiveThreshold;
+  bool started;
 };
 
 /** @brief An interface uses safe IK as the real-time planner class to achieve

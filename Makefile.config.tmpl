@@ -26,9 +26,19 @@ ODEDOUBLE=1
 #FREEGLUT = 0
 #ODEDOUBLE=1
 
-## Turn this on if you built KrisLibrary with Assimp loading
+# Assimp 3D mesh loading library -- will autodetect in Library/assimp--3.0.1270-sdk and usr/lib
 HAVE_ASSIMP=0
 ASSIMP=Library/assimp--3.0.1270-sdk
+ASSIMPINCDIR=$(ASSIMP)/include
+ASSIMPLIBDIR=$(ASSIMP)/lib
+ifneq ($(wildcard $(ASSIMP)),)
+	HAVE_ASSIMP=1
+endif
+ifneq ($(wildcard /usr/lib/libassimp.so), )
+	HAVE_ASSIMP=1
+	ASSIMPINCDIR=/usr/include
+	ASSIMPLIBDIR=/usr/lib
+endif
 
 ##################################################
 # Probably don't have to modify the following,

@@ -22,7 +22,7 @@ default: $(OBJS)
 
 clean:
 	rm -f $(DEPDIR)/*.d $(OBJDIR)/*.o
-	rmdir $(DEPDIR) $(OBJDIR)
+	rm -rf $(DEPDIR) $(OBJDIR)
 
 -include $(DEPENDS)
 

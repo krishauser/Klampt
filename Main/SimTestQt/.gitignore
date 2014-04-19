@@ -1,0 +1,9 @@
+*.txt
+*.mpg
+*.ppm
+SimTest
+Makefile
+Simtest.pro.user
+ui_*
+moc*
+qrc_*

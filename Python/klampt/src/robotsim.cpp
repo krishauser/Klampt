@@ -255,7 +255,9 @@ Geometry3D::Geometry3D()
 
 string Geometry3D::type()
 {
-  return worlds[this->world]->world.GetGeometry(id).TypeName();
+  AnyGeometry3D& geom = worlds[this->world]->world.GetGeometry(id);
+  if(geom.Empty()) return "";
+  return geom.TypeName();
 }
 
 TriangleMesh Geometry3D::getTriangleMesh()
@@ -540,7 +542,7 @@ RobotModel WorldModel::robot(const char* robot)
   for(size_t i=0;i<world.robots.size();i++)
     if(world.robots[i].name == robot) {
       r.index = (int)i;
-      r.robot = worlds[index]->world.robots[i].robot;
+      r.robot = world.robots[i].robot;
       return r;
     }
   throw PyException("Invalid robot name");
@@ -674,6 +676,7 @@ RobotModel WorldModel::loadRobot(const char* fn)
   RobotModel robot;
   robot.world = index;
   robot.index = oindex;
+  robot.robot = world.robots.back().robot;
   return robot;
 }
 
@@ -685,6 +688,7 @@ RigidObjectModel WorldModel::loadRigidObject(const char* fn)
   RigidObjectModel obj;
   obj.world = index;
   obj.index = oindex;
+  obj.object = world.rigidObjects.back().object;
   return obj;
 }
 
@@ -696,6 +700,7 @@ TerrainModel WorldModel::loadTerrain(const char* fn)
   TerrainModel obj;
   obj.world = index;
   obj.index = oindex;
+  obj.terrain = world.terrains.back().terrain;
   return obj;
 }
 
@@ -712,6 +717,10 @@ void WorldModel::drawGL()
   world.DrawGL();
 }
 
+void WorldModel::enableGeometryLoading(bool enabled)
+{
+  Robot::disableGeometryLoading = !enabled;
+}
 
 
 RobotModelLink::RobotModelLink()
@@ -729,6 +738,7 @@ RobotModel RobotModelLink::getRobot()
 
 const char* RobotModelLink::getName()
 {
+  if(index < 0) return "";
   return robot->linkNames[index].c_str();
 }
 
@@ -932,6 +942,83 @@ void RobotModelLink::drawWorldGL(bool keepAppearance)
   glPopMatrix();
 }
 
+RobotModelDriver::RobotModelDriver()
+  :world(-1),robotIndex(-1),robot(NULL),index(-1)
+{}
+
+RobotModel RobotModelDriver::getRobot()
+{
+  RobotModel r;
+  r.world = world;
+  r.index = robotIndex;
+  r.robot = robot;
+  return r;
+}
+
+const char* RobotModelDriver::getName()
+{
+  if(index < 0) return "";
+  return robot->driverNames[index].c_str();
+}
+
+const char* RobotModelDriver::getType()
+{
+  if(index < 0) return "";
+  switch(robot->drivers[index].type) {
+  case RobotJointDriver::Normal: return "normal";
+  case RobotJointDriver::Affine: return "affine";
+  case RobotJointDriver::Translation: return "translation";
+  case RobotJointDriver::Rotation: return "rotation";
+  case RobotJointDriver::Custom: return "custom";
+  default: return "error";
+  }
+}
+int RobotModelDriver::getAffectedLink()
+{
+  if(index < 0) return -1;
+  return robot->drivers[index].linkIndices[0];
+}
+
+void RobotModelDriver::getAffectedLinks(std::vector<int>& links)
+{
+  if(index < 0) links.resize(0); 
+  else links = robot->drivers[index].linkIndices;
+}
+
+void RobotModelDriver::getAffineCoeffs(std::vector<double>& scale,std::vector<double>& offset)
+{
+  if(index < 0) {
+    scale.resize(0); 
+    offset.resize(0);
+  }
+  else {
+    scale = robot->drivers[index].affScaling;
+    offset = robot->drivers[index].affOffset;
+  }
+}
+
+void RobotModelDriver::setValue(double val)
+{
+  robot->SetDriverValue(index,val);
+}
+
+double RobotModelDriver::getValue()
+{
+  return robot->GetDriverValue(index);
+}
+void RobotModelDriver::setVelocity(double val)
+{
+  robot->SetDriverVelocity(index,val);
+}
+
+double RobotModelDriver::getVelocity(double val)
+{
+  return robot->GetDriverVelocity(index);
+}
+
+
+
+
 RobotModel::RobotModel()
   :world(-1),index(-1),robot(NULL)
 {}
@@ -965,16 +1052,46 @@ RobotModelLink RobotModel::getLink(int linkindex)
 
 RobotModelLink RobotModel::getLink(const char* name)
 {
+  for(size_t i=0;i<robot->linkNames.size();i++)
+    if(string(name) == robot->linkNames[i]) {
+      return getLink((int)i);
+    }
   RobotModelLink link;
   link.world = this->world;
   link.robot = robot;
   link.robotIndex = index;
   link.index = -1;
-  for(size_t i=0;i<robot->linkNames.size();i++)
-    if(name == robot->linkNames[i]) {
-      link.index = (int)i;
-      return link;
+  return link;
+}
+
+
+int RobotModel::numDrivers()
+{
+  if(index < 0) return -1;
+  return robot->drivers.size();
+}
+
+RobotModelDriver RobotModel::getDriver(int driverindex)
+{
+  RobotModelDriver link;
+  link.world = world;
+  link.robotIndex = index;
+  link.robot = robot;
+  link.index = driverindex;
+  return link;
+}
+
+RobotModelDriver RobotModel::getDriver(const char* name)
+{
+  for(size_t i=0;i<robot->driverNames.size();i++)
+    if(name == robot->driverNames[i]) {
+      return getDriver((int)i);
     }
+  RobotModelDriver link;
+  link.world = this->world;
+  link.robot = robot;
+  link.robotIndex = index;
+  link.index = -1;
   return link;
 }
 
