@@ -99,7 +99,7 @@ public:
 
   int forceApplicationMode,forceSpringActive;
   Vector3 forceSpringAnchor;
-  int drawBBs,drawPoser,drawDesired,drawEstimated,drawContacts,drawWrenches,drawExpanded;
+  int drawBBs,drawPoser,drawDesired,drawEstimated,drawContacts,drawWrenches,drawExpanded,doLogging;
   string simLogFile;
   string contactStateLogFile, contactWrenchLogFile;
   map<int,string> robotCommandLogFiles, robotSensedLogFiles, robotStateLogFiles;

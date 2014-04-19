@@ -21,6 +21,9 @@ using namespace Math;
  * and frictional forces f* = min_f |x''| s.t. |f| <= mu_d + |x'|*mu_v
  * returns the ending x(T),x'(T)
  */
+
+//TODO create error dialogs for error prompts
+
 void SimulateDOF(Real minv,Real d,Real k,Real c,
 		 Real x0,Real dx0,
 		 Real xDes,Real dxDes,
@@ -243,7 +246,8 @@ dts,torquemin,torquemax);
       if(!IsFinite(res[0]) || !IsFinite(res[1]) || Abs(res[1]) > 1e2) {
 	printf("Large error on step %d, this may require tuning initial parameters\n",i);
 	printf("Press enter to continue\n");
-	getchar();
+	//removed for GUI
+	//getchar();
 	paused = true;
 	break;
       }
@@ -536,6 +540,7 @@ void RunCalibrationInd(MotorCalibrationProblem& problem,int numIters)
     int d = problem.estimateDrivers[k];
     Assert(problem.robot->drivers[d].type == RobotJointDriver::Normal);
     int j = problem.robot->drivers[d].linkIndices[0];
+
     Real& kP = problem.robot->drivers[d].servoP;
     Real& kI = problem.robot->drivers[d].servoI;
     Real& kD = problem.robot->drivers[d].servoD;
@@ -555,6 +560,7 @@ void RunCalibrationInd(MotorCalibrationProblem& problem,int numIters)
     printf("Time %g\n",timer.ElapsedTime());
     printf("\n");
     rmsds[k]=res;
+    //removed for GUI
     //getchar();
   }
 
@@ -827,30 +833,6 @@ void test()
   Vector b;
   ConstrainedForwardDynamics(robot,fixedLinks,fixedDofs,A,b);
 }
-
-<<<<<<< HEAD
-
-class MotorCalibrateSettings : public AnyCollection
-{
-public:
-  MotorCalibrateSettings() {
-  }
-  bool read(const char* fn) {
-    ifstream in(fn,ios::in);
-    if(!in) return false;
-    AnyCollection newEntries;
-    if(!newEntries.read(in)) return false;
-    merge(newEntries);
-    return true;
-  }
-  bool write(const char* fn) {
-    ofstream out(fn,ios::out);
-    if(!out) return false;
-    AnyCollection::write(out);
-    out.close();
-    return true;
-  }
-};
 
 string motorcalibrate(AnyCollection settings){
   string robotfn;

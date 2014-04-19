@@ -398,12 +398,13 @@ bool SimTestBackend::OnCommand(const string& cmd,const string& args)
     ToggleSensorMeasurement(index,measurement,0);
   }
   else if(cmd=="constrain_link") {
-    for(size_t i=0;i<robotWidgets.size();i++)
-      robotWidgets[i].FixCurrent();
+      robotWidgets[0].FixCurrent();
+  }
+  else if(cmd=="constrain_link_point"){
+    robotWidgets[0].FixCurrentPoint();
   }
   else if(cmd == "delete_constraint") {
-    for(size_t i=0;i<robotWidgets.size();i++)
-      robotWidgets[i].DeleteConstraint();
+      robotWidgets[0].DeleteConstraint();
   }
   else if(cmd=="set_link") {
     ss >> cur_link;
