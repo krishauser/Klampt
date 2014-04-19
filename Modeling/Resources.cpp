@@ -107,8 +107,8 @@ bool RobotResource::Save(const string& fn)
       FileUtils::CreateDirectory(path.c_str());
   }
   path += "/";
-  path += name + "/" + name;
-  if(!robot.Save(fn.c_str(),path.c_str())) return false;
+  path += name + "/";
+  if(!robot.Save(fn.c_str())) return false;
   if(!robot.SaveGeometry(path.c_str())) return false;
   return false;
 }
