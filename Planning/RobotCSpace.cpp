@@ -990,9 +990,100 @@ void SingleRobotCSpace2::SampleNeighborhood(const Config& c,Real r,Config& x)
 }
 
 
+SingleRigidObjectCSpace::SingleRigidObjectCSpace(RobotWorld& _world,int _index,WorldPlannerSettings* _settings)
+  :world(_world),index(_index),settings(_settings),collisionPairsInitialized(false)
+{
+  Assert(settings != NULL);
+}
+
+void SingleRigidObjectCSpace::Interpolate(const Config& x,const Config& y,Real u,Config& out)
+{
+  RigidTransform Ta,Tb,Tout;
+  ConfigToTransform(x,Ta);
+  ConfigToTransform(y,Tb);
+  interpolate(Ta,Tb,u,Tout);
+  TransformToConfig(Tout,out);
+}
+
+void SingleRigidObjectCSpace::Midpoint(const Config& x,const Config& y,Config& out)
+{
+  Interpolate(x,y,0.5,out);
+}
+
+Real SingleRigidObjectCSpace::Distance(const Config& x,const Config& y)
+{
+  RigidTransform Ta,Tb;
+  ConfigToTransform(x,Ta);
+  ConfigToTransform(y,Tb);
+  Real d = Ta.t.distance(Tb.t);
+  Matrix3 Rrel;
+  Rrel.mulTransposeB(Ta.R,Tb.R);
+  AngleAxisRotation aa;
+  aa.setMatrix(Rrel);
+  Real wt = settings->objectSettings[index].translationWeight;
+  Real wr = settings->objectSettings[index].rotationWeight;
+  d = Sqrt(d*d*wt + aa.angle*aa.angle*wr);
+  return d;
+}
+
+RigidObject* SingleRigidObjectCSpace::GetObject() const
+{
+  return world.rigidObjects[index].object;
+}
+
+bool SingleRigidObjectCSpace::IsFeasible(const Config& q)
+{
+  RigidTransform T;
+  ConfigToTransform(q,T);
+  return CheckCollisionFree(T);
+}
 
 
+void SingleRigidObjectCSpace::InitializeCollisionPairs()
+{
+  collisionPairsInitialized=true;
+  int id = world.RigidObjectID(index);
+  collisionPairs.resize(0);
+  collisionQueries.resize(0);
+  settings->EnumerateCollisionQueries(world,id,-1,collisionPairs,collisionQueries);
+}
 
+bool SingleRigidObjectCSpace::CheckCollisionFree(const RigidTransform& T)
+{
+  GetObject()->T = T;
+  GetObject()->UpdateGeometry();
+  if(!collisionPairsInitialized) InitializeCollisionPairs();
+  for(size_t i=0;i<collisionQueries.size();i++)
+    if(collisionQueries[i].Collide()) return false;
+  return true;
+}
+
+void SingleRigidObjectCSpace::Sample(Config& q)
+{
+  QuaternionRotation quat;
+  RigidTransform T;
+  RandRotation(quat);
+  quat.getMatrix(T.R);
+  SampleAABB(settings->objectSettings[index].worldBounds.bmin,settings->objectSettings[index].worldBounds.bmax,T.t);
+  TransformToConfig(T,q);
+}
+
+void SingleRigidObjectCSpace::SampleNeighborhood(const Config& c,Real r,Config& q)
+{
+  AngleAxisRotation aa;
+  RigidTransform T,T0;
+  aa.angle = Rand(0,r);
+  SampleSphere(1.0,aa.axis);
+  aa.getMatrix(T.R);
+  SampleCube(r,T.t);
+  ConfigToTransform(c,T0);
+  TransformToConfig(T*T0,q);
+}
+
+EdgePlanner* SingleRigidObjectCSpace::LocalPlanner(const Config& a,const Config& b)
+{
+  return new BisectionEpsilonEdgePlanner(this,a,b,settings->objectSettings[index].collisionEpsilon);
+}
 
 
 
@@ -1009,104 +1100,110 @@ MultiRobotCSpace::MultiRobotCSpace(const MultiRobotCSpace& space)
 
 void MultiRobotCSpace::InitRobots(const vector<int>& indices)
 {
-  robotIndices = indices;
-  robotSpaces.resize(indices.size());
-  for(size_t i=0;i<indices.size();i++)
-    robotSpaces[i] = new SingleRobotCSpace(world,indices[i],settings);
+  robot.elements.clear();
+  robotElementIDs.resize(indices.size());
+  elementSpaces.resize(indices.size());
+  for(size_t i=0;i<indices.size();i++) {
+    robot.Add(world.robots[indices[i]].robot,world.robots[indices[i]].name.c_str());
+    robotElementIDs[i] = world.RobotID(indices[i]);
+    elementSpaces[i] = new SingleRobotCSpace(world,indices[i],settings);
+  }
 }
 
 void MultiRobotCSpace::AddRobot(int index)
 {
-  robotIndices.push_back(index);
-  robotSpaces.push_back(new SingleRobotCSpace(world,index,settings));
+  int element = robot.Add(world.robots[index].robot,world.robots[index].name.c_str());
+  robotElementIDs.push_back(world.RobotID(index));
+  elementSpaces.push_back(new SingleRobotCSpace(world,index,settings));
 }
+
+void MultiRobotCSpace::AddRigidObject(int index)
+{
+  int element = robot.Add(world.rigidObjects[index].object,world.rigidObjects[index].name.c_str());
+  robotElementIDs.push_back(world.RigidObjectID(index));
+  elementSpaces.push_back(new SingleRigidObjectCSpace(world,index,settings));
+}
+
 
 int MultiRobotCSpace::NumDimensions() const
 {
-  size_t n=0;
-  for(size_t i=0;i<robotSpaces.size();i++)
-    n += robotSpaces[i]->NumDimensions();
-  return n;
+  return robot.NumDof();
 }
 
 void MultiRobotCSpace::Sample(Config& x)
 {
   x.resize(NumDimensions());
   vector<Config> xelements;
-  SplitRefs(x,xelements);
-  for(size_t i=0;i<robotSpaces.size();i++)
-    robotSpaces[i]->Sample(xelements[i]);
+  robot.SplitRefs(x,xelements);
+  for(size_t i=0;i<elementSpaces.size();i++)
+    elementSpaces[i]->Sample(xelements[i]);
 }
 
 void MultiRobotCSpace::SampleNeighborhood(const Config& c,Real r,Config& x)
 {
   x.resize(NumDimensions());
   vector<Config> celements,xelements;
-  SplitRefs(c,celements);
-  SplitRefs(x,xelements);
-  for(size_t i=0;i<robotSpaces.size();i++)
-    robotSpaces[i]->SampleNeighborhood(celements[i],r,xelements[i]);
+  robot.SplitRefs(c,celements);
+  robot.SplitRefs(x,xelements);
+  for(size_t i=0;i<elementSpaces.size();i++)
+    elementSpaces[i]->SampleNeighborhood(celements[i],r,xelements[i]);
 }
 
 bool MultiRobotCSpace::IsFeasible(const Config& x)
 {
   vector<Config> xelements;
-  SplitRefs(x,xelements);
-  for(size_t i=0;i<robotSpaces.size();i++) {
-    if(!robotSpaces[i]->IsFeasible(xelements[i])) return false;
+  robot.SplitRefs(x,xelements);
+  for(size_t i=0;i<elementSpaces.size();i++) {
+    if(!elementSpaces[i]->IsFeasible(xelements[i])) return false;
   }
-  //TODO: eliminate some of the collision checks
+  //TODO: self-collision checking. 
+  //eliminate some of the collision checks
   return true;
 }
 
 EdgePlanner* MultiRobotCSpace::LocalPlanner(const Config& a,const Config& b)
 {
   Real minEps=1.0;
-  for(size_t i=0;i<robotIndices.size();i++)
-    minEps = Min(minEps,settings->robotSettings[robotIndices[i]].collisionEpsilon);
+  for(size_t i=0;i<robotElementIDs.size();i++) {
+    int id = robotElementIDs[i];
+    int rindex = world.IsRobot(id);
+    int oindex = world.IsRigidObject(id);
+    if(rindex >= 0)
+      minEps = Min(minEps,settings->robotSettings[rindex].collisionEpsilon);
+    else
+      minEps = Min(minEps,settings->objectSettings[oindex].collisionEpsilon);
+  }
   return new BisectionEpsilonEdgePlanner(this,a,b,minEps);
 }
 
 Real MultiRobotCSpace::Distance(const Config& x, const Config& y)
 {
   vector<Config> xelements,yelements;
-  SplitRefs(x,xelements);
-  SplitRefs(y,yelements);
+  robot.SplitRefs(x,xelements);
+  robot.SplitRefs(y,yelements);
 
   Real d=0;
-  for(size_t i=0;i<robotSpaces.size();i++) 
-    d+=Sqr(robotSpaces[i]->Distance(xelements[i],yelements[i]));
+  for(size_t i=0;i<elementSpaces.size();i++) 
+    d+=Sqr(elementSpaces[i]->Distance(xelements[i],yelements[i]));
   return Sqrt(d);
 }
 
 void MultiRobotCSpace::Interpolate(const Config& x,const Config& y,Real u,Config& out)
 {
   vector<Config> xelements,yelements,outelements;
-  SplitRefs(x,xelements);
-  SplitRefs(y,yelements);  
-  SplitRefs(out,outelements);  
-  for(size_t i=0;i<robotSpaces.size();i++) 
-    robotSpaces[i]->Interpolate(xelements[i],yelements[i],u,outelements[i]);
+  robot.SplitRefs(x,xelements);
+  robot.SplitRefs(y,yelements);  
+  robot.SplitRefs(out,outelements);  
+  for(size_t i=0;i<elementSpaces.size();i++) 
+    elementSpaces[i]->Interpolate(xelements[i],yelements[i],u,outelements[i]);
 }
 
 void MultiRobotCSpace::Midpoint(const Config& x,const Config& y,Config& out)
 {
   vector<Config> xelements,yelements,outelements;
-  SplitRefs(x,xelements);
-  SplitRefs(y,yelements);  
-  SplitRefs(out,outelements);  
-  for(size_t i=0;i<robotSpaces.size();i++) 
-    robotSpaces[i]->Midpoint(xelements[i],yelements[i],outelements[i]);
-}
-
-void MultiRobotCSpace::SplitRefs(const Config& x,vector<Config>& robotConfigs) const
-{
-  robotConfigs.resize(robotSpaces.size());
-  size_t cnt=0;
-  for(size_t i=0;i<robotSpaces.size();i++) {
-    size_t n=world.robots[robotIndices[i]].robot->links.size();
-    robotConfigs[i].setRef(x,cnt,1,n);
-    cnt += n;
-  }
-  Assert((int)cnt == x.n);
+  robot.SplitRefs(x,xelements);
+  robot.SplitRefs(y,yelements);  
+  robot.SplitRefs(out,outelements);  
+  for(size_t i=0;i<elementSpaces.size();i++) 
+    elementSpaces[i]->Midpoint(xelements[i],yelements[i],outelements[i]);
 }

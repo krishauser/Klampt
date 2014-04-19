@@ -2,28 +2,8 @@
 #include <robotics/IKFunctions.h>
 #include <robotics/JointStructure.h>
 #include <math3d/random.h>
-#include <math3d/rotation.h>
-#include <math3d/interpolate.h>
 
 #define TEST_NO_JOINT_LIMITS 0
-
-void ConfigToTransform(const Config& q,RigidTransform& T)
-{
-  Assert(q.n >= 6);
-  T.t.set(q(0),q(1),q(2));
-  EulerAngleRotation e(q(3),q(4),q(5));
-  e.getMatrixZYX(T.R);
-}
-
-void TransformToConfig(const RigidTransform& T,Config& q)
-{
-  Assert(q.n >= 6);
-  T.t.get(q(0),q(1),q(2));
-  EulerAngleRotation e;
-  e.setMatrixZYX(T.R);
-  e.get(q(3),q(4),q(5));
-}
-
 
 
 
@@ -217,7 +197,7 @@ MultiContactCSpace::MultiContactCSpace(const MultiRobotCSpace& space)
 
 MultiContactCSpace::MultiContactCSpace(const MultiContactCSpace& space)
   :MultiRobotCSpace(space),
-   contactPairs(space.contactPairs),activeIDs(space.activeIDs),robotActive(space.robotActive),objectActive(space.objectActive),
+   contactPairs(space.contactPairs),
    aggregateRobot(space.aggregateRobot),closedChainConstraints(space.closedChainConstraints)
 {}
 
@@ -226,11 +206,9 @@ void MultiContactCSpace::InitContactPairs(const vector<ContactPair>& pairs)
   //TODO: error checking on contact pairs?
 
   contactPairs = pairs;
-  robotActive.resize(world.robots.size());
-  objectActive.resize(world.rigidObjects.size());
-  fill(robotActive.begin(),robotActive.end(),false);
-  fill(objectActive.begin(),objectActive.end(),false);
-  activeIDs.resize(0);
+  vector<bool> robotActive(world.robots.size(),false);
+  vector<bool> objectActive(world.rigidObjects.size(),false);
+  map<int,int> worldIDtoRobotID;
 
   for(size_t i=0;i<pairs.size();i++) {
     int rob1=world.IsRobotLink(pairs[i].id1).first;
@@ -247,43 +225,23 @@ void MultiContactCSpace::InitContactPairs(const vector<ContactPair>& pairs)
   int numRobots=0,numObjects=0;
   for(size_t i=0;i<robotActive.size();i++)
     if(robotActive[i]) {
-      activeIDs.push_back(world.RobotID(i));
       numRobots++;
-      MultiRobotCSpace::AddRobot(i);
+      int robotid = robot.Add(world.robots[i].robot,world.robots[i].name.c_str());
+      worldIDtoRobotID[world.RobotID(i)] = robotid;
     }
   for(size_t i=0;i<objectActive.size();i++)
     if(objectActive[i]){
-      activeIDs.push_back(world.RigidObjectID(i));
+      int robotid = robot.Add(world.rigidObjects[i].object,world.rigidObjects[i].name.c_str());
+      worldIDtoRobotID[world.RigidObjectID(i)] = robotid;
       numObjects++;
     }
 
   //build the aggregate robot
-  vector<RobotKinematics3D> subRobots(activeIDs.size());
-  vector<int> robotOffsets(world.robots.size(),-1);
-  vector<int> objectOffsets(world.rigidObjects.size(),-1);  
-  int k=0;
-  for(size_t i=0;i<activeIDs.size();i++) {
-    int index=world.IsRobot(activeIDs[i]);
-    if(index >= 0) {
-      subRobots[i] = *world.robots[index].robot;
-      robotOffsets[index] = k;
-      k += (int)subRobots[i].links.size();
-    }
-    else {
-      //build an object into a fake robot
-      index=world.IsRigidObject(activeIDs[i]);
-      Assert(index >= 0);
-      subRobots[i].InitializeRigidObject();
-      //init configuration
-      TransformToConfig(world.rigidObjects[index].object->T,subRobots[i].q);
-      subRobots[i].UpdateFrames();
-      objectOffsets[index] = k;
-      k += 6;
-    }
-  }
-  aggregateRobot.Merge(subRobots);
+  robot.GetMegaRobot(aggregateRobot);
 
+  //convert the contact pairs to IK constraints
   closedChainConstraints.resize(contactPairs.size());
+  aggregateStance.clear();
   for(size_t i=0;i<contactPairs.size();i++) {
     pair<int,int> rob1=world.IsRobotLink(contactPairs[i].id1);
     pair<int,int> rob2=world.IsRobotLink(contactPairs[i].id2);
@@ -291,53 +249,50 @@ void MultiContactCSpace::InitContactPairs(const vector<ContactPair>& pairs)
     int obj2=world.IsRigidObject(contactPairs[i].id2);
     if(rob1.first >= 0) {
       Assert(rob1.second >= 0);
-      closedChainConstraints[i].link = robotOffsets[rob1.first]+rob1.second;
+      closedChainConstraints[i].link = robot.Dof(worldIDtoRobotID[world.RobotID(rob1.first)],rob1.second);
     }
     else {
       Assert(obj1 >= 0);
-      closedChainConstraints[i].link = objectOffsets[obj1];
+      closedChainConstraints[i].link = robot.Dof(worldIDtoRobotID[obj1],5);
     }
     if(rob2.first >= 0) {
       Assert(rob2.second >= 0);
-      closedChainConstraints[i].destLink = robotOffsets[rob2.first]+rob2.second;
+      closedChainConstraints[i].destLink = robot.Dof(worldIDtoRobotID[world.RobotID(rob2.first)],rob2.second);
     }
     else if(obj2 >= 0) {
-      closedChainConstraints[i].destLink = objectOffsets[obj2];
+      closedChainConstraints[i].destLink = robot.Dof(worldIDtoRobotID[obj2],5);
     }
     else
       closedChainConstraints[i].destLink = -1;
     closedChainConstraints[i].SetFromPoints(contactPairs[i].c1,contactPairs[i].c2);
+
+    int link = closedChainConstraints[i].link;
+    aggregateStance[link].contacts.resize(contactPairs[i].c1.size());
+    RigidTransform T,Tinv;
+    T = world.GetTransform(contactPairs[i].id1);
+    Tinv.setInverse(T);
+    for(size_t k=0;k<contactPairs[i].c2.size();k++) {
+      aggregateStance[link].contacts[k].x = contactPairs[i].c2[k];
+      aggregateStance[link].contacts[k].n = contactPairs[i].n2[k];
+      aggregateStance[link].contacts[k].kFriction = 0;
+    }
+    aggregateStance[link].ikConstraint = closedChainConstraints[i];
   }
 }
 
 int MultiContactCSpace::NumDimensions() const
 {
-  int nrd = MultiRobotCSpace::NumDimensions();
-  int n=nrd;
-  for(size_t i=0;i<objectActive.size();i++)
-    if(objectActive[i]) n+=6;
-  return n;
+  return MultiRobotCSpace::NumDimensions();
 }
 
 void MultiContactCSpace::Sample(Config& x)
 {
+  MultiRobotCSpace::Sample(x);
   x.resize(NumDimensions());
   vector<Config> robotConfigs;
-  vector<Config> objectConfigs;
-  SplitRefs(x,robotConfigs,objectConfigs);
+  robot.SplitRefs(x,robotConfigs);
   for(size_t i=0;i<robotConfigs.size();i++)
-    robotSpaces[i]->Sample(robotConfigs[i]);
-  int k=0;
-  for(size_t i=0;i<objectActive.size();i++) {
-    if(!objectActive[i]) continue;
-    QuaternionRotation q;
-    RigidTransform T;
-    RandRotation(q);
-    q.getMatrix(T.R);
-    SampleAABB(settings->objectSettings[i].worldBounds.bmin,settings->objectSettings[i].worldBounds.bmax,T.t);
-    TransformToConfig(T,objectConfigs[k]);
-    k++;
-  }
+    elementSpaces[i]->Sample(robotConfigs[i]);
   SolveContact(x);
 }
 
@@ -346,24 +301,10 @@ void MultiContactCSpace::SampleNeighborhood(const Config& c,Real r,Config& x)
   x.resize(NumDimensions());
   Assert(c.n == x.n);
   vector<Config> crobotConfigs,robotConfigs;
-  vector<Config> cobjectConfigs,objectConfigs;
-  SplitRefs(c,crobotConfigs,cobjectConfigs);
-  SplitRefs(x,robotConfigs,objectConfigs);
+  robot.SplitRefs(c,crobotConfigs);
+  robot.SplitRefs(x,robotConfigs);
   for(size_t i=0;i<robotConfigs.size();i++)
-    robotSpaces[i]->SampleNeighborhood(crobotConfigs[i],r,robotConfigs[i]);
-  int k=0;
-  for(size_t i=0;i<objectActive.size();i++) {
-    if(!objectActive[i]) continue;
-    AngleAxisRotation aa;
-    RigidTransform T,T0;
-    aa.angle = Rand(0,r);
-    SampleSphere(1.0,aa.axis);
-    aa.getMatrix(T.R);
-    SampleCube(r,T.t);
-    ConfigToTransform(cobjectConfigs[k],T0);
-    TransformToConfig(T*T0,objectConfigs[k]);
-    k++;
-  }
+    elementSpaces[i]->SampleNeighborhood(crobotConfigs[i],r,robotConfigs[i]);
   SolveContact(x);
 }
 
@@ -371,43 +312,14 @@ bool MultiContactCSpace::IsFeasible(const Config& x)
 {
   if(!CheckContact(x)) return false;
 
-  vector<Config> robotConfigs;
-  vector<Config> objectConfigs;
-  SplitRefs(x,robotConfigs,objectConfigs);
+  vector<Config> elementConfigs;
+  robot.SplitRefs(x,elementConfigs);
 
-  SetWorldConfig(x);
-  for(size_t i=0;i<robotSpaces.size();i++)
-    if(!robotSpaces[i]->IsFeasible(robotConfigs[i])) return false;
-  //TODO: check object-object, object-terrain collision  
+  robot.SetConfig(x);
+  for(size_t i=0;i<elementSpaces.size();i++)
+    if(!elementSpaces[i]->IsFeasible(elementConfigs[i])) return false;
+  //TODO: allow element-element collision
   return true;
-}
-
-void MultiContactCSpace::Interpolate(const Config& x,const Config& y,Real u,Config& out)
-{
-  out.resize(NumDimensions());
-  Assert(out.n == x.n);
-  Assert(out.n == y.n);
-
-  vector<Config> xrob,yrob,orob;
-  vector<Config> xobj,yobj,oobj;
-  SplitRefs(x,xrob,xobj);
-  SplitRefs(y,yrob,yobj);
-  SplitRefs(out,orob,oobj);
-  for(size_t i=0;i<robotSpaces.size();i++)
-    robotSpaces[i]->Interpolate(xrob[i],yrob[i],u,orob[i]);
-  for(size_t i=0;i<xobj.size();i++) {
-    RigidTransform xT,yT,oT;
-    ConfigToTransform(xobj[i],xT);
-    ConfigToTransform(yobj[i],yT);
-    interpolate(xT,yT,u,oT); 
-    TransformToConfig(oT,oobj[i]);
-  }
-  SolveContact(out);
-}
-
-void MultiContactCSpace::Midpoint(const Config& x,const Config& y,Config& out)
-{
-  Interpolate(x,y,0.5,out);
 }
 
 bool MultiContactCSpace::SolveContact(Config& x,int numIters,Real tol)
@@ -456,57 +368,5 @@ bool MultiContactCSpace::CheckContact(const Config& x,Real dist)
   return ContactDistance(x) <= dist;
 }
 
-void MultiContactCSpace::SplitRefs(const Config& x,vector<Config>& robotConfigs,vector<Config>& objectConfigs) const
-{
-  robotConfigs.resize(0);
-  objectConfigs.resize(0);
-  int k=0;
-  for(size_t i=0;i<activeIDs.size();i++) {
-    int index=world.IsRobot(activeIDs[i]);
-    if(index >= 0) {
-      robotConfigs.push_back(Config());
-      robotConfigs.back().setRef(x,k,1,world.robots[index].robot->links.size());
-      k += (int)world.robots[index].robot->links.size();
-    }
-    else {
-      //build an object into a fake robot
-      index=world.IsRigidObject(activeIDs[i]);
-      Assert(index >= 0);
-      objectConfigs.push_back(Config());
-      objectConfigs.back().setRef(x,k,1,6);
-      k += 6;
-    }
-  }
-}
-
-void MultiContactCSpace::SetWorldConfig(const Config& x)
-{
-  vector<Config> robotConfigs,objectConfigs;
-  SplitRefs(x,robotConfigs,objectConfigs);
-  for(size_t i=0;i<robotSpaces.size();i++)
-    robotSpaces[i]->GetRobot()->UpdateConfig(robotConfigs[i]);
-  int k=0;
-  for(size_t i=0;i<objectActive.size();i++) {
-    if(objectActive[i]) {
-      ConfigToTransform(objectConfigs[k],world.rigidObjects[i].object->T);
-      k++;
-    }
-  }
-}
-
-void MultiContactCSpace::GetWorldConfig(Config& x)
-{
-  vector<Config> robotConfigs,objectConfigs;
-  SplitRefs(x,robotConfigs,objectConfigs);
-  for(size_t i=0;i<robotSpaces.size();i++)
-    robotConfigs[i]=robotSpaces[i]->GetRobot()->q;
-  int k=0;
-  for(size_t i=0;i<objectActive.size();i++) {
-    if(objectActive[i]) {
-      TransformToConfig(world.rigidObjects[i].object->T,objectConfigs[k]);
-      k++;
-    }
-  }
-}
 
 
