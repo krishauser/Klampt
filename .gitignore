@@ -62,3 +62,4 @@ Makefile.config
 *.pro.user
 moc_*.cpp
 ui_*.h
+*Qt/Makefile

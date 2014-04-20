@@ -9,6 +9,7 @@
 #include "qrobottestguibase.h"
 
 #include <collisionoutput.h>
+#include <resourcemanager.h>
 
 namespace Ui {
 class MainWindow;
@@ -31,6 +32,7 @@ public:
     QRobotTestGUIBase *gui;
     QTimer* refresh_timer;
     Robot* rob;
+    ResourceManager* manager;
     int mode;
     int argc;
     const char** argv;

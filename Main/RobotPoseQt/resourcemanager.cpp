@@ -95,6 +95,7 @@ vector<ResourceTracker*> ResourceManager::ExpandSelected(){
 }
 
 bool ResourceManager::DeleteSelected(){
+    if(selected==NULL) return false;
   if(selected->parent != NULL){
     selected->parent->children.erase(std::remove(selected->parent->children.begin(), selected->parent->children.end(),selected),selected->parent->children.end());
     //should do stuff with children
@@ -104,7 +105,7 @@ bool ResourceManager::DeleteSelected(){
 }
 
 bool ResourceManager::SendSelectedToGUI(){
-  //backend->RunResource(selected->resource);
+    open = selected;
 }
 
 bool ResourceManager::AddFromPoser(){

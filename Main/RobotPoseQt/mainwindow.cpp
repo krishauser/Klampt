@@ -43,8 +43,15 @@ void MainWindow::Initialize(int _argc,const char** _argv)
     printf("BACKEND LOADED\n");
     gui=new QRobotTestGUIBase(ui->displaywidget,world);
 
+    manager = new ResourceManager();
+
     ui->frame_resources->gui = gui;
+    ui->frame_resources->manager = manager;
+    ui->displaywidget->manager = manager;
+
     ui->frame_resources->robot = rob;
+
+
 
     ui->displaywidget->Start();
 

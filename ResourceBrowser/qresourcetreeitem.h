@@ -4,7 +4,7 @@
 #include <QTreeWidgetItem>
 
 #include "Modeling/Resources.h"
-#include "RobotPoseTestQt/resourcemanager.h"
+#include "resourcemanager.h"
 
 #define NAMECOL 0
 #define TYPECOL 1

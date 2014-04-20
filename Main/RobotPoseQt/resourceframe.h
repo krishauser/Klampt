@@ -10,7 +10,7 @@
 #include <qresourcetreeitem.h>
 
 #include "resourcemanager.h"
-
+#include "qrobottestguibase.h"
 namespace Ui {
   class ResourceFrame;
 }
@@ -21,8 +21,8 @@ class ResourceFrame : public QFrame
     
 public:
     explicit ResourceFrame(QWidget *parent = 0);
-    ResourceManager manager;
-    GenericGUIBase *gui;
+    ResourceManager* manager;
+    QRobotTestGUIBase *gui;
     Robot* robot;
 
     ~ResourceFrame();

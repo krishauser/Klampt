@@ -5,6 +5,9 @@
 #include <QKeyEvent>
 
 #include <Interface/RobotTestGUI.h>
+#include <resourcemanager.h>
+#include <View/ViewResource.h>
+
 //#include <GLdraw/GLScreenshotProgram.h>
 
 class QRobotTestBackend : public QGLWidget, public RobotTestBackend//, public GLScreenshotPlugin
@@ -13,7 +16,9 @@ class QRobotTestBackend : public QGLWidget, public RobotTestBackend//, public GL
 public:
     typedef RobotTestBackend BaseT;
     explicit QRobotTestBackend(QWidget *parent = 0);
-    
+    ResourceManager* manager;
+    ViewResource viewResource;
+
     void initializeGL();
     void paintGL();
     bool OnIdle();
@@ -30,6 +35,8 @@ public:
     void enterEvent(QEvent *);
     //    bool OnCommand(const string &cmd, const string &args);
     bool OnCommand(const string &cmd, const string &args);
+    void RenderCurrentResource();
+    void RenderWorld();
 signals:
     void ResizeFrame(QResizeEvent *e);
     void MouseMove(QMouseEvent *e);

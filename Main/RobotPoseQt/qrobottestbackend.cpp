@@ -62,6 +62,17 @@ void QRobotTestBackend::resizeGL(int w, int h){
     glViewport(0,0,(GLsizei)w,(GLsizei)h);
 }
 
+void QRobotTestBackend::RenderCurrentResource(){
+    if(manager->open == NULL) return;
+    viewResource.DrawGL(manager->open->resource);
+}
+
+void QRobotTestBackend::RenderWorld(){
+    RobotTestBackend::RenderWorld();
+    RenderCurrentResource();
+}
+
+
 bool QRobotTestBackend::OnButtonToggle(const string &button, int checked){
     BaseT::OnButtonToggle(button,checked);
 }
