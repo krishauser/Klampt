@@ -7,6 +7,7 @@
 /** A unified interface to control either a simulated or real robot, which
  * operates in a motion queue mode.
  * 
+ * Subclasses must overload the following methods:
  * - GetCurTime returns the current absolute time
  * - GetEndTime returns the absolute time of the end of the current motion 
  *   queue

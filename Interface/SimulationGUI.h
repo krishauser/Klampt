@@ -17,7 +17,9 @@
  * - simulate(active): turns simulation on or off
  * - toggle_simulate(): toggles simulation activity value
  * - reset(): resets the simulation
- * - load_file(file): loads a file of format simulation state (.state) or a path (.path,.xml,.milestones).
+ * - load_file(file): loads an entity (object,robot,mesh,path,state) into
+ *   the simulation.
+ * - load_path(file): loads a path (.path,.xml,.milestones).
  * - load_state(file): loads a simulation state from file
  * - save_state(file): saves a simulation state to file
  * - load_view(file): loads a previously saved view (inherited from GLNavigationProgram)
@@ -53,6 +55,9 @@ public:
 
   ///Loads some file, figuring out the type from the extension
   bool LoadFile(const char* fn);
+
+  ///Loads some file, figuring out the type from the extension
+  bool LoadPath(const char* fn);
 
   ///Initializes simulation default controllers, sensors, and contact feedback
   virtual void InitSim();

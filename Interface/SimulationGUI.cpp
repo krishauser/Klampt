@@ -74,6 +74,9 @@ bool SimGUIBackend::OnCommand(const string& cmd,const string& args)
   else if(cmd=="load_file") {
     LoadFile(args.c_str());
   }
+  else if(cmd=="load_path") {
+    LoadPath(args.c_str());
+  }
   else if(cmd=="save_state") {
     File f;
     if(!f.Open((char *)args.c_str(),FILEWRITE)) {
@@ -476,6 +479,33 @@ void SimGUIBackend::DrawWrenches(Real fscale)
 bool SimGUIBackend::LoadFile(const char* fn)
 {
   const char* ext = FileExtension(fn);
+  if(0==strcmp(ext,"state"))
+    return LoadState(fn);
+  else if(0==strcmp(ext,"milestones"))
+    return LoadMilestones(fn);
+  else if(0==strcmp(ext,"path"))
+    return LoadLinearPath(fn);
+  else if(0==strcmp(ext,"xml"))
+    return LoadMultiPath(fn);
+  else if(0==strcmp(ext,"rob") || 0==strcmp(ext,"urdf") || 
+	  0==strcmp(ext,"obj") || 0==strcmp(ext,"ext") ||
+	  Geometry::AnyGeometry3D::CanLoadExt(ext)) {
+    int res = world->LoadElement(fn);
+    if(res<0) {
+      printf("SimGUIBackend::LoadFile: Error loading entity %s\n",fn);
+      return false;
+    }
+    return true;
+  }
+  else {
+    printf("SimGUIBackend::LoadFile: Unknown file extension on %s\n",fn);
+    return false;
+  }
+}
+
+bool SimGUIBackend::LoadPath(const char* fn)
+{
+  const char* ext = FileExtension(fn);
   if(0==strcmp(ext,"milestones"))
     return LoadMilestones(fn);
   else if(0==strcmp(ext,"path"))
@@ -483,7 +513,7 @@ bool SimGUIBackend::LoadFile(const char* fn)
   else if(0==strcmp(ext,"xml"))
     return LoadMultiPath(fn);
   else {
-    printf("SimGUIBackend::LoadFile: Unknown file extension on %s\n",fn);
+    printf("SimGUIBackend::LoadPath: Unknown file extension on %s\n",fn);
     return false;
   }
 }

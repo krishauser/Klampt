@@ -40,9 +40,6 @@ void RobotTestBackend::Start()
   for(size_t i=0;i<world->rigidObjects.size();i++)
     allWidgets.widgets.push_back(&objectWidgets[i]);
 
-
-  UpdateConfig();
-
   MapButtonToggle("pose_ik",&pose_ik);
   MapButtonToggle("draw_geom",&draw_geom);
   MapButtonToggle("draw_bbs",&draw_bbs);
