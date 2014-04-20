@@ -242,7 +242,7 @@
     <item row="14" column="1" colspan="2">
      <widget class="QLineEdit" name="line_error">
       <property name="text">
-       <string>0.79</string>
+       <string>0.0005</string>
       </property>
      </widget>
     </item>
