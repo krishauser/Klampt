@@ -21,9 +21,8 @@ public:
     ~MainWindow();
     QDir directory;
     QString filename;
-    RobotWorld *world;
-    QSimTestGUI *gui;
-    QTimer* refresh_timer;
+    SmartPointer<QSimTestGUI> gui;
+    QTimer refresh_timer;
     int argc;
     const char** argv;
     void Initialize(int _argc, const char **_argv);

@@ -22,7 +22,6 @@ void MainWindow::Initialize(int _argc,const char** _argv)
     qDebug()<<argv[1];
     qDebug()<<argv[2];
     */
-    //world=new RobotWorld();
     //SimTestBackend backend(world);
     if(!ui->displaywidget->LoadAndInitSim(argc,argv)) {
       printf("ERROR");
@@ -41,9 +40,8 @@ void MainWindow::Initialize(int _argc,const char** _argv)
     connect(ui->displaywidget, SIGNAL(KeyPress(QKeyEvent*)),gui,SLOT(SendKeyDown(QKeyEvent*)));
     //connect(ui->displaywidget, SIGNAL(KeyRelease(QKeyEvent*)),gui,SLOT(SendKeyRelease(QKeyEvent*)));
 
-    refresh_timer=new QTimer();
-    connect(refresh_timer, SIGNAL(timeout()),ui->displaywidget,SLOT(updateGL()));
-    refresh_timer->start(1000/30);
+    connect(&refresh_timer, SIGNAL(timeout()),ui->displaywidget,SLOT(updateGL()));
+    refresh_timer.start(1000/30);
     ui->displaywidget->Start();
 
     ui->displaywidget->installEventFilter(this);
@@ -55,8 +53,6 @@ void MainWindow::Initialize(int _argc,const char** _argv)
 MainWindow::~MainWindow()
 {
     delete ui;
-    delete world;
-    delete gui;
 }
 
 //gui stuff
@@ -172,26 +168,16 @@ void MainWindow::IKDelete(){
 }
 
 void MainWindow::Reset(){
-    /*
-    refresh_timer->stop();
-    //delete ui->displaywidget;
-    QSimTestBackend *displaywidget=new QSimTestBackend();
-    ui->verticalLayout_5->addWidget(displaywidget);
-    ui->displaywidget=displaywidget;
-    QApplication::processEvents();
-    QTimer::singleShot(0,this,SLOT(Shrink()));
-    ui->displaywidget->initializeGL();
-    */
-    delete this;
-    MainWindow w;
-    w.Initialize(argc,argv);
+  gui->SendCommand("reset");
 }
 
 void MainWindow::ChangeRecordFile(){
     QString filter="MPG Video (*.mpg)";
     QString recordfilename = QFileDialog::getSaveFileName(0,"Recording Output",QDir::home().absolutePath(),filter,&filter);
-    if(!recordfilename.isNull())
-        gui->SendCommand("record_file",recordfilename.toStdString());
+    if(!recordfilename.isNull()) {
+      string str = recordfilename.toStdString();
+      gui->SendCommand("record_file",str);
+    }
 }
 
 void MainWindow::ChangeResolution(int w, int h)

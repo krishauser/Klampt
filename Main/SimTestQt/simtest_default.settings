@@ -1,15 +1,15 @@
 {
   "movieHeight": 480, 
   "dragForceMultiplier": 10, 
-  "updateStep": 0.01, 
-  "contact": {"forceScale": 0.01, "pointSize": 5, "normalLength": 0.05}, 
-  "poser": {
-    "color": [1, 1, 0, 0.5]
-  }, 
-  "sensorPlot": {"width": 300, "autotime": false, "duration": 2, "spacing": 20, "x": 20, "height": 200, "y": 20}, 
   "desired": {
     "color": [0, 1, 0, 0.5]
   }, 
+  "sensorPlot": {"width": 300, "duration": 2, "height": 200, "autotime": false, "spacing": 20, "y": 20, "x": 20}, 
+  "updateStep": 0.01, 
+  "poser": {
+    "color": [1, 1, 0, 0.5]
+  }, 
   "pathDelay": 0.1, 
+  "contact": {"normalLength": 0.05, "pointSize": 5, "forceScale": 0.01}, 
   "movieWidth": 640
 }

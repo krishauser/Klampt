@@ -2,7 +2,7 @@
 
 #include <QFileDialog>
 #include "mainwindow.h"
-#include "glut.h"
+#include <GL/glut.h>
 #include "QDebug"
 int main(int argc, char *argv[])
 {
@@ -32,7 +32,8 @@ int main(int argc, char *argv[])
       }
       MainWindow w;
       if(argc==1){
-          const char* args[3] = {"SimTest",filename.toStdString().c_str(),""};
+	string fn = filename.toStdString();
+          const char* args[3] = {"SimTest",fn.c_str(),""};
           w.Initialize(2,(const char**)args);
       }
       else

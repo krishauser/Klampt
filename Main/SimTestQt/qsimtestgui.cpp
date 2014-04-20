@@ -136,18 +136,21 @@ void QSimTestGUI::LoadFile(QString filename){
     QFileDialog f;
     QString filename = f.getOpenFileName(0,"Open File",QDir::home().absolutePath(),"");
   }
-  if(!filename.isNull())
-    SendCommand("load_file",filename.toStdString());
+  if(!filename.isNull()) {
+    string str = filename.toStdString();
+    SendCommand("load_file",str);
+  }
 }
 
 void QSimTestGUI::SaveScenario(QString filename){
   if(filename.isEmpty()){
     QFileDialog f;
-    filename = f.getSaveFileName(0,"Save Scenario",QDir::home().absolutePath(),"");
+    filename = f.getSaveFileName(0,"Save State",QDir::home().absolutePath(),"");
   }
   if(!filename.isNull()){
-      SendCommand("save_file",filename.toStdString());
-      old_filename=filename;
+    string str = filename.toStdString();
+    SendCommand("save_state",str);
+    old_filename=filename;
   }
 }
 
