@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui
+QT       += core gui opengl
 
 TARGET = MotorCalibrate
 TEMPLATE = app
@@ -25,7 +25,5 @@ FORMS    += \
     showtext.ui
 
 include(../KlamptQt/common.pri)
-
-LIBS += -lKlampt -lKrisLibrary -lglut -lGL -lm -lGLU -lXm -lXi -lXext -lXmu -lX11 -lode -ltinyxml -lglpk -lassimp -lglui
 
 DEFINES += HAVE_QT
