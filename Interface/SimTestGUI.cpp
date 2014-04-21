@@ -433,9 +433,11 @@ bool SimTestBackend::OnCommand(const string& cmd,const string& args)
   else if(cmd=="log_contact_state") {
     contactStateLogFile = args;
   }
+
   else if(cmd=="log_contact_wrenches") {
     contactWrenchLogFile = args;
   }
+
   else
     return BaseT::OnCommand(cmd,args);
   SendRefresh();

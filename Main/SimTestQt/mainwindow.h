@@ -51,6 +51,8 @@ public slots:
   void DoIKMode(){SetMode(1);}
   void DoForceMode(){SetMode(2);}
   void LoadResource();
+  void LoadPath();
+  void LoadState();
   void SaveScenario();
   void SaveLastScenario();
   void DefaultViewport();
@@ -64,6 +66,11 @@ public slots:
   void ShowCommand();
   void ShowHelp();
   void ShowAbout();
+
+  //logging
+  void LogSimulation(bool status);
+  void LogContactState(bool status);
+  void LogContactWrenches(bool status);
 
   //IK Mode
   void IKConstrain();

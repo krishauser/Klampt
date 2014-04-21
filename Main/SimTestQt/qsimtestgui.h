@@ -35,7 +35,7 @@ public:
     void UpdateGUI();
     ~QSimTestGUI();
     void UpdateMeasurements();
-    void LoadFile(QString filename=QString());
+    void LoadFile(QString filename=QString(), QString filetype=QString());
     void SaveScenario(QString filename=QString());
     void SaveLastScenario();
     void ShowHelp();

@@ -2,6 +2,7 @@
 #include "ui_mainwindow.h"
 #include "QDebug"
 #include <QTimer>
+#include <QWidgetList>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -109,7 +110,19 @@ void MainWindow::SendMilestone(){
 void MainWindow::SetRecord(bool status){
     gui->SendCommand("record",status);
 }
-#include <QWidgetList>
+
+void MainWindow::LogSimulation(bool status){
+    gui->SendCommand("log_sim",status);
+}
+
+void MainWindow::LogContactState(bool status){
+    gui->SendCommand("log_contact_state",status);
+}
+
+void MainWindow::LogContactWrenches(bool status){
+    gui->SendCommand("log_contact_wrenches",status);
+}
+
 void MainWindow::SetMode(int option){
     gui->SendButtonToggle("pose_ik",(option==1));
     gui->SendButtonToggle("force_application_mode",(option==2));
@@ -128,7 +141,15 @@ void MainWindow::SetMode(int option){
 }
 
 void MainWindow::LoadResource(){
-    gui->LoadFile();
+    gui->LoadFile("","");
+}
+
+void MainWindow::LoadPath(){
+    gui->LoadFile("","*.path *.milestones *.xml");
+}
+
+void MainWindow::LoadState(){
+    gui->LoadFile("","*.state");
 }
 
 void MainWindow::SaveScenario(){
