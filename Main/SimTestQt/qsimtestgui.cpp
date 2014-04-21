@@ -137,7 +137,7 @@ void QSimTestGUI::SendMeasurement(int sensor,int measurement,bool status){
 void QSimTestGUI::LoadFile(QString filename,QString filter){
   if(filename.isEmpty()){
     QFileDialog f;
-    filename = f.getOpenFileName(0,"Open File",QDir::home().absolutePath(),filter);
+    filename = f.getOpenFileName(0,"Open File","../../data",filter);
   }
   if(!filename.isNull()) {
     string str = filename.toStdString();

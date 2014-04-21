@@ -27,7 +27,7 @@ int main(int argc, char *argv[])
 
     if(argc==1){
         QFileDialog f;
-        filename = f.getOpenFileName(0,"Open Scenario","../data","*.xml");
+        filename = f.getOpenFileName(0,"Open Scenario","../../data","*.xml");
         if(filename.isNull()) return 0;
       }
       MainWindow w;
