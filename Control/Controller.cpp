@@ -63,6 +63,51 @@ void RobotController::SetFeedforwardPIDCommand(const Config& qdes,const Config& 
     command->actuators[i].torque = torques[i];
 }
 
+
+void RobotController::GetCommandedConfig(Config& q) 
+{
+  Assert(command->actuators.size() == robot.drivers.size());
+  for(size_t i=0;i<command->actuators.size();i++) {
+    if(command->actuators[i].mode == ActuatorCommand::PID)
+      robot.SetDriverValue(i,command->actuators[i].qdes);
+    else
+      FatalError("Can't get commanded config for non-config drivers");
+  }
+  q = robot.q;
+}
+
+void RobotController::GetCommandedVelocity(Config& dq)
+{ 
+  Assert(command->actuators.size() == robot.drivers.size());
+  for(size_t i=0;i<command->actuators.size();i++) {
+    if(command->actuators[i].mode == ActuatorCommand::PID)
+      robot.SetDriverVelocity(i,command->actuators[i].dqdes);
+    else
+      FatalError("Can't get commanded config for non-config drivers");
+  }
+  dq = robot.dq;
+}
+
+void RobotController::GetSensedConfig(Config& q)
+{
+  JointPositionSensor* s = sensors->GetTypedSensor<JointPositionSensor>();
+  if(s==NULL) 
+    fprintf(stderr,"Warning, robot has no joint position sensor\n");
+  else
+    q = s->q;
+}
+
+void RobotController::GetSensedVelocity(Config& dq)
+{
+  JointVelocitySensor* s=sensors->GetTypedSensor<JointVelocitySensor>();
+  if(s==NULL)
+    fprintf(stderr,"Warning, robot has no joint velocity sensor\n");
+  else
+    dq = s->dq;
+}
+
+
+
 void RobotControllerFactory::RegisterDefault(Robot& robot)
 {
   Register("JointTrackingController",new JointTrackingController(robot));
