@@ -3,6 +3,7 @@
 
 #include "Modeling/Robot.h"
 #include "Modeling/DynamicPath.h"
+#include "Control/PathController.h"
 
 /** A unified interface to control either a simulated or real robot, which
  * operates in a motion queue mode.
@@ -38,5 +39,28 @@ class MotionQueueInterface
   virtual MotionResult SendMilestoneImmediate(const Config& x)=0;
   virtual MotionResult SendPathImmediate(Real tbreak,const ParabolicRamp::DynamicPath& path)=0;
 };
+
+
+/** @brief A MotionQueueInterface that just sends to a
+ * PolynomialPathController.
+ */
+class DefaultMotionQueueInterface : public MotionQueueInterface
+{
+ public:
+  PolynomialPathController* controller;
+
+  DefaultMotionQueueInterface(PolynomialPathController* controller);
+  virtual Real GetCurTime();
+  virtual void GetCurConfig(Config& x);
+  virtual void GetCurVelocity(Config& dx);
+  virtual Real GetEndTime();
+  virtual void GetEndConfig(Config& x);
+  virtual void GetEndVelocity(Config& dx);
+  virtual void GetConfig(Real t,Config& x);
+  virtual MotionResult SendMilestone(const Config& x);
+  virtual MotionResult SendMilestoneImmediate(const Config& x);
+  virtual MotionResult SendPathImmediate(Real tbreak,const ParabolicRamp::DynamicPath& path);
+};
+
 
 #endif

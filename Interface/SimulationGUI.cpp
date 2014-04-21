@@ -496,6 +496,7 @@ bool SimGUIBackend::LoadFile(const char* fn)
       printf("SimGUIBackend::LoadFile: Error loading entity %s\n",fn);
       return false;
     }
+    sim.OnAddModel();
     return true;
   }
   else {

@@ -9,8 +9,6 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    ui->displaywidget->installEventFilter(this);
-    ui->displaywidget->setFocusPolicy(Qt::WheelFocus);
 }
 
 void MainWindow::Initialize(int _argc,const char** _argv)
@@ -30,8 +28,6 @@ void MainWindow::Initialize(int _argc,const char** _argv)
     printf("BACKEND LOADED\n");
 //    gui=new GenericGUIBase(ui->displaywidget);
     gui=new QSimTestGUI(ui->displaywidget,ui->displaywidget->world);
-    ui->displaywidget->Start();
-
 
     //mediator, can be moved to direct calls
     connect(ui->displaywidget, SIGNAL(MouseMove(QMouseEvent*)),gui,SLOT(SendMouseMove(QMouseEvent*)));
