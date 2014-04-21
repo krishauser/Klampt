@@ -14,7 +14,8 @@ class ConnectSerial : public QDialog
 public:
     explicit ConnectSerial(QWidget *parent = 0);
     ~ConnectSerial();
-    
+public slots:
+    void accepted();
 private:
     Ui::ConnectSerial *ui;
 };

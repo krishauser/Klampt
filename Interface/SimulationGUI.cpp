@@ -115,6 +115,7 @@ bool SimGUIBackend::OnCommand(const string& cmd,const string& args)
       return false;
     }
     ConnectSerialController(robot,port,rate);
+    return true;
   }
   else {
     return BaseT::OnCommand(cmd,args);

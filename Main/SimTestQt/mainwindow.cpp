@@ -176,6 +176,13 @@ void MainWindow::ShowPlotOptions(){
     gui->log_options->show();
 }
 
+
+void MainWindow::ShowSerialController()
+{
+    gui->connect_serial->exec();
+}
+
+
 void MainWindow::IKConstrain(){
     gui->constrain_mode=1;
 }

@@ -64,6 +64,7 @@ public slots:
   void ShowDriverEdit();
   void ShowOptions();
   void ShowCommand();
+  void ShowSerialController();
   void ShowHelp();
   void ShowAbout();
 

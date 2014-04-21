@@ -434,7 +434,7 @@
    </widget>
    <widget class="QMenu" name="menuMilestones">
     <property name="title">
-     <string>View</string>
+     <string>Camera</string>
     </property>
     <addaction name="actionSaveView"/>
     <addaction name="actionRevertView"/>
@@ -448,6 +448,7 @@
     <addaction name="actionSensor_Plot"/>
     <addaction name="actionOptions"/>
     <addaction name="actionSend_Command"/>
+    <addaction name="actionConnect_Serial_Controller"/>
    </widget>
    <widget class="QMenu" name="menuRecord">
     <property name="title">
@@ -490,14 +491,6 @@
    <addaction name="menuRecord"/>
    <addaction name="menuLogging"/>
    <addaction name="menuHelp"/>
-  </widget>
-  <widget class="QToolBar" name="mainToolBar">
-   <attribute name="toolBarArea">
-    <enum>TopToolBarArea</enum>
-   </attribute>
-   <attribute name="toolBarBreak">
-    <bool>false</bool>
-   </attribute>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <action name="actionOpen">
@@ -585,7 +578,7 @@
   </action>
   <action name="actionOptions">
    <property name="text">
-    <string>Options</string>
+    <string>Controller Settings</string>
    </property>
    <property name="toolTip">
     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;ctrl-r&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
@@ -704,6 +697,11 @@
    </property>
    <property name="text">
     <string>Log Wrenches</string>
+   </property>
+  </action>
+  <action name="actionConnect_Serial_Controller">
+   <property name="text">
+    <string>Connect Serial Controller</string>
    </property>
   </action>
  </widget>
@@ -1438,6 +1436,22 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>actionConnect_Serial_Controller</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>ShowSerialController()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>343</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>Reset()</slot>
@@ -1491,5 +1505,6 @@
   <slot>LogSimulation(bool)</slot>
   <slot>LogContactState(bool)</slot>
   <slot>LogContactWrenches(bool)</slot>
+  <slot>ShowSerialController()</slot>
  </slots>
 </ui>

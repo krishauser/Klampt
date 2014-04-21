@@ -12,3 +12,8 @@ ConnectSerial::~ConnectSerial()
 {
     delete ui;
 }
+
+void ConnectSerial::accepted()
+{
+    QDialog::accepted();
+}

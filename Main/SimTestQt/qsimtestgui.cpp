@@ -38,6 +38,9 @@ QSimTestGUI::QSimTestGUI(GenericBackendBase *_backend, RobotWorld *_world) :
   connect(command_dialog,SIGNAL(ControllerCommand(string,string)),this,SLOT(SendControllerCommand(string,string)));
   command_dialog->Refresh();
 
+  connect_serial = new ConnectSerial();
+  connect(connect_serial,SIGNAL(DoConnect(int,QString,int)),this,SLOT(ConnectSerial(int,QString,int)));
+
   UpdateGUI();
 
   const static int NR = 15;
