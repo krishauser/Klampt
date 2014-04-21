@@ -118,6 +118,8 @@ public:
   void SimStep(Real dt);
   void SensorPlotUpdate();
 
+  bool LoadFile(const char* fn);
+
   //overrides of GLNavigationBackend
   virtual void RenderWorld();
   virtual void RenderScreen(); 
