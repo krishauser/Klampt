@@ -29,10 +29,6 @@ FORMS    += mainwindow.ui \
 
 include(../KlamptQt/common.pri)
 
-LIBS += -lKlampt -lKrisLibrary -lglut -lGL -lm -lGLU -lXm -lXi -lXext -lXmu -lX11 -lode -ltinyxml -lglpk -lassimp -lglui
-
-DEFINES += dDOUBLE
-
 QMAKE_CFLAGE_DEGUG += -g
 
 RESOURCES += \
