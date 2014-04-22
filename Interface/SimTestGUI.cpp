@@ -699,7 +699,7 @@ GLUISimTestGUI::GLUISimTestGUI(GenericBackendBase* _backend,RobotWorld* _world,i
   sim = &sbackend->sim;
   sbackend->gui = this;
 }
-x
+
 bool GLUISimTestGUI::Initialize()
 {
   if(!BaseT::Initialize()) return false;

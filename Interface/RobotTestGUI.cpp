@@ -46,25 +46,6 @@ void RobotTestBackend::Start()
   MapButtonToggle("draw_com",&draw_com);
   MapButtonToggle("draw_frame",&draw_frame);
   MapButtonToggle("draw_self_collision_tests",&draw_self_collision_tests);
-
-  /*
-  //TEST: robot-to-robot IK test.  only works for AL5Dx2
-  IKGoal test;
-  test.link = 8;
-  test.destLink = 16;
-  test.localPosition.set(0,0,0.05);
-  test.endPosition.set(0,0,0.05);
-  //test.SetFixedPosition(test.endPosition);
-  Matrix3 R;
-  R.setRotateZ(120);
-  test.SetFixedRotation(R);
-
-  vector<IKGoal> problem(1,test);
-  int iters=100;
-  bool res=SolveIK(*robot,problem,1e-3,iters);
-  printf("Solved IK: %d, %d iters, error %g\n",(int)res,iters,RobotIKError(*robot,test));
-  UpdateConfig();
-  */
 }
   
 void RobotTestBackend::UpdateConfig()
