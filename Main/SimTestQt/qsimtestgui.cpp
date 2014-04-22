@@ -41,8 +41,8 @@ QSimTestGUI::QSimTestGUI(GenericBackendBase *_backend, RobotWorld *_world) :
   connect(command_dialog,SIGNAL(ControllerCommand(string,string)),this,SLOT(SendControllerCommand(string,string)));
   command_dialog->Refresh();
 
-  connect_serial = new ConnectSerial();
-  connect(connect_serial,SIGNAL(DoConnect(int,QString,int)),this,SLOT(ConnectSerial(int,QString,int)));
+  connect_serial = new ConnectSerial(world->robots.size());
+  connect(connect_serial,SIGNAL(MakeConnect(int,QString,int,int)),this,SLOT(SendConnection(int,QString,int,int)));
 
   UpdateGUI();
 
@@ -184,6 +184,13 @@ void QSimTestGUI::SendControllerSetting(string setting, string value){
 void QSimTestGUI::SendControllerCommand(string setting,string value){
     bool res = sim->robotControllers[0]->SendCommand(setting,value);
     if(!res) printf("Failed to send command %s\n",setting.c_str());
+}
+
+void QSimTestGUI::SendConnection(int robot, QString host, int port, int rate)
+{
+    stringstream ss;
+    ss<<robot<<" "<<host.toStdString()<<" "<<port<<" "<<rate;
+    SendCommand("send_serial_connection",ss.str());
 }
 
 void QSimTestGUI::ShowHelp(){

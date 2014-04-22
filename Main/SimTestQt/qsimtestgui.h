@@ -51,7 +51,7 @@ public slots:
     void SendMeasurement(int sensor, int measurement, bool status);
     void SendControllerSetting(string setting, string value);
     void SendControllerCommand(string setting, string value);
-
+    void SendConnection(int robot,QString host,int port,int rate);
 signals:
     void  EndDelete();
     void EndConstrain();
