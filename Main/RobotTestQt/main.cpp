@@ -5,12 +5,13 @@
 #include <GL/glut.h>
 #include "QDebug"
 #include <QSettings>
+
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
     glutInit(&argc,argv);
     QString filename;
-    //inithome directory
+    //load settings from qsetings ini
     QCoreApplication::setOrganizationName("Klampt");
     QCoreApplication::setOrganizationDomain("klampt.org");
     QCoreApplication::setApplicationName("RobotTest");
@@ -22,10 +23,10 @@ int main(int argc, char *argv[])
 
     if(argc==1){
         QFileDialog f;
-	QString openDir = ini.value("last_open_robot_directory",".").toString();
+        QString openDir = ini.value("last_open_robot_directory",".").toString();
         filename = f.getOpenFileName(0,"Open Robot",openDir,"*.rob");
         if(filename.isNull()) return 0;
-	ini.setValue("last_open_robot_directory",QFileInfo(filename).absolutePath());
+        ini.setValue("last_open_robot_directory",QFileInfo(filename).absolutePath());
       }
       MainWindow w;
       if(argc==1){

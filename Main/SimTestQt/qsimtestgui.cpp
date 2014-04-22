@@ -1,5 +1,8 @@
 #include "qsimtestgui.h"
 
+#include <QSettings>
+#include <QtGui/QApplication>
+
 QSimTestGUI::QSimTestGUI(GenericBackendBase *_backend, RobotWorld *_world) :
   QtGUIBase(_backend,_world)
 {
@@ -134,14 +137,23 @@ void QSimTestGUI::SendMeasurement(int sensor,int measurement,bool status){
 }
 
 
-void QSimTestGUI::LoadFile(QString filename,QString filter){
-  if(filename.isEmpty()){
-    QFileDialog f;
-    filename = f.getOpenFileName(0,"Open File","../../data",filter);
-  }
-  if(!filename.isNull()) {
+void QSimTestGUI::LoadFile(QString filename){
+  if(!filename.isEmpty()) {
     string str = filename.toStdString();
     SendCommand("load_file",str);
+  }
+}
+
+void QSimTestGUI::LoadFilePrompt(QString directory,QString filter){
+  QFileDialog f;
+  QSettings ini(QSettings::IniFormat, QSettings::UserScope,
+		QCoreApplication::organizationName(),
+		QCoreApplication::applicationName());
+  QString openDir = ini.value(directory,".").toString();
+  QString filename = f.getOpenFileName(0,"Open File",openDir,filter);
+  if(!filename.isEmpty()){
+    ini.setValue(directory,QFileInfo(filename).absolutePath());
+    LoadFile(filename);
   }
 }
 

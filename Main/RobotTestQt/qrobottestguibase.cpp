@@ -1,5 +1,8 @@
 #include "qrobottestguibase.h"
 
+#include <QSettings>
+#include <QtGui/QApplication>
+
 QRobotTestGUIBase::QRobotTestGUIBase(GenericBackendBase *_backend, RobotWorld *_world) :
     QtGUIBase(_backend,_world),
     col_out(new CollisionOutput)
@@ -68,10 +71,16 @@ void QRobotTestGUIBase::UpdateGUI(){
 }
 
 void QRobotTestGUIBase::LoadFile(QString filename){
-    if(filename.isEmpty()){
-      QFileDialog f;
-      filename = f.getOpenFileName(0,"Open File",QDir::home().absolutePath(),"");
+  QSettings ini(QSettings::IniFormat, QSettings::UserScope,
+		QCoreApplication::organizationName(),
+		QCoreApplication::applicationName());
+  if(filename.isEmpty()){
+    QString openDir = ini.value("last_open_resource_directory",".").toString();
+    QFileDialog f;
+    filename = f.getOpenFileName(0,"Open File",openDir,"");
+    if(!filename.isEmpty())
+      ini.setValue("last_open_resource_directory",f.directory().absolutePath());
     }
-    if(!filename.isNull())
-      SendCommand("load_file",filename.toStdString());
-  }
+  if(!filename.isEmpty())
+    SendCommand("load_file",filename.toStdString());
+}
