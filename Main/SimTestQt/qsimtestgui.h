@@ -37,7 +37,8 @@ public:
     void UpdateGUI();
     ~QSimTestGUI();
     void UpdateMeasurements();
-    void LoadFile(QString filename=QString(), QString filetype=QString());
+    void LoadFile(QString filename=QString());
+    void LoadFilePrompt(QString directory=".",QString filter="*");
     void SaveScenario(QString filename=QString());
     void SaveLastScenario();
     void ShowHelp();
@@ -50,7 +51,7 @@ public slots:
     void SendMeasurement(int sensor, int measurement, bool status);
     void SendControllerSetting(string setting, string value);
     void SendControllerCommand(string setting, string value);
-
+    void SendConnection(int robot,QString host,int port,int rate);
 signals:
     void  EndDelete();
     void EndConstrain();

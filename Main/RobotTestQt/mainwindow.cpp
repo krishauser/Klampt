@@ -20,17 +20,7 @@ void MainWindow::Initialize(int _argc,const char** _argv)
 {
     argc=_argc;
     argv=_argv;
-    /*
-    qDebug()<<argc;
-    qDebug()<<argv[0];
-    qDebug()<<argv[1];
-    qDebug()<<argv[2];
-    */
-    //world=new RobotWorld();
-    //SimTestBackend backend(world);
-    //if(!ui->displaywidget->LoadAndInitSim(argc,argv)) {
-    //  printf("ERROR");
-    //}
+
     Robot robot;
     if(!robot.Load(argv[1])){
         printf("Error");

@@ -137,15 +137,15 @@ void MainWindow::SetMode(int option){
 }
 
 void MainWindow::LoadResource(){
-    gui->LoadFile("","");
+    gui->LoadFilePrompt();
 }
 
 void MainWindow::LoadPath(){
-    gui->LoadFile("","*.path *.milestones *.xml");
+  gui->LoadFilePrompt("last_open_path_directory","*.path *.milestones *.xml");
 }
 
 void MainWindow::LoadState(){
-    gui->LoadFile("","*.state");
+  gui->LoadFilePrompt("last_open_state_directory","*.state");
 }
 
 void MainWindow::SaveScenario(){
