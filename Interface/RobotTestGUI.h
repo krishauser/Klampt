@@ -21,6 +21,7 @@ using namespace GLDraw;
  * - constrain_current_link(): constrains the currently hovered link
  * - delete_current_constraint(): deletes constraints on the currently hovered link
  * - print_pose()
+ * - print_self_collisions()
  * - load_file(file): loads an element into the world (inherited from WorldGUIBackend)
  * - load_view(file): loads a previously saved view (inherited from GLNavigationProgram)
  * - save_view(file): saves a view to a file (inherited from GLNavigationProgram)
