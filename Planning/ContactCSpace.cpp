@@ -274,7 +274,12 @@ void MultiContactCSpace::InitContactPairs(const vector<ContactPair>& pairs)
     for(size_t k=0;k<contactPairs[i].c2.size();k++) {
       aggregateStance[link].contacts[k].x = contactPairs[i].c2[k];
       aggregateStance[link].contacts[k].n = contactPairs[i].n2[k];
-      aggregateStance[link].contacts[k].kFriction = 0;
+      Real friction = 0;
+      if(contactPairs[i].kFriction.size()==1)
+	friction = contactPairs[i].kFriction[0];
+      else if(contactPairs[i].kFriction.size()>=1)
+	friction = contactPairs[i].kFriction[k];
+      aggregateStance[link].contacts[k].kFriction = friction;
     }
     aggregateStance[link].ikConstraint = closedChainConstraints[i];
   }
@@ -369,4 +374,15 @@ bool MultiContactCSpace::CheckContact(const Config& x,Real dist)
 }
 
 
+void MultiContactCSpace::Interpolate(const Config& x,const Config& y,Real u,Config& out)
+{
+  MultiRobotCSpace::Interpolate(x,y,u,out);
+  SolveContact(out);
+}
+
+void MultiContactCSpace::Midpoint(const Config& x,const Config& y,Config& out)
+{
+  MultiRobotCSpace::Midpoint(x,y,out);
+  SolveContact(out);
+}
 
