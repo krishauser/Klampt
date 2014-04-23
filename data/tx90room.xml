@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<world>
+  <robot name="TX90L_right" file="robots/tx90robotiq.rob" rotateZ="3.1415926" position="3 -1.5 0.26" config="20      0 0 0 0 0 0 0 0 0 0 0 0.76 0 -0.72 0.785927 0 -0.86 0.745927 0 -0.82"/>
+  <!-- floor rectangle -->
+  <terrain file="objects/cube.tri" position = "	0	-3.7592	-0.1524	" scale="	4.4275	3.7592	0.1524	"   >
+    <display color = "0.3 0.3 0.3"/>
+  </terrain>
+  <!-- left wall -->
+  <terrain file="objects/cube.tri" position = "	-0.1524	-3.7592	-0.1524	" scale="	0.1524	3.7592	2.7686	"  >
+    <display color="0.90 0.85 0.5" />
+  </terrain>
+  <!-- rear wall -->
+  <terrain file="objects/cube.tri" position = "	-0.1524	0	-0.1524	" scale="	4.7371	0.1524	2.7686	"  >
+    <display color="0.90 0.85 0.5" />
+  </terrain>
+  <!-- right wall -->
+  <terrain file="objects/cube.tri" position = "	4.4323	-3.7592	-0.1524	" scale="	0.1524	3.7592	2.7686	"  >
+    <display color="0.90 0.85 0.5" />
+  </terrain>
+  <!-- ceiling rectangle -->
+  <terrain file="objects/cube.tri" position = "	0	-3.7592	2.3114	" scale="	4.4275	3.7592	0.3048	"  >
+    <display color="1 1 1" />
+  </terrain>
+  <!-- rear pipe  -->
+  <terrain file="objects/cube.tri" position = "	0	-0.1905	1.7145	" scale="	4.4275	0.1905	0.1143	"  >
+    <display color="0.95 0.92 0.85" />
+  </terrain>
+  <!-- right pipe -->
+  <terrain file="objects/cube.tri" position = "	4.3079	-3.5687	1.7145	" scale="	0.1285	3.3782	0.1143	"  >
+    <display color="0.95 0.92 0.85" />
+  </terrain>
+  <!-- left duct -->
+  <terrain file="objects/cube.tri" position = "	0	-3.7592	2.0066	" scale="	1.1176	0.8629	0.3048	"  />
+  <!-- front duct -->
+  <terrain file="objects/cube.tri" position = "	1.1176	-3.7592	2.1717	" scale="	3.3147	1.2224	0.1397	"  />
+  <!-- r central pipe -->
+  <terrain file="objects/cube.tri" position = "	0.9285	-3.7592	2.1082	" scale="	0.1143	3.7592	0.2032	"  />
+  <!-- l central pipe -->
+  <terrain file="objects/cube.tri" position = "	3.302	-3.7592	2.1082	" scale="	0.1143	3.7592	0.2032	"  />
+  <!-- left light -->
+  <terrain file="objects/cube.tri" position = "	1.297	-3.7592	2.0193	" scale="	0.1527	3.7592	0.2921	"   >
+    <display color = "1 1 1"/>
+  </terrain>
+  <!-- right light -->
+  <terrain file="objects/cube.tri" position = "	2.9815	-3.7592	2.0193	" scale="	0.1522	3.7592	0.2921	"  >
+    <display color = "1 1 1" />
+  </terrain>
+  <!-- l front pipes -->
+  <terrain file="objects/cube.tri" position = "	3.5451	-2.9972	1.9558	" scale="	0.7601	0.4318	0.3556	"  />
+  <!-- ac unit -->
+  <terrain file="objects/cube.tri" position = "	3.6449	-2.5654	2.0066	" scale="	0.6603	1.0922	0.3048	"  />
+  <!-- left pipe mess -->
+  <terrain file="objects/cube.tri" position = "	4.3037	-3.7592	1.8288	" scale="	0.1286	2.286	0.4826	"  />
+  <!-- support platform -->
+  <terrain file="objects/cube.tri" position = "	0.6541	-1.9082	0	" scale="	3.0607	0.8128	0.254	"  >
+    <display color = "0.1 0.1 0.1" />
+  </terrain>
+
+
+</world>
