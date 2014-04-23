@@ -410,7 +410,7 @@ bool GLUIRobotTestGUI::Initialize()
 
   GLUI_Checkbox* checkbox = glui->add_checkbox("Draw geometry");
   checkbox->set_int_val(1);
-  AddControl(checkbox,"draw_geometry");
+  AddControl(checkbox,"draw_geom");
   checkbox = glui->add_checkbox("Draw COM");
   AddControl(checkbox,"draw_com");
   checkbox = glui->add_checkbox("Draw frame");
@@ -422,14 +422,14 @@ bool GLUIRobotTestGUI::Initialize()
   checkbox = glui->add_checkbox("Draw collision tests");
   AddControl(checkbox,"draw_self_collision_tests");
   AddControl(glui->add_button("Print self colliding links"),"print_self_collisions");
-  AddControl(glui->add_button("Print config"),"print_config");
+  AddControl(glui->add_button("Print config"),"print_pose");
   UpdateGUI();
 
   const char* rules = "[ \
 [{type:key_down,key:c}, {type:command,cmd:constrain_current_link,args:\"\"}],	\
 [{type:key_down,key:d}, {type:command,cmd:delete_current_constraint,args:\"\"}], \
-[{type:key_down,key:p}, {type:command,cmd:print_config,args:\"\"}],	\
-[{type:button_press,button:print_config}, {type:command,cmd:print_pose,args:_0}], \
+[{type:key_down,key:p}, {type:command,cmd:print_pose,args:\"\"}],	\
+[{type:button_press,button:print_config}, {type:command,cmd:print_pose,args:\"\"}], \
 [{type:widget_value,widget:link,value:_0}, {type:command,cmd:set_link,args:_0}], \
 [{type:widget_value,widget:link_value,value:_0}, {type:command,cmd:set_link_value,args:_0}], \
 [{type:widget_value,widget:driver,value:_0}, {type:command,cmd:set_driver,args:_0}], \
