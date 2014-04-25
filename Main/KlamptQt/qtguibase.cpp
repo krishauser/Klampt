@@ -1,4 +1,5 @@
 #include "qtguibase.h"
+#include "QSettings"
 
 QtGUIBase::QtGUIBase(GenericBackendBase *_backend, RobotWorld *_world) :
     world(_world),GenericGUIBase(_backend)

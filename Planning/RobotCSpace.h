@@ -174,6 +174,7 @@ class SingleRobotCSpace2 : public SingleRobotCSpace
   virtual bool IsFeasible(const Config&);
   virtual bool IsFeasible(const Config&,int obstacle);
   virtual EdgePlanner* LocalPlanner(const Config& a,const Config& b,int obstacle);
+  virtual EdgePlanner* LocalPlanner(const Config& a,const Config& b);
   virtual void Sample(Config& x);
   virtual void SampleNeighborhood(const Config& c,Real r,Config& x);
 

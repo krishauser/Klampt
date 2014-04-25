@@ -4,18 +4,18 @@
 #include <QGLWidget>
 #include <QKeyEvent>
 
-#include <Interface/RobotTestGUI.h>
+#include <Interface/RobotPoseGUI.h>
 #include <resourcemanager.h>
 #include <View/ViewResource.h>
 
 //#include <GLdraw/GLScreenshotProgram.h>
 
-class QRobotTestBackend : public QGLWidget, public RobotTestBackend//, public GLScreenshotPlugin
+class QRobotPoseBackend : public QGLWidget, public RobotPoseBackend//, public GLScreenshotPlugin
 {
     Q_OBJECT
 public:
-    typedef RobotTestBackend BaseT;
-    explicit QRobotTestBackend(QWidget *parent = 0);
+    typedef RobotPoseBackend BaseT;
+    explicit QRobotPoseBackend(QWidget *parent = 0);
     ResourceManager* manager;
     ViewResource viewResource;
 
@@ -27,7 +27,7 @@ public:
     bool OnMouseWheel(int dwheel);
     void wheelEvent(QWheelEvent *e);
     void resizeGL(int w, int h);
-    bool OnButtonToggle(const string &button, int checked);
+//    bool OnButtonToggle(const string &button, int checked);
     void keyReleaseEvent(QKeyEvent *e);
     void mouseMoveEvent(QMouseEvent *e);
     void mousePressEvent(QMouseEvent *e);

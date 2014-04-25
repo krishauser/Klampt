@@ -4,11 +4,15 @@
 #include "Modeling/MultiPath.h"
 #include <robotics/IKFunctions.h>
 #include "Contact/Utils.h"
-
+#include "Planning/RobotCSpace.h"
+#include "Planning/RobotConstrainedInterpolator.h"
+#include "Planning/RobotTimeScaling.h"
+#include "Modeling/MultiPath.h"
+#include "Modeling/Interpolate.h"
 #include <sstream>
 
-RobotPoseBackend::RobotPoseBackend(RobotWorld* world):
-  WorldGUIBackend(world){
+RobotPoseBackend::RobotPoseBackend(RobotWorld* world,ResourceLibrary* library)
+: ResourceGUIBackend(world,library){
   settings["cleanContactsNTol"]= 0.01;
   settings["pathOptimize"]["contactTol"] = 0.05;
   settings["pathOptimize"]["outputResolution"] = 0.01; 
@@ -22,10 +26,10 @@ RobotPoseBackend::RobotPoseBackend(RobotWorld* world):
   settings["selfCollideColor"][2] = 0;
   settings["selfCollideColor"][3] = 1;
   settings["movieWidth"] = 640;
-  settings["hoverColor"] = 1;
-  settings["hoverColor"] = 1;
-  settings["hoverColor"] = 0;
-  settings["hoverColor"] = 1;
+  settings["hoverColor"][0] = 1;
+  settings["hoverColor"][1] = 1;
+  settings["hoverColor"][2] = 0;
+  settings["hoverColor"][3] = 1;
   settings["robotColor"][0] = 0.5;
   settings["robotColor"][1] = 0.5;
   settings["robotColor"][2] = 0.5;
@@ -37,9 +41,9 @@ RobotPoseBackend::RobotPoseBackend(RobotWorld* world):
   settings["envCollideColor"][3] = 1;
 
   settings["poser"]["color"][0] = 1;
-  settings["poser"]["color"][0] = 1;
-  settings["poser"]["color"][0] = 0;
-  settings["poser"]["color"][0] = 0.5;
+  settings["poser"]["color"][1] = 1;
+  settings["poser"]["color"][2] = 0;
+  settings["poser"]["color"][3] = 0.5;
 
   settings["defaultStanceFriction"] = 0.5;
   settings["configResourceColor"][0] = 0.5;
@@ -53,12 +57,12 @@ RobotPoseBackend::RobotPoseBackend(RobotWorld* world):
 void RobotPoseBackend::Start()
 {
   if(!settings.read("robotpose.settings")) {
-    printf("Didn't read settings from simtest.settings\n");
-    printf("Writing default settings to simtest_default.settings\n");
-    settings.write("simtest_default.settings");
+    printf("Didn't read settings from robotpose.settings\n");
+    printf("Writing default settings to robotpose_default.settings\n");
+    settings.write("robotpose_default.settings");
   }
 
- WorldGUIBackend:Start();
+  WorldGUIBackend::Start();
   robot = world->robots[0].robot;
   cur_link=0;
   cur_driver=0;
@@ -66,9 +70,17 @@ void RobotPoseBackend::Start()
   draw_bbs = 0;
   draw_com = 0;
   draw_frame = 0;
-  draw_expanded = 0;
   pose_ik = 0;
   self_colliding.resize(robot->links.size(),false);   
+
+
+  robotWidgets.resize(world->robots.size());
+  for(size_t i=0;i<world->robots.size();i++) {
+    robotWidgets[i].Set(world->robots[i].robot,&world->robots[i].view);
+    robotWidgets[i].linkPoser.highlightColor.set(0.75,0.75,0);
+  }
+  objectWidgets.resize(world->rigidObjects.size());
+
 
   for(size_t i=0;i<world->rigidObjects.size();i++)
     objectWidgets[i].Set(world->rigidObjects[i].object,&world->rigidObjects[i].view);
@@ -153,7 +165,7 @@ void RobotPoseBackend::RenderWorld()
 
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
-  //  ResourceBrowserProgram::RenderCurResource();
+  ResourceGUIBackend::RenderCurResource();
   glDisable(GL_BLEND);
    
   if(draw_com) {
@@ -171,46 +183,6 @@ void RobotPoseBackend::RenderWorld()
     glPopMatrix();
     glEnable(GL_DEPTH_TEST);
   }
-  /*
-    if(!poseGoals.empty()) {
-    glPolygonOffset(0,-1000);
-    glEnable(GL_POLYGON_OFFSET_FILL);
-    for(size_t i=0;i<poseGoals.size();i++) {
-    Vector3 curpos = robot->links[poseGoals[i].link].T_World*poseGoals[i].localPosition;
-    Vector3 despos = poseGoals[i].endPosition;
-    if(poseGoals[i].destLink >= 0)
-    despos = robot->links[poseGoals[i].destLink].T_World*despos;
-    glDisable(GL_LIGHTING);
-    glColor3f(1,0,0);
-    glLineWidth(5.0);
-    glBegin(GL_LINES);
-    glVertex3v(curpos);
-    glVertex3v(despos);
-    glEnd();
-    glLineWidth(1.0);
-
-    poseWidgets[i].DrawGL(viewport);
-
-    float color2[4] = {1,0.5,0,1};
-    glMaterialfv(GL_FRONT,GL_AMBIENT_AND_DIFFUSE,color2); 
-    glPushMatrix();
-    if(poseGoals[i].rotConstraint == IKGoal::RotFixed) {
-    RigidTransform T;
-    poseGoals[i].GetFixedGoalTransform(T);
-    if(poseGoals[i].destLink >= 0)
-    T = robot->links[poseGoals[i].destLink].T_World*T;
-    glMultMatrix(Matrix4(T));
-    drawBox(0.04,0.04,0.04);
-    }
-    else {
-    glTranslate(despos);
-    drawSphere(0.02,16,8);
-    }
-    glPopMatrix();
-    }
-    glDisable(GL_POLYGON_OFFSET_FILL);
-    }
-  */
 }
 
 
@@ -252,11 +224,9 @@ Stance RobotPoseBackend::GetFlatStance()
   return s;
 }
 
-/*
-RsourcePtr PoserToResource()
+ResourcePtr RobotPoseBackend::PoserToResource(const string& type)
 {
   Robot* robot = world->robots[0].robot;
-  string type = resource_types[ResourceBrowserProgram::cur_resource_type];
   if(type == "Config") 
     return MakeResource("",robot->q);
   else if(type == "IKGoal") {
@@ -288,7 +258,7 @@ RsourcePtr PoserToResource()
 	g.fixedValues.push_back(robot->q[i]);
       }
       
-    ResourcePtr r=ResourceBrowserProgram::CurrentResource();
+    ResourcePtr r=ResourceGUIBackend::CurrentResource();
     const GeometricPrimitive3DResource* gr = dynamic_cast<const GeometricPrimitive3DResource*>((const ResourceBase*)r);
     if(gr) {
       cout<<"Making grasp relative to "<<gr->name<<endl;
@@ -318,13 +288,393 @@ RsourcePtr PoserToResource()
     return NULL;
   }
 }
-*/
-/*
 void RobotPoseBackend::CleanContacts(Hold& h)
 {
   Real ntol = settings["cleanContactsNTol"];
   Real xtol = settings["cleanContactsXTol"];
   CHContacts(h.contacts,ntol,xtol);
 }
-*/
+
 //BUTTON HANDLING METHODS
+
+
+bool RobotPoseBackend::OnCommand(const string& cmd,const string& args)
+{
+  Robot* robot = world->robots[0].robot;
+  stringstream ss(args);
+  if(cmd == "poser_to_resource") {
+    ResourcePtr r=PoserToResource(args);
+    if(r) {
+      ResourceGUIBackend::Add(r);
+    }
+  }
+  else if(cmd == "poser_to_resource_overwrite") { 
+    ResourcePtr oldr = ResourceGUIBackend::CurrentResource();
+    if(!oldr)
+      printf("No resource selected\n");
+    ResourcePtr r = PoserToResource(r->Type());
+    r->name = oldr->name;
+    r->fileName = oldr->fileName;
+    vector<ResourcePtr >& v=resources->itemsByType[cur_resource_type];
+    for(size_t i=0;i<v.size();i++)
+      if(v[i]->name == cur_resource_name)
+	v[i] = r;
+    vector<ResourcePtr>& v2 = resources->itemsByName[cur_resource_name];
+    for(size_t i=0;i<v2.size();i++)
+      if(v2[i] == oldr) v2[i] = r;
+    last_added = r;
+    SetLastActive();
+  }
+  else if(cmd == "resource_to_poser") {
+    ResourcePtr r=ResourceGUIBackend::CurrentResource();
+    const ConfigResource* rc = dynamic_cast<const ConfigResource*>((const ResourceBase*)r);
+    if(rc) {
+      poseWidget.SetPose(rc->data);
+      robot->NormalizeAngles(poseWidget.linkPoser.poseConfig);
+      if(poseWidget.linkPoser.poseConfig != rc->data)
+	printf("Warning: config in library is not normalized\n");
+      UpdateConfig();
+    }
+    else {
+      const IKGoalResource* rc = dynamic_cast<const IKGoalResource*>((const ResourceBase*)r);
+      if(rc) {
+	poseWidget.ikPoser.ClearLink(rc->data.link);
+	poseWidget.ikPoser.Add(rc->data);
+      }
+      else {
+	const StanceResource* rc = dynamic_cast<const StanceResource*>((const ResourceBase*)r);
+	if(rc) {
+	  poseWidget.ikPoser.poseGoals.clear();
+	  poseWidget.ikPoser.poseWidgets.clear();
+	  for(Stance::const_iterator i=rc->stance.begin();i!=rc->stance.end();i++) {
+	    Assert(i->first == i->second.ikConstraint.link);
+	    poseWidget.ikPoser.Add(i->second.ikConstraint);
+	  }
+	}
+	else {
+	  const GraspResource* rc = dynamic_cast<const GraspResource*>((const ResourceBase*)r);
+	  if(rc) {
+	    poseWidget.ikPoser.poseGoals.clear();
+	    poseWidget.ikPoser.poseWidgets.clear();
+	    Stance s;
+	    rc->grasp.GetStance(s);
+	    for(Stance::const_iterator i=s.begin();i!=s.end();i++)
+	      poseWidget.ikPoser.Add(i->second.ikConstraint);
+	  }
+	}
+	
+      }
+    }
+  }
+  else if(cmd == "create_path") {
+    vector<Real> times;
+    vector<Config> configs,milestones;
+    
+    ResourcePtr r=ResourceGUIBackend::CurrentResource();
+    const ConfigResource* rc = dynamic_cast<const ConfigResource*>((const ResourceBase*)r);
+    if(rc) {
+      Config a,b;
+      a = rc->data;
+      b = robot->q;
+      if(a.n != b.n) {
+	fprintf(stderr,"Incorrect start and end config size\n");
+	return true;
+      }
+      milestones.resize(2);
+      milestones[0] = a;
+      milestones[1] = b;
+      times.resize(2);
+      times[0] = 0;
+      times[1] = 1;
+    }
+    else {
+      const ConfigsResource* rc = dynamic_cast<const ConfigsResource*>((const ResourceBase*)r);
+      if(rc) {
+	milestones = rc->configs;
+	times.resize(rc->configs.size());
+	for(size_t i=0;i<rc->configs.size();i++)
+	  times[i] = Real(i)/(rc->configs.size()-1);
+      }
+      else {
+	return true;
+      }
+    }
+    /*
+      if(poseWidget.Constraints().empty()) {
+      //straight line interpolator
+      configs = milestones;
+      }
+      else {
+      Robot* robot=world->robots[0].robot;
+      Timer timer;
+      if(!InterpolateConstrainedPath(*robot,milestones,poseWidget.Constraints(),configs,1e-2)) return;
+      
+      //int numdivs = (configs.size()-1)*10+1;
+      int numdivs = (configs.size()-1);
+      vector<Real> newtimes;
+      vector<Config> newconfigs;
+      printf("Discretizing at resolution %g\n",1.0/Real(numdivs));
+      SmoothDiscretizePath(*robot,configs,numdivs,newtimes,newconfigs);
+      cout<<"Smoothed to "<<newconfigs.size()<<" milestones"<<endl;
+      cout<<"Total time "<<timer.ElapsedTime()<<endl;
+      swap(times,newtimes);
+      swap(configs,newconfigs);
+      }
+      ResourceGUIBackend::Add("",times,configs);
+    */
+    MultiPath path;
+    path.SetMilestones(milestones);
+    path.SetIKProblem(poseWidget.Constraints());
+    ResourceGUIBackend::Add("",path);
+    ResourceGUIBackend::SetLastActive(); 
+    ResourceGUIBackend::viewResource.pathTime = 0;
+  }
+  else if(cmd == "discretize_path") {
+    int num;
+    stringstream ss(args);
+    ss>>num;
+    ResourcePtr r=ResourceGUIBackend::CurrentResource();
+    const ConfigsResource* cp = dynamic_cast<const ConfigsResource*>((const ResourceBase*)r);
+    if(cp) {
+      for(size_t i=0;i<cp->configs.size();i++) {
+	stringstream ss;
+	ss<<cp->name<<"["<<i+1<<"/"<<cp->configs.size()<<"]";
+	Add(ss.str(),cp->configs[i]);
+      }
+      ResourceGUIBackend::SetLastActive(); 
+    }
+    const LinearPathResource* lp = dynamic_cast<const LinearPathResource*>((const ResourceBase*)r);
+    if(lp) {
+      for(int i=0;i<num;i++) {
+	Real t = Real(lp->times.size()-1)*Real(i+1)/(num+1);
+	int seg = (int)Floor(t);
+	Real u = t - Floor(t);
+	Config q;
+	Assert(seg >= 0 && seg+1 <(int)lp->milestones.size());
+	Interpolate(*robot,lp->milestones[seg],lp->milestones[seg+1],u,q);
+	stringstream ss;
+	ss<<lp->name<<"["<<i+1<<"/"<<num<<"]";
+	Add(ss.str(),q);
+      }
+      ResourceGUIBackend::SetLastActive(); 
+    }
+    const MultiPathResource* mp = dynamic_cast<const MultiPathResource*>((const ResourceBase*)r);
+    if(mp) {
+      Real minTime = 0, maxTime = 1;
+      if(mp->path.HasTiming()) {
+	minTime = mp->path.sections.front().times.front();
+	maxTime = mp->path.sections.back().times.back();
+      }
+      Config q;
+      for(int i=0;i<num;i++) {
+	Real t = minTime + (maxTime - minTime)*Real(i+1)/(num+1);
+	EvaluateMultiPath(*robot,mp->path,t,q);
+	stringstream ss;
+	ss<<mp->name<<"["<<i+1<<"/"<<num<<"]";
+	Add(ss.str(),q);
+      }
+      ResourceGUIBackend::SetLastActive(); 
+    }
+  }
+  else if(cmd == "optimize_path") {
+    ResourcePtr r=ResourceGUIBackend::CurrentResource();
+    const LinearPathResource* lp = dynamic_cast<const LinearPathResource*>((const ResourceBase*)r);
+    if(lp) {
+      vector<double> newtimes;
+      vector<Config> newconfigs;
+      if(!TimeOptimizePath(*robot,lp->times,lp->milestones,0.01,newtimes,newconfigs)) {
+	fprintf(stderr,"Error optimizing path\n");
+	return true;
+      }
+      ResourceGUIBackend::Add("",newtimes,newconfigs);
+      ResourceGUIBackend::SetLastActive(); 
+      ResourceGUIBackend::viewResource.pathTime = 0;
+    }
+    const MultiPathResource* mp = dynamic_cast<const MultiPathResource*>((const ResourceBase*)r);
+    if(mp) {
+      Real xtol = settings["pathOptimize"]["contactTol"];
+      Real dt = settings["pathOptimize"]["outputResolution"];
+      MultiPath path = mp->path;
+      if(!GenerateAndTimeOptimizeMultiPath(*robot,path,xtol,dt)) {
+	fprintf(stderr,"Error optimizing path\n");
+	return true;
+      }
+      ResourceGUIBackend::Add("",path);
+      ResourceGUIBackend::SetLastActive(); 
+      ResourceGUIBackend::viewResource.pathTime = 0;
+    }
+    const ConfigsResource* rc = dynamic_cast<const ConfigsResource*>((const ResourceBase*)r);
+    if(rc) {
+      MultiPath path;
+      path.sections.resize(1);
+      path.sections[0].milestones = rc->configs;
+      path.SetIKProblem(poseWidget.Constraints(),0);
+      Real xtol = settings["pathOptimize"]["contactTol"];
+      Real dt = settings["pathOptimize"]["outputResolution"];
+      if(!GenerateAndTimeOptimizeMultiPath(*robot,path,xtol,dt)) {
+	fprintf(stderr,"Error optimizing path\n");
+	return true;
+      }
+      ResourceGUIBackend::Add("",path);
+      ResourceGUIBackend::SetLastActive(); 
+      ResourceGUIBackend::viewResource.pathTime = 0;	  
+    }
+  }
+  else if(cmd == "store_flat_contacts") {
+    Stance s = GetFlatStance();
+    ResourcePtr r = MakeResource("",s);
+    if(r) {
+      ResourceGUIBackend::Add(r);
+      ResourceGUIBackend::SetLastActive();
+    }
+  }
+  else if(cmd == "clean_contacts") {
+    ResourcePtr r=ResourceGUIBackend::CurrentResource();
+    const StanceResource* sp = dynamic_cast<const StanceResource*>((const ResourceBase*)r);
+    if(sp) {
+      Stance s=sp->stance;
+      for(Stance::iterator i=s.begin();i!=s.end();i++)
+	CleanContacts(i->second);
+      ResourcePtr r = MakeResource(sp->name+"_clean",s);
+      if(r) {
+	ResourceGUIBackend::Add(r);
+	ResourceGUIBackend::SetLastActive();
+      }
+    }
+    const HoldResource* hp = dynamic_cast<const HoldResource*>((const ResourceBase*)r);
+    if(hp) {
+      Hold h = hp->data;
+      CleanContacts(h);
+      ResourcePtr r = MakeResource(hp->name+"_clean",h);
+      if(r) {
+	ResourceGUIBackend::Add(r);
+	ResourceGUIBackend::SetLastActive();
+      }
+    }
+  }
+  else if(cmd=="constrain_link") {
+      robotWidgets[0].FixCurrent();
+  }
+  else if(cmd=="constrain_link_point"){
+    robotWidgets[0].FixCurrentPoint();
+  }
+  else if(cmd == "delete_constraint") {
+      robotWidgets[0].DeleteConstraint();
+  }
+  else if(cmd=="set_link") {
+    ss >> cur_link;
+  }
+  else if(cmd=="set_link_value") {
+    double value;
+    ss>>value;
+    Vector q = robotWidgets[0].Pose();
+    q(cur_link)=value;
+    robotWidgets[0].SetPose(q);
+  }
+  else if(cmd=="set_driver") {
+    ss >> cur_driver;
+  }
+  else if(cmd=="set_driver_value") {
+    double driver_value;
+    ss>>driver_value;
+    Robot* robot = world->robots[0].robot;
+    robot->UpdateConfig(robotWidgets[0].Pose());
+    robot->SetDriverValue(cur_driver,driver_value);
+    robotWidgets[0].SetPose(robot->q);
+  }
+  else {
+    return ResourceGUIBackend::OnCommand(cmd,args);
+  }
+  SendRefresh();
+  return true;
+}
+
+void RobotPoseBackend::BeginDrag(int x,int y,int button,int modifiers)
+{
+  for(size_t i=0;i<robotWidgets.size();i++)
+    robotWidgets[i].poseIKMode = (pose_ik != 0);
+  //for(size_t i=0;i<objectWidgets.size();i++)
+  //objectWidgets[i].poseIKMode = (pose_objects != 0);
+  
+  Robot* robot = world->robots[0].robot;
+  if(button == GLUT_RIGHT_BUTTON) {
+    double d;
+    if(allWidgets.BeginDrag(x,viewport.h-y,viewport,d))
+      allWidgets.SetFocus(true);
+    else
+      allWidgets.SetFocus(false);
+    if(allWidgets.requestRedraw) { SendRefresh(); allWidgets.requestRedraw=false; }
+  }
+}
+
+void RobotPoseBackend::EndDrag(int x,int y,int button,int modifiers)
+{
+  for(size_t i=0;i<robotWidgets.size();i++)
+    robotWidgets[i].poseIKMode = (pose_ik != 0);
+  //for(size_t i=0;i<objectWidgets.size();i++)
+  //objectWidgets[i].poseIKMode = (pose_objects != 0);
+  
+  if(button == GLUT_RIGHT_BUTTON) {
+    if(allWidgets.hasFocus) {
+      allWidgets.EndDrag();
+      allWidgets.SetFocus(false);
+    }
+  }
+}
+
+void RobotPoseBackend::DoFreeDrag(int dx,int dy,int button)
+{
+  for(size_t i=0;i<robotWidgets.size();i++)
+    robotWidgets[i].poseIKMode = (pose_ik != 0);
+  //for(size_t i=0;i<objectWidgets.size();i++)
+  //objectWidgets[i].poseIKMode = (pose_objects != 0);
+  
+  Robot* robot = world->robots[0].robot;
+  if(button == GLUT_LEFT_BUTTON)  DragRotate(dx,dy);
+  else if(button == GLUT_RIGHT_BUTTON) {
+    if(allWidgets.hasFocus) {
+      allWidgets.Drag(dx,-dy,viewport);
+      if(allWidgets.requestRedraw) {
+	allWidgets.requestRedraw = false;
+	SendRefresh();
+	UpdateConfig();
+      }
+    }
+  }
+}
+
+void RobotPoseBackend::DoPassiveMouseMove(int x, int y)
+{
+  
+  for(size_t i=0;i<robotWidgets.size();i++)
+    robotWidgets[i].poseIKMode = (pose_ik != 0);
+  //for(size_t i=0;i<objectWidgets.size();i++)
+  //objectWidgets[i].poseIKMode = (pose_objects != 0);
+  
+  double d;
+  if(allWidgets.Hover(x,viewport.h-y,viewport,d))
+    allWidgets.SetHighlight(true);
+  else
+    allWidgets.SetHighlight(false);
+  if(allWidgets.requestRedraw) { SendRefresh(); allWidgets.requestRedraw=false; }
+  
+}
+
+
+bool RobotPoseBackend::OnButtonPress(const string& button)
+{
+  if(!GenericBackendBase::OnButtonPress(button)) {
+    cout<<"RobotTestBackend: Unknown button: "<<button<<endl;
+    return false;
+  }
+  return true;
+}
+
+bool RobotPoseBackend::OnButtonToggle(const string& button,int checked)
+{
+  if(!GenericBackendBase::OnButtonToggle(button,checked)) {
+    cout<<"RobotTestBackend: Unknown button: "<<button<<endl;
+    return false;
+  }
+  return true;
+}

@@ -17,6 +17,7 @@
 #include <logoptions.h>
 #include <controllersettings.h>
 #include <controllercommanddialog.h>
+#include <connectserial.h>
 
 class QSimTestGUI : public QtGUIBase
 {
@@ -26,6 +27,7 @@ public:
     WorldSimulation* sim;
     DriverEdit *driver_tool;
     LogOptions *log_options;
+    ConnectSerial *connect_serial;
     ControllerSettings *controller_settings;
     ControllerCommandDialog *command_dialog;
     QSimTestGUI(GenericBackendBase* _backend,RobotWorld* _world);
@@ -36,6 +38,7 @@ public:
     ~QSimTestGUI();
     void UpdateMeasurements();
     void LoadFile(QString filename=QString());
+    void LoadFilePrompt(QString directory=".",QString filter="*");
     void SaveScenario(QString filename=QString());
     void SaveLastScenario();
     void ShowHelp();
@@ -48,7 +51,7 @@ public slots:
     void SendMeasurement(int sensor, int measurement, bool status);
     void SendControllerSetting(string setting, string value);
     void SendControllerCommand(string setting, string value);
-
+    void SendConnection(int robot,QString host,int port,int rate);
 signals:
     void  EndDelete();
     void EndConstrain();

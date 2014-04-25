@@ -386,9 +386,6 @@
    </attribute>
   </widget>
   <widget class="QStatusBar" name="statusBar">
-   <property name="statusTip">
-    <string>test123</string>
-   </property>
   </widget>
   <action name="actionOpen">
    <property name="text">

@@ -1,13 +1,13 @@
-#include "qrobottestbackend.h"
+#include "qrobotposebackend.h"
 #include "GLdraw/GLView.h"
 
-QRobotTestBackend::QRobotTestBackend(QWidget *parent) :
-      QGLWidget(parent),RobotTestBackend(new RobotWorld())//,GLScreenshotPlugin()
+QRobotPoseBackend::QRobotPoseBackend(QWidget *parent) :
+    QGLWidget(parent),RobotPoseBackend(new RobotWorld(),new ResourceLibrary())//,GLScreenshotPlugin()
 {
     setMouseTracking(true);
 }
 
-void QRobotTestBackend::initializeGL(){
+void QRobotPoseBackend::initializeGL(){
     glClearColor(.4,.4,1,1);
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
@@ -20,21 +20,21 @@ void QRobotTestBackend::initializeGL(){
 }
 
 //widget specific function
-void QRobotTestBackend::paintGL(){
+void QRobotPoseBackend::paintGL(){
     OnGLRender();
 }
 
-bool QRobotTestBackend::OnIdle(){
+bool QRobotPoseBackend::OnIdle(){
     //MovieUpdate(sim.time);
     BaseT::OnIdle();
     return true;
 }
 
-bool QRobotTestBackend::OnMouseMove(int mx, int my){
+bool QRobotPoseBackend::OnMouseMove(int mx, int my){
     BaseT::OnMouseMove(mx,my);
 }
 
-bool QRobotTestBackend::OnMouseWheel(int dwheel){
+bool QRobotPoseBackend::OnMouseWheel(int dwheel){
     viewport.scale *=(1+dwheel/1000.0);
 //    DragZoom(0,dwheel);
     //ToggleSensorPlot(0,1);
@@ -42,7 +42,7 @@ bool QRobotTestBackend::OnMouseWheel(int dwheel){
     return true;
 }
 
-bool QRobotTestBackend::OnCommand(const string &cmd, const string &args){
+bool QRobotPoseBackend::OnCommand(const string &cmd, const string &args){
     if(cmd=="set_q"){
         Config q;
         stringstream ss(args);
@@ -55,54 +55,50 @@ bool QRobotTestBackend::OnCommand(const string &cmd, const string &args){
     return BaseT::OnCommand(cmd,args);
 }
 
-void QRobotTestBackend::resizeGL(int w, int h){
+void QRobotPoseBackend::resizeGL(int w, int h){
     //emit ResizeFrame(e);
     viewport.w=w;
     viewport.h=h;
     glViewport(0,0,(GLsizei)w,(GLsizei)h);
 }
 
-void QRobotTestBackend::RenderCurrentResource(){
+void QRobotPoseBackend::RenderCurrentResource(){
     if(manager->open == NULL) return;
     viewResource.DrawGL(manager->open->resource);
 }
 
-void QRobotTestBackend::RenderWorld(){
-    RobotTestBackend::RenderWorld();
+void QRobotPoseBackend::RenderWorld(){
+    RobotPoseBackend::RenderWorld();
     RenderCurrentResource();
 }
 
 
-bool QRobotTestBackend::OnButtonToggle(const string &button, int checked){
-    BaseT::OnButtonToggle(button,checked);
-}
-
 //GUI functionality: Possible new file
 
-void QRobotTestBackend::keyPressEvent(QKeyEvent *e){
+void QRobotPoseBackend::keyPressEvent(QKeyEvent *e){
     emit KeyPress(e);
 }
 
-void QRobotTestBackend::keyReleaseEvent(QKeyEvent *e){
+void QRobotPoseBackend::keyReleaseEvent(QKeyEvent *e){
     emit KeyRelease(e);
 }
 
-void QRobotTestBackend::mouseMoveEvent(QMouseEvent *e){
+void QRobotPoseBackend::mouseMoveEvent(QMouseEvent *e){
     emit MouseMove(e);
 }
 
-void QRobotTestBackend::mousePressEvent(QMouseEvent *e){
+void QRobotPoseBackend::mousePressEvent(QMouseEvent *e){
     emit MousePress(e);
 }
 
-void QRobotTestBackend::mouseReleaseEvent(QMouseEvent *e){
+void QRobotPoseBackend::mouseReleaseEvent(QMouseEvent *e){
     emit MouseRelease(e);
 }
 
-void QRobotTestBackend::wheelEvent(QWheelEvent *e){
+void QRobotPoseBackend::wheelEvent(QWheelEvent *e){
     emit MouseWheel(e);
 }
 
-void QRobotTestBackend::enterEvent(QEvent *){
+void QRobotPoseBackend::enterEvent(QEvent *){
     this->focusWidget();
 }

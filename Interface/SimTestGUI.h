@@ -7,13 +7,13 @@
 #include "View/RobotPoseWidget.h"
 #include "View/ObjectPoseWidget.h"
 #include <utils/stringutils.h>
-//#include <GL/glut.h>
-#include "GLUIGUI.h"
-#include <GLdraw/GLScreenshotProgram.h>
-#include <GL/glui.h>
 #include <fstream>
 using namespace Math3D;
 using namespace GLDraw;
+
+#define GLUT_LEFT_BUTTON 0
+#define GLUT_MIDDLE_BUTTON 1
+#define GLUT_RIGHT_BUTTON 2
 
 class ProgramSettings : public AnyCollection
 {
@@ -118,6 +118,8 @@ public:
   void SimStep(Real dt);
   void SensorPlotUpdate();
 
+  bool LoadFile(const char* fn);
+
   //overrides of GLNavigationBackend
   virtual void RenderWorld();
   virtual void RenderScreen(); 
@@ -144,6 +146,11 @@ public:
 
 
 #ifdef HAVE_GLUI
+
+#include <GLdraw/GLScreenshotProgram.h>
+#include "GLUIGUI.h"
+#include <GL/glui.h>
+
 
 class GLUISimTestGUI : public GLScreenshotProgram<GLUIGUI>
 {
@@ -182,7 +189,7 @@ public:
   GLUI_Listbox* measurementListbox;
 
   GLUISimTestGUI(GenericBackendBase* backend,RobotWorld* _world,int w=800,int h=600);
-  bool Initialize();
+  virtual bool Initialize();
   void UpdateGUI();
   void UpdateControllerSettingGUI();
   void UpdateSensorGUI();

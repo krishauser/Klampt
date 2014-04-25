@@ -1,6 +1,9 @@
-#include "qrobottestguibase.h"
+#include "qrobottestgui.h"
 
-QRobotTestGUIBase::QRobotTestGUIBase(GenericBackendBase *_backend, RobotWorld *_world) :
+#include <QSettings>
+#include <QtGui/QApplication>
+
+QRobotTestGUI::QRobotTestGUI(GenericBackendBase *_backend, RobotWorld *_world) :
     QtGUIBase(_backend,_world),
     col_out(new CollisionOutput)
 
@@ -22,31 +25,31 @@ QRobotTestGUIBase::QRobotTestGUIBase(GenericBackendBase *_backend, RobotWorld *_
   link_index=0;
 }
 
-void QRobotTestGUIBase::SetDriver(int index){
+void QRobotTestGUI::SetDriver(int index){
     driver_index=index;
     SendCommand("set_driver",index);
     emit UpdateDriverValue();
     emit UpdateDriverParameters();
 }
 
-void QRobotTestGUIBase::SetDriverValue(double val){
+void QRobotTestGUI::SetDriverValue(double val){
     SendCommand("set_driver",driver_index);
     SendCommand("set_driver_value",val);
 }
 
-void QRobotTestGUIBase::SetLink(int index){
+void QRobotTestGUI::SetLink(int index){
     link_index=index;
     SendCommand("set_link",index);
     emit UpdateLinkValue();
     emit UpdateLinkParameters();
 }
 
-void QRobotTestGUIBase::SetLinkValue(double val){
+void QRobotTestGUI::SetLinkValue(double val){
     SendCommand("set_link",link_index);
     SendCommand("set_link_value",val);
 }
 
-bool QRobotTestGUIBase::OnCommand(const string &cmd, const string &args){
+bool QRobotTestGUI::OnCommand(const string &cmd, const string &args){
     if(cmd=="update_config"){
         UpdateGUI();
         return true;
@@ -59,7 +62,7 @@ bool QRobotTestGUIBase::OnCommand(const string &cmd, const string &args){
     else return QtGUIBase::OnCommand(cmd,args);
 }
 
-void QRobotTestGUIBase::UpdateGUI(){
+void QRobotTestGUI::UpdateGUI(){
 
     emit UpdateLinkValue();
     emit UpdateLinkParameters();
@@ -67,11 +70,17 @@ void QRobotTestGUIBase::UpdateGUI(){
     emit UpdateDriverParameters();
 }
 
-void QRobotTestGUIBase::LoadFile(QString filename){
-    if(filename.isEmpty()){
-      QFileDialog f;
-      filename = f.getOpenFileName(0,"Open File",QDir::home().absolutePath(),"");
+void QRobotTestGUI::LoadFile(QString filename){
+  QSettings ini(QSettings::IniFormat, QSettings::UserScope,
+		QCoreApplication::organizationName(),
+		QCoreApplication::applicationName());
+  if(filename.isEmpty()){
+    QString openDir = ini.value("last_open_resource_directory",".").toString();
+    QFileDialog f;
+    filename = f.getOpenFileName(0,"Open File",openDir,"");
+    if(!filename.isEmpty())
+      ini.setValue("last_open_resource_directory",f.directory().absolutePath());
     }
-    if(!filename.isNull())
-      SendCommand("load_file",filename.toStdString());
-  }
+  if(!filename.isEmpty())
+    SendCommand("load_file",filename.toStdString());
+}

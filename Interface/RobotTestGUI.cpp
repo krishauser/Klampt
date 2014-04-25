@@ -40,34 +40,12 @@ void RobotTestBackend::Start()
   for(size_t i=0;i<world->rigidObjects.size();i++)
     allWidgets.widgets.push_back(&objectWidgets[i]);
 
-
-  UpdateConfig();
-
   MapButtonToggle("pose_ik",&pose_ik);
   MapButtonToggle("draw_geom",&draw_geom);
   MapButtonToggle("draw_bbs",&draw_bbs);
   MapButtonToggle("draw_com",&draw_com);
   MapButtonToggle("draw_frame",&draw_frame);
   MapButtonToggle("draw_self_collision_tests",&draw_self_collision_tests);
-
-  /*
-  //TEST: robot-to-robot IK test.  only works for AL5Dx2
-  IKGoal test;
-  test.link = 8;
-  test.destLink = 16;
-  test.localPosition.set(0,0,0.05);
-  test.endPosition.set(0,0,0.05);
-  //test.SetFixedPosition(test.endPosition);
-  Matrix3 R;
-  R.setRotateZ(120);
-  test.SetFixedRotation(R);
-
-  vector<IKGoal> problem(1,test);
-  int iters=100;
-  bool res=SolveIK(*robot,problem,1e-3,iters);
-  printf("Solved IK: %d, %d iters, error %g\n",(int)res,iters,RobotIKError(*robot,test));
-  UpdateConfig();
-  */
 }
   
 void RobotTestBackend::UpdateConfig()
@@ -210,6 +188,7 @@ bool RobotTestBackend::OnButtonPress(const string& button)
   }
   return true;
 }
+
 bool RobotTestBackend::OnButtonToggle(const string& button,int checked)
 {
   if(button=="draw_expanded") {
@@ -432,7 +411,7 @@ bool GLUIRobotTestGUI::Initialize()
 
   GLUI_Checkbox* checkbox = glui->add_checkbox("Draw geometry");
   checkbox->set_int_val(1);
-  AddControl(checkbox,"draw_geometry");
+  AddControl(checkbox,"draw_geom");
   checkbox = glui->add_checkbox("Draw COM");
   AddControl(checkbox,"draw_com");
   checkbox = glui->add_checkbox("Draw frame");
@@ -444,14 +423,14 @@ bool GLUIRobotTestGUI::Initialize()
   checkbox = glui->add_checkbox("Draw collision tests");
   AddControl(checkbox,"draw_self_collision_tests");
   AddControl(glui->add_button("Print self colliding links"),"print_self_collisions");
-  AddControl(glui->add_button("Print config"),"print_config");
+  AddControl(glui->add_button("Print config"),"print_pose");
   UpdateGUI();
 
   const char* rules = "[ \
 [{type:key_down,key:c}, {type:command,cmd:constrain_current_link,args:\"\"}],	\
 [{type:key_down,key:d}, {type:command,cmd:delete_current_constraint,args:\"\"}], \
-[{type:key_down,key:p}, {type:command,cmd:print_config,args:\"\"}],	\
-[{type:button_press,button:print_config}, {type:command,cmd:print_pose,args:_0}], \
+[{type:key_down,key:p}, {type:command,cmd:print_pose,args:\"\"}],	\
+[{type:button_press,button:print_config}, {type:command,cmd:print_pose,args:\"\"}], \
 [{type:widget_value,widget:link,value:_0}, {type:command,cmd:set_link,args:_0}], \
 [{type:widget_value,widget:link_value,value:_0}, {type:command,cmd:set_link_value,args:_0}], \
 [{type:widget_value,widget:driver,value:_0}, {type:command,cmd:set_driver,args:_0}], \

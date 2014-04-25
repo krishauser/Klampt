@@ -18,7 +18,8 @@ SOURCES += main.cpp\
     controllersettings.cpp \
     controllercommanddialog.cpp \
     ../KlamptQt/qtguibase.cpp \
-    qsimtestgui.cpp
+    qsimtestgui.cpp \
+    connectserial.cpp
 
 HEADERS  += mainwindow.h \
     qsimtestbackend.h \
@@ -28,21 +29,17 @@ HEADERS  += mainwindow.h \
     GLScreenshotPlugin.h \
     controllercommanddialog.h \
     ../KlamptQt/qtguibase.h \
-    qsimtestgui.h
+    qsimtestgui.h \
+    connectserial.h
 
 FORMS    += mainwindow.ui \
     logoptions.ui \
     driveredit.ui \
     controllersettings.ui \
-    controllercommanddialog.ui
+    controllercommanddialog.ui \
+    connectserial.ui
 
 include(../KlamptQt/common.pri)
-
-
-LIBS += -lKlampt -lKrisLibrary -lglut -lGL -lm -lGLU -lXm -lXi -lXext -lXmu -lX11 -lode -ltinyxml -lglpk
-LIBS += -L../Library/glui-2.36/src/include -lglui -lGLU -lassimp
-INCLUDEPATH +=/usr/include ../ ../Library/KrisLibrary ../Library/glui-2.36/src/include ../Library/ode0.11.1/ode/src
-DEFINES += dDOUBLE
 
 QMAKE_CFLAGE_DEGUG += -g
 

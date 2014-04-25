@@ -21,9 +21,8 @@ public:
     ~MainWindow();
     QDir directory;
     QString filename;
-    RobotWorld *world;
-    QSimTestGUI *gui;
-    QTimer* refresh_timer;
+    SmartPointer<QSimTestGUI> gui;
+    QTimer refresh_timer;
     int argc;
     const char** argv;
     void Initialize(int _argc, const char **_argv);
@@ -52,6 +51,8 @@ public slots:
   void DoIKMode(){SetMode(1);}
   void DoForceMode(){SetMode(2);}
   void LoadResource();
+  void LoadPath();
+  void LoadState();
   void SaveScenario();
   void SaveLastScenario();
   void DefaultViewport();
@@ -63,8 +64,14 @@ public slots:
   void ShowDriverEdit();
   void ShowOptions();
   void ShowCommand();
+  void ShowSerialController();
   void ShowHelp();
   void ShowAbout();
+
+  //logging
+  void LogSimulation(bool status);
+  void LogContactState(bool status);
+  void LogContactWrenches(bool status);
 
   //IK Mode
   void IKConstrain();

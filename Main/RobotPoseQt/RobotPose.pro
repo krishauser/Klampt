@@ -13,25 +13,25 @@ TEMPLATE = app
 
 SOURCES += main.cpp\
         mainwindow.cpp \
-    qrobottestbackend.cpp \
     ../KlamptQt/qtguibase.cpp \
-    qrobottestguibase.cpp \
     collisionoutput.cpp \
     resourceframe.cpp \
     qresourcetreeitem.cpp \
     resourcemanager.cpp \ #\
-    playresourceframe.cpp
+    playresourceframe.cpp \
+    qrobotposebackend.cpp \
+    qrobotposegui.cpp
    # ../../Interface/RobotTestGUI.cpp
 
 HEADERS  += mainwindow.h \
-    qrobottestbackend.h \
     ../KlamptQt/qtguibase.h \
-    qrobottestguibase.h \
     collisionoutput.h \
     resourceframe.h \
     qresourcetreeitem.h \
     resourcemanager.h \ #\
-    playresourceframe.h
+    playresourceframe.h \
+    qrobotposebackend.h \
+    qrobotposegui.h
     #../../Interface/RobotTestGUI.h
 
 FORMS    += mainwindow.ui \
@@ -40,8 +40,6 @@ FORMS    += mainwindow.ui \
     playresourceframe.ui
 
 include(../KlamptQt/common.pri)
-
-LIBS += -lKlampt -lKrisLibrary -lglut -lGL -lm -lGLU -lXm -lXi -lXext -lXmu -lX11 -lode -ltinyxml -lglpk -lassimp -lglui
 
 DEFINES += dDOUBLE
 

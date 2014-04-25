@@ -433,15 +433,37 @@ bool SimTestBackend::OnCommand(const string& cmd,const string& args)
   else if(cmd=="log_contact_state") {
     contactStateLogFile = args;
   }
+
   else if(cmd=="log_contact_wrenches") {
     contactWrenchLogFile = args;
   }
+
   else
     return BaseT::OnCommand(cmd,args);
   SendRefresh();
   return true;
 }
 
+bool SimTestBackend::LoadFile(const char* fn)
+{
+  if(SimGUIBackend::LoadFile(fn)) {
+    //refresh the posers if there's an added object
+    size_t nr = robotWidgets.size();
+    size_t no = objectWidgets.size();
+    robotWidgets.resize(world->robots.size());
+    for(size_t i=nr;i<world->robots.size();i++) {
+      robotWidgets[i].Set(world->robots[i].robot,&world->robots[i].view);
+      allWidgets.widgets.push_back(&robotWidgets[i]);
+    }
+    objectWidgets.resize(world->rigidObjects.size());
+    for(size_t i=no;i<world->rigidObjects.size();i++) {
+      objectWidgets[i].Set(world->rigidObjects[i].object,&world->rigidObjects[i].view);
+      allObjectWidgets.widgets.push_back(&objectWidgets[i]);
+    }
+    return true;
+  }
+  return false;
+}
 
 void SimTestBackend::DoPassiveMouseMove(int x, int y)
 {

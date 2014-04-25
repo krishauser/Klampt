@@ -695,8 +695,8 @@ EdgePlanner* SingleRobotCSpace::LocalPlanner(const Config& a,const Config& b,int
 
 EdgePlanner* SingleRobotCSpace::LocalPlanner(const Config& a,const Config& b)
 {
-  //return new BisectionEpsilonExplicitEdgePlanner(this,a,b,settings->robotSettings[index].collisionEpsilon);
-  return new ExplicitEdgePlanner(this,a,b);
+  return new BisectionEpsilonExplicitEdgePlanner(this,a,b,settings->robotSettings[index].collisionEpsilon);
+  //return new ExplicitEdgePlanner(this,a,b);
 }
 
 Real SingleRobotCSpace::Distance(const Config& x, const Config& y)
@@ -974,6 +974,13 @@ EdgePlanner* SingleRobotCSpace2::LocalPlanner(const Config& a,const Config& b,in
     return new TrueEdgePlanner(this,a,b);
   return SingleRobotCSpace::LocalPlanner(a,b,obstacle-(int)fixedDofs.size());
 }
+
+EdgePlanner* SingleRobotCSpace2::LocalPlanner(const Config& a,const Config& b)
+{
+  return new BisectionEpsilonExplicitEdgePlanner(this,a,b,settings->robotSettings[index].collisionEpsilon);
+  //return new ExplicitEdgePlanner(this,a,b);
+}
+
 
 void SingleRobotCSpace2::Sample(Config& x)
 {

@@ -15,23 +15,19 @@ SOURCES += main.cpp\
         mainwindow.cpp \
     qrobottestbackend.cpp \
     ../KlamptQt/qtguibase.cpp \
-    qrobottestguibase.cpp \
-    collisionoutput.cpp
+    collisionoutput.cpp \
+    qrobottestgui.cpp
 
 HEADERS  += mainwindow.h \
     qrobottestbackend.h \
     ../KlamptQt/qtguibase.h \
-    qrobottestguibase.h \
-    collisionoutput.h
+    collisionoutput.h \
+    qrobottestgui.h
 
 FORMS    += mainwindow.ui \
     collisionoutput.ui
 
 include(../KlamptQt/common.pri)
-
-LIBS += -lKlampt -lKrisLibrary -lglut -lGL -lm -lGLU -lXm -lXi -lXext -lXmu -lX11 -lode -ltinyxml -lglpk -lassimp -lglui
-
-DEFINES += dDOUBLE
 
 QMAKE_CFLAGE_DEGUG += -g
 

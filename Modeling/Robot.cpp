@@ -1003,30 +1003,32 @@ bool Robot::LoadRob(const char* fn) {
 
 	for (size_t i = 0; i < mountLinks.size(); i++) {
 		printf("   Mounting file %s\n", mountFiles[i].c_str());
-		mountFiles[i] = path + mountFiles[i];
+		string fn = path + mountFiles[i];
 		if (Geometry::AnyGeometry3D::CanLoadExt(FileExtension(mountFiles[i].c_str()))) {
 			//mount a triangle mesh on top of another triangle mesh
 			Geometry::AnyGeometry3D geom;
-			if(!geom.Load(mountFiles[i].c_str())) {
+			if(!geom.Load(fn.c_str())) {
 				fprintf(stderr, "   Error loading mount geometry file %s\n",
-						mountFiles[i].c_str());
+						fn.c_str());
 				return false;
 			}
 			Mount(mountLinks[i], geom, mountT[i]);
 		} else {
 			Robot subchain;
-			if (!subchain.Load(mountFiles[i].c_str())) {
+			if (!subchain.Load(fn.c_str())) {
 				fprintf(stderr, "   Error reading subchain file %s\n",
-						mountFiles[i].c_str());
+						fn.c_str());
 				return false;
 			}
 			size_t lstart = links.size();
 			size_t dstart = drivers.size();
 			Mount(mountLinks[i], subchain, mountT[i]);
-			for (size_t k = lstart; k < links.size(); k++)
-				linkNames[k] = mountFiles[i] + ":" + linkNames[k];
+			string robotName = mountFiles[i];
+			StripExtension(robotName);
+			for (size_t k = lstart; k < links.size(); k++) 
+				linkNames[k] = robotName + ":" + linkNames[k];
 			for (size_t k = dstart; k < drivers.size(); k++)
-				driverNames[k] = mountFiles[i] + ":" + driverNames[k];
+				driverNames[k] = robotName + ":" + driverNames[k];
 		}
 	}
 	if (!CheckValid())
@@ -1541,6 +1543,7 @@ void Robot::Mount(int link, const Robot& subchain, const RigidTransform& T) {
 	ArrayUtils::concat(geometry, subchain.geometry);
 	ArrayUtils::concat(geomFiles, subchain.geomFiles);
 	InitCollisions();
+	ArrayUtils::concat(envCollisions, subchain.envCollisions);
 	concat(selfCollisions, subchain.selfCollisions);
 	//need to get the right self collision pointers
 	for (int i = 0; i < selfCollisions.m; i++)

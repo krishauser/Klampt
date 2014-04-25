@@ -3,21 +3,21 @@
 
 #include "../KlamptQt/qtguibase.h"
 
-#include <qrobottestbackend.h>
+#include <qrobotposebackend.h>
 #include <collisionoutput.h>
-class QRobotTestGUIBase : public QtGUIBase
+class QRobotPoseGUI : public QtGUIBase
 {
     Q_OBJECT
 public:
-    explicit QRobotTestGUIBase(GenericBackendBase* _backend,RobotWorld* _world);
+    explicit QRobotPoseGUI(GenericBackendBase* _backend,RobotWorld* _world);
     void SetDriver(int index);
     void SetLink(int index);
     void LoadFile(QString filename=QString());
+    void LoadFilePrompt(QString directory=".", QString filter="*");
     bool OnCommand(const string &cmd, const string &args);
     void UpdateGUI();
 
-    QRobotTestBackend* backend;
-    CollisionOutput* col_out;
+    QRobotPoseBackend* backend;
 
     int driver_index;
     int link_index;

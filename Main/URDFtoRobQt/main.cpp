@@ -1,14 +1,12 @@
 #include <QtGui/QApplication>
 #include "dialog.h"
-#include "Main/motorcalibrate.h"
+#include "Main/urdftorob.h"
 
 int main(int argc, char *argv[])
 {
-  if(argc > 1){
-      return main_shell(argc,argv);
-  }
-  Robot::disableGeometryLoading = true;
-
+    if(argc > 2){
+        return main_shell(argc,argv);
+    }
     QApplication a(argc, argv);
     Dialog w;
     w.show();

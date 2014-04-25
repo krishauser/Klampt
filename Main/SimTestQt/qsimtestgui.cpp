@@ -1,5 +1,8 @@
 #include "qsimtestgui.h"
 
+#include <QSettings>
+#include <QtGui/QApplication>
+
 QSimTestGUI::QSimTestGUI(GenericBackendBase *_backend, RobotWorld *_world) :
   QtGUIBase(_backend,_world)
 {
@@ -37,6 +40,9 @@ QSimTestGUI::QSimTestGUI(GenericBackendBase *_backend, RobotWorld *_world) :
   command_dialog->commands=sim->robotControllers[0]->Commands();
   connect(command_dialog,SIGNAL(ControllerCommand(string,string)),this,SLOT(SendControllerCommand(string,string)));
   command_dialog->Refresh();
+
+  connect_serial = new ConnectSerial(world->robots.size());
+  connect(connect_serial,SIGNAL(MakeConnect(int,QString,int,int)),this,SLOT(SendConnection(int,QString,int,int)));
 
   UpdateGUI();
 
@@ -132,22 +138,34 @@ void QSimTestGUI::SendMeasurement(int sensor,int measurement,bool status){
 
 
 void QSimTestGUI::LoadFile(QString filename){
-  if(filename.isEmpty()){
-    QFileDialog f;
-    QString filename = f.getOpenFileName(0,"Open File",QDir::home().absolutePath(),"");
+  if(!filename.isEmpty()) {
+    string str = filename.toStdString();
+    SendCommand("load_file",str);
   }
-  if(!filename.isNull())
-    SendCommand("load_file",filename.toStdString());
+}
+
+void QSimTestGUI::LoadFilePrompt(QString directory,QString filter){
+  QFileDialog f;
+  QSettings ini(QSettings::IniFormat, QSettings::UserScope,
+		QCoreApplication::organizationName(),
+		QCoreApplication::applicationName());
+  QString openDir = ini.value(directory,".").toString();
+  QString filename = f.getOpenFileName(0,"Open File",openDir,filter);
+  if(!filename.isEmpty()){
+    ini.setValue(directory,QFileInfo(filename).absolutePath());
+    LoadFile(filename);
+  }
 }
 
 void QSimTestGUI::SaveScenario(QString filename){
   if(filename.isEmpty()){
     QFileDialog f;
-    filename = f.getSaveFileName(0,"Save Scenario",QDir::home().absolutePath(),"");
+    filename = f.getSaveFileName(0,"Save State",QDir::home().absolutePath(),"");
   }
   if(!filename.isNull()){
-      SendCommand("save_file",filename.toStdString());
-      old_filename=filename;
+    string str = filename.toStdString();
+    SendCommand("save_state",str);
+    old_filename=filename;
   }
 }
 
@@ -166,6 +184,13 @@ void QSimTestGUI::SendControllerSetting(string setting, string value){
 void QSimTestGUI::SendControllerCommand(string setting,string value){
     bool res = sim->robotControllers[0]->SendCommand(setting,value);
     if(!res) printf("Failed to send command %s\n",setting.c_str());
+}
+
+void QSimTestGUI::SendConnection(int robot, QString host, int port, int rate)
+{
+    stringstream ss;
+    ss<<robot<<" "<<host.toStdString()<<" "<<port<<" "<<rate;
+    SendCommand("send_serial_connection",ss.str());
 }
 
 void QSimTestGUI::ShowHelp(){

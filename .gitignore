@@ -63,3 +63,6 @@ Makefile.config
 moc_*.cpp
 ui_*.h
 *Qt/Makefile
+
+# Settings Files
+*.settings

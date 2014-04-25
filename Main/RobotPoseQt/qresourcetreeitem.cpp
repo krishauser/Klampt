@@ -15,7 +15,6 @@ QResourceTreeItem::QResourceTreeItem(ResourceTracker* rt){
     string type = rt->resource->Type();
     if(!type.empty())
         setText(TYPECOL,QString::fromStdString(rt->resource->Type()));
-    //setText(TYPECOL,"wxyz");
 }
 
 void QResourceTreeItem::ToGUI()

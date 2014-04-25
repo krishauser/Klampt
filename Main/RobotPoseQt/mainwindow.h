@@ -5,8 +5,8 @@
 #include <QDir>
 
 #include "Modeling/World.h"
-#include "Interface/SimTestGUI.h"
-#include "qrobottestguibase.h"
+#include "Interface/RobotPoseGUI.h"
+#include "qrobotposegui.h"
 
 #include <collisionoutput.h>
 #include <resourcemanager.h>
@@ -29,7 +29,7 @@ public:
     QDir directory;
     QString filename;
     RobotWorld *world;
-    QRobotTestGUIBase *gui;
+    QRobotPoseGUI *gui;
     QTimer* refresh_timer;
     Robot* rob;
     ResourceManager* manager;

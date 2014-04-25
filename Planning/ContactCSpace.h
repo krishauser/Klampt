@@ -48,6 +48,7 @@ class MultiContactCSpace : public MultiRobotCSpace
     int id1,id2;            //world id of the given object
     vector<Vector3> c1,c2;  //cx = contacts in local frame of object x
     vector<Vector3> n1,n2;  //nx = normals in local frame  of object x
+    vector<Real> kFriction;
   };
 
   MultiContactCSpace(RobotWorld& world,
@@ -55,7 +56,10 @@ class MultiContactCSpace : public MultiRobotCSpace
   MultiContactCSpace(const MultiRobotCSpace&);
   MultiContactCSpace(const MultiContactCSpace&);
   virtual ~MultiContactCSpace() {}
+  ///Initializes all internal structures
   void InitContactPairs(const vector<ContactPair>& pairs);
+  ///Same as above, but with different structure.  Here all the indexes in the formation are World ids.
+  void InitContactPairs(const ContactFormation& formation);
 
   virtual int NumDimensions() const;
   virtual void Sample(Config& x);

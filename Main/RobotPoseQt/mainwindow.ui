@@ -18,31 +18,6 @@
   </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QGridLayout" name="gridLayout">
-    <item row="0" column="0">
-     <widget class="QRobotTestBackend" name="displaywidget" native="true">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-        <horstretch>3</horstretch>
-        <verstretch>1</verstretch>
-       </sizepolicy>
-      </property>
-      <property name="minimumSize">
-       <size>
-        <width>200</width>
-        <height>200</height>
-       </size>
-      </property>
-      <property name="maximumSize">
-       <size>
-        <width>16777215</width>
-        <height>16777215</height>
-       </size>
-      </property>
-      <property name="toolTip">
-       <string>free mode</string>
-      </property>
-     </widget>
-    </item>
     <item row="0" column="1">
      <widget class="ResourceFrame" name="frame_resources">
       <property name="sizePolicy">
@@ -381,6 +356,9 @@
       </item>
      </layout>
     </item>
+    <item row="0" column="0">
+     <widget class="QRobotPoseBackend" name="displaywidget" native="true"/>
+    </item>
    </layout>
   </widget>
   <widget class="QMenuBar" name="menuBar">
@@ -422,11 +400,7 @@
     <bool>false</bool>
    </attribute>
   </widget>
-  <widget class="QStatusBar" name="statusBar">
-   <property name="statusTip">
-    <string>test123</string>
-   </property>
-  </widget>
+  <widget class="QStatusBar" name="statusBar"/>
   <widget class="QToolBar" name="toolBar_2">
    <property name="windowTitle">
     <string>toolBar_2</string>
@@ -644,9 +618,9 @@
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>
   <customwidget>
-   <class>QRobotTestBackend</class>
+   <class>QRobotPoseBackend</class>
    <extends>QWidget</extends>
-   <header>qrobottestbackend.h</header>
+   <header>qrobotposebackend.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
@@ -657,6 +631,7 @@
   </customwidget>
  </customwidgets>
  <resources>
+  <include location="../KlamptQt/icons.qrc"/>
   <include location="../KlamptQt/icons.qrc"/>
  </resources>
  <connections>

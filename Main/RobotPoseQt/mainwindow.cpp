@@ -20,28 +20,15 @@ void MainWindow::Initialize(int _argc,const char** _argv)
 {
     argc=_argc;
     argv=_argv;
-    /*
-    qDebug()<<argc;
-    qDebug()<<argv[0];
-    qDebug()<<argv[1];
-    qDebug()<<argv[2];
-    */
-    //world=new RobotWorld();
-    //SimTestBackend backend(world);
-    //if(!ui->displaywidget->LoadAndInitSim(argc,argv)) {
-    //  printf("ERROR");
-    //}
+
     Robot robot;
     if(!robot.Load(argv[1])){
         printf("Error");
     }
-    const string robname="placeholder";
     world=new RobotWorld();
-    //world->AddRobot(robname,&robot);
     world->LoadRobot(argv[1]);
     ui->displaywidget->world=world;
-    printf("BACKEND LOADED\n");
-    gui=new QRobotTestGUIBase(ui->displaywidget,world);
+    gui=new QRobotPoseGUI(ui->displaywidget,world);
 
     manager = new ResourceManager();
 
@@ -50,8 +37,6 @@ void MainWindow::Initialize(int _argc,const char** _argv)
     ui->displaywidget->manager = manager;
 
     ui->frame_resources->robot = rob;
-
-
 
     ui->displaywidget->Start();
 
@@ -247,7 +232,7 @@ void MainWindow::PrintCollisions(){
 }
 
 void MainWindow::LoadFile(){
-    gui->LoadFile();
+    gui->LoadFilePrompt();
 }
 
 MainWindow::~MainWindow()
