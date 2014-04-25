@@ -31,7 +31,7 @@ void MainWindow::Initialize(int _argc,const char** _argv)
     world->LoadRobot(argv[1]);
     ui->displaywidget->world=world;
     printf("BACKEND LOADED\n");
-    gui=new QRobotTestGUIBase(ui->displaywidget,world);
+    gui=new QRobotTestGUI(ui->displaywidget,world);
     ui->displaywidget->Start();
 
     //mediator, can be moved to direct calls

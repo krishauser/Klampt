@@ -1,9 +1,9 @@
-#include "qrobottestguibase.h"
+#include "qrobottestgui.h"
 
 #include <QSettings>
 #include <QtGui/QApplication>
 
-QRobotTestGUIBase::QRobotTestGUIBase(GenericBackendBase *_backend, RobotWorld *_world) :
+QRobotTestGUI::QRobotTestGUI(GenericBackendBase *_backend, RobotWorld *_world) :
     QtGUIBase(_backend,_world),
     col_out(new CollisionOutput)
 
@@ -25,31 +25,31 @@ QRobotTestGUIBase::QRobotTestGUIBase(GenericBackendBase *_backend, RobotWorld *_
   link_index=0;
 }
 
-void QRobotTestGUIBase::SetDriver(int index){
+void QRobotTestGUI::SetDriver(int index){
     driver_index=index;
     SendCommand("set_driver",index);
     emit UpdateDriverValue();
     emit UpdateDriverParameters();
 }
 
-void QRobotTestGUIBase::SetDriverValue(double val){
+void QRobotTestGUI::SetDriverValue(double val){
     SendCommand("set_driver",driver_index);
     SendCommand("set_driver_value",val);
 }
 
-void QRobotTestGUIBase::SetLink(int index){
+void QRobotTestGUI::SetLink(int index){
     link_index=index;
     SendCommand("set_link",index);
     emit UpdateLinkValue();
     emit UpdateLinkParameters();
 }
 
-void QRobotTestGUIBase::SetLinkValue(double val){
+void QRobotTestGUI::SetLinkValue(double val){
     SendCommand("set_link",link_index);
     SendCommand("set_link_value",val);
 }
 
-bool QRobotTestGUIBase::OnCommand(const string &cmd, const string &args){
+bool QRobotTestGUI::OnCommand(const string &cmd, const string &args){
     if(cmd=="update_config"){
         UpdateGUI();
         return true;
@@ -62,7 +62,7 @@ bool QRobotTestGUIBase::OnCommand(const string &cmd, const string &args){
     else return QtGUIBase::OnCommand(cmd,args);
 }
 
-void QRobotTestGUIBase::UpdateGUI(){
+void QRobotTestGUI::UpdateGUI(){
 
     emit UpdateLinkValue();
     emit UpdateLinkParameters();
@@ -70,7 +70,7 @@ void QRobotTestGUIBase::UpdateGUI(){
     emit UpdateDriverParameters();
 }
 
-void QRobotTestGUIBase::LoadFile(QString filename){
+void QRobotTestGUI::LoadFile(QString filename){
   QSettings ini(QSettings::IniFormat, QSettings::UserScope,
 		QCoreApplication::organizationName(),
 		QCoreApplication::applicationName());

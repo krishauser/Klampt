@@ -5,11 +5,11 @@
 
 #include <qrobottestbackend.h>
 #include <collisionoutput.h>
-class QRobotTestGUIBase : public QtGUIBase
+class QRobotTestGUI : public QtGUIBase
 {
     Q_OBJECT
 public:
-    explicit QRobotTestGUIBase(GenericBackendBase* _backend,RobotWorld* _world);
+    explicit QRobotTestGUI(GenericBackendBase* _backend,RobotWorld* _world);
     void SetDriver(int index);
     void SetLink(int index);
     void LoadFile(QString filename=QString());
