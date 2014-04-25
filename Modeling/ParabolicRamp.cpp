@@ -835,20 +835,24 @@ Real PPRamp::CalcMinAccel(Real endTime,Real sign,Real& switchTime) const
   }
   bool firstInfeas = false;
   if(res > 0 && (FuzzyZero(accel1,EpsilonA) || FuzzyZero(endTime/rat1,EpsilonA))) { //infer that accel must be small
-    if(!FuzzyZero(dx0-dx1,EpsilonT)) { //no good answer if dx0=dx1
-      switchTime1 = endTime*0.5;
-    }
+    //if(!FuzzyZero(dx0-dx1,EpsilonT)) { //no good answer if dx0!=dx1
+    //  switchTime1 = endTime*0.5;
+    //}
     if(!FuzzyEquals(x0 + switchTime1*dx0 + 0.5*Sqr(switchTime1)*accel1,x1 - (endTime-switchTime1)*dx1 - 0.5*Sqr(endTime-switchTime1)*accel1,EpsilonX) ||
        !FuzzyEquals(dx0+switchTime1*accel1,dx1+(endTime-switchTime1)*accel1,EpsilonV)) {
       firstInfeas = true;
+      //printf("First solution %g for time %g, %g for time %g\n",accel1,switchTime1,-accel1,endTime-switchTime1);
+      //printf("First solution infeasible, x diff %g, v %g %g\n",x0 + switchTime1*dx0 + 0.5*Sqr(switchTime1)*accel1 - (x1 - (endTime-switchTime1)*dx1 - 0.5*Sqr(endTime-switchTime1)*accel1),dx0+switchTime1*accel1,(dx1+(endTime-switchTime1)*accel1));
     }
   }
   if(res > 1 && (FuzzyZero(accel2,EpsilonA) || FuzzyZero(endTime/rat2,EpsilonA))) {
-    if(!FuzzyZero(dx0-dx1,EpsilonT)) { //no good answer if dx0=dx1
-      switchTime2 = endTime*0.5;
-    }
+    //if(!FuzzyZero(dx0-dx1,EpsilonT)) { //no good answer if dx0!=dx1
+    //  switchTime2 = endTime*0.5;
+    //}
     if(!FuzzyEquals(x0 + switchTime2*dx0 + 0.5*Sqr(switchTime2)*accel2,x1 - (endTime-switchTime2)*dx1 - 0.5*Sqr(endTime-switchTime2)*accel2,EpsilonX) ||
        !FuzzyEquals(dx0+switchTime2*accel2,dx1+(endTime-switchTime2)*accel2,EpsilonV)) {
+      //printf("Second solution %g for time %g, %g for time %g\n",accel2,switchTime2,-accel2,endTime-switchTime2);
+      //printf("Second solution infeasible, x %g %g, v %g %g\n",x0 + switchTime2*dx0 + 0.5*Sqr(switchTime2)*accel2,x1 - (endTime-switchTime2)*dx1 - 0.5*Sqr(endTime-switchTime2)*accel2,dx0+switchTime2*accel2,(dx1+(endTime-switchTime2)*accel2));
       res--;
     }
   }
