@@ -63,32 +63,59 @@ public:
   bool newTarget;
 };
 
+/** 
+ * API:
+ * Commands:
+ * - new_target: sets a new target
+ * - set_collision_margin val: sets a new collision avoidance margin.
+ * 
+ * Button toggles
+ * - draw_commanded
+ * - draw_desired
+ * - draw_path
+ * - draw_ui
+ * - draw_contacts
+ */
 class RealTimePlannerGUIBackend : public SimGUIBackend
 {
 public:
   WorldPlannerSettings settings;
 
-  SimRobotInterface robotInterface;
+  SmartPointer<SimRobotInterface> robotInterface;
   SmartPointer<InputProcessingInterface> ui;
   SmartPointer<InputProcessorBase> inputProcessor;
+  //store existing collision geometries before modifying them for planner
+  vector<AnyCollisionGeometry3D> geomStorage;
 
   Real collisionMargin;
   int drawCommanded,drawDesired,drawPath,drawUI,drawContacts;
 
   RealTimePlannerGUIBackend(RobotWorld* world)
-    :SimGUIBackend(world),robotInterface(&sim)
+    :SimGUIBackend(world)
   {
   }
 
 
   void Start()
   {
-    settings.InitializeDefault(*world);
+    Assert(sim.robotControllers[0] != NULL);
+    Assert(sim.robotControllers[0]->command != NULL);
+    Assert(sim.robotControllers[0]->sensors != NULL);
+
     //choose and set the collision avoidance margin
-    collisionMargin = 0.01;
+    collisionMargin = 0.0;
     Robot* robot = world->robots[0].robot;
-    for(size_t i=0;i<robot->geometry.size();i++)
+    //Weirdness: the memory from the existing geometries must be kept around
+    //for the simulator to use
+    geomStorage.resize(robot->geometry.size());
+    std::swap(geomStorage,robot->geometry);
+    //create new collision geometry for the planner
+    for(size_t i=0;i<robot->geometry.size();i++) {
+      robot->geometry[i] = AnyCollisionGeometry3D(geomStorage[i]);
       robot->geometry[i].margin += collisionMargin;
+    }
+
+    settings.InitializeDefault(*world);
     drawCommanded = 0;
     drawDesired = 1;
     drawPath = 0;
@@ -102,13 +129,16 @@ public:
     MapButtonToggle("draw_contacts",&drawContacts);
 
     //set up user interface
+    robotInterface = new SimRobotInterface(&sim);
 #ifndef WIN32
+    printf("Constructing multi-threaded RRT user interface...\n");
     ui = new MTRRTCommandInterface;
 #else
+    printf("Constructing single-threaded RRT user interface...\n");
     ui = new RRTCommandInterface;
 #endif //WIN32
     ui->world = world;
-    ui->robotInterface = &robotInterface;
+    ui->robotInterface = robotInterface;
     ui->viewport = &viewport;
     ui->settings = &settings;
     inputProcessor = new MyInputProcessor;
@@ -142,7 +172,7 @@ public:
 
     if(drawDesired) {
       Config curBest;
-      robotInterface.GetEndConfig(curBest);
+      robotInterface->GetEndConfig(curBest);
       robot->UpdateConfig(curBest); 
       world->robots[0].view.SetColors(GLColor(1,1,0,0.5));
       world->robots[0].view.Draw();
@@ -181,8 +211,8 @@ public:
 
     //draw desired path
     if(drawPath) {
-      Real tstart = robotInterface.GetCurTime();
-      Real tend = robotInterface.GetEndTime();
+      Real tstart = robotInterface->GetCurTime();
+      Real tend = robotInterface->GetEndTime();
       Real dt = 0.05;
       //draw end effector path
       glColor3f(1,1,0);
@@ -193,10 +223,10 @@ public:
       for(int i=istart;i<iend;i++) {
 	Real t1=i*dt;
 	Real t2=t1+0.5*dt;
-	robotInterface.GetConfig(t1,robot->q);
+	robotInterface->GetConfig(t1,robot->q);
 	robot->UpdateFrames();
 	glVertex3v(robot->links.back().T_World.t);
-	robotInterface.GetConfig(t2,robot->q);
+	robotInterface->GetConfig(t2,robot->q);
 	robot->UpdateFrames();
 	glVertex3v(robot->links.back().T_World.t);
       }
@@ -214,6 +244,27 @@ public:
     if(cmd=="new_target") {
       dynamic_cast<MyInputProcessor*>(&*inputProcessor)->Randomize(world->robots[0].robot);
     }
+    else if(cmd=="set_collision_margin") {
+      double newmargin;
+      bool res = LexicalCast<double>(args,newmargin);
+      Assert(res != false);
+      Robot* robot = world->robots[0].robot;
+      for(size_t i=0;i<robot->geometry.size();i++)
+	robot->geometry[i].margin -= collisionMargin;
+      collisionMargin = newmargin;
+      for(size_t i=0;i<robot->geometry.size();i++)
+	robot->geometry[i].margin += collisionMargin;
+
+      //HACK: planning thread world is separate from the visualization
+      //thread world
+      MTPlannerCommandInterface* mtui = dynamic_cast<MTPlannerCommandInterface*>(&(*ui));
+      if(mtui) {
+	for(size_t i=0;i<robot->geometry.size();i++)
+	  mtui->planningWorld.robots[0].robot->geometry[i].margin = robot->geometry[i].margin;
+      }
+    }
+    else
+      return false;
     SendRefresh();
     return true;
   }
@@ -275,13 +326,8 @@ public:
       Timer timer;
       string res=ui->UpdateEvent();
 
-      Robot* robot = world->robots[0].robot;
-      for(size_t i=0;i<robot->geometry.size();i++)
-	robot->geometry[i].margin -= collisionMargin;
       sim.Advance(dt);
 
-      for(size_t i=0;i<robot->geometry.size();i++)
-	robot->geometry[i].margin += collisionMargin;
       SendRefresh();
 
       SendPauseIdle(int(Max(0.0,dt-timer.ElapsedTime())*1000.0));
@@ -334,12 +380,17 @@ bool GLUIRealTimePlannerGUI::Initialize()
   AddControl(glui->add_checkbox("Draw UI"),"draw_ui");
   AddControl(glui->add_checkbox("Draw path"),"draw_path");
   AddControl(glui->add_checkbox("Draw contacts"),"draw_contacts");
-
+  GLUI_Spinner* spinner = glui->add_spinner("Collision margin",GLUI_SPINNER_FLOAT);
+  spinner->set_float_limits(0.0,1.0);
+  AddControl(spinner,"collision_margin");
 
   AnyCollection c;
   bool res=c.read("{type:button_press,button:new_target}");
   Assert(res == true);
   AddCommandRule(c,"new_target","");
+  res=c.read("{type:widget_value,widget:collision_margin,value:_1}");
+  Assert(res == true);
+  AddCommandRule(c,"set_collision_margin","_1");
   
   printf("Done initializing...\n");
   return true;
