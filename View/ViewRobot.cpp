@@ -223,12 +223,11 @@ void ViewRobot::DrawLinkFrames()
   }
 }
 
-/*void ViewRobot::DrawTorques(const Vector& T)
+void ViewRobot::DrawTorques(const Vector& T)
 {
   SetTorqueColors(T);
   Draw();
 }
-*/
 
 inline void GetTorqueColor(Real t,GLColor& color)
 {
@@ -245,20 +244,26 @@ inline bool EqualColor(const GLColor& a,const GLColor& b)
   return true;
 }
 
-/*
-
 void ViewRobot::SetTorqueColors(const Vector& T)
 {
-  if(T.isEmpty()) {
+  if(T.empty()) {
     SetColors(GLColor(1,0,1));
     return;
   }
   //draw torques
-  Assert(T.n == (int)robot->links.size());
-  for(int i=0;i<T.n;i++) {
-    GetTorqueColor(T[i],linkAppearance[i].faceColor);
+  Assert(T.n == (int)robot->links.size() || T.n == (int)robot->drivers.size());
+  if(T.n == (int)robot->links.size()) {
+    for(int i=0;i<T.n;i++) {
+      GetTorqueColor(T[i],linkAppearance[i].faceColor);
+    }
+  }
+  else {
+    for(int i=0;i<T.n;i++) {
+      GLColor c;
+      GetTorqueColor(T[i],c);
+      for(size_t k=0;k<robot->drivers[i].linkIndices.size();k++)
+	linkAppearance[robot->drivers[i].linkIndices[k]].faceColor = c;
+    }
   }
 }
 
-
-*/

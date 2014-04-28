@@ -547,7 +547,7 @@ string MTPlannerCommandInterface::ActivateEvent(bool enabled)
     data.globalTime = 0;
     data.pathRefresh = false;
     pthread_create(&planningThread,NULL,planner_thread_func,&data);
-    printf("Creating planning thread\n");
+    printf("Starting planning thread...\n");
   }
   else {
     pthread_mutex_lock(&data.mutex);

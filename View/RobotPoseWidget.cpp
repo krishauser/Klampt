@@ -3,11 +3,11 @@
 #include <robotics/IKFunctions.h>
 
 RobotLinkPoseWidget::RobotLinkPoseWidget()
-  :robot(NULL),viewRobot(NULL),highlightColor(1,1,0,1),hoverLink(-1)
+  :robot(NULL),viewRobot(NULL),highlightColor(1,1,0,1),hoverLink(-1),draw(true)
 {}
 
 RobotLinkPoseWidget::RobotLinkPoseWidget(Robot* _robot,ViewRobot* _viewRobot)
-  :robot(_robot),viewRobot(_viewRobot),poseConfig(_robot->q),highlightColor(1,1,0,1),hoverLink(-1)
+  :robot(_robot),viewRobot(_viewRobot),poseConfig(_robot->q),highlightColor(1,1,0,1),hoverLink(-1),draw(true)
 {}
 
 
@@ -27,6 +27,7 @@ bool RobotLinkPoseWidget::Hover(int x,int y,Camera::Viewport& viewport,double& d
   distance = Inf;    
   hoverLink = -1;
   Vector3 worldpt;
+  Config oldConfig = robot->q;
   robot->UpdateConfig(poseConfig);
   robot->UpdateGeometry();
   for(size_t i=0;i<robot->links.size();i++) {
@@ -41,6 +42,8 @@ bool RobotLinkPoseWidget::Hover(int x,int y,Camera::Viewport& viewport,double& d
       }
     }
   }
+  robot->UpdateConfig(oldConfig);
+  robot->UpdateGeometry();
   if(hoverLink != oldHoverLink) Refresh();
   return (hoverLink != -1);
 }
@@ -65,9 +68,17 @@ void RobotLinkPoseWidget::Drag(int dx,int dy,Camera::Viewport& viewport)
 
 void RobotLinkPoseWidget::DrawGL(Camera::Viewport& viewport) 
 {
-  if(hasHighlight || hasFocus) {
-    if(hoverLink >= 0)
-      viewRobot->linkAppearance[hoverLink].faceColor = highlightColor;
+  if(draw) {
+    vector<GeometryAppearance> oldAppearance = viewRobot->linkAppearance;
+    robot->UpdateConfig(poseConfig);
+    if(!poserAppearance.empty())
+      viewRobot->linkAppearance = poserAppearance;
+    if(hasHighlight || hasFocus) {
+      if(hoverLink >= 0)
+	viewRobot->linkAppearance[hoverLink].faceColor = highlightColor;
+    }
+    viewRobot->Draw();
+    viewRobot->linkAppearance = oldAppearance;
   }
 }
 
