@@ -31,7 +31,7 @@ public:
   WorldPlannerSettings plannerSettings;
   string initialState;
 
-  SimRobotInterface robotInterface;
+  SmartPointer<SimRobotInterface> robotInterface;
   vector<SmartPointer<RobotUserInterface> > uis;
   SmartPointer<InputProcessorBase> serialInputProcessor;
   int currentUI,oldUI;
@@ -43,7 +43,7 @@ public:
   int drawCommanded,drawDesired,drawPath,drawUI,drawContacts;
 
   SafeSerialProgram(RobotWorld* world)
-    :SimViewProgram(world),/*context(1),*/robotInterface(&sim)
+    :SimViewProgram(world)
   {
     //setup the settings
     AnyCollection settings;
@@ -81,6 +81,7 @@ public:
     drawUI = 1;
     drawContacts = 1;
 
+    robotInterface = new SimRobotInterface(&sim);
     plannerSettings.InitializeDefault(*world);
     uis.resize(0);
     uis.push_back(new IKPlannerCommandInterface);
@@ -91,7 +92,7 @@ public:
 #endif //WIN32
     for(size_t i=0;i<uis.size();i++) {
       uis[i]->world = world;
-      uis[i]->robotInterface = &robotInterface;
+      uis[i]->robotInterface = robotInterface;
       uis[i]->viewport = &viewport;
       uis[i]->settings = &plannerSettings;
       dynamic_cast<InputProcessingInterface*>((RobotUserInterface*)uis[i])->SetProcessor(serialInputProcessor);
@@ -143,13 +144,13 @@ public:
 
     if(drawDesired) {
       Config curBest;
-      robotInterface.GetEndConfig(curBest);
+      robotInterface->GetEndConfig(curBest);
       robot->UpdateConfig(curBest); 
       world->robots[0].view.SetColors(GLColor(1,1,0,0.5));
       world->robots[0].view.Draw();
 
-      Real tstart = robotInterface.GetCurTime();
-      Real tend = robotInterface.GetEndTime();
+      Real tstart = robotInterface->GetCurTime();
+      Real tend = robotInterface->GetEndTime();
       Real dt = 0.05;
       //draw end effector path
       glColor3f(1,1,0);
@@ -160,10 +161,10 @@ public:
       for(int i=istart;i<iend;i++) {
 	Real t1=i*dt;
 	Real t2=t2+0.5*dt;
-	robotInterface.GetConfig(t1,robot->q);
+	robotInterface->GetConfig(t1,robot->q);
 	robot->UpdateFrames();
 	glVertex3v(robot->links.back().T_World.t);
-	robotInterface.GetConfig(t2,robot->q);
+	robotInterface->GetConfig(t2,robot->q);
 	robot->UpdateFrames();
 	glVertex3v(robot->links.back().T_World.t);
       }
@@ -176,8 +177,8 @@ public:
 
     //draw desired path
     if(drawPath) {
-      Real tstart = robotInterface.GetCurTime();
-      Real tend = robotInterface.GetEndTime();
+      Real tstart = robotInterface->GetCurTime();
+      Real tend = robotInterface->GetEndTime();
       Real dt = 0.05;
       //draw end effector path
       glColor3f(1,1,0);
@@ -188,10 +189,10 @@ public:
       for(int i=istart;i<iend;i++) {
 	Real t1=i*dt;
 	Real t2=t1+0.5*dt;
-	robotInterface.GetConfig(t1,robot->q);
+	robotInterface->GetConfig(t1,robot->q);
 	robot->UpdateFrames();
 	glVertex3v(robot->links.back().T_World.t);
-	robotInterface.GetConfig(t2,robot->q);
+	robotInterface->GetConfig(t2,robot->q);
 	robot->UpdateFrames();
 	glVertex3v(robot->links.back().T_World.t);
       }
