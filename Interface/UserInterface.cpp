@@ -457,22 +457,22 @@ RealTimePlannerDataSender::RealTimePlannerDataSender(RealTimePlannerData* _data)
 
 bool RealTimePlannerDataSender::Send(Real tplanstart,Real tcut,const ParabolicRamp::DynamicPath& path)
 {
-  pthread_mutex_lock(&data->mutex);
+	{
+		ScopedLock lock(data->mutex);
   Assert(data->startPlanTime == tplanstart);
   data->pathRefresh = true;
   data->tcut = tcut;
   data->path = path;
-  pthread_mutex_unlock(&data->mutex);
-  
+	}  
   while(true) {
-    usleep(1);
-    pthread_mutex_lock(&data->mutex);
-    if(!data->pathRefresh) {  //this signals that the calling thread picked up the data
-      bool res = data->pathRefreshSuccess;
-      pthread_mutex_unlock(&data->mutex);
-      return res;
-    }
-    pthread_mutex_unlock(&data->mutex);
+    ThreadSleep(0.001);
+	{
+		ScopedLock lock(data->mutex);
+		if(!data->pathRefresh) {  //this signals that the calling thread picked up the data
+			bool res = data->pathRefreshSuccess;
+			return res; //unlocks mutex
+		}
+	}//unlocks mutex
   }
 }  
 
@@ -481,13 +481,13 @@ void* planner_thread_func(void * ptr)
   RealTimePlannerData* data = reinterpret_cast<RealTimePlannerData*>(ptr);
   while (true) {
     //first wait for a lock
-    pthread_mutex_lock(&data->mutex);
+	  {
+		  ScopedLock(data->mutex);
 
     //parse the data
     if(!data->active) {
       //quit
-      pthread_mutex_unlock(&data->mutex);
-      return NULL;
+      return NULL;  //unlocks the mutex
     }
     assert(data->pathRefresh == false);
     bool start=false;
@@ -504,7 +504,7 @@ void* planner_thread_func(void * ptr)
 	data->planner->Reset(NULL);
       }
     }
-    pthread_mutex_unlock(&data->mutex);
+	  } //unlocks the mutex
 
     if(start) {
       //do the planning -- the callback will output the result to the
@@ -514,7 +514,7 @@ void* planner_thread_func(void * ptr)
       
       printf("Planning thread: result %d\n",(int)res);    
     }
-    usleep(1);
+    ThreadSleep(0.001);
   }
   return NULL;
 }
@@ -523,7 +523,6 @@ void* planner_thread_func(void * ptr)
 MTPlannerCommandInterface::MTPlannerCommandInterface()
   : planner(NULL)
 {
-  data.mutex = PTHREAD_MUTEX_INITIALIZER;
 }
 
 MTPlannerCommandInterface::~MTPlannerCommandInterface()
@@ -546,14 +545,15 @@ string MTPlannerCommandInterface::ActivateEvent(bool enabled)
     data.active = true;
     data.globalTime = 0;
     data.pathRefresh = false;
-    pthread_create(&planningThread,NULL,planner_thread_func,&data);
+    planningThread = ThreadStart(planner_thread_func,&data);
     printf("Creating planning thread\n");
   }
   else {
-    pthread_mutex_lock(&data.mutex);
-    data.active = false;
-    pthread_mutex_unlock(&data.mutex);
-    pthread_join(planningThread,NULL);
+	  {
+		ScopedLock lock(data.mutex);
+		data.active = false;
+	  } //unlocks the mutex
+    ThreadJoin(planningThread);
   }
   return "";
 }
@@ -574,7 +574,8 @@ string MTPlannerCommandInterface::UpdateEvent()
   }
 
   //now lock the planning thread's mutex
-  pthread_mutex_lock(&data.mutex);
+  {
+  ScopedLock lock(data.mutex);
 
   //update the objective function if necessary
   if(ObjectiveChanged()) {
@@ -602,7 +603,7 @@ string MTPlannerCommandInterface::UpdateEvent()
     //printf("Sim thread: waiting for plan to complete\n");
   }
   data.globalTime = robotInterface->GetCurTime();
-  pthread_mutex_unlock(&data.mutex);
+  } //unlocks the mutex
   return "";
 }
 

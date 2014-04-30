@@ -9,9 +9,7 @@
 #include "Planning/RealTimePlanner.h"
 #include "RobotInterface.h"
 #include "InputProcessor.h"
-#ifndef WIN32
-#include <pthread.h>
-#endif //WIN32
+#include <utils/threadutils.h>
 
 
 
@@ -170,15 +168,13 @@ class RRTCommandInterface : public PlannerCommandInterface
 };
 
 
-#ifndef WIN32
-//Win32 doesn't have pthreads... should migrate to a cross platform threading library in the future
 
 /** @brief Shared data structure for a multithreaded real time planner.
  * The planner must have a RealTimePlannerDataSender as a sendPathCallback.
  */
 struct RealTimePlannerData
 {
-  pthread_mutex_t mutex;
+  Mutex mutex;
   RealTimePlannerBase* planner;
   SmartPointer<PlannerObjectiveBase> objective;   //(in) the planning objective, can be NULL
   bool active;             //(in) set this to false to quit
@@ -211,7 +207,7 @@ public:
   //the inputProcessor can point into the regular world
   RobotWorld planningWorld;
   RealTimePlannerBase* planner;
-  pthread_t planningThread;
+  Thread planningThread;
   RealTimePlannerData data;
 
   MTPlannerCommandInterface();
@@ -253,6 +249,5 @@ class MTRRTCommandInterface: public MTPlannerCommandInterface
 
   SmartPointer<SingleRobotCSpace> cspace;
 };
-#endif //WIN32
 
 #endif
