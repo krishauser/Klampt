@@ -567,6 +567,8 @@ string MTPlannerCommandInterface::UpdateEvent()
   SmartPointer<PlannerObjectiveBase> obj;
   if(ObjectiveChanged()) {
     obj = inputProcessor->MakeObjective(planner->cspace->GetRobot());
+    //this is the visualization objective
+    currentObjective = obj;
     if(planner->goal && planner->goal->Delta(obj) > gPlannerStopDeltaThreshold) {
       printf("\n");
       printf("****** STOP PLANNING **********\n");
