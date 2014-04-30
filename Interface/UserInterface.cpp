@@ -6,9 +6,6 @@
 #include <GLdraw/GL.h>
 #include <GLdraw/drawextra.h>
 #include <sstream>
-#ifdef CYGWIN
-#undef WIN32
-#endif //CYGWIN
 #ifndef WIN32
 #include <unistd.h>
 #endif //WIN32
@@ -450,7 +447,6 @@ string RRTCommandInterface::ActivateEvent(bool enabled)
 
 
 
-#ifndef WIN32
 RealTimePlannerDataSender::RealTimePlannerDataSender(RealTimePlannerData* _data)
   :data(_data)
 {}
@@ -481,6 +477,8 @@ void* planner_thread_func(void * ptr)
   RealTimePlannerData* data = reinterpret_cast<RealTimePlannerData*>(ptr);
   while (true) {
     //first wait for a lock
+    bool start=false;
+    Real startTime;
 	  {
 		  ScopedLock(data->mutex);
 
@@ -490,8 +488,6 @@ void* planner_thread_func(void * ptr)
       return NULL;  //unlocks the mutex
     }
     assert(data->pathRefresh == false);
-    bool start=false;
-    Real startTime;
     if(data->objective) {
       start=true;
       startTime = data->startPlanTime = data->globalTime;
@@ -503,8 +499,8 @@ void* planner_thread_func(void * ptr)
 	printf("Planning thread: NULL objective function set...\n");
 	data->planner->Reset(NULL);
       }
-    }
-	  } //unlocks the mutex
+	}
+	  }  //unlocks the mutex
 
     if(start) {
       //do the planning -- the callback will output the result to the
@@ -638,4 +634,3 @@ string MTRRTCommandInterface::ActivateEvent(bool enabled)
   }
   return MTPlannerCommandInterface::ActivateEvent(enabled);
 }
-#endif //WIN32

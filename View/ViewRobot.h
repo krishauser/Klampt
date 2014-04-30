@@ -21,11 +21,11 @@ struct ViewRobot
   void DrawCenterOfMass(Real radius = 0.05);
   void DrawLinkCenterOfMass(int i,Real radius = 0.05);
   void DrawLinkFrames();
-  //void DrawTorques(const Vector& t);
+  void DrawTorques(const Vector& t);
   void SetColors(const GLColor& c);
   void SetColor(int i,const GLColor& c);
   void SetGrey();
-  //void SetTorqueColors(const Vector& t);
+  void SetTorqueColors(const Vector& t);
 
   Robot* robot;
   vector<GeometryAppearance> linkAppearance;

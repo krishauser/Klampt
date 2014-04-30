@@ -75,6 +75,12 @@ public:
   ///Renders the state of the simulation
   virtual void RenderWorld();
 
+  ///Sets the colors of robots to indicate force magnitudes
+  void SetForceColors();
+
+  ///Sets the colors of robots to indicate torque magnitudes
+  void SetTorqueColors();
+
   ///Renders the simulation clock (when in screen mode)
   void DrawClock(int x,int y);
 
