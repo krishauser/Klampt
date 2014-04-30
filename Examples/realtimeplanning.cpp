@@ -11,9 +11,9 @@
 using namespace Math3D;
 using namespace GLDraw;
 
-#ifdef CYGWIN
-#undef WIN32
-#endif // CYGWIN
+//comment this out if you want to try single-threaded planning and simulation 
+#define MULTITHREADED
+
 
 //planner update time step
 double dt=0.01;
@@ -79,6 +79,7 @@ public:
 class RealTimePlannerGUIBackend : public SimGUIBackend
 {
 public:
+  RobotWorld planningWorld;
   WorldPlannerSettings settings;
 
   SmartPointer<SimRobotInterface> robotInterface;
@@ -104,18 +105,13 @@ public:
 
     //choose and set the collision avoidance margin
     collisionMargin = 0.0;
-    Robot* robot = world->robots[0].robot;
-    //Weirdness: the memory from the existing geometries must be kept around
-    //for the simulator to use
-    geomStorage.resize(robot->geometry.size());
-    std::swap(geomStorage,robot->geometry);
-    //create new collision geometry for the planner
+    CopyWorld(*world,planningWorld);
+    Robot* robot = planningWorld.robots[0].robot;
     for(size_t i=0;i<robot->geometry.size();i++) {
-      robot->geometry[i] = AnyCollisionGeometry3D(geomStorage[i]);
       robot->geometry[i].margin += collisionMargin;
     }
 
-    settings.InitializeDefault(*world);
+    settings.InitializeDefault(planningWorld);
     drawCommanded = 0;
     drawDesired = 1;
     drawPath = 0;
@@ -130,7 +126,7 @@ public:
 
     //set up user interface
     robotInterface = new SimRobotInterface(&sim);
-#ifndef WIN32
+#ifdef MULTITHREADED
     printf("Constructing multi-threaded RRT user interface...\n");
     ui = new MTRRTCommandInterface;
 #else
@@ -138,9 +134,10 @@ public:
     ui = new RRTCommandInterface;
 #endif //WIN32
     ui->world = world;
+    ui->settings = &settings;
+    ui->planningWorld = &planningWorld;
     ui->robotInterface = robotInterface;
     ui->viewport = &viewport;
-    ui->settings = &settings;
     inputProcessor = new MyInputProcessor;
     ui->SetProcessor(inputProcessor);
 
@@ -158,6 +155,7 @@ public:
     Robot* robot=world->robots[0].robot;
     RobotController* rc=sim.robotControllers[0];
 
+    SimGUIBackend::SetForceColors();
     SimGUIBackend::RenderWorld();
 
     //draw current commanded configuration -- transparent
@@ -215,6 +213,7 @@ public:
       Real tend = robotInterface->GetEndTime();
       Real dt = 0.05;
       //draw end effector path
+      glDisable(GL_LIGHTING);
       glColor3f(1,1,0);
       glLineWidth(2.0);
       glBegin(GL_LINES);
@@ -248,20 +247,12 @@ public:
       double newmargin;
       bool res = LexicalCast<double>(args,newmargin);
       Assert(res != false);
-      Robot* robot = world->robots[0].robot;
+      Robot* robot = planningWorld.robots[0].robot;
       for(size_t i=0;i<robot->geometry.size();i++)
 	robot->geometry[i].margin -= collisionMargin;
       collisionMargin = newmargin;
       for(size_t i=0;i<robot->geometry.size();i++)
 	robot->geometry[i].margin += collisionMargin;
-
-      //HACK: planning thread world is separate from the visualization
-      //thread world
-      MTPlannerCommandInterface* mtui = dynamic_cast<MTPlannerCommandInterface*>(&(*ui));
-      if(mtui) {
-	for(size_t i=0;i<robot->geometry.size();i++)
-	  mtui->planningWorld.robots[0].robot->geometry[i].margin = robot->geometry[i].margin;
-      }
     }
     else
       return false;
