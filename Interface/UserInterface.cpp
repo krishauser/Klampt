@@ -316,6 +316,23 @@ string PlannerCommandInterface::ActivateEvent(bool enabled)
   return "";
 }
 
+string PlannerCommandInterface::Instructions() const
+{
+  if(!started) {
+    if(robotInterface->GetEndTime() > robotInterface->GetCurTime()) {
+      return "Waiting until the physical robot stops...";
+    }
+    else if(currentObjective) {
+      stringstream ss;
+      ss<<"Waiting until the error gets below threshold "<<startObjectiveThreshold;
+      return ss.str();
+    }
+    else
+      return InputProcessingInterface::Instructions();
+  }
+  return InputProcessingInterface::Instructions();
+}
+
 string PlannerCommandInterface::UpdateEvent()
 {
   InputProcessingInterface::UpdateEvent();
@@ -326,7 +343,6 @@ string PlannerCommandInterface::UpdateEvent()
 
     //robot still moving
     if(robotInterface->GetEndTime() > robotInterface->GetCurTime()) {
-      printf("Waiting until the robot stops...\n");
       return "";
     }
     if(IsInf(startObjectiveThreshold)) {
@@ -334,6 +350,7 @@ string PlannerCommandInterface::UpdateEvent()
     }
     else if(ObjectiveChanged()) {
       SmartPointer<PlannerObjectiveBase> obj = GetObjective();
+      Assert(currentObjective != NULL);
       Config q,v;
       robotInterface->GetEndConfig(q);
       v.resize(q.n,Zero);

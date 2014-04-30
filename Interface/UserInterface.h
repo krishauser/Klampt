@@ -107,7 +107,6 @@ class IKCommandInterface : public InputProcessingInterface
  public:
   virtual string Name() const { return "PointPoser"; }
   virtual string Description() const { return "Point poser"; }
-  virtual string Instructions() const { return "Click and drag to pose points"; }
   virtual string UpdateEvent();
 };
 
@@ -122,10 +121,10 @@ class PlannerCommandInterface : public InputProcessingInterface
   virtual ~PlannerCommandInterface();
   virtual string Name() const { return "UnnamedPlanner"; }
   virtual string Description() const { return "Unnamed planner interface"; }
-  virtual string Instructions() const { return "Click and drag to set planner goal"; }
 
   virtual string ActivateEvent(bool enabled);
   virtual string UpdateEvent();
+  virtual string Instructions() const;
 
   RealTimePlannerBase* planner;
   double lastPlanTime;
@@ -146,8 +145,6 @@ class IKPlannerCommandInterface : public PlannerCommandInterface
  public:
   virtual string Name() const { return "IKPointPoser"; }
   virtual string Description() const { return "Smart point poser"; }
-  virtual string Instructions() const { return "Click and drag to pose points"; }
-
   virtual string ActivateEvent(bool enabled);
 
   SmartPointer<SingleRobotCSpace> cspace;
@@ -161,7 +158,6 @@ class RRTCommandInterface : public PlannerCommandInterface
  public:
   virtual string Name() const { return "RRTPointPoser"; }
   virtual string Description() const { return "Goal-based point poser"; }
-  virtual string Instructions() const { return "Click and drag to set the goal for a point"; }
   virtual string ActivateEvent(bool enabled);
 
   //TODO: draw the plan feedback?
