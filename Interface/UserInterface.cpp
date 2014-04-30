@@ -68,7 +68,7 @@ double MaxAbsError(const vector<double>& a,const vector<double>& b)
 
 
 RobotUserInterface::RobotUserInterface()
-  :world(NULL),viewport(NULL),robotInterface(NULL),settings(NULL),planningWorld(NULL)
+  :world(NULL),viewport(NULL),planningWorld(NULL),settings(NULL),robotInterface(NULL)
 {}
 
 void RobotUserInterface::GetClickRay(int mx,int my,Ray3D& ray) const

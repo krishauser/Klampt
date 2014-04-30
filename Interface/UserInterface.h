@@ -87,6 +87,7 @@ class InputProcessingInterface : public RobotUserInterface
   SmartPointer<PlannerObjectiveBase> GetObjective();
   CartesianObjective* GetCartesianObjective();
 
+  virtual string Instructions() const { if(inputProcessor) return inputProcessor->Instructions(); else return ""; }
   virtual string ActivateEvent(bool enabled);
   virtual void DrawGL();
   virtual string MouseInputEvent(int mx,int my,bool drag);
@@ -213,9 +214,6 @@ public:
   virtual ~MTPlannerCommandInterface();
   virtual string Name() const { return "UnnamedPlanner"; }
   virtual string Description() const {  return "Unnamed planner interface";  }
-  virtual string Instructions() const {
-    return "Right-click and drag any point on the robot to the place you want it to be";
-  }
   
   virtual string ActivateEvent(bool enabled);
   virtual string UpdateEvent();
@@ -226,9 +224,6 @@ class MTIKPlannerCommandInterface: public MTPlannerCommandInterface
  public:
   virtual string Name() const { return "IKPointPoser"; }
   virtual string Description() const { 	return "Smart point poser (MT)"; }
-  virtual string Instructions() const {
-    return "Right-click and drag any point on the robot to the place you want it to be";
-  }
   virtual string ActivateEvent(bool enabled);
 
   SmartPointer<SingleRobotCSpace> cspace;
@@ -240,9 +235,6 @@ class MTRRTCommandInterface: public MTPlannerCommandInterface
  public:
   virtual string Name() const { return "RRTPointPoser"; }
   virtual string Description() const {  return "Goal-based point poser (MT)"; }
-  virtual string Instructions() const {
-    return "Right-click and drag any point on the robot to the place you want it to be";
-  }
   //sets up the planner
   virtual string ActivateEvent(bool enabled);
 

@@ -17,6 +17,7 @@ class InputProcessorBase
  public:
   InputProcessorBase();
   virtual ~InputProcessorBase() {}
+  virtual string Instructions() const { return ""; }
   virtual void Activate(bool enabled) {}
   virtual bool HasUpdate() { return true; }
   virtual void Hover(int mx,int my) {}
@@ -43,6 +44,7 @@ class StandardInputProcessor : public InputProcessorBase
  public:
   StandardInputProcessor();
   virtual ~StandardInputProcessor() {}
+  virtual string Instructions() const { return "Click and drag to pose points on the robot"; }
   virtual void Activate(bool enabled);
   virtual bool HasUpdate() { return changed; }
   virtual void Hover(int mx,int my);
@@ -117,6 +119,7 @@ class SocketObjectiveProcessor : public SerializedObjectiveProcessor
     :SerializedObjectiveProcessor(&socketReader),socketReader(addr)
     {}
   virtual ~SocketObjectiveProcessor() {}
+  virtual string Instructions() { return "Reading objectives over socket..."; }
   SocketReadWorker socketReader;
 };
 
