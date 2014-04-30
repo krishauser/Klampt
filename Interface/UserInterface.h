@@ -49,6 +49,8 @@ class RobotUserInterface
   //settings
   RobotWorld* world;
   Camera::Viewport* viewport;
+  //if set, the planner will plan in this world
+  RobotWorld* planningWorld;
   WorldPlannerSettings* settings;
   MotionQueueInterface* robotInterface;
 };
@@ -203,9 +205,6 @@ public:
 class MTPlannerCommandInterface: public InputProcessingInterface
 {
 public:
-  //need the planner to point into the planningWorld
-  //the inputProcessor can point into the regular world
-  RobotWorld planningWorld;
   RealTimePlannerBase* planner;
   Thread planningThread;
   RealTimePlannerData data;

@@ -120,42 +120,4 @@ class SocketObjectiveProcessor : public SerializedObjectiveProcessor
   SocketReadWorker socketReader;
 };
 
-
-#if HAVE_ZMQ
-
-#include "zmq.hpp"
-
-///Lets you read the last message sent to this ZMQ subscriber.
-///If no read has occurred for 'timeout' seconds, then the thread will quit
-class ZMQSubWorker : public AsyncReaderThread
-{
- public:
-  ZMQSubWorker(zmq::context_t& context,const char* addr,const char* filter=NULL,double timeout=Inf);
-  virtual bool Start();
-  virtual void Stop();
-  virtual const char* Callback();
-
-  zmq::context_t& context;
-  string addr;
-  string filter;
-  SmartPointer<zmq::socket_t> subscriber;
-  zmq::message_t update;
-};
-
-
-class ZMQObjectiveProcessor : public SerializedObjectiveProcessor
-{
- public:
-  ZMQObjectiveProcessor(zmq::context_t& context,const char* addr,const char* filter=NULL);
-  void InitTimePublisher(const char* timepubaddr);
-  virtual void Activate(bool enabled);
-  virtual void SetGlobalTime(Real time);
-
-  ZMQSubWorker subworker;
-  zmq::socket_t timepub;
-  bool publishTime;
-};
-
-#endif //HAVE_ZMQ
-
 #endif

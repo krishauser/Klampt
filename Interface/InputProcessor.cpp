@@ -2,11 +2,8 @@
 #include <GLdraw/GL.h>
 #include <GLdraw/drawextra.h>
 #include <utils/AnyCollection.h>
-#ifdef CYGWIN
-//Cygwin W32API OpenGL defines WIN32
-#undef WIN32
-#endif //CYGWIN
 #include <sstream>
+using namespace std;
 
 InputProcessorBase::InputProcessorBase()
   : world(NULL),viewport(NULL),currentTime(0)
@@ -232,8 +229,24 @@ SerializedObjectiveProcessor::SerializedObjectiveProcessor(AsyncReaderThread* _r
 void SerializedObjectiveProcessor::Activate(bool enabled)
 {
   if(reader) {
-    if(enabled) reader->Start();
-    else reader->Stop();
+    if(enabled) {
+      bool res=reader->Start();
+      if(!res) {
+	fprintf(stderr,"SerializedObjectiveProcessor: Reader thread could not start\n");
+	fprintf(stderr,"Waiting and retrying at 1s intervals...\n");
+	while(!res) {
+	  ThreadSleep(1);
+	  res = reader->Start();
+	  fprintf(stderr,"...\n");
+	}
+	fprintf(stderr,"Done!\n");
+      }
+    }
+    else {
+      reader->Stop();
+      //wait a second for socket to close on server
+      ThreadSleep(0.5);
+    }
   }
 }
 
@@ -254,76 +267,3 @@ PlannerObjectiveBase* SerializedObjectiveProcessor::MakeObjective(Robot* robot)
 }
 
 
-#if HAVE_ZMQ
-
-
-
-ZMQSubWorker::ZMQSubWorker(zmq::context_t& _context,const char* _addr,const char* _filter,double _timeout)
-  :AsyncReaderThread(_timeout),context(_context),addr(_addr),filter(_filter ? _filter : "")
-{
-}
-
-const char* ZMQSubWorker::Callback()
-{
-  cout<<"Receiving subscriber data..."<<endl;
-  subscriber->recv(&update);
-  cout<<"Done receiving subscriber data..."<<endl;
-  return static_cast<const char*>(update.data());
-}
-
-bool ZMQSubWorker::Start()
-{
-  cout<<"Creating subscriber socket..."<<endl;
-  subscriber = new zmq::socket_t(context,ZMQ_SUB);
-  cout<<"Connecting subscriber socket to "<<addr<<"..."<<endl;
-  subscriber->connect(addr.c_str());
-  if(!filter.empty()) {
-    cout<<"Setting filter options "<<filter<<endl;
-    subscriber->setsockopt(ZMQ_SUBSCRIBE, filter.c_str(), filter.length());
-  }
-  cout<<"Done connecting"<<endl;
-  return AsyncReaderThread::Start();
-}
-
-void ZMQSubWorker::Stop()
-{
-  AsyncReaderThread::Stop();
-  cout<<"Destroying subscriber socket:"<<endl;
-  subscriber = NULL;
-  cout<<"Done destroying subscriber socket:"<<endl;
-}
-
-
-
-
-ZMQObjectiveProcessor::ZMQObjectiveProcessor(zmq::context_t& context,const char* addr,const char* filter)
-  :SerializedObjectiveProcessor(&subworker),subworker(context,addr,filter),timepub(context,ZMQ_PUB),publishTime(false)
-{
-}
-
-void ZMQObjectiveProcessor::InitTimePublisher(const char* timepubaddr)
-{
-  if(timepubaddr) {
-    timepub.bind(timepubaddr);
-    publishTime = true;
-  }
-}
-
-void ZMQObjectiveProcessor::Activate(bool enabled)
-{
-  SerializedObjectiveProcessor::Activate(enabled);
-}
-
-void ZMQObjectiveProcessor::SetGlobalTime(Real time)
-{
-  if(publishTime) {
-    //build the global time message
-    stringstream ss;
-    ss << time;
-    zmq::message_t message(ss.str().length()+1);
-    strcpy((char *) message.data(), ss.str().c_str());
-    timepub.send(message);
-  }
-} 
-
-#endif //HAVE_ZMQ
