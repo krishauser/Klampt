@@ -514,6 +514,8 @@ bool SimGUIBackend::LoadFile(const char* fn)
       return false;
     }
     sim.OnAddModel();
+    //refresh contact feedback
+    InitContactFeedbackAll();
     return true;
   }
   else {

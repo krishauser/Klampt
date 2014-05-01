@@ -1,5 +1,6 @@
 #include "SimTestGUI.h"
 #include <utils/AnyValue.h>
+#include <utils/ioutils.h>
 #include <math/random.h>
 
 
@@ -431,11 +432,25 @@ bool SimTestBackend::OnCommand(const string& cmd,const string& args)
   else if(cmd=="log_contact_state") {
     contactStateLogFile = args;
   }
-
   else if(cmd=="log_contact_wrenches") {
     contactWrenchLogFile = args;
   }
-
+  else if(cmd=="log_commanded_path") {
+    int robot;
+    string fn;
+    stringstream ss(args);
+    ss>>robot;
+    SafeInputString(ss,fn);
+    robotCommandLogFiles[robot] = fn;
+  }
+  else if(cmd=="log_sensed_path") {
+    int robot;
+    string fn;
+    stringstream ss(args);
+    ss>>robot;
+    SafeInputString(ss,fn);
+    robotSensedLogFiles[robot] = fn;
+  }
   else
     return BaseT::OnCommand(cmd,args);
   SendRefresh();
@@ -586,7 +601,46 @@ void SimTestBackend::SimStep(Real dt)
   if(!simLogFile.empty()) DoLogging(simLogFile.c_str());
   if(!contactStateLogFile.empty()) DoContactStateLogging(contactStateLogFile.c_str());
   if(!contactWrenchLogFile.empty()) DoContactWrenchLogging(contactWrenchLogFile.c_str());
-  //TODO: robot linear path logging
+  for(map<int,string>::iterator i=robotCommandLogFiles.begin();i!=robotCommandLogFiles.end();i++) {
+    if(i->second.empty()) continue;
+    if(i->first < 0 || i->first >= (int)world->robots.size()) continue;
+    ofstream out(i->second.c_str(),ios::app);
+    if(!out) {
+      printf("Error writing robot command path to %s\n",i->second.c_str());
+      continue;
+    }
+    Config q;
+    sim.controlSimulators[i->first].GetCommandedConfig(q);
+    out<<sim.time<<'\t'<<q<<endl;
+    out.close();
+  }
+  for(map<int,string>::iterator i=robotSensedLogFiles.begin();i!=robotSensedLogFiles.end();i++) {
+    if(i->second.empty()) continue;
+    if(i->first < 0 || i->first >= (int)world->robots.size()) continue;
+    ofstream out(i->second.c_str(),ios::app);
+    if(!out) {
+      printf("Error writing robot sensed path to %s\n",i->second.c_str());
+      continue;
+    }
+    Config q;
+    sim.controlSimulators[i->first].GetSensedConfig(q);
+    out<<sim.time<<'\t'<<q<<endl;
+    out.close();
+  }
+  for(map<int,string>::iterator i=robotTorqueLogFiles.begin();i!=robotTorqueLogFiles.end();i++) {
+    if(i->second.empty()) continue;
+    if(i->first < 0 || i->first >= (int)world->robots.size()) continue;
+    ofstream out(i->second.c_str(),ios::app);
+    if(!out) {
+      printf("Error writing robot torque path to %s\n",i->second.c_str());
+      continue;
+    }
+    Config q;
+    sim.controlSimulators[i->first].GetActuatorTorques(q);
+    out<<sim.time<<'\t'<<q<<endl;
+    out.close();
+  }
+
 
   if(forceSpringActive)
     sim.hooks.resize(sim.hooks.size()-1);
