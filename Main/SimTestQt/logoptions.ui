@@ -79,13 +79,6 @@
          </widget>
         </item>
         <item>
-         <widget class="QCheckBox" name="chk_log">
-          <property name="text">
-           <string>Logging</string>
-          </property>
-         </widget>
-        </item>
-        <item>
          <spacer name="verticalSpacer">
           <property name="orientation">
            <enum>Qt::Vertical</enum>
@@ -201,22 +194,6 @@
     <hint type="destinationlabel">
      <x>357</x>
      <y>24</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>chk_log</sender>
-   <signal>clicked(bool)</signal>
-   <receiver>LogOptions</receiver>
-   <slot>ToggleLogging(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>289</x>
-     <y>54</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>293</x>
-     <y>64</y>
     </hint>
    </hints>
   </connection>
