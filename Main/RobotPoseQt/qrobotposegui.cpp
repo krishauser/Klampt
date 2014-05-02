@@ -58,6 +58,10 @@ bool QRobotPoseGUI::OnCommand(const string &cmd, const string &args){
         UpdateGUI();
         return true;
     }
+    else if (cmd=="inform_new_resource"){
+        //from poser to gui
+        resource_frame->updateNewResource(args);
+    }
     else return QtGUIBase::OnCommand(cmd,args);
 }
 

@@ -38,7 +38,10 @@ void ResourceFrame::OpenFile(QString filename){
 }
 
 void ResourceFrame::ChangeSelectedItem(QTreeWidgetItem* it){
-    manager->ChangeSelected(((QResourceTreeItem*)it)->resource);
+    if(it)
+        manager->ChangeSelected(it->text(0).toStdString());
+    else
+        manager->ChangeSelected("");
 }
 
 void ResourceFrame::PressedDelete(){
@@ -55,6 +58,7 @@ void ResourceFrame::PressedExpand(){
 }
 
 void ResourceFrame::ToGUI(){
+    gui->SendCommand("resource_to_poser");
     //gui->backend->RenderCurrentResource();
   /*
     if(0 == strcmp(selected->resource->Type(),"Config")){
@@ -67,8 +71,24 @@ void ResourceFrame::ToGUI(){
 }
 
 void ResourceFrame::FromGUI(){
+    gui->SendCommand("poser_to_resource","Config");
 }
 
+void ResourceFrame::updateNewResource(string name){
+    ResourceNode node = manager->itemsByName[name];
+    if(node){
+        if(ui->treeWidget->selectedItems().isEmpty()){
+            ui->treeWidget->addTopLevelItem(new QResourceTreeItem(node));
+        }
+        else{
+        QResourceTreeItem *parent = (QResourceTreeItem*)(ui->treeWidget->selectedItems()[0]);
+        parent->addChild(node);
+        }
+    }
+    else{
+       printf("No node of name %s found in tree",name.c_str());
+    }
+}
 
 //void ResourceFrame::selectionChanged(){
 

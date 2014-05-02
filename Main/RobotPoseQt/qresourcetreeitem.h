@@ -29,6 +29,7 @@ public:
 
     QResourceTreeItem(ResourceNode rt);
     void AddChildren(vector<ResourceNode> resources);
+    void addChild(ResourceNode r);
 public slots:
     virtual void ToGUI();
     virtual void FromGUI();

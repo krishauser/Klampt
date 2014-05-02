@@ -117,12 +117,19 @@ bool ResourceGUIBackend::LoadCommandLine(int argc,char** argv)
 void ResourceGUIBackend::Add(ResourcePtr r)
 {
   if(r->name.empty()) {
-    stringstream ss;
-    ss<<r->name<<"["<<resources->selected->children.size()<<"]";
-    r->name = ss.str();
+      stringstream ss;
+//      if(resources == NULL) return;
+      if(resources->selected.isNull()){
+          ss<<r->Type()<<"["<<resources->toplevel.size()<<"]";
+      }
+      else{
+          ss<<"["<<resources->selected->children.size()<<"]";
+      }
+      r->name = ss.str();
   }
   last_added = r;
   resources->AddAsChild(r);
+  SendCommand("inform_new_resource", r->name);
 }
 
 ResourcePtr ResourceGUIBackend::Add(const string& name,const string& type)
@@ -289,13 +296,21 @@ bool ResourceGUIBackend::OnCommand(const string& cmd,const string& args)
 
 ResourcePtr ResourceGUIBackend::CurrentResource()
 {
-  if(resources->itemsByName.count(cur_resource_type) == 0) return 0;
-  return resources->selected->resource;
+  //if(resources->itemsByName.count(cur_resource_type) == 0)
+  //      return 0;
+    if(resources && resources->selected)
+        return resources->selected->resource;
+    else return 0;
 }
 
 void ResourceGUIBackend::RenderCurResource()
 {
+  /*
     ResourcePtr current = CurrentResource();
     if(current)
         viewResource.DrawGL(current);
+  */
+  //separate open?
+  if(resources && resources->selected)
+    viewResource.DrawGL(resources->selected->resource);
 }

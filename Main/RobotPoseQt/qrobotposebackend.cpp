@@ -63,8 +63,8 @@ void QRobotPoseBackend::resizeGL(int w, int h){
 }
 
 void QRobotPoseBackend::RenderCurrentResource(){
-    if(manager->open == NULL) return;
-    viewResource.DrawGL(manager->open->resource);
+    if(resources->open == NULL) return;
+    viewResource.DrawGL(resources->open->resource);
 }
 
 void QRobotPoseBackend::RenderWorld(){

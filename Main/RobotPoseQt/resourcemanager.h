@@ -47,13 +47,16 @@ class ResourceManager
   bool DeleteNode(ResourceNode r);
   bool DeleteSelected();
   bool ChangeSelected(ResourceNode);
+  bool ChangeSelected(string str);
+
   bool ChangeSelectedName(string name);
   int size();
   bool SaveSelected(const string& file="");
 
   vector<ResourceNode> ExtractSelectedChildren(vector<string> types);
   vector<ResourceNode> ExpandSelected();
-  bool AddAsChild(ResourcePtr r);
+  ResourceNode AddAsChild(ResourcePtr r);
+  ResourceNode AddTopLevel(ResourcePtr r);
 
   bool Print(ResourceNode current=NULL,int level=0);
 };

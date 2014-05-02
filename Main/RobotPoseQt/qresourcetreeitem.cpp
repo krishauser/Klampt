@@ -35,9 +35,13 @@ void QResourceTreeItem::DeleteItem()
     //if(parent.) delete this;
 }
 
+void QResourceTreeItem::addChild(ResourceNode r){
+    QResourceTreeItem* exp=new QResourceTreeItem(r);
+    QTreeWidgetItem::addChild(exp);
+}
+
 void QResourceTreeItem::AddChildren(vector<ResourceNode> resources){
     for(int i=0;i<resources.size();i++){
-        QResourceTreeItem* exp=new QResourceTreeItem(resources[i]);
-        addChild(exp);
+        addChild(resources[i]);
     }
 }

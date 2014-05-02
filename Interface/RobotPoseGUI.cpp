@@ -329,7 +329,7 @@ bool RobotPoseBackend::OnCommand(const string& cmd,const string& args)
     */
     resources->selected->resource = r;
   }
-  else if(cmd == "resource_to_poser") {
+    else if(cmd == "resource_to_poser") {
     ResourcePtr r=ResourceGUIBackend::CurrentResource();
     const ConfigResource* rc = dynamic_cast<const ConfigResource*>((const ResourceBase*)r);
     if(rc) {

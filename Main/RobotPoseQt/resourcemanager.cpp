@@ -20,10 +20,10 @@ ResourceManager::ResourceManager(){
 }
 
 ResourceNode ResourceTracker::AddChild(ResourcePtr p){
-  ResourceNode rt = new ResourceTracker(p);
-  children.push_back(rt);
-  cout<<"Added Child "<<rt->resource->name<<endl;
-  return rt;
+  ResourceNode node(new ResourceTracker(p));
+  children.push_back(node);
+  cout<<"Added Child "<<node->resource->name<<endl;
+  return node;
 }
 
 vector<ResourceNode> ResourceTracker::AddChildren(vector<ResourcePtr> ptrs){
@@ -37,7 +37,7 @@ vector<ResourceNode> ResourceTracker::AddChildren(vector<ResourcePtr> ptrs){
 void ResourceTracker::SetDirty(){
     if(!dirty){
       dirty=true;
-    if(parent != NULL) parent->SetDirty();
+      if(parent != NULL) parent->SetDirty();
     }
 }
 
@@ -82,16 +82,34 @@ bool ResourceManager::ChangeSelected(ResourceNode sel){
   selected = sel;
 }
 
+bool ResourceManager::ChangeSelected(string str){
+    if(itemsByName[str] != NULL)
+        ChangeSelected(itemsByName[str]);
+}
+
 bool ResourceManager::ChangeSelectedName(string name){
   itemsByName.erase(selected->Name());
   selected->resource->name = name;
   itemsByName[name] = selected;  
 }
 
-bool ResourceManager::AddAsChild(ResourcePtr r){
-    ResourceNode rt = selected->AddChild(r);
-    rt->SetDirty();
-    itemsByName.insert(pair<string,ResourceNode>(rt->Name(),rt));
+ResourceNode ResourceManager::AddTopLevel(ResourcePtr r){
+    ResourceNode node(new ResourceTracker(r));
+    toplevel.push_back(node);
+    cout<<"Added Child "<<node->resource->name<<endl;
+    return node;
+}
+
+ResourceNode ResourceManager::AddAsChild(ResourcePtr r){
+    ResourceNode node;
+    if(selected)
+        node = selected->AddChild(r);
+    else{
+        node = AddTopLevel(r);
+    }
+    node->SetDirty();
+    itemsByName.insert(pair<string,ResourceNode>(node->Name(),node));
+    return node;
 }
 
 vector<ResourceNode> ResourceManager::ExtractSelectedChildren(vector<string> types){
@@ -125,7 +143,7 @@ vector<ResourceNode> ResourceManager::ExpandSelected(){
         types.push_back("Hold");
         types.push_back("Stance");
         types.push_back("IKGoal");
-    }
+     }
     else if(strcmp(selected->Type(),"LinearPath") == 0){
         types.push_back("Configs");
     }

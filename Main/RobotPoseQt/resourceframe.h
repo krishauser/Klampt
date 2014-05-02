@@ -28,6 +28,7 @@ public:
 
     ~ResourceFrame();
     
+    void updateNewResource(string name);
 public slots:
     void OpenFile(QString filename);
     virtual void OpenFile(){OpenFile(QString());}

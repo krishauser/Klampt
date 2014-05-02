@@ -38,7 +38,7 @@ void MainWindow::Initialize(int _argc,const char** _argv)
 
     ui->frame_resources->gui = gui;
     ui->frame_resources->manager = manager;
-    ui->displaywidget->manager = manager;
+    ui->displaywidget->resources = manager;
 
     ui->frame_resources->robot = rob;
 

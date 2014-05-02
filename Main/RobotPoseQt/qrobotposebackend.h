@@ -16,7 +16,6 @@ class QRobotPoseBackend : public QGLWidget, public RobotPoseBackend//, public GL
 public:
     typedef RobotPoseBackend BaseT;
     explicit QRobotPoseBackend(QWidget *parent = 0);
-    ResourceManager* manager;
     ViewResource viewResource;
 
     void initializeGL();
