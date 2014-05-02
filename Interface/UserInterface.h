@@ -9,9 +9,7 @@
 #include "Planning/RealTimePlanner.h"
 #include "RobotInterface.h"
 #include "InputProcessor.h"
-#ifndef WIN32
-#include <pthread.h>
-#endif //WIN32
+#include <utils/threadutils.h>
 
 
 
@@ -51,6 +49,8 @@ class RobotUserInterface
   //settings
   RobotWorld* world;
   Camera::Viewport* viewport;
+  //if set, the planner will plan in this world
+  RobotWorld* planningWorld;
   WorldPlannerSettings* settings;
   MotionQueueInterface* robotInterface;
 };
@@ -87,6 +87,7 @@ class InputProcessingInterface : public RobotUserInterface
   SmartPointer<PlannerObjectiveBase> GetObjective();
   CartesianObjective* GetCartesianObjective();
 
+  virtual string Instructions() const { if(inputProcessor) return inputProcessor->Instructions(); else return ""; }
   virtual string ActivateEvent(bool enabled);
   virtual void DrawGL();
   virtual string MouseInputEvent(int mx,int my,bool drag);
@@ -106,7 +107,6 @@ class IKCommandInterface : public InputProcessingInterface
  public:
   virtual string Name() const { return "PointPoser"; }
   virtual string Description() const { return "Point poser"; }
-  virtual string Instructions() const { return "Click and drag to pose points"; }
   virtual string UpdateEvent();
 };
 
@@ -121,10 +121,10 @@ class PlannerCommandInterface : public InputProcessingInterface
   virtual ~PlannerCommandInterface();
   virtual string Name() const { return "UnnamedPlanner"; }
   virtual string Description() const { return "Unnamed planner interface"; }
-  virtual string Instructions() const { return "Click and drag to set planner goal"; }
 
   virtual string ActivateEvent(bool enabled);
   virtual string UpdateEvent();
+  virtual string Instructions() const;
 
   RealTimePlannerBase* planner;
   double lastPlanTime;
@@ -145,8 +145,6 @@ class IKPlannerCommandInterface : public PlannerCommandInterface
  public:
   virtual string Name() const { return "IKPointPoser"; }
   virtual string Description() const { return "Smart point poser"; }
-  virtual string Instructions() const { return "Click and drag to pose points"; }
-
   virtual string ActivateEvent(bool enabled);
 
   SmartPointer<SingleRobotCSpace> cspace;
@@ -160,7 +158,6 @@ class RRTCommandInterface : public PlannerCommandInterface
  public:
   virtual string Name() const { return "RRTPointPoser"; }
   virtual string Description() const { return "Goal-based point poser"; }
-  virtual string Instructions() const { return "Click and drag to set the goal for a point"; }
   virtual string ActivateEvent(bool enabled);
 
   //TODO: draw the plan feedback?
@@ -170,15 +167,13 @@ class RRTCommandInterface : public PlannerCommandInterface
 };
 
 
-#ifndef WIN32
-//Win32 doesn't have pthreads... should migrate to a cross platform threading library in the future
 
 /** @brief Shared data structure for a multithreaded real time planner.
  * The planner must have a RealTimePlannerDataSender as a sendPathCallback.
  */
 struct RealTimePlannerData
 {
-  pthread_mutex_t mutex;
+  Mutex mutex;
   RealTimePlannerBase* planner;
   SmartPointer<PlannerObjectiveBase> objective;   //(in) the planning objective, can be NULL
   bool active;             //(in) set this to false to quit
@@ -207,20 +202,14 @@ public:
 class MTPlannerCommandInterface: public InputProcessingInterface
 {
 public:
-  //need the planner to point into the planningWorld
-  //the inputProcessor can point into the regular world
-  RobotWorld planningWorld;
   RealTimePlannerBase* planner;
-  pthread_t planningThread;
+  Thread planningThread;
   RealTimePlannerData data;
 
   MTPlannerCommandInterface();
   virtual ~MTPlannerCommandInterface();
   virtual string Name() const { return "UnnamedPlanner"; }
   virtual string Description() const {  return "Unnamed planner interface";  }
-  virtual string Instructions() const {
-    return "Right-click and drag any point on the robot to the place you want it to be";
-  }
   
   virtual string ActivateEvent(bool enabled);
   virtual string UpdateEvent();
@@ -231,9 +220,6 @@ class MTIKPlannerCommandInterface: public MTPlannerCommandInterface
  public:
   virtual string Name() const { return "IKPointPoser"; }
   virtual string Description() const { 	return "Smart point poser (MT)"; }
-  virtual string Instructions() const {
-    return "Right-click and drag any point on the robot to the place you want it to be";
-  }
   virtual string ActivateEvent(bool enabled);
 
   SmartPointer<SingleRobotCSpace> cspace;
@@ -245,14 +231,10 @@ class MTRRTCommandInterface: public MTPlannerCommandInterface
  public:
   virtual string Name() const { return "RRTPointPoser"; }
   virtual string Description() const {  return "Goal-based point poser (MT)"; }
-  virtual string Instructions() const {
-    return "Right-click and drag any point on the robot to the place you want it to be";
-  }
   //sets up the planner
   virtual string ActivateEvent(bool enabled);
 
   SmartPointer<SingleRobotCSpace> cspace;
 };
-#endif //WIN32
 
 #endif

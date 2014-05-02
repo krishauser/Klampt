@@ -310,7 +310,11 @@ void WorldSimulation::SetController(int index,SmartPointer<RobotController> c)
   }
   robotControllers[index] = c;
   controlSimulators[index].controller = c;
-  if(c) c->Reset();
+  if(c) {
+    c->sensors = &controlSimulators[index].sensors;
+    c->command = &controlSimulators[index].command;
+    c->Reset();
+  }
 }
 
 void WorldSimulation::Advance(Real dt)

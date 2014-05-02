@@ -77,9 +77,10 @@ int IsVisible(EdgePlanner* e,Timer& timer,Real cutoff,int numStepsPerCheck=5)
 RealTimePlannerBase::RealTimePlannerBase()
   :robot(NULL),settings(NULL),cspace(NULL),goal(NULL),
    protocol(ExponentialBackoff),currentSplitTime(0.1),currentPadding(0.01),
-   currentExternalPadding(0.01)
-   //protocol(Constant),currentSplitTime(0.1),currentPadding(0.05)
-   ///protocol(Constant),currentSplitTime(0.5),currentPadding(0.05)
+   currentExternalPadding(0.01),
+   //protocol(Constant),currentSplitTime(0.1),currentPadding(0.05),
+   ///protocol(Constant),currentSplitTime(0.5),currentPadding(0.05),
+  maxPadding(5.0)
 {
   pathStartTime = 0;
   cognitiveMultiplier = 1.0;
@@ -190,6 +191,9 @@ bool RealTimePlannerBase::PlanUpdate(Real tglobal,Real& splitTime,Real& planTime
     //update currentPadding
     if(planTime > splitTime-currentExternalPadding) {
       currentPadding *= 2.0;
+      //cap the padding at the max
+      if(currentPadding > maxPadding)
+	currentPadding = maxPadding;
       //if the current padding is exceedingly low, boost it up
       //so that it doesnt have to adapt by doubling
       if(res == Timeout && currentPadding < planTime-(currentSplitTime-currentExternalPadding)) 

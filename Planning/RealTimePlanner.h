@@ -193,6 +193,7 @@ public:
   enum SplitUpdateProtocol { Constant, ExponentialBackoff, Learning };
   SplitUpdateProtocol protocol;
   Real currentSplitTime,currentPadding,currentExternalPadding;
+  Real maxPadding;
 
   ///Statistics captured on planning times, depending on PlanMore output.
   StatCollector planFailTimeStats,planSuccessTimeStats,planTimeoutTimeStats;

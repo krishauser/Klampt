@@ -6,9 +6,9 @@
 #include <fstream>
 using namespace Math3D;
 using namespace GLDraw;
-#ifdef CYGWIN
-#undef WIN32
-#endif // CYGWIN
+
+//comment this out if you want to force single-threaded planning and simulation
+#define MULTITHREADED
 
 enum {
   SIMULATE_BUTTON_ID,
@@ -25,25 +25,30 @@ double timeCostCoeff = 0.0;
 
 
 
+
 class SafeSerialProgram : public SimViewProgram
 {
 public:
+  RobotWorld planningWorld;
   WorldPlannerSettings plannerSettings;
   string initialState;
 
-  SimRobotInterface robotInterface;
+  SmartPointer<SimRobotInterface> robotInterface;
   vector<SmartPointer<RobotUserInterface> > uis;
   SmartPointer<InputProcessorBase> serialInputProcessor;
+  //store existing collision geometries before modifying them for planner
+  vector<AnyCollisionGeometry3D> geomStorage;
   int currentUI,oldUI;
 
   //GUI state
   GLUI* glui;
   GLUI_Listbox* ui_listbox;
 
+  Real collisionMargin;
   int drawCommanded,drawDesired,drawPath,drawUI,drawContacts;
 
   SafeSerialProgram(RobotWorld* world)
-    :SimViewProgram(world),/*context(1),*/robotInterface(&sim)
+    :SimViewProgram(world)
   {
     //setup the settings
     AnyCollection settings;
@@ -62,6 +67,7 @@ public:
       settings["objective_address"]=string("tcp://localhost:3456");
       settings["objective_filter"]=string("objective");
       settings["time_publish_address"]=string("tcp://*:3457");
+      settings["collision_margin"] = 0.0;
       cerr<<settings<<endl;
       exit(-1);
     }
@@ -70,8 +76,8 @@ public:
     string timepubaddr = settings["time_publish_address"];
     SocketObjectiveProcessor* processor = new SocketObjectiveProcessor(objsubaddr.c_str());
     serialInputProcessor = processor;
+    collisionMargin = settings["collision_margin"];
   }
-
 
   virtual bool Initialize()
   {
@@ -81,18 +87,25 @@ public:
     drawUI = 1;
     drawContacts = 1;
 
-    plannerSettings.InitializeDefault(*world);
+    robotInterface = new SimRobotInterface(&sim);
+    CopyWorld(*world,planningWorld);
+    Robot* robot = planningWorld.robots[0].robot;
+    for(size_t i=0;i<robot->geometry.size();i++)
+      robot->geometry[i].margin += collisionMargin;
+    plannerSettings.InitializeDefault(planningWorld);
     uis.resize(0);
+#ifndef MULTITHREADED
     uis.push_back(new IKPlannerCommandInterface);
     uis.push_back(new RRTCommandInterface);
-#ifndef WIN32
+#else
     uis.push_back(new MTIKPlannerCommandInterface);
     uis.push_back(new MTRRTCommandInterface);
 #endif //WIN32
     for(size_t i=0;i<uis.size();i++) {
       uis[i]->world = world;
-      uis[i]->robotInterface = &robotInterface;
+      uis[i]->robotInterface = robotInterface;
       uis[i]->viewport = &viewport;
+      uis[i]->planningWorld = &planningWorld;
       uis[i]->settings = &plannerSettings;
       dynamic_cast<InputProcessingInterface*>((RobotUserInterface*)uis[i])->SetProcessor(serialInputProcessor);
     }
@@ -143,43 +156,22 @@ public:
 
     if(drawDesired) {
       Config curBest;
-      robotInterface.GetEndConfig(curBest);
+      robotInterface->GetEndConfig(curBest);
       robot->UpdateConfig(curBest); 
       world->robots[0].view.SetColors(GLColor(1,1,0,0.5));
       world->robots[0].view.Draw();
-
-      Real tstart = robotInterface.GetCurTime();
-      Real tend = robotInterface.GetEndTime();
-      Real dt = 0.05;
-      //draw end effector path
-      glColor3f(1,1,0);
-      glLineWidth(2.0);
-      glBegin(GL_LINES);
-      int istart=(int)Ceil(tstart/dt);
-      int iend=(int)Ceil(tend/dt);
-      for(int i=istart;i<iend;i++) {
-	Real t1=i*dt;
-	Real t2=t2+0.5*dt;
-	robotInterface.GetConfig(t1,robot->q);
-	robot->UpdateFrames();
-	glVertex3v(robot->links.back().T_World.t);
-	robotInterface.GetConfig(t2,robot->q);
-	robot->UpdateFrames();
-	glVertex3v(robot->links.back().T_World.t);
-      }
-      glEnd();
     }
     if(drawUI) {
-      cout<<"DrawUI"<<endl;
       uis[currentUI]->DrawGL();
     }
 
     //draw desired path
     if(drawPath) {
-      Real tstart = robotInterface.GetCurTime();
-      Real tend = robotInterface.GetEndTime();
+      Real tstart = robotInterface->GetCurTime();
+      Real tend = robotInterface->GetEndTime();
       Real dt = 0.05;
       //draw end effector path
+      glDisable(GL_LIGHTING);
       glColor3f(1,1,0);
       glLineWidth(2.0);
       glBegin(GL_LINES);
@@ -188,10 +180,10 @@ public:
       for(int i=istart;i<iend;i++) {
 	Real t1=i*dt;
 	Real t2=t1+0.5*dt;
-	robotInterface.GetConfig(t1,robot->q);
+	robotInterface->GetConfig(t1,robot->q);
 	robot->UpdateFrames();
 	glVertex3v(robot->links.back().T_World.t);
-	robotInterface.GetConfig(t2,robot->q);
+	robotInterface->GetConfig(t2,robot->q);
 	robot->UpdateFrames();
 	glVertex3v(robot->links.back().T_World.t);
       }

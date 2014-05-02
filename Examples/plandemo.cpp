@@ -1,5 +1,6 @@
 #include "Planning/RobotCSpace.h"
 #include <planning/AnyMotionPlanner.h>
+#include <utils/ioutils.h>
 #include "Modeling/MultiPath.h"
 #include "IO/XmlWorld.h"
 #include <string.h>
@@ -7,35 +8,52 @@
 
 /** @brief Performs basic path planning in collision-free space for the
  * given robot and start/end points.
- * The output is given in path.  At most maxIters iterations are spent
+ * The output is given in path.  At most cond.maxIters iterations are spent
  * planning.
  *
  * The constraint specifications are given in WorldPlannerSettings. If you
  * have custom requirements, you will need to set them up.
  */
-bool SimplePlan(RobotWorld& world,int robot,const Config& qstart,const Config& qgoal,MilestonePath& path,int maxIters=1000)
+bool SimplePlan(RobotWorld& world,int robot,const Config& qstart,const Config& qgoal,MilestonePath& path,
+		const HaltingCondition& cond,const string& plannerSettings="")
 {
   WorldPlannerSettings settings;
   settings.InitializeDefault(world);
   //do more constraint setup here (modifying the settings object) if desired,
   //e.g., set collision margins, edge collision checking resolution, etc.
   SingleRobotCSpace cspace(world,robot,&settings); 
+  if(!cspace.IsFeasible(qstart)) {
+    cout<<"Start configuration is infeasible, violated constraints:"<<endl;
+    vector<bool> infeasible;
+    cspace.CheckObstacles(qstart,infeasible);
+    for(size_t i=0;i<infeasible.size();i++)
+      if(infeasible[i]) cout<<"  "<<cspace.ObstacleName(i)<<endl;
+    return false;
+  }
+  if(!cspace.IsFeasible(qstart)) {
+    cout<<"Goal configuration is infeasible, violated constraints:"<<endl;
+    vector<bool> infeasible;
+    cspace.CheckObstacles(qgoal,infeasible);
+    for(size_t i=0;i<infeasible.size();i++)
+      if(infeasible[i]) cout<<"  "<<cspace.ObstacleName(i)<<endl;
+    return false;
+  }
+  //set up the motion planner settings
   MotionPlannerFactory factory;
+  if(!plannerSettings.empty()) {
+    bool res = factory.LoadJSON(plannerSettings);
+    if(!res) 
+      printf("Warning, incorrectly formatted planner settings file\n");
+  }
   //do more planner setup here if desired, e.g., change planner type,
   //perturbation size, connection radius, etc
-  MotionPlannerInterface* planner = factory.Create(&cspace);
-  int istart=planner->AddMilestone(qstart); //should be 0
-  int igoal=planner->AddMilestone(qgoal); //should be 1
-  for(int i=0;i<maxIters;i++) {
-    planner->PlanMore();
-    if(planner->IsConnected(0,1)) {
-      planner->GetPath(0,1,path);
-      delete planner;
-      return true;
-    }
-  }
+
+  //create the planner and run until the termination criterion stops you
+  MotionPlannerInterface* planner = factory.Create(&cspace,qstart,qgoal);
+  string res = planner->Plan(path,cond);
+  cout<<"Planner terminated with condition "<<res<<endl;
   delete planner;
-  return false;
+  return !path.edges.empty();
 }
 
 int main(int argc,const char** argv)
@@ -44,19 +62,38 @@ int main(int argc,const char** argv)
     printf("USAGE: PlanDemo [options] world_file configs\n");
     printf("OPTIONS:\n");
     printf("-o filename: the output linear path or multipath (default plandemo.xml)\n");
+    printf("-p settings: set the planner configuration file\n");
+    printf("-opt: do optimal planning (do not terminate on the first found solution)\n");
     printf("-n iters: set the default number of iterations (default 1000)\n");
+    printf("-t time: set the planning time limit (default infinity)\n");
     printf("-r robotindex: set the robot index (default 0)\n");
     return 0;
   }
+  Srand(time(NULL));
   int robot = 0;
   const char* outputfile = "plandemo.xml";
-  int maxIters = 1000;
+  HaltingCondition termCond;
+  string plannerSettings;
   int i;
   //parse command line arguments
   for(i=1;i<argc;i++) {
     if(argv[i][0]=='-') {
       if(0==strcmp(argv[i],"-n")) {
-	maxIters = atoi(argv[i+1]);
+	termCond.maxIters = atoi(argv[i+1]);
+	i++;
+      }
+      else if(0==strcmp(argv[i],"-t")) {
+	termCond.timeLimit = atof(argv[i+1]);
+	i++;
+      }
+      else if(0==strcmp(argv[i],"-opt")) {
+	termCond.foundSolution = false;
+      }
+      else if(0==strcmp(argv[i],"-p")) {
+	if(!GetFileContents(argv[i+1],plannerSettings)) {
+	  printf("Unable to load planner settings file %s\n",argv[i+1]);
+	  return 1;
+	}
 	i++;
       }
       else if(0==strcmp(argv[i],"-r")) {
@@ -128,7 +165,7 @@ int main(int argc,const char** argv)
   bool feasible = true;
   for(size_t i=0;i+1<configs.size();i++) {
     MilestonePath mpath;
-    if(!SimplePlan(world,robot,configs[i],configs[i+1],mpath,maxIters)) {
+    if(!SimplePlan(world,robot,configs[i],configs[i+1],mpath,termCond,plannerSettings)) {
       printf("Planning from configuration %d to %d failed\n",i,i+1);
       path.sections.resize(path.sections.size()+1);
       path.sections.back().settings["infeasible"]=1;

@@ -39,6 +39,8 @@ public:
   GLColor highlightColor;
   int hoverLink,hoverDriver;
   Vector3 hoverPt;
+  bool draw;
+  vector<GeometryAppearance> poserAppearance;
 };
 
 /** @brief A widget that allows creating and editing IK constraints

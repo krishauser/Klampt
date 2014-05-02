@@ -67,6 +67,9 @@ struct SensorPlot
  * - load_view(file): loads a previously saved view (inherited from GLNavigationProgram)
  * - save_view(file): saves a view to a file (inherited from GLNavigationProgram)
  * - log_sim(file): saves simulation log to a given file, or "" to set no logging.
+ * - log_commanded_path(robot,file): saves commanded path to a given linear path file, or "" to set no logging.
+ * - log_sensed_path(robot,file): saves actual path to a given linear path file, or "" to set no logging.
+ * - log_torque_path(robot,file): saves applied torques as a linear path file, or "" to set no logging.
  * - log_contact_state(file): saves contact state log to a given file, or "" to set no logging.
  * - log_contact_wrenches(file): saves contact wrench log to a given file, or "" to set no logging.
  *
@@ -93,7 +96,7 @@ public:
   int pose_ik,pose_objects;
   vector<RobotPoseWidget> robotWidgets;
   vector<RigidObjectPoseWidget> objectWidgets;
-  WidgetSet allObjectWidgets;
+  WidgetSet allRobotWidgets,allObjectWidgets;
   WorldDragWidget dragWidget;
   WidgetSet allWidgets;
 
@@ -102,7 +105,7 @@ public:
   int drawBBs,drawPoser,drawDesired,drawEstimated,drawContacts,drawWrenches,drawExpanded,doLogging;
   string simLogFile;
   string contactStateLogFile, contactWrenchLogFile;
-  map<int,string> robotCommandLogFiles, robotSensedLogFiles, robotStateLogFiles;
+  map<int,string> robotCommandLogFiles, robotSensedLogFiles, robotTorqueLogFiles;
 
   vector<SensorPlot> sensorPlots;
   vector<GeometryAppearance> originalAppearance,expandedAppearance;

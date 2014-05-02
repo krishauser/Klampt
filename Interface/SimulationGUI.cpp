@@ -335,20 +335,10 @@ void SimGUIBackend::DrawClock(int x,int y)
     glEnable(GL_DEPTH_TEST);
 }
 
-void SimGUIBackend::RenderWorld()
+void SimGUIBackend::SetForceColors()
 {
-  //WorldGUIBackend::RenderWorld();
-  glDisable(GL_LIGHTING);
-  drawCoords(0.1);
-  glEnable(GL_LIGHTING);
-  for(size_t i=0;i<world->terrains.size();i++)
-    world->terrains[i].view.Draw();
-  for(size_t i=0;i<world->rigidObjects.size();i++)
-    world->rigidObjects[i].view.Draw();
-
   for(size_t i=0;i<world->robots.size();i++) {
     for(size_t j=0;j<world->robots[i].robot->links.size();j++) {
-      sim.odesim.robot(i)->GetLinkTransform(j,world->robots[i].robot->links[j].T_World);
       float color[4] = {0.5,0.5,0.5,1.0};
       if(i==0) {
 	Real kg=sim.ContactForce(world->RobotLinkID(i,j)).norm()/9.8;
@@ -379,6 +369,33 @@ void SimGUIBackend::RenderWorld()
 	}
       }
       world->robots[i].view.SetColor(j,GLColor(color));
+    }
+  }
+}
+
+void SimGUIBackend::SetTorqueColors()
+{
+  for(size_t i=0;i<world->robots.size();i++) {
+    Vector T;
+    sim.controlSimulators[i].GetActuatorTorques(T);
+    world->robots[i].view.SetTorqueColors(T);
+  }
+}
+
+void SimGUIBackend::RenderWorld()
+{
+  //WorldGUIBackend::RenderWorld();
+  glDisable(GL_LIGHTING);
+  drawCoords(0.1);
+  glEnable(GL_LIGHTING);
+  for(size_t i=0;i<world->terrains.size();i++)
+    world->terrains[i].view.Draw();
+  for(size_t i=0;i<world->rigidObjects.size();i++)
+    world->rigidObjects[i].view.Draw();
+
+  for(size_t i=0;i<world->robots.size();i++) {
+    for(size_t j=0;j<world->robots[i].robot->links.size();j++) {
+      sim.odesim.robot(i)->GetLinkTransform(j,world->robots[i].robot->links[j].T_World);
       world->robots[i].view.DrawLink_World(j);
     }
   }
@@ -497,6 +514,8 @@ bool SimGUIBackend::LoadFile(const char* fn)
       return false;
     }
     sim.OnAddModel();
+    //refresh contact feedback
+    InitContactFeedbackAll();
     return true;
   }
   else {

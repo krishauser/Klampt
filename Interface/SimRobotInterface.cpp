@@ -24,4 +24,9 @@ inline MyController* GetController(RobotController* rc)
 
 SimRobotInterface::SimRobotInterface(WorldSimulation* _sim,int _index)
   :DefaultMotionQueueInterface(GetController(_sim->robotControllers[_index]))
-{}
+{
+  //HACK: the command and sensors pointer in controller are not the same
+  //as the top level interface, meaning that GetConfig messes up
+  controller->command = _sim->robotControllers[_index]->command;
+  controller->sensors = _sim->robotControllers[_index]->sensors;
+}

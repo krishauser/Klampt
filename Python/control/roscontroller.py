@@ -63,22 +63,33 @@ rospy = RospyProxy()
 """
 
 class RosRobotController(controller.BaseController):
-    """A controller that reads JointTrajectory from the ROS topic
-    '/[robot_name]/joint_trajectory' and writes JointState to the ROS topic
-    '/[robot_name]/joint_state'.
+    """A controller that reads JointTrajectory messages from a given ROS topic,
+    maintains the trajectory for use in a Klamp't simulation, and writes
+    JointState messages to another ROS topic.
 
-    Uses PID control with feedforward torques.
+    Uses PID control with optional feedforward torques in the effort term.
 
-    Supports partial commands as well, e.g., only controlling part of the
-    robot, ignoring feedforward torques, etc.  Note that if you start sending
-    some command and then stop (like velocities or feedforward torques) this
-    controller will NOT zero them out.
-
+    Acts very much like a ROS JointTrajectoryActionController
+    (http://wiki.ros.org/robot_mechanism_controllers/JointTrajectoryActionController)
     Currently does not support:
         * Setting PID gain constants,
-        * Setting PID integral term bounds.
+        * Setting PID integral term bounds,
+        * Parsing of FollowJointTrajectoryActions or reporting completion
+          of the action.
+        * Partial commands for subsets of joints are supported, but you
+          cannot interleave separate messages to subsets of joints (i.e.,
+          you must let one joint group finish before sending messages to
+          another).
+    
+    Note: trajectory messages start execution exactly at the *Klamp't time*
+    given in the time stamp in the header.  Hence, any nodes connected to this
+    must have the /use_sim_time flag set to 1.
     """
-    def __init__(self,robot_name,link_list):
+    def __init__(self,joint_trajectory_sub_topic,joint_state_pub_topic,link_list):
+        """Sets the controller to subscribe to JointTrajectory messages from
+        joint_trajectory_sub_topic, and publishes JointState messages from
+        joint_state_pub_topic.  The link_list argument is the ordered list
+        of link names in the Klamp't robot model."""
         self.state = JointState()
         n = len(link_list)
         self.state.name = link_list[:]
@@ -90,23 +101,23 @@ class RosRobotController(controller.BaseController):
         self.nameToIndex = dict(zip(self.state.name,range(i)))
 
         # Setup publisher of robot states
-        self.pub = rospy.Publisher("/%s/joint_states"%(robot_name,), JointState)
+        self.pub = rospy.Publisher(joint_state_pub_topic, JointState)
         
         # set up the command subscriber
-        self.firstJointTrajectory = False
-        self.currentJointTrajectoryMsg = None
-        rospy.Subscriber('/%s/joint_trajectory'%(robot_name), JointTrajectory,self.jointTrajectoryCallback)
+        self.jointTrajectoryRosMsgQueue = []
+        rospy.Subscriber(joint_state_pub_topic, JointTrajectory,self.jointTrajectoryCallback)
 
         # these are parsed in from the trajectory message
         self.currentTrajectoryStart = 0
         self.currentTrajectoryNames = []
+        self.currentPhaseTrajectory = None
         self.currentPositionTrajectory = None
         self.currentVelocityTrajectory = None
         self.currentEffortTrajectory = None
         return
 
     def jointTrajectoryCallback(self,msg):
-        self.currentJointTrajectoryMsg = msg
+        self.jointTrajectoryRosMsgQueue.append(msg)
         return
 
     def set_index(self,name,index):
@@ -114,40 +125,83 @@ class RosRobotController(controller.BaseController):
 
     def output(self,**inputs):       
         res = {}
-        if self.currentJointTrajectoryMsg != None:
+        for msg in self.jointTrajectoryRosMsgQueue:
             #parse in the message -- are positions, velocities, efforts specified?
             self.currentTrajectoryStart = inputs['t']
-            self.currentTrajectoryNames = self.currentJointTrajectoryMsg.joint_names
-            times = [p.time_from_start for p in self.currentJointTrajectoryMsg.points]
-            milestones = [p.positions for p in self.currentJointTrajectoryMsg.points]
-            velocities = [p.velocities for p in self.currentJointTrajectoryMsg.points]
-            efforts = [p.velocities for p in self.currentJointTrajectoryMsg.points]
+            self.currentTrajectoryNames = msg.joint_names
+            #read in the start time according to the msg time stamp, as
+            #specified by the ROS JointTrajectoryActionController
+            starttime = msg.header.stamp.to_sec()
+            #read in the relative times 
+            times = [p.time_from_start.to_sec() for p in msg.points]
+            milestones = [p.positions for p in msg.points]
+            velocities = [p.velocities for p in msg.points]
+            accels = [p.accelerations for p in msg.points]
+            efforts = [p.efforts for p in msg.points]
+            #TODO: quintic interpolation with accelerations
+            if any(len(x) != 0 for x in accels):
+                print "roscontroller.py: Warning, acceleration trajectories not handled"
             if all(len(x) != 0 for x in milestones):
-                self.currentPositionTrajectory = Trajectory(times,milestones)
+                if all(len(x) != 0 for x in velocities):
+                    #Hermite interpolation
+                    traj = HermiteTrajectory(times,milestones,velocities)
+                    if self.currentPhaseTrajectory == None:
+                        self.currentPhaseTrajectory = traj
+                    else:
+                        self.currentPhaseTrajectory=self.currentPhaseTrajectory.splice(traj,time=splicetime,relative=True,jumpPolicy='blend')
+                else:
+                    #linear interpolation
+                    self.currentPhaseTrajectory = None
+                    traj = Trajectory(times,milestones)
+                    if self.currentPositionTrajectory == None:
+                        self.currentPositionTrajectory = traj
+                    else:
+                        self.currentPositionTrajectory = self.currentPositionTrajectory.splice(traj,time=splicetime,relative=True,jumpPolicy='blend')
             else:
                 self.currentPositionTrajectory = None
-            if all(len(x) != 0 for x in velocities):
-                self.currentVelocityTrajectory = Trajectory(times,velocities)
-            else:
-                self.currentVelocityTrajectory = None
+                self.currentPhaseTrajectory = None
+                if all(len(x) != 0 for x in velocities):
+                    #velocity control
+                    traj = Trajectory(times,velocities)
+                    if self.currentVelocityTrajectory == None:
+                        self.currentVelocityTrajectory = traj
+                    else:
+                        self.currentVelocityTrajectory = self.currentVelocityTrajectory.splice(traj,time=splicetime,relative=True,jumpPolicy='blend')
+                else:
+                    self.currentVelocityTrajectory = None
             if all(len(x) != 0 for x in efforts):
-                self.currentEffortTrajectory = Trajectory(times,efforts)
+                traj = Trajectory(times,efforts)
+                if self.currentEffortTrajectory == None:
+                    self.currentEffortTrajectory = traj
+                else:
+                    self.currentEffortTrajectory.splice(traj,time=splicetime,relative=True,jumpPolicy='blend')
             else:
                 self.currentEffortTrajectory = None
-            self.currentJointTrajectoryMsg = None
+        #clear the message queue
+        self.jointTrajectoryRosMsgQueue = []
             
         #evaluate the trajectory and send it to controller's output
-        t = inputs['t']-self.currentTrajectoryStart
-        if self.currentPositionTrajectory != None:
-            qcmd = self.currentPositionTrajectory.eval(t,'halt')
+        t = inputs['t']
+        if self.currentPhaseTrajectory != None:
+            #hermite trajectory mode
+            qdqcmd = self.currentPhaseTrajectory.eval(t,'halt')
+            qcmd = qdqcmd[:len(qdqcmd)/2]
+            dqcmd = qdqcmd[len(qdqcmd)/2:]
             self.map_output(qcmd,self.currentTrajectoryNames,res,'qcmd')
-        if self.currentVelocityTrajectory != None:
-            dqcmd = self.currentVelocityTrajectory.deriv(t,'halt')
             self.map_output(dqcmd,self.currentTrajectoryNames,res,'dqcmd')
         elif self.currentPositionTrajectory != None:
+            #piecewise linear trajectory mode
+            qcmd = self.currentPositionTrajectory.eval(t,'halt')
+            self.map_output(qcmd,self.currentTrajectoryNames,res,'qcmd')
             #automatic differentiation
             dqcmd = self.currentPositionTrajectory.deriv(t,'halt')
             self.map_output(dqcmd,self.currentTrajectoryNames,res,'dqcmd')
+        elif self.currentVelocityTrajectory != None:
+            #velocity trajectory mode
+            dqcmd = self.currentVelocityTrajectory.deriv(t,'halt')
+            self.map_output(dqcmd,self.currentTrajectoryNames,res,'dqcmd')
+            #TODO: compute actual time of velocity
+            res['tcmd'] = 1.0
         if self.currentEffortTrajectory != None:
             torquecmd = self.currentEffortTrajectory.eval(t,'halt')
             self.map_output(torquecmd,self.currentTrajectoryNames,res,'torquecmd')
@@ -188,8 +242,7 @@ class RosTimeController(controller.BaseController):
     def output(self,**inputs):
         t = inputs['t']
         time = Clock()
-        time.clock.secs = int(t)
-        time.clock.nsecs = int(float(t-int(t))*1000000000)
+        time.clock = rospy.Time.from_sec(t)
         self.clockpub.publish(time)
         return {}
 
@@ -199,7 +252,11 @@ ros_initialized = False
 
 def make(klampt_robot_model):
     """Creates a ROS controller for the given model.
-    klampt_robot_model is a RobotModel instance."""
+    klampt_robot_model is a RobotModel instance.
+
+    Subscribes to '/[robot_name]/joint_trajectory'.
+    Publishes to '/[robot_name]/joint_state' and '/clock'
+    """
     global ros_initialized
     robotName = klampt_robot_model.getName()
     linkNames = [klampt_robot_model.getLink(i).getName() for i in range(klampt_robotmodel.numLinks())]
@@ -210,6 +267,8 @@ def make(klampt_robot_model):
         #the robot's controller
         c = controller.MultiController()
         c.launch(RosTimeController())
+        joint_trajectory_topic = "/%s/joint_trajectory"%(robot_name,)
+        joint_states_topic = "/%s/joint_states"%(robot_name,)
         c.launch(RosRobotController(robotName,linkNames))
         return c
     #just launch the robot's controller, some other RosTimeController has been

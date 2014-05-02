@@ -1,5 +1,6 @@
 #include "SimTestGUI.h"
 #include <utils/AnyValue.h>
+#include <utils/ioutils.h>
 #include <math/random.h>
 
 
@@ -44,18 +45,26 @@ void SimTestBackend::Start()
 
   dragWidget.Set(world);
   robotWidgets.resize(world->robots.size());
-  for(size_t i=0;i<world->robots.size();i++)
+  for(size_t i=0;i<world->robots.size();i++) {
     robotWidgets[i].Set(world->robots[i].robot,&world->robots[i].view);
+    robotWidgets[i].linkPoser.poserAppearance = world->robots[i].view.linkAppearance;
+    AnyCollection poserColorSetting = settings["poser"]["color"];
+    GLColor poserColor(poserColorSetting[0],poserColorSetting[1],poserColorSetting[2],poserColorSetting[3]);
+    for(size_t j=0;j<robotWidgets[i].linkPoser.poserAppearance.size();j++)
+      robotWidgets[i].linkPoser.poserAppearance[j].faceColor = poserColor;
+  }
+  //draw desired milestone
   objectWidgets.resize(world->rigidObjects.size());
   for(size_t i=0;i<world->rigidObjects.size();i++) 
     objectWidgets[i].Set(world->rigidObjects[i].object,&world->rigidObjects[i].view);
   allWidgets.widgets.push_back(&dragWidget);
   for(size_t i=0;i<world->robots.size();i++)
-    allWidgets.widgets.push_back(&robotWidgets[i]);
+    allRobotWidgets.widgets.push_back(&robotWidgets[i]);
   for(size_t i=0;i<world->rigidObjects.size();i++)
     allObjectWidgets.widgets.push_back(&objectWidgets[i]);
-  //don't pose objects first
-  //allWidgets.widgets.push_back(&allObjectWidgets);
+  allWidgets.widgets.push_back(&allRobotWidgets);
+  allWidgets.widgets.push_back(&allObjectWidgets);
+  allWidgets.Enable(&allObjectWidgets,false);
 
   drawBBs = 0;
   drawPoser = 1;
@@ -190,20 +199,8 @@ void SimTestBackend::RenderWorld()
   glEnable(GL_BLEND);
   Robot* robot=world->robots[0].robot;
   RobotController* rc=sim.robotControllers[0];
-  if(drawPoser) {
-    //draw desired milestone
-    AnyCollection poserColorSetting = settings["poser"]["color"];
-    GLColor poserColor(poserColorSetting[0],poserColorSetting[1],poserColorSetting[2],poserColorSetting[3]);
-    for(size_t i=0;i<robotWidgets.size();i++) { 
-      world->robots[i].robot->UpdateConfig(robotWidgets[i].Pose());
-      world->robots[i].view.SetColors(poserColor);
-    }
-    //draw poser and such
-    allWidgets.DrawGL(viewport);
-    for(size_t i=0;i<robotWidgets.size();i++) { 
-      world->robots[i].view.Draw();
-    }
-  }
+  allWidgets.Enable(&allRobotWidgets,drawPoser==1);
+  allWidgets.DrawGL(viewport);
 
   //applying a force
   if(forceSpringActive) {
@@ -217,8 +214,10 @@ void SimTestBackend::RenderWorld()
     robot->UpdateFrames();
     AnyCollection desiredColorSetting = settings["desired"]["color"];
     GLColor desiredColor(desiredColorSetting[0],desiredColorSetting[1],desiredColorSetting[2],desiredColorSetting[3]);
+    vector<GeometryAppearance> oldAppearance = world->robots[0].view.linkAppearance;
     world->robots[0].view.SetColors(desiredColor);
     world->robots[0].view.Draw();
+    world->robots[0].view.linkAppearance = oldAppearance;
   }
   if(drawEstimated) {
   }
@@ -433,11 +432,25 @@ bool SimTestBackend::OnCommand(const string& cmd,const string& args)
   else if(cmd=="log_contact_state") {
     contactStateLogFile = args;
   }
-
   else if(cmd=="log_contact_wrenches") {
     contactWrenchLogFile = args;
   }
-
+  else if(cmd=="log_commanded_path") {
+    int robot;
+    string fn;
+    stringstream ss(args);
+    ss>>robot;
+    SafeInputString(ss,fn);
+    robotCommandLogFiles[robot] = fn;
+  }
+  else if(cmd=="log_sensed_path") {
+    int robot;
+    string fn;
+    stringstream ss(args);
+    ss>>robot;
+    SafeInputString(ss,fn);
+    robotSensedLogFiles[robot] = fn;
+  }
   else
     return BaseT::OnCommand(cmd,args);
   SendRefresh();
@@ -453,7 +466,7 @@ bool SimTestBackend::LoadFile(const char* fn)
     robotWidgets.resize(world->robots.size());
     for(size_t i=nr;i<world->robots.size();i++) {
       robotWidgets[i].Set(world->robots[i].robot,&world->robots[i].view);
-      allWidgets.widgets.push_back(&robotWidgets[i]);
+      allRobotWidgets.widgets.push_back(&robotWidgets[i]);
     }
     objectWidgets.resize(world->rigidObjects.size());
     for(size_t i=no;i<world->rigidObjects.size();i++) {
@@ -467,20 +480,12 @@ bool SimTestBackend::LoadFile(const char* fn)
 
 void SimTestBackend::DoPassiveMouseMove(int x, int y)
 {
-  dragWidget.active = (forceApplicationMode==1);
-  for(size_t i=0;i<robotWidgets.size();i++)
+  if(forceApplicationMode) sim.UpdateModel();
+  allWidgets.Enable(&dragWidget,(forceApplicationMode==1));
+  allWidgets.Enable(&allObjectWidgets,(pose_objects == 1));
+  allWidgets.Enable(&allRobotWidgets,(drawPoser==1));
+  for(size_t i=0;i<robotWidgets.size();i++) 
     robotWidgets[i].poseIKMode = (pose_ik != 0);
-
-  if(pose_objects == 0) {
-    if(allWidgets.widgets.back() == &allObjectWidgets)
-      //disable object widgets
-      allWidgets.widgets.resize(allWidgets.widgets.size()-1);
-  }
-  else {
-    if(allWidgets.widgets.back() != &allObjectWidgets)
-      //enable object widgets
-      allWidgets.widgets.push_back(&allObjectWidgets);
-  }
 
   double d;
   if(allWidgets.Hover(x,viewport.h-y,viewport,d))
@@ -492,19 +497,12 @@ void SimTestBackend::DoPassiveMouseMove(int x, int y)
 
 void SimTestBackend::BeginDrag(int x,int y,int button,int modifiers)
 {
-  dragWidget.active = (forceApplicationMode==1);
-  for(size_t i=0;i<robotWidgets.size();i++)
+  if(forceApplicationMode) sim.UpdateModel();
+  allWidgets.Enable(&dragWidget,(forceApplicationMode==1));
+  allWidgets.Enable(&allObjectWidgets,(pose_objects == 1));
+  allWidgets.Enable(&allRobotWidgets,(drawPoser==1));
+  for(size_t i=0;i<robotWidgets.size();i++) 
     robotWidgets[i].poseIKMode = (pose_ik != 0);
-  if(pose_objects == 0) {
-    if(allWidgets.widgets.back() == &allObjectWidgets)
-      //disable object widgets
-      allWidgets.widgets.resize(allWidgets.widgets.size()-1);
-  }
-  else {
-    if(allWidgets.widgets.back() != &allObjectWidgets)
-      //enable object widgets
-      allWidgets.widgets.push_back(&allObjectWidgets);
-  }
 
   Robot* robot = world->robots[0].robot;
   if(button == GLUT_RIGHT_BUTTON) {
@@ -519,19 +517,12 @@ void SimTestBackend::BeginDrag(int x,int y,int button,int modifiers)
 
 void SimTestBackend::EndDrag(int x,int y,int button,int modifiers)
 {
-  dragWidget.active = (forceApplicationMode==1);
-  for(size_t i=0;i<robotWidgets.size();i++)
+  if(forceApplicationMode) sim.UpdateModel();
+  allWidgets.Enable(&dragWidget,(forceApplicationMode==1));
+  allWidgets.Enable(&allObjectWidgets,(pose_objects == 1));
+  allWidgets.Enable(&allRobotWidgets,(drawPoser==1));
+  for(size_t i=0;i<robotWidgets.size();i++) 
     robotWidgets[i].poseIKMode = (pose_ik != 0);
-  if(pose_objects == 0) {
-    if(allWidgets.widgets.back() == &allObjectWidgets)
-      //disable object widgets
-      allWidgets.widgets.resize(allWidgets.widgets.size()-1);
-  }
-  else {
-    if(allWidgets.widgets.back() != &allObjectWidgets)
-      //enable object widgets
-      allWidgets.widgets.push_back(&allObjectWidgets);
-  }
 
   if(button == GLUT_RIGHT_BUTTON) {
     if(allWidgets.hasFocus) {
@@ -551,23 +542,17 @@ void SimTestBackend::EndDrag(int x,int y,int button,int modifiers)
 
 void SimTestBackend::DoFreeDrag(int dx,int dy,int button)
 {
-  dragWidget.active = (forceApplicationMode==1);
-  for(size_t i=0;i<robotWidgets.size();i++)
-    robotWidgets[i].poseIKMode = (pose_ik != 0);
-  if(pose_objects == 0) {
-    if(allWidgets.widgets.back() == &allObjectWidgets)
-      //disable object widgets
-      allWidgets.widgets.resize(allWidgets.widgets.size()-1);
-  }
-  else {
-    if(allWidgets.widgets.back() != &allObjectWidgets)
-      //enable object widgets
-      allWidgets.widgets.push_back(&allObjectWidgets);
-  }
-
   Robot* robot = world->robots[0].robot;
   if(button == GLUT_LEFT_BUTTON)  DragRotate(dx,dy);
   else if(button == GLUT_RIGHT_BUTTON) {
+    //dragging widgets
+    if(forceApplicationMode) sim.UpdateModel();
+    allWidgets.Enable(&dragWidget,(forceApplicationMode==1));
+    allWidgets.Enable(&allObjectWidgets,(pose_objects == 1));
+    allWidgets.Enable(&allRobotWidgets,(drawPoser==1));
+    for(size_t i=0;i<robotWidgets.size();i++) 
+      robotWidgets[i].poseIKMode = (pose_ik != 0);
+    
     if(allWidgets.hasFocus) {
       allWidgets.Drag(dx,-dy,viewport);
       if(allWidgets.requestRedraw) {
@@ -616,10 +601,52 @@ void SimTestBackend::SimStep(Real dt)
   if(!simLogFile.empty()) DoLogging(simLogFile.c_str());
   if(!contactStateLogFile.empty()) DoContactStateLogging(contactStateLogFile.c_str());
   if(!contactWrenchLogFile.empty()) DoContactWrenchLogging(contactWrenchLogFile.c_str());
-  //TODO: robot linear path logging
+  for(map<int,string>::iterator i=robotCommandLogFiles.begin();i!=robotCommandLogFiles.end();i++) {
+    if(i->second.empty()) continue;
+    if(i->first < 0 || i->first >= (int)world->robots.size()) continue;
+    ofstream out(i->second.c_str(),ios::app);
+    if(!out) {
+      printf("Error writing robot command path to %s\n",i->second.c_str());
+      continue;
+    }
+    Config q;
+    sim.controlSimulators[i->first].GetCommandedConfig(q);
+    out<<sim.time<<'\t'<<q<<endl;
+    out.close();
+  }
+  for(map<int,string>::iterator i=robotSensedLogFiles.begin();i!=robotSensedLogFiles.end();i++) {
+    if(i->second.empty()) continue;
+    if(i->first < 0 || i->first >= (int)world->robots.size()) continue;
+    ofstream out(i->second.c_str(),ios::app);
+    if(!out) {
+      printf("Error writing robot sensed path to %s\n",i->second.c_str());
+      continue;
+    }
+    Config q;
+    sim.controlSimulators[i->first].GetSensedConfig(q);
+    out<<sim.time<<'\t'<<q<<endl;
+    out.close();
+  }
+  for(map<int,string>::iterator i=robotTorqueLogFiles.begin();i!=robotTorqueLogFiles.end();i++) {
+    if(i->second.empty()) continue;
+    if(i->first < 0 || i->first >= (int)world->robots.size()) continue;
+    ofstream out(i->second.c_str(),ios::app);
+    if(!out) {
+      printf("Error writing robot torque path to %s\n",i->second.c_str());
+      continue;
+    }
+    Config q;
+    sim.controlSimulators[i->first].GetActuatorTorques(q);
+    out<<sim.time<<'\t'<<q<<endl;
+    out.close();
+  }
+
 
   if(forceSpringActive)
     sim.hooks.resize(sim.hooks.size()-1);
+
+  //update visualization colors
+  SetForceColors();
     
   //update root of poseConfig from simulation
   for(size_t r=0;r<world->robots.size();r++) {

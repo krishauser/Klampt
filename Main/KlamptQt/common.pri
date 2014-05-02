@@ -19,7 +19,7 @@ INCLUDEPATH += $${KLAMPTDIR} \
 	       $${KLAMPTDEPS}/KrisLibrary \
 	       $${KLAMPTDEPS}/ode-0.11.1/ode/src
 
-LIBS += -lKlampt -lKrisLibrary -lode -ltinyxml -lglpk -lglui -lglut -lGLU
+LIBS += -lKlampt -lKrisLibrary -lode -ltinyxml -lglpk -lglui -lglut -lGLU -lboost_thread-mt -lboost_system-mt
 LIBS += -lassimp
 DEFINES += dDOUBLE
 

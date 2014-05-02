@@ -38,7 +38,7 @@ bool WorldDragWidget::Hover(int x,int y,Camera::Viewport& viewport,double& dista
   viewport.getClickSource(x,y,r.source);
   viewport.getClickVector(x,y,r.direction);
   hoverID = -1;
-  Real bestD = Inf;
+  distance = Inf;
   if(robotsActive) {
     int body;
     Vector3 localpt;
@@ -48,7 +48,7 @@ bool WorldDragWidget::Hover(int x,int y,Camera::Viewport& viewport,double& dista
       hoverID = world->RobotLinkID(rob-&world->robots[0],body);
       const Geometry::AnyCollisionGeometry3D& geom = world->GetGeometry(hoverID);
       Vector3 worldpt = geom.GetTransform()*localpt;
-      bestD = worldpt.distance(r.source);
+      distance = worldpt.distance(r.source);
       dragPt = worldpt;
     }
   }
@@ -58,16 +58,18 @@ bool WorldDragWidget::Hover(int x,int y,Camera::Viewport& viewport,double& dista
     if(obj) {
       Vector3 worldpt = obj->object->T*localpt;
       Real d=worldpt.distance(r.source);
-      if(d < bestD) {
-	bestD = d;
+      if(d < distance) {
+	distance = d;
 	hoverPt = localpt;
 	hoverID = world->RigidObjectID(obj-&world->rigidObjects[0]);
 	dragPt = worldpt;
       }
     }
   }
-  hoverDistance = bestD;
-  if(hoverID >= 0)  return true;
+  hoverDistance = distance;
+  if(hoverID >= 0)  {
+    return true;
+  }
   return false;
 }
 

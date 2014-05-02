@@ -368,6 +368,7 @@ bool OrXmlTransformation::GetContent(){
 		this->rotationaxis.push_back(r);
 		c = getNextSibling(c,"rotationAxis");
 	}
+	return true;
 }
 
 bool OrXmlTransformation::ComputeTransform(){

@@ -51,9 +51,7 @@ public:
   string servAddr;
   Real writeRate;
   Real lastWriteTime;
-#ifndef WIN32
   SmartPointer<SocketPipeWorker> controllerPipe;
-#endif //WIN32
 };
 
 #endif

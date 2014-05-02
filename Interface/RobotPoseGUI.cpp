@@ -11,6 +11,11 @@
 #include "Modeling/Interpolate.h"
 #include <sstream>
 
+#define GLUT_LEFT_BUTTON 0
+#define GLUT_MIDDLE_BUTTON 1
+#define GLUT_RIGHT_BUTTON 2
+
+
 RobotPoseBackend::RobotPoseBackend(RobotWorld* world,ResourceLibrary* library)
 : ResourceGUIBackend(world,library){
   settings["cleanContactsNTol"]= 0.01;
@@ -287,7 +292,15 @@ void RobotPoseBackend::CleanContacts(Hold& h)
 }
 
 //BUTTON HANDLING METHODS
+bool RobotPoseBackend::OnButtonPress(const string& button)
+{
+  return ResourceGUIBackend::OnButtonPress(button);
+}
 
+bool RobotPoseBackend::OnButtonToggle(const string& button,int checked)
+{
+  return ResourceGUIBackend::OnButtonToggle(button,checked);
+}
 
 bool RobotPoseBackend::OnCommand(const string& cmd,const string& args)
 {
@@ -547,4 +560,78 @@ bool RobotPoseBackend::OnCommand(const string& cmd,const string& args)
   }
   SendRefresh();
   return true;
+}
+
+
+
+void RobotPoseBackend::DoPassiveMouseMove(int x, int y)
+{
+  
+  for(size_t i=0;i<robotWidgets.size();i++)
+    robotWidgets[i].poseIKMode = (pose_ik != 0);
+  //for(size_t i=0;i<objectWidgets.size();i++)
+  //objectWidgets[i].poseIKMode = (pose_objects != 0);
+  
+  double d;
+  if(allWidgets.Hover(x,viewport.h-y,viewport,d))
+    allWidgets.SetHighlight(true);
+  else
+    allWidgets.SetHighlight(false);
+  if(allWidgets.requestRedraw) { SendRefresh(); allWidgets.requestRedraw=false; }
+  
+}
+
+
+void RobotPoseBackend::BeginDrag(int x,int y,int button,int modifiers)
+{
+  for(size_t i=0;i<robotWidgets.size();i++)
+    robotWidgets[i].poseIKMode = (pose_ik != 0);
+  //for(size_t i=0;i<objectWidgets.size();i++)
+  //objectWidgets[i].poseIKMode = (pose_objects != 0);
+  
+  Robot* robot = world->robots[0].robot;
+  if(button == GLUT_RIGHT_BUTTON) {
+    double d;
+    if(allWidgets.BeginDrag(x,viewport.h-y,viewport,d))
+      allWidgets.SetFocus(true);
+    else
+      allWidgets.SetFocus(false);
+    if(allWidgets.requestRedraw) { SendRefresh(); allWidgets.requestRedraw=false; }
+  }
+}
+
+void RobotPoseBackend::EndDrag(int x,int y,int button,int modifiers)
+{
+  for(size_t i=0;i<robotWidgets.size();i++)
+    robotWidgets[i].poseIKMode = (pose_ik != 0);
+  //for(size_t i=0;i<objectWidgets.size();i++)
+  //objectWidgets[i].poseIKMode = (pose_objects != 0);
+  
+  if(button == GLUT_RIGHT_BUTTON) {
+    if(allWidgets.hasFocus) {
+      allWidgets.EndDrag();
+      allWidgets.SetFocus(false);
+    }
+  }
+}
+
+void RobotPoseBackend::DoFreeDrag(int dx,int dy,int button)
+{
+  for(size_t i=0;i<robotWidgets.size();i++)
+    robotWidgets[i].poseIKMode = (pose_ik != 0);
+  //for(size_t i=0;i<objectWidgets.size();i++)
+  //objectWidgets[i].poseIKMode = (pose_objects != 0);
+  
+  Robot* robot = world->robots[0].robot;
+  if(button == GLUT_LEFT_BUTTON)  DragRotate(dx,dy);
+  else if(button == GLUT_RIGHT_BUTTON) {
+    if(allWidgets.hasFocus) {
+      allWidgets.Drag(dx,-dy,viewport);
+      if(allWidgets.requestRedraw) {
+	allWidgets.requestRedraw = false;
+	SendRefresh();
+	UpdateConfig();
+      }
+    }
+  }
 }

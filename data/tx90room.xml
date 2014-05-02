@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <world>
-  <robot name="TX90L_right" file="robots/tx90robotiq.rob" rotateZ="3.1415926" position="3 -1.5 0.26" config="20      0 0 0 0 0 0 0 0 0 0 0 0.76 0 -0.72 0.785927 0 -0.86 0.745927 0 -0.82"/>
+  <robot name="TX90L_right" file="robots/tx90robotiq_frozen.rob" rotateZ="3.1415926" position="3.10 -1.5 0.26" />
   <!-- floor rectangle -->
   <terrain file="objects/cube.tri" position = "	0	-3.7592	-0.1524	" scale="	4.4275	3.7592	0.1524	"   >
     <display color = "0.3 0.3 0.3"/>
@@ -38,11 +38,11 @@
   <!-- l central pipe -->
   <terrain file="objects/cube.tri" position = "	3.302	-3.7592	2.1082	" scale="	0.1143	3.7592	0.2032	"  />
   <!-- left light -->
-  <terrain file="objects/cube.tri" position = "	1.297	-3.7592	2.0193	" scale="	0.1527	3.7592	0.2921	"   >
+  <terrain file="objects/cube.tri" position = "	1.297	-3.7592	2	" scale="	0.1527	3.7592	0.2921	"   >
     <display color = "1 1 1"/>
   </terrain>
   <!-- right light -->
-  <terrain file="objects/cube.tri" position = "	2.9815	-3.7592	2.0193	" scale="	0.1522	3.7592	0.2921	"  >
+  <terrain file="objects/cube.tri" position = "	2.9815	-3.7592	2	" scale="	0.1522	3.7592	0.2921	"  >
     <display color = "1 1 1" />
   </terrain>
   <!-- l front pipes -->

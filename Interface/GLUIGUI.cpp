@@ -86,6 +86,11 @@ int GLUIGUI::AddControl(GLUI_Control* control,const char* name)
     controlNames.push_back(name);
   control->callback = GLUI_CB(ControlFunc);
   control->user_id = id;
+  if(dynamic_cast<GLUI_Spinner*>(control) != NULL) {
+    GLUI_EditText* partner = dynamic_cast<GLUI_Spinner*>(control)->edittext;
+    partner->callback = GLUI_CB(ControlFunc);
+    partner->user_id = id;
+  }
   return id;
 }
 
