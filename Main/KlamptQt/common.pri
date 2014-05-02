@@ -16,6 +16,7 @@ LIBS += -L/usr/lib \
 INCLUDEPATH += $${KLAMPTDIR} \
                /usr/include \
                .. \
+               ../KlamptQt \
 	       $${KLAMPTDEPS}/KrisLibrary \
 	       $${KLAMPTDEPS}/ode-0.11.1/ode/src
 

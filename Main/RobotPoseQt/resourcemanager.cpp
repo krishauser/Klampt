@@ -1,9 +1,10 @@
 #include <resourcemanager.h>
-#include <Interface/GenericGUI.h>
 #include <Modeling/Resources.h>
 #include <string.h>
 
-ResourceTracker::ResourceTracker(ResourcePtr p,ResourceTracker* _parent):
+#include <boost/foreach.hpp>
+
+ResourceTracker::ResourceTracker(ResourcePtr p,ResourceNode _parent):
   resource(p),parent(_parent)
 {
   //children = new vector<ResourceTracker>();
@@ -18,15 +19,15 @@ ResourceManager::ResourceManager(){
   open=NULL;
 }
 
-ResourceTracker* ResourceTracker::AddChild(ResourcePtr p){
-  ResourceTracker *rt = new ResourceTracker(p);
+ResourceNode ResourceTracker::AddChild(ResourcePtr p){
+  ResourceNode rt = new ResourceTracker(p);
   children.push_back(rt);
   cout<<"Added Child "<<rt->resource->name<<endl;
   return rt;
 }
 
-vector<ResourceTracker*> ResourceTracker::AddChildren(vector<ResourcePtr> ptrs){
-  vector<ResourceTracker*> ret;
+vector<ResourceNode> ResourceTracker::AddChildren(vector<ResourcePtr> ptrs){
+  vector<ResourceNode> ret;
   for(int i=0;i<ptrs.size();i++){
     ret.push_back(AddChild(ptrs[i]));
   }
@@ -34,39 +35,85 @@ vector<ResourceTracker*> ResourceTracker::AddChildren(vector<ResourcePtr> ptrs){
 }
 
 void ResourceTracker::SetDirty(){
-  dirty=true;
-  if(parent != NULL) parent->SetDirty();
+    if(!dirty){
+      dirty=true;
+    if(parent != NULL) parent->SetDirty();
+    }
 }
 
-
-ResourceTracker* ResourceManager::LoadResource(const string& fn){
+ResourceNode ResourceManager::LoadResource(const string& fn){
   ResourcePtr r = library.LoadItem(fn);
-  ResourceTracker* rt = new ResourceTracker(r);
+  if(r==NULL) return NULL;
+  ResourceNode rt = new ResourceTracker(r);
+  itemsByName.insert(pair<string,ResourceNode>(rt->Name(),rt));
   toplevel.push_back(rt);
   return rt;
 }
 
-const char* ResourceTracker::Type(){
-    return resource->Type();
+/*
+ResourceNode ResourceManager::LoadResources(const string& fn){
+    library.LoadAll(fn);
+}
+*/
+
+int ResourceManager::size(){
+  return itemsByName.size();
 }
 
-bool ResourceManager::ChangeSelected(ResourceTracker* sel){
+bool ResourceManager::SaveSelected(const string &file)
+{
+    ResourcePtr r = selected->resource;
+    if(file.empty()){
+        r->fileName = library.DefaultFileName(r);
+    }
+    else
+        r->fileName = file;
+  if(!r->Save()){
+    fprintf(stderr,"Unable to save %s to %s\n",r->name.c_str(),r->fileName.c_str());
+    return true;
+  }
+  else {
+    printf("Saved %s to %s\n",r->name.c_str(),r->fileName.c_str());
+    return false;
+  }
+}
+
+bool ResourceManager::ChangeSelected(ResourceNode sel){
   selected = sel;
 }
 
-vector<ResourceTracker*> ResourceManager::ExtractSelectedChildren(vector<string> types){
+bool ResourceManager::ChangeSelectedName(string name){
+  itemsByName.erase(selected->Name());
+  selected->resource->name = name;
+  itemsByName[name] = selected;  
+}
+
+bool ResourceManager::AddAsChild(ResourcePtr r){
+    ResourceNode rt = selected->AddChild(r);
+    rt->SetDirty();
+    itemsByName.insert(pair<string,ResourceNode>(rt->Name(),rt));
+}
+
+vector<ResourceNode> ResourceManager::ExtractSelectedChildren(vector<string> types){
   vector<ResourcePtr> added;
   for(int i=0;i<types.size();i++){
       vector<ResourcePtr> seg = ExtractResources(selected->resource,types[i].c_str());
     added.insert(added.end(),seg.begin(),seg.end());
   }
-  return selected->AddChildren(added);
+  vector<ResourceNode> addedNodes =  selected->AddChildren(added);
+  BOOST_FOREACH(ResourceNode node,addedNodes){
+    itemsByName.insert(pair<string,ResourceNode>(node->Name(),node));
+  }
+  return addedNodes;
 }
 
-vector<ResourceTracker*> ResourceManager::ExpandSelected(){
+vector<ResourceNode> ResourceManager::ExpandSelected(){
   vector<string> types;
-  if(selected->expanded) return vector<ResourceTracker*>();
-    if(strcmp(selected->Type(),"Stance") == 0){
+  if(selected->expanded){
+    printf("Selected resource is already expanded");
+    return vector<ResourceNode>();
+  }
+  if(strcmp(selected->Type(),"Stance") == 0){
       types.push_back("Hold");
       types.push_back("IKGoal");
     }
@@ -89,27 +136,29 @@ vector<ResourceTracker*> ResourceManager::ExpandSelected(){
         types.push_back("Config");
 
     }
-    else return vector<ResourceTracker*>();
+    else{
+      printf("No expansion known for type %s",selected->Type());
+      return vector<ResourceNode>();
+    }
     selected->expanded = true;
     return ExtractSelectedChildren(types);
 }
 
+bool ResourceManager::DeleteNode(ResourceNode r){
+    if(r==NULL) return false;
+    itemsByName.erase(r->Name());
+    BOOST_FOREACH(ResourceNode child,r->children){
+      DeleteNode(child);
+    }
+    delete &(*r);
+    return true;
+}
+
 bool ResourceManager::DeleteSelected(){
-    if(selected==NULL) return false;
+  DeleteNode(selected);
   if(selected->parent != NULL){
     selected->parent->children.erase(std::remove(selected->parent->children.begin(), selected->parent->children.end(),selected),selected->parent->children.end());
-    //should do stuff with children
-   }
-  selected->SetDirty();
-  return true;
-}
-
-bool ResourceManager::SendSelectedToGUI(){
-    open = selected;
-}
-
-bool ResourceManager::AddFromPoser(){
-}
-
-bool ResourceManager::ReplaceFromPoser(){
+    selected->parent->SetDirty();
+    }
+  selected = NULL;
 }

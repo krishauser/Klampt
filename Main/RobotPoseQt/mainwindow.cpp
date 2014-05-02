@@ -14,6 +14,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->displaywidget->setFocusPolicy(Qt::WheelFocus);
     LinkMode();
     ui->radioButton->setChecked(1);
+
 }
 
 void MainWindow::Initialize(int _argc,const char** _argv)
@@ -29,6 +30,9 @@ void MainWindow::Initialize(int _argc,const char** _argv)
     world->LoadRobot(argv[1]);
     ui->displaywidget->world=world;
     gui=new QRobotPoseGUI(ui->displaywidget,world);
+
+
+    gui->resource_frame=ui->frame_resources;
 
     manager = new ResourceManager();
 

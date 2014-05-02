@@ -20,15 +20,15 @@ public:
     int show_togui;
     int show_expand;
 
-    ResourceTracker* resource;
+    ResourceNode resource;
     Math::VectorTemplate<double> *config;
 
     QString type;
 
     QResourceTreeItem();
 
-    QResourceTreeItem(ResourceTracker* rt);
-    void AddChildren(vector<ResourceTracker*> resources);
+    QResourceTreeItem(ResourceNode rt);
+    void AddChildren(vector<ResourceNode> resources);
 public slots:
     virtual void ToGUI();
     virtual void FromGUI();

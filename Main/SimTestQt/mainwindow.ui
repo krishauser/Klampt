@@ -198,13 +198,6 @@
            </widget>
           </item>
           <item>
-           <widget class="QLabel" name="label_2">
-            <property name="text">
-             <string>Simulation</string>
-            </property>
-           </widget>
-          </item>
-          <item>
            <widget class="QPushButton" name="pushButton_4">
             <property name="toolTip">
              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Direct the simulation to move to the milestone&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
@@ -213,7 +206,7 @@
              <string>set a milestone for the robots to acheive</string>
             </property>
             <property name="text">
-             <string/>
+             <string>Add Milestone</string>
             </property>
             <property name="icon">
              <iconset resource="../KlamptQt/icons.qrc">
@@ -221,6 +214,23 @@
             </property>
             <property name="shortcut">
              <string>Space</string>
+            </property>
+            <property name="flat">
+             <bool>false</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="Line" name="line_4">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="label_2">
+            <property name="text">
+             <string>Simulation</string>
             </property>
            </widget>
           </item>
@@ -301,6 +311,9 @@
             <property name="checkable">
              <bool>true</bool>
             </property>
+            <property name="flat">
+             <bool>true</bool>
+            </property>
            </widget>
           </item>
           <item>
@@ -315,6 +328,9 @@
             <property name="checkable">
              <bool>true</bool>
             </property>
+            <property name="flat">
+             <bool>true</bool>
+            </property>
            </widget>
           </item>
           <item>
@@ -327,6 +343,9 @@
               <normaloff>Images/spring.gif</normaloff>Images/spring.gif</iconset>
             </property>
             <property name="checkable">
+             <bool>true</bool>
+            </property>
+            <property name="flat">
              <bool>true</bool>
             </property>
            </widget>
@@ -745,6 +764,7 @@
   </customwidget>
  </customwidgets>
  <resources>
+  <include location="../KlamptQt/icons.qrc"/>
   <include location="../KlamptQt/icons.qrc"/>
  </resources>
  <connections>
@@ -1379,8 +1399,8 @@
    <slot>LoadPath()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>310</x>
-     <y>552</y>
+     <x>-1</x>
+     <y>-1</y>
     </hint>
     <hint type="destinationlabel">
      <x>343</x>

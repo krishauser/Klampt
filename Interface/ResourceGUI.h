@@ -4,6 +4,8 @@
 #include "WorldGUI.h"
 #include "Modeling/Resources.h"
 #include "View/ViewResource.h"
+//#include "resourcemanager.h"
+#include "Main/RobotPoseQt/resourcemanager.h"
 #include <sstream>
 using namespace Math3D;
 
@@ -13,7 +15,7 @@ using namespace Math3D;
  * trimeshes
  *
  * Handles the following commands:
- * - set_resource type name: sets the current resource type and name
+ * - set_resource name: sets the current resource name
  * - get_resource: requests a return message getting the current resource
  *   type and name
  * - set_resource_name name: sets the name of the current resource
@@ -40,7 +42,7 @@ using namespace Math3D;
 class ResourceGUIBackend : public WorldGUIBackend
 {
 public:
-  ResourceGUIBackend(RobotWorld* world,ResourceLibrary* library);
+  ResourceGUIBackend(RobotWorld* world,ResourceManager* library);
   bool LoadCommandLine(int argc,char** argv);
 
   void Add(ResourcePtr r);
@@ -76,7 +78,7 @@ public:
   void RenderCurResource();
 
   //stores all resources
-  ResourceLibrary* resources;
+  ResourceManager* resources;
   string cur_resource_type,cur_resource_name;
 
   //stores the last added resource

@@ -11,7 +11,7 @@
 #include "Modeling/Interpolate.h"
 #include <sstream>
 
-RobotPoseBackend::RobotPoseBackend(RobotWorld* world,ResourceLibrary* library)
+RobotPoseBackend::RobotPoseBackend(RobotWorld* world,ResourceManager* library)
 : ResourceGUIBackend(world,library){
   settings["cleanContactsNTol"]= 0.01;
   settings["pathOptimize"]["contactTol"] = 0.05;
@@ -315,6 +315,8 @@ bool RobotPoseBackend::OnCommand(const string& cmd,const string& args)
     ResourcePtr r = PoserToResource(r->Type());
     r->name = oldr->name;
     r->fileName = oldr->fileName;
+
+    /*
     vector<ResourcePtr >& v=resources->itemsByType[cur_resource_type];
     for(size_t i=0;i<v.size();i++)
       if(v[i]->name == cur_resource_name)
@@ -324,6 +326,8 @@ bool RobotPoseBackend::OnCommand(const string& cmd,const string& args)
       if(v2[i] == oldr) v2[i] = r;
     last_added = r;
     SetLastActive();
+    */
+    resources->selected->resource = r;
   }
   else if(cmd == "resource_to_poser") {
     ResourcePtr r=ResourceGUIBackend::CurrentResource();

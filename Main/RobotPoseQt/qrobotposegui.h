@@ -1,10 +1,12 @@
 #ifndef QROBOTTESTGUIBASE_H
 #define QROBOTTESTGUIBASE_H
 
-#include "../KlamptQt/qtguibase.h"
+#include "qtguibase.h"
 
 #include <qrobotposebackend.h>
 #include <collisionoutput.h>
+#include <resourceframe.h>
+
 class QRobotPoseGUI : public QtGUIBase
 {
     Q_OBJECT
@@ -13,11 +15,12 @@ public:
     void SetDriver(int index);
     void SetLink(int index);
     void LoadFile(QString filename=QString());
-    void LoadFilePrompt(QString directory=".", QString filter="*");
+    void LoadFilePrompt(QString directory="", QString filter="*");
     bool OnCommand(const string &cmd, const string &args);
     void UpdateGUI();
 
     QRobotPoseBackend* backend;
+    ResourceFrame* resource_frame;
 
     int driver_index;
     int link_index;

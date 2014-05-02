@@ -2,7 +2,7 @@
 #include "GLdraw/GLView.h"
 
 QRobotPoseBackend::QRobotPoseBackend(QWidget *parent) :
-    QGLWidget(parent),RobotPoseBackend(new RobotWorld(),new ResourceLibrary())//,GLScreenshotPlugin()
+    QGLWidget(parent),RobotPoseBackend(new RobotWorld(),new ResourceManager())//,GLScreenshotPlugin()
 {
     setMouseTracking(true);
 }

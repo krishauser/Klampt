@@ -1,6 +1,9 @@
 #include "resourceframe.h"
 #include "ui_resourceframe.h"
 
+#include <QSettings>
+#include <QCoreApplication>
+
 #include <boost/foreach.hpp>
 
 ResourceFrame::ResourceFrame(QWidget *parent) :
@@ -16,19 +19,24 @@ ResourceFrame::~ResourceFrame()
 }
 
 void ResourceFrame::OpenFile(QString filename){
-  if(filename.isEmpty()){
+    QSettings ini(QSettings::IniFormat, QSettings::UserScope,
+          QCoreApplication::organizationName(),
+          QCoreApplication::applicationName());  if(filename.isEmpty()){
     QFileDialog f;
+    QString openDir = ini.value("last_open_resource_directory",".").toString();
     filename = f.getOpenFileName(0,"Open File",QDir::home().absolutePath(),"");
   }
   if(!filename.isNull()){
-    int valid;
-//      LinearPathDock* widget = new LinearPathDock(filename,&valid);
-      ResourceTracker *r = manager->LoadResource(filename.toStdString());
-      //ResourceDockWidget* widget;
-      QResourceTreeItem* it=new QResourceTreeItem(r);
-      ui->treeWidget->addTopLevelItem(it);
+    ini.setValue("last_open_resource_directory",QFileInfo(filename).absolutePath());
+    //gui->SendCommand("load_resource",filename.toStdString());
+
+    ResourceNode r = manager->LoadResource(filename.toStdString());
+    QResourceTreeItem* it=new QResourceTreeItem(r);
+    ui->treeWidget->addTopLevelItem(it);
+
     }
 }
+
 void ResourceFrame::ChangeSelectedItem(QTreeWidgetItem* it){
     manager->ChangeSelected(((QResourceTreeItem*)it)->resource);
 }
@@ -43,13 +51,11 @@ void ResourceFrame::PressedDelete(){
 void ResourceFrame::PressedExpand(){
     if(ui->treeWidget->selectedItems().isEmpty()) return;
     QResourceTreeItem* sel=(QResourceTreeItem*)(ui->treeWidget->selectedItems()[0]);
-    BOOST_FOREACH(ResourceTracker* rt,manager->ExpandSelected()){
-        sel->addChild(new QResourceTreeItem(rt));
-    }
+    sel->AddChildren(manager->ExpandSelected());
 }
 
 void ResourceFrame::ToGUI(){
-    gui->backend->RenderCurrentResource();
+    //gui->backend->RenderCurrentResource();
   /*
     if(0 == strcmp(selected->resource->Type(),"Config")){
         ConfigResource* config = dynamic_cast<ConfigResource*>((ResourceBase*)selected->resource);
@@ -62,3 +68,8 @@ void ResourceFrame::ToGUI(){
 
 void ResourceFrame::FromGUI(){
 }
+
+
+//void ResourceFrame::selectionChanged(){
+
+//}

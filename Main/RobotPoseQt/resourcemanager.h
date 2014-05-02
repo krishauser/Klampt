@@ -3,47 +3,57 @@
 
 
 #include <Modeling/Resources.h>
-#include <Interface/GenericGUI.h>
 
 using namespace std;
+
+class ResourceTracker;
+
+typedef SmartPointer<ResourceTracker> ResourceNode;
 
 class ResourceTracker
 {
 
  public:
   ResourcePtr resource;
-  vector<ResourceTracker*> children;
+  vector<ResourceNode> children;
   bool dirty;
   bool expanded;
-  ResourceTracker* parent;
+  ResourceNode parent;
 
-  ResourceTracker(ResourcePtr,ResourceTracker* parent=NULL);
-  ResourceTracker *AddChild(ResourcePtr);
-  vector<ResourceTracker*> AddChildren(vector<ResourcePtr>);
+  ResourceTracker(ResourcePtr,ResourceNode parent=NULL);
+  ResourceNode AddChild(ResourcePtr);
+  vector<ResourceNode> AddChildren(vector<ResourcePtr>);
   void SetDirty();
-  const char *Type();
+  const char *Type(){return resource->Type();}
+  const char *Name(){return resource->name.c_str();}
 };
+
+
 
 class ResourceManager
 {
   
  public:
-  GenericBackendBase* backend;
+//  GenericBackendBase* backend;
   ResourceLibrary library;
-  vector<ResourceTracker*> toplevel;
-  ResourceTracker* selected;
-  ResourceTracker* open;
+  vector<ResourceNode> toplevel;
+  ResourceNode selected;
+  ResourceNode open;
+  map<string,ResourceNode> itemsByName;
 
   ResourceManager();
-  ResourceTracker* LoadResource(const string& fn);
-  bool DeleteSelected();
-  bool ChangeSelected(ResourceTracker*);
-  bool SendSelectedToGUI();
-  bool AddFromPoser();
-  bool ReplaceFromPoser();
+  ResourceNode LoadResource(const string& fn);
 
-  vector<ResourceTracker *> ExtractSelectedChildren(vector<string> types);
-  vector<ResourceTracker *> ExpandSelected();
+  bool DeleteNode(ResourceNode r);
+  bool DeleteSelected();
+  bool ChangeSelected(ResourceNode);
+  bool ChangeSelectedName(string name);
+  int size();
+  bool SaveSelected(const string& file="");
+
+  vector<ResourceNode> ExtractSelectedChildren(vector<string> types);
+  vector<ResourceNode> ExpandSelected();
+  bool AddAsChild(ResourcePtr r);
 };
 
 #endif

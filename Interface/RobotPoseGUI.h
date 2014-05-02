@@ -79,7 +79,7 @@ class RobotPoseBackend : public ResourceGUIBackend
   WidgetSet allWidgets;
   int draw_geom,draw_bbs,draw_com,draw_frame;
 
-  RobotPoseBackend(RobotWorld* world,ResourceLibrary* library);
+  RobotPoseBackend(RobotWorld* world,ResourceManager* library);
   virtual void Start();
   void UpdateConfig();
   virtual void RenderWorld();
