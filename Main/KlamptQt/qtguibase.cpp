@@ -27,19 +27,19 @@ void QtGUIBase::SendMouseMove(QMouseEvent *e){
 void QtGUIBase::SendMousePress(QMouseEvent *e){
     int button=e->button();
     if(button==1) button=0;
-    GenericGUIBase::SendMouseClick(button,1,e->x(),e->y());
-    if(e->modifiers()&&Qt::CTRL)
+    if(e->modifiers()&Qt::ControlModifier)
       GenericGUIBase::SendKeyDown("control");
     else
       GenericGUIBase::SendKeyUp("control");
-    if(e->modifiers()&&Qt::SHIFT)
+    if(e->modifiers()&Qt::ShiftModifier)
       GenericGUIBase::SendKeyDown("shift");
     else
       GenericGUIBase::SendKeyUp("shift");
-    if(e->modifiers()&&Qt::ALT)
+    if(e->modifiers()&Qt::AltModifier)
       GenericGUIBase::SendKeyDown("alt");
     else
       GenericGUIBase::SendKeyUp("alt");
+    GenericGUIBase::SendMouseClick(button,1,e->x(),e->y());
 }
 
 void QtGUIBase::SendMouseRelease(QMouseEvent *e){
