@@ -190,7 +190,7 @@ void QSimTestGUI::SendConnection(int robot, QString host, int port, int rate)
 {
     stringstream ss;
     ss<<robot<<" "<<host.toStdString()<<" "<<port<<" "<<rate;
-    SendCommand("send_serial_connection",ss.str());
+    SendCommand("connect_serial_controller",ss.str());
 }
 
 void QSimTestGUI::ShowHelp(){
