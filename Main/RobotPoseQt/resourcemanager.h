@@ -54,6 +54,8 @@ class ResourceManager
   vector<ResourceNode> ExtractSelectedChildren(vector<string> types);
   vector<ResourceNode> ExpandSelected();
   bool AddAsChild(ResourcePtr r);
+
+  bool Print(ResourceNode current=NULL,int level=0);
 };
 
 #endif

@@ -162,3 +162,18 @@ bool ResourceManager::DeleteSelected(){
     }
   selected = NULL;
 }
+
+bool ResourceManager::Print(ResourceNode current,int level){
+  if(current == NULL){
+    BOOST_FOREACH(ResourceNode child,toplevel){
+      Print(child,0);
+    }
+  }
+  else{
+    for(int i=0;i<level;i++) cout<<"-";
+    cout<<current->Name()<<endl;
+    BOOST_FOREACH(ResourceNode child,current->children){
+      Print(child,level+1);
+    }
+  }
+}
