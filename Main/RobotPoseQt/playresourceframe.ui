@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>PlayResourceFrame</class>
+ <widget class="QFrame" name="PlayResourceFrame">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>240</width>
+    <height>146</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Frame</string>
+  </property>
+  <property name="frameShape">
+   <enum>QFrame::StyledPanel</enum>
+  </property>
+  <property name="frameShadow">
+   <enum>QFrame::Raised</enum>
+  </property>
+  <layout class="QGridLayout" name="gridLayout">
+   <item row="5" column="0">
+    <widget class="QPushButton" name="pushButton_5">
+     <property name="text">
+      <string/>
+     </property>
+     <property name="icon">
+      <iconset resource="../KlamptQt/icons.qrc">
+       <normaloff>:/Images/Images/media-playback-start.svg</normaloff>:/Images/Images/media-playback-start.svg</iconset>
+     </property>
+    </widget>
+   </item>
+   <item row="5" column="2">
+    <widget class="QPushButton" name="pushButton_3">
+     <property name="text">
+      <string/>
+     </property>
+     <property name="icon">
+      <iconset resource="../KlamptQt/icons.qrc">
+       <normaloff>:/Images/Images/media-record.svg</normaloff>:/Images/Images/media-record.svg</iconset>
+     </property>
+    </widget>
+   </item>
+   <item row="5" column="1">
+    <widget class="QPushButton" name="pushButton_2">
+     <property name="text">
+      <string/>
+     </property>
+     <property name="icon">
+      <iconset resource="../KlamptQt/icons.qrc">
+       <normaloff>:/Images/Images/media-playback-pause.svg</normaloff>:/Images/Images/media-playback-pause.svg</iconset>
+     </property>
+    </widget>
+   </item>
+   <item row="4" column="0" colspan="3">
+    <widget class="QSlider" name="slider">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="0" colspan="3">
+    <widget class="QLabel" name="lbl_name">
+     <property name="text">
+      <string>Name</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="0" colspan="3">
+    <widget class="QLabel" name="lbl_info">
+     <property name="text">
+      <string>Information</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources>
+  <include location="../KlamptQt/icons.qrc"/>
+ </resources>
+ <connections>
+  <connection>
+   <sender>pushButton_5</sender>
+   <signal>clicked()</signal>
+   <receiver>PlayResourceFrame</receiver>
+   <slot>Play()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>36</x>
+     <y>124</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>4</x>
+     <y>121</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>pushButton_2</sender>
+   <signal>clicked()</signal>
+   <receiver>PlayResourceFrame</receiver>
+   <slot>Pause()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>125</x>
+     <y>120</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>159</x>
+     <y>107</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>pushButton_3</sender>
+   <signal>clicked()</signal>
+   <receiver>PlayResourceFrame</receiver>
+   <slot>Record()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>210</x>
+     <y>127</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>232</x>
+     <y>102</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>Play()</slot>
+  <slot>Pause()</slot>
+  <slot>Record()</slot>
+ </slots>
+</ui>

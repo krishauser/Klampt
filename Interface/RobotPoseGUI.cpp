@@ -11,12 +11,7 @@
 #include "Modeling/Interpolate.h"
 #include <sstream>
 
-#define GLUT_LEFT_BUTTON 0
-#define GLUT_MIDDLE_BUTTON 1
-#define GLUT_RIGHT_BUTTON 2
-
-
-RobotPoseBackend::RobotPoseBackend(RobotWorld* world,ResourceLibrary* library)
+RobotPoseBackend::RobotPoseBackend(RobotWorld* world,ResourceManager* library)
 : ResourceGUIBackend(world,library){
   settings["cleanContactsNTol"]= 0.01;
   settings["pathOptimize"]["contactTol"] = 0.05;
@@ -31,10 +26,10 @@ RobotPoseBackend::RobotPoseBackend(RobotWorld* world,ResourceLibrary* library)
   settings["selfCollideColor"][2] = 0;
   settings["selfCollideColor"][3] = 1;
   settings["movieWidth"] = 640;
-  settings["hoverColor"] = 1;
-  settings["hoverColor"] = 1;
-  settings["hoverColor"] = 0;
-  settings["hoverColor"] = 1;
+  settings["hoverColor"][0] = 1;
+  settings["hoverColor"][1] = 1;
+  settings["hoverColor"][2] = 0;
+  settings["hoverColor"][3] = 1;
   settings["robotColor"][0] = 0.5;
   settings["robotColor"][1] = 0.5;
   settings["robotColor"][2] = 0.5;
@@ -46,9 +41,9 @@ RobotPoseBackend::RobotPoseBackend(RobotWorld* world,ResourceLibrary* library)
   settings["envCollideColor"][3] = 1;
 
   settings["poser"]["color"][0] = 1;
-  settings["poser"]["color"][0] = 1;
-  settings["poser"]["color"][0] = 0;
-  settings["poser"]["color"][0] = 0.5;
+  settings["poser"]["color"][1] = 1;
+  settings["poser"]["color"][2] = 0;
+  settings["poser"]["color"][3] = 0.5;
 
   settings["defaultStanceFriction"] = 0.5;
   settings["configResourceColor"][0] = 0.5;
@@ -77,6 +72,15 @@ void RobotPoseBackend::Start()
   draw_frame = 0;
   pose_ik = 0;
   self_colliding.resize(robot->links.size(),false);   
+
+
+  robotWidgets.resize(world->robots.size());
+  for(size_t i=0;i<world->robots.size();i++) {
+    robotWidgets[i].Set(world->robots[i].robot,&world->robots[i].view);
+    robotWidgets[i].linkPoser.highlightColor.set(0.75,0.75,0);
+  }
+  objectWidgets.resize(world->rigidObjects.size());
+
 
   for(size_t i=0;i<world->rigidObjects.size();i++)
     objectWidgets[i].Set(world->rigidObjects[i].object,&world->rigidObjects[i].view);
@@ -292,19 +296,12 @@ void RobotPoseBackend::CleanContacts(Hold& h)
 }
 
 //BUTTON HANDLING METHODS
-bool RobotPoseBackend::OnButtonPress(const string& button)
-{
-  return ResourceGUIBackend::OnButtonPress(button);
-}
 
-bool RobotPoseBackend::OnButtonToggle(const string& button,int checked)
-{
-  return ResourceGUIBackend::OnButtonToggle(button,checked);
-}
 
 bool RobotPoseBackend::OnCommand(const string& cmd,const string& args)
 {
   Robot* robot = world->robots[0].robot;
+  stringstream ss(args);
   if(cmd == "poser_to_resource") {
     ResourcePtr r=PoserToResource(args);
     if(r) {
@@ -318,6 +315,8 @@ bool RobotPoseBackend::OnCommand(const string& cmd,const string& args)
     ResourcePtr r = PoserToResource(r->Type());
     r->name = oldr->name;
     r->fileName = oldr->fileName;
+
+    /*
     vector<ResourcePtr >& v=resources->itemsByType[cur_resource_type];
     for(size_t i=0;i<v.size();i++)
       if(v[i]->name == cur_resource_name)
@@ -327,6 +326,8 @@ bool RobotPoseBackend::OnCommand(const string& cmd,const string& args)
       if(v2[i] == oldr) v2[i] = r;
     last_added = r;
     SetLastActive();
+    */
+    resources->selected->resource = r;
   }
   else if(cmd == "resource_to_poser") {
     ResourcePtr r=ResourceGUIBackend::CurrentResource();
@@ -555,32 +556,42 @@ bool RobotPoseBackend::OnCommand(const string& cmd,const string& args)
       }
     }
   }
+  else if(cmd=="constrain_link") {
+      robotWidgets[0].FixCurrent();
+  }
+  else if(cmd=="constrain_link_point"){
+    robotWidgets[0].FixCurrentPoint();
+  }
+  else if(cmd == "delete_constraint") {
+      robotWidgets[0].DeleteConstraint();
+  }
+  else if(cmd=="set_link") {
+    ss >> cur_link;
+  }
+  else if(cmd=="set_link_value") {
+    double value;
+    ss>>value;
+    Vector q = robotWidgets[0].Pose();
+    q(cur_link)=value;
+    robotWidgets[0].SetPose(q);
+  }
+  else if(cmd=="set_driver") {
+    ss >> cur_driver;
+  }
+  else if(cmd=="set_driver_value") {
+    double driver_value;
+    ss>>driver_value;
+    Robot* robot = world->robots[0].robot;
+    robot->UpdateConfig(robotWidgets[0].Pose());
+    robot->SetDriverValue(cur_driver,driver_value);
+    robotWidgets[0].SetPose(robot->q);
+  }
   else {
     return ResourceGUIBackend::OnCommand(cmd,args);
   }
   SendRefresh();
   return true;
 }
-
-
-
-void RobotPoseBackend::DoPassiveMouseMove(int x, int y)
-{
-  
-  for(size_t i=0;i<robotWidgets.size();i++)
-    robotWidgets[i].poseIKMode = (pose_ik != 0);
-  //for(size_t i=0;i<objectWidgets.size();i++)
-  //objectWidgets[i].poseIKMode = (pose_objects != 0);
-  
-  double d;
-  if(allWidgets.Hover(x,viewport.h-y,viewport,d))
-    allWidgets.SetHighlight(true);
-  else
-    allWidgets.SetHighlight(false);
-  if(allWidgets.requestRedraw) { SendRefresh(); allWidgets.requestRedraw=false; }
-  
-}
-
 
 void RobotPoseBackend::BeginDrag(int x,int y,int button,int modifiers)
 {
@@ -634,4 +645,40 @@ void RobotPoseBackend::DoFreeDrag(int dx,int dy,int button)
       }
     }
   }
+}
+
+void RobotPoseBackend::DoPassiveMouseMove(int x, int y)
+{
+  
+  for(size_t i=0;i<robotWidgets.size();i++)
+    robotWidgets[i].poseIKMode = (pose_ik != 0);
+  //for(size_t i=0;i<objectWidgets.size();i++)
+  //objectWidgets[i].poseIKMode = (pose_objects != 0);
+  
+  double d;
+  if(allWidgets.Hover(x,viewport.h-y,viewport,d))
+    allWidgets.SetHighlight(true);
+  else
+    allWidgets.SetHighlight(false);
+  if(allWidgets.requestRedraw) { SendRefresh(); allWidgets.requestRedraw=false; }
+  
+}
+
+
+bool RobotPoseBackend::OnButtonPress(const string& button)
+{
+  if(!GenericBackendBase::OnButtonPress(button)) {
+    cout<<"RobotTestBackend: Unknown button: "<<button<<endl;
+    return false;
+  }
+  return true;
+}
+
+bool RobotPoseBackend::OnButtonToggle(const string& button,int checked)
+{
+  if(!GenericBackendBase::OnButtonToggle(button,checked)) {
+    cout<<"RobotTestBackend: Unknown button: "<<button<<endl;
+    return false;
+  }
+  return true;
 }

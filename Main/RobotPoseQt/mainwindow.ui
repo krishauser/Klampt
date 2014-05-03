@@ -6,172 +6,37 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>800</width>
+    <width>980</width>
     <height>600</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Robot Test</string>
+   <string>Robot Pose</string>
   </property>
   <property name="statusTip">
    <string/>
   </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QGridLayout" name="gridLayout">
-    <item row="4" column="0">
-     <layout class="QHBoxLayout" name="link_layout">
-      <item>
-       <spacer name="horizontalSpacer">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>40</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-      <item>
-       <widget class="QLabel" name="lbl_mode">
-        <property name="text">
-         <string>Link    </string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QSpinBox" name="spn_link_index">
-        <property name="wrapping">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QSpinBox" name="spn_driver_index">
-        <property name="visible">
-         <bool>false</bool>
-        </property>
-        <property name="wrapping">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QComboBox" name="cb_link"/>
-      </item>
-      <item>
-       <widget class="QComboBox" name="cb_driver">
-        <property name="visible">
-         <bool>false</bool>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLabel" name="label_5">
-        <property name="text">
-         <string>Angle</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QDoubleSpinBox" name="spn_link">
-        <property name="accelerated">
-         <bool>true</bool>
-        </property>
-        <property name="decimals">
-         <number>4</number>
-        </property>
-        <property name="minimum">
-         <double>-99.000000000000000</double>
-        </property>
-        <property name="singleStep">
-         <double>0.030000000000000</double>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QDoubleSpinBox" name="spn_driver">
-        <property name="visible">
-         <bool>false</bool>
-        </property>
-        <property name="accelerated">
-         <bool>true</bool>
-        </property>
-        <property name="decimals">
-         <number>4</number>
-        </property>
-        <property name="minimum">
-         <double>-99.000000000000000</double>
-        </property>
-        <property name="singleStep">
-         <double>0.030000000000000</double>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLabel" name="lbl_driver_info">
-        <property name="minimumSize">
-         <size>
-          <width>200</width>
-          <height>0</height>
-         </size>
-        </property>
-        <property name="text">
-         <string>info</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLabel" name="lbl_link_info">
-        <property name="minimumSize">
-         <size>
-          <width>200</width>
-          <height>0</height>
-         </size>
-        </property>
-        <property name="text">
-         <string>info</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <spacer name="horizontalSpacer_2">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>40</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-     </layout>
-    </item>
-    <item row="0" column="0">
-     <widget class="QRobotTestBackend" name="displaywidget" native="true">
+    <item row="0" column="1">
+     <widget class="ResourceFrame" name="frame_resources">
       <property name="sizePolicy">
-       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-        <horstretch>1</horstretch>
-        <verstretch>1</verstretch>
+       <sizepolicy hsizetype="Ignored" vsizetype="Expanding">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
        </sizepolicy>
       </property>
       <property name="minimumSize">
        <size>
         <width>200</width>
-        <height>200</height>
+        <height>0</height>
        </size>
       </property>
-      <property name="maximumSize">
-       <size>
-        <width>16777215</width>
-        <height>16777215</height>
-       </size>
+      <property name="frameShape">
+       <enum>QFrame::NoFrame</enum>
       </property>
-      <property name="toolTip">
-       <string>free mode</string>
+      <property name="frameShadow">
+       <enum>QFrame::Raised</enum>
       </property>
      </widget>
     </item>
@@ -324,7 +189,7 @@
            <string/>
           </property>
           <property name="icon">
-           <iconset resource="icons.qrc">
+           <iconset resource="../KlamptQt/icons.qrc">
             <normaloff>:/Images/Images/IK.gif</normaloff>:/Images/Images/IK.gif</iconset>
           </property>
           <property name="checkable">
@@ -343,15 +208,165 @@
       </item>
      </layout>
     </item>
+    <item row="1" column="1" rowspan="2">
+     <widget class="QFrame" name="frame">
+      <property name="minimumSize">
+       <size>
+        <width>200</width>
+        <height>0</height>
+       </size>
+      </property>
+      <property name="frameShape">
+       <enum>QFrame::StyledPanel</enum>
+      </property>
+      <property name="frameShadow">
+       <enum>QFrame::Raised</enum>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="0">
+     <layout class="QHBoxLayout" name="link_layout">
+      <item>
+       <spacer name="horizontalSpacer">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QLabel" name="lbl_mode">
+        <property name="text">
+         <string>Link    </string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QSpinBox" name="spn_link_index">
+        <property name="wrapping">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QSpinBox" name="spn_driver_index">
+        <property name="visible">
+         <bool>false</bool>
+        </property>
+        <property name="wrapping">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="cb_link"/>
+      </item>
+      <item>
+       <widget class="QComboBox" name="cb_driver">
+        <property name="visible">
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="label_5">
+        <property name="text">
+         <string>Angle</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QDoubleSpinBox" name="spn_link">
+        <property name="accelerated">
+         <bool>true</bool>
+        </property>
+        <property name="decimals">
+         <number>4</number>
+        </property>
+        <property name="minimum">
+         <double>-99.000000000000000</double>
+        </property>
+        <property name="singleStep">
+         <double>0.030000000000000</double>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QDoubleSpinBox" name="spn_driver">
+        <property name="visible">
+         <bool>false</bool>
+        </property>
+        <property name="accelerated">
+         <bool>true</bool>
+        </property>
+        <property name="decimals">
+         <number>4</number>
+        </property>
+        <property name="minimum">
+         <double>-99.000000000000000</double>
+        </property>
+        <property name="singleStep">
+         <double>0.030000000000000</double>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="lbl_driver_info">
+        <property name="minimumSize">
+         <size>
+          <width>200</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>info</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="lbl_link_info">
+        <property name="minimumSize">
+         <size>
+          <width>200</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>info</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer_2">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+     </layout>
+    </item>
+    <item row="0" column="0">
+     <widget class="QRobotPoseBackend" name="displaywidget" native="true"/>
+    </item>
    </layout>
-   <zorder>displaywidget</zorder>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>800</width>
+     <width>980</width>
      <height>25</height>
     </rect>
    </property>
@@ -385,7 +400,39 @@
     <bool>false</bool>
    </attribute>
   </widget>
-  <widget class="QStatusBar" name="statusBar">
+  <widget class="QStatusBar" name="statusBar"/>
+  <widget class="QToolBar" name="toolBar_2">
+   <property name="windowTitle">
+    <string>toolBar_2</string>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+  </widget>
+  <widget class="QToolBar" name="toolBar_3">
+   <property name="windowTitle">
+    <string>toolBar_3</string>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+  </widget>
+  <widget class="QToolBar" name="toolBar_4">
+   <property name="windowTitle">
+    <string>toolBar_4</string>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
   </widget>
   <action name="actionOpen">
    <property name="text">
@@ -571,14 +618,21 @@
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>
   <customwidget>
-   <class>QRobotTestBackend</class>
+   <class>QRobotPoseBackend</class>
    <extends>QWidget</extends>
-   <header>qrobottestbackend.h</header>
+   <header>qrobotposebackend.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ResourceFrame</class>
+   <extends>QFrame</extends>
+   <header>resourceframe.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
  <resources>
-  <include location="icons.qrc"/>
+  <include location="../KlamptQt/icons.qrc"/>
+  <include location="../KlamptQt/icons.qrc"/>
  </resources>
  <connections>
   <connection>
@@ -588,7 +642,7 @@
    <slot>SetGeometry(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>176</x>
+     <x>129</x>
      <y>495</y>
     </hint>
     <hint type="destinationlabel">
@@ -604,7 +658,7 @@
    <slot>SetCOM(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>246</x>
+     <x>199</x>
      <y>495</y>
     </hint>
     <hint type="destinationlabel">
@@ -620,8 +674,8 @@
    <slot>SetFrame(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>323</x>
-     <y>476</y>
+     <x>275</x>
+     <y>495</y>
     </hint>
     <hint type="destinationlabel">
      <x>340</x>
@@ -636,8 +690,8 @@
    <slot>SetBboxes(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>408</x>
-     <y>476</y>
+     <x>360</x>
+     <y>495</y>
     </hint>
     <hint type="destinationlabel">
      <x>407</x>
@@ -652,8 +706,8 @@
    <slot>SetExpanded(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>510</x>
-     <y>476</y>
+     <x>462</x>
+     <y>495</y>
     </hint>
     <hint type="destinationlabel">
      <x>500</x>
@@ -668,8 +722,8 @@
    <slot>SetCollisions(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>607</x>
-     <y>476</y>
+     <x>559</x>
+     <y>495</y>
     </hint>
     <hint type="destinationlabel">
      <x>624</x>
@@ -684,7 +738,7 @@
    <slot>SetLink(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>261</x>
+     <x>206</x>
      <y>567</y>
     </hint>
     <hint type="destinationlabel">
@@ -700,7 +754,7 @@
    <slot>SetIK(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>482</x>
+     <x>434</x>
      <y>530</y>
     </hint>
     <hint type="destinationlabel">
@@ -720,7 +774,7 @@
      <y>567</y>
     </hint>
     <hint type="destinationlabel">
-     <x>261</x>
+     <x>206</x>
      <y>567</y>
     </hint>
    </hints>
@@ -748,7 +802,7 @@
    <slot>setValue(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>261</x>
+     <x>206</x>
      <y>567</y>
     </hint>
     <hint type="destinationlabel">
@@ -764,8 +818,8 @@
    <slot>LinkMode()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>97</x>
-     <y>520</y>
+     <x>92</x>
+     <y>527</y>
     </hint>
     <hint type="destinationlabel">
      <x>3</x>
@@ -780,8 +834,8 @@
    <slot>DriverMode()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>186</x>
-     <y>517</y>
+     <x>170</x>
+     <y>527</y>
     </hint>
     <hint type="destinationlabel">
      <x>125</x>
@@ -796,8 +850,8 @@
    <slot>SetDriver(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>183</x>
-     <y>567</y>
+     <x>108</x>
+     <y>569</y>
     </hint>
     <hint type="destinationlabel">
      <x>25</x>
@@ -812,12 +866,12 @@
    <slot>setCurrentIndex(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>183</x>
-     <y>567</y>
+     <x>108</x>
+     <y>569</y>
     </hint>
     <hint type="destinationlabel">
-     <x>333</x>
-     <y>567</y>
+     <x>108</x>
+     <y>569</y>
     </hint>
    </hints>
   </connection>
@@ -828,12 +882,12 @@
    <slot>setValue(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>333</x>
-     <y>567</y>
+     <x>108</x>
+     <y>569</y>
     </hint>
     <hint type="destinationlabel">
-     <x>183</x>
-     <y>567</y>
+     <x>108</x>
+     <y>569</y>
     </hint>
    </hints>
   </connection>
@@ -844,8 +898,8 @@
    <slot>SetDriver(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>333</x>
-     <y>567</y>
+     <x>108</x>
+     <y>569</y>
     </hint>
     <hint type="destinationlabel">
      <x>541</x>
@@ -892,8 +946,8 @@
    <slot>UpdateLinkSlider(double)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>436</x>
-     <y>557</y>
+     <x>345</x>
+     <y>567</y>
     </hint>
     <hint type="destinationlabel">
      <x>457</x>
@@ -908,8 +962,8 @@
    <slot>UpdateDriverSlider(double)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>518</x>
-     <y>557</y>
+     <x>108</x>
+     <y>569</y>
     </hint>
     <hint type="destinationlabel">
      <x>511</x>
@@ -924,8 +978,8 @@
    <slot>PrintCollisions()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>580</x>
-     <y>523</y>
+     <x>558</x>
+     <y>530</y>
     </hint>
     <hint type="destinationlabel">
      <x>628</x>

@@ -9,6 +9,10 @@
 using namespace Math3D;
 using namespace GLDraw;
 
+#define GLUT_LEFT_BUTTON 0
+#define GLUT_MIDDLE_BUTTON 1
+#define GLUT_RIGHT_BUTTON 2
+
 class ProgramSettings : public AnyCollection
 {
 public:
@@ -75,7 +79,7 @@ class RobotPoseBackend : public ResourceGUIBackend
   WidgetSet allWidgets;
   int draw_geom,draw_bbs,draw_com,draw_frame;
 
-  RobotPoseBackend(RobotWorld* world,ResourceLibrary* library);
+  RobotPoseBackend(RobotWorld* world,ResourceManager* library);
   virtual void Start();
   void UpdateConfig();
   virtual void RenderWorld();

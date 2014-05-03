@@ -17,7 +17,7 @@ SOURCES += main.cpp\
 
 HEADERS  += \
     dialog.h \
-    ../Main/urdftorob.h
+    ../urdftorob.h
 
 FORMS    += \
     dialog.ui

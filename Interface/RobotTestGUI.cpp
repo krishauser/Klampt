@@ -188,6 +188,7 @@ bool RobotTestBackend::OnButtonPress(const string& button)
   }
   return true;
 }
+
 bool RobotTestBackend::OnButtonToggle(const string& button,int checked)
 {
   if(button=="draw_expanded") {

@@ -3,7 +3,7 @@
 #include "utils/ioutils.h"
 #include "IO/XmlWorld.h"
 
-ResourceGUIBackend::ResourceGUIBackend(RobotWorld* world,ResourceLibrary* library)
+ResourceGUIBackend::ResourceGUIBackend(RobotWorld* world,ResourceManager* library)
   :WorldGUIBackend(world),resources(library)
 {
   cur_resource_type = "";
@@ -11,10 +11,12 @@ ResourceGUIBackend::ResourceGUIBackend(RobotWorld* world,ResourceLibrary* librar
 }
 
 
-inline bool LoadResources(const char* fn,ResourceLibrary& lib)
+inline bool LoadResources(const char* fn,ResourceManager& lib)
 {
-  size_t origsize = lib.itemsByName.size();
-  if(!lib.LoadAll(fn)) {
+  size_t origsize = lib.size();
+  //TODO
+  /*
+  if(!lib.LoadAllItems(fn)) {
     fprintf(stderr,"Warning, couldn't load library %s\n",fn);
     return false;
   }
@@ -22,10 +24,13 @@ inline bool LoadResources(const char* fn,ResourceLibrary& lib)
     printf("Loaded %d items from %s\n",lib.itemsByName.size()-origsize,fn);
     return true;
   }
+  */return false;
 }
 
-inline bool LoadResources(TiXmlElement* e,ResourceLibrary& lib)
+inline bool LoadResources(TiXmlElement* e,ResourceManager& lib)
 {
+  //TODO
+  /*
   size_t origsize = lib.itemsByName.size();
   if(!lib.Load(e)) {
     fprintf(stderr,"Warning, couldn't load library from XML\n");
@@ -34,15 +39,14 @@ inline bool LoadResources(TiXmlElement* e,ResourceLibrary& lib)
   else {
     printf("Loaded %d items from XML\n",lib.itemsByName.size()-origsize);
     return true;
-  }
+    }*/return false;
 }
 
-inline bool LoadItem(const char* fn,ResourceLibrary& lib)
+inline bool LoadItem(const char* fn,ResourceManager& lib)
 {
-  ResourcePtr r=lib.LoadItem(fn);
-  if(r) {
+  ResourceNode r=lib.LoadResource(fn);
+  if(r != NULL) {
     printf("Loaded %s as type %s\n",fn,r->Type());
-    lib.Add(r);
     return true;
   }
   else {
@@ -113,18 +117,25 @@ bool ResourceGUIBackend::LoadCommandLine(int argc,char** argv)
 void ResourceGUIBackend::Add(ResourcePtr r)
 {
   if(r->name.empty()) {
-    stringstream ss;
-    ss<<r->Type()<<"["<<resources->CountByType(r->Type())<<"]";
-    r->name = ss.str();
+      stringstream ss;
+//      if(resources == NULL) return;
+      if(resources->selected.isNull()){
+          ss<<r->Type()<<"["<<resources->toplevel.size()<<"]";
+      }
+      else{
+          ss<<"["<<resources->selected->children.size()<<"]";
+      }
+      r->name = ss.str();
   }
   last_added = r;
-  resources->Add(r);
+  resources->AddAsChild(r);
+  SendCommand("inform_new_resource", r->name);
 }
 
 ResourcePtr ResourceGUIBackend::Add(const string& name,const string& type)
 {
-  if(resources->knownTypes.count(type)==0) return NULL;
-  ResourcePtr r=resources->knownTypes[type][0]->Make();
+  if(resources->library.knownTypes.count(type)==0) return NULL;
+  ResourcePtr r=resources->library.knownTypes[type][0]->Make();
   r->name = name;
   Add(r);
   return r;
@@ -132,35 +143,17 @@ ResourcePtr ResourceGUIBackend::Add(const string& name,const string& type)
 
 void ResourceGUIBackend::SaveCur(const string& file)
 {
-  ResourcePtr r=CurrentResource();
-  if(file.empty()) {
-    r->fileName = resources->DefaultFileName(r);
-  }
-  else
-    r->fileName = file;
-
-  if(!r->Save()) 
-    fprintf(stderr,"Unable to save %s to %s\n",r->name.c_str(),r->fileName.c_str());
-  else {
-    printf("Saved %s to %s\n",r->name.c_str(),r->fileName.c_str());
-  }
+  resources->SaveSelected(file);
 }
 
 bool ResourceGUIBackend::LoadNew(const string& file)
 {
-  ResourcePtr r=resources->LoadItem(file);
-  if(!r) {
-    fprintf(stderr,"Unable to load resource from  %s\n",file.c_str());
-    return false;
-  }
-  else {
-    printf("Loaded %s from %s\n",r->name.c_str(),file.c_str());
-    return true;
-  }
+  return resources->LoadResource(file) != NULL;
 }
 
 void ResourceGUIBackend::SaveAll(const string& path)
 {
+  /*
   for(ResourceLibrary::Map::iterator i=resources->itemsByType.begin();i!=resources->itemsByType.end();i++) {
     for(size_t j=0;j<i->second.size();j++)
       if(i->second[j]->fileName.empty())
@@ -171,10 +164,13 @@ void ResourceGUIBackend::SaveAll(const string& path)
     fprintf(stderr,"Unable to save all resources to %s\n",path.c_str());
   else
     fprintf(stderr,"Saved all resources to %s\n",path.c_str());
+  */
 }
 
 bool ResourceGUIBackend::LoadAll(const string& path)
 {
+  //TODO
+  /*
   if(!resources->LoadAll(path)) {
     fprintf(stderr,"Error loading resources from %s\n",path.c_str());
     return false;
@@ -183,7 +179,10 @@ bool ResourceGUIBackend::LoadAll(const string& path)
     fprintf(stderr,"Loaded all resources from %s\n",path.c_str());
     return true;
   }
+  */
+  return false;
 }
+
 
 void ResourceGUIBackend::SetLastActive()
 {
@@ -207,31 +206,27 @@ bool ResourceGUIBackend::OnCommand(const string& cmd,const string& args)
 {
   if(cmd == "set_resource") {
     stringstream ss;
-    string type,name;
-    if(!SafeInputString(ss,type)) {
-      cout<<"Error reading resource type from "<<args<<endl;
-      return true;
-    }
+    string name;
     if(!SafeInputString(ss,name)) {
       cout<<"Error reading resource name from "<<args<<endl;
       return true;
     }
-    cur_resource_type = type;
-    cur_resource_name = name;
+    resources->selected = resources->itemsByName[name];
+    return true;      
   }
   else if(cmd == "get_resource") {
     stringstream ss;
-    ss<<cur_resource_type<<" "<<cur_resource_name;
+    ss<<resources->selected->Type()<<" "<<resources->selected->Name();
     SendCommand("current_resource",ss.str());
     return true;
   }
   else if(cmd == "set_resource_name") {
-    CurrentResource()->name = args;
+    resources->ChangeSelectedName(args);
     printf("Updating name to %s\n",args.c_str());
   }
   else if(cmd == "delete_resource") {
     string type = CurrentResource()->Type();
-    resources->Erase(CurrentResource());
+    resources->DeleteSelected();
   }
   else if(cmd == "add_resource") {
     string type,name;
@@ -279,8 +274,12 @@ bool ResourceGUIBackend::OnCommand(const string& cmd,const string& args)
     ResourcePtr r=CurrentResource();
     if(!r) return true;
     vector<ResourcePtr> res = ExtractResources(r,args.c_str());
-    for(size_t i=0;i<res.size();i++)
+    for(size_t i=0;i<res.size();i++){
       Add(res[i]);     
+      stringstream ss;
+      ss<<r->name<<" "<<r->Type();
+      SendCommand("resource_added",ss.str());
+    }
     if(!res.empty())
       SetLastActive();
   }
@@ -297,15 +296,21 @@ bool ResourceGUIBackend::OnCommand(const string& cmd,const string& args)
 
 ResourcePtr ResourceGUIBackend::CurrentResource()
 {
-  if(resources->itemsByType.count(cur_resource_type) == 0) return 0;
-  vector<ResourcePtr >& v=resources->itemsByType[cur_resource_type];
-  for(size_t i=0;i<v.size();i++)
-    if(v[i]->name == cur_resource_name)
-      return v[i];
-  return NULL;
+  //if(resources->itemsByName.count(cur_resource_type) == 0)
+  //      return 0;
+    if(resources && resources->selected)
+        return resources->selected->resource;
+    else return 0;
 }
 
 void ResourceGUIBackend::RenderCurResource()
 {
-  viewResource.DrawGL(CurrentResource());
+  /*
+    ResourcePtr current = CurrentResource();
+    if(current)
+        viewResource.DrawGL(current);
+  */
+  //separate open?
+  if(resources && resources->selected)
+    viewResource.DrawGL(resources->selected->resource);
 }
