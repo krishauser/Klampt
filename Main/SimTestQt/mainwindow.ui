@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>702</width>
+    <width>825</width>
     <height>600</height>
    </rect>
   </property>
@@ -439,7 +439,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>702</width>
+     <width>825</width>
      <height>25</height>
     </rect>
    </property>
@@ -507,9 +507,22 @@
     <property name="title">
      <string>Logging</string>
     </property>
+    <widget class="QMenu" name="menuSet_Log_File">
+     <property name="title">
+      <string>Set Log Files</string>
+     </property>
+     <addaction name="actionSimulation"/>
+     <addaction name="actionContact_State"/>
+     <addaction name="actionContact_Wrenches"/>
+     <addaction name="actionSensed_Path"/>
+     <addaction name="actionCommanded_Path"/>
+    </widget>
     <addaction name="actionLog_Simulation"/>
     <addaction name="actionLog_Contact_State"/>
     <addaction name="actionLog_Wrenches"/>
+    <addaction name="actionLog_Sensed_Path"/>
+    <addaction name="actionLog_Commanded_Path"/>
+    <addaction name="menuSet_Log_File"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuPreferences"/>
@@ -728,6 +741,47 @@
   <action name="actionConnect_Serial_Controller">
    <property name="text">
     <string>Connect Serial Controller</string>
+   </property>
+  </action>
+  <action name="actionSimulation">
+   <property name="text">
+    <string>Simulation</string>
+   </property>
+  </action>
+  <action name="actionContact_State">
+   <property name="text">
+    <string>Contact State</string>
+   </property>
+  </action>
+  <action name="actionContact_Wrenches">
+   <property name="text">
+    <string>Contact Wrenches</string>
+   </property>
+  </action>
+  <action name="actionLog_Sensed_Path">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Log Sensed Path</string>
+   </property>
+  </action>
+  <action name="actionLog_Commanded_Path">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Log Commanded Path</string>
+   </property>
+  </action>
+  <action name="actionSensed_Path">
+   <property name="text">
+    <string>Sensed Path</string>
+   </property>
+  </action>
+  <action name="actionCommanded_Path">
+   <property name="text">
+    <string>Commanded Path</string>
    </property>
   </action>
  </widget>
@@ -1495,6 +1549,118 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>actionSimulation</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>ChangeSimulationLogFile()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>412</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionContact_State</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>ChangeContactStateLogFile()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>412</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionContact_Wrenches</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>ChangeContactWrenchesLogFile()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>412</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionLog_Sensed_Path</sender>
+   <signal>triggered(bool)</signal>
+   <receiver>MainWindow</receiver>
+   <slot>LogSensedPath(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>412</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionLog_Commanded_Path</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>MainWindow</receiver>
+   <slot>LogCommandedPath(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>412</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionSensed_Path</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>ChangeSensedPathLogFile()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>412</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionCommanded_Path</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>ChangeCommandedPathLogFile()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>412</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>Reset()</slot>
@@ -1550,5 +1716,12 @@
   <slot>LogContactWrenches(bool)</slot>
   <slot>ShowSerialController()</slot>
   <slot>SetPoseObjects(bool)</slot>
+  <slot>ChangeSimulationLogFile()</slot>
+  <slot>ChangeContactStateLogFile()</slot>
+  <slot>ChangeContactWrenchesLogFile()</slot>
+  <slot>ChangeSensedPathLogFile()</slot>
+  <slot>ChangeCommandedPathLogFile()</slot>
+  <slot>LogSensedPath(bool)</slot>
+  <slot>LogCommandedPath(bool)</slot>
  </slots>
 </ui>

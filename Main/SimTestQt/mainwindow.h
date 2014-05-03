@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include <QDir>
+#include <QSettings>
 
 #include "Modeling/World.h"
 #include "Interface/SimTestGUI.h"
@@ -19,6 +20,7 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
+    QSettings* ini;
     QDir directory;
     QString filename;
     SmartPointer<QSimTestGUI> gui;
@@ -73,6 +75,13 @@ public slots:
   void LogSimulation(bool status);
   void LogContactState(bool status);
   void LogContactWrenches(bool status);
+  void LogSensedPath(bool status);
+  void LogCommandedPath(bool status);
+  void ChangeSimulationLogFile();
+  void ChangeContactStateLogFile();
+  void ChangeContactWrenchesLogFile();
+  void ChangeSensedPathLogFile();
+  void ChangeCommandedPathLogFile();
 
   //IK Mode
   void IKConstrain();

@@ -3,6 +3,7 @@
 #include "QDebug"
 #include <QTimer>
 #include <QWidgetList>
+#include <QFileInfo>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -112,15 +113,77 @@ void MainWindow::SetRecord(bool status){
 }
 
 void MainWindow::LogSimulation(bool status){
-    gui->SendCommand("log_sim",status);
+  string file;
+  if(status) file = ini->value("log_simulation_file","simtest_log.csv").toString().toStdString();
+  gui->SendCommand("log_sim",file);
 }
 
 void MainWindow::LogContactState(bool status){
-    gui->SendCommand("log_contact_state",status);
+  string file;
+  if(status) file = ini->value("log_contact_state_file","simtest_contact_log.csv").toString().toStdString();
+  gui->SendCommand("log_contact_state",file);
 }
 
 void MainWindow::LogContactWrenches(bool status){
-    gui->SendCommand("log_contact_wrenches",status);
+  string file;
+  if(status) file = ini->value("log_contact_wrenches_file","simtest_wrenches_log.csv").toString().toStdString();
+  gui->SendCommand("log_contact_wrenches",file);
+}
+
+void MainWindow::LogSensedPath(bool status){
+  string file;
+  stringstream ss;
+  if(status) file = ini->value("log_sensed_path_file","simtest_sensed_path_log.csv").toString().toStdString();
+  ss<<"0 "<<file;//multiple robots what do we do?
+  gui->SendCommand("log_sensed_path",ss.str());
+}
+
+void MainWindow::LogCommandedPath(bool status){
+  string file;
+  stringstream ss;
+  if(status) file = ini->value("log_commanded_path_file","simtest_commanded_path_log.csv").toString().toStdString();
+  ss<<"0 "<<file;//multiple robots what do we do?
+  gui->SendCommand("log_commanded_path",ss.str());
+}
+
+void MainWindow::ChangeSimulationLogFile(){
+  QFileDialog f;
+  QString openDir = ini->value("log_simulation_directory",".").toString();
+  filename = f.getSaveFileName(this,"Set Simulation Log File",openDir,tr("CSV File (*.csv);;Any File (*)"));
+  ini->setValue("log_simulation_file",QFileInfo(filename).absoluteFilePath());
+  ini->setValue("log_simulation_directory",QFileInfo(filename).absolutePath());
+}
+
+void MainWindow::ChangeContactStateLogFile(){
+  QFileDialog f;
+  QString openDir = ini->value("log_contact_state_directory",".").toString();
+  filename = f.getSaveFileName(this,"Set Contact State Log File",openDir,tr("CSV File (*.csv);;Any File (*)"));
+  ini->setValue("log_contact_state_file",QFileInfo(filename).absoluteFilePath());
+  ini->setValue("log_contact_state_directory",QFileInfo(filename).absolutePath());
+}
+
+void MainWindow::ChangeContactWrenchesLogFile(){
+  QFileDialog f;
+  QString openDir = ini->value("log_contact_wrenches_directory",".").toString();
+  filename = f.getSaveFileName(this,"Set Contact Wrenches Log File",openDir,tr("CSV File (*.csv);;Any File (*)"));
+  ini->setValue("log_contact_wrenches_file",QFileInfo(filename).absoluteFilePath());
+  ini->setValue("log_contact_wrenches_directory",QFileInfo(filename).absolutePath());
+}
+
+void MainWindow::ChangeSensedPathLogFile(){
+  QFileDialog f;
+  QString openDir = ini->value("log_sensed_path_directory",".").toString();
+  filename = f.getSaveFileName(this,"Set Sensed Path Log File",openDir,tr("CSV File (*.csv);;Any File (*)"));
+  ini->setValue("log_sensed_path_file",QFileInfo(filename).absoluteFilePath());
+  ini->setValue("log_sensed_path_directory",QFileInfo(filename).absolutePath());
+}
+
+void MainWindow::ChangeCommandedPathLogFile(){
+  QFileDialog f;
+  QString openDir = ini->value("log_commanded_path_directory",".").toString();
+  filename = f.getSaveFileName(this,"Set commanded Path Log File",openDir,tr("CSV File (*.csv);;Any File (*)"));
+  ini->setValue("log_commanded_path_file",QFileInfo(filename).absoluteFilePath());
+  ini->setValue("log_commanded_path_directory",QFileInfo(filename).absolutePath());
 }
 
 void MainWindow::SetMode(int option){

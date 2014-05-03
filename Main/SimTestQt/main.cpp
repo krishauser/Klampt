@@ -30,6 +30,7 @@ int main(int argc, char *argv[])
         ini.setValue("last_open_scenario_directory",QFileInfo(filename).absolutePath());
       }
       MainWindow w;
+      w.ini=&ini;
       if(argc==1){
 	string fn = filename.toStdString();
           const char* args[3] = {"SimTest",fn.c_str(),""};
