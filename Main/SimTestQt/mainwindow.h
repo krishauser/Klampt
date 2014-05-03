@@ -22,7 +22,7 @@ public:
     ~MainWindow();
     QSettings* ini;
     QDir directory;
-    QString filename;
+//    QString filename;
     SmartPointer<QSimTestGUI> gui;
     QTimer refresh_timer;
     int argc;
