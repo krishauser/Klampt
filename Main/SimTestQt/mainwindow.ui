@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>688</width>
+    <width>702</width>
     <height>600</height>
    </rect>
   </property>
@@ -312,7 +312,7 @@
              <bool>true</bool>
             </property>
             <property name="flat">
-             <bool>true</bool>
+             <bool>false</bool>
             </property>
            </widget>
           </item>
@@ -329,7 +329,7 @@
              <bool>true</bool>
             </property>
             <property name="flat">
-             <bool>true</bool>
+             <bool>false</bool>
             </property>
            </widget>
           </item>
@@ -346,7 +346,7 @@
              <bool>true</bool>
             </property>
             <property name="flat">
-             <bool>true</bool>
+             <bool>false</bool>
             </property>
            </widget>
           </item>
@@ -407,6 +407,13 @@
            </widget>
           </item>
           <item>
+           <widget class="QCheckBox" name="chk_objects">
+            <property name="text">
+             <string>Pose Objects</string>
+            </property>
+           </widget>
+          </item>
+          <item>
            <spacer name="horizontalSpacer_2">
             <property name="orientation">
              <enum>Qt::Horizontal</enum>
@@ -432,7 +439,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>688</width>
+     <width>702</width>
      <height>25</height>
     </rect>
    </property>
@@ -775,7 +782,7 @@
    <slot>SetSimulate(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>231</x>
+     <x>218</x>
      <y>565</y>
     </hint>
     <hint type="destinationlabel">
@@ -791,7 +798,7 @@
    <slot>SendMilestone()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>187</x>
+     <x>92</x>
      <y>565</y>
     </hint>
     <hint type="destinationlabel">
@@ -807,7 +814,7 @@
    <slot>SetRecord(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>275</x>
+     <x>262</x>
      <y>565</y>
     </hint>
     <hint type="destinationlabel">
@@ -1047,7 +1054,7 @@
    <slot>IKConstrain()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>579</x>
+     <x>566</x>
      <y>565</y>
     </hint>
     <hint type="destinationlabel">
@@ -1063,7 +1070,7 @@
    <slot>IKDelete()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>623</x>
+     <x>610</x>
      <y>565</y>
     </hint>
     <hint type="destinationlabel">
@@ -1271,7 +1278,7 @@
    <slot>IKConstrainPoint()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>535</x>
+     <x>522</x>
      <y>565</y>
     </hint>
     <hint type="destinationlabel">
@@ -1287,7 +1294,7 @@
    <slot>DoForceMode()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>461</x>
+     <x>448</x>
      <y>565</y>
     </hint>
     <hint type="destinationlabel">
@@ -1303,7 +1310,7 @@
    <slot>DoFreeMode()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>373</x>
+     <x>360</x>
      <y>565</y>
     </hint>
     <hint type="destinationlabel">
@@ -1319,7 +1326,7 @@
    <slot>DoIKMode()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>417</x>
+     <x>404</x>
      <y>565</y>
     </hint>
     <hint type="destinationlabel">
@@ -1472,6 +1479,22 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>chk_objects</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>MainWindow</receiver>
+   <slot>SetPoseObjects(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>642</x>
+     <y>546</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>635</x>
+     <y>535</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>Reset()</slot>
@@ -1526,5 +1549,6 @@
   <slot>LogContactState(bool)</slot>
   <slot>LogContactWrenches(bool)</slot>
   <slot>ShowSerialController()</slot>
+  <slot>SetPoseObjects(bool)</slot>
  </slots>
 </ui>

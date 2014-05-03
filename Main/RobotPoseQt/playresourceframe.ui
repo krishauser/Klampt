@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>240</width>
+    <width>182</width>
     <height>146</height>
    </rect>
   </property>
@@ -83,6 +83,7 @@
   </layout>
  </widget>
  <resources>
+  <include location="../KlamptQt/icons.qrc"/>
   <include location="../KlamptQt/icons.qrc"/>
  </resources>
  <connections>

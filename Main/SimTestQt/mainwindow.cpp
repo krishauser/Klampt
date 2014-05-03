@@ -62,6 +62,10 @@ void MainWindow::SetPoser(bool status){
   gui->SendButtonToggle("draw_poser",status);
 }
 
+void MainWindow::SetPoseObjects(bool status){
+    gui->SendButtonToggle("pose_objects",status);
+}
+
 void MainWindow::SetDesired(bool status){
   gui->SendButtonToggle("draw_desired",status);
 }
@@ -123,6 +127,7 @@ void MainWindow::SetMode(int option){
     gui->SendButtonToggle("pose_ik",(option==1));
     gui->SendButtonToggle("force_application_mode",(option==2));
     ui->btn_free->setChecked(option==0);
+    ui->chk_objects->setVisible(option==0);
     ui->btn_ik->setChecked(option==1);
     ui->lbl_ik->setVisible(option==1);
     ui->line_ik->setVisible(option==1);

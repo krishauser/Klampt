@@ -37,6 +37,7 @@ public slots:
   void SetBBoxes(bool status);
   void SetContacts(bool status);
   void SetPoser(bool status);
+  void SetPoseObjects(bool status);
   void SetExpanded(bool status);
   void SetPoseIK(bool status);
   void SetSensorPlot(bool status);
