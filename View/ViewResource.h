@@ -15,10 +15,9 @@ class ViewResource
   void DrawGL(const ResourcePtr& r);
 
   //helpers
-  void RenderLinearPath(const LinearPathResource* rc,Real pathTime,bool scaled = 0);
-  void RenderMultiPath(const MultiPathResource* path,Real pathTime,bool scaled=0);
+  void RenderLinearPath(const LinearPathResource* rc,Real pathTime);
+  void RenderMultiPath(const MultiPathResource* path,Real pathTime);
 
-  bool scaled;
   ViewRobot configViewer,configsViewer;
   ViewRobot pathViewer; Real pathTime;
   Real pathIKResolution;

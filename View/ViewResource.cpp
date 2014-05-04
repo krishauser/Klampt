@@ -170,7 +170,6 @@ ViewResource::ViewResource(Robot* robot)
 {
   SetRobot(robot);
   pathTime = 0;
-  scaled = 0;
 
   pathIKResolution = 0.005;
 }
@@ -180,10 +179,14 @@ void ViewResource::SetRobot(Robot* robot)
   configViewer.robot = robot;
   configsViewer.robot = robot;
   pathViewer.robot = robot;
+  /*
   configViewer.SetGrey();
   configsViewer.SetGrey();
   pathViewer.SetGrey();
-
+  */
+  configViewer.SetColors(GLColor(0.5,0.5,0.5,0.7));
+  configsViewer.SetColors(GLColor(0.5,0.5,0.5,0.7));
+  pathViewer.SetColors(GLColor(0.5,0.5,0.5,0.7));
 }
 void ViewResource::SetAnimTime(Real time)
 {
@@ -226,7 +229,7 @@ void ViewResource::DrawGL(const ResourcePtr& r)
   else if(typeid(*r)==typeid(LinearPathResource)) {
     const LinearPathResource* rc=dynamic_cast<const LinearPathResource*>((const ResourceBase*)r);
     if(!rc) return;
-    RenderLinearPath(rc,pathTime,scaled);
+    RenderLinearPath(rc,pathTime);
   }
   else if(typeid(*r)==typeid(MultiPathResource)) {
     const MultiPathResource* rc=dynamic_cast<const MultiPathResource*>((const ResourceBase*)r);
@@ -258,7 +261,7 @@ void ViewResource::DrawGL(const ResourcePtr& r)
 }
 
 
-void ViewResource::RenderLinearPath(const LinearPathResource* rc,Real pathTime,bool scaled)
+void ViewResource::RenderLinearPath(const LinearPathResource* rc,Real pathTime)
 {
   if(pathViewer.robot==NULL) {
     printf("ViewResource: Robot is NULL\n");
@@ -285,11 +288,7 @@ void ViewResource::RenderLinearPath(const LinearPathResource* rc,Real pathTime,b
       pathTime = normalizedPathTime;
     */
     //bouncing behavior
-    double cnt;
-    if(scaled)
-      cnt=pathTime;
-    else
-      cnt = (pathTime-rc->times.front())/(rc->times.back()-rc->times.front());
+    double cnt = (pathTime-rc->times.front())/(rc->times.back()-rc->times.front());
     int n = (int)Floor(cnt);
     if(n%2==0)
       normalizedPathTime = (cnt-n)*(rc->times.back()-rc->times.front());
@@ -313,7 +312,7 @@ void ViewResource::RenderLinearPath(const LinearPathResource* rc,Real pathTime,b
   pathViewer.robot->UpdateConfig(oldq);
 }
 
-void ViewResource::RenderMultiPath(const MultiPathResource* rc,Real pathTime,bool scaled)
+void ViewResource::RenderMultiPath(const MultiPathResource* rc,Real pathTime)
 {
   if(pathViewer.robot==NULL) {
     printf("ViewResource: Robot is NULL\n");
@@ -329,11 +328,7 @@ void ViewResource::RenderMultiPath(const MultiPathResource* rc,Real pathTime,boo
   else
     pathTime /= rc->path.sections.size();
   //do bouncing behavior
-  double cnt;
-  if(scaled)
-    cnt = pathTime;
-  else
-    cnt = (pathTime-minTime)/(maxTime-minTime);
+  double cnt = (pathTime-minTime)/(maxTime-minTime);
   int n = (int)Floor(cnt);
   Real normalizedPathTime;
   if(n%2==0)
