@@ -18,6 +18,9 @@ public slots:
     void Play();
     void Pause();
     void Record();
+    void NewTime(int t);
+signals:
+    void TimeChanged(double);
 private:
     Ui::PlayResourceFrame *ui;
 };

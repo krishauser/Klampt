@@ -90,6 +90,10 @@ void ResourceFrame::updateNewResource(string name){
     }
 }
 
+void ResourceFrame::SendPathTime(double t){
+    gui->SendCommand("set_path_time",t);
+}
+
 //void ResourceFrame::selectionChanged(){
 
 //}

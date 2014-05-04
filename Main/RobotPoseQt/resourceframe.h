@@ -37,6 +37,8 @@ public slots:
     void PressedExpand();
     void ToGUI();
     void FromGUI();
+    void SendPathTime(double t);
+
 
 private:
     Ui::ResourceFrame *ui;

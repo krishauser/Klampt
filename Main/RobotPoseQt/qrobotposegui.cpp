@@ -85,10 +85,10 @@ void QRobotPoseGUI::LoadFilePrompt(QString directory,QString filter){
   QSettings ini(QSettings::IniFormat, QSettings::UserScope,
 		QCoreApplication::organizationName(),
 		QCoreApplication::applicationName());
-  QString openDir = ini.value(directory,".").toString();
+  QString openDir = ini.value("last_resource_file",".").toString();
   QString filename = f.getOpenFileName(0,"Open File",openDir,filter);
   if(!filename.isEmpty()){
-    ini.setValue(directory,QFileInfo(filename).absolutePath());
+      ini.setValue("last_resource_file",QFileInfo(filename).absolutePath());
     LoadFile(filename);
   }
 }

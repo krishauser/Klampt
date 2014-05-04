@@ -7,42 +7,26 @@
     <x>0</x>
     <y>0</y>
     <width>182</width>
-    <height>146</height>
+    <height>105</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Frame</string>
   </property>
+  <property name="styleSheet">
+   <string notr="true"/>
+  </property>
   <property name="frameShape">
-   <enum>QFrame::StyledPanel</enum>
+   <enum>QFrame::NoFrame</enum>
   </property>
   <property name="frameShadow">
-   <enum>QFrame::Raised</enum>
+   <enum>QFrame::Sunken</enum>
+  </property>
+  <property name="lineWidth">
+   <number>1</number>
   </property>
   <layout class="QGridLayout" name="gridLayout">
-   <item row="5" column="0">
-    <widget class="QPushButton" name="pushButton_5">
-     <property name="text">
-      <string/>
-     </property>
-     <property name="icon">
-      <iconset resource="../KlamptQt/icons.qrc">
-       <normaloff>:/Images/Images/media-playback-start.svg</normaloff>:/Images/Images/media-playback-start.svg</iconset>
-     </property>
-    </widget>
-   </item>
-   <item row="5" column="2">
-    <widget class="QPushButton" name="pushButton_3">
-     <property name="text">
-      <string/>
-     </property>
-     <property name="icon">
-      <iconset resource="../KlamptQt/icons.qrc">
-       <normaloff>:/Images/Images/media-record.svg</normaloff>:/Images/Images/media-record.svg</iconset>
-     </property>
-    </widget>
-   </item>
-   <item row="5" column="1">
+   <item row="2" column="1">
     <widget class="QPushButton" name="pushButton_2">
      <property name="text">
       <string/>
@@ -53,10 +37,25 @@
      </property>
     </widget>
    </item>
-   <item row="4" column="0" colspan="3">
-    <widget class="QSlider" name="slider">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
+   <item row="2" column="2">
+    <widget class="QPushButton" name="pushButton_3">
+     <property name="text">
+      <string/>
+     </property>
+     <property name="icon">
+      <iconset resource="../KlamptQt/icons.qrc">
+       <normaloff>:/Images/Images/media-record.svg</normaloff>:/Images/Images/media-record.svg</iconset>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="0">
+    <widget class="QPushButton" name="pushButton_5">
+     <property name="text">
+      <string/>
+     </property>
+     <property name="icon">
+      <iconset resource="../KlamptQt/icons.qrc">
+       <normaloff>:/Images/Images/media-playback-start.svg</normaloff>:/Images/Images/media-playback-start.svg</iconset>
      </property>
     </widget>
    </item>
@@ -71,12 +70,12 @@
     </widget>
    </item>
    <item row="1" column="0" colspan="3">
-    <widget class="QLabel" name="lbl_info">
-     <property name="text">
-      <string>Information</string>
+    <widget class="QSlider" name="slider">
+     <property name="maximum">
+      <number>999</number>
      </property>
-     <property name="alignment">
-      <set>Qt::AlignCenter</set>
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
      </property>
     </widget>
    </item>
@@ -94,12 +93,12 @@
    <slot>Play()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>36</x>
-     <y>124</y>
+     <x>45</x>
+     <y>95</y>
     </hint>
     <hint type="destinationlabel">
      <x>4</x>
-     <y>121</y>
+     <y>104</y>
     </hint>
    </hints>
   </connection>
@@ -110,12 +109,12 @@
    <slot>Pause()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>125</x>
-     <y>120</y>
+     <x>115</x>
+     <y>95</y>
     </hint>
     <hint type="destinationlabel">
      <x>159</x>
-     <y>107</y>
+     <y>104</y>
     </hint>
    </hints>
   </connection>
@@ -126,12 +125,28 @@
    <slot>Record()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>210</x>
-     <y>127</y>
+     <x>172</x>
+     <y>95</y>
     </hint>
     <hint type="destinationlabel">
-     <x>232</x>
+     <x>181</x>
      <y>102</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>slider</sender>
+   <signal>sliderMoved(int)</signal>
+   <receiver>PlayResourceFrame</receiver>
+   <slot>NewTime(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>145</x>
+     <y>39</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>180</x>
+     <y>16</y>
     </hint>
    </hints>
   </connection>
@@ -140,5 +155,6 @@
   <slot>Play()</slot>
   <slot>Pause()</slot>
   <slot>Record()</slot>
+  <slot>NewTime(int)</slot>
  </slots>
 </ui>

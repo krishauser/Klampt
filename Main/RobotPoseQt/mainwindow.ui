@@ -351,6 +351,16 @@
       </item>
      </layout>
     </item>
+    <item row="1" column="1" rowspan="2">
+     <widget class="PlayResourceFrame" name="playframe">
+      <property name="frameShape">
+       <enum>QFrame::StyledPanel</enum>
+      </property>
+      <property name="frameShadow">
+       <enum>QFrame::Raised</enum>
+      </property>
+     </widget>
+    </item>
    </layout>
   </widget>
   <widget class="QMenuBar" name="menuBar">
@@ -568,6 +578,18 @@
    <extends>QFrame</extends>
    <header>resourceframe.h</header>
    <container>1</container>
+   <slots>
+    <slot>SendPathTime(double)</slot>
+   </slots>
+  </customwidget>
+  <customwidget>
+   <class>PlayResourceFrame</class>
+   <extends>QFrame</extends>
+   <header>playresourceframe.h</header>
+   <container>1</container>
+   <slots>
+    <signal>TimeChanged(double)</signal>
+   </slots>
   </customwidget>
  </customwidgets>
  <resources>
@@ -582,7 +604,7 @@
    <slot>SetGeometry(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>129</x>
+     <x>314</x>
      <y>495</y>
     </hint>
     <hint type="destinationlabel">
@@ -598,7 +620,7 @@
    <slot>SetCOM(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>199</x>
+     <x>384</x>
      <y>495</y>
     </hint>
     <hint type="destinationlabel">
@@ -614,7 +636,7 @@
    <slot>SetFrame(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>275</x>
+     <x>461</x>
      <y>495</y>
     </hint>
     <hint type="destinationlabel">
@@ -630,7 +652,7 @@
    <slot>SetBboxes(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>360</x>
+     <x>546</x>
      <y>495</y>
     </hint>
     <hint type="destinationlabel">
@@ -646,7 +668,7 @@
    <slot>SetLink(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>206</x>
+     <x>301</x>
      <y>567</y>
     </hint>
     <hint type="destinationlabel">
@@ -662,7 +684,7 @@
    <slot>SetIK(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>434</x>
+     <x>620</x>
      <y>530</y>
     </hint>
     <hint type="destinationlabel">
@@ -678,11 +700,11 @@
    <slot>setCurrentIndex(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>122</x>
+     <x>217</x>
      <y>567</y>
     </hint>
     <hint type="destinationlabel">
-     <x>206</x>
+     <x>301</x>
      <y>567</y>
     </hint>
    </hints>
@@ -694,7 +716,7 @@
    <slot>SetLink(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>122</x>
+     <x>217</x>
      <y>567</y>
     </hint>
     <hint type="destinationlabel">
@@ -710,11 +732,11 @@
    <slot>setValue(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>206</x>
+     <x>301</x>
      <y>567</y>
     </hint>
     <hint type="destinationlabel">
-     <x>122</x>
+     <x>217</x>
      <y>567</y>
     </hint>
    </hints>
@@ -726,7 +748,7 @@
    <slot>LinkMode()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>92</x>
+     <x>277</x>
      <y>527</y>
     </hint>
     <hint type="destinationlabel">
@@ -742,7 +764,7 @@
    <slot>DriverMode()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>170</x>
+     <x>355</x>
      <y>527</y>
     </hint>
     <hint type="destinationlabel">
@@ -822,8 +844,8 @@
    <slot>SliderLinkAngle(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>235</x>
-     <y>524</y>
+     <x>470</x>
+     <y>531</y>
     </hint>
     <hint type="destinationlabel">
      <x>157</x>
@@ -838,8 +860,8 @@
    <slot>SliderDriverAngle(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>378</x>
-     <y>525</y>
+     <x>576</x>
+     <y>531</y>
     </hint>
     <hint type="destinationlabel">
      <x>420</x>
@@ -854,7 +876,7 @@
    <slot>UpdateLinkSlider(double)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>345</x>
+     <x>440</x>
      <y>567</y>
     </hint>
     <hint type="destinationlabel">
@@ -886,7 +908,7 @@
    <slot>PrintCollisions()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>558</x>
+     <x>744</x>
      <y>530</y>
     </hint>
     <hint type="destinationlabel">
@@ -918,7 +940,7 @@
    <slot>SetCollisions(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>559</x>
+     <x>745</x>
      <y>495</y>
     </hint>
     <hint type="destinationlabel">
@@ -934,12 +956,28 @@
    <slot>SetExpanded(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>462</x>
+     <x>648</x>
      <y>495</y>
     </hint>
     <hint type="destinationlabel">
      <x>500</x>
      <y>570</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>playframe</sender>
+   <signal>TimeChanged(double)</signal>
+   <receiver>frame_resources</receiver>
+   <slot>SendPathTime(double)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>965</x>
+     <y>485</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>966</x>
+     <y>457</y>
     </hint>
    </hints>
   </connection>

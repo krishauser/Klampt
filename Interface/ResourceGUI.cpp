@@ -286,6 +286,7 @@ bool ResourceGUIBackend::OnCommand(const string& cmd,const string& args)
   else if(cmd == "set_path_time") {
     stringstream ss(args);
     ss>>viewResource.pathTime;
+    viewResource.scaled = 1;
   }
   else {
     return WorldGUIBackend::OnCommand(cmd,args);
@@ -311,6 +312,7 @@ void ResourceGUIBackend::RenderCurResource()
         viewResource.DrawGL(current);
   */
   //separate open?
+  viewResource.SetRobot(world->robots[0].robot);
   if(resources && resources->selected)
     viewResource.DrawGL(resources->selected->resource);
 }
