@@ -15,7 +15,7 @@ public:
     void SetDriver(int index);
     void SetLink(int index);
     void LoadFile(QString filename=QString());
-    void LoadFilePrompt(QString directory="", QString filter="*");
+    void LoadFilePrompt(QString directory_key="", QString filter="*");
     bool OnCommand(const string &cmd, const string &args);
     void UpdateGUI();
 

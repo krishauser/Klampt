@@ -24,7 +24,7 @@ void ResourceFrame::OpenFile(QString filename){
           QCoreApplication::applicationName());  if(filename.isEmpty()){
     QFileDialog f;
     QString openDir = ini.value("last_open_resource_directory",".").toString();
-    filename = f.getOpenFileName(0,"Open File",QDir::home().absolutePath(),"");
+    filename = f.getOpenFileName(0,"Open File",openDir,"");
   }
   if(!filename.isNull()){
     ini.setValue("last_open_resource_directory",QFileInfo(filename).absolutePath());

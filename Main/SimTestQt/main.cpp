@@ -25,7 +25,7 @@ int main(int argc, char *argv[])
     if(argc==1){
         QFileDialog f;
         QString openDir = ini.value("last_open_scenario_directory",".").toString();
-        filename = f.getOpenFileName(0,"Open Scenario",openDir,"*.xml");
+        filename = f.getOpenFileName(0,"Open Scenario",openDir,"Scenario (*.xml);;Robot (*.rob);;All Files (*)");
         if(filename.isNull()) return 0;
         ini.setValue("last_open_scenario_directory",QFileInfo(filename).absolutePath());
       }

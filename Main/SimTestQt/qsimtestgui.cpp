@@ -141,12 +141,12 @@ void QSimTestGUI::LoadFile(QString filename){
   }
 }
 
-void QSimTestGUI::LoadFilePrompt(QString directory,QString filter){
+void QSimTestGUI::LoadFilePrompt(QString directory_key,QString filter){
   QFileDialog f;
-  QString openDir = ini->value(directory,".").toString();
+  QString openDir = ini->value(directory_key,".").toString();
   QString filename = f.getOpenFileName(0,"Open File",openDir,filter);
   if(!filename.isEmpty()){
-    ini->setValue(directory,QFileInfo(filename).absolutePath());
+    ini->setValue(directory_key,QFileInfo(filename).absolutePath());
     LoadFile(filename);
   }
 }

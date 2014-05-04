@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include <QDir>
+#include <QSettings>
 
 #include "Modeling/World.h"
 #include "Interface/RobotPoseGUI.h"

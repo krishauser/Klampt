@@ -236,7 +236,7 @@ void MainWindow::PrintCollisions(){
 }
 
 void MainWindow::LoadFile(){
-    gui->LoadFilePrompt();
+    gui->LoadFilePrompt("last_resource_location");
 }
 
 MainWindow::~MainWindow()

@@ -41,7 +41,7 @@ public:
     ~QSimTestGUI();
     void UpdateMeasurements();
     void LoadFile(QString filename=QString());
-    void LoadFilePrompt(QString directory=".",QString filter="*");
+    void LoadFilePrompt(QString directory_key=".",QString filter="*");
     void SaveScenario(QString filename=QString());
     void SaveLastScenario();
     void ShowHelp();

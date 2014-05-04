@@ -80,15 +80,15 @@ void QRobotPoseGUI::LoadFile(QString filename){
   }
 }
 
-void QRobotPoseGUI::LoadFilePrompt(QString directory,QString filter){
+void QRobotPoseGUI::LoadFilePrompt(QString directory_key,QString filter){
   QFileDialog f;
   QSettings ini(QSettings::IniFormat, QSettings::UserScope,
 		QCoreApplication::organizationName(),
 		QCoreApplication::applicationName());
-  QString openDir = ini.value("last_resource_file",".").toString();
+  QString openDir = ini.value(directory_key,".").toString();
   QString filename = f.getOpenFileName(0,"Open File",openDir,filter);
   if(!filename.isEmpty()){
-      ini.setValue("last_resource_file",QFileInfo(filename).absolutePath());
+      ini.setValue(directory_key,QFileInfo(filename).absolutePath());
     LoadFile(filename);
   }
 }
