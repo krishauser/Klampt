@@ -183,6 +183,34 @@ void RobotPoseBackend::RenderWorld()
     glPopMatrix();
     glEnable(GL_DEPTH_TEST);
   }
+  //draw bounding boxes
+  if(draw_bbs) {
+    //    sim.UpdateModel();
+    for(size_t i=0;i<world->robots.size();i++) {
+      for(size_t j=0;j<world->robots[i].robot->geometry.size();j++) {
+	if(world->robots[i].robot->geometry[j].Empty()) continue;
+	Box3D bbox = world->robots[i].robot->geometry[j].GetBB();
+	Matrix4 basis;
+	bbox.getBasis(basis);
+	glColor3f(1,0,0);
+	drawOrientedWireBox(bbox.dims.x,bbox.dims.y,bbox.dims.z,basis);
+      }
+    }
+    for(size_t i=0;i<world->rigidObjects.size();i++) {
+      Box3D bbox = world->rigidObjects[i].object->geometry.GetBB();
+      Matrix4 basis;
+      bbox.getBasis(basis);
+      glColor3f(1,0,0);
+      drawOrientedWireBox(bbox.dims.x,bbox.dims.y,bbox.dims.z,basis);
+    }
+    for(size_t i=0;i<world->terrains.size();i++) {
+      Box3D bbox = world->terrains[i].terrain->geometry.GetBB();
+      Matrix4 basis;
+      bbox.getBasis(basis);
+      glColor3f(1,0.5,0);
+      drawOrientedWireBox(bbox.dims.x,bbox.dims.y,bbox.dims.z,basis);
+    }
+  }
 }
 
 
