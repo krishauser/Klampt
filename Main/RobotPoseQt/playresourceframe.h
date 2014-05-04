@@ -2,6 +2,11 @@
 #define PLAYRESOURCEFRAME_H
 
 #include <QFrame>
+#include <stdio.h>
+#include <sstream>
+#include <printf.h>
+
+using namespace std;
 
 namespace Ui {
 class PlayResourceFrame;
@@ -14,6 +19,7 @@ class PlayResourceFrame : public QFrame
 public:
     explicit PlayResourceFrame(QWidget *parent = 0);
     ~PlayResourceFrame();
+    void EnablePath(string args);
 public slots:
     void Play();
     void Pause();

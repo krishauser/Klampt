@@ -85,6 +85,7 @@ bool ResourceManager::ChangeSelected(ResourceNode sel){
 bool ResourceManager::ChangeSelected(string str){
     if(itemsByName[str] != NULL)
         ChangeSelected(itemsByName[str]);
+    else selected = NULL;
 }
 
 bool ResourceManager::ChangeSelectedName(string name){

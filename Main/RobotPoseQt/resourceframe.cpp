@@ -38,10 +38,15 @@ void ResourceFrame::OpenFile(QString filename){
 }
 
 void ResourceFrame::ChangeSelectedItem(QTreeWidgetItem* it){
+    /*
     if(it)
         manager->ChangeSelected(it->text(0).toStdString());
     else
         manager->ChangeSelected("");
+        */
+    QResourceTreeItem* rti=(QResourceTreeItem*)it;
+    printf("recovering %s\n",rti->name.c_str());
+    gui->SendCommand("set_resource",rti->name);
 }
 
 void ResourceFrame::PressedDelete(){

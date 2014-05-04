@@ -6,6 +6,7 @@
 #include <qrobotposebackend.h>
 #include <collisionoutput.h>
 #include <resourceframe.h>
+#include <playresourceframe.h>
 
 class QRobotPoseGUI : public QtGUIBase
 {
@@ -21,6 +22,7 @@ public:
 
     QRobotPoseBackend* backend;
     ResourceFrame* resource_frame;
+    PlayResourceFrame* play_frame;
 
     int driver_index;
     int link_index;

@@ -11,7 +11,8 @@ QResourceTreeItem::QResourceTreeItem()
 
 QResourceTreeItem::QResourceTreeItem(ResourceNode rt){
     resource=rt;
-    setText(NAMECOL,QString::fromStdString(rt->resource->name));
+    name=rt->Name();
+    setText(NAMECOL,QString::fromStdString(name));
     string type = rt->resource->Type();
     if(!type.empty())
         setText(TYPECOL,QString::fromStdString(rt->resource->Type()));

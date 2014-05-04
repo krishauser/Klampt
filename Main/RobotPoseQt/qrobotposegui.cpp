@@ -62,6 +62,9 @@ bool QRobotPoseGUI::OnCommand(const string &cmd, const string &args){
         //from poser to gui
         resource_frame->updateNewResource(args);
     }
+    else if (cmd=="enable_path"){
+        play_frame->EnablePath(args);
+    }
     else return QtGUIBase::OnCommand(cmd,args);
 }
 

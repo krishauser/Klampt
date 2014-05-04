@@ -30,6 +30,13 @@ void PlayResourceFrame::NewTime(int t){
     emit TimeChanged(scaled);
 }
 
+void PlayResourceFrame::EnablePath(string args){
+    stringstream ss(args);
+    double front,back;
+    ss>>back>>front;
+    printf("Start %d End %d",back,front);
+}
+
 /*
 void PlayResourceFrame::setDisabled(bool status){
     ui->pushButton_2->setDisabled(status);

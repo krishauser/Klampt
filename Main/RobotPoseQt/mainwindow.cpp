@@ -42,6 +42,8 @@ void MainWindow::Initialize(int _argc,const char** _argv)
 
     ui->frame_resources->robot = rob;
 
+    gui->play_frame = ui->playframe;
+
     ui->displaywidget->Start();
 
     //mediator, can be moved to direct calls

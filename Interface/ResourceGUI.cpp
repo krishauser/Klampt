@@ -205,13 +205,27 @@ void ResourceGUIBackend::SetActive(const string& type,const string& name)
 bool ResourceGUIBackend::OnCommand(const string& cmd,const string& args)
 {
   if(cmd == "set_resource") {
-    stringstream ss;
+    stringstream ss(args);
     string name;
     if(!SafeInputString(ss,name)) {
       cout<<"Error reading resource name from "<<args<<endl;
       return true;
     }
-    resources->selected = resources->itemsByName[name];
+    resources->ChangeSelected(name);
+    if(resources->selected){
+      const LinearPathResource* rc=dynamic_cast<const LinearPathResource*>((const ResourceBase*)resources->selected->resource);
+      if(rc){
+	stringstream ss;
+	ss<<rc->times.back()<<" "<<rc->times.front();
+	SendCommand("enable_path",ss.str());
+      }
+      else{
+	const LinearPathResource* rc=dynamic_cast<const LinearPathResource*>((const ResourceBase*)resources->selected->resource);
+	if(rc){
+	  //todo
+	}
+      }
+    }
     return true;      
   }
   else if(cmd == "get_resource") {
@@ -286,7 +300,6 @@ bool ResourceGUIBackend::OnCommand(const string& cmd,const string& args)
   else if(cmd == "set_path_time") {
     stringstream ss(args);
     ss>>viewResource.pathTime;
-    viewResource.scaled = 1;
   }
   else {
     return WorldGUIBackend::OnCommand(cmd,args);

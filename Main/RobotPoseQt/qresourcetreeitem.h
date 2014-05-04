@@ -19,6 +19,7 @@ public:
     int show_load;
     int show_togui;
     int show_expand;
+    string name;
 
     ResourceNode resource;
     Math::VectorTemplate<double> *config;
