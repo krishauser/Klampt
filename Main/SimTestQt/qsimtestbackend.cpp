@@ -1,5 +1,16 @@
 #include "qsimtestbackend.h"
 #include "GLdraw/GLView.h"
+
+/** @brief QSimTestBackend.
+ *
+ * Messages are defined as follows.
+ * 
+ * command:
+ * - record(status): turns the recording on or off
+ * - set_record_command(command): sets the system call to use while recording
+ * - record_file(filename): sets the record file location
+ */
+
 QSimTestBackend::QSimTestBackend(QWidget *parent) :
     QGLWidget(parent),SimTestBackend(new RobotWorld()),GLScreenshotPlugin()
 {
