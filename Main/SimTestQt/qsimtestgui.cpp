@@ -1,8 +1,5 @@
 #include "qsimtestgui.h"
 
-#include <QSettings>
-#include <QtGui/QApplication>
-
 QSimTestGUI::QSimTestGUI(GenericBackendBase *_backend, RobotWorld *_world) :
   QtGUIBase(_backend,_world)
 {
@@ -146,13 +143,10 @@ void QSimTestGUI::LoadFile(QString filename){
 
 void QSimTestGUI::LoadFilePrompt(QString directory,QString filter){
   QFileDialog f;
-  QSettings ini(QSettings::IniFormat, QSettings::UserScope,
-		QCoreApplication::organizationName(),
-		QCoreApplication::applicationName());
-  QString openDir = ini.value(directory,".").toString();
+  QString openDir = ini->value(directory,".").toString();
   QString filename = f.getOpenFileName(0,"Open File",openDir,filter);
   if(!filename.isEmpty()){
-    ini.setValue(directory,QFileInfo(filename).absolutePath());
+    ini->setValue(directory,QFileInfo(filename).absolutePath());
     LoadFile(filename);
   }
 }

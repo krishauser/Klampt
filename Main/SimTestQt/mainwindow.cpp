@@ -4,6 +4,7 @@
 #include <QTimer>
 #include <QWidgetList>
 #include <QFileInfo>
+#include <QInputDialog>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -29,7 +30,9 @@ void MainWindow::Initialize(int _argc,const char** _argv)
     printf("BACKEND LOADED\n");
 //    gui=new GenericGUIBase(ui->displaywidget);
     gui=new QSimTestGUI(ui->displaywidget,ui->displaywidget->world);
-
+    gui->ini=ini;
+    //set the system call for encoding video
+    gui->SendCommand("set_record_command",ini->value("video_encoding_command","ffmpeg -y -f image2 -i image%04d.ppm").toString().toStdString());
     //mediator, can be moved to direct calls
     connect(ui->displaywidget, SIGNAL(MouseMove(QMouseEvent*)),gui,SLOT(SendMouseMove(QMouseEvent*)));
     connect(ui->displaywidget, SIGNAL(MousePress(QMouseEvent*)),gui,SLOT(SendMousePress(QMouseEvent*)));
@@ -110,6 +113,16 @@ void MainWindow::SendMilestone(){
 
 void MainWindow::SetRecord(bool status){
     gui->SendCommand("record",status);
+}
+
+void MainWindow::ChangeEncoderCommand(){
+    QString preset = ini->value("video_encoding_command","ffmpeg -y -f image2 -i image%04d.ppm").toString();
+    QString value = QInputDialog::getText(this,"Record Command","enter the system command for the encoder using input files *.ppm",
+                          QLineEdit::Normal,preset);
+    string tmp = value.toStdString();
+    const char* cstr = tmp.c_str();
+    gui->SendCommand("set_record_command",value.toStdString());
+    ini->setValue("video_encoding_command",value);
 }
 
 void MainWindow::LogSimulation(bool status){

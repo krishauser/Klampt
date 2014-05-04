@@ -102,6 +102,8 @@ public slots:
   void Shrink(){this->resize(0,0);}
   void DoMultipleParts(bool status);
   void Encode();
+  void ChangeEncoderCommand();
+
 };
 
 #endif // MAINWINDOW_H

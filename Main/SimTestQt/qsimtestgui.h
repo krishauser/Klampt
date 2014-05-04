@@ -12,6 +12,7 @@
 #include <QTimer>
 #include <QFileDialog>
 #include <QMessageBox>
+#include <QSettings>
 
 #include <driveredit.h>
 #include <logoptions.h>
@@ -32,6 +33,8 @@ public:
     ControllerCommandDialog *command_dialog;
     QSimTestGUI(GenericBackendBase* _backend,RobotWorld* _world);
     QString old_filename;
+    QSettings* ini;
+
     int constrain_mode,constrain_point_mode,delete_mode;
     bool OnCommand(const string &cmd, const string &args);
     void UpdateGUI();

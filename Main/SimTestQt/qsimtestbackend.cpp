@@ -30,6 +30,11 @@ bool QSimTestBackend::OnCommand(const string &cmd, const string &args){
         else{
             StopMovie();
         }
+        return true;
+    }
+    else if(cmd=="set_record_command"){
+        GLScreenshotPlugin::video_encoding_command = args;
+        return true;
     }
     else if(cmd=="record_file"){
         moviefile=args;

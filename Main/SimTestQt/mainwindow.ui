@@ -495,6 +495,7 @@
     <addaction name="menuResolution"/>
     <addaction name="actionMultiple_Parts"/>
     <addaction name="actionEncode"/>
+    <addaction name="actionChange_Encoder"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
@@ -782,6 +783,11 @@
   <action name="actionCommanded_Path">
    <property name="text">
     <string>Commanded Path</string>
+   </property>
+  </action>
+  <action name="actionChange_Encoder">
+   <property name="text">
+    <string>Change Encoder</string>
    </property>
   </action>
  </widget>
@@ -1661,6 +1667,22 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>actionChange_Encoder</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>ChangeEncoderCommand()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>412</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>Reset()</slot>
@@ -1723,5 +1745,6 @@
   <slot>ChangeCommandedPathLogFile()</slot>
   <slot>LogSensedPath(bool)</slot>
   <slot>LogCommandedPath(bool)</slot>
+  <slot>ChangeEncoderCommand()</slot>
  </slots>
 </ui>

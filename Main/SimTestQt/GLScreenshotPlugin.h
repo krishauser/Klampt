@@ -18,6 +18,7 @@
  * frame.  The program will automatically increment the digits in #screenshotFile,
  * keeping the same number of leading zeroes if possible.
  */
+
 class GLScreenshotPlugin
 {
 public:
@@ -29,6 +30,7 @@ public:
   int verbose;
   bool stop_encode; //encodes automatically when recording ends
   string moviefile;
+  string video_encoding_command;
 
   GLScreenshotPlugin()
   {
@@ -38,6 +40,7 @@ public:
     screenshotFile = "image0000.ppm";
     verbose = 1;
     moviefile="klampt_record.mpg";
+    video_encoding_command = "ffmpeg -y -f image2 -i image%04d.ppm";
     stop_encode=true;
   }
 
@@ -60,12 +63,13 @@ public:
   void EncodeMovie(){
       //TODO add native support
       //http://ffmpeg.org/doxygen/trunk/api-example_8c-source.html
+      //temprorarily using system calls
 
   #ifdef WIN32
-      printf("No encoding support on Windows\n");
+      system((video_encoding_command + " " + moviefile + " & del image*.ppm").c_str());
       return;
   #else
-      system(("ffmpeg -y -f image2 -i image%04d.ppm " + moviefile + ";rm image*.ppm").c_str());
+      system((video_encoding_command + " " + moviefile + ";rm image*.ppm").c_str());
       //system(("avconv -y -f image2 -i image%04d.ppm " + moviefile + ";rm image*.ppm").c_str());
   #endif
       screenshotFile = "image0000.ppm";
