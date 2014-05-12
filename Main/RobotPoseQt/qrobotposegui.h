@@ -1,7 +1,7 @@
 #ifndef QROBOTTESTGUIBASE_H
 #define QROBOTTESTGUIBASE_H
 
-#include "qtguibase.h"
+#include "KlamptQt/qtguibase.h"
 
 #include <qrobotposebackend.h>
 #include <collisionoutput.h>
