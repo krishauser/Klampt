@@ -2,9 +2,9 @@
 #define QROBOTTESTGUIBASE_H
 
 #include "qtguibase.h"
+#include "qrobottestbackend.h"
+#include "collisionoutput.h"
 
-#include <qrobottestbackend.h>
-#include <collisionoutput.h>
 class QRobotTestGUI : public QtGUIBase
 {
     Q_OBJECT
