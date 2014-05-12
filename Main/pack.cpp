@@ -186,7 +186,7 @@ HoldResource* PackHold(ResourceLibrary& lib)
   std::vector<FloatArrayResource*> contacts = lib.GetPtrsByType<FloatArrayResource>();
   if(ikgoals.size() != 1) {
     fprintf(stderr,"Trying to pack more than 1 ik goal into a hold\n");
-    return false;
+    return NULL;
   }
   HoldResource* h=new HoldResource;
   h->data.link = ikgoals[0]->data.link;
@@ -195,7 +195,7 @@ HoldResource* PackHold(ResourceLibrary& lib)
   for(size_t i=0;i<contacts.size();i++) {
     if(contacts[i]->data.size() != 7) {
       fprintf(stderr,"Contact point doesn't have 7 entries x y z nx ny nz kf\n");
-      return false;
+      return NULL;
     }
     h->data.contacts[i].x.set(&contacts[i]->data[0]);
     h->data.contacts[i].n.set(&contacts[i]->data[3]);
@@ -212,12 +212,12 @@ LinearPathResource* PackLinearPath(ResourceLibrary& lib)
   std::vector<ConfigsResource*> configss = lib.GetPtrsByType<ConfigsResource>();
   if(times.size() != 1) {
     fprintf(stderr,"Trying to pack more than 1 time vector into a linear path\n");
-    return false;
+    return NULL;
   }
   if(configs.empty()) {
     if(configss.size() != 1) {
       fprintf(stderr,"Trying to pack more than 1 config set into a linear path\n");
-      return false;
+      return NULL;
     }
     LinearPathResource* p=new LinearPathResource;
     p->times = times[0]->data;
@@ -227,11 +227,11 @@ LinearPathResource* PackLinearPath(ResourceLibrary& lib)
   else {
     if(!configss.empty()) {
       fprintf(stderr,"Cannot combine config's and config sets into a linear path\n");
-      return false;
+      return NULL;
     }
     if(times[0]->data.size() != configs.size()) {
       fprintf(stderr,"Mismatch in time vector vs configs: %d vs %d\n",times[0]->data.size(),configs.size());
-      return false;
+      return NULL;
     }
     LinearPathResource* p=new LinearPathResource;
     p->times = times[0]->data;
@@ -250,12 +250,12 @@ MultiPathResource* PackMultiPath(ResourceLibrary& lib)
   std::vector<MultiPathResource*> multiPaths = lib.GetPtrsByType<MultiPathResource>();
   if(linearPaths.empty() && configs.empty() && multiPaths.empty()) {
     fprintf(stderr,"MultiPath must consist of at least one path section\n");
-    return false;
+    return NULL;
   }
   int cnt = (linearPaths.empty() ? 0 : 1) + (configs.empty() ? 0 : 1) + (multiPaths.empty() ? 0 : 1);
   if(cnt != 1) {
     fprintf(stderr,"MultiPath may not consist of multiple types of path sections\n");
-    return false;
+    return NULL;
   }
   MultiPathResource* p = new MultiPathResource;
   if(!multiPaths.empty()) {
