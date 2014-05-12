@@ -47,6 +47,7 @@ void ResourceFrame::ChangeSelectedItem(QTreeWidgetItem* it){
     QResourceTreeItem* rti=(QResourceTreeItem*)it;
     printf("recovering %s\n",rti->name.c_str());
     gui->SendCommand("set_resource",rti->name);
+    ui->addNewBox->clear();
 }
 
 void ResourceFrame::PressedDelete(){
@@ -75,8 +76,10 @@ void ResourceFrame::ToGUI(){
   */
 }
 
-void ResourceFrame::FromGUI(){
-    gui->SendCommand("poser_to_resource","Config");
+void ResourceFrame::FromGUI(QString type){
+    if(type == "Add New") return;
+    gui->SendCommand("poser_to_resource",type.toStdString());
+    ui->addNewBox->setCurrentIndex(0);
 }
 
 void ResourceFrame::updateNewResource(string name){

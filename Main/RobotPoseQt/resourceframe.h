@@ -36,7 +36,7 @@ public slots:
     void PressedDelete();
     void PressedExpand();
     void ToGUI();
-    void FromGUI();
+    void FromGUI(QString type);
     void SendPathTime(double t);
 
 

@@ -26,13 +26,6 @@
    <property name="horizontalSpacing">
     <number>20</number>
    </property>
-   <item row="3" column="2">
-    <widget class="QPushButton" name="pushButton_2">
-     <property name="text">
-      <string>Replace Current</string>
-     </property>
-    </widget>
-   </item>
    <item row="4" column="1">
     <widget class="QPushButton" name="btn_togui">
      <property name="text">
@@ -47,10 +40,17 @@
      </property>
     </widget>
    </item>
-   <item row="3" column="1">
-    <widget class="QPushButton" name="btn_fromgui">
+   <item row="0" column="1" colspan="2">
+    <widget class="QPushButton" name="pushButton">
      <property name="text">
-      <string>Add New</string>
+      <string>Load File</string>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="1">
+    <widget class="QPushButton" name="btn_expand">
+     <property name="text">
+      <string>Expand</string>
      </property>
     </widget>
    </item>
@@ -62,20 +62,6 @@
      <property name="icon">
       <iconset resource="../KlamptQt/icons.qrc">
        <normaloff>:/Images/Images/list-remove.svg</normaloff>:/Images/Images/list-remove.svg</iconset>
-     </property>
-    </widget>
-   </item>
-   <item row="2" column="1">
-    <widget class="QPushButton" name="btn_expand">
-     <property name="text">
-      <string>Expand</string>
-     </property>
-    </widget>
-   </item>
-   <item row="0" column="1" colspan="2">
-    <widget class="QPushButton" name="pushButton">
-     <property name="text">
-      <string>Load File</string>
      </property>
     </widget>
    </item>
@@ -91,6 +77,27 @@
        <string>Type</string>
       </property>
      </column>
+    </widget>
+   </item>
+   <item row="3" column="1">
+    <widget class="QComboBox" name="addNewBox">
+     <item>
+      <property name="text">
+       <string>Add New</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Config</string>
+      </property>
+     </item>
+    </widget>
+   </item>
+   <item row="3" column="2">
+    <widget class="QPushButton" name="pushButton_2">
+     <property name="text">
+      <string>Replace Current</string>
+     </property>
     </widget>
    </item>
   </layout>
@@ -155,7 +162,7 @@
    <slot>ChangeSelectedItem(QTreeWidgetItem*)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>395</x>
+     <x>276</x>
      <y>252</y>
     </hint>
     <hint type="destinationlabel">
@@ -177,22 +184,6 @@
     <hint type="destinationlabel">
      <x>313</x>
      <y>306</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>btn_fromgui</sender>
-   <signal>clicked()</signal>
-   <receiver>ResourceFrame</receiver>
-   <slot>FromGUI()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>128</x>
-     <y>318</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>344</x>
-     <y>273</y>
     </hint>
    </hints>
   </connection>
@@ -244,14 +235,30 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>addNewBox</sender>
+   <signal>currentIndexChanged(QString)</signal>
+   <receiver>ResourceFrame</receiver>
+   <slot>FromGUI(QString)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>121</x>
+     <y>308</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>145</x>
+     <y>321</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>OpenFile()</slot>
   <slot>ChangeSelectedItem(QTreeWidgetItem*)</slot>
   <slot>PressedDelete()</slot>
   <slot>PressedExpand()</slot>
-  <slot>ToGUI()</slot>
-  <slot>FromGUI()</slot>
+  <slot>ToGUI(QString)</slot>
+  <slot>FromGUI(QString)</slot>
   <slot>ReplaceFromGUI()</slot>
   <slot>Launch()</slot>
  </slots>

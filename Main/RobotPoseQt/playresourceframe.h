@@ -20,6 +20,9 @@ public:
     explicit PlayResourceFrame(QWidget *parent = 0);
     ~PlayResourceFrame();
     void EnablePath(string args);
+
+    int start;
+    int endtime;
 public slots:
     void Play();
     void Pause();

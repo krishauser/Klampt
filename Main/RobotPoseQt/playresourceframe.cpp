@@ -1,6 +1,8 @@
 #include "playresourceframe.h"
 #include "ui_playresourceframe.h"
 
+#include <QTimer>
+
 PlayResourceFrame::PlayResourceFrame(QWidget *parent) :
     QFrame(parent),
     ui(new Ui::PlayResourceFrame)

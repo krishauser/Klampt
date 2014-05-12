@@ -128,6 +128,10 @@ vector<ResourceNode> ResourceManager::ExtractSelectedChildren(vector<string> typ
 
 vector<ResourceNode> ResourceManager::ExpandSelected(){
   vector<string> types;
+  if(selected == NULL){
+      printf("No resource is currently selected");
+      return vector<ResourceNode>();
+  }
   if(selected->expanded){
     printf("Selected resource is already expanded");
     return vector<ResourceNode>();
@@ -151,9 +155,8 @@ vector<ResourceNode> ResourceManager::ExpandSelected(){
     else if(strcmp(selected->Type(),"MultiPath") == 0){
         types.push_back("LinearPath");
     }
-    else if(strcmp(selected->Type(),"Configs") ==0 ){
+    else if(strcmp(selected->Type(),"Configs") == 0 ){
         types.push_back("Config");
-
     }
     else{
       printf("No expansion known for type %s",selected->Type());

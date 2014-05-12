@@ -154,12 +154,13 @@ void RobotPoseBackend::RenderWorld()
       if(self_colliding[i]) viewRobot.SetColor(i,selfcolliding);
       if(env_colliding[i]) viewRobot.SetColor(i,envcolliding);
       else if((int)i == cur_link)
-	viewRobot.SetColor(i,highlight); 
+      viewRobot.SetColor(i,highlight);
     }
     allWidgets.DrawGL(viewport);
     viewRobot.Draw();
   }
   else {
+    //    viewRobot.SetColors(GLColor(0,0,0,0));
     allWidgets.DrawGL(viewport);
   }
 

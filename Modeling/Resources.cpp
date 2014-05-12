@@ -574,7 +574,10 @@ vector<ResourcePtr> ExtractResources(const ResourcePtr& item,const char* type)
   else if(0==strcmp("LinearPath",item->Type())) {
     const LinearPathResource* pr = dynamic_cast<const LinearPathResource*>((const ResourceBase*)item);
     if(0==strcmp(type,"Configs")) {
-      res.push_back(MakeResource(pr->name,pr->milestones));
+      stringstream ss;
+      ss<<pr->name<<".config";
+      //      pr->name = ss.str();
+      res.push_back(MakeResource(ss.str(),pr->milestones));
       return res;
     }
     else if(0==strcmp(type,"vector<double>")) {
@@ -585,7 +588,9 @@ vector<ResourcePtr> ExtractResources(const ResourcePtr& item,const char* type)
     }
     else if(0==strcmp(type,"MultiPath")) {
       MultiPathResource* mp = new MultiPathResource;
-      mp->name = pr->name;
+      stringstream ss;
+      ss<< pr->name<<".mp";
+      mp->name = ss.str();
       mp->path.SetTimedMilestones(pr->times,pr->milestones);
       res.push_back(mp);
       return res;
