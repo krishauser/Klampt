@@ -4,7 +4,7 @@
 #include <QFrame>
 #include <stdio.h>
 #include <sstream>
-#include <printf.h>
+#include <stdlib.h>
 
 using namespace std;
 
