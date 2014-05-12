@@ -3,7 +3,6 @@
 #include "QDebug"
 #include <QTimer>
 #include <cmath>
-#include <collisionoutput.h>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
