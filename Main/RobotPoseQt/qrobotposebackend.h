@@ -7,10 +7,10 @@
 #include <Interface/RobotPoseGUI.h>
 #include <resourcemanager.h>
 #include <View/ViewResource.h>
-
+#include <KlamptQt/GLScreenshotPlugin.h>
 //#include <GLdraw/GLScreenshotProgram.h>
 
-class QRobotPoseBackend : public QGLWidget, public RobotPoseBackend//, public GLScreenshotPlugin
+class QRobotPoseBackend : public QGLWidget, public RobotPoseBackend, public GLScreenshotPlugin
 {
     Q_OBJECT
 public:

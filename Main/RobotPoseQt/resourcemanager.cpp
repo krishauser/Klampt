@@ -177,12 +177,17 @@ bool ResourceManager::DeleteNode(ResourceNode r){
 }
 
 bool ResourceManager::DeleteSelected(){
+  if(selected == NULL){
+    printf("No resource is currently selected");
+    return false;
+  }
   DeleteNode(selected);
   if(selected->parent != NULL){
     selected->parent->children.erase(std::remove(selected->parent->children.begin(), selected->parent->children.end(),selected),selected->parent->children.end());
     selected->parent->SetDirty();
     }
   selected = NULL;
+  return true;
 }
 
 bool ResourceManager::Print(ResourceNode current,int level){

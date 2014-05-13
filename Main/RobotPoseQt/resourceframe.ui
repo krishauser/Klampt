@@ -67,6 +67,12 @@
    </item>
    <item row="1" column="1" colspan="2">
     <widget class="QTreeWidget" name="treeWidget">
+     <property name="dragDropMode">
+      <enum>QAbstractItemView::NoDragDrop</enum>
+     </property>
+     <property name="selectionMode">
+      <enum>QAbstractItemView::SingleSelection</enum>
+     </property>
      <column>
       <property name="text">
        <string>Name</string>

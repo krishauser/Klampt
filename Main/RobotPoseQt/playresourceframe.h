@@ -1,10 +1,12 @@
 #ifndef PLAYRESOURCEFRAME_H
 #define PLAYRESOURCEFRAME_H
 
-#include <QFrame>
 #include <stdio.h>
 #include <sstream>
 #include <printf.h>
+
+#include <QTimer>
+#include <QFrame>
 
 using namespace std;
 
@@ -21,10 +23,14 @@ public:
     ~PlayResourceFrame();
     void EnablePath(string args);
 
-    int start;
-    int endtime;
+    QTimer *timer;
+
+    double duration;
+    double time;
+    double start;
 public slots:
     void Play();
+    void Tick();
     void Pause();
     void Record();
     void NewTime(int t);

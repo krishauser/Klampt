@@ -30,7 +30,8 @@ HEADERS  += mainwindow.h \
     controllercommanddialog.h \
     ../KlamptQt/qtguibase.h \
     qsimtestgui.h \
-    connectserial.h
+    connectserial.h \
+    ../KlamptQt/GLScreenshotPlugin.h
 
 FORMS    += mainwindow.ui \
     logoptions.ui \

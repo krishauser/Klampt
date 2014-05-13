@@ -29,15 +29,17 @@ void ResourceFrame::OpenFile(QString filename){
   if(!filename.isNull()){
     ini.setValue("last_open_resource_directory",QFileInfo(filename).absolutePath());
     //gui->SendCommand("load_resource",filename.toStdString());
-
+    //todo send message
     ResourceNode r = manager->LoadResource(filename.toStdString());
     QResourceTreeItem* it=new QResourceTreeItem(r);
     ui->treeWidget->addTopLevelItem(it);
-
+    ui->treeWidget->setItemSelected(it,1);
+    gui->SendCommand("set_resource",r->Name());
     }
 }
 
 void ResourceFrame::ChangeSelectedItem(QTreeWidgetItem* it){
+    if(it == NULL) return;
     /*
     if(it)
         manager->ChangeSelected(it->text(0).toStdString());
@@ -50,6 +52,7 @@ void ResourceFrame::ChangeSelectedItem(QTreeWidgetItem* it){
     ui->addNewBox->clear();
 }
 
+//todo make this message passing like adding a resource
 void ResourceFrame::PressedDelete(){
     if(manager->DeleteSelected())
         BOOST_FOREACH(QTreeWidgetItem* it, ui->treeWidget->selectedItems()){
