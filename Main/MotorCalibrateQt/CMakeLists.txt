@@ -14,6 +14,7 @@ ENDIF( )
 
 INCLUDE_DIRECTORIES(".")
 INCLUDE_DIRECTORIES("..")
+INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR})
 
 ##### Qt Specific stuff ####
 # Configure Qt
@@ -23,11 +24,11 @@ INCLUDE(${QT_USE_FILE})
 
 # Define the app's UI and MOC items
 
-QT4_WRAP_UI(UISrcs dialog.ui showtext.ui)
-QT4_WRAP_CPP(MOCSrcs dialog.h showtext.h)
+QT4_WRAP_UI(MotorCalibrate_UISrcs dialog.ui showtext.ui)
+QT4_WRAP_CPP(MotorCalibrate_MOCSrcs dialog.h showtext.h)
 
 ##### Build target ####
-ADD_EXECUTABLE(MotorCalibrate main.cpp dialog.cpp ../motorcalibrate.cpp showtext.cpp ${MOCSrcs} ${UISrcs})
+ADD_EXECUTABLE(MotorCalibrate main.cpp dialog.cpp ../motorcalibrate.cpp showtext.cpp ${MotorCalibrate_MOCSrcs} ${MotorCalibrate_UISrcs})
 TARGET_LINK_LIBRARIES(MotorCalibrate ${KLAMPT_LIBRARIES} ${QT_LIBRARIES})
 
 #used to ignore main() definition in motorcalibrate.cpp

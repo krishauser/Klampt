@@ -1,6 +1,6 @@
-# Make the RobotPose Qt program
+# Make the RobotTest Qt program
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8.4)
-PROJECT(RobotPose)
+PROJECT(RobotTest)
 
 #Building from within Main/[AppName] folder
 IF(NOT KLAMPT_ROOT)
@@ -15,6 +15,7 @@ ENDIF( )
 
 INCLUDE_DIRECTORIES(".")
 INCLUDE_DIRECTORIES("..")
+INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR})
 
 ##### Qt Specific stuff ####
 # Configure Qt
@@ -24,10 +25,10 @@ INCLUDE(${QT_USE_FILE})
 
 # Define the app's UI and MOC items
 
-QT4_WRAP_UI(UISrcs collisionoutput.ui mainwindow.ui)
-QT4_WRAP_CPP(MOCSrcs collisionoutput.h mainwindow.h qtguibase.h qrobottestbackend.h qrobottestgui.h)
+QT4_WRAP_UI(RobotTest_UISrcs collisionoutput.ui mainwindow.ui)
+QT4_WRAP_CPP(RobotTest_MOCSrcs collisionoutput.h mainwindow.h qtguibase.h qrobottestbackend.h qrobottestgui.h)
 
 ##### Build target ####
-ADD_EXECUTABLE(RobotTest main.cpp collisionoutput.cpp mainwindow.cpp qtguibase.cpp qrobottestbackend.cpp qrobottestgui.cpp ${MOCSrcs} ${UISrcs})
+ADD_EXECUTABLE(RobotTest main.cpp collisionoutput.cpp mainwindow.cpp qtguibase.cpp qrobottestbackend.cpp qrobottestgui.cpp ${RobotTest_MOCSrcs} ${RobotTest_UISrcs})
 TARGET_LINK_LIBRARIES(RobotTest ${KLAMPT_LIBRARIES} ${QT_LIBRARIES})
 
