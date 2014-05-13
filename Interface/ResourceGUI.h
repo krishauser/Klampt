@@ -70,6 +70,7 @@ public:
   void SetLastActive(); 
   //sets the active item to the one of the given type/name
   void SetActive(const string& type,const string& name);
+  virtual void SetPathTime(double time);
 
   //subclasses should call this so that the GLUI controls will work
   virtual bool OnCommand(const string& cmd,const string& args);

@@ -8,6 +8,8 @@
 #include <QTimer>
 #include <QFrame>
 
+#define RESOURCE_RECORD_FPS 120
+
 using namespace std;
 
 namespace Ui {
@@ -39,7 +41,6 @@ public slots:
 signals:
     void TimeChanged(double);
     void ToggleRecording(bool);
-    void TakeFrame();
 private:
     Ui::PlayResourceFrame *ui;
 };

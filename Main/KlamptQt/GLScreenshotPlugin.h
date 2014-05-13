@@ -36,7 +36,7 @@ public:
   {
     saveMovie = false;
     lastScreenshotTime = 0;
-    frameTime = 1.0/30.0;
+    frameTime = 1.000/30.0;
     screenshotFile = "image0000.ppm";
     verbose = 1;
     moviefile="klampt_record.mpg";

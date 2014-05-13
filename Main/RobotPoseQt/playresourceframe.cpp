@@ -19,11 +19,11 @@ PlayResourceFrame::~PlayResourceFrame()
 
 void PlayResourceFrame::Play(){
     time=start;
-    timer->start(100);// 10fps
+    timer->start(1000/RESOURCE_RECORD_FPS);
 }
 
 void PlayResourceFrame::Tick(){
-    time += .1;
+    time += 1.0/RESOURCE_RECORD_FPS;
     if(time >= start + duration){
         time= start + duration;
         timer->stop();
@@ -34,9 +34,6 @@ void PlayResourceFrame::Tick(){
         }
     }
     else{
-        if(recording){
-            emit TakeFrame();
-        }
         ui->slider->setValue((time - start) / duration * 1000 - 1);
         emit TimeChanged((time - start) / duration);
     }

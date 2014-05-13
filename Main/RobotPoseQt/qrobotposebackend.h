@@ -36,6 +36,7 @@ public:
     bool OnCommand(const string &cmd, const string &args);
     void RenderCurrentResource();
     void RenderWorld();
+    void SetPathTime(double time);
 signals:
     void ResizeFrame(QResizeEvent *e);
     void MouseMove(QMouseEvent *e);

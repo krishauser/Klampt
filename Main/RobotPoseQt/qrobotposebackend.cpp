@@ -42,6 +42,12 @@ bool QRobotPoseBackend::OnMouseWheel(int dwheel){
     return true;
 }
 
+void QRobotPoseBackend::SetPathTime(double time){
+  if(saveMovie)
+    MovieUpdate();
+  ResourceGUIBackend::SetPathTime(time);
+}
+
 bool QRobotPoseBackend::OnCommand(const string &cmd, const string &args){
   //todo make recordgui class
     stringstream ss(args);
@@ -63,9 +69,6 @@ bool QRobotPoseBackend::OnCommand(const string &cmd, const string &args){
     else if(cmd=="record_file"){
         moviefile=args;
 	return true;
-    }
-    else if(cmd=="record_take_frame"){
-      MovieUpdate();
     }
     return BaseT::OnCommand(cmd,args);
 }

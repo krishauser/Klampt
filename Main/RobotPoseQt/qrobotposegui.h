@@ -30,7 +30,6 @@ public slots:
     void SetDriverValue(double val);
     void SetLinkValue(double val);
     void SetRecord(bool status);
-    void RecordFrame();
 
 signals:
     void UpdateDriverValue();

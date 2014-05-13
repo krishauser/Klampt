@@ -202,6 +202,10 @@ void ResourceGUIBackend::SetActive(const string& type,const string& name)
   cur_resource_name = name;
 }
 
+void ResourceGUIBackend::SetPathTime(double time){
+  viewResource.pathTime = time;
+}
+
 bool ResourceGUIBackend::OnCommand(const string& cmd,const string& args)
 {
   if(cmd == "set_resource") {
@@ -306,7 +310,9 @@ bool ResourceGUIBackend::OnCommand(const string& cmd,const string& args)
   }
   else if(cmd == "set_path_time") {
     stringstream ss(args);
-    ss>>viewResource.pathTime;
+    double time;
+    ss>>time;
+    SetPathTime(time);
   }
   else {
     return WorldGUIBackend::OnCommand(cmd,args);
