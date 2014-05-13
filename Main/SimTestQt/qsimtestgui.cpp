@@ -38,7 +38,7 @@ QSimTestGUI::QSimTestGUI(GenericBackendBase *_backend, RobotWorld *_world) :
   connect(command_dialog,SIGNAL(ControllerCommand(string,string)),this,SLOT(SendControllerCommand(string,string)));
   command_dialog->Refresh();
 
-  connect_serial = new ConnectSerial(world->robots.size());
+  connect_serial = new ConnectSerial(world);
   connect(connect_serial,SIGNAL(MakeConnect(int,QString,int,int)),this,SLOT(SendConnection(int,QString,int,int)));
 
   UpdateGUI();
@@ -183,7 +183,7 @@ void QSimTestGUI::SendControllerCommand(string setting,string value){
 void QSimTestGUI::SendConnection(int robot, QString host, int port, int rate)
 {
     stringstream ss;
-    ss<<robot<<" "<<host.toStdString()<<" "<<port<<" "<<rate;
+    ss<<robot<<" "<<port<<" "<<rate;
     SendCommand("connect_serial_controller",ss.str());
 }
 

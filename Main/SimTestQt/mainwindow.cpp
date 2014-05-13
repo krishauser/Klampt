@@ -161,35 +161,35 @@ void MainWindow::LogCommandedPath(bool status){
 
 void MainWindow::ChangeSimulationLogFile(){
   QFileDialog f;
-  QString openDir = ini->value("log_simulation_file",".").toString();
+  QString openDir = ini->value("log_simulation_file","simtest_log.csv").toString();
   QString filename = f.getSaveFileName(this,"Set Simulation Log File",openDir,tr("CSV File (*.csv);;Any File (*)"));
   ini->setValue("log_simulation_file",QFileInfo(filename).absoluteFilePath());
 }
 
 void MainWindow::ChangeContactStateLogFile(){
   QFileDialog f;
-  QString openDir = ini->value("log_contact_state_file",".").toString();
+  QString openDir = ini->value("log_contact_state_file","simtest_contact_log.csv").toString();
   QString filename = f.getSaveFileName(this,"Set Contact State Log File",openDir,tr("CSV File (*.csv);;Any File (*)"));
   ini->setValue("log_contact_state_file",QFileInfo(filename).absoluteFilePath());
 }
 
 void MainWindow::ChangeContactWrenchesLogFile(){
   QFileDialog f;
-  QString openDir = ini->value("log_contact_wrenches_file",".").toString();
+  QString openDir = ini->value("log_contact_wrenches_file","simtest_wrenches_log.csv").toString();
   QString filename = f.getSaveFileName(this,"Set Contact Wrenches Log File",openDir,tr("CSV File (*.csv);;Any File (*)"));
   ini->setValue("log_contact_wrenches_file",QFileInfo(filename).absoluteFilePath());
 }
 
 void MainWindow::ChangeSensedPathLogFile(){
   QFileDialog f;
-  QString openDir = ini->value("log_sensed_path_file",".").toString();
+  QString openDir = ini->value("log_sensed_path_file","simtest_sensed_path_log.csv").toString();
   QString filename = f.getSaveFileName(this,"Set Sensed Path Log File",openDir,tr("CSV File (*.csv);;Any File (*)"));
   ini->setValue("log_sensed_path_file",QFileInfo(filename).absoluteFilePath());
 }
 
 void MainWindow::ChangeCommandedPathLogFile(){
   QFileDialog f;
-  QString openDir = ini->value("log_commanded_path_file",".").toString();
+  QString openDir = ini->value("log_commanded_path_file","simtest_commanded_path_log.csv").toString();
   QString filename = f.getSaveFileName(this,"Set commanded Path Log File",openDir,tr("CSV File (*.csv);;Any File (*)"));
   ini->setValue("log_commanded_path_file",QFileInfo(filename).absoluteFilePath());
 }

@@ -14,10 +14,13 @@
    <string>SimTest</string>
   </property>
   <property name="statusTip">
-   <string>start recording</string>
+   <string>Begin recording movie</string>
   </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QHBoxLayout" name="horizontalLayout_3">
+    <property name="margin">
+     <number>0</number>
+    </property>
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout_2">
       <item>
@@ -63,61 +66,19 @@
            </spacer>
           </item>
           <item>
+           <widget class="QLabel" name="label_3">
+            <property name="text">
+             <string>Display</string>
+            </property>
+           </widget>
+          </item>
+          <item>
            <widget class="QCheckBox" name="chk_contacts">
             <property name="statusTip">
-             <string>draw contacts</string>
+             <string>Toggle drawing of contact points</string>
             </property>
             <property name="text">
-             <string>contacts</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QCheckBox" name="chk_bboxes">
-            <property name="statusTip">
-             <string>draw bounding boxes</string>
-            </property>
-            <property name="text">
-             <string>bboxes</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QCheckBox" name="chk_desired">
-            <property name="statusTip">
-             <string>draw desired configuration</string>
-            </property>
-            <property name="text">
-             <string>desired</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QCheckBox" name="chk_estimated">
-            <property name="statusTip">
-             <string>draw estimated configuration</string>
-            </property>
-            <property name="text">
-             <string>estimated</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QCheckBox" name="chk_poser">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="statusTip">
-             <string>draw the poser widget</string>
-            </property>
-            <property name="text">
-             <string>poser</string>
-            </property>
-            <property name="checked">
-             <bool>true</bool>
+             <string>Contacts</string>
             </property>
            </widget>
           </item>
@@ -130,7 +91,7 @@
              </sizepolicy>
             </property>
             <property name="statusTip">
-             <string>draw wrenches</string>
+             <string>Toggle drawing of contact wrenches</string>
             </property>
             <property name="text">
              <string>Wrenches</string>
@@ -141,12 +102,61 @@
            </widget>
           </item>
           <item>
-           <widget class="QCheckBox" name="chk_expanded">
+           <widget class="QCheckBox" name="chk_desired">
             <property name="statusTip">
-             <string>draw expanded</string>
+             <string>Toggle drawing of desired configuration</string>
             </property>
             <property name="text">
-             <string>expanded</string>
+             <string>Desired</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="chk_estimated">
+            <property name="statusTip">
+             <string>Toggle drawing of estimated configuration</string>
+            </property>
+            <property name="text">
+             <string>Estimated</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="chk_poser">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="statusTip">
+             <string>Toggle drawing the robot poser widget</string>
+            </property>
+            <property name="text">
+             <string>Poser</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="chk_bboxes">
+            <property name="statusTip">
+             <string>Toggle drawing of bounding boxes</string>
+            </property>
+            <property name="text">
+             <string>BBoxes</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="chk_expanded">
+            <property name="statusTip">
+             <string>Toggle drawing of expanded boundary layer meshes</string>
+            </property>
+            <property name="text">
+             <string>Expanded</string>
             </property>
             <property name="tristate">
              <bool>false</bool>
@@ -198,15 +208,15 @@
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="pushButton_4">
+           <widget class="QPushButton" name="pushButtonMoveMilestone">
             <property name="toolTip">
-             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Direct the simulation to move to the milestone&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Send a move-to command with the posed configuration&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
             </property>
             <property name="statusTip">
-             <string>set a milestone for the robots to acheive</string>
+             <string>Send a move-to command with the posed configuration</string>
             </property>
             <property name="text">
-             <string>Add Milestone</string>
+             <string>Goto</string>
             </property>
             <property name="icon">
              <iconset resource="../KlamptQt/icons.qrc">
@@ -216,7 +226,7 @@
              <string>Space</string>
             </property>
             <property name="flat">
-             <bool>false</bool>
+             <bool>true</bool>
             </property>
            </widget>
           </item>
@@ -230,17 +240,17 @@
           <item>
            <widget class="QLabel" name="label_2">
             <property name="text">
-             <string>Simulation</string>
+             <string>Sim</string>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="pushButton">
+           <widget class="QPushButton" name="pushButtonPlay">
             <property name="toolTip">
              <string>Start the simulation</string>
             </property>
             <property name="statusTip">
-             <string>start or stop the simulation</string>
+             <string>Start or stop the simulation</string>
             </property>
             <property name="text">
              <string/>
@@ -251,16 +261,25 @@
               <normalon>:/Images/Images/media-playback-pause.svg</normalon>
               <activeon>:/Images/Images/media-playback-pause.svg</activeon>:/Images/Images/media-playback-start.svg</iconset>
             </property>
+            <property name="iconSize">
+             <size>
+              <width>24</width>
+              <height>24</height>
+             </size>
+            </property>
             <property name="shortcut">
              <string>S</string>
             </property>
             <property name="checkable">
              <bool>true</bool>
             </property>
+            <property name="flat">
+             <bool>true</bool>
+            </property>
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="pushButton_2">
+           <widget class="QPushButton" name="pushButtonRecord">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
               <horstretch>0</horstretch>
@@ -277,10 +296,79 @@
              <iconset resource="../KlamptQt/icons.qrc">
               <normaloff>:/Images/Images/media-record.svg</normaloff>:/Images/Images/media-record.svg</iconset>
             </property>
+            <property name="iconSize">
+             <size>
+              <width>24</width>
+              <height>24</height>
+             </size>
+            </property>
             <property name="shortcut">
              <string>R</string>
             </property>
             <property name="checkable">
+             <bool>true</bool>
+            </property>
+            <property name="flat">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="pushButtonReset">
+            <property name="text">
+             <string/>
+            </property>
+            <property name="icon">
+             <iconset resource="../KlamptQt/icons.qrc">
+              <normaloff>:/Images/Images/rewind.gif</normaloff>:/Images/Images/rewind.gif</iconset>
+            </property>
+            <property name="iconSize">
+             <size>
+              <width>24</width>
+              <height>24</height>
+             </size>
+            </property>
+            <property name="flat">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="pushButtonSaveState">
+            <property name="text">
+             <string/>
+            </property>
+            <property name="icon">
+             <iconset resource="../KlamptQt/icons.qrc">
+              <normaloff>:/Images/Images/save.gif</normaloff>:/Images/Images/save.gif</iconset>
+            </property>
+            <property name="iconSize">
+             <size>
+              <width>24</width>
+              <height>24</height>
+             </size>
+            </property>
+            <property name="flat">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="pushButtonLoadState">
+            <property name="text">
+             <string/>
+            </property>
+            <property name="icon">
+             <iconset resource="../KlamptQt/icons.qrc">
+              <normaloff>:/Images/Images/open.gif</normaloff>:/Images/Images/open.gif</iconset>
+            </property>
+            <property name="iconSize">
+             <size>
+              <width>24</width>
+              <height>24</height>
+             </size>
+            </property>
+            <property name="flat">
              <bool>true</bool>
             </property>
            </widget>
@@ -301,6 +389,12 @@
           </item>
           <item>
            <widget class="QPushButton" name="btn_free">
+            <property name="toolTip">
+             <string>Pose mode</string>
+            </property>
+            <property name="statusTip">
+             <string>Pose mode</string>
+            </property>
             <property name="text">
              <string/>
             </property>
@@ -308,16 +402,28 @@
              <iconset resource="../KlamptQt/icons.qrc">
               <normaloff>:/Images/Images/hand.gif</normaloff>:/Images/Images/hand.gif</iconset>
             </property>
+            <property name="iconSize">
+             <size>
+              <width>24</width>
+              <height>24</height>
+             </size>
+            </property>
             <property name="checkable">
              <bool>true</bool>
             </property>
             <property name="flat">
-             <bool>false</bool>
+             <bool>true</bool>
             </property>
            </widget>
           </item>
           <item>
            <widget class="QPushButton" name="btn_ik">
+            <property name="toolTip">
+             <string>IK mode</string>
+            </property>
+            <property name="statusTip">
+             <string>IK mode</string>
+            </property>
             <property name="text">
              <string/>
             </property>
@@ -329,24 +435,36 @@
              <bool>true</bool>
             </property>
             <property name="flat">
-             <bool>false</bool>
+             <bool>true</bool>
             </property>
            </widget>
           </item>
           <item>
            <widget class="QPushButton" name="btn_force">
+            <property name="toolTip">
+             <string>Force application mode (right-drag)</string>
+            </property>
+            <property name="statusTip">
+             <string>Force application mode (right-drag)</string>
+            </property>
             <property name="text">
              <string/>
             </property>
             <property name="icon">
-             <iconset>
-              <normaloff>Images/spring.gif</normaloff>Images/spring.gif</iconset>
+             <iconset resource="../KlamptQt/icons.qrc">
+              <normaloff>:/Images/Images/spring.gif</normaloff>:/Images/Images/spring.gif</iconset>
+            </property>
+            <property name="iconSize">
+             <size>
+              <width>24</width>
+              <height>24</height>
+             </size>
             </property>
             <property name="checkable">
              <bool>true</bool>
             </property>
             <property name="flat">
-             <bool>false</bool>
+             <bool>true</bool>
             </property>
            </widget>
           </item>
@@ -367,21 +485,27 @@
           <item>
            <widget class="QPushButton" name="btn_constrain_point">
             <property name="statusTip">
-             <string>constrain a point</string>
+             <string>Constrain a point</string>
             </property>
             <property name="text">
              <string/>
             </property>
             <property name="icon">
-             <iconset>
-              <normaloff>Images/constrain.gif</normaloff>Images/constrain.gif</iconset>
+             <iconset resource="../KlamptQt/icons.qrc">
+              <normaloff>:/Images/Images/constrain.gif</normaloff>:/Images/Images/constrain.gif</iconset>
+            </property>
+            <property name="checkable">
+             <bool>true</bool>
+            </property>
+            <property name="flat">
+             <bool>true</bool>
             </property>
            </widget>
           </item>
           <item>
            <widget class="QPushButton" name="btn_constrain">
             <property name="statusTip">
-             <string>click a robot link to constrain it</string>
+             <string>Constrain link position and orientation</string>
             </property>
             <property name="text">
              <string/>
@@ -390,12 +514,18 @@
              <iconset resource="../KlamptQt/icons.qrc">
               <normaloff>:/Images/Images/constrainpoint.gif</normaloff>:/Images/Images/constrainpoint.gif</iconset>
             </property>
+            <property name="checkable">
+             <bool>true</bool>
+            </property>
+            <property name="flat">
+             <bool>true</bool>
+            </property>
            </widget>
           </item>
           <item>
            <widget class="QPushButton" name="btn_delete">
             <property name="statusTip">
-             <string>delete a robot constraint</string>
+             <string>Delete a constraint</string>
             </property>
             <property name="text">
              <string/>
@@ -404,12 +534,46 @@
              <iconset resource="../KlamptQt/icons.qrc">
               <normaloff>:/Images/Images/dialog-cancel-3.png</normaloff>:/Images/Images/dialog-cancel-3.png</iconset>
             </property>
+            <property name="iconSize">
+             <size>
+              <width>24</width>
+              <height>24</height>
+             </size>
+            </property>
+            <property name="checkable">
+             <bool>true</bool>
+            </property>
+            <property name="flat">
+             <bool>true</bool>
+            </property>
            </widget>
           </item>
           <item>
-           <widget class="QCheckBox" name="chk_objects">
+           <widget class="QPushButton" name="chk_objects">
+            <property name="toolTip">
+             <string>Toggle object posing</string>
+            </property>
+            <property name="statusTip">
+             <string>Toggle object posing</string>
+            </property>
             <property name="text">
-             <string>Pose Objects</string>
+             <string/>
+            </property>
+            <property name="icon">
+             <iconset resource="../KlamptQt/icons.qrc">
+              <normaloff>:/Images/Images/poseobjects.gif</normaloff>:/Images/Images/poseobjects.gif</iconset>
+            </property>
+            <property name="iconSize">
+             <size>
+              <width>24</width>
+              <height>24</height>
+             </size>
+            </property>
+            <property name="checkable">
+             <bool>true</bool>
+            </property>
+            <property name="flat">
+             <bool>true</bool>
             </property>
            </widget>
           </item>
@@ -440,7 +604,7 @@
      <x>0</x>
      <y>0</y>
      <width>825</width>
-     <height>25</height>
+     <height>19</height>
     </rect>
    </property>
    <property name="nativeMenuBar">
@@ -452,10 +616,6 @@
     </property>
     <addaction name="actionOpen"/>
     <addaction name="actionLoad_Path"/>
-    <addaction name="actionLoad_State"/>
-    <addaction name="actionSave_State"/>
-    <addaction name="actionSave_State_As"/>
-    <addaction name="actionReset"/>
     <addaction name="actionExit"/>
    </widget>
    <widget class="QMenu" name="menuMilestones">
@@ -832,11 +992,10 @@
  </customwidgets>
  <resources>
   <include location="../KlamptQt/icons.qrc"/>
-  <include location="../KlamptQt/icons.qrc"/>
  </resources>
  <connections>
   <connection>
-   <sender>pushButton</sender>
+   <sender>pushButtonPlay</sender>
    <signal>clicked(bool)</signal>
    <receiver>MainWindow</receiver>
    <slot>SetSimulate(bool)</slot>
@@ -852,7 +1011,7 @@
    </hints>
   </connection>
   <connection>
-   <sender>pushButton_4</sender>
+   <sender>pushButtonMoveMilestone</sender>
    <signal>clicked()</signal>
    <receiver>MainWindow</receiver>
    <slot>SendMilestone()</slot>
@@ -868,7 +1027,7 @@
    </hints>
   </connection>
   <connection>
-   <sender>pushButton_2</sender>
+   <sender>pushButtonRecord</sender>
    <signal>clicked(bool)</signal>
    <receiver>MainWindow</receiver>
    <slot>SetRecord(bool)</slot>
@@ -901,6 +1060,22 @@
   </connection>
   <connection>
    <sender>actionSave_State_As</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>SaveScenario()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>331</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionSave_State</sender>
    <signal>triggered()</signal>
    <receiver>MainWindow</receiver>
    <slot>SaveLastScenario()</slot>
@@ -1540,22 +1715,6 @@
    </hints>
   </connection>
   <connection>
-   <sender>chk_objects</sender>
-   <signal>clicked(bool)</signal>
-   <receiver>MainWindow</receiver>
-   <slot>SetPoseObjects(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>642</x>
-     <y>546</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>635</x>
-     <y>535</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
    <sender>actionSimulation</sender>
    <signal>triggered()</signal>
    <receiver>MainWindow</receiver>
@@ -1676,6 +1835,54 @@
     <hint type="sourcelabel">
      <x>-1</x>
      <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>412</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>pushButtonSaveState</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>SaveScenario()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>333</x>
+     <y>555</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>412</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>pushButtonLoadState</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>LoadState()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>385</x>
+     <y>555</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>412</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>pushButtonReset</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>Reset()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>415</x>
+     <y>555</y>
     </hint>
     <hint type="destinationlabel">
      <x>412</x>
