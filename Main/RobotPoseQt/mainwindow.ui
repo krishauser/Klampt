@@ -183,90 +183,18 @@
       <zorder></zorder>
      </widget>
     </item>
+    <item row="1" column="1" rowspan="2">
+     <widget class="PlayResourceFrame" name="playframe">
+      <property name="frameShape">
+       <enum>QFrame::StyledPanel</enum>
+      </property>
+      <property name="frameShadow">
+       <enum>QFrame::Raised</enum>
+      </property>
+     </widget>
+    </item>
     <item row="1" column="0">
      <layout class="QGridLayout" name="gridLayout_2">
-      <item row="1" column="1" colspan="6">
-       <layout class="QHBoxLayout" name="horizontalLayout_4">
-        <item>
-         <widget class="QRadioButton" name="radioButton">
-          <property name="text">
-           <string>Link</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QRadioButton" name="radioButton_2">
-          <property name="text">
-           <string>Driver</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="Line" name="line">
-          <property name="orientation">
-           <enum>Qt::Vertical</enum>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QSlider" name="sld_link">
-          <property name="enabled">
-           <bool>true</bool>
-          </property>
-          <property name="maximum">
-           <number>1000</number>
-          </property>
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QSlider" name="sld_driver">
-          <property name="enabled">
-           <bool>false</bool>
-          </property>
-          <property name="maximum">
-           <number>1000</number>
-          </property>
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QPushButton" name="btn_ik">
-          <property name="text">
-           <string/>
-          </property>
-          <property name="icon">
-           <iconset resource="../KlamptQt/icons.qrc">
-            <normaloff>:/Images/Images/IK.gif</normaloff>:/Images/Images/IK.gif</iconset>
-          </property>
-          <property name="checkable">
-           <bool>true</bool>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QPushButton" name="pushButton">
-          <property name="text">
-           <string>Print Collisions</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </item>
-      <item row="0" column="6">
-       <widget class="QCheckBox" name="chk_collisions">
-        <property name="statusTip">
-         <string>draw collision map</string>
-        </property>
-        <property name="text">
-         <string>collisions</string>
-        </property>
-       </widget>
-      </item>
       <item row="0" column="3">
        <widget class="QCheckBox" name="chk_frame">
         <property name="statusTip">
@@ -336,30 +264,85 @@
         </property>
        </widget>
       </item>
-      <item row="0" column="5">
+      <item row="0" column="5" colspan="2">
        <widget class="QCheckBox" name="chk_expanded">
         <property name="statusTip">
          <string>draw expanded</string>
         </property>
         <property name="text">
-         <string>expanded</string>
+         <string>poser</string>
         </property>
         <property name="tristate">
          <bool>false</bool>
         </property>
        </widget>
       </item>
+      <item row="1" column="0" colspan="8">
+       <layout class="QHBoxLayout" name="horizontalLayout_4">
+        <item>
+         <widget class="QRadioButton" name="radioButton">
+          <property name="text">
+           <string>Link</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QRadioButton" name="radioButton_2">
+          <property name="text">
+           <string>Driver</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="Line" name="line">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QSlider" name="sld_link">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
+          <property name="maximum">
+           <number>1000</number>
+          </property>
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QSlider" name="sld_driver">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="maximum">
+           <number>1000</number>
+          </property>
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="btn_ik">
+          <property name="text">
+           <string/>
+          </property>
+          <property name="icon">
+           <iconset resource="../KlamptQt/icons.qrc">
+            <normaloff>:/Images/Images/IK.gif</normaloff>:/Images/Images/IK.gif</iconset>
+          </property>
+          <property name="checkable">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
      </layout>
-    </item>
-    <item row="1" column="1" rowspan="2">
-     <widget class="PlayResourceFrame" name="playframe">
-      <property name="frameShape">
-       <enum>QFrame::StyledPanel</enum>
-      </property>
-      <property name="frameShadow">
-       <enum>QFrame::Raised</enum>
-      </property>
-     </widget>
     </item>
    </layout>
   </widget>
@@ -902,22 +885,6 @@
    </hints>
   </connection>
   <connection>
-   <sender>pushButton</sender>
-   <signal>clicked()</signal>
-   <receiver>MainWindow</receiver>
-   <slot>PrintCollisions()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>744</x>
-     <y>530</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>628</x>
-     <y>508</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
    <sender>actionOpen_File</sender>
    <signal>triggered()</signal>
    <receiver>MainWindow</receiver>
@@ -930,22 +897,6 @@
     <hint type="destinationlabel">
      <x>399</x>
      <y>299</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>chk_collisions</sender>
-   <signal>clicked(bool)</signal>
-   <receiver>MainWindow</receiver>
-   <slot>SetCollisions(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>745</x>
-     <y>495</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>624</x>
-     <y>552</y>
     </hint>
    </hints>
   </connection>

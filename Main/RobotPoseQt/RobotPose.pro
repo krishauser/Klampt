@@ -31,7 +31,8 @@ HEADERS  += mainwindow.h \
     resourcemanager.h \ #\
     playresourceframe.h \
     qrobotposebackend.h \
-    qrobotposegui.h
+    qrobotposegui.h \
+    ../KlamptQt/GLScreenshotPlugin.h
     #../../Interface/RobotTestGUI.h
 
 FORMS    += mainwindow.ui \

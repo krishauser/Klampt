@@ -43,6 +43,7 @@ void MainWindow::Initialize(int _argc,const char** _argv)
     ui->frame_resources->robot = rob;
 
     gui->play_frame = ui->playframe;
+    connect(gui->play_frame,SIGNAL(ToggleRecording(bool)),gui,SLOT(SetRecord(bool)));
 
     ui->displaywidget->Start();
 

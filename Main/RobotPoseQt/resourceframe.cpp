@@ -29,15 +29,17 @@ void ResourceFrame::OpenFile(QString filename){
   if(!filename.isNull()){
     ini.setValue("last_open_resource_directory",QFileInfo(filename).absolutePath());
     //gui->SendCommand("load_resource",filename.toStdString());
-
+    //todo send message
     ResourceNode r = manager->LoadResource(filename.toStdString());
     QResourceTreeItem* it=new QResourceTreeItem(r);
     ui->treeWidget->addTopLevelItem(it);
-
+    ui->treeWidget->setItemSelected(it,1);
+    gui->SendCommand("set_resource",r->Name());
     }
 }
 
 void ResourceFrame::ChangeSelectedItem(QTreeWidgetItem* it){
+    if(it == NULL) return;
     /*
     if(it)
         manager->ChangeSelected(it->text(0).toStdString());
@@ -47,8 +49,10 @@ void ResourceFrame::ChangeSelectedItem(QTreeWidgetItem* it){
     QResourceTreeItem* rti=(QResourceTreeItem*)it;
     printf("recovering %s\n",rti->name.c_str());
     gui->SendCommand("set_resource",rti->name);
+    ui->addNewBox->clear();
 }
 
+//todo make this message passing like adding a resource
 void ResourceFrame::PressedDelete(){
     if(manager->DeleteSelected())
         BOOST_FOREACH(QTreeWidgetItem* it, ui->treeWidget->selectedItems()){
@@ -75,8 +79,10 @@ void ResourceFrame::ToGUI(){
   */
 }
 
-void ResourceFrame::FromGUI(){
-    gui->SendCommand("poser_to_resource","Config");
+void ResourceFrame::FromGUI(QString type){
+    if(type == "Add New") return;
+    gui->SendCommand("poser_to_resource",type.toStdString());
+    ui->addNewBox->setCurrentIndex(0);
 }
 
 void ResourceFrame::updateNewResource(string name){

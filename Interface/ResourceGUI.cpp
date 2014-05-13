@@ -202,6 +202,10 @@ void ResourceGUIBackend::SetActive(const string& type,const string& name)
   cur_resource_name = name;
 }
 
+void ResourceGUIBackend::SetPathTime(double time){
+  viewResource.pathTime = time;
+}
+
 bool ResourceGUIBackend::OnCommand(const string& cmd,const string& args)
 {
   if(cmd == "set_resource") {
@@ -220,9 +224,16 @@ bool ResourceGUIBackend::OnCommand(const string& cmd,const string& args)
 	SendCommand("enable_path",ss.str());
       }
       else{
-	const LinearPathResource* rc=dynamic_cast<const LinearPathResource*>((const ResourceBase*)resources->selected->resource);
+	const MultiPathResource* rc=dynamic_cast<const MultiPathResource*>((const ResourceBase*)resources->selected->resource);
 	if(rc){
-	  //todo
+	  Real minTime = 0, maxTime = 1;
+	  if(rc->path.HasTiming()) {
+	    minTime = rc->path.sections.front().times.front();
+	    maxTime = rc->path.sections.back().times.back();
+	  }
+	  stringstream ss;
+	  ss<<maxTime<<" "<<minTime;
+	  SendCommand("enable_path",ss.str());
 	}
       }
     }
@@ -299,7 +310,9 @@ bool ResourceGUIBackend::OnCommand(const string& cmd,const string& args)
   }
   else if(cmd == "set_path_time") {
     stringstream ss(args);
-    ss>>viewResource.pathTime;
+    double time;
+    ss>>time;
+    SetPathTime(time);
   }
   else {
     return WorldGUIBackend::OnCommand(cmd,args);

@@ -7,10 +7,10 @@
 #include <Interface/RobotPoseGUI.h>
 #include <resourcemanager.h>
 #include <View/ViewResource.h>
-
+#include <KlamptQt/GLScreenshotPlugin.h>
 //#include <GLdraw/GLScreenshotProgram.h>
 
-class QRobotPoseBackend : public QGLWidget, public RobotPoseBackend//, public GLScreenshotPlugin
+class QRobotPoseBackend : public QGLWidget, public RobotPoseBackend, public GLScreenshotPlugin
 {
     Q_OBJECT
 public:
@@ -36,6 +36,7 @@ public:
     bool OnCommand(const string &cmd, const string &args);
     void RenderCurrentResource();
     void RenderWorld();
+    void SetPathTime(double time);
 signals:
     void ResizeFrame(QResizeEvent *e);
     void MouseMove(QMouseEvent *e);

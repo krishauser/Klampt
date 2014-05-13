@@ -1,10 +1,14 @@
 #ifndef PLAYRESOURCEFRAME_H
 #define PLAYRESOURCEFRAME_H
 
-#include <QFrame>
 #include <stdio.h>
 #include <sstream>
 #include <stdlib.h>
+
+#include <QTimer>
+#include <QFrame>
+
+#define RESOURCE_RECORD_FPS 120
 
 using namespace std;
 
@@ -20,13 +24,23 @@ public:
     explicit PlayResourceFrame(QWidget *parent = 0);
     ~PlayResourceFrame();
     void EnablePath(string args);
+
+    QTimer *timer;
+
+    double duration;
+    double time;
+    double start;
+    bool recording;
+
 public slots:
     void Play();
+    void Tick();
     void Pause();
     void Record();
     void NewTime(int t);
 signals:
     void TimeChanged(double);
+    void ToggleRecording(bool);
 private:
     Ui::PlayResourceFrame *ui;
 };
