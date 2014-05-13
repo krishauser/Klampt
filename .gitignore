@@ -49,6 +49,8 @@ Documentation/build
 Documentation/html
 Documentation/latex
 Documentation/*.tags
+bin
+lib
 
 # Cygwin stack dump files
 *.stackdump
@@ -66,3 +68,15 @@ ui_*.h
 
 # Settings Files
 *.settings
+
+#CMake temporary files
+CMakeFiles
+CMakeCache.txt
+CPack*
+CTest*
+cmake*.cmake
+_CPack*
+
+# Log files
+*.log
+*.csv
