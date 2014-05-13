@@ -28,6 +28,8 @@ public:
     double duration;
     double time;
     double start;
+    bool recording;
+
 public slots:
     void Play();
     void Tick();
@@ -36,6 +38,8 @@ public slots:
     void NewTime(int t);
 signals:
     void TimeChanged(double);
+    void ToggleRecording(bool);
+    void TakeFrame();
 private:
     Ui::PlayResourceFrame *ui;
 };

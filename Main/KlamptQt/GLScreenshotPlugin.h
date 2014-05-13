@@ -79,12 +79,13 @@ public:
   {
     saveMovie = false;
     if(stop_encode)
-    EncodeMovie();
+      EncodeMovie();
   }
 
   void ToggleMovie()
   {
-    if(saveMovie) StopMovie();
+    if(saveMovie)
+      StopMovie();
     else StartMovie();
   }
 

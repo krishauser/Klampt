@@ -53,6 +53,15 @@ void QRobotPoseGUI::SetLinkValue(double val){
     SendCommand("set_link_value",val);
 }
 
+void QRobotPoseGUI::SetRecord(bool status)
+{
+    SendCommand("record",status);
+}
+
+void QRobotPoseGUI::RecordFrame(){
+    SendCommand("record_take_frame");
+}
+
 bool QRobotPoseGUI::OnCommand(const string &cmd, const string &args){
     if(cmd=="update_config"){
         UpdateGUI();

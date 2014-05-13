@@ -9,6 +9,7 @@ PlayResourceFrame::PlayResourceFrame(QWidget *parent) :
     ui->setupUi(this);
     timer=new QTimer(this);
     connect(timer,SIGNAL(timeout()),this,SLOT(Tick()));
+    recording = 0;
 }
 
 PlayResourceFrame::~PlayResourceFrame()
@@ -27,8 +28,15 @@ void PlayResourceFrame::Tick(){
         time= start + duration;
         timer->stop();
         ui->slider->setValue((time - start) / duration);
+        if(recording){
+            emit ToggleRecording(false);
+            recording = 0;
+        }
     }
     else{
+        if(recording){
+            emit TakeFrame();
+        }
         ui->slider->setValue((time - start) / duration * 1000 - 1);
         emit TimeChanged((time - start) / duration);
     }
@@ -40,7 +48,9 @@ void PlayResourceFrame::Pause(){
 }
 
 void PlayResourceFrame::Record(){
-
+    recording = 1;
+    emit ToggleRecording(true);
+    Play();
 }
 
 void PlayResourceFrame::NewTime(int t){
@@ -55,11 +65,3 @@ void PlayResourceFrame::EnablePath(string args){
     duration = back-front;
     time=start=front;
 }
-
-/*
-void PlayResourceFrame::setDisabled(bool status){
-    ui->pushButton_2->setDisabled(status);
-    ui->pushButton_3->setDisabled(status);
-    ui->pushButton_5->setDisabled(status);
-    ui->slider->setDisabled(status);
-}*/

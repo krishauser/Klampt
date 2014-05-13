@@ -43,14 +43,29 @@ bool QRobotPoseBackend::OnMouseWheel(int dwheel){
 }
 
 bool QRobotPoseBackend::OnCommand(const string &cmd, const string &args){
-    if(cmd=="set_q"){
-        Config q;
-        stringstream ss(args);
-        while(ss>>q);
-        cout<<q.n<<robotWidgets[0].Pose().n<<"\n";
-        robotWidgets[0].SetPose(q);
-        SendCommand("update_config","");
-        return 1;
+  //todo make recordgui class
+    stringstream ss(args);
+    if(cmd=="record"){
+        int status;
+        ss >> status;
+        if(status){
+            StartMovie();
+        }
+        else{
+            StopMovie();
+        }
+        return true;
+    }
+    else if(cmd=="set_record_command"){
+        GLScreenshotPlugin::video_encoding_command = args;
+        return true;
+    }
+    else if(cmd=="record_file"){
+        moviefile=args;
+	return true;
+    }
+    else if(cmd=="record_take_frame"){
+      MovieUpdate();
     }
     return BaseT::OnCommand(cmd,args);
 }

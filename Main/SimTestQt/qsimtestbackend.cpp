@@ -31,6 +31,7 @@ void QSimTestBackend::initializeGL(){
 }
 
 bool QSimTestBackend::OnCommand(const string &cmd, const string &args){
+  //todo make recordgui class
     stringstream ss(args);
     if(cmd=="record"){
         int status;
