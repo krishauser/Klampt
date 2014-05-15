@@ -75,6 +75,11 @@ class MultiPath
   ///to a stop between sections.  Existing timing is overwritten.  See
   ///@SetDuration for a description of uniformSectionTimes.
   void SetSmoothTiming(Real duration,bool uniformSectionTimes=true);
+  ///Concatenates another multipath.  If this is a timed path, the suffix
+  ///path must be timed as well.  In such a case, if relative = true then
+  ///timing of the suffix path is shifted forward by time this->Duration()
+  ///before concatenating it.
+  void Concat(const MultiPath& suffix,bool relative=true);
   ///Retrieves all of the IK goals from the problem, including holds
   void GetIKProblem(vector<IKGoal>& goals,int section=0) const;
   ///Sets the section to just an IK constrained section (holds are deleted).

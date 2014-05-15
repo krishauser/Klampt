@@ -397,6 +397,7 @@ void MultiPath::SetDynamicPath(const ParabolicRamp::DynamicPath& path,int s)
 Real MultiPath::Duration() const
 {
   if(!HasTiming()) return 1.0;
+  if(sections.empty()) return 0.0;
   return sections.back().times.back();
 }
 
@@ -468,6 +469,30 @@ void MultiPath::SetSmoothTiming(Real duration,bool uniformSectionTime)
 	sections[i].times[j] = tstart+T/2*Sqrt(2*Real(j)/n);
       else
 	sections[i].times[j] = tstart+T-T/2*Sqrt(2*Real(n-j)/n);
+    }
+  }
+}
+
+void MultiPath::Concat(const MultiPath& suffix,bool relative)
+{
+  //TODO: merge the settings
+  if(settings.empty())
+    settings = suffix.settings;
+
+  if(sections.empty())
+    sections = suffix.sections;
+  else {
+    Real tofs = 0;
+    if(HasTiming()) {
+      Assert(suffix.HasTiming());
+      if(relative) tofs = Duration();
+    }
+    size_t i=sections.size();
+    sections.insert(sections.end(),suffix.sections.begin(),suffix.sections.end());
+    if(tofs != 0) {
+      for(;i<sections.size();i++)
+	for(size_t j=0;j<sections[i].times.size();j++)
+	  sections[i].times[j] += tofs;
     }
   }
 }
