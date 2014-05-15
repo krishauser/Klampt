@@ -191,6 +191,20 @@ ContactPlan/fast:
 .PHONY : ContactPlan/fast
 
 # Convenience name for target.
+Examples/CMakeFiles/DynamicPlanDemo.dir/rule:
+	cd /home/hauser/gitlibs/Klampt && $(MAKE) -f CMakeFiles/Makefile2 Examples/CMakeFiles/DynamicPlanDemo.dir/rule
+.PHONY : Examples/CMakeFiles/DynamicPlanDemo.dir/rule
+
+# Convenience name for target.
+DynamicPlanDemo: Examples/CMakeFiles/DynamicPlanDemo.dir/rule
+.PHONY : DynamicPlanDemo
+
+# fast build rule for target.
+DynamicPlanDemo/fast:
+	cd /home/hauser/gitlibs/Klampt && $(MAKE) -f Examples/CMakeFiles/DynamicPlanDemo.dir/build.make Examples/CMakeFiles/DynamicPlanDemo.dir/build
+.PHONY : DynamicPlanDemo/fast
+
+# Convenience name for target.
 Examples/CMakeFiles/PlanDemo.dir/rule:
 	cd /home/hauser/gitlibs/Klampt && $(MAKE) -f CMakeFiles/Makefile2 Examples/CMakeFiles/PlanDemo.dir/rule
 .PHONY : Examples/CMakeFiles/PlanDemo.dir/rule
@@ -280,6 +294,30 @@ contactplan.cpp.s:
 	cd /home/hauser/gitlibs/Klampt && $(MAKE) -f Examples/CMakeFiles/ContactPlan.dir/build.make Examples/CMakeFiles/ContactPlan.dir/contactplan.cpp.s
 .PHONY : contactplan.cpp.s
 
+dynamicplandemo.o: dynamicplandemo.cpp.o
+.PHONY : dynamicplandemo.o
+
+# target to build an object file
+dynamicplandemo.cpp.o:
+	cd /home/hauser/gitlibs/Klampt && $(MAKE) -f Examples/CMakeFiles/DynamicPlanDemo.dir/build.make Examples/CMakeFiles/DynamicPlanDemo.dir/dynamicplandemo.cpp.o
+.PHONY : dynamicplandemo.cpp.o
+
+dynamicplandemo.i: dynamicplandemo.cpp.i
+.PHONY : dynamicplandemo.i
+
+# target to preprocess a source file
+dynamicplandemo.cpp.i:
+	cd /home/hauser/gitlibs/Klampt && $(MAKE) -f Examples/CMakeFiles/DynamicPlanDemo.dir/build.make Examples/CMakeFiles/DynamicPlanDemo.dir/dynamicplandemo.cpp.i
+.PHONY : dynamicplandemo.cpp.i
+
+dynamicplandemo.s: dynamicplandemo.cpp.s
+.PHONY : dynamicplandemo.s
+
+# target to generate assembly for a file
+dynamicplandemo.cpp.s:
+	cd /home/hauser/gitlibs/Klampt && $(MAKE) -f Examples/CMakeFiles/DynamicPlanDemo.dir/build.make Examples/CMakeFiles/DynamicPlanDemo.dir/dynamicplandemo.cpp.s
+.PHONY : dynamicplandemo.cpp.s
+
 plandemo.o: plandemo.cpp.o
 .PHONY : plandemo.o
 
@@ -336,6 +374,7 @@ help:
 	@echo "... depend"
 	@echo "... CartPole"
 	@echo "... ContactPlan"
+	@echo "... DynamicPlanDemo"
 	@echo "... PlanDemo"
 	@echo "... RealTimePlanning"
 	@echo "... edit_cache"
@@ -353,6 +392,9 @@ help:
 	@echo "... contactplan.o"
 	@echo "... contactplan.i"
 	@echo "... contactplan.s"
+	@echo "... dynamicplandemo.o"
+	@echo "... dynamicplandemo.i"
+	@echo "... dynamicplandemo.s"
 	@echo "... plandemo.o"
 	@echo "... plandemo.i"
 	@echo "... plandemo.s"

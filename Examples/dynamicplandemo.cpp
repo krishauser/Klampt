@@ -1,62 +1,67 @@
-//these two include files are needed for SimplePlan
 #include "Planning/RobotCSpace.h"
-  //defines WorldPlannerSettings and SingleRobotCSpace
-  //includes definitions for RobotWorld, Config
 #include <planning/AnyMotionPlanner.h>
-  //defines MotionPlannerFactory
-  //includes MilestonePath, HaltingCondition
-
-//the following include files are used for IO and command line processing
 #include "IO/XmlWorld.h"
-  //defines XmlWorld for loading RobotWorlds from .xml files
 #include "Modeling/MultiPath.h"
-  //defines MultiPath for saving multi-section paths to MultiPath .xml files
 #include <utils/ioutils.h>
 #include <string.h>
 #include <fstream>
 
+//includes for dynamic path checking
+#include "Modeling/DynamicPath.h"
+//includes CSpaceFeasibilityChecker
+#include "Planning/RampCSpace.h"
+//includes Convert to convert between path representations
+#include "Modeling/Paths.h"
+
+/** @brief Converts a kinematically planned path to a dynamic one with
+ * velocity and acceleration bounds.
+ * 
+ * Performs at most maxIters iterations of shortcutting.
+ *
+ * The output is placed in dynamicPath.
+ */
+void DynamicShortcut(RobotWorld& world,int robot,const MilestonePath& path,int maxIters,
+		     ParabolicRamp::DynamicPath& dynamicPath)
+{
+  //1. Make initial start-and-stop path.
+  //set up joint/velocity/acceleration limits
+  dynamicPath.xMin = world.robots[robot].robot->qMin;
+  dynamicPath.xMax = world.robots[robot].robot->qMax;
+  dynamicPath.velMax = world.robots[robot].robot->velMax;
+  dynamicPath.accMax = world.robots[robot].robot->accMax;
+  //extract milestones from MilestonePath
+  vector<ParabolicRamp::Vector> milestones(path.NumMilestones());
+  for(size_t i=0;i<milestones.size();i++)
+    milestones[i] = path.GetMilestone(i);
+  dynamicPath.SetMilestones(milestones);
+  printf("Initial path duration: %g seconds\n",dynamicPath.GetTotalTime());
+
+  //2. Set up the collision checker
+  WorldPlannerSettings settings;
+  settings.InitializeDefault(world);
+  SingleRobotCSpace cspace(world,robot,&settings); 
+  CSpaceFeasibilityChecker feasibilityChecker(&cspace);
+  Real tolerance = settings.robotSettings[robot].collisionEpsilon;
+  ParabolicRamp::RampFeasibilityChecker checker(&feasibilityChecker,tolerance);
+
+  //3. Perform shortcutting
+  int numShortcuts = dynamicPath.Shortcut(maxIters,checker);
+  printf("%d dynamic shortcuts performed\n",numShortcuts);
+  printf("Optimized path duration: %g seconds\n",dynamicPath.GetTotalTime());
+}
+
 /** @brief Performs basic path planning in collision-free space for the
  * given robot and start/end points.
  * 
- * The output is given in path.  At most cond.maxIters iterations and at
- * most cond.timeLimit seconds are spent planning.
- *
- * The constraint specifications are given in WorldPlannerSettings. If you
- * have custom requirements, you will need to set them up.
+ * See plandemo.cpp
  */
 bool SimplePlan(RobotWorld& world,int robot,const Config& qstart,const Config& qgoal,MilestonePath& path,
 		const HaltingCondition& cond,const string& plannerSettings="")
 {
-  //1. Create and initialize a WorldPlannerSettings object for the given
-  //world. 
   WorldPlannerSettings settings;
   settings.InitializeDefault(world);
-  //Here you can modify the setting object to do more constraint setup
-  //if desired, e.g., which collisions are tested, edge collision checking
-  //resolution, etc.  See the Planning/PlannerSettings.h file for more
-  //information.
-  //
-  //If you wish to add extra collision avoidance margins, you may do so by
-  //adding margins onto the geometries in the world. For example, to avoid
-  //collisions by 0.05 units, you can use the following code:
-  //  Real margin = 0.05
-  //  for(size_t i=0;i<world.robots[robot].robot->geometries.size();i++)
-  //    world.robots[robot].robot->geometries[i].margin += margin;
-  //(make sure to restore the old margins if you want to perform multiple
-  // planning runs)
-
-  //2. Create a SingleRobotCSpace object for the indicated robot.
-  //
-  //If you want to plan only for certain degrees-of-freedom, you can
-  //use the SingleRobotCSpace2 class.  See its documentation in
-  //Planning/RobotCSpace.h
-  //
-  //If you wish to add custom kinematic constraints, you can subclass
-  //SingleRobotCSpace and override the IsFeasible method.
   SingleRobotCSpace cspace(world,robot,&settings); 
 
-  //3. Some sanity checks -- make sure the start and goal configurations
-  //are feasible.
   if(!cspace.IsFeasible(qstart)) {
     cout<<"Start configuration is infeasible, violated constraints:"<<endl;
     vector<bool> infeasible;
@@ -74,19 +79,13 @@ bool SimplePlan(RobotWorld& world,int robot,const Config& qstart,const Config& q
     return false;
   }
 
-  //4. Set up the motion planner settings from a given planner settings string
-  //(see Examples/PlanDemo/*.settings)
   MotionPlannerFactory factory;
   if(!plannerSettings.empty()) {
     bool res = factory.LoadJSON(plannerSettings);
     if(!res) 
       printf("Warning, incorrectly formatted planner settings file\n");
   }
-  //You may also manually do more planner setup here if desired, e.g.,
-  //change planner type, perturbation size, connection radius, etc.
-  //See KrisLibrary/planning/AnyMotionPlanner.h
 
-  //5. Create the planner and run until the termination criterion stops it
   MotionPlannerInterface* planner = factory.Create(&cspace,qstart,qgoal);
   string res = planner->Plan(path,cond);
   cout<<"Planner terminated with condition "<<res<<endl;
@@ -97,21 +96,23 @@ bool SimplePlan(RobotWorld& world,int robot,const Config& qstart,const Config& q
 int main(int argc,const char** argv)
 {
   if(argc <= 2) {
-    printf("USAGE: PlanDemo [options] world_file configs\n");
+    printf("USAGE: DynamicPlanDemo [options] world_file configs\n");
     printf("OPTIONS:\n");
-    printf("-o filename: the output linear path or multipath (default plandemo.xml)\n");
+    printf("-o filename: the output linear path or multipath (default dynamicplandemo.xml)\n");
     printf("-p settings: set the planner configuration file\n");
     printf("-opt: do optimal planning (do not terminate on the first found solution)\n");
     printf("-n iters: set the default number of iterations (default 1000)\n");
     printf("-t time: set the planning time limit (default infinity)\n");
+    printf("-s iters: set the number of shortcuts (default 100)\n");
     printf("-r robotindex: set the robot index (default 0)\n");
     return 0;
   }
   Srand(time(NULL));
   int robot = 0;
-  const char* outputfile = "plandemo.xml";
+  const char* outputfile = "dynamicplandemo.xml";
   HaltingCondition termCond;
   string plannerSettings;
+  int numShortcutIters = 100;
   int i;
   //parse command line arguments
   for(i=1;i<argc;i++) {
@@ -134,6 +135,10 @@ int main(int argc,const char** argv)
 	}
 	i++;
       }
+      else if(0==strcmp(argv[i],"-s")) {
+	numShortcutIters = atoi(argv[i+1]);
+	i++;
+      }
       else if(0==strcmp(argv[i],"-r")) {
 	robot = atoi(argv[i+1]);
 	i++;
@@ -151,7 +156,7 @@ int main(int argc,const char** argv)
   }
   if(i+2 < argc) {
     printf("Too few arguments provided\n");
-    printf("USAGE: PlanDemo [options] world_file configs\n");
+    printf("USAGE: DynamicPlanDemo [options] world_file configs\n");
     return 1;
   }
   if(i+2 > argc) {
@@ -213,10 +218,11 @@ int main(int argc,const char** argv)
       feasible = false;
     }
     else {
-      path.sections.resize(path.sections.size()+1);
-      path.sections.back().milestones.resize(mpath.NumMilestones());
-      for(int j=0;j<mpath.NumMilestones();j++)
-	path.sections.back().milestones[j] = mpath.GetMilestone(j);
+      ParabolicRamp::DynamicPath dpath;
+      DynamicShortcut(world,robot,mpath,numShortcutIters,dpath);
+      MultiPath dpathSection;
+      Convert(dpath,dpathSection);
+      path.Concat(dpathSection);
     }
   }
   if(feasible)
