@@ -10,6 +10,18 @@
 if (ODE_INCLUDE_DIRS AND ODE_LIBRARIES)
 # ODE has already been found and the necessary variables are cached
   set(ODE_FOUND TRUE)
+  if(NOT ODE_DEFINITIONS_FOUND)
+    #find the precision from the name of the library? Works on windows
+    if (ODE_LIBRARIES MATCHES double)
+      set(ODE_DEFINITIONS -DdDOUBLE)
+    endif( )
+    if (ODE_LIBRARIES MATCHES single)
+      set(ODE_DEFINITIONS -DdSINGLE)
+    endif( )
+    if (ODE_DEFINITIONS)
+      set(ODE_DEFINITIONS_FOUND TRUE)
+    endif( )
+  endif(NOT ODE_DEFINITIONS_FOUND)
 else (ODE_INCLUDE_DIRS AND ODE_LIBRARIES)
   # Find ODE
 

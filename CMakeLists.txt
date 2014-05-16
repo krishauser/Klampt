@@ -50,10 +50,13 @@ INCLUDE(KlamptDependencies)
 ADD_DEFINITIONS(${KLAMPT_DEFINITIONS})
 INCLUDE_DIRECTORIES(${KLAMPT_INCLUDE_DIRS})
 
+#show in CMake cache
+SET(KLAMPT_INCLUDE_DIRS ${KLAMPT_INCLUDE_DIRS} CACHE STRING "Klamp't include directories" FORCE)
+SET(KLAMPT_DEFINITIONS ${KLAMPT_DEFINITIONS} CACHE STRING "Klamp't compiler definitions" FORCE)
+SET(KLAMPT_LIBRARIES ${KLAMPT_LIBRARIES} CACHE STRING "Klamp't link libraries" FORCE)
+
 #add Klamp't onto KLAMPT_LIBRARIES
-FIND_LIBRARY( KLAMPT_LIBRARY Klampt
-	      PATHS "${KLAMPT_ROOT}/lib" )
-SET(KLAMPT_LIBRARIES ${KLAMPT_LIBRARY} ${KLAMPT_LIBRARIES})
+SET(KLAMPT_LIBRARIES Klampt ${KLAMPT_LIBRARIES})
 SET(KLAMPT_INCLUDE_DIRS ${KLAMPT_INCLUDE_DIRS} ${KLAMPT_ROOT})
 
 
@@ -80,7 +83,6 @@ IF(DOXYGEN_FOUND)
     WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
     COMMENT "Generating documentation (Doxygen) at location ${PROJECT_SOURCE_DIR}/doc/html/")
 ENDIF(DOXYGEN_FOUND)
-
 
 # Python API directory
 ADD_SUBDIRECTORY(Python)
@@ -123,8 +125,9 @@ MESSAGE (STATUS "    RobotTest, SimTest, RobotPose, MotorCalibrate,")
 MESSAGE (STATUS "    URDFtoRob, SimUtil, TrajOpt, Merge, or Pack\n")
 MESSAGE (STATUS "Compile examples using: make examples OR make [examplename]")
 MESSAGE (STATUS "  Possible values for [examplename]:")
-MESSAGE (STATUS "    IKDemo, PlanDemo, ContactPlan, or RealTimePlanning\n")
-MESSAGE (STATUS "Compile Python API using: make python\n")
-MESSAGE (STATUS "Compile API-documentation using: make docs\n")
-MESSAGE (STATUS "Install using: make install\n")
+MESSAGE (STATUS "    IKDemo, PlanDemo, DynamicPlanDemo, ContactPlan,")
+MESSAGE (STATUS "    UserTrials, or RealTimePlanning\n")
+MESSAGE (STATUS "Compile Python API using: make python")
+MESSAGE (STATUS "Compile Python API-documentation using: make docs\n")
+MESSAGE (STATUS "Install using: make install")
 MESSAGE (STATUS "Uninstall using: make uninstall\n")
