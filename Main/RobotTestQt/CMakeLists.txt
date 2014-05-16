@@ -15,6 +15,7 @@ ENDIF( )
 
 INCLUDE_DIRECTORIES(".")
 INCLUDE_DIRECTORIES("..")
+INCLUDE_DIRECTORIES("../KlamptQt")
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR})
 
 ##### Qt Specific stuff ####
@@ -26,9 +27,10 @@ INCLUDE(${QT_USE_FILE})
 # Define the app's UI and MOC items
 
 QT4_WRAP_UI(RobotTest_UISrcs collisionoutput.ui mainwindow.ui)
-QT4_WRAP_CPP(RobotTest_MOCSrcs collisionoutput.h mainwindow.h qtguibase.h qrobottestbackend.h qrobottestgui.h)
+QT4_WRAP_CPP(RobotTest_MOCSrcs collisionoutput.h mainwindow.h ../KlamptQt/qklamptdisplay.h ../KlamptQt/qtguibase.h qrobottestgui.h)
+QT4_ADD_RESOURCES(RobotTest_Resources ../KlamptQt/icons.qrc)
 
 ##### Build target ####
-ADD_EXECUTABLE(RobotTest main.cpp collisionoutput.cpp mainwindow.cpp qtguibase.cpp qrobottestbackend.cpp qrobottestgui.cpp ${RobotTest_MOCSrcs} ${RobotTest_UISrcs})
+ADD_EXECUTABLE(RobotTest main.cpp collisionoutput.cpp mainwindow.cpp ../KlamptQt/qklamptdisplay.cpp ../KlamptQt/qtguibase.cpp qrobottestgui.cpp ${RobotTest_MOCSrcs} ${RobotTest_UISrcs} ${RobotTest_Resources})
 TARGET_LINK_LIBRARIES(RobotTest ${KLAMPT_LIBRARIES} ${QT_LIBRARIES})
 

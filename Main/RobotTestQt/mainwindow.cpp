@@ -20,26 +20,14 @@ void MainWindow::Initialize(int _argc,const char** _argv)
     argc=_argc;
     argv=_argv;
 
-    Robot robot;
-    if(!robot.Load(argv[1])){
-        printf("Error");
-    }
     const string robname="placeholder";
-    world=new RobotWorld();
     //world->AddRobot(robname,&robot);
-    world->LoadRobot(argv[1]);
-    ui->displaywidget->world=world;
+    world.LoadRobot(argv[1]);
+    backend = new RobotTestBackend(&world);
     printf("BACKEND LOADED\n");
-    gui=new QRobotTestGUI(ui->displaywidget,world);
-    ui->displaywidget->Start();
-
-    //mediator, can be moved to direct calls
-    connect(ui->displaywidget, SIGNAL(MouseMove(QMouseEvent*)),gui,SLOT(SendMouseMove(QMouseEvent*)));
-    connect(ui->displaywidget, SIGNAL(MousePress(QMouseEvent*)),gui,SLOT(SendMousePress(QMouseEvent*)));
-    connect(ui->displaywidget, SIGNAL(MouseRelease(QMouseEvent*)),gui,SLOT(SendMouseRelease(QMouseEvent*)));
-    connect(ui->displaywidget, SIGNAL(MouseWheel(QWheelEvent*)),gui,SLOT(SendMouseWheel(QWheelEvent*)));
-    connect(ui->displaywidget, SIGNAL(KeyPress(QKeyEvent*)),gui,SLOT(SendKeyDown(QKeyEvent*)));
-    //connect(ui->displaywidget, SIGNAL(KeyRelease(QKeyEvent*)),gui,SLOT(SendKeyRelease(QKeyEvent*)));
+    gui=new QRobotTestGUI(backend,ui->displaywidget);
+    backend->Start();
+    ui->displaywidget->gui = gui;
 
     //Receive info from the GUI
     connect(gui,SIGNAL(UpdateDriverValue()),this,SLOT(UpdateDriverValue()));
@@ -52,7 +40,7 @@ void MainWindow::Initialize(int _argc,const char** _argv)
     connect(ui->spn_driver,SIGNAL(valueChanged(double)),gui,SLOT(SetDriverValue(double)));
     connect(ui->spn_link,SIGNAL(valueChanged(double)),gui,SLOT(SetLinkValue(double)));
 
-    rob=world->robots[0].robot;
+    rob=world.robots[0].robot;
 
     //fill GUI info
     for(int i=0;i<rob->linkNames.size();i++)
@@ -63,11 +51,6 @@ void MainWindow::Initialize(int _argc,const char** _argv)
 
     ui->spn_driver_index->setMaximum(rob->drivers.size() - 1);
     ui->spn_link_index->setMaximum(rob->links.size() - 1);
-
-    refresh_timer=new QTimer();
-    connect(refresh_timer, SIGNAL(timeout()),ui->displaywidget,SLOT(updateGL()));
-    refresh_timer->start(1000/30);
-    //ui->displaywidget->Start();
 
     ui->displaywidget->installEventFilter(this);
     ui->displaywidget->setFocusPolicy(Qt::WheelFocus);    
@@ -229,6 +212,6 @@ void MainWindow::LoadFile(){
 MainWindow::~MainWindow()
 {
     delete ui;
-    delete world;
-    delete gui;
+    gui = NULL;
+    backend = NULL;
 }

@@ -5,7 +5,7 @@
 #include <QDir>
 
 #include "Modeling/World.h"
-#include "Interface/SimTestGUI.h"
+#include "Interface/RobotTestGUI.h"
 #include "qrobottestgui.h"
 
 #include "collisionoutput.h"
@@ -27,9 +27,9 @@ public:
     ~MainWindow();
     QDir directory;
     QString filename;
-    RobotWorld *world;
-    QRobotTestGUI *gui;
-    QTimer* refresh_timer;
+    RobotWorld world;
+    SmartPointer<RobotTestBackend> backend;
+    SmartPointer<QRobotTestGUI> gui;
     Robot* rob;
     int mode;
     int argc;
