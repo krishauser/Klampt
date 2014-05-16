@@ -1,18 +1,21 @@
 #include "qsimtestgui.h"
 
-QSimTestGUI::QSimTestGUI(GenericBackendBase *_backend, RobotWorld *_world) :
-  QtGUIBase(_backend,_world)
+QSimTestGUI::QSimTestGUI(QKlamptDisplay* _display,SimTestBackend *_backend) :
+  QtGUIBase(_backend), display(_display)
 {
   //BaseT::backend = _backend;
   //  BaseT::width = w;
   //  BaseT::height = h;
 
-  SimTestBackend* sbackend = dynamic_cast<SimTestBackend*>(_backend);
-  Assert(sbackend != NULL);
-  sim = &sbackend->sim;
-  sbackend->gui = this;
+  sim = &_backend->sim;
+  assert(_backend != NULL);
+  assert(sim != NULL);
+  assert(sim->world != NULL);
+  assert(sim->world->robots.size()>0);
+  assert(sim->controlSimulators.size()>0);
+  _backend->gui = this;
 
-  driver_tool=new DriverEdit(world);
+  driver_tool=new DriverEdit(sim->world);
   connect(driver_tool,SIGNAL(SetDriverValue(int,float)),this,SLOT(SendDriverValue(int,float)));
   //driver_tool->show();
 
@@ -27,19 +30,10 @@ QSimTestGUI::QSimTestGUI(GenericBackendBase *_backend, RobotWorld *_world) :
   //log_options->show();
   //UpdateMeasurements();
 
-  controller_settings=new ControllerSettings();
-  controller_settings->settings=sim->robotControllers[0]->Settings();
-  connect(controller_settings,SIGNAL(SendControllerSetting(string,string)),this,SLOT(SendControllerSetting(string,string)));
-  controller_settings->Refresh();
-  //controller_settings->show();
-
-  command_dialog=new ControllerCommandDialog();
-  command_dialog->commands=sim->robotControllers[0]->Commands();
-  connect(command_dialog,SIGNAL(ControllerCommand(string,string)),this,SLOT(SendControllerCommand(string,string)));
-  command_dialog->Refresh();
-
-  connect_serial = new ConnectSerial(world);
-  connect(connect_serial,SIGNAL(MakeConnect(int,QString,int,int)),this,SLOT(SendConnection(int,QString,int,int)));
+  controller_dialog=new ControllerDialog(sim);
+  connect(controller_dialog,SIGNAL(SendControllerSetting(int,string,string)),this,SLOT(SendControllerSetting(int,string,string)));
+  connect(controller_dialog,SIGNAL(ControllerCommand(int,string,string)),this,SLOT(SendControllerCommand(int,string,string)));
+  connect(controller_dialog,SIGNAL(MakeConnect(int,QString,int,int)),this,SLOT(SendConnection(int,QString,int,int)));
 
   UpdateGUI();
 
@@ -52,9 +46,9 @@ QSimTestGUI::QSimTestGUI(GenericBackendBase *_backend, RobotWorld *_world) :
 				    "{type:key_down,key:\" \"}","command_pose","",
 				    "{type:key_down,key:v}","save_view","view.txt",
 				    "{type:key_down,key:V}","load_view","view.txt",
-				    "{type:button_press,button:simulate}","toggle_simulate","",
+				    "{type:button_toggle,button:simulate,checked:_0}","toggle_simulate","",
 				    "{type:button_press,button:reset}","reset","",
-                    "{type:button_press,button:set_milestone}","command_pose","",
+				    "{type:button_press,button:set_milestone}","command_pose","",
 				    "{type:widget_value,widget:link,value:_0}","set_link","_0",
 				    "{type:widget_value,widget:link_value,value:_0}","set_link_value","_0",
 				    "{type:widget_value,widget:driver,value:_0}","set_driver","_0",
@@ -70,17 +64,33 @@ QSimTestGUI::QSimTestGUI(GenericBackendBase *_backend, RobotWorld *_world) :
   constrain_mode = delete_mode = constrain_point_mode= 0;
 }
 
+bool QSimTestGUI::OnCommand(const string& cmd,const string& args)
+{
+  if(cmd=="update_config"){
+    UpdateGUI();
+    return true;
+  }
+  else if(cmd=="update_sim_time"){
+    double time;
+    if(LexicalCast<double>(args,time)) {
+      display->MovieUpdate(time);
+    }
+    return true;
+  }
+  else
+    return QtGUIBase::OnCommand(cmd,args);
+}
+
+bool QSimTestGUI::OnRefresh()
+{
+  display->updateGL();
+  return true;
+}
+
 QSimTestGUI::~QSimTestGUI(){
     delete log_options;
     delete driver_tool;
-}
-
-bool QSimTestGUI::OnCommand(const string &cmd, const string &args){
-    if(cmd=="update_sim_time"){
-        double time;
-        return true;
-    }
-    else return QtGUIBase::OnCommand(cmd,args);
+    delete controller_dialog;
 }
 
 void QSimTestGUI::UpdateGUI(){
@@ -170,13 +180,13 @@ void QSimTestGUI::SaveLastScenario(){
         SaveScenario(old_filename);
 }
 
-void QSimTestGUI::SendControllerSetting(string setting, string value){
-    bool res = sim->robotControllers[0]->SetSetting(setting,value);
+void QSimTestGUI::SendControllerSetting(int robot,string setting, string value){
+    bool res = sim->robotControllers[robot]->SetSetting(setting,value);
     if(!res) printf("Failed to set setting %s\n",setting.c_str());
 }
 
-void QSimTestGUI::SendControllerCommand(string setting,string value){
-    bool res = sim->robotControllers[0]->SendCommand(setting,value);
+void QSimTestGUI::SendControllerCommand(int robot,string setting,string value){
+    bool res = sim->robotControllers[robot]->SendCommand(setting,value);
     if(!res) printf("Failed to send command %s\n",setting.c_str());
 }
 
@@ -205,8 +215,9 @@ void QSimTestGUI::ShowHelp(){
 //should be made more informative
 void QSimTestGUI::ShowAbout(){
     QMessageBox *about = new QMessageBox();
-    QString text = "Klamp't\n"
-            "A robot simulation, planning, and control package from Indiana University";
+    QString text = "SimTest\n"
+      "The main simulation GUI in Klamp't\n"
+      "Authors: Jordan Trittel, Kris Hauser";
     about->setText(text);
     about->show();
 }
