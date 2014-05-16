@@ -1,23 +1,15 @@
 #include "qtguibase.h"
 #include "QSettings"
 
-QtGUIBase::QtGUIBase(GenericBackendBase *_backend, RobotWorld *_world) :
-    world(_world),GenericGUIBase(_backend)
+QtGUIBase::QtGUIBase(GenericBackendBase *_backend) :
+    GenericGUIBase(_backend)
 {
-    idle_timer=new QTimer();
-    connect(idle_timer,SIGNAL(timeout()),this,SLOT(SendIdle()));
-    idle_timer->start(100);  //UpdateGUI();
+  //idle_timer=new QTimer();
+  //connect(idle_timer,SIGNAL(timeout()),this,SLOT(SendIdle()));
+  //idle_timer->start(0); 
 }
 
 QtGUIBase::~QtGUIBase(){
-}
-
-bool QtGUIBase::OnCommand(const string &cmd, const string &args){
-    if(cmd=="update_config"){
-        UpdateGUI();
-        return true;
-    }
-    else return GenericGUIBase::OnCommand(cmd,args);
 }
 
 void QtGUIBase::SendMouseMove(QMouseEvent *e){
@@ -67,7 +59,7 @@ void QtGUIBase::SendKeyUp(QKeyEvent *e){
 }
 
 void QtGUIBase::SendIdle(){
-    GenericGUIBase::SendIdle();
+  GenericGUIBase::SendIdle();
 }
 
 void QtGUIBase::ShowHelp(){

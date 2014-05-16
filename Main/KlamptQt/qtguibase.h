@@ -15,14 +15,11 @@ class QtGUIBase : public QObject,public GenericGUIBase
     Q_OBJECT
 
 public:
-    RobotWorld *world;
     QTimer* idle_timer;
-    QtGUIBase(GenericBackendBase* _backend,RobotWorld* _world);
-    bool OnCommand(const string &cmd, const string &args);
+    QtGUIBase(GenericBackendBase* _backend);
     ~QtGUIBase();
     void ShowHelp();
     void ShowAbout();
-    virtual void UpdateGUI(){}
 public slots:
     void SendMouseMove(QMouseEvent *e);
     void SendMouseWheel(QWheelEvent *e);
@@ -33,6 +30,7 @@ public slots:
     void SendIdle();
 
 signals:
+
 };
 
 #endif // QTGUIBASE_H
