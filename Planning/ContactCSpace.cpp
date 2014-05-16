@@ -2,22 +2,26 @@
 #include <robotics/IKFunctions.h>
 #include <robotics/JointStructure.h>
 #include <math3d/random.h>
+#include <Timer.h>
 
 #define TEST_NO_JOINT_LIMITS 0
-
+#define DO_TIMING 1
 
 
 ContactCSpace::ContactCSpace(RobotWorld& world,int index,
 			     WorldPlannerSettings* settings)
-  :SingleRobotCSpace2(world,index,settings)
+  :SingleRobotCSpace2(world,index,settings),
+   numSolveContact(0),numIsFeasible(0),solveContactTime(0),isFeasibleTime(0)
 {}
 
 ContactCSpace::ContactCSpace(const SingleRobotCSpace& space)
-  :SingleRobotCSpace2(space)
+  :SingleRobotCSpace2(space),
+   numSolveContact(0),numIsFeasible(0),solveContactTime(0),isFeasibleTime(0)
 {}
 
 ContactCSpace::ContactCSpace(const ContactCSpace& space)
-  :SingleRobotCSpace2(space),contactIK(space.contactIK)
+  :SingleRobotCSpace2(space),contactIK(space.contactIK),
+   numSolveContact(0),numIsFeasible(0),solveContactTime(0),isFeasibleTime(0)
 {}
 
 void ContactCSpace::Sample(Config& x)
@@ -73,12 +77,29 @@ void ContactCSpace::SampleNeighborhood(const Config& c,Real r,Config& x)
 
 bool ContactCSpace::IsFeasible(const Config& q)
 {
+  numIsFeasible++;
+#if DO_TIMING
+  Timer timer;
+#endif // DO_TIMING
+
   GetRobot()->UpdateConfig(q);
   if(!CheckContact()) {
     printf("ContactCSpace:: Configuration fails distance check: %g > %g\n",ContactDistance(),settings->robotSettings[index].contactEpsilon*1.1);
+#if DO_TIMING
+    isFeasibleTime += timer.ElapsedTime();
+#endif //DO_TIMING
     return false;
   }
-  return SingleRobotCSpace2::IsFeasible(q);
+  bool res = SingleRobotCSpace2::IsFeasible(q);
+#if DO_TIMING
+    isFeasibleTime += timer.ElapsedTime();
+#endif //DO_TIMING
+    return res;
+}
+
+EdgePlanner* ContactCSpace::LocalPlanner(const Config& a,const Config& b)
+{
+  return new BisectionEpsilonEdgePlanner(this,a,b,settings->robotSettings[index].collisionEpsilon);
 }
 
 void ContactCSpace::Interpolate(const Config& x,const Config& y,Real u,Config& out)
@@ -133,6 +154,14 @@ void ContactCSpace::RemoveContact(int link)
     }
 }
 
+
+Real ContactCSpace::ContactDistance(const Config& q)
+{
+  GetRobot()->UpdateConfig(q);
+  return ContactDistance();
+}
+
+
 Real ContactCSpace::ContactDistance()
 {
   Real emax=0;
@@ -140,6 +169,12 @@ Real ContactCSpace::ContactDistance()
     emax = Max(emax,RobotIKError(*GetRobot(),contactIK[i]));
   }
   return emax;
+}
+
+bool ContactCSpace::CheckContact(const Config& q,Real dist)
+{
+  GetRobot()->UpdateConfig(q);
+  return CheckContact(dist);
 }
 
 bool ContactCSpace::CheckContact(Real dist)
@@ -150,6 +185,10 @@ bool ContactCSpace::CheckContact(Real dist)
 
 bool ContactCSpace::SolveContact(int numIters,Real dist)
 {
+  numSolveContact++;
+#if DO_TIMING
+  Timer timer;
+#endif // DO_TIMING
   if(dist==0) dist = settings->robotSettings[index].contactEpsilon*0.9;
   if(numIters==0) numIters = settings->robotSettings[index].contactIKMaxIters;
   Robot* robot=GetRobot();
@@ -179,26 +218,30 @@ bool ContactCSpace::SolveContact(int numIters,Real dist)
 #endif //TEST_NO_JOINT_LIMITS
 
   solver.solver.verbose = 0;
-  if(solver.Solve(dist,numIters)) {
-    return true;
-  }
-  return false;
+  bool res = solver.Solve(dist,numIters);
+#if DO_TIMING
+  solveContactTime += timer.ElapsedTime();
+#endif // DO_TIMING
+  return res;
 }
   
 
 
 MultiContactCSpace::MultiContactCSpace(RobotWorld& world,WorldPlannerSettings* settings)
-  :MultiRobotCSpace(world,settings)
+  :MultiRobotCSpace(world,settings),
+   numSolveContact(0),numIsFeasible(0),solveContactTime(0),isFeasibleTime(0)
 {}
 
 MultiContactCSpace::MultiContactCSpace(const MultiRobotCSpace& space)
-  :MultiRobotCSpace(space)
+  :MultiRobotCSpace(space),
+   numSolveContact(0),numIsFeasible(0),solveContactTime(0),isFeasibleTime(0)
 {}
 
 MultiContactCSpace::MultiContactCSpace(const MultiContactCSpace& space)
   :MultiRobotCSpace(space),
    contactPairs(space.contactPairs),
-   aggregateRobot(space.aggregateRobot),closedChainConstraints(space.closedChainConstraints)
+   aggregateRobot(space.aggregateRobot),closedChainConstraints(space.closedChainConstraints),
+   numSolveContact(0),numIsFeasible(0),solveContactTime(0),isFeasibleTime(0)
 {}
 
 void MultiContactCSpace::InitContactPairs(const vector<ContactPair>& pairs)
@@ -315,6 +358,7 @@ void MultiContactCSpace::SampleNeighborhood(const Config& c,Real r,Config& x)
 
 bool MultiContactCSpace::IsFeasible(const Config& x)
 {
+  numIsFeasible++;
   if(!CheckContact(x)) return false;
 
   vector<Config> elementConfigs;
@@ -329,6 +373,8 @@ bool MultiContactCSpace::IsFeasible(const Config& x)
 
 bool MultiContactCSpace::SolveContact(Config& x,int numIters,Real tol)
 {
+  numSolveContact++;
+  Timer timer;
   if(tol==0) tol = settings->robotSettings[0].contactEpsilon*0.9;
   if(numIters==0) numIters = settings->robotSettings[0].contactIKMaxIters;
   aggregateRobot.UpdateConfig(x);
@@ -348,17 +394,22 @@ bool MultiContactCSpace::SolveContact(Config& x,int numIters,Real tol)
 #endif //TEST_NO_JOINT_LIMITS
 
   solver.solver.verbose = 0;
-  if(solver.Solve(tol,numIters)) {
-    x = aggregateRobot.q;
-    return true;
-  }
+  bool res = solver.Solve(tol,numIters);
   x = aggregateRobot.q;
-  return false;  
+#if DO_TIMING
+  solveContactTime += timer.ElapsedTime();
+#endif // DO_TIMING
+  return res;  
 }
 
 Real MultiContactCSpace::ContactDistance(const Config& x)
 {
   aggregateRobot.UpdateConfig(x);
+  return ContactDistance();
+}
+
+Real MultiContactCSpace::ContactDistance()
+{
   Real emax=0;
   for(size_t i=0;i<closedChainConstraints.size();i++) {
     const IKGoal& g=closedChainConstraints[i];
@@ -372,6 +423,13 @@ bool MultiContactCSpace::CheckContact(const Config& x,Real dist)
   if(dist==0) dist = settings->robotSettings[0].contactEpsilon;
   return ContactDistance(x) <= dist;
 }
+
+bool MultiContactCSpace::CheckContact(Real dist)
+{
+  if(dist==0) dist = settings->robotSettings[0].contactEpsilon;
+  return ContactDistance() <= dist;
+}
+
 
 
 void MultiContactCSpace::Interpolate(const Config& x,const Config& y,Real u,Config& out)

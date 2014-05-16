@@ -201,7 +201,7 @@ void RobotGeodesicManifold::InterpolateDerivB(const Config& a,const Config& b,Re
 { 
   dx.mul(db,u);
   for(size_t i=0;i<robot.joints.size();i++) {
-    int k=robot.joints[i].linkIndex;
+    //int k=robot.joints[i].linkIndex;
     if(robot.joints[i].type == RobotJoint::Floating) {
       vector<int> indices;
       robot.GetJointIndices(i,indices);
@@ -481,7 +481,8 @@ bool SingleRobotCSpace::CheckJointLimits(const Config& x)
   robot->UpdateConfig(x);
   for(size_t i=0;i<robot->joints.size();i++) {
     if(robot->joints[i].type == RobotJoint::Normal || robot->joints[i].type == RobotJoint::Weld) {
-      if(x(i) < robot->qMin(i) || x(i) > robot->qMax(i)) {
+      int k=robot->joints[i].linkIndex;
+      if(x(k) < robot->qMin(k) || x(k) > robot->qMax(k)) {
 	//printf("Joint %d value %g out of bounds [%g,%g]\n",i,x(i),robot->qMin(i),robot->qMax(i));
 	return false;
       }
@@ -514,12 +515,11 @@ void SingleRobotCSpace::Sample(Config& x)
   for(size_t i=0;i<robot->joints.size();i++) {
     if(robot->joints[i].type == RobotJoint::Normal) {
       int k=robot->joints[i].linkIndex;
-      if(robot->links[k].type == RobotLink3D::Revolute && robot->qMax(k) > robot->qMin(k) + TwoPi) {
-	x(k) = Rand(0,TwoPi);
-      }
-      else {
-	x(k) = Rand(robot->qMin(k),robot->qMax(k));
-      }
+      x(k) = Rand(robot->qMin(k),robot->qMax(k));
+    }
+    else if(robot->joints[i].type == RobotJoint::Spin) {
+      int k=robot->joints[i].linkIndex;
+      x(k) = Rand(0,TwoPi);
     }
     else if(robot->joints[i].type == RobotJoint::Floating) {
       //generate a floating base
@@ -588,15 +588,16 @@ void SingleRobotCSpace::SampleNeighborhood(const Config& c,Real r,Config& x)
 int SingleRobotCSpace::NumObstacles()
 {
   if(!collisionPairsInitialized) InitializeCollisionPairs();
-  return GetRobot()->links.size()+collisionPairs.size();
+  return GetRobot()->joints.size()+collisionPairs.size();
 }
 
 string SingleRobotCSpace::ObstacleName(int obstacle)
 {
   Robot* robot=GetRobot();
-  if(obstacle < (int)robot->links.size()) {
+  if(obstacle < (int)robot->joints.size()) {
     stringstream ss;
-    ss<<"joint_limit["<<robot->LinkName(obstacle)<<"]";
+    int link = robot->joints[obstacle].linkIndex;
+    ss<<"joint_limit["<<robot->LinkName(link)<<"]";
     return ss.str();
   }
   if(!collisionPairsInitialized) InitializeCollisionPairs();
@@ -610,9 +611,10 @@ string SingleRobotCSpace::ObstacleName(int obstacle)
 bool SingleRobotCSpace::IsFeasible(const Config& x,int constraint)
 {
   Robot* robot=GetRobot();
-  if(constraint < (int)robot->links.size()) {
-    if(robot->joints[constraint].type == RobotJoint::Normal) {
-      if(x(constraint) < robot->qMin(constraint) || x(constraint) > robot->qMax(constraint))
+  if(constraint < (int)robot->joints.size()) {
+    if(robot->joints[constraint].type == RobotJoint::Normal  || robot->joints[constraint].type == RobotJoint::Weld) {
+      int k=robot->joints[constraint].linkIndex;
+      if(x(k) < robot->qMin(k) || x(k) > robot->qMax(k))
 	return false;
     }
     return true;
@@ -626,7 +628,7 @@ bool SingleRobotCSpace::IsFeasible(const Config& x,int constraint)
   }
   */
 
-  constraint -= robot->links.size();
+  constraint -= robot->joints.size();
   robot->UpdateConfig(x);
   robot->UpdateGeometry();
 
@@ -650,8 +652,9 @@ bool SingleRobotCSpace::CheckCollisionFree()
 {
   Robot* robot = GetRobot();
   robot->UpdateGeometry();
-  
+
   if(!collisionPairsInitialized) InitializeCollisionPairs();
+
   for(size_t i=0;i<collisionQueries.size();i++)
     if(collisionQueries[i].Collide()) return false;
   return true;
@@ -664,14 +667,16 @@ void SingleRobotCSpace::CheckObstacles(const Config& x,vector<bool>& infeasible)
   robot->UpdateConfig(x);
   for(size_t i=0;i<robot->joints.size();i++) {
     if(robot->joints[i].type == RobotJoint::Normal || robot->joints[i].type == RobotJoint::Weld) {
-      infeasible[i] = (x(i) < robot->qMin(i) || x(i) > robot->qMax(i));
+      int k=robot->joints[i].linkIndex;
+      infeasible[i] = (x(k) < robot->qMin(k) || x(k) > robot->qMax(k));
     }
   }
   for(size_t i=0;i<robot->drivers.size();i++) {
     Real v=robot->GetDriverValue(i);
     if(v < robot->drivers[i].qmin || v > robot->drivers[i].qmax) {
       //TODO: what about driver violations
-      infeasible[i] = true;
+      //fprintf(stderr,"Warning, driver %d violation...\n");
+      //infeasible[i] = true;
     }
   }
 
@@ -679,14 +684,14 @@ void SingleRobotCSpace::CheckObstacles(const Config& x,vector<bool>& infeasible)
   robot->UpdateGeometry();
 
   if(!collisionPairsInitialized) InitializeCollisionPairs();
-  for(size_t i=0;i<collisionQueries.size();i++)
+  for(size_t i=0;i<collisionQueries.size();i++) 
     infeasible[i+(int)robot->joints.size()]=collisionQueries[i].Collide();
 }
 
 
 EdgePlanner* SingleRobotCSpace::LocalPlanner(const Config& a,const Config& b,int obstacle)
 {
-  if(obstacle < (int)GetRobot()->links.size()) {
+  if(obstacle < (int)GetRobot()->joints.size()) {
     return new TrueEdgePlanner(this,a,b);
   }
   SingleObstacleCSpace* ospace = new SingleObstacleCSpace(this,obstacle);
@@ -813,8 +818,14 @@ void SingleRobotCSpace::GetJointLimits(Vector& bmin,Vector& bmax)
   bmax.resize(robot->links.size(),Inf);
   for(size_t i=0;i<robot->links.size();i++) {
     if(robot->joints[i].type == RobotJoint::Normal) {
-      bmin(i) = robot->qMin(i);
-      bmax(i) = robot->qMax(i);
+      int k=robot->joints[i].linkIndex;
+      bmin(k) = robot->qMin(k);
+      bmax(k) = robot->qMax(k);
+    }
+    else if(robot->joints[i].type == RobotJoint::Spin) {
+      int k=robot->joints[i].linkIndex;
+      bmin(k) = 0;
+      bmax(k) = TwoPi;
     }
   }
   /* TODO: driver limits
@@ -835,7 +846,7 @@ Real SingleRobotCSpace::FreeWorkspaceBound(const Config& x,int constraint)
   
   if(!collisionPairsInitialized) InitializeCollisionPairs();
 
-  constraint -= robot->links.size();
+  constraint -= robot->joints.size();
   Assert(constraint >= 0 && constraint < (int)collisionPairs.size());
   return collisionQueries[constraint].Distance(0.0,0.0);
 }
@@ -845,7 +856,7 @@ Real SingleRobotCSpace::WorkspaceMovementBound(const Config& x,const Vector& dx,
   Robot* robot=GetRobot();
 
   if(!collisionPairsInitialized) InitializeCollisionPairs();
-  constraint -= robot->links.size();
+  constraint -= robot->joints.size();
   Assert(constraint >= 0 && constraint < (int)collisionPairs.size());
 
   int link=world.IsRobotLink(collisionPairs[constraint].first).second;
