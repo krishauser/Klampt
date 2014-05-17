@@ -1,16 +1,16 @@
 #include "connectserial.h"
 #include "ui_connectserial.h"
+#include "Modeling/World.h"
 
 #include <QDialogButtonBox>
 #include <QPushButton>
 
-ConnectSerial::ConnectSerial(int robots,QWidget *parent) :
+ConnectSerial::ConnectSerial(RobotWorld* world,QWidget *parent) :
     QDialog(parent),
     ui(new Ui::ConnectSerial)
 {
     ui->setupUi(this);
-    SetNumRobots(robots);
-    OnTextEdit();
+    SetNumRobots(world);
 }
 
 ConnectSerial::~ConnectSerial()
@@ -20,18 +20,15 @@ ConnectSerial::~ConnectSerial()
 
 void ConnectSerial::accept()
 {
-    emit MakeConnect(ui->cmb_robot->itemData(ui->cmb_robot->currentIndex()).Int,
-                     ui->line_host->text(),ui->spn_port->value(),ui->spn_rate->value());
+    emit MakeConnect(ui->cmb_robot->itemData(ui->cmb_robot->currentIndex()).toInt(),
+                     QString("localhost"),ui->spn_port->value(),ui->spn_rate->value());
     QDialog::accepted();
 }
 
-void ConnectSerial::SetNumRobots(int n){
+void ConnectSerial::SetNumRobots(RobotWorld* world){
    ui->cmb_robot->clear();
-   for(int i=0;i<n;i++){
-       ui->cmb_robot->addItem(QString::number(i),i);
+   if(world==NULL) return;
+   for(size_t i=0;i<world->robots.size();i++){
+     ui->cmb_robot->addItem(QString(world->robots[i].name.c_str()),i);
    }
-}
-
-void ConnectSerial::OnTextEdit(){
-    ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(!ui->line_host->text().isEmpty());
 }

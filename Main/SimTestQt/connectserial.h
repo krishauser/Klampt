@@ -7,16 +7,17 @@ namespace Ui {
 class ConnectSerial;
 }
 
+class RobotWorld;
+
 class ConnectSerial : public QDialog
 {
     Q_OBJECT
     
 public:
-    explicit ConnectSerial(int robots = 0, QWidget *parent = 0);
+    explicit ConnectSerial(RobotWorld* world=NULL, QWidget *parent = 0);
     ~ConnectSerial();
-    void SetNumRobots(int n);
+    void SetNumRobots(RobotWorld* world);
 public slots:
-    void OnTextEdit();
     void accept();
 signals:
     void MakeConnect(int,QString,int,int);

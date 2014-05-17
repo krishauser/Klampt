@@ -175,6 +175,195 @@ bool MultiPathResource::Save(TiXmlElement* out)
   return path.Save(out);
 }
 
+void Convert(const IKGoal& g,AnyCollection& c)
+{
+  c["link"]=g.link;
+  if(g.destLink >= 0)
+    c["destLink"]=g.destLink;
+  switch(g.posConstraint) {
+  case IKGoal::PosNone:
+    break;
+  case IKGoal::PosPlanar:
+    c["posConstraint"] = string("planar");
+    c["localPosition"] = g.localPosition;
+    c["endPosition"] = g.endPosition;
+    c["direction"] = g.direction;
+    break;
+  case IKGoal::PosLinear:
+    c["posConstraint"] = string("linear");
+    c["localPosition"] = g.localPosition;
+    c["endPosition"] = g.endPosition;
+    c["direction"] = g.direction;
+    break;
+  case IKGoal::PosFixed:
+    c["posConstraint"] = string("fixed");
+    c["localPosition"] = g.localPosition;
+    c["endPosition"] = g.endPosition;
+    break;
+  default:
+    break;
+  }
+  switch(g.rotConstraint) {
+  case IKGoal::RotNone:
+    break;
+  case IKGoal::RotTwoAxis:
+    c["posConstraint"] = string("twoaxis");
+    c["localAxis"] = g.localAxis;
+    c["endRotation"] = g.endRotation;
+    break;
+  case IKGoal::RotAxis:
+    c["posConstraint"] = string("axis");
+    c["localAxis"] = g.localAxis;
+    c["endRotation"] = g.endRotation;
+    break;
+  case IKGoal::RotFixed:
+    c["posConstraint"] = string("fixed");
+    c["endRotation"] = g.endRotation;
+    break;
+  }
+
+}
+void Convert(const Hold& h,AnyCollection& c)
+{
+  Convert(h.ikConstraint,c["ik"]);
+  c["contacts"].resize(h.contacts.size());
+  for(size_t i=0;i<h.contacts.size();i++) {
+    c["contacts"][(int)i]["x"] = h.contacts[i].x;
+    c["contacts"][(int)i]["n"] = h.contacts[i].n;
+    c["contacts"][(int)i]["kFriction"] = h.contacts[i].kFriction;
+  }
+}
+
+void Convert(const Grasp& g,AnyCollection& c)
+{
+  c["objectIndex"] = g.objectIndex;
+  c["robotIndex"] = g.robotIndex;
+  c["constraints"].resize(g.constraints.size());
+  for(size_t i=0;i<g.constraints.size();i++)
+    Convert(g.constraints[i],c["constraints"][(int)i]);
+  c["fixedValues"] = g.fixedValues;
+  c["fixedDofs"] = g.fixedDofs;
+  c["contacts"].resize(g.contacts.size());
+  for(size_t i=0;i<g.contacts.size();i++) {
+    c["contacts"][(int)i]["x"] = g.contacts[i].x;
+    c["contacts"][(int)i]["n"] = g.contacts[i].n;
+    c["contacts"][(int)i]["kFriction"] = g.contacts[i].kFriction;
+  }
+  c["contactLinks"] = g.contactLinks;
+  c["forces"].resize(g.forces.size());
+  for(size_t i=0;i<g.forces.size();i++)
+    c["forces"] = g.forces[i];
+}
+
+bool Convert(const AnyCollection& c,IKGoal& g)
+{
+  if(!c["link"].as(g.link)) return false;
+  if(!c["destLink"].as(g.destLink))
+    g.destLink = -1;
+  string s;
+  if(!c["posConstraint"].as(s))
+    g.SetFreePosition();
+  else {
+    if(s == "fixed") 
+      g.posConstraint = IKGoal::PosFixed;
+    else if(s == "planar")
+      g.posConstraint = IKGoal::PosPlanar; 
+    else if(s=="linear") 
+      g.posConstraint = IKGoal::PosLinear;
+    else {
+      fprintf(stderr,"AnyCollection to IKGoal: Invalid posConstraint type %s\n",s.c_str());
+      return false;
+    }
+    if(s == "fixed" || s == "planar" || s=="linear") {
+      if(!c["endPosition"].as(g.endPosition)) return false;
+      if(!c["localPosition"].as(g.localPosition)) return false;
+    }
+    if(s == "planar" || s=="linear") {
+      if(!c["direction"].as(g.direction)) return false;
+    }
+  }
+  if(!c["rotConstraint"].as(s))
+    g.SetFreeRotation();
+  else {
+    if(s == "fixed") 
+      g.rotConstraint = IKGoal::RotFixed;
+    else if(s == "axis")
+      g.rotConstraint = IKGoal::RotAxis;
+    else if(s=="twoaxis") 
+      g.rotConstraint = IKGoal::RotTwoAxis;
+    else {
+      fprintf(stderr,"AnyCollection to IKGoal: Invalid rotConstraint type %s\n",s.c_str());
+      return false;
+    }
+    if(s == "fixed" || s == "axis" || s=="twoaxis") {
+      if(!c["endRotation"].as(g.endRotation)) return false;
+    }
+    if(s == "axis" || s=="twoaxis") {
+      if(!c["localAxis"].as(g.localAxis)) return false;
+    }
+  }
+  return true;
+}
+
+bool Convert(const AnyCollection& c,Hold& h)
+{
+  if(!Convert(c["ik"],h.ikConstraint)) return false;
+  h.contacts.resize(c["contacts"].size());
+  for(size_t i=0;i<h.contacts.size();i++) {
+    if(!c["contacts"][(int)i]["x"].as(h.contacts[i].x)) return false;
+    if(!c["contacts"][(int)i]["n"].as(h.contacts[i].n)) return false;
+    if(!c["contacts"][(int)i]["kFriction"].as(h.contacts[i].kFriction)) return false;
+  }
+  return true;
+}
+
+
+bool Convert(const AnyCollection& c,Grasp& g)
+{
+  g.objectIndex = c["objectIndex"];
+  g.robotIndex = c["robotIndex"];
+  g.constraints.resize(c["constraints"].size());
+  for(size_t i=0;i<g.constraints.size();i++)
+    Convert(c["constraints"][(int)i],g.constraints[i]);
+  if(!c["fixedValues"].asvector(g.fixedValues)) return false;
+  if(!c["fixedDofs"].asvector(g.fixedDofs)) return false;
+  g.contacts.resize(c["contacts"].size());
+  for(size_t i=0;i<g.contacts.size();i++) {
+    g.contacts[i].x = c["contacts"][(int)i]["x"];
+    g.contacts[i].n = c["contacts"][(int)i]["n"];
+    g.contacts[i].kFriction = c["contacts"][(int)i]["kFriction"];
+  }
+  if(!c["contactLinks"].asvector(g.contactLinks)) return false;
+  g.forces.resize(c["forces"].size());
+  for(size_t i=0;i<g.forces.size();i++)
+    g.forces[i] = c["forces"];
+  return true;
+}
+
+
+bool IKGoalResource::Load(AnyCollection& c)
+{
+  return Convert(c,data);
+}
+
+bool IKGoalResource::Save(AnyCollection& c)
+{
+  Convert(data,c);
+  return true;
+}
+
+
+bool HoldResource::Load(AnyCollection& c)
+{
+  return Convert(c,data);
+}
+
+bool HoldResource::Save(AnyCollection& c)
+{
+  Convert(data,c);
+  return true;
+}
+
 StanceResource::StanceResource(const Stance& val)
   :stance(val)
 {}
@@ -225,6 +414,33 @@ bool StanceResource::Save(TiXmlElement* out)
   return true;
 }
 
+bool StanceResource::Load(AnyCollection& c)
+{
+  vector<SmartPointer<AnyCollection> > holds;
+  stance.clear();
+  c["holds"].enumerate(holds);
+  for(size_t i=0;i<holds.size();i++) {
+    HoldResource h;
+    if(!h.Load(*holds[i])) {
+      fprintf(stderr,"StanceResource: Error reading hold %d\n",i);
+      return false;
+    }
+    stance.insert(h.data);
+  }
+  return true;
+}
+
+bool StanceResource::Save(AnyCollection& c)
+{
+  c["holds"].resize(stance.size());
+  int k=0;
+  for(Stance::const_iterator i=stance.begin();i!=stance.end();i++,k++) {
+    HoldResource h(i->second);
+    if(!h.Save(c["holds"][k])) return false;
+  }
+  return true;
+}
+
 
 
 GraspResource::GraspResource(const Grasp& val)
@@ -240,6 +456,17 @@ bool GraspResource::Load(TiXmlElement* in)
 bool GraspResource::Save(TiXmlElement* out)
 {
   return grasp.Save(out);
+}
+
+bool GraspResource::Load(AnyCollection& c)
+{
+  return Convert(c,grasp);
+}
+
+bool GraspResource::Save(AnyCollection& c)
+{
+  Convert(grasp,c);
+  return true;
 }
 
 

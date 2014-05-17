@@ -8,6 +8,8 @@
 #include <math/LDL.h>
 #include <optimization/Minimization.h>
 #include <utils/AnyCollection.h>
+#include <utils/stringutils.h>
+#include <string.h>
 #include <fstream>
 #include <Timer.h>
 using namespace std;
@@ -901,25 +903,43 @@ string motorcalibrate(AnyCollection settings){
 
   RunCalibrationInd(problem,numIters);
   stringstream ret_stream;
-  ret_stream<<"servoP ";
-  for(size_t i=0;i<robot.drivers.size();i++)
-    ret_stream<<robot.drivers[i].servoP<<" ";
-  ret_stream<<"\n";
-  ret_stream<<"servoI ";
-  for(size_t i=0;i<robot.drivers.size();i++)
-    ret_stream<<robot.drivers[i].servoI<<" ";
-  ret_stream<<"\n";
-  ret_stream<<"servoD ";
-  for(size_t i=0;i<robot.drivers.size();i++)
-    ret_stream<<robot.drivers[i].servoD<<" ";
-  ret_stream<<"\n";
-  ret_stream<<"dryFriction ";
-  for(size_t i=0;i<robot.drivers.size();i++)
-    ret_stream<<robot.drivers[i].dryFriction<<" ";
-  ret_stream<<"\n";
-  ret_stream<<"viscousFriction ";
-  for(size_t i=0;i<robot.drivers.size();i++)
-    ret_stream<<robot.drivers[i].viscousFriction<<" ";
+  bool asURDF = (0==strcmp(FileExtension(robotfn.c_str()),"urdf"));
+  if(asURDF) {
+    //write as <robot><klampt> children
+    for(size_t i=0;i<robot.drivers.size();i++) {
+      if(robot.drivers[i].type == RobotJointDriver::Normal) {
+	int link = robot.drivers[i].linkIndices[0];
+	ret_stream<<"<link name=\""<<robot.linkNames[link]<<"\" "<<
+	  "servoP="<<robot.drivers[i].servoP<<" "
+	  "servoI="<<robot.drivers[i].servoI<<" "
+	  "servoD="<<robot.drivers[i].servoD<<" "
+	  "dryFriction="<<robot.drivers[i].dryFriction<<" "
+	  "viscousFriction="<<robot.drivers[i].viscousFriction<<" />"<<endl;
+      }
+    }
+  }
+  else {
+    //write as .rob file children
+    ret_stream<<"servoP ";
+    for(size_t i=0;i<robot.drivers.size();i++)
+      ret_stream<<robot.drivers[i].servoP<<" ";
+    ret_stream<<"\n";
+    ret_stream<<"servoI ";
+    for(size_t i=0;i<robot.drivers.size();i++)
+      ret_stream<<robot.drivers[i].servoI<<" ";
+    ret_stream<<"\n";
+    ret_stream<<"servoD ";
+    for(size_t i=0;i<robot.drivers.size();i++)
+      ret_stream<<robot.drivers[i].servoD<<" ";
+    ret_stream<<"\n";
+    ret_stream<<"dryFriction ";
+    for(size_t i=0;i<robot.drivers.size();i++)
+      ret_stream<<robot.drivers[i].dryFriction<<" ";
+    ret_stream<<"\n";
+    ret_stream<<"viscousFriction ";
+    for(size_t i=0;i<robot.drivers.size();i++)
+      ret_stream<<robot.drivers[i].viscousFriction<<" ";
+  }
   string output=ret_stream.str();
   cout<<output;
   return output;
@@ -949,10 +969,11 @@ int main_shell(int argc,char** argv)
     settings.read(argv[i]);
 
   motorcalibrate(settings);
+  return 0;
 }
 
 #ifndef HAVE_QT
 int main(int argc,char** argv){
-  main_shell(argc,argv);
+  return main_shell(argc,argv);
 }
 #endif

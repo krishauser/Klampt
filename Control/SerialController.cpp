@@ -22,7 +22,6 @@ void SerialController::PackSensorData(AnyCollection& data) const
 void SerialController::Update(Real dt)
 {
   RobotController::Update(dt);
-#ifndef WIN32
   if(time >= lastWriteTime + 1.0/writeRate) {
     lastWriteTime += 1.0/writeRate;
     if(time >= lastWriteTime + 1.0/writeRate) {
@@ -94,7 +93,6 @@ void SerialController::Update(Real dt)
       return;
     }
   }
-#endif //WIN32
 }
 
 void SerialController::Reset()

@@ -1,7 +1,7 @@
 #ifndef CONTROLLED_ROBOT_H
 #define CONTROLLED_ROBOT_H
 
-#include "Control/Controller.h"
+#include "Controller.h"
 
 /** @brief An interface for a Klamp't controlled robot.  This should be
  * implemented if you wish to use Klamp't controllers to communicate directly

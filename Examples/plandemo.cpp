@@ -1,15 +1,25 @@
+//these two include files are needed for SimplePlan
 #include "Planning/RobotCSpace.h"
+  //defines WorldPlannerSettings and SingleRobotCSpace
+  //includes definitions for RobotWorld, Config
 #include <planning/AnyMotionPlanner.h>
-#include <utils/ioutils.h>
-#include "Modeling/MultiPath.h"
+  //defines MotionPlannerFactory
+  //includes MilestonePath, HaltingCondition
+
+//the following include files are used for IO and command line processing
 #include "IO/XmlWorld.h"
+  //defines XmlWorld for loading RobotWorlds from .xml files
+#include "Modeling/MultiPath.h"
+  //defines MultiPath for saving multi-section paths to MultiPath .xml files
+#include <utils/ioutils.h>
 #include <string.h>
 #include <fstream>
 
 /** @brief Performs basic path planning in collision-free space for the
  * given robot and start/end points.
- * The output is given in path.  At most cond.maxIters iterations are spent
- * planning.
+ * 
+ * The output is given in path.  At most cond.maxIters iterations and at
+ * most cond.timeLimit seconds are spent planning.
  *
  * The constraint specifications are given in WorldPlannerSettings. If you
  * have custom requirements, you will need to set them up.
@@ -17,11 +27,36 @@
 bool SimplePlan(RobotWorld& world,int robot,const Config& qstart,const Config& qgoal,MilestonePath& path,
 		const HaltingCondition& cond,const string& plannerSettings="")
 {
+  //1. Create and initialize a WorldPlannerSettings object for the given
+  //world. 
   WorldPlannerSettings settings;
   settings.InitializeDefault(world);
-  //do more constraint setup here (modifying the settings object) if desired,
-  //e.g., set collision margins, edge collision checking resolution, etc.
+  //Here you can modify the setting object to do more constraint setup
+  //if desired, e.g., which collisions are tested, edge collision checking
+  //resolution, etc.  See the Planning/PlannerSettings.h file for more
+  //information.
+  //
+  //If you wish to add extra collision avoidance margins, you may do so by
+  //adding margins onto the geometries in the world. For example, to avoid
+  //collisions by 0.05 units, you can use the following code:
+  //  Real margin = 0.05
+  //  for(size_t i=0;i<world.robots[robot].robot->geometries.size();i++)
+  //    world.robots[robot].robot->geometries[i].margin += margin;
+  //(make sure to restore the old margins if you want to perform multiple
+  // planning runs)
+
+  //2. Create a SingleRobotCSpace object for the indicated robot.
+  //
+  //If you want to plan only for certain degrees-of-freedom, you can
+  //use the SingleRobotCSpace2 class.  See its documentation in
+  //Planning/RobotCSpace.h
+  //
+  //If you wish to add custom kinematic constraints, you can subclass
+  //SingleRobotCSpace and override the IsFeasible method.
   SingleRobotCSpace cspace(world,robot,&settings); 
+
+  //3. Some sanity checks -- make sure the start and goal configurations
+  //are feasible.
   if(!cspace.IsFeasible(qstart)) {
     cout<<"Start configuration is infeasible, violated constraints:"<<endl;
     vector<bool> infeasible;
@@ -38,17 +73,20 @@ bool SimplePlan(RobotWorld& world,int robot,const Config& qstart,const Config& q
       if(infeasible[i]) cout<<"  "<<cspace.ObstacleName(i)<<endl;
     return false;
   }
-  //set up the motion planner settings
+
+  //4. Set up the motion planner settings from a given planner settings string
+  //(see Examples/PlanDemo/*.settings)
   MotionPlannerFactory factory;
   if(!plannerSettings.empty()) {
     bool res = factory.LoadJSON(plannerSettings);
     if(!res) 
       printf("Warning, incorrectly formatted planner settings file\n");
   }
-  //do more planner setup here if desired, e.g., change planner type,
-  //perturbation size, connection radius, etc
+  //You may also manually do more planner setup here if desired, e.g.,
+  //change planner type, perturbation size, connection radius, etc.
+  //See KrisLibrary/planning/AnyMotionPlanner.h
 
-  //create the planner and run until the termination criterion stops you
+  //5. Create the planner and run until the termination criterion stops it
   MotionPlannerInterface* planner = factory.Create(&cspace,qstart,qgoal);
   string res = planner->Plan(path,cond);
   cout<<"Planner terminated with condition "<<res<<endl;

@@ -8,7 +8,7 @@
 #include "Interface/SimTestGUI.h"
 #include "qrobottestgui.h"
 
-#include <collisionoutput.h>
+#include "collisionoutput.h"
 
 namespace Ui {
 class MainWindow;

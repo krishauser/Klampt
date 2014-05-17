@@ -3,7 +3,7 @@
 
 #include <stdio.h>
 #include <sstream>
-#include <printf.h>
+#include <stdlib.h>
 
 #include <QTimer>
 #include <QFrame>

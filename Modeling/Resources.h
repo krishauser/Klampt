@@ -2,6 +2,7 @@
 #define ROBOT_RESOURCES_H
 
 #include <utils/ResourceLibrary.h>
+#include <utils/AnyCollection.h>
 #include <math3d/geometry3d.h>
 #include "World.h"
 #include "MultiPath.h"
@@ -15,8 +16,6 @@ typedef BasicResource<Matrix3> Matrix3Resource;
 typedef BasicResource<Matrix> MatrixResource;
 typedef BasicResource<RigidTransform> RigidTransformResource;
 typedef BasicResource<GeometricPrimitive3D> GeometricPrimitive3DResource;
-typedef BasicResource<Hold> HoldResource;
-typedef BasicResource<IKGoal> IKGoalResource;
 typedef BasicResource<Meshing::TriMesh> TriMeshResource;
 typedef BasicResource<Camera::Viewport> ViewportResource;
 
@@ -26,9 +25,11 @@ class ConfigsResource : public ResourceBase
   virtual bool Load(istream& in);
   virtual bool Save(ostream& out);
   virtual bool Load(const std::string& fn) { return ResourceBase::Load(fn); }
-  virtual bool Load() { return ResourceBase::Load(); }
   virtual bool Save(const std::string& fn) { return ResourceBase::Save(fn); }
+  virtual bool Load() { return ResourceBase::Load(); }
   virtual bool Save() { return ResourceBase::Save(); }
+  virtual bool Save(AnyCollection& c) { c["configs"]=configs; return true; }
+  virtual bool Load(AnyCollection& c) { return c["configs"].asvector(configs); }
   virtual const char* Type() const { return "Configs"; }
   virtual ResourceBase* Make() { return new ConfigsResource; }
 
@@ -93,6 +94,8 @@ class LinearPathResource : public ResourceBase
   virtual bool Load() { return ResourceBase::Load(); }
   virtual bool Save(const std::string& fn) { return ResourceBase::Save(fn); }
   virtual bool Save() { return ResourceBase::Save(); }
+  virtual bool Save(AnyCollection& c) { c["times"]=times; c["milestones"]=milestones; return true; }
+  virtual bool Load(AnyCollection& c) { return c["times"].asvector(times) && c["milestones"].asvector(milestones); }
   virtual const char* Type() const { return "LinearPath"; }
   virtual ResourceBase* Make() { return new LinearPathResource; }
 
@@ -115,6 +118,26 @@ class MultiPathResource : public ResourceBase
   MultiPath path;
 };
 
+class IKGoalResource : public BasicResource<IKGoal> 
+{
+ public:
+  IKGoalResource() {}
+  IKGoalResource(const IKGoal& val) : BasicResource<IKGoal>(val) {}
+  IKGoalResource(const IKGoal& val,const std::string& name) : BasicResource<IKGoal>(val,name) {}
+  virtual bool Load(AnyCollection& c);
+  virtual bool Save(AnyCollection& c);
+};
+
+class HoldResource : public BasicResource<Hold> 
+{
+ public:
+  HoldResource() {}
+  HoldResource(const Hold& val) : BasicResource<Hold>(val) {}
+  HoldResource(const Hold& val,const std::string& name) : BasicResource<Hold>(val,name) {}
+  virtual bool Load(AnyCollection& c);
+  virtual bool Save(AnyCollection& c);
+};
+
 class StanceResource : public ResourceBase
 {
  public:
@@ -127,6 +150,8 @@ class StanceResource : public ResourceBase
   virtual bool Load() { return ResourceBase::Load(); }
   virtual bool Save() { return ResourceBase::Save(); }
   virtual bool Load(const std::string& fn) { return ResourceBase::Load(fn); }
+  virtual bool Load(AnyCollection& c);
+  virtual bool Save(AnyCollection& c);
   virtual const char* Type() const { return "Stance"; }
   virtual ResourceBase* Make() { return new StanceResource; }
 
@@ -142,12 +167,18 @@ class GraspResource : public ResourceBase
   virtual bool Save(TiXmlElement* out);
   virtual bool Load() { return ResourceBase::Load(); }
   virtual bool Save() { return ResourceBase::Save(); }
+  virtual bool Load(AnyCollection& c);
+  virtual bool Save(AnyCollection& c);
   virtual const char* Type() const { return "Grasp"; }
   virtual ResourceBase* Make() { return new GraspResource; }
 
   Grasp grasp;
 };
 
+void Convert(const IKGoal& g,AnyCollection& c);
+void Convert(const Hold& h,AnyCollection& c);
+bool Convert(const AnyCollection& c,IKGoal& g);
+bool Convert(const AnyCollection& c,Hold& h);
 
 /** @ingroup Modeling
  * @brief Initializes a ResourceLibrary so that it accepts standard RobotSim

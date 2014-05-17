@@ -4,7 +4,7 @@
 #include <QSettings>
 
 #include "mainwindow.h"
-#include "glut.h"
+#include <GL/glut.h>
 
 int main(int argc, char *argv[])
 {
