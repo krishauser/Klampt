@@ -41,6 +41,14 @@ void ResourceTracker::SetDirty(){
     }
 }
 
+bool ResourceTracker::Print(int level){
+    for(int i=0;i<level;i++)
+       printf("-");
+    BOOST_FOREACH(ResourceNode child,children)
+            child->Print();
+    printf("%s\n",Name());
+}
+
 ResourceNode ResourceManager::LoadResource(const string& fn){
   ResourcePtr r = library.LoadItem(fn);
   if(r==NULL) return NULL;
@@ -166,13 +174,20 @@ vector<ResourceNode> ResourceManager::ExpandSelected(){
     return ExtractSelectedChildren(types);
 }
 
-bool ResourceManager::DeleteNode(ResourceNode r){
+bool ResourceManager::DeleteNode(ResourceNode r,bool delete_reference){
     if(r==NULL) return false;
     itemsByName.erase(r->Name());
-    BOOST_FOREACH(ResourceNode child,r->children){
-      DeleteNode(child);
+    while(!r->children.empty()){
+        ResourceNode child = r->children.back();
+        r->children.pop_back();
+        DeleteNode(child,false);
     }
-    delete &(*r);
+    if(delete_reference){
+        if(r->parent != NULL){
+            vector<ResourceNode>::iterator index= std::remove(r->parent->children.begin(), r->parent->children.end(), r);
+            r->parent->children.erase(index, r->parent->children.end());
+        }
+    }
     return true;
 }
 
@@ -190,17 +205,7 @@ bool ResourceManager::DeleteSelected(){
   return true;
 }
 
-bool ResourceManager::Print(ResourceNode current,int level){
-  if(current == NULL){
-    BOOST_FOREACH(ResourceNode child,toplevel){
-      Print(child,0);
-    }
-  }
-  else{
-    for(int i=0;i<level;i++) cout<<"-";
-    cout<<current->Name()<<endl;
-    BOOST_FOREACH(ResourceNode child,current->children){
-      Print(child,level+1);
-    }
-  }
+bool ResourceManager::Print(){
+    BOOST_FOREACH(ResourceNode child,toplevel)
+      child->Print();
 }

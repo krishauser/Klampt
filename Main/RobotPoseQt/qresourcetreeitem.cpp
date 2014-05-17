@@ -10,7 +10,6 @@ QResourceTreeItem::QResourceTreeItem()
 //}
 
 QResourceTreeItem::QResourceTreeItem(ResourceNode rt){
-    resource=rt;
     name=rt->Name();
     setText(NAMECOL,QString::fromStdString(name));
     string type = rt->resource->Type();
@@ -30,11 +29,6 @@ void QResourceTreeItem::ToGUI()
 void QResourceTreeItem::FromGUI()
 {printf("virtual class");}
 
-void QResourceTreeItem::DeleteItem()
-{
-    printf("delete this?");
-    //if(parent.) delete this;
-}
 
 void QResourceTreeItem::addChild(ResourceNode r){
     QResourceTreeItem* exp=new QResourceTreeItem(r);

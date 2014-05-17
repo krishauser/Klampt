@@ -26,14 +26,14 @@
    <property name="horizontalSpacing">
     <number>20</number>
    </property>
-   <item row="4" column="1">
+   <item row="5" column="1">
     <widget class="QPushButton" name="btn_togui">
      <property name="text">
       <string>Display Item</string>
      </property>
     </widget>
    </item>
-   <item row="4" column="2">
+   <item row="5" column="2">
     <widget class="QPushButton" name="pushButton_3">
      <property name="text">
       <string>Advanced</string>
@@ -106,6 +106,20 @@
      </property>
     </widget>
    </item>
+   <item row="4" column="1">
+    <widget class="QPushButton" name="btn_discretize">
+     <property name="text">
+      <string>Discretize</string>
+     </property>
+    </widget>
+   </item>
+   <item row="4" column="2">
+    <widget class="QPushButton" name="btn_optimize">
+     <property name="text">
+      <string>Optimize</string>
+     </property>
+    </widget>
+   </item>
   </layout>
  </widget>
  <resources>
@@ -136,8 +150,8 @@
    <slot>PressedDelete()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>216</x>
-     <y>285</y>
+     <x>276</x>
+     <y>252</y>
     </hint>
     <hint type="destinationlabel">
      <x>15</x>
@@ -152,8 +166,8 @@
    <slot>PressedExpand()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>99</x>
-     <y>285</y>
+     <x>109</x>
+     <y>252</y>
     </hint>
     <hint type="destinationlabel">
      <x>26</x>
@@ -169,7 +183,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>276</x>
-     <y>252</y>
+     <y>219</y>
     </hint>
     <hint type="destinationlabel">
      <x>405</x>
@@ -216,8 +230,8 @@
    <slot>ReplaceFromGUI()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>250</x>
-     <y>313</y>
+     <x>276</x>
+     <y>285</y>
     </hint>
     <hint type="destinationlabel">
      <x>281</x>
@@ -248,12 +262,44 @@
    <slot>FromGUI(QString)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>121</x>
-     <y>308</y>
+     <x>130</x>
+     <y>285</y>
     </hint>
     <hint type="destinationlabel">
      <x>145</x>
      <y>321</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>btn_discretize</sender>
+   <signal>clicked()</signal>
+   <receiver>ResourceFrame</receiver>
+   <slot>DiscretizePath()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>111</x>
+     <y>305</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>140</x>
+     <y>296</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>btn_optimize</sender>
+   <signal>clicked()</signal>
+   <receiver>ResourceFrame</receiver>
+   <slot>OptimizePath()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>257</x>
+     <y>301</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>284</x>
+     <y>298</y>
     </hint>
    </hints>
   </connection>
@@ -267,5 +313,7 @@
   <slot>FromGUI(QString)</slot>
   <slot>ReplaceFromGUI()</slot>
   <slot>Launch()</slot>
+  <slot>DiscretizePath()</slot>
+  <slot>OptimizePath()</slot>
  </slots>
 </ui>

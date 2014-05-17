@@ -38,7 +38,8 @@ public slots:
     void ToGUI();
     void FromGUI(QString type);
     void SendPathTime(double t);
-
+    void DiscretizePath();
+    void OptimizePath();
 
 private:
     Ui::ResourceFrame *ui;
