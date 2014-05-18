@@ -2,6 +2,8 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8.4)
 PROJECT(SimTest)
 
+set (KRISLIBRARY_INCLUDE_DIR /home/jordan/Klampt/Library/KrisLibrary)
+
 #Building from within Main/[AppName] folder
 IF(NOT KLAMPT_ROOT)
   MESSAGE("No KLAMPT_ROOT set, using ../../")
@@ -15,6 +17,7 @@ ENDIF( )
 
 INCLUDE_DIRECTORIES(".")
 INCLUDE_DIRECTORIES("..")
+INCLUDE_DIRECTORIES("../KlamptQt")
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR})
 
 ##### Qt Specific stuff ####

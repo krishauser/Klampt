@@ -5,7 +5,6 @@
 #include <QKeyEvent>
 
 #include <Interface/SimTestGUI.h>
-//#include <GLdraw/GLScreenshotProgram.h>
 
 #include <GLScreenshotPlugin.h>
 
