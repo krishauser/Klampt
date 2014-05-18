@@ -21,7 +21,6 @@ public:
     int show_expand;
     string name;
 
-    ResourceNode resource;
     Math::VectorTemplate<double> *config;
 
     QString type;
@@ -34,7 +33,5 @@ public:
 public slots:
     virtual void ToGUI();
     virtual void FromGUI();
-    virtual void DeleteItem();
-
 };
 #endif // QRESOURCETREEITEM_H

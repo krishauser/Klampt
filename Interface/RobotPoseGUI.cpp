@@ -362,10 +362,15 @@ bool RobotPoseBackend::OnCommand(const string& cmd,const string& args)
     ResourcePtr r=ResourceGUIBackend::CurrentResource();
     const ConfigResource* rc = dynamic_cast<const ConfigResource*>((const ResourceBase*)r);
     if(rc) {
+      Vector q = robotWidgets[0].Pose();
+      q=rc->data;
+      robotWidgets[0].SetPose(q);
+      /*
       poseWidget.SetPose(rc->data);
       robot->NormalizeAngles(poseWidget.linkPoser.poseConfig);
       if(poseWidget.linkPoser.poseConfig != rc->data)
 	printf("Warning: config in library is not normalized\n");
+      */
       UpdateConfig();
     }
     else {

@@ -62,7 +62,7 @@
    <item row="0" column="0" colspan="3">
     <widget class="QLabel" name="lbl_name">
      <property name="text">
-      <string>Name</string>
+      <string/>
      </property>
      <property name="alignment">
       <set>Qt::AlignCenter</set>

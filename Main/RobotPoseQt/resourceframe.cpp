@@ -3,6 +3,7 @@
 
 #include <QSettings>
 #include <QCoreApplication>
+#include <QInputDialog>
 
 #include <boost/foreach.hpp>
 
@@ -54,10 +55,22 @@ void ResourceFrame::ChangeSelectedItem(QTreeWidgetItem* it){
 
 //todo make this message passing like adding a resource
 void ResourceFrame::PressedDelete(){
-    if(manager->DeleteSelected())
-        BOOST_FOREACH(QTreeWidgetItem* it, ui->treeWidget->selectedItems()){
-            delete it;
+    if(manager->DeleteSelected()){
+        QList<QTreeWidgetItem*> sel = ui->treeWidget->selectedItems();
+        BOOST_FOREACH(QTreeWidgetItem* it, sel){
+            if(it != NULL){
+                if(it->parent() == NULL){
+                    delete it;
+                }
+                else{
+                    it->parent()->removeChild(it);
+                    delete it;
+                }
+
+            }
         }
+    }
+    ui->treeWidget->clearSelection();
 }
 
 void ResourceFrame::PressedExpand(){
@@ -66,17 +79,19 @@ void ResourceFrame::PressedExpand(){
     sel->AddChildren(manager->ExpandSelected());
 }
 
+void ResourceFrame::DiscretizePath(){
+    int value = QInputDialog::getInteger(this,"Discrete Segmants","enter the number of segments output",10,1);
+    if(value > 0){
+        gui->SendCommand("discretize_path",value);
+    }
+}
+
+void ResourceFrame::OptimizePath(){
+
+}
+
 void ResourceFrame::ToGUI(){
     gui->SendCommand("resource_to_poser");
-    //gui->backend->RenderCurrentResource();
-  /*
-    if(0 == strcmp(selected->resource->Type(),"Config")){
-        ConfigResource* config = dynamic_cast<ConfigResource*>((ResourceBase*)selected->resource);
-            stringstream ss;
-            ss<<config->data;
-          gui->SendCommand("set_q",ss.str());
-    }
-  */
 }
 
 void ResourceFrame::FromGUI(QString type){

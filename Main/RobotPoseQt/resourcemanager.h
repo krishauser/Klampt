@@ -26,6 +26,7 @@ class ResourceTracker
   void SetDirty();
   const char *Type(){return resource->Type();}
   const char *Name(){return resource->name.c_str();}
+  bool Print(int level=0);
 };
 
 
@@ -44,7 +45,7 @@ class ResourceManager
   ResourceManager();
   ResourceNode LoadResource(const string& fn);
 
-  bool DeleteNode(ResourceNode r);
+  bool DeleteNode(ResourceNode r, bool delete_reference=true);
   bool DeleteSelected();
   bool ChangeSelected(ResourceNode);
   bool ChangeSelected(string str);
@@ -58,7 +59,7 @@ class ResourceManager
   ResourceNode AddAsChild(ResourcePtr r);
   ResourceNode AddTopLevel(ResourcePtr r);
 
-  bool Print(ResourceNode current=NULL,int level=0);
+  bool Print();
 };
 
 #endif
