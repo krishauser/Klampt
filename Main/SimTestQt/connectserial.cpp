@@ -29,6 +29,6 @@ void ConnectSerial::SetNumRobots(RobotWorld* world){
    ui->cmb_robot->clear();
    if(world==NULL) return;
    for(size_t i=0;i<world->robots.size();i++){
-     ui->cmb_robot->addItem(QString(world->robots[i].name.c_str()),i);
+     ui->cmb_robot->addItem(QString(world->robots[i].name.c_str()),(int)i);
    }
 }
