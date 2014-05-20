@@ -341,7 +341,7 @@ bool RobotPoseBackend::OnCommand(const string& cmd,const string& args)
     ResourcePtr oldr = ResourceGUIBackend::CurrentResource();
     if(!oldr)
       printf("No resource selected\n");
-    ResourcePtr r = PoserToResource(r->Type());
+    ResourcePtr r = PoserToResource(oldr->Type());
     r->name = oldr->name;
     r->fileName = oldr->fileName;
 
