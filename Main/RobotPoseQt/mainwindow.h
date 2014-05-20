@@ -67,8 +67,6 @@ public slots:
     void PrintCollisions();
 
     void LoadFile();
-
-
 };
 
 #endif // MAINWINDOW_H

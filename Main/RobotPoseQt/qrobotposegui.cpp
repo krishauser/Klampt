@@ -68,7 +68,11 @@ bool QRobotPoseGUI::OnCommand(const string &cmd, const string &args){
         resource_frame->updateNewResource(args);
     }
     else if (cmd=="enable_path"){
+        play_frame->setEnabled(true);
         play_frame->EnablePath(args);
+    }
+    else if(cmd=="disable_path"){
+        play_frame->setDisabled(true);
     }
     else return QtGUIBase::OnCommand(cmd,args);
 }
