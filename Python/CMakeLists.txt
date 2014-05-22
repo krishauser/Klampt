@@ -6,6 +6,9 @@ endif( )
 
 find_program(PYTHON "python")
 
+IF(NOT WIN32)
+  SET(SUDO sudo)
+ENDIF(NOT WIN32)
 SET(OUTPUT ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 SET(DEPS Klampt)
 
@@ -25,7 +28,7 @@ IF(PYTHON)
   )
   add_custom_command(
     OUTPUT ${OUTPUT}/python_install_timestamp
-    COMMAND ${PYTHON} setup.py install
+    COMMAND ${SUDO} ${PYTHON} setup.py install
     COMMAND ${CMAKE_COMMAND} -E touch ${OUTPUT}/python_install_timestamp
     DEPENDS ${DEPS}
   )
