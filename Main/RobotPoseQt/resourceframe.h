@@ -37,6 +37,7 @@ public slots:
     void PressedExpand();
     void ToGUI();
     void FromGUI(QString type);
+    void ReplaceFromGUI();
     void SendPathTime(double t);
     void DiscretizePath();
     void OptimizePath();

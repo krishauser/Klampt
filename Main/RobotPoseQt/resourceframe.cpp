@@ -120,6 +120,10 @@ void ResourceFrame::SendPathTime(double t){
     gui->SendCommand("set_path_time",t);
 }
 
+void ResourceFrame::ReplaceFromGUI(){
+    gui->SendCommand("poser_to_resource_overwrite");
+}
+
 //void ResourceFrame::selectionChanged(){
 
 //}

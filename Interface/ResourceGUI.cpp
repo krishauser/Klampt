@@ -16,14 +16,14 @@ inline bool LoadResources(const char* fn,ResourceManager& lib)
   size_t origsize = lib.size();
   //TODO
   /*
-  if(!lib.LoadAllItems(fn)) {
+    if(!lib.LoadAllItems(fn)) {
     fprintf(stderr,"Warning, couldn't load library %s\n",fn);
     return false;
-  }
-  else {
+    }
+    else {
     printf("Loaded %d items from %s\n",lib.itemsByName.size()-origsize,fn);
     return true;
-  }
+    }
   */return false;
 }
 
@@ -31,12 +31,12 @@ inline bool LoadResources(TiXmlElement* e,ResourceManager& lib)
 {
   //TODO
   /*
-  size_t origsize = lib.itemsByName.size();
-  if(!lib.Load(e)) {
+    size_t origsize = lib.itemsByName.size();
+    if(!lib.Load(e)) {
     fprintf(stderr,"Warning, couldn't load library from XML\n");
     return false;
-  }
-  else {
+    }
+    else {
     printf("Loaded %d items from XML\n",lib.itemsByName.size()-origsize);
     return true;
     }*/return false;
@@ -117,15 +117,15 @@ bool ResourceGUIBackend::LoadCommandLine(int argc,char** argv)
 void ResourceGUIBackend::Add(ResourcePtr r)
 {
   if(r->name.empty()) {
-      stringstream ss;
-//      if(resources == NULL) return;
-      if(resources->selected.isNull()){
-          ss<<r->Type()<<"["<<resources->toplevel.size()<<"]";
-      }
-      else{
-          ss<<"["<<resources->selected->children.size()<<"]";
-      }
-      r->name = ss.str();
+    stringstream ss;
+    //      if(resources == NULL) return;
+    if(resources->selected.isNull()){
+      ss<<r->Type()<<"["<<resources->toplevel.size()<<"]";
+    }
+    else{
+      ss<<"["<<resources->selected->children.size()<<"]";
+    }
+    r->name = ss.str();
   }
   last_added = r;
   resources->AddAsChild(r);
@@ -154,15 +154,15 @@ bool ResourceGUIBackend::LoadNew(const string& file)
 void ResourceGUIBackend::SaveAll(const string& path)
 {
   /*
-  for(ResourceLibrary::Map::iterator i=resources->itemsByType.begin();i!=resources->itemsByType.end();i++) {
+    for(ResourceLibrary::Map::iterator i=resources->itemsByType.begin();i!=resources->itemsByType.end();i++) {
     for(size_t j=0;j<i->second.size();j++)
-      if(i->second[j]->fileName.empty())
-	i->second[j]->fileName = resources->DefaultFileName(i->second[j]);
-  }
-  resources->ChangeBaseDirectory(path);
-  if(!resources->SaveAll()) 
+    if(i->second[j]->fileName.empty())
+    i->second[j]->fileName = resources->DefaultFileName(i->second[j]);
+    }
+    resources->ChangeBaseDirectory(path);
+    if(!resources->SaveAll()) 
     fprintf(stderr,"Unable to save all resources to %s\n",path.c_str());
-  else
+    else
     fprintf(stderr,"Saved all resources to %s\n",path.c_str());
   */
 }
@@ -171,14 +171,14 @@ bool ResourceGUIBackend::LoadAll(const string& path)
 {
   //TODO
   /*
-  if(!resources->LoadAll(path)) {
+    if(!resources->LoadAll(path)) {
     fprintf(stderr,"Error loading resources from %s\n",path.c_str());
     return false;
-  }
-  else {
+    }
+    else {
     fprintf(stderr,"Loaded all resources from %s\n",path.c_str());
     return true;
-  }
+    }
   */
   return false;
 }
@@ -235,9 +235,12 @@ bool ResourceGUIBackend::OnCommand(const string& cmd,const string& args)
 	  ss<<maxTime<<" "<<minTime;
 	  SendCommand("enable_path",ss.str());
 	}
+	else{
+	  SendCommand("disable_path","");
+	}
       }
     }
-    return true;      
+    return true;       
   }
   else if(cmd == "get_resource") {
     stringstream ss;
@@ -325,9 +328,9 @@ ResourcePtr ResourceGUIBackend::CurrentResource()
 {
   //if(resources->itemsByName.count(cur_resource_type) == 0)
   //      return 0;
-    if(resources && resources->selected)
-        return resources->selected->resource;
-    else return 0;
+  if(resources && resources->selected)
+    return resources->selected->resource;
+  else return 0;
 }
 
 void ResourceGUIBackend::RenderCurResource()
@@ -335,7 +338,7 @@ void ResourceGUIBackend::RenderCurResource()
   /*
     ResourcePtr current = CurrentResource();
     if(current)
-        viewResource.DrawGL(current);
+    viewResource.DrawGL(current);
   */
   //separate open?
   viewResource.SetRobot(world->robots[0].robot);
