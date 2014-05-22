@@ -75,6 +75,7 @@ CMakeCache.txt
 CPack*
 CTest*
 cmake*.cmake
+Makefile
 _CPack*
 
 # Log files

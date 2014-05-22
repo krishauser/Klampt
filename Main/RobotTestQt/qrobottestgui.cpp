@@ -3,8 +3,8 @@
 #include <QSettings>
 #include <QtGui/QApplication>
 
-QRobotTestGUI::QRobotTestGUI(GenericBackendBase *_backend, RobotWorld *_world) :
-    QtGUIBase(_backend,_world),
+QRobotTestGUI::QRobotTestGUI(GenericBackendBase *_backend,QKlamptDisplay* _display) :
+  QtGUIBase(_backend),display(_display),
     col_out(new CollisionOutput)
 
 {
@@ -23,6 +23,11 @@ QRobotTestGUI::QRobotTestGUI(GenericBackendBase *_backend, RobotWorld *_world) :
   assert(res==true);
   driver_index=0;
   link_index=0;
+}
+
+QRobotTestGUI::~QRobotTestGUI()
+{
+  delete col_out;
 }
 
 void QRobotTestGUI::SetDriver(int index){
@@ -49,8 +54,14 @@ void QRobotTestGUI::SetLinkValue(double val){
     SendCommand("set_link_value",val);
 }
 
+bool QRobotTestGUI::OnRefresh()
+{
+  display->updateGL();
+  return true;
+}
+
 bool QRobotTestGUI::OnCommand(const string &cmd, const string &args){
-    if(cmd=="update_config"){
+  if(cmd=="update_config"){
         UpdateGUI();
         return true;
     }

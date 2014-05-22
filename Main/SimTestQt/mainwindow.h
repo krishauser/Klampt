@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include <QDir>
 #include <QSettings>
+#include <QTimer>
 
 #include "Modeling/World.h"
 #include "Interface/SimTestGUI.h"
@@ -23,8 +24,10 @@ public:
     QSettings* ini;
     QDir directory;
 //    QString filename;
+    RobotWorld world;
+    SmartPointer<SimTestBackend> backend;
     SmartPointer<QSimTestGUI> gui;
-    QTimer refresh_timer;
+    QTimer idle_timer;
     int argc;
     const char** argv;
     void Initialize(int _argc, const char **_argv);
@@ -47,7 +50,7 @@ public slots:
   void SetSimulate(bool status);
   void SetRecord(bool status);
 
-
+  void OnIdleTimer();
   void SendMilestone();
   void SetMode(int);
   void DoFreeMode(){SetMode(0);}

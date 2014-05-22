@@ -358,6 +358,19 @@ ContactPlan/fast:
 .PHONY : ContactPlan/fast
 
 #=============================================================================
+# Target rules for targets named DynamicPlanDemo
+
+# Build rule for target.
+DynamicPlanDemo: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 DynamicPlanDemo
+.PHONY : DynamicPlanDemo
+
+# fast build rule for target.
+DynamicPlanDemo/fast:
+	$(MAKE) -f Examples/CMakeFiles/DynamicPlanDemo.dir/build.make Examples/CMakeFiles/DynamicPlanDemo.dir/build
+.PHONY : DynamicPlanDemo/fast
+
+#=============================================================================
 # Target rules for targets named PlanDemo
 
 # Build rule for target.
@@ -410,17 +423,30 @@ python/fast:
 .PHONY : python/fast
 
 #=============================================================================
-# Target rules for targets named python_docs
+# Target rules for targets named python-docs
 
 # Build rule for target.
-python_docs: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 python_docs
-.PHONY : python_docs
+python-docs: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 python-docs
+.PHONY : python-docs
 
 # fast build rule for target.
-python_docs/fast:
-	$(MAKE) -f Python/CMakeFiles/python_docs.dir/build.make Python/CMakeFiles/python_docs.dir/build
-.PHONY : python_docs/fast
+python-docs/fast:
+	$(MAKE) -f Python/CMakeFiles/python-docs.dir/build.make Python/CMakeFiles/python-docs.dir/build
+.PHONY : python-docs/fast
+
+#=============================================================================
+# Target rules for targets named python-install
+
+# Build rule for target.
+python-install: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 python-install
+.PHONY : python-install
+
+# fast build rule for target.
+python-install/fast:
+	$(MAKE) -f Python/CMakeFiles/python-install.dir/build.make Python/CMakeFiles/python-install.dir/build
+.PHONY : python-install/fast
 
 Contact/ContactDistance.o: Contact/ContactDistance.cpp.o
 .PHONY : Contact/ContactDistance.o
@@ -2947,11 +2973,13 @@ help:
 	@echo "... URDFtoRob"
 	@echo "... CartPole"
 	@echo "... ContactPlan"
+	@echo "... DynamicPlanDemo"
 	@echo "... PlanDemo"
 	@echo "... RealTimePlanning"
 	@echo "... examples"
 	@echo "... python"
-	@echo "... python_docs"
+	@echo "... python-docs"
+	@echo "... python-install"
 	@echo "... Contact/ContactDistance.o"
 	@echo "... Contact/ContactDistance.i"
 	@echo "... Contact/ContactDistance.s"

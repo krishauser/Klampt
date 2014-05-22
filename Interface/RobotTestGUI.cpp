@@ -205,7 +205,7 @@ bool RobotTestBackend::OnButtonToggle(const string& button,int checked)
 
 bool RobotTestBackend::OnCommand(const string& cmd,const string& args)
 {
-  cout<<"Command: "<<cmd<<", args "<<args<<endl;
+  //cout<<"Command: "<<cmd<<", args "<<args<<endl;
   Robot* robot = world->robots[0].robot;
   stringstream ss(args);
   if(cmd=="set_link") {

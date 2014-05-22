@@ -23,37 +23,38 @@ void MainWindow::Initialize(int _argc,const char** _argv)
     qDebug()<<argv[1];
     qDebug()<<argv[2];
     */
-    //SimTestBackend backend(world);
-    if(!ui->displaywidget->LoadAndInitSim(argc,argv)) {
+    backend = new SimTestBackend(&world);
+    if(!backend->LoadAndInitSim(argc,argv)) {
       printf("ERROR");
     }
     printf("BACKEND LOADED\n");
-//    gui=new GenericGUIBase(ui->displaywidget);
-    gui=new QSimTestGUI(ui->displaywidget,ui->displaywidget->world);
-    gui->ini=ini;
-    //set the system call for encoding video
-    gui->SendCommand("set_record_command",ini->value("video_encoding_command","ffmpeg -y -f image2 -i image%04d.ppm").toString().toStdString());
-    //mediator, can be moved to direct calls
-    connect(ui->displaywidget, SIGNAL(MouseMove(QMouseEvent*)),gui,SLOT(SendMouseMove(QMouseEvent*)));
-    connect(ui->displaywidget, SIGNAL(MousePress(QMouseEvent*)),gui,SLOT(SendMousePress(QMouseEvent*)));
-    connect(ui->displaywidget, SIGNAL(MouseRelease(QMouseEvent*)),gui,SLOT(SendMouseRelease(QMouseEvent*)));
-    connect(ui->displaywidget, SIGNAL(MouseWheel(QWheelEvent*)),gui,SLOT(SendMouseWheel(QWheelEvent*)));
-    connect(ui->displaywidget, SIGNAL(KeyPress(QKeyEvent*)),gui,SLOT(SendKeyDown(QKeyEvent*)));
-    //connect(ui->displaywidget, SIGNAL(KeyRelease(QKeyEvent*)),gui,SLOT(SendKeyRelease(QKeyEvent*)));
 
-    connect(&refresh_timer, SIGNAL(timeout()),ui->displaywidget,SLOT(updateGL()));
-    refresh_timer.start(1000/30);
-    ui->displaywidget->Start();
+    gui=new QSimTestGUI(ui->displaywidget,backend);
+    gui->ini=ini;
+    ui->displaywidget->gui = gui;
+
+    //set the system call for encoding video
+    ui->displaywidget->SetVideoEncoding(ini->value("video_encoding_command","ffmpeg -y -f image2 -i image%04d.ppm").toString().toStdString());
+
+    connect(&idle_timer, SIGNAL(timeout()),this,SLOT(OnIdleTimer()));
+    idle_timer.start(0);
 
     ui->displaywidget->installEventFilter(this);
     ui->displaywidget->setFocusPolicy(Qt::WheelFocus);
 
+    backend->Start();
     DoFreeMode();
+}
+
+void MainWindow::OnIdleTimer()
+{
+  gui->SendIdle();
 }
 
 MainWindow::~MainWindow()
 {
-    delete ui;
+  backend->Stop();
+  delete ui;
 }
 
 //gui stuff
@@ -67,7 +68,7 @@ void MainWindow::SetPoser(bool status){
 }
 
 void MainWindow::SetPoseObjects(bool status){
-    gui->SendButtonToggle("pose_objects",status);
+  gui->SendButtonToggle("pose_objects",status);
 }
 
 void MainWindow::SetDesired(bool status){
@@ -121,7 +122,7 @@ void MainWindow::ChangeEncoderCommand(){
                           QLineEdit::Normal,preset);
     string tmp = value.toStdString();
     const char* cstr = tmp.c_str();
-    gui->SendCommand("set_record_command",value.toStdString());
+    ui->displaywidget->SetVideoEncoding(value.toStdString());
     ini->setValue("video_encoding_command",value);
 }
 
@@ -237,11 +238,11 @@ void MainWindow::ShowDriverEdit(){
 }
 
 void MainWindow::ShowOptions(){
-    gui->controller_settings->show();
+    gui->controller_dialog->show();
 }
 
 void MainWindow::ShowCommand(){
-    gui->command_dialog->show();
+    gui->controller_dialog->show();
 }
 
 void MainWindow::ShowPlotOptions(){
@@ -251,7 +252,7 @@ void MainWindow::ShowPlotOptions(){
 
 void MainWindow::ShowSerialController()
 {
-    gui->connect_serial->exec();
+    gui->controller_dialog->show();
 }
 
 
@@ -278,7 +279,7 @@ void MainWindow::ChangeRecordFile(){
     if(!recordfilename.isNull()) {
       ini->setValue("video_record_file",QFileInfo(recordfilename).absoluteFilePath());
       string str = recordfilename.toStdString();
-      gui->SendCommand("record_file",str);
+      ui->displaywidget->moviefile = str;
     }
 }
 

@@ -1,22 +1,25 @@
 #ifndef QROBOTTESTGUIBASE_H
 #define QROBOTTESTGUIBASE_H
 
-#include "qtguibase.h"
-#include "qrobottestbackend.h"
+#include "KlamptQt/qtguibase.h"
+#include "KlamptQt/qklamptdisplay.h"
+#include "Interface/RobotTestGUI.h"
 #include "collisionoutput.h"
 
 class QRobotTestGUI : public QtGUIBase
 {
     Q_OBJECT
 public:
-    explicit QRobotTestGUI(GenericBackendBase* _backend,RobotWorld* _world);
+  explicit QRobotTestGUI(GenericBackendBase* _backend,QKlamptDisplay* display);
+    virtual ~QRobotTestGUI();
     void SetDriver(int index);
     void SetLink(int index);
     void LoadFile(QString filename=QString());
-    bool OnCommand(const string &cmd, const string &args);
+    virtual bool OnCommand(const string &cmd, const string &args);
+    virtual bool OnRefresh();
     void UpdateGUI();
 
-    QRobotTestBackend* backend;
+    QKlamptDisplay* display;
     CollisionOutput* col_out;
 
     int driver_index;

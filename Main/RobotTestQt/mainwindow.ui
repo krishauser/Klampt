@@ -18,6 +18,37 @@
   </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QGridLayout" name="gridLayout">
+    <property name="margin">
+     <number>0</number>
+    </property>
+    <property name="spacing">
+     <number>0</number>
+    </property>
+    <item row="0" column="0">
+     <widget class="QKlamptDisplay" name="displaywidget" native="true">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+        <horstretch>1</horstretch>
+        <verstretch>1</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="minimumSize">
+       <size>
+        <width>200</width>
+        <height>200</height>
+       </size>
+      </property>
+      <property name="maximumSize">
+       <size>
+        <width>16777215</width>
+        <height>16777215</height>
+       </size>
+      </property>
+      <property name="toolTip">
+       <string>free mode</string>
+      </property>
+     </widget>
+    </item>
     <item row="4" column="0">
      <layout class="QHBoxLayout" name="link_layout">
       <item>
@@ -150,33 +181,18 @@
       </item>
      </layout>
     </item>
-    <item row="0" column="0">
-     <widget class="QRobotTestBackend" name="displaywidget" native="true">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-        <horstretch>1</horstretch>
-        <verstretch>1</verstretch>
-       </sizepolicy>
-      </property>
-      <property name="minimumSize">
-       <size>
-        <width>200</width>
-        <height>200</height>
-       </size>
-      </property>
-      <property name="maximumSize">
-       <size>
-        <width>16777215</width>
-        <height>16777215</height>
-       </size>
-      </property>
-      <property name="toolTip">
-       <string>free mode</string>
-      </property>
-     </widget>
-    </item>
     <item row="1" column="0">
      <layout class="QGridLayout" name="gridLayout_2">
+      <item row="0" column="4">
+       <widget class="QCheckBox" name="chk_bboxes">
+        <property name="statusTip">
+         <string>draw bounding boxes</string>
+        </property>
+        <property name="text">
+         <string>bboxes</string>
+        </property>
+       </widget>
+      </item>
       <item row="0" column="0">
        <spacer name="horizontalSpacer_3">
         <property name="orientation">
@@ -243,16 +259,6 @@
         </property>
         <property name="text">
          <string>frame</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="4">
-       <widget class="QCheckBox" name="chk_bboxes">
-        <property name="statusTip">
-         <string>draw bounding boxes</string>
-        </property>
-        <property name="text">
-         <string>bboxes</string>
         </property>
        </widget>
       </item>
@@ -324,7 +330,7 @@
            <string/>
           </property>
           <property name="icon">
-           <iconset resource="icons.qrc">
+           <iconset resource="../KlamptQt/icons.qrc">
             <normaloff>:/Images/Images/IK.gif</normaloff>:/Images/Images/IK.gif</iconset>
           </property>
           <property name="checkable">
@@ -343,8 +349,14 @@
       </item>
      </layout>
     </item>
+    <item row="5" column="0">
+     <widget class="Line" name="line_2">
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+     </widget>
+    </item>
    </layout>
-   <zorder>displaywidget</zorder>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">
@@ -352,7 +364,7 @@
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>25</height>
+     <height>21</height>
     </rect>
    </property>
    <property name="nativeMenuBar">
@@ -366,27 +378,7 @@
    </widget>
    <addaction name="menuFile"/>
   </widget>
-  <widget class="QToolBar" name="mainToolBar">
-   <attribute name="toolBarArea">
-    <enum>TopToolBarArea</enum>
-   </attribute>
-   <attribute name="toolBarBreak">
-    <bool>false</bool>
-   </attribute>
-  </widget>
-  <widget class="QToolBar" name="toolBar">
-   <property name="windowTitle">
-    <string>toolBar</string>
-   </property>
-   <attribute name="toolBarArea">
-    <enum>TopToolBarArea</enum>
-   </attribute>
-   <attribute name="toolBarBreak">
-    <bool>false</bool>
-   </attribute>
-  </widget>
-  <widget class="QStatusBar" name="statusBar">
-  </widget>
+  <widget class="QStatusBar" name="statusBar"/>
   <action name="actionOpen">
    <property name="text">
     <string>Open</string>
@@ -573,12 +565,11 @@
   <customwidget>
    <class>QRobotTestBackend</class>
    <extends>QWidget</extends>
-   <header>qrobottestbackend.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
  <resources>
-  <include location="icons.qrc"/>
+  <include location="../KlamptQt/icons.qrc"/>
  </resources>
  <connections>
   <connection>

@@ -23,7 +23,14 @@ IF(PYTHON)
     COMMAND ${CMAKE_COMMAND} -E touch ${OUTPUT}/python_docs_timestamp
     DEPENDS ${DEPS}
   )
+  add_custom_command(
+    OUTPUT ${OUTPUT}/python_install_timestamp
+    COMMAND ${PYTHON} setup.py install
+    COMMAND ${CMAKE_COMMAND} -E touch ${OUTPUT}/python_install_timestamp
+    DEPENDS ${DEPS}
+  )
   add_custom_target(python ALL DEPENDS ${OUTPUT}/python_timestamp)
-  add_custom_target(python_docs DEPENDS ${OUTPUT}/python_docs_timestamp)
-  install(CODE "execute_process(COMMAND ${PYTHON} ${SETUP_PY} install)")
+  add_custom_target(python-docs DEPENDS ${OUTPUT}/python_docs_timestamp)
+  install(CODE "execute_process(COMMAND ${PYTHON} setup.py install)")
+  add_custom_target(python-install DEPENDS ${OUTPUT}/python_install_timestamp)
 ENDIF(PYTHON)

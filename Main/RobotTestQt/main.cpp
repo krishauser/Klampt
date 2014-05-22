@@ -9,7 +9,7 @@
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
-    glutInit(&argc,argv);
+    //glutInit(&argc,argv);
     QString filename;
     //load settings from qsetings ini
     QCoreApplication::setOrganizationName("Klampt");
@@ -37,7 +37,6 @@ int main(int argc, char *argv[])
           w.Initialize(2,(const char**)args);
       }
       else{
-          string s = argv[1];
           w.Initialize(argc,(const char**)argv);
       }
       w.directory=dir;

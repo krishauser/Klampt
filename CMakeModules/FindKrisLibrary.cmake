@@ -8,15 +8,19 @@
 # This will properly configure a build to include all external libraries:
 # KrisLibrary and its dependencies
 
+SET(KRISLIBRARY_LIBRARIES "")
+SET(KRISLIBRARY_INCLUDE_DIRS "")
+SET(KRISLIBRARY_DEFINITIONS "")
+
 #this will get everything but KrisLibrary
 INCLUDE(KrisLibraryDependencies)
 
 # Find KrisLibrary
-FIND_LIBRARY( KRISLIBRARY_LIBRARY KrisLibrary PATHS /usr/local/lib "${KRISLIBRARY_ROOT}/KrisLibrary/lib" )
+FIND_LIBRARY( KRISLIBRARY_LIBRARY KrisLibrary PATHS /usr/local/lib "${KRISLIBRARY_ROOT}/KrisLibrary/lib" ${KRISLIBRARY_ROOT})
 FIND_PATH(KRISLIBRARY_INCLUDE_DIR
-	myfile.h
-PATHS /usr/include/KrisLibrary /usr/local/include/KrisLibrary ${KrisLibrary_ROOT}/KrisLibrary
-DOC "Directory where KrisLibrary header files are stored" )
+ 	myfile.h
+        PATHS /usr/include/KrisLibrary /usr/local/include/KrisLibrary ${KRISLIBRARY_ROOT}/KrisLibrary
+         DOC "Directory where KrisLibrary header files are stored" )
 
 #do the find_package call...
 include(FindPackageHandleStandardArgs)

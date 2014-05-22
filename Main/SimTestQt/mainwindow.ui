@@ -26,7 +26,7 @@
       <item>
        <layout class="QVBoxLayout" name="verticalLayout_5">
         <item>
-         <widget class="QSimTestBackend" name="displaywidget" native="true">
+         <widget class="QKlamptDisplay" name="displaywidget" native="true">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
             <horstretch>1</horstretch>

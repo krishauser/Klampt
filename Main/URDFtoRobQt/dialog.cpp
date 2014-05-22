@@ -23,7 +23,7 @@ void Dialog::findIn()
         if(ui->line_out->text().isEmpty()){
             filename=QFileInfo(filename).path() +
             #ifdef WIN32
-            "\"
+            "\\"
             #else
             "/"
             #endif

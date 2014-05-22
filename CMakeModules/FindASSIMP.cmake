@@ -7,7 +7,6 @@
 #  ASSIMP_FOUND        - system has ASSIMP
 #  ASSIMP_INCLUDE_DIR  - the ASSIMP include directory
 #  ASSIMP_LIBRARY      - Link these to use ASSIMP
-#  ASSIMP_LIBRARY_DIR  - Link library path
 #   
 
 IF (ASSIMP_INCLUDE_DIR)
@@ -20,17 +19,21 @@ ENDIF (ASSIMP_INCLUDE_DIR)
             PATHS /usr/include "${ASSIMP_ROOT}/include" )
 
 if( WIN32 )
- FIND_LIBRARY( ASSIMP_LIBRARY
-               NAMES libassimp.lib
-               PATHS "C:/libs/assimp/lib"  "${ASSIMP_ROOT}/lib" )  
+  IF(CMAKE_SIZEOF_VOID_P EQUAL 8)
+    SET(ASSIMP_BUILD_DIR assimp_release-dll_x64)
+  ELSE ()
+    SET(ASSIMP_BUILD_DIR assimp_release-dll_win32)
+  ENDIF ()
 
- GET_FILENAME_COMPONENT( ASSIMP_LIBRARY_DIR ${ASSIMP_LIBRARY} PATH ) 
+  FIND_LIBRARY( ASSIMP_LIBRARY
+               NAMES libassimp.lib assimp.lib assimp.dll
+               PATHS "C:/libs/assimp/lib"  "${ASSIMP_ROOT}/lib" "${ASSIMP_ROOT}/lib/${ASSIMP_BUILD_DIR}")  
+
 else (WIN32)
 
  FIND_LIBRARY( ASSIMP_LIBRARY
                NAMES assimp
                PATHS /usr/lib /usr/local/lib "${ASSIMP_ROOT}/lib"  )
- GET_FILENAME_COMPONENT( ASSIMP_LIBRARY_DIR ${ASSIMP_LIBRARY} PATH ) 
 endif( WIN32)
 
 

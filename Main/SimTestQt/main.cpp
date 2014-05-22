@@ -9,7 +9,7 @@
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
-    glutInit(&argc,argv);
+    //glutInit(&argc,argv);
     QString filename;
     //inithome directory
     //load settings from qsetings ini

@@ -34,28 +34,28 @@ endif()
 if(OPENGL_FOUND AND GLUT_FOUND)
 	if(WIN32)
 		find_path(GLUI_INCLUDE_DIR
-			NAMES
+			NAMES 
 			GL/glui.h
 			PATHS
-			${GLUI_ROOT_PATH}/include
+			${GLUI_ROOT_DIR}/include
 			DOC
 			"GLUI include directory")
 		find_library(GLUI_LIBRARY
 			NAMES
-			glui
-			${GLUI_ROOT_DIR}/lib
-			${GLUI_ROOT_DIR}/Release
+			glui32
 			HINTS
+			${GLUI_ROOT_DIR}/msvc/lib
+			${GLUI_ROOT_DIR}/Release
 			${OPENGL_LIBRARY_DIR}
 			${OPENGL_INCLUDE_DIR}/../lib
 			DOC
 			"GLUI library")
 		find_library(GLUI_DEBUG_LIBRARY
 			NAMES
-			glui32
-			${GLUI_ROOT_DIR}/lib
-			${GLUI_ROOT_DIR}/Debug
+			glui32d
 			HINTS
+			${GLUI_ROOT_DIR}/msvc/lib
+			${GLUI_ROOT_DIR}/Debug
 			${OPENGL_LIBRARY_DIR}
 			${OPENGL_INCLUDE_DIR}/../lib
 			DOC

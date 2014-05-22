@@ -9,9 +9,11 @@
 //the following include files are used for IO and command line processing
 #include "IO/XmlWorld.h"
   //defines XmlWorld for loading RobotWorlds from .xml files
+#include "Modeling/Paths.h"
 #include "Modeling/MultiPath.h"
-  //defines MultiPath for saving multi-section paths to MultiPath .xml files
+  //defines paths and conversion routines
 #include <utils/ioutils.h>
+#include <utils/stringutils.h>
 #include <string.h>
 #include <fstream>
 
@@ -65,7 +67,7 @@ bool SimplePlan(RobotWorld& world,int robot,const Config& qstart,const Config& q
       if(infeasible[i]) cout<<"  "<<cspace.ObstacleName(i)<<endl;
     return false;
   }
-  if(!cspace.IsFeasible(qstart)) {
+  if(!cspace.IsFeasible(qgoal)) {
     cout<<"Goal configuration is infeasible, violated constraints:"<<endl;
     vector<bool> infeasible;
     cspace.CheckObstacles(qgoal,infeasible);
@@ -223,6 +225,16 @@ int main(int argc,const char** argv)
     printf("Path planning success! Saving to %s\n",outputfile);
   else
     printf("Path planning failure. Saving placeholder path to %s\n",outputfile);
-  path.Save(outputfile);
+  const char* ext = FileExtension(outputfile);
+  if(ext && 0==strcmp(ext,"path")) {
+    printf("Converted to linear path format\n");
+    LinearPath lpath;
+    Convert(path,lpath);
+    ofstream f(outputfile,ios::out);
+    lpath.Save(f);
+    f.close();
+  }
+  else 
+    path.Save(outputfile);
   return 0;
 }

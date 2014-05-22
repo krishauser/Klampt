@@ -536,7 +536,7 @@ int RobotWorld::LoadElement(const string& sfn)
     return TerrainID(res);
   }
   else {
-    printf("Unknown file extension %s on file %s\n",ext,fn);
+    printf("RobotWorld::Load: Unknown file extension %s on file %s\n",ext,fn);
     return -1;
   }
 }

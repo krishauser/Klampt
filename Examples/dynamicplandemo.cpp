@@ -3,6 +3,7 @@
 #include "IO/XmlWorld.h"
 #include "Modeling/MultiPath.h"
 #include <utils/ioutils.h>
+#include <utils/stringutils.h>
 #include <string.h>
 #include <fstream>
 
@@ -70,7 +71,7 @@ bool SimplePlan(RobotWorld& world,int robot,const Config& qstart,const Config& q
       if(infeasible[i]) cout<<"  "<<cspace.ObstacleName(i)<<endl;
     return false;
   }
-  if(!cspace.IsFeasible(qstart)) {
+  if(!cspace.IsFeasible(qgoal)) {
     cout<<"Goal configuration is infeasible, violated constraints:"<<endl;
     vector<bool> infeasible;
     cspace.CheckObstacles(qgoal,infeasible);
@@ -99,6 +100,7 @@ int main(int argc,const char** argv)
     printf("USAGE: DynamicPlanDemo [options] world_file configs\n");
     printf("OPTIONS:\n");
     printf("-o filename: the output linear path or multipath (default dynamicplandemo.xml)\n");
+    printf("-h timestep: resolution for linear path output (default 0.01)\n");
     printf("-p settings: set the planner configuration file\n");
     printf("-opt: do optimal planning (do not terminate on the first found solution)\n");
     printf("-n iters: set the default number of iterations (default 1000)\n");
@@ -113,6 +115,7 @@ int main(int argc,const char** argv)
   HaltingCondition termCond;
   string plannerSettings;
   int numShortcutIters = 100;
+  Real discretizeTimeStep = 0.01;
   int i;
   //parse command line arguments
   for(i=1;i<argc;i++) {
@@ -137,6 +140,10 @@ int main(int argc,const char** argv)
       }
       else if(0==strcmp(argv[i],"-s")) {
 	numShortcutIters = atoi(argv[i+1]);
+	i++;
+      }
+      else if(0==strcmp(argv[i],"-h")) {
+	discretizeTimeStep = atof(argv[i+1]);
 	i++;
       }
       else if(0==strcmp(argv[i],"-r")) {
@@ -229,6 +236,16 @@ int main(int argc,const char** argv)
     printf("Path planning success! Saving to %s\n",outputfile);
   else
     printf("Path planning failure. Saving placeholder path to %s\n",outputfile);
-  path.Save(outputfile);
+  const char* ext = FileExtension(outputfile);
+  if(ext && 0==strcmp(ext,"path")) {
+    printf("Converted to linear path format at resolution %g\n",discretizeTimeStep);
+    LinearPath lpath;
+    Discretize(path,discretizeTimeStep,lpath.times,lpath.milestones);
+    ofstream f(outputfile,ios::out);
+    lpath.Save(f);
+    f.close();
+  }
+  else 
+    path.Save(outputfile);
   return 0;
 }

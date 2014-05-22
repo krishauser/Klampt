@@ -5,6 +5,8 @@
 #include <Timer.h>
 #include <string>
 #include <GLdraw/GLScreenshot.h>
+#include <math/math.h>
+
 /** @ingroup GLDraw
  * @brief A plugin class that "automatically" saves a movie to disk in the form of
  * PPM screenshots.
@@ -29,8 +31,8 @@ public:
   Timer timer;
   int verbose;
   bool stop_encode; //encodes automatically when recording ends
-  string moviefile;
-  string video_encoding_command;
+  std::string moviefile;
+  std::string video_encoding_command;
 
   GLScreenshotPlugin()
   {
@@ -100,7 +102,7 @@ public:
   {
     if(saveMovie) {
       if(t >= lastScreenshotTime + frameTime) {
-	printf("Time %g last %g, Saving %d screenshots\n",t,lastScreenshotTime,(int)Floor((t-lastScreenshotTime)/frameTime));
+	printf("Time %g last %g, Saving %d screenshots\n",t,lastScreenshotTime,(int)Math::Floor((t-lastScreenshotTime)/frameTime));
 	while(lastScreenshotTime+frameTime < t) {
 	  SaveScreenshot();
 	  IncrementStringDigits(screenshotFile);
