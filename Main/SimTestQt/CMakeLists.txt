@@ -2,8 +2,6 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8.4)
 PROJECT(SimTest)
 
-set (KRISLIBRARY_INCLUDE_DIR /home/jordan/Klampt/Library/KrisLibrary)
-
 #Building from within Main/[AppName] folder
 IF(NOT KLAMPT_ROOT)
   MESSAGE("No KLAMPT_ROOT set, using ../../")
