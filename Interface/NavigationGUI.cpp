@@ -211,7 +211,9 @@ void GLNavigationBackend::ClickRay(int x,int y,Math3D::Vector3& src,Math3D::Vect
 
 bool GLNavigationBackend::OnMouseWheel(int dwheel)
 {
-  DragZoom(0,dwheel);
+  viewport.scale *= (1+float(dwheel)/20*0.01);
+  SHOW_VIEW_TARGET(0.5);
+  SendRefresh();
   return true;
 }
 

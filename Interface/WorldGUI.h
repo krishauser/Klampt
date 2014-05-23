@@ -46,10 +46,7 @@ public:
     if(button == 0) { camera.dist *= (1 + 0.01*Real(dy)); SendRefresh(); }
   }
 
-  virtual bool OnMouseWheel(int dwheel) {
-    camera.dist *= (1 + 0.01*Real(dwheel));
-    return true;
-  }
+  virtual bool OnMouseWheel(int dwheel);
 
   RobotWorld* world;
 };
