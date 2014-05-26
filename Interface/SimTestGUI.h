@@ -56,7 +56,13 @@ struct SensorPlot
  * - reset(): reverts to the initial simulation state
  * - command_pose(): sends the current pose(s) to the robot controller(s)
  * - command_config(q): sends the specified config command to the first robot controller
+ * - pose_mode: next clicks will pose the robot's joints
+ * - constrain_link_mode: next clicks will add constraints to a link
+ * - constrain_point_mode: next clicks will add point constraints
+ * - delete_constraint_mode: next clicks will delete constraints
+ * - force_application_mode: next clicks will add forces
  * - constrain_current_link(): constrains the currently hovered link
+ * - constrain_current_point(): point-constrains the currently hovered link
  * - delete_current_constraint(): deletes constraints on the currently hovered link
  * - simulate(active): turns simulation on or off (inherited from SimGUIBackend)
  * - toggle_simulate(): toggles simulation activity value (inherited from SimGUIBackend)
@@ -74,14 +80,12 @@ struct SensorPlot
  * - log_contact_wrenches(file): saves contact wrench log to a given file, or "" to set no logging.
  *
  * button_toggle
- * - pose_ik
  * - pose_objects
  * - draw_poser
  * - draw_bbs
  * - draw_contacts
  * - draw_wrenches
  * - draw_expanded 
- * - force_application_mode
  *
  * Signals sent back to GUI are defined as follows:
  * - command update_config: notifies that the configuration of the world has changed.
@@ -93,14 +97,16 @@ public:
   ProgramSettings settings;
 
   int cur_link,cur_driver;
-  int pose_ik,pose_objects;
+  int pose_objects;
+  enum {ModeNormal, ModeForceApplication};
+  int click_mode;
   vector<RobotPoseWidget> robotWidgets;
   vector<RigidObjectPoseWidget> objectWidgets;
   WidgetSet allRobotWidgets,allObjectWidgets;
   WorldDragWidget dragWidget;
   WidgetSet allWidgets;
 
-  int forceApplicationMode,forceSpringActive;
+  int forceSpringActive;
   Vector3 forceSpringAnchor;
   int drawBBs,drawPoser,drawDesired,drawEstimated,drawContacts,drawWrenches,drawExpanded,doLogging;
   string simLogFile;

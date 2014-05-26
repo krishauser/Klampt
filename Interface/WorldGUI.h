@@ -6,6 +6,12 @@
 #include <math3d/Ray3D.h>
 using namespace Math3D;
 
+/** @brief A generic gui with a RobotWorld which allows clicking on entities
+ * and loading files.
+ * 
+ * Accepts commands:
+ * - load_file fn: loads a file into the world.
+ */
 class WorldGUIBackend : public GLNavigationBackend
 {
 public:

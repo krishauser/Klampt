@@ -40,7 +40,6 @@ void RobotTestBackend::Start()
   for(size_t i=0;i<world->rigidObjects.size();i++)
     allWidgets.widgets.push_back(&objectWidgets[i]);
 
-  MapButtonToggle("pose_ik",&pose_ik);
   MapButtonToggle("draw_geom",&draw_geom);
   MapButtonToggle("draw_bbs",&draw_bbs);
   MapButtonToggle("draw_com",&draw_com);
@@ -233,6 +232,22 @@ bool RobotTestBackend::OnCommand(const string& cmd,const string& args)
     robotWidgets[0].SetPose(robot->q);
     robot->UpdateFrames();
   }
+  else if(cmd=="pose_mode") {
+    for(size_t i=0;i<robotWidgets.size();i++)
+      robotWidgets[i].SetFixedPoseIKMode(false);
+  }
+  else if(cmd=="constrain_link_mode") {
+    for(size_t i=0;i<robotWidgets.size();i++)
+      robotWidgets[i].SetFixedPoseIKMode(true);
+  }
+  else if(cmd=="constrain_point_mode") {
+    for(size_t i=0;i<robotWidgets.size();i++)
+      robotWidgets[i].SetPoseIKMode(true);
+  }
+  else if(cmd=="delete_constraint_mode") {
+    for(size_t i=0;i<robotWidgets.size();i++)
+      robotWidgets[i].SetDeleteIKMode(true);
+  }
   else if(cmd=="constrain_current_link") {
     for(size_t i=0;i<robotWidgets.size();i++)
       robotWidgets[i].FixCurrent();
@@ -253,12 +268,6 @@ bool RobotTestBackend::OnCommand(const string& cmd,const string& args)
 
 void RobotTestBackend::DoPassiveMouseMove(int x, int y)
 {
-  
-  for(size_t i=0;i<robotWidgets.size();i++)
-    robotWidgets[i].poseIKMode = (pose_ik != 0);
-  //for(size_t i=0;i<objectWidgets.size();i++)
-  //objectWidgets[i].poseIKMode = (pose_objects != 0);
-  
   double d;
   if(allWidgets.Hover(x,viewport.h-y,viewport,d))
     allWidgets.SetHighlight(true);
@@ -269,12 +278,7 @@ void RobotTestBackend::DoPassiveMouseMove(int x, int y)
 }
 
 void RobotTestBackend::BeginDrag(int x,int y,int button,int modifiers)
-{
-  for(size_t i=0;i<robotWidgets.size();i++)
-    robotWidgets[i].poseIKMode = (pose_ik != 0);
-  //for(size_t i=0;i<objectWidgets.size();i++)
-  //objectWidgets[i].poseIKMode = (pose_objects != 0);
-  
+{  
   Robot* robot = world->robots[0].robot;
   if(button == GLUT_RIGHT_BUTTON) {
     double d;
@@ -288,11 +292,6 @@ void RobotTestBackend::BeginDrag(int x,int y,int button,int modifiers)
 
 void RobotTestBackend::EndDrag(int x,int y,int button,int modifiers)
 {
-  for(size_t i=0;i<robotWidgets.size();i++)
-    robotWidgets[i].poseIKMode = (pose_ik != 0);
-  //for(size_t i=0;i<objectWidgets.size();i++)
-  //objectWidgets[i].poseIKMode = (pose_objects != 0);
-  
   if(button == GLUT_RIGHT_BUTTON) {
     if(allWidgets.hasFocus) {
       allWidgets.EndDrag();
@@ -303,11 +302,6 @@ void RobotTestBackend::EndDrag(int x,int y,int button,int modifiers)
 
 void RobotTestBackend::DoFreeDrag(int dx,int dy,int button)
 {
-  for(size_t i=0;i<robotWidgets.size();i++)
-    robotWidgets[i].poseIKMode = (pose_ik != 0);
-  //for(size_t i=0;i<objectWidgets.size();i++)
-  //objectWidgets[i].poseIKMode = (pose_objects != 0);
-  
   Robot* robot = world->robots[0].robot;
   if(button == GLUT_LEFT_BUTTON)  DragRotate(dx,dy);
   else if(button == GLUT_RIGHT_BUTTON) {
@@ -431,6 +425,8 @@ bool GLUIRobotTestGUI::Initialize()
 [{type:key_down,key:d}, {type:command,cmd:delete_current_constraint,args:\"\"}], \
 [{type:key_down,key:p}, {type:command,cmd:print_pose,args:\"\"}],	\
 [{type:button_press,button:print_config}, {type:command,cmd:print_pose,args:\"\"}], \
+[{type:button_toggle,button:pose_ik,checked:1}, {type:command,cmd:constrain_point_mode,args:\"\"}], \
+[{type:button_toggle,button:pose_ik,checked:0}, {type:command,cmd:pose_mode,args:\"\"}], \
 [{type:widget_value,widget:link,value:_0}, {type:command,cmd:set_link,args:_0}], \
 [{type:widget_value,widget:link_value,value:_0}, {type:command,cmd:set_link_value,args:_0}], \
 [{type:widget_value,widget:driver,value:_0}, {type:command,cmd:set_driver,args:_0}], \

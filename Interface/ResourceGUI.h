@@ -15,9 +15,9 @@ using namespace Math3D;
  * trimeshes
  *
  * Handles the following commands:
- * - set_resource name: sets the current resource name
+ * - set_resource id: sets the current resource to the given identifier
  * - get_resource: requests a return message getting the current resource
- *   type and name
+ *   identifier.
  * - set_resource_name name: sets the name of the current resource
  * - delete_resource: deletes the current resource
  * - add_resource type name: creates a new resource of the given type and name
@@ -32,9 +32,9 @@ using namespace Math3D;
  * - set_path_time t: sets the path time for the current view.
  *
  * Sends the following commands:
- * - current_resource type name: returns the currently selected resource
+ * - current_resource identifier: returns the currently selected resource
  * - refresh_resources: major change to the library, refresh display
- * - new_resource type name: a new resource was added
+ * - new_resource identifier: a new resource was added
  *
  * Caller must have previously called MakeRobotResourceLibrary(library)
  * on the initialized library
@@ -43,20 +43,18 @@ class ResourceGUIBackend : public WorldGUIBackend
 {
 public:
   ResourceGUIBackend(RobotWorld* world,ResourceManager* library);
-  bool LoadCommandLine(int argc,char** argv);
+  bool LoadCommandLine(int argc,const char** argv);
 
-  void Add(ResourcePtr r);
-  ResourcePtr Add(const string& name,const string& type);
+  ResourceNodePtr Add(ResourcePtr r);
+  ResourceNodePtr Add(const string& name,const string& type);
   template <class T>
-  ResourcePtr Add(const string& name,const T& val) {
+  ResourceNodePtr Add(const string& name,const T& val) {
     ResourcePtr r=MakeResource(name,val);
-    Add(r);
-    return r;
+    return Add(r);
   }
-  ResourcePtr Add(const string& name,const vector<Real>& ts,const vector<Config>& qs) {
+  ResourceNodePtr Add(const string& name,const vector<Real>& ts,const vector<Config>& qs) {
     ResourcePtr r=MakeResource(name,ts,qs);
-    Add(r); 
-    return r;
+    return Add(r); 
   }
   //save current resource to disk
   void SaveCur(const string& file);
@@ -68,8 +66,8 @@ public:
   bool LoadAll(const string& path);
   //sets the active item to the last added item
   void SetLastActive(); 
-  //sets the active item to the one of the given type/name
-  void SetActive(const string& type,const string& name);
+  //sets the active item to the one of the given identifier
+  void SetActive(const string& identifier);
   virtual void SetPathTime(double time);
 
   //subclasses should call this so that the GLUI controls will work
@@ -80,10 +78,9 @@ public:
 
   //stores all resources
   ResourceManager* resources;
-  string cur_resource_type,cur_resource_name;
 
   //stores the last added resource
-  ResourcePtr last_added;
+  ResourceNodePtr last_added;
 
   //view
   ViewResource viewResource;

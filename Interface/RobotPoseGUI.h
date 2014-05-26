@@ -37,13 +37,20 @@ public:
 /** @brief Contains the functionality for the RobotPose program
  *
  * Accepts button toggle messages:
- * - pose_ik
  * - draw_geom
  * - draw_bbs
  * - draw_com
  * - draw_frame
  * 
  * Accepts commands (in addition to ResourceGUIBackend and WorldGUIBackend):
+ * - pose_mode: next clicks will pose the robot's joints
+ * - constrain_link_mode: next clicks will add constraints to a link
+ * - constrain_point_mode: next clicks will add point constraints
+ * - delete_constraint_mode: next clicks will delete constraints
+ * - set_link(link): sets the selected link
+ * - set_link_value(value): sets the value of the selected link
+ * - set_driver(link): sets the selected driver
+ * - set_driver_value(value): sets the value of the selected driver
  * - poser_to_resource type: Takes the poser and converts it to a resource
  *   of the given type (can be Config, IKGoal, Stance, Grasp)
  * - poser_to_resource_overwrite: Uses the poser to overwrite the current
@@ -61,7 +68,9 @@ public:
  *   resource.
  * - store_flat_contacts: gets the stance for the robot standing on flat
  *   ground and adds it as a new resource
- * - clean_contacts: cleans up the current Stance or Hold resource.
+ * - clean_contacts [xtol] [ntol]: cleans up the current Stance or Hold
+ *   resource. Points and normals within xtol and ntol, respectively, will
+ *   be merged.
  */
 class RobotPoseBackend : public ResourceGUIBackend
 {
@@ -71,9 +80,7 @@ class RobotPoseBackend : public ResourceGUIBackend
   int cur_link,cur_driver;
   vector<bool> self_colliding, env_colliding;
 
-  RobotPoseWidget poseWidget;
-
-  int pose_ik,pose_objects;
+  int pose_objects;
   vector<RobotPoseWidget> robotWidgets;
   vector<RigidObjectPoseWidget> objectWidgets;
   WidgetSet allWidgets;
@@ -93,7 +100,7 @@ class RobotPoseBackend : public ResourceGUIBackend
   void SetDrawExpanded(int value);
 
   Stance GetFlatStance();
-  void CleanContacts(Hold&);
+  void CleanContacts(Hold&,Real xtol=0,Real ntol=0);
   ResourcePtr PoserToResource(const string& type);
 };
 
