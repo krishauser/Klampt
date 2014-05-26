@@ -963,6 +963,8 @@ void EvaluateMultiPath(Robot& robot,const MultiPath& path,Real t,Config& q,Real 
   GeneralizedCubicBezierCurve curve(&space,&manifold);
   Real duration,param;
   int seg=path.Evaluate(t,curve,duration,param,MultiPath::InterpLinear);
+  if(seg < 0) seg = 0;
+  if(seg >= path.sections.size()) seg = (int)path.sections.size()-1;
   curve.Eval(param,q);
 
   //solve for constraints
