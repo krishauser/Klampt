@@ -11,8 +11,6 @@ int main(int argc, char *argv[])
     QApplication a(argc, argv);
     glutInit(&argc,argv);
     QString filename;
-    //inithome directory
-    QDir directory=QDir::home();
 
     //load settings from qsetings ini
     QCoreApplication::setOrganizationName("Klampt");
@@ -39,7 +37,6 @@ int main(int argc, char *argv[])
       }
       else
           w.Initialize(argc,(const char**)argv);
-      w.directory=directory;
     w.show();
     return a.exec();
 }

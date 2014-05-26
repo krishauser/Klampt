@@ -1,211 +1,453 @@
 #include <resourcemanager.h>
 #include <Modeling/Resources.h>
 #include <string.h>
+#include <utils/ioutils.h>
 
 #include <boost/foreach.hpp>
 
-ResourceTracker::ResourceTracker(ResourcePtr p,ResourceNode _parent):
+ResourceNode::ResourceNode(const ResourcePtr& p,ResourceNode* _parent):
   resource(p),parent(_parent)
 {
-  //children = new vector<ResourceTracker>();
-  dirty= false;
+  childrenChanged= false;
+  childrenEditable = true;
   expanded = false;
+  valid = true;
+  saved = false;
 }
 
-ResourceManager::ResourceManager(){
-  //toplevel = new vector<ResourceTracker>();
-  MakeRobotResourceLibrary(library);
-  selected=NULL;
-  open=NULL;
+int ResourceNode::Depth() const
+{
+  if(!parent) return 0;
+  return 1+parent->Depth();
 }
 
-ResourceNode ResourceTracker::AddChild(ResourcePtr p){
-  ResourceNode node(new ResourceTracker(p));
+ResourceNodePtr ResourceNode::AddChild(const ResourcePtr& p)
+{
+  ResourceNodePtr node = new ResourceNode(p,this);
   children.push_back(node);
-  cout<<"Added Child "<<node->resource->name<<endl;
+  childrenChanged = true;
+  if(!childrenEditable)
+    node->childrenEditable = false;
   return node;
 }
 
-vector<ResourceNode> ResourceTracker::AddChildren(vector<ResourcePtr> ptrs){
-  vector<ResourceNode> ret;
-  for(int i=0;i<ptrs.size();i++){
+vector<ResourceNodePtr> ResourceNode::AddChildren(const vector<ResourcePtr>& ptrs)
+{
+  vector<ResourceNodePtr> ret;
+  for(size_t i=0;i<ptrs.size();i++){
     ret.push_back(AddChild(ptrs[i]));
   }
   return ret;
 }
 
-void ResourceTracker::SetDirty(){
-    if(!dirty){
-      dirty=true;
-      if(parent != NULL) parent->SetDirty();
-    }
-}
-
-bool ResourceTracker::Print(int level){
-    for(int i=0;i<level;i++)
-       printf("-");
-    BOOST_FOREACH(ResourceNode child,children)
-            child->Print();
-    printf("%s\n",Name());
-}
-
-ResourceNode ResourceManager::LoadResource(const string& fn){
-  ResourcePtr r = library.LoadItem(fn);
-  if(r==NULL) return NULL;
-  ResourceNode rt = new ResourceTracker(r);
-  itemsByName.insert(pair<string,ResourceNode>(rt->Name(),rt));
-  toplevel.push_back(rt);
-  return rt;
-}
-
-/*
-ResourceNode ResourceManager::LoadResources(const string& fn){
-    library.LoadAll(fn);
-}
-*/
-
-int ResourceManager::size(){
-  return itemsByName.size();
-}
-
-bool ResourceManager::SaveSelected(const string &file)
+void ResourceNode::SetChanged()
 {
-    ResourcePtr r = selected->resource;
-    if(file.empty()){
-        r->fileName = library.DefaultFileName(r);
-    }
-    else
-        r->fileName = file;
-  if(!r->Save()){
-    fprintf(stderr,"Unable to save %s to %s\n",r->name.c_str(),r->fileName.c_str());
-    return true;
+  if(parent) parent->SetChildrenChanged();
+  saved = false;
+}
+
+void ResourceNode::SetChildrenChanged() 
+{
+  childrenChanged=true;
+  ResourceNode* n=this;
+  while(n != NULL) {
+    n->saved = false;
+    n = n->parent;
   }
-  else {
-    printf("Saved %s to %s\n",r->name.c_str(),r->fileName.c_str());
+}
+
+bool ResourceNode::IsDirty() const
+{
+  if(childrenChanged) return true;
+  for(size_t i=0;i<children.size();i++)
+    if(children[i]->IsDirty()) return true;
+  return false;
+}
+
+bool ResourceNode::IsExpandable() const
+{
+  return (dynamic_cast<const CompoundResourceBase*>(&*resource)!=NULL);
+}
+
+void ResourceNode::Expand()
+{
+  if(expanded){
+    return;
+  }
+  bool successful,incomplete;
+  vector<ResourcePtr> seg = UnpackResource(resource,&successful,&incomplete);
+  AddChildren(seg);
+  childrenChanged = false;
+  expanded = true;
+  if(incomplete) childrenEditable = false;
+}
+
+bool ResourceNode::Editable() const
+{
+  if(!parent) return true;
+  else return parent->childrenEditable;
+}
+
+bool ResourceNode::Backup(string* errorMessage,ResourceNode** where)
+{
+  for(size_t i=0;i<children.size();i++)
+    if(!children[i]->Backup(errorMessage,where)) return false;
+  if(!childrenChanged) return true;
+
+  printf("Packing resources of type %s into %s\n",Type(),Identifier().c_str());
+  //try doing the packing
+  vector<ResourcePtr> temp;
+  for(size_t i=0;i<children.size();i++)
+    temp.push_back(children[i]->resource);
+  string packerror;
+  CompoundResourceBase* cr = dynamic_cast<CompoundResourceBase*>(&*resource);
+  if(!cr) return false;
+  if(!cr->Pack(temp,&packerror)) {
+    //TODO: better errors
+    if(errorMessage)
+      *errorMessage = packerror;
+    if(where)
+      *where = this;
+    valid = false;
     return false;
   }
-}
 
-bool ResourceManager::ChangeSelected(ResourceNode sel){
-  selected = sel;
-}
-
-bool ResourceManager::ChangeSelected(string str){
-    if(itemsByName[str] != NULL)
-        ChangeSelected(itemsByName[str]);
-    else selected = NULL;
-}
-
-bool ResourceManager::ChangeSelectedName(string name){
-  itemsByName.erase(selected->Name());
-  selected->resource->name = name;
-  itemsByName[name] = selected;  
-}
-
-ResourceNode ResourceManager::AddTopLevel(ResourcePtr r){
-    ResourceNode node(new ResourceTracker(r));
-    toplevel.push_back(node);
-    cout<<"Added Child "<<node->resource->name<<endl;
-    return node;
-}
-
-ResourceNode ResourceManager::AddAsChild(ResourcePtr r){
-    ResourceNode node;
-    if(selected)
-        node = selected->AddChild(r);
-    else{
-        node = AddTopLevel(r);
-    }
-    node->SetDirty();
-    itemsByName.insert(pair<string,ResourceNode>(node->Name(),node));
-    return node;
-}
-
-vector<ResourceNode> ResourceManager::ExtractSelectedChildren(vector<string> types){
-  vector<ResourcePtr> added;
-  for(int i=0;i<types.size();i++){
-      vector<ResourcePtr> seg = ExtractResources(selected->resource,types[i].c_str());
-    added.insert(added.end(),seg.begin(),seg.end());
-  }
-  vector<ResourceNode> addedNodes =  selected->AddChildren(added);
-  BOOST_FOREACH(ResourceNode node,addedNodes){
-    itemsByName.insert(pair<string,ResourceNode>(node->Name(),node));
-  }
-  return addedNodes;
-}
-
-vector<ResourceNode> ResourceManager::ExpandSelected(){
-  vector<string> types;
-  if(selected == NULL){
-      printf("No resource is currently selected");
-      return vector<ResourceNode>();
-  }
-  if(selected->expanded){
-    printf("Selected resource is already expanded");
-    return vector<ResourceNode>();
-  }
-  if(strcmp(selected->Type(),"Stance") == 0){
-      types.push_back("Hold");
-      types.push_back("IKGoal");
-    }
-    else if(strcmp(selected->Type(),"Hold") == 0){
-        //contacts...
-        types.push_back("IKGoal");
-    }
-    else if(strcmp(selected->Type(),"Grasp") == 0){
-        types.push_back("Hold");
-        types.push_back("Stance");
-        types.push_back("IKGoal");
-     }
-    else if(strcmp(selected->Type(),"LinearPath") == 0){
-        types.push_back("Configs");
-    }
-    else if(strcmp(selected->Type(),"MultiPath") == 0){
-        types.push_back("LinearPath");
-    }
-    else if(strcmp(selected->Type(),"Configs") == 0 ){
-        types.push_back("Config");
-    }
-    else{
-      printf("No expansion known for type %s",selected->Type());
-      return vector<ResourceNode>();
-    }
-    selected->expanded = true;
-    return ExtractSelectedChildren(types);
-}
-
-bool ResourceManager::DeleteNode(ResourceNode r,bool delete_reference){
-    if(r==NULL) return false;
-    itemsByName.erase(r->Name());
-    while(!r->children.empty()){
-        ResourceNode child = r->children.back();
-        r->children.pop_back();
-        DeleteNode(child,false);
-    }
-    if(delete_reference){
-        if(r->parent != NULL){
-            vector<ResourceNode>::iterator index= std::remove(r->parent->children.begin(), r->parent->children.end(), r);
-            r->parent->children.erase(index, r->parent->children.end());
-        }
-    }
-    return true;
-}
-
-bool ResourceManager::DeleteSelected(){
-  if(selected == NULL){
-    printf("No resource is currently selected");
-    return false;
-  }
-  DeleteNode(selected);
-  if(selected->parent != NULL){
-    selected->parent->children.erase(std::remove(selected->parent->children.begin(), selected->parent->children.end(),selected),selected->parent->children.end());
-    selected->parent->SetDirty();
-    }
-  selected = NULL;
+  printf("Successful\n");
+  valid = true;
+  childrenChanged = false;
   return true;
 }
 
-bool ResourceManager::Print(){
-    BOOST_FOREACH(ResourceNode child,toplevel)
+void ResourceNode::ClearExpansion()
+{
+  children.resize(0);
+  childrenChanged = false;
+  expanded = false;
+  valid = true;
+}
+
+const char* ResourceNode::Decorator() const
+{
+  if(!valid) return "!";
+  if(childrenChanged) return "@";
+  if(parent==NULL && !saved) return "*";
+  return "";
+}
+
+void ResourceNode::Print(int level)
+{
+  for(int i=0;i<level;i++)
+    printf("-");
+  printf("%s%s\n",Name(),Decorator());
+  BOOST_FOREACH(ResourceNodePtr child,children)
+    child->Print(level+1);
+}
+
+vector<string> ResourceNode::PathTo() const
+{
+  vector<string> res;
+  if(parent) 
+    res = parent->PathTo();
+  res.push_back(resource->name);
+  return res;
+}
+
+string ResourceNode::Identifier() const
+{
+  string root;
+  if(parent) 
+    root = parent->Identifier() + "/";
+
+  stringstream ss;
+  ss<<root;
+  SafeOutputString(ss,resource->name);
+  return ss.str();
+}
+
+ResourceTree::ResourceTree(){
+  MakeRobotResourceLibrary(library);
+}
+
+bool ResourceTree::AnyUnsaved() const
+{
+  for(size_t i=0;i<topLevel.size();i++)
+    if(!topLevel[i]->IsSaved()) return false;
+  return true;
+}
+
+ResourceNodePtr ResourceTree::LoadFile(const string& fn)
+{
+  ResourcePtr r = library.LoadItem(fn);
+  if(!r) return NULL;
+  topLevel.push_back(new ResourceNode(r));
+  topLevel.back()->SetSaved();
+  return topLevel.back();
+}
+
+bool ResourceTree::LoadFolder(const string& fn){
+  if(!library.LoadAll(fn)) return false;
+  TreeFromLibrary();
+  for(size_t i=0;i<topLevel.size();i++)
+    topLevel[i]->SetSaved();
+  return true;
+}
+
+bool ResourceTree::Save(ResourceNodePtr &node,string file)
+{
+  ResourcePtr r = node->resource;
+  if(file.empty()){
+    r->fileName = library.DefaultFileName(r);
+  }
+  else
+    r->fileName = file;
+  if(!r->Save()){
+    fprintf(stderr,"Unable to save %s to %s\n",r->name.c_str(),r->fileName.c_str());
+    return false;
+  }
+  else {
+    printf("Saved %s to %s\n",r->name.c_str(),r->fileName.c_str());
+    node->SetSaved();
+    return true;
+  }
+}
+
+bool ResourceTree::SaveFolder(const string& path)
+{
+  TreeToLibrary();
+  for(ResourceLibrary::Map::iterator i=library.itemsByType.begin();i!=library.itemsByType.end();i++) {
+    for(size_t j=0;j<i->second.size();j++)
+      if(i->second[j]->fileName.empty())
+	i->second[j]->fileName = library.DefaultFileName(i->second[j]);
+  }
+  library.ChangeBaseDirectory(path);
+  if(!library.SaveAll()) {
+    fprintf(stderr,"Unable to save all resources to %s\n",path.c_str());
+    return false;
+  }
+  else {
+    for(size_t i=0;i<topLevel.size();i++)
+      topLevel[i]->SetSaved();
+    fprintf(stderr,"Saved all resources to %s\n",path.c_str());
+    return true;
+  }
+}
+
+ResourceNodePtr ResourceTree::Add(ResourcePtr r,ResourceNodePtr parent)
+{
+  if(parent)
+    return parent->AddChild(r);
+  else {
+    topLevel.push_back(new ResourceNode(r));
+    library.Add(r);
+    return topLevel.back();
+  }
+}
+
+
+
+void ResourceTree::Delete(ResourceNodePtr r){
+  if(r->parent == NULL) { //top level
+    int index = ChildIndex(r);
+    if(index < 0)
+      fprintf(stderr,"ResourceTree::Delete: inconsistency found, resource %s has no parent but is not in topLevel list\n",r->Identifier().c_str());
+    assert(index >= 0);
+    assert(index < (int)topLevel.size());
+    topLevel.erase(topLevel.begin()+index);
+    library.Erase(r->resource);
+  }
+  else {
+    int index = ChildIndex(r);
+    if(index < 0)
+      fprintf(stderr,"ResourceTree::Delete: inconsistency found, resource %s has parent but is not in child list of %s\n",r->Identifier().c_str(),r->parent->Identifier().c_str());
+    assert(index >= 0);
+    assert(index < (int)r->parent->children.size());
+    r->parent->children.erase(r->parent->children.begin()+index);
+    r->parent->SetChildrenChanged();
+    r->parent = NULL;
+  }
+}
+
+bool ResourceTree::IsValid() const
+{
+  for(size_t i=0;i<topLevel.size();i++) {
+    if(!topLevel[i]->IsValid()) return false;
+  }
+  return true;
+}
+
+bool ResourceTree::BackupAll(string* errorMessage) 
+{
+  ResourceNode* nerror;
+  for(size_t i=0;i<topLevel.size();i++) {
+    if(!topLevel[i]->Backup(errorMessage,&nerror)) {
+      //TODO: report where
+      return false;
+    }
+  }
+  return true;
+}
+
+void ResourceTree::Print(){
+    BOOST_FOREACH(ResourceNodePtr child,topLevel)
       child->Print();
+}
+
+int ResourceTree::ChildIndex(ResourceNode* n) const
+{
+  if(n->parent == NULL) {
+    for(size_t j=0;j<topLevel.size();j++) 
+      if(topLevel[j] == n) return (int)j;
+    return -1;
+  }
+  else {
+    for(size_t j=0;j<n->parent->children.size();j++)
+      if(n->parent->children[j] == n) return (int)j;
+    return -1;
+  }
+}
+
+void ResourceTree::TreeFromLibrary()
+{
+  for(ResourceLibrary::Map::iterator i=library.itemsByType.begin();i!=library.itemsByType.end();i++) {
+    for(size_t j=0;j<i->second.size();j++) {
+      bool exists = false;
+      for(size_t k=0;k<topLevel.size();k++)
+	if(i->second[j] == topLevel[k]->resource) {
+	  exists=true;
+	  break;
+	}
+      if(!exists) Add(i->second[j]);
+    }
+  }
+}
+
+bool ResourceTree::TreeToLibrary(bool trybackup)
+{
+  bool backupOk = true;
+  library.itemsByType.clear();
+  library.itemsByName.clear();
+  for(size_t i=0;i<topLevel.size();i++) {
+    if(trybackup) {
+      if(topLevel[i]->IsDirty())
+	if(!topLevel[i]->Backup())
+	  backupOk = false;
+    }
+    library.Add(topLevel[i]->resource);
+  }
+  return backupOk;
+}
+
+
+
+ResourceManager::ResourceManager()
+{}
+
+void ResourceManager::Select(const string& identifier)
+{
+  selected = Get(identifier);
+}
+
+void ResourceManager::Select(const vector<string>& path)
+{
+  selected = Get(path);
+}
+
+ResourceNodePtr ResourceManager::Next()
+{
+  if(selected->parent == NULL) {
+    //top level
+    for(size_t i=0;i<topLevel.size();i++) {
+      if(topLevel[i] == selected) 
+	if(i+1 < topLevel.size()) return topLevel[i+1];
+    }
+  }
+  else {
+    for(size_t i=0;i<selected->parent->children.size();i++) {
+      if(selected->parent->children[i] == selected) 
+	if(i+1 < selected->parent->children.size()) return selected->parent->children[i+1];
+    }
+  }
+  return NULL;
+}
+
+ResourceNodePtr ResourceManager::Get(const string& name)
+{
+  stringstream ss(name);
+  vector<string> path;
+  string temp;
+  while(SafeInputString(ss,temp)) {
+    //discard /
+    int c = ss.get();
+    if(c != EOF && c != '/')
+      printf("Warning, strange character %c in identifier\n",(char)c);
+    path.push_back(temp);
+  }
+  return Get(path);
+}
+
+ResourceNodePtr ResourceManager::Get(const vector<string>& path)
+{
+  vector<ResourceNodePtr>* curList = &topLevel;
+  for(size_t i=0;i<path.size();i++) {
+    bool found = false;
+    for(size_t j=0;j<curList->size();j++) {
+      if((*curList)[j]->resource->name == path[i]) {
+	found = true;
+	if(i+1 == path.size()) return (*curList)[j];
+	else curList = &(*curList)[j]->children;
+	break;
+      }
+    }
+    if(!found) return NULL;
+  }
+  return NULL;
+}
+
+
+ResourceNodePtr ResourceManager::AddChildOfSelected(ResourcePtr r,bool changeSelection)
+{
+  ResourceNodePtr n = Add(r,selected);
+  if(changeSelection)
+    selected = n;
+  return n;
+}
+
+void ResourceManager::DeleteSelected()
+{
+  if(selected) {
+    ResourceNodePtr n = Next();
+    Delete(selected);
+    selected = n;
+  }
+}
+
+bool ResourceManager::BackupSelected(string* errorString,ResourceNode** which)
+{
+  if(selected) return selected->Backup(errorString,which);
+  return false;
+}
+
+vector<ResourceNodePtr> ResourceManager::ExpandSelected()
+{
+  if(selected) {
+    if(!selected->IsExpanded()) {
+      selected->Expand();
+      return selected->children;
+    }
+  }
+  return vector<ResourceNodePtr>();
+}
+
+bool ResourceManager::SaveSelected()
+{
+  if(selected) return Save(selected);
+  return false;
+}
+
+bool ResourceManager::SaveSelected(const string& fn)
+{
+  if(selected) {
+    return Save(selected,fn);
+  }
+  return false;
 }

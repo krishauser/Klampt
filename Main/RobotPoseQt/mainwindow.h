@@ -27,16 +27,12 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
-    QDir directory;
-    QString filename;
-    RobotWorld *world;
-    QRobotPoseGUI *gui;
+    RobotWorld world;
+    SmartPointer<QRobotPoseGUI> gui;
+    SmartPointer<RobotPoseBackend> backend;
+    SmartPointer<ResourceManager> manager;
     QTimer* refresh_timer;
-    Robot* rob;
-    ResourceManager* manager;
     int mode;
-    int argc;
-    const char** argv;
     void Initialize(int _argc, const char **_argv);
     void StatusConnect();
 private:
@@ -46,8 +42,6 @@ public slots:
     void SetBboxes(bool status);
     void SetCOM(bool status);
     void SetFrame(bool status);
-    void SetExpanded(bool status);
-    void SetCollisions(bool status);
     void SetIK(bool status);
 
     void SetDriver(int index);

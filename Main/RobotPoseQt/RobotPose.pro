@@ -17,23 +17,21 @@ SOURCES += main.cpp\
     collisionoutput.cpp \
     resourceframe.cpp \
     qresourcetreeitem.cpp \
-    resourcemanager.cpp \ #\
+    resourcemanager.cpp \ 
     playresourceframe.cpp \
     qrobotposebackend.cpp \
     qrobotposegui.cpp
-   # ../../Interface/RobotTestGUI.cpp
 
 HEADERS  += mainwindow.h \
     ../KlamptQt/qtguibase.h \
     collisionoutput.h \
     resourceframe.h \
     qresourcetreeitem.h \
-    resourcemanager.h \ #\
+    resourcemanager.h \ 
     playresourceframe.h \
     qrobotposebackend.h \
     qrobotposegui.h \
     ../KlamptQt/GLScreenshotPlugin.h
-    #../../Interface/RobotTestGUI.h
 
 FORMS    += mainwindow.ui \
     collisionoutput.ui \

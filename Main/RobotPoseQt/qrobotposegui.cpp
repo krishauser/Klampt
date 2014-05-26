@@ -3,9 +3,8 @@
 #include <QSettings>
 #include <QCoreApplication>
 
-QRobotPoseGUI::QRobotPoseGUI(GenericBackendBase *_backend, RobotWorld *_world) :
-    QtGUIBase(_backend,_world)
-
+QRobotPoseGUI::QRobotPoseGUI(QKlamptDisplay* _display,RobotPoseBackend *_backend) :
+  QtGUIBase(_backend), display(_display)
 {
   const char* rules = "[ \
 [{type:key_down,key:c}, {type:command,cmd:constrain_current_link,args:\"\"}],	\
@@ -55,27 +54,34 @@ void QRobotPoseGUI::SetLinkValue(double val){
 
 void QRobotPoseGUI::SetRecord(bool status)
 {
-    SendCommand("record",status);
+  //SendCommand("record",status);
+  if(status)
+    display->StartMovie();
+  else
+    display->StopMovie();
 }
 
 bool QRobotPoseGUI::OnCommand(const string &cmd, const string &args){
     if(cmd=="update_config"){
         UpdateGUI();
-        return true;
     }
-    else if (cmd=="inform_new_resource"){
+    else if (cmd=="new_resource"){
+      resource_frame->updateNewResource(args);
+    }
+    else if (cmd=="refresh_resources"){
         //from poser to gui
-        resource_frame->updateNewResource(args);
-    }
-    else if (cmd=="enable_path"){
-        play_frame->setEnabled(true);
-        play_frame->EnablePath(args);
-    }
-    else if(cmd=="disable_path"){
-        play_frame->setDisabled(true);
+      resource_frame->refreshResources();
     }
     else return QtGUIBase::OnCommand(cmd,args);
+    return true;
 }
+
+bool QRobotPoseGUI::OnRefresh()
+{
+  display->updateGL();
+  return true;
+}
+
 
 void QRobotPoseGUI::UpdateGUI(){
 

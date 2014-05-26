@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>287</width>
-    <height>362</height>
+    <height>514</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -19,116 +19,167 @@
   <property name="frameShadow">
    <enum>QFrame::Raised</enum>
   </property>
-  <layout class="QGridLayout" name="gridLayout">
-   <property name="sizeConstraint">
-    <enum>QLayout::SetMinimumSize</enum>
+  <layout class="QVBoxLayout" name="verticalLayout_2">
+   <property name="spacing">
+    <number>6</number>
    </property>
-   <property name="horizontalSpacing">
-    <number>20</number>
+   <property name="margin">
+    <number>6</number>
    </property>
-   <item row="5" column="1">
-    <widget class="QPushButton" name="btn_togui">
-     <property name="text">
-      <string>Display Item</string>
+   <item>
+    <layout class="QVBoxLayout" name="verticalLayout">
+     <property name="margin">
+      <number>0</number>
      </property>
-    </widget>
-   </item>
-   <item row="5" column="2">
-    <widget class="QPushButton" name="pushButton_3">
-     <property name="text">
-      <string>Advanced</string>
-     </property>
-    </widget>
-   </item>
-   <item row="0" column="1" colspan="2">
-    <widget class="QPushButton" name="pushButton">
-     <property name="text">
-      <string>Load File</string>
-     </property>
-    </widget>
-   </item>
-   <item row="2" column="1">
-    <widget class="QPushButton" name="btn_expand">
-     <property name="text">
-      <string>Expand</string>
-     </property>
-    </widget>
-   </item>
-   <item row="2" column="2">
-    <widget class="QPushButton" name="btn_delete">
-     <property name="text">
-      <string>Delete</string>
-     </property>
-     <property name="icon">
-      <iconset resource="../KlamptQt/icons.qrc">
-       <normaloff>:/Images/Images/list-remove.svg</normaloff>:/Images/Images/list-remove.svg</iconset>
-     </property>
-    </widget>
-   </item>
-   <item row="1" column="1" colspan="2">
-    <widget class="QTreeWidget" name="treeWidget">
-     <property name="dragDropMode">
-      <enum>QAbstractItemView::NoDragDrop</enum>
-     </property>
-     <property name="selectionMode">
-      <enum>QAbstractItemView::SingleSelection</enum>
-     </property>
-     <column>
-      <property name="text">
-       <string>Name</string>
-      </property>
-     </column>
-     <column>
-      <property name="text">
-       <string>Type</string>
-      </property>
-     </column>
-    </widget>
-   </item>
-   <item row="3" column="1">
-    <widget class="QComboBox" name="addNewBox">
      <item>
-      <property name="text">
-       <string>Add New</string>
-      </property>
+      <layout class="QGridLayout" name="gridLayout">
+       <item row="1" column="0">
+        <widget class="QPushButton" name="btn_save">
+         <property name="text">
+          <string>Save Resource</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="1">
+        <widget class="QPushButton" name="btn_save_all">
+         <property name="text">
+          <string>Save All</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="0" colspan="2">
+        <widget class="QPushButton" name="btn_load">
+         <property name="text">
+          <string>Load Resource(s)</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
      </item>
      <item>
-      <property name="text">
-       <string>Config</string>
-      </property>
+      <widget class="QResourceTreeWidget" name="treeWidget">
+       <property name="dragEnabled">
+        <bool>true</bool>
+       </property>
+       <property name="dragDropMode">
+        <enum>QAbstractItemView::DragDrop</enum>
+       </property>
+       <property name="defaultDropAction">
+        <enum>Qt::MoveAction</enum>
+       </property>
+       <property name="selectionMode">
+        <enum>QAbstractItemView::SingleSelection</enum>
+       </property>
+       <attribute name="headerDefaultSectionSize">
+        <number>100</number>
+       </attribute>
+       <attribute name="headerHighlightSections">
+        <bool>false</bool>
+       </attribute>
+       <attribute name="headerMinimumSectionSize">
+        <number>10</number>
+       </attribute>
+       <attribute name="headerShowSortIndicator" stdset="0">
+        <bool>false</bool>
+       </attribute>
+       <attribute name="headerStretchLastSection">
+        <bool>false</bool>
+       </attribute>
+       <column>
+        <property name="text">
+         <string>Name</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>Type</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>?</string>
+        </property>
+       </column>
+      </widget>
      </item>
-    </widget>
+     <item>
+      <layout class="QGridLayout" name="gridLayout_2">
+       <item row="0" column="1">
+        <widget class="QComboBox" name="convertToBox">
+         <item>
+          <property name="text">
+           <string>Convert to...</string>
+          </property>
+         </item>
+        </widget>
+       </item>
+       <item row="0" column="0">
+        <widget class="QComboBox" name="addNewBox">
+         <item>
+          <property name="text">
+           <string>Add new...</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Config</string>
+          </property>
+         </item>
+        </widget>
+       </item>
+       <item row="1" column="0">
+        <widget class="QPushButton" name="btn_togui">
+         <property name="text">
+          <string>To Poser</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="1">
+        <widget class="QPushButton" name="btn_fromgui">
+         <property name="text">
+          <string>From Poser</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+    </layout>
    </item>
-   <item row="3" column="2">
-    <widget class="QPushButton" name="pushButton_2">
-     <property name="text">
-      <string>Replace Current</string>
+   <item>
+    <widget class="QStackedWidget" name="selectedResourceWidget">
+     <property name="currentIndex">
+      <number>0</number>
      </property>
-    </widget>
-   </item>
-   <item row="4" column="1">
-    <widget class="QPushButton" name="btn_discretize">
-     <property name="text">
-      <string>Discretize</string>
-     </property>
-    </widget>
-   </item>
-   <item row="4" column="2">
-    <widget class="QPushButton" name="btn_optimize">
-     <property name="text">
-      <string>Optimize</string>
-     </property>
+     <widget class="QWidget" name="page">
+      <widget class="QWidget" name="widget" native="true">
+       <property name="geometry">
+        <rect>
+         <x>80</x>
+         <y>50</y>
+         <width>120</width>
+         <height>80</height>
+        </rect>
+       </property>
+      </widget>
+     </widget>
     </widget>
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>QResourceTreeWidget</class>
+   <extends>QTreeWidget</extends>
+   <header>qresourcetreewidget.h</header>
+  </customwidget>
+ </customwidgets>
  <resources>
   <include location="../KlamptQt/icons.qrc"/>
   <include location="../KlamptQt/icons.qrc"/>
  </resources>
  <connections>
   <connection>
-   <sender>pushButton</sender>
+   <sender>btn_load</sender>
    <signal>clicked()</signal>
    <receiver>ResourceFrame</receiver>
    <slot>OpenFile()</slot>
@@ -140,38 +191,6 @@
     <hint type="destinationlabel">
      <x>106</x>
      <y>14</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>btn_delete</sender>
-   <signal>clicked()</signal>
-   <receiver>ResourceFrame</receiver>
-   <slot>PressedDelete()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>276</x>
-     <y>252</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>15</x>
-     <y>285</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>btn_expand</sender>
-   <signal>clicked()</signal>
-   <receiver>ResourceFrame</receiver>
-   <slot>PressedExpand()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>109</x>
-     <y>252</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>26</x>
-     <y>309</y>
     </hint>
    </hints>
   </connection>
@@ -198,8 +217,8 @@
    <slot>ToGUI()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>128</x>
-     <y>351</y>
+     <x>140</x>
+     <y>314</y>
     </hint>
     <hint type="destinationlabel">
      <x>313</x>
@@ -209,49 +228,33 @@
   </connection>
   <connection>
    <sender>treeWidget</sender>
-   <signal>doubleClicked(QModelIndex)</signal>
+   <signal>itemExpanded(QTreeWidgetItem*)</signal>
    <receiver>ResourceFrame</receiver>
-   <slot>PressedExpand()</slot>
+   <slot>ItemExpanded(QTreeWidgetItem*)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>51</x>
-     <y>116</y>
+     <x>104</x>
+     <y>132</y>
     </hint>
     <hint type="destinationlabel">
-     <x>12</x>
-     <y>33</y>
+     <x>3</x>
+     <y>154</y>
     </hint>
    </hints>
   </connection>
   <connection>
-   <sender>pushButton_2</sender>
+   <sender>btn_fromgui</sender>
    <signal>clicked()</signal>
    <receiver>ResourceFrame</receiver>
-   <slot>ReplaceFromGUI()</slot>
+   <slot>FromGUI()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>276</x>
-     <y>285</y>
+     <x>278</x>
+     <y>314</y>
     </hint>
     <hint type="destinationlabel">
-     <x>281</x>
-     <y>313</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>pushButton_3</sender>
-   <signal>clicked()</signal>
-   <receiver>ResourceFrame</receiver>
-   <slot>Launch()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>251</x>
-     <y>341</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>321</x>
-     <y>339</y>
+     <x>147</x>
+     <y>323</y>
     </hint>
    </hints>
   </connection>
@@ -259,47 +262,79 @@
    <sender>addNewBox</sender>
    <signal>currentIndexChanged(QString)</signal>
    <receiver>ResourceFrame</receiver>
-   <slot>FromGUI(QString)</slot>
+   <slot>AddNew(QString)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>130</x>
+     <x>132</x>
      <y>285</y>
     </hint>
     <hint type="destinationlabel">
+     <x>144</x>
+     <y>278</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>treeWidget</sender>
+   <signal>itemChanged(QTreeWidgetItem*,int)</signal>
+   <receiver>ResourceFrame</receiver>
+   <slot>ItemChanged(QTreeWidgetItem*,int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>38</x>
+     <y>90</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>6</x>
+     <y>98</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>btn_save</sender>
+   <signal>clicked()</signal>
+   <receiver>ResourceFrame</receiver>
+   <slot>SaveResource()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>116</x>
+     <y>44</y>
+    </hint>
+    <hint type="destinationlabel">
      <x>145</x>
-     <y>321</y>
+     <y>50</y>
     </hint>
    </hints>
   </connection>
   <connection>
-   <sender>btn_discretize</sender>
+   <sender>btn_save_all</sender>
    <signal>clicked()</signal>
    <receiver>ResourceFrame</receiver>
-   <slot>DiscretizePath()</slot>
+   <slot>SaveAllResources()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>111</x>
-     <y>305</y>
+     <x>215</x>
+     <y>51</y>
     </hint>
     <hint type="destinationlabel">
-     <x>140</x>
-     <y>296</y>
+     <x>143</x>
+     <y>42</y>
     </hint>
    </hints>
   </connection>
   <connection>
-   <sender>btn_optimize</sender>
-   <signal>clicked()</signal>
+   <sender>convertToBox</sender>
+   <signal>currentIndexChanged(QString)</signal>
    <receiver>ResourceFrame</receiver>
-   <slot>OptimizePath()</slot>
+   <slot>ConvertTo(QString)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>257</x>
-     <y>301</y>
+     <x>278</x>
+     <y>285</y>
     </hint>
     <hint type="destinationlabel">
-     <x>284</x>
-     <y>298</y>
+     <x>282</x>
+     <y>319</y>
     </hint>
    </hints>
   </connection>
@@ -309,11 +344,16 @@
   <slot>ChangeSelectedItem(QTreeWidgetItem*)</slot>
   <slot>PressedDelete()</slot>
   <slot>PressedExpand()</slot>
-  <slot>ToGUI(QString)</slot>
-  <slot>FromGUI(QString)</slot>
-  <slot>ReplaceFromGUI()</slot>
+  <slot>ToGUI()</slot>
   <slot>Launch()</slot>
   <slot>DiscretizePath()</slot>
   <slot>OptimizePath()</slot>
+  <slot>ItemExpanded(QTreeWidgetItem*)</slot>
+  <slot>AddNew(QString)</slot>
+  <slot>FromGUI()</slot>
+  <slot>ItemChanged(QTreeWidgetItem*,int)</slot>
+  <slot>SaveResource()</slot>
+  <slot>SaveAllResources()</slot>
+  <slot>ConvertTo(QString)</slot>
  </slots>
 </ui>

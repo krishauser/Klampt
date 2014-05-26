@@ -23,7 +23,6 @@ class PlayResourceFrame : public QFrame
 public:
     explicit PlayResourceFrame(QWidget *parent = 0);
     ~PlayResourceFrame();
-    void EnablePath(string args);
 
     QTimer *timer;
 
@@ -32,12 +31,16 @@ public:
     double start;
     bool recording;
 
+    void Reset();
+
 public slots:
     void Play();
     void Tick();
     void Pause();
     void Record();
     void NewTime(int t);
+    void UpdatePlayerTimeRange(double minTime,double maxTime);
+    void EnablePlayer(bool enabled);
 signals:
     void TimeChanged(double);
     void ToggleRecording(bool);

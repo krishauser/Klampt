@@ -1,6 +1,7 @@
 #include "playresourceframe.h"
 #include "ui_playresourceframe.h"
-
+#include <iostream>
+using namespace std;
 
 PlayResourceFrame::PlayResourceFrame(QWidget *parent) :
     QFrame(parent),
@@ -14,7 +15,20 @@ PlayResourceFrame::PlayResourceFrame(QWidget *parent) :
 
 PlayResourceFrame::~PlayResourceFrame()
 {
-    delete ui;
+  if(recording)
+    emit ToggleRecording(false);
+  delete ui;
+}
+
+void PlayResourceFrame::Reset()
+{
+  if(recording)
+    emit ToggleRecording(false);
+  recording = 0;
+  time=start;
+  timer->stop();
+  ui->slider->setValue(0);
+  emit TimeChanged(time);
 }
 
 void PlayResourceFrame::Play(){
@@ -27,7 +41,7 @@ void PlayResourceFrame::Tick(){
     if(time >= start + duration){
         time= start + duration;
         timer->stop();
-        ui->slider->setValue((time - start) / duration);
+        ui->slider->setValue(0);
         if(recording){
             emit ToggleRecording(false);
             recording = 0;
@@ -35,7 +49,7 @@ void PlayResourceFrame::Tick(){
     }
     else{
         ui->slider->setValue((time - start) / duration * 1000 - 1);
-        emit TimeChanged((time - start) / duration);
+        //emit TimeChanged((time - start) / duration);
     }
     emit TimeChanged(time);
 }
@@ -55,10 +69,17 @@ void PlayResourceFrame::NewTime(int t){
     emit TimeChanged(scaled);
 }
 
-void PlayResourceFrame::EnablePath(string args){
-    stringstream ss(args);
-    double front,back;
-    ss>>back>>front;
-    duration = back-front;
-    time=start=front;
+void PlayResourceFrame::UpdatePlayerTimeRange(double minTime,double maxTime)
+{
+    duration = maxTime-minTime;
+    time = start = minTime;
+}
+
+void PlayResourceFrame::EnablePlayer(bool enabled)
+{
+  //show/hide widgets
+  ui->pushButton_2->setEnabled(enabled);
+  ui->pushButton_3->setEnabled(enabled);
+  ui->pushButton_5->setEnabled(enabled);
+  ui->slider->setEnabled(enabled);
 }
