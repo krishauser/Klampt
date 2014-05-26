@@ -13,16 +13,8 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
 }
 
-void MainWindow::Initialize(int _argc,const char** _argv)
+void MainWindow::Initialize(int argc,const char** argv)
 {
-    argc=_argc;
-    argv=_argv;
-    /*
-    qDebug()<<argc;
-    qDebug()<<argv[0];
-    qDebug()<<argv[1];
-    qDebug()<<argv[2];
-    */
     backend = new SimTestBackend(&world);
     if(!backend->LoadAndInitSim(argc,argv)) {
       printf("ERROR");
@@ -36,19 +28,11 @@ void MainWindow::Initialize(int _argc,const char** _argv)
     //set the system call for encoding video
     ui->displaywidget->SetVideoEncoding(ini->value("video_encoding_command","ffmpeg -y -f image2 -i image%04d.ppm").toString().toStdString());
 
-    connect(&idle_timer, SIGNAL(timeout()),this,SLOT(OnIdleTimer()));
-    idle_timer.start(0);
-
     ui->displaywidget->installEventFilter(this);
     ui->displaywidget->setFocusPolicy(Qt::WheelFocus);
 
     backend->Start();
     DoFreeMode();
-}
-
-void MainWindow::OnIdleTimer()
-{
-  gui->SendIdle();
 }
 
 MainWindow::~MainWindow()
@@ -113,7 +97,11 @@ void MainWindow::SendMilestone(){
 }
 
 void MainWindow::SetRecord(bool status){
-    gui->SendCommand("record",status);
+  //gui->SendCommand("record",status);
+  if(status)
+    ui->displaywidget->StartMovie();
+  else
+    ui->displaywidget->StopMovie();
 }
 
 void MainWindow::ChangeEncoderCommand(){
@@ -196,8 +184,9 @@ void MainWindow::ChangeCommandedPathLogFile(){
 }
 
 void MainWindow::SetMode(int option){
-    gui->SendButtonToggle("pose_ik",(option==1));
-    gui->SendButtonToggle("force_application_mode",(option==2));
+  if(option==0) gui->SendCommand("pose_mode");
+  if(option==1) gui->SendCommand("constrain_point_mode");
+  if(option==2) gui->SendCommand("force_application_mode");
     ui->btn_free->setChecked(option==0);
     ui->chk_objects->setVisible(option==0);
     ui->btn_ik->setChecked(option==1);
@@ -205,6 +194,11 @@ void MainWindow::SetMode(int option){
     ui->line_ik->setVisible(option==1);
     ui->btn_constrain->setVisible(option==1);
     ui->btn_constrain_point->setVisible(option==1);
+    if(option==1) {
+      ui->btn_constrain_point->setChecked(1);
+      ui->btn_constrain->setChecked(0);
+      ui->btn_delete->setChecked(0);
+    }
     ui->btn_delete->setVisible(option==1);
     ui->btn_force->setChecked(option==2);
     if(option==0) ui->displaywidget->setStatusTip("Free Drag Mode: drag to rotate, shift drag to zoom, ctrl drag to truck");
@@ -257,15 +251,30 @@ void MainWindow::ShowSerialController()
 
 
 void MainWindow::IKConstrain(){
-    gui->constrain_mode=1;
+  gui->SendCommand("constrain_link_mode");
+  blockSignals(true);
+  ui->btn_constrain_point->setChecked(0);
+  ui->btn_constrain->setChecked(1);
+  ui->btn_delete->setChecked(0);
+  blockSignals(false);
 }
 
 void MainWindow::IKConstrainPoint(){
-    gui->constrain_point_mode=1;
+  gui->SendCommand("constrain_point_mode");
+  blockSignals(true);
+  ui->btn_constrain_point->setChecked(1);
+  ui->btn_constrain->setChecked(0);
+  ui->btn_delete->setChecked(0);
+  blockSignals(false);
 }
 
 void MainWindow::IKDelete(){
-    gui->delete_mode=1;
+  gui->SendCommand("delete_constraint_mode");
+  blockSignals(true);
+  ui->btn_constrain_point->setChecked(0);
+  ui->btn_constrain->setChecked(0);
+  ui->btn_delete->setChecked(1);
+  blockSignals(false);
 }
 
 void MainWindow::Reset(){

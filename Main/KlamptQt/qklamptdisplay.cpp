@@ -10,6 +10,11 @@ QKlamptDisplay::QKlamptDisplay(QWidget *parent) :
     setMouseTracking(true);
 }
 
+void QKlamptDisplay::SetGUI(GenericGUIBase* _gui)
+{
+  gui = _gui;
+}
+
 void QKlamptDisplay::initializeGL(){
     glClearColor(.4,.4,1,1);
     glEnable(GL_DEPTH_TEST);
@@ -56,6 +61,8 @@ string QtKeyToString(int key)
     return "alt";
   case Qt::Key_Escape:
     return "escape";
+  case Qt::Key_Delete:
+    return "delete";
   case Qt::Key_Backspace:
     return "backspace";
   case Qt::Key_Backtab:
@@ -94,10 +101,15 @@ string QtKeyToString(int key)
 
 void QKlamptDisplay::keyPressEvent(QKeyEvent *e){
   if(gui == NULL) return;
-  int key = e->key();
-  string str = QtKeyToString(key);
-  if(!str.empty())
-    gui->SendKeyDown(str);
+  if(e->text().isEmpty()) {
+    int key = e->key();
+    string str = QtKeyToString(key);
+    if(!str.empty())
+      gui->SendKeyDown(str);
+  }
+  else {
+    gui->SendKeyDown(e->text().toStdString());
+  }
 }
 
 void QKlamptDisplay::keyReleaseEvent(QKeyEvent *e){

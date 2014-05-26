@@ -22,14 +22,9 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
     QSettings* ini;
-    QDir directory;
-//    QString filename;
     RobotWorld world;
     SmartPointer<SimTestBackend> backend;
     SmartPointer<QSimTestGUI> gui;
-    QTimer idle_timer;
-    int argc;
-    const char** argv;
     void Initialize(int _argc, const char **_argv);
     void StatusConnect();
 private:
@@ -50,7 +45,6 @@ public slots:
   void SetSimulate(bool status);
   void SetRecord(bool status);
 
-  void OnIdleTimer();
   void SendMilestone();
   void SetMode(int);
   void DoFreeMode(){SetMode(0);}
