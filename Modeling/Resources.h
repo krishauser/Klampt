@@ -24,6 +24,8 @@ typedef BasicResource<Camera::Viewport> ViewportResource;
 class ConfigsResource : public CompoundResourceBase
 {
  public:
+  using ResourceBase::Load;
+  using ResourceBase::Save;
   virtual bool Load(istream& in);
   virtual bool Save(ostream& out);
   virtual bool Save(AnyCollection& c) { c["configs"]=configs; return true; }
@@ -46,6 +48,8 @@ class ConfigsResource : public CompoundResourceBase
 class PointCloudResource : public ResourceBase
 {
  public:
+  using ResourceBase::Load;
+  using ResourceBase::Save;
   virtual bool Load(istream& in);
   virtual bool Save(ostream& out);
   virtual const char* Type() const { return "PointCloud"; }
@@ -60,6 +64,8 @@ class PointCloudResource : public ResourceBase
 class RobotResource : public ResourceBase
 {
  public:
+  using ResourceBase::Load;
+  using ResourceBase::Save;
   virtual bool Load(const string& fn);
   virtual bool Save(const string& fn);
   virtual const char* Type() const { return "Robot"; }
@@ -74,6 +80,8 @@ class RobotResource : public ResourceBase
 class RigidObjectResource : public ResourceBase
 {
  public:
+  using ResourceBase::Load;
+  using ResourceBase::Save;
   virtual bool Load(const string& fn);
   virtual bool Save(const string& fn);
   virtual const char* Type() const { return "RigidObject"; }
@@ -91,6 +99,8 @@ class RigidObjectResource : public ResourceBase
 class WorldResource : public CompoundResourceBase
 {
  public:
+  using ResourceBase::Load;
+  using ResourceBase::Save;
   virtual bool Load(const string& fn);
   virtual bool Save(const string& fn);
   virtual const char* Type() const { return "World"; }
@@ -108,6 +118,8 @@ class WorldResource : public CompoundResourceBase
 class LinearPathResource : public CompoundResourceBase
 {
  public:
+  using ResourceBase::Load;
+  using ResourceBase::Save;
   virtual bool Load(istream& in);
   virtual bool Save(ostream& out);
   virtual bool Save(AnyCollection& c) { c["times"]=times; c["milestones"]=milestones; return true; }
@@ -135,12 +147,12 @@ class LinearPathResource : public CompoundResourceBase
 class MultiPathResource : public CompoundResourceBase
 {
  public:
+  using ResourceBase::Load;
+  using ResourceBase::Save;
   virtual bool Load(const string& fn);
   virtual bool Save(const string& fn);
   virtual bool Load(TiXmlElement* in);
   virtual bool Save(TiXmlElement* out);
-  virtual bool Load() { return ResourceBase::Load(); }
-  virtual bool Save() { return ResourceBase::Save(); }
   virtual const char* Type() const { return "MultiPath"; }
   virtual ResourceBase* Make() { return new MultiPathResource; }
   virtual ResourceBase* Copy();
@@ -165,6 +177,8 @@ class IKGoalResource : public CompoundResourceBase
   IKGoalResource() {}
   IKGoalResource(const IKGoal& val) : goal(val) {}
   IKGoalResource(const IKGoal& val,const string& name) : CompoundResourceBase(name),goal(val) {}
+  using ResourceBase::Load;
+  using ResourceBase::Save;
   virtual bool Load(AnyCollection& c);
   virtual bool Save(AnyCollection& c);
   virtual bool Load(std::istream& in) {
@@ -193,6 +207,8 @@ class HoldResource : public CompoundResourceBase
   HoldResource() {}
   HoldResource(const Hold& val) : hold(val) {}
   HoldResource(const Hold& val,const string& name) : CompoundResourceBase(name),hold(val) {}
+  using ResourceBase::Load;
+  using ResourceBase::Save;
   virtual bool Load(AnyCollection& c);
   virtual bool Save(AnyCollection& c);
   virtual bool Load(std::istream& in) {
@@ -223,6 +239,8 @@ class StanceResource : public CompoundResourceBase
  public:
   StanceResource() {}
   StanceResource(const Stance& val);
+  using ResourceBase::Load;
+  using ResourceBase::Save;
   virtual bool Load(istream& in);
   virtual bool Save(ostream& out);
   virtual bool Load(TiXmlElement* in);
@@ -253,6 +271,8 @@ class GraspResource : public CompoundResourceBase
  public:
   GraspResource() {}
   GraspResource(const Grasp& val);
+  using ResourceBase::Load;
+  using ResourceBase::Save;
   virtual bool Load(TiXmlElement* in);
   virtual bool Save(TiXmlElement* out);
   virtual bool Load(AnyCollection& c);
