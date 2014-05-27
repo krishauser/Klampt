@@ -9,7 +9,7 @@ find_program(PYTHON "python")
 IF(NOT WIN32)
   SET(SUDO sudo)
 ENDIF(NOT WIN32)
-SET(OUTPUT ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+SET(TEMPOUTPUT CMakeFiles)
 SET(DEPS Klampt)
 
 IF(PYTHON)
@@ -17,19 +17,19 @@ IF(PYTHON)
   add_custom_command(
     OUTPUT ${OUTPUT}/python_timestamp
     COMMAND ${PYTHON} setup.py build_ext
-    COMMAND ${CMAKE_COMMAND} -E touch ${OUTPUT}/python_timestamp
+    COMMAND ${CMAKE_COMMAND} -E touch ${TEMPOUTPUT}/python_timestamp
     DEPENDS ${DEPS}
   )
   add_custom_command(
     OUTPUT ${OUTPUT}/python_docs_timestamp
     COMMAND doxygen klampt/doxygen.conf
-    COMMAND ${CMAKE_COMMAND} -E touch ${OUTPUT}/python_docs_timestamp
+    COMMAND ${CMAKE_COMMAND} -E touch ${TEMPOUTPUT}/python_docs_timestamp
     DEPENDS ${DEPS}
   )
   add_custom_command(
     OUTPUT ${OUTPUT}/python_install_timestamp
     COMMAND ${SUDO} ${PYTHON} setup.py install
-    COMMAND ${CMAKE_COMMAND} -E touch ${OUTPUT}/python_install_timestamp
+    COMMAND ${CMAKE_COMMAND} -E touch ${TEMPOUTPUT}/python_install_timestamp
     DEPENDS ${DEPS}
   )
   add_custom_target(python ALL DEPENDS ${OUTPUT}/python_timestamp)
