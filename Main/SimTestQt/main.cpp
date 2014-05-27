@@ -34,10 +34,11 @@ int main(int argc, char *argv[])
       if(argc==1){
 	string fn = filename.toStdString();
           const char* args[3] = {"SimTest",fn.c_str(),""};
-          w.Initialize(2,(const char**)args);
+          if(!w.Initialize(2,(const char**)args)) return 1;
       }
-      else
-          w.Initialize(argc,(const char**)argv);
+      else {
+	if(!w.Initialize(argc,(const char**)argv)) return 1;
+      }
     w.show();
     return a.exec();
 }

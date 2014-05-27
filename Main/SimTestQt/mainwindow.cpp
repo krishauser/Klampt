@@ -13,13 +13,15 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
 }
 
-void MainWindow::Initialize(int argc,const char** argv)
+bool  MainWindow::Initialize(int argc,const char** argv)
 {
     backend = new SimTestBackend(&world);
     if(!backend->LoadAndInitSim(argc,argv)) {
-      printf("ERROR");
+      printf("ERROR LOADING FROM COMMAND LINE");
+      return false;
     }
-    printf("BACKEND LOADED\n");
+    else
+      printf("BACKEND LOADED\n");
 
     gui=new QSimTestGUI(ui->displaywidget,backend);
     gui->ini=ini;
@@ -33,6 +35,7 @@ void MainWindow::Initialize(int argc,const char** argv)
 
     backend->Start();
     DoFreeMode();
+    return true;
 }
 
 MainWindow::~MainWindow()
