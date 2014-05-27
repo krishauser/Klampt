@@ -1,8 +1,0 @@
-*.mpg
-*.ppm
-RobotPose
-Makefile
-RobotPose.pro.user
-ui_*
-moc*
-qrc_*
