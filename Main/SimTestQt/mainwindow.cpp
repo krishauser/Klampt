@@ -234,11 +234,7 @@ void MainWindow::ShowDriverEdit(){
     gui->driver_tool->show();
 }
 
-void MainWindow::ShowOptions(){
-    gui->controller_dialog->show();
-}
-
-void MainWindow::ShowCommand(){
+void MainWindow::ShowController(){
     gui->controller_dialog->show();
 }
 
@@ -247,10 +243,6 @@ void MainWindow::ShowPlotOptions(){
 }
 
 
-void MainWindow::ShowSerialController()
-{
-    gui->controller_dialog->show();
-}
 
 
 void MainWindow::IKConstrain(){

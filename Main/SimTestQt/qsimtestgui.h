@@ -3,7 +3,6 @@
 
 #include "KlamptQt/qtguibase.h"
 #include "KlamptQt/qklamptdisplay.h"
-#include "qsimtestbackend.h"
 
 #include <Interface/GenericGUI.h>
 #include "Modeling/World.h"

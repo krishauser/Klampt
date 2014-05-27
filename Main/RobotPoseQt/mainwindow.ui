@@ -43,7 +43,6 @@
           <verstretch>0</verstretch>
          </sizepolicy>
         </property>
-        <zorder></zorder>
        </widget>
       </item>
       <item>
@@ -540,7 +539,7 @@
   </action>
   <action name="actionOpen_File">
    <property name="text">
-    <string>Open File</string>
+    <string>Open File...</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+O</string>

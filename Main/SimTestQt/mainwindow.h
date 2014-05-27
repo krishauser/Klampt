@@ -62,9 +62,7 @@ public slots:
   //Menus
   void ShowPlotOptions();
   void ShowDriverEdit();
-  void ShowOptions();
-  void ShowCommand();
-  void ShowSerialController();
+  void ShowController();
   void ShowHelp();
   void ShowAbout();
 
