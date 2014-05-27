@@ -276,7 +276,7 @@ RobotTest: cmake_check_build_system
 
 # fast build rule for target.
 RobotTest/fast:
-	$(MAKE) -f bin/RobotTest/CMakeFiles/RobotTest.dir/build.make bin/RobotTest/CMakeFiles/RobotTest.dir/build
+	$(MAKE) -f Main/RobotTestQt/CMakeFiles/RobotTest.dir/build.make Main/RobotTestQt/CMakeFiles/RobotTest.dir/build
 .PHONY : RobotTest/fast
 
 #=============================================================================
@@ -289,7 +289,7 @@ SimTest: cmake_check_build_system
 
 # fast build rule for target.
 SimTest/fast:
-	$(MAKE) -f bin/SimTest/CMakeFiles/SimTest.dir/build.make bin/SimTest/CMakeFiles/SimTest.dir/build
+	$(MAKE) -f Main/SimTestQt/CMakeFiles/SimTest.dir/build.make Main/SimTestQt/CMakeFiles/SimTest.dir/build
 .PHONY : SimTest/fast
 
 #=============================================================================
@@ -302,7 +302,7 @@ RobotPose: cmake_check_build_system
 
 # fast build rule for target.
 RobotPose/fast:
-	$(MAKE) -f bin/RobotPose/CMakeFiles/RobotPose.dir/build.make bin/RobotPose/CMakeFiles/RobotPose.dir/build
+	$(MAKE) -f Main/RobotPoseQt/CMakeFiles/RobotPose.dir/build.make Main/RobotPoseQt/CMakeFiles/RobotPose.dir/build
 .PHONY : RobotPose/fast
 
 #=============================================================================
@@ -315,7 +315,7 @@ MotorCalibrate: cmake_check_build_system
 
 # fast build rule for target.
 MotorCalibrate/fast:
-	$(MAKE) -f bin/MotorCalibrate/CMakeFiles/MotorCalibrate.dir/build.make bin/MotorCalibrate/CMakeFiles/MotorCalibrate.dir/build
+	$(MAKE) -f Main/MotorCalibrateQt/CMakeFiles/MotorCalibrate.dir/build.make Main/MotorCalibrateQt/CMakeFiles/MotorCalibrate.dir/build
 .PHONY : MotorCalibrate/fast
 
 #=============================================================================
@@ -328,7 +328,7 @@ URDFtoRob: cmake_check_build_system
 
 # fast build rule for target.
 URDFtoRob/fast:
-	$(MAKE) -f bin/URDFtoRob/CMakeFiles/URDFtoRob.dir/build.make bin/URDFtoRob/CMakeFiles/URDFtoRob.dir/build
+	$(MAKE) -f Main/URDFtoRobQt/CMakeFiles/URDFtoRob.dir/build.make Main/URDFtoRobQt/CMakeFiles/URDFtoRob.dir/build
 .PHONY : URDFtoRob/fast
 
 #=============================================================================
