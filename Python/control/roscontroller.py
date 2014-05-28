@@ -98,14 +98,14 @@ class RosRobotController(controller.BaseController):
         self.state.effort       = []
 
         # fast indexing structure for partial commands
-        self.nameToIndex = dict(zip(self.state.name,range(i)))
+        self.nameToIndex = dict(zip(self.state.name,range(n)))
 
         # Setup publisher of robot states
         self.pub = rospy.Publisher(joint_state_pub_topic, JointState)
         
         # set up the command subscriber
         self.jointTrajectoryRosMsgQueue = []
-        rospy.Subscriber(joint_state_pub_topic, JointTrajectory,self.jointTrajectoryCallback)
+        rospy.Subscriber(joint_trajectory_sub_topic, JointTrajectory,self.jointTrajectoryCallback)
 
         # these are parsed in from the trajectory message
         self.currentTrajectoryStart = 0
@@ -215,6 +215,7 @@ class RosRobotController(controller.BaseController):
         if 'torque' in inputs:
             self.state.effort = inputs['torque']
         self.pub.publish(self.state)
+        #print "ROS control result is",res
         return res
 
     def map_output(self,vector,names,output_map,output_name):
@@ -259,7 +260,7 @@ def make(klampt_robot_model):
     """
     global ros_initialized
     robotName = klampt_robot_model.getName()
-    linkNames = [klampt_robot_model.getLink(i).getName() for i in range(klampt_robotmodel.numLinks())]
+    linkNames = [klampt_robot_model.getLink(i).getName() for i in range(klampt_robot_model.numLinks())]
     if not ros_initialized:
         ros_initialized = True
         rospy.init_node('klampt_sim')
@@ -267,9 +268,9 @@ def make(klampt_robot_model):
         #the robot's controller
         c = controller.MultiController()
         c.launch(RosTimeController())
-        joint_trajectory_topic = "/%s/joint_trajectory"%(robot_name,)
-        joint_states_topic = "/%s/joint_states"%(robot_name,)
-        c.launch(RosRobotController(robotName,linkNames))
+        joint_trajectory_topic = "/%s/joint_trajectory"%(robotName,)
+        joint_states_topic = "/%s/joint_states"%(robotName,)
+        c.launch(RosRobotController(joint_trajectory_topic,joint_states_topic,linkNames))
         return c
     #just launch the robot's controller, some other RosTimeController has been
     #launched before

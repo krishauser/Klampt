@@ -100,7 +100,9 @@ class JsonClient(asyncore.dispatcher):
     def sendMessage(self,msg):
         """Call this to send an outgoing message"""
         smsg = json.dumps(msg)
+        #print "JSON message:",smsg
         self.buffer = self.buffer + packStrlen(smsg) + smsg
+        #print "buffer now:",self.buffer
 
     def read(self,length):
         chunk = self.recv(length)
@@ -114,26 +116,28 @@ class JsonClient(asyncore.dispatcher):
 
     def recv(self, buffer_size):
         """Fix for windows sockets throwing EAGAIN crashing asyncore"""
-        try:
-            data = self.socket.recv(buffer_size)
-            if not data:
-                # a closed connection is indicated by signaling
-                # a read condition, and having recv() return 0.
-                print "Socket closed..."
-                self.handle_close()
-                return ''
-            else:
-                return data
-        except socket.error, why:
-            # winsock sometimes throws ENOTCONN
-            if why.args[0] in (errno.EAGAIN, errno.EWOULDBLOCK):
-                print "EGAIN or EWOULDBLOCK returned... spin waiting"
-                return self.recv(buffer_size)
-            elif why.args[0] == errno.ENOTCONN:
-                self.handle_close()
-                return ''
-            else:
-                raise
+        while True:
+            try:
+                data = self.socket.recv(buffer_size)
+                if not data:
+                    # a closed connection is indicated by signaling
+                    # a read condition, and having recv() return 0.
+                    print "Socket closed..."
+                    self.handle_close()
+                    return ''
+                else:
+                    return data
+            except socket.error, why:
+                # winsock sometimes throws ENOTCONN
+                if why.args[0] in (errno.EAGAIN, errno.EWOULDBLOCK):
+                    #print "EGAIN or EWOULDBLOCK returned... spin waiting"
+                    time.sleep(0.001)
+                    continue
+                elif why.args[0] == errno.ENOTCONN:
+                    self.handle_close()
+                    return ''
+                else:
+                    raise
 
 class ControllerClient(JsonClient):
     """A client that relays Python BaseController object to a
@@ -149,9 +153,24 @@ class ControllerClient(JsonClient):
         """Sends the output of a controller to a SerialController.
         controller is assumed to follow the control.BaseController interface.
         """
+        self.connecting = True
         JsonClient.__init__(self,addr)
         self.controller = controller
     def handle_connect(self):
+        print "Handle connect"
+        JsonClient.handle_connect(self)
+    def handle_expt(self):
+        self.close()
+    def handle_error(self):
+        JsonClient.handle_error(self)
+        if self.connecting:
+            print
+            print "(Did you forget to start up a Klamp't controller server?)"
+        else:
+            print
+            print "(Did the Klamp't controller server shut down?)"
+    def handle_connect(self):
+        self.connecting = False;
         self.controller.signal('enter')
         return
     def onMessage(self,msg):
