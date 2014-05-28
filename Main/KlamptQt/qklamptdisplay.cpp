@@ -10,6 +10,11 @@ QKlamptDisplay::QKlamptDisplay(QWidget *parent) :
     setMouseTracking(true);
 }
 
+void QKlamptDisplay::SetGUI(GenericGUIBase* _gui)
+{
+  gui = _gui;
+}
+
 void QKlamptDisplay::initializeGL(){
     glClearColor(.4,.4,1,1);
     glEnable(GL_DEPTH_TEST);
@@ -45,22 +50,74 @@ void QKlamptDisplay::SetVideoOutputFile(const std::string& fn)
 }
 
 
+string QtKeyToString(int key)
+{
+  switch(key) {
+  case Qt::Key_Shift:
+    return "shift";
+  case Qt::Key_Control:
+    return "control";
+  case Qt::Key_Alt:
+    return "alt";
+  case Qt::Key_Escape:
+    return "escape";
+  case Qt::Key_Delete:
+    return "delete";
+  case Qt::Key_Backspace:
+    return "backspace";
+  case Qt::Key_Backtab:
+    return "backdab";
+  case Qt::Key_Tab:
+    return "tab";
+  case Qt::Key_Return:
+    return "return";
+  case Qt::Key_Enter:
+    return "enter";
+  case Qt::Key_Home:
+    return "home";
+  case Qt::Key_End:
+    return "end";
+  case Qt::Key_Left:
+    return "left";
+  case Qt::Key_Right:
+    return "right";
+  case Qt::Key_Up:
+    return "up";
+  case Qt::Key_Down:
+    return "down";
+  case Qt::Key_PageUp:
+    return "pageup";
+  case Qt::Key_PageDown:
+    return "pagedown";
+  case Qt::Key_Meta:
+    return "meta";
+  }
+  if(key < 256)
+    return string(1,char(key));
+  return "";
+}
+
 
 
 void QKlamptDisplay::keyPressEvent(QKeyEvent *e){
   if(gui == NULL) return;
-  int key = e->key();
-  if(key==Qt::Key_Shift || key==Qt::Key_Control){
-    return;}
-  if(!(e->modifiers() & Qt::ShiftModifier))key=tolower(key);
-  gui->SendKeyDown(string(1,key));
+  if(e->text().isEmpty()) {
+    int key = e->key();
+    string str = QtKeyToString(key);
+    if(!str.empty())
+      gui->SendKeyDown(str);
+  }
+  else {
+    gui->SendKeyDown(e->text().toStdString());
+  }
 }
 
 void QKlamptDisplay::keyReleaseEvent(QKeyEvent *e){
   if(gui == NULL) return;
   int key = e->key();
-  if(!(e->modifiers() & Qt::ShiftModifier))key=tolower(key);
-  gui->SendKeyUp(string(1,key));
+  string str = QtKeyToString(key);
+  if(!str.empty())
+    gui->SendKeyUp(str);
 }
 
 void QKlamptDisplay::mouseMoveEvent(QMouseEvent *e){

@@ -37,7 +37,7 @@ QSimTestGUI::QSimTestGUI(QKlamptDisplay* _display,SimTestBackend *_backend) :
 
   UpdateGUI();
 
-  const static int NR = 15;
+  const static int NR = 9;
   const static char* rules [NR*3]= {"{type:key_down,key:c}","constrain_link","",
                     "{type:key_down,key:C}","constrain_link_point","",
 				    "{type:key_down,key:d}","delete_constraint","",
@@ -47,12 +47,6 @@ QSimTestGUI::QSimTestGUI(QKlamptDisplay* _display,SimTestBackend *_backend) :
 				    "{type:key_down,key:v}","save_view","view.txt",
 				    "{type:key_down,key:V}","load_view","view.txt",
 				    "{type:button_toggle,button:simulate,checked:_0}","toggle_simulate","",
-				    "{type:button_press,button:reset}","reset","",
-				    "{type:button_press,button:set_milestone}","command_pose","",
-				    "{type:widget_value,widget:link,value:_0}","set_link","_0",
-				    "{type:widget_value,widget:link_value,value:_0}","set_link_value","_0",
-				    "{type:widget_value,widget:driver,value:_0}","set_driver","_0",
-				    "{type:widget_value,widget:driver_value,value:_0}","set_driver_value","_0",
   };
   for(int i=0;i<NR;i++) {
     AnyCollection c;
@@ -61,7 +55,22 @@ QSimTestGUI::QSimTestGUI(QKlamptDisplay* _display,SimTestBackend *_backend) :
     AddCommandRule(c,rules[i*3+1],rules[i*3+2]);
   }
 
-  constrain_mode = delete_mode = constrain_point_mode= 0;
+  connect(&idle_timer, SIGNAL(timeout()),this,SLOT(OnIdleTimer()));
+  idle_timer.start(0);
+}
+
+void QSimTestGUI::OnIdleTimer()
+{
+  SendIdle();
+}
+
+bool QSimTestGUI::OnPauseIdle(double secs) 
+{
+  if(secs > 10000000)
+    idle_timer.stop();
+  else
+    idle_timer.start(int(secs*1000));
+  return true;
 }
 
 bool QSimTestGUI::OnCommand(const string& cmd,const string& args)
@@ -99,27 +108,6 @@ void QSimTestGUI::UpdateGUI(){
         driver_tool->RequestDriverValue();
 }
 
-void QSimTestGUI::SendMousePress(QMouseEvent *e){
-    if(constrain_mode){
-        SendCommand("constrain_link");
-        emit EndConstrain();
-        constrain_mode=0;
-        return;
-    }
-    if(constrain_point_mode){
-        SendCommand("constrain_link_point");
-        emit EndConstrain();
-        constrain_point_mode=0;
-        return;
-    }
-    if(delete_mode){
-        SendCommand("delete_constraint");
-        emit EndDelete();
-        delete_mode=0;
-        return;
-    }
-    QtGUIBase::SendMousePress(e);
-}
 
 void QSimTestGUI::SendDriverValue(int dr, float value){
     SendCommand("set_driver",dr);

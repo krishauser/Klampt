@@ -31,6 +31,6 @@ QT4_WRAP_CPP(SimTest_MOCSrcs driveredit.h controllerdialog.h logoptions.h mainwi
 QT4_ADD_RESOURCES(SimTest_Resources ../KlamptQt/icons.qrc)
 
 ##### Build target ####
-ADD_EXECUTABLE(SimTest main.cpp controllerdialog.cpp driveredit.cpp logoptions.cpp mainwindow.cpp qsimtestbackend.cpp ../KlamptQt/qklamptdisplay.cpp qsimtestgui.cpp ../KlamptQt/qtguibase.cpp ${SimTest_MOCSrcs} ${SimTest_UISrcs} ${SimTest_Resources})
+ADD_EXECUTABLE(SimTest main.cpp controllerdialog.cpp driveredit.cpp logoptions.cpp mainwindow.cpp ../KlamptQt/qklamptdisplay.cpp qsimtestgui.cpp ../KlamptQt/qtguibase.cpp ${SimTest_MOCSrcs} ${SimTest_UISrcs} ${SimTest_Resources})
 TARGET_LINK_LIBRARIES(SimTest ${KLAMPT_LIBRARIES} ${QT_LIBRARIES})
 

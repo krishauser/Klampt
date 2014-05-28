@@ -3,7 +3,6 @@
 
 #include "KlamptQt/qtguibase.h"
 #include "KlamptQt/qklamptdisplay.h"
-#include "qsimtestbackend.h"
 
 #include <Interface/GenericGUI.h>
 #include "Modeling/World.h"
@@ -34,10 +33,11 @@ public:
     ControllerDialog *controller_dialog;
     QString old_filename;
     QSettings* ini;
+    QTimer idle_timer;
 
-    int constrain_mode,constrain_point_mode,delete_mode;
     virtual bool OnCommand(const string& cmd,const string& args);
     virtual bool OnRefresh();
+    virtual bool OnPauseIdle(double secs);
     void UpdateGUI();
     void UpdateMeasurements();
     void LoadFile(QString filename=QString());
@@ -47,7 +47,7 @@ public:
     void ShowHelp();
     void ShowAbout();
 public slots:
-    void SendMousePress(QMouseEvent *e);
+    void OnIdleTimer();
     void SendDriverValue(int index, float value);
     void ShowSensor(int sensor);
     void HideSensor(int sensor);
@@ -55,9 +55,6 @@ public slots:
     void SendControllerSetting(int robot,string setting, string value);
     void SendControllerCommand(int robot,string setting, string value);
     void SendConnection(int robot,QString host,int port,int rate);
-signals:
-    void  EndDelete();
-    void EndConstrain();
 };
 
 #endif // QTGUIBASE_H

@@ -298,13 +298,13 @@ void RobotIKPoseWidget::Drag(int dx,int dy,Camera::Viewport& viewport)
 }
 
 RobotPoseWidget::RobotPoseWidget()
-  :useBase(false),linkPoser(),ikPoser(NULL),poseIKMode(false),attachIKMode(false)
+  :useBase(false),linkPoser(),ikPoser(NULL),mode(ModeNormal)
 {
   useBase = 0;
 }
 
 RobotPoseWidget::RobotPoseWidget(Robot* robot,ViewRobot* viewRobot)
-  :useBase(false),linkPoser(robot,viewRobot),ikPoser(robot),poseIKMode(false),attachIKMode(false)
+  :useBase(false),linkPoser(robot,viewRobot),ikPoser(robot),mode(ModeNormal)
 {
   if(robot->joints[0].type == RobotJoint::Floating) {
     useBase=true;
@@ -377,16 +377,28 @@ bool RobotPoseWidget::DeleteConstraint()
   return false;
 }
 
-bool RobotPoseWidget::ToggleAttach()
+void RobotPoseWidget::SetAttachIKMode(bool on)
 {
-  attachIKMode = !attachIKMode;
-  return attachIKMode;
+  if(on) mode = ModeIKAttach;
+  else mode = ModeNormal;
 }
 
-bool RobotPoseWidget::TogglePoseIK()
+void RobotPoseWidget::SetPoseIKMode(bool on)
 {
-  poseIKMode = !poseIKMode;
-  return poseIKMode;
+  if(on) mode = ModeIKPose;
+  else mode = ModeNormal;
+}
+
+void RobotPoseWidget::SetFixedPoseIKMode(bool on)
+{
+  if(on) mode = ModeIKPoseFixed;
+  else mode = ModeNormal;
+}
+
+void RobotPoseWidget::SetDeleteIKMode(bool on)
+{
+  if(on) mode = ModeIKDelete;
+  else mode = ModeNormal;
 }
 
 void RobotPoseWidget::SetPose(const Config& q)
@@ -402,7 +414,7 @@ void RobotPoseWidget::SetPose(const Config& q)
 void RobotPoseWidget::DrawGL(Camera::Viewport& viewport)
 {
   WidgetSet::DrawGL(viewport);
-  if(attachIKMode && hasFocus) {
+  if(mode == ModeIKAttach && hasFocus) {
     //draw a line
     if(ikPoser.ActiveWidget() >= 0) {
       Vector3 x;
@@ -420,10 +432,9 @@ void RobotPoseWidget::DrawGL(Camera::Viewport& viewport)
 
 bool RobotPoseWidget::BeginDrag(int x,int y,Camera::Viewport& viewport,double& distance)
 {
-  if(attachIKMode) {
+  if(mode == ModeIKAttach) {
     bool res = ikPoser.Hover(x,y,viewport,distance);
     if(!res) {
-      attachIKMode = false;
       return false;    
     }
     attachx=x;
@@ -431,11 +442,11 @@ bool RobotPoseWidget::BeginDrag(int x,int y,Camera::Viewport& viewport,double& d
     Refresh();
     return true;
   }
-  else if(poseIKMode) {
+  else if(mode == ModeIKPose) {
     bool res=WidgetSet::BeginDrag(x,y,viewport,distance);
     if(!res) return false;
     if(closestWidget == &linkPoser) {
-      printf("Adding new fixed point constraint\n");
+      printf("Adding new point constraint\n");
       res=FixCurrentPoint();
       ikPoser.poseWidgets.back().Hover(x,y,viewport,distance);
       ikPoser.poseWidgets.back().SetHighlight(true);
@@ -448,6 +459,27 @@ bool RobotPoseWidget::BeginDrag(int x,int y,Camera::Viewport& viewport,double& d
     }
     return true;
   }
+  else if(mode == ModeIKPoseFixed) {
+    bool res=WidgetSet::BeginDrag(x,y,viewport,distance);
+    if(!res) return false;
+    if(closestWidget == &linkPoser) {
+      printf("Adding new fixed transform constraint\n");
+      res=FixCurrent();
+      ikPoser.poseWidgets.back().Hover(x,y,viewport,distance);
+      ikPoser.poseWidgets.back().SetHighlight(true);
+      //following lines let it be dragged immediately -- comment out if you want it fixed
+      if(ikPoser.poseWidgets.back().BeginDrag(x,y,viewport,distance)) {
+	closestWidget = &ikPoser;
+	ikPoser.closestWidget = &ikPoser.poseWidgets.back();
+	return true;
+      }
+    }
+    return true;
+  }
+  else if(mode == ModeIKDelete) {
+    DeleteConstraint();
+    return true;
+  }
   else {
     return WidgetSet::BeginDrag(x,y,viewport,distance);
   }
@@ -455,7 +487,7 @@ bool RobotPoseWidget::BeginDrag(int x,int y,Camera::Viewport& viewport,double& d
 
 void RobotPoseWidget::Drag(int dx,int dy,Camera::Viewport& viewport)
 {
-  if(attachIKMode) {
+  if(mode == ModeIKAttach) {
     //printf("Attach dragging, hover widget %d\n",ikPoser.ActiveWidget());
     attachx += dx;
     attachy += dy; 
@@ -464,6 +496,9 @@ void RobotPoseWidget::Drag(int dx,int dy,Camera::Viewport& viewport)
     double dist;
     bool res=linkPoser.Hover(attachx,attachy,viewport,dist);
     Refresh();
+    return;
+  }
+  else if(mode == ModeIKDelete) {
     return;
   }
   WidgetSet::Drag(dx,dy,viewport);
@@ -487,8 +522,7 @@ void RobotPoseWidget::Drag(int dx,int dy,Camera::Viewport& viewport)
 
 void RobotPoseWidget::EndDrag()
 {
-  if(attachIKMode) {
-    attachIKMode = false;
+  if(mode == ModeIKAttach) {
     cout<<"Attaching constraint to "<<linkPoser.hoverLink<<endl;
     Refresh();
     int link = linkPoser.hoverLink;

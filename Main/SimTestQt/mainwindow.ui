@@ -112,16 +112,6 @@
            </widget>
           </item>
           <item>
-           <widget class="QCheckBox" name="chk_estimated">
-            <property name="statusTip">
-             <string>Toggle drawing of estimated configuration</string>
-            </property>
-            <property name="text">
-             <string>Estimated</string>
-            </property>
-           </widget>
-          </item>
-          <item>
            <widget class="QCheckBox" name="chk_poser">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
@@ -604,7 +594,7 @@
      <x>0</x>
      <y>0</y>
      <width>825</width>
-     <height>19</height>
+     <height>21</height>
     </rect>
    </property>
    <property name="nativeMenuBar">
@@ -632,9 +622,7 @@
     </property>
     <addaction name="actionDrivers"/>
     <addaction name="actionSensor_Plot"/>
-    <addaction name="actionOptions"/>
-    <addaction name="actionSend_Command"/>
-    <addaction name="actionConnect_Serial_Controller"/>
+    <addaction name="actionController"/>
    </widget>
    <widget class="QMenu" name="menuRecord">
     <property name="title">
@@ -695,37 +683,13 @@
   <widget class="QStatusBar" name="statusBar"/>
   <action name="actionOpen">
    <property name="text">
-    <string>Open</string>
+    <string>Open...</string>
    </property>
    <property name="statusTip">
     <string>ctrl-o</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+O</string>
-   </property>
-  </action>
-  <action name="actionSave_State">
-   <property name="text">
-    <string>Save State</string>
-   </property>
-   <property name="toolTip">
-    <string>ctrl-s</string>
-   </property>
-   <property name="statusTip">
-    <string/>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+S</string>
-   </property>
-  </action>
-  <action name="actionLoad_MultiPath">
-   <property name="text">
-    <string>Load MultiPath</string>
-   </property>
-  </action>
-  <action name="actionReset">
-   <property name="text">
-    <string>Reset</string>
    </property>
   </action>
   <action name="actionExit">
@@ -776,9 +740,9 @@
     <string>Ctrl+P</string>
    </property>
   </action>
-  <action name="actionOptions">
+  <action name="actionController">
    <property name="text">
-    <string>Controller Settings</string>
+    <string>Controller</string>
    </property>
    <property name="toolTip">
     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;ctrl-r&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
@@ -787,20 +751,9 @@
     <string>Ctrl+R</string>
    </property>
   </action>
-  <action name="actionSave_State_As">
-   <property name="text">
-    <string>Save State As</string>
-   </property>
-   <property name="toolTip">
-    <string>ctrl-shift-s</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+Shift+S</string>
-   </property>
-  </action>
   <action name="actionRecordFile">
    <property name="text">
-    <string>Change File</string>
+    <string>Change File...</string>
    </property>
   </action>
   <action name="actionMultiple_Parts">
@@ -847,14 +800,9 @@
     <string>Encode</string>
    </property>
   </action>
-  <action name="actionSend_Command">
-   <property name="text">
-    <string>Send Command</string>
-   </property>
-  </action>
   <action name="actionHelp">
    <property name="text">
-    <string>Help</string>
+    <string>Help...</string>
    </property>
    <property name="shortcut">
     <string>F1</string>
@@ -862,17 +810,12 @@
   </action>
   <action name="actionAbout">
    <property name="text">
-    <string>About</string>
+    <string>About...</string>
    </property>
   </action>
   <action name="actionLoad_Path">
    <property name="text">
-    <string>Load Path</string>
-   </property>
-  </action>
-  <action name="actionLoad_State">
-   <property name="text">
-    <string>Load State</string>
+    <string>Load Path...</string>
    </property>
   </action>
   <action name="actionLog_Simulation">
@@ -899,24 +842,19 @@
     <string>Log Wrenches</string>
    </property>
   </action>
-  <action name="actionConnect_Serial_Controller">
-   <property name="text">
-    <string>Connect Serial Controller</string>
-   </property>
-  </action>
   <action name="actionSimulation">
    <property name="text">
-    <string>Simulation</string>
+    <string>Simulation...</string>
    </property>
   </action>
   <action name="actionContact_State">
    <property name="text">
-    <string>Contact State</string>
+    <string>Contact State...</string>
    </property>
   </action>
   <action name="actionContact_Wrenches">
    <property name="text">
-    <string>Contact Wrenches</string>
+    <string>Contact Wrenches...</string>
    </property>
   </action>
   <action name="actionLog_Sensed_Path">
@@ -937,57 +875,27 @@
   </action>
   <action name="actionSensed_Path">
    <property name="text">
-    <string>Sensed Path</string>
+    <string>Sensed Path...</string>
    </property>
   </action>
   <action name="actionCommanded_Path">
    <property name="text">
-    <string>Commanded Path</string>
+    <string>Commanded Path...</string>
    </property>
   </action>
   <action name="actionChange_Encoder">
    <property name="text">
-    <string>Change Encoder</string>
+    <string>Change Encoder...</string>
    </property>
   </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>
   <customwidget>
-   <class>QSimTestBackend</class>
+   <class>QKlamptDisplay</class>
    <extends>QWidget</extends>
-   <header>qsimtestbackend.h</header>
+   <header>../KlamptQt/qklamptdisplay.h</header>
    <container>1</container>
-   <slots>
-    <signal>AddSensor(QString)</signal>
-    <signal>AddMeasurement(QString)</signal>
-    <signal>ClearAllMeasurements()</signal>
-    <slot>Toggle_Simulation()</slot>
-    <slot>SetWrenches(bool)</slot>
-    <slot>SetSimSpeed(int)</slot>
-    <slot>ToggleMovie(bool)</slot>
-    <slot>SetPoser(bool)</slot>
-    <slot>SetDesired(bool)</slot>
-    <slot>SetEstimated(bool)</slot>
-    <slot>SetBBoxes(bool)</slot>
-    <slot>SetContacts(bool)</slot>
-    <slot>SetExpanded(bool)</slot>
-    <slot>SyncSensorMeasurements(int)</slot>
-    <slot>SetSensorPlot(bool)</slot>
-    <slot>SetLogCheck(bool)</slot>
-    <slot>Reset()</slot>
-    <slot>SetMilestone()</slot>
-    <slot>SetMode(int)</slot>
-    <slot>LoadState()</slot>
-    <slot>LoadMultiPath()</slot>
-    <slot>IsolateSensorMeasurementDraw()</slot>
-    <slot>SetSensorMeasurementSelectIndex(int)</slot>
-    <slot>ConstrainLink()</slot>
-    <slot>DeleteIKGoal()</slot>
-    <slot>LoadDefaultViewport()</slot>
-    <slot>LoadViewport()</slot>
-    <slot>SaveViewport()</slot>
-   </slots>
   </customwidget>
  </customwidgets>
  <resources>
@@ -1059,38 +967,6 @@
    </hints>
   </connection>
   <connection>
-   <sender>actionSave_State_As</sender>
-   <signal>triggered()</signal>
-   <receiver>MainWindow</receiver>
-   <slot>SaveScenario()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>331</x>
-     <y>299</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>actionSave_State</sender>
-   <signal>triggered()</signal>
-   <receiver>MainWindow</receiver>
-   <slot>SaveLastScenario()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>331</x>
-     <y>299</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
    <sender>actionDrivers</sender>
    <signal>triggered()</signal>
    <receiver>MainWindow</receiver>
@@ -1107,26 +983,10 @@
    </hints>
   </connection>
   <connection>
-   <sender>actionOptions</sender>
+   <sender>actionController</sender>
    <signal>triggered()</signal>
    <receiver>MainWindow</receiver>
-   <slot>ShowOptions()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>331</x>
-     <y>299</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>actionReset</sender>
-   <signal>triggered()</signal>
-   <receiver>MainWindow</receiver>
-   <slot>Reset()</slot>
+   <slot>ShowController()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>-1</x>
@@ -1177,8 +1037,8 @@
    <slot>SetExpanded(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>663</x>
-     <y>521</y>
+     <x>634</x>
+     <y>525</y>
     </hint>
     <hint type="destinationlabel">
      <x>637</x>
@@ -1193,8 +1053,8 @@
    <slot>SetWrenches(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>561</x>
-     <y>521</y>
+     <x>372</x>
+     <y>525</y>
     </hint>
     <hint type="destinationlabel">
      <x>636</x>
@@ -1209,8 +1069,8 @@
    <slot>SetBBoxes(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>195</x>
-     <y>521</y>
+     <x>557</x>
+     <y>525</y>
     </hint>
     <hint type="destinationlabel">
      <x>636</x>
@@ -1225,8 +1085,8 @@
    <slot>SetContacts(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>110</x>
-     <y>521</y>
+     <x>295</x>
+     <y>525</y>
     </hint>
     <hint type="destinationlabel">
      <x>636</x>
@@ -1241,8 +1101,8 @@
    <slot>SetDesired(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>281</x>
-     <y>521</y>
+     <x>437</x>
+     <y>525</y>
     </hint>
     <hint type="destinationlabel">
      <x>636</x>
@@ -1267,30 +1127,14 @@
    </hints>
   </connection>
   <connection>
-   <sender>chk_estimated</sender>
-   <signal>clicked(bool)</signal>
-   <receiver>MainWindow</receiver>
-   <slot>SetEstimated(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>385</x>
-     <y>521</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>636</x>
-     <y>148</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
    <sender>btn_constrain</sender>
-   <signal>clicked()</signal>
+   <signal>clicked(bool)</signal>
    <receiver>MainWindow</receiver>
    <slot>IKConstrain()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>566</x>
-     <y>565</y>
+     <x>658</x>
+     <y>572</y>
     </hint>
     <hint type="destinationlabel">
      <x>521</x>
@@ -1300,13 +1144,13 @@
   </connection>
   <connection>
    <sender>btn_delete</sender>
-   <signal>clicked()</signal>
+   <signal>clicked(bool)</signal>
    <receiver>MainWindow</receiver>
    <slot>IKDelete()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>610</x>
-     <y>565</y>
+     <x>700</x>
+     <y>576</y>
     </hint>
     <hint type="destinationlabel">
      <x>623</x>
@@ -1508,13 +1352,13 @@
   </connection>
   <connection>
    <sender>btn_constrain_point</sender>
-   <signal>clicked()</signal>
+   <signal>clicked(bool)</signal>
    <receiver>MainWindow</receiver>
    <slot>IKConstrainPoint()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>522</x>
-     <y>565</y>
+     <x>624</x>
+     <y>572</y>
     </hint>
     <hint type="destinationlabel">
      <x>619</x>
@@ -1524,13 +1368,13 @@
   </connection>
   <connection>
    <sender>btn_force</sender>
-   <signal>clicked()</signal>
+   <signal>clicked(bool)</signal>
    <receiver>MainWindow</receiver>
    <slot>DoForceMode()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>448</x>
-     <y>565</y>
+     <x>565</x>
+     <y>576</y>
     </hint>
     <hint type="destinationlabel">
      <x>528</x>
@@ -1545,8 +1389,8 @@
    <slot>DoFreeMode()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>360</x>
-     <y>565</y>
+     <x>489</x>
+     <y>576</y>
     </hint>
     <hint type="destinationlabel">
      <x>352</x>
@@ -1561,28 +1405,12 @@
    <slot>DoIKMode()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>404</x>
-     <y>565</y>
+     <x>523</x>
+     <y>572</y>
     </hint>
     <hint type="destinationlabel">
      <x>223</x>
      <y>575</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>actionSend_Command</sender>
-   <signal>triggered()</signal>
-   <receiver>MainWindow</receiver>
-   <slot>ShowCommand()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>343</x>
-     <y>299</y>
     </hint>
    </hints>
   </connection>
@@ -1607,22 +1435,6 @@
    <signal>triggered()</signal>
    <receiver>MainWindow</receiver>
    <slot>ShowAbout()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>343</x>
-     <y>299</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>actionLoad_State</sender>
-   <signal>triggered()</signal>
-   <receiver>MainWindow</receiver>
-   <slot>LoadState()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>-1</x>
@@ -1687,22 +1499,6 @@
    <signal>toggled(bool)</signal>
    <receiver>MainWindow</receiver>
    <slot>LogContactWrenches(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>343</x>
-     <y>299</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>actionConnect_Serial_Controller</sender>
-   <signal>triggered()</signal>
-   <receiver>MainWindow</receiver>
-   <slot>ShowSerialController()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>-1</x>
@@ -1881,12 +1677,28 @@
    <slot>Reset()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>415</x>
-     <y>555</y>
+     <x>322</x>
+     <y>576</y>
     </hint>
     <hint type="destinationlabel">
      <x>412</x>
      <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>chk_objects</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>MainWindow</receiver>
+   <slot>SetPoseObjects(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>724</x>
+     <y>555</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>37</x>
+     <y>506</y>
     </hint>
    </hints>
   </connection>
@@ -1914,7 +1726,7 @@
   <slot>SetRecord(bool)</slot>
   <slot>LoadResource()</slot>
   <slot>ShowDriverEdit()</slot>
-  <slot>ShowOptions()</slot>
+  <slot>ShowController()</slot>
   <slot>SaveScenario()</slot>
   <slot>SaveLastScenario()</slot>
   <slot>IKConstrain()</slot>
@@ -1935,7 +1747,6 @@
   <slot>DoFreeMode()</slot>
   <slot>DoIKMode()</slot>
   <slot>DoForceMode()</slot>
-  <slot>ShowCommand()</slot>
   <slot>ShowHelp()</slot>
   <slot>ShowAbout()</slot>
   <slot>LoadPath()</slot>
@@ -1943,7 +1754,6 @@
   <slot>LogSimulation(bool)</slot>
   <slot>LogContactState(bool)</slot>
   <slot>LogContactWrenches(bool)</slot>
-  <slot>ShowSerialController()</slot>
   <slot>SetPoseObjects(bool)</slot>
   <slot>ChangeSimulationLogFile()</slot>
   <slot>ChangeContactStateLogFile()</slot>

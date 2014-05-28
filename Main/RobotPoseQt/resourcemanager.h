@@ -6,60 +6,102 @@
 
 using namespace std;
 
-class ResourceTracker;
-
-typedef SmartPointer<ResourceTracker> ResourceNode;
-
-class ResourceTracker
+/** @brief Allows a resource to be expanded into component resources,
+ * edited, and then backed up.
+ */
+class ResourceNode
 {
-
  public:
-  ResourcePtr resource;
-  vector<ResourceNode> children;
-  bool dirty;
-  bool expanded;
-  ResourceNode parent;
-
-  ResourceTracker(ResourcePtr,ResourceNode parent=NULL);
-  ResourceNode AddChild(ResourcePtr);
-  vector<ResourceNode> AddChildren(vector<ResourcePtr>);
-  void SetDirty();
+  ResourceNode(const ResourcePtr& res,ResourceNode* parent=NULL);
   const char *Type(){return resource->Type();}
   const char *Name(){return resource->name.c_str();}
-  bool Print(int level=0);
+  int Depth() const;
+  void Print(int level=0);
+  string Identifier() const;
+  vector<string> PathTo() const;
+  SmartPointer<ResourceNode> AddChild(const ResourcePtr& res);
+  vector<SmartPointer<ResourceNode> > AddChildren(const vector<ResourcePtr>& children);
+  bool Editable() const;
+  void SetSaved() { saved = true; }
+  bool IsSaved() const { return saved; }
+  void SetChanged();
+  void SetChildrenChanged();
+  bool ChildrenChanged() const { return childrenChanged; }
+  bool IsDirty() const;
+  ///Extracts everything to children
+  void Expand();
+  bool IsExpandable() const;
+  bool IsExpanded() const { return expanded; }
+  ///Backs up changes from children, marks as invalid if changes
+  ///couldn't be made, and returns false.  The reason is given in 
+  ///the error string if is is non-NULL.
+  bool Backup(string* errorMessage=NULL,ResourceNode** where=NULL);
+  bool IsValid() const { return valid; }
+  ///If a backup couldn't be made, either the expansion should be cleared
+  ///or the backup needs to be fixed
+  void ClearExpansion();
+  ///Decorator can be:
+  ///- '!' for an invalid resource
+  ///- '@' for a non-backed up resource
+  ///- '*' for a backed-up, unsaved top-level resource
+  ///- empty for an unchanged inner resource, or an unchanged saved top-level
+  ///  resource
+  const char* Decorator() const;
+
+  ResourcePtr resource;
+  vector<SmartPointer<ResourceNode> > children;
+  ResourceNode* parent;
+ private:
+  bool saved;
+  bool childrenChanged;
+  bool childrenEditable;
+  bool expanded;
+  bool valid;
 };
 
+typedef SmartPointer<ResourceNode> ResourceNodePtr;
 
-
-class ResourceManager
-{
-  
+class ResourceTree
+{  
  public:
-//  GenericBackendBase* backend;
   ResourceLibrary library;
-  vector<ResourceNode> toplevel;
-  ResourceNode selected;
-  ResourceNode open;
-  map<string,ResourceNode> itemsByName;
+  vector<ResourceNodePtr> topLevel;
 
+  ResourceTree();
+  ResourceNodePtr LoadFile(const string& fn);
+  bool LoadFolder(const string& fn);
+  bool Save(ResourceNodePtr& node,string file="");
+  bool SaveFolder(const string& fn);
+  void Delete(ResourceNodePtr r);
+  bool AnyUnsaved() const;
+  bool IsValid() const;
+  bool BackupAll(string* errorMessage);
+  void TreeFromLibrary();
+  bool TreeToLibrary(bool trybackup=true);
+  int ChildIndex(ResourceNode* n) const;
+
+  ResourceNodePtr Add(ResourcePtr r,ResourceNodePtr parent=NULL);
+
+  void Print();
+};
+
+class ResourceManager : public ResourceTree
+{
+ public:
   ResourceManager();
-  ResourceNode LoadResource(const string& fn);
+  void Select(const string& identifier);
+  void Select(const vector<string>& path);
+  ResourceNodePtr Next();
+  ResourceNodePtr Get(const string& identifier);
+  ResourceNodePtr Get(const vector<string>& path);
+  ResourceNodePtr AddChildOfSelected(ResourcePtr r,bool changeSelection=true);
+  void DeleteSelected();
+  bool BackupSelected(string* errorString=NULL,ResourceNode** which=NULL);
+  vector<ResourceNodePtr> ExpandSelected();
+  bool SaveSelected();
+  bool SaveSelected(const string& fn);
 
-  bool DeleteNode(ResourceNode r, bool delete_reference=true);
-  bool DeleteSelected();
-  bool ChangeSelected(ResourceNode);
-  bool ChangeSelected(string str);
-
-  bool ChangeSelectedName(string name);
-  int size();
-  bool SaveSelected(const string& file="");
-
-  vector<ResourceNode> ExtractSelectedChildren(vector<string> types);
-  vector<ResourceNode> ExpandSelected();
-  ResourceNode AddAsChild(ResourcePtr r);
-  ResourceNode AddTopLevel(ResourcePtr r);
-
-  bool Print();
+  ResourceNodePtr selected;
 };
 
 #endif

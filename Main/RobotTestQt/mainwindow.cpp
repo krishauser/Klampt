@@ -82,7 +82,8 @@ void MainWindow::SetCollisions(bool status){
 }
 
 void MainWindow::SetIK(bool status){
-    gui->SendButtonToggle("pose_ik",status);
+  if(status) gui->SendCommand("constrain_point_mode");
+  else gui->SendCommand("pose_mode");
 }
 
 void MainWindow::SetDriver(int index){

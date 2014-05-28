@@ -8,30 +8,16 @@
 
 #define NAMECOL 0
 #define TYPECOL 1
+#define DECORATORCOL 2
 
 class QResourceTreeItem : public QTreeWidgetItem
 {
 public:
+  ResourceNodePtr resource;
 
-    int dirty;
-
-    int show_delete;
-    int show_load;
-    int show_togui;
-    int show_expand;
-    string name;
-
-    Math::VectorTemplate<double> *config;
-
-    QString type;
-
-    QResourceTreeItem();
-
-    QResourceTreeItem(ResourceNode rt);
-    void AddChildren(vector<ResourceNode> resources);
-    void addChild(ResourceNode r);
-public slots:
-    virtual void ToGUI();
-    virtual void FromGUI();
+    QResourceTreeItem(ResourceNodePtr rt);
+    void AddChildren(const vector<ResourceNodePtr>& resources);
+    void addChild(ResourceNodePtr r);
+    void updateDecorator();
 };
 #endif // QRESOURCETREEITEM_H

@@ -98,10 +98,14 @@ public:
   bool FixCurrentPoint();
   ///Deletes the currently hovered constraint or all constraints on the currently hovered link
   bool DeleteConstraint();
-  ///Turn attach mode on/off
-  bool ToggleAttach();
-  ///Turn IK posing on/off
-  bool TogglePoseIK();
+  ///Turn attach IK mode on/off
+  void SetAttachIKMode(bool);
+  ///Turn point IK posing on/off
+  void SetPoseIKMode(bool);
+  ///Turn fixed IK posing on/off
+  void SetFixedPoseIKMode(bool);
+  ///Turn delete IK widgets on/off
+  void SetDeleteIKMode(bool);
 
   virtual void DrawGL(Camera::Viewport& viewport);
   virtual bool BeginDrag(int x,int y,Camera::Viewport& viewport,double& distance);
@@ -113,8 +117,8 @@ public:
   TransformWidget basePoser;
   RobotLinkPoseWidget linkPoser;
   RobotIKPoseWidget ikPoser;
-  bool poseIKMode;
-  bool attachIKMode;
+  enum { ModeNormal, ModeIKAttach, ModeIKPose, ModeIKPoseFixed, ModeIKDelete };
+  int mode;
   int attachx,attachy;
   Ray3D attachRay;
 };

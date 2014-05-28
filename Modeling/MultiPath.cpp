@@ -277,21 +277,25 @@ bool MultiPath::Save(const string& fn) const
 
 bool MultiPath::HasTiming(int s) const
 {
+  if(s < 0 || s >= (int)sections.size()) return false;
   return !sections[s].times.empty();
 }
 
 bool MultiPath::HasVelocity(int s) const
 {
+  if(s < 0 || s >= (int)sections.size()) return false;
   return !sections[s].velocities.empty();
 }
 
 bool MultiPath::HasConstraints(int s) const
 {
+  if(s < 0 || s >= (int)sections.size()) return false;
   return !sections[s].ikGoals.empty() || HasContacts(s);
 }
 
 bool MultiPath::HasContacts(int s) const
 {
+  if(s < 0 || s >= (int)sections.size()) return false;
   return (sections[s].holds.size()+sections[s].holdNames.size()+sections[s].holdIndices.size() > 0);
 }
 
@@ -614,7 +618,7 @@ int MultiPath::Evaluate(Real time,GeneralizedCubicBezierCurve& curve,Real& durat
   if(seg < 0) { 
     curve.x0 = curve.x1 = curve.x2 = curve.x3 = sections[0].milestones[0]; 
     duration = param = 0;
-    return seg; 
+    return -1; 
   }
   else if(seg == (int)sections.size()) { 
     curve.x0 = curve.x1 = curve.x2 = curve.x3 = sections.back().milestones.back(); 

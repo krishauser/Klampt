@@ -233,6 +233,20 @@ RealTimePlanning/fast:
 .PHONY : RealTimePlanning/fast
 
 # Convenience name for target.
+Examples/CMakeFiles/UserTrials.dir/rule:
+	cd /home/hauser/gitlibs/Klampt && $(MAKE) -f CMakeFiles/Makefile2 Examples/CMakeFiles/UserTrials.dir/rule
+.PHONY : Examples/CMakeFiles/UserTrials.dir/rule
+
+# Convenience name for target.
+UserTrials: Examples/CMakeFiles/UserTrials.dir/rule
+.PHONY : UserTrials
+
+# fast build rule for target.
+UserTrials/fast:
+	cd /home/hauser/gitlibs/Klampt && $(MAKE) -f Examples/CMakeFiles/UserTrials.dir/build.make Examples/CMakeFiles/UserTrials.dir/build
+.PHONY : UserTrials/fast
+
+# Convenience name for target.
 Examples/CMakeFiles/examples.dir/rule:
 	cd /home/hauser/gitlibs/Klampt && $(MAKE) -f CMakeFiles/Makefile2 Examples/CMakeFiles/examples.dir/rule
 .PHONY : Examples/CMakeFiles/examples.dir/rule
@@ -366,6 +380,30 @@ realtimeplanning.cpp.s:
 	cd /home/hauser/gitlibs/Klampt && $(MAKE) -f Examples/CMakeFiles/RealTimePlanning.dir/build.make Examples/CMakeFiles/RealTimePlanning.dir/realtimeplanning.cpp.s
 .PHONY : realtimeplanning.cpp.s
 
+usertrials.o: usertrials.cpp.o
+.PHONY : usertrials.o
+
+# target to build an object file
+usertrials.cpp.o:
+	cd /home/hauser/gitlibs/Klampt && $(MAKE) -f Examples/CMakeFiles/UserTrials.dir/build.make Examples/CMakeFiles/UserTrials.dir/usertrials.cpp.o
+.PHONY : usertrials.cpp.o
+
+usertrials.i: usertrials.cpp.i
+.PHONY : usertrials.i
+
+# target to preprocess a source file
+usertrials.cpp.i:
+	cd /home/hauser/gitlibs/Klampt && $(MAKE) -f Examples/CMakeFiles/UserTrials.dir/build.make Examples/CMakeFiles/UserTrials.dir/usertrials.cpp.i
+.PHONY : usertrials.cpp.i
+
+usertrials.s: usertrials.cpp.s
+.PHONY : usertrials.s
+
+# target to generate assembly for a file
+usertrials.cpp.s:
+	cd /home/hauser/gitlibs/Klampt && $(MAKE) -f Examples/CMakeFiles/UserTrials.dir/build.make Examples/CMakeFiles/UserTrials.dir/usertrials.cpp.s
+.PHONY : usertrials.cpp.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -377,6 +415,7 @@ help:
 	@echo "... DynamicPlanDemo"
 	@echo "... PlanDemo"
 	@echo "... RealTimePlanning"
+	@echo "... UserTrials"
 	@echo "... edit_cache"
 	@echo "... examples"
 	@echo "... install"
@@ -401,6 +440,9 @@ help:
 	@echo "... realtimeplanning.o"
 	@echo "... realtimeplanning.i"
 	@echo "... realtimeplanning.s"
+	@echo "... usertrials.o"
+	@echo "... usertrials.i"
+	@echo "... usertrials.s"
 .PHONY : help
 
 

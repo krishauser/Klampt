@@ -553,7 +553,7 @@
   </action>
   <action name="actionOpen_File">
    <property name="text">
-    <string>Open File</string>
+    <string>Open File...</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+O</string>
@@ -563,8 +563,9 @@
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>
   <customwidget>
-   <class>QRobotTestBackend</class>
+   <class>QKlamptDisplay</class>
    <extends>QWidget</extends>
+   <header>../KlamptQt/qklamptdisplay.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

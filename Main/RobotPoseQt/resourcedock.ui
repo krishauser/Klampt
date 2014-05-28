@@ -59,7 +59,7 @@
           <string>Delete</string>
          </property>
          <property name="icon">
-          <iconset resource="../SimTestQt/icons.qrc">
+          <iconset resource="../KlamptQt/icons.qrc">
            <normaloff>:/Images/Images/list-remove.svg</normaloff>:/Images/Images/list-remove.svg</iconset>
          </property>
         </widget>
@@ -109,7 +109,7 @@
      <x>0</x>
      <y>0</y>
      <width>400</width>
-     <height>25</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -162,7 +162,7 @@
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <resources>
-  <include location="../SimTestQt/icons.qrc"/>
+  <include location="../KlamptQt/icons.qrc"/>
  </resources>
  <connections>
   <connection>

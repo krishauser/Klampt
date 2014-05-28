@@ -51,7 +51,8 @@ public:
   void SaveScreenshot()
   {
     const char* screenshotFilec=screenshotFile.c_str();
-    GLSaveScreenshotPPM(screenshotFilec);
+    bool res=GLSaveScreenshotPPM(screenshotFilec);
+    if(!res) printf("Error saving screenshot to %s\n",screenshotFile.c_str());
     if(verbose) printf("Screenshot saved to %s\n",screenshotFile.c_str());
   }
 
@@ -65,7 +66,7 @@ public:
   void EncodeMovie(){
       //TODO add native support
       //http://ffmpeg.org/doxygen/trunk/api-example_8c-source.html
-      //temprorarily using system calls
+      //temporarily using system calls
 
   #ifdef WIN32
       system((video_encoding_command + " " + moviefile + " & del image*.ppm").c_str());

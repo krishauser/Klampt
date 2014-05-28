@@ -391,7 +391,7 @@ WARN_LOGFILE           = "doxygen_warnings.log"
 # directories like "/usr/src/myproject". Separate the files or directories 
 # with spaces.
 
-INPUT                  = . Contact Control Modeling Planning Simulation IO View
+INPUT                  = . Contact Control Interface Modeling Planning Simulation IO View 
 
 # If the value of the INPUT tag contains directories, you can use the 
 # FILE_PATTERNS tag to specify one or more wildcard pattern (like *.cpp 

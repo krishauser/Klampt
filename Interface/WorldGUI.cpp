@@ -18,7 +18,16 @@ bool WorldGUIBackend::OnCommand(const string& cmd,const string& args)
     return true;
   }
   return GLNavigationBackend::OnCommand(cmd,args);
-  return false;
+}
+
+bool WorldGUIBackend::OnMouseWheel(int dwheel)
+{
+  camera.dist *= (1 + 0.01*Real(dwheel)/20);
+  show_view_target=1; 
+  t_hide_view_target=timer.LastElapsedTime()+0.5; 
+  SendPauseIdle(0);
+  SendRefresh();
+  return true;
 }
 
 bool WorldGUIBackend::LoadFile(const char* fn)

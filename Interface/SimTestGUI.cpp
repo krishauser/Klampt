@@ -73,9 +73,9 @@ void SimTestBackend::Start()
   drawContacts = 0;
   drawWrenches = 1;
   drawExpanded = 0;
-  pose_ik = 0;
+  click_mode = 0;
   pose_objects = 0;
-  forceApplicationMode = false, forceSpringActive = false;
+  forceSpringActive = false;
 
   MapButtonToggle("draw_bbs",&drawBBs);
   MapButtonToggle("draw_poser",&drawPoser);
@@ -84,9 +84,7 @@ void SimTestBackend::Start()
   MapButtonToggle("draw_contacts",&drawContacts);
   MapButtonToggle("draw_wrenches",&drawWrenches);
   MapButtonToggle("draw_expanded",&drawExpanded);
-  MapButtonToggle("pose_ik",&pose_ik);
   MapButtonToggle("pose_objects",&pose_objects);
-  MapButtonToggle("force_application_mode",&forceApplicationMode);
  
   /*
   //TEMP: testing determinism
@@ -396,14 +394,37 @@ bool SimTestBackend::OnCommand(const string& cmd,const string& args)
     ss>>index>>measurement;
     ToggleSensorMeasurement(index,measurement,0);
   }
-  else if(cmd=="constrain_link") {
-      robotWidgets[0].FixCurrent();
+  else if(cmd=="pose_mode") {
+    click_mode = ModeNormal;
+    for(size_t i=0;i<robotWidgets.size();i++)
+      robotWidgets[i].SetFixedPoseIKMode(false);
   }
-  else if(cmd=="constrain_link_point"){
+  else if(cmd=="constrain_link_mode") {
+    click_mode = ModeNormal;
+    for(size_t i=0;i<robotWidgets.size();i++)
+      robotWidgets[i].SetFixedPoseIKMode(true);
+  }
+  else if(cmd=="constrain_point_mode") {
+    click_mode = ModeNormal;
+    for(size_t i=0;i<robotWidgets.size();i++)
+      robotWidgets[i].SetPoseIKMode(true);
+  }
+  else if(cmd=="delete_constraint_mode") {
+    click_mode = ModeNormal;
+    for(size_t i=0;i<robotWidgets.size();i++)
+      robotWidgets[i].SetDeleteIKMode(true);
+  }
+  else if(cmd=="force_application_mode") {
+    click_mode = ModeForceApplication;
+  }
+  else if(cmd=="constrain_current_point"){
     robotWidgets[0].FixCurrentPoint();
   }
-  else if(cmd == "delete_constraint") {
+  else if(cmd == "delete_current_constraint") {
       robotWidgets[0].DeleteConstraint();
+  }
+  else if(cmd=="constrain_current_link") {
+      robotWidgets[0].FixCurrent();
   }
   else if(cmd=="set_link") {
     ss >> cur_link;
@@ -480,12 +501,10 @@ bool SimTestBackend::LoadFile(const char* fn)
 
 void SimTestBackend::DoPassiveMouseMove(int x, int y)
 {
-  if(forceApplicationMode) sim.UpdateModel();
-  allWidgets.Enable(&dragWidget,(forceApplicationMode==1));
-  allWidgets.Enable(&allObjectWidgets,(pose_objects == 1));
-  allWidgets.Enable(&allRobotWidgets,(drawPoser==1));
-  for(size_t i=0;i<robotWidgets.size();i++) 
-    robotWidgets[i].poseIKMode = (pose_ik != 0);
+  if(click_mode == ModeForceApplication) sim.UpdateModel();
+  allWidgets.Enable(&dragWidget,(click_mode == ModeForceApplication));
+  allWidgets.Enable(&allObjectWidgets,((click_mode != ModeForceApplication) && (pose_objects == 1)));
+  allWidgets.Enable(&allRobotWidgets,(click_mode != ModeForceApplication && drawPoser==1));
 
   double d;
   if(allWidgets.Hover(x,viewport.h-y,viewport,d))
@@ -497,12 +516,10 @@ void SimTestBackend::DoPassiveMouseMove(int x, int y)
 
 void SimTestBackend::BeginDrag(int x,int y,int button,int modifiers)
 {
-  if(forceApplicationMode) sim.UpdateModel();
-  allWidgets.Enable(&dragWidget,(forceApplicationMode==1));
-  allWidgets.Enable(&allObjectWidgets,(pose_objects == 1));
-  allWidgets.Enable(&allRobotWidgets,(drawPoser==1));
-  for(size_t i=0;i<robotWidgets.size();i++) 
-    robotWidgets[i].poseIKMode = (pose_ik != 0);
+  if(click_mode == ModeForceApplication) sim.UpdateModel();
+  allWidgets.Enable(&dragWidget,(click_mode == ModeForceApplication));
+  allWidgets.Enable(&allObjectWidgets,((click_mode != ModeForceApplication) && (pose_objects == 1)));
+  allWidgets.Enable(&allRobotWidgets,(click_mode != ModeForceApplication && drawPoser==1));
 
   Robot* robot = world->robots[0].robot;
   if(button == GLUT_RIGHT_BUTTON) {
@@ -517,12 +534,10 @@ void SimTestBackend::BeginDrag(int x,int y,int button,int modifiers)
 
 void SimTestBackend::EndDrag(int x,int y,int button,int modifiers)
 {
-  if(forceApplicationMode) sim.UpdateModel();
-  allWidgets.Enable(&dragWidget,(forceApplicationMode==1));
-  allWidgets.Enable(&allObjectWidgets,(pose_objects == 1));
-  allWidgets.Enable(&allRobotWidgets,(drawPoser==1));
-  for(size_t i=0;i<robotWidgets.size();i++) 
-    robotWidgets[i].poseIKMode = (pose_ik != 0);
+  if(click_mode == ModeForceApplication) sim.UpdateModel();
+  allWidgets.Enable(&dragWidget,(click_mode == ModeForceApplication));
+  allWidgets.Enable(&allObjectWidgets,((click_mode != ModeForceApplication) && (pose_objects == 1)));
+  allWidgets.Enable(&allRobotWidgets,(click_mode != ModeForceApplication && drawPoser==1));
 
   if(button == GLUT_RIGHT_BUTTON) {
     if(allWidgets.hasFocus) {
@@ -546,12 +561,10 @@ void SimTestBackend::DoFreeDrag(int dx,int dy,int button)
   if(button == GLUT_LEFT_BUTTON)  DragRotate(dx,dy);
   else if(button == GLUT_RIGHT_BUTTON) {
     //dragging widgets
-    if(forceApplicationMode) sim.UpdateModel();
-    allWidgets.Enable(&dragWidget,(forceApplicationMode==1));
-    allWidgets.Enable(&allObjectWidgets,(pose_objects == 1));
-    allWidgets.Enable(&allRobotWidgets,(drawPoser==1));
-    for(size_t i=0;i<robotWidgets.size();i++) 
-      robotWidgets[i].poseIKMode = (pose_ik != 0);
+    if(click_mode == ModeForceApplication) sim.UpdateModel();
+    allWidgets.Enable(&dragWidget,(click_mode == ModeForceApplication));
+    allWidgets.Enable(&allObjectWidgets,((click_mode != ModeForceApplication) && (pose_objects == 1)));
+    allWidgets.Enable(&allRobotWidgets,(click_mode != ModeForceApplication && drawPoser==1));
     
     if(allWidgets.hasFocus) {
       allWidgets.Drag(dx,-dy,viewport);
@@ -844,7 +857,7 @@ bool GLUISimTestGUI::Initialize()
 
   UpdateGUI();
 
-  const static int NR = 20;
+  const static int NR = 24;
   const static char* rules [NR*3]= {"{type:key_down,key:c}","constrain_link","",
 				    "{type:key_down,key:d}","delete_constraint","",
 				    "{type:key_down,key:p}","print_config","",
@@ -855,6 +868,10 @@ bool GLUISimTestGUI::Initialize()
 				    "{type:button_press,button:simulate}","toggle_simulate","",
 				    "{type:button_press,button:reset}","reset","",
 				    "{type:button_press,button:set_milestone}","command_pose","",
+				    "{type:button_toggle,button:pose_ik_mode,checked:1}","constrain_point_mode","",
+				    "{type:button_toggle,button:pose_ik,checked:0}","pose_mode","",
+				    "{type:button_toggle,button:force_application_mode,checked:1}","force_application_mode","",
+				    "{type:button_toggle,button:force_application_mode,checked:0}","pose_mode","",
 				    "{type:button_toggle,button:do_logging,checked:1}","log_sim","simtest_log.csv",
 				    "{type:button_toggle,button:do_logging,checked:0}","log_sim","",
 				    "{type:button_toggle,button:do_contact_state_logging,checked:1}","log_contact_state","simtest_contact_log.csv",

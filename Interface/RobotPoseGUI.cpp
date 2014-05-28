@@ -70,7 +70,6 @@ void RobotPoseBackend::Start()
   draw_bbs = 0;
   draw_com = 0;
   draw_frame = 0;
-  pose_ik = 0;
   self_colliding.resize(robot->links.size(),false);   
 
 
@@ -89,7 +88,6 @@ void RobotPoseBackend::Start()
   for(size_t i=0;i<world->rigidObjects.size();i++)
     allWidgets.widgets.push_back(&objectWidgets[i]);
   
-  poseWidget.Set(world->robots[0].robot,&world->robots[0].view);
   objectWidgets.resize(world->rigidObjects.size());
   
 
@@ -98,7 +96,6 @@ void RobotPoseBackend::Start()
 
   UpdateConfig();
 
-  MapButtonToggle("pose_ik",&pose_ik);
   MapButtonToggle("draw_geom",&draw_geom);
   MapButtonToggle("draw_bbs",&draw_bbs);
   MapButtonToggle("draw_com",&draw_com);
@@ -219,7 +216,7 @@ Stance RobotPoseBackend::GetFlatStance()
 {
   Robot* robot = world->robots[0].robot;
   Stance s;
-  if(poseWidget.ikPoser.poseGoals.empty()) {
+  if(robotWidgets[0].ikPoser.poseGoals.empty()) {
     printf("Storing flat ground stance\n");
     ContactFormation cf;
     GetFlatContacts(*robot,settings["flatContactTolerance"],cf);
@@ -236,8 +233,8 @@ Stance RobotPoseBackend::GetFlatStance()
   }
   else {
     printf("Storing flat contact stance\n");
-    for(size_t i=0;i<poseWidget.ikPoser.poseGoals.size();i++) {
-      int link = poseWidget.ikPoser.poseGoals[i].link;
+    for(size_t i=0;i<robotWidgets[0].ikPoser.poseGoals.size();i++) {
+      int link = robotWidgets[0].ikPoser.poseGoals[i].link;
       vector<ContactPoint> cps;
       GetFlatContacts(*robot,link,settings["flatContactTolerance"],cps);
       Real friction = settings["defaultStanceFriction"];
@@ -246,7 +243,7 @@ Stance RobotPoseBackend::GetFlatStance()
 	cps[j].kFriction = friction;
       Hold h;
       LocalContactsToHold(cps,link,*robot,h);
-      h.ikConstraint = poseWidget.ikPoser.poseGoals[i];
+      h.ikConstraint = robotWidgets[0].ikPoser.poseGoals[i];
       s.insert(h);
     }
   }
@@ -259,12 +256,12 @@ ResourcePtr RobotPoseBackend::PoserToResource(const string& type)
   if(type == "Config") 
     return MakeResource("",robot->q);
   else if(type == "IKGoal") {
-    int ind = poseWidget.ikPoser.ActiveWidget();
+    int ind = robotWidgets[0].ikPoser.ActiveWidget();
     if(ind < 0) {
       printf("Not hovering over any IK widget\n");
       return NULL;
     }
-    return MakeResource("",poseWidget.ikPoser.poseGoals[ind]);
+    return MakeResource("",robotWidgets[0].ikPoser.poseGoals[ind]);
   }
   else if(type == "Stance") {
     Stance s = GetFlatStance();
@@ -317,10 +314,12 @@ ResourcePtr RobotPoseBackend::PoserToResource(const string& type)
     return NULL;
   }
 }
-void RobotPoseBackend::CleanContacts(Hold& h)
+void RobotPoseBackend::CleanContacts(Hold& h,Real xtol,Real ntol)
 {
-  Real ntol = settings["cleanContactsNTol"];
-  Real xtol = settings["cleanContactsXTol"];
+  if(xtol==0)
+    xtol = settings["cleanContactsXTol"];
+  if(ntol==0)
+    ntol = settings["cleanContactsNTol"];
   CHContacts(h.contacts,ntol,xtol);
 }
 
@@ -331,7 +330,23 @@ bool RobotPoseBackend::OnCommand(const string& cmd,const string& args)
 {
   Robot* robot = world->robots[0].robot;
   stringstream ss(args);
-  if(cmd == "poser_to_resource") {
+  if(cmd=="pose_mode") {
+    for(size_t i=0;i<robotWidgets.size();i++)
+      robotWidgets[i].SetFixedPoseIKMode(false);
+  }
+  else if(cmd=="constrain_link_mode") {
+    for(size_t i=0;i<robotWidgets.size();i++)
+      robotWidgets[i].SetFixedPoseIKMode(true);
+  }
+  else if(cmd=="constrain_point_mode") {
+    for(size_t i=0;i<robotWidgets.size();i++)
+      robotWidgets[i].SetPoseIKMode(true);
+  }
+  else if(cmd=="delete_constraint_mode") {
+    for(size_t i=0;i<robotWidgets.size();i++)
+      robotWidgets[i].SetDeleteIKMode(true);
+  }
+  else if(cmd == "poser_to_resource") {
     ResourcePtr r=PoserToResource(args);
     if(r) {
       ResourceGUIBackend::Add(r);
@@ -339,24 +354,19 @@ bool RobotPoseBackend::OnCommand(const string& cmd,const string& args)
   }
   else if(cmd == "poser_to_resource_overwrite") { 
     ResourcePtr oldr = ResourceGUIBackend::CurrentResource();
-    if(!oldr)
+    if(!oldr) {
       printf("No resource selected\n");
+      return true;
+    }
     ResourcePtr r = PoserToResource(oldr->Type());
     r->name = oldr->name;
     r->fileName = oldr->fileName;
 
-    /*
-    vector<ResourcePtr >& v=resources->itemsByType[cur_resource_type];
-    for(size_t i=0;i<v.size();i++)
-      if(v[i]->name == cur_resource_name)
-	v[i] = r;
-    vector<ResourcePtr>& v2 = resources->itemsByName[cur_resource_name];
-    for(size_t i=0;i<v2.size();i++)
-      if(v2[i] == oldr) v2[i] = r;
-    last_added = r;
-    SetLastActive();
-    */
     resources->selected->resource = r;
+    if(resources->selected->IsExpanded()) {
+      fprintf(stderr,"Warning, don't know how clearing children will be reflected in GUI\n");
+      resources->selected->ClearExpansion();
+    }
   }
   else if(cmd == "resource_to_poser") {
     ResourcePtr r=ResourceGUIBackend::CurrentResource();
@@ -366,9 +376,9 @@ bool RobotPoseBackend::OnCommand(const string& cmd,const string& args)
       q=rc->data;
       robotWidgets[0].SetPose(q);
       /*
-      poseWidget.SetPose(rc->data);
-      robot->NormalizeAngles(poseWidget.linkPoser.poseConfig);
-      if(poseWidget.linkPoser.poseConfig != rc->data)
+      robotWidgets[0].SetPose(rc->data);
+      robot->NormalizeAngles(robotWidgets[0].linkPoser.poseConfig);
+      if(robotWidgets[0].linkPoser.poseConfig != rc->data)
 	printf("Warning: config in library is not normalized\n");
       */
       UpdateConfig();
@@ -376,28 +386,51 @@ bool RobotPoseBackend::OnCommand(const string& cmd,const string& args)
     else {
       const IKGoalResource* rc = dynamic_cast<const IKGoalResource*>((const ResourceBase*)r);
       if(rc) {
-	poseWidget.ikPoser.ClearLink(rc->data.link);
-	poseWidget.ikPoser.Add(rc->data);
+	robotWidgets[0].ikPoser.ClearLink(rc->goal.link);
+	robotWidgets[0].ikPoser.Add(rc->goal);
       }
       else {
 	const StanceResource* rc = dynamic_cast<const StanceResource*>((const ResourceBase*)r);
 	if(rc) {
-	  poseWidget.ikPoser.poseGoals.clear();
-	  poseWidget.ikPoser.poseWidgets.clear();
+	  robotWidgets[0].ikPoser.poseGoals.clear();
+	  robotWidgets[0].ikPoser.poseWidgets.clear();
 	  for(Stance::const_iterator i=rc->stance.begin();i!=rc->stance.end();i++) {
 	    Assert(i->first == i->second.ikConstraint.link);
-	    poseWidget.ikPoser.Add(i->second.ikConstraint);
+	    robotWidgets[0].ikPoser.Add(i->second.ikConstraint);
 	  }
 	}
 	else {
-	  const GraspResource* rc = dynamic_cast<const GraspResource*>((const ResourceBase*)r);
+	  const HoldResource* rc = dynamic_cast<const HoldResource*>((const ResourceBase*)r);
 	  if(rc) {
-	    poseWidget.ikPoser.poseGoals.clear();
-	    poseWidget.ikPoser.poseWidgets.clear();
-	    Stance s;
-	    rc->grasp.GetStance(s);
-	    for(Stance::const_iterator i=s.begin();i!=s.end();i++)
-	      poseWidget.ikPoser.Add(i->second.ikConstraint);
+	    robotWidgets[0].ikPoser.ClearLink(rc->hold.link);
+	    robotWidgets[0].ikPoser.Add(rc->hold.ikConstraint);
+	  }
+	  else {
+	    const GraspResource* rc = dynamic_cast<const GraspResource*>((const ResourceBase*)r);
+	    if(rc) {
+	      robotWidgets[0].ikPoser.poseGoals.clear();
+	      robotWidgets[0].ikPoser.poseWidgets.clear();
+	      Stance s;
+	      rc->grasp.GetStance(s);
+	      for(Stance::const_iterator i=s.begin();i!=s.end();i++)
+		robotWidgets[0].ikPoser.Add(i->second.ikConstraint);
+	    }
+	    else {
+	      const LinearPathResource* rc = dynamic_cast<const LinearPathResource*>((const ResourceBase*)r);
+	      if(rc) {
+		Config q;
+		ResourceGUIBackend::viewResource.GetAnimConfig(r,q);
+		robotWidgets[0].SetPose(q);
+	      }
+	      else {
+		const MultiPathResource* rc = dynamic_cast<const MultiPathResource*>((const ResourceBase*)r);
+		if(rc) {
+		  Config q;
+		  ResourceGUIBackend::viewResource.GetAnimConfig(r,q);
+		  robotWidgets[0].SetPose(q);
+		}
+	      }
+	    }
 	  }
 	}
 	
@@ -438,14 +471,14 @@ bool RobotPoseBackend::OnCommand(const string& cmd,const string& args)
       }
     }
     /*
-      if(poseWidget.Constraints().empty()) {
+      if(robotWidgets[0].Constraints().empty()) {
       //straight line interpolator
       configs = milestones;
       }
       else {
       Robot* robot=world->robots[0].robot;
       Timer timer;
-      if(!InterpolateConstrainedPath(*robot,milestones,poseWidget.Constraints(),configs,1e-2)) return;
+      if(!InterpolateConstrainedPath(*robot,milestones,robotWidgets[0].Constraints(),configs,1e-2)) return;
       
       //int numdivs = (configs.size()-1)*10+1;
       int numdivs = (configs.size()-1);
@@ -462,7 +495,7 @@ bool RobotPoseBackend::OnCommand(const string& cmd,const string& args)
     */
     MultiPath path;
     path.SetMilestones(milestones);
-    path.SetIKProblem(poseWidget.Constraints());
+    path.SetIKProblem(robotWidgets[0].Constraints());
     ResourceGUIBackend::Add("",path);
     ResourceGUIBackend::SetLastActive(); 
     ResourceGUIBackend::viewResource.pathTime = 0;
@@ -546,7 +579,7 @@ bool RobotPoseBackend::OnCommand(const string& cmd,const string& args)
       MultiPath path;
       path.sections.resize(1);
       path.sections[0].milestones = rc->configs;
-      path.SetIKProblem(poseWidget.Constraints(),0);
+      path.SetIKProblem(robotWidgets[0].Constraints(),0);
       Real xtol = settings["pathOptimize"]["contactTol"];
       Real dt = settings["pathOptimize"]["outputResolution"];
       if(!GenerateAndTimeOptimizeMultiPath(*robot,path,xtol,dt)) {
@@ -567,12 +600,16 @@ bool RobotPoseBackend::OnCommand(const string& cmd,const string& args)
     }
   }
   else if(cmd == "clean_contacts") {
+    Real xtol,ntol;
+    stringstream ss(args);
+    ss >> xtol >> ntol;
+    if(ss.bad()) xtol = ntol = 0;
     ResourcePtr r=ResourceGUIBackend::CurrentResource();
     const StanceResource* sp = dynamic_cast<const StanceResource*>((const ResourceBase*)r);
     if(sp) {
       Stance s=sp->stance;
-      for(Stance::iterator i=s.begin();i!=s.end();i++)
-	CleanContacts(i->second);
+      for(Stance::iterator i=s.begin();i!=s.end();i++) 
+	CleanContacts(i->second,xtol,ntol);
       ResourcePtr r = MakeResource(sp->name+"_clean",s);
       if(r) {
 	ResourceGUIBackend::Add(r);
@@ -581,8 +618,8 @@ bool RobotPoseBackend::OnCommand(const string& cmd,const string& args)
     }
     const HoldResource* hp = dynamic_cast<const HoldResource*>((const ResourceBase*)r);
     if(hp) {
-      Hold h = hp->data;
-      CleanContacts(h);
+      Hold h = hp->hold;
+      CleanContacts(h,xtol,ntol);
       ResourcePtr r = MakeResource(hp->name+"_clean",h);
       if(r) {
 	ResourceGUIBackend::Add(r);
@@ -628,12 +665,7 @@ bool RobotPoseBackend::OnCommand(const string& cmd,const string& args)
 }
 
 void RobotPoseBackend::BeginDrag(int x,int y,int button,int modifiers)
-{
-  for(size_t i=0;i<robotWidgets.size();i++)
-    robotWidgets[i].poseIKMode = (pose_ik != 0);
-  //for(size_t i=0;i<objectWidgets.size();i++)
-  //objectWidgets[i].poseIKMode = (pose_objects != 0);
-  
+{ 
   Robot* robot = world->robots[0].robot;
   if(button == GLUT_RIGHT_BUTTON) {
     double d;
@@ -646,12 +678,7 @@ void RobotPoseBackend::BeginDrag(int x,int y,int button,int modifiers)
 }
 
 void RobotPoseBackend::EndDrag(int x,int y,int button,int modifiers)
-{
-  for(size_t i=0;i<robotWidgets.size();i++)
-    robotWidgets[i].poseIKMode = (pose_ik != 0);
-  //for(size_t i=0;i<objectWidgets.size();i++)
-  //objectWidgets[i].poseIKMode = (pose_objects != 0);
-  
+{  
   if(button == GLUT_RIGHT_BUTTON) {
     if(allWidgets.hasFocus) {
       allWidgets.EndDrag();
@@ -661,12 +688,7 @@ void RobotPoseBackend::EndDrag(int x,int y,int button,int modifiers)
 }
 
 void RobotPoseBackend::DoFreeDrag(int dx,int dy,int button)
-{
-  for(size_t i=0;i<robotWidgets.size();i++)
-    robotWidgets[i].poseIKMode = (pose_ik != 0);
-  //for(size_t i=0;i<objectWidgets.size();i++)
-  //objectWidgets[i].poseIKMode = (pose_objects != 0);
-  
+{  
   Robot* robot = world->robots[0].robot;
   if(button == GLUT_LEFT_BUTTON)  DragRotate(dx,dy);
   else if(button == GLUT_RIGHT_BUTTON) {
@@ -682,13 +704,7 @@ void RobotPoseBackend::DoFreeDrag(int dx,int dy,int button)
 }
 
 void RobotPoseBackend::DoPassiveMouseMove(int x, int y)
-{
-  
-  for(size_t i=0;i<robotWidgets.size();i++)
-    robotWidgets[i].poseIKMode = (pose_ik != 0);
-  //for(size_t i=0;i<objectWidgets.size();i++)
-  //objectWidgets[i].poseIKMode = (pose_objects != 0);
-  
+{  
   double d;
   if(allWidgets.Hover(x,viewport.h-y,viewport,d))
     allWidgets.SetHighlight(true);

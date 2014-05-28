@@ -6,6 +6,12 @@
 #include <math3d/Ray3D.h>
 using namespace Math3D;
 
+/** @brief A generic gui with a RobotWorld which allows clicking on entities
+ * and loading files.
+ * 
+ * Accepts commands:
+ * - load_file fn: loads a file into the world.
+ */
 class WorldGUIBackend : public GLNavigationBackend
 {
 public:
@@ -46,10 +52,7 @@ public:
     if(button == 0) { camera.dist *= (1 + 0.01*Real(dy)); SendRefresh(); }
   }
 
-  virtual bool OnMouseWheel(int dwheel) {
-    camera.dist *= (1 + 0.01*Real(dwheel));
-    return true;
-  }
+  virtual bool OnMouseWheel(int dwheel);
 
   RobotWorld* world;
 };
