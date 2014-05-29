@@ -41,6 +41,6 @@ QT4_WRAP_CPP(RobotPose_MOCSrcs ${H_FRAMES} ../KlamptQt/qtguibase.h ../KlamptQt/q
 QT4_ADD_RESOURCES(RobotPose_Resources ../KlamptQt/icons.qrc)
 
 ##### Build target ####
-ADD_EXECUTABLE(RobotPose main.cpp ${CPP_FRAMES} qresourcetreeitem.cpp qresourcetreewidget.cpp qrobotposegui.cpp ../KlamptQt/qtguibase.cpp ../KlamptQt/qklamptdisplay.cpp resourcemanager.cpp ${RobotPose_MOCSrcs} ${RobotPose_UISrcs} ${RobotPose_Resources})
+ADD_EXECUTABLE(RobotPose main.cpp ${CPP_FRAMES} qresourcetreewidget.cpp qrobotposegui.cpp ../KlamptQt/qtguibase.cpp ../KlamptQt/qklamptdisplay.cpp resourcemanager.cpp ${RobotPose_MOCSrcs} ${RobotPose_UISrcs} ${RobotPose_Resources})
 TARGET_LINK_LIBRARIES(RobotPose ${KLAMPT_LIBRARIES} ${QT_LIBRARIES})
 
