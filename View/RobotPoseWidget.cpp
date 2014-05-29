@@ -72,11 +72,16 @@ void RobotLinkPoseWidget::DrawGL(Camera::Viewport& viewport)
     robot->UpdateConfig(poseConfig);
     if(!poserAppearance.empty()) 
       swap(poserAppearance,viewRobot->linkAppearance);
+    GLColor oldColor;
+    if(hoverLink >= 0)
+      oldColor = viewRobot->linkAppearance[hoverLink].faceColor;
     if(hasHighlight || hasFocus) {
       if(hoverLink >= 0)
 	viewRobot->linkAppearance[hoverLink].faceColor = highlightColor;
     }
     viewRobot->Draw();
+    if(hoverLink >= 0)
+      viewRobot->linkAppearance[hoverLink].faceColor = oldColor;
     if(!poserAppearance.empty()) 
       swap(poserAppearance,viewRobot->linkAppearance);
   }
