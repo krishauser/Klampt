@@ -101,7 +101,6 @@ void QResourceTreeWidget::addNotify(ResourceNode* node)
   reverse(path.begin(),path.end());
 
   QTreeWidgetItem* newitem = makeItem(node);
-  qDebug() << "addNotify: "<<(int)newitem;
   if(path.size()==1) {
     //add to top-level items
     insertTopLevelItem(manager->ChildIndex(node),newitem);
