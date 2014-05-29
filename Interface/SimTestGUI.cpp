@@ -711,7 +711,10 @@ bool SimTestBackend::OnIdle() {
 
     SensorPlotUpdate();
 
-    SendPauseIdle(Max(0.0,dt-timer.ElapsedTime()));
+    Real elapsedTime = timer.ElapsedTime();
+    Real remainingTime = Max(0.0,dt-elapsedTime);
+    //printf("Simulated time %g took time %g, pausing for time %g\n",dt,elapsedTime,remainingTime);
+    SendPauseIdle(remainingTime);
     return true;
   }
   return res;
