@@ -5,6 +5,7 @@
 #include <utils/ioutils.h>
 #include <utils/stringutils.h>
 #include <string.h>
+#include <time.h>
 #include <fstream>
 
 //includes for dynamic path checking
