@@ -5,7 +5,7 @@ import glob
 
 #Parse settings from CMake
 includeDirs = '${KLAMPT_INCLUDE_DIRS}'.split(';')
-libs = '${KLAMPT_LIBRARIES}'.split(';')
+libs = '${KLAMPT_ABSOLUTE_LIBRARIES}'.split(';')
 defs = '${KLAMPT_DEFINITIONS}'.split(';')
 
 #Parse libraries

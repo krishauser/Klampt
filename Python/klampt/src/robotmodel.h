@@ -172,7 +172,7 @@ class RobotModelDriver
   ///Sets the robot's velocity to correspond to the given driver velocity value 
   void setVelocity(double val);
   ///Gets the current driver velocity value from the robot's velocity
-  double getVelocity(double val);
+  double getVelocity();
 
   int world;
   int robotIndex;
