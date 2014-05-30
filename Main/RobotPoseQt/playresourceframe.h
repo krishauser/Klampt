@@ -7,8 +7,9 @@
 
 #include <QTimer>
 #include <QFrame>
+#include <timer.h>
 
-#define RESOURCE_RECORD_FPS 120
+#define RESOURCE_RECORD_FPS 60
 
 using namespace std;
 
@@ -25,6 +26,8 @@ public:
     ~PlayResourceFrame();
 
     QTimer *timer;
+    Timer realTimer;
+    double realTimerStartTime;
 
     double duration;
     double time;

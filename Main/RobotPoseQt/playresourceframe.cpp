@@ -34,10 +34,12 @@ void PlayResourceFrame::Reset()
 void PlayResourceFrame::Play(){
     time=start;
     timer->start(1000/RESOURCE_RECORD_FPS);
+    realTimer.Reset();
+    realTimerStartTime=start;
 }
 
 void PlayResourceFrame::Tick(){
-    time += 1.0/RESOURCE_RECORD_FPS;
+  time = realTimerStartTime + realTimer.ElapsedTime();
     if(time >= start + duration){
         time= start + duration;
         timer->stop();
@@ -65,8 +67,10 @@ void PlayResourceFrame::Record(){
 }
 
 void PlayResourceFrame::NewTime(int t){
-    double scaled = t/1000.0;
-    emit TimeChanged(scaled);
+  time = start+(t/1000.0)*duration;
+  realTimer.Reset();
+  realTimerStartTime=time;
+  emit TimeChanged(time);
 }
 
 void PlayResourceFrame::UpdatePlayerTimeRange(double minTime,double maxTime)

@@ -5,7 +5,6 @@
 #include <QDebug>
 #include <QStyledItemDelegate>
 
-/*
 class NoEditDelegate: public QStyledItemDelegate {
     public:
       NoEditDelegate(QObject* parent=0): QStyledItemDelegate(parent) {}
@@ -13,7 +12,6 @@ class NoEditDelegate: public QStyledItemDelegate {
         return 0;
       }
     };
-*/
 
 QResourceTreeWidget::QResourceTreeWidget(QWidget* parent)
   :QTreeWidget(parent)

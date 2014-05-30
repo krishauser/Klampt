@@ -238,7 +238,7 @@ void ResourceFrame::PressedDelete(){
 
 void ResourceFrame::ItemChanged(QTreeWidgetItem* sel,int col)
 {
-  qD//ebug()<<"ItemChanged: "<<(int)sel;
+  //qDebug()<<"ItemChanged: "<<(int)sel;
   if(col != NAMECOL) {
     qDebug()<<"Can only edit name column";
     //restore
