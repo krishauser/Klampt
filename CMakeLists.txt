@@ -111,6 +111,9 @@ foreach(s ${SUBDIRS})
     DESTINATION include/Klampt/${s}
     COMPONENT headers)
 endforeach(s)
+install(DIRECTORY data
+    DESTINATION .
+    COMPONENT datafiles)
 
 # Needs to be last statement:
 INCLUDE(CPackSettings)

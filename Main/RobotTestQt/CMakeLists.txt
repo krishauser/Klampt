@@ -34,3 +34,6 @@ QT4_ADD_RESOURCES(RobotTest_Resources ../KlamptQt/icons.qrc)
 ADD_EXECUTABLE(RobotTest main.cpp collisionoutput.cpp mainwindow.cpp ../KlamptQt/qklamptdisplay.cpp ../KlamptQt/qtguibase.cpp qrobottestgui.cpp ${RobotTest_MOCSrcs} ${RobotTest_UISrcs} ${RobotTest_Resources})
 TARGET_LINK_LIBRARIES(RobotTest ${KLAMPT_LIBRARIES} ${QT_LIBRARIES})
 
+install(TARGETS RobotTest
+  DESTINATION bin
+  COMPONENT apps)

@@ -5,6 +5,7 @@
 #include "Modeling/Paths.h"
 #include "Modeling/MultiPath.h"
 #include "IO/XmlWorld.h"
+#include <time.h>
 #include <Timer.h>
 #include <string.h>
 #include <fstream>

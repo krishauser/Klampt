@@ -105,7 +105,7 @@ void MainWindow::UpdateDriverParameters(){
   ui->spn_driver->setMinimum(limits.x);
   ui->spn_driver->setMaximum(limits.y);
 #undef NUM(x)
-     if(std::isinf(ui->spn_driver->minimum()) || std::isinf(ui->spn_driver->minimum()))
+     if(IsInf(ui->spn_driver->minimum()) || IsInf(ui->spn_driver->minimum()))
          ui->sld_driver->setEnabled(false);
      else ui->sld_driver->setEnabled(true);
   ui->spn_driver->blockSignals((oldState));
@@ -155,7 +155,7 @@ void MainWindow::UpdateLinkParameters(){
   ui->lbl_link_info->setText(link_info);
   ui->spn_link->setMinimum(rob->qMin(gui->link_index));
   ui->spn_link->setMaximum(rob->qMax(gui->link_index));
-  if(std::isinf(ui->spn_link->minimum()) || std::isinf(ui->spn_link->minimum()))
+  if(IsInf(ui->spn_link->minimum()) || IsInf(ui->spn_link->minimum()))
       ui->sld_link->setEnabled(false);
   else ui->sld_link->setEnabled(true);
 
