@@ -34,3 +34,6 @@ QT4_ADD_RESOURCES(SimTest_Resources ../KlamptQt/icons.qrc)
 ADD_EXECUTABLE(SimTest main.cpp controllerdialog.cpp driveredit.cpp logoptions.cpp mainwindow.cpp ../KlamptQt/qklamptdisplay.cpp qsimtestgui.cpp ../KlamptQt/qtguibase.cpp ${SimTest_MOCSrcs} ${SimTest_UISrcs} ${SimTest_Resources})
 TARGET_LINK_LIBRARIES(SimTest ${KLAMPT_LIBRARIES} ${QT_LIBRARIES})
 
+install(TARGETS SimTest
+  DESTINATION bin
+  COMPONENT apps)

@@ -44,3 +44,6 @@ QT4_ADD_RESOURCES(RobotPose_Resources ../KlamptQt/icons.qrc)
 ADD_EXECUTABLE(RobotPose main.cpp ${CPP_FRAMES} qresourcetreewidget.cpp qrobotposegui.cpp ../KlamptQt/qtguibase.cpp ../KlamptQt/qklamptdisplay.cpp resourcemanager.cpp ${RobotPose_MOCSrcs} ${RobotPose_UISrcs} ${RobotPose_Resources})
 TARGET_LINK_LIBRARIES(RobotPose ${KLAMPT_LIBRARIES} ${QT_LIBRARIES})
 
+install(TARGETS RobotPose
+  DESTINATION bin
+  COMPONENT apps)
