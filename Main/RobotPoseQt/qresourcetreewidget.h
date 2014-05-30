@@ -5,7 +5,10 @@
 #include <QModelIndex>
 #include <QDropEvent>
 #include "resourcemanager.h"
-#include "qresourcetreeitem.h"
+
+#define NAMECOL 0
+#define TYPECOL 1
+#define DECORATORCOL 2
 
 //enum { TypeCol=0,NameCol=1,DecoratorCol=2 };
 
@@ -18,14 +21,16 @@ public:
   explicit QResourceTreeWidget(QWidget* parent=NULL);
   void setManager(ResourceManager* manager);
   void refresh();
-  void addNotify(ResourceNodePtr node);
+  void addNotify(ResourceNode* node);
   void onAdd(ResourcePtr r);
   void onDeletePressed();
   void onDelete(QTreeWidgetItem* n);
   void onExpand(QTreeWidgetItem* n);
-  QResourceTreeItem* nodeToItem(ResourceNode* node);
-  ResourceNodePtr itemToNode(QTreeWidgetItem* node);
+  QTreeWidgetItem* nodeToItem(ResourceNode* node);
+  ResourceNode* itemToNode(QTreeWidgetItem* node);
   void updateAllDecorators();
+  void updateDecorator(QTreeWidgetItem* item);
+  void updateProperties(QTreeWidgetItem* item);
 
 private:
   //for drag and drop
@@ -40,6 +45,9 @@ private:
 
   //for delete
   virtual void keyPressEvent(QKeyEvent * event);
+
+  //helpers
+  QTreeWidgetItem* makeItem(ResourceNode* node);
 };
 
 #endif

@@ -192,7 +192,7 @@ bool ResourceTree::LoadFolder(const string& fn){
   return true;
 }
 
-bool ResourceTree::Save(ResourceNodePtr &node,string file)
+bool ResourceTree::Save(ResourceNode* node,string file)
 {
   ResourcePtr r = node->resource;
   if(file.empty()){
@@ -245,7 +245,7 @@ ResourceNodePtr ResourceTree::Add(ResourcePtr r,ResourceNodePtr parent)
 
 
 
-void ResourceTree::Delete(ResourceNodePtr r){
+void ResourceTree::Delete(ResourceNode* r){
   if(r->parent == NULL) { //top level
     int index = ChildIndex(r);
     if(index < 0)
@@ -340,6 +340,7 @@ bool ResourceTree::TreeToLibrary(bool trybackup)
 
 
 ResourceManager::ResourceManager()
+  :selected(NULL)
 {}
 
 void ResourceManager::Select(const string& identifier)

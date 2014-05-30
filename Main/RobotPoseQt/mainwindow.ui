@@ -79,7 +79,7 @@
         <item row="0" column="4">
          <widget class="QCheckBox" name="chk_bboxes">
           <property name="statusTip">
-           <string>draw bounding boxes</string>
+           <string>Draw geometry bounding boxes</string>
           </property>
           <property name="text">
            <string>BBoxes</string>
@@ -89,7 +89,7 @@
         <item row="0" column="3">
          <widget class="QCheckBox" name="chk_frame">
           <property name="statusTip">
-           <string>draw frames</string>
+           <string>Draw link frames</string>
           </property>
           <property name="text">
            <string>Frames</string>
@@ -124,6 +124,9 @@
             <property name="enabled">
              <bool>true</bool>
             </property>
+            <property name="statusTip">
+             <string>Set the selected link's value</string>
+            </property>
             <property name="maximum">
              <number>1000</number>
             </property>
@@ -137,6 +140,9 @@
             <property name="enabled">
              <bool>false</bool>
             </property>
+            <property name="statusTip">
+             <string>Set the selected driver's value</string>
+            </property>
             <property name="maximum">
              <number>1000</number>
             </property>
@@ -147,6 +153,9 @@
           </item>
           <item>
            <widget class="QPushButton" name="btn_ik">
+            <property name="statusTip">
+             <string>Toggle IK mode</string>
+            </property>
             <property name="text">
              <string/>
             </property>
@@ -164,7 +173,7 @@
         <item row="0" column="2">
          <widget class="QCheckBox" name="chk_com">
           <property name="statusTip">
-           <string>draw COM</string>
+           <string>Draw center of masses</string>
           </property>
           <property name="text">
            <string>COM</string>
@@ -174,7 +183,7 @@
         <item row="0" column="1">
          <widget class="QCheckBox" name="chk_geometry">
           <property name="statusTip">
-           <string>draw the robot geometry</string>
+           <string>Draw the robot geometry</string>
           </property>
           <property name="text">
            <string>Geometry</string>
@@ -226,7 +235,11 @@
          </widget>
         </item>
         <item>
-         <widget class="QComboBox" name="cb_link"/>
+         <widget class="QComboBox" name="cb_link">
+          <property name="statusTip">
+           <string>Select a link</string>
+          </property>
+         </widget>
         </item>
         <item>
          <widget class="QComboBox" name="cb_driver">
@@ -549,6 +562,12 @@
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>
   <customwidget>
+   <class>QKlamptDisplay</class>
+   <extends>QWidget</extends>
+   <header>../KlamptQt/qklamptdisplay.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
    <class>ResourceFrame</class>
    <extends>QFrame</extends>
    <header>resourceframe.h</header>
@@ -556,12 +575,6 @@
    <slots>
     <slot>SendPathTime(double)</slot>
    </slots>
-  </customwidget>
-  <customwidget>
-   <class>QKlamptDisplay</class>
-   <extends>QWidget</extends>
-   <header>../KlamptQt/qklamptdisplay.h</header>
-   <container>1</container>
   </customwidget>
  </customwidgets>
  <resources>

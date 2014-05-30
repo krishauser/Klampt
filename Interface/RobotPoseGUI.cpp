@@ -352,6 +352,15 @@ bool RobotPoseBackend::OnCommand(const string& cmd,const string& args)
       ResourceGUIBackend::Add(r);
     }
   }
+  else if(cmd=="constrain_current_point"){
+    robotWidgets[0].FixCurrentPoint();
+  }
+  else if(cmd == "delete_current_constraint") {
+    robotWidgets[0].DeleteConstraint();
+  }
+  else if(cmd=="constrain_current_link") {
+    robotWidgets[0].FixCurrent();
+  }
   else if(cmd == "poser_to_resource_overwrite") { 
     ResourcePtr oldr = ResourceGUIBackend::CurrentResource();
     if(!oldr) {

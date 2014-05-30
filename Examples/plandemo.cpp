@@ -15,6 +15,7 @@
 #include <utils/ioutils.h>
 #include <utils/stringutils.h>
 #include <string.h>
+#include <time.h>
 #include <fstream>
 
 /** @brief Performs basic path planning in collision-free space for the

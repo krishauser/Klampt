@@ -41,12 +41,53 @@ void QResourceTreeWidget::refresh()
   while(topLevelItemCount() > 0)
     delete topLevelItem(0);
   for(size_t i=0;i<manager->topLevel.size();i++) {
-    QResourceTreeItem* res=new QResourceTreeItem(manager->topLevel[i]);
+    QTreeWidgetItem* res=makeItem(manager->topLevel[i]);
     addTopLevelItem(res);
   }
 }
 
-void QResourceTreeWidget::addNotify(ResourceNodePtr node)
+QTreeWidgetItem* QResourceTreeWidget::makeItem(ResourceNode* rt)
+{
+  QTreeWidgetItem* item = new QTreeWidgetItem;
+  item->setData(NAMECOL,Qt::UserRole,qVariantFromValue((void*)rt));
+    string name=rt->Name();
+    item->setText(NAMECOL,QString::fromStdString(name));
+    string type = rt->resource->Type();
+    if(!type.empty())
+        item->setText(TYPECOL,QString::fromStdString(rt->resource->Type()));
+
+    updateProperties(item);
+    updateDecorator(item);
+
+    for(size_t i=0;i<rt->children.size();i++) {
+      QTreeWidgetItem* c = makeItem(rt->children[i]);
+      item->addChild(c);
+    }
+    return item;
+}
+
+void QResourceTreeWidget::updateProperties(QTreeWidgetItem* item)
+{
+  ResourceNode* resource = itemToNode(item);
+  if(resource->IsExpandable()) {
+    item->setFlags(Qt::ItemIsEnabled | Qt::ItemIsEditable | Qt::ItemIsSelectable | Qt::ItemIsDropEnabled | Qt::ItemIsDragEnabled);
+    item->setChildIndicatorPolicy(QTreeWidgetItem::ShowIndicator);
+  }
+  else {
+    item->setChildIndicatorPolicy(QTreeWidgetItem::DontShowIndicator);
+    item->setFlags(Qt::ItemIsEnabled | Qt::ItemIsEditable | Qt::ItemIsSelectable | Qt::ItemIsDragEnabled);
+  }
+}
+
+void QResourceTreeWidget::updateDecorator(QTreeWidgetItem* item)
+{
+  if(!item) return;
+  ResourceNode* resource = itemToNode(item);
+  item->setText(DECORATORCOL,QString(resource->Decorator()));
+}
+
+
+void QResourceTreeWidget::addNotify(ResourceNode* node)
 {
   //parse the path
   vector<ResourceNode*> path;
@@ -56,20 +97,24 @@ void QResourceTreeWidget::addNotify(ResourceNodePtr node)
     n = n->parent;
   }
   reverse(path.begin(),path.end());
-  if(path.size()==1)
+
+  QTreeWidgetItem* newitem = makeItem(node);
+  if(path.size()==1) {
     //add to top-level items
-    insertTopLevelItem(manager->ChildIndex(node),new QResourceTreeItem(node));
+    insertTopLevelItem(manager->ChildIndex(node),newitem);
+  }
   else {
     QTreeWidgetItem* item = invisibleRootItem();
     for(size_t i=0;i+1<path.size();i++) {
       int row = manager->ChildIndex(path[i]);
       if(row < 0) {
 	fprintf(stderr,"Error finding %d'th path item %s\n",i,path[i]->Name());
+	delete newitem;
 	return;
       }
       item = item->child(row);
     }
-    item->insertChild(manager->ChildIndex(node),new QResourceTreeItem(node));
+    item->insertChild(manager->ChildIndex(node),newitem);
   }
 }
 
@@ -90,26 +135,24 @@ void QResourceTreeWidget::onDeletePressed()
 void QResourceTreeWidget::onDelete(QTreeWidgetItem* n)
 {
   assert(n!=NULL);
-  QResourceTreeItem* rn = dynamic_cast<QResourceTreeItem*>(n);
-  assert(rn!=NULL);
-  manager->Delete(rn->resource);
+  ResourceNode* r = itemToNode(n);
+  assert(r!=NULL);
+  manager->Delete(r);
   if(n->parent() != NULL) {
     QTreeWidgetItem* p = n->parent();
-    QResourceTreeItem* rp = dynamic_cast<QResourceTreeItem*>(p);
-    assert(rp!=NULL);
-    rp->updateDecorator();
+    updateDecorator(p);
   }
-  delete rn;
+  delete n;
 }
 
 void QResourceTreeWidget::onExpand(QTreeWidgetItem* n)
 {
-  QResourceTreeItem* rn = dynamic_cast<QResourceTreeItem*>(n);
-  assert(n!=NULL);
-  if(rn->resource && !rn->resource->IsExpanded()) {
-    rn->resource->Expand();
-    for(size_t i=0;i<rn->resource->children.size();i++)
-      n->addChild(new QResourceTreeItem(rn->resource->children[i]));
+  ResourceNode* r = itemToNode(n);
+  assert(r!=NULL);
+  if(!r->IsExpanded()) {
+    r->Expand();
+    for(size_t i=0;i<r->children.size();i++)
+      n->addChild(makeItem(r->children[i]));
   }
 }
 
@@ -128,7 +171,13 @@ void QResourceTreeWidget::mouseMoveEvent(QMouseEvent *event)
         int distance = (event->pos() - startPos).manhattanLength();
         if (distance >= QApplication::startDragDistance()) {
 	  QTreeWidgetItem *item = currentItem();
-	  dragNode = dynamic_cast<QResourceTreeItem*>(item)->resource;
+	  //need to convert raw pointer to a smart pointer
+	  ResourceNode * nodePtr = itemToNode(item);
+	  int index = manager->ChildIndex(nodePtr);
+	  if(nodePtr->parent)
+	    dragNode = nodePtr->parent->children[index];
+	  else
+	    dragNode = manager->topLevel[index];
 	}
     }
  
@@ -150,7 +199,7 @@ void QResourceTreeWidget::dragLeaveEvent(QDragLeaveEvent *event)
   QTreeWidget::dragLeaveEvent(event);
 }
 
-QResourceTreeItem* QResourceTreeWidget::nodeToItem(ResourceNode* n)
+QTreeWidgetItem* QResourceTreeWidget::nodeToItem(ResourceNode* n)
 {
   vector<ResourceNode*> path;
   while(n != NULL) {
@@ -167,29 +216,27 @@ QResourceTreeItem* QResourceTreeWidget::nodeToItem(ResourceNode* n)
     }
     item = item->child(row);
   }
-  return dynamic_cast<QResourceTreeItem*>(item);
+  return item;
 }
 
-ResourceNodePtr QResourceTreeWidget::itemToNode(QTreeWidgetItem* node)
+ResourceNode* QResourceTreeWidget::itemToNode(QTreeWidgetItem* node)
 {
-  QResourceTreeItem* qnode = dynamic_cast<QResourceTreeItem*>(node);
-  if(!qnode) return NULL;
-  return qnode->resource;
+  if(!node) return NULL;
+  QVariant data = node->data(NAMECOL,Qt::UserRole);
+  return (ResourceNode*)data.value<void*>();
 }
 
-void updateDecoratorsRecurse(QTreeWidgetItem* node)
+void updateDecoratorsRecurse(QResourceTreeWidget* w,QTreeWidgetItem* node)
 {
-  QResourceTreeItem* qnode = dynamic_cast<QResourceTreeItem*>(node);
-  if(qnode) qnode->updateDecorator();
-  else printf("Unable to cast to QResourceTreeItem\n");
+  w->updateDecorator(node);
   for(int i=0;i<node->childCount();i++)
-    updateDecoratorsRecurse(node->child(i));
+    updateDecoratorsRecurse(w,node->child(i));
 }
 
 void QResourceTreeWidget::updateAllDecorators()
 {
   for(int i=0;i<topLevelItemCount();i++)
-    updateDecoratorsRecurse(topLevelItem(i));
+    updateDecoratorsRecurse(this,topLevelItem(i));
 }
 
 void QResourceTreeWidget::dropEvent(QDropEvent *event)
@@ -199,15 +246,13 @@ void QResourceTreeWidget::dropEvent(QDropEvent *event)
     assert(dragNode != NULL);
     cout<<"Dragged item: "<<dragNode->Identifier()<<endl;
 
-    QResourceTreeItem* dragParent = NULL;
+    QTreeWidgetItem* dragParent = NULL;
     if(dragNode->parent) dragParent = nodeToItem(dragNode->parent);
 
     QTreeWidgetItem* target = this->itemAt(event->pos());
-    ResourceNodePtr targetNode;
+    ResourceNode* targetNode;
     if(target) {
-      QResourceTreeItem* qtarget = dynamic_cast<QResourceTreeItem*>(target);
-      assert(qtarget != NULL);
-      targetNode = qtarget->resource;
+      targetNode = itemToNode(target);
     }
     if(event->dropAction() == Qt::MoveAction) {
       QTreeWidgetItem* targetParent = target;
@@ -247,7 +292,7 @@ void QResourceTreeWidget::dropEvent(QDropEvent *event)
       manager->Delete(dragNode);
       if(dragParent) {
 	printf("Updating drag parent decorator\n");
-	dragParent->updateDecorator();
+	updateDecorator(dragParent);
       }
 
       printf("Adding to target parent\n");
@@ -261,7 +306,7 @@ void QResourceTreeWidget::dropEvent(QDropEvent *event)
 	else
 	  targetNodeParent->children.insert(targetNodeParent->children.begin()+insertIndex,dragNode);
 	targetNodeParent->SetChildrenChanged();
-	dynamic_cast<QResourceTreeItem*>(targetParent)->updateDecorator();
+	updateDecorator(targetParent);
       }
       else {
 	dragNode->parent = NULL;
@@ -335,7 +380,7 @@ void QResourceTreeWidget::dropEvent(QDropEvent *event)
 void QResourceTreeWidget::keyPressEvent(QKeyEvent * event)
 {
   int key = event->key();
-  if(key == Qt::Key_Delete || Qt::Key_Backspace)
+  if(key == Qt::Key_Delete || key == Qt::Key_Backspace)
     onDeletePressed();
   else
     QTreeWidget::keyPressEvent(event);

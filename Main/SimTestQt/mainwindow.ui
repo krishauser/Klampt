@@ -279,6 +279,9 @@
             <property name="toolTip">
              <string>Record the simulation</string>
             </property>
+            <property name="statusTip">
+             <string>Record a movie</string>
+            </property>
             <property name="text">
              <string/>
             </property>
@@ -305,6 +308,9 @@
           </item>
           <item>
            <widget class="QPushButton" name="pushButtonReset">
+            <property name="statusTip">
+             <string>Go back to the start state</string>
+            </property>
             <property name="text">
              <string/>
             </property>
@@ -325,6 +331,9 @@
           </item>
           <item>
            <widget class="QPushButton" name="pushButtonSaveState">
+            <property name="statusTip">
+             <string>Save the current sim state</string>
+            </property>
             <property name="text">
              <string/>
             </property>
@@ -345,6 +354,9 @@
           </item>
           <item>
            <widget class="QPushButton" name="pushButtonLoadState">
+            <property name="statusTip">
+             <string>Load a sim state</string>
+            </property>
             <property name="text">
              <string/>
             </property>
@@ -686,7 +698,7 @@
     <string>Open...</string>
    </property>
    <property name="statusTip">
-    <string>ctrl-o</string>
+    <string>Open a file</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+O</string>
@@ -704,6 +716,9 @@
    <property name="toolTip">
     <string>v</string>
    </property>
+   <property name="statusTip">
+    <string>Save the current view to view.txt</string>
+   </property>
   </action>
   <action name="actionRevertView">
    <property name="text">
@@ -712,10 +727,16 @@
    <property name="toolTip">
     <string>V</string>
    </property>
+   <property name="statusTip">
+    <string>Reverts to a previously saved view.txt</string>
+   </property>
   </action>
   <action name="actionDefaultView">
    <property name="text">
     <string>Default</string>
+   </property>
+   <property name="statusTip">
+    <string>Reverts to a view in defaultview.txt</string>
    </property>
   </action>
   <action name="actionDrivers">
@@ -724,6 +745,9 @@
    </property>
    <property name="toolTip">
     <string>ctrl-d</string>
+   </property>
+   <property name="statusTip">
+    <string>Show the drivers pane</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+D</string>
@@ -736,6 +760,9 @@
    <property name="toolTip">
     <string>ctrl-p</string>
    </property>
+   <property name="statusTip">
+    <string>Configure sensor plotting</string>
+   </property>
    <property name="shortcut">
     <string>Ctrl+P</string>
    </property>
@@ -746,6 +773,9 @@
    </property>
    <property name="toolTip">
     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;ctrl-r&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+   </property>
+   <property name="statusTip">
+    <string>Configure the robot's controller</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+R</string>
@@ -764,7 +794,7 @@
     <string>Multiple Parts</string>
    </property>
    <property name="statusTip">
-    <string>Does not automatically encode when a recording ends.  Can record 2 parts consecutively into 1 video.</string>
+    <string>If active, does not encode when a recording ends.  Can record 2 parts consecutively into 1 video.</string>
    </property>
   </action>
   <action name="action640x480">
@@ -817,6 +847,9 @@
    <property name="text">
     <string>Load Path...</string>
    </property>
+   <property name="statusTip">
+    <string>Load a path to the controller</string>
+   </property>
   </action>
   <action name="actionLog_Simulation">
    <property name="checkable">
@@ -824,6 +857,9 @@
    </property>
    <property name="text">
     <string>Log Simulation</string>
+   </property>
+   <property name="statusTip">
+    <string>Toggle simulation logging</string>
    </property>
   </action>
   <action name="actionLog_Contact_State">
@@ -833,6 +869,9 @@
    <property name="text">
     <string>Log Contact State</string>
    </property>
+   <property name="statusTip">
+    <string>Toggle contact state logging</string>
+   </property>
   </action>
   <action name="actionLog_Wrenches">
    <property name="checkable">
@@ -840,6 +879,9 @@
    </property>
    <property name="text">
     <string>Log Wrenches</string>
+   </property>
+   <property name="statusTip">
+    <string>Toggle contact wrench logging</string>
    </property>
   </action>
   <action name="actionSimulation">
@@ -864,6 +906,9 @@
    <property name="text">
     <string>Log Sensed Path</string>
    </property>
+   <property name="statusTip">
+    <string>Toggle sensed path logging</string>
+   </property>
   </action>
   <action name="actionLog_Commanded_Path">
    <property name="checkable">
@@ -871,6 +916,9 @@
    </property>
    <property name="text">
     <string>Log Commanded Path</string>
+   </property>
+   <property name="statusTip">
+    <string>Toggle commanded path logging</string>
    </property>
   </action>
   <action name="actionSensed_Path">
@@ -886,6 +934,9 @@
   <action name="actionChange_Encoder">
    <property name="text">
     <string>Change Encoder...</string>
+   </property>
+   <property name="statusTip">
+    <string>Edits the command line for encoding PPM frames into a vide</string>
    </property>
   </action>
  </widget>

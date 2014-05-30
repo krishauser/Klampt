@@ -7,6 +7,7 @@
 #include "stanceframe.h"
 
 #include <QSettings>
+#include <QDebug>
 #include <QCoreApplication>
 #include <QInputDialog>
 #include <QMessageBox>
@@ -87,34 +88,35 @@ void ResourceFrame::onResourceEdit()
 {
   QTreeWidgetItem* item = ui->treeWidget->currentItem();
   if(!item) return;
-  QResourceTreeItem* qitem = dynamic_cast<QResourceTreeItem*>(item);
-  if(qitem->resource->IsExpanded()) {
+  ResourceNode* n = ui->treeWidget->itemToNode(item);
+  assert(n != NULL);
+  if(n->IsExpanded()) {
     //need to re-expand
-    if(!qitem->resource->IsValid()) {
+    if(!n->IsValid()) {
       QMessageBox::warning(this,"Edit warning","Resource's children have not been backed up, edit will delete changes");
     }
-    while(qitem->childCount() > 0) 
-      ui->treeWidget->onDelete(qitem->child(0));
-    ui->treeWidget->onExpand(qitem);
+    while(item->childCount() > 0) 
+      ui->treeWidget->onDelete(item->child(0));
+    ui->treeWidget->onExpand(item);
   }
+  ui->treeWidget->updateProperties(item);
+  ui->treeWidget->updateDecorator(item);
 }
 
 bool ResourceFrame::doBackup(QTreeWidgetItem* it)
 {
-  QResourceTreeItem* qi = dynamic_cast<QResourceTreeItem*>(it);
-  assert(qi != NULL);
-
+  ResourceNode* n = ui->treeWidget->itemToNode(it);
   bool res = true;
   string errormessage;
   ResourceNode* where;
-  if(!qi->resource->Backup(&errormessage,&where)) {
+  if(!n->Backup(&errormessage,&where)) {
     string title = "Couldn't back up changes to "+where->Identifier();
     string msg = errormessage;
     QMessageBox::warning(this,title.c_str(),QString(msg.c_str()));
     res = false;
   }
   else {
-    printf("Backup successful\n");
+    //printf("Backup successful\n");
     res = true;
   }
   ui->treeWidget->updateAllDecorators();
@@ -201,12 +203,10 @@ void ResourceFrame::ChangeSelectedItem(QTreeWidgetItem* it){
     updateConvertBox(NULL);
     return;
   }
-  QResourceTreeItem* qi = dynamic_cast<QResourceTreeItem*>(it);
-  assert(qi != NULL);
-  manager->selected = qi->resource;
+  manager->selected = ui->treeWidget->itemToNode(it);
 
   //attempt backup if selected
-  if(qi->resource->IsDirty()) {
+  if(manager->selected->IsDirty()) {
     doBackup(it);
   }
 
@@ -238,13 +238,14 @@ void ResourceFrame::PressedDelete(){
 
 void ResourceFrame::ItemChanged(QTreeWidgetItem* sel,int col)
 {
+  //qDebug()<<"ItemChanged: "<<(int)sel;
   if(col != NAMECOL) {
+    qDebug()<<"Can only edit name column";
     //restore
     return;
   }
-  QResourceTreeItem* qsel = dynamic_cast<QResourceTreeItem*>(sel);
-  if(!qsel) return;
-  qsel->resource->resource->name = sel->text(NAMECOL).toStdString();
+  //qDebug()<<"Changing name to: "<<sel->text(NAMECOL);
+  ui->treeWidget->itemToNode(sel)->resource->name = sel->text(NAMECOL).toStdString();
 }
 
 void ResourceFrame::ItemExpanded(QTreeWidgetItem* sel)
@@ -280,16 +281,16 @@ void ResourceFrame::SaveResource()
 
   QTreeWidgetItem* item = ui->treeWidget->currentItem();
   if(!item) return;
-  QResourceTreeItem* qitem = dynamic_cast<QResourceTreeItem*>(item);
   doBackup(item);
+  ResourceNode* n = ui->treeWidget->itemToNode(item);
 
   QFileDialog f;
   //do we want to go from registry ?
   QString openDir;
   bool changeSettings = true;
-  if(!qitem->resource->resource->fileName.empty()) {
+  if(!n->resource->fileName.empty()) {
     changeSettings = false;
-    openDir = QString(qitem->resource->resource->fileName.c_str());
+    openDir = QString(n->resource->fileName.c_str());
   }
   else {
     openDir = ini.value("save_resource_file",".").toString();
@@ -303,7 +304,7 @@ void ResourceFrame::SaveResource()
     if(changeSettings) 
       ini.setValue("save_resource_file",QFileInfo(filename).absolutePath());
 
-    manager->Save(qitem->resource,filename.toStdString());
+    manager->Save(n,filename.toStdString());
   }
 }
 
@@ -347,8 +348,7 @@ void ResourceFrame::FromGUI(){
     QTreeWidgetItem* item = ui->treeWidget->currentItem();
     if(item) {
       if(item->parent()!=NULL) {
-	QResourceTreeItem* qitem = dynamic_cast<QResourceTreeItem*>(item->parent());
-	qitem->updateDecorator();
+	ui->treeWidget->updateDecorator(item->parent());
       }
     }
   }

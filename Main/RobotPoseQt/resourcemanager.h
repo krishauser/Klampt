@@ -70,9 +70,9 @@ class ResourceTree
   ResourceTree();
   ResourceNodePtr LoadFile(const string& fn);
   bool LoadFolder(const string& fn);
-  bool Save(ResourceNodePtr& node,string file="");
+  bool Save(ResourceNode* node,string file="");
   bool SaveFolder(const string& fn);
-  void Delete(ResourceNodePtr r);
+  void Delete(ResourceNode* r);
   bool AnyUnsaved() const;
   bool IsValid() const;
   bool BackupAll(string* errorMessage);
@@ -101,7 +101,7 @@ class ResourceManager : public ResourceTree
   bool SaveSelected();
   bool SaveSelected(const string& fn);
 
-  ResourceNodePtr selected;
+  ResourceNode* selected;
 };
 
 #endif

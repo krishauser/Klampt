@@ -33,6 +33,9 @@ ELSE(USE_QT4_APPS)
 	TARGET_LINK_LIBRARIES(RobotPose ${KLAMPT_LIBRARIES})
 	TARGET_LINK_LIBRARIES(MotorCalibrate ${KLAMPT_LIBRARIES})
 	TARGET_LINK_LIBRARIES(URDFtoRob ${KLAMPT_LIBRARIES})
+	install(TARGETS RobotTest RobotPose SimTest MotorCalibrate URDFtoRob
+	  DESTINATION bin
+	  COMPONENT apps)
 ENDIF(USE_QT4_APPS)
 ADD_DEPENDENCIES(RobotTest Klampt)
 ADD_DEPENDENCIES(SimTest Klampt)
@@ -56,3 +59,4 @@ ADD_DEPENDENCIES(SimUtil Klampt)
 
 ADD_CUSTOM_TARGET(apps ALL
 		DEPENDS RobotTest SimTest RobotPose MotorCalibrate URDFtoRob Pack Merge TrajOpt SimUtil)
+

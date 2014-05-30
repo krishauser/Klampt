@@ -1,4 +1,4 @@
-<multipath program="GenerateAndTimeOptimizeMultiPath" resolution="0.05">
+<multipath program="GenerateAndTimeOptimizeMultiPath" resolution="0.01">
     <section>
         <ikgoal>41 -1&#x0A;F 0.151785 0 0   0.428842 -0.742765 0.123181&#x0A;F 0.815484 1.41246 -0.815477&#x0A;</ikgoal>
         <ikgoal>11 -1&#x0A;F 0.151785 0 0   0.857676 6.53768e-06 0.123184&#x0A;F -2.48125e-12 1.5708 7.37147e-06&#x0A;</ikgoal>

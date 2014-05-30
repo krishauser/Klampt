@@ -34,3 +34,7 @@ TARGET_LINK_LIBRARIES(MotorCalibrate ${KLAMPT_LIBRARIES} ${QT_LIBRARIES})
 #used to ignore main() definition in motorcalibrate.cpp
 SET_TARGET_PROPERTIES(MotorCalibrate PROPERTIES
                 COMPILE_DEFINITIONS "${QT_DEFINITIONS};HAVE_QT") 
+
+install(TARGETS MotorCalibrate
+  DESTINATION bin
+  COMPONENT apps)

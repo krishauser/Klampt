@@ -22,6 +22,9 @@
   <layout class="QGridLayout" name="gridLayout">
    <item row="0" column="0">
     <widget class="QPushButton" name="btn_insert">
+     <property name="statusTip">
+      <string>Insert a new value</string>
+     </property>
      <property name="text">
       <string>Insert</string>
      </property>
@@ -29,6 +32,9 @@
    </item>
    <item row="0" column="1">
     <widget class="QPushButton" name="btn_delete">
+     <property name="statusTip">
+      <string>Delete selected value</string>
+     </property>
      <property name="text">
       <string>Delete</string>
      </property>
@@ -44,7 +50,11 @@
       </widget>
      </item>
      <item>
-      <widget class="QSpinBox" name="spin_index"/>
+      <widget class="QSpinBox" name="spin_index">
+       <property name="statusTip">
+        <string>Select an element</string>
+       </property>
+      </widget>
      </item>
     </layout>
    </item>
@@ -59,6 +69,9 @@
      </item>
      <item>
       <widget class="QLineEdit" name="edit_value">
+       <property name="statusTip">
+        <string>Edit the selected value</string>
+       </property>
        <property name="maxLength">
         <number>20</number>
        </property>
