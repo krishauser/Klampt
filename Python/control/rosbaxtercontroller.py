@@ -21,17 +21,19 @@ class RosBaxterController(controller.BaseController):
     and writes JointState to the ROS topic
     
     '/[robot_name]/joint_states'.
+
+    As used by baxter's ROS package, '[robot_name]' should be set to 'robot'.
     """
-    def __init__(self,robot_name,link_list):
+    def __init__(self,robot_model,robot_name='robot'):
+        self.robot_model = robot_model
         self.state = JointState()
-        n = len(link_list)
-        self.state.name = link_list[:]
+        self.state.name = [self.robot_model.getDriver(d).getName() for d in range(self.robot_model.numDrivers())]
         self.state.position     = []
         self.state.velocity     = []
         self.state.effort       = []
 
         # fast indexing structure for partial commands
-        self.nameToIndex = dict(zip(self.state.name,range(len(link_list))))
+        self.nameToIndex = dict(zip(self.state.name,range(len(self.state.name))))
 
         # Setup publisher of robot states
         self.pub = rospy.Publisher("/%s/joint_states"%(robot_name,), JointState)
@@ -78,11 +80,15 @@ class RosBaxterController(controller.BaseController):
         #sense the configuration and velocity, possibly the effort
         self.state.header.stamp = rospy.get_rostime()
         if 'q' in inputs:
-            self.state.position = inputs['q']
+            self.robot_model.setConfig(inputs['q'])
+            self.state.position = [self.robot_model.getDriver(d).getValue() for d in range(self.robot_model.numDrivers())]
         if 'dq' in inputs:
-            self.state.velocity = inputs['dq']
+            self.robot_model.setVelocity(inputs['q'])
+            self.state.velocity = [self.robot_model.getDriver(d).getValue() for d in range(self.robot_model.numDrivers())]
         if 'torque' in inputs:
             self.state.effort = inputs['torque']
+            if(len(self.state.effort) != len(self.state.name)):
+                print "Uh... input[torque] has length",len(inputs['torque']),"while names has length",len(self.state.name)
         self.pub.publish(self.state)
         return res
 
@@ -104,8 +110,6 @@ class RosBaxterController(controller.BaseController):
 
 def make(klampt_robot_model):
     global ros_initialized
-    robotName = 'robot'
-    linkNames = [klampt_robot_model.getLink(i).getName() for i in range(klampt_robot_model.numLinks())]
     if not ros_initialized:
         ros_initialized = True
         rospy.init_node('klampt_sim')
@@ -113,8 +117,8 @@ def make(klampt_robot_model):
         #the robot's controller
         c = controller.MultiController()
         c.launch(RosTimeController())
-        c.launch(RosBaxterController(robotName,linkNames))
+        c.launch(RosBaxterController(klampt_robot_model))
         return c
     #just launch the robot's controller, some other RosTimeController has been
     #launched before
-    return RosBaxterController(robotName,linkNames)
+    return RosBaxterController(klampt_robot_model)

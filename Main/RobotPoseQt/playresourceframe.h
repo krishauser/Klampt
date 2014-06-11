@@ -7,7 +7,7 @@
 
 #include <QTimer>
 #include <QFrame>
-#include <timer.h>
+#include <Timer.h>
 
 #define RESOURCE_RECORD_FPS 60
 
