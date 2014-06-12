@@ -305,6 +305,7 @@ void ResourceFrame::SaveResource()
       ini.setValue("save_resource_file",QFileInfo(filename).absolutePath());
 
     manager->Save(n,filename.toStdString());
+    ui->treeWidget->updateDecorator(item);
   }
 }
 
@@ -322,6 +323,7 @@ void ResourceFrame::SaveAllResources()
     ini.setValue("save_resource_folder",QFileInfo(filename).absolutePath());
 
     manager->SaveFolder(filename.toStdString());
+    ui->treeWidget->updateAllDecorators();
   }
 }
 

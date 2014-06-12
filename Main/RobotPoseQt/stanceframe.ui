@@ -63,5 +63,42 @@
   </layout>
  </widget>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>btn_createFlat</sender>
+   <signal>clicked()</signal>
+   <receiver>StanceFrame</receiver>
+   <slot>CreateFlat()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>106</x>
+     <y>30</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>128</x>
+     <y>15</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>btn_createNearby</sender>
+   <signal>clicked()</signal>
+   <receiver>StanceFrame</receiver>
+   <slot>CreateNearby()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>235</x>
+     <y>37</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>263</x>
+     <y>13</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>CreateFlat()</slot>
+  <slot>CreateNearby()</slot>
+ </slots>
 </ui>

@@ -25,7 +25,7 @@ void StanceFrame::set(StanceResource* r)
 
 void StanceFrame::CreateFlat()
 {
-  printf("TODO: CreateFlat\n");
+  frame->gui->SendCommand("get_flat_contacts",ui->contactToleranceSpin->value());
   frame->onResourceEdit();
 }
 
