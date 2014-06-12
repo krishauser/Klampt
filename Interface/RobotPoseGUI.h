@@ -66,8 +66,10 @@ public:
  *   evenly spaced milestones.
  * - optimize_path: optimizes the current LinearPath, MultiPath, Configs
  *   resource.
- * - store_flat_contacts: gets the stance for the robot standing on flat
- *   ground and adds it as a new resource
+ * - store_flat_contacts [xtol]: gets the stance for the robot standing on
+ *   flat ground and adds it as a new resource
+ * - get_flat_contacts [xtol]: gets the stance for the robot standing on
+ *   flat ground and stores it in the current Stance resource.
  * - clean_contacts [xtol] [ntol]: cleans up the current Stance or Hold
  *   resource. Points and normals within xtol and ntol, respectively, will
  *   be merged.
@@ -99,7 +101,7 @@ class RobotPoseBackend : public ResourceGUIBackend
   virtual void DoFreeDrag(int dx,int dy,int button);
   void SetDrawExpanded(int value);
 
-  Stance GetFlatStance();
+  Stance GetFlatStance(Real tolerance=0);
   void CleanContacts(Hold&,Real xtol=0,Real ntol=0);
   ResourcePtr PoserToResource(const string& type);
 };
