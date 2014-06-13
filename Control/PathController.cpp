@@ -565,8 +565,13 @@ void PolynomialPathController::AppendRamp(const Config& x,const Vector& v)
 	printf("  Reason: current velocity[%d] is out of vel limits: |%g| <= %g\n",i,dmilestones[0][i],robot.velMax[i]);
       }
   }
-  else
+  else {
+    if(path.EndTime() < pathOffset) {
+      printf("AppendRamp: Warning, path end time is in the past, cutting...\n");
+      Cut(0);
+    }
     path.Concat(Cast(dpath),true);
+  }
 }
 
 void PolynomialPathController::GetPath(Spline::PiecewisePolynomialND& _path) const
