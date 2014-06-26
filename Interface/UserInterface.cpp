@@ -26,20 +26,22 @@ public:
   
   virtual bool Send(Real tplanstart,Real tcut,const ParabolicRamp::DynamicPath& path) {
     //impose hard real time constraint
+    /*
     Real t= iface->GetCurTime();
     printf("Plan time elapsed = %g, split time ... %g\n",t-tplanstart,tcut);
     if(t >= tplanstart+tcut) {
       //too late
-      printf("Path send violates hard real-time constraint\n");
+      printf("MotionQueueInterfaceSender: Path send violates hard real-time constraint\n");
       return false;
     }
-    
+    */
     MotionQueueInterface::MotionResult res=iface->SendPathImmediate(tplanstart+tcut,path);
     if(res == MotionQueueInterface::TransmitError) {
+      printf("MotionQueueInterfaceSender: Transmission error\n");
       return false;
     }
     else if(res != MotionQueueInterface::Success) {
-      printf("Hmmm.. failed path check.  Should debug!\n");
+      printf("MotionQueueInterfaceSender: Hmmm.. failed path check.  Should debug!\n");
       return false;
     }
       
@@ -370,6 +372,15 @@ string PlannerCommandInterface::UpdateEvent()
     robotInterface->GetEndConfig(q);
     planner->SetConstantPath(q);
   }
+  if(robotInterface->HadExternalChange()) {
+    if(robotInterface->GetCurTime()  < robotInterface->GetEndTime()) {
+      fprintf(stderr,"Cannot handle an externally changed robot that is still moving\n");
+      return "";
+    }
+    Config q;
+    robotInterface->GetEndConfig(q);
+    planner->SetConstantPath(q);
+  }
 
   //wait until next planning step, otherwise try planning
   if(robotInterface->GetCurTime()  < nextPlanTime) return "";
@@ -432,8 +443,10 @@ string IKPlannerCommandInterface::ActivateEvent(bool enabled)
     cspace = new SingleRobotCSpace(*planningWorld,0,settings);
     
     planner = new RealTimeIKPlanner;
-    planner->protocol = RealTimePlannerBase::Constant;
-    planner->currentSplitTime=0.1;
+    //planner = new RealTimePerturbationIKPlanner;
+    //planner->LogBegin();
+    //planner->protocol = RealTimePlannerBase::Constant;
+    planner->currentSplitTime=0.10;
     planner->currentPadding=0.05;
     planner->SetSpace(cspace);
     assert(planner->settings != NULL);
@@ -450,6 +463,7 @@ string RRTCommandInterface::ActivateEvent(bool enabled)
     RealTimeRRTPlanner* p=new RealTimeRRTPlanner;
     p->delta = 0.5;
     planner = p;
+    planner->LogBegin();
     //planner->protocol = RealTimePlannerBase::Constant;
     planner->protocol = RealTimePlannerBase::ExponentialBackoff;
     planner->currentSplitTime=0.1;
@@ -494,6 +508,16 @@ bool RealTimePlannerDataSender::Send(Real tplanstart,Real tcut,const ParabolicRa
 void* planner_thread_func(void * ptr)
 {
   RealTimePlannerData* data = reinterpret_cast<RealTimePlannerData*>(ptr);
+  //read initial configuration
+  {
+    ScopedLock(data->mutex);
+    assert(data->resetStartConfig == true);
+    data->planner->SetConstantPath(data->startConfig);
+    data->resetStartConfig = false;
+  }
+  //FOR SOME REASON, LOGGING FAILS UNLESS DONE HERE
+  //data->planner->LogBegin();
+
   while (true) {
     //first wait for a lock
     bool start=false;
@@ -507,6 +531,11 @@ void* planner_thread_func(void * ptr)
 	return NULL;  //unlocks the mutex
       }
       assert(data->pathRefresh == false);
+      if(data->resetStartConfig == true) {
+	printf("Planning thread: resetting start configuration\n");
+	data->planner->SetConstantPath(data->startConfig);
+	data->resetStartConfig = false;
+      }
       if(data->objective) {
 	start=true;
 	startTime = data->startPlanTime = data->globalTime;
@@ -550,13 +579,11 @@ string MTPlannerCommandInterface::ActivateEvent(bool enabled)
   InputProcessingInterface::ActivateEvent(enabled);
   if(enabled) {
     Assert(robotInterface->GetEndTime() <= robotInterface->GetCurTime());
-    Config q;
-    robotInterface->GetCurConfig(q);
-    planner->SetConstantPath(q);
-
     Assert(&planner->cspace->world == planningWorld);
     data.planner = planner;
     data.planner->sendPathCallback = new RealTimePlannerDataSender(&data);
+    data.resetStartConfig = true;
+    robotInterface->GetCurConfig(data.startConfig);
     data.active = true;
     data.globalTime = 0;
     data.pathRefresh = false;
@@ -580,13 +607,28 @@ string MTPlannerCommandInterface::UpdateEvent()
 
   inputProcessor->SetGlobalTime(robotInterface->GetCurTime());
 
+  if(robotInterface->HadExternalChange()) {
+    if(robotInterface->GetCurTime()  < robotInterface->GetEndTime()) {
+      fprintf(stderr,"Cannot handle an externally changed robot that is still moving\n");
+      return "";
+    }
+    //lock the planning thread's mutex and reset the start config
+    {
+      ScopedLock lock(data.mutex);
+      data.resetStartConfig = true;
+      robotInterface->GetEndConfig(data.startConfig);
+    }
+  }
+
   //tell the planner to stop if there's a new objective
   SmartPointer<PlannerObjectiveBase> obj;
+  bool changedObjective = false;
   if(ObjectiveChanged()) {
+    changedObjective = true;
     obj = inputProcessor->MakeObjective(planner->cspace->GetRobot());
     //this is the visualization objective
     currentObjective = obj;
-    if(planner->goal && planner->goal->Delta(obj) > gPlannerStopDeltaThreshold) {
+    if((planner->goal && !obj) || (planner->goal && planner->goal->Delta(obj) > gPlannerStopDeltaThreshold)) {
       printf("\n");
       printf("****** STOP PLANNING **********\n");
       printf("\n");
@@ -599,7 +641,7 @@ string MTPlannerCommandInterface::UpdateEvent()
     ScopedLock lock(data.mutex);
 
     //update the objective function if necessary
-    if(obj != NULL) {
+    if(changedObjective) {
       //set the objective function
       data.objective = obj;
     }

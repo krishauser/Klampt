@@ -175,6 +175,8 @@ struct RealTimePlannerData
 {
   Mutex mutex;
   RealTimePlannerBase* planner;
+  bool resetStartConfig;      //(in) true if the start configuration should be reset
+  Config startConfig;         //(in) the start config
   SmartPointer<PlannerObjectiveBase> objective;   //(in) the planning objective, can be NULL
   bool active;             //(in) set this to false to quit
   Real globalTime;         //(in) time measured in calling thread
