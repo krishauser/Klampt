@@ -7,6 +7,7 @@ It also acts as a ROS clock server.
 
 import controller
 import rospy
+from klampt.trajectory import Trajectory,HermiteTrajectory
 from trajectory_msgs.msg import JointTrajectory
 from sensor_msgs.msg import JointState
 from rosgraph_msgs.msg import Clock
