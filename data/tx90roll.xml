@@ -16,6 +16,9 @@
     <object index="0">
        <geometry kFriction="0.5" kRestitution="0.9" padding="0.002"/>
     </object>
+    <terrain index="0">
+       <geometry kFriction="0.5" kRestitution="0.7" />
+    </terrain>
     <robot index="0">
        <geometry kFriction="0.5" kRestitution="0.1" padding="0.002"/>
     </robot>
