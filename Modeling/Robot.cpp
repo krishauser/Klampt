@@ -700,6 +700,17 @@ bool Robot::LoadRob(const char* fn) {
 			parents[i] = i - 1;
 	}
 	Initialize(n);
+
+	//Init standard stuff
+	if (linkNames.empty()) {
+		linkNames.resize(links.size());
+		for (size_t i = 0; i < links.size(); i++) {
+			char buf[64];
+			sprintf(buf, "Link %d", i);
+			linkNames[i] = buf;
+		}
+	}
+
 	accMax.resize(n, Inf);
 	if (qVec.empty())
 		q.set(Zero);
@@ -785,7 +796,25 @@ bool Robot::LoadRob(const char* fn) {
 		for (size_t i = 0; i < links.size(); i++)
 			links[i].inertia = inertiaVec[i];
 	}
-	//TODO: scaling isn't done yet
+	//automatically compute torque limits from COMs
+	if (autoTorque != 0.0) {
+		Real grav = Abs(autoTorque) * 9.8;
+		//TODO: more sophisticated chain structures
+		Real sumMass = 0;
+		Real sumCom = 0;
+		for (int i = (int) links.size() - 1; i >= 0; i--) {
+			Real oldMass = sumMass;
+			Real oldCom = sumCom;
+			sumMass += links[i].mass;
+			oldCom += links[i].T0_Parent.t.length();
+			sumCom = (links[i].com.length() * links[i].mass + oldCom * oldMass)
+					/ (links[i].mass + oldMass);
+			torqueMax[i] = sumCom * sumMass * grav;
+			//printf("Torque Max %d = %g, moment arm = %g\n",i,torqueMax[i],sumCom);
+		}
+	}
+
+	//TODO: whole-body scaling isn't done yet
 	if (scale != 1.0)
 		FatalError("Scale not done yet");
 	if (geomscale.size() == 1)
@@ -829,46 +858,6 @@ bool Robot::LoadRob(const char* fn) {
 		geometry[geomIndex].Transform(geomTransform[i]);
 	}
 
-	//automatically compute mass parameters from geometry
-	if (autoMass) {
-		for (size_t i = 0; i < links.size(); i++) {
-			if (comVec.empty()) {
-				if (!geometry[i].Empty())
-					links[i].com = CenterOfMass(geometry[i]);
-				else
-					links[i].com.setZero();
-			}
-			if (inertiaVec.empty()) {
-				if (!geometry[i].Empty() && links[i].mass != 0.0) {
-					links[i].inertia = Inertia(geometry[i], links[i].com,
-							links[i].mass);
-					//cout<<"Automass inertia for "<<linkNames[i]<<": "<<endl<<links[i].inertia<<endl;
-				} else {
-					links[i].inertia.setZero();
-					//cout<<"Automass setting zero inertia for "<<linkNames[i]<<endl;
-				}
-			}
-		}
-	}
-
-	//automatically compute torque limits from COMs
-	if (autoTorque != 0.0) {
-		Real grav = Abs(autoTorque) * 9.8;
-		//TODO: more sophisticated chain structures
-		Real sumMass = 0;
-		Real sumCom = 0;
-		for (int i = (int) links.size() - 1; i >= 0; i--) {
-			Real oldMass = sumMass;
-			Real oldCom = sumCom;
-			sumMass += links[i].mass;
-			oldCom += links[i].T0_Parent.t.length();
-			sumCom = (links[i].com.length() * links[i].mass + oldCom * oldMass)
-					/ (links[i].mass + oldMass);
-			torqueMax[i] = sumCom * sumMass * grav;
-			//printf("Torque Max %d = %g, moment arm = %g\n",i,torqueMax[i],sumCom);
-		}
-	}
-
 	if (collision.empty())
 		InitCollisions();
 	else {
@@ -883,15 +872,6 @@ bool Robot::LoadRob(const char* fn) {
 	  FatalError("So far, no mechanism to turn off collisions");
 	}
 
-	//Init standard stuff
-	if (linkNames.empty()) {
-		linkNames.resize(links.size());
-		for (size_t i = 0; i < links.size(); i++) {
-			char buf[64];
-			sprintf(buf, "Link %d", i);
-			linkNames[i] = buf;
-		}
-	}
 	if (joints.empty()) {
 		joints.resize(links.size());
 		for (size_t i = 0; i < links.size(); i++) {
@@ -1034,6 +1014,28 @@ bool Robot::LoadRob(const char* fn) {
 	}
 	if (!CheckValid())
 		return false;
+
+	//automatically compute mass parameters from geometry
+	if (autoMass) {
+		for (size_t i = 0; i < links.size(); i++) {
+			if (comVec.empty()) {
+				if (!geometry[i].Empty())
+					links[i].com = CenterOfMass(geometry[i]);
+				else
+					links[i].com.setZero();
+			}
+			if (inertiaVec.empty()) {
+				if (!geometry[i].Empty() && links[i].mass != 0.0) {
+					links[i].inertia = Inertia(geometry[i], links[i].com,
+							links[i].mass);
+					//cout<<"Automass inertia for "<<linkNames[i]<<": "<<endl<<links[i].inertia<<endl;
+				} else {
+					links[i].inertia.setZero();
+					//cout<<"Automass setting zero inertia for "<<linkNames[i]<<endl;
+				}
+			}
+		}
+	}
 
 	CleanupSelfCollisions();
 	if (selfCollision.empty()) {
