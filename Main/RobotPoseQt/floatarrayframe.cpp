@@ -59,10 +59,14 @@ void FloatArrayFrame::Insert()
     ui->spin_index->setValue(0);
     resource->data.push_back(0.0);
   }
-  else
-    resource->data.insert(resource->data.begin()+ui->spin_index->value(),0.0);
+  else {
+    int index=ui->spin_index->value();
+    assert(index >= 0 && index < (int)resource->data.size());
+    resource->data.insert(resource->data.begin()+index,0.0);
+  }
   ui->spin_index->setMaximum(resource->data.size()-1);
   int index=ui->spin_index->value();
+  assert(index >= 0 && index < (int)resource->data.size());
   ui->edit_value->setText(QString::number(resource->data[index]));
   blockSignals(false);
   frame->onResourceEdit();
@@ -70,6 +74,7 @@ void FloatArrayFrame::Insert()
 
 void FloatArrayFrame::Delete()
 {
+  if(resource->data.empty()) return;
   blockSignals(true);
   resource->data.erase(resource->data.begin()+ui->spin_index->value());
   if(resource->data.size()==0) {

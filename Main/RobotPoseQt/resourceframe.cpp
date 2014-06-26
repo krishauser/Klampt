@@ -90,6 +90,7 @@ void ResourceFrame::onResourceEdit()
   if(!item) return;
   ResourceNode* n = ui->treeWidget->itemToNode(item);
   assert(n != NULL);
+  n->SetChanged();
   if(n->IsExpanded()) {
     //need to re-expand
     if(!n->IsValid()) {

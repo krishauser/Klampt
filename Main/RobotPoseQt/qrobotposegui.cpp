@@ -33,6 +33,7 @@ QRobotPoseGUI::QRobotPoseGUI(QKlamptDisplay* _display,RobotPoseBackend *_backend
 void QRobotPoseGUI::OnIdleTimer()
 {
   SendIdle();
+  idle_timer.start(0);
 }
 
 bool QRobotPoseGUI::OnPauseIdle(double secs) 
