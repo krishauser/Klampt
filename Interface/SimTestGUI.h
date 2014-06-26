@@ -86,6 +86,7 @@ struct SensorPlot
  * - draw_contacts
  * - draw_wrenches
  * - draw_expanded 
+ * - draw_time
  *
  * Signals sent back to GUI are defined as follows:
  * - command update_config: notifies that the configuration of the world has changed.
@@ -108,7 +109,7 @@ public:
 
   int forceSpringActive;
   Vector3 forceSpringAnchor;
-  int drawBBs,drawPoser,drawDesired,drawEstimated,drawContacts,drawWrenches,drawExpanded,doLogging;
+  int drawBBs,drawPoser,drawDesired,drawEstimated,drawContacts,drawWrenches,drawExpanded,drawTime,doLogging;
   string simLogFile;
   string contactStateLogFile, contactWrenchLogFile;
   map<int,string> robotCommandLogFiles, robotSensedLogFiles, robotTorqueLogFiles;
