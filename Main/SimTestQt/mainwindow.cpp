@@ -67,6 +67,10 @@ void MainWindow::SetEstimated(bool status){
   gui->SendButtonToggle("draw_estimated",status);
 }
 
+void MainWindow::SetDrawTime(bool status){
+  gui->SendButtonToggle("draw_time",status);
+}
+
 void MainWindow::SetBBoxes(bool status){
   gui->SendButtonToggle("draw_bbs",status);
 }

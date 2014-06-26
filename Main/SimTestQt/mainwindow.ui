@@ -154,6 +154,19 @@
            </widget>
           </item>
           <item>
+           <widget class="QCheckBox" name="chk_draw_time">
+            <property name="statusTip">
+             <string>Toggle drawing of expanded boundary layer meshes</string>
+            </property>
+            <property name="text">
+             <string>Time</string>
+            </property>
+            <property name="tristate">
+             <bool>false</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
            <spacer name="horizontalSpacer_5">
             <property name="orientation">
              <enum>Qt::Horizontal</enum>
@@ -1088,7 +1101,7 @@
    <slot>SetExpanded(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>634</x>
+     <x>609</x>
      <y>525</y>
     </hint>
     <hint type="destinationlabel">
@@ -1104,7 +1117,7 @@
    <slot>SetWrenches(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>372</x>
+     <x>347</x>
      <y>525</y>
     </hint>
     <hint type="destinationlabel">
@@ -1120,7 +1133,7 @@
    <slot>SetBBoxes(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>557</x>
+     <x>532</x>
      <y>525</y>
     </hint>
     <hint type="destinationlabel">
@@ -1136,7 +1149,7 @@
    <slot>SetContacts(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>295</x>
+     <x>270</x>
      <y>525</y>
     </hint>
     <hint type="destinationlabel">
@@ -1152,7 +1165,7 @@
    <slot>SetDesired(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>437</x>
+     <x>412</x>
      <y>525</y>
     </hint>
     <hint type="destinationlabel">
@@ -1753,6 +1766,22 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>chk_draw_time</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>MainWindow</receiver>
+   <slot>SetDrawTime(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>637</x>
+     <y>517</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>39</x>
+     <y>573</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>Reset()</slot>
@@ -1814,5 +1843,6 @@
   <slot>LogSensedPath(bool)</slot>
   <slot>LogCommandedPath(bool)</slot>
   <slot>ChangeEncoderCommand()</slot>
+  <slot>SetDrawTime(bool)</slot>
  </slots>
 </ui>
