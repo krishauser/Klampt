@@ -13,7 +13,7 @@ unpack-deps:
 deps: dep-KrisLibrary dep-tinyxml dep-glui dep-ode
 
 dep-KrisLibrary:
-	cd KrisLibrary; cp Makefile.config.klampt Makefile.config
+	cd KrisLibrary; cmake .
 	cd KrisLibrary; make KrisLibrary
 
 dep-tinyxml:
