@@ -1256,6 +1256,24 @@ bool Robot::Save(const char* fn) {
 	}
 	file << endl << endl;
 
+	for(int i=0;i<nLinks;i++) {
+	  if(geometry[i].Empty()) continue;
+	  vector<int> nocollision;
+	  for(int j=i+1;j<nLinks;j++) {
+	    if(geometry[j].Empty()) continue;
+	    if(parents[i] != j && parents[j] != i)
+	      if(selfCollisions(i,j) == NULL)
+		nocollision.push_back(j);
+	  }
+	  if(!nocollision.empty()) {
+	    file<<"noselfcollision\t";
+	    for(size_t j=0;j<nocollision.size();j++)
+	      file<<i<<" "<<nocollision[j]<<"\t";
+	    file<<endl;
+	  }
+	}
+	file << endl;
+
 	int nJoints = joints.size();
 	for (int i = 0; i < nJoints; i++) {
 		file << "joint ";
@@ -2080,20 +2098,26 @@ bool Robot::LoadURDF(const char* fn)
 	//parse Klamp't extras
 	//format:
 	//- <robot>
-	//  - <klampt [default_mass:float] [default_inertia:H] [use_vis_geom:bool] [flip_yz:bool] [package_root:string]>
+	//  - <klampt [default_mass:float] [default_inertia:H] [default_acc_max:float] [use_vis_geom:bool] [flip_yz:bool] [world_frame:string] [package_root:string]>
 	//    default_mass: sets the mass of links for which URDF has no mass.
 	//    default_inertia can be either a float (diagonal of matrix),
 	//      3-vector (diagonal of matrix), or 9-vector (entries of 3x3
 	//      inertia matrix)
+	//    default_acc_max: default acceleration limit (default: 100)
 	//    use_vis_geom: true if you want to use visualization geometry
 	//      instead of collision geometry
 	//    flip_yz: true if you want to swap the y-z components when
 	//      importing meshes.
+	//    world_frame: set this to change the name of the world frame
+	//      for fixed-base robots (default: "world").
+	//    freeze_root_link: set this if you want the root link to be
+	//      frozen in space (default: false).
 	//    package_root: set this to determine relative location of package:// header
 	//    - <link name:string [physical:bool] [servoP:float] [servoI:float] [servoD:float] [dryFriction:float] [viscousFriction:float]>
 	//      name: identifies a link
 	//      physical: sets whether it is considered a physical
 	//        or virtual link.  Virtual links have mass set to 0.
+	//      accMax: sets the acceleration limit
 	//      servoP,servoI,servoD,dryFriction,viscousFriction: 
 	//        optionally set the driver parameters for the given link
 	//    - <noselfcollision pairs:"a1 b1 ... ak bk" >
@@ -2104,10 +2128,13 @@ bool Robot::LoadURDF(const char* fn)
 	//      tested
 	double default_mass = 0.0001;
 	Matrix3 default_inertia; default_inertia.setIdentity(); default_inertia *= 1e-8;	
+	double default_acc_max = 100;
+	int freezeRootLink = 0;
+	string worldFrame = "world";
 	vector<pair<string, string> > selfCollision;
 	vector<pair<string, string> > noSelfCollision;
 	map<string,bool> virtualLinks;
-	map<string,Real> kP,kI,kD,dryFriction,viscousFriction;
+	map<string,Real> kP,kI,kD,dryFriction,viscousFriction,customAccMax;
 	TiXmlDocument xml_doc;
 	bool loaded=xml_doc.LoadFile(s.c_str());
 	if(!loaded) {
@@ -2125,8 +2152,19 @@ bool Robot::LoadURDF(const char* fn)
 	  if(klampt_xml->QueryValueAttribute("flip_yz",&flip_yz)==TIXML_SUCCESS) {
 	    URDFConverter::flipYZ = (flip_yz != 0);
 	  }
+	  if(klampt_xml->QueryValueAttribute("freeze_root_link",&freezeRootLink)==TIXML_SUCCESS) {
+	    //value has been read in already...
+	  }
+	  else freezeRootLink = false;
+
+	  if(klampt_xml->Attribute("world_frame") != 0) {
+	    worldFrame = klampt_xml->Attribute("world_frame");
+	  }
 	  if(klampt_xml->Attribute("package_root") != 0) {
-	    URDFConverter::packageRootPath = klampt_xml->Attribute("package_root");
+	    URDFConverter::packageRootPath = path+"/"+klampt_xml->Attribute("package_root");
+	  }
+	  if(klampt_xml->QueryValueAttribute("default_acc_max",&default_acc_max)!=TIXML_SUCCESS) {
+	    //pass
 	  }
 	  if(klampt_xml->QueryValueAttribute("default_mass",&default_mass)!=TIXML_SUCCESS) {
 	    //pass
@@ -2178,31 +2216,63 @@ bool Robot::LoadURDF(const char* fn)
 	    if(e->QueryValueAttribute("viscousFriction",&temp) == TIXML_SUCCESS) {
 	      viscousFriction[name] = temp;
 	    }
+	    if(e->QueryValueAttribute("accMax",&temp) == TIXML_SUCCESS) {
+	      customAccMax[name] = temp;
+	    }
 	    e = e->NextSiblingElement("link");
 	  }
 	  e = klampt_xml->FirstChildElement("selfcollision");
 	  while(e != NULL) {
-	    if(e->Attribute("pairs")==NULL) {
-	      cerr<<"Error, robot/klampt/selfcollision does not contain pairs attribute"<<endl;
-	      e = e->NextSiblingElement("selfcollision");
+	    if(e->Attribute("pairs")!=NULL) {
+	      stringstream ss(e->Attribute("pairs"));
+	      pair<string, string> ptemp;
+	      while (SafeInputString(ss,ptemp.first) && SafeInputString(ss,ptemp.second))
+		selfCollision.push_back(ptemp);
+	    }
+	    else if(e->Attribute("group1")!=NULL && e->Attribute("group2")!=NULL) {
+	      vector<string> group1,group2;
+	      string stemp;
+	      stringstream ss1(e->Attribute("group1"));
+	      stringstream ss2(e->Attribute("group2"));
+	      while (SafeInputString(ss1,stemp))
+		group1.push_back(stemp);
+	      while (SafeInputString(ss2,stemp))
+		group2.push_back(stemp);
+	      for(size_t i=0;i<group1.size();i++) 
+		for(size_t j=0;j<group2.size();j++) 
+		  selfCollision.push_back(pair<string,string>(group1[i],group2[j]));
+	    }
+	    else {
+	      cerr<<"Error, robot/klampt/selfcollision does not contain pairs, or group1 and group2 attributes"<<endl;
 	    }	      
-	    stringstream ss(e->Attribute("pairs"));
-	    pair<string, string> ptemp;
-	    while (SafeInputString(ss,ptemp.first) && SafeInputString(ss,ptemp.second))
-	      selfCollision.push_back(ptemp);
+
 
 	    e = e->NextSiblingElement("selfcollision");
 	  }
 	  e = klampt_xml->FirstChildElement("noselfcollision");
 	  while(e != NULL) {
-	    if(e->Attribute("pairs")==NULL) {
-	      cerr<<"Error, robot/klampt/noselfcollision does not contain pairs attribute"<<endl;
-	      e = e->NextSiblingElement("noselfcollision");
+	    if(e->Attribute("pairs")!=NULL) {
+	      stringstream ss(e->Attribute("pairs"));
+	      pair<string, string> ptemp;
+	      while (SafeInputString(ss,ptemp.first) && SafeInputString(ss,ptemp.second))
+		noSelfCollision.push_back(ptemp);
+	    }
+	    else if(e->Attribute("group1")!=NULL && e->Attribute("group2")!=NULL) {
+	      vector<string> group1,group2;
+	      string stemp;
+	      stringstream ss1(e->Attribute("group1"));
+	      stringstream ss2(e->Attribute("group2"));
+	      while (SafeInputString(ss1,stemp))
+		group1.push_back(stemp);
+	      while (SafeInputString(ss2,stemp))
+		group2.push_back(stemp);
+	      for(size_t i=0;i<group1.size();i++) 
+		for(size_t j=0;j<group2.size();j++) 
+		  noSelfCollision.push_back(pair<string,string>(group1[i],group2[j]));
+	    }
+	    else {
+	      cerr<<"Error, robot/klampt/noselfcollision does not contain pairs, or group1 and group2 attributes"<<endl;
 	    }	      
-	    stringstream ss(e->Attribute("pairs"));
-	    pair<string, string> ptemp;
-	    while (SafeInputString(ss,ptemp.first) && SafeInputString(ss,ptemp.second))
-	      noSelfCollision.push_back(ptemp);
 
 	    e = e->NextSiblingElement("noselfcollision");
 	  }
@@ -2210,7 +2280,7 @@ bool Robot::LoadURDF(const char* fn)
 
 	//fixed-base robots have the root link "world", floating-base robots
 	//do not.
-	bool floating = (root_link->name != "world");
+	bool floating = (root_link->name != worldFrame);
 	int links_size, joints_size;
 	if(floating) {
 	  //links_size: URDF 36, ROB 41 with 5 extra DOFS for base
@@ -2224,6 +2294,9 @@ bool Robot::LoadURDF(const char* fn)
 		 << " do not match for floating-base robot!" << endl;
 	    return false;
 	  }
+
+	  if(freezeRootLink)
+	    joints_size += 5;
 	}
 	else {
 	  links_size = (int)parser->links_.size() - 1;
@@ -2299,9 +2372,19 @@ bool Robot::LoadURDF(const char* fn)
 	  }
 
 	  //floating base joint
-	  this->joints[0].type = RobotJoint::Floating;
-	  this->joints[0].linkIndex = 5;
-	  this->joints[0].baseIndex = -1;
+	  if(!freezeRootLink) {
+	    this->joints[0].type = RobotJoint::Floating;
+	    this->joints[0].linkIndex = 5;
+	    this->joints[0].baseIndex = -1;
+	  }
+	  else {
+	    //freezeRootLink = true, so freeze all those links
+	    for(int i=0;i<6;i++) {
+	      this->joints[i].type =  RobotJoint::Weld;
+	      this->joints[i].linkIndex = i;
+	      this->joints[i].baseIndex = -1;
+	    }
+	  }
 	}
 	else {
 	  //fixed base
@@ -2350,22 +2433,22 @@ bool Robot::LoadURDF(const char* fn)
 		}
 
 		//If have inertia specified, then, use the specified inertia
-		if (linkNode->link->inertial) {
-			this->links[link_index].com = linkNode->T_link_to_inertia.t;
-			this->links[link_index].mass = linkNode->link->inertial->mass; //done
-			Matrix3 ori_inertia = URDFConverter::convertInertial(
-					*linkNode->link->inertial);
-			this->links[link_index].inertia.mul(
-					linkNode->T_link_to_inertia_inverse.R, ori_inertia);
-		}
-		//Otherwise, set it to default value
-		else {
-		  if(virtualLinks.count(linkNode->link->name)!=0) {
+		if(virtualLinks.count(linkNode->link->name)!=0) {
 		    //assume its a virtual link
 		    this->links[link_index].com = Vector3(0, 0, 0);
 		    this->links[link_index].mass = 0;
 		    this->links[link_index].inertia.setZero();
+		}
+		else {
+		  if (linkNode->link->inertial) {
+		    this->links[link_index].com = linkNode->T_link_to_inertia.t;
+		    this->links[link_index].mass = linkNode->link->inertial->mass; //done
+		    Matrix3 ori_inertia = URDFConverter::convertInertial(
+									 *linkNode->link->inertial);
+		    this->links[link_index].inertia.mul(
+							linkNode->T_link_to_inertia_inverse.R, ori_inertia);
 		  }
+		//Otherwise, set it to default value
 		  else {
 			this->links[link_index].com = Vector3(0, 0, 0);
 			this->links[link_index].mass = default_mass;
@@ -2385,7 +2468,9 @@ bool Robot::LoadURDF(const char* fn)
 		urdf::Joint* joint = linkNode->joint;
 		if (joint) {
 		  int joint_index = link_index;
-		  if(floating) joint_index -= 5;
+		  if(floating) {
+		    if(!freezeRootLink) joint_index -= 5;
+		  }
 			this->joints[joint_index].type = URDFConverter::jointType_URDF2ROB(
 					joint->type); //done. finish function
 			if (joint->type == urdf::Joint::PRISMATIC){
@@ -2402,6 +2487,10 @@ bool Robot::LoadURDF(const char* fn)
 				this->velMin[link_index] = -joint->limits->velocity;
 				this->torqueMax[link_index] = joint->limits->effort; //TODO: in URDF, no explicit value specified, effort has unit n*m,
 			}
+			if(customAccMax.count(linkNode->link->name) != 0)
+			  this->accMax[link_index] = customAccMax[linkNode->link->name];
+			else
+			  this->accMax[link_index] = default_acc_max;
 			if(this->joints[joint_index].type == RobotJoint::Weld){
 				qMin[link_index] = 0;
 				qMax[link_index] = 0;
@@ -2509,6 +2598,7 @@ bool Robot::LoadURDF(const char* fn)
 			   selfCollision[i].first.c_str(),selfCollision[i].second.c_str());
 		    return false;
 		  }
+		  if(link1 == link2) continue;
 		  if(link1 > link2) Swap(link1,link2);
 		  Assert(link1 < link2);
 		  InitSelfCollisionPair(link1,link2);
@@ -2527,6 +2617,7 @@ bool Robot::LoadURDF(const char* fn)
 			       noSelfCollision[i].first.c_str(), noSelfCollision[i].second.c_str());
 			return false;
 		}
+		  if(link1 == link2) continue;
 		  if(link1 > link2) Swap(link1,link2);
 		Assert(link1 < link2);
 		SafeDelete(selfCollisions(link1,link2));
