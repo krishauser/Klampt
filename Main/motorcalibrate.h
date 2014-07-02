@@ -20,6 +20,9 @@ static Vector3 gGravity(0,0,-9.8);
 static Real gDefaultTimestep = 1e-3;
 static Real gDefaultVelocityWeight = Sqr(0.005);
 
+static int gVerbose = 0;
+static int gErrorGetchar = 1;
+static int gStepGetchar = 0;
 
 class MotorCalibrateSettings : public AnyCollection
 {

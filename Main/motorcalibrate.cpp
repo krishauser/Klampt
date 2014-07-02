@@ -5,7 +5,6 @@
 #include <robotics/ConstrainedDynamics.h>
 #include <robotics/NewtonEuler.h>
 #include <math/differentiation.h>
-#include <math/LDL.h>
 #include <optimization/Minimization.h>
 #include <utils/AnyCollection.h>
 #include <utils/stringutils.h>
@@ -14,10 +13,6 @@
 #include <Timer.h>
 using namespace std;
 using namespace Math;
-
-#ifdef HAVE_QT
-#define getchar() //do nothing
-#endif
 
 /** @brief Simulates a single DOF under PD control and stick-slip friction.
  *
@@ -248,12 +243,14 @@ dts,torquemin,torquemax);
     for(size_t i=0;i<f.fs.size();i++) { 
       (*f.fs[i])(minProblem.x,res);
       printf("%g, %g: x'' = %g*(PID(%g,%g) - %g*x' + %g*x + %g)\n",res[0],res[1],minvs[i],xDes[i],dxDes[i],ds[i],ks[i],cs[i]);
-      if((i+1)%100 == 0) getchar();
+      if(gErrorGetchar && (i+1)%100 == 0) getchar();
       if(!IsFinite(res[0]) || !IsFinite(res[1]) || Abs(res[1]) > 1e2) {
 	printf("Large error on step %d, this may require tuning initial parameters\n",i);
-	printf("Press enter to continue\n");
-	getchar();
-	paused = true;
+	if(gErrorGetchar) {
+	  printf("Press enter to continue\n");
+	  getchar();
+	  paused = true;
+	}
 	break;
       }
     }
@@ -356,6 +353,8 @@ void LinearizeRobot(Robot& robot,const vector<int>& fixedLinks,
     Vector zero(robot.links.size(),Zero);
     res=ConstrainedCalcTorque(robot,fixedLinks,fixedDofs,zero,tsteady);
     if(!res) {
+      cout<<"Warning, unable to solve for constrained torques"<<endl;
+      cout<<"   Calculating free-floating torques instead, may be erroneous..."<<endl;
       NewtonEulerSolver ne(robot);
       ne.SetGravityWrenches(gGravity);
       ne.CalcResidualTorques(tsteady);
@@ -373,7 +372,19 @@ void LinearizeRobot(Robot& robot,const vector<int>& fixedLinks,
     if(FuzzyZero(minv(i))) {
       c(i) = 0;
     }
-    else c(i) /= minv(i);
+    else if(IsFinite(minv(i))) {
+      c(i) /= minv(i);
+    }
+    else {
+      fprintf(stderr,"Invalid mass matrix inverse, entry %d: %g\n",i,minv(i));
+      fprintf(stderr,"Most likely reason is an invalid setting for the fixed links\n");
+      //if(gErrorGetchar) {
+      //printf("Press enter to continue\n");
+      //getchar();
+      //}
+      fprintf(stderr,"Aborting...\n");
+      Abort();
+    }
     if(robot.joints[i].type == RobotJoint::Weld) 
       c(i) = 0;
   }
@@ -383,8 +394,10 @@ void LinearizeRobot(Robot& robot,const vector<int>& fixedLinks,
     cout<<"Steady state torques: "<<tsteady<<endl;
     cout<<"Linearized offset vector: "<<b<<endl;
     cout<<"Mass matrix inverse diag"<<minv<<endl;
-    printf("Press enter to continue\n");
-    getchar();
+    if(gErrorGetchar) {
+      printf("Press enter to continue\n");
+      getchar();
+    }
   }
 }
 
@@ -426,7 +439,6 @@ void RunCalibrationInd(MotorCalibrationProblem& problem,int numIters)
   Vector minv,d,k,c;
   for(size_t trial=0;trial<problem.commandedQ.size();trial++) {
     size_t n=problem.sensedQ[trial].milestones.size()-1;
-    if(n > gMaxMilestones) n=gMaxMilestones;
     size_t istart = dts.size();
     for(size_t j=0;j<ndof;j++) {
       minvs[j].resize(istart+n);
@@ -565,7 +577,9 @@ void RunCalibrationInd(MotorCalibrationProblem& problem,int numIters)
     printf("Time %g\n",timer.ElapsedTime());
     printf("\n");
     rmsds[k]=res;
-    getchar();
+    if(gStepGetchar) {
+      getchar();
+    }
   }
 
   if(problem.savePostOptimize) {
@@ -892,13 +906,20 @@ string motorcalibrate(AnyCollection settings){
       fprintf(stderr,"Failed to load path %s\n",sensedPaths[i].c_str());
       return NULL;
     }
+    if((int)problem.commandedQ[i].times.size() > gMaxMilestones) {
+      problem.commandedQ[i].times.resize(gMaxMilestones+1);
+      problem.commandedQ[i].milestones.resize(gMaxMilestones+1);
+    }
+    if((int)problem.sensedQ[i].times.size() > gMaxMilestones) {
+      problem.sensedQ[i].times.resize(gMaxMilestones+1);
+      problem.sensedQ[i].milestones.resize(gMaxMilestones+1);
+    }
   }
   problem.commandedV.resize(problem.commandedQ.size());
   problem.sensedV.resize(problem.sensedQ.size());
   for(size_t i=0;i<problem.commandedQ.size();i++) {
     Difference(robot,problem.commandedQ[i],problem.commandedV[i]);
     Difference(robot,problem.sensedQ[i],problem.sensedV[i]);
-    problem.commandedV[i].Save("test.path");
   }
 
   RunCalibrationInd(problem,numIters);
@@ -941,7 +962,9 @@ string motorcalibrate(AnyCollection settings){
       ret_stream<<robot.drivers[i].viscousFriction<<" ";
   }
   string output=ret_stream.str();
-  cout<<output;
+  cout<<endl;
+  cout<<"Copy the following lines into your robot file:"<<endl;
+  cout<<output<<endl;
   return output;
 }
 
