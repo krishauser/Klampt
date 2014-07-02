@@ -22,7 +22,7 @@ Dialog::~Dialog()
 }
 
 int Dialog::LoadRobot(){
-    robotFilename = f.getOpenFileName(0,"Open Robot","","*.rob");
+    robotFilename = f.getOpenFileName(0,"Open Robot","","*.rob *.urdf");
     if(!robotFilename.isEmpty()){
         Robot r;
         r.Load(robotFilename.toStdString().c_str());
@@ -100,9 +100,14 @@ int Dialog::DoCalibrate(){
   settings["fixedLinks"]=fixed;
   settings["commandedPaths"]=commanded;
   settings["sensedPaths"]=sensed;
-  cout<<settings;
   QString newtext=QString::fromStdString(motorcalibrate(settings));
   popup->SetText(newtext);
   popup->rob=robotFilename;
   popup->show();
+
+  cout<<endl;
+  cout<<"To re-run from command line, copy the following lines to \n\
+motorcalibrate.settings and run \n\
+  ./MotorCalibrate motorcalibrate.settings"<<endl;
+  cout<<settings<<endl;
 }
