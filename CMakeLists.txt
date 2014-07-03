@@ -114,6 +114,12 @@ endforeach(s)
 install(DIRECTORY data
     DESTINATION .
     COMPONENT datafiles)
+IF(WIN32)
+	#need to install Assimp and GLPK dlls
+	install(FILES Library/Assimp32.dll Library/glpk_4_52.dll
+		DESTINATION bin
+		COMPONENT apps)
+ENDIF(WIN32)
 
 # Needs to be last statement:
 INCLUDE(CPackSettings)
