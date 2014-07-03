@@ -100,7 +100,7 @@ void MainWindow::UpdateDriverParameters(){
   Vector2 limits = rob->GetDriverLimits(gui->driver_index);
   ui->spn_driver->setMinimum(limits.x);
   ui->spn_driver->setMaximum(limits.y);
-#undef NUM(x)
+#undef NUM
      if(IsInf(ui->spn_driver->minimum()) || IsInf(ui->spn_driver->minimum()))
          ui->sld_driver->setEnabled(false);
      else ui->sld_driver->setEnabled(true);
@@ -143,7 +143,10 @@ void MainWindow::UpdateDriverSlider(double value){
 
 void MainWindow::UpdateLinkParameters(){
 #define NUM(x) QString::number(x)
-  QString link_info=QString("[%1 %2], T [%3,%4]").arg(NUM(rob->velMin(gui->link_index)),NUM(rob->velMax(gui->link_index)),NUM(-rob->torqueMax(gui->link_index)),NUM(rob->torqueMax(gui->link_index)));
+  QString link_info=QString("V [%1 %2], A [%3,%4], T [%5,%6]").arg(
+	NUM(rob->velMin(gui->link_index)),NUM(rob->velMax(gui->link_index)),
+	NUM(-rob->accMax(gui->link_index)),NUM(rob->accMax(gui->link_index)),
+	NUM(-rob->torqueMax(gui->link_index)),NUM(rob->torqueMax(gui->link_index)));
   ui->lbl_link_info->setText(link_info);
   ui->spn_link->setMinimum(rob->qMin(gui->link_index));
   ui->spn_link->setMaximum(rob->qMax(gui->link_index));
@@ -151,7 +154,7 @@ void MainWindow::UpdateLinkParameters(){
       ui->sld_link->setEnabled(false);
   else ui->sld_link->setEnabled(true);
 
-#undef NUM(x)
+#undef NUM
 }
 
 void MainWindow::LinkMode(){

@@ -15,16 +15,19 @@ public:
     void SetDriver(int index);
     void SetLink(int index);
     void LoadFile(QString filename=QString());
+    virtual bool OnPauseIdle(double secs);
     virtual bool OnCommand(const string &cmd, const string &args);
     virtual bool OnRefresh();
     void UpdateGUI();
 
     QKlamptDisplay* display;
     CollisionOutput* col_out;
+    QTimer idle_timer;
 
     int driver_index;
     int link_index;
 public slots:
+    void OnIdleTimer();
     void SetDriverValue(double val);
     void SetLinkValue(double val);
 

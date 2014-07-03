@@ -40,7 +40,26 @@ void QRobotTestGUI::SetDriver(int index){
 void QRobotTestGUI::SetDriverValue(double val){
     SendCommand("set_driver",driver_index);
     SendCommand("set_driver_value",val);
+
+  connect(&idle_timer, SIGNAL(timeout()),this,SLOT(OnIdleTimer()));
+  idle_timer.start(0);
 }
+
+
+void QRobotTestGUI::OnIdleTimer()
+{
+  SendIdle();
+}
+
+bool QRobotTestGUI::OnPauseIdle(double secs) 
+{
+  if(secs > 10000000)
+    idle_timer.stop();
+  else
+    idle_timer.start(int(secs*1000));
+  return true;
+}
+
 
 void QRobotTestGUI::SetLink(int index){
     link_index=index;

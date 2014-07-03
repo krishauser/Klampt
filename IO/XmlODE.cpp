@@ -71,7 +71,7 @@ bool XmlODESettings::GetSettings(ODESimulator& sim)
   while(c!=NULL) {
     const char* name=c->Value();
     printf("Parsing element %s\n",name);
-    if(0 == strcmp(name,"env")) {
+    if(0 == strcmp(name,"terrain")) {
       int index;
       if(c->QueryValueAttribute("index",&index)==TIXML_SUCCESS) {
 	Assert(index < (int)sim.numEnvs());
@@ -79,13 +79,13 @@ bool XmlODESettings::GetSettings(ODESimulator& sim)
 	if(eg) {
 	  XmlODEGeometry g(eg);
 	  if(!g.Get(*sim.envGeom(index))) {
-	    fprintf(stderr,"Error reading environment geometry from XML\n");
+	    fprintf(stderr,"Error reading terrain geometry from XML\n");
 	    return false;
 	  }
 	}
       }
       else {
-	fprintf(stderr,"Error reading environment index from XML file\n");
+	fprintf(stderr,"Error reading terrain index from XML file\n");
 	return false;
       }
     }

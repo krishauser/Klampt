@@ -260,7 +260,7 @@ PlannerObjectiveBase* SerializedObjectiveProcessor::MakeObjective(Robot* robot)
 {
   if(!reader) return NULL;
   string payload = reader->NewestMessage();
-  cout<<"SerializedObjectiveProcessor: Got a message: "<<payload<<endl;
+  //cout<<"SerializedObjectiveProcessor: Got a message: "<<payload<<endl;
   if(payload.length()==0) return NULL;
   stringstream ss(payload);
   return LoadPlannerObjective(ss,robot);

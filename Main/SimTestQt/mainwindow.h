@@ -33,6 +33,7 @@ public slots:
     //all checkboxes
   void SetWrenches(bool status);
   void SetDesired(bool status);
+  void SetDrawTime(bool status);
   void SetEstimated(bool status);
   void SetBBoxes(bool status);
   void SetContacts(bool status);

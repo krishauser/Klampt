@@ -171,7 +171,7 @@ void Approximate(const T1& in,Real res,T2& out)
 {
   vector<Real> times;
   vector<Vector> milestones,dmilestones;
-  Discretize(in,times,milestones,dmilestones);
+  Discretize(in,res,times,milestones,dmilestones);
   Interpolate(times,milestones,dmilestones,out);
 }
 ///Create a representation that matches the input path at keyframes derived from the 
@@ -181,7 +181,7 @@ void Approximate(const T1& in,Real res,LinearPath& out)
 {
   vector<Real> times;
   vector<Vector> milestones;
-  Discretize(in,times,milestones);
+  Discretize(in,res,times,milestones);
   Interpolate(times,milestones,out);
 }
 

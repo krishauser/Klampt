@@ -107,6 +107,13 @@ public:
   ///Turn delete IK widgets on/off
   void SetDeleteIKMode(bool);
 
+  ///Solves the current IK problem (by default uses 100 iters, tolerance 0.001)
+  bool SolveIK(int iters=0,Real tol=0);
+  ///Solves the current IK problem with a fixed base
+  bool SolveIKFixedBase(int iters=0,Real tol=0);
+  ///Solves the current IK problem with a joint fixed in place
+  bool SolveIKFixedJoint(int fixedJoint,int iters=0,Real tol=0);
+
   virtual void DrawGL(Camera::Viewport& viewport);
   virtual bool BeginDrag(int x,int y,Camera::Viewport& viewport,double& distance);
   virtual void Drag(int dx,int dy,Camera::Viewport& viewport);

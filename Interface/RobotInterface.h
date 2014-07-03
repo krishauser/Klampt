@@ -9,6 +9,8 @@
  * operates in a motion queue mode.
  * 
  * Subclasses must overload the following methods:
+ * - HadExternalChange returns true if the queue changed for reasons outside
+ *   of the caller's control.
  * - GetCurTime returns the current absolute time
  * - GetEndTime returns the absolute time of the end of the current motion 
  *   queue
@@ -28,6 +30,7 @@ class MotionQueueInterface
   enum MotionResult { Success, InvalidParams, FailedCheck, TransmitError };
 
   virtual ~MotionQueueInterface() {}
+  virtual bool HadExternalChange()=0;
   virtual Real GetCurTime()=0;
   virtual void GetCurConfig(Config& x)=0;
   virtual void GetCurVelocity(Config& dx)=0;
@@ -50,6 +53,7 @@ class DefaultMotionQueueInterface : public MotionQueueInterface
   PolynomialPathController* controller;
 
   DefaultMotionQueueInterface(PolynomialPathController* controller);
+  virtual bool HadExternalChange();
   virtual Real GetCurTime();
   virtual void GetCurConfig(Config& x);
   virtual void GetCurVelocity(Config& dx);

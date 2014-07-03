@@ -27,7 +27,8 @@ bool  MainWindow::Initialize(int argc,const char** argv)
     gui->ini=ini;
     ui->displaywidget->gui = gui;
 
-    //set the system call for encoding video
+    //set the system calls for encoding video
+    ui->displaywidget->moviefile = ini->value("video_record_file","klampt_record.mp4").toString().toStdString();
     ui->displaywidget->SetVideoEncoding(ini->value("video_encoding_command","ffmpeg -y -f image2 -i image%04d.ppm").toString().toStdString());
 
     ui->displaywidget->installEventFilter(this);
@@ -64,6 +65,10 @@ void MainWindow::SetDesired(bool status){
 
 void MainWindow::SetEstimated(bool status){
   gui->SendButtonToggle("draw_estimated",status);
+}
+
+void MainWindow::SetDrawTime(bool status){
+  gui->SendButtonToggle("draw_time",status);
 }
 
 void MainWindow::SetBBoxes(bool status){

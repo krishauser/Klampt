@@ -25,11 +25,12 @@ double timeCostCoeff = 0.0;
 class UserTrialProgram : public SimViewProgram
 {
 public:
+  RobotWorld planningWorld;
   WorldPlannerSettings settings;
   string initialState;
 
   string logFile;
-  SimRobotInterface robotInterface;
+  SmartPointer<SimRobotInterface> robotInterface;
   vector<SmartPointer<RobotUserInterface> > uis;
   int currentUI,oldUI;
 
@@ -40,7 +41,7 @@ public:
   int drawDesired,drawPath,drawUI,drawContacts;
 
   UserTrialProgram(RobotWorld* world)
-    :SimViewProgram(world),robotInterface(&sim)
+    :SimViewProgram(world)
   {
     settings.InitializeDefault(*world);
     logFile = "trial.log";
@@ -102,6 +103,9 @@ public:
     drawUI = 1;
     drawContacts = 1;
 
+    robotInterface = new SimRobotInterface(&sim);
+    CopyWorld(*world,planningWorld);
+
     uis.resize(0);
     uis.push_back(new JointCommandInterface);
     uis.push_back(new IKCommandInterface);
@@ -113,7 +117,8 @@ public:
 #endif //WIN32
     for(size_t i=0;i<uis.size();i++) {
       uis[i]->world = world;
-      uis[i]->robotInterface = &robotInterface;
+      uis[i]->robotInterface = robotInterface;
+      uis[i]->planningWorld = &planningWorld;
       uis[i]->viewport = &viewport;
       uis[i]->settings = &settings;
     }
@@ -162,7 +167,7 @@ public:
 
     if(drawDesired) {
       Config curBest;
-      robotInterface.GetEndConfig(curBest);
+      robotInterface->GetEndConfig(curBest);
       robot->UpdateConfig(curBest); 
       world->robots[0].view.SetColors(GLColor(1,1,0,0.5));
       world->robots[0].view.Draw();

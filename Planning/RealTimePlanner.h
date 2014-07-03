@@ -89,6 +89,9 @@ public:
   RealTimePlannerBase();
   virtual ~RealTimePlannerBase();
 
+  bool LogBegin(const char* fn="realtimeplanner.log");
+  bool LogEnd();
+
   ///Convenience fn: will set up the robot, space, settings pointers
   void SetSpace(SingleRobotCSpace* space);
 
@@ -197,6 +200,9 @@ public:
 
   ///Statistics captured on planning times, depending on PlanMore output.
   StatCollector planFailTimeStats,planSuccessTimeStats,planTimeoutTimeStats;
+
+  //log file
+  FILE* flog;
 };
 
 #endif

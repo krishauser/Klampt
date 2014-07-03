@@ -402,7 +402,21 @@ Real MultiPath::Duration() const
 {
   if(!HasTiming()) return 1.0;
   if(sections.empty()) return 0.0;
-  return sections.back().times.back();
+  return sections.back().times.back()-sections.front().times.front();
+}
+
+Real MultiPath::StartTime() const
+{
+  if(!HasTiming()) return 0;
+  if(sections.empty()) return 0.0;
+  return sections.front().times.front();
+}
+
+Real MultiPath::EndTime() const
+{
+  if(!HasTiming()) return 1;
+  if(sections.empty()) return 0.0;
+  return sections.front().times.back();
 }
 
 void MultiPath::SetDuration(Real duration,bool uniformSectionTime)
@@ -432,6 +446,7 @@ void MultiPath::SetDuration(Real duration,bool uniformSectionTime)
   }
   else {
     Real scale = duration / Duration();
+    Real t0 = StartTime();
     for(size_t i=0;i<sections.size();i++) {
       Assert(!sections[i].times.empty());
       for(size_t j=0;j<sections[i].times.size();j++)
@@ -487,10 +502,8 @@ void MultiPath::Concat(const MultiPath& suffix,bool relative)
     sections = suffix.sections;
   else {
     Real tofs = 0;
-    if(HasTiming()) {
-      Assert(suffix.HasTiming());
-      if(relative) tofs = Duration();
-    }
+    if(relative) tofs = EndTime();
+    if(HasTiming()) Assert(suffix.HasTiming());
     size_t i=sections.size();
     sections.insert(sections.end(),suffix.sections.begin(),suffix.sections.end());
     if(tofs != 0) {

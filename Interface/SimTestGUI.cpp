@@ -73,6 +73,7 @@ void SimTestBackend::Start()
   drawContacts = 0;
   drawWrenches = 1;
   drawExpanded = 0;
+  drawTime = 1;
   click_mode = 0;
   pose_objects = 0;
   forceSpringActive = false;
@@ -84,6 +85,7 @@ void SimTestBackend::Start()
   MapButtonToggle("draw_contacts",&drawContacts);
   MapButtonToggle("draw_wrenches",&drawWrenches);
   MapButtonToggle("draw_expanded",&drawExpanded);
+  MapButtonToggle("draw_time",&drawTime);
   MapButtonToggle("pose_objects",&pose_objects);
  
   /*
@@ -270,7 +272,8 @@ void SimTestBackend::RenderWorld()
 
 void SimTestBackend::RenderScreen()
 {
-  //SimGUIBackend::DrawClock(20,40);
+  if(drawTime)
+    SimGUIBackend::DrawClock(20,40);
   for(size_t i=0;i<sensorPlots.size();i++)
     sensorPlots[i].view.DrawGL();
 }
@@ -784,7 +787,8 @@ bool GLUISimTestGUI::Initialize()
   AddControl(checkbox,"draw_wrenches");
   checkbox = glui->add_checkbox("Draw expanded");
   AddControl(checkbox,"draw_expanded");
-
+  checkbox = glui->add_checkbox("Draw time");
+  AddControl(checkbox,"draw_time");
 
   map<string,string> csettings = sim->robotControllers[0]->Settings();
   controllerCommands = sim->robotControllers[0]->Commands();

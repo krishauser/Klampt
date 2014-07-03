@@ -1,6 +1,6 @@
 #include "Interface/UserInterface.h"
 #include "Interface/SimRobotInterface.h"
-#include "SimViewProgram.h"
+#include "Main/SimViewProgram.h"
 #include <utils/AnyCollection.h>
 #include <GL/glui.h>
 #include <fstream>

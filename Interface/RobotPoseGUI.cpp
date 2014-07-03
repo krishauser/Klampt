@@ -133,6 +133,7 @@ void RobotPoseBackend::RenderWorld()
 {
   Robot* robot = world->robots[0].robot;
   ViewRobot& viewRobot = world->robots[0].view;
+  //want conditional drawing of the robot geometry
   //ResourceBrowserProgram::RenderWorld();
   for(size_t i=0;i<world->terrains.size();i++)
     world->terrains[i].view.Draw();
@@ -157,8 +158,11 @@ void RobotPoseBackend::RenderWorld()
     viewRobot.Draw();
   }
   else {
-    //    viewRobot.SetColors(GLColor(0,0,0,0));
-    allWidgets.DrawGL(viewport);
+    if(draw_frame) {
+      //drawing frames, still should draw poser
+      viewRobot.SetColors(GLColor(0,0,0,0));
+      allWidgets.DrawGL(viewport);
+    }
   }
 
   glEnable(GL_BLEND);
@@ -212,14 +216,16 @@ void RobotPoseBackend::RenderWorld()
 }
 
 
-Stance RobotPoseBackend::GetFlatStance()
+Stance RobotPoseBackend::GetFlatStance(Real tolerance)
 {
+  if(tolerance==0)
+    tolerance = settings["flatContactTolerance"];
   Robot* robot = world->robots[0].robot;
   Stance s;
   if(robotWidgets[0].ikPoser.poseGoals.empty()) {
     printf("Storing flat ground stance\n");
     ContactFormation cf;
-    GetFlatContacts(*robot,settings["flatContactTolerance"],cf);
+    GetFlatContacts(*robot,tolerance,cf);
 
     Real friction = settings["defaultStanceFriction"];
     for(size_t i=0;i<cf.links.size();i++) {
@@ -236,7 +242,7 @@ Stance RobotPoseBackend::GetFlatStance()
     for(size_t i=0;i<robotWidgets[0].ikPoser.poseGoals.size();i++) {
       int link = robotWidgets[0].ikPoser.poseGoals[i].link;
       vector<ContactPoint> cps;
-      GetFlatContacts(*robot,link,settings["flatContactTolerance"],cps);
+      GetFlatContacts(*robot,link,tolerance,cps);
       Real friction = settings["defaultStanceFriction"];
       //assign default friction
       for(size_t j=0;j<cps.size();j++)
@@ -560,9 +566,10 @@ bool RobotPoseBackend::OnCommand(const string& cmd,const string& args)
     ResourcePtr r=ResourceGUIBackend::CurrentResource();
     const LinearPathResource* lp = dynamic_cast<const LinearPathResource*>((const ResourceBase*)r);
     if(lp) {
+      Real dt = settings["pathOptimize"]["outputResolution"];
       vector<double> newtimes;
       vector<Config> newconfigs;
-      if(!TimeOptimizePath(*robot,lp->times,lp->milestones,0.01,newtimes,newconfigs)) {
+      if(!TimeOptimizePath(*robot,lp->times,lp->milestones,dt,newtimes,newconfigs)) {
 	fprintf(stderr,"Error optimizing path\n");
 	return true;
       }
@@ -601,11 +608,30 @@ bool RobotPoseBackend::OnCommand(const string& cmd,const string& args)
     }
   }
   else if(cmd == "store_flat_contacts") {
-    Stance s = GetFlatStance();
+    Real tolerance = 0;
+    if(!args.empty()) {
+      stringstream ss(args); ss>>tolerance; 
+    }
+    Stance s = GetFlatStance(tolerance);
     ResourcePtr r = MakeResource("",s);
     if(r) {
       ResourceGUIBackend::Add(r);
       ResourceGUIBackend::SetLastActive();
+    }
+  }
+  else if(cmd == "get_flat_contacts") {
+    ResourcePtr r=ResourceGUIBackend::CurrentResource();
+    StanceResource* sp = dynamic_cast<StanceResource*>((ResourceBase*)r);
+    if(sp) {
+      Real tolerance = 0;
+      if(!args.empty()) {
+	stringstream ss(args); ss>>tolerance; 
+      }
+      Stance s = GetFlatStance(tolerance);
+      sp->stance = s;
+    }
+    else {
+      printf("Need to be selecting a Stance resource\n");
     }
   }
   else if(cmd == "clean_contacts") {

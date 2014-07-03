@@ -90,6 +90,7 @@ void ResourceFrame::onResourceEdit()
   if(!item) return;
   ResourceNode* n = ui->treeWidget->itemToNode(item);
   assert(n != NULL);
+  n->SetChanged();
   if(n->IsExpanded()) {
     //need to re-expand
     if(!n->IsValid()) {
@@ -305,6 +306,7 @@ void ResourceFrame::SaveResource()
       ini.setValue("save_resource_file",QFileInfo(filename).absolutePath());
 
     manager->Save(n,filename.toStdString());
+    ui->treeWidget->updateDecorator(item);
   }
 }
 
@@ -322,6 +324,7 @@ void ResourceFrame::SaveAllResources()
     ini.setValue("save_resource_folder",QFileInfo(filename).absolutePath());
 
     manager->SaveFolder(filename.toStdString());
+    ui->treeWidget->updateAllDecorators();
   }
 }
 

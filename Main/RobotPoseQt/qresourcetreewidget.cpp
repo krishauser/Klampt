@@ -21,6 +21,7 @@ QResourceTreeWidget::QResourceTreeWidget(QWidget* parent)
   viewport()->setAcceptDrops(true);
   setDropIndicatorShown(true);
   setDragDropMode(QAbstractItemView::InternalMove);
+  header()->resizeSection ( 1, 300 );
   header()->resizeSection ( 1, 80 );
   header()->resizeSection ( 2, 20 );
   //disallow editing for columns 1 and 2
@@ -254,7 +255,7 @@ void QResourceTreeWidget::dropEvent(QDropEvent *event)
     if(target) {
       targetNode = itemToNode(target);
     }
-    if(event->dropAction() == Qt::MoveAction) {
+    if(event->dropAction() == Qt::MoveAction || event->dropAction() == Qt::CopyAction) {
       QTreeWidgetItem* targetParent = target;
       ResourceNode* targetNodeParent = targetNode;
       int insertIndex = -1;  //default: insert at end
@@ -287,12 +288,22 @@ void QResourceTreeWidget::dropEvent(QDropEvent *event)
       cout<<"Insert position: "<<insertIndex<<endl;
 
       Assert(dragNode != targetNodeParent);
-      printf("Deleting from drag parent\n");
-      //detatch dragNode from parent and put it before, after, or in targetNode
-      manager->Delete(dragNode);
-      if(dragParent) {
-	printf("Updating drag parent decorator\n");
-	updateDecorator(dragParent);
+      if(event->dropAction() == Qt::MoveAction) {
+	printf("Deleting from drag parent\n");
+	//detatch dragNode from parent and put it before, after, or in targetNode
+	manager->Delete(dragNode);
+	if(dragParent) {
+	  printf("Updating drag parent decorator\n");
+	  updateDecorator(dragParent);
+	}
+      }
+      else {
+	//copying -- make a copy
+	printf("Copying resource\n");
+	ResourcePtr rcopy = dragNode->resource->Copy();
+	rcopy->name = dragNode->resource->name;
+	rcopy->fileName = dragNode->resource->fileName;
+	dragNode = new ResourceNode(rcopy);
       }
 
       printf("Adding to target parent\n");
@@ -328,7 +339,13 @@ void QResourceTreeWidget::dropEvent(QDropEvent *event)
     manager->Print();
     cout<<endl;
 
-    QTreeWidget::dropEvent(event);
+    if(event->dropAction() == Qt::CopyAction) {
+      //item can't load data pointer type, we need to set new pointer for the 
+      //item
+      addNotify(dragNode);
+    }
+    else 
+      QTreeWidget::dropEvent(event);
 
     //for some reason QTreeWidget takes away the child indicator
     //when all children are deleted

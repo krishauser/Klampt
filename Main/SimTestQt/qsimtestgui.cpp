@@ -62,6 +62,7 @@ QSimTestGUI::QSimTestGUI(QKlamptDisplay* _display,SimTestBackend *_backend) :
 void QSimTestGUI::OnIdleTimer()
 {
   SendIdle();
+  idle_timer.start(0);
 }
 
 bool QSimTestGUI::OnPauseIdle(double secs) 

@@ -1011,7 +1011,7 @@ void RobotModelDriver::setVelocity(double val)
   robot->SetDriverVelocity(index,val);
 }
 
-double RobotModelDriver::getVelocity(double val)
+double RobotModelDriver::getVelocity()
 {
   return robot->GetDriverVelocity(index);
 }

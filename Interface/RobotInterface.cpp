@@ -4,6 +4,11 @@ DefaultMotionQueueInterface::DefaultMotionQueueInterface(PolynomialPathControlle
   :controller(_controller)
 {}
 
+bool DefaultMotionQueueInterface::HadExternalChange()
+{
+  return false;
+}
+
   //interfaces to simulated or actual world
 Real DefaultMotionQueueInterface::GetCurTime()
 {

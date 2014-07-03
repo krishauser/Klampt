@@ -128,6 +128,23 @@ public:
 
 void ContactOptimizeMultipath(const char* robfile,const char* pathfile,const char* settingsfile = NULL)
 {
+  ContactOptimizeSettings settings;
+  if(settingsfile != NULL) {
+    if(!settings.read(settingsfile)) {
+      printf("Unable to read settings file %s\n",settingsfile);
+      return;
+    }
+  }
+  Real xtol=Real(settings["xtol"]);
+  int numdivs = int(settings["numdivs"]);
+  bool ignoreForces = bool(settings["ignoreForces"]);
+  Real torqueRobustness = Real(settings["torqueRobustness"]);
+  Real frictionRobustness = Real(settings["frictionRobustness"]);
+  Real forceRobustness = Real(settings["forceRobustness"]);
+  string outputPath;
+  settings["outputPath"].as(outputPath);
+  Real outputDt = Real(settings["outputDt"]);
+
   Robot robot;
   if(!robot.Load(robfile)) {
     printf("Unable to load robot file %s\n",robfile);
@@ -146,7 +163,9 @@ void ContactOptimizeMultipath(const char* robfile,const char* pathfile,const cha
     path.GetStance(s,i);
     bool changed = false;
     int k=0;
+    int numContacts = 0;
     for(Stance::iterator h=s.begin();h!=s.end();h++,k++) {
+      numContacts += (int)h->second.contacts.size();
       for(size_t j=0;j<h->second.contacts.size();j++)
 	if(h->second.contacts[j].kFriction <= 0) {
 	  if(!changed)
@@ -156,25 +175,16 @@ void ContactOptimizeMultipath(const char* robfile,const char* pathfile,const cha
 	}
     }
     path.SetStance(s,i);
+    if(numContacts == 0 && !ignoreForces && robot.joints[0].type == RobotJoint::Floating) {
+      printf("Warning, no contacts given in stance %d for floating-base robot\n",i);
+      printf("Should set ignoreForces = true in trajopt.settings if you wish\n");
+      printf("to ignore contact force constraints.\n");
+      printf("Press enter to continue...\n");
+      getchar();
+    }
   }
 
   TimeScaledBezierCurve opttraj;
-  ContactOptimizeSettings settings;
-  if(settingsfile != NULL) {
-    if(!settings.read(settingsfile)) {
-      printf("Unable to read settings file %s\n",settingsfile);
-      return;
-    }
-  }
-  Real xtol=Real(settings["xtol"]);
-  int numdivs = int(settings["numdivs"]);
-  bool ignoreForces = bool(settings["ignoreForces"]);
-  Real torqueRobustness = Real(settings["torqueRobustness"]);
-  Real frictionRobustness = Real(settings["frictionRobustness"]);
-  Real forceRobustness = Real(settings["forceRobustness"]);
-  string outputPath;
-  settings["outputPath"].as(outputPath);
-  Real outputDt = Real(settings["outputDt"]);
   if(ignoreForces) {
     bool res=GenerateAndTimeOptimizeMultiPath(robot,path,xtol,outputDt);
     if(!res) {
@@ -191,6 +201,7 @@ void ContactOptimizeMultipath(const char* robfile,const char* pathfile,const cha
     out.close();
   }
   else {
+    
     bool res=ContactOptimizeMultipath(robot,path,xtol,
 				 numdivs,opttraj,
 				 torqueRobustness,
@@ -214,12 +225,16 @@ void ContactOptimizeMultipath(const char* robfile,const char* pathfile,const cha
       out<<i*outputDt<<"\t"<<milestones[i]<<endl;
     }
     out.close();
+
+    printf("Plotting vel/acc constraints to trajopt_plot.csv...\n");
+    opttraj.Plot("trajopt_plot.csv",robot.velMin,robot.velMax,-1.0*robot.accMax,robot.accMax);
   }
 }
 
 
 int main(int argc, char** argv)
 {
+  Robot::disableGeometryLoading = true;
   if(argc < 3) {
     printf("Usage: TrajOpt robot multipath [settings]\n");
     printf("Saving settings template to trajopt_default.settings...\n");

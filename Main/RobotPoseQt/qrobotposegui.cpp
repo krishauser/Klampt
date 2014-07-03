@@ -26,7 +26,25 @@ QRobotPoseGUI::QRobotPoseGUI(QKlamptDisplay* _display,RobotPoseBackend *_backend
   RobotPoseBackend* rbackend = dynamic_cast<RobotPoseBackend*>(_backend);
   Assert(rbackend != NULL);
 
+  connect(&idle_timer, SIGNAL(timeout()),this,SLOT(OnIdleTimer()));
+  idle_timer.start(0);
 }
+
+void QRobotPoseGUI::OnIdleTimer()
+{
+  SendIdle();
+  idle_timer.start(0);
+}
+
+bool QRobotPoseGUI::OnPauseIdle(double secs) 
+{
+  if(secs > 10000000)
+    idle_timer.stop();
+  else
+    idle_timer.start(int(secs*1000));
+  return true;
+}
+
 
 void QRobotPoseGUI::SetDriver(int index){
     driver_index=index;

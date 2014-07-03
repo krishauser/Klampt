@@ -513,15 +513,13 @@ void RobotPoseWidget::Drag(int dx,int dy,Camera::Viewport& viewport)
     linkPoser.poseConfig = linkPoser.robot->q;
   }
   if(activeWidget == &ikPoser) {
-    //solve the IK problem
-    Robot* robot=linkPoser.robot;
-    robot->UpdateConfig(linkPoser.poseConfig);
-    int iters=100;
-    bool res=SolveIK(*robot,ikPoser.poseGoals,1e-3,iters,0);
-    linkPoser.poseConfig = robot->q;
-    if(useBase)
-      basePoser.T = robot->links[robot->joints[0].linkIndex].T_World;
-    Refresh();
+    SolveIK();
+  }
+  if(activeWidget == &basePoser) {
+    SolveIKFixedBase();
+  }
+  if(activeWidget == &linkPoser) {
+    SolveIKFixedJoint(linkPoser.hoverLink);
   }
 }
 
@@ -538,17 +536,82 @@ void RobotPoseWidget::EndDrag()
   WidgetSet::EndDrag();
 }
 
+bool RobotPoseWidget::SolveIK(int iters,Real tol)
+{
+  if(Constraints().empty()) return true;
+  if(iters <= 0) iters=100;
+  if(tol <= 0) tol = 1e-3;
+  //solve the IK problem    
+  Robot* robot=linkPoser.robot;
+  robot->UpdateConfig(linkPoser.poseConfig);
+  bool res=::SolveIK(*robot,ikPoser.poseGoals,tol,iters,0);
+  linkPoser.poseConfig = robot->q;
+  if(useBase)
+    basePoser.T = robot->links[robot->joints[0].linkIndex].T_World;
+  Refresh();
+  return res;
+}
+
+bool RobotPoseWidget::SolveIKFixedBase(int iters,Real tol)
+{
+  if(Constraints().empty()) return true;
+  if(iters <= 0) iters=100;
+  if(tol <= 0) tol = 1e-3;
+  //solve the IK problem    
+  Robot* robot=linkPoser.robot;
+  robot->UpdateConfig(linkPoser.poseConfig);
+
+  RobotIKFunction f(*robot);
+  f.UseIK(Constraints());
+  GetDefaultIKDofs(*robot,Constraints(),f.activeDofs);
+  //take out the base DOFs
+  set<int> dofs(f.activeDofs.mapping.begin(),f.activeDofs.mapping.end());
+  for(int i=0;i<6;i++)
+    dofs.erase(i);
+  f.activeDofs.mapping = vector<int>(dofs.begin(),dofs.end());
+
+  RobotIKSolver solver(f);
+  solver.UseJointLimits(TwoPi);
+  bool res = solver.Solve(tol,iters);
+
+  linkPoser.poseConfig = robot->q;
+  if(useBase)
+    basePoser.T = robot->links[robot->joints[0].linkIndex].T_World;
+  Refresh();
+  return res;
+}
+
+bool RobotPoseWidget::SolveIKFixedJoint(int fixedJoint,int iters,Real tol)
+{
+  if(Constraints().empty()) return true;
+  if(iters <= 0) iters=100;
+  if(tol <= 0) tol = 1e-3;
+  //solve the IK problem    
+  Robot* robot=linkPoser.robot;
+  robot->UpdateConfig(linkPoser.poseConfig);
+
+  RobotIKFunction f(*robot);
+  f.UseIK(Constraints());
+  GetDefaultIKDofs(*robot,Constraints(),f.activeDofs);
+  //take out the fixed DOF
+  set<int> dofs(f.activeDofs.mapping.begin(),f.activeDofs.mapping.end());
+  dofs.erase(fixedJoint);
+  f.activeDofs.mapping = vector<int>(dofs.begin(),dofs.end());
+
+  RobotIKSolver solver(f);
+  solver.UseJointLimits(TwoPi);
+  bool res = solver.Solve(tol,iters);
+
+  linkPoser.poseConfig = robot->q;
+  if(useBase)
+    basePoser.T = robot->links[robot->joints[0].linkIndex].T_World;
+  Refresh();
+  return res;
+}
+
 void RobotPoseWidget::Keypress(char c)
 {
   if(c=='s') {
-    //solve the IK problem    
-    Robot* robot=linkPoser.robot;
-    robot->UpdateConfig(linkPoser.poseConfig);
-    int iters=100;
-    bool res=SolveIK(*robot,ikPoser.poseGoals,1e-3,iters,0);
-    linkPoser.poseConfig = robot->q;
-    if(useBase)
-      basePoser.T = robot->links[robot->joints[0].linkIndex].T_World;
-    Refresh();
+    SolveIK();
   }
 }

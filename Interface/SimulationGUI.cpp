@@ -706,7 +706,7 @@ bool SimGUIBackend::SendLinearPath(const vector<Real>& times,const vector<Config
   Assert(sim.robotControllers.size()>=1);
   if(sim.robotControllers.size()>1)
     printf("Warning, sending path to robot 0 by default\n");
-  if(sim.time > 0) printf("SendLinearPath: simulation time offset %g\n",sim.time);
+  //if(sim.time > 0) printf("SendLinearPath: simulation time offset %g\n",sim.time);
   for(size_t i=0;i<milestones.size();i++) {
     stringstream ss;
     ss<<fixed<<setprecision(5);

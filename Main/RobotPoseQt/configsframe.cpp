@@ -33,6 +33,6 @@ ConfigsFrame::~ConfigsFrame()
 
 void ConfigsFrame::Optimize()
 {
-  printf("TODO: optimize\n");
-  frame->onResourceEdit();
+  int numdivs = ui->spin_numDivs->value();
+  frame->gui->SendCommand("optimize_path",numdivs);
 }

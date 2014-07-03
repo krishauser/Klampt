@@ -41,7 +41,7 @@ public:
     frameTime = 1.000/30.0;
     screenshotFile = "image0000.ppm";
     verbose = 1;
-    moviefile="klampt_record.mpg";
+    moviefile="klampt_record.mp4";
     video_encoding_command = "ffmpeg -y -f image2 -i image%04d.ppm";
     stop_encode=true;
   }

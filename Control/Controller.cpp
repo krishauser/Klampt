@@ -50,9 +50,30 @@ void RobotController::SetPIDCommand(const Config& _qdes,const Config& dqdes)
 
 void RobotController::SetTorqueCommand(const Vector& torques)
 {
-  Assert(torques.size()==robot.drivers.size());
-  for(size_t i=0;i<robot.drivers.size();i++)
-    command->actuators[i].SetTorque(torques[i]);
+  if(torques.size()==robot.drivers.size()) {
+    //setting drivers directly
+    for(size_t i=0;i<robot.drivers.size();i++)
+      command->actuators[i].SetTorque(torques[i]);
+  }
+  else if(torques.size()==robot.links.size()) {
+    //parse out links
+    for(size_t i=0;i<robot.drivers.size();i++) {
+      if(robot.drivers[i].type == RobotJointDriver::Normal) {
+	command->actuators[i].SetTorque(torques(robot.drivers[i].linkIndices[0]));
+      }
+      else {
+	//use dq as a temporary variable
+	Vector dq;
+	swap(dq,robot.dq);
+	robot.dq = torques;
+	command->actuators[i].SetTorque(robot.GetDriverVelocity(i));
+	swap(dq,robot.dq);
+      }
+    }
+  }
+  else {
+    FatalError("RobotController::SetTorqueCommand: invalid vector size: %d\n",torques.size());
+  }
 }
 
 void RobotController::SetFeedforwardPIDCommand(const Config& qdes,const Config& dqdes,const Vector& torques)

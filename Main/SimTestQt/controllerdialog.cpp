@@ -30,6 +30,8 @@ void ControllerDialog::OnRobotChange(int robot)
 {
   if(sim==NULL) return;
 
+  blockSignals(true);
+    refreshing=1;
     settings=sim->robotControllers[robot]->Settings();
     ui->tableWidget->clear();
     ui->tableWidget->setRowCount(settings.size());
@@ -44,6 +46,8 @@ void ControllerDialog::OnRobotChange(int robot)
     BOOST_FOREACH(string str,commands){
         ui->comboBox->addItem(QString::fromStdString(str));
     }
+    refreshing=0;
+  blockSignals(false);
 }
 
 void ControllerDialog::Refresh(){

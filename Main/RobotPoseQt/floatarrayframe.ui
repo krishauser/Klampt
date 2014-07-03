@@ -85,5 +85,76 @@
   </layout>
  </widget>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>btn_insert</sender>
+   <signal>clicked()</signal>
+   <receiver>FloatArrayFrame</receiver>
+   <slot>Insert()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>49</x>
+     <y>30</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>6</x>
+     <y>36</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>btn_delete</sender>
+   <signal>clicked()</signal>
+   <receiver>FloatArrayFrame</receiver>
+   <slot>Delete()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>231</x>
+     <y>34</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>250</x>
+     <y>8</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>spin_index</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>FloatArrayFrame</receiver>
+   <slot>IndexChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>59</x>
+     <y>67</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>82</x>
+     <y>80</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>edit_value</sender>
+   <signal>textChanged(QString)</signal>
+   <receiver>FloatArrayFrame</receiver>
+   <slot>ValueChanged(QString)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>184</x>
+     <y>56</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>204</x>
+     <y>78</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>Insert()</slot>
+  <slot>Delete()</slot>
+  <slot>IndexChanged(int)</slot>
+  <slot>ValueChanged(QString)</slot>
+ </slots>
 </ui>
