@@ -20,6 +20,19 @@ IF(USE_QT4_APPS)
 	ADD_SUBDIRECTORY( RobotPoseQt )
 	ADD_SUBDIRECTORY( MotorCalibrateQt )
 	ADD_SUBDIRECTORY( URDFtoRobQt )
+	IF(WIN32) 
+		#need to install Qt dlls
+		install(FILES ${QT_BINARY_DIR}/QtCore4.dll
+			      ${QT_BINARY_DIR}/QtGui4.dll
+			      ${QT_BINARY_DIR}/QtOpenGL4.dll
+			      ${QT_BINARY_DIR}/QtSvg4.dll
+			      ${QT_BINARY_DIR}/QtXml4.dll
+			DESTINATION bin
+			COMPONENT apps)
+		install(FILES ${QT_PLUGINS_DIR}/iconengines/qsvgicon4.dll
+			      DESTINATION bin/plugins/iconengines
+			      COMPONENT apps)
+	ENDIF(WIN32)
 ELSE(USE_QT4_APPS)
 	#GLUI GUIs
 	MESSAGE(STATUS "Using GLUI/console versions of main apps")
