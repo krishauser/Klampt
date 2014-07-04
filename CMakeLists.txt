@@ -120,6 +120,9 @@ endforeach(s)
 install(DIRECTORY data
     DESTINATION .
     COMPONENT datafiles)
+install(DIRECTORY Examples
+    DESTINATION .
+    COMPONENT examples)
 IF(WIN32)
 	#need to install Assimp and GLPK dlls
 	install(FILES Library/Assimp32.dll Library/glpk_4_52.dll

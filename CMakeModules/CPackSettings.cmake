@@ -22,6 +22,13 @@ ELSE(WIN32)
   "${PROJECT_NAME}-${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH}")
 ENDIF(WIN32)
 
+set(CPACK_COMPONENT_APPS_DISPLAY_NAME "Klamp't Core Applications")
+set(CPACK_COMPONENT_LIBRARIES_DISPLAY_NAME "Klamp't Static Library")
+set(CPACK_COMPONENT_DATAFILES_DISPLAY_NAME "Data files (robots, worlds, etc)")
+set(CPACK_COMPONENT_HEADERS_DISPLAY_NAME "C++ Headers")
+set(CPACK_COMPONENT_EXAMPLES_DISPLAY_NAME "Klamp't Example Programs/Source")
+set(CPACK_COMPONENTS_ALL apps libraries datafiles headers examples)
+
  # This must always be last statement!
 INCLUDE(CPack)
 
