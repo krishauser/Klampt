@@ -18,6 +18,9 @@ for l in libs:
 	if fn.startswith('lib'):
 		name = fn.split('.')[0]
 		libnames.append(name[3:])
+	elif fn.endswith('lib'):
+		name = fn.split('.')[0]
+		libnames.append(name)
 libs = libnames
 
 #Parse definitions
