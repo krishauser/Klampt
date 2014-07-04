@@ -258,25 +258,28 @@ void MultiContactCSpace::InitContactPairs(const vector<ContactPair>& pairs)
     }
 
   //build the aggregate robot
-  vector<RobotKinematics3D> subRobots(activeIDs.size());
+  list<RobotKinematics3D> tempStorage;
+  vector<RobotKinematics3D*> subRobots(activeIDs.size());
   vector<int> robotOffsets(world.robots.size(),-1);
   vector<int> objectOffsets(world.rigidObjects.size(),-1);  
   int k=0;
   for(size_t i=0;i<activeIDs.size();i++) {
     int index=world.IsRobot(activeIDs[i]);
     if(index >= 0) {
-      subRobots[i] = *world.robots[index].robot;
+      subRobots[i] = world.robots[index].robot;
       robotOffsets[index] = k;
-      k += (int)subRobots[i].links.size();
+      k += (int)subRobots[i]->links.size();
     }
     else {
       //build an object into a fake robot
       index=world.IsRigidObject(activeIDs[i]);
       Assert(index >= 0);
-      subRobots[i].InitializeRigidObject();
+      tempStorage.push_back(RobotKinematics3D());
+      subRobots[i] = &tempStorage.back();
+      subRobots[i]->InitializeRigidObject();
       //init configuration
-      TransformToConfig(world.rigidObjects[index].object->T,subRobots[i].q);
-      subRobots[i].UpdateFrames();
+      TransformToConfig(world.rigidObjects[index].object->T,subRobots[i]->q);
+      subRobots[i]->UpdateFrames();
       objectOffsets[index] = k;
       k += 6;
     }
