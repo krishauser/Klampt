@@ -30,7 +30,10 @@ IF(USE_QT4_APPS)
 			DESTINATION bin
 			COMPONENT apps)
 		install(FILES ${QT_PLUGINS_DIR}/iconengines/qsvgicon4.dll
-			      DESTINATION bin/plugins/iconengines
+			      DESTINATION bin/iconengines
+			      COMPONENT apps)
+		install(FILES ${QT_PLUGINS_DIR}/imageformats/qjpeg4.dll ${QT_PLUGINS_DIR}/imageformats/qgif4.dll ${QT_PLUGINS_DIR}/imageformats/qsvg4.dll
+			      DESTINATION bin/imageformats
 			      COMPONENT apps)
 	ENDIF(WIN32)
 ELSE(USE_QT4_APPS)
