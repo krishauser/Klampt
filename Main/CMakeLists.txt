@@ -69,6 +69,9 @@ ADD_DEPENDENCIES(Pack Klampt)
 ADD_DEPENDENCIES(Merge Klampt)
 ADD_DEPENDENCIES(TrajOpt Klampt)
 ADD_DEPENDENCIES(SimUtil Klampt)
+install(TARGETS Pack Merge TrajOpt SimUtil
+	DESTINATION bin
+	COMPONENT apps)
 
 ADD_CUSTOM_TARGET(apps ALL
 		DEPENDS RobotTest SimTest RobotPose MotorCalibrate URDFtoRob Pack Merge TrajOpt SimUtil)
