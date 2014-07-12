@@ -123,6 +123,9 @@ void ContactCSpace::AddContact(const IKGoal& goal)
 {
   //DEBUG
   for(size_t i=0;i<contactIK.size();i++) {
+    if(contactIK[i].link == goal.link) {
+      fprintf(stderr,"ContactCSpace::AddContact: adding goal on existing link, link %d, constraint %d\n",goal.link,i);
+    }
     Assert(contactIK[i].link != goal.link);
   }
 
