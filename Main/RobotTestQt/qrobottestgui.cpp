@@ -11,7 +11,7 @@ QRobotTestGUI::QRobotTestGUI(GenericBackendBase *_backend,QKlamptDisplay* _displ
   const char* rules = "[ \
 [{type:key_down,key:c}, {type:command,cmd:constrain_current_link,args:\"\"}],	\
 [{type:key_down,key:d}, {type:command,cmd:delete_current_constraint,args:\"\"}], \
-[{type:key_down,key:p}, {type:command,cmd:print_config,args:\"\"}],	\
+[{type:key_down,key:p}, {type:command,cmd:print_pose,args:\"\"}],	\
 [{type:button_press,button:print_config}, {type:command,cmd:print_pose,args:_0}], \
 [{type:widget_value,widget:link,value:_0}, {type:command,cmd:set_link,args:_0}], \
 [{type:widget_value,widget:link_value,value:_0}, {type:command,cmd:set_link_value,args:_0}], \
