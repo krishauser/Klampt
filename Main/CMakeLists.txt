@@ -20,6 +20,22 @@ IF(USE_QT4_APPS)
 	ADD_SUBDIRECTORY( RobotPoseQt )
 	ADD_SUBDIRECTORY( MotorCalibrateQt )
 	ADD_SUBDIRECTORY( URDFtoRobQt )
+	IF(WIN32) 
+		#need to install Qt dlls
+		install(FILES ${QT_BINARY_DIR}/QtCore4.dll
+			      ${QT_BINARY_DIR}/QtGui4.dll
+			      ${QT_BINARY_DIR}/QtOpenGL4.dll
+			      ${QT_BINARY_DIR}/QtSvg4.dll
+			      ${QT_BINARY_DIR}/QtXml4.dll
+			DESTINATION bin
+			COMPONENT apps)
+		install(FILES ${QT_PLUGINS_DIR}/iconengines/qsvgicon4.dll
+			      DESTINATION bin/iconengines
+			      COMPONENT apps)
+		install(FILES ${QT_PLUGINS_DIR}/imageformats/qjpeg4.dll ${QT_PLUGINS_DIR}/imageformats/qgif4.dll ${QT_PLUGINS_DIR}/imageformats/qsvg4.dll
+			      DESTINATION bin/imageformats
+			      COMPONENT apps)
+	ENDIF(WIN32)
 ELSE(USE_QT4_APPS)
 	#GLUI GUIs
 	MESSAGE(STATUS "Using GLUI/console versions of main apps")
@@ -56,6 +72,9 @@ ADD_DEPENDENCIES(Pack Klampt)
 ADD_DEPENDENCIES(Merge Klampt)
 ADD_DEPENDENCIES(TrajOpt Klampt)
 ADD_DEPENDENCIES(SimUtil Klampt)
+install(TARGETS Pack Merge TrajOpt SimUtil
+	DESTINATION bin
+	COMPONENT apps)
 
 ADD_CUSTOM_TARGET(apps ALL
 		DEPENDS RobotTest SimTest RobotPose MotorCalibrate URDFtoRob Pack Merge TrajOpt SimUtil)

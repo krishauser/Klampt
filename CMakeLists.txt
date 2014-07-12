@@ -121,6 +121,30 @@ install(DIRECTORY data
     DESTINATION .
     COMPONENT datafiles)
 
+#examples and apps already added
+
+IF(WIN32)
+	#need to install Assimp and GLPK dlls
+	install(FILES Library/Assimp32.dll Library/glpk_4_52.dll
+		DESTINATION bin
+		COMPONENT apps)
+ENDIF(WIN32)
+
+#python demos
+install(DIRECTORY Python/demos
+    DESTINATION Python
+    COMPONENT pythonexamples)
+install(DIRECTORY Python/exercises
+    DESTINATION Python
+    COMPONENT pythonexamples)
+install(DIRECTORY Python/control
+    DESTINATION Python
+    COMPONENT pythonexamples)
+install(DIRECTORY Python/utils
+    DESTINATION Python
+    COMPONENT pythonexamples)
+
+
 # Needs to be last statement:
 INCLUDE(CPackSettings)
 

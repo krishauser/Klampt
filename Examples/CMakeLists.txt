@@ -31,3 +31,21 @@ ENDFOREACH( )
 
 ADD_CUSTOM_TARGET(examples ALL
 		DEPENDS ${EXAMPLES})
+
+#examples install targets
+install(TARGETS ${EXAMPLES}
+    DESTINATION Examples
+    COMPONENT examples)
+file(GLOB EXAMPLEFILES *.cpp )
+install(FILES ${EXAMPLEFILES}
+    DESTINATION Examples
+    COMPONENT examples)
+install(DIRECTORY ContactPlan
+    DESTINATION Examples
+    COMPONENT examples)
+install(DIRECTORY MotorCalibrateBaxter
+    DESTINATION Examples
+    COMPONENT examples)
+install(DIRECTORY PlanDemo
+    DESTINATION Examples
+    COMPONENT examples)
