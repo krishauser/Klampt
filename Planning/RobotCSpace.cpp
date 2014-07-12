@@ -657,8 +657,6 @@ bool SingleRobotCSpace::CheckCollisionFree()
 
   for(size_t i=0;i<collisionQueries.size();i++) {
     if(collisionQueries[i].Collide()) {
-      cout<<"Configuration "<<robot->q<<endl;
-      cout<<"collision on "<<collisionPairs[i].first<<","<<collisionPairs[i].second<<endl;
       return false;
     }
   }
