@@ -103,6 +103,7 @@ class PolynomialPathController : public JointTrackingController
   void Append(const Spline::PiecewisePolynomialND& path);
   void Append(const ParabolicRamp::DynamicPath& path);
   void AppendLinear(const Config& config,Real dt);
+  void AppendCubic(const Config& x,const Config& v,Real dt);
   void AppendRamp(const Config& x);
   void AppendRamp(const Config& x,const Vector& v);
   void GetPath(Spline::PiecewisePolynomialND& path) const;

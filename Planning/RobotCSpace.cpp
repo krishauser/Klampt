@@ -655,8 +655,11 @@ bool SingleRobotCSpace::CheckCollisionFree()
 
   if(!collisionPairsInitialized) InitializeCollisionPairs();
 
-  for(size_t i=0;i<collisionQueries.size();i++)
-    if(collisionQueries[i].Collide()) return false;
+  for(size_t i=0;i<collisionQueries.size();i++) {
+    if(collisionQueries[i].Collide()) {
+      return false;
+    }
+  }
   return true;
 }
 
@@ -959,7 +962,7 @@ bool SingleRobotCSpace2::IsFeasible(const Config& x)
 {
   for(size_t i=0;i<fixedDofs.size();i++) {
     if(x(fixedDofs[i]) != fixedValues[i]) {
-      printf("Fixed degree of freedom %d does not match its fixed value %g!=%g\n",fixedDofs[i],x(fixedDofs[i]),fixedValues[i]);
+      printf("Fixed degree of freedom %d does not match its fixed value %g!=%g, error %g\n",fixedDofs[i],x(fixedDofs[i]),fixedValues[i],x(fixedDofs[i])-fixedValues[i]);
       return false;
     }
   }
@@ -970,13 +973,25 @@ bool SingleRobotCSpace2::IsFeasible(const Config& x)
 
 bool SingleRobotCSpace2::IsFeasible(const Config& x,int obstacle)
 {
-  if(obstacle < (int)fixedDofs.size())
+  if(obstacle < (int)fixedDofs.size()) {
     if(x(fixedDofs[obstacle]) != fixedValues[obstacle]) {
       return false;
     }
+    return true;
+  }
   if(!collisionPairsInitialized) Init();
   bool res=SingleRobotCSpace::IsFeasible(x,obstacle-(int)fixedDofs.size());
   return res;
+}
+
+void SingleRobotCSpace2::CheckObstacles(const Config& x,vector<bool>& infeasible)
+{
+  vector<bool> otherObstacles;
+  SingleRobotCSpace::CheckObstacles(x,otherObstacles);
+  infeasible.resize(fixedDofs.size());
+  for(size_t i=0;i<infeasible.size();i++)
+    infeasible[i] = (x(fixedDofs[i]) != fixedValues[i]);
+  infeasible.insert(infeasible.end(),otherObstacles.begin(),otherObstacles.end());
 }
 
 EdgePlanner* SingleRobotCSpace2::LocalPlanner(const Config& a,const Config& b,int obstacle)

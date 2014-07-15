@@ -416,7 +416,7 @@ Real MultiPath::EndTime() const
 {
   if(!HasTiming()) return 1;
   if(sections.empty()) return 0.0;
-  return sections.front().times.back();
+  return sections.back().times.back();
 }
 
 void MultiPath::SetDuration(Real duration,bool uniformSectionTime)

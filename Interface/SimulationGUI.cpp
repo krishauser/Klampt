@@ -625,6 +625,7 @@ bool SimGUIBackend::LoadMultiPath(const char* fn,bool constrainedInterpolate,Rea
   }
   bool timed = path.HasTiming();
   bool timeOptimizePath = false;
+  if(!path.HasConstraints()) constrainedInterpolate = false;
   if(!timed && timeOptimizePath) {
     //this function both discretizes and optimizes at once
     printf("Discretizing MultiPath by resolution %g and time-optimizing with res %g\n",interpolateTolerance,0.05);
@@ -657,20 +658,70 @@ bool SimGUIBackend::LoadMultiPath(const char* fn,bool constrainedInterpolate,Rea
       printf("Using existing timing in MultiPath, duration %g\n",path.Duration());
   }
 
-  vector<Real> times,stimes;
-  vector<Vector> milestones,smilestones;  
-  for(size_t i=0;i<path.sections.size();i++) {
-    path.GetTimedMilestones(stimes,smilestones,i);
-    //skip a milestones at each section
-    int ofs = (i==0 ? 0 : 1);
-    if(i > 0) {
-      if(stimes.front() != times.back()) ofs = 0; //some fixed delay
+  if(path.HasVelocity()) {
+    printf("Path has velocity, doing smooth interpolation\n");
+    //hermite interpolators
+    printf("Path time range [%g,%g]\n",path.StartTime(),path.EndTime());
+    bool first=true;
+    for(size_t i=0;i<path.sections.size();i++) {
+      if(path.HasTiming(i)) {
+	for(size_t j=0;j<path.sections[i].milestones.size();j++) {
+	  stringstream ss;
+	  ss<<path.sections[i].times[j]<<"\t"<<path.sections[i].milestones[j]<<"\t"<<path.sections[i].velocities[j];
+	  if(first) {
+	    if(!sim.robotControllers[0]->SendCommand("set_tqv",ss.str())) { 
+	      fprintf(stderr,"set_tqv command failed or does not work with the robot's controller\n");
+	      return false;
+	    }
+	    first = false;
+	  }
+	  else {
+	    if(!sim.robotControllers[0]->SendCommand("append_tqv",ss.str())) { 
+	      fprintf(stderr,"append_tqv command failed or does not work with the robot's controller\n");
+	      return false;
+	    }
+	  }
+	}
+      }
+      else {
+	for(size_t j=0;j<path.sections[i].milestones.size();j++) {
+	  stringstream ss;
+	  ss<<path.sections[i].milestones[j]<<"\t"<<path.sections[i].velocities[j];
+	  if(first) {
+	    if(!sim.robotControllers[0]->SendCommand("set_qv",ss.str())) { 
+	      fprintf(stderr,"set_qv command failed or does not work with the robot's controller\n");
+	      return false;
+	    }
+	    first = false;
+	  }
+	  else {
+	    if(!sim.robotControllers[0]->SendCommand("append_qv",ss.str())) { 
+	      fprintf(stderr,"append_qv command failed or does not work with the robot's controller\n");
+	      return false;
+	    }
+	  }
+	}
+      }
     }
-    times.insert(times.end(),stimes.begin()+ofs,stimes.end());
-    milestones.insert(milestones.end(),smilestones.begin()+ofs,smilestones.end());
+    return true;
   }
-  printf("Path time range [%g,%g]\n",times.front(),times.back());
-  return SendLinearPath(times,milestones);
+  else {
+    printf("No velocity in path, using piecewise linear evaluation\n");
+    vector<Real> times,stimes;
+    vector<Vector> milestones,smilestones;  
+    for(size_t i=0;i<path.sections.size();i++) {
+      path.GetTimedMilestones(stimes,smilestones,i);
+      //skip a milestones at each section
+      int ofs = (i==0 ? 0 : 1);
+      if(i > 0) {
+	if(stimes.front() != times.back()) ofs = 0; //some fixed delay
+      }
+      times.insert(times.end(),stimes.begin()+ofs,stimes.end());
+      milestones.insert(milestones.end(),smilestones.begin()+ofs,smilestones.end());
+    }
+    printf("Path time range [%g,%g]\n",times.front(),times.back());
+    return SendLinearPath(times,milestones);
+  }
 }
 
 
