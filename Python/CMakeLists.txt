@@ -1,6 +1,8 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.6.4)
 
 if(NOT KLAMPT_ROOT)
+  SET (CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/../CMakeModules")
+  SET (KLAMPT_ROOT ${PROJECT_SOURCE_DIR}/.. )
   find_package(Klampt)
 endif( )
 
