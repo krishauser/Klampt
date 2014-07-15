@@ -6,6 +6,7 @@
 #include <string>
 #include <GLdraw/GLScreenshot.h>
 #include <math/math.h>
+#include <stdio.h>
 
 /** @ingroup GLDraw
  * @brief A plugin class that "automatically" saves a movie to disk in the form of
