@@ -78,6 +78,7 @@ void ContactCSpace::SampleNeighborhood(const Config& c,Real r,Config& x)
 bool ContactCSpace::IsFeasible(const Config& q)
 {
   numIsFeasible++;
+
 #if DO_TIMING
   Timer timer;
 #endif // DO_TIMING
@@ -202,8 +203,10 @@ bool ContactCSpace::SolveContact(int numIters,Real dist)
     vector<bool> active(robot->links.size(),false);
     for(size_t j=0;j<equality.activeDofs.mapping.size();j++) 
       active[equality.activeDofs.mapping[j]]=true;
-    for(size_t i=0;i<fixedDofs.size();i++) 
+    for(size_t i=0;i<fixedDofs.size();i++) {
+      robot->q[fixedDofs[i]] = fixedValues[i];
       active[fixedDofs[i]]=false;
+    }
     equality.activeDofs.mapping.resize(0);
     for(size_t i=0;i<active.size();i++)
       if(active[i]) equality.activeDofs.mapping.push_back(i);
@@ -225,6 +228,11 @@ bool ContactCSpace::SolveContact(int numIters,Real dist)
 #if DO_TIMING
   solveContactTime += timer.ElapsedTime();
 #endif // DO_TIMING
+
+  //for some reason the fixed DOFs get moved slightly... TODO debug this
+  for(size_t i=0;i<fixedDofs.size();i++) 
+    robot->q(fixedDofs[i]) = fixedValues[i];
+
   return res;
 }
   
