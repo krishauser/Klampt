@@ -94,7 +94,7 @@ install/strip/fast: install/strip
 
 # Special rule for the target list_install_components
 list_install_components:
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Available install components are: \"Unspecified\" \"headers\" \"libraries\""
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Available install components are: \"Unspecified\" \"apps\" \"datafiles\" \"examples\" \"headers\" \"libraries\" \"pythonexamples\""
 .PHONY : list_install_components
 
 # Special rule for the target list_install_components
@@ -231,6 +231,20 @@ RealTimePlanning: Examples/CMakeFiles/RealTimePlanning.dir/rule
 RealTimePlanning/fast:
 	cd /home/hauser/gitlibs/Klampt && $(MAKE) -f Examples/CMakeFiles/RealTimePlanning.dir/build.make Examples/CMakeFiles/RealTimePlanning.dir/build
 .PHONY : RealTimePlanning/fast
+
+# Convenience name for target.
+Examples/CMakeFiles/SafeSerialClient.dir/rule:
+	cd /home/hauser/gitlibs/Klampt && $(MAKE) -f CMakeFiles/Makefile2 Examples/CMakeFiles/SafeSerialClient.dir/rule
+.PHONY : Examples/CMakeFiles/SafeSerialClient.dir/rule
+
+# Convenience name for target.
+SafeSerialClient: Examples/CMakeFiles/SafeSerialClient.dir/rule
+.PHONY : SafeSerialClient
+
+# fast build rule for target.
+SafeSerialClient/fast:
+	cd /home/hauser/gitlibs/Klampt && $(MAKE) -f Examples/CMakeFiles/SafeSerialClient.dir/build.make Examples/CMakeFiles/SafeSerialClient.dir/build
+.PHONY : SafeSerialClient/fast
 
 # Convenience name for target.
 Examples/CMakeFiles/UserTrials.dir/rule:
@@ -380,6 +394,30 @@ realtimeplanning.cpp.s:
 	cd /home/hauser/gitlibs/Klampt && $(MAKE) -f Examples/CMakeFiles/RealTimePlanning.dir/build.make Examples/CMakeFiles/RealTimePlanning.dir/realtimeplanning.cpp.s
 .PHONY : realtimeplanning.cpp.s
 
+safeserialclient.o: safeserialclient.cpp.o
+.PHONY : safeserialclient.o
+
+# target to build an object file
+safeserialclient.cpp.o:
+	cd /home/hauser/gitlibs/Klampt && $(MAKE) -f Examples/CMakeFiles/SafeSerialClient.dir/build.make Examples/CMakeFiles/SafeSerialClient.dir/safeserialclient.cpp.o
+.PHONY : safeserialclient.cpp.o
+
+safeserialclient.i: safeserialclient.cpp.i
+.PHONY : safeserialclient.i
+
+# target to preprocess a source file
+safeserialclient.cpp.i:
+	cd /home/hauser/gitlibs/Klampt && $(MAKE) -f Examples/CMakeFiles/SafeSerialClient.dir/build.make Examples/CMakeFiles/SafeSerialClient.dir/safeserialclient.cpp.i
+.PHONY : safeserialclient.cpp.i
+
+safeserialclient.s: safeserialclient.cpp.s
+.PHONY : safeserialclient.s
+
+# target to generate assembly for a file
+safeserialclient.cpp.s:
+	cd /home/hauser/gitlibs/Klampt && $(MAKE) -f Examples/CMakeFiles/SafeSerialClient.dir/build.make Examples/CMakeFiles/SafeSerialClient.dir/safeserialclient.cpp.s
+.PHONY : safeserialclient.cpp.s
+
 usertrials.o: usertrials.cpp.o
 .PHONY : usertrials.o
 
@@ -415,6 +453,7 @@ help:
 	@echo "... DynamicPlanDemo"
 	@echo "... PlanDemo"
 	@echo "... RealTimePlanning"
+	@echo "... SafeSerialClient"
 	@echo "... UserTrials"
 	@echo "... edit_cache"
 	@echo "... examples"
@@ -440,6 +479,9 @@ help:
 	@echo "... realtimeplanning.o"
 	@echo "... realtimeplanning.i"
 	@echo "... realtimeplanning.s"
+	@echo "... safeserialclient.o"
+	@echo "... safeserialclient.i"
+	@echo "... safeserialclient.s"
 	@echo "... usertrials.o"
 	@echo "... usertrials.i"
 	@echo "... usertrials.s"
