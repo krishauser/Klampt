@@ -1,6 +1,6 @@
 .PHONY: docs swig clean
 
-default: cpp-docs docs swig
+default: cpp-docs swig docs
 
 cpp-docs: 
 	cd src; doxygen doxygen.conf

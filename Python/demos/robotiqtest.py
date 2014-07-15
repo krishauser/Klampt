@@ -114,6 +114,8 @@ class MyGLViewer(GLRealtimeProgram):
 
 
 if __name__ == "__main__":
+    print """robotiqtestpy: A program to test the behavior of the RobotiQ
+    emulator.  Right now it just opens and closes the gripper repeatedly."""
     world = WorldModel()
 
     if not world.readFile('robotiq.xml'):

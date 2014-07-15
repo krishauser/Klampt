@@ -1,6 +1,8 @@
 #include "PathController.h"
 #include "Modeling/Conversions.h"
+#include <spline/Hermite.h>
 #include <sstream>
+#include <fstream>
 
 const static Real gJointLimitEpsilon = 1e-7;
 const static Real gVelocityLimitEpsilon = 1e-7;
@@ -515,10 +517,39 @@ void PolynomialPathController::AppendLinear(const Config& config,Real dt)
   if(dt == 0 && config != Endpoint()) {
     //want a continuous jump?
     printf("PolynomialPathController::AppendLinear: Warning, discontinuous jump requested\n");
+    cout<<"Time "<<path.EndTime()<<" distance "<<config.distance(Endpoint())<<endl;
     path.Concat(Spline::Linear(config,config,0,0),true);    
   }
   else 
     path.Concat(Spline::Linear(Endpoint(),config,0,dt),true);
+}
+
+void PolynomialPathController::AppendCubic(const Config& x,const Vector& v,Real dt)
+{
+  if(dt == 0) {
+    if(x != Endpoint()) {
+      //want a continuous jump?
+      printf("PolynomialPathController::AppendCubic: Warning, discontinuous jump requested\n");
+      cout<<"Time "<<path.EndTime()<<" distance "<<x.distance(Endpoint())<<endl;
+      path.Concat(Spline::Linear(x,x,0,0),true);    
+    }
+  }
+  else {
+    Config x0 = Endpoint();
+    Vector v0 = EndpointVelocity();
+    for(int i=0;i<x.n;i++) {
+      Spline::Polynomial<double> poly;
+      Spline::HermitePolynomial(x0[i],v0[i]*dt,x[i],v[i]*dt,poly);
+      //time scale it to length dt
+      Spline::Polynomial<double> timescale;
+      timescale.SetCoef(0,0);
+      timescale.SetCoef(1,1.0/dt);
+      poly = poly.Evaluate(timescale);
+      Real xtest = poly.Evaluate(dt);
+      Real vtest = poly.Derivative(dt); 
+      path.elements[i].Append(poly,dt,true);
+    }
+  }
 }
 
 void PolynomialPathController::AppendRamp(const Config& x)
@@ -563,8 +594,13 @@ void PolynomialPathController::AppendRamp(const Config& x,const Vector& v)
 	printf("  Reason: current velocity[%d] is out of vel limits: |%g| <= %g\n",i,dmilestones[0][i],robot.velMax[i]);
       }
   }
-  else
+  else {
+    if(path.EndTime() < pathOffset) {
+      printf("AppendRamp: Warning, path end time is in the past, cutting...\n");
+      Cut(0);
+    }
     path.Concat(Cast(dpath),true);
+  }
 }
 
 void PolynomialPathController::GetPath(Spline::PiecewisePolynomialND& _path) const
@@ -581,6 +617,22 @@ void PolynomialPathController::Cut(Real time,bool relative)
   else {
     path.TrimBack(time);
   }
+}
+
+void PolynomialPathController::Eval(Real time,Config& x,bool relative) const
+{
+  if(relative)
+    x = path.Evaluate(time+pathOffset);
+  else
+    x = path.Evaluate(time);
+}
+
+void PolynomialPathController::Deriv(Real time,Config& dx,bool relative) const
+{
+  if(relative)
+    dx = path.Derivative(time+pathOffset);
+  else
+    dx = path.Derivative(time);
 }
 
 Config PolynomialPathController::Endpoint() const
@@ -646,9 +698,11 @@ vector<string> PolynomialPathController::Commands() const
   res.push_back("set_q");
   res.push_back("set_qv");
   res.push_back("set_v");
+  res.push_back("set_tqv");
   res.push_back("append_tq");
   res.push_back("append_q");
   res.push_back("append_qv");
+  res.push_back("append_tqv");
   res.push_back("brake");
   return res;
 }
@@ -704,6 +758,21 @@ bool PolynomialPathController::SendCommand(const string& name,const string& str)
     ss>>q>>v;
     if(!ss) return false;
     AppendRamp(q,v);
+    return true;
+  }
+  else if(name == "set_tqv") {
+    ss>>t>>q>>v;
+    if(!ss) return false;
+    Cut(0);
+    Assert(t >= path.EndTime());
+    AppendCubic(q,v,t-path.EndTime());
+    return true;
+  }
+  else if(name == "append_tqv") {
+    ss>>t>>q>>v;
+    if(!ss) return false;
+    Assert(t >= path.EndTime());
+    AppendCubic(q,v,t-path.EndTime());
     return true;
   }
   else if(name == "brake") {

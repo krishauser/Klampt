@@ -6,12 +6,11 @@
 #include <GLdraw/GL.h>
 #include <GLdraw/drawextra.h>
 #include <sstream>
-#ifdef CYGWIN
-#undef WIN32
-#endif //CYGWIN
 #ifndef WIN32
 #include <unistd.h>
 #endif //WIN32
+
+const static Real gPlannerStopDeltaThreshold = 0.2;
 
 /** @brief Adaptor for sending paths to PhysicalRobotInterface from a
  * RealTimePlannerBase.
@@ -27,20 +26,22 @@ public:
   
   virtual bool Send(Real tplanstart,Real tcut,const ParabolicRamp::DynamicPath& path) {
     //impose hard real time constraint
+    /*
     Real t= iface->GetCurTime();
     printf("Plan time elapsed = %g, split time ... %g\n",t-tplanstart,tcut);
     if(t >= tplanstart+tcut) {
       //too late
-      printf("Path send violates hard real-time constraint\n");
+      printf("MotionQueueInterfaceSender: Path send violates hard real-time constraint\n");
       return false;
     }
-    
+    */
     MotionQueueInterface::MotionResult res=iface->SendPathImmediate(tplanstart+tcut,path);
     if(res == MotionQueueInterface::TransmitError) {
+      printf("MotionQueueInterfaceSender: Transmission error\n");
       return false;
     }
     else if(res != MotionQueueInterface::Success) {
-      printf("Hmmm.. failed path check.  Should debug!\n");
+      printf("MotionQueueInterfaceSender: Hmmm.. failed path check.  Should debug!\n");
       return false;
     }
       
@@ -69,7 +70,7 @@ double MaxAbsError(const vector<double>& a,const vector<double>& b)
 
 
 RobotUserInterface::RobotUserInterface()
-  :world(NULL),viewport(NULL),robotInterface(NULL)
+  :world(NULL),viewport(NULL),planningWorld(NULL),settings(NULL),robotInterface(NULL)
 {}
 
 void RobotUserInterface::GetClickRay(int mx,int my,Ray3D& ray) const
@@ -176,14 +177,19 @@ bool InputProcessingInterface::ObjectiveChanged()
 
 SmartPointer<PlannerObjectiveBase> InputProcessingInterface::GetObjective()
 {
-  if(!inputProcessor) return NULL;
-  PlannerObjectiveBase* obj = inputProcessor->MakeObjective(GetRobot());
-  return obj;
+  if(!inputProcessor) {
+    currentObjective = NULL;
+  }
+  else {
+    PlannerObjectiveBase* obj = inputProcessor->MakeObjective(GetRobot());
+    currentObjective = obj;
+  }
+  return currentObjective;
 }
 
 CartesianObjective* InputProcessingInterface::GetCartesianObjective()
 {
-  currentObjective = GetObjective();
+  GetObjective();
   if(!currentObjective) return NULL;
   CartesianObjective* pobj = dynamic_cast<CartesianObjective*>(&*currentObjective);
   assert(pobj != NULL);
@@ -193,6 +199,49 @@ CartesianObjective* InputProcessingInterface::GetCartesianObjective()
 void InputProcessingInterface::DrawGL()
 {
   if(inputProcessor) inputProcessor->DrawGL();
+  if(currentObjective) {
+    Robot* robot=GetRobot();
+    CartesianObjective* cobj = dynamic_cast<CartesianObjective*>(&*currentObjective);
+    if(cobj) {
+      glPointSize(5.0);
+      glEnable( GL_POINT_SMOOTH);
+      glDisable( GL_LIGHTING);
+      glBegin( GL_POINTS);
+      glColor3f(0, 1, 1);
+      glVertex3v(robot->links[cobj->ikGoal.link].T_World
+		 * cobj->ikGoal.localPosition);
+      glColor3f(0, 1, 0.5);
+      glVertex3v(cobj->ikGoal.endPosition);
+      glEnd();
+    }
+    ConfigObjective* qobj = dynamic_cast<ConfigObjective*>(&*currentObjective);
+    if(qobj) {
+      world->robots[0].view.SetColors(GLColor(1,0.5,0,0.5));
+      glEnable(GL_LIGHTING);
+      robot->UpdateConfig(qobj->qgoal);
+      world->robots[0].view.Draw();
+      glDisable(GL_LIGHTING);
+    }
+    CartesianTrackingObjective* ptrack = dynamic_cast<CartesianTrackingObjective*>(&*currentObjective);
+    if(ptrack) {
+      glPointSize(5.0);
+      glEnable( GL_POINT_SMOOTH);
+      glDisable( GL_LIGHTING);
+      glBegin( GL_POINTS);
+      glColor3f(0, 1, 1);
+      glVertex3v(robot->links[ptrack->link].T_World
+		 * ptrack->localPosition);
+      glEnd();
+      glLineWidth(3.0);
+      glColor3f(0, 1, 0.5);
+      glBegin(GL_LINE_STRIP);
+      for(size_t i=0;i<ptrack->positions.size();i++) 
+	glVertex3v(ptrack->positions[i]);
+      glEnd();
+      glLineWidth(1.0);
+    }
+    //TODO: others
+  }
 }
 
 string InputProcessingInterface::MouseInputEvent(int mx, int my, bool drag)
@@ -249,7 +298,7 @@ string IKCommandInterface::UpdateEvent()
 
 
 PlannerCommandInterface::PlannerCommandInterface()
-  :planner(NULL),lastPlanTime(0),nextPlanTime(0)
+  :planner(NULL),lastPlanTime(0),nextPlanTime(0),startObjectiveThreshold(Inf),started(false)
 {}
 
 PlannerCommandInterface::~PlannerCommandInterface()
@@ -260,6 +309,7 @@ PlannerCommandInterface::~PlannerCommandInterface()
 string PlannerCommandInterface::ActivateEvent(bool enabled)
 {
   InputProcessingInterface::ActivateEvent(enabled);
+  started = false;
   if(planner) {
     planner->currentPath.ramps.resize(0);
     lastPlanTime = nextPlanTime = robotInterface->GetCurTime();
@@ -268,21 +318,68 @@ string PlannerCommandInterface::ActivateEvent(bool enabled)
   return "";
 }
 
+string PlannerCommandInterface::Instructions() const
+{
+  if(!started) {
+    if(robotInterface->GetEndTime() > robotInterface->GetCurTime()) {
+      return "Waiting until the physical robot stops...";
+    }
+    else if(currentObjective) {
+      stringstream ss;
+      ss<<"Waiting until the error gets below threshold "<<startObjectiveThreshold;
+      return ss.str();
+    }
+    else
+      return InputProcessingInterface::Instructions();
+  }
+  return InputProcessingInterface::Instructions();
+}
+
 string PlannerCommandInterface::UpdateEvent()
 {
   InputProcessingInterface::UpdateEvent();
   if(!planner) return "";
-  if(planner->currentPath.ramps.empty()) {
-    if(robotInterface->GetEndTime() <= robotInterface->GetCurTime()) { //done moving
-      Config q;
-      robotInterface->GetCurConfig(q);
-      planner->SetConstantPath(q);
-    }
-    else {
-      printf("Waiting until robot stops...\n");
-      //wait until done moving
+  if(!started) {
+    //2 conditions must be met before start: robot is stopped, robot hits the
+    //startobjectivethreshold.
+
+    //robot still moving
+    if(robotInterface->GetEndTime() > robotInterface->GetCurTime()) {
       return "";
     }
+    if(IsInf(startObjectiveThreshold)) {
+      started=true;
+    }
+    else if(ObjectiveChanged()) {
+      SmartPointer<PlannerObjectiveBase> obj = GetObjective();
+      Assert(currentObjective != NULL);
+      Config q,v;
+      robotInterface->GetEndConfig(q);
+      v.resize(q.n,Zero);
+      if(obj->TerminalCost(0,q,v) > startObjectiveThreshold) {
+	printf("Waiting until the objective gets below %g, currently %g...\n",startObjectiveThreshold,obj->TerminalCost(0,q,v));
+	return "";
+      }
+      else started=true;
+    } 
+    else {
+      printf("Waiting for an objective...\n");
+    }
+  }
+  if(!started) return "";
+  if(planner->currentPath.ramps.empty()) {
+    Config q;
+    robotInterface->GetEndConfig(q);
+    planner->SetConstantPath(q);
+  }
+  if(robotInterface->HadExternalChange()) {
+    if(robotInterface->GetCurTime()  < robotInterface->GetEndTime()) {
+      fprintf(stderr,"Cannot handle an externally changed robot that is still moving\n");
+      return "";
+    }
+    Config q;
+    robotInterface->GetEndConfig(q);
+    planner->SetConstantPath(q);
   }
 
   //wait until next planning step, otherwise try planning
@@ -343,11 +440,13 @@ string IKPlannerCommandInterface::ActivateEvent(bool enabled)
   if(!planner) {
     printf("IK planner activated, 150ms loop\n");
     assert(settings != NULL);
-    cspace = new SingleRobotCSpace(*world,0,settings);
+    cspace = new SingleRobotCSpace(*planningWorld,0,settings);
     
     planner = new RealTimeIKPlanner;
-    planner->protocol = RealTimePlannerBase::Constant;
-    planner->currentSplitTime=0.1;
+    //planner = new RealTimePerturbationIKPlanner;
+    //planner->LogBegin();
+    //planner->protocol = RealTimePlannerBase::Constant;
+    planner->currentSplitTime=0.10;
     planner->currentPadding=0.05;
     planner->SetSpace(cspace);
     assert(planner->settings != NULL);
@@ -359,11 +458,12 @@ string IKPlannerCommandInterface::ActivateEvent(bool enabled)
 string RRTCommandInterface::ActivateEvent(bool enabled)
 {
   if(!planner) {
-    cspace = new SingleRobotCSpace(*world,0,settings);
+    cspace = new SingleRobotCSpace(*planningWorld,0,settings);
     
     RealTimeRRTPlanner* p=new RealTimeRRTPlanner;
     p->delta = 0.5;
     planner = p;
+    planner->LogBegin();
     //planner->protocol = RealTimePlannerBase::Constant;
     planner->protocol = RealTimePlannerBase::ExponentialBackoff;
     planner->currentSplitTime=0.1;
@@ -380,61 +480,75 @@ string RRTCommandInterface::ActivateEvent(bool enabled)
 
 
 
-#ifndef WIN32
 RealTimePlannerDataSender::RealTimePlannerDataSender(RealTimePlannerData* _data)
   :data(_data)
 {}
 
 bool RealTimePlannerDataSender::Send(Real tplanstart,Real tcut,const ParabolicRamp::DynamicPath& path)
 {
-  pthread_mutex_lock(&data->mutex);
-  Assert(data->startPlanTime == tplanstart);
-  data->pathRefresh = true;
-  data->tcut = tcut;
-  data->path = path;
-  pthread_mutex_unlock(&data->mutex);
-  
+  {
+    ScopedLock lock(data->mutex);
+    Assert(data->startPlanTime == tplanstart);
+    data->pathRefresh = true;
+    data->tcut = tcut;
+    data->path = path;
+  }  
   while(true) {
-    usleep(1);
-    pthread_mutex_lock(&data->mutex);
-    if(!data->pathRefresh) {  //this signals that the calling thread picked up the data
-      bool res = data->pathRefreshSuccess;
-      pthread_mutex_unlock(&data->mutex);
-      return res;
-    }
-    pthread_mutex_unlock(&data->mutex);
+    ThreadSleep(0.001);
+    {
+      ScopedLock lock(data->mutex);
+      if(!data->pathRefresh) {  //this signals that the calling thread picked up the data
+	bool res = data->pathRefreshSuccess;
+	return res; //unlocks mutex
+      }
+    }//unlocks mutex
   }
 }  
 
 void* planner_thread_func(void * ptr)
 {
   RealTimePlannerData* data = reinterpret_cast<RealTimePlannerData*>(ptr);
+  //read initial configuration
+  {
+    ScopedLock(data->mutex);
+    assert(data->resetStartConfig == true);
+    data->planner->SetConstantPath(data->startConfig);
+    data->resetStartConfig = false;
+  }
+  //FOR SOME REASON, LOGGING FAILS UNLESS DONE HERE
+  //data->planner->LogBegin();
+
   while (true) {
     //first wait for a lock
-    pthread_mutex_lock(&data->mutex);
-
-    //parse the data
-    if(!data->active) {
-      //quit
-      pthread_mutex_unlock(&data->mutex);
-      return NULL;
-    }
-    assert(data->pathRefresh == false);
     bool start=false;
     Real startTime;
-    if(data->objective) {
-      start=true;
-      startTime = data->startPlanTime = data->globalTime;
-    }
-    if(data->objective != data->planner->goal) {
-      if(data->objective) {
-	data->planner->Reset(data->objective);      }
-      else {
-	printf("NULL objective function set...\n");
-	data->planner->Reset(NULL);
+    {
+      ScopedLock(data->mutex);
+      
+      //parse the data
+      if(!data->active) {
+	//quit
+	return NULL;  //unlocks the mutex
       }
-    }
-    pthread_mutex_unlock(&data->mutex);
+      assert(data->pathRefresh == false);
+      if(data->resetStartConfig == true) {
+	printf("Planning thread: resetting start configuration\n");
+	data->planner->SetConstantPath(data->startConfig);
+	data->resetStartConfig = false;
+      }
+      if(data->objective) {
+	start=true;
+	startTime = data->startPlanTime = data->globalTime;
+      }
+      if(data->objective != data->planner->goal) {
+	if(data->objective) {
+	  data->planner->Reset(data->objective);      }
+	else {
+	  printf("Planning thread: NULL objective function set...\n");
+	  data->planner->Reset(NULL);
+	}
+      }
+    }  //unlocks the mutex
 
     if(start) {
       //do the planning -- the callback will output the result to the
@@ -444,7 +558,7 @@ void* planner_thread_func(void * ptr)
       
       printf("Planning thread: result %d\n",(int)res);    
     }
-    usleep(1);
+    ThreadSleep(0.001);
   }
   return NULL;
 }
@@ -453,7 +567,6 @@ void* planner_thread_func(void * ptr)
 MTPlannerCommandInterface::MTPlannerCommandInterface()
   : planner(NULL)
 {
-  data.mutex = PTHREAD_MUTEX_INITIALIZER;
 }
 
 MTPlannerCommandInterface::~MTPlannerCommandInterface()
@@ -466,24 +579,23 @@ string MTPlannerCommandInterface::ActivateEvent(bool enabled)
   InputProcessingInterface::ActivateEvent(enabled);
   if(enabled) {
     Assert(robotInterface->GetEndTime() <= robotInterface->GetCurTime());
-    Config q;
-    robotInterface->GetCurConfig(q);
-    planner->SetConstantPath(q);
-
-    Assert(&planner->cspace->world == &planningWorld);
+    Assert(&planner->cspace->world == planningWorld);
     data.planner = planner;
     data.planner->sendPathCallback = new RealTimePlannerDataSender(&data);
+    data.resetStartConfig = true;
+    robotInterface->GetCurConfig(data.startConfig);
     data.active = true;
     data.globalTime = 0;
     data.pathRefresh = false;
-    pthread_create(&planningThread,NULL,planner_thread_func,&data);
+    planningThread = ThreadStart(planner_thread_func,&data);
     printf("Creating planning thread\n");
   }
   else {
-    pthread_mutex_lock(&data.mutex);
-    data.active = false;
-    pthread_mutex_unlock(&data.mutex);
-    pthread_join(planningThread,NULL);
+	  {
+		ScopedLock lock(data.mutex);
+		data.active = false;
+	  } //unlocks the mutex
+    ThreadJoin(planningThread);
   }
   return "";
 }
@@ -494,34 +606,66 @@ string MTPlannerCommandInterface::UpdateEvent()
     return "";
 
   inputProcessor->SetGlobalTime(robotInterface->GetCurTime());
-  
-  //see if the planning thread has a plan update
-  pthread_mutex_lock(&data.mutex);
-  if(ObjectiveChanged()) {
-    //set the objective function
-    PlannerObjectiveBase* obj = inputProcessor->MakeObjective(planner->cspace->GetRobot());
-    data.objective = obj;
+
+  if(robotInterface->HadExternalChange()) {
+    if(robotInterface->GetCurTime()  < robotInterface->GetEndTime()) {
+      fprintf(stderr,"Cannot handle an externally changed robot that is still moving\n");
+      return "";
+    }
+    //lock the planning thread's mutex and reset the start config
+    {
+      ScopedLock lock(data.mutex);
+      data.resetStartConfig = true;
+      robotInterface->GetEndConfig(data.startConfig);
+    }
   }
+
+  //tell the planner to stop if there's a new objective
+  SmartPointer<PlannerObjectiveBase> obj;
+  bool changedObjective = false;
+  if(ObjectiveChanged()) {
+    changedObjective = true;
+    obj = inputProcessor->MakeObjective(planner->cspace->GetRobot());
+    //this is the visualization objective
+    currentObjective = obj;
+    if((planner->goal && !obj) || (planner->goal && planner->goal->Delta(obj) > gPlannerStopDeltaThreshold)) {
+      printf("\n");
+      printf("****** STOP PLANNING **********\n");
+      printf("\n");
+      planner->StopPlanning();
+    }
+  }
+
+  //now lock the planning thread's mutex
+  {
+    ScopedLock lock(data.mutex);
+
+    //update the objective function if necessary
+    if(changedObjective) {
+      //set the objective function
+      data.objective = obj;
+    }
   
-  if(data.pathRefresh) {
-    //if so, mark that it's refreshed
-    data.pathRefresh = false;
-    MotionQueueInterface::MotionResult res = robotInterface->SendPathImmediate(data.startPlanTime+data.tcut,data.path);
-    Real t=robotInterface->GetCurTime();
-    if(res == MotionQueueInterface::Success) {
-      data.pathRefreshSuccess = true;
-      printf("Exec thread: Planner successful, split %g, delay %g\n",data.tcut,t - data.startPlanTime);
+    //see if the planning thread has a plan update
+    if(data.pathRefresh) {
+      //if so, mark that it's refreshed
+      data.pathRefresh = false;
+      MotionQueueInterface::MotionResult res = robotInterface->SendPathImmediate(data.startPlanTime+data.tcut,data.path);
+      Real t=robotInterface->GetCurTime();
+      if(res == MotionQueueInterface::Success) {
+	data.pathRefreshSuccess = true;
+	printf("Exec thread: Planner successful, split %g, delay %g\n",data.tcut,t - data.startPlanTime);
+      }
+      else {
+	data.pathRefreshSuccess = false;
+	printf("Exec thread: Planner overrun, split %g, delay %g\n",data.tcut,t - data.startPlanTime);
+      }
     }
     else {
-      data.pathRefreshSuccess = false;
-      printf("Exec thread: Planner overrun, split %g, delay %g\n",data.tcut,t - data.startPlanTime);
+      //printf("Sim thread: waiting for plan to complete\n");
     }
-  }
-  else {
-    //printf("Sim thread: waiting for plan to complete\n");
-  }
-  data.globalTime = robotInterface->GetCurTime();;
-  pthread_mutex_unlock(&data.mutex);
+    data.globalTime = robotInterface->GetCurTime();
+  } //unlocks the mutex
   return "";
 }
 
@@ -529,8 +673,8 @@ string MTIKPlannerCommandInterface::ActivateEvent(bool enabled)
 {
   
   if (!planner) {
-    CopyWorld(*world,planningWorld);
-    cspace = new SingleRobotCSpace(planningWorld, 0, settings);
+    Assert(planningWorld != NULL);
+    cspace = new SingleRobotCSpace(*planningWorld, 0, settings);
     
     planner = new RealTimeIKPlanner;
     //planner->protocol = RealTimePlannerBase::Constant;
@@ -545,8 +689,8 @@ string MTIKPlannerCommandInterface::ActivateEvent(bool enabled)
 string MTRRTCommandInterface::ActivateEvent(bool enabled)
 {
   if (!planner) {
-    CopyWorld(*world,planningWorld);
-    cspace = new SingleRobotCSpace(planningWorld, 0, settings);
+    Assert(planningWorld != NULL);
+    cspace = new SingleRobotCSpace(*planningWorld, 0, settings);
     
     //RealTimeRRTPlanner* p = new RealTimeRRTPlanner;
     RealTimeTreePlanner* p = new RealTimeTreePlanner;
@@ -556,4 +700,3 @@ string MTRRTCommandInterface::ActivateEvent(bool enabled)
   }
   return MTPlannerCommandInterface::ActivateEvent(enabled);
 }
-#endif //WIN32

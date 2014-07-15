@@ -54,8 +54,10 @@ bool Optimize(PlannerObjectiveBase* obj,Robot* robot,int iters,Real tol)
     if(joint_constraints.size()!=robot->links.size())
       fprintf(stderr,"Cannot support partial joint constraints yet\n");
     assert(joint_constraints.size()==robot->links.size());
-    for(size_t i=0;i<joint_constraints.size();i++)
-      robot->q(joint_constraints[i].first) = joint_constraints[i].second;
+    for(size_t i=0;i<joint_constraints.size();i++) {
+      int k=joint_constraints[i].first;
+      robot->q(k) = Clamp(joint_constraints[i].second,robot->qMin[k],robot->qMax[k]);
+    }
     return true;
   }
 
@@ -75,17 +77,45 @@ int IsVisible(EdgePlanner* e,Timer& timer,Real cutoff,int numStepsPerCheck=5)
 RealTimePlannerBase::RealTimePlannerBase()
   :robot(NULL),settings(NULL),cspace(NULL),goal(NULL),
    protocol(ExponentialBackoff),currentSplitTime(0.1),currentPadding(0.01),
-   currentExternalPadding(0.01)
-   //protocol(Constant),currentSplitTime(0.1),currentPadding(0.05)
-   ///protocol(Constant),currentSplitTime(0.5),currentPadding(0.05)
+   currentExternalPadding(0.01),
+   //protocol(Constant),currentSplitTime(0.1),currentPadding(0.05),
+   ///protocol(Constant),currentSplitTime(0.5),currentPadding(0.05),
+  maxPadding(5.0)
 {
   pathStartTime = 0;
   cognitiveMultiplier = 1.0;
   acceptTimeOverruns = false;
+  flog = stdout;
 }
 
 RealTimePlannerBase::~RealTimePlannerBase()
 {
+  LogEnd();
+}
+
+bool RealTimePlannerBase::LogBegin(const char* fn)
+{
+  return true;
+  if(flog != stdout)
+    fclose(flog);
+  flog = fopen(fn,"a");
+  if(!flog) {
+    cout<<"RealTimePlannerBase: Couldn't open log to file "<<fn<<endl;
+    getchar();
+    flog = stdout;
+    return false;
+  }
+  fprintf(flog,"Log begin...\n");
+  return true;
+}
+
+bool RealTimePlannerBase::LogEnd()
+{
+  if(flog != stdout) {
+    fclose(flog);
+    flog = stdout;
+  }
+  return true;
 }
 
 void RealTimePlannerBase::SetSpace(SingleRobotCSpace* space)
@@ -93,6 +123,12 @@ void RealTimePlannerBase::SetSpace(SingleRobotCSpace* space)
   cspace = space;
   robot = space->GetRobot();
   settings = space->settings;
+}
+
+bool RealTimePlannerBase::StopPlanning()
+{
+  stopPlanning = true;
+  return true;
 }
 
 void RealTimePlannerBase::Reset(SmartPointer<PlannerObjectiveBase> newgoal)
@@ -107,7 +143,7 @@ void RealTimePlannerBase::Reset(SmartPointer<PlannerObjectiveBase> newgoal)
       //works well for position tasks
       //Real u=Exp(-2*d);
       currentSplitTime = currentSplitTime*u + (1.0-u)*currentPadding;
-      printf("Movement with distance %g, updating split time to %g\n",d,currentSplitTime); 
+      fprintf(flog,"Movement with distance %g, updating split time to %g\n",d,currentSplitTime); 
     }
     else {
       //reset the split time
@@ -122,12 +158,14 @@ void RealTimePlannerBase::Reset(SmartPointer<PlannerObjectiveBase> newgoal)
 bool RealTimePlannerBase::PlanUpdate(Real tglobal,Real& splitTime,Real& planTime)
 {
   assert(!currentPath.ramps.empty());
-  if(currentSplitTime < currentPadding+currentExternalPadding+0.001)
+  if(currentSplitTime < currentPadding+currentExternalPadding+0.001) {
     currentSplitTime=currentPadding+currentExternalPadding+0.001;
+  }
 
   //advance the current path time
-  ParabolicRamp::DynamicPath before,updatedPath;
+  ParabolicRamp::DynamicPath before;
   if(tglobal > pathStartTime) {
+    ParabolicRamp::DynamicPath updatedPath;
     currentPath.Split(tglobal-pathStartTime,before,updatedPath);
     currentPath = updatedPath;
     pathStartTime = tglobal;
@@ -136,30 +174,32 @@ bool RealTimePlannerBase::PlanUpdate(Real tglobal,Real& splitTime,Real& planTime
     FatalError("RealTimePlannerBase::PlanUpdate: Time is not moving forward!");
   }
 
+  //Here's where the planning takes place
   Timer timer;
   splitTime = currentSplitTime;
+  stopPlanning = false;
   ParabolicRamp::DynamicPath after;
   currentPath.Split(splitTime,before,after);
   assert(FuzzyEquals(before.GetTotalTime(),splitTime));
   //printf("Split took time %g\n",timer.ElapsedTime());
-  printf("***** Planning for time %gs *********\n",(currentSplitTime-currentPadding-currentExternalPadding)*cognitiveMultiplier);
+  fprintf(flog,"***** Planning for time %gs (split %g, padding %g, ext %g)*********\n",(currentSplitTime-currentPadding-currentExternalPadding)*cognitiveMultiplier,currentSplitTime,currentPadding,currentExternalPadding);
   timer.Reset();
   int res=PlanFrom(after,(currentSplitTime-currentPadding-currentExternalPadding)*cognitiveMultiplier);
   planTime = timer.ElapsedTime()/cognitiveMultiplier;
-  printf("***** Planning took time %gs *********\n",timer.ElapsedTime());
+  fprintf(flog,"***** Planning took time %gs *********\n",timer.ElapsedTime());
   //printf("Planning took time %g\n",planTime);
   //collect statistics
   if(res==Failure) planFailTimeStats.collect(planTime);
   else if(res==Success) planSuccessTimeStats.collect(planTime);
   else if(res==Timeout) planTimeoutTimeStats.collect(planTime);
 
+  //now decide whether to update the path 
   bool updatePath = false;
-
-  //decide whether to update the path 
   if(res==Success) {
     updatePath = true;
     //if the planning time exceeds the split time, disallow it
     if(!acceptTimeOverruns && planTime > currentSplitTime-currentExternalPadding) {
+      fprintf(flog,"Planner returned Success, but time budget overrun\n");
       updatePath = false;
     }
   }
@@ -168,8 +208,12 @@ bool RealTimePlannerBase::PlanUpdate(Real tglobal,Real& splitTime,Real& planTime
     updatePath = true;
     //if the planning time exceeds the split time, disallow it
     if(!acceptTimeOverruns && planTime > currentSplitTime-currentExternalPadding) {
+      fprintf(flog,"Planner returned Timeout, time budget overrun\n");
       updatePath = false;
     }
+  }
+  else {
+    fprintf(flog,"Planner returned Failure\n");
   }
 
   //update currentSplitTime and currentPadding
@@ -178,27 +222,31 @@ bool RealTimePlannerBase::PlanUpdate(Real tglobal,Real& splitTime,Real& planTime
   else if(protocol == ExponentialBackoff) {
     //update currentPadding
     if(planTime > splitTime-currentExternalPadding) {
+      currentSplitTime += currentPadding;
       currentPadding *= 2.0;
+      //cap the padding at the max
+      if(currentPadding > maxPadding)
+	currentPadding = maxPadding;
       //if the current padding is exceedingly low, boost it up
       //so that it doesnt have to adapt by doubling
       if(res == Timeout && currentPadding < planTime-(currentSplitTime-currentExternalPadding)) 
 	currentPadding = planTime-(currentSplitTime-currentExternalPadding);
-      printf("Not enough padding, setting padding to %g\n",currentPadding);
+      fprintf(flog,"Not enough padding, setting padding to %g\n",currentPadding);
     }
     else if(planTime+currentPadding*0.5 < splitTime-currentExternalPadding) {
       currentPadding *= 0.5;
-      printf("Too much padding, setting padding to %g\n",currentPadding);
+      fprintf(flog,"Too much padding, setting padding to %g\n",currentPadding);
     }
     if(currentPadding < 0.001) currentPadding=0.001;
       
     //update currentSplitTime
     if(res == Success) {
       currentSplitTime *= 0.33;
-      printf("Success, setting split time to %g\n",currentSplitTime); 
+      fprintf(flog,"Success, setting split time to %g\n",currentSplitTime); 
     }
     else if(res == Timeout) {
       currentSplitTime *= 2.0;
-      printf("Failure, setting split time to %g\n",currentSplitTime); 
+      fprintf(flog,"Failure, setting split time to %g\n",currentSplitTime); 
     }
   }
   else if(protocol == Learning) {
@@ -243,6 +291,7 @@ bool RealTimePlannerBase::PlanUpdate(Real tglobal,Real& splitTime,Real& planTime
       else {
 	//Send failed for some reason -- now expand the padding
 	MarkSendFailure();
+	fprintf(flog,"Send failed! Increased external padding to %g, split time %g\n",currentExternalPadding,currentSplitTime); 
       }
     }
     else {
@@ -260,7 +309,13 @@ bool RealTimePlannerBase::PlanUpdate(Real tglobal,Real& splitTime,Real& planTime
 
 void RealTimePlannerBase::MarkSendFailure()
 {
+  currentSplitTime += currentExternalPadding;
   currentExternalPadding = currentExternalPadding*2.0;
+  if(currentExternalPadding > 1.0) {
+    fprintf(flog,"Warning... multiple send failures, padding now > 1s.\n");
+    fprintf(flog,"Please debug the communication system.\n");
+    currentExternalPadding = 1.0;
+  }
 }
 
 
@@ -273,7 +328,7 @@ int RealTimePlannerBase::Shortcut(ParabolicRamp::DynamicPath& path,Real timeLimi
   Real pathEpsilon = settings->robotSettings[0].collisionEpsilon;
   CSpaceFeasibilityChecker feas(cspace);
   ParabolicRamp::RampFeasibilityChecker checker(&feas,pathEpsilon);
-  while(timer.ElapsedTime() < timeLimit) {
+  while(timer.ElapsedTime() < timeLimit && !stopPlanning) {
     Real t1 = Sqr(Rand())*path.GetTotalTime();
     Real t2 = Sqr(Rand())*path.GetTotalTime();
     if(path.TryShortcut(t1,t2,checker))
@@ -325,6 +380,7 @@ int RealTimePlannerBase::SmartShortcut(Real tstart,ParabolicRamp::DynamicPath& p
   Real u1,u2;
   vector<Real> x0,x1,dx0,dx1;
   while(timer.ElapsedTime() < timeLimit) {
+    if(stopPlanning) return num;
     Real t1 = Sqr(Rand())*(startTimes.back()-startTimes.front());
     Real t2 = Sqr(Rand())*(startTimes.back()-startTimes.front());
     if(t1 > t2) swap(t1,t2);
@@ -452,21 +508,33 @@ bool RealTimePlannerBase::GetMilestoneRamp(const ParabolicRamp::DynamicPath& cur
 //returns true if the ramp from the current config to q is collision free
 bool RealTimePlannerBase::CheckMilestoneRamp(const ParabolicRamp::DynamicPath& curPath,const Config& q,ParabolicRamp::DynamicPath& ramp) const
 {
-  if(!GetMilestoneRamp(curPath,q,ramp)) return false;
+  if(!GetMilestoneRamp(curPath,q,ramp)) {
+    printf("CheckMilestoneRamp: Failed to get milestone ramp\n");
+    return false;
+  }
   //check bounding box exactly
   ParabolicRamp::Vector bmin,bmax;
   for(size_t r=0;r<ramp.ramps.size();r++) {
     ramp.ramps[r].Bounds(bmin,bmax);
     for(size_t i=0;i<bmin.size();i++) {
-      if(bmin[i] < robot->qMin(i)) return false;
-      if(bmax[i] > robot->qMax(i)) return false;
+      if(bmin[i] < robot->qMin(i)) {
+	printf("CheckMilestoneRamp: Bound on link %d failed check: %g < %g\n",i,bmin[i],robot->qMin(i));
+	return false;
+      }
+      if(bmax[i] > robot->qMax(i)) {
+	printf("CheckMilestoneRamp: Bound on link %d failed check: %g > %g\n",i,bmax[i],robot->qMax(i));
+	return false;
+      }
     }
   }
   //now check collisions approximately
   Real pathEpsilon = settings->robotSettings[0].collisionEpsilon;
   CSpaceFeasibilityChecker checker(cspace);
   for(size_t r=0;r<ramp.ramps.size();r++) {
-    if(!CheckRamp(ramp.ramps[r],&checker,pathEpsilon)) return false;
+    if(!CheckRamp(ramp.ramps[r],&checker,pathEpsilon)) {
+      printf("CheckMilestoneRamp: Collision check failed.\n");
+      return false;
+    }
   }
   return true;
 }
@@ -511,6 +579,10 @@ void RealTimePlannerBase::SetConstantPath(const Config& q)
     currentPath.accMax = robot->accMax;
   if(currentPath.velMax.empty())
     currentPath.velMax = robot->velMax;
+ if(currentPath.xMin.empty())
+    currentPath.xMin = robot->qMin;
+ if(currentPath.xMax.empty())
+    currentPath.xMax = robot->qMax;
 }
 
 void RealTimePlannerBase::SetCurrentPath(Real tglobal,const ParabolicRamp::DynamicPath& path)
@@ -538,9 +610,9 @@ int RealTimeIKPlanner::PlanFrom(ParabolicRamp::DynamicPath& path,Real cutoff)
   robot->UpdateConfig(CurrentDestination());
   bool res=Optimize(goal,robot,10,1e-3);
   if(!res) { //optimization failed, do we do anything?
+    fprintf(flog,"IK optimization failed\n");
   }
   Config q = robot->q;
-
   for(int i=0;i<10;i++) {
     //check for an improvement
     Real cost=EvaluateDestinationCost(q);
@@ -551,8 +623,17 @@ int RealTimeIKPlanner::PlanFrom(ParabolicRamp::DynamicPath& path,Real cutoff)
 	return Success;
       }
     }
+    if(IsInf(cost)) {
+      fprintf(flog,"IK Planner: bisection %d couldn't achieve feasible ramp\n",i);
+      fprintf(flog,"  %s\n",LexicalCast(q).c_str());
+    }
+    if(stopPlanning) {
+      fprintf(flog,"IK Planner: Timeout called\n");
+      return Timeout;
+    }
     q = (q + Vector(CurrentDestination()))*0.5;
   }
+  fprintf(flog,"IK planner: collision checks failed\n");
   return Failure;
 }
 
@@ -586,10 +667,12 @@ int RealTimePerturbationPlanner::PlanFrom(ParabolicRamp::DynamicPath& path,Real 
       iteration=0;
       return Success;
     }
+    if(stopPlanning) return Timeout;
     ParabolicRamp::Vector temp;
     path.Evaluate(0,temp);
-    cspace->Interpolate(temp,q,0.5,robot->q);
-    q = robot->q;
+    Config qmid;
+    cspace->Interpolate(temp,q,0.5,qmid);
+    q = qmid;
   }
   return Failure;
 }
@@ -633,10 +716,12 @@ int RealTimePerturbationIKPlanner::PlanFrom(ParabolicRamp::DynamicPath& path,Rea
 	return Success;
       }
     }
+    if(stopPlanning) return Timeout;
     ParabolicRamp::Vector temp;
     path.Evaluate(0,temp);
-    cspace->Interpolate(temp,q,0.5,robot->q);
-    q = robot->q;
+    Config qmid;
+    cspace->Interpolate(temp,q,0.5,qmid);
+    q = qmid;
   }
   return Failure;
 }
@@ -775,7 +860,7 @@ int RealTimeRRTPlanner::PlanFrom(ParabolicRamp::DynamicPath& path,Real cutoff)
   Assert(path.IsValid());
   Timer timer;
   if(goal->TerminalCost(0.0,path.ramps.back().x1,path.ramps.back().dx1) < 1e-3) {
-    printf("Already at solution, doing shortcutting...\n");
+    fprintf(flog,"Already at solution, doing shortcutting...\n");
     Shortcut(path,cutoff);
     Assert(path.IsValid());
     return Success;
@@ -783,7 +868,7 @@ int RealTimeRRTPlanner::PlanFrom(ParabolicRamp::DynamicPath& path,Real cutoff)
 
   RRTPlanner::Node* bestNode=NULL;
   Real bestPathCost = EvaluatePathCost(path,currentSplitTime);
-  printf("*** Total cost %g, terminal cost %g ***\n",bestPathCost,goal->TerminalCost(0.0,path.ramps.back().x1,path.ramps.back().dx1));
+  fprintf(flog,"*** Total cost %g, terminal cost %g ***\n",bestPathCost,goal->TerminalCost(0.0,path.ramps.back().x1,path.ramps.back().dx1));
 
   rrt = NULL;
   //create new RRT tree
@@ -795,7 +880,7 @@ int RealTimeRRTPlanner::PlanFrom(ParabolicRamp::DynamicPath& path,Real cutoff)
   //initialize tree with existing path
   RRTPlanner::Node* n=rrt->AddMilestone(MakeState(path.ramps[0].x0,path.ramps[0].dx0));
   if(!stateSpace->IsFeasible(n->x)) {
-    printf("Warning, start state is infeasible!\n");
+    fprintf(flog,"Warning, start state is infeasible!\n");
   }
   RRTPlanner::Node* root = n;
   assert(root == rrt->milestones[0]);
@@ -812,7 +897,7 @@ int RealTimeRRTPlanner::PlanFrom(ParabolicRamp::DynamicPath& path,Real cutoff)
       bestPathCost = EvaluateNodePathCost(nik);
     }
     else {
-      //printf("Deleted subtree derived from path ik %d\n",0);
+      //fprintf(flog,"Deleted subtree derived from path ik %d\n",0);
       rrt->DeleteSubtree(nik);
       //assert(root == rrt->milestones[0]);
     }
@@ -826,7 +911,7 @@ int RealTimeRRTPlanner::PlanFrom(ParabolicRamp::DynamicPath& path,Real cutoff)
     Assert(((RampEdgePlanner*)((EdgePlanner*)n->edgeFromParent()))->IsValid());
     /*
     if(!n->edgeFromParent()->IsVisible()) {
-      printf("Prior path edge %d became infeasible\n",i);
+      fprintf(flog,"Prior path edge %d became infeasible\n",i);
       rrt->DeleteSubtree(n);
       assert(root == rrt->milestones[0]);
       break;
@@ -834,12 +919,12 @@ int RealTimeRRTPlanner::PlanFrom(ParabolicRamp::DynamicPath& path,Real cutoff)
     */
 
     existingNodes.push_back(n);
-    //printf("Node %d \n",i+1);
+    //fprintf(flog,"Node %d \n",i+1);
 
     if(ikSolveProbability > 0 && i+1 == path.ramps.size() && bestNode == NULL) {
       //check the ik extension
       nik=(RandBool(ikSolveProbability)?TryIKExtend(n,false):NULL);
-      //if(nik) printf("IK node %d\n",i+1);
+      //if(nik) fprintf(flog,"IK node %d\n",i+1);
       if(nik && EvaluateNodePathCost(nik) < bestPathCost) {
 	if(nik->edgeFromParent()->IsVisible()) {
 	  Assert(((RampEdgePlanner*)((EdgePlanner*)nik->edgeFromParent()))->IsValid());
@@ -847,11 +932,12 @@ int RealTimeRRTPlanner::PlanFrom(ParabolicRamp::DynamicPath& path,Real cutoff)
 	  bestPathCost = EvaluateNodePathCost(nik);
 	}
 	else {
-	  //printf("Deleted subtree derived from path ik %d\n",i);
+	  //fprintf(flog,"Deleted subtree derived from path ik %d\n",i);
 	  rrt->DeleteSubtree(nik);
 	}
       }
     }
+    if(stopPlanning) return Timeout;
   }
   //sanity check
   for(size_t i=0;i<existingNodes.size();i++) {
@@ -873,6 +959,8 @@ int RealTimeRRTPlanner::PlanFrom(ParabolicRamp::DynamicPath& path,Real cutoff)
 
   if(bestPathCost < 1e-3) bestPathCost=0;
 
+  if(stopPlanning) return Timeout;
+
   Real planTimeLimit = (1.0-smoothTime)*cutoff;
   Real rrtCutoff = cutoff;
   Real currentPathTime = path.GetTotalTime();
@@ -880,9 +968,10 @@ int RealTimeRRTPlanner::PlanFrom(ParabolicRamp::DynamicPath& path,Real cutoff)
     rrtCutoff = Max(cutoff-currentPathTime,planTimeLimit); 
 
   Real t;
-  printf("Starting RRT planning with %g seconds left\n",rrtCutoff-timer.ElapsedTime());
+  fprintf(flog,"Starting RRT planning with %g seconds left\n",rrtCutoff-timer.ElapsedTime());
   while((t=timer.ElapsedTime()) < rrtCutoff) {
     //if(timer.ElapsedTime() > planTimeLimit) { //smooth only if an improvement has been made?
+    if(stopPlanning) return Timeout;
     if(bestNode && t > planTimeLimit) {
       //start smoothing
       break;
@@ -909,7 +998,7 @@ int RealTimeRRTPlanner::PlanFrom(ParabolicRamp::DynamicPath& path,Real cutoff)
     //add a dynamic point in the middle
     RRTPlanner::Node* n2 = rrt->SplitEdge(n->getParent(),n,0.5); 
     if(!stateSpace->IsFeasible(n2->x)) {
-      //printf("SplitEdge failed\n");
+      //fprintf(flog,"SplitEdge failed\n");
       rrt->DeleteSubtree(n2);
       continue;
     }
@@ -917,10 +1006,10 @@ int RealTimeRRTPlanner::PlanFrom(ParabolicRamp::DynamicPath& path,Real cutoff)
     
     nik=(RandBool(ikSolveProbability)?TryIKExtend(n):NULL);
     if(nik && EvaluateNodePathCost(nik) < bestPathCost) {
-      //printf("Actual cost %g <=> %g\n",EvaluateNodePathCost(nik),bestPathCost);
+      //fprintf(flog,"Actual cost %g <=> %g\n",EvaluateNodePathCost(nik),bestPathCost);
       vector<RRTPlanner::Node*> delnodes(1,n);
       if(CheckPath(nik,delnodes,timer,cutoff)) {
-	//printf("Extend + IK succeeded to a feasible node\n");
+	//fprintf(flog,"Extend + IK succeeded to a feasible node\n");
 	bestNode = nik;
 	bestPathCost = EvaluateNodePathCost(nik);
 	
@@ -930,7 +1019,7 @@ int RealTimeRRTPlanner::PlanFrom(ParabolicRamp::DynamicPath& path,Real cutoff)
 	}
       }
       else {
-	printf("Extend + IK succeeded but path check failed\n");
+	fprintf(flog,"Extend + IK succeeded but path check failed\n");
 	n=delnodes[0];
 	
 	//can't use these nodes if they don't end in zero velocity!
@@ -947,10 +1036,10 @@ int RealTimeRRTPlanner::PlanFrom(ParabolicRamp::DynamicPath& path,Real cutoff)
       }
     }
     if(n && EvaluateNodePathCost(n) < bestPathCost) {
-      //printf("Actual cost %g <=> %g\n",EvaluateNodePathCost(n),bestPathCost);
+      //fprintf(flog,"Actual cost %g <=> %g\n",EvaluateNodePathCost(n),bestPathCost);
       vector<RRTPlanner::Node*> delnodes;
       if(CheckPath(n,delnodes,timer,cutoff)) {
-	//printf("Extend succeeded to a feasible node\n");
+	//fprintf(flog,"Extend succeeded to a feasible node\n");
 	bestNode = n;
 	bestPathCost = EvaluateNodePathCost(n);
 	
@@ -960,7 +1049,7 @@ int RealTimeRRTPlanner::PlanFrom(ParabolicRamp::DynamicPath& path,Real cutoff)
 	}
       }
       else {
-	printf("Extend succeeded but path check failed\n");
+	fprintf(flog,"Extend succeeded but path check failed\n");
       }
     }
   }
@@ -975,7 +1064,7 @@ int RealTimeRRTPlanner::PlanFrom(ParabolicRamp::DynamicPath& path,Real cutoff)
   }
 
   if(bestNode) {
-    printf("Successfully reduced path cost to %g with %g time left\n",bestPathCost,cutoff-timer.ElapsedTime());
+    fprintf(flog,"Successfully reduced path cost to %g with %g time left\n",bestPathCost,cutoff-timer.ElapsedTime());
     MilestonePath rampPath;
     assert(root == rrt->milestones[0]);    
     n = bestNode;
@@ -983,9 +1072,9 @@ int RealTimeRRTPlanner::PlanFrom(ParabolicRamp::DynamicPath& path,Real cutoff)
     while(n->getParent() != NULL) {
       Assert(n->edgeFromParent()->Goal() == n->x);
       if(n->edgeFromParent()->Start() != n->getParent()->x) {
-	printf("Parent %d node is incorrect\n",parent+1);
-	cout<<n->edgeFromParent()->Start()<<endl;
-	cout<<n->getParent()->x<<endl;
+	fprintf(flog,"Parent %d node is incorrect\n",parent+1);
+	fprintf(flog,"%s\n",LexicalCast(n->edgeFromParent()->Start()).c_str());
+	fprintf(flog,"%s\n",LexicalCast(n->getParent()->x).c_str());
       }
       Assert(n->edgeFromParent()->Start() == n->getParent()->x);
       parent += 0;
@@ -999,7 +1088,7 @@ int RealTimeRRTPlanner::PlanFrom(ParabolicRamp::DynamicPath& path,Real cutoff)
     /*
     //test feasibility of last state
     if(!stateSpace->IsFeasible(bestNode->x)) {
-      printf("Problem: last node is infeasible?\n");
+      fprintf(flog,"Problem: last node is infeasible?\n");
       getchar();
     }
     */
@@ -1036,7 +1125,7 @@ int RealTimeRRTPlanner::PlanFrom(ParabolicRamp::DynamicPath& path,Real cutoff)
       Assert(e->IsValid());
     }
     for(size_t i=0;i<path.ramps.size();i++) {
-      if(path.ramps[i].ramps.empty()) printf("Empty ramp %d / %d.\n",i,rampPath.edges.size());
+      if(path.ramps[i].ramps.empty()) fprintf(flog,"Empty ramp %d / %d.\n",i,rampPath.edges.size());
       Assert(path.ramps[i].IsValid());
       Assert(path.ramps[i].x0.size() == path.ramps[i].ramps.size());
       if(i > 0) {
@@ -1045,22 +1134,23 @@ int RealTimeRRTPlanner::PlanFrom(ParabolicRamp::DynamicPath& path,Real cutoff)
       }
     }
     if(!Vector(path.ramps.back().dx1).isZero()) {
-      cout<<"Weird, path does not end in zero velocity?"<<endl;
-      cout<<Vector(path.ramps.back().dx1)<<endl;
-      cout<<"Last milestone: "<<bestNode->x<<endl;
-      printf("About to Abort() after getchar...\n");
+      fprintf(flog,"Weird, path does not end in zero velocity?\n");
+      fprintf(flog,"%s\n",LexicalCast(Vector(path.ramps.back().dx1)).c_str());
+      fprintf(flog,"Last milestone: %s\n",LexicalCast(bestNode->x).c_str());
+      fprintf(flog,"About to Abort() after getchar...\n");
       getchar();
       Abort();
     }
     Assert(Vector(path.ramps.back().dx1).isZero());
 
-    printf("Devoting %g seconds to smoothing new path\n",cutoff-timer.ElapsedTime());
+    fprintf(flog,"Devoting %g seconds to smoothing new path\n",cutoff-timer.ElapsedTime());
     Assert(path.IsValid());
     Shortcut(path,cutoff-timer.ElapsedTime());
     assert(path.IsValid());
     return Success;
   }
-  printf("Devoting %g seconds to smoothing old path\n",cutoff-timer.ElapsedTime());
+  fprintf(flog,"Devoting %g seconds to smoothing old path\n",cutoff-timer.ElapsedTime());
+  if(stopPlanning) return Timeout;
   Assert(path.IsValid());
   Shortcut(path,cutoff-timer.ElapsedTime());
   assert(path.IsValid());
@@ -1097,7 +1187,7 @@ void RealTimeTreePlanner::Reset(SmartPointer<PlannerObjectiveBase> newgoal)
     stateSpace = new RampCSpaceAdaptor(cspace,currentPath.velMax,currentPath.accMax);
     stateSpace->qMin = robot->qMin;
     stateSpace->qMax = robot->qMax;
-    printf("%d %d\n",currentPath.velMax.size(),robot->q.size());
+    fprintf(flog,"%d %d\n",currentPath.velMax.size(),robot->q.size());
     assert((int)currentPath.velMax.size() == (int)robot->q.size());
     stateSpace->visibilityTolerance = settings->robotSettings[0].collisionEpsilon;
   }
@@ -1325,7 +1415,7 @@ RealTimeTreePlanner::Node* RealTimeTreePlanner::TryIKExtend(Node* node,bool sear
     Vector x0 = opt.x;
     Real f0 = f(opt.x);
     if(!IsFinite(f0)) {
-      printf("Warning: initial point for optimization is not feasible\n");
+      fprintf(flog,"Warning: initial point for optimization is not feasible\n");
       return NULL;
     }
     /*
@@ -1344,12 +1434,12 @@ RealTimeTreePlanner::Node* RealTimeTreePlanner::TryIKExtend(Node* node,bool sear
     opt.bmax(robot->q.n) = 1.0;
     for(int i=0;i<opt.x.n;i++) {
       if(opt.x(i) < opt.bmin(i) || opt.x(i) > opt.bmax(i)) 
-	printf("Error on %d: %g in [%g,%g]\n",i,opt.x(i),opt.bmin(i),opt.bmax(i));
+	fprintf(flog,"Error on %d: %g in [%g,%g]\n",i,opt.x(i),opt.bmin(i),opt.bmax(i));
       assert(opt.x(i) >= opt.bmin(i) && opt.x(i) <= opt.bmax(i));
     }
     iters=10;
     opt.SolveQuasiNewton_Ident(iters);
-    //printf("Quasi newton solved f %g->%g\n",f0,f(opt.x));
+    //fprintf(flog,"Quasi newton solved f %g->%g\n",f0,f(opt.x));
     f.PreEval(opt.x);
     Vector dest=Vector(f.path.ramps.back().x1);
     for(int iters=0;iters<4;iters++) {
@@ -1361,13 +1451,13 @@ RealTimeTreePlanner::Node* RealTimeTreePlanner::TryIKExtend(Node* node,bool sear
       opt.x.copySubVector(0,dest);
       f.PreEval(opt.x);
       if(f.path.ramps.empty()) {
-	printf("Quasi-newton optimized point not feasible\n");
+	fprintf(flog,"Quasi-newton optimized point not feasible\n");
 	return NULL;
       }
     }
     //f.PreEval(x0);
     //return AddChild(node,f.path);
-    printf("Quasi-newton optimized point not feasible\n");
+    fprintf(flog,"Quasi-newton optimized point not feasible\n");
     return NULL;
   }
 
@@ -1423,7 +1513,7 @@ bool RealTimeTreePlanner::CheckPath(Node* n,Timer& timer,Real cutoff,Node** spli
   }
   while(temp != NULL) {
     if(!temp->reachable) {
-      printf("Warning: inconsitency in reachability marking\n");
+      fprintf(flog,"Warning: inconsitency in reachability marking\n");
       getchar();
     }
     temp = temp->getParent();
@@ -1432,7 +1522,7 @@ bool RealTimeTreePlanner::CheckPath(Node* n,Timer& timer,Real cutoff,Node** spli
 
   for(size_t i=0;i<checkNodes.size();i++) {
     if(timer.ElapsedTime() >= cutoff) {
-      printf("Path check ran up against cutoff\n");
+      fprintf(flog,"Path check ran up against cutoff\n");
       return false;
     }
     //assume existing path is feasible, so check if temp is on the existing path
@@ -1441,7 +1531,7 @@ bool RealTimeTreePlanner::CheckPath(Node* n,Timer& timer,Real cutoff,Node** spli
     int res=IsVisible(temp->edgeFromParent().e,timer,cutoff);
     if(res==-1) {
       //cutoff
-      printf("Path check ran up against cutoff\n");
+      fprintf(flog,"Path check ran up against cutoff\n");
       return false;
     }
     else if (res == 0) {
@@ -1534,7 +1624,7 @@ RealTimeTreePlanner::Node* RealTimeTreePlanner::SplitEdge(RealTimeTreePlanner::N
   p->detachChild(n);
   Node* s=AddChild(p,before);
   if(!s) {
-    printf("Warning, failure to add child in splitEdge\n");
+    fprintf(flog,"Warning, failure to add child in splitEdge\n");
     return NULL;
   }
   //do not allow stopping at a nonstationary configuration
@@ -1564,7 +1654,7 @@ int RealTimeTreePlanner::PlanFrom(ParabolicRamp::DynamicPath& path,Real cutoff)
   Timer timer;
   /*
   if(goal->TerminalCost(path.GetTotalTime(),path.ramps.back().x1,path.ramps.back().dx1) < 1e-3) {
-    printf("Already at solution, doing shortcutting...\n");
+    fprintf(flog,"Already at solution, doing shortcutting...\n");
     Shortcut(path,cutoff);
     Assert(path.IsValid());
     return Success;
@@ -1576,13 +1666,13 @@ int RealTimeTreePlanner::PlanFrom(ParabolicRamp::DynamicPath& path,Real cutoff)
 
   Node* bestNode=NULL;
   Real bestTotalCost = EvaluatePathCost(path,currentSplitTime);
-  printf("*** Current total cost %g, terminal cost %g *** \n",bestTotalCost,goal->TerminalCost(currentSplitTime+path.GetTotalTime(),path.ramps.back().x1,path.ramps.back().dx1));
+  fprintf(flog,"*** Current total cost %g, terminal cost %g *** \n",bestTotalCost,goal->TerminalCost(currentSplitTime+path.GetTotalTime(),path.ramps.back().x1,path.ramps.back().dx1));
   if(bestTotalCost < 1e-5) return Success;
 
-  //printf("Adding old path...\n");
+  //fprintf(flog,"Adding old path...\n");
   //initialize tree with existing path
   if(!stateSpace->IsFeasible(path.ramps[0].x0,path.ramps[0].dx0)) {
-    printf("Warning, start state is infeasible!\n");
+    fprintf(flog,"Warning, start state is infeasible!\n");
   }
   root=new Node;
   root->t = currentSplitTime;
@@ -1607,7 +1697,7 @@ int RealTimeTreePlanner::PlanFrom(ParabolicRamp::DynamicPath& path,Real cutoff)
       Assert(nik->edgeFromParent().e->path.IsValid());
       bestNode = nik;
       bestTotalCost = nik->totalCost;
-      printf("Optimization of current state succeeded\n");
+      fprintf(flog,"Optimization of current state succeeded\n");
 
       Node* ntemp = bestNode;
       while(ntemp != NULL) {
@@ -1616,27 +1706,29 @@ int RealTimeTreePlanner::PlanFrom(ParabolicRamp::DynamicPath& path,Real cutoff)
       }
     }
     else if(res == 0) {
-      printf("Optimization of current state failed to yield feasible path\n");
+      fprintf(flog,"Optimization of current state failed to yield feasible path\n");
       root->eraseChild(nik);
       numIKExistingUnreachable++;
     }
     else return Timeout;
   }
   else
-    printf("Optimization of current state failed **outright**\n");
+    fprintf(flog,"Optimization of current state failed\n");
   //extending path destinations
   Node* n = root;
   for(size_t i=0;i<path.ramps.size();i++) {
+    if(stopPlanning) return Timeout;
+
     n = AddChild(n,path.ramps[i]);
     if(!n) {
-      printf("Warning, failure to add child for existing path\n");
+      fprintf(flog,"Warning, failure to add child for existing path\n");
       continue;
     }
     n->reachable = true;
     numExistingNodes++;
     /*
     if(!n->edgeFromParent().e->IsVisible()) {
-      printf("Prior path edge %d became infeasible\n",i);
+      fprintf(flog,"Prior path edge %d became infeasible\n",i);
       break;
     }
     */
@@ -1646,7 +1738,7 @@ int RealTimeTreePlanner::PlanFrom(ParabolicRamp::DynamicPath& path,Real cutoff)
       //check the ik extension
       //nik=(RandBool(ikSolveProbability)?TryIKExtend(n,true):NULL);
       nik=TryIKExtend(n,true);
-      //if(nik) printf("IK node %d\n",i+1);
+      //if(nik) fprintf(flog,"IK node %d\n",i+1);
       if(nik) numIKExisting++;
       if(nik && nik->totalCost < bestTotalCost) {
 	numIKExistingImprove++;
@@ -1659,22 +1751,22 @@ int RealTimeTreePlanner::PlanFrom(ParabolicRamp::DynamicPath& path,Real cutoff)
 	    assert(ntemp->reachable);
 	    ntemp = ntemp->getParent();
 	  }
-	  printf("Optimization of endpoint state succeeded\n");
+	  fprintf(flog,"Optimization of endpoint state succeeded\n");
 	}
 	else {
-	  printf("Optimization of path node %d failed to produce feasible path\n",i);
+	  fprintf(flog,"Optimization of path node %d failed to produce feasible path\n",i);
 	  numIKExistingUnreachable++;
 	  if(timer.LastElapsedTime() >= cutoff)
 	    return Timeout;
 	}
       }
       else {
-	printf("Optimization of path node %d failed **outright**\n",i);
+	fprintf(flog,"Optimization of path node %d failed\n",i);
       }
     }
   }
   //if(bestTotalCost < 1e-3) bestTotalCost=0;
-  printf("Local optimization of existing path has cost %g\n",bestTotalCost);
+  fprintf(flog,"Local optimization of existing path has cost %g\n",bestTotalCost);
   Node* ntemp = bestNode;
   while(ntemp != NULL) {
     assert(ntemp->reachable);
@@ -1688,8 +1780,9 @@ int RealTimeTreePlanner::PlanFrom(ParabolicRamp::DynamicPath& path,Real cutoff)
     rrtCutoff = Max(cutoff-currentPathTime,planTimeLimit); 
 
   Real t=timer.ElapsedTime();
-  if(rrtCutoff-t > 0) printf("Starting randomized planning with %gs left\n",rrtCutoff-t);
+  if(rrtCutoff-t > 0) fprintf(flog,"Starting randomized planning with %gs left\n",rrtCutoff-t);
   while((t=timer.ElapsedTime()) < rrtCutoff) {
+    if(stopPlanning) return Timeout;
     //if(timer.ElapsedTime() > planTimeLimit) { //smooth only if an improvement has been made?
     if(bestNode && t > planTimeLimit) {
       //start smoothing
@@ -1710,7 +1803,7 @@ int RealTimeTreePlanner::PlanFrom(ParabolicRamp::DynamicPath& path,Real cutoff)
     //add a dynamic point in the middle
     Node* n2 = SplitEdge(n->getParent(),n,0.5); 
     if(!cspace->IsFeasible(n2->q)) {
-      //printf("SplitEdge failed\n");
+      //fprintf(flog,"SplitEdge failed\n");
       n2->getParent()->eraseChild(n2);
       numFailSplitNodes++;
       continue;
@@ -1718,16 +1811,16 @@ int RealTimeTreePlanner::PlanFrom(ParabolicRamp::DynamicPath& path,Real cutoff)
     //fix up the split paths
 
     if(n->totalCost < bestTotalCost) {
-      //printf("Actual cost %g < %g\n",n->totalCost,bestTotalCost);
+      //fprintf(flog,"Actual cost %g < %g\n",n->totalCost,bestTotalCost);
       numImproveNodes++;
       if(CheckPath(n,timer,cutoff)) {
-	//printf("Extend succeeded to a feasible node\n");
+	//fprintf(flog,"Extend succeeded to a feasible node\n");
 	bestNode = n;
 	bestTotalCost = n->totalCost;
       }
       else {
 	numUnreachableNodes++;
-	printf("Extend succeeded but path check failed\n");
+	fprintf(flog,"Extend succeeded but path check failed\n");
 	continue;
       }
     }
@@ -1739,18 +1832,18 @@ int RealTimeTreePlanner::PlanFrom(ParabolicRamp::DynamicPath& path,Real cutoff)
       numIKImproveNodes++;
       Node* n2 = SplitEdge(nik->getParent(),nik,0.5); 
       if(!cspace->IsFeasible(n2->q)) {
-	printf("Extend + IK succeeded but path check failed\n");
+	fprintf(flog,"Extend + IK succeeded but path check failed\n");
 	continue;
       }
-      //printf("Actual cost %g <=> %g\n",nik->totalCost,bestTotalCost);
+      //fprintf(flog,"Actual cost %g <=> %g\n",nik->totalCost,bestTotalCost);
       Node* split=NULL;
       if(CheckPath(nik,timer,cutoff,&split)) {
-	//printf("Extend + IK succeeded to a feasible node\n");
+	//fprintf(flog,"Extend + IK succeeded to a feasible node\n");
 	bestNode = nik;
 	bestTotalCost = nik->totalCost;
       }
       else {
-	printf("Extend + IK succeeded but path check failed\n");
+	fprintf(flog,"Extend + IK succeeded but path check failed\n");
 	numUnreachableIKNodes++;
 
 	if(split==n2) {
@@ -1761,22 +1854,22 @@ int RealTimeTreePlanner::PlanFrom(ParabolicRamp::DynamicPath& path,Real cutoff)
 	  ramp.dx0=split->dq;
 	  ramp.SolveBraking(stateSpace->accMax);
 	  if(cspace->IsFeasible(ramp.x1)) {
-	    printf("Braking at 0.33 wouldn't help\n");
+	    fprintf(flog,"Braking at 0.33 wouldn't help\n");
 	    Node* c=AddChild(split,ramp);
 	    if(c->totalCost < bestTotalCost) {
-	      printf("Braking would help objective function\n");
+	      fprintf(flog,"Braking would help objective function\n");
 	      if(c->edgeFromParent().e->IsVisible()) {
-		printf("Braking worked!\n");
+		fprintf(flog,"Braking worked!\n");
 		bestNode = c;
 		bestTotalCost = c->totalCost;
 	      }
 	      else {
-		printf("Braking failed.\n");
+		fprintf(flog,"Braking failed.\n");
 		split->eraseChild(c);
 	      }
 	    }
 	    else {
-	      printf("Braking wouldn't help\n");
+	      fprintf(flog,"Braking wouldn't help\n");
 	      split->eraseChild(c);
 	    }
 	  }
@@ -1786,17 +1879,17 @@ int RealTimeTreePlanner::PlanFrom(ParabolicRamp::DynamicPath& path,Real cutoff)
     }
   }
 
-  printf("Stats:\n");
-  printf("  Existing %d, %d ik, %d improve, %d unreachable\n",numExistingNodes,numIKExisting,numIKExistingImprove,numIKExistingUnreachable);
-  printf("  New %d, %d fail split, %d improve, %d unreachable\n",numGeneratedNodes,numFailSplitNodes,numImproveNodes,numUnreachableNodes);
-  printf("  IK %d, %d improve, %d unreachable\n",numIKNodes,numIKImproveNodes,numUnreachableIKNodes);
+  fprintf(flog,"Stats:\n");
+  fprintf(flog,"  Existing %d, %d ik, %d improve, %d unreachable\n",numExistingNodes,numIKExisting,numIKExistingImprove,numIKExistingUnreachable);
+  fprintf(flog,"  New %d, %d fail split, %d improve, %d unreachable\n",numGeneratedNodes,numFailSplitNodes,numImproveNodes,numUnreachableNodes);
+  fprintf(flog,"  IK %d, %d improve, %d unreachable\n",numIKNodes,numIKImproveNodes,numUnreachableIKNodes);
 
   if(!bestNode) {
-    printf("Failed to improve upon old path\n");
+    fprintf(flog,"Failed to improve upon old path\n");
     Assert(path.IsValid());
     Real t=timer.ElapsedTime();
     if(cutoff > t) {
-      printf("Devoting %g seconds to smoothing old path\n",cutoff-t);
+      fprintf(flog,"Devoting %g seconds to smoothing old path\n",cutoff-t);
       SmartShortcut(currentSplitTime,path,cutoff-t);
       Assert(path.IsValid());
     }
@@ -1804,7 +1897,7 @@ int RealTimeTreePlanner::PlanFrom(ParabolicRamp::DynamicPath& path,Real cutoff)
   }
 
   //success reducing path cost
-  printf("Successfully reduced path cost to %g with %g time left\n",bestTotalCost,cutoff-timer.ElapsedTime());
+  fprintf(flog,"Successfully reduced path cost to %g with %g time left\n",bestTotalCost,cutoff-timer.ElapsedTime());
   assert(bestNode->reachable);
   assert(bestNode->terminalCost <= bestTotalCost);
 
@@ -1831,10 +1924,10 @@ int RealTimeTreePlanner::PlanFrom(ParabolicRamp::DynamicPath& path,Real cutoff)
   swap(xMax,path.xMax);
 
   if(!Vector(path.ramps.back().dx1).isZero()) {
-    cout<<"Weird, path does not end in zero velocity?"<<endl;
-    cout<<Vector(path.ramps.back().dx1)<<endl;
-    cout<<"Last milestone: "<<bestNode->q<<", "<<bestNode->dq<<endl;
-    printf("About to Abort() after getchar...\n");
+    fprintf(flog,"Weird, path does not end in zero velocity?\n");
+    fprintf(flog,"%s\n",LexicalCast(Vector(path.ramps.back().dx1)).c_str());
+    fprintf(flog,"Last milestone %s, %s\n",LexicalCast(bestNode->q).c_str(),LexicalCast(bestNode->dq).c_str());
+    fprintf(flog,"About to Abort() after getchar...\n");
     getchar();
     Abort();
   }
@@ -1843,7 +1936,7 @@ int RealTimeTreePlanner::PlanFrom(ParabolicRamp::DynamicPath& path,Real cutoff)
   Assert(path.IsValid());
   if(cutoff > timer.ElapsedTime()) {
     Vector xold = path.ramps.back().x1;
-    printf("Devoting %g seconds to smoothing new path\n",cutoff-timer.ElapsedTime());
+    fprintf(flog,"Devoting %g seconds to smoothing new path\n",cutoff-timer.ElapsedTime());
     SmartShortcut(currentSplitTime,path,cutoff-timer.ElapsedTime());
     assert(path.IsValid());
     assert(xold == Vector(path.ramps.back().x1));

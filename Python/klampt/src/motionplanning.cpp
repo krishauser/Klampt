@@ -427,18 +427,7 @@ void CSpaceInterface::setInterpolate(PyObject* pyInterp)
 
 void setPlanType(const char* type)
 {
-  if(0==strcmp(type,"prm")) {
-    factory.type = MotionPlannerFactory::PRM;
-  }
-  else if(0==strcmp(type,"rrt")) {
-    factory.type = MotionPlannerFactory::RRT;
-  }
-  else if(0==strcmp(type,"sbl")) {
-    factory.type = MotionPlannerFactory::SBL;
-  }
-  else {
-    throw PyException("Invalid planner type");
-  }
+  factory.type = type;
 }
 void setPlanSetting(const char* setting,double value)
 {

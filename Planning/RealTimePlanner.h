@@ -89,6 +89,9 @@ public:
   RealTimePlannerBase();
   virtual ~RealTimePlannerBase();
 
+  bool LogBegin(const char* fn="realtimeplanner.log");
+  bool LogEnd();
+
   ///Convenience fn: will set up the robot, space, settings pointers
   void SetSpace(SingleRobotCSpace* space);
 
@@ -107,6 +110,13 @@ public:
    * Default implementation: fix the split time, call PlanFrom
    * Returns true if the path changed and planTime < splitTime */
   virtual bool PlanUpdate(Real tglobal,Real& splitTime,Real& planTime);
+
+  /** Tells the planner to stop.  Can be called from an external thread.
+   * 
+   * Subclasses should detect if stopPlanning is set to true and return
+   * Timeout.
+   */
+  bool StopPlanning();
 
   /** RealTimePlannerBase subclasses should override this. 
    * Plans from the start of 'path', and returns the result in 'path'.
@@ -171,6 +181,10 @@ public:
   /// Users should set this up to capture the outputted path
   SmartPointer<SendPathCallbackBase> sendPathCallback;
 
+  /// This flag should be set to true to tell a long planning cycle to stop.
+  /// Thread safe.  StopPlanning() can also be used. 
+  bool stopPlanning;
+
   /// Use only in simulation: multiplies the effective computational power
   /// of this machine (i.e., simulate a machine that's x times faster)
   Real cognitiveMultiplier;
@@ -182,9 +196,13 @@ public:
   enum SplitUpdateProtocol { Constant, ExponentialBackoff, Learning };
   SplitUpdateProtocol protocol;
   Real currentSplitTime,currentPadding,currentExternalPadding;
+  Real maxPadding;
 
   ///Statistics captured on planning times, depending on PlanMore output.
   StatCollector planFailTimeStats,planSuccessTimeStats,planTimeoutTimeStats;
+
+  //log file
+  FILE* flog;
 };
 
 #endif

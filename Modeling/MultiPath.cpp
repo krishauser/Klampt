@@ -277,21 +277,25 @@ bool MultiPath::Save(const string& fn) const
 
 bool MultiPath::HasTiming(int s) const
 {
+  if(s < 0 || s >= (int)sections.size()) return false;
   return !sections[s].times.empty();
 }
 
 bool MultiPath::HasVelocity(int s) const
 {
+  if(s < 0 || s >= (int)sections.size()) return false;
   return !sections[s].velocities.empty();
 }
 
 bool MultiPath::HasConstraints(int s) const
 {
+  if(s < 0 || s >= (int)sections.size()) return false;
   return !sections[s].ikGoals.empty() || HasContacts(s);
 }
 
 bool MultiPath::HasContacts(int s) const
 {
+  if(s < 0 || s >= (int)sections.size()) return false;
   return (sections[s].holds.size()+sections[s].holdNames.size()+sections[s].holdIndices.size() > 0);
 }
 
@@ -397,6 +401,21 @@ void MultiPath::SetDynamicPath(const ParabolicRamp::DynamicPath& path,int s)
 Real MultiPath::Duration() const
 {
   if(!HasTiming()) return 1.0;
+  if(sections.empty()) return 0.0;
+  return sections.back().times.back()-sections.front().times.front();
+}
+
+Real MultiPath::StartTime() const
+{
+  if(!HasTiming()) return 0;
+  if(sections.empty()) return 0.0;
+  return sections.front().times.front();
+}
+
+Real MultiPath::EndTime() const
+{
+  if(!HasTiming()) return 1;
+  if(sections.empty()) return 0.0;
   return sections.back().times.back();
 }
 
@@ -427,6 +446,7 @@ void MultiPath::SetDuration(Real duration,bool uniformSectionTime)
   }
   else {
     Real scale = duration / Duration();
+    Real t0 = StartTime();
     for(size_t i=0;i<sections.size();i++) {
       Assert(!sections[i].times.empty());
       for(size_t j=0;j<sections[i].times.size();j++)
@@ -468,6 +488,28 @@ void MultiPath::SetSmoothTiming(Real duration,bool uniformSectionTime)
 	sections[i].times[j] = tstart+T/2*Sqrt(2*Real(j)/n);
       else
 	sections[i].times[j] = tstart+T-T/2*Sqrt(2*Real(n-j)/n);
+    }
+  }
+}
+
+void MultiPath::Concat(const MultiPath& suffix,bool relative)
+{
+  //TODO: merge the settings
+  if(settings.empty())
+    settings = suffix.settings;
+
+  if(sections.empty())
+    sections = suffix.sections;
+  else {
+    Real tofs = 0;
+    if(relative) tofs = EndTime();
+    if(HasTiming()) Assert(suffix.HasTiming());
+    size_t i=sections.size();
+    sections.insert(sections.end(),suffix.sections.begin(),suffix.sections.end());
+    if(tofs != 0) {
+      for(;i<sections.size();i++)
+	for(size_t j=0;j<sections[i].times.size();j++)
+	  sections[i].times[j] += tofs;
     }
   }
 }
@@ -589,7 +631,7 @@ int MultiPath::Evaluate(Real time,GeneralizedCubicBezierCurve& curve,Real& durat
   if(seg < 0) { 
     curve.x0 = curve.x1 = curve.x2 = curve.x3 = sections[0].milestones[0]; 
     duration = param = 0;
-    return seg; 
+    return -1; 
   }
   else if(seg == (int)sections.size()) { 
     curve.x0 = curve.x1 = curve.x2 = curve.x3 = sections.back().milestones.back(); 

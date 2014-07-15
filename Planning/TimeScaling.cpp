@@ -2538,7 +2538,7 @@ void TimeScaledBezierCurve::Eval(Real t,Vector& x) const
       seg--;
       u = 1;
     }
-    Assert(seg >= 0 && seg < path.segments.size());
+    Assert(seg >= 0 && seg < (int)path.segments.size());
     path.segments[seg].Eval(u,x);
   }
 }
@@ -2610,7 +2610,7 @@ void TimeScaledBezierCurve::Plot(const char* fn,const Vector& vmin,const Vector&
     fprintf(stderr,"TimeScaledBezierCurve::Plot(): Error opening %s\n",fn);
     return;
   }
-  out<<"s,seg,t,ds,dds,dsmax,ddsmin(ds),ddsmax(ds),max dd saturation"<<endl;
+  out<<"s,seg,t,ds,dds,dsmax,ddsmin(ds),ddsmax(ds),max d saturation,max dd saturation,active constraint"<<endl;
   Real s=0;
   Real smax = path.TotalTime();
   Vector dxds,ddxds;
@@ -2645,13 +2645,26 @@ void TimeScaledBezierCurve::Plot(const char* fn,const Vector& vmin,const Vector&
       if(a + ddsmin*dxds(i) > amax(i)) 
 	ddsmin = (amax(i) - a) / dxds(i);
     }
+    int maxVSatIndex = 0;
+    Real maxVSat = 0;
+    for(int i=0;i<vmin.n;i++) {
+      Real v = dxds(i)*ds;
+      if(v/vmin(i) >  maxVSat) { maxVSat  = v/vmin(i); maxVSatIndex=i; }
+      if(v/vmax(i) >  maxVSat) { maxVSat  = v/vmax(i); maxVSatIndex=i; }
+    }
+    int maxASatIndex = 0;
     Real maxASat = 0;
     for(int i=0;i<amin.n;i++) {
       Real a = ddxds(i)*Sqr(ds) + dds*dxds(i);
-      if(a/amin(i) > maxASat) maxASat = a/amin(i);
-      if(a/amax(i) > maxASat) maxASat = a/amax(i);
+      if(a/amin(i) > maxASat) { maxASat = a/amin(i); maxASatIndex=i; }
+      if(a/amax(i) > maxASat) { maxASat = a/amax(i); maxASatIndex=i; }
     }
-    out<<s<<","<<seg<<","<<t<<","<<ds<<","<<dds<<","<<dsmax<<","<<ddsmin<<","<<ddsmax<<","<<maxASat<<endl;
+    stringstream activeConstraint;
+    if(maxVSat > maxASat)
+      activeConstraint<<"v "<<maxVSatIndex;
+    else
+      activeConstraint<<"a "<<maxASatIndex;
+    out<<s<<","<<seg<<","<<t<<","<<ds<<","<<dds<<","<<dsmax<<","<<ddsmin<<","<<ddsmax<<","<<maxVSat<<","<<maxASat<<","<<activeConstraint.str()<<endl;
     s += res;
   }
 }
@@ -2714,9 +2727,11 @@ void CustomTimeScaling::SetPath(const MultiPath& path,const vector<Real>& paramD
   paramSections.resize(paramDivs.size());
   for(size_t i=0;i<paramDivs.size();i++) {
     paramSections[i] = path.TimeToSection(paramDivs[i]);
-    if(paramSections[i] == path.sections.size())
+    if(paramSections[i] == (int)path.sections.size())
       paramSections[i] = (int)path.sections.size()-1;
-    Assert(paramSections[i] >= 0 && paramSections[i] < path.sections.size());
+    if(paramSections[i] == -1)
+      paramSections[i] = 0;
+    Assert(paramSections[i] >= 0 && paramSections[i] < (int)path.sections.size());
   }
   vector<GeneralizedCubicBezierSpline> smoothPaths(path.sections.size());
 
@@ -2822,7 +2837,6 @@ void CustomTimeScaling::SetDefaultBounds()
   //acceleration bounds
   //amin <= ddx*ds^2 + dx*dds <= amax
   for(size_t i=0;i<paramDivs.size();i++) { 
-    int num=0;
     for(int j=0;j<d;j++) {
       Real dx = dxs[i][j];
       Real ddx = ddxs[i][j];

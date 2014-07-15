@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>ControllerDialog</class>
+ <widget class="QDialog" name="ControllerDialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>341</width>
+    <height>243</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Controller</string>
+  </property>
+  <layout class="QGridLayout" name="gridLayout">
+   <item row="5" column="2" colspan="4">
+    <widget class="QLineEdit" name="lineEdit"/>
+   </item>
+   <item row="5" column="0" colspan="2">
+    <widget class="QComboBox" name="comboBox"/>
+   </item>
+   <item row="5" column="6" colspan="2">
+    <widget class="QPushButton" name="pushButton_2">
+     <property name="text">
+      <string>Send</string>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="5" colspan="2">
+    <widget class="QLabel" name="label_4">
+     <property name="text">
+      <string>Rate (Hz)</string>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="0">
+    <widget class="QLabel" name="label">
+     <property name="text">
+      <string>Robot</string>
+     </property>
+    </widget>
+   </item>
+   <item row="4" column="0" colspan="3">
+    <widget class="QLabel" name="label_5">
+     <property name="text">
+      <string>Custom command</string>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="3">
+    <widget class="QLabel" name="label_3">
+     <property name="text">
+      <string>Port</string>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="0" colspan="3">
+    <widget class="QPushButton" name="pushButton">
+     <property name="text">
+      <string>Connect serial</string>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="7">
+    <widget class="QSpinBox" name="spn_rate">
+     <property name="maximum">
+      <number>1000</number>
+     </property>
+     <property name="value">
+      <number>50</number>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="0" colspan="3">
+    <widget class="QLabel" name="label_2">
+     <property name="text">
+      <string>Settings</string>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="0" colspan="8">
+    <widget class="QTableWidget" name="tableWidget">
+     <property name="styleSheet">
+      <string notr="true">font: 75 9pt &quot;Ubuntu&quot;;</string>
+     </property>
+     <property name="columnCount">
+      <number>1</number>
+     </property>
+     <attribute name="horizontalHeaderVisible">
+      <bool>false</bool>
+     </attribute>
+     <row>
+      <property name="text">
+       <string>New Row</string>
+      </property>
+     </row>
+     <column>
+      <property name="text">
+       <string>Setting</string>
+      </property>
+     </column>
+     <item row="0" column="0">
+      <property name="text">
+       <string/>
+      </property>
+     </item>
+    </widget>
+   </item>
+   <item row="1" column="4">
+    <widget class="QSpinBox" name="spn_port">
+     <property name="maximum">
+      <number>65535</number>
+     </property>
+     <property name="value">
+      <number>3456</number>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="1" colspan="4">
+    <widget class="QComboBox" name="cmb_robot"/>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>pushButton_2</sender>
+   <signal>clicked()</signal>
+   <receiver>ControllerDialog</receiver>
+   <slot>OnSendCommand()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>259</x>
+     <y>213</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>329</x>
+     <y>141</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>pushButton</sender>
+   <signal>clicked()</signal>
+   <receiver>ControllerDialog</receiver>
+   <slot>OnConnectSerial()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>87</x>
+     <y>48</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>184</x>
+     <y>-6</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>tableWidget</sender>
+   <signal>itemChanged(QTableWidgetItem*)</signal>
+   <receiver>ControllerDialog</receiver>
+   <slot>OnCellEdited(QTableWidgetItem*)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>241</x>
+     <y>118</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>275</x>
+     <y>17</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cmb_robot</sender>
+   <signal>currentIndexChanged(int)</signal>
+   <receiver>ControllerDialog</receiver>
+   <slot>OnRobotChange(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>140</x>
+     <y>15</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>214</x>
+     <y>15</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>OnSendCommand()</slot>
+  <slot>OnConnectSerial()</slot>
+  <slot>OnCellEdited(QTableWidgetItem*)</slot>
+  <slot>OnRobotChange(int)</slot>
+ </slots>
+</ui>

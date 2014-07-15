@@ -1,6 +1,7 @@
 #include "ViewResource.h"
 #include "Planning/RobotCSpace.h"
 #include "Planning/RobotTimeScaling.h"
+#include <math/interpolate.h>
 #include "Modeling/Interpolate.h"
 #include <GLdraw/drawgeometry.h>
 #include <GLdraw/GL.h>
@@ -179,10 +180,14 @@ void ViewResource::SetRobot(Robot* robot)
   configViewer.robot = robot;
   configsViewer.robot = robot;
   pathViewer.robot = robot;
+  /*
   configViewer.SetGrey();
   configsViewer.SetGrey();
   pathViewer.SetGrey();
-
+  */
+  configViewer.SetColors(GLColor(0.5,0.5,0.5,0.7));
+  configsViewer.SetColors(GLColor(0.5,0.5,0.5,0.7));
+  pathViewer.SetColors(GLColor(0.5,0.5,0.5,0.7));
 }
 void ViewResource::SetAnimTime(Real time)
 {
@@ -196,7 +201,7 @@ void ViewResource::DrawGL(const ResourcePtr& r)
     const ConfigResource* rc=dynamic_cast<const ConfigResource*>((const ResourceBase*)r);
     Config oldq = configViewer.robot->q;
     if(rc->data.n != configViewer.robot->q.n) {
-      fprintf(stderr,"Incorrect robot configuration size: %d vs %d\n",rc->data.n,configViewer.robot->q.n);
+      //fprintf(stderr,"Incorrect robot configuration size: %d vs %d\n",rc->data.n,configViewer.robot->q.n);
     }
     else {
       configViewer.robot->UpdateConfig(rc->data);
@@ -213,7 +218,7 @@ void ViewResource::DrawGL(const ResourcePtr& r)
       skip = rc->configs.size()/50;
     for(size_t i=0;i<rc->configs.size();i+=skip) {
       if(rc->configs[i].n != configViewer.robot->q.n) {
-	fprintf(stderr,"Incorrect robot configuration size: %d vs %d\n",rc->configs[i].n,configViewer.robot->q.n);
+	//fprintf(stderr,"Incorrect robot configuration size: %d vs %d\n",rc->configs[i].n,configViewer.robot->q.n);
       }
       else {
 	configsViewer.robot->UpdateConfig(rc->configs[i]);
@@ -243,7 +248,7 @@ void ViewResource::DrawGL(const ResourcePtr& r)
   }
   else if(typeid(*r)==typeid(HoldResource)) {
     const HoldResource* rc=dynamic_cast<const HoldResource*>((const ResourceBase*)r);
-    holdViewer.Draw(rc->data);
+    holdViewer.Draw(rc->hold);
   }
   else if(typeid(*r)==typeid(PointCloudResource)) {
     const PointCloudResource* rc=dynamic_cast<const PointCloudResource*>((const ResourceBase*)r);
@@ -256,19 +261,29 @@ void ViewResource::DrawGL(const ResourcePtr& r)
   }
 }
 
-
-void ViewResource::RenderLinearPath(const LinearPathResource* rc,Real pathTime)
+void ViewResource::GetAnimConfig(const ResourcePtr& r,Config& q)
 {
-  if(pathViewer.robot==NULL) {
-    printf("ViewResource: Robot is NULL\n");
+  if(typeid(*r)==typeid(LinearPathResource)) {
+    const LinearPathResource* rc=dynamic_cast<const LinearPathResource*>((const ResourceBase*)r);
+    GetLinearPathConfig(rc,pathTime,q);
+  }
+  else if(typeid(*r)==typeid(MultiPathResource)) {
+    const MultiPathResource* rc=dynamic_cast<const MultiPathResource*>((const ResourceBase*)r);
+    GetMultiPathConfig(rc,pathTime,q);
+  }
+  else
+    q.clear();
+}
+
+void ViewResource::GetLinearPathConfig(const LinearPathResource* rc,Real pathTime,Config& q)
+{
+  q.clear();
+  if(rc->times.empty()) {
     return;
   }
-  Config oldq = pathViewer.robot->q;
-  if(rc->times.empty()) {
-  }
   else if(rc->times.front() == rc->times.back()) {
-    pathViewer.robot->UpdateConfig(rc->milestones[0]);
-    pathViewer.Draw();
+    q = rc->milestones[0];
+    return;
   }
   else {
     //TODO: faster tracking using upper_bound?
@@ -292,20 +307,60 @@ void ViewResource::RenderLinearPath(const LinearPathResource* rc,Real pathTime)
       normalizedPathTime = rc->times.back()-(cnt-n)*(rc->times.back()-rc->times.front());
     bool drawn=false;
     for(size_t i=0;i+1<rc->times.size();i++) {
-      Assert(rc->milestones[i].n == oldq.n);
-      Assert(rc->milestones[i+1].n == oldq.n);
       if(rc->times[i] <= normalizedPathTime && normalizedPathTime <= rc->times[i+1]) {
 	Real u=(normalizedPathTime-rc->times[i])/(rc->times[i+1]-rc->times[i]);
-	Vector q;
-	Interpolate(*pathViewer.robot,rc->milestones[i],rc->milestones[i+1],u,q);
-	pathViewer.robot->UpdateConfig(q);
-	pathViewer.Draw();
-	drawn=true;
-	break;
+	if(pathViewer.robot==NULL)
+	  interpolate(rc->milestones[i],rc->milestones[i+1],u,q);
+	else {
+	  int d=pathViewer.robot->q.n;
+	  Assert(rc->milestones[i].n == d);
+	  Assert(rc->milestones[i+1].n == d);
+	  Interpolate(*pathViewer.robot,rc->milestones[i],rc->milestones[i+1],u,q);
+	}
+	return;
       }
     }
   }
-  pathViewer.robot->UpdateConfig(oldq);
+}
+
+void ViewResource::GetMultiPathConfig(const MultiPathResource* rc,Real pathTime,Config& q)
+{
+  Real minTime = 0, maxTime = 1;
+  if(rc->path.HasTiming()) {
+    minTime = rc->path.sections.front().times.front();
+    maxTime = rc->path.sections.back().times.back();
+  }
+  else
+    pathTime /= rc->path.sections.size();
+  //do bouncing behavior
+  double cnt = (pathTime-minTime)/(maxTime-minTime);
+  int n = (int)Floor(cnt);
+  Real normalizedPathTime;
+  if(n%2==0)
+    normalizedPathTime = (cnt-n)*(maxTime-minTime)+minTime;
+  else
+    normalizedPathTime = maxTime-(cnt-n)*(maxTime-minTime);
+
+  if(pathViewer.robot)
+    EvaluateMultiPath(*pathViewer.robot,rc->path,normalizedPathTime,q,pathIKResolution);
+  else
+    rc->path.Evaluate(normalizedPathTime,q);
+}
+
+void ViewResource::RenderLinearPath(const LinearPathResource* rc,Real pathTime)
+{
+  if(pathViewer.robot==NULL) {
+    printf("ViewResource: Robot is NULL\n");
+    return;
+  }
+  Config oldq = pathViewer.robot->q;
+  Config q;
+  GetLinearPathConfig(rc,pathTime,q);
+  if(q.size() == oldq.size()) {
+    pathViewer.robot->UpdateConfig(q);
+    pathViewer.Draw();
+    pathViewer.robot->UpdateConfig(oldq);
+  }
 }
 
 void ViewResource::RenderMultiPath(const MultiPathResource* rc,Real pathTime)
@@ -339,7 +394,10 @@ void ViewResource::RenderMultiPath(const MultiPathResource* rc,Real pathTime)
   pathViewer.robot->UpdateConfig(oldq);
 
   int seg=rc->path.TimeToSection(normalizedPathTime);
-  Assert(seg >= 0 && seg < (int)rc->path.sections.size());
+  if(seg  < 0)
+    seg = 0;
+  if(seg >= (int)rc->path.sections.size())
+    seg = (int)rc->path.sections.size()-1;
   Stance s;
   rc->path.GetStance(s,seg);
   stanceViewer.DrawHolds(s);

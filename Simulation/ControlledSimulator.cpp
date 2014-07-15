@@ -59,7 +59,7 @@ void ControlledRobotSimulator::GetCommandedVelocity(Config& dq)
   for(size_t i=0;i<command.actuators.size();i++) {
     RobotJointDriver& d=robot->drivers[i];
     if(command.actuators[i].mode == ActuatorCommand::PID)
-      robot->SetDriverValue(i,command.actuators[i].dqdes);
+      robot->SetDriverVelocity(i,command.actuators[i].dqdes);
     else
       FatalError("Can't get commanded config for non-config drivers");
   }

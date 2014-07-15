@@ -80,24 +80,29 @@ public:
   bool Load(const char* fn);
   bool LoadRob(const char* fn);
   bool LoadURDF(const char* fn);
-  bool Save(const char* fn,const char* geomPrefix="",const char* geomExt="tri");  ///< Saves the geometry line as geomPrefix+[linkName].[geomExt]
-  bool Save(const char* fn,const vector<string>& geomFiles); 
-  bool SaveGeometry(const char* geomPrefix="",const char* geomExt="tri");  ///< Saves the geometry files to geomPrefix+[linkName].[geomExt]
-  bool SaveGeometry(const vector<string>& geomFiles); 
+  bool Save(const char* fn);
+  void SetGeomFiles(const char* geomPrefix="",const char* geomExt="tri");  ///< Sets the geometry file names to geomPrefix+[linkName].[geomExt]
+  void SetGeomFiles(const vector<string>& geomFiles);
+  bool SaveGeometry(const char* prefix="");  
   void InitStandardJoints();
   bool CheckValid() const;
   //adds a geometry to the geometry of the given link
   void Mount(int link,const Geometry::AnyGeometry3D& geom,const RigidTransform& T);
   //adds a subchain as descendents of a given link
   void Mount(int link,const Robot& subchain,const RigidTransform& T);
+  ///Creates this into a mega-robot from several other robots
+  void Merge(const std::vector<Robot*>& robots);
 
   bool DoesJointAffect(int joint,int dof) const;
   void GetJointIndices(int joint,vector<int>& indices) const;
-  //for floating joints
+  ///Used for setting configuration of floating and ball-and-socket joints
   void SetJointByTransform(int joint,int link,const RigidTransform& T);
+  ///Used for setting configuration of floating and ball-and-socket joints
   void SetJointByOrientation(int joint,int link,const Matrix3& R);
+  ///Used for setting velocity of floating and ball-and-socket joints
   void SetJointVelocityByMoment(int joint,int link,const Vector3& w,const Vector3& v);
 
+  ///Returns true if the given DOF does not have a driver attached to it
   bool IsPassiveDOF(int dof) const;
   bool DoesDriverAffect(int driver,int dof) const;
   void GetDriverIndices(int driver,vector<int>& indices) const;
@@ -106,19 +111,25 @@ public:
   Real GetDriverVelocity(int driver) const;
   void SetDriverValue(int driver,Real value);
   void SetDriverVelocity(int driver,Real value);
+  ///Returns a vector J such that the change in dof values is J*v where v is the change in the driver value
   void GetDriverJacobian(int driver,Vector& J);
 
-  //The lipschitz matrix (i,j) is a bound on the amount that the geometry at
-  //link j moves in the workspace in response to a unit change in q(i)
-  //It is used by exact collision checkers, and is uninitialized by default.
+  ///The lipschitz matrix (i,j) is a bound on the amount that the geometry at
+  ///link j moves in the workspace in response to a unit change in q(i)
+  ///It is used by exact collision checkers, and is uninitialized by default.
   void ComputeLipschitzMatrix();
 
-  Vector accMax;   //conservative acceleration limits, used by DynamicPath
+  vector<string> geomFiles;   ///< geometry file names (used in saving)
+  Vector accMax;   ///< conservative acceleration limits, used by DynamicPath
   vector<RobotJoint> joints;
   vector<RobotJointDriver> drivers;
   vector<string> linkNames;
   vector<string> driverNames;
   Matrix lipschitzMatrix;
+
+  ///Set this to true if you want to disable loading of geometry -- saves time
+  ///for some utility programs.
+  static bool disableGeometryLoading;
 };
 
 #endif

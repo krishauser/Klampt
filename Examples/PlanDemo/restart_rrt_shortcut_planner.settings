@@ -1,0 +1,1 @@
+{ type:"rrt", perturbationRadius:0.5, bidirectional:1, shortcut:1, restart:1, restartTermCond:"{foundSolution:1,maxIters:1000}" }

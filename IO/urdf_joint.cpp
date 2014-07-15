@@ -94,7 +94,7 @@ bool parseJointDynamics(JointDynamics &jd, TiXmlElement* config)
     return false;
   }
   else{
-    printf("joint dynamics: damping %f and friction %f", jd.damping, jd.friction);
+    printf("joint dynamics: damping %f and friction %f\n", jd.damping, jd.friction);
     return true;
   }
 }
