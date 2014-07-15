@@ -26,12 +26,13 @@ joint weld  3
 joint normal 1
 joint normal 2
 #scissor joint     indices   scale factors       offsets dmin dmax vmin  vmax tmin tmax
-driver affine 2      1 2       0.296706 -0.296706  0 0     -1   1    -1.57 1.57 -5 5
+driver affine 2      1 2       0.296706 -0.296706  0 0     -1   1    -1.57 1.57 -10 10
 
 servoP  50 
 servoD  0  
 servoI  10 
-dryFriction 1     
+dryFriction 1 
+viscousFriction 3
  
 mount 0 "RobotiQ/finger.rob"   0 -1 0  1 0 0   0 0 1     0.04  0.039  0 
 mount 1 "RobotiQ/finger.rob"    1 0 0  0 1 0   0 0 1     0.018  0.0008   -0.0005
@@ -61,7 +62,7 @@ noselfcollision 3 10  3 11  3 12    #scissor 3
 noselfcollision 0 4              #palm
 noselfcollision 3 4  3 5  3 6   #scissor 3 
 noselfcollision 1 4  1 5  1 6    #scissor 1 
-noselfcollision 1 4  2 5  2 6    #scissor 2 
+noselfcollision 2 4  2 5  2 6    #scissor 2 
 
 #proximal to distal joints, all fingers
 noselfcollision 4 6  7 9  10 12

@@ -45,7 +45,10 @@ class MyGLViewer(GLRealtimeProgram):
         #Put your idle loop handler here
         #the current example simulates with the current time step self.dt
         if self.simulate and self.saveScreenshots:
-            if self.ttotal >= self.nextScreenshotTime:
+            #The following line saves movies on simulation time
+            if self.sim.getTime() >= self.nextScreenshotTime:
+            #The following line saves movies on wall clock time
+            #if self.ttotal >= self.nextScreenshotTime:
                 self.save_screen("image%04d.ppm"%(self.screenshotCount,))
             self.screenshotCount += 1
             self.nextScreenshotTime += 1.0/30.0;

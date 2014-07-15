@@ -82,7 +82,7 @@ boost::shared_ptr<ModelInterface>  parseURDF(const std::string &xml_string)
 
   TiXmlDocument xml_doc;
   xml_doc.LoadFile(xml_string.c_str());
-  xml_doc.Parse(xml_string.c_str());
+  //xml_doc.Parse(xml_string.c_str());
 
   TiXmlElement *robot_xml = xml_doc.FirstChildElement("robot");
   if (!robot_xml)

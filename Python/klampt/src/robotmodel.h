@@ -149,6 +149,37 @@ class RobotModelLink
   int index;
 };
 
+/** @brief A reference to a driver of a RobotModel.
+ */
+class RobotModelDriver
+{
+ public:
+  RobotModelDriver();
+  const char* getName();
+  RobotModel getRobot();
+  ///Currently can be "normal", "affine", "rotation", "translation", or "custom"
+  const char* getType();
+  ///Returns the single affected link for "normal" links
+  int getAffectedLink();
+  ///Returns the driver's affected links
+  void getAffectedLinks(std::vector<int>& links);
+  ///For "affine" links, returns the scale and offset of the driver value mapped to the world
+  void getAffineCoeffs(std::vector<double>& scale,std::vector<double>& offset);
+  ///Sets the robot's config to correspond to the given driver value 
+  void setValue(double val);
+  ///Gets the current driver value from the robot's config
+  double getValue();
+  ///Sets the robot's velocity to correspond to the given driver velocity value 
+  void setVelocity(double val);
+  ///Gets the current driver velocity value from the robot's velocity
+  double getVelocity();
+
+  int world;
+  int robotIndex;
+  Robot* robot;
+  int index;
+};
+
 /** @brief A model of a dynamic and kinematic robot.
  *
  * It is important to understand that changing the configuration of the model
@@ -172,6 +203,9 @@ class RobotModel
   int numLinks();
   RobotModelLink getLink(int index);
   RobotModelLink getLink(const char* name);
+  int numDrivers();
+  RobotModelDriver getDriver(int index);
+  RobotModelDriver getDriver(const char* name);
 
   //kinematic and dynamic properties
   void getConfig(std::vector<double>& out);
@@ -295,6 +329,7 @@ class WorldModel
   TerrainModel loadTerrain(const char* fn);
   int loadElement(const char* fn);
   void drawGL();
+  void enableGeometryLoading(bool enabled);
 
   //WARNING: do not modify this member directly
   int index;

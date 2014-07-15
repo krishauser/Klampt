@@ -2,6 +2,7 @@
 #define ROBOT_CSPACE_H
 
 #include "Modeling/World.h"
+#include "Modeling/GeneralizedRobot.h"
 #include "PlannerSettings.h"
 #include <planning/ExplicitCSpace.h>
 #include <planning/GeodesicSpace.h>
@@ -173,12 +174,45 @@ class SingleRobotCSpace2 : public SingleRobotCSpace
   virtual bool IsFeasible(const Config&);
   virtual bool IsFeasible(const Config&,int obstacle);
   virtual EdgePlanner* LocalPlanner(const Config& a,const Config& b,int obstacle);
+  virtual EdgePlanner* LocalPlanner(const Config& a,const Config& b);
   virtual void Sample(Config& x);
   virtual void SampleNeighborhood(const Config& c,Real r,Config& x);
 
   vector<int> fixedDofs;
   vector<Real> fixedValues;
   vector<pair<int,int> > ignoreCollisions;
+};
+
+/** @ingroup Planning
+ * @brief A configuration space for a rigid object, treated like a robot.
+ *
+ * For compatibility with GeneralizedRobot, the configuration is (x,y,z,rz,ry,rx).
+ */
+class SingleRigidObjectCSpace: public CSpace
+{
+ public:
+  SingleRigidObjectCSpace(RobotWorld& world,int index,WorldPlannerSettings* settings);
+  RigidObject* GetObject() const;
+  virtual int NumDimensions() const { return 6; }
+  virtual bool IsFeasible(const Config& q);
+
+  virtual void Sample(Config& q);
+  virtual void SampleNeighborhood(const Config& c,Real r,Config& q);
+  virtual Real Distance(const Config& a,const Config& b);
+  virtual void Interpolate(const Config& a,const Config& b,Real u,Config& out);
+  virtual void Midpoint(const Config& a,const Config& b,Config& out);
+  virtual EdgePlanner* LocalPlanner(const Config& x,const Config& y);
+
+  void InitializeCollisionPairs();
+  bool CheckCollisionFree(const RigidTransform& T);
+
+  RobotWorld& world;
+  int index;
+  WorldPlannerSettings* settings;
+
+  bool collisionPairsInitialized;
+  vector<pair<int,int> > collisionPairs;
+  vector<Geometry::AnyCollisionQuery> collisionQueries;
 };
 
 /** @ingroup Planning
@@ -191,6 +225,7 @@ class MultiRobotCSpace : public CSpace
   MultiRobotCSpace(const MultiRobotCSpace&);
   virtual ~MultiRobotCSpace() {}
   virtual void AddRobot(int index);
+  virtual void AddRigidObject(int index);
   virtual void InitRobots(const vector<int>& indices);
 
   virtual int NumDimensions() const;
@@ -203,12 +238,14 @@ class MultiRobotCSpace : public CSpace
   virtual void Interpolate(const Config& x,const Config& y,Real u,Config& out);
   virtual void Midpoint(const Config& x,const Config& y,Config& out);
 
-  void SplitRefs(const Config& x,vector<Config>& robotConfigs) const;
-
   RobotWorld& world;
   WorldPlannerSettings* settings;
-  vector<int> robotIndices;
-  vector<SmartPointer<SingleRobotCSpace> > robotSpaces;
+  ///All added objects go into this GeneralizedRobot object
+  GeneralizedRobot robot;
+  ///Store the mapping from robot elements to world IDs
+  vector<int> robotElementIDs;
+  ///Each element has its own CSpace
+  vector<SmartPointer<CSpace> > elementSpaces;
 };
 
 

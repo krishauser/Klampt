@@ -2,6 +2,8 @@
 #define ROBOT_CONTACT_CSPACE_H
 
 #include "RobotCSpace.h"
+#include "Modeling/GeneralizedRobot.h"
+#include "Contact/Stance.h"
 #include <robotics/IK.h>
 
 /** @brief A SingleRobotCSpace for a robot maintaining contact.
@@ -23,6 +25,7 @@ class ContactCSpace : public SingleRobotCSpace2
   virtual void Sample(Config& x);
   virtual void SampleNeighborhood(const Config& c,Real r,Config& x);
   virtual bool IsFeasible(const Config&);
+  virtual EdgePlanner* LocalPlanner(const Config& a,const Config& b);
 
   virtual void Interpolate(const Config& x,const Config& y,Real u,Config& out);
   virtual void Midpoint(const Config& x,const Config& y,Config& out);
@@ -32,10 +35,21 @@ class ContactCSpace : public SingleRobotCSpace2
   void AddContact(int link,const vector<Vector3>& localPos,const vector<Vector3>& worldPos);
   void RemoveContact(int link);
   bool SolveContact(int numIters=0,Real tol=0);
+  ///Returns the max error on the contact constraints at the robot's current
+  ///configuration.
   Real ContactDistance();
+  ///Same as ContactDistance(). Note: sets the robot's configuration to q.
+  Real ContactDistance(const Config& q);
+  ///Checks whether the contact constraints are satisfied at the robot's
+  //current configuration.  If dist is nonzero, this overrides the defaults
+  ///in the WorldPlannerSettings
   bool CheckContact(Real dist=0);
+  ///Same as CheckContact(Real). Note: sets the robot's configuration to q.
+  bool CheckContact(const Config& q,Real dist=0);
 
   vector<IKGoal> contactIK;
+  int numSolveContact,numIsFeasible;
+  double solveContactTime,isFeasibleTime;
 };
 
 class MultiContactCSpace : public MultiRobotCSpace
@@ -46,6 +60,7 @@ class MultiContactCSpace : public MultiRobotCSpace
     int id1,id2;            //world id of the given object
     vector<Vector3> c1,c2;  //cx = contacts in local frame of object x
     vector<Vector3> n1,n2;  //nx = normals in local frame  of object x
+    vector<Real> kFriction;
   };
 
   MultiContactCSpace(RobotWorld& world,
@@ -53,31 +68,32 @@ class MultiContactCSpace : public MultiRobotCSpace
   MultiContactCSpace(const MultiRobotCSpace&);
   MultiContactCSpace(const MultiContactCSpace&);
   virtual ~MultiContactCSpace() {}
+  ///Initializes all internal structures
   void InitContactPairs(const vector<ContactPair>& pairs);
+  ///Same as above, but with different structure.  Here all the indexes in the formation are World ids.
+  void InitContactPairs(const ContactFormation& formation);
 
   virtual int NumDimensions() const;
   virtual void Sample(Config& x);
   virtual void SampleNeighborhood(const Config& c,Real r,Config& x);
   virtual bool IsFeasible(const Config&);
-
   virtual void Interpolate(const Config& x,const Config& y,Real u,Config& out);
   virtual void Midpoint(const Config& x,const Config& y,Config& out);
 
   bool SolveContact(Config& x,int numIters=0,Real tol=0);
+  Real ContactDistance();
   Real ContactDistance(const Config& x);
+  bool CheckContact(Real dist=0);
   bool CheckContact(const Config& x,Real dist=0);
 
-  void SplitRefs(const Config& x,vector<Config>& robotConfigs,vector<Config>& objectConfigs) const;
-  void SetWorldConfig(const Config& x);
-  void GetWorldConfig(Config& x);
-
   vector<ContactPair> contactPairs;
-  vector<int> activeIDs;  //IDs of robots/objects used in the aggregate robot
-  vector<bool> robotActive;   //true if the robot is active
-  vector<bool> objectActive;  //true if the object is active
-
-  RobotKinematics3D aggregateRobot;
+  Robot aggregateRobot;
   vector<IKGoal> closedChainConstraints;
+  Stance aggregateStance;
+
+  //stats
+  int numSolveContact,numIsFeasible;
+  double solveContactTime,isFeasibleTime;
 };
 
 #endif

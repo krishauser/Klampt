@@ -1,4 +1,4 @@
-"""A test script that does some assorted testing of the robot module"""
+"""A test script that does some assorted testing of the klampt module"""
 
 from klampt import *
 from klampt import rootfind

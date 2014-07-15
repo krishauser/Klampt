@@ -12,6 +12,8 @@
 *.la
 *.a
 
+#compiled python libraries
+Python/build
 
 # Compiled source #
 ###################
@@ -47,6 +49,8 @@ Documentation/build
 Documentation/html
 Documentation/latex
 Documentation/*.tags
+bin
+lib
 
 # Cygwin stack dump files
 *.stackdump
@@ -54,3 +58,26 @@ Documentation/*.tags
 # platform specific configuration
 ######################
 Makefile.config
+
+# Qt meta objects
+######################
+*.pro.user
+moc_*.cpp
+ui_*.h
+*Qt/Makefile
+
+# Settings Files
+*.settings
+
+#CMake temporary files
+CMakeFiles
+CMakeCache.txt
+CPack*
+CTest*
+cmake*.cmake
+Makefile
+_CPack*
+
+# Log files
+*.log
+*.csv

@@ -9,6 +9,7 @@
 #include <math3d/basis.h>
 #include <meshing/IO.h>
 #include <utils/ioutils.h>
+#include <utils/fileutils.h>
 #include <fstream>
 #include <sstream>
 #include <Timer.h>
@@ -95,6 +96,8 @@ bool RobotJointDriver::Affects(int link) const {
 			return true;
 	return false;
 }
+
+bool Robot::disableGeometryLoading = false;
 
 std::string Robot::LinkName(int i) const {
 	if (linkNames.empty())
@@ -348,7 +351,7 @@ bool Robot::LoadRob(const char* fn) {
 			ss >> autoTorque;
 		} else if (name == "geometry") {
 			while (SafeInputString(ss, stemp))
-				geomFn.push_back(stemp);
+			  geomFn.push_back(stemp);
 		} else if (name == "scale") {
 			ss >> scale;
 		} else if (name == "geomscale") {
@@ -697,6 +700,17 @@ bool Robot::LoadRob(const char* fn) {
 			parents[i] = i - 1;
 	}
 	Initialize(n);
+
+	//Init standard stuff
+	if (linkNames.empty()) {
+		linkNames.resize(links.size());
+		for (size_t i = 0; i < links.size(); i++) {
+			char buf[64];
+			sprintf(buf, "Link %d", i);
+			linkNames[i] = buf;
+		}
+	}
+
 	accMax.resize(n, Inf);
 	if (qVec.empty())
 		q.set(Zero);
@@ -782,17 +796,38 @@ bool Robot::LoadRob(const char* fn) {
 		for (size_t i = 0; i < links.size(); i++)
 			links[i].inertia = inertiaVec[i];
 	}
-	//TODO: scaling isn't done yet
+	//automatically compute torque limits from COMs
+	if (autoTorque != 0.0) {
+		Real grav = Abs(autoTorque) * 9.8;
+		//TODO: more sophisticated chain structures
+		Real sumMass = 0;
+		Real sumCom = 0;
+		for (int i = (int) links.size() - 1; i >= 0; i--) {
+			Real oldMass = sumMass;
+			Real oldCom = sumCom;
+			sumMass += links[i].mass;
+			oldCom += links[i].T0_Parent.t.length();
+			sumCom = (links[i].com.length() * links[i].mass + oldCom * oldMass)
+					/ (links[i].mass + oldMass);
+			torqueMax[i] = sumCom * sumMass * grav;
+			//printf("Torque Max %d = %g, moment arm = %g\n",i,torqueMax[i],sumCom);
+		}
+	}
+
+	//TODO: whole-body scaling isn't done yet
 	if (scale != 1.0)
 		FatalError("Scale not done yet");
 	if (geomscale.size() == 1)
 		geomscale.resize(n, geomscale[0]);
+	geomFiles.resize(n);
 	string path = GetFilePath(fn);
 	for (size_t i = 0; i < geomFn.size(); i++) {
 		if (geomFn[i].empty()) {
 			continue;
 		}
+		geomFiles[i] = geomFn[i];
 		geomFn[i] = path + geomFn[i];
+		if(Robot::disableGeometryLoading) continue;
 		if (!LoadGeometry(i, geomFn[i].c_str())) {
 		  fprintf(stderr, "   Unable to load link %d geometry file %s\n", i,
 			  geomFn[i].c_str());
@@ -823,46 +858,6 @@ bool Robot::LoadRob(const char* fn) {
 		geometry[geomIndex].Transform(geomTransform[i]);
 	}
 
-	//automatically compute mass parameters from geometry
-	if (autoMass) {
-		for (size_t i = 0; i < links.size(); i++) {
-			if (comVec.empty()) {
-				if (!geometry[i].Empty())
-					links[i].com = CenterOfMass(geometry[i]);
-				else
-					links[i].com.setZero();
-			}
-			if (inertiaVec.empty()) {
-				if (!geometry[i].Empty() && links[i].mass != 0.0) {
-					links[i].inertia = Inertia(geometry[i], links[i].com,
-							links[i].mass);
-					//cout<<"Automass inertia for "<<linkNames[i]<<": "<<endl<<links[i].inertia<<endl;
-				} else {
-					links[i].inertia.setZero();
-					//cout<<"Automass setting zero inertia for "<<linkNames[i]<<endl;
-				}
-			}
-		}
-	}
-
-	//automatically compute torque limits from COMs
-	if (autoTorque != 0.0) {
-		Real grav = Abs(autoTorque) * 9.8;
-		//TODO: more sophisticated chain structures
-		Real sumMass = 0;
-		Real sumCom = 0;
-		for (int i = (int) links.size() - 1; i >= 0; i--) {
-			Real oldMass = sumMass;
-			Real oldCom = sumCom;
-			sumMass += links[i].mass;
-			oldCom += links[i].T0_Parent.t.length();
-			sumCom = (links[i].com.length() * links[i].mass + oldCom * oldMass)
-					/ (links[i].mass + oldMass);
-			torqueMax[i] = sumCom * sumMass * grav;
-			//printf("Torque Max %d = %g, moment arm = %g\n",i,torqueMax[i],sumCom);
-		}
-	}
-
 	if (collision.empty())
 		InitCollisions();
 	else {
@@ -877,15 +872,6 @@ bool Robot::LoadRob(const char* fn) {
 	  FatalError("So far, no mechanism to turn off collisions");
 	}
 
-	//Init standard stuff
-	if (linkNames.empty()) {
-		linkNames.resize(links.size());
-		for (size_t i = 0; i < links.size(); i++) {
-			char buf[64];
-			sprintf(buf, "Link %d", i);
-			linkNames[i] = buf;
-		}
-	}
 	if (joints.empty()) {
 		joints.resize(links.size());
 		for (size_t i = 0; i < links.size(); i++) {
@@ -950,25 +936,25 @@ bool Robot::LoadRob(const char* fn) {
 		}
 	}
 	//setup driver servo parameters, if they exist
-	if (!servoP.empty() && (int) servoP.size() != nd) {
+	if (!servoP.empty() && servoP.size() != nd) {
 		fprintf(stderr,
 				"   Wrong number of servo P parameters specified: %d vs %d\n",
 				servoP.size(), nd);
 		return false;
 	}
-	if (!servoI.empty() && (int) servoI.size() != nd) {
+	if (!servoI.empty() && servoI.size() != nd) {
 		fprintf(stderr, "   Wrong number of servo I parameters specified\n");
 		return false;
 	}
-	if (!servoD.empty() && (int) servoD.size() != nd) {
+	if (!servoD.empty() && servoD.size() != nd) {
 		fprintf(stderr, "   Wrong number of servo D parameters specified\n");
 		return false;
 	}
-	if (!dryFriction.empty() && (int) dryFriction.size() != nd) {
+	if (!dryFriction.empty() && dryFriction.size() != nd) {
 		fprintf(stderr, "   Wrong number of dry friction parameters specified\n");
 		return false;
 	}
-	if (!viscousFriction.empty() && (int) viscousFriction.size() != nd) {
+	if (!viscousFriction.empty() &&  viscousFriction.size() != nd) {
 		fprintf(stderr, "   Wrong number of viscous friction parameters specified\n");
 		return false;
 	}
@@ -998,34 +984,58 @@ bool Robot::LoadRob(const char* fn) {
 
 	for (size_t i = 0; i < mountLinks.size(); i++) {
 		printf("   Mounting file %s\n", mountFiles[i].c_str());
-		mountFiles[i] = path + mountFiles[i];
+		string fn = path + mountFiles[i];
 		if (Geometry::AnyGeometry3D::CanLoadExt(FileExtension(mountFiles[i].c_str()))) {
 			//mount a triangle mesh on top of another triangle mesh
 			Geometry::AnyGeometry3D geom;
-			if(!geom.Load(mountFiles[i].c_str())) {
+			if(!geom.Load(fn.c_str())) {
 				fprintf(stderr, "   Error loading mount geometry file %s\n",
-						mountFiles[i].c_str());
+						fn.c_str());
 				return false;
 			}
 			Mount(mountLinks[i], geom, mountT[i]);
 		} else {
 			Robot subchain;
-			if (!subchain.Load(mountFiles[i].c_str())) {
+			if (!subchain.Load(fn.c_str())) {
 				fprintf(stderr, "   Error reading subchain file %s\n",
-						mountFiles[i].c_str());
+						fn.c_str());
 				return false;
 			}
 			size_t lstart = links.size();
 			size_t dstart = drivers.size();
 			Mount(mountLinks[i], subchain, mountT[i]);
-			for (size_t k = lstart; k < links.size(); k++)
-				linkNames[k] = mountFiles[i] + ":" + linkNames[k];
+			string robotName = mountFiles[i];
+			StripExtension(robotName);
+			for (size_t k = lstart; k < links.size(); k++) 
+				linkNames[k] = robotName + ":" + linkNames[k];
 			for (size_t k = dstart; k < drivers.size(); k++)
-				driverNames[k] = mountFiles[i] + ":" + driverNames[k];
+				driverNames[k] = robotName + ":" + driverNames[k];
 		}
 	}
 	if (!CheckValid())
 		return false;
+
+	//automatically compute mass parameters from geometry
+	if (autoMass) {
+		for (size_t i = 0; i < links.size(); i++) {
+			if (comVec.empty()) {
+				if (!geometry[i].Empty())
+					links[i].com = CenterOfMass(geometry[i]);
+				else
+					links[i].com.setZero();
+			}
+			if (inertiaVec.empty()) {
+				if (!geometry[i].Empty() && links[i].mass != 0.0) {
+					links[i].inertia = Inertia(geometry[i], links[i].com,
+							links[i].mass);
+					//cout<<"Automass inertia for "<<linkNames[i]<<": "<<endl<<links[i].inertia<<endl;
+				} else {
+					links[i].inertia.setZero();
+					//cout<<"Automass setting zero inertia for "<<linkNames[i]<<endl;
+				}
+			}
+		}
+	}
 
 	CleanupSelfCollisions();
 	if (selfCollision.empty()) {
@@ -1108,22 +1118,29 @@ void Robot::InitStandardJoints() {
 	}
 }
 
-bool Robot::SaveGeometry(const char* geomPath,const char* geomExt) {
-	vector<string> geomFiles;
+void Robot::SetGeomFiles(const char* geomPath,const char* geomExt) {
 	geomFiles.resize(links.size());
 	for (size_t i = 0; i < links.size(); i++) {
 		stringstream ss;
 		ss << geomPath << linkNames[i] << "." << geomExt;
 		geomFiles[i] = ss.str();
 	}
-	return SaveGeometry(geomFiles);
 }
 
-bool Robot::SaveGeometry(const vector<string>& geomFiles) {
+void Robot::SetGeomFiles(const vector<string>& files)
+{
+  geomFiles = files;
+}
+
+bool Robot::SaveGeometry(const char* prefix) {
 	for (size_t i = 0; i < links.size(); i++) {
 		if (!geometry[i].Empty()) {
-		  if(!geometry[i].Save(geomFiles[i].c_str())) {
-		       cerr << "Unable to save to geometry file " << geomFiles[i] << endl;
+		  if(geomFiles[i].empty()) {
+		    cerr<<"Robot::SaveGeometry: warning, link "<<i<<" has empty file name"<<endl;
+		    continue;
+		  }
+		  if(!geometry[i].Save((string(prefix)+geomFiles[i]).c_str())) {
+		       cerr << "Robot::SaveGeometry: Unable to save to geometry file " << string(prefix)+geomFiles[i] << endl;
 		       return false;
 		     }
 		}
@@ -1131,18 +1148,7 @@ bool Robot::SaveGeometry(const vector<string>& geomFiles) {
 	return true;
 }
 
-bool Robot::Save(const char* fn, const char* geomPath,const char* geomExt) {
-	vector<string> geomFiles;
-	geomFiles.resize(links.size());
-	for (size_t i = 0; i < links.size(); i++) {
-		stringstream ss;
-		ss << geomPath << linkNames[i] << "." << geomExt;
-		geomFiles[i] = ss.str();
-	}
-	return Save(fn, geomFiles);
-}
-
-bool Robot::Save(const char* fn, const vector<string>& geomFiles) {
+bool Robot::Save(const char* fn) {
 	ofstream file;
 	file.open(fn, ios::out);
 	if (!file.is_open()) {
@@ -1249,6 +1255,24 @@ bool Robot::Save(const char* fn, const vector<string>& geomFiles) {
 		file << accMax[i] << " ";
 	}
 	file << endl << endl;
+
+	for(int i=0;i<nLinks;i++) {
+	  if(geometry[i].Empty()) continue;
+	  vector<int> nocollision;
+	  for(int j=i+1;j<nLinks;j++) {
+	    if(geometry[j].Empty()) continue;
+	    if(parents[i] != j && parents[j] != i)
+	      if(selfCollisions(i,j) == NULL)
+		nocollision.push_back(j);
+	  }
+	  if(!nocollision.empty()) {
+	    file<<"noselfcollision\t";
+	    for(size_t j=0;j<nocollision.size();j++)
+	      file<<i<<" "<<nocollision[j]<<"\t";
+	    file<<endl;
+	  }
+	}
+	file << endl;
 
 	int nJoints = joints.size();
 	for (int i = 0; i < nJoints; i++) {
@@ -1538,7 +1562,9 @@ void Robot::Mount(int link, const Robot& subchain, const RigidTransform& T) {
 	concat(powerMax, subchain.powerMax);
 	concat(accMax, subchain.accMax);
 	ArrayUtils::concat(geometry, subchain.geometry);
+	ArrayUtils::concat(geomFiles, subchain.geomFiles);
 	InitCollisions();
+	ArrayUtils::concat(envCollisions, subchain.envCollisions);
 	concat(selfCollisions, subchain.selfCollisions);
 	//need to get the right self collision pointers
 	for (int i = 0; i < selfCollisions.m; i++)
@@ -2060,6 +2086,7 @@ bool Robot::LoadURDF(const char* fn)
 {
 	string s(fn);
 	string path = GetFilePath(s);
+
 	//Get content from the Willow Garage parser
 	boost::shared_ptr<urdf::ModelInterface> parser = urdf::parseURDF(s);
 	boost::shared_ptr<urdf::Link> root_link = parser->root_link_;
@@ -2068,9 +2095,192 @@ bool Robot::LoadURDF(const char* fn)
 		return false;
 	}
 
+	//parse Klamp't extras
+	//format:
+	//- <robot>
+	//  - <klampt [default_mass:float] [default_inertia:H] [default_acc_max:float] [use_vis_geom:bool] [flip_yz:bool] [world_frame:string] [package_root:string]>
+	//    default_mass: sets the mass of links for which URDF has no mass.
+	//    default_inertia can be either a float (diagonal of matrix),
+	//      3-vector (diagonal of matrix), or 9-vector (entries of 3x3
+	//      inertia matrix)
+	//    default_acc_max: default acceleration limit (default: 100)
+	//    use_vis_geom: true if you want to use visualization geometry
+	//      instead of collision geometry
+	//    flip_yz: true if you want to swap the y-z components when
+	//      importing meshes.
+	//    world_frame: set this to change the name of the world frame
+	//      for fixed-base robots (default: "world").
+	//    freeze_root_link: set this if you want the root link to be
+	//      frozen in space (default: false).
+	//    package_root: set this to determine relative location of package:// header
+	//    - <link name:string [physical:bool] [servoP:float] [servoI:float] [servoD:float] [dryFriction:float] [viscousFriction:float]>
+	//      name: identifies a link
+	//      physical: sets whether it is considered a physical
+	//        or virtual link.  Virtual links have mass set to 0.
+	//      accMax: sets the acceleration limit
+	//      servoP,servoI,servoD,dryFriction,viscousFriction: 
+	//        optionally set the driver parameters for the given link
+	//    - <noselfcollision pairs:"a1 b1 ... ak bk" >
+	//      sets collision pairs for which self collision should not be
+	//      tested
+	//    - <selfcollision pairs:"a1 b1 ... ak bk" >
+	//      sets collision pairs for which self collision should be
+	//      tested
+	double default_mass = 0.0001;
+	Matrix3 default_inertia; default_inertia.setIdentity(); default_inertia *= 1e-8;	
+	double default_acc_max = 100;
+	int freezeRootLink = 0;
+	string worldFrame = "world";
+	vector<pair<string, string> > selfCollision;
+	vector<pair<string, string> > noSelfCollision;
+	map<string,bool> virtualLinks;
+	map<string,Real> kP,kI,kD,dryFriction,viscousFriction,customAccMax;
+	TiXmlDocument xml_doc;
+	bool loaded=xml_doc.LoadFile(s.c_str());
+	if(!loaded) {
+	  printf("Strange, unable to re-open robot file %s\n",fn);
+	}
+	TiXmlElement *robot_xml = xml_doc.FirstChildElement("robot");
+	TiXmlElement *klampt_xml = NULL;
+	if(robot_xml)
+	  klampt_xml = robot_xml->FirstChildElement("klampt");
+	if(klampt_xml) {
+	  int use_vis_geom,flip_yz;
+	  if(klampt_xml->QueryValueAttribute("use_vis_geom",&use_vis_geom)==TIXML_SUCCESS) {
+	    URDFConverter::useVisGeom = (use_vis_geom != 0);
+	  }
+	  if(klampt_xml->QueryValueAttribute("flip_yz",&flip_yz)==TIXML_SUCCESS) {
+	    URDFConverter::flipYZ = (flip_yz != 0);
+	  }
+	  if(klampt_xml->QueryValueAttribute("freeze_root_link",&freezeRootLink)==TIXML_SUCCESS) {
+	    //value has been read in already...
+	  }
+	  else freezeRootLink = false;
+
+	  if(klampt_xml->Attribute("world_frame") != 0) {
+	    worldFrame = klampt_xml->Attribute("world_frame");
+	  }
+	  if(klampt_xml->Attribute("package_root") != 0) {
+	    URDFConverter::packageRootPath = path+"/"+klampt_xml->Attribute("package_root");
+	  }
+	  if(klampt_xml->QueryValueAttribute("default_acc_max",&default_acc_max)!=TIXML_SUCCESS) {
+	    //pass
+	  }
+	  if(klampt_xml->QueryValueAttribute("default_mass",&default_mass)!=TIXML_SUCCESS) {
+	    //pass
+	  }
+	  Real H;
+	  Vector3 H3;
+	  if(klampt_xml->QueryValueAttribute("default_inertia",&default_inertia)==TIXML_SUCCESS) {
+	    //pass
+	  }
+	  else if(klampt_xml->QueryValueAttribute("default_inertia",&H3)==TIXML_SUCCESS) {
+	    default_inertia.setIdentity();
+	    default_inertia(0,0) = H3.x;
+	    default_inertia(1,1) = H3.y;
+	    default_inertia(2,1) = H3.z;
+	  }
+	  else if(klampt_xml->QueryValueAttribute("default_inertia",&H)==TIXML_SUCCESS) {
+	    default_inertia.setIdentity();
+	    default_inertia *= H;
+	  }
+	  else {
+	    default_inertia.setIdentity(); 
+	    default_inertia *= 1e-8; 
+	  }
+	  TiXmlElement* e = klampt_xml->FirstChildElement("link");
+	  while(e != NULL) {
+	    string name;
+	    int physicalLink;
+	    Real temp;
+	    if(e->QueryValueAttribute("name",&name) != TIXML_SUCCESS) {
+	      cerr<<"Warning: Xml element robot/klampt/link doesnt have name attribute"<<endl;
+	      e = e->NextSiblingElement("link");
+	      continue;
+	    }
+	    if(e->QueryValueAttribute("physical",&physicalLink) == TIXML_SUCCESS && physicalLink==0) {
+	      virtualLinks[name] = true;
+	    }
+	    if(e->QueryValueAttribute("servoP",&temp) == TIXML_SUCCESS) {
+	      kP[name] = temp;
+	    }
+	    if(e->QueryValueAttribute("servoD",&temp) == TIXML_SUCCESS) {
+	      kD[name] = temp;
+	    }
+	    if(e->QueryValueAttribute("servoI",&temp) == TIXML_SUCCESS) {
+	      kI[name] = temp;
+	    }
+	    if(e->QueryValueAttribute("dryFriction",&temp) == TIXML_SUCCESS) {
+	      dryFriction[name] = temp;
+	    }
+	    if(e->QueryValueAttribute("viscousFriction",&temp) == TIXML_SUCCESS) {
+	      viscousFriction[name] = temp;
+	    }
+	    if(e->QueryValueAttribute("accMax",&temp) == TIXML_SUCCESS) {
+	      customAccMax[name] = temp;
+	    }
+	    e = e->NextSiblingElement("link");
+	  }
+	  e = klampt_xml->FirstChildElement("selfcollision");
+	  while(e != NULL) {
+	    if(e->Attribute("pairs")!=NULL) {
+	      stringstream ss(e->Attribute("pairs"));
+	      pair<string, string> ptemp;
+	      while (SafeInputString(ss,ptemp.first) && SafeInputString(ss,ptemp.second))
+		selfCollision.push_back(ptemp);
+	    }
+	    else if(e->Attribute("group1")!=NULL && e->Attribute("group2")!=NULL) {
+	      vector<string> group1,group2;
+	      string stemp;
+	      stringstream ss1(e->Attribute("group1"));
+	      stringstream ss2(e->Attribute("group2"));
+	      while (SafeInputString(ss1,stemp))
+		group1.push_back(stemp);
+	      while (SafeInputString(ss2,stemp))
+		group2.push_back(stemp);
+	      for(size_t i=0;i<group1.size();i++) 
+		for(size_t j=0;j<group2.size();j++) 
+		  selfCollision.push_back(pair<string,string>(group1[i],group2[j]));
+	    }
+	    else {
+	      cerr<<"Error, robot/klampt/selfcollision does not contain pairs, or group1 and group2 attributes"<<endl;
+	    }	      
+
+
+	    e = e->NextSiblingElement("selfcollision");
+	  }
+	  e = klampt_xml->FirstChildElement("noselfcollision");
+	  while(e != NULL) {
+	    if(e->Attribute("pairs")!=NULL) {
+	      stringstream ss(e->Attribute("pairs"));
+	      pair<string, string> ptemp;
+	      while (SafeInputString(ss,ptemp.first) && SafeInputString(ss,ptemp.second))
+		noSelfCollision.push_back(ptemp);
+	    }
+	    else if(e->Attribute("group1")!=NULL && e->Attribute("group2")!=NULL) {
+	      vector<string> group1,group2;
+	      string stemp;
+	      stringstream ss1(e->Attribute("group1"));
+	      stringstream ss2(e->Attribute("group2"));
+	      while (SafeInputString(ss1,stemp))
+		group1.push_back(stemp);
+	      while (SafeInputString(ss2,stemp))
+		group2.push_back(stemp);
+	      for(size_t i=0;i<group1.size();i++) 
+		for(size_t j=0;j<group2.size();j++) 
+		  noSelfCollision.push_back(pair<string,string>(group1[i],group2[j]));
+	    }
+	    else {
+	      cerr<<"Error, robot/klampt/noselfcollision does not contain pairs, or group1 and group2 attributes"<<endl;
+	    }	      
+
+	    e = e->NextSiblingElement("noselfcollision");
+	  }
+	}
+
 	//fixed-base robots have the root link "world", floating-base robots
 	//do not.
-	bool floating = (root_link->name != "world");
+	bool floating = (root_link->name != worldFrame);
 	int links_size, joints_size;
 	if(floating) {
 	  //links_size: URDF 36, ROB 41 with 5 extra DOFS for base
@@ -2084,6 +2294,9 @@ bool Robot::LoadURDF(const char* fn)
 		 << " do not match for floating-base robot!" << endl;
 	    return false;
 	  }
+
+	  if(freezeRootLink)
+	    joints_size += 5;
 	}
 	else {
 	  links_size = (int)parser->links_.size() - 1;
@@ -2106,6 +2319,7 @@ bool Robot::LoadURDF(const char* fn)
 	this->parents.resize(links_size);
 	this->linkNames.resize(links_size);
 	this->geometry.resize(links_size);
+	this->geomFiles.resize(links_size);
 	this->q.resize(links_size);
 	this->q.setZero();
 	this->qMin.resize(links_size);
@@ -2158,9 +2372,19 @@ bool Robot::LoadURDF(const char* fn)
 	  }
 
 	  //floating base joint
-	  this->joints[0].type = RobotJoint::Floating;
-	  this->joints[0].linkIndex = 5;
-	  this->joints[0].baseIndex = -1;
+	  if(!freezeRootLink) {
+	    this->joints[0].type = RobotJoint::Floating;
+	    this->joints[0].linkIndex = 5;
+	    this->joints[0].baseIndex = -1;
+	  }
+	  else {
+	    //freezeRootLink = true, so freeze all those links
+	    for(int i=0;i<6;i++) {
+	      this->joints[i].type =  RobotJoint::Weld;
+	      this->joints[i].linkIndex = i;
+	      this->joints[i].baseIndex = -1;
+	    }
+	  }
 	}
 	else {
 	  //fixed base
@@ -2181,10 +2405,6 @@ bool Robot::LoadURDF(const char* fn)
 	}
 	URDFConverter::setJointforNodes(urdfJoints, linkNodes);
 	URDFConverter::processTParentTransformations(linkNodes);
-
-	//TODO: how do we tell if it's just a frame vs. a 
-	double default_mass = 0.0001;
-	Matrix3 default_inertia; default_inertia.setIdentity(); default_inertia *= 1e-8;
 
 	size_t start = (floating ? 0 : 1);
 	for (size_t i = start; i < linkNodes.size(); i++) {
@@ -2213,19 +2433,27 @@ bool Robot::LoadURDF(const char* fn)
 		}
 
 		//If have inertia specified, then, use the specified inertia
-		if (linkNode->link->inertial) {
-			this->links[link_index].com = linkNode->T_link_to_inertia.t;
-			this->links[link_index].mass = linkNode->link->inertial->mass; //done
-			Matrix3 ori_inertia = URDFConverter::convertInertial(
-					*linkNode->link->inertial);
-			this->links[link_index].inertia.mul(
-					linkNode->T_link_to_inertia_inverse.R, ori_inertia);
+		if(virtualLinks.count(linkNode->link->name)!=0) {
+		    //assume its a virtual link
+		    this->links[link_index].com = Vector3(0, 0, 0);
+		    this->links[link_index].mass = 0;
+		    this->links[link_index].inertia.setZero();
 		}
-		//Otherwise, set it to default value
 		else {
+		  if (linkNode->link->inertial) {
+		    this->links[link_index].com = linkNode->T_link_to_inertia.t;
+		    this->links[link_index].mass = linkNode->link->inertial->mass; //done
+		    Matrix3 ori_inertia = URDFConverter::convertInertial(
+									 *linkNode->link->inertial);
+		    this->links[link_index].inertia.mul(
+							linkNode->T_link_to_inertia_inverse.R, ori_inertia);
+		  }
+		//Otherwise, set it to default value
+		  else {
 			this->links[link_index].com = Vector3(0, 0, 0);
 			this->links[link_index].mass = default_mass;
 			this->links[link_index].inertia = default_inertia;
+		  }
 		}
 
 		//At first, set them to be default Inf value; it will be modified in later steps.
@@ -2240,7 +2468,9 @@ bool Robot::LoadURDF(const char* fn)
 		urdf::Joint* joint = linkNode->joint;
 		if (joint) {
 		  int joint_index = link_index;
-		  if(floating) joint_index -= 5;
+		  if(floating) {
+		    if(!freezeRootLink) joint_index -= 5;
+		  }
 			this->joints[joint_index].type = URDFConverter::jointType_URDF2ROB(
 					joint->type); //done. finish function
 			if (joint->type == urdf::Joint::PRISMATIC){
@@ -2257,6 +2487,10 @@ bool Robot::LoadURDF(const char* fn)
 				this->velMin[link_index] = -joint->limits->velocity;
 				this->torqueMax[link_index] = joint->limits->effort; //TODO: in URDF, no explicit value specified, effort has unit n*m,
 			}
+			if(customAccMax.count(linkNode->link->name) != 0)
+			  this->accMax[link_index] = customAccMax[linkNode->link->name];
+			else
+			  this->accMax[link_index] = default_acc_max;
 			if(this->joints[joint_index].type == RobotJoint::Weld){
 				qMin[link_index] = 0;
 				qMax[link_index] = 0;
@@ -2290,6 +2524,16 @@ bool Robot::LoadURDF(const char* fn)
 				  driver.dryFriction = joint->dynamics->friction;
 				  driver.viscousFriction = joint->dynamics->damping;
 				}
+				if(kP.count(linkNode->link->name) != 0)
+				  driver.servoP = kP[linkNode->link->name];
+				if(kD.count(linkNode->link->name) != 0)
+				  driver.servoD = kD[linkNode->link->name];
+				if(kI.count(linkNode->link->name) != 0)
+				  driver.servoI = kI[linkNode->link->name];
+				if(dryFriction.count(linkNode->link->name) != 0)
+				  driver.dryFriction = dryFriction[linkNode->link->name];
+				if(viscousFriction.count(linkNode->link->name) != 0)
+				  driver.viscousFriction = viscousFriction[linkNode->link->name];
 				drivers.push_back(driver);
 			}
 		}
@@ -2303,19 +2547,33 @@ bool Robot::LoadURDF(const char* fn)
 		else link_index -= 1;
 
 		//geometry
-		if (!linkNode->geomName.empty()) {
+		if (!linkNode->geomName.empty() && !Robot::disableGeometryLoading) {
 		  string fn;
-		  fn = linkNode->geomName;
-		  if (!LoadGeometry(link_index, fn.c_str())) {
-		    printf("Failed to load geometry directly, trying relative path...\n");
-		    fn = path + linkNode->geomName;
+		  geomFiles[link_index] = linkNode->geomName;
+		  fn = path + linkNode->geomName;
+		  if(FileUtils::Exists(fn.c_str())) {
 		    if (!LoadGeometry(link_index, fn.c_str())) {
-		      cout << "Failed loading geometry " << fn
+		      cout << "Failed loading geometry " << linkNode->geomName
 			   << " for link " << link_index << endl;
 		      //TEMP
 		      cout<< "Temporarily ignoring error..."<<endl;
 		      //return false;
 		    }
+		  }
+		  else if(FileUtils::Exists(geomFiles[link_index].c_str())) {
+		    if (!LoadGeometry(link_index, geomFiles[link_index].c_str())) {
+		      cout << "Failed loading geometry " << linkNode->geomName
+			   << " for link " << link_index << endl;
+		      //TEMP
+		      cout<< "Temporarily ignoring error..."<<endl;
+		      //return false;
+		    }
+		  }
+		  else {
+		    cout << "Could not load geometry " << linkNode->geomName <<", in relative or absolute paths"<<endl;
+		    //TEMP
+		    cout<< "Temporarily ignoring error..."<<endl;
+		    //return false;
 		  }
 
 		  this->geometry[link_index].Transform(linkNode->geomScale);
@@ -2326,28 +2584,45 @@ bool Robot::LoadURDF(const char* fn)
 	envCollisions.resize(links_size, NULL);
 
 	InitCollisions();
-	InitAllSelfCollisions();
+	CleanupSelfCollisions();
+	if (selfCollision.empty()) {
+		InitAllSelfCollisions();
+	} else {
+		for (size_t i = 0; i < selfCollision.size(); i++) {
+		  int link1,link2;
+		  link1 = LinkIndex(selfCollision[i].first.c_str());
+		  link2 = LinkIndex(selfCollision[i].second.c_str());
+		  if (link1 < 0 || link1 >= (int) links.size() ||
+		      link2 < 0 || link2 >= (int) links.size()) {
+		    printf("   Error, invalid self-collision index %s-%s\n",
+			   selfCollision[i].first.c_str(),selfCollision[i].second.c_str());
+		    return false;
+		  }
+		  if(link1 == link2) continue;
+		  if(link1 > link2) Swap(link1,link2);
+		  Assert(link1 < link2);
+		  InitSelfCollisionPair(link1,link2);
+		}
+	}
 
-//	vector<pair<int, int> > noSelfCollision;
-//	ifstream ifile("")
-//	if (name == "noselfcollision") {
-//				pair<int, int> ptemp;
-//				while (ss >> ptemp.first && ss >> ptemp.second)
-//					noSelfCollision.push_back(ptemp);
-//	}
-//	//Initialize self collisions -- these needs to be done after mounting
-//	for (size_t i = 0; i < noSelfCollision.size(); i++) {
-//		if (noSelfCollision[i].first >= (int) links.size()
-//				|| noSelfCollision[i].second >= (int) links.size()) {
-//			printf("Invalid no-collision index %d-%d\n",
-//					noSelfCollision[i].first, noSelfCollision[i].second);
-//			return false;
-//		}
-//		Assert(noSelfCollision[i].first < noSelfCollision[i].second);
-//		SafeDelete(
-//				selfCollisions(noSelfCollision[i].first,
-//						noSelfCollision[i].second));
-//	}
+	//Initialize self collisions -- these needs to be done after mounting
+	for (size_t i = 0; i < noSelfCollision.size(); i++) {
+		  int link1,link2;
+		  link1 = LinkIndex(noSelfCollision[i].first.c_str());
+		  link2 = LinkIndex(noSelfCollision[i].second.c_str());
+		  if (link1 < 0 || link1 >= (int) links.size() ||
+		      link2 < 0 || link2 >= (int) links.size()) {
+
+			printf("  Error, invalid no-collision index %s-%s\n",
+			       noSelfCollision[i].first.c_str(), noSelfCollision[i].second.c_str());
+			return false;
+		}
+		  if(link1 == link2) continue;
+		  if(link1 > link2) Swap(link1,link2);
+		Assert(link1 < link2);
+		SafeDelete(selfCollisions(link1,link2));
+	}
+
 
 	this->UpdateConfig(q);
 
@@ -2404,4 +2679,49 @@ void Robot::ComputeLipschitzMatrix() {
 	}
 	printf("Done computing lipschitz constants, took %gs\n",
 			timer.ElapsedTime());
+}
+
+
+void Robot::Merge(const std::vector<Robot*>& robots)
+{
+  vector<RobotWithGeometry*> grobots(robots.size());
+  copy(robots.begin(),robots.end(),grobots.begin());
+  RobotWithGeometry::Merge(grobots);
+
+  size_t nl = 0, nj = 0, nd = 0;
+  vector<size_t> offset(robots.size());
+  vector<size_t> joffset(robots.size());
+  vector<size_t> doffset(robots.size());
+  for(size_t i=0;i<robots.size();i++) {
+    offset[i] = nl;
+    joffset[i] = nj;
+    doffset[i] = nd;
+    nl += robots[i]->links.size();
+    nj += robots[i]->joints.size();
+    nd += robots[i]->drivers.size();
+  }
+  
+  geomFiles.resize(nl);
+  accMax.resize(nl);
+  joints.resize(nj);
+  drivers.resize(nd);
+  linkNames.resize(nl);
+  driverNames.resize(nd);
+  for(size_t i=0;i<robots.size();i++) {
+    accMax.copySubVector(offset[i],robots[i]->accMax);
+    copy(robots[i]->geomFiles.begin(),robots[i]->geomFiles.end(),geomFiles.begin()+offset[i]);
+    copy(robots[i]->linkNames.begin(),robots[i]->linkNames.end(),linkNames.begin()+offset[i]);
+    for(size_t j=0;j<robots[i]->joints.size();j++) {
+      joints[j+joffset[i]] = robots[i]->joints[j];
+      joints[j+joffset[i]].linkIndex += offset[i];
+      if(joints[j+joffset[i]].baseIndex >= 0)
+	joints[j+joffset[i]].baseIndex += offset[i];
+    }
+    for(size_t j=0;j<robots[i]->drivers.size();j++) {
+      drivers[j+doffset[i]] = robots[i]->drivers[j];
+      for(size_t k=0;k<robots[i]->drivers[j].linkIndices.size();k++)
+	drivers[j+doffset[i]].linkIndices[k] += offset[i];
+    }
+    copy(robots[i]->driverNames.begin(),robots[i]->driverNames.end(),driverNames.begin()+doffset[i]);
+  }
 }

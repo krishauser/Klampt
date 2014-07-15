@@ -3,7 +3,7 @@
 #include "LoggingController.h"
 #include "PathController.h"
 #include "JointTrackingController.h"
-#include "PyController.h"
+#include "SerialController.h"
 #include <utils/PropertyMap.h>
 #include <tinyxml.h>
 
@@ -23,6 +23,111 @@ bool RobotController::WriteState(File& f) const
   return true;
 }
 
+void RobotController::SetPIDCommand(const Config& qdes)
+{
+  Config dqdes(qdes.size(),0.0);
+  SetPIDCommand(qdes,dqdes);
+}
+
+void RobotController::SetPIDCommand(const Config& _qdes,const Config& dqdes)
+{
+  Assert(_qdes.size()==robot.links.size());
+  Assert(dqdes.size()==robot.links.size());
+  Config qdes = _qdes;
+  robot.NormalizeAngles(qdes);
+  for(size_t i=0;i<robot.drivers.size();i++) {
+    if(robot.drivers[i].type == RobotJointDriver::Normal) {
+      command->actuators[i].SetPID(qdes(robot.drivers[i].linkIndices[0]),dqdes(robot.drivers[i].linkIndices[0]),command->actuators[i].iterm);
+    }
+    else {
+      robot.q = qdes;
+      robot.dq = dqdes;
+      //printf("Desired affine driver value %g, vel %g\n",robot.GetDriverValue(i),robot.GetDriverVelocity(i));
+      command->actuators[i].SetPID(robot.GetDriverValue(i),robot.GetDriverVelocity(i),command->actuators[i].iterm);
+    }
+  }
+}
+
+void RobotController::SetTorqueCommand(const Vector& torques)
+{
+  if(torques.size()==robot.drivers.size()) {
+    //setting drivers directly
+    for(size_t i=0;i<robot.drivers.size();i++)
+      command->actuators[i].SetTorque(torques[i]);
+  }
+  else if(torques.size()==robot.links.size()) {
+    //parse out links
+    for(size_t i=0;i<robot.drivers.size();i++) {
+      if(robot.drivers[i].type == RobotJointDriver::Normal) {
+	command->actuators[i].SetTorque(torques(robot.drivers[i].linkIndices[0]));
+      }
+      else {
+	//use dq as a temporary variable
+	Vector dq;
+	swap(dq,robot.dq);
+	robot.dq = torques;
+	command->actuators[i].SetTorque(robot.GetDriverVelocity(i));
+	swap(dq,robot.dq);
+      }
+    }
+  }
+  else {
+    FatalError("RobotController::SetTorqueCommand: invalid vector size: %d\n",torques.size());
+  }
+}
+
+void RobotController::SetFeedforwardPIDCommand(const Config& qdes,const Config& dqdes,const Vector& torques)
+{
+  Assert(torques.size()==robot.drivers.size());
+  SetPIDCommand(qdes,dqdes);
+  for(size_t i=0;i<robot.drivers.size();i++)
+    command->actuators[i].torque = torques[i];
+}
+
+
+void RobotController::GetCommandedConfig(Config& q) 
+{
+  Assert(command->actuators.size() == robot.drivers.size());
+  for(size_t i=0;i<command->actuators.size();i++) {
+    if(command->actuators[i].mode == ActuatorCommand::PID)
+      robot.SetDriverValue(i,command->actuators[i].qdes);
+    else
+      FatalError("Can't get commanded config for non-config drivers");
+  }
+  q = robot.q;
+}
+
+void RobotController::GetCommandedVelocity(Config& dq)
+{ 
+  Assert(command->actuators.size() == robot.drivers.size());
+  for(size_t i=0;i<command->actuators.size();i++) {
+    if(command->actuators[i].mode == ActuatorCommand::PID)
+      robot.SetDriverVelocity(i,command->actuators[i].dqdes);
+    else
+      FatalError("Can't get commanded config for non-config drivers");
+  }
+  dq = robot.dq;
+}
+
+void RobotController::GetSensedConfig(Config& q)
+{
+  JointPositionSensor* s = sensors->GetTypedSensor<JointPositionSensor>();
+  if(s==NULL) 
+    fprintf(stderr,"Warning, robot has no joint position sensor\n");
+  else
+    q = s->q;
+}
+
+void RobotController::GetSensedVelocity(Config& dq)
+{
+  JointVelocitySensor* s=sensors->GetTypedSensor<JointVelocitySensor>();
+  if(s==NULL)
+    fprintf(stderr,"Warning, robot has no joint velocity sensor\n");
+  else
+    dq = s->dq;
+}
+
+
 
 void RobotControllerFactory::RegisterDefault(Robot& robot)
 {
@@ -32,7 +137,7 @@ void RobotControllerFactory::RegisterDefault(Robot& robot)
   Register("FeedforwardJointTrackingController",new FeedforwardController(robot,new JointTrackingController(robot)));
   Register("FeedforwardMilestonePathController",new FeedforwardController(robot,new MilestonePathController(robot)));
   Register("FeedforwardPolynomialPathController",new FeedforwardController(robot,new PolynomialPathController(robot)));
-  Register("PyController",new PyController(robot));
+  Register("SerialController",new SerialController(robot));
 }
 
 void RobotControllerFactory::Register(RobotController* controller)
@@ -84,7 +189,7 @@ SmartPointer<RobotController> RobotControllerFactory::Load(TiXmlElement* in,Robo
       continue;
     }
     if(!c->SetSetting(attr->Name(),attr->Value())) {
-      fprintf(stderr,"Unable to set controller %s setting %s\n",in->Attribute("type"),attr->Name());
+      fprintf(stderr,"Load controller  %s from XML: Unable to set setting %s\n",in->Attribute("type"),attr->Name());
       return NULL;
     }
     attr = attr->Next();

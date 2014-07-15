@@ -271,8 +271,16 @@ bool DynamicPath::SetMilestones(const vector<Vector>& x,const vector<Vector>& dx
       ramps.reserve(x.size()-1);
       std::vector<std::vector<ParabolicRamp1D> > tempRamps;
       std::vector<ParabolicRampND> tempRamps2;
+      if(!InBounds(x[0],xMin,xMax)) {
+	fprintf(stderr,"DynamicPath::SetMilestones: Initial milestone is not within joint limits\n");
+	return false;
+      }
       PARABOLIC_RAMP_ASSERT(InBounds(x[0],xMin,xMax));
       for(size_t i=0;i+1<x.size();i++) {
+	if(!InBounds(x[i+1],xMin,xMax)) {
+	  fprintf(stderr,"DynamicPath::SetMilestones: Milestone %d is not within joint limits\n",i+1);
+	  return false;
+	}
 	PARABOLIC_RAMP_ASSERT(InBounds(x[i+1],xMin,xMax));
 	Real res=SolveMinTimeBounded(x[i],dx[i],x[i+1],dx[i+1],
 				     accMax,velMax,xMin,xMax,
@@ -387,7 +395,10 @@ void DynamicPath::Concat(const DynamicPath& suffix)
       printf("dx:\n");
       for(size_t i=0;i<ramps.back().x1.size();i++)
 	printf("%g - %g = %g\n",ramps.back().dx1[i],suffix.ramps.front().dx0[i],ramps.back().dx1[i]-suffix.ramps.front().dx0[i]);
-      getchar();
+      if(gErrorGetchar) {
+	printf("Press enter to continue\n");
+	getchar();
+      }
     }
     ramps.back().x1 = suffix.ramps.front().x0;
     ramps.back().dx1 = suffix.ramps.front().dx0;

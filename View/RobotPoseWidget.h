@@ -39,6 +39,8 @@ public:
   GLColor highlightColor;
   int hoverLink,hoverDriver;
   Vector3 hoverPt;
+  bool draw;
+  vector<GeometryAppearance> poserAppearance;
 };
 
 /** @brief A widget that allows creating and editing IK constraints
@@ -96,10 +98,21 @@ public:
   bool FixCurrentPoint();
   ///Deletes the currently hovered constraint or all constraints on the currently hovered link
   bool DeleteConstraint();
-  ///Turn attach mode on/off
-  bool ToggleAttach();
-  ///Turn IK posing on/off
-  bool TogglePoseIK();
+  ///Turn attach IK mode on/off
+  void SetAttachIKMode(bool);
+  ///Turn point IK posing on/off
+  void SetPoseIKMode(bool);
+  ///Turn fixed IK posing on/off
+  void SetFixedPoseIKMode(bool);
+  ///Turn delete IK widgets on/off
+  void SetDeleteIKMode(bool);
+
+  ///Solves the current IK problem (by default uses 100 iters, tolerance 0.001)
+  bool SolveIK(int iters=0,Real tol=0);
+  ///Solves the current IK problem with a fixed base
+  bool SolveIKFixedBase(int iters=0,Real tol=0);
+  ///Solves the current IK problem with a joint fixed in place
+  bool SolveIKFixedJoint(int fixedJoint,int iters=0,Real tol=0);
 
   virtual void DrawGL(Camera::Viewport& viewport);
   virtual bool BeginDrag(int x,int y,Camera::Viewport& viewport,double& distance);
@@ -111,8 +124,8 @@ public:
   TransformWidget basePoser;
   RobotLinkPoseWidget linkPoser;
   RobotIKPoseWidget ikPoser;
-  bool poseIKMode;
-  bool attachIKMode;
+  enum { ModeNormal, ModeIKAttach, ModeIKPose, ModeIKPoseFixed, ModeIKDelete };
+  int mode;
   int attachx,attachy;
   Ray3D attachRay;
 };

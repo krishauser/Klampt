@@ -10,7 +10,7 @@
 #include <GLdraw/drawextra.h>
 #include <GLdraw/GL.h>
 #include <GLdraw/GLLight.h>
-#include <glui.h>
+#include <GL/glui.h>
 
 class RobotViewProgram : public GLUINavigationProgram
 {

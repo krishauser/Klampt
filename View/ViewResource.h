@@ -17,6 +17,10 @@ class ViewResource
   //helpers
   void RenderLinearPath(const LinearPathResource* rc,Real pathTime);
   void RenderMultiPath(const MultiPathResource* path,Real pathTime);
+  void GetAnimConfig(const ResourcePtr& r,Config& q);
+  void GetLinearPathConfig(const LinearPathResource* rc,Real pathTime,Config& q);
+  void GetMultiPathConfig(const MultiPathResource* path,Real pathTime,Config& q);
+
 
   ViewRobot configViewer,configsViewer;
   ViewRobot pathViewer; Real pathTime;
