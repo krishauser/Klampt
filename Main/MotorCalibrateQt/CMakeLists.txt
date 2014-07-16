@@ -1,5 +1,5 @@
 # Make the MotorCalibrate Qt program
-CMAKE_MINIMUM_REQUIRED(VERSION 2.8.4)
+CMAKE_MINIMUM_REQUIRED(VERSION 2.6.4)
 PROJECT(MotorCalibrate)
 
 #Building from within Main/[AppName] folder
@@ -18,7 +18,6 @@ INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR})
 
 ##### Qt Specific stuff ####
 # Configure Qt
-SET(QT_USE_QTOPENGL TRUE)
 FIND_PACKAGE(Qt4 REQUIRED)
 INCLUDE(${QT_USE_FILE})
 
@@ -33,7 +32,7 @@ TARGET_LINK_LIBRARIES(MotorCalibrate ${KLAMPT_LIBRARIES} ${QT_LIBRARIES})
 
 #used to ignore main() definition in motorcalibrate.cpp
 SET_TARGET_PROPERTIES(MotorCalibrate PROPERTIES
-                COMPILE_DEFINITIONS "${QT_DEFINITIONS};HAVE_QT") 
+                COMPILE_DEFINITIONS "HAVE_QT") 
 
 install(TARGETS MotorCalibrate
   DESTINATION bin
