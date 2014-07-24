@@ -24,4 +24,4 @@ dep-glui:
 
 dep-ode:
 	cd ode-0.11.1; X_EXTRA_LIBS=-lX11 ./configure $(ODECONFIG)
-	cd ode-0.11.1; make ode
+	cd ode-0.11.1/ode/src; make
