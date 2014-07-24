@@ -1,5 +1,5 @@
 # Make the SimTest Qt program
-CMAKE_MINIMUM_REQUIRED(VERSION 2.8.4)
+CMAKE_MINIMUM_REQUIRED(VERSION 2.6.4)
 PROJECT(SimTest)
 
 #Building from within Main/[AppName] folder

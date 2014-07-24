@@ -1,5 +1,5 @@
 # Make the RobotTest Qt program
-CMAKE_MINIMUM_REQUIRED(VERSION 2.8.4)
+CMAKE_MINIMUM_REQUIRED(VERSION 2.6.4)
 PROJECT(RobotTest)
 
 #Building from within Main/[AppName] folder
