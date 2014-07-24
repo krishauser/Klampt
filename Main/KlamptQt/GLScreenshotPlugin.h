@@ -43,7 +43,7 @@ public:
     screenshotFile = "image0000.ppm";
     verbose = 1;
     moviefile="klampt_record.mp4";
-    video_encoding_command = "ffmpeg -y -f image2 -i image%04d.ppm";
+    video_encoding_command = "ffmpeg -y -qscale 2 -f image2 -i image%04d.ppm";
     stop_encode=true;
   }
 
