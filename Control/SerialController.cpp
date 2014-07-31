@@ -1,17 +1,36 @@
 #include "SerialController.h"
+#include <utils/threadutils.h>
 #include <utils/AnyCollection.h>
 
 SerialController::SerialController(Robot& robot,const string& _servAddr,Real _writeRate)
-  :RobotController(robot),servAddr(_servAddr),writeRate(_writeRate),lastWriteTime(0)
+  :RobotController(robot),servAddr(_servAddr),writeRate(_writeRate),lastWriteTime(0),endVCmdTime(-1)
 {
-  if(!servAddr.empty())
-    OpenConnection(servAddr);
+  if(!servAddr.empty()) {
+    while(!OpenConnection(servAddr)) {
+      printf("\n...Trying to connect again in 5 seconds...\n");
+      ThreadSleep(5);
+    }
+  }
 }
 
-void SerialController::PackSensorData(AnyCollection& data) const
+void SerialController::PackSensorData(AnyCollection& data)
 {
   data["t"] = time;
   data["dt"] = 1.0/writeRate;
+
+  bool isPID = true;
+  for(size_t i=0;i<command->actuators.size();i++) {
+    if(command->actuators[i].mode != ActuatorCommand::PID)
+      isPID = false;
+  }
+  if(isPID) {
+    Config qcmd,dqcmd;
+    GetCommandedConfig(qcmd);
+    GetCommandedVelocity(dqcmd);
+    data["qcmd"] = vector<double>(qcmd);
+    data["dqcmd"] = vector<double>(dqcmd);
+  }
+
   for(size_t i=0;i<sensors->sensors.size();i++) {
     vector<double> values;
     sensors->sensors[i]->GetMeasurements(values);
@@ -22,6 +41,23 @@ void SerialController::PackSensorData(AnyCollection& data) const
 void SerialController::Update(Real dt)
 {
   RobotController::Update(dt);
+  if(time < endVCmdTime) {
+    //do velocity commands
+    Assert(!vcmd.empty());
+    Config qcmd;
+    GetCommandedConfig(qcmd);
+    qcmd.madd(vcmd,dt);
+    SetPIDCommand(qcmd,vcmd);
+  }
+  else if(!vcmd.empty()) {
+    //stop doing velocity commands
+    vcmd.setZero();
+    Config qcmd;
+    GetCommandedConfig(qcmd);
+    SetPIDCommand(qcmd,vcmd);
+    vcmd.clear();
+  }
+
   if(time >= lastWriteTime + 1.0/writeRate) {
     lastWriteTime += 1.0/writeRate;
     if(time >= lastWriteTime + 1.0/writeRate) {
@@ -43,11 +79,16 @@ void SerialController::Update(Real dt)
       fprintf(stderr,"SerialController: Unable to parse incoming message %s\n",scmd.c_str());
       return;
     }
+    if(cmd.size()==0) {
+      return;
+    }
     SmartPointer<AnyCollection> qcmdptr = cmd.find("qcmd");
     SmartPointer<AnyCollection> dqcmdptr = cmd.find("dqcmd");
     SmartPointer<AnyCollection> torquecmdptr = cmd.find("torquecmd");
     SmartPointer<AnyCollection> tcmdptr = cmd.find("tcmd");
     if(qcmdptr) {
+      endVCmdTime = -1;
+      vcmd.clear();
       vector<Real> qcmd,dqcmd,torquecmd;
       if(!qcmdptr->asvector(qcmd)) {
 	fprintf(stderr,"SerialController: qcmd not of proper type\n");
@@ -78,9 +119,22 @@ void SerialController::Update(Real dt)
 	fprintf(stderr,"SerialController: dqcmd not given with tcmd\n");
 	return;
       }
-      FatalError("Velocity commands not implemented yet");
+      vector<Real> dqcmd;
+      if(!dqcmdptr->asvector(dqcmd)) {
+	fprintf(stderr,"SerialController: dqcmd not of proper type\n");
+	return;
+      }
+      Real tcmd;
+      if(!tcmdptr->as(tcmd)) {
+	fprintf(stderr,"SerialController: tcmd not of proper type\n");
+	return;
+      }
+      endVCmdTime = time + tcmd;
+      vcmd = dqcmd;
     }
     else if(torquecmdptr) {
+      endVCmdTime = -1;
+      vcmd.clear();
       vector<Real> torquecmd;
       if(!torquecmdptr->asvector(torquecmd)) {
 	fprintf(stderr,"SerialController: torquecmd not of proper type\n");
@@ -89,7 +143,8 @@ void SerialController::Update(Real dt)
       SetTorqueCommand(torquecmd);
     }
     else {
-      fprintf(stderr,"SerialController: message doesn't contain proper command type\n");
+      fprintf(stderr,"SerialController: message doesn't contain proper command type (qcmd, dqcmd, or torquecmd)\n");
+      cout<<"   Message: "<<scmd<<endl;
       return;
     }
   }
@@ -99,6 +154,7 @@ void SerialController::Reset()
 {
   RobotController::Reset();
   lastWriteTime = 0;
+  endVCmdTime = -1;
 }
 
 map<string,string> SerialController::Settings() const
@@ -129,7 +185,10 @@ bool SerialController::GetSetting(const string& name,string& str) const
 bool SerialController::SetSetting(const string& name,const string& str)
 {
   if(name == "servAddr") {
-    OpenConnection(str);
+    while(!OpenConnection(str)) {
+      printf("\n...Trying to connect again in 5 seconds...\n");
+      ThreadSleep(5);
+    }
     return true;
   }
   WRITE_CONTROLLER_SETTING(writeRate)  

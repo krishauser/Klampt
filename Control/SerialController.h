@@ -46,12 +46,17 @@ public:
 
   bool OpenConnection(const string& servaddr);
   bool CloseConnection();
-  void PackSensorData(AnyCollection& data) const;
+  void PackSensorData(AnyCollection& data);
 
   string servAddr;
   Real writeRate;
   Real lastWriteTime;
   SmartPointer<SocketPipeWorker> controllerPipe;
+
+  //for fixed-velocity commands, these are an accumulator that processes
+  //the linearly increasing configuration
+  Config vcmd;
+  Real endVCmdTime;
 };
 
 #endif
