@@ -56,7 +56,7 @@ class GLProgram:
         glutInitWindowPosition (x, y);
         glutInitWindowSize (self.width, self.height);
         glutCreateWindow (self.name)
-    
+  
         # keyboard callback
         _currentObject = self
         glutReshapeFunc (_reshapefunc)
@@ -68,7 +68,15 @@ class GLProgram:
         glutMouseFunc (_mousefunc)
         glutDisplayFunc (_displayfunc)
         glutIdleFunc(_idlefunc)
+
+        #init function
+        self.initialize()
         glutMainLoop ()
+
+    def initialize(self):
+        """Called after GLUT is initialized, but before main loop"""
+        glutPostRedisplay()
+        pass
 
     def reshapefunc(self,w,h):
         self.width = w

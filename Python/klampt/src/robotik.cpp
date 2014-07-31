@@ -164,8 +164,8 @@ GeneralizedIKObjective::GeneralizedIKObjective(const RigidObjectModel& obj)
 {
 }
 
-GeneralizedIKObjective::GeneralizedIKObjective(const RobotModelLink& link,const RobotModelLink& link2)
-  :link1(link1),link2(link2),isObj1(false),isObj2(false)
+GeneralizedIKObjective::GeneralizedIKObjective(const RobotModelLink& _link,const RobotModelLink& _link2)
+  :link1(_link),link2(_link2),isObj1(false),isObj2(false)
 {}
 
 GeneralizedIKObjective::GeneralizedIKObjective(const RobotModelLink& link,const RigidObjectModel& obj)

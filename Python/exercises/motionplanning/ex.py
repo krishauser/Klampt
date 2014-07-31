@@ -6,8 +6,8 @@ from klampt.cspace import CSpace,MotionPlan
 from klampt.glprogram import GLProgram
 from klampt import vectorops
 
-#problem = "1"
-problem = "2"
+problem = "1"
+#problem = "2"
 
 def interpolate(a,b,u):
     """Interpolates linearly between a and b"""
@@ -141,26 +141,47 @@ class CSpaceObstacleProgram(GLProgram):
     def __init__(self,space,start=(0.1,0.5),goal=(0.9,0.5)):
         GLProgram.__init__(self)
         self.space = space
+        #PRM planner
         MotionPlan.setOptions(type="prm",knn=10,connectionThreshold=0.1)
+        self.optimizingPlanner = False
+        
+        #FMM* planner
+        #MotionPlan.setOptions(type="fmm*")
+        #self.optimizingPlanner = True
+        
+        #RRT planner
         #MotionPlan.setOptions(type="rrt",perturbationRadius=0.25,bidirectional=True)
+        #self.optimizingPlanner = False
+
+        #RRT* planner
+        #MotionPlan.setOptions(type="rrt*")
+        #self.optimizingPlanner = True
+        
+        #random-restart RRT planner
+        #MotionPlan.setOptions(type="rrt",perturbationRadius=0.25,bidirectional=True,shortcut=True,restart=True,restartTermCond="{foundSolution:1,maxIters:1000}")
+        #self.optimizingPlanner = True
+        
         self.planner = MotionPlan(space)
         self.start=start
         self.goal=goal
         self.planner.setEndpoints(start,goal)
         self.path = []
+        self.G = None
         
     def keyboardfunc(self,key,x,y):
         if key==' ':
-            if not self.path:
+            if self.optimizingPlanner or not self.path:
                 print "Planning 1..."
                 self.planner.planMore(1)
                 self.path = self.planner.getPath()
+                self.G = self.planner.getRoadmap()
                 glutPostRedisplay()
         elif key=='p':
-            if not self.path:
+            if self.optimizingPlanner or not self.path:
                 print "Planning 100..."
                 self.planner.planMore(100)
                 self.path = self.planner.getPath()
+                self.G = self.planner.getRoadmap()
                 glutPostRedisplay()
        
     def display(self):
@@ -173,6 +194,7 @@ class CSpaceObstacleProgram(GLProgram):
         glDisable(GL_LIGHTING)
         self.space.drawObstaclesGL()
         if self.path:
+            #draw path
             glColor3f(0,1,0)
             glBegin(GL_LINE_STRIP)
             for q in self.path:
@@ -184,6 +206,25 @@ class CSpaceObstacleProgram(GLProgram):
         else:
             self.space.drawRobotGL(self.start)
             self.space.drawRobotGL(self.goal)
+
+        if self.G:
+            #draw graph
+            V,E = self.G
+            glEnable(GL_BLEND)
+            glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA)
+            glColor4f(0,0,0,0.5)
+            glPointSize(3.0)
+            glBegin(GL_POINTS)
+            for v in V:
+                glVertex2f(v[0],v[1])
+            glEnd()
+            glColor4f(0.5,0.5,0.5,0.5)
+            glBegin(GL_LINES)
+            for (i,j) in E:
+                glVertex2f(V[i][0],V[i][1])
+                glVertex2f(V[j][0],V[j][1])
+            glEnd()
+            glDisable(GL_BLEND)
     
 if __name__=='__main__':
     space = None

@@ -425,10 +425,22 @@ void CSpaceInterface::setInterpolate(PyObject* pyInterp)
   spaces[index]->interpolate = pyInterp;
 }
 
+void setPlanJSONString(const char* string)
+{
+  if(!factory.LoadJSON(string))
+    throw PyException("Invalid JSON string");
+}
+
+std::string getPlanJSONString()
+{
+  return factory.SaveJSON();
+}
+
 void setPlanType(const char* type)
 {
   factory.type = type;
 }
+
 void setPlanSetting(const char* setting,double value)
 {
   //printf("Setting factory setting %s to %g\n",setting,value);
@@ -446,10 +458,38 @@ void setPlanSetting(const char* setting,double value)
     factory.gridResolution = value;
   else if(0==strcmp(setting,"randomizeFrequency"))
     factory.randomizeFrequency = (int)value;
+  else if(0==strcmp(setting,"domainMin"))
+    factory.domainMin.resize(1,value);
+  else if(0==strcmp(setting,"domainMax"))
+    factory.domainMax.resize(1,value);
+  else if(0==strcmp(setting,"shortcut"))
+    factory.shortcut = (value != 0);
+  else if(0==strcmp(setting,"restart"))
+    factory.restart = (value != 0);
   else {
     throw PyException("Invalid setting");
   }
 }
+
+void setPlanSetting(const char* setting,const char* value)
+{
+  if(0==strcmp(setting,"domainMin")) {
+    stringstream ss(value);
+    ss >> factory.domainMin;
+  }
+  else if(0==strcmp(setting,"domainMax")) {
+    stringstream ss(value);
+    ss >> factory.domainMax;
+  }
+  else if(0==strcmp(setting,"pointLocation"))
+    factory.pointLocation = value;
+  else if(0==strcmp(setting,"restartTermCond"))
+    factory.restartTermCond = value;
+  else {
+    throw PyException("Invalid setting");
+  }
+}
+
 
 int makeNewPlan(int cspace)
 {
@@ -555,7 +595,17 @@ void PlannerInterface::planMore(int iterations)
 
 PyObject* PlannerInterface::getPathEndpoints()
 {
-  return getPath(0,1);
+  if(index < 0 || index >= (int)plans.size() || plans[index]==NULL) 
+    throw PyException("Invalid plan index");  
+  if(!plans[index]->IsSolved()) {
+    Py_RETURN_NONE;
+  }
+  MilestonePath path;
+  plans[index]->GetSolution(path);
+  PyObject* pypath = PyList_New(path.NumMilestones());
+  for(int i=0;i<path.NumMilestones();i++)
+    PyList_SetItem(pypath,(Py_ssize_t)i,PyListFromVector(path.GetMilestone(i)));
+  return pypath;
 }
 
 PyObject* PlannerInterface::getPath(int milestone1,int milestone2)
@@ -591,6 +641,28 @@ double PlannerInterface::getData(const char* setting)
     throw PyException("Invalid plan option");
     return 0;
   }
+}
+
+PyObject* PlannerInterface::getRoadmap()
+{
+  if(index < 0 || index >= (int)plans.size() || plans[index]==NULL) 
+    throw PyException("Invalid plan index");
+  RoadmapPlanner prm(NULL);
+  plans[index]->GetRoadmap(prm);
+  PyObject* pyV = PyList_New(prm.roadmap.nodes.size());
+  for(size_t i=0;i<prm.roadmap.nodes.size();i++)
+    PyList_SetItem(pyV,(Py_ssize_t)i,PyListFromVector(prm.roadmap.nodes[i]));
+  PyObject* pyE = PyList_New(0);
+  for(size_t i=0;i<prm.roadmap.nodes.size();i++) {
+    RoadmapPlanner::Roadmap::Iterator e;
+    for(prm.roadmap.Begin(i,e);!e.end();e++) {
+      PyObject* pair = Py_BuildValue("(ii)",e.source(),e.target());
+      PyList_Append(pyE,pair);
+      Py_XDECREF(pair);
+    }
+  }
+  //this steals the references
+  return Py_BuildValue("NN",pyV,pyE);
 }
 
 void PlannerInterface::dump(const char* fn)

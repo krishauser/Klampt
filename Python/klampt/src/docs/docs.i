@@ -424,8 +424,12 @@ in later calls to getPath().
 To plan, call planMore(iters) until getPath(0,1) returns non-NULL. The
 return value is a list of configurations.
 
-To get a roadmap dump, call dump(fn). This saves to a Trivial Graph
-Format (TGF) format.
+To get a roadmap (V,E), call getRoadmap(). V is a list of
+configurations (each configuration is a Python list) and E is a list
+of edges (each edge is a pair (i,j) indexing into V).
+
+To dump the roadmap to disk, call dump(fn). This saves to a Trivial
+Graph Format (TGF) format.
 
 C++ includes: motionplanning.h ";
 
@@ -453,6 +457,9 @@ PlannerInterface::getPath(int milestone1, int milestone2) ";
 
 %feature("docstring")  PlannerInterface::getData "double
 PlannerInterface::getData(const char *setting) ";
+
+%feature("docstring")  PlannerInterface::getRoadmap "PyObject *
+PlannerInterface::getRoadmap() ";
 
 %feature("docstring")  PlannerInterface::dump "void
 PlannerInterface::dump(const char *fn) ";
@@ -616,6 +623,15 @@ RobotModel::getLink(int index) ";
 %feature("docstring")  RobotModel::getLink "RobotModelLink
 RobotModel::getLink(const char *name) ";
 
+%feature("docstring")  RobotModel::numDrivers "int
+RobotModel::numDrivers() ";
+
+%feature("docstring")  RobotModel::getDriver "RobotModelDriver
+RobotModel::getDriver(int index) ";
+
+%feature("docstring")  RobotModel::getDriver "RobotModelDriver
+RobotModel::getDriver(const char *name) ";
+
 %feature("docstring")  RobotModel::getConfig "void
 RobotModel::getConfig(std::vector< double > &out) ";
 
@@ -709,6 +725,66 @@ RobotModel::enableSelfCollision(int link1, int link2, bool value) ";
 
 %feature("docstring")  RobotModel::drawGL "void
 RobotModel::drawGL(bool keepAppearance=true) ";
+
+
+// File: classRobotModelDriver.xml
+%feature("docstring") RobotModelDriver "
+
+A reference to a driver of a RobotModel.
+
+C++ includes: robotmodel.h ";
+
+%feature("docstring")  RobotModelDriver::RobotModelDriver "RobotModelDriver::RobotModelDriver() ";
+
+%feature("docstring")  RobotModelDriver::getName "const char *
+RobotModelDriver::getName() ";
+
+%feature("docstring")  RobotModelDriver::getRobot "RobotModel
+RobotModelDriver::getRobot() ";
+
+%feature("docstring")  RobotModelDriver::getType "const char *
+RobotModelDriver::getType()
+
+Currently can be \"normal\", \"affine\", \"rotation\",
+\"translation\", or \"custom\". ";
+
+%feature("docstring")  RobotModelDriver::getAffectedLink "int
+RobotModelDriver::getAffectedLink()
+
+Returns the single affected link for \"normal\" links. ";
+
+%feature("docstring")  RobotModelDriver::getAffectedLinks "void
+RobotModelDriver::getAffectedLinks(std::vector< int > &links)
+
+Returns the driver's affected links. ";
+
+%feature("docstring")  RobotModelDriver::getAffineCoeffs "void
+RobotModelDriver::getAffineCoeffs(std::vector< double > &scale,
+std::vector< double > &offset)
+
+For \"affine\" links, returns the scale and offset of the driver value
+mapped to the world. ";
+
+%feature("docstring")  RobotModelDriver::setValue "void
+RobotModelDriver::setValue(double val)
+
+Sets the robot's config to correspond to the given driver value. ";
+
+%feature("docstring")  RobotModelDriver::getValue "double
+RobotModelDriver::getValue()
+
+Gets the current driver value from the robot's config. ";
+
+%feature("docstring")  RobotModelDriver::setVelocity "void
+RobotModelDriver::setVelocity(double val)
+
+Sets the robot's velocity to correspond to the given driver velocity
+value. ";
+
+%feature("docstring")  RobotModelDriver::getVelocity "double
+RobotModelDriver::getVelocity()
+
+Gets the current driver velocity value from the robot's velocity. ";
 
 
 // File: classRobotModelLink.xml
@@ -1373,6 +1449,9 @@ WorldModel::loadElement(const char *fn) ";
 %feature("docstring")  WorldModel::drawGL "void WorldModel::drawGL()
 ";
 
+%feature("docstring")  WorldModel::enableGeometryLoading "void
+WorldModel::enableGeometryLoading(bool enabled) ";
+
 
 // File: namespaceGeometry.xml
 
@@ -1985,39 +2064,87 @@ PyListFromVector(const std::vector< double > &x) ";
 %feature("docstring")  destroyCSpace "void destroyCSpace(int cspace)
 ";
 
+%feature("docstring")  setPlanJSONString "void
+setPlanJSONString(const char *string)
+
+Loads planner values from a JSON string. ";
+
+%feature("docstring")  getPlanJSONString "string getPlanJSONString()
+
+Saves planner values to a JSON string. ";
+
 %feature("docstring")  setPlanType "void setPlanType(const char
 *type)
 
 Sets the planner type.
 
-Valid values are \"prm\": Probabilistic roadmap
+Valid values are prm: the Probabilistic Roadmap algorithm
 
-\"rrt\": Rapidly-exploring Random Trees
+rrt: the Rapidly Exploring Random Trees algorithm
 
-\"sbl\": The SBL (single-query, bidirectional, lazy) planner ";
+sbl: the Single-Query Bidirectional Lazy planner
+
+sblprt: the probabilistic roadmap of trees (PRT) algorithm with SBL as
+the inter-root planner.
+
+rrt*: the RRT* algorithm for optimal motion planning
+
+prm*: the PRM* algorithm for optimal motion planning
+
+lazyprm*: the Lazy-PRM* algorithm for optimal motion planning
+
+lazyrrg*: the Lazy-RRG* algorithm for optimal motion planning
+
+fmm: the fast marching method algorithm for resolution-complete
+optimal motion planning
+
+fmm*: an anytime fast marching method algorithm for optimal motion
+planning ";
 
 %feature("docstring")  setPlanSetting "void setPlanSetting(const char
-*setting, double value)
+*setting, double value) ";
 
-Sets a setting for the planner.
+%feature("docstring")  setPlanSetting "void setPlanSetting(const char
+*setting, const char *value)
 
-Valid values are \"knn\": k value for the k-nearest neighbor
+Sets a numeric or string-valued setting for the planner.
+
+Valid numeric values are \"knn\": k value for the k-nearest neighbor
 connection strategy (only for PRM)
 
 \"connectionThreshold\": a milestone connection threshold
 
-\"perturbationRadius\": (only for RRT and SBL)
+\"perturbationRadius\": (for RRT and SBL)
 
-\"bidirectional\": 1 if bidirectional planning is requested (only for
-RRT)
+\"bidirectional\": 1 if bidirectional planning is requested (for RRT)
 
-\"grid\": 1 if a point selection grid should be used (only for SBL)
+\"grid\": 1 if a point selection grid should be used (for SBL)
 
 \"gridResolution\": resolution for the grid, if the grid should be
 used
 
-\"randomizeFrequency\": a grid randomization frequency (only for SBL)
-";
+\"randomizeFrequency\": a grid randomization frequency (for SBL)
+
+\"domainMin\",\"domainMax\": optional bounds on the CSpace feasible
+set. default uses a dynamic domain (for FMM, FMM*)
+
+\"shortcut\": nonzero if you wish to perform shortcutting after a
+first plan is found.
+
+\"restart\": nonzero if you wish to restart the planner to get better
+paths with the remaining time.
+
+Valid string values are \"domainMin\",\"domainMax\": optional bounds
+on the CSpace feasible set. default uses a dynamic domain (for FMM,
+FMM*)
+
+\"pointLocation\": a string designating a point location data
+structure. \"kdtree\" is supported, optionally followed by a weight
+vector (for PRM, RRT*, PRM*, LazyPRM*, LazyRRG*)
+
+\"restartTermCond\": used if the \"restart\" setting is true. This is
+a JSON string defining the termination condition (default value:
+\"{foundSolution:1;maxIters:1000}\") ";
 
 %feature("docstring")  makeNewPlan "int makeNewPlan(int cspace) ";
 
@@ -2041,39 +2168,87 @@ destroys internal data structures ";
 
 Sets the random seed used by the motion planner. ";
 
+%feature("docstring")  setPlanJSONString "void
+setPlanJSONString(const char *string)
+
+Loads planner values from a JSON string. ";
+
+%feature("docstring")  getPlanJSONString "string getPlanJSONString()
+
+Saves planner values to a JSON string. ";
+
 %feature("docstring")  setPlanType "void setPlanType(const char
 *type)
 
 Sets the planner type.
 
-Valid values are \"prm\": Probabilistic roadmap
+Valid values are prm: the Probabilistic Roadmap algorithm
 
-\"rrt\": Rapidly-exploring Random Trees
+rrt: the Rapidly Exploring Random Trees algorithm
 
-\"sbl\": The SBL (single-query, bidirectional, lazy) planner ";
+sbl: the Single-Query Bidirectional Lazy planner
+
+sblprt: the probabilistic roadmap of trees (PRT) algorithm with SBL as
+the inter-root planner.
+
+rrt*: the RRT* algorithm for optimal motion planning
+
+prm*: the PRM* algorithm for optimal motion planning
+
+lazyprm*: the Lazy-PRM* algorithm for optimal motion planning
+
+lazyrrg*: the Lazy-RRG* algorithm for optimal motion planning
+
+fmm: the fast marching method algorithm for resolution-complete
+optimal motion planning
+
+fmm*: an anytime fast marching method algorithm for optimal motion
+planning ";
 
 %feature("docstring")  setPlanSetting "void setPlanSetting(const char
-*setting, double value)
+*setting, double value) ";
 
-Sets a setting for the planner.
+%feature("docstring")  setPlanSetting "void setPlanSetting(const char
+*setting, const char *value)
 
-Valid values are \"knn\": k value for the k-nearest neighbor
+Sets a numeric or string-valued setting for the planner.
+
+Valid numeric values are \"knn\": k value for the k-nearest neighbor
 connection strategy (only for PRM)
 
 \"connectionThreshold\": a milestone connection threshold
 
-\"perturbationRadius\": (only for RRT and SBL)
+\"perturbationRadius\": (for RRT and SBL)
 
-\"bidirectional\": 1 if bidirectional planning is requested (only for
-RRT)
+\"bidirectional\": 1 if bidirectional planning is requested (for RRT)
 
-\"grid\": 1 if a point selection grid should be used (only for SBL)
+\"grid\": 1 if a point selection grid should be used (for SBL)
 
 \"gridResolution\": resolution for the grid, if the grid should be
 used
 
-\"randomizeFrequency\": a grid randomization frequency (only for SBL)
-";
+\"randomizeFrequency\": a grid randomization frequency (for SBL)
+
+\"domainMin\",\"domainMax\": optional bounds on the CSpace feasible
+set. default uses a dynamic domain (for FMM, FMM*)
+
+\"shortcut\": nonzero if you wish to perform shortcutting after a
+first plan is found.
+
+\"restart\": nonzero if you wish to restart the planner to get better
+paths with the remaining time.
+
+Valid string values are \"domainMin\",\"domainMax\": optional bounds
+on the CSpace feasible set. default uses a dynamic domain (for FMM,
+FMM*)
+
+\"pointLocation\": a string designating a point location data
+structure. \"kdtree\" is supported, optionally followed by a weight
+vector (for PRM, RRT*, PRM*, LazyPRM*, LazyRRG*)
+
+\"restartTermCond\": used if the \"restart\" setting is true. This is
+a JSON string defining the termination condition (default value:
+\"{foundSolution:1;maxIters:1000}\") ";
 
 %feature("docstring")  destroy "void destroy()
 
@@ -2244,6 +2419,8 @@ findRootsBounded(PyObject *startVals, PyObject *boundVals, int iter)
 Same as findRoots, but with given bounds (xmin,xmax) ";
 
 %feature("docstring")  destroy "void destroy()
+
+destroys internal data structures
 
 destroys internal data structures ";
 

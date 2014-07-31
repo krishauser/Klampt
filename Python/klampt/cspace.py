@@ -85,6 +85,8 @@ class MotionPlan:
         for (a,b) in opts.items():
             if a=='type':
                 motionplanning.setPlanType(str(b))
+            elif isinstance(b,str):
+                motionplanning.setPlanSetting(a,b)
             else:
                 motionplanning.setPlanSetting(a,float(b))
 
@@ -103,6 +105,8 @@ class MotionPlan:
         else:
             return self.planner.getPath(milestone1,milestone2)
 
+    def getRoadmap(self):
+        return self.planner.getRoadmap();
 
 
 
