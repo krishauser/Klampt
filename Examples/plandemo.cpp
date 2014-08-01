@@ -15,7 +15,7 @@
 #include <utils/ioutils.h>
 #include <utils/stringutils.h>
   //for easy timing 
-#include <timer.h>
+#include <Timer.h>
 #include <string.h>
 #include <time.h>
 #include <fstream>
