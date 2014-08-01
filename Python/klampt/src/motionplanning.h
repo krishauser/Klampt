@@ -42,18 +42,17 @@ void setPlanSetting(const char* setting,double value);
  * - "perturbationRadius": (for RRT and SBL)
  * - "bidirectional": 1 if bidirectional planning is requested (for RRT)
  * - "grid": 1 if a point selection grid should be used (for SBL)
- * - "gridResolution": resolution for the grid, if the grid should be used
+ * - "gridResolution": resolution for the grid, if the grid should be used 
+ *   (for SBL with grid, FMM, FMM*)
+ * - "suboptimalityFactor": allowable suboptimality (for RRT*, lazy PRM*,
+ *   lazy RRG*)
  * - "randomizeFrequency": a grid randomization frequency (for SBL)
- * - "domainMin","domainMax": optional bounds on the CSpace feasible set.
- *   default uses a dynamic domain (for FMM, FMM*)
  * - "shortcut": nonzero if you wish to perform shortcutting after a first
  *   plan is found.
  * - "restart": nonzero if you wish to restart the planner to get better
  *   paths with the remaining time.
  * 
  * Valid string values are:
- * - "domainMin","domainMax": optional bounds on the CSpace feasible set.
- *   default uses a dynamic domain (for FMM, FMM*)
  * - "pointLocation": a string designating a point location data structure.
  *   "kdtree" is supported, optionally followed by a weight vector (for
  *   PRM, RRT*, PRM*, LazyPRM*, LazyRRG*)
@@ -83,6 +82,7 @@ class CSpaceInterface
   void setNeighborhoodSampler(PyObject* pySamp);
   void setDistance(PyObject* pyDist);
   void setInterpolate(PyObject* pyInterp);
+  void setProperty(const char* key,const char* value);
 
   int index;
 };
@@ -124,6 +124,7 @@ class PlannerInterface
   PyObject* getPathEndpoints();
   PyObject* getPath(int milestone1,int milestone2);
   double getData(const char* setting);
+  PyObject* getStats();
   PyObject* getRoadmap();
   void dump(const char* fn);
 

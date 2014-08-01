@@ -2938,7 +2938,7 @@ SWIG_Python_NonDynamicSetAttr(PyObject *obj, PyObject *name, PyObject *value) {
 #define SWIGTYPE_p_PlannerInterface swig_types[1]
 #define SWIGTYPE_p__object swig_types[2]
 #define SWIGTYPE_p_char swig_types[3]
-#define SWIGTYPE_p_string swig_types[4]
+#define SWIGTYPE_p_std__string swig_types[4]
 static swig_type_info *swig_types[6];
 static swig_module_info swig_module = {swig_types, 5, 0, 0, 0, 0};
 #define SWIG_TypeQuery(name) SWIG_TypeQueryModule(&swig_module, &swig_module, name)
@@ -3373,7 +3373,7 @@ fail:
 
 SWIGINTERN PyObject *_wrap_getPlanJSONString(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  string result;
+  std::string result;
   
   if (!PyArg_ParseTuple(args,(char *)":getPlanJSONString")) SWIG_fail;
   {
@@ -3391,7 +3391,7 @@ SWIGINTERN PyObject *_wrap_getPlanJSONString(PyObject *SWIGUNUSEDPARM(self), PyO
       return NULL;
     }
   }
-  resultobj = SWIG_NewPointerObj((new string(static_cast< const string& >(result))), SWIGTYPE_p_string, SWIG_POINTER_OWN |  0 );
+  resultobj = SWIG_NewPointerObj((new std::string(static_cast< const std::string& >(result))), SWIGTYPE_p_std__string, SWIG_POINTER_OWN |  0 );
   return resultobj;
 fail:
   return NULL;
@@ -4044,6 +4044,65 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_CSpaceInterface_setProperty(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  CSpaceInterface *arg1 = (CSpaceInterface *) 0 ;
+  char *arg2 = (char *) 0 ;
+  char *arg3 = (char *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int res2 ;
+  char *buf2 = 0 ;
+  int alloc2 = 0 ;
+  int res3 ;
+  char *buf3 = 0 ;
+  int alloc3 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  PyObject * obj2 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OOO:CSpaceInterface_setProperty",&obj0,&obj1,&obj2)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_CSpaceInterface, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "CSpaceInterface_setProperty" "', argument " "1"" of type '" "CSpaceInterface *""'"); 
+  }
+  arg1 = reinterpret_cast< CSpaceInterface * >(argp1);
+  res2 = SWIG_AsCharPtrAndSize(obj1, &buf2, NULL, &alloc2);
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "CSpaceInterface_setProperty" "', argument " "2"" of type '" "char const *""'");
+  }
+  arg2 = reinterpret_cast< char * >(buf2);
+  res3 = SWIG_AsCharPtrAndSize(obj2, &buf3, NULL, &alloc3);
+  if (!SWIG_IsOK(res3)) {
+    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "CSpaceInterface_setProperty" "', argument " "3"" of type '" "char const *""'");
+  }
+  arg3 = reinterpret_cast< char * >(buf3);
+  {
+    try {
+      (arg1)->setProperty((char const *)arg2,(char const *)arg3);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      destroy();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      destroy();
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  if (alloc2 == SWIG_NEWOBJ) delete[] buf2;
+  if (alloc3 == SWIG_NEWOBJ) delete[] buf3;
+  return resultobj;
+fail:
+  if (alloc2 == SWIG_NEWOBJ) delete[] buf2;
+  if (alloc3 == SWIG_NEWOBJ) delete[] buf3;
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_CSpaceInterface_index_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   CSpaceInterface *arg1 = (CSpaceInterface *) 0 ;
@@ -4475,6 +4534,42 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_PlannerInterface_getStats(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  PlannerInterface *arg1 = (PlannerInterface *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject *result = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:PlannerInterface_getStats",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_PlannerInterface, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "PlannerInterface_getStats" "', argument " "1"" of type '" "PlannerInterface *""'"); 
+  }
+  arg1 = reinterpret_cast< PlannerInterface * >(argp1);
+  {
+    try {
+      result = (PyObject *)(arg1)->getStats();
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      destroy();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      destroy();
+      return NULL;
+    }
+  }
+  resultobj = result;
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_PlannerInterface_getRoadmap(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   PlannerInterface *arg1 = (PlannerInterface *) 0 ;
@@ -4635,9 +4730,10 @@ static PyMethodDef SwigMethods[] = {
 		"Loads planner values from a JSON string. \n"
 		""},
 	 { (char *)"getPlanJSONString", _wrap_getPlanJSONString, METH_VARARGS, (char *)"\n"
-		"getPlanJSONString() -> string\n"
+		"getPlanJSONString() -> std::string\n"
 		"\n"
-		"string getPlanJSONString()\n"
+		"std::string\n"
+		"getPlanJSONString()\n"
 		"\n"
 		"Saves planner values to a JSON string. \n"
 		""},
@@ -4681,7 +4777,7 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"Sets a numeric or string-valued setting for the planner.\n"
 		"\n"
-		"Valid numeric values are \"knn\": k value for the k-nearest neighbor\n"
+		"Valid numeric values are: \"knn\": k value for the k-nearest neighbor\n"
 		"connection strategy (only for PRM)\n"
 		"\n"
 		"\"connectionThreshold\": a milestone connection threshold\n"
@@ -4693,12 +4789,12 @@ static PyMethodDef SwigMethods[] = {
 		"\"grid\": 1 if a point selection grid should be used (for SBL)\n"
 		"\n"
 		"\"gridResolution\": resolution for the grid, if the grid should be\n"
-		"used\n"
+		"used (for SBL with grid, FMM, FMM*)\n"
+		"\n"
+		"\"suboptimalityFactor\": allowable suboptimality (for RRT*, lazy PRM*,\n"
+		"lazy RRG*)\n"
 		"\n"
 		"\"randomizeFrequency\": a grid randomization frequency (for SBL)\n"
-		"\n"
-		"\"domainMin\",\"domainMax\": optional bounds on the CSpace feasible\n"
-		"set. default uses a dynamic domain (for FMM, FMM*)\n"
 		"\n"
 		"\"shortcut\": nonzero if you wish to perform shortcutting after a\n"
 		"first plan is found.\n"
@@ -4706,13 +4802,9 @@ static PyMethodDef SwigMethods[] = {
 		"\"restart\": nonzero if you wish to restart the planner to get better\n"
 		"paths with the remaining time.\n"
 		"\n"
-		"Valid string values are \"domainMin\",\"domainMax\": optional bounds\n"
-		"on the CSpace feasible set. default uses a dynamic domain (for FMM,\n"
-		"FMM*)\n"
-		"\n"
-		"\"pointLocation\": a string designating a point location data\n"
-		"structure. \"kdtree\" is supported, optionally followed by a weight\n"
-		"vector (for PRM, RRT*, PRM*, LazyPRM*, LazyRRG*)\n"
+		"Valid string values are: \"pointLocation\": a string designating a\n"
+		"point location data structure. \"kdtree\" is supported, optionally\n"
+		"followed by a weight vector (for PRM, RRT*, PRM*, LazyPRM*, LazyRRG*)\n"
 		"\n"
 		"\"restartTermCond\": used if the \"restart\" setting is true. This is\n"
 		"a JSON string defining the termination condition (default value:\n"
@@ -4786,6 +4878,12 @@ static PyMethodDef SwigMethods[] = {
 		"void\n"
 		"CSpaceInterface::setInterpolate(PyObject *pyInterp) \n"
 		""},
+	 { (char *)"CSpaceInterface_setProperty", _wrap_CSpaceInterface_setProperty, METH_VARARGS, (char *)"\n"
+		"CSpaceInterface_setProperty(CSpaceInterface self, char const * key, char const * value)\n"
+		"\n"
+		"void\n"
+		"CSpaceInterface::setProperty(const char *key, const char *value) \n"
+		""},
 	 { (char *)"CSpaceInterface_index_set", _wrap_CSpaceInterface_index_set, METH_VARARGS, (char *)"CSpaceInterface_index_set(CSpaceInterface self, int index)"},
 	 { (char *)"CSpaceInterface_index_get", _wrap_CSpaceInterface_index_get, METH_VARARGS, (char *)"CSpaceInterface_index_get(CSpaceInterface self) -> int"},
 	 { (char *)"CSpaceInterface_swigregister", CSpaceInterface_swigregister, METH_VARARGS, NULL},
@@ -4841,6 +4939,12 @@ static PyMethodDef SwigMethods[] = {
 		"double\n"
 		"PlannerInterface::getData(const char *setting) \n"
 		""},
+	 { (char *)"PlannerInterface_getStats", _wrap_PlannerInterface_getStats, METH_VARARGS, (char *)"\n"
+		"PlannerInterface_getStats(PlannerInterface self) -> PyObject *\n"
+		"\n"
+		"PyObject *\n"
+		"PlannerInterface::getStats() \n"
+		""},
 	 { (char *)"PlannerInterface_getRoadmap", _wrap_PlannerInterface_getRoadmap, METH_VARARGS, (char *)"\n"
 		"PlannerInterface_getRoadmap(PlannerInterface self) -> PyObject *\n"
 		"\n"
@@ -4866,28 +4970,28 @@ static swig_type_info _swigt__p_CSpaceInterface = {"_p_CSpaceInterface", "CSpace
 static swig_type_info _swigt__p_PlannerInterface = {"_p_PlannerInterface", "PlannerInterface *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p__object = {"_p__object", "_object *|PyObject *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_char = {"_p_char", "char *", 0, 0, (void*)0, 0};
-static swig_type_info _swigt__p_string = {"_p_string", "string *", 0, 0, (void*)0, 0};
+static swig_type_info _swigt__p_std__string = {"_p_std__string", "std::string *", 0, 0, (void*)0, 0};
 
 static swig_type_info *swig_type_initial[] = {
   &_swigt__p_CSpaceInterface,
   &_swigt__p_PlannerInterface,
   &_swigt__p__object,
   &_swigt__p_char,
-  &_swigt__p_string,
+  &_swigt__p_std__string,
 };
 
 static swig_cast_info _swigc__p_CSpaceInterface[] = {  {&_swigt__p_CSpaceInterface, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_PlannerInterface[] = {  {&_swigt__p_PlannerInterface, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p__object[] = {  {&_swigt__p__object, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_char[] = {  {&_swigt__p_char, 0, 0, 0},{0, 0, 0, 0}};
-static swig_cast_info _swigc__p_string[] = {  {&_swigt__p_string, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_std__string[] = {  {&_swigt__p_std__string, 0, 0, 0},{0, 0, 0, 0}};
 
 static swig_cast_info *swig_cast_initial[] = {
   _swigc__p_CSpaceInterface,
   _swigc__p_PlannerInterface,
   _swigc__p__object,
   _swigc__p_char,
-  _swigc__p_string,
+  _swigc__p_std__string,
 };
 
 

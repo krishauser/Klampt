@@ -43,6 +43,9 @@ CSpaceInterface::setDistance(PyObject *pyDist) ";
 %feature("docstring")  CSpaceInterface::setInterpolate "void
 CSpaceInterface::setInterpolate(PyObject *pyInterp) ";
 
+%feature("docstring")  CSpaceInterface::setProperty "void
+CSpaceInterface::setProperty(const char *key, const char *value) ";
+
 
 // File: classGeneralizedIKObjective.xml
 %feature("docstring") GeneralizedIKObjective "
@@ -458,6 +461,9 @@ PlannerInterface::getPath(int milestone1, int milestone2) ";
 %feature("docstring")  PlannerInterface::getData "double
 PlannerInterface::getData(const char *setting) ";
 
+%feature("docstring")  PlannerInterface::getStats "PyObject *
+PlannerInterface::getStats() ";
+
 %feature("docstring")  PlannerInterface::getRoadmap "PyObject *
 PlannerInterface::getRoadmap() ";
 
@@ -511,6 +517,9 @@ PyCSpace::Distance(const Config &x, const Config &y) ";
 %feature("docstring")  PyCSpace::Interpolate "virtual void
 PyCSpace::Interpolate(const Config &x, const Config &y, double u,
 Config &out) ";
+
+%feature("docstring")  PyCSpace::Properties "virtual void
+PyCSpace::Properties(PropertyMap &props) const ";
 
 
 // File: classPyEdgePlanner.xml
@@ -2069,7 +2078,8 @@ setPlanJSONString(const char *string)
 
 Loads planner values from a JSON string. ";
 
-%feature("docstring")  getPlanJSONString "string getPlanJSONString()
+%feature("docstring")  getPlanJSONString "std::string
+getPlanJSONString()
 
 Saves planner values to a JSON string. ";
 
@@ -2109,7 +2119,7 @@ planning ";
 
 Sets a numeric or string-valued setting for the planner.
 
-Valid numeric values are \"knn\": k value for the k-nearest neighbor
+Valid numeric values are: \"knn\": k value for the k-nearest neighbor
 connection strategy (only for PRM)
 
 \"connectionThreshold\": a milestone connection threshold
@@ -2121,12 +2131,12 @@ connection strategy (only for PRM)
 \"grid\": 1 if a point selection grid should be used (for SBL)
 
 \"gridResolution\": resolution for the grid, if the grid should be
-used
+used (for SBL with grid, FMM, FMM*)
+
+\"suboptimalityFactor\": allowable suboptimality (for RRT*, lazy PRM*,
+lazy RRG*)
 
 \"randomizeFrequency\": a grid randomization frequency (for SBL)
-
-\"domainMin\",\"domainMax\": optional bounds on the CSpace feasible
-set. default uses a dynamic domain (for FMM, FMM*)
 
 \"shortcut\": nonzero if you wish to perform shortcutting after a
 first plan is found.
@@ -2134,13 +2144,9 @@ first plan is found.
 \"restart\": nonzero if you wish to restart the planner to get better
 paths with the remaining time.
 
-Valid string values are \"domainMin\",\"domainMax\": optional bounds
-on the CSpace feasible set. default uses a dynamic domain (for FMM,
-FMM*)
-
-\"pointLocation\": a string designating a point location data
-structure. \"kdtree\" is supported, optionally followed by a weight
-vector (for PRM, RRT*, PRM*, LazyPRM*, LazyRRG*)
+Valid string values are: \"pointLocation\": a string designating a
+point location data structure. \"kdtree\" is supported, optionally
+followed by a weight vector (for PRM, RRT*, PRM*, LazyPRM*, LazyRRG*)
 
 \"restartTermCond\": used if the \"restart\" setting is true. This is
 a JSON string defining the termination condition (default value:
@@ -2173,7 +2179,8 @@ setPlanJSONString(const char *string)
 
 Loads planner values from a JSON string. ";
 
-%feature("docstring")  getPlanJSONString "string getPlanJSONString()
+%feature("docstring")  getPlanJSONString "std::string
+getPlanJSONString()
 
 Saves planner values to a JSON string. ";
 
@@ -2213,7 +2220,7 @@ planning ";
 
 Sets a numeric or string-valued setting for the planner.
 
-Valid numeric values are \"knn\": k value for the k-nearest neighbor
+Valid numeric values are: \"knn\": k value for the k-nearest neighbor
 connection strategy (only for PRM)
 
 \"connectionThreshold\": a milestone connection threshold
@@ -2225,12 +2232,12 @@ connection strategy (only for PRM)
 \"grid\": 1 if a point selection grid should be used (for SBL)
 
 \"gridResolution\": resolution for the grid, if the grid should be
-used
+used (for SBL with grid, FMM, FMM*)
+
+\"suboptimalityFactor\": allowable suboptimality (for RRT*, lazy PRM*,
+lazy RRG*)
 
 \"randomizeFrequency\": a grid randomization frequency (for SBL)
-
-\"domainMin\",\"domainMax\": optional bounds on the CSpace feasible
-set. default uses a dynamic domain (for FMM, FMM*)
 
 \"shortcut\": nonzero if you wish to perform shortcutting after a
 first plan is found.
@@ -2238,13 +2245,9 @@ first plan is found.
 \"restart\": nonzero if you wish to restart the planner to get better
 paths with the remaining time.
 
-Valid string values are \"domainMin\",\"domainMax\": optional bounds
-on the CSpace feasible set. default uses a dynamic domain (for FMM,
-FMM*)
-
-\"pointLocation\": a string designating a point location data
-structure. \"kdtree\" is supported, optionally followed by a weight
-vector (for PRM, RRT*, PRM*, LazyPRM*, LazyRRG*)
+Valid string values are: \"pointLocation\": a string designating a
+point location data structure. \"kdtree\" is supported, optionally
+followed by a weight vector (for PRM, RRT*, PRM*, LazyPRM*, LazyRRG*)
 
 \"restartTermCond\": used if the \"restart\" setting is true. This is
 a JSON string defining the termination condition (default value:

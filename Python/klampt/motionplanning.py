@@ -97,9 +97,10 @@ def setPlanJSONString(*args):
 
 def getPlanJSONString():
   """
-    getPlanJSONString() -> string
+    getPlanJSONString() -> std::string
 
-    string getPlanJSONString()
+    std::string
+    getPlanJSONString()
 
     Saves planner values to a JSON string. 
     """
@@ -149,7 +150,7 @@ def setPlanSetting(*args):
 
     Sets a numeric or string-valued setting for the planner.
 
-    Valid numeric values are "knn": k value for the k-nearest neighbor
+    Valid numeric values are: "knn": k value for the k-nearest neighbor
     connection strategy (only for PRM)
 
     "connectionThreshold": a milestone connection threshold
@@ -161,12 +162,12 @@ def setPlanSetting(*args):
     "grid": 1 if a point selection grid should be used (for SBL)
 
     "gridResolution": resolution for the grid, if the grid should be
-    used
+    used (for SBL with grid, FMM, FMM*)
+
+    "suboptimalityFactor": allowable suboptimality (for RRT*, lazy PRM*,
+    lazy RRG*)
 
     "randomizeFrequency": a grid randomization frequency (for SBL)
-
-    "domainMin","domainMax": optional bounds on the CSpace feasible
-    set. default uses a dynamic domain (for FMM, FMM*)
 
     "shortcut": nonzero if you wish to perform shortcutting after a
     first plan is found.
@@ -174,13 +175,9 @@ def setPlanSetting(*args):
     "restart": nonzero if you wish to restart the planner to get better
     paths with the remaining time.
 
-    Valid string values are "domainMin","domainMax": optional bounds
-    on the CSpace feasible set. default uses a dynamic domain (for FMM,
-    FMM*)
-
-    "pointLocation": a string designating a point location data
-    structure. "kdtree" is supported, optionally followed by a weight
-    vector (for PRM, RRT*, PRM*, LazyPRM*, LazyRRG*)
+    Valid string values are: "pointLocation": a string designating a
+    point location data structure. "kdtree" is supported, optionally
+    followed by a weight vector (for PRM, RRT*, PRM*, LazyPRM*, LazyRRG*)
 
     "restartTermCond": used if the "restart" setting is true. This is
     a JSON string defining the termination condition (default value:
@@ -295,6 +292,15 @@ class CSpaceInterface(_object):
         """
         return _motionplanning.CSpaceInterface_setInterpolate(self, *args)
 
+    def setProperty(self, *args):
+        """
+        setProperty(CSpaceInterface self, char const * key, char const * value)
+
+        void
+        CSpaceInterface::setProperty(const char *key, const char *value) 
+        """
+        return _motionplanning.CSpaceInterface_setProperty(self, *args)
+
     __swig_setmethods__["index"] = _motionplanning.CSpaceInterface_index_set
     __swig_getmethods__["index"] = _motionplanning.CSpaceInterface_index_get
     if _newclass:index = _swig_property(_motionplanning.CSpaceInterface_index_get, _motionplanning.CSpaceInterface_index_set)
@@ -408,6 +414,15 @@ class PlannerInterface(_object):
         PlannerInterface::getData(const char *setting) 
         """
         return _motionplanning.PlannerInterface_getData(self, *args)
+
+    def getStats(self):
+        """
+        getStats(PlannerInterface self) -> PyObject *
+
+        PyObject *
+        PlannerInterface::getStats() 
+        """
+        return _motionplanning.PlannerInterface_getStats(self)
 
     def getRoadmap(self):
         """

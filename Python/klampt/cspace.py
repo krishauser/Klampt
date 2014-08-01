@@ -16,16 +16,48 @@ class CSpace:
 
     * indicates that the method does not need to be defined.
 
-    If sample is not defined, then subclasses should set self.bound to be a list
-    of pairs defining an axis-aligned bounding box.
+    To avoid memory leaks, CSpace.close() or motionplanning.destroy() must
+    be called when you are done.  (The latter deallocates all previously
+    created cspaces and planners)
+
+    If sample is not defined, then subclasses should set self.bound to be a
+    list of pairs defining an axis-aligned bounding box.  The setBounds method
+    is a convenient way of defining this.
 
     If visible is not defined, then paths are checked by subdivision, with the
     collision tolerance self.eps.
+
+    To help planners know a bit more about the CSpace, you can set the
+    self.properties member to a map from strings to values.  Useful values
+    are
+    - euclidean (0 or 1): indicates a euclidean space
+    - geodesic (0 or 1): indicates whether the interpolation is along
+      geodesics.
+    - volume (real): a size of the space
+    - minimum, maximum (real array): bounds on the space
+    - metric (string): the metric used by distance, can be "euclidean",
+      "weighted euclidean", "manhattan", "weighted manhattan", "Linf", etc.
+    - metricWeights (real array): weights used by weighted metrics
+    
+    volume is necessary for Lazy PRM* and Lazy RRG* to work.
+    
+    metricWeights is necessary for KD-tree point location structures to work,
+    for FMM methods to work, etc.
+
+    minimum/maximum can be used by grid-based methods (optional for FMM, FMM*).
     """
     def __init__(self):
         self.cspace = None
         self.eps = 1e-3
         self.bound = [(0,1)]
+        self.properties = {}
+
+    def setBounds(self,bounds):
+        """Convenience function: sets the sampling bound and the
+        space properties in one lie."""
+        self.bounds = bounds
+        self.properties["minimum"] = [b[0] for b in bounds]
+        self.properties["maximum"] = [b[1] for b in bounds]
 
     def close(self):
         if self.cspace != None:
@@ -53,6 +85,11 @@ class CSpace:
             self.cspace.setDistance(getattr(self,'distance'))
         if hasattr(self,'interpolate'):
             self.cspace.setInterpolate(getattr(self,'interpolate'))
+        for (k,v) in self.properties:
+            if isinstance(v,(list,tuple)):
+                self.cspace.setPropety(k," ".join([str(item) for item in v]))
+            else:
+                self.cspace.setProperty(k,str(v))
 
     def sample(self):
         """Overload this to define a nonuniform sampler.

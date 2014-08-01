@@ -236,6 +236,17 @@ public:
     }
   }
 
+  virtual void Properties(PropertyMap& props) const
+  {
+    props = properties;
+    if(!distance) {
+      props.set("euclidean",1);
+      props.set("metric","euclidean");
+      if(!interpolate)
+	props.set("geodesic",1);
+    }
+  }
+
   PyObject *sample,
     *sampleNeighborhood,
     *feasible,
@@ -243,6 +254,7 @@ public:
     *distance,
     *interpolate;
   double edgeResolution;
+  PropertyMap properties;
 };
 
 class PyEdgePlanner : public EdgePlanner
@@ -425,6 +437,13 @@ void CSpaceInterface::setInterpolate(PyObject* pyInterp)
   spaces[index]->interpolate = pyInterp;
 }
 
+void CSpaceInterface::setProperty(const char* key,const char* value)
+{
+  if(index < 0 || index >= (int)spaces.size() || spaces[index]==NULL) 
+    throw PyException("Invalid cspace index");
+  spaces[index]->properties[key] = value;
+}
+
 void setPlanJSONString(const char* string)
 {
   if(!factory.LoadJSON(string))
@@ -456,12 +475,10 @@ void setPlanSetting(const char* setting,double value)
     factory.useGrid = (bool)(int)(value);
   else if(0==strcmp(setting,"gridResolution"))
     factory.gridResolution = value;
+  else if(0==strcmp(setting,"suboptimalityFactor")) 
+    factory.suboptimalityFactor = value;
   else if(0==strcmp(setting,"randomizeFrequency"))
     factory.randomizeFrequency = (int)value;
-  else if(0==strcmp(setting,"domainMin"))
-    factory.domainMin.resize(1,value);
-  else if(0==strcmp(setting,"domainMax"))
-    factory.domainMax.resize(1,value);
   else if(0==strcmp(setting,"shortcut"))
     factory.shortcut = (value != 0);
   else if(0==strcmp(setting,"restart"))
@@ -473,15 +490,7 @@ void setPlanSetting(const char* setting,double value)
 
 void setPlanSetting(const char* setting,const char* value)
 {
-  if(0==strcmp(setting,"domainMin")) {
-    stringstream ss(value);
-    ss >> factory.domainMin;
-  }
-  else if(0==strcmp(setting,"domainMax")) {
-    stringstream ss(value);
-    ss >> factory.domainMax;
-  }
-  else if(0==strcmp(setting,"pointLocation"))
+  if(0==strcmp(setting,"pointLocation"))
     factory.pointLocation = value;
   else if(0==strcmp(setting,"restartTermCond"))
     factory.restartTermCond = value;
@@ -641,6 +650,21 @@ double PlannerInterface::getData(const char* setting)
     throw PyException("Invalid plan option");
     return 0;
   }
+}
+
+PyObject* PlannerInterface::getStats()
+{
+  if(index < 0 || index >= (int)plans.size() || plans[index]==NULL) 
+    throw PyException("Invalid plan index");  
+  PropertyMap stats;
+  plans[index]->GetStats(stats);
+  PyObject* res = PyDict_New();
+  for(PropertyMap::const_iterator i=stats.begin();i!=stats.end();i++) {
+    PyObject* value = PyString_FromString(i->second.c_str());
+    PyDict_SetItemString(res,i->first.c_str(),value);
+    Py_XDECREF(value);
+  }
+  return res;
 }
 
 PyObject* PlannerInterface::getRoadmap()
