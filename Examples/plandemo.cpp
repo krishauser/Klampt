@@ -14,6 +14,8 @@
   //defines paths and conversion routines
 #include <utils/ioutils.h>
 #include <utils/stringutils.h>
+  //for easy timing 
+#include <timer.h>
 #include <string.h>
 #include <time.h>
 #include <fstream>
@@ -91,9 +93,19 @@ bool SimplePlan(RobotWorld& world,int robot,const Config& qstart,const Config& q
 
   //5. Create the planner and run until the termination criterion stops it
   MotionPlannerInterface* planner = factory.Create(&cspace,qstart,qgoal);
+  Timer timer;
   string res = planner->Plan(path,cond);
-  cout<<"Planner terminated with condition "<<res<<endl;
+  //print some debugging information
+  cout<<"Planner terminated with condition "<<res<<" after "<<planner->NumIterations()<<" iters and time "<<timer.ElapsedTime()<<"s"<<endl;
+  if(!path.edges.empty())
+    cout<<"Solution path length: "<<path.Length()<<endl;
+  PropertyMap stats;
+  planner->GetStats(stats);
+  cout<<"Planner stats: ";
+  stats.Print(cout);
+  cout<<endl;
   delete planner;
+  //return true if a solution was found
   return !path.edges.empty();
 }
 
