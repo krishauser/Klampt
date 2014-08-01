@@ -35,6 +35,7 @@ public:
   virtual Real Distance(const Config& x,const Config& y);
   virtual bool IsFeasible(const Config& x);
   virtual EdgePlanner* LocalPlanner(const Config& x,const Config& y);
+  virtual void Properties(PropertyMap&) const;
 
   Robot& robot;
   //optional: can edit weights for distance metric and neighborhood sampling
@@ -78,6 +79,7 @@ public:
   virtual Real Distance(const Config& x,const Config& y);
   virtual bool IsFeasible(const Config& x);
   virtual EdgePlanner* LocalPlanner(const Config& x,const Config& y);
+  virtual void Properties(PropertyMap&) const;
 
   Robot& robot;
   const ArrayMapping& dofs;
@@ -135,6 +137,7 @@ class SingleRobotCSpace : public ExplicitCSpace
   virtual Real Distance(const Config& x, const Config& y);
   virtual void Interpolate(const Config& x,const Config& y,Real u,Config& out);
   virtual void Midpoint(const Config& x,const Config& y,Config& out);
+  virtual void Properties(PropertyMap&) const;
 
   virtual void GetJointLimits(Vector& bmin,Vector& bmax);
   virtual Real FreeWorkspaceBound(const Config& x,int constraint);
@@ -178,6 +181,7 @@ class SingleRobotCSpace2 : public SingleRobotCSpace
   virtual EdgePlanner* LocalPlanner(const Config& a,const Config& b);
   virtual void Sample(Config& x);
   virtual void SampleNeighborhood(const Config& c,Real r,Config& x);
+  virtual void Properties(PropertyMap&) const;
 
   vector<int> fixedDofs;
   vector<Real> fixedValues;
@@ -203,6 +207,7 @@ class SingleRigidObjectCSpace: public CSpace
   virtual void Interpolate(const Config& a,const Config& b,Real u,Config& out);
   virtual void Midpoint(const Config& a,const Config& b,Config& out);
   virtual EdgePlanner* LocalPlanner(const Config& x,const Config& y);
+  virtual void Properties(PropertyMap&) const;
 
   void InitializeCollisionPairs();
   bool CheckCollisionFree(const RigidTransform& T);
@@ -238,6 +243,7 @@ class MultiRobotCSpace : public CSpace
   virtual Real Distance(const Config& x, const Config& y);
   virtual void Interpolate(const Config& x,const Config& y,Real u,Config& out);
   virtual void Midpoint(const Config& x,const Config& y,Config& out);
+  virtual void Properties(PropertyMap&) const;
 
   RobotWorld& world;
   WorldPlannerSettings* settings;

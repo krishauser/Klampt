@@ -128,6 +128,67 @@ bool RobotCSpace::IsFeasible(const Config& x)
   return true;
 }
 
+void RobotCSpace::Properties(PropertyMap& map) const
+{
+  int euclidean = 1;
+  Real v = 1;
+  int dim = robot.q.n;
+  Vector vmin(robot.qMin),vmax(robot.qMax);
+  vector<Real> weights;
+  if(jointWeights.empty()) weights.resize(robot.q.n,1.0);
+  else weights = jointWeights;
+  for(int i=0;i<robot.joints.size();i++) {
+    int link = robot.joints[i].linkIndex;
+    switch(robot.joints[i].type) {
+    case RobotJoint::Normal:
+      v*=robot.qMax(link)-robot.qMin(link);
+      break;
+    case RobotJoint::Weld:
+      dim--;
+      break;
+    case RobotJoint::Spin:
+      v*=TwoPi;
+      vmin(link) = 0;
+      vmax(link) = TwoPi;
+      euclidean = 0;
+      break;
+    case RobotJoint::Floating:
+    case RobotJoint::BallAndSocket:
+      v*= Pi*4.0/3.0;
+      weights[link] = weights[link-1] = weights[link-2] = floatingRotationWeight;
+      euclidean = 0;
+      break;
+    case RobotJoint::FloatingPlanar:
+      vmin(link) = 0;
+      vmax(link) = TwoPi;
+      v*= TwoPi;
+      weights[link] = floatingRotationWeight;
+      euclidean = 0;
+      break;
+    default:
+      euclidean = 0;
+      break;
+    }
+  }
+
+  map.set("euclidean",euclidean);
+  map.set("geodesic",1);
+  if(dim < robot.q.n) {
+    map.set("submanifold",1);
+    map.set("intrinsicDimension",dim);
+  }
+  map.setArray("minimum",vector<Real>(vmin));
+  map.setArray("maximum",vector<Real>(vmax));
+  map.set("volume",v);
+  if(norm == 2)
+    map.set("metric","weighted euclidean");
+  else if(norm == 1)
+    map.set("metric","weighted manhattan");
+  else if(IsInf(norm))
+    map.set("metric","weighted Linf");
+  map.setArray("metricWeights",weights);
+}
+
 EdgePlanner* RobotCSpace::LocalPlanner(const Config& x,const Config& y) 
 {
   return new TrueEdgePlanner(this,x,y);
@@ -392,6 +453,12 @@ EdgePlanner* ActiveRobotCSpace::LocalPlanner(const Config& x,const Config& y)
   return new TrueEdgePlanner(this,x,y);
 }
 
+
+void ActiveRobotCSpace::Properties(PropertyMap& map) const
+{
+  //TODO
+}
+
 ActiveRobotGeodesicManifold::ActiveRobotGeodesicManifold(Robot& _robot,const ArrayMapping& _dofs)
   :robot(_robot),dofs(_dofs)
 {
@@ -483,7 +550,7 @@ bool SingleRobotCSpace::CheckJointLimits(const Config& x)
     if(robot->joints[i].type == RobotJoint::Normal || robot->joints[i].type == RobotJoint::Weld) {
       int k=robot->joints[i].linkIndex;
       if(x(k) < robot->qMin(k) || x(k) > robot->qMax(k)) {
-	//printf("Joint %d value %g out of bounds [%g,%g]\n",i,x(i),robot->qMin(i),robot->qMax(i));
+	printf("Joint %d value %g out of bounds [%g,%g]\n",i,x(i),robot->qMin(i),robot->qMax(i));
 	return false;
       }
     }
@@ -491,7 +558,7 @@ bool SingleRobotCSpace::CheckJointLimits(const Config& x)
   for(size_t i=0;i<robot->drivers.size();i++) {
     Real v=robot->GetDriverValue(i);
     if(v < robot->drivers[i].qmin || v > robot->drivers[i].qmax) {
-      //printf("Driver %d value %g out of bounds [%g,%g]\n",i,v,robot->drivers[i].qmin,robot->drivers[i].qmax);
+      printf("Driver %d value %g out of bounds [%g,%g]\n",i,v,robot->drivers[i].qmin,robot->drivers[i].qmax);
       return false;
     }
   }
@@ -775,6 +842,64 @@ void SingleRobotCSpace::Midpoint(const Config& x,const Config& y,Config& out)
   Interpolate(x,y,0.5,out);
 }
 
+void SingleRobotCSpace::Properties(PropertyMap& map) const
+{
+  Robot* robot = world.robots[index].robot;
+  int euclidean = 1;
+  Real v = 1;
+  int dim = robot->q.n;
+  Vector vmin(robot->qMin),vmax(robot->qMax);
+  const Vector& w=settings->robotSettings[index].distanceWeights;
+  vector<Real> weights;
+  if(w.empty()) weights.resize(robot->q.n,1.0);
+  else weights = w;
+  for(int i=0;i<robot->joints.size();i++) {
+    int link = robot->joints[i].linkIndex;
+    switch(robot->joints[i].type) {
+    case RobotJoint::Normal:
+      v*=robot->qMax(link)-robot->qMin(link);
+      break;
+    case RobotJoint::Weld:
+      dim--;
+      break;
+    case RobotJoint::Spin:
+      v*=TwoPi;
+      vmin(link) = 0;
+      vmax(link) = TwoPi;
+      euclidean = 0;
+      break;
+    case RobotJoint::Floating:
+    case RobotJoint::BallAndSocket:
+      v*= Pi*4.0/3.0;
+      weights[link] = weights[link-1] = weights[link-2];
+      euclidean = 0;
+      break;
+    case RobotJoint::FloatingPlanar:
+      vmin(link) = 0;
+      vmax(link) = TwoPi;
+      v*= TwoPi;
+      euclidean = 0;
+      break;
+    default:
+      euclidean = 0;
+      break;
+    }
+  }
+
+  map.set("euclidean",euclidean);
+  map.set("geodesic",1);
+  if(dim < robot->q.n) {
+    map.set("submanifold",1);
+    map.set("intrinsicDimension",dim);
+  }
+  map.setArray("minimum",vector<Real>(vmin));
+  map.setArray("maximum",vector<Real>(vmax));
+  map.set("volume",v);
+  map.set("metric","weighted Linf");
+  map.setArray("metricWeights",weights);
+}
+
+
 /*
 vector<pair<int,int> > linkIndices;
 vector<vector<Geometry::CollisionMeshQueryEnhanced> > linkCollisions;
@@ -1023,6 +1148,38 @@ void SingleRobotCSpace2::SampleNeighborhood(const Config& c,Real r,Config& x)
 }
 
 
+void SingleRobotCSpace2::Properties(PropertyMap& map) const
+{
+  SingleRobotCSpace::Properties(map);
+  Robot* robot = GetRobot();
+  if(!fixedDofs.empty()) {
+    int dim;
+    if(map.get("intrinsicDimension",dim))
+      ;
+    else {
+      dim = robot->q.n;
+      dim -= fixedDofs.size();
+    }
+    map.set("intrinsicDimension",dim);
+    Real v;
+    map.get("volume",v);
+    vector<Real> minimum,maximum;
+    map.getArray("minimum",minimum);
+    map.getArray("maximum",maximum);
+    for(size_t i=0;i<fixedDofs.size();i++) {
+      int k=fixedDofs[i];
+      if(robot->qMax[k] != robot->qMin[k])
+	v /= (robot->qMax[k]-robot->qMin[k]);
+      minimum[k] = maximum[k] = fixedValues[i];
+    }
+    map.set("volume",v);
+    map.setArray("minimum",minimum);
+    map.setArray("maximum",maximum);    
+  }
+}
+
+
+
 SingleRigidObjectCSpace::SingleRigidObjectCSpace(RobotWorld& _world,int _index,WorldPlannerSettings* _settings)
   :world(_world),index(_index),settings(_settings),collisionPairsInitialized(false)
 {
@@ -1116,6 +1273,19 @@ void SingleRigidObjectCSpace::SampleNeighborhood(const Config& c,Real r,Config& 
 EdgePlanner* SingleRigidObjectCSpace::LocalPlanner(const Config& a,const Config& b)
 {
   return new BisectionEpsilonEdgePlanner(this,a,b,settings->objectSettings[index].collisionEpsilon);
+}
+
+void SingleRigidObjectCSpace::Properties(PropertyMap& map) const
+{
+  map.set("euclidean",0);
+  map.set("geodesic",1);
+  map.set("metric","weighted euclidean");
+  vector<Real> weights(6);
+  Real wt = settings->objectSettings[index].translationWeight;
+  Real wr = settings->objectSettings[index].rotationWeight;
+  weights[0] = weights[1] = weights[2] = Sqrt(wt);
+  weights[3] = weights[4] = weights[5] = Sqrt(wr);
+  map.setArray("metricWeights",weights);
 }
 
 
@@ -1239,4 +1409,12 @@ void MultiRobotCSpace::Midpoint(const Config& x,const Config& y,Config& out)
   robot.SplitRefs(out,outelements);  
   for(size_t i=0;i<elementSpaces.size();i++) 
     elementSpaces[i]->Midpoint(xelements[i],yelements[i],outelements[i]);
+}
+
+
+void MultiRobotCSpace::Properties(PropertyMap& map) const
+{
+  map.set("euclidean",0);
+  map.set("geodesic",1);
+  //TODO: inspect the robots and objects
 }

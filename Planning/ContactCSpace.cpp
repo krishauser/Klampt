@@ -235,6 +235,22 @@ bool ContactCSpace::SolveContact(int numIters,Real dist)
 
   return res;
 }
+
+void ContactCSpace::Properties(PropertyMap& map) const
+{
+  SingleRobotCSpace2::Properties(map);
+  if(!contactIK.empty()) {
+    int dim;
+    if(map.get("intrinsicDimensionality",dim))
+      ;
+    else
+      dim = GetRobot()->q.n;
+    for(size_t i=0;i<contactIK.size();i++)
+      dim -= IKGoal::NumDims(contactIK[i].posConstraint)+IKGoal::NumDims(contactIK[i].rotConstraint);
+    map.set("intrinsicDimensionality",dim);
+    map.set("submanifold",1);
+  }
+}
   
 
 
@@ -455,3 +471,18 @@ void MultiContactCSpace::Midpoint(const Config& x,const Config& y,Config& out)
   SolveContact(out);
 }
 
+void MultiContactCSpace::Properties(PropertyMap& map) const
+{
+  MultiRobotCSpace::Properties(map);
+  if(!closedChainConstraints.empty()) {
+    int dim;
+    if(map.get("intrinsicDimensionality",dim))
+      ;
+    else
+      dim = aggregateRobot.q.n;
+    for(size_t i=0;i<closedChainConstraints.size();i++)
+      dim -= IKGoal::NumDims(closedChainConstraints[i].posConstraint)+IKGoal::NumDims(closedChainConstraints[i].rotConstraint);
+    map.set("intrinsicDimensionality",dim);
+    map.set("submanifold",1);
+  }
+}

@@ -59,7 +59,8 @@ void WorldPlannerSettings::InitializeDefault(RobotWorld& world)
   for(size_t i=0;i<objectSettings.size();i++) {
     objectSettings[i].worldBounds = bounds;
     objectSettings[i].touchable = true;
-    objectSettings[i].collisionEpsilon = 0.005;
+    //1cm or 0.57 degrees movement allowed between checked points
+    objectSettings[i].collisionEpsilon = 0.01;
     objectSettings[i].translationWeight = 1.0;
     objectSettings[i].rotationWeight = Radius(world.rigidObjects[i].object->geometry);
   }
@@ -67,7 +68,8 @@ void WorldPlannerSettings::InitializeDefault(RobotWorld& world)
   robotSettings.resize(world.robots.size());
   for(size_t i=0;i<robotSettings.size();i++) {
     robotSettings[i].worldBounds = bounds;
-    robotSettings[i].collisionEpsilon = 0.005;
+    //1cm or 0.57 degrees movement allowed between checked points
+    robotSettings[i].collisionEpsilon = 0.01;
     robotSettings[i].distanceWeights.clear();
     robotSettings[i].worldBounds = bounds;
     robotSettings[i].contactEpsilon = 0.001;

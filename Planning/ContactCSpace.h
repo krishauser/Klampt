@@ -29,6 +29,7 @@ class ContactCSpace : public SingleRobotCSpace2
 
   virtual void Interpolate(const Config& x,const Config& y,Real u,Config& out);
   virtual void Midpoint(const Config& x,const Config& y,Config& out);
+  virtual void Properties(PropertyMap&) const;
 
   void AddContact(const IKGoal& goal);
   void AddContact(int link,const Vector3& localPos,const Vector3& worldPos);
@@ -79,6 +80,7 @@ class MultiContactCSpace : public MultiRobotCSpace
   virtual bool IsFeasible(const Config&);
   virtual void Interpolate(const Config& x,const Config& y,Real u,Config& out);
   virtual void Midpoint(const Config& x,const Config& y,Config& out);
+  virtual void Properties(PropertyMap&) const;
 
   bool SolveContact(Config& x,int numIters=0,Real tol=0);
   Real ContactDistance();

@@ -21,6 +21,7 @@ public:
   virtual EdgePlanner* LocalPlanner(const State& a,const State& b);
   virtual Real Distance(const State& x, const State& y);
   virtual void Interpolate(const State& x,const State& y,Real u,State& out);
+  virtual void Properties(PropertyMap& props) const;
   bool IsFeasible(const Config& q,const Config& dq);
 
   CSpace* cspace;

@@ -105,6 +105,32 @@ void RampCSpaceAdaptor::Interpolate(const State& x,const State& y,Real u,State& 
   }
 }
 
+void RampCSpaceAdaptor::Properties(PropertyMap& props) const
+{
+  cspace->Properties(props);
+  props.set("euclidean",0);
+  props.set("geodesic",1);
+  Real v;
+  if(!props.get("volume",v)) {
+    v = 1.0;
+    for(size_t i=0;i<qMin.size();i++)
+      v *= qMax[i]-qMin[i];
+  }
+  for(size_t i=0;i<velMax.size();i++)
+    v *= 2.0*velMax[i];
+  props.set("metric","execution time");
+  props.set("volume",v);
+  vector<Real> qvmin,qvmax;
+  qvmin = qMin;
+  qvmax = qMax;
+  for(size_t i=0;i<velMax.size();i++) {
+    qvmin.push_back(-velMax[i]); 
+    qvmax.push_back(velMax[i]); 
+  }
+  props.setArray("minimum",qvmin);
+  props.setArray("maximum",qvmax);
+  props.remove("diameter");
+}
 
 
 
