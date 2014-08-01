@@ -26,11 +26,7 @@ void PathFrame::set(MultiPathResource* r)
   linearpath = NULL;
 
   blockSignals(true);
-  Real minTime = 0, maxTime = 1;
-  if(r->path.HasTiming()) {
-    minTime = r->path.sections.front().times.front();
-    maxTime = r->path.sections.back().times.back();
-  }
+  Real minTime = r->path.StartTime(), maxTime = r->path.EndTime();
   ui->spin_duration->setEnabled(true);
   ui->spin_duration->setValue(maxTime-minTime);
   ui->playFrame->UpdatePlayerTimeRange(minTime,maxTime);

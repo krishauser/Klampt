@@ -371,13 +371,7 @@ void ViewResource::RenderMultiPath(const MultiPathResource* rc,Real pathTime)
   }
   Config oldq = pathViewer.robot->q;
 
-  Real minTime = 0, maxTime = 1;
-  if(rc->path.HasTiming()) {
-    minTime = rc->path.sections.front().times.front();
-    maxTime = rc->path.sections.back().times.back();
-  }
-  else
-    pathTime /= rc->path.sections.size();
+  Real minTime = rc->path.StartTime(), maxTime = rc->path.EndTime();
   //do bouncing behavior
   double cnt = (pathTime-minTime)/(maxTime-minTime);
   int n = (int)Floor(cnt);
