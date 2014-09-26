@@ -729,7 +729,7 @@ int RealTimePerturbationIKPlanner::PlanFrom(ParabolicRamp::DynamicPath& path,Rea
 
 
 RealTimeRRTPlanner::RealTimeRRTPlanner()
-  : delta(0.3),smoothTime(0.5),ikSolveProbability(1.0)
+  : delta(0.3),smoothTime(0.5),ikSolveProbability(0.5)
 {}
 
 void RealTimeRRTPlanner::Reset(SmartPointer<PlannerObjectiveBase> newgoal)
@@ -1019,7 +1019,7 @@ int RealTimeRRTPlanner::PlanFrom(ParabolicRamp::DynamicPath& path,Real cutoff)
 	}
       }
       else {
-	fprintf(flog,"Extend + IK succeeded but path check failed\n");
+	//fprintf(flog,"Extend + IK succeeded but path check failed\n");
 	n=delnodes[0];
 	
 	//can't use these nodes if they don't end in zero velocity!
@@ -1174,7 +1174,7 @@ int RealTimeRRTPlanner::PlanFrom(ParabolicRamp::DynamicPath& path,Real cutoff)
 
 
 RealTimeTreePlanner::RealTimeTreePlanner()
-  : delta(0.3),smoothTime(0.5),ikSolveProbability(1.0)
+  : delta(0.3),smoothTime(0.5),ikSolveProbability(0.5)
 {}
 
 void RealTimeTreePlanner::Reset(SmartPointer<PlannerObjectiveBase> newgoal)
@@ -1737,7 +1737,8 @@ int RealTimeTreePlanner::PlanFrom(ParabolicRamp::DynamicPath& path,Real cutoff)
     if(ikSolveProbability > 0 && (i%3 == 1 || i+1 == path.ramps.size())) {
       //check the ik extension
       //nik=(RandBool(ikSolveProbability)?TryIKExtend(n,true):NULL);
-      nik=TryIKExtend(n,true);
+      //nik=TryIKExtend(n,true);
+      nik=TryIKExtend(n,false);
       //if(nik) fprintf(flog,"IK node %d\n",i+1);
       if(nik) numIKExisting++;
       if(nik && nik->totalCost < bestTotalCost) {
@@ -1810,6 +1811,7 @@ int RealTimeTreePlanner::PlanFrom(ParabolicRamp::DynamicPath& path,Real cutoff)
     }
     //fix up the split paths
 
+    //fprintf(flog,"Extended to node with cost %g, best is %g\n",n->totalCost,bestTotalCost);
     if(n->totalCost < bestTotalCost) {
       //fprintf(flog,"Actual cost %g < %g\n",n->totalCost,bestTotalCost);
       numImproveNodes++;
@@ -1825,14 +1827,18 @@ int RealTimeTreePlanner::PlanFrom(ParabolicRamp::DynamicPath& path,Real cutoff)
       }
     }
     
-    nik=(RandBool(ikSolveProbability)?TryIKExtend(n,true):NULL);
-    if(nik)
+    //It looks like setting search=true is detremental in some narrow passages
+    //nik=(RandBool(ikSolveProbability)?TryIKExtend(n,true):NULL);
+    nik=(RandBool(ikSolveProbability)?TryIKExtend(n,false):NULL);
+    if(nik) {
+      //fprintf(flog,"IK to node with cost %g, best is %g\n",nik->totalCost,bestTotalCost);
       numIKNodes++;
+    }
     if(nik && nik->totalCost < bestTotalCost) {
       numIKImproveNodes++;
       Node* n2 = SplitEdge(nik->getParent(),nik,0.5); 
       if(!cspace->IsFeasible(n2->q)) {
-	fprintf(flog,"Extend + IK succeeded but path check failed\n");
+	//fprintf(flog,"Extend + IK succeeded but path check failed\n");
 	continue;
       }
       //fprintf(flog,"Actual cost %g <=> %g\n",nik->totalCost,bestTotalCost);
@@ -1843,7 +1849,7 @@ int RealTimeTreePlanner::PlanFrom(ParabolicRamp::DynamicPath& path,Real cutoff)
 	bestTotalCost = nik->totalCost;
       }
       else {
-	fprintf(flog,"Extend + IK succeeded but path check failed\n");
+	//fprintf(flog,"Extend + IK succeeded but path check failed\n");
 	numUnreachableIKNodes++;
 
 	if(split==n2) {
