@@ -1,5 +1,5 @@
 #include "WorldGUI.h"
-#include "IO/XmlWorld.h"
+#include <string.h>
 #include <utils/stringutils.h>
 #include <GLdraw/GL.h>
 #include <GLdraw/drawextra.h>
@@ -34,13 +34,8 @@ bool WorldGUIBackend::LoadFile(const char* fn)
 {
     const char* ext=FileExtension(fn);
     if(0==strcmp(ext,"xml")) {
-      XmlWorld xmlWorld;
-      if(!xmlWorld.Load(fn)) {
+      if(!world->LoadXML(fn)) {
 	printf("Error loading world file %s\n",fn);
-	return false;
-      }
-      if(!xmlWorld.GetWorld(*world)) {
-	printf("Error loading world from %s\n",fn);
 	return false;
       }
     }
@@ -55,7 +50,6 @@ bool WorldGUIBackend::LoadFile(const char* fn)
 
 bool WorldGUIBackend::LoadCommandLine(int argc,const char** argv)
 {
-  XmlWorld xmlWorld;
   vector<string> configs;
 
   world->lights.resize(1);
@@ -77,11 +71,7 @@ bool WorldGUIBackend::LoadCommandLine(int argc,const char** argv)
     else {
       const char* ext=FileExtension(argv[i]);
       if(0==strcmp(ext,"xml")) {
-	if(!xmlWorld.Load(argv[i])) {
-	  printf("Error loading world file %s\n",argv[i]);
-	  return false;
-	}
-	if(!xmlWorld.GetWorld(*world)) {
+	if(!world->LoadXML(argv[i])) {
 	  printf("Error loading world from %s\n",argv[i]);
 	  return false;
 	}
