@@ -1,7 +1,7 @@
 #include "ResourceGUI.h"
+#include "IO/XmlWorld.h"
 #include "utils/stringutils.h"
 #include "utils/ioutils.h"
-#include "IO/XmlWorld.h"
 
 ResourceGUIBackend::ResourceGUIBackend(RobotWorld* world,ResourceManager* library)
   :WorldGUIBackend(world),resources(library)
@@ -96,7 +96,8 @@ bool ResourceGUIBackend::LoadCommandLine(int argc,const char** argv)
       }
       else {
 	//try loading into the world
-	if(world->LoadElement(argv[i])>= 0) {
+	const char* ext = FileExtension(argv[i]);
+	if(world->CanLoadElementExt(ext) && world->LoadElement(argv[i])>= 0) {
 	  //loaded successfully
 	}
 	else {
