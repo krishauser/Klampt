@@ -550,7 +550,7 @@ bool SingleRobotCSpace::CheckJointLimits(const Config& x)
     if(robot->joints[i].type == RobotJoint::Normal || robot->joints[i].type == RobotJoint::Weld) {
       int k=robot->joints[i].linkIndex;
       if(x(k) < robot->qMin(k) || x(k) > robot->qMax(k)) {
-	printf("Joint %d value %g out of bounds [%g,%g]\n",i,x(i),robot->qMin(i),robot->qMax(i));
+	//printf("Joint %d value %g out of bounds [%g,%g]\n",i,x(i),robot->qMin(i),robot->qMax(i));
 	return false;
       }
     }
@@ -558,7 +558,7 @@ bool SingleRobotCSpace::CheckJointLimits(const Config& x)
   for(size_t i=0;i<robot->drivers.size();i++) {
     Real v=robot->GetDriverValue(i);
     if(v < robot->drivers[i].qmin || v > robot->drivers[i].qmax) {
-      printf("Driver %d value %g out of bounds [%g,%g]\n",i,v,robot->drivers[i].qmin,robot->drivers[i].qmax);
+      //printf("Driver %d value %g out of bounds [%g,%g]\n",i,v,robot->drivers[i].qmin,robot->drivers[i].qmax);
       return false;
     }
   }
@@ -677,6 +677,7 @@ string SingleRobotCSpace::ObstacleName(int obstacle)
 
 bool SingleRobotCSpace::IsFeasible(const Config& x,int constraint)
 {
+  FatalError("Don't do IsFeasible per constraint! expensive");
   Robot* robot=GetRobot();
   if(constraint < (int)robot->joints.size()) {
     if(robot->joints[constraint].type == RobotJoint::Normal  || robot->joints[constraint].type == RobotJoint::Weld) {
@@ -770,7 +771,9 @@ EdgePlanner* SingleRobotCSpace::LocalPlanner(const Config& a,const Config& b,int
 
 EdgePlanner* SingleRobotCSpace::LocalPlanner(const Config& a,const Config& b)
 {
-  return new BisectionEpsilonExplicitEdgePlanner(this,a,b,settings->robotSettings[index].collisionEpsilon);
+  return new BisectionEpsilonEdgePlanner(this,a,b,settings->robotSettings[index].collisionEpsilon);
+  //uncomment this if you need an explicit edge planner
+  //return new BisectionEpsilonExplicitEdgePlanner(this,a,b,settings->robotSettings[index].collisionEpsilon);
   //return new ExplicitEdgePlanner(this,a,b);
 }
 
