@@ -42,6 +42,8 @@ class RobotWorld
 {
  public:
   RobotWorld();
+  bool LoadXML(const char* fn);
+  bool SaveXML(const char* fn,const char* elementDir);
   void UpdateGeometry();
   void SetGLLights();
   void DrawGL();
@@ -92,6 +94,8 @@ class RobotWorld
   ///Loads an element from the file, using its extension to figure out what
   ///type it is.
   int LoadElement(const string& fn);
+  ///Returns true if the given extension is loadable as an element
+  bool CanLoadElementExt(const char* ext) const;
 
   //viewport info
   Camera::Camera camera;

@@ -4,10 +4,31 @@
 #include <GLdraw/GLError.h>
 #include <string.h>
 #include <meshing/IO.h>
+#include <IO/XmlWorld.h>
 
 RobotWorld::RobotWorld()
 {
   background.set(0.4,0.4,1,0);
+}
+
+bool RobotWorld::LoadXML(const char* fn)
+{
+  XmlWorld xmlWorld;
+  if(!xmlWorld.Load(fn)) {
+    printf("RobotWorld::LoadXML: Error loading world file %s\n",fn);
+    return false;
+  }
+  if(!xmlWorld.GetWorld(*this)) {
+    printf("RobotWorld::LoadXML: Error extracting world data from %s\n",fn);
+    return false;
+  }
+  return true;
+}
+
+bool RobotWorld::SaveXML(const char* fn,const char* elementDir)
+{
+  fprintf(stderr,"RobotWorld::SaveXML: Saving worlds is not implemented yet\n");
+  return false;
 }
 
 int RobotWorld::NumIDs() const
@@ -316,7 +337,7 @@ int RobotWorld::LoadTerrain(const string& fn)
     delete t;
     return -1;
   }
-  AABB3D bb = t->geometry.GetAABB();
+  //AABB3D bb = t->geometry.GetAABB();
   //printf("Environment %s bounding box [%g,%g]x[%g,%g]x[%g,%g]\n",fn.c_str(),bb.bmin.x,bb.bmax.x,bb.bmin.y,bb.bmax.y,bb.bmin.z,bb.bmax.z);
   const char* justfn = GetFileName(fn.c_str());
   char* buf = new char[strlen(justfn)+1];
@@ -541,3 +562,17 @@ int RobotWorld::LoadElement(const string& sfn)
   }
 }
 
+bool RobotWorld::CanLoadElementExt(const char* ext) const
+{
+  if(!ext) return false;
+  if(0==strcmp(ext,"rob") || 0==strcmp(ext,"urdf")) {
+    return true;
+  }
+  if(0==strcmp(ext,"obj")) {
+    return true;
+  }
+  if(0==strcmp(ext,"env") || Geometry::AnyGeometry3D::CanLoadExt(ext)) {
+    return true;
+  }
+  return false;
+}
