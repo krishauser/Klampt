@@ -96,15 +96,15 @@ velmax	inf inf inf inf inf inf 0 0 0 10 0 0 0 0 0 1.5 1.5 1.5 1.5 4 0 4 4 0 0 0 
 
 accmax	inf inf inf inf inf inf 0 0 0 4 0 0 0 0 0 4 4 4 4 4 0 4 4 0 0 0 0 0 0 0 0 0 0 0 0 4 4 4 4 4 0 4 4 0 0 0 0 0 0 0 0 0 0 0 
 
-noselfcollision	6 7	6 12	6 15	6 16	6 35	6 36	
-noselfcollision	7 12	7 15	7 16	7 35	7 36	
-noselfcollision	8 12	8 15	8 16	8 35	8 36	
-noselfcollision	9 15	9 16	9 33	9 35	9 36	
+noselfcollision	6 7	6 8 	6 9	6 12	6 13	6 15	6 16	6 17	6 33	6 35	6 36 	6 37	6 53	
+noselfcollision	7 8	7 9	7 12	7 13	7 15	7 16	7 17	7 33	7 35	7 36	7 37	7 53
+noselfcollision	8 9	8 12	8 13	8 15	8 16	8 17	8 33	8 35	8 36	8 37	8 53
+noselfcollision	9 12	9 13	9 15	9 16	9 17	9 33	9 35	9 36	9 37	9 53
 noselfcollision	12 15	12 16	12 33	12 35	12 36	12 53	
-noselfcollision	15 33	15 35	15 36	15 37	15 53	
-noselfcollision	16 33	16 35	16 36	16 37	16 53	
-noselfcollision	17 19	17 21	17 22	17 24	17 25	17 27	17 29	17 35	17 36	
-noselfcollision	18 21	18 22	18 24	18 25	18 27	18 29	
+noselfcollision	15 17	15 18	15 19	15 33	15 35	15 36	15 37	15 53	
+noselfcollision	16 18	16 19	16 33	16 35	16 36	16 37	16 53	
+noselfcollision	17 19	17 21	17 22	17 24	17 25	17 27	17 29	17 33	17 35	17 36	
+noselfcollision	18 21	18 22	18 24	18 25	18 27	18 29	18 33	18 35	18 36	
 noselfcollision	19 22	19 24	19 25	19 27	19 29	
 noselfcollision	21 24	21 25	21 27	21 29	
 noselfcollision	22 24	22 25	22 27	22 29	
@@ -112,8 +112,8 @@ noselfcollision	24 27	24 29
 noselfcollision	25 27	25 29	
 noselfcollision	27 29	
 noselfcollision	33 35	33 36	33 53	
-noselfcollision	35 53	
-noselfcollision	36 53	
+noselfcollision	35 37	35 38	35 53	
+noselfcollision	36 38	36 53	
 noselfcollision	37 39	37 41	37 42	37 44	37 45	37 47	37 49	
 noselfcollision	38 41	38 42	38 44	38 45	38 47	38 49	
 noselfcollision	39 42	39 44	39 45	39 47	39 49	
