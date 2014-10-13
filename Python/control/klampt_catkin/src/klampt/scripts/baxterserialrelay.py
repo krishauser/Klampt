@@ -43,7 +43,7 @@ robotName = klampt_robot_model.getName()
 linkNames = [klampt_robot_model.getLink(i).getName() for i in range(klampt_robot_model.numLinks())]
 print "Running controller listening on topic /%s/limb/right/joint_command and"%(robotName,)
 print "and /%s/limb/left/joint_command andd publishing on topic"%(robotName,)
-print "/%s/joint_stated"%(robotName,)
+print "/%s/joint_states"%(robotName,)
 print "Klamp't link names are:",linkNames
 
 #create the ROS controller
@@ -54,4 +54,7 @@ host = 'localhost'
 port = klampt_serial_port
 s = ControllerClient((host,port),c)
 
-asyncore.loop()
+try:
+    asyncore.loop()
+except KeyboardInterrupt:
+    print "Ctrl+C pressed, exiting..."
