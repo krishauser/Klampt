@@ -1,3 +1,6 @@
+//This program will read objective functions from a socket via the
+//objective function serialization interface and run real-time planning
+//to avoid obstacles.  The robot will be simulated.
 #include "Interface/UserInterface.h"
 #include "Interface/SimRobotInterface.h"
 #include "Main/SimViewProgram.h"
@@ -36,8 +39,6 @@ public:
   SmartPointer<SimRobotInterface> robotInterface;
   vector<SmartPointer<RobotUserInterface> > uis;
   SmartPointer<InputProcessorBase> serialInputProcessor;
-  //store existing collision geometries before modifying them for planner
-  vector<AnyCollisionGeometry3D> geomStorage;
   int currentUI,oldUI;
 
   //GUI state

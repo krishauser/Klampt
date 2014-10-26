@@ -1,8 +1,10 @@
+/** This program provides a user interface for controlling a (real) robot 
+ * via the Klamp't socket communication protocol.
+ */
 #include "Interface/UserInterface.h"
 #include "Interface/RobotInterface.h"
 #include "Control/SerialControlledRobot.h"
 #include "Main/WorldViewProgram.h"
-#include <utils/StatCollector.h>
 #include <GL/glui.h>
 #include <GLdraw/GLUTString.h>
 #include <fstream>
