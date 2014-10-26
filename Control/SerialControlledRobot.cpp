@@ -4,9 +4,6 @@
 SerialControlledRobot::SerialControlledRobot(const char* _host,double timeout)
   :host(_host),robotTime(0),timeStep(0),numOverruns(0),stopFlag(false)
 {
-  //HACK: is this where the sigpipe ignore should be?
-  signal(SIGPIPE, SIG_IGN);
-
   controllerPipe = new SocketPipeWorker(_host,false,timeout);
 }
 
