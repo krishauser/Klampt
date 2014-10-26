@@ -52,10 +52,10 @@ namespace ParabolicRamp {
   ///- 0 all messages off
   ///- 1 brief messages
   ///- 2 detailed messages
-  const static int gVerbose = 2;
+  const static int gVerbose = 0;
 
   ///whether or not to pause on serious errors
-  const static bool gErrorGetchar = true;
+  const static bool gErrorGetchar = false;
 
   ///whether or not errors are logged to disk
   const static bool gErrorSave = true;
