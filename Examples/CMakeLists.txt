@@ -15,7 +15,7 @@ ENDIF( )
 
 
 #IKDemo 
-SET(EXAMPLES  CartPole ContactPlan PlanDemo DynamicPlanDemo RealTimePlanning SafeSerialClient UserTrials)
+SET(EXAMPLES  CartPole ContactPlan PlanDemo DynamicPlanDemo RealTimePlanning SafeSerialClient UserTrials UserTrialsSerial)
 ADD_EXECUTABLE(CartPole cartpole.cpp)
 ADD_EXECUTABLE(ContactPlan contactplan.cpp)
 #ADD_EXECUTABLE(IKDemo ikdemo.cpp)
@@ -24,6 +24,7 @@ ADD_EXECUTABLE(DynamicPlanDemo dynamicplandemo.cpp)
 ADD_EXECUTABLE(RealTimePlanning realtimeplanning.cpp)
 ADD_EXECUTABLE(SafeSerialClient safeserialclient.cpp)
 ADD_EXECUTABLE(UserTrials usertrials.cpp)
+ADD_EXECUTABLE(UserTrialsSerial usertrials_serial.cpp)
 FOREACH(f ${EXAMPLES})
 	  TARGET_LINK_LIBRARIES(${f} ${KLAMPT_LIBRARIES})
 	  ADD_DEPENDENCIES(${f} Klampt)
