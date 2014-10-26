@@ -208,11 +208,18 @@ public:
   Thread planningThread;
   RealTimePlannerData data;
 
+  ///The planner will not be called until the objective function is set below
+  ///this threshold.  Infinity by default (i.e., the planner will start
+  ///instantly)
+  double startObjectiveThreshold;
+  bool started;
+
   MTPlannerCommandInterface();
   virtual ~MTPlannerCommandInterface();
   virtual string Name() const { return "UnnamedPlanner"; }
   virtual string Description() const {  return "Unnamed planner interface";  }
   
+  string Instructions() const;
   virtual string ActivateEvent(bool enabled);
   virtual string UpdateEvent();
 };
@@ -221,7 +228,7 @@ class MTIKPlannerCommandInterface: public MTPlannerCommandInterface
 {
  public:
   virtual string Name() const { return "IKPointPoser"; }
-  virtual string Description() const { 	return "Smart point poser (MT)"; }
+  virtual string Description() const { 	return "Safety Filter"; }
   virtual string ActivateEvent(bool enabled);
 
   SmartPointer<SingleRobotCSpace> cspace;
@@ -232,7 +239,7 @@ class MTRRTCommandInterface: public MTPlannerCommandInterface
 {
  public:
   virtual string Name() const { return "RRTPointPoser"; }
-  virtual string Description() const {  return "Goal-based point poser (MT)"; }
+  virtual string Description() const {  return "Sampling-Based Planner"; }
   //sets up the planner
   virtual string ActivateEvent(bool enabled);
 
