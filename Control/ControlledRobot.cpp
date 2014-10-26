@@ -4,7 +4,7 @@ ControlledRobot::ControlledRobot()
   :klamptRobotModel(NULL),klamptController(NULL)
 {}
 
-void ControlledRobot::Init(Robot* _robot,RobotController* _controller)
+bool ControlledRobot::Init(Robot* _robot,RobotController* _controller)
 {
   klamptRobotModel=_robot;
   klamptController=_controller;
@@ -12,6 +12,7 @@ void ControlledRobot::Init(Robot* _robot,RobotController* _controller)
   if(klamptController) {
     klamptController->Reset();  
   }
+  return true;
 }
 
 void ControlledRobot::Step(Real dt)

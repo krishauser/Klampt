@@ -21,7 +21,7 @@ class ControlledRobot
  public:
   ControlledRobot();
   virtual ~ControlledRobot() {}
-  virtual void Init(Robot* robot,RobotController* controller=NULL);
+  virtual bool Init(Robot* robot,RobotController* controller=NULL);
   virtual void Step(Real dt);
   virtual void ReadSensorData(RobotSensors& sensors)=0;
   virtual void WriteCommandData(const RobotMotorCommand& command)=0;
