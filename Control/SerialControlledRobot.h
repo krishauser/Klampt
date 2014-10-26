@@ -2,7 +2,7 @@
 #define SERIAL_CONTROLLED_ROBOT_H
 
 #include "ControlledRobot.h"
-#include <myfile.h>
+#include <utils/AsyncIO.h>
 
 /** @brief A Klamp't controlled robot that communicates to a robot (either
  * real or virtual) using the Klamp't controller serialization mechanism.
@@ -14,15 +14,26 @@
 class SerialControlledRobot : public ControlledRobot
 {
  public:
-  SerialControlledRobot(const char* host);
-  virtual ~SerialControlledRobot() {}
-  ///This call will run the controller forever and never terminate
-  void Run();
+  SerialControlledRobot(const char* host,double timeout=Inf);
+  virtual ~SerialControlledRobot();
+  ///call this first before calling Run
+  virtual bool Init(Robot* robot,RobotController* controller);
+  ///Call to process a single message
+  bool Process(double timeout);
+  ///This call will run the controller forever and never terminate unless
+  ///an external thread calls Stop()
+  bool Run();
+  ///Called by an external thread to stop the Run() loop
+  void Stop();
   virtual void ReadSensorData(RobotSensors& sensors);
   virtual void WriteCommandData(const RobotMotorCommand& command);
-  
-  File socketfile;
+ 
+  string host;
+  SmartPointer<SocketPipeWorker> controllerPipe;
+  Real robotTime;
   Real timeStep;
+  int numOverruns;
+  bool stopFlag;
 };
 
 #endif
