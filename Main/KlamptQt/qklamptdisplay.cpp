@@ -28,9 +28,10 @@ void QKlamptDisplay::initializeGL(){
 }
 
 void QKlamptDisplay::paintGL(){
-  glClear(0);
   if(gui != NULL)
     gui->SendGLRender();
+  else
+    glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 }
 
 
