@@ -565,13 +565,30 @@ void* planner_thread_func(void * ptr)
 
 
 MTPlannerCommandInterface::MTPlannerCommandInterface()
-  : planner(NULL)
+  : planner(NULL),startObjectiveThreshold(Inf),started(false)
 {
 }
 
 MTPlannerCommandInterface::~MTPlannerCommandInterface()
 {
   SafeDelete(planner);
+}
+
+string MTPlannerCommandInterface::Instructions() const
+{
+  if(!started) {
+    if(robotInterface->GetEndTime() > robotInterface->GetCurTime()) {
+      return "Waiting until the physical robot stops...";
+    }
+    else if(currentObjective) {
+      stringstream ss;
+      ss<<"Waiting until the error gets below threshold "<<startObjectiveThreshold;
+      return ss.str();
+    }
+    else
+      return InputProcessingInterface::Instructions();
+  }
+  return InputProcessingInterface::Instructions();
 }
   
 string MTPlannerCommandInterface::ActivateEvent(bool enabled)
@@ -607,6 +624,35 @@ string MTPlannerCommandInterface::UpdateEvent()
 
   inputProcessor->SetGlobalTime(robotInterface->GetCurTime());
 
+  if(!started) {
+    //2 conditions must be met before start: robot is stopped, robot hits the
+    //startobjectivethreshold.
+
+    //robot still moving
+    if(robotInterface->GetEndTime() > robotInterface->GetCurTime()) {
+      return "";
+    }
+    if(IsInf(startObjectiveThreshold)) {
+      started=true;
+    }
+    else if(ObjectiveChanged()) {
+      SmartPointer<PlannerObjectiveBase> obj = GetObjective();
+      Assert(currentObjective != NULL);
+      Config q,v;
+      robotInterface->GetEndConfig(q);
+      v.resize(q.n,Zero);
+      if(obj->TerminalCost(0,q,v) > startObjectiveThreshold) {
+	printf("Waiting until the objective gets below %g, currently %g...\n",startObjectiveThreshold,obj->TerminalCost(0,q,v));
+	return "";
+      }
+      else started=true;
+    } 
+    else {
+      printf("Waiting for an objective...\n");
+    }
+  }
+  if(!started) return "";
+
   if(robotInterface->HadExternalChange()) {
     if(robotInterface->GetCurTime()  < robotInterface->GetEndTime()) {
       fprintf(stderr,"Cannot handle an externally changed robot that is still moving\n");
@@ -630,7 +676,10 @@ string MTPlannerCommandInterface::UpdateEvent()
     currentObjective = obj;
     if((planner->goal && !obj) || (planner->goal && planner->goal->Delta(obj) > gPlannerStopDeltaThreshold)) {
       printf("\n");
-      printf("****** STOP PLANNING **********\n");
+      if(obj)
+	printf("********* Objective changed, STOP PLANNING **********\n");
+      else
+	printf("********* Objective deleted, STOP PLANNING **********\n");
       printf("\n");
       planner->StopPlanning();
     }
@@ -662,7 +711,7 @@ string MTPlannerCommandInterface::UpdateEvent()
       }
     }
     else {
-      //printf("Sim thread: waiting for plan to complete\n");
+      //printf("UpdateEvent (sim thread): waiting for plan to complete\n");
     }
     data.globalTime = robotInterface->GetCurTime();
   } //unlocks the mutex
