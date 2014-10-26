@@ -49,10 +49,10 @@ public:
   void SetFeedforwardPIDCommand(const Config& qdes,const Config& dqdes,const Vector&torques);
   void SetTorqueCommand(const Vector& torques);
 
-  void GetCommandedConfig(Config& q);
-  void GetCommandedVelocity(Config& dq);
-  void GetSensedConfig(Config& q);
-  void GetSensedVelocity(Config& dq);
+  bool GetCommandedConfig(Config& q);
+  bool GetCommandedVelocity(Config& dq);
+  bool GetSensedConfig(Config& q);
+  bool GetSensedVelocity(Config& dq);
 
   Robot& robot;
   Real time;

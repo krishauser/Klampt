@@ -85,46 +85,62 @@ void RobotController::SetFeedforwardPIDCommand(const Config& qdes,const Config& 
 }
 
 
-void RobotController::GetCommandedConfig(Config& q) 
+bool RobotController::GetCommandedConfig(Config& q) 
 {
   Assert(command->actuators.size() == robot.drivers.size());
   for(size_t i=0;i<command->actuators.size();i++) {
     if(command->actuators[i].mode == ActuatorCommand::PID)
       robot.SetDriverValue(i,command->actuators[i].qdes);
-    else
-      FatalError("Can't get commanded config for non-config drivers");
+    else {
+      fprintf(stderr,"GetCommandedConfig: driver %d is not in PID mode",i);
+      return false;
+    }
   }
   q = robot.q;
+  return true;
 }
 
-void RobotController::GetCommandedVelocity(Config& dq)
+bool RobotController::GetCommandedVelocity(Config& dq)
 { 
   Assert(command->actuators.size() == robot.drivers.size());
   for(size_t i=0;i<command->actuators.size();i++) {
     if(command->actuators[i].mode == ActuatorCommand::PID)
       robot.SetDriverVelocity(i,command->actuators[i].dqdes);
-    else
-      FatalError("Can't get commanded config for non-config drivers");
+    else {
+      fprintf(stderr,"GetCommandedVelocity: driver %d is not in PID mode",i);
+      return false;
+    }
   }
   dq = robot.dq;
+  return true;
 }
 
-void RobotController::GetSensedConfig(Config& q)
+bool RobotController::GetSensedConfig(Config& q)
 {
   JointPositionSensor* s = sensors->GetTypedSensor<JointPositionSensor>();
-  if(s==NULL) 
+  if(s==NULL) {
     fprintf(stderr,"Warning, robot has no joint position sensor\n");
-  else
-    q = s->q;
+    fprintf(stderr,"Sensor list:\n");
+    for(size_t i=0;i<sensors->sensors.size();i++)
+      fprintf(stderr,"  %s: %s\n",sensors->sensors[i]->Type(),sensors->sensors[i]->name.c_str());
+    return false;
+  }
+  q = s->q;
+  return true;
 }
 
-void RobotController::GetSensedVelocity(Config& dq)
+bool RobotController::GetSensedVelocity(Config& dq)
 {
   JointVelocitySensor* s=sensors->GetTypedSensor<JointVelocitySensor>();
-  if(s==NULL)
+  if(s==NULL) {
     fprintf(stderr,"Warning, robot has no joint velocity sensor\n");
-  else
-    dq = s->dq;
+    fprintf(stderr,"Sensor list:\n");
+    for(size_t i=0;i<sensors->sensors.size();i++)
+      fprintf(stderr,"  %s: %s\n",sensors->sensors[i]->Type(),sensors->sensors[i]->name.c_str());
+    return false;
+  }
+  dq = s->dq;
+  return true;
 }
 
 
