@@ -29,6 +29,7 @@ class MotionQueueInterface
  public:
   enum MotionResult { Success, InvalidParams, FailedCheck, TransmitError };
 
+  MotionQueueInterface();
   virtual ~MotionQueueInterface() {}
   virtual bool HadExternalChange()=0;
   virtual Real GetCurTime()=0;
@@ -65,6 +66,5 @@ class DefaultMotionQueueInterface : public MotionQueueInterface
   virtual MotionResult SendMilestoneImmediate(const Config& x);
   virtual MotionResult SendPathImmediate(Real tbreak,const ParabolicRamp::DynamicPath& path);
 };
-
 
 #endif
