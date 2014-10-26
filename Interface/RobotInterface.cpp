@@ -1,5 +1,8 @@
 #include "RobotInterface.h"
 
+MotionQueueInterface::MotionQueueInterface()
+{}
+
 DefaultMotionQueueInterface::DefaultMotionQueueInterface(PolynomialPathController* _controller)
   :controller(_controller)
 {}
