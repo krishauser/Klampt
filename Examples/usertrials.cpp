@@ -206,13 +206,27 @@ public:
 
     //draw desired path
     if(drawPath) {
-      RobotController* rc=sim.robotControllers[0];
-      for(size_t i=0;i<robot->drivers.size();i++) {
-	robot->SetDriverValue(i,rc->command->actuators[i].qdes);
+      Real tstart = robotInterface->GetCurTime();
+      Real tend = robotInterface->GetEndTime();
+      Real dt = 0.05;
+      //draw end effector path
+      glDisable(GL_LIGHTING);
+      glColor3f(1,1,0);
+      glLineWidth(2.0);
+      glBegin(GL_LINES);
+      int istart=(int)Ceil(tstart/dt);
+      int iend=(int)Ceil(tend/dt);
+      for(int i=istart;i<iend;i++) {
+	Real t1=i*dt;
+	Real t2=t1+0.5*dt;
+	robotInterface->GetConfig(t1,robot->q);
+	robot->UpdateFrames();
+	glVertex3v(robot->links.back().T_World.t);
+	robotInterface->GetConfig(t2,robot->q);
+	robot->UpdateFrames();
+	glVertex3v(robot->links.back().T_World.t);
       }
-      robot->UpdateFrames();
-      world->robots[0].view.SetColors(GLColor(0,1,0,0.5));
-      world->robots[0].view.Draw();
+      glEnd();
     }
 
     //draw collision feedback
