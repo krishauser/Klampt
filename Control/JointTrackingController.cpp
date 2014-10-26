@@ -5,7 +5,6 @@
 JointTrackingController::JointTrackingController(Robot& _robot)
   :RobotController(_robot)
 {
-  qdesDefault = _robot.q;
 }
     
 //subclasses should override this
@@ -17,6 +16,10 @@ void JointTrackingController::GetDesiredState(Config& q_des,Vector& dq_des)
 
 void JointTrackingController::Update(Real dt)
 {
+  if(qdesDefault.n == 0) {
+    if(!GetSensedConfig(qdesDefault))
+      return;
+  }
   Assert(command != NULL);
 
   Config qdes(robot.links.size()),dqdes(robot.links.size());

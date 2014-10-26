@@ -13,9 +13,6 @@ MilestonePathController::MilestonePathController(Robot& robot)
 {
   path.Init(robot.velMax,robot.accMax);
   path.SetJointLimits(robot.qMin,robot.qMax);
-  xcur=robot.q;
-  dxcur=robot.dq;
-  SetMilestone(robot.q);
 }
 
 map<string,string> MilestonePathController::Settings() const
@@ -355,6 +352,26 @@ Real MilestonePathController::AddMilestone(const Vector& x,const Vector& dx,Real
 
 void MilestonePathController::Update(Real dt)
 {
+  if(path.Empty()) {
+    if(GetSensedConfig(robot.q)) {
+      if(GetSensedVelocity(robot.dq)) {
+	//first time, read from sensors
+	xcur=robot.q;
+	dxcur=robot.dq;
+	SetMilestone(robot.q);
+      }
+      else {
+	xcur=robot.q;
+	dxcur.resize(robot.q.n,Zero);
+	SetMilestone(robot.q);
+      }
+    }
+    else {
+      //don't have a path yet
+      return; 
+    }
+  }
+
   Real speedModifier = GetSpeedScale(xcur,dxcur);
   pathParameter += dt*speedModifier;
   assert(!path.Empty());
@@ -474,9 +491,6 @@ PolynomialPathController::PolynomialPathController(Robot& robot)
   :JointTrackingController(robot)
 {
   pathOffset = 0;
-  path.elements.resize(robot.q.n);
-  for(int i=0;i<robot.q.n;i++)
-    path.elements[i] = Spline::Constant(robot.q(i),0,0);
 }
 
 void PolynomialPathController::SetPath(const Spline::PiecewisePolynomialND& _path)
@@ -663,12 +677,27 @@ void PolynomialPathController::GetDesiredState(Config& q_des,Vector& dq_des)
 
 void PolynomialPathController::Update(Real dt)
 {
+  if(path.elements.empty()) {
+    //first time
+    Config q;
+    if(GetSensedConfig(q)) {
+      Assert(q.n == robot.q.n);
+      path.elements.resize(q.n);
+      for(int i=0;i<robot.q.n;i++)
+	path.elements[i] = Spline::Constant(q(i),0,0);
+    }
+    else {
+      return;
+    }
+  }
+
   pathOffset += dt;
   //keep the path relatively short
   if((pathOffset - path.StartTime()) > Max(0.1,0.1*(path.EndTime()-path.StartTime())))
     path.TrimFront(pathOffset);
 
   JointTrackingController::Update(dt);
+
 }
 
 void PolynomialPathController::Reset()
