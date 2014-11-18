@@ -2,7 +2,7 @@
 #include <utils/AnyCollection.h>
 
 SerialControlledRobot::SerialControlledRobot(const char* _host,double timeout)
-  :host(_host),robotTime(0),timeStep(0),numOverruns(0),stopFlag(false)
+  :host(_host),robotTime(0),timeStep(0),numOverruns(0),stopFlag(false),controllerMutex(NULL)
 {
   controllerPipe = new SocketPipeWorker(_host,false,timeout);
 }
@@ -34,11 +34,13 @@ bool SerialControlledRobot::Process(double timeout)
     Real lastReadTime = timer.ElapsedTime();
     if(lastReadTime > timeout) return false;
     timeStep = 0;
+    if(controllerMutex) controllerMutex->lock();
     ReadSensorData(sensors);
     if(timeStep == 0) {
       //first time, or failed to read -- 
       //read next sensor data again to get timing info
       ThreadSleep(0.01);
+      controllerMutex->unlock();
     }
     else {
       if(klamptController) {
@@ -46,6 +48,7 @@ bool SerialControlledRobot::Process(double timeout)
 	klamptController->command = &command;
 	klamptController->Update(timeStep);
       }
+      if(controllerMutex) controllerMutex->unlock();
       WriteCommandData(command);
 
       Real time = timer.ElapsedTime();
@@ -69,6 +72,7 @@ bool SerialControlledRobot::Run()
   while(!stopFlag) {
     Real lastReadTime = timer.ElapsedTime();
     timeStep = 0;
+    if(controllerMutex) controllerMutex->unlock();
     ReadSensorData(sensors);
     if(timeStep == 0) {
       //first time, or failed to read -- 
@@ -81,6 +85,7 @@ bool SerialControlledRobot::Run()
 	klamptController->command = &command;
 	klamptController->Update(timeStep);
       }
+      if(controllerMutex) controllerMutex->unlock();
       WriteCommandData(command);
 
       Real time = timer.ElapsedTime();
@@ -98,6 +103,11 @@ bool SerialControlledRobot::Run()
 void SerialControlledRobot::Stop()
 {
   stopFlag = true;
+}
+
+void SerialControlledRobot::SetMutex(Mutex* mutex)
+{
+  controllerMutex = mutex;
 }
 
 void SerialControlledRobot::ReadSensorData(RobotSensors& sensors)

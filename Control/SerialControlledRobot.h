@@ -25,6 +25,8 @@ class SerialControlledRobot : public ControlledRobot
   bool Run();
   ///Called by an external thread to stop the Run() loop
   void Stop();
+  //for multi-threaded applications
+  void SetMutex(Mutex* controllerMutex);
   virtual void ReadSensorData(RobotSensors& sensors);
   virtual void WriteCommandData(const RobotMotorCommand& command);
  
@@ -34,6 +36,7 @@ class SerialControlledRobot : public ControlledRobot
   Real timeStep;
   int numOverruns;
   bool stopFlag;
+  Mutex* controllerMutex;
 };
 
 #endif
