@@ -31,6 +31,7 @@ struct CommunicationThreadData
   DefaultMotionQueueInterface* queue;  //(in)
   bool ready;  //(out)
   SerialControlledRobot* comms; //(out): can be used to stop robot
+  Mutex mutex;
 };
 
 void* communicationThreadFunc(void* vdata)
@@ -41,6 +42,7 @@ void* communicationThreadFunc(void* vdata)
   char buf[64];
   sprintf(buf,"tcp://localhost:%d",commsPort);
   SerialControlledRobot comms(buf);
+  comms.SetMutex(&data->mutex);
   data->comms = &comms;
   comms.Init(&queue->controller->robot,queue->controller);
   if(comms.Process(Inf)) {
@@ -154,9 +156,11 @@ public:
 
     //update actual configuration from sensors
     if(connected && controller->sensors != NULL) {
+      communicationData.mutex.lock();
       Config q;
       if(controller->GetSensedConfig(q))
 	robot->UpdateConfig(q);
+      communicationData.mutex.unlock();
       world->robots[0].view.SetGrey();
     }
     WorldViewProgram::RenderWorld();
@@ -166,18 +170,24 @@ public:
       GLColor newColor(0,1,0,0.5);
       world->robots[0].view.SetColors(newColor);
       Config q;
+      communicationData.mutex.lock();
       if(controller->GetCommandedConfig(q)) {
+	communicationData.mutex.unlock();
 	robot->UpdateConfig(q);
 	world->robots[0].view.Draw();
       }
+      else
+	communicationData.mutex.unlock();
     }
 
     if(drawDesired && connected) {
+      communicationData.mutex.lock();
       Config curBest;
       robotInterface->GetEndConfig(curBest);
       robot->UpdateConfig(curBest); 
       world->robots[0].view.SetColors(GLColor(1,1,0,0.5));
       world->robots[0].view.Draw();
+      communicationData.mutex.unlock();
       /*
       if(curGoal) {
 	glPointSize(5.0);
@@ -213,6 +223,7 @@ public:
 
     //draw desired path
     if(drawPath && connected) {
+      communicationData.mutex.lock();
       Real tstart = robotInterface->GetCurTime();
       Real tend = robotInterface->GetEndTime();
       Real dt = 0.05;
@@ -234,6 +245,7 @@ public:
 	glVertex3v(robot->links.back().T_World.t);
       }
       glEnd();
+      communicationData.mutex.unlock();
     }
   }
 
@@ -332,6 +344,7 @@ public:
   {
     if(button == GLUT_RIGHT_BUTTON) {
       if(connected) {
+	ScopedLock lock(communicationData.mutex);
 	string res=uis[currentUI]->MouseInputEvent(0,0,true);
       }
     }
@@ -342,6 +355,7 @@ public:
     if(button == GLUT_LEFT_BUTTON)  DragRotate(dx,dy);
     else if(button == GLUT_RIGHT_BUTTON) {
       if(connected) {
+	ScopedLock lock(communicationData.mutex);
 	string res=uis[currentUI]->MouseInputEvent(dx,dy,true);
       }
     }
@@ -365,6 +379,7 @@ public:
   virtual void Handle_Motion(int x,int y)
   {
     if(connected) {
+      ScopedLock lock(communicationData.mutex);
       string res=uis[currentUI]->MouseInputEvent(x,y,false);
       Refresh();
     }
@@ -373,6 +388,7 @@ public:
   virtual void Handle_Keypress(unsigned char key,int x,int y)
   {
     if(connected) {
+      ScopedLock lock(communicationData.mutex);
       string res=uis[currentUI]->KeypressEvent(key,x,y);
       Refresh();
     }
@@ -381,6 +397,7 @@ public:
   virtual void Handle_Idle() {
     Timer timer;
     if(connected) {
+      ScopedLock lock(communicationData.mutex);
       string res=uis[currentUI]->UpdateEvent();
     }
     
