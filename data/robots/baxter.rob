@@ -78,9 +78,14 @@ Tparent	1 0 0	0 1 0	0 0 1	0 0 0 \
 1 0 0	0 4.89667e-12 -1	0 1 4.89667e-12	-0.08897 -0.15593 0.389125 \
 1 0 0	0 1 0	0 0 1	0.0947 0 0.817
 
-qmin	-inf -inf -inf -inf -inf -inf 0 0 0 -1.5708 0 0 -0.2 0 0 -1.70168 -2.147 -3.05418 -0.05 -3.059 0 -1.5708 -3.059 0 0 0 0 0 0 0 0 0 0 0 0 -1.70168 -2.147 -3.05418 -0.05 -3.059 0 -1.5708 -3.059 0 0 0 0 0 0 0 0 0 0 0 
+#qmin	-inf -inf -inf -inf -inf -inf 0 0 0 -1.5708 0 0 -0.2 0 0 -1.70168 -2.147 -3.05418 -0.05 -3.059 0 -1.5708 -3.059 0 0 0 0 0 0 0 0 0 0 0 0 -1.70168 -2.147 -3.05418 -0.05 -3.059 0 -1.5708 -3.059 0 0 0 0 0 0 0 0 0 0 0 
 
-qmax	inf inf inf inf inf inf 0 0 0 1.5708 0 0 0.2 0 0 1.70168 1.047 3.05418 2.618 3.059 0 2.094 3.059 0 0 0 0 0 0 0 0 0 0 0 0 1.70168 1.047 3.05418 2.618 3.059 0 2.094 3.059 0 0 0 0 0 0 0 0 0 0 0 
+#qmax	inf inf inf inf inf inf 0 0 0 1.5708 0 0 0.2 0 0 1.70168 1.047 3.05418 2.618 3.059 0 2.094 3.059 0 0 0 0 0 0 0 0 0 0 0 0 1.70168 1.047 3.05418 2.618 3.059 0 2.094 3.059 0 0 0 0 0 0 0 0 0 0 0 
+
+#these fix the base of the robot
+qmin	0 0 0 0 0 0 0 0 0 -1.5708 0 0 -0.2 0 0 -1.70168 -2.147 -3.05418 -0.05 -3.059 0 -1.5708 -3.059 0 0 0 0 0 0 0 0 0 0 0 0 -1.70168 -2.147 -3.05418 -0.05 -3.059 0 -1.5708 -3.059 0 0 0 0 0 0 0 0 0 0 0 
+
+qmax	0 0 0 0 0 0 0 0 0 1.5708 0 0 0.2 0 0 1.70168 1.047 3.05418 2.618 3.059 0 2.094 3.059 0 0 0 0 0 0 0 0 0 0 0 0 1.70168 1.047 3.05418 2.618 3.059 0 2.094 3.059 0 0 0 0 0 0 0 0 0 0 0 
 
 geometry	"" "" "" "" "" "" "baxter/collision_head_link_1.tri" "baxter/collision_head_link_2.tri" "baxter/torso.tri" "baxter/head.tri" "" "" "baxter/screen.tri" "baxter/display.tri" "" "baxter/left_upper_shoulder.tri" "baxter/left_lower_shoulder.tri" "baxter/left_upper_elbow.tri" "baxter/left_lower_elbow.tri" "baxter/left_upper_forearm.tri" "" "baxter/left_lower_forearm.tri" "baxter/left_wrist.tri" "" "baxter/left_gripper_base.tri" "baxter/left_gripper.tri" "baxter/left_hand_accelerometer.tri" "baxter/left_hand_camera.tri" "" "baxter/left_hand_range.tri" "" "" "" "baxter/pedestal.tri" "" "baxter/right_upper_shoulder.tri" "baxter/right_lower_shoulder.tri" "baxter/right_upper_elbow.tri" "baxter/right_lower_elbow.tri" "baxter/right_upper_forearm.tri" "" "baxter/right_lower_forearm.tri" "baxter/right_wrist.tri" "" "baxter/right_gripper_base.tri" "baxter/right_gripper.tri" "baxter/right_hand_accelerometer.tri" "baxter/right_hand_camera.tri" "" "baxter/right_hand_range.tri" "" "" "" "baxter/sonar_ring.tri" 
 
