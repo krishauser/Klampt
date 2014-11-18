@@ -13,6 +13,7 @@ import argparse
 def mainKlamptControllerToRosRobot(klampt_robot_model_fn,klampt_serial_port):
     """Relays Klampt controller messages to and from a ROS Baxter robot"""
     #load robot file
+    rospy.init_node('klampt_controller')
     world = WorldModel()
     world.enableGeometryLoading(False)
     res = world.readFile(klampt_robot_model_fn)
@@ -71,14 +72,14 @@ def mainRosControllerToKlamptRobot(klampt_robot_model_fn,klampt_serial_port):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Run a Baxter controller <-> Klampt simulator or Baxter robot <-> Klampt controller.')
-    parser.add_argument('-m','--mode',default='b2k',help='For Baxter controller to klampt simulator use b2k, otherwise use k2b')
-    parser.add_argument('-p','--port',default=None,help="Set the Klamp't port (default 3456)")
-    parser.add_argument('-r','--robot',default=None,help="Set the Klamp't robot model")
-    parser.parse_args()
+    parser.add_argument('-m','--mode',default='b2k',nargs='?',help='For Baxter controller to klampt simulator use b2k, otherwise use k2b')
+    parser.add_argument('-p','--port',default=None,nargs='?',help="Set the Klamp't port (default 3456)")
+    parser.add_argument('-r','--robot',default=None,nargs='?',help="Set the Klamp't robot model")
+    args = parser.parse_args()
 
     #read klampt_robot_file and optionally klampt_serial_port from parameter server
-    klampt_serial_port = parser.port
-    klampt_robot_model_fn = parser.robot
+    klampt_serial_port = args.port
+    klampt_robot_model_fn = args.robot
     if klampt_robot_model_fn == None:
         try:
             klampt_robot_model_fn = rospy.get_param('/klampt_robot_file')
@@ -96,9 +97,9 @@ if __name__ == '__main__':
             print "klampt_serial_port [PORT] if you want to change this."
 
 
-    if parser.mode == 'b2k':
+    if args.mode == 'b2k':
         mainRosControllerToKlamptRobot(klampt_robot_model_fn,klampt_serial_port)
-    elif parser.mode == 'k2b':
+    elif args.mode == 'k2b':
         mainKlamptControllerToRosRobot(klampt_robot_model_fn,klampt_serial_port)
     else:
         raise ValueError("Invalid mode, must be either b2k or k2b")
