@@ -218,7 +218,9 @@ public:
       */
     }
     if(drawUI && connected) {
+      communicationData.mutex.lock();
       uis[currentUI]->DrawGL();
+      communicationData.mutex.unlock();
     }
 
     //draw desired path
