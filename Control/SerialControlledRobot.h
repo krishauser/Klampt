@@ -25,7 +25,7 @@ class SerialControlledRobot : public ControlledRobot
   bool Run();
   ///Called by an external thread to stop the Run() loop
   void Stop();
-  //for multi-threaded applications
+  //for multi-threaded applications -- this mutex locks access to the command / sensors / klamptController structures
   void SetMutex(Mutex* controllerMutex);
   virtual void ReadSensorData(RobotSensors& sensors);
   virtual void WriteCommandData(const RobotMotorCommand& command);
