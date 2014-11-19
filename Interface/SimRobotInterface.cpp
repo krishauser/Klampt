@@ -29,4 +29,6 @@ SimRobotInterface::SimRobotInterface(WorldSimulation* _sim,int _index)
   //as the top level interface, meaning that GetConfig messes up
   controller->command = _sim->robotControllers[_index]->command;
   controller->sensors = _sim->robotControllers[_index]->sensors;
+  ///HACK: get the initial configuration for the controller for apps that don't do proper error checking for GetConfig/GetEndConfig
+  controller->Update(0);
 }
