@@ -4,15 +4,20 @@
 import controller
 import rospy
 import math
+import time
+import socket
 from roscontroller import ros_initialized,RosTimeController
 from sensor_msgs.msg import JointState
 from rosgraph_msgs.msg import Clock
 from baxter_core_msgs.msg import JointCommand,HeadState,HeadPanCommand,AssemblyState
 from std_msgs.msg import Bool
+from serialcontroller import SerialController
+import json
 
 POSITION_MODE=1
 VELOCITY_MODE=2
 TORQUE_MODE=3
+RAW_POSITION_MODE=4
 
 class RosBaxterController(controller.BaseController):
     """A controller that reads from the ROS topics
@@ -46,7 +51,8 @@ class RosBaxterController(controller.BaseController):
                             'left_upper_forearm':'left_w0', 'left_lower_forearm':'left_w1', 'left_wrist':'left_w2',
                             'right_upper_shoulder':'right_s0', 'right_lower_shoulder':'right_s1', 
                             'right_upper_elbow':'right_e0', 'right_lower_elbow':'right_e1',
-                            'right_upper_forearm':'right_w0', 'right_lower_forearm':'right_w1', 'right_wrist':'right_w2'}
+                            'right_upper_forearm':'right_w0', 'right_lower_forearm':'right_w1', 'right_wrist':'right_w2',
+                            'head':'head_pan','screen':'head_nod'}
         for l in range(self.robot_model.numLinks()):
             klamptName = self.robot_model.getLink(l).getName()
             if klamptName not in self.names_klampt_to_baxter:
@@ -307,6 +313,229 @@ class RosBaxterController(controller.BaseController):
                 res['dqcmd'][index] = value
 
 
+class KlamptSerialBaxterController(SerialController):
+    """A controller that reads from the ROS topics
+
+    '/[robot_name]/state' (AssemblyState)
+    '/[robot_name]/joint_states' (JointState)
+    '/[robot_name]/head/head_state' (HeadState)    
+
+    into a Klamp't input message, and writes it to the given socket.
+    It then reads the replied Klamp't control messages from the socket and
+    translates the messages to the Baxter-specific ROS topics:
+
+    '/[robot_name]/limb/right/joint_command' (JointCommand)
+    '/[robot_name]/limb/left/joint_command' (JointCommand)
+    '/[robot_name]/head/command_head_pan' (HeadPanCommand)
+    '/[robot_name]/head/command_head_nod' (Bool)
+
+    As used by baxter's ROS package, '[robot_name]' should be set to 'robot'.
+    """
+    def __init__(self,addr,robot_model,robot_name='robot'):
+        SerialController.__init__(self,addr)
+        #defined in SerialController       
+        self.robot_model = robot_model
+
+        self.baxter_larm_names = ['left_s0','left_s1','left_e0','left_e1','left_w0','left_w1','left_w2']
+        self.baxter_rarm_names = ['right_s0','right_s1','right_e0','right_e1','right_w0','right_w1','right_w2']
+        self.names_klampt_to_baxter = {'left_upper_shoulder':'left_s0', 'left_lower_shoulder':'left_s1', 
+                            'left_upper_elbow':'left_e0', 'left_lower_elbow':'left_e1',
+                            'left_upper_forearm':'left_w0', 'left_lower_forearm':'left_w1', 'left_wrist':'left_w2',
+                            'right_upper_shoulder':'right_s0', 'right_lower_shoulder':'right_s1', 
+                            'right_upper_elbow':'right_e0', 'right_lower_elbow':'right_e1',
+                            'right_upper_forearm':'right_w0', 'right_lower_forearm':'right_w1', 'right_wrist':'right_w2',
+                            'head':'head_pan','screen':'head_nod'}
+        for l in range(self.robot_model.numLinks()):
+            klamptName = self.robot_model.getLink(l).getName()
+            if klamptName not in self.names_klampt_to_baxter:
+                self.names_klampt_to_baxter[klamptName] = klamptName
+        self.baxterDriverNames = [self.names_klampt_to_baxter[self.robot_model.getDriver(d).getName()] for d in range(self.robot_model.numDrivers())]
+        self.head_pan_link_index = self.robot_model.getLink("head").index
+        self.head_nod_link_index = self.robot_model.getLink("screen").index
+
+        self.larm_command = JointCommand()
+        self.rarm_command = JointCommand()
+        self.hpan_command = HeadPanCommand()
+        self.hnod_command = Bool()
+
+        # fast indexing structure for partial commands
+        self.nameToDriverIndex = dict(zip(self.baxterDriverNames,range(len(self.baxterDriverNames))))
+        self.nameToLinkIndex = dict((self.names_klampt_to_baxter[self.robot_model.getLink(l).getName()],l) for l in range(self.robot_model.numLinks()))
+
+        # Setup publisher of robot states
+        self.currentTime = None
+        self.lastUpdateTime = None
+        self.currentAssemblyState = None
+        self.currentJointStates = None
+        self.currentHeadState = None
+        rospy.Subscriber("/%s/state"%(robot_name,), AssemblyState, self.assemblyStateCallback)
+        rospy.Subscriber("/%s/joint_states"%(robot_name,), JointState, self.jointStatesCallback)
+        rospy.Subscriber("/%s/head/head_state"%(robot_name,), HeadState, self.headStateCallback)
+        
+        self.pub_larm = rospy.Publisher('/%s/limb/left/joint_command'%(robot_name), JointCommand)
+        self.pub_rarm = rospy.Publisher('/%s/limb/right/joint_command'%(robot_name), JointCommand)
+        self.pub_hpan = rospy.Publisher('/%s/head/command_head_pan'%(robot_name), HeadPanCommand)
+        self.pub_hnod = rospy.Publisher('/%s/head/command_head_nod'%(robot_name), Bool)
+        return
+
+    def assemblyStateCallback(self,msg):
+        self.currentAssemblyState = msg
+        return
+
+    def jointStatesCallback(self,msg):
+        self.currentJointStates = msg
+        return
+
+    def headStateCallback(self,msg):
+        self.currentHeadState = msg
+        return
+
+    def process(self):
+        if self.currentAssemblyState==None:
+            #not enabled, return
+            print "Waiting for /robot/state..."
+            time.sleep(1.0)
+            return
+        if self.currentAssemblyState.stopped:
+            print "Robot is stopped"
+            time.sleep(1.0)
+            return
+        if self.currentJointStates==None:
+            print "Waiting for joint states to be published..."
+            time.sleep(1.0)
+            return
+        if self.lastUpdateTime == None:
+            self.lastUpdateTime = self.currentJointStates.header.stamp
+            return
+        self.currentTime = self.currentJointStates.header.stamp
+
+        #convert to Klamp't message
+        klamptInput = dict()
+        klamptInput['t'] = self.currentTime.to_sec()
+        klamptInput['dt'] = self.currentTime.to_sec() - self.lastUpdateTime.to_sec()
+        if klamptInput['dt'] == 0.0:
+            #no new clock messages read
+            return
+        klamptInput['q'] = [0.0]*self.robot_model.numLinks()
+        klamptInput['dq'] = [0.0]*self.robot_model.numLinks()
+        klamptInput['torque'] = [0.0]*self.robot_model.numDrivers()
+        for i,n in enumerate(self.currentJointStates.name):
+            if n not in self.nameToLinkIndex:
+                if n != 'torso_t0':
+                    print "Ignoring state of link",n
+                continue
+            klamptIndex = self.nameToLinkIndex[n]
+            klamptInput['q'][klamptIndex] = self.currentJointStates.position[i]
+            if len(self.currentJointStates.velocity) > 0:
+                klamptInput['dq'][klamptIndex] = self.currentJointStates.velocity[i]
+            if len(self.currentJointStates.effort) > 0:
+                driverIndex = self.nameToDriverIndex[n]
+                klamptInput['torque'][driverIndex] = self.currentJointStates.effort[i]
+        #if self.currentHeadState != None:
+        #    klamptInput['q'][self.head_pan_link_index] = self.currentHeadState.pan
+
+        #output is defined in SerialController
+        klamptReply = self.output(**klamptInput)
+        if klamptReply == None:
+            return False
+
+        #now conver the Klamp't reply to a Baxter command
+        lcmd = JointCommand()
+        rcmd = JointCommand()
+        lcmd.names = self.baxter_larm_names
+        rcmd.names = self.baxter_rarm_names
+        hpcmd = HeadPanCommand()
+        hncmd = Bool()
+        if 'qcmd' in klamptReply:
+            #use position mode
+            lcmd.mode = rcmd.mode = POSITION_MODE
+            q = klamptReply['qcmd']
+            lcmd.command = [q[self.nameToLinkIndex[n]] for n in lcmd.names]
+            rcmd.command = [q[self.nameToLinkIndex[n]] for n in rcmd.names]
+            hpcmd.target = q[self.head_pan_link_index]
+            hpcmd.speed = q[self.head_pan_link_index]
+        elif 'dqcmd' in klamptReply:
+            lcmd.mode = rcmd.mode = VELOCITY_MODE
+            dq = klamptReply['dqcmd']
+            lcmd.command = [dq[self.nameToLinkIndex[n]] for n in lcmd.names]
+            rcmd.command = [dq[self.nameToLinkIndex[n]] for n in rcmd.names]
+
+            hpcmd = None
+        elif 'torquecmd' in klamptReply:
+            lcmd.mode = rcmd.mode = TORQUE_MODE
+            torque = klamptReply['torquecmd']
+            lcmd.command = [torque[self.nameToDriverIndex[n]] for n in lcmd.names]
+            rcmd.command = [torque[self.nameToDriverIndex[n]] for n in rcmd.names]
+
+            hpcmd = None
+        else:
+            lcmd = rcmd = None
+            hpcmd = None
+        hncmd = None
+
+        if self.currentAssemblyState.estop_button != AssemblyState.ESTOP_BUTTON_UNPRESSED:
+            print "Estop is on..."
+            time.sleep(1.0)
+        elif not self.currentAssemblyState.enabled:
+            print "Waiting for robot to turn on..."
+            time.sleep(1.0)
+        else:
+            #publish the messages
+            if lcmd:
+                self.pub_larm.publish(lcmd)
+            if rcmd:
+                self.pub_rarm.publish(rcmd)
+            if hpcmd:
+                self.pub_hpan.publish(hpcmd) 
+            if hncmd:
+                self.pub_hnod.publish(hncmd)
+        self.lastUpdateTime = self.currentTime
+        return True
+
+    def run(self,rate=100):
+        self.accept()
+        delay = 1.0/rate
+        try:
+            while True:
+                res = self.process()
+                if res == False:
+                    print "Connection closed... stopping robot and going back to waiting state"
+                    self.stopMoving()
+                    self.accept()
+                time.sleep(delay)
+        except socket.error:
+            print "Klampt controller disconnected"
+            self.stopMoving()
+            self.close()
+            raise
+        except Exception as e:
+            self.stopMoving()
+            self.close()
+            raise
+        except KeyboardInterrupt:
+            print "Closing... stopping robot"
+            self.stopMoving()
+            self.close()
+            
+    def stopMoving(self):
+        lcmd = JointCommand()
+        rcmd = JointCommand()
+        lcmd.names = self.baxter_larm_names
+        rcmd.names = self.baxter_rarm_names
+        lcmd.mode = rcmd.mode = POSITION_MODE
+        lcmd.command = []
+        for n in lcmd.names:
+            index = self.currentJointStates.name.index(n)
+            lcmd.command.append(self.currentJointStates.position[index])
+        rcmd.command = []
+        for n in rcmd.names:
+            index = self.currentJointStates.name.index(n)
+            rcmd.command.append(self.currentJointStates.position[index])
+        self.pub_larm.publish(lcmd)
+        self.pub_rarm.publish(rcmd)
+        self.pub_hnod.publish(False)
+            
+            
 def make(klampt_robot_model):
     global ros_initialized
     if not ros_initialized:

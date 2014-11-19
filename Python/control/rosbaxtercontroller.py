@@ -333,9 +333,7 @@ class KlamptSerialBaxterController(SerialController):
     """
     def __init__(self,addr,robot_model,robot_name='robot'):
         SerialController.__init__(self,addr)
-        #defined in SerialController
-        self.accept()
-        
+        #defined in SerialController       
         self.robot_model = robot_model
 
         self.baxter_larm_names = ['left_s0','left_s1','left_e0','left_e1','left_w0','left_w1','left_w2']
@@ -495,20 +493,23 @@ class KlamptSerialBaxterController(SerialController):
         return True
 
     def run(self,rate=100):
+        self.accept()
         delay = 1.0/rate
         try:
             while True:
                 res = self.process()
                 if res == False:
-                    print "Closing... stopping robot"
+                    print "Connection closed... stopping robot and going back to waiting state"
                     self.stopMoving()
-                    self.close()
-                    return
+                    self.accept()
                 time.sleep(delay)
         except socket.error:
             print "Klampt controller disconnected"
+            self.stopMoving()
+            self.close()
             raise
         except Exception as e:
+            self.stopMoving()
             self.close()
             raise
         except KeyboardInterrupt:
@@ -522,8 +523,14 @@ class KlamptSerialBaxterController(SerialController):
         lcmd.names = self.baxter_larm_names
         rcmd.names = self.baxter_rarm_names
         lcmd.mode = rcmd.mode = POSITION_MODE
-        lcmd.command = [self.currentJointStates[n] for n in lcmd.names]
-        rcmd.command = [self.currentJointStates[n] for n in rcmd.names]
+        lcmd.command = []
+        for n in lcmd.names:
+            index = self.currentJointStates.name.index(n)
+            lcmd.command.append(self.currentJointStates.position[index])
+        rcmd.command = []
+        for n in rcmd.names:
+            index = self.currentJointStates.name.index(n)
+            rcmd.command.append(self.currentJointStates.position[index])
         self.pub_larm.publish(lcmd)
         self.pub_rarm.publish(rcmd)
         self.pub_hnod.publish(False)
