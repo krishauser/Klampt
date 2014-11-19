@@ -168,9 +168,11 @@ public:
     if(drawDesired) {
       Config curBest;
       robotInterface->GetEndConfig(curBest);
-      robot->UpdateConfig(curBest); 
-      world->robots[0].view.SetColors(GLColor(1,1,0,0.5));
-      world->robots[0].view.Draw();
+      if(!curBest.empty()) {
+	robot->UpdateConfig(curBest); 
+	world->robots[0].view.SetColors(GLColor(1,1,0,0.5));
+	world->robots[0].view.Draw();
+      }
       /*
       if(curGoal) {
 	glPointSize(5.0);
