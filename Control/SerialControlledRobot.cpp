@@ -39,8 +39,8 @@ bool SerialControlledRobot::Process(double timeout)
     if(timeStep == 0) {
       //first time, or failed to read -- 
       //read next sensor data again to get timing info
+      if(controllerMutex) controllerMutex->unlock();
       ThreadSleep(0.01);
-      controllerMutex->unlock();
     }
     else {
       if(klamptController) {
@@ -72,11 +72,12 @@ bool SerialControlledRobot::Run()
   while(!stopFlag) {
     Real lastReadTime = timer.ElapsedTime();
     timeStep = 0;
-    if(controllerMutex) controllerMutex->unlock();
+    if(controllerMutex) controllerMutex->lock();
     ReadSensorData(sensors);
     if(timeStep == 0) {
       //first time, or failed to read -- 
       //read next sensor data again to get timing info
+      if(controllerMutex) controllerMutex->unlock();
       ThreadSleep(0.01);
     }
     else {
