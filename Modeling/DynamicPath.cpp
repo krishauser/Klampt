@@ -1015,6 +1015,14 @@ bool DynamicPath::IsValid() const
       fprintf(stderr,"DynamicPath::IsValid: ramp %d is invalid\n",i);
       return false;
     }
+    if(ramps[i].ramps.size() != velMax.size()) {
+      fprintf(stderr,"DynamicPath::IsValid: invalid size of velocity bound or size of ramp %d: %d vs %d\n",i,velMax.size(),ramps[i].ramps.size());
+      return false;
+    }
+    if(ramps[i].ramps.size() != accMax.size()) {
+      fprintf(stderr,"DynamicPath::IsValid: invalid size of acceleration bound or size of ramp %d: %d vs %d\n",i,accMax.size(),ramps[i].ramps.size());
+      return false;
+    }
     for(size_t j=0;j<accMax.size();j++) {
       if(Abs(ramps[i].ramps[j].a1) > accMax[j]+EpsilonA ||
 	 Abs(ramps[i].ramps[j].v) > velMax[j] ||
