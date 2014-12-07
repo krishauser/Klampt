@@ -249,6 +249,56 @@ void GetPointCloud(const PointCloud& pc,Geometry::AnyCollisionGeometry3D& geom)
   geom.InitCollisions();
 }
 
+void GeometricPrimitive::setPoint(const double pt[3])
+{
+  type = "Point";
+  properties.resize(3);
+  copy(pt,pt+3,properties.begin());
+}
+
+void GeometricPrimitive::setSphere(const double c[3],double r)
+{
+  type = "Sphere";
+  properties.resize(4);
+  copy(c,c+3,properties.begin());
+}
+
+void GeometricPrimitive::setSegment(const double a[3],const double b[3])
+{
+  type = "Segment";
+  properties.resize(6);
+  copy(a,a+3,properties.begin());
+  copy(b,b+3,properties.begin()+3);
+}
+
+void GeometricPrimitive::setAABB(const double bmin[3],const double bmax[3])
+{
+  type = "AABB";
+  properties.resize(6);
+  copy(bmin,bmin+3,properties.begin());
+  copy(bmax,bmax+3,properties.begin()+3);
+}
+
+bool GeometricPrimitive::loadString(const char* str)
+{
+  vector<string> items = Split(str," \t\n");
+  type = items[0];
+  properties.resize(items.size()-1);
+  for(size_t i=1;i<items.size();i++)
+    if(!LexicalCast<double>(items[i],properties[i-1])) return false;
+  return true;
+}
+
+std::string GeometricPrimitive::saveString() const
+{
+  stringstream ss;
+  ss<<type<<" ";
+  for(size_t i=0;i<properties.size();i++)
+    ss<<properties[i]<<" ";
+  return ss.str();
+}
+
+
 Geometry3D::Geometry3D()
   :world(-1),id(-1)
 {}
@@ -266,6 +316,21 @@ TriangleMesh Geometry3D::getTriangleMesh()
   GetMesh(worlds[this->world]->world.GetGeometry(id),mesh);
   return mesh;
 }
+
+
+GeometricPrimitive Geometry3D::getGeometricPrimitive()
+{
+  RobotWorld& world=worlds[this->world]->world;
+  stringstream ss;
+  ss<<world.GetGeometry(id).AsPrimitive();
+  GeometricPrimitive geom;
+  bool res=geom.loadString(ss.str().c_str());
+  if(!res) {
+    throw PyException("Internal error");
+  }
+  return geom;
+}
+
 
 void Geometry3D::setTriangleMesh(const TriangleMesh& mesh)
 {
@@ -294,6 +359,32 @@ void Geometry3D::setPointCloud(const PointCloud& pc)
   world.GetAppearance(id).Set(world.GetGeometry(id));
 }
 
+void Geometry3D::setGeometricPrimitive(const GeometricPrimitive& geom)
+{
+  RobotWorld& world=worlds[this->world]->world;
+  stringstream ss(geom.saveString());
+  GeometricPrimitive3D g;
+  ss>>g;
+  if(!ss) {
+    throw PyException("Internal error");
+  }
+  world.GetGeometry(id) = AnyCollisionGeometry3D(g);
+  world.GetAppearance(id).Set(world.GetGeometry(id));
+}
+
+
+bool Geometry3D::loadFile(const char* fn)
+{
+  RobotWorld& world=worlds[this->world]->world;
+  return world.GetGeometry(id).Load(fn);
+}
+
+bool Geometry3D::saveFile(const char* fn)
+{
+  RobotWorld& world=worlds[this->world]->world;
+  return world.GetGeometry(id).Save(fn);
+}
+
 void Geometry3D::translate(const double t[3])
 {
   RobotWorld& world=worlds[this->world]->world;
@@ -301,6 +392,7 @@ void Geometry3D::translate(const double t[3])
   T.R.setIdentity();
   T.t.set(t);
   world.GetGeometry(id).Transform(T);
+  world.GetGeometry(id).InitCollisions();
 }
 
 void Geometry3D::transform(const double R[9],const double t[3])
@@ -310,6 +402,7 @@ void Geometry3D::transform(const double R[9],const double t[3])
   T.R.set(R);
   T.t.set(t);
   world.GetGeometry(id).Transform(T);  
+  world.GetGeometry(id).InitCollisions();
 }
 
 void Geometry3D::setCollisionMargin(double margin)
@@ -322,6 +415,51 @@ double Geometry3D::getCollisionMargin()
 {
   RobotWorld& world=worlds[this->world]->world;
   return world.GetGeometry(id).margin;
+}
+
+void Geometry3D::getBB(double out[3],double out2[3])
+{
+  RobotWorld& world=worlds[this->world]->world;
+  AABB3D bb = world.GetGeometry(id).GetAABB();
+  bb.bmin.get(out);
+  bb.bmax.get(out2);
+}
+
+bool Geometry3D::collides(const Geometry3D& other)
+{
+  RobotWorld& world=worlds[this->world]->world;
+  RobotWorld& world2=worlds[other.world]->world;
+  return world.GetGeometry(id).Collides(world2.GetGeometry(other.id));
+}
+
+bool Geometry3D::withinDistance(const Geometry3D& other,double tol)
+{
+  RobotWorld& world=worlds[this->world]->world;
+  RobotWorld& world2=worlds[other.world]->world;
+  return world.GetGeometry(id).WithinDistance(world2.GetGeometry(other.id),tol);
+}
+
+double Geometry3D::distance(const Geometry3D& other,double relErr,double absErr)
+{
+  RobotWorld& world=worlds[this->world]->world;
+  RobotWorld& world2=worlds[other.world]->world;
+  AnyCollisionQuery q(world.GetGeometry(id),world2.GetGeometry(other.id));
+  return q.Distance(relErr,absErr);
+}
+
+bool Geometry3D::rayCast(const double s[3],const double d[3],double out[3])
+{
+  RobotWorld& world=worlds[this->world]->world;
+  Ray3D r;
+  r.source.set(s);
+  r.direction.set(d);
+  Real distance;
+  if(world.GetGeometry(id).RayCast(r,&distance)) {
+    Vector3 pt = r.source + r.direction*distance;
+    pt.get(out);
+    return true;
+  }
+  return false;
 }
 
 
@@ -525,7 +663,7 @@ int WorldModel::numIDs()
 
 RobotModel WorldModel::robot(int robot)
 {
-  if(robot < 0  || robot >= worlds[index]->world.robots.size())
+  if(robot < 0  || robot >= (int)worlds[index]->world.robots.size())
     throw PyException("Invalid robot index");
   RobotModel r;
   r.world = index;
@@ -762,7 +900,7 @@ int RobotModelLink::getID()
   return world.RobotLinkID(robotIndex,index);
 }
 
-Geometry3D RobotModelLink::getGeometry()
+Geometry3D RobotModelLink::geometry()
 {
   Geometry3D res;
   res.world = world;
@@ -1323,7 +1461,7 @@ int RigidObjectModel::getID()
   return world.RigidObjectID(index);
 }
 
-Geometry3D RigidObjectModel::getGeometry()
+Geometry3D RigidObjectModel::geometry()
 {
   Geometry3D res;
   res.world = world;
@@ -1433,7 +1571,7 @@ int TerrainModel::getID()
   return world.TerrainID(index);
 }
 
-Geometry3D TerrainModel::getGeometry()
+Geometry3D TerrainModel::geometry()
 {
   Geometry3D res;
   res.world = world;

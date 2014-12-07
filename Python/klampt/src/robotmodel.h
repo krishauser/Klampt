@@ -63,21 +63,45 @@ struct PointCloud
   std::vector<double> properties;
 };
 
+struct GeometricPrimitive
+{
+  void setPoint(const double pt[3]);
+  void setSphere(const double c[3],double r);
+  void setSegment(const double a[3],const double b[3]);
+  void setAABB(const double bmin[3],const double bmax[3]);
+  bool loadString(const char* str);
+  std::string saveString() const;
+
+  std::string type;
+  std::vector<double> properties;
+};
+
 /** @brief A reference to a world item's three-D geometry.
  */
 class Geometry3D
 {
  public:
   Geometry3D();
+  ///Returns the type of geometry: TriangleMesh, PointCloud, or
+  ///GeometricPrimitive
   std::string type();
   TriangleMesh getTriangleMesh();
   PointCloud getPointCloud();
+  GeometricPrimitive getGeometricPrimitive();
   void setTriangleMesh(const TriangleMesh&);
   void setPointCloud(const PointCloud&);
+  void setGeometricPrimitive(const GeometricPrimitive&);
+  bool loadFile(const char* fn);
+  bool saveFile(const char* fn);
   void translate(const double t[3]);
   void transform(const double R[9],const double t[3]);
   void setCollisionMargin(double margin);
   double getCollisionMargin();
+  void getBB(double out[3],double out2[3]);
+  bool collides(const Geometry3D& other);
+  bool withinDistance(const Geometry3D& other,double tol);
+  double distance(const Geometry3D& other,double relErr=0,double absErr=0);
+  bool rayCast(const double s[3],const double d[3],double out[3]);
 
   int world;
   int id;
@@ -103,7 +127,7 @@ class RobotModelLink
   RobotModel getRobot();
   int getParent();
   void setParent(int p);
-  Geometry3D getGeometry();
+  Geometry3D geometry();
   Mass getMass();
   void setMass(const Mass& mass);
   ///Gets transformation (R,t) to the parent link
@@ -257,7 +281,7 @@ class RigidObjectModel
   RigidObjectModel();
   int getID();
   const char* getName();
-  Geometry3D getGeometry();
+  Geometry3D geometry();
   Mass getMass();
   void setMass(const Mass& mass);
   ContactParameters getContactParameters();
@@ -279,7 +303,7 @@ class TerrainModel
   TerrainModel();
   int getID();
   const char* getName();
-  Geometry3D getGeometry();
+  Geometry3D geometry();
   void setFriction(double friction);
   void drawGL(bool keepAppearance=true);
 
