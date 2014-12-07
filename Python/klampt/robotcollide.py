@@ -1,53 +1,8 @@
 from __future__ import generators
 from robotsim import *
-import collide
 import se3
 
 
-def makeTrimeshGeom(trimesh):
-    if len(trimesh.indices)==0:
-        return None
-    inds = collide.intArray(len(trimesh.indices))
-    for index in xrange(len(trimesh.indices)):
-        inds[index] = trimesh.indices[index]
-    verts = collide.doubleArray(len(trimesh.vertices))
-    for index in xrange(len(trimesh.vertices)):
-        verts[index] = trimesh.vertices[index]
-    gindex = collide.newGeom()
-    collide.makeTriMeshGeom(gindex,verts,inds,len(trimesh.vertices)/3,len(trimesh.indices)/3)
-    return gindex
-
-def makePointCloudGeom(pc,radius=0):
-    if len(pc.vertices)==0:
-        return None
-    #make individual points / spheres
-    verts = []
-    for v in len(pc.vertices)/3:
-        vert = [pc.vertices[v*3],pc.vertices[v*3+1],pc.vertices[v*3+2]]
-        verts.append(collide.newGeom())
-        if radius == 0:
-            collide.makePointGeom(verts[-1],vert)
-        else:
-            collide.makeSphereGeom(verts[-1],vert,radius)
-    #make a collision group
-    res = collide.newGeom()
-    vertArray = collide.intArray(len(verts))
-    for index in xrange(len(verts)):
-        vertArray[index] = verts[index]
-    collide.makeGroupGeom(res,vertArray,len(verts))
-    return res
-
-def makeGeom(geometry):
-    s = geometry.type()
-    if s=='TriangleMesh':
-        return makeTrimeshGeom(geometry.getTriangleMesh())
-    elif s=='PointCloud':
-        return makePointCloudGeom(geometry.getPointCloud(),geometry.getCollisionMargin())
-    elif s=='':
-        return None
-    else:
-        print "robotcollide.py: Warning, geometries of type %s not supported"%(s,)
-        return None
 
 class WorldCollider:
     """
@@ -60,10 +15,6 @@ class WorldCollider:
       - robots: indicates the geomList indices of each robot in the world.
 
     Methods:
-      - destroy(): call this to cleanup the collide library
-      - updateFrame(obj,geom): using the current transform of the object
-      - updateFrames(): use the model's current status to update the geometry
-        of the meshes.  Usually this doesn't need to be called.
       - getGeom(obj): finds the geometry corresponding to an object
       - collisionTests(filter1,filter2): returns an iterator over potential
         colliding pairs
@@ -94,7 +45,7 @@ class WorldCollider:
         
         for i in xrange(world.numTerrains()):
             t = world.terrain(i)
-            g = makeGeom(t.getGeometry())
+            g = t.geometry()
             if g != None:
                 self.terrains.append(len(self.geomList))
                 self.geomList.append((t,g))
@@ -102,7 +53,7 @@ class WorldCollider:
                 self.terrains.append(-1)
         for i in xrange(world.numRigidObjects()):
             o = world.rigidObject(i)
-            g = makeGeom(o.getGeometry())
+            g = o.geometry()
             if g != None:
                 self.rigidObjects.append(len(self.geomList))
                 self.geomList.append((o,g))
@@ -113,7 +64,7 @@ class WorldCollider:
             self.robots.append([])
             for j in xrange(r.numLinks()):
                 l = r.getLink(j)
-                g = makeGeom(l.getGeometry())
+                g = l.geometry()
                 if g != None:
                     self.robots[-1].append(len(self.geomList))
                     self.geomList.append((l,g))
@@ -167,20 +118,6 @@ class WorldCollider:
                         self.mask[r[i]].add(r[j])
                         self.mask[r[j]].add(r[i])
                 
-    def destroy(self):
-        for g in self.geomList:
-            destroyGeom(g[1])
-
-    def updateFrame(self,object,geom):
-        if hasattr(object,'getTransform'):
-            R,t = object.getTransform()
-            collide.setTriMeshRotation(geom,R)
-            collide.setTriMeshTranslation(geom,t)
-
-    def updateFrames(self):
-        for (o,g) in self.geomList:
-            self.updateFrame(o,g)
-
     def getGeom(self,object):
         for (o,g) in self.geomList:
             if o==object:
@@ -231,7 +168,7 @@ class WorldCollider:
         objects, optionally that satisfies the filter(s)"""
         self.updateFrames()
         for (g0,g1) in self.collisionTests(filter1,filter2):
-            if collide.collide(g0[1],g1[1]):
+            if g0[1].collides(g1[1]):
                 yield (g0[0],g1[0])
 
     def robotSelfCollisions(self,robot=None):
@@ -258,7 +195,7 @@ class WorldCollider:
             for j in rindices:
                 if i < j: break
                 if j not in self.mask[i]: continue
-                if collide.collide(self.geomList[i][1],self.geomList[j][1]):
+                if self.geomList[i][1].collides(self.geomList[j][1]):
                     yield (self.geomList[i][0],self.geomList[j][0])
        
     def robotObjectCollisions(self,robot,object=None):
@@ -290,7 +227,7 @@ class WorldCollider:
             if i < 0: continue
             if oindex not in self.mask[i]: continue
             self.updateFrame(*self.geomList[i])
-            if collide.collide(self.geomList[oindex][1],self.geomList[i][1]):
+            if self.geomList[oindex][1].collide(self.geomList[i][1]):
                 yield (self.geomList[i][0],self.geomList[oindex][0])
 
     def robotTerrainCollisions(self,robot,terrain=None):
@@ -321,7 +258,7 @@ class WorldCollider:
             if i < 0: continue
             if tindex not in self.mask[i]: continue
             self.updateFrame(*self.geomList[i])
-            if collide.collide(self.geomList[tindex][1],self.geomList[i][1]):
+            if self.geomList[tindex][1].collide(self.geomList[i][1]):
                 yield (self.geomList[i][0],self.geomList[tindex][0])
 
     def objectTerrainCollisions(self,object,terrain=None):
@@ -347,14 +284,7 @@ class WorldCollider:
         if tindex < 0: return
         if tindex not in self.mask[oindex]: return
         self.updateFrame(*self.geomList[oindex])
-        if collide.collide(self.geomList[oindex][1],self.geomList[tindex][1]):
-            q = collide.makeCollQuery(self.geomList[oindex][1],self.geomList[tindex][1])
-            coll = collide.queryCollide(q)
-            d = collide.queryDistance(q,0,0)
-            (cp1,cp2) = collide.queryClosestPoints(q)
-            #print "Coll",coll,"dist",d,"Cps:",(se3.apply(self.geomList[oindex][0].getTransform(),cp1),cp2)
-            
-            collide.destroyCollQuery(q)
+        if self.geomList[oindex][1].collides(self.geomList[tindex][1]):
             yield (self.geomList[oindex][0],self.geomList[tindex][0])
         return
 
@@ -382,7 +312,7 @@ class WorldCollider:
         if oindex not in self.mask[oindex2]: return
         self.updateFrame(*self.geomList[oindex])
         self.updateFrame(*self.geomList[oindex2])
-        if collide.collide(self.geomList[oindex][1],self.geomList[oindex2][1]):
+        if self.geomList[oindex][1].collides(self.geomList[oindex2][1]):
             yield (self.geomList[oindex][0],self.geomList[oindex2][0])
         return
 
@@ -394,7 +324,7 @@ class WorldCollider:
         dmin = 1e300
         geoms = (self.geomList if indices==None else [self.geomList[i] for i in indices])
         for g in geoms:
-            (coll,pt) = collide.rayCast(g[1],s,d)
+            (coll,pt) = g[1].rayCast(s,d)
             if coll:
                 dist = vectorops.dot(d,vectorops,sub(pt,s))
                 if dist < dmin:
