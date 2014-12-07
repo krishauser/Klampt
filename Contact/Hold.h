@@ -101,7 +101,6 @@ bool operator > (const Hold& a,const Hold& b);
 ostream& operator << (ostream&, const Hold&);
 istream& operator >> (istream&, Hold&);
 
-
 /**@}*/
 
 #endif
