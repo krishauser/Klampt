@@ -2,7 +2,10 @@
 
 import math
 import vectorops
+import se3
+import ctypes
 from OpenGL.GL import *
+from OpenGL.GLUT import *
 
 def point(p):
     glBegin(GL_POINTS)
@@ -76,3 +79,38 @@ def box(a=(0,0,0),b=(1,1,1),lighting=True):
 
 def centered_box(dims=(1,1,1),lighting=True):
     box([-d*0.5 for d in dims],[d*0.5 for d in dims],lighting)
+
+def setcolor(r,g,b,a=1.0,lighting=True):
+    if lighting:
+        glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,[r,g,b,a])
+    else:
+        glColor4f(r,g,b,a)
+
+def xform_widget(T,length,width,lighting=True):
+    mat = zip(*se3.homogeneous(T))
+    mat = sum([list(coli) for coli in mat],[])
+
+    glPushMatrix()
+    glMultMatrixf(mat)
+
+    #center
+    setcolor(1,1,1,1,lighting=lighting)
+    box((-width*0.75,-width*0.75,-width*0.75),(width*0.75,width*0.75,width*0.75),lighting=lighting)
+
+    #x axis
+    setcolor(1,0,0,1,lighting=lighting)
+    box((-width*0.5,-width*0.5,-width*0.5),(length,width*0.5,width*0.5),lighting=lighting)
+    
+    #y axis
+    setcolor(0,1,0,1,lighting=lighting)
+    box((-width*0.5,-width*0.5,-width*0.5),(width*0.5,length,width*0.5),lighting=lighting)
+    
+    #z axis
+    setcolor(0,0,1,1,lighting=lighting)
+    box((-width*0.5,-width*0.5,-width*0.5),(width*0.5,width*0.5,length),lighting=lighting)
+    
+    glPopMatrix()
+
+def glutBitmapString(font,string):
+    for c in string:
+        glutBitmapCharacter(font,ctypes.c_int(ord(c)))

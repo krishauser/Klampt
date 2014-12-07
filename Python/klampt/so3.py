@@ -126,6 +126,12 @@ def from_axis_angle(aa):
     """Converts an axis-angle representation (axis,angle) to a 3D rotation
     matrix."""
     return rotation(aa[0],aa[1])
+
+def from_moment(w):
+    """Converts a moment representation w to a 3D rotation matrix."""
+    length = vectorops.norm(w)
+    if length < 1e-7: return identity()
+    return rotation(vectorops.mul(w,1.0/length),length)
     
 def distance(R1,R2):
     """Returns the absolute angle one would need to rotate in order to get
