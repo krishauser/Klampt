@@ -1,4 +1,4 @@
-from controller import BaseController
+from controller import ControllerAPI,BaseController
 from klampt import trajectory
 import time
 
@@ -11,11 +11,12 @@ class TrajectoryWithFeedforwardController(BaseController):
         self.startTime = None
         self.realStartTime = time.time()
     def output(self,**inputs):
-        t = inputs['t']
+        api = ControllerAPI(inputs)
+        t = api.time()
         if self.startTime == None:
             self.startTime = t
         t = t - self.startTime
-        return {'qcmd':self.traj.eval(t),'torquecmd':self.torquetraj.eval(t)}
+        return api.makeFeedforwardPIDCommand(self.traj.eval(t),self.traj.deriv(t),self.torquetraj.eval(t))
     def signal(self,type,**inputs):
         if type=='reset':
             self.startTime = None

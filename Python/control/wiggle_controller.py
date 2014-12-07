@@ -1,4 +1,4 @@
-from controller import BaseController
+from controller import ControllerAPI,BaseController
 import math
 
 class WiggleController(BaseController):
@@ -12,7 +12,8 @@ class WiggleController(BaseController):
         self.startTime = None
         self.period = period
     def output(self,**inputs):
-        t = inputs['t']
+        api = ControllerAPI(inputs)
+        t = api.time()
         if self.startTime == None:
             self.startTime = t
         u = (t - self.startTime)/self.period
@@ -40,7 +41,7 @@ class WiggleController(BaseController):
             self.index += 1
             if self.index >= self.robot.numLinks():
                 self.index = 0
-        return {'qcmd':qdes}
+        return api.makePositionCommand(qdes)
 
     def signal(self,type,**inputs):
         if type=='reset':
