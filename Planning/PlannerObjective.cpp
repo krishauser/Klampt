@@ -601,6 +601,52 @@ void CartesianTrackingObjective::GetDifferentialCostFunction(Real t,Matrix3& A,V
   else A = matWeights[index];
 }
 
+bool SavePlannerObjective(PlannerObjectiveBase* obj,AnyCollection& msg)
+{
+  msg.clear();
+  string type = string(obj->TypeString());
+  msg["type"] = type;
+  if(type == "time") {
+  }
+  else if(type == "term_time") {
+    msg["data"] = dynamic_cast<TerminalTimeObjective*>(obj)->tgoal;
+  }
+  else if(type == "config") {
+    msg["data"] = vector<Real>(dynamic_cast<ConfigObjective*>(obj)->qgoal);
+  }
+  else if(type == "velocity") {
+    msg["data"] = vector<Real>(dynamic_cast<VelocityObjective*>(obj)->vgoal);
+  }
+  else if(type == "composite") {
+    CompositeObjective* cobj = dynamic_cast<CompositeObjective*>(obj);
+    msg["norm"] = cobj->norm;
+    for(size_t i=0;i<cobj->components.size();i++) {
+      if(!SavePlannerObjective(cobj->components[i],msg["components"][i])) {
+	fprintf(stderr,"SavePlannerObjective: error saving component %d of composite objective\n",i);
+	return false;
+      }
+    }
+    msg["weights"] = cobj->weights;
+  }
+  else if(type == "cartesian") {
+    CartesianObjective* cobj = dynamic_cast<CartesianObjective*>(obj);
+    msg["link"] = cobj->ikGoal.link;
+    msg["plocal"] = cobj->ikGoal.localPosition;
+    msg["pworld"] = cobj->ikGoal.endPosition;
+  }
+  else if(type == "ik") {
+    IKObjective* cobj = dynamic_cast<IKObjective*>(obj);
+    stringstream ss;
+    ss<<cobj->ikGoal;
+    msg["data"] = ss.str();
+  }
+  else {
+    fprintf(stderr,"SavePlannerObjective: unknown objective type %s\n",type.c_str());
+    return false;
+  }
+  return true;
+}
+
 
 PlannerObjectiveBase* LoadPlannerObjective(AnyCollection& msg,Robot* robot)
 {
@@ -608,7 +654,7 @@ PlannerObjectiveBase* LoadPlannerObjective(AnyCollection& msg,Robot* robot)
   bool res = msg["type"].as<string>(type);
   if(!res) {
     fprintf(stderr,"LoadPlannerObjective: message didn't contain 'type' member\n");
-    return false;
+    return NULL;
   }
   if(type == "time") {
     return new TimeObjective();
@@ -622,7 +668,7 @@ PlannerObjectiveBase* LoadPlannerObjective(AnyCollection& msg,Robot* robot)
       fprintf(stderr,"LoadPlannerObjective: config message didn't contain 'data' member\n");
       return NULL;
     }
-    if(q.size() != robot->links.size()) {
+    if(robot && q.size() != robot->links.size()) {
       fprintf(stderr,"LoadPlannerObjective: config message contains desired configuration of incorrect length %d vs %d\n",q.size(),robot->links.size());
       return NULL;
     }
@@ -634,7 +680,7 @@ PlannerObjectiveBase* LoadPlannerObjective(AnyCollection& msg,Robot* robot)
       fprintf(stderr,"LoadPlannerObjective: velocity  message didn't contain 'data' member\n");
       return NULL;
     }
-    if(v.size() != robot->links.size()) {
+    if(robot && v.size() != robot->links.size()) {
       fprintf(stderr,"LoadPlannerObjective: velocity message contains desired velocity of incorrect length %d vs %d\n",v.size(),robot->links.size());
       return NULL;
     }
@@ -676,4 +722,17 @@ PlannerObjectiveBase* LoadPlannerObjective(istream& in,Robot* robot)
     return NULL;
   }
   return LoadPlannerObjective(msg,robot);
+}
+
+
+bool SavePlannerObjective(PlannerObjectiveBase* obj,ostream& out)
+{
+  AnyCollection msg;
+  if(!SavePlannerObjective(obj,msg)) return false;
+  out<<msg;
+  if(!out) {
+    fprintf(stderr,"LoadPlannerObjective: Unable to write message\n");
+    return false;
+  }
+  return true;
 }

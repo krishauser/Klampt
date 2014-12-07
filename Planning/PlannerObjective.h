@@ -289,5 +289,14 @@ class CartesianTrackingObjective : public PlannerObjectiveBase
  */
 PlannerObjectiveBase* LoadPlannerObjective(istream& in,Robot* robot=NULL);
 
+///Saves an objective in the format used by LoadPlannerObjective
+bool SavePlannerObjective(PlannerObjectiveBase* obj,ostream& out);
+
+class AnyCollection;
+
+///Same as the other LoadPlannerObjective, but just given a JSON structure.
+PlannerObjectiveBase* LoadPlannerObjective(AnyCollection& msg,Robot* robot=NULL);
+bool SavePlannerObjective(PlannerObjectiveBase* obj,AnyCollection& msg);
+
 #endif
 
