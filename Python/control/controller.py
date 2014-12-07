@@ -33,6 +33,14 @@ class BaseController(object):
         If dqcmd and tcmd are set, it's a fixed velocity command.
 
         Otherwise, torquecmd must be set, and it's a torque command.
+
+        For convenience, you may use the ControllerAPI class. Usage is as
+        follows:
+        api = ControllerAPI(inputs)
+        print "Current time is",api.time()
+        #set a position command
+        api.setJointPositionCommand(5,0.5)
+        return api.makeCommand()
         """
         return None
     def signal(self,type,**inputs):
@@ -52,6 +60,118 @@ class BaseController(object):
     def drawGL(self):
         """Optional: hook to give feedback to the visualizer"""
         pass
+
+class ControllerAPI:
+    """A helper class that makes it a bit easier to interact with the
+    dictionary-based controller communication protocol, if you prefer
+    object-oriented code.
+
+    The non-prefixed methods get values from the input dictionary.
+
+    The makeXCommand functions return a propertly formatted output
+    dictionary.  Alternatively, you can make several setXCommand calls
+    and then call makeCommand() to retrieve the output dictionary.
+    """
+    def __init__(self,inputs):
+        self.inputs = inputs.copy()
+        self.retval = dict()
+    def time(self):
+        """Returns the robot clock time"""
+        return self.inputs['t']
+    def timeStep(self):
+        """Returns the robot time step"""
+        return self.inputs['dt']
+    def commandedConfiguration(self):
+        """Returns the commanded joint configuration or None if it is not
+        sensed."""
+        try: return self.inputs['qcmd']
+        except KeyError: return None
+    def commandedVelocity(self):
+        """Returns the commanded joint velocities or None if it is not
+        sensed."""
+        try: return self.inputs['dqcmd']
+        except KeyError: return None
+    def sensedConfiguration(self):
+        """Returns the sensed joint configuration or None if it is not
+        sensed."""
+        try: return self.inputs['q']
+        except KeyError: return None
+    def sensedVelocity(self):
+        """Returns the sensed joint velocity or None if it is not
+        sensed."""
+        try: return self.inputs['dq']
+        except KeyError: return None
+    def sensedTorque(self):
+        """Returns the sensed torque or None if it is not
+        sensed."""
+        try: return self.inputs['torque']
+        except KeyError: return None
+    def sensorNames(self):
+        """Returns the list of sensor names (including clock and time step)"""
+        return self.inputs.keys()
+    def sensorValue(self,sensor):
+        """Returns the value of the named sensor."""
+        try: return self.inputs[sensor]
+        except KeyError: reutrn None
+    def makePositionCommand(self,q):
+        return {'qcmd':q}
+    def makePIDCommand(self,q,dq):
+        return {'qcmd':q,'dqcmd':dq}
+    def makeFeedforwardPIDCommand(self,q,dq,torque):
+        return {'qcmd':q,'dqcmd':dq,'torquecmd':torque}
+    def makeVelocityCommand(self,dq,t):
+        return {'dqcmd':dq,'tcmd':t}
+    def makeTorqueCommand(self,torque):
+        return {'torquecmd':t}
+    def setPositionCommand(self,value):
+        self.retval['qcmd'] = value
+    def setPIDCommand(self,q,dq):
+        self.retval['qcmd'] = q
+        self.retval['dqcmd'] = dq
+    def setFeedforwardPIDCommand(self,q,dq,torque):
+        self.retval['qcmd'] = q
+        self.retval['dqcmd'] = dq
+        self.retval['torquecmd'] = torque
+    def setVelocityCommand(self,v,dt):
+        self.retval['dqcmd'] = value
+        self.retval['tcmd'] = dt
+    def setTorqueCommand(self,torque):
+        self.retval['torquecmd'] = torque
+    def setJointPositionCommand(self,index,value):
+        """Sets a single indexed joint to a position command"""
+        #klampt can only do uniform position, velocity, or torque commands
+        if 'qcmd' in self.retval:
+            self.retval['qcmd'][index] = value
+        elif 'dqcmd' in self.retval:
+            self.retval['dqcmd'][index] = (value - self.inputs['qcmd'][index]) / inputs['dt']
+            self.retval['tcmd']=self.inputs['dt']
+        elif 'torquecmd' in self.retval:
+            print "Cannot combine joint position commands with joint torque commands"
+        else:
+            #no joint commands set yet, set a position command
+            self.retval['qcmd'] = self.inputs['qcmd']
+            self.retval['qcmd'][index] = value
+    def setJointVelocityCommand(self,index,value):
+        """Sets a single indexed joint to a velocity command"""
+        #klampt can only do uniform position, velocity, or torque commands
+        if 'qcmd' in self.retval:
+            self.retval['qcmd'][index] = self.inputs['qcmd'][index]+value*self.inputs['dt']
+            if 'dqcmd' not in self.retval:
+                self.retval['dqcmd'] = self.inputs['dqcmd']
+            self.retval['dqcmd'][index] = value
+        elif 'dqcmd' in self.retval:
+            self.retval['dqcmd'][index] = value
+            self.retval['tcmd']=self.inputs['dt']
+        elif 'torquecmd' in self.retval:
+            print "Cannot combine joint velocity commands with joint torque commands"
+        else:
+            #no velocity commands set yet, set a velocity command
+            self.retval['dqcmd'] = self.inputs['dqcmd']
+            self.retval['dqcmd'][index] = value
+    def makeCommand(self):
+        """Returns the command from previous setXCommand() calls."
+        return self.retval
+
 
 class MultiController(BaseController):
     """A controller that runs several other subcontrollers each time step
@@ -295,12 +415,19 @@ class TimedControllerSequence(TransitionStateMachineController):
 class LinearController(BaseController):
     """Implements a linear controller
     u = K1*input[x1] + ... + Kn*input[xn] + offset
+
+    The user must fill out the self.gains member using the addGain()
+    method.
     """
-    def __init__(self,type='torque'):
+    def __init__(self,type='torquecmd'):
         import numpy as np
         self.outputType = type
         self.gains = dict()
         self.offset = None
+    def addGain(self,inputTerm,K):
+        self.gains[inputTerm] = K
+    def setConstant(self,offset):
+        self.offset = offset
     def output(self,**inputs):
         res = self.offset
         for (x,K) in self.gains.iteritems():
