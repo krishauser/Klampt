@@ -119,6 +119,10 @@ class DynamicPath
   void SetJointLimits(const Vector& qMin,const Vector& qMax);
   inline void Clear() { ramps.clear(); }
   inline bool Empty() const { return ramps.empty(); }
+  inline const Vector& StartConfig() const { return ramps.front().x0; }
+  inline const Vector& EndConfig() const { return ramps.back().x1; }
+  inline const Vector& StartVelocity() const { return ramps.front().dx0; }
+  inline const Vector& EndVelocity() const { return ramps.back().dx1; }
   Real GetTotalTime() const;
   int GetSegment(Real t,Real& u) const;
   void Evaluate(Real t,Vector& x) const;
