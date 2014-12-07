@@ -3,6 +3,7 @@
 #include <utils/fileutils.h>
 #include <tinyxml.h>
 #include "IO/XmlWorld.h"
+#include "IO/JSON.h"
 #include <sstream>
 
 template class BasicResource<Config>;
@@ -53,6 +54,18 @@ void MakeRobotResourceLibrary(ResourceLibrary& library)
   library.AddLoader<GraspResource>("xml");
 }
 
+
+bool ConfigsResource::Save(AnyCollection& c) 
+{ 
+  c["type"] = "Configs";
+  Convert(configs,c["configs"]);
+  return true;
+}
+
+bool ConfigsResource::Load(AnyCollection& c) 
+{
+  return Convert(c["configs"],configs);
+}
 
 bool ConfigsResource::Load(istream& in)
 {
@@ -362,6 +375,19 @@ bool LinearPathResource::Save(ostream& out)
     out<<times[i]<<"    "<<milestones[i]<<endl;
   }
   return true;
+}
+
+bool LinearPathResource::Save(AnyCollection& c)
+{
+  c["type"] = "LinearPath";
+  Convert(times,c["times"]); 
+  Convert(milestones,c["milestones"]);
+  return true; 
+}
+
+bool LinearPathResource::Load(AnyCollection& c) 
+{
+  return Convert(c["times"],times) && Convert(c["milestones"],milestones); 
 }
 
 ResourceBase* LinearPathResource::Copy()
@@ -706,170 +732,6 @@ bool MultiPathResource::Unpack(vector<ResourcePtr>& res,bool* incomplete)
 
 
 
-void Convert(const IKGoal& g,AnyCollection& c)
-{
-  c["link"]=g.link;
-  if(g.destLink >= 0)
-    c["destLink"]=g.destLink;
-  switch(g.posConstraint) {
-  case IKGoal::PosNone:
-    break;
-  case IKGoal::PosPlanar:
-    c["posConstraint"] = string("planar");
-    c["localPosition"] = g.localPosition;
-    c["endPosition"] = g.endPosition;
-    c["direction"] = g.direction;
-    break;
-  case IKGoal::PosLinear:
-    c["posConstraint"] = string("linear");
-    c["localPosition"] = g.localPosition;
-    c["endPosition"] = g.endPosition;
-    c["direction"] = g.direction;
-    break;
-  case IKGoal::PosFixed:
-    c["posConstraint"] = string("fixed");
-    c["localPosition"] = g.localPosition;
-    c["endPosition"] = g.endPosition;
-    break;
-  default:
-    break;
-  }
-  switch(g.rotConstraint) {
-  case IKGoal::RotNone:
-    break;
-  case IKGoal::RotTwoAxis:
-    c["posConstraint"] = string("twoaxis");
-    c["localAxis"] = g.localAxis;
-    c["endRotation"] = g.endRotation;
-    break;
-  case IKGoal::RotAxis:
-    c["posConstraint"] = string("axis");
-    c["localAxis"] = g.localAxis;
-    c["endRotation"] = g.endRotation;
-    break;
-  case IKGoal::RotFixed:
-    c["posConstraint"] = string("fixed");
-    c["endRotation"] = g.endRotation;
-    break;
-  }
-
-}
-void Convert(const Hold& h,AnyCollection& c)
-{
-  Convert(h.ikConstraint,c["ik"]);
-  c["contacts"].resize(h.contacts.size());
-  for(size_t i=0;i<h.contacts.size();i++) {
-    c["contacts"][(int)i]["x"] = h.contacts[i].x;
-    c["contacts"][(int)i]["n"] = h.contacts[i].n;
-    c["contacts"][(int)i]["kFriction"] = h.contacts[i].kFriction;
-  }
-}
-
-void Convert(const Grasp& g,AnyCollection& c)
-{
-  c["objectIndex"] = g.objectIndex;
-  c["robotIndex"] = g.robotIndex;
-  c["constraints"].resize(g.constraints.size());
-  for(size_t i=0;i<g.constraints.size();i++)
-    Convert(g.constraints[i],c["constraints"][(int)i]);
-  c["fixedValues"] = g.fixedValues;
-  c["fixedDofs"] = g.fixedDofs;
-  c["contacts"].resize(g.contacts.size());
-  for(size_t i=0;i<g.contacts.size();i++) {
-    c["contacts"][(int)i]["x"] = g.contacts[i].x;
-    c["contacts"][(int)i]["n"] = g.contacts[i].n;
-    c["contacts"][(int)i]["kFriction"] = g.contacts[i].kFriction;
-  }
-  c["contactLinks"] = g.contactLinks;
-  c["forces"].resize(g.forces.size());
-  for(size_t i=0;i<g.forces.size();i++)
-    c["forces"] = g.forces[i];
-}
-
-bool Convert(const AnyCollection& c,IKGoal& g)
-{
-  if(!c["link"].as(g.link)) return false;
-  if(!c["destLink"].as(g.destLink))
-    g.destLink = -1;
-  string s;
-  if(!c["posConstraint"].as(s))
-    g.SetFreePosition();
-  else {
-    if(s == "fixed") 
-      g.posConstraint = IKGoal::PosFixed;
-    else if(s == "planar")
-      g.posConstraint = IKGoal::PosPlanar; 
-    else if(s=="linear") 
-      g.posConstraint = IKGoal::PosLinear;
-    else {
-      fprintf(stderr,"AnyCollection to IKGoal: Invalid posConstraint type %s\n",s.c_str());
-      return false;
-    }
-    if(s == "fixed" || s == "planar" || s=="linear") {
-      if(!c["endPosition"].as(g.endPosition)) return false;
-      if(!c["localPosition"].as(g.localPosition)) return false;
-    }
-    if(s == "planar" || s=="linear") {
-      if(!c["direction"].as(g.direction)) return false;
-    }
-  }
-  if(!c["rotConstraint"].as(s))
-    g.SetFreeRotation();
-  else {
-    if(s == "fixed") 
-      g.rotConstraint = IKGoal::RotFixed;
-    else if(s == "axis")
-      g.rotConstraint = IKGoal::RotAxis;
-    else if(s=="twoaxis") 
-      g.rotConstraint = IKGoal::RotTwoAxis;
-    else {
-      fprintf(stderr,"AnyCollection to IKGoal: Invalid rotConstraint type %s\n",s.c_str());
-      return false;
-    }
-    if(s == "fixed" || s == "axis" || s=="twoaxis") {
-      if(!c["endRotation"].as(g.endRotation)) return false;
-    }
-    if(s == "axis" || s=="twoaxis") {
-      if(!c["localAxis"].as(g.localAxis)) return false;
-    }
-  }
-  return true;
-}
-
-bool Convert(const AnyCollection& c,Hold& h)
-{
-  if(!Convert(c["ik"],h.ikConstraint)) return false;
-  h.contacts.resize(c["contacts"].size());
-  for(size_t i=0;i<h.contacts.size();i++) {
-    if(!c["contacts"][(int)i]["x"].as(h.contacts[i].x)) return false;
-    if(!c["contacts"][(int)i]["n"].as(h.contacts[i].n)) return false;
-    if(!c["contacts"][(int)i]["kFriction"].as(h.contacts[i].kFriction)) return false;
-  }
-  return true;
-}
-
-
-bool Convert(const AnyCollection& c,Grasp& g)
-{
-  g.objectIndex = c["objectIndex"];
-  g.robotIndex = c["robotIndex"];
-  g.constraints.resize(c["constraints"].size());
-  for(size_t i=0;i<g.constraints.size();i++)
-    Convert(c["constraints"][(int)i],g.constraints[i]);
-  if(!c["fixedValues"].asvector(g.fixedValues)) return false;
-  if(!c["fixedDofs"].asvector(g.fixedDofs)) return false;
-  g.contacts.resize(c["contacts"].size());
-  for(size_t i=0;i<g.contacts.size();i++) {
-    g.contacts[i].x = c["contacts"][(int)i]["x"];
-    g.contacts[i].n = c["contacts"][(int)i]["n"];
-    g.contacts[i].kFriction = c["contacts"][(int)i]["kFriction"];
-  }
-  if(!c["contactLinks"].asvector(g.contactLinks)) return false;
-  g.forces.resize(c["forces"].size());
-  for(size_t i=0;i<g.forces.size();i++)
-    g.forces[i] = c["forces"];
-  return true;
-}
 
 
 bool IKGoalResource::Load(AnyCollection& c)
@@ -879,6 +741,7 @@ bool IKGoalResource::Load(AnyCollection& c)
 
 bool IKGoalResource::Save(AnyCollection& c)
 {
+  c["type"] = "IKGoal";
   Convert(goal,c);
   return true;
 }
@@ -925,6 +788,7 @@ bool HoldResource::Load(AnyCollection& c)
 
 bool HoldResource::Save(AnyCollection& c)
 {
+  c["type"] = "Hold";
   Convert(hold,c);
   return true;
 }
@@ -1058,28 +922,14 @@ bool StanceResource::Save(TiXmlElement* out)
 
 bool StanceResource::Load(AnyCollection& c)
 {
-  vector<SmartPointer<AnyCollection> > holds;
-  stance.clear();
-  c["holds"].enumerate(holds);
-  for(size_t i=0;i<holds.size();i++) {
-    HoldResource h;
-    if(!h.Load(*holds[i])) {
-      fprintf(stderr,"StanceResource: Error reading hold %d\n",i);
-      return false;
-    }
-    stance.insert(h.hold);
-  }
+  Convert(c,stance);
   return true;
 }
 
 bool StanceResource::Save(AnyCollection& c)
 {
-  c["holds"].resize(stance.size());
-  int k=0;
-  for(Stance::const_iterator i=stance.begin();i!=stance.end();i++,k++) {
-    HoldResource h(i->second);
-    if(!h.Save(c["holds"][k])) return false;
-  }
+  c["type"] = "Stance";
+  Convert(stance,c);
   return true;
 }
 
@@ -1192,6 +1042,7 @@ bool GraspResource::Load(AnyCollection& c)
 
 bool GraspResource::Save(AnyCollection& c)
 {
+  c["type"] = "Grasp";
   Convert(grasp,c);
   return true;
 }
@@ -1522,4 +1373,230 @@ ResourcePtr PackResources(vector<ResourcePtr>& lib,ResourcePtr rtemplate,string*
   CompoundResourceBase* cr = dynamic_cast<CompoundResourceBase*>((ResourceBase*)r);
   if(cr->Pack(lib,errorMessage)) return r;
   return NULL;  
+}
+
+
+
+
+void Convert(const Vector& v,AnyCollection& c)
+{
+  Convert(vector<Real>(v),c);
+}
+
+bool Convert(const AnyCollection& c,Vector& v)
+{
+  if(c.as(v)) return true;
+  vector<Real> array;
+  if(!Convert(c,array)) return false;
+  v = array;
+  return true;
+}
+
+void Convert(const Vector3& x,AnyCollection& c)
+{
+  vector<double> v(3);
+  x.get(v[0],v[1],v[2]);
+  c = v;
+}
+
+bool Convert(const AnyCollection& c,Vector3& x)
+{
+  if(c.as(x)) return true;
+  vector<double> v;
+  if(!c.asvector<double>(v))
+    return false;
+  if(v.size() != 3) 
+    return false;
+  x.set(v[0],v[1],v[2]);
+  return true;
+}
+
+void Convert(const IKGoal& g,AnyCollection& c)
+{
+  c["link"]=g.link;
+  if(g.destLink >= 0)
+    c["destLink"]=g.destLink;
+  switch(g.posConstraint) {
+  case IKGoal::PosNone:
+    break;
+  case IKGoal::PosPlanar:
+    c["posConstraint"] = string("planar");
+    c["localPosition"] = g.localPosition;
+    c["endPosition"] = g.endPosition;
+    c["direction"] = g.direction;
+    break;
+  case IKGoal::PosLinear:
+    c["posConstraint"] = string("linear");
+    c["localPosition"] = g.localPosition;
+    c["endPosition"] = g.endPosition;
+    c["direction"] = g.direction;
+    break;
+  case IKGoal::PosFixed:
+    c["posConstraint"] = string("fixed");
+    c["localPosition"] = g.localPosition;
+    c["endPosition"] = g.endPosition;
+    break;
+  default:
+    break;
+  }
+  switch(g.rotConstraint) {
+  case IKGoal::RotNone:
+    break;
+  case IKGoal::RotTwoAxis:
+    c["posConstraint"] = string("twoaxis");
+    c["localAxis"] = g.localAxis;
+    c["endRotation"] = g.endRotation;
+    break;
+  case IKGoal::RotAxis:
+    c["posConstraint"] = string("axis");
+    c["localAxis"] = g.localAxis;
+    c["endRotation"] = g.endRotation;
+    break;
+  case IKGoal::RotFixed:
+    c["posConstraint"] = string("fixed");
+    c["endRotation"] = g.endRotation;
+    break;
+  }
+
+}
+void Convert(const Hold& h,AnyCollection& c)
+{
+  Convert(h.ikConstraint,c["ik"]);
+  c["contacts"].resize(h.contacts.size());
+  for(size_t i=0;i<h.contacts.size();i++) {
+    c["contacts"][(int)i]["x"] = h.contacts[i].x;
+    c["contacts"][(int)i]["n"] = h.contacts[i].n;
+    c["contacts"][(int)i]["kFriction"] = h.contacts[i].kFriction;
+  }
+}
+
+void Convert(const Grasp& g,AnyCollection& c)
+{
+  c["objectIndex"] = g.objectIndex;
+  c["robotIndex"] = g.robotIndex;
+  c["constraints"].resize(g.constraints.size());
+  for(size_t i=0;i<g.constraints.size();i++)
+    Convert(g.constraints[i],c["constraints"][(int)i]);
+  c["fixedValues"] = g.fixedValues;
+  c["fixedDofs"] = g.fixedDofs;
+  c["contacts"].resize(g.contacts.size());
+  for(size_t i=0;i<g.contacts.size();i++) {
+    c["contacts"][(int)i]["x"] = g.contacts[i].x;
+    c["contacts"][(int)i]["n"] = g.contacts[i].n;
+    c["contacts"][(int)i]["kFriction"] = g.contacts[i].kFriction;
+  }
+  c["contactLinks"] = g.contactLinks;
+  c["forces"].resize(g.forces.size());
+  for(size_t i=0;i<g.forces.size();i++)
+    c["forces"] = g.forces[i];
+}
+
+void Convert(const Stance& s,AnyCollection& c)
+{
+  c["holds"].resize(s.size());
+  int k=0;
+  for(Stance::const_iterator i=s.begin();i!=s.end();i++,k++) {
+    Convert(i->second,c["holds"][k]);
+  }
+}
+
+bool Convert(const AnyCollection& c,IKGoal& g)
+{
+  if(!c["link"].as(g.link)) return false;
+  if(!c["destLink"].as(g.destLink))
+    g.destLink = -1;
+  string s;
+  if(!c["posConstraint"].as(s))
+    g.SetFreePosition();
+  else {
+    if(s == "fixed") 
+      g.posConstraint = IKGoal::PosFixed;
+    else if(s == "planar")
+      g.posConstraint = IKGoal::PosPlanar; 
+    else if(s=="linear") 
+      g.posConstraint = IKGoal::PosLinear;
+    else {
+      fprintf(stderr,"AnyCollection to IKGoal: Invalid posConstraint type %s\n",s.c_str());
+      return false;
+    }
+    if(s == "fixed" || s == "planar" || s=="linear") {
+      if(!c["endPosition"].as(g.endPosition)) return false;
+      if(!c["localPosition"].as(g.localPosition)) return false;
+    }
+    if(s == "planar" || s=="linear") {
+      if(!c["direction"].as(g.direction)) return false;
+    }
+  }
+  if(!c["rotConstraint"].as(s))
+    g.SetFreeRotation();
+  else {
+    if(s == "fixed") 
+      g.rotConstraint = IKGoal::RotFixed;
+    else if(s == "axis")
+      g.rotConstraint = IKGoal::RotAxis;
+    else if(s=="twoaxis") 
+      g.rotConstraint = IKGoal::RotTwoAxis;
+    else {
+      fprintf(stderr,"AnyCollection to IKGoal: Invalid rotConstraint type %s\n",s.c_str());
+      return false;
+    }
+    if(s == "fixed" || s == "axis" || s=="twoaxis") {
+      if(!c["endRotation"].as(g.endRotation)) return false;
+    }
+    if(s == "axis" || s=="twoaxis") {
+      if(!c["localAxis"].as(g.localAxis)) return false;
+    }
+  }
+  return true;
+}
+
+bool Convert(const AnyCollection& c,Hold& h)
+{
+  if(!Convert(c["ik"],h.ikConstraint)) return false;
+  h.contacts.resize(c["contacts"].size());
+  for(size_t i=0;i<h.contacts.size();i++) {
+    if(!c["contacts"][(int)i]["x"].as(h.contacts[i].x)) return false;
+    if(!c["contacts"][(int)i]["n"].as(h.contacts[i].n)) return false;
+    if(!c["contacts"][(int)i]["kFriction"].as(h.contacts[i].kFriction)) return false;
+  }
+  return true;
+}
+
+
+bool Convert(const AnyCollection& c,Grasp& g)
+{
+  g.objectIndex = c["objectIndex"];
+  g.robotIndex = c["robotIndex"];
+  g.constraints.resize(c["constraints"].size());
+  for(size_t i=0;i<g.constraints.size();i++)
+    Convert(c["constraints"][(int)i],g.constraints[i]);
+  if(!c["fixedValues"].asvector(g.fixedValues)) return false;
+  if(!c["fixedDofs"].asvector(g.fixedDofs)) return false;
+  g.contacts.resize(c["contacts"].size());
+  for(size_t i=0;i<g.contacts.size();i++) {
+    g.contacts[i].x = c["contacts"][(int)i]["x"];
+    g.contacts[i].n = c["contacts"][(int)i]["n"];
+    g.contacts[i].kFriction = c["contacts"][(int)i]["kFriction"];
+  }
+  if(!c["contactLinks"].asvector(g.contactLinks)) return false;
+  g.forces.resize(c["forces"].size());
+  for(size_t i=0;i<g.forces.size();i++)
+    g.forces[i] = c["forces"];
+  return true;
+}
+
+bool Convert(const AnyCollection& c,Stance& s)
+{
+  vector<SmartPointer<AnyCollection> > holds;
+  s.clear();
+  c["holds"].enumerate(holds);
+  for(size_t i=0;i<holds.size();i++) {
+    HoldResource h;
+    if(!h.Load(*holds[i])) {
+      fprintf(stderr,"Convert(AnyCollection,Stance): Error reading hold %d\n",i);
+      return false;
+    }
+    s.insert(h.hold);
+  }
+  return true;
 }

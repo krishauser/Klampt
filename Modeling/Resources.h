@@ -2,7 +2,6 @@
 #define ROBOT_RESOURCES_H
 
 #include <utils/ResourceLibrary.h>
-#include <utils/AnyCollection.h>
 #include <math3d/geometry3d.h>
 #include "World.h"
 #include "MultiPath.h"
@@ -10,6 +9,7 @@
 #include "Contact/Grasp.h"
 using namespace std;
 
+class AnyCollection;
 typedef BasicResource<Config> ConfigResource;
 typedef BasicResource<Vector3> Vector3Resource;
 typedef BasicResource<Matrix3> Matrix3Resource;
@@ -28,8 +28,8 @@ class ConfigsResource : public CompoundResourceBase
   using ResourceBase::Save;
   virtual bool Load(istream& in);
   virtual bool Save(ostream& out);
-  virtual bool Save(AnyCollection& c) { c["configs"]=configs; return true; }
-  virtual bool Load(AnyCollection& c) { return c["configs"].asvector(configs); }
+  virtual bool Save(AnyCollection& c);
+  virtual bool Load(AnyCollection& c);
   virtual const char* Type() const { return "Configs"; }
   virtual ResourceBase* Make() { return new ConfigsResource; }
   virtual ResourceBase* Copy();
@@ -122,8 +122,8 @@ class LinearPathResource : public CompoundResourceBase
   using ResourceBase::Save;
   virtual bool Load(istream& in);
   virtual bool Save(ostream& out);
-  virtual bool Save(AnyCollection& c) { c["times"]=times; c["milestones"]=milestones; return true; }
-  virtual bool Load(AnyCollection& c) { return c["times"].asvector(times) && c["milestones"].asvector(milestones); }
+  virtual bool Save(AnyCollection& c);
+  virtual bool Load(AnyCollection& c);
   virtual const char* Type() const { return "LinearPath"; }
   virtual ResourceBase* Make() { return new LinearPathResource; }
   virtual ResourceBase* Copy();
@@ -290,11 +290,6 @@ class GraspResource : public CompoundResourceBase
 
   Grasp grasp;
 };
-
-void Convert(const IKGoal& g,AnyCollection& c);
-void Convert(const Hold& h,AnyCollection& c);
-bool Convert(const AnyCollection& c,IKGoal& g);
-bool Convert(const AnyCollection& c,Hold& h);
 
 /** @ingroup Modeling
  * @brief Initializes a ResourceLibrary so that it accepts standard RobotSim
