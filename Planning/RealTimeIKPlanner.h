@@ -8,21 +8,20 @@
  * goal.  The goal must be of CartesianObjective or IKObjective type, or
  * a composite of several such objectives. (see PlannerObjectives.h)
  */
-class RealTimeIKPlanner : public RealTimePlannerBase
+class DynamicIKPlanner : public DynamicMotionPlannerBase
 {
 public:
-  virtual void Reset(SmartPointer<PlannerObjectiveBase> newgoal);
   virtual int PlanFrom(ParabolicRamp::DynamicPath& path,Real cutoff);
 };
 
 /** @brief A planner that perturbs the current configuration to get an
  * improved path.
  */
-class RealTimePerturbationPlanner : public RealTimePlannerBase
+class DynamicPerturbationPlanner : public DynamicMotionPlannerBase
 {
 public:
-  RealTimePerturbationPlanner();
-  virtual void Reset(SmartPointer<PlannerObjectiveBase> newgoal);
+  DynamicPerturbationPlanner();
+  virtual void SetGoal(SmartPointer<PlannerObjectiveBase> newgoal);
   virtual int PlanFrom(ParabolicRamp::DynamicPath& path,Real cutoff);
 
   //setting
@@ -37,11 +36,11 @@ public:
  * numerical IK to get an improved path.  All caveats of RealTimeIKPlanner
  * apply.
  */
-class RealTimePerturbationIKPlanner : public RealTimePlannerBase
+class DynamicPerturbationIKPlanner : public DynamicMotionPlannerBase
 {
 public:
-  RealTimePerturbationIKPlanner();
-  virtual void Reset(SmartPointer<PlannerObjectiveBase> newgoal);
+  DynamicPerturbationIKPlanner();
+  virtual void SetGoal(SmartPointer<PlannerObjectiveBase> newgoal);
   virtual int PlanFrom(ParabolicRamp::DynamicPath& path,Real cutoff);
 
   //setting

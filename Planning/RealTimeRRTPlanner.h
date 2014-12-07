@@ -4,14 +4,14 @@
 #include "RealTimePlanner.h"
 #include <planning/MotionPlanner.h>
 
-/** @brief Real time RRT planner -- not recently tested
+/** @brief Dynamic RRT planner -- not recently tested
  */
-class RealTimeRRTPlanner : public RealTimePlannerBase
+class DynamicRRTPlanner : public DynamicMotionPlannerBase
 {
 public:
-  RealTimeRRTPlanner();
-  virtual ~RealTimeRRTPlanner() {  }
-  virtual void Reset(SmartPointer<PlannerObjectiveBase> newgoal);
+  DynamicRRTPlanner();
+  virtual ~DynamicRRTPlanner() {  }
+  virtual void SetGoal(SmartPointer<PlannerObjectiveBase> newgoal);
   Vector& MakeState(const Config& q,const Config& dq);
   Vector& MakeState(const Config& q);
   RRTPlanner::Node* TryIKExtend(RRTPlanner::Node* node,bool search=true);
@@ -37,10 +37,11 @@ public:
   Vector tempV;
 };
 
-/** @brief The preferred sampling-based planner.  Will alternate sampling-based
-* planning and smoothing via shortcutting.
+/** @brief The preferred dynamic sampling-based planner for realtime planning.
+ *  Will alternate sampling-based
+ * planning and smoothing via shortcutting.
  */
-class RealTimeTreePlanner : public RealTimePlannerBase
+class DynamicHybridTreePlanner : public DynamicMotionPlannerBase
 {
 public:
   struct NodeData
@@ -59,9 +60,9 @@ public:
   };
   typedef Graph::TreeNode<NodeData,EdgeData> Node;
 
-  RealTimeTreePlanner();
-  virtual ~RealTimeTreePlanner() {  }
-  virtual void Reset(SmartPointer<PlannerObjectiveBase> newgoal);
+  DynamicHybridTreePlanner();
+  virtual ~DynamicHybridTreePlanner() {  }
+  virtual void SetGoal(SmartPointer<PlannerObjectiveBase> newgoal);
   Node* AddChild(Node* node,const Config& q);
   Node* AddChild(Node* node,const ParabolicRamp::ParabolicRampND& ramp);
   Node* AddChild(Node* node,const ParabolicRamp::DynamicPath& path);

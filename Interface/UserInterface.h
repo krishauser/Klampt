@@ -126,7 +126,7 @@ class PlannerCommandInterface : public InputProcessingInterface
   virtual string UpdateEvent();
   virtual string Instructions() const;
 
-  RealTimePlannerBase* planner;
+  SmartPointer<RealTimePlanner> planner;
   double lastPlanTime;
   double nextPlanTime;
 
@@ -168,45 +168,15 @@ class RRTCommandInterface : public PlannerCommandInterface
 
 
 
-/** @brief Shared data structure for a multithreaded real time planner.
- * The planner must have a RealTimePlannerDataSender as a sendPathCallback.
- */
-struct RealTimePlannerData
-{
-  Mutex mutex;
-  RealTimePlannerBase* planner;
-  bool resetStartConfig;      //(in) true if the start configuration should be reset
-  Config startConfig;         //(in) the start config
-  SmartPointer<PlannerObjectiveBase> objective;   //(in) the planning objective, can be NULL
-  bool active;             //(in) set this to false to quit
-  Real globalTime;         //(in) time measured in calling thread
-  Real startPlanTime;       //(out) time of planning
-
-  bool pathRefresh;         //(in/out) whether to refresh the path
-  Real tcut;                //(out) the path cut time, relative to startPlanTime
-  ParabolicRamp::DynamicPath path;  //(out) the path to splice in 
-  bool pathRefreshSuccess;  //(in) whether the execution thread read in the path successfully
-};
-
-/** @brief For use with a multithreaded RealTimePlannerBase
- */
-class RealTimePlannerDataSender : public SendPathCallbackBase
-{
-public:
-  RealTimePlannerDataSender(RealTimePlannerData* data);
-  virtual bool Send(Real tplanstart,Real tcut,const ParabolicRamp::DynamicPath& path);
-  RealTimePlannerData* data;
-};
 
 /** @brief A base class for a multithreaded planning robot UI.
- * Subclasses must fill out planner.
+ * Subclasses must call planningThread.SetStartConfig(), SetCSpace(), and
+ * SetPlanner().
  */
 class MTPlannerCommandInterface: public InputProcessingInterface
 {
 public:
-  RealTimePlannerBase* planner;
-  Thread planningThread;
-  RealTimePlannerData data;
+  RealTimePlanningThread planningThread;
 
   ///The planner will not be called until the objective function is set below
   ///this threshold.  Infinity by default (i.e., the planner will start

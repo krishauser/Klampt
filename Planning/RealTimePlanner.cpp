@@ -1,6 +1,7 @@
 #include "RealTimePlanner.h"
 #include "RealTimeIKPlanner.h"
 #include "RealTimeRRTPlanner.h"
+#include "Interface/RobotInterface.h"
 #include <robotics/IKFunctions.h>
 #include <math/random.h>
 #include <math/differentiation.h>
@@ -74,9 +75,8 @@ int IsVisible(EdgePlanner* e,Timer& timer,Real cutoff,int numStepsPerCheck=5)
   return (e->IsVisible()?1:0);
 }
 
-RealTimePlannerBase::RealTimePlannerBase()
-  :robot(NULL),settings(NULL),cspace(NULL),goal(NULL),
-   protocol(ExponentialBackoff),currentSplitTime(0.1),currentPadding(0.01),
+RealTimePlanner::RealTimePlanner()
+  :protocol(ExponentialBackoff),currentSplitTime(0.1),currentPadding(0.01),
    currentExternalPadding(0.01),
    //protocol(Constant),currentSplitTime(0.1),currentPadding(0.05),
    ///protocol(Constant),currentSplitTime(0.5),currentPadding(0.05),
@@ -85,79 +85,56 @@ RealTimePlannerBase::RealTimePlannerBase()
   pathStartTime = 0;
   cognitiveMultiplier = 1.0;
   acceptTimeOverruns = false;
-  flog = stdout;
 }
 
-RealTimePlannerBase::~RealTimePlannerBase()
+RealTimePlanner::~RealTimePlanner()
 {
-  LogEnd();
 }
 
-bool RealTimePlannerBase::LogBegin(const char* fn)
+
+void RealTimePlanner::SetSpace(SingleRobotCSpace* space)
 {
-  return true;
-  if(flog != stdout)
-    fclose(flog);
-  flog = fopen(fn,"a");
-  if(!flog) {
-    cout<<"RealTimePlannerBase: Couldn't open log to file "<<fn<<endl;
-    getchar();
-    flog = stdout;
-    return false;
+  if(planner) {
+    planner->Init(space,space->GetRobot(),space->settings);
   }
-  fprintf(flog,"Log begin...\n");
-  return true;
 }
 
-bool RealTimePlannerBase::LogEnd()
+void RealTimePlanner::Reset(SmartPointer<PlannerObjectiveBase> newgoal)
 {
-  if(flog != stdout) {
-    fclose(flog);
-    flog = stdout;
-  }
-  return true;
-}
+  if(!planner) return;
 
-void RealTimePlannerBase::SetSpace(SingleRobotCSpace* space)
-{
-  cspace = space;
-  robot = space->GetRobot();
-  settings = space->settings;
-}
-
-bool RealTimePlannerBase::StopPlanning()
-{
-  stopPlanning = true;
-  return true;
-}
-
-void RealTimePlannerBase::Reset(SmartPointer<PlannerObjectiveBase> newgoal)
-{
   if(protocol == ExponentialBackoff) {
-    if(goal && newgoal) {  //reduce timestep depending on the delta from the prior goal
-      Real d=newgoal->Delta(goal);
+    if(planner->goal && newgoal) {  //reduce timestep depending on the delta from the prior goal
+      Real d=newgoal->Delta(planner->goal);
       assert(d >= 0);
+      //TODO: figure the correlation between task changes and likelihood of
+      //success with a shorter planning period
       //works well for cartesian tracking tasks
       //Real u=Exp(-0.1*d);
       Real u=Exp(-2*d);
       //works well for position tasks
       //Real u=Exp(-2*d);
       currentSplitTime = currentSplitTime*u + (1.0-u)*currentPadding;
-      fprintf(flog,"Movement with distance %g, updating split time to %g\n",d,currentSplitTime); 
+      fprintf(planner->flog,"Movement with distance %g, updating split time to %g\n",d,currentSplitTime); 
     }
     else {
       //reset the split time
       currentSplitTime = 0.1;
     }
   }
-  goal = newgoal;
+  planner->SetGoal(newgoal);
 }
 
 //default implementation: fix the split time, call PlanFrom
 //returns true if the path changed and planTime < splitTime
-bool RealTimePlannerBase::PlanUpdate(Real tglobal,Real& splitTime,Real& planTime)
+bool RealTimePlanner::PlanUpdate(Real tglobal,Real& splitTime,Real& planTime)
 {
+  if(!planner) {
+    splitTime = planTime = 0;
+    return false;
+  }
   assert(!currentPath.ramps.empty());
+  assert(currentPath.IsValid());
   if(currentSplitTime < currentPadding+currentExternalPadding+0.001) {
     currentSplitTime=currentPadding+currentExternalPadding+0.001;
   }
@@ -166,54 +143,58 @@ bool RealTimePlannerBase::PlanUpdate(Real tglobal,Real& splitTime,Real& planTime
   ParabolicRamp::DynamicPath before;
   if(tglobal > pathStartTime) {
     ParabolicRamp::DynamicPath updatedPath;
+    printf("split at %g for path of duration %g\n",tglobal-pathStartTime,currentPath.GetTotalTime());
     currentPath.Split(tglobal-pathStartTime,before,updatedPath);
     currentPath = updatedPath;
     pathStartTime = tglobal;
   }
   else if(tglobal < pathStartTime) {
-    FatalError("RealTimePlannerBase::PlanUpdate: Time is not moving forward!");
+    FatalError("RealTimePlanner::PlanUpdate: Time is not moving forward!");
   }
 
   //Here's where the planning takes place
   Timer timer;
   splitTime = currentSplitTime;
-  stopPlanning = false;
   ParabolicRamp::DynamicPath after;
   currentPath.Split(splitTime,before,after);
   assert(FuzzyEquals(before.GetTotalTime(),splitTime));
   //printf("Split took time %g\n",timer.ElapsedTime());
-  fprintf(flog,"***** Planning for time %gs (split %g, padding %g, ext %g)*********\n",(currentSplitTime-currentPadding-currentExternalPadding)*cognitiveMultiplier,currentSplitTime,currentPadding,currentExternalPadding);
+  fprintf(planner->flog,"***** Planning for time %gs (split %g, padding %g, ext %g)*********\n",(currentSplitTime-currentPadding-currentExternalPadding)*cognitiveMultiplier,currentSplitTime,currentPadding,currentExternalPadding);
+
   timer.Reset();
-  int res=PlanFrom(after,(currentSplitTime-currentPadding-currentExternalPadding)*cognitiveMultiplier);
+  planner->stopPlanning = false;
+  planner->SetTime(currentSplitTime);
+  int res=planner->PlanFrom(after,(currentSplitTime-currentPadding-currentExternalPadding)*cognitiveMultiplier);
   planTime = timer.ElapsedTime()/cognitiveMultiplier;
-  fprintf(flog,"***** Planning took time %gs *********\n",timer.ElapsedTime());
+
+  fprintf(planner->flog,"***** Planning took time %gs *********\n",timer.ElapsedTime());
   //printf("Planning took time %g\n",planTime);
   //collect statistics
-  if(res==Failure) planFailTimeStats.collect(planTime);
-  else if(res==Success) planSuccessTimeStats.collect(planTime);
-  else if(res==Timeout) planTimeoutTimeStats.collect(planTime);
+  if(res==DynamicMotionPlannerBase::Failure) planFailTimeStats.collect(planTime);
+  else if(res==DynamicMotionPlannerBase::Success) planSuccessTimeStats.collect(planTime);
+  else if(res==DynamicMotionPlannerBase::Timeout) planTimeoutTimeStats.collect(planTime);
 
   //now decide whether to update the path 
   bool updatePath = false;
-  if(res==Success) {
+  if(res==DynamicMotionPlannerBase::Success) {
     updatePath = true;
     //if the planning time exceeds the split time, disallow it
     if(!acceptTimeOverruns && planTime > currentSplitTime-currentExternalPadding) {
-      fprintf(flog,"Planner returned Success, but time budget overrun\n");
+      fprintf(planner->flog,"Planner returned Success, but time budget overrun\n");
       updatePath = false;
     }
   }
-  else if(res==Timeout) {
+  else if(res==DynamicMotionPlannerBase::Timeout) {
     //TEMP: RRT semantics indicate that a better path may have been found
     updatePath = true;
     //if the planning time exceeds the split time, disallow it
     if(!acceptTimeOverruns && planTime > currentSplitTime-currentExternalPadding) {
-      fprintf(flog,"Planner returned Timeout, time budget overrun\n");
+      fprintf(planner->flog,"Planner returned Timeout, time budget overrun\n");
       updatePath = false;
     }
   }
   else {
-    fprintf(flog,"Planner returned Failure\n");
+    fprintf(planner->flog,"Planner returned Failure\n");
   }
 
   //update currentSplitTime and currentPadding
@@ -229,24 +210,24 @@ bool RealTimePlannerBase::PlanUpdate(Real tglobal,Real& splitTime,Real& planTime
 	currentPadding = maxPadding;
       //if the current padding is exceedingly low, boost it up
       //so that it doesnt have to adapt by doubling
-      if(res == Timeout && currentPadding < planTime-(currentSplitTime-currentExternalPadding)) 
+      if(res == DynamicMotionPlannerBase::Timeout && currentPadding < planTime-(currentSplitTime-currentExternalPadding)) 
 	currentPadding = planTime-(currentSplitTime-currentExternalPadding);
-      fprintf(flog,"Not enough padding, setting padding to %g\n",currentPadding);
+      fprintf(planner->flog,"Not enough padding, setting padding to %g\n",currentPadding);
     }
     else if(planTime+currentPadding*0.5 < splitTime-currentExternalPadding) {
       currentPadding *= 0.5;
-      fprintf(flog,"Too much padding, setting padding to %g\n",currentPadding);
+      fprintf(planner->flog,"Too much padding, setting padding to %g\n",currentPadding);
     }
     if(currentPadding < 0.001) currentPadding=0.001;
       
     //update currentSplitTime
-    if(res == Success) {
+    if(res == DynamicMotionPlannerBase::Success) {
       currentSplitTime *= 0.33;
-      fprintf(flog,"Success, setting split time to %g\n",currentSplitTime); 
+      fprintf(planner->flog,"Success, setting split time to %g\n",currentSplitTime); 
     }
-    else if(res == Timeout) {
+    else if(res == DynamicMotionPlannerBase::Timeout) {
       currentSplitTime *= 2.0;
-      fprintf(flog,"Failure, setting split time to %g\n",currentSplitTime); 
+      fprintf(planner->flog,"Failure, setting split time to %g\n",currentSplitTime); 
     }
   }
   else if(protocol == Learning) {
@@ -267,8 +248,14 @@ bool RealTimePlannerBase::PlanUpdate(Real tglobal,Real& splitTime,Real& planTime
 
     //debugging path
     if(!Vector(after.ramps.front().x0).isEqual(Vector(before.ramps.back().x1),1e-5)) {
+      cout<<"Updated path start configuration mismatch"<<endl;
       cout<<Vector(before.ramps.back().x1)<<endl;
       cout<<Vector(after.ramps.front().x0)<<endl;
+    }
+    if(!Vector(after.ramps.front().dx0).isEqual(Vector(before.ramps.back().dx1),1e-5)) {
+      cout<<"Updated path start velocity mismatch"<<endl;
+      cout<<Vector(before.ramps.back().dx1)<<endl;
+      cout<<Vector(after.ramps.front().dx0)<<endl;
     }
     Assert(Vector(after.ramps.front().x0).isEqual(Vector(before.ramps.back().x1),1e-5));
     Assert(Vector(after.ramps.front().dx0).isEqual(Vector(before.ramps.back().dx1),1e-5));
@@ -291,7 +278,7 @@ bool RealTimePlannerBase::PlanUpdate(Real tglobal,Real& splitTime,Real& planTime
       else {
 	//Send failed for some reason -- now expand the padding
 	MarkSendFailure();
-	fprintf(flog,"Send failed! Increased external padding to %g, split time %g\n",currentExternalPadding,currentSplitTime); 
+	fprintf(planner->flog,"Send failed! Increased external padding to %g, split time %g\n",currentExternalPadding,currentSplitTime); 
       }
     }
     else {
@@ -307,21 +294,387 @@ bool RealTimePlannerBase::PlanUpdate(Real tglobal,Real& splitTime,Real& planTime
     return false;
 }
 
-void RealTimePlannerBase::MarkSendFailure()
+void RealTimePlanner::MarkSendFailure()
 {
   currentSplitTime += currentExternalPadding;
   currentExternalPadding = currentExternalPadding*2.0;
   if(currentExternalPadding > 1.0) {
-    fprintf(flog,"Warning... multiple send failures, padding now > 1s.\n");
-    fprintf(flog,"Please debug the communication system.\n");
+    fprintf(planner->flog,"Warning... multiple send failures, padding now > 1s.\n");
+    fprintf(planner->flog,"Please debug the communication system.\n");
     currentExternalPadding = 1.0;
   }
 }
 
+void RealTimePlanner::SetConstantPath(const Config& q)
+{
+  currentPath.ramps.resize(1);
+  currentPath.ramps[0].SetConstant(q);
+  if(planner) {
+    currentPath.xMin = planner->qMin;
+    currentPath.xMax = planner->qMax;
+    currentPath.velMax = planner->velMax;
+    currentPath.accMax = planner->accMax;
+  }
+  else {
+    printf("RealTimePlanner: Warning, dynamic limits are not set yet\n");
+  }
+}
 
-int RealTimePlannerBase::Shortcut(ParabolicRamp::DynamicPath& path,Real timeLimit)
+void RealTimePlanner::SetCurrentPath(Real tglobal,const ParabolicRamp::DynamicPath& path)
+{
+  pathStartTime = tglobal;
+  currentPath = path;
+}
+
+
+
+
+
+/** @brief Shared data structure for a multithreaded real time planner.
+ * The planner must have a RealTimePlannerDataSender as a sendPathCallback.
+ */
+struct RealTimePlannerData
+{
+  Mutex mutex;
+  RealTimePlanner* planner;
+  bool resetStartConfig;      //(in) true if the start configuration should be reset
+  Config startConfig;         //(in) the start config
+  SmartPointer<PlannerObjectiveBase> objective;   //(in) the planning objective, can be NULL
+  bool active;             //(in) set this to false to quit
+  Real globalTime;         //(in) time measured in calling thread
+  Real startPlanTime;       //(out) time of planning
+
+  bool pathRefresh;         //(in/out) whether to refresh the path
+  Real tcut;                //(out) the path cut time, relative to startPlanTime
+  ParabolicRamp::DynamicPath path;  //(out) the path to splice in 
+  bool pathRefreshSuccess;  //(in) whether the execution thread read in the path successfully
+};
+
+/** @brief For use with a multithreaded RealTimePlannerBase
+ */
+class RealTimePlannerDataSender : public SendPathCallbackBase
+{
+public:
+  RealTimePlannerDataSender(RealTimePlannerData* data);
+  virtual bool Send(Real tplanstart,Real tcut,const ParabolicRamp::DynamicPath& path);
+  RealTimePlannerData* data;
+};
+
+RealTimePlannerDataSender::RealTimePlannerDataSender(RealTimePlannerData* _data)
+  :data(_data)
+{}
+
+bool RealTimePlannerDataSender::Send(Real tplanstart,Real tcut,const ParabolicRamp::DynamicPath& path)
+{
+  {
+    ScopedLock lock(data->mutex);
+    Assert(data->startPlanTime == tplanstart);
+    data->pathRefresh = true;
+    data->tcut = tcut;
+    data->path = path;
+  }  
+  while(true) {
+    ThreadSleep(0.001);
+    {
+      ScopedLock lock(data->mutex);
+      if(!data->pathRefresh) {  //this signals that the calling thread picked up the data
+	bool res = data->pathRefreshSuccess;
+	return res; //unlocks mutex
+      }
+    }//unlocks mutex
+  }
+}  
+
+void* planner_thread_func(void * ptr)
+{
+  RealTimePlannerData* data = reinterpret_cast<RealTimePlannerData*>(ptr);
+  //read initial configuration
+  {
+    ScopedLock(data->mutex);
+    assert(data->resetStartConfig == true);
+    data->planner->SetConstantPath(data->startConfig);
+    data->resetStartConfig = false;
+  }
+  //FOR SOME REASON, LOGGING FAILS UNLESS DONE HERE
+  //data->planner->LogBegin();
+
+  while (true) {
+    //first wait for a lock
+    bool start=false;
+    Real startTime;
+    {
+      ScopedLock(data->mutex);
+      
+      //parse the data
+      if(!data->active) {
+	printf("Planner_thread_func: quitting\n");
+	//quit
+	return NULL;  //unlocks the mutex
+      }
+      assert(data->pathRefresh == false);
+      if(data->resetStartConfig == true) {
+	printf("Planning thread: resetting start configuration\n");
+	data->planner->SetConstantPath(data->startConfig);
+	data->resetStartConfig = false;
+      }
+      if(data->objective) {
+	start=true;
+	startTime = data->startPlanTime = data->globalTime;
+      }
+      if(data->objective != data->planner->Objective()) {
+	if(data->objective) {
+	  data->planner->Reset(data->objective);      }
+	else {
+	  data->planner->Reset(NULL);
+	}
+      }
+    }  //unlocks the mutex
+
+    if(start) {
+      //do the planning -- the callback will output the result to the
+      //UI thread
+      Real splitTime, planTime;
+      bool res = data->planner->PlanUpdate(startTime, splitTime, planTime);
+      
+      printf("Planning thread: result %d\n",(int)res);    
+      ThreadYield();
+    }
+    else ThreadSleep(0.001);
+  }
+  return NULL;
+}
+
+RealTimePlanningThread::RealTimePlanningThread()
+{
+  internal = new RealTimePlannerData;
+  RealTimePlannerData* data = reinterpret_cast<RealTimePlannerData*>(internal);
+  data->active = false;
+  data->resetStartConfig = false;
+  data->planner = NULL;
+  data->pathRefresh = false;
+}
+
+RealTimePlanningThread::~RealTimePlanningThread()
+{
+  RealTimePlannerData* data = reinterpret_cast<RealTimePlannerData*>(internal);
+  delete data;
+}
+
+void RealTimePlanningThread::SetStartConfig(const Config& qstart)
+{
+  RealTimePlannerData* data = reinterpret_cast<RealTimePlannerData*>(internal);
+  if(!this->planner)
+    SetPlanner(new RealTimePlanner);
+  ScopedLock lock(data->mutex);
+  data->startConfig = qstart;
+  data->resetStartConfig = true;
+}
+
+void RealTimePlanningThread::SetCSpace(SingleRobotCSpace* space)
+{
+  RealTimePlannerData* data = reinterpret_cast<RealTimePlannerData*>(internal);
+  if(!this->planner)
+    SetPlanner(new RealTimePlanner);
+  ScopedLock lock(data->mutex);
+  this->planner->SetSpace(space);
+}
+
+void RealTimePlanningThread::ResetCurrentPath(Real tglobal,const ParabolicRamp::DynamicPath& path)
+{
+  FatalError("Cannot do ResetCurrentPath yet");
+}
+
+void RealTimePlanningThread::SetObjective(SmartPointer<PlannerObjectiveBase> newgoal)
+{
+  RealTimePlannerData* data = reinterpret_cast<RealTimePlannerData*>(internal);
+  //set the objective function
+  ScopedLock lock(data->mutex);
+  data->objective = newgoal;
+}
+
+SmartPointer<PlannerObjectiveBase> RealTimePlanningThread::GetObjective() const
+{
+  RealTimePlannerData* data = reinterpret_cast<RealTimePlannerData*>(internal);
+  return data->objective;
+}
+
+void RealTimePlanningThread::SetPlanner(SmartPointer<DynamicMotionPlannerBase> planner)
+{
+  RealTimePlannerData* data = reinterpret_cast<RealTimePlannerData*>(internal);
+  if(!this->planner) SetPlanner(new RealTimePlanner);
+  ScopedLock lock(data->mutex);
+  this->planner->planner = planner;
+
+}
+void RealTimePlanningThread::SetPlanner(SmartPointer<RealTimePlanner> planner)
+{
+  RealTimePlannerData* data = reinterpret_cast<RealTimePlannerData*>(internal);
+  this->planner = planner;
+  planner->sendPathCallback = new RealTimePlannerDataSender(data);
+  ScopedLock lock(data->mutex);
+  data->planner = this->planner;
+}
+
+bool RealTimePlanningThread::Start()
+{
+  RealTimePlannerData* data = reinterpret_cast<RealTimePlannerData*>(internal);
+  if(data->active) return true;
+  data->active = true;
+  data->globalTime = 0;
+  data->pathRefresh = false;
+  printf("Creating planning thread\n");
+  thread = ThreadStart(planner_thread_func,data);
+  return true;
+}
+
+void RealTimePlanningThread::BreakPlanning()
+{
+  planner->StopPlanning();
+}
+
+void RealTimePlanningThread::Stop()
+{
+  printf("Stopping planning thread\n");
+  RealTimePlannerData* data = reinterpret_cast<RealTimePlannerData*>(internal);
+  {
+    ScopedLock lock(data->mutex);
+    planner->StopPlanning();
+    data->active = false;
+  }
+  ThreadJoin(thread);
+}
+
+bool RealTimePlanningThread::HasUpdate()
+{
+  RealTimePlannerData* data = reinterpret_cast<RealTimePlannerData*>(internal);
+  return data->pathRefresh;
+}
+
+bool RealTimePlanningThread::SendUpdate(MotionQueueInterface* robotInterface)
+{
+  RealTimePlannerData* data = reinterpret_cast<RealTimePlannerData*>(internal);
+  //see if the planning thread has a plan update
+  if(!data->pathRefresh) {
+    data->globalTime = robotInterface->GetCurTime();
+    return false;
+  }
+
+  //if so, mark that it's refreshed and send the path
+  ScopedLock lock(data->mutex);
+  data->pathRefresh = false;
+  MotionQueueInterface::MotionResult res = robotInterface->SendPathImmediate(data->startPlanTime+data->tcut,data->path);
+  Real t=robotInterface->GetCurTime();
+  if(res == MotionQueueInterface::Success) {
+    data->pathRefreshSuccess = true;
+    printf("Exec thread: Planner successful, split %g, delay %g\n",data->tcut,t - data->startPlanTime);
+    data->globalTime = robotInterface->GetCurTime();
+    return true;
+  }
+  else {
+    data->pathRefreshSuccess = false;
+    printf("Exec thread: Planner overrun, split %g, delay %g\n",data->tcut,t - data->startPlanTime);
+    data->globalTime = robotInterface->GetCurTime();
+    return false;
+  }
+}
+
+Real RealTimePlanningThread::ObjectiveValue()
+{
+  RealTimePlannerData* data = reinterpret_cast<RealTimePlannerData*>(internal);
+  ScopedLock lock(data->mutex);
+  if(!data->pathRefresh) return Inf;
+  if(!data->objective) return 0;
+  return data->objective->PathCost(data->path,data->startPlanTime+data->tcut);
+}
+
+
+
+
+
+
+DynamicMotionPlannerBase::DynamicMotionPlannerBase()
+  :robot(NULL),settings(NULL),cspace(NULL),tstart(0)
+{
+  flog = stdout;
+}
+
+DynamicMotionPlannerBase::~DynamicMotionPlannerBase()
+{
+  LogEnd();
+}
+
+bool DynamicMotionPlannerBase::LogBegin(const char* fn)
+{
+  return true;
+  if(flog != stdout)
+    fclose(flog);
+  flog = fopen(fn,"a");
+  if(!flog) {
+    cout<<"DynamicMotionPlannerBase: Couldn't open log to file "<<fn<<endl;
+    getchar();
+    flog = stdout;
+    return false;
+  }
+  fprintf(flog,"Log begin...\n");
+  return true;
+}
+
+bool DynamicMotionPlannerBase::LogEnd()
+{
+  if(flog != stdout) {
+    fclose(flog);
+    flog = stdout;
+  }
+  return true;
+}
+
+void DynamicMotionPlannerBase::Init(CSpace* _space,Robot* _robot,WorldPlannerSettings* _settings)
+{
+  cspace = _space;
+  robot = _robot;
+  settings = _settings;
+  tstart = 0;
+  stopPlanning = false;
+  SetDefaultLimits();
+}
+
+void DynamicMotionPlannerBase::SetGoal(SmartPointer<PlannerObjectiveBase> newgoal)
+{
+  goal = newgoal;
+}
+
+void DynamicMotionPlannerBase::SetTime(Real _tstart)
+{
+  tstart = _tstart; 
+}
+
+void DynamicMotionPlannerBase::SetDefaultLimits()
+{
+  SetLimits();
+}
+
+void DynamicMotionPlannerBase::SetLimits(Real qScale,Real vScale,Real aScale)
+{
+  qMin = robot->qMin + (1.0-qScale)*0.5*(robot->qMax-robot->qMin);
+  qMax = robot->qMax - (1.0-qScale)*0.5*(robot->qMax-robot->qMin);
+  velMax = robot->velMax*vScale;
+  accMax = robot->accMax*aScale;
+}
+
+
+bool DynamicMotionPlannerBase::StopPlanning()
+{
+  stopPlanning = true;
+  return true;
+}
+
+int DynamicMotionPlannerBase::Shortcut(ParabolicRamp::DynamicPath& path,Real timeLimit)
 {
   if(timeLimit <= 0) return 0;
+  path.xMin = qMin;
+  path.xMax = qMax;
+  path.velMax = velMax;
+  path.accMax = accMax;
   Timer timer;
   //do shortcutting with the remaining time
   int num=0;
@@ -347,10 +700,11 @@ inline bool InBounds(const vector<Real>& x,const vector<Real>& bmin,const vector
 }
 
 
-int RealTimePlannerBase::SmartShortcut(Real tstart,ParabolicRamp::DynamicPath& path,Real timeLimit) 
+int DynamicMotionPlannerBase::SmartShortcut(Real tstart,ParabolicRamp::DynamicPath& path,Real timeLimit) 
 {
   if(goal->PathInvariant()) return Shortcut(path,timeLimit);
   if(timeLimit <= 0) return 0;
+
   Timer timer;
   //do shortcutting with the remaining time
   int num=0;
@@ -359,10 +713,10 @@ int RealTimePlannerBase::SmartShortcut(Real tstart,ParabolicRamp::DynamicPath& p
   ParabolicRamp::RampFeasibilityChecker checker(&feas,pathEpsilon);
   ParabolicRamp::DynamicPath intermediate;
   ParabolicRamp::ParabolicRampND leadin,leadout;
-  intermediate.xMin = robot->qMin;
-  intermediate.xMax = robot->qMax;
-  intermediate.velMax = robot->velMax;
-  intermediate.accMax = robot->accMax;
+  path.xMin = intermediate.xMin = qMin;
+  path.xMax = intermediate.xMax = qMax;
+  path.velMax = intermediate.velMax = velMax;
+  path.accMax = intermediate.accMax = accMax;
 
   vector<Real> startTimes(path.ramps.size()+1);
   vector<Real> accumCosts(path.ramps.size()+1);
@@ -480,10 +834,10 @@ int RealTimePlannerBase::SmartShortcut(Real tstart,ParabolicRamp::DynamicPath& p
   return num;
 }
 
-bool RealTimePlannerBase::GetMilestoneRamp(const Config& q0,const Vector& dq0,const Config& q1,ParabolicRamp::DynamicPath& ramp) const
+bool DynamicMotionPlannerBase::GetMilestoneRamp(const Config& q0,const Vector& dq0,const Config& q1,ParabolicRamp::DynamicPath& ramp) const
 {
-  ramp.Init(currentPath.velMax,currentPath.accMax);
-  ramp.SetJointLimits(currentPath.xMin,currentPath.xMax);
+  ramp.Init(velMax,accMax);
+  ramp.SetJointLimits(qMin,qMax);
   vector<ParabolicRamp::Vector> x(2),dx(2);
   x[0] = q0;
   x[1] = q1;
@@ -493,20 +847,13 @@ bool RealTimePlannerBase::GetMilestoneRamp(const Config& q0,const Vector& dq0,co
   return true;
 }
 
-bool RealTimePlannerBase::GetMilestoneRamp(const ParabolicRamp::DynamicPath& curPath,const Config& q,ParabolicRamp::DynamicPath& ramp) const
+bool DynamicMotionPlannerBase::GetMilestoneRamp(const ParabolicRamp::DynamicPath& curPath,const Config& q,ParabolicRamp::DynamicPath& ramp) const
 {
-  ramp.Init(currentPath.velMax,currentPath.accMax);
-  ramp.SetJointLimits(currentPath.xMin,currentPath.xMax);
-  vector<ParabolicRamp::Vector> x(2),dx(2);
-  curPath.Evaluate(0,x[0]);
-  curPath.Derivative(0,dx[0]);
-  x[1] = q;
-  dx[1].resize(q.n,0.0);
-  return ramp.SetMilestones(x,dx);
+  return GetMilestoneRamp(curPath.StartConfig(),curPath.StartVelocity(),q,ramp);
 }
 
 //returns true if the ramp from the current config to q is collision free
-bool RealTimePlannerBase::CheckMilestoneRamp(const ParabolicRamp::DynamicPath& curPath,const Config& q,ParabolicRamp::DynamicPath& ramp) const
+bool DynamicMotionPlannerBase::CheckMilestoneRamp(const ParabolicRamp::DynamicPath& curPath,const Config& q,ParabolicRamp::DynamicPath& ramp) const
 {
   if(!GetMilestoneRamp(curPath,q,ramp)) {
     printf("CheckMilestoneRamp: Failed to get milestone ramp\n");
@@ -539,75 +886,37 @@ bool RealTimePlannerBase::CheckMilestoneRamp(const ParabolicRamp::DynamicPath& c
   return true;
 }
 
-//returns the cost of going through q (assuming no collision detection)
-Real RealTimePlannerBase::EvaluateDestinationCost(const Config& q) 
+//returns the cost of going from the start to  q (assuming no collision detection)
+Real DynamicMotionPlannerBase::EvaluateDirectPathCost(const ParabolicRamp::DynamicPath& currentPath,const Config& q) 
 {
   ParabolicRamp::DynamicPath ramp;
   if(!GetMilestoneRamp(currentPath,q,ramp)) return Inf;
-  return goal->PathCost(ramp);
+  return goal->PathCost(ramp,tstart);
 }
 
 //returns the cost of using the given path
-Real RealTimePlannerBase::EvaluatePathCost(const ParabolicRamp::DynamicPath& path,Real tstart)
+Real DynamicMotionPlannerBase::EvaluatePathCost(const ParabolicRamp::DynamicPath& path,Real pathtstart)
 {
-  return goal->PathCost(path,tstart);
+  if(pathtstart < 0) pathtstart= tstart;
+  return goal->PathCost(path,pathtstart);
 }
 
-//returns the current final destination
-const ParabolicRamp::Vector& RealTimePlannerBase::CurrentDestination() const 
+//returns the cost of using the given path
+Real DynamicMotionPlannerBase::EvaluateTerminalCost(const Config& q,Real tEnd)
 {
-  return currentPath.ramps.back().x1;
-}
-
-//returns the cost for the current destination
-Real RealTimePlannerBase::CurrentDestinationCost() 
-{
-  return EvaluateDestinationCost(currentPath.ramps.back().x1);
-}
-
-//returns the cost for the current path
-Real RealTimePlannerBase::CurrentPathCost()
-{
-  return EvaluatePathCost(currentPath);
-}
-
-void RealTimePlannerBase::SetConstantPath(const Config& q)
-{
-  currentPath.ramps.resize(1);
-  currentPath.ramps[0].SetConstant(q);
-  if(currentPath.accMax.empty())
-    currentPath.accMax = robot->accMax;
-  if(currentPath.velMax.empty())
-    currentPath.velMax = robot->velMax;
- if(currentPath.xMin.empty())
-    currentPath.xMin = robot->qMin;
- if(currentPath.xMax.empty())
-    currentPath.xMax = robot->qMax;
-}
-
-void RealTimePlannerBase::SetCurrentPath(Real tglobal,const ParabolicRamp::DynamicPath& path)
-{
-  pathStartTime = tglobal;
-  currentPath = path;
-  if(currentPath.accMax.empty())
-    currentPath.accMax = robot->accMax;
-  if(currentPath.velMax.empty())
-    currentPath.velMax = robot->velMax;
+  Config zero(q.n,0.0);
+  return goal->TerminalCost(tEnd,q,zero);
 }
 
 
-void RealTimeIKPlanner::Reset(SmartPointer<PlannerObjectiveBase> newgoal)
-{
-  RealTimePlannerBase::Reset(newgoal);
-}
-
-int RealTimeIKPlanner::PlanFrom(ParabolicRamp::DynamicPath& path,Real cutoff)
+int DynamicIKPlanner::PlanFrom(ParabolicRamp::DynamicPath& path,Real cutoff)
 {
   if (!goal) return Failure;
   //check if we've converged
-  if(CurrentDestinationCost() < 1e-3) return Failure;
+  Real Cstart = EvaluatePathCost(path);
+  if(Cstart < 1e-3) return Failure;
 
-  robot->UpdateConfig(CurrentDestination());
+  robot->UpdateConfig(path.EndConfig());
   bool res=Optimize(goal,robot,10,1e-3);
   if(!res) { //optimization failed, do we do anything?
     fprintf(flog,"IK optimization failed\n");
@@ -615,8 +924,8 @@ int RealTimeIKPlanner::PlanFrom(ParabolicRamp::DynamicPath& path,Real cutoff)
   Config q = robot->q;
   for(int i=0;i<10;i++) {
     //check for an improvement
-    Real cost=EvaluateDestinationCost(q);
-    if(cost < CurrentDestinationCost()) {
+    Real cost=EvaluateDirectPathCost(path,q);
+    if(cost < Cstart) {
       ParabolicRamp::DynamicPath ramp;
       if(CheckMilestoneRamp(path,q,ramp)) {
 	path = ramp;
@@ -631,36 +940,37 @@ int RealTimeIKPlanner::PlanFrom(ParabolicRamp::DynamicPath& path,Real cutoff)
       fprintf(flog,"IK Planner: Timeout called\n");
       return Timeout;
     }
-    q = (q + Vector(CurrentDestination()))*0.5;
+    q = (q + Vector(path.EndConfig()))*0.5;
   }
   fprintf(flog,"IK planner: collision checks failed\n");
   return Failure;
 }
 
-RealTimePerturbationPlanner::RealTimePerturbationPlanner()
+DynamicPerturbationPlanner::DynamicPerturbationPlanner()
   : perturbationStep(0.01),perturbLimit(100)
 {}
 
-void RealTimePerturbationPlanner::Reset(SmartPointer<PlannerObjectiveBase> newgoal)
+void DynamicPerturbationPlanner::SetGoal(SmartPointer<PlannerObjectiveBase> newgoal)
 {
   iteration = 0;
-  RealTimePlannerBase::Reset(newgoal);
+  DynamicMotionPlannerBase::SetGoal(newgoal);
 }
 
-int RealTimePerturbationPlanner::PlanFrom(ParabolicRamp::DynamicPath& path,Real cutoff)
+int DynamicPerturbationPlanner::PlanFrom(ParabolicRamp::DynamicPath& path,Real cutoff)
 {
   if (!goal) return Failure;
   //check if we've converged
-  if(CurrentDestinationCost() < 1e-3) return Failure;
+  Real Cstart = EvaluatePathCost(path);
+  if(Cstart < 1e-3) return Failure;
 
   iteration++;
   Config q;
   if(iteration < perturbLimit) 
-    cspace->SampleNeighborhood(CurrentDestination(),iteration*perturbationStep,q);
+    cspace->SampleNeighborhood(path.EndConfig(),iteration*perturbationStep,q);
   else
     cspace->Sample(q);
-  Real cost=EvaluateDestinationCost(q);
-  if(cost < CurrentDestinationCost()) {
+  Real cost=EvaluateDirectPathCost(path,q);
+  if(cost < Cstart) {
     ParabolicRamp::DynamicPath ramp;
     if(CheckMilestoneRamp(path,q,ramp)) {
       path = ramp;
@@ -678,28 +988,29 @@ int RealTimePerturbationPlanner::PlanFrom(ParabolicRamp::DynamicPath& path,Real 
 }
 
 
-RealTimePerturbationIKPlanner::RealTimePerturbationIKPlanner()
+DynamicPerturbationIKPlanner::DynamicPerturbationIKPlanner()
   : perturbationStep(0.01),perturbLimit(100)
 {}
 
-void RealTimePerturbationIKPlanner::Reset(SmartPointer<PlannerObjectiveBase> newgoal)
+void DynamicPerturbationIKPlanner::SetGoal(SmartPointer<PlannerObjectiveBase> newgoal)
 {
   iteration = 0;
-  RealTimePlannerBase::Reset(newgoal);
+  DynamicMotionPlannerBase::SetGoal(newgoal);
 }
 
-int RealTimePerturbationIKPlanner::PlanFrom(ParabolicRamp::DynamicPath& path,Real cutoff)
+int DynamicPerturbationIKPlanner::PlanFrom(ParabolicRamp::DynamicPath& path,Real cutoff)
 {
   if (!goal) return Failure;
   //check if we've converged
-  if(CurrentDestinationCost() < 1e-3) return Failure;
+  Real Cstart = EvaluatePathCost(path);
+  if(Cstart < 1e-3) return Failure;
 
   iteration++;
   Config q;
   if(iteration > perturbLimit) 
     cspace->Sample(q);
   else
-    cspace->SampleNeighborhood(CurrentDestination(),iteration*perturbationStep,q);
+    cspace->SampleNeighborhood(path.EndConfig(),iteration*perturbationStep,q);
   robot->UpdateConfig(q);
   bool res=Optimize(goal,robot,1,1e-3);
   if(!res) { //IK failed, do we do anything
@@ -707,8 +1018,8 @@ int RealTimePerturbationIKPlanner::PlanFrom(ParabolicRamp::DynamicPath& path,Rea
   q = robot->q;
 
   for(int i=0;i<10;i++) {
-    Real cost=EvaluateDestinationCost(q);
-    if(cost < CurrentDestinationCost()) {
+    Real cost=EvaluateDirectPathCost(path,q);
+    if(cost < Cstart) {
       ParabolicRamp::DynamicPath ramp;
       if(CheckMilestoneRamp(path,q,ramp)) {
 	path = ramp;
@@ -728,25 +1039,18 @@ int RealTimePerturbationIKPlanner::PlanFrom(ParabolicRamp::DynamicPath& path,Rea
 
 
 
-RealTimeRRTPlanner::RealTimeRRTPlanner()
+DynamicRRTPlanner::DynamicRRTPlanner()
   : delta(0.3),smoothTime(0.5),ikSolveProbability(0.5)
 {}
 
-void RealTimeRRTPlanner::Reset(SmartPointer<PlannerObjectiveBase> newgoal)
+void DynamicRRTPlanner::SetGoal(SmartPointer<PlannerObjectiveBase> newgoal)
 {
   //reset
   iteration = 0;
-  RealTimePlannerBase::Reset(newgoal);
-
-  if(stateSpace==NULL) {
-    stateSpace = new RampCSpaceAdaptor(cspace,currentPath.velMax,currentPath.accMax);
-    stateSpace->qMin=robot->qMin;
-    stateSpace->qMax=robot->qMax;
-    stateSpace->visibilityTolerance = settings->robotSettings[0].collisionEpsilon;
-  }
+  DynamicMotionPlannerBase::SetGoal(newgoal);
 }
 
-Vector& RealTimeRRTPlanner::MakeState(const Config& q,const Config& dq)
+Vector& DynamicRRTPlanner::MakeState(const Config& q,const Config& dq)
 {
   Assert(dq.n == q.n);
   tempV.resize(q.n*2);
@@ -754,7 +1058,7 @@ Vector& RealTimeRRTPlanner::MakeState(const Config& q,const Config& dq)
   tempV.copySubVector(q.n,dq);
   return tempV;
 }
-Vector& RealTimeRRTPlanner::MakeState(const Config& q)
+Vector& DynamicRRTPlanner::MakeState(const Config& q)
 {
   tempV.resize(q.n*2);
   tempV.copySubVector(0,q);
@@ -763,7 +1067,7 @@ Vector& RealTimeRRTPlanner::MakeState(const Config& q)
   return tempV;
 }
 
-RRTPlanner::Node* RealTimeRRTPlanner::TryIKExtend(RRTPlanner::Node* node,bool search)
+RRTPlanner::Node* DynamicRRTPlanner::TryIKExtend(RRTPlanner::Node* node,bool search)
 {
   Config q;
   q.setRef(node->x,0,1,node->x.n/2);
@@ -804,7 +1108,7 @@ RRTPlanner::Node* RealTimeRRTPlanner::TryIKExtend(RRTPlanner::Node* node,bool se
     return ((TreeRoadmapPlanner*)((RRTPlanner*)rrt))->Extend(node,x);
 }
 
-Real RealTimeRRTPlanner::EvaluateNodePathCost(RRTPlanner::Node* n) 
+Real DynamicRRTPlanner::EvaluateNodePathCost(RRTPlanner::Node* n) 
 {
   Config q,dq;
   q.setRef(n->x,0,1,n->x.n/2);
@@ -821,7 +1125,7 @@ Real RealTimeRRTPlanner::EvaluateNodePathCost(RRTPlanner::Node* n)
 //ndelete allows you to check if any nodes are deleted
 //pass in nodes to check, they will be set to NULL if they lie in the
 //deleted subtree
-bool RealTimeRRTPlanner::CheckPath(RRTPlanner::Node* n,vector<RRTPlanner::Node*>& ndelete,Timer& timer,Real cutoff)
+bool DynamicRRTPlanner::CheckPath(RRTPlanner::Node* n,vector<RRTPlanner::Node*>& ndelete,Timer& timer,Real cutoff)
 {
   //lazy collision checking
   RRTPlanner::Node* temp=n;
@@ -853,13 +1157,21 @@ bool RealTimeRRTPlanner::CheckPath(RRTPlanner::Node* n,vector<RRTPlanner::Node*>
   return true;
 }
 
-int RealTimeRRTPlanner::PlanFrom(ParabolicRamp::DynamicPath& path,Real cutoff)
+int DynamicRRTPlanner::PlanFrom(ParabolicRamp::DynamicPath& path,Real cutoff)
 {
   if (!goal) return Failure;
 
+  if(stateSpace==NULL) {
+    stateSpace = new RampCSpaceAdaptor(cspace,velMax,accMax);
+    stateSpace->qMin=qMin;
+    stateSpace->qMax=qMax;
+    stateSpace->visibilityTolerance = settings->robotSettings[0].collisionEpsilon;
+  }
+
+
   Assert(path.IsValid());
   Timer timer;
-  if(goal->TerminalCost(0.0,path.ramps.back().x1,path.ramps.back().dx1) < 1e-3) {
+  if(goal->TerminalCost(tstart+path.GetTotalTime(),path.ramps.back().x1,path.ramps.back().dx1) < 1e-3) {
     fprintf(flog,"Already at solution, doing shortcutting...\n");
     Shortcut(path,cutoff);
     Assert(path.IsValid());
@@ -867,7 +1179,7 @@ int RealTimeRRTPlanner::PlanFrom(ParabolicRamp::DynamicPath& path,Real cutoff)
   }
 
   RRTPlanner::Node* bestNode=NULL;
-  Real bestPathCost = EvaluatePathCost(path,currentSplitTime);
+  Real bestPathCost = EvaluatePathCost(path);
   fprintf(flog,"*** Total cost %g, terminal cost %g ***\n",bestPathCost,goal->TerminalCost(0.0,path.ramps.back().x1,path.ramps.back().dx1));
 
   rrt = NULL;
@@ -1173,27 +1485,18 @@ int RealTimeRRTPlanner::PlanFrom(ParabolicRamp::DynamicPath& path,Real cutoff)
 
 
 
-RealTimeTreePlanner::RealTimeTreePlanner()
+DynamicHybridTreePlanner::DynamicHybridTreePlanner()
   : delta(0.3),smoothTime(0.5),ikSolveProbability(0.5)
 {}
 
-void RealTimeTreePlanner::Reset(SmartPointer<PlannerObjectiveBase> newgoal)
+void DynamicHybridTreePlanner::SetGoal(SmartPointer<PlannerObjectiveBase> newgoal)
 {
   //reset
   iteration = 0;
-  RealTimePlannerBase::Reset(newgoal);
-
-  if(stateSpace==NULL) {
-    stateSpace = new RampCSpaceAdaptor(cspace,currentPath.velMax,currentPath.accMax);
-    stateSpace->qMin = robot->qMin;
-    stateSpace->qMax = robot->qMax;
-    fprintf(flog,"%d %d\n",currentPath.velMax.size(),robot->q.size());
-    assert((int)currentPath.velMax.size() == (int)robot->q.size());
-    stateSpace->visibilityTolerance = settings->robotSettings[0].collisionEpsilon;
-  }
+  DynamicMotionPlannerBase::SetGoal(newgoal);
 }
 
-RealTimeTreePlanner::Node* RealTimeTreePlanner::AddChild(Node* node,const Config& q)
+DynamicHybridTreePlanner::Node* DynamicHybridTreePlanner::AddChild(Node* node,const Config& q)
 {
   assert(q(0) == 0.0);
   Config xn(node->q.n+node->dq.n),xq(xn.n);
@@ -1206,20 +1509,20 @@ RealTimeTreePlanner::Node* RealTimeTreePlanner::AddChild(Node* node,const Config
   return AddChild(node,ptr);
 }
 
-RealTimeTreePlanner::Node* RealTimeTreePlanner::AddChild(Node* node,const ParabolicRamp::ParabolicRampND& ramp)
+DynamicHybridTreePlanner::Node* DynamicHybridTreePlanner::AddChild(Node* node,const ParabolicRamp::ParabolicRampND& ramp)
 {
   SmartPointer<RampEdgePlanner> ptr(new RampEdgePlanner(stateSpace,ramp));
   return AddChild(node,ptr);
 }
 
 
-RealTimeTreePlanner::Node* RealTimeTreePlanner::AddChild(Node* node,const ParabolicRamp::DynamicPath& path)
+DynamicHybridTreePlanner::Node* DynamicHybridTreePlanner::AddChild(Node* node,const ParabolicRamp::DynamicPath& path)
 {
   SmartPointer<RampEdgePlanner> ptr(new RampEdgePlanner(stateSpace,path));
   return AddChild(node,ptr);
 }
 
-RealTimeTreePlanner::Node* RealTimeTreePlanner::AddChild(Node* node,SmartPointer<RampEdgePlanner>& e)
+DynamicHybridTreePlanner::Node* DynamicHybridTreePlanner::AddChild(Node* node,SmartPointer<RampEdgePlanner>& e)
 {
   if(e->path.ramps.empty()) return NULL;
   Node* c = new Node;
@@ -1354,7 +1657,7 @@ Real MinBrakingTime(const Vector& vel,const Vector& acc)
   return maxT;
 }
 
-RealTimeTreePlanner::Node* RealTimeTreePlanner::TryIKExtend(Node* node,bool search)
+DynamicHybridTreePlanner::Node* DynamicHybridTreePlanner::TryIKExtend(Node* node,bool search)
 {
   if(typeid(*goal) == typeid(CartesianTrackingObjective)) {
     //special optimization -- try to optimize a local path from the given node
@@ -1501,7 +1804,7 @@ RealTimeTreePlanner::Node* RealTimeTreePlanner::TryIKExtend(Node* node,bool sear
 //perform lazy collision checking of the path up to n
 //pass in nodes to check, they will be set to NULL if they lie in the
 //deleted subtree
-bool RealTimeTreePlanner::CheckPath(Node* n,Timer& timer,Real cutoff,Node** split)
+bool DynamicHybridTreePlanner::CheckPath(Node* n,Timer& timer,Real cutoff,Node** split)
 {
   //lazy collision checking
   Node* temp=n;
@@ -1549,13 +1852,13 @@ bool RealTimeTreePlanner::CheckPath(Node* n,Timer& timer,Real cutoff,Node** spli
 
 }
 
-struct ClosestCallback : public Graph::CallbackBase<RealTimeTreePlanner::Node*>
+struct ClosestCallback : public Graph::CallbackBase<DynamicHybridTreePlanner::Node*>
 {
   RampCSpaceAdaptor* space;
   const Config& q;
   Real costBranch;
   Real closestDist;
-  RealTimeTreePlanner::Node* closest;
+  DynamicHybridTreePlanner::Node* closest;
   ParabolicRamp::ParabolicRampND ramp;
 
   ClosestCallback(RampCSpaceAdaptor* _space,const Config& _q)
@@ -1569,7 +1872,7 @@ struct ClosestCallback : public Graph::CallbackBase<RealTimeTreePlanner::Node*>
     fill(ramp.dx1.begin(),ramp.dx1.end(),0.0);
   }
 
-  void Visit(RealTimeTreePlanner::Node* n) {
+  void Visit(DynamicHybridTreePlanner::Node* n) {
     /*
     if(n->q.distance(q) < closestDist) {
       closestDist = n->q.distance(q);
@@ -1590,7 +1893,7 @@ struct ClosestCallback : public Graph::CallbackBase<RealTimeTreePlanner::Node*>
   }
 };
 
-RealTimeTreePlanner::Node* RealTimeTreePlanner::Closest(const Config& q,Real costBranch)
+DynamicHybridTreePlanner::Node* DynamicHybridTreePlanner::Closest(const Config& q,Real costBranch)
 {
   ClosestCallback callback(stateSpace,q);
   callback.costBranch = costBranch;
@@ -1598,7 +1901,7 @@ RealTimeTreePlanner::Node* RealTimeTreePlanner::Closest(const Config& q,Real cos
   return callback.closest;
 }
 
-RealTimeTreePlanner::Node* RealTimeTreePlanner::ExtendToward(const Config& qdes,Real costBranch)
+DynamicHybridTreePlanner::Node* DynamicHybridTreePlanner::ExtendToward(const Config& qdes,Real costBranch)
 {
   //pick closest milestone, step in that direction
   Vector q;
@@ -1614,7 +1917,7 @@ RealTimeTreePlanner::Node* RealTimeTreePlanner::ExtendToward(const Config& qdes,
   return AddChild(closest,qdes);
 }
 
-RealTimeTreePlanner::Node* RealTimeTreePlanner::SplitEdge(RealTimeTreePlanner::Node* p,RealTimeTreePlanner::Node* n,Real u)
+DynamicHybridTreePlanner::Node* DynamicHybridTreePlanner::SplitEdge(DynamicHybridTreePlanner::Node* p,DynamicHybridTreePlanner::Node* n,Real u)
 {
   Assert(p==n->getParent());
   const ParabolicRamp::DynamicPath& path=n->edgeFromParent().e->path;
@@ -1646,9 +1949,17 @@ RealTimeTreePlanner::Node* RealTimeTreePlanner::SplitEdge(RealTimeTreePlanner::N
   return s;
 }
 
-int RealTimeTreePlanner::PlanFrom(ParabolicRamp::DynamicPath& path,Real cutoff)
+int DynamicHybridTreePlanner::PlanFrom(ParabolicRamp::DynamicPath& path,Real cutoff)
 {
   if (!goal) return Failure;
+
+  if(stateSpace==NULL) {
+    stateSpace = new RampCSpaceAdaptor(cspace,velMax,accMax);
+    stateSpace->qMin = qMin;
+    stateSpace->qMax = qMax;
+    assert((int)path.velMax.size() == (int)robot->q.size());
+    stateSpace->visibilityTolerance = settings->robotSettings[0].collisionEpsilon;
+  }
 
   Assert(path.IsValid());
   Timer timer;
@@ -1665,8 +1976,8 @@ int RealTimeTreePlanner::PlanFrom(ParabolicRamp::DynamicPath& path,Real cutoff)
   int numExistingNodes=0,numIKExisting=0,numIKExistingImprove=0,numIKExistingUnreachable=0,numGeneratedNodes=0,numFailSplitNodes=0,numImproveNodes=0,numUnreachableNodes=0,numIKNodes=0,numIKImproveNodes=0,numUnreachableIKNodes=0;
 
   Node* bestNode=NULL;
-  Real bestTotalCost = EvaluatePathCost(path,currentSplitTime);
-  fprintf(flog,"*** Current total cost %g, terminal cost %g *** \n",bestTotalCost,goal->TerminalCost(currentSplitTime+path.GetTotalTime(),path.ramps.back().x1,path.ramps.back().dx1));
+  Real bestTotalCost = EvaluatePathCost(path,tstart);
+  fprintf(flog,"*** Current total cost %g, terminal cost %g *** \n",bestTotalCost,goal->TerminalCost(tstart+path.GetTotalTime(),path.ramps.back().x1,path.ramps.back().dx1));
   if(bestTotalCost < 1e-5) return Success;
 
   //fprintf(flog,"Adding old path...\n");
@@ -1675,7 +1986,7 @@ int RealTimeTreePlanner::PlanFrom(ParabolicRamp::DynamicPath& path,Real cutoff)
     fprintf(flog,"Warning, start state is infeasible!\n");
   }
   root=new Node;
-  root->t = currentSplitTime;
+  root->t = tstart;
   root->q = path.ramps[0].x0;
   root->dq = path.ramps[0].dx0;
   root->sumPathCost = 0.0;
@@ -1896,7 +2207,7 @@ int RealTimeTreePlanner::PlanFrom(ParabolicRamp::DynamicPath& path,Real cutoff)
     Real t=timer.ElapsedTime();
     if(cutoff > t) {
       fprintf(flog,"Devoting %g seconds to smoothing old path\n",cutoff-t);
-      SmartShortcut(currentSplitTime,path,cutoff-t);
+      SmartShortcut(tstart,path,cutoff-t);
       Assert(path.IsValid());
     }
     return Timeout;
@@ -1943,7 +2254,7 @@ int RealTimeTreePlanner::PlanFrom(ParabolicRamp::DynamicPath& path,Real cutoff)
   if(cutoff > timer.ElapsedTime()) {
     Vector xold = path.ramps.back().x1;
     fprintf(flog,"Devoting %g seconds to smoothing new path\n",cutoff-timer.ElapsedTime());
-    SmartShortcut(currentSplitTime,path,cutoff-timer.ElapsedTime());
+    SmartShortcut(tstart,path,cutoff-timer.ElapsedTime());
     assert(path.IsValid());
     assert(xold == Vector(path.ramps.back().x1));
   }

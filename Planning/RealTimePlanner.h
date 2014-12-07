@@ -7,7 +7,104 @@
 #include "RampCSpace.h"
 #include "Modeling/DynamicPath.h"
 #include <utils/StatCollector.h>
+#include <utils/threadutils.h>
 #include <Timer.h>
+
+class MotionQueueInterface;
+
+/** @brief A base class for a motion planner that generates dynamic paths.
+ * The output should always respect joint, velocity, and acceleration limits
+ * and end in a zero-velocity terminal states.
+ */
+class DynamicMotionPlannerBase
+{
+ public:
+  enum { Failure=0, Success=1, Timeout=2 };
+
+  DynamicMotionPlannerBase();
+  virtual ~DynamicMotionPlannerBase();
+  virtual void Init(CSpace* space,Robot* robot,WorldPlannerSettings* settings);
+  virtual void SetGoal(SmartPointer<PlannerObjectiveBase> newgoal);
+  virtual void SetTime(Real tstart);
+  virtual void SetDefaultLimits();
+  virtual void SetLimits(Real qScale=1.0,Real vScale=1.0,Real aScale=1.0);
+
+  bool LogBegin(const char* fn="realtimeplanner.log");
+  bool LogEnd();
+
+
+  /** DynamicMotionPlanner subclasses should override this. 
+   * Plans from the start of 'path', and returns the result in 'path'.
+   * The planning duration should not exceed 'cutoff', if possible.
+   * 
+   * Must return Success if successful, Failure if planning fails.
+   *
+   * Subroutines may maintain a timer, and stop and return Timeout
+   * planning time exceeds the cutoff.  This is not strictly necessary;
+   * the caller should check whether the planning time exceeds the cutoff.
+   */
+  virtual int PlanFrom(ParabolicRamp::DynamicPath& path,Real cutoff)
+  {
+    return Failure;
+  }
+
+  ///Plans from a start configuration
+  int PlanFrom(const Config& qstart,Real cutoff,ParabolicRamp::DynamicPath& result)
+  {
+    result.ramps.resize(1);
+    result.ramps[0].SetConstant(qstart);
+    return PlanFrom(result,cutoff);
+  }
+
+  /** Tells the planner to stop.  Can be called from an external thread.
+   * 
+   * Subclasses should detect if stopPlanning is set to true and return
+   * Timeout.
+   */
+  bool StopPlanning();
+
+  ///Performs shortcutting up until the time limit
+  int Shortcut(ParabolicRamp::DynamicPath& path,Real timeLimit);
+  ///Performs shortcuts that reduce the objective function, only on the 
+  ///portion of the path after time tstart
+  int SmartShortcut(Real tstart,ParabolicRamp::DynamicPath& path,Real timeLimit);
+
+  ///Helper
+  bool GetMilestoneRamp(const Config& q0,const Vector& dq0,const Config& q1,ParabolicRamp::DynamicPath& ramp) const;
+  ///Helper
+  bool GetMilestoneRamp(const ParabolicRamp::DynamicPath& curPath,const Config& q,ParabolicRamp::DynamicPath& ramp) const;
+
+  //returns true if the ramp from the current config to q is collision free
+  bool CheckMilestoneRamp(const ParabolicRamp::DynamicPath& curPath,const Config& q,ParabolicRamp::DynamicPath& ramp) const;
+
+  ///returns the cost of going straight to q (assuming no collision detection)
+  Real EvaluateDirectPathCost(const ParabolicRamp::DynamicPath& curPath,const Config& q);
+
+  ///returns the cost of using the given path.  If tStart is not given, this
+  ///uses the previously set tstart
+  Real EvaluatePathCost(const ParabolicRamp::DynamicPath& path,Real tStart=-1.0);
+
+  ///returns the terminal cost for a path ending at q at time tEnd
+  Real EvaluateTerminalCost(const Config& q,Real tEnd);
+
+  Robot* robot;
+  WorldPlannerSettings* settings;
+  CSpace* cspace;
+  //objective function
+  SmartPointer<PlannerObjectiveBase> goal;
+  //configuration, velocity, and acceleration limits
+  ParabolicRamp::Vector qMin,qMax,velMax,accMax;
+
+  //planning start time
+  Real tstart;
+  //flag: another thread may set this to true when the planner should
+  //stop during a long planning cycle.  The subclass needs to continually
+  //monitor this flag
+  bool stopPlanning;
+
+  //log file
+  FILE* flog;
+};
 
 
 /** @brief A base class for the path sending callback.  Send is called by the
@@ -29,19 +126,22 @@ class SendPathCallbackBase
 
 
 /** @ingroup Planning
- * @brief A base class for a real-time planner.
- * Supports constant time-stepping or adaptive time-stepping
+ * @brief A real-time planner. Supports constant time-stepping or
+ * adaptive time-stepping
  *
- * Subclasses must override PlanMore.  Users must set up the planning
+ * Users must set up the underlying planner, the planning
  * problem and may add in path sending hooks.
- * @sa RealTimeIKPlanner
- * @sa RealTimeTreePlanner
+ * @sa DynamicMotionPlannerBase
+ * @sa SendPathCallbackBase
+ * @sa RealTimePlanningThread
  *
  * Setup: Given a world and a robotIndex (typically 0), assuming the robot
  * model is set to its current configuration ...
  *
  * @code
- * MyRealTimePlanner planner; (initialize subclass as necessary)
+ * RealTimePlanner planner; 
+ * planner.planner = new MyDynamicMotionPlanner;
+ *    (try, for example, DynamicIKPlanner, DynamicHybridTreePlanner)
  * SingleRobotCSpace cspace(...); (initialize cspace as necessary)
  * //set planning problem
  * planner.SetSpace(&cspace);
@@ -81,18 +181,13 @@ class SendPathCallbackBase
  * }
  * @endcode
  */
-class RealTimePlannerBase
+class RealTimePlanner
 {
 public:
-  enum { Failure=0, Success=1, Timeout=2 };
+  RealTimePlanner();
+  virtual ~RealTimePlanner();
 
-  RealTimePlannerBase();
-  virtual ~RealTimePlannerBase();
-
-  bool LogBegin(const char* fn="realtimeplanner.log");
-  bool LogEnd();
-
-  ///Convenience fn: will set up the robot, space, settings pointers
+  ///Convenience fn: will set up the planner's robot, space, settings pointers
   void SetSpace(SingleRobotCSpace* space);
 
   ///Should be called at the start to initialize the start configuration
@@ -104,86 +199,35 @@ public:
   /// Set the objective function.
   virtual void Reset(SmartPointer<PlannerObjectiveBase> newgoal);
 
-  /** Performs planning, returns the splitting time and planning time.
+  /// Gets the objective function
+  SmartPointer<PlannerObjectiveBase> Objective() const { return planner->goal; }
+
+  /** Calls the planner, returns the splitting time and planning time.
    * tglobal is a global clock synchronized between the planning and
    * execution threads.
-   * Default implementation: fix the split time, call PlanFrom
-   * Returns true if the path changed and planTime < splitTime */
+   * Default implementation: fix the split time, call planner->PlanFrom
+   * Returns true if the path changed and planTime < splitTime 
+   */
   virtual bool PlanUpdate(Real tglobal,Real& splitTime,Real& planTime);
 
-  /** Tells the planner to stop.  Can be called from an external thread.
-   * 
-   * Subclasses should detect if stopPlanning is set to true and return
-   * Timeout.
-   */
-  bool StopPlanning();
-
-  /** RealTimePlannerBase subclasses should override this. 
-   * Plans from the start of 'path', and returns the result in 'path'.
-   * The planning duration should not exceed 'cutoff', if possible.
-   * 
-   * Must return Success if successful, Failure if planning fails.
-   *
-   * Subroutines may maintain a timer, and stop and return Timeout
-   * planning time exceeds the cutoff.  This is not strictly necessary;
-   * PlanUpdate already checks whether the planning time exceeds the cutoff.
-   * Timeout is mostly used for debugging; statistics are captured in
-   * planTimeoutTimeStats.
-   */
-  virtual int PlanFrom(ParabolicRamp::DynamicPath& path,Real cutoff)
-  {
-    return Failure;
-  }
-
-  ///Performs shortcutting up until the time limit
-  int Shortcut(ParabolicRamp::DynamicPath& path,Real timeLimit);
-  ///Performs shortcuts that reduce the objective function, only on the 
-  ///portion of the path after time tstart
-  int SmartShortcut(Real tstart,ParabolicRamp::DynamicPath& path,Real timeLimit);
-
-  ///Helper
-  bool GetMilestoneRamp(const Config& q0,const Vector& dq0,const Config& q1,ParabolicRamp::DynamicPath& ramp) const;
-  ///Helper
-  bool GetMilestoneRamp(const ParabolicRamp::DynamicPath& curPath,const Config& q,ParabolicRamp::DynamicPath& ramp) const;
-
-  //returns true if the ramp from the current config to q is collision free
-  bool CheckMilestoneRamp(const ParabolicRamp::DynamicPath& curPath,const Config& q,ParabolicRamp::DynamicPath& ramp) const;
-
-  ///returns the cost of going straight to q (assuming no collision detection)
-  Real EvaluateDestinationCost(const Config& q);
-
-  ///returns the cost of using the given path
-  Real EvaluatePathCost(const ParabolicRamp::DynamicPath& path,Real tStart=0.0);
-
-  ///returns the current final destination
-  const ParabolicRamp::Vector& CurrentDestination() const;
-
-  ///returns the cost for the current destination
-  Real CurrentDestinationCost();
-
-  ///returns the cost for the current path
-  Real CurrentPathCost();
+  /// Tells the planner to stop, when called from an external thread.
+  bool StopPlanning() { return planner->StopPlanning(); }
 
   /// Called whenever the sendPathCallback returned false on a planned path
   /// (e.g., the padding was too short)
   virtual void MarkSendFailure();
 
   /// Users must set these members before planning
-  Robot* robot;
-  WorldPlannerSettings* settings;
-  SingleRobotCSpace* cspace;
+
+  /// The underlying planing algorithm
+  SmartPointer<DynamicMotionPlannerBase> planner;
+
   /// Set the current path before planning, using SetConstantPath or SetCurrentPath
   Real pathStartTime; 
   ParabolicRamp::DynamicPath currentPath;
-  /// Set objective before planning, using Reset()
-  SmartPointer<PlannerObjectiveBase> goal;
 
   /// Users should set this up to capture the outputted path
   SmartPointer<SendPathCallbackBase> sendPathCallback;
-
-  /// This flag should be set to true to tell a long planning cycle to stop.
-  /// Thread safe.  StopPlanning() can also be used. 
-  bool stopPlanning;
 
   /// Use only in simulation: multiplies the effective computational power
   /// of this machine (i.e., simulate a machine that's x times faster)
@@ -200,9 +244,74 @@ public:
 
   ///Statistics captured on planning times, depending on PlanMore output.
   StatCollector planFailTimeStats,planSuccessTimeStats,planTimeoutTimeStats;
+};
 
-  //log file
-  FILE* flog;
+/** @brief An interface to a planning thread.
+ * 
+ * All methods are thread-safe and meant to be called by the execution
+ * thread.
+ *
+ * Example code is as follows:
+ *
+ * MotionQueueInterface* queue = new MyMotionQueueInterface(robot);
+ *
+ * RealTimePlanningThread thread;
+ * thread.SetPlanner(planner)
+ * thread.SetStartConfig(qstart);
+ * thread.Start();
+ * while(want to continue planning) {
+ *   if(newObjectiveAvailable()) {
+ *     thread.BreakPlanning();   //optional, if this is not called the
+ *                               //planner will finish an internal planning 
+ *                               //cycle on the old objective
+ *     thread.SetObjective(getObjective()); 
+ *     //change the cspace or planner here if needed
+ *   }
+ *   if(thread.SendUpdate(queue)) {
+ *     printf("Planner had an update\n")
+ *   }
+ *   ///advance the motion queue and do whatever else you need to do here...
+ * }
+ * thread.Stop()
+ */
+class RealTimePlanningThread
+{
+ public:
+  RealTimePlanningThread();
+  ~RealTimePlanningThread();
+
+  /// Initializes the planning thread with a start configuration 
+  void SetStartConfig(const Config& qstart);
+  /// Initializes the planning thread with a CSpace
+  void SetCSpace(SingleRobotCSpace* space);
+  /// Sets the planner
+  void SetPlanner(SmartPointer<DynamicMotionPlannerBase> planner);
+  void SetPlanner(SmartPointer<RealTimePlanner> planner);
+  /// Set the objective function.
+  void SetObjective(SmartPointer<PlannerObjectiveBase> newgoal);
+  /// Gets the objective function
+  SmartPointer<PlannerObjectiveBase> GetObjective() const;
+  ///If the robot's path has changed for a reason outside of the planner's
+  ///control, call this
+  void ResetCurrentPath(Real tglobal,const ParabolicRamp::DynamicPath& path);
+  /// Starts planning. Returns false if there was some problem, e.g., the
+  /// Initial config was not set.
+  bool Start();
+  /// Breaks an internal planning cycle on the existing objective
+  void BreakPlanning();
+  /// Stops the planning thread. 
+  void Stop();
+  /// Returns true if a trajectory update is available
+  bool HasUpdate();
+  /// Send the trajectory update, if one exists
+  bool SendUpdate(MotionQueueInterface* interface);
+  /// Returns the objective function value of the current trajectory
+  /// update
+  Real ObjectiveValue();
+
+  void* internal;
+  SmartPointer<RealTimePlanner> planner;
+  Thread thread;
 };
 
 #endif

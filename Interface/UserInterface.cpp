@@ -13,7 +13,7 @@
 const static Real gPlannerStopDeltaThreshold = 0.2;
 
 /** @brief Adaptor for sending paths to PhysicalRobotInterface from a
- * RealTimePlannerBase.
+ * RealTimePlanner.
  */
 class MotionQueueInterfaceSender : public SendPathCallbackBase
 {
@@ -298,12 +298,11 @@ string IKCommandInterface::UpdateEvent()
 
 
 PlannerCommandInterface::PlannerCommandInterface()
-  :planner(NULL),lastPlanTime(0),nextPlanTime(0),startObjectiveThreshold(Inf),started(false)
+  :lastPlanTime(0),nextPlanTime(0),startObjectiveThreshold(Inf),started(false)
 {}
 
 PlannerCommandInterface::~PlannerCommandInterface()
 {
-  SafeDelete(planner);
 }
 
 string PlannerCommandInterface::ActivateEvent(bool enabled)
@@ -420,7 +419,7 @@ string PlannerCommandInterface::UpdateEvent()
   Timer timer;
   Real splitTime=0,planTime=0;
   bool res=false;
-  if(planner->goal != NULL) {
+  if(planner->Objective() != NULL) {
     res=planner->PlanUpdate(t,splitTime,planTime);
     printf("Plan update: time %g, time elapsed %g, result %d\n",t,planTime,(int)res);
     
@@ -442,14 +441,15 @@ string IKPlannerCommandInterface::ActivateEvent(bool enabled)
     assert(settings != NULL);
     cspace = new SingleRobotCSpace(*planningWorld,0,settings);
     
-    planner = new RealTimeIKPlanner;
+    planner = new RealTimePlanner;
+    planner->planner = new DynamicIKPlanner;
     //planner = new RealTimePerturbationIKPlanner;
     //planner->LogBegin();
-    //planner->protocol = RealTimePlannerBase::Constant;
+    //planner->protocol = RealTimePlanner::Constant;
     planner->currentSplitTime=0.10;
     planner->currentPadding=0.05;
     planner->SetSpace(cspace);
-    assert(planner->settings != NULL);
+    assert(planner->planner->settings != NULL);
   }
   PlannerCommandInterface::ActivateEvent(enabled);
   return "";
@@ -460,12 +460,13 @@ string RRTCommandInterface::ActivateEvent(bool enabled)
   if(!planner) {
     cspace = new SingleRobotCSpace(*planningWorld,0,settings);
     
-    RealTimeRRTPlanner* p=new RealTimeRRTPlanner;
+    planner = new RealTimePlanner;
+    DynamicRRTPlanner* p = new DynamicRRTPlanner;
     p->delta = 0.5;
-    planner = p;
-    planner->LogBegin();
-    //planner->protocol = RealTimePlannerBase::Constant;
-    planner->protocol = RealTimePlannerBase::ExponentialBackoff;
+    planner->planner = p;
+    planner->planner->LogBegin();
+    //planner->protocol = RealTimePlanner::Constant;
+    planner->protocol = RealTimePlanner::ExponentialBackoff;
     planner->currentSplitTime=0.1;
     planner->currentPadding=0.05;
     //test insufficient padding
@@ -480,98 +481,14 @@ string RRTCommandInterface::ActivateEvent(bool enabled)
 
 
 
-RealTimePlannerDataSender::RealTimePlannerDataSender(RealTimePlannerData* _data)
-  :data(_data)
-{}
-
-bool RealTimePlannerDataSender::Send(Real tplanstart,Real tcut,const ParabolicRamp::DynamicPath& path)
-{
-  {
-    ScopedLock lock(data->mutex);
-    Assert(data->startPlanTime == tplanstart);
-    data->pathRefresh = true;
-    data->tcut = tcut;
-    data->path = path;
-  }  
-  while(true) {
-    ThreadSleep(0.001);
-    {
-      ScopedLock lock(data->mutex);
-      if(!data->pathRefresh) {  //this signals that the calling thread picked up the data
-	bool res = data->pathRefreshSuccess;
-	return res; //unlocks mutex
-      }
-    }//unlocks mutex
-  }
-}  
-
-void* planner_thread_func(void * ptr)
-{
-  RealTimePlannerData* data = reinterpret_cast<RealTimePlannerData*>(ptr);
-  //read initial configuration
-  {
-    ScopedLock(data->mutex);
-    assert(data->resetStartConfig == true);
-    data->planner->SetConstantPath(data->startConfig);
-    data->resetStartConfig = false;
-  }
-  //FOR SOME REASON, LOGGING FAILS UNLESS DONE HERE
-  //data->planner->LogBegin();
-
-  while (true) {
-    //first wait for a lock
-    bool start=false;
-    Real startTime;
-    {
-      ScopedLock(data->mutex);
-      
-      //parse the data
-      if(!data->active) {
-	//quit
-	return NULL;  //unlocks the mutex
-      }
-      assert(data->pathRefresh == false);
-      if(data->resetStartConfig == true) {
-	printf("Planning thread: resetting start configuration\n");
-	data->planner->SetConstantPath(data->startConfig);
-	data->resetStartConfig = false;
-      }
-      if(data->objective) {
-	start=true;
-	startTime = data->startPlanTime = data->globalTime;
-      }
-      if(data->objective != data->planner->goal) {
-	if(data->objective) {
-	  data->planner->Reset(data->objective);      }
-	else {
-	  printf("Planning thread: NULL objective function set...\n");
-	  data->planner->Reset(NULL);
-	}
-      }
-    }  //unlocks the mutex
-
-    if(start) {
-      //do the planning -- the callback will output the result to the
-      //UI thread
-      Real splitTime, planTime;
-      bool res = data->planner->PlanUpdate(startTime, splitTime, planTime);
-      
-      printf("Planning thread: result %d\n",(int)res);    
-    }
-    ThreadSleep(0.001);
-  }
-  return NULL;
-}
-
 
 MTPlannerCommandInterface::MTPlannerCommandInterface()
-  : planner(NULL),startObjectiveThreshold(Inf),started(false)
+  : startObjectiveThreshold(Inf),started(false)
 {
 }
 
 MTPlannerCommandInterface::~MTPlannerCommandInterface()
 {
-  SafeDelete(planner);
 }
 
 string MTPlannerCommandInterface::Instructions() const
@@ -596,30 +513,21 @@ string MTPlannerCommandInterface::ActivateEvent(bool enabled)
   InputProcessingInterface::ActivateEvent(enabled);
   if(enabled) {
     Assert(robotInterface->GetEndTime() <= robotInterface->GetCurTime());
-    Assert(&planner->cspace->world == planningWorld);
-    data.planner = planner;
-    data.planner->sendPathCallback = new RealTimePlannerDataSender(&data);
-    data.resetStartConfig = true;
-    robotInterface->GetCurConfig(data.startConfig);
-    data.active = true;
-    data.globalTime = 0;
-    data.pathRefresh = false;
-    planningThread = ThreadStart(planner_thread_func,&data);
-    printf("Creating planning thread\n");
+
+    Config qstart;
+    robotInterface->GetCurConfig(qstart);
+    planningThread.SetStartConfig(qstart);
+    planningThread.Start();
   }
   else {
-	  {
-		ScopedLock lock(data.mutex);
-		data.active = false;
-	  } //unlocks the mutex
-    ThreadJoin(planningThread);
+    planningThread.Stop();
   }
   return "";
 }
 
 string MTPlannerCommandInterface::UpdateEvent()
 {
-  if (!planner)
+  if (!planningThread.planner)
     return "";
 
   inputProcessor->SetGlobalTime(robotInterface->GetCurTime());
@@ -658,12 +566,9 @@ string MTPlannerCommandInterface::UpdateEvent()
       fprintf(stderr,"Cannot handle an externally changed robot that is still moving\n");
       return "";
     }
-    //lock the planning thread's mutex and reset the start config
-    {
-      ScopedLock lock(data.mutex);
-      data.resetStartConfig = true;
-      robotInterface->GetEndConfig(data.startConfig);
-    }
+    Config q;
+    robotInterface->GetEndConfig(q);
+    planningThread.SetStartConfig(q);
   }
 
   //tell the planner to stop if there's a new objective
@@ -671,81 +576,60 @@ string MTPlannerCommandInterface::UpdateEvent()
   bool changedObjective = false;
   if(ObjectiveChanged()) {
     changedObjective = true;
-    obj = inputProcessor->MakeObjective(planner->cspace->GetRobot());
+    obj = inputProcessor->MakeObjective(planningWorld->robots[0].robot);
     //this is the visualization objective
     currentObjective = obj;
-    if((planner->goal && !obj) || (planner->goal && planner->goal->Delta(obj) > gPlannerStopDeltaThreshold)) {
+    SmartPointer<PlannerObjectiveBase> oldObj = planningThread.GetObjective();
+    if((oldObj && !obj) || (oldObj && oldObj->Delta(obj) > gPlannerStopDeltaThreshold)) {
       printf("\n");
       if(obj)
 	printf("********* Objective changed, STOP PLANNING **********\n");
       else
 	printf("********* Objective deleted, STOP PLANNING **********\n");
       printf("\n");
-      planner->StopPlanning();
+      planningThread.BreakPlanning();
     }
   }
 
-  //now lock the planning thread's mutex
-  {
-    ScopedLock lock(data.mutex);
+  if(changedObjective)
+    planningThread.SetObjective(obj);
 
-    //update the objective function if necessary
-    if(changedObjective) {
-      //set the objective function
-      data.objective = obj;
-    }
-  
-    //see if the planning thread has a plan update
-    if(data.pathRefresh) {
-      //if so, mark that it's refreshed
-      data.pathRefresh = false;
-      MotionQueueInterface::MotionResult res = robotInterface->SendPathImmediate(data.startPlanTime+data.tcut,data.path);
-      Real t=robotInterface->GetCurTime();
-      if(res == MotionQueueInterface::Success) {
-	data.pathRefreshSuccess = true;
-	printf("Exec thread: Planner successful, split %g, delay %g\n",data.tcut,t - data.startPlanTime);
-      }
-      else {
-	data.pathRefreshSuccess = false;
-	printf("Exec thread: Planner overrun, split %g, delay %g\n",data.tcut,t - data.startPlanTime);
-      }
-    }
-    else {
-      //printf("UpdateEvent (sim thread): waiting for plan to complete\n");
-    }
-    data.globalTime = robotInterface->GetCurTime();
-  } //unlocks the mutex
+  //send any pending updates to the robotinterface
+  planningThread.SendUpdate(robotInterface);
   return "";
 }
 
 string MTIKPlannerCommandInterface::ActivateEvent(bool enabled)
 {
-  
-  if (!planner) {
+  if (!cspace) {
     Assert(planningWorld != NULL);
     cspace = new SingleRobotCSpace(*planningWorld, 0, settings);
     
-    planner = new RealTimeIKPlanner;
-    //planner->protocol = RealTimePlannerBase::Constant;
+    RealTimePlanner* planner = new RealTimePlanner;
+    planner->planner = new DynamicIKPlanner;
+    //planner->protocol = RealTimePlanner::Constant;
     planner->currentSplitTime = 0.05;
     planner->currentPadding = 0.025;
     planner->currentExternalPadding = 0.02;
     planner->SetSpace(cspace);
+    planningThread.SetPlanner(planner);
   }
   return MTPlannerCommandInterface::ActivateEvent(enabled);
 }
 
 string MTRRTCommandInterface::ActivateEvent(bool enabled)
 {
-  if (!planner) {
+  if (!cspace) {
     Assert(planningWorld != NULL);
     cspace = new SingleRobotCSpace(*planningWorld, 0, settings);
     
-    //RealTimeRRTPlanner* p = new RealTimeRRTPlanner;
-    RealTimeTreePlanner* p = new RealTimeTreePlanner;
+    //DynamicRRTPlanner* p = new DynamicRRTPlanner;
+    DynamicHybridTreePlanner* p = new DynamicHybridTreePlanner;
     p->delta = 0.5;
-    planner = p;
+    RealTimePlanner* planner = new RealTimePlanner;
+    planner->planner = p;
     planner->SetSpace(cspace);
+    planningThread.SetPlanner(planner);
   }
   return MTPlannerCommandInterface::ActivateEvent(enabled);
 }
