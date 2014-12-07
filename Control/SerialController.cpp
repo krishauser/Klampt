@@ -5,6 +5,9 @@
 SerialController::SerialController(Robot& robot,const string& _servAddr,Real _writeRate)
   :RobotController(robot),servAddr(_servAddr),writeRate(_writeRate),lastWriteTime(0),endVCmdTime(-1)
 {
+  //HACK: is this where the sigpipe ignore should be?
+  signal(SIGPIPE, SIG_IGN);
+
   if(!servAddr.empty()) {
     while(!OpenConnection(servAddr)) {
       printf("\n...Trying to connect again in 5 seconds...\n");
@@ -76,12 +79,13 @@ void SerialController::Update(Real dt)
     string scmd = controllerPipe->NewestMessage();
     AnyCollection cmd;
     if(!cmd.read(scmd.c_str())) {
-      fprintf(stderr,"SerialController: Unable to parse incoming message %s\n",scmd.c_str());
+      fprintf(stderr,"SerialController: Unable to parse incoming message \"%s\"\n",scmd.c_str());
       return;
     }
     if(cmd.size()==0) {
       return;
     }
+    //parse and do error checking
     SmartPointer<AnyCollection> qcmdptr = cmd.find("qcmd");
     SmartPointer<AnyCollection> dqcmdptr = cmd.find("dqcmd");
     SmartPointer<AnyCollection> torquecmdptr = cmd.find("torquecmd");
@@ -108,6 +112,20 @@ void SerialController::Update(Real dt)
 	  return;
 	}
       }
+      if(qcmd.size() != robot.q.n) {
+	fprintf(stderr,"SerialController: position command of wrong size: %d vs %d \n",qcmd.size(),robot.q.n);
+	return;
+      }
+      if(!dqcmd.empty() && (dqcmd.size() != robot.dq.n)) {
+	fprintf(stderr,"SerialController: velocity command of wrong size: %d vs %d \n",dqcmd.size(),robot.q.n);
+	return;
+      }
+      if(!torquecmd.empty() && (torquecmd.size() != robot.drivers.size())) {
+	fprintf(stderr,"SerialController: torque command of wrong size: %d vs %d \n",torquecmd.size(),robot.drivers.size());
+	return;
+      }
+
+      //everything checks out -- now send the command
       if(torquecmd.empty()) {
 	SetPIDCommand(qcmd,dqcmd);
       }
@@ -129,6 +147,10 @@ void SerialController::Update(Real dt)
 	fprintf(stderr,"SerialController: tcmd not of proper type\n");
 	return;
       }
+      if(dqcmd.size() != robot.dq.n) {
+	fprintf(stderr,"SerialController: velocity command of wrong size: %d vs %d \n",dqcmd.size(),robot.q.n);
+	return;
+      }
       endVCmdTime = time + tcmd;
       vcmd = dqcmd;
     }
@@ -140,6 +162,11 @@ void SerialController::Update(Real dt)
 	fprintf(stderr,"SerialController: torquecmd not of proper type\n");
 	return;
       }
+      if(!torquecmd.empty() && (torquecmd.size() != robot.drivers.size())) {
+	fprintf(stderr,"SerialController: torque command of wrong size: %d vs %d \n",torquecmd.size(),robot.drivers.size());
+	return;
+      }
+
       SetTorqueCommand(torquecmd);
     }
     else {
@@ -162,10 +189,12 @@ map<string,string> SerialController::Settings() const
   map<string,string> settings;
   FILL_CONTROLLER_SETTING(settings,servAddr);
   FILL_CONTROLLER_SETTING(settings,writeRate);
-  if(controllerPipe) 
-    settings["connected"]="1";
-  else
-    settings["connected"]="0";
+  if(controllerPipe) {
+    settings["listening"]="1";
+  }
+  else {
+    settings["listening"]="0";
+  }
   return settings;
 }
 
@@ -173,7 +202,7 @@ bool SerialController::GetSetting(const string& name,string& str) const
 {
   READ_CONTROLLER_SETTING(servAddr)
   READ_CONTROLLER_SETTING(writeRate)
-  if(name=="connected") {
+  if(name=="listening") {
     if(controllerPipe)
       str = "1";
     else
@@ -219,3 +248,4 @@ bool SerialController::CloseConnection()
   }
   return false;
 }
+
