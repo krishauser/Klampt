@@ -57,7 +57,7 @@ void MakeRobotResourceLibrary(ResourceLibrary& library)
 
 bool ConfigsResource::Save(AnyCollection& c) 
 { 
-  c["type"] = "Configs";
+  c["type"] = string("Configs");
   Convert(configs,c["configs"]);
   return true;
 }
@@ -379,7 +379,7 @@ bool LinearPathResource::Save(ostream& out)
 
 bool LinearPathResource::Save(AnyCollection& c)
 {
-  c["type"] = "LinearPath";
+  c["type"] = string("LinearPath");
   Convert(times,c["times"]); 
   Convert(milestones,c["milestones"]);
   return true; 
@@ -741,7 +741,7 @@ bool IKGoalResource::Load(AnyCollection& c)
 
 bool IKGoalResource::Save(AnyCollection& c)
 {
-  c["type"] = "IKGoal";
+  c["type"] = string("IKGoal");
   Convert(goal,c);
   return true;
 }
@@ -788,7 +788,7 @@ bool HoldResource::Load(AnyCollection& c)
 
 bool HoldResource::Save(AnyCollection& c)
 {
-  c["type"] = "Hold";
+  c["type"] = string("Hold");
   Convert(hold,c);
   return true;
 }
@@ -928,7 +928,7 @@ bool StanceResource::Load(AnyCollection& c)
 
 bool StanceResource::Save(AnyCollection& c)
 {
-  c["type"] = "Stance";
+  c["type"] = string("Stance");
   Convert(stance,c);
   return true;
 }
@@ -1042,7 +1042,7 @@ bool GraspResource::Load(AnyCollection& c)
 
 bool GraspResource::Save(AnyCollection& c)
 {
-  c["type"] = "Grasp";
+  c["type"] = string("Grasp");
   Convert(grasp,c);
   return true;
 }
@@ -1421,20 +1421,20 @@ void Convert(const IKGoal& g,AnyCollection& c)
     break;
   case IKGoal::PosPlanar:
     c["posConstraint"] = string("planar");
-    c["localPosition"] = g.localPosition;
-    c["endPosition"] = g.endPosition;
-    c["direction"] = g.direction;
+    Convert(g.localPosition,c["localPosition"]);
+    Convert(g.endPosition,c["endPosition"]);
+    Convert(g.direction,c["direction"]);
     break;
   case IKGoal::PosLinear:
     c["posConstraint"] = string("linear");
-    c["localPosition"] = g.localPosition;
-    c["endPosition"] = g.endPosition;
-    c["direction"] = g.direction;
+    Convert(g.localPosition,c["localPosition"]);
+    Convert(g.endPosition,c["endPosition"]);
+    Convert(g.direction,c["direction"]);
     break;
   case IKGoal::PosFixed:
     c["posConstraint"] = string("fixed");
-    c["localPosition"] = g.localPosition;
-    c["endPosition"] = g.endPosition;
+    Convert(g.localPosition,c["localPosition"]);
+    Convert(g.endPosition,c["endPosition"]);
     break;
   default:
     break;
@@ -1444,17 +1444,17 @@ void Convert(const IKGoal& g,AnyCollection& c)
     break;
   case IKGoal::RotTwoAxis:
     c["posConstraint"] = string("twoaxis");
-    c["localAxis"] = g.localAxis;
-    c["endRotation"] = g.endRotation;
+    Convert(g.localAxis,c["localAxis"]);
+    Convert(g.endRotation,c["endRotation"]);
     break;
   case IKGoal::RotAxis:
     c["posConstraint"] = string("axis");
-    c["localAxis"] = g.localAxis;
-    c["endRotation"] = g.endRotation;
+    Convert(g.localAxis,c["localAxis"]);
+    Convert(g.endRotation,c["endRotation"]);
     break;
   case IKGoal::RotFixed:
     c["posConstraint"] = string("fixed");
-    c["endRotation"] = g.endRotation;
+    Convert(g.endRotation,c["endRotation"]);
     break;
   }
 
@@ -1464,8 +1464,8 @@ void Convert(const Hold& h,AnyCollection& c)
   Convert(h.ikConstraint,c["ik"]);
   c["contacts"].resize(h.contacts.size());
   for(size_t i=0;i<h.contacts.size();i++) {
-    c["contacts"][(int)i]["x"] = h.contacts[i].x;
-    c["contacts"][(int)i]["n"] = h.contacts[i].n;
+    Convert(h.contacts[i].x,c["contacts"][(int)i]["x"]);
+    Convert(h.contacts[i].n,c["contacts"][(int)i]["n"]);
     c["contacts"][(int)i]["kFriction"] = h.contacts[i].kFriction;
   }
 }
@@ -1481,14 +1481,14 @@ void Convert(const Grasp& g,AnyCollection& c)
   c["fixedDofs"] = g.fixedDofs;
   c["contacts"].resize(g.contacts.size());
   for(size_t i=0;i<g.contacts.size();i++) {
-    c["contacts"][(int)i]["x"] = g.contacts[i].x;
-    c["contacts"][(int)i]["n"] = g.contacts[i].n;
+    Convert(g.contacts[i].x,c["contacts"][(int)i]["x"]);
+    Convert(g.contacts[i].n,c["contacts"][(int)i]["n"]);
     c["contacts"][(int)i]["kFriction"] = g.contacts[i].kFriction;
   }
   c["contactLinks"] = g.contactLinks;
   c["forces"].resize(g.forces.size());
   for(size_t i=0;i<g.forces.size();i++)
-    c["forces"] = g.forces[i];
+    Convert(g.forces[i],c["forces"][(int)i]);
 }
 
 void Convert(const Stance& s,AnyCollection& c)
@@ -1499,7 +1499,7 @@ void Convert(const Stance& s,AnyCollection& c)
     Convert(i->second,c["holds"][k]);
   }
 }
-
+ 
 bool Convert(const AnyCollection& c,IKGoal& g)
 {
   if(!c["link"].as(g.link)) return false;
@@ -1520,11 +1520,11 @@ bool Convert(const AnyCollection& c,IKGoal& g)
       return false;
     }
     if(s == "fixed" || s == "planar" || s=="linear") {
-      if(!c["endPosition"].as(g.endPosition)) return false;
-      if(!c["localPosition"].as(g.localPosition)) return false;
+      if(!Convert(c["endPosition"],g.endPosition)) return false;
+      if(!Convert(c["localPosition"],g.localPosition)) return false;
     }
     if(s == "planar" || s=="linear") {
-      if(!c["direction"].as(g.direction)) return false;
+      if(!Convert(c["direction"],g.direction)) return false;
     }
   }
   if(!c["rotConstraint"].as(s))
@@ -1541,10 +1541,10 @@ bool Convert(const AnyCollection& c,IKGoal& g)
       return false;
     }
     if(s == "fixed" || s == "axis" || s=="twoaxis") {
-      if(!c["endRotation"].as(g.endRotation)) return false;
+      if(!Convert(c["endRotation"],g.endRotation)) return false;
     }
     if(s == "axis" || s=="twoaxis") {
-      if(!c["localAxis"].as(g.localAxis)) return false;
+      if(!Convert(c["localAxis"],g.localAxis)) return false;
     }
   }
   return true;
@@ -1555,9 +1555,9 @@ bool Convert(const AnyCollection& c,Hold& h)
   if(!Convert(c["ik"],h.ikConstraint)) return false;
   h.contacts.resize(c["contacts"].size());
   for(size_t i=0;i<h.contacts.size();i++) {
-    if(!c["contacts"][(int)i]["x"].as(h.contacts[i].x)) return false;
-    if(!c["contacts"][(int)i]["n"].as(h.contacts[i].n)) return false;
-    if(!c["contacts"][(int)i]["kFriction"].as(h.contacts[i].kFriction)) return false;
+    if(!Convert(c["contacts"][(int)i]["x"],h.contacts[i].x)) return false;
+    if(!Convert(c["contacts"][(int)i]["n"],h.contacts[i].n)) return false;
+    if(!Convert(c["contacts"][(int)i]["kFriction"],h.contacts[i].kFriction)) return false;
   }
   return true;
 }
@@ -1569,19 +1569,19 @@ bool Convert(const AnyCollection& c,Grasp& g)
   g.robotIndex = c["robotIndex"];
   g.constraints.resize(c["constraints"].size());
   for(size_t i=0;i<g.constraints.size();i++)
-    Convert(c["constraints"][(int)i],g.constraints[i]);
+    if(!Convert(c["constraints"][(int)i],g.constraints[i])) return false;
   if(!c["fixedValues"].asvector(g.fixedValues)) return false;
   if(!c["fixedDofs"].asvector(g.fixedDofs)) return false;
   g.contacts.resize(c["contacts"].size());
   for(size_t i=0;i<g.contacts.size();i++) {
-    g.contacts[i].x = c["contacts"][(int)i]["x"];
-    g.contacts[i].n = c["contacts"][(int)i]["n"];
+    if(!Convert(c["contacts"][(int)i]["x"],g.contacts[i].x)) return false;
+    if(!Convert(c["contacts"][(int)i]["n"],g.contacts[i].n)) return false;
     g.contacts[i].kFriction = c["contacts"][(int)i]["kFriction"];
   }
   if(!c["contactLinks"].asvector(g.contactLinks)) return false;
   g.forces.resize(c["forces"].size());
   for(size_t i=0;i<g.forces.size();i++)
-    g.forces[i] = c["forces"];
+    if(!Convert(c["forces"],g.forces[i])) return false;
   return true;
 }
 
@@ -1593,7 +1593,7 @@ bool Convert(const AnyCollection& c,Stance& s)
   for(size_t i=0;i<holds.size();i++) {
     HoldResource h;
     if(!h.Load(*holds[i])) {
-      fprintf(stderr,"Convert(AnyCollection,Stance): Error reading hold %d\n",i);
+      fprintf(stderr,"Convert(AnyCollection,Stance): Error reading hold %d\n",(int)i);
       return false;
     }
     s.insert(h.hold);

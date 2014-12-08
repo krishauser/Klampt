@@ -1,6 +1,7 @@
 #include "PlannerObjective.h"
 #include <utils/AnyCollection.h>
 #include <robotics/IKFunctions.h>
+#include <IO/JSON.h>
 #include <string.h>
 
 struct ErrorAccumulator
@@ -622,7 +623,7 @@ bool SavePlannerObjective(PlannerObjectiveBase* obj,AnyCollection& msg)
     msg["norm"] = cobj->norm;
     for(size_t i=0;i<cobj->components.size();i++) {
       if(!SavePlannerObjective(cobj->components[i],msg["components"][i])) {
-	fprintf(stderr,"SavePlannerObjective: error saving component %d of composite objective\n",i);
+	fprintf(stderr,"SavePlannerObjective: error saving component %d of composite objective\n",(int)i);
 	return false;
       }
     }
@@ -631,14 +632,12 @@ bool SavePlannerObjective(PlannerObjectiveBase* obj,AnyCollection& msg)
   else if(type == "cartesian") {
     CartesianObjective* cobj = dynamic_cast<CartesianObjective*>(obj);
     msg["link"] = cobj->ikGoal.link;
-    msg["plocal"] = cobj->ikGoal.localPosition;
-    msg["pworld"] = cobj->ikGoal.endPosition;
+    Convert(cobj->ikGoal.localPosition,msg["plocal"]);
+    Convert(cobj->ikGoal.endPosition,msg["pworld"]);
   }
   else if(type == "ik") {
     IKObjective* cobj = dynamic_cast<IKObjective*>(obj);
-    stringstream ss;
-    ss<<cobj->ikGoal;
-    msg["data"] = ss.str();
+    Convert(cobj->ikGoal,msg["data"]);
   }
   else {
     fprintf(stderr,"SavePlannerObjective: unknown objective type %s\n",type.c_str());
@@ -669,7 +668,7 @@ PlannerObjectiveBase* LoadPlannerObjective(AnyCollection& msg,Robot* robot)
       return NULL;
     }
     if(robot && q.size() != robot->links.size()) {
-      fprintf(stderr,"LoadPlannerObjective: config message contains desired configuration of incorrect length %d vs %d\n",q.size(),robot->links.size());
+      fprintf(stderr,"LoadPlannerObjective: config message contains desired configuration of incorrect length %d vs %d\n",(int)q.size(),(int)robot->links.size());
       return NULL;
     }
     return new ConfigObjective(Vector(q));
@@ -681,7 +680,7 @@ PlannerObjectiveBase* LoadPlannerObjective(AnyCollection& msg,Robot* robot)
       return NULL;
     }
     if(robot && v.size() != robot->links.size()) {
-      fprintf(stderr,"LoadPlannerObjective: velocity message contains desired velocity of incorrect length %d vs %d\n",v.size(),robot->links.size());
+      fprintf(stderr,"LoadPlannerObjective: velocity message contains desired velocity of incorrect length %d vs %d\n",(int)v.size(),(int)robot->links.size());
       return NULL;
     }
     return new VelocityObjective(Vector(v));
