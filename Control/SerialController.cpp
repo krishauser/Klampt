@@ -1,6 +1,7 @@
 #include "SerialController.h"
 #include <utils/threadutils.h>
 #include <utils/AnyCollection.h>
+#include <signal.h>
 
 SerialController::SerialController(Robot& robot,const string& _servAddr,Real _writeRate)
   :RobotController(robot),servAddr(_servAddr),writeRate(_writeRate),lastWriteTime(0),endVCmdTime(-1)
@@ -77,6 +78,7 @@ void SerialController::Update(Real dt)
   }
   if(controllerPipe && controllerPipe->NewMessageCount() > 0) {
     string scmd = controllerPipe->NewestMessage();
+    if(scmd.empty()) return;
     AnyCollection cmd;
     if(!cmd.read(scmd.c_str())) {
       fprintf(stderr,"SerialController: Unable to parse incoming message \"%s\"\n",scmd.c_str());
@@ -113,15 +115,15 @@ void SerialController::Update(Real dt)
 	}
       }
       if(qcmd.size() != robot.q.n) {
-	fprintf(stderr,"SerialController: position command of wrong size: %d vs %d \n",qcmd.size(),robot.q.n);
+	fprintf(stderr,"SerialController: position command of wrong size: %d vs %d \n",(int)qcmd.size(),robot.q.n);
 	return;
       }
       if(!dqcmd.empty() && (dqcmd.size() != robot.dq.n)) {
-	fprintf(stderr,"SerialController: velocity command of wrong size: %d vs %d \n",dqcmd.size(),robot.q.n);
+	fprintf(stderr,"SerialController: velocity command of wrong size: %d vs %d \n",(int)dqcmd.size(),robot.q.n);
 	return;
       }
       if(!torquecmd.empty() && (torquecmd.size() != robot.drivers.size())) {
-	fprintf(stderr,"SerialController: torque command of wrong size: %d vs %d \n",torquecmd.size(),robot.drivers.size());
+	fprintf(stderr,"SerialController: torque command of wrong size: %d vs %d \n",(int)torquecmd.size(),(int)robot.drivers.size());
 	return;
       }
 
@@ -148,7 +150,7 @@ void SerialController::Update(Real dt)
 	return;
       }
       if(dqcmd.size() != robot.dq.n) {
-	fprintf(stderr,"SerialController: velocity command of wrong size: %d vs %d \n",dqcmd.size(),robot.q.n);
+	fprintf(stderr,"SerialController: velocity command of wrong size: %d vs %d \n",(int)dqcmd.size(),robot.q.n);
 	return;
       }
       endVCmdTime = time + tcmd;
@@ -163,7 +165,7 @@ void SerialController::Update(Real dt)
 	return;
       }
       if(!torquecmd.empty() && (torquecmd.size() != robot.drivers.size())) {
-	fprintf(stderr,"SerialController: torque command of wrong size: %d vs %d \n",torquecmd.size(),robot.drivers.size());
+	fprintf(stderr,"SerialController: torque command of wrong size: %d vs %d \n",(int)torquecmd.size(),(int)robot.drivers.size());
 	return;
       }
 
@@ -236,6 +238,7 @@ bool SerialController::OpenConnection(const string& addr)
     cout<<"Controller could not be opened on address "<<addr<<endl;
     return false;
   }
+  cout<<"Opened controller on address "<<addr<<endl;
   return true;
 }
 
