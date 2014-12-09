@@ -1503,10 +1503,10 @@ void Convert(const Stance& s,AnyCollection& c)
 bool Convert(const AnyCollection& c,IKGoal& g)
 {
   if(!c["link"].as(g.link)) return false;
-  if(!c["destLink"].as(g.destLink))
+  if(c.find("destLink") == NULL || !c["destLink"].as(g.destLink))
     g.destLink = -1;
   string s;
-  if(!c["posConstraint"].as(s))
+  if(c.find("posConstraint") == NULL || !c["posConstraint"].as(s))
     g.SetFreePosition();
   else {
     if(s == "fixed") 
@@ -1527,7 +1527,7 @@ bool Convert(const AnyCollection& c,IKGoal& g)
       if(!Convert(c["direction"],g.direction)) return false;
     }
   }
-  if(!c["rotConstraint"].as(s))
+  if(c.find("rotConstraint") == NULL || !c["rotConstraint"].as(s))
     g.SetFreeRotation();
   else {
     if(s == "fixed") 
