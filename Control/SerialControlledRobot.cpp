@@ -30,6 +30,7 @@ bool SerialControlledRobot::Process(double timeout)
   }
 
   Timer timer;
+  int iteration = 0;
   while(!stopFlag) {
     Real lastReadTime = timer.ElapsedTime();
     if(lastReadTime > timeout) return false;
@@ -40,6 +41,8 @@ bool SerialControlledRobot::Process(double timeout)
       //first time, or failed to read -- 
       //read next sensor data again to get timing info
       if(controllerMutex) controllerMutex->unlock();
+      if(iteration % 100 == 0)
+	printf("SerialControlledRobot(): Error getting timestep? Waiting.\n");
       ThreadSleep(0.01);
     }
     else {
@@ -57,6 +60,7 @@ bool SerialControlledRobot::Process(double timeout)
       }
       return true;
     }
+    iteration ++;
   }
   return false;
 }
@@ -87,6 +91,11 @@ bool SerialControlledRobot::Run()
 	klamptController->Update(timeStep);
       }
       if(controllerMutex) controllerMutex->unlock();
+
+      if(!controllerPipe->initialized) {
+	fprintf(stderr,"SerialControlledRobot::Run(): killed by socket disconnect?\n");
+	return false;
+      }
       WriteCommandData(command);
 
       Real time = timer.ElapsedTime();
