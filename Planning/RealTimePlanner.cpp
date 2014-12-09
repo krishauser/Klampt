@@ -50,7 +50,7 @@ bool Optimize(PlannerObjectiveBase* obj,Robot* robot,int iters,Real tol)
   Extract(obj,robot,ikproblem,joint_constraints);
   if(!joint_constraints.empty()) {
     if(!ikproblem.empty())
-      fprintf(stderr,"Cannot support IK and configuration objectives simultaneously net\n");
+      fprintf(stderr,"Cannot support IK and configuration objectives simultaneously yet\n");
     assert(joint_constraints.size()==robot->links.size());
     if(joint_constraints.size()!=robot->links.size())
       fprintf(stderr,"Cannot support partial joint constraints yet\n");
@@ -89,6 +89,7 @@ RealTimePlanner::RealTimePlanner()
 
 RealTimePlanner::~RealTimePlanner()
 {
+  printf("RealTimePlanner destructor\n");
 }
 
 
@@ -97,6 +98,15 @@ void RealTimePlanner::SetSpace(SingleRobotCSpace* space)
   if(planner) {
     planner->Init(space,space->GetRobot(),space->settings);
   }
+  else {
+    fprintf(stderr,"RealTimePlanner::SetSpace: warning, underlying planner not set\n");
+  }
+}
+
+SmartPointer<PlannerObjectiveBase> RealTimePlanner::Objective() const
+{
+  if(!planner) return NULL;
+  return planner->goal; 
 }
 
 void RealTimePlanner::Reset(SmartPointer<PlannerObjectiveBase> newgoal)
@@ -105,7 +115,7 @@ void RealTimePlanner::Reset(SmartPointer<PlannerObjectiveBase> newgoal)
 
   if(protocol == ExponentialBackoff) {
     if(planner->goal && newgoal) {  //reduce timestep depending on the delta from the prior goal
-      Real d=newgoal->Delta(planner->goal);
+      Real d=planner->goal->Delta(newgoal);
       assert(d >= 0);
       //TODO: figure the correlation between task changes and likelihood of
       //success with a shorter planning period
@@ -341,8 +351,10 @@ struct RealTimePlannerData
   Config startConfig;         //(in) the start config
   SmartPointer<PlannerObjectiveBase> objective;   //(in) the planning objective, can be NULL
   bool active;             //(in) set this to false to quit
+  bool pause;              //(in) set this to true to pause the planner
   Real globalTime;         //(in) time measured in calling thread
   Real startPlanTime;       //(out) time of planning
+  bool planning;           //(out) currently planning
 
   bool pathRefresh;         //(in/out) whether to refresh the path
   Real tcut;                //(out) the path cut time, relative to startPlanTime
@@ -373,6 +385,7 @@ bool RealTimePlannerDataSender::Send(Real tplanstart,Real tcut,const ParabolicRa
     data->tcut = tcut;
     data->path = path;
   }  
+  int iters=0;
   while(true) {
     ThreadSleep(0.001);
     {
@@ -382,6 +395,10 @@ bool RealTimePlannerDataSender::Send(Real tplanstart,Real tcut,const ParabolicRa
 	return res; //unlocks mutex
       }
     }//unlocks mutex
+    iters ++ ;
+    if(iters % 1000 == 0) {
+      fprintf(stderr,"Data sender is waiting for a long time... Did you forget to call RealTimePlanningThread.SendUpdate()?\n");
+    }
   }
 }  
 
@@ -391,9 +408,10 @@ void* planner_thread_func(void * ptr)
   //read initial configuration
   {
     ScopedLock(data->mutex);
-    assert(data->resetStartConfig == true);
-    data->planner->SetConstantPath(data->startConfig);
-    data->resetStartConfig = false;
+    if(data->resetStartConfig) {
+      data->planner->SetConstantPath(data->startConfig);
+      data->resetStartConfig = false;
+    }
   }
   //FOR SOME REASON, LOGGING FAILS UNLESS DONE HERE
   //data->planner->LogBegin();
@@ -404,12 +422,20 @@ void* planner_thread_func(void * ptr)
     Real startTime;
     {
       ScopedLock(data->mutex);
-      
+
+      //update general status
+      data->planning = false;
+
       //parse the data
       if(!data->active) {
 	printf("Planner_thread_func: quitting\n");
 	//quit
 	return NULL;  //unlocks the mutex
+      }
+      if(!data->planner) {
+	//no planner set
+	ThreadSleep(0.1);
+	continue;
       }
       assert(data->pathRefresh == false);
       if(data->resetStartConfig == true) {
@@ -418,12 +444,17 @@ void* planner_thread_func(void * ptr)
 	data->resetStartConfig = false;
       }
       if(data->objective) {
-	start=true;
-	startTime = data->startPlanTime = data->globalTime;
+	if(!data->pause) {  //don't start if pause is true
+	  start=true;
+	  startTime = data->startPlanTime = data->globalTime;
+	  data->planning=true;
+	}
       }
       if(data->objective != data->planner->Objective()) {
+	printf("Planning thread: changing objective\n");
 	if(data->objective) {
-	  data->planner->Reset(data->objective);      }
+	  data->planner->Reset(data->objective);
+	}
 	else {
 	  data->planner->Reset(NULL);
 	}
@@ -436,10 +467,13 @@ void* planner_thread_func(void * ptr)
       Real splitTime, planTime;
       bool res = data->planner->PlanUpdate(startTime, splitTime, planTime);
       
-      printf("Planning thread: result %d\n",(int)res);    
+      printf("Planning thread: plan result %d\n",(int)res);    
       ThreadYield();
     }
-    else ThreadSleep(0.001);
+    else {
+      //printf("Planning thread waiting for an objective...\n");
+      ThreadSleep(0.01);
+    }
   }
   return NULL;
 }
@@ -449,8 +483,10 @@ RealTimePlanningThread::RealTimePlanningThread()
   internal = new RealTimePlannerData;
   RealTimePlannerData* data = reinterpret_cast<RealTimePlannerData*>(internal);
   data->active = false;
+  data->pause = false;
   data->resetStartConfig = false;
   data->planner = NULL;
+  data->planning = false;
   data->pathRefresh = false;
 }
 
@@ -465,9 +501,30 @@ void RealTimePlanningThread::SetStartConfig(const Config& qstart)
   RealTimePlannerData* data = reinterpret_cast<RealTimePlannerData*>(internal);
   if(!this->planner)
     SetPlanner(new RealTimePlanner);
+  else {
+    StopPlanning();
+    //poll to wait for planning to stop
+    int iters=0;
+    while(IsPlanning()) {
+      ThreadSleep(0.01);
+      iters++;
+      if(iters % 100 == 0)
+	printf("SetStartConfig... Waiting for planner to stop...\n");
+    }
+  }
   ScopedLock lock(data->mutex);
   data->startConfig = qstart;
   data->resetStartConfig = true;
+
+  if(this->planner->currentPath.xMin.empty() && this->planner->planner) {
+    //initialize dynamic bounds
+    this->planner->currentPath.xMin = this->planner->planner->qMin;
+    this->planner->currentPath.xMax = this->planner->planner->qMax;
+    this->planner->currentPath.velMax = this->planner->planner->velMax;
+    this->planner->currentPath.accMax = this->planner->planner->accMax;
+  }
+
+  ResumePlanning();
 }
 
 void RealTimePlanningThread::SetCSpace(SingleRobotCSpace* space)
@@ -475,22 +532,41 @@ void RealTimePlanningThread::SetCSpace(SingleRobotCSpace* space)
   RealTimePlannerData* data = reinterpret_cast<RealTimePlannerData*>(internal);
   if(!this->planner)
     SetPlanner(new RealTimePlanner);
+  else {
+    StopPlanning();
+    int iters=0;
+    while(IsPlanning()) {
+      ThreadSleep(0.01);
+      iters++;
+      if(iters % 100 == 0)
+	printf("SetCSpace... Waiting for planner to stop...\n");
+    }
+  }
   ScopedLock lock(data->mutex);
   this->planner->SetSpace(space);
+  if(this->planner->planner && this->planner->currentPath.xMin.empty()) {
+    //initialize dynamic bounds
+    this->planner->currentPath.xMin = this->planner->planner->qMin;
+    this->planner->currentPath.xMax = this->planner->planner->qMax;
+    this->planner->currentPath.velMax = this->planner->planner->velMax;
+    this->planner->currentPath.accMax = this->planner->planner->accMax;
+  }
+
+  ResumePlanning();
 }
 
 void RealTimePlanningThread::ResetCurrentPath(Real tglobal,const ParabolicRamp::DynamicPath& path)
 {
-  FatalError("Cannot do ResetCurrentPath yet");
+  FatalError("ResetCurrentPath not implemented yet");
 }
 
-void RealTimePlanningThread::SetObjective(SmartPointer<PlannerObjectiveBase> newgoal)
+void RealTimePlanningThread::SetObjective(const SmartPointer<PlannerObjectiveBase>& newgoal)
 {
   RealTimePlannerData* data = reinterpret_cast<RealTimePlannerData*>(internal);
   //set the objective function
   ScopedLock lock(data->mutex);
   data->objective = newgoal;
-}
+ }
 
 SmartPointer<PlannerObjectiveBase> RealTimePlanningThread::GetObjective() const
 {
@@ -498,19 +574,38 @@ SmartPointer<PlannerObjectiveBase> RealTimePlanningThread::GetObjective() const
   return data->objective;
 }
 
-void RealTimePlanningThread::SetPlanner(SmartPointer<DynamicMotionPlannerBase> planner)
+void RealTimePlanningThread::SetPlanner(const SmartPointer<DynamicMotionPlannerBase>& planner)
 {
   RealTimePlannerData* data = reinterpret_cast<RealTimePlannerData*>(internal);
   if(!this->planner) SetPlanner(new RealTimePlanner);
+  else {
+    StopPlanning();
+    int iters=0;
+    while(IsPlanning()) {
+      ThreadSleep(0.01);
+      iters++;
+      if(iters % 100 == 0)
+	printf("SetCSpace... Waiting for planner to stop...\n");
+    }
+  }
   ScopedLock lock(data->mutex);
   this->planner->planner = planner;
+  if(this->planner->currentPath.xMin.empty()) {
+    //initialize dynamic bounds
+    this->planner->currentPath.xMin = this->planner->planner->qMin;
+    this->planner->currentPath.xMax = this->planner->planner->qMax;
+    this->planner->currentPath.velMax = this->planner->planner->velMax;
+    this->planner->currentPath.accMax = this->planner->planner->accMax;
+  }
 
+  ResumePlanning();
 }
-void RealTimePlanningThread::SetPlanner(SmartPointer<RealTimePlanner> planner)
+void RealTimePlanningThread::SetPlanner(const SmartPointer<RealTimePlanner>& planner)
 {
   RealTimePlannerData* data = reinterpret_cast<RealTimePlannerData*>(internal);
   this->planner = planner;
-  planner->sendPathCallback = new RealTimePlannerDataSender(data);
+  if(planner)
+    this->planner->sendPathCallback = new RealTimePlannerDataSender(data);
   ScopedLock lock(data->mutex);
   data->planner = this->planner;
 }
@@ -520,6 +615,7 @@ bool RealTimePlanningThread::Start()
   RealTimePlannerData* data = reinterpret_cast<RealTimePlannerData*>(internal);
   if(data->active) return true;
   data->active = true;
+  data->pause = false;
   data->globalTime = 0;
   data->pathRefresh = false;
   printf("Creating planning thread\n");
@@ -527,15 +623,47 @@ bool RealTimePlanningThread::Start()
   return true;
 }
 
+bool RealTimePlanningThread::IsPlanning()
+{
+  RealTimePlannerData* data = reinterpret_cast<RealTimePlannerData*>(internal);
+  //do we need to lock the mutex?  probably not.
+  if(!data->planner) return false;
+  if(!data->planner->planner) return false;
+  return data->planning;
+}
+
+void RealTimePlanningThread::PausePlanning()
+{
+  RealTimePlannerData* data = reinterpret_cast<RealTimePlannerData*>(internal);
+  data->pause = true;
+}
+
 void RealTimePlanningThread::BreakPlanning()
 {
-  planner->StopPlanning();
+  RealTimePlannerData* data = reinterpret_cast<RealTimePlannerData*>(internal);
+  if(data->planner)
+    planner->StopPlanning();
+}
+
+void RealTimePlanningThread::StopPlanning()
+{
+  RealTimePlannerData* data = reinterpret_cast<RealTimePlannerData*>(internal);
+  if(data->planner)
+    planner->StopPlanning();
+  data->pause = true;
+}
+
+void RealTimePlanningThread::ResumePlanning()
+{
+  RealTimePlannerData* data = reinterpret_cast<RealTimePlannerData*>(internal);
+  data->pause = false;
 }
 
 void RealTimePlanningThread::Stop()
 {
   printf("Stopping planning thread\n");
   RealTimePlannerData* data = reinterpret_cast<RealTimePlannerData*>(internal);
+  if(data->planner)
   {
     ScopedLock lock(data->mutex);
     planner->StopPlanning();
@@ -561,6 +689,7 @@ bool RealTimePlanningThread::SendUpdate(MotionQueueInterface* robotInterface)
 
   //if so, mark that it's refreshed and send the path
   ScopedLock lock(data->mutex);
+  printf("Exec thread: SendUpdate: Refreshing path...\n");
   data->pathRefresh = false;
   MotionQueueInterface::MotionResult res = robotInterface->SendPathImmediate(data->startPlanTime+data->tcut,data->path);
   Real t=robotInterface->GetCurTime();
@@ -638,7 +767,7 @@ void DynamicMotionPlannerBase::Init(CSpace* _space,Robot* _robot,WorldPlannerSet
   SetDefaultLimits();
 }
 
-void DynamicMotionPlannerBase::SetGoal(SmartPointer<PlannerObjectiveBase> newgoal)
+void DynamicMotionPlannerBase::SetGoal(const SmartPointer<PlannerObjectiveBase>& newgoal)
 {
   goal = newgoal;
 }
@@ -843,7 +972,7 @@ bool DynamicMotionPlannerBase::GetMilestoneRamp(const Config& q0,const Vector& d
   x[1] = q1;
   dx[0] = dq0;
   dx[1].resize(q1.n,0.0);
-  ramp.SetMilestones(x,dx);
+  return ramp.SetMilestones(x,dx);
   return true;
 }
 
@@ -865,11 +994,11 @@ bool DynamicMotionPlannerBase::CheckMilestoneRamp(const ParabolicRamp::DynamicPa
     ramp.ramps[r].Bounds(bmin,bmax);
     for(size_t i=0;i<bmin.size();i++) {
       if(bmin[i] < robot->qMin(i)) {
-	printf("CheckMilestoneRamp: Bound on link %d failed check: %g < %g\n",i,bmin[i],robot->qMin(i));
+	printf("CheckMilestoneRamp: Bound on link %d failed check: %g < %g\n",(int)i,bmin[i],robot->qMin(i));
 	return false;
       }
       if(bmax[i] > robot->qMax(i)) {
-	printf("CheckMilestoneRamp: Bound on link %d failed check: %g > %g\n",i,bmax[i],robot->qMax(i));
+	printf("CheckMilestoneRamp: Bound on link %d failed check: %g > %g\n",(int)i,bmax[i],robot->qMax(i));
 	return false;
       }
     }
@@ -928,6 +1057,7 @@ int DynamicIKPlanner::PlanFrom(ParabolicRamp::DynamicPath& path,Real cutoff)
     if(cost < Cstart) {
       ParabolicRamp::DynamicPath ramp;
       if(CheckMilestoneRamp(path,q,ramp)) {
+	printf("IK planner: success\n");
 	path = ramp;
 	return Success;
       }
@@ -1437,7 +1567,7 @@ int DynamicRRTPlanner::PlanFrom(ParabolicRamp::DynamicPath& path,Real cutoff)
       Assert(e->IsValid());
     }
     for(size_t i=0;i<path.ramps.size();i++) {
-      if(path.ramps[i].ramps.empty()) fprintf(flog,"Empty ramp %d / %d.\n",i,rampPath.edges.size());
+      if(path.ramps[i].ramps.empty()) fprintf(flog,"Empty ramp %d / %d.\n",(int)i,(int)rampPath.edges.size());
       Assert(path.ramps[i].IsValid());
       Assert(path.ramps[i].x0.size() == path.ramps[i].ramps.size());
       if(i > 0) {

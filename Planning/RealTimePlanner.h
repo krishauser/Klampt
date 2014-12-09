@@ -24,7 +24,7 @@ class DynamicMotionPlannerBase
   DynamicMotionPlannerBase();
   virtual ~DynamicMotionPlannerBase();
   virtual void Init(CSpace* space,Robot* robot,WorldPlannerSettings* settings);
-  virtual void SetGoal(SmartPointer<PlannerObjectiveBase> newgoal);
+  virtual void SetGoal(const SmartPointer<PlannerObjectiveBase>& newgoal);
   virtual void SetTime(Real tstart);
   virtual void SetDefaultLimits();
   virtual void SetLimits(Real qScale=1.0,Real vScale=1.0,Real aScale=1.0);
@@ -200,7 +200,7 @@ public:
   virtual void Reset(SmartPointer<PlannerObjectiveBase> newgoal);
 
   /// Gets the objective function
-  SmartPointer<PlannerObjectiveBase> Objective() const { return planner->goal; }
+  SmartPointer<PlannerObjectiveBase> Objective() const;
 
   /** Calls the planner, returns the splitting time and planning time.
    * tglobal is a global clock synchronized between the planning and
@@ -211,7 +211,10 @@ public:
   virtual bool PlanUpdate(Real tglobal,Real& splitTime,Real& planTime);
 
   /// Tells the planner to stop, when called from an external thread.
-  bool StopPlanning() { return planner->StopPlanning(); }
+  bool StopPlanning() { 
+    if(!planner) return true;
+    return planner->StopPlanning(); 
+  }
 
   /// Called whenever the sendPathCallback returned false on a planned path
   /// (e.g., the padding was too short)
@@ -285,10 +288,10 @@ class RealTimePlanningThread
   /// Initializes the planning thread with a CSpace
   void SetCSpace(SingleRobotCSpace* space);
   /// Sets the planner
-  void SetPlanner(SmartPointer<DynamicMotionPlannerBase> planner);
-  void SetPlanner(SmartPointer<RealTimePlanner> planner);
+  void SetPlanner(const SmartPointer<DynamicMotionPlannerBase>& planner);
+  void SetPlanner(const SmartPointer<RealTimePlanner>& planner);
   /// Set the objective function.
-  void SetObjective(SmartPointer<PlannerObjectiveBase> newgoal);
+  void SetObjective(const SmartPointer<PlannerObjectiveBase>& newgoal);
   /// Gets the objective function
   SmartPointer<PlannerObjectiveBase> GetObjective() const;
   ///If the robot's path has changed for a reason outside of the planner's
@@ -297,10 +300,18 @@ class RealTimePlanningThread
   /// Starts planning. Returns false if there was some problem, e.g., the
   /// Initial config was not set.
   bool Start();
-  /// Breaks an internal planning cycle on the existing objective
-  void BreakPlanning();
   /// Stops the planning thread. 
   void Stop();
+  /// Returns true if a planning cycle is happening
+  bool IsPlanning();
+  /// Pauses planning after the current planning cycle
+  void PausePlanning();
+  /// Breaks an internal planning cycle on the existing objective
+  void BreakPlanning();
+  /// Stops planning.  Equivalent to break and pause
+  void StopPlanning();
+  /// Resumes planning after a pause or stop
+  void ResumePlanning();
   /// Returns true if a trajectory update is available
   bool HasUpdate();
   /// Send the trajectory update, if one exists

@@ -145,9 +145,10 @@ class CompositeObjective : public PlannerObjectiveBase
 {
  public:
   CompositeObjective();
+  ~CompositeObjective();
 
   ///Adds a new component.  Note: this takes ownership of the pointer.
-  void Add(PlannerObjectiveBase* obj,Real weight=1.0);
+  void Add(const SmartPointer<PlannerObjectiveBase>& obj,Real weight=1.0);
 
   virtual const char* TypeString() { return "composite"; }
   virtual string Description();

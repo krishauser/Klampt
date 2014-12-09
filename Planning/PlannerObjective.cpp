@@ -222,10 +222,13 @@ IKObjective::IKObjective(Robot* _robot)
 
 Real IKObjective::TerminalCost(Real tend,const Vector& qend,const Vector& dqend)
 {
+  Assert(ikGoal.link >= 0 && ikGoal.link < robot->q.n);
+  Assert(ikGoal.link >= 0 && ikGoal.link < (int)robot->links.size());
+  Assert(qend.n == robot->q.n);
   robot->UpdateConfig(qend);
-  Real poserr,orierr;
-  EvalIKError(ikGoal,robot->links[ikGoal.link].T_World,&poserr,&orierr);
-  return posCoeff*poserr + oriCoeff*orierr;
+  Vector3 poserr,orierr;
+  EvalIKError(ikGoal,robot->links[ikGoal.link].T_World,&poserr.x,&orierr.x);
+  return posCoeff*poserr.norm() + oriCoeff*orierr.norm();
 }
 
 Real IKObjective::Delta(PlannerObjectiveBase* priorGoal)
@@ -241,7 +244,12 @@ CompositeObjective::CompositeObjective()
 : norm(1.0)
 {}
 
-void CompositeObjective::Add(PlannerObjectiveBase* obj,Real weight)
+CompositeObjective::~CompositeObjective()
+{
+  printf("CompositeObjective destructor\n");
+}
+
+void CompositeObjective::Add(const SmartPointer<PlannerObjectiveBase>& obj,Real weight)
 {
   components.push_back(obj);
   if(!weights.empty())
