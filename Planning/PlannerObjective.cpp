@@ -246,7 +246,6 @@ CompositeObjective::CompositeObjective()
 
 CompositeObjective::~CompositeObjective()
 {
-  printf("CompositeObjective destructor\n");
 }
 
 void CompositeObjective::Add(const SmartPointer<PlannerObjectiveBase>& obj,Real weight)

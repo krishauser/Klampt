@@ -290,10 +290,10 @@ class RealTimePlanningThread
   /// Sets the planner
   void SetPlanner(const SmartPointer<DynamicMotionPlannerBase>& planner);
   void SetPlanner(const SmartPointer<RealTimePlanner>& planner);
-  /// Set the objective function.
-  void SetObjective(const SmartPointer<PlannerObjectiveBase>& newgoal);
-  /// Gets the objective function
-  SmartPointer<PlannerObjectiveBase> GetObjective() const;
+  /// Set the objective function.  Takes ownership over the pointer
+  void SetObjective(PlannerObjectiveBase* newgoal);
+  /// Gets the objective function.  You must not delete the pointer
+  PlannerObjectiveBase* GetObjective() const;
   ///If the robot's path has changed for a reason outside of the planner's
   ///control, call this
   void ResetCurrentPath(Real tglobal,const ParabolicRamp::DynamicPath& path);

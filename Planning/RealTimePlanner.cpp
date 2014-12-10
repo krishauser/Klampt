@@ -132,7 +132,7 @@ void RealTimePlanner::Reset(SmartPointer<PlannerObjectiveBase> newgoal)
       currentSplitTime = 0.1;
     }
   }
-  planner->SetGoal(newgoal);
+  planner->goal = newgoal;
 }
 
 //default implementation: fix the split time, call PlanFrom
@@ -167,6 +167,8 @@ bool RealTimePlanner::PlanUpdate(Real tglobal,Real& splitTime,Real& planTime)
   splitTime = currentSplitTime;
   ParabolicRamp::DynamicPath after;
   currentPath.Split(splitTime,before,after);
+  Assert(before.IsValid());
+  Assert(after.IsValid());
   assert(FuzzyEquals(before.GetTotalTime(),splitTime));
   //printf("Split took time %g\n",timer.ElapsedTime());
   fprintf(planner->flog,"***** Planning for time %gs (split %g, padding %g, ext %g)*********\n",(currentSplitTime-currentPadding-currentExternalPadding)*cognitiveMultiplier,currentSplitTime,currentPadding,currentExternalPadding);
@@ -349,7 +351,8 @@ struct RealTimePlannerData
   RealTimePlanner* planner;
   bool resetStartConfig;      //(in) true if the start configuration should be reset
   Config startConfig;         //(in) the start config
-  SmartPointer<PlannerObjectiveBase> objective;   //(in) the planning objective, can be NULL
+  PlannerObjectiveBase* objective;   //(in) the planning objective, can be NULL
+  bool objectiveOwned;     //whether the objective is owned by the planner
   bool active;             //(in) set this to false to quit
   bool pause;              //(in) set this to true to pause the planner
   Real globalTime;         //(in) time measured in calling thread
@@ -432,7 +435,7 @@ void* planner_thread_func(void * ptr)
 	//quit
 	return NULL;  //unlocks the mutex
       }
-      if(!data->planner) {
+      if(!data->planner || !data->planner->planner) {
 	//no planner set
 	ThreadSleep(0.1);
 	continue;
@@ -450,10 +453,12 @@ void* planner_thread_func(void * ptr)
 	  data->planning=true;
 	}
       }
-      if(data->objective != data->planner->Objective()) {
+      if(data->objective != (PlannerObjectiveBase*)data->planner->planner->goal) {
 	printf("Planning thread: changing objective\n");
 	if(data->objective) {
+	  //planner takes ownership
 	  data->planner->Reset(data->objective);
+	  data->objectiveOwned = true;
 	}
 	else {
 	  data->planner->Reset(NULL);
@@ -482,6 +487,7 @@ RealTimePlanningThread::RealTimePlanningThread()
 {
   internal = new RealTimePlannerData;
   RealTimePlannerData* data = reinterpret_cast<RealTimePlannerData*>(internal);
+  data->objectiveOwned = false;
   data->active = false;
   data->pause = false;
   data->resetStartConfig = false;
@@ -493,6 +499,10 @@ RealTimePlanningThread::RealTimePlanningThread()
 RealTimePlanningThread::~RealTimePlanningThread()
 {
   RealTimePlannerData* data = reinterpret_cast<RealTimePlannerData*>(internal);
+  if(data->active)
+    Stop();
+  if(!data->objectiveOwned && data->objective)
+    delete data->objective;
   delete data;
 }
 
@@ -560,15 +570,16 @@ void RealTimePlanningThread::ResetCurrentPath(Real tglobal,const ParabolicRamp::
   FatalError("ResetCurrentPath not implemented yet");
 }
 
-void RealTimePlanningThread::SetObjective(const SmartPointer<PlannerObjectiveBase>& newgoal)
+void RealTimePlanningThread::SetObjective(PlannerObjectiveBase* newgoal)
 {
   RealTimePlannerData* data = reinterpret_cast<RealTimePlannerData*>(internal);
   //set the objective function
   ScopedLock lock(data->mutex);
+  data->objectiveOwned = true;
   data->objective = newgoal;
  }
 
-SmartPointer<PlannerObjectiveBase> RealTimePlanningThread::GetObjective() const
+PlannerObjectiveBase* RealTimePlanningThread::GetObjective() const
 {
   RealTimePlannerData* data = reinterpret_cast<RealTimePlannerData*>(internal);
   return data->objective;
@@ -695,13 +706,13 @@ bool RealTimePlanningThread::SendUpdate(MotionQueueInterface* robotInterface)
   Real t=robotInterface->GetCurTime();
   if(res == MotionQueueInterface::Success) {
     data->pathRefreshSuccess = true;
-    printf("Exec thread: Planner successful, split %g, delay %g\n",data->tcut,t - data->startPlanTime);
+    printf("Exec thread: Plan+send successful, split %g, delay %g\n",data->tcut,t - data->startPlanTime);
     data->globalTime = robotInterface->GetCurTime();
     return true;
   }
   else {
     data->pathRefreshSuccess = false;
-    printf("Exec thread: Planner overrun, split %g, delay %g\n",data->tcut,t - data->startPlanTime);
+    printf("Exec thread: Plan+send overrun, split %g, delay %g\n",data->tcut,t - data->startPlanTime);
     data->globalTime = robotInterface->GetCurTime();
     return false;
   }
@@ -1018,6 +1029,7 @@ bool DynamicMotionPlannerBase::CheckMilestoneRamp(const ParabolicRamp::DynamicPa
 //returns the cost of going from the start to  q (assuming no collision detection)
 Real DynamicMotionPlannerBase::EvaluateDirectPathCost(const ParabolicRamp::DynamicPath& currentPath,const Config& q) 
 {
+  if(!goal) return 0;
   ParabolicRamp::DynamicPath ramp;
   if(!GetMilestoneRamp(currentPath,q,ramp)) return Inf;
   return goal->PathCost(ramp,tstart);
@@ -1026,6 +1038,7 @@ Real DynamicMotionPlannerBase::EvaluateDirectPathCost(const ParabolicRamp::Dynam
 //returns the cost of using the given path
 Real DynamicMotionPlannerBase::EvaluatePathCost(const ParabolicRamp::DynamicPath& path,Real pathtstart)
 {
+  if(!goal) return 0;
   if(pathtstart < 0) pathtstart= tstart;
   return goal->PathCost(path,pathtstart);
 }
@@ -1033,6 +1046,7 @@ Real DynamicMotionPlannerBase::EvaluatePathCost(const ParabolicRamp::DynamicPath
 //returns the cost of using the given path
 Real DynamicMotionPlannerBase::EvaluateTerminalCost(const Config& q,Real tEnd)
 {
+  if(!goal) return 0;
   Config zero(q.n,0.0);
   return goal->TerminalCost(tEnd,q,zero);
 }
