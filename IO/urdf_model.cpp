@@ -38,7 +38,8 @@
 #include <vector>
 #include "urdf_parser.h"
 
-const bool debug = true;
+//const bool debug = true;
+const bool debug = false;
 
 namespace urdf{
 
