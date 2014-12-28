@@ -211,16 +211,33 @@ void ViewRobot::DrawLinkCenterOfMass(int i,Real radius)
   sph.Draw();
 }
 
-void ViewRobot::DrawLinkFrames()
+void ViewRobot::DrawLinkFrames(Real size)
 {
   if(!robot) return;
   glDisable(GL_LIGHTING);
   for(int i=0;i<robot->links.size();i++) {
     glPushMatrix();
     glMultMatrix((Matrix4)robot->links[i].T_World);
-    drawCoords(0.1);
+    drawCoords(size);
     glPopMatrix();
   }
+}
+
+void ViewRobot::DrawLinkSkeleton()
+{
+  if(!robot) return;
+  glDisable(GL_LIGHTING);
+  glColor3f(1,0.5,0);
+  glLineWidth(3.0);
+  glBegin(GL_LINES);
+  for(int i=0;i<robot->links.size();i++) {
+    if(robot->parents[i] >= 0) {
+      glVertex3v(robot->links[robot->parents[i]].T_World.t);
+      glVertex3v(robot->links[i].T_World.t);
+    }
+  }
+  glEnd();
+  glLineWidth(1.0);
 }
 
 void ViewRobot::DrawTorques(const Vector& T)

@@ -88,8 +88,9 @@ void RobotLinkPoseWidget::DrawGL(Camera::Viewport& viewport)
 
     if(hoverLink >= 0 && (hasHighlight || hasFocus)) {
       //draw joint position widget
+      //push depth upward so the widget shows through
       glPushAttrib(GL_DEPTH_BUFFER_BIT | GL_ENABLE_BIT);
-      glDisable(GL_DEPTH_TEST);
+      glDepthRange (0.0, 0.9);
       glDisable(GL_CULL_FACE);
       for(size_t i=0;i<robot->drivers.size();i++)
 	if(robot->DoesDriverAffect(i,hoverLink)) {
@@ -169,6 +170,7 @@ void RobotLinkPoseWidget::DrawGL(Camera::Viewport& viewport)
 	    }
 	  }
 	}
+      glDepthRange (0.0, 1.0);
       glPopAttrib();
     }
   }

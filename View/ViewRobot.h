@@ -20,7 +20,8 @@ struct ViewRobot
   void DrawLink_World(int i,bool keepAppearance=true);  //draws the geometry in the world frame
   void DrawCenterOfMass(Real radius = 0.05);
   void DrawLinkCenterOfMass(int i,Real radius = 0.05);
-  void DrawLinkFrames();
+  void DrawLinkFrames(Real size = 0.1);
+  void DrawLinkSkeleton();
   void DrawTorques(const Vector& t);
   void SetColors(const GLColor& c);
   void SetColor(int i,const GLColor& c);
