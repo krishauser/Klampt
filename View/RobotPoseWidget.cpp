@@ -1,4 +1,5 @@
 #include "RobotPoseWidget.h"
+#include <math3d/basis.h>
 #include <GLdraw/drawextra.h>
 #include <robotics/IKFunctions.h>
 
@@ -84,6 +85,92 @@ void RobotLinkPoseWidget::DrawGL(Camera::Viewport& viewport)
       viewRobot->linkAppearance[hoverLink].faceColor = oldColor;
     if(!poserAppearance.empty()) 
       swap(poserAppearance,viewRobot->linkAppearance);
+
+    if(hoverLink >= 0 && (hasHighlight || hasFocus)) {
+      //draw joint position widget
+      glPushAttrib(GL_DEPTH_BUFFER_BIT | GL_ENABLE_BIT);
+      glDisable(GL_DEPTH_TEST);
+      glDisable(GL_CULL_FACE);
+      for(size_t i=0;i<robot->drivers.size();i++)
+	if(robot->DoesDriverAffect(i,hoverLink)) {
+	  if(robot->drivers[i].type == RobotJointDriver::Normal) {
+	    Vector3 center = robot->links[hoverLink].T_World.t;
+	    Vector3 worldAxis = robot->links[hoverLink].T_World.R*robot->links[hoverLink].w;
+	    Vector3 x,y;
+	    GetCanonicalBasis(worldAxis,x,y);
+	    Real q1 = robot->qMin(hoverLink);
+	    Real q2 = robot->qMax(hoverLink);
+	    if(!IsInf(q1) && !IsInf(q2) && q1 != q2) {
+	      if(robot->links[hoverLink].type == RobotLink3D::Revolute) {
+		//rotational joint, draw a strip arc
+		Real r1 = 0.1;
+		Real r2 = 0.12;
+		Real zscale = 0.0;
+		if (q2 > q1+Pi*3/2)
+		  zscale = 0.01;
+		Real dq = 0.1;
+		Real q = q1;
+		glBegin(GL_TRIANGLE_STRIP);
+		while(q < q2) {
+		  GLColor col(1,1-0.5*(q-q1)/(q2-q1),0);
+		  glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,col);
+		  Real c = Cos(q);
+		  Real s = Sin(q);
+		  Vector3 p1 = center+worldAxis*zscale*q + c*r1*x + s*r1*y;
+		  Vector3 p2 = center+worldAxis*zscale*q + c*r2*x + s*r2*y;
+		  glNormal3v(worldAxis);
+		  glVertex3v(p1);
+		  glVertex3v(p2);
+		  q += dq;
+		}
+		q = q2;
+		GLColor col(1,0.5,0);
+		Real c = Cos(q);
+		Real s = Sin(q);
+		glNormal3v(worldAxis);
+		Vector3 p1 = center+worldAxis*zscale*q + c*r1*x + s*r1*y;
+		Vector3 p2 = center+worldAxis*zscale*q + c*r2*x + s*r2*y;
+		glVertex3v(p1);
+		glVertex3v(p2);
+		glEnd();
+		Real rmid = (r1+r2)*0.5;
+		q = robot->q(hoverLink);
+		c = Cos(q);
+		s = Sin(q);
+		glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,col);
+		Vector3 pt = center+worldAxis*zscale*q + c*rmid*x + s*rmid*y;
+		glPushMatrix();
+		glTranslate(pt);
+		drawSphere(0.02,16,8);
+		glPopMatrix();
+	      }
+	      else {
+		//translational joint, draw a strip
+		glBegin(GL_TRIANGLE_STRIP);
+		Vector3 p1 = center+worldAxis*q1 - x*0.01;
+		Vector3 p2 = center+worldAxis*q1 + x*0.01;
+		GLColor col(1,1,0);
+		glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,col);
+		glVertex3v(p1);
+		glVertex3v(p2);
+		p1 = center+worldAxis*q2 - x*0.01;
+		p2 = center+worldAxis*q2 + x*0.01;
+		col.rgba[1] = 0.5;
+		glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,col);
+		glVertex3v(p1);
+		glVertex3v(p2);
+		glEnd();
+		p1 = center+worldAxis*robot->q(hoverLink);
+		glPushMatrix();
+		glTranslate(p1);
+		drawSphere(0.02,16,8);
+		glPopMatrix();
+	      }
+	    }
+	  }
+	}
+      glPopAttrib();
+    }
   }
 }
 
