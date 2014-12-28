@@ -263,6 +263,7 @@ void ResourceFrame::ItemExpanded(QTreeWidgetItem* sel)
   */
 }
 
+/*
 void ResourceFrame::DiscretizePath()
 {
     int value = QInputDialog::getInteger(this,"Discrete Segments","Enter the number of configurations to generate",10,1);
@@ -270,9 +271,8 @@ void ResourceFrame::DiscretizePath()
         gui->SendCommand("discretize_path",value);
     }
 }
+*/
 
-void ResourceFrame::OptimizePath(){
-}
 
 void ResourceFrame::SaveResource()
 {
@@ -317,8 +317,7 @@ void ResourceFrame::SaveAllResources()
 		QCoreApplication::applicationName());
   QFileDialog f;
   QString openDir = ini.value("save_resource_folder",".").toString();
-  QString filter;
-  QString filename = f.getSaveFileName(0,"Save Library To...",openDir,filter);
+  QString filename = f.getExistingDirectory(this,"Save Library To...",openDir,QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
   if(!filename.isEmpty()){
     //save to registry
     ini.setValue("save_resource_folder",QFileInfo(filename).absolutePath());
@@ -378,3 +377,4 @@ void ResourceFrame::refreshResources()
 void ResourceFrame::SendPathTime(double t){
     gui->SendCommand("set_path_time",t);
 }
+
