@@ -32,6 +32,9 @@ void GetFlatContacts(RobotWithGeometry& robot,Real tol,ContactFormation& contact
     case AnyGeometry3D::ImplicitSurface:
       FatalError("Can't get flat contacts for implicit surfaces");
       break;
+    case AnyGeometry3D::Group:
+      FatalError("Can't get flat contacts for geometry group");
+      break;
     case AnyGeometry3D::TriangleMesh:
       {
 	const TriMesh* m=AnyCast<TriMesh>(&robot.geometry[k].data);
@@ -127,6 +130,9 @@ void GetFlatContacts(RobotWithGeometry& robot,int link,Real tol,vector<ContactPo
     break;
   case AnyGeometry3D::ImplicitSurface:
     FatalError("Can't get flat contacts for implicit surfaces");
+    break;
+  case AnyGeometry3D::Group:
+    FatalError("Can't get flat contacts for geometry group");
     break;
   case AnyGeometry3D::TriangleMesh:
     points = &AnyCast<TriMesh>(&robot.geometry[link].data)->verts;
