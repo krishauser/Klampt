@@ -67,19 +67,32 @@ Vector3 CenterOfMass(const Meshing::VolumeGrid& grid)
   return mean / sum;
 }
 
+
+Vector3 CenterOfMass(const vector<AnyGeometry3D>& group)
+{
+  Vector3 sum(0.0);
+  if(group.empty()) return sum;
+  for(size_t i=0;i<group.size();i++)
+    sum += CenterOfMass(group[i]);
+  return sum / group.size();
+}
+
+
 Vector3 CenterOfMass(const AnyGeometry3D& geom)
 {
   switch(geom.type) {
   case AnyGeometry3D::Primitive:
-    return CenterOfMass(*AnyCast<GeometricPrimitive3D>(&geom.data));
+    return CenterOfMass(geom.AsPrimitive());
   case AnyGeometry3D::TriangleMesh:
-    return CenterOfMass(*AnyCast<Meshing::TriMesh>(&geom.data));
+    return CenterOfMass(geom.AsTriangleMesh());
   case AnyGeometry3D::PointCloud:
-    return CenterOfMass(*AnyCast<Meshing::PointCloud3D>(&geom.data));
+    return CenterOfMass(geom.AsPointCloud());
   case AnyGeometry3D::ImplicitSurface:
-    return CenterOfMass(*AnyCast<Meshing::VolumeGrid>(&geom.data));
+    return CenterOfMass(geom.AsImplicitSurface());
+  case AnyGeometry3D::Group:
+    return CenterOfMass(geom.AsGroup());
   }
-  return Vector3();
+  return Vector3(0.0);
 }
 
 Matrix3 Covariance(const TriMesh& mesh,const Vector3& center)
@@ -145,17 +158,28 @@ Matrix3 Covariance(const GeometricPrimitive3D& geom,const Vector3& center)
   return Matrix3();
 }
 
+Matrix3 Covariance(const vector<AnyGeometry3D>& group,const Vector3& center)
+{
+  Matrix3 res(0.0); 
+  for(size_t i=0;i<group.size();i++) 
+    res += Covariance(group[i],center);
+  return res;
+}
+
+
 Matrix3 Covariance(const AnyGeometry3D& geom,const Vector3& center)
 {
   switch(geom.type) {
   case AnyGeometry3D::Primitive:
-    return Covariance(*AnyCast<GeometricPrimitive3D>(&geom.data),center);
+    return Covariance(geom.AsPrimitive(),center);
   case AnyGeometry3D::TriangleMesh:
-    return Covariance(*AnyCast<Meshing::TriMesh>(&geom.data),center);
+    return Covariance(geom.AsTriangleMesh(),center);
   case AnyGeometry3D::PointCloud:
-    return Covariance(*AnyCast<Meshing::PointCloud3D>(&geom.data),center);
+    return Covariance(geom.AsPointCloud(),center);
   case AnyGeometry3D::ImplicitSurface:
-    return Covariance(*AnyCast<Meshing::VolumeGrid>(&geom.data),center);
+    return Covariance(geom.AsImplicitSurface(),center);
+  case AnyGeometry3D::Group:
+    return Covariance(geom.AsGroup(),center);
   }
   return Matrix3();
 }
@@ -197,17 +221,33 @@ Matrix3 Inertia(const VolumeGrid& mesh,const Vector3& center,Real mass)
 }
 
 
+Matrix3 Inertia(const vector<AnyGeometry3D>& group,const Vector3& center,Real mass)
+{
+  Matrix3 cov=Covariance(group,center);
+  Matrix3 H;
+  H.setNegative(cov);
+  H(0,0) = cov(1,1)+cov(2,2);
+  H(1,1) = cov(0,0)+cov(2,2);
+  H(2,2) = cov(0,0)+cov(1,1);
+  H *= mass;
+  return H;
+}
+
+
+
 Matrix3 Inertia(const AnyGeometry3D& geom,const Vector3& center,Real mass)
 {
   switch(geom.type) {
   case AnyGeometry3D::Primitive:
-    return Inertia(*AnyCast<GeometricPrimitive3D>(&geom.data),center,mass);
+    return Inertia(geom.AsPrimitive(),center,mass);
   case AnyGeometry3D::TriangleMesh:
-    return Inertia(*AnyCast<Meshing::TriMesh>(&geom.data),center,mass);
+    return Inertia(geom.AsTriangleMesh(),center,mass);
   case AnyGeometry3D::PointCloud:
-    return Inertia(*AnyCast<Meshing::PointCloud3D>(&geom.data),center,mass);
+    return Inertia(geom.AsPointCloud(),center,mass);
   case AnyGeometry3D::ImplicitSurface:
-    return Inertia(*AnyCast<Meshing::VolumeGrid>(&geom.data),center,mass);
+    return Inertia(geom.AsImplicitSurface(),center,mass);
+  case AnyGeometry3D::Group:
+    return Inertia(geom.AsGroup(),center,mass);
   }
   return Matrix3();
 }
