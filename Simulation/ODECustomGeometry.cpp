@@ -544,6 +544,133 @@ int PrimitiveMeshCollide(GeometricPrimitive3D& g1,const RigidTransform& T1,Real 
   return num;
 }
 
+int PrimitiveGeometryCollide(GeometricPrimitive3D& g1,const RigidTransform& T, Real outerMargin1,Geometry::AnyCollisionGeometry3D& g2,Real outerMargin2,dContactGeom* contact,int m)
+{
+  switch(g2.type) {
+  case AnyGeometry3D::Primitive:
+    fprintf(stderr,"TODO: primitive-primitive collisions\n");
+    break;
+  case AnyGeometry3D::TriangleMesh:
+    return PrimitiveMeshCollide(g1,T,outerMargin1,
+				g2.TriangleMeshCollisionData(),g2.margin+outerMargin2,contact,m);
+  case AnyGeometry3D::PointCloud:
+    fprintf(stderr,"TODO: primitive-point cloud collisions\n");
+    break;
+  case AnyGeometry3D::ImplicitSurface:
+    fprintf(stderr,"TODO: primitive-implicit surface collisions\n");
+    break;
+  case AnyGeometry3D::Group:
+    {
+      vector<Geometry::AnyCollisionGeometry3D>& items = g2.GroupCollisionData();
+      int n=0;
+      for(size_t i=0;i<items.size();i++) {
+	n += PrimitiveGeometryCollide(g1,T,outerMargin1,items[i],g2.margin+outerMargin2,contact+n,m-n);
+	if(n >= m) return n;
+      }
+      return n;
+    }
+    break;
+  }
+  return 0;
+}
+
+int MeshGeometryCollide(CollisionMesh& m1,Real outerMargin1,Geometry::AnyCollisionGeometry3D& g2,Real outerMargin2,dContactGeom* contact,int m)
+{
+  switch(g2.type) {
+  case AnyGeometry3D::Primitive:
+    return MeshPrimitiveCollide(m1,outerMargin1,
+				g2.AsPrimitive(),g2.PrimitiveCollisionData(),g2.margin+outerMargin2,
+				contact,m);
+  case AnyGeometry3D::TriangleMesh:
+    return MeshMeshCollide(m1,outerMargin1,
+			   g2.TriangleMeshCollisionData(),g2.margin+outerMargin2,
+			   contact,m);
+  case AnyGeometry3D::PointCloud:
+    return MeshPointCloudCollide(m1,outerMargin1,
+				 g2.PointCloudCollisionData(),g2.margin+outerMargin2,
+				 contact,m);
+    break;
+  case AnyGeometry3D::ImplicitSurface:
+    fprintf(stderr,"TODO: triangle mesh-implicit surface collisions\n");
+    break;
+  case AnyGeometry3D::Group:
+    {
+      vector<Geometry::AnyCollisionGeometry3D>& items = g2.GroupCollisionData();
+      int n=0;
+      for(size_t i=0;i<items.size();i++) {
+	n += MeshGeometryCollide(m1,outerMargin1,items[i],g2.margin+outerMargin2,contact+n,m-n);
+	if(n >= m) return n;
+      }
+      return n;
+    }
+    break;
+  }
+  return 0;
+}
+
+//m is max number of contacts
+int GeometryGeometryCollide(Geometry::AnyCollisionGeometry3D& g1,Real outerMargin1,
+			    Geometry::AnyCollisionGeometry3D& g2,Real outerMargin2,
+			    dContactGeom* contact,int m)
+{
+  switch(g1.type) {
+  case AnyGeometry3D::Primitive:
+    return PrimitiveGeometryCollide(g1.AsPrimitive(),g1.PrimitiveCollisionData(),g1.margin+outerMargin1,g2,outerMargin2,contact,m);
+  case AnyGeometry3D::TriangleMesh:
+    return MeshGeometryCollide(g1.TriangleMeshCollisionData(),g1.margin+outerMargin1,g2,outerMargin2,contact,m);
+  case AnyGeometry3D::PointCloud:
+    switch(g2.type) {
+    case AnyGeometry3D::Primitive:
+      fprintf(stderr,"TODO: point cloud-primitive collisions\n");
+      break;
+    case AnyGeometry3D::TriangleMesh:
+      return PointCloudMeshCollide(*AnyCast<CollisionPointCloud>(&g1.collisionData),g1.margin+outerMargin1,
+				   *AnyCast<CollisionMesh>(&g2.collisionData),g2.margin+outerMargin2,
+				   contact,m);
+      break;
+    case AnyGeometry3D::PointCloud:
+      fprintf(stderr,"TODO: point cloud-point cloud collisions\n");
+      break;
+    case AnyGeometry3D::ImplicitSurface:
+      fprintf(stderr,"TODO: point cloud-implicit surface collisions\n");
+      break;
+    case AnyGeometry3D::Group:
+      fprintf(stderr,"TODO: point cloud-group collisions\n");
+      break;
+    }
+    break;
+  case AnyGeometry3D::ImplicitSurface:
+    switch(g2.type) {
+    case AnyGeometry3D::Primitive:
+      fprintf(stderr,"TODO: implicit surface-primitive collisions\n");
+      break;
+    case AnyGeometry3D::TriangleMesh:
+      fprintf(stderr,"TODO: implicit surface-triangle mesh collisions\n");
+      break;
+    case AnyGeometry3D::PointCloud:
+      fprintf(stderr,"TODO: implicit surface-point cloud collisions\n");
+      break;
+    case AnyGeometry3D::ImplicitSurface:
+      fprintf(stderr,"TODO: implicit surface-implicit surface collisions\n");
+      break;
+    case AnyGeometry3D::Group:
+      fprintf(stderr,"TODO: implicit surface-group collisions\n");
+      break;
+    }
+    break;
+  case AnyGeometry3D::Group:
+    {
+      vector<Geometry::AnyCollisionGeometry3D>& items = g1.GroupCollisionData();
+      int n=0;
+      for(size_t i=0;i<items.size();i++) {
+	n += GeometryGeometryCollide(items[i],g1.margin+outerMargin1,g2,outerMargin2,contact+n,m-n);
+	if(n >= m) return n;
+      }
+      return n;
+    }
+    break;
+  }
+}
 
 int dCustomGeometryCollide (dGeomID o1, dGeomID o2, int flags,
 			   dContactGeom *contact, int skip)
@@ -564,83 +691,8 @@ int dCustomGeometryCollide (dGeomID o1, dGeomID o2, int flags,
   d1->geometry->SetTransform(T1);
   d2->geometry->SetTransform(T2);
 
-  int n=0;
-  switch(d1->geometry->type) {
-  case AnyGeometry3D::Primitive:
-    switch(d2->geometry->type) {
-    case AnyGeometry3D::Primitive:
-      fprintf(stderr,"TODO: primitive-primitive collisions\n");
-      break;
-    case AnyGeometry3D::TriangleMesh:
-      n = PrimitiveMeshCollide(d1->geometry->AsPrimitive(),d1->geometry->PrimitiveCollisionData(),d1->geometry->margin+d1->outerMargin,
-			  d2->geometry->TriangleMeshCollisionData(),d2->geometry->margin+d2->outerMargin,
-			  contact,m);
-      break;
-    case AnyGeometry3D::PointCloud:
-      fprintf(stderr,"TODO: primitive-point cloud collisions\n");
-      break;
-    case AnyGeometry3D::ImplicitSurface:
-      fprintf(stderr,"TODO: primitive-implicit surface collisions\n");
-      break;
-    }
-    break;
-  case AnyGeometry3D::TriangleMesh:
-    switch(d2->geometry->type) {
-    case AnyGeometry3D::Primitive:
-      n = MeshPrimitiveCollide(d1->geometry->TriangleMeshCollisionData(),d1->geometry->margin+d1->outerMargin,
-			  d2->geometry->AsPrimitive(),d2->geometry->PrimitiveCollisionData(),d2->geometry->margin+d2->outerMargin,
-			  contact,m);
-      break;
-    case AnyGeometry3D::TriangleMesh:
-      n = MeshMeshCollide(d1->geometry->TriangleMeshCollisionData(),d1->geometry->margin+d1->outerMargin,
-			  d2->geometry->TriangleMeshCollisionData(),d2->geometry->margin+d2->outerMargin,
-			  contact,m);
-      break;
-    case AnyGeometry3D::PointCloud:
-      n = MeshPointCloudCollide(d1->geometry->TriangleMeshCollisionData(),d1->geometry->margin+d1->outerMargin,
-				d2->geometry->PointCloudCollisionData(),d2->geometry->margin+d2->outerMargin,
-				contact,m);
-      break;
-    case AnyGeometry3D::ImplicitSurface:
-      fprintf(stderr,"TODO: triangle mesh-implicit surface collisions\n");
-      break;
-    }
-    break;
-  case AnyGeometry3D::PointCloud:
-    switch(d2->geometry->type) {
-    case AnyGeometry3D::Primitive:
-      fprintf(stderr,"TODO: point cloud-primitive collisions\n");
-      break;
-    case AnyGeometry3D::TriangleMesh:
-      n = PointCloudMeshCollide(*AnyCast<CollisionPointCloud>(&d1->geometry->collisionData),d1->geometry->margin+d1->outerMargin,
-				   *AnyCast<CollisionMesh>(&d2->geometry->collisionData),d2->geometry->margin+d2->outerMargin,
-				   contact,m);
-      break;
-    case AnyGeometry3D::PointCloud:
-      fprintf(stderr,"TODO: point cloud-point cloud collisions\n");
-      break;
-    case AnyGeometry3D::ImplicitSurface:
-      fprintf(stderr,"TODO: point cloud-implicit surface collisions\n");
-      break;
-    }
-    break;
-  case AnyGeometry3D::ImplicitSurface:
-    switch(d2->geometry->type) {
-    case AnyGeometry3D::Primitive:
-      fprintf(stderr,"TODO: implicit surface-primitive collisions\n");
-      break;
-    case AnyGeometry3D::TriangleMesh:
-      fprintf(stderr,"TODO: implicit surface-triangle mesh collisions\n");
-      break;
-    case AnyGeometry3D::PointCloud:
-      fprintf(stderr,"TODO: implicit surface-point cloud collisions\n");
-      break;
-    case AnyGeometry3D::ImplicitSurface:
-      fprintf(stderr,"TODO: implicit surface-implicit surface collisions\n");
-      break;
-    }
-    break;
-  }
+  int n=GeometryGeometryCollide(*d1->geometry,d1->outerMargin,*d2->geometry,d2->outerMargin,contact,m);
+
   for(int k=0;k<n;k++) {
     contact[k].g1 = o1;
     contact[k].g2 = o2;
