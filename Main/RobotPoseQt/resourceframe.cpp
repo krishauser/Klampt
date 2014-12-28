@@ -76,9 +76,8 @@ void ResourceFrame::OpenFile(QString filename){
   if(!filename.isNull()){
     ini.setValue("last_open_resource_directory",QFileInfo(filename).absolutePath());
     //gui->SendCommand("load_resource",filename.toStdString());
-    //todo send message
+    //todo send message to GUI
     ResourceNodePtr r = manager->LoadFile(filename.toStdString());
-    //resourceTreeModel->addNotify(r);
     ui->treeWidget->addNotify(r);
     manager->selected = r;
   }
@@ -294,16 +293,31 @@ void ResourceFrame::SaveResource()
     openDir = QString(n->resource->fileName.c_str());
   }
   else {
-    openDir = ini.value("save_resource_file",".").toString();
+    QString defaultfn = QString::fromStdString(manager->library.DefaultFileName(n->resource));
+    openDir = QDir(ini.value("save_resource_dir",".").toString()).filePath(defaultfn);
     changeSettings = true;
   }
-  //TODO: extension filter by resource type
+  //setup extension filter by resource type
   QString filter;
+  for(ResourceLibrary::Map::const_iterator i=manager->library.loaders.begin();i!=manager->library.loaders.end();i++) {
+    for(size_t k=0;k<i->second.size();k++) {
+      if(0==strcmp(n->resource->Type(),i->second[k]->Type())) {
+	if(!filter.isEmpty())
+	  filter += QString(" ");
+	filter += QString("*.")+QString::fromStdString(i->first);
+      }
+    }
+  }
+  if(!filter.isEmpty()) {
+    filter = QString(n->resource->Type())+QString(" files (")+filter+QString(")");
+    filter += QString(";;All files (*.*)");
+  }
+  //Do the file name
   QString filename = f.getSaveFileName(0,"Save To...",openDir,filter);
   if(!filename.isEmpty()){
     //save to registry
     if(changeSettings) 
-      ini.setValue("save_resource_file",QFileInfo(filename).absolutePath());
+      ini.setValue("save_resource_dir",f.directory().absolutePath());
 
     manager->Save(n,filename.toStdString());
     ui->treeWidget->updateDecorator(item);

@@ -58,16 +58,22 @@ void MainWindow::Initialize(int argc,const char** argv)
     ui->spn_driver_index->setMaximum(rob->drivers.size() - 1);
     ui->spn_link_index->setMaximum(rob->links.size() - 1);
 
-    refresh_timer=new QTimer();
-    connect(refresh_timer, SIGNAL(timeout()),ui->displaywidget,SLOT(updateGL()));
-    refresh_timer->start(1000/30);
+    //refresh_timer=new QTimer();
+    //connect(refresh_timer, SIGNAL(timeout()),ui->displaywidget,SLOT(updateGL()));
+    //refresh_timer->start(1000/30);
 
     ui->displaywidget->installEventFilter(this);
     ui->displaywidget->setFocusPolicy(Qt::WheelFocus);    
+
+    SetFree();
 }
 
 void MainWindow::SetGeometry(bool status){
   gui->SendButtonToggle("draw_geom",status);
+}
+
+void MainWindow::SetPoser(bool status){
+  gui->SendButtonToggle("draw_poser",status);
 }
 
 void MainWindow::SetBboxes(bool status){
@@ -83,9 +89,61 @@ void MainWindow::SetFrame(bool status){
   gui->SendButtonToggle("draw_frame",status);
 }
 
-void MainWindow::SetIK(bool status){
-  if(status) gui->SendCommand("constrain_point_mode");
-  else gui->SendCommand("pose_mode");
+void MainWindow::SetFree() {
+  gui->SendCommand("pose_mode");
+  ui->btn_free->setChecked(true);
+  ui->btn_ik->setChecked(false);
+  ui->lbl_ik->setVisible(false);
+  ui->line_ik->setVisible(false);
+  ui->btn_delete->setVisible(false);
+  ui->btn_constrain->setVisible(false);
+  ui->btn_constrain_point->setVisible(false);
+  ui->btn_constrain_point->setChecked(false);
+  ui->btn_constrain->setChecked(0);
+  ui->btn_delete->setChecked(0);
+  ui->displaywidget->setStatusTip("Pose Mode: Right-click to pose joints");
+}
+
+void MainWindow::SetIK(){
+  gui->SendCommand("constrain_point_mode");
+  ui->btn_free->setChecked(false);
+  ui->btn_ik->setChecked(true);
+  ui->lbl_ik->setVisible(true);
+  ui->line_ik->setVisible(true);
+  ui->btn_delete->setVisible(true);
+  ui->btn_constrain->setVisible(true);
+  ui->btn_constrain_point->setVisible(true);
+  ui->btn_constrain_point->setChecked(true);
+  ui->btn_constrain->setChecked(0);
+  ui->btn_delete->setChecked(0);
+  ui->displaywidget->setStatusTip("IK Mode: right drag to pose by IK, c=constrain, d=delete");
+}
+
+void MainWindow::IKConstrain(){
+  gui->SendCommand("constrain_link_mode");
+  blockSignals(true);
+  ui->btn_constrain_point->setChecked(0);
+  ui->btn_constrain->setChecked(1);
+  ui->btn_delete->setChecked(0);
+  blockSignals(false);
+}
+
+void MainWindow::IKConstrainPoint(){
+  gui->SendCommand("constrain_point_mode");
+  blockSignals(true);
+  ui->btn_constrain_point->setChecked(1);
+  ui->btn_constrain->setChecked(0);
+  ui->btn_delete->setChecked(0);
+  blockSignals(false);
+}
+
+void MainWindow::IKDelete(){
+  gui->SendCommand("delete_constraint_mode");
+  blockSignals(true);
+  ui->btn_constrain_point->setChecked(0);
+  ui->btn_constrain->setChecked(0);
+  ui->btn_delete->setChecked(1);
+  blockSignals(false);
 }
 
 void MainWindow::SetDriver(int index){

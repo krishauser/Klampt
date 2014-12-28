@@ -67,6 +67,7 @@ void RobotPoseBackend::Start()
   cur_link=0;
   cur_driver=0;
   draw_geom = 1;
+  draw_poser = 1;
   draw_bbs = 0;
   draw_com = 0;
   draw_frame = 0;
@@ -97,6 +98,7 @@ void RobotPoseBackend::Start()
   UpdateConfig();
 
   MapButtonToggle("draw_geom",&draw_geom);
+  MapButtonToggle("draw_poser",&draw_poser);
   MapButtonToggle("draw_bbs",&draw_bbs);
   MapButtonToggle("draw_com",&draw_com);
   MapButtonToggle("draw_frame",&draw_frame);
@@ -154,11 +156,12 @@ void RobotPoseBackend::RenderWorld()
       else if((int)i == cur_link)
       viewRobot.SetColor(i,highlight);
     }
-    allWidgets.DrawGL(viewport);
+    if(draw_poser)
+      allWidgets.DrawGL(viewport);
     viewRobot.Draw();
   }
   else {
-    if(draw_frame) {
+    if(draw_frame && draw_poser) {
       //drawing frames, still should draw poser
       viewRobot.SetColors(GLColor(0,0,0,0));
       allWidgets.DrawGL(viewport);
@@ -178,6 +181,7 @@ void RobotPoseBackend::RenderWorld()
   }
   if(draw_frame) {
     viewRobot.DrawLinkFrames();
+    viewRobot.DrawLinkSkeleton();
     glDisable(GL_DEPTH_TEST);
     glPushMatrix();
     glMultMatrix((Matrix4)robot->links[cur_link].T_World);

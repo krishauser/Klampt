@@ -41,6 +41,7 @@ public:
  * - draw_bbs
  * - draw_com
  * - draw_frame
+ * - draw_poser
  * 
  * Accepts commands (in addition to ResourceGUIBackend and WorldGUIBackend):
  * - pose_mode: next clicks will pose the robot's joints
@@ -86,7 +87,7 @@ class RobotPoseBackend : public ResourceGUIBackend
   vector<RobotPoseWidget> robotWidgets;
   vector<RigidObjectPoseWidget> objectWidgets;
   WidgetSet allWidgets;
-  int draw_geom,draw_bbs,draw_com,draw_frame;
+  int draw_geom,draw_poser,draw_bbs,draw_com,draw_frame;
 
   RobotPoseBackend(RobotWorld* world,ResourceManager* library);
   virtual void Start();

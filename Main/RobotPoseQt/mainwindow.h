@@ -39,10 +39,15 @@ private:
     Ui::MainWindow *ui;
 public slots:
     void SetGeometry(bool status);
+    void SetPoser(bool status);
     void SetBboxes(bool status);
     void SetCOM(bool status);
     void SetFrame(bool status);
-    void SetIK(bool status);
+    void SetFree();
+    void SetIK();
+    void IKConstrain();
+    void IKConstrainPoint();
+    void IKDelete();
 
     void SetDriver(int index);
     void UpdateDriverValue();

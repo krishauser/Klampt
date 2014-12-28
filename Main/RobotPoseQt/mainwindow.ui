@@ -50,7 +50,7 @@
         <property name="horizontalSpacing">
          <number>6</number>
         </property>
-        <item row="0" column="5">
+        <item row="0" column="6">
          <spacer name="horizontalSpacer_4">
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
@@ -76,7 +76,7 @@
           </property>
          </spacer>
         </item>
-        <item row="0" column="4">
+        <item row="0" column="5">
          <widget class="QCheckBox" name="chk_bboxes">
           <property name="statusTip">
            <string>Draw geometry bounding boxes</string>
@@ -86,7 +86,7 @@
           </property>
          </widget>
         </item>
-        <item row="0" column="3">
+        <item row="0" column="4">
          <widget class="QCheckBox" name="chk_frame">
           <property name="statusTip">
            <string>Draw link frames</string>
@@ -96,7 +96,7 @@
           </property>
          </widget>
         </item>
-        <item row="1" column="0" colspan="6">
+        <item row="1" column="0" colspan="7">
          <layout class="QHBoxLayout" name="horizontalLayout_4">
           <item>
            <widget class="QRadioButton" name="radioButton">
@@ -152,9 +152,52 @@
            </widget>
           </item>
           <item>
+           <widget class="Line" name="line_3">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="label">
+            <property name="text">
+             <string>Mode</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="btn_free">
+            <property name="toolTip">
+             <string>Pose mode</string>
+            </property>
+            <property name="statusTip">
+             <string>Pose mode</string>
+            </property>
+            <property name="text">
+             <string/>
+            </property>
+            <property name="icon">
+             <iconset resource="../KlamptQt/icons.qrc">
+              <normaloff>:/Images/Images/hand.gif</normaloff>:/Images/Images/hand.gif</iconset>
+            </property>
+            <property name="iconSize">
+             <size>
+              <width>24</width>
+              <height>24</height>
+             </size>
+            </property>
+            <property name="checkable">
+             <bool>true</bool>
+            </property>
+            <property name="flat">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
            <widget class="QPushButton" name="btn_ik">
             <property name="statusTip">
-             <string>Toggle IK mode</string>
+             <string>IK mode</string>
             </property>
             <property name="text">
              <string/>
@@ -166,11 +209,94 @@
             <property name="checkable">
              <bool>true</bool>
             </property>
+            <property name="flat">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="Line" name="line_ik">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="lbl_ik">
+            <property name="text">
+             <string>IK</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="btn_constrain_point">
+            <property name="statusTip">
+             <string>Constrain a point</string>
+            </property>
+            <property name="text">
+             <string/>
+            </property>
+            <property name="icon">
+             <iconset resource="../KlamptQt/icons.qrc">
+              <normaloff>:/Images/Images/constrain.gif</normaloff>:/Images/Images/constrain.gif</iconset>
+            </property>
+            <property name="checkable">
+             <bool>true</bool>
+            </property>
+            <property name="flat">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="btn_constrain">
+            <property name="statusTip">
+             <string>Constrain link position and orientation</string>
+            </property>
+            <property name="text">
+             <string/>
+            </property>
+            <property name="icon">
+             <iconset resource="../KlamptQt/icons.qrc">
+              <normaloff>:/Images/Images/constrainpoint.gif</normaloff>:/Images/Images/constrainpoint.gif</iconset>
+            </property>
+            <property name="checkable">
+             <bool>true</bool>
+            </property>
+            <property name="flat">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="btn_delete">
+            <property name="statusTip">
+             <string>Delete a constraint</string>
+            </property>
+            <property name="text">
+             <string/>
+            </property>
+            <property name="icon">
+             <iconset resource="../KlamptQt/icons.qrc">
+              <normaloff>:/Images/Images/dialog-cancel-3.png</normaloff>:/Images/Images/dialog-cancel-3.png</iconset>
+            </property>
+            <property name="iconSize">
+             <size>
+              <width>24</width>
+              <height>24</height>
+             </size>
+            </property>
+            <property name="checkable">
+             <bool>true</bool>
+            </property>
+            <property name="flat">
+             <bool>true</bool>
+            </property>
            </widget>
           </item>
          </layout>
         </item>
-        <item row="0" column="2">
+        <item row="0" column="3">
          <widget class="QCheckBox" name="chk_com">
           <property name="statusTip">
            <string>Draw center of masses</string>
@@ -187,6 +313,16 @@
           </property>
           <property name="text">
            <string>Geometry</string>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="2">
+         <widget class="QCheckBox" name="chk_poser">
+          <property name="text">
+           <string>Poser</string>
           </property>
           <property name="checked">
            <bool>true</bool>
@@ -589,8 +725,8 @@
    <slot>SetGeometry(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>314</x>
-     <y>495</y>
+     <x>259</x>
+     <y>513</y>
     </hint>
     <hint type="destinationlabel">
      <x>151</x>
@@ -605,8 +741,8 @@
    <slot>SetCOM(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>384</x>
-     <y>495</y>
+     <x>367</x>
+     <y>513</y>
     </hint>
     <hint type="destinationlabel">
      <x>221</x>
@@ -621,8 +757,8 @@
    <slot>SetFrame(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>461</x>
-     <y>495</y>
+     <x>431</x>
+     <y>513</y>
     </hint>
     <hint type="destinationlabel">
      <x>340</x>
@@ -637,8 +773,8 @@
    <slot>SetBboxes(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>546</x>
-     <y>495</y>
+     <x>495</x>
+     <y>513</y>
     </hint>
     <hint type="destinationlabel">
      <x>407</x>
@@ -653,28 +789,12 @@
    <slot>SetLink(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>301</x>
-     <y>567</y>
+     <x>160</x>
+     <y>577</y>
     </hint>
     <hint type="destinationlabel">
      <x>293</x>
      <y>573</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>btn_ik</sender>
-   <signal>clicked(bool)</signal>
-   <receiver>MainWindow</receiver>
-   <slot>SetIK(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>620</x>
-     <y>530</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>28</x>
-     <y>486</y>
     </hint>
    </hints>
   </connection>
@@ -685,12 +805,12 @@
    <slot>setCurrentIndex(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>217</x>
-     <y>567</y>
+     <x>85</x>
+     <y>577</y>
     </hint>
     <hint type="destinationlabel">
-     <x>301</x>
-     <y>567</y>
+     <x>160</x>
+     <y>577</y>
     </hint>
    </hints>
   </connection>
@@ -701,8 +821,8 @@
    <slot>SetLink(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>217</x>
-     <y>567</y>
+     <x>85</x>
+     <y>577</y>
     </hint>
     <hint type="destinationlabel">
      <x>41</x>
@@ -717,12 +837,12 @@
    <slot>setValue(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>301</x>
-     <y>567</y>
+     <x>160</x>
+     <y>577</y>
     </hint>
     <hint type="destinationlabel">
-     <x>217</x>
-     <y>567</y>
+     <x>85</x>
+     <y>577</y>
     </hint>
    </hints>
   </connection>
@@ -733,8 +853,8 @@
    <slot>LinkMode()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>277</x>
-     <y>527</y>
+     <x>43</x>
+     <y>546</y>
     </hint>
     <hint type="destinationlabel">
      <x>3</x>
@@ -749,8 +869,8 @@
    <slot>DriverMode()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>355</x>
-     <y>527</y>
+     <x>101</x>
+     <y>546</y>
     </hint>
     <hint type="destinationlabel">
      <x>125</x>
@@ -765,8 +885,8 @@
    <slot>SetDriver(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>108</x>
-     <y>569</y>
+     <x>100</x>
+     <y>586</y>
     </hint>
     <hint type="destinationlabel">
      <x>25</x>
@@ -781,12 +901,12 @@
    <slot>setCurrentIndex(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>108</x>
-     <y>569</y>
+     <x>100</x>
+     <y>586</y>
     </hint>
     <hint type="destinationlabel">
-     <x>108</x>
-     <y>569</y>
+     <x>100</x>
+     <y>586</y>
     </hint>
    </hints>
   </connection>
@@ -797,12 +917,12 @@
    <slot>setValue(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>108</x>
-     <y>569</y>
+     <x>100</x>
+     <y>586</y>
     </hint>
     <hint type="destinationlabel">
-     <x>108</x>
-     <y>569</y>
+     <x>100</x>
+     <y>586</y>
     </hint>
    </hints>
   </connection>
@@ -813,8 +933,8 @@
    <slot>SetDriver(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>108</x>
-     <y>569</y>
+     <x>100</x>
+     <y>586</y>
     </hint>
     <hint type="destinationlabel">
      <x>541</x>
@@ -829,8 +949,8 @@
    <slot>SliderLinkAngle(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>470</x>
-     <y>531</y>
+     <x>270</x>
+     <y>547</y>
     </hint>
     <hint type="destinationlabel">
      <x>157</x>
@@ -845,8 +965,8 @@
    <slot>SliderDriverAngle(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>576</x>
-     <y>531</y>
+     <x>429</x>
+     <y>547</y>
     </hint>
     <hint type="destinationlabel">
      <x>420</x>
@@ -861,8 +981,8 @@
    <slot>UpdateLinkSlider(double)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>440</x>
-     <y>567</y>
+     <x>264</x>
+     <y>577</y>
     </hint>
     <hint type="destinationlabel">
      <x>457</x>
@@ -877,8 +997,8 @@
    <slot>UpdateDriverSlider(double)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>108</x>
-     <y>569</y>
+     <x>100</x>
+     <y>586</y>
     </hint>
     <hint type="destinationlabel">
      <x>511</x>
@@ -902,6 +1022,102 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>chk_poser</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>MainWindow</receiver>
+   <slot>SetPoser(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>281</x>
+     <y>510</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>784</x>
+     <y>-12</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>btn_free</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>SetFree()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>488</x>
+     <y>530</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>677</x>
+     <y>-5</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>btn_ik</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>SetIK()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>533</x>
+     <y>532</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>621</x>
+     <y>-19</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>btn_constrain_point</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>IKConstrainPoint()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>591</x>
+     <y>538</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>408</x>
+     <y>-3</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>btn_constrain</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>IKConstrain()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>618</x>
+     <y>543</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>164</x>
+     <y>-9</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>btn_delete</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>IKDelete()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>659</x>
+     <y>539</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>206</x>
+     <y>-13</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>ShowHelp()</slot>
@@ -915,7 +1131,7 @@
   <slot>SetLink(int)</slot>
   <slot>SetDriver(int)</slot>
   <slot>SetDriverValue(double)</slot>
-  <slot>SetIK(bool)</slot>
+  <slot>SetIK()</slot>
   <slot>LinkMode()</slot>
   <slot>DriverMode()</slot>
   <slot>SliderLinkAngle(int)</slot>
@@ -924,5 +1140,10 @@
   <slot>UpdateDriverSlider(double)</slot>
   <slot>PrintCollisions()</slot>
   <slot>LoadFile()</slot>
+  <slot>SetPoser(bool)</slot>
+  <slot>SetFree()</slot>
+  <slot>IKConstrainPoint()</slot>
+  <slot>IKConstrain()</slot>
+  <slot>IKDelete()</slot>
  </slots>
 </ui>
