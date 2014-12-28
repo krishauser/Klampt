@@ -104,7 +104,17 @@ class GLProgram:
         glutSwapBuffers ()
         
     def idlefunc(self):
-        pass
+        self.idlesleep()
+
+    def idlesleep(self,duration=float('inf')):
+        """Sleeps the idle callback for t seconds.  If t is not provided,
+        the idle callback is slept forever"""
+        if time==0:
+            glutIdleFunc(_idlefunc);
+        else:
+            glutIdleFunc(None);
+            if duration!=float('inf'):
+                glutTimerFunc(duration*1000,lambda x:glutIdleFunc(_idlefunc),0);
 
     def prepare_GL(self):
         """Prepare drawing in world coordinate frame
