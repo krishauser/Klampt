@@ -163,6 +163,9 @@ void URDFLinkNode::GetGeometryProperty(bool useVisGeom){
 			  geomScale = geomScale * Ryz;
 			}
 		}
+	  else {
+	    cout<<"Unknown URDF geometry type "<<(int)geom->type<<endl;
+	  }
 	}else{
 		geomName = "";
 		geomScale.setIdentity();
@@ -259,6 +262,7 @@ void URDFConverter::processTParentTransformations(vector<URDFLinkNode>& linkNode
 		linkNodes[i].T_parent.set(T0);
 
 		RigidTransform G0, G1;
+		G1.setIdentity();
 		if(useVisGeom) {
 		  G0.mul(linkNodes[i].T_link_to_inertia_inverse, linkNodes[i].T_link_to_visgeom);
 		  G1.mul(linkNodes[i].T_link_to_visgeom, linkNodes[i].geomScale);
