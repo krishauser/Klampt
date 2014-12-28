@@ -24,7 +24,7 @@ Real Radius(const Geometry::AnyGeometry3D& geom)
   case Geometry::AnyGeometry3D::Primitive:
     {
       if(geom.Empty()) return 0.0;
-      Box3D box = AnyCast<GeometricPrimitive3D>(&geom.data)->GetBB();
+      Box3D box = geom.AsPrimitive().GetBB();
       Vector3 originLocal;
       box.toLocal(Vector3(0.0),originLocal);
       Real xmax = Max(Abs(originLocal.x),Abs(originLocal.x+box.dims.x));
@@ -34,24 +34,24 @@ Real Radius(const Geometry::AnyGeometry3D& geom)
     }
   case Geometry::AnyGeometry3D::TriangleMesh:
     {
-      const Meshing::TriMesh* mesh = AnyCast<Meshing::TriMesh>(&geom.data);
+      const Meshing::TriMesh& mesh = geom.AsTriangleMesh();
       Real dmax = 0;
-      for(size_t i=0;i<mesh->verts.size();i++)
-	dmax = Max(dmax,mesh->verts[i].normSquared());
+      for(size_t i=0;i<mesh.verts.size();i++)
+	dmax = Max(dmax,mesh.verts[i].normSquared());
       return Sqrt(dmax);
     }
   case Geometry::AnyGeometry3D::PointCloud:
     {
-      const Meshing::PointCloud3D* mesh = AnyCast<Meshing::PointCloud3D>(&geom.data);
+      const Meshing::PointCloud3D& mesh = geom.AsPointCloud();
       Real dmax = 0;
-      for(size_t i=0;i<mesh->points.size();i++)
-	dmax = Max(dmax,mesh->points[i].normSquared());
+      for(size_t i=0;i<mesh.points.size();i++)
+	dmax = Max(dmax,mesh.points[i].normSquared());
       return Sqrt(dmax);
     }
   case Geometry::AnyGeometry3D::ImplicitSurface:
     {
       Box3D box;
-      box.set(AnyCast<Meshing::VolumeGrid>(&geom.data)->bb);
+      box.set(geom.AsImplicitSurface().bb);
       Vector3 originLocal;
       box.toLocal(Vector3(0.0),originLocal);
       Real xmax = Max(Abs(originLocal.x),Abs(originLocal.x+box.dims.x));
@@ -60,6 +60,14 @@ Real Radius(const Geometry::AnyGeometry3D& geom)
       return Sqrt(Sqr(xmax)+Sqr(ymax)+Sqr(zmax));
     }
     break;
+  case Geometry::AnyGeometry3D::Group:
+    {
+      const vector<Geometry::AnyGeometry3D>& items = geom.AsGroup();
+      Real rmax = 0;
+      for(size_t i=0;i<items.size();i++)
+	rmax = Max(rmax,Radius(items[i]));
+      return rmax;
+    }
   }
   return 0;
 }
@@ -2575,6 +2583,7 @@ bool Robot::LoadURDF(const char* fn)
 		    cout<< "Temporarily ignoring error..."<<endl;
 		    //return false;
 		  }
+		  cout<<"Geometry "<<geomFiles[link_index]<<" has "<<this->geometry[link_index].NumElements()<<" triangles"<<endl;
 
 		  this->geometry[link_index].Transform(linkNode->geomScale);
 		}
