@@ -223,7 +223,9 @@ void ODERobot::Create(dWorldID worldID,bool useBoundaryLayer)
       bodyObjects[i].com /= bodyObjects[i].mass;
       bodyObjects[i].inertia /= bodyObjects[i].mass;
       bodyObjects[i].T.R = robot.links[baseLink].T_World.R; 
+      //set the COM to be the origin of the body
       bodyObjects[i].T.t = robot.links[baseLink].T_World * bodyObjects[i].com; 
+      bodyObjects[i].com.setZero();
       
       tempGeometries.resize(tempGeometries.size()+1);
       tempGeometries.back() = new RobotWithGeometry::CollisionGeometry;
