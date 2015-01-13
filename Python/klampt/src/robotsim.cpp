@@ -1601,11 +1601,11 @@ Simulator::Simulator(const WorldModel& model)
 {
 #ifdef dDOUBLE
   if(dCheckConfiguration("ODE_double_precision")!=1) {
-    FatalError("ODE is compiled with single precision but Klamp't Python API is compiled with double, please set odedouble=False in setup.py and recompile");
+    FatalError("ODE is compiled with single precision but Klamp't Python API is compiled with double, please check that -DdSINGLE is defined in the KLAMPT_DEFINITIONS variable in CMake and recompile");
   }
 #else
   if(dCheckConfiguration("ODE_single_precision")!=1) {
-    FatalError("ODE is compiled with single precision but Klamp't Python API is compiled with double, please set odedouble=True in setup.py and recompile");
+    FatalError("ODE is compiled with double precision but Klamp't Python API is compiled with single, please check that -DdDOUBLE is defined in the KLAMPT_DEFINITIONS variable in CMake and recompile");
   }
 #endif
 
