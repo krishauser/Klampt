@@ -2,7 +2,8 @@
 #define COLLIDE_H
 
 /** @file collide.h
- * @brief C bindings for the collide module. */
+ * @brief C bindings for the collide module. (1/17/15: deprecated,
+ * use the object-oriented bindings in geometry.h instead) */
 
 /* @brief Creates a new empty geometry ID.  When done, this ID should be
  * freed from memory using destroyGeom(id) or destroy().

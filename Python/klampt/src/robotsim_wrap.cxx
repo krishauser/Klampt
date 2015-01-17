@@ -2941,53 +2941,57 @@ SWIG_Python_NonDynamicSetAttr(PyObject *obj, PyObject *name, PyObject *value) {
 #define SWIGTYPE_p_Environment swig_types[1]
 #define SWIGTYPE_p_GeneralizedIKObjective swig_types[2]
 #define SWIGTYPE_p_GeneralizedIKSolver swig_types[3]
-#define SWIGTYPE_p_Geometry3D swig_types[4]
-#define SWIGTYPE_p_IKGoal swig_types[5]
-#define SWIGTYPE_p_IKObjective swig_types[6]
-#define SWIGTYPE_p_IKSolver swig_types[7]
-#define SWIGTYPE_p_Mass swig_types[8]
-#define SWIGTYPE_p_ODEGeometry swig_types[9]
-#define SWIGTYPE_p_ODESurfaceProperties swig_types[10]
-#define SWIGTYPE_p_RigidObject swig_types[11]
-#define SWIGTYPE_p_RigidObjectModel swig_types[12]
-#define SWIGTYPE_p_Robot swig_types[13]
-#define SWIGTYPE_p_RobotModel swig_types[14]
-#define SWIGTYPE_p_RobotModelDriver swig_types[15]
-#define SWIGTYPE_p_RobotModelLink swig_types[16]
-#define SWIGTYPE_p_SensorBase swig_types[17]
-#define SWIGTYPE_p_SimBody swig_types[18]
-#define SWIGTYPE_p_SimRobotController swig_types[19]
-#define SWIGTYPE_p_SimRobotSensor swig_types[20]
-#define SWIGTYPE_p_Simulator swig_types[21]
-#define SWIGTYPE_p_TerrainModel swig_types[22]
-#define SWIGTYPE_p_WorldModel swig_types[23]
-#define SWIGTYPE_p_WorldSimulation swig_types[24]
-#define SWIGTYPE_p__object swig_types[25]
-#define SWIGTYPE_p_allocator_type swig_types[26]
-#define SWIGTYPE_p_char swig_types[27]
-#define SWIGTYPE_p_difference_type swig_types[28]
-#define SWIGTYPE_p_double swig_types[29]
-#define SWIGTYPE_p_doubleArray swig_types[30]
-#define SWIGTYPE_p_dxBody swig_types[31]
-#define SWIGTYPE_p_int swig_types[32]
-#define SWIGTYPE_p_intArray swig_types[33]
-#define SWIGTYPE_p_p__object swig_types[34]
-#define SWIGTYPE_p_size_type swig_types[35]
-#define SWIGTYPE_p_std__allocatorT_double_t swig_types[36]
-#define SWIGTYPE_p_std__allocatorT_int_t swig_types[37]
-#define SWIGTYPE_p_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t swig_types[38]
-#define SWIGTYPE_p_std__invalid_argument swig_types[39]
-#define SWIGTYPE_p_std__vectorT_GeneralizedIKObjective_std__allocatorT_GeneralizedIKObjective_t_t swig_types[40]
-#define SWIGTYPE_p_std__vectorT_IKObjective_std__allocatorT_IKObjective_t_t swig_types[41]
-#define SWIGTYPE_p_std__vectorT__Tp__Alloc_t swig_types[42]
-#define SWIGTYPE_p_std__vectorT_double_std__allocatorT_double_t_t swig_types[43]
-#define SWIGTYPE_p_std__vectorT_int_std__allocatorT_int_t_t swig_types[44]
-#define SWIGTYPE_p_std__vectorT_std__string_std__allocatorT_std__string_t_t swig_types[45]
-#define SWIGTYPE_p_std__vectorT_std__vectorT_double_std__allocatorT_double_t_t_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t_t swig_types[46]
-#define SWIGTYPE_p_swig__SwigPyIterator swig_types[47]
-#define SWIGTYPE_p_value_type swig_types[48]
-static swig_type_info *swig_types[50];
-static swig_module_info swig_module = {swig_types, 49, 0, 0, 0, 0};
+#define SWIGTYPE_p_GeometricPrimitive swig_types[4]
+#define SWIGTYPE_p_Geometry3D swig_types[5]
+#define SWIGTYPE_p_IKGoal swig_types[6]
+#define SWIGTYPE_p_IKObjective swig_types[7]
+#define SWIGTYPE_p_IKSolver swig_types[8]
+#define SWIGTYPE_p_Mass swig_types[9]
+#define SWIGTYPE_p_ODEGeometry swig_types[10]
+#define SWIGTYPE_p_ODESurfaceProperties swig_types[11]
+#define SWIGTYPE_p_PointCloud swig_types[12]
+#define SWIGTYPE_p_RigidObject swig_types[13]
+#define SWIGTYPE_p_RigidObjectModel swig_types[14]
+#define SWIGTYPE_p_Robot swig_types[15]
+#define SWIGTYPE_p_RobotModel swig_types[16]
+#define SWIGTYPE_p_RobotModelDriver swig_types[17]
+#define SWIGTYPE_p_RobotModelLink swig_types[18]
+#define SWIGTYPE_p_SensorBase swig_types[19]
+#define SWIGTYPE_p_SimBody swig_types[20]
+#define SWIGTYPE_p_SimRobotController swig_types[21]
+#define SWIGTYPE_p_SimRobotSensor swig_types[22]
+#define SWIGTYPE_p_Simulator swig_types[23]
+#define SWIGTYPE_p_TerrainModel swig_types[24]
+#define SWIGTYPE_p_TriangleMesh swig_types[25]
+#define SWIGTYPE_p_WorldModel swig_types[26]
+#define SWIGTYPE_p_WorldSimulation swig_types[27]
+#define SWIGTYPE_p__object swig_types[28]
+#define SWIGTYPE_p_allocator_type swig_types[29]
+#define SWIGTYPE_p_char swig_types[30]
+#define SWIGTYPE_p_difference_type swig_types[31]
+#define SWIGTYPE_p_double swig_types[32]
+#define SWIGTYPE_p_doubleArray swig_types[33]
+#define SWIGTYPE_p_dxBody swig_types[34]
+#define SWIGTYPE_p_int swig_types[35]
+#define SWIGTYPE_p_intArray swig_types[36]
+#define SWIGTYPE_p_p__object swig_types[37]
+#define SWIGTYPE_p_size_type swig_types[38]
+#define SWIGTYPE_p_std__allocatorT_double_t swig_types[39]
+#define SWIGTYPE_p_std__allocatorT_int_t swig_types[40]
+#define SWIGTYPE_p_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t swig_types[41]
+#define SWIGTYPE_p_std__invalid_argument swig_types[42]
+#define SWIGTYPE_p_std__vectorT_GeneralizedIKObjective_std__allocatorT_GeneralizedIKObjective_t_t swig_types[43]
+#define SWIGTYPE_p_std__vectorT_IKObjective_std__allocatorT_IKObjective_t_t swig_types[44]
+#define SWIGTYPE_p_std__vectorT__Tp__Alloc_t swig_types[45]
+#define SWIGTYPE_p_std__vectorT_double_std__allocatorT_double_t_t swig_types[46]
+#define SWIGTYPE_p_std__vectorT_int_std__allocatorT_int_t_t swig_types[47]
+#define SWIGTYPE_p_std__vectorT_std__string_std__allocatorT_std__string_t_t swig_types[48]
+#define SWIGTYPE_p_std__vectorT_std__vectorT_double_std__allocatorT_double_t_t_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t_t swig_types[49]
+#define SWIGTYPE_p_swig__SwigPyIterator swig_types[50]
+#define SWIGTYPE_p_value_type swig_types[51]
+#define SWIGTYPE_p_void swig_types[52]
+static swig_type_info *swig_types[54];
+static swig_module_info swig_module = {swig_types, 53, 0, 0, 0, 0};
 #define SWIG_TypeQuery(name) SWIG_TypeQueryModule(&swig_module, &swig_module, name)
 #define SWIG_MangledTypeQuery(name) SWIG_MangledTypeQueryModule(&swig_module, &swig_module, name)
 
@@ -3087,6 +3091,7 @@ namespace swig {
 	#include <exception>
 	#include <vector>
 	#include "pyerr.h"
+	#include "geometry.h"
 	#include "robotmodel.h"
 	#include "robotik.h"
 	#include "robotsim.h"
@@ -5117,45 +5122,6 @@ SWIG_pchar_descriptor(void)
 }
 
 
-SWIGINTERNINLINE PyObject *
-SWIG_FromCharPtrAndSize(const char* carray, size_t size)
-{
-  if (carray) {
-    if (size > INT_MAX) {
-      swig_type_info* pchar_descriptor = SWIG_pchar_descriptor();
-      return pchar_descriptor ? 
-	SWIG_InternalNewPointerObj(const_cast< char * >(carray), pchar_descriptor, 0) : SWIG_Py_Void();
-    } else {
-#if PY_VERSION_HEX >= 0x03000000
-      return PyUnicode_FromStringAndSize(carray, static_cast< int >(size));
-#else
-      return PyString_FromStringAndSize(carray, static_cast< int >(size));
-#endif
-    }
-  } else {
-    return SWIG_Py_Void();
-  }
-}
-
-
-SWIGINTERNINLINE PyObject * 
-SWIG_FromCharPtr(const char *cptr)
-{ 
-  return SWIG_FromCharPtrAndSize(cptr, (cptr ? strlen(cptr) : 0));
-}
-
-
-SWIGINTERN int
-SWIG_AsVal_bool (PyObject *obj, bool *val)
-{
-  int r = PyObject_IsTrue(obj);
-  if (r == -1)
-    return SWIG_ERROR;
-  if (val) *val = r ? true : false;
-  return SWIG_OK;
-}
-
-
 SWIGINTERN int
 SWIG_AsCharPtrAndSize(PyObject *obj, char** cptr, size_t* psize, int *alloc)
 {
@@ -5236,6 +5202,27 @@ SWIG_AsCharPtrAndSize(PyObject *obj, char** cptr, size_t* psize, int *alloc)
 
 
 SWIGINTERNINLINE PyObject *
+SWIG_FromCharPtrAndSize(const char* carray, size_t size)
+{
+  if (carray) {
+    if (size > INT_MAX) {
+      swig_type_info* pchar_descriptor = SWIG_pchar_descriptor();
+      return pchar_descriptor ? 
+	SWIG_InternalNewPointerObj(const_cast< char * >(carray), pchar_descriptor, 0) : SWIG_Py_Void();
+    } else {
+#if PY_VERSION_HEX >= 0x03000000
+      return PyUnicode_FromStringAndSize(carray, static_cast< int >(size));
+#else
+      return PyString_FromStringAndSize(carray, static_cast< int >(size));
+#endif
+    }
+  } else {
+    return SWIG_Py_Void();
+  }
+}
+
+
+SWIGINTERNINLINE PyObject *
 SWIG_From_std_string  (const std::string& s)
 {
   return SWIG_FromCharPtrAndSize(s.data(), s.size());
@@ -5270,6 +5257,24 @@ SWIG_AsPtr_std_string (PyObject * obj, std::string **val)
     }
   }
   return SWIG_ERROR;
+}
+
+
+SWIGINTERNINLINE PyObject * 
+SWIG_FromCharPtr(const char *cptr)
+{ 
+  return SWIG_FromCharPtrAndSize(cptr, (cptr ? strlen(cptr) : 0));
+}
+
+
+SWIGINTERN int
+SWIG_AsVal_bool (PyObject *obj, bool *val)
+{
+  int r = PyObject_IsTrue(obj);
+  if (r == -1)
+    return SWIG_ERROR;
+  if (val) *val = r ? true : false;
+  return SWIG_OK;
 }
 
 #ifdef __cplusplus
@@ -12207,6 +12212,2482 @@ SWIGINTERN PyObject *doubleMatrix_swigregister(PyObject *SWIGUNUSEDPARM(self), P
   PyObject *obj;
   if (!PyArg_ParseTuple(args,(char*)"O:swigregister", &obj)) return NULL;
   SWIG_TypeNewClientData(SWIGTYPE_p_std__vectorT_std__vectorT_double_std__allocatorT_double_t_t_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t_t, SWIG_NewClientData(obj));
+  return SWIG_Py_Void();
+}
+
+SWIGINTERN PyObject *_wrap_TriangleMesh_translate(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  TriangleMesh *arg1 = (TriangleMesh *) 0 ;
+  double *arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double temp2[3] ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:TriangleMesh_translate",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_TriangleMesh, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "TriangleMesh_translate" "', argument " "1"" of type '" "TriangleMesh *""'"); 
+  }
+  arg1 = reinterpret_cast< TriangleMesh * >(argp1);
+  {
+    if (!convert_darray(obj1,temp2,3)) {
+      return NULL;
+    }
+    arg2 = &temp2[0];
+  }
+  {
+    try {
+      (arg1)->translate((double const (*))arg2);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_TriangleMesh_transform(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  TriangleMesh *arg1 = (TriangleMesh *) 0 ;
+  double *arg2 ;
+  double *arg3 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double temp2[9] ;
+  double temp3[3] ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  PyObject * obj2 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OOO:TriangleMesh_transform",&obj0,&obj1,&obj2)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_TriangleMesh, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "TriangleMesh_transform" "', argument " "1"" of type '" "TriangleMesh *""'"); 
+  }
+  arg1 = reinterpret_cast< TriangleMesh * >(argp1);
+  {
+    if (!convert_darray(obj1,temp2,9)) {
+      return NULL;
+    }
+    arg2 = &temp2[0];
+  }
+  {
+    if (!convert_darray(obj2,temp3,3)) {
+      return NULL;
+    }
+    arg3 = &temp3[0];
+  }
+  {
+    try {
+      (arg1)->transform((double const (*))arg2,(double const (*))arg3);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_TriangleMesh_indices_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  TriangleMesh *arg1 = (TriangleMesh *) 0 ;
+  std::vector< int,std::allocator< int > > *arg2 = (std::vector< int,std::allocator< int > > *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:TriangleMesh_indices_set",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_TriangleMesh, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "TriangleMesh_indices_set" "', argument " "1"" of type '" "TriangleMesh *""'"); 
+  }
+  arg1 = reinterpret_cast< TriangleMesh * >(argp1);
+  res2 = SWIG_ConvertPtr(obj1, &argp2,SWIGTYPE_p_std__vectorT_int_std__allocatorT_int_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "TriangleMesh_indices_set" "', argument " "2"" of type '" "std::vector< int,std::allocator< int > > *""'"); 
+  }
+  arg2 = reinterpret_cast< std::vector< int,std::allocator< int > > * >(argp2);
+  if (arg1) (arg1)->indices = *arg2;
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_TriangleMesh_indices_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  TriangleMesh *arg1 = (TriangleMesh *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  std::vector< int,std::allocator< int > > *result = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:TriangleMesh_indices_get",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_TriangleMesh, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "TriangleMesh_indices_get" "', argument " "1"" of type '" "TriangleMesh *""'"); 
+  }
+  arg1 = reinterpret_cast< TriangleMesh * >(argp1);
+  result = (std::vector< int,std::allocator< int > > *)& ((arg1)->indices);
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_std__vectorT_int_std__allocatorT_int_t_t, 0 |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_TriangleMesh_vertices_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  TriangleMesh *arg1 = (TriangleMesh *) 0 ;
+  std::vector< double,std::allocator< double > > *arg2 = (std::vector< double,std::allocator< double > > *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:TriangleMesh_vertices_set",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_TriangleMesh, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "TriangleMesh_vertices_set" "', argument " "1"" of type '" "TriangleMesh *""'"); 
+  }
+  arg1 = reinterpret_cast< TriangleMesh * >(argp1);
+  res2 = SWIG_ConvertPtr(obj1, &argp2,SWIGTYPE_p_std__vectorT_double_std__allocatorT_double_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "TriangleMesh_vertices_set" "', argument " "2"" of type '" "std::vector< double,std::allocator< double > > *""'"); 
+  }
+  arg2 = reinterpret_cast< std::vector< double,std::allocator< double > > * >(argp2);
+  if (arg1) (arg1)->vertices = *arg2;
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_TriangleMesh_vertices_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  TriangleMesh *arg1 = (TriangleMesh *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  std::vector< double,std::allocator< double > > *result = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:TriangleMesh_vertices_get",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_TriangleMesh, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "TriangleMesh_vertices_get" "', argument " "1"" of type '" "TriangleMesh *""'"); 
+  }
+  arg1 = reinterpret_cast< TriangleMesh * >(argp1);
+  result = (std::vector< double,std::allocator< double > > *)& ((arg1)->vertices);
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_std__vectorT_double_std__allocatorT_double_t_t, 0 |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_new_TriangleMesh(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  TriangleMesh *result = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)":new_TriangleMesh")) SWIG_fail;
+  {
+    try {
+      result = (TriangleMesh *)new TriangleMesh();
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_TriangleMesh, SWIG_POINTER_NEW |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_delete_TriangleMesh(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  TriangleMesh *arg1 = (TriangleMesh *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:delete_TriangleMesh",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_TriangleMesh, SWIG_POINTER_DISOWN |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "delete_TriangleMesh" "', argument " "1"" of type '" "TriangleMesh *""'"); 
+  }
+  arg1 = reinterpret_cast< TriangleMesh * >(argp1);
+  {
+    try {
+      delete arg1;
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *TriangleMesh_swigregister(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *obj;
+  if (!PyArg_ParseTuple(args,(char*)"O:swigregister", &obj)) return NULL;
+  SWIG_TypeNewClientData(SWIGTYPE_p_TriangleMesh, SWIG_NewClientData(obj));
+  return SWIG_Py_Void();
+}
+
+SWIGINTERN PyObject *_wrap_PointCloud_translate(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  PointCloud *arg1 = (PointCloud *) 0 ;
+  double *arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double temp2[3] ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:PointCloud_translate",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_PointCloud, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "PointCloud_translate" "', argument " "1"" of type '" "PointCloud *""'"); 
+  }
+  arg1 = reinterpret_cast< PointCloud * >(argp1);
+  {
+    if (!convert_darray(obj1,temp2,3)) {
+      return NULL;
+    }
+    arg2 = &temp2[0];
+  }
+  {
+    try {
+      (arg1)->translate((double const (*))arg2);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_PointCloud_transform(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  PointCloud *arg1 = (PointCloud *) 0 ;
+  double *arg2 ;
+  double *arg3 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double temp2[9] ;
+  double temp3[3] ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  PyObject * obj2 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OOO:PointCloud_transform",&obj0,&obj1,&obj2)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_PointCloud, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "PointCloud_transform" "', argument " "1"" of type '" "PointCloud *""'"); 
+  }
+  arg1 = reinterpret_cast< PointCloud * >(argp1);
+  {
+    if (!convert_darray(obj1,temp2,9)) {
+      return NULL;
+    }
+    arg2 = &temp2[0];
+  }
+  {
+    if (!convert_darray(obj2,temp3,3)) {
+      return NULL;
+    }
+    arg3 = &temp3[0];
+  }
+  {
+    try {
+      (arg1)->transform((double const (*))arg2,(double const (*))arg3);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_PointCloud_vertices_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  PointCloud *arg1 = (PointCloud *) 0 ;
+  std::vector< double,std::allocator< double > > *arg2 = (std::vector< double,std::allocator< double > > *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:PointCloud_vertices_set",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_PointCloud, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "PointCloud_vertices_set" "', argument " "1"" of type '" "PointCloud *""'"); 
+  }
+  arg1 = reinterpret_cast< PointCloud * >(argp1);
+  res2 = SWIG_ConvertPtr(obj1, &argp2,SWIGTYPE_p_std__vectorT_double_std__allocatorT_double_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "PointCloud_vertices_set" "', argument " "2"" of type '" "std::vector< double,std::allocator< double > > *""'"); 
+  }
+  arg2 = reinterpret_cast< std::vector< double,std::allocator< double > > * >(argp2);
+  if (arg1) (arg1)->vertices = *arg2;
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_PointCloud_vertices_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  PointCloud *arg1 = (PointCloud *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  std::vector< double,std::allocator< double > > *result = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:PointCloud_vertices_get",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_PointCloud, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "PointCloud_vertices_get" "', argument " "1"" of type '" "PointCloud *""'"); 
+  }
+  arg1 = reinterpret_cast< PointCloud * >(argp1);
+  result = (std::vector< double,std::allocator< double > > *)& ((arg1)->vertices);
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_std__vectorT_double_std__allocatorT_double_t_t, 0 |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_PointCloud_propertyNames_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  PointCloud *arg1 = (PointCloud *) 0 ;
+  std::vector< std::string,std::allocator< std::string > > *arg2 = (std::vector< std::string,std::allocator< std::string > > *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:PointCloud_propertyNames_set",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_PointCloud, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "PointCloud_propertyNames_set" "', argument " "1"" of type '" "PointCloud *""'"); 
+  }
+  arg1 = reinterpret_cast< PointCloud * >(argp1);
+  res2 = SWIG_ConvertPtr(obj1, &argp2,SWIGTYPE_p_std__vectorT_std__string_std__allocatorT_std__string_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "PointCloud_propertyNames_set" "', argument " "2"" of type '" "std::vector< std::string,std::allocator< std::string > > *""'"); 
+  }
+  arg2 = reinterpret_cast< std::vector< std::string,std::allocator< std::string > > * >(argp2);
+  if (arg1) (arg1)->propertyNames = *arg2;
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_PointCloud_propertyNames_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  PointCloud *arg1 = (PointCloud *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  std::vector< std::string,std::allocator< std::string > > *result = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:PointCloud_propertyNames_get",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_PointCloud, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "PointCloud_propertyNames_get" "', argument " "1"" of type '" "PointCloud *""'"); 
+  }
+  arg1 = reinterpret_cast< PointCloud * >(argp1);
+  result = (std::vector< std::string,std::allocator< std::string > > *)& ((arg1)->propertyNames);
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_std__vectorT_std__string_std__allocatorT_std__string_t_t, 0 |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_PointCloud_properties_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  PointCloud *arg1 = (PointCloud *) 0 ;
+  std::vector< double,std::allocator< double > > *arg2 = (std::vector< double,std::allocator< double > > *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:PointCloud_properties_set",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_PointCloud, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "PointCloud_properties_set" "', argument " "1"" of type '" "PointCloud *""'"); 
+  }
+  arg1 = reinterpret_cast< PointCloud * >(argp1);
+  res2 = SWIG_ConvertPtr(obj1, &argp2,SWIGTYPE_p_std__vectorT_double_std__allocatorT_double_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "PointCloud_properties_set" "', argument " "2"" of type '" "std::vector< double,std::allocator< double > > *""'"); 
+  }
+  arg2 = reinterpret_cast< std::vector< double,std::allocator< double > > * >(argp2);
+  if (arg1) (arg1)->properties = *arg2;
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_PointCloud_properties_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  PointCloud *arg1 = (PointCloud *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  std::vector< double,std::allocator< double > > *result = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:PointCloud_properties_get",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_PointCloud, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "PointCloud_properties_get" "', argument " "1"" of type '" "PointCloud *""'"); 
+  }
+  arg1 = reinterpret_cast< PointCloud * >(argp1);
+  result = (std::vector< double,std::allocator< double > > *)& ((arg1)->properties);
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_std__vectorT_double_std__allocatorT_double_t_t, 0 |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_new_PointCloud(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  PointCloud *result = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)":new_PointCloud")) SWIG_fail;
+  {
+    try {
+      result = (PointCloud *)new PointCloud();
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_PointCloud, SWIG_POINTER_NEW |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_delete_PointCloud(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  PointCloud *arg1 = (PointCloud *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:delete_PointCloud",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_PointCloud, SWIG_POINTER_DISOWN |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "delete_PointCloud" "', argument " "1"" of type '" "PointCloud *""'"); 
+  }
+  arg1 = reinterpret_cast< PointCloud * >(argp1);
+  {
+    try {
+      delete arg1;
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *PointCloud_swigregister(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *obj;
+  if (!PyArg_ParseTuple(args,(char*)"O:swigregister", &obj)) return NULL;
+  SWIG_TypeNewClientData(SWIGTYPE_p_PointCloud, SWIG_NewClientData(obj));
+  return SWIG_Py_Void();
+}
+
+SWIGINTERN PyObject *_wrap_GeometricPrimitive_setPoint(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  GeometricPrimitive *arg1 = (GeometricPrimitive *) 0 ;
+  double *arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double temp2[3] ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:GeometricPrimitive_setPoint",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_GeometricPrimitive, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "GeometricPrimitive_setPoint" "', argument " "1"" of type '" "GeometricPrimitive *""'"); 
+  }
+  arg1 = reinterpret_cast< GeometricPrimitive * >(argp1);
+  {
+    if (!convert_darray(obj1,temp2,3)) {
+      return NULL;
+    }
+    arg2 = &temp2[0];
+  }
+  {
+    try {
+      (arg1)->setPoint((double const (*))arg2);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_GeometricPrimitive_setSphere(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  GeometricPrimitive *arg1 = (GeometricPrimitive *) 0 ;
+  double *arg2 ;
+  double arg3 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double temp2[3] ;
+  double val3 ;
+  int ecode3 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  PyObject * obj2 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OOO:GeometricPrimitive_setSphere",&obj0,&obj1,&obj2)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_GeometricPrimitive, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "GeometricPrimitive_setSphere" "', argument " "1"" of type '" "GeometricPrimitive *""'"); 
+  }
+  arg1 = reinterpret_cast< GeometricPrimitive * >(argp1);
+  {
+    if (!convert_darray(obj1,temp2,3)) {
+      return NULL;
+    }
+    arg2 = &temp2[0];
+  }
+  ecode3 = SWIG_AsVal_double(obj2, &val3);
+  if (!SWIG_IsOK(ecode3)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "GeometricPrimitive_setSphere" "', argument " "3"" of type '" "double""'");
+  } 
+  arg3 = static_cast< double >(val3);
+  {
+    try {
+      (arg1)->setSphere((double const (*))arg2,arg3);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_GeometricPrimitive_setSegment(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  GeometricPrimitive *arg1 = (GeometricPrimitive *) 0 ;
+  double *arg2 ;
+  double *arg3 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double temp2[3] ;
+  double temp3[3] ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  PyObject * obj2 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OOO:GeometricPrimitive_setSegment",&obj0,&obj1,&obj2)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_GeometricPrimitive, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "GeometricPrimitive_setSegment" "', argument " "1"" of type '" "GeometricPrimitive *""'"); 
+  }
+  arg1 = reinterpret_cast< GeometricPrimitive * >(argp1);
+  {
+    if (!convert_darray(obj1,temp2,3)) {
+      return NULL;
+    }
+    arg2 = &temp2[0];
+  }
+  {
+    if (!convert_darray(obj2,temp3,3)) {
+      return NULL;
+    }
+    arg3 = &temp3[0];
+  }
+  {
+    try {
+      (arg1)->setSegment((double const (*))arg2,(double const (*))arg3);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_GeometricPrimitive_setAABB(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  GeometricPrimitive *arg1 = (GeometricPrimitive *) 0 ;
+  double *arg2 ;
+  double *arg3 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double temp2[3] ;
+  double temp3[3] ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  PyObject * obj2 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OOO:GeometricPrimitive_setAABB",&obj0,&obj1,&obj2)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_GeometricPrimitive, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "GeometricPrimitive_setAABB" "', argument " "1"" of type '" "GeometricPrimitive *""'"); 
+  }
+  arg1 = reinterpret_cast< GeometricPrimitive * >(argp1);
+  {
+    if (!convert_darray(obj1,temp2,3)) {
+      return NULL;
+    }
+    arg2 = &temp2[0];
+  }
+  {
+    if (!convert_darray(obj2,temp3,3)) {
+      return NULL;
+    }
+    arg3 = &temp3[0];
+  }
+  {
+    try {
+      (arg1)->setAABB((double const (*))arg2,(double const (*))arg3);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_GeometricPrimitive_loadString(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  GeometricPrimitive *arg1 = (GeometricPrimitive *) 0 ;
+  char *arg2 = (char *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int res2 ;
+  char *buf2 = 0 ;
+  int alloc2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  bool result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:GeometricPrimitive_loadString",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_GeometricPrimitive, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "GeometricPrimitive_loadString" "', argument " "1"" of type '" "GeometricPrimitive *""'"); 
+  }
+  arg1 = reinterpret_cast< GeometricPrimitive * >(argp1);
+  res2 = SWIG_AsCharPtrAndSize(obj1, &buf2, NULL, &alloc2);
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "GeometricPrimitive_loadString" "', argument " "2"" of type '" "char const *""'");
+  }
+  arg2 = reinterpret_cast< char * >(buf2);
+  {
+    try {
+      result = (bool)(arg1)->loadString((char const *)arg2);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_From_bool(static_cast< bool >(result));
+  if (alloc2 == SWIG_NEWOBJ) delete[] buf2;
+  return resultobj;
+fail:
+  if (alloc2 == SWIG_NEWOBJ) delete[] buf2;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_GeometricPrimitive_saveString(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  GeometricPrimitive *arg1 = (GeometricPrimitive *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  std::string result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:GeometricPrimitive_saveString",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_GeometricPrimitive, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "GeometricPrimitive_saveString" "', argument " "1"" of type '" "GeometricPrimitive const *""'"); 
+  }
+  arg1 = reinterpret_cast< GeometricPrimitive * >(argp1);
+  {
+    try {
+      result = ((GeometricPrimitive const *)arg1)->saveString();
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_From_std_string(static_cast< std::string >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_GeometricPrimitive_type_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  GeometricPrimitive *arg1 = (GeometricPrimitive *) 0 ;
+  std::string *arg2 = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int res2 = SWIG_OLDOBJ ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:GeometricPrimitive_type_set",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_GeometricPrimitive, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "GeometricPrimitive_type_set" "', argument " "1"" of type '" "GeometricPrimitive *""'"); 
+  }
+  arg1 = reinterpret_cast< GeometricPrimitive * >(argp1);
+  {
+    std::string *ptr = (std::string *)0;
+    res2 = SWIG_AsPtr_std_string(obj1, &ptr);
+    if (!SWIG_IsOK(res2)) {
+      SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "GeometricPrimitive_type_set" "', argument " "2"" of type '" "std::string const &""'"); 
+    }
+    if (!ptr) {
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "GeometricPrimitive_type_set" "', argument " "2"" of type '" "std::string const &""'"); 
+    }
+    arg2 = ptr;
+  }
+  if (arg1) (arg1)->type = *arg2;
+  resultobj = SWIG_Py_Void();
+  if (SWIG_IsNewObj(res2)) delete arg2;
+  return resultobj;
+fail:
+  if (SWIG_IsNewObj(res2)) delete arg2;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_GeometricPrimitive_type_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  GeometricPrimitive *arg1 = (GeometricPrimitive *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  std::string *result = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:GeometricPrimitive_type_get",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_GeometricPrimitive, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "GeometricPrimitive_type_get" "', argument " "1"" of type '" "GeometricPrimitive *""'"); 
+  }
+  arg1 = reinterpret_cast< GeometricPrimitive * >(argp1);
+  result = (std::string *) & ((arg1)->type);
+  resultobj = SWIG_From_std_string(static_cast< std::string >(*result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_GeometricPrimitive_properties_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  GeometricPrimitive *arg1 = (GeometricPrimitive *) 0 ;
+  std::vector< double,std::allocator< double > > *arg2 = (std::vector< double,std::allocator< double > > *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:GeometricPrimitive_properties_set",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_GeometricPrimitive, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "GeometricPrimitive_properties_set" "', argument " "1"" of type '" "GeometricPrimitive *""'"); 
+  }
+  arg1 = reinterpret_cast< GeometricPrimitive * >(argp1);
+  res2 = SWIG_ConvertPtr(obj1, &argp2,SWIGTYPE_p_std__vectorT_double_std__allocatorT_double_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "GeometricPrimitive_properties_set" "', argument " "2"" of type '" "std::vector< double,std::allocator< double > > *""'"); 
+  }
+  arg2 = reinterpret_cast< std::vector< double,std::allocator< double > > * >(argp2);
+  if (arg1) (arg1)->properties = *arg2;
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_GeometricPrimitive_properties_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  GeometricPrimitive *arg1 = (GeometricPrimitive *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  std::vector< double,std::allocator< double > > *result = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:GeometricPrimitive_properties_get",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_GeometricPrimitive, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "GeometricPrimitive_properties_get" "', argument " "1"" of type '" "GeometricPrimitive *""'"); 
+  }
+  arg1 = reinterpret_cast< GeometricPrimitive * >(argp1);
+  result = (std::vector< double,std::allocator< double > > *)& ((arg1)->properties);
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_std__vectorT_double_std__allocatorT_double_t_t, 0 |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_new_GeometricPrimitive(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  GeometricPrimitive *result = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)":new_GeometricPrimitive")) SWIG_fail;
+  {
+    try {
+      result = (GeometricPrimitive *)new GeometricPrimitive();
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_GeometricPrimitive, SWIG_POINTER_NEW |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_delete_GeometricPrimitive(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  GeometricPrimitive *arg1 = (GeometricPrimitive *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:delete_GeometricPrimitive",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_GeometricPrimitive, SWIG_POINTER_DISOWN |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "delete_GeometricPrimitive" "', argument " "1"" of type '" "GeometricPrimitive *""'"); 
+  }
+  arg1 = reinterpret_cast< GeometricPrimitive * >(argp1);
+  {
+    try {
+      delete arg1;
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *GeometricPrimitive_swigregister(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *obj;
+  if (!PyArg_ParseTuple(args,(char*)"O:swigregister", &obj)) return NULL;
+  SWIG_TypeNewClientData(SWIGTYPE_p_GeometricPrimitive, SWIG_NewClientData(obj));
+  return SWIG_Py_Void();
+}
+
+SWIGINTERN PyObject *_wrap_new_Geometry3D(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Geometry3D *result = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)":new_Geometry3D")) SWIG_fail;
+  {
+    try {
+      result = (Geometry3D *)new Geometry3D();
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_Geometry3D, SWIG_POINTER_NEW |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_delete_Geometry3D(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Geometry3D *arg1 = (Geometry3D *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:delete_Geometry3D",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Geometry3D, SWIG_POINTER_DISOWN |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "delete_Geometry3D" "', argument " "1"" of type '" "Geometry3D *""'"); 
+  }
+  arg1 = reinterpret_cast< Geometry3D * >(argp1);
+  {
+    try {
+      delete arg1;
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Geometry3D_clone(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Geometry3D *arg1 = (Geometry3D *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  Geometry3D result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:Geometry3D_clone",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Geometry3D, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Geometry3D_clone" "', argument " "1"" of type '" "Geometry3D *""'"); 
+  }
+  arg1 = reinterpret_cast< Geometry3D * >(argp1);
+  {
+    try {
+      result = (arg1)->clone();
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_NewPointerObj((new Geometry3D(static_cast< const Geometry3D& >(result))), SWIGTYPE_p_Geometry3D, SWIG_POINTER_OWN |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Geometry3D_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Geometry3D *arg1 = (Geometry3D *) 0 ;
+  Geometry3D *arg2 = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:Geometry3D_set",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Geometry3D, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Geometry3D_set" "', argument " "1"" of type '" "Geometry3D *""'"); 
+  }
+  arg1 = reinterpret_cast< Geometry3D * >(argp1);
+  res2 = SWIG_ConvertPtr(obj1, &argp2, SWIGTYPE_p_Geometry3D,  0  | 0);
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "Geometry3D_set" "', argument " "2"" of type '" "Geometry3D const &""'"); 
+  }
+  if (!argp2) {
+    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "Geometry3D_set" "', argument " "2"" of type '" "Geometry3D const &""'"); 
+  }
+  arg2 = reinterpret_cast< Geometry3D * >(argp2);
+  {
+    try {
+      (arg1)->set((Geometry3D const &)*arg2);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Geometry3D_isStandalone(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Geometry3D *arg1 = (Geometry3D *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  bool result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:Geometry3D_isStandalone",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Geometry3D, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Geometry3D_isStandalone" "', argument " "1"" of type '" "Geometry3D *""'"); 
+  }
+  arg1 = reinterpret_cast< Geometry3D * >(argp1);
+  {
+    try {
+      result = (bool)(arg1)->isStandalone();
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_From_bool(static_cast< bool >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Geometry3D_free(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Geometry3D *arg1 = (Geometry3D *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:Geometry3D_free",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Geometry3D, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Geometry3D_free" "', argument " "1"" of type '" "Geometry3D *""'"); 
+  }
+  arg1 = reinterpret_cast< Geometry3D * >(argp1);
+  {
+    try {
+      (arg1)->free();
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Geometry3D_type(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Geometry3D *arg1 = (Geometry3D *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  std::string result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:Geometry3D_type",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Geometry3D, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Geometry3D_type" "', argument " "1"" of type '" "Geometry3D *""'"); 
+  }
+  arg1 = reinterpret_cast< Geometry3D * >(argp1);
+  {
+    try {
+      result = (arg1)->type();
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_From_std_string(static_cast< std::string >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Geometry3D_getTriangleMesh(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Geometry3D *arg1 = (Geometry3D *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  TriangleMesh result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:Geometry3D_getTriangleMesh",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Geometry3D, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Geometry3D_getTriangleMesh" "', argument " "1"" of type '" "Geometry3D *""'"); 
+  }
+  arg1 = reinterpret_cast< Geometry3D * >(argp1);
+  {
+    try {
+      result = (arg1)->getTriangleMesh();
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_NewPointerObj((new TriangleMesh(static_cast< const TriangleMesh& >(result))), SWIGTYPE_p_TriangleMesh, SWIG_POINTER_OWN |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Geometry3D_getPointCloud(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Geometry3D *arg1 = (Geometry3D *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  PointCloud result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:Geometry3D_getPointCloud",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Geometry3D, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Geometry3D_getPointCloud" "', argument " "1"" of type '" "Geometry3D *""'"); 
+  }
+  arg1 = reinterpret_cast< Geometry3D * >(argp1);
+  {
+    try {
+      result = (arg1)->getPointCloud();
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_NewPointerObj((new PointCloud(static_cast< const PointCloud& >(result))), SWIGTYPE_p_PointCloud, SWIG_POINTER_OWN |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Geometry3D_getGeometricPrimitive(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Geometry3D *arg1 = (Geometry3D *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  GeometricPrimitive result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:Geometry3D_getGeometricPrimitive",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Geometry3D, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Geometry3D_getGeometricPrimitive" "', argument " "1"" of type '" "Geometry3D *""'"); 
+  }
+  arg1 = reinterpret_cast< Geometry3D * >(argp1);
+  {
+    try {
+      result = (arg1)->getGeometricPrimitive();
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_NewPointerObj((new GeometricPrimitive(static_cast< const GeometricPrimitive& >(result))), SWIGTYPE_p_GeometricPrimitive, SWIG_POINTER_OWN |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Geometry3D_setTriangleMesh(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Geometry3D *arg1 = (Geometry3D *) 0 ;
+  TriangleMesh *arg2 = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:Geometry3D_setTriangleMesh",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Geometry3D, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Geometry3D_setTriangleMesh" "', argument " "1"" of type '" "Geometry3D *""'"); 
+  }
+  arg1 = reinterpret_cast< Geometry3D * >(argp1);
+  res2 = SWIG_ConvertPtr(obj1, &argp2, SWIGTYPE_p_TriangleMesh,  0  | 0);
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "Geometry3D_setTriangleMesh" "', argument " "2"" of type '" "TriangleMesh const &""'"); 
+  }
+  if (!argp2) {
+    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "Geometry3D_setTriangleMesh" "', argument " "2"" of type '" "TriangleMesh const &""'"); 
+  }
+  arg2 = reinterpret_cast< TriangleMesh * >(argp2);
+  {
+    try {
+      (arg1)->setTriangleMesh((TriangleMesh const &)*arg2);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Geometry3D_setPointCloud(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Geometry3D *arg1 = (Geometry3D *) 0 ;
+  PointCloud *arg2 = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:Geometry3D_setPointCloud",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Geometry3D, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Geometry3D_setPointCloud" "', argument " "1"" of type '" "Geometry3D *""'"); 
+  }
+  arg1 = reinterpret_cast< Geometry3D * >(argp1);
+  res2 = SWIG_ConvertPtr(obj1, &argp2, SWIGTYPE_p_PointCloud,  0  | 0);
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "Geometry3D_setPointCloud" "', argument " "2"" of type '" "PointCloud const &""'"); 
+  }
+  if (!argp2) {
+    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "Geometry3D_setPointCloud" "', argument " "2"" of type '" "PointCloud const &""'"); 
+  }
+  arg2 = reinterpret_cast< PointCloud * >(argp2);
+  {
+    try {
+      (arg1)->setPointCloud((PointCloud const &)*arg2);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Geometry3D_setGeometricPrimitive(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Geometry3D *arg1 = (Geometry3D *) 0 ;
+  GeometricPrimitive *arg2 = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:Geometry3D_setGeometricPrimitive",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Geometry3D, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Geometry3D_setGeometricPrimitive" "', argument " "1"" of type '" "Geometry3D *""'"); 
+  }
+  arg1 = reinterpret_cast< Geometry3D * >(argp1);
+  res2 = SWIG_ConvertPtr(obj1, &argp2, SWIGTYPE_p_GeometricPrimitive,  0  | 0);
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "Geometry3D_setGeometricPrimitive" "', argument " "2"" of type '" "GeometricPrimitive const &""'"); 
+  }
+  if (!argp2) {
+    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "Geometry3D_setGeometricPrimitive" "', argument " "2"" of type '" "GeometricPrimitive const &""'"); 
+  }
+  arg2 = reinterpret_cast< GeometricPrimitive * >(argp2);
+  {
+    try {
+      (arg1)->setGeometricPrimitive((GeometricPrimitive const &)*arg2);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Geometry3D_loadFile(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Geometry3D *arg1 = (Geometry3D *) 0 ;
+  char *arg2 = (char *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int res2 ;
+  char *buf2 = 0 ;
+  int alloc2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  bool result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:Geometry3D_loadFile",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Geometry3D, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Geometry3D_loadFile" "', argument " "1"" of type '" "Geometry3D *""'"); 
+  }
+  arg1 = reinterpret_cast< Geometry3D * >(argp1);
+  res2 = SWIG_AsCharPtrAndSize(obj1, &buf2, NULL, &alloc2);
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "Geometry3D_loadFile" "', argument " "2"" of type '" "char const *""'");
+  }
+  arg2 = reinterpret_cast< char * >(buf2);
+  {
+    try {
+      result = (bool)(arg1)->loadFile((char const *)arg2);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_From_bool(static_cast< bool >(result));
+  if (alloc2 == SWIG_NEWOBJ) delete[] buf2;
+  return resultobj;
+fail:
+  if (alloc2 == SWIG_NEWOBJ) delete[] buf2;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Geometry3D_saveFile(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Geometry3D *arg1 = (Geometry3D *) 0 ;
+  char *arg2 = (char *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int res2 ;
+  char *buf2 = 0 ;
+  int alloc2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  bool result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:Geometry3D_saveFile",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Geometry3D, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Geometry3D_saveFile" "', argument " "1"" of type '" "Geometry3D *""'"); 
+  }
+  arg1 = reinterpret_cast< Geometry3D * >(argp1);
+  res2 = SWIG_AsCharPtrAndSize(obj1, &buf2, NULL, &alloc2);
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "Geometry3D_saveFile" "', argument " "2"" of type '" "char const *""'");
+  }
+  arg2 = reinterpret_cast< char * >(buf2);
+  {
+    try {
+      result = (bool)(arg1)->saveFile((char const *)arg2);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_From_bool(static_cast< bool >(result));
+  if (alloc2 == SWIG_NEWOBJ) delete[] buf2;
+  return resultobj;
+fail:
+  if (alloc2 == SWIG_NEWOBJ) delete[] buf2;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Geometry3D_setCurrentTransform(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Geometry3D *arg1 = (Geometry3D *) 0 ;
+  double *arg2 ;
+  double *arg3 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double temp2[9] ;
+  double temp3[3] ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  PyObject * obj2 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OOO:Geometry3D_setCurrentTransform",&obj0,&obj1,&obj2)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Geometry3D, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Geometry3D_setCurrentTransform" "', argument " "1"" of type '" "Geometry3D *""'"); 
+  }
+  arg1 = reinterpret_cast< Geometry3D * >(argp1);
+  {
+    if (!convert_darray(obj1,temp2,9)) {
+      return NULL;
+    }
+    arg2 = &temp2[0];
+  }
+  {
+    if (!convert_darray(obj2,temp3,3)) {
+      return NULL;
+    }
+    arg3 = &temp3[0];
+  }
+  {
+    try {
+      (arg1)->setCurrentTransform((double const (*))arg2,(double const (*))arg3);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Geometry3D_translate(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Geometry3D *arg1 = (Geometry3D *) 0 ;
+  double *arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double temp2[3] ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:Geometry3D_translate",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Geometry3D, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Geometry3D_translate" "', argument " "1"" of type '" "Geometry3D *""'"); 
+  }
+  arg1 = reinterpret_cast< Geometry3D * >(argp1);
+  {
+    if (!convert_darray(obj1,temp2,3)) {
+      return NULL;
+    }
+    arg2 = &temp2[0];
+  }
+  {
+    try {
+      (arg1)->translate((double const (*))arg2);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Geometry3D_transform(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Geometry3D *arg1 = (Geometry3D *) 0 ;
+  double *arg2 ;
+  double *arg3 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double temp2[9] ;
+  double temp3[3] ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  PyObject * obj2 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OOO:Geometry3D_transform",&obj0,&obj1,&obj2)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Geometry3D, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Geometry3D_transform" "', argument " "1"" of type '" "Geometry3D *""'"); 
+  }
+  arg1 = reinterpret_cast< Geometry3D * >(argp1);
+  {
+    if (!convert_darray(obj1,temp2,9)) {
+      return NULL;
+    }
+    arg2 = &temp2[0];
+  }
+  {
+    if (!convert_darray(obj2,temp3,3)) {
+      return NULL;
+    }
+    arg3 = &temp3[0];
+  }
+  {
+    try {
+      (arg1)->transform((double const (*))arg2,(double const (*))arg3);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Geometry3D_setCollisionMargin(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Geometry3D *arg1 = (Geometry3D *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:Geometry3D_setCollisionMargin",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Geometry3D, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Geometry3D_setCollisionMargin" "', argument " "1"" of type '" "Geometry3D *""'"); 
+  }
+  arg1 = reinterpret_cast< Geometry3D * >(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Geometry3D_setCollisionMargin" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = static_cast< double >(val2);
+  {
+    try {
+      (arg1)->setCollisionMargin(arg2);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Geometry3D_getCollisionMargin(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Geometry3D *arg1 = (Geometry3D *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  double result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:Geometry3D_getCollisionMargin",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Geometry3D, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Geometry3D_getCollisionMargin" "', argument " "1"" of type '" "Geometry3D *""'"); 
+  }
+  arg1 = reinterpret_cast< Geometry3D * >(argp1);
+  {
+    try {
+      result = (double)(arg1)->getCollisionMargin();
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Geometry3D_getBB(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Geometry3D *arg1 = (Geometry3D *) 0 ;
+  double *arg2 ;
+  double *arg3 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double temp2[3] ;
+  double temp23[3] ;
+  PyObject * obj0 = 0 ;
+  
+  {
+    arg2 = &temp2[0];
+  }
+  {
+    arg3 = &temp23[0];
+  }
+  if (!PyArg_ParseTuple(args,(char *)"O:Geometry3D_getBB",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Geometry3D, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Geometry3D_getBB" "', argument " "1"" of type '" "Geometry3D *""'"); 
+  }
+  arg1 = reinterpret_cast< Geometry3D * >(argp1);
+  {
+    try {
+      (arg1)->getBB(arg2,arg3);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  {
+    PyObject *o, *o2, *o3;
+    o = convert_darray_obj(arg2,3);
+    if ((!resultobj) || (resultobj == Py_None)) {
+      resultobj = o;
+    } else {
+      if (!PyTuple_Check(resultobj)) {
+        PyObject *o2 = resultobj;
+        resultobj = PyTuple_New(1);
+        PyTuple_SetItem(resultobj,0,o2);
+      }
+      o3 = PyTuple_New(1);
+      PyTuple_SetItem(o3,0,o);
+      o2 = resultobj;
+      resultobj = PySequence_Concat(o2,o3);
+      Py_DECREF(o2);
+      Py_DECREF(o3);
+    }
+  }
+  {
+    PyObject *o, *o2, *o3;
+    o = convert_darray_obj(arg3,3);
+    if ((!resultobj) || (resultobj == Py_None)) {
+      resultobj = o;
+    } else {
+      if (!PyTuple_Check(resultobj)) {
+        PyObject *o2 = resultobj;
+        resultobj = PyTuple_New(1);
+        PyTuple_SetItem(resultobj,0,o2);
+      }
+      o3 = PyTuple_New(1);
+      PyTuple_SetItem(o3,0,o);
+      o2 = resultobj;
+      resultobj = PySequence_Concat(o2,o3);
+      Py_DECREF(o2);
+      Py_DECREF(o3);
+    }
+  }
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Geometry3D_collides(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Geometry3D *arg1 = (Geometry3D *) 0 ;
+  Geometry3D *arg2 = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  bool result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:Geometry3D_collides",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Geometry3D, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Geometry3D_collides" "', argument " "1"" of type '" "Geometry3D *""'"); 
+  }
+  arg1 = reinterpret_cast< Geometry3D * >(argp1);
+  res2 = SWIG_ConvertPtr(obj1, &argp2, SWIGTYPE_p_Geometry3D,  0  | 0);
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "Geometry3D_collides" "', argument " "2"" of type '" "Geometry3D const &""'"); 
+  }
+  if (!argp2) {
+    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "Geometry3D_collides" "', argument " "2"" of type '" "Geometry3D const &""'"); 
+  }
+  arg2 = reinterpret_cast< Geometry3D * >(argp2);
+  {
+    try {
+      result = (bool)(arg1)->collides((Geometry3D const &)*arg2);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_From_bool(static_cast< bool >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Geometry3D_withinDistance(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Geometry3D *arg1 = (Geometry3D *) 0 ;
+  Geometry3D *arg2 = 0 ;
+  double arg3 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  double val3 ;
+  int ecode3 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  PyObject * obj2 = 0 ;
+  bool result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OOO:Geometry3D_withinDistance",&obj0,&obj1,&obj2)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Geometry3D, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Geometry3D_withinDistance" "', argument " "1"" of type '" "Geometry3D *""'"); 
+  }
+  arg1 = reinterpret_cast< Geometry3D * >(argp1);
+  res2 = SWIG_ConvertPtr(obj1, &argp2, SWIGTYPE_p_Geometry3D,  0  | 0);
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "Geometry3D_withinDistance" "', argument " "2"" of type '" "Geometry3D const &""'"); 
+  }
+  if (!argp2) {
+    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "Geometry3D_withinDistance" "', argument " "2"" of type '" "Geometry3D const &""'"); 
+  }
+  arg2 = reinterpret_cast< Geometry3D * >(argp2);
+  ecode3 = SWIG_AsVal_double(obj2, &val3);
+  if (!SWIG_IsOK(ecode3)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "Geometry3D_withinDistance" "', argument " "3"" of type '" "double""'");
+  } 
+  arg3 = static_cast< double >(val3);
+  {
+    try {
+      result = (bool)(arg1)->withinDistance((Geometry3D const &)*arg2,arg3);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_From_bool(static_cast< bool >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Geometry3D_distance__SWIG_0(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Geometry3D *arg1 = (Geometry3D *) 0 ;
+  Geometry3D *arg2 = 0 ;
+  double arg3 ;
+  double arg4 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  double val3 ;
+  int ecode3 = 0 ;
+  double val4 ;
+  int ecode4 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  PyObject * obj2 = 0 ;
+  PyObject * obj3 = 0 ;
+  double result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OOOO:Geometry3D_distance",&obj0,&obj1,&obj2,&obj3)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Geometry3D, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Geometry3D_distance" "', argument " "1"" of type '" "Geometry3D *""'"); 
+  }
+  arg1 = reinterpret_cast< Geometry3D * >(argp1);
+  res2 = SWIG_ConvertPtr(obj1, &argp2, SWIGTYPE_p_Geometry3D,  0  | 0);
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "Geometry3D_distance" "', argument " "2"" of type '" "Geometry3D const &""'"); 
+  }
+  if (!argp2) {
+    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "Geometry3D_distance" "', argument " "2"" of type '" "Geometry3D const &""'"); 
+  }
+  arg2 = reinterpret_cast< Geometry3D * >(argp2);
+  ecode3 = SWIG_AsVal_double(obj2, &val3);
+  if (!SWIG_IsOK(ecode3)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "Geometry3D_distance" "', argument " "3"" of type '" "double""'");
+  } 
+  arg3 = static_cast< double >(val3);
+  ecode4 = SWIG_AsVal_double(obj3, &val4);
+  if (!SWIG_IsOK(ecode4)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode4), "in method '" "Geometry3D_distance" "', argument " "4"" of type '" "double""'");
+  } 
+  arg4 = static_cast< double >(val4);
+  {
+    try {
+      result = (double)(arg1)->distance((Geometry3D const &)*arg2,arg3,arg4);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Geometry3D_distance__SWIG_1(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Geometry3D *arg1 = (Geometry3D *) 0 ;
+  Geometry3D *arg2 = 0 ;
+  double arg3 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  double val3 ;
+  int ecode3 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  PyObject * obj2 = 0 ;
+  double result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OOO:Geometry3D_distance",&obj0,&obj1,&obj2)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Geometry3D, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Geometry3D_distance" "', argument " "1"" of type '" "Geometry3D *""'"); 
+  }
+  arg1 = reinterpret_cast< Geometry3D * >(argp1);
+  res2 = SWIG_ConvertPtr(obj1, &argp2, SWIGTYPE_p_Geometry3D,  0  | 0);
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "Geometry3D_distance" "', argument " "2"" of type '" "Geometry3D const &""'"); 
+  }
+  if (!argp2) {
+    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "Geometry3D_distance" "', argument " "2"" of type '" "Geometry3D const &""'"); 
+  }
+  arg2 = reinterpret_cast< Geometry3D * >(argp2);
+  ecode3 = SWIG_AsVal_double(obj2, &val3);
+  if (!SWIG_IsOK(ecode3)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "Geometry3D_distance" "', argument " "3"" of type '" "double""'");
+  } 
+  arg3 = static_cast< double >(val3);
+  {
+    try {
+      result = (double)(arg1)->distance((Geometry3D const &)*arg2,arg3);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Geometry3D_distance__SWIG_2(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Geometry3D *arg1 = (Geometry3D *) 0 ;
+  Geometry3D *arg2 = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  double result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:Geometry3D_distance",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Geometry3D, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Geometry3D_distance" "', argument " "1"" of type '" "Geometry3D *""'"); 
+  }
+  arg1 = reinterpret_cast< Geometry3D * >(argp1);
+  res2 = SWIG_ConvertPtr(obj1, &argp2, SWIGTYPE_p_Geometry3D,  0  | 0);
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "Geometry3D_distance" "', argument " "2"" of type '" "Geometry3D const &""'"); 
+  }
+  if (!argp2) {
+    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "Geometry3D_distance" "', argument " "2"" of type '" "Geometry3D const &""'"); 
+  }
+  arg2 = reinterpret_cast< Geometry3D * >(argp2);
+  {
+    try {
+      result = (double)(arg1)->distance((Geometry3D const &)*arg2);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Geometry3D_distance(PyObject *self, PyObject *args) {
+  int argc;
+  PyObject *argv[5];
+  int ii;
+  
+  if (!PyTuple_Check(args)) SWIG_fail;
+  argc = args ? (int)PyObject_Length(args) : 0;
+  for (ii = 0; (ii < 4) && (ii < argc); ii++) {
+    argv[ii] = PyTuple_GET_ITEM(args,ii);
+  }
+  if (argc == 2) {
+    int _v;
+    void *vptr = 0;
+    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_Geometry3D, 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      int res = SWIG_ConvertPtr(argv[1], 0, SWIGTYPE_p_Geometry3D, 0);
+      _v = SWIG_CheckState(res);
+      if (_v) {
+        return _wrap_Geometry3D_distance__SWIG_2(self, args);
+      }
+    }
+  }
+  if (argc == 3) {
+    int _v;
+    void *vptr = 0;
+    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_Geometry3D, 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      int res = SWIG_ConvertPtr(argv[1], 0, SWIGTYPE_p_Geometry3D, 0);
+      _v = SWIG_CheckState(res);
+      if (_v) {
+        {
+          int res = SWIG_AsVal_double(argv[2], NULL);
+          _v = SWIG_CheckState(res);
+        }
+        if (_v) {
+          return _wrap_Geometry3D_distance__SWIG_1(self, args);
+        }
+      }
+    }
+  }
+  if (argc == 4) {
+    int _v;
+    void *vptr = 0;
+    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_Geometry3D, 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      int res = SWIG_ConvertPtr(argv[1], 0, SWIGTYPE_p_Geometry3D, 0);
+      _v = SWIG_CheckState(res);
+      if (_v) {
+        {
+          int res = SWIG_AsVal_double(argv[2], NULL);
+          _v = SWIG_CheckState(res);
+        }
+        if (_v) {
+          {
+            int res = SWIG_AsVal_double(argv[3], NULL);
+            _v = SWIG_CheckState(res);
+          }
+          if (_v) {
+            return _wrap_Geometry3D_distance__SWIG_0(self, args);
+          }
+        }
+      }
+    }
+  }
+  
+fail:
+  SWIG_SetErrorMsg(PyExc_NotImplementedError,"Wrong number or type of arguments for overloaded function 'Geometry3D_distance'.\n"
+    "  Possible C/C++ prototypes are:\n"
+    "    Geometry3D::distance(Geometry3D const &,double,double)\n"
+    "    Geometry3D::distance(Geometry3D const &,double)\n"
+    "    Geometry3D::distance(Geometry3D const &)\n");
+  return 0;
+}
+
+
+SWIGINTERN PyObject *_wrap_Geometry3D_rayCast(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Geometry3D *arg1 = (Geometry3D *) 0 ;
+  double *arg2 ;
+  double *arg3 ;
+  double *arg4 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double temp2[3] ;
+  double temp3[3] ;
+  double temp4[3] ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  PyObject * obj2 = 0 ;
+  bool result;
+  
+  {
+    arg4 = &temp4[0];
+  }
+  if (!PyArg_ParseTuple(args,(char *)"OOO:Geometry3D_rayCast",&obj0,&obj1,&obj2)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Geometry3D, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Geometry3D_rayCast" "', argument " "1"" of type '" "Geometry3D *""'"); 
+  }
+  arg1 = reinterpret_cast< Geometry3D * >(argp1);
+  {
+    if (!convert_darray(obj1,temp2,3)) {
+      return NULL;
+    }
+    arg2 = &temp2[0];
+  }
+  {
+    if (!convert_darray(obj2,temp3,3)) {
+      return NULL;
+    }
+    arg3 = &temp3[0];
+  }
+  {
+    try {
+      result = (bool)(arg1)->rayCast((double const (*))arg2,(double const (*))arg3,arg4);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_From_bool(static_cast< bool >(result));
+  {
+    PyObject *o, *o2, *o3;
+    o = convert_darray_obj(arg4,3);
+    if ((!resultobj) || (resultobj == Py_None)) {
+      resultobj = o;
+    } else {
+      if (!PyTuple_Check(resultobj)) {
+        PyObject *o2 = resultobj;
+        resultobj = PyTuple_New(1);
+        PyTuple_SetItem(resultobj,0,o2);
+      }
+      o3 = PyTuple_New(1);
+      PyTuple_SetItem(o3,0,o);
+      o2 = resultobj;
+      resultobj = PySequence_Concat(o2,o3);
+      Py_DECREF(o2);
+      Py_DECREF(o3);
+    }
+  }
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Geometry3D_world_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Geometry3D *arg1 = (Geometry3D *) 0 ;
+  int arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:Geometry3D_world_set",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Geometry3D, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Geometry3D_world_set" "', argument " "1"" of type '" "Geometry3D *""'"); 
+  }
+  arg1 = reinterpret_cast< Geometry3D * >(argp1);
+  ecode2 = SWIG_AsVal_int(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Geometry3D_world_set" "', argument " "2"" of type '" "int""'");
+  } 
+  arg2 = static_cast< int >(val2);
+  if (arg1) (arg1)->world = arg2;
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Geometry3D_world_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Geometry3D *arg1 = (Geometry3D *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  int result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:Geometry3D_world_get",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Geometry3D, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Geometry3D_world_get" "', argument " "1"" of type '" "Geometry3D *""'"); 
+  }
+  arg1 = reinterpret_cast< Geometry3D * >(argp1);
+  result = (int) ((arg1)->world);
+  resultobj = SWIG_From_int(static_cast< int >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Geometry3D_id_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Geometry3D *arg1 = (Geometry3D *) 0 ;
+  int arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:Geometry3D_id_set",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Geometry3D, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Geometry3D_id_set" "', argument " "1"" of type '" "Geometry3D *""'"); 
+  }
+  arg1 = reinterpret_cast< Geometry3D * >(argp1);
+  ecode2 = SWIG_AsVal_int(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Geometry3D_id_set" "', argument " "2"" of type '" "int""'");
+  } 
+  arg2 = static_cast< int >(val2);
+  if (arg1) (arg1)->id = arg2;
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Geometry3D_id_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Geometry3D *arg1 = (Geometry3D *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  int result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:Geometry3D_id_get",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Geometry3D, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Geometry3D_id_get" "', argument " "1"" of type '" "Geometry3D *""'"); 
+  }
+  arg1 = reinterpret_cast< Geometry3D * >(argp1);
+  result = (int) ((arg1)->id);
+  resultobj = SWIG_From_int(static_cast< int >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Geometry3D_geomPtr_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Geometry3D *arg1 = (Geometry3D *) 0 ;
+  void *arg2 = (void *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int res2 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:Geometry3D_geomPtr_set",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Geometry3D, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Geometry3D_geomPtr_set" "', argument " "1"" of type '" "Geometry3D *""'"); 
+  }
+  arg1 = reinterpret_cast< Geometry3D * >(argp1);
+  res2 = SWIG_ConvertPtr(obj1,SWIG_as_voidptrptr(&arg2), 0, SWIG_POINTER_DISOWN);
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "Geometry3D_geomPtr_set" "', argument " "2"" of type '" "void *""'"); 
+  }
+  if (arg1) (arg1)->geomPtr = arg2;
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Geometry3D_geomPtr_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Geometry3D *arg1 = (Geometry3D *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  void *result = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:Geometry3D_geomPtr_get",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Geometry3D, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Geometry3D_geomPtr_get" "', argument " "1"" of type '" "Geometry3D *""'"); 
+  }
+  arg1 = reinterpret_cast< Geometry3D * >(argp1);
+  result = (void *) ((arg1)->geomPtr);
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_void, 0 |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *Geometry3D_swigregister(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *obj;
+  if (!PyArg_ParseTuple(args,(char*)"O:swigregister", &obj)) return NULL;
+  SWIG_TypeNewClientData(SWIGTYPE_p_Geometry3D, SWIG_NewClientData(obj));
   return SWIG_Py_Void();
 }
 
@@ -28348,6 +30829,94 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"doubleMatrix_capacity", _wrap_doubleMatrix_capacity, METH_VARARGS, NULL},
 	 { (char *)"delete_doubleMatrix", _wrap_delete_doubleMatrix, METH_VARARGS, (char *)"delete_doubleMatrix(doubleMatrix self)"},
 	 { (char *)"doubleMatrix_swigregister", doubleMatrix_swigregister, METH_VARARGS, NULL},
+	 { (char *)"TriangleMesh_translate", _wrap_TriangleMesh_translate, METH_VARARGS, (char *)"TriangleMesh_translate(TriangleMesh self, double const [3] t)"},
+	 { (char *)"TriangleMesh_transform", _wrap_TriangleMesh_transform, METH_VARARGS, (char *)"TriangleMesh_transform(TriangleMesh self, double const [9] R, double const [3] t)"},
+	 { (char *)"TriangleMesh_indices_set", _wrap_TriangleMesh_indices_set, METH_VARARGS, (char *)"TriangleMesh_indices_set(TriangleMesh self, intVector indices)"},
+	 { (char *)"TriangleMesh_indices_get", _wrap_TriangleMesh_indices_get, METH_VARARGS, (char *)"TriangleMesh_indices_get(TriangleMesh self) -> intVector"},
+	 { (char *)"TriangleMesh_vertices_set", _wrap_TriangleMesh_vertices_set, METH_VARARGS, (char *)"TriangleMesh_vertices_set(TriangleMesh self, doubleVector vertices)"},
+	 { (char *)"TriangleMesh_vertices_get", _wrap_TriangleMesh_vertices_get, METH_VARARGS, (char *)"TriangleMesh_vertices_get(TriangleMesh self) -> doubleVector"},
+	 { (char *)"new_TriangleMesh", _wrap_new_TriangleMesh, METH_VARARGS, (char *)"new_TriangleMesh() -> TriangleMesh"},
+	 { (char *)"delete_TriangleMesh", _wrap_delete_TriangleMesh, METH_VARARGS, (char *)"delete_TriangleMesh(TriangleMesh self)"},
+	 { (char *)"TriangleMesh_swigregister", TriangleMesh_swigregister, METH_VARARGS, NULL},
+	 { (char *)"PointCloud_translate", _wrap_PointCloud_translate, METH_VARARGS, (char *)"PointCloud_translate(PointCloud self, double const [3] t)"},
+	 { (char *)"PointCloud_transform", _wrap_PointCloud_transform, METH_VARARGS, (char *)"PointCloud_transform(PointCloud self, double const [9] R, double const [3] t)"},
+	 { (char *)"PointCloud_vertices_set", _wrap_PointCloud_vertices_set, METH_VARARGS, (char *)"PointCloud_vertices_set(PointCloud self, doubleVector vertices)"},
+	 { (char *)"PointCloud_vertices_get", _wrap_PointCloud_vertices_get, METH_VARARGS, (char *)"PointCloud_vertices_get(PointCloud self) -> doubleVector"},
+	 { (char *)"PointCloud_propertyNames_set", _wrap_PointCloud_propertyNames_set, METH_VARARGS, (char *)"PointCloud_propertyNames_set(PointCloud self, std::vector< std::string,std::allocator< std::string > > * propertyNames)"},
+	 { (char *)"PointCloud_propertyNames_get", _wrap_PointCloud_propertyNames_get, METH_VARARGS, (char *)"PointCloud_propertyNames_get(PointCloud self) -> std::vector< std::string,std::allocator< std::string > > *"},
+	 { (char *)"PointCloud_properties_set", _wrap_PointCloud_properties_set, METH_VARARGS, (char *)"PointCloud_properties_set(PointCloud self, doubleVector properties)"},
+	 { (char *)"PointCloud_properties_get", _wrap_PointCloud_properties_get, METH_VARARGS, (char *)"PointCloud_properties_get(PointCloud self) -> doubleVector"},
+	 { (char *)"new_PointCloud", _wrap_new_PointCloud, METH_VARARGS, (char *)"new_PointCloud() -> PointCloud"},
+	 { (char *)"delete_PointCloud", _wrap_delete_PointCloud, METH_VARARGS, (char *)"delete_PointCloud(PointCloud self)"},
+	 { (char *)"PointCloud_swigregister", PointCloud_swigregister, METH_VARARGS, NULL},
+	 { (char *)"GeometricPrimitive_setPoint", _wrap_GeometricPrimitive_setPoint, METH_VARARGS, (char *)"GeometricPrimitive_setPoint(GeometricPrimitive self, double const [3] pt)"},
+	 { (char *)"GeometricPrimitive_setSphere", _wrap_GeometricPrimitive_setSphere, METH_VARARGS, (char *)"GeometricPrimitive_setSphere(GeometricPrimitive self, double const [3] c, double r)"},
+	 { (char *)"GeometricPrimitive_setSegment", _wrap_GeometricPrimitive_setSegment, METH_VARARGS, (char *)"GeometricPrimitive_setSegment(GeometricPrimitive self, double const [3] a, double const [3] b)"},
+	 { (char *)"GeometricPrimitive_setAABB", _wrap_GeometricPrimitive_setAABB, METH_VARARGS, (char *)"GeometricPrimitive_setAABB(GeometricPrimitive self, double const [3] bmin, double const [3] bmax)"},
+	 { (char *)"GeometricPrimitive_loadString", _wrap_GeometricPrimitive_loadString, METH_VARARGS, (char *)"GeometricPrimitive_loadString(GeometricPrimitive self, char const * str) -> bool"},
+	 { (char *)"GeometricPrimitive_saveString", _wrap_GeometricPrimitive_saveString, METH_VARARGS, (char *)"GeometricPrimitive_saveString(GeometricPrimitive self) -> std::string"},
+	 { (char *)"GeometricPrimitive_type_set", _wrap_GeometricPrimitive_type_set, METH_VARARGS, (char *)"GeometricPrimitive_type_set(GeometricPrimitive self, std::string const & type)"},
+	 { (char *)"GeometricPrimitive_type_get", _wrap_GeometricPrimitive_type_get, METH_VARARGS, (char *)"GeometricPrimitive_type_get(GeometricPrimitive self) -> std::string const &"},
+	 { (char *)"GeometricPrimitive_properties_set", _wrap_GeometricPrimitive_properties_set, METH_VARARGS, (char *)"GeometricPrimitive_properties_set(GeometricPrimitive self, doubleVector properties)"},
+	 { (char *)"GeometricPrimitive_properties_get", _wrap_GeometricPrimitive_properties_get, METH_VARARGS, (char *)"GeometricPrimitive_properties_get(GeometricPrimitive self) -> doubleVector"},
+	 { (char *)"new_GeometricPrimitive", _wrap_new_GeometricPrimitive, METH_VARARGS, (char *)"new_GeometricPrimitive() -> GeometricPrimitive"},
+	 { (char *)"delete_GeometricPrimitive", _wrap_delete_GeometricPrimitive, METH_VARARGS, (char *)"delete_GeometricPrimitive(GeometricPrimitive self)"},
+	 { (char *)"GeometricPrimitive_swigregister", GeometricPrimitive_swigregister, METH_VARARGS, NULL},
+	 { (char *)"new_Geometry3D", _wrap_new_Geometry3D, METH_VARARGS, (char *)"new_Geometry3D() -> Geometry3D"},
+	 { (char *)"delete_Geometry3D", _wrap_delete_Geometry3D, METH_VARARGS, (char *)"delete_Geometry3D(Geometry3D self)"},
+	 { (char *)"Geometry3D_clone", _wrap_Geometry3D_clone, METH_VARARGS, (char *)"Geometry3D_clone(Geometry3D self) -> Geometry3D"},
+	 { (char *)"Geometry3D_set", _wrap_Geometry3D_set, METH_VARARGS, (char *)"Geometry3D_set(Geometry3D self, Geometry3D arg2)"},
+	 { (char *)"Geometry3D_isStandalone", _wrap_Geometry3D_isStandalone, METH_VARARGS, (char *)"Geometry3D_isStandalone(Geometry3D self) -> bool"},
+	 { (char *)"Geometry3D_free", _wrap_Geometry3D_free, METH_VARARGS, (char *)"Geometry3D_free(Geometry3D self)"},
+	 { (char *)"Geometry3D_type", _wrap_Geometry3D_type, METH_VARARGS, (char *)"Geometry3D_type(Geometry3D self) -> std::string"},
+	 { (char *)"Geometry3D_getTriangleMesh", _wrap_Geometry3D_getTriangleMesh, METH_VARARGS, (char *)"Geometry3D_getTriangleMesh(Geometry3D self) -> TriangleMesh"},
+	 { (char *)"Geometry3D_getPointCloud", _wrap_Geometry3D_getPointCloud, METH_VARARGS, (char *)"Geometry3D_getPointCloud(Geometry3D self) -> PointCloud"},
+	 { (char *)"Geometry3D_getGeometricPrimitive", _wrap_Geometry3D_getGeometricPrimitive, METH_VARARGS, (char *)"Geometry3D_getGeometricPrimitive(Geometry3D self) -> GeometricPrimitive"},
+	 { (char *)"Geometry3D_setTriangleMesh", _wrap_Geometry3D_setTriangleMesh, METH_VARARGS, (char *)"Geometry3D_setTriangleMesh(Geometry3D self, TriangleMesh arg2)"},
+	 { (char *)"Geometry3D_setPointCloud", _wrap_Geometry3D_setPointCloud, METH_VARARGS, (char *)"Geometry3D_setPointCloud(Geometry3D self, PointCloud arg2)"},
+	 { (char *)"Geometry3D_setGeometricPrimitive", _wrap_Geometry3D_setGeometricPrimitive, METH_VARARGS, (char *)"Geometry3D_setGeometricPrimitive(Geometry3D self, GeometricPrimitive arg2)"},
+	 { (char *)"Geometry3D_loadFile", _wrap_Geometry3D_loadFile, METH_VARARGS, (char *)"Geometry3D_loadFile(Geometry3D self, char const * fn) -> bool"},
+	 { (char *)"Geometry3D_saveFile", _wrap_Geometry3D_saveFile, METH_VARARGS, (char *)"Geometry3D_saveFile(Geometry3D self, char const * fn) -> bool"},
+	 { (char *)"Geometry3D_setCurrentTransform", _wrap_Geometry3D_setCurrentTransform, METH_VARARGS, (char *)"Geometry3D_setCurrentTransform(Geometry3D self, double const [9] R, double const [3] t)"},
+	 { (char *)"Geometry3D_translate", _wrap_Geometry3D_translate, METH_VARARGS, (char *)"Geometry3D_translate(Geometry3D self, double const [3] t)"},
+	 { (char *)"Geometry3D_transform", _wrap_Geometry3D_transform, METH_VARARGS, (char *)"Geometry3D_transform(Geometry3D self, double const [9] R, double const [3] t)"},
+	 { (char *)"Geometry3D_setCollisionMargin", _wrap_Geometry3D_setCollisionMargin, METH_VARARGS, (char *)"Geometry3D_setCollisionMargin(Geometry3D self, double margin)"},
+	 { (char *)"Geometry3D_getCollisionMargin", _wrap_Geometry3D_getCollisionMargin, METH_VARARGS, (char *)"Geometry3D_getCollisionMargin(Geometry3D self) -> double"},
+	 { (char *)"Geometry3D_getBB", _wrap_Geometry3D_getBB, METH_VARARGS, (char *)"Geometry3D_getBB(Geometry3D self)"},
+	 { (char *)"Geometry3D_collides", _wrap_Geometry3D_collides, METH_VARARGS, (char *)"Geometry3D_collides(Geometry3D self, Geometry3D other) -> bool"},
+	 { (char *)"Geometry3D_withinDistance", _wrap_Geometry3D_withinDistance, METH_VARARGS, (char *)"Geometry3D_withinDistance(Geometry3D self, Geometry3D other, double tol) -> bool"},
+	 { (char *)"Geometry3D_distance", _wrap_Geometry3D_distance, METH_VARARGS, (char *)"\n"
+		"distance(Geometry3D other, double relErr=0, double absErr=0) -> double\n"
+		"distance(Geometry3D other, double relErr=0) -> double\n"
+		"Geometry3D_distance(Geometry3D self, Geometry3D other) -> double\n"
+		"\n"
+		"double distance(int geom1, int\n"
+		"geom2, double relErr, double absErr)\n"
+		"\n"
+		"Returns the distance between the two geometries, possibly with an\n"
+		"approximation error (useful to speed up mesh-mesh distance detection)\n"
+		"\n"
+		"Error of result is no more than D*relErr+absErr where D is the actual\n"
+		"distance. Set relErr=absErr=0 to get exact distance.\n"
+		"\n"
+		"NOTE: Not yet implemented. \n"
+		""},
+	 { (char *)"Geometry3D_rayCast", _wrap_Geometry3D_rayCast, METH_VARARGS, (char *)"\n"
+		"Geometry3D_rayCast(Geometry3D self, double const [3] s, double const [3] d) -> bool\n"
+		"\n"
+		"bool rayCast(int geom, const double\n"
+		"s[3], const double d[3], double out[3])\n"
+		"\n"
+		"Returns true if the geometry is hit by the given ray, and also returns\n"
+		"the hit point (in world coordinates). \n"
+		""},
+	 { (char *)"Geometry3D_world_set", _wrap_Geometry3D_world_set, METH_VARARGS, (char *)"Geometry3D_world_set(Geometry3D self, int world)"},
+	 { (char *)"Geometry3D_world_get", _wrap_Geometry3D_world_get, METH_VARARGS, (char *)"Geometry3D_world_get(Geometry3D self) -> int"},
+	 { (char *)"Geometry3D_id_set", _wrap_Geometry3D_id_set, METH_VARARGS, (char *)"Geometry3D_id_set(Geometry3D self, int id)"},
+	 { (char *)"Geometry3D_id_get", _wrap_Geometry3D_id_get, METH_VARARGS, (char *)"Geometry3D_id_get(Geometry3D self) -> int"},
+	 { (char *)"Geometry3D_geomPtr_set", _wrap_Geometry3D_geomPtr_set, METH_VARARGS, (char *)"Geometry3D_geomPtr_set(Geometry3D self, void * geomPtr)"},
+	 { (char *)"Geometry3D_geomPtr_get", _wrap_Geometry3D_geomPtr_get, METH_VARARGS, (char *)"Geometry3D_geomPtr_get(Geometry3D self) -> void *"},
+	 { (char *)"Geometry3D_swigregister", Geometry3D_swigregister, METH_VARARGS, NULL},
 	 { (char *)"Mass_setMass", _wrap_Mass_setMass, METH_VARARGS, (char *)"\n"
 		"Mass_setMass(Mass self, double _mass)\n"
 		"\n"
@@ -30065,6 +32634,7 @@ static swig_type_info _swigt__p_ContactParameters = {"_p_ContactParameters", "Co
 static swig_type_info _swigt__p_Environment = {"_p_Environment", "Environment *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_GeneralizedIKObjective = {"_p_GeneralizedIKObjective", "GeneralizedIKObjective *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_GeneralizedIKSolver = {"_p_GeneralizedIKSolver", "GeneralizedIKSolver *", 0, 0, (void*)0, 0};
+static swig_type_info _swigt__p_GeometricPrimitive = {"_p_GeometricPrimitive", "GeometricPrimitive *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_Geometry3D = {"_p_Geometry3D", "Geometry3D *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_IKGoal = {"_p_IKGoal", "IKGoal *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_IKObjective = {"_p_IKObjective", "IKObjective *", 0, 0, (void*)0, 0};
@@ -30072,6 +32642,7 @@ static swig_type_info _swigt__p_IKSolver = {"_p_IKSolver", "IKSolver *", 0, 0, (
 static swig_type_info _swigt__p_Mass = {"_p_Mass", "Mass *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_ODEGeometry = {"_p_ODEGeometry", "ODEGeometry *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_ODESurfaceProperties = {"_p_ODESurfaceProperties", "ODESurfaceProperties *", 0, 0, (void*)0, 0};
+static swig_type_info _swigt__p_PointCloud = {"_p_PointCloud", "PointCloud *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_RigidObject = {"_p_RigidObject", "RigidObject *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_RigidObjectModel = {"_p_RigidObjectModel", "RigidObjectModel *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_Robot = {"_p_Robot", "Robot *", 0, 0, (void*)0, 0};
@@ -30084,6 +32655,7 @@ static swig_type_info _swigt__p_SimRobotController = {"_p_SimRobotController", "
 static swig_type_info _swigt__p_SimRobotSensor = {"_p_SimRobotSensor", "SimRobotSensor *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_Simulator = {"_p_Simulator", "Simulator *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_TerrainModel = {"_p_TerrainModel", "TerrainModel *", 0, 0, (void*)0, 0};
+static swig_type_info _swigt__p_TriangleMesh = {"_p_TriangleMesh", "TriangleMesh *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_WorldModel = {"_p_WorldModel", "WorldModel *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_WorldSimulation = {"_p_WorldSimulation", "WorldSimulation *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p__object = {"_p__object", "_object *|PyObject *", 0, 0, (void*)0, 0};
@@ -30110,12 +32682,14 @@ static swig_type_info _swigt__p_std__vectorT_std__string_std__allocatorT_std__st
 static swig_type_info _swigt__p_std__vectorT_std__vectorT_double_std__allocatorT_double_t_t_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t_t = {"_p_std__vectorT_std__vectorT_double_std__allocatorT_double_t_t_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t_t", "std::vector< std::vector< double > > *|std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *|std::vector< std::vector< double,std::allocator< double > > > *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_swig__SwigPyIterator = {"_p_swig__SwigPyIterator", "swig::SwigPyIterator *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_value_type = {"_p_value_type", "value_type *", 0, 0, (void*)0, 0};
+static swig_type_info _swigt__p_void = {"_p_void", "void *", 0, 0, (void*)0, 0};
 
 static swig_type_info *swig_type_initial[] = {
   &_swigt__p_ContactParameters,
   &_swigt__p_Environment,
   &_swigt__p_GeneralizedIKObjective,
   &_swigt__p_GeneralizedIKSolver,
+  &_swigt__p_GeometricPrimitive,
   &_swigt__p_Geometry3D,
   &_swigt__p_IKGoal,
   &_swigt__p_IKObjective,
@@ -30123,6 +32697,7 @@ static swig_type_info *swig_type_initial[] = {
   &_swigt__p_Mass,
   &_swigt__p_ODEGeometry,
   &_swigt__p_ODESurfaceProperties,
+  &_swigt__p_PointCloud,
   &_swigt__p_RigidObject,
   &_swigt__p_RigidObjectModel,
   &_swigt__p_Robot,
@@ -30135,6 +32710,7 @@ static swig_type_info *swig_type_initial[] = {
   &_swigt__p_SimRobotSensor,
   &_swigt__p_Simulator,
   &_swigt__p_TerrainModel,
+  &_swigt__p_TriangleMesh,
   &_swigt__p_WorldModel,
   &_swigt__p_WorldSimulation,
   &_swigt__p__object,
@@ -30161,12 +32737,14 @@ static swig_type_info *swig_type_initial[] = {
   &_swigt__p_std__vectorT_std__vectorT_double_std__allocatorT_double_t_t_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t_t,
   &_swigt__p_swig__SwigPyIterator,
   &_swigt__p_value_type,
+  &_swigt__p_void,
 };
 
 static swig_cast_info _swigc__p_ContactParameters[] = {  {&_swigt__p_ContactParameters, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_Environment[] = {  {&_swigt__p_Environment, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_GeneralizedIKObjective[] = {  {&_swigt__p_GeneralizedIKObjective, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_GeneralizedIKSolver[] = {  {&_swigt__p_GeneralizedIKSolver, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_GeometricPrimitive[] = {  {&_swigt__p_GeometricPrimitive, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_Geometry3D[] = {  {&_swigt__p_Geometry3D, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_IKGoal[] = {  {&_swigt__p_IKGoal, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_IKObjective[] = {  {&_swigt__p_IKObjective, 0, 0, 0},{0, 0, 0, 0}};
@@ -30174,6 +32752,7 @@ static swig_cast_info _swigc__p_IKSolver[] = {  {&_swigt__p_IKSolver, 0, 0, 0},{
 static swig_cast_info _swigc__p_Mass[] = {  {&_swigt__p_Mass, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_ODEGeometry[] = {  {&_swigt__p_ODEGeometry, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_ODESurfaceProperties[] = {  {&_swigt__p_ODESurfaceProperties, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_PointCloud[] = {  {&_swigt__p_PointCloud, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_RigidObject[] = {  {&_swigt__p_RigidObject, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_RigidObjectModel[] = {  {&_swigt__p_RigidObjectModel, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_Robot[] = {  {&_swigt__p_Robot, 0, 0, 0},{0, 0, 0, 0}};
@@ -30186,6 +32765,7 @@ static swig_cast_info _swigc__p_SimRobotController[] = {  {&_swigt__p_SimRobotCo
 static swig_cast_info _swigc__p_SimRobotSensor[] = {  {&_swigt__p_SimRobotSensor, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_Simulator[] = {  {&_swigt__p_Simulator, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_TerrainModel[] = {  {&_swigt__p_TerrainModel, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_TriangleMesh[] = {  {&_swigt__p_TriangleMesh, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_WorldModel[] = {  {&_swigt__p_WorldModel, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_WorldSimulation[] = {  {&_swigt__p_WorldSimulation, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p__object[] = {  {&_swigt__p__object, 0, 0, 0},{0, 0, 0, 0}};
@@ -30212,12 +32792,14 @@ static swig_cast_info _swigc__p_std__vectorT_std__string_std__allocatorT_std__st
 static swig_cast_info _swigc__p_std__vectorT_std__vectorT_double_std__allocatorT_double_t_t_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t_t[] = {  {&_swigt__p_std__vectorT_std__vectorT_double_std__allocatorT_double_t_t_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t_t, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_swig__SwigPyIterator[] = {  {&_swigt__p_swig__SwigPyIterator, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_value_type[] = {  {&_swigt__p_value_type, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_void[] = {  {&_swigt__p_void, 0, 0, 0},{0, 0, 0, 0}};
 
 static swig_cast_info *swig_cast_initial[] = {
   _swigc__p_ContactParameters,
   _swigc__p_Environment,
   _swigc__p_GeneralizedIKObjective,
   _swigc__p_GeneralizedIKSolver,
+  _swigc__p_GeometricPrimitive,
   _swigc__p_Geometry3D,
   _swigc__p_IKGoal,
   _swigc__p_IKObjective,
@@ -30225,6 +32807,7 @@ static swig_cast_info *swig_cast_initial[] = {
   _swigc__p_Mass,
   _swigc__p_ODEGeometry,
   _swigc__p_ODESurfaceProperties,
+  _swigc__p_PointCloud,
   _swigc__p_RigidObject,
   _swigc__p_RigidObjectModel,
   _swigc__p_Robot,
@@ -30237,6 +32820,7 @@ static swig_cast_info *swig_cast_initial[] = {
   _swigc__p_SimRobotSensor,
   _swigc__p_Simulator,
   _swigc__p_TerrainModel,
+  _swigc__p_TriangleMesh,
   _swigc__p_WorldModel,
   _swigc__p_WorldSimulation,
   _swigc__p__object,
@@ -30263,6 +32847,7 @@ static swig_cast_info *swig_cast_initial[] = {
   _swigc__p_std__vectorT_std__vectorT_double_std__allocatorT_double_t_t_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t_t,
   _swigc__p_swig__SwigPyIterator,
   _swigc__p_value_type,
+  _swigc__p_void,
 };
 
 

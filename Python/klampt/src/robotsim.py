@@ -8,7 +8,7 @@
 
 
 """
-Loading, modeling, and simulating RobotSim files
+Klamp't Core Python bindings
 """
 
 
@@ -290,6 +290,259 @@ class doubleMatrix(_object):
     __del__ = lambda self : None;
 doubleMatrix_swigregister = _robotsim.doubleMatrix_swigregister
 doubleMatrix_swigregister(doubleMatrix)
+
+class TriangleMesh(_object):
+    """Proxy of C++ TriangleMesh class"""
+    __swig_setmethods__ = {}
+    __setattr__ = lambda self, name, value: _swig_setattr(self, TriangleMesh, name, value)
+    __swig_getmethods__ = {}
+    __getattr__ = lambda self, name: _swig_getattr(self, TriangleMesh, name)
+    __repr__ = _swig_repr
+    def translate(self, *args):
+        """translate(TriangleMesh self, double const [3] t)"""
+        return _robotsim.TriangleMesh_translate(self, *args)
+
+    def transform(self, *args):
+        """transform(TriangleMesh self, double const [9] R, double const [3] t)"""
+        return _robotsim.TriangleMesh_transform(self, *args)
+
+    __swig_setmethods__["indices"] = _robotsim.TriangleMesh_indices_set
+    __swig_getmethods__["indices"] = _robotsim.TriangleMesh_indices_get
+    if _newclass:indices = _swig_property(_robotsim.TriangleMesh_indices_get, _robotsim.TriangleMesh_indices_set)
+    __swig_setmethods__["vertices"] = _robotsim.TriangleMesh_vertices_set
+    __swig_getmethods__["vertices"] = _robotsim.TriangleMesh_vertices_get
+    if _newclass:vertices = _swig_property(_robotsim.TriangleMesh_vertices_get, _robotsim.TriangleMesh_vertices_set)
+    def __init__(self): 
+        """__init__(TriangleMesh self) -> TriangleMesh"""
+        this = _robotsim.new_TriangleMesh()
+        try: self.this.append(this)
+        except: self.this = this
+    __swig_destroy__ = _robotsim.delete_TriangleMesh
+    __del__ = lambda self : None;
+TriangleMesh_swigregister = _robotsim.TriangleMesh_swigregister
+TriangleMesh_swigregister(TriangleMesh)
+
+class PointCloud(_object):
+    """Proxy of C++ PointCloud class"""
+    __swig_setmethods__ = {}
+    __setattr__ = lambda self, name, value: _swig_setattr(self, PointCloud, name, value)
+    __swig_getmethods__ = {}
+    __getattr__ = lambda self, name: _swig_getattr(self, PointCloud, name)
+    __repr__ = _swig_repr
+    def translate(self, *args):
+        """translate(PointCloud self, double const [3] t)"""
+        return _robotsim.PointCloud_translate(self, *args)
+
+    def transform(self, *args):
+        """transform(PointCloud self, double const [9] R, double const [3] t)"""
+        return _robotsim.PointCloud_transform(self, *args)
+
+    __swig_setmethods__["vertices"] = _robotsim.PointCloud_vertices_set
+    __swig_getmethods__["vertices"] = _robotsim.PointCloud_vertices_get
+    if _newclass:vertices = _swig_property(_robotsim.PointCloud_vertices_get, _robotsim.PointCloud_vertices_set)
+    __swig_setmethods__["propertyNames"] = _robotsim.PointCloud_propertyNames_set
+    __swig_getmethods__["propertyNames"] = _robotsim.PointCloud_propertyNames_get
+    if _newclass:propertyNames = _swig_property(_robotsim.PointCloud_propertyNames_get, _robotsim.PointCloud_propertyNames_set)
+    __swig_setmethods__["properties"] = _robotsim.PointCloud_properties_set
+    __swig_getmethods__["properties"] = _robotsim.PointCloud_properties_get
+    if _newclass:properties = _swig_property(_robotsim.PointCloud_properties_get, _robotsim.PointCloud_properties_set)
+    def __init__(self): 
+        """__init__(PointCloud self) -> PointCloud"""
+        this = _robotsim.new_PointCloud()
+        try: self.this.append(this)
+        except: self.this = this
+    __swig_destroy__ = _robotsim.delete_PointCloud
+    __del__ = lambda self : None;
+PointCloud_swigregister = _robotsim.PointCloud_swigregister
+PointCloud_swigregister(PointCloud)
+
+class GeometricPrimitive(_object):
+    """Proxy of C++ GeometricPrimitive class"""
+    __swig_setmethods__ = {}
+    __setattr__ = lambda self, name, value: _swig_setattr(self, GeometricPrimitive, name, value)
+    __swig_getmethods__ = {}
+    __getattr__ = lambda self, name: _swig_getattr(self, GeometricPrimitive, name)
+    __repr__ = _swig_repr
+    def setPoint(self, *args):
+        """setPoint(GeometricPrimitive self, double const [3] pt)"""
+        return _robotsim.GeometricPrimitive_setPoint(self, *args)
+
+    def setSphere(self, *args):
+        """setSphere(GeometricPrimitive self, double const [3] c, double r)"""
+        return _robotsim.GeometricPrimitive_setSphere(self, *args)
+
+    def setSegment(self, *args):
+        """setSegment(GeometricPrimitive self, double const [3] a, double const [3] b)"""
+        return _robotsim.GeometricPrimitive_setSegment(self, *args)
+
+    def setAABB(self, *args):
+        """setAABB(GeometricPrimitive self, double const [3] bmin, double const [3] bmax)"""
+        return _robotsim.GeometricPrimitive_setAABB(self, *args)
+
+    def loadString(self, *args):
+        """loadString(GeometricPrimitive self, char const * str) -> bool"""
+        return _robotsim.GeometricPrimitive_loadString(self, *args)
+
+    def saveString(self):
+        """saveString(GeometricPrimitive self) -> std::string"""
+        return _robotsim.GeometricPrimitive_saveString(self)
+
+    __swig_setmethods__["type"] = _robotsim.GeometricPrimitive_type_set
+    __swig_getmethods__["type"] = _robotsim.GeometricPrimitive_type_get
+    if _newclass:type = _swig_property(_robotsim.GeometricPrimitive_type_get, _robotsim.GeometricPrimitive_type_set)
+    __swig_setmethods__["properties"] = _robotsim.GeometricPrimitive_properties_set
+    __swig_getmethods__["properties"] = _robotsim.GeometricPrimitive_properties_get
+    if _newclass:properties = _swig_property(_robotsim.GeometricPrimitive_properties_get, _robotsim.GeometricPrimitive_properties_set)
+    def __init__(self): 
+        """__init__(GeometricPrimitive self) -> GeometricPrimitive"""
+        this = _robotsim.new_GeometricPrimitive()
+        try: self.this.append(this)
+        except: self.this = this
+    __swig_destroy__ = _robotsim.delete_GeometricPrimitive
+    __del__ = lambda self : None;
+GeometricPrimitive_swigregister = _robotsim.GeometricPrimitive_swigregister
+GeometricPrimitive_swigregister(GeometricPrimitive)
+
+class Geometry3D(_object):
+    """Proxy of C++ Geometry3D class"""
+    __swig_setmethods__ = {}
+    __setattr__ = lambda self, name, value: _swig_setattr(self, Geometry3D, name, value)
+    __swig_getmethods__ = {}
+    __getattr__ = lambda self, name: _swig_getattr(self, Geometry3D, name)
+    __repr__ = _swig_repr
+    def __init__(self): 
+        """__init__(Geometry3D self) -> Geometry3D"""
+        this = _robotsim.new_Geometry3D()
+        try: self.this.append(this)
+        except: self.this = this
+    __swig_destroy__ = _robotsim.delete_Geometry3D
+    __del__ = lambda self : None;
+    def clone(self):
+        """clone(Geometry3D self) -> Geometry3D"""
+        return _robotsim.Geometry3D_clone(self)
+
+    def set(self, *args):
+        """set(Geometry3D self, Geometry3D arg2)"""
+        return _robotsim.Geometry3D_set(self, *args)
+
+    def isStandalone(self):
+        """isStandalone(Geometry3D self) -> bool"""
+        return _robotsim.Geometry3D_isStandalone(self)
+
+    def free(self):
+        """free(Geometry3D self)"""
+        return _robotsim.Geometry3D_free(self)
+
+    def type(self):
+        """type(Geometry3D self) -> std::string"""
+        return _robotsim.Geometry3D_type(self)
+
+    def getTriangleMesh(self):
+        """getTriangleMesh(Geometry3D self) -> TriangleMesh"""
+        return _robotsim.Geometry3D_getTriangleMesh(self)
+
+    def getPointCloud(self):
+        """getPointCloud(Geometry3D self) -> PointCloud"""
+        return _robotsim.Geometry3D_getPointCloud(self)
+
+    def getGeometricPrimitive(self):
+        """getGeometricPrimitive(Geometry3D self) -> GeometricPrimitive"""
+        return _robotsim.Geometry3D_getGeometricPrimitive(self)
+
+    def setTriangleMesh(self, *args):
+        """setTriangleMesh(Geometry3D self, TriangleMesh arg2)"""
+        return _robotsim.Geometry3D_setTriangleMesh(self, *args)
+
+    def setPointCloud(self, *args):
+        """setPointCloud(Geometry3D self, PointCloud arg2)"""
+        return _robotsim.Geometry3D_setPointCloud(self, *args)
+
+    def setGeometricPrimitive(self, *args):
+        """setGeometricPrimitive(Geometry3D self, GeometricPrimitive arg2)"""
+        return _robotsim.Geometry3D_setGeometricPrimitive(self, *args)
+
+    def loadFile(self, *args):
+        """loadFile(Geometry3D self, char const * fn) -> bool"""
+        return _robotsim.Geometry3D_loadFile(self, *args)
+
+    def saveFile(self, *args):
+        """saveFile(Geometry3D self, char const * fn) -> bool"""
+        return _robotsim.Geometry3D_saveFile(self, *args)
+
+    def setCurrentTransform(self, *args):
+        """setCurrentTransform(Geometry3D self, double const [9] R, double const [3] t)"""
+        return _robotsim.Geometry3D_setCurrentTransform(self, *args)
+
+    def translate(self, *args):
+        """translate(Geometry3D self, double const [3] t)"""
+        return _robotsim.Geometry3D_translate(self, *args)
+
+    def transform(self, *args):
+        """transform(Geometry3D self, double const [9] R, double const [3] t)"""
+        return _robotsim.Geometry3D_transform(self, *args)
+
+    def setCollisionMargin(self, *args):
+        """setCollisionMargin(Geometry3D self, double margin)"""
+        return _robotsim.Geometry3D_setCollisionMargin(self, *args)
+
+    def getCollisionMargin(self):
+        """getCollisionMargin(Geometry3D self) -> double"""
+        return _robotsim.Geometry3D_getCollisionMargin(self)
+
+    def getBB(self):
+        """getBB(Geometry3D self)"""
+        return _robotsim.Geometry3D_getBB(self)
+
+    def collides(self, *args):
+        """collides(Geometry3D self, Geometry3D other) -> bool"""
+        return _robotsim.Geometry3D_collides(self, *args)
+
+    def withinDistance(self, *args):
+        """withinDistance(Geometry3D self, Geometry3D other, double tol) -> bool"""
+        return _robotsim.Geometry3D_withinDistance(self, *args)
+
+    def distance(self, *args):
+        """
+        distance(Geometry3D self, Geometry3D other, double relErr=0, double absErr=0) -> double
+        distance(Geometry3D self, Geometry3D other, double relErr=0) -> double
+        distance(Geometry3D self, Geometry3D other) -> double
+
+        double distance(int geom1, int
+        geom2, double relErr, double absErr)
+
+        Returns the distance between the two geometries, possibly with an
+        approximation error (useful to speed up mesh-mesh distance detection)
+
+        Error of result is no more than D*relErr+absErr where D is the actual
+        distance. Set relErr=absErr=0 to get exact distance.
+
+        NOTE: Not yet implemented. 
+        """
+        return _robotsim.Geometry3D_distance(self, *args)
+
+    def rayCast(self, *args):
+        """
+        rayCast(Geometry3D self, double const [3] s, double const [3] d) -> bool
+
+        bool rayCast(int geom, const double
+        s[3], const double d[3], double out[3])
+
+        Returns true if the geometry is hit by the given ray, and also returns
+        the hit point (in world coordinates). 
+        """
+        return _robotsim.Geometry3D_rayCast(self, *args)
+
+    __swig_setmethods__["world"] = _robotsim.Geometry3D_world_set
+    __swig_getmethods__["world"] = _robotsim.Geometry3D_world_get
+    if _newclass:world = _swig_property(_robotsim.Geometry3D_world_get, _robotsim.Geometry3D_world_set)
+    __swig_setmethods__["id"] = _robotsim.Geometry3D_id_set
+    __swig_getmethods__["id"] = _robotsim.Geometry3D_id_get
+    if _newclass:id = _swig_property(_robotsim.Geometry3D_id_get, _robotsim.Geometry3D_id_set)
+    __swig_setmethods__["geomPtr"] = _robotsim.Geometry3D_geomPtr_set
+    __swig_getmethods__["geomPtr"] = _robotsim.Geometry3D_geomPtr_get
+    if _newclass:geomPtr = _swig_property(_robotsim.Geometry3D_geomPtr_get, _robotsim.Geometry3D_geomPtr_set)
+Geometry3D_swigregister = _robotsim.Geometry3D_swigregister
+Geometry3D_swigregister(Geometry3D)
 
 class Mass(_object):
     """

@@ -310,12 +310,35 @@ Geometry3D::~Geometry3D()
 
 bool Geometry3D::isStandalone()
 {
-  return(geomPtr != NULL && world >= 0);
+  return(geomPtr != NULL && world < 0);
+}
+
+Geometry3D Geometry3D::clone()
+{
+  Geometry3D res;
+  if(geomPtr != NULL) {
+    AnyCollisionGeometry3D* geom = reinterpret_cast<AnyCollisionGeometry3D*>(geomPtr);
+    res.geomPtr = new AnyCollisionGeometry3D(*geom);
+  }
+  return res;
+}
+
+void Geometry3D::set(const Geometry3D& g)
+{
+  AnyCollisionGeometry3D* ggeom = reinterpret_cast<AnyCollisionGeometry3D*>(geomPtr);
+  if(geomPtr == NULL) {
+    geomPtr = new AnyCollisionGeometry3D(*ggeom);
+  }
+  else {
+    AnyCollisionGeometry3D* geom = reinterpret_cast<AnyCollisionGeometry3D*>(geomPtr);
+    *geom = *ggeom;
+  }
 }
 
 void Geometry3D::free()
 {
   if(isStandalone()) {
+    printf("Geometry3D(): Freeing standalone geometry\n");
     AnyCollisionGeometry3D* ptr = reinterpret_cast<AnyCollisionGeometry3D*>(geomPtr);
     delete ptr;
   }
@@ -435,6 +458,17 @@ bool Geometry3D::saveFile(const char* fn)
   if(!geomPtr) return false;
   AnyCollisionGeometry3D* geom = reinterpret_cast<AnyCollisionGeometry3D*>(geomPtr);
   return geom->Save(fn);
+}
+
+
+void Geometry3D::setCurrentTransform(const double R[9],const double t[3])
+{
+  if(!geomPtr) return;
+  AnyCollisionGeometry3D* geom = reinterpret_cast<AnyCollisionGeometry3D*>(geomPtr);
+  RigidTransform T;
+  T.R.set(R);
+  T.t.set(t);
+  geom->SetTransform(T);
 }
 
 void Geometry3D::translate(const double t[3])

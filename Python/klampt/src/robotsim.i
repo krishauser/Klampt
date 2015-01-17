@@ -1,8 +1,9 @@
-%module(docstring="Loading, modeling, and simulating RobotSim files") robotsim
+%module(docstring="Klamp't Core Python bindings") robotsim
 %{
 	#include <exception>
 	#include <vector>
 	#include "pyerr.h"
+	#include "geometry.h"
 	#include "robotmodel.h"
 	#include "robotik.h"
 	#include "robotsim.h"
@@ -287,6 +288,7 @@ static PyObject* convert_dmatrix_obj(const std::vector<std::vector<double> >& ma
 %feature("autodoc","1");
 %include "docs/docs.i"
 
+%include "geometry.h"
 %include "robotmodel.h"
 %include "robotik.h"
 %include "robotsim.h"
