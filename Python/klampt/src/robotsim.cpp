@@ -300,161 +300,226 @@ std::string GeometricPrimitive::saveString() const
 
 
 Geometry3D::Geometry3D()
-  :world(-1),id(-1)
+  :world(-1),id(-1),geomPtr(NULL)
 {}
+
+Geometry3D::~Geometry3D()
+{
+  free();
+}
+
+bool Geometry3D::isStandalone()
+{
+  return(geomPtr != NULL && world >= 0);
+}
+
+void Geometry3D::free()
+{
+  if(isStandalone()) {
+    AnyCollisionGeometry3D* ptr = reinterpret_cast<AnyCollisionGeometry3D*>(geomPtr);
+    delete ptr;
+  }
+  world = -1;
+  id = -1;
+  geomPtr = NULL;
+}
 
 string Geometry3D::type()
 {
-  AnyGeometry3D& geom = worlds[this->world]->world.GetGeometry(id);
-  if(geom.Empty()) return "";
-  return geom.TypeName();
+  if(!geomPtr) return "";
+  AnyCollisionGeometry3D* geom = reinterpret_cast<AnyCollisionGeometry3D*>(geomPtr);
+  if(geom->Empty()) return "";
+  return geom->TypeName();
 }
 
 TriangleMesh Geometry3D::getTriangleMesh()
 {
   TriangleMesh mesh;
-  GetMesh(worlds[this->world]->world.GetGeometry(id),mesh);
+  if(geomPtr) {
+    AnyCollisionGeometry3D* geom = reinterpret_cast<AnyCollisionGeometry3D*>(geomPtr);
+    GetMesh(*geom,mesh);
+  }
   return mesh;
 }
 
 
 GeometricPrimitive Geometry3D::getGeometricPrimitive()
 {
-  RobotWorld& world=worlds[this->world]->world;
+  if(!geomPtr) return GeometricPrimitive();
+  AnyCollisionGeometry3D* geom = reinterpret_cast<AnyCollisionGeometry3D*>(geomPtr);
   stringstream ss;
-  ss<<world.GetGeometry(id).AsPrimitive();
-  GeometricPrimitive geom;
-  bool res=geom.loadString(ss.str().c_str());
+  ss<<geom->AsPrimitive();
+  GeometricPrimitive prim;
+  bool res=prim.loadString(ss.str().c_str());
   if(!res) {
-    throw PyException("Internal error");
+    throw PyException("Internal error, geometric primitive conversion");
   }
-  return geom;
+  return prim;
 }
 
 
 void Geometry3D::setTriangleMesh(const TriangleMesh& mesh)
 {
-  RobotWorld& world=worlds[this->world]->world;
-  GetMesh(mesh,world.GetGeometry(id));
-  //update the display list
-  world.GetAppearance(id).vertexDisplayList.erase();
-  world.GetAppearance(id).faceDisplayList.erase();
-  world.GetAppearance(id).Set(world.GetGeometry(id));
+  if(!geomPtr) {
+    geomPtr = new AnyCollisionGeometry3D();
+  }
+  AnyCollisionGeometry3D* geom = reinterpret_cast<AnyCollisionGeometry3D*>(geomPtr);
+  GetMesh(mesh,*geom);
+  if(!isStandalone()) {
+    //update the display list
+    RobotWorld& world=worlds[this->world]->world;
+    world.GetAppearance(id).vertexDisplayList.erase();
+    world.GetAppearance(id).faceDisplayList.erase();
+    world.GetAppearance(id).Set(*geom);
+  }
 }
 
 PointCloud Geometry3D::getPointCloud()
 {
   PointCloud pc;
-  GetPointCloud(worlds[this->world]->world.GetGeometry(id),pc);
+  if(geomPtr) {
+    AnyCollisionGeometry3D* geom = reinterpret_cast<AnyCollisionGeometry3D*>(geomPtr);
+    GetPointCloud(*geom,pc);
+  }
   return pc;
 }
 
 void Geometry3D::setPointCloud(const PointCloud& pc)
 {
-  RobotWorld& world=worlds[this->world]->world;
-  GetPointCloud(pc,world.GetGeometry(id));
-  //update the display list
-  world.GetAppearance(id).vertexDisplayList.erase();
-  world.GetAppearance(id).faceDisplayList.erase();
-  world.GetAppearance(id).Set(world.GetGeometry(id));
+  if(!geomPtr) {
+    geomPtr = new AnyCollisionGeometry3D();
+  }
+  AnyCollisionGeometry3D* geom = reinterpret_cast<AnyCollisionGeometry3D*>(geomPtr);
+  GetPointCloud(pc,*geom);
+  if(!isStandalone()) {
+    //update the display list
+    RobotWorld& world=worlds[this->world]->world;
+    world.GetAppearance(id).vertexDisplayList.erase();
+    world.GetAppearance(id).faceDisplayList.erase();
+    world.GetAppearance(id).Set(*geom);
+  }
 }
 
-void Geometry3D::setGeometricPrimitive(const GeometricPrimitive& geom)
+void Geometry3D::setGeometricPrimitive(const GeometricPrimitive& prim)
 {
-  RobotWorld& world=worlds[this->world]->world;
-  stringstream ss(geom.saveString());
+  if(!geomPtr) {
+    geomPtr = new AnyCollisionGeometry3D();
+  }
+  AnyCollisionGeometry3D* geom = reinterpret_cast<AnyCollisionGeometry3D*>(geomPtr);
+  stringstream ss(prim.saveString());
   GeometricPrimitive3D g;
   ss>>g;
   if(!ss) {
     throw PyException("Internal error");
   }
-  world.GetGeometry(id) = AnyCollisionGeometry3D(g);
-  world.GetAppearance(id).Set(world.GetGeometry(id));
+  *geom = g;
+  geom->InitCollisions();
+  if(!isStandalone()) {
+    RobotWorld& world=worlds[this->world]->world;
+    world.GetAppearance(id).Set(*geom);
+  }
 }
 
 
 bool Geometry3D::loadFile(const char* fn)
 {
-  RobotWorld& world=worlds[this->world]->world;
-  return world.GetGeometry(id).Load(fn);
+  if(!geomPtr) {
+    geomPtr = new AnyCollisionGeometry3D();
+  }
+  AnyCollisionGeometry3D* geom = reinterpret_cast<AnyCollisionGeometry3D*>(geomPtr);
+  return geom->Load(fn);
 }
 
 bool Geometry3D::saveFile(const char* fn)
 {
-  RobotWorld& world=worlds[this->world]->world;
-  return world.GetGeometry(id).Save(fn);
+  if(!geomPtr) return false;
+  AnyCollisionGeometry3D* geom = reinterpret_cast<AnyCollisionGeometry3D*>(geomPtr);
+  return geom->Save(fn);
 }
 
 void Geometry3D::translate(const double t[3])
 {
-  RobotWorld& world=worlds[this->world]->world;
+  if(!geomPtr) return;
+  AnyCollisionGeometry3D* geom = reinterpret_cast<AnyCollisionGeometry3D*>(geomPtr);
   RigidTransform T;
   T.R.setIdentity();
   T.t.set(t);
-  world.GetGeometry(id).Transform(T);
-  world.GetGeometry(id).InitCollisions();
+  geom->Transform(T);
+  geom->InitCollisions();
 }
 
 void Geometry3D::transform(const double R[9],const double t[3])
 {
-  RobotWorld& world=worlds[this->world]->world;
+  if(!geomPtr) return;
+  AnyCollisionGeometry3D* geom = reinterpret_cast<AnyCollisionGeometry3D*>(geomPtr);
   RigidTransform T;
   T.R.set(R);
   T.t.set(t);
-  world.GetGeometry(id).Transform(T);  
-  world.GetGeometry(id).InitCollisions();
+  geom->Transform(T);  
+  geom->InitCollisions();
 }
 
 void Geometry3D::setCollisionMargin(double margin)
 {
-  RobotWorld& world=worlds[this->world]->world;
-  world.GetGeometry(id).margin = margin;
+  if(!geomPtr) return;
+  AnyCollisionGeometry3D* geom = reinterpret_cast<AnyCollisionGeometry3D*>(geomPtr);
+  geom->margin = margin;
 }
 
 double Geometry3D::getCollisionMargin()
 {
-  RobotWorld& world=worlds[this->world]->world;
-  return world.GetGeometry(id).margin;
+  if(!geomPtr) return 0;
+  AnyCollisionGeometry3D* geom = reinterpret_cast<AnyCollisionGeometry3D*>(geomPtr);
+  return geom->margin;
 }
 
 void Geometry3D::getBB(double out[3],double out2[3])
 {
-  RobotWorld& world=worlds[this->world]->world;
-  AABB3D bb = world.GetGeometry(id).GetAABB();
+  if(!geomPtr) {
+    out[0] = out[1] = out[2] = Inf;
+    out2[0] = out2[1] = out2[2] = -Inf;
+    return;
+  }
+  AnyCollisionGeometry3D* geom = reinterpret_cast<AnyCollisionGeometry3D*>(geomPtr);
+  AABB3D bb = geom->GetAABB();
   bb.bmin.get(out);
   bb.bmax.get(out2);
 }
 
 bool Geometry3D::collides(const Geometry3D& other)
 {
-  RobotWorld& world=worlds[this->world]->world;
-  RobotWorld& world2=worlds[other.world]->world;
-  return world.GetGeometry(id).Collides(world2.GetGeometry(other.id));
+  if(!geomPtr || !other.geomPtr) return false;
+  AnyCollisionGeometry3D* geom = reinterpret_cast<AnyCollisionGeometry3D*>(geomPtr);
+  AnyCollisionGeometry3D* geom2 = reinterpret_cast<AnyCollisionGeometry3D*>(other.geomPtr);
+  return geom->Collides(*geom2);
 }
 
 bool Geometry3D::withinDistance(const Geometry3D& other,double tol)
 {
-  RobotWorld& world=worlds[this->world]->world;
-  RobotWorld& world2=worlds[other.world]->world;
-  return world.GetGeometry(id).WithinDistance(world2.GetGeometry(other.id),tol);
+  if(!geomPtr || !other.geomPtr) return false;
+  AnyCollisionGeometry3D* geom = reinterpret_cast<AnyCollisionGeometry3D*>(geomPtr);
+  AnyCollisionGeometry3D* geom2 = reinterpret_cast<AnyCollisionGeometry3D*>(other.geomPtr);
+  return geom->WithinDistance(*geom2,tol);
 }
 
 double Geometry3D::distance(const Geometry3D& other,double relErr,double absErr)
 {
-  RobotWorld& world=worlds[this->world]->world;
-  RobotWorld& world2=worlds[other.world]->world;
-  AnyCollisionQuery q(world.GetGeometry(id),world2.GetGeometry(other.id));
+  if(!geomPtr || !other.geomPtr) return false;
+  AnyCollisionGeometry3D* geom = reinterpret_cast<AnyCollisionGeometry3D*>(geomPtr);
+  AnyCollisionGeometry3D* geom2 = reinterpret_cast<AnyCollisionGeometry3D*>(other.geomPtr);
+  AnyCollisionQuery q(*geom,*geom2);
   return q.Distance(relErr,absErr);
 }
 
 bool Geometry3D::rayCast(const double s[3],const double d[3],double out[3])
 {
-  RobotWorld& world=worlds[this->world]->world;
+  if(!geomPtr) return false;
+  AnyCollisionGeometry3D* geom = reinterpret_cast<AnyCollisionGeometry3D*>(geomPtr);
   Ray3D r;
   r.source.set(s);
   r.direction.set(d);
   Real distance;
-  if(world.GetGeometry(id).RayCast(r,&distance)) {
+  if(geom->RayCast(r,&distance)) {
     Vector3 pt = r.source + r.direction*distance;
     pt.get(out);
     return true;
@@ -905,6 +970,7 @@ Geometry3D RobotModelLink::geometry()
   Geometry3D res;
   res.world = world;
   res.id = getID();
+  res.geomPtr = &worlds[world]->world.GetGeometry(res.id);
   return res;
 }
 
@@ -1466,6 +1532,7 @@ Geometry3D RigidObjectModel::geometry()
   Geometry3D res;
   res.world = world;
   res.id = getID();
+  res.geomPtr = &worlds[world]->world.GetGeometry(res.id);
   return res;
 }
 
@@ -1576,6 +1643,7 @@ Geometry3D TerrainModel::geometry()
   Geometry3D res;
   res.world = world;
   res.id = getID();
+  res.geomPtr = &worlds[world]->world.GetGeometry(res.id);
   return res;
 }
 

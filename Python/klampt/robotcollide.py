@@ -166,7 +166,6 @@ class WorldCollider:
     def collisions(self,filter1=None,filter2=None):
         """Returns an iterator over the colliding pairs of
         objects, optionally that satisfies the filter(s)"""
-        self.updateFrames()
         for (g0,g1) in self.collisionTests(filter1,filter2):
             if g0[1].collides(g1[1]):
                 yield (g0[0],g1[0])
@@ -187,9 +186,6 @@ class WorldCollider:
                     yield c
             return
         rindices = self.robots[robot]
-        for i in rindices:
-            if i < 0: continue
-            self.updateFrame(*self.geomList[i])
         for i in rindices:
             if i < 0: continue
             for j in rindices:
@@ -222,11 +218,9 @@ class WorldCollider:
         rindices = self.robots[robot]
         oindex = self.rigidObjects[object]
         if oindex < 0: return
-        self.updateFrame(*self.geomList[oindex])
         for i in rindices:
             if i < 0: continue
             if oindex not in self.mask[i]: continue
-            self.updateFrame(*self.geomList[i])
             if self.geomList[oindex][1].collide(self.geomList[i][1]):
                 yield (self.geomList[i][0],self.geomList[oindex][0])
 
@@ -253,11 +247,9 @@ class WorldCollider:
         rindices = self.robots[robot]
         tindex = self.terrains[terrain]
         if tindex < 0: return
-        self.updateFrame(*self.geomList[tindex])
         for i in rindices:
             if i < 0: continue
             if tindex not in self.mask[i]: continue
-            self.updateFrame(*self.geomList[i])
             if self.geomList[tindex][1].collide(self.geomList[i][1]):
                 yield (self.geomList[i][0],self.geomList[tindex][0])
 
@@ -283,7 +275,6 @@ class WorldCollider:
         if oindex < 0: return
         if tindex < 0: return
         if tindex not in self.mask[oindex]: return
-        self.updateFrame(*self.geomList[oindex])
         if self.geomList[oindex][1].collides(self.geomList[tindex][1]):
             yield (self.geomList[oindex][0],self.geomList[tindex][0])
         return
@@ -310,8 +301,6 @@ class WorldCollider:
         if oindex < 0: return
         if oindex2 < 0: return
         if oindex not in self.mask[oindex2]: return
-        self.updateFrame(*self.geomList[oindex])
-        self.updateFrame(*self.geomList[oindex2])
         if self.geomList[oindex][1].collides(self.geomList[oindex2][1]):
             yield (self.geomList[oindex][0],self.geomList[oindex2][0])
         return

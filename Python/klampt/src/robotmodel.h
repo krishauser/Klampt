@@ -4,6 +4,8 @@
 /** @file robotmodel.h
  * @brief C++ bindings for robot/world modeling. */
 
+#include "geometry.h"
+
 //forward definitions for API objects
 class WorldModel;
 class RobotModel;
@@ -29,82 +31,6 @@ struct Mass
   double mass;        ///<mass
   std::vector<double> com;      ///<local center of mass, size 3
   std::vector<double> inertia;  ///<local inertia matrix, size 3 or 9
-};
-
-/** @brief A 3D indexed triangle mesh class.
- *
- * vertices is a list of vertices, given as a list [x1, y1, z1, x2, y2, ...]
- * indices is a list of triangle vertices given as indices into the
- *    vertices list, i.e., [a1,b1,c2, a2,b2,c2, ...]
- */
-struct TriangleMesh
-{
-  void translate(const double t[3]);
-  void transform(const double R[9],const double t[3]);
-
-  std::vector<int> indices;
-  std::vector<double> vertices;
-};
-
-/** @brief A 3D point cloud class.  
- * vertices is a list of vertices, given as a list [x1, y1, z1, x2, y2, ... zn]
- * properties is a list of vertex properties, given as a list
- * [p11, p21, ..., pk1,  p12, p22, ..., pk2, ... , pn1, pn2, ..., pn2]
- * where each vertex has k properties.  The name of each property is given
- * by the propertyNames member.
- */
-struct PointCloud
-{
-  void translate(const double t[3]);
-  void transform(const double R[9],const double t[3]);
-
-  std::vector<double> vertices;
-  std::vector<std::string> propertyNames;
-  std::vector<double> properties;
-};
-
-struct GeometricPrimitive
-{
-  void setPoint(const double pt[3]);
-  void setSphere(const double c[3],double r);
-  void setSegment(const double a[3],const double b[3]);
-  void setAABB(const double bmin[3],const double bmax[3]);
-  bool loadString(const char* str);
-  std::string saveString() const;
-
-  std::string type;
-  std::vector<double> properties;
-};
-
-/** @brief A reference to a world item's three-D geometry.
- */
-class Geometry3D
-{
- public:
-  Geometry3D();
-  ///Returns the type of geometry: TriangleMesh, PointCloud, or
-  ///GeometricPrimitive
-  std::string type();
-  TriangleMesh getTriangleMesh();
-  PointCloud getPointCloud();
-  GeometricPrimitive getGeometricPrimitive();
-  void setTriangleMesh(const TriangleMesh&);
-  void setPointCloud(const PointCloud&);
-  void setGeometricPrimitive(const GeometricPrimitive&);
-  bool loadFile(const char* fn);
-  bool saveFile(const char* fn);
-  void translate(const double t[3]);
-  void transform(const double R[9],const double t[3]);
-  void setCollisionMargin(double margin);
-  double getCollisionMargin();
-  void getBB(double out[3],double out2[3]);
-  bool collides(const Geometry3D& other);
-  bool withinDistance(const Geometry3D& other,double tol);
-  double distance(const Geometry3D& other,double relErr=0,double absErr=0);
-  bool rayCast(const double s[3],const double d[3],double out[3]);
-
-  int world;
-  int id;
 };
 
 struct ContactParameters

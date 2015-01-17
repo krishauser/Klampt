@@ -149,42 +149,6 @@ Samples an initial random configuration. ";
 %feature("docstring") GeomCollisionQuery "";
 
 
-// File: classGeometry3D.xml
-%feature("docstring") Geometry3D "
-
-A reference to a world item's three-D geometry.
-
-C++ includes: robotmodel.h ";
-
-%feature("docstring")  Geometry3D::Geometry3D "Geometry3D::Geometry3D() ";
-
-%feature("docstring")  Geometry3D::type "string Geometry3D::type() ";
-
-%feature("docstring")  Geometry3D::getTriangleMesh "TriangleMesh
-Geometry3D::getTriangleMesh() ";
-
-%feature("docstring")  Geometry3D::getPointCloud "PointCloud
-Geometry3D::getPointCloud() ";
-
-%feature("docstring")  Geometry3D::setTriangleMesh "void
-Geometry3D::setTriangleMesh(const TriangleMesh &) ";
-
-%feature("docstring")  Geometry3D::setPointCloud "void
-Geometry3D::setPointCloud(const PointCloud &) ";
-
-%feature("docstring")  Geometry3D::translate "void
-Geometry3D::translate(const double t[3]) ";
-
-%feature("docstring")  Geometry3D::transform "void
-Geometry3D::transform(const double R[9], const double t[3]) ";
-
-%feature("docstring")  Geometry3D::setCollisionMargin "void
-Geometry3D::setCollisionMargin(double margin) ";
-
-%feature("docstring")  Geometry3D::getCollisionMargin "double
-Geometry3D::getCollisionMargin() ";
-
-
 // File: classIKObjective.xml
 %feature("docstring") IKObjective "
 
@@ -471,24 +435,6 @@ PlannerInterface::getRoadmap() ";
 PlannerInterface::dump(const char *fn) ";
 
 
-// File: structPointCloud.xml
-%feature("docstring") PointCloud "
-
-A 3D point cloud class. vertices is a list of vertices, given as a
-list [x1, y1, z1, x2, y2, ... zn] properties is a list of vertex
-properties, given as a list [p11, p21, ..., pk1, p12, p22, ..., pk2,
-... , pn1, pn2, ..., pn2] where each vertex has k properties. The name
-of each property is given by the propertyNames member.
-
-C++ includes: robotmodel.h ";
-
-%feature("docstring")  PointCloud::translate "void
-PointCloud::translate(const double t[3]) ";
-
-%feature("docstring")  PointCloud::transform "void
-PointCloud::transform(const double R[9], const double t[3]) ";
-
-
 // File: classPyCSpace.xml
 %feature("docstring") PyCSpace "
 
@@ -571,8 +517,8 @@ RigidObjectModel::getID() ";
 %feature("docstring")  RigidObjectModel::getName "const char *
 RigidObjectModel::getName() ";
 
-%feature("docstring")  RigidObjectModel::getGeometry "Geometry3D
-RigidObjectModel::getGeometry() ";
+%feature("docstring")  RigidObjectModel::geometry "Geometry3D
+RigidObjectModel::geometry() ";
 
 %feature("docstring")  RigidObjectModel::getMass "Mass
 RigidObjectModel::getMass() ";
@@ -823,8 +769,8 @@ RobotModelLink::getParent() ";
 %feature("docstring")  RobotModelLink::setParent "void
 RobotModelLink::setParent(int p) ";
 
-%feature("docstring")  RobotModelLink::getGeometry "Geometry3D
-RobotModelLink::getGeometry() ";
+%feature("docstring")  RobotModelLink::geometry "Geometry3D
+RobotModelLink::geometry() ";
 
 %feature("docstring")  RobotModelLink::getMass "Mass
 RobotModelLink::getMass() ";
@@ -1335,32 +1281,14 @@ C++ includes: robotmodel.h ";
 %feature("docstring")  TerrainModel::getName "const char *
 TerrainModel::getName() ";
 
-%feature("docstring")  TerrainModel::getGeometry "Geometry3D
-TerrainModel::getGeometry() ";
+%feature("docstring")  TerrainModel::geometry "Geometry3D
+TerrainModel::geometry() ";
 
 %feature("docstring")  TerrainModel::setFriction "void
 TerrainModel::setFriction(double friction) ";
 
 %feature("docstring")  TerrainModel::drawGL "void
 TerrainModel::drawGL(bool keepAppearance=true) ";
-
-
-// File: structTriangleMesh.xml
-%feature("docstring") TriangleMesh "
-
-A 3D indexed triangle mesh class.
-
-vertices is a list of vertices, given as a list [x1, y1, z1, x2, y2,
-...] indices is a list of triangle vertices given as indices into the
-vertices list, i.e., [a1,b1,c2, a2,b2,c2, ...]
-
-C++ includes: robotmodel.h ";
-
-%feature("docstring")  TriangleMesh::translate "void
-TriangleMesh::translate(const double t[3]) ";
-
-%feature("docstring")  TriangleMesh::transform "void
-TriangleMesh::transform(const double R[9], const double t[3]) ";
 
 
 // File: structWorldData.xml
@@ -1587,176 +1515,11 @@ const double bmin[3], const double bmax[3])
 Makes a geom into an axis-aligned bounding box with lower bound bmin
 and upper bound bmax. ";
 
-%feature("docstring")  std::checkCircularReference "bool
-checkCircularReference(int geom, int checkIndex) ";
-
 %feature("docstring")  std::makeGroupGeom "void makeGroupGeom(int
 geom, int *elements, int numelements)
 
 Makes a geom into a group geom from an array of other geoms. Note: in
 Python, must use an intArray for geoms argument. ";
-
-%feature("docstring")  std::Collide "bool Collide(const Point3D &p1,
-const Point3D &p2) ";
-
-%feature("docstring")  std::Collide "bool Collide(const Point3D &p,
-const Sphere3D &s) ";
-
-%feature("docstring")  std::Collide "bool Collide(const Point3D &p,
-const Segment3D &s) ";
-
-%feature("docstring")  std::Collide "bool Collide(const Point3D &p,
-const Ray3D &r) ";
-
-%feature("docstring")  std::Collide "bool Collide(const Point3D &p,
-const Line3D &l) ";
-
-%feature("docstring")  std::Collide "bool Collide(const Point3D &p,
-const AABB3D &a) ";
-
-%feature("docstring")  std::Collide "bool Collide(const Point3D &p,
-const CollisionMesh &m) ";
-
-%feature("docstring")  std::Collide "bool Collide(const Sphere3D &s,
-const Point3D &p) ";
-
-%feature("docstring")  std::Collide "bool Collide(const Sphere3D &s1,
-const Sphere3D &s2) ";
-
-%feature("docstring")  std::Collide "bool Collide(const Sphere3D &s,
-const Segment3D &seg) ";
-
-%feature("docstring")  std::Collide "bool Collide(const Sphere3D &s,
-const Ray3D &r) ";
-
-%feature("docstring")  std::Collide "bool Collide(const Sphere3D &s,
-const Line3D &r) ";
-
-%feature("docstring")  std::Collide "bool Collide(const Sphere3D &s,
-const AABB3D &a) ";
-
-%feature("docstring")  std::Collide "bool Collide(const Sphere3D &s,
-const CollisionMesh &m) ";
-
-%feature("docstring")  std::Collide "bool Collide(const Segment3D &s,
-const Point3D &p) ";
-
-%feature("docstring")  std::Collide "bool Collide(const Segment3D
-&seg, const Sphere3D &s) ";
-
-%feature("docstring")  std::Collide "bool Collide(const Segment3D
-&s1, const Segment3D &s2) ";
-
-%feature("docstring")  std::Collide "bool Collide(const Segment3D &s,
-const Ray3D &r) ";
-
-%feature("docstring")  std::Collide "bool Collide(const Segment3D &s,
-const Line3D &l) ";
-
-%feature("docstring")  std::Collide "bool Collide(const Segment3D
-&seg, const AABB3D &a) ";
-
-%feature("docstring")  std::Collide "bool Collide(const Segment3D &s,
-const CollisionMesh &m) ";
-
-%feature("docstring")  std::Collide "bool Collide(const Ray3D &r,
-const Point3D &p) ";
-
-%feature("docstring")  std::Collide "bool Collide(const Ray3D &r,
-const Sphere3D &s) ";
-
-%feature("docstring")  std::Collide "bool Collide(const Ray3D &r,
-const Segment3D &s) ";
-
-%feature("docstring")  std::Collide "bool Collide(const Ray3D &r1,
-const Ray3D &r2) ";
-
-%feature("docstring")  std::Collide "bool Collide(const Ray3D &r,
-const Line3D &l) ";
-
-%feature("docstring")  std::Collide "bool Collide(const Ray3D &r,
-const AABB3D &a) ";
-
-%feature("docstring")  std::Collide "bool Collide(const Ray3D &r,
-const CollisionMesh &m) ";
-
-%feature("docstring")  std::Collide "bool Collide(const Line3D &l,
-const Point3D &p) ";
-
-%feature("docstring")  std::Collide "bool Collide(const Line3D &l,
-const Sphere3D &s) ";
-
-%feature("docstring")  std::Collide "bool Collide(const Line3D &l,
-const Segment3D &s) ";
-
-%feature("docstring")  std::Collide "bool Collide(const Line3D &l,
-const Ray3D &r) ";
-
-%feature("docstring")  std::Collide "bool Collide(const Line3D &l1,
-const Line3D &l2) ";
-
-%feature("docstring")  std::Collide "bool Collide(const Line3D &l,
-const AABB3D &a) ";
-
-%feature("docstring")  std::Collide "bool Collide(const Line3D &l,
-const CollisionMesh &m) ";
-
-%feature("docstring")  std::Collide "bool Collide(const AABB3D &a,
-const Point3D &p) ";
-
-%feature("docstring")  std::Collide "bool Collide(const AABB3D &a,
-const Sphere3D &s) ";
-
-%feature("docstring")  std::Collide "bool Collide(const AABB3D &a,
-const Segment3D &seg) ";
-
-%feature("docstring")  std::Collide "bool Collide(const AABB3D &a,
-const Ray3D &r) ";
-
-%feature("docstring")  std::Collide "bool Collide(const AABB3D &a,
-const Line3D &l) ";
-
-%feature("docstring")  std::Collide "bool Collide(const AABB3D &a1,
-const AABB3D &a2) ";
-
-%feature("docstring")  std::Collide "bool Collide(const AABB3D &a,
-const CollisionMesh &m) ";
-
-%feature("docstring")  std::Collide "bool Collide(const CollisionMesh
-&m, const Point3D &p) ";
-
-%feature("docstring")  std::Collide "bool Collide(const CollisionMesh
-&m, const Segment3D &s) ";
-
-%feature("docstring")  std::Collide "bool Collide(const CollisionMesh
-&m, const Ray3D &r) ";
-
-%feature("docstring")  std::Collide "bool Collide(const CollisionMesh
-&m, const Line3D &l) ";
-
-%feature("docstring")  std::collideMesh "bool
-collideMesh(CollisionMesh *m1, int geom2) ";
-
-%feature("docstring")  std::collidePoint "bool collidePoint(Point3D
-*p1, int geom2) ";
-
-%feature("docstring")  std::collideSphere "bool
-collideSphere(Sphere3D *s1, int geom2) ";
-
-%feature("docstring")  std::collideSegment "bool
-collideSegment(Segment3D *s1, int geom2) ";
-
-%feature("docstring")  std::collideRay "bool collideRay(Ray3D *s1,
-int geom2) ";
-
-%feature("docstring")  std::collideLine "bool collideLine(Line3D *s1,
-int geom2) ";
-
-%feature("docstring")  std::collideAABB "bool collideAABB(AABB3D *a1,
-int geom2) ";
-
-%feature("docstring")  std::collideGroup "bool collideGroup(const
-vector< int > &group, int geom2) ";
 
 %feature("docstring")  std::collide "bool collide(int geom1, int
 geom2)
