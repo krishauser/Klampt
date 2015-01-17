@@ -69,6 +69,9 @@ class MyGLViewer(GLRealtimeProgram):
             return
         GLRealtimeProgram.mousefunc(self,button,state,x,y)
 
+    def motionfunc(self,x,y):
+        GLRealtimeProgram.motionfunc(self,x,y)
+
     def specialfunc(self,c,x,y):
         #Put your keyboard special character handler here
         print c,"pressed"

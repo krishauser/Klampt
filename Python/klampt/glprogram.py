@@ -166,9 +166,11 @@ class GLNavigationProgram(GLProgram):
         self.fov = 30
         #near and far clipping planes
         self.clippingplanes = (0.2,20)
+        #mouse state information
         self.lastx = 0
         self.lasty = 0
         self.modifiers = 0
+        self.dragging = False
         self.clearColor = [0.8,0.8,0.9,0]        
 
     def get_view(self):
@@ -225,20 +227,25 @@ class GLNavigationProgram(GLProgram):
     def motionfunc(self,x,y):
         dx = x - self.lastx
         dy = y - self.lasty
-        if self.modifiers & GLUT_ACTIVE_CTRL:
-            R,t = self.camera.matrix()
-            delta = so3.apply(so3.inv(R),[float(dx)*self.camera.dist/self.width,-float(dy)*self.camera.dist/self.width,0])
-            self.camera.tgt = vectorops.add(self.camera.tgt,delta)
-        elif self.modifiers & GLUT_ACTIVE_SHIFT:
-            self.camera.dist *= math.exp(dy*0.01)
-        else:
-            self.camera.rot[2] += float(dx)*0.01
-            self.camera.rot[1] += float(dy)*0.01        
+        if self.dragging:
+            if self.modifiers & GLUT_ACTIVE_CTRL:
+                R,t = self.camera.matrix()
+                delta = so3.apply(so3.inv(R),[float(dx)*self.camera.dist/self.width,-float(dy)*self.camera.dist/self.width,0])
+                self.camera.tgt = vectorops.add(self.camera.tgt,delta)
+            elif self.modifiers & GLUT_ACTIVE_SHIFT:
+                self.camera.dist *= math.exp(dy*0.01)
+            else:
+                self.camera.rot[2] += float(dx)*0.01
+                self.camera.rot[1] += float(dy)*0.01        
         self.lastx = x
         self.lasty = y
         glutPostRedisplay()
     
     def mousefunc(self,button,state,x,y):
+        if state == 0:
+            self.dragging = True
+        else:
+            self.dragging = False
         self.modifiers = glutGetModifiers()
         self.lastx = x
         self.lasty = y
