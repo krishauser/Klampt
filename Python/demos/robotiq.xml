@@ -3,6 +3,7 @@
   <robot name="RobotiQ 3-Finger Adaptive Gripper" file="../../data/robots/robotiQ_3finger.rob" />
 
   <rigidObject name="ball" file="../../data/objects/sphere_5cm.obj"  position="0.0 0.0 0.2">
+  <!-- <rigidObject name="ball" file="../../data/objects/srimugsmooth.obj"  position="0.02 0.0 0.2">  -->
   </rigidObject> 
 
   <simulation>

@@ -66,7 +66,7 @@ class MyGLViewer(GLRealtimeProgram):
         if button==2:
             if state==0:
                 print [o.getName() for o in self.click_world(x,y)]
-                return
+            return
         GLRealtimeProgram.mousefunc(self,button,state,x,y)
 
     def specialfunc(self,c,x,y):
@@ -92,10 +92,10 @@ class MyGLViewer(GLRealtimeProgram):
         (s,d) = self.click_ray(x,y)
         
         #run the collision tests
-        self.collider.updateFrames()
+        #self.collider.updateFrames()
         collided = []
         for g in self.collider.geomList:
-            (hit,pt) = collide.rayCast(g[1],s,d)
+            (hit,pt) = g[1].rayCast(s,d)
             if hit:
                 dist = vectorops.dot(vectorops.sub(pt,s),d)
                 collided.append((dist,g[0]))
