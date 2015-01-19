@@ -82,6 +82,7 @@ public:
   float driver_value;
   RobotPoseWidget poseWidget;
   int pose_ik;
+  bool attachMode;
   vector<RigidObjectPoseWidget> objectWidgets;
   WidgetSet allWidgets;
   int draw_geom,draw_com,draw_frame;
@@ -152,6 +153,7 @@ public:
     draw_com = 0;
     draw_frame = 0;
     pose_ik = 0;
+    attachMode = false;
     if(!ResourceBrowserProgram::Initialize()) return false;
     Robot* robot = world->robots[0].robot;
     viewResource.SetRobot(robot);
@@ -559,8 +561,8 @@ public:
 	else {
 	  const IKGoalResource* rc = dynamic_cast<const IKGoalResource*>((const ResourceBase*)r);
 	  if(rc) {
-	    poseWidget.ikPoser.ClearLink(rc->data.link);
-	    poseWidget.ikPoser.Add(rc->data);
+	    poseWidget.ikPoser.ClearLink(rc->goal.link);
+	    poseWidget.ikPoser.Add(rc->goal);
 	  }
 	  else {
 	    const StanceResource* rc = dynamic_cast<const StanceResource*>((const ResourceBase*)r);
@@ -788,7 +790,7 @@ public:
 	}
 	const HoldResource* hp = dynamic_cast<const HoldResource*>((const ResourceBase*)r);
 	if(hp) {
-	  Hold h = hp->data;
+	  Hold h = hp->hold;
 	  CleanContacts(h);
 	  ResourcePtr r = MakeResource(hp->name+"_clean",h);
 	  if(r) {
@@ -800,7 +802,7 @@ public:
       }
       break;
     case POSE_IK_TOGGLED_ID:
-      poseWidget.poseIKMode = (pose_ik != 0);
+      poseWidget.SetPoseIKMode(pose_ik != 0);
       Refresh();
       break;
     case LINK_SPINNER_ID:
@@ -877,7 +879,8 @@ public:
 	  printf("Before constraining a link you need to hover over it\n");
       break;
     case 'a':
-      poseWidget.ToggleAttach();
+      attachMode = !attachMode;
+      poseWidget.SetAttachIKMode(attachMode);
       break;
     case 'd':
       poseWidget.DeleteConstraint();
