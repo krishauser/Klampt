@@ -104,7 +104,7 @@ class WorldCollider:
         for i,r in enumerate(self.robots):
             #robot - robot collision
             for r2 in self.robots[0:i]:
-                for l in r:
+                for l1 in r:
                     for l2 in r2:
                         if l < 0 or l2 < 0: continue
                         self.mask[l1].add(l2)
