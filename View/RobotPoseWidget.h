@@ -37,7 +37,8 @@ public:
   ViewRobot* viewRobot;
   Config poseConfig;
   GLColor highlightColor;
-  int hoverLink,hoverDriver;
+  int hoverLink,affectedLink,affectedDriver;
+  vector<int> highlightedLinks;
   Vector3 hoverPt;
   bool draw;
   vector<GeometryAppearance> poserAppearance;
