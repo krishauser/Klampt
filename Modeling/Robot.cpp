@@ -990,6 +990,63 @@ bool Robot::LoadRob(const char* fn) {
 	if (!CheckValid())
 		return false;
 
+	//automatically compute mass parameters from geometry
+	if (autoMass) {
+		for (size_t i = 0; i < links.size(); i++) {
+			if (comVec.empty()) {
+				if (!geometry[i].Empty())
+					links[i].com = CenterOfMass(geometry[i]);
+				else
+					links[i].com.setZero();
+			}
+			if (inertiaVec.empty()) {
+				if (!geometry[i].Empty() && links[i].mass != 0.0) {
+					links[i].inertia = Inertia(geometry[i], links[i].com,
+							links[i].mass);
+					//cout<<"Automass inertia for "<<linkNames[i]<<": "<<endl<<links[i].inertia<<endl;
+				} else {
+					links[i].inertia.setZero();
+					//cout<<"Automass setting zero inertia for "<<linkNames[i]<<endl;
+				}
+			}
+		}
+	}
+
+	CleanupSelfCollisions();
+	vector<pair<string,string> > residualSelfCollisions,residualNoSelfCollisions;
+	//Initialize self collisions -- pre mounting
+	if (selfCollision.empty()) {
+		InitAllSelfCollisions();
+	} else {
+		for (size_t i = 0; i < selfCollision.size(); i++) {
+		  int link1,link2;
+		  link1 = LinkIndex(selfCollision[i].first.c_str());
+		  link2 = LinkIndex(selfCollision[i].second.c_str());
+		  if (link1 < 0 || link1 >= (int) links.size() ||
+		      link2 < 0 || link2 >= (int) links.size()) {
+		    residualSelfCollisions.push_back(selfCollision[i]);
+		    continue;
+		  }
+		  if(link1 > link2) Swap(link1,link2);
+		  Assert(link1 < link2);
+		  InitSelfCollisionPair(link1,link2);
+		}
+	}
+
+	for (size_t i = 0; i < noSelfCollision.size(); i++) {
+		  int link1,link2;
+		  link1 = LinkIndex(noSelfCollision[i].first.c_str());
+		  link2 = LinkIndex(noSelfCollision[i].second.c_str());
+		  if (link1 < 0 || link1 >= (int) links.size() ||
+		      link2 < 0 || link2 >= (int) links.size()) {
+		    residualNoSelfCollisions.push_back(noSelfCollision[i]);
+		}
+		  if(link1 > link2) Swap(link1,link2);
+		Assert(link1 < link2);
+		SafeDelete(selfCollisions(link1,link2));
+	}
+
+
 	for (size_t i = 0; i < mountLinks.size(); i++) {
 		printf("   Mounting file %s\n", mountFiles[i].c_str());
 		string fn = path + mountFiles[i];
@@ -1023,63 +1080,37 @@ bool Robot::LoadRob(const char* fn) {
 	if (!CheckValid())
 		return false;
 
-	//automatically compute mass parameters from geometry
-	if (autoMass) {
-		for (size_t i = 0; i < links.size(); i++) {
-			if (comVec.empty()) {
-				if (!geometry[i].Empty())
-					links[i].com = CenterOfMass(geometry[i]);
-				else
-					links[i].com.setZero();
-			}
-			if (inertiaVec.empty()) {
-				if (!geometry[i].Empty() && links[i].mass != 0.0) {
-					links[i].inertia = Inertia(geometry[i], links[i].com,
-							links[i].mass);
-					//cout<<"Automass inertia for "<<linkNames[i]<<": "<<endl<<links[i].inertia<<endl;
-				} else {
-					links[i].inertia.setZero();
-					//cout<<"Automass setting zero inertia for "<<linkNames[i]<<endl;
-				}
-			}
-		}
+	//after mounting may need to add extra self collisions / no self collisions
+	swap(selfCollision,residualSelfCollisions);
+	swap(noSelfCollision,residualNoSelfCollisions);
+	for (size_t i = 0; i < selfCollision.size(); i++) {
+	  int link1,link2;
+	  link1 = LinkIndex(selfCollision[i].first.c_str());
+	  link2 = LinkIndex(selfCollision[i].second.c_str());
+	  if (link1 < 0 || link1 >= (int) links.size() ||
+	      link2 < 0 || link2 >= (int) links.size()) {
+	    printf("   Error, invalid self-collision index %s-%s\n",
+		   selfCollision[i].first.c_str(),selfCollision[i].second.c_str());
+	    return false;
+	  }
+	  if(link1 > link2) Swap(link1,link2);
+	  Assert(link1 < link2);
+	  InitSelfCollisionPair(link1,link2);
 	}
 
-	CleanupSelfCollisions();
-	if (selfCollision.empty()) {
-		InitAllSelfCollisions();
-	} else {
-		for (size_t i = 0; i < selfCollision.size(); i++) {
-		  int link1,link2;
-		  link1 = LinkIndex(selfCollision[i].first.c_str());
-		  link2 = LinkIndex(selfCollision[i].second.c_str());
-		  if (link1 < 0 || link1 >= (int) links.size() ||
-		      link2 < 0 || link2 >= (int) links.size()) {
-		    printf("   Error, invalid self-collision index %s-%s\n",
-			   selfCollision[i].first.c_str(),selfCollision[i].second.c_str());
-		    return false;
-		  }
-		  if(link1 > link2) Swap(link1,link2);
-		  Assert(link1 < link2);
-		  InitSelfCollisionPair(link1,link2);
-		}
-	}
-
-	//Initialize self collisions -- these needs to be done after mounting
 	for (size_t i = 0; i < noSelfCollision.size(); i++) {
-		  int link1,link2;
-		  link1 = LinkIndex(noSelfCollision[i].first.c_str());
-		  link2 = LinkIndex(noSelfCollision[i].second.c_str());
-		  if (link1 < 0 || link1 >= (int) links.size() ||
-		      link2 < 0 || link2 >= (int) links.size()) {
-
-			printf("  Error, invalid no-collision index %s-%s\n",
-			       noSelfCollision[i].first.c_str(), noSelfCollision[i].second.c_str());
-			return false;
-		}
-		  if(link1 > link2) Swap(link1,link2);
-		Assert(link1 < link2);
-		SafeDelete(selfCollisions(link1,link2));
+	  int link1,link2;
+	  link1 = LinkIndex(noSelfCollision[i].first.c_str());
+	  link2 = LinkIndex(noSelfCollision[i].second.c_str());
+	  if (link1 < 0 || link1 >= (int) links.size() ||
+	      link2 < 0 || link2 >= (int) links.size()) {
+	    printf("  Error, invalid no-collision index %s-%s\n",
+		   noSelfCollision[i].first.c_str(), noSelfCollision[i].second.c_str());
+	    return false;
+	  }
+	  if(link1 > link2) Swap(link1,link2);
+	  Assert(link1 < link2);
+	  SafeDelete(selfCollisions(link1,link2));
 	}
 
 	printf("Done loading robot file.\n");
@@ -1574,14 +1605,15 @@ void Robot::Mount(int link, const Robot& subchain, const RigidTransform& T) {
 	InitCollisions();
 	ArrayUtils::concat(envCollisions, subchain.envCollisions);
 	concat(selfCollisions, subchain.selfCollisions);
-	//need to get the right self collision pointers
-	for (int i = 0; i < selfCollisions.m; i++)
+	//need to re-initialize the self collision pointers
+	for (int i = 0; i < selfCollisions.m; i++) {
 		for (int j = 0; j < selfCollisions.n; j++) {
-			if (selfCollisions(i, j)) {
+			if (selfCollisions(i, j) != NULL) {
 				selfCollisions(i, j) = NULL;
 				InitSelfCollisionPair(i, j);
 			}
 		}
+	}
 	//init collisions between subchain and existing links
 	for (size_t j = 0; j < subchain.links.size(); j++) {
 		if (subchain.parents[j] < 0 && !geometry[link].Empty()) {
