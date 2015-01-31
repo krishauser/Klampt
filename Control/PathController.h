@@ -85,21 +85,28 @@ class MilestonePathController : public JointTrackingController
   ///squared errors between the actual and commanded configuration
   bool modifySpeedByError;
   Real modifySpeedCoeff;
-
 };
 
 /** @ingroup Control
- * @brief A controller that uses a piecewise polynomial trajectory.
+ * @brief A motion queue that runs on a piecewise polynomial path.
  *
- * Accepts commands set_q,append_q,set_tq,append_tq,set_qv,append_qv,brake.
+ * In order to use AppendRamp functions you will need to fill out the
+ * accMax and velMax members.  If you wish to obey joint limits, fill 
+ * out qMin and qMax.  Or, you can just call SetLimits(robot) for you
+ * given robot model.
  */
-class PolynomialPathController : public JointTrackingController
+class PolynomialMotionQueue
 {
- public:
-  PolynomialPathController(Robot& robot);
+public:
+  PolynomialMotionQueue();
+  virtual ~PolynomialMotionQueue() {}
+  void SetLimits(const Robot& robot);
+  void SetConstant(const Config& x);
   void SetPath(const Spline::PiecewisePolynomialND& path);
-  void SetPath(const vector<Config>& milestones,const vector<Real>& times);
   void SetPath(const ParabolicRamp::DynamicPath& path);
+  void SetPiecewiseLinear(const vector<Config>& milestones,const vector<Real>& times);
+  void SetPiecewiseCubic(const vector<Config>& milestones,const vector<Vector>& velocities,const vector<Real>& times);
+  void Advance(Real dt);
   void Append(const Spline::PiecewisePolynomialND& path);
   void Append(const ParabolicRamp::DynamicPath& path);
   void AppendLinear(const Config& config,Real dt);
@@ -108,12 +115,33 @@ class PolynomialPathController : public JointTrackingController
   void AppendRamp(const Config& x,const Vector& v);
   void GetPath(Spline::PiecewisePolynomialND& path) const;
   void Cut(Real time,bool relative=true);
+  Real CurTime() const;
+  Config CurConfig() const;
+  Config CurVelocity() const;
   Config Endpoint() const;
   Vector EndpointVelocity() const;
   void Eval(Real time,Config& x,bool relative=true) const;
   void Deriv(Real time,Config& dx,bool relative=true) const;
   bool Done() const;
   Real TimeRemaining() const;
+
+  Real pathOffset;
+  Spline::PiecewisePolynomialND path;
+
+  //limits are used for Ramp functions
+  Vector qMin,qMax,velMax,accMax;
+};
+
+/** @ingroup Control
+ * @brief A controller that uses a piecewise polynomial trajectory.
+ *
+ * Accepts commands set_q,append_q,set_tq,append_tq,set_qv,append_qv,brake.
+ */
+class PolynomialPathController : public JointTrackingController, public PolynomialMotionQueue
+{
+ public:
+  PolynomialPathController(Robot& robot);
+  virtual ~PolynomialPathController() {}
 
   virtual const char* Type() const { return "PolynomialPathController"; }
   virtual void GetDesiredState(Config& q_des,Vector& dq_des);
@@ -125,9 +153,6 @@ class PolynomialPathController : public JointTrackingController
   //commands
   virtual vector<string> Commands() const;
   virtual bool SendCommand(const string& name,const string& str);
-
-  Real pathOffset;
-  Spline::PiecewisePolynomialND path;
 };
 
 #endif
