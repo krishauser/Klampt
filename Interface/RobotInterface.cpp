@@ -3,8 +3,8 @@
 MotionQueueInterface::MotionQueueInterface()
 {}
 
-DefaultMotionQueueInterface::DefaultMotionQueueInterface(PolynomialPathController* _controller)
-  :controller(_controller)
+DefaultMotionQueueInterface::DefaultMotionQueueInterface(PolynomialMotionQueue* _queue)
+  :queue(_queue)
 {}
 
 bool DefaultMotionQueueInterface::HadExternalChange()
@@ -15,62 +15,62 @@ bool DefaultMotionQueueInterface::HadExternalChange()
   //interfaces to simulated or actual world
 Real DefaultMotionQueueInterface::GetCurTime()
 {
-  return controller->time;
+  return queue->CurTime();
 }
 
 void DefaultMotionQueueInterface::GetCurConfig(Config& x)
 {
-  controller->GetCommandedConfig(x);
+  x = queue->CurConfig();
 }
 
 void DefaultMotionQueueInterface::GetCurVelocity(Config& dx)
 {
-  controller->GetCommandedVelocity(dx);
+  dx = queue->CurVelocity();
 }
 
 Real DefaultMotionQueueInterface::GetEndTime()
 {
-  return controller->time+controller->TimeRemaining();
+  return queue->CurTime()+queue->TimeRemaining();
 }
 
 void DefaultMotionQueueInterface::GetEndConfig(Config& x)
 {
-  x=controller->Endpoint();
+  x=queue->Endpoint();
 }
 
 void DefaultMotionQueueInterface::GetEndVelocity(Config& dx)
 {
-  dx=controller->EndpointVelocity();
+  dx=queue->EndpointVelocity();
 }
 
 void DefaultMotionQueueInterface::GetConfig(Real t,Config& x)
 {
-  controller->Eval(t - controller->time,x);
+  queue->Eval(t,x,false);
 }
 
 MotionQueueInterface::MotionResult DefaultMotionQueueInterface::SendMilestone(const Config& x)
 {
-  controller->AppendRamp(x);
+  queue->AppendRamp(x);
   return Success;
 }
 
 MotionQueueInterface::MotionResult DefaultMotionQueueInterface::SendMilestoneImmediate(const Config& x)
 {
-  controller->Cut(0);
-  controller->AppendRamp(x);
+  queue->Cut(0);
+  queue->AppendRamp(x);
   return Success;
 }
 
 MotionQueueInterface::MotionResult DefaultMotionQueueInterface::SendPathImmediate(Real tbreak,const ParabolicRamp::DynamicPath& path)
 {
-  if(tbreak > controller->time) {
-    controller->Cut(tbreak - controller->time);
-    controller->Append(path);
+  if(tbreak > queue->CurTime()) {
+    queue->Cut(tbreak - queue->CurTime());
+    queue->Append(path);
   }
   else {
     fprintf(stderr,"Warning, sending immediate path with time < current sim time\n");
     return InvalidParams;
-    controller->SetPath(path);
+    queue->SetPath(path);
   }
   return Success;
 }
