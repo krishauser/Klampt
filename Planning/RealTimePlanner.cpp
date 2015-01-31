@@ -351,8 +351,7 @@ struct RealTimePlannerData
   RealTimePlanner* planner;
   bool resetStartConfig;      //(in) true if the start configuration should be reset
   Config startConfig;         //(in) the start config
-  PlannerObjectiveBase* objective;   //(in) the planning objective, can be NULL
-  bool objectiveOwned;     //whether the objective is owned by the planner
+  SmartPointer<PlannerObjectiveBase> objective;   //(in) the planning objective, can be NULL
   bool active;             //(in) set this to false to quit
   bool pause;              //(in) set this to true to pause the planner
   Real globalTime;         //(in) time measured in calling thread
@@ -453,12 +452,11 @@ void* planner_thread_func(void * ptr)
 	  data->planning=true;
 	}
       }
-      if(data->objective != (PlannerObjectiveBase*)data->planner->planner->goal) {
+      if(data->objective != data->planner->planner->goal) {
 	printf("Planning thread: changing objective\n");
 	if(data->objective) {
 	  //planner takes ownership
 	  data->planner->Reset(data->objective);
-	  data->objectiveOwned = true;
 	}
 	else {
 	  data->planner->Reset(NULL);
@@ -487,7 +485,6 @@ RealTimePlanningThread::RealTimePlanningThread()
 {
   internal = new RealTimePlannerData;
   RealTimePlannerData* data = reinterpret_cast<RealTimePlannerData*>(internal);
-  data->objectiveOwned = false;
   data->active = false;
   data->pause = false;
   data->resetStartConfig = false;
@@ -501,8 +498,6 @@ RealTimePlanningThread::~RealTimePlanningThread()
   RealTimePlannerData* data = reinterpret_cast<RealTimePlannerData*>(internal);
   if(data->active)
     Stop();
-  if(!data->objectiveOwned && data->objective)
-    delete data->objective;
   delete data;
 }
 
@@ -570,12 +565,11 @@ void RealTimePlanningThread::ResetCurrentPath(Real tglobal,const ParabolicRamp::
   FatalError("ResetCurrentPath not implemented yet");
 }
 
-void RealTimePlanningThread::SetObjective(PlannerObjectiveBase* newgoal)
+void RealTimePlanningThread::SetObjective(SmartPointer<PlannerObjectiveBase> newgoal)
 {
   RealTimePlannerData* data = reinterpret_cast<RealTimePlannerData*>(internal);
   //set the objective function
   ScopedLock lock(data->mutex);
-  data->objectiveOwned = true;
   data->objective = newgoal;
  }
 
@@ -778,7 +772,7 @@ void DynamicMotionPlannerBase::Init(CSpace* _space,Robot* _robot,WorldPlannerSet
   SetDefaultLimits();
 }
 
-void DynamicMotionPlannerBase::SetGoal(const SmartPointer<PlannerObjectiveBase>& newgoal)
+void DynamicMotionPlannerBase::SetGoal(SmartPointer<PlannerObjectiveBase> newgoal)
 {
   goal = newgoal;
 }

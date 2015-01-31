@@ -15,6 +15,11 @@ class MotionQueueInterface;
 /** @brief A base class for a motion planner that generates dynamic paths.
  * The output should always respect joint, velocity, and acceleration limits
  * and end in a zero-velocity terminal states.
+ *
+ * Important note: the objects pointed to by CSpace* space, Robot *robot,
+ * and WorldPlannerSettings *settings must be owned by an outside source.
+ * Make sure to pass a SmartPointer to SetGoal if you are going to use the
+ * objective elsewhere.
  */
 class DynamicMotionPlannerBase
 {
@@ -24,7 +29,7 @@ class DynamicMotionPlannerBase
   DynamicMotionPlannerBase();
   virtual ~DynamicMotionPlannerBase();
   virtual void Init(CSpace* space,Robot* robot,WorldPlannerSettings* settings);
-  virtual void SetGoal(const SmartPointer<PlannerObjectiveBase>& newgoal);
+  virtual void SetGoal(SmartPointer<PlannerObjectiveBase> newgoal);
   virtual void SetTime(Real tstart);
   virtual void SetDefaultLimits();
   virtual void SetLimits(Real qScale=1.0,Real vScale=1.0,Real aScale=1.0);
@@ -290,9 +295,10 @@ class RealTimePlanningThread
   /// Sets the planner
   void SetPlanner(const SmartPointer<DynamicMotionPlannerBase>& planner);
   void SetPlanner(const SmartPointer<RealTimePlanner>& planner);
-  /// Set the objective function.  Takes ownership over the pointer
-  void SetObjective(PlannerObjectiveBase* newgoal);
-  /// Gets the objective function.  You must not delete the pointer
+  /// Set the objective function.
+  void SetObjective(SmartPointer<PlannerObjectiveBase> newgoal);
+  /// Gets the objective function.  (You must not delete the pointer or assign
+  /// it to a SmartPointer)
   PlannerObjectiveBase* GetObjective() const;
   ///If the robot's path has changed for a reason outside of the planner's
   ///control, call this
