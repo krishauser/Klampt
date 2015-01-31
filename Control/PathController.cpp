@@ -498,7 +498,7 @@ void PolynomialMotionQueue::SetLimits(const Robot& robot)
   accMax = robot.accMax;
 }
 
-void PolynomialMotionQueue::SetConstant(const Config&  q)
+void PolynomialMotionQueue::SetConstant(const Config& q)
 {
   path = Spline::Constant(q,0,0);
   pathOffset = 0;
@@ -571,6 +571,7 @@ void PolynomialMotionQueue::Append(const ParabolicRamp::DynamicPath& _path)
 
 void PolynomialMotionQueue::AppendLinear(const Config& config,Real dt)
 {
+  if(path.elements.empty()) FatalError("PolynomialMotionQueue::AppendLinear: motion queue is uninitialized\n");
   if(dt == 0 && config != Endpoint()) {
     //want a continuous jump?
     printf("PolynomialMotionQueue::AppendLinear: Warning, discontinuous jump requested\n");
@@ -583,6 +584,7 @@ void PolynomialMotionQueue::AppendLinear(const Config& config,Real dt)
 
 void PolynomialMotionQueue::AppendCubic(const Config& x,const Vector& v,Real dt)
 {
+  if(path.elements.empty()) FatalError("PolynomialMotionQueue::AppendCubic: motion queue is uninitialized\n");
   if(dt == 0) {
     if(x != Endpoint()) {
       //want a continuous jump?
@@ -618,6 +620,7 @@ void PolynomialMotionQueue::AppendRamp(const Config& x)
 
 void PolynomialMotionQueue::AppendRamp(const Config& x,const Vector& v)
 {
+  if(path.elements.empty()) FatalError("PolynomialMotionQueue::AppendRamp: motion queue is uninitialized\n");
   if(accMax.empty()) 
     FatalError("Cannot append ramp without acceleration limits");
   if(accMax.size() != path.elements.size()) 
@@ -727,6 +730,7 @@ Config PolynomialMotionQueue::Endpoint() const
 
 Vector PolynomialMotionQueue::EndpointVelocity() const
 {
+  if(path.elements.empty()) return Vector();
   return path.Derivative(path.EndTime());
 }
 
@@ -737,6 +741,7 @@ bool PolynomialMotionQueue::Done() const
 
 Real PolynomialMotionQueue::TimeRemaining() const
 {
+  if(path.elements.empty()) return 0;
   return path.EndTime() - pathOffset;
 }
 
