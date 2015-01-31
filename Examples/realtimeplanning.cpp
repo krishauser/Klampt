@@ -145,6 +145,9 @@ public:
     MapButtonToggle("draw_ui",&drawUI);
     MapButtonToggle("draw_contacts",&drawContacts);
 
+    ///Hack to initialize motion queue before the planner tries to get a hold of it
+    sim.robotControllers[0]->Update(0); 
+
     //set up user interface
     robotInterface = new DefaultMotionQueueInterface(GetMotionQueue(sim.robotControllers[0]));
 #ifdef MULTITHREADED
