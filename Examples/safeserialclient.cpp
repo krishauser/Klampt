@@ -2,7 +2,7 @@
 //objective function serialization interface and run real-time planning
 //to avoid obstacles.  The robot will be simulated.
 #include "Interface/UserInterface.h"
-#include "Interface/SimRobotInterface.h"
+#include "Interface/RobotInterface.h"
 #include "Main/SimViewProgram.h"
 #include <utils/AnyCollection.h>
 #include <GL/glui.h>
@@ -36,7 +36,7 @@ public:
   WorldPlannerSettings plannerSettings;
   string initialState;
 
-  SmartPointer<SimRobotInterface> robotInterface;
+  SmartPointer<DefaultMotionQueueInterface> robotInterface;
   vector<SmartPointer<RobotUserInterface> > uis;
   SmartPointer<InputProcessorBase> serialInputProcessor;
   int currentUI,oldUI;
@@ -88,7 +88,7 @@ public:
     drawUI = 1;
     drawContacts = 1;
 
-    robotInterface = new SimRobotInterface(&sim);
+    robotInterface = new DefaultMotionQueueInterface(GetMotionQueue(sim.robotControllers[0]));
     CopyWorld(*world,planningWorld);
     Robot* robot = planningWorld.robots[0].robot;
     for(size_t i=0;i<robot->geometry.size();i++)

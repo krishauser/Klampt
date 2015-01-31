@@ -1,8 +1,10 @@
 #include "Interface/UserInterface.h"
-#include "Interface/SimRobotInterface.h"
 #include "Interface/SimulationGUI.h"
 #include "Interface/GLUIGUI.h"
 #include "Interface/SimTestGUI.h"
+#include <Control/LoggingController.h>
+#include <Control/FeedforwardController.h>
+#include <Control/PathController.h>
 #include <GLdraw/GLScreenshotProgram.h>
 #include <utils/StatCollector.h>
 #include <GLdraw/drawextra.h>
@@ -10,6 +12,25 @@
 #include <fstream>
 using namespace Math3D;
 using namespace GLDraw;
+
+//Gets the motion queue from the controller consructed in InitSim
+inline PolynomialMotionQueue* GetMotionQueue(RobotController* rc)
+{
+  LoggingController* lc = dynamic_cast<LoggingController*>(rc);
+  if(!lc) {
+    FatalError("Robot controller isn't a LoggingController");
+  }
+  FeedforwardController* fc = dynamic_cast<FeedforwardController*>(&*lc->base);
+  if(!fc) {
+    FatalError("LoggingController base is not a feedforward controller");
+  }
+  PolynomialPathController* c = dynamic_cast<PolynomialPathController*>(&*fc->base);
+  if(!c) {
+    FatalError("Feedforward base is not a PolynomialPathController");
+  }
+  return c;
+}
+
 
 //comment this out if you want to try single-threaded planning and simulation 
 #define MULTITHREADED
@@ -82,7 +103,7 @@ public:
   RobotWorld planningWorld;
   WorldPlannerSettings settings;
 
-  SmartPointer<SimRobotInterface> robotInterface;
+  SmartPointer<DefaultMotionQueueInterface> robotInterface;
   SmartPointer<InputProcessingInterface> ui;
   SmartPointer<InputProcessorBase> inputProcessor;
   //store existing collision geometries before modifying them for planner
@@ -125,7 +146,7 @@ public:
     MapButtonToggle("draw_contacts",&drawContacts);
 
     //set up user interface
-    robotInterface = new SimRobotInterface(&sim);
+    robotInterface = new DefaultMotionQueueInterface(GetMotionQueue(sim.robotControllers[0]));
 #ifdef MULTITHREADED
     printf("Constructing multi-threaded RRT user interface...\n");
     ui = new MTRRTCommandInterface;
