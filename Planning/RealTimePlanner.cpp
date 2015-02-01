@@ -89,7 +89,6 @@ RealTimePlanner::RealTimePlanner()
 
 RealTimePlanner::~RealTimePlanner()
 {
-  printf("RealTimePlanner destructor\n");
 }
 
 
