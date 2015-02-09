@@ -103,6 +103,9 @@ public:
     robotInterface = new DefaultMotionQueueInterface(GetMotionQueue(sim.robotControllers[0]));
     CopyWorld(*world,planningWorld);
 
+    ///Hack to initialize motion queue before the planner tries to get a hold of it
+    sim.robotControllers[0]->Update(0); 
+
     uis.resize(0);
     uis.push_back(new JointCommandInterface);
     uis.push_back(new IKCommandInterface);
