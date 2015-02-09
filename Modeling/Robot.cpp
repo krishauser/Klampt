@@ -1012,9 +1012,25 @@ bool Robot::LoadRob(const char* fn) {
 		}
 	}
 
+	//first mount the geometries, they affect whether a link is included in self collision testing
+	for (size_t i = 0; i < mountLinks.size(); i++) {
+		if (Geometry::AnyGeometry3D::CanLoadExt(FileExtension(mountFiles[i].c_str()))) {
+		  string fn = path + mountFiles[i];
+		  printf("   Mounting geometry file %s\n", mountFiles[i].c_str());
+		  //mount a triangle mesh on top of another triangle mesh
+		  Geometry::AnyGeometry3D geom;
+		  if(!geom.Load(fn.c_str())) {
+		    fprintf(stderr, "   Error loading mount geometry file %s\n",
+			    fn.c_str());
+		    return false;
+		  }
+		  Mount(mountLinks[i], geom, mountT[i]);
+		}
+	}
+
+	//Initialize self collisions -- pre subchain mounting
 	CleanupSelfCollisions();
 	vector<pair<string,string> > residualSelfCollisions,residualNoSelfCollisions;
-	//Initialize self collisions -- pre mounting
 	if (selfCollision.empty()) {
 		InitAllSelfCollisions();
 	} else {
@@ -1047,19 +1063,11 @@ bool Robot::LoadRob(const char* fn) {
 	}
 
 
+	//do the mounting of subchains
 	for (size_t i = 0; i < mountLinks.size(); i++) {
-		printf("   Mounting file %s\n", mountFiles[i].c_str());
-		string fn = path + mountFiles[i];
-		if (Geometry::AnyGeometry3D::CanLoadExt(FileExtension(mountFiles[i].c_str()))) {
-			//mount a triangle mesh on top of another triangle mesh
-			Geometry::AnyGeometry3D geom;
-			if(!geom.Load(fn.c_str())) {
-				fprintf(stderr, "   Error loading mount geometry file %s\n",
-						fn.c_str());
-				return false;
-			}
-			Mount(mountLinks[i], geom, mountT[i]);
-		} else {
+		if (!Geometry::AnyGeometry3D::CanLoadExt(FileExtension(mountFiles[i].c_str()))) {
+		  string fn = path + mountFiles[i];
+		  printf("   Mounting subchain file %s\n", mountFiles[i].c_str());
 			Robot subchain;
 			if (!subchain.Load(fn.c_str())) {
 				fprintf(stderr, "   Error reading subchain file %s\n",
@@ -1564,6 +1572,8 @@ void Robot::Mount(int link, const Geometry::AnyGeometry3D& mesh,
 	mergeMeshes[1].Transform(Matrix4(T));
 	geometry[link].Merge(mergeMeshes);
 	geometry[link].InitCollisions();
+	//need to reinitialize all self collisions with this mesh
+	
 }
 
 void Robot::Mount(int link, const Robot& subchain, const RigidTransform& T) {
