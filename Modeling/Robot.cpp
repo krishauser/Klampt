@@ -2211,7 +2211,12 @@ bool Robot::LoadURDF(const char* fn)
 	    worldFrame = klampt_xml->Attribute("world_frame");
 	  }
 	  if(klampt_xml->Attribute("package_root") != 0) {
-	    URDFConverter::packageRootPath = path+"/"+klampt_xml->Attribute("package_root");
+	    string root_path = klampt_xml->Attribute("package_root");
+	    //TODO: windows root references?
+	    if(root_path[0]=='/' || path.empty())
+	      URDFConverter::packageRootPath = root_path;
+	    else 
+	      URDFConverter::packageRootPath = path+"/"+root_path;
 	  }
 	  if(klampt_xml->QueryValueAttribute("default_acc_max",&default_acc_max)!=TIXML_SUCCESS) {
 	    //pass
