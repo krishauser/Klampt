@@ -117,10 +117,12 @@ class SimRobotController
 /** @brief A reference to a rigid body inside a Simulator (either a
  * RigidObjectModel, TerrainModel, or a link of a RobotModel).
  *
- * Can use this class to apply forces or control velocities / positions
- * directly to objects in the simulation.  However, note that the changes
+ * Can use this class to directly apply forces to or control positions
+ * / velocities of objects in the simulation.  However, note that the changes
  * are only applied in the current simulation substep, not the duration
- * provided to Simulation.simulate()..
+ * provided to Simulation.simulate().  If you need fine-grained control,
+ * make sure to call simulate() with time steps equal to the value provided
+ * to Simulation.setSimStep() (this is 0.001s by default).
  */
 class SimBody
 {
@@ -138,7 +140,7 @@ class SimBody
   void setTransform(const double R[9],const double t[3]);
   void getTransform(double out[9],double out2[3]);
 
-  /// Sets the collision padding (useful for thin objects)
+  /// Sets the collision padding (useful for thin objects).  Default is 0.0025
   void setCollisionPadding(double padding);
   double getCollisionPadding();
 

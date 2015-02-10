@@ -881,17 +881,26 @@ RobotModelLink::drawWorldGL(bool keepAppearance=true) ";
 A reference to a rigid body inside a Simulator (either a
 RigidObjectModel, TerrainModel, or a link of a RobotModel).
 
+Can use this class to directly apply forces to or control positions /
+velocities of objects in the simulation. However, note that the
+changes are only applied in the current simulation substep, not the
+duration provided to Simulation.simulate(). If you need fine-grained
+control, make sure to call simulate() with time steps equal to the
+value provided to Simulation.setSimStep() (this is 0.001s by default).
+
 C++ includes: robotsim.h ";
 
 %feature("docstring")  SimBody::applyWrench "void
 SimBody::applyWrench(const double f[3], const double t[3])
 
-Applies a force and torque about the COM. ";
+Applies a force and torque about the COM at the current simulation
+time step. ";
 
 %feature("docstring")  SimBody::setVelocity "void
 SimBody::setVelocity(const double w[3], const double v[3])
 
-Sets the angular velocity and translational velocity. ";
+Sets the angular velocity and translational velocity at the current
+simulation time step. ";
 
 %feature("docstring")  SimBody::getVelocity "void
 SimBody::getVelocity(double out[3], double out2[3])
@@ -899,7 +908,9 @@ SimBody::getVelocity(double out[3], double out2[3])
 Returns the angular velocity and translational velocity. ";
 
 %feature("docstring")  SimBody::setTransform "void
-SimBody::setTransform(const double R[9], double t[3]) ";
+SimBody::setTransform(const double R[9], const double t[3])
+
+Sets the body's transformation at the current simulation time step. ";
 
 %feature("docstring")  SimBody::getTransform "void
 SimBody::getTransform(double out[9], double out2[3]) ";
@@ -907,7 +918,8 @@ SimBody::getTransform(double out[9], double out2[3]) ";
 %feature("docstring")  SimBody::setCollisionPadding "void
 SimBody::setCollisionPadding(double padding)
 
-Sets the collision padding (useful for thin objects) ";
+Sets the collision padding (useful for thin objects). Default is
+0.0025. ";
 
 %feature("docstring")  SimBody::getCollisionPadding "double
 SimBody::getCollisionPadding() ";
