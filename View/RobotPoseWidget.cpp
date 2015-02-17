@@ -1,4 +1,5 @@
 #include "RobotPoseWidget.h"
+#include <math/angle.h>
 #include <math3d/basis.h>
 #include <GLdraw/drawextra.h>
 #include <robotics/IKFunctions.h>
@@ -461,6 +462,20 @@ void RobotPoseWidget::Set(Robot* robot,ViewRobot* viewRobot)
   }
 }
 
+Config RobotPoseWidget::Pose_Conditioned(const Config& qref) const
+{
+  Robot* robot = linkPoser.robot;
+  Assert(qref.n == linkPoser.poseConfig.n);
+  Config res = linkPoser.poseConfig;
+  for(int i=0;i<robot->q.n;i++) {
+    if(robot->links[i].type == RobotLink3D::Revolute && robot->qMin(i)+TwoPi < robot->qMax(i)) {
+      if(Abs(res[i]-qref[i]) > Pi) {
+	res[i] = AngleDiff(AngleNormalize(res[i]),AngleNormalize(qref[i])) + qref[i];
+      }
+    }
+  }
+  return res;
+}
   
 bool RobotPoseWidget::FixCurrent() 
 {
