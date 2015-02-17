@@ -149,6 +149,141 @@ Samples an initial random configuration. ";
 %feature("docstring") GeomCollisionQuery "";
 
 
+// File: structGeometricPrimitive.xml
+%feature("docstring") GeometricPrimitive "";
+
+%feature("docstring")  GeometricPrimitive::setPoint "void
+GeometricPrimitive::setPoint(const double pt[3]) ";
+
+%feature("docstring")  GeometricPrimitive::setSphere "void
+GeometricPrimitive::setSphere(const double c[3], double r) ";
+
+%feature("docstring")  GeometricPrimitive::setSegment "void
+GeometricPrimitive::setSegment(const double a[3], const double b[3])
+";
+
+%feature("docstring")  GeometricPrimitive::setAABB "void
+GeometricPrimitive::setAABB(const double bmin[3], const double
+bmax[3]) ";
+
+%feature("docstring")  GeometricPrimitive::loadString "bool
+GeometricPrimitive::loadString(const char *str) ";
+
+%feature("docstring")  GeometricPrimitive::saveString "std::string
+GeometricPrimitive::saveString() const ";
+
+
+// File: classGeometry3D.xml
+%feature("docstring") Geometry3D "
+
+A three-D geometry. Can either be a reference to a world item's
+geometry, in which case modifiers change the world item's geometry, or
+it can be a standalone geometry.
+
+Modifiers include any setX() functions, translate(), and transform().
+
+Proximity queries include collides(), withinDistance(), distance(),
+and rayCast().
+
+C++ includes: geometry.h ";
+
+%feature("docstring")  Geometry3D::Geometry3D "Geometry3D::Geometry3D() ";
+
+%feature("docstring")  Geometry3D::~Geometry3D "Geometry3D::~Geometry3D() ";
+
+%feature("docstring")  Geometry3D::clone "Geometry3D
+Geometry3D::clone()
+
+Creates a standalone geometry from this geometry. ";
+
+%feature("docstring")  Geometry3D::set "void Geometry3D::set(const
+Geometry3D &)
+
+Copies the geometry of the argument into this geometry. ";
+
+%feature("docstring")  Geometry3D::isStandalone "bool
+Geometry3D::isStandalone()
+
+Returns true if this is a standalone geometry. ";
+
+%feature("docstring")  Geometry3D::free "void Geometry3D::free()
+
+Frees the data associated with this geometry, if standalone. ";
+
+%feature("docstring")  Geometry3D::type "string Geometry3D::type()
+
+Returns the type of geometry: TriangleMesh, PointCloud, or
+GeometricPrimitive ";
+
+%feature("docstring")  Geometry3D::getTriangleMesh "TriangleMesh
+Geometry3D::getTriangleMesh()
+
+Returns a TriangleMesh if this geometry is of type TriangleMesh. ";
+
+%feature("docstring")  Geometry3D::getPointCloud "PointCloud
+Geometry3D::getPointCloud()
+
+Returns a PointCloud if this geometry is of type PointCloud. ";
+
+%feature("docstring")  Geometry3D::getGeometricPrimitive "GeometricPrimitive Geometry3D::getGeometricPrimitive()
+
+Returns a GeometricPrimitive if this geometry is of type
+GeometricPrimitive. ";
+
+%feature("docstring")  Geometry3D::setTriangleMesh "void
+Geometry3D::setTriangleMesh(const TriangleMesh &) ";
+
+%feature("docstring")  Geometry3D::setPointCloud "void
+Geometry3D::setPointCloud(const PointCloud &) ";
+
+%feature("docstring")  Geometry3D::setGeometricPrimitive "void
+Geometry3D::setGeometricPrimitive(const GeometricPrimitive &) ";
+
+%feature("docstring")  Geometry3D::loadFile "bool
+Geometry3D::loadFile(const char *fn) ";
+
+%feature("docstring")  Geometry3D::saveFile "bool
+Geometry3D::saveFile(const char *fn) ";
+
+%feature("docstring")  Geometry3D::setCurrentTransform "void
+Geometry3D::setCurrentTransform(const double R[9], const double t[3])
+
+Sets the current transformation (not modifying the underlying data) ";
+
+%feature("docstring")  Geometry3D::translate "void
+Geometry3D::translate(const double t[3])
+
+Translates the geometry data. ";
+
+%feature("docstring")  Geometry3D::transform "void
+Geometry3D::transform(const double R[9], const double t[3])
+
+Translates/rotates the geometry data. ";
+
+%feature("docstring")  Geometry3D::setCollisionMargin "void
+Geometry3D::setCollisionMargin(double margin) ";
+
+%feature("docstring")  Geometry3D::getCollisionMargin "double
+Geometry3D::getCollisionMargin() ";
+
+%feature("docstring")  Geometry3D::getBB "void
+Geometry3D::getBB(double out[3], double out2[3]) ";
+
+%feature("docstring")  Geometry3D::collides "bool
+Geometry3D::collides(const Geometry3D &other) ";
+
+%feature("docstring")  Geometry3D::withinDistance "bool
+Geometry3D::withinDistance(const Geometry3D &other, double tol) ";
+
+%feature("docstring")  Geometry3D::distance "double
+Geometry3D::distance(const Geometry3D &other, double relErr=0, double
+absErr=0) ";
+
+%feature("docstring")  Geometry3D::rayCast "bool
+Geometry3D::rayCast(const double s[3], const double d[3], double
+out[3]) ";
+
+
 // File: classIKObjective.xml
 %feature("docstring") IKObjective "
 
@@ -433,6 +568,24 @@ PlannerInterface::getRoadmap() ";
 
 %feature("docstring")  PlannerInterface::dump "void
 PlannerInterface::dump(const char *fn) ";
+
+
+// File: structPointCloud.xml
+%feature("docstring") PointCloud "
+
+A 3D point cloud class. vertices is a list of vertices, given as a
+list [x1, y1, z1, x2, y2, ... zn] properties is a list of vertex
+properties, given as a list [p11, p21, ..., pk1, p12, p22, ..., pk2,
+... , pn1, pn2, ..., pn2] where each vertex has k properties. The name
+of each property is given by the propertyNames member.
+
+C++ includes: geometry.h ";
+
+%feature("docstring")  PointCloud::translate "void
+PointCloud::translate(const double t[3]) ";
+
+%feature("docstring")  PointCloud::transform "void
+PointCloud::transform(const double R[9], const double t[3]) ";
 
 
 // File: classPyCSpace.xml
@@ -890,11 +1043,28 @@ value provided to Simulation.setSimStep() (this is 0.001s by default).
 
 C++ includes: robotsim.h ";
 
+%feature("docstring")  SimBody::enable "void SimBody::enable(bool
+enabled=true)
+
+Sets the simulation of this body on/off. ";
+
+%feature("docstring")  SimBody::isEnabled "bool SimBody::isEnabled()
+
+Returns true if this body is being simulated. ";
+
 %feature("docstring")  SimBody::applyWrench "void
 SimBody::applyWrench(const double f[3], const double t[3])
 
 Applies a force and torque about the COM at the current simulation
 time step. ";
+
+%feature("docstring")  SimBody::setTransform "void
+SimBody::setTransform(const double R[9], const double t[3])
+
+Sets the body's transformation at the current simulation time step. ";
+
+%feature("docstring")  SimBody::getTransform "void
+SimBody::getTransform(double out[9], double out2[3]) ";
 
 %feature("docstring")  SimBody::setVelocity "void
 SimBody::setVelocity(const double w[3], const double v[3])
@@ -906,14 +1076,6 @@ simulation time step. ";
 SimBody::getVelocity(double out[3], double out2[3])
 
 Returns the angular velocity and translational velocity. ";
-
-%feature("docstring")  SimBody::setTransform "void
-SimBody::setTransform(const double R[9], const double t[3])
-
-Sets the body's transformation at the current simulation time step. ";
-
-%feature("docstring")  SimBody::getTransform "void
-SimBody::getTransform(double out[9], double out2[3]) ";
 
 %feature("docstring")  SimBody::setCollisionPadding "void
 SimBody::setCollisionPadding(double padding)
@@ -1301,6 +1463,24 @@ TerrainModel::setFriction(double friction) ";
 
 %feature("docstring")  TerrainModel::drawGL "void
 TerrainModel::drawGL(bool keepAppearance=true) ";
+
+
+// File: structTriangleMesh.xml
+%feature("docstring") TriangleMesh "
+
+A 3D indexed triangle mesh class.
+
+vertices is a list of vertices, given as a list [x1, y1, z1, x2, y2,
+...] indices is a list of triangle vertices given as indices into the
+vertices list, i.e., [a1,b1,c2, a2,b2,c2, ...]
+
+C++ includes: geometry.h ";
+
+%feature("docstring")  TriangleMesh::translate "void
+TriangleMesh::translate(const double t[3]) ";
+
+%feature("docstring")  TriangleMesh::transform "void
+TriangleMesh::transform(const double R[9], const double t[3]) ";
 
 
 // File: structWorldData.xml
@@ -1832,6 +2012,9 @@ the points on geom1 and geom2, respectively that are within that
 tolerance. ";
 
 
+// File: geometry_8h.xml
+
+
 // File: motionplanning_8cpp.xml
 %feature("docstring")  setRandomSeed "void setRandomSeed(int seed)
 
@@ -2145,11 +2328,18 @@ PyListFromVector(const Vector &x) ";
 *startVals, int iter)
 
 Performs unconstrained root finding for up to iter iterations Return
-values is a tuple indicating (0,x,n) : convergence reached in x
-(1,x,n) : convergence reached in f (2,x,n) : divergence (3,x,n) :
-degeneration of gradient (local extremum or saddle point) (4,x,n) :
-maximum iterations reached (5,x,n) : numerical error occurred where x
-is the final point and n is the number of iterations used ";
+values is a tuple indicating: (0,x,n) : convergence reached in x
+
+(1,x,n) : convergence reached in f
+
+(2,x,n) : divergence
+
+(3,x,n) : degeneration of gradient (local extremum or saddle point)
+
+(4,x,n) : maximum iterations reached
+
+(5,x,n) : numerical error occurred where x is the final point and n is
+the number of iterations used ";
 
 %feature("docstring")  findRootsBounded "PyObject*
 findRootsBounded(PyObject *startVals, PyObject *boundVals, int iter)
@@ -2185,11 +2375,18 @@ Sets the vector field object, returns 0 if pVFObj = NULL, 1 otherwise.
 *startVals, int iter)
 
 Performs unconstrained root finding for up to iter iterations Return
-values is a tuple indicating (0,x,n) : convergence reached in x
-(1,x,n) : convergence reached in f (2,x,n) : divergence (3,x,n) :
-degeneration of gradient (local extremum or saddle point) (4,x,n) :
-maximum iterations reached (5,x,n) : numerical error occurred where x
-is the final point and n is the number of iterations used ";
+values is a tuple indicating: (0,x,n) : convergence reached in x
+
+(1,x,n) : convergence reached in f
+
+(2,x,n) : divergence
+
+(3,x,n) : degeneration of gradient (local extremum or saddle point)
+
+(4,x,n) : maximum iterations reached
+
+(5,x,n) : numerical error occurred where x is the final point and n is
+the number of iterations used ";
 
 %feature("docstring")  findRootsBounded "PyObject*
 findRootsBounded(PyObject *startVals, PyObject *boundVals, int iter)

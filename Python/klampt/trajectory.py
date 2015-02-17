@@ -1,9 +1,25 @@
+"""Classes for loading, saving, evaluating, and operating on trajectories.
+
+- For piecewise-linear interpolation in cartesian space, use
+  :class:`Trajectory`.
+- For piecewise-linear interpolation on a robot, use :class:`RobotTrajectory`.
+- For Hermite interpolation in cartesian space, use :class:`HermiteTrajectory`.
+"""
+
 import bisect
 import vectorops
 
 class Trajectory:
-	"""A basic piecewise-linear trajectory class.  By default, interpolates
-	in Cartesian space.  To interpolate for a robot, use RobotTrajectory.
+	"""A basic piecewise-linear trajectory class, which can be overloaded
+	to provide different functionality.  A plain Trajectory interpolates
+	in Cartesian space.
+
+	(To interpolate for a robot, use RobotTrajectory. To perform
+	Hermite interpolation, use HermiteTrajectory)
+
+	Attributes:
+		- times: a list of times at which the milestones are met.
+		- milestones: a list of milestones that are interpolated.
         """
         
 	def __init__(self,times=[],milestones=[]):
@@ -198,7 +214,8 @@ class RobotTrajectory(Trajectory):
 		return self.robot.interpolate_deriv(b,a)
 
 class HermiteTrajectory(Trajectory):
-	"""A trajectory whose milestones are given in phase space (x,dx)"""
+	"""A trajectory whose milestones are given in phase space (x,dx).
+	"""
 	def __init__(self,times=[],milestones=[],dmilestones=None):
 		"""If dmilestones is given, then milestones is interpreted
 		as configurations and dmilestones is interpreted as velocities.

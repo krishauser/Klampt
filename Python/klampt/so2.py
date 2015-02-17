@@ -1,4 +1,5 @@
-"""Operations for 2D rotations represented by a single number
+"""Operations for 2D rotations.  Rotations are represented by a single number
+giving the angle in radians.
 """
 
 import math

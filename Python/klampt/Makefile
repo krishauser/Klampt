@@ -9,6 +9,11 @@ cpp-docs:
 docs:
 	doxygen doxygen.conf
 
+sphinx-docs:
+	sphinx-apidoc --separate -o sphinx_docs .
+	sphinx-build -b html sphinx_docs sphinx_docs/_build
+	echo "HTML docs are placed in sphinx_docs/_build"
+
 swig:
 	swig -python -c++ src/robotsim.i
 	swig -python -c++ src/motionplanning.i

@@ -7,13 +7,22 @@ import so3
 from loader import *
 
 class Hold:
-    """A Hold, similar to the Hold class in the C++ RobotSim library."""
+    """A Hold, similar to the Hold class in the C++ RobotSim library.
+
+    Attributes:
+        - link: the link index
+        - ikConstraint: an IKObjective object
+          (see :class:`klampt.robotsim.IKObjective` or :func:`klampt.ik.objective`)
+        - contacts: a list of ContactPoint objects
+          (see :class:`klampt.contact.ContactPoint`)
+    """
     def __init__(self):
         self.link = None
         self.ikConstraint = None
         self.contacts = []
 
 def readHold(text):
+    """Loads a Hold from a string"""
     lines = parseLines(text)
     if lines[0] != 'begin hold':
         raise ValueError('Invalid hold begin text')
@@ -70,6 +79,7 @@ def readHold(text):
     return h
        
 def writeHold(h):
+    """Writes a Hold to a string"""
     text = "begin hold\n"
     text += "link = "+str(h.link)+"\n"
     text += "contacts = ";

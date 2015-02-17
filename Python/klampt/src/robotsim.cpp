@@ -1743,6 +1743,10 @@ Simulator::Simulator(const WorldModel& model)
     printf("Done\n");
   }
 
+  //TEMP: play around with auto disable of rigid objects
+  for(size_t i=0;i<sim->odesim.numObjects();i++)
+    dBodySetAutoDisableFlag(sim->odesim.object(i)->body(),1);
+
   sim->WriteState(initialState);
 }
 
@@ -1955,6 +1959,17 @@ SimRobotController Simulator::getController(const RobotModel& robot)
   c.sim = sim;
   c.index = robot.index;
   return c;
+}
+
+void SimBody::enable(bool enabled)
+{
+  if(!enabled) dBodyDisable(body);
+  else dBodyEnable(body);
+}
+
+bool SimBody::isEnabled()
+{
+  return dBodyIsEnabled(body) != 0;
 }
 
 void SimBody::applyWrench(const double f[3],const double t[3])

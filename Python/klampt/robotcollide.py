@@ -1,3 +1,6 @@
+"""A class for managing collision tests between all objects in a WorldModel.
+"""
+
 from __future__ import generators
 from robotsim import *
 import se3
@@ -6,13 +9,14 @@ import se3
 
 class WorldCollider:
     """
-    Members:
-      - geomList: a list of (object,geom) pairs
+    Attributes:
+      - geomList: a list of (object,geom) pairs for all objects in the world
       - mask: a list of sets, indicating which items are activated for
-        collision detection.
-      - terrains: indicates the geomList indices of each terrain in the world.
-      - rigidObjects: indicates the geomList indices of each object in the world
-      - robots: indicates the geomList indices of each robot in the world.
+        collision detection for each object in the world.
+      - terrains: contains the geomList indices of each terrain in the world.
+      - rigidObjects: contains the geomList indices of each object in
+        the world
+      - robots: contains the geomList indices of each robot in the world.
 
     Methods:
       - getGeom(obj): finds the geometry corresponding to an object
@@ -27,6 +31,10 @@ class WorldCollider:
       - objectTerrainCollide(o,t): returns whether an object and terrain
         collide
       - objectObjectCollide(o1,o2): returns whether two objects collide
+      - rayCast(ray_source,ray_direction,obj_indices): finds the first
+        object intersected by a ray
+      - rayCastRobot(robot_index,ray_source_ray_direction): finds the
+        first robot link intersected by a ray
     """
     
     def __init__(self,world):
@@ -126,15 +134,22 @@ class WorldCollider:
 
     def collisionTests(self,filter1=None,filter2=None):
         """Iterates over ((object,geom),(object,geom)) pairs indicating
-        which objects to collide.  filter1 and filter2 optionally indicate
-        subsets of objects to collide.
+        which objects should be tested for collision.  The geom objects
+        will be instances of Geometry3D (see :class:`Geometry3D`).
 
-        If filter1 is provided but filter2 is not, then objects in the set
-        filter1 will be collided against each other.
+        E.g., to test collisions, you will call
 
-        If filter1 and filter2 are provided, then objects that
-        satisfy filter1 will be collided against objects that satisfy
-        filter2.  In this case there is no checking of duplicates."""
+            for i,j in worldCollider.collisionTests():
+                if i[1].collides(j[1]):
+                    print "Object",i[0].getName(),"collides with",j[0].getName()
+                    
+        (Note that for this purpose is easier to just call collisions();
+        however you may want to use collisionTests to perform other queries
+        like proximity detection.)
+
+        See :func:`collisionTests` for a description of the filter1 and
+        filter2 arguments.
+        """
         res = []
         if filter1 == None:
             for (i,(g,objs)) in enumerate(zip(self.geomList,self.mask)):
@@ -165,7 +180,18 @@ class WorldCollider:
 
     def collisions(self,filter1=None,filter2=None):
         """Returns an iterator over the colliding pairs of
-        objects, optionally that satisfies the filter(s)"""
+        objects, optionally that satisfies the filter(s).
+
+        Arguments filter1 and filter2 optionally indicate  subsets of
+        objects to collide. If neither filter1 nor filter2 are provided,
+        then all pairs are returned.
+
+        If filter1 is provided but filter2 is not, then objects in the set
+        filter1 will be collided against each other.
+
+        If filter1 and filter2 are provided, then objects that
+        satisfy filter1 will be collided against objects that satisfy
+        filter2.  (Note: in this case there is no checking of duplicates)."""
         for (g0,g1) in self.collisionTests(filter1,filter2):
             if g0[1].collides(g1[1]):
                 yield (g0[0],g1[0])
