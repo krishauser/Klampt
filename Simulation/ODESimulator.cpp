@@ -646,6 +646,17 @@ void MergeContacts(vector<dContactGeom>& contacts,double posTolerance,double ori
 void collisionCallback(void *data, dGeomID o1, dGeomID o2)
 {
   Assert(!dGeomIsSpace(o1) && !dGeomIsSpace(o2));
+
+  dBodyID b1 = dGeomGetBody(o1);
+  dBodyID b2 = dGeomGetBody(o2);
+
+  // take care of disabled bodies
+  if( b1 && !b2 && !dBodyIsEnabled(b1) )
+   return; // b1 is disabled and collides with no-body
+  if( b2 && !b1 && !dBodyIsEnabled(b2) )
+    return; // b2 is disabled and collides with no-body
+  if( b1 && b2 && !dBodyIsEnabled(b1) && !dBodyIsEnabled(b2) )
+   return; // both b1 and b2 are disabled
   
   int num = dCollide (o1,o2,max_contacts,gContactTemp,sizeof(dContactGeom));
   vector<dContactGeom> vcontact(num);
