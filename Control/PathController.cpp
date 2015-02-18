@@ -358,16 +358,22 @@ void MilestonePathController::Update(Real dt)
 	//first time, read from sensors
 	xcur=robot.q;
 	dxcur=robot.dq;
+	//clamp -- minor errors
+	for(int i=0;i<xcur.n;i++) 
+	  xcur[i] = Clamp(xcur[i],robot.qMin[i],robot.qMax[i]);
 	SetMilestone(robot.q);
       }
       else {
 	xcur=robot.q;
 	dxcur.resize(robot.q.n,Zero);
+	//clamp -- minor errors
+	for(int i=0;i<xcur.n;i++) 
+	  xcur[i] = Clamp(xcur[i],robot.qMin[i],robot.qMax[i]);
 	SetMilestone(robot.q);
       }
     }
     else {
-      //don't have a path yet
+      //don't have a path yet, don't have sensor data yet either
       return; 
     }
   }
@@ -657,7 +663,7 @@ void PolynomialMotionQueue::AppendRamp(const Config& x,const Vector& v)
   if(!qMin.empty()) //optional joint limits
     dpath.SetJointLimits(qMin,qMax);
   if(!dpath.SetMilestones(milestones,dmilestones)) {
-    printf("AppendRamp: Warning, SetMilestones failed!\n");
+    printf("AppendRamp: Warning, DynamicPath::SetMilestones failed!\n");
     for(int i=0;i<x.n;i++)
       if(milestones[0][i] != Clamp(milestones[0][i],qMin[i],qMax[i])) {
 	printf("  Reason: current config[%d] is out of joint limits: %g <= %g <= %g\n",i,qMin[i],milestones[0][i],qMax[i]);
@@ -775,6 +781,9 @@ void PolynomialPathController::Update(Real dt)
     Config q;
     if(GetSensedConfig(q)) {
       Assert(q.n == robot.q.n);
+      //clamp -- minor errors
+      for(int i=0;i<q.n;i++) 
+	q[i] = Clamp(q[i],robot.qMin[i],robot.qMax[i]);
       SetConstant(q);
     }
     else {
