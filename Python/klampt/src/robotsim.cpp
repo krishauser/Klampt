@@ -391,8 +391,6 @@ void Geometry3D::setTriangleMesh(const TriangleMesh& mesh)
   if(!isStandalone()) {
     //update the display list
     RobotWorld& world=worlds[this->world]->world;
-    world.GetAppearance(id).vertexDisplayList.erase();
-    world.GetAppearance(id).faceDisplayList.erase();
     world.GetAppearance(id).Set(*geom);
   }
 }
@@ -417,8 +415,6 @@ void Geometry3D::setPointCloud(const PointCloud& pc)
   if(!isStandalone()) {
     //update the display list
     RobotWorld& world=worlds[this->world]->world;
-    world.GetAppearance(id).vertexDisplayList.erase();
-    world.GetAppearance(id).faceDisplayList.erase();
     world.GetAppearance(id).Set(*geom);
   }
 }
@@ -450,7 +446,15 @@ bool Geometry3D::loadFile(const char* fn)
     geomPtr = new AnyCollisionGeometry3D();
   }
   AnyCollisionGeometry3D* geom = reinterpret_cast<AnyCollisionGeometry3D*>(geomPtr);
-  return geom->Load(fn);
+  if(!geom->Load(fn)) return false;
+  geom->InitCollisions();
+
+  if(!isStandalone()) {
+    //update the display list
+    RobotWorld& world=worlds[this->world]->world;
+    world.GetAppearance(id).Set(*geom);
+  }
+  return true;
 }
 
 bool Geometry3D::saveFile(const char* fn)
@@ -480,6 +484,12 @@ void Geometry3D::translate(const double t[3])
   T.t.set(t);
   geom->Transform(T);
   geom->InitCollisions();
+
+  if(!isStandalone()) {
+    //update the display list
+    RobotWorld& world=worlds[this->world]->world;
+    world.GetAppearance(id).Set(*geom);
+  }
 }
 
 void Geometry3D::transform(const double R[9],const double t[3])
@@ -491,6 +501,12 @@ void Geometry3D::transform(const double R[9],const double t[3])
   T.t.set(t);
   geom->Transform(T);  
   geom->InitCollisions();
+
+  if(!isStandalone()) {
+    //update the display list
+    RobotWorld& world=worlds[this->world]->world;
+    world.GetAppearance(id).Set(*geom);
+  }
 }
 
 void Geometry3D::setCollisionMargin(double margin)
@@ -875,8 +891,7 @@ RobotModel WorldModel::makeRobot(const char* name)
   RobotModel robot;
   robot.world = index;
   robot.index = (int)world.robots.size();
-  world.AddRobot(name);
-  world.robots.back().robot = new Robot();
+  world.AddRobot(name,new Robot());
   robot.robot = world.robots.back().robot;
   return robot;
 }
@@ -887,8 +902,7 @@ RigidObjectModel WorldModel::makeRigidObject(const char* name)
   RigidObjectModel object;
   object.world = index;
   object.index = (int)world.rigidObjects.size();
-  world.AddRigidObject(name);
-  world.rigidObjects.back().object = new RigidObject();
+  world.AddRigidObject(name,new RigidObject());
   object.object = world.rigidObjects.back().object;
   return object;
 }
@@ -899,8 +913,7 @@ TerrainModel WorldModel::makeTerrain(const char* name)
   TerrainModel terrain;
   terrain.world = index;
   terrain.index = world.terrains.size();
-  world.AddTerrain(name);
-  world.terrains.back().terrain = new Environment();  
+  world.AddTerrain(name,new Environment());
   terrain.terrain = world.terrains.back().terrain;
   return terrain;
 }
