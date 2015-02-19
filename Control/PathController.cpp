@@ -485,52 +485,96 @@ bool MilestonePathController::WriteState(File& f) const
 
 
 
-
-
-PolynomialPathController::PolynomialPathController(Robot& robot)
-  :JointTrackingController(robot)
+PolynomialMotionQueue::PolynomialMotionQueue()
 {
   pathOffset = 0;
 }
 
-void PolynomialPathController::SetPath(const Spline::PiecewisePolynomialND& _path)
+void PolynomialMotionQueue::SetLimits(const Robot& robot)
+{
+  qMin = robot.qMin;
+  qMax = robot.qMax;
+  velMax = robot.velMax;
+  accMax = robot.accMax;
+}
+
+void PolynomialMotionQueue::SetConstant(const Config& q)
+{
+  path = Spline::Constant(q,0,0);
+  pathOffset = 0;
+}
+
+void PolynomialMotionQueue::SetPath(const Spline::PiecewisePolynomialND& _path)
 {
   path = _path;
   pathOffset = 0;
 }
 
-void PolynomialPathController::SetPath(const vector<Config>& milestones,const vector<Real>& times)
+void PolynomialMotionQueue::SetPiecewiseLinear(const vector<Config>& milestones,const vector<Real>& times)
 {
-  vector<double> elems(milestones.size());
-  for(size_t i=0;i<path.elements.size();i++) {
-    for(size_t j=0;j<milestones.size();j++)
-      elems[j] = milestones[j](i);
-    path.elements[i] = Spline::PiecewiseLinear(elems,times);
+  if(!milestones.empty()) {
+    vector<double> elems(milestones.size());
+    path.elements.resize(milestones[0].n);
+    for(size_t i=0;i<path.elements.size();i++) {
+      for(size_t j=0;j<milestones.size();j++)
+	elems[j] = milestones[j](i);
+      path.elements[i] = Spline::PiecewiseLinear(elems,times);
+    }
   }
+  else path.elements.resize(0);
   pathOffset = 0;
 }
 
-void PolynomialPathController::SetPath(const ParabolicRamp::DynamicPath& _path)
+void PolynomialMotionQueue::SetPiecewiseCubic(const vector<Config>& milestones,const vector<Vector>& velocities,const vector<Real>& times)
+{
+  Assert(milestones.size()==velocities.size());
+  Assert(milestones.size()==times.size());
+  if(!milestones.empty()) {
+    path.elements.resize(milestones[0].n);
+    for(size_t i=0;i<path.elements.size();i++) {
+      path.elements[i] = Spline::PiecewisePolynomial();
+      for(size_t j=0;j+1<milestones.size();j++) {
+	Real dt = times[j+1]-times[j];
+	if(dt == 0) //null motion or discontinuous jump requested?
+	  continue;
+	Spline::Polynomial<double> poly;
+	Spline::HermitePolynomial(milestones[j][i],velocities[j][i]*dt,milestones[j+1][i],velocities[j+1][i]*dt,poly);
+	//time scale it to length dt
+	Spline::Polynomial<double> timescale;
+	timescale.SetCoef(0,0);
+	timescale.SetCoef(1,1.0/dt);
+	poly = poly.Evaluate(timescale);
+	path.elements[i].Append(poly,dt,true);
+      }
+    }
+  }
+  else
+    path.elements.resize(0);
+  pathOffset = 0;
+}
+
+void PolynomialMotionQueue::SetPath(const ParabolicRamp::DynamicPath& _path)
 {
   path = Cast(_path);
   pathOffset = 0;
 }
 
-void PolynomialPathController::Append(const Spline::PiecewisePolynomialND& _path)
+void PolynomialMotionQueue::Append(const Spline::PiecewisePolynomialND& _path)
 {
   path.Concat(_path,true);
 }
 
-void PolynomialPathController::Append(const ParabolicRamp::DynamicPath& _path)
+void PolynomialMotionQueue::Append(const ParabolicRamp::DynamicPath& _path)
 {
   path.Concat(Cast(_path),true);
 }
 
-void PolynomialPathController::AppendLinear(const Config& config,Real dt)
+void PolynomialMotionQueue::AppendLinear(const Config& config,Real dt)
 {
+  if(path.elements.empty()) FatalError("PolynomialMotionQueue::AppendLinear: motion queue is uninitialized\n");
   if(dt == 0 && config != Endpoint()) {
     //want a continuous jump?
-    printf("PolynomialPathController::AppendLinear: Warning, discontinuous jump requested\n");
+    printf("PolynomialMotionQueue::AppendLinear: Warning, discontinuous jump requested\n");
     cout<<"Time "<<path.EndTime()<<" distance "<<config.distance(Endpoint())<<endl;
     path.Concat(Spline::Linear(config,config,0,0),true);    
   }
@@ -538,12 +582,13 @@ void PolynomialPathController::AppendLinear(const Config& config,Real dt)
     path.Concat(Spline::Linear(Endpoint(),config,0,dt),true);
 }
 
-void PolynomialPathController::AppendCubic(const Config& x,const Vector& v,Real dt)
+void PolynomialMotionQueue::AppendCubic(const Config& x,const Vector& v,Real dt)
 {
+  if(path.elements.empty()) FatalError("PolynomialMotionQueue::AppendCubic: motion queue is uninitialized\n");
   if(dt == 0) {
     if(x != Endpoint()) {
       //want a continuous jump?
-      printf("PolynomialPathController::AppendCubic: Warning, discontinuous jump requested\n");
+      printf("PolynomialMotionQueue::AppendCubic: Warning, discontinuous jump requested\n");
       cout<<"Time "<<path.EndTime()<<" distance "<<x.distance(Endpoint())<<endl;
       path.Concat(Spline::Linear(x,x,0,0),true);    
     }
@@ -559,21 +604,30 @@ void PolynomialPathController::AppendCubic(const Config& x,const Vector& v,Real 
       timescale.SetCoef(0,0);
       timescale.SetCoef(1,1.0/dt);
       poly = poly.Evaluate(timescale);
-      Real xtest = poly.Evaluate(dt);
-      Real vtest = poly.Derivative(dt); 
+      //TODO test
+      //Real xtest = poly.Evaluate(dt);
+      //Real vtest = poly.Derivative(dt); 
       path.elements[i].Append(poly,dt,true);
     }
   }
 }
 
-void PolynomialPathController::AppendRamp(const Config& x)
+void PolynomialMotionQueue::AppendRamp(const Config& x)
 {
   Vector zero(x.n,Zero);
   AppendRamp(x,zero);
 }
 
-void PolynomialPathController::AppendRamp(const Config& x,const Vector& v)
+void PolynomialMotionQueue::AppendRamp(const Config& x,const Vector& v)
 {
+  if(path.elements.empty()) FatalError("PolynomialMotionQueue::AppendRamp: motion queue is uninitialized\n");
+  if(accMax.empty()) 
+    FatalError("Cannot append ramp without acceleration limits");
+  if(accMax.size() != path.elements.size()) 
+    FatalError("Invalid acceleration limit size");
+  if(velMax.empty()) velMax.resize(accMax.size(),Inf);
+  if(velMax.size() != path.elements.size()) 
+    FatalError("Invalid velocity limit size");
   vector<ParabolicRamp::Vector> milestones(2);
   vector<ParabolicRamp::Vector> dmilestones(2);
   milestones[0] = Endpoint();
@@ -581,31 +635,36 @@ void PolynomialPathController::AppendRamp(const Config& x,const Vector& v)
   dmilestones[0] = EndpointVelocity();
   dmilestones[1] = v;
 
-  for(int i=0;i<x.n;i++) {
-    if(x[i] != Clamp(x[i],robot.qMin[i],robot.qMax[i])) {
-      printf("AppendRamp: Warning, clamping desired config %d to joint limits %g in [%g,%g]\n",i,x[i],robot.qMin[i],robot.qMax[i]);
-      Real shrink = gJointLimitEpsilon*(robot.qMax[i]-robot.qMin[i]);
-      milestones[1][i] = Clamp(x[i],robot.qMin[i]+shrink,robot.qMax[i]-shrink);
+  if(!qMin.empty()) {
+    for(int i=0;i<x.n;i++) {
+      if(x[i] != Clamp(x[i],qMin[i],qMax[i])) {
+	printf("AppendRamp: Warning, clamping desired config %d to joint limits %g in [%g,%g]\n",i,x[i],qMin[i],qMax[i]);
+	Real shrink = gJointLimitEpsilon*(qMax[i]-qMin[i]);
+	milestones[1][i] = Clamp(x[i],qMin[i]+shrink,qMax[i]-shrink);
+      }
     }
-    if(Abs(v[i]) > robot.velMax[i]) {
-      printf("AppendRamp: Warning, clamping desired velocity %d to limits |%g|<=%g\n",i,v[i],robot.velMax[i]);
-      Real shrink = gVelocityLimitEpsilon*robot.velMax[i]*2.0;
-      dmilestones[1][i] = Clamp(v[i],-robot.velMax[i]+shrink,robot.velMax[i]-shrink);
+  }
+  for(int i=0;i<x.n;i++) {
+    if(Abs(v[i]) > velMax[i]) {
+      printf("AppendRamp: Warning, clamping desired velocity %d to limits |%g|<=%g\n",i,v[i],velMax[i]);
+      Real shrink = gVelocityLimitEpsilon*velMax[i]*2.0;
+      dmilestones[1][i] = Clamp(v[i],-velMax[i]+shrink,velMax[i]-shrink);
     }
   }
 
   ParabolicRamp::DynamicPath dpath;
-  dpath.Init(robot.velMax,robot.accMax);
-  dpath.SetJointLimits(robot.qMin,robot.qMax);
+  dpath.Init(velMax,accMax);
+  if(!qMin.empty()) //optional joint limits
+    dpath.SetJointLimits(qMin,qMax);
   if(!dpath.SetMilestones(milestones,dmilestones)) {
     printf("AppendRamp: Warning, SetMilestones failed!\n");
     for(int i=0;i<x.n;i++)
-      if(milestones[0][i] != Clamp(milestones[0][i],robot.qMin[i],robot.qMax[i])) {
-	printf("  Reason: current config[%d] is out of joint limits: %g <= %g <= %g\n",i,robot.qMin[i],milestones[0][i],robot.qMax[i]);
+      if(milestones[0][i] != Clamp(milestones[0][i],qMin[i],qMax[i])) {
+	printf("  Reason: current config[%d] is out of joint limits: %g <= %g <= %g\n",i,qMin[i],milestones[0][i],qMax[i]);
       }
     for(int i=0;i<v.n;i++)
-      if(Abs(dmilestones[0][i]) > robot.velMax[i]) {
-	printf("  Reason: current velocity[%d] is out of vel limits: |%g| <= %g\n",i,dmilestones[0][i],robot.velMax[i]);
+      if(Abs(dmilestones[0][i]) > velMax[i]) {
+	printf("  Reason: current velocity[%d] is out of vel limits: |%g| <= %g\n",i,dmilestones[0][i],velMax[i]);
       }
   }
   else {
@@ -617,13 +676,13 @@ void PolynomialPathController::AppendRamp(const Config& x,const Vector& v)
   }
 }
 
-void PolynomialPathController::GetPath(Spline::PiecewisePolynomialND& _path) const
+void PolynomialMotionQueue::GetPath(Spline::PiecewisePolynomialND& _path) const
 {
   Spline::PiecewisePolynomialND front;
   path.Split(pathOffset,front,_path);
 }
 
-void PolynomialPathController::Cut(Real time,bool relative)
+void PolynomialMotionQueue::Cut(Real time,bool relative)
 {
   if(relative)  {
     path.TrimBack(pathOffset+time);
@@ -633,7 +692,7 @@ void PolynomialPathController::Cut(Real time,bool relative)
   }
 }
 
-void PolynomialPathController::Eval(Real time,Config& x,bool relative) const
+void PolynomialMotionQueue::Eval(Real time,Config& x,bool relative) const
 {
   if(relative)
     x = path.Evaluate(time+pathOffset);
@@ -641,7 +700,7 @@ void PolynomialPathController::Eval(Real time,Config& x,bool relative) const
     x = path.Evaluate(time);
 }
 
-void PolynomialPathController::Deriv(Real time,Config& dx,bool relative) const
+void PolynomialMotionQueue::Deriv(Real time,Config& dx,bool relative) const
 {
   if(relative)
     dx = path.Derivative(time+pathOffset);
@@ -649,30 +708,64 @@ void PolynomialPathController::Deriv(Real time,Config& dx,bool relative) const
     dx = path.Derivative(time);
 }
 
-Config PolynomialPathController::Endpoint() const
+Real PolynomialMotionQueue::CurTime() const
+{
+  return pathOffset;
+}
+
+Config PolynomialMotionQueue::CurConfig() const
+{
+  return path.Evaluate(pathOffset);
+}
+
+Config PolynomialMotionQueue::CurVelocity() const
+{
+  return path.Derivative(pathOffset);
+}
+
+Config PolynomialMotionQueue::Endpoint() const
 {
   return path.End();
 }
 
-Vector PolynomialPathController::EndpointVelocity() const
+Vector PolynomialMotionQueue::EndpointVelocity() const
 {
+  if(path.elements.empty()) return Vector();
   return path.Derivative(path.EndTime());
 }
 
-bool PolynomialPathController::Done() const
+bool PolynomialMotionQueue::Done() const
 {
   return pathOffset >= path.EndTime();
 }
 
-Real PolynomialPathController::TimeRemaining() const
+Real PolynomialMotionQueue::TimeRemaining() const
 {
+  if(path.elements.empty()) return 0;
   return path.EndTime() - pathOffset;
+}
+
+void PolynomialMotionQueue::Advance(Real dt)
+{
+  pathOffset += dt;
+  //keep the path relatively short and keep it at the current time
+  if((pathOffset - path.StartTime()) > Max(0.1,0.1*(path.EndTime()-path.StartTime())))
+    path.TrimFront(pathOffset);
+}
+
+
+
+
+PolynomialPathController::PolynomialPathController(Robot& robot)
+  :JointTrackingController(robot)
+{
+  PolynomialMotionQueue::SetLimits(robot);
 }
 
 void PolynomialPathController::GetDesiredState(Config& q_des,Vector& dq_des)
 {
-  q_des = path.Evaluate(pathOffset);
-  dq_des = path.Derivative(pathOffset);
+  q_des = CurConfig();
+  dq_des = CurVelocity();
 }
 
 void PolynomialPathController::Update(Real dt)
@@ -682,28 +775,21 @@ void PolynomialPathController::Update(Real dt)
     Config q;
     if(GetSensedConfig(q)) {
       Assert(q.n == robot.q.n);
-      path.elements.resize(q.n);
-      for(int i=0;i<robot.q.n;i++)
-	path.elements[i] = Spline::Constant(q(i),0,0);
+      SetConstant(q);
     }
     else {
       return;
     }
   }
 
-  pathOffset += dt;
-  //keep the path relatively short
-  if((pathOffset - path.StartTime()) > Max(0.1,0.1*(path.EndTime()-path.StartTime())))
-    path.TrimFront(pathOffset);
+  PolynomialMotionQueue::Advance(dt);
 
   JointTrackingController::Update(dt);
-
 }
 
 void PolynomialPathController::Reset()
 {
-  path = Spline::Constant(path.Evaluate(pathOffset),0,0);
-  pathOffset = 0;
+  PolynomialMotionQueue::SetConstant(path.Evaluate(pathOffset));
 }
 
 bool PolynomialPathController::ReadState(File& f)

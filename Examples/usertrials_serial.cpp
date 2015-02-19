@@ -28,7 +28,7 @@ int commsPort = 3456;
 
 struct CommunicationThreadData
 {
-  DefaultMotionQueueInterface* queue;  //(in)
+  RobotController* controller;  //(in)
   bool ready;  //(out)
   SerialControlledRobot* comms; //(out): can be used to stop robot
   Mutex mutex;
@@ -38,13 +38,12 @@ void* communicationThreadFunc(void* vdata)
 {
   CommunicationThreadData* data = (CommunicationThreadData*)vdata;
   data->ready = false;
-  DefaultMotionQueueInterface* queue = data->queue;
   char buf[64];
   sprintf(buf,"tcp://localhost:%d",commsPort);
   SerialControlledRobot comms(buf);
   comms.SetMutex(&data->mutex);
   data->comms = &comms;
-  comms.Init(&queue->controller->robot,queue->controller);
+  comms.Init(&data->controller->robot,data->controller);
   if(comms.Process(Inf)) {
     //run loop
     data->ready = true;
@@ -285,7 +284,7 @@ public:
     case CONNECT_BUTTON_ID:
       if(!connected) {
 	communicationData.ready = false;
-	communicationData.queue = robotInterface;
+	communicationData.controller = controller;
 	communicationThread = ThreadStart(communicationThreadFunc,&communicationData);
 	while(!communicationData.ready) {
 	  ThreadSleep(0.1);

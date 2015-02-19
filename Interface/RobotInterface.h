@@ -46,14 +46,14 @@ class MotionQueueInterface
 
 
 /** @brief A MotionQueueInterface that just sends to a
- * PolynomialPathController.
+ * PolynomialMotionQueue.
  */
 class DefaultMotionQueueInterface : public MotionQueueInterface
 {
  public:
-  PolynomialPathController* controller;
+  PolynomialMotionQueue* queue;
 
-  DefaultMotionQueueInterface(PolynomialPathController* controller);
+  DefaultMotionQueueInterface(PolynomialMotionQueue* queue);
   virtual bool HadExternalChange();
   virtual Real GetCurTime();
   virtual void GetCurConfig(Config& x);

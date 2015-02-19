@@ -1,4 +1,5 @@
 #include "SimTestGUI.h"
+#include <GLdraw/GLError.h>
 #include <utils/AnyValue.h>
 #include <utils/ioutils.h>
 #include <math/random.h>
@@ -194,6 +195,7 @@ void SimTestBackend::ToggleSensorMeasurement(int sensorIndex,int measurement,int
 
 void SimTestBackend::RenderWorld()
 {
+  DEBUG_GL_ERRORS()
   BaseT::RenderWorld();
 
   glEnable(GL_BLEND);
@@ -268,14 +270,17 @@ void SimTestBackend::RenderWorld()
       drawOrientedWireBox(bbox.dims.x,bbox.dims.y,bbox.dims.z,basis);
     }
   }
+  DEBUG_GL_ERRORS()
 }
 
 void SimTestBackend::RenderScreen()
 {
+  DEBUG_GL_ERRORS()
   if(drawTime)
     SimGUIBackend::DrawClock(20,40);
   for(size_t i=0;i<sensorPlots.size();i++)
     sensorPlots[i].view.DrawGL();
+  DEBUG_GL_ERRORS()
 }
 
 void SimTestBackend::ToggleDrawExpandedCheckbox(int checked)

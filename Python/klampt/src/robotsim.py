@@ -2815,7 +2815,7 @@ class SimBody(_object):
 
     def setTransform(self, *args):
         """
-        setTransform(SimBody self, double const [9] R, double [3] t)
+        setTransform(SimBody self, double const [9] R, double const [3] t)
 
         void
         SimBody::setTransform(const double R[9], double t[3]) 

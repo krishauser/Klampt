@@ -43,6 +43,23 @@ inline void MakeDefaultSensors(Robot* robot,RobotSensors& sensors)
   sensors.sensors.push_back(jv);
 }
 
+inline PolynomialMotionQueue* GetMotionQueue(RobotController* rc)
+{
+  LoggingController* lc = dynamic_cast<LoggingController*>(rc);
+  if(!lc) {
+    FatalError("Robot controller isn't a LoggingController");
+  }
+  FeedforwardController* fc = dynamic_cast<FeedforwardController*>(&*lc->base);
+  if(!fc) {
+    FatalError("LoggingController base is not a feedforward controller");
+  }
+  PolynomialPathController* c = dynamic_cast<PolynomialPathController*>(&*fc->base);
+  if(!c) {
+    FatalError("Feedforward base is not a PolynomialPathController");
+  }
+  return c;
+}
+
 
 class SimViewProgram : public WorldViewProgram
 {

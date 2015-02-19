@@ -146,7 +146,12 @@ string JointCommandInterface::UpdateEvent()
 
 
 InputProcessingInterface::InputProcessingInterface()
-{}
+{
+}
+
+InputProcessingInterface::~InputProcessingInterface()
+{
+}
 
 void InputProcessingInterface::SetProcessor(SmartPointer<InputProcessorBase>& processor)
 {
@@ -177,10 +182,9 @@ bool InputProcessingInterface::ObjectiveChanged()
 
 SmartPointer<PlannerObjectiveBase> InputProcessingInterface::GetObjective()
 {
-  if(!inputProcessor) {
-    currentObjective = NULL;
-  }
-  else {
+  currentObjective = NULL;
+  
+  if(inputProcessor) {
     PlannerObjectiveBase* obj = inputProcessor->MakeObjective(GetRobot());
     currentObjective = obj;
   }
@@ -389,7 +393,8 @@ string PlannerCommandInterface::UpdateEvent()
   double t = robotInterface->GetCurTime();
   lastPlanTime = t;
   if(ObjectiveChanged()) {
-    planner->Reset(GetObjective());
+    plannerObjective = GetObjective();
+    planner->Reset(plannerObjective);
   }
 
   //cout<<"Path advance "<<startPlanTime-lastPlanTime<<endl;
@@ -577,9 +582,10 @@ string MTPlannerCommandInterface::UpdateEvent()
   if(ObjectiveChanged()) {
     changedObjective = true;
     obj = inputProcessor->MakeObjective(planningWorld->robots[0].robot);
-    //this is the visualization objective
-    currentObjective = obj;
-    SmartPointer<PlannerObjectiveBase> oldObj = planningThread.GetObjective();
+    //this is the visualization objective -- must be a different pointer
+    currentObjective = inputProcessor->MakeObjective(planningWorld->robots[0].robot);
+    //evaluate the objective
+    PlannerObjectiveBase* oldObj = planningThread.GetObjective();
     if((oldObj && !obj) || (oldObj && oldObj->Delta(obj) > gPlannerStopDeltaThreshold)) {
       printf("\n");
       if(obj)
@@ -591,8 +597,10 @@ string MTPlannerCommandInterface::UpdateEvent()
     }
   }
 
-  if(changedObjective)
+  if(changedObjective) {
+    //planning thread needs this to be persistent across GetObjective() calls
     planningThread.SetObjective(obj);
+  }
 
   //send any pending updates to the robotinterface
   planningThread.SendUpdate(robotInterface);

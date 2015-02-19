@@ -28471,8 +28471,7 @@ SWIGINTERN PyObject *_wrap_SimBody_setTransform(PyObject *SWIGUNUSEDPARM(self), 
   void *argp1 = 0 ;
   int res1 = 0 ;
   double temp2[9] ;
-  void *argp3 = 0 ;
-  int res3 = 0 ;
+  double temp3[3] ;
   PyObject * obj0 = 0 ;
   PyObject * obj1 = 0 ;
   PyObject * obj2 = 0 ;
@@ -28489,14 +28488,15 @@ SWIGINTERN PyObject *_wrap_SimBody_setTransform(PyObject *SWIGUNUSEDPARM(self), 
     }
     arg2 = &temp2[0];
   }
-  res3 = SWIG_ConvertPtr(obj2, &argp3,SWIGTYPE_p_double, 0 |  0 );
-  if (!SWIG_IsOK(res3)) {
-    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "SimBody_setTransform" "', argument " "3"" of type '" "double [3]""'"); 
-  } 
-  arg3 = reinterpret_cast< double * >(argp3);
+  {
+    if (!convert_darray(obj2,temp3,3)) {
+      return NULL;
+    }
+    arg3 = &temp3[0];
+  }
   {
     try {
-      (arg1)->setTransform((double const (*))arg2,arg3);
+      (arg1)->setTransform((double const (*))arg2,(double const (*))arg3);
     }
     catch(PyException& e) {
       e.setPyErr();
@@ -32325,7 +32325,7 @@ static PyMethodDef SwigMethods[] = {
 		"Returns the angular velocity and translational velocity. \n"
 		""},
 	 { (char *)"SimBody_setTransform", _wrap_SimBody_setTransform, METH_VARARGS, (char *)"\n"
-		"SimBody_setTransform(SimBody self, double const [9] R, double [3] t)\n"
+		"SimBody_setTransform(SimBody self, double const [9] R, double const [3] t)\n"
 		"\n"
 		"void\n"
 		"SimBody::setTransform(const double R[9], double t[3]) \n"

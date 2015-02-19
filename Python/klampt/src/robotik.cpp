@@ -314,8 +314,10 @@ PyObject* IKSolver::solve(int iters,double tol)
 
 void IKSolver::sampleInitial()
 {
-  for(int i=0;i<robot.robot->q.n;i++)
-    robot.robot->q(i) = Rand(robot.robot->qMin(i),robot.robot->qMax(i));
+  vector<int> active;
+  getActiveDofs(active);
+  for(size_t i=0;i<active.size();i++)
+    robot.robot->q(active[i]) = Rand(robot.robot->qMin(active[i]),robot.robot->qMax(active[i]));
   robot.robot->UpdateFrames();
 }
 

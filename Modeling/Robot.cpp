@@ -990,39 +990,6 @@ bool Robot::LoadRob(const char* fn) {
 	if (!CheckValid())
 		return false;
 
-	for (size_t i = 0; i < mountLinks.size(); i++) {
-		printf("   Mounting file %s\n", mountFiles[i].c_str());
-		string fn = path + mountFiles[i];
-		if (Geometry::AnyGeometry3D::CanLoadExt(FileExtension(mountFiles[i].c_str()))) {
-			//mount a triangle mesh on top of another triangle mesh
-			Geometry::AnyGeometry3D geom;
-			if(!geom.Load(fn.c_str())) {
-				fprintf(stderr, "   Error loading mount geometry file %s\n",
-						fn.c_str());
-				return false;
-			}
-			Mount(mountLinks[i], geom, mountT[i]);
-		} else {
-			Robot subchain;
-			if (!subchain.Load(fn.c_str())) {
-				fprintf(stderr, "   Error reading subchain file %s\n",
-						fn.c_str());
-				return false;
-			}
-			size_t lstart = links.size();
-			size_t dstart = drivers.size();
-			Mount(mountLinks[i], subchain, mountT[i]);
-			string robotName = mountFiles[i];
-			StripExtension(robotName);
-			for (size_t k = lstart; k < links.size(); k++) 
-				linkNames[k] = robotName + ":" + linkNames[k];
-			for (size_t k = dstart; k < drivers.size(); k++)
-				driverNames[k] = robotName + ":" + driverNames[k];
-		}
-	}
-	if (!CheckValid())
-		return false;
-
 	//automatically compute mass parameters from geometry
 	if (autoMass) {
 		for (size_t i = 0; i < links.size(); i++) {
@@ -1045,7 +1012,25 @@ bool Robot::LoadRob(const char* fn) {
 		}
 	}
 
+	//first mount the geometries, they affect whether a link is included in self collision testing
+	for (size_t i = 0; i < mountLinks.size(); i++) {
+		if (Geometry::AnyGeometry3D::CanLoadExt(FileExtension(mountFiles[i].c_str()))) {
+		  string fn = path + mountFiles[i];
+		  printf("   Mounting geometry file %s\n", mountFiles[i].c_str());
+		  //mount a triangle mesh on top of another triangle mesh
+		  Geometry::AnyGeometry3D geom;
+		  if(!geom.Load(fn.c_str())) {
+		    fprintf(stderr, "   Error loading mount geometry file %s\n",
+			    fn.c_str());
+		    return false;
+		  }
+		  Mount(mountLinks[i], geom, mountT[i]);
+		}
+	}
+
+	//Initialize self collisions -- pre subchain mounting
 	CleanupSelfCollisions();
+	vector<pair<string,string> > residualSelfCollisions,residualNoSelfCollisions;
 	if (selfCollision.empty()) {
 		InitAllSelfCollisions();
 	} else {
@@ -1055,9 +1040,8 @@ bool Robot::LoadRob(const char* fn) {
 		  link2 = LinkIndex(selfCollision[i].second.c_str());
 		  if (link1 < 0 || link1 >= (int) links.size() ||
 		      link2 < 0 || link2 >= (int) links.size()) {
-		    printf("   Error, invalid self-collision index %s-%s\n",
-			   selfCollision[i].first.c_str(),selfCollision[i].second.c_str());
-		    return false;
+		    residualSelfCollisions.push_back(selfCollision[i]);
+		    continue;
 		  }
 		  if(link1 > link2) Swap(link1,link2);
 		  Assert(link1 < link2);
@@ -1065,21 +1049,76 @@ bool Robot::LoadRob(const char* fn) {
 		}
 	}
 
-	//Initialize self collisions -- these needs to be done after mounting
 	for (size_t i = 0; i < noSelfCollision.size(); i++) {
 		  int link1,link2;
 		  link1 = LinkIndex(noSelfCollision[i].first.c_str());
 		  link2 = LinkIndex(noSelfCollision[i].second.c_str());
 		  if (link1 < 0 || link1 >= (int) links.size() ||
 		      link2 < 0 || link2 >= (int) links.size()) {
-
-			printf("  Error, invalid no-collision index %s-%s\n",
-			       noSelfCollision[i].first.c_str(), noSelfCollision[i].second.c_str());
-			return false;
+		    residualNoSelfCollisions.push_back(noSelfCollision[i]);
 		}
 		  if(link1 > link2) Swap(link1,link2);
 		Assert(link1 < link2);
 		SafeDelete(selfCollisions(link1,link2));
+	}
+
+
+	//do the mounting of subchains
+	for (size_t i = 0; i < mountLinks.size(); i++) {
+		if (!Geometry::AnyGeometry3D::CanLoadExt(FileExtension(mountFiles[i].c_str()))) {
+		  string fn = path + mountFiles[i];
+		  printf("   Mounting subchain file %s\n", mountFiles[i].c_str());
+			Robot subchain;
+			if (!subchain.Load(fn.c_str())) {
+				fprintf(stderr, "   Error reading subchain file %s\n",
+						fn.c_str());
+				return false;
+			}
+			size_t lstart = links.size();
+			size_t dstart = drivers.size();
+			Mount(mountLinks[i], subchain, mountT[i]);
+			string robotName = mountFiles[i];
+			StripExtension(robotName);
+			for (size_t k = lstart; k < links.size(); k++) 
+				linkNames[k] = robotName + ":" + linkNames[k];
+			for (size_t k = dstart; k < drivers.size(); k++)
+				driverNames[k] = robotName + ":" + driverNames[k];
+		}
+	}
+	if (!CheckValid())
+		return false;
+
+	//after mounting may need to add extra self collisions / no self collisions
+	swap(selfCollision,residualSelfCollisions);
+	swap(noSelfCollision,residualNoSelfCollisions);
+	for (size_t i = 0; i < selfCollision.size(); i++) {
+	  int link1,link2;
+	  link1 = LinkIndex(selfCollision[i].first.c_str());
+	  link2 = LinkIndex(selfCollision[i].second.c_str());
+	  if (link1 < 0 || link1 >= (int) links.size() ||
+	      link2 < 0 || link2 >= (int) links.size()) {
+	    printf("   Error, invalid self-collision index %s-%s\n",
+		   selfCollision[i].first.c_str(),selfCollision[i].second.c_str());
+	    return false;
+	  }
+	  if(link1 > link2) Swap(link1,link2);
+	  Assert(link1 < link2);
+	  InitSelfCollisionPair(link1,link2);
+	}
+
+	for (size_t i = 0; i < noSelfCollision.size(); i++) {
+	  int link1,link2;
+	  link1 = LinkIndex(noSelfCollision[i].first.c_str());
+	  link2 = LinkIndex(noSelfCollision[i].second.c_str());
+	  if (link1 < 0 || link1 >= (int) links.size() ||
+	      link2 < 0 || link2 >= (int) links.size()) {
+	    printf("  Error, invalid no-collision index %s-%s\n",
+		   noSelfCollision[i].first.c_str(), noSelfCollision[i].second.c_str());
+	    return false;
+	  }
+	  if(link1 > link2) Swap(link1,link2);
+	  Assert(link1 < link2);
+	  SafeDelete(selfCollisions(link1,link2));
 	}
 
 	printf("Done loading robot file.\n");
@@ -1533,6 +1572,8 @@ void Robot::Mount(int link, const Geometry::AnyGeometry3D& mesh,
 	mergeMeshes[1].Transform(Matrix4(T));
 	geometry[link].Merge(mergeMeshes);
 	geometry[link].InitCollisions();
+	//need to reinitialize all self collisions with this mesh
+	
 }
 
 void Robot::Mount(int link, const Robot& subchain, const RigidTransform& T) {
@@ -1574,14 +1615,15 @@ void Robot::Mount(int link, const Robot& subchain, const RigidTransform& T) {
 	InitCollisions();
 	ArrayUtils::concat(envCollisions, subchain.envCollisions);
 	concat(selfCollisions, subchain.selfCollisions);
-	//need to get the right self collision pointers
-	for (int i = 0; i < selfCollisions.m; i++)
+	//need to re-initialize the self collision pointers
+	for (int i = 0; i < selfCollisions.m; i++) {
 		for (int j = 0; j < selfCollisions.n; j++) {
-			if (selfCollisions(i, j)) {
+			if (selfCollisions(i, j) != NULL) {
 				selfCollisions(i, j) = NULL;
 				InitSelfCollisionPair(i, j);
 			}
 		}
+	}
 	//init collisions between subchain and existing links
 	for (size_t j = 0; j < subchain.links.size(); j++) {
 		if (subchain.parents[j] < 0 && !geometry[link].Empty()) {
@@ -2169,7 +2211,12 @@ bool Robot::LoadURDF(const char* fn)
 	    worldFrame = klampt_xml->Attribute("world_frame");
 	  }
 	  if(klampt_xml->Attribute("package_root") != 0) {
-	    URDFConverter::packageRootPath = path+"/"+klampt_xml->Attribute("package_root");
+	    string root_path = klampt_xml->Attribute("package_root");
+	    //TODO: windows root references?
+	    if(root_path[0]=='/' || path.empty())
+	      URDFConverter::packageRootPath = root_path;
+	    else 
+	      URDFConverter::packageRootPath = path+"/"+root_path;
 	  }
 	  if(klampt_xml->QueryValueAttribute("default_acc_max",&default_acc_max)!=TIXML_SUCCESS) {
 	    //pass

@@ -1984,7 +1984,7 @@ void SimBody::getVelocity(double out[3],double out2[3])
   for(int i=0;i<3;i++) out2[i] = v[i];
 }
 
-void SimBody::setTransform(const double R[9],double t[3])
+void SimBody::setTransform(const double R[9],const double t[3])
 {
   //out matrix is 3x3 column major, ODE matrices are 4x4 row major
   if(!body) return;

@@ -1,5 +1,5 @@
 #include "Interface/UserInterface.h"
-#include "Interface/SimRobotInterface.h"
+#include "Interface/RobotInterface.h"
 #include "Main/SimViewProgram.h"
 #include <utils/StatCollector.h>
 #include <GL/glui.h>
@@ -19,9 +19,6 @@ double dt=0.01;
 double timeCostCoeff = 0.0;
 
 
-
-
-
 class UserTrialProgram : public SimViewProgram
 {
 public:
@@ -30,7 +27,7 @@ public:
   string initialState;
 
   string logFile;
-  SmartPointer<SimRobotInterface> robotInterface;
+  SmartPointer<DefaultMotionQueueInterface> robotInterface;
   vector<SmartPointer<RobotUserInterface> > uis;
   int currentUI,oldUI;
 
@@ -103,8 +100,11 @@ public:
     drawUI = 1;
     drawContacts = 1;
 
-    robotInterface = new SimRobotInterface(&sim);
+    robotInterface = new DefaultMotionQueueInterface(GetMotionQueue(sim.robotControllers[0]));
     CopyWorld(*world,planningWorld);
+
+    ///Hack to initialize motion queue before the planner tries to get a hold of it
+    sim.robotControllers[0]->Update(0); 
 
     uis.resize(0);
     uis.push_back(new JointCommandInterface);

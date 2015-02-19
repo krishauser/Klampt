@@ -55,6 +55,10 @@ def mainRosControllerToKlamptRobot(klampt_robot_model_fn,klampt_serial_port):
     print "/%s/joint_states"%(robotName,)
     print "Klamp't link names are:",linkNames
 
+    #advertise version 1.0.0 of the Baxter software
+    print "Emulating ROS Baxter API version 1.0.0"
+    rospy.set_param('/rethink/software_version', '1.0.0')
+
     #create the ROS controller
     c = rosbaxtercontroller.make(klampt_robot_model)
 

@@ -82,6 +82,7 @@ class InputProcessingInterface : public RobotUserInterface
 {
  public:
   InputProcessingInterface();
+  virtual ~InputProcessingInterface();
   void SetProcessor(SmartPointer<InputProcessorBase>& newProcessor);
   bool ObjectiveChanged();
   SmartPointer<PlannerObjectiveBase> GetObjective();
@@ -127,6 +128,7 @@ class PlannerCommandInterface : public InputProcessingInterface
   virtual string Instructions() const;
 
   SmartPointer<RealTimePlanner> planner;
+  SmartPointer<PlannerObjectiveBase> plannerObjective;
   double lastPlanTime;
   double nextPlanTime;
 
@@ -177,6 +179,7 @@ class MTPlannerCommandInterface: public InputProcessingInterface
 {
 public:
   RealTimePlanningThread planningThread;
+  SmartPointer<PlannerObjectiveBase> plannerObjective; ///< this is needed to maintain object pointed to by planner's objective
 
   ///The planner will not be called until the objective function is set below
   ///this threshold.  Infinity by default (i.e., the planner will start
