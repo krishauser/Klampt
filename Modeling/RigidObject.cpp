@@ -9,6 +9,17 @@
 using namespace Math3D;
 using namespace std;
 
+RigidObject::RigidObject()
+{
+  T.setIdentity();
+  mass = 1;
+  com.setZero();
+  inertia.setIdentity();
+  kFriction = 0.5;
+  kRestitution = 0.0;
+  kStiffness = kDamping = Inf;
+}
+
 bool RigidObject::Load(const char* fn)
 {
   const char* ext=FileExtension(fn);

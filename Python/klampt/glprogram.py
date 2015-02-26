@@ -1,5 +1,6 @@
 """This module defines convenient classes for building 3D GUI programs
 over OpenGL (GLUT).
+
 - GLProgram takes care of basic user input.
 - GLNavigationProgram allows 3D navigation with the mouse.
 - GLRealtimeProgram calls a subclass-defined idle() function roughly on a
@@ -38,6 +39,17 @@ def _idlefunc():
 
 
 class GLProgram:
+    """A basic OpenGL program using GLUT.  Set up your window parameters,
+    then call run() to start the GLUT main loop.
+
+    Attributes:
+        - name: title of the window (only has an effect before calling
+          run())
+        - width, height: width/height of the window (only has an effect
+          before calling run(), and these are updated when the user resizes
+          the window.
+        - clearColor: the RGBA floating point values of the background color.
+    """
     def __init__(self,name="OpenGL Program"):
         self.name = name
         self.width = 640
@@ -45,6 +57,7 @@ class GLProgram:
         self.clearColor = [1.0,1.0,1.0,0.0]
 
     def run(self):
+        """Starts the main loop"""
         global _currentObject
         # Initialize Glut
         glutInit ([])
@@ -74,29 +87,40 @@ class GLProgram:
         glutMainLoop ()
 
     def initialize(self):
-        """Called after GLUT is initialized, but before main loop"""
+        """Called after GLUT is initialized, but before main loop.
+        May be overridden."""
         glutPostRedisplay()
         pass
 
     def reshapefunc(self,w,h):
+        """Called on window resize.  May be overridden."""
         self.width = w
         self.height = h
         glutPostRedisplay()
         
     def keyboardfunc(self,c,x,y):
+        """Called on keypress down. May be overridden."""
         pass
     def keyboardupfunc(self,c,x,y):
+        """Called on keyboard up (if your system allows it). May be overridden."""
         pass
     def specialfunc(self,c,x,y):
+        """Called on special character keypress down.  May be overridden"""
         pass
     def specialupfunc(self,c,x,y):
+        """Called on special character keypress up up (if your system allows
+        it).  May be overridden"""
         pass
     def motionfunc(self,x,y):
+        """Called when the mouse moves on screen.  May be overridden."""
         pass
     def mousefunc(self,button,state,x,y):
+        """Called when the mouse is clicked.  May be overridden."""
         pass
     
     def displayfunc(self):
+        """All OpenGL calls go here.  May be overridden, although you
+        may wish to override display() and display_screen() instead."""
         self.prepare_GL()
         self.display()
         self.prepare_screen_GL()
@@ -104,6 +128,7 @@ class GLProgram:
         glutSwapBuffers ()
         
     def idlefunc(self):
+        """Called on idle.  May be overridden."""
         self.idlesleep()
 
     def idlesleep(self,duration=float('inf')):
@@ -158,6 +183,15 @@ class GLProgram:
 
     
 class GLNavigationProgram(GLProgram):
+    """A more advanced form of GLProgram that allows you to navigate a
+    camera around a 3D world.  Click-drag rotates, Control-drag translates,
+    Shift-drag zooms.
+
+    Attributes:
+        - camera: an orbit camera (see :class:`orbit`)
+        - fov: the camera field of view
+        - clippingplanes: a pair containing the near and far clipping planes
+    """
     def __init__(self,name):
         GLProgram.__init__(self,name)
         self.camera = camera.orbit()
@@ -252,6 +286,14 @@ class GLNavigationProgram(GLProgram):
 
 
 class GLRealtimeProgram(GLNavigationProgram):
+    """A GLNavigationProgram that refreshes the screen at a given frame rate.
+
+    Attributes:
+        - ttotal: total elapsed time
+        - fps: the frame rate in Hz
+        - dt: 1.0/fps
+        - counter: a frame counter
+    """
     def __init__(self,name):        
         GLNavigationProgram.__init__(self,name)
         self.ttotal = 0.0

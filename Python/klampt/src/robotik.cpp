@@ -306,6 +306,7 @@ PyObject* IKSolver::solve(int iters,double tol)
   solver.solver.verbose = 0;
 
   bool res = solver.Solve(tol,iters);
+  robot.robot->UpdateGeometry();
   PyObject* tuple = PyTuple_New(2);
   PyTuple_SetItem(tuple,0,PyBool_FromLong(res));
   PyTuple_SetItem(tuple,1,PyInt_FromLong(iters));

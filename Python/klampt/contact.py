@@ -29,10 +29,12 @@ def idToObject(world,ID):
 
 class ContactPoint:
     """A point contact between two rigid bodies, object1 and object2.
-    x is the contact point in world coordinates.
-    n is the normal pointing from object1 into object 2.
-    kFriction is the friction coefficient.
-    object1 and object2 are the objects in contact.
+
+    Attributes:
+        - x is the contact point in world coordinates.
+        - n is the normal pointing from object1 into object 2.
+        - kFriction is the friction coefficient.
+        - object1 and object2 are the objects in contact (optional).
     """
     def __init__(self,x=[0.,0.,0.],n=[0.,0.,1.],kFriction=0.):
         self.x = x
@@ -142,6 +144,8 @@ def contactIKObjectives(contactMap):
         return objectives
 
 def skew(x):
+    """Returns the skew-symmetric cross-product matrix corresponding to the
+    matrix x"""
     assert(len(x) == 3)
     xhat = numpy.zeros((3,3))
     xhat[0,1] = -x[2]

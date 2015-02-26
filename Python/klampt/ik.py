@@ -1,4 +1,52 @@
-"""Helpers to make inverse kinematics more convenient (and Pythonic)"""
+"""Inverse kinematics methods.  These use the underlying C++ solver in
+Klamp't.  Compared to the SWIG bindings in robotik.h, these helpers
+are more convenient (and Pythonic). 
+
+The IK solver is a Newton-Raphson solver, which acts like a local
+optimization.  It starts from the robot model's initial configuration
+and takes a number of iterations to seek the objective.  The solution
+is placed in the robot model's configuration.  If successful, the
+solution is also guaranteed to satisfy the robot's joint limits.
+
+For basic IK, the calling sequence is
+
+    link = robot.getLink("name")
+    goal = ik.objective(link,local=[p1,p2,p3],world=[r1,r2,r3])
+    robot.setConfig(startConfig)  #(optional, set the initial configuration)
+    if ik.solve(goal):
+        print "Hooray, IK solved"
+        print "Resulting config:",robot.getConfig()
+    else:
+        print "IK failed"
+        print "Final config:",robot.getConfig()
+
+Here, the points p1,...,p3 on the link (specified in local coordinates)
+will be matched to the points r1,...,r3 in the world.  You can also
+directly constrain the translation/rotation of the link via the form:
+    
+    ik.objective(link,R=link.getTransform()[0],t=[x,y,z])
+    
+which will keep the orientation of the link constant, while setting its
+position.
+
+More advanced usage can constrain a link to another link using the ref
+argument to ik.objective().  You may also pass multiple goals to ik.solve().
+
+For more control over the solution process, you may use a ik.solver() object.
+This object will let you set the active degrees of freedom, get the residual
+and Jacobian, and sample random initial solutions.  (see
+klampt.robotsim.IKSolver)
+
+    1. By default, the active degrees of freedom are all ancestors of
+       the constrained links.  For more control, set them using a solver
+       object.
+    2. As with any local IK method, Newton-Raphson has a tendency to get
+       stuck in local minima.  As a result you may wish to choose random
+       initial configurations if the first solve fails.
+
+Note: IK solving with constraints between robot links and rigid objects
+is not yet implemented and will result in a thrown exception.
+"""
 
 from robotsim import *
 
@@ -73,18 +121,26 @@ def objective(body,ref=None,local=None,world=None,R=None,t=None):
 
 def objects(objectives):
     """Returns a list of all objects touched by the given objective(s).
-    
-    If using any regular IKObjectives, the .robot member must be set (see the
-    objectives() function)."""
+    Not currently implemented."""
     raise NotImplementedError()
     pass
 
 def solver(objectives):
-    """Returns either an IKSolver, list of IKSolver's, or a
-    GeneralizedIKSolver corresponding to the given objective(s).
+    """Returns a solver for the given objective(s). Either a single objective
+    or a list of objectives can be provided. 
     
-    If using any regular IKObjectives, the .robot member must be set (see the
-    objectives() function).
+    The result is either an IKSolver or a GeneralizedIKSolver corresponding
+    to the given objective(s).  (see klampt.robotsim.IKSolver and
+    klampt.robotsim.GeneralizedIKSolver).
+
+    In rare cases, it may return a list of IKSolver's if you give
+    it objectives on different robots.  They should be solved
+    independently for efficiency.
+    
+    (The objectives should be a result from the :func:`objective` function.
+    Beware that if you are making your own goals by calling the IKObjective
+    constructors from the robotsim module, the .robot member of these goals
+    must be set).
     """
     if hasattr(objectives,'__iter__'):
         generalized = []
@@ -138,10 +194,16 @@ def solver(objectives):
             raise TypeError("Objective is of wrong type")
 
 def solve(objectives,iters=1000,tol=1e-3):
-    """Attempts to solve the given objectives.  Returns true if successful.
+    """Attempts to solve the given objective(s). Either a single objective
+    or a list of objectives can be provided.
+
+    Returns true if a solution is successfully found to the given tolerance,
+    within the provided number of iterations.
     
-    If using any regular IKObjectives, the .robot member must be set (see the
-    objectives() function).
+    (The objectives should be a result from the :func:`objective` function.
+    Beware that if you are making your own goals by calling the IKObjective
+    constructors from the robotsim module, the .robot member of these goals
+    must be set).
     """
     s = solver(objectives)
     if hasattr(s,'__iter__'):

@@ -34,7 +34,9 @@ void RobotController::SetPIDCommand(const Config& _qdes,const Config& dqdes)
   Assert(_qdes.size()==robot.links.size());
   Assert(dqdes.size()==robot.links.size());
   Config qdes = _qdes;
-  robot.NormalizeAngles(qdes);
+  //TEMP: do we want to normalize angles here or at a higher level in the
+  //controller?
+  //robot.NormalizeAngles(qdes);
   for(size_t i=0;i<robot.drivers.size();i++) {
     if(robot.drivers[i].type == RobotJointDriver::Normal) {
       command->actuators[i].SetPID(qdes(robot.drivers[i].linkIndices[0]),dqdes(robot.drivers[i].linkIndices[0]),command->actuators[i].iterm);

@@ -93,6 +93,9 @@ public:
   const Config& Pose() const { return linkPoser.poseConfig; }
   void SetPose(const Config& q);
   vector<IKGoal>& Constraints() { return ikPoser.poseGoals; }
+  ///if there are multiple solutions for the current pose, picks the one that
+  ///most closely matches qref (useful for spin joints)
+  Config Pose_Conditioned(const Config& qref) const;
   ///Adds a pos/rot constraint on the currently hovered link
   bool FixCurrent();
   ///Adds a point constraint on the currently hovered link

@@ -9,6 +9,7 @@ using namespace Math3D;
  */
 struct RigidObject
 {
+  RigidObject();
   bool Load(const char* fn);
   bool Save(const char* fn);
   void SetMassFromGeometry(Real totalMass);

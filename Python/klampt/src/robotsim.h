@@ -127,18 +127,25 @@ class SimRobotController
 class SimBody
 {
  public:
+  /// Sets the simulation of this body on/off
+  void enable(bool enabled=true);
+  /// Returns true if this body is being simulated
+  bool isEnabled();
+
   /// Applies a force and torque about the COM at the current simulation
   /// time step.
   void applyWrench(const double f[3],const double t[3]);
+
+  /// Sets the body's transformation at the current
+  /// simulation time step.
+  void setTransform(const double R[9],const double t[3]);
+  void getTransform(double out[9],double out2[3]);
+
   /// Sets the angular velocity and translational velocity at the current
   /// simulation time step.
   void setVelocity(const double w[3],const double v[3]);
   /// Returns the angular velocity and translational velocity 
   void getVelocity(double out[3],double out2[3]);
-  /// Sets the body's transformation at the current
-  /// simulation time step.
-  void setTransform(const double R[9],const double t[3]);
-  void getTransform(double out[9],double out2[3]);
 
   /// Sets the collision padding (useful for thin objects).  Default is 0.0025
   void setCollisionPadding(double padding);

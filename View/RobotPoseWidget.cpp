@@ -1,4 +1,5 @@
 #include "RobotPoseWidget.h"
+#include <math/angle.h>
 #include <math3d/basis.h>
 #include <GLdraw/drawextra.h>
 #include <robotics/IKFunctions.h>
@@ -84,7 +85,22 @@ void RobotLinkPoseWidget::Drag(int dx,int dy,Camera::Viewport& viewport)
 {
   if(affectedDriver < 0) return;
   robot->UpdateConfig(poseConfig);
-  Real val = Clamp(robot->GetDriverValue(affectedDriver)+dy*0.02,robot->drivers[affectedDriver].qmin,robot->drivers[affectedDriver].qmax);
+  //this is for rotational joints
+  Real shift = dy*0.02;
+  //for prismatic joints, use the distance in space
+  if(robot->drivers[affectedDriver].linkIndices.size()==1) {
+    int link = robot->drivers[affectedDriver].linkIndices[0];
+    if(robot->links[link].type == RobotLink3D::Prismatic) {
+      Vector3 pt = robot->links[link].T_World.t;
+      float x,y,d;
+      viewport.project(pt,x,y,d);
+      Vector3 v;
+      viewport.getMovementVectorAtDistance(0,dy,d,v);
+      shift = -Sign(Real(dy))*v.norm();
+    }
+  }
+
+  Real val = Clamp(robot->GetDriverValue(affectedDriver)+shift,robot->drivers[affectedDriver].qmin,robot->drivers[affectedDriver].qmax);
   robot->SetDriverValue(affectedDriver,val);
   poseConfig = robot->q;
   Refresh();
@@ -461,6 +477,20 @@ void RobotPoseWidget::Set(Robot* robot,ViewRobot* viewRobot)
   }
 }
 
+Config RobotPoseWidget::Pose_Conditioned(const Config& qref) const
+{
+  Robot* robot = linkPoser.robot;
+  Assert(qref.n == linkPoser.poseConfig.n);
+  Config res = linkPoser.poseConfig;
+  for(int i=0;i<robot->q.n;i++) {
+    if(robot->links[i].type == RobotLink3D::Revolute && robot->qMin(i)+TwoPi < robot->qMax(i)) {
+      if(Abs(res[i]-qref[i]) > Pi) {
+	res[i] = AngleDiff(AngleNormalize(res[i]),AngleNormalize(qref[i])) + qref[i];
+      }
+    }
+  }
+  return res;
+}
   
 bool RobotPoseWidget::FixCurrent() 
 {

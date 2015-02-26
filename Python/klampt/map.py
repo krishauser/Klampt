@@ -1,4 +1,14 @@
-"""Helpers for accessing world variables using a class-style interface"""
+"""Helpers for accessing world variables using a class-style interface
+
+You can, for example, write map(world).robots[0].config to retrieve the
+name of robot 0, rather than world.robot(0).getConfig().
+
+You can also write map(world).robots[0].config = [q1,...,qn] to set the
+configuration of robot 0, rather than world.robot(0).getConfig([q1,...,qn]).
+
+Conveniently, you can write expressions like
+map(world).robots[0].config[4] = 3.5
+"""
 
 from robotsim import *
 
@@ -6,7 +16,8 @@ class map:
     """A class-style interface for accessing all elements of the
     world model"""
     
-    def __init__(self,obj):
+    def __init__(self,obj,setter=None):
+        self.setter = setter
         if isinstance(obj,map):
             self.obj = obj.obj
         else:
@@ -41,9 +52,9 @@ class map:
             elif name == 'links':
                 return [map(self.obj.getLink(i)) for i in xrange(self.obj.numLinks())]
             elif name == 'config':
-                return self.obj.getConfig()
+                return map(self.obj.getConfig(),self.obj.getConfig)
             elif name == 'velocity':
-                return self.obj.getVelocity()
+                return map(self.obj.getVelocity(),self.obj.getVelocity)
             elif name == 'jointLimits':
                 return self.obj.getJointLimits()
             elif name == 'velocityLimits':
@@ -65,8 +76,8 @@ class map:
                 return map(self.obj.getRobot())
             elif name == 'parent':
                 return self.obj.getParent()
-            elif name == 'mesh':
-                return self.obj.getMesh()
+            elif name == 'geometry':
+                return self.obj.geometry()
             elif name == 'mass':
                 return self.obj.getMass()
             elif name == 'parentTransform':
@@ -74,14 +85,14 @@ class map:
             elif name == 'transform':
                 return self.obj.getTransform()
             elif name == 'axis':
-                return self.obj.getAxis()
+                return map(self.obj.getAxis(),self.obj.getAxis)
         elif isinstance(self.obj,RigidObjectModel):
             if name == 'name':
                 return self.obj.getName()
             elif name == 'id':
                 return self.obj.getID()
-            elif name == 'mesh':
-                return self.obj.getMesh()
+            elif name == 'geometry':
+                return self.obj.geometry()
             elif name == 'mass':
                 return self.obj.getMass()
             elif name == 'contactParameters':
@@ -93,11 +104,17 @@ class map:
                 return self.obj.getName()
             elif name == 'id':
                 return self.obj.getID()
-            elif name == 'mesh':
-                return self.obj.getMesh()            
+            elif name == 'geometry':
+                return self.obj.geometry()
+        elif isinstance(self.obj,(list,tuple,dict)):
+            return self.obj[name]
         raise AttributeError(name)
 
     def __setattr__(self,name,value):
+        if self.setter != None:
+            self.obj[name] = value
+            self.setter(self.obj)
+            return
         if name == 'obj':
             self.__dict__['obj'] = value
             return
@@ -185,9 +202,13 @@ def set_item(obj,name,value):
     exec '_w.'+name+'='+str(value) in globals(),loc
 
 def get_dict(world,items):
+    """Retrieves a dictionary of elements referred to by the given
+    list of items."""
     return dict((i,get_item(world,i)) for i in items)
 
 def set_dict(world,config):
+    """Sets the values in the dictionary config, which maps element names
+    to values which should be set in the world."""
     for (k,v) in config.iteritems():
         set_item(world,k,v)
 
@@ -222,6 +243,9 @@ def match_hierarchy(flattened,ref):
 
 
 class Vectorizer:
+    """A class that retrieves named items in a world and places them into
+    a flattened vector.  Useful for planning.
+    """
     def __init__(self,world,items):
         self.world = world
         self.ref = get_dict(world,items)
