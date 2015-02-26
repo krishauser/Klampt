@@ -12,9 +12,9 @@ class Hold:
     Attributes:
         - link: the link index
         - ikConstraint: an IKObjective object
-          (see :class:`klampt.robotsim.IKObjective` or :func:`klampt.ik.objective`)
+          (see klampt.robotsim.IKObjective or klampt.ik.objective)
         - contacts: a list of ContactPoint objects
-          (see :class:`klampt.contact.ContactPoint`)
+          (see klampt.contact.ContactPoint)
     """
     def __init__(self):
         self.link = None

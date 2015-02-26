@@ -135,7 +135,7 @@ class WorldCollider:
     def collisionTests(self,filter1=None,filter2=None):
         """Iterates over ((object,geom),(object,geom)) pairs indicating
         which objects should be tested for collision.  The geom objects
-        will be instances of Geometry3D (see :class:`Geometry3D`).
+        will be instances of Geometry3D.
 
         E.g., to test collisions, you will call
 
@@ -147,7 +147,7 @@ class WorldCollider:
         however you may want to use collisionTests to perform other queries
         like proximity detection.)
 
-        See :func:`collisionTests` for a description of the filter1 and
+        See collisions for a description of the filter1 and
         filter2 arguments.
         """
         res = []
@@ -156,27 +156,27 @@ class WorldCollider:
                 for objIndex in objs:
                     #already checked
                     if objIndex < i: continue
-                    yield (g,geomList[objIndex])
+                    yield (g,self.geomList[objIndex])
         elif filter2 == None:
             for (i,(g,objs)) in enumerate(zip(self.geomList,self.mask)):
                 if not filter1(g[0]): continue
                 for objIndex in objs:
                     #already checked
                     if objIndex < i: continue
-                    if not filter1(geomList[objIndex][0]): continue
-                    yield (g,geomList[objIndex])
+                    if not filter1(self.geomList[objIndex][0]): continue
+                    yield (g,self.geomList[objIndex])
         else:
             for (i,(g,objs)) in enumerate(zip(self.geomList,self.mask)):
                 f1 = filter1(g[0])
                 f2 = filter2(g[0])
                 for objIndex in objs:
                     #already checked
-                    if geomList[objIndex][0]==g[0]:
+                    if self.geomList[objIndex][0]==g[0]:
                         continue
-                    if f1 and filter2(geomList[objIndex][0]):
-                        yield (g,geomList[objIndex])
-                    elif f2 and filter1(geomList[objIndex][0]):
-                        yield (geomList[objIndex],g)
+                    if f1 and filter2(self.geomList[objIndex][0]):
+                        yield (g,self.geomList[objIndex])
+                    elif f2 and filter1(self.geomList[objIndex][0]):
+                        yield (self.geomList[objIndex],g)
 
     def collisions(self,filter1=None,filter2=None):
         """Returns an iterator over the colliding pairs of

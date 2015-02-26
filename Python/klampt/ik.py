@@ -35,7 +35,7 @@ argument to ik.objective().  You may also pass multiple goals to ik.solve().
 For more control over the solution process, you may use a ik.solver() object.
 This object will let you set the active degrees of freedom, get the residual
 and Jacobian, and sample random initial solutions.  (see
-:class:`klampt.robotsim.IKSolver`)
+klampt.robotsim.IKSolver)
 
     1. By default, the active degrees of freedom are all ancestors of
        the constrained links.  For more control, set them using a solver
@@ -130,9 +130,8 @@ def solver(objectives):
     or a list of objectives can be provided. 
     
     The result is either an IKSolver or a GeneralizedIKSolver corresponding
-    to the given objective(s).  (see
-    :class:`klampt.robotsim.IKSolver` and
-    :class:`klampt.robotsim.GeneralizedIKSolver`).
+    to the given objective(s).  (see klampt.robotsim.IKSolver and
+    klampt.robotsim.GeneralizedIKSolver).
 
     In rare cases, it may return a list of IKSolver's if you give
     it objectives on different robots.  They should be solved

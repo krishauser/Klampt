@@ -129,7 +129,7 @@ class MotionPlan:
     If type is not specified in the constructor, the planning algorithm
     will be chosen by default.
     
-    Note that MotionPlan.close() motionplanning.destroy() must be called
+    Note that MotionPlan.close() or motionplanning.destroy() must be called
     to free memory after you are done.
     """
     def __init__(self,space,type=None):

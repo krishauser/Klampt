@@ -1,9 +1,8 @@
 """Classes for loading, saving, evaluating, and operating on trajectories.
 
-- For piecewise-linear interpolation in cartesian space, use
-  :class:`Trajectory`.
-- For piecewise-linear interpolation on a robot, use :class:`RobotTrajectory`.
-- For Hermite interpolation in cartesian space, use :class:`HermiteTrajectory`.
+- For piecewise-linear interpolation in cartesian space, use Trajectory.
+- For piecewise-linear interpolation on a robot, use RobotTrajectory.
+- For Hermite interpolation in cartesian space, use HermiteTrajectory.
 """
 
 import bisect
