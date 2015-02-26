@@ -8,6 +8,7 @@
 #include "IO/XmlWorld.h"
 #include "IO/XmlODE.h"
 #include <robotics/NewtonEuler.h>
+#include <meshing/PointCloud.h>
 #include <GLdraw/drawextra.h>
 #include <GLdraw/drawMesh.h>
 #include <utils/stringutils.h>
@@ -1097,6 +1098,7 @@ void RobotModelLink::setTransform(const double R[9],const double t[3])
   RobotLink3D& link=robot->links[index];
   link.T_World.R.set(R);
   link.T_World.t.set(t);
+  robot->geometry[index].SetTransform(link.T_World);
 }
 
 void RobotModelLink::getParentTransform(double R[9],double t[3])
@@ -1363,6 +1365,7 @@ void RobotModel::setConfig(const vector<double>& q)
 {
   robot->q.copy(&q[0]);
   robot->UpdateFrames();
+  robot->UpdateGeometry();
 }
 
 void RobotModel::setVelocity(const vector<double>& dq)
