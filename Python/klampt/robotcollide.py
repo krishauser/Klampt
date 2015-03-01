@@ -247,7 +247,7 @@ class WorldCollider:
         for i in rindices:
             if i < 0: continue
             if oindex not in self.mask[i]: continue
-            if self.geomList[oindex][1].collide(self.geomList[i][1]):
+            if self.geomList[oindex][1].collides(self.geomList[i][1]):
                 yield (self.geomList[i][0],self.geomList[oindex][0])
 
     def robotTerrainCollisions(self,robot,terrain=None):
@@ -276,7 +276,7 @@ class WorldCollider:
         for i in rindices:
             if i < 0: continue
             if tindex not in self.mask[i]: continue
-            if self.geomList[tindex][1].collide(self.geomList[i][1]):
+            if self.geomList[tindex][1].collides(self.geomList[i][1]):
                 yield (self.geomList[i][0],self.geomList[tindex][0])
 
     def objectTerrainCollisions(self,object,terrain=None):
