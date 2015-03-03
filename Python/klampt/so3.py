@@ -1,5 +1,6 @@
-"""Operations for rigid rotations represented by a 9-list specifying the
-entries of the rotation matrix in column major form.
+"""Operations for rigid rotations in Klampt.  All rotations are
+represented by a 9-list specifying the entries of the rotation matrix
+in column major form.
 
 These are useful for interfacing with C code.
 """

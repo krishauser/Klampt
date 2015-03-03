@@ -29,12 +29,6 @@ def writeContactPoint(cp):
     """Writes a contact point to text 'x1 x2 x3 n1 n2 n3 kFriction'"""
     return ' '.join([str(v) for v in cp.x+cp.n+[cp.kFriction]]) 
     
-def momentToMatrix(m):
-    """Converts an exponential map rotation represenation m to a matrix R"""
-    angle = vectorops.norm(m)
-    axis = vectorops.div(m,angle)
-    return so3.rotation(axis,angle)
-
 def readIKObjective(text):
     """Reads an IKObjective from text"""
     items = text.split()
@@ -93,7 +87,7 @@ def readIKObjective(text):
         obj.setRelativePoint(link,destlink,[float(v) for v in posLocal],[float(v) for v in posWorld])
     elif rotType == 'F':
         #fixed constraint
-        R = momentToMatrix([float(v) for v in rotWorld])
+        R = so3.from_moment([float(v) for v in rotWorld])
         t = vectorops.sub([float(v) for v in posWorld],so3.apply(R,[float(v) for v in posLocal]))
         obj.setRelativeTransform(link,destlink,R,t)
     elif rotType == 'A':

@@ -1,4 +1,5 @@
-"""Operations for rigid transformations specified in the form (R,T)
+"""Operations for rigid transformations in Klamp't.  All rigid
+transformations are specified in the form (R,T),
 where R is a 9-list specifying the entries of the rotation matrix in column
 major form, and t is a 3-list specifying the translation vector.
 

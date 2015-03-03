@@ -28,16 +28,20 @@ def orientation_matrix(axis1,axis2,axis3):
 
 class free:
     """A free-floating camera that is controlled using a translation and
-    euler angle rotation vector"""
+    euler angle rotation vector.
+
+    Attributes:
+        - pos: camera center position
+        - rot: euler angle rotation
+        - ori: orientation matrix type (see :func:`orientation_matrix`)
+    """
     def __init__(self):
-        #center
         self.pos = [0.,0.,0.]
-        #euler angle rotation
         self.rot = [0.,0.,0.]
-        #orientation matrix
         self.ori = ['x','-z','y']
 
     def matrix(self):
+        """Returns the camera transform."""
         o = orientation_matrix(*self.ori)
         Ry = so3.rotation([0.,1.,0.],self.rot[0])
         Rx = so3.rotation([1.,0.,0.],self.rot[1])
@@ -48,7 +52,14 @@ class free:
 
 class target:
     """A look-at camera that is controlled using a translation,
-    target point, and up vector"""
+    target point, and up vector
+
+    Attributes:
+        
+    - pos: camera center position
+    - tgt: target point
+    - up: up direction
+    """
     def __init__(self):
         #center
         self.pos = [0.,0.,0.]
@@ -58,11 +69,19 @@ class target:
         self.up = [0.,0.,1.]
 
     def matrix(self):
+        """Returns the camera transform."""
         raise NotImplementedError()
 
 class orbit:
     """An orbit camera that is controlled using a rotation, 
-    target point, distance, and orientation"""
+    target point, distance, and orientation.
+
+    Attributes:        
+        - tgt: target point
+        - rot: euler angle rotation
+        - dist: target distance
+        - ori: orientation matrix type (see :func:`orientation_matrix`)
+    """
     def __init__(self):
         #euler angle rotation
         self.rot = [0.,0.,0.]
@@ -74,6 +93,7 @@ class orbit:
         self.ori = ['x','-z','y']
 
     def matrix(self):
+        """Returns the camera transform."""
         o = orientation_matrix(*self.ori)
         Ry = so3.rotation([0.,1.,0.],self.rot[0])
         Rx = so3.rotation([1.,0.,0.],self.rot[1])

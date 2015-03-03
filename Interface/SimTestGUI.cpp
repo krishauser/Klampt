@@ -367,7 +367,10 @@ bool SimTestBackend::OnCommand(const string& cmd,const string& args)
     for(size_t i=0;i<sim.robotControllers.size();i++) {
       RobotController* rc=sim.robotControllers[i];
       stringstream ss;
-      ss<<robotWidgets[i].Pose();
+      Config qref;
+      if(!rc->GetCommandedConfig(qref)) 
+	sim.controlSimulators[i].GetCommandedConfig(qref);
+      ss<<robotWidgets[i].Pose_Conditioned(qref);
       if(!rc->SendCommand("set_q",ss.str())) {
 	fprintf(stderr,"set_q command does not work with the robot's controller\n");
       }

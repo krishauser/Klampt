@@ -28280,6 +28280,159 @@ SWIGINTERN PyObject *SimRobotController_swigregister(PyObject *SWIGUNUSEDPARM(se
   return SWIG_Py_Void();
 }
 
+SWIGINTERN PyObject *_wrap_SimBody_enable__SWIG_0(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  SimBody *arg1 = (SimBody *) 0 ;
+  bool arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  bool val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:SimBody_enable",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_SimBody, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SimBody_enable" "', argument " "1"" of type '" "SimBody *""'"); 
+  }
+  arg1 = reinterpret_cast< SimBody * >(argp1);
+  ecode2 = SWIG_AsVal_bool(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "SimBody_enable" "', argument " "2"" of type '" "bool""'");
+  } 
+  arg2 = static_cast< bool >(val2);
+  {
+    try {
+      (arg1)->enable(arg2);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_SimBody_enable__SWIG_1(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  SimBody *arg1 = (SimBody *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:SimBody_enable",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_SimBody, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SimBody_enable" "', argument " "1"" of type '" "SimBody *""'"); 
+  }
+  arg1 = reinterpret_cast< SimBody * >(argp1);
+  {
+    try {
+      (arg1)->enable();
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_SimBody_enable(PyObject *self, PyObject *args) {
+  int argc;
+  PyObject *argv[3];
+  int ii;
+  
+  if (!PyTuple_Check(args)) SWIG_fail;
+  argc = args ? (int)PyObject_Length(args) : 0;
+  for (ii = 0; (ii < 2) && (ii < argc); ii++) {
+    argv[ii] = PyTuple_GET_ITEM(args,ii);
+  }
+  if (argc == 1) {
+    int _v;
+    void *vptr = 0;
+    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_SimBody, 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      return _wrap_SimBody_enable__SWIG_1(self, args);
+    }
+  }
+  if (argc == 2) {
+    int _v;
+    void *vptr = 0;
+    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_SimBody, 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      {
+        int res = SWIG_AsVal_bool(argv[1], NULL);
+        _v = SWIG_CheckState(res);
+      }
+      if (_v) {
+        return _wrap_SimBody_enable__SWIG_0(self, args);
+      }
+    }
+  }
+  
+fail:
+  SWIG_SetErrorMsg(PyExc_NotImplementedError,"Wrong number or type of arguments for overloaded function 'SimBody_enable'.\n"
+    "  Possible C/C++ prototypes are:\n"
+    "    SimBody::enable(bool)\n"
+    "    SimBody::enable()\n");
+  return 0;
+}
+
+
+SWIGINTERN PyObject *_wrap_SimBody_isEnabled(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  SimBody *arg1 = (SimBody *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  bool result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:SimBody_isEnabled",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_SimBody, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SimBody_isEnabled" "', argument " "1"" of type '" "SimBody *""'"); 
+  }
+  arg1 = reinterpret_cast< SimBody * >(argp1);
+  {
+    try {
+      result = (bool)(arg1)->isEnabled();
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_From_bool(static_cast< bool >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_SimBody_applyWrench(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   SimBody *arg1 = (SimBody *) 0 ;
@@ -28325,138 +28478,6 @@ SWIGINTERN PyObject *_wrap_SimBody_applyWrench(PyObject *SWIGUNUSEDPARM(self), P
     }
   }
   resultobj = SWIG_Py_Void();
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_SimBody_setVelocity(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  SimBody *arg1 = (SimBody *) 0 ;
-  double *arg2 ;
-  double *arg3 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  double temp2[3] ;
-  double temp3[3] ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
-  PyObject * obj2 = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"OOO:SimBody_setVelocity",&obj0,&obj1,&obj2)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_SimBody, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SimBody_setVelocity" "', argument " "1"" of type '" "SimBody *""'"); 
-  }
-  arg1 = reinterpret_cast< SimBody * >(argp1);
-  {
-    if (!convert_darray(obj1,temp2,3)) {
-      return NULL;
-    }
-    arg2 = &temp2[0];
-  }
-  {
-    if (!convert_darray(obj2,temp3,3)) {
-      return NULL;
-    }
-    arg3 = &temp3[0];
-  }
-  {
-    try {
-      (arg1)->setVelocity((double const (*))arg2,(double const (*))arg3);
-    }
-    catch(PyException& e) {
-      e.setPyErr();
-      return NULL;
-    }
-    catch(std::exception& e) {
-      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
-      return NULL;
-    }
-  }
-  resultobj = SWIG_Py_Void();
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_SimBody_getVelocity(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  SimBody *arg1 = (SimBody *) 0 ;
-  double *arg2 ;
-  double *arg3 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  double temp2[3] ;
-  double temp23[3] ;
-  PyObject * obj0 = 0 ;
-  
-  {
-    arg2 = &temp2[0];
-  }
-  {
-    arg3 = &temp23[0];
-  }
-  if (!PyArg_ParseTuple(args,(char *)"O:SimBody_getVelocity",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_SimBody, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SimBody_getVelocity" "', argument " "1"" of type '" "SimBody *""'"); 
-  }
-  arg1 = reinterpret_cast< SimBody * >(argp1);
-  {
-    try {
-      (arg1)->getVelocity(arg2,arg3);
-    }
-    catch(PyException& e) {
-      e.setPyErr();
-      return NULL;
-    }
-    catch(std::exception& e) {
-      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
-      return NULL;
-    }
-  }
-  resultobj = SWIG_Py_Void();
-  {
-    PyObject *o, *o2, *o3;
-    o = convert_darray_obj(arg2,3);
-    if ((!resultobj) || (resultobj == Py_None)) {
-      resultobj = o;
-    } else {
-      if (!PyTuple_Check(resultobj)) {
-        PyObject *o2 = resultobj;
-        resultobj = PyTuple_New(1);
-        PyTuple_SetItem(resultobj,0,o2);
-      }
-      o3 = PyTuple_New(1);
-      PyTuple_SetItem(o3,0,o);
-      o2 = resultobj;
-      resultobj = PySequence_Concat(o2,o3);
-      Py_DECREF(o2);
-      Py_DECREF(o3);
-    }
-  }
-  {
-    PyObject *o, *o2, *o3;
-    o = convert_darray_obj(arg3,3);
-    if ((!resultobj) || (resultobj == Py_None)) {
-      resultobj = o;
-    } else {
-      if (!PyTuple_Check(resultobj)) {
-        PyObject *o2 = resultobj;
-        resultobj = PyTuple_New(1);
-        PyTuple_SetItem(resultobj,0,o2);
-      }
-      o3 = PyTuple_New(1);
-      PyTuple_SetItem(o3,0,o);
-      o2 = resultobj;
-      resultobj = PySequence_Concat(o2,o3);
-      Py_DECREF(o2);
-      Py_DECREF(o3);
-    }
-  }
   return resultobj;
 fail:
   return NULL;
@@ -28554,6 +28575,138 @@ SWIGINTERN PyObject *_wrap_SimBody_getTransform(PyObject *SWIGUNUSEDPARM(self), 
   {
     PyObject *o, *o2, *o3;
     o = convert_darray_obj(arg2,9);
+    if ((!resultobj) || (resultobj == Py_None)) {
+      resultobj = o;
+    } else {
+      if (!PyTuple_Check(resultobj)) {
+        PyObject *o2 = resultobj;
+        resultobj = PyTuple_New(1);
+        PyTuple_SetItem(resultobj,0,o2);
+      }
+      o3 = PyTuple_New(1);
+      PyTuple_SetItem(o3,0,o);
+      o2 = resultobj;
+      resultobj = PySequence_Concat(o2,o3);
+      Py_DECREF(o2);
+      Py_DECREF(o3);
+    }
+  }
+  {
+    PyObject *o, *o2, *o3;
+    o = convert_darray_obj(arg3,3);
+    if ((!resultobj) || (resultobj == Py_None)) {
+      resultobj = o;
+    } else {
+      if (!PyTuple_Check(resultobj)) {
+        PyObject *o2 = resultobj;
+        resultobj = PyTuple_New(1);
+        PyTuple_SetItem(resultobj,0,o2);
+      }
+      o3 = PyTuple_New(1);
+      PyTuple_SetItem(o3,0,o);
+      o2 = resultobj;
+      resultobj = PySequence_Concat(o2,o3);
+      Py_DECREF(o2);
+      Py_DECREF(o3);
+    }
+  }
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_SimBody_setVelocity(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  SimBody *arg1 = (SimBody *) 0 ;
+  double *arg2 ;
+  double *arg3 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double temp2[3] ;
+  double temp3[3] ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  PyObject * obj2 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OOO:SimBody_setVelocity",&obj0,&obj1,&obj2)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_SimBody, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SimBody_setVelocity" "', argument " "1"" of type '" "SimBody *""'"); 
+  }
+  arg1 = reinterpret_cast< SimBody * >(argp1);
+  {
+    if (!convert_darray(obj1,temp2,3)) {
+      return NULL;
+    }
+    arg2 = &temp2[0];
+  }
+  {
+    if (!convert_darray(obj2,temp3,3)) {
+      return NULL;
+    }
+    arg3 = &temp3[0];
+  }
+  {
+    try {
+      (arg1)->setVelocity((double const (*))arg2,(double const (*))arg3);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_SimBody_getVelocity(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  SimBody *arg1 = (SimBody *) 0 ;
+  double *arg2 ;
+  double *arg3 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double temp2[3] ;
+  double temp23[3] ;
+  PyObject * obj0 = 0 ;
+  
+  {
+    arg2 = &temp2[0];
+  }
+  {
+    arg3 = &temp23[0];
+  }
+  if (!PyArg_ParseTuple(args,(char *)"O:SimBody_getVelocity",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_SimBody, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SimBody_getVelocity" "', argument " "1"" of type '" "SimBody *""'"); 
+  }
+  arg1 = reinterpret_cast< SimBody * >(argp1);
+  {
+    try {
+      (arg1)->getVelocity(arg2,arg3);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  {
+    PyObject *o, *o2, *o3;
+    o = convert_darray_obj(arg2,3);
     if ((!resultobj) || (resultobj == Py_None)) {
       resultobj = o;
     } else {
@@ -30829,32 +30982,104 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"doubleMatrix_capacity", _wrap_doubleMatrix_capacity, METH_VARARGS, NULL},
 	 { (char *)"delete_doubleMatrix", _wrap_delete_doubleMatrix, METH_VARARGS, (char *)"delete_doubleMatrix(doubleMatrix self)"},
 	 { (char *)"doubleMatrix_swigregister", doubleMatrix_swigregister, METH_VARARGS, NULL},
-	 { (char *)"TriangleMesh_translate", _wrap_TriangleMesh_translate, METH_VARARGS, (char *)"TriangleMesh_translate(TriangleMesh self, double const [3] t)"},
-	 { (char *)"TriangleMesh_transform", _wrap_TriangleMesh_transform, METH_VARARGS, (char *)"TriangleMesh_transform(TriangleMesh self, double const [9] R, double const [3] t)"},
+	 { (char *)"TriangleMesh_translate", _wrap_TriangleMesh_translate, METH_VARARGS, (char *)"\n"
+		"TriangleMesh_translate(TriangleMesh self, double const [3] t)\n"
+		"\n"
+		"void\n"
+		"TriangleMesh::translate(const double t[3]) \n"
+		""},
+	 { (char *)"TriangleMesh_transform", _wrap_TriangleMesh_transform, METH_VARARGS, (char *)"\n"
+		"TriangleMesh_transform(TriangleMesh self, double const [9] R, double const [3] t)\n"
+		"\n"
+		"void\n"
+		"TriangleMesh::transform(const double R[9], const double t[3]) \n"
+		""},
 	 { (char *)"TriangleMesh_indices_set", _wrap_TriangleMesh_indices_set, METH_VARARGS, (char *)"TriangleMesh_indices_set(TriangleMesh self, intVector indices)"},
 	 { (char *)"TriangleMesh_indices_get", _wrap_TriangleMesh_indices_get, METH_VARARGS, (char *)"TriangleMesh_indices_get(TriangleMesh self) -> intVector"},
 	 { (char *)"TriangleMesh_vertices_set", _wrap_TriangleMesh_vertices_set, METH_VARARGS, (char *)"TriangleMesh_vertices_set(TriangleMesh self, doubleVector vertices)"},
 	 { (char *)"TriangleMesh_vertices_get", _wrap_TriangleMesh_vertices_get, METH_VARARGS, (char *)"TriangleMesh_vertices_get(TriangleMesh self) -> doubleVector"},
-	 { (char *)"new_TriangleMesh", _wrap_new_TriangleMesh, METH_VARARGS, (char *)"new_TriangleMesh() -> TriangleMesh"},
+	 { (char *)"new_TriangleMesh", _wrap_new_TriangleMesh, METH_VARARGS, (char *)"\n"
+		"new_TriangleMesh() -> TriangleMesh\n"
+		"\n"
+		"A 3D indexed triangle mesh class.\n"
+		"\n"
+		"vertices is a list of vertices, given as a list [x1, y1, z1, x2, y2,\n"
+		"...] indices is a list of triangle vertices given as indices into the\n"
+		"vertices list, i.e., [a1,b1,c2, a2,b2,c2, ...]\n"
+		"\n"
+		"C++ includes: geometry.h \n"
+		""},
 	 { (char *)"delete_TriangleMesh", _wrap_delete_TriangleMesh, METH_VARARGS, (char *)"delete_TriangleMesh(TriangleMesh self)"},
 	 { (char *)"TriangleMesh_swigregister", TriangleMesh_swigregister, METH_VARARGS, NULL},
-	 { (char *)"PointCloud_translate", _wrap_PointCloud_translate, METH_VARARGS, (char *)"PointCloud_translate(PointCloud self, double const [3] t)"},
-	 { (char *)"PointCloud_transform", _wrap_PointCloud_transform, METH_VARARGS, (char *)"PointCloud_transform(PointCloud self, double const [9] R, double const [3] t)"},
+	 { (char *)"PointCloud_translate", _wrap_PointCloud_translate, METH_VARARGS, (char *)"\n"
+		"PointCloud_translate(PointCloud self, double const [3] t)\n"
+		"\n"
+		"void\n"
+		"PointCloud::translate(const double t[3]) \n"
+		""},
+	 { (char *)"PointCloud_transform", _wrap_PointCloud_transform, METH_VARARGS, (char *)"\n"
+		"PointCloud_transform(PointCloud self, double const [9] R, double const [3] t)\n"
+		"\n"
+		"void\n"
+		"PointCloud::transform(const double R[9], const double t[3]) \n"
+		""},
 	 { (char *)"PointCloud_vertices_set", _wrap_PointCloud_vertices_set, METH_VARARGS, (char *)"PointCloud_vertices_set(PointCloud self, doubleVector vertices)"},
 	 { (char *)"PointCloud_vertices_get", _wrap_PointCloud_vertices_get, METH_VARARGS, (char *)"PointCloud_vertices_get(PointCloud self) -> doubleVector"},
 	 { (char *)"PointCloud_propertyNames_set", _wrap_PointCloud_propertyNames_set, METH_VARARGS, (char *)"PointCloud_propertyNames_set(PointCloud self, std::vector< std::string,std::allocator< std::string > > * propertyNames)"},
 	 { (char *)"PointCloud_propertyNames_get", _wrap_PointCloud_propertyNames_get, METH_VARARGS, (char *)"PointCloud_propertyNames_get(PointCloud self) -> std::vector< std::string,std::allocator< std::string > > *"},
 	 { (char *)"PointCloud_properties_set", _wrap_PointCloud_properties_set, METH_VARARGS, (char *)"PointCloud_properties_set(PointCloud self, doubleVector properties)"},
 	 { (char *)"PointCloud_properties_get", _wrap_PointCloud_properties_get, METH_VARARGS, (char *)"PointCloud_properties_get(PointCloud self) -> doubleVector"},
-	 { (char *)"new_PointCloud", _wrap_new_PointCloud, METH_VARARGS, (char *)"new_PointCloud() -> PointCloud"},
+	 { (char *)"new_PointCloud", _wrap_new_PointCloud, METH_VARARGS, (char *)"\n"
+		"new_PointCloud() -> PointCloud\n"
+		"\n"
+		"A 3D point cloud class. vertices is a list of vertices, given as a\n"
+		"list [x1, y1, z1, x2, y2, ... zn] properties is a list of vertex\n"
+		"properties, given as a list [p11, p21, ..., pk1, p12, p22, ..., pk2,\n"
+		"... , pn1, pn2, ..., pn2] where each vertex has k properties. The name\n"
+		"of each property is given by the propertyNames member.\n"
+		"\n"
+		"C++ includes: geometry.h \n"
+		""},
 	 { (char *)"delete_PointCloud", _wrap_delete_PointCloud, METH_VARARGS, (char *)"delete_PointCloud(PointCloud self)"},
 	 { (char *)"PointCloud_swigregister", PointCloud_swigregister, METH_VARARGS, NULL},
-	 { (char *)"GeometricPrimitive_setPoint", _wrap_GeometricPrimitive_setPoint, METH_VARARGS, (char *)"GeometricPrimitive_setPoint(GeometricPrimitive self, double const [3] pt)"},
-	 { (char *)"GeometricPrimitive_setSphere", _wrap_GeometricPrimitive_setSphere, METH_VARARGS, (char *)"GeometricPrimitive_setSphere(GeometricPrimitive self, double const [3] c, double r)"},
-	 { (char *)"GeometricPrimitive_setSegment", _wrap_GeometricPrimitive_setSegment, METH_VARARGS, (char *)"GeometricPrimitive_setSegment(GeometricPrimitive self, double const [3] a, double const [3] b)"},
-	 { (char *)"GeometricPrimitive_setAABB", _wrap_GeometricPrimitive_setAABB, METH_VARARGS, (char *)"GeometricPrimitive_setAABB(GeometricPrimitive self, double const [3] bmin, double const [3] bmax)"},
-	 { (char *)"GeometricPrimitive_loadString", _wrap_GeometricPrimitive_loadString, METH_VARARGS, (char *)"GeometricPrimitive_loadString(GeometricPrimitive self, char const * str) -> bool"},
-	 { (char *)"GeometricPrimitive_saveString", _wrap_GeometricPrimitive_saveString, METH_VARARGS, (char *)"GeometricPrimitive_saveString(GeometricPrimitive self) -> std::string"},
+	 { (char *)"GeometricPrimitive_setPoint", _wrap_GeometricPrimitive_setPoint, METH_VARARGS, (char *)"\n"
+		"GeometricPrimitive_setPoint(GeometricPrimitive self, double const [3] pt)\n"
+		"\n"
+		"void\n"
+		"GeometricPrimitive::setPoint(const double pt[3]) \n"
+		""},
+	 { (char *)"GeometricPrimitive_setSphere", _wrap_GeometricPrimitive_setSphere, METH_VARARGS, (char *)"\n"
+		"GeometricPrimitive_setSphere(GeometricPrimitive self, double const [3] c, double r)\n"
+		"\n"
+		"void\n"
+		"GeometricPrimitive::setSphere(const double c[3], double r) \n"
+		""},
+	 { (char *)"GeometricPrimitive_setSegment", _wrap_GeometricPrimitive_setSegment, METH_VARARGS, (char *)"\n"
+		"GeometricPrimitive_setSegment(GeometricPrimitive self, double const [3] a, double const [3] b)\n"
+		"\n"
+		"void\n"
+		"GeometricPrimitive::setSegment(const double a[3], const double b[3])\n"
+		"\n"
+		""},
+	 { (char *)"GeometricPrimitive_setAABB", _wrap_GeometricPrimitive_setAABB, METH_VARARGS, (char *)"\n"
+		"GeometricPrimitive_setAABB(GeometricPrimitive self, double const [3] bmin, double const [3] bmax)\n"
+		"\n"
+		"void\n"
+		"GeometricPrimitive::setAABB(const double bmin[3], const double\n"
+		"bmax[3]) \n"
+		""},
+	 { (char *)"GeometricPrimitive_loadString", _wrap_GeometricPrimitive_loadString, METH_VARARGS, (char *)"\n"
+		"GeometricPrimitive_loadString(GeometricPrimitive self, char const * str) -> bool\n"
+		"\n"
+		"bool\n"
+		"GeometricPrimitive::loadString(const char *str) \n"
+		""},
+	 { (char *)"GeometricPrimitive_saveString", _wrap_GeometricPrimitive_saveString, METH_VARARGS, (char *)"\n"
+		"GeometricPrimitive_saveString(GeometricPrimitive self) -> std::string\n"
+		"\n"
+		"std::string\n"
+		"GeometricPrimitive::saveString() const \n"
+		""},
 	 { (char *)"GeometricPrimitive_type_set", _wrap_GeometricPrimitive_type_set, METH_VARARGS, (char *)"GeometricPrimitive_type_set(GeometricPrimitive self, std::string const & type)"},
 	 { (char *)"GeometricPrimitive_type_get", _wrap_GeometricPrimitive_type_get, METH_VARARGS, (char *)"GeometricPrimitive_type_get(GeometricPrimitive self) -> std::string const &"},
 	 { (char *)"GeometricPrimitive_properties_set", _wrap_GeometricPrimitive_properties_set, METH_VARARGS, (char *)"GeometricPrimitive_properties_set(GeometricPrimitive self, doubleVector properties)"},
@@ -30862,53 +31087,178 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"new_GeometricPrimitive", _wrap_new_GeometricPrimitive, METH_VARARGS, (char *)"new_GeometricPrimitive() -> GeometricPrimitive"},
 	 { (char *)"delete_GeometricPrimitive", _wrap_delete_GeometricPrimitive, METH_VARARGS, (char *)"delete_GeometricPrimitive(GeometricPrimitive self)"},
 	 { (char *)"GeometricPrimitive_swigregister", GeometricPrimitive_swigregister, METH_VARARGS, NULL},
-	 { (char *)"new_Geometry3D", _wrap_new_Geometry3D, METH_VARARGS, (char *)"new_Geometry3D() -> Geometry3D"},
-	 { (char *)"delete_Geometry3D", _wrap_delete_Geometry3D, METH_VARARGS, (char *)"delete_Geometry3D(Geometry3D self)"},
-	 { (char *)"Geometry3D_clone", _wrap_Geometry3D_clone, METH_VARARGS, (char *)"Geometry3D_clone(Geometry3D self) -> Geometry3D"},
-	 { (char *)"Geometry3D_set", _wrap_Geometry3D_set, METH_VARARGS, (char *)"Geometry3D_set(Geometry3D self, Geometry3D arg2)"},
-	 { (char *)"Geometry3D_isStandalone", _wrap_Geometry3D_isStandalone, METH_VARARGS, (char *)"Geometry3D_isStandalone(Geometry3D self) -> bool"},
-	 { (char *)"Geometry3D_free", _wrap_Geometry3D_free, METH_VARARGS, (char *)"Geometry3D_free(Geometry3D self)"},
-	 { (char *)"Geometry3D_type", _wrap_Geometry3D_type, METH_VARARGS, (char *)"Geometry3D_type(Geometry3D self) -> std::string"},
-	 { (char *)"Geometry3D_getTriangleMesh", _wrap_Geometry3D_getTriangleMesh, METH_VARARGS, (char *)"Geometry3D_getTriangleMesh(Geometry3D self) -> TriangleMesh"},
-	 { (char *)"Geometry3D_getPointCloud", _wrap_Geometry3D_getPointCloud, METH_VARARGS, (char *)"Geometry3D_getPointCloud(Geometry3D self) -> PointCloud"},
-	 { (char *)"Geometry3D_getGeometricPrimitive", _wrap_Geometry3D_getGeometricPrimitive, METH_VARARGS, (char *)"Geometry3D_getGeometricPrimitive(Geometry3D self) -> GeometricPrimitive"},
-	 { (char *)"Geometry3D_setTriangleMesh", _wrap_Geometry3D_setTriangleMesh, METH_VARARGS, (char *)"Geometry3D_setTriangleMesh(Geometry3D self, TriangleMesh arg2)"},
-	 { (char *)"Geometry3D_setPointCloud", _wrap_Geometry3D_setPointCloud, METH_VARARGS, (char *)"Geometry3D_setPointCloud(Geometry3D self, PointCloud arg2)"},
-	 { (char *)"Geometry3D_setGeometricPrimitive", _wrap_Geometry3D_setGeometricPrimitive, METH_VARARGS, (char *)"Geometry3D_setGeometricPrimitive(Geometry3D self, GeometricPrimitive arg2)"},
-	 { (char *)"Geometry3D_loadFile", _wrap_Geometry3D_loadFile, METH_VARARGS, (char *)"Geometry3D_loadFile(Geometry3D self, char const * fn) -> bool"},
-	 { (char *)"Geometry3D_saveFile", _wrap_Geometry3D_saveFile, METH_VARARGS, (char *)"Geometry3D_saveFile(Geometry3D self, char const * fn) -> bool"},
-	 { (char *)"Geometry3D_setCurrentTransform", _wrap_Geometry3D_setCurrentTransform, METH_VARARGS, (char *)"Geometry3D_setCurrentTransform(Geometry3D self, double const [9] R, double const [3] t)"},
-	 { (char *)"Geometry3D_translate", _wrap_Geometry3D_translate, METH_VARARGS, (char *)"Geometry3D_translate(Geometry3D self, double const [3] t)"},
-	 { (char *)"Geometry3D_transform", _wrap_Geometry3D_transform, METH_VARARGS, (char *)"Geometry3D_transform(Geometry3D self, double const [9] R, double const [3] t)"},
-	 { (char *)"Geometry3D_setCollisionMargin", _wrap_Geometry3D_setCollisionMargin, METH_VARARGS, (char *)"Geometry3D_setCollisionMargin(Geometry3D self, double margin)"},
-	 { (char *)"Geometry3D_getCollisionMargin", _wrap_Geometry3D_getCollisionMargin, METH_VARARGS, (char *)"Geometry3D_getCollisionMargin(Geometry3D self) -> double"},
-	 { (char *)"Geometry3D_getBB", _wrap_Geometry3D_getBB, METH_VARARGS, (char *)"Geometry3D_getBB(Geometry3D self)"},
-	 { (char *)"Geometry3D_collides", _wrap_Geometry3D_collides, METH_VARARGS, (char *)"Geometry3D_collides(Geometry3D self, Geometry3D other) -> bool"},
-	 { (char *)"Geometry3D_withinDistance", _wrap_Geometry3D_withinDistance, METH_VARARGS, (char *)"Geometry3D_withinDistance(Geometry3D self, Geometry3D other, double tol) -> bool"},
+	 { (char *)"new_Geometry3D", _wrap_new_Geometry3D, METH_VARARGS, (char *)"\n"
+		"new_Geometry3D() -> Geometry3D\n"
+		"\n"
+		"Geometry3D::Geometry3D() \n"
+		""},
+	 { (char *)"delete_Geometry3D", _wrap_delete_Geometry3D, METH_VARARGS, (char *)"\n"
+		"delete_Geometry3D(Geometry3D self)\n"
+		"\n"
+		"Geometry3D::~Geometry3D() \n"
+		""},
+	 { (char *)"Geometry3D_clone", _wrap_Geometry3D_clone, METH_VARARGS, (char *)"\n"
+		"Geometry3D_clone(Geometry3D self) -> Geometry3D\n"
+		"\n"
+		"Geometry3D\n"
+		"Geometry3D::clone()\n"
+		"\n"
+		"Creates a standalone geometry from this geometry. \n"
+		""},
+	 { (char *)"Geometry3D_set", _wrap_Geometry3D_set, METH_VARARGS, (char *)"\n"
+		"Geometry3D_set(Geometry3D self, Geometry3D arg2)\n"
+		"\n"
+		"void Geometry3D::set(const\n"
+		"Geometry3D &)\n"
+		"\n"
+		"Copies the geometry of the argument into this geometry. \n"
+		""},
+	 { (char *)"Geometry3D_isStandalone", _wrap_Geometry3D_isStandalone, METH_VARARGS, (char *)"\n"
+		"Geometry3D_isStandalone(Geometry3D self) -> bool\n"
+		"\n"
+		"bool\n"
+		"Geometry3D::isStandalone()\n"
+		"\n"
+		"Returns true if this is a standalone geometry. \n"
+		""},
+	 { (char *)"Geometry3D_free", _wrap_Geometry3D_free, METH_VARARGS, (char *)"\n"
+		"Geometry3D_free(Geometry3D self)\n"
+		"\n"
+		"void Geometry3D::free()\n"
+		"\n"
+		"Frees the data associated with this geometry, if standalone. \n"
+		""},
+	 { (char *)"Geometry3D_type", _wrap_Geometry3D_type, METH_VARARGS, (char *)"\n"
+		"Geometry3D_type(Geometry3D self) -> std::string\n"
+		"\n"
+		"string Geometry3D::type()\n"
+		"\n"
+		"Returns the type of geometry: TriangleMesh, PointCloud, or\n"
+		"GeometricPrimitive \n"
+		""},
+	 { (char *)"Geometry3D_getTriangleMesh", _wrap_Geometry3D_getTriangleMesh, METH_VARARGS, (char *)"\n"
+		"Geometry3D_getTriangleMesh(Geometry3D self) -> TriangleMesh\n"
+		"\n"
+		"TriangleMesh\n"
+		"Geometry3D::getTriangleMesh()\n"
+		"\n"
+		"Returns a TriangleMesh if this geometry is of type TriangleMesh. \n"
+		""},
+	 { (char *)"Geometry3D_getPointCloud", _wrap_Geometry3D_getPointCloud, METH_VARARGS, (char *)"\n"
+		"Geometry3D_getPointCloud(Geometry3D self) -> PointCloud\n"
+		"\n"
+		"PointCloud\n"
+		"Geometry3D::getPointCloud()\n"
+		"\n"
+		"Returns a PointCloud if this geometry is of type PointCloud. \n"
+		""},
+	 { (char *)"Geometry3D_getGeometricPrimitive", _wrap_Geometry3D_getGeometricPrimitive, METH_VARARGS, (char *)"\n"
+		"Geometry3D_getGeometricPrimitive(Geometry3D self) -> GeometricPrimitive\n"
+		"\n"
+		"GeometricPrimitive Geometry3D::getGeometricPrimitive()\n"
+		"\n"
+		"Returns a GeometricPrimitive if this geometry is of type\n"
+		"GeometricPrimitive. \n"
+		""},
+	 { (char *)"Geometry3D_setTriangleMesh", _wrap_Geometry3D_setTriangleMesh, METH_VARARGS, (char *)"\n"
+		"Geometry3D_setTriangleMesh(Geometry3D self, TriangleMesh arg2)\n"
+		"\n"
+		"void\n"
+		"Geometry3D::setTriangleMesh(const TriangleMesh &) \n"
+		""},
+	 { (char *)"Geometry3D_setPointCloud", _wrap_Geometry3D_setPointCloud, METH_VARARGS, (char *)"\n"
+		"Geometry3D_setPointCloud(Geometry3D self, PointCloud arg2)\n"
+		"\n"
+		"void\n"
+		"Geometry3D::setPointCloud(const PointCloud &) \n"
+		""},
+	 { (char *)"Geometry3D_setGeometricPrimitive", _wrap_Geometry3D_setGeometricPrimitive, METH_VARARGS, (char *)"\n"
+		"Geometry3D_setGeometricPrimitive(Geometry3D self, GeometricPrimitive arg2)\n"
+		"\n"
+		"void\n"
+		"Geometry3D::setGeometricPrimitive(const GeometricPrimitive &) \n"
+		""},
+	 { (char *)"Geometry3D_loadFile", _wrap_Geometry3D_loadFile, METH_VARARGS, (char *)"\n"
+		"Geometry3D_loadFile(Geometry3D self, char const * fn) -> bool\n"
+		"\n"
+		"bool\n"
+		"Geometry3D::loadFile(const char *fn) \n"
+		""},
+	 { (char *)"Geometry3D_saveFile", _wrap_Geometry3D_saveFile, METH_VARARGS, (char *)"\n"
+		"Geometry3D_saveFile(Geometry3D self, char const * fn) -> bool\n"
+		"\n"
+		"bool\n"
+		"Geometry3D::saveFile(const char *fn) \n"
+		""},
+	 { (char *)"Geometry3D_setCurrentTransform", _wrap_Geometry3D_setCurrentTransform, METH_VARARGS, (char *)"\n"
+		"Geometry3D_setCurrentTransform(Geometry3D self, double const [9] R, double const [3] t)\n"
+		"\n"
+		"void\n"
+		"Geometry3D::setCurrentTransform(const double R[9], const double t[3])\n"
+		"\n"
+		"Sets the current transformation (not modifying the underlying data) \n"
+		""},
+	 { (char *)"Geometry3D_translate", _wrap_Geometry3D_translate, METH_VARARGS, (char *)"\n"
+		"Geometry3D_translate(Geometry3D self, double const [3] t)\n"
+		"\n"
+		"void\n"
+		"Geometry3D::translate(const double t[3])\n"
+		"\n"
+		"Translates the geometry data. \n"
+		""},
+	 { (char *)"Geometry3D_transform", _wrap_Geometry3D_transform, METH_VARARGS, (char *)"\n"
+		"Geometry3D_transform(Geometry3D self, double const [9] R, double const [3] t)\n"
+		"\n"
+		"void\n"
+		"Geometry3D::transform(const double R[9], const double t[3])\n"
+		"\n"
+		"Translates/rotates the geometry data. \n"
+		""},
+	 { (char *)"Geometry3D_setCollisionMargin", _wrap_Geometry3D_setCollisionMargin, METH_VARARGS, (char *)"\n"
+		"Geometry3D_setCollisionMargin(Geometry3D self, double margin)\n"
+		"\n"
+		"void\n"
+		"Geometry3D::setCollisionMargin(double margin) \n"
+		""},
+	 { (char *)"Geometry3D_getCollisionMargin", _wrap_Geometry3D_getCollisionMargin, METH_VARARGS, (char *)"\n"
+		"Geometry3D_getCollisionMargin(Geometry3D self) -> double\n"
+		"\n"
+		"double\n"
+		"Geometry3D::getCollisionMargin() \n"
+		""},
+	 { (char *)"Geometry3D_getBB", _wrap_Geometry3D_getBB, METH_VARARGS, (char *)"\n"
+		"Geometry3D_getBB(Geometry3D self)\n"
+		"\n"
+		"void\n"
+		"Geometry3D::getBB(double out[3], double out2[3]) \n"
+		""},
+	 { (char *)"Geometry3D_collides", _wrap_Geometry3D_collides, METH_VARARGS, (char *)"\n"
+		"Geometry3D_collides(Geometry3D self, Geometry3D other) -> bool\n"
+		"\n"
+		"bool\n"
+		"Geometry3D::collides(const Geometry3D &other) \n"
+		""},
+	 { (char *)"Geometry3D_withinDistance", _wrap_Geometry3D_withinDistance, METH_VARARGS, (char *)"\n"
+		"Geometry3D_withinDistance(Geometry3D self, Geometry3D other, double tol) -> bool\n"
+		"\n"
+		"bool\n"
+		"Geometry3D::withinDistance(const Geometry3D &other, double tol) \n"
+		""},
 	 { (char *)"Geometry3D_distance", _wrap_Geometry3D_distance, METH_VARARGS, (char *)"\n"
 		"distance(Geometry3D other, double relErr=0, double absErr=0) -> double\n"
 		"distance(Geometry3D other, double relErr=0) -> double\n"
 		"Geometry3D_distance(Geometry3D self, Geometry3D other) -> double\n"
 		"\n"
-		"double distance(int geom1, int\n"
-		"geom2, double relErr, double absErr)\n"
-		"\n"
-		"Returns the distance between the two geometries, possibly with an\n"
-		"approximation error (useful to speed up mesh-mesh distance detection)\n"
-		"\n"
-		"Error of result is no more than D*relErr+absErr where D is the actual\n"
-		"distance. Set relErr=absErr=0 to get exact distance.\n"
-		"\n"
-		"NOTE: Not yet implemented. \n"
+		"double\n"
+		"Geometry3D::distance(const Geometry3D &other, double relErr=0, double\n"
+		"absErr=0) \n"
 		""},
 	 { (char *)"Geometry3D_rayCast", _wrap_Geometry3D_rayCast, METH_VARARGS, (char *)"\n"
 		"Geometry3D_rayCast(Geometry3D self, double const [3] s, double const [3] d) -> bool\n"
 		"\n"
-		"bool rayCast(int geom, const double\n"
-		"s[3], const double d[3], double out[3])\n"
-		"\n"
-		"Returns true if the geometry is hit by the given ray, and also returns\n"
-		"the hit point (in world coordinates). \n"
+		"bool\n"
+		"Geometry3D::rayCast(const double s[3], const double d[3], double\n"
+		"out[3]) \n"
 		""},
 	 { (char *)"Geometry3D_world_set", _wrap_Geometry3D_world_set, METH_VARARGS, (char *)"Geometry3D_world_set(Geometry3D self, int world)"},
 	 { (char *)"Geometry3D_world_get", _wrap_Geometry3D_world_get, METH_VARARGS, (char *)"Geometry3D_world_get(Geometry3D self) -> int"},
@@ -32300,13 +32650,44 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"SimRobotController_sim_set", _wrap_SimRobotController_sim_set, METH_VARARGS, (char *)"SimRobotController_sim_set(SimRobotController self, WorldSimulation * sim)"},
 	 { (char *)"SimRobotController_sim_get", _wrap_SimRobotController_sim_get, METH_VARARGS, (char *)"SimRobotController_sim_get(SimRobotController self) -> WorldSimulation *"},
 	 { (char *)"SimRobotController_swigregister", SimRobotController_swigregister, METH_VARARGS, NULL},
+	 { (char *)"SimBody_enable", _wrap_SimBody_enable, METH_VARARGS, (char *)"\n"
+		"enable(bool enabled=True)\n"
+		"SimBody_enable(SimBody self)\n"
+		"\n"
+		"void SimBody::enable(bool\n"
+		"enabled=true)\n"
+		"\n"
+		"Sets the simulation of this body on/off. \n"
+		""},
+	 { (char *)"SimBody_isEnabled", _wrap_SimBody_isEnabled, METH_VARARGS, (char *)"\n"
+		"SimBody_isEnabled(SimBody self) -> bool\n"
+		"\n"
+		"bool SimBody::isEnabled()\n"
+		"\n"
+		"Returns true if this body is being simulated. \n"
+		""},
 	 { (char *)"SimBody_applyWrench", _wrap_SimBody_applyWrench, METH_VARARGS, (char *)"\n"
 		"SimBody_applyWrench(SimBody self, double const [3] f, double const [3] t)\n"
 		"\n"
 		"void\n"
 		"SimBody::applyWrench(const double f[3], const double t[3])\n"
 		"\n"
-		"Applies a force and torque about the COM. \n"
+		"Applies a force and torque about the COM at the current simulation\n"
+		"time step. \n"
+		""},
+	 { (char *)"SimBody_setTransform", _wrap_SimBody_setTransform, METH_VARARGS, (char *)"\n"
+		"SimBody_setTransform(SimBody self, double const [9] R, double const [3] t)\n"
+		"\n"
+		"void\n"
+		"SimBody::setTransform(const double R[9], const double t[3])\n"
+		"\n"
+		"Sets the body's transformation at the current simulation time step. \n"
+		""},
+	 { (char *)"SimBody_getTransform", _wrap_SimBody_getTransform, METH_VARARGS, (char *)"\n"
+		"SimBody_getTransform(SimBody self)\n"
+		"\n"
+		"void\n"
+		"SimBody::getTransform(double out[9], double out2[3]) \n"
 		""},
 	 { (char *)"SimBody_setVelocity", _wrap_SimBody_setVelocity, METH_VARARGS, (char *)"\n"
 		"SimBody_setVelocity(SimBody self, double const [3] w, double const [3] v)\n"
@@ -32314,7 +32695,8 @@ static PyMethodDef SwigMethods[] = {
 		"void\n"
 		"SimBody::setVelocity(const double w[3], const double v[3])\n"
 		"\n"
-		"Sets the angular velocity and translational velocity. \n"
+		"Sets the angular velocity and translational velocity at the current\n"
+		"simulation time step. \n"
 		""},
 	 { (char *)"SimBody_getVelocity", _wrap_SimBody_getVelocity, METH_VARARGS, (char *)"\n"
 		"SimBody_getVelocity(SimBody self)\n"
@@ -32324,25 +32706,14 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"Returns the angular velocity and translational velocity. \n"
 		""},
-	 { (char *)"SimBody_setTransform", _wrap_SimBody_setTransform, METH_VARARGS, (char *)"\n"
-		"SimBody_setTransform(SimBody self, double const [9] R, double const [3] t)\n"
-		"\n"
-		"void\n"
-		"SimBody::setTransform(const double R[9], double t[3]) \n"
-		""},
-	 { (char *)"SimBody_getTransform", _wrap_SimBody_getTransform, METH_VARARGS, (char *)"\n"
-		"SimBody_getTransform(SimBody self)\n"
-		"\n"
-		"void\n"
-		"SimBody::getTransform(double out[9], double out2[3]) \n"
-		""},
 	 { (char *)"SimBody_setCollisionPadding", _wrap_SimBody_setCollisionPadding, METH_VARARGS, (char *)"\n"
 		"SimBody_setCollisionPadding(SimBody self, double padding)\n"
 		"\n"
 		"void\n"
 		"SimBody::setCollisionPadding(double padding)\n"
 		"\n"
-		"Sets the collision padding (useful for thin objects) \n"
+		"Sets the collision padding (useful for thin objects). Default is\n"
+		"0.0025. \n"
 		""},
 	 { (char *)"SimBody_getCollisionPadding", _wrap_SimBody_getCollisionPadding, METH_VARARGS, (char *)"\n"
 		"SimBody_getCollisionPadding(SimBody self) -> double\n"
@@ -32367,6 +32738,13 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"A reference to a rigid body inside a Simulator (either a\n"
 		"RigidObjectModel, TerrainModel, or a link of a RobotModel).\n"
+		"\n"
+		"Can use this class to directly apply forces to or control positions /\n"
+		"velocities of objects in the simulation. However, note that the\n"
+		"changes are only applied in the current simulation substep, not the\n"
+		"duration provided to Simulation.simulate(). If you need fine-grained\n"
+		"control, make sure to call simulate() with time steps equal to the\n"
+		"value provided to Simulation.setSimStep() (this is 0.001s by default).\n"
 		"\n"
 		"C++ includes: robotsim.h \n"
 		""},

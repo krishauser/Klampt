@@ -292,18 +292,36 @@ doubleMatrix_swigregister = _robotsim.doubleMatrix_swigregister
 doubleMatrix_swigregister(doubleMatrix)
 
 class TriangleMesh(_object):
-    """Proxy of C++ TriangleMesh class"""
+    """
+    A 3D indexed triangle mesh class.
+
+    vertices is a list of vertices, given as a list [x1, y1, z1, x2, y2,
+    ...] indices is a list of triangle vertices given as indices into the
+    vertices list, i.e., [a1,b1,c2, a2,b2,c2, ...]
+
+    C++ includes: geometry.h 
+    """
     __swig_setmethods__ = {}
     __setattr__ = lambda self, name, value: _swig_setattr(self, TriangleMesh, name, value)
     __swig_getmethods__ = {}
     __getattr__ = lambda self, name: _swig_getattr(self, TriangleMesh, name)
     __repr__ = _swig_repr
     def translate(self, *args):
-        """translate(TriangleMesh self, double const [3] t)"""
+        """
+        translate(TriangleMesh self, double const [3] t)
+
+        void
+        TriangleMesh::translate(const double t[3]) 
+        """
         return _robotsim.TriangleMesh_translate(self, *args)
 
     def transform(self, *args):
-        """transform(TriangleMesh self, double const [9] R, double const [3] t)"""
+        """
+        transform(TriangleMesh self, double const [9] R, double const [3] t)
+
+        void
+        TriangleMesh::transform(const double R[9], const double t[3]) 
+        """
         return _robotsim.TriangleMesh_transform(self, *args)
 
     __swig_setmethods__["indices"] = _robotsim.TriangleMesh_indices_set
@@ -313,7 +331,17 @@ class TriangleMesh(_object):
     __swig_getmethods__["vertices"] = _robotsim.TriangleMesh_vertices_get
     if _newclass:vertices = _swig_property(_robotsim.TriangleMesh_vertices_get, _robotsim.TriangleMesh_vertices_set)
     def __init__(self): 
-        """__init__(TriangleMesh self) -> TriangleMesh"""
+        """
+        __init__(TriangleMesh self) -> TriangleMesh
+
+        A 3D indexed triangle mesh class.
+
+        vertices is a list of vertices, given as a list [x1, y1, z1, x2, y2,
+        ...] indices is a list of triangle vertices given as indices into the
+        vertices list, i.e., [a1,b1,c2, a2,b2,c2, ...]
+
+        C++ includes: geometry.h 
+        """
         this = _robotsim.new_TriangleMesh()
         try: self.this.append(this)
         except: self.this = this
@@ -323,18 +351,36 @@ TriangleMesh_swigregister = _robotsim.TriangleMesh_swigregister
 TriangleMesh_swigregister(TriangleMesh)
 
 class PointCloud(_object):
-    """Proxy of C++ PointCloud class"""
+    """
+    A 3D point cloud class. vertices is a list of vertices, given as a
+    list [x1, y1, z1, x2, y2, ... zn] properties is a list of vertex
+    properties, given as a list [p11, p21, ..., pk1, p12, p22, ..., pk2,
+    ... , pn1, pn2, ..., pn2] where each vertex has k properties. The name
+    of each property is given by the propertyNames member.
+
+    C++ includes: geometry.h 
+    """
     __swig_setmethods__ = {}
     __setattr__ = lambda self, name, value: _swig_setattr(self, PointCloud, name, value)
     __swig_getmethods__ = {}
     __getattr__ = lambda self, name: _swig_getattr(self, PointCloud, name)
     __repr__ = _swig_repr
     def translate(self, *args):
-        """translate(PointCloud self, double const [3] t)"""
+        """
+        translate(PointCloud self, double const [3] t)
+
+        void
+        PointCloud::translate(const double t[3]) 
+        """
         return _robotsim.PointCloud_translate(self, *args)
 
     def transform(self, *args):
-        """transform(PointCloud self, double const [9] R, double const [3] t)"""
+        """
+        transform(PointCloud self, double const [9] R, double const [3] t)
+
+        void
+        PointCloud::transform(const double R[9], const double t[3]) 
+        """
         return _robotsim.PointCloud_transform(self, *args)
 
     __swig_setmethods__["vertices"] = _robotsim.PointCloud_vertices_set
@@ -347,7 +393,17 @@ class PointCloud(_object):
     __swig_getmethods__["properties"] = _robotsim.PointCloud_properties_get
     if _newclass:properties = _swig_property(_robotsim.PointCloud_properties_get, _robotsim.PointCloud_properties_set)
     def __init__(self): 
-        """__init__(PointCloud self) -> PointCloud"""
+        """
+        __init__(PointCloud self) -> PointCloud
+
+        A 3D point cloud class. vertices is a list of vertices, given as a
+        list [x1, y1, z1, x2, y2, ... zn] properties is a list of vertex
+        properties, given as a list [p11, p21, ..., pk1, p12, p22, ..., pk2,
+        ... , pn1, pn2, ..., pn2] where each vertex has k properties. The name
+        of each property is given by the propertyNames member.
+
+        C++ includes: geometry.h 
+        """
         this = _robotsim.new_PointCloud()
         try: self.this.append(this)
         except: self.this = this
@@ -364,27 +420,59 @@ class GeometricPrimitive(_object):
     __getattr__ = lambda self, name: _swig_getattr(self, GeometricPrimitive, name)
     __repr__ = _swig_repr
     def setPoint(self, *args):
-        """setPoint(GeometricPrimitive self, double const [3] pt)"""
+        """
+        setPoint(GeometricPrimitive self, double const [3] pt)
+
+        void
+        GeometricPrimitive::setPoint(const double pt[3]) 
+        """
         return _robotsim.GeometricPrimitive_setPoint(self, *args)
 
     def setSphere(self, *args):
-        """setSphere(GeometricPrimitive self, double const [3] c, double r)"""
+        """
+        setSphere(GeometricPrimitive self, double const [3] c, double r)
+
+        void
+        GeometricPrimitive::setSphere(const double c[3], double r) 
+        """
         return _robotsim.GeometricPrimitive_setSphere(self, *args)
 
     def setSegment(self, *args):
-        """setSegment(GeometricPrimitive self, double const [3] a, double const [3] b)"""
+        """
+        setSegment(GeometricPrimitive self, double const [3] a, double const [3] b)
+
+        void
+        GeometricPrimitive::setSegment(const double a[3], const double b[3])
+
+        """
         return _robotsim.GeometricPrimitive_setSegment(self, *args)
 
     def setAABB(self, *args):
-        """setAABB(GeometricPrimitive self, double const [3] bmin, double const [3] bmax)"""
+        """
+        setAABB(GeometricPrimitive self, double const [3] bmin, double const [3] bmax)
+
+        void
+        GeometricPrimitive::setAABB(const double bmin[3], const double
+        bmax[3]) 
+        """
         return _robotsim.GeometricPrimitive_setAABB(self, *args)
 
     def loadString(self, *args):
-        """loadString(GeometricPrimitive self, char const * str) -> bool"""
+        """
+        loadString(GeometricPrimitive self, char const * str) -> bool
+
+        bool
+        GeometricPrimitive::loadString(const char *str) 
+        """
         return _robotsim.GeometricPrimitive_loadString(self, *args)
 
     def saveString(self):
-        """saveString(GeometricPrimitive self) -> std::string"""
+        """
+        saveString(GeometricPrimitive self) -> std::string
+
+        std::string
+        GeometricPrimitive::saveString() const 
+        """
         return _robotsim.GeometricPrimitive_saveString(self)
 
     __swig_setmethods__["type"] = _robotsim.GeometricPrimitive_type_set
@@ -404,101 +492,242 @@ GeometricPrimitive_swigregister = _robotsim.GeometricPrimitive_swigregister
 GeometricPrimitive_swigregister(GeometricPrimitive)
 
 class Geometry3D(_object):
-    """Proxy of C++ Geometry3D class"""
+    """
+    A three-D geometry. Can either be a reference to a world item's
+    geometry, in which case modifiers change the world item's geometry, or
+    it can be a standalone geometry.
+
+    Modifiers include any setX() functions, translate(), and transform().
+
+    Proximity queries include collides(), withinDistance(), distance(),
+    and rayCast().
+
+    C++ includes: geometry.h 
+    """
     __swig_setmethods__ = {}
     __setattr__ = lambda self, name, value: _swig_setattr(self, Geometry3D, name, value)
     __swig_getmethods__ = {}
     __getattr__ = lambda self, name: _swig_getattr(self, Geometry3D, name)
     __repr__ = _swig_repr
     def __init__(self): 
-        """__init__(Geometry3D self) -> Geometry3D"""
+        """
+        __init__(Geometry3D self) -> Geometry3D
+
+        Geometry3D::Geometry3D() 
+        """
         this = _robotsim.new_Geometry3D()
         try: self.this.append(this)
         except: self.this = this
     __swig_destroy__ = _robotsim.delete_Geometry3D
     __del__ = lambda self : None;
     def clone(self):
-        """clone(Geometry3D self) -> Geometry3D"""
+        """
+        clone(Geometry3D self) -> Geometry3D
+
+        Geometry3D
+        Geometry3D::clone()
+
+        Creates a standalone geometry from this geometry. 
+        """
         return _robotsim.Geometry3D_clone(self)
 
     def set(self, *args):
-        """set(Geometry3D self, Geometry3D arg2)"""
+        """
+        set(Geometry3D self, Geometry3D arg2)
+
+        void Geometry3D::set(const
+        Geometry3D &)
+
+        Copies the geometry of the argument into this geometry. 
+        """
         return _robotsim.Geometry3D_set(self, *args)
 
     def isStandalone(self):
-        """isStandalone(Geometry3D self) -> bool"""
+        """
+        isStandalone(Geometry3D self) -> bool
+
+        bool
+        Geometry3D::isStandalone()
+
+        Returns true if this is a standalone geometry. 
+        """
         return _robotsim.Geometry3D_isStandalone(self)
 
     def free(self):
-        """free(Geometry3D self)"""
+        """
+        free(Geometry3D self)
+
+        void Geometry3D::free()
+
+        Frees the data associated with this geometry, if standalone. 
+        """
         return _robotsim.Geometry3D_free(self)
 
     def type(self):
-        """type(Geometry3D self) -> std::string"""
+        """
+        type(Geometry3D self) -> std::string
+
+        string Geometry3D::type()
+
+        Returns the type of geometry: TriangleMesh, PointCloud, or
+        GeometricPrimitive 
+        """
         return _robotsim.Geometry3D_type(self)
 
     def getTriangleMesh(self):
-        """getTriangleMesh(Geometry3D self) -> TriangleMesh"""
+        """
+        getTriangleMesh(Geometry3D self) -> TriangleMesh
+
+        TriangleMesh
+        Geometry3D::getTriangleMesh()
+
+        Returns a TriangleMesh if this geometry is of type TriangleMesh. 
+        """
         return _robotsim.Geometry3D_getTriangleMesh(self)
 
     def getPointCloud(self):
-        """getPointCloud(Geometry3D self) -> PointCloud"""
+        """
+        getPointCloud(Geometry3D self) -> PointCloud
+
+        PointCloud
+        Geometry3D::getPointCloud()
+
+        Returns a PointCloud if this geometry is of type PointCloud. 
+        """
         return _robotsim.Geometry3D_getPointCloud(self)
 
     def getGeometricPrimitive(self):
-        """getGeometricPrimitive(Geometry3D self) -> GeometricPrimitive"""
+        """
+        getGeometricPrimitive(Geometry3D self) -> GeometricPrimitive
+
+        GeometricPrimitive Geometry3D::getGeometricPrimitive()
+
+        Returns a GeometricPrimitive if this geometry is of type
+        GeometricPrimitive. 
+        """
         return _robotsim.Geometry3D_getGeometricPrimitive(self)
 
     def setTriangleMesh(self, *args):
-        """setTriangleMesh(Geometry3D self, TriangleMesh arg2)"""
+        """
+        setTriangleMesh(Geometry3D self, TriangleMesh arg2)
+
+        void
+        Geometry3D::setTriangleMesh(const TriangleMesh &) 
+        """
         return _robotsim.Geometry3D_setTriangleMesh(self, *args)
 
     def setPointCloud(self, *args):
-        """setPointCloud(Geometry3D self, PointCloud arg2)"""
+        """
+        setPointCloud(Geometry3D self, PointCloud arg2)
+
+        void
+        Geometry3D::setPointCloud(const PointCloud &) 
+        """
         return _robotsim.Geometry3D_setPointCloud(self, *args)
 
     def setGeometricPrimitive(self, *args):
-        """setGeometricPrimitive(Geometry3D self, GeometricPrimitive arg2)"""
+        """
+        setGeometricPrimitive(Geometry3D self, GeometricPrimitive arg2)
+
+        void
+        Geometry3D::setGeometricPrimitive(const GeometricPrimitive &) 
+        """
         return _robotsim.Geometry3D_setGeometricPrimitive(self, *args)
 
     def loadFile(self, *args):
-        """loadFile(Geometry3D self, char const * fn) -> bool"""
+        """
+        loadFile(Geometry3D self, char const * fn) -> bool
+
+        bool
+        Geometry3D::loadFile(const char *fn) 
+        """
         return _robotsim.Geometry3D_loadFile(self, *args)
 
     def saveFile(self, *args):
-        """saveFile(Geometry3D self, char const * fn) -> bool"""
+        """
+        saveFile(Geometry3D self, char const * fn) -> bool
+
+        bool
+        Geometry3D::saveFile(const char *fn) 
+        """
         return _robotsim.Geometry3D_saveFile(self, *args)
 
     def setCurrentTransform(self, *args):
-        """setCurrentTransform(Geometry3D self, double const [9] R, double const [3] t)"""
+        """
+        setCurrentTransform(Geometry3D self, double const [9] R, double const [3] t)
+
+        void
+        Geometry3D::setCurrentTransform(const double R[9], const double t[3])
+
+        Sets the current transformation (not modifying the underlying data) 
+        """
         return _robotsim.Geometry3D_setCurrentTransform(self, *args)
 
     def translate(self, *args):
-        """translate(Geometry3D self, double const [3] t)"""
+        """
+        translate(Geometry3D self, double const [3] t)
+
+        void
+        Geometry3D::translate(const double t[3])
+
+        Translates the geometry data. 
+        """
         return _robotsim.Geometry3D_translate(self, *args)
 
     def transform(self, *args):
-        """transform(Geometry3D self, double const [9] R, double const [3] t)"""
+        """
+        transform(Geometry3D self, double const [9] R, double const [3] t)
+
+        void
+        Geometry3D::transform(const double R[9], const double t[3])
+
+        Translates/rotates the geometry data. 
+        """
         return _robotsim.Geometry3D_transform(self, *args)
 
     def setCollisionMargin(self, *args):
-        """setCollisionMargin(Geometry3D self, double margin)"""
+        """
+        setCollisionMargin(Geometry3D self, double margin)
+
+        void
+        Geometry3D::setCollisionMargin(double margin) 
+        """
         return _robotsim.Geometry3D_setCollisionMargin(self, *args)
 
     def getCollisionMargin(self):
-        """getCollisionMargin(Geometry3D self) -> double"""
+        """
+        getCollisionMargin(Geometry3D self) -> double
+
+        double
+        Geometry3D::getCollisionMargin() 
+        """
         return _robotsim.Geometry3D_getCollisionMargin(self)
 
     def getBB(self):
-        """getBB(Geometry3D self)"""
+        """
+        getBB(Geometry3D self)
+
+        void
+        Geometry3D::getBB(double out[3], double out2[3]) 
+        """
         return _robotsim.Geometry3D_getBB(self)
 
     def collides(self, *args):
-        """collides(Geometry3D self, Geometry3D other) -> bool"""
+        """
+        collides(Geometry3D self, Geometry3D other) -> bool
+
+        bool
+        Geometry3D::collides(const Geometry3D &other) 
+        """
         return _robotsim.Geometry3D_collides(self, *args)
 
     def withinDistance(self, *args):
-        """withinDistance(Geometry3D self, Geometry3D other, double tol) -> bool"""
+        """
+        withinDistance(Geometry3D self, Geometry3D other, double tol) -> bool
+
+        bool
+        Geometry3D::withinDistance(const Geometry3D &other, double tol) 
+        """
         return _robotsim.Geometry3D_withinDistance(self, *args)
 
     def distance(self, *args):
@@ -507,16 +736,9 @@ class Geometry3D(_object):
         distance(Geometry3D self, Geometry3D other, double relErr=0) -> double
         distance(Geometry3D self, Geometry3D other) -> double
 
-        double distance(int geom1, int
-        geom2, double relErr, double absErr)
-
-        Returns the distance between the two geometries, possibly with an
-        approximation error (useful to speed up mesh-mesh distance detection)
-
-        Error of result is no more than D*relErr+absErr where D is the actual
-        distance. Set relErr=absErr=0 to get exact distance.
-
-        NOTE: Not yet implemented. 
+        double
+        Geometry3D::distance(const Geometry3D &other, double relErr=0, double
+        absErr=0) 
         """
         return _robotsim.Geometry3D_distance(self, *args)
 
@@ -524,11 +746,9 @@ class Geometry3D(_object):
         """
         rayCast(Geometry3D self, double const [3] s, double const [3] d) -> bool
 
-        bool rayCast(int geom, const double
-        s[3], const double d[3], double out[3])
-
-        Returns true if the geometry is hit by the given ray, and also returns
-        the hit point (in world coordinates). 
+        bool
+        Geometry3D::rayCast(const double s[3], const double d[3], double
+        out[3]) 
         """
         return _robotsim.Geometry3D_rayCast(self, *args)
 
@@ -2773,6 +2993,13 @@ class SimBody(_object):
     A reference to a rigid body inside a Simulator (either a
     RigidObjectModel, TerrainModel, or a link of a RobotModel).
 
+    Can use this class to directly apply forces to or control positions /
+    velocities of objects in the simulation. However, note that the
+    changes are only applied in the current simulation substep, not the
+    duration provided to Simulation.simulate(). If you need fine-grained
+    control, make sure to call simulate() with time steps equal to the
+    value provided to Simulation.setSimStep() (this is 0.001s by default).
+
     C++ includes: robotsim.h 
     """
     __swig_setmethods__ = {}
@@ -2780,6 +3007,28 @@ class SimBody(_object):
     __swig_getmethods__ = {}
     __getattr__ = lambda self, name: _swig_getattr(self, SimBody, name)
     __repr__ = _swig_repr
+    def enable(self, enabled=True):
+        """
+        enable(SimBody self, bool enabled=True)
+        enable(SimBody self)
+
+        void SimBody::enable(bool
+        enabled=true)
+
+        Sets the simulation of this body on/off. 
+        """
+        return _robotsim.SimBody_enable(self, enabled)
+
+    def isEnabled(self):
+        """
+        isEnabled(SimBody self) -> bool
+
+        bool SimBody::isEnabled()
+
+        Returns true if this body is being simulated. 
+        """
+        return _robotsim.SimBody_isEnabled(self)
+
     def applyWrench(self, *args):
         """
         applyWrench(SimBody self, double const [3] f, double const [3] t)
@@ -2787,9 +3036,30 @@ class SimBody(_object):
         void
         SimBody::applyWrench(const double f[3], const double t[3])
 
-        Applies a force and torque about the COM. 
+        Applies a force and torque about the COM at the current simulation
+        time step. 
         """
         return _robotsim.SimBody_applyWrench(self, *args)
+
+    def setTransform(self, *args):
+        """
+        setTransform(SimBody self, double const [9] R, double const [3] t)
+
+        void
+        SimBody::setTransform(const double R[9], const double t[3])
+
+        Sets the body's transformation at the current simulation time step. 
+        """
+        return _robotsim.SimBody_setTransform(self, *args)
+
+    def getTransform(self):
+        """
+        getTransform(SimBody self)
+
+        void
+        SimBody::getTransform(double out[9], double out2[3]) 
+        """
+        return _robotsim.SimBody_getTransform(self)
 
     def setVelocity(self, *args):
         """
@@ -2798,7 +3068,8 @@ class SimBody(_object):
         void
         SimBody::setVelocity(const double w[3], const double v[3])
 
-        Sets the angular velocity and translational velocity. 
+        Sets the angular velocity and translational velocity at the current
+        simulation time step. 
         """
         return _robotsim.SimBody_setVelocity(self, *args)
 
@@ -2813,24 +3084,6 @@ class SimBody(_object):
         """
         return _robotsim.SimBody_getVelocity(self)
 
-    def setTransform(self, *args):
-        """
-        setTransform(SimBody self, double const [9] R, double const [3] t)
-
-        void
-        SimBody::setTransform(const double R[9], double t[3]) 
-        """
-        return _robotsim.SimBody_setTransform(self, *args)
-
-    def getTransform(self):
-        """
-        getTransform(SimBody self)
-
-        void
-        SimBody::getTransform(double out[9], double out2[3]) 
-        """
-        return _robotsim.SimBody_getTransform(self)
-
     def setCollisionPadding(self, *args):
         """
         setCollisionPadding(SimBody self, double padding)
@@ -2838,7 +3091,8 @@ class SimBody(_object):
         void
         SimBody::setCollisionPadding(double padding)
 
-        Sets the collision padding (useful for thin objects) 
+        Sets the collision padding (useful for thin objects). Default is
+        0.0025. 
         """
         return _robotsim.SimBody_setCollisionPadding(self, *args)
 
@@ -2874,6 +3128,13 @@ class SimBody(_object):
 
         A reference to a rigid body inside a Simulator (either a
         RigidObjectModel, TerrainModel, or a link of a RobotModel).
+
+        Can use this class to directly apply forces to or control positions /
+        velocities of objects in the simulation. However, note that the
+        changes are only applied in the current simulation substep, not the
+        duration provided to Simulation.simulate(). If you need fine-grained
+        control, make sure to call simulate() with time steps equal to the
+        value provided to Simulation.setSimStep() (this is 0.001s by default).
 
         C++ includes: robotsim.h 
         """

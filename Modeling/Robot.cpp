@@ -1056,6 +1056,7 @@ bool Robot::LoadRob(const char* fn) {
 		  if (link1 < 0 || link1 >= (int) links.size() ||
 		      link2 < 0 || link2 >= (int) links.size()) {
 		    residualNoSelfCollisions.push_back(noSelfCollision[i]);
+		    continue;
 		}
 		  if(link1 > link2) Swap(link1,link2);
 		Assert(link1 < link2);
