@@ -14,6 +14,8 @@
 #
 # Revision to newest version: 7/1/2014
 # - Updated urdf file has more links
+#
+# Revised velocity / acceleration limits to match robot (approximate)
 
 links	"base0" "base1" "base2" "base3" "base4" "base" "collision_head_link_1" "collision_head_link_2" "torso" "head" "dummyhead1" "head_camera" "screen" "display" "left_arm_mount" "left_upper_shoulder" "left_lower_shoulder" "left_upper_elbow" "left_lower_elbow" "left_upper_forearm" "left_arm_itb" "left_lower_forearm" "left_wrist" "left_hand" "left_gripper_base" "left_gripper" "left_hand_accelerometer" "left_hand_camera" "left_hand_camera_axis" "left_hand_range" "left_upper_forearm_visual" "left_upper_elbow_visual" "left_torso_itb" "pedestal" "right_arm_mount" "right_upper_shoulder" "right_lower_shoulder" "right_upper_elbow" "right_lower_elbow" "right_upper_forearm" "right_arm_itb" "right_lower_forearm" "right_wrist" "right_hand" "right_gripper_base" "right_gripper" "right_hand_accelerometer" "right_hand_camera" "right_hand_camera_axis" "right_hand_range" "right_upper_forearm_visual" "right_upper_elbow_visual" "right_torso_itb" "sonar_ring" 
 
@@ -97,9 +99,9 @@ inertia	0 0 0 0 0 0 0 0 0	0 0 0 0 0 0 0 0 0	0 0 0 0 0 0 0 0 0	0 0 0 0 0 0 0 0 0	
 
 torquemax	0 0 0 0 0 inf inf inf 50 50 inf inf 50 inf inf 50 100 50 50 15 inf 15 15 inf inf inf inf inf inf inf inf inf inf inf inf 50 100 50 50 15 inf 15 15 inf inf inf inf inf inf inf inf inf inf inf 
 
-velmax	inf inf inf inf inf inf 0 0 0 10 0 0 10 0 0 1.5 1.5 1.5 1.5 4 0 4 4 0 0 0 0 0 0 0 0 0 0 0 0 1.5 1.5 1.5 1.5 4 0 4 4 0 0 0 0 0 0 0 0 0 0 0 
+velmax	inf inf inf inf inf inf 0 0 0 4 0 0 0 0 0 0.7 1 1 1 0.6 0 0.6 1 0 0 0 0 0 0 0 0 0 0 0 0 0.7 1 1 1 0.6 0 0.6 1 0 0 0 0 0 0 0 0 0 0 0 
 
-accmax	inf inf inf inf inf inf 0 0 0 4 0 0 4 0 0 4 4 4 4 4 0 4 4 0 0 0 0 0 0 0 0 0 0 0 0 4 4 4 4 4 0 4 4 0 0 0 0 0 0 0 0 0 0 0 
+accmax	inf inf inf inf inf inf 0 0 0 2 0 0 0 0 0 0.7 1 1 1 2 0 2 2 0 0 0 0 0 0 0 0 0 0 0 0 0.7 1 1 1 2 0 2 2 0 0 0 0 0 0 0 0 0 0 0 
 
 noselfcollision	6 7	6 8 	6 9	6 12	6 13	6 15	6 16	6 17	6 33	6 35	6 36 	6 37	6 53	
 noselfcollision	7 8	7 9	7 12	7 13	7 15	7 16	7 17	7 33	7 35	7 36	7 37	7 53
