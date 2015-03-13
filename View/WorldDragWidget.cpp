@@ -1,5 +1,6 @@
 #include "WorldDragWidget.h"
 #include <GLdraw/drawextra.h>
+using namespace GLDraw;
 
 WorldDragWidget::WorldDragWidget(RobotWorld* _world)
   :world(_world),active(true),robotsActive(true),objectsActive(true),terrainsActive(false),

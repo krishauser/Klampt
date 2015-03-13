@@ -3,6 +3,7 @@
 #include <GLdraw/drawextra.h>
 #include <utils/AnyCollection.h>
 #include <sstream>
+using namespace GLDraw;
 using namespace std;
 
 InputProcessorBase::InputProcessorBase()

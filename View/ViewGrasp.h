@@ -17,7 +17,7 @@ struct ViewGrasp
 
   ViewRobot* viewRobot;
   ViewContact viewContact;
-  GLColor forceColor;
+  GLDraw::GLColor forceColor;
 };
 
 #endif

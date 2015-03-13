@@ -9,7 +9,6 @@
 #include <sstream>
 using namespace Math3D;
 
-
 /**@brief A backend for resource browsing.
  * Natively supports configs, paths, transforms, ik goals, holds, stance,
  * trimeshes

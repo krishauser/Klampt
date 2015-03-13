@@ -1,6 +1,7 @@
 #include "ViewIK.h"
 #include <robotics/Rotation.h>
 #include <GLdraw/drawextra.h>
+using namespace GLDraw;
 
 ViewIKGoal::ViewIKGoal()
 {

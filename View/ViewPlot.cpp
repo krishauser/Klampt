@@ -3,6 +3,7 @@
 #include <math/random.h>
 #include <stdio.h>
 #include <GLdraw/GLUTString.h>
+using namespace GLDraw;
 
 ViewPlot::ViewPlot()
   :xMonotone(true),autoXRange(true),autoYRange(true),autoErase(true),

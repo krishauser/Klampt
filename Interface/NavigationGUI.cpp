@@ -1,6 +1,7 @@
 #include "NavigationGUI.h"
 #include <GLdraw/GL.h>
 #include <GLdraw/GLView.h>
+#include <GLdraw/GLError.h>
 #include <GLdraw/drawextra.h>
 #include <iostream>
 #include <string>
@@ -154,6 +155,7 @@ bool GLNavigationBackend::OnGLViewport(int x,int y,int w,int h)
 
 bool GLNavigationBackend::OnGLRender()
 {
+  DEBUG_GL_ERRORS()
   glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
   glMatrixMode(GL_MODELVIEW);
@@ -162,6 +164,7 @@ bool GLNavigationBackend::OnGLRender()
 
   camera.toCamera(viewport);
 
+  DEBUG_GL_ERRORS()
   GLView view;
   view.setViewport(viewport);
   view.setCurrentGL();
@@ -197,6 +200,7 @@ bool GLNavigationBackend::OnGLRender()
   ++frames_rendered;
   SendPauseIdle(0);
 
+  DEBUG_GL_ERRORS()
   return true;
 }
 

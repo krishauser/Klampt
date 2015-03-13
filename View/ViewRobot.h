@@ -5,7 +5,6 @@
 #include <GLdraw/GLDisplayList.h>
 #include <GLdraw/GeometryAppearance.h>
 #include "Modeling/Robot.h"
-using namespace GLDraw;
 
 /** @ingroup View
  * @brief Draws the robot (potentially color-coded)
@@ -23,13 +22,13 @@ struct ViewRobot
   void DrawLinkFrames(Real size = 0.1);
   void DrawLinkSkeleton();
   void DrawTorques(const Vector& t);
-  void SetColors(const GLColor& c);
-  void SetColor(int i,const GLColor& c);
+  void SetColors(const GLDraw::GLColor& c);
+  void SetColor(int i,const GLDraw::GLColor& c);
   void SetGrey();
   void SetTorqueColors(const Vector& t);
 
   Robot* robot;
-  vector<GeometryAppearance> linkAppearance;
+  vector<GLDraw::GeometryAppearance> linkAppearance;
 };
 
 #endif

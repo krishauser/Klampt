@@ -9,6 +9,7 @@
 #ifndef WIN32
 #include <unistd.h>
 #endif //WIN32
+using namespace GLDraw;
 
 const static Real gPlannerStopDeltaThreshold = 0.2;
 

@@ -15,6 +15,7 @@
 #include <utils/stringutils.h>
 #include <fstream>
 #include <iomanip>
+using namespace GLDraw;
 
 typedef LoggingController MyController;
 typedef PolynomialPathController MyMilestoneController;

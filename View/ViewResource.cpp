@@ -8,6 +8,7 @@
 #include <GLdraw/drawextra.h>
 #include <robotics/IKFunctions.h>
 #include <sstream>
+using namespace GLDraw;
 
 #if 0
   void drawgeom(const GeometricPrimitive2D& geom)

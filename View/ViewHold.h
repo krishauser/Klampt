@@ -4,7 +4,6 @@
 #include <GLdraw/GLColor.h>
 #include "Contact/Hold.h"
 #include "ViewRobot.h"
-using namespace GLDraw;
 
 /** \ingroup View 
  * \brief Displays a contact point using OpenGL.
@@ -18,7 +17,7 @@ struct ViewContact
   void Draw(const ContactPoint& _p) { p=&_p; Draw(); }
 
   const ContactPoint* p;
-  GLColor pointColor, normalColor, coneColor;
+  GLDraw::GLColor pointColor, normalColor, coneColor;
   Real normalScale;
 };
 
@@ -47,7 +46,7 @@ struct ViewHold
   const Hold* h;
   ViewContact viewContact;
   bool drawContacts;
-  GLColor outlineColor;
+  GLDraw::GLColor outlineColor;
 };
 
 #endif

@@ -2,6 +2,7 @@
 #include "ViewIK.h"
 #include <GLdraw/drawextra.h>
 #include <GLdraw/GL.h>
+using namespace GLDraw;
 
 ViewGrasp::ViewGrasp()
   :viewRobot(NULL)
