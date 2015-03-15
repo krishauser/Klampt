@@ -559,6 +559,21 @@ void PolynomialMotionQueue::SetPiecewiseCubic(const vector<Config>& milestones,c
   pathOffset = 0;
 }
 
+void PolynomialMotionQueue::SetPiecewiseLinearRamp(const vector<Config>& milestones)
+{
+  vector<ParabolicRamp::Vector> pmilestones(milestones.size());
+  for(size_t i=0;i<milestones.size();i++)
+    pmilestones[i] = milestones[i];
+  ParabolicRamp::DynamicPath dpath;
+  dpath.Init(velMax,accMax);
+  if(!qMin.empty()) //optional joint limits
+    dpath.SetJointLimits(qMin,qMax);
+  if(!dpath.SetMilestones(pmilestones)) {
+    FatalError("SetPiecewiseLinearRamp: DynamicPath.SetMilestones failed");
+  }
+  SetPath(dpath);
+}
+
 void PolynomialMotionQueue::SetPath(const ParabolicRamp::DynamicPath& _path)
 {
   path = Cast(_path);
@@ -681,6 +696,45 @@ void PolynomialMotionQueue::AppendRamp(const Config& x,const Vector& v)
     path.Concat(Cast(dpath),true);
   }
 }
+
+void PolynomialMotionQueue::AppendLinearRamp(const Config& x)
+{
+  if(path.elements.empty()) FatalError("PolynomialMotionQueue::AppendLinearRamp: motion queue is uninitialized\n");
+  if(accMax.empty()) 
+    FatalError("Cannot append ramp without acceleration limits");
+  if(accMax.size() != path.elements.size()) 
+    FatalError("Invalid acceleration limit size");
+  if(velMax.empty()) velMax.resize(accMax.size(),Inf);
+  if(velMax.size() != path.elements.size()) 
+    FatalError("Invalid velocity limit size");
+  vector<ParabolicRamp::Vector> milestones(2);
+  milestones[0] = Endpoint();
+  milestones[1] = x;
+
+  if(!qMin.empty()) {
+    for(int i=0;i<x.n;i++) {
+      if(x[i] != Clamp(x[i],qMin[i],qMax[i])) {
+	printf("AppendRamp: Warning, clamping desired config %d to joint limits %g in [%g,%g]\n",i,x[i],qMin[i],qMax[i]);
+	Real shrink = gJointLimitEpsilon*(qMax[i]-qMin[i]);
+	milestones[1][i] = Clamp(x[i],qMin[i]+shrink,qMax[i]-shrink);
+      }
+    }
+  }
+
+  ParabolicRamp::DynamicPath dpath;
+  dpath.Init(velMax,accMax);
+  if(!dpath.SetMilestones(milestones)) {
+    printf("AppendRamp: Warning, DynamicPath::SetMilestones failed!\n");
+  }
+  else {
+    if(path.EndTime() < pathOffset) {
+      printf("AppendRamp: Warning, path end time is in the past, cutting...\n");
+      Cut(0);
+    }
+    path.Concat(Cast(dpath),true);
+  }
+}
+
 
 void PolynomialMotionQueue::GetPath(Spline::PiecewisePolynomialND& _path) const
 {
@@ -825,6 +879,7 @@ vector<string> PolynomialPathController::Commands() const
   res.push_back("set_tqv");
   res.push_back("append_tq");
   res.push_back("append_q");
+  res.push_back("append_q_linear");
   res.push_back("append_qv");
   res.push_back("append_tqv");
   res.push_back("brake");
@@ -869,6 +924,12 @@ bool PolynomialPathController::SendCommand(const string& name,const string& str)
     ss>>q;
     if(!ss) return false;
     AppendRamp(q);
+    return true;
+  }
+  else if(name == "append_q_linear") {
+    ss>>q;
+    if(!ss) return false;
+    AppendLinearRamp(q);
     return true;
   }
   else if(name == "set_qv") {
