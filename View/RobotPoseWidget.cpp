@@ -3,6 +3,8 @@
 #include <math3d/basis.h>
 #include <GLdraw/drawextra.h>
 #include <robotics/IKFunctions.h>
+#include <map>
+using namespace GLDraw;
 
 RobotLinkPoseWidget::RobotLinkPoseWidget()
   :robot(NULL),viewRobot(NULL),highlightColor(1,1,0,1),hoverLink(-1),draw(true)
@@ -128,13 +130,16 @@ void RobotLinkPoseWidget::DrawGL(Camera::Viewport& viewport)
     if(affectedLink >= 0 && (hasHighlight || hasFocus)) {
       //draw joint position widget
       //push depth upward so the widget shows through
+      glEnable(GL_LIGHTING);
       glPushAttrib(GL_DEPTH_BUFFER_BIT | GL_ENABLE_BIT);
       glDepthRange (0.0, 0.9);
       glDisable(GL_CULL_FACE);
       int i = affectedDriver;
       if(i >= 0) {
 	if(robot->drivers[i].type == RobotJointDriver::Normal) {
-	  Vector3 center = robot->links[affectedLink].T_World.t;
+	  Vector3 center;
+	  if(robot->parents[affectedLink] < 0) center=robot->links[affectedLink].T0_Parent.t;
+	  else center=robot->links[robot->parents[affectedLink]].T_World*robot->links[affectedLink].T0_Parent.t;
 	  Vector3 worldAxis = robot->links[affectedLink].T_World.R*robot->links[affectedLink].w;
 	  Vector3 x,y;
 	  GetCanonicalBasis(worldAxis,x,y);

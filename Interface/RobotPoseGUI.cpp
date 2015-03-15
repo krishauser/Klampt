@@ -180,7 +180,7 @@ void RobotPoseBackend::RenderWorld()
       viewRobot.DrawLinkCenterOfMass(i,comSize);
   }
   if(draw_frame) {
-    viewRobot.DrawLinkFrames();
+    viewRobot.DrawLinkFrames(settings["linkFrameSize"]);
     viewRobot.DrawLinkSkeleton();
     glDisable(GL_DEPTH_TEST);
     glPushMatrix();

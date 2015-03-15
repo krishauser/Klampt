@@ -1,7 +1,7 @@
 #include "ViewStance.h"
 #include <GLdraw/GL.h>
 #include <GLdraw/drawextra.h>
-
+using namespace GLDraw;
 
 ViewPolytope::ViewPolytope()
   :poly(NULL),wireframe(false),h(0)

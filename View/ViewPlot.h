@@ -5,7 +5,6 @@
 #include <GLdraw/GLColor.h>
 #include <deque>
 #include <vector>
-using namespace GLDraw;
 using namespace std;
 
 class ViewPlot
@@ -23,9 +22,9 @@ class ViewPlot
   bool drawBound,drawPlotArea,drawXRangeBottom,drawXRangeTop,drawYRangeLeft,drawYRangeRight;
   string xlabel,ylabel;
   int x,y,width,height;
-  GLColor boundColor,plotAreaColor,axisColor;
+  GLDraw::GLColor boundColor,plotAreaColor,axisColor;
   vector<deque<pair<double,double> > > curves;
-  vector<GLColor> curveColors;
+  vector<GLDraw::GLColor> curveColors;
   double xmin,xmax;
   double ymin,ymax;
 };

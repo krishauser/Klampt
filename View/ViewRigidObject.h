@@ -3,7 +3,6 @@
 
 #include "Modeling/RigidObject.h"
 #include <GLdraw/GeometryAppearance.h>
-using namespace GLDraw;
 
 /** @ingroup View 
  * @brief Displays an RigidObject structure using OpenGL.
@@ -16,7 +15,7 @@ struct ViewRigidObject
   void Draw();
 
   RigidObject* obj;
-  GeometryAppearance appearance;
+  GLDraw::GeometryAppearance appearance;
 };
 
 

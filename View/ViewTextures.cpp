@@ -3,6 +3,7 @@
 #include <math/random.h>
 #include <math/infnan.h>
 using namespace Math;
+using namespace GLDraw;
 
 float startValidColors = 0;
 bool texture_set_up=false;
@@ -16,9 +17,9 @@ GLTexture1D ViewTextures::rainbowGradient;
 GLTexture1D ViewTextures::rainbowGradientWithHashmarks;
 
 
-void ViewTextures::Initialize() 
+void ViewTextures::Initialize(bool force) 
 {
-  if(texture_set_up) return;
+  if(!force && texture_set_up) return;
   texture_set_up=true;
 
   const static int gradientSize=256;

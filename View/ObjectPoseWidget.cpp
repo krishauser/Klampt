@@ -1,4 +1,5 @@
 #include "ObjectPoseWidget.h"
+using namespace GLDraw;
 
 RigidObjectPoseWidget::RigidObjectPoseWidget()
   :rigidObject(NULL)

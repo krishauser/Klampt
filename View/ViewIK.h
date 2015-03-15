@@ -13,8 +13,8 @@ struct ViewIKGoal
   void DrawLink(const IKGoal& goal,ViewRobot& robotviewer);
   void DrawLink(const IKGoal& goal,ViewRobot& robotviewer,const Matrix3& refMatrix);
 
-  GLColor lineColor;
-  GLColor linkColor;
+  GLDraw::GLColor lineColor;
+  GLDraw::GLColor linkColor;
   Real widgetSize;
 };
 

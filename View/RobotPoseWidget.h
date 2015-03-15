@@ -5,7 +5,6 @@
 #include <GLdraw/TransformWidget.h>
 #include <robotics/IK.h>
 #include "ViewRobot.h"
-using namespace GLDraw;
 
 /* @defgroup View
  * @brief Definitions of OpenGL drawing routines and UI widgets.
@@ -21,7 +20,7 @@ using namespace GLDraw;
 
 /** @brief A widget that allows the robot's driven links to be posed.
  */
-class RobotLinkPoseWidget : public Widget
+class RobotLinkPoseWidget : public GLDraw::Widget
 {
 public:
   RobotLinkPoseWidget();
@@ -36,17 +35,17 @@ public:
   Robot* robot;
   ViewRobot* viewRobot;
   Config poseConfig;
-  GLColor highlightColor;
+  GLDraw::GLColor highlightColor;
   int hoverLink,affectedLink,affectedDriver;
   vector<int> highlightedLinks;
   Vector3 hoverPt;
   bool draw;
-  vector<GeometryAppearance> poserAppearance;
+  vector<GLDraw::GeometryAppearance> poserAppearance;
 };
 
 /** @brief A widget that allows creating and editing IK constraints
  */
-class RobotIKPoseWidget : public WidgetSet
+class RobotIKPoseWidget : public GLDraw::WidgetSet
 {
 public:
   RobotIKPoseWidget(Robot* robot);
@@ -77,13 +76,13 @@ public:
 
   Robot* robot;
   vector<IKGoal> poseGoals;
-  vector<TransformWidget> poseWidgets;
+  vector<GLDraw::TransformWidget> poseWidgets;
 };
 
 /** A widget that allows full posing and editing of the robot config including
  * IK constraints and base motion.
  */
-class RobotPoseWidget : public WidgetSet
+class RobotPoseWidget : public GLDraw::WidgetSet
 {
 public:
   RobotPoseWidget();
@@ -125,7 +124,7 @@ public:
   virtual void Keypress(char c);
 
   bool useBase;
-  TransformWidget basePoser;
+  GLDraw::TransformWidget basePoser;
   RobotLinkPoseWidget linkPoser;
   RobotIKPoseWidget ikPoser;
   enum { ModeNormal, ModeIKAttach, ModeIKPose, ModeIKPoseFixed, ModeIKDelete };

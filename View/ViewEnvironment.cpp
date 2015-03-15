@@ -10,6 +10,7 @@
 #include <meshing/LSConformalMapping.h>
 using namespace Math;
 using namespace Meshing;
+using namespace GLDraw;
 
 void SetupTextureCoordinates(TriMeshWithTopology& mesh,vector<Vector2>& texcoords)
 {

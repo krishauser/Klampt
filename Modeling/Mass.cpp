@@ -1,6 +1,7 @@
 #include "Mass.h"
 #include <meshing/VolumeGrid.h>
 #include <meshing/Voxelize.h>
+#include <meshing/PointCloud.h>
 #include <errors.h>
 using namespace Meshing;
 using namespace Geometry;

@@ -1,5 +1,6 @@
 #include "Utils.h"
 #include <math3d/basis.h>
+#include <meshing/PointCloud.h>
 #include <geometry/ConvexHull2D.h>
 #include <statistics/KMeans.h>
 #include <utils/EquivalenceMap.h>
