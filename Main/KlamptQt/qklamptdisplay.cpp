@@ -67,7 +67,7 @@ string QtKeyToString(int key)
   case Qt::Key_Backspace:
     return "backspace";
   case Qt::Key_Backtab:
-    return "backdab";
+    return "backtab";
   case Qt::Key_Tab:
     return "tab";
   case Qt::Key_Return:
