@@ -86,29 +86,46 @@ def setcolor(r,g,b,a=1.0,lighting=True):
     else:
         glColor4f(r,g,b,a)
 
-def xform_widget(T,length,width,lighting=True):
+def xform_widget(T,length,width,lighting=True,fancy=False):
     mat = zip(*se3.homogeneous(T))
     mat = sum([list(coli) for coli in mat],[])
 
     glPushMatrix()
     glMultMatrixf(mat)
 
-    #center
-    setcolor(1,1,1,1,lighting=lighting)
-    box((-width*0.75,-width*0.75,-width*0.75),(width*0.75,width*0.75,width*0.75),lighting=lighting)
+    if fancy:
+        #center
+        setcolor(1,1,1,1,lighting=lighting)
+        box((-width*0.75,-width*0.75,-width*0.75),(width*0.75,width*0.75,width*0.75),lighting=lighting)
+        
+        #x axis
+        setcolor(1,0,0,1,lighting=lighting)
+        box((-width*0.5,-width*0.5,-width*0.5),(length,width*0.5,width*0.5),lighting=lighting)
+    
+        #y axis
+        setcolor(0,1,0,1,lighting=lighting)
+        box((-width*0.5,-width*0.5,-width*0.5),(width*0.5,length,width*0.5),lighting=lighting)
+    
+        #z axis
+        setcolor(0,0,1,1,lighting=lighting)
+        box((-width*0.5,-width*0.5,-width*0.5),(width*0.5,width*0.5,length),lighting=lighting)
+    else:
+        glDisable(GL_LIGHTING)
+        glBegin(GL_LINES)
+        glColor4f(1,1,1,1)
+        glVertex3f(0,0,0)
+        glColor4f(1,0,0,1)
+        glVertex3f(length,0,0)
+        glColor4f(1,1,1,1)
+        glVertex3f(0,0,0)
+        glColor4f(0,1,0,1)
+        glVertex3f(0,length,0)
+        glColor4f(1,1,1,1)
+        glVertex3f(0,0,0)
+        glColor4f(0,0,1,1)
+        glVertex3f(0,0,length)
+        glEnd()
 
-    #x axis
-    setcolor(1,0,0,1,lighting=lighting)
-    box((-width*0.5,-width*0.5,-width*0.5),(length,width*0.5,width*0.5),lighting=lighting)
-    
-    #y axis
-    setcolor(0,1,0,1,lighting=lighting)
-    box((-width*0.5,-width*0.5,-width*0.5),(width*0.5,length,width*0.5),lighting=lighting)
-    
-    #z axis
-    setcolor(0,0,1,1,lighting=lighting)
-    box((-width*0.5,-width*0.5,-width*0.5),(width*0.5,width*0.5,length),lighting=lighting)
-    
     glPopMatrix()
 
 def glutBitmapString(font,string):

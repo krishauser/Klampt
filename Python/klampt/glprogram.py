@@ -16,27 +16,7 @@ import so3
 import vectorops
 import math
 import time
-
-_currentObject = None
-def _reshapefunc(w,h):
-    return _currentObject.reshapefunc(w,h)
-def _keyboardfunc(c,x,y):
-    return _currentObject.keyboardfunc(c,x,y)
-def _keyboardupfunc(c,x,y):
-    return _currentObject.keyboardupfunc(c,x,y)
-def _specialfunc(c,x,y):
-    return _currentObject.specialfunc(c,x,y)
-def _specialupfunc(c,x,y):
-    return _currentObject.specialupfunc(c,x,y)
-def _motionfunc(x,y):
-    return _currentObject.motionfunc(x,y)
-def _mousefunc(button,state,x,y):
-    return _currentObject.mousefunc(button,state,x,y)
-def _displayfunc():
-    return _currentObject.displayfunc()
-def _idlefunc():
-    return _currentObject.idlefunc()
-
+from robotsim import Viewport
 
 class GLProgram:
     """A basic OpenGL program using GLUT.  Set up your window parameters,
@@ -56,12 +36,8 @@ class GLProgram:
         self.height = 480
         self.clearColor = [1.0,1.0,1.0,0.0]
 
-    def run(self):
-        """Starts the main loop"""
-        global _currentObject
-        # Initialize Glut
-        glutInit ([])
-        # Open a window
+    def initWindow(self):
+        """ Open a window and initialize """
         glutInitDisplayMode (GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH)
 
         x = 0
@@ -70,20 +46,26 @@ class GLProgram:
         glutInitWindowSize (self.width, self.height);
         glutCreateWindow (self.name)
   
-        # keyboard callback
-        _currentObject = self
-        glutReshapeFunc (_reshapefunc)
-        glutKeyboardFunc (_keyboardfunc)
-        glutKeyboardUpFunc (_keyboardupfunc)
-        glutSpecialFunc (_specialfunc)
-        glutSpecialUpFunc (_specialupfunc)
-        glutMotionFunc (_motionfunc)
-        glutMouseFunc (_mousefunc)
-        glutDisplayFunc (_displayfunc)
-        glutIdleFunc(_idlefunc)
+        # set window callbacks
+        glutReshapeFunc (self.reshapefunc)
+        glutKeyboardFunc (self.keyboardfunc)
+        glutKeyboardUpFunc (self.keyboardupfunc)
+        glutSpecialFunc (self.specialfunc)
+        glutSpecialUpFunc (self.specialupfunc)
+        glutMotionFunc (self.motionfunc)
+        glutPassiveMotionFunc (self.motionfunc)
+        glutMouseFunc (self.mousefunc)
+        glutDisplayFunc (self.displayfunc)
+        glutIdleFunc(self.idlefunc)
 
         #init function
         self.initialize()
+
+    def run(self):
+        """Starts the main loop"""
+        # Initialize Glut
+        glutInit ([])
+        self.initWindow()
         glutMainLoop ()
 
     def initialize(self):
@@ -91,6 +73,10 @@ class GLProgram:
         May be overridden."""
         glutPostRedisplay()
         pass
+
+    def refresh(self):
+        """Call this to redraw the screen on the next event loop"""
+        glutPostRedisplay()
 
     def reshapefunc(self,w,h):
         """Called on window resize.  May be overridden."""
@@ -175,7 +161,11 @@ class GLProgram:
 
     def save_screen(self,fn):
         """Saves a screenshot"""
-        import Image
+        try:
+            import Image
+        except ImportError:
+            print "Cannot save screens to disk, the Python Imaging Library is not installed"
+            return
         screenshot = glReadPixels( 0,0, self.width, self.height, GL_RGBA, GL_UNSIGNED_BYTE)
         im = Image.frombuffer("RGBA", (self.width, self.height), screenshot, "raw", "RGBA", 0, 0)
         print "Saving screen to",fn
@@ -189,14 +179,14 @@ class GLNavigationProgram(GLProgram):
 
     Attributes:
         - camera: an orbit camera (see :class:`orbit`)
-        - fov: the camera field of view
+        - fov: the camera field of view in x direction
         - clippingplanes: a pair containing the near and far clipping planes
     """
     def __init__(self,name):
         GLProgram.__init__(self,name)
         self.camera = camera.orbit()
-        self.camera.dist = 10.0
-        #field of view in degrees
+        self.camera.dist = 6.0
+        #x field of view in degrees
         self.fov = 30
         #near and far clipping planes
         self.clippingplanes = (0.2,20)
@@ -208,12 +198,29 @@ class GLNavigationProgram(GLProgram):
         self.clearColor = [0.8,0.8,0.9,0]        
 
     def get_view(self):
+        """Returns a tuple describing the viewport, which could be saved to
+        file."""
         return (self.width,self.height,self.camera,self.fov,self.clippingplanes)
 
     def set_view(self,v):
+        """Sets the viewport to a tuple previously returned by get_view(),
+        e.g. a prior view that was saved to file."""
         self.width,self.height,self.camera,self.fov,self.clippingplanes = v
         glutReshapeWindow(self.width,self.height)
-        glutPostRedisplay()
+        self.refresh()
+
+    def viewport(self):
+        """Gets a Viewport instance corresponding to the current view.
+        This is used to interface with the Widget classes"""
+        vp = Viewport()
+        vp.x,vp.y,vp.w,vp.h = 0,0,self.width,self.height
+        vp.n,vp.f = self.clippingplanes
+        vp.perspective = True
+        aspect = float(self.width)/float(self.height)
+        rfov = self.fov*math.pi/180.0
+        vp.scale = 1.0/(2.0*math.tan(rfov*0.5/aspect)*aspect)
+        vp.setRigidTransform(*se3.inv(self.camera.matrix()))
+        return vp
 
     def click_ray(self,x,y):
         """Returns a pair of 3-tuples indicating the ray source and direction
@@ -222,9 +229,9 @@ class GLNavigationProgram(GLProgram):
         #from x and y compute ray direction
         u = float(x-self.width/2)
         v = float(self.height-y-self.height/2)
-        scale = math.tan(self.fov*math.pi/180.0)/self.height
-        #HACK: I don't know why this seems to work!
-        scale *= 0.925
+        aspect = float(self.width)/float(self.height)
+        rfov = self.fov*math.pi/180.0
+        scale = 2.0*math.tan(rfov*0.5/aspect)*aspect
         d = (u*scale,v*scale,-1.0)
         d = vectorops.div(d,vectorops.norm(d))
         return (t,so3.apply(R,d))
@@ -235,7 +242,8 @@ class GLNavigationProgram(GLProgram):
         # Projection
         glMatrixMode(GL_PROJECTION)
         glLoadIdentity()
-        gluPerspective (self.fov,float(self.width)/float(self.height),self.clippingplanes[0],self.clippingplanes[1])
+        aspect = float(self.width)/float(self.height)
+        gluPerspective (self.fov/aspect,aspect,self.clippingplanes[0],self.clippingplanes[1])
 
         # Initialize ModelView matrix
         glMatrixMode(GL_MODELVIEW)
@@ -273,7 +281,7 @@ class GLNavigationProgram(GLProgram):
                 self.camera.rot[1] += float(dy)*0.01        
         self.lastx = x
         self.lasty = y
-        glutPostRedisplay()
+        self.refresh()
     
     def mousefunc(self,button,state,x,y):
         if state == 0:

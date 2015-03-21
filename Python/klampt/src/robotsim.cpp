@@ -1,6 +1,7 @@
 #include <vector>
 #include "pyerr.h"
 #include "robotsim.h"
+#include "widget.h"
 #include "Control/PathController.h"
 #include "Control/FeedforwardController.h"
 #include "Simulation/WorldSimulation.h"
@@ -11,13 +12,17 @@
 #include <meshing/PointCloud.h>
 #include <GLdraw/drawextra.h>
 #include <GLdraw/drawMesh.h>
+#include <GLdraw/Widget.h>
+#include <GLdraw/TransformWidget.h>
+#include "View/ObjectPoseWidget.h"
+#include "View/RobotPoseWidget.h"
+#include <utils/AnyCollection.h>
 #include <utils/stringutils.h>
 #include <ode/ode.h>
 #include <fstream>
 #ifndef WIN32
 #include <unistd.h>
 #endif //WIN32
-using namespace GLDraw;
 
 /// Internally used.
 struct WorldData
@@ -33,11 +38,23 @@ struct SimData
   WorldSimulation sim;
 };
 
+
+/// Internally used.
+struct WidgetData
+{
+  SmartPointer<GLDraw::Widget> widget;
+  int refCount;
+};
+
+
 static vector<SmartPointer<WorldData> > worlds;
 static list<int> worldDeleteList;
 
 static vector<SmartPointer<SimData> > sims;
 static list<int> simDeleteList;
+
+static vector<WidgetData> widgets;
+static list<int> widgetDeleteList;
 
 int createWorld()
 {
@@ -108,6 +125,48 @@ void destroySim(int index)
   simDeleteList.push_back(index);
 }
 
+int createWidget()
+{
+  if(widgetDeleteList.empty()) {
+    widgets.resize(widgets.size()+1);
+    widgets.back().refCount = 1;
+    return (int)(widgets.size()-1);
+  }
+  else {
+    int index = widgetDeleteList.front();
+    widgetDeleteList.erase(widgetDeleteList.begin());
+    widgets[index].widget = NULL;
+    widgets[index].refCount = 1;
+    return index;
+  }
+}
+
+void derefWidget(int index)
+{
+  if(index < 0 || index >= (int)widgets.size()) 
+    throw PyException("Invalid widget index");
+  if(widgets[index].refCount <= 0)
+    throw PyException("Invalid dereference");
+
+  widgets[index].refCount--;
+  //printf("Deref widget %d: count %d\n",index,widgets[index]->refCount);
+  if(widgets[index].refCount == 0) {
+    //printf("Deleting widget %d\n",index);
+    widgets[index].widget = NULL;
+    widgetDeleteList.push_back(index);
+  }
+}
+
+void refWidget(int index)
+{
+  if(index < 0 || index >= (int)widgets.size()) 
+    throw PyException("Invalid widget index");
+  widgets[index].refCount++;
+  //printf("Ref widget %d: count %d\n",index,widgets[index]->refCount);
+}
+
+
+
 class ManualOverrideController : public RobotController
 {
  public:
@@ -163,10 +222,9 @@ void ManualOverrideController::Update(Real dt)
 
 
 typedef ManualOverrideController MyController;
-typedef MilestonePathController MyMilestoneController;
 inline MyController* MakeController(Robot* robot)
 {
-  MilestonePathController* c = new MilestonePathController(*robot);
+  PolynomialPathController* c = new PolynomialPathController(*robot);
   FeedforwardController* fc = new FeedforwardController(*robot,c);
   ManualOverrideController* lc=new ManualOverrideController(*robot,fc);
   //defaults -- gravity compensation is better off with free-floating robots
@@ -174,9 +232,18 @@ inline MyController* MakeController(Robot* robot)
     fc->enableGravityCompensation=false;  //feedforward capability
   else
     fc->enableGravityCompensation=true;  //feedforward capability
-  fc->enableGravityCompensation=true;  //feedforward capability
   fc->enableFeedforwardAcceleration=false;  //feedforward capability
   return lc;
+}
+inline PolynomialMotionQueue* GetMotionQueue(RobotController* controller)
+{
+  MyController* mc=dynamic_cast<MyController*>(controller);
+  if(!mc) {
+    throw PyException("Not using the default manual override controller");  
+  }
+  FeedforwardController* ffc=dynamic_cast<FeedforwardController*>((RobotController*)mc->base);
+  PolynomialPathController* pc=dynamic_cast<PolynomialPathController*>((RobotController*)ffc->base);
+  return pc;
 }
 inline void MakeSensors(Robot* robot,RobotSensors& sensors)
 {
@@ -326,13 +393,20 @@ Geometry3D Geometry3D::clone()
 
 void Geometry3D::set(const Geometry3D& g)
 {
-  AnyCollisionGeometry3D* ggeom = reinterpret_cast<AnyCollisionGeometry3D*>(geomPtr);
+  AnyCollisionGeometry3D* ggeom = reinterpret_cast<AnyCollisionGeometry3D*>(g.geomPtr);
   if(geomPtr == NULL) {
     geomPtr = new AnyCollisionGeometry3D(*ggeom);
   }
   else {
     AnyCollisionGeometry3D* geom = reinterpret_cast<AnyCollisionGeometry3D*>(geomPtr);
     *geom = *ggeom;
+  }
+  AnyCollisionGeometry3D* geom = reinterpret_cast<AnyCollisionGeometry3D*>(geomPtr);
+  geom->InitCollisions();
+  if(!isStandalone()) {
+    //update the display list
+    RobotWorld& world=worlds[this->world]->world;
+    world.GetAppearance(id).Set(*geom);
   }
 }
 
@@ -577,6 +651,189 @@ bool Geometry3D::rayCast(const double s[3],const double d[3],double out[3])
   }
   return false;
 }
+
+Appearance::Appearance()
+  :world(-1),id(-1),appearancePtr(NULL)
+{}
+
+Appearance::~Appearance()
+{
+  free();
+}
+
+void Appearance::refresh()
+{
+  if(!appearancePtr) return;
+  GLDraw::GeometryAppearance* app = reinterpret_cast<GLDraw::GeometryAppearance*>(appearancePtr);
+  printf("Calling GeometryAppearance::Refresh()\n");
+  app->Refresh();
+}
+
+bool Appearance::isStandalone()
+{
+  return(appearancePtr != NULL && world < 0);
+}
+
+Appearance Appearance::clone()
+{
+  Appearance res;
+  if(appearancePtr != NULL) {
+    GLDraw::GeometryAppearance* app = reinterpret_cast<GLDraw::GeometryAppearance*>(appearancePtr);
+    res.appearancePtr = new GLDraw::GeometryAppearance(*app);
+  }
+  return res;
+}
+
+void Appearance::set(const Appearance& g)
+{
+  GLDraw::GeometryAppearance* gapp = reinterpret_cast<GLDraw::GeometryAppearance*>(appearancePtr);
+  if(appearancePtr == NULL) {
+    appearancePtr = new GLDraw::GeometryAppearance(*gapp);
+  }
+  else {
+    GLDraw::GeometryAppearance* app = reinterpret_cast<GLDraw::GeometryAppearance*>(appearancePtr);
+    *app = *gapp;
+  }
+}
+
+void Appearance::free()
+{
+  if(isStandalone()) {
+    printf("Appearance(): Freeing standalone appearance\n");
+    GLDraw::GeometryAppearance* app = reinterpret_cast<GLDraw::GeometryAppearance*>(appearancePtr);
+    delete app;
+  }
+  world = -1;
+  id = -1;
+  appearancePtr = NULL;
+}
+
+void Appearance::setDraw(bool draw)
+{
+  if(!appearancePtr) return;
+  GLDraw::GeometryAppearance* app = reinterpret_cast<GLDraw::GeometryAppearance*>(appearancePtr);
+  if(draw) {
+    app->drawFaces = true;
+    app->drawVertices = false;
+    app->drawEdges = false;
+  }
+  else {
+    app->drawFaces = false;
+    app->drawVertices = false;
+    app->drawEdges = false;
+  }
+}
+void Appearance::setDraw(int primitive,bool draw)
+{
+  if(!appearancePtr) return;
+  GLDraw::GeometryAppearance* app = reinterpret_cast<GLDraw::GeometryAppearance*>(appearancePtr);
+  switch(primitive) {
+  case ALL: app->drawFaces = app->drawVertices = app->drawEdges = draw; break;
+  case VERTICES: app->drawVertices = draw; break;
+  case EDGES: app->drawEdges = draw; break;
+  case FACES: app->drawFaces = draw; break;
+  }
+}
+
+bool Appearance::getDraw()
+{
+  if(!appearancePtr) return false;
+  GLDraw::GeometryAppearance* app = reinterpret_cast<GLDraw::GeometryAppearance*>(appearancePtr);
+  return app->drawFaces || app->drawVertices || app->drawEdges;
+}
+
+bool Appearance::getDraw(int primitive)
+{
+  if(!appearancePtr) return false;
+  GLDraw::GeometryAppearance* app = reinterpret_cast<GLDraw::GeometryAppearance*>(appearancePtr);
+  switch(primitive) {
+  case ALL: return app->drawFaces || app->drawVertices || app->drawEdges;
+  case VERTICES: return app->drawVertices;
+  case EDGES: return app->drawEdges;
+  case FACES: return app->drawFaces;
+  }
+  return false;
+}
+
+void Appearance::setColor(float r,float g,float b,float a)
+{
+  if(!appearancePtr) return;
+  GLDraw::GeometryAppearance* app = reinterpret_cast<GLDraw::GeometryAppearance*>(appearancePtr);
+  app->vertexColor.set(r,g,b,a);
+  app->edgeColor.set(r,g,b,a);
+  app->faceColor.set(r,g,b,a);
+}
+
+void Appearance::setColor(int primitive,float r,float g,float b,float a)
+{
+  if(!appearancePtr) return;
+  GLDraw::GeometryAppearance* app = reinterpret_cast<GLDraw::GeometryAppearance*>(appearancePtr);
+  switch(primitive) {
+  case ALL: 
+    app->vertexColor.set(r,g,b,a);
+    app->edgeColor.set(r,g,b,a);
+    app->faceColor.set(r,g,b,a);
+    break;
+  case VERTICES: app->vertexColor.set(r,g,b,a); break;
+  case EDGES: app->edgeColor.set(r,g,b,a);  break;
+  case FACES: app->faceColor.set(r,g,b,a); break;
+  }
+}
+  
+void Appearance::getColor(float out[4])
+{
+  FatalError("Not implemented yet");
+}
+void Appearance::getColor(int primitive,float out[4])
+{
+  FatalError("Not implemented yet");
+}
+void Appearance::setColors(int primitive,const std::vector<float>& colors,bool alpha)
+{
+  FatalError("Not implemented yet");
+}
+void Appearance::setTexture1D(int w,const char* format,const std::vector<unsigned char>& bytes)
+{
+  FatalError("Not implemented yet");
+}
+
+void Appearance::setTexture2D(int w,int h,const char* format,const std::vector<unsigned char>& bytes)
+{
+  FatalError("Not implemented yet");
+}
+
+void Appearance::setTexcoords(const std::vector<double>& uvs)
+{
+  FatalError("Not implemented yet");
+}
+
+void Appearance::drawGL()
+{
+  if(!appearancePtr) return;
+  GLDraw::GeometryAppearance* app = reinterpret_cast<GLDraw::GeometryAppearance*>(appearancePtr);
+  if(!app->geom) return;
+  app->DrawGL();
+}
+
+void Appearance::drawGL(Geometry3D& geom)
+{
+  if(!appearancePtr) return;
+  if(!geom.geomPtr) return;
+  GLDraw::GeometryAppearance* app = reinterpret_cast<GLDraw::GeometryAppearance*>(appearancePtr);
+  if(app->geom) {
+    if(app->geom != geom.geomPtr) {
+      fprintf(stderr,"Appearance::drawGL(): performance warning, setting to a different geometry\n");
+      app->Set(*reinterpret_cast<Geometry::AnyCollisionGeometry3D*>(geom.geomPtr));
+    }
+  }
+  else {
+    app->Set(*reinterpret_cast<Geometry::AnyCollisionGeometry3D*>(geom.geomPtr));
+  }
+
+  app->DrawGL();
+}
+
+
 
 
 void copy(const Vector& vec,vector<double>& v)
@@ -973,6 +1230,45 @@ void WorldModel::enableGeometryLoading(bool enabled)
   Robot::disableGeometryLoading = !enabled;
 }
 
+std::string WorldModel::getName(int id)
+{
+  RobotWorld& world = worlds[index]->world;
+  return world.GetName(id);
+}
+
+Geometry3D WorldModel::geometry(int id)
+{
+  RobotWorld& world = worlds[index]->world;
+  if(world.IsTerrain(id)>=0 || world.IsRigidObject(id)>=0 || world.IsRobotLink(id).first>=0) {
+    Geometry3D geom;
+    geom.world = index;
+    geom.id = id;
+    geom.geomPtr = &world.GetGeometry(id);
+    return geom;
+  }
+  Geometry3D geom;
+  geom.world = -1;
+  geom.id = -1;
+  return geom;
+}
+
+Appearance WorldModel::appearance(int id)
+{
+  RobotWorld& world = worlds[index]->world;
+  if(world.IsTerrain(id)>=0 || world.IsRigidObject(id)>=0 || world.IsRobotLink(id).first>=0) {
+    Appearance geom;
+    geom.world = index;
+    geom.id = id;
+    geom.appearancePtr = &world.GetAppearance(id);
+    return geom;
+  }
+  Appearance geom;
+  geom.world = -1;
+  geom.id = -1;
+  return geom;
+}
+
+
 
 RobotModelLink::RobotModelLink()
   :world(-1),robotIndex(-1),robot(NULL),index(-1)
@@ -991,6 +1287,11 @@ const char* RobotModelLink::getName()
 {
   if(index < 0) return "";
   return robot->linkNames[index].c_str();
+}
+
+int RobotModelLink::getIndex()
+{
+  return index;
 }
 
 int RobotModelLink::getParent()
@@ -1019,6 +1320,15 @@ Geometry3D RobotModelLink::geometry()
   res.world = world;
   res.id = getID();
   res.geomPtr = &worlds[world]->world.GetGeometry(res.id);
+  return res;
+}
+
+Appearance RobotModelLink::appearance()
+{
+  Appearance res;
+  res.world = world;
+  res.id = getID();
+  res.appearancePtr = &worlds[world]->world.GetAppearance(res.id);
   return res;
 }
 
@@ -1190,7 +1500,7 @@ void RobotModelLink::drawWorldGL(bool keepAppearance)
 {
   glMatrixMode(GL_MODELVIEW);
   glPushMatrix();
-  glMultMatrix(Matrix4(robot->links[index].T_World));
+  GLDraw::glMultMatrix(Matrix4(robot->links[index].T_World));
   drawLocalGL(keepAppearance);
   glPopMatrix();
 }
@@ -1586,6 +1896,15 @@ Geometry3D RigidObjectModel::geometry()
   return res;
 }
 
+Appearance RigidObjectModel::appearance()
+{
+  Appearance res;
+  res.world = world;
+  res.id = getID();
+  res.appearancePtr = &worlds[world]->world.GetAppearance(res.id);
+  return res;
+}
+
 Mass RigidObjectModel::getMass()
 {
   Mass mass;
@@ -1664,8 +1983,8 @@ void RigidObjectModel::drawGL(bool keepAppearance)
   else {
     glMatrixMode(GL_MODELVIEW);
     glPushMatrix();
-    glMultMatrix(Matrix4(object->T));
-    draw(object->geometry);
+    GLDraw::glMultMatrix(Matrix4(object->T));
+    GLDraw::draw(object->geometry);
     glPopMatrix();
   }
 }
@@ -1697,6 +2016,16 @@ Geometry3D TerrainModel::geometry()
   return res;
 }
 
+
+Appearance TerrainModel::appearance()
+{
+  Appearance res;
+  res.world = world;
+  res.id = getID();
+  res.appearancePtr = &worlds[world]->world.GetAppearance(res.id);
+  return res;
+}
+
 void TerrainModel::setFriction(double friction)
 {
   terrain->SetUniformFriction(friction);
@@ -1709,7 +2038,7 @@ void TerrainModel::drawGL(bool keepAppearance)
     world.terrains[index].view.Draw();
   }
   else {
-    draw(terrain->geometry);
+    GLDraw::draw(terrain->geometry);
   }
 }
 
@@ -1995,6 +2324,18 @@ void SimBody::applyWrench(const double f[3],const double t[3])
   dBodyAddTorque(body,t[0],t[1],t[2]);
 }
 
+void SimBody::applyForceAtPoint(const double f[3],const double pworld[3])
+{
+  if(!body) return;
+  dBodyAddForceAtPos(body,f[0],f[1],f[2],pworld[0],pworld[1],pworld[2]);
+}
+
+void SimBody::applyForceAtLocalPoint(const double f[3],const double plocal[3])
+{
+  if(!body) return;
+  dBodyAddForceAtRelPos(body,f[0],f[1],f[2],plocal[0],plocal[1],plocal[2]);
+}
+
 void SimBody::setVelocity(const double w[3],const double v[3])
 {
   if(!body) return;
@@ -2051,10 +2392,30 @@ double SimBody::getCollisionPadding()
   return geometry->GetPadding();
 }
 
-ODESurfaceProperties* SimBody::surface()
+ContactParameters SimBody::getSurface()
 {
-  if(!geometry) return NULL;
-  return &geometry->surf();
+  ContactParameters res;
+  if(!geometry) {
+    res.kFriction=res.kRestitution=res.kStiffness=res.kDamping=0;
+  }
+  else {
+    ODESurfaceProperties* params = &geometry->surf();
+    res.kFriction=params->kFriction;
+    res.kRestitution=params->kRestitution;
+    res.kStiffness=params->kStiffness;
+    res.kDamping=params->kDamping;
+  }
+  return res;
+}
+
+void SimBody::setSurface(const ContactParameters& res)
+{
+  if(!geometry) return;
+  ODESurfaceProperties* params = &geometry->surf();
+  params->kFriction=res.kFriction;
+  params->kRestitution=res.kRestitution;
+  params->kStiffness=res.kStiffness;
+  params->kDamping=res.kDamping;
 }
 
 
@@ -2261,15 +2622,35 @@ void SimRobotController::addMilestone(const vector<double>& q)
   sim->controlSimulators[index].controller->SendCommand("append_q",ss.str());
 }
 
-double SimRobotController::remainingTime() const
+void SimRobotController::addMilestoneLinear(const vector<double>& q)
 {
-  MyController* c = dynamic_cast<MyController*>((RobotController*)sim->controlSimulators[index].controller);
-  if(!c) return 0;
-  FeedforwardController* fc = dynamic_cast<FeedforwardController*>((RobotController*)c->base);
-  if(!fc) return 0;
-  MyMilestoneController* mc = dynamic_cast<MyMilestoneController*>((RobotController*)fc->base);
-  if(!mc) return 0;
-  return mc->TimeRemaining();
+  Config qv(sim->controlSimulators[index].robot->links.size(),&q[0]);
+  stringstream ss;
+  ss<<qv;
+  sim->controlSimulators[index].controller->SendCommand("append_q_linear",ss.str());
+}
+
+void SimRobotController::setLinear(const std::vector<double>& q,double dt)
+{
+  PolynomialMotionQueue* mq = GetMotionQueue(sim->controlSimulators[index].controller);
+  mq->Cut(0);
+  mq->AppendLinear(q,dt);
+}
+void SimRobotController::setCubic(const std::vector<double>& q,const std::vector<double>& v,double dt)
+{
+  PolynomialMotionQueue* mq = GetMotionQueue(sim->controlSimulators[index].controller);
+  mq->Cut(0);
+  mq->AppendCubic(q,v,dt);
+}
+void SimRobotController::appendLinear(const std::vector<double>& q,double dt)
+{
+  PolynomialMotionQueue* mq = GetMotionQueue(sim->controlSimulators[index].controller);
+  mq->AppendLinear(q,dt);
+}
+void SimRobotController::addCubic(const std::vector<double>& q,const std::vector<double>& v,double dt)
+{
+  PolynomialMotionQueue* mq = GetMotionQueue(sim->controlSimulators[index].controller);
+  mq->AppendCubic(q,v,dt);
 }
 
 void SimRobotController::addMilestone(const vector<double>& q,const vector<double>& dq)
@@ -2281,7 +2662,6 @@ void SimRobotController::addMilestone(const vector<double>& q,const vector<doubl
   sim->controlSimulators[index].controller->SendCommand("append_qv",ss.str());
 }
 
-
 void SimRobotController::setVelocity(const vector<double>& dq,double dt)
 {
   Config qv(sim->controlSimulators[index].robot->links.size(),&dq[0]);
@@ -2289,6 +2669,13 @@ void SimRobotController::setVelocity(const vector<double>& dq,double dt)
   ss<<dt<<"\t"<<qv;
   sim->controlSimulators[index].controller->SendCommand("set_tv",ss.str());
 }
+
+double SimRobotController::remainingTime() const
+{
+  PolynomialMotionQueue* mq = GetMotionQueue(sim->controlSimulators[index].controller);
+  return mq->TimeRemaining();
+}
+
 
 void SimRobotController::setTorque(const std::vector<double>& t)
 {
@@ -2362,3 +2749,303 @@ void SimRobotController::setPIDGains(const std::vector<double>& kP,const std::ve
   }
 }
 
+
+
+
+
+
+
+
+
+bool Viewport::fromJson(const std::string& str)
+{
+  AnyCollection coll;
+  std::stringstream ss(str);
+  ss>>coll;
+  if(!ss) return false;
+  if(!coll["perspective"].as(perspective)) return false;
+  if(!coll["scale"].as(scale)) return false;
+  if(!coll["x"].as(x)) return false;
+  if(!coll["y"].as(y)) return false;
+  if(!coll["w"].as(w)) return false;
+  if(!coll["h"].as(h)) return false;
+  if(!coll["n"].as(n)) return false;
+  if(!coll["f"].as(f)) return false;
+  if(!coll["xform"].asvector(xform)) return false;
+  if(xform.size() != 16) return false;
+  return true;
+}
+
+void Viewport::setModelviewMatrix(const double M[16])
+{
+  xform.resize(16);
+  copy(&M[0],&M[0]+16,xform.begin());
+}
+
+void Viewport::setRigidTransform(const double R[9],const double t[3])
+{
+  RigidTransform T;
+  T.R.set(R);
+  T.t.set(t);
+  Matrix4 m(T);
+  xform.resize(16);
+  m.get(&xform[0]);
+}
+
+void Viewport::getRigidTransform(double out[9],double out2[3])
+{
+  Matrix4 m;
+  m.set(&xform[0]);
+  RigidTransform T(m);
+  T.R.get(out);
+  T.t.get(out2);
+}
+
+
+std::string Viewport::toJson() const
+{
+  AnyCollection coll;
+  coll["perspective"] = perspective;
+  coll["scale"] = scale;
+  coll["x"] = x;
+  coll["y"] = y;
+  coll["w"] = w;
+  coll["h"] = h;
+  coll["n"] = n;
+  coll["f"] = f;
+  coll["xform"].resize(16);
+  for(int i=0;i<16;i++)
+    coll["xform"][i] = xform[i];
+  std::stringstream ss;
+  ss<<coll;
+  return ss.str();
+}
+
+Widget::Widget()
+{
+  index = createWidget();
+}
+
+Widget::~Widget()
+{
+  derefWidget(index);
+}
+
+Camera::Viewport GetCameraViewport(const Viewport& viewport)
+{
+  Camera::Viewport vp;
+  vp.x = viewport.x;
+  vp.y = viewport.y;
+  vp.w = viewport.w;
+  vp.h = viewport.h;
+  vp.n = viewport.n;
+  vp.f = viewport.f;
+  vp.perspective = viewport.perspective;
+  vp.scale = viewport.scale;
+  Assert(viewport.xform.size()==16);
+  vp.xform.set(Matrix4(&viewport.xform[0]));
+  return vp;
+}
+
+bool Widget::hover(int x,int y,const Viewport& viewport)
+{
+  double distance;
+  Camera::Viewport vp = GetCameraViewport(viewport);
+  bool res=widgets[index].widget->Hover(x,y,vp,distance);
+  if(res) widgets[index].widget->SetHighlight(true);
+  else widgets[index].widget->SetHighlight(false);
+  return res;
+}
+
+bool Widget::beginDrag(int x,int y,const Viewport& viewport)
+{
+  double distance;
+  Camera::Viewport vp = GetCameraViewport(viewport);
+  bool res=widgets[index].widget->BeginDrag(x,y,vp,distance); 
+  if(res) widgets[index].widget->SetFocus(true);
+  else widgets[index].widget->SetFocus(false);
+  return res;
+}
+
+void Widget::drag(int dx,int dy,const Viewport& viewport)
+{
+  Camera::Viewport vp = GetCameraViewport(viewport);
+  widgets[index].widget->Drag(dx,dy,vp);
+}
+
+void Widget::endDrag()
+{
+  widgets[index].widget->EndDrag();
+  widgets[index].widget->SetFocus(false);
+}
+
+void Widget::keypress(char c)
+{
+  widgets[index].widget->Keypress(c);
+}
+
+void Widget::drawGL(const Viewport& viewport)
+{
+  Camera::Viewport vp = GetCameraViewport(viewport);
+  widgets[index].widget->DrawGL(vp);
+  widgets[index].widget->requestRedraw = false;
+}
+
+void Widget::idle()
+{
+  widgets[index].widget->Idle();
+}
+
+bool Widget::wantsRedraw()
+{
+  return widgets[index].widget->requestRedraw;
+}
+
+WidgetSet::WidgetSet()
+  :Widget()
+{
+  widgets[index].widget = new GLDraw::WidgetSet;
+}
+
+void WidgetSet::add(const Widget& subwidget)
+{
+  GLDraw::WidgetSet* ws=dynamic_cast<GLDraw::WidgetSet*>(&*widgets[index].widget);
+  ws->widgets.push_back(widgets[subwidget.index].widget);
+  ws->widgetEnabled.push_back(true);
+  refWidget(subwidget.index);
+}
+void WidgetSet::remove(const Widget& subwidget)
+{
+  GLDraw::WidgetSet* ws=dynamic_cast<GLDraw::WidgetSet*>(&*widgets[index].widget);
+  for(size_t i=0;i<ws->widgets.size();i++)
+    if(ws->widgets[i] == widgets[subwidget.index].widget) {
+      //delete it
+      ws->widgets.erase(ws->widgets.begin()+i);
+      ws->widgetEnabled.erase(ws->widgetEnabled.begin()+i);
+      derefWidget(subwidget.index);
+      i--;
+    }
+}
+
+void WidgetSet::enable(const Widget& subwidget,bool enabled)
+{
+  GLDraw::WidgetSet* ws=dynamic_cast<GLDraw::WidgetSet*>(&*widgets[index].widget);
+  for(size_t i=0;i<ws->widgets.size();i++)
+    if(ws->widgets[i] == widgets[subwidget.index].widget) {
+      ws->widgetEnabled[i] = enabled;
+    }
+}
+
+PointPoser::PointPoser()
+  :Widget()
+{
+  widgets[index].widget = new GLDraw::TransformWidget;
+  GLDraw::TransformWidget* tw=dynamic_cast<GLDraw::TransformWidget*>(&*widgets[index].widget);
+  tw->enableRotation = false;
+}
+
+void PointPoser::set(const double t[3])
+{
+  GLDraw::TransformWidget* tw=dynamic_cast<GLDraw::TransformWidget*>(&*widgets[index].widget);
+  tw->T.t.set(t);
+}
+
+void PointPoser::get(double out[3])
+{
+  GLDraw::TransformWidget* tw=dynamic_cast<GLDraw::TransformWidget*>(&*widgets[index].widget);
+  tw->T.t.get(out);
+}
+
+
+void PointPoser::setAxes(const double R[9])
+{
+  GLDraw::TransformWidget* tw=dynamic_cast<GLDraw::TransformWidget*>(&*widgets[index].widget);
+  tw->T.R.set(R);
+}
+
+
+TransformPoser::TransformPoser()
+  :Widget()
+{
+  widgets[index].widget = new GLDraw::TransformWidget;
+}
+
+void TransformPoser::set(const double R[9],const double t[3])
+{
+  GLDraw::TransformWidget* tw=dynamic_cast<GLDraw::TransformWidget*>(&*widgets[index].widget);
+  tw->T.R.set(R);
+  tw->T.t.set(t);
+}
+
+void TransformPoser::get(double out[9],double out2[3])
+{
+  GLDraw::TransformWidget* tw=dynamic_cast<GLDraw::TransformWidget*>(&*widgets[index].widget);
+  tw->T.R.get(out);
+  tw->T.t.get(out2);
+}
+
+void TransformPoser::enableTranslation(bool enable)
+{
+  GLDraw::TransformWidget* tw=dynamic_cast<GLDraw::TransformWidget*>(&*widgets[index].widget);
+  tw->enableTranslation = enable;
+}
+
+void TransformPoser::enableRotation(bool enable)
+{
+  GLDraw::TransformWidget* tw=dynamic_cast<GLDraw::TransformWidget*>(&*widgets[index].widget);
+  tw->enableRotation = enable;
+}
+
+ObjectPoser::ObjectPoser(RigidObjectModel& object)
+  :Widget()
+{
+  RobotWorld& world = worlds[object.world]->world;
+  RigidObject* obj = world.rigidObjects[object.index].object;
+  ViewRigidObject* view = &world.rigidObjects[object.index].view;
+  widgets[index].widget = new RigidObjectPoseWidget(obj,view);
+}
+
+void ObjectPoser::set(const double R[9],const double t[3])
+{
+  RigidObjectPoseWidget* tw=dynamic_cast<RigidObjectPoseWidget*>(&*widgets[index].widget);
+  RigidTransform T;
+  T.R.set(R);
+  T.t.set(t);
+  tw->SetPose(T);
+}
+
+void ObjectPoser::get(double out[9],double out2[3])
+{
+  RigidObjectPoseWidget* tw=dynamic_cast<RigidObjectPoseWidget*>(&*widgets[index].widget);
+  RigidTransform T = tw->Pose();
+  T.R.get(out);
+  T.t.get(out2);
+}
+
+RobotPoser::RobotPoser(RobotModel& robot)
+{
+  RobotWorld& world = worlds[robot.world]->world;
+  Robot* rob = world.robots[robot.index].robot;
+  ViewRobot* view = &world.robots[robot.index].view;
+  widgets[index].widget = new RobotPoseWidget(rob,view);
+}
+
+void RobotPoser::set(const std::vector<double>& q)
+{
+  RobotPoseWidget* tw=dynamic_cast<RobotPoseWidget*>(&*widgets[index].widget);
+  tw->SetPose(Config(q));
+}
+
+void RobotPoser::get(std::vector<double>& out)
+{
+  RobotPoseWidget* tw=dynamic_cast<RobotPoseWidget*>(&*widgets[index].widget);
+  out.resize(tw->Pose().size());
+  tw->Pose().getCopy(&out[0]);
+}
+
+void RobotPoser::getConditioned(const std::vector<double>& qref,std::vector<double>& out)
+{
+  RobotPoseWidget* tw=dynamic_cast<RobotPoseWidget*>(&*widgets[index].widget);
+  out.resize(tw->Pose().size());
+  tw->Pose_Conditioned(Config(qref)).getCopy(&out[0]);
+}

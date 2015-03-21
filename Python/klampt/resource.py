@@ -18,10 +18,19 @@ import time
 from robotsim import WidgetSet,RobotPoser,ObjectPoser,TransformPoser,WorldModel,RobotModelLink,RigidObjectModel
 from threading import Thread
 from OpenGL.GL import *
-from PyQt4.QtCore import *
-from PyQt4.QtGui import *
-import qtprogram
 import gldraw
+
+_PyQtAvailable = False
+"""
+try:
+    from PyQt4.QtCore import *
+    from PyQt4.QtGui import *
+    import qtprogram
+    _PyQtAvailable = True
+except ImportError:
+    pass
+"""
+
 
 _directory = 'resources'
 
@@ -97,13 +106,16 @@ def get(name,type='auto',directory=None,default=None,doedit='auto',description=N
           before this call returns.
         - description: an optional text description of the resource, for use
           in the edit prompt.
-        - editor: either 'visual' or 'text', determining what to
+        - editor: either 'visual' or 'console', determining whether to use the
+          visual OpenGL or console editor.
         - world: for a visual editor, this world will be shown along with
           the item to edit.  If this is a string it points to a file
           that will be loaded for the world (e.g., a world XML file, or a
           robot file).
         - frame: for rigid transforms / rotations / points, the reference
-          frame for the visual editor.  This is an element of se3.
+          frame for the visual editor.  This is an element of se3, or an
+          ObjectModel, or a RobotModelLink, or a string indicating a named
+          rigid element of the world.
           """
     if name==None:
         if doedit==False:
@@ -361,99 +373,161 @@ class ObjectTransformVisualEditor(VisualEditorBase):
             self.value = self.objposer.get()
 
 
-
 #Qt stuff
-_app = None
-_dialog = None
-_glwidget = None
+if _PyQtAvailable:
+    _app = None
+    _dialog = None
+    _glwidget = None
 
-class AppGLWidget(qtprogram.GLNavigationProgram):
-    def __init__(self):
-        qtprogram.GLNavigationProgram.__init__(self,"GLWidget")
-        self.iface = None
-    def setInterface(self,iface):
-        self.iface = iface
-        if iface:
-            iface.qtwidget = self
-            iface.reshapefunc(self.width,self.height)
-        self.refresh()
-    def initialize(self):
-        if self.iface: self.iface.initialize()
-        qtprogram.GLNavigationProgram.initialize(self)
-    def reshapefunc(self,w,h):
-        if self.iface==None or not self.iface.reshapefunc(w,h):
-            qtprogram.GLNavigationProgram.reshapefunc(self,w,h)
-    def keyboardfunc(self,c,x,y):
-        if self.iface==None or not self.iface.keyboardfunc(c,x,y):
-            qtprogram.GLNavigationProgram.keyboardfunc(self,c,x,y)
-    def keyboardupfunc(self,c,x,y):
-        if self.iface==None or not self.iface.keyboardupfunc(c,x,y):
-            qtprogram.GLNavigationProgram.keyboardupfunc(self,c,x,y)
-    def specialfunc(self,c,x,y):
-        if self.iface==None or not self.iface.specialfunc(c,x,y):
-            qtprogram.GLNavigationProgram.specialfunc(self,c,x,y)
-    def specialupfunc(self,c,x,y):
-        if self.iface==None or not self.iface.specialupfunc(c,x,y):
-            qtprogram.GLNavigationProgram.specialupfunc(self,c,x,y)
-    def motionfunc(self,x,y,dx,dy):
-        if self.iface==None or not self.iface.motionfunc(x,y,dx,dy):
-            qtprogram.GLNavigationProgram.motionfunc(self,x,y,dx,dy)
-    def mousefunc(self,button,state,x,y):
-        if self.iface==None or not self.iface.mousefunc(button,state,x,y):
-            qtprogram.GLNavigationProgram.mousefunc(self,button,state,x,y)
-    def idlefunc(self):
-        if self.iface!=None: self.iface.idlefunc()
-        qtprogram.GLNavigationProgram.idlefunc(self)
-    def display(self):
-        if self.iface!=None:
-            self.iface.display()
-    def display_screen(self):
-        if self.iface!=None:
-            self.iface.display_screen()
+    class AppGLWidget(qtprogram.GLNavigationProgram):
+        def __init__(self):
+            qtprogram.GLNavigationProgram.__init__(self,"GLWidget")
+            self.iface = None
+        def setInterface(self,iface):
+            self.iface = iface
+            if iface:
+                iface.qtwidget = self
+                iface.reshapefunc(self.width,self.height)
+            self.refresh()
+        def initialize(self):
+            if self.iface: self.iface.initialize()
+            qtprogram.GLNavigationProgram.initialize(self)
+        def reshapefunc(self,w,h):
+            if self.iface==None or not self.iface.reshapefunc(w,h):
+                qtprogram.GLNavigationProgram.reshapefunc(self,w,h)
+        def keyboardfunc(self,c,x,y):
+            if self.iface==None or not self.iface.keyboardfunc(c,x,y):
+                qtprogram.GLNavigationProgram.keyboardfunc(self,c,x,y)
+        def keyboardupfunc(self,c,x,y):
+            if self.iface==None or not self.iface.keyboardupfunc(c,x,y):
+                qtprogram.GLNavigationProgram.keyboardupfunc(self,c,x,y)
+        def specialfunc(self,c,x,y):
+            if self.iface==None or not self.iface.specialfunc(c,x,y):
+                qtprogram.GLNavigationProgram.specialfunc(self,c,x,y)
+        def specialupfunc(self,c,x,y):
+            if self.iface==None or not self.iface.specialupfunc(c,x,y):
+                qtprogram.GLNavigationProgram.specialupfunc(self,c,x,y)
+        def motionfunc(self,x,y,dx,dy):
+            if self.iface==None or not self.iface.motionfunc(x,y,dx,dy):
+                qtprogram.GLNavigationProgram.motionfunc(self,x,y,dx,dy)
+        def mousefunc(self,button,state,x,y):
+            if self.iface==None or not self.iface.mousefunc(button,state,x,y):
+                qtprogram.GLNavigationProgram.mousefunc(self,button,state,x,y)
+        def idlefunc(self):
+            if self.iface!=None: self.iface.idlefunc()
+            qtprogram.GLNavigationProgram.idlefunc(self)
+        def display(self):
+            if self.iface!=None:
+                self.iface.display()
+        def display_screen(self):
+            if self.iface!=None:
+                self.iface.display_screen()
 
-class MyDialog(QDialog):
-    def __init__(self):
-        QDialog.__init__(self)
-        global _glwidget
-        _glwidget.initWindow(self)
-        self.instructions = QLabel()
-        self.description = QLabel()
-        self.description2 = QLabel("Press OK to save, Cancel to continue without saving")
-        self.layout = QVBoxLayout(self)
-        self.layout.addWidget(self.description)
-        self.layout.addWidget(self.instructions)
-        self.layout.addWidget(_glwidget)
-        self.layout.addWidget(self.description2)
-        self.buttons = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel,Qt.Horizontal, self)
-        self.buttons.accepted.connect(self.accept)
-        self.buttons.rejected.connect(self.reject)
-        self.layout.addWidget(self.buttons)
-    def setEditor(self,editorObject):
-        self.editorObject = editorObject
-        self.setWindowTitle("Editing "+editorObject.name)
-        _glwidget.setInterface(editorObject)
-        if editorObject.description==None:
-            self.description.setText("")
+    class MyDialog(QDialog):
+        def __init__(self):
+            QDialog.__init__(self)
+            global _glwidget
+            _glwidget.initWindow(self)
+            self.instructions = QLabel()
+            self.description = QLabel()
+            self.description2 = QLabel("Press OK to save, Cancel to continue without saving")
+            self.layout = QVBoxLayout(self)
+            self.layout.addWidget(self.description)
+            self.layout.addWidget(self.instructions)
+            self.layout.addWidget(_glwidget)
+            self.layout.addWidget(self.description2)
+            self.buttons = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel,Qt.Horizontal, self)
+            self.buttons.accepted.connect(self.accept)
+            self.buttons.rejected.connect(self.reject)
+            self.layout.addWidget(self.buttons)
+        def setEditor(self,editorObject):
+            self.editorObject = editorObject
+            self.setWindowTitle("Editing "+editorObject.name)
+            _glwidget.setInterface(editorObject)
+            if editorObject.description==None:
+                self.description.setText("")
+            else:
+                self.description.setText(editorObject.description)
+            self.instructions.setText(editorObject.instructions())
+        def finish(self):
+            _glwidget.setInterface(None)
+            res = self.editorObject.value
+            self.editorObject = None
+            return res
+
+    def _launch(editorObject):
+        global _app,_dialog,_glwidget
+        if _app == None:
+            #Do Qt setup
+            _app = QApplication(["Editor"])
+            _glwidget = AppGLWidget()
+            _dialog=MyDialog()
+        _dialog.setEditor(editorObject)
+        res = _dialog.exec_()
+        retVal = _dialog.finish()
+        return res,retVal
+
+def console_edit(name,value,type,description=None,world=None,frame=None):
+    print "*********************************************************"
+    print 
+    print "Editing resource",name,"of type",type
+    print
+    if description!=None:
+        print description
+        print
+    if frame!=None:
+        if isinstance(frame,(RigidObjectModel,RobotModelLink)):
+            print "Reference frame:",frame.getName()
         else:
-            self.description.setText(editorObject.description)
-        self.instructions.setText(editorObject.instructions())
-    def finish(self):
-        _glwidget.setInterface(None)
-        res = self.editorObject.value
-        self.editorObject = None
-        return res
-
-def _launch(editorObject):
-    global _app,_dialog,_glwidget
-    if _app == None:
-        #Do Qt setup
-        _app = QApplication(["Editor"])
-        _glwidget = AppGLWidget()
-        _dialog=MyDialog()
-    _dialog.setEditor(editorObject)
-    res = _dialog.exec_()
-    retVal = _dialog.finish()
-    return res,retVal
+            print "Reference frame:",frame
+        print
+    print "*********************************************************"
+    print "Current value:",value
+    print "Do you wish to change it? (y/n/q) >",
+    choice = ''
+    while choice not in ['y','n','q']:
+        choice = raw_input()[0].lower()
+        if choice not in ['y','n','q']:
+            print "Please enter y/n/q indicating yes/no/quit."
+            print ">",
+    if choice=='y':
+        print "Enter the new desired value below.  You may use native text,"
+        print "JSON strings, or file(fn) to indicate a file name."
+        print "New value >",
+        data = raw_input()
+        if data.startswith('{') or data.startswith('['):
+            jsonobj = json.loads(data)
+            try:
+                obj = loader.fromJson(jsonobj,type)
+                return True,obj
+            except Exception:
+                print "Error loading from JSON, press enter to continue..."
+                raw_input()
+                return False,value
+        elif data.startswith('file('):
+            try:
+                obj = get(data[5:-1],type,doedit=False)
+                if obj==None:
+                    return False,value
+                return True,obj
+            except Exception:
+                print "Error loading from file, press enter to continue..."
+                raw_input()
+                return False,value
+        else:
+            try:
+                obj = loader.read(type,data)
+                return True,obj
+            except Exception:
+                print "Error loading from text, press enter to continue..."
+                raw_input()
+                return False,value
+    elif choice=='n':
+        print "Using current value."
+        print "*********************************************************"
+        return False,value
+    elif choice=='q':
+        return False,None
 
 _editTemporaryWorlds = {}
 
@@ -467,6 +541,10 @@ def edit(name,value,type='auto',description=None,editor='visual',world=None,fram
         name = 'Anonymous'
     if type == 'auto':
         type = nameToType(name)
+    if not _PyQtAvailable and editor=='visual':
+        print "PyQt is not available, defaulting to console editor"
+        editor = 'console'
+            
     if isinstance(world,str):
         #a single argument, e.g., a robot file
         global _editTemporaryWorlds
@@ -475,6 +553,20 @@ def edit(name,value,type='auto',description=None,editor='visual',world=None,fram
             if not _editTemporaryWorlds[world].readFile(world):
                 raise RuntimeError("Error loading world file "+world)
         world = _editTemporaryWorlds[world]    
+    if isinstance(frame,str):
+        try:
+            oframe = world.rigidObject(frame)
+            frame = oframe
+        except RuntimeError:
+            try:
+                oframe = world.robot(0).getLink(frame)
+                frame = oframe
+            except RuntimeError:
+                try:
+                    oframe = world.terrain(frame)
+                    frame = oframe
+                except RuntimeError:
+                    raise RuntimeError('Named frame "'+frame+'" is not a valid frame')
     if value==None:
         if type == 'Config':
             if world==None:
@@ -493,22 +585,30 @@ def edit(name,value,type='auto',description=None,editor='visual',world=None,fram
             value = se3.identity()
         else:
             raise RuntimeError("Don't know how to edit objects of type "+type)
-    if type == 'Config':
-        return _launch(ConfigVisualEditor(name,value,description,world))
-    elif type == 'Configs':
-        return _launch(ConfigsVisualEditor(name,value,description,world))
-    elif type == 'Vector3' or type == 'Point':
-        if isinstance(frame,(RigidObjectModel,RobotLink)):
-            frame = frame.getTransform()
-        return _launch(PointVisualEditor(name,value,description,world,frame))
-    elif type == 'Rotation':
-        if isinstance(frame,(RigidObjectModel,RobotLink)):
-            frame = frame.getTransform()
-        return _launch(RotationVisualEditor(name,value,description,world,frame))
-    elif type == 'RigidTransform':
-        if isinstance(frame,RigidObjectModel):
-            return _launch(ObjectTransformVisualEditor(name,value,description,world,frame))
-        return _launch(RigidTransformVisualEditor(name,value,description,world,frame))
+
+    if editor == 'console':
+        return console_edit(name,value,type,description,world,frame)
+    elif editor == 'visual':
+        if type == 'Config':
+            return _launch(ConfigVisualEditor(name,value,description,world))
+        elif type == 'Configs':
+            return _launch(ConfigsVisualEditor(name,value,description,world))
+        elif type == 'Vector3' or type == 'Point':
+            if isinstance(frame,(RigidObjectModel,RobotModelLink)):
+                frame = frame.getTransform()
+            return _launch(PointVisualEditor(name,value,description,world,frame))
+        elif type == 'Rotation':
+            if isinstance(frame,(RigidObjectModel,RobotModelLink)):
+                frame = frame.getTransform()
+            return _launch(RotationVisualEditor(name,value,description,world,frame))
+        elif type == 'RigidTransform':
+            if isinstance(frame,RigidObjectModel):
+                return _launch(ObjectTransformVisualEditor(name,value,description,world,frame))
+            if isinstance(frame,RobotModelLink):
+                frame = frame.getTransform()
+            return _launch(RigidTransformVisualEditor(name,value,description,world,frame))
+        else:
+            raise RuntimeError("Don't know how to edit objects of type "+type)
     else:
-        raise RuntimeError("Don't know how to edit objects of type "+type)
-    
+        raise ValueError("Invalid value for argument 'editor', must be either 'visual' or 'console'")
+
