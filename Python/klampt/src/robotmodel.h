@@ -5,6 +5,7 @@
  * @brief C++ bindings for robot/world modeling. */
 
 #include "geometry.h"
+#include "appearance.h"
 
 //forward definitions for API objects
 class WorldModel;
@@ -51,9 +52,11 @@ class RobotModelLink
   int getID();
   const char* getName();
   RobotModel getRobot();
+  int getIndex();
   int getParent();
   void setParent(int p);
   Geometry3D geometry();
+  Appearance appearance();
   Mass getMass();
   void setMass(const Mass& mass);
   ///Gets transformation (R,t) to the parent link
@@ -208,6 +211,7 @@ class RigidObjectModel
   int getID();
   const char* getName();
   Geometry3D geometry();
+  Appearance appearance();
   Mass getMass();
   void setMass(const Mass& mass);
   ContactParameters getContactParameters();
@@ -230,6 +234,7 @@ class TerrainModel
   int getID();
   const char* getName();
   Geometry3D geometry();
+  Appearance appearance();
   void setFriction(double friction);
   void drawGL(bool keepAppearance=true);
 
@@ -241,9 +246,18 @@ class TerrainModel
 /** @brief The main world class, containing robots, rigid objects, and static
  * environment geometry.
  *
- *
  * Note that this is just a model and can be changed at will -- in fact 
  * planners and simulators will make use of a model to "display" computed
+ *
+ * Every robot/robot link/terrain/rigid object is given a unique ID in the
+ * world.  This is potentially a source of confusion because some functions
+ * take IDs and some take indices.  Only the WorldModel and Simulator
+ * classes use IDs when the argument has 'id' as a suffix, e.g., geometry(),
+ * appearance(), Simulator.inContact().
+ * All other functions use indices, e.g. robot(0), terrain(0), etc.
+ *
+ * To get an object's ID, you can see the value returned by loadElement
+ * and/or object.getID().  
  * states.
  *
  * To save/restore the state of the model, you must manually maintain copies of
@@ -278,6 +292,9 @@ class WorldModel
   RigidObjectModel loadRigidObject(const char* fn);
   TerrainModel loadTerrain(const char* fn);
   int loadElement(const char* fn);
+  std::string getName(int id);
+  Geometry3D geometry(int id);
+  Appearance appearance(int id);
   void drawGL();
   void enableGeometryLoading(bool enabled);
 

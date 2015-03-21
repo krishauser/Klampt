@@ -4815,8 +4815,6 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"void destroy()\n"
 		"\n"
-		"destroys internal data structures\n"
-		"\n"
 		"destroys internal data structures \n"
 		""},
 	 { (char *)"new_CSpaceInterface", _wrap_new_CSpaceInterface, METH_VARARGS, (char *)"\n"

@@ -1,24 +1,42 @@
-"""This module defines convenient classes for building 3D GUI programs
-over OpenGL (GLUT).
-
-- GLProgram takes care of basic user input.
-- GLNavigationProgram allows 3D navigation with the mouse.
-- GLRealtimeProgram calls a subclass-defined idle() function roughly on a
-  constant time step.
-"""
-
 from OpenGL.GL import *
 from OpenGL.GLU import *
-from OpenGL.GLUT import *
-import camera
-import se3
-import so3
+from PyQt4 import QtGui
+from PyQt4.QtCore import *
+from PyQt4.QtOpenGL import *
+import camera,so3,se3,vectorops
 import vectorops
 import math
 import time
 from robotsim import Viewport
 
-class GLProgram:
+_currentProgram = None
+
+GLUT_UP = 1
+GLUT_DOWN = 0
+GLUT_ACTIVE_CTRL = 2
+GLUT_ACTIVE_SHIFT = 1
+GLUT_ACTIVE_ALT = 4
+
+def toGlutButton(button):
+    if button==Qt.LeftButton:
+        return 0
+    elif button==Qt.RightButton:
+        return 2
+    elif button==Qt.MidButton:
+        return 1
+    return 0
+
+def toGlutModifiers(modifiers):
+    res = 0
+    if modifiers & Qt.AltModifier:
+        res = res | GLUT_ACTIVE_ALT
+    if modifiers & Qt.ShiftModifier:
+        res = res | GLUT_ACTIVE_SHIFT
+    if modifiers & Qt.ControlModifier:
+        res = res | GLUT_ACTIVE_CTRL
+    return res
+
+class GLProgram(QGLWidget):
     """A basic OpenGL program using GLUT.  Set up your window parameters,
     then call run() to start the GLUT main loop.
 
@@ -35,54 +53,91 @@ class GLProgram:
         self.width = 640
         self.height = 480
         self.clearColor = [1.0,1.0,1.0,0.0]
+        #keyboard state information
+        self.modifiers = 0
+        #mouse state information
+        self.lastx,self.lasty = None,None
 
-    def initWindow(self):
+    def initWindow(self,parent=None):
         """ Open a window and initialize """
-        glutInitDisplayMode (GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH)
+        QGLWidget.__init__(self,parent)
+        self.setWindowTitle(self.name)
+        self.idleTimer = QTimer()
+        self.idleTimer.timeout.connect(lambda:self.idlefunc())
+        self.idleTimer.start(0)
+        format = QGLFormat()
+        format.setRgba(True)
+        format.setDoubleBuffer(True)
+        format.setDepth(True)
+        self.setFormat(format)
+        self.setFixedSize(self.width,self.height)
 
-        x = 0
-        y = 0
-        glutInitWindowPosition (x, y);
-        glutInitWindowSize (self.width, self.height);
-        glutCreateWindow (self.name)
-  
-        # set window callbacks
-        glutReshapeFunc (self.reshapefunc)
-        glutKeyboardFunc (self.keyboardfunc)
-        glutKeyboardUpFunc (self.keyboardupfunc)
-        glutSpecialFunc (self.specialfunc)
-        glutSpecialUpFunc (self.specialupfunc)
-        glutMotionFunc (self.motionfunc)
-        glutPassiveMotionFunc (self.motionfunc)
-        glutMouseFunc (self.mousefunc)
-        glutDisplayFunc (self.displayfunc)
-        glutIdleFunc(self.idlefunc)
-
+        self.setMouseTracking(True)
         #init function
         self.initialize()
 
-    def run(self):
+    def run(self,parent=None):
         """Starts the main loop"""
-        # Initialize Glut
-        glutInit ([])
+        if parent==None:
+            global _currentProgram
+            _currentProgram = self
+            app = QtGui.QApplication([self.name])
         self.initWindow()
-        glutMainLoop ()
+        self.show()
+        if parent == None:
+            app.exec_()
+            _currentProgram = None
+            self.close()
 
-    def initialize(self):
-        """Called after GLUT is initialized, but before main loop.
-        May be overridden."""
-        glutPostRedisplay()
-        pass
+    def close(self):
+        """Call close() after this widget should be closed down, to stop
+        any existing Qt callbacks."""
+        self.idleTimer.stop()
 
     def refresh(self):
-        """Call this to redraw the screen on the next event loop"""
-        glutPostRedisplay()
+        QTimer.singleShot(0,lambda:self.updateGL());
+
+    #QtGLWidget bindings
+    def initializeGL(self): return self.initialize()
+    def resizeGL(self,w,h): return self.reshapefunc(w,h)
+    def paintGL(self) : return self.displayfunc()
+    #QWidget bindings
+    def mouseMoveEvent(self,e):
+        x,y = e.pos().x(),e.pos().y()
+        if self.lastx == None: dx,dy = 0,0
+        else: dx, dy = x - self.lastx, y - self.lasty
+        res = self.motionfunc(x,y,dx,dy)
+        self.lastx,self.lasty = x,y
+        return res
+    def mousePressEvent(self,e):
+        x,y = e.pos().x(),e.pos().y()
+        self.modifiers = toGlutModifiers(e.modifiers())
+        self.lastx,self.lasty = x,y
+        return self.mousefunc(toGlutButton(e.button()),GLUT_DOWN,x,y)
+    def mouseReleaseEvent(self,e):
+        x,y = e.pos().x(),e.pos().y()
+        self.modifiers = toGlutModifiers(e.modifiers())
+        self.lastx,self.lasty = x,y
+        return self.mousefunc(toGlutButton(e.button()),GLUT_UP,x,y)
+    def keyPressEvent(self,e):
+        c = e.text()
+        if len(c)==0: return #some empty press, like shift/control
+        return self.keyboardfunc(c,self.lastx,self.lasty)
+    def keyReleaseEvent(self,e):
+        c = e.text()
+        if len(c)==0: return #some empty press, like shift/control
+        return self.keyboardupfunc(c,self.lastx,self.lasty)
+
+    def initialize(self):
+        """Called after GL context is initialized, but before main loop.
+        May be overridden."""
+        pass
 
     def reshapefunc(self,w,h):
         """Called on window resize.  May be overridden."""
         self.width = w
         self.height = h
-        glutPostRedisplay()
+        self.refresh()
         
     def keyboardfunc(self,c,x,y):
         """Called on keypress down. May be overridden."""
@@ -97,7 +152,7 @@ class GLProgram:
         """Called on special character keypress up up (if your system allows
         it).  May be overridden"""
         pass
-    def motionfunc(self,x,y):
+    def motionfunc(self,x,y,dx,dy):
         """Called when the mouse moves on screen.  May be overridden."""
         pass
     def mousefunc(self,button,state,x,y):
@@ -111,7 +166,6 @@ class GLProgram:
         self.display()
         self.prepare_screen_GL()
         self.display_screen()
-        glutSwapBuffers ()
         
     def idlefunc(self):
         """Called on idle.  May be overridden."""
@@ -121,11 +175,11 @@ class GLProgram:
         """Sleeps the idle callback for t seconds.  If t is not provided,
         the idle callback is slept forever"""
         if time==0:
-            glutIdleFunc(_idlefunc);
+            self.idleTimer.start(0)
         else:
-            glutIdleFunc(None);
+            self.idleTimer.stop()
             if duration!=float('inf'):
-                glutTimerFunc(duration*1000,lambda x:glutIdleFunc(_idlefunc),0);
+                QTimer.singleShot(duration*1000,lambda x:self.idleTimer.start(0));
 
     def prepare_GL(self):
         """Prepare drawing in world coordinate frame
@@ -179,7 +233,7 @@ class GLNavigationProgram(GLProgram):
 
     Attributes:
         - camera: an orbit camera (see :class:`orbit`)
-        - fov: the camera field of view in x direction
+        - fov: the camera field of view in x direction, in degrees
         - clippingplanes: a pair containing the near and far clipping planes
     """
     def __init__(self,name):
@@ -191,11 +245,9 @@ class GLNavigationProgram(GLProgram):
         #near and far clipping planes
         self.clippingplanes = (0.2,20)
         #mouse state information
-        self.lastx = 0
-        self.lasty = 0
-        self.modifiers = 0
         self.dragging = False
         self.clearColor = [0.8,0.8,0.9,0]        
+
 
     def get_view(self):
         """Returns a tuple describing the viewport, which could be saved to
@@ -206,8 +258,8 @@ class GLNavigationProgram(GLProgram):
         """Sets the viewport to a tuple previously returned by get_view(),
         e.g. a prior view that was saved to file."""
         self.width,self.height,self.camera,self.fov,self.clippingplanes = v
-        glutReshapeWindow(self.width,self.height)
-        self.refresh()
+        self.setFixedSize(self.width,self.height)
+        self.reshapefunc(self.width,self.height)
 
     def viewport(self):
         """Gets a Viewport instance corresponding to the current view.
@@ -242,8 +294,7 @@ class GLNavigationProgram(GLProgram):
         # Projection
         glMatrixMode(GL_PROJECTION)
         glLoadIdentity()
-        aspect = float(self.width)/float(self.height)
-        gluPerspective (self.fov/aspect,aspect,self.clippingplanes[0],self.clippingplanes[1])
+        gluPerspective (self.fov*float(self.height)/float(self.width),float(self.width)/float(self.height),self.clippingplanes[0],self.clippingplanes[1])
 
         # Initialize ModelView matrix
         glMatrixMode(GL_MODELVIEW)
@@ -266,9 +317,7 @@ class GLNavigationProgram(GLProgram):
         glLightfv(GL_LIGHT1,GL_SPECULAR,[0.5,0.5,0.5,1])
         glEnable(GL_LIGHT1)
 
-    def motionfunc(self,x,y):
-        dx = x - self.lastx
-        dy = y - self.lasty
+    def motionfunc(self,x,y,dx,dy):
         if self.dragging:
             if self.modifiers & GLUT_ACTIVE_CTRL:
                 R,t = self.camera.matrix()
@@ -279,8 +328,6 @@ class GLNavigationProgram(GLProgram):
             else:
                 self.camera.rot[2] += float(dx)*0.01
                 self.camera.rot[1] += float(dy)*0.01        
-        self.lastx = x
-        self.lasty = y
         self.refresh()
     
     def mousefunc(self,button,state,x,y):
@@ -288,9 +335,6 @@ class GLNavigationProgram(GLProgram):
             self.dragging = True
         else:
             self.dragging = False
-        self.modifiers = glutGetModifiers()
-        self.lastx = x
-        self.lasty = y
 
 
 class GLRealtimeProgram(GLNavigationProgram):
@@ -324,7 +368,10 @@ class GLRealtimeProgram(GLNavigationProgram):
         self.idle()
         
         self.lasttime = time.time()
-        glutPostRedisplay()
+        self.refresh()
 
     def idle(self):
         pass
+
+
+

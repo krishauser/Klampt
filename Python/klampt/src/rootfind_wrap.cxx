@@ -3457,8 +3457,6 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"void destroy()\n"
 		"\n"
-		"destroys internal data structures\n"
-		"\n"
 		"destroys internal data structures \n"
 		""},
 	 { NULL, NULL, 0, NULL }

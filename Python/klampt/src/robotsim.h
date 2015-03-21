@@ -6,7 +6,6 @@
 
 #include <stddef.h>
 #include "robotmodel.h"
-#include <Simulation/ODESurface.h>
 
 class Simulator;
 class SimRobotController;
@@ -43,6 +42,10 @@ class SimRobotSensor
  * configuration/velocity.  To handle disturbances, a PID loop is run.
  * The constants of this loop are initially set in the robot file, or you can
  * perform tuning via setPIDGains.
+ *
+ * Move-to motions are handled using a motion queue.  To get finer-grained
+ * control over the motion queue you may use the setLinear/setCubic/
+ * addLinear/addCubic functions.
  *
  * Arbitrary trajectories can be tracked by using setVelocity over short time
  * steps.  Force controllers can be implemented using setTorque, again using
@@ -90,6 +93,19 @@ class SimRobotController
   /// motion queue starting at the current queued end state.
   void addMilestone(const std::vector<double>& q);
   void addMilestone(const std::vector<double>& q,const std::vector<double>& dq);
+  /// Same as addMilestone, but enforces that the motion should move along
+  /// a straight-line joint-space path
+  void addMilestoneLinear(const std::vector<double>& q);
+  /// Uses linear interpolation to get from the current configuration to the
+  /// desired configuration after time dt
+  void setLinear(const std::vector<double>& q,double dt);
+  /// Uses cubic (Hermite) interpolation to get from the current
+  /// configuration/velocity to the desired configuration/velocity after time dt
+  void setCubic(const std::vector<double>& q,const std::vector<double>& v,double dt);
+  /// Same as setLinear but appends an interpolant onto the motion queue
+  void appendLinear(const std::vector<double>& q,double dt);
+  /// Same as setCubic but appends an interpolant onto the motion queue
+  void addCubic(const std::vector<double>& q,const std::vector<double>& v,double dt);
 
   /// Returns the remaining duration of the motion queue
   double remainingTime() const;
@@ -135,6 +151,12 @@ class SimBody
   /// Applies a force and torque about the COM at the current simulation
   /// time step.
   void applyWrench(const double f[3],const double t[3]);
+  /// Applies a force at a given point (in world coordinates) at the
+  ///current simulation time step.
+  void applyForceAtPoint(const double f[3],const double pworld[3]);
+  /// Applies a force at a given point (in local coordinates) at the
+  ///current simulation time step.
+  void applyForceAtLocalPoint(const double f[3],const double plocal[3]);
 
   /// Sets the body's transformation at the current
   /// simulation time step.
@@ -152,7 +174,8 @@ class SimBody
   double getCollisionPadding();
 
   /// Gets/sets the surface properties
-  ODESurfaceProperties* surface();  
+  ContactParameters getSurface();
+  void setSurface(const ContactParameters& params);
 
   ODEGeometry* geometry;
   dBodyID body;
