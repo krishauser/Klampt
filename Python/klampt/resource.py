@@ -21,7 +21,6 @@ from OpenGL.GL import *
 import gldraw
 
 _PyQtAvailable = False
-"""
 try:
     from PyQt4.QtCore import *
     from PyQt4.QtGui import *
@@ -29,7 +28,6 @@ try:
     _PyQtAvailable = True
 except ImportError:
     pass
-"""
 
 
 _directory = 'resources'
