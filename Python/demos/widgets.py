@@ -3,7 +3,7 @@
 import sys
 import math
 from klampt import *
-from klampt import WidgetSet,PointPoser,RobotPoser,Viewport
+from klampt import WidgetSet,PointPoser,RobotPoser
 from klampt.glprogram import *
 
 class GLWidgetProgram(GLRealtimeProgram):
@@ -88,7 +88,7 @@ class MyGLViewer(GLWidgetProgram):
 
     def keyboardfunc(self,c,x,y):
         #Put your keyboard handler here
-        #the current example toggles simulation / movie mode
+        #the current example prints the config when [space] is pressed
         if c == ' ':
             config = self.robotWidget.get()
             print "Config:",config
