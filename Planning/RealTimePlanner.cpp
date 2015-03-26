@@ -665,8 +665,10 @@ void RealTimePlanningThread::ResumePlanning()
 
 void RealTimePlanningThread::Stop()
 {
-  printf("Stopping planning thread\n");
   RealTimePlannerData* data = reinterpret_cast<RealTimePlannerData*>(internal);
+  if(!data->active) return;
+
+  printf("Stopping planning thread\n");
   if(data->planner)
   {
     ScopedLock lock(data->mutex);
