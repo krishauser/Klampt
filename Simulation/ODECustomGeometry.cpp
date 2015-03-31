@@ -670,6 +670,7 @@ int GeometryGeometryCollide(Geometry::AnyCollisionGeometry3D& g1,Real outerMargi
     }
     break;
   }
+  return 0;
 }
 
 int dCustomGeometryCollide (dGeomID o1, dGeomID o2, int flags,
