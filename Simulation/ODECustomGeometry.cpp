@@ -1,5 +1,6 @@
 #include "ODECustomGeometry.h"
 #include "ODECommon.h"
+#include <geometry/CollisionPointCloud.h>
 #include <ode/collision.h>
 #include <Timer.h>
 #include <errors.h>
@@ -441,11 +442,24 @@ int MeshMeshCollide(CollisionMesh& m1,Real outerMargin1,CollisionMesh& m2,Real o
 int MeshPointCloudCollide(CollisionMesh& m1,Real outerMargin1,CollisionPointCloud& pc2,Real outerMargin2,dContactGeom* contact,int maxcontacts)
 {
   Real tol = outerMargin1 + outerMargin2;
+  Box3D mbb,mbb_pclocal;
+  GetBB(m1,mbb);
+  RigidTransform Tw_pc;
+  Tw_pc.setInverse(pc2.currentTransform);
+  mbb_pclocal.setTransformed(mbb,Tw_pc);
+  AABB3D maabb_pclocal;
+  mbb_pclocal.getAABB(maabb_pclocal);
+  maabb_pclocal.bmin -= Vector3(tol);
+  maabb_pclocal.bmax += Vector3(tol);
+  maabb_pclocal.setIntersection(pc2.bblocal);
+  list<void*> nearpoints;
+  pc2.grid.BoxItems(Vector(3,maabb_pclocal.bmin),Vector(3,maabb_pclocal.bmax),nearpoints);
   int k=0;
   vector<int> tris;
   Triangle3D tri,triw;
-  for(size_t i=0;i<pc2.points.size();i++) {
-    Vector3 pw = pc2.currentTransform*pc2.points[i];
+  for(list<void*>::iterator i=nearpoints.begin();i!=nearpoints.end();i++) {
+    Vector3 pcpt = *reinterpret_cast<Vector3*>(*i);
+    Vector3 pw = pc2.currentTransform*pcpt;
     NearbyTriangles(m1,pw,tol,tris,maxcontacts-k);
     for(size_t j=0;j<tris.size();j++) {   
       m1.GetTriangle(tris[j],tri);

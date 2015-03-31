@@ -8,6 +8,8 @@
 #include <math3d/misc.h>
 #include <math3d/basis.h>
 #include <meshing/IO.h>
+#include <meshing/VolumeGrid.h>
+#include <meshing/PointCloud.h>
 #include <utils/ioutils.h>
 #include <utils/fileutils.h>
 #include <fstream>
@@ -828,6 +830,7 @@ bool Robot::LoadRob(const char* fn) {
 	if (geomscale.size() == 1)
 		geomscale.resize(n, geomscale[0]);
 	geomFiles.resize(n);
+	Timer timer;
 	string path = GetFilePath(fn);
 	for (size_t i = 0; i < geomFn.size(); i++) {
 		if (geomFn[i].empty()) {
@@ -852,6 +855,11 @@ bool Robot::LoadRob(const char* fn) {
 		else if(i < geommargin.size())
 		  geometry[i].margin = geommargin[i];
 	}
+	int numGeomElements = 0;
+	for(size_t i=0;i<geometry.size();i++)
+	  numGeomElements += geometry[i].NumElements();
+	printf("Loaded geometries in time %gs, %d total primitive elements\n",timer.ElapsedTime(),numGeomElements);
+	timer.Reset();
 
 	//process transformation of geometry shapes
 	if(geomTransformIndex.size() != geomTransform.size()){
@@ -866,8 +874,10 @@ bool Robot::LoadRob(const char* fn) {
 		geometry[geomIndex].Transform(geomTransform[i]);
 	}
 
-	if (collision.empty())
+	if (collision.empty()) {
 		InitCollisions();
+		printf("Initialized robot collision data structures in time %gs\n",timer.ElapsedTime());
+	}
 	else {
 		FatalError("So far, no mechanism to select environment collisions");
 	}

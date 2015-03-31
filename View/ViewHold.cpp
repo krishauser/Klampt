@@ -3,6 +3,7 @@
 #include <GLdraw/drawextra.h>
 #include <GLdraw/GL.h>
 #include <GLdraw/GLUTString.h>
+using namespace GLDraw;
 
 ViewContact::ViewContact()
 {

@@ -145,10 +145,6 @@ GeneralizedIKSolver::sampleInitial()
 Samples an initial random configuration. ";
 
 
-// File: structGeomCollisionQuery.xml
-%feature("docstring") GeomCollisionQuery "";
-
-
 // File: structGeometricPrimitive.xml
 %feature("docstring") GeometricPrimitive "";
 
@@ -673,6 +669,9 @@ RigidObjectModel::getName() ";
 %feature("docstring")  RigidObjectModel::geometry "Geometry3D
 RigidObjectModel::geometry() ";
 
+%feature("docstring")  RigidObjectModel::appearance "Appearance
+RigidObjectModel::appearance() ";
+
 %feature("docstring")  RigidObjectModel::getMass "Mass
 RigidObjectModel::getMass() ";
 
@@ -916,6 +915,9 @@ RobotModelLink::getName() ";
 %feature("docstring")  RobotModelLink::getRobot "RobotModel
 RobotModelLink::getRobot() ";
 
+%feature("docstring")  RobotModelLink::getIndex "int
+RobotModelLink::getIndex() ";
+
 %feature("docstring")  RobotModelLink::getParent "int
 RobotModelLink::getParent() ";
 
@@ -924,6 +926,9 @@ RobotModelLink::setParent(int p) ";
 
 %feature("docstring")  RobotModelLink::geometry "Geometry3D
 RobotModelLink::geometry() ";
+
+%feature("docstring")  RobotModelLink::appearance "Appearance
+RobotModelLink::appearance() ";
 
 %feature("docstring")  RobotModelLink::getMass "Mass
 RobotModelLink::getMass() ";
@@ -1058,6 +1063,19 @@ SimBody::applyWrench(const double f[3], const double t[3])
 Applies a force and torque about the COM at the current simulation
 time step. ";
 
+%feature("docstring")  SimBody::applyForceAtPoint "void
+SimBody::applyForceAtPoint(const double f[3], const double pworld[3])
+
+Applies a force at a given point (in world coordinates) at the current
+simulation time step. ";
+
+%feature("docstring")  SimBody::applyForceAtLocalPoint "void
+SimBody::applyForceAtLocalPoint(const double f[3], const double
+plocal[3])
+
+Applies a force at a given point (in local coordinates) at the current
+simulation time step. ";
+
 %feature("docstring")  SimBody::setTransform "void
 SimBody::setTransform(const double R[9], const double t[3])
 
@@ -1086,10 +1104,13 @@ Sets the collision padding (useful for thin objects). Default is
 %feature("docstring")  SimBody::getCollisionPadding "double
 SimBody::getCollisionPadding() ";
 
-%feature("docstring")  SimBody::surface "ODESurfaceProperties *
-SimBody::surface()
+%feature("docstring")  SimBody::getSurface "ContactParameters
+SimBody::getSurface()
 
 Gets/sets the surface properties. ";
+
+%feature("docstring")  SimBody::setSurface "void
+SimBody::setSurface(const ContactParameters &params) ";
 
 
 // File: structSimData.xml
@@ -1109,6 +1130,10 @@ calls to addMilestone) and interpolates dynamically from the current
 configuration/velocity. To handle disturbances, a PID loop is run. The
 constants of this loop are initially set in the robot file, or you can
 perform tuning via setPIDGains.
+
+Move-to motions are handled using a motion queue. To get finer-grained
+control over the motion queue you may use the setLinear/setCubic/
+addLinear/addCubic functions.
 
 Arbitrary trajectories can be tracked by using setVelocity over short
 time steps. Force controllers can be implemented using setTorque,
@@ -1198,6 +1223,39 @@ motion queue starting at the current queued end state. ";
 %feature("docstring")  SimRobotController::addMilestone "void
 SimRobotController::addMilestone(const std::vector< double > &q, const
 std::vector< double > &dq) ";
+
+%feature("docstring")  SimRobotController::addMilestoneLinear "void
+SimRobotController::addMilestoneLinear(const std::vector< double > &q)
+
+Same as addMilestone, but enforces that the motion should move along a
+straight-line joint-space path ";
+
+%feature("docstring")  SimRobotController::setLinear "void
+SimRobotController::setLinear(const std::vector< double > &q, double
+dt)
+
+Uses linear interpolation to get from the current configuration to the
+desired configuration after time dt ";
+
+%feature("docstring")  SimRobotController::setCubic "void
+SimRobotController::setCubic(const std::vector< double > &q, const
+std::vector< double > &v, double dt)
+
+Uses cubic (Hermite) interpolation to get from the current
+configuration/velocity to the desired configuration/velocity after
+time dt ";
+
+%feature("docstring")  SimRobotController::appendLinear "void
+SimRobotController::appendLinear(const std::vector< double > &q,
+double dt)
+
+Same as setLinear but appends an interpolant onto the motion queue. ";
+
+%feature("docstring")  SimRobotController::addCubic "void
+SimRobotController::addCubic(const std::vector< double > &q, const
+std::vector< double > &v, double dt)
+
+Same as setCubic but appends an interpolant onto the motion queue. ";
 
 %feature("docstring")  SimRobotController::remainingTime "double
 SimRobotController::remainingTime() const
@@ -1458,6 +1516,9 @@ TerrainModel::getName() ";
 %feature("docstring")  TerrainModel::geometry "Geometry3D
 TerrainModel::geometry() ";
 
+%feature("docstring")  TerrainModel::appearance "Appearance
+TerrainModel::appearance() ";
+
 %feature("docstring")  TerrainModel::setFriction "void
 TerrainModel::setFriction(double friction) ";
 
@@ -1483,6 +1544,12 @@ TriangleMesh::translate(const double t[3]) ";
 TriangleMesh::transform(const double R[9], const double t[3]) ";
 
 
+// File: structWidgetData.xml
+%feature("docstring") WidgetData "
+
+Internally used. ";
+
+
 // File: structWorldData.xml
 %feature("docstring") WorldData "
 
@@ -1497,7 +1564,17 @@ environment geometry.
 
 Note that this is just a model and can be changed at will in fact
 planners and simulators will make use of a model to \"display\"
-computed states.
+computed
+
+Every robot/robot link/terrain/rigid object is given a unique ID in
+the world. This is potentially a source of confusion because some
+functions take IDs and some take indices. Only the WorldModel and
+Simulator classes use IDs when the argument has 'id' as a suffix,
+e.g., geometry(), appearance(), Simulator.inContact(). All other
+functions use indices, e.g. robot(0), terrain(0), etc.
+
+To get an object's ID, you can see the value returned by loadElement
+and/or object.getID(). states.
 
 To save/restore the state of the model, you must manually maintain
 copies of the states of whichever objects you wish to save/restore.
@@ -1575,6 +1652,15 @@ WorldModel::loadTerrain(const char *fn) ";
 %feature("docstring")  WorldModel::loadElement "int
 WorldModel::loadElement(const char *fn) ";
 
+%feature("docstring")  WorldModel::getName "std::string
+WorldModel::getName(int id) ";
+
+%feature("docstring")  WorldModel::geometry "Geometry3D
+WorldModel::geometry(int id) ";
+
+%feature("docstring")  WorldModel::appearance "Appearance
+WorldModel::appearance(int id) ";
+
 %feature("docstring")  WorldModel::drawGL "void WorldModel::drawGL()
 ";
 
@@ -1582,466 +1668,40 @@ WorldModel::loadElement(const char *fn) ";
 WorldModel::enableGeometryLoading(bool enabled) ";
 
 
-// File: namespaceGeometry.xml
-
-
-// File: namespaceGLDraw.xml
-
-
-// File: namespaceMath3D.xml
-
-
 // File: namespacestd.xml
-
-
-// File: collide_8cpp.xml
-%feature("docstring")  std::newGeom "int newGeom() ";
-
-%feature("docstring")  std::destroyGeom "void destroyGeom(int geom)
-";
-
-%feature("docstring")  std::loadGeom "bool loadGeom(int geom, const
-char *fn)
-
-Loads a geometry from a file. Sets it to the correct type based on the
-file contents.
-
-Currently supported file extensions are Trimeshes: .tri, any other
-mesh files that Assimp may support (if Klamp't is built using Assimp
-support).
-
-Point clouds: .pcd
-
-Primitive geometries: .geom
-
-Returns False if there is a load error. Raises an exception if the ID
-is invalid. ";
-
-%feature("docstring")  std::makeTriMeshGeom "void makeTriMeshGeom(int
-geom, const char *fn)
-
-Makes a geometry into a trimesh loaded from the file fn. ";
-
-%feature("docstring")  std::makeTriMeshGeom "void makeTriMeshGeom(int
-geom, const double *verts, const int *inds, int nv, int nt)
-
-Makes a geometry into a trimesh given the vertex and index data. verts
-is of length nv*3, and inds is of length nt*3.
-
-Note: in Python, must use doubleArray and intArray for the verts and
-inds objects. ";
-
-%feature("docstring")  std::setTriMeshTranslation "void
-setTriMeshTranslation(int geom, const double t[3])
-
-Sets the translation of a trimesh geom. ";
-
-%feature("docstring")  std::setTriMeshRotation "void
-setTriMeshRotation(int geom, const double r[9])
-
-Sets the rotation of a trimesh geom. ";
-
-%feature("docstring")  std::getTriMeshTranslation "void
-getTriMeshTranslation(int geom, double t[3])
-
-Gets the translation of a trimesh geom. ";
-
-%feature("docstring")  std::getTriMeshRotation "void
-getTriMeshRotation(int geom, double r[9])
-
-Gets the rotation of a trimesh geom. ";
-
-%feature("docstring")  std::getTriMeshBB "void getTriMeshBB(int geom,
-double bmin[3], double bmax[3])
-
-Gets the bounding box of a trimesh geom. ";
-
-%feature("docstring")  std::getTriMeshNumVerts "int
-getTriMeshNumVerts(int geom)
-
-Gets the number of vertices of a trimesh geom. ";
-
-%feature("docstring")  std::getTriMeshNumTris "int
-getTriMeshNumTris(int geom)
-
-Gets the number of triangles of a trimesh geom. ";
-
-%feature("docstring")  std::getTriMeshVerts "double*
-getTriMeshVerts(int geom)
-
-Gets the vertex data of a trimesh geom (length nv*3). ";
-
-%feature("docstring")  std::getTriMeshTris "int* getTriMeshTris(int
-geom)
-
-Gets the index data of a trimesh geom (length nt*3). ";
-
-%feature("docstring")  std::makePointGeom "void makePointGeom(int
-geom, const double x[3])
-
-Makes a geom into a point x. ";
-
-%feature("docstring")  std::makeSphereGeom "void makeSphereGeom(int
-geom, const double c[3], double r)
-
-Makes a geom into a sphere centered at c with radius r. ";
-
-%feature("docstring")  std::makeRayGeom "void makeRayGeom(int geom,
-const double s[3], const double d[3])
-
-Makes a geom into a ray with source s and direction d. ";
-
-%feature("docstring")  std::makeLineGeom "void makeLineGeom(int geom,
-const double s[3], const double d[3])
-
-Makes a geom into a line with source s and direction d. ";
-
-%feature("docstring")  std::makeSegmentGeom "void makeSegmentGeom(int
-geom, const double a[3], const double b[3])
-
-Makes a geom into a segment with endpoints a, b. ";
-
-%feature("docstring")  std::makeAABBGeom "void makeAABBGeom(int geom,
-const double bmin[3], const double bmax[3])
-
-Makes a geom into an axis-aligned bounding box with lower bound bmin
-and upper bound bmax. ";
-
-%feature("docstring")  std::makeGroupGeom "void makeGroupGeom(int
-geom, int *elements, int numelements)
-
-Makes a geom into a group geom from an array of other geoms. Note: in
-Python, must use an intArray for geoms argument. ";
-
-%feature("docstring")  std::collide "bool collide(int geom1, int
-geom2)
-
-Tests whether the two geometries collide. ";
-
-%feature("docstring")  std::withinTolerance "bool withinTolerance(int
-geom1, int geom2, double tol)
-
-Tests whether the two geometries are within the given tolerance. ";
-
-%feature("docstring")  std::distance "double distance(int geom1, int
-geom2, double relErr, double absErr)
-
-Returns the distance between the two geometries, possibly with an
-approximation error (useful to speed up mesh-mesh distance detection)
-
-Error of result is no more than D*relErr+absErr where D is the actual
-distance. Set relErr=absErr=0 to get exact distance.
-
-NOTE: Not yet implemented. ";
-
-%feature("docstring")  std::closestPoints "void closestPoints(int
-geom1, int geom2, double p1[3], double p2[3])
-
-Returns the closest points between the two geometries. These are given
-in world coordinates.
-
-NOTE: Not yet implemented. ";
-
-%feature("docstring")  std::rayCast "bool rayCast(int geom, const
-double s[3], const double d[3], double out[3])
-
-Returns true if the geometry is hit by the given ray, and also returns
-the hit point (in world coordinates). ";
-
-%feature("docstring")  std::makeCollQuery "int makeCollQuery(int
-geom1, int geom2)
-
-Creates a collision query object attachd to the two given geometries.
-For mesh-mesh collisions, on repeated calls, this may be somewhat
-faster than querying from scratch. ";
-
-%feature("docstring")  std::destroyCollQuery "void
-destroyCollQuery(int query)
-
-Deletes a collision query object. ";
-
-%feature("docstring")  std::queryCollide "bool queryCollide(int
-query)
-
-Checks if the two geoms associated with this query are colliding. ";
-
-%feature("docstring")  std::queryWithinTolerance "bool
-queryWithinTolerance(int query, double tol)
-
-Checks if the two geoms associated with this query are within the
-given tolerance.
-
-See:   withinTolerance ";
-
-%feature("docstring")  std::queryDistance "double queryDistance(int
-query, double relErr, double absErr)
-
-Computes the distance betweeen the two geoms associated with this
-query.
-
-See:   distance ";
-
-%feature("docstring")  std::queryClosestPoints "void
-queryClosestPoints(int query, double p1[3], double p2[3])
-
-Computes points that give rise to the closest distance betweeen the
-two geoms associated with this query.
-
-See:   closestPoints ";
-
-%feature("docstring")  std::queryTolerancePoints "void
-queryTolerancePoints(int query, double p1[3], double p2[3])
-
-If the two geoms associated with this query are within a given
-tolerance (from a previous queryWithinTolerance call), this produces
-the points on geom1 and geom2, respectively that are within that
-tolerance. ";
-
-%feature("docstring")  std::destroy "void destroy()
-
-Frees all memory allocated by the collide module. All existing
-geometry ids and collision query ids are invalidated.
-
-Performs cleanup of all created spaces and planners.
-
-destroys internal data structures ";
-
-
-// File: collide_8h.xml
-%feature("docstring")  newGeom "int newGeom() ";
-
-%feature("docstring")  destroyGeom "void destroyGeom(int geom) ";
-
-%feature("docstring")  destroy "void destroy()
-
-Frees all memory allocated by the collide module. All existing
-geometry ids and collision query ids are invalidated. ";
-
-%feature("docstring")  loadGeom "bool loadGeom(int geom, const char
-*fn)
-
-Loads a geometry from a file. Sets it to the correct type based on the
-file contents.
-
-Currently supported file extensions are Trimeshes: .tri, any other
-mesh files that Assimp may support (if Klamp't is built using Assimp
-support).
-
-Point clouds: .pcd
-
-Primitive geometries: .geom
-
-Returns False if there is a load error. Raises an exception if the ID
-is invalid. ";
-
-%feature("docstring")  makeTriMeshGeom "void makeTriMeshGeom(int
-geom, const char *fn)
-
-Makes a geometry into a trimesh loaded from the file fn. ";
-
-%feature("docstring")  makeTriMeshGeom "void makeTriMeshGeom(int
-geom, const double *verts, const int *inds, int nv, int nt)
-
-Makes a geometry into a trimesh given the vertex and index data. verts
-is of length nv*3, and inds is of length nt*3.
-
-Note: in Python, must use doubleArray and intArray for the verts and
-inds objects. ";
-
-%feature("docstring")  setTriMeshTranslation "void
-setTriMeshTranslation(int geom, const double t[3])
-
-Sets the translation of a trimesh geom. ";
-
-%feature("docstring")  setTriMeshRotation "void
-setTriMeshRotation(int geom, const double r[9])
-
-Sets the rotation of a trimesh geom. ";
-
-%feature("docstring")  getTriMeshTranslation "void
-getTriMeshTranslation(int geom, double out[3])
-
-Gets the translation of a trimesh geom. ";
-
-%feature("docstring")  getTriMeshRotation "void
-getTriMeshRotation(int geom, double out[9])
-
-Gets the rotation of a trimesh geom. ";
-
-%feature("docstring")  getTriMeshBB "void getTriMeshBB(int geom,
-double out[3], double out2[3])
-
-Gets the bounding box of a trimesh geom. ";
-
-%feature("docstring")  getTriMeshNumVerts "int getTriMeshNumVerts(int
-geom)
-
-Gets the number of vertices of a trimesh geom. ";
-
-%feature("docstring")  getTriMeshNumTris "int getTriMeshNumTris(int
-geom)
-
-Gets the number of triangles of a trimesh geom. ";
-
-%feature("docstring")  getTriMeshVerts "double* getTriMeshVerts(int
-geom)
-
-Gets the vertex data of a trimesh geom (length nv*3). ";
-
-%feature("docstring")  getTriMeshTris "int* getTriMeshTris(int geom)
-
-Gets the index data of a trimesh geom (length nt*3). ";
-
-%feature("docstring")  makePointGeom "void makePointGeom(int geom,
-const double x[3])
-
-Makes a geom into a point x. ";
-
-%feature("docstring")  makeSphereGeom "void makeSphereGeom(int geom,
-const double c[3], double r)
-
-Makes a geom into a sphere centered at c with radius r. ";
-
-%feature("docstring")  makeRayGeom "void makeRayGeom(int geom, const
-double s[3], const double d[3])
-
-Makes a geom into a ray with source s and direction d. ";
-
-%feature("docstring")  makeLineGeom "void makeLineGeom(int geom,
-const double s[3], const double d[3])
-
-Makes a geom into a line with source s and direction d. ";
-
-%feature("docstring")  makeSegmentGeom "void makeSegmentGeom(int
-geom, const double a[3], const double b[3])
-
-Makes a geom into a segment with endpoints a, b. ";
-
-%feature("docstring")  makeAABBGeom "void makeAABBGeom(int geom,
-const double bmin[3], const double bmax[3])
-
-Makes a geom into an axis-aligned bounding box with lower bound bmin
-and upper bound bmax. ";
-
-%feature("docstring")  makeGroupGeom "void makeGroupGeom(int geom,
-int *geoms, int numgeoms)
-
-Makes a geom into a group geom from an array of other geoms. Note: in
-Python, must use an intArray for geoms argument. ";
-
-%feature("docstring")  collide "bool collide(int geom1, int geom2)
-
-Tests whether the two geometries collide. ";
-
-%feature("docstring")  withinTolerance "bool withinTolerance(int
-geom1, int geom2, double tol)
-
-Tests whether the two geometries are within the given tolerance. ";
-
-%feature("docstring")  distance "double distance(int geom1, int
-geom2, double relErr, double absErr)
-
-Returns the distance between the two geometries, possibly with an
-approximation error (useful to speed up mesh-mesh distance detection)
-
-Error of result is no more than D*relErr+absErr where D is the actual
-distance. Set relErr=absErr=0 to get exact distance.
-
-NOTE: Not yet implemented. ";
-
-%feature("docstring")  closestPoints "void closestPoints(int geom1,
-int geom2, double out[3], double out2[3])
-
-Returns the closest points between the two geometries. These are given
-in world coordinates.
-
-NOTE: Not yet implemented. ";
-
-%feature("docstring")  rayCast "bool rayCast(int geom, const double
-s[3], const double d[3], double out[3])
-
-Returns true if the geometry is hit by the given ray, and also returns
-the hit point (in world coordinates). ";
-
-%feature("docstring")  makeCollQuery "int makeCollQuery(int geom1,
-int geom2)
-
-Creates a collision query object attachd to the two given geometries.
-For mesh-mesh collisions, on repeated calls, this may be somewhat
-faster than querying from scratch. ";
-
-%feature("docstring")  destroyCollQuery "void destroyCollQuery(int
-query)
-
-Deletes a collision query object. ";
-
-%feature("docstring")  queryCollide "bool queryCollide(int query)
-
-Checks if the two geoms associated with this query are colliding. ";
-
-%feature("docstring")  queryWithinTolerance "bool
-queryWithinTolerance(int query, double tol)
-
-Checks if the two geoms associated with this query are within the
-given tolerance.
-
-See:   withinTolerance ";
-
-%feature("docstring")  queryDistance "double queryDistance(int query,
-double relErr, double absErr)
-
-Computes the distance betweeen the two geoms associated with this
-query.
-
-See:   distance ";
-
-%feature("docstring")  queryClosestPoints "void
-queryClosestPoints(int query, double out[3], double out2[3])
-
-Computes points that give rise to the closest distance betweeen the
-two geoms associated with this query.
-
-See:   closestPoints ";
-
-%feature("docstring")  queryTolerancePoints "void
-queryTolerancePoints(int query, double out[3], double out2[3])
-
-If the two geoms associated with this query are within a given
-tolerance (from a previous queryWithinTolerance call), this produces
-the points on geom1 and geom2, respectively that are within that
-tolerance. ";
 
 
 // File: geometry_8h.xml
 
 
 // File: motionplanning_8cpp.xml
-%feature("docstring")  setRandomSeed "void setRandomSeed(int seed)
+%feature("docstring")  std::setRandomSeed "void setRandomSeed(int
+seed)
 
 Sets the random seed used by the motion planner. ";
 
-%feature("docstring")  PyListFromVector "PyObject*
+%feature("docstring")  std::PyListFromVector "PyObject*
 PyListFromVector(const std::vector< double > &x) ";
 
-%feature("docstring")  PyListToVector "bool PyListToVector(PyObject
-*seq, std::vector< double > &x) ";
+%feature("docstring")  std::PyListToVector "bool
+PyListToVector(PyObject *seq, std::vector< double > &x) ";
 
-%feature("docstring")  makeNewCSpace "int makeNewCSpace() ";
+%feature("docstring")  std::makeNewCSpace "int makeNewCSpace() ";
 
-%feature("docstring")  destroyCSpace "void destroyCSpace(int cspace)
-";
+%feature("docstring")  std::destroyCSpace "void destroyCSpace(int
+cspace) ";
 
-%feature("docstring")  setPlanJSONString "void
+%feature("docstring")  std::setPlanJSONString "void
 setPlanJSONString(const char *string)
 
 Loads planner values from a JSON string. ";
 
-%feature("docstring")  getPlanJSONString "std::string
+%feature("docstring")  std::getPlanJSONString "std::string
 getPlanJSONString()
 
 Saves planner values to a JSON string. ";
 
-%feature("docstring")  setPlanType "void setPlanType(const char
+%feature("docstring")  std::setPlanType "void setPlanType(const char
 *type)
 
 Sets the planner type.
@@ -2069,11 +1729,11 @@ optimal motion planning
 fmm*: an anytime fast marching method algorithm for optimal motion
 planning ";
 
-%feature("docstring")  setPlanSetting "void setPlanSetting(const char
-*setting, double value) ";
+%feature("docstring")  std::setPlanSetting "void setPlanSetting(const
+char *setting, double value) ";
 
-%feature("docstring")  setPlanSetting "void setPlanSetting(const char
-*setting, const char *value)
+%feature("docstring")  std::setPlanSetting "void setPlanSetting(const
+char *setting, const char *value)
 
 Sets a numeric or string-valued setting for the planner.
 
@@ -2110,21 +1770,20 @@ followed by a weight vector (for PRM, RRT*, PRM*, LazyPRM*, LazyRRG*)
 a JSON string defining the termination condition (default value:
 \"{foundSolution:1;maxIters:1000}\") ";
 
-%feature("docstring")  makeNewPlan "int makeNewPlan(int cspace) ";
+%feature("docstring")  std::makeNewPlan "int makeNewPlan(int cspace)
+";
 
-%feature("docstring")  destroyPlan "void destroyPlan(int plan) ";
+%feature("docstring")  std::destroyPlan "void destroyPlan(int plan)
+";
 
-%feature("docstring")  DumpPlan "void DumpPlan(MotionPlannerInterface
-*planner, const char *fn) ";
+%feature("docstring")  std::DumpPlan "void
+DumpPlan(MotionPlannerInterface *planner, const char *fn) ";
 
-%feature("docstring")  destroy "void destroy()
+%feature("docstring")  std::destroy "void destroy()
 
-Frees all memory allocated by the collide module. All existing
-geometry ids and collision query ids are invalidated.
+destroys internal data structures
 
-Performs cleanup of all created spaces and planners.
-
-destroys internal data structures ";
+Performs cleanup of all created spaces and planners. ";
 
 
 // File: motionplanning_8h.xml
@@ -2215,9 +1874,7 @@ a JSON string defining the termination condition (default value:
 
 Performs cleanup of all created spaces and planners.
 
-Performs cleanup of all created spaces and planners.
-
-destroys internal data structures ";
+Performs cleanup of all created spaces and planners. ";
 
 
 // File: robotik_8cpp.xml
@@ -2258,49 +1915,57 @@ GeneralizedIKObjective &obj, double out[9], double out2[3]) ";
 
 
 // File: robotsim_8cpp.xml
-%feature("docstring")  GLDraw::createWorld "int createWorld() ";
+%feature("docstring")  createWorld "int createWorld() ";
 
-%feature("docstring")  GLDraw::derefWorld "void derefWorld(int index)
-";
+%feature("docstring")  derefWorld "void derefWorld(int index) ";
 
-%feature("docstring")  GLDraw::refWorld "void refWorld(int index) ";
+%feature("docstring")  refWorld "void refWorld(int index) ";
 
-%feature("docstring")  GLDraw::createSim "int createSim() ";
+%feature("docstring")  createSim "int createSim() ";
 
-%feature("docstring")  GLDraw::destroySim "void destroySim(int index)
-";
+%feature("docstring")  destroySim "void destroySim(int index) ";
 
-%feature("docstring")  GLDraw::MakeController "MyController*
+%feature("docstring")  createWidget "int createWidget() ";
+
+%feature("docstring")  derefWidget "void derefWidget(int index) ";
+
+%feature("docstring")  refWidget "void refWidget(int index) ";
+
+%feature("docstring")  MakeController "MyController*
 MakeController(Robot *robot) ";
 
-%feature("docstring")  GLDraw::MakeSensors "void MakeSensors(Robot
-*robot, RobotSensors &sensors) ";
+%feature("docstring")  GetMotionQueue "PolynomialMotionQueue*
+GetMotionQueue(RobotController *controller) ";
 
-%feature("docstring")  GLDraw::GetMesh "void GetMesh(const
+%feature("docstring")  MakeSensors "void MakeSensors(Robot *robot,
+RobotSensors &sensors) ";
+
+%feature("docstring")  GetMesh "void GetMesh(const
 Geometry::AnyCollisionGeometry3D &geom, TriangleMesh &tmesh) ";
 
-%feature("docstring")  GLDraw::GetMesh "void GetMesh(const
-TriangleMesh &tmesh, Geometry::AnyCollisionGeometry3D &geom) ";
+%feature("docstring")  GetMesh "void GetMesh(const TriangleMesh
+&tmesh, Geometry::AnyCollisionGeometry3D &geom) ";
 
-%feature("docstring")  GLDraw::GetPointCloud "void
-GetPointCloud(const Geometry::AnyCollisionGeometry3D &geom, PointCloud
-&pc) ";
+%feature("docstring")  GetPointCloud "void GetPointCloud(const
+Geometry::AnyCollisionGeometry3D &geom, PointCloud &pc) ";
 
-%feature("docstring")  GLDraw::GetPointCloud "void
-GetPointCloud(const PointCloud &pc, Geometry::AnyCollisionGeometry3D
-&geom) ";
+%feature("docstring")  GetPointCloud "void GetPointCloud(const
+PointCloud &pc, Geometry::AnyCollisionGeometry3D &geom) ";
 
-%feature("docstring")  GLDraw::copy "void copy(const Vector &vec,
-vector< double > &v) ";
+%feature("docstring")  copy "void copy(const Vector &vec, vector<
+double > &v) ";
 
-%feature("docstring")  GLDraw::copy "void copy(const vector< double >
-&vec, Vector &v) ";
+%feature("docstring")  copy "void copy(const vector< double > &vec,
+Vector &v) ";
 
-%feature("docstring")  GLDraw::copy "void copy(const Matrix &mat,
-vector< double > &v) ";
+%feature("docstring")  copy "void copy(const Matrix &mat, vector<
+double > &v) ";
 
-%feature("docstring")  GLDraw::copy "void copy(const Matrix &mat,
-vector< vector< double > > &v) ";
+%feature("docstring")  copy "void copy(const Matrix &mat, vector<
+vector< double > > &v) ";
+
+%feature("docstring")  GetCameraViewport "Camera::Viewport
+GetCameraViewport(const Viewport &viewport) ";
 
 
 // File: robotsim_8h.xml
@@ -2348,12 +2013,9 @@ Same as findRoots, but with given bounds (xmin,xmax) ";
 
 %feature("docstring")  destroy "void destroy()
 
-Frees all memory allocated by the collide module. All existing
-geometry ids and collision query ids are invalidated.
+destroys internal data structures
 
-Performs cleanup of all created spaces and planners.
-
-destroys internal data structures ";
+Performs cleanup of all created spaces and planners. ";
 
 
 // File: rootfind_8h.xml
@@ -2394,8 +2056,6 @@ findRootsBounded(PyObject *startVals, PyObject *boundVals, int iter)
 Same as findRoots, but with given bounds (xmin,xmax) ";
 
 %feature("docstring")  destroy "void destroy()
-
-destroys internal data structures
 
 destroys internal data structures ";
 

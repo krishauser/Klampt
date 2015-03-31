@@ -18,7 +18,7 @@ struct ViewPolytope
   void Draw(const Geometry::UnboundedPolytope2D& _poly) { poly=&_poly; Draw(); }
 
   const Geometry::UnboundedPolytope2D* poly;
-  GLColor color;
+  GLDraw::GLColor color;
   bool wireframe;
   Real h;
 };
@@ -38,7 +38,7 @@ struct ViewStance
 
   const Stance* s;
   ViewHold viewHold;
-  GLColor forceColor;
+  GLDraw::GLColor forceColor;
 };
 
 

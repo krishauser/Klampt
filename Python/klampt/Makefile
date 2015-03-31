@@ -17,11 +17,9 @@ sphinx-docs:
 swig:
 	swig -python -c++ src/robotsim.i
 	swig -python -c++ src/motionplanning.i
-	swig -python -c++ src/collide.i
 	swig -python -c++ src/rootfind.i
 	cp src/robotsim.py .
 	cp src/motionplanning.py .
-	cp src/collide.py .
 	cp src/rootfind.py .
 
 

@@ -5,7 +5,6 @@
 #include <GLdraw/TransformWidget.h>
 #include <robotics/IK.h>
 #include "ViewRigidObject.h"
-using namespace GLDraw;
 
 /** @addtogroup View */
 /** @{ */
@@ -13,7 +12,7 @@ using namespace GLDraw;
 /** A widget that allows full posing and editing of the robot config including
  * IK constraints and base motion.
  */
-class RigidObjectPoseWidget : public WidgetSet
+class RigidObjectPoseWidget : public GLDraw::WidgetSet
 {
 public:
   RigidObjectPoseWidget();
@@ -30,7 +29,7 @@ public:
   virtual void Keypress(char c);
 
   RigidObject* rigidObject;
-  TransformWidget poser;
+  GLDraw::TransformWidget poser;
 };
 
 /** @} */

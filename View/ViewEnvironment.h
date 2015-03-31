@@ -3,7 +3,6 @@
 
 #include "Modeling/Environment.h"
 #include <GLdraw/GeometryAppearance.h>
-using namespace GLDraw;
 
 /** @ingroup View 
  * @brief Displays an Environment structure using OpenGL.
@@ -22,7 +21,7 @@ struct ViewEnvironment
 
   Environment* env;
   int texture, texCoords, texDivs;
-  GeometryAppearance appearance;
+  GLDraw::GeometryAppearance appearance;
 };
 
 

@@ -7,6 +7,7 @@
 #include <GLdraw/GLError.h>
 using namespace Math;
 using namespace Meshing;
+using namespace GLDraw;
 
 ViewRigidObject::ViewRigidObject()
 {

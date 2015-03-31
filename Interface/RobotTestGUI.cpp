@@ -219,7 +219,7 @@ bool RobotTestBackend::OnCommand(const string& cmd,const string& args)
     robot->q(cur_link)=value;
     robot->UpdateFrames();
     SendRefresh();
-    //    UpdateConfig();
+    UpdateConfig();
   }
   else if(cmd=="set_driver") {
     ss >> cur_driver;
@@ -230,7 +230,7 @@ bool RobotTestBackend::OnCommand(const string& cmd,const string& args)
     robot->UpdateConfig(robotWidgets[0].Pose());
     robot->SetDriverValue(cur_driver,driver_value);
     robotWidgets[0].SetPose(robot->q);
-    robot->UpdateFrames();
+    UpdateConfig();
   }
   else if(cmd=="pose_mode") {
     for(size_t i=0;i<robotWidgets.size();i++)

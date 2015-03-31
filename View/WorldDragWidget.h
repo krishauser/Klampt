@@ -4,7 +4,7 @@
 #include <GLdraw/Widget.h>
 #include "Modeling/World.h"
 
-class WorldDragWidget : public Widget
+class WorldDragWidget : public GLDraw::Widget
 {
 public:
   WorldDragWidget(RobotWorld* world=NULL);
@@ -21,7 +21,7 @@ public:
   RobotWorld* world;
   bool active;
   bool robotsActive,objectsActive,terrainsActive;
-  GLColor highlightColor,lineColor;
+  GLDraw::GLColor highlightColor,lineColor;
   float lineWidth;
   bool dragging;
   int hoverID;
@@ -30,7 +30,7 @@ public:
   Real hoverDistance;
 
   int highlightID;
-  GLColor originalFaceColor;
+  GLDraw::GLColor originalFaceColor;
 };
 
 #endif

@@ -146,8 +146,6 @@ def destroy():
 
     void destroy()
 
-    destroys internal data structures
-
     destroys internal data structures 
     """
   return _rootfind.destroy()

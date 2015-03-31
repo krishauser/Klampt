@@ -3,6 +3,7 @@
 
 #include <utils/ResourceLibrary.h>
 #include <math3d/geometry3d.h>
+#include <meshing/PointCloud.h>
 #include "World.h"
 #include "MultiPath.h"
 #include "Contact/Stance.h"

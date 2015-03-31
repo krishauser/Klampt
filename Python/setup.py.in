@@ -43,7 +43,6 @@ for d in defs:
 commonfiles = ['pyerr.cpp']
 rssourcefiles = commonfiles + ['robotsim.cpp','robotik.cpp','robotsim_wrap.cxx']
 mpsourcefiles = commonfiles + ['motionplanning.cpp','motionplanning_wrap.cxx']
-cosourcefiles = commonfiles + ['collide.cpp','collide_wrap.cxx']
 rfsourcefiles = commonfiles + ['rootfind.cpp','pyvectorfield.cpp','rootfind_wrap.cxx']
 
 setup(name='Klampt',
@@ -66,13 +65,6 @@ setup(name='Klampt',
                              library_dirs=libdirs,
                              libraries=libs,
                              language='c++'),
-                   Extension('klampt._collide',
-                             [os.path.join('klampt/src',f) for f in cosourcefiles],
-                             include_dirs=includeDirs,
-                             define_macros=commondefines,
-                             library_dirs=libdirs,
-                             libraries=libs,
-                             language='c++'),
                    Extension('klampt._rootfind',
                              [os.path.join('klampt/src',f) for f in rfsourcefiles],
                              include_dirs=includeDirs,
@@ -80,7 +72,7 @@ setup(name='Klampt',
                              library_dirs=libdirs,
                              libraries=libs,
                              language='c++')],
-      py_modules=['klampt.robotsim','klampt.motionplanning','klampt.collide','klampt.rootfind'],
+      py_modules=['klampt.robotsim','klampt.motionplanning','klampt.rootfind'],
       packages=['klampt']
      )
 

@@ -126,6 +126,30 @@ def doubleArray_frompointer(*args):
   return _robotsim.doubleArray_frompointer(*args)
 doubleArray_frompointer = _robotsim.doubleArray_frompointer
 
+class floatArray(_object):
+    __swig_setmethods__ = {}
+    __setattr__ = lambda self, name, value: _swig_setattr(self, floatArray, name, value)
+    __swig_getmethods__ = {}
+    __getattr__ = lambda self, name: _swig_getattr(self, floatArray, name)
+    __repr__ = _swig_repr
+    def __init__(self, *args): 
+        this = _robotsim.new_floatArray(*args)
+        try: self.this.append(this)
+        except: self.this = this
+    __swig_destroy__ = _robotsim.delete_floatArray
+    __del__ = lambda self : None;
+    def __getitem__(self, *args): return _robotsim.floatArray___getitem__(self, *args)
+    def __setitem__(self, *args): return _robotsim.floatArray___setitem__(self, *args)
+    def cast(self): return _robotsim.floatArray_cast(self)
+    __swig_getmethods__["frompointer"] = lambda x: _robotsim.floatArray_frompointer
+    if _newclass:frompointer = staticmethod(_robotsim.floatArray_frompointer)
+floatArray_swigregister = _robotsim.floatArray_swigregister
+floatArray_swigregister(floatArray)
+
+def floatArray_frompointer(*args):
+  return _robotsim.floatArray_frompointer(*args)
+floatArray_frompointer = _robotsim.floatArray_frompointer
+
 class intArray(_object):
     __swig_setmethods__ = {}
     __setattr__ = lambda self, name, value: _swig_setattr(self, intArray, name, value)
@@ -149,53 +173,6 @@ intArray_swigregister(intArray)
 def intArray_frompointer(*args):
   return _robotsim.intArray_frompointer(*args)
 intArray_frompointer = _robotsim.intArray_frompointer
-
-class intVector(_object):
-    __swig_setmethods__ = {}
-    __setattr__ = lambda self, name, value: _swig_setattr(self, intVector, name, value)
-    __swig_getmethods__ = {}
-    __getattr__ = lambda self, name: _swig_getattr(self, intVector, name)
-    __repr__ = _swig_repr
-    def iterator(self): return _robotsim.intVector_iterator(self)
-    def __iter__(self): return self.iterator()
-    def __nonzero__(self): return _robotsim.intVector___nonzero__(self)
-    def __bool__(self): return _robotsim.intVector___bool__(self)
-    def __len__(self): return _robotsim.intVector___len__(self)
-    def pop(self): return _robotsim.intVector_pop(self)
-    def __getslice__(self, *args): return _robotsim.intVector___getslice__(self, *args)
-    def __setslice__(self, *args): return _robotsim.intVector___setslice__(self, *args)
-    def __delslice__(self, *args): return _robotsim.intVector___delslice__(self, *args)
-    def __delitem__(self, *args): return _robotsim.intVector___delitem__(self, *args)
-    def __getitem__(self, *args): return _robotsim.intVector___getitem__(self, *args)
-    def __setitem__(self, *args): return _robotsim.intVector___setitem__(self, *args)
-    def append(self, *args): return _robotsim.intVector_append(self, *args)
-    def empty(self): return _robotsim.intVector_empty(self)
-    def size(self): return _robotsim.intVector_size(self)
-    def clear(self): return _robotsim.intVector_clear(self)
-    def swap(self, *args): return _robotsim.intVector_swap(self, *args)
-    def get_allocator(self): return _robotsim.intVector_get_allocator(self)
-    def begin(self): return _robotsim.intVector_begin(self)
-    def end(self): return _robotsim.intVector_end(self)
-    def rbegin(self): return _robotsim.intVector_rbegin(self)
-    def rend(self): return _robotsim.intVector_rend(self)
-    def pop_back(self): return _robotsim.intVector_pop_back(self)
-    def erase(self, *args): return _robotsim.intVector_erase(self, *args)
-    def __init__(self, *args): 
-        this = _robotsim.new_intVector(*args)
-        try: self.this.append(this)
-        except: self.this = this
-    def push_back(self, *args): return _robotsim.intVector_push_back(self, *args)
-    def front(self): return _robotsim.intVector_front(self)
-    def back(self): return _robotsim.intVector_back(self)
-    def assign(self, *args): return _robotsim.intVector_assign(self, *args)
-    def resize(self, *args): return _robotsim.intVector_resize(self, *args)
-    def insert(self, *args): return _robotsim.intVector_insert(self, *args)
-    def reserve(self, *args): return _robotsim.intVector_reserve(self, *args)
-    def capacity(self): return _robotsim.intVector_capacity(self)
-    __swig_destroy__ = _robotsim.delete_intVector
-    __del__ = lambda self : None;
-intVector_swigregister = _robotsim.intVector_swigregister
-intVector_swigregister(intVector)
 
 class doubleVector(_object):
     __swig_setmethods__ = {}
@@ -243,6 +220,100 @@ class doubleVector(_object):
     __del__ = lambda self : None;
 doubleVector_swigregister = _robotsim.doubleVector_swigregister
 doubleVector_swigregister(doubleVector)
+
+class floatVector(_object):
+    __swig_setmethods__ = {}
+    __setattr__ = lambda self, name, value: _swig_setattr(self, floatVector, name, value)
+    __swig_getmethods__ = {}
+    __getattr__ = lambda self, name: _swig_getattr(self, floatVector, name)
+    __repr__ = _swig_repr
+    def iterator(self): return _robotsim.floatVector_iterator(self)
+    def __iter__(self): return self.iterator()
+    def __nonzero__(self): return _robotsim.floatVector___nonzero__(self)
+    def __bool__(self): return _robotsim.floatVector___bool__(self)
+    def __len__(self): return _robotsim.floatVector___len__(self)
+    def pop(self): return _robotsim.floatVector_pop(self)
+    def __getslice__(self, *args): return _robotsim.floatVector___getslice__(self, *args)
+    def __setslice__(self, *args): return _robotsim.floatVector___setslice__(self, *args)
+    def __delslice__(self, *args): return _robotsim.floatVector___delslice__(self, *args)
+    def __delitem__(self, *args): return _robotsim.floatVector___delitem__(self, *args)
+    def __getitem__(self, *args): return _robotsim.floatVector___getitem__(self, *args)
+    def __setitem__(self, *args): return _robotsim.floatVector___setitem__(self, *args)
+    def append(self, *args): return _robotsim.floatVector_append(self, *args)
+    def empty(self): return _robotsim.floatVector_empty(self)
+    def size(self): return _robotsim.floatVector_size(self)
+    def clear(self): return _robotsim.floatVector_clear(self)
+    def swap(self, *args): return _robotsim.floatVector_swap(self, *args)
+    def get_allocator(self): return _robotsim.floatVector_get_allocator(self)
+    def begin(self): return _robotsim.floatVector_begin(self)
+    def end(self): return _robotsim.floatVector_end(self)
+    def rbegin(self): return _robotsim.floatVector_rbegin(self)
+    def rend(self): return _robotsim.floatVector_rend(self)
+    def pop_back(self): return _robotsim.floatVector_pop_back(self)
+    def erase(self, *args): return _robotsim.floatVector_erase(self, *args)
+    def __init__(self, *args): 
+        this = _robotsim.new_floatVector(*args)
+        try: self.this.append(this)
+        except: self.this = this
+    def push_back(self, *args): return _robotsim.floatVector_push_back(self, *args)
+    def front(self): return _robotsim.floatVector_front(self)
+    def back(self): return _robotsim.floatVector_back(self)
+    def assign(self, *args): return _robotsim.floatVector_assign(self, *args)
+    def resize(self, *args): return _robotsim.floatVector_resize(self, *args)
+    def insert(self, *args): return _robotsim.floatVector_insert(self, *args)
+    def reserve(self, *args): return _robotsim.floatVector_reserve(self, *args)
+    def capacity(self): return _robotsim.floatVector_capacity(self)
+    __swig_destroy__ = _robotsim.delete_floatVector
+    __del__ = lambda self : None;
+floatVector_swigregister = _robotsim.floatVector_swigregister
+floatVector_swigregister(floatVector)
+
+class intVector(_object):
+    __swig_setmethods__ = {}
+    __setattr__ = lambda self, name, value: _swig_setattr(self, intVector, name, value)
+    __swig_getmethods__ = {}
+    __getattr__ = lambda self, name: _swig_getattr(self, intVector, name)
+    __repr__ = _swig_repr
+    def iterator(self): return _robotsim.intVector_iterator(self)
+    def __iter__(self): return self.iterator()
+    def __nonzero__(self): return _robotsim.intVector___nonzero__(self)
+    def __bool__(self): return _robotsim.intVector___bool__(self)
+    def __len__(self): return _robotsim.intVector___len__(self)
+    def pop(self): return _robotsim.intVector_pop(self)
+    def __getslice__(self, *args): return _robotsim.intVector___getslice__(self, *args)
+    def __setslice__(self, *args): return _robotsim.intVector___setslice__(self, *args)
+    def __delslice__(self, *args): return _robotsim.intVector___delslice__(self, *args)
+    def __delitem__(self, *args): return _robotsim.intVector___delitem__(self, *args)
+    def __getitem__(self, *args): return _robotsim.intVector___getitem__(self, *args)
+    def __setitem__(self, *args): return _robotsim.intVector___setitem__(self, *args)
+    def append(self, *args): return _robotsim.intVector_append(self, *args)
+    def empty(self): return _robotsim.intVector_empty(self)
+    def size(self): return _robotsim.intVector_size(self)
+    def clear(self): return _robotsim.intVector_clear(self)
+    def swap(self, *args): return _robotsim.intVector_swap(self, *args)
+    def get_allocator(self): return _robotsim.intVector_get_allocator(self)
+    def begin(self): return _robotsim.intVector_begin(self)
+    def end(self): return _robotsim.intVector_end(self)
+    def rbegin(self): return _robotsim.intVector_rbegin(self)
+    def rend(self): return _robotsim.intVector_rend(self)
+    def pop_back(self): return _robotsim.intVector_pop_back(self)
+    def erase(self, *args): return _robotsim.intVector_erase(self, *args)
+    def __init__(self, *args): 
+        this = _robotsim.new_intVector(*args)
+        try: self.this.append(this)
+        except: self.this = this
+    def push_back(self, *args): return _robotsim.intVector_push_back(self, *args)
+    def front(self): return _robotsim.intVector_front(self)
+    def back(self): return _robotsim.intVector_back(self)
+    def assign(self, *args): return _robotsim.intVector_assign(self, *args)
+    def resize(self, *args): return _robotsim.intVector_resize(self, *args)
+    def insert(self, *args): return _robotsim.intVector_insert(self, *args)
+    def reserve(self, *args): return _robotsim.intVector_reserve(self, *args)
+    def capacity(self): return _robotsim.intVector_capacity(self)
+    __swig_destroy__ = _robotsim.delete_intVector
+    __del__ = lambda self : None;
+intVector_swigregister = _robotsim.intVector_swigregister
+intVector_swigregister(intVector)
 
 class doubleMatrix(_object):
     __swig_setmethods__ = {}
@@ -764,6 +835,381 @@ class Geometry3D(_object):
 Geometry3D_swigregister = _robotsim.Geometry3D_swigregister
 Geometry3D_swigregister(Geometry3D)
 
+class Appearance(_object):
+    """Proxy of C++ Appearance class"""
+    __swig_setmethods__ = {}
+    __setattr__ = lambda self, name, value: _swig_setattr(self, Appearance, name, value)
+    __swig_getmethods__ = {}
+    __getattr__ = lambda self, name: _swig_getattr(self, Appearance, name)
+    __repr__ = _swig_repr
+    ALL = _robotsim.Appearance_ALL
+    VERTICES = _robotsim.Appearance_VERTICES
+    EDGES = _robotsim.Appearance_EDGES
+    FACES = _robotsim.Appearance_FACES
+    def __init__(self): 
+        """__init__(Appearance self) -> Appearance"""
+        this = _robotsim.new_Appearance()
+        try: self.this.append(this)
+        except: self.this = this
+    __swig_destroy__ = _robotsim.delete_Appearance
+    __del__ = lambda self : None;
+    def refresh(self):
+        """refresh(Appearance self)"""
+        return _robotsim.Appearance_refresh(self)
+
+    def clone(self):
+        """clone(Appearance self) -> Appearance"""
+        return _robotsim.Appearance_clone(self)
+
+    def set(self, *args):
+        """set(Appearance self, Appearance arg2)"""
+        return _robotsim.Appearance_set(self, *args)
+
+    def isStandalone(self):
+        """isStandalone(Appearance self) -> bool"""
+        return _robotsim.Appearance_isStandalone(self)
+
+    def free(self):
+        """free(Appearance self)"""
+        return _robotsim.Appearance_free(self)
+
+    def setDraw(self, *args):
+        """
+        setDraw(Appearance self, bool draw)
+        setDraw(Appearance self, int primitive, bool draw)
+        """
+        return _robotsim.Appearance_setDraw(self, *args)
+
+    def getDraw(self, *args):
+        """
+        getDraw(Appearance self) -> bool
+        getDraw(Appearance self, int primitive) -> bool
+        """
+        return _robotsim.Appearance_getDraw(self, *args)
+
+    def setColor(self, *args):
+        """
+        setColor(Appearance self, float r, float g, float b, float a)
+        setColor(Appearance self, int primitive, float r, float g, float b, float a)
+        """
+        return _robotsim.Appearance_setColor(self, *args)
+
+    def getColor(self, *args):
+        """
+        getColor(Appearance self)
+        getColor(Appearance self, int primitive)
+        """
+        return _robotsim.Appearance_getColor(self, *args)
+
+    def setColors(self, *args):
+        """
+        setColors(Appearance self, int primitive, floatVector colors, bool alpha=False)
+        setColors(Appearance self, int primitive, floatVector colors)
+        """
+        return _robotsim.Appearance_setColors(self, *args)
+
+    def setTexture1D(self, *args):
+        """setTexture1D(Appearance self, int w, char const * format, std::vector< unsigned char,std::allocator< unsigned char > > const & bytes)"""
+        return _robotsim.Appearance_setTexture1D(self, *args)
+
+    def setTexture2D(self, *args):
+        """setTexture2D(Appearance self, int w, int h, char const * format, std::vector< unsigned char,std::allocator< unsigned char > > const & bytes)"""
+        return _robotsim.Appearance_setTexture2D(self, *args)
+
+    def setTexcoords(self, *args):
+        """setTexcoords(Appearance self, doubleVector uvs)"""
+        return _robotsim.Appearance_setTexcoords(self, *args)
+
+    def drawGL(self, *args):
+        """
+        drawGL(Appearance self)
+        drawGL(Appearance self, Geometry3D geom)
+        """
+        return _robotsim.Appearance_drawGL(self, *args)
+
+    __swig_setmethods__["world"] = _robotsim.Appearance_world_set
+    __swig_getmethods__["world"] = _robotsim.Appearance_world_get
+    if _newclass:world = _swig_property(_robotsim.Appearance_world_get, _robotsim.Appearance_world_set)
+    __swig_setmethods__["id"] = _robotsim.Appearance_id_set
+    __swig_getmethods__["id"] = _robotsim.Appearance_id_get
+    if _newclass:id = _swig_property(_robotsim.Appearance_id_get, _robotsim.Appearance_id_set)
+    __swig_setmethods__["appearancePtr"] = _robotsim.Appearance_appearancePtr_set
+    __swig_getmethods__["appearancePtr"] = _robotsim.Appearance_appearancePtr_get
+    if _newclass:appearancePtr = _swig_property(_robotsim.Appearance_appearancePtr_get, _robotsim.Appearance_appearancePtr_set)
+Appearance_swigregister = _robotsim.Appearance_swigregister
+Appearance_swigregister(Appearance)
+
+class Viewport(_object):
+    """Proxy of C++ Viewport class"""
+    __swig_setmethods__ = {}
+    __setattr__ = lambda self, name, value: _swig_setattr(self, Viewport, name, value)
+    __swig_getmethods__ = {}
+    __getattr__ = lambda self, name: _swig_getattr(self, Viewport, name)
+    __repr__ = _swig_repr
+    def fromJson(self, *args):
+        """fromJson(Viewport self, std::string const & str) -> bool"""
+        return _robotsim.Viewport_fromJson(self, *args)
+
+    def toJson(self):
+        """toJson(Viewport self) -> std::string"""
+        return _robotsim.Viewport_toJson(self)
+
+    def setModelviewMatrix(self, *args):
+        """setModelviewMatrix(Viewport self, double const [16] M)"""
+        return _robotsim.Viewport_setModelviewMatrix(self, *args)
+
+    def setRigidTransform(self, *args):
+        """setRigidTransform(Viewport self, double const [9] R, double const [3] t)"""
+        return _robotsim.Viewport_setRigidTransform(self, *args)
+
+    def getRigidTransform(self):
+        """getRigidTransform(Viewport self)"""
+        return _robotsim.Viewport_getRigidTransform(self)
+
+    __swig_setmethods__["perspective"] = _robotsim.Viewport_perspective_set
+    __swig_getmethods__["perspective"] = _robotsim.Viewport_perspective_get
+    if _newclass:perspective = _swig_property(_robotsim.Viewport_perspective_get, _robotsim.Viewport_perspective_set)
+    __swig_setmethods__["scale"] = _robotsim.Viewport_scale_set
+    __swig_getmethods__["scale"] = _robotsim.Viewport_scale_get
+    if _newclass:scale = _swig_property(_robotsim.Viewport_scale_get, _robotsim.Viewport_scale_set)
+    __swig_setmethods__["x"] = _robotsim.Viewport_x_set
+    __swig_getmethods__["x"] = _robotsim.Viewport_x_get
+    if _newclass:x = _swig_property(_robotsim.Viewport_x_get, _robotsim.Viewport_x_set)
+    __swig_setmethods__["y"] = _robotsim.Viewport_y_set
+    __swig_getmethods__["y"] = _robotsim.Viewport_y_get
+    if _newclass:y = _swig_property(_robotsim.Viewport_y_get, _robotsim.Viewport_y_set)
+    __swig_setmethods__["w"] = _robotsim.Viewport_w_set
+    __swig_getmethods__["w"] = _robotsim.Viewport_w_get
+    if _newclass:w = _swig_property(_robotsim.Viewport_w_get, _robotsim.Viewport_w_set)
+    __swig_setmethods__["h"] = _robotsim.Viewport_h_set
+    __swig_getmethods__["h"] = _robotsim.Viewport_h_get
+    if _newclass:h = _swig_property(_robotsim.Viewport_h_get, _robotsim.Viewport_h_set)
+    __swig_setmethods__["n"] = _robotsim.Viewport_n_set
+    __swig_getmethods__["n"] = _robotsim.Viewport_n_get
+    if _newclass:n = _swig_property(_robotsim.Viewport_n_get, _robotsim.Viewport_n_set)
+    __swig_setmethods__["f"] = _robotsim.Viewport_f_set
+    __swig_getmethods__["f"] = _robotsim.Viewport_f_get
+    if _newclass:f = _swig_property(_robotsim.Viewport_f_get, _robotsim.Viewport_f_set)
+    __swig_setmethods__["xform"] = _robotsim.Viewport_xform_set
+    __swig_getmethods__["xform"] = _robotsim.Viewport_xform_get
+    if _newclass:xform = _swig_property(_robotsim.Viewport_xform_get, _robotsim.Viewport_xform_set)
+    def __init__(self): 
+        """__init__(Viewport self) -> Viewport"""
+        this = _robotsim.new_Viewport()
+        try: self.this.append(this)
+        except: self.this = this
+    __swig_destroy__ = _robotsim.delete_Viewport
+    __del__ = lambda self : None;
+Viewport_swigregister = _robotsim.Viewport_swigregister
+Viewport_swigregister(Viewport)
+
+class Widget(_object):
+    """Proxy of C++ Widget class"""
+    __swig_setmethods__ = {}
+    __setattr__ = lambda self, name, value: _swig_setattr(self, Widget, name, value)
+    __swig_getmethods__ = {}
+    __getattr__ = lambda self, name: _swig_getattr(self, Widget, name)
+    __repr__ = _swig_repr
+    def __init__(self): 
+        """__init__(Widget self) -> Widget"""
+        this = _robotsim.new_Widget()
+        try: self.this.append(this)
+        except: self.this = this
+    __swig_destroy__ = _robotsim.delete_Widget
+    __del__ = lambda self : None;
+    def hover(self, *args):
+        """hover(Widget self, int x, int y, Viewport viewport) -> bool"""
+        return _robotsim.Widget_hover(self, *args)
+
+    def beginDrag(self, *args):
+        """beginDrag(Widget self, int x, int y, Viewport viewport) -> bool"""
+        return _robotsim.Widget_beginDrag(self, *args)
+
+    def drag(self, *args):
+        """drag(Widget self, int dx, int dy, Viewport viewport)"""
+        return _robotsim.Widget_drag(self, *args)
+
+    def endDrag(self):
+        """endDrag(Widget self)"""
+        return _robotsim.Widget_endDrag(self)
+
+    def keypress(self, *args):
+        """keypress(Widget self, char c)"""
+        return _robotsim.Widget_keypress(self, *args)
+
+    def drawGL(self, *args):
+        """drawGL(Widget self, Viewport viewport)"""
+        return _robotsim.Widget_drawGL(self, *args)
+
+    def idle(self):
+        """idle(Widget self)"""
+        return _robotsim.Widget_idle(self)
+
+    def wantsRedraw(self):
+        """wantsRedraw(Widget self) -> bool"""
+        return _robotsim.Widget_wantsRedraw(self)
+
+    __swig_setmethods__["index"] = _robotsim.Widget_index_set
+    __swig_getmethods__["index"] = _robotsim.Widget_index_get
+    if _newclass:index = _swig_property(_robotsim.Widget_index_get, _robotsim.Widget_index_set)
+Widget_swigregister = _robotsim.Widget_swigregister
+Widget_swigregister(Widget)
+
+class WidgetSet(Widget):
+    """Proxy of C++ WidgetSet class"""
+    __swig_setmethods__ = {}
+    for _s in [Widget]: __swig_setmethods__.update(getattr(_s,'__swig_setmethods__',{}))
+    __setattr__ = lambda self, name, value: _swig_setattr(self, WidgetSet, name, value)
+    __swig_getmethods__ = {}
+    for _s in [Widget]: __swig_getmethods__.update(getattr(_s,'__swig_getmethods__',{}))
+    __getattr__ = lambda self, name: _swig_getattr(self, WidgetSet, name)
+    __repr__ = _swig_repr
+    def __init__(self): 
+        """__init__(WidgetSet self) -> WidgetSet"""
+        this = _robotsim.new_WidgetSet()
+        try: self.this.append(this)
+        except: self.this = this
+    def add(self, *args):
+        """add(WidgetSet self, Widget subwidget)"""
+        return _robotsim.WidgetSet_add(self, *args)
+
+    def remove(self, *args):
+        """remove(WidgetSet self, Widget subwidget)"""
+        return _robotsim.WidgetSet_remove(self, *args)
+
+    def enable(self, *args):
+        """enable(WidgetSet self, Widget subwidget, bool enabled)"""
+        return _robotsim.WidgetSet_enable(self, *args)
+
+    __swig_destroy__ = _robotsim.delete_WidgetSet
+    __del__ = lambda self : None;
+WidgetSet_swigregister = _robotsim.WidgetSet_swigregister
+WidgetSet_swigregister(WidgetSet)
+
+class PointPoser(Widget):
+    """Proxy of C++ PointPoser class"""
+    __swig_setmethods__ = {}
+    for _s in [Widget]: __swig_setmethods__.update(getattr(_s,'__swig_setmethods__',{}))
+    __setattr__ = lambda self, name, value: _swig_setattr(self, PointPoser, name, value)
+    __swig_getmethods__ = {}
+    for _s in [Widget]: __swig_getmethods__.update(getattr(_s,'__swig_getmethods__',{}))
+    __getattr__ = lambda self, name: _swig_getattr(self, PointPoser, name)
+    __repr__ = _swig_repr
+    def __init__(self): 
+        """__init__(PointPoser self) -> PointPoser"""
+        this = _robotsim.new_PointPoser()
+        try: self.this.append(this)
+        except: self.this = this
+    def set(self, *args):
+        """set(PointPoser self, double const [3] t)"""
+        return _robotsim.PointPoser_set(self, *args)
+
+    def get(self):
+        """get(PointPoser self)"""
+        return _robotsim.PointPoser_get(self)
+
+    def setAxes(self, *args):
+        """setAxes(PointPoser self, double const [9] R)"""
+        return _robotsim.PointPoser_setAxes(self, *args)
+
+    __swig_destroy__ = _robotsim.delete_PointPoser
+    __del__ = lambda self : None;
+PointPoser_swigregister = _robotsim.PointPoser_swigregister
+PointPoser_swigregister(PointPoser)
+
+class TransformPoser(Widget):
+    """Proxy of C++ TransformPoser class"""
+    __swig_setmethods__ = {}
+    for _s in [Widget]: __swig_setmethods__.update(getattr(_s,'__swig_setmethods__',{}))
+    __setattr__ = lambda self, name, value: _swig_setattr(self, TransformPoser, name, value)
+    __swig_getmethods__ = {}
+    for _s in [Widget]: __swig_getmethods__.update(getattr(_s,'__swig_getmethods__',{}))
+    __getattr__ = lambda self, name: _swig_getattr(self, TransformPoser, name)
+    __repr__ = _swig_repr
+    def __init__(self): 
+        """__init__(TransformPoser self) -> TransformPoser"""
+        this = _robotsim.new_TransformPoser()
+        try: self.this.append(this)
+        except: self.this = this
+    def set(self, *args):
+        """set(TransformPoser self, double const [9] R, double const [3] t)"""
+        return _robotsim.TransformPoser_set(self, *args)
+
+    def get(self):
+        """get(TransformPoser self)"""
+        return _robotsim.TransformPoser_get(self)
+
+    def enableTranslation(self, *args):
+        """enableTranslation(TransformPoser self, bool arg2)"""
+        return _robotsim.TransformPoser_enableTranslation(self, *args)
+
+    def enableRotation(self, *args):
+        """enableRotation(TransformPoser self, bool arg2)"""
+        return _robotsim.TransformPoser_enableRotation(self, *args)
+
+    __swig_destroy__ = _robotsim.delete_TransformPoser
+    __del__ = lambda self : None;
+TransformPoser_swigregister = _robotsim.TransformPoser_swigregister
+TransformPoser_swigregister(TransformPoser)
+
+class ObjectPoser(Widget):
+    """Proxy of C++ ObjectPoser class"""
+    __swig_setmethods__ = {}
+    for _s in [Widget]: __swig_setmethods__.update(getattr(_s,'__swig_setmethods__',{}))
+    __setattr__ = lambda self, name, value: _swig_setattr(self, ObjectPoser, name, value)
+    __swig_getmethods__ = {}
+    for _s in [Widget]: __swig_getmethods__.update(getattr(_s,'__swig_getmethods__',{}))
+    __getattr__ = lambda self, name: _swig_getattr(self, ObjectPoser, name)
+    __repr__ = _swig_repr
+    def __init__(self, *args): 
+        """__init__(ObjectPoser self, RigidObjectModel object) -> ObjectPoser"""
+        this = _robotsim.new_ObjectPoser(*args)
+        try: self.this.append(this)
+        except: self.this = this
+    def set(self, *args):
+        """set(ObjectPoser self, double const [9] R, double const [3] t)"""
+        return _robotsim.ObjectPoser_set(self, *args)
+
+    def get(self):
+        """get(ObjectPoser self)"""
+        return _robotsim.ObjectPoser_get(self)
+
+    __swig_destroy__ = _robotsim.delete_ObjectPoser
+    __del__ = lambda self : None;
+ObjectPoser_swigregister = _robotsim.ObjectPoser_swigregister
+ObjectPoser_swigregister(ObjectPoser)
+
+class RobotPoser(Widget):
+    """Proxy of C++ RobotPoser class"""
+    __swig_setmethods__ = {}
+    for _s in [Widget]: __swig_setmethods__.update(getattr(_s,'__swig_setmethods__',{}))
+    __setattr__ = lambda self, name, value: _swig_setattr(self, RobotPoser, name, value)
+    __swig_getmethods__ = {}
+    for _s in [Widget]: __swig_getmethods__.update(getattr(_s,'__swig_getmethods__',{}))
+    __getattr__ = lambda self, name: _swig_getattr(self, RobotPoser, name)
+    __repr__ = _swig_repr
+    def __init__(self, *args): 
+        """__init__(RobotPoser self, RobotModel robot) -> RobotPoser"""
+        this = _robotsim.new_RobotPoser(*args)
+        try: self.this.append(this)
+        except: self.this = this
+    def set(self, *args):
+        """set(RobotPoser self, doubleVector q)"""
+        return _robotsim.RobotPoser_set(self, *args)
+
+    def get(self):
+        """get(RobotPoser self)"""
+        return _robotsim.RobotPoser_get(self)
+
+    def getConditioned(self, *args):
+        """getConditioned(RobotPoser self, doubleVector qref)"""
+        return _robotsim.RobotPoser_getConditioned(self, *args)
+
+    __swig_destroy__ = _robotsim.delete_RobotPoser
+    __del__ = lambda self : None;
+RobotPoser_swigregister = _robotsim.RobotPoser_swigregister
+RobotPoser_swigregister(RobotPoser)
+
 class Mass(_object):
     """
     Stores mass information for a rigid body.
@@ -932,6 +1378,15 @@ class RobotModelLink(_object):
         """
         return _robotsim.RobotModelLink_getRobot(self)
 
+    def getIndex(self):
+        """
+        getIndex(RobotModelLink self) -> int
+
+        int
+        RobotModelLink::getIndex() 
+        """
+        return _robotsim.RobotModelLink_getIndex(self)
+
     def getParent(self):
         """
         getParent(RobotModelLink self) -> int
@@ -958,6 +1413,15 @@ class RobotModelLink(_object):
         RobotModelLink::geometry() 
         """
         return _robotsim.RobotModelLink_geometry(self)
+
+    def appearance(self):
+        """
+        appearance(RobotModelLink self) -> Appearance
+
+        Appearance
+        RobotModelLink::appearance() 
+        """
+        return _robotsim.RobotModelLink_appearance(self)
 
     def getMass(self):
         """
@@ -1755,6 +2219,15 @@ class RigidObjectModel(_object):
         """
         return _robotsim.RigidObjectModel_geometry(self)
 
+    def appearance(self):
+        """
+        appearance(RigidObjectModel self) -> Appearance
+
+        Appearance
+        RigidObjectModel::appearance() 
+        """
+        return _robotsim.RigidObjectModel_appearance(self)
+
     def getMass(self):
         """
         getMass(RigidObjectModel self) -> Mass
@@ -1881,6 +2354,15 @@ class TerrainModel(_object):
         """
         return _robotsim.TerrainModel_geometry(self)
 
+    def appearance(self):
+        """
+        appearance(TerrainModel self) -> Appearance
+
+        Appearance
+        TerrainModel::appearance() 
+        """
+        return _robotsim.TerrainModel_appearance(self)
+
     def setFriction(self, *args):
         """
         setFriction(TerrainModel self, double friction)
@@ -1921,7 +2403,17 @@ class WorldModel(_object):
 
     Note that this is just a model and can be changed at will in fact
     planners and simulators will make use of a model to "display"
-    computed states.
+    computed
+
+    Every robot/robot link/terrain/rigid object is given a unique ID in
+    the world. This is potentially a source of confusion because some
+    functions take IDs and some take indices. Only the WorldModel and
+    Simulator classes use IDs when the argument has 'id' as a suffix,
+    e.g., geometry(), appearance(), Simulator.inContact(). All other
+    functions use indices, e.g. robot(0), terrain(0), etc.
+
+    To get an object's ID, you can see the value returned by loadElement
+    and/or object.getID(). states.
 
     To save/restore the state of the model, you must manually maintain
     copies of the states of whichever objects you wish to save/restore.
@@ -2102,6 +2594,33 @@ class WorldModel(_object):
         WorldModel::loadElement(const char *fn) 
         """
         return _robotsim.WorldModel_loadElement(self, *args)
+
+    def getName(self, *args):
+        """
+        getName(WorldModel self, int id) -> std::string
+
+        std::string
+        WorldModel::getName(int id) 
+        """
+        return _robotsim.WorldModel_getName(self, *args)
+
+    def geometry(self, *args):
+        """
+        geometry(WorldModel self, int id) -> Geometry3D
+
+        Geometry3D
+        WorldModel::geometry(int id) 
+        """
+        return _robotsim.WorldModel_geometry(self, *args)
+
+    def appearance(self, *args):
+        """
+        appearance(WorldModel self, int id) -> Appearance
+
+        Appearance
+        WorldModel::appearance(int id) 
+        """
+        return _robotsim.WorldModel_appearance(self, *args)
 
     def drawGL(self):
         """
@@ -2738,6 +3257,10 @@ class SimRobotController(_object):
     constants of this loop are initially set in the robot file, or you can
     perform tuning via setPIDGains.
 
+    Move-to motions are handled using a motion queue. To get finer-grained
+    control over the motion queue you may use the setLinear/setCubic/
+    addLinear/addCubic functions.
+
     Arbitrary trajectories can be tracked by using setVelocity over short
     time steps. Force controllers can be implemented using setTorque,
     again using short time steps. These set the controller into manual
@@ -2906,6 +3429,69 @@ class SimRobotController(_object):
         """
         return _robotsim.SimRobotController_addMilestone(self, *args)
 
+    def addMilestoneLinear(self, *args):
+        """
+        addMilestoneLinear(SimRobotController self, doubleVector q)
+
+        void
+        SimRobotController::addMilestoneLinear(const std::vector< double > &q)
+
+        Same as addMilestone, but enforces that the motion should move along a
+        straight-line joint-space path 
+        """
+        return _robotsim.SimRobotController_addMilestoneLinear(self, *args)
+
+    def setLinear(self, *args):
+        """
+        setLinear(SimRobotController self, doubleVector q, double dt)
+
+        void
+        SimRobotController::setLinear(const std::vector< double > &q, double
+        dt)
+
+        Uses linear interpolation to get from the current configuration to the
+        desired configuration after time dt 
+        """
+        return _robotsim.SimRobotController_setLinear(self, *args)
+
+    def setCubic(self, *args):
+        """
+        setCubic(SimRobotController self, doubleVector q, doubleVector v, double dt)
+
+        void
+        SimRobotController::setCubic(const std::vector< double > &q, const
+        std::vector< double > &v, double dt)
+
+        Uses cubic (Hermite) interpolation to get from the current
+        configuration/velocity to the desired configuration/velocity after
+        time dt 
+        """
+        return _robotsim.SimRobotController_setCubic(self, *args)
+
+    def appendLinear(self, *args):
+        """
+        appendLinear(SimRobotController self, doubleVector q, double dt)
+
+        void
+        SimRobotController::appendLinear(const std::vector< double > &q,
+        double dt)
+
+        Same as setLinear but appends an interpolant onto the motion queue. 
+        """
+        return _robotsim.SimRobotController_appendLinear(self, *args)
+
+    def addCubic(self, *args):
+        """
+        addCubic(SimRobotController self, doubleVector q, doubleVector v, double dt)
+
+        void
+        SimRobotController::addCubic(const std::vector< double > &q, const
+        std::vector< double > &v, double dt)
+
+        Same as setCubic but appends an interpolant onto the motion queue. 
+        """
+        return _robotsim.SimRobotController_addCubic(self, *args)
+
     def remainingTime(self):
         """
         remainingTime(SimRobotController self) -> double
@@ -3041,6 +3627,31 @@ class SimBody(_object):
         """
         return _robotsim.SimBody_applyWrench(self, *args)
 
+    def applyForceAtPoint(self, *args):
+        """
+        applyForceAtPoint(SimBody self, double const [3] f, double const [3] pworld)
+
+        void
+        SimBody::applyForceAtPoint(const double f[3], const double pworld[3])
+
+        Applies a force at a given point (in world coordinates) at the current
+        simulation time step. 
+        """
+        return _robotsim.SimBody_applyForceAtPoint(self, *args)
+
+    def applyForceAtLocalPoint(self, *args):
+        """
+        applyForceAtLocalPoint(SimBody self, double const [3] f, double const [3] plocal)
+
+        void
+        SimBody::applyForceAtLocalPoint(const double f[3], const double
+        plocal[3])
+
+        Applies a force at a given point (in local coordinates) at the current
+        simulation time step. 
+        """
+        return _robotsim.SimBody_applyForceAtLocalPoint(self, *args)
+
     def setTransform(self, *args):
         """
         setTransform(SimBody self, double const [9] R, double const [3] t)
@@ -3105,16 +3716,25 @@ class SimBody(_object):
         """
         return _robotsim.SimBody_getCollisionPadding(self)
 
-    def surface(self):
+    def getSurface(self):
         """
-        surface(SimBody self) -> ODESurfaceProperties *
+        getSurface(SimBody self) -> ContactParameters
 
-        ODESurfaceProperties *
-        SimBody::surface()
+        ContactParameters
+        SimBody::getSurface()
 
         Gets/sets the surface properties. 
         """
-        return _robotsim.SimBody_surface(self)
+        return _robotsim.SimBody_getSurface(self)
+
+    def setSurface(self, *args):
+        """
+        setSurface(SimBody self, ContactParameters params)
+
+        void
+        SimBody::setSurface(const ContactParameters &params) 
+        """
+        return _robotsim.SimBody_setSurface(self, *args)
 
     __swig_setmethods__["geometry"] = _robotsim.SimBody_geometry_set
     __swig_getmethods__["geometry"] = _robotsim.SimBody_geometry_get

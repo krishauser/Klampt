@@ -7,7 +7,6 @@
 #include <Graph/Callback.h>
 #include <GLDraw/GL.h>
 #include <GLDraw/drawExtra.h>
-using namespace GLDraw;
 
 struct DrawEECallback : public Graph::CallbackBase<SBLTree::Node*>
 {
@@ -20,8 +19,8 @@ struct DrawEECallback : public Graph::CallbackBase<SBLTree::Node*>
     //const SmartPointer<EdgePlanner>& e=j->edgeFromParent();
     edgeColor.setCurrentGL();
     glBegin(GL_LINES);
-    glVertex3v(EEPosition(*i));
-    glVertex3v(EEPosition(*j));
+    GLDraw::glVertex3v(EEPosition(*i));
+    GLDraw::glVertex3v(EEPosition(*j));
     glEnd();
     return true;
   }
@@ -30,7 +29,7 @@ struct DrawEECallback : public Graph::CallbackBase<SBLTree::Node*>
   {
     nodeColor.setCurrentGL();
     glBegin(GL_POINTS);
-    glVertex3v(EEPosition(*node));
+    GLDraw::glVertex3v(EEPosition(*node));
     glEnd();
   }
 
@@ -42,7 +41,7 @@ struct DrawEECallback : public Graph::CallbackBase<SBLTree::Node*>
 
   Robot& robot;
   IKGoal goal;
-  GLColor nodeColor,edgeColor;
+  GLDraw::GLColor nodeColor,edgeColor;
 };
 
 struct DrawEECallback2 : public Graph::CallbackBase<int>
@@ -58,8 +57,8 @@ struct DrawEECallback2 : public Graph::CallbackBase<int>
     //const SmartPointer<EdgePlanner>& e=j->edgeFromParent();
     edgeColor.setCurrentGL();
     glBegin(GL_LINES);
-    glVertex3v(EEPosition(prm->roadmap.nodes[i]));
-    glVertex3v(EEPosition(prm->roadmap.nodes[j]));
+    GLDraw::glVertex3v(EEPosition(prm->roadmap.nodes[i]));
+    GLDraw::glVertex3v(EEPosition(prm->roadmap.nodes[j]));
     glEnd();
   }
 
@@ -72,7 +71,7 @@ struct DrawEECallback2 : public Graph::CallbackBase<int>
     if(node <= 1) return;
     nodeColor.setCurrentGL();
     glBegin(GL_POINTS);
-    glVertex3v(EEPosition(prm->roadmap.nodes[node]));
+    GLDraw::glVertex3v(EEPosition(prm->roadmap.nodes[node]));
     glEnd();
   }
 
@@ -85,7 +84,7 @@ struct DrawEECallback2 : public Graph::CallbackBase<int>
   Robot& robot;
   IKGoal goal;
   RoadmapPlanner* prm;
-  GLColor nodeColor,edgeColor;
+  GLDraw::GLColor nodeColor,edgeColor;
 };
 
 struct DrawEECallback3 : public Graph::CallbackBase<RRTPlanner::Node*>
@@ -99,8 +98,8 @@ struct DrawEECallback3 : public Graph::CallbackBase<RRTPlanner::Node*>
     //const SmartPointer<EdgePlanner>& e=j->edgeFromParent();
     edgeColor.setCurrentGL();
     glBegin(GL_LINES);
-    glVertex3v(EEPosition(i->x));
-    glVertex3v(EEPosition(j->x));
+    GLDraw::glVertex3v(EEPosition(i->x));
+    GLDraw::glVertex3v(EEPosition(j->x));
     glEnd();
     return true;
   }
@@ -109,7 +108,7 @@ struct DrawEECallback3 : public Graph::CallbackBase<RRTPlanner::Node*>
   {
     nodeColor.setCurrentGL();
     glBegin(GL_POINTS);
-    glVertex3v(EEPosition(node->x));
+    GLDraw::glVertex3v(EEPosition(node->x));
     glEnd();
   }
 
@@ -123,7 +122,7 @@ struct DrawEECallback3 : public Graph::CallbackBase<RRTPlanner::Node*>
 
   Robot& robot;
   IKGoal goal;
-  GLColor nodeColor,edgeColor;
+  GLDraw::GLColor nodeColor,edgeColor;
 };
 
 #endif

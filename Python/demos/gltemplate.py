@@ -56,7 +56,7 @@ class MyGLViewer(GLRealtimeProgram):
         if self.simulate:
             self.control_loop()
             self.sim.simulate(self.dt)
-            glutPostRedisplay()
+            self.refresh()
 
     def mousefunc(self,button,state,x,y):
         #Put your mouse handler here
@@ -86,7 +86,7 @@ class MyGLViewer(GLRealtimeProgram):
         elif c == 'm':
             self.saveScreenshots = not self.saveScreenshots
             print "Movie mode:",self.saveScreenshots
-        glutPostRedisplay()
+        self.refresh()
 
     def click_world(self,x,y):
         """Helper: returns a list of world objects sorted in order of
