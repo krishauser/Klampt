@@ -143,7 +143,6 @@ bool Robot::Load(const char* fn) {
 }
 
 bool Robot::LoadRob(const char* fn) {
-	printf("Reading robot file %s...\n", fn);
 	links.resize(0);
 	parents.resize(0);
 	qMin.clear();
@@ -183,8 +182,11 @@ bool Robot::LoadRob(const char* fn) {
 	vector<Matrix4> geomTransform;
 
 	ifstream in(fn, ios::in);
-	if (!in)
-		return false;
+	if (!in) {
+	  printf("Unable to read robot file %s, file does not exist or is not available for reading\n", fn);
+	  return false;
+	}
+	printf("Reading robot file %s...\n", fn);
 	int lineno = 0;
 	string name;
 	while (in >> name) {
