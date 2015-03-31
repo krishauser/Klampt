@@ -176,6 +176,7 @@ bool Robot::LoadRob(const char* fn) {
 	vector<int> mountLinks;
 	vector<string> mountFiles;
 	vector<RigidTransform> mountT;
+	vector<string> mountNames;
 
 	//add a new keyword: geomTransform for transform 3D geometry
 	vector<int> geomTransformIndex;
@@ -552,12 +553,29 @@ bool Robot::LoadRob(const char* fn) {
 			if (ss) {
 				ss >> Ttemp;
 				if (!ss) {
-					printf("   Didn't read subchain transform\n");
+					printf("   Note: didn't read subchain transform\n");
 					ss.clear();
 					Ttemp.setIdentity();
 				}
 			}
 			mountT.push_back(Ttemp);
+			string name;
+			if (ss) {
+			  string op;
+			  ss >> op;
+			  if(op == "as") {
+			    if(!SafeInputString(ss,name))  {
+			      fprintf(stderr,"   Error reading mount alias\n");
+			      name = "";
+			    }
+			  }
+			}
+			if(name.empty()) {
+			  string robotName = stemp;
+			  StripExtension(robotName);
+			  mountNames.push_back(robotName);
+			}
+			else mountNames.push_back(name);
 		} else {
 			fprintf(stderr, "   Invalid robot property %s on line %d\n",
 					name.c_str(), lineno);
@@ -1090,12 +1108,11 @@ bool Robot::LoadRob(const char* fn) {
 			size_t lstart = links.size();
 			size_t dstart = drivers.size();
 			Mount(mountLinks[i], subchain, mountT[i]);
-			string robotName = mountFiles[i];
-			StripExtension(robotName);
+
 			for (size_t k = lstart; k < links.size(); k++) 
-				linkNames[k] = robotName + ":" + linkNames[k];
+				linkNames[k] = mountNames[i] + ":" + linkNames[k];
 			for (size_t k = dstart; k < drivers.size(); k++)
-				driverNames[k] = robotName + ":" + driverNames[k];
+				driverNames[k] = mountNames[i] + ":" + driverNames[k];
 		}
 	}
 	if (!CheckValid())

@@ -92,6 +92,13 @@ void RobotTestBackend::RenderWorld()
       else if(cur_driver >= 0 && cur_driver < (int)robot->drivers.size() &&
 	      robot->DoesDriverAffect(cur_driver,i))
 	viewRobot.SetColor(i,driven); 
+      if(draw_self_collision_tests) {
+	//draw a little blue
+    	if(robot->selfCollisions(i,cur_link) || robot->selfCollisions(cur_link,i) )  {
+	  viewRobot.linkAppearance[i].faceColor[2] = (1.0+viewRobot.linkAppearance[i].faceColor[2])*0.5;
+	  viewRobot.linkAppearance[i].vertexColor[2] = (1.0+viewRobot.linkAppearance[i].vertexColor[2])*0.5;
+	}
+      }
     }
     //this will set the hover colors
     allWidgets.DrawGL(viewport);
