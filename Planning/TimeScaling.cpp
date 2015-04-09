@@ -1502,7 +1502,10 @@ bool TimeScaling::SolveMinTime(const Vector& vmin,const Vector& vmax,
     slp.SetFixed(0,ds0);
   if(dsEnd >= 0)
     slp.SetFixed(n,dsEnd);
-  if(dxMins.size()==1 && ds0 == 0 && dsEnd == 0) return false;
+  if(dxMins.size()==1 && ds0 == 0 && dsEnd == 0) {
+    printf("SolveMinTime: failed, start and goal velocities are 0, only 1 grid cell\n");
+    return false;
+  }
 
   //set up constraints
   //Ai * x[i] + Ai * x[i+1] <= bi
@@ -1800,7 +1803,10 @@ bool TimeScaling::SolveMinTime(const Vector& vmin,const Vector& vmax,
     slp.SetFixed(0,ds0);
   if(dsEnd >= 0)
     slp.SetFixed(n,dsEnd);
-  if(n==1 && ds0 == 0 && dsEnd == 0) return false;
+  if(n==1 && ds0 == 0 && dsEnd == 0) {
+    printf("SolveMinTime: failed, start and goal velocities are 0, only 1 grid cell\n");
+    return false;
+  }
 
   //spline bound coefficients on a*theta[i], a*theta[i+1], b*(theta[i+1]-theta[i])
   //there's also an offset of b*theta[i]+c/2*(theta[i+1]-theta[i])
@@ -1946,7 +1952,10 @@ bool TimeScaling::SolveMinTimeArcLength(const Vector& vmin,const Vector& vmax,
     lp.u(0) = lp.l(0) = Sqr(ds0);
   if(dsEnd >= 0)
     lp.u(n) = lp.l(n) = Sqr(dsEnd);
-  if(dxMins.size()==1 && ds0 == 0 && dsEnd == 0) return false;
+  if(dxMins.size()==1 && ds0 == 0 && dsEnd == 0) {
+    printf("SolveMinTimeArcLength: failed, start and goal velocities are 0, only 1 grid cell\n");
+    return false;
+  }
 
   //set up constraints
   int k=0;
