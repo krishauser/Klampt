@@ -14,7 +14,9 @@ def default_distance(self,a,b):
 def default_interpolate(self,a,b,u):
     return [ai+u*(bi-ai) for (ai,bi) in zip(a,b)]
 
-def makedefault(space):    
+def makedefault(space):
+    """Helper: makes a space's callbacks perform the default Cartesian space
+    operations."""
     space.sampleneighborhood = default_sampleneighborhood
     space.visible = default_visible
     space.distance = default_distance

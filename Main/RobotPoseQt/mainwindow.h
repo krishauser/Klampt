@@ -31,7 +31,6 @@ public:
     SmartPointer<QRobotPoseGUI> gui;
     SmartPointer<RobotPoseBackend> backend;
     SmartPointer<ResourceManager> manager;
-    QTimer* refresh_timer;
     int mode;
     void Initialize(int _argc, const char **_argv);
     void StatusConnect();

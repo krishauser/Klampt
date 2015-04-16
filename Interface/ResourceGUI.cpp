@@ -268,6 +268,7 @@ bool ResourceGUIBackend::OnCommand(const string& cmd,const string& args)
     double time;
     ss>>time;
     SetPathTime(time);
+    SendRefresh();
   }
   else {
     return WorldGUIBackend::OnCommand(cmd,args);

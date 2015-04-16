@@ -58,10 +58,6 @@ void MainWindow::Initialize(int argc,const char** argv)
     ui->spn_driver_index->setMaximum(rob->drivers.size() - 1);
     ui->spn_link_index->setMaximum(rob->links.size() - 1);
 
-    //refresh_timer=new QTimer();
-    //connect(refresh_timer, SIGNAL(timeout()),ui->displaywidget,SLOT(updateGL()));
-    //refresh_timer->start(1000/30);
-
     ui->displaywidget->installEventFilter(this);
     ui->displaywidget->setFocusPolicy(Qt::WheelFocus);    
 
@@ -279,5 +275,4 @@ void MainWindow::LoadFile(){
 MainWindow::~MainWindow()
 {
     delete ui;
-    delete refresh_timer;
 }

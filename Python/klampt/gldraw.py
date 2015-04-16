@@ -8,6 +8,7 @@ from OpenGL.GL import *
 from OpenGL.GLUT import *
 
 def point(p):
+    """Draws a point at position p (either a 2d or 3d list/tuple)"""
     glBegin(GL_POINTS)
     if len(p)==2:
         glVertex2f(*p)
@@ -18,6 +19,8 @@ def point(p):
     glEnd()
 
 def circle(center,radius,res=0.01):
+    """Draws a 2D filled circle with the given center, radius, and angular
+    resolution."""
     numdivs = int(math.ceil(radius*math.pi*2/res))
     glNormal3f(0,0,1)
     glBegin(GL_TRIANGLE_FAN)
@@ -28,6 +31,8 @@ def circle(center,radius,res=0.01):
     glEnd()
 
 def triangle(a,b,c,lighting=True):
+    """Draws a 3D triangle with points a,b,c.  If lighting is true, computes
+    a GL normal vector dynamically"""
     if lighting:
         n = vectorops.cross(vectorops.sub(b,a),vectorops.sub(c,a))
         n = vectorops.mul(n,1.0/vectorops.norm(n))
@@ -40,6 +45,8 @@ def triangle(a,b,c,lighting=True):
 
 
 def quad(a,b,c,d,lighting=True):
+    """Draws a 3D quad with points a,b,c,d.  If lighting is true, computes
+    a GL normal vector dynamically"""
     if lighting:
         n = vectorops.cross(vectorops.sub(b,a),vectorops.sub(c,a))
         n = vectorops.mul(n,1.0/vectorops.norm(n))
@@ -52,41 +59,55 @@ def quad(a,b,c,d,lighting=True):
     glEnd();
 
 def box(a=(0,0,0),b=(1,1,1),lighting=True):
+    """Draws a filled 3D axis-aligned bounding box with lower corner a and
+    upper corner b.  If lighting is true, sends gl normal vectors"""
+    glNormal3f(0,0,-1)
     quad((a[0], a[1], a[2]),
          (a[0], b[1], a[2]),
          (b[0], b[1], a[2]),
-         (b[0], a[1], a[2]),lighting)
+         (b[0], a[1], a[2]),False)
+    glNormal3f(0,0,1)
     quad((a[0], a[1], b[2]),
          (b[0], a[1], b[2]),
          (b[0], b[1], b[2]),
-         (a[0], b[1], b[2]),lighting)
+         (a[0], b[1], b[2]),False)
+    glNormal3f(-1,0,0)
     quad((a[0], a[1], a[2]),
          (a[0], a[1], b[2]),
          (a[0], b[1], b[2]),
-         (a[0], b[1], a[2]),lighting)
+         (a[0], b[1], a[2]),False)
+    glNormal3f(1,0,0)
     quad((b[0], a[1], a[2]),
          (b[0], b[1], a[2]),
          (b[0], b[1], b[2]),
-         (b[0], a[1], b[2]),lighting)
+         (b[0], a[1], b[2]),False)
+    glNormal3f(0,-1,0)
     quad((a[0], a[1], a[2]),
          (b[0], a[1], a[2]),
          (b[0], a[1], b[2]),
-         (a[0], a[1], b[2]),lighting)
+         (a[0], a[1], b[2]),False)
+    glNormal3f(0,1,0)
     quad((a[0], b[1], a[2]),
          (a[0], b[1], b[2]),
          (b[0], b[1], b[2]),
          (b[0], b[1], a[2]),lighting)
 
 def centered_box(dims=(1,1,1),lighting=True):
+    """Draws a box centered around the origin with the given width x height x
+    depth"""
     box([-d*0.5 for d in dims],[d*0.5 for d in dims],lighting)
 
 def setcolor(r,g,b,a=1.0,lighting=True):
+    """Sets the current color/material, depending on the lighting flag"""
     if lighting:
         glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,[r,g,b,a])
     else:
         glColor4f(r,g,b,a)
 
 def xform_widget(T,length,width,lighting=True,fancy=False):
+    """Draws an axis-aligned transform widget for the se3 transform T.
+    Length / width govern the length / width of the axes.  If fancy=True,
+    draws the axes with real volume rather than lines"""
     mat = zip(*se3.homogeneous(T))
     mat = sum([list(coli) for coli in mat],[])
 
@@ -129,5 +150,6 @@ def xform_widget(T,length,width,lighting=True,fancy=False):
     glPopMatrix()
 
 def glutBitmapString(font,string):
+    """Renders a string using GLUT characters"""
     for c in string:
         glutBitmapCharacter(font,ctypes.c_int(ord(c)))
