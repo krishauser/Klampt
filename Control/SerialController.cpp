@@ -7,7 +7,9 @@ SerialController::SerialController(Robot& robot,const string& _servAddr,Real _wr
   :RobotController(robot),servAddr(_servAddr),writeRate(_writeRate),lastWriteTime(0),endVCmdTime(-1)
 {
   //HACK: is this where the sigpipe ignore should be?
+#ifndef WIN32
   signal(SIGPIPE, SIG_IGN);
+#endif
 
   if(!servAddr.empty()) {
     while(!OpenConnection(servAddr)) {

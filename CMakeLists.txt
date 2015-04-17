@@ -124,8 +124,8 @@ install(DIRECTORY data
 #examples and apps already added
 
 IF(WIN32)
-	#need to install Assimp and GLPK dlls
-	install(FILES Library/Assimp32.dll Library/glpk_4_52.dll
+	#need to install Assimp, GLPK, glut32 dlls
+	install(FILES Library/Assimp32.dll Library/glpk_4_52.dll Library/glut32.dll
 		DESTINATION bin
 		COMPONENT apps)
 ENDIF(WIN32)
