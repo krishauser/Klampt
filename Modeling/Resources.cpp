@@ -209,7 +209,7 @@ bool RigidObjectResource::Save(const string& fn)
   string path = GetFilePath(fn);
   if(!path.empty()) {
     if(!FileUtils::IsDirectory(path.c_str()))
-      FileUtils::CreateDirectory(path.c_str());
+      FileUtils::MakeDirectory(path.c_str());
   }
   path += "/";
   path += name + "/" + name;
@@ -234,7 +234,7 @@ bool RobotResource::Save(const string& fn)
   string path = GetFilePath(fn);
   if(!path.empty()) {
     if(!FileUtils::IsDirectory(path.c_str()))
-      FileUtils::CreateDirectory(path.c_str());
+      FileUtils::MakeDirectory(path.c_str());
   }
   path += "/";
   path += name + "/";
