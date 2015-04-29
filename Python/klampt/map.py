@@ -1,20 +1,106 @@
-"""Helpers for accessing world variables using a class-style interface
+"""Helpers for accessing world/simulation variables using a class-style
+interface.
 
-You can, for example, write map(world).robots[0].config to retrieve the
-name of robot 0, rather than world.robot(0).getConfig().
+For example, map(world).robots[0].config retrieves the name of robot 0.
+This saves a little writing compared to world.robot(0).getConfig().
 
 You can also write map(world).robots[0].config = [q1,...,qn] to set the
-configuration of robot 0, rather than world.robot(0).getConfig([q1,...,qn]).
+configuration of robot 0, rather than world.robot(0).setConfig([q1,...,qn]).
 
-Conveniently, you can write expressions like
-map(world).robots[0].config[4] = 3.5
+Conveniently, you can write expressions like:
+    print len(map(world).robots)
+    map(world).robots[0].config[4] = 3.5
+
+Which is a shortcut to:
+    print world.numRobots()
+    q = world.robot(0).getConfig()
+    q[4] = 3.5
+    world.robot(0).setConfig(q)
 """
 
 from robotsim import *
+import string
 
 class map:
-    """A class-style interface for accessing all elements of the
-    world model"""
+    """A class-style interface for accessing all elements of a
+    WorldModel or Simulator.
+
+    The following class hierarchy is supported:
+        * indicates read-only
+        # indicates sub-item set access is supported (otherwise, to set
+          you have to set the entire object)
+    WorldModel:
+        *robots (list/dict of RobotModels)
+        *rigidObjects (list/dict of RigidObjectModels)
+        *terrains (list/dict of TerrainModels)
+        *elements (list/dict of all elements by id)
+        *[string]: accesses objects by name
+    RobotModel:
+        *name (string)
+        *id (int)
+        *links (list/dict of RobotModelLinks)
+        #config (list of floats)
+        #velocity (list of floats)
+        #jointLimits (pair of lists of floats)
+        velocityLimits (list of floats)
+        accelerationLimits (list of floats)
+        torqueLimits (list of floats)
+        *[string]: accesses links by name
+    RobotModelLink:
+        *name (string)
+        *id (int)
+        *robot (RobotModel)
+        parent (int)
+        geometry (Geometry3D)
+        appearance (Appearance)
+        mass (Mass)
+        parentTransform (se3 object (R,t))
+        transform (se3 object (R,t))
+        #axis (3-list of floats)
+    RigidObjectModel:
+        *name (string)
+        *id (int)
+        geometry (Geometry3D)
+        appearance (Appearance)
+        mass (Mass)
+        contactParameters (ContactParameters)
+    TerrainModel:
+        *name (string)
+        *id (int)
+        geometry (Geometry3D)
+        appearance (Appearance)
+    Simulator:
+        *world (WorldModel)
+        *bodies (list of SimBodys)
+        *controllers (list/dict of SimRobotControllers)
+        *time (float)
+        *robots (list/dict of SimRobots)
+        *rigidObjects (list/dict of SimBodys)
+        *terrains (list of SimBodys)
+        gravity (3-list of floats)
+        [string]: accesses bodies by name
+    SimRobot:
+        *actualConfig (list of floats)
+        *actualVelocity (list of floats)
+        *actualTorques (list of floats)
+        *links (list/dict of SimBodys)
+    SimBody:
+        enabled (bool)
+        transform (se3 object (R,t))
+        velocity (angular velocity / velocity pair (w,v))
+        collisionPadding (float)
+        surface (ContactParameters)
+    SimRobotController:
+        *commandedConfig (list of floats)
+        *commandedVelocity (list of floats)
+        *sensedConfig (list of floats)
+        *sensors (list/dict of SimRobotSensors)
+    
+    dicts, lists, tuples: behave like normal
+    
+    Other objects (e.g., ContactParameters, Mass, Geometry3D): must
+    be operated with using the standard Klamp't API.
+    """
     
     def __init__(self,obj,setter=None):
         self.setter = setter
@@ -24,16 +110,22 @@ class map:
             self.obj = obj
 
     def __getattr__(self,name):        
-        if hasattr(self.obj,name):
-            return self.obj.name
-        
+        #handle non-standard getters
+        if name in['obj','setter']: return self.__dict__[name]
         if isinstance(self.obj,WorldModel):
             if name == 'robots':
-                return [map(self.obj.robot(i)) for i in xrange(self.obj.numRobots())]
+                return _index_name_map([self.obj.robot(i) for i in xrange(self.obj.numRobots())])
             elif name == 'rigidObjects':
-                return [map(self.obj.rigidObject(i)) for r in xrange(self.obj.numRigidObjects())]
+                return _index_name_map([self.obj.rigidObject(i) for r in xrange(self.obj.numRigidObjects())])
             elif name == 'terrains':
-                return [map(self.obj.terrain(i)) for r in xrange(self.obj.numTerrains())]
+                return _index_name_map([self.obj.terrain(i) for r in xrange(self.obj.numTerrains())])
+            elif name == 'elements':
+                elements = [self.obj.terrain(i) for r in xrange(self.obj.numTerrains())]+[self.obj.rigidObjects(i) for r in xrange(self.obj.numRigidObjects())]
+                for i in xrange(self.obj.numRobots()):
+                    elements.append(self.obj.robot(i))
+                    for j in self.obj.robot(i).numLinks():
+                        elements.append(self.obj.robotModelLink(i,j))
+                return _index_name_map(elements)
             else:
                 for i in xrange(self.obj.numRobots()):
                     if name == self.obj.robot(i).getName():
@@ -45,81 +137,107 @@ class map:
                     if name == self.obj.terrain(i).getName():
                         return map(self.obj.terrain(i))
         elif isinstance(self.obj,RobotModel):
-            if name == 'name':
-                return self.obj.getName()
-            elif name == 'id':
+            if name == 'id':
                 return self.obj.getID()
             elif name == 'links':
-                return [map(self.obj.getLink(i)) for i in xrange(self.obj.numLinks())]
+                return _index_name_map([self.obj.getLink(i) for i in xrange(self.obj.numLinks())])
             elif name == 'config':
-                return map(self.obj.getConfig(),self.obj.getConfig)
+                return map(self.obj.getConfig(),self.obj.setConfig)
             elif name == 'velocity':
-                return map(self.obj.getVelocity(),self.obj.getVelocity)
-            elif name == 'jointLimits':
-                return self.obj.getJointLimits()
-            elif name == 'velocityLimits':
-                return self.obj.getVelocityLimits()
-            elif name == 'accelerationLimits':
-                return self.obj.getAccelerationLimits()
-            elif name == 'torqueLimits':
-                return self.obj.getTorqueLimits()
+                return map(self.obj.getVelocity(),self.obj.setVelocity)
             else:
                 for i in xrange(self.obj.numLinks()):
                     if self.obj.getLink(i).getName() == name:
                         return map(self.obj.getLink(i))
         elif isinstance(self.obj,RobotModelLink):
-            if name == 'name':
-                return self.obj.getName()
-            elif name == 'id':
+            if name == 'id':
                 return self.obj.getID()
             elif name == 'robot':
                 return map(self.obj.getRobot())
-            elif name == 'parent':
-                return self.obj.getParent()
             elif name == 'geometry':
                 return self.obj.geometry()
-            elif name == 'mass':
-                return self.obj.getMass()
-            elif name == 'parentTransform':
-                return self.obj.getParentTransform()
-            elif name == 'transform':
-                return self.obj.getTransform()
+            elif name == 'appearance':
+                return self.obj.appearance()
             elif name == 'axis':
-                return map(self.obj.getAxis(),self.obj.getAxis)
+                return map(self.obj.getAxis(),self.obj.setAxis)
         elif isinstance(self.obj,RigidObjectModel):
-            if name == 'name':
-                return self.obj.getName()
-            elif name == 'id':
+            if name == 'id':
                 return self.obj.getID()
             elif name == 'geometry':
                 return self.obj.geometry()
-            elif name == 'mass':
-                return self.obj.getMass()
-            elif name == 'contactParameters':
-                return self.obj.getContactParameters()
-            elif name == 'transform':
-                return self.obj.getTransform()
+            elif name == 'appearance':
+                return self.obj.appearance()
         elif isinstance(self.obj,TerrainModel):
-            if name == 'name':
-                return self.obj.getName()
-            elif name == 'id':
+            if name == 'id':
                 return self.obj.getID()
             elif name == 'geometry':
                 return self.obj.geometry()
+            elif name == 'appearance':
+                return self.obj.appearance()
+        elif isinstance(self.obj,Simulator):
+            w = self.obj.getWorld()
+            if name == 'world':
+                return w
+            elif name == 'bodies':
+                return self.obj.getID()
+            elif name == 'controllers':
+                nr = w.numRobots()
+                return _index_name_map([self.obj.getController(i) for i in range(nr)],[w.robot(i).getName() for i in range(nr)])
+            elif name == 'robots':
+                nr = w.numRobots()
+                return _index_name_map([_SimRobot(self.obj,i) for i in range(w.numRobots())],[w.robot(i).getName() for i in range(nr)])
+            elif name == 'rigidObjects':
+                nr = w.numRigidObjects()
+                return _index_name_map([self.obj.getBody(w.rigidObject(i)) for i in range(w.numRigidObjects())],[w.rigidObject(i).getName() for i in range(nr)])
+            elif name == 'terrains':
+                nr = w.numTerrains()
+                return _index_name_map([self.obj.getBody(w.terrain(i)) for i in range(w.numTerrains())],[w.terrain(i).getName() for i in range(nr)])
+            elif name == 'gravity':
+                return map(self.obj.getGravity(),self.obj.setGravity)
+            else:
+                try:
+                    obj = getattr(map(w),name)
+                    if isinstance(obj.obj,RobotModel):
+                        return map(_SimRobot(self.obj,obj.obj.index))
+                    return map(self.obj.getBody(obj.obj))
+                except Exception as e:
+                    print "Exception raised on Simulator.",name,":",e
+                    print "Simulator has no object",name
+                    pass
+        elif isinstance(self.obj,_SimRobot):
+            if name=='links':
+                return _index_name_map(self.obj.getBodies(),self.obj.getBodyNames())
+        elif isinstance(self.obj,SimBody):
+            if name=='enabled':
+                return self.obj.isEnabled()
+        elif isinstance(self.obj,SimRobotController):
+            if name=='sensors':
+                sensors = []
+                index = 0
+                while True:
+                    s = self.obj.getSensor(index)
+                    if s.type() == '': break
+                    sensors.append(s)
+                    index += 1
+                return _index_name_map(sensors,[s.name() for s in sensors])
         elif isinstance(self.obj,(list,tuple,dict)):
             return self.obj[name]
-        raise AttributeError(name)
+
+        #now do the default
+        getname = 'get'+name[0].upper()+name[1:]
+        if hasattr(self.obj,name):
+            return self.obj.name
+        elif hasattr(self.obj,getname):
+            return getattr(self.obj,getname)()
+        raise AttributeError("Object of type "+self.obj.__class__.__name__+" does not have attribute "+name)
 
     def __setattr__(self,name,value):
+        if name in ['obj','setter']:
+            self.__dict__[name] = value
+            return
         if self.setter != None:
             self.obj[name] = value
             self.setter(self.obj)
-            return
-        if name == 'obj':
-            self.__dict__['obj'] = value
-            return
-        elif hasattr(self.obj,name):
-            setattr(self.obj,name,value)
             return
         if isinstance(self.obj,WorldModel):
             raise ValueError("Element "+name+" is read only")
@@ -135,26 +253,14 @@ class map:
             elif name == 'jointLimits':
                 self.obj.setJointLimits(*value)
                 return
-            elif name == 'velocityLimits':
-                self.obj.setVelocityLimits(value)
-                return
-            elif name == 'accelerationLimits':
-                self.obj.setAccelerationLimits(value)
-                return
-            elif name == 'torqueLimits':
-                self.obj.getTorqueLimits(value)
-                return
         elif isinstance(self.obj,RobotModelLink):
             if name == 'name' or name == 'id' or name == 'robot':
                 raise ValueError("Element "+name+" is read only")
-            elif name == 'parent':
-                self.obj.setParent(value)
+            elif name == 'geometry':
+                self.obj.geometry().set(value)
                 return
-            elif name == 'mesh':
-                self.obj.setMesh(value)
-                return
-            elif name == 'mass':
-                self.obj.setMass(value)
+            elif name == 'appearance':
+                self.obj.appearance().set(value)
                 return
             elif name == 'parentTransform':
                 self.obj.setParentTransform(*value)
@@ -162,20 +268,11 @@ class map:
             elif name == 'transform':
                 self.obj.setTransform(*value)
                 return
-            elif name == 'axis':
-                self.obj.setAxis(value)
-                return
         elif isinstance(self.obj,RigidObjectModel):
             if name == 'name' or name == 'id':
                 raise ValueError("Element "+name+" is read only")
-            elif name == 'mesh':
-                self.obj.setMesh(value)
-                return
-            elif name == 'mass':
-                self.obj.setMass(value)
-                return
-            elif name == 'contactParameters':
-                self.obj.setContactParameters(value)
+            elif name == 'geometry':
+                self.obj.geometry().set(value)
                 return
             elif name == 'transform':
                 self.obj.setTransform(*value)
@@ -183,32 +280,105 @@ class map:
         elif isinstance(self.obj,TerrainModel):
             if name == 'name' or name == 'id':
                 raise ValueError("Element "+name+" is read only")
-            elif name == 'mesh':
-                self.obj.setMesh(value)
+            elif name == 'geometry':
+                self.obj.geometry().set(value)
+            elif name == 'appearance':
+                self.obj.appearance().set(value)
+        setname ='set'+name[0].upper()+name[1:]
+        if hasattr(self.obj,name):
+            setattr(self.obj,name,value)
+            return
+        elif hasattr(self.obj,setname):
+            getattr(self.obj,name,setname)(value)
+            return
+        #duck-typing: add it to this item's dict
         self.__dict__[name]=value
+
+    def __setitem__(self,index,value):
+        #for lists / dicts with a setter
+        if self.setter != None:
+            self.obj[index] = value
+            self.setter(self.obj)
+            return
+        else:
+            raise AttributeError("Array access invalid on object of type "+self.obj.__class__.__name__)
+
+class _index_name_map:
+    #helper: allows accessing items of lists via named string access
+    #if the object supports object.getName()
+    def __init__(self,objects,names=None):
+        self.objects = objects
+        if names != None:
+            self.nameMap = dict((n,i) for i,n in enumerate(names))
+        else:
+            self.nameMap = dict()
+            for i,o in enumerate(self.objects):
+                self.nameMap[o.getName()]=i
+    def __getitem__(self,index):
+        if isinstance(index,str):
+            return map(self.objects[self.nameMap[index]])
+        return map(self.objects[index])
+    def __len__(self):
+        return len(self.objects)
+    def __iter__(self):
+        for i in self.objects:
+            yield i
+    def __setitem__(self,index):
+        raise AttributeError("Cannot set in a map()'ed named list")
+
+class _SimRobot:
+    #helper for accessing robot
+    def __init__(self,sim,index):
+        self.sim = sim
+        self.index = index
+    def getActualConfig(self):
+        return self.sim.getActualConfig(self.index)
+    def getActualVelocity(self):
+        return self.sim.getActualVelocity(self.index)
+    def getActualTorques(self):
+        return self.sim.getActualTorques(self.index)
+    def getBodies(self):
+        w = self.sim.getWorld()
+        r = w.robot(self.index)
+        return [self.sim.getBody(r.getLink(j) ) for j in range(r.numLinks())]
+    def getBodyNames(self):
+        w = self.sim.getWorld()
+        r = w.robot(self.index)
+        return [r.getLink(j).getName() for j in range(r.numLinks())]
+
 
 def get_item(obj,name):
     """Given a attribute item like 'robots[2].links[4].name', evaluates
     the value of the item in the object.
+
+    Note: not secure! Uses eval()
     """
     loc = {'_w':map(obj)}
     result = {}
     return eval('_w.'+name,globals(),loc)
 
 def set_item(obj,name,value):
-    """Given a config dict, sets the object's configuration accordingly"""
+    """Given a config dict, sets the object's configuration accordingly
+    
+    Note: not secure! Uses exec
+    """
     loc = {'_w':map(obj)}
     result = {}
     exec '_w.'+name+'='+str(value) in globals(),loc
 
 def get_dict(world,items):
     """Retrieves a dictionary of elements referred to by the given
-    list of items."""
+    list of items.
+    
+    Note: not secure! Uses eval()
+    """
     return dict((i,get_item(world,i)) for i in items)
 
 def set_dict(world,config):
     """Sets the values in the dictionary config, which maps element names
-    to values which should be set in the world."""
+    to values which should be set in the world.
+        
+    Note: not secure! Uses exec """
     for (k,v) in config.iteritems():
         set_item(world,k,v)
 
@@ -235,7 +405,7 @@ def _match_hierarchy_iter(flattened,ref):
         return flattened[0],flattened[1:]
 
 
-def match_hierarchy(flattened,ref):
+def _match_hierarchy(flattened,ref):
     result,flattened = _match_hierarchy_iter(flattened,ref)
     if len(flattened) != 0:
         raise ValueError("Vector too large for hierarchy")
@@ -253,14 +423,16 @@ class Vectorizer:
         self.lengths = [len(flatten(self.ref[k])) for k in self.keys]
 
     def getVector(self):
+        """Flattens the selected items in the world into a vector"""
         v = [get_item(self.world,k) for k in self.keys]
         return flatten(v)
 
     def setVector(self,v):
+        """Un-flattens the selected elements in the world from a vector"""
         suml = 0
         for l,k in zip(self.lengths,self.keys):
             vk = v[suml:suml+l]
-            vk_val = match_hierarchy(vk,self.ref[k])
+            vk_val = _match_hierarchy(vk,self.ref[k])
             set_item(self.world,k,vk_val)
             suml += l
 

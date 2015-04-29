@@ -4,7 +4,7 @@ PROJECT( Klampt )
 # version (e.g. for packaging)
 set(KLAMPT_MAJOR_VERSION 0)
 set(KLAMPT_MINOR_VERSION 6)
-set(KLAMPT_PATCH_VERSION 0)
+set(KLAMPT_PATCH_VERSION 1)
 set(KLAMPT_VERSION ${KLAMPT_MAJOR_VERSION}.${KLAMPT_MINOR_VERSION}.${KLAMPT_PATCH_VERSION})
 if(COMMAND cmake_policy)
   cmake_policy(SET CMP0003 NEW)
@@ -124,8 +124,8 @@ install(DIRECTORY data
 #examples and apps already added
 
 IF(WIN32)
-	#need to install Assimp and GLPK dlls
-	install(FILES Library/Assimp32.dll Library/glpk_4_52.dll
+	#need to install Assimp, GLPK, glut32 dlls
+	install(FILES Library/Assimp32.dll Library/glpk_4_52.dll Library/glut32.dll
 		DESTINATION bin
 		COMPONENT apps)
 ENDIF(WIN32)

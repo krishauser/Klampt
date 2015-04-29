@@ -42,7 +42,7 @@ def setDirectory(value):
     global _directory
     _directory = value
 
-def ensure_dir(f):
+def _ensure_dir(f):
     d = os.path.dirname(f)
     if len(d)==0: return
     if not os.path.exists(d):
@@ -176,7 +176,7 @@ def set(name,value,type='auto',directory=None):
     if directory==None:
         directory = getDirectory()    
     fn = os.path.join(directory,name)
-    ensure_dir(fn)
+    _ensure_dir(fn)
     if type == 'xml':
         raise NotImplementedError("TODO: save xml files from Python API")
     elif type == 'json':
@@ -188,8 +188,9 @@ def set(name,value,type='auto',directory=None):
     else:
         return loader.save(value,type,fn)
 
-class VisualEditorBase:
-    """A base class for editing resources."""
+class _VisualEditorBase:
+    #A base class for editing resources.
+    
     def __init__(self,name,value,description,world):
         self.name = name
         self.value = value
@@ -278,9 +279,9 @@ class VisualEditorBase:
         self.klamptwidgetmaster.idle()
         return True
 
-class ConfigVisualEditor(VisualEditorBase):
+class _ConfigVisualEditor(_VisualEditorBase):
     def __init__(self,name,value,description,world):
-        VisualEditorBase.__init__(self,name,value,description,world)
+        _VisualEditorBase.__init__(self,name,value,description,world)
         world.robot(0).setConfig(value)
         self.clicked = None
         self.hovered = None
@@ -291,7 +292,7 @@ class ConfigVisualEditor(VisualEditorBase):
         return 'Right-click and drag on the robot links to pose the robot'
 
     def mousefunc(self,button,state,x,y):
-        if VisualEditorBase.mousefunc(self,button,state,x,y):
+        if _VisualEditorBase.mousefunc(self,button,state,x,y):
             self.value = self.robotposer.get()
 
     def display(self):
@@ -306,9 +307,9 @@ class ConfigVisualEditor(VisualEditorBase):
         #this line will draw the robot
         self.klamptwidgetmaster.drawGL(self.viewport())
 
-class PointVisualEditor(VisualEditorBase):
+class _PointVisualEditor(_VisualEditorBase):
     def __init__(self,name,value,description,world,frame=None):
-        VisualEditorBase.__init__(self,name,value,description,world)
+        _VisualEditorBase.__init__(self,name,value,description,world)
         self.frame = se3.identity() if frame==None else frame
         self.pointposer = PointPoser()
         self.pointposer.set(se3.apply(self.frame,value))
@@ -319,12 +320,12 @@ class PointVisualEditor(VisualEditorBase):
         return 'Right-click and drag on the widget to pose the point'
 
     def mousefunc(self,button,state,x,y):
-        if VisualEditorBase.mousefunc(self,button,state,x,y):
+        if _VisualEditorBase.mousefunc(self,button,state,x,y):
             self.value = se3.apply(se3.inv(self.frame),self.pointposer.get())
 
-class RotationVisualEditor(VisualEditorBase):
+class _RotationVisualEditor(_VisualEditorBase):
     def __init__(self,name,value,description,world,frame=None):
-        VisualEditorBase.__init__(self,name,value,description,world)
+        _VisualEditorBase.__init__(self,name,value,description,world)
         self.frame = se3.identity() if frame==None else frame
         self.xformposer = TransformPoser()
         self.xformposer.set(*se3.mul(self.frame,(value,[0,0,0])))
@@ -336,12 +337,12 @@ class RotationVisualEditor(VisualEditorBase):
         return 'Right-click and drag on the widget to pose the rotation'
 
     def mousefunc(self,button,state,x,y):
-        if VisualEditorBase.mousefunc(self,button,state,x,y):
+        if _VisualEditorBase.mousefunc(self,button,state,x,y):
             self.value = se3.mul(se3.inv(self.frame),self.xformposer.get())[0]
 
-class RigidTransformVisualEditor(VisualEditorBase):
+class _RigidTransformVisualEditor(_VisualEditorBase):
     def __init__(self,name,value,description,world,frame=None):
-        VisualEditorBase.__init__(self,name,value,description,world)
+        _VisualEditorBase.__init__(self,name,value,description,world)
         self.frame = se3.identity() if frame==None else frame
         self.xformposer = TransformPoser()
         self.xformposer.set(*se3.mul(self.frame,value))
@@ -353,13 +354,13 @@ class RigidTransformVisualEditor(VisualEditorBase):
         return 'Right-click and drag on the widget to pose the transform'
 
     def mousefunc(self,button,state,x,y):
-        if VisualEditorBase.mousefunc(self,button,state,x,y):
+        if _VisualEditorBase.mousefunc(self,button,state,x,y):
             self.value = se3.mul(se3.inv(self.frame),self.xformposer.get())
 
 
-class ObjectTransformVisualEditor(VisualEditorBase):
+class _ObjectTransformVisualEditor(_VisualEditorBase):
     def __init__(self,name,value,description,world,object):
-        VisualEditorBase.__init__(self,name,value,description,world)
+        _VisualEditorBase.__init__(self,name,value,description,world)
         self.object = object
         self.objposer = ObjectPoser(object)
         self.addWidget(self.objposer)
@@ -368,7 +369,7 @@ class ObjectTransformVisualEditor(VisualEditorBase):
         return 'Right-click and drag on the widget to pose the object'
 
     def mousefunc(self,button,state,x,y):
-        if VisualEditorBase.mousefunc(self,button,state,x,y):
+        if _VisualEditorBase.mousefunc(self,button,state,x,y):
             self.value = self.objposer.get()
 
 
@@ -378,7 +379,7 @@ if _PyQtAvailable:
     _dialog = None
     _glwidget = None
 
-    class AppGLWidget(qtprogram.GLNavigationProgram):
+    class _AppGLWidget(qtprogram.GLNavigationProgram):
         def __init__(self):
             qtprogram.GLNavigationProgram.__init__(self,"GLWidget")
             self.iface = None
@@ -422,7 +423,7 @@ if _PyQtAvailable:
             if self.iface!=None:
                 self.iface.display_screen()
 
-    class MyDialog(QDialog):
+    class _MyDialog(QDialog):
         def __init__(self):
             QDialog.__init__(self)
             global _glwidget
@@ -459,8 +460,8 @@ if _PyQtAvailable:
         if _app == None:
             #Do Qt setup
             _app = QApplication(["Editor"])
-            _glwidget = AppGLWidget()
-            _dialog=MyDialog()
+            _glwidget = _AppGLWidget()
+            _dialog=_MyDialog()
         _dialog.setEditor(editorObject)
         res = _dialog.exec_()
         retVal = _dialog.finish()
@@ -589,23 +590,23 @@ def edit(name,value,type='auto',description=None,editor='visual',world=None,fram
         return console_edit(name,value,type,description,world,frame)
     elif editor == 'visual':
         if type == 'Config':
-            return _launch(ConfigVisualEditor(name,value,description,world))
+            return _launch(_ConfigVisualEditor(name,value,description,world))
         elif type == 'Configs':
-            return _launch(ConfigsVisualEditor(name,value,description,world))
+            return _launch(_ConfigsVisualEditor(name,value,description,world))
         elif type == 'Vector3' or type == 'Point':
             if isinstance(frame,(RigidObjectModel,RobotModelLink)):
                 frame = frame.getTransform()
-            return _launch(PointVisualEditor(name,value,description,world,frame))
+            return _launch(_PointVisualEditor(name,value,description,world,frame))
         elif type == 'Rotation':
             if isinstance(frame,(RigidObjectModel,RobotModelLink)):
                 frame = frame.getTransform()
-            return _launch(RotationVisualEditor(name,value,description,world,frame))
+            return _launch(_RotationVisualEditor(name,value,description,world,frame))
         elif type == 'RigidTransform':
             if isinstance(frame,RigidObjectModel):
-                return _launch(ObjectTransformVisualEditor(name,value,description,world,frame))
+                return _launch(_ObjectTransformVisualEditor(name,value,description,world,frame))
             if isinstance(frame,RobotModelLink):
                 frame = frame.getTransform()
-            return _launch(RigidTransformVisualEditor(name,value,description,world,frame))
+            return _launch(_RigidTransformVisualEditor(name,value,description,world,frame))
         else:
             raise RuntimeError("Don't know how to edit objects of type "+type)
     else:

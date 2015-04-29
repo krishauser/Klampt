@@ -12,31 +12,6 @@ import xml.etree.ElementTree as ET
 from xml.sax.saxutils import escape
 from xml.dom import minidom
 
-def escape_nl(text):
-    return escape(text).replace('\n','&#x0A;')
-
-def prettify(elem,indent_level=0):
-    """Return a pretty-printed XML string for the Element.
-    """
-    indent = "  "
-    res = indent_level*indent + '<'+elem.tag.encode('utf-8')
-    for k in elem.keys():
-        res += " "+k.encode('utf-8')+'="'+escape_nl(elem.get(k)).encode('utf-8')+'"'
-    children  = elem.getchildren()
-    if len(children)==0 and not elem.text:
-        res += ' />'
-        return res
-    res += '>'
-    
-    if elem.text:
-        res += escape_nl(elem.text).encode('utf-8')
-    for c in children:
-        res += '\n'+prettify(c,indent_level+1)
-    if len(children)>0:
-        res += '\n'+indent_level*indent
-    res += '</'+elem.tag.encode('utf-8')+'>'
-    return res
-
 class MultiPath:
     """Contains a list of Sections which are fixed-stance paths or
     trajectories.
@@ -77,10 +52,12 @@ class MultiPath:
         return self.sections[0].times[0]
 
     def endTime(self):
+        """Returns the final time parameter"""
         if self.sections[-1].times==None: return sum(len(s.configs)-1 for s in self.sections)
         return self.sections[-1].times[-1]
 
     def hasTiming(self):
+        """Returns true if the multipath is timed"""
         return self.sections[0].times!=None
 
     def getStance(self,section):
@@ -139,19 +116,20 @@ class MultiPath:
         self.holdSet.update(newholds)
 
     def save(self,fn):
+        """Saves this  multipath to an xml file."""
         tree = self.saveXML()
         f = open(fn,'w')
         f.write('<?xml version="1.0"?>\n')
-        f.write(prettify(tree.getroot()))
+        f.write(_prettify(tree.getroot()))
         #tree.write(fn,pretty_print=True)
 
     def load(self,fn):
-        """Loads a multipath from a multipath xml file."""
+        """Loads this  multipath from a multipath xml file."""
         tree = ET.parse(fn)
         return self.loadXML(tree)
 
     def saveXML(self):
-        """Saves a multipath to a multipath xml tree (ElementTree)"""
+        """Saves this multipath to a multipath xml tree (ElementTree)"""
         root = ET.Element("multipath")
         root.attrib = self.settings
         for sec in self.sections:
@@ -265,7 +243,33 @@ class MultiPath:
         if u==0: return self.sections[s].milestones[i]
         return vectorops.interpolate(self.sections[s].milestones[i],self.sections[s].milestones[i+1],u)
 
-if __name__ == '__main__':
+def _escape_nl(text):
+    return escape(text).replace('\n','&#x0A;')
+
+def _prettify(elem,indent_level=0):
+    """Return a pretty-printed XML string for the Element.
+    """
+    indent = "  "
+    res = indent_level*indent + '<'+elem.tag.encode('utf-8')
+    for k in elem.keys():
+        res += " "+k.encode('utf-8')+'="'+_escape_nl(elem.get(k)).encode('utf-8')+'"'
+    children  = elem.getchildren()
+    if len(children)==0 and not elem.text:
+        res += ' />'
+        return res
+    res += '>'
+    
+    if elem.text:
+        res += _escape_nl(elem.text).encode('utf-8')
+    for c in children:
+        res += '\n'+_prettify(c,indent_level+1)
+    if len(children)>0:
+        res += '\n'+indent_level*indent
+    res += '</'+elem.tag.encode('utf-8')+'>'
+    return res
+
+
+def _main():
     import sys
     import optparse
     usage = "Usage: %prog [options] filename(s)"
@@ -342,3 +346,8 @@ if __name__ == '__main__':
                     print "/ velocities",
                 print len(p.getStance(i)),"holds",
                 print
+
+
+if __name__ == '__main__':
+    _main()
+    

@@ -258,6 +258,7 @@ void QResourceTreeWidget::dropEvent(QDropEvent *event)
     if(event->dropAction() == Qt::MoveAction || event->dropAction() == Qt::CopyAction) {
       QTreeWidgetItem* targetParent = target;
       ResourceNode* targetNodeParent = targetNode;
+      int dragIndex = manager->ChildIndex(dragNode);
       int insertIndex = -1;  //default: insert at end
       if(dropIndicatorPosition() == OnItem) {
 	if(!target) {
@@ -295,6 +296,11 @@ void QResourceTreeWidget::dropEvent(QDropEvent *event)
 	if(dragParent) {
 	  printf("Updating drag parent decorator\n");
 	  updateDecorator(dragParent);
+	}
+	if(dragParent==targetParent) {
+	  //need to adjust insertion index
+	  if(dragIndex < insertIndex)
+	    insertIndex--;
 	}
       }
       else {

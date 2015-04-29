@@ -69,7 +69,7 @@ def distance(T1,T2,Rweight=1.0,tweight=1.0):
     is weighted by tweight"""
     (R1,t1)=T1
     (R2,t2)=T2
-    return rweight*so3.distance(R1,R2) + tweight*vectorops.distance(t1,t2)
+    return Rweight*so3.distance(R1,R2) + tweight*vectorops.distance(t1,t2)
 
 def error(T1,T2):
     """Returns a 6D "difference vector" that describes how far T1 is from T2.
