@@ -88,7 +88,10 @@ bool SerialControlledRobot::Run()
       if(klamptController) {
 	klamptController->sensors = &sensors;
 	klamptController->command = &command;
-	klamptController->Update(timeStep);
+	Real dt = robotTime-klamptController->time;
+	if(klamptController->time == 0) //first update
+	  dt = timeStep;
+	klamptController->Update(robotTime-klamptController->time);
       }
       if(controllerMutex) controllerMutex->unlock();
 
@@ -100,6 +103,7 @@ bool SerialControlledRobot::Run()
 
       Real time = timer.ElapsedTime();
       if(time > lastReadTime + timeStep) {
+	printf("Klamp't controller overrun, took time %g which exceeds time step %g\n",time-lastReadTime,timeStep);
 	numOverruns ++;
       }
       else {
@@ -123,6 +127,10 @@ void SerialControlledRobot::SetMutex(Mutex* mutex)
 void SerialControlledRobot::ReadSensorData(RobotSensors& sensors)
 {
   if(controllerPipe && controllerPipe->NewMessageCount() > 0) {
+    if(controllerPipe->NewMessageCount() > 1) {
+      fprintf(stderr,"SerialControlledRobot: Warning, skipping %d sensor messages\n",controllerPipe->NewMessageCount()-1);
+      fprintf(stderr,"  TODO: debug the controller pipe?\n");
+    }
     string msg = controllerPipe->NewestMessage();
 
     AnyCollection c;
@@ -160,7 +168,7 @@ void SerialControlledRobot::ReadSensorData(RobotSensors& sensors)
     for(size_t i=0;i<keys.size();i++) {
       string key;
       if(LexicalCast(keys[i].value,key)) {
-	if(key == "dt")
+	if(key == "dt") 
 	  timeStep = c["dt"];
 	else if(key == "t") 
 	  robotTime = c["t"];
@@ -249,6 +257,7 @@ void SerialControlledRobot::WriteCommandData(const RobotMotorCommand& command)
     //write JSON message to socket file
     stringstream ss;
     c.write(ss);
+    cout<<"Writing message: "<<ss.str()<<endl;
     controllerPipe->SendMessage(ss.str());
   }
 }
