@@ -3,7 +3,6 @@ import os
 import sys
 from klampt import *
 from klampt.glprogram import *
-from klampt import collide
 import importlib
 
 class MyGLViewer(GLRealtimeProgram):
