@@ -97,6 +97,14 @@ class Geometry3D
   bool collides(const Geometry3D& other);
   bool withinDistance(const Geometry3D& other,double tol);
   double distance(const Geometry3D& other,double relErr=0,double absErr=0);
+  ///Returns (success,cp) giving the closest point to the input point.
+  ///success is false if that operation is not supported with the given
+  ///geometry type.
+  ///cp are given in world coordinates.
+  bool closestPoint(const double pt[3],double out[3]);
+  ///Returns (hit,pt) where hit is true if the ray starting at s and pointing
+  ///in direction d hits the geometry (given in world coordinates); pt is
+  ///the hit point, in world coordinates.
   bool rayCast(const double s[3],const double d[3],double out[3]);
 
   int world;

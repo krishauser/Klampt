@@ -636,6 +636,17 @@ double Geometry3D::distance(const Geometry3D& other,double relErr,double absErr)
   return q.Distance(relErr,absErr);
 }
 
+bool Geometry3D::closestPoint(const double pt[3],double out[3])
+{
+  if(!geomPtr) return false;
+  AnyCollisionGeometry3D* geom = reinterpret_cast<AnyCollisionGeometry3D*>(geomPtr);
+  Vector3 vout;
+  Real d = geom->Distance(Vector3(pt),vout);
+  if(IsInf(d)) return false;
+  vout.get(out);
+  return true;
+}
+
 bool Geometry3D::rayCast(const double s[3],const double d[3],double out[3])
 {
   if(!geomPtr) return false;
