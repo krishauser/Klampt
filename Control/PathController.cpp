@@ -898,6 +898,12 @@ bool PolynomialPathController::SendCommand(const string& name,const string& str)
       fprintf(stderr,"set_tq: warning, cut time %g is less than path's endtime %g\n",t,pathOffset);
       return false;
     }
+    if(path.elements.empty()) {
+      fprintf(stderr,"set_tq: warning, the controller has not been set up yet with the robot's current configuration... starting at given configuration\n");    
+      path = Spline::Constant(q,0,t);
+      pathOffset = 0;
+      return true;
+    }
     Cut(0);
     Assert(t >= path.EndTime());
     AppendLinear(q,t-path.EndTime());
