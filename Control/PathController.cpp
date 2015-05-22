@@ -888,6 +888,13 @@ vector<string> PolynomialPathController::Commands() const
 
 bool PolynomialPathController::SendCommand(const string& name,const string& str)
 {
+  if(name.substr(0,6) == "append") {
+    if(path.elements.empty()) {
+      fprintf(stderr,"%s: warning, the controller has not been set up yet with the robot's current configuration... try to take some simulation steps first, call set_tq, or SetConstant(q)\n",name.c_str());    
+      return false;
+    }
+  }
+
   stringstream ss(str);
   Real t;
   Config q,v;
@@ -899,7 +906,7 @@ bool PolynomialPathController::SendCommand(const string& name,const string& str)
       return false;
     }
     if(path.elements.empty()) {
-      fprintf(stderr,"set_tq: warning, the controller has not been set up yet with the robot's current configuration... starting at given configuration\n");    
+      fprintf(stderr,"set_tq: warning, the controller has not been set up yet with the robot's current configuration... starting at the given configuration\n");    
       path = Spline::Constant(q,0,t);
       pathOffset = 0;
       return true;
@@ -922,6 +929,11 @@ bool PolynomialPathController::SendCommand(const string& name,const string& str)
   else if(name == "set_q") {
     ss>>q;
     if(!ss) return false;
+    if(path.elements.empty()) {
+      fprintf(stderr,"set_q: warning, the controller has not been set up yet with the robot's current configuration... starting at the given configuration\n");    
+      SetConstant(q);
+      return true;
+    }
     Cut(0);
     AppendRamp(q);
     return true;
@@ -941,6 +953,11 @@ bool PolynomialPathController::SendCommand(const string& name,const string& str)
   else if(name == "set_qv") {
     ss>>q>>v;
     if(!ss) return false;
+    if(path.elements.empty()) {
+      fprintf(stderr,"set_qq: warning, the controller has not been set up yet with the robot's current configuration... starting at the given configuration\n");    
+      SetConstant(q);
+      return true;
+    }
     Cut(0);
     AppendRamp(q,v);
     return true;
@@ -954,6 +971,12 @@ bool PolynomialPathController::SendCommand(const string& name,const string& str)
   else if(name == "set_tqv") {
     ss>>t>>q>>v;
     if(!ss) return false;
+    if(path.elements.empty()) {
+      fprintf(stderr,"set_tqv: warning, the controller has not been set up yet with the robot's current configuration... starting at the given configuration\n");    
+      path = Spline::Constant(q,0,t);
+      pathOffset = 0;
+      return true;
+    }
     Cut(0);
     Assert(t >= path.EndTime());
     AppendCubic(q,v,t-path.EndTime());
