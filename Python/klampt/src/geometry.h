@@ -74,6 +74,8 @@ class Geometry3D
   ///Returns the type of geometry: TriangleMesh, PointCloud, or
   ///GeometricPrimitive
   std::string type();
+  ///Returns true if this has no contents
+  bool empty();
   ///Returns a TriangleMesh if this geometry is of type TriangleMesh
   TriangleMesh getTriangleMesh();
   ///Returns a PointCloud if this geometry is of type PointCloud

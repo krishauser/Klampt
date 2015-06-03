@@ -99,12 +99,12 @@ if __name__ == "__main__":
         raise RuntimeError("Unable to load world "+fn)
     sim = Simulator(world)
     if problem == "2b":
-        m = world.robot(0).getLink(0).getMass()
+        m = world.robot(0).link(0).getMass()
         #mass estimated to be 50% lighter
         scale = 0.5
         m.mass *= scale
         for i in xrange(9):
             m.inertia[i] *= scale
-        world.robot(0).getLink(0).setMass(m)
+        world.robot(0).link(0).setMass(m)
     GLTest(world,sim).run()
 

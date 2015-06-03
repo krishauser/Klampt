@@ -54,7 +54,7 @@ class RosBaxterController(controller.BaseController):
                             'right_upper_forearm':'right_w0', 'right_lower_forearm':'right_w1', 'right_wrist':'right_w2',
                             'head':'head_pan','screen':'head_nod'}
         for l in range(self.robot_model.numLinks()):
-            klamptName = self.robot_model.getLink(l).getName()
+            klamptName = self.robot_model.link(l).getName()
             if klamptName not in self.names_klampt_to_baxter:
                 self.names_klampt_to_baxter[klamptName] = klamptName
         self.joint_state = JointState()
@@ -67,15 +67,15 @@ class RosBaxterController(controller.BaseController):
         self.head_state.pan = None
         self.head_state.isPanning = False
         self.head_state.isNodding = False
-        self.head_pan_link_index = self.robot_model.getLink("head").index
-        self.head_nod_link_index = self.robot_model.getLink("screen").index
+        self.head_pan_link_index = self.robot_model.link("head").index
+        self.head_nod_link_index = self.robot_model.link("screen").index
         self.head_pan_driver_index = self.robot_model.getDriver("head").index
         self.head_nod_driver_index = self.robot_model.getDriver("screen").index
         self.head_nod_start_time = None
 
         # fast indexing structure for partial commands
         self.nameToDriverIndex = dict(zip(self.joint_state.name,range(len(self.joint_state.name))))
-        self.nameToLinkIndex = dict((self.names_klampt_to_baxter[self.robot_model.getLink(l).getName()],l) for l in range(self.robot_model.numLinks()))
+        self.nameToLinkIndex = dict((self.names_klampt_to_baxter[self.robot_model.link(l).getName()],l) for l in range(self.robot_model.numLinks()))
 
         # Setup publisher of robot states
         self.pub_s = rospy.Publisher("/%s/state"%(robot_name,), AssemblyState)
@@ -346,12 +346,12 @@ class KlamptSerialBaxterController(SerialController):
                             'right_upper_forearm':'right_w0', 'right_lower_forearm':'right_w1', 'right_wrist':'right_w2',
                             'head':'head_pan','screen':'head_nod'}
         for l in range(self.robot_model.numLinks()):
-            klamptName = self.robot_model.getLink(l).getName()
+            klamptName = self.robot_model.link(l).getName()
             if klamptName not in self.names_klampt_to_baxter:
                 self.names_klampt_to_baxter[klamptName] = klamptName
         self.baxterDriverNames = [self.names_klampt_to_baxter[self.robot_model.getDriver(d).getName()] for d in range(self.robot_model.numDrivers())]
-        self.head_pan_link_index = self.robot_model.getLink("head").index
-        self.head_nod_link_index = self.robot_model.getLink("screen").index
+        self.head_pan_link_index = self.robot_model.link("head").index
+        self.head_nod_link_index = self.robot_model.link("screen").index
 
         self.larm_command = JointCommand()
         self.rarm_command = JointCommand()
@@ -360,7 +360,7 @@ class KlamptSerialBaxterController(SerialController):
 
         # fast indexing structure for partial commands
         self.nameToDriverIndex = dict(zip(self.baxterDriverNames,range(len(self.baxterDriverNames))))
-        self.nameToLinkIndex = dict((self.names_klampt_to_baxter[self.robot_model.getLink(l).getName()],l) for l in range(self.robot_model.numLinks()))
+        self.nameToLinkIndex = dict((self.names_klampt_to_baxter[self.robot_model.link(l).getName()],l) for l in range(self.robot_model.numLinks()))
 
         # Setup publisher of robot states
         self.currentTime = None

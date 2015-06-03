@@ -49,7 +49,7 @@ def mainRosControllerToKlamptRobot(klampt_robot_model_fn,klampt_serial_port):
 
     #print some info
     robotName = klampt_robot_model.getName()
-    linkNames = [klampt_robot_model.getLink(i).getName() for i in range(klampt_robot_model.numLinks())]
+    linkNames = [klampt_robot_model.link(i).getName() for i in range(klampt_robot_model.numLinks())]
     print "Running controller listening on topic /%s/limb/right/joint_command and"%(robotName,)
     print "and /%s/limb/left/joint_command andd publishing on topic"%(robotName,)
     print "/%s/joint_states"%(robotName,)

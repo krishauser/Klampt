@@ -293,7 +293,7 @@ class Emulator:
         """
         finger_links_touching = [[self.sim.hadContact(linkj,-1) for linkj in self.fingerids[f]] for f in range(3)]
 
-        controller = self.sim.getController(self.robotIndex)
+        controller = self.sim.controller(self.robotIndex)
         desired_joint_angles = controller.getCommandedConfig()
         actual_joint_angles = self.sim.getActualConfig(self.robotIndex)
         #commanded finger configuration
@@ -317,7 +317,7 @@ class Emulator:
     def send_command(self,g,scissor=None):
         """Sends the command given by g and scissor to the robot controller"""
         qdes = self.get_command(g,scissor)
-        controller = self.sim.getController(self.robotIndex)
+        controller = self.sim.controller(self.robotIndex)
         controller.setPIDCommand(qdes,[0.0]*len(qdes))
 
 def self_test(fn="robotiq.csv",gob1=None,gob2=None,gob3=None):

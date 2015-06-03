@@ -39,7 +39,7 @@ class MyGLViewer(GLRealtimeProgram):
         glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,[0,1,0,0.5])
         for i in xrange(self.world.numRobots()):
             r = self.world.robot(i)
-            q = self.sim.getController(i).getCommandedConfig()
+            q = self.sim.controller(i).getCommandedConfig()
             r.setConfig(q)
             r.drawGL(False)
         glDisable(GL_BLEND)
@@ -66,7 +66,7 @@ class MyGLViewer(GLRealtimeProgram):
     def control_loop(self):
         for i in xrange(self.world.numRobots()):
             if i >= len(self.controllers): break
-            c = self.sim.getController(i)
+            c = self.sim.controller(i)
             #build measurement dict
             measurements = {'t':self.sim.getTime(),'dt':self.dt,'qcmd':c.getCommandedConfig(),'dqcmd':c.getCommandedVelocity()}
             k = 0

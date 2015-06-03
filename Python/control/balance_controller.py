@@ -44,7 +44,7 @@ class BalanceController(OpSpaceController):
         #store local position of COM relative to feet
         self.comLocalHomePos = {}
         for k,v in feet.iteritems():
-            self.comLocalHomePos[v] = se3.apply(se3.inv(robot.getLink(v).getTransform()),self.comTask.getDesiredValue())
+            self.comLocalHomePos[v] = se3.apply(se3.inv(robot.link(v).getTransform()),self.comTask.getDesiredValue())
 
         """
         # joint task
@@ -67,7 +67,7 @@ class BalanceController(OpSpaceController):
                 for c in opController.motionModel.linksInContact:
                     #rotate the x-y components of the com position,
                     #adjust vertically by the z component
-                    (Rl,tl) = self.robot.getLink(c).getTransform()
+                    (Rl,tl) = self.robot.link(c).getTransform()
                     comLocal = self.comLocalHomePos[c]
                     comDesC = [0]*3
                     so3.apply(Rl,(comLocal[0],comLocal[1],0))

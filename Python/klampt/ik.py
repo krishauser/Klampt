@@ -10,7 +10,7 @@ solution is also guaranteed to satisfy the robot's joint limits.
 
 For basic IK, the calling sequence is
 
-    link = robot.getLink("name")
+    link = robot.link("name")
     goal = ik.objective(link,local=[p1,p2,p3],world=[r1,r2,r3])
     robot.setConfig(startConfig)  #(optional, set the initial configuration)
     if ik.solve(goal):
@@ -62,10 +62,10 @@ def objective(body,ref=None,local=None,world=None,R=None,t=None):
     transformation between body and ref.
     """
     generalized = False
-    if not hasattr(body,'getRobot'):
+    if not hasattr(body,'robot'):
         generalized = True
     else: 
-        if ref and (not hasattr(ref,'getRobot') or ref.getRobot() != body.getRobot()):
+        if ref and (not hasattr(ref,'robot') or ref.robot() != body.robot()):
             generalized=True
 
     if generalized:
@@ -92,7 +92,7 @@ def objective(body,ref=None,local=None,world=None,R=None,t=None):
         return obj
     else:
         obj = IKObjective()
-        obj.robot = body.getRobot()
+        obj.robot = body.robot()
         if local and world:
             assert(len(local)==len(world))
             if hasattr(local[0],'__iter__'):

@@ -34,7 +34,7 @@ class MyGLViewer(GLRealtimeProgram):
         glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,[0,1,0,0.5])
         for i in xrange(self.world.numRobots()):
             r = self.world.robot(i)
-            q = self.sim.getController(i).getCommandedConfig()
+            q = self.sim.controller(i).getCommandedConfig()
             r.setConfig(q)
             r.drawGL(False)
         glDisable(GL_BLEND)
@@ -43,7 +43,7 @@ class MyGLViewer(GLRealtimeProgram):
         #Put your control handler here
         
         #TODO: right now, just sets g to an oscillation between 0 and 199
-        controller = self.sim.getController(0)
+        controller = self.sim.controller(0)
         g = int(self.sim.getTime()*50.0)
         maxval = 120
         if int(g/maxval)%2 == 1:

@@ -37,8 +37,9 @@ def toGlutModifiers(modifiers):
     return res
 
 class GLProgram(QGLWidget):
-    """A basic OpenGL program using GLUT.  Set up your window parameters,
-    then call run() to start the GLUT main loop.
+    """A basic OpenGL program using Qt.  Set up your window parameters,
+    then call run() to start the Qt main loop.  This function can also be
+    passed a main window / application as a parent.
 
     Attributes:
         - name: title of the window (only has an effect before calling
@@ -57,10 +58,13 @@ class GLProgram(QGLWidget):
         self.modifiers = 0
         #mouse state information
         self.lastx,self.lasty = None,None
+        self.initialized = False
 
-    def initWindow(self,parent=None):
+    def initWindow(self,parent=None,shared=None):
         """ Open a window and initialize """
-        QGLWidget.__init__(self,parent)
+        if self.initialized:
+            raw_input("initWindow called twice... this may invalidate textures and display lists... are you sure you want to continue?")
+        QGLWidget.__init__(self,parent,shared)
         self.setWindowTitle(self.name)
         self.idleTimer = QTimer()
         self.idleTimer.timeout.connect(lambda:self.idlefunc())
@@ -75,6 +79,10 @@ class GLProgram(QGLWidget):
         self.setMouseTracking(True)
         #init function
         self.initialize()
+        self.initialized = True
+
+    def sizeHint(self):
+        return QSize(self.width,self.height)
 
     def run(self,parent=None):
         """Starts the main loop"""

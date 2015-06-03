@@ -54,7 +54,7 @@ class WorldCollider:
         for i in xrange(world.numTerrains()):
             t = world.terrain(i)
             g = t.geometry()
-            if g != None:
+            if g != None and g.type()!="":
                 self.terrains.append(len(self.geomList))
                 self.geomList.append((t,g))
             else:
@@ -62,7 +62,7 @@ class WorldCollider:
         for i in xrange(world.numRigidObjects()):
             o = world.rigidObject(i)
             g = o.geometry()
-            if g != None:
+            if g != None and g.type()!="":
                 self.rigidObjects.append(len(self.geomList))
                 self.geomList.append((o,g))
             else:
@@ -71,9 +71,9 @@ class WorldCollider:
             r = world.robot(i)
             self.robots.append([])
             for j in xrange(r.numLinks()):
-                l = r.getLink(j)
+                l = r.link(j)
                 g = l.geometry()
-                if g != None:
+                if g != None and g.type()!="":
                     self.robots[-1].append(len(self.geomList))
                     self.geomList.append((l,g))
                 else:
@@ -118,7 +118,7 @@ class WorldCollider:
                         self.mask[l1].add(l2)
                         self.mask[l2].add(l1)
             #robot self-collision
-            rob = self.geomList[r[0]][0].getRobot()
+            rob = self.geomList[r[0]][0].robot()
             nl = rob.numLinks()
             for i in xrange(nl):
                 for j in xrange(i):

@@ -51,6 +51,7 @@ class RobotModelLink
   RobotModelLink();
   int getID();
   const char* getName();
+  RobotModel robot();
   RobotModel getRobot();
   int getIndex();
   int getParent();
@@ -98,7 +99,7 @@ class RobotModelLink
 
   int world;
   int robotIndex;
-  Robot* robot;
+  Robot* robotPtr;
   int index;
 };
 
@@ -109,6 +110,7 @@ class RobotModelDriver
  public:
   RobotModelDriver();
   const char* getName();
+  RobotModel robot();
   RobotModel getRobot();
   ///Currently can be "normal", "affine", "rotation", "translation", or "custom"
   const char* getType();
@@ -129,7 +131,7 @@ class RobotModelDriver
 
   int world;
   int robotIndex;
-  Robot* robot;
+  Robot* robotPtr;
   int index;
 };
 
@@ -154,10 +156,18 @@ class RobotModel
   int getID();
   const char* getName();
   int numLinks();
+  RobotModelLink link(int index);
+  RobotModelLink link(const char* name);
+  ///Old-style: will be deprecated
   RobotModelLink getLink(int index);
+  ///Old-style: will be deprecated
   RobotModelLink getLink(const char* name);
   int numDrivers();
+  RobotModelDriver driver(int index);
+  RobotModelDriver driver(const char* name);
+  ///Old-style: will be deprecated
   RobotModelDriver getDriver(int index);
+  ///Old-style: will be deprecated
   RobotModelDriver getDriver(const char* name);
 
   //kinematic and dynamic properties

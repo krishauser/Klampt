@@ -39,7 +39,7 @@ print "Load successful"
 
 #print some info
 robotName = klampt_robot_model.getName()
-linkNames = [klampt_robot_model.getLink(i).getName() for i in range(klampt_robot_model.numLinks())]
+linkNames = [klampt_robot_model.link(i).getName() for i in range(klampt_robot_model.numLinks())]
 print "Running controller listening on topic /%s/joint_trajectory and"%(robotName,)
 print "publishing on topic /%s/joint_state"%(robotName,)
 print "Klamp't link names are:",linkNames

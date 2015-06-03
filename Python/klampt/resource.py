@@ -15,20 +15,23 @@ import robotsim
 import vectorops,se3,so3
 import os
 import time
-from robotsim import WidgetSet,RobotPoser,ObjectPoser,TransformPoser,WorldModel,RobotModelLink,RigidObjectModel
-from threading import Thread
-from OpenGL.GL import *
-import gldraw
+from robotsim import WidgetSet,RobotPoser,ObjectPoser,TransformPoser,WorldModel,RobotModelLink,RigidObjectModel,IKObjective
+from contact import ContactPoint
+from hold import Hold
+import visualization
+import glcommon
+#from OpenGL.GL import *
+#import gldraw
 
-_PyQtAvailable = False
-try:
-    from PyQt4.QtCore import *
-    from PyQt4.QtGui import *
-    import qtprogram
-    _PyQtAvailable = True
-except ImportError:
-    print "QT is not available... try sudo apt-get install python-qt4 python-qt4-gl"
-    pass
+#_PyQtAvailable = False
+#try:
+#    from PyQt4.QtCore import *
+#    from PyQt4.QtGui import *
+#    import qtprogram
+#    _PyQtAvailable = True
+#except ImportError:
+#    print "QT is not available... try sudo apt-get install python-qt4 python-qt4-gl"
+#    pass
 
 
 _directory = 'resources'
@@ -77,6 +80,39 @@ def filenameToType(name):
     else:
         raise RuntimeError("Cannot determine type of resource from name "+name)
 
+def objectToTypes(object,world=None):
+    """Returns all possible types that could be associated with the given
+    Python Klamp't object."""
+    if hasattr(object,'type'):
+        return object.type
+    if isinstance(object,ContactPoint):
+        return 'ContactPoint'
+    elif isinstance(object,Hold):
+        return 'Hold'
+    elif isinstance(object,IKObjective):
+        return 'IKGoal'
+    elif hasattr(object,'__iter__'):
+        if hasattr(object[0],'__iter__'):
+            #list of lists or tuples
+            if len(object)==2:
+                if len(object[0])==9 and len(object[1])==3:
+                    #se3
+                    return 'RigidTransform'
+            return 'Configs'
+        else:
+            if len(object)==2:
+                #2d point
+                return ['Vector2','Config']
+            elif len(object)==3:
+                #3d point
+                return ['Vector3','Config']
+            elif len(object)==9:
+                #so3 or 9d point?
+                return ['Matrix3','Config']
+            else:
+                return 'Config'
+    else:
+        raise ValueError("Unknown object passed to objectToTypes")
 
 def get(name,type='auto',directory=None,default=None,doedit='auto',description=None,editor='visual',world=None,frame=None):
     """Retrieve a resource of the given name from the current resources
@@ -188,25 +224,15 @@ def set(name,value,type='auto',directory=None):
     else:
         return loader.save(value,type,fn)
 
-class _VisualEditorBase:
+class _VisualEditorBase(glcommon.GLWidgetPlugin):
     #A base class for editing resources.
     
     def __init__(self,name,value,description,world):
+        glcommon.GLWidgetPlugin.__init__(self)
         self.name = name
         self.value = value
         self.description = description
         self.world = world
-        self.qtwidget = None
-        self.width = 100
-        self.height = 100
-        self.klamptwidgetbutton = 2
-        self.klamptwidgetmaster = WidgetSet()
-        self.klamptwidgetdragging = False
-        #refresh appearances for new OpenGL context
-        #for i in xrange(world.numIDs()):
-        #    world.appearance(i).refresh()
-    def addWidget(self,widget):
-        self.klamptwidgetmaster.add(widget)
     def instructions(self):
         return None
     def display(self):
@@ -228,56 +254,6 @@ class _VisualEditorBase:
         glRasterPos(20,h)
         gldraw.glutBitmapString(GLUT_BITMAP_HELVETICA_12,"Press 'x' to exit without saving, 'q' to save+exit")
         """
-    def viewport(self):
-        return self.qtwidget.viewport()
-    def idlesleep(self,seconds):
-        self.qtwidget.idlesleep(seconds)
-    def refresh(self):
-        self.qtwidget.refresh()
-    def click_ray(self,x,y):
-        return self.qtwidget.click_ray(x,y)
-    def initialize(self):
-        return False
-    def reshapefunc(self,w,h):
-        self.width,self.height = w,h
-        return False
-    def keyboardfunc(self,c,x,y):
-        self.klamptwidgetmaster.keypress(c)
-        return False
-    def keyboardupfunc(self,c,x,y):
-        return False
-    def specialfunc(self,c,x,y):
-        self.klamptwidgetmaster.keypress(c)
-        return False
-    def specialupfunc(self,c,x,y):
-        return False
-    def mousefunc(self,button,state,x,y):
-        if button == self.klamptwidgetbutton:
-            if state == 0:  #down
-                if self.klamptwidgetmaster.beginDrag(x,self.height-y,self.viewport()):
-                    self.klamptwidgetdragging = True
-            else:
-                if self.klamptwidgetdragging:
-                    self.klamptwidgetmaster.endDrag()
-                self.klamptwidgetdragging = False
-            if self.klamptwidgetmaster.wantsRedraw():
-                self.refresh()
-            return True
-        return False
-    def motionfunc(self,x,y,dx,dy):
-        if self.klamptwidgetdragging:
-            self.klamptwidgetmaster.drag(dx,-dy,self.viewport())
-            if self.klamptwidgetmaster.wantsRedraw():
-                self.refresh()
-            return True
-        else:
-            self.klamptwidgetmaster.hover(x,self.height-y,self.viewport())
-            if self.klamptwidgetmaster.wantsRedraw():
-                self.refresh()
-        return False
-    def idlefunc(self):
-        self.klamptwidgetmaster.idle()
-        return True
 
 class _ConfigVisualEditor(_VisualEditorBase):
     def __init__(self,name,value,description,world):
@@ -374,68 +350,27 @@ class _ObjectTransformVisualEditor(_VisualEditorBase):
 
 
 #Qt stuff
-if _PyQtAvailable:
-    _app = None
+if glcommon._PyQtAvailable:
+    from PyQt4.QtCore import *
+    from PyQt4.QtGui import *
+    from OpenGL.GL import *
     _dialog = None
-    _glwidget = None
-
-    class _AppGLWidget(qtprogram.GLNavigationProgram):
-        def __init__(self):
-            qtprogram.GLNavigationProgram.__init__(self,"GLWidget")
-            self.iface = None
-        def setInterface(self,iface):
-            self.iface = iface
-            if iface:
-                iface.qtwidget = self
-                iface.reshapefunc(self.width,self.height)
-            self.refresh()
-        def initialize(self):
-            if self.iface: self.iface.initialize()
-            qtprogram.GLNavigationProgram.initialize(self)
-        def reshapefunc(self,w,h):
-            if self.iface==None or not self.iface.reshapefunc(w,h):
-                qtprogram.GLNavigationProgram.reshapefunc(self,w,h)
-        def keyboardfunc(self,c,x,y):
-            if self.iface==None or not self.iface.keyboardfunc(c,x,y):
-                qtprogram.GLNavigationProgram.keyboardfunc(self,c,x,y)
-        def keyboardupfunc(self,c,x,y):
-            if self.iface==None or not self.iface.keyboardupfunc(c,x,y):
-                qtprogram.GLNavigationProgram.keyboardupfunc(self,c,x,y)
-        def specialfunc(self,c,x,y):
-            if self.iface==None or not self.iface.specialfunc(c,x,y):
-                qtprogram.GLNavigationProgram.specialfunc(self,c,x,y)
-        def specialupfunc(self,c,x,y):
-            if self.iface==None or not self.iface.specialupfunc(c,x,y):
-                qtprogram.GLNavigationProgram.specialupfunc(self,c,x,y)
-        def motionfunc(self,x,y,dx,dy):
-            if self.iface==None or not self.iface.motionfunc(x,y,dx,dy):
-                qtprogram.GLNavigationProgram.motionfunc(self,x,y,dx,dy)
-        def mousefunc(self,button,state,x,y):
-            if self.iface==None or not self.iface.mousefunc(button,state,x,y):
-                qtprogram.GLNavigationProgram.mousefunc(self,button,state,x,y)
-        def idlefunc(self):
-            if self.iface!=None: self.iface.idlefunc()
-            qtprogram.GLNavigationProgram.idlefunc(self)
-        def display(self):
-            if self.iface!=None:
-                self.iface.display()
-        def display_screen(self):
-            if self.iface!=None:
-                self.iface.display_screen()
 
     class _MyDialog(QDialog):
-        def __init__(self):
+        def __init__(self,glwidget):
             QDialog.__init__(self)
-            global _glwidget
-            _glwidget.initWindow(self)
+            glwidget.setMinimumSize(glwidget.width,glwidget.height)
+            glwidget.setMaximumSize(4000,4000)
+            glwidget.setSizePolicy(QSizePolicy(QSizePolicy.Maximum))
             self.instructions = QLabel()
             self.description = QLabel()
             self.description2 = QLabel("Press OK to save, Cancel to continue without saving")
             self.layout = QVBoxLayout(self)
             self.layout.addWidget(self.description)
             self.layout.addWidget(self.instructions)
-            self.layout.addWidget(_glwidget)
+            self.layout.addWidget(glwidget)
             self.layout.addWidget(self.description2)
+            self.layout.setStretchFactor(glwidget,10)
             self.buttons = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel,Qt.Horizontal, self)
             self.buttons.accepted.connect(self.accept)
             self.buttons.rejected.connect(self.reject)
@@ -443,29 +378,41 @@ if _PyQtAvailable:
         def setEditor(self,editorObject):
             self.editorObject = editorObject
             self.setWindowTitle("Editing "+editorObject.name)
-            _glwidget.setInterface(editorObject)
+            visualization.setPlugin(editorObject)
             if editorObject.description==None:
                 self.description.setText("")
             else:
                 self.description.setText(editorObject.description)
             self.instructions.setText(editorObject.instructions())
         def finish(self):
-            _glwidget.setInterface(None)
+            visualization.setPlugin(None)
             res = self.editorObject.value
             self.editorObject = None
             return res
 
-    def _launch(editorObject):
-        global _app,_dialog,_glwidget
-        if _app == None:
-            #Do Qt setup
-            _app = QApplication(["Editor"])
-            _glwidget = _AppGLWidget()
-            _dialog=_MyDialog()
+    def _makeDialog(editorObject):
+        global _dialog
+        if _dialog == None:
+            _dialog=_MyDialog(visualization._vis)
         _dialog.setEditor(editorObject)
         res = _dialog.exec_()
         retVal = _dialog.finish()
         return res,retVal
+
+    def _launch(editorObject):
+        olditems = visualization._vis.items.copy()
+        visualization._vis.items = {}
+
+        oldtitle = visualization.getWindowTitle()
+        visualization.setWindowTitle("Resource Editor")
+        res,retVal = visualization.customRun(_makeDialog,args=(editorObject,))
+        visualization.setWindowTitle(oldtitle)
+
+        visualization._vis.items = olditems
+        return res,retVal
+else:
+    def _launch(editorObject):
+        raise ValueError("Unable to perform visual editing without PyQt")
 
 def console_edit(name,value,type,description=None,world=None,frame=None):
     print "*********************************************************"
@@ -541,7 +488,7 @@ def edit(name,value,type='auto',description=None,editor='visual',world=None,fram
         name = 'Anonymous'
     if type == 'auto':
         type = nameToType(name)
-    if not _PyQtAvailable and editor=='visual':
+    if not glcommon._PyQtAvailable and editor=='visual':
         print "PyQt is not available, defaulting to console editor"
         editor = 'console'
             
@@ -559,7 +506,7 @@ def edit(name,value,type='auto',description=None,editor='visual',world=None,fram
             frame = oframe
         except RuntimeError:
             try:
-                oframe = world.robot(0).getLink(frame)
+                oframe = world.robot(0).link(frame)
                 frame = oframe
             except RuntimeError:
                 try:

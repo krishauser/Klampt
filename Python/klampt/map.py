@@ -140,20 +140,20 @@ class map:
             if name == 'id':
                 return self.obj.getID()
             elif name == 'links':
-                return _index_name_map([self.obj.getLink(i) for i in xrange(self.obj.numLinks())])
+                return _index_name_map([self.obj.link(i) for i in xrange(self.obj.numLinks())])
             elif name == 'config':
                 return map(self.obj.getConfig(),self.obj.setConfig)
             elif name == 'velocity':
                 return map(self.obj.getVelocity(),self.obj.setVelocity)
             else:
                 for i in xrange(self.obj.numLinks()):
-                    if self.obj.getLink(i).getName() == name:
-                        return map(self.obj.getLink(i))
+                    if self.obj.link(i).getName() == name:
+                        return map(self.obj.link(i))
         elif isinstance(self.obj,RobotModelLink):
             if name == 'id':
                 return self.obj.getID()
             elif name == 'robot':
-                return map(self.obj.getRobot())
+                return map(self.obj.robot())
             elif name == 'geometry':
                 return self.obj.geometry()
             elif name == 'appearance':
@@ -182,7 +182,7 @@ class map:
                 return self.obj.getID()
             elif name == 'controllers':
                 nr = w.numRobots()
-                return _index_name_map([self.obj.getController(i) for i in range(nr)],[w.robot(i).getName() for i in range(nr)])
+                return _index_name_map([self.obj.controller(i) for i in range(nr)],[w.robot(i).getName() for i in range(nr)])
             elif name == 'robots':
                 nr = w.numRobots()
                 return _index_name_map([_SimRobot(self.obj,i) for i in range(w.numRobots())],[w.robot(i).getName() for i in range(nr)])
@@ -340,11 +340,11 @@ class _SimRobot:
     def getBodies(self):
         w = self.sim.getWorld()
         r = w.robot(self.index)
-        return [self.sim.getBody(r.getLink(j) ) for j in range(r.numLinks())]
+        return [self.sim.getBody(r.link(j) ) for j in range(r.numLinks())]
     def getBodyNames(self):
         w = self.sim.getWorld()
         r = w.robot(self.index)
-        return [r.getLink(j).getName() for j in range(r.numLinks())]
+        return [r.link(j).getName() for j in range(r.numLinks())]
 
 
 def get_item(obj,name):

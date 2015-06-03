@@ -13,7 +13,7 @@ class GLTest(GLRealtimeProgram):
         self.world.drawGL()
 
     def idle(self):
-        rfs = sim.getController(0).getNamedSensor("RF_ForceSensor")
+        rfs = sim.controller(0).sensor("RF_ForceSensor")
         print "Sensor values:",rfs.getMeasurements()
         sim.simulate(self.dt)
         return

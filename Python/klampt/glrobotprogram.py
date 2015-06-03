@@ -18,7 +18,7 @@ class GLSimulationProgram(GLRealtimeProgram):
 
     Subclasses should overload self.control_loop() and put whatever control
     loop you desire inside.  Note: should interact with
-    self.sim.getController(0), not self.world.robot(0).  self.world is simply
+    self.sim.controller(0), not self.world.robot(0).  self.world is simply
     a model and does not have a direct relation to the simulation.
     """
     def __init__(self,world,name="My GL simulation program"):
@@ -54,7 +54,7 @@ class GLSimulationProgram(GLRealtimeProgram):
             glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,self.commanded_config_color)
             for i in xrange(self.world.numRobots()):
                 r = self.world.robot(i)
-                q = self.sim.getController(i).getCommandedConfig()
+                q = self.sim.controller(i).getCommandedConfig()
                 r.setConfig(q)
                 r.drawGL(False)
             glDisable(GL_BLEND)

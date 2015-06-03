@@ -19,7 +19,7 @@ class GLIKTest(GLRealtimeProgram):
         link = 7
         localpos = (0.17,0,0)
         robot = self.world.robot(0)
-        eepos = robot.getLink(link).getWorldPosition(localpos)
+        eepos = robot.link(link).getWorldPosition(localpos)
         glDisable(GL_LIGHTING)
         glDisable(GL_DEPTH_TEST)
         glPointSize(5.0)
@@ -43,17 +43,17 @@ class GLIKTest(GLRealtimeProgram):
         #hint: your code should look like this
         #obj = IKObjective()
         # ... do something to set up the objective, see robot/src/robotik.h ...
-        #s = IKSolver(robotlink.getRobot())
+        #s = IKSolver(robotlink.robot())
         #s.add(obj)
         #maxIters = 100
         #tol = 1e-3
         # ... optionally you can set an initial configuration like so:
-        #robotlink.getRobot().setConfig([0]*robotlink.getRobot().numLinks())
+        #robotlink.robot().setConfig([0]*robotlink.robot().numLinks())
         #(res,iters) = s.solve(maxIters,tol);
-        #return robotlink.getRobot().getConfig()
+        #return robotlink.robot().getConfig()
 
         #right now this just sets the zero configuration
-        q = [0]*robotlink.getRobot().numLinks()
+        q = [0]*robotlink.robot().numLinks()
         return q
     
 
@@ -64,7 +64,7 @@ class GLIKTest(GLRealtimeProgram):
         link = 7
         localpos = (0.17,0,0)
         robot = self.world.robot(0)
-        q = self.solve_ik(robot.getLink(link),localpos,self.position)
+        q = self.solve_ik(robot.link(link),localpos,self.position)
         robot.setConfig(q)
     
 
