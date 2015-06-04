@@ -44,6 +44,13 @@ Vector3 CenterOfMass(const TriMesh& mesh)
   return center;
 }
 
+Vector3 CenterOfMass(const Math3D::GeometricPrimitive3D& g)
+{
+  AABB3D bbox = g.GetAABB();
+  return (bbox.bmin + bbox.bmax)*0.5;
+}
+
+
 Vector3 CenterOfMass(const Meshing::PointCloud3D& pc)
 {
   Vector3 center(Zero);
@@ -153,11 +160,17 @@ Matrix3 Covariance(const VolumeGrid& grid,const Vector3& center)
   return cov;
 }
 
-Matrix3 Covariance(const GeometricPrimitive3D& geom,const Vector3& center)
+
+Matrix3 Covariance(const GeometricPrimitive3D& g,const Vector3& center)
 {
-  FatalError("Covariance of primitives not done yet");
-  return Matrix3();
+  AABB3D bbox = g.GetAABB();
+  Matrix3 res(0.0);
+  res(0,0) = Sqr(bbox.bmax[0] - bbox.bmin[0])/12.0;
+  res(1,1) = Sqr(bbox.bmax[1] - bbox.bmin[1])/12.0;
+  res(2,2) = Sqr(bbox.bmax[2] - bbox.bmin[2])/12.0;
+  return res;
 }
+
 
 Matrix3 Covariance(const vector<AnyGeometry3D>& group,const Vector3& center)
 {
@@ -184,6 +197,19 @@ Matrix3 Covariance(const AnyGeometry3D& geom,const Vector3& center)
   }
   return Matrix3();
 }
+
+Matrix3 Inertia(const Math3D::GeometricPrimitive3D& geom,const Vector3& center,Real mass)
+{
+  Matrix3 cov=Covariance(geom,center);
+  Matrix3 H;
+  H.setNegative(cov);
+  H(0,0) = cov(1,1)+cov(2,2);
+  H(1,1) = cov(0,0)+cov(2,2);
+  H(2,2) = cov(0,0)+cov(1,1);
+  H *= mass;
+  return H;
+}
+
 
 Matrix3 Inertia(const TriMesh& mesh,const Vector3& center,Real mass)
 {
