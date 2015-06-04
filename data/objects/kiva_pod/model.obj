@@ -1,0 +1,10 @@
+mesh "meshes/pod_lowres.stl"
+T 1 0 0 0 0 1 0 -1 0      0 0 0.01
+mass 76.26
+inertia 47 0 0 0 47 0 0 0 13.075
+
+#kStiffness 100000
+#kDamping 300000
+kRestitution 0
+kFriction 0.8
+
