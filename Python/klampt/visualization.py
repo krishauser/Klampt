@@ -485,58 +485,14 @@ if glcommon._PyQtAvailable or glcommon._GLUTAvailable:
 
     if glcommon._PyQtAvailable:
         import qtprogram
-        _baseClass = qtprogram.GLRealtimeProgram
+        _baseClass = qtprogram.GLPluginProgram
     else:
         import glprogram
-        _baseClass = glprogram.GLRealtimeProgram
+        _baseClass = glprogram.GLPluginProgram
            
-    class GLPluginProgram(_baseClass):
-        def __init__(self,name="GLWidget"):
-            _baseClass.__init__(self,name)
-            self.iface = None
-        def setPlugin(self,iface):
-            self.iface = iface
-            if iface:
-                iface.widget = self
-                iface.reshapefunc(self.width,self.height)
-            self.refresh()
-        def initialize(self):
-            if self.iface: self.iface.initialize()
-            _baseClass.initialize(self)
-        def reshapefunc(self,w,h):
-            if self.iface==None or not self.iface.reshapefunc(w,h):
-                _baseClass.reshapefunc(self,w,h)
-        def keyboardfunc(self,c,x,y):
-            if self.iface==None or not self.iface.keyboardfunc(c,x,y):
-                _baseClass.keyboardfunc(self,c,x,y)
-        def keyboardupfunc(self,c,x,y):
-            if self.iface==None or not self.iface.keyboardupfunc(c,x,y):
-                _baseClass.keyboardupfunc(self,c,x,y)
-        def specialfunc(self,c,x,y):
-            if self.iface==None or not self.iface.specialfunc(c,x,y):
-                _baseClass.specialfunc(self,c,x,y)
-        def specialupfunc(self,c,x,y):
-            if self.iface==None or not self.iface.specialupfunc(c,x,y):
-                _baseClass.specialupfunc(self,c,x,y)
-        def motionfunc(self,x,y,dx,dy):
-            if self.iface==None or not self.iface.motionfunc(x,y,dx,dy):
-                _baseClass.motionfunc(self,x,y,dx,dy)
-        def mousefunc(self,button,state,x,y):
-            if self.iface==None or not self.iface.mousefunc(button,state,x,y):
-                _baseClass.mousefunc(self,button,state,x,y)
-        def idlefunc(self):
-            if self.iface!=None: self.iface.idlefunc()
-            _baseClass.idlefunc(self)
-        def display(self):
-            if self.iface!=None:
-                self.iface.display()
-        def display_screen(self):
-            if self.iface!=None:
-                self.iface.display_screen()
-
-    class VisualizationProgram(GLPluginProgram):
+    class VisualizationProgram(_baseClass):
         def __init__(self):
-            GLPluginProgram.__init__(self,"Klamp't Visualizer")
+            _baseClass.__init__(self,"Klamp't Visualizer")
             self.items = {}
             self.labels = []
 
@@ -558,7 +514,7 @@ if glcommon._PyQtAvailable or glcommon._GLUTAvailable:
                 v.widget = None #allows garbage collector to delete these objects
             for (p,textlist,color) in self.labels:
                 self.drawLabelRaw(p,textlist,color)
-            GLPluginProgram.display(self)
+            _baseClass.display(self)
             _globalLock.release()
         def drawLabelRaw(self,point,textList,color):
             #assert not self.makingDisplayList,"drawText must be called outside of display list"
