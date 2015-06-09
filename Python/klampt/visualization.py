@@ -485,14 +485,14 @@ if glcommon._PyQtAvailable or glcommon._GLUTAvailable:
 
     if glcommon._PyQtAvailable:
         import qtprogram
-        _baseClass = qtprogram.GLPluginProgram
+        _BaseClass = qtprogram.GLPluginProgram
     else:
         import glprogram
-        _baseClass = glprogram.GLPluginProgram
+        _BaseClass = glprogram.GLPluginProgram
            
-    class VisualizationProgram(_baseClass):
+    class VisualizationPlugin(glcommon.GLPluginBase):
         def __init__(self):
-            _baseClass.__init__(self,"Klamp't Visualizer")
+            glcommon.GLPluginBase.__init__(self)
             self.items = {}
             self.labels = []
 
@@ -514,8 +514,8 @@ if glcommon._PyQtAvailable or glcommon._GLUTAvailable:
                 v.widget = None #allows garbage collector to delete these objects
             for (p,textlist,color) in self.labels:
                 self.drawLabelRaw(p,textlist,color)
-            _baseClass.display(self)
             _globalLock.release()
+
         def drawLabelRaw(self,point,textList,color):
             #assert not self.makingDisplayList,"drawText must be called outside of display list"
             for i,text in enumerate(textList):
@@ -524,7 +524,9 @@ if glcommon._PyQtAvailable or glcommon._GLUTAvailable:
                     glRasterPos3f(*point)
                     glColor3f(1,1,1)
                     glDisable(GL_LIGHTING)
+                    glDisable(GL_DEPTH_TEST)
                     gldraw.glutBitmapString(GLUT_BITMAP_HELVETICA_10,text)
+                    glEnable(GL_DEPTH_TEST)
                 elif glcommon._PyQtAvailable:
                     glColor3f(1,1,1)
                     glDisable(GL_DEPTH_TEST)
@@ -535,15 +537,16 @@ if glcommon._PyQtAvailable or glcommon._GLUTAvailable:
 
         def idle(self):
             pass
-        
-    _vis = VisualizationProgram()
-    #_vis.initWindow(self)
+
+    _vis = VisualizationPlugin()        
 
 if glcommon._PyQtAvailable:
     from PyQt4.QtCore import *
     from PyQt4.QtGui import *
     #Qt specific startup
     #need to set up a QDialog and an QApplication
+    _widget = GLPluginProgram()
+    #_vis.initWindow(self)
     _window = None
     _app = None
     _quit = False
@@ -555,13 +558,13 @@ if glcommon._PyQtAvailable:
     class _MyDialog(QDialog):
         def __init__(self):
             QDialog.__init__(self)
-            global _vis,_window_title
-            _vis.setMinimumSize(_vis.width,_vis.height)
-            _vis.setMaximumSize(4000,4000)
-            _vis.setSizePolicy(QSizePolicy(QSizePolicy.Maximum))
+            global _vis,_widget,_window_title
+            _widget.setMinimumSize(_vis.width,_vis.height)
+            _widget.setMaximumSize(4000,4000)
+            _widget.setSizePolicy(QSizePolicy(QSizePolicy.Maximum))
             self.description = QLabel("Press OK to continue")
             self.layout = QVBoxLayout(self)
-            self.layout.addWidget(_vis)
+            self.layout.addWidget(_widget)
             self.layout.addWidget(self.description)
             self.buttons = QDialogButtonBox(QDialogButtonBox.Ok,Qt.Horizontal, self)
             self.buttons.accepted.connect(self.accept)
@@ -570,26 +573,27 @@ if glcommon._PyQtAvailable:
 
     class _MyWindow(QMainWindow):
         def __init__(self):
-            global _vis,_window_title
+            global _vis,_widget,_window_title
             QMainWindow.__init__(self)
-            _vis.setMinimumSize(_vis.width,_vis.height)
-            _vis.setMaximumSize(4000,4000)
-            _vis.setSizePolicy(QSizePolicy(QSizePolicy.Maximum))
-            self.setCentralWidget(_vis)
+            _widget.setMinimumSize(_vis.width,_vis.height)
+            _widget.setMaximumSize(4000,4000)
+            _widget.setSizePolicy(QSizePolicy(QSizePolicy.Maximum))
+            self.setCentralWidget(_widget)
             self.setWindowTitle(_window_title)
         def closeEvent(self,event):
-            global _showwindow,_vis
+            global _showwindow,_widget
             _showwindow = False
-            _vis.setParent(None)
+            _widget.setParent(None)
             self.hide()
 
     def _run_app_thread():
-        global _thread_running,_app,_vis,_window,_quit,_showdialog,_showwindow
+        global _thread_running,_app,_vis,_widget,_window,_quit,_showdialog,_showwindow,_window_title
         global _custom_run_method,_custom_run_retval
         _thread_running = True
         #Do Qt setup
-        _app = QApplication(["Klamp't visualizer"])
-        _vis.initWindow()
+        _app = QApplication([_window_title])
+        _widget.initWindow()
+        _widget.setPlugin(_vis)
         #res = _app.exec_()
         res = None
         while not _quit:
@@ -600,7 +604,7 @@ if glcommon._PyQtAvailable:
                     _window.hide()
                     _showwindow = False
                     _window = None
-                    _vis.setParent(None)
+                    _widget.setParent(None)
             else:
                 if _showwindow:
                     _window=_MyWindow()
@@ -610,7 +614,7 @@ if glcommon._PyQtAvailable:
                 _dialog=_MyDialog()
                 res = _dialog.exec_()
                 _showdialog = False
-                _vis.setParent(None)
+                _widget.setParent(None)
 
             if _custom_run_method:
                 res = _custom_run_method()
@@ -639,6 +643,117 @@ if glcommon._PyQtAvailable:
 
     def _hide():
         global _window,_showwindow,_thread_running
+        _showwindow = False
+
+    def _dialog():
+        global _app,_vis,_widget,_dialog_shown,_showwindow,_showdialog,_thread_running
+        if not _thread_running:
+            signal.signal(signal.SIGINT, signal.SIG_DFL)
+            thread = Thread(target=_run_app_thread)
+            thread.start()
+        old_show_window = _showwindow
+        _showwindow = False
+        _showdialog = True
+        while _showdialog:
+            time.sleep(0.1)
+        _showwindow = old_show_window
+        return
+
+    def _customRun(func):
+        global _app,_vis,_widget,_dialog_shown,_showwindow,_showdialog,_thread_running
+        global _custom_run_method,_custom_run_retval
+        if not _thread_running:
+            signal.signal(signal.SIGINT, signal.SIG_DFL)
+            thread = Thread(target=_run_app_thread)
+            thread.start()
+        old_show_window = _showwindow
+        _showwindow = False
+        _custom_run_method = func
+        while _custom_run_method:
+            time.sleep(0.1)
+        _showwindow = old_show_window
+        return _custom_run_retval
+elif glcommon._GLUTAvailable:
+    from OpenGL.GLUT import *
+    from glprogram import GLPluginProgram
+    _app = None
+    _quit = False
+    _showdialog = False
+    _showwindow = False
+    _thread_running = False
+    _custom_run_method = None
+    _custom_run_retval = None
+    class GLUTVisualization(GLPluginProgram):
+        def __init__(self):
+            global _vis,_window_title
+            GLPluginProgram.__init__(self,_window_title)
+            self.inDialog = False
+        def initialize(self):
+            GLPluginProgram.initialize(self)
+            self.setPlugin(_vis)
+        def display_screen(self):
+            GLPluginProgram.display_screen(self)
+            glColor3f(1,1,1)
+            glRasterPos(20,50)
+            gldraw.glutBitmapString(GLUT_BITMAP_HELVETICA_18,"(Do not close this window except to quit)")
+            if self.inDialog:
+                glColor3f(1,1,0)
+                glRasterPos(20,80)
+                gldraw.glutBitmapString(GLUT_BITMAP_HELVETICA_18,"In Dialog mode. Press 'q' to return to normal mode")
+        def handle_keypress(self,c,x,y):
+            if self.inDialog and c=='q':
+                self.inDialog = False
+                self.refresh()
+                global _showwindow,_showdialog
+                _showdialog = False
+                if not _showwindow:
+                    glutIconifyWindow()
+            else:
+                GLPluginProgram.handle_keypress(self,c,x,y)
+
+        def idlefunc(self):
+            global _thread_running,_app,_vis,_quit,_showdialog,_showwindow
+            global _custom_run_method,_custom_run_retval
+            if not self.inDialog:
+                if _showwindow:
+                    glutShowWindow()
+                else:
+                    glutIconifyWindow()
+
+                if _showdialog:
+                    self.inDialog = True
+                    glutShowWindow()
+
+                if _custom_run_method:
+                    pass
+            GLPluginProgram.idlefunc(self)
+
+
+    def _run_app_thread():
+        global _thread_running,_app,_vis
+        _thread_running = True
+        _app = GLUTVisualization()
+        _app.run()
+        print "Visualization thread closing..."
+        for (name,itemvis) in _vis.items.iteritems():
+            itemvis.destroy()
+        _thread_running = False
+        return
+    
+    def _kill():
+        global _quit
+        _quit = True
+
+    def _show():
+        global _showwindow,_thread_running
+        if not _thread_running:
+            signal.signal(signal.SIGINT, signal.SIG_DFL)
+            thread = Thread(target=_run_app_thread)
+            thread.start()
+        _showwindow = True
+
+    def _hide():
+        global _showwindow,_thread_running
         _showwindow = False
 
     def _dialog():
