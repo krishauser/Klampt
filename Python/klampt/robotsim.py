@@ -645,6 +645,16 @@ class Geometry3D(_object):
         """
         return _robotsim.Geometry3D_type(self)
 
+    def empty(self):
+        """
+        empty(Geometry3D self) -> bool
+
+        bool Geometry3D::empty()
+
+        Returns true if this has no contents. 
+        """
+        return _robotsim.Geometry3D_empty(self)
+
     def getTriangleMesh(self):
         """
         getTriangleMesh(Geometry3D self) -> TriangleMesh
@@ -2974,6 +2984,32 @@ class IKSolver(_object):
         """
         return _robotsim.IKSolver_getActiveDofs(self)
 
+    def setJointLimits(self, *args):
+        """
+        setJointLimits(IKSolver self, doubleVector qmin, doubleVector qmax)
+
+        void
+        IKSolver::setJointLimits(const std::vector< double > &qmin, const
+        std::vector< double > &qmax)
+
+        Sets limits on the robot's configuration. If empty, this turns off
+        joint limits. 
+        """
+        return _robotsim.IKSolver_setJointLimits(self, *args)
+
+    def getJointLimits(self):
+        """
+        getJointLimits(IKSolver self)
+
+        void
+        IKSolver::getJointLimits(std::vector< double > &out, std::vector<
+        double > &out2)
+
+        Gets the limits on the robot's configuration (by default this is the
+        robot's joint limits. 
+        """
+        return _robotsim.IKSolver_getJointLimits(self)
+
     def getResidual(self):
         """
         getResidual(IKSolver self)
@@ -3028,12 +3064,18 @@ class IKSolver(_object):
     __swig_setmethods__["objectives"] = _robotsim.IKSolver_objectives_set
     __swig_getmethods__["objectives"] = _robotsim.IKSolver_objectives_get
     if _newclass:objectives = _swig_property(_robotsim.IKSolver_objectives_get, _robotsim.IKSolver_objectives_set)
-    __swig_setmethods__["useJointLimits"] = _robotsim.IKSolver_useJointLimits_set
-    __swig_getmethods__["useJointLimits"] = _robotsim.IKSolver_useJointLimits_get
-    if _newclass:useJointLimits = _swig_property(_robotsim.IKSolver_useJointLimits_get, _robotsim.IKSolver_useJointLimits_set)
     __swig_setmethods__["activeDofs"] = _robotsim.IKSolver_activeDofs_set
     __swig_getmethods__["activeDofs"] = _robotsim.IKSolver_activeDofs_get
     if _newclass:activeDofs = _swig_property(_robotsim.IKSolver_activeDofs_get, _robotsim.IKSolver_activeDofs_set)
+    __swig_setmethods__["useJointLimits"] = _robotsim.IKSolver_useJointLimits_set
+    __swig_getmethods__["useJointLimits"] = _robotsim.IKSolver_useJointLimits_get
+    if _newclass:useJointLimits = _swig_property(_robotsim.IKSolver_useJointLimits_get, _robotsim.IKSolver_useJointLimits_set)
+    __swig_setmethods__["qmin"] = _robotsim.IKSolver_qmin_set
+    __swig_getmethods__["qmin"] = _robotsim.IKSolver_qmin_get
+    if _newclass:qmin = _swig_property(_robotsim.IKSolver_qmin_get, _robotsim.IKSolver_qmin_set)
+    __swig_setmethods__["qmax"] = _robotsim.IKSolver_qmax_set
+    __swig_getmethods__["qmax"] = _robotsim.IKSolver_qmax_get
+    if _newclass:qmax = _swig_property(_robotsim.IKSolver_qmax_get, _robotsim.IKSolver_qmax_set)
     __swig_destroy__ = _robotsim.delete_IKSolver
     __del__ = lambda self : None;
 IKSolver_swigregister = _robotsim.IKSolver_swigregister
