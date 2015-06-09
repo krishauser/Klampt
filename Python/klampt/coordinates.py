@@ -11,56 +11,116 @@ class Frame:
         self._worldCoordinates = worldCoordinates
         self._data = None
         if relativeCoordinates == None:
+            if worldCoordinates == None:
+                raise ValueError("One of relativeCoordinates or worldCoordinates must be provided")
             if parent == None:
                 self._relativeCoordinates = worldCoordinates
             else:
-                self._relativeCoordinates = se3.mul(se3.inv(parent.worldCoordinates,worldCoordinates))
+                self._relativeCoordinates = se3.mul(se3.inv(parent.worldCoordinates()),worldCoordinates)
         else:
             self._relativeCoordinates = relativeCoordinates
+            if worldCoordinates == None:
+                if parent == None:
+                    self._worldcoordinates = relativeCoordinates
+                else:
+                    self._worldCoordinates = se3.mul(parent.worldCoordinates(),relativeCoordinates)
     def name(self):
+        """Returns the name of this frame"""
         return self._name
     def data(self):
+        """If any data is attached to this frame, returns it"""
         return self._data
+    def worldOrigin(self):
+        """Returns an element of R^3 denoting the translation of the origin
+        of this frame in world coordinates"""
+        return self._worldCoordinates[1]
+    def relativeOrigin(self):
+        """Returns an element of R^3 denoting the translation of the origin
+        of this frame relative to its parent"""
+        return self._relativeCoordinates[1]
+    def worldRotation(self):
+        """Returns an element of SO(3) denoting the rotation from this frame
+        to world coordinates"""
+        return self._worldCoordinates[0]
+    def relativeRotation(self):
+        """Returns an element of SO(3) denoting the rotation from this frame
+        to its parent"""
+        return self._relativeCoordinates[0]
     def worldCoordinates(self):
+        """Returns an element of SE(3) denoting the transform from this frame
+        to world coordinates"""
         return self._worldCoordinates
     def relativeCoordinates(self):
+        """Returns an element of SE(3) denoting the transform from this frame
+        to its parent"""
         return self._relativeCoordinates
     def parent(self):
+        """Returns the parent of the frame, or None if it's given in the world
+        frame."""
         return self._parent
 
 class Transform:
-    """A transform from one frame (source) to another (destination).  The
+    """A transform from one Frame (source) to another (destination).  The
     destination may be None, in which case the transform is the world transform
-    of the source"""
+    of the source.
+
+    The difference between a Transform and a relative Frame (i.e., one with
+    a parent) is that a Transform is a sort of "read-only" structure whose
+    coordinates change as the frames' coordinates change."""
     def __init__(self,source,destination=None):
+        self._name = None
         self._source = source
         self._destination = destination
     def source(self):
+        """Returns the source Frame"""
         return self._source
     def destination(self):
+        """Returns the source Frame"""
         return self._destination
     def coordinates(self):
+        """Returns the SE(3) coordinates that transform elements from the
+        source to the destination Frame."""
         if self._destination==None:
             return self._source.worldCoodinates()
-        return se3.mul(sel3.inv(self._destination.worldCoordinates()),self._source.worldCoordinates())
+        return se3.mul(se3.inv(self._destination.worldCoordinates()),self._source.worldCoordinates())
+    def translationCoordinates(self):
+        """Returns the coordinates of the origin of this frame in R^3, relative
+        to its destination"""
+        if self._destination==None:
+            return self._source.worldOrigin()
+        return se3.apply(se3.inv(self._destination.worldCoordinates()),self._source.worldOrigin())
+    def rotationCoordinates(self):
+        """Returns the SO(3) coordinates that rotate elements from the source
+        to the destination Frame"""
+        if self._destination==None:
+            return self._source.worldRotation()
+        return so3.mul(so3.inv(self._destination.worldRotation()),self._source.worldRotation())
     def toWorld(self):
+        """Returns a Transform designating the transformation from the
+        source frame to the world frame."""
         return Transform(self.source,None)
     def to(self,frame):
+        """Returns a Transform designating the transformation from the
+        source frame to the given frame."""
         return Transform(self.source,frame)
 
 class Point:
     """Represents a point in 3D space.  It is attached to a frame, so if the
     frame is changed then its world coordinates will also change."""
     def __init__(self,localCoordinates=[0,0,0],frame=None):
+        self._name = None
         self._localCoordinates = localCoordinates
         self._frame = frame
     def localCoordinates(self):
+        """Returns the coordinates of this point in its parent Frame"""
         return self._localCoordinates[:]
     def worldCoordinates(self):
+        """Returns the coordinates of this point in the world Frame"""
         if self._frame ==None:
             return self._localCoordinates[:]
         return se3.apply(self._frame.worldCoordinates(),self._localCoordinates)
     def frame(self):
+        """Returns the frame to which this Point is attached"""
         return self._frame
     def toWorld(self):
         """Returns a Point representing the same point in space, but
@@ -88,6 +148,7 @@ class Direction:
     frame, so if the frame is rotated then its world coordinates will also
     change."""
     def __init__(self,localCoordinates=[0,0,0],frame=None):
+        self._name = None
         self._localCoordinates = localCoordinates
         self._frame = frame
     def localCoordinates(self):
@@ -139,6 +200,7 @@ class Group:
     - subgroups: a map from subgroup names to Group objects
     """
     def __init__(self):
+        self._name = None
         self.destroy()
     def rootFrame(self):
         return self.frames.get('root',None)
@@ -156,43 +218,61 @@ class Group:
             rgroup = self.addGroup(worldModel.robot(0).getName())
             rgroup.setRobotModel(worldModel.robot(0))
         for i in xrange(worldModel.numRigidObjects()):
-            f = self.addFrame(worldModel.rigidObject(0).getName(),worldModel.rigidObject(0).getTransform())
-            f.data = worldModel.rigidObject(0)
+            f = self.addFrame(worldModel.rigidObject(0).getName(),worldCoordinates=worldModel.rigidObject(0).getTransform())
+            f._data = worldModel.rigidObject(0)
         for i in xrange(worldModel.numTerrains()):
-            f = self.addFrame(worldModel.terrain(0).getName())
-            f.data = worldModel.terrain(0)
+            f = self.addFrame(worldModel.terrain(0).getName(),worldCoordinates=se3.identity())
+            f._data = worldModel.terrain(0)
         return
     def setRobotModel(self,robotModel):
         """Sets this group to contain all links of a robot model"""
+        root = self.frames['root']
         for i in xrange(robotModel.numLinks()):
-            f = self.addFrame(robotModel.link(0).getName(),robotModel.link(0).getTransform())
-            f.data = robotModel.link(0)
+            p = robotModel.link(i).getParent()
+            if p >= 0:
+                Fp = self.frames[robotModel.link(p).getName()]
+            else:
+                Fp = root
+            f = self.addFrame(robotModel.link(i).getName(),worldCoordinates=robotModel.link(i).getTransform(),parent=Fp)
+            f._data = robotModel.link(i)
         return
     def setController(self,controller):
         """Given a robotController, sets this group to contain all sensed
         and commanded frames."""
+        root = self.frames['root']
         robot = controller.robot()
         robot.setConfig(controller.getCommandedConfig())
         for i in xrange(robot.numLinks()):
-            f = self.addFrame(robot.link(0).getName()+"_commanded",robot.link(0).getTransform())
-            f.data = controller
+            if p >= 0:
+                Fp = self.frames[robotModel.link(p).getName()+"_commanded"]
+            else:
+                Fp = root
+            f = self.addFrame(robot.link(i).getName()+"_commanded",worldCoordinates=robot.link(i).getTransform(),parent=Fp)
+            f._data = (controller,i,'commanded')
         robot.setConfig(controller.getSensedConfig())
         for i in xrange(robot.numLinks()):
-            f = self.addFrame(robot.link(0).getName()+"_sensed",robot.link(0).getTransform())
-            f.data = controller
+            if p >= 0:
+                Fp = self.frames[robotModel.link(p).getName()+"_commanded"]
+            else:
+                Fp = root
+            f = self.addFrame(robot.link(i).getName()+"_sensed",worldCoordinates=robot.link(i).getTransform(),parent=Fp)
+            f._data = (controller,i,'sensed')
         return
     def setSimBody(self,name,simBody):
         """Sets this group to be attached to a simBody"""
-        f = self.addFrame(name,simBody.getTransform())
-        f.data = simBody
+        f = self.addFrame(name,worldCoordinates=simBody.getTransform())
+        f._data = simBody
         return
     def updateFromWorld():
         """For any frames with associated world elements, updates the
         transforms from the world elements."""
         for (n,f) in self.frames.iteritems():
-            if f.data == None: continue
-            if hasattr(f.data,'getTransform'):
-                self.setFrameCoordinates(f,f.data.getTransform(),'world')
+            if f._data == None: continue
+            if hasattr(f._data,'getTransform'):
+                self.setFrameCoordinates(f,f._data.getTransform(),'world')
+            if isinstance(f._data,tuple) and isinstance(f._data[0],SimRobotController):
+                controller,index,itemtype = f._data
+                #TODO: update the frame from the controller data
     def updateToWorld():
         """For any frames with associated world elements, updates the
         transforms of the world elements.  Note: this does NOT perform inverse
@@ -201,27 +281,40 @@ class Group:
             if f.data == None: continue
             if hasattr(f.data,'setTransform'):
                 f.data.setTransform(*f.worldCoordinates())
-    def addFrame(self,name,coordinates,parent=None):
+    def addFrame(self,name,worldCoordinates=None,parent=None,relativeCoordinates=None):
+        """Adds a new named Frame, possibly with a parent.  'parent' may either be a string
+        identifying another named Frame in this Group, or it can be a Frame object. (Warning:
+        unknown behavior may result from specifying a Frame not in this Group).
+
+        Either worldCoordinates or relativeCoordinates must be given.  If worldCoordinates is given,
+        then the frame's initial relative transform is determined by the current coordinates of the
+        parent.  If all parameters are left as default, the frame is placed directly at the origin
+        of the parent"""
         if name in self.frames:
             raise ValueError("Frame "+name+" already exists")
         if parent==None:
             parent = 'root'
         if isinstance(parent,str):
             parent = self.frames[parent]
-        worldCoordinates = se3.mul(parent._worldCoordinates,coordinates)
-        self.frames[name] = Frame(name,worldCoordinates,parent,coordinates)
+        if worldCoordinates == None and relativeCoordinates == None:
+            relativeCoordinates = se3.identity()
+        self.frames[name] = Frame(name,worldCoordinates=worldCoordinates,parent=parent,relativeCoordinates=relativeCoordinates)
         self.childLists[parent._name].append(self.frames[name])
         return self.frames[name]
     def addPoint(self,name,coordinates=[0,0,0],frame='root'):
-        if name in self.frames:
+        if name in self.points:
             raise ValueError("Point "+name+" already exists")
-        self.points[name] = self.point(coordinates,frame)
-        return self.points[name]
+        res = self.point(coordinates,frame)
+        res._name = name
+        self.points[name] = res
+        return res
     def addDirection(self,name,coordinates=[0,0,0],frame='world'):
-        if name in self.frames:
+        if name in self.direction:
             raise ValueError("Direction "+name+" already exists")
-        self.directions[name] = self.direction(coordinates,frame)
-        return self.directions[name]
+        res = self.direction(coordinates,frame)
+        res._name = name
+        self.directions[name] = res
+        return res
     def addGroup(self,name,group=None,parentFrame='root'):
         """Adds a subgroup to this group. If parentFrame is given,
         then the group is attached relative to the given frame.
@@ -230,8 +323,9 @@ class Group:
             group = Group()
         if name in self.subgroups:
             raise ValueError("Subgroup "+name+" already exists")
+        group._name = name
         self.subgroups[name] = group
-        group.frames['root'].parent = self.frame(parentFrame)
+        group.frames['root']._parent = self.frame(parentFrame)
         return group
     def deleteFrame(self,name):
         """Deletes the named frame.  All items that refer to this frame
@@ -274,14 +368,14 @@ class Group:
             parent = 'root'
         if isinstance(parent,str):
             if parent=='relative':
-                parent = f.parent
+                parent = f._parent
             else:
                 parent = self.frames[parent]
         worldCoordinates = se3.mul(parent._worldCoordinates,coordinates)
-        if parent == f.parent:
+        if parent == f._parent:
             f._relativeCoordinates = coordinates
         else:
-            f._relativeCoordinates = se3.mul(se3.inv(f.parent._worldCoordinates),worldCoordinates)
+            f._relativeCoordinates = se3.mul(se3.inv(f._parent._worldCoordinates),worldCoordinates)
         f._worldCoordinates = worldCoordinates
         self.updateDependentFrames(self,f)
     def updateDependentFrames(self,frame):
@@ -367,6 +461,7 @@ class Manager(Group):
     """A manager of coordinate frames."""
     def __init__(self):
         Group.__init__(self)
+        self._name = "world_group"
         self.frames['world'] = self.frames['root']
     def worldFrame(self):
         return self.frames.get('world',None)
@@ -380,12 +475,23 @@ class Manager(Group):
 
 
 #create defaults so you can just call coordinates.addFrame() etc.
-defaultManager = Manager()
+_defaultManager = Manager()
 def _callfn(name):
-    global defaultManager
-    return lambda *args:getattr(defaultManager,name)(*args)
+    global _defaultManager
+    return lambda *args:getattr(_defaultManager,name)(*args)
+
+def manager():
+    """Retrieves the default top-level manager"""
+    global _defaultManager
+    return _defaultManager
 
 destroy = _callfn("destroy")
+setWorldModel = _callfn("setWorldModel")
+setRobotModel = _callfn("setRobotModel")
+setController = _callfn("setController")
+setSimBody = _callfn("setSimBody")
+updateFromWorld = _callfn("updateFromWorld")
+updateToWorld = _callfn("updateToWorld")
 addFrame = _callfn("addFrame")
 addPoint = _callfn("addPoint")
 addDirection = _callfn("addDirection")
