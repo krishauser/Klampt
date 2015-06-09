@@ -4,6 +4,7 @@ import math
 import vectorops
 import se3
 import ctypes
+import spline
 from OpenGL.GL import *
 from OpenGL.GLUT import *
 
@@ -162,6 +163,30 @@ def xform_widget(T,length,width,lighting=True,fancy=False):
         glEnd()
 
     glPopMatrix()
+
+def hermite_curve(x1,v1,x2,v2,res=0.01,textured=False):
+    """Draws a 3D Hermite curve with control points x1,v1,x2,v2 and resolution
+    res.  If textured=True, generate texture coordinates for each point
+    (useful for applying patterns)."""
+    bezier_curve(*spline.hermite_to_bezier(x1,v1,x2,v2),res=res,textured=textured)
+
+def bezier_curve(x1,x2,x3,x4,res=0.01,textured=False):
+    """Draws a 3D Bezier curve with control points x1,x2,x3,x4 and resolution
+    res.  If textured=True, generate texture coordinates for each point
+    (useful for applying patterns)."""
+    if textured:
+        path,params = spline.bezier_discretize(x1,x2,x3,x4,res,return_params=True)
+        glBegin(GL_LINE_STRIP)
+        for p,u in zip(path,params):
+            glTexCoord1f(u)
+            glVertex3f(*p)
+        glEnd()
+    else:
+        path = spline.bezier_discretize(x1,x2,x3,x4,res)
+        glBegin(GL_LINE_STRIP)
+        for p in path:
+            glVertex3f(*p)
+        glEnd()
 
 def glutBitmapString(font,string):
     """Renders a string using GLUT characters"""
