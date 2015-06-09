@@ -65,6 +65,7 @@ class GLProgram(QGLWidget):
         if self.initialized:
             raw_input("initWindow called twice... this may invalidate textures and display lists... are you sure you want to continue?")
         QGLWidget.__init__(self,parent,shared)
+        self.setFocusPolicy(Qt.StrongFocus)
         self.setWindowTitle(self.name)
         self.idleTimer = QTimer()
         self.idleTimer.timeout.connect(lambda:self.idlefunc())
