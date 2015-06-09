@@ -362,9 +362,12 @@ class GLPluginProgram(GLRealtimeProgram):
     def specialupfunc(self,c,x,y):
         if self.iface==None or not self.iface.specialupfunc(c,x,y):
             GLRealtimeProgram.specialupfunc(self,c,x,y)
-    def motionfunc(self,x,y,dx,dy):
+    def motionfunc(self,x,y):
+        dx = x - self.lastx
+        dy = y - self.lasty
         if self.iface==None or not self.iface.motionfunc(x,y,dx,dy):
-            GLRealtimeProgram.motionfunc(self,x,y,dx,dy)
+            GLRealtimeProgram.motionfunc(self,x,y)
+        self.lastx,self.lasty = x,y
     def mousefunc(self,button,state,x,y):
         if self.iface==None or not self.iface.mousefunc(button,state,x,y):
             GLRealtimeProgram.mousefunc(self,button,state,x,y)
