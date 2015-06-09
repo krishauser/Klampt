@@ -1660,7 +1660,7 @@ RobotModelLink RobotModel::link(const char* name)
 {
   for(size_t i=0;i<robot->linkNames.size();i++)
     if(string(name) == robot->linkNames[i]) {
-      return getLink((int)i);
+      return link((int)i);
     }
   RobotModelLink link;
   link.world = this->world;
