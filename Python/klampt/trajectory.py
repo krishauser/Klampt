@@ -7,6 +7,7 @@
 
 import bisect
 import vectorops
+import spline
 
 class Trajectory:
 	"""A basic piecewise-linear trajectory class, which can be overloaded
@@ -106,14 +107,14 @@ class Trajectory:
 		i,u = self.getSegment(t,endBehavior)
 		if i<0: return [0.0]*len(self.milestones[0])
 		elif i>=len(self.milestones): return [0.0]*len(self.milestones[-1])
-		return vectorops.mul(self.difference(self.milestones[i+1],self.milestones[i]),1.0/(self.times[i+1]-self.times[i]))
+		return vectorops.mul(self.difference(self.milestones[i+1],self.milestones[i],u),1.0/(self.times[i+1]-self.times[i]))
 
 	def interpolate(self,a,b,u):
 		"""Can override this to implement non-cartesian spaces.
 		Interpolates along the geodesic from a to b."""
 		return vectorops.interpolate(a,b,u)
 	
-	def difference(self,a,b):
+	def difference(self,a,b,u):
 		"""Subclasses can override this to implement non-Cartesian
 		spaces.  Returns the derivative along the geodesic from b to
 		a."""
@@ -209,7 +210,7 @@ class RobotTrajectory(Trajectory):
 		self.robot = robot
 	def interpolate(self,a,b,u):
 		return self.robot.interpolate(a,b,u)
-	def difference(self,a,b):
+	def difference(self,a,b,u):
 		return self.robot.interpolate_deriv(b,a)
 
 class HermiteTrajectory(Trajectory):
@@ -270,45 +271,18 @@ class HermiteTrajectory(Trajectory):
 		return res[len(res)/2:]
 
 	def interpolate(self,a,b,u):
+		assert len(a)==len(b)
 		x1,v1 = a[:len(a)/2],a[len(a)/2:]
 		x2,v2 = b[:len(b)/2],b[len(b)/2:]
-		assert len(a)==len(b)
-		assert len(x1)==len(v1)
-		u2 = u*u
-		u3 = u*u*u
-		cx1 = 2.0*u3-3.0*u2+1.0
-		cx2 = -2.0*u3+3.0*u2
-		cv1 = (u3-2.0*u2+u)
-		cv2 = (u3-u2)
-		dcx1 = (6.0*u2-6.0*u)
-		dcx2 = (-6.0*u2+6.0*u)
-		dcv1 = 3.0*u2-4.0*u+1.0
-		dcv2 = 3.0*u2-2.0*u
-		x = [0]*len(x1)
-		dx = [0]*len(x1)
-		for i in xrange(len(x1)):
-			x[i] = cx1*x1[i] + cx2*x2[i] + cv1*v1[i] + cv2*v2[i]
-			dx[i] = dcx1*x1[i] + dcx2*x2[i] + dcv1*v1[i] + dcv2*v2[i];
+		x = spline.hermite_eval(x1,v1,x2,v2,u)
+		dx = spline.hermite_deriv(x1,v1,x2,v2,u)
 		return x+dx
 	
-	def difference(self,a,b):
+	def difference(self,a,b,u):
+		assert len(a)==len(b)
 		x1,v1 = a[:len(a)/2],a[len(a)/2:]
 		x2,v2 = b[:len(b)/2],b[len(b)/2:]
-		assert len(a)==len(b)
-		assert len(x1)==len(v1)
-		u2 = u*u
-		dcx1 = (6.0*u2-6.0*u)
-		dcx2 = (-6.0*u2+6.0*u)
-		dcv1 = 3.0*u2-4.0*u+1.0
-		dcv2 = 3.0*u2-2.0*u
-		ddcx1 = 12*u
-		ddcx2 = -12.0*u
-		ddcv1 = 6.0*u-4.0
-		ddcv2 = 6.0*u-2.0
-		dx = [0]*len(x1)
-		ddx = [0]*len(x1)
-		for i in xrange(len(x1)):
-			dx[i] = dcx1*x1[i] + dcx2*x2[i] + dcv1*v1[i] + dcv2*v2[i]
-			ddx[i] = ddcx1*x1[i] + ddcx2*x2[i] + ddcv1*v1[i] + ddcv2*v2[i]
+		dx = spline.hermite_deriv(x1,v1,x2,v2,u,order=1)
+		ddx = spline.hermite_deriv(x1,v1,x2,v2,u,order=2)
 		return dx+ddx
 
