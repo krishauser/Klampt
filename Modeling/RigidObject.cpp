@@ -176,7 +176,8 @@ bool RigidObject::Load(const char* fn)
     kRestitution = 0.5;
     kStiffness=Inf;
     kDamping=Inf;
-    fprintf(stderr,"Warning, loading object from .%s file %s.  May have zero inertia.\n",ext,fn);
+    fprintf(stderr,"Warning, loading object from .%s file %s.  Setting COM and inertia matrix from geometry.\n",ext,fn);
+    SetMassFromGeometry(1.0);
     return true;
   }
   else {
