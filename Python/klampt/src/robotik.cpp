@@ -214,7 +214,7 @@ IKSolver::IKSolver(const RobotModel& _robot)
 {}
 
 IKSolver::IKSolver(const IKSolver& solver)
-  :robot(solver.robot),objectives(solver.objectives),useJointLimits(solver.useJointLimits),activeDofs(solver.activeDofs)
+  :robot(solver.robot),objectives(solver.objectives),useJointLimits(solver.useJointLimits),activeDofs(solver.activeDofs),qmin(solver.qmin),qmax(solver.qmax)
 {}
 
 void IKSolver::add(const IKObjective& objective)
@@ -239,6 +239,23 @@ void IKSolver::getActiveDofs(std::vector<int>& out)
   }
   else {
     out = activeDofs;
+  }
+}
+
+void IKSolver::setJointLimits(const std::vector<double>& _qmin,const std::vector<double>& _qmax)
+{
+  qmin = _qmin;
+  qmax = _qmax;
+}
+
+void IKSolver::getJointLimits(std::vector<double>& out,std::vector<double>& out2)
+{
+  if(qmin.empty()) {
+    robot.getJointLimits(out,out2);
+  }
+  else {
+    out = qmin;
+    out2 = qmax;
   }
 }
 
@@ -302,7 +319,12 @@ PyObject* IKSolver::solve(int iters,double tol)
   else f.activeDofs.mapping = activeDofs;
 
   RobotIKSolver solver(f);
-  if(useJointLimits) solver.UseJointLimits();
+  if(useJointLimits) {
+    if(qmin.empty())
+      solver.UseJointLimits();
+    else
+      solver.UseJointLimits(Vector(qmin),Vector(qmax));
+  }
   solver.solver.verbose = 0;
 
   bool res = solver.Solve(tol,iters);
@@ -321,6 +343,7 @@ void IKSolver::sampleInitial()
     robot.robot->q(active[i]) = Rand(robot.robot->qMin(active[i]),robot.robot->qMax(active[i]));
   robot.robot->UpdateFrames();
 }
+
 
 GeneralizedIKSolver::GeneralizedIKSolver(const WorldModel& world)
   :world(world)

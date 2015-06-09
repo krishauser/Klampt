@@ -211,6 +211,10 @@ Frees the data associated with this geometry, if standalone. ";
 Returns the type of geometry: TriangleMesh, PointCloud, or
 GeometricPrimitive ";
 
+%feature("docstring")  Geometry3D::empty "bool Geometry3D::empty()
+
+Returns true if this has no contents. ";
+
 %feature("docstring")  Geometry3D::getTriangleMesh "TriangleMesh
 Geometry3D::getTriangleMesh()
 
@@ -424,6 +428,20 @@ Sets the active degrees of freedom. ";
 IKSolver::getActiveDofs(std::vector< int > &out)
 
 Gets the active degrees of freedom. ";
+
+%feature("docstring")  IKSolver::setJointLimits "void
+IKSolver::setJointLimits(const std::vector< double > &qmin, const
+std::vector< double > &qmax)
+
+Sets limits on the robot's configuration. If empty, this turns off
+joint limits. ";
+
+%feature("docstring")  IKSolver::getJointLimits "void
+IKSolver::getJointLimits(std::vector< double > &out, std::vector<
+double > &out2)
+
+Gets the limits on the robot's configuration (by default this is the
+robot's joint limits. ";
 
 %feature("docstring")  IKSolver::getResidual "void
 IKSolver::getResidual(std::vector< double > &out)

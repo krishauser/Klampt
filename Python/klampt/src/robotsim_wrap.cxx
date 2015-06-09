@@ -15828,6 +15828,40 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_Geometry3D_empty(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Geometry3D *arg1 = (Geometry3D *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  bool result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:Geometry3D_empty",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Geometry3D, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Geometry3D_empty" "', argument " "1"" of type '" "Geometry3D *""'"); 
+  }
+  arg1 = reinterpret_cast< Geometry3D * >(argp1);
+  {
+    try {
+      result = (bool)(arg1)->empty();
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_From_bool(static_cast< bool >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_Geometry3D_getTriangleMesh(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   Geometry3D *arg1 = (Geometry3D *) 0 ;
@@ -31211,6 +31245,152 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_IKSolver_setJointLimits(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  IKSolver *arg1 = (IKSolver *) 0 ;
+  std::vector< double,std::allocator< double > > *arg2 = 0 ;
+  std::vector< double,std::allocator< double > > *arg3 = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int res2 = SWIG_OLDOBJ ;
+  int res3 = SWIG_OLDOBJ ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  PyObject * obj2 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OOO:IKSolver_setJointLimits",&obj0,&obj1,&obj2)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_IKSolver, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IKSolver_setJointLimits" "', argument " "1"" of type '" "IKSolver *""'"); 
+  }
+  arg1 = reinterpret_cast< IKSolver * >(argp1);
+  {
+    std::vector<double,std::allocator< double > > *ptr = (std::vector<double,std::allocator< double > > *)0;
+    res2 = swig::asptr(obj1, &ptr);
+    if (!SWIG_IsOK(res2)) {
+      SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "IKSolver_setJointLimits" "', argument " "2"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
+    }
+    if (!ptr) {
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "IKSolver_setJointLimits" "', argument " "2"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
+    }
+    arg2 = ptr;
+  }
+  {
+    std::vector<double,std::allocator< double > > *ptr = (std::vector<double,std::allocator< double > > *)0;
+    res3 = swig::asptr(obj2, &ptr);
+    if (!SWIG_IsOK(res3)) {
+      SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "IKSolver_setJointLimits" "', argument " "3"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
+    }
+    if (!ptr) {
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "IKSolver_setJointLimits" "', argument " "3"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
+    }
+    arg3 = ptr;
+  }
+  {
+    try {
+      (arg1)->setJointLimits((std::vector< double,std::allocator< double > > const &)*arg2,(std::vector< double,std::allocator< double > > const &)*arg3);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  if (SWIG_IsNewObj(res2)) delete arg2;
+  if (SWIG_IsNewObj(res3)) delete arg3;
+  return resultobj;
+fail:
+  if (SWIG_IsNewObj(res2)) delete arg2;
+  if (SWIG_IsNewObj(res3)) delete arg3;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_IKSolver_getJointLimits(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  IKSolver *arg1 = (IKSolver *) 0 ;
+  std::vector< double,std::allocator< double > > *arg2 = 0 ;
+  std::vector< double,std::allocator< double > > *arg3 = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  std::vector< double > temp2 ;
+  std::vector< double > temp23 ;
+  PyObject * obj0 = 0 ;
+  
+  {
+    arg2 = &temp2;
+  }
+  {
+    arg3 = &temp23;
+  }
+  if (!PyArg_ParseTuple(args,(char *)"O:IKSolver_getJointLimits",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_IKSolver, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IKSolver_getJointLimits" "', argument " "1"" of type '" "IKSolver *""'"); 
+  }
+  arg1 = reinterpret_cast< IKSolver * >(argp1);
+  {
+    try {
+      (arg1)->getJointLimits(*arg2,*arg3);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  {
+    PyObject *o, *o2, *o3;
+    o = convert_darray_obj(&(*arg2)[0],(int)arg2->size());
+    if ((!resultobj) || (resultobj == Py_None)) {
+      resultobj = o;
+    } else {
+      if (!PyTuple_Check(resultobj)) {
+        PyObject *o2 = resultobj;
+        resultobj = PyTuple_New(1);
+        PyTuple_SetItem(resultobj,0,o2);
+      }
+      o3 = PyTuple_New(1);
+      PyTuple_SetItem(o3,0,o);
+      o2 = resultobj;
+      resultobj = PySequence_Concat(o2,o3);
+      Py_DECREF(o2);
+      Py_DECREF(o3);
+    }
+  }
+  {
+    PyObject *o, *o2, *o3;
+    o = convert_darray_obj(&(*arg3)[0],(int)arg3->size());
+    if ((!resultobj) || (resultobj == Py_None)) {
+      resultobj = o;
+    } else {
+      if (!PyTuple_Check(resultobj)) {
+        PyObject *o2 = resultobj;
+        resultobj = PyTuple_New(1);
+        PyTuple_SetItem(resultobj,0,o2);
+      }
+      o3 = PyTuple_New(1);
+      PyTuple_SetItem(o3,0,o);
+      o2 = resultobj;
+      resultobj = PySequence_Concat(o2,o3);
+      Py_DECREF(o2);
+      Py_DECREF(o3);
+    }
+  }
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_IKSolver_getResidual(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   IKSolver *arg1 = (IKSolver *) 0 ;
@@ -31613,6 +31793,58 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_IKSolver_activeDofs_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  IKSolver *arg1 = (IKSolver *) 0 ;
+  std::vector< int,std::allocator< int > > *arg2 = (std::vector< int,std::allocator< int > > *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:IKSolver_activeDofs_set",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_IKSolver, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IKSolver_activeDofs_set" "', argument " "1"" of type '" "IKSolver *""'"); 
+  }
+  arg1 = reinterpret_cast< IKSolver * >(argp1);
+  res2 = SWIG_ConvertPtr(obj1, &argp2,SWIGTYPE_p_std__vectorT_int_std__allocatorT_int_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "IKSolver_activeDofs_set" "', argument " "2"" of type '" "std::vector< int,std::allocator< int > > *""'"); 
+  }
+  arg2 = reinterpret_cast< std::vector< int,std::allocator< int > > * >(argp2);
+  if (arg1) (arg1)->activeDofs = *arg2;
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_IKSolver_activeDofs_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  IKSolver *arg1 = (IKSolver *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  std::vector< int,std::allocator< int > > *result = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:IKSolver_activeDofs_get",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_IKSolver, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IKSolver_activeDofs_get" "', argument " "1"" of type '" "IKSolver *""'"); 
+  }
+  arg1 = reinterpret_cast< IKSolver * >(argp1);
+  result = (std::vector< int,std::allocator< int > > *)& ((arg1)->activeDofs);
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_std__vectorT_int_std__allocatorT_int_t_t, 0 |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_IKSolver_useJointLimits_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   IKSolver *arg1 = (IKSolver *) 0 ;
@@ -31665,10 +31897,10 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_IKSolver_activeDofs_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_IKSolver_qmin_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   IKSolver *arg1 = (IKSolver *) 0 ;
-  std::vector< int,std::allocator< int > > *arg2 = (std::vector< int,std::allocator< int > > *) 0 ;
+  std::vector< double,std::allocator< double > > *arg2 = (std::vector< double,std::allocator< double > > *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
   void *argp2 = 0 ;
@@ -31676,18 +31908,18 @@ SWIGINTERN PyObject *_wrap_IKSolver_activeDofs_set(PyObject *SWIGUNUSEDPARM(self
   PyObject * obj0 = 0 ;
   PyObject * obj1 = 0 ;
   
-  if (!PyArg_ParseTuple(args,(char *)"OO:IKSolver_activeDofs_set",&obj0,&obj1)) SWIG_fail;
+  if (!PyArg_ParseTuple(args,(char *)"OO:IKSolver_qmin_set",&obj0,&obj1)) SWIG_fail;
   res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_IKSolver, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IKSolver_activeDofs_set" "', argument " "1"" of type '" "IKSolver *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IKSolver_qmin_set" "', argument " "1"" of type '" "IKSolver *""'"); 
   }
   arg1 = reinterpret_cast< IKSolver * >(argp1);
-  res2 = SWIG_ConvertPtr(obj1, &argp2,SWIGTYPE_p_std__vectorT_int_std__allocatorT_int_t_t, 0 |  0 );
+  res2 = SWIG_ConvertPtr(obj1, &argp2,SWIGTYPE_p_std__vectorT_double_std__allocatorT_double_t_t, 0 |  0 );
   if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "IKSolver_activeDofs_set" "', argument " "2"" of type '" "std::vector< int,std::allocator< int > > *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "IKSolver_qmin_set" "', argument " "2"" of type '" "std::vector< double,std::allocator< double > > *""'"); 
   }
-  arg2 = reinterpret_cast< std::vector< int,std::allocator< int > > * >(argp2);
-  if (arg1) (arg1)->activeDofs = *arg2;
+  arg2 = reinterpret_cast< std::vector< double,std::allocator< double > > * >(argp2);
+  if (arg1) (arg1)->qmin = *arg2;
   resultobj = SWIG_Py_Void();
   return resultobj;
 fail:
@@ -31695,22 +31927,74 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_IKSolver_activeDofs_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_IKSolver_qmin_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   IKSolver *arg1 = (IKSolver *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
   PyObject * obj0 = 0 ;
-  std::vector< int,std::allocator< int > > *result = 0 ;
+  std::vector< double,std::allocator< double > > *result = 0 ;
   
-  if (!PyArg_ParseTuple(args,(char *)"O:IKSolver_activeDofs_get",&obj0)) SWIG_fail;
+  if (!PyArg_ParseTuple(args,(char *)"O:IKSolver_qmin_get",&obj0)) SWIG_fail;
   res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_IKSolver, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IKSolver_activeDofs_get" "', argument " "1"" of type '" "IKSolver *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IKSolver_qmin_get" "', argument " "1"" of type '" "IKSolver *""'"); 
   }
   arg1 = reinterpret_cast< IKSolver * >(argp1);
-  result = (std::vector< int,std::allocator< int > > *)& ((arg1)->activeDofs);
-  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_std__vectorT_int_std__allocatorT_int_t_t, 0 |  0 );
+  result = (std::vector< double,std::allocator< double > > *)& ((arg1)->qmin);
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_std__vectorT_double_std__allocatorT_double_t_t, 0 |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_IKSolver_qmax_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  IKSolver *arg1 = (IKSolver *) 0 ;
+  std::vector< double,std::allocator< double > > *arg2 = (std::vector< double,std::allocator< double > > *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:IKSolver_qmax_set",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_IKSolver, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IKSolver_qmax_set" "', argument " "1"" of type '" "IKSolver *""'"); 
+  }
+  arg1 = reinterpret_cast< IKSolver * >(argp1);
+  res2 = SWIG_ConvertPtr(obj1, &argp2,SWIGTYPE_p_std__vectorT_double_std__allocatorT_double_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "IKSolver_qmax_set" "', argument " "2"" of type '" "std::vector< double,std::allocator< double > > *""'"); 
+  }
+  arg2 = reinterpret_cast< std::vector< double,std::allocator< double > > * >(argp2);
+  if (arg1) (arg1)->qmax = *arg2;
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_IKSolver_qmax_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  IKSolver *arg1 = (IKSolver *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  std::vector< double,std::allocator< double > > *result = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:IKSolver_qmax_get",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_IKSolver, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IKSolver_qmax_get" "', argument " "1"" of type '" "IKSolver *""'"); 
+  }
+  arg1 = reinterpret_cast< IKSolver * >(argp1);
+  result = (std::vector< double,std::allocator< double > > *)& ((arg1)->qmax);
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_std__vectorT_double_std__allocatorT_double_t_t, 0 |  0 );
   return resultobj;
 fail:
   return NULL;
@@ -39152,6 +39436,13 @@ static PyMethodDef SwigMethods[] = {
 		"Returns the type of geometry: TriangleMesh, PointCloud, or\n"
 		"GeometricPrimitive \n"
 		""},
+	 { (char *)"Geometry3D_empty", _wrap_Geometry3D_empty, METH_VARARGS, (char *)"\n"
+		"Geometry3D_empty(Geometry3D self) -> bool\n"
+		"\n"
+		"bool Geometry3D::empty()\n"
+		"\n"
+		"Returns true if this has no contents. \n"
+		""},
 	 { (char *)"Geometry3D_getTriangleMesh", _wrap_Geometry3D_getTriangleMesh, METH_VARARGS, (char *)"\n"
 		"Geometry3D_getTriangleMesh(Geometry3D self) -> TriangleMesh\n"
 		"\n"
@@ -40494,6 +40785,26 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"Gets the active degrees of freedom. \n"
 		""},
+	 { (char *)"IKSolver_setJointLimits", _wrap_IKSolver_setJointLimits, METH_VARARGS, (char *)"\n"
+		"IKSolver_setJointLimits(IKSolver self, doubleVector qmin, doubleVector qmax)\n"
+		"\n"
+		"void\n"
+		"IKSolver::setJointLimits(const std::vector< double > &qmin, const\n"
+		"std::vector< double > &qmax)\n"
+		"\n"
+		"Sets limits on the robot's configuration. If empty, this turns off\n"
+		"joint limits. \n"
+		""},
+	 { (char *)"IKSolver_getJointLimits", _wrap_IKSolver_getJointLimits, METH_VARARGS, (char *)"\n"
+		"IKSolver_getJointLimits(IKSolver self)\n"
+		"\n"
+		"void\n"
+		"IKSolver::getJointLimits(std::vector< double > &out, std::vector<\n"
+		"double > &out2)\n"
+		"\n"
+		"Gets the limits on the robot's configuration (by default this is the\n"
+		"robot's joint limits. \n"
+		""},
 	 { (char *)"IKSolver_getResidual", _wrap_IKSolver_getResidual, METH_VARARGS, (char *)"\n"
 		"IKSolver_getResidual(IKSolver self)\n"
 		"\n"
@@ -40534,10 +40845,14 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"IKSolver_robot_get", _wrap_IKSolver_robot_get, METH_VARARGS, (char *)"IKSolver_robot_get(IKSolver self) -> RobotModel"},
 	 { (char *)"IKSolver_objectives_set", _wrap_IKSolver_objectives_set, METH_VARARGS, (char *)"IKSolver_objectives_set(IKSolver self, std::vector< IKObjective,std::allocator< IKObjective > > * objectives)"},
 	 { (char *)"IKSolver_objectives_get", _wrap_IKSolver_objectives_get, METH_VARARGS, (char *)"IKSolver_objectives_get(IKSolver self) -> std::vector< IKObjective,std::allocator< IKObjective > > *"},
-	 { (char *)"IKSolver_useJointLimits_set", _wrap_IKSolver_useJointLimits_set, METH_VARARGS, (char *)"IKSolver_useJointLimits_set(IKSolver self, bool useJointLimits)"},
-	 { (char *)"IKSolver_useJointLimits_get", _wrap_IKSolver_useJointLimits_get, METH_VARARGS, (char *)"IKSolver_useJointLimits_get(IKSolver self) -> bool"},
 	 { (char *)"IKSolver_activeDofs_set", _wrap_IKSolver_activeDofs_set, METH_VARARGS, (char *)"IKSolver_activeDofs_set(IKSolver self, intVector activeDofs)"},
 	 { (char *)"IKSolver_activeDofs_get", _wrap_IKSolver_activeDofs_get, METH_VARARGS, (char *)"IKSolver_activeDofs_get(IKSolver self) -> intVector"},
+	 { (char *)"IKSolver_useJointLimits_set", _wrap_IKSolver_useJointLimits_set, METH_VARARGS, (char *)"IKSolver_useJointLimits_set(IKSolver self, bool useJointLimits)"},
+	 { (char *)"IKSolver_useJointLimits_get", _wrap_IKSolver_useJointLimits_get, METH_VARARGS, (char *)"IKSolver_useJointLimits_get(IKSolver self) -> bool"},
+	 { (char *)"IKSolver_qmin_set", _wrap_IKSolver_qmin_set, METH_VARARGS, (char *)"IKSolver_qmin_set(IKSolver self, doubleVector qmin)"},
+	 { (char *)"IKSolver_qmin_get", _wrap_IKSolver_qmin_get, METH_VARARGS, (char *)"IKSolver_qmin_get(IKSolver self) -> doubleVector"},
+	 { (char *)"IKSolver_qmax_set", _wrap_IKSolver_qmax_set, METH_VARARGS, (char *)"IKSolver_qmax_set(IKSolver self, doubleVector qmax)"},
+	 { (char *)"IKSolver_qmax_get", _wrap_IKSolver_qmax_get, METH_VARARGS, (char *)"IKSolver_qmax_get(IKSolver self) -> doubleVector"},
 	 { (char *)"delete_IKSolver", _wrap_delete_IKSolver, METH_VARARGS, (char *)"delete_IKSolver(IKSolver self)"},
 	 { (char *)"IKSolver_swigregister", IKSolver_swigregister, METH_VARARGS, NULL},
 	 { (char *)"new_GeneralizedIKObjective", _wrap_new_GeneralizedIKObjective, METH_VARARGS, (char *)"\n"
