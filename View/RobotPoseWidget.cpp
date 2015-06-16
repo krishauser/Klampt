@@ -448,6 +448,15 @@ RobotPoseWidget::RobotPoseWidget(Robot* robot,ViewRobot* viewRobot)
     useBase=true;
     basePoser.T = robot->links[robot->joints[0].linkIndex].T_World;
   }
+  else if(robot->joints[0].type == RobotJoint::FloatingPlanar) {  //only allow movement in x,y, and yaw axes
+    useBase=true;
+    basePoser.T = robot->links[robot->joints[0].linkIndex].T_World;
+    basePoser.enableTranslationAxes[2] = 0;
+    basePoser.enableRotationAxes[0] = 0;
+    basePoser.enableRotationAxes[1] = 0;
+    basePoser.enableOriginTranslation = 0;
+    basePoser.enableOuterRingRotation = 0;
+  }
   if(useBase) {
     widgets.resize(3);
     widgets[0]=&basePoser;
@@ -468,6 +477,15 @@ void RobotPoseWidget::Set(Robot* robot,ViewRobot* viewRobot)
   if(robot->joints[0].type == RobotJoint::Floating) {
     useBase=true;
     basePoser.T = robot->links[robot->joints[0].linkIndex].T_World;
+  }
+  else if(robot->joints[0].type == RobotJoint::FloatingPlanar) {  //only allow movement in x,y, and yaw axes
+    useBase=true;
+    basePoser.T = robot->links[robot->joints[0].linkIndex].T_World;
+    basePoser.enableTranslationAxes[2] = 0;
+    basePoser.enableRotationAxes[0] = 0;
+    basePoser.enableRotationAxes[1] = 0;
+    basePoser.enableOriginTranslation = 0;
+    basePoser.enableOuterRingRotation = 0;
   }
   if(useBase) {
     widgets.resize(3);
@@ -655,9 +673,10 @@ void RobotPoseWidget::Drag(int dx,int dy,Camera::Viewport& viewport)
   }
   WidgetSet::Drag(dx,dy,viewport);
   if(activeWidget == &basePoser) {
-    linkPoser.robot->SetJointByTransform(0,5,basePoser.T);
-    linkPoser.robot->UpdateFrames();
-    linkPoser.poseConfig = linkPoser.robot->q;
+    Robot* robot=linkPoser.robot;
+    robot->SetJointByTransform(0,robot->joints[0].linkIndex,basePoser.T);
+    robot->UpdateFrames();
+    linkPoser.poseConfig = robot->q;
   }
   if(activeWidget == &ikPoser) {
     SolveIK();
