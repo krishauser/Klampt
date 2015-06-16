@@ -15,14 +15,17 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->radioButton->setChecked(1);
 }
 
-void MainWindow::Initialize(int _argc,const char** _argv)
+bool MainWindow::Initialize(int _argc,const char** _argv)
 {
     argc=_argc;
     argv=_argv;
 
     const string robname="placeholder";
     //world->AddRobot(robname,&robot);
-    world.LoadRobot(argv[1]);
+    if(world.LoadRobot(argv[1]) < 0) {
+      printf("RobotTest: error loading robot file %s, quitting\n",argv[1]);
+      return false;
+    }
     backend = new RobotTestBackend(&world);
     printf("BACKEND LOADED\n");
     gui=new QRobotTestGUI(backend,ui->displaywidget);
@@ -54,6 +57,7 @@ void MainWindow::Initialize(int _argc,const char** _argv)
 
     ui->displaywidget->installEventFilter(this);
     ui->displaywidget->setFocusPolicy(Qt::WheelFocus);    
+    return true;
 }
 
 void MainWindow::SetGeometry(bool status){

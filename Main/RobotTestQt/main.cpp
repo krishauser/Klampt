@@ -22,24 +22,30 @@ int main(int argc, char *argv[])
     QString dir = QFileInfo(ini.fileName()).absolutePath();
 
     if(argc==1){
-        QFileDialog f;
-        QString openDir = ini.value("last_open_robot_directory",".").toString();
-        filename = f.getOpenFileName(0,"Open Robot",openDir,"Robot (*.rob);;Scenario (*.xml);;All Files (*)");
-        if(filename.isNull()) return 0;
-        ini.setValue("last_open_robot_directory",QFileInfo(filename).absolutePath());
+      QFileDialog f;
+      QString openDir = ini.value("last_open_robot_directory",".").toString();
+      filename = f.getOpenFileName(0,"Open Robot",openDir,"Robot (*.rob);;Scenario (*.xml);;All Files (*)");
+      if(filename.isNull()) return 0;
+      ini.setValue("last_open_robot_directory",QFileInfo(filename).absolutePath());
+    }
+    MainWindow w;
+    if(argc==1){
+      //do not simplify the proceeding lines, this makes it work somehow
+      string s = filename.toStdString();
+      const char* c = s.c_str();
+      const char* args[3] = {"RobotTest",c,""};
+      if(!w.Initialize(2,(const char**)args)) {
+	printf("Failed to initialize\n");
+	return 1;
       }
-      MainWindow w;
-      if(argc==1){
-          //do not simplify the proceeding lines, this makes it work somehow
-          string s = filename.toStdString();
-          const char* c = s.c_str();
-          const char* args[3] = {"RobotTest",c,""};
-          w.Initialize(2,(const char**)args);
+    }
+    else{
+      if(!w.Initialize(argc,(const char**)argv)) {
+	printf("Failed to initialize\n");
+	return 1;
       }
-      else{
-          w.Initialize(argc,(const char**)argv);
-      }
-      w.directory=dir;
+    }
+    w.directory=dir;
     w.show();
     return a.exec();
 }
