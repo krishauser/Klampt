@@ -1950,9 +1950,10 @@ void Robot::SetJointByOrientation(int j, int link, const Matrix3& Rl) {
 			Assert(links[indices[1]].type == RobotLink3D::Prismatic);
 			Assert(links[indices[2]].type == RobotLink3D::Revolute);
 			//rotation
+			//rotation
 			Vector3 x, y;
 			GetCanonicalBasis(links[indices[2]].w, x, y);
-			Vector3 desx = R * x;
+			Vector3 desx = -(T.R * y);
 			q(indices[2]) = Atan2(desx.y, desx.x);
 		}
 		break;
