@@ -1722,8 +1722,8 @@ bool Robot::DoesJointAffect(int joint, int dof) const {
 		return false;
 	}
 	default:
-		FatalError("TODO");
-		return false;
+	  FatalError("TODO joint type %d",joints[joint].type);
+	  return false;
 	}
 }
 
@@ -1748,8 +1748,8 @@ void Robot::GetJointIndices(int joint, vector<int>& indices) const {
 		break;
 	}
 	default:
-		FatalError("TODO");
-		break;
+	  FatalError("TODO joint type %d",joints[joint].type);
+	  break;
 	}
 }
 
@@ -1791,8 +1791,8 @@ Real Robot::GetDriverValue(int d) const {
 		return vavg / drivers[d].linkIndices.size();
 	}
 	default:
-		FatalError("TODO");
-		return 0;
+	  FatalError("TODO driver type %d",drivers[d].type);
+	  return 0;
 	}
 }
 
@@ -1812,8 +1812,7 @@ void Robot::SetDriverValue(int d, Real value) {
 		break;
 	}
 	default:
-		FatalError("TODO");
-		break;
+	  FatalError("TODO driver type %d",drivers[d].type);
 	}
 }
 
@@ -1834,7 +1833,7 @@ void Robot::SetJointByTransform(int j, int link, const RigidTransform& Tl) {
 	case RobotJoint::Normal:
 	case RobotJoint::Spin:
 		Assert(joints[j].linkIndex == link);
-		FatalError("TODO: infer link parameter from transform");
+		FatalError("TODO: infer Normal/Spin link parameter from transform");
 		break;
 	case RobotJoint::BallAndSocket:
 		SetJointByOrientation(j, link, Tl.R);
@@ -1888,13 +1887,13 @@ void Robot::SetJointByTransform(int j, int link, const RigidTransform& Tl) {
 			//rotation
 			Vector3 x, y;
 			GetCanonicalBasis(links[indices[2]].w, x, y);
-			Vector3 desx = T.R * x;
+			Vector3 desx = -(T.R * y);
 			q(indices[2]) = Atan2(desx.y, desx.x);
 		}
 		break;
 	default:
-		FatalError("TODO");
-		break;
+	  FatalError("TODO joint type %d",joints[j].type);
+	  break;
 	}
 }
 
@@ -1982,8 +1981,8 @@ void Robot::SetJointByOrientation(int j, int link, const Matrix3& Rl) {
 		}
 		break;
 	default:
-		FatalError("TODO");
-		break;
+	  FatalError("TODO joint type %d",joints[j].type);
+	  break;
 	}
 }
 
@@ -2003,8 +2002,8 @@ Real Robot::GetDriverVelocity(int d) const {
 		return vavg / drivers[d].linkIndices.size();
 	}
 	default:
-		FatalError("TODO");
-		return 0;
+	  FatalError("TODO driver type %d",drivers[d].type);
+	  return 0;
 	}
 }
 
@@ -2025,8 +2024,8 @@ void Robot::SetDriverVelocity(int d, Real value) {
 	}
 		break;
 	default:
-		FatalError("TODO");
-		break;
+	  FatalError("TODO driver type %d",drivers[d].type);
+	  break;
 	}
 }
 
@@ -2066,7 +2065,7 @@ void Robot::SetJointVelocityByMoment(int j, int link, const Vector3& w,
 	case RobotJoint::Normal:
 	case RobotJoint::Spin:
 		Assert(joints[j].linkIndex == link);
-		FatalError("TODO: infer link parameter from transform");
+		FatalError("TODO: infer Normal/Spin link velocity from twist");
 		break;
 	case RobotJoint::Floating: {
 		//TODO: only know how to do translation then RPY, make this more sophisticated
@@ -2149,8 +2148,8 @@ void Robot::SetJointVelocityByMoment(int j, int link, const Vector3& w,
 	}
 		break;
 	default:
-		FatalError("TODO");
-		break;
+	  FatalError("TODO joint type %d",joints[j].type);
+	  break;
 	}
 }
 
@@ -2168,8 +2167,8 @@ void Robot::GetDriverJacobian(int d, Vector& J) {
 	}
 		break;
 	default:
-		FatalError("TODO");
-		break;
+	  FatalError("TODO driver type %d",drivers[d].type);
+	  break;
 	}
 }
 
