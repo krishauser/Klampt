@@ -195,18 +195,18 @@ bool Robot::LoadRob(const char* fn) {
 	}
 	printf("Reading robot file %s...\n", fn);
 	int lineno = 0;
-	string name;
 	while (in) {
 		//cout<<"Reading line "<<name<<"..."<<endl;
 		//read the rest of the line
-		string line;
+		string line,name;
 		char buf[1025];
 		buf[1024] = 0;
 		bool foundEndline = false, comment = false;
+		bool foundEof = false;
 		while (!foundEndline) {
 			for (int i = 0; i < 1024; i++) {
 				int c = in.get();
-				if(!in || c == EOF) { foundEndline=true; break; }
+				if(!in || c == EOF) { buf[i] = 0; foundEndline=true; foundEof=true; break; }
 				if (c == '\n') {
 					buf[i] = 0;
 					foundEndline = true;
@@ -230,8 +230,12 @@ bool Robot::LoadRob(const char* fn) {
 		stringstream ss;
 		ss.str(line);
 		ss>>name;
-		if(!ss) continue; //empty line
+		if(!ss) {
+		  if(foundEof) break;
+		  continue; //empty line
+		}
 		Lowercase(name);
+		//cout<<"Reading line "<<name<<" line "<<lineno<<endl;
 		string stemp;
 		int itemp;
 		Real ftemp;
@@ -1953,7 +1957,7 @@ void Robot::SetJointByOrientation(int j, int link, const Matrix3& Rl) {
 			//rotation
 			Vector3 x, y;
 			GetCanonicalBasis(links[indices[2]].w, x, y);
-			Vector3 desx = -(T.R * y);
+			Vector3 desx = -(R * y);
 			q(indices[2]) = Atan2(desx.y, desx.x);
 		}
 		break;
