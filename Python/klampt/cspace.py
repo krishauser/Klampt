@@ -132,8 +132,9 @@ class MotionPlan:
     Note that MotionPlan.close() or motionplanning.destroy() must be called
     to free memory after you are done.
     """
-    def __init__(self,space,type=None):
+    def __init__(self,space,type=None,**options):
         """Initializes a plan with a given CSpace and a given type.
+        Optionally, planner options can be set via keyword arguments.
         
         Valid values for type are:
             - prm: the Probabilistic Roadmap algorithm
@@ -147,12 +148,14 @@ class MotionPlan:
             - fmm: the fast marching method algorithm for resolution-complete optimal motion planning
             - fmm*: an anytime fast marching method algorithm for optimal motion planning
         (this list may be out-of-date; the most current documentation
-        is listed in motionplanning.h)
+        is listed in src/motionplanning.h)
         """
         if space.cspace == None:
             space.setup()
         if type != None:
             motionplanning.setPlanType(type)
+        if len(options) > 0:
+            MotionPlan.setOptions(**options)
         self.planner = motionplanning.PlannerInterface(space.cspace)
 
     def close(self):
