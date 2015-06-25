@@ -4,7 +4,11 @@ import robotcollide
 from cspaceutils import AdaptiveCSpace
 
 class RobotCSpace(AdaptiveCSpace):
-    """A basic robot cspace that allows collision free motion"""
+    """A basic robot cspace that allows collision free motion.
+
+    Warning: if your robot has non-standard joints, like a free-
+    floating base or continuously rotating (spin) joints, you will need to
+    overload the sample() method."""
     def __init__(self,robot,collider=None):
         AdaptiveCSpace.__init__(self)
         self.robot = robot
@@ -22,8 +26,14 @@ class RobotCSpace(AdaptiveCSpace):
         self.addFeasibleTest(lambda(x): not self.selfCollision(),"self collision")
         self.addFeasibleTest(lambda(x): not self.envCollision(),"env collision")
 
+    def sample(self):
+        """Overload this to implement custom sampling strategies or to handle
+        non-standard joints"""
+        AdaptiveCSpace.sample(self)
 
     def feasible(self,x):
+        """Feasibility test.  If self.adaptive=True, uses the adaptive
+        feasibility tester which may speed up collision testing."""
         if self.adaptive:
             #Use the adaptive tester
             self.robot.setConfig(x)
@@ -39,17 +49,21 @@ class RobotCSpace(AdaptiveCSpace):
         return True
 
     def inJointLimits(self,x):
-        #check joint limits
+        """Checks joint limits of the configuration x"""
         for (xi,bi) in zip(x,self.bound):
             if xi < bi[0] or xi > bi[1]:
                 return False
         return True
 
     def selfCollision(self):
+        """Checks whether the robot at its current configuration is in
+        self collision"""
         if not self.collider: return False
         return any(self.collider.robotSelfCollisions(self.robot.index))
 
     def envCollision(self):
+        """Checks whether the robot at its current configuration is in
+        collision with the environment."""
         if not self.collider: return False
         for o in xrange(self.collider.world.numRigidObjects()):
             if any(self.collider.robotObjectCollisions(self.robot.index,o)):
@@ -61,7 +75,8 @@ class RobotCSpace(AdaptiveCSpace):
                   
 
 class ClosedLoopRobotCSpace(RobotCSpace):
-    """A closed loop cspace"""
+    """A closed loop cspace.  Allows one or more IK constraints to be
+    maintained during the robot's motion."""
     def __init__(self,robot,iks,collider=None):
         RobotCSpace.__init__self(robot,collider)
         self.solver = robotsim.IKSolver(robot)
@@ -78,24 +93,28 @@ class ClosedLoopRobotCSpace(RobotCSpace):
         #adaptive checker
         self.addFeasibleTest(lambda(x): self.closedLoop())
 
-    def sample():
+    def sample(self):
+        """Samples directly on the contact manifold"""
         self.solver.sampleInitial()
         (res,iters) = self.solver.solve(self.maxIters,self.tol)
+        return self.robot.getConfig()
 
     def feasible(self,x):
         if self.adaptive:
             #Use the adaptive tester
-            robot.setConfig(x)
+            self.robot.setConfig(x)
             return AdaptiveCSpace.feasible(self,x)
             
         if not self.inJointLimits(x): return False
-        robot.setConfig(x)
+        self.robot.setConfig(x)
         if not self.closedLoop(): return False;
         if self.selfCollision(): return False
         if self.envCollision(): return False
         return True
 
     def closedLoop(self,tol=None):
+        """Returns true if the closed loop constraint has been met at the
+        robot's current configuration."""
         e = self.solver.getError()
         if tol==None: tol = self.tol
         return max(abs(ei) for ei in e) <= tol
