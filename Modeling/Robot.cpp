@@ -586,9 +586,12 @@ bool Robot::LoadRob(const char* fn) {
 			  }
 			}
 			if(name.empty()) {
+			  mountNames.push_back(string());
+			  /*
 			  string robotName = stemp;
 			  StripExtension(robotName);
 			  mountNames.push_back(robotName);
+			  */
 			}
 			else mountNames.push_back(name);
 		} else {
@@ -1124,10 +1127,18 @@ bool Robot::LoadRob(const char* fn) {
 			size_t dstart = drivers.size();
 			Mount(mountLinks[i], subchain, mountT[i]);
 
-			for (size_t k = lstart; k < links.size(); k++) 
-				linkNames[k] = mountNames[i] + ":" + linkNames[k];
-			for (size_t k = dstart; k < drivers.size(); k++)
-				driverNames[k] = mountNames[i] + ":" + driverNames[k];
+			if(mountNames[i].empty()) {
+			  for (size_t k = lstart; k < links.size(); k++) 
+			    linkNames[k] = linkNames[k];
+			  for (size_t k = dstart; k < drivers.size(); k++)
+			    driverNames[k] = driverNames[k];
+			}
+			else {
+			  for (size_t k = lstart; k < links.size(); k++) 
+			    linkNames[k] = mountNames[i] + ":" + linkNames[k];
+			  for (size_t k = dstart; k < drivers.size(); k++)
+			    driverNames[k] = mountNames[i] + ":" + driverNames[k];
+			}
 		}
 	}
 	if (!CheckValid())
