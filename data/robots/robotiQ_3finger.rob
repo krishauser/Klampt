@@ -34,9 +34,9 @@ servoI  10
 dryFriction 1 
 viscousFriction 3
  
-mount 0 "RobotiQ/finger.rob"   0 -1 0  1 0 0   0 0 1     0.04  0.039  0 
-mount 1 "RobotiQ/finger.rob"    1 0 0  0 1 0   0 0 1     0.018  0.0008   -0.0005
-mount 2 "RobotiQ/finger.rob"    1 0 0  0 1 0   0 0 1     0.018  0.0008   0.0005
+mount 0 "RobotiQ/finger.rob"   0 -1 0  1 0 0   0 0 1     0.04  0.039  0  as "thumb"
+mount 1 "RobotiQ/finger.rob"    1 0 0  0 1 0   0 0 1     0.018  0.0008   -0.0005  as "finger1"
+mount 2 "RobotiQ/finger.rob"    1 0 0  0 1 0   0 0 1     0.018  0.0008   0.0005 as "finger2"
 
 
 #scissor 1 to scissor 2
