@@ -30,7 +30,7 @@ dryFriction 5 5 3 1 0.1 0.05
 viscousFriction 100 100 70 40 5 2
 
 #mounted with orientation pi+0.125156 radians orientation about z axis
-mount 6 "robotiQ_3finger.rob"  -0.99217820589793865345916299856371 0.1248295147036455133524368152559 0    -0.1248295147036455133524368152559 -0.99217820589793865345916299856371  0     0 0 1    0 0 0.09
+mount 6 "robotiQ_3finger.rob"  -0.99217820589793865345916299856371 0.1248295147036455133524368152559 0    -0.1248295147036455133524368152559 -0.99217820589793865345916299856371  0     0 0 1    0 0 0.09   as "gripper"
 
 #links "base" "link1" "link2" "link3" "link4" "link5"  "link6"  "flange"  "thumb_proximal" "thumb_medial" "thumb_distal" "finger1_proximal" "finger1_medial" "finger1_distal" "finger2_proximal" "finger2_medial" "finger2_distal"
 
