@@ -33,27 +33,32 @@ class GLIKTest(GLRealtimeProgram):
         glEnable(GL_DEPTH_TEST)
 
     def solve_ik(self,robotlink,localpos,worldpos):
-        """TODO: solve inverse kinematics to place the 3D point localpos
-        on robotlink (a RobotLink instance) at the 3D position worldpos
-        in the world coordinate frame.
+        """IMPLEMENT ME: solve inverse kinematics to place the 3D point
+        localpos on robotlink (a RobotLink instance) at the 3D position
+        worldpos in the world coordinate frame.
         
         Returns the robot configuration that solves the IK problem.
         """
         linkindex = robotlink.index
+        robot = robotlink.robot()
         #hint: your code should look like this
-        #obj = IKObjective()
-        # ... do something to set up the objective, see robot/src/robotik.h ...
-        #s = IKSolver(robotlink.robot())
-        #s.add(obj)
+        #obj = ik.objective(robotlink,...)
+        # # In the ... you should do something to set up the objective so
+        # # that the point localpos on the link is matched to worldpos.
+        # # See klampt/ik.py for more details.
+        #s = ik.solver(obj)
+        # # Set up some parameters for the numerical solver
         #maxIters = 100
         #tol = 1e-3
-        # ... optionally you can set an initial configuration like so:
-        #robotlink.robot().setConfig([0]*robotlink.robot().numLinks())
+        # # Optionally you can set an initial configuration like so:
+        # # robot.setConfig([0]*robot.numLinks())
+        # # or set a random initial configuration like so:
+        # # s.sampleInitial()
         #(res,iters) = s.solve(maxIters,tol);
-        #return robotlink.robot().getConfig()
+        #return robot.getConfig()
 
         #right now this just sets the zero configuration
-        q = [0]*robotlink.robot().numLinks()
+        q = [0]*robot.numLinks()
         return q
     
 
