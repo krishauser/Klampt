@@ -176,6 +176,7 @@ def bezier_curve(x1,x2,x3,x4,res=0.01,textured=False):
     (useful for applying patterns)."""
     if textured:
         path,params = spline.bezier_discretize(x1,x2,x3,x4,res,return_params=True)
+        if len(path)==0: return
         glBegin(GL_LINE_STRIP)
         for p,u in zip(path,params):
             glTexCoord1f(u)
@@ -183,6 +184,7 @@ def bezier_curve(x1,x2,x3,x4,res=0.01,textured=False):
         glEnd()
     else:
         path = spline.bezier_discretize(x1,x2,x3,x4,res)
+        if len(path)==0: return
         glBegin(GL_LINE_STRIP)
         for p in path:
             glVertex3f(*p)

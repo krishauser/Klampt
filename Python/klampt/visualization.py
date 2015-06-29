@@ -1,13 +1,15 @@
-"""Klamp't world visualization routines.
+"""Klamp't world visualization routines.  See demos/vistemplate.py for an
+example of how to run this module.
 
 Due to weird OpenGL behavior when opening/closing windows, you should only
 run visualizations using the methods in this module, or manually running
-glprogram / qtprogram code, NOT BOTH.  Since the editors in the
+glprogram / qtprogram code, but NOT BOTH.  Since the editors in the
 resource module use this module, you should also use it if you plan to use
 the resource editor.
 
-Note: when changing the data shown by the window (e.g., a WorldModel)
-you must call lock() before accessing the data and then call unlock() afterwards.
+Note: when changing the data shown by the window (e.g., modifying the
+configurations of robots in a WorldModel) you must call lock() before
+accessing the data and then call unlock() afterwards.
 
 The main interface is as follows:
 
@@ -33,7 +35,7 @@ def remove(name): removes an item from the visualization.
 def hide(name,hidden=True): hides/unhides an item.  The item is not removed,
     it just becomes invisible.
 def hideLabel(name,hidden=True): hides/unhides an item's text label.
-def setAnimation(name,animation,speed=1.0): TODO: implement me. Should send
+def animate(name,animation,speed=1.0): TODO: implement me. Should send
     an animation to the object.  May be a Trajectory or a list of
     configurations
 def setAppearance(name,appearance): changes the Appearance of an item.
@@ -48,11 +50,17 @@ def setPlugin(plugin): plugin must be an instance of a GLPluginBase.
 def setCustom(function,args): Advanced usage.  This function is called within
     the visualization thread, and is necessary to do anything with the opengl
     visualization including drawing.
+def pauseAnimation(paused=True): Turns on/off animation.
+def stepAnimation(amount): Moves forward the animation time by the given amount
+    in seconds
+def animationTime(newtime=None): Retrieves the current animation time
+    If newtime != None, this sets a new animation time.
 """
 
 
 from OpenGL.GL import *
 from threading import Thread,Lock
+from robotsim import *
 import vectorops,so3,se3
 import resource
 import gldraw
@@ -60,6 +68,7 @@ import glcommon
 import time
 import signal
 import coordinates
+from trajectory import *
 
 _baseClass = None
 _globalLock = Lock()
@@ -157,16 +166,49 @@ def add(name,item,keepAppearance=False):
     _vis.items[name] = app
     _globalLock.release()
 
-def setAnimation(name,animation,speed):
+def animate(name,animation,speed=1.0):
     global _vis,_globalLock
     if _vis==None:
         print "Visualization disabled"
         return
     _globalLock.acquire()
+    if hasattr(animation,'__iter__'):
+        #a list of milestones -- loop through them with 1s delay
+        animation = Trajectory(range(len(animation)),animation)
     _vis.items[name].animation = animation
-    _vis.items[name].animationSpeed = animationSpeed
+    _vis.items[name].animationStartTime = _vis.animationTime
+    _vis.items[name].animationSpeed = speed
     _vis.items[name].markChanged()
     _globalLock.release()
+
+def pauseAnimation(paused=True):
+    global _vis,_globalLock
+    if _vis==None:
+        print "Visualization disabled"
+        return
+    _globalLock.acquire()
+    _vis.animate = not paused
+    _globalLock.release()
+
+def stepAnimation(amount):
+    global _vis,_globalLock
+    if _vis==None:
+        print "Visualization disabled"
+        return
+    _globalLock.acquire()
+    _vis.animationTime += amount
+    _globalLock.release()
+
+def animationTime(newtime=None):
+    global _vis,_globalLock
+    if _vis==None:
+        print "Visualization disabled"
+        return 0
+    if newtime != None:
+        _globalLock.acquire()
+        _vis.animationTime = newtime
+        _globalLock.release()
+    return _vis.animationTime
 
 def remove(name):
     global _vis,_globalLock
@@ -238,6 +280,109 @@ def setColor(name,r,g,b,a=1.0):
 
 
 
+def getItemConfig(item):
+    """Returns a flattened version of the configuration of the given item.
+    Nearly all Klamp't objects are recognized, including RobotModel's,
+    RigidObjectModel's, WorldModel's, and all variable types in the
+    coordinates module.
+    """
+    if isinstance(item,RobotModel):
+        return item.getConfig()
+    elif isinstance(item,RigidObjectModel):
+        R,t = item.getTransform()
+        return R+t
+    elif isinstance(item,WorldModel):
+        res = []
+        for i in range(item.numRobots()):
+            res += getItemConfig(item.robot(i))
+        for i in range(item.numRigidObjects()):
+            res += getItemConfig(item.rigidObject(i))
+        return res
+    elif isinstance(item,coordinates.Point):
+        return item.localCoordinates()
+    elif isinstance(item,coordinates.Direction):
+        return item.localCoordinates()
+    elif isinstance(item,coordinates.Frame):
+        R,t = item.relativeCoordinates()
+        return R+t
+    elif isinstance(item,coordinates.Group):
+        res = []
+        for n,f in item.frames.iteritems():
+            res += getItemConfig(f)
+        for n,p in item.points.iteritems():
+            res += getItemConfig(p)
+        for n,d in item.directions.iteritems():
+            res += getItemConfig(d)
+        for n,g in item.subgroups.iteritems():
+            res += getItemConfig(g)
+        return res
+    elif hasattr(item,'__iter__'):
+        if not hasattr(item[0],'__iter__'):
+            return item[:]
+        else:
+            return sum(item,[])
+    else:
+        return []
+
+def setItemConfig(item,vector):
+    """Sets the configuration of the given item to the given vector.
+    Nearly all Klamp't objects are recognized, including RobotModel's,
+    RigidObjectModel's, WorldModel's, and all variable types in the
+    coordinates module.
+    """
+    if isinstance(item,RobotModel):
+        assert len(vector)==item.numLinks(),"Robot model config has %d DOFs"%(item.numLinks(),)
+        item.setConfig(vector)
+    elif isinstance(item,RigidObjectModel):
+        assert len(vector)==12,"Rigid object model config has 12 DOFs"
+        item.setTransform(vector[:9],vector[9:])
+    elif isinstance(item,WorldModel):
+        k=0
+        for i in range(item.numRobots()):
+            n = item.robot(i).numLinks()
+            setItemConfig(item.robot(i),vector[k:k+n])
+            k += n
+        for i in range(item.numRigidObjects()):
+            n = 12
+            setItemConfig(item.robot(i),vector[k:k+n])
+            k += n
+        assert k == len(vector),"World model has %d DOFs"%(k,)
+    elif isinstance(item,coordinates.Point):
+        assert len(vector)==3,"Point config has 3 DOFs"
+        item._localCoordinates = vector[:]
+    elif isinstance(item,coordinates.Direction):
+        assert len(vector)==3,"Direction config has 3 DOFs"
+        item._localCoordinates = vector[:]
+    elif isinstance(item,coordinates.Frame):
+        assert len(vector)==12,"Frame config has 12 DOFs"
+        item._relativeCoordinates = (vector[:9],vector[9:])
+    elif isinstance(item,coordinates.Group):
+        k = 0
+        for n,f in item.frames.iteritems():
+            setItemConfig(f,vector[k:k+12])
+            k += 12
+        for n,p in item.points.iteritems():
+            setItemConfig(p,vector[k:k+3])
+            k += 3
+        for n,d in item.directions.iteritems():
+            setItemConfig(d,vector[k:k+3])
+            k += 3
+        for n,g in item.subgroups.iteritems():
+            raise NotImplementedError("TODO: set configuration of Group's subgroups")
+    elif hasattr(item,'__iter__'):
+        if not hasattr(item[0],'__iter__'):
+            return vector[:]
+        else:
+            #split vector according to the sizes of the items
+            res = []
+            k = 0
+            for v in item:
+                n = len(v)
+                res.append(vector[k:k+n])
+                k += n
+            return res
+    return item
+
 
 class VisAppearance:
     def __init__(self,item,name = None):
@@ -248,6 +393,7 @@ class VisAppearance:
         #For group items, this allows you to customize appearance of sub-items
         self.subAppearances = {}
         self.animation = None
+        self.animationStartTime = 0
         self.animationSpeed = 1.0
         self.attributes = {}
         #used for Qt text rendering
@@ -260,6 +406,8 @@ class VisAppearance:
         self.displayListParameters = None
         #dirty bit to indicate whether the display list should be recompiled
         self.changed = False
+        #temporary configuration of the item
+        self.drawConfig = None
         self.setItem(item)
     def setItem(self,item):
         self.item = item
@@ -289,10 +437,11 @@ class VisAppearance:
         for (k,a) in self.subAppearances.iteritems():
             a.destroy()
         self.subAppearances = {}
+        
     def drawText(self,text,point):
         """Draws the given text at the given point"""
         if self.attributes.get("text_hidden",False): return
-        self.widget.addLabel(text,point,[1,1,1])
+        self.widget.addLabel(text,point,[0,0,0])
 
     def cachedDraw(self,drawFunction,transform=None,parameters=None):
         if self.makingDisplayList:
@@ -300,15 +449,23 @@ class VisAppearance:
             return
         if self.glDisplayList == None or self.changed or parameters != self.displayListParameters:
             self.displayListParameters = parameters
+            self.changed = False
             if self.glDisplayList == None:
                 print "Generating new display list",self.name
                 self.glDisplayList = glGenLists(1)
-            print "Compiling display list",self.name
+            #print "Compiling display list",self.name
+            if transform:
+                glPushMatrix()
+                glMultMatrixf(sum(zip(*se3.homogeneous(transform)),()))
+            
             glNewList(self.glDisplayList,GL_COMPILE_AND_EXECUTE)
             self.makingDisplayList = True
             drawFunction()
             self.makingDisplayList = False
             glEndList()
+
+            if transform:
+                glPopMatrix()
         else:
             if transform:
                 glPushMatrix()
@@ -317,11 +474,36 @@ class VisAppearance:
             if transform:
                 glPopMatrix()
 
+    def update(self,t):
+        if not self.animation:
+            self.drawConfig = None
+        else:
+            u = self.animationSpeed*(t-self.animationStartTime)
+            q = self.animation.eval(u,'loop')
+            self.drawConfig = q
+        for n,app in self.subAppearances.iteritems():
+            app.update(t)
+
+    def swapDrawConfig(self):
+        """Given self.drawConfig, swaps out the item in """
+        if self.drawConfig: 
+            try:
+                newDrawConfig = getItemConfig(self.item)
+                self.item = setItemConfig(self.item,self.drawConfig)
+                self.drawConfig = newDrawConfig
+            except Exception as e:
+                print "Warning, exception thrown during animation update.  Probably have incorrect length of configuration"
+                print e
+                pass
+        for n,app in self.subAppearances.iteritems():
+            app.swapDrawConfig()        
+
     def draw(self,world=None):
         """Draws the specified item in the specified world.  If name
         is given and text_hidden != False, then the name of the item is
         shown."""
         if self.hidden: return
+       
         item = self.item
         name = self.name
         #set appearance
@@ -331,7 +513,7 @@ class VisAppearance:
                 item.appearance().set(self.customAppearance)
             elif "color" in self.attributes:
                 item.appearance().setColor(*self.attributes["color"])
-                
+
         if hasattr(item,'drawGL'):
             item.drawGL()
         elif len(self.subAppearances)!=0:
@@ -344,7 +526,7 @@ class VisAppearance:
                 glDisable(GL_LIGHTING)
                 glEnable(GL_POINT_SMOOTH)
                 glPointSize(self.attributes.get("size",5.0))
-                glColor4f(*self.attributes.get("color",[1,1,1,1]))
+                glColor4f(*self.attributes.get("color",[0,0,0,1]))
                 glBegin(GL_POINTS)
                 glVertex3f(0,0,0)
                 glEnd()
@@ -359,7 +541,7 @@ class VisAppearance:
                 glDisable(GL_DEPTH_TEST)
                 L = self.attributes.get("length",0.15)
                 source = [0,0,0]
-                glColor4f(*self.attributes.get("color",[1,1,1,1]))
+                glColor4f(*self.attributes.get("color",[0,1,1,1]))
                 glBegin(GL_LINES)
                 glVertex3f(*source)
                 glVertex3f(*vectorops.mul(item.localCoordinates(),L))
@@ -388,15 +570,22 @@ class VisAppearance:
                     vlen = d*0.5
                     v1 = so3.apply(tlocal[0],[-vlen]*3)
                     v2 = [vlen]*3
-                    glEnable(GL_BLEND)
-                    glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA)
+                    #glEnable(GL_BLEND)
+                    #glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA)
                     #glColor4f(1,1,0,0.5)
                     glColor3f(1,1,0)
                     gldraw.hermite_curve(tlocal[1],v1,[0,0,0],v2,0.03)
-                    glDisable(GL_BLEND)
+                    #glDisable(GL_BLEND)
                 glEnable(GL_DEPTH_TEST)
-                #write name
-            self.cachedDraw(drawRaw,transform=tp, parameters = tlocal)
+
+            #For some reason, cached drawing is causing OpenGL problems
+            #when the frame is rapidly changing
+            #self.cachedDraw(drawRaw,transform=tp, parameters = tlocal)
+            glPushMatrix()
+            glMultMatrixf(sum(zip(*se3.homogeneous(tp)),()))
+            drawRaw()
+            glPopMatrix()
+            #write name
             if name != None:
                 self.drawText(name,se3.apply(t,[-0.05]*3))
         elif isinstance(item,coordinates.Transform):
@@ -460,7 +649,7 @@ class VisAppearance:
                     glDisable(GL_LIGHTING)
                     glEnable(GL_POINT_SMOOTH)
                     glPointSize(self.attributes.get("size",5.0))
-                    glColor4f(*self.attributes.get("color",[1,1,1,1]))
+                    glColor4f(*self.attributes.get("color",[0,0,0,1]))
                     glBegin(GL_POINTS)
                     glVertex3f(0,0,0)
                     glEnd()
@@ -495,6 +684,9 @@ if glcommon._PyQtAvailable or glcommon._GLUTAvailable:
             glcommon.GLPluginBase.__init__(self)
             self.items = {}
             self.labels = []
+            self.t = time.time()
+            self.animate = True
+            self.animationTime = 0
 
         def addLabel(self,text,point,color):
             for (p,textList,pcolor) in self.labels:
@@ -504,13 +696,18 @@ if glcommon._PyQtAvailable or glcommon._GLUTAvailable:
             self.labels.append((point,[text],color))
 
         def display(self):
+            global _globalLock
             _globalLock.acquire()
             self.labels = []
             world = self.items.get('world',None)
             if world != None: world=world.item
             for (k,v) in self.items.iteritems():
                 v.widget = self
+                #do animation updates
+                v.update(self.animationTime)
+                v.swapDrawConfig()
                 v.draw(world)
+                v.swapDrawConfig()
                 v.widget = None #allows garbage collector to delete these objects
             for (p,textlist,color) in self.labels:
                 self.drawLabelRaw(p,textlist,color)
@@ -522,21 +719,26 @@ if glcommon._PyQtAvailable or glcommon._GLUTAvailable:
                 if i+1 < len(textList): text = text+","
                 if glcommon._GLUTAvailable:
                     glRasterPos3f(*point)
-                    glColor3f(1,1,1)
+                    glColor3f(0,0,0)
                     glDisable(GL_LIGHTING)
                     glDisable(GL_DEPTH_TEST)
                     gldraw.glutBitmapString(GLUT_BITMAP_HELVETICA_10,text)
                     glEnable(GL_DEPTH_TEST)
                 elif glcommon._PyQtAvailable:
-                    glColor3f(1,1,1)
+                    glColor3f(0,0,0)
                     glDisable(GL_DEPTH_TEST)
-                    self.renderText(point[0],point[1],point[2],text)
+                    self.widget.renderText(point[0],point[1],point[2],text)
                     glEnable(GL_DEPTH_TEST)
                 point = vectorops.add(point,[0,0,-0.05])
 
-
-        def idle(self):
-            pass
+        def idlefunc(self):
+            oldt = self.t
+            self.t = time.time()
+            if self.animate:
+                _globalLock.acquire()
+                self.animationTime += (self.t - oldt)
+                _globalLock.release()
+            return True
 
     _vis = VisualizationPlugin()        
 
@@ -545,7 +747,7 @@ if glcommon._PyQtAvailable:
     from PyQt4.QtGui import *
     #Qt specific startup
     #need to set up a QDialog and an QApplication
-    _widget = GLPluginProgram()
+    _widget = _BaseClass()
     #_vis.initWindow(self)
     _window = None
     _app = None
@@ -673,6 +875,7 @@ if glcommon._PyQtAvailable:
             time.sleep(0.1)
         _showwindow = old_show_window
         return _custom_run_retval
+
 elif glcommon._GLUTAvailable:
     from OpenGL.GLUT import *
     from glprogram import GLPluginProgram

@@ -6,8 +6,9 @@
 """
 
 import bisect
-import vectorops
+import so3,se3,vectorops
 import spline
+from geodesic import *
 
 class Trajectory:
 	"""A basic piecewise-linear trajectory class, which can be overloaded
@@ -46,6 +47,20 @@ class Trajectory:
 			fout.write('\n')
 		fout.close()
 
+	def startTime(self):
+		"""Returns the initial time."""
+		try: return self.times[0]
+		except IndexError: return 0.0
+		
+	def endTime(self):
+		"""Returns the final time."""
+		try: return self.times[-1]
+		except IndexError: return 0.0
+
+	def duration(self):
+		"""Returns the duration of the trajectory."""
+		return self.endTime()-self.startTime()
+
 	def checkValid(self):
 		"""Checks whether this is a valid trajectory, raises a
 		ValueError if not."""
@@ -65,7 +80,8 @@ class Trajectory:
 	def getSegment(self,t,endBehavior='halt'):
 		"""Returns the index and interpolation parameter for the
 		segment at time t.  If endBehavior='loop' then the trajectory
-		loops forver."""
+		loops forver.  O(log n) time where n is the number of
+		segments."""
 		if len(self.times)==0:
 			raise ValueError("Empty trajectory")
 		if len(self.times)==1:
@@ -152,26 +168,27 @@ class Trajectory:
 					#discard last milestone of self
 					times = self.times[:-1] + [t+offset for t in suffix.times]
 					milestones = self.milestones[:-1] + suffix.milestones
-					return Trajectory(times,milestones)
+					return self.constructor()(times,milestones)
 		times = self.times + [t+offset for t in suffix.times]
 		milestones = self.milestones + suffix.milestones
-		return Trajectory(times,milestones)
+		return self.constructor()(times,milestones)
 
 	def split(self,time):
-		"""Returns two trajectories split at the given time"""
+		"""Returns a pair of trajectories obtained from splitting this
+		one at the given time"""
 		i,u = self.getSegment(time)
 		if time < 0:
-			return Trajectory(),Trajectory()
+			return self.constructor()(),self.constructor()()
 		if time <= self.times[0]:
 			#split before start of trajectory
-			return Trajectory([time],[self.milestones[0]]),Trajectory([time]+self.times,[self.milestones[0]]+self.milestones)
+			return self.constructor()([time],[self.milestones[0]]),self.constructor()([time]+self.times,[self.milestones[0]]+self.milestones)
 		if time >= self.times[-1]:
 			#split after end of trajectory
-			return Trajectory(self.times+[time],self.milestones+[self.milestones[-1]]),trajectory([time],self.milestones[-1])
+			return self.constructor()(self.times+[time],self.milestones+[self.milestones[-1]]),trajectory([time],self.milestones[-1])
 		#split in middle of trajectory
 		splitpt = self.interpolate(self.milestones[i],self.milestones[i+1],u)
-		front = Trajectory(self.times[:i+1],self.milestones[:i+1])
-		back = Trajectory(self.times[i+1:],self.milestones[i+1:])
+		front = self.constructor()(self.times[:i+1],self.milestones[:i+1])
+		back = self.constructor()(self.times[i+1:],self.milestones[i+1:])
 		if u > 0:
 			front.times.append(time)
 			front.milestones.append(splitpt)
@@ -201,6 +218,11 @@ class Trajectory:
 		time = time+offset
 		before = self.before(time)
 		return before.concat(suffix,relative,jumpPolicy)
+	def constructor(self):
+		"""Returns a "standard" constructor for the split / concat
+		routines, a function that takes a list of times and
+		milestones."""
+		return Trajectory
 
 class RobotTrajectory(Trajectory):
 	"""A trajectory that performs interpolation according to the robot's
@@ -212,9 +234,63 @@ class RobotTrajectory(Trajectory):
 		return self.robot.interpolate(a,b,u)
 	def difference(self,a,b,u):
 		return self.robot.interpolate_deriv(b,a)
+	def constructor(self):
+		return lambda time,milestones: RobotTrajectory(self.robot,time,milestones)
+
+class GeodesicTrajectory(Trajectory):
+	"""A trajectory that performs interpolation on a GeodesicSpace.
+	See klampt.geodesic for more information."""
+	def __init__(self,geodesic,times=[],milestones=[]):
+		self.geodesic = geodesic
+		Trajectory.__init__(self,times,milestones)
+	def interpolate(self,a,b,u):
+		return self.geodesic.interpolate(a,b,u)
+	def difference(self,a,b,u):
+		if u > 0.5:
+			#do this from the b side
+			return vectorops.mul(self.difference(b,a,1.0-u),-1.0)
+		x = self.interpolate(a,b,u)
+		return vectorops.mul(self.geodesic.difference(x,b),1.0/(1.0-u))
+	def constructor(self):
+		return lambda times,milestones:GeodesicTrajectory(self.geodesic,times,milestones)
+
+class SO3Trajectory(GeodesicTrajectory):
+	"""A trajectory that performs interpolation in SO3.  Each milestone
+	is a 9-D klampt.so3 element."""
+	def __init__(self,times=[],milestones=[]):
+		GeodesicTrajectory.__init__(self,SO3Space(),times,milestones)
+	def constructor(self):
+		return SO3Trajectory
+
+class SE3Trajectory(GeodesicTrajectory):
+	"""A trajectory that performs interpolation in SE3.  Each milestone
+	is a 12-D flattened klampt.se3 element (i.e., the concatenation of
+	R + t for an (R,t) pair)."""
+	def __init__(self,times=[],milestones=[]):
+		"""Constructor can take either a list of SE3 elements or
+		12-element vectors."""
+		if len(milestones) > 0 and len(milestones[0])==2:
+			GeodesicTrajectory.__init__(self,SE3Space(),times,[m[0]+m[1] for m in milestones])
+		else:
+			GeodesicTrajectory.__init__(self,SE3Space(),times,milestones)
+	def eval_se3(self,t,endBehavior='halt'):
+		"""Returns an SE3 element"""
+		res = self.eval(t,endBehavior)
+		return (res[:9],res[9:])
+	def deriv_se3(self,t,endBehavior='halt'):
+		"""Returns the derivative as the derivatives of an SE3
+		element"""
+		res = self.deriv(t,endBehavior)
+		return (res[:9],res[9:])
+	def constructor(self):
+		return SE3Trajectory
 
 class HermiteTrajectory(Trajectory):
 	"""A trajectory whose milestones are given in phase space (x,dx).
+	
+	eval(t) is overloaded to just get the configuration, and deriv(t) is
+	overloaded to just get the velocity.  To obtain state, use
+	eval_state(t).  To get acceleration, use eval_accel(t).
 	"""
 	def __init__(self,times=[],milestones=[],dmilestones=None):
 		"""If dmilestones is given, then milestones is interpreted
@@ -246,28 +322,42 @@ class HermiteTrajectory(Trajectory):
 				velocities.append(v)
 			#start velocity as quadratic
 			x2 = vectorops.madd(t.milestones[1],velocities[0],-1.0/3.0)
-			x1 = vectorops.madd(x2,vectorops.sub(t.milestones[1],t.milestones[0],-1.0/3.0))
+			x1 = vectorops.madd(x2,vectorops.sub(t.milestones[1],t.milestones[0]),-1.0/3.0)
 			v0 = vectorops.mul(vectorops.sub(x1,t.milestones[0]),3.0)
 			#terminal velocity as quadratic
 			xn_2 = vectorops.madd(t.milestones[-2],velocities[-1],1.0/3.0)
-			xn_1 = vectorops.madd(xn_2,vectorops.sub(t.milestones[-1],t.milestones[-2],1.0/3.0))
+			xn_1 = vectorops.madd(xn_2,vectorops.sub(t.milestones[-1],t.milestones[-2]),1.0/3.0)
 			vn = vectorops.mul(vectorops.sub(t.milestones[-1],xn_1),3.0)
 			velocities = [v0]+velocities+[vn]
 		self.__init__(waypointTrajectory.times[:],waypointTrajectory.milestones,velocities)
 
+	def eval(self,t,endBehavior='halt'):
+		"""Returns just the configuration component of the result"""
+		res = Trajectory.eval(self,t,endBehavior)
+		return res[:len(res)/2]
+
+	def deriv(self,t,endBehavior='halt'):
+		"""Returns the derivative of configuration"""
+		res = Trajectory.eval(self,t,endBehavior)
+		return res[len(res)/2:]
+
+	def eval_state(self,t,endBehavior='halt'):
+		"""Returns the (configuration,velocity) state at time t."""
+		return Trajectory.eval(self,t,endBehavior)
+
 	def eval_config(self,t,endBehavior='halt'):
 		"""Returns just the configuration component of the result"""
-		res = self.eval(t,endBehavior)
+		res = Trajectory.eval(self,t,endBehavior)
 		return res[:len(res)/2]
 	
 	def eval_velocity(self,t,endBehavior='halt'):
 		"""Returns just the velocity component of the result"""
-		res = self.eval(t,endBehavior)
+		res = Trajectory.eval(self,t,endBehavior)
 		return res[len(res)/2:]
 
 	def eval_accel(self,t,endBehavior='halt'):
-		"""Returns just the acceleration component of the result"""
-		res = self.deriv(t,endBehavior)
+		"""Returns just the acceleration component of the derivative"""
+		res = Trajectory.deriv(self,t,endBehavior)
 		return res[len(res)/2:]
 
 	def interpolate(self,a,b,u):
@@ -286,3 +376,5 @@ class HermiteTrajectory(Trajectory):
 		ddx = spline.hermite_deriv(x1,v1,x2,v2,u,order=2)
 		return dx+ddx
 
+	def constructor(self):
+		return HermiteTrajectory
