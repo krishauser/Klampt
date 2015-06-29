@@ -48,15 +48,20 @@ def solve_3R_forward_kinematics(q1,q2,q3,L1=1,L2=1,L3=1):
     return [T1,T2,T3,T4]
 
 def solve_3R_inverse_kinematics(x,y,theta,L1=1,L2=1,L3=1):
-    """TODO: for a planar, 3R manipulator with link lengths L1, L2, L3,
+    """IMPLEMENT ME: for a planar, 3R manipulator with link lengths L1, L2, L3,
     solve for the joint angles (q1,q2,q3) such that the end effector
     is placed at x,y and is oriented along the angle theta.
 
-    In general there will be up to two solutions.  The result is a list of
-    solutions
+    The current implementation is incorrect, and only tries to reach x,y
+    with the second and third joint angle, using 2R manipulator routine
+    presented in class.  Your implementation should correctly place the end
+    effector to be oriented at the angle theta (which will require using all
+    three joint angles).
 
-    The current implementation only tries to reach x,y with the second and
-    third joint angle with the routine presented in class"""
+    In general there will be up to two solutions.  The result is a list of
+    solutions.  Your implementation should correctly return 0 solutions
+    if the request is infeasible.
+    """
     q1,q2,q3 = 0,0,0
     (x1,y1) = (L1*math.cos(q1),L1*math.sin(q1))
     q23s = solve_2R_inverse_kinematics(x-x1,y-y1,L2,L3)
