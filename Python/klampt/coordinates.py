@@ -1,6 +1,9 @@
-import so3,se3,vectorops
-from collections import defaultdict
+"""A module to help manage coordinate frames and objects attached to them."""
 
+import so3,se3,vectorops
+import ik
+from collections import defaultdict
+from robotsim import RobotModelLink,RigidObjectModel
 
 class Frame:
     """Represents some coordinate frame in space."""
@@ -125,7 +128,7 @@ class Point:
     def toWorld(self):
         """Returns a Point representing the same point in space, but
         in the world reference frame"""
-        return Point(worldCoordinates(),None)
+        return Point(self.worldCoordinates(),None)
     def to(self,newframe):
         """Returns a Point representing the same point in space, but
         in a different reference frame"""
@@ -162,7 +165,7 @@ class Direction:
     def toWorld(self):
         """Returns a Direction representing the same direction in space, but
         in the world reference frame"""
-        return Direction(worldCoordinates(),None)
+        return Direction(self.worldCoordinates(),None)
     def to(self,newframe):
         """Returns a Direction representing the same direction in space, but
         in a different reference frame"""
@@ -263,17 +266,35 @@ class Group:
         f = self.addFrame(name,worldCoordinates=simBody.getTransform())
         f._data = simBody
         return
-    def updateFromWorld():
+    def updateFromWorld(self):
         """For any frames with associated world elements, updates the
         transforms from the world elements."""
         for (n,f) in self.frames.iteritems():
             if f._data == None: continue
             if hasattr(f._data,'getTransform'):
-                self.setFrameCoordinates(f,f._data.getTransform(),'world')
+                worldCoordinates = f._data.getTransform()
+                if hasattr(f._data,'getParent'):
+                    p = f._data.getParent()
+                    if p >= 0:
+                        plink = f._data.robot().link(p)
+                        parentCoordinates = plink.getTransform()
+                        f._relativeCoordinates = se3.mul(se3.inv(parentCoordinates),worldCoordinates)
+                    else:
+                        f._relativeCoordinates = worldCoordinates
+                else:
+                    f._relativeCoordinates = worldCoordinates
+                f._worldCoordinates = worldCoordinates
+                #update downstream non-link items
+                for c in self.childLists[f._name]:
+                    if c.data == None or not hasattr(c._data,'getTransform'):
+                        c._worldCoordinates = se3.mul(f._worldCoordinates,c._relativeCoordinates)
+                        self.updateDependentFrames(c)
             if isinstance(f._data,tuple) and isinstance(f._data[0],SimRobotController):
                 controller,index,itemtype = f._data
                 #TODO: update the frame from the controller data
-    def updateToWorld():
+        for (n,g) in self.subgroups.iteritems():
+            g.updateFromWorld()
+    def updateToWorld(self):
         """For any frames with associated world elements, updates the
         transforms of the world elements.  Note: this does NOT perform inverse
         kinematics!"""
@@ -281,6 +302,8 @@ class Group:
             if f.data == None: continue
             if hasattr(f.data,'setTransform'):
                 f.data.setTransform(*f.worldCoordinates())
+        for (n,g) in self.subgroups.iteritems():
+            g.updateToWorld()
     def addFrame(self,name,worldCoordinates=None,parent=None,relativeCoordinates=None):
         """Adds a new named Frame, possibly with a parent.  'parent' may either be a string
         identifying another named Frame in this Group, or it can be a Frame object. (Warning:
@@ -308,7 +331,7 @@ class Group:
         res._name = name
         self.points[name] = res
         return res
-    def addDirection(self,name,coordinates=[0,0,0],frame='world'):
+    def addDirection(self,name,coordinates=[0,0,0],frame='root'):
         if name in self.direction:
             raise ValueError("Direction "+name+" already exists")
         res = self.direction(coordinates,frame)
@@ -341,14 +364,14 @@ class Group:
         for (n,p) in self.points.iteritems():
             if p._parent == f:
                 p._localCoordinates = p.worldCoordinates()
-                p._parent = self.frames['world']
+                p._parent = self.frames['root']
         for (n,p) in self.directions.iteritems():
             if p._parent == f:
                 p._localCoordinates = p.worldCoordinates()
-                p._parent = self.frames['world']
+                p._parent = self.frames['root']
         for c in self.childLists[name]:
             p._relativeCoordinates = p._worldCoordinates
-            p._parent = self.frames['world']
+            p._parent = self.frames['root']
         del self.frames[name]
         del self.childLists[name]
     def deletePoint(self,name):
@@ -361,30 +384,37 @@ class Group:
         """Sets the coordinates of the frame, given as an se3 element.
         The coordinates can be given either in 'relative' mode, where the
         coordinates are the natural coordinates of the frame relative to
-        its parent, or they can be given relative to any other frame in
-        this coordinate Manager."""
-        f = self.frames[name]
+        its parent, or in 'world' mode, where the coordinates are the
+        global world coordinates, or they can be given relative to any
+        other frame in this coordinate Group.  If None, this defaults
+        to the root frame of this Group."""
+        f = self.frame(name)
         if parent==None:
             parent = 'root'
         if isinstance(parent,str):
             if parent=='relative':
                 parent = f._parent
+            elif parent=='world':
+                parent = None
             else:
                 parent = self.frames[parent]
-        worldCoordinates = se3.mul(parent._worldCoordinates,coordinates)
+        if parent:
+            worldCoordinates = se3.mul(parent._worldCoordinates,coordinates)
+        else:
+            worldCoordinates = coordinates
         if parent == f._parent:
             f._relativeCoordinates = coordinates
         else:
             f._relativeCoordinates = se3.mul(se3.inv(f._parent._worldCoordinates),worldCoordinates)
         f._worldCoordinates = worldCoordinates
-        self.updateDependentFrames(self,f)
+        self.updateDependentFrames(f)
     def updateDependentFrames(self,frame):
         """Whenever Frame's world coordinates are updated, call this to update
         the downstream frames. This will be called automatically via
         setFrameCoordinates but not if you change a Frame's coordinates
         manually."""
         for c in self.childLists[frame._name]:
-            c._worldCoordinates = se3.mul(f.worldCoordinates,c._relativeCoordinates)
+            c._worldCoordinates = se3.mul(frame._worldCoordinates,c._relativeCoordinates)
             self.updateDependentFrames(c)
     def frame(self,name):
         """Retrieves a named Frame."""
@@ -433,25 +463,25 @@ class Group:
         """Converts a Transform, Point, or Direction to have coordinates
         relative to the given frame 'frame'."""
         return object.to(self.frame(frame))
-    def transform(self,sourceFrame,destFrame='world'):
+    def transform(self,sourceFrame,destFrame='root'):
         """Makes a Transform object from the source frame to the destination
         frame. """
         return Transform(self.frame(sourceFrame),self.frame(testFrame))
-    def point(self,coordinates=[0,0,0],frame='world'):
+    def point(self,coordinates=[0,0,0],frame='root'):
         """Makes a Point object with the given local coordinates in the given 
         frame. Does not add it to the list of managed points."""
         return Point(coordinates,self.frame(frame))
-    def direction(self,coordinates=[0,0,0],frame='world'):
+    def direction(self,coordinates=[0,0,0],frame='root'):
         """Makes a Direction object with the given local coordinates in the
         given frame. Does not add it to the list of managed points."""
         return Direction(coordinates,self.frame(frame))
-    def pointFromWorld(self,worldCoordinates=[0,0,0],frame='world'):
-        """Alias for to(point(worldCoordinates,'world'),frame)"""
+    def pointFromWorld(self,worldCoordinates=[0,0,0],frame='root'):
+        """Alias for to(point(worldCoordinates,'root'),frame)"""
         f = self.frame(frame)
         local = se3.apply(se3.inv(f._worldCoordinates),worldCoordinates)
         return Point(local,f)
     def directionFromWorld(self,worldCoordinates=[0,0,0],frame='world'):
-        """Alias for to(direction(worldCoordinates,'world'),frame)"""
+        """Alias for to(direction(worldCoordinates,'root'),frame)"""
         f = self.frame(frame)
         local = so3.apply(so3.inv(f._worldCoordinates[0]),worldCoordinates)
         return Direction(local,f)
@@ -511,3 +541,123 @@ point = _callfn("point")
 direction = _callfn("direction")
 pointFromWorld = _callfn("pointFromWorld")
 directionFromWorld = _callfn("directionFromWorld")
+
+
+
+
+def _ancestor_with_link(frame):
+    """Returns the nearest ancestor of the given frame attached to a robot
+    link or rigid object"""
+    while frame and (frame._data == None or not isinstance(frame._data,(RobotModelLink,RigidObjectModel))):
+        frame = frame._parent
+    return frame
+    
+def ik_objective(obj,target):
+    """Returns an IK objective that attempts to fix the given
+    klampt.coordinates object 'obj' at given target object 'target'. 
+
+    Arguments:
+     - obj: An instance of one of the
+       {Point,Direction,Transform,Frame} classes.
+     - target: If 'obj' is a Point, Direction, or  Frame objects, this
+       must be an object of the same type of 'obj' denoting the target to
+       which 'obj' should be fixed.  In other words, the local coordinates
+       of 'obj' relative to 'target's parent frame will be equal to 'target's
+       local coordinates.
+       If obj is a Transform object, this element is an se3 object.
+    Return value:
+     - An IK objective to be used with the klampt.ik module.
+
+    Since the klampt.ik module is not aware about custom frames, an
+    ancestor of the object must be attached to a RobotModelLink or a
+    RigidObjectModel, or else None will be returned.  The same goes for target,
+    if provided.
+
+    TODO: support lists of objects to fix.
+
+    TODO: support Direction constraints.
+    """
+    body = None
+    coords = None
+    ref = None
+    if isinstance(obj,Frame):
+        assert isinstance(target,Frame),"ik_objective: target must be of same type as obj"
+        body = obj
+        ref = target.parent()
+        coords = target.relativeCoordinates()
+    elif isinstance(obj,Transform):
+        if ref != None: print "ik_objective: Warning, ref argument passed with Transform object, ignoring"
+        body = obj.source()
+        ref = obj.destination()
+        coords = target
+    elif isinstance(obj,(Point,Direction)):
+        assert type(target)==type(obj),"ik_objective: target must be of same type as obj"
+        body = obj.frame()
+        ref = target.frame()
+        coords = target.localCoordinates()
+    else:
+        raise ValueError("Argument to ik_objective must be an object from the coordinates module")
+    
+    linkframe = _ancestor_with_link(body)
+    if linkframe == None:
+        print "Warning: object provided to ik_objective is not attached to a robot link or rigid object, returning None"
+        return None
+    linkbody = linkframe._data
+
+    #find the movable frame attached to ref
+    refframe = _ancestor_with_link(ref) if ref != None else None
+    refbody = (refframe._data if refframe!=None else None)
+    if isinstance(obj,(Frame,Transform)):
+        #figure out the desired transform T[linkbody->refbody], given
+        #coords = T[obj->ref], T[obj->linkbody], T[ref->refbody]
+        #result = (T[ref->refbody] * coords * T[obj->linkbody]^-1)
+        if linkframe != body: coords = se3.mul(coords,Transform(linkframe,body).coordinates())
+        if refframe != ref: coords = se3.mul(Transform(ref,refframe).coordinates(),coords)
+        return ik.objective(linkbody,ref=refbody,R=coords[0],t=coords[1])
+    elif isinstance(obj,Point):
+        #figure out the local and world points
+        local = obj.to(linkframe).localCoordinates()
+        world = target.to(refframe).localCoordinates()
+        return ik.objective(linkbody,local=[local],world=[world])
+    elif isinstance(obj,Direction):
+        raise ValueError("Axis constraints are not yet supported in the klampt.ik module")
+    return None
+
+    
+
+def ik_fixed_objective(obj,ref=None):
+    """Returns an IK objective that attempts to fix the given
+    klampt.coordinates object at its current pose.  If ref=None,
+    its pose is fixed in world coordinates.  Otherwise, its pose is fixed
+    relative to the reference frame ref.
+
+    Arguments:
+     - obj: An instance of one of the
+       {Point,Direction,Transform,Frame} classes.
+     - ref: either None, or a Frame object denoting the reference frame
+       to which the object should be fixed.  (If obj is a Transform object,
+       its destination frame is used as the reference frame, and this argument
+       is ignored.)
+    Return value:
+     - An IK objective to be used with the klampt.ik module.  For
+       Point, Direction, and Frame objects this objective fixes the
+       object coordinates relative to the ref frame, or the world if None frame
+       is provided.  For Transform objects the source frame is fixed
+       relative to the destination frame.
+
+    Since the klampt.ik module is not aware about custom frames, an
+    ancestor of the object must be attached to a RobotModelLink or a
+    RigidObjectModel, or else None will be returned.  The same goes for ref,
+    if provided.
+
+    TODO: support lists of objects to fix.
+
+    TODO: support Direction constraints.
+    """
+    if isinstance(obj,(Frame,Point,Direction)):
+        return ik_objective(obj,obj.to(ref))
+    elif isinstance(obj,Transform):
+        if ref != None: print "ik_fixed_objective: Warning, ref argument passed with Transform object, ignoring"
+        return ik_objective(obj,obj.coordnates())
+    else:
+        raise ValueError("Argument to ik_fixed_objective must be an object from the coordinates module")
