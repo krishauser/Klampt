@@ -29,6 +29,17 @@ directly constrain the translation/rotation of the link via the form:
 which will keep the orientation of the link constant, while setting its
 position.
 
+A convenience function is ik.fixed_objective(link) which fixes the position
+of the link in its current position/orientation in world coordinates.
+Individual points on the link can be constrained to their coordinates using
+the local argument, as follows:
+
+    ik.fixed_objective(link,local=[p1,p2,p3])
+
+or if you prefer to give world coordinates, like so:
+
+    ik.fixed_objective(link,world=[q1,q2,q3])
+
 More advanced usage can constrain a link to another link using the ref
 argument to ik.objective().  You may also pass multiple goals to ik.solve().
 
@@ -49,6 +60,7 @@ is not yet implemented and will result in a thrown exception.
 """
 
 from robotsim import *
+from coordinates import Point,Direction,Frame,Transform
 
 def objective(body,ref=None,local=None,world=None,R=None,t=None):
     """Returns an IKObjective or GeneralizedIKObjective for a given body.
@@ -118,6 +130,25 @@ def objective(body,ref=None,local=None,world=None,R=None,t=None):
         else:
             raise RuntimeError("Need to specify either local and world or R and t")
         return obj
+
+
+def fixed_objective(link,ref=None,local=None,world=None):
+    """Convenience function for fixing the given link at the current position
+    in space.  If local and world are not provided, the entire"""
+    refcoords = ref.getTransform() if ref != None else se3.identity()
+    Tw = link.getTransform()
+    Trel = se3.mul(se3.inv(refcoords),Tw)
+    if local == None and world == None:
+        return objective(link,ref,R=Trel[0],t=Trel[1])
+    elif local == None:
+        Trelinv = se3.inv(Trel)
+        local = [se3.apply(trelinv,p) for p in world]
+        return objective(link,ref,local=local,world=world)
+    elif world == None:
+        world = [se3.apply(Trel,p) for p in local]
+        return objective(link,ref,local=local,world=world)
+    else:
+        raise ValueError("ik.fixed_objective does not accept both local and world keyword arguments")
 
 def objects(objectives):
     """Returns a list of all objects touched by the given objective(s).
