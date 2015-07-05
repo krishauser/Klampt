@@ -29,7 +29,7 @@ class RobotCSpace(AdaptiveCSpace):
     def sample(self):
         """Overload this to implement custom sampling strategies or to handle
         non-standard joints"""
-        AdaptiveCSpace.sample(self)
+        return AdaptiveCSpace.sample(self)
 
     def feasible(self,x):
         """Feasibility test.  If self.adaptive=True, uses the adaptive
