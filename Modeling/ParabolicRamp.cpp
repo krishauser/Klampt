@@ -1348,18 +1348,22 @@ void ParabolicRamp1D::SetLinear(Real _x0,Real _x1,Real t)
 Real ParabolicRamp1D::Evaluate(Real t) const
 {
   Real tmT = t - ttotal;
-  if(t < tswitch1) return x0 + 0.5*a1*t*t + dx0*t;
+  if(t < 0) return x0;
+  else if(t < tswitch1) return x0 + 0.5*a1*t*t + dx0*t;
   else if(t < tswitch2) {
     Real xswitch = x0 + 0.5*a1*tswitch1*tswitch1 + dx0*tswitch1;
     return xswitch + (t-tswitch1)*v;
   }
+  else if(t >= ttotal) return x1;
   else return x1 + 0.5*a2*tmT*tmT + dx1*tmT;
 }
 
 Real ParabolicRamp1D::Derivative(Real t) const
 {
-  if(t < tswitch1) return a1*t + dx0;
+  if(t < 0) return dx0;
+  else if(t < tswitch1) return a1*t + dx0;
   else if(t < tswitch2) return v;
+  else if(t >= ttotal) return dx1;
   else {
     Real tmT = t - ttotal;
     return a2*tmT + dx1;
@@ -1368,8 +1372,10 @@ Real ParabolicRamp1D::Derivative(Real t) const
 
 Real ParabolicRamp1D::Accel(Real t) const
 {
-  if(t < tswitch1) return a1;
+  if(t < 0) return 0;
+  else if(t < tswitch1) return a1;
   else if(t < tswitch2) return 0;
+  else if(t >= ttotal) return 0;
   else return a2;
 }
 
