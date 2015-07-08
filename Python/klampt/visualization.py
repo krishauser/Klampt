@@ -82,7 +82,12 @@ def setPlugin(plugin):
     if _vis==None:
         print "Visualization disabled"
         return
-    _vis.setPlugin(plugin)
+    if glcommon._PyQtAvailable:
+        global _widget
+        _widget.setPlugin(plugin)
+    elif glcommon._GLUTAvailable:
+        global _app
+        _app.setPlugin(plugin)
 
 def dialog():
     global _vis

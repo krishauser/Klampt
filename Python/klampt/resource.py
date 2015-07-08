@@ -393,7 +393,7 @@ if glcommon._PyQtAvailable:
     def _makeDialog(editorObject):
         global _dialog
         if _dialog == None:
-            _dialog=_MyDialog(visualization._vis)
+            _dialog=_MyDialog(visualization._widget)
         _dialog.setEditor(editorObject)
         res = _dialog.exec_()
         retVal = _dialog.finish()
