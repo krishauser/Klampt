@@ -112,7 +112,7 @@ class ControllerAPI:
     def sensorValue(self,sensor):
         """Returns the value of the named sensor."""
         try: return self.inputs[sensor]
-        except KeyError: reutrn None
+        except KeyError: return None
     def makePositionCommand(self,q):
         return {'qcmd':q}
     def makePIDCommand(self,q,dq):
@@ -122,7 +122,7 @@ class ControllerAPI:
     def makeVelocityCommand(self,dq,t):
         return {'dqcmd':dq,'tcmd':t}
     def makeTorqueCommand(self,torque):
-        return {'torquecmd':t}
+        return {'torquecmd':torque}
     def setPositionCommand(self,value):
         self.retval['qcmd'] = value
     def setPIDCommand(self,q,dq):
@@ -169,7 +169,7 @@ class ControllerAPI:
             self.retval['dqcmd'] = self.inputs['dqcmd']
             self.retval['dqcmd'][index] = value
     def makeCommand(self):
-        """Returns the command from previous setXCommand() calls."
+        """Returns the command from previous setXCommand() calls."""
         return self.retval
 
 
