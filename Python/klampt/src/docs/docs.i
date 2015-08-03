@@ -275,9 +275,20 @@ Geometry3D::withinDistance(const Geometry3D &other, double tol) ";
 Geometry3D::distance(const Geometry3D &other, double relErr=0, double
 absErr=0) ";
 
+%feature("docstring")  Geometry3D::closestPoint "bool
+Geometry3D::closestPoint(const double pt[3], double out[3])
+
+Returns (success,cp) giving the closest point to the input point.
+success is false if that operation is not supported with the given
+geometry type. cp are given in world coordinates. ";
+
 %feature("docstring")  Geometry3D::rayCast "bool
 Geometry3D::rayCast(const double s[3], const double d[3], double
-out[3]) ";
+out[3])
+
+Returns (hit,pt) where hit is true if the ray starting at s and
+pointing in direction d hits the geometry (given in world
+coordinates); pt is the hit point, in world coordinates. ";
 
 
 // File: classIKObjective.xml
@@ -1292,6 +1303,19 @@ SimRobotController::setManualMode(bool enabled)
 
 Turns on/off manual mode, if either the setTorque or setPID command
 were previously set. ";
+
+%feature("docstring")  SimRobotController::getControlType "std::string SimRobotController::getControlType()
+
+Returns the control type for the active controller valid values are:
+unknown
+
+off
+
+torque
+
+PID
+
+locked_velocity ";
 
 %feature("docstring")  SimRobotController::setPIDGains "void
 SimRobotController::setPIDGains(const std::vector< double > &kP, const
