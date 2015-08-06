@@ -226,10 +226,21 @@ def solver(objectives):
 
 def solve(objectives,iters=1000,tol=1e-3):
     """Attempts to solve the given objective(s). Either a single objective
-    or a list of objectives can be provided.
+    or a list of simultaneous objectives can be provided.
 
-    Returns true if a solution is successfully found to the given tolerance,
-    within the provided number of iterations.
+    Arguments:
+        - objectives: either a single IKObjective or a list of IKObjectives.
+        - iters: a maximum number of iterations.
+        - tol: a maximum error tolerance on satisfying the objectives
+
+    Returns True if a solution is successfully found to the given tolerance,
+    within the provided number of iterations.  The robot(s) are then set
+    to the solution configuration.  If a solution is not found, False is
+    returned and the robot(s) are set to the best found configuration.
+
+    This function will be smart about multiple objects / robots.  If the
+    objectives are on disjoint robots then disjoint IK problems will be
+    solved individually, which is fater.
     
     (The objectives should be a result from the :func:`objective` function.
     Beware that if you are making your own goals by calling the IKObjective
@@ -250,3 +261,86 @@ def residual(objectives):
 def jacobian(objectives):
     """Returns the jacobian of the given objectives."""
     return solver(objectives).getJacobian()
+
+
+def solve_global(objectives,iters=1000,tol=1e-3,numRestarts=100,feasibilityCheck=None,startRandom=False):
+    """Attempts to solve the given objective(s) but avoids local minima
+    to some extent using a random-restart technique.  
+        
+    Arguments: same as :func:`solve` except for...
+    - numRestarts: the number of random restarts.  The larger this is, the more
+      likely a solution will be found, but if no solution exists, the routine
+      will take more time.
+    - feasibilityCheck: if provided, it will be a function that takes no
+      arguments and returns True if the robot/world in the current
+      configuration is feasible, and False otherwise.
+    - startRandom: True if you wish to forgo the robot's current configuration
+      and start from random initial configurations
+
+    Returns true if a feasible solution is successfully found to the given
+    tolerance, within the provided number of iterations.
+    """
+    if feasibilityCheck==None: feasibilityCheck=lambda : True
+    s = solver(objectives)
+    if hasattr(s,'__iter__'):
+        if not startRandom:
+            res = [si.solve(iters,tol)[0] for si in s]
+            if all(res):
+                if feasibilityCheck():
+                    return True
+        for i in xrange(numRestarts):
+            for si in s:
+                si.sampleInitial()
+            res = [si.solve(iters,tol)[0] for si in s]
+            if all(res):
+                if feasibilityCheck():
+                    return True
+        return False
+    else:
+        if not startRandom:
+            if s.solve(iters,tol)[0]:
+                if feasibilityCheck():
+                    return True
+        for i in xrange(numRestarts):
+            s.sampleInitial()
+            if s.solve(iters,tol)[0]:
+                if feasibilityCheck():
+                    return True
+        return False
+
+def solve_nearby(objectives,maxDeviation,iters=1000,tol=1e-3,numRestarts=0,feasibilityCheck=None):
+    """Solves for an IK solution that does not deviate too far from the
+    initial configuration.
+
+    Note: currently only supports single-robot objectives!
+    
+    Arguments: same as :func:`solve_global` except for...
+    - maxDeviation: the maximum absolute amount in configuration space that
+      each configuration element is allowed to change.
+    - numRestarts: same as in solve_global, but is by default set to zero.
+    """
+    s = solver(objectives)
+    if not isinstance(s,IKSolver):
+        raise NotImplementedError("solve_nearby: currently only supports single-robot objectives")
+    if hasattr(objectives,'__iter__'):
+        robot = objectives[0].robot
+    else:
+        robot = objectives.robot
+    #set up the joint limits
+    dofs = s.getActiveDofs()
+    q = robot.getConfig()
+    qmin,qmax = robot.getJointLimits()
+    for d in dofs:
+        qmin[d] = max(qmin[d],q[d]-maxDeviation)
+        qmax[d] = min(qmax[d],q[d]+maxDeviation)
+    s.setJointLimits(qmin,qmax)
+    #start solving
+    if s.solve(iters,tol)[0]:
+        if feasibilityCheck():
+            return True
+    for i in xrange(numRestarts):
+        s.sampleInitial()
+        if s.solve(iters,tol)[0]:
+            if feasibilityCheck():
+                return True
+    return False
