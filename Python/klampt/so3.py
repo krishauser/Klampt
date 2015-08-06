@@ -2,7 +2,14 @@
 represented by a 9-list specifying the entries of the rotation matrix
 in column major form.
 
-These are useful for interfacing with C code.
+In other words, given a 3x3 matrix
+   [a11,a12,a13]
+   [a21,a22,a23]
+   [a31,a32,a33],
+Klamp't represents the matrix as a list [a11,a21,a31,a12,a22,a32,a13,a23,a33].
+
+The reasons for this representation are 1) simplicity, and 2) a more
+convenient interface with C code.
 """
 
 import math
@@ -133,6 +140,65 @@ def from_moment(w):
     length = vectorops.norm(w)
     if length < 1e-7: return identity()
     return rotation(vectorops.mul(w,1.0/length),length)
+
+def from_quaternion(q):
+    """Given a unit quaternion (x,y,z,w), produce the corresponding rotation
+    matrix."""
+    x,y,z,w = q
+    x2 = x + x; y2 = y + y; z2 = z + z;
+    xx = x * x2;   xy = x * y2;   xz = x * z2;
+    yy = y * y2;   yz = y * z2;   zz = z * z2;
+    wx = w * x2;   wy = w * y2;   wz = w * z2;
+
+    a11 = 1.0 - (yy + zz)
+    a12 = xy - wz
+    a13 = xz + wy
+    a21 = xy + wz
+    a22 = 1.0 - (xx + zz)
+    a23 = yz - wx
+    a31 = xz - wy
+    a32 = yz + wx
+    a33 = 1.0 - (xx + yy)
+    return [a11,a21,a31,a12,a22,a32,a13,a23,a33]
+
+def quaternion(R):
+    """Given a Klamp't rotation representation, produces the corresponding
+    unit quaternion (x,y,z,w)."""
+    tr = trace(R) + 1.0;
+    a11,a21,a31,a12,a22,a32,a13,a23,a33 = R
+
+    #If the trace is nonzero, it's a nondegenerate rotation
+    if tr > 1e-5:
+        s = math.sqrt(tr)
+        w = s * 0.5
+        s = 0.5 / s
+        x = (a32 - a23) * s
+        y = (a13 - a31) * s
+        z = (a21 - a12) * s
+        return vectorops.unit((x,y,z,w))
+    else:
+        #degenerate it's a rotation of 180 degrees
+        nxt = [1, 2, 0]
+        #check for largest diagonal entry
+        i = 0
+        if a22 > a11: i = 1
+        if a33 > max(a11,a22): i = 2
+        j = nxt[i]
+        k = nxt[j]
+        M = matrix(R)
+
+        q = [0.0]*4
+        s = math.sqrt((M[i][i] - (M[j][j] + M[k][k])) + 1.0);
+        q[i] = s * 0.5
+    
+        if abs(s)<1e-7:
+            raise ValueError("Could not solve for quaternion... Invalid rotation matrix?")
+        else:
+            s = 0.5 / s;
+            q[3] = (M[k][j] - M[j][k]) * s;
+            q[j] = (M[i][j] + M[j][i]) * s;
+            q[k] = (M[i][k] + M[i][k]) * s;
+        return vectorops.unit(q)
     
 def distance(R1,R2):
     """Returns the absolute angle one would need to rotate in order to get
