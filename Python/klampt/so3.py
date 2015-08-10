@@ -142,9 +142,9 @@ def from_moment(w):
     return rotation(vectorops.mul(w,1.0/length),length)
 
 def from_quaternion(q):
-    """Given a unit quaternion (x,y,z,w), produce the corresponding rotation
+    """Given a unit quaternion (w,x,y,z), produce the corresponding rotation
     matrix."""
-    x,y,z,w = q
+    w,x,y,z = q
     x2 = x + x; y2 = y + y; z2 = z + z;
     xx = x * x2;   xy = x * y2;   xz = x * z2;
     yy = y * y2;   yz = y * z2;   zz = z * z2;
@@ -175,7 +175,7 @@ def quaternion(R):
         x = (a32 - a23) * s
         y = (a13 - a31) * s
         z = (a21 - a12) * s
-        return vectorops.unit((x,y,z,w))
+        return vectorops.unit((w,x,y,z))
     else:
         #degenerate it's a rotation of 180 degrees
         nxt = [1, 2, 0]
@@ -198,7 +198,8 @@ def quaternion(R):
             q[3] = (M[k][j] - M[j][k]) * s;
             q[j] = (M[i][j] + M[j][i]) * s;
             q[k] = (M[i][k] + M[i][k]) * s;
-        return vectorops.unit(q)
+        x,y,z,w = q[3],q[0],q[1],q[2]
+        return vectorops.unit([w,x,y,z])
     
 def distance(R1,R2):
     """Returns the absolute angle one would need to rotate in order to get
