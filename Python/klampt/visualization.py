@@ -15,6 +15,8 @@ The main interface is as follows:
 
 def setWindowTitle(title): sets the title of the visualization window.
 def getWindowtitle(): returns the title of the visualization window
+def kill(): kills all previously launched visualizations.  Afterwards, you may not
+    be able to start new windows. Call this to cleanly quit.
 def dialog(): pops up a dialog box (does not return to calling
     thread until closed).
 def show(visible=True): shows or hides a visualization window run
@@ -388,6 +390,70 @@ def setItemConfig(item,vector):
             return res
     return item
 
+class CachedGLObject:
+    """An object whose drawing is accelerated by means of a display list.
+    The draw function may draw the object in the local frame, and the
+    object may be transformed without having to recompile the display list.
+    """
+    def __init__(self):
+        self.name = ""
+        #OpenGL display list
+        self.glDisplayList = None
+        #marker for recursive calls
+        self.makingDisplayList = False
+        #parameters for display lists
+        self.displayListParameters = None
+        #dirty bit to indicate whether the display list should be recompiled
+        self.changed = False
+
+    def destroy(self):
+        """Must be called to free up resources used by this object"""
+        if self.glDisplayList != None:
+            glDeleteLists(self.glDisplayList,1)
+            self.glDisplayList = None
+
+    def markChanged(self):
+        """Marked by an outside source to indicate the object has changed and
+        should be redrawn."""
+        self.changed = True
+    
+    def draw(self,renderFunction,transform=None,parameters=None):
+        """Given the function that actually makes OpenGL calls, this
+        will draw the object.
+
+        If parameters is given, the object's local appearance is assumed
+        to be defined deterministically from these parameters.  The display
+        list will be redrawn if the parameters change.
+        """
+        if self.makingDisplayList:
+            renderFunction()
+            return
+        if self.glDisplayList == None or self.changed or parameters != self.displayListParameters:
+            self.displayListParameters = parameters
+            self.changed = False
+            if self.glDisplayList == None:
+                print "Generating new display list",self.name
+                self.glDisplayList = glGenLists(1)
+            print "Compiling display list",self.name
+            if transform:
+                glPushMatrix()
+                glMultMatrixf(sum(zip(*se3.homogeneous(transform)),()))
+            
+            glNewList(self.glDisplayList,GL_COMPILE_AND_EXECUTE)
+            self.makingDisplayList = True
+            renderFunction()
+            self.makingDisplayList = False
+            glEndList()
+
+            if transform:
+                glPopMatrix()
+        else:
+            if transform:
+                glPushMatrix()
+                glMultMatrixf(sum(zip(*se3.homogeneous(transform)),()))
+            glCallList(self.glDisplayList)
+            if transform:
+                glPopMatrix()
 
 class VisAppearance:
     def __init__(self,item,name = None):
@@ -403,14 +469,9 @@ class VisAppearance:
         self.attributes = {}
         #used for Qt text rendering
         self.widget = None
-        #OpenGL display list
-        self.glDisplayList = None
-        #marker for recursive calls
-        self.makingDisplayList = False
-        #parameters for display lists
-        self.displayListParameters = None
-        #dirty bit to indicate whether the display list should be recompiled
-        self.changed = False
+        #cached drawing
+        self.displayCache = [CachedGLObject()]
+        self.displayCache[0].name = name
         #temporary configuration of the item
         self.drawConfig = None
         self.setItem(item)
@@ -431,14 +492,14 @@ class VisAppearance:
             a.attributes = self.attributes
             
     def markChanged(self):
-        self.changed = True
+        for c in self.displayCache:
+            c.markChanged()
         for (k,a) in self.subAppearances.iteritems():
-            a.changed = True
+            a.markChanged()
 
     def destroy(self):
-        if self.glDisplayList != None:
-            glDeleteLists(self.glDisplayList,1)
-            self.glDisplayList = None
+        for c in self.displayCache:
+            c.destroy()
         for (k,a) in self.subAppearances.iteritems():
             a.destroy()
         self.subAppearances = {}
@@ -447,37 +508,6 @@ class VisAppearance:
         """Draws the given text at the given point"""
         if self.attributes.get("text_hidden",False): return
         self.widget.addLabel(text,point,[0,0,0])
-
-    def cachedDraw(self,drawFunction,transform=None,parameters=None):
-        if self.makingDisplayList:
-            drawFunction()
-            return
-        if self.glDisplayList == None or self.changed or parameters != self.displayListParameters:
-            self.displayListParameters = parameters
-            self.changed = False
-            if self.glDisplayList == None:
-                print "Generating new display list",self.name
-                self.glDisplayList = glGenLists(1)
-            #print "Compiling display list",self.name
-            if transform:
-                glPushMatrix()
-                glMultMatrixf(sum(zip(*se3.homogeneous(transform)),()))
-            
-            glNewList(self.glDisplayList,GL_COMPILE_AND_EXECUTE)
-            self.makingDisplayList = True
-            drawFunction()
-            self.makingDisplayList = False
-            glEndList()
-
-            if transform:
-                glPopMatrix()
-        else:
-            if transform:
-                glPushMatrix()
-                glMultMatrixf(sum(zip(*se3.homogeneous(transform)),()))
-            glCallList(self.glDisplayList)
-            if transform:
-                glPopMatrix()
 
     def update(self,t):
         if not self.animation:
@@ -537,7 +567,7 @@ class VisAppearance:
                 glEnd()
                 glEnable(GL_DEPTH_TEST)
                 #write name
-            self.cachedDraw(drawRaw,[so3.identity(),item.worldCoordinates()])
+            self.displayCache[0].draw(drawRaw,[so3.identity(),item.worldCoordinates()])
             if name != None:
                 self.drawText(name,vectorops.add(item.worldCoordinates(),[0,0,-0.05]))
         elif isinstance(item,coordinates.Direction):
@@ -553,7 +583,7 @@ class VisAppearance:
                 glEnd()
                 glEnable(GL_DEPTH_TEST)
                 #write name
-            self.cachedDraw(drawRaw,item.frame().worldCoordinates(),parameters = item.localCoordinates())
+            self.displayCache[0].draw(drawRaw,item.frame().worldCoordinates(),parameters = item.localCoordinates())
             if name != None:
                 self.drawText(name,vectorops.add(vectorops.add(item.frame().worldCoordinates()[1],item.worldCoordinates()),[0,0,-0.05]))
         elif isinstance(item,coordinates.Frame):
@@ -585,7 +615,7 @@ class VisAppearance:
 
             #For some reason, cached drawing is causing OpenGL problems
             #when the frame is rapidly changing
-            #self.cachedDraw(drawRaw,transform=tp, parameters = tlocal)
+            #self.displayCache[0].draw(drawRaw,transform=tp, parameters = tlocal)
             glPushMatrix()
             glMultMatrixf(sum(zip(*se3.homogeneous(tp)),()))
             drawRaw()
@@ -611,7 +641,7 @@ class VisAppearance:
                 gldraw.hermite_curve(t1[1],v1,t2[1],v2,0.03)
                 glEnable(GL_DEPTH_TEST)
                 #write name at curve
-            self.cachedDraw(drawRaw,transform=None,parameters = (t1,t2))
+            self.displayCache[0].draw(drawRaw,transform=None,parameters = (t1,t2))
             if name != None:
                 self.drawText(name,spline.hermite_eval(t1[1],v1,t2[1],v2,0.5))
         else:
@@ -658,15 +688,137 @@ class VisAppearance:
                     glBegin(GL_POINTS)
                     glVertex3f(0,0,0)
                     glEnd()
-                self.cachedDraw(drawRaw,[so3.identity(),item])
+                self.displayCache[0].draw(drawRaw,[so3.identity(),item])
                 if name != None:
                     self.drawText(name,vectorops.add(item,[0,0,-0.05]))
             elif types == 'RigidTransform':
                 def drawRaw():
                     gldraw.xform_widget(se3.identity(),self.attributes.get("length",0.1),self.attributes.get("width",0.01))
-                self.cachedDraw(drawRaw,transform=item)
+                self.displayCache[0].draw(drawRaw,transform=item)
                 if name != None:
                     self.drawText(name,se3.apply(item,[-0.05]*3))
+            elif types == 'IKGoal':
+                if hasattr(item,'robot'):
+                    #need this to be built with a robot element.
+                    #Otherwise, can't determine the correct transforms
+                    robot = item.robot
+                elif world:
+                    robot = world.robot(0)
+                else:
+                    robot = None
+                if robot != None:
+                    link = robot.link(item.link())
+                    dest = robot.link(item.destLink()) if item.destLink()>=0 else None
+                    while len(self.displayCache) < 3:
+                        self.displayCache.append(CachedGLObject())
+                    if item.numPosDims() != 0:
+                        lp,wp = item.getPosition()
+                        #set up parameters of connector
+                        p1 = se3.apply(link.getTransform(),lp)
+                        if dest != None:
+                            p2 = se3.apply(dest.getTransform(),wp)
+                        else:
+                            p2 = wp
+                        d = vectorops.distance(p1,p2)
+                        v1 = [0.0]*3
+                        v2 = [0.0]*3
+                        if item.numRotDims()==3: #full constraint
+                            R = item.getRotation()
+                            def drawRaw():
+                                gldraw.xform_widget(se3.identity(),self.attributes.get("length",0.1),self.attributes.get("width",0.01))
+                            t1 = se3.mul(link.getTransform(),(so3.identity(),lp))
+                            t2 = (R,wp) if dest==None else se3.mul(dest.getTransform(),(R,wp))
+                            self.displayCache[0].draw(drawRaw,transform=t1)
+                            self.displayCache[1].draw(drawRaw,transform=t2)
+                            vlen = d*0.1
+                            v1 = so3.apply(t1[0],[-vlen]*3)
+                            v2 = so3.apply(t2[0],[vlen]*3)
+                        elif item.numRotDims()==0: #point constraint
+                            def drawRaw():
+                                glDisable(GL_LIGHTING)
+                                glEnable(GL_POINT_SMOOTH)
+                                glPointSize(self.attributes.get("size",5.0))
+                                glColor4f(*self.attributes.get("color",[0,0,0,1]))
+                                glBegin(GL_POINTS)
+                                glVertex3f(0,0,0)
+                                glEnd()
+                            self.displayCache[0].draw(drawRaw,transform=(so3.identity(),p1))
+                            self.displayCache[1].draw(drawRaw,transform=(so3.identity(),p2))
+                            #set up the connecting curve
+                            vlen = d*0.5
+                            d = vectorops.sub(p2,p1)
+                            v1 = vectorops.mul(d,0.5)
+                            #curve in the destination
+                            v2 = vectorops.cross((0,0,0.5),d)
+                        else: #hinge constraint
+                            p = [0,0,0]
+                            d = [0,0,0]
+                            def drawRawLine():
+                                glDisable(GL_LIGHTING)
+                                glEnable(GL_POINT_SMOOTH)
+                                glPointSize(self.attributes.get("size",5.0))
+                                glColor4f(*self.attributes.get("color",[0,0,0,1]))
+                                glBegin(GL_POINTS)
+                                glVertex3f(*p)
+                                glEnd()
+                                glColor4f(*self.attributes.get("color",[0.5,0,0.5,1]))
+                                glLineWidth(self.attributes.get("width",3.0))
+                                glBegin(GL_LINES)
+                                glVertex3f(*p)
+                                glVertex3f(*vectorops.madd(p,d,self.attributes.get("length",0.1)))
+                                glEnd()
+                                glLineWidth(1.0)
+                            ld,wd = item.getRotationAxis()
+                            p = lp
+                            d = ld
+                            self.displayCache[0].draw(drawRawLine,transform=link.getTransform(),parameters=(p,d))
+                            p = wp
+                            d = wd
+                            self.displayCache[1].draw(drawRawLine,transform=dest.getTransform() if dest else se3.identity(),parameters=(p,d))
+                            #set up the connecting curve
+                            d = vectorops.sub(p2,p1)
+                            v1 = vectorops.mul(d,0.5)
+                            #curve in the destination
+                            v2 = vectorops.cross((0,0,0.5),d)
+                        def drawConnection():
+                            glDisable(GL_DEPTH_TEST)
+                            glDisable(GL_LIGHTING)
+                            glColor3f(1,0.5,0)
+                            gldraw.hermite_curve(p1,v1,p2,v2,0.03)
+                            glEnable(GL_DEPTH_TEST)
+                        self.displayCache[2].draw(drawConnection,transform=None,parameters = (p1,v1,p2,v2))
+                        if name != None:
+                            self.drawText(name,vectorops.add(wp,[-0.05]*3))
+                    else:
+                        wp = link.getTransform()[1]
+                        if item.numRotDims()==3: #full constraint
+                            R = item.getRotation()
+                            def drawRaw():
+                                gldraw.xform_widget(se3.identity(),self.attributes.get("length",0.1),self.attributes.get("width",0.01))
+                            self.displayCache[0].draw(drawRaw,transform=link.getTransform())
+                            self.displayCache[1].draw(drawRaw,transform=se3.mul(link.getTransform(),(R,[0,0,0])))
+                        elif item.numRotDims() > 0:
+                            #axis constraint
+                            d = [0,0,0]
+                            def drawRawLine():
+                                glDisable(GL_LIGHTING)
+                                glColor4f(*self.attributes.get("color",[0.5,0,0.5,1]))
+                                glLineWidth(self.attributes.get("width",3.0))
+                                glBegin(GL_LINES)
+                                glVertex3f(0,0,0)
+                                glVertex3f(*vectorops.mul(d,self.attributes.get("length",0.1)))
+                                glEnd()
+                                glLineWidth(1.0)
+                            ld,wd = item.getRotationAxis()
+                            d = ld
+                            self.displayCache[0].draw(drawRawLine,transform=link.getTransform(),parameters=d)
+                            d = wd
+                            self.displayCache[1].draw(drawRawLine,transform=(dest.getTransform()[0] if dest else so3.identity(),wp),parameters=d)
+                        else:
+                            #no drawing
+                            pass
+                        if name != None:
+                            self.drawText(name,se3.apply(wp,[-0.05]*3))
             else:
                 print "Unable to draw item of type",types
 
@@ -768,7 +920,7 @@ if glcommon._PyQtAvailable:
             global _vis,_widget,_window_title
             _widget.setMinimumSize(_vis.width,_vis.height)
             _widget.setMaximumSize(4000,4000)
-            _widget.setSizePolicy(QSizePolicy(QSizePolicy.Maximum))
+            _widget.setSizePolicy(QSizePolicy(QSizePolicy.Maximum,QSizePolicy.Maximum))
             self.description = QLabel("Press OK to continue")
             self.layout = QVBoxLayout(self)
             self.layout.addWidget(_widget)
@@ -784,7 +936,7 @@ if glcommon._PyQtAvailable:
             QMainWindow.__init__(self)
             _widget.setMinimumSize(_vis.width,_vis.height)
             _widget.setMaximumSize(4000,4000)
-            _widget.setSizePolicy(QSizePolicy(QSizePolicy.Maximum))
+            _widget.setSizePolicy(QSizePolicy(QSizePolicy.Maximum,QSizePolicy.Maximum))
             self.setCentralWidget(_widget)
             self.setWindowTitle(_window_title)
         def closeEvent(self,event):
