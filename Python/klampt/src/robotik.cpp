@@ -102,7 +102,7 @@ int IKObjective::numPosDims() const
 
 int IKObjective::numRotDims() const
 {
-  return IKGoal::NumDims(goal.posConstraint);
+  return IKGoal::NumDims(goal.rotConstraint);
 }
 
 void IKObjective::getPosition(double out[3],double out2[3]) const
