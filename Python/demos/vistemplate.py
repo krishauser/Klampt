@@ -32,6 +32,17 @@ if __name__ == "__main__":
     visualization.add("some point",pt)
     #test a rigid transform
     visualization.add("some blinking transform",[so3.identity(),[1,3,0.5]])
+    #test an IKObjective
+    link = world.robot(0).link(world.robot(0).numLinks()-1)
+    #point constraint
+    #obj = ik.objective(link,local=[[0,0,0]],world=[pt])
+    #hinge constraint
+    obj = ik.objective(link,local=[[0,0,0],[0,0,0.1]],world=[pt,[pt[0],pt[1],pt[2]+0.1]])
+    #transform constraint
+    #obj = ik.objective(link,R=link.getTransform()[0],t=pt)
+    visualization.add("ik objective",obj)
+
+    print "Starting visualization..."
     #run the visualizer in a separate thread
     visualization.show()
     iteration = 0
