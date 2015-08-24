@@ -59,6 +59,7 @@ class GLProgram(QGLWidget):
         #mouse state information
         self.lastx,self.lasty = None,None
         self.initialized = False
+        self.refreshed = False
 
     def initWindow(self,parent=None,shared=None):
         """ Open a window and initialize """
@@ -104,12 +105,20 @@ class GLProgram(QGLWidget):
         self.idleTimer.stop()
 
     def refresh(self):
-        QTimer.singleShot(0,lambda:self.updateGL());
+        if not self.refreshed:
+            self.refreshed = False
+            #TODO: resolve whether it's better to call updateGL here or to schedule
+            # a timer event
+            self.updateGL()
+            #QTimer.singleShot(0,lambda:self.updateGL());
 
     #QtGLWidget bindings
     def initializeGL(self): return self.initialize()
     def resizeGL(self,w,h): return self.reshapefunc(w,h)
-    def paintGL(self) : return self.displayfunc()
+    def paintGL(self) :
+        self.refreshed = False
+        res = self.displayfunc()
+        return res
     #QWidget bindings
     def mouseMoveEvent(self,e):
         x,y = e.pos().x(),e.pos().y()
@@ -336,7 +345,7 @@ class GLNavigationProgram(GLProgram):
                 self.camera.dist *= math.exp(dy*0.01)
             else:
                 self.camera.rot[2] += float(dx)*0.01
-                self.camera.rot[1] += float(dy)*0.01        
+                self.camera.rot[1] += float(dy)*0.01
         self.refresh()
     
     def mousefunc(self,button,state,x,y):
