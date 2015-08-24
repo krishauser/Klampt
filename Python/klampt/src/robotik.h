@@ -20,9 +20,9 @@ class IKObjective
 {
  public:
   IKObjective();
-  ///The link that is constrained
+  ///The index of the robot link that is constrained
   int link() const;
-  ///The destination link, or -1 if fixed to the world
+  ///The index of the destination link, or -1 if fixed to the world
   int destLink() const;
   ///Returns the number of position dimensions constrained (0-3)
   int numPosDims() const;
