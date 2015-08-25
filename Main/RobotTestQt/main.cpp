@@ -1,14 +1,20 @@
 #include <QtGui/QApplication>
-
 #include <QFileDialog>
 #include "mainwindow.h"
-#include <GL/glut.h>
 #include "QDebug"
 #include <QSettings>
+/*
+#ifdef __APPLE__
+#include <GLUT/glut.h>
+#else
+#include <GL/glut.h>
+#endif
+*/
 
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
+    //needed for GLUTBitmapCharacter
     //glutInit(&argc,argv);
     QString filename;
     //load settings from qsetings ini
