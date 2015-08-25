@@ -1,0 +1,252 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>klampt.robotcollide module &mdash; PyKlampt 0.6.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.6.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="PyKlampt 0.6.0 documentation" href="index.html" />
+    <link rel="up" title="klampt package" href="klampt.html" />
+    <link rel="next" title="klampt.robotcspace module" href="klampt.robotcspace.html" />
+    <link rel="prev" title="klampt.multipath module" href="klampt.multipath.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="klampt.robotcspace.html" title="klampt.robotcspace module"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="klampt.multipath.html" title="klampt.multipath module"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">PyKlampt 0.6.0 documentation</a> &raquo;</li>
+          <li><a href="klampt.html" accesskey="U">klampt package</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-klampt.robotcollide">
+<span id="klampt-robotcollide-module"></span><h1>klampt.robotcollide module<a class="headerlink" href="#module-klampt.robotcollide" title="Permalink to this headline">¶</a></h1>
+<p>A class for managing collision tests between all objects in a WorldModel.</p>
+<dl class="class">
+<dt id="klampt.robotcollide.WorldCollider">
+<em class="property">class </em><code class="descclassname">klampt.robotcollide.</code><code class="descname">WorldCollider</code><span class="sig-paren">(</span><em>world</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/robotcollide.html#WorldCollider"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.robotcollide.WorldCollider" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>Attributes:</dt>
+<dd><ul class="first last simple">
+<li>geomList: a list of (object,geom) pairs for all objects in the world</li>
+<li>mask: a list of sets, indicating which items are activated for
+collision detection for each object in the world.</li>
+<li>terrains: contains the geomList indices of each terrain in the world.</li>
+<li>rigidObjects: contains the geomList indices of each object in
+the world</li>
+<li>robots: contains the geomList indices of each robot in the world.</li>
+</ul>
+</dd>
+<dt>Methods:</dt>
+<dd><ul class="first last simple">
+<li>getGeom(obj): finds the geometry corresponding to an object</li>
+<li>collisionTests(filter1,filter2): returns an iterator over potential
+colliding pairs</li>
+<li>collisions(filter1,filter2): yields an iterator over collision pairs</li>
+<li>robotSelfCollisions(r): yields an iterator over robot self collisions</li>
+<li>robotObjectCollisions(r,o): yields an iterator over robot-object
+collision pairs</li>
+<li>robotTerrainCollisions(r,t): yields an iterator over robot-terrain
+collision pairs</li>
+<li>objectTerrainCollide(o,t): returns whether an object and terrain
+collide</li>
+<li>objectObjectCollide(o1,o2): returns whether two objects collide</li>
+<li>rayCast(ray_source,ray_direction,obj_indices): finds the first
+object intersected by a ray</li>
+<li>rayCastRobot(robot_index,ray_source_ray_direction): finds the
+first robot link intersected by a ray</li>
+</ul>
+</dd>
+</dl>
+<p>Initializes the collision detection structure given a WorldModel
+as input.</p>
+<dl class="method">
+<dt id="klampt.robotcollide.WorldCollider.collisionTests">
+<code class="descname">collisionTests</code><span class="sig-paren">(</span><em>filter1=None</em>, <em>filter2=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/robotcollide.html#WorldCollider.collisionTests"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.robotcollide.WorldCollider.collisionTests" title="Permalink to this definition">¶</a></dt>
+<dd><p>Iterates over ((object,geom),(object,geom)) pairs indicating
+which objects should be tested for collision.  The geom objects
+will be instances of Geometry3D (see <code class="xref py py-class docutils literal"><span class="pre">Geometry3D</span></code>).</p>
+<p>E.g., to test collisions, you will call</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>for i,j in worldCollider.collisionTests():</dt>
+<dd><dl class="first last docutils">
+<dt>if i[1].collides(j[1]):</dt>
+<dd>print &#8220;Object&#8221;,i[0].getName(),&#8221;collides with&#8221;,j[0].getName()</dd>
+</dl>
+</dd>
+</dl>
+</div></blockquote>
+<p>(Note that for this purpose is easier to just call collisions();
+however you may want to use collisionTests to perform other queries
+like proximity detection.)</p>
+<p>See <a class="reference internal" href="#klampt.robotcollide.WorldCollider.collisionTests" title="klampt.robotcollide.WorldCollider.collisionTests"><code class="xref py py-func docutils literal"><span class="pre">collisionTests()</span></code></a> for a description of the filter1 and
+filter2 arguments.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.robotcollide.WorldCollider.collisions">
+<code class="descname">collisions</code><span class="sig-paren">(</span><em>filter1=None</em>, <em>filter2=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/robotcollide.html#WorldCollider.collisions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.robotcollide.WorldCollider.collisions" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns an iterator over the colliding pairs of
+objects, optionally that satisfies the filter(s).</p>
+<p>Arguments filter1 and filter2 optionally indicate  subsets of
+objects to collide. If neither filter1 nor filter2 are provided,
+then all pairs are returned.</p>
+<p>If filter1 is provided but filter2 is not, then objects in the set
+filter1 will be collided against each other.</p>
+<p>If filter1 and filter2 are provided, then objects that
+satisfy filter1 will be collided against objects that satisfy
+filter2.  (Note: in this case there is no checking of duplicates).</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.robotcollide.WorldCollider.getGeom">
+<code class="descname">getGeom</code><span class="sig-paren">(</span><em>object</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/robotcollide.html#WorldCollider.getGeom"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.robotcollide.WorldCollider.getGeom" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="klampt.robotcollide.WorldCollider.objectObjectCollisions">
+<code class="descname">objectObjectCollisions</code><span class="sig-paren">(</span><em>object</em>, <em>object2</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/robotcollide.html#WorldCollider.objectObjectCollisions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.robotcollide.WorldCollider.objectObjectCollisions" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="klampt.robotcollide.WorldCollider.objectTerrainCollisions">
+<code class="descname">objectTerrainCollisions</code><span class="sig-paren">(</span><em>object</em>, <em>terrain=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/robotcollide.html#WorldCollider.objectTerrainCollisions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.robotcollide.WorldCollider.objectTerrainCollisions" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="klampt.robotcollide.WorldCollider.rayCast">
+<code class="descname">rayCast</code><span class="sig-paren">(</span><em>s</em>, <em>d</em>, <em>indices=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/robotcollide.html#WorldCollider.rayCast"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.robotcollide.WorldCollider.rayCast" title="Permalink to this definition">¶</a></dt>
+<dd><p>Finds the first collision with the ray at source s and direction
+d.  Returns the (object,point) pair or None if no collision is found.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.robotcollide.WorldCollider.rayCastRobot">
+<code class="descname">rayCastRobot</code><span class="sig-paren">(</span><em>robot</em>, <em>s</em>, <em>d</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/robotcollide.html#WorldCollider.rayCastRobot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.robotcollide.WorldCollider.rayCastRobot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given robot index, do ray casting with the given ray</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.robotcollide.WorldCollider.robotObjectCollisions">
+<code class="descname">robotObjectCollisions</code><span class="sig-paren">(</span><em>robot</em>, <em>object=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/robotcollide.html#WorldCollider.robotObjectCollisions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.robotcollide.WorldCollider.robotObjectCollisions" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given robot and object indices, tests all collisions between robot
+links and the object.  If object is not provided, all objects
+are tested</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.robotcollide.WorldCollider.robotSelfCollisions">
+<code class="descname">robotSelfCollisions</code><span class="sig-paren">(</span><em>robot=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/robotcollide.html#WorldCollider.robotSelfCollisions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.robotcollide.WorldCollider.robotSelfCollisions" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given robot, tests all self collisions.  If robot is None, all
+robots are tested.  If robots is an index or a RobotModel object
+only collisions for that robot are tested</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.robotcollide.WorldCollider.robotTerrainCollisions">
+<code class="descname">robotTerrainCollisions</code><span class="sig-paren">(</span><em>robot</em>, <em>terrain=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/robotcollide.html#WorldCollider.robotTerrainCollisions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.robotcollide.WorldCollider.robotTerrainCollisions" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given robot and terrain indices, tests all collisions between robot
+links and the terrain</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="klampt.multipath.html"
+                        title="previous chapter">klampt.multipath module</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="klampt.robotcspace.html"
+                        title="next chapter">klampt.robotcspace module</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/klampt.robotcollide.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="klampt.robotcspace.html" title="klampt.robotcspace module"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="klampt.multipath.html" title="klampt.multipath module"
+             >previous</a> |</li>
+        <li><a href="index.html">PyKlampt 0.6.0 documentation</a> &raquo;</li>
+          <li><a href="klampt.html" >klampt package</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2015, Kris Hauser.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3b2.
+    </div>
+  </body>
+</html>

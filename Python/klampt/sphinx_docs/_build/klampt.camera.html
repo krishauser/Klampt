@@ -1,0 +1,196 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>klampt.camera module &mdash; PyKlampt 0.6.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.6.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="PyKlampt 0.6.0 documentation" href="index.html" />
+    <link rel="up" title="klampt package" href="klampt.html" />
+    <link rel="next" title="klampt.collide module" href="klampt.collide.html" />
+    <link rel="prev" title="klampt package" href="klampt.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="klampt.collide.html" title="klampt.collide module"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="klampt.html" title="klampt package"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">PyKlampt 0.6.0 documentation</a> &raquo;</li>
+          <li><a href="klampt.html" accesskey="U">klampt package</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-klampt.camera">
+<span id="klampt-camera-module"></span><h1>klampt.camera module<a class="headerlink" href="#module-klampt.camera" title="Permalink to this headline">¶</a></h1>
+<p>This module defines a basic set of 3D cameras that can be controlled
+by a GUI.</p>
+<dl class="class">
+<dt id="klampt.camera.free">
+<em class="property">class </em><code class="descclassname">klampt.camera.</code><code class="descname">free</code><a class="reference internal" href="_modules/klampt/camera.html#free"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.camera.free" title="Permalink to this definition">¶</a></dt>
+<dd><p>A free-floating camera that is controlled using a translation and
+euler angle rotation vector.</p>
+<dl class="docutils">
+<dt>Attributes:</dt>
+<dd><ul class="first last simple">
+<li>pos: camera center position</li>
+<li>rot: euler angle rotation</li>
+<li>ori: orientation matrix type (see <a class="reference internal" href="#klampt.camera.orientation_matrix" title="klampt.camera.orientation_matrix"><code class="xref py py-func docutils literal"><span class="pre">orientation_matrix()</span></code></a>)</li>
+</ul>
+</dd>
+</dl>
+<dl class="method">
+<dt id="klampt.camera.free.matrix">
+<code class="descname">matrix</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/camera.html#free.matrix"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.camera.free.matrix" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the camera transform.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="klampt.camera.orbit">
+<em class="property">class </em><code class="descclassname">klampt.camera.</code><code class="descname">orbit</code><a class="reference internal" href="_modules/klampt/camera.html#orbit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.camera.orbit" title="Permalink to this definition">¶</a></dt>
+<dd><p>An orbit camera that is controlled using a rotation, 
+target point, distance, and orientation.</p>
+<dl class="docutils">
+<dt>Attributes:        </dt>
+<dd><ul class="first last simple">
+<li>tgt: target point</li>
+<li>rot: euler angle rotation</li>
+<li>dist: target distance</li>
+<li>ori: orientation matrix type (see <a class="reference internal" href="#klampt.camera.orientation_matrix" title="klampt.camera.orientation_matrix"><code class="xref py py-func docutils literal"><span class="pre">orientation_matrix()</span></code></a>)</li>
+</ul>
+</dd>
+</dl>
+<dl class="method">
+<dt id="klampt.camera.orbit.matrix">
+<code class="descname">matrix</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/camera.html#orbit.matrix"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.camera.orbit.matrix" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the camera transform.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="klampt.camera.orientation_matrix">
+<code class="descclassname">klampt.camera.</code><code class="descname">orientation_matrix</code><span class="sig-paren">(</span><em>axis1</em>, <em>axis2</em>, <em>axis3</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/camera.html#orientation_matrix"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.camera.orientation_matrix" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the matrix that maps world axes 1,2,3 to the
+camera&#8217;s coordinate system (left,down,forward) (assuming no camera motion).</p>
+<p>Each axis can be either a 3-tuple or any element of
+[&#8216;x&#8217;,&#8217;y&#8217;,&#8217;z&#8217;,&#8217;-x&#8217;,&#8217;-y&#8217;,&#8217;-z&#8217;]</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="klampt.camera.target">
+<em class="property">class </em><code class="descclassname">klampt.camera.</code><code class="descname">target</code><a class="reference internal" href="_modules/klampt/camera.html#target"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.camera.target" title="Permalink to this definition">¶</a></dt>
+<dd><p>A look-at camera that is controlled using a translation,
+target point, and up vector</p>
+<p>Attributes:</p>
+<ul class="simple">
+<li>pos: camera center position</li>
+<li>tgt: target point</li>
+<li>up: up direction</li>
+</ul>
+<dl class="method">
+<dt id="klampt.camera.target.matrix">
+<code class="descname">matrix</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/camera.html#target.matrix"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.camera.target.matrix" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the camera transform.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="klampt.html"
+                        title="previous chapter">klampt package</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="klampt.collide.html"
+                        title="next chapter">klampt.collide module</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/klampt.camera.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="klampt.collide.html" title="klampt.collide module"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="klampt.html" title="klampt package"
+             >previous</a> |</li>
+        <li><a href="index.html">PyKlampt 0.6.0 documentation</a> &raquo;</li>
+          <li><a href="klampt.html" >klampt package</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2015, Kris Hauser.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3b2.
+    </div>
+  </body>
+</html>

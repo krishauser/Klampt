@@ -1,0 +1,193 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>klampt.robotcspace &mdash; PyKlampt 0.6.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.6.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="PyKlampt 0.6.0 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">PyKlampt 0.6.0 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for klampt.robotcspace</h1><div class="highlight"><pre>
+<span class="kn">import</span> <span class="nn">cspace</span>
+<span class="kn">import</span> <span class="nn">robotsim</span>
+<span class="kn">import</span> <span class="nn">robotcollide</span>
+<span class="kn">from</span> <span class="nn">cspaceutils</span> <span class="kn">import</span> <span class="n">AdaptiveCSpace</span>
+
+<div class="viewcode-block" id="RobotCSpace"><a class="viewcode-back" href="../../klampt.robotcspace.html#klampt.robotcspace.RobotCSpace">[docs]</a><span class="k">class</span> <span class="nc">RobotCSpace</span><span class="p">(</span><span class="n">AdaptiveCSpace</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;A basic robot cspace that allows collision free motion&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">robot</span><span class="p">,</span><span class="n">collider</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="n">AdaptiveCSpace</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">robot</span> <span class="o">=</span> <span class="n">robot</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bound</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">robot</span><span class="o">.</span><span class="n">getJointLimits</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">collider</span> <span class="o">=</span> <span class="n">collider</span>
+
+        <span class="c">#set this to false to turn off the adaptive tester, which may</span>
+        <span class="c">#have some overhead</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">adaptive</span> <span class="o">=</span> <span class="bp">True</span>
+
+        <span class="c">#adaptive tests</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addFeasibleTest</span><span class="p">(</span><span class="k">lambda</span><span class="p">(</span><span class="n">x</span><span class="p">):</span> <span class="bp">self</span><span class="o">.</span><span class="n">inJointLimits</span><span class="p">(</span><span class="n">x</span><span class="p">),</span><span class="s">&quot;joint limits&quot;</span><span class="p">)</span>
+        <span class="c">#TODO explode these into individual self collision / env collision</span>
+        <span class="c">#tests</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addFeasibleTest</span><span class="p">(</span><span class="k">lambda</span><span class="p">(</span><span class="n">x</span><span class="p">):</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">selfCollision</span><span class="p">(),</span><span class="s">&quot;self collision&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addFeasibleTest</span><span class="p">(</span><span class="k">lambda</span><span class="p">(</span><span class="n">x</span><span class="p">):</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">envCollision</span><span class="p">(),</span><span class="s">&quot;env collision&quot;</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="RobotCSpace.feasible"><a class="viewcode-back" href="../../klampt.robotcspace.html#klampt.robotcspace.RobotCSpace.feasible">[docs]</a>    <span class="k">def</span> <span class="nf">feasible</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">adaptive</span><span class="p">:</span>
+            <span class="c">#Use the adaptive tester</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">robot</span><span class="o">.</span><span class="n">setConfig</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">AdaptiveCSpace</span><span class="o">.</span><span class="n">feasible</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">)</span>
+
+        <span class="c">#Use the regular tester</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">inJointLimits</span><span class="p">(</span><span class="n">x</span><span class="p">):</span> <span class="k">return</span> <span class="bp">False</span>
+        <span class="c">#check collisions</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">collider</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">robot</span><span class="o">.</span><span class="n">setConfig</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">selfCollision</span><span class="p">():</span> <span class="k">return</span> <span class="bp">False</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">envCollision</span><span class="p">():</span> <span class="k">return</span> <span class="bp">False</span>
+        <span class="k">return</span> <span class="bp">True</span>
+</div>
+<div class="viewcode-block" id="RobotCSpace.inJointLimits"><a class="viewcode-back" href="../../klampt.robotcspace.html#klampt.robotcspace.RobotCSpace.inJointLimits">[docs]</a>    <span class="k">def</span> <span class="nf">inJointLimits</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">):</span>
+        <span class="c">#check joint limits</span>
+        <span class="k">for</span> <span class="p">(</span><span class="n">xi</span><span class="p">,</span><span class="n">bi</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">bound</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">xi</span> <span class="o">&lt;</span> <span class="n">bi</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">or</span> <span class="n">xi</span> <span class="o">&gt;</span> <span class="n">bi</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+                <span class="k">return</span> <span class="bp">False</span>
+        <span class="k">return</span> <span class="bp">True</span>
+</div>
+<div class="viewcode-block" id="RobotCSpace.selfCollision"><a class="viewcode-back" href="../../klampt.robotcspace.html#klampt.robotcspace.RobotCSpace.selfCollision">[docs]</a>    <span class="k">def</span> <span class="nf">selfCollision</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">collider</span><span class="p">:</span> <span class="k">return</span> <span class="bp">False</span>
+        <span class="k">return</span> <span class="nb">any</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">collider</span><span class="o">.</span><span class="n">robotSelfCollisions</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">robot</span><span class="o">.</span><span class="n">index</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="RobotCSpace.envCollision"><a class="viewcode-back" href="../../klampt.robotcspace.html#klampt.robotcspace.RobotCSpace.envCollision">[docs]</a>    <span class="k">def</span> <span class="nf">envCollision</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">collider</span><span class="p">:</span> <span class="k">return</span> <span class="bp">False</span>
+        <span class="k">for</span> <span class="n">o</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">collider</span><span class="o">.</span><span class="n">world</span><span class="o">.</span><span class="n">numRigidObjects</span><span class="p">()):</span>
+            <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">collider</span><span class="o">.</span><span class="n">robotObjectCollisions</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">robot</span><span class="o">.</span><span class="n">index</span><span class="p">,</span><span class="n">o</span><span class="p">)):</span>
+                <span class="k">return</span> <span class="bp">True</span><span class="p">;</span>
+        <span class="k">for</span> <span class="n">o</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">collider</span><span class="o">.</span><span class="n">world</span><span class="o">.</span><span class="n">numTerrains</span><span class="p">()):</span>
+            <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">collider</span><span class="o">.</span><span class="n">robotTerrainCollisions</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">robot</span><span class="o">.</span><span class="n">index</span><span class="p">,</span><span class="n">o</span><span class="p">)):</span>
+                <span class="k">return</span> <span class="bp">True</span><span class="p">;</span>
+        <span class="k">return</span> <span class="bp">False</span>
+                  
+</div></div>
+<div class="viewcode-block" id="ClosedLoopRobotCSpace"><a class="viewcode-back" href="../../klampt.robotcspace.html#klampt.robotcspace.ClosedLoopRobotCSpace">[docs]</a><span class="k">class</span> <span class="nc">ClosedLoopRobotCSpace</span><span class="p">(</span><span class="n">RobotCSpace</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;A closed loop cspace&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">robot</span><span class="p">,</span><span class="n">iks</span><span class="p">,</span><span class="n">collider</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="n">RobotCSpace</span><span class="o">.</span><span class="n">__init__self</span><span class="p">(</span><span class="n">robot</span><span class="p">,</span><span class="n">collider</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">solver</span> <span class="o">=</span> <span class="n">robotsim</span><span class="o">.</span><span class="n">IKSolver</span><span class="p">(</span><span class="n">robot</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">iks</span><span class="p">,</span><span class="s">&#39;__iter__&#39;</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">ik</span> <span class="ow">in</span> <span class="n">iks</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">solver</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">ik</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">solver</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">ik</span><span class="p">)</span>
+
+        <span class="c">#IK solve iterations</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">maxIters</span> <span class="o">=</span> <span class="mi">100</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tol</span> <span class="o">=</span> <span class="mf">1e-3</span>
+
+        <span class="c">#adaptive checker</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addFeasibleTest</span><span class="p">(</span><span class="k">lambda</span><span class="p">(</span><span class="n">x</span><span class="p">):</span> <span class="bp">self</span><span class="o">.</span><span class="n">closedLoop</span><span class="p">())</span>
+
+<div class="viewcode-block" id="ClosedLoopRobotCSpace.sample"><a class="viewcode-back" href="../../klampt.robotcspace.html#klampt.robotcspace.ClosedLoopRobotCSpace.sample">[docs]</a>    <span class="k">def</span> <span class="nf">sample</span><span class="p">():</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">solver</span><span class="o">.</span><span class="n">sampleInitial</span><span class="p">()</span>
+        <span class="p">(</span><span class="n">res</span><span class="p">,</span><span class="n">iters</span><span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">solver</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">maxIters</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">tol</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="ClosedLoopRobotCSpace.feasible"><a class="viewcode-back" href="../../klampt.robotcspace.html#klampt.robotcspace.ClosedLoopRobotCSpace.feasible">[docs]</a>    <span class="k">def</span> <span class="nf">feasible</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">adaptive</span><span class="p">:</span>
+            <span class="c">#Use the adaptive tester</span>
+            <span class="n">robot</span><span class="o">.</span><span class="n">setConfig</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">AdaptiveCSpace</span><span class="o">.</span><span class="n">feasible</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">)</span>
+            
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">inJointLimits</span><span class="p">(</span><span class="n">x</span><span class="p">):</span> <span class="k">return</span> <span class="bp">False</span>
+        <span class="n">robot</span><span class="o">.</span><span class="n">setConfig</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">closedLoop</span><span class="p">():</span> <span class="k">return</span> <span class="bp">False</span><span class="p">;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">selfCollision</span><span class="p">():</span> <span class="k">return</span> <span class="bp">False</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">envCollision</span><span class="p">():</span> <span class="k">return</span> <span class="bp">False</span>
+        <span class="k">return</span> <span class="bp">True</span>
+</div>
+<div class="viewcode-block" id="ClosedLoopRobotCSpace.closedLoop"><a class="viewcode-back" href="../../klampt.robotcspace.html#klampt.robotcspace.ClosedLoopRobotCSpace.closedLoop">[docs]</a>    <span class="k">def</span> <span class="nf">closedLoop</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">tol</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="n">e</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">solver</span><span class="o">.</span><span class="n">getError</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">tol</span><span class="o">==</span><span class="bp">None</span><span class="p">:</span> <span class="n">tol</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tol</span>
+        <span class="k">return</span> <span class="nb">max</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">ei</span><span class="p">)</span> <span class="k">for</span> <span class="n">ei</span> <span class="ow">in</span> <span class="n">e</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">tol</span>
+</pre></div></div></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">PyKlampt 0.6.0 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2015, Kris Hauser.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3b2.
+    </div>
+  </body>
+</html>

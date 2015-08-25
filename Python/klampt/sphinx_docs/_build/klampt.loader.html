@@ -1,0 +1,157 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>klampt.loader module &mdash; PyKlampt 0.6.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.6.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="PyKlampt 0.6.0 documentation" href="index.html" />
+    <link rel="up" title="klampt package" href="klampt.html" />
+    <link rel="next" title="klampt.map module" href="klampt.map.html" />
+    <link rel="prev" title="klampt.ik module" href="klampt.ik.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="klampt.map.html" title="klampt.map module"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="klampt.ik.html" title="klampt.ik module"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">PyKlampt 0.6.0 documentation</a> &raquo;</li>
+          <li><a href="klampt.html" accesskey="U">klampt package</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-klampt.loader">
+<span id="klampt-loader-module"></span><h1>klampt.loader module<a class="headerlink" href="#module-klampt.loader" title="Permalink to this headline">¶</a></h1>
+<dl class="function">
+<dt id="klampt.loader.parseLines">
+<code class="descclassname">klampt.loader.</code><code class="descname">parseLines</code><span class="sig-paren">(</span><em>text</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/loader.html#parseLines"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.loader.parseLines" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a list of lines from the given text.  Understands end-of-line escapes &#8216;n&#8217;</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="klampt.loader.readContactPoint">
+<code class="descclassname">klampt.loader.</code><code class="descname">readContactPoint</code><span class="sig-paren">(</span><em>text</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/loader.html#readContactPoint"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.loader.readContactPoint" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads a contact point from text &#8216;x1 x2 x3 n1 n2 n3 kFriction&#8217;</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="klampt.loader.readIKObjective">
+<code class="descclassname">klampt.loader.</code><code class="descname">readIKObjective</code><span class="sig-paren">(</span><em>text</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/loader.html#readIKObjective"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.loader.readIKObjective" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads an IKObjective from text</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="klampt.loader.readVector">
+<code class="descclassname">klampt.loader.</code><code class="descname">readVector</code><span class="sig-paren">(</span><em>text</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/loader.html#readVector"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.loader.readVector" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads a vector from text &#8216;n v1 ... vn&#8217;</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="klampt.loader.writeContactPoint">
+<code class="descclassname">klampt.loader.</code><code class="descname">writeContactPoint</code><span class="sig-paren">(</span><em>cp</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/loader.html#writeContactPoint"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.loader.writeContactPoint" title="Permalink to this definition">¶</a></dt>
+<dd><p>Writes a contact point to text &#8216;x1 x2 x3 n1 n2 n3 kFriction&#8217;</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="klampt.loader.writeVector">
+<code class="descclassname">klampt.loader.</code><code class="descname">writeVector</code><span class="sig-paren">(</span><em>q</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/loader.html#writeVector"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.loader.writeVector" title="Permalink to this definition">¶</a></dt>
+<dd><p>Writes a vector to text &#8216;n v1 ... vn&#8217;</p>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="klampt.ik.html"
+                        title="previous chapter">klampt.ik module</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="klampt.map.html"
+                        title="next chapter">klampt.map module</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/klampt.loader.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="klampt.map.html" title="klampt.map module"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="klampt.ik.html" title="klampt.ik module"
+             >previous</a> |</li>
+        <li><a href="index.html">PyKlampt 0.6.0 documentation</a> &raquo;</li>
+          <li><a href="klampt.html" >klampt package</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2015, Kris Hauser.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3b2.
+    </div>
+  </body>
+</html>

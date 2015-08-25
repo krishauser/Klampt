@@ -1,0 +1,1981 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>klampt package &mdash; PyKlampt 0.6.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.6.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="PyKlampt 0.6.0 documentation" href="index.html" />
+    <link rel="next" title="klampt.camera module" href="klampt.camera.html" />
+    <link rel="prev" title="Welcome to PyKlampt’s documentation!" href="index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="klampt.camera.html" title="klampt.camera module"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Welcome to PyKlampt’s documentation!"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">PyKlampt 0.6.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="klampt-package">
+<h1>klampt package<a class="headerlink" href="#klampt-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="klampt.camera.html">klampt.camera module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="klampt.collide.html">klampt.collide module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="klampt.contact.html">klampt.contact module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="klampt.contactcspace.html">klampt.contactcspace module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="klampt.cspace.html">klampt.cspace module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="klampt.cspaceutils.html">klampt.cspaceutils module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="klampt.gldraw.html">klampt.gldraw module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="klampt.glprogram.html">klampt.glprogram module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="klampt.hold.html">klampt.hold module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="klampt.ik.html">klampt.ik module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="klampt.loader.html">klampt.loader module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="klampt.map.html">klampt.map module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="klampt.motionplanning.html">klampt.motionplanning module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="klampt.multipath.html">klampt.multipath module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="klampt.robotcollide.html">klampt.robotcollide module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="klampt.robotcspace.html">klampt.robotcspace module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="klampt.robotsim.html">klampt.robotsim module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="klampt.rootfind.html">klampt.rootfind module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="klampt.se3.html">klampt.se3 module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="klampt.so2.html">klampt.so2 module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="klampt.so3.html">klampt.so3 module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="klampt.trajectory.html">klampt.trajectory module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="klampt.vectorops.html">klampt.vectorops module</a></li>
+</ul>
+</div>
+</div>
+<div class="section" id="module-contents">
+<h2>Module contents<a class="headerlink" href="#module-contents" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="module-klampt"></span><dl class="class">
+<dt id="klampt.WorldModel">
+<em class="property">class </em><code class="descclassname">klampt.</code><code class="descname">WorldModel</code><span class="sig-paren">(</span><em>WorldModel self</em><span class="sig-paren">)</span> &rarr; WorldModel<a class="reference internal" href="_modules/klampt/robotsim.html#WorldModel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.WorldModel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>The main world class, containing robots, rigid objects, and static
+environment geometry.</p>
+<p>Note that this is just a model and can be changed at will in fact
+planners and simulators will make use of a model to &#8220;display&#8221;
+computed states.</p>
+<p>To save/restore the state of the model, you must manually maintain
+copies of the states of whichever objects you wish to save/restore.</p>
+<p>C++ includes: robotmodel.h</p>
+<p>__init__(WorldModel self, int index) -&gt; WorldModel
+__init__(WorldModel self, WorldModel w) -&gt; WorldModel</p>
+<p>WorldModel::WorldModel(const WorldModel &amp;w)</p>
+<dl class="method">
+<dt id="klampt.WorldModel.drawGL">
+<code class="descname">drawGL</code><span class="sig-paren">(</span><em>WorldModel self</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/robotsim.html#WorldModel.drawGL"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.WorldModel.drawGL" title="Permalink to this definition">¶</a></dt>
+<dd><p>void WorldModel::drawGL()</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.WorldModel.enableGeometryLoading">
+<code class="descname">enableGeometryLoading</code><span class="sig-paren">(</span><em>WorldModel self</em>, <em>bool enabled</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/robotsim.html#WorldModel.enableGeometryLoading"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.WorldModel.enableGeometryLoading" title="Permalink to this definition">¶</a></dt>
+<dd><p>void
+WorldModel::enableGeometryLoading(bool enabled)</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="klampt.WorldModel.index">
+<code class="descname">index</code><a class="headerlink" href="#klampt.WorldModel.index" title="Permalink to this definition">¶</a></dt>
+<dd><p>WorldModel_index_get(WorldModel self) -&gt; int</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.WorldModel.loadElement">
+<code class="descname">loadElement</code><span class="sig-paren">(</span><em>WorldModel self</em>, <em>char const * fn</em><span class="sig-paren">)</span> &rarr; int<a class="reference internal" href="_modules/klampt/robotsim.html#WorldModel.loadElement"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.WorldModel.loadElement" title="Permalink to this definition">¶</a></dt>
+<dd><p>int
+WorldModel::loadElement(const char <a href="#id1"><span class="problematic" id="id2">*</span></a>fn)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.WorldModel.loadRigidObject">
+<code class="descname">loadRigidObject</code><span class="sig-paren">(</span><em>WorldModel self</em>, <em>char const * fn</em><span class="sig-paren">)</span> &rarr; RigidObjectModel<a class="reference internal" href="_modules/klampt/robotsim.html#WorldModel.loadRigidObject"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.WorldModel.loadRigidObject" title="Permalink to this definition">¶</a></dt>
+<dd><p>RigidObjectModel
+WorldModel::loadRigidObject(const char <a href="#id3"><span class="problematic" id="id4">*</span></a>fn)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.WorldModel.loadRobot">
+<code class="descname">loadRobot</code><span class="sig-paren">(</span><em>WorldModel self</em>, <em>char const * fn</em><span class="sig-paren">)</span> &rarr; RobotModel<a class="reference internal" href="_modules/klampt/robotsim.html#WorldModel.loadRobot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.WorldModel.loadRobot" title="Permalink to this definition">¶</a></dt>
+<dd><p>RobotModel
+WorldModel::loadRobot(const char <a href="#id5"><span class="problematic" id="id6">*</span></a>fn)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.WorldModel.loadTerrain">
+<code class="descname">loadTerrain</code><span class="sig-paren">(</span><em>WorldModel self</em>, <em>char const * fn</em><span class="sig-paren">)</span> &rarr; TerrainModel<a class="reference internal" href="_modules/klampt/robotsim.html#WorldModel.loadTerrain"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.WorldModel.loadTerrain" title="Permalink to this definition">¶</a></dt>
+<dd><p>TerrainModel
+WorldModel::loadTerrain(const char <a href="#id7"><span class="problematic" id="id8">*</span></a>fn)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.WorldModel.makeRigidObject">
+<code class="descname">makeRigidObject</code><span class="sig-paren">(</span><em>WorldModel self</em>, <em>char const * name</em><span class="sig-paren">)</span> &rarr; RigidObjectModel<a class="reference internal" href="_modules/klampt/robotsim.html#WorldModel.makeRigidObject"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.WorldModel.makeRigidObject" title="Permalink to this definition">¶</a></dt>
+<dd><p>RigidObjectModel
+WorldModel::makeRigidObject(const char <a href="#id9"><span class="problematic" id="id10">*</span></a>name)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.WorldModel.makeRobot">
+<code class="descname">makeRobot</code><span class="sig-paren">(</span><em>WorldModel self</em>, <em>char const * name</em><span class="sig-paren">)</span> &rarr; RobotModel<a class="reference internal" href="_modules/klampt/robotsim.html#WorldModel.makeRobot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.WorldModel.makeRobot" title="Permalink to this definition">¶</a></dt>
+<dd><p>RobotModel
+WorldModel::makeRobot(const char <a href="#id11"><span class="problematic" id="id12">*</span></a>name)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.WorldModel.makeTerrain">
+<code class="descname">makeTerrain</code><span class="sig-paren">(</span><em>WorldModel self</em>, <em>char const * name</em><span class="sig-paren">)</span> &rarr; TerrainModel<a class="reference internal" href="_modules/klampt/robotsim.html#WorldModel.makeTerrain"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.WorldModel.makeTerrain" title="Permalink to this definition">¶</a></dt>
+<dd><p>TerrainModel
+WorldModel::makeTerrain(const char <a href="#id13"><span class="problematic" id="id14">*</span></a>name)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.WorldModel.numIDs">
+<code class="descname">numIDs</code><span class="sig-paren">(</span><em>WorldModel self</em><span class="sig-paren">)</span> &rarr; int<a class="reference internal" href="_modules/klampt/robotsim.html#WorldModel.numIDs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.WorldModel.numIDs" title="Permalink to this definition">¶</a></dt>
+<dd><p>int WorldModel::numIDs()</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.WorldModel.numRigidObjects">
+<code class="descname">numRigidObjects</code><span class="sig-paren">(</span><em>WorldModel self</em><span class="sig-paren">)</span> &rarr; int<a class="reference internal" href="_modules/klampt/robotsim.html#WorldModel.numRigidObjects"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.WorldModel.numRigidObjects" title="Permalink to this definition">¶</a></dt>
+<dd><p>int
+WorldModel::numRigidObjects()</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.WorldModel.numRobotLinks">
+<code class="descname">numRobotLinks</code><span class="sig-paren">(</span><em>WorldModel self</em>, <em>int robot</em><span class="sig-paren">)</span> &rarr; int<a class="reference internal" href="_modules/klampt/robotsim.html#WorldModel.numRobotLinks"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.WorldModel.numRobotLinks" title="Permalink to this definition">¶</a></dt>
+<dd><p>int
+WorldModel::numRobotLinks(int robot)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.WorldModel.numRobots">
+<code class="descname">numRobots</code><span class="sig-paren">(</span><em>WorldModel self</em><span class="sig-paren">)</span> &rarr; int<a class="reference internal" href="_modules/klampt/robotsim.html#WorldModel.numRobots"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.WorldModel.numRobots" title="Permalink to this definition">¶</a></dt>
+<dd><p>int
+WorldModel::numRobots()</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.WorldModel.numTerrains">
+<code class="descname">numTerrains</code><span class="sig-paren">(</span><em>WorldModel self</em><span class="sig-paren">)</span> &rarr; int<a class="reference internal" href="_modules/klampt/robotsim.html#WorldModel.numTerrains"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.WorldModel.numTerrains" title="Permalink to this definition">¶</a></dt>
+<dd><p>int
+WorldModel::numTerrains()</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.WorldModel.readFile">
+<code class="descname">readFile</code><span class="sig-paren">(</span><em>WorldModel self</em>, <em>char const * fn</em><span class="sig-paren">)</span> &rarr; bool<a class="reference internal" href="_modules/klampt/robotsim.html#WorldModel.readFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.WorldModel.readFile" title="Permalink to this definition">¶</a></dt>
+<dd><p>bool
+WorldModel::readFile(const char <a href="#id15"><span class="problematic" id="id16">*</span></a>fn)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.WorldModel.rigidObject">
+<code class="descname">rigidObject</code><span class="sig-paren">(</span><em>WorldModel self</em>, <em>int index</em><span class="sig-paren">)</span> &rarr; RigidObjectModel<a class="reference internal" href="_modules/klampt/robotsim.html#WorldModel.rigidObject"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.WorldModel.rigidObject" title="Permalink to this definition">¶</a></dt>
+<dd><p>rigidObject(WorldModel self, char const * name) -&gt; RigidObjectModel</p>
+<p>RigidObjectModel
+WorldModel::rigidObject(const char <a href="#id17"><span class="problematic" id="id18">*</span></a>name)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.WorldModel.robot">
+<code class="descname">robot</code><span class="sig-paren">(</span><em>WorldModel self</em>, <em>int index</em><span class="sig-paren">)</span> &rarr; RobotModel<a class="reference internal" href="_modules/klampt/robotsim.html#WorldModel.robot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.WorldModel.robot" title="Permalink to this definition">¶</a></dt>
+<dd><p>robot(WorldModel self, char const * name) -&gt; RobotModel</p>
+<p>RobotModel
+WorldModel::robot(const char <a href="#id19"><span class="problematic" id="id20">*</span></a>name)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.WorldModel.robotLink">
+<code class="descname">robotLink</code><span class="sig-paren">(</span><em>WorldModel self</em>, <em>int robot</em>, <em>int index</em><span class="sig-paren">)</span> &rarr; RobotModelLink<a class="reference internal" href="_modules/klampt/robotsim.html#WorldModel.robotLink"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.WorldModel.robotLink" title="Permalink to this definition">¶</a></dt>
+<dd><p>robotLink(WorldModel self, char const * robot, char const * name) -&gt; RobotModelLink</p>
+<p>RobotModelLink
+WorldModel::robotLink(const char <a href="#id21"><span class="problematic" id="id22">*</span></a>robot, const char <a href="#id23"><span class="problematic" id="id24">*</span></a>name)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.WorldModel.terrain">
+<code class="descname">terrain</code><span class="sig-paren">(</span><em>WorldModel self</em>, <em>int index</em><span class="sig-paren">)</span> &rarr; TerrainModel<a class="reference internal" href="_modules/klampt/robotsim.html#WorldModel.terrain"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.WorldModel.terrain" title="Permalink to this definition">¶</a></dt>
+<dd><p>terrain(WorldModel self, char const * name) -&gt; TerrainModel</p>
+<p>TerrainModel
+WorldModel::terrain(const char <a href="#id25"><span class="problematic" id="id26">*</span></a>name)</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="klampt.RobotModel">
+<em class="property">class </em><code class="descclassname">klampt.</code><code class="descname">RobotModel</code><span class="sig-paren">(</span><em>RobotModel self</em><span class="sig-paren">)</span> &rarr; RobotModel<a class="reference internal" href="_modules/klampt/robotsim.html#RobotModel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.RobotModel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>A model of a dynamic and kinematic robot.</p>
+<p>It is important to understand that changing the configuration of the
+model doesn&#8217;t actually send a command to the robot. In essence, this
+model maintains temporary storage for performing kinematics and
+dynamics computations.</p>
+<p>The robot maintains configuration/velocity/acceleration/torque bounds
+which are not enforced by the model, but must rather be enforced by
+the planner / simulator.</p>
+<p>The state of the robot is retrieved using getConfig/getVelocity calls,
+and is set using setConfig/setVelocity.</p>
+<p>C++ includes: robotmodel.h</p>
+<p>RobotModel::RobotModel()</p>
+<dl class="method">
+<dt id="klampt.RobotModel.accelFromTorques">
+<code class="descname">accelFromTorques</code><span class="sig-paren">(</span><em>RobotModel self</em>, <em>doubleVector t</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/robotsim.html#RobotModel.accelFromTorques"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.RobotModel.accelFromTorques" title="Permalink to this definition">¶</a></dt>
+<dd><p>void
+RobotModel::accelFromTorques(const std::vector&lt; double &gt; &amp;t,
+std::vector&lt; double &gt; &amp;out)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.RobotModel.distance">
+<code class="descname">distance</code><span class="sig-paren">(</span><em>RobotModel self</em>, <em>doubleVector a</em>, <em>doubleVector b</em><span class="sig-paren">)</span> &rarr; double<a class="reference internal" href="_modules/klampt/robotsim.html#RobotModel.distance"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.RobotModel.distance" title="Permalink to this definition">¶</a></dt>
+<dd><p>double
+RobotModel::distance(const std::vector&lt; double &gt; &amp;a, const
+std::vector&lt; double &gt; &amp;b)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.RobotModel.drawGL">
+<code class="descname">drawGL</code><span class="sig-paren">(</span><em>RobotModel self</em>, <em>bool keepAppearance=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/robotsim.html#RobotModel.drawGL"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.RobotModel.drawGL" title="Permalink to this definition">¶</a></dt>
+<dd><p>drawGL(RobotModel self)</p>
+<p>void
+RobotModel::drawGL(bool keepAppearance=true)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.RobotModel.enableSelfCollision">
+<code class="descname">enableSelfCollision</code><span class="sig-paren">(</span><em>RobotModel self</em>, <em>int link1</em>, <em>int link2</em>, <em>bool value</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/robotsim.html#RobotModel.enableSelfCollision"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.RobotModel.enableSelfCollision" title="Permalink to this definition">¶</a></dt>
+<dd><p>void
+RobotModel::enableSelfCollision(int link1, int link2, bool value)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.RobotModel.getAccelerationLimits">
+<code class="descname">getAccelerationLimits</code><span class="sig-paren">(</span><em>RobotModel self</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/robotsim.html#RobotModel.getAccelerationLimits"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.RobotModel.getAccelerationLimits" title="Permalink to this definition">¶</a></dt>
+<dd><p>void
+RobotModel::getAccelerationLimits(std::vector&lt; double &gt; &amp;out)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.RobotModel.getCom">
+<code class="descname">getCom</code><span class="sig-paren">(</span><em>RobotModel self</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/robotsim.html#RobotModel.getCom"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.RobotModel.getCom" title="Permalink to this definition">¶</a></dt>
+<dd><p>void
+RobotModel::getCom(double out[3])</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.RobotModel.getComJacobian">
+<code class="descname">getComJacobian</code><span class="sig-paren">(</span><em>RobotModel self</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/robotsim.html#RobotModel.getComJacobian"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.RobotModel.getComJacobian" title="Permalink to this definition">¶</a></dt>
+<dd><p>void
+RobotModel::getComJacobian(std::vector&lt; std::vector&lt; double &gt; &gt; &amp;out)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.RobotModel.getConfig">
+<code class="descname">getConfig</code><span class="sig-paren">(</span><em>RobotModel self</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/robotsim.html#RobotModel.getConfig"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.RobotModel.getConfig" title="Permalink to this definition">¶</a></dt>
+<dd><p>void
+RobotModel::getConfig(std::vector&lt; double &gt; &amp;out)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.RobotModel.getCoriolisForceMatrix">
+<code class="descname">getCoriolisForceMatrix</code><span class="sig-paren">(</span><em>RobotModel self</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/robotsim.html#RobotModel.getCoriolisForceMatrix"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.RobotModel.getCoriolisForceMatrix" title="Permalink to this definition">¶</a></dt>
+<dd><p>void
+RobotModel::getCoriolisForceMatrix(std::vector&lt; std::vector&lt; double &gt;
+&gt; &amp;out)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.RobotModel.getCoriolisForces">
+<code class="descname">getCoriolisForces</code><span class="sig-paren">(</span><em>RobotModel self</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/robotsim.html#RobotModel.getCoriolisForces"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.RobotModel.getCoriolisForces" title="Permalink to this definition">¶</a></dt>
+<dd><p>void
+RobotModel::getCoriolisForces(std::vector&lt; double &gt; &amp;out)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.RobotModel.getDriver">
+<code class="descname">getDriver</code><span class="sig-paren">(</span><em>RobotModel self</em>, <em>int index</em><span class="sig-paren">)</span> &rarr; RobotModelDriver<a class="reference internal" href="_modules/klampt/robotsim.html#RobotModel.getDriver"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.RobotModel.getDriver" title="Permalink to this definition">¶</a></dt>
+<dd><p>getDriver(RobotModel self, char const * name) -&gt; RobotModelDriver</p>
+<p>RobotModelDriver
+RobotModel::getDriver(const char <a href="#id27"><span class="problematic" id="id28">*</span></a>name)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.RobotModel.getGravityForces">
+<code class="descname">getGravityForces</code><span class="sig-paren">(</span><em>RobotModel self</em>, <em>double const [3] g</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/robotsim.html#RobotModel.getGravityForces"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.RobotModel.getGravityForces" title="Permalink to this definition">¶</a></dt>
+<dd><p>void
+RobotModel::getGravityForces(const double g[3], std::vector&lt; double &gt;
+&amp;out)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.RobotModel.getID">
+<code class="descname">getID</code><span class="sig-paren">(</span><em>RobotModel self</em><span class="sig-paren">)</span> &rarr; int<a class="reference internal" href="_modules/klampt/robotsim.html#RobotModel.getID"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.RobotModel.getID" title="Permalink to this definition">¶</a></dt>
+<dd><p>int RobotModel::getID()</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.RobotModel.getJointLimits">
+<code class="descname">getJointLimits</code><span class="sig-paren">(</span><em>RobotModel self</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/robotsim.html#RobotModel.getJointLimits"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.RobotModel.getJointLimits" title="Permalink to this definition">¶</a></dt>
+<dd><p>void
+RobotModel::getJointLimits(std::vector&lt; double &gt; &amp;out, std::vector&lt;
+double &gt; &amp;out2)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.RobotModel.getLink">
+<code class="descname">getLink</code><span class="sig-paren">(</span><em>RobotModel self</em>, <em>int index</em><span class="sig-paren">)</span> &rarr; RobotModelLink<a class="reference internal" href="_modules/klampt/robotsim.html#RobotModel.getLink"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.RobotModel.getLink" title="Permalink to this definition">¶</a></dt>
+<dd><p>getLink(RobotModel self, char const * name) -&gt; RobotModelLink</p>
+<p>RobotModelLink
+RobotModel::getLink(const char <a href="#id29"><span class="problematic" id="id30">*</span></a>name)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.RobotModel.getMassMatrix">
+<code class="descname">getMassMatrix</code><span class="sig-paren">(</span><em>RobotModel self</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/robotsim.html#RobotModel.getMassMatrix"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.RobotModel.getMassMatrix" title="Permalink to this definition">¶</a></dt>
+<dd><p>void
+RobotModel::getMassMatrix(std::vector&lt; std::vector&lt; double &gt; &gt; &amp;out)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.RobotModel.getMassMatrixInv">
+<code class="descname">getMassMatrixInv</code><span class="sig-paren">(</span><em>RobotModel self</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/robotsim.html#RobotModel.getMassMatrixInv"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.RobotModel.getMassMatrixInv" title="Permalink to this definition">¶</a></dt>
+<dd><p>void
+RobotModel::getMassMatrixInv(std::vector&lt; std::vector&lt; double &gt; &gt;
+&amp;out)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.RobotModel.getName">
+<code class="descname">getName</code><span class="sig-paren">(</span><em>RobotModel self</em><span class="sig-paren">)</span> &rarr; char const *<a class="reference internal" href="_modules/klampt/robotsim.html#RobotModel.getName"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.RobotModel.getName" title="Permalink to this definition">¶</a></dt>
+<dd><p>const char *
+RobotModel::getName()</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.RobotModel.getTorqueLimits">
+<code class="descname">getTorqueLimits</code><span class="sig-paren">(</span><em>RobotModel self</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/robotsim.html#RobotModel.getTorqueLimits"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.RobotModel.getTorqueLimits" title="Permalink to this definition">¶</a></dt>
+<dd><p>void
+RobotModel::getTorqueLimits(std::vector&lt; double &gt; &amp;out)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.RobotModel.getVelocity">
+<code class="descname">getVelocity</code><span class="sig-paren">(</span><em>RobotModel self</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/robotsim.html#RobotModel.getVelocity"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.RobotModel.getVelocity" title="Permalink to this definition">¶</a></dt>
+<dd><p>void
+RobotModel::getVelocity(std::vector&lt; double &gt; &amp;out)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.RobotModel.getVelocityLimits">
+<code class="descname">getVelocityLimits</code><span class="sig-paren">(</span><em>RobotModel self</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/robotsim.html#RobotModel.getVelocityLimits"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.RobotModel.getVelocityLimits" title="Permalink to this definition">¶</a></dt>
+<dd><p>void
+RobotModel::getVelocityLimits(std::vector&lt; double &gt; &amp;out)</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="klampt.RobotModel.index">
+<code class="descname">index</code><a class="headerlink" href="#klampt.RobotModel.index" title="Permalink to this definition">¶</a></dt>
+<dd><p>RobotModel_index_get(RobotModel self) -&gt; int</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.RobotModel.interpolate">
+<code class="descname">interpolate</code><span class="sig-paren">(</span><em>RobotModel self</em>, <em>doubleVector a</em>, <em>doubleVector b</em>, <em>double u</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/robotsim.html#RobotModel.interpolate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.RobotModel.interpolate" title="Permalink to this definition">¶</a></dt>
+<dd><p>void
+RobotModel::interpolate(const std::vector&lt; double &gt; &amp;a, const
+std::vector&lt; double &gt; &amp;b, double u, std::vector&lt; double &gt; &amp;out)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.RobotModel.interpolate_deriv">
+<code class="descname">interpolate_deriv</code><span class="sig-paren">(</span><em>RobotModel self</em>, <em>doubleVector a</em>, <em>doubleVector b</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/robotsim.html#RobotModel.interpolate_deriv"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.RobotModel.interpolate_deriv" title="Permalink to this definition">¶</a></dt>
+<dd><p>void
+RobotModel::interpolate_deriv(const std::vector&lt; double &gt; &amp;a, const
+std::vector&lt; double &gt; &amp;b, std::vector&lt; double &gt; &amp;out)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.RobotModel.numDrivers">
+<code class="descname">numDrivers</code><span class="sig-paren">(</span><em>RobotModel self</em><span class="sig-paren">)</span> &rarr; int<a class="reference internal" href="_modules/klampt/robotsim.html#RobotModel.numDrivers"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.RobotModel.numDrivers" title="Permalink to this definition">¶</a></dt>
+<dd><p>int
+RobotModel::numDrivers()</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.RobotModel.numLinks">
+<code class="descname">numLinks</code><span class="sig-paren">(</span><em>RobotModel self</em><span class="sig-paren">)</span> &rarr; int<a class="reference internal" href="_modules/klampt/robotsim.html#RobotModel.numLinks"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.RobotModel.numLinks" title="Permalink to this definition">¶</a></dt>
+<dd><p>int
+RobotModel::numLinks()</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="klampt.RobotModel.robot">
+<code class="descname">robot</code><a class="headerlink" href="#klampt.RobotModel.robot" title="Permalink to this definition">¶</a></dt>
+<dd><p>RobotModel_robot_get(RobotModel self) -&gt; Robot *</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.RobotModel.selfCollisionEnabled">
+<code class="descname">selfCollisionEnabled</code><span class="sig-paren">(</span><em>RobotModel self</em>, <em>int link1</em>, <em>int link2</em><span class="sig-paren">)</span> &rarr; bool<a class="reference internal" href="_modules/klampt/robotsim.html#RobotModel.selfCollisionEnabled"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.RobotModel.selfCollisionEnabled" title="Permalink to this definition">¶</a></dt>
+<dd><p>bool
+RobotModel::selfCollisionEnabled(int link1, int link2)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.RobotModel.setAccelerationLimits">
+<code class="descname">setAccelerationLimits</code><span class="sig-paren">(</span><em>RobotModel self</em>, <em>doubleVector amax</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/robotsim.html#RobotModel.setAccelerationLimits"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.RobotModel.setAccelerationLimits" title="Permalink to this definition">¶</a></dt>
+<dd><p>void
+RobotModel::setAccelerationLimits(const std::vector&lt; double &gt; &amp;amax)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.RobotModel.setConfig">
+<code class="descname">setConfig</code><span class="sig-paren">(</span><em>RobotModel self</em>, <em>doubleVector q</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/robotsim.html#RobotModel.setConfig"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.RobotModel.setConfig" title="Permalink to this definition">¶</a></dt>
+<dd><p>void
+RobotModel::setConfig(const std::vector&lt; double &gt; &amp;q)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.RobotModel.setJointLimits">
+<code class="descname">setJointLimits</code><span class="sig-paren">(</span><em>RobotModel self</em>, <em>doubleVector qmin</em>, <em>doubleVector qmax</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/robotsim.html#RobotModel.setJointLimits"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.RobotModel.setJointLimits" title="Permalink to this definition">¶</a></dt>
+<dd><p>void
+RobotModel::setJointLimits(const std::vector&lt; double &gt; &amp;qmin, const
+std::vector&lt; double &gt; &amp;qmax)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.RobotModel.setTorqueLimits">
+<code class="descname">setTorqueLimits</code><span class="sig-paren">(</span><em>RobotModel self</em>, <em>doubleVector tmax</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/robotsim.html#RobotModel.setTorqueLimits"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.RobotModel.setTorqueLimits" title="Permalink to this definition">¶</a></dt>
+<dd><p>void
+RobotModel::setTorqueLimits(const std::vector&lt; double &gt; &amp;tmax)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.RobotModel.setVelocity">
+<code class="descname">setVelocity</code><span class="sig-paren">(</span><em>RobotModel self</em>, <em>doubleVector dq</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/robotsim.html#RobotModel.setVelocity"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.RobotModel.setVelocity" title="Permalink to this definition">¶</a></dt>
+<dd><p>void
+RobotModel::setVelocity(const std::vector&lt; double &gt; &amp;dq)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.RobotModel.setVelocityLimits">
+<code class="descname">setVelocityLimits</code><span class="sig-paren">(</span><em>RobotModel self</em>, <em>doubleVector vmax</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/robotsim.html#RobotModel.setVelocityLimits"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.RobotModel.setVelocityLimits" title="Permalink to this definition">¶</a></dt>
+<dd><p>void
+RobotModel::setVelocityLimits(const std::vector&lt; double &gt; &amp;vmax)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.RobotModel.torquesFromAccel">
+<code class="descname">torquesFromAccel</code><span class="sig-paren">(</span><em>RobotModel self</em>, <em>doubleVector ddq</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/robotsim.html#RobotModel.torquesFromAccel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.RobotModel.torquesFromAccel" title="Permalink to this definition">¶</a></dt>
+<dd><p>void
+RobotModel::torquesFromAccel(const std::vector&lt; double &gt; &amp;ddq,
+std::vector&lt; double &gt; &amp;out)</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="klampt.RobotModel.world">
+<code class="descname">world</code><a class="headerlink" href="#klampt.RobotModel.world" title="Permalink to this definition">¶</a></dt>
+<dd><p>RobotModel_world_get(RobotModel self) -&gt; int</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="klampt.RobotModelLink">
+<em class="property">class </em><code class="descclassname">klampt.</code><code class="descname">RobotModelLink</code><span class="sig-paren">(</span><em>RobotModelLink self</em><span class="sig-paren">)</span> &rarr; RobotModelLink<a class="reference internal" href="_modules/klampt/robotsim.html#RobotModelLink"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.RobotModelLink" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>A reference to a link of a RobotModel.</p>
+<p>Note that the mass is given local to the link frame, not about the
+COM.</p>
+<p>C++ includes: robotmodel.h</p>
+<p>RobotModelLink::RobotModelLink()</p>
+<dl class="method">
+<dt id="klampt.RobotModelLink.drawLocalGL">
+<code class="descname">drawLocalGL</code><span class="sig-paren">(</span><em>RobotModelLink self</em>, <em>bool keepAppearance=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/robotsim.html#RobotModelLink.drawLocalGL"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.RobotModelLink.drawLocalGL" title="Permalink to this definition">¶</a></dt>
+<dd><p>drawLocalGL(RobotModelLink self)</p>
+<p>void
+RobotModelLink::drawLocalGL(bool keepAppearance=true)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.RobotModelLink.drawWorldGL">
+<code class="descname">drawWorldGL</code><span class="sig-paren">(</span><em>RobotModelLink self</em>, <em>bool keepAppearance=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/robotsim.html#RobotModelLink.drawWorldGL"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.RobotModelLink.drawWorldGL" title="Permalink to this definition">¶</a></dt>
+<dd><p>drawWorldGL(RobotModelLink self)</p>
+<p>void
+RobotModelLink::drawWorldGL(bool keepAppearance=true)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.RobotModelLink.geometry">
+<code class="descname">geometry</code><span class="sig-paren">(</span><em>RobotModelLink self</em><span class="sig-paren">)</span> &rarr; Geometry3D<a class="reference internal" href="_modules/klampt/robotsim.html#RobotModelLink.geometry"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.RobotModelLink.geometry" title="Permalink to this definition">¶</a></dt>
+<dd><p>Geometry3D
+RobotModelLink::geometry()</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.RobotModelLink.getAngularVelocity">
+<code class="descname">getAngularVelocity</code><span class="sig-paren">(</span><em>RobotModelLink self</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/robotsim.html#RobotModelLink.getAngularVelocity"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.RobotModelLink.getAngularVelocity" title="Permalink to this definition">¶</a></dt>
+<dd><p>void
+RobotModelLink::getAngularVelocity(double out[3])</p>
+<p>Returns the angular velocity given the robot&#8217;s current velocity.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.RobotModelLink.getAxis">
+<code class="descname">getAxis</code><span class="sig-paren">(</span><em>RobotModelLink self</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/robotsim.html#RobotModelLink.getAxis"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.RobotModelLink.getAxis" title="Permalink to this definition">¶</a></dt>
+<dd><p>void
+RobotModelLink::getAxis(double out[3])</p>
+<p>Gets the local rotational axis.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.RobotModelLink.getID">
+<code class="descname">getID</code><span class="sig-paren">(</span><em>RobotModelLink self</em><span class="sig-paren">)</span> &rarr; int<a class="reference internal" href="_modules/klampt/robotsim.html#RobotModelLink.getID"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.RobotModelLink.getID" title="Permalink to this definition">¶</a></dt>
+<dd><p>int
+RobotModelLink::getID()</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.RobotModelLink.getJacobian">
+<code class="descname">getJacobian</code><span class="sig-paren">(</span><em>RobotModelLink self</em>, <em>double const [3] p</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/robotsim.html#RobotModelLink.getJacobian"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.RobotModelLink.getJacobian" title="Permalink to this definition">¶</a></dt>
+<dd><p>void
+RobotModelLink::getJacobian(const double p[3], std::vector&lt;
+std::vector&lt; double &gt; &gt; &amp;out)</p>
+<p>Returns the total jacobian of the local point p (row-major matrix)
+(orientation jacobian is stacked on position jacobian)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.RobotModelLink.getLocalDirection">
+<code class="descname">getLocalDirection</code><span class="sig-paren">(</span><em>RobotModelLink self</em>, <em>double const [3] vworld</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/robotsim.html#RobotModelLink.getLocalDirection"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.RobotModelLink.getLocalDirection" title="Permalink to this definition">¶</a></dt>
+<dd><p>void
+RobotModelLink::getLocalDirection(const double vworld[3], double
+out[3])</p>
+<p>Converts direction from world to local coordinates.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.RobotModelLink.getLocalPosition">
+<code class="descname">getLocalPosition</code><span class="sig-paren">(</span><em>RobotModelLink self</em>, <em>double const [3] pworld</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/robotsim.html#RobotModelLink.getLocalPosition"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.RobotModelLink.getLocalPosition" title="Permalink to this definition">¶</a></dt>
+<dd><p>void
+RobotModelLink::getLocalPosition(const double pworld[3], double
+out[3])</p>
+<p>Converts point from world to local coordinates.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.RobotModelLink.getMass">
+<code class="descname">getMass</code><span class="sig-paren">(</span><em>RobotModelLink self</em><span class="sig-paren">)</span> &rarr; Mass<a class="reference internal" href="_modules/klampt/robotsim.html#RobotModelLink.getMass"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.RobotModelLink.getMass" title="Permalink to this definition">¶</a></dt>
+<dd><p>Mass
+RobotModelLink::getMass()</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.RobotModelLink.getName">
+<code class="descname">getName</code><span class="sig-paren">(</span><em>RobotModelLink self</em><span class="sig-paren">)</span> &rarr; char const *<a class="reference internal" href="_modules/klampt/robotsim.html#RobotModelLink.getName"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.RobotModelLink.getName" title="Permalink to this definition">¶</a></dt>
+<dd><p>const char *
+RobotModelLink::getName()</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.RobotModelLink.getOrientationJacobian">
+<code class="descname">getOrientationJacobian</code><span class="sig-paren">(</span><em>RobotModelLink self</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/robotsim.html#RobotModelLink.getOrientationJacobian"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.RobotModelLink.getOrientationJacobian" title="Permalink to this definition">¶</a></dt>
+<dd><p>void
+RobotModelLink::getOrientationJacobian(std::vector&lt; std::vector&lt;
+double &gt; &gt; &amp;out)</p>
+<p>Returns the orientation jacobian of the link (row-major matrix)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.RobotModelLink.getParent">
+<code class="descname">getParent</code><span class="sig-paren">(</span><em>RobotModelLink self</em><span class="sig-paren">)</span> &rarr; int<a class="reference internal" href="_modules/klampt/robotsim.html#RobotModelLink.getParent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.RobotModelLink.getParent" title="Permalink to this definition">¶</a></dt>
+<dd><p>int
+RobotModelLink::getParent()</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.RobotModelLink.getParentTransform">
+<code class="descname">getParentTransform</code><span class="sig-paren">(</span><em>RobotModelLink self</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/robotsim.html#RobotModelLink.getParentTransform"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.RobotModelLink.getParentTransform" title="Permalink to this definition">¶</a></dt>
+<dd><p>void
+RobotModelLink::getParentTransform(double out[9], double out2[3])</p>
+<p>Gets transformation (R,t) to the parent link.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.RobotModelLink.getPointVelocity">
+<code class="descname">getPointVelocity</code><span class="sig-paren">(</span><em>RobotModelLink self</em>, <em>double const [3] plocal</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/robotsim.html#RobotModelLink.getPointVelocity"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.RobotModelLink.getPointVelocity" title="Permalink to this definition">¶</a></dt>
+<dd><p>void
+RobotModelLink::getPointVelocity(const double plocal[3], double
+out[3])</p>
+<p>Returns the world velocity of the point given the robot&#8217;s current
+velocity.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.RobotModelLink.getPositionJacobian">
+<code class="descname">getPositionJacobian</code><span class="sig-paren">(</span><em>RobotModelLink self</em>, <em>double const [3] p</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/robotsim.html#RobotModelLink.getPositionJacobian"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.RobotModelLink.getPositionJacobian" title="Permalink to this definition">¶</a></dt>
+<dd><p>void
+RobotModelLink::getPositionJacobian(const double p[3], std::vector&lt;
+std::vector&lt; double &gt; &gt; &amp;out)</p>
+<p>Returns the jacobian of the local point p (row-major matrix)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.RobotModelLink.getRobot">
+<code class="descname">getRobot</code><span class="sig-paren">(</span><em>RobotModelLink self</em><span class="sig-paren">)</span> &rarr; RobotModel<a class="reference internal" href="_modules/klampt/robotsim.html#RobotModelLink.getRobot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.RobotModelLink.getRobot" title="Permalink to this definition">¶</a></dt>
+<dd><p>RobotModel
+RobotModelLink::getRobot()</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.RobotModelLink.getTransform">
+<code class="descname">getTransform</code><span class="sig-paren">(</span><em>RobotModelLink self</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/robotsim.html#RobotModelLink.getTransform"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.RobotModelLink.getTransform" title="Permalink to this definition">¶</a></dt>
+<dd><p>void
+RobotModelLink::getTransform(double out[9], double out2[3])</p>
+<p>Gets transformation (R,t) to the world frame.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.RobotModelLink.getVelocity">
+<code class="descname">getVelocity</code><span class="sig-paren">(</span><em>RobotModelLink self</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/robotsim.html#RobotModelLink.getVelocity"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.RobotModelLink.getVelocity" title="Permalink to this definition">¶</a></dt>
+<dd><p>void
+RobotModelLink::getVelocity(double out[3])</p>
+<p>Returns the velocity of the origin given the robot&#8217;s current velocity.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.RobotModelLink.getWorldDirection">
+<code class="descname">getWorldDirection</code><span class="sig-paren">(</span><em>RobotModelLink self</em>, <em>double const [3] vlocal</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/robotsim.html#RobotModelLink.getWorldDirection"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.RobotModelLink.getWorldDirection" title="Permalink to this definition">¶</a></dt>
+<dd><p>void
+RobotModelLink::getWorldDirection(const double vlocal[3], double
+out[3])</p>
+<p>Converts direction from local to world coordinates.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.RobotModelLink.getWorldPosition">
+<code class="descname">getWorldPosition</code><span class="sig-paren">(</span><em>RobotModelLink self</em>, <em>double const [3] plocal</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/robotsim.html#RobotModelLink.getWorldPosition"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.RobotModelLink.getWorldPosition" title="Permalink to this definition">¶</a></dt>
+<dd><p>void
+RobotModelLink::getWorldPosition(const double plocal[3], double
+out[3])</p>
+<p>Converts point from local to world coordinates.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="klampt.RobotModelLink.index">
+<code class="descname">index</code><a class="headerlink" href="#klampt.RobotModelLink.index" title="Permalink to this definition">¶</a></dt>
+<dd><p>RobotModelLink_index_get(RobotModelLink self) -&gt; int</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="klampt.RobotModelLink.robot">
+<code class="descname">robot</code><a class="headerlink" href="#klampt.RobotModelLink.robot" title="Permalink to this definition">¶</a></dt>
+<dd><p>RobotModelLink_robot_get(RobotModelLink self) -&gt; Robot *</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="klampt.RobotModelLink.robotIndex">
+<code class="descname">robotIndex</code><a class="headerlink" href="#klampt.RobotModelLink.robotIndex" title="Permalink to this definition">¶</a></dt>
+<dd><p>RobotModelLink_robotIndex_get(RobotModelLink self) -&gt; int</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.RobotModelLink.setAxis">
+<code class="descname">setAxis</code><span class="sig-paren">(</span><em>RobotModelLink self</em>, <em>double const [3] axis</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/robotsim.html#RobotModelLink.setAxis"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.RobotModelLink.setAxis" title="Permalink to this definition">¶</a></dt>
+<dd><p>void
+RobotModelLink::setAxis(const double axis[3])</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.RobotModelLink.setMass">
+<code class="descname">setMass</code><span class="sig-paren">(</span><em>RobotModelLink self</em>, <em>Mass mass</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/robotsim.html#RobotModelLink.setMass"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.RobotModelLink.setMass" title="Permalink to this definition">¶</a></dt>
+<dd><p>void
+RobotModelLink::setMass(const Mass &amp;mass)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.RobotModelLink.setParent">
+<code class="descname">setParent</code><span class="sig-paren">(</span><em>RobotModelLink self</em>, <em>int p</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/robotsim.html#RobotModelLink.setParent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.RobotModelLink.setParent" title="Permalink to this definition">¶</a></dt>
+<dd><p>void
+RobotModelLink::setParent(int p)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.RobotModelLink.setParentTransform">
+<code class="descname">setParentTransform</code><span class="sig-paren">(</span><em>RobotModelLink self</em>, <em>double const [9] R</em>, <em>double const [3] t</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/robotsim.html#RobotModelLink.setParentTransform"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.RobotModelLink.setParentTransform" title="Permalink to this definition">¶</a></dt>
+<dd><p>void
+RobotModelLink::setParentTransform(const double R[9], const double
+t[3])</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.RobotModelLink.setTransform">
+<code class="descname">setTransform</code><span class="sig-paren">(</span><em>RobotModelLink self</em>, <em>double const [9] R</em>, <em>double const [3] t</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/robotsim.html#RobotModelLink.setTransform"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.RobotModelLink.setTransform" title="Permalink to this definition">¶</a></dt>
+<dd><p>void
+RobotModelLink::setTransform(const double R[9], const double t[3])</p>
+<p>Sets transformation (R,t) to the world frame. Note: this does NOT
+perform inverse kinematics. The transform is overwritten when the
+robot&#8217;s setConfig() method is called.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="klampt.RobotModelLink.world">
+<code class="descname">world</code><a class="headerlink" href="#klampt.RobotModelLink.world" title="Permalink to this definition">¶</a></dt>
+<dd><p>RobotModelLink_world_get(RobotModelLink self) -&gt; int</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="klampt.RigidObjectModel">
+<em class="property">class </em><code class="descclassname">klampt.</code><code class="descname">RigidObjectModel</code><span class="sig-paren">(</span><em>RigidObjectModel self</em><span class="sig-paren">)</span> &rarr; RigidObjectModel<a class="reference internal" href="_modules/klampt/robotsim.html#RigidObjectModel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.RigidObjectModel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#klampt.RigidObjectModel.object" title="klampt.RigidObjectModel.object"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<p>A rigid movable object.</p>
+<p>State is retrieved/set using get/setTransform. No velocities are
+stored.</p>
+<p>C++ includes: robotmodel.h</p>
+<p>RigidObjectModel::RigidObjectModel()</p>
+<dl class="method">
+<dt id="klampt.RigidObjectModel.drawGL">
+<code class="descname">drawGL</code><span class="sig-paren">(</span><em>RigidObjectModel self</em>, <em>bool keepAppearance=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/robotsim.html#RigidObjectModel.drawGL"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.RigidObjectModel.drawGL" title="Permalink to this definition">¶</a></dt>
+<dd><p>drawGL(RigidObjectModel self)</p>
+<p>void
+RigidObjectModel::drawGL(bool keepAppearance=true)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.RigidObjectModel.geometry">
+<code class="descname">geometry</code><span class="sig-paren">(</span><em>RigidObjectModel self</em><span class="sig-paren">)</span> &rarr; Geometry3D<a class="reference internal" href="_modules/klampt/robotsim.html#RigidObjectModel.geometry"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.RigidObjectModel.geometry" title="Permalink to this definition">¶</a></dt>
+<dd><p>Geometry3D
+RigidObjectModel::geometry()</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.RigidObjectModel.getContactParameters">
+<code class="descname">getContactParameters</code><span class="sig-paren">(</span><em>RigidObjectModel self</em><span class="sig-paren">)</span> &rarr; ContactParameters<a class="reference internal" href="_modules/klampt/robotsim.html#RigidObjectModel.getContactParameters"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.RigidObjectModel.getContactParameters" title="Permalink to this definition">¶</a></dt>
+<dd><p>ContactParameters RigidObjectModel::getContactParameters()</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.RigidObjectModel.getID">
+<code class="descname">getID</code><span class="sig-paren">(</span><em>RigidObjectModel self</em><span class="sig-paren">)</span> &rarr; int<a class="reference internal" href="_modules/klampt/robotsim.html#RigidObjectModel.getID"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.RigidObjectModel.getID" title="Permalink to this definition">¶</a></dt>
+<dd><p>int
+RigidObjectModel::getID()</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.RigidObjectModel.getMass">
+<code class="descname">getMass</code><span class="sig-paren">(</span><em>RigidObjectModel self</em><span class="sig-paren">)</span> &rarr; Mass<a class="reference internal" href="_modules/klampt/robotsim.html#RigidObjectModel.getMass"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.RigidObjectModel.getMass" title="Permalink to this definition">¶</a></dt>
+<dd><p>Mass
+RigidObjectModel::getMass()</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.RigidObjectModel.getName">
+<code class="descname">getName</code><span class="sig-paren">(</span><em>RigidObjectModel self</em><span class="sig-paren">)</span> &rarr; char const *<a class="reference internal" href="_modules/klampt/robotsim.html#RigidObjectModel.getName"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.RigidObjectModel.getName" title="Permalink to this definition">¶</a></dt>
+<dd><p>const char *
+RigidObjectModel::getName()</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.RigidObjectModel.getTransform">
+<code class="descname">getTransform</code><span class="sig-paren">(</span><em>RigidObjectModel self</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/robotsim.html#RigidObjectModel.getTransform"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.RigidObjectModel.getTransform" title="Permalink to this definition">¶</a></dt>
+<dd><p>void
+RigidObjectModel::getTransform(double out[9], double out2[3])</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="klampt.RigidObjectModel.index">
+<code class="descname">index</code><a class="headerlink" href="#klampt.RigidObjectModel.index" title="Permalink to this definition">¶</a></dt>
+<dd><p>RigidObjectModel_index_get(RigidObjectModel self) -&gt; int</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="klampt.RigidObjectModel.object">
+<code class="descname">object</code><a class="headerlink" href="#klampt.RigidObjectModel.object" title="Permalink to this definition">¶</a></dt>
+<dd><p>RigidObjectModel_object_get(RigidObjectModel self) -&gt; RigidObject *</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.RigidObjectModel.setContactParameters">
+<code class="descname">setContactParameters</code><span class="sig-paren">(</span><em>RigidObjectModel self</em>, <em>ContactParameters params</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/robotsim.html#RigidObjectModel.setContactParameters"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.RigidObjectModel.setContactParameters" title="Permalink to this definition">¶</a></dt>
+<dd><p>void
+RigidObjectModel::setContactParameters(const ContactParameters
+&amp;params)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.RigidObjectModel.setMass">
+<code class="descname">setMass</code><span class="sig-paren">(</span><em>RigidObjectModel self</em>, <em>Mass mass</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/robotsim.html#RigidObjectModel.setMass"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.RigidObjectModel.setMass" title="Permalink to this definition">¶</a></dt>
+<dd><p>void
+RigidObjectModel::setMass(const Mass &amp;mass)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.RigidObjectModel.setTransform">
+<code class="descname">setTransform</code><span class="sig-paren">(</span><em>RigidObjectModel self</em>, <em>double const [9] R</em>, <em>double const [3] t</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/robotsim.html#RigidObjectModel.setTransform"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.RigidObjectModel.setTransform" title="Permalink to this definition">¶</a></dt>
+<dd><p>void
+RigidObjectModel::setTransform(const double R[9], const double t[3])</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="klampt.RigidObjectModel.world">
+<code class="descname">world</code><a class="headerlink" href="#klampt.RigidObjectModel.world" title="Permalink to this definition">¶</a></dt>
+<dd><p>RigidObjectModel_world_get(RigidObjectModel self) -&gt; int</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="klampt.TerrainModel">
+<em class="property">class </em><code class="descclassname">klampt.</code><code class="descname">TerrainModel</code><span class="sig-paren">(</span><em>TerrainModel self</em><span class="sig-paren">)</span> &rarr; TerrainModel<a class="reference internal" href="_modules/klampt/robotsim.html#TerrainModel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.TerrainModel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Static environment geometry.</p>
+<p>C++ includes: robotmodel.h</p>
+<p>TerrainModel::TerrainModel()</p>
+<dl class="method">
+<dt id="klampt.TerrainModel.drawGL">
+<code class="descname">drawGL</code><span class="sig-paren">(</span><em>TerrainModel self</em>, <em>bool keepAppearance=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/robotsim.html#TerrainModel.drawGL"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.TerrainModel.drawGL" title="Permalink to this definition">¶</a></dt>
+<dd><p>drawGL(TerrainModel self)</p>
+<p>void
+TerrainModel::drawGL(bool keepAppearance=true)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.TerrainModel.geometry">
+<code class="descname">geometry</code><span class="sig-paren">(</span><em>TerrainModel self</em><span class="sig-paren">)</span> &rarr; Geometry3D<a class="reference internal" href="_modules/klampt/robotsim.html#TerrainModel.geometry"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.TerrainModel.geometry" title="Permalink to this definition">¶</a></dt>
+<dd><p>Geometry3D
+TerrainModel::geometry()</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.TerrainModel.getID">
+<code class="descname">getID</code><span class="sig-paren">(</span><em>TerrainModel self</em><span class="sig-paren">)</span> &rarr; int<a class="reference internal" href="_modules/klampt/robotsim.html#TerrainModel.getID"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.TerrainModel.getID" title="Permalink to this definition">¶</a></dt>
+<dd><p>int TerrainModel::getID()</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.TerrainModel.getName">
+<code class="descname">getName</code><span class="sig-paren">(</span><em>TerrainModel self</em><span class="sig-paren">)</span> &rarr; char const *<a class="reference internal" href="_modules/klampt/robotsim.html#TerrainModel.getName"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.TerrainModel.getName" title="Permalink to this definition">¶</a></dt>
+<dd><p>const char *
+TerrainModel::getName()</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="klampt.TerrainModel.index">
+<code class="descname">index</code><a class="headerlink" href="#klampt.TerrainModel.index" title="Permalink to this definition">¶</a></dt>
+<dd><p>TerrainModel_index_get(TerrainModel self) -&gt; int</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.TerrainModel.setFriction">
+<code class="descname">setFriction</code><span class="sig-paren">(</span><em>TerrainModel self</em>, <em>double friction</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/robotsim.html#TerrainModel.setFriction"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.TerrainModel.setFriction" title="Permalink to this definition">¶</a></dt>
+<dd><p>void
+TerrainModel::setFriction(double friction)</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="klampt.TerrainModel.terrain">
+<code class="descname">terrain</code><a class="headerlink" href="#klampt.TerrainModel.terrain" title="Permalink to this definition">¶</a></dt>
+<dd><p>TerrainModel_terrain_get(TerrainModel self) -&gt; Environment *</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="klampt.TerrainModel.world">
+<code class="descname">world</code><a class="headerlink" href="#klampt.TerrainModel.world" title="Permalink to this definition">¶</a></dt>
+<dd><p>TerrainModel_world_get(TerrainModel self) -&gt; int</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="klampt.SimRobotController">
+<em class="property">class </em><code class="descclassname">klampt.</code><code class="descname">SimRobotController</code><span class="sig-paren">(</span><em>SimRobotController self</em><span class="sig-paren">)</span> &rarr; SimRobotController<a class="reference internal" href="_modules/klampt/robotsim.html#SimRobotController"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.SimRobotController" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>A controller for a simulated robot.</p>
+<p>The basic way of using this is in &#8220;standard&#8221; move-to mode which
+accepts a milestone (setMilestone) or list of milestones (repeated
+calls to addMilestone) and interpolates dynamically from the current
+configuration/velocity. To handle disturbances, a PID loop is run. The
+constants of this loop are initially set in the robot file, or you can
+perform tuning via setPIDGains.</p>
+<p>Arbitrary trajectories can be tracked by using setVelocity over short
+time steps. Force controllers can be implemented using setTorque,
+again using short time steps. These set the controller into manual
+override mode. To reset back to regular motion queue control,</p>
+<p>C++ includes: robotsim.h</p>
+<p>SimRobotController::SimRobotController()</p>
+<dl class="method">
+<dt id="klampt.SimRobotController.addMilestone">
+<code class="descname">addMilestone</code><span class="sig-paren">(</span><em>SimRobotController self</em>, <em>doubleVector q</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/robotsim.html#SimRobotController.addMilestone"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.SimRobotController.addMilestone" title="Permalink to this definition">¶</a></dt>
+<dd><p>addMilestone(SimRobotController self, doubleVector q, doubleVector dq)</p>
+<p>void
+SimRobotController::addMilestone(const std::vector&lt; double &gt; &amp;q, const
+std::vector&lt; double &gt; &amp;dq)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.SimRobotController.commands">
+<code class="descname">commands</code><span class="sig-paren">(</span><em>SimRobotController self</em><span class="sig-paren">)</span> &rarr; std::vector&lt; std::string,std::allocator&lt; std::string &gt; &gt;<a class="reference internal" href="_modules/klampt/robotsim.html#SimRobotController.commands"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.SimRobotController.commands" title="Permalink to this definition">¶</a></dt>
+<dd><p>std::vector&lt;
+std::string &gt; SimRobotController::commands()</p>
+<p>gets a command list</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.SimRobotController.getCommandedConfig">
+<code class="descname">getCommandedConfig</code><span class="sig-paren">(</span><em>SimRobotController self</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/robotsim.html#SimRobotController.getCommandedConfig"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.SimRobotController.getCommandedConfig" title="Permalink to this definition">¶</a></dt>
+<dd><p>void
+SimRobotController::getCommandedConfig(std::vector&lt; double &gt; &amp;out)</p>
+<p>Returns the current commanded configuration.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.SimRobotController.getCommandedVelocity">
+<code class="descname">getCommandedVelocity</code><span class="sig-paren">(</span><em>SimRobotController self</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/robotsim.html#SimRobotController.getCommandedVelocity"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.SimRobotController.getCommandedVelocity" title="Permalink to this definition">¶</a></dt>
+<dd><p>void
+SimRobotController::getCommandedVelocity(std::vector&lt; double &gt; &amp;out)</p>
+<p>Returns the current commanded velocity.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.SimRobotController.getNamedSensor">
+<code class="descname">getNamedSensor</code><span class="sig-paren">(</span><em>SimRobotController self</em>, <em>std::string const &amp; name</em><span class="sig-paren">)</span> &rarr; SimRobotSensor<a class="reference internal" href="_modules/klampt/robotsim.html#SimRobotController.getNamedSensor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.SimRobotController.getNamedSensor" title="Permalink to this definition">¶</a></dt>
+<dd><p>SimRobotSensor SimRobotController::getNamedSensor(const std::string
+&amp;name)</p>
+<p>Returns a sensor by name. If unavailable, a null sensor is returned.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.SimRobotController.getSensedConfig">
+<code class="descname">getSensedConfig</code><span class="sig-paren">(</span><em>SimRobotController self</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/robotsim.html#SimRobotController.getSensedConfig"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.SimRobotController.getSensedConfig" title="Permalink to this definition">¶</a></dt>
+<dd><p>void
+SimRobotController::getSensedConfig(std::vector&lt; double &gt; &amp;out)</p>
+<p>Returns the current &#8220;sensed&#8221; configuration from the simulator.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.SimRobotController.getSensedVelocity">
+<code class="descname">getSensedVelocity</code><span class="sig-paren">(</span><em>SimRobotController self</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/robotsim.html#SimRobotController.getSensedVelocity"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.SimRobotController.getSensedVelocity" title="Permalink to this definition">¶</a></dt>
+<dd><p>void
+SimRobotController::getSensedVelocity(std::vector&lt; double &gt; &amp;out)</p>
+<p>Returns the current &#8220;sensed&#8221; velocity from the simulator.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.SimRobotController.getSensor">
+<code class="descname">getSensor</code><span class="sig-paren">(</span><em>SimRobotController self</em>, <em>int index</em><span class="sig-paren">)</span> &rarr; SimRobotSensor<a class="reference internal" href="_modules/klampt/robotsim.html#SimRobotController.getSensor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.SimRobotController.getSensor" title="Permalink to this definition">¶</a></dt>
+<dd><p>SimRobotSensor
+SimRobotController::getSensor(int index)</p>
+<p>Returns a sensor by index. If out of bounds, a null sensor is
+returned.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.SimRobotController.getSetting">
+<code class="descname">getSetting</code><span class="sig-paren">(</span><em>SimRobotController self</em>, <em>std::string const &amp; name</em><span class="sig-paren">)</span> &rarr; std::string<a class="reference internal" href="_modules/klampt/robotsim.html#SimRobotController.getSetting"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.SimRobotController.getSetting" title="Permalink to this definition">¶</a></dt>
+<dd><p>std::string
+SimRobotController::getSetting(const std::string &amp;name)</p>
+<p>gets/sets settings of the controller</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="klampt.SimRobotController.index">
+<code class="descname">index</code><a class="headerlink" href="#klampt.SimRobotController.index" title="Permalink to this definition">¶</a></dt>
+<dd><p>SimRobotController_index_get(SimRobotController self) -&gt; int</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.SimRobotController.remainingTime">
+<code class="descname">remainingTime</code><span class="sig-paren">(</span><em>SimRobotController self</em><span class="sig-paren">)</span> &rarr; double<a class="reference internal" href="_modules/klampt/robotsim.html#SimRobotController.remainingTime"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.SimRobotController.remainingTime" title="Permalink to this definition">¶</a></dt>
+<dd><p>double
+SimRobotController::remainingTime() const</p>
+<p>Returns the remaining duration of the motion queue.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.SimRobotController.sendCommand">
+<code class="descname">sendCommand</code><span class="sig-paren">(</span><em>SimRobotController self</em>, <em>std::string const &amp; name</em>, <em>std::string const &amp; args</em><span class="sig-paren">)</span> &rarr; bool<a class="reference internal" href="_modules/klampt/robotsim.html#SimRobotController.sendCommand"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.SimRobotController.sendCommand" title="Permalink to this definition">¶</a></dt>
+<dd><p>bool
+SimRobotController::sendCommand(const std::string &amp;name, const
+std::string &amp;args)</p>
+<p>sends a command to the controller</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.SimRobotController.setManualMode">
+<code class="descname">setManualMode</code><span class="sig-paren">(</span><em>SimRobotController self</em>, <em>bool enabled</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/robotsim.html#SimRobotController.setManualMode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.SimRobotController.setManualMode" title="Permalink to this definition">¶</a></dt>
+<dd><p>void
+SimRobotController::setManualMode(bool enabled)</p>
+<p>Turns on/off manual mode, if either the setTorque or setPID command
+were previously set.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.SimRobotController.setMilestone">
+<code class="descname">setMilestone</code><span class="sig-paren">(</span><em>SimRobotController self</em>, <em>doubleVector q</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/robotsim.html#SimRobotController.setMilestone"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.SimRobotController.setMilestone" title="Permalink to this definition">¶</a></dt>
+<dd><p>setMilestone(SimRobotController self, doubleVector q, doubleVector dq)</p>
+<p>void
+SimRobotController::setMilestone(const std::vector&lt; double &gt; &amp;q, const
+std::vector&lt; double &gt; &amp;dq)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.SimRobotController.setPIDCommand">
+<code class="descname">setPIDCommand</code><span class="sig-paren">(</span><em>SimRobotController self</em>, <em>doubleVector qdes</em>, <em>doubleVector dqdes</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/robotsim.html#SimRobotController.setPIDCommand"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.SimRobotController.setPIDCommand" title="Permalink to this definition">¶</a></dt>
+<dd><p>setPIDCommand(SimRobotController self, doubleVector qdes, doubleVector dqdes, doubleVector tfeedforward)</p>
+<p>void
+SimRobotController::setPIDCommand(const std::vector&lt; double &gt; &amp;qdes,
+const std::vector&lt; double &gt; &amp;dqdes, const std::vector&lt; double &gt;
+&amp;tfeedforward)</p>
+<p>Sets a PID command controller with feedforward torques.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.SimRobotController.setPIDGains">
+<code class="descname">setPIDGains</code><span class="sig-paren">(</span><em>SimRobotController self</em>, <em>doubleVector kP</em>, <em>doubleVector kI</em>, <em>doubleVector kD</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/robotsim.html#SimRobotController.setPIDGains"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.SimRobotController.setPIDGains" title="Permalink to this definition">¶</a></dt>
+<dd><p>void
+SimRobotController::setPIDGains(const std::vector&lt; double &gt; &amp;kP, const
+std::vector&lt; double &gt; &amp;kI, const std::vector&lt; double &gt; &amp;kD)</p>
+<p>Sets the PID gains.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.SimRobotController.setRate">
+<code class="descname">setRate</code><span class="sig-paren">(</span><em>SimRobotController self</em>, <em>double dt</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/robotsim.html#SimRobotController.setRate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.SimRobotController.setRate" title="Permalink to this definition">¶</a></dt>
+<dd><p>void
+SimRobotController::setRate(double dt)</p>
+<p>Sets the current feedback control rate.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.SimRobotController.setSetting">
+<code class="descname">setSetting</code><span class="sig-paren">(</span><em>SimRobotController self</em>, <em>std::string const &amp; name</em>, <em>std::string const &amp; val</em><span class="sig-paren">)</span> &rarr; bool<a class="reference internal" href="_modules/klampt/robotsim.html#SimRobotController.setSetting"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.SimRobotController.setSetting" title="Permalink to this definition">¶</a></dt>
+<dd><p>bool
+SimRobotController::setSetting(const std::string &amp;name, const
+std::string &amp;val)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.SimRobotController.setTorque">
+<code class="descname">setTorque</code><span class="sig-paren">(</span><em>SimRobotController self</em>, <em>doubleVector t</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/robotsim.html#SimRobotController.setTorque"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.SimRobotController.setTorque" title="Permalink to this definition">¶</a></dt>
+<dd><p>void
+SimRobotController::setTorque(const std::vector&lt; double &gt; &amp;t)</p>
+<p>Sets a torque command controller.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.SimRobotController.setVelocity">
+<code class="descname">setVelocity</code><span class="sig-paren">(</span><em>SimRobotController self</em>, <em>doubleVector dq</em>, <em>double dt</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/robotsim.html#SimRobotController.setVelocity"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.SimRobotController.setVelocity" title="Permalink to this definition">¶</a></dt>
+<dd><p>void
+SimRobotController::setVelocity(const std::vector&lt; double &gt; &amp;dq,
+double dt)</p>
+<p>Sets a rate controller from the current commanded config to move at
+rate dq for time dt.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="klampt.SimRobotController.sim">
+<code class="descname">sim</code><a class="headerlink" href="#klampt.SimRobotController.sim" title="Permalink to this definition">¶</a></dt>
+<dd><p>SimRobotController_sim_get(SimRobotController self) -&gt; WorldSimulation *</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="klampt.SimBody">
+<em class="property">class </em><code class="descclassname">klampt.</code><code class="descname">SimBody</code><span class="sig-paren">(</span><em>SimBody self</em><span class="sig-paren">)</span> &rarr; SimBody<a class="reference internal" href="_modules/klampt/robotsim.html#SimBody"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.SimBody" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>A reference to a rigid body inside a Simulator (either a
+RigidObjectModel, TerrainModel, or a link of a RobotModel).</p>
+<p>Can use this class to directly apply forces to or control positions /
+velocities of objects in the simulation. However, note that the
+changes are only applied in the current simulation substep, not the
+duration provided to Simulation.simulate(). If you need fine-grained
+control, make sure to call simulate() with time steps equal to the
+value provided to Simulation.setSimStep() (this is 0.001s by default).</p>
+<p>C++ includes: robotsim.h</p>
+<p>A reference to a rigid body inside a Simulator (either a
+RigidObjectModel, TerrainModel, or a link of a RobotModel).</p>
+<p>Can use this class to directly apply forces to or control positions /
+velocities of objects in the simulation. However, note that the
+changes are only applied in the current simulation substep, not the
+duration provided to Simulation.simulate(). If you need fine-grained
+control, make sure to call simulate() with time steps equal to the
+value provided to Simulation.setSimStep() (this is 0.001s by default).</p>
+<p>C++ includes: robotsim.h</p>
+<dl class="method">
+<dt id="klampt.SimBody.applyWrench">
+<code class="descname">applyWrench</code><span class="sig-paren">(</span><em>SimBody self</em>, <em>double const [3] f</em>, <em>double const [3] t</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/robotsim.html#SimBody.applyWrench"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.SimBody.applyWrench" title="Permalink to this definition">¶</a></dt>
+<dd><p>void
+SimBody::applyWrench(const double f[3], const double t[3])</p>
+<p>Applies a force and torque about the COM at the current simulation
+time step.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="klampt.SimBody.body">
+<code class="descname">body</code><a class="headerlink" href="#klampt.SimBody.body" title="Permalink to this definition">¶</a></dt>
+<dd><p>SimBody_body_get(SimBody self) -&gt; dBodyID</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.SimBody.enable">
+<code class="descname">enable</code><span class="sig-paren">(</span><em>SimBody self</em>, <em>bool enabled=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/robotsim.html#SimBody.enable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.SimBody.enable" title="Permalink to this definition">¶</a></dt>
+<dd><p>enable(SimBody self)</p>
+<p>void SimBody::enable(bool
+enabled=true)</p>
+<p>Sets the simulation of this body on/off.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="klampt.SimBody.geometry">
+<code class="descname">geometry</code><a class="headerlink" href="#klampt.SimBody.geometry" title="Permalink to this definition">¶</a></dt>
+<dd><p>SimBody_geometry_get(SimBody self) -&gt; ODEGeometry *</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.SimBody.getCollisionPadding">
+<code class="descname">getCollisionPadding</code><span class="sig-paren">(</span><em>SimBody self</em><span class="sig-paren">)</span> &rarr; double<a class="reference internal" href="_modules/klampt/robotsim.html#SimBody.getCollisionPadding"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.SimBody.getCollisionPadding" title="Permalink to this definition">¶</a></dt>
+<dd><p>double
+SimBody::getCollisionPadding()</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.SimBody.getTransform">
+<code class="descname">getTransform</code><span class="sig-paren">(</span><em>SimBody self</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/robotsim.html#SimBody.getTransform"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.SimBody.getTransform" title="Permalink to this definition">¶</a></dt>
+<dd><p>void
+SimBody::getTransform(double out[9], double out2[3])</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.SimBody.getVelocity">
+<code class="descname">getVelocity</code><span class="sig-paren">(</span><em>SimBody self</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/robotsim.html#SimBody.getVelocity"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.SimBody.getVelocity" title="Permalink to this definition">¶</a></dt>
+<dd><p>void
+SimBody::getVelocity(double out[3], double out2[3])</p>
+<p>Returns the angular velocity and translational velocity.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.SimBody.isEnabled">
+<code class="descname">isEnabled</code><span class="sig-paren">(</span><em>SimBody self</em><span class="sig-paren">)</span> &rarr; bool<a class="reference internal" href="_modules/klampt/robotsim.html#SimBody.isEnabled"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.SimBody.isEnabled" title="Permalink to this definition">¶</a></dt>
+<dd><p>bool SimBody::isEnabled()</p>
+<p>Returns true if this body is being simulated.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.SimBody.setCollisionPadding">
+<code class="descname">setCollisionPadding</code><span class="sig-paren">(</span><em>SimBody self</em>, <em>double padding</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/robotsim.html#SimBody.setCollisionPadding"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.SimBody.setCollisionPadding" title="Permalink to this definition">¶</a></dt>
+<dd><p>void
+SimBody::setCollisionPadding(double padding)</p>
+<p>Sets the collision padding (useful for thin objects). Default is
+0.0025.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.SimBody.setTransform">
+<code class="descname">setTransform</code><span class="sig-paren">(</span><em>SimBody self</em>, <em>double const [9] R</em>, <em>double const [3] t</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/robotsim.html#SimBody.setTransform"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.SimBody.setTransform" title="Permalink to this definition">¶</a></dt>
+<dd><p>void
+SimBody::setTransform(const double R[9], const double t[3])</p>
+<p>Sets the body&#8217;s transformation at the current simulation time step.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.SimBody.setVelocity">
+<code class="descname">setVelocity</code><span class="sig-paren">(</span><em>SimBody self</em>, <em>double const [3] w</em>, <em>double const [3] v</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/robotsim.html#SimBody.setVelocity"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.SimBody.setVelocity" title="Permalink to this definition">¶</a></dt>
+<dd><p>void
+SimBody::setVelocity(const double w[3], const double v[3])</p>
+<p>Sets the angular velocity and translational velocity at the current
+simulation time step.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.SimBody.surface">
+<code class="descname">surface</code><span class="sig-paren">(</span><em>SimBody self</em><span class="sig-paren">)</span> &rarr; ODESurfaceProperties *<a class="reference internal" href="_modules/klampt/robotsim.html#SimBody.surface"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.SimBody.surface" title="Permalink to this definition">¶</a></dt>
+<dd><p>ODESurfaceProperties *
+SimBody::surface()</p>
+<p>Gets/sets the surface properties.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="klampt.Simulator">
+<em class="property">class </em><code class="descclassname">klampt.</code><code class="descname">Simulator</code><span class="sig-paren">(</span><em>Simulator self</em>, <em>WorldModel model</em><span class="sig-paren">)</span> &rarr; Simulator<a class="reference internal" href="_modules/klampt/robotsim.html#Simulator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.Simulator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>A dynamics simulator for a WorldModel.</p>
+<p>C++ includes: robotsim.h</p>
+<p>Simulator::Simulator(const WorldModel &amp;model)</p>
+<p>Constructs the simulator from a WorldModel. If the WorldModel was
+loaded from an XML file, then the simulation setup is loaded from it.</p>
+<dl class="method">
+<dt id="klampt.Simulator.contactForce">
+<code class="descname">contactForce</code><span class="sig-paren">(</span><em>Simulator self</em>, <em>int aid</em>, <em>int bid</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/robotsim.html#Simulator.contactForce"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.Simulator.contactForce" title="Permalink to this definition">¶</a></dt>
+<dd><p>void
+Simulator::contactForce(int aid, int bid, double out[3])</p>
+<p>Returns the contact force on object a at the last time step.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.Simulator.enableContactFeedback">
+<code class="descname">enableContactFeedback</code><span class="sig-paren">(</span><em>Simulator self</em>, <em>int obj1</em>, <em>int obj2</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/robotsim.html#Simulator.enableContactFeedback"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.Simulator.enableContactFeedback" title="Permalink to this definition">¶</a></dt>
+<dd><p>void
+Simulator::enableContactFeedback(int obj1, int obj2)</p>
+<p>Call this to enable contact feedback between the two objects
+(arguments are indexes returned by object.getID()). Contact feedback
+has a small overhead so you may want to do this selectively.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.Simulator.enableContactFeedbackAll">
+<code class="descname">enableContactFeedbackAll</code><span class="sig-paren">(</span><em>Simulator self</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/robotsim.html#Simulator.enableContactFeedbackAll"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.Simulator.enableContactFeedbackAll" title="Permalink to this definition">¶</a></dt>
+<dd><p>void
+Simulator::enableContactFeedbackAll()</p>
+<p>Call this to enable contact feedback between all pairs of objects.
+Contact feedback has a small overhead so you may want to do this
+selectively.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.Simulator.fakeSimulate">
+<code class="descname">fakeSimulate</code><span class="sig-paren">(</span><em>Simulator self</em>, <em>double t</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/robotsim.html#Simulator.fakeSimulate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.Simulator.fakeSimulate" title="Permalink to this definition">¶</a></dt>
+<dd><p>void
+Simulator::fakeSimulate(double t)</p>
+<p>Advances a faked simulation by time t, and updates the world model
+from the faked simulation state.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.Simulator.getActualConfig">
+<code class="descname">getActualConfig</code><span class="sig-paren">(</span><em>Simulator self</em>, <em>int robot</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/robotsim.html#Simulator.getActualConfig"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.Simulator.getActualConfig" title="Permalink to this definition">¶</a></dt>
+<dd><p>void
+Simulator::getActualConfig(int robot, std::vector&lt; double &gt; &amp;out)</p>
+<p>Returns the current actual configuration of the robot from the
+simulator.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.Simulator.getActualTorques">
+<code class="descname">getActualTorques</code><span class="sig-paren">(</span><em>Simulator self</em>, <em>int robot</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/robotsim.html#Simulator.getActualTorques"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.Simulator.getActualTorques" title="Permalink to this definition">¶</a></dt>
+<dd><p>void
+Simulator::getActualTorques(int robot, std::vector&lt; double &gt; &amp;out)</p>
+<p>Returns the current actual torques on the robot&#8217;s drivers from the
+simulator</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.Simulator.getActualVelocity">
+<code class="descname">getActualVelocity</code><span class="sig-paren">(</span><em>Simulator self</em>, <em>int robot</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/robotsim.html#Simulator.getActualVelocity"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.Simulator.getActualVelocity" title="Permalink to this definition">¶</a></dt>
+<dd><p>void
+Simulator::getActualVelocity(int robot, std::vector&lt; double &gt; &amp;out)</p>
+<p>Returns the current actual velocity of the robot from the simulator.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.Simulator.getBody">
+<code class="descname">getBody</code><span class="sig-paren">(</span><em>Simulator self</em>, <em>RobotModelLink link</em><span class="sig-paren">)</span> &rarr; SimBody<a class="reference internal" href="_modules/klampt/robotsim.html#Simulator.getBody"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.Simulator.getBody" title="Permalink to this definition">¶</a></dt>
+<dd><p>getBody(Simulator self, RigidObjectModel object) -&gt; SimBody
+getBody(Simulator self, TerrainModel terrain) -&gt; SimBody</p>
+<p>SimBody
+Simulator::getBody(const TerrainModel &amp;terrain)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.Simulator.getContactForces">
+<code class="descname">getContactForces</code><span class="sig-paren">(</span><em>Simulator self</em>, <em>int aid</em>, <em>int bid</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/robotsim.html#Simulator.getContactForces"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.Simulator.getContactForces" title="Permalink to this definition">¶</a></dt>
+<dd><p>void
+Simulator::getContactForces(int aid, int bid, std::vector&lt;
+std::vector&lt; double &gt; &gt; &amp;out)</p>
+<p>Returns the list of contact forces on object a at the last time step.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.Simulator.getContacts">
+<code class="descname">getContacts</code><span class="sig-paren">(</span><em>Simulator self</em>, <em>int aid</em>, <em>int bid</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/robotsim.html#Simulator.getContacts"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.Simulator.getContacts" title="Permalink to this definition">¶</a></dt>
+<dd><p>void
+Simulator::getContacts(int aid, int bid, std::vector&lt; std::vector&lt;
+double &gt; &gt; &amp;out)</p>
+<p>Returns the list of contacts (x,n,kFriction) at the last time step.
+Normals point into object a.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.Simulator.getController">
+<code class="descname">getController</code><span class="sig-paren">(</span><em>Simulator self</em>, <em>int robot</em><span class="sig-paren">)</span> &rarr; SimRobotController<a class="reference internal" href="_modules/klampt/robotsim.html#Simulator.getController"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.Simulator.getController" title="Permalink to this definition">¶</a></dt>
+<dd><p>getController(Simulator self, RobotModel robot) -&gt; SimRobotController</p>
+<p>SimRobotController
+Simulator::getController(const RobotModel &amp;robot)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.Simulator.getJointForces">
+<code class="descname">getJointForces</code><span class="sig-paren">(</span><em>Simulator self</em>, <em>RobotModelLink link</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/robotsim.html#Simulator.getJointForces"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.Simulator.getJointForces" title="Permalink to this definition">¶</a></dt>
+<dd><p>void
+Simulator::getJointForces(const RobotModelLink &amp;link, double out[6])</p>
+<p>Returns the joint force and torque local to the link, as would be read
+by a force-torque sensor mounted at the given link&#8217;s origin. The 6
+entries are (fx,fy,fz,mx,my,mz)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.Simulator.getState">
+<code class="descname">getState</code><span class="sig-paren">(</span><em>Simulator self</em><span class="sig-paren">)</span> &rarr; std::string<a class="reference internal" href="_modules/klampt/robotsim.html#Simulator.getState"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.Simulator.getState" title="Permalink to this definition">¶</a></dt>
+<dd><p>string
+Simulator::getState()</p>
+<p>Returns a Base64 string representing the binary data for the current
+simulation state, including controller parameters, etc.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.Simulator.getTime">
+<code class="descname">getTime</code><span class="sig-paren">(</span><em>Simulator self</em><span class="sig-paren">)</span> &rarr; double<a class="reference internal" href="_modules/klampt/robotsim.html#Simulator.getTime"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.Simulator.getTime" title="Permalink to this definition">¶</a></dt>
+<dd><p>double
+Simulator::getTime()</p>
+<p>Returns the simulation time.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.Simulator.getWorld">
+<code class="descname">getWorld</code><span class="sig-paren">(</span><em>Simulator self</em><span class="sig-paren">)</span> &rarr; WorldModel<a class="reference internal" href="_modules/klampt/robotsim.html#Simulator.getWorld"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.Simulator.getWorld" title="Permalink to this definition">¶</a></dt>
+<dd><p>WorldModel
+Simulator::getWorld() const</p>
+<p>Returns the associated world model.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.Simulator.hadContact">
+<code class="descname">hadContact</code><span class="sig-paren">(</span><em>Simulator self</em>, <em>int aid</em>, <em>int bid</em><span class="sig-paren">)</span> &rarr; bool<a class="reference internal" href="_modules/klampt/robotsim.html#Simulator.hadContact"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.Simulator.hadContact" title="Permalink to this definition">¶</a></dt>
+<dd><p>bool
+Simulator::hadContact(int aid, int bid)</p>
+<p>Returns true if the objects had contact over the last simulate() call.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.Simulator.hadSeparation">
+<code class="descname">hadSeparation</code><span class="sig-paren">(</span><em>Simulator self</em>, <em>int aid</em>, <em>int bid</em><span class="sig-paren">)</span> &rarr; bool<a class="reference internal" href="_modules/klampt/robotsim.html#Simulator.hadSeparation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.Simulator.hadSeparation" title="Permalink to this definition">¶</a></dt>
+<dd><p>bool
+Simulator::hadSeparation(int aid, int bid)</p>
+<p>Returns true if the objects had ever separated during the last
+simulate() call</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.Simulator.inContact">
+<code class="descname">inContact</code><span class="sig-paren">(</span><em>Simulator self</em>, <em>int aid</em>, <em>int bid</em><span class="sig-paren">)</span> &rarr; bool<a class="reference internal" href="_modules/klampt/robotsim.html#Simulator.inContact"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.Simulator.inContact" title="Permalink to this definition">¶</a></dt>
+<dd><p>bool
+Simulator::inContact(int aid, int bid)</p>
+<p>Returns true if the objects (indexes returned by object.getID()) are
+in contact on the current time step</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="klampt.Simulator.index">
+<code class="descname">index</code><a class="headerlink" href="#klampt.Simulator.index" title="Permalink to this definition">¶</a></dt>
+<dd><p>Simulator_index_get(Simulator self) -&gt; int</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="klampt.Simulator.initialState">
+<code class="descname">initialState</code><a class="headerlink" href="#klampt.Simulator.initialState" title="Permalink to this definition">¶</a></dt>
+<dd><p>Simulator_initialState_get(Simulator self) -&gt; std::string const &amp;</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.Simulator.meanContactForce">
+<code class="descname">meanContactForce</code><span class="sig-paren">(</span><em>Simulator self</em>, <em>int aid</em>, <em>int bid</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/robotsim.html#Simulator.meanContactForce"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.Simulator.meanContactForce" title="Permalink to this definition">¶</a></dt>
+<dd><p>void
+Simulator::meanContactForce(int aid, int bid, double out[3])</p>
+<p>Returns the average contact force on object a over the last simulate()
+call</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.Simulator.reset">
+<code class="descname">reset</code><span class="sig-paren">(</span><em>Simulator self</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/robotsim.html#Simulator.reset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.Simulator.reset" title="Permalink to this definition">¶</a></dt>
+<dd><p>void Simulator::reset()</p>
+<p>Resets to the initial state (same as setState(initialState))</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.Simulator.setGravity">
+<code class="descname">setGravity</code><span class="sig-paren">(</span><em>Simulator self</em>, <em>double const [3] g</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/robotsim.html#Simulator.setGravity"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.Simulator.setGravity" title="Permalink to this definition">¶</a></dt>
+<dd><p>void
+Simulator::setGravity(const double g[3])</p>
+<p>Sets the overall gravity vector.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.Simulator.setSimStep">
+<code class="descname">setSimStep</code><span class="sig-paren">(</span><em>Simulator self</em>, <em>double dt</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/robotsim.html#Simulator.setSimStep"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.Simulator.setSimStep" title="Permalink to this definition">¶</a></dt>
+<dd><p>void
+Simulator::setSimStep(double dt)</p>
+<p>Sets the internal simulation substep. Values &lt; 0.01 are recommended.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.Simulator.setState">
+<code class="descname">setState</code><span class="sig-paren">(</span><em>Simulator self</em>, <em>std::string const &amp; str</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/robotsim.html#Simulator.setState"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.Simulator.setState" title="Permalink to this definition">¶</a></dt>
+<dd><p>void
+Simulator::setState(const std::string &amp;str)</p>
+<p>Sets the current simulation state from a Base64 string returned by a
+prior getState call.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="klampt.Simulator.sim">
+<code class="descname">sim</code><a class="headerlink" href="#klampt.Simulator.sim" title="Permalink to this definition">¶</a></dt>
+<dd><p>Simulator_sim_get(Simulator self) -&gt; WorldSimulation *</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.Simulator.simulate">
+<code class="descname">simulate</code><span class="sig-paren">(</span><em>Simulator self</em>, <em>double t</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/robotsim.html#Simulator.simulate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.Simulator.simulate" title="Permalink to this definition">¶</a></dt>
+<dd><p>void
+Simulator::simulate(double t)</p>
+<p>Advances the simulation by time t, and updates the world model from
+the simulation state.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.Simulator.updateWorld">
+<code class="descname">updateWorld</code><span class="sig-paren">(</span><em>Simulator self</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/robotsim.html#Simulator.updateWorld"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.Simulator.updateWorld" title="Permalink to this definition">¶</a></dt>
+<dd><p>void
+Simulator::updateWorld()</p>
+<p>Updates the world model from the current simulation state. This only
+needs to be called if you change the world model and want to revert
+back to the simulation state.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="klampt.Simulator.world">
+<code class="descname">world</code><a class="headerlink" href="#klampt.Simulator.world" title="Permalink to this definition">¶</a></dt>
+<dd><p>Simulator_world_get(Simulator self) -&gt; WorldModel</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="klampt.IKObjective">
+<em class="property">class </em><code class="descclassname">klampt.</code><code class="descname">IKObjective</code><span class="sig-paren">(</span><em>IKObjective self</em><span class="sig-paren">)</span> &rarr; IKObjective<a class="reference internal" href="_modules/klampt/robotsim.html#IKObjective"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.IKObjective" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>A class defining an inverse kinematic target. Either a link on a robot
+can take on a fixed position/orientation in the world frame, or a
+relative position/orientation to another frame.</p>
+<p>Currently only fixed-point constraints and fixed-transform constraints
+are implemented in the Python API.</p>
+<p>C++ includes: robotik.h</p>
+<p>IKObjective::IKObjective()</p>
+<dl class="method">
+<dt id="klampt.IKObjective.destLink">
+<code class="descname">destLink</code><span class="sig-paren">(</span><em>IKObjective self</em><span class="sig-paren">)</span> &rarr; int<a class="reference internal" href="_modules/klampt/robotsim.html#IKObjective.destLink"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.IKObjective.destLink" title="Permalink to this definition">¶</a></dt>
+<dd><p>int
+IKObjective::destLink() const</p>
+<p>The destination link, or -1 if fixed to the world.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.IKObjective.getPosition">
+<code class="descname">getPosition</code><span class="sig-paren">(</span><em>IKObjective self</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/robotsim.html#IKObjective.getPosition"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.IKObjective.getPosition" title="Permalink to this definition">¶</a></dt>
+<dd><p>void
+IKObjective::getPosition(double out[3], double out2[3]) const</p>
+<p>Returns the local and global position of the position constraint.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.IKObjective.getPositionDirection">
+<code class="descname">getPositionDirection</code><span class="sig-paren">(</span><em>IKObjective self</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/robotsim.html#IKObjective.getPositionDirection"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.IKObjective.getPositionDirection" title="Permalink to this definition">¶</a></dt>
+<dd><p>void
+IKObjective::getPositionDirection(double out[3]) const</p>
+<p>For linear and planar constraints, returns the direction.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.IKObjective.getRotation">
+<code class="descname">getRotation</code><span class="sig-paren">(</span><em>IKObjective self</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/robotsim.html#IKObjective.getRotation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.IKObjective.getRotation" title="Permalink to this definition">¶</a></dt>
+<dd><p>void
+IKObjective::getRotation(double out[9]) const</p>
+<p>For fixed rotation constraints, returns the orientation.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.IKObjective.getRotationAxis">
+<code class="descname">getRotationAxis</code><span class="sig-paren">(</span><em>IKObjective self</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/robotsim.html#IKObjective.getRotationAxis"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.IKObjective.getRotationAxis" title="Permalink to this definition">¶</a></dt>
+<dd><p>void
+IKObjective::getRotationAxis(double out[3], double out2[3]) const</p>
+<p>For axis rotation constraints, returns the local and global axes.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.IKObjective.getTransform">
+<code class="descname">getTransform</code><span class="sig-paren">(</span><em>IKObjective self</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/robotsim.html#IKObjective.getTransform"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.IKObjective.getTransform" title="Permalink to this definition">¶</a></dt>
+<dd><p>void
+IKObjective::getTransform(double out[9], double out2[3]) const</p>
+<p>For fixed-transform constraints, returns the transform (R,T)</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="klampt.IKObjective.goal">
+<code class="descname">goal</code><a class="headerlink" href="#klampt.IKObjective.goal" title="Permalink to this definition">¶</a></dt>
+<dd><p>IKObjective_goal_get(IKObjective self) -&gt; IKGoal</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.IKObjective.link">
+<code class="descname">link</code><span class="sig-paren">(</span><em>IKObjective self</em><span class="sig-paren">)</span> &rarr; int<a class="reference internal" href="_modules/klampt/robotsim.html#IKObjective.link"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.IKObjective.link" title="Permalink to this definition">¶</a></dt>
+<dd><p>int IKObjective::link()
+const</p>
+<p>The link that is constrained.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.IKObjective.numPosDims">
+<code class="descname">numPosDims</code><span class="sig-paren">(</span><em>IKObjective self</em><span class="sig-paren">)</span> &rarr; int<a class="reference internal" href="_modules/klampt/robotsim.html#IKObjective.numPosDims"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.IKObjective.numPosDims" title="Permalink to this definition">¶</a></dt>
+<dd><p>int
+IKObjective::numPosDims() const</p>
+<p>Returns the number of position dimensions constrained (0-3)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.IKObjective.numRotDims">
+<code class="descname">numRotDims</code><span class="sig-paren">(</span><em>IKObjective self</em><span class="sig-paren">)</span> &rarr; int<a class="reference internal" href="_modules/klampt/robotsim.html#IKObjective.numRotDims"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.IKObjective.numRotDims" title="Permalink to this definition">¶</a></dt>
+<dd><p>int
+IKObjective::numRotDims() const</p>
+<p>Returns the number of rotation dimensions constrained (0-3)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.IKObjective.setFixedPoint">
+<code class="descname">setFixedPoint</code><span class="sig-paren">(</span><em>IKObjective self</em>, <em>int link</em>, <em>double const [3] plocal</em>, <em>double const [3] pworld</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/robotsim.html#IKObjective.setFixedPoint"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.IKObjective.setFixedPoint" title="Permalink to this definition">¶</a></dt>
+<dd><p>void
+IKObjective::setFixedPoint(int link, const double plocal[3], const
+double pworld[3])</p>
+<p>Sets a fixed-point constraint.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.IKObjective.setFixedPoints">
+<code class="descname">setFixedPoints</code><span class="sig-paren">(</span><em>IKObjective self</em>, <em>int link</em>, <em>PyObject * plocals</em>, <em>PyObject * pworlds</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/robotsim.html#IKObjective.setFixedPoints"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.IKObjective.setFixedPoints" title="Permalink to this definition">¶</a></dt>
+<dd><p>void
+IKObjective::setFixedPoints(int link, PyObject <a href="#id31"><span class="problematic" id="id32">*</span></a>plocals, PyObject
+<a href="#id33"><span class="problematic" id="id34">*</span></a>pworlds)</p>
+<p>Sets a multiple fixed-point constraint.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.IKObjective.setFixedTransform">
+<code class="descname">setFixedTransform</code><span class="sig-paren">(</span><em>IKObjective self</em>, <em>int link</em>, <em>double const [9] R</em>, <em>double const [3] t</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/robotsim.html#IKObjective.setFixedTransform"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.IKObjective.setFixedTransform" title="Permalink to this definition">¶</a></dt>
+<dd><p>void
+IKObjective::setFixedTransform(int link, const double R[9], const
+double t[3])</p>
+<p>Sets a fixed-transform constraint (R,t)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.IKObjective.setRelativePoint">
+<code class="descname">setRelativePoint</code><span class="sig-paren">(</span><em>IKObjective self</em>, <em>int link1</em>, <em>int link2</em>, <em>double const [3] p1</em>, <em>double const [3] p2</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/robotsim.html#IKObjective.setRelativePoint"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.IKObjective.setRelativePoint" title="Permalink to this definition">¶</a></dt>
+<dd><p>void
+IKObjective::setRelativePoint(int link1, int link2, const double
+p1[3], const double p2[3])</p>
+<p>Sets a fixed-point constraint relative to link2.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.IKObjective.setRelativePoints">
+<code class="descname">setRelativePoints</code><span class="sig-paren">(</span><em>IKObjective self</em>, <em>int link1</em>, <em>int link2</em>, <em>PyObject * p1s</em>, <em>PyObject * p2s</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/robotsim.html#IKObjective.setRelativePoints"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.IKObjective.setRelativePoints" title="Permalink to this definition">¶</a></dt>
+<dd><p>void
+IKObjective::setRelativePoints(int link1, int link2, PyObject <a href="#id35"><span class="problematic" id="id36">*</span></a>p1s,
+PyObject <a href="#id37"><span class="problematic" id="id38">*</span></a>p2s)</p>
+<p>Sets a multiple fixed-point constraint relative to link2.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.IKObjective.setRelativeTransform">
+<code class="descname">setRelativeTransform</code><span class="sig-paren">(</span><em>IKObjective self</em>, <em>int link</em>, <em>int linkTgt</em>, <em>double const [9] R</em>, <em>double const [3] t</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/robotsim.html#IKObjective.setRelativeTransform"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.IKObjective.setRelativeTransform" title="Permalink to this definition">¶</a></dt>
+<dd><p>void
+IKObjective::setRelativeTransform(int link, int linkTgt, const double
+R[9], const double t[3])</p>
+<p>Sets a fixed-transform constraint (R,t) relative to linkTgt.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="klampt.IKSolver">
+<em class="property">class </em><code class="descclassname">klampt.</code><code class="descname">IKSolver</code><span class="sig-paren">(</span><em>IKSolver self</em>, <em>RobotModel robot</em><span class="sig-paren">)</span> &rarr; IKSolver<a class="reference internal" href="_modules/klampt/robotsim.html#IKSolver"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.IKSolver" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>An inverse kinematics solver based on the Newton-Raphson technique.</p>
+<p>Typical calling pattern is s = IKSolver(robot) s.add(objective1)
+s.add(objective2) (res,iters) = s.solve(100,1e-4) if res: print &#8220;IK
+solution:&#8221;,robot.getConfig(),&#8221;found in&#8221;,iters,&#8221;iterations,
+residual&#8221;,s.getResidual() else: print &#8220;IK
+failed:&#8221;,robot.getConfig(),&#8221;found in&#8221;,iters,&#8221;iterations,
+residual&#8221;,s.getResidual()</p>
+<p>sampleInitial() is a convenience routine. More initial configurations
+can be sampled in case the prior configs lead to local minima.</p>
+<p>C++ includes: robotik.h</p>
+<p>__init__(IKSolver self, IKSolver solver) -&gt; IKSolver</p>
+<p>IKSolver::IKSolver(const
+IKSolver &amp;solver)</p>
+<dl class="attribute">
+<dt id="klampt.IKSolver.activeDofs">
+<code class="descname">activeDofs</code><a class="headerlink" href="#klampt.IKSolver.activeDofs" title="Permalink to this definition">¶</a></dt>
+<dd><p>IKSolver_activeDofs_get(IKSolver self) -&gt; intVector</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.IKSolver.add">
+<code class="descname">add</code><span class="sig-paren">(</span><em>IKSolver self</em>, <em>IKObjective objective</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/robotsim.html#IKSolver.add"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.IKSolver.add" title="Permalink to this definition">¶</a></dt>
+<dd><p>void IKSolver::add(const
+IKObjective &amp;objective)</p>
+<p>Adds a new simultaneous objective.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.IKSolver.getActiveDofs">
+<code class="descname">getActiveDofs</code><span class="sig-paren">(</span><em>IKSolver self</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/robotsim.html#IKSolver.getActiveDofs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.IKSolver.getActiveDofs" title="Permalink to this definition">¶</a></dt>
+<dd><p>void
+IKSolver::getActiveDofs(std::vector&lt; int &gt; &amp;out)</p>
+<p>Gets the active degrees of freedom.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.IKSolver.getJacobian">
+<code class="descname">getJacobian</code><span class="sig-paren">(</span><em>IKSolver self</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/robotsim.html#IKSolver.getJacobian"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.IKSolver.getJacobian" title="Permalink to this definition">¶</a></dt>
+<dd><p>void
+IKSolver::getJacobian(std::vector&lt; std::vector&lt; double &gt; &gt; &amp;out)</p>
+<p>Returns a matrix describing the instantaneous derivative of the
+objective with respect to the active Dofs</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.IKSolver.getResidual">
+<code class="descname">getResidual</code><span class="sig-paren">(</span><em>IKSolver self</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/robotsim.html#IKSolver.getResidual"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.IKSolver.getResidual" title="Permalink to this definition">¶</a></dt>
+<dd><p>void
+IKSolver::getResidual(std::vector&lt; double &gt; &amp;out)</p>
+<p>Returns a vector describing the error of the objective.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="klampt.IKSolver.objectives">
+<code class="descname">objectives</code><a class="headerlink" href="#klampt.IKSolver.objectives" title="Permalink to this definition">¶</a></dt>
+<dd><p>IKSolver_objectives_get(IKSolver self) -&gt; std::vector&lt; IKObjective,std::allocator&lt; IKObjective &gt; &gt; *</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="klampt.IKSolver.robot">
+<code class="descname">robot</code><a class="headerlink" href="#klampt.IKSolver.robot" title="Permalink to this definition">¶</a></dt>
+<dd><p>IKSolver_robot_get(IKSolver self) -&gt; RobotModel</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.IKSolver.sampleInitial">
+<code class="descname">sampleInitial</code><span class="sig-paren">(</span><em>IKSolver self</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/robotsim.html#IKSolver.sampleInitial"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.IKSolver.sampleInitial" title="Permalink to this definition">¶</a></dt>
+<dd><p>void
+IKSolver::sampleInitial()</p>
+<p>Samples an initial random configuration.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.IKSolver.setActiveDofs">
+<code class="descname">setActiveDofs</code><span class="sig-paren">(</span><em>IKSolver self</em>, <em>intVector active</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/robotsim.html#IKSolver.setActiveDofs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.IKSolver.setActiveDofs" title="Permalink to this definition">¶</a></dt>
+<dd><p>void
+IKSolver::setActiveDofs(const std::vector&lt; int &gt; &amp;active)</p>
+<p>Sets the active degrees of freedom.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.IKSolver.solve">
+<code class="descname">solve</code><span class="sig-paren">(</span><em>IKSolver self</em>, <em>int iters</em>, <em>double tol=1e-3</em><span class="sig-paren">)</span> &rarr; PyObject<a class="reference internal" href="_modules/klampt/robotsim.html#IKSolver.solve"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.IKSolver.solve" title="Permalink to this definition">¶</a></dt>
+<dd><p>solve(IKSolver self, int iters) -&gt; PyObject *</p>
+<p>PyObject *
+IKSolver::solve(int iters, double tol=1e-3)</p>
+<p>Tries to find a configuration that satifies all simultaneous
+objectives up to the desired tolerance. Returns (res,iters) where res
+indicates whether x converged.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="klampt.IKSolver.useJointLimits">
+<code class="descname">useJointLimits</code><a class="headerlink" href="#klampt.IKSolver.useJointLimits" title="Permalink to this definition">¶</a></dt>
+<dd><p>IKSolver_useJointLimits_get(IKSolver self) -&gt; bool</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="klampt.GeneralizedIKObjective">
+<em class="property">class </em><code class="descclassname">klampt.</code><code class="descname">GeneralizedIKObjective</code><span class="sig-paren">(</span><em>GeneralizedIKObjective self</em>, <em>GeneralizedIKObjective obj</em><span class="sig-paren">)</span> &rarr; GeneralizedIKObjective<a class="reference internal" href="_modules/klampt/robotsim.html#GeneralizedIKObjective"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.GeneralizedIKObjective" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>An inverse kinematics target for matching points between two robots
+and/or objects.</p>
+<p>The objects are chosen upon construction, so the following are valid:
+GeneralizedIKObjective(a) is an objective for object a to be
+constrained relative to the environment.</p>
+<p>GeneralizedIKObjective(a,b) is an objective for object a to be
+constrained relative to b. Here a and b can be links on any robot or
+rigid objects.</p>
+<p>Once constructed, call setPoint, setPoints, or setTransform to specify
+the nature of the constraint.</p>
+<p>C++ includes: robotik.h</p>
+<p>__init__(GeneralizedIKObjective self, RobotModelLink link) -&gt; GeneralizedIKObjective
+__init__(GeneralizedIKObjective self, RigidObjectModel obj) -&gt; GeneralizedIKObjective
+__init__(GeneralizedIKObjective self, RobotModelLink link, RobotModelLink link2) -&gt; GeneralizedIKObjective
+__init__(GeneralizedIKObjective self, RobotModelLink link, RigidObjectModel obj2) -&gt; GeneralizedIKObjective
+__init__(GeneralizedIKObjective self, RigidObjectModel obj, RobotModelLink link2) -&gt; GeneralizedIKObjective
+__init__(GeneralizedIKObjective self, RigidObjectModel obj, RigidObjectModel obj2) -&gt; GeneralizedIKObjective</p>
+<p>GeneralizedIKObjective::GeneralizedIKObjective(const
+RigidObjectModel &amp;obj, const RigidObjectModel &amp;obj2)</p>
+<dl class="attribute">
+<dt id="klampt.GeneralizedIKObjective.goal">
+<code class="descname">goal</code><a class="headerlink" href="#klampt.GeneralizedIKObjective.goal" title="Permalink to this definition">¶</a></dt>
+<dd><p>GeneralizedIKObjective_goal_get(GeneralizedIKObjective self) -&gt; IKGoal</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="klampt.GeneralizedIKObjective.isObj1">
+<code class="descname">isObj1</code><a class="headerlink" href="#klampt.GeneralizedIKObjective.isObj1" title="Permalink to this definition">¶</a></dt>
+<dd><p>GeneralizedIKObjective_isObj1_get(GeneralizedIKObjective self) -&gt; bool</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="klampt.GeneralizedIKObjective.isObj2">
+<code class="descname">isObj2</code><a class="headerlink" href="#klampt.GeneralizedIKObjective.isObj2" title="Permalink to this definition">¶</a></dt>
+<dd><p>GeneralizedIKObjective_isObj2_get(GeneralizedIKObjective self) -&gt; bool</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="klampt.GeneralizedIKObjective.link1">
+<code class="descname">link1</code><a class="headerlink" href="#klampt.GeneralizedIKObjective.link1" title="Permalink to this definition">¶</a></dt>
+<dd><p>GeneralizedIKObjective_link1_get(GeneralizedIKObjective self) -&gt; RobotModelLink</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="klampt.GeneralizedIKObjective.link2">
+<code class="descname">link2</code><a class="headerlink" href="#klampt.GeneralizedIKObjective.link2" title="Permalink to this definition">¶</a></dt>
+<dd><p>GeneralizedIKObjective_link2_get(GeneralizedIKObjective self) -&gt; RobotModelLink</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="klampt.GeneralizedIKObjective.obj1">
+<code class="descname">obj1</code><a class="headerlink" href="#klampt.GeneralizedIKObjective.obj1" title="Permalink to this definition">¶</a></dt>
+<dd><p>GeneralizedIKObjective_obj1_get(GeneralizedIKObjective self) -&gt; RigidObjectModel</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="klampt.GeneralizedIKObjective.obj2">
+<code class="descname">obj2</code><a class="headerlink" href="#klampt.GeneralizedIKObjective.obj2" title="Permalink to this definition">¶</a></dt>
+<dd><p>GeneralizedIKObjective_obj2_get(GeneralizedIKObjective self) -&gt; RigidObjectModel</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.GeneralizedIKObjective.setPoint">
+<code class="descname">setPoint</code><span class="sig-paren">(</span><em>GeneralizedIKObjective self</em>, <em>double const [3] p1</em>, <em>double const [3] p2</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/robotsim.html#GeneralizedIKObjective.setPoint"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.GeneralizedIKObjective.setPoint" title="Permalink to this definition">¶</a></dt>
+<dd><p>void
+GeneralizedIKObjective::setPoint(const double p1[3], const double
+p2[3])</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.GeneralizedIKObjective.setPoints">
+<code class="descname">setPoints</code><span class="sig-paren">(</span><em>GeneralizedIKObjective self</em>, <em>PyObject * p1s</em>, <em>PyObject * p2s</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/robotsim.html#GeneralizedIKObjective.setPoints"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.GeneralizedIKObjective.setPoints" title="Permalink to this definition">¶</a></dt>
+<dd><p>void
+GeneralizedIKObjective::setPoints(PyObject <a href="#id39"><span class="problematic" id="id40">*</span></a>p1s, PyObject <a href="#id41"><span class="problematic" id="id42">*</span></a>p2s)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.GeneralizedIKObjective.setTransform">
+<code class="descname">setTransform</code><span class="sig-paren">(</span><em>GeneralizedIKObjective self</em>, <em>double const [9] R</em>, <em>double const [3] t</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/robotsim.html#GeneralizedIKObjective.setTransform"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.GeneralizedIKObjective.setTransform" title="Permalink to this definition">¶</a></dt>
+<dd><p>void
+GeneralizedIKObjective::setTransform(const double R[9], const double
+t[3])</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="klampt.GeneralizedIKSolver">
+<em class="property">class </em><code class="descclassname">klampt.</code><code class="descname">GeneralizedIKSolver</code><span class="sig-paren">(</span><em>GeneralizedIKSolver self</em>, <em>WorldModel world</em><span class="sig-paren">)</span> &rarr; GeneralizedIKSolver<a class="reference internal" href="_modules/klampt/robotsim.html#GeneralizedIKSolver"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.GeneralizedIKSolver" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>An inverse kinematics solver between multiple robots and/or objects.</p>
+<p>C++ includes: robotik.h</p>
+<p>GeneralizedIKSolver::GeneralizedIKSolver(const WorldModel &amp;world)</p>
+<dl class="method">
+<dt id="klampt.GeneralizedIKSolver.add">
+<code class="descname">add</code><span class="sig-paren">(</span><em>GeneralizedIKSolver self</em>, <em>GeneralizedIKObjective objective</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/robotsim.html#GeneralizedIKSolver.add"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.GeneralizedIKSolver.add" title="Permalink to this definition">¶</a></dt>
+<dd><p>void
+GeneralizedIKSolver::add(const GeneralizedIKObjective &amp;objective)</p>
+<p>Adds a new simultaneous objective.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.GeneralizedIKSolver.getJacobian">
+<code class="descname">getJacobian</code><span class="sig-paren">(</span><em>GeneralizedIKSolver self</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/robotsim.html#GeneralizedIKSolver.getJacobian"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.GeneralizedIKSolver.getJacobian" title="Permalink to this definition">¶</a></dt>
+<dd><p>void
+GeneralizedIKSolver::getJacobian(std::vector&lt; std::vector&lt; double &gt; &gt;
+&amp;out)</p>
+<p>Returns a matrix describing the instantaneous derivative of the
+objective with respect to the active parameters</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.GeneralizedIKSolver.getResidual">
+<code class="descname">getResidual</code><span class="sig-paren">(</span><em>GeneralizedIKSolver self</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/robotsim.html#GeneralizedIKSolver.getResidual"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.GeneralizedIKSolver.getResidual" title="Permalink to this definition">¶</a></dt>
+<dd><p>void
+GeneralizedIKSolver::getResidual(std::vector&lt; double &gt; &amp;out)</p>
+<p>Returns a vector describing the error of the objective.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="klampt.GeneralizedIKSolver.objectives">
+<code class="descname">objectives</code><a class="headerlink" href="#klampt.GeneralizedIKSolver.objectives" title="Permalink to this definition">¶</a></dt>
+<dd><p>GeneralizedIKSolver_objectives_get(GeneralizedIKSolver self) -&gt; std::vector&lt; GeneralizedIKObjective,std::allocator&lt; GeneralizedIKObjective &gt; &gt; *</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.GeneralizedIKSolver.sampleInitial">
+<code class="descname">sampleInitial</code><span class="sig-paren">(</span><em>GeneralizedIKSolver self</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/robotsim.html#GeneralizedIKSolver.sampleInitial"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.GeneralizedIKSolver.sampleInitial" title="Permalink to this definition">¶</a></dt>
+<dd><p>void
+GeneralizedIKSolver::sampleInitial()</p>
+<p>Samples an initial random configuration.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="klampt.GeneralizedIKSolver.solve">
+<code class="descname">solve</code><span class="sig-paren">(</span><em>GeneralizedIKSolver self</em>, <em>int iters</em>, <em>double tol=1e-3</em><span class="sig-paren">)</span> &rarr; PyObject<a class="reference internal" href="_modules/klampt/robotsim.html#GeneralizedIKSolver.solve"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.GeneralizedIKSolver.solve" title="Permalink to this definition">¶</a></dt>
+<dd><p>solve(GeneralizedIKSolver self, int iters) -&gt; PyObject *</p>
+<p>PyObject *
+GeneralizedIKSolver::solve(int iters, double tol=1e-3)</p>
+<p>Tries to find a configuration that satifies all simultaneous
+objectives up to the desired tolerance. Returns (res,iters) where res
+indicates whether x converged.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="klampt.GeneralizedIKSolver.useJointLimits">
+<code class="descname">useJointLimits</code><a class="headerlink" href="#klampt.GeneralizedIKSolver.useJointLimits" title="Permalink to this definition">¶</a></dt>
+<dd><p>GeneralizedIKSolver_useJointLimits_get(GeneralizedIKSolver self) -&gt; bool</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="klampt.GeneralizedIKSolver.world">
+<code class="descname">world</code><a class="headerlink" href="#klampt.GeneralizedIKSolver.world" title="Permalink to this definition">¶</a></dt>
+<dd><p>GeneralizedIKSolver_world_get(GeneralizedIKSolver self) -&gt; WorldModel</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">klampt package</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-contents">Module contents</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="index.html"
+                        title="previous chapter">Welcome to PyKlampt&#8217;s documentation!</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="klampt.camera.html"
+                        title="next chapter">klampt.camera module</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/klampt.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="klampt.camera.html" title="klampt.camera module"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Welcome to PyKlampt’s documentation!"
+             >previous</a> |</li>
+        <li><a href="index.html">PyKlampt 0.6.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2015, Kris Hauser.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3b2.
+    </div>
+  </body>
+</html>

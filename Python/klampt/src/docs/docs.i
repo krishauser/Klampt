@@ -1358,6 +1358,19 @@ SimRobotController::setManualMode(bool enabled)
 Turns on/off manual mode, if either the setTorque or setPID command
 were previously set. ";
 
+%feature("docstring")  SimRobotController::getControlType "std::string SimRobotController::getControlType()
+
+Returns the control type for the active controller valid values are:
+unknown
+
+off
+
+torque
+
+PID
+
+locked_velocity ";
+
 %feature("docstring")  SimRobotController::setPIDGains "void
 SimRobotController::setPIDGains(const std::vector< double > &kP, const
 std::vector< double > &kI, const std::vector< double > &kD)

@@ -1,0 +1,176 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>klampt.se3 &mdash; PyKlampt 0.6.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.6.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="PyKlampt 0.6.0 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">PyKlampt 0.6.0 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for klampt.se3</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;Operations for rigid transformations in Klamp&#39;t.  All rigid</span>
+<span class="sd">transformations are specified in the form (R,T),</span>
+<span class="sd">where R is a 9-list specifying the entries of the rotation matrix in column</span>
+<span class="sd">major form, and t is a 3-list specifying the translation vector.</span>
+
+<span class="sd">These are useful for interfacing with C code.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">vectorops</span>
+<span class="kn">import</span> <span class="nn">so3</span>
+
+<div class="viewcode-block" id="identity"><a class="viewcode-back" href="../../klampt.se3.html#klampt.se3.identity">[docs]</a><span class="k">def</span> <span class="nf">identity</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;Returns the identity transformation.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="p">([</span><span class="mf">1.</span><span class="p">,</span><span class="mf">0.</span><span class="p">,</span><span class="mf">0.</span><span class="p">,</span><span class="mf">0.</span><span class="p">,</span><span class="mf">1.</span><span class="p">,</span><span class="mf">0.</span><span class="p">,</span><span class="mf">0.</span><span class="p">,</span><span class="mf">0.</span><span class="p">,</span><span class="mf">1.</span><span class="p">],[</span><span class="mf">0.</span><span class="p">,</span><span class="mf">0.</span><span class="p">,</span><span class="mf">0.</span><span class="p">])</span>
+</div>
+<div class="viewcode-block" id="inv"><a class="viewcode-back" href="../../klampt.se3.html#klampt.se3.inv">[docs]</a><span class="k">def</span> <span class="nf">inv</span><span class="p">(</span><span class="n">T</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Returns the inverse of the transformation.&quot;&quot;&quot;</span>
+    <span class="p">(</span><span class="n">R</span><span class="p">,</span><span class="n">t</span><span class="p">)</span> <span class="o">=</span> <span class="n">T</span>
+    <span class="n">Rinv</span> <span class="o">=</span> <span class="n">so3</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">R</span><span class="p">)</span>
+    <span class="n">tinv</span> <span class="o">=</span> <span class="p">[</span><span class="o">-</span><span class="n">Rinv</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">t</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="n">Rinv</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="o">*</span><span class="n">t</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">Rinv</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span><span class="o">*</span><span class="n">t</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
+            <span class="o">-</span><span class="n">Rinv</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">t</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="n">Rinv</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span><span class="o">*</span><span class="n">t</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">Rinv</span><span class="p">[</span><span class="mi">7</span><span class="p">]</span><span class="o">*</span><span class="n">t</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
+            <span class="o">-</span><span class="n">Rinv</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">*</span><span class="n">t</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="n">Rinv</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span><span class="o">*</span><span class="n">t</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">Rinv</span><span class="p">[</span><span class="mi">8</span><span class="p">]</span><span class="o">*</span><span class="n">t</span><span class="p">[</span><span class="mi">2</span><span class="p">]]</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">Rinv</span><span class="p">,</span><span class="n">tinv</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="apply"><a class="viewcode-back" href="../../klampt.se3.html#klampt.se3.apply">[docs]</a><span class="k">def</span> <span class="nf">apply</span><span class="p">(</span><span class="n">T</span><span class="p">,</span><span class="n">point</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Applies the transform T to the given point&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">vectorops</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">apply_rotation</span><span class="p">(</span><span class="n">T</span><span class="p">,</span><span class="n">point</span><span class="p">),</span><span class="n">T</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+</div>
+<div class="viewcode-block" id="apply_rotation"><a class="viewcode-back" href="../../klampt.se3.html#klampt.se3.apply_rotation">[docs]</a><span class="k">def</span> <span class="nf">apply_rotation</span><span class="p">(</span><span class="n">T</span><span class="p">,</span><span class="n">point</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Applies only the rotation part of T&quot;&quot;&quot;</span>
+    <span class="n">R</span> <span class="o">=</span> <span class="n">T</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">so3</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">R</span><span class="p">,</span><span class="n">point</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="rotation"><a class="viewcode-back" href="../../klampt.se3.html#klampt.se3.rotation">[docs]</a><span class="k">def</span> <span class="nf">rotation</span><span class="p">(</span><span class="n">T</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Returns the 3x3 rotation matrix corresponding to T&#39;s rotation&quot;&quot;&quot;</span>
+    <span class="p">(</span><span class="n">R</span><span class="p">,</span><span class="n">t</span><span class="p">)</span> <span class="o">=</span> <span class="n">T</span>
+    <span class="k">return</span> <span class="n">so3</span><span class="o">.</span><span class="n">matrix</span><span class="p">(</span><span class="n">R</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="from_rotation"><a class="viewcode-back" href="../../klampt.se3.html#klampt.se3.from_rotation">[docs]</a><span class="k">def</span> <span class="nf">from_rotation</span><span class="p">(</span><span class="n">mat</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Returns a T corresponding to the 3x3 rotation matrix mat&quot;&quot;&quot;</span>
+    <span class="n">R</span> <span class="o">=</span> <span class="n">so3</span><span class="o">.</span><span class="n">from_matrix</span><span class="p">(</span><span class="n">R</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">R</span><span class="p">,[</span><span class="mf">0.</span><span class="p">,</span><span class="mf">0.</span><span class="p">,</span><span class="mf">0.</span><span class="p">])</span>
+</div>
+<div class="viewcode-block" id="homogeneous"><a class="viewcode-back" href="../../klampt.se3.html#klampt.se3.homogeneous">[docs]</a><span class="k">def</span> <span class="nf">homogeneous</span><span class="p">(</span><span class="n">T</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Returns the 4x4 homogeneous transform corresponding to T&quot;&quot;&quot;</span>
+    <span class="p">(</span><span class="n">R</span><span class="p">,</span><span class="n">t</span><span class="p">)</span> <span class="o">=</span> <span class="n">T</span>
+    <span class="k">return</span> <span class="p">[[</span><span class="n">R</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">R</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span><span class="n">R</span><span class="p">[</span><span class="mi">6</span><span class="p">],</span><span class="n">t</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span>
+            <span class="p">[</span><span class="n">R</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="n">R</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span><span class="n">R</span><span class="p">[</span><span class="mi">7</span><span class="p">],</span><span class="n">t</span><span class="p">[</span><span class="mi">1</span><span class="p">]],</span>
+            <span class="p">[</span><span class="n">R</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span><span class="n">R</span><span class="p">[</span><span class="mi">5</span><span class="p">],</span><span class="n">R</span><span class="p">[</span><span class="mi">8</span><span class="p">],</span><span class="n">t</span><span class="p">[</span><span class="mi">2</span><span class="p">]],</span>
+            <span class="p">[</span><span class="mf">0.</span><span class="p">,</span><span class="mf">0.</span><span class="p">,</span><span class="mf">0.</span><span class="p">,</span><span class="mf">1.</span><span class="p">]]</span>
+</div>
+<div class="viewcode-block" id="from_homogeneous"><a class="viewcode-back" href="../../klampt.se3.html#klampt.se3.from_homogeneous">[docs]</a><span class="k">def</span> <span class="nf">from_homogeneous</span><span class="p">(</span><span class="n">mat</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Returns a T corresponding to the 4x4 homogeneous transform mat&quot;&quot;&quot;</span>
+    <span class="n">t</span> <span class="o">=</span> <span class="p">[</span><span class="n">mat</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">3</span><span class="p">],</span><span class="n">mat</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">3</span><span class="p">],</span><span class="n">mat</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">3</span><span class="p">]]</span>
+    <span class="n">R</span> <span class="o">=</span> <span class="p">[</span><span class="n">mat</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span><span class="n">mat</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span><span class="n">mat</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span><span class="n">mat</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span><span class="n">mat</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span><span class="n">mat</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span><span class="n">mat</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">2</span><span class="p">],</span><span class="n">mat</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">2</span><span class="p">],</span><span class="n">mat</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">2</span><span class="p">]]</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">R</span><span class="p">,</span><span class="n">t</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="mul"><a class="viewcode-back" href="../../klampt.se3.html#klampt.se3.mul">[docs]</a><span class="k">def</span> <span class="nf">mul</span><span class="p">(</span><span class="n">T1</span><span class="p">,</span><span class="n">T2</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Composes two transformations.&quot;&quot;&quot;</span>
+    <span class="p">(</span><span class="n">R1</span><span class="p">,</span><span class="n">t1</span><span class="p">)</span> <span class="o">=</span> <span class="n">T1</span>
+    <span class="p">(</span><span class="n">R2</span><span class="p">,</span><span class="n">t2</span><span class="p">)</span> <span class="o">=</span> <span class="n">T2</span>
+    <span class="n">R</span> <span class="o">=</span> <span class="n">so3</span><span class="o">.</span><span class="n">mul</span><span class="p">(</span><span class="n">R1</span><span class="p">,</span><span class="n">R2</span><span class="p">)</span>
+    <span class="n">t</span> <span class="o">=</span> <span class="nb">apply</span><span class="p">(</span><span class="n">T1</span><span class="p">,</span><span class="n">t2</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">R</span><span class="p">,</span><span class="n">t</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="distance"><a class="viewcode-back" href="../../klampt.se3.html#klampt.se3.distance">[docs]</a><span class="k">def</span> <span class="nf">distance</span><span class="p">(</span><span class="n">T1</span><span class="p">,</span><span class="n">T2</span><span class="p">,</span><span class="n">Rweight</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span><span class="n">tweight</span><span class="o">=</span><span class="mf">1.0</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Returns a distance metric between the two transformations. The</span>
+<span class="sd">    rotation distance is weighted by Rweight and the translation distance</span>
+<span class="sd">    is weighted by tweight&quot;&quot;&quot;</span>
+    <span class="p">(</span><span class="n">R1</span><span class="p">,</span><span class="n">t1</span><span class="p">)</span><span class="o">=</span><span class="n">T1</span>
+    <span class="p">(</span><span class="n">R2</span><span class="p">,</span><span class="n">t2</span><span class="p">)</span><span class="o">=</span><span class="n">T2</span>
+    <span class="k">return</span> <span class="n">rweight</span><span class="o">*</span><span class="n">so3</span><span class="o">.</span><span class="n">distance</span><span class="p">(</span><span class="n">R1</span><span class="p">,</span><span class="n">R2</span><span class="p">)</span> <span class="o">+</span> <span class="n">tweight</span><span class="o">*</span><span class="n">vectorops</span><span class="o">.</span><span class="n">distance</span><span class="p">(</span><span class="n">t1</span><span class="p">,</span><span class="n">t2</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="error"><a class="viewcode-back" href="../../klampt.se3.html#klampt.se3.error">[docs]</a><span class="k">def</span> <span class="nf">error</span><span class="p">(</span><span class="n">T1</span><span class="p">,</span><span class="n">T2</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Returns a 6D &quot;difference vector&quot; that describes how far T1 is from T2.</span>
+<span class="sd">    More precisely, this is the Lie derivative (w,v).&quot;&quot;&quot;</span>
+    <span class="p">(</span><span class="n">R1</span><span class="p">,</span><span class="n">t1</span><span class="p">)</span><span class="o">=</span><span class="n">T1</span>
+    <span class="p">(</span><span class="n">R2</span><span class="p">,</span><span class="n">t2</span><span class="p">)</span><span class="o">=</span><span class="n">T2</span>
+    <span class="c">#concatenate lists</span>
+    <span class="k">return</span> <span class="n">so3</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">R1</span><span class="p">,</span><span class="n">R2</span><span class="p">)</span> <span class="o">+</span> <span class="n">vectorops</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="n">t1</span><span class="p">,</span><span class="n">t2</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="interpolate"><a class="viewcode-back" href="../../klampt.se3.html#klampt.se3.interpolate">[docs]</a><span class="k">def</span> <span class="nf">interpolate</span><span class="p">(</span><span class="n">T1</span><span class="p">,</span><span class="n">T2</span><span class="p">,</span><span class="n">u</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Interpolate linearly between the two transformations T1 and T2.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">so3</span><span class="o">.</span><span class="n">interpolate</span><span class="p">(</span><span class="n">T1</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">T2</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">u</span><span class="p">),</span><span class="n">vectorops</span><span class="o">.</span><span class="n">interpolate</span><span class="p">(</span><span class="n">T1</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="n">T2</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="n">u</span><span class="p">))</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">PyKlampt 0.6.0 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2015, Kris Hauser.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3b2.
+    </div>
+  </body>
+</html>

@@ -4,6 +4,7 @@ import sys
 from klampt import *
 from klampt.glprogram import *
 import importlib
+from IPython.core.debugger import Tracer
 
 class MyGLViewer(GLRealtimeProgram):
     def __init__(self,world):
@@ -39,9 +40,11 @@ class MyGLViewer(GLRealtimeProgram):
         glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,[0,1,0,0.5])
         for i in xrange(self.world.numRobots()):
             r = self.world.robot(i)
-            q = self.sim.controller(i).getCommandedConfig()
-            r.setConfig(q)
-            r.drawGL(False)
+            mode = self.sim.getController(i).getControlType()
+            if mode == "PID":
+                q = self.sim.getController(i).getCommandedConfig()
+                r.setConfig(q)
+                r.drawGL(False)
         glDisable(GL_BLEND)
 
         #draw controller
@@ -68,7 +71,12 @@ class MyGLViewer(GLRealtimeProgram):
             if i >= len(self.controllers): break
             c = self.sim.controller(i)
             #build measurement dict
-            measurements = {'t':self.sim.getTime(),'dt':self.dt,'qcmd':c.getCommandedConfig(),'dqcmd':c.getCommandedVelocity()}
+            measurements = {'t':self.sim.getTime(),'dt':self.dt}
+            mode = self.sim.getController(i).getControlType()
+            if mode == "PID":
+                measurements['qcmd'] = c.getCommandedConfig()
+                measurements['dqcmd'] = c.getCommandedVelocity()
+
             k = 0
             while True:
                 s = c.getSensor(k)

@@ -1,0 +1,147 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>klampt.robotcspace module &mdash; PyKlampt 0.6.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.6.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="PyKlampt 0.6.0 documentation" href="index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="index.html">PyKlampt 0.6.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-klampt.robotcspace">
+<span id="klampt-robotcspace-module"></span><h1>klampt.robotcspace module<a class="headerlink" href="#module-klampt.robotcspace" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="klampt.robotcspace.ClosedLoopRobotCSpace">
+<em class="property">class </em><code class="descclassname">klampt.robotcspace.</code><code class="descname">ClosedLoopRobotCSpace</code><span class="sig-paren">(</span><em>robot</em>, <em>iks</em>, <em>collider=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/robotcspace.html#ClosedLoopRobotCSpace"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.robotcspace.ClosedLoopRobotCSpace" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#klampt.robotcspace.RobotCSpace" title="klampt.robotcspace.RobotCSpace"><code class="xref py py-class docutils literal"><span class="pre">klampt.robotcspace.RobotCSpace</span></code></a></p>
+<p>A closed loop cspace</p>
+<dl class="method">
+<dt id="klampt.robotcspace.ClosedLoopRobotCSpace.closedLoop">
+<code class="descname">closedLoop</code><span class="sig-paren">(</span><em>tol=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/robotcspace.html#ClosedLoopRobotCSpace.closedLoop"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.robotcspace.ClosedLoopRobotCSpace.closedLoop" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="klampt.robotcspace.ClosedLoopRobotCSpace.feasible">
+<code class="descname">feasible</code><span class="sig-paren">(</span><em>x</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/robotcspace.html#ClosedLoopRobotCSpace.feasible"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.robotcspace.ClosedLoopRobotCSpace.feasible" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="klampt.robotcspace.ClosedLoopRobotCSpace.sample">
+<code class="descname">sample</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/robotcspace.html#ClosedLoopRobotCSpace.sample"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.robotcspace.ClosedLoopRobotCSpace.sample" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="klampt.robotcspace.RobotCSpace">
+<em class="property">class </em><code class="descclassname">klampt.robotcspace.</code><code class="descname">RobotCSpace</code><span class="sig-paren">(</span><em>robot</em>, <em>collider=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/robotcspace.html#RobotCSpace"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.robotcspace.RobotCSpace" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="klampt.cspaceutils.html#klampt.cspaceutils.AdaptiveCSpace" title="klampt.cspaceutils.AdaptiveCSpace"><code class="xref py py-class docutils literal"><span class="pre">klampt.cspaceutils.AdaptiveCSpace</span></code></a></p>
+<p>A basic robot cspace that allows collision free motion</p>
+<dl class="method">
+<dt id="klampt.robotcspace.RobotCSpace.envCollision">
+<code class="descname">envCollision</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/robotcspace.html#RobotCSpace.envCollision"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.robotcspace.RobotCSpace.envCollision" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="klampt.robotcspace.RobotCSpace.feasible">
+<code class="descname">feasible</code><span class="sig-paren">(</span><em>x</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/robotcspace.html#RobotCSpace.feasible"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.robotcspace.RobotCSpace.feasible" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="klampt.robotcspace.RobotCSpace.inJointLimits">
+<code class="descname">inJointLimits</code><span class="sig-paren">(</span><em>x</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/robotcspace.html#RobotCSpace.inJointLimits"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.robotcspace.RobotCSpace.inJointLimits" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="klampt.robotcspace.RobotCSpace.selfCollision">
+<code class="descname">selfCollision</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/robotcspace.html#RobotCSpace.selfCollision"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.robotcspace.RobotCSpace.selfCollision" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/klampt.robotcspace.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="index.html">PyKlampt 0.6.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2015, Kris Hauser.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3b2.
+    </div>
+  </body>
+</html>

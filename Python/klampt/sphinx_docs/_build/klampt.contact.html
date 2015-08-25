@@ -1,0 +1,212 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>klampt.contact module &mdash; PyKlampt 0.6.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.6.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="PyKlampt 0.6.0 documentation" href="index.html" />
+    <link rel="up" title="klampt package" href="klampt.html" />
+    <link rel="next" title="klampt.contactcspace module" href="klampt.contactcspace.html" />
+    <link rel="prev" title="klampt.collide module" href="klampt.collide.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="klampt.contactcspace.html" title="klampt.contactcspace module"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="klampt.collide.html" title="klampt.collide module"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">PyKlampt 0.6.0 documentation</a> &raquo;</li>
+          <li><a href="klampt.html" accesskey="U">klampt package</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-klampt.contact">
+<span id="klampt-contact-module"></span><h1>klampt.contact module<a class="headerlink" href="#module-klampt.contact" title="Permalink to this headline">¶</a></h1>
+<p>Definitions of frictional point contacts, contact maps, and basic wrench
+subroutines.</p>
+<dl class="class">
+<dt id="klampt.contact.ContactPoint">
+<em class="property">class </em><code class="descclassname">klampt.contact.</code><code class="descname">ContactPoint</code><span class="sig-paren">(</span><em>x=[0.0, 0.0, 0.0], n=[0.0, 0.0, 1.0], kFriction=0.0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/contact.html#ContactPoint"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.contact.ContactPoint" title="Permalink to this definition">¶</a></dt>
+<dd><p>A point contact between two rigid bodies, object1 and object2.</p>
+<dl class="docutils">
+<dt>Attributes:</dt>
+<dd><ul class="first last simple">
+<li>x is the contact point in world coordinates.</li>
+<li>n is the normal pointing from object1 into object 2.</li>
+<li>kFriction is the friction coefficient.</li>
+<li>object1 and object2 are the objects in contact (optional).</li>
+</ul>
+</dd>
+</dl>
+<dl class="method">
+<dt id="klampt.contact.ContactPoint.reflect">
+<code class="descname">reflect</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/contact.html#ContactPoint.reflect"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.contact.ContactPoint.reflect" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="klampt.contact.contactIKObjectives">
+<code class="descclassname">klampt.contact.</code><code class="descname">contactIKObjectives</code><span class="sig-paren">(</span><em>contactMap</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/contact.html#contactIKObjectives"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.contact.contactIKObjectives" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given a contact map, computes a set of non-conflicting
+IKObjective&#8217;s or GeneralizedIKObjective&#8217;s that enforce all simultaneous
+contact constraints.  Usually called in conjunction with contactMap
+with the following sequence:</p>
+<p>objectives = contactIKObjectives(contactMap(contacts,lambda(x):x==None or isinstance(x,TerrainModel)))</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="klampt.contact.contactMap">
+<code class="descclassname">klampt.contact.</code><code class="descname">contactMap</code><span class="sig-paren">(</span><em>contacts</em>, <em>fixed=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/contact.html#contactMap"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.contact.contactMap" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given an unordered list of ContactPoints, computes a canonical dict
+from (obj1,obj2) pairs to a list of contacts on those objects.
+The resulting dict is also regularized so that objects are sorted in
+increasing getID(), so that (obj1,obj2) is not duplicated as (obj2,obj1).</p>
+<p>If fixed is provided, all objects for which fixed(x) returns true will be
+set to None.  The most common example, which fixes terrains, is</p>
+<blockquote>
+<div>lambda(x): x==None or isinstance(x,TerrainModel)</div></blockquote>
+</dd></dl>
+
+<dl class="function">
+<dt id="klampt.contact.idToObject">
+<code class="descclassname">klampt.contact.</code><code class="descname">idToObject</code><span class="sig-paren">(</span><em>world</em>, <em>ID</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/contact.html#idToObject"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.contact.idToObject" title="Permalink to this definition">¶</a></dt>
+<dd><p>Helper: takes a WorldModel ID and converts it into an object.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="klampt.contact.invMassMatrix">
+<code class="descclassname">klampt.contact.</code><code class="descname">invMassMatrix</code><span class="sig-paren">(</span><em>obj</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/contact.html#invMassMatrix"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.contact.invMassMatrix" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>Returns the inverse of obj&#8217;s generalized mass matrix</dt>
+<dd>[H 0 ]-1
+[0 mI]</dd>
+</dl>
+<p>about the origin.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="klampt.contact.simContactMap">
+<code class="descclassname">klampt.contact.</code><code class="descname">simContactMap</code><span class="sig-paren">(</span><em>sim</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/contact.html#simContactMap"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.contact.simContactMap" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given a robotsim simulation, returns a contact map representing all
+current contacts (among bodies with collision feedback enabled).</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="klampt.contact.skew">
+<code class="descclassname">klampt.contact.</code><code class="descname">skew</code><span class="sig-paren">(</span><em>x</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/contact.html#skew"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.contact.skew" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the skew-symmetric cross-product matrix corresponding to the
+matrix x</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="klampt.contact.wrenchMatrices">
+<code class="descclassname">klampt.contact.</code><code class="descname">wrenchMatrices</code><span class="sig-paren">(</span><em>contactMap</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/contact.html#wrenchMatrices"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.contact.wrenchMatrices" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a map from contact pairs (o1,o2) to pairs of rigid-body wrench
+matrices (W1,W2) corresponding to each pair of objects in the contact map.</p>
+<p>Let the pair (o1,o2) have n contacts. The matrix W1 is a 6 x 3n mapping
+from contact force vectors applied on o2 to torque and force at the
+origin of o1.
+The columns [3i,...,3i+2] correspond to the force at the i&#8217;th point in
+contactMap[(o1,o2)].  Rows 0-2 correspond to torque about the origin, 
+while 3-5 correspond to force.</p>
+<p>W2 is similar, but is the jacobian regarding the force on o1.</p>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="klampt.collide.html"
+                        title="previous chapter">klampt.collide module</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="klampt.contactcspace.html"
+                        title="next chapter">klampt.contactcspace module</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/klampt.contact.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="klampt.contactcspace.html" title="klampt.contactcspace module"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="klampt.collide.html" title="klampt.collide module"
+             >previous</a> |</li>
+        <li><a href="index.html">PyKlampt 0.6.0 documentation</a> &raquo;</li>
+          <li><a href="klampt.html" >klampt package</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2015, Kris Hauser.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3b2.
+    </div>
+  </body>
+</html>

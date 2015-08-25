@@ -1,0 +1,314 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>klampt.ik &mdash; PyKlampt 0.6.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.6.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="PyKlampt 0.6.0 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">PyKlampt 0.6.0 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for klampt.ik</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;Inverse kinematics methods.  These use the underlying C++ solver in</span>
+<span class="sd">Klamp&#39;t.  Compared to the SWIG bindings in robotik.h, these helpers</span>
+<span class="sd">are more convenient (and Pythonic). </span>
+
+<span class="sd">The IK solver is a Newton-Raphson solver, which acts like a local</span>
+<span class="sd">optimization.  It starts from the robot model&#39;s initial configuration</span>
+<span class="sd">and takes a number of iterations to seek the objective.  The solution</span>
+<span class="sd">is placed in the robot model&#39;s configuration.  If successful, the</span>
+<span class="sd">solution is also guaranteed to satisfy the robot&#39;s joint limits.</span>
+
+<span class="sd">For basic IK, the calling sequence is</span>
+
+<span class="sd">    link = robot.getLink(&quot;name&quot;)</span>
+<span class="sd">    goal = ik.objective(link,local=[p1,p2,p3],world=[r1,r2,r3])</span>
+<span class="sd">    robot.setConfig(startConfig)  #(optional, set the initial configuration)</span>
+<span class="sd">    if ik.solve(goal):</span>
+<span class="sd">        print &quot;Hooray, IK solved&quot;</span>
+<span class="sd">        print &quot;Resulting config:&quot;,robot.getConfig()</span>
+<span class="sd">    else:</span>
+<span class="sd">        print &quot;IK failed&quot;</span>
+<span class="sd">        print &quot;Final config:&quot;,robot.getConfig()</span>
+
+<span class="sd">Here, the points p1,...,p3 on the link (specified in local coordinates)</span>
+<span class="sd">will be matched to the points r1,...,r3 in the world.  You can also</span>
+<span class="sd">directly constrain the translation/rotation of the link via the form:</span>
+<span class="sd">    </span>
+<span class="sd">    ik.objective(link,R=link.getTransform()[0],t=[x,y,z])</span>
+<span class="sd">    </span>
+<span class="sd">which will keep the orientation of the link constant, while setting its</span>
+<span class="sd">position.</span>
+
+<span class="sd">More advanced usage can constrain a link to another link using the ref</span>
+<span class="sd">argument to ik.objective().  You may also pass multiple goals to ik.solve().</span>
+
+<span class="sd">For more control over the solution process, you may use a ik.solver() object.</span>
+<span class="sd">This object will let you set the active degrees of freedom, get the residual</span>
+<span class="sd">and Jacobian, and sample random initial solutions.  (see</span>
+<span class="sd">:class:`klampt.robotsim.IKSolver`)</span>
+
+<span class="sd">    1. By default, the active degrees of freedom are all ancestors of</span>
+<span class="sd">       the constrained links.  For more control, set them using a solver</span>
+<span class="sd">       object.</span>
+<span class="sd">    2. As with any local IK method, Newton-Raphson has a tendency to get</span>
+<span class="sd">       stuck in local minima.  As a result you may wish to choose random</span>
+<span class="sd">       initial configurations if the first solve fails.</span>
+
+<span class="sd">Note: IK solving with constraints between robot links and rigid objects</span>
+<span class="sd">is not yet implemented and will result in a thrown exception.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">robotsim</span> <span class="kn">import</span> <span class="o">*</span>
+
+<div class="viewcode-block" id="objective"><a class="viewcode-back" href="../../klampt.ik.html#klampt.ik.objective">[docs]</a><span class="k">def</span> <span class="nf">objective</span><span class="p">(</span><span class="n">body</span><span class="p">,</span><span class="n">ref</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span><span class="n">local</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span><span class="n">world</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span><span class="n">R</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span><span class="n">t</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Returns an IKObjective or GeneralizedIKObjective for a given body.</span>
+<span class="sd">    If ref is provided, there is a target body.</span>
+
+<span class="sd">    If local and world are provided (either as single 3D points, or a list of</span>
+<span class="sd">    3D points), then this objective will match the local point(s) to the</span>
+<span class="sd">    world point(s).</span>
+
+<span class="sd">    If R and t are provided, then the objective is set to a relative</span>
+<span class="sd">    transformation between body and ref.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">generalized</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">body</span><span class="p">,</span><span class="s">&#39;getRobot&#39;</span><span class="p">):</span>
+        <span class="n">generalized</span> <span class="o">=</span> <span class="bp">True</span>
+    <span class="k">else</span><span class="p">:</span> 
+        <span class="k">if</span> <span class="n">ref</span> <span class="ow">and</span> <span class="p">(</span><span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">ref</span><span class="p">,</span><span class="s">&#39;getRobot&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">ref</span><span class="o">.</span><span class="n">getRobot</span><span class="p">()</span> <span class="o">!=</span> <span class="n">body</span><span class="o">.</span><span class="n">getRobot</span><span class="p">()):</span>
+            <span class="n">generalized</span><span class="o">=</span><span class="bp">True</span>
+
+    <span class="k">if</span> <span class="n">generalized</span><span class="p">:</span>
+        <span class="n">obj</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="k">if</span> <span class="n">ref</span><span class="p">:</span>
+            <span class="n">obj</span> <span class="o">=</span> <span class="n">GeneralizedIKObjective</span><span class="p">(</span><span class="n">body</span><span class="p">,</span><span class="n">ref</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">obj</span> <span class="o">=</span> <span class="n">GeneralizedIKObjective</span><span class="p">(</span><span class="n">body</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">local</span> <span class="ow">and</span> <span class="n">world</span><span class="p">:</span>
+            <span class="k">assert</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">local</span><span class="p">)</span><span class="o">==</span><span class="nb">len</span><span class="p">(</span><span class="n">world</span><span class="p">))</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">local</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="s">&#39;__iter__&#39;</span><span class="p">):</span>
+                <span class="c">#sanity check</span>
+                <span class="k">for</span> <span class="n">pt</span> <span class="ow">in</span> <span class="n">local</span><span class="p">:</span>
+                    <span class="k">assert</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">pt</span><span class="p">)</span><span class="o">==</span><span class="mi">3</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">pt</span> <span class="ow">in</span> <span class="n">world</span><span class="p">:</span>
+                    <span class="k">assert</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">pt</span><span class="p">)</span><span class="o">==</span><span class="mi">3</span><span class="p">)</span>
+                <span class="n">obj</span><span class="o">.</span><span class="n">setPoints</span><span class="p">(</span><span class="n">local</span><span class="p">,</span><span class="n">world</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">obj</span><span class="o">.</span><span class="n">setPoint</span><span class="p">(</span><span class="n">local</span><span class="p">,</span><span class="n">world</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">R</span> <span class="ow">and</span> <span class="n">t</span><span class="p">:</span>
+            <span class="n">obj</span><span class="o">.</span><span class="n">setTransform</span><span class="p">(</span><span class="n">R</span><span class="p">,</span><span class="n">t</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s">&quot;Need to specify either local and world or R and t&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">obj</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">obj</span> <span class="o">=</span> <span class="n">IKObjective</span><span class="p">()</span>
+        <span class="n">obj</span><span class="o">.</span><span class="n">robot</span> <span class="o">=</span> <span class="n">body</span><span class="o">.</span><span class="n">getRobot</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">local</span> <span class="ow">and</span> <span class="n">world</span><span class="p">:</span>
+            <span class="k">assert</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">local</span><span class="p">)</span><span class="o">==</span><span class="nb">len</span><span class="p">(</span><span class="n">world</span><span class="p">))</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">local</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="s">&#39;__iter__&#39;</span><span class="p">):</span>
+                <span class="c">#sanity check</span>
+                <span class="k">for</span> <span class="n">pt</span> <span class="ow">in</span> <span class="n">local</span><span class="p">:</span>
+                    <span class="k">assert</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">pt</span><span class="p">)</span><span class="o">==</span><span class="mi">3</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">pt</span> <span class="ow">in</span> <span class="n">world</span><span class="p">:</span>
+                    <span class="k">assert</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">pt</span><span class="p">)</span><span class="o">==</span><span class="mi">3</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">ref</span><span class="p">:</span>
+                    <span class="n">obj</span><span class="o">.</span><span class="n">setRelativePoints</span><span class="p">(</span><span class="n">body</span><span class="o">.</span><span class="n">index</span><span class="p">,</span><span class="n">ref</span><span class="o">.</span><span class="n">index</span><span class="p">,</span><span class="n">local</span><span class="p">,</span><span class="n">world</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">obj</span><span class="o">.</span><span class="n">setFixedPoints</span><span class="p">(</span><span class="n">body</span><span class="o">.</span><span class="n">index</span><span class="p">,</span><span class="n">local</span><span class="p">,</span><span class="n">world</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">ref</span><span class="p">:</span>
+                    <span class="n">obj</span><span class="o">.</span><span class="n">setRelativePoint</span><span class="p">(</span><span class="n">body</span><span class="o">.</span><span class="n">index</span><span class="p">,</span><span class="n">ref</span><span class="o">.</span><span class="n">index</span><span class="p">,</span><span class="n">local</span><span class="p">,</span><span class="n">world</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">obj</span><span class="o">.</span><span class="n">setFixedPoint</span><span class="p">(</span><span class="n">body</span><span class="o">.</span><span class="n">index</span><span class="p">,</span><span class="n">local</span><span class="p">,</span><span class="n">world</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">R</span> <span class="ow">and</span> <span class="n">t</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">ref</span><span class="p">:</span>
+                <span class="n">obj</span><span class="o">.</span><span class="n">setRelativeTransform</span><span class="p">(</span><span class="n">body</span><span class="o">.</span><span class="n">index</span><span class="p">,</span><span class="n">ref</span><span class="o">.</span><span class="n">index</span><span class="p">,</span><span class="n">R</span><span class="p">,</span><span class="n">t</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">obj</span><span class="o">.</span><span class="n">setFixedTransform</span><span class="p">(</span><span class="n">body</span><span class="o">.</span><span class="n">index</span><span class="p">,</span><span class="n">R</span><span class="p">,</span><span class="n">t</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s">&quot;Need to specify either local and world or R and t&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">obj</span>
+</div>
+<div class="viewcode-block" id="objects"><a class="viewcode-back" href="../../klampt.ik.html#klampt.ik.objects">[docs]</a><span class="k">def</span> <span class="nf">objects</span><span class="p">(</span><span class="n">objectives</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Returns a list of all objects touched by the given objective(s).</span>
+<span class="sd">    Not currently implemented.&quot;&quot;&quot;</span>
+    <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span>
+    <span class="k">pass</span>
+</div>
+<div class="viewcode-block" id="solver"><a class="viewcode-back" href="../../klampt.ik.html#klampt.ik.solver">[docs]</a><span class="k">def</span> <span class="nf">solver</span><span class="p">(</span><span class="n">objectives</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Returns a solver for the given objective(s). Either a single objective</span>
+<span class="sd">    or a list of objectives can be provided. </span>
+<span class="sd">    </span>
+<span class="sd">    The result is either an IKSolver or a GeneralizedIKSolver corresponding</span>
+<span class="sd">    to the given objective(s).  (see</span>
+<span class="sd">    :class:`klampt.robotsim.IKSolver` and</span>
+<span class="sd">    :class:`klampt.robotsim.GeneralizedIKSolver`).</span>
+
+<span class="sd">    In rare cases, it may return a list of IKSolver&#39;s if you give</span>
+<span class="sd">    it objectives on different robots.  They should be solved</span>
+<span class="sd">    independently for efficiency.</span>
+<span class="sd">    </span>
+<span class="sd">    (The objectives should be a result from the :func:`objective` function.</span>
+<span class="sd">    Beware that if you are making your own goals by calling the IKObjective</span>
+<span class="sd">    constructors from the robotsim module, the .robot member of these goals</span>
+<span class="sd">    must be set).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">objectives</span><span class="p">,</span><span class="s">&#39;__iter__&#39;</span><span class="p">):</span>
+        <span class="n">generalized</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">robs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="n">objectives</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span><span class="n">IKObjective</span><span class="p">):</span>
+                <span class="n">robs</span><span class="o">.</span><span class="n">getdefault</span><span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">robot</span><span class="p">,[])</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span><span class="n">GeneralizedIKObjective</span><span class="p">):</span>
+                <span class="n">generalized</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s">&quot;Objective is of wrong type&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">generalized</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="c">#need a generalized solver</span>
+            <span class="n">world</span> <span class="o">=</span> <span class="bp">None</span>
+            <span class="k">if</span> <span class="n">generalized</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">isObj1</span><span class="p">:</span>
+                <span class="n">world</span> <span class="o">=</span> <span class="n">WorldModel</span><span class="p">(</span><span class="n">generalized</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">obj1</span><span class="o">.</span><span class="n">world</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">world</span> <span class="o">=</span> <span class="n">WorldModel</span><span class="p">(</span><span class="n">generalized</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">link1</span><span class="o">.</span><span class="n">world</span><span class="p">)</span>
+            <span class="n">s</span> <span class="o">=</span> <span class="n">GeneralizedIKSolver</span><span class="p">(</span><span class="n">world</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="n">generalized</span><span class="p">:</span>
+                <span class="n">s</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+            <span class="k">for</span> <span class="p">(</span><span class="n">r</span><span class="p">,</span><span class="n">objs</span><span class="p">)</span> <span class="ow">in</span> <span class="n">robs</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
+                <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="n">objs</span><span class="p">:</span>
+                    <span class="n">s</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">GeneralizedIKObjective</span><span class="p">(</span><span class="n">r</span><span class="p">,</span><span class="n">obj</span><span class="p">))</span>
+            <span class="k">return</span> <span class="n">s</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">res</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="p">(</span><span class="n">r</span><span class="p">,</span><span class="n">objs</span><span class="p">)</span> <span class="ow">in</span> <span class="n">robs</span><span class="p">:</span>
+                <span class="n">s</span> <span class="o">=</span> <span class="n">IKSolver</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="n">objs</span><span class="p">:</span>
+                    <span class="n">s</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+                <span class="n">res</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">res</span><span class="p">)</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">res</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">return</span> <span class="n">res</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">objectives</span><span class="p">,</span><span class="n">IKObjective</span><span class="p">):</span>
+            <span class="n">s</span> <span class="o">=</span> <span class="n">IKSolver</span><span class="p">(</span><span class="n">objectives</span><span class="o">.</span><span class="n">robot</span><span class="p">)</span>
+            <span class="n">s</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">objectives</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">s</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">objectives</span><span class="p">,</span><span class="n">GeneralizedIKObjective</span><span class="p">):</span>
+            <span class="n">world</span> <span class="o">=</span> <span class="bp">None</span>
+            <span class="k">if</span> <span class="n">objectives</span><span class="o">.</span><span class="n">isObj1</span><span class="p">:</span>
+                <span class="n">world</span> <span class="o">=</span> <span class="n">WorldModel</span><span class="p">(</span><span class="n">objectives</span><span class="o">.</span><span class="n">obj1</span><span class="o">.</span><span class="n">world</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">world</span> <span class="o">=</span> <span class="n">WorldModel</span><span class="p">(</span><span class="n">objectives</span><span class="o">.</span><span class="n">link1</span><span class="o">.</span><span class="n">world</span><span class="p">)</span>
+            <span class="n">s</span> <span class="o">=</span> <span class="n">GeneralizedIKSolver</span><span class="p">(</span><span class="n">world</span><span class="p">)</span>
+            <span class="n">s</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">objectives</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">s</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s">&quot;Objective is of wrong type&quot;</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="solve"><a class="viewcode-back" href="../../klampt.ik.html#klampt.ik.solve">[docs]</a><span class="k">def</span> <span class="nf">solve</span><span class="p">(</span><span class="n">objectives</span><span class="p">,</span><span class="n">iters</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span><span class="n">tol</span><span class="o">=</span><span class="mf">1e-3</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Attempts to solve the given objective(s). Either a single objective</span>
+<span class="sd">    or a list of objectives can be provided.</span>
+
+<span class="sd">    Returns true if a solution is successfully found to the given tolerance,</span>
+<span class="sd">    within the provided number of iterations.</span>
+<span class="sd">    </span>
+<span class="sd">    (The objectives should be a result from the :func:`objective` function.</span>
+<span class="sd">    Beware that if you are making your own goals by calling the IKObjective</span>
+<span class="sd">    constructors from the robotsim module, the .robot member of these goals</span>
+<span class="sd">    must be set).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">s</span> <span class="o">=</span> <span class="n">solver</span><span class="p">(</span><span class="n">objectives</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">s</span><span class="p">,</span><span class="s">&#39;__iter__&#39;</span><span class="p">):</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="p">[</span><span class="n">si</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">iters</span><span class="p">,</span><span class="n">tol</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">si</span> <span class="ow">in</span> <span class="n">s</span><span class="p">]</span>
+        <span class="k">return</span> <span class="nb">all</span><span class="p">(</span><span class="n">res</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">s</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">iters</span><span class="p">,</span><span class="n">tol</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+</div>
+<div class="viewcode-block" id="residual"><a class="viewcode-back" href="../../klampt.ik.html#klampt.ik.residual">[docs]</a><span class="k">def</span> <span class="nf">residual</span><span class="p">(</span><span class="n">objectives</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Returns the residual of the given objectives.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">solver</span><span class="p">(</span><span class="n">objectives</span><span class="p">)</span><span class="o">.</span><span class="n">getResidual</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="jacobian"><a class="viewcode-back" href="../../klampt.ik.html#klampt.ik.jacobian">[docs]</a><span class="k">def</span> <span class="nf">jacobian</span><span class="p">(</span><span class="n">objectives</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Returns the jacobian of the given objectives.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">solver</span><span class="p">(</span><span class="n">objectives</span><span class="p">)</span><span class="o">.</span><span class="n">getJacobian</span><span class="p">()</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">PyKlampt 0.6.0 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2015, Kris Hauser.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3b2.
+    </div>
+  </body>
+</html>

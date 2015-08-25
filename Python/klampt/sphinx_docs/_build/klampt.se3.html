@@ -1,0 +1,201 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>klampt.se3 module &mdash; PyKlampt 0.6.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.6.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="PyKlampt 0.6.0 documentation" href="index.html" />
+    <link rel="up" title="klampt package" href="klampt.html" />
+    <link rel="next" title="klampt.so2 module" href="klampt.so2.html" />
+    <link rel="prev" title="klampt.rootfind module" href="klampt.rootfind.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="klampt.so2.html" title="klampt.so2 module"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="klampt.rootfind.html" title="klampt.rootfind module"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">PyKlampt 0.6.0 documentation</a> &raquo;</li>
+          <li><a href="klampt.html" accesskey="U">klampt package</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-klampt.se3">
+<span id="klampt-se3-module"></span><h1>klampt.se3 module<a class="headerlink" href="#module-klampt.se3" title="Permalink to this headline">¶</a></h1>
+<p>Operations for rigid transformations in Klamp&#8217;t.  All rigid
+transformations are specified in the form (R,T),
+where R is a 9-list specifying the entries of the rotation matrix in column
+major form, and t is a 3-list specifying the translation vector.</p>
+<p>These are useful for interfacing with C code.</p>
+<dl class="function">
+<dt id="klampt.se3.apply">
+<code class="descclassname">klampt.se3.</code><code class="descname">apply</code><span class="sig-paren">(</span><em>T</em>, <em>point</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/se3.html#apply"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.se3.apply" title="Permalink to this definition">¶</a></dt>
+<dd><p>Applies the transform T to the given point</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="klampt.se3.apply_rotation">
+<code class="descclassname">klampt.se3.</code><code class="descname">apply_rotation</code><span class="sig-paren">(</span><em>T</em>, <em>point</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/se3.html#apply_rotation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.se3.apply_rotation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Applies only the rotation part of T</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="klampt.se3.distance">
+<code class="descclassname">klampt.se3.</code><code class="descname">distance</code><span class="sig-paren">(</span><em>T1</em>, <em>T2</em>, <em>Rweight=1.0</em>, <em>tweight=1.0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/se3.html#distance"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.se3.distance" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a distance metric between the two transformations. The
+rotation distance is weighted by Rweight and the translation distance
+is weighted by tweight</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="klampt.se3.error">
+<code class="descclassname">klampt.se3.</code><code class="descname">error</code><span class="sig-paren">(</span><em>T1</em>, <em>T2</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/se3.html#error"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.se3.error" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a 6D &#8220;difference vector&#8221; that describes how far T1 is from T2.
+More precisely, this is the Lie derivative (w,v).</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="klampt.se3.from_homogeneous">
+<code class="descclassname">klampt.se3.</code><code class="descname">from_homogeneous</code><span class="sig-paren">(</span><em>mat</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/se3.html#from_homogeneous"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.se3.from_homogeneous" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a T corresponding to the 4x4 homogeneous transform mat</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="klampt.se3.from_rotation">
+<code class="descclassname">klampt.se3.</code><code class="descname">from_rotation</code><span class="sig-paren">(</span><em>mat</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/se3.html#from_rotation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.se3.from_rotation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a T corresponding to the 3x3 rotation matrix mat</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="klampt.se3.homogeneous">
+<code class="descclassname">klampt.se3.</code><code class="descname">homogeneous</code><span class="sig-paren">(</span><em>T</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/se3.html#homogeneous"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.se3.homogeneous" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the 4x4 homogeneous transform corresponding to T</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="klampt.se3.identity">
+<code class="descclassname">klampt.se3.</code><code class="descname">identity</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/se3.html#identity"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.se3.identity" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the identity transformation.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="klampt.se3.interpolate">
+<code class="descclassname">klampt.se3.</code><code class="descname">interpolate</code><span class="sig-paren">(</span><em>T1</em>, <em>T2</em>, <em>u</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/se3.html#interpolate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.se3.interpolate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Interpolate linearly between the two transformations T1 and T2.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="klampt.se3.inv">
+<code class="descclassname">klampt.se3.</code><code class="descname">inv</code><span class="sig-paren">(</span><em>T</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/se3.html#inv"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.se3.inv" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the inverse of the transformation.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="klampt.se3.mul">
+<code class="descclassname">klampt.se3.</code><code class="descname">mul</code><span class="sig-paren">(</span><em>T1</em>, <em>T2</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/se3.html#mul"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.se3.mul" title="Permalink to this definition">¶</a></dt>
+<dd><p>Composes two transformations.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="klampt.se3.rotation">
+<code class="descclassname">klampt.se3.</code><code class="descname">rotation</code><span class="sig-paren">(</span><em>T</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/se3.html#rotation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.se3.rotation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the 3x3 rotation matrix corresponding to T&#8217;s rotation</p>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="klampt.rootfind.html"
+                        title="previous chapter">klampt.rootfind module</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="klampt.so2.html"
+                        title="next chapter">klampt.so2 module</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/klampt.se3.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="klampt.so2.html" title="klampt.so2 module"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="klampt.rootfind.html" title="klampt.rootfind module"
+             >previous</a> |</li>
+        <li><a href="index.html">PyKlampt 0.6.0 documentation</a> &raquo;</li>
+          <li><a href="klampt.html" >klampt package</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2015, Kris Hauser.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3b2.
+    </div>
+  </body>
+</html>

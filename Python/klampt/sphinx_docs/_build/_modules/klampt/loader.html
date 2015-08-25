@@ -1,0 +1,207 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>klampt.loader &mdash; PyKlampt 0.6.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.6.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="PyKlampt 0.6.0 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">PyKlampt 0.6.0 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for klampt.loader</h1><div class="highlight"><pre>
+<span class="kn">from</span> <span class="nn">robotsim</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">contact</span> <span class="kn">import</span> <span class="n">ContactPoint</span>
+<span class="kn">import</span> <span class="nn">so3</span>
+<span class="kn">import</span> <span class="nn">vectorops</span>
+
+<div class="viewcode-block" id="writeVector"><a class="viewcode-back" href="../../klampt.loader.html#klampt.loader.writeVector">[docs]</a><span class="k">def</span> <span class="nf">writeVector</span><span class="p">(</span><span class="n">q</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Writes a vector to text &#39;n v1 ... vn&#39;&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">q</span><span class="p">))</span><span class="o">+</span><span class="s">&#39;</span><span class="se">\t</span><span class="s">&#39;</span><span class="o">+</span><span class="s">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">q</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="readVector"><a class="viewcode-back" href="../../klampt.loader.html#klampt.loader.readVector">[docs]</a><span class="k">def</span> <span class="nf">readVector</span><span class="p">(</span><span class="n">text</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Reads a vector from text &#39;n v1 ... vn&#39;&quot;&quot;&quot;</span>
+    <span class="n">items</span> <span class="o">=</span> <span class="n">text</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+    <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">items</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">+</span><span class="mi">1</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">items</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Invalid number of items&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">items</span><span class="p">[</span><span class="mi">1</span><span class="p">:]]</span>
+</div>
+<span class="k">def</span> <span class="nf">writeContactPoint</span><span class="p">(</span><span class="n">cp</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Writes a contact point&#39;s members x,n,kFriction&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="s">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="p">(</span><span class="n">cp</span><span class="o">.</span><span class="n">x</span><span class="o">+</span><span class="n">cp</span><span class="o">.</span><span class="n">n</span><span class="o">+</span><span class="p">[</span><span class="n">cp</span><span class="o">.</span><span class="n">kFriction</span><span class="p">]))</span>
+
+<div class="viewcode-block" id="readContactPoint"><a class="viewcode-back" href="../../klampt.loader.html#klampt.loader.readContactPoint">[docs]</a><span class="k">def</span> <span class="nf">readContactPoint</span><span class="p">(</span><span class="n">text</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Reads a contact point from text &#39;x1 x2 x3 n1 n2 n3 kFriction&#39;&quot;&quot;&quot;</span>
+    <span class="n">items</span> <span class="o">=</span> <span class="n">text</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">items</span><span class="p">)</span><span class="o">!=</span><span class="mi">7</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Invalid number of items, should be 7&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">ContactPoint</span><span class="p">([</span><span class="nb">float</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">items</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">]],[</span><span class="nb">float</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">items</span><span class="p">[</span><span class="mi">3</span><span class="p">:</span><span class="mi">6</span><span class="p">]],</span><span class="nb">float</span><span class="p">(</span><span class="n">items</span><span class="p">[</span><span class="mi">6</span><span class="p">]))</span>
+</div>
+<div class="viewcode-block" id="writeContactPoint"><a class="viewcode-back" href="../../klampt.loader.html#klampt.loader.writeContactPoint">[docs]</a><span class="k">def</span> <span class="nf">writeContactPoint</span><span class="p">(</span><span class="n">cp</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Writes a contact point to text &#39;x1 x2 x3 n1 n2 n3 kFriction&#39;&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="s">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">cp</span><span class="o">.</span><span class="n">x</span><span class="o">+</span><span class="n">cp</span><span class="o">.</span><span class="n">n</span><span class="o">+</span><span class="p">[</span><span class="n">cp</span><span class="o">.</span><span class="n">kFriction</span><span class="p">]])</span> 
+    </div>
+<div class="viewcode-block" id="readIKObjective"><a class="viewcode-back" href="../../klampt.loader.html#klampt.loader.readIKObjective">[docs]</a><span class="k">def</span> <span class="nf">readIKObjective</span><span class="p">(</span><span class="n">text</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Reads an IKObjective from text&quot;&quot;&quot;</span>
+    <span class="n">items</span> <span class="o">=</span> <span class="n">text</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">items</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">4</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Not enough items to unpack&quot;</span><span class="p">)</span>
+    <span class="n">link</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">items</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">destlink</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">items</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">ind</span> <span class="o">=</span> <span class="mi">2</span>
+    <span class="n">posType</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">posLocal</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">posWorld</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">posDirection</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">rotType</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">rotWorld</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">rotAxis</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="c">#read pos constraint</span>
+    <span class="n">posType</span> <span class="o">=</span> <span class="n">items</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span>
+    <span class="n">ind</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="k">if</span> <span class="n">posType</span><span class="o">==</span><span class="s">&#39;N&#39;</span><span class="p">:</span>
+        <span class="c">#no constraint</span>
+        <span class="k">pass</span>
+    <span class="k">elif</span> <span class="n">posType</span><span class="o">==</span><span class="s">&#39;P&#39;</span> <span class="ow">or</span> <span class="n">posType</span><span class="o">==</span><span class="s">&#39;L&#39;</span><span class="p">:</span>
+        <span class="n">posLocal</span> <span class="o">=</span> <span class="n">items</span><span class="p">[</span><span class="n">ind</span><span class="p">:</span><span class="n">ind</span><span class="o">+</span><span class="mi">3</span><span class="p">]</span>
+        <span class="n">ind</span> <span class="o">+=</span> <span class="mi">3</span>
+        <span class="n">posWorld</span> <span class="o">=</span> <span class="n">items</span><span class="p">[</span><span class="n">ind</span><span class="p">:</span><span class="n">ind</span><span class="o">+</span><span class="mi">3</span><span class="p">]</span>
+        <span class="n">ind</span> <span class="o">+=</span> <span class="mi">3</span>
+        <span class="n">posDirection</span> <span class="o">=</span> <span class="n">items</span><span class="p">[</span><span class="n">ind</span><span class="p">:</span><span class="n">ind</span><span class="o">+</span><span class="mi">3</span><span class="p">]</span>
+        <span class="n">ind</span> <span class="o">+=</span> <span class="mi">3</span>
+    <span class="k">elif</span> <span class="n">posType</span><span class="o">==</span><span class="s">&#39;F&#39;</span><span class="p">:</span>
+        <span class="n">posLocal</span> <span class="o">=</span> <span class="n">items</span><span class="p">[</span><span class="n">ind</span><span class="p">:</span><span class="n">ind</span><span class="o">+</span><span class="mi">3</span><span class="p">]</span>
+        <span class="n">ind</span> <span class="o">+=</span> <span class="mi">3</span>
+        <span class="n">posWorld</span> <span class="o">=</span> <span class="n">items</span><span class="p">[</span><span class="n">ind</span><span class="p">:</span><span class="n">ind</span><span class="o">+</span><span class="mi">3</span><span class="p">]</span>
+        <span class="n">ind</span> <span class="o">+=</span> <span class="mi">3</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Invalid pos type &quot;</span><span class="o">+</span><span class="n">posType</span><span class="o">+</span><span class="s">&quot;, must be N,P,L or F&quot;</span><span class="p">)</span>
+    <span class="n">rotType</span> <span class="o">=</span> <span class="n">items</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span>
+    <span class="n">ind</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="k">if</span> <span class="n">rotType</span><span class="o">==</span><span class="s">&#39;N&#39;</span><span class="p">:</span>
+        <span class="c">#no constraint</span>
+        <span class="k">pass</span>
+    <span class="k">elif</span> <span class="n">rotType</span><span class="o">==</span><span class="s">&#39;T&#39;</span> <span class="ow">or</span> <span class="n">rotType</span><span class="o">==</span><span class="s">&#39;A&#39;</span><span class="p">:</span>
+        <span class="n">rotAxis</span> <span class="o">=</span> <span class="n">items</span><span class="p">[</span><span class="n">ind</span><span class="p">:</span><span class="n">ind</span><span class="o">+</span><span class="mi">3</span><span class="p">]</span>
+        <span class="n">ind</span> <span class="o">+=</span> <span class="mi">3</span>
+        <span class="n">rotWorld</span> <span class="o">=</span> <span class="n">items</span><span class="p">[</span><span class="n">ind</span><span class="p">:</span><span class="n">ind</span><span class="o">+</span><span class="mi">3</span><span class="p">]</span>
+        <span class="n">ind</span> <span class="o">+=</span> <span class="mi">3</span>
+    <span class="k">elif</span> <span class="n">rotType</span><span class="o">==</span><span class="s">&#39;F&#39;</span><span class="p">:</span>
+        <span class="n">rotWorld</span> <span class="o">=</span> <span class="n">items</span><span class="p">[</span><span class="n">ind</span><span class="p">:</span><span class="n">ind</span><span class="o">+</span><span class="mi">3</span><span class="p">]</span>
+        <span class="n">ind</span> <span class="o">+=</span> <span class="mi">3</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Invalid rot type &quot;</span><span class="o">+</span><span class="n">rotType</span><span class="o">+</span><span class="s">&quot;, must be N,T,A or F&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">posType</span> <span class="o">!=</span> <span class="s">&#39;F&#39;</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s">&quot;Python API can only do point and fixed IK goals&quot;</span><span class="p">)</span>
+    <span class="n">obj</span> <span class="o">=</span> <span class="n">IKObjective</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">rotType</span> <span class="o">==</span> <span class="s">&#39;N&#39;</span><span class="p">:</span>
+        <span class="c">#point constraint</span>
+        <span class="n">obj</span><span class="o">.</span><span class="n">setRelativePoint</span><span class="p">(</span><span class="n">link</span><span class="p">,</span><span class="n">destlink</span><span class="p">,[</span><span class="nb">float</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">posLocal</span><span class="p">],[</span><span class="nb">float</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">posWorld</span><span class="p">])</span>
+    <span class="k">elif</span> <span class="n">rotType</span> <span class="o">==</span> <span class="s">&#39;F&#39;</span><span class="p">:</span>
+        <span class="c">#fixed constraint</span>
+        <span class="n">R</span> <span class="o">=</span> <span class="n">so3</span><span class="o">.</span><span class="n">from_moment</span><span class="p">([</span><span class="nb">float</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">rotWorld</span><span class="p">])</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="n">vectorops</span><span class="o">.</span><span class="n">sub</span><span class="p">([</span><span class="nb">float</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">posWorld</span><span class="p">],</span><span class="n">so3</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">R</span><span class="p">,[</span><span class="nb">float</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">posLocal</span><span class="p">]))</span>
+        <span class="n">obj</span><span class="o">.</span><span class="n">setRelativeTransform</span><span class="p">(</span><span class="n">link</span><span class="p">,</span><span class="n">destlink</span><span class="p">,</span><span class="n">R</span><span class="p">,</span><span class="n">t</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">rotType</span> <span class="o">==</span> <span class="s">&#39;A&#39;</span><span class="p">:</span>
+        <span class="c">#TODO: rotational axis constraints actually can be set in the python API</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s">&quot;Axis rotations not yet implemented&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s">&quot;Two-axis rotational constraints not supported&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">obj</span>
+</div>
+<div class="viewcode-block" id="parseLines"><a class="viewcode-back" href="../../klampt.loader.html#klampt.loader.parseLines">[docs]</a><span class="k">def</span> <span class="nf">parseLines</span><span class="p">(</span><span class="n">text</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Returns a list of lines from the given text.  Understands end-of-line escapes &#39;\\n&#39;&quot;&quot;&quot;</span>
+    <span class="n">lines</span> <span class="o">=</span> <span class="n">text</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+    <span class="n">esclines</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">esc</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">lines</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">esc</span><span class="p">:</span>
+            <span class="n">esclines</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">esclines</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="n">l</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">esclines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">l</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">l</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span> <span class="ow">and</span> <span class="n">l</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">==</span><span class="s">&#39;</span><span class="se">\\</span><span class="s">&#39;</span><span class="p">:</span>
+            <span class="n">esclines</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">esclines</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">esc</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">esc</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="k">return</span> <span class="n">esclines</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">PyKlampt 0.6.0 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2015, Kris Hauser.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3b2.
+    </div>
+  </body>
+</html>

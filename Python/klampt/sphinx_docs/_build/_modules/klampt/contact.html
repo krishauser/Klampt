@@ -1,0 +1,307 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>klampt.contact &mdash; PyKlampt 0.6.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.6.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="PyKlampt 0.6.0 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">PyKlampt 0.6.0 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for klampt.contact</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;Definitions of frictional point contacts, contact maps, and basic wrench</span>
+<span class="sd">subroutines.&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">ik</span>
+<span class="kn">from</span> <span class="nn">robotsim</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="k">try</span><span class="p">:</span>
+	<span class="kn">import</span> <span class="nn">numpy</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+	<span class="k">pass</span>
+
+<div class="viewcode-block" id="idToObject"><a class="viewcode-back" href="../../klampt.contact.html#klampt.contact.idToObject">[docs]</a><span class="k">def</span> <span class="nf">idToObject</span><span class="p">(</span><span class="n">world</span><span class="p">,</span><span class="n">ID</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Helper: takes a WorldModel ID and converts it into an object.&quot;&quot;&quot;</span>
+    <span class="k">assert</span><span class="p">(</span><span class="n">ID</span> <span class="o">&gt;=</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">ID</span> <span class="o">&lt;</span> <span class="n">world</span><span class="o">.</span><span class="n">numIDs</span><span class="p">())</span>
+    <span class="k">if</span> <span class="n">ID</span> <span class="o">&lt;</span> <span class="n">world</span><span class="o">.</span><span class="n">numTerrains</span><span class="p">():</span>
+        <span class="k">return</span> <span class="n">world</span><span class="o">.</span><span class="n">terrain</span><span class="p">(</span><span class="n">ID</span><span class="p">)</span>
+    <span class="n">ID</span> <span class="o">-=</span> <span class="n">world</span><span class="o">.</span><span class="n">numTerrains</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">ID</span> <span class="o">&lt;</span> <span class="n">world</span><span class="o">.</span><span class="n">numRigidObjects</span><span class="p">():</span>
+        <span class="k">return</span> <span class="n">world</span><span class="o">.</span><span class="n">rigidObject</span><span class="p">(</span><span class="n">ID</span><span class="p">)</span>
+    <span class="n">ID</span> <span class="o">-=</span> <span class="n">world</span><span class="o">.</span><span class="n">numRigidObjects</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="n">world</span><span class="o">.</span><span class="n">numRobots</span><span class="p">()):</span>
+        <span class="k">if</span> <span class="n">ID</span><span class="o">==</span><span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">world</span><span class="o">.</span><span class="n">robot</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+        <span class="n">ID</span> <span class="o">-=</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="n">ID</span> <span class="o">&lt;</span> <span class="n">world</span><span class="o">.</span><span class="n">numRobotLinks</span><span class="p">(</span><span class="n">i</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">world</span><span class="o">.</span><span class="n">robotLink</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">ID</span><span class="p">)</span>
+        <span class="n">ID</span> <span class="o">-=</span> <span class="n">world</span><span class="o">.</span><span class="n">numRobotLinks</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+    <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s">&quot;Internal error in idToObject&quot;</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="ContactPoint"><a class="viewcode-back" href="../../klampt.contact.html#klampt.contact.ContactPoint">[docs]</a><span class="k">class</span> <span class="nc">ContactPoint</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;A point contact between two rigid bodies, object1 and object2.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        - x is the contact point in world coordinates.</span>
+<span class="sd">        - n is the normal pointing from object1 into object 2.</span>
+<span class="sd">        - kFriction is the friction coefficient.</span>
+<span class="sd">        - object1 and object2 are the objects in contact (optional).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="o">=</span><span class="p">[</span><span class="mf">0.</span><span class="p">,</span><span class="mf">0.</span><span class="p">,</span><span class="mf">0.</span><span class="p">],</span><span class="n">n</span><span class="o">=</span><span class="p">[</span><span class="mf">0.</span><span class="p">,</span><span class="mf">0.</span><span class="p">,</span><span class="mf">1.</span><span class="p">],</span><span class="n">kFriction</span><span class="o">=</span><span class="mf">0.</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">x</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n</span> <span class="o">=</span> <span class="n">n</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">kFriction</span> <span class="o">=</span> <span class="n">kFriction</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">object1</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">object2</span> <span class="o">=</span> <span class="bp">None</span>
+
+<div class="viewcode-block" id="ContactPoint.reflect"><a class="viewcode-back" href="../../klampt.contact.html#klampt.contact.ContactPoint.reflect">[docs]</a>    <span class="k">def</span> <span class="nf">reflect</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="n">ContactPoint</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,[</span><span class="o">-</span><span class="n">ni</span> <span class="k">for</span> <span class="n">ni</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">],</span><span class="bp">self</span><span class="o">.</span><span class="n">kFriction</span><span class="p">)</span>
+        <span class="n">p</span><span class="o">.</span><span class="n">object2</span><span class="p">,</span><span class="n">p</span><span class="o">.</span><span class="n">object1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">object1</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">object2</span>
+        <span class="k">return</span> <span class="n">p</span>
+</div></div>
+<div class="viewcode-block" id="contactMap"><a class="viewcode-back" href="../../klampt.contact.html#klampt.contact.contactMap">[docs]</a><span class="k">def</span> <span class="nf">contactMap</span><span class="p">(</span><span class="n">contacts</span><span class="p">,</span><span class="n">fixed</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Given an unordered list of ContactPoints, computes a canonical dict</span>
+<span class="sd">    from (obj1,obj2) pairs to a list of contacts on those objects.</span>
+<span class="sd">    The resulting dict is also regularized so that objects are sorted in</span>
+<span class="sd">    increasing getID(), so that (obj1,obj2) is not duplicated as (obj2,obj1).</span>
+<span class="sd">    </span>
+<span class="sd">    If fixed is provided, all objects for which fixed(x) returns true will be</span>
+<span class="sd">    set to None.  The most common example, which fixes terrains, is</span>
+<span class="sd">       lambda(x): x==None or isinstance(x,TerrainModel)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">worlds</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="n">robots</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="n">objects</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="c">#check which worlds, robots, and objects are used</span>
+    <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">contacts</span><span class="p">:</span>
+        <span class="k">assert</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">object1</span><span class="o">.</span><span class="n">world</span> <span class="o">==</span> <span class="n">c</span><span class="o">.</span><span class="n">object2</span><span class="o">.</span><span class="n">world</span><span class="p">),</span><span class="s">&quot;Contacts need to be in the same world&quot;</span>
+        <span class="n">worlds</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">object1</span><span class="o">.</span><span class="n">world</span><span class="p">)</span>
+    <span class="k">assert</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">worlds</span><span class="p">)</span><span class="o">&lt;=</span><span class="mi">1</span><span class="p">),</span><span class="s">&quot;Only one world is supported&quot;</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">worlds</span><span class="p">)</span><span class="o">==</span><span class="mi">0</span><span class="p">:</span> <span class="k">return</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">contacts</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">object1</span><span class="p">,</span><span class="s">&#39;robot&#39;</span><span class="p">):</span>
+            <span class="k">assert</span><span class="p">(</span><span class="nb">hasattr</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">object1</span><span class="p">,</span><span class="s">&#39;robotIndex&#39;</span><span class="p">)),</span><span class="s">&quot;Contact pairs must be RobotModelLink&#39;s&quot;</span>
+            <span class="n">robots</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">object1</span><span class="o">.</span><span class="n">robot</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">object1</span><span class="p">,</span><span class="s">&#39;object&#39;</span><span class="p">):</span>
+            <span class="n">objects</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">object1</span><span class="o">.</span><span class="n">object</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">object2</span><span class="p">,</span><span class="s">&#39;robot&#39;</span><span class="p">):</span>
+            <span class="k">assert</span><span class="p">(</span><span class="nb">hasattr</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">object2</span><span class="p">,</span><span class="s">&#39;robotIndex&#39;</span><span class="p">)),</span><span class="s">&quot;Contact pairs must be RobotModelLink&#39;s&quot;</span>
+            <span class="n">robots</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">object2</span><span class="o">.</span><span class="n">robot</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">object2</span><span class="p">,</span><span class="s">&#39;object&#39;</span><span class="p">):</span>
+            <span class="n">objects</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">object2</span><span class="o">.</span><span class="n">object</span><span class="p">)</span>
+
+    <span class="c">#first sort out all the collision pairs</span>
+    <span class="n">paircontacts</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">contacts</span><span class="p">:</span>
+        <span class="n">reverse</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="c">#treat all non RigidObjectModel or RobotModelLink objects as fixed</span>
+        <span class="n">o1</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">object1</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">fixed</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">object1</span><span class="p">)</span> <span class="k">else</span> <span class="bp">None</span>
+        <span class="n">o2</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">object2</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">fixed</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">object2</span><span class="p">)</span> <span class="k">else</span> <span class="bp">None</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">o1</span><span class="p">,</span><span class="s">&#39;getID&#39;</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">o2</span><span class="p">,</span><span class="s">&#39;getID&#39;</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">o2</span><span class="o">.</span><span class="n">getID</span><span class="p">()</span> <span class="o">&lt;</span> <span class="n">o1</span><span class="o">.</span><span class="n">getID</span><span class="p">():</span>
+                    <span class="n">reverse</span><span class="o">=</span><span class="bp">True</span>
+                <span class="k">elif</span> <span class="n">o2</span><span class="o">.</span><span class="n">getID</span><span class="p">()</span> <span class="o">==</span> <span class="n">o1</span><span class="o">.</span><span class="n">getID</span><span class="p">():</span>
+                    <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s">&quot;Contacts specified on object to itself&quot;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">o2</span><span class="p">,</span><span class="s">&#39;getID&#39;</span><span class="p">):</span>
+                <span class="n">reflect</span> <span class="o">=</span> <span class="bp">True</span>
+
+        <span class="k">if</span> <span class="n">o1</span> <span class="o">==</span> <span class="n">o2</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s">&quot;Contact specified between an object and itself&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">reflect</span><span class="p">:</span>
+            <span class="n">paircontacts</span><span class="o">.</span><span class="n">getdefault</span><span class="p">((</span><span class="n">o2</span><span class="p">,</span><span class="n">o1</span><span class="p">),[])</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">reflect</span><span class="p">())</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">paircontacts</span><span class="o">.</span><span class="n">getdefault</span><span class="p">((</span><span class="n">o1</span><span class="p">,</span><span class="n">o2</span><span class="p">),[])</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">paircontacts</span>
+</div>
+<div class="viewcode-block" id="simContactMap"><a class="viewcode-back" href="../../klampt.contact.html#klampt.contact.simContactMap">[docs]</a><span class="k">def</span> <span class="nf">simContactMap</span><span class="p">(</span><span class="n">sim</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Given a robotsim simulation, returns a contact map representing all</span>
+<span class="sd">    current contacts (among bodies with collision feedback enabled).&quot;&quot;&quot;</span>
+    <span class="n">cmap</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+    <span class="n">w</span> <span class="o">=</span> <span class="n">sim</span><span class="o">.</span><span class="n">getWorld</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="n">w</span><span class="o">.</span><span class="n">numIDs</span><span class="p">()):</span>
+        <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="n">a</span><span class="p">):</span>
+            <span class="n">c</span> <span class="o">=</span> <span class="n">sim</span><span class="o">.</span><span class="n">getContacts</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="c">#figure out the objects corresponding to a and b</span>
+                <span class="n">oa</span> <span class="o">=</span> <span class="n">idToObject</span><span class="p">(</span><span class="n">w</span><span class="p">,</span><span class="n">a</span><span class="p">)</span>
+                <span class="n">ob</span> <span class="o">=</span> <span class="n">idToObject</span><span class="p">(</span><span class="n">w</span><span class="p">,</span><span class="n">b</span><span class="p">)</span>
+                <span class="n">clist</span> <span class="o">=</span> <span class="p">[</span><span class="n">ContactPoint</span><span class="p">(</span><span class="n">ci</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">],</span><span class="n">ci</span><span class="p">[</span><span class="mi">3</span><span class="p">:</span><span class="mi">6</span><span class="p">],</span><span class="n">ci</span><span class="p">[</span><span class="mi">6</span><span class="p">])</span> <span class="k">for</span> <span class="n">ci</span> <span class="ow">in</span> <span class="n">c</span><span class="p">]</span>
+                <span class="n">cmap</span><span class="p">[(</span><span class="n">oa</span><span class="p">,</span><span class="n">ob</span><span class="p">)]</span> <span class="o">=</span> <span class="n">clist</span>
+    <span class="k">return</span> <span class="n">cmap</span>
+</div>
+<div class="viewcode-block" id="contactIKObjectives"><a class="viewcode-back" href="../../klampt.contact.html#klampt.contact.contactIKObjectives">[docs]</a><span class="k">def</span> <span class="nf">contactIKObjectives</span><span class="p">(</span><span class="n">contactMap</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Given a contact map, computes a set of non-conflicting</span>
+<span class="sd">    IKObjective&#39;s or GeneralizedIKObjective&#39;s that enforce all simultaneous</span>
+<span class="sd">    contact constraints.  Usually called in conjunction with contactMap</span>
+<span class="sd">    with the following sequence:</span>
+
+<span class="sd">    objectives = contactIKObjectives(contactMap(contacts,lambda(x):x==None or isinstance(x,TerrainModel)))</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="p">(</span><span class="n">o1</span><span class="p">,</span><span class="n">o2</span><span class="p">)</span> <span class="ow">in</span> <span class="n">contactMap</span><span class="o">.</span><span class="n">iterkeys</span><span class="p">():</span>
+        <span class="n">objectives</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="p">((</span><span class="n">o1</span><span class="p">,</span><span class="n">o2</span><span class="p">),</span><span class="n">clist</span><span class="p">)</span> <span class="ow">in</span> <span class="n">contactMap</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="n">o1</span> <span class="o">!=</span> <span class="bp">None</span>
+            
+            <span class="n">x1loc</span> <span class="o">=</span> <span class="p">[</span><span class="n">o1</span><span class="o">.</span><span class="n">getLocalPosition</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">clist</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">o2</span> <span class="o">!=</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">x2loc</span> <span class="o">=</span> <span class="p">[</span><span class="n">o2</span><span class="o">.</span><span class="n">getLocalPosition</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">clist</span><span class="p">]</span>
+                <span class="n">objectives</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ik</span><span class="o">.</span><span class="n">objective</span><span class="p">(</span><span class="n">o1</span><span class="p">,</span><span class="n">o2</span><span class="p">,</span><span class="n">local</span><span class="o">=</span><span class="n">x1loc</span><span class="p">,</span><span class="n">world</span><span class="o">=</span><span class="n">x2loc</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">x2</span> <span class="o">=</span> <span class="p">[</span><span class="n">c</span><span class="o">.</span><span class="n">x</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">clist</span><span class="p">]</span>
+                <span class="n">objectives</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ik</span><span class="o">.</span><span class="n">objective</span><span class="p">(</span><span class="n">o1</span><span class="p">,</span><span class="n">local</span><span class="o">=</span><span class="n">x1loc</span><span class="p">,</span><span class="n">world</span><span class="o">=</span><span class="n">x2</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">objectives</span>
+</div>
+<div class="viewcode-block" id="skew"><a class="viewcode-back" href="../../klampt.contact.html#klampt.contact.skew">[docs]</a><span class="k">def</span> <span class="nf">skew</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Returns the skew-symmetric cross-product matrix corresponding to the</span>
+<span class="sd">    matrix x&quot;&quot;&quot;</span>
+    <span class="k">assert</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span><span class="p">)</span>
+    <span class="n">xhat</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">))</span>
+    <span class="n">xhat</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="n">x</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+    <span class="n">xhat</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+    <span class="n">xhat</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">xhat</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">xhat</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">xhat</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">xhat</span>
+</div>
+<div class="viewcode-block" id="invMassMatrix"><a class="viewcode-back" href="../../klampt.contact.html#klampt.contact.invMassMatrix">[docs]</a><span class="k">def</span> <span class="nf">invMassMatrix</span><span class="p">(</span><span class="n">obj</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Returns the inverse of obj&#39;s generalized mass matrix</span>
+<span class="sd">      [H 0 ]-1</span>
+<span class="sd">      [0 mI]</span>
+<span class="sd">    about the origin.&quot;&quot;&quot;</span>
+    <span class="n">Hinv</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">6</span><span class="p">,</span><span class="mi">6</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">obj</span> <span class="o">==</span> <span class="bp">None</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span><span class="n">TerrainModel</span><span class="p">):</span>
+        <span class="c">#infinite inertia</span>
+        <span class="k">return</span> <span class="n">Hinv</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span><span class="n">RobotModel</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">obj</span><span class="o">.</span><span class="n">getMassMatrixInv</span><span class="p">()</span>
+    <span class="n">m</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">getMass</span><span class="p">()</span>
+    <span class="n">minv</span> <span class="o">=</span> <span class="mf">1.0</span><span class="o">/</span><span class="n">m</span><span class="o">.</span><span class="n">mass</span>
+    <span class="n">Hinv</span><span class="p">[</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">]</span><span class="o">=</span><span class="n">Hinv</span><span class="p">[</span><span class="mi">4</span><span class="p">,</span><span class="mi">4</span><span class="p">]</span><span class="o">=</span><span class="n">Hinv</span><span class="p">[</span><span class="mi">5</span><span class="p">,</span><span class="mi">5</span><span class="p">]</span><span class="o">=</span><span class="n">minv</span>
+    <span class="c">#offset the inertia matrix about the COM</span>
+    <span class="n">H</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">))</span>
+    <span class="n">H</span><span class="p">[</span><span class="mi">0</span><span class="p">,:]</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">inertia</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">])</span>
+    <span class="n">H</span><span class="p">[</span><span class="mi">1</span><span class="p">,:]</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">inertia</span><span class="p">[</span><span class="mi">3</span><span class="p">:</span><span class="mi">6</span><span class="p">])</span>
+    <span class="n">H</span><span class="p">[</span><span class="mi">2</span><span class="p">,:]</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">inertia</span><span class="p">[</span><span class="mi">6</span><span class="p">:</span><span class="mi">9</span><span class="p">])</span>
+    <span class="n">H</span> <span class="o">-=</span> <span class="n">skew</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">com</span><span class="p">)</span><span class="o">*</span><span class="n">skew</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">com</span><span class="p">)</span><span class="o">*</span><span class="n">m</span><span class="o">.</span><span class="n">mass</span>
+    <span class="n">Hinv</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">H</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">Hinv</span>
+</div>
+<div class="viewcode-block" id="wrenchMatrices"><a class="viewcode-back" href="../../klampt.contact.html#klampt.contact.wrenchMatrices">[docs]</a><span class="k">def</span> <span class="nf">wrenchMatrices</span><span class="p">(</span><span class="n">contactMap</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Returns a map from contact pairs (o1,o2) to pairs of rigid-body wrench</span>
+<span class="sd">    matrices (W1,W2) corresponding to each pair of objects in the contact map.</span>
+
+<span class="sd">    Let the pair (o1,o2) have n contacts. The matrix W1 is a 6 x 3n mapping</span>
+<span class="sd">    from contact force vectors applied on o2 to torque and force at the</span>
+<span class="sd">    origin of o1.</span>
+<span class="sd">    The columns [3i,...,3i+2] correspond to the force at the i&#39;th point in</span>
+<span class="sd">    contactMap[(o1,o2)].  Rows 0-2 correspond to torque about the origin, </span>
+<span class="sd">    while 3-5 correspond to force.</span>
+
+<span class="sd">    W2 is similar, but is the jacobian regarding the force on o1.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">res</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+    <span class="k">for</span> <span class="p">((</span><span class="n">o1</span><span class="p">,</span><span class="n">o2</span><span class="p">),</span><span class="n">clist</span><span class="p">)</span> <span class="ow">in</span> <span class="n">contactMap</span><span class="p">:</span>
+        <span class="n">w1</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">6</span><span class="p">,</span><span class="mi">3</span><span class="o">*</span><span class="nb">len</span><span class="p">(</span><span class="n">clist</span><span class="p">)))</span>
+        <span class="n">w2</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">6</span><span class="p">,</span><span class="mi">3</span><span class="o">*</span><span class="nb">len</span><span class="p">(</span><span class="n">clist</span><span class="p">)))</span>
+        <span class="k">for</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">c</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">clist</span><span class="p">):</span>
+            <span class="n">arm</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">x</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">o1</span> <span class="o">!=</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">arm</span> <span class="o">-=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">o1</span><span class="o">.</span><span class="n">getTransform</span><span class="p">()[</span><span class="mi">1</span><span class="p">])</span>
+            <span class="c">#skew symmetric product matrix</span>
+            <span class="n">w1</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="o">*</span><span class="n">i</span><span class="p">:</span><span class="mi">3</span><span class="o">*</span><span class="n">i</span><span class="o">+</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">skew</span><span class="p">(</span><span class="n">arm</span><span class="p">)</span>            
+            <span class="n">w1</span><span class="p">[</span><span class="mi">3</span><span class="p">:</span><span class="mi">6</span><span class="p">,</span><span class="mi">3</span><span class="o">*</span><span class="n">i</span><span class="p">:</span><span class="mi">3</span><span class="o">*</span><span class="n">i</span><span class="o">+</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="n">numpy</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+            
+        <span class="k">for</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">c</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">clist</span><span class="p">):</span>
+            <span class="n">arm</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">x</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">o1</span> <span class="o">!=</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">arm</span> <span class="o">-=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">o1</span><span class="o">.</span><span class="n">getTransform</span><span class="p">()[</span><span class="mi">1</span><span class="p">])</span>
+            <span class="c">#negative skew symmetric product matrix</span>
+            <span class="n">w2</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="o">*</span><span class="n">i</span><span class="p">:</span><span class="mi">3</span><span class="o">*</span><span class="n">i</span><span class="o">+</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="n">skew</span><span class="p">(</span><span class="n">arm</span><span class="p">)</span>
+            <span class="n">w2</span><span class="p">[</span><span class="mi">3</span><span class="p">:</span><span class="mi">6</span><span class="p">,</span><span class="mi">3</span><span class="o">*</span><span class="n">i</span><span class="p">:</span><span class="mi">3</span><span class="o">*</span><span class="n">i</span><span class="o">+</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+            
+        <span class="n">res</span><span class="p">[(</span><span class="n">o1</span><span class="p">,</span><span class="n">o2</span><span class="p">)]</span><span class="o">=</span><span class="p">(</span><span class="n">w1</span><span class="p">,</span><span class="n">w2</span><span class="p">)</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">PyKlampt 0.6.0 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2015, Kris Hauser.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3b2.
+    </div>
+  </body>
+</html>

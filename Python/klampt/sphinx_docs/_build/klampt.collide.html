@@ -1,0 +1,443 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>klampt.collide module &mdash; PyKlampt 0.6.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.6.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="PyKlampt 0.6.0 documentation" href="index.html" />
+    <link rel="up" title="klampt package" href="klampt.html" />
+    <link rel="next" title="klampt.contact module" href="klampt.contact.html" />
+    <link rel="prev" title="klampt.camera module" href="klampt.camera.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="klampt.contact.html" title="klampt.contact module"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="klampt.camera.html" title="klampt.camera module"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">PyKlampt 0.6.0 documentation</a> &raquo;</li>
+          <li><a href="klampt.html" accesskey="U">klampt package</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-klampt.collide">
+<span id="klampt-collide-module"></span><h1>klampt.collide module<a class="headerlink" href="#module-klampt.collide" title="Permalink to this headline">¶</a></h1>
+<p>Python interface to KrisLibrary collision detection routines</p>
+<dl class="function">
+<dt id="klampt.collide.closestPoints">
+<code class="descclassname">klampt.collide.</code><code class="descname">closestPoints</code><span class="sig-paren">(</span><em>int geom1</em>, <em>int geom2</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/collide.html#closestPoints"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.collide.closestPoints" title="Permalink to this definition">¶</a></dt>
+<dd><p>void closestPoints(int geom1,
+int geom2, double out[3], double out2[3])</p>
+<p>Returns the closest points between the two geometries. These are given
+in world coordinates.</p>
+<p>NOTE: Not yet implemented.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="klampt.collide.collide">
+<code class="descclassname">klampt.collide.</code><code class="descname">collide</code><span class="sig-paren">(</span><em>int geom1</em>, <em>int geom2</em><span class="sig-paren">)</span> &rarr; bool<a class="reference internal" href="_modules/klampt/collide.html#collide"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.collide.collide" title="Permalink to this definition">¶</a></dt>
+<dd><p>bool collide(int geom1, int geom2)</p>
+<p>Tests whether the two geometries collide.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="klampt.collide.destroy">
+<code class="descclassname">klampt.collide.</code><code class="descname">destroy</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/collide.html#destroy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.collide.destroy" title="Permalink to this definition">¶</a></dt>
+<dd><p>void destroy()</p>
+<p>destroys internal data structures</p>
+<p>destroys internal data structures</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="klampt.collide.destroyCollQuery">
+<code class="descclassname">klampt.collide.</code><code class="descname">destroyCollQuery</code><span class="sig-paren">(</span><em>int query</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/collide.html#destroyCollQuery"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.collide.destroyCollQuery" title="Permalink to this definition">¶</a></dt>
+<dd><p>void destroyCollQuery(int
+query)</p>
+<p>Deletes a collision query object.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="klampt.collide.destroyGeom">
+<code class="descclassname">klampt.collide.</code><code class="descname">destroyGeom</code><span class="sig-paren">(</span><em>int geom</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/collide.html#destroyGeom"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.collide.destroyGeom" title="Permalink to this definition">¶</a></dt>
+<dd><p>void destroyGeom(int geom)</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="klampt.collide.distance">
+<code class="descclassname">klampt.collide.</code><code class="descname">distance</code><span class="sig-paren">(</span><em>int geom1</em>, <em>int geom2</em>, <em>double relErr</em>, <em>double absErr</em><span class="sig-paren">)</span> &rarr; double<a class="reference internal" href="_modules/klampt/collide.html#distance"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.collide.distance" title="Permalink to this definition">¶</a></dt>
+<dd><p>double distance(int geom1, int
+geom2, double relErr, double absErr)</p>
+<p>Returns the distance between the two geometries, possibly with an
+approximation error (useful to speed up mesh-mesh distance detection)</p>
+<p>Error of result is no more than D*relErr+absErr where D is the actual
+distance. Set relErr=absErr=0 to get exact distance.</p>
+<p>NOTE: Not yet implemented.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="klampt.collide.doubleArray">
+<em class="property">class </em><code class="descclassname">klampt.collide.</code><code class="descname">doubleArray</code><span class="sig-paren">(</span><em>*args</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/collide.html#doubleArray"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.collide.doubleArray" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<dl class="method">
+<dt id="klampt.collide.doubleArray.cast">
+<code class="descname">cast</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/collide.html#doubleArray.cast"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.collide.doubleArray.cast" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="staticmethod">
+<dt id="klampt.collide.doubleArray.frompointer">
+<em class="property">static </em><code class="descname">frompointer</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#klampt.collide.doubleArray.frompointer" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="klampt.collide.getTriMeshBB">
+<code class="descclassname">klampt.collide.</code><code class="descname">getTriMeshBB</code><span class="sig-paren">(</span><em>int geom</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/collide.html#getTriMeshBB"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.collide.getTriMeshBB" title="Permalink to this definition">¶</a></dt>
+<dd><p>void getTriMeshBB(int geom,
+double out[3], double out2[3])</p>
+<p>Gets the bounding box of a trimesh geom.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="klampt.collide.getTriMeshNumTris">
+<code class="descclassname">klampt.collide.</code><code class="descname">getTriMeshNumTris</code><span class="sig-paren">(</span><em>int geom</em><span class="sig-paren">)</span> &rarr; int<a class="reference internal" href="_modules/klampt/collide.html#getTriMeshNumTris"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.collide.getTriMeshNumTris" title="Permalink to this definition">¶</a></dt>
+<dd><p>int getTriMeshNumTris(int
+geom)</p>
+<p>Gets the number of triangles of a trimesh geom.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="klampt.collide.getTriMeshNumVerts">
+<code class="descclassname">klampt.collide.</code><code class="descname">getTriMeshNumVerts</code><span class="sig-paren">(</span><em>int geom</em><span class="sig-paren">)</span> &rarr; int<a class="reference internal" href="_modules/klampt/collide.html#getTriMeshNumVerts"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.collide.getTriMeshNumVerts" title="Permalink to this definition">¶</a></dt>
+<dd><p>int getTriMeshNumVerts(int
+geom)</p>
+<p>Gets the number of vertices of a trimesh geom.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="klampt.collide.getTriMeshRotation">
+<code class="descclassname">klampt.collide.</code><code class="descname">getTriMeshRotation</code><span class="sig-paren">(</span><em>int geom</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/collide.html#getTriMeshRotation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.collide.getTriMeshRotation" title="Permalink to this definition">¶</a></dt>
+<dd><p>void
+getTriMeshRotation(int geom, double out[9])</p>
+<p>Gets the rotation of a trimesh geom.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="klampt.collide.getTriMeshTranslation">
+<code class="descclassname">klampt.collide.</code><code class="descname">getTriMeshTranslation</code><span class="sig-paren">(</span><em>int geom</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/collide.html#getTriMeshTranslation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.collide.getTriMeshTranslation" title="Permalink to this definition">¶</a></dt>
+<dd><p>void
+getTriMeshTranslation(int geom, double out[3])</p>
+<p>Gets the translation of a trimesh geom.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="klampt.collide.getTriMeshTris">
+<code class="descclassname">klampt.collide.</code><code class="descname">getTriMeshTris</code><span class="sig-paren">(</span><em>int geom</em><span class="sig-paren">)</span> &rarr; int *<a class="reference internal" href="_modules/klampt/collide.html#getTriMeshTris"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.collide.getTriMeshTris" title="Permalink to this definition">¶</a></dt>
+<dd><p>int* getTriMeshTris(int geom)</p>
+<p>Gets the index data of a trimesh geom (length nt*3).</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="klampt.collide.getTriMeshVerts">
+<code class="descclassname">klampt.collide.</code><code class="descname">getTriMeshVerts</code><span class="sig-paren">(</span><em>int geom</em><span class="sig-paren">)</span> &rarr; double *<a class="reference internal" href="_modules/klampt/collide.html#getTriMeshVerts"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.collide.getTriMeshVerts" title="Permalink to this definition">¶</a></dt>
+<dd><p>double* getTriMeshVerts(int
+geom)</p>
+<p>Gets the vertex data of a trimesh geom (length nv*3).</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="klampt.collide.intArray">
+<em class="property">class </em><code class="descclassname">klampt.collide.</code><code class="descname">intArray</code><span class="sig-paren">(</span><em>*args</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/collide.html#intArray"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.collide.intArray" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<dl class="method">
+<dt id="klampt.collide.intArray.cast">
+<code class="descname">cast</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/collide.html#intArray.cast"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.collide.intArray.cast" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="staticmethod">
+<dt id="klampt.collide.intArray.frompointer">
+<em class="property">static </em><code class="descname">frompointer</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#klampt.collide.intArray.frompointer" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="klampt.collide.loadGeom">
+<code class="descclassname">klampt.collide.</code><code class="descname">loadGeom</code><span class="sig-paren">(</span><em>int geom</em>, <em>char const * fn</em><span class="sig-paren">)</span> &rarr; bool<a class="reference internal" href="_modules/klampt/collide.html#loadGeom"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.collide.loadGeom" title="Permalink to this definition">¶</a></dt>
+<dd><p>bool loadGeom(int geom, const char
+<a href="#id1"><span class="problematic" id="id2">*</span></a>fn)</p>
+<p>Loads a geometry from a file. Sets it to the correct type based on the
+file contents.</p>
+<p>Currently supported file extensions are Trimeshes: .tri, any other
+mesh files that Assimp may support (if Klamp&#8217;t is built using Assimp
+support).</p>
+<p>Point clouds: .pcd</p>
+<p>Primitive geometries: .geom</p>
+<p>Returns False if there is a load error. Raises an exception if the ID
+is invalid.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="klampt.collide.makeAABBGeom">
+<code class="descclassname">klampt.collide.</code><code class="descname">makeAABBGeom</code><span class="sig-paren">(</span><em>int geom</em>, <em>double const [3] bmin</em>, <em>double const [3] bmax</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/collide.html#makeAABBGeom"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.collide.makeAABBGeom" title="Permalink to this definition">¶</a></dt>
+<dd><p>void makeAABBGeom(int geom,
+const double bmin[3], const double bmax[3])</p>
+<p>Makes a geom into an axis-aligned bounding box with lower bound bmin
+and upper bound bmax.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="klampt.collide.makeCollQuery">
+<code class="descclassname">klampt.collide.</code><code class="descname">makeCollQuery</code><span class="sig-paren">(</span><em>int geom1</em>, <em>int geom2</em><span class="sig-paren">)</span> &rarr; int<a class="reference internal" href="_modules/klampt/collide.html#makeCollQuery"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.collide.makeCollQuery" title="Permalink to this definition">¶</a></dt>
+<dd><p>int makeCollQuery(int geom1,
+int geom2)</p>
+<p>Creates a collision query object attachd to the two given geometries.
+For mesh-mesh collisions, on repeated calls, this may be somewhat
+faster than querying from scratch.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="klampt.collide.makeGroupGeom">
+<code class="descclassname">klampt.collide.</code><code class="descname">makeGroupGeom</code><span class="sig-paren">(</span><em>int geom</em>, <em>int * geoms</em>, <em>int numgeoms</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/collide.html#makeGroupGeom"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.collide.makeGroupGeom" title="Permalink to this definition">¶</a></dt>
+<dd><p>void makeGroupGeom(int geom,
+int <a href="#id3"><span class="problematic" id="id4">*</span></a>geoms, int numgeoms)</p>
+<p>Makes a geom into a group geom from an array of other geoms. Note: in
+Python, must use an intArray for geoms argument.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="klampt.collide.makeLineGeom">
+<code class="descclassname">klampt.collide.</code><code class="descname">makeLineGeom</code><span class="sig-paren">(</span><em>int geom</em>, <em>double const [3] s</em>, <em>double const [3] d</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/collide.html#makeLineGeom"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.collide.makeLineGeom" title="Permalink to this definition">¶</a></dt>
+<dd><p>void makeLineGeom(int geom,
+const double s[3], const double d[3])</p>
+<p>Makes a geom into a line with source s and direction d.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="klampt.collide.makePointGeom">
+<code class="descclassname">klampt.collide.</code><code class="descname">makePointGeom</code><span class="sig-paren">(</span><em>int geom</em>, <em>double const [3] x</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/collide.html#makePointGeom"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.collide.makePointGeom" title="Permalink to this definition">¶</a></dt>
+<dd><p>void makePointGeom(int geom,
+const double x[3])</p>
+<p>Makes a geom into a point x.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="klampt.collide.makeRayGeom">
+<code class="descclassname">klampt.collide.</code><code class="descname">makeRayGeom</code><span class="sig-paren">(</span><em>int geom</em>, <em>double const [3] s</em>, <em>double const [3] d</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/collide.html#makeRayGeom"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.collide.makeRayGeom" title="Permalink to this definition">¶</a></dt>
+<dd><p>void makeRayGeom(int geom, const
+double s[3], const double d[3])</p>
+<p>Makes a geom into a ray with source s and direction d.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="klampt.collide.makeSegmentGeom">
+<code class="descclassname">klampt.collide.</code><code class="descname">makeSegmentGeom</code><span class="sig-paren">(</span><em>int geom</em>, <em>double const [3] a</em>, <em>double const [3] b</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/collide.html#makeSegmentGeom"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.collide.makeSegmentGeom" title="Permalink to this definition">¶</a></dt>
+<dd><p>void makeSegmentGeom(int
+geom, const double a[3], const double b[3])</p>
+<p>Makes a geom into a segment with endpoints a, b.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="klampt.collide.makeSphereGeom">
+<code class="descclassname">klampt.collide.</code><code class="descname">makeSphereGeom</code><span class="sig-paren">(</span><em>int geom</em>, <em>double const [3] c</em>, <em>double r</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/collide.html#makeSphereGeom"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.collide.makeSphereGeom" title="Permalink to this definition">¶</a></dt>
+<dd><p>void makeSphereGeom(int geom,
+const double c[3], double r)</p>
+<p>Makes a geom into a sphere centered at c with radius r.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="klampt.collide.makeTriMeshGeom">
+<code class="descclassname">klampt.collide.</code><code class="descname">makeTriMeshGeom</code><span class="sig-paren">(</span><em>int geom</em>, <em>char const * fn</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/collide.html#makeTriMeshGeom"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.collide.makeTriMeshGeom" title="Permalink to this definition">¶</a></dt>
+<dd><p>makeTriMeshGeom(int geom, double const * verts, int const * inds, int nv, int nt)</p>
+<p>void makeTriMeshGeom(int
+geom, const double <a href="#id5"><span class="problematic" id="id6">*</span></a>verts, const int <a href="#id7"><span class="problematic" id="id8">*</span></a>inds, int nv, int nt)</p>
+<p>Makes a geometry into a trimesh given the vertex and index data. verts
+is of length nv*3, and inds is of length nt*3.</p>
+<p>Note: in Python, must use doubleArray and intArray for the verts and
+inds objects.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="klampt.collide.newGeom">
+<code class="descclassname">klampt.collide.</code><code class="descname">newGeom</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &rarr; int<a class="reference internal" href="_modules/klampt/collide.html#newGeom"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.collide.newGeom" title="Permalink to this definition">¶</a></dt>
+<dd><p>int newGeom()</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="klampt.collide.queryClosestPoints">
+<code class="descclassname">klampt.collide.</code><code class="descname">queryClosestPoints</code><span class="sig-paren">(</span><em>int query</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/collide.html#queryClosestPoints"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.collide.queryClosestPoints" title="Permalink to this definition">¶</a></dt>
+<dd><p>void
+queryClosestPoints(int query, double out[3], double out2[3])</p>
+<p>Computes points that give rise to the closest distance betweeen the
+two geoms associated with this query.</p>
+<p>See:   closestPoints</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="klampt.collide.queryCollide">
+<code class="descclassname">klampt.collide.</code><code class="descname">queryCollide</code><span class="sig-paren">(</span><em>int query</em><span class="sig-paren">)</span> &rarr; bool<a class="reference internal" href="_modules/klampt/collide.html#queryCollide"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.collide.queryCollide" title="Permalink to this definition">¶</a></dt>
+<dd><p>bool queryCollide(int query)</p>
+<p>Checks if the two geoms associated with this query are colliding.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="klampt.collide.queryDistance">
+<code class="descclassname">klampt.collide.</code><code class="descname">queryDistance</code><span class="sig-paren">(</span><em>int query</em>, <em>double relErr</em>, <em>double absErr</em><span class="sig-paren">)</span> &rarr; double<a class="reference internal" href="_modules/klampt/collide.html#queryDistance"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.collide.queryDistance" title="Permalink to this definition">¶</a></dt>
+<dd><p>double queryDistance(int query,
+double relErr, double absErr)</p>
+<p>Computes the distance betweeen the two geoms associated with this
+query.</p>
+<p>See:   distance</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="klampt.collide.queryTolerancePoints">
+<code class="descclassname">klampt.collide.</code><code class="descname">queryTolerancePoints</code><span class="sig-paren">(</span><em>int query</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/collide.html#queryTolerancePoints"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.collide.queryTolerancePoints" title="Permalink to this definition">¶</a></dt>
+<dd><p>void
+queryTolerancePoints(int query, double out[3], double out2[3])</p>
+<p>If the two geoms associated with this query are within a given
+tolerance (from a previous queryWithinTolerance call), this produces
+the points on geom1 and geom2, respectively that are within that
+tolerance.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="klampt.collide.queryWithinTolerance">
+<code class="descclassname">klampt.collide.</code><code class="descname">queryWithinTolerance</code><span class="sig-paren">(</span><em>int query</em>, <em>double tol</em><span class="sig-paren">)</span> &rarr; bool<a class="reference internal" href="_modules/klampt/collide.html#queryWithinTolerance"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.collide.queryWithinTolerance" title="Permalink to this definition">¶</a></dt>
+<dd><p>bool
+queryWithinTolerance(int query, double tol)</p>
+<p>Checks if the two geoms associated with this query are within the
+given tolerance.</p>
+<p>See:   withinTolerance</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="klampt.collide.rayCast">
+<code class="descclassname">klampt.collide.</code><code class="descname">rayCast</code><span class="sig-paren">(</span><em>int geom</em>, <em>double const [3] s</em>, <em>double const [3] d</em><span class="sig-paren">)</span> &rarr; bool<a class="reference internal" href="_modules/klampt/collide.html#rayCast"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.collide.rayCast" title="Permalink to this definition">¶</a></dt>
+<dd><p>bool rayCast(int geom, const double
+s[3], const double d[3], double out[3])</p>
+<p>Returns true if the geometry is hit by the given ray, and also returns
+the hit point (in world coordinates).</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="klampt.collide.setTriMeshRotation">
+<code class="descclassname">klampt.collide.</code><code class="descname">setTriMeshRotation</code><span class="sig-paren">(</span><em>int geom</em>, <em>double const [9] r</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/collide.html#setTriMeshRotation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.collide.setTriMeshRotation" title="Permalink to this definition">¶</a></dt>
+<dd><p>void
+setTriMeshRotation(int geom, const double r[9])</p>
+<p>Sets the rotation of a trimesh geom.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="klampt.collide.setTriMeshTranslation">
+<code class="descclassname">klampt.collide.</code><code class="descname">setTriMeshTranslation</code><span class="sig-paren">(</span><em>int geom</em>, <em>double const [3] t</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/collide.html#setTriMeshTranslation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.collide.setTriMeshTranslation" title="Permalink to this definition">¶</a></dt>
+<dd><p>void
+setTriMeshTranslation(int geom, const double t[3])</p>
+<p>Sets the translation of a trimesh geom.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="klampt.collide.withinTolerance">
+<code class="descclassname">klampt.collide.</code><code class="descname">withinTolerance</code><span class="sig-paren">(</span><em>int geom1</em>, <em>int geom2</em>, <em>double tol</em><span class="sig-paren">)</span> &rarr; bool<a class="reference internal" href="_modules/klampt/collide.html#withinTolerance"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.collide.withinTolerance" title="Permalink to this definition">¶</a></dt>
+<dd><p>bool withinTolerance(int
+geom1, int geom2, double tol)</p>
+<p>Tests whether the two geometries are within the given tolerance.</p>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="klampt.camera.html"
+                        title="previous chapter">klampt.camera module</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="klampt.contact.html"
+                        title="next chapter">klampt.contact module</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/klampt.collide.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="klampt.contact.html" title="klampt.contact module"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="klampt.camera.html" title="klampt.camera module"
+             >previous</a> |</li>
+        <li><a href="index.html">PyKlampt 0.6.0 documentation</a> &raquo;</li>
+          <li><a href="klampt.html" >klampt package</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2015, Kris Hauser.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3b2.
+    </div>
+  </body>
+</html>

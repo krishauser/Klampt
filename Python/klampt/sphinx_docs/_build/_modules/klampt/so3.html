@@ -1,0 +1,316 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>klampt.so3 &mdash; PyKlampt 0.6.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.6.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="PyKlampt 0.6.0 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">PyKlampt 0.6.0 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for klampt.so3</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;Operations for rigid rotations in Klampt.  All rotations are</span>
+<span class="sd">represented by a 9-list specifying the entries of the rotation matrix</span>
+<span class="sd">in column major form.</span>
+
+<span class="sd">These are useful for interfacing with C code.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">vectorops</span>
+
+<span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="n">R</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Converts a rotation to a string.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">ri</span><span class="p">)</span> <span class="k">for</span> <span class="n">ri</span> <span class="ow">in</span> <span class="n">r</span><span class="p">])</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">matrix</span><span class="p">(</span><span class="n">R</span><span class="p">)])</span>
+
+<div class="viewcode-block" id="identity"><a class="viewcode-back" href="../../klampt.so3.html#klampt.so3.identity">[docs]</a><span class="k">def</span> <span class="nf">identity</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;Returns the identity rotation&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="p">[</span><span class="mf">1.</span><span class="p">,</span><span class="mf">0.</span><span class="p">,</span><span class="mf">0.</span><span class="p">,</span><span class="mf">0.</span><span class="p">,</span><span class="mf">1.</span><span class="p">,</span><span class="mf">0.</span><span class="p">,</span><span class="mf">0.</span><span class="p">,</span><span class="mf">0.</span><span class="p">,</span><span class="mf">1.</span><span class="p">]</span>
+</div>
+<div class="viewcode-block" id="inv"><a class="viewcode-back" href="../../klampt.so3.html#klampt.so3.inv">[docs]</a><span class="k">def</span> <span class="nf">inv</span><span class="p">(</span><span class="n">R</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Inverts the rotation&quot;&quot;&quot;</span>
+    <span class="n">Rinv</span> <span class="o">=</span> <span class="p">[</span><span class="n">R</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">R</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span><span class="n">R</span><span class="p">[</span><span class="mi">6</span><span class="p">],</span><span class="n">R</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="n">R</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span><span class="n">R</span><span class="p">[</span><span class="mi">7</span><span class="p">],</span><span class="n">R</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span><span class="n">R</span><span class="p">[</span><span class="mi">5</span><span class="p">],</span><span class="n">R</span><span class="p">[</span><span class="mi">8</span><span class="p">]]</span>
+    <span class="k">return</span> <span class="n">Rinv</span>
+</div>
+<div class="viewcode-block" id="apply"><a class="viewcode-back" href="../../klampt.so3.html#klampt.so3.apply">[docs]</a><span class="k">def</span> <span class="nf">apply</span><span class="p">(</span><span class="n">R</span><span class="p">,</span><span class="n">point</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Applies the rotation to a point&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">R</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">point</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span><span class="n">R</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="o">*</span><span class="n">point</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="n">R</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span><span class="o">*</span><span class="n">point</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
+            <span class="n">R</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">point</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span><span class="n">R</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span><span class="o">*</span><span class="n">point</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="n">R</span><span class="p">[</span><span class="mi">7</span><span class="p">]</span><span class="o">*</span><span class="n">point</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
+            <span class="n">R</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">*</span><span class="n">point</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span><span class="n">R</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span><span class="o">*</span><span class="n">point</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="n">R</span><span class="p">[</span><span class="mi">8</span><span class="p">]</span><span class="o">*</span><span class="n">point</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+</div>
+<div class="viewcode-block" id="matrix"><a class="viewcode-back" href="../../klampt.so3.html#klampt.so3.matrix">[docs]</a><span class="k">def</span> <span class="nf">matrix</span><span class="p">(</span><span class="n">R</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Returns the 3x3 rotation matrix corresponding to R&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="p">[[</span><span class="n">R</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">R</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span><span class="n">R</span><span class="p">[</span><span class="mi">6</span><span class="p">]],</span>
+            <span class="p">[</span><span class="n">R</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="n">R</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span><span class="n">R</span><span class="p">[</span><span class="mi">7</span><span class="p">]],</span>
+            <span class="p">[</span><span class="n">R</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span><span class="n">R</span><span class="p">[</span><span class="mi">5</span><span class="p">],</span><span class="n">R</span><span class="p">[</span><span class="mi">8</span><span class="p">]]]</span>
+</div>
+<div class="viewcode-block" id="from_matrix"><a class="viewcode-back" href="../../klampt.so3.html#klampt.so3.from_matrix">[docs]</a><span class="k">def</span> <span class="nf">from_matrix</span><span class="p">(</span><span class="n">mat</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Returns an R corresponding to the 3x3 rotation matrix mat&quot;&quot;&quot;</span>
+    <span class="n">R</span> <span class="o">=</span> <span class="p">[</span><span class="n">mat</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span><span class="n">mat</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span><span class="n">mat</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span><span class="n">mat</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span><span class="n">mat</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span><span class="n">mat</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span><span class="n">mat</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">2</span><span class="p">],</span><span class="n">mat</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">2</span><span class="p">],</span><span class="n">mat</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">2</span><span class="p">]]</span>
+    <span class="k">return</span> <span class="n">R</span>
+</div>
+<div class="viewcode-block" id="mul"><a class="viewcode-back" href="../../klampt.so3.html#klampt.so3.mul">[docs]</a><span class="k">def</span> <span class="nf">mul</span><span class="p">(</span><span class="n">R1</span><span class="p">,</span><span class="n">R2</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Multiplies two rotations.&quot;&quot;&quot;</span>
+    <span class="n">m1</span><span class="o">=</span><span class="n">matrix</span><span class="p">(</span><span class="n">R1</span><span class="p">)</span>
+    <span class="n">m2T</span><span class="o">=</span><span class="n">matrix</span><span class="p">(</span><span class="n">inv</span><span class="p">(</span><span class="n">R2</span><span class="p">))</span>
+    <span class="n">mres</span> <span class="o">=</span> <span class="n">matrix</span><span class="p">(</span><span class="n">identity</span><span class="p">())</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
+            <span class="n">mres</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">vectorops</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">m1</span><span class="p">[</span><span class="n">i</span><span class="p">],</span><span class="n">m2T</span><span class="p">[</span><span class="n">j</span><span class="p">])</span>
+    <span class="c">#print &quot;Argument 1&quot;</span>
+    <span class="c">#print __str__(R1)</span>
+    <span class="c">#print &quot;Argument 2&quot;</span>
+    <span class="c">#print __str__(R2)</span>
+    <span class="c">#print &quot;Result&quot;</span>
+    <span class="n">R</span> <span class="o">=</span> <span class="n">from_matrix</span><span class="p">(</span><span class="n">mres</span><span class="p">)</span>
+    <span class="c">#print __str__(R)</span>
+    <span class="k">return</span> <span class="n">R</span>
+</div>
+<div class="viewcode-block" id="trace"><a class="viewcode-back" href="../../klampt.so3.html#klampt.so3.trace">[docs]</a><span class="k">def</span> <span class="nf">trace</span><span class="p">(</span><span class="n">R</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Computes the trace of the rotation matrix.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">R</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span><span class="n">R</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span><span class="o">+</span><span class="n">R</span><span class="p">[</span><span class="mi">8</span><span class="p">]</span>
+</div>
+<div class="viewcode-block" id="angle"><a class="viewcode-back" href="../../klampt.so3.html#klampt.so3.angle">[docs]</a><span class="k">def</span> <span class="nf">angle</span><span class="p">(</span><span class="n">R</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Returns absolute deviation of R from identity&quot;&quot;&quot;</span>
+    <span class="n">ctheta</span> <span class="o">=</span> <span class="p">(</span><span class="n">trace</span><span class="p">(</span><span class="n">R</span><span class="p">)</span> <span class="o">-</span> <span class="mf">1.0</span><span class="p">)</span><span class="o">*</span><span class="mf">0.5</span>
+    <span class="k">return</span> <span class="n">math</span><span class="o">.</span><span class="n">acos</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">ctheta</span><span class="p">,</span><span class="mf">1.0</span><span class="p">),</span><span class="o">-</span><span class="mf">1.0</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="moment"><a class="viewcode-back" href="../../klampt.so3.html#klampt.so3.moment">[docs]</a><span class="k">def</span> <span class="nf">moment</span><span class="p">(</span><span class="n">R</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Returns the moment w (exponential map) representation of R such</span>
+<span class="sd">    that e^[w] = R.  Equivalent to axis-angle representation with</span>
+<span class="sd">    w/||w||=axis, ||w||=angle.&quot;&quot;&quot;</span>
+    <span class="n">theta</span> <span class="o">=</span> <span class="n">angle</span><span class="p">(</span><span class="n">R</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">theta</span><span class="o">-</span><span class="n">math</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span><span class="o">&lt;</span><span class="mf">1e-5</span><span class="p">:</span>
+        <span class="c">#can&#39;t do normal version because the scale factor reaches a singularity</span>
+        <span class="n">x2</span><span class="o">=</span><span class="p">(</span><span class="n">R</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span><span class="mf">1.</span><span class="p">)</span><span class="o">*</span><span class="mf">0.5</span>
+        <span class="n">y2</span><span class="o">=</span><span class="p">(</span><span class="n">R</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span><span class="o">+</span><span class="mf">1.</span><span class="p">)</span><span class="o">*</span><span class="mf">0.5</span>
+        <span class="n">z2</span><span class="o">=</span><span class="p">(</span><span class="n">R</span><span class="p">[</span><span class="mi">8</span><span class="p">]</span><span class="o">+</span><span class="mf">1.</span><span class="p">)</span><span class="o">*</span><span class="mf">0.5</span>
+        <span class="k">if</span> <span class="n">x2</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">assert</span><span class="p">(</span><span class="n">x2</span><span class="o">&gt;-</span><span class="mf">1e-5</span><span class="p">)</span>
+            <span class="n">x2</span><span class="o">=</span><span class="mi">0</span>
+        <span class="k">if</span> <span class="n">y2</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">assert</span><span class="p">(</span><span class="n">y2</span><span class="o">&gt;-</span><span class="mf">1e-5</span><span class="p">)</span>
+            <span class="n">y2</span><span class="o">=</span><span class="mi">0</span>
+        <span class="k">if</span> <span class="n">z2</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">assert</span><span class="p">(</span><span class="n">z2</span><span class="o">&gt;-</span><span class="mf">1e-5</span><span class="p">)</span>
+            <span class="n">z2</span><span class="o">=</span><span class="mi">0</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">x2</span><span class="p">)</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">y2</span><span class="p">)</span>
+        <span class="n">z</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">z2</span><span class="p">)</span>
+        <span class="c">#determined up to sign changes, we know r12=2xy,r13=2xz,r23=2yz</span>
+        <span class="n">xy</span><span class="o">=</span><span class="n">R</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+        <span class="n">xz</span><span class="o">=</span><span class="n">R</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span>
+        <span class="n">yz</span><span class="o">=</span><span class="n">R</span><span class="p">[</span><span class="mi">7</span><span class="p">]</span>
+        <span class="k">if</span><span class="p">(</span><span class="n">x</span> <span class="o">&gt;</span> <span class="n">y</span><span class="p">):</span>
+            <span class="k">if</span><span class="p">(</span><span class="n">x</span> <span class="o">&gt;</span> <span class="n">z</span><span class="p">):</span>
+                <span class="c">#x is largest</span>
+                <span class="k">if</span><span class="p">(</span><span class="n">xy</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">):</span> <span class="n">y</span><span class="o">=-</span><span class="n">y</span>
+                <span class="k">if</span><span class="p">(</span><span class="n">xz</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">):</span> <span class="n">z</span><span class="o">=-</span><span class="n">z</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c">#z is largest</span>
+                <span class="k">if</span><span class="p">(</span><span class="n">yz</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">):</span> <span class="n">y</span><span class="o">=-</span><span class="n">y</span>
+                <span class="k">if</span><span class="p">(</span><span class="n">xz</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">):</span> <span class="n">x</span><span class="o">=-</span><span class="n">x</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span><span class="p">(</span><span class="n">y</span> <span class="o">&gt;</span> <span class="n">z</span><span class="p">):</span>
+                <span class="c">#y is largest</span>
+                <span class="k">if</span><span class="p">(</span><span class="n">xy</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">):</span> <span class="n">x</span><span class="o">=-</span><span class="n">x</span>
+                <span class="k">if</span><span class="p">(</span><span class="n">yz</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">):</span> <span class="n">z</span><span class="o">=-</span><span class="n">z</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c">#z is largest</span>
+                <span class="k">if</span><span class="p">(</span><span class="n">yz</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">):</span> <span class="n">y</span><span class="o">=-</span><span class="n">y</span>
+                <span class="k">if</span><span class="p">(</span><span class="n">xz</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">):</span> <span class="n">x</span><span class="o">=-</span><span class="n">x</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">z</span><span class="p">]</span>
+    <span class="c">#normal</span>
+    <span class="n">scale</span> <span class="o">=</span> <span class="mf">0.5</span>
+    <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mf">1e-5</span><span class="p">:</span>
+        <span class="n">scale</span> <span class="o">=</span> <span class="mf">0.5</span><span class="o">*</span><span class="n">theta</span><span class="o">/</span><span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="p">(</span><span class="n">R</span><span class="p">[</span><span class="mi">3</span><span class="o">+</span><span class="mi">2</span><span class="p">]</span><span class="o">-</span><span class="n">R</span><span class="p">[</span><span class="mi">6</span><span class="o">+</span><span class="mi">1</span><span class="p">])</span> <span class="o">*</span> <span class="n">scale</span><span class="p">;</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="p">(</span><span class="n">R</span><span class="p">[</span><span class="mi">6</span><span class="o">+</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="n">R</span><span class="p">[</span><span class="mi">0</span><span class="o">+</span><span class="mi">2</span><span class="p">])</span> <span class="o">*</span> <span class="n">scale</span><span class="p">;</span>
+    <span class="n">z</span> <span class="o">=</span> <span class="p">(</span><span class="n">R</span><span class="p">[</span><span class="mi">0</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">R</span><span class="p">[</span><span class="mi">3</span><span class="o">+</span><span class="mi">0</span><span class="p">])</span> <span class="o">*</span> <span class="n">scale</span><span class="p">;</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">z</span><span class="p">]</span>
+</div>
+<div class="viewcode-block" id="axis_angle"><a class="viewcode-back" href="../../klampt.so3.html#klampt.so3.axis_angle">[docs]</a><span class="k">def</span> <span class="nf">axis_angle</span><span class="p">(</span><span class="n">R</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Returns the (axis,angle) pair representing R&quot;&quot;&quot;</span>
+    <span class="n">m</span> <span class="o">=</span> <span class="n">moment</span><span class="p">(</span><span class="n">R</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">vectorops</span><span class="o">.</span><span class="n">unit</span><span class="p">(</span><span class="n">m</span><span class="p">),</span><span class="n">vectorops</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">m</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="from_axis_angle"><a class="viewcode-back" href="../../klampt.so3.html#klampt.so3.from_axis_angle">[docs]</a><span class="k">def</span> <span class="nf">from_axis_angle</span><span class="p">(</span><span class="n">aa</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Converts an axis-angle representation (axis,angle) to a 3D rotation</span>
+<span class="sd">    matrix.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">rotation</span><span class="p">(</span><span class="n">aa</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">aa</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+</div>
+<div class="viewcode-block" id="from_moment"><a class="viewcode-back" href="../../klampt.so3.html#klampt.so3.from_moment">[docs]</a><span class="k">def</span> <span class="nf">from_moment</span><span class="p">(</span><span class="n">w</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Converts a moment representation w to a 3D rotation matrix.&quot;&quot;&quot;</span>
+    <span class="n">length</span> <span class="o">=</span> <span class="n">vectorops</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">w</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">length</span> <span class="o">&lt;</span> <span class="mf">1e-7</span><span class="p">:</span> <span class="k">return</span> <span class="n">identity</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">rotation</span><span class="p">(</span><span class="n">vectorops</span><span class="o">.</span><span class="n">mul</span><span class="p">(</span><span class="n">w</span><span class="p">,</span><span class="mf">1.0</span><span class="o">/</span><span class="n">length</span><span class="p">),</span><span class="n">length</span><span class="p">)</span>
+    </div>
+<div class="viewcode-block" id="distance"><a class="viewcode-back" href="../../klampt.so3.html#klampt.so3.distance">[docs]</a><span class="k">def</span> <span class="nf">distance</span><span class="p">(</span><span class="n">R1</span><span class="p">,</span><span class="n">R2</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Returns the absolute angle one would need to rotate in order to get</span>
+<span class="sd">    from R1 to R2&quot;&quot;&quot;</span>
+    <span class="n">R</span> <span class="o">=</span> <span class="n">mul</span><span class="p">(</span><span class="n">R1</span><span class="p">,</span><span class="n">inv</span><span class="p">(</span><span class="n">R2</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">angle</span><span class="p">(</span><span class="n">R</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="error"><a class="viewcode-back" href="../../klampt.so3.html#klampt.so3.error">[docs]</a><span class="k">def</span> <span class="nf">error</span><span class="p">(</span><span class="n">R1</span><span class="p">,</span><span class="n">R2</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Returns a 3D &quot;difference vector&quot; that describes how far R1 is from R2.</span>
+<span class="sd">    More precisely, this is the Lie derivative.&quot;&quot;&quot;</span>
+    <span class="n">R</span> <span class="o">=</span> <span class="n">mul</span><span class="p">(</span><span class="n">R1</span><span class="p">,</span><span class="n">inv</span><span class="p">(</span><span class="n">R2</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">moment</span><span class="p">(</span><span class="n">R</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="cross_product"><a class="viewcode-back" href="../../klampt.so3.html#klampt.so3.cross_product">[docs]</a><span class="k">def</span> <span class="nf">cross_product</span><span class="p">(</span><span class="n">w</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Returns the cross product matrix associated with w.</span>
+
+<span class="sd">    The matrix [w]R is the derivative of the matrix R as it rotates about</span>
+<span class="sd">    the axis w/||w|| with angular velocity ||w||.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="p">[</span><span class="mf">0.</span><span class="p">,</span><span class="n">w</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span><span class="o">-</span><span class="n">w</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>  <span class="o">-</span><span class="n">w</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span><span class="mf">0.</span><span class="p">,</span><span class="n">w</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>  <span class="n">w</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="o">-</span><span class="n">w</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="mf">0.</span><span class="p">]</span>
+</div>
+<div class="viewcode-block" id="rotation"><a class="viewcode-back" href="../../klampt.so3.html#klampt.so3.rotation">[docs]</a><span class="k">def</span> <span class="nf">rotation</span><span class="p">(</span><span class="n">axis</span><span class="p">,</span><span class="n">angle</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Given a unit axis and an angle in radians, returns the rotation</span>
+<span class="sd">    matrix.&quot;&quot;&quot;</span>
+    <span class="n">cm</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">angle</span><span class="p">)</span>
+    <span class="n">sm</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">angle</span><span class="p">)</span>
+
+    <span class="c">#m = s[r]-c[r][r]+rrt = s[r]-c(rrt-I)+rrt = cI + rrt(1-c) + s[r]</span>
+    <span class="n">R</span> <span class="o">=</span> <span class="n">vectorops</span><span class="o">.</span><span class="n">mul</span><span class="p">(</span><span class="n">cross_product</span><span class="p">(</span><span class="n">axis</span><span class="p">),</span><span class="n">sm</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
+            <span class="n">R</span><span class="p">[</span><span class="n">i</span><span class="o">*</span><span class="mi">3</span><span class="o">+</span><span class="n">j</span><span class="p">]</span> <span class="o">+=</span> <span class="n">axis</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">*</span><span class="n">axis</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">*</span><span class="p">(</span><span class="mf">1.</span><span class="o">-</span><span class="n">cm</span><span class="p">)</span>
+    <span class="n">R</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+=</span> <span class="n">cm</span>
+    <span class="n">R</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">+=</span> <span class="n">cm</span>
+    <span class="n">R</span><span class="p">[</span><span class="mi">8</span><span class="p">]</span> <span class="o">+=</span> <span class="n">cm</span>
+    <span class="k">return</span> <span class="n">R</span>
+</div>
+<div class="viewcode-block" id="canonical"><a class="viewcode-back" href="../../klampt.so3.html#klampt.so3.canonical">[docs]</a><span class="k">def</span> <span class="nf">canonical</span><span class="p">(</span><span class="n">v</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Given a unit vector v, finds R that defines a basis [x,y,z] such that</span>
+<span class="sd">    x = v and y and z are orthogonal&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">vectorops</span><span class="o">.</span><span class="n">normSquared</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="o">-</span> <span class="mf">1.0</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mf">1e-4</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s">&quot;Nonunit vector supplied to canonical()&quot;</span><span class="p">)</span>
+    <span class="k">assert</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">v</span><span class="p">)</span><span class="o">==</span><span class="mi">3</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">v</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="mf">1.0</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mf">1e-5</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">identity</span><span class="p">()</span>
+    <span class="k">elif</span> <span class="nb">abs</span><span class="p">(</span><span class="n">v</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span><span class="mf">1.0</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mf">1e-5</span><span class="p">:</span>
+        <span class="c">#flip of basis</span>
+        <span class="n">R</span> <span class="o">=</span> <span class="n">identity</span><span class="p">()</span>
+        <span class="n">R</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mf">1.0</span>
+        <span class="n">R</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mf">1.0</span>
+        <span class="k">return</span> <span class="n">R</span>
+    <span class="n">R</span> <span class="o">=</span> <span class="n">v</span> <span class="o">+</span> <span class="p">[</span><span class="mf">0.</span><span class="p">]</span><span class="o">*</span><span class="mi">6</span>
+    <span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">z</span><span class="p">)</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+    <span class="n">scale</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.0</span><span class="o">-</span><span class="n">x</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="mf">1.0</span><span class="o">-</span><span class="n">x</span><span class="o">*</span><span class="n">x</span><span class="p">);</span>
+    <span class="n">R</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="o">=</span> <span class="o">-</span><span class="n">y</span><span class="p">;</span>
+    <span class="n">R</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span><span class="o">=</span> <span class="n">x</span> <span class="o">+</span> <span class="n">scale</span><span class="o">*</span><span class="n">z</span><span class="o">*</span><span class="n">z</span><span class="p">;</span>
+    <span class="n">R</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span><span class="o">=</span> <span class="o">-</span><span class="n">scale</span><span class="o">*</span><span class="n">y</span><span class="o">*</span><span class="n">z</span><span class="p">;</span>
+    <span class="n">R</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span><span class="o">=</span> <span class="o">-</span><span class="n">z</span><span class="p">;</span>
+    <span class="n">R</span><span class="p">[</span><span class="mi">7</span><span class="p">]</span><span class="o">=</span> <span class="o">-</span><span class="n">scale</span><span class="o">*</span><span class="n">y</span><span class="o">*</span><span class="n">z</span><span class="p">;</span>
+    <span class="n">R</span><span class="p">[</span><span class="mi">8</span><span class="p">]</span><span class="o">=</span> <span class="n">x</span> <span class="o">+</span> <span class="n">scale</span><span class="o">*</span><span class="n">y</span><span class="o">*</span><span class="n">y</span><span class="p">;</span>
+    <span class="k">return</span> <span class="n">R</span>
+</div>
+<div class="viewcode-block" id="vector_rotation"><a class="viewcode-back" href="../../klampt.so3.html#klampt.so3.vector_rotation">[docs]</a><span class="k">def</span> <span class="nf">vector_rotation</span><span class="p">(</span><span class="n">v1</span><span class="p">,</span><span class="n">v2</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Finds the minimal-angle matrix that rotates v1 to v2.  v1 and v2</span>
+<span class="sd">    are assumed to be nonzero&quot;&quot;&quot;</span>
+    <span class="n">a1</span> <span class="o">=</span> <span class="n">vectorops</span><span class="o">.</span><span class="n">unit</span><span class="p">(</span><span class="n">v1</span><span class="p">)</span>
+    <span class="n">a2</span> <span class="o">=</span> <span class="n">vectorops</span><span class="o">.</span><span class="n">unit</span><span class="p">(</span><span class="n">v2</span><span class="p">)</span>
+    <span class="n">cp</span> <span class="o">=</span> <span class="n">vectorops</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">a1</span><span class="p">,</span><span class="n">a2</span><span class="p">)</span>
+    <span class="n">dp</span> <span class="o">=</span> <span class="n">vectorops</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">a1</span><span class="p">,</span><span class="n">a2</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">vectorops</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">cp</span><span class="p">))</span> <span class="o">&lt;</span> <span class="mf">1e-4</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">dp</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">R0</span> <span class="o">=</span> <span class="n">canonical</span><span class="p">(</span><span class="n">a1</span><span class="p">)</span>
+            <span class="c">#return a rotation 180 degrees about the canonical y axis</span>
+            <span class="k">return</span> <span class="n">rotation</span><span class="p">(</span><span class="n">R0</span><span class="p">[</span><span class="mi">3</span><span class="p">:</span><span class="mi">6</span><span class="p">],</span><span class="n">math</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">identity</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">angle</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">acos</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">dp</span><span class="p">,</span><span class="mf">1.0</span><span class="p">),</span><span class="o">-</span><span class="mf">1.0</span><span class="p">))</span>
+        <span class="n">axis</span> <span class="o">=</span> <span class="n">vectorops</span><span class="o">.</span><span class="n">mul</span><span class="p">(</span><span class="n">cp</span><span class="p">,</span><span class="mf">1.0</span><span class="o">/</span><span class="n">vectorops</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">cp</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">rotation</span><span class="p">(</span><span class="n">axis</span><span class="p">,</span><span class="n">angle</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="interpolate"><a class="viewcode-back" href="../../klampt.so3.html#klampt.so3.interpolate">[docs]</a><span class="k">def</span> <span class="nf">interpolate</span><span class="p">(</span><span class="n">R1</span><span class="p">,</span><span class="n">R2</span><span class="p">,</span><span class="n">u</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Interpolate linearly between the two rotations R1 and R2. &quot;&quot;&quot;</span>
+    <span class="n">R</span> <span class="o">=</span> <span class="n">mul</span><span class="p">(</span><span class="n">inv</span><span class="p">(</span><span class="n">R1</span><span class="p">),</span><span class="n">R2</span><span class="p">)</span>
+    <span class="n">m</span> <span class="o">=</span> <span class="n">moment</span><span class="p">(</span><span class="n">R</span><span class="p">)</span>
+    <span class="n">angle</span> <span class="o">=</span> <span class="n">vectorops</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">angle</span><span class="o">==</span><span class="mi">0</span><span class="p">:</span> <span class="k">return</span> <span class="n">R1</span>
+    <span class="n">axis</span> <span class="o">=</span> <span class="n">vectorops</span><span class="o">.</span><span class="n">div</span><span class="p">(</span><span class="n">m</span><span class="p">,</span><span class="n">angle</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">mul</span><span class="p">(</span><span class="n">R1</span><span class="p">,</span><span class="n">rotation</span><span class="p">(</span><span class="n">axis</span><span class="p">,</span><span class="n">angle</span><span class="o">*</span><span class="n">u</span><span class="p">))</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">PyKlampt 0.6.0 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2015, Kris Hauser.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3b2.
+    </div>
+  </body>
+</html>

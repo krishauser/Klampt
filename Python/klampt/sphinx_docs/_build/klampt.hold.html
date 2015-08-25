@@ -1,0 +1,152 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>klampt.hold module &mdash; PyKlampt 0.6.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.6.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="PyKlampt 0.6.0 documentation" href="index.html" />
+    <link rel="up" title="klampt package" href="klampt.html" />
+    <link rel="next" title="klampt.ik module" href="klampt.ik.html" />
+    <link rel="prev" title="klampt.glprogram module" href="klampt.glprogram.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="klampt.ik.html" title="klampt.ik module"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="klampt.glprogram.html" title="klampt.glprogram module"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">PyKlampt 0.6.0 documentation</a> &raquo;</li>
+          <li><a href="klampt.html" accesskey="U">klampt package</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-klampt.hold">
+<span id="klampt-hold-module"></span><h1>klampt.hold module<a class="headerlink" href="#module-klampt.hold" title="Permalink to this headline">¶</a></h1>
+<p>This module helps load and read holds.  Defines
+the Hold class, and the functions readHold(text) and writeHold(h).</p>
+<dl class="class">
+<dt id="klampt.hold.Hold">
+<em class="property">class </em><code class="descclassname">klampt.hold.</code><code class="descname">Hold</code><a class="reference internal" href="_modules/klampt/hold.html#Hold"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.hold.Hold" title="Permalink to this definition">¶</a></dt>
+<dd><p>A Hold, similar to the Hold class in the C++ RobotSim library.</p>
+<dl class="docutils">
+<dt>Attributes:</dt>
+<dd><ul class="first last simple">
+<li>link: the link index</li>
+<li>ikConstraint: an IKObjective object
+(see <a class="reference internal" href="klampt.robotsim.html#klampt.robotsim.IKObjective" title="klampt.robotsim.IKObjective"><code class="xref py py-class docutils literal"><span class="pre">klampt.robotsim.IKObjective</span></code></a> or <a class="reference internal" href="klampt.ik.html#klampt.ik.objective" title="klampt.ik.objective"><code class="xref py py-func docutils literal"><span class="pre">klampt.ik.objective()</span></code></a>)</li>
+<li>contacts: a list of ContactPoint objects
+(see <a class="reference internal" href="klampt.contact.html#klampt.contact.ContactPoint" title="klampt.contact.ContactPoint"><code class="xref py py-class docutils literal"><span class="pre">klampt.contact.ContactPoint</span></code></a>)</li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="klampt.hold.readHold">
+<code class="descclassname">klampt.hold.</code><code class="descname">readHold</code><span class="sig-paren">(</span><em>text</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/hold.html#readHold"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.hold.readHold" title="Permalink to this definition">¶</a></dt>
+<dd><p>Loads a Hold from a string</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="klampt.hold.writeHold">
+<code class="descclassname">klampt.hold.</code><code class="descname">writeHold</code><span class="sig-paren">(</span><em>h</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/klampt/hold.html#writeHold"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#klampt.hold.writeHold" title="Permalink to this definition">¶</a></dt>
+<dd><p>Writes a Hold to a string</p>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="klampt.glprogram.html"
+                        title="previous chapter">klampt.glprogram module</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="klampt.ik.html"
+                        title="next chapter">klampt.ik module</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/klampt.hold.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="klampt.ik.html" title="klampt.ik module"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="klampt.glprogram.html" title="klampt.glprogram module"
+             >previous</a> |</li>
+        <li><a href="index.html">PyKlampt 0.6.0 documentation</a> &raquo;</li>
+          <li><a href="klampt.html" >klampt package</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2015, Kris Hauser.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3b2.
+    </div>
+  </body>
+</html>

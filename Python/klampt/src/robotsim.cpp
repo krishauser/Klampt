@@ -2,6 +2,7 @@
 #include "pyerr.h"
 #include "robotsim.h"
 #include "widget.h"
+#include "Control/Command.h"
 #include "Control/PathController.h"
 #include "Control/FeedforwardController.h"
 #include "Simulation/WorldSimulation.h"
@@ -74,7 +75,7 @@ int createWorld()
 
 void derefWorld(int index)
 {
-  if(index < 0 || index >= (int)worlds.size()) 
+  if(index < 0 || index >= (int)worlds.size())
     throw PyException("Invalid world index");
   if(!worlds[index])
     throw PyException("Invalid dereference");
@@ -92,7 +93,7 @@ void derefWorld(int index)
 
 void refWorld(int index)
 {
-  if(index < 0 || index >= (int)worlds.size()) 
+  if(index < 0 || index >= (int)worlds.size())
     throw PyException("Invalid world index");
   if(!worlds[index])
     throw PyException("Invalid dereference");
@@ -116,7 +117,7 @@ int createSim()
 
 void destroySim(int index)
 {
-  if(index < 0 || index >= (int)sims.size()) 
+  if(index < 0 || index >= (int)sims.size())
     throw PyException("Invalid sim index");
   if(!sims[index])
     throw PyException("Invalid sim index");
@@ -143,7 +144,7 @@ int createWidget()
 
 void derefWidget(int index)
 {
-  if(index < 0 || index >= (int)widgets.size()) 
+  if(index < 0 || index >= (int)widgets.size())
     throw PyException("Invalid widget index");
   if(widgets[index].refCount <= 0)
     throw PyException("Invalid dereference");
@@ -159,7 +160,7 @@ void derefWidget(int index)
 
 void refWidget(int index)
 {
-  if(index < 0 || index >= (int)widgets.size()) 
+  if(index < 0 || index >= (int)widgets.size())
     throw PyException("Invalid widget index");
   widgets[index].refCount++;
   //printf("Ref widget %d: count %d\n",index,widgets[index]->refCount);
@@ -239,7 +240,7 @@ inline PolynomialMotionQueue* GetMotionQueue(RobotController* controller)
 {
   MyController* mc=dynamic_cast<MyController*>(controller);
   if(!mc) {
-    throw PyException("Not using the default manual override controller");  
+    throw PyException("Not using the default manual override controller");
   }
   FeedforwardController* ffc=dynamic_cast<FeedforwardController*>((RobotController*)mc->base);
   PolynomialPathController* pc=dynamic_cast<PolynomialPathController*>((RobotController*)ffc->base);
@@ -279,9 +280,9 @@ void GetMesh(const TriangleMesh& tmesh,Geometry::AnyCollisionGeometry3D& geom)
   Meshing::TriMesh mesh;
   mesh.tris.resize(tmesh.indices.size()/3);
   mesh.verts.resize(tmesh.vertices.size()/3);
-  for(size_t i=0;i<mesh.tris.size();i++) 
+  for(size_t i=0;i<mesh.tris.size();i++)
     mesh.tris[i].set(tmesh.indices[i*3],tmesh.indices[i*3+1],tmesh.indices[i*3+2]);
-  for(size_t i=0;i<mesh.verts.size();i++) 
+  for(size_t i=0;i<mesh.verts.size();i++)
     mesh.verts[i].set(tmesh.vertices[i*3],tmesh.vertices[i*3+1],tmesh.vertices[i*3+2]);
   geom = mesh;
   geom.InitCollisions();
@@ -305,7 +306,7 @@ void GetPointCloud(const PointCloud& pc,Geometry::AnyCollisionGeometry3D& geom)
 {
   Meshing::PointCloud3D gpc;
   gpc.points.resize(pc.vertices.size()/3);
-  for(size_t i=0;i<gpc.points.size();i++) 
+  for(size_t i=0;i<gpc.points.size();i++)
     gpc.points[i].set(pc.vertices[i*3],pc.vertices[i*3+1],pc.vertices[i*3+2]);
   gpc.propertyNames = pc.propertyNames;
   gpc.properties.resize(pc.properties.size() / pc.propertyNames.size());
@@ -582,7 +583,7 @@ void Geometry3D::transform(const double R[9],const double t[3])
   RigidTransform T;
   T.R.set(R);
   T.t.set(t);
-  geom->Transform(T);  
+  geom->Transform(T);
   geom->InitCollisions();
 
   if(!isStandalone()) {
@@ -788,7 +789,7 @@ void Appearance::setColor(int primitive,float r,float g,float b,float a)
   if(!appearancePtr) return;
   GLDraw::GeometryAppearance* app = reinterpret_cast<GLDraw::GeometryAppearance*>(appearancePtr);
   switch(primitive) {
-  case ALL: 
+  case ALL:
     app->vertexColor.set(r,g,b,a);
     app->edgeColor.set(r,g,b,a);
     app->faceColor.set(r,g,b,a);
@@ -798,7 +799,7 @@ void Appearance::setColor(int primitive,float r,float g,float b,float a)
   case FACES: app->faceColor.set(r,g,b,a); break;
   }
 }
-  
+
 void Appearance::getColor(float out[4])
 {
   FatalError("Not implemented yet");
@@ -1002,7 +1003,7 @@ bool WorldModel::readFile(const char* fn)
     //if(worlds[index]->xmlWorld.Load(GetFileName(fn))) {
     if(worlds[index]->xmlWorld.Load(fn)) {
       if(worlds[index]->xmlWorld.GetWorld(world)) {
-	result = true;
+    result = true;
       }
     }
     /*
@@ -1517,7 +1518,7 @@ void RobotModelLink::drawLocalGL(bool keepAppearance)
   if(keepAppearance) {
     world.robots[robotIndex].view.DrawLink_Local(index);
   }
-  else 
+  else
     world.robots[robotIndex].robot->DrawLinkGL(index);
 }
 
@@ -1582,7 +1583,7 @@ void RobotModelDriver::getAffectedLinks(std::vector<int>& links)
 void RobotModelDriver::getAffineCoeffs(std::vector<double>& scale,std::vector<double>& offset)
 {
   if(index < 0) {
-    scale.resize(0); 
+    scale.resize(0);
     offset.resize(0);
   }
   else {
@@ -2125,7 +2126,7 @@ Simulator::Simulator(const WorldModel& model)
   sim->robotControllers.resize(rworld.robots.size());
   for(size_t i=0;i<sim->robotControllers.size();i++) {
     Robot* robot=rworld.robots[i].robot;
-    sim->SetController(i,MakeController(robot)); 
+    sim->SetController(i,MakeController(robot));
 
     MakeSensors(robot,sim->controlSimulators[i].sensors);
   }
@@ -2300,8 +2301,8 @@ void Simulator::enableContactFeedbackAll()
   if(settings.rigidObjectCollisions) {
     for(size_t i=0;i<rworld.rigidObjects.size();i++) {
       int objid = rworld.RigidObjectID(i);
-      for(size_t j=0;j<rworld.terrains.size();j++) 
-	sim->EnableContactFeedback(objid,rworld.TerrainID(j));
+      for(size_t j=0;j<rworld.terrains.size();j++)
+    sim->EnableContactFeedback(objid,rworld.TerrainID(j));
     }
   }
   for(size_t r=0;r<rworld.robots.size();r++) {
@@ -2309,28 +2310,28 @@ void Simulator::enableContactFeedbackAll()
       int linkid = rworld.RobotLinkID(r,j);
       //robot-world
       for(size_t i=0;i<rworld.rigidObjects.size();i++) {
-	sim->EnableContactFeedback(rworld.RigidObjectID(i),linkid);
+    sim->EnableContactFeedback(rworld.RigidObjectID(i),linkid);
       }
       //robot-object
       for(size_t i=0;i<rworld.terrains.size();i++) {
-	sim->EnableContactFeedback(rworld.TerrainID(i),linkid);
+    sim->EnableContactFeedback(rworld.TerrainID(i),linkid);
       }
       //robot-self
       if(settings.robotSelfCollisions) {
-	for(size_t k=0;k<rworld.robots[r].robot->links.size();k++) {
-	  if(rworld.robots[r].robot->selfCollisions(j,k)) {
-	    sim->EnableContactFeedback(rworld.RobotLinkID(r,k),linkid);
-	  }
-	}
+    for(size_t k=0;k<rworld.robots[r].robot->links.size();k++) {
+      if(rworld.robots[r].robot->selfCollisions(j,k)) {
+        sim->EnableContactFeedback(rworld.RobotLinkID(r,k),linkid);
+      }
+    }
       }
       //robot-robot
       if(settings.robotRobotCollisions) {
-	for(size_t i=0;i<rworld.robots.size();i++) {
-	  if(i==r) continue;
-	  for(size_t k=0;k<rworld.robots[i].robot->links.size();k++) {
-	    sim->EnableContactFeedback(rworld.RobotLinkID(i,k),linkid);
-	  }
-	}
+    for(size_t i=0;i<rworld.robots.size();i++) {
+      if(i==r) continue;
+      for(size_t k=0;k<rworld.robots[i].robot->links.size();k++) {
+        sim->EnableContactFeedback(rworld.RobotLinkID(i,k),linkid);
+      }
+    }
       }
     }
   }
@@ -2646,7 +2647,7 @@ SimRobotSensor SimRobotController::sensor(int sensorIndex)
   RobotSensors& sensors = sim->controlSimulators[index].sensors;
   if(sensorIndex < 0 || sensorIndex >= (int)sensors.sensors.size())
     return SimRobotSensor(NULL);
-  return SimRobotSensor(sensors.sensors[sensorIndex]);  
+  return SimRobotSensor(sensors.sensors[sensorIndex]);
 }
 
 SimRobotSensor SimRobotController::sensor(const char* name)
@@ -2668,13 +2669,42 @@ void SimRobotController::setManualMode(bool enabled)
 {
   RobotController* c=sim->robotControllers[index];
   MyController* mc=dynamic_cast<MyController*>(c);
-  if(mc) 
+  if(mc)
     mc->override = enabled;
   else {
     if(enabled)
       throw PyException("Cannot enable manual mode, controller type incorrect");
   }
 }
+
+std::string SimRobotController::getControlType()
+{
+  std::vector<int> res;
+  typedef std::vector<ActuatorCommand>::iterator it_ac;
+  RobotMotorCommand& command = sim->controlSimulators[index].command;
+  int mode = -1;
+  for(it_ac it = command.actuators.begin();
+            it != command.actuators.end();
+          ++it)
+      if(mode == -1)
+          mode = it->mode;
+      else if(mode != it->mode)
+          mode = -2;
+  switch(mode)
+  {
+  case ActuatorCommand::OFF:
+      return "off";
+  case ActuatorCommand::TORQUE:
+      return "torque";
+  case ActuatorCommand::PID:
+      return "PID";
+  case ActuatorCommand::LOCKED_VELOCITY:
+      return "locked_velocity";
+  default:
+      return "unknown";
+  }
+}
+
 
 bool SimRobotController::sendCommand(const std::string& name,const std::string& args)
 {
@@ -2776,9 +2806,9 @@ double SimRobotController::remainingTime() const
 
 void SimRobotController::setTorque(const std::vector<double>& t)
 {
-  RobotMotorCommand& command = sim->controlSimulators[index].command;  
+  RobotMotorCommand& command = sim->controlSimulators[index].command;
   if(t.size() != command.actuators.size()) {
-    throw PyException("Invalid command size, must be equal to driver size");  
+    throw PyException("Invalid command size, must be equal to driver size");
   }
   for(size_t i=0;i<command.actuators.size();i++) {
     command.actuators[i].SetTorque(t[i]);
@@ -2786,18 +2816,18 @@ void SimRobotController::setTorque(const std::vector<double>& t)
   RobotController* c=sim->robotControllers[index];
   MyController* mc=dynamic_cast<MyController*>(c);
   if(!mc) {
-    throw PyException("Not using the default manual override controller");  
+    throw PyException("Not using the default manual override controller");
   }
   mc->override = true;
 }
 
 void SimRobotController::setPIDCommand(const std::vector<double>& qdes,const std::vector<double>& dqdes)
 {
-  RobotMotorCommand& command = sim->controlSimulators[index].command;  
+  RobotMotorCommand& command = sim->controlSimulators[index].command;
   Robot* robot=sim->controlSimulators[index].robot;
   if(qdes.size() != command.actuators.size() || dqdes.size() != command.actuators.size()) {
     if(qdes.size() != robot->links.size() || dqdes.size() != robot->links.size())
-      throw PyException("Invalid command sizes");  
+      throw PyException("Invalid command sizes");
     for(size_t i=0;i<qdes.size();i++) {
       robot->q(i) = qdes[i];
       robot->dq(i) = dqdes[i];
@@ -2814,7 +2844,7 @@ void SimRobotController::setPIDCommand(const std::vector<double>& qdes,const std
   RobotController* c=sim->robotControllers[index];
   MyController* mc=dynamic_cast<MyController*>(c);
   if(!mc) {
-    throw PyException("Not using the default manual override controller");  
+    throw PyException("Not using the default manual override controller");
   }
   mc->override = true;
 }
@@ -2822,10 +2852,10 @@ void SimRobotController::setPIDCommand(const std::vector<double>& qdes,const std
 void SimRobotController::setPIDCommand(const std::vector<double>& qdes,const std::vector<double>& dqdes,const std::vector<double>& tfeedforward)
 {
   setPIDCommand(qdes,dqdes);
-  RobotMotorCommand& command = sim->controlSimulators[index].command;  
+  RobotMotorCommand& command = sim->controlSimulators[index].command;
   Robot* robot=sim->controlSimulators[index].robot;
   if(tfeedforward.size() != command.actuators.size())
-     throw PyException("Invalid command sizes");  
+     throw PyException("Invalid command sizes");
   for(size_t i=0;i<command.actuators.size();i++) {
     command.actuators[i].torque = tfeedforward[i];
   }
@@ -2837,7 +2867,7 @@ void SimRobotController::setPIDGains(const std::vector<double>& kP,const std::ve
 {
   RobotMotorCommand& command = sim->controlSimulators[index].command;
   if(kP.size() != command.actuators.size() || kI.size() != command.actuators.size() || kD.size() != command.actuators.size()) {
-    throw PyException("Invalid gain sizes");  
+    throw PyException("Invalid gain sizes");
   }
   for(size_t i=0;i<kP.size();i++) {
     command.actuators[i].kP = kP[i];
@@ -2958,7 +2988,7 @@ bool Widget::beginDrag(int x,int y,const Viewport& viewport)
 {
   double distance;
   Camera::Viewport vp = GetCameraViewport(viewport);
-  bool res=widgets[index].widget->BeginDrag(x,y,vp,distance); 
+  bool res=widgets[index].widget->BeginDrag(x,y,vp,distance);
   if(res) widgets[index].widget->SetFocus(true);
   else widgets[index].widget->SetFocus(false);
   return res;

@@ -31,7 +31,7 @@ class SimRobotSensor
   std::vector<std::string> measurementNames();
   void getMeasurements(std::vector<double>& out);
 
-  SensorBase* sensor; 
+  SensorBase* sensor;
 };
 
 /** @brief A controller for a simulated robot.
@@ -50,7 +50,7 @@ class SimRobotSensor
  * Arbitrary trajectories can be tracked by using setVelocity over short time
  * steps.  Force controllers can be implemented using setTorque, again using
  * short time steps.  These set the controller into manual override mode.
- * To reset back to regular motion queue control, 
+ * To reset back to regular motion queue control,
  */
 class SimRobotController
 {
@@ -119,13 +119,22 @@ class SimRobotController
   void setVelocity(const std::vector<double>& dq,double dt);
   /// Sets a torque command controller
   void setTorque(const std::vector<double>& t);
-  /// Sets a PID command controller 
+  /// Sets a PID command controller
   void setPIDCommand(const std::vector<double>& qdes,const std::vector<double>& dqdes);
   /// Sets a PID command controller with feedforward torques
   void setPIDCommand(const std::vector<double>& qdes,const std::vector<double>& dqdes,const std::vector<double>& tfeedforward);
   /// Turns on/off manual mode, if either the setTorque or setPID command were
   /// previously set.
   void setManualMode(bool enabled);
+
+  /// Returns the control type for the active controller
+  /// valid values are:
+  /// - unknown
+  /// - off
+  /// - torque
+  /// - PID
+  /// - locked_velocity
+  std::string getControlType();
 
   /// Sets the PID gains
   void setPIDGains(const std::vector<double>& kP,const std::vector<double>& kI,const std::vector<double>& kD);
@@ -170,7 +179,7 @@ class SimBody
   /// Sets the angular velocity and translational velocity at the current
   /// simulation time step.
   void setVelocity(const double w[3],const double v[3]);
-  /// Returns the angular velocity and translational velocity 
+  /// Returns the angular velocity and translational velocity
   void getVelocity(double out[3],double out2[3]);
 
   /// Sets the collision padding (useful for thin objects).  Default is 0.0025
@@ -185,7 +194,7 @@ class SimBody
   dBodyID body;
 };
 
-/** @brief A dynamics simulator for a WorldModel. 
+/** @brief A dynamics simulator for a WorldModel.
  */
 class Simulator
 {
