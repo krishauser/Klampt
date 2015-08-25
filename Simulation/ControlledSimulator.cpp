@@ -182,10 +182,12 @@ void ControlledRobotSimulator::Step(Real dt)
 	  oderobot->AddDriverTorque(i,t(i));
 	}
 	else if(d.type == RobotJointDriver::Affine) {
+	  //figure out how the drive mechanism affects torques on the links
 	  Real q=cmd.qdes;
 	  Real dq=cmd.dqdes;
 	  Vector tjoints(d.linkIndices.size());
 	  Vector driverBasis(d.linkIndices.size());
+	  //robot joints now have desired q and dq
 	  robot->SetDriverValue(i,q);
 	  robot->SetDriverVelocity(i,dq);
 	  //TODO: don't hard-code these!  But how to encode arbitrary drive
