@@ -88,6 +88,7 @@ bool QRobotTestGUI::OnCommand(const string &cmd, const string &args){
         string str=&(args[0]);
         col_out->SetText(QString::fromStdString(str));
         col_out->show();
+		return true;
     }
     else return QtGUIBase::OnCommand(cmd,args);
 }
