@@ -58,8 +58,10 @@ class RobotCSpace(AdaptiveCSpace):
     def selfCollision(self):
         """Checks whether the robot at its current configuration is in
         self collision"""
-        if not self.collider: return False
-        return any(self.collider.robotSelfCollisions(self.robot.index))
+        #This should be faster than going through the collider... 
+        return self.robot.selfCollides()
+        #if not self.collider: return False
+        #return any(self.collider.robotSelfCollisions(self.robot.index))
 
     def envCollision(self):
         """Checks whether the robot at its current configuration is in
