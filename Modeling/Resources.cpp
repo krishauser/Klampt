@@ -6,13 +6,6 @@
 #include "IO/JSON.h"
 #include <sstream>
 
-template class BasicResource<Config>;
-template class BasicResource<Vector3>;
-template class BasicResource<Matrix3>;
-template class BasicResource<Matrix>;
-template class BasicResource<RigidTransform>;
-template class BasicResource<Hold>;
-template class BasicResource<Meshing::TriMesh>;
 template <> const char* BasicResource<Config>::className = "Config";
 template <> const char* BasicResource<Vector3>::className = "Vector3";
 template <> const char* BasicResource<Matrix3>::className = "Matrix3";
@@ -22,6 +15,13 @@ template <> const char* BasicResource<GeometricPrimitive3D>::className = "Geomet
 template <> const char* BasicResource<Hold>::className = "Hold";
 template <> const char* BasicResource<Meshing::TriMesh>::className = "TriMesh";
 template <> const char* BasicResource<Camera::Viewport>::className = "Viewport";
+template class BasicResource<Config>;
+template class BasicResource<Vector3>;
+template class BasicResource<Matrix3>;
+template class BasicResource<Matrix>;
+template class BasicResource<RigidTransform>;
+template class BasicResource<Hold>;
+template class BasicResource<Meshing::TriMesh>;
 
 
 void MakeRobotResourceLibrary(ResourceLibrary& library)
