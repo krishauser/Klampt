@@ -5,6 +5,8 @@ ODECONFIG = --enable-shared --with-trimesh=none
 #(not recommended on Linux, may give reasonable performance on Windows)
 ODECONFIG += --enable-double-precision
 
+UNAME = $(shell uname)
+
 unpack-deps:
 	git clone https://github.com/krishauser/KrisLibrary
 	tar xvzf ode-0.11.1.tar.gz
@@ -19,8 +21,14 @@ dep-KrisLibrary:
 dep-tinyxml:
 	cd tinyxml; make lib
 
-dep-glui: 
+ifeq ($(UNAME), Darwin)
+dep-glui:
+	patch -N glui-2.36/src/makefile < glui-mac-osx.patch || true
 	cd glui-2.36/src; make
+else
+dep-glui:
+	cd glui-2.36/src; make
+endif
 
 dep-ode:
 	cd ode-0.11.1; X_EXTRA_LIBS=-lX11 ./configure $(ODECONFIG)
