@@ -1,5 +1,9 @@
 #include "GLUTGUI.h"
+#ifdef __APPLE__
+#include <GLUT/glut.h>
+#else
 #include <GL/glut.h>
+#endif
 #include <limits.h>
 #include <assert.h>
 #include <stdio.h>
