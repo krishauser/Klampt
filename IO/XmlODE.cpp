@@ -10,8 +10,17 @@ bool XmlODEGeometry::Get(ODEGeometry& mesh)
 {
   //const char* fn = e->Attribute("file");
   double padding,temp;
+  int preshrink;
   if(e->QueryValueAttribute("padding",&padding)==TIXML_SUCCESS) {
-    mesh.SetPadding(padding);
+    if(e->QueryValueAttribute("preshrink",&preshrink)==TIXML_SUCCESS && preshrink!=0) {
+      if(preshrink == 2)
+	mesh.SetPaddingWithPreshrink(padding,true);
+      else
+	mesh.SetPaddingWithPreshrink(padding,false);
+    }
+    else {
+      mesh.SetPadding(padding);
+    }
   }
   if(e->QueryValueAttribute("kFriction",&temp)==TIXML_SUCCESS) {
     mesh.surf().kFriction=temp;
