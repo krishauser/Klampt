@@ -15,21 +15,21 @@
     <globals /> 
     <!-- object parameters -->
     <object index="0">
-       <geometry kFriction="0.5" kRestitution="0.0" kStiffness="500" kDamping="5" padding="0.01"/>
+       <geometry kFriction="0.5" kRestitution="0.0" kStiffness="1000" kDamping="50" padding="0.04" preshrink="1"/>
     </object>
     <!-- robot parameters -->
     <robot index="0">
        <!-- controller parameters -->
        <sensors>
-          <position enabled="1" variance="0.0" resolution="0.001"/>
-          <velocity enabled="1" variance="0.0" resolution="0.001"/>
+          <JointPositionSensor name="joint_position" indices="1 2 3 4 5 6" qvariance="0 0 0 0 0 0" qresolution="0.001 0.001 0.001 0.001 0.001 0.001"/>
+          <JointVelocitySensor name="joint_velocity" indices="1 2 3 4 5 6" dqvariance="0 0 0 0 0 0" dqresolution="0.001 0.001 0.001 0.001 0.001 0.001"/>
        </sensors>
-       <controller gravityCompensation="0" feedforwardAcceleration="0" log="1" vscale="0.1" ascale="0.1">
+       <controller type="FeedforwardMilestonePathController" enableGravityCompensation="0" enableFeedforwardAcceleration="0" velScale="0.1" accScale="0.1">
        </controller>
        <geometry kFriction="0.5" kRestitution="0.1" padding="0.002"/>
     </robot>
     <robot index="0" body="6">  <!-- fingertip -->
-       <geometry kFriction="1.0" kRestitution="0.0" kStiffness="1000" kDamping="100" padding="0.05"/>
+       <geometry kFriction="1.0" kRestitution="0.0" kStiffness="10000" kDamping="1000" padding="0.02" preshrink="2"/>
     </robot>
   </simulation>
 </world>
