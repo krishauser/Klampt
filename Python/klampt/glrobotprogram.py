@@ -35,6 +35,11 @@ class GLSimulationProgram(GLRealtimeProgram):
         self.simulate = False
         self.commanded_config_color = [0,1,0,0.5]
 
+
+        #turn this on to draw contact points
+        self.drawContacts = False
+
+        #turn this on to save screenshots
         self.saveScreenshots = False
         self.nextScreenshotTime = 0
         self.screenshotCount = 0
@@ -58,6 +63,32 @@ class GLSimulationProgram(GLRealtimeProgram):
                 r.setConfig(q)
                 r.drawGL(False)
             glDisable(GL_BLEND)
+
+        #draw contacts, if enabled
+        if self.drawContacts:
+            glDisable(GL_LIGHTING)
+            glDisable(GL_DEPTH_TEST)
+            glEnable(GL_POINT_SMOOTH)
+            glColor3f(1,1,0)
+            glLineWidth(1.0)
+            glPointSize(5.0)
+            forceLen = 0.1  #scale of forces
+            maxid = self.world.numIDs()
+            for i in xrange(maxid):
+                for j in xrange(i+1,maxid):
+                    points = self.sim.getContacts(i,j)
+                    if len(points) > 0:
+                        forces = self.sim.getContactForces(i,j)
+                        glBegin(GL_POINTS)
+                        for p in points:
+                            glVertex3f(*p[0:3])
+                        glEnd()
+                        glBegin(GL_LINES)
+                        for p,f in zip(points,forces):
+                            glVertex3f(*p[0:3])
+                            glVertex3f(*vectorops.madd(p[0:3],f,forceLen))
+                        glEnd()                        
+            glEnable(GL_DEPTH_TEST)
 
     def control_loop(self):
         #Put your control handler here
@@ -105,6 +136,10 @@ class GLSimulationProgram(GLRealtimeProgram):
         elif c == 'm':
             self.saveScreenshots = not self.saveScreenshots
             print "Movie mode:",self.saveScreenshots
+        elif c == 'c':
+            self.drawContacts = not self.drawContacts
+            if self.drawContacts:
+                self.sim.enableContactFeedbackAll()
         self.refresh()
 
     def click_world(self,x,y):
