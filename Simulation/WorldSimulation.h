@@ -92,8 +92,12 @@ public:
   ODEContactList* GetContactList(int aid,int bid);
   ///Returns the resultant contact force (on object a) from the prior time step
   Vector3 ContactForce(int aid,int bid=-1);
+  ///Returns the resultant contact torque (on object a, about its origin) from the prior time step
+  Vector3 ContactTorque(int aid,int bid=-1);
   ///Returns the average contact force (on object a) from the past Advance call
   Vector3 MeanContactForce(int aid,int bid=-1);
+  ///Returns the resultant contact torque (on object a, about its origin) from the past Advance call
+  Vector3 MeanContactTorque(int aid,int bid=-1);
 
   //helpers to convert indexing schemes
   int ODEToWorldID(const ODEObjectID& odeid) const;

@@ -706,6 +706,62 @@ Vector3 WorldSimulation::MeanContactForce(int aid,int bid)
   }
 }
 
+Vector3 WorldSimulation::ContactTorque(int aid,int bid)
+{
+  ODEObjectID a=WorldToODEID(aid);
+  if(bid < 0) {
+    Vector3 sum(Zero);
+    for(ContactFeedbackMap::iterator i=contactFeedback.begin();i!=contactFeedback.end();i++) {
+      ODEContactList* c=NULL;
+      if(i->first.first == a) 
+	c=odesim.GetContactFeedback(a,i->first.second);
+      else if(i->first.second == a)
+	c=odesim.GetContactFeedback(i->first.first,a);
+      if(c) {
+	Vector3 isum(Zero);
+	for(size_t j=0;j<c->forces.size();j++)
+	  isum += cross(c->points[j].x,c->forces[j]);
+	
+	//add to the accumulator
+	if(a == i->first.first) sum+=isum;
+	else sum-=isum;
+      }
+    }
+    return sum;
+  }
+  else {
+    ODEObjectID b=WorldToODEID(bid);
+    ODEContactList* c=odesim.GetContactFeedback(a,b);
+    Vector3 sum(Zero);
+    if(!c) return sum;
+    for(size_t i=0;i<c->forces.size();i++)
+      sum += cross(c->points[i].x,c->forces[i]);
+    if(a<b) return sum;
+    else return -sum;
+  }
+}
+
+Vector3 WorldSimulation::MeanContactTorque(int aid,int bid)
+{
+  ODEObjectID a=WorldToODEID(aid);
+  if(bid < 0) {
+    Vector3 sum(Zero);
+    for(ContactFeedbackMap::iterator i=contactFeedback.begin();i!=contactFeedback.end();i++) {
+      if(a == i->first.first)
+	sum += i->second.meanTorque;
+      else if(a == i->first.second)
+	sum -= i->second.meanTorque;
+    }
+    return sum;
+  }
+  else {
+    ContactFeedbackInfo* info=GetContactFeedback(aid,bid);
+    if(aid<bid) return info->meanTorque;
+    else return info->meanTorque;
+  }
+}
+
+
 
 int WorldSimulation::ODEToWorldID(const ODEObjectID& odeid) const
 {
