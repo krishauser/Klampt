@@ -2229,8 +2229,14 @@ bool Simulator::inContact(int aid,int bid)
 
 void Simulator::contactForce(int aid,int bid,double res[3])
 {
-  sim->ContactForce(aid,bid).get(res);
+  sim->MeanContactForce(aid,bid).get(res);
 }
+
+void Simulator::contactTorque(int aid,int bid,double res[3])
+{
+  sim->MeanContactTorque(aid,bid).get(res);
+}
+
 
 void Simulator::getContacts(int aid,int bid,std::vector<std::vector<double> >& out)
 {

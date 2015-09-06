@@ -256,6 +256,8 @@ class Simulator
   void getContactForces(int aid,int bid,std::vector<std::vector<double> >& out);
   /// Returns the contact force on object a at the last time step
   void contactForce(int aid,int bid,double out[3]);
+  /// Returns the contact force on object a (about a's origin) at the last time step
+  void contactTorque(int aid,int bid,double out[3]);
   /// Returns true if the objects had contact over the last simulate() call
   bool hadContact(int aid,int bid);
   /// Returns true if the objects had ever separated during the last
