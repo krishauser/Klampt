@@ -228,7 +228,7 @@ class GLNavigationProgram(GLProgram):
         R,t = se3.inv(self.camera.matrix())
         #from x and y compute ray direction
         u = float(x-self.width/2)/self.width
-        v = float(self.height-y-self.height/2)/self.height
+        v = float(self.height-y-self.height/2)/self.width
         aspect = float(self.width)/float(self.height)
         rfov = self.fov*math.pi/180.0
         scale = 2.0*math.tan(rfov*0.5/aspect)*aspect
