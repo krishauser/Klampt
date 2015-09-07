@@ -160,14 +160,15 @@ void GetGeometries(RobotWorld& world,const vector<int>& ids,vector<Geometry::Any
   geoms.reserve(ids.size());
   activeids.reserve(ids.size());
   for(size_t i=0;i<ids.size();i++) {
-    if(world.IsRobot(ids[i])>=0) {
+    int robotindex = world.IsRobot(ids[i]);;
+    if(robotindex >=0) {
       //crud, have to expand
-      Robot* robot = world.robots[world.IsRobot(ids[i])].robot;
+      Robot* robot = world.robots[robotindex].robot;
       for(size_t j=0;j<robot->links.size();j++) {
 	Geometry::AnyCollisionGeometry3D* g=&robot->geometry[j];
 	if(!g->Empty()) {
 	  geoms.push_back(g);
-	  activeids.push_back(world.RobotLinkID(ids[i],j));
+	  activeids.push_back(world.RobotLinkID(robotindex,j));
 	}
       }
     }
