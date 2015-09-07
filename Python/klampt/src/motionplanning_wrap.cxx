@@ -4948,14 +4948,26 @@ static PyMethodDef SwigMethods[] = {
 		"void\n"
 		"CSpaceInterface::setFeasibility(PyObject *pyFeas) \n"
 		""},
-	 { (char *)"CSpaceInterface_addFeasibilityTest", _wrap_CSpaceInterface_addFeasibilityTest, METH_VARARGS, (char *)"CSpaceInterface_addFeasibilityTest(CSpaceInterface self, char const * name, PyObject * pyFeas)"},
+	 { (char *)"CSpaceInterface_addFeasibilityTest", _wrap_CSpaceInterface_addFeasibilityTest, METH_VARARGS, (char *)"\n"
+		"CSpaceInterface_addFeasibilityTest(CSpaceInterface self, char const * name, PyObject * pyFeas)\n"
+		"\n"
+		"void\n"
+		"CSpaceInterface::addFeasibilityTest(const char *name, PyObject\n"
+		"*pyFeas) \n"
+		""},
 	 { (char *)"CSpaceInterface_setVisibility", _wrap_CSpaceInterface_setVisibility, METH_VARARGS, (char *)"\n"
 		"CSpaceInterface_setVisibility(CSpaceInterface self, PyObject * pyVisible)\n"
 		"\n"
 		"void\n"
 		"CSpaceInterface::setVisibility(PyObject *pyVisible) \n"
 		""},
-	 { (char *)"CSpaceInterface_addVisibilityTest", _wrap_CSpaceInterface_addVisibilityTest, METH_VARARGS, (char *)"CSpaceInterface_addVisibilityTest(CSpaceInterface self, char const * name, PyObject * pyVisible)"},
+	 { (char *)"CSpaceInterface_addVisibilityTest", _wrap_CSpaceInterface_addVisibilityTest, METH_VARARGS, (char *)"\n"
+		"CSpaceInterface_addVisibilityTest(CSpaceInterface self, char const * name, PyObject * pyVisible)\n"
+		"\n"
+		"void\n"
+		"CSpaceInterface::addVisibilityTest(const char *name, PyObject\n"
+		"*pyVisible) \n"
+		""},
 	 { (char *)"CSpaceInterface_setVisibilityEpsilon", _wrap_CSpaceInterface_setVisibilityEpsilon, METH_VARARGS, (char *)"\n"
 		"CSpaceInterface_setVisibilityEpsilon(CSpaceInterface self, double eps)\n"
 		"\n"

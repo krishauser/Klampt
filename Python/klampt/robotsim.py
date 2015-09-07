@@ -716,8 +716,10 @@ class TriangleMesh(_object):
     """
     A 3D indexed triangle mesh class.
 
-    vertices is a list of vertices, given as a list [x1, y1, z1, x2, y2,
-    ...] indices is a list of triangle vertices given as indices into the
+    Attributes: vertices: a list of vertices, given as a flattened
+    coordinate list [x1, y1, z1, x2, y2, ...]
+
+    indices: a list of triangle vertices given as indices into the
     vertices list, i.e., [a1,b1,c2, a2,b2,c2, ...]
 
     C++ includes: geometry.h 
@@ -762,8 +764,10 @@ class TriangleMesh(_object):
 
         A 3D indexed triangle mesh class.
 
-        vertices is a list of vertices, given as a list [x1, y1, z1, x2, y2,
-        ...] indices is a list of triangle vertices given as indices into the
+        Attributes: vertices: a list of vertices, given as a flattened
+        coordinate list [x1, y1, z1, x2, y2, ...]
+
+        indices: a list of triangle vertices given as indices into the
         vertices list, i.e., [a1,b1,c2, a2,b2,c2, ...]
 
         C++ includes: geometry.h 
@@ -780,11 +784,15 @@ TriangleMesh_swigregister(TriangleMesh)
 
 class PointCloud(_object):
     """
-    A 3D point cloud class. vertices is a list of vertices, given as a
-    list [x1, y1, z1, x2, y2, ... zn] properties is a list of vertex
-    properties, given as a list [p11, p21, ..., pk1, p12, p22, ..., pk2,
-    ... , pn1, pn2, ..., pn2] where each vertex has k properties. The name
-    of each property is given by the propertyNames member.
+    A 3D point cloud class.
+
+    Attributes: vertices: a list of vertices, given as a list [x1, y1, z1,
+    x2, y2, ... zn]
+
+    properties: a list of vertex properties, given as a list [p11, p21,
+    ..., pk1, p12, p22, ..., pk2, ... , pn1, pn2, ..., pn2] where each
+    vertex has k properties. The name of each property is given by the
+    propertyNames member.
 
     C++ includes: geometry.h 
     """
@@ -830,11 +838,15 @@ class PointCloud(_object):
         """
         __init__(PointCloud self) -> PointCloud
 
-        A 3D point cloud class. vertices is a list of vertices, given as a
-        list [x1, y1, z1, x2, y2, ... zn] properties is a list of vertex
-        properties, given as a list [p11, p21, ..., pk1, p12, p22, ..., pk2,
-        ... , pn1, pn2, ..., pn2] where each vertex has k properties. The name
-        of each property is given by the propertyNames member.
+        A 3D point cloud class.
+
+        Attributes: vertices: a list of vertices, given as a list [x1, y1, z1,
+        x2, y2, ... zn]
+
+        properties: a list of vertex properties, given as a list [p11, p21,
+        ..., pk1, p12, p22, ..., pk2, ... , pn1, pn2, ..., pn2] where each
+        vertex has k properties. The name of each property is given by the
+        propertyNames member.
 
         C++ includes: geometry.h 
         """
@@ -944,10 +956,20 @@ class Geometry3D(_object):
     geometry, in which case modifiers change the world item's geometry, or
     it can be a standalone geometry.
 
+    If you want to set a world item's geometry to be equal to a standalone
+    geometry, use the set(rhs) function rather than the assignment (=)
+    operator.
+
     Modifiers include any setX() functions, translate(), and transform().
 
     Proximity queries include collides(), withinDistance(), distance(),
     and rayCast().
+
+    Each object also has a "collision margin" which may virtually fatten
+    the object, as far as proximity queries are concerned. This is useful
+    for setting collision avoidance margins in motion planning. By default
+    it is zero. (Note that this is NOT the same thing as simulation body
+    collision padding!)
 
     C++ includes: geometry.h 
     """
@@ -1188,7 +1210,9 @@ class Geometry3D(_object):
         getBB(Geometry3D self)
 
         void
-        Geometry3D::getBB(double out[3], double out2[3]) 
+        Geometry3D::getBB(double out[3], double out2[3])
+
+        Returns the axis-aligned bounding box of the object. 
         """
         return _robotsim.Geometry3D_getBB(self)
 
@@ -1874,9 +1898,6 @@ class RobotModelLink(_object):
     """
     A reference to a link of a RobotModel.
 
-    Note that the mass is given local to the link frame, not about the
-    COM.
-
     C++ includes: robotmodel.h 
     """
     __swig_setmethods__ = {}
@@ -1902,7 +1923,10 @@ class RobotModelLink(_object):
         getID(RobotModelLink self) -> int
 
         int
-        RobotModelLink::getID() 
+        RobotModelLink::getID()
+
+        Returns the ID of the robot link in its world (Note: not the same as
+        getIndex()) 
         """
         return _robotsim.RobotModelLink_getID(self)
 
@@ -1922,7 +1946,9 @@ class RobotModelLink(_object):
         robot(RobotModelLink self) -> RobotModel
 
         RobotModel
-        RobotModelLink::robot() 
+        RobotModelLink::robot()
+
+        Returns a reference to the link's robot. 
         """
         return _robotsim.RobotModelLink_robot(self)
 
@@ -1932,7 +1958,9 @@ class RobotModelLink(_object):
         getRobot(RobotModelLink self) -> RobotModel
 
         RobotModel
-        RobotModelLink::getRobot() 
+        RobotModelLink::getRobot()
+
+        Old-style: will be deprecated. 
         """
         return _robotsim.RobotModelLink_getRobot(self)
 
@@ -1942,7 +1970,9 @@ class RobotModelLink(_object):
         getIndex(RobotModelLink self) -> int
 
         int
-        RobotModelLink::getIndex() 
+        RobotModelLink::getIndex()
+
+        Returns the index of the link (on its robot). 
         """
         return _robotsim.RobotModelLink_getIndex(self)
 
@@ -1952,7 +1982,9 @@ class RobotModelLink(_object):
         getParent(RobotModelLink self) -> int
 
         int
-        RobotModelLink::getParent() 
+        RobotModelLink::getParent()
+
+        Returns the index of the link's parent (on its robot). 
         """
         return _robotsim.RobotModelLink_getParent(self)
 
@@ -1962,7 +1994,9 @@ class RobotModelLink(_object):
         setParent(RobotModelLink self, int p)
 
         void
-        RobotModelLink::setParent(int p) 
+        RobotModelLink::setParent(int p)
+
+        Sets the index of the link's parent (on its robot). 
         """
         return _robotsim.RobotModelLink_setParent(self, p)
 
@@ -1972,7 +2006,9 @@ class RobotModelLink(_object):
         geometry(RobotModelLink self) -> Geometry3D
 
         Geometry3D
-        RobotModelLink::geometry() 
+        RobotModelLink::geometry()
+
+        Returns a reference to the link's geometry. 
         """
         return _robotsim.RobotModelLink_geometry(self)
 
@@ -1982,7 +2018,9 @@ class RobotModelLink(_object):
         appearance(RobotModelLink self) -> Appearance
 
         Appearance
-        RobotModelLink::appearance() 
+        RobotModelLink::appearance()
+
+        Returns a reference to the link's appearance. 
         """
         return _robotsim.RobotModelLink_appearance(self)
 
@@ -1992,7 +2030,10 @@ class RobotModelLink(_object):
         getMass(RobotModelLink self) -> Mass
 
         Mass
-        RobotModelLink::getMass() 
+        RobotModelLink::getMass()
+
+        Retrieves the inertial properties of the link. (Note that the Mass is
+        given with origin at the link frame, not about the COM.) 
         """
         return _robotsim.RobotModelLink_getMass(self)
 
@@ -2002,7 +2043,10 @@ class RobotModelLink(_object):
         setMass(RobotModelLink self, Mass mass)
 
         void
-        RobotModelLink::setMass(const Mass &mass) 
+        RobotModelLink::setMass(const Mass &mass)
+
+        Sets the inertial proerties of the link. (Note that the Mass is given
+        with origin at the link frame, not about the COM.) 
         """
         return _robotsim.RobotModelLink_setMass(self, mass)
 
@@ -2037,7 +2081,7 @@ class RobotModelLink(_object):
         void
         RobotModelLink::getAxis(double out[3])
 
-        Gets the local rotational axis. 
+        Gets the local rotational / translational axis. 
         """
         return _robotsim.RobotModelLink_getAxis(self)
 
@@ -2215,7 +2259,11 @@ class RobotModelLink(_object):
         drawLocalGL(RobotModelLink self)
 
         void
-        RobotModelLink::drawLocalGL(bool keepAppearance=true) 
+        RobotModelLink::drawLocalGL(bool keepAppearance=true)
+
+        Draws the link's geometry in its local frame. If keepAppearance=true,
+        the current Appearance is honored. Otherwise, just the geometry is
+        drawn. 
         """
         return _robotsim.RobotModelLink_drawLocalGL(self, keepAppearance)
 
@@ -2226,7 +2274,11 @@ class RobotModelLink(_object):
         drawWorldGL(RobotModelLink self)
 
         void
-        RobotModelLink::drawWorldGL(bool keepAppearance=true) 
+        RobotModelLink::drawWorldGL(bool keepAppearance=true)
+
+        Draws the link's geometry in the world frame. If keepAppearance=true,
+        the current Appearance is honored. Otherwise, just the geometry is
+        drawn. 
         """
         return _robotsim.RobotModelLink_drawWorldGL(self, keepAppearance)
 
@@ -2290,7 +2342,9 @@ class RobotModelDriver(_object):
         robot(RobotModelDriver self) -> RobotModel
 
         RobotModel
-        RobotModelDriver::robot() 
+        RobotModelDriver::robot()
+
+        Returns a reference to the driver's robot. 
         """
         return _robotsim.RobotModelDriver_robot(self)
 
@@ -2300,7 +2354,9 @@ class RobotModelDriver(_object):
         getRobot(RobotModelDriver self) -> RobotModel
 
         RobotModel
-        RobotModelDriver::getRobot() 
+        RobotModelDriver::getRobot()
+
+        Old-style: will be deprecated. 
         """
         return _robotsim.RobotModelDriver_getRobot(self)
 
@@ -2465,7 +2521,10 @@ class RobotModel(_object):
         """
         getID(RobotModel self) -> int
 
-        int RobotModel::getID() 
+        int RobotModel::getID()
+
+        Returns the ID of the robot in its world (Note: not the same as the
+        robot index) 
         """
         return _robotsim.RobotModel_getID(self)
 
@@ -2496,7 +2555,9 @@ class RobotModel(_object):
         link(RobotModel self, char const * name) -> RobotModelLink
 
         RobotModelLink
-        RobotModel::link(const char *name) 
+        RobotModel::link(const char *name)
+
+        Returns a reference to the named link. 
         """
         return _robotsim.RobotModel_link(self, *args)
 
@@ -2676,7 +2737,9 @@ class RobotModel(_object):
         getCom(RobotModel self)
 
         void
-        RobotModel::getCom(double out[3]) 
+        RobotModel::getCom(double out[3])
+
+        Returns the 3D center of mass at the current config. 
         """
         return _robotsim.RobotModel_getCom(self)
 
@@ -2688,6 +2751,7 @@ class RobotModel(_object):
         void
         RobotModel::getComJacobian(std::vector< std::vector< double > > &out)
 
+        Returns the 3xn Jacobian matrix of the current center of mass. 
         """
         return _robotsim.RobotModel_getComJacobian(self)
 
@@ -2699,6 +2763,7 @@ class RobotModel(_object):
         void
         RobotModel::getMassMatrix(std::vector< std::vector< double > > &out)
 
+        Returns the nxn mass matrix B(q) 
         """
         return _robotsim.RobotModel_getMassMatrix(self)
 
@@ -2709,7 +2774,10 @@ class RobotModel(_object):
 
         void
         RobotModel::getMassMatrixInv(std::vector< std::vector< double > >
-        &out) 
+        &out)
+
+        Returns the inverse of the nxn mass matrix B(q)^-1 (faster than
+        inverting result of getMassMatrix) 
         """
         return _robotsim.RobotModel_getMassMatrixInv(self)
 
@@ -2720,7 +2788,10 @@ class RobotModel(_object):
 
         void
         RobotModel::getCoriolisForceMatrix(std::vector< std::vector< double >
-        > &out) 
+        > &out)
+
+        Returns the Coriolis force matrix C(q,dq) for current config and
+        velocity. 
         """
         return _robotsim.RobotModel_getCoriolisForceMatrix(self)
 
@@ -2730,7 +2801,10 @@ class RobotModel(_object):
         getCoriolisForces(RobotModel self)
 
         void
-        RobotModel::getCoriolisForces(std::vector< double > &out) 
+        RobotModel::getCoriolisForces(std::vector< double > &out)
+
+        Returns the Coriolis forces C(q,dq)*dq for current config and velocity
+        (faster than computing matrix and doing product) 
         """
         return _robotsim.RobotModel_getCoriolisForces(self)
 
@@ -2741,7 +2815,10 @@ class RobotModel(_object):
 
         void
         RobotModel::getGravityForces(const double g[3], std::vector< double >
-        &out) 
+        &out)
+
+        Returns the gravity force vector G(q) for the given workspace gravity
+        vector g (usually (0,0,-9.8)) 
         """
         return _robotsim.RobotModel_getGravityForces(self, g)
 
@@ -2752,7 +2829,9 @@ class RobotModel(_object):
 
         void
         RobotModel::torquesFromAccel(const std::vector< double > &ddq,
-        std::vector< double > &out) 
+        std::vector< double > &out)
+
+        Computes the inverse dynamics (using Recursive Newton Euler solver) 
         """
         return _robotsim.RobotModel_torquesFromAccel(self, ddq)
 
@@ -2763,7 +2842,9 @@ class RobotModel(_object):
 
         void
         RobotModel::accelFromTorques(const std::vector< double > &t,
-        std::vector< double > &out) 
+        std::vector< double > &out)
+
+        Computes the foward dynamics (using Recursive Newton Euler solver) 
         """
         return _robotsim.RobotModel_accelFromTorques(self, t)
 
@@ -2774,7 +2855,10 @@ class RobotModel(_object):
 
         void
         RobotModel::interpolate(const std::vector< double > &a, const
-        std::vector< double > &b, double u, std::vector< double > &out) 
+        std::vector< double > &b, double u, std::vector< double > &out)
+
+        Interpolates smoothly between two configurations, properly taking into
+        account nonstandard joints. 
         """
         return _robotsim.RobotModel_interpolate(self, a, b, u)
 
@@ -2785,7 +2869,10 @@ class RobotModel(_object):
 
         double
         RobotModel::distance(const std::vector< double > &a, const
-        std::vector< double > &b) 
+        std::vector< double > &b)
+
+        Computes a distance between two configurations, properly taking into
+        account nonstandard joints. 
         """
         return _robotsim.RobotModel_distance(self, a, b)
 
@@ -2796,7 +2883,10 @@ class RobotModel(_object):
 
         void
         RobotModel::interpolate_deriv(const std::vector< double > &a, const
-        std::vector< double > &b, std::vector< double > &out) 
+        std::vector< double > &b, std::vector< double > &out)
+
+        Returns the configuration derivative at a as you interpolate toward b
+        at unit speed. 
         """
         return _robotsim.RobotModel_interpolate_deriv(self, a, b)
 
@@ -2806,7 +2896,9 @@ class RobotModel(_object):
         selfCollisionEnabled(RobotModel self, int link1, int link2) -> bool
 
         bool
-        RobotModel::selfCollisionEnabled(int link1, int link2) 
+        RobotModel::selfCollisionEnabled(int link1, int link2)
+
+        Queries whether self collisions between two links is enabled. 
         """
         return _robotsim.RobotModel_selfCollisionEnabled(self, link1, link2)
 
@@ -2816,9 +2908,25 @@ class RobotModel(_object):
         enableSelfCollision(RobotModel self, int link1, int link2, bool value)
 
         void
-        RobotModel::enableSelfCollision(int link1, int link2, bool value) 
+        RobotModel::enableSelfCollision(int link1, int link2, bool value)
+
+        Enables/disables self collisions between two links (depending on
+        value) 
         """
         return _robotsim.RobotModel_enableSelfCollision(self, link1, link2, value)
+
+
+    def selfCollides(self):
+        """
+        selfCollides(RobotModel self) -> bool
+
+        bool
+        RobotModel::selfCollides()
+
+        Returns true if the robot is in self collision (faster than manual
+        testing) 
+        """
+        return _robotsim.RobotModel_selfCollides(self)
 
 
     def drawGL(self, keepAppearance=True):
@@ -2827,7 +2935,10 @@ class RobotModel(_object):
         drawGL(RobotModel self)
 
         void
-        RobotModel::drawGL(bool keepAppearance=true) 
+        RobotModel::drawGL(bool keepAppearance=true)
+
+        Draws the robot geometry. If keepAppearance=true, the current
+        appearance is honored. Otherwise, only the raw geometry is drawn. 
         """
         return _robotsim.RobotModel_drawGL(self, keepAppearance)
 
@@ -3155,7 +3266,9 @@ class WorldModel(_object):
         readFile(WorldModel self, char const * fn) -> bool
 
         bool
-        WorldModel::readFile(const char *fn) 
+        WorldModel::readFile(const char *fn)
+
+        Reads from a world XML file. 
         """
         return _robotsim.WorldModel_readFile(self, fn)
 
@@ -3259,7 +3372,10 @@ class WorldModel(_object):
         makeRobot(WorldModel self, char const * name) -> RobotModel
 
         RobotModel
-        WorldModel::makeRobot(const char *name) 
+        WorldModel::makeRobot(const char *name)
+
+        Creates a new empty robot. (Not terribly useful now since you can't
+        resize the number of links yet) 
         """
         return _robotsim.WorldModel_makeRobot(self, name)
 
@@ -3269,7 +3385,9 @@ class WorldModel(_object):
         makeRigidObject(WorldModel self, char const * name) -> RigidObjectModel
 
         RigidObjectModel
-        WorldModel::makeRigidObject(const char *name) 
+        WorldModel::makeRigidObject(const char *name)
+
+        Creates a new empty rigid object. 
         """
         return _robotsim.WorldModel_makeRigidObject(self, name)
 
@@ -3279,7 +3397,9 @@ class WorldModel(_object):
         makeTerrain(WorldModel self, char const * name) -> TerrainModel
 
         TerrainModel
-        WorldModel::makeTerrain(const char *name) 
+        WorldModel::makeTerrain(const char *name)
+
+        Creates a new empty terrain. 
         """
         return _robotsim.WorldModel_makeTerrain(self, name)
 
@@ -3289,7 +3409,10 @@ class WorldModel(_object):
         loadRobot(WorldModel self, char const * fn) -> RobotModel
 
         RobotModel
-        WorldModel::loadRobot(const char *fn) 
+        WorldModel::loadRobot(const char *fn)
+
+        Loads a robot from a .rob or .urdf file. An empty robot is returned if
+        loading fails. 
         """
         return _robotsim.WorldModel_loadRobot(self, fn)
 
@@ -3299,7 +3422,10 @@ class WorldModel(_object):
         loadRigidObject(WorldModel self, char const * fn) -> RigidObjectModel
 
         RigidObjectModel
-        WorldModel::loadRigidObject(const char *fn) 
+        WorldModel::loadRigidObject(const char *fn)
+
+        Loads a rigid object from a .obj or a mesh file. An empty rigid object
+        is returned if loading fails. 
         """
         return _robotsim.WorldModel_loadRigidObject(self, fn)
 
@@ -3309,7 +3435,10 @@ class WorldModel(_object):
         loadTerrain(WorldModel self, char const * fn) -> TerrainModel
 
         TerrainModel
-        WorldModel::loadTerrain(const char *fn) 
+        WorldModel::loadTerrain(const char *fn)
+
+        Loads a rigid object from a mesh file. An empty terrain is returned if
+        loading fails. 
         """
         return _robotsim.WorldModel_loadTerrain(self, fn)
 
@@ -3319,7 +3448,11 @@ class WorldModel(_object):
         loadElement(WorldModel self, char const * fn) -> int
 
         int
-        WorldModel::loadElement(const char *fn) 
+        WorldModel::loadElement(const char *fn)
+
+        Loads some element from a file, automatically detecting its type.
+        Meshes are interpreted as terrains. The ID is returned, or -1 if
+        loading failed. 
         """
         return _robotsim.WorldModel_loadElement(self, fn)
 
@@ -3329,7 +3462,9 @@ class WorldModel(_object):
         getName(WorldModel self, int id) -> std::string
 
         std::string
-        WorldModel::getName(int id) 
+        WorldModel::getName(int id)
+
+        Retrieves a name for a given element ID. 
         """
         return _robotsim.WorldModel_getName(self, id)
 
@@ -3339,7 +3474,9 @@ class WorldModel(_object):
         geometry(WorldModel self, int id) -> Geometry3D
 
         Geometry3D
-        WorldModel::geometry(int id) 
+        WorldModel::geometry(int id)
+
+        Retrieves a geometry for a given element ID. 
         """
         return _robotsim.WorldModel_geometry(self, id)
 
@@ -3349,7 +3486,9 @@ class WorldModel(_object):
         appearance(WorldModel self, int id) -> Appearance
 
         Appearance
-        WorldModel::appearance(int id) 
+        WorldModel::appearance(int id)
+
+        Retrieves an appearance for a given element ID. 
         """
         return _robotsim.WorldModel_appearance(self, id)
 
@@ -3360,6 +3499,7 @@ class WorldModel(_object):
 
         void WorldModel::drawGL()
 
+        Draws the entire world. 
         """
         return _robotsim.WorldModel_drawGL(self)
 
@@ -3369,7 +3509,12 @@ class WorldModel(_object):
         enableGeometryLoading(WorldModel self, bool enabled)
 
         void
-        WorldModel::enableGeometryLoading(bool enabled) 
+        WorldModel::enableGeometryLoading(bool enabled)
+
+        If geometry loading is set to false, then only the kinematics are
+        loaded from disk, and no geometry / visualization / collision
+        detection structures will be loaded. Useful for quick scripts that
+        just use kinematics / dynamics of a robot. 
         """
         return _robotsim.WorldModel_enableGeometryLoading(self, enabled)
 
@@ -3416,7 +3561,7 @@ class IKObjective(_object):
         int IKObjective::link()
         const
 
-        The link that is constrained. 
+        The index of the robot link that is constrained. 
         """
         return _robotsim.IKObjective_link(self)
 
@@ -3428,7 +3573,7 @@ class IKObjective(_object):
         int
         IKObjective::destLink() const
 
-        The destination link, or -1 if fixed to the world. 
+        The index of the destination link, or -1 if fixed to the world. 
         """
         return _robotsim.IKObjective_destLink(self)
 
@@ -4929,6 +5074,19 @@ class Simulator(_object):
         Returns the contact force on object a at the last time step. 
         """
         return _robotsim.Simulator_contactForce(self, aid, bid)
+
+
+    def contactTorque(self, aid, bid):
+        """
+        contactTorque(Simulator self, int aid, int bid)
+
+        void
+        Simulator::contactTorque(int aid, int bid, double out[3])
+
+        Returns the contact force on object a (about a's origin) at the last
+        time step. 
+        """
+        return _robotsim.Simulator_contactTorque(self, aid, bid)
 
 
     def hadContact(self, aid, bid):

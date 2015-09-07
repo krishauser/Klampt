@@ -1825,6 +1825,17 @@ void RobotModel::enableSelfCollision(int link1,int link2,bool value)
   }
 }
 
+bool RobotModel::selfCollides()
+{
+  /* old version
+  for(size_t i=0;i<robot->links.size();i++)
+    for(size_t j=0;j<robot->links.size();j++)
+      if(robot->SelfCollision(i,j)) return true;
+  return false;
+  */
+  return robot->SelfCollision();
+}
+
 void RobotModel::drawGL(bool keepAppearance)
 {
   RobotWorld& world = worlds[this->world]->world;

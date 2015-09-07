@@ -26851,6 +26851,40 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_RobotModel_selfCollides(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  RobotModel *arg1 = (RobotModel *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  bool result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:RobotModel_selfCollides",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_RobotModel, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "RobotModel_selfCollides" "', argument " "1"" of type '" "RobotModel *""'"); 
+  }
+  arg1 = reinterpret_cast< RobotModel * >(argp1);
+  {
+    try {
+      result = (bool)(arg1)->selfCollides();
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_From_bool(static_cast< bool >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_RobotModel_drawGL__SWIG_0(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   RobotModel *arg1 = (RobotModel *) 0 ;
@@ -37922,6 +37956,81 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_Simulator_contactTorque(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Simulator *arg1 = (Simulator *) 0 ;
+  int arg2 ;
+  int arg3 ;
+  double *arg4 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  int val3 ;
+  int ecode3 = 0 ;
+  double temp4[3] ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  PyObject * obj2 = 0 ;
+  
+  {
+    arg4 = &temp4[0];
+  }
+  if (!PyArg_ParseTuple(args,(char *)"OOO:Simulator_contactTorque",&obj0,&obj1,&obj2)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Simulator, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Simulator_contactTorque" "', argument " "1"" of type '" "Simulator *""'"); 
+  }
+  arg1 = reinterpret_cast< Simulator * >(argp1);
+  ecode2 = SWIG_AsVal_int(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Simulator_contactTorque" "', argument " "2"" of type '" "int""'");
+  } 
+  arg2 = static_cast< int >(val2);
+  ecode3 = SWIG_AsVal_int(obj2, &val3);
+  if (!SWIG_IsOK(ecode3)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "Simulator_contactTorque" "', argument " "3"" of type '" "int""'");
+  } 
+  arg3 = static_cast< int >(val3);
+  {
+    try {
+      (arg1)->contactTorque(arg2,arg3,arg4);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  {
+    PyObject *o, *o2, *o3;
+    o = convert_darray_obj(arg4,3);
+    if ((!resultobj) || (resultobj == Py_None)) {
+      resultobj = o;
+    } else {
+      if (!PyTuple_Check(resultobj)) {
+        PyObject *o2 = resultobj;
+        resultobj = PyTuple_New(1);
+        PyTuple_SetItem(resultobj,0,o2);
+      }
+      o3 = PyTuple_New(1);
+      PyTuple_SetItem(o3,0,o);
+      o2 = resultobj;
+      resultobj = PySequence_Concat(o2,o3);
+      Py_DECREF(o2);
+      Py_DECREF(o3);
+    }
+  }
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_Simulator_hadContact(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   Simulator *arg1 = (Simulator *) 0 ;
@@ -39344,8 +39453,10 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"A 3D indexed triangle mesh class.\n"
 		"\n"
-		"vertices is a list of vertices, given as a list [x1, y1, z1, x2, y2,\n"
-		"...] indices is a list of triangle vertices given as indices into the\n"
+		"Attributes: vertices: a list of vertices, given as a flattened\n"
+		"coordinate list [x1, y1, z1, x2, y2, ...]\n"
+		"\n"
+		"indices: a list of triangle vertices given as indices into the\n"
 		"vertices list, i.e., [a1,b1,c2, a2,b2,c2, ...]\n"
 		"\n"
 		"C++ includes: geometry.h \n"
@@ -39373,11 +39484,15 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"new_PointCloud", _wrap_new_PointCloud, METH_VARARGS, (char *)"\n"
 		"new_PointCloud() -> PointCloud\n"
 		"\n"
-		"A 3D point cloud class. vertices is a list of vertices, given as a\n"
-		"list [x1, y1, z1, x2, y2, ... zn] properties is a list of vertex\n"
-		"properties, given as a list [p11, p21, ..., pk1, p12, p22, ..., pk2,\n"
-		"... , pn1, pn2, ..., pn2] where each vertex has k properties. The name\n"
-		"of each property is given by the propertyNames member.\n"
+		"A 3D point cloud class.\n"
+		"\n"
+		"Attributes: vertices: a list of vertices, given as a list [x1, y1, z1,\n"
+		"x2, y2, ... zn]\n"
+		"\n"
+		"properties: a list of vertex properties, given as a list [p11, p21,\n"
+		"..., pk1, p12, p22, ..., pk2, ... , pn1, pn2, ..., pn2] where each\n"
+		"vertex has k properties. The name of each property is given by the\n"
+		"propertyNames member.\n"
 		"\n"
 		"C++ includes: geometry.h \n"
 		""},
@@ -39578,7 +39693,9 @@ static PyMethodDef SwigMethods[] = {
 		"Geometry3D_getBB(Geometry3D self)\n"
 		"\n"
 		"void\n"
-		"Geometry3D::getBB(double out[3], double out2[3]) \n"
+		"Geometry3D::getBB(double out[3], double out2[3])\n"
+		"\n"
+		"Returns the axis-aligned bounding box of the object. \n"
 		""},
 	 { (char *)"Geometry3D_collides", _wrap_Geometry3D_collides, METH_VARARGS, (char *)"\n"
 		"Geometry3D_collides(Geometry3D self, Geometry3D other) -> bool\n"
@@ -39809,7 +39926,10 @@ static PyMethodDef SwigMethods[] = {
 		"RobotModelLink_getID(RobotModelLink self) -> int\n"
 		"\n"
 		"int\n"
-		"RobotModelLink::getID() \n"
+		"RobotModelLink::getID()\n"
+		"\n"
+		"Returns the ID of the robot link in its world (Note: not the same as\n"
+		"getIndex()) \n"
 		""},
 	 { (char *)"RobotModelLink_getName", _wrap_RobotModelLink_getName, METH_VARARGS, (char *)"\n"
 		"RobotModelLink_getName(RobotModelLink self) -> char const *\n"
@@ -39821,55 +39941,75 @@ static PyMethodDef SwigMethods[] = {
 		"RobotModelLink_robot(RobotModelLink self) -> RobotModel\n"
 		"\n"
 		"RobotModel\n"
-		"RobotModelLink::robot() \n"
+		"RobotModelLink::robot()\n"
+		"\n"
+		"Returns a reference to the link's robot. \n"
 		""},
 	 { (char *)"RobotModelLink_getRobot", _wrap_RobotModelLink_getRobot, METH_VARARGS, (char *)"\n"
 		"RobotModelLink_getRobot(RobotModelLink self) -> RobotModel\n"
 		"\n"
 		"RobotModel\n"
-		"RobotModelLink::getRobot() \n"
+		"RobotModelLink::getRobot()\n"
+		"\n"
+		"Old-style: will be deprecated. \n"
 		""},
 	 { (char *)"RobotModelLink_getIndex", _wrap_RobotModelLink_getIndex, METH_VARARGS, (char *)"\n"
 		"RobotModelLink_getIndex(RobotModelLink self) -> int\n"
 		"\n"
 		"int\n"
-		"RobotModelLink::getIndex() \n"
+		"RobotModelLink::getIndex()\n"
+		"\n"
+		"Returns the index of the link (on its robot). \n"
 		""},
 	 { (char *)"RobotModelLink_getParent", _wrap_RobotModelLink_getParent, METH_VARARGS, (char *)"\n"
 		"RobotModelLink_getParent(RobotModelLink self) -> int\n"
 		"\n"
 		"int\n"
-		"RobotModelLink::getParent() \n"
+		"RobotModelLink::getParent()\n"
+		"\n"
+		"Returns the index of the link's parent (on its robot). \n"
 		""},
 	 { (char *)"RobotModelLink_setParent", _wrap_RobotModelLink_setParent, METH_VARARGS, (char *)"\n"
 		"RobotModelLink_setParent(RobotModelLink self, int p)\n"
 		"\n"
 		"void\n"
-		"RobotModelLink::setParent(int p) \n"
+		"RobotModelLink::setParent(int p)\n"
+		"\n"
+		"Sets the index of the link's parent (on its robot). \n"
 		""},
 	 { (char *)"RobotModelLink_geometry", _wrap_RobotModelLink_geometry, METH_VARARGS, (char *)"\n"
 		"RobotModelLink_geometry(RobotModelLink self) -> Geometry3D\n"
 		"\n"
 		"Geometry3D\n"
-		"RobotModelLink::geometry() \n"
+		"RobotModelLink::geometry()\n"
+		"\n"
+		"Returns a reference to the link's geometry. \n"
 		""},
 	 { (char *)"RobotModelLink_appearance", _wrap_RobotModelLink_appearance, METH_VARARGS, (char *)"\n"
 		"RobotModelLink_appearance(RobotModelLink self) -> Appearance\n"
 		"\n"
 		"Appearance\n"
-		"RobotModelLink::appearance() \n"
+		"RobotModelLink::appearance()\n"
+		"\n"
+		"Returns a reference to the link's appearance. \n"
 		""},
 	 { (char *)"RobotModelLink_getMass", _wrap_RobotModelLink_getMass, METH_VARARGS, (char *)"\n"
 		"RobotModelLink_getMass(RobotModelLink self) -> Mass\n"
 		"\n"
 		"Mass\n"
-		"RobotModelLink::getMass() \n"
+		"RobotModelLink::getMass()\n"
+		"\n"
+		"Retrieves the inertial properties of the link. (Note that the Mass is\n"
+		"given with origin at the link frame, not about the COM.) \n"
 		""},
 	 { (char *)"RobotModelLink_setMass", _wrap_RobotModelLink_setMass, METH_VARARGS, (char *)"\n"
 		"RobotModelLink_setMass(RobotModelLink self, Mass mass)\n"
 		"\n"
 		"void\n"
-		"RobotModelLink::setMass(const Mass &mass) \n"
+		"RobotModelLink::setMass(const Mass &mass)\n"
+		"\n"
+		"Sets the inertial proerties of the link. (Note that the Mass is given\n"
+		"with origin at the link frame, not about the COM.) \n"
 		""},
 	 { (char *)"RobotModelLink_getParentTransform", _wrap_RobotModelLink_getParentTransform, METH_VARARGS, (char *)"\n"
 		"RobotModelLink_getParentTransform(RobotModelLink self)\n"
@@ -39892,7 +40032,7 @@ static PyMethodDef SwigMethods[] = {
 		"void\n"
 		"RobotModelLink::getAxis(double out[3])\n"
 		"\n"
-		"Gets the local rotational axis. \n"
+		"Gets the local rotational / translational axis. \n"
 		""},
 	 { (char *)"RobotModelLink_setAxis", _wrap_RobotModelLink_setAxis, METH_VARARGS, (char *)"\n"
 		"RobotModelLink_setAxis(RobotModelLink self, double const [3] axis)\n"
@@ -40014,14 +40154,22 @@ static PyMethodDef SwigMethods[] = {
 		"RobotModelLink_drawLocalGL(RobotModelLink self)\n"
 		"\n"
 		"void\n"
-		"RobotModelLink::drawLocalGL(bool keepAppearance=true) \n"
+		"RobotModelLink::drawLocalGL(bool keepAppearance=true)\n"
+		"\n"
+		"Draws the link's geometry in its local frame. If keepAppearance=true,\n"
+		"the current Appearance is honored. Otherwise, just the geometry is\n"
+		"drawn. \n"
 		""},
 	 { (char *)"RobotModelLink_drawWorldGL", _wrap_RobotModelLink_drawWorldGL, METH_VARARGS, (char *)"\n"
 		"drawWorldGL(bool keepAppearance=True)\n"
 		"RobotModelLink_drawWorldGL(RobotModelLink self)\n"
 		"\n"
 		"void\n"
-		"RobotModelLink::drawWorldGL(bool keepAppearance=true) \n"
+		"RobotModelLink::drawWorldGL(bool keepAppearance=true)\n"
+		"\n"
+		"Draws the link's geometry in the world frame. If keepAppearance=true,\n"
+		"the current Appearance is honored. Otherwise, just the geometry is\n"
+		"drawn. \n"
 		""},
 	 { (char *)"RobotModelLink_world_set", _wrap_RobotModelLink_world_set, METH_VARARGS, (char *)"RobotModelLink_world_set(RobotModelLink self, int world)"},
 	 { (char *)"RobotModelLink_world_get", _wrap_RobotModelLink_world_get, METH_VARARGS, (char *)"RobotModelLink_world_get(RobotModelLink self) -> int"},
@@ -40048,13 +40196,17 @@ static PyMethodDef SwigMethods[] = {
 		"RobotModelDriver_robot(RobotModelDriver self) -> RobotModel\n"
 		"\n"
 		"RobotModel\n"
-		"RobotModelDriver::robot() \n"
+		"RobotModelDriver::robot()\n"
+		"\n"
+		"Returns a reference to the driver's robot. \n"
 		""},
 	 { (char *)"RobotModelDriver_getRobot", _wrap_RobotModelDriver_getRobot, METH_VARARGS, (char *)"\n"
 		"RobotModelDriver_getRobot(RobotModelDriver self) -> RobotModel\n"
 		"\n"
 		"RobotModel\n"
-		"RobotModelDriver::getRobot() \n"
+		"RobotModelDriver::getRobot()\n"
+		"\n"
+		"Old-style: will be deprecated. \n"
 		""},
 	 { (char *)"RobotModelDriver_getType", _wrap_RobotModelDriver_getType, METH_VARARGS, (char *)"\n"
 		"RobotModelDriver_getType(RobotModelDriver self) -> char const *\n"
@@ -40142,7 +40294,10 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"RobotModel_getID", _wrap_RobotModel_getID, METH_VARARGS, (char *)"\n"
 		"RobotModel_getID(RobotModel self) -> int\n"
 		"\n"
-		"int RobotModel::getID() \n"
+		"int RobotModel::getID()\n"
+		"\n"
+		"Returns the ID of the robot in its world (Note: not the same as the\n"
+		"robot index) \n"
 		""},
 	 { (char *)"RobotModel_getName", _wrap_RobotModel_getName, METH_VARARGS, (char *)"\n"
 		"RobotModel_getName(RobotModel self) -> char const *\n"
@@ -40161,7 +40316,9 @@ static PyMethodDef SwigMethods[] = {
 		"RobotModel_link(RobotModel self, char const * name) -> RobotModelLink\n"
 		"\n"
 		"RobotModelLink\n"
-		"RobotModel::link(const char *name) \n"
+		"RobotModel::link(const char *name)\n"
+		"\n"
+		"Returns a reference to the named link. \n"
 		""},
 	 { (char *)"RobotModel_getLink", _wrap_RobotModel_getLink, METH_VARARGS, (char *)"\n"
 		"getLink(int index) -> RobotModelLink\n"
@@ -40273,7 +40430,9 @@ static PyMethodDef SwigMethods[] = {
 		"RobotModel_getCom(RobotModel self)\n"
 		"\n"
 		"void\n"
-		"RobotModel::getCom(double out[3]) \n"
+		"RobotModel::getCom(double out[3])\n"
+		"\n"
+		"Returns the 3D center of mass at the current config. \n"
 		""},
 	 { (char *)"RobotModel_getComJacobian", _wrap_RobotModel_getComJacobian, METH_VARARGS, (char *)"\n"
 		"RobotModel_getComJacobian(RobotModel self)\n"
@@ -40281,6 +40440,7 @@ static PyMethodDef SwigMethods[] = {
 		"void\n"
 		"RobotModel::getComJacobian(std::vector< std::vector< double > > &out)\n"
 		"\n"
+		"Returns the 3xn Jacobian matrix of the current center of mass. \n"
 		""},
 	 { (char *)"RobotModel_getMassMatrix", _wrap_RobotModel_getMassMatrix, METH_VARARGS, (char *)"\n"
 		"RobotModel_getMassMatrix(RobotModel self)\n"
@@ -40288,87 +40448,130 @@ static PyMethodDef SwigMethods[] = {
 		"void\n"
 		"RobotModel::getMassMatrix(std::vector< std::vector< double > > &out)\n"
 		"\n"
+		"Returns the nxn mass matrix B(q) \n"
 		""},
 	 { (char *)"RobotModel_getMassMatrixInv", _wrap_RobotModel_getMassMatrixInv, METH_VARARGS, (char *)"\n"
 		"RobotModel_getMassMatrixInv(RobotModel self)\n"
 		"\n"
 		"void\n"
 		"RobotModel::getMassMatrixInv(std::vector< std::vector< double > >\n"
-		"&out) \n"
+		"&out)\n"
+		"\n"
+		"Returns the inverse of the nxn mass matrix B(q)^-1 (faster than\n"
+		"inverting result of getMassMatrix) \n"
 		""},
 	 { (char *)"RobotModel_getCoriolisForceMatrix", _wrap_RobotModel_getCoriolisForceMatrix, METH_VARARGS, (char *)"\n"
 		"RobotModel_getCoriolisForceMatrix(RobotModel self)\n"
 		"\n"
 		"void\n"
 		"RobotModel::getCoriolisForceMatrix(std::vector< std::vector< double >\n"
-		"> &out) \n"
+		"> &out)\n"
+		"\n"
+		"Returns the Coriolis force matrix C(q,dq) for current config and\n"
+		"velocity. \n"
 		""},
 	 { (char *)"RobotModel_getCoriolisForces", _wrap_RobotModel_getCoriolisForces, METH_VARARGS, (char *)"\n"
 		"RobotModel_getCoriolisForces(RobotModel self)\n"
 		"\n"
 		"void\n"
-		"RobotModel::getCoriolisForces(std::vector< double > &out) \n"
+		"RobotModel::getCoriolisForces(std::vector< double > &out)\n"
+		"\n"
+		"Returns the Coriolis forces C(q,dq)*dq for current config and velocity\n"
+		"(faster than computing matrix and doing product) \n"
 		""},
 	 { (char *)"RobotModel_getGravityForces", _wrap_RobotModel_getGravityForces, METH_VARARGS, (char *)"\n"
 		"RobotModel_getGravityForces(RobotModel self, double const [3] g)\n"
 		"\n"
 		"void\n"
 		"RobotModel::getGravityForces(const double g[3], std::vector< double >\n"
-		"&out) \n"
+		"&out)\n"
+		"\n"
+		"Returns the gravity force vector G(q) for the given workspace gravity\n"
+		"vector g (usually (0,0,-9.8)) \n"
 		""},
 	 { (char *)"RobotModel_torquesFromAccel", _wrap_RobotModel_torquesFromAccel, METH_VARARGS, (char *)"\n"
 		"RobotModel_torquesFromAccel(RobotModel self, doubleVector ddq)\n"
 		"\n"
 		"void\n"
 		"RobotModel::torquesFromAccel(const std::vector< double > &ddq,\n"
-		"std::vector< double > &out) \n"
+		"std::vector< double > &out)\n"
+		"\n"
+		"Computes the inverse dynamics (using Recursive Newton Euler solver) \n"
 		""},
 	 { (char *)"RobotModel_accelFromTorques", _wrap_RobotModel_accelFromTorques, METH_VARARGS, (char *)"\n"
 		"RobotModel_accelFromTorques(RobotModel self, doubleVector t)\n"
 		"\n"
 		"void\n"
 		"RobotModel::accelFromTorques(const std::vector< double > &t,\n"
-		"std::vector< double > &out) \n"
+		"std::vector< double > &out)\n"
+		"\n"
+		"Computes the foward dynamics (using Recursive Newton Euler solver) \n"
 		""},
 	 { (char *)"RobotModel_interpolate", _wrap_RobotModel_interpolate, METH_VARARGS, (char *)"\n"
 		"RobotModel_interpolate(RobotModel self, doubleVector a, doubleVector b, double u)\n"
 		"\n"
 		"void\n"
 		"RobotModel::interpolate(const std::vector< double > &a, const\n"
-		"std::vector< double > &b, double u, std::vector< double > &out) \n"
+		"std::vector< double > &b, double u, std::vector< double > &out)\n"
+		"\n"
+		"Interpolates smoothly between two configurations, properly taking into\n"
+		"account nonstandard joints. \n"
 		""},
 	 { (char *)"RobotModel_distance", _wrap_RobotModel_distance, METH_VARARGS, (char *)"\n"
 		"RobotModel_distance(RobotModel self, doubleVector a, doubleVector b) -> double\n"
 		"\n"
 		"double\n"
 		"RobotModel::distance(const std::vector< double > &a, const\n"
-		"std::vector< double > &b) \n"
+		"std::vector< double > &b)\n"
+		"\n"
+		"Computes a distance between two configurations, properly taking into\n"
+		"account nonstandard joints. \n"
 		""},
 	 { (char *)"RobotModel_interpolate_deriv", _wrap_RobotModel_interpolate_deriv, METH_VARARGS, (char *)"\n"
 		"RobotModel_interpolate_deriv(RobotModel self, doubleVector a, doubleVector b)\n"
 		"\n"
 		"void\n"
 		"RobotModel::interpolate_deriv(const std::vector< double > &a, const\n"
-		"std::vector< double > &b, std::vector< double > &out) \n"
+		"std::vector< double > &b, std::vector< double > &out)\n"
+		"\n"
+		"Returns the configuration derivative at a as you interpolate toward b\n"
+		"at unit speed. \n"
 		""},
 	 { (char *)"RobotModel_selfCollisionEnabled", _wrap_RobotModel_selfCollisionEnabled, METH_VARARGS, (char *)"\n"
 		"RobotModel_selfCollisionEnabled(RobotModel self, int link1, int link2) -> bool\n"
 		"\n"
 		"bool\n"
-		"RobotModel::selfCollisionEnabled(int link1, int link2) \n"
+		"RobotModel::selfCollisionEnabled(int link1, int link2)\n"
+		"\n"
+		"Queries whether self collisions between two links is enabled. \n"
 		""},
 	 { (char *)"RobotModel_enableSelfCollision", _wrap_RobotModel_enableSelfCollision, METH_VARARGS, (char *)"\n"
 		"RobotModel_enableSelfCollision(RobotModel self, int link1, int link2, bool value)\n"
 		"\n"
 		"void\n"
-		"RobotModel::enableSelfCollision(int link1, int link2, bool value) \n"
+		"RobotModel::enableSelfCollision(int link1, int link2, bool value)\n"
+		"\n"
+		"Enables/disables self collisions between two links (depending on\n"
+		"value) \n"
+		""},
+	 { (char *)"RobotModel_selfCollides", _wrap_RobotModel_selfCollides, METH_VARARGS, (char *)"\n"
+		"RobotModel_selfCollides(RobotModel self) -> bool\n"
+		"\n"
+		"bool\n"
+		"RobotModel::selfCollides()\n"
+		"\n"
+		"Returns true if the robot is in self collision (faster than manual\n"
+		"testing) \n"
 		""},
 	 { (char *)"RobotModel_drawGL", _wrap_RobotModel_drawGL, METH_VARARGS, (char *)"\n"
 		"drawGL(bool keepAppearance=True)\n"
 		"RobotModel_drawGL(RobotModel self)\n"
 		"\n"
 		"void\n"
-		"RobotModel::drawGL(bool keepAppearance=true) \n"
+		"RobotModel::drawGL(bool keepAppearance=true)\n"
+		"\n"
+		"Draws the robot geometry. If keepAppearance=true, the current\n"
+		"appearance is honored. Otherwise, only the raw geometry is drawn. \n"
 		""},
 	 { (char *)"RobotModel_world_set", _wrap_RobotModel_world_set, METH_VARARGS, (char *)"RobotModel_world_set(RobotModel self, int world)"},
 	 { (char *)"RobotModel_world_get", _wrap_RobotModel_world_get, METH_VARARGS, (char *)"RobotModel_world_get(RobotModel self) -> int"},
@@ -40525,7 +40728,9 @@ static PyMethodDef SwigMethods[] = {
 		"WorldModel_readFile(WorldModel self, char const * fn) -> bool\n"
 		"\n"
 		"bool\n"
-		"WorldModel::readFile(const char *fn) \n"
+		"WorldModel::readFile(const char *fn)\n"
+		"\n"
+		"Reads from a world XML file. \n"
 		""},
 	 { (char *)"WorldModel_numRobots", _wrap_WorldModel_numRobots, METH_VARARGS, (char *)"\n"
 		"WorldModel_numRobots(WorldModel self) -> int\n"
@@ -40589,73 +40794,105 @@ static PyMethodDef SwigMethods[] = {
 		"WorldModel_makeRobot(WorldModel self, char const * name) -> RobotModel\n"
 		"\n"
 		"RobotModel\n"
-		"WorldModel::makeRobot(const char *name) \n"
+		"WorldModel::makeRobot(const char *name)\n"
+		"\n"
+		"Creates a new empty robot. (Not terribly useful now since you can't\n"
+		"resize the number of links yet) \n"
 		""},
 	 { (char *)"WorldModel_makeRigidObject", _wrap_WorldModel_makeRigidObject, METH_VARARGS, (char *)"\n"
 		"WorldModel_makeRigidObject(WorldModel self, char const * name) -> RigidObjectModel\n"
 		"\n"
 		"RigidObjectModel\n"
-		"WorldModel::makeRigidObject(const char *name) \n"
+		"WorldModel::makeRigidObject(const char *name)\n"
+		"\n"
+		"Creates a new empty rigid object. \n"
 		""},
 	 { (char *)"WorldModel_makeTerrain", _wrap_WorldModel_makeTerrain, METH_VARARGS, (char *)"\n"
 		"WorldModel_makeTerrain(WorldModel self, char const * name) -> TerrainModel\n"
 		"\n"
 		"TerrainModel\n"
-		"WorldModel::makeTerrain(const char *name) \n"
+		"WorldModel::makeTerrain(const char *name)\n"
+		"\n"
+		"Creates a new empty terrain. \n"
 		""},
 	 { (char *)"WorldModel_loadRobot", _wrap_WorldModel_loadRobot, METH_VARARGS, (char *)"\n"
 		"WorldModel_loadRobot(WorldModel self, char const * fn) -> RobotModel\n"
 		"\n"
 		"RobotModel\n"
-		"WorldModel::loadRobot(const char *fn) \n"
+		"WorldModel::loadRobot(const char *fn)\n"
+		"\n"
+		"Loads a robot from a .rob or .urdf file. An empty robot is returned if\n"
+		"loading fails. \n"
 		""},
 	 { (char *)"WorldModel_loadRigidObject", _wrap_WorldModel_loadRigidObject, METH_VARARGS, (char *)"\n"
 		"WorldModel_loadRigidObject(WorldModel self, char const * fn) -> RigidObjectModel\n"
 		"\n"
 		"RigidObjectModel\n"
-		"WorldModel::loadRigidObject(const char *fn) \n"
+		"WorldModel::loadRigidObject(const char *fn)\n"
+		"\n"
+		"Loads a rigid object from a .obj or a mesh file. An empty rigid object\n"
+		"is returned if loading fails. \n"
 		""},
 	 { (char *)"WorldModel_loadTerrain", _wrap_WorldModel_loadTerrain, METH_VARARGS, (char *)"\n"
 		"WorldModel_loadTerrain(WorldModel self, char const * fn) -> TerrainModel\n"
 		"\n"
 		"TerrainModel\n"
-		"WorldModel::loadTerrain(const char *fn) \n"
+		"WorldModel::loadTerrain(const char *fn)\n"
+		"\n"
+		"Loads a rigid object from a mesh file. An empty terrain is returned if\n"
+		"loading fails. \n"
 		""},
 	 { (char *)"WorldModel_loadElement", _wrap_WorldModel_loadElement, METH_VARARGS, (char *)"\n"
 		"WorldModel_loadElement(WorldModel self, char const * fn) -> int\n"
 		"\n"
 		"int\n"
-		"WorldModel::loadElement(const char *fn) \n"
+		"WorldModel::loadElement(const char *fn)\n"
+		"\n"
+		"Loads some element from a file, automatically detecting its type.\n"
+		"Meshes are interpreted as terrains. The ID is returned, or -1 if\n"
+		"loading failed. \n"
 		""},
 	 { (char *)"WorldModel_getName", _wrap_WorldModel_getName, METH_VARARGS, (char *)"\n"
 		"WorldModel_getName(WorldModel self, int id) -> std::string\n"
 		"\n"
 		"std::string\n"
-		"WorldModel::getName(int id) \n"
+		"WorldModel::getName(int id)\n"
+		"\n"
+		"Retrieves a name for a given element ID. \n"
 		""},
 	 { (char *)"WorldModel_geometry", _wrap_WorldModel_geometry, METH_VARARGS, (char *)"\n"
 		"WorldModel_geometry(WorldModel self, int id) -> Geometry3D\n"
 		"\n"
 		"Geometry3D\n"
-		"WorldModel::geometry(int id) \n"
+		"WorldModel::geometry(int id)\n"
+		"\n"
+		"Retrieves a geometry for a given element ID. \n"
 		""},
 	 { (char *)"WorldModel_appearance", _wrap_WorldModel_appearance, METH_VARARGS, (char *)"\n"
 		"WorldModel_appearance(WorldModel self, int id) -> Appearance\n"
 		"\n"
 		"Appearance\n"
-		"WorldModel::appearance(int id) \n"
+		"WorldModel::appearance(int id)\n"
+		"\n"
+		"Retrieves an appearance for a given element ID. \n"
 		""},
 	 { (char *)"WorldModel_drawGL", _wrap_WorldModel_drawGL, METH_VARARGS, (char *)"\n"
 		"WorldModel_drawGL(WorldModel self)\n"
 		"\n"
 		"void WorldModel::drawGL()\n"
 		"\n"
+		"Draws the entire world. \n"
 		""},
 	 { (char *)"WorldModel_enableGeometryLoading", _wrap_WorldModel_enableGeometryLoading, METH_VARARGS, (char *)"\n"
 		"WorldModel_enableGeometryLoading(WorldModel self, bool enabled)\n"
 		"\n"
 		"void\n"
-		"WorldModel::enableGeometryLoading(bool enabled) \n"
+		"WorldModel::enableGeometryLoading(bool enabled)\n"
+		"\n"
+		"If geometry loading is set to false, then only the kinematics are\n"
+		"loaded from disk, and no geometry / visualization / collision\n"
+		"detection structures will be loaded. Useful for quick scripts that\n"
+		"just use kinematics / dynamics of a robot. \n"
 		""},
 	 { (char *)"WorldModel_index_set", _wrap_WorldModel_index_set, METH_VARARGS, (char *)"WorldModel_index_set(WorldModel self, int index)"},
 	 { (char *)"WorldModel_index_get", _wrap_WorldModel_index_get, METH_VARARGS, (char *)"WorldModel_index_get(WorldModel self) -> int"},
@@ -40671,7 +40908,7 @@ static PyMethodDef SwigMethods[] = {
 		"int IKObjective::link()\n"
 		"const\n"
 		"\n"
-		"The link that is constrained. \n"
+		"The index of the robot link that is constrained. \n"
 		""},
 	 { (char *)"IKObjective_destLink", _wrap_IKObjective_destLink, METH_VARARGS, (char *)"\n"
 		"IKObjective_destLink(IKObjective self) -> int\n"
@@ -40679,7 +40916,7 @@ static PyMethodDef SwigMethods[] = {
 		"int\n"
 		"IKObjective::destLink() const\n"
 		"\n"
-		"The destination link, or -1 if fixed to the world. \n"
+		"The index of the destination link, or -1 if fixed to the world. \n"
 		""},
 	 { (char *)"IKObjective_numPosDims", _wrap_IKObjective_numPosDims, METH_VARARGS, (char *)"\n"
 		"IKObjective_numPosDims(IKObjective self) -> int\n"
@@ -41582,6 +41819,15 @@ static PyMethodDef SwigMethods[] = {
 		"Simulator::contactForce(int aid, int bid, double out[3])\n"
 		"\n"
 		"Returns the contact force on object a at the last time step. \n"
+		""},
+	 { (char *)"Simulator_contactTorque", _wrap_Simulator_contactTorque, METH_VARARGS, (char *)"\n"
+		"Simulator_contactTorque(Simulator self, int aid, int bid)\n"
+		"\n"
+		"void\n"
+		"Simulator::contactTorque(int aid, int bid, double out[3])\n"
+		"\n"
+		"Returns the contact force on object a (about a's origin) at the last\n"
+		"time step. \n"
 		""},
 	 { (char *)"Simulator_hadContact", _wrap_Simulator_hadContact, METH_VARARGS, (char *)"\n"
 		"Simulator_hadContact(Simulator self, int aid, int bid) -> bool\n"

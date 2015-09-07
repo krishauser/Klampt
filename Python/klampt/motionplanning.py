@@ -217,8 +217,28 @@ def destroy():
     return _motionplanning.destroy()
 class CSpaceInterface(_object):
     """
-    A raw interface for a configuration space. The CSpace interface in
-    cspace.py is easier to use.
+    A raw interface for a configuration space. Note: the native Python
+    CSpace interface class in cspace.py is easier to use.
+
+    You can either set a single feasibility test function using
+    setFeasibility() or add several feasibility tests, all of which need
+    to be satisfied, using addFeasibilityTest(). In the latter case,
+    planners may be able to provide debugging statistics, solve Minimum
+    Constraint Removal problems, run faster by eliminating constraint
+    tests, etc.
+
+    Either setVisibility() or setVisibilityEpsilon() must be called to
+    define a visibility checker between two (feasible) configurations. In
+    the latter case, the path will be discretized at the resolution sent
+    to setVisibilityEpsilon. If you have special single-constraint
+    visibility tests, you can call that using addVisibilityTest (for
+    example, for convex constraints you can set it to the lambda function
+    that returns true regardless of its arguments).
+
+    Supported properties include "euclidean" (boolean), "metric"
+    (string), "geodesic" (boolean). These may be used by planners to
+    make planning faster or more accurate. For a more complete list see
+    KrisLibrary/planning/CSpace.h.
 
     C++ includes: motionplanning.h 
     """
@@ -264,7 +284,13 @@ class CSpaceInterface(_object):
 
 
     def addFeasibilityTest(self, name, pyFeas):
-        """addFeasibilityTest(CSpaceInterface self, char const * name, PyObject * pyFeas)"""
+        """
+        addFeasibilityTest(CSpaceInterface self, char const * name, PyObject * pyFeas)
+
+        void
+        CSpaceInterface::addFeasibilityTest(const char *name, PyObject
+        *pyFeas) 
+        """
         return _motionplanning.CSpaceInterface_addFeasibilityTest(self, name, pyFeas)
 
 
@@ -279,7 +305,13 @@ class CSpaceInterface(_object):
 
 
     def addVisibilityTest(self, name, pyVisible):
-        """addVisibilityTest(CSpaceInterface self, char const * name, PyObject * pyVisible)"""
+        """
+        addVisibilityTest(CSpaceInterface self, char const * name, PyObject * pyVisible)
+
+        void
+        CSpaceInterface::addVisibilityTest(const char *name, PyObject
+        *pyVisible) 
+        """
         return _motionplanning.CSpaceInterface_addVisibilityTest(self, name, pyVisible)
 
 
