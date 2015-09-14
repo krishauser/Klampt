@@ -103,10 +103,12 @@ bool RigidObject::Load(const char* fn)
       mass = f["mass"][0].AsDouble();
       f.erase("mass");
     }
+    bool hasCOM = false;
     if(f.count("com")==0) { com.setZero();  }
     else {
       if(!f.CheckSize("com",3)) return false;
       if(!f.CheckType("com",PrimitiveValue::Double)) return false;
+      hasCOM = true;
       com.set(f["com"][0].AsDouble(),f["com"][1].AsDouble(),f["com"][2].AsDouble());
       f.erase("com");
     }
@@ -155,7 +157,7 @@ bool RigidObject::Load(const char* fn)
       f.erase("kDamping");
     }
     if(f.count("autoMass")!=0) {
-      if(f.count("com")!=0) //com specified, compute inertia about given com
+      if(hasCOM) //com specified, compute inertia about given com
 	inertia = Inertia(geometry,com,mass);
       else
 	SetMassFromGeometry(mass);
