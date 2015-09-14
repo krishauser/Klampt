@@ -403,9 +403,13 @@ void MilestonePathController::Reset()
 {
   path.ramps.clear();
   pathParameter = 0;
+  /*
   //xcur = robot.q;
   dxcur.setZero();
   SetMilestone(xcur);
+  */
+  xcur.clear();
+  dxcur.clear();
   JointTrackingController::Reset();
 }
 

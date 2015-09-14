@@ -8,8 +8,28 @@
 // File: classCSpaceInterface.xml
 %feature("docstring") CSpaceInterface "
 
-A raw interface for a configuration space. The CSpace interface in
-cspace.py is easier to use.
+A raw interface for a configuration space. Note: the native Python
+CSpace interface class in cspace.py is easier to use.
+
+You can either set a single feasibility test function using
+setFeasibility() or add several feasibility tests, all of which need
+to be satisfied, using addFeasibilityTest(). In the latter case,
+planners may be able to provide debugging statistics, solve Minimum
+Constraint Removal problems, run faster by eliminating constraint
+tests, etc.
+
+Either setVisibility() or setVisibilityEpsilon() must be called to
+define a visibility checker between two (feasible) configurations. In
+the latter case, the path will be discretized at the resolution sent
+to setVisibilityEpsilon. If you have special single-constraint
+visibility tests, you can call that using addVisibilityTest (for
+example, for convex constraints you can set it to the lambda function
+that returns true regardless of its arguments).
+
+Supported properties include \"euclidean\" (boolean), \"metric\"
+(string), \"geodesic\" (boolean). These may be used by planners to
+make planning faster or more accurate. For a more complete list see
+KrisLibrary/planning/CSpace.h.
 
 C++ includes: motionplanning.h ";
 
@@ -25,8 +45,16 @@ CSpaceInterface::destroy() ";
 %feature("docstring")  CSpaceInterface::setFeasibility "void
 CSpaceInterface::setFeasibility(PyObject *pyFeas) ";
 
+%feature("docstring")  CSpaceInterface::addFeasibilityTest "void
+CSpaceInterface::addFeasibilityTest(const char *name, PyObject
+*pyFeas) ";
+
 %feature("docstring")  CSpaceInterface::setVisibility "void
 CSpaceInterface::setVisibility(PyObject *pyVisible) ";
+
+%feature("docstring")  CSpaceInterface::addVisibilityTest "void
+CSpaceInterface::addVisibilityTest(const char *name, PyObject
+*pyVisible) ";
 
 %feature("docstring")  CSpaceInterface::setVisibilityEpsilon "void
 CSpaceInterface::setVisibilityEpsilon(double eps) ";
@@ -176,10 +204,20 @@ A three-D geometry. Can either be a reference to a world item's
 geometry, in which case modifiers change the world item's geometry, or
 it can be a standalone geometry.
 
+If you want to set a world item's geometry to be equal to a standalone
+geometry, use the set(rhs) function rather than the assignment (=)
+operator.
+
 Modifiers include any setX() functions, translate(), and transform().
 
 Proximity queries include collides(), withinDistance(), distance(),
 and rayCast().
+
+Each object also has a \"collision margin\" which may virtually fatten
+the object, as far as proximity queries are concerned. This is useful
+for setting collision avoidance margins in motion planning. By default
+it is zero. (Note that this is NOT the same thing as simulation body
+collision padding!)
 
 C++ includes: geometry.h ";
 
@@ -210,6 +248,10 @@ Frees the data associated with this geometry, if standalone. ";
 
 Returns the type of geometry: TriangleMesh, PointCloud, or
 GeometricPrimitive ";
+
+%feature("docstring")  Geometry3D::empty "bool Geometry3D::empty()
+
+Returns true if this has no contents. ";
 
 %feature("docstring")  Geometry3D::getTriangleMesh "TriangleMesh
 Geometry3D::getTriangleMesh()
@@ -263,7 +305,9 @@ Geometry3D::setCollisionMargin(double margin) ";
 Geometry3D::getCollisionMargin() ";
 
 %feature("docstring")  Geometry3D::getBB "void
-Geometry3D::getBB(double out[3], double out2[3]) ";
+Geometry3D::getBB(double out[3], double out2[3])
+
+Returns the axis-aligned bounding box of the object. ";
 
 %feature("docstring")  Geometry3D::collides "bool
 Geometry3D::collides(const Geometry3D &other) ";
@@ -308,12 +352,12 @@ C++ includes: robotik.h ";
 %feature("docstring")  IKObjective::link "int IKObjective::link()
 const
 
-The link that is constrained. ";
+The index of the robot link that is constrained. ";
 
 %feature("docstring")  IKObjective::destLink "int
 IKObjective::destLink() const
 
-The destination link, or -1 if fixed to the world. ";
+The index of the destination link, or -1 if fixed to the world. ";
 
 %feature("docstring")  IKObjective::numPosDims "int
 IKObjective::numPosDims() const
@@ -424,6 +468,20 @@ Sets the active degrees of freedom. ";
 IKSolver::getActiveDofs(std::vector< int > &out)
 
 Gets the active degrees of freedom. ";
+
+%feature("docstring")  IKSolver::setJointLimits "void
+IKSolver::setJointLimits(const std::vector< double > &qmin, const
+std::vector< double > &qmax)
+
+Sets limits on the robot's configuration. If empty, this turns off
+joint limits. ";
+
+%feature("docstring")  IKSolver::getJointLimits "void
+IKSolver::getJointLimits(std::vector< double > &out, std::vector<
+double > &out2)
+
+Gets the limits on the robot's configuration (by default this is the
+robot's joint limits. ";
 
 %feature("docstring")  IKSolver::getResidual "void
 IKSolver::getResidual(std::vector< double > &out)
@@ -580,11 +638,15 @@ PlannerInterface::dump(const char *fn) ";
 // File: structPointCloud.xml
 %feature("docstring") PointCloud "
 
-A 3D point cloud class. vertices is a list of vertices, given as a
-list [x1, y1, z1, x2, y2, ... zn] properties is a list of vertex
-properties, given as a list [p11, p21, ..., pk1, p12, p22, ..., pk2,
-... , pn1, pn2, ..., pn2] where each vertex has k properties. The name
-of each property is given by the propertyNames member.
+A 3D point cloud class.
+
+Attributes: vertices: a list of vertices, given as a list [x1, y1, z1,
+x2, y2, ... zn]
+
+properties: a list of vertex properties, given as a list [p11, p21,
+..., pk1, p12, p22, ..., pk2, ... , pn1, pn2, ..., pn2] where each
+vertex has k properties. The name of each property is given by the
+propertyNames member.
 
 C++ includes: geometry.h ";
 
@@ -727,7 +789,10 @@ C++ includes: robotmodel.h ";
 
 %feature("docstring")  RobotModel::RobotModel "RobotModel::RobotModel() ";
 
-%feature("docstring")  RobotModel::getID "int RobotModel::getID() ";
+%feature("docstring")  RobotModel::getID "int RobotModel::getID()
+
+Returns the ID of the robot in its world (Note: not the same as the
+robot index) ";
 
 %feature("docstring")  RobotModel::getName "const char *
 RobotModel::getName() ";
@@ -735,20 +800,44 @@ RobotModel::getName() ";
 %feature("docstring")  RobotModel::numLinks "int
 RobotModel::numLinks() ";
 
-%feature("docstring")  RobotModel::getLink "RobotModelLink
-RobotModel::getLink(int index) ";
+%feature("docstring")  RobotModel::link "RobotModelLink
+RobotModel::link(int index)
+
+Returns a reference to the indexed link. ";
+
+%feature("docstring")  RobotModel::link "RobotModelLink
+RobotModel::link(const char *name)
+
+Returns a reference to the named link. ";
 
 %feature("docstring")  RobotModel::getLink "RobotModelLink
-RobotModel::getLink(const char *name) ";
+RobotModel::getLink(int index)
+
+Old-style: will be deprecated. ";
+
+%feature("docstring")  RobotModel::getLink "RobotModelLink
+RobotModel::getLink(const char *name)
+
+Old-style: will be deprecated. ";
 
 %feature("docstring")  RobotModel::numDrivers "int
 RobotModel::numDrivers() ";
 
-%feature("docstring")  RobotModel::getDriver "RobotModelDriver
-RobotModel::getDriver(int index) ";
+%feature("docstring")  RobotModel::driver "RobotModelDriver
+RobotModel::driver(int index) ";
+
+%feature("docstring")  RobotModel::driver "RobotModelDriver
+RobotModel::driver(const char *name) ";
 
 %feature("docstring")  RobotModel::getDriver "RobotModelDriver
-RobotModel::getDriver(const char *name) ";
+RobotModel::getDriver(int index)
+
+Old-style: will be deprecated. ";
+
+%feature("docstring")  RobotModel::getDriver "RobotModelDriver
+RobotModel::getDriver(const char *name)
+
+Old-style: will be deprecated. ";
 
 %feature("docstring")  RobotModel::getConfig "void
 RobotModel::getConfig(std::vector< double > &out) ";
@@ -790,59 +879,102 @@ RobotModel::getTorqueLimits(std::vector< double > &out) ";
 RobotModel::setTorqueLimits(const std::vector< double > &tmax) ";
 
 %feature("docstring")  RobotModel::getCom "void
-RobotModel::getCom(double out[3]) ";
+RobotModel::getCom(double out[3])
+
+Returns the 3D center of mass at the current config. ";
 
 %feature("docstring")  RobotModel::getComJacobian "void
 RobotModel::getComJacobian(std::vector< std::vector< double > > &out)
-";
+
+Returns the 3xn Jacobian matrix of the current center of mass. ";
 
 %feature("docstring")  RobotModel::getMassMatrix "void
 RobotModel::getMassMatrix(std::vector< std::vector< double > > &out)
-";
+
+Returns the nxn mass matrix B(q) ";
 
 %feature("docstring")  RobotModel::getMassMatrixInv "void
 RobotModel::getMassMatrixInv(std::vector< std::vector< double > >
-&out) ";
+&out)
+
+Returns the inverse of the nxn mass matrix B(q)^-1 (faster than
+inverting result of getMassMatrix) ";
 
 %feature("docstring")  RobotModel::getCoriolisForceMatrix "void
 RobotModel::getCoriolisForceMatrix(std::vector< std::vector< double >
-> &out) ";
+> &out)
+
+Returns the Coriolis force matrix C(q,dq) for current config and
+velocity. ";
 
 %feature("docstring")  RobotModel::getCoriolisForces "void
-RobotModel::getCoriolisForces(std::vector< double > &out) ";
+RobotModel::getCoriolisForces(std::vector< double > &out)
+
+Returns the Coriolis forces C(q,dq)*dq for current config and velocity
+(faster than computing matrix and doing product) ";
 
 %feature("docstring")  RobotModel::getGravityForces "void
 RobotModel::getGravityForces(const double g[3], std::vector< double >
-&out) ";
+&out)
+
+Returns the gravity force vector G(q) for the given workspace gravity
+vector g (usually (0,0,-9.8)) ";
 
 %feature("docstring")  RobotModel::torquesFromAccel "void
 RobotModel::torquesFromAccel(const std::vector< double > &ddq,
-std::vector< double > &out) ";
+std::vector< double > &out)
+
+Computes the inverse dynamics (using Recursive Newton Euler solver) ";
 
 %feature("docstring")  RobotModel::accelFromTorques "void
 RobotModel::accelFromTorques(const std::vector< double > &t,
-std::vector< double > &out) ";
+std::vector< double > &out)
+
+Computes the foward dynamics (using Recursive Newton Euler solver) ";
 
 %feature("docstring")  RobotModel::interpolate "void
 RobotModel::interpolate(const std::vector< double > &a, const
-std::vector< double > &b, double u, std::vector< double > &out) ";
+std::vector< double > &b, double u, std::vector< double > &out)
+
+Interpolates smoothly between two configurations, properly taking into
+account nonstandard joints. ";
 
 %feature("docstring")  RobotModel::distance "double
 RobotModel::distance(const std::vector< double > &a, const
-std::vector< double > &b) ";
+std::vector< double > &b)
+
+Computes a distance between two configurations, properly taking into
+account nonstandard joints. ";
 
 %feature("docstring")  RobotModel::interpolate_deriv "void
 RobotModel::interpolate_deriv(const std::vector< double > &a, const
-std::vector< double > &b, std::vector< double > &out) ";
+std::vector< double > &b, std::vector< double > &out)
+
+Returns the configuration derivative at a as you interpolate toward b
+at unit speed. ";
 
 %feature("docstring")  RobotModel::selfCollisionEnabled "bool
-RobotModel::selfCollisionEnabled(int link1, int link2) ";
+RobotModel::selfCollisionEnabled(int link1, int link2)
+
+Queries whether self collisions between two links is enabled. ";
 
 %feature("docstring")  RobotModel::enableSelfCollision "void
-RobotModel::enableSelfCollision(int link1, int link2, bool value) ";
+RobotModel::enableSelfCollision(int link1, int link2, bool value)
+
+Enables/disables self collisions between two links (depending on
+value) ";
+
+%feature("docstring")  RobotModel::selfCollides "bool
+RobotModel::selfCollides()
+
+Returns true if the robot is in self collision (faster than manual
+testing) ";
 
 %feature("docstring")  RobotModel::drawGL "void
-RobotModel::drawGL(bool keepAppearance=true) ";
+RobotModel::drawGL(bool keepAppearance=true)
+
+Draws the robot geometry. If keepAppearance=true, the current
+appearance is honored. Otherwise, only the raw geometry is drawn. ";
 
 
 // File: classRobotModelDriver.xml
@@ -857,8 +989,15 @@ C++ includes: robotmodel.h ";
 %feature("docstring")  RobotModelDriver::getName "const char *
 RobotModelDriver::getName() ";
 
+%feature("docstring")  RobotModelDriver::robot "RobotModel
+RobotModelDriver::robot()
+
+Returns a reference to the driver's robot. ";
+
 %feature("docstring")  RobotModelDriver::getRobot "RobotModel
-RobotModelDriver::getRobot() ";
+RobotModelDriver::getRobot()
+
+Old-style: will be deprecated. ";
 
 %feature("docstring")  RobotModelDriver::getType "const char *
 RobotModelDriver::getType()
@@ -910,42 +1049,65 @@ Gets the current driver velocity value from the robot's velocity. ";
 
 A reference to a link of a RobotModel.
 
-Note that the mass is given local to the link frame, not about the
-COM.
-
 C++ includes: robotmodel.h ";
 
 %feature("docstring")  RobotModelLink::RobotModelLink "RobotModelLink::RobotModelLink() ";
 
 %feature("docstring")  RobotModelLink::getID "int
-RobotModelLink::getID() ";
+RobotModelLink::getID()
+
+Returns the ID of the robot link in its world (Note: not the same as
+getIndex()) ";
 
 %feature("docstring")  RobotModelLink::getName "const char *
 RobotModelLink::getName() ";
 
+%feature("docstring")  RobotModelLink::robot "RobotModel
+RobotModelLink::robot()
+
+Returns a reference to the link's robot. ";
+
 %feature("docstring")  RobotModelLink::getRobot "RobotModel
-RobotModelLink::getRobot() ";
+RobotModelLink::getRobot()
+
+Old-style: will be deprecated. ";
 
 %feature("docstring")  RobotModelLink::getIndex "int
-RobotModelLink::getIndex() ";
+RobotModelLink::getIndex()
+
+Returns the index of the link (on its robot). ";
 
 %feature("docstring")  RobotModelLink::getParent "int
-RobotModelLink::getParent() ";
+RobotModelLink::getParent()
+
+Returns the index of the link's parent (on its robot). ";
 
 %feature("docstring")  RobotModelLink::setParent "void
-RobotModelLink::setParent(int p) ";
+RobotModelLink::setParent(int p)
+
+Sets the index of the link's parent (on its robot). ";
 
 %feature("docstring")  RobotModelLink::geometry "Geometry3D
-RobotModelLink::geometry() ";
+RobotModelLink::geometry()
+
+Returns a reference to the link's geometry. ";
 
 %feature("docstring")  RobotModelLink::appearance "Appearance
-RobotModelLink::appearance() ";
+RobotModelLink::appearance()
+
+Returns a reference to the link's appearance. ";
 
 %feature("docstring")  RobotModelLink::getMass "Mass
-RobotModelLink::getMass() ";
+RobotModelLink::getMass()
+
+Retrieves the inertial properties of the link. (Note that the Mass is
+given with origin at the link frame, not about the COM.) ";
 
 %feature("docstring")  RobotModelLink::setMass "void
-RobotModelLink::setMass(const Mass &mass) ";
+RobotModelLink::setMass(const Mass &mass)
+
+Sets the inertial proerties of the link. (Note that the Mass is given
+with origin at the link frame, not about the COM.) ";
 
 %feature("docstring")  RobotModelLink::getParentTransform "void
 RobotModelLink::getParentTransform(double out[9], double out2[3])
@@ -959,7 +1121,7 @@ t[3]) ";
 %feature("docstring")  RobotModelLink::getAxis "void
 RobotModelLink::getAxis(double out[3])
 
-Gets the local rotational axis. ";
+Gets the local rotational / translational axis. ";
 
 %feature("docstring")  RobotModelLink::setAxis "void
 RobotModelLink::setAxis(const double axis[3]) ";
@@ -1038,10 +1200,18 @@ Returns the world velocity of the point given the robot's current
 velocity. ";
 
 %feature("docstring")  RobotModelLink::drawLocalGL "void
-RobotModelLink::drawLocalGL(bool keepAppearance=true) ";
+RobotModelLink::drawLocalGL(bool keepAppearance=true)
+
+Draws the link's geometry in its local frame. If keepAppearance=true,
+the current Appearance is honored. Otherwise, just the geometry is
+drawn. ";
 
 %feature("docstring")  RobotModelLink::drawWorldGL "void
-RobotModelLink::drawWorldGL(bool keepAppearance=true) ";
+RobotModelLink::drawWorldGL(bool keepAppearance=true)
+
+Draws the link's geometry in the world frame. If keepAppearance=true,
+the current Appearance is honored. Otherwise, just the geometry is
+drawn. ";
 
 
 // File: classSimBody.xml
@@ -1182,17 +1352,27 @@ SimRobotController::getSensedVelocity(std::vector< double > &out)
 
 Returns the current \"sensed\" velocity from the simulator. ";
 
-%feature("docstring")  SimRobotController::getSensor "SimRobotSensor
-SimRobotController::getSensor(int index)
+%feature("docstring")  SimRobotController::sensor "SimRobotSensor
+SimRobotController::sensor(int index)
 
 Returns a sensor by index. If out of bounds, a null sensor is
 returned. ";
 
-%feature("docstring")  SimRobotController::getNamedSensor "SimRobotSensor SimRobotController::getNamedSensor(const std::string
-&name)
+%feature("docstring")  SimRobotController::sensor "SimRobotSensor
+SimRobotController::sensor(const char *name)
 
 Returns a sensor by name. If unavailable, a null sensor is returned.
 ";
+
+%feature("docstring")  SimRobotController::getSensor "SimRobotSensor
+SimRobotController::getSensor(int index)
+
+Old-style: will be deprecated. ";
+
+%feature("docstring")  SimRobotController::getNamedSensor "SimRobotSensor SimRobotController::getNamedSensor(const std::string
+&name)
+
+Old-style: will be deprecated. ";
 
 %feature("docstring")  SimRobotController::commands "std::vector<
 std::string > SimRobotController::commands()
@@ -1373,7 +1553,7 @@ Resets to the initial state (same as setState(initialState)) ";
 %feature("docstring")  Simulator::getWorld "WorldModel
 Simulator::getWorld() const
 
-Returns the associated world model. ";
+Old-style: will be deprecated. ";
 
 %feature("docstring")  Simulator::getState "string
 Simulator::getState()
@@ -1468,6 +1648,12 @@ Simulator::contactForce(int aid, int bid, double out[3])
 
 Returns the contact force on object a at the last time step. ";
 
+%feature("docstring")  Simulator::contactTorque "void
+Simulator::contactTorque(int aid, int bid, double out[3])
+
+Returns the contact force on object a (about a's origin) at the last
+time step. ";
+
 %feature("docstring")  Simulator::hadContact "bool
 Simulator::hadContact(int aid, int bid)
 
@@ -1486,22 +1672,47 @@ Simulator::meanContactForce(int aid, int bid, double out[3])
 Returns the average contact force on object a over the last simulate()
 call ";
 
-%feature("docstring")  Simulator::getController "SimRobotController
-Simulator::getController(int robot)
+%feature("docstring")  Simulator::controller "SimRobotController
+Simulator::controller(int robot)
 
 Returns a controller for the indicated robot. ";
 
+%feature("docstring")  Simulator::controller "SimRobotController
+Simulator::controller(const RobotModel &robot) ";
+
+%feature("docstring")  Simulator::body "SimBody Simulator::body(const
+RobotModelLink &link) ";
+
+%feature("docstring")  Simulator::body "SimBody Simulator::body(const
+RigidObjectModel &object) ";
+
+%feature("docstring")  Simulator::body "SimBody Simulator::body(const
+TerrainModel &terrain) ";
+
 %feature("docstring")  Simulator::getController "SimRobotController
-Simulator::getController(const RobotModel &robot) ";
+Simulator::getController(int robot)
+
+Old-style: will be deprecated. ";
+
+%feature("docstring")  Simulator::getController "SimRobotController
+Simulator::getController(const RobotModel &robot)
+
+Old-style: will be deprecated. ";
 
 %feature("docstring")  Simulator::getBody "SimBody
-Simulator::getBody(const RobotModelLink &link) ";
+Simulator::getBody(const RobotModelLink &link)
+
+Old-style: will be deprecated. ";
 
 %feature("docstring")  Simulator::getBody "SimBody
-Simulator::getBody(const RigidObjectModel &object) ";
+Simulator::getBody(const RigidObjectModel &object)
+
+Old-style: will be deprecated. ";
 
 %feature("docstring")  Simulator::getBody "SimBody
-Simulator::getBody(const TerrainModel &terrain) ";
+Simulator::getBody(const TerrainModel &terrain)
+
+Old-style: will be deprecated. ";
 
 %feature("docstring")  Simulator::getJointForces "void
 Simulator::getJointForces(const RobotModelLink &link, double out[6])
@@ -1555,8 +1766,10 @@ TerrainModel::drawGL(bool keepAppearance=true) ";
 
 A 3D indexed triangle mesh class.
 
-vertices is a list of vertices, given as a list [x1, y1, z1, x2, y2,
-...] indices is a list of triangle vertices given as indices into the
+Attributes: vertices: a list of vertices, given as a flattened
+coordinate list [x1, y1, z1, x2, y2, ...]
+
+indices: a list of triangle vertices given as indices into the
 vertices list, i.e., [a1,b1,c2, a2,b2,c2, ...]
 
 C++ includes: geometry.h ";
@@ -1614,7 +1827,9 @@ C++ includes: robotmodel.h ";
 %feature("docstring")  WorldModel::~WorldModel "WorldModel::~WorldModel() ";
 
 %feature("docstring")  WorldModel::readFile "bool
-WorldModel::readFile(const char *fn) ";
+WorldModel::readFile(const char *fn)
+
+Reads from a world XML file. ";
 
 %feature("docstring")  WorldModel::numRobots "int
 WorldModel::numRobots() ";
@@ -1656,40 +1871,72 @@ WorldModel::terrain(int index) ";
 WorldModel::terrain(const char *name) ";
 
 %feature("docstring")  WorldModel::makeRobot "RobotModel
-WorldModel::makeRobot(const char *name) ";
+WorldModel::makeRobot(const char *name)
+
+Creates a new empty robot. (Not terribly useful now since you can't
+resize the number of links yet) ";
 
 %feature("docstring")  WorldModel::makeRigidObject "RigidObjectModel
-WorldModel::makeRigidObject(const char *name) ";
+WorldModel::makeRigidObject(const char *name)
+
+Creates a new empty rigid object. ";
 
 %feature("docstring")  WorldModel::makeTerrain "TerrainModel
-WorldModel::makeTerrain(const char *name) ";
+WorldModel::makeTerrain(const char *name)
+
+Creates a new empty terrain. ";
 
 %feature("docstring")  WorldModel::loadRobot "RobotModel
-WorldModel::loadRobot(const char *fn) ";
+WorldModel::loadRobot(const char *fn)
+
+Loads a robot from a .rob or .urdf file. An empty robot is returned if
+loading fails. ";
 
 %feature("docstring")  WorldModel::loadRigidObject "RigidObjectModel
-WorldModel::loadRigidObject(const char *fn) ";
+WorldModel::loadRigidObject(const char *fn)
+
+Loads a rigid object from a .obj or a mesh file. An empty rigid object
+is returned if loading fails. ";
 
 %feature("docstring")  WorldModel::loadTerrain "TerrainModel
-WorldModel::loadTerrain(const char *fn) ";
+WorldModel::loadTerrain(const char *fn)
+
+Loads a rigid object from a mesh file. An empty terrain is returned if
+loading fails. ";
 
 %feature("docstring")  WorldModel::loadElement "int
-WorldModel::loadElement(const char *fn) ";
+WorldModel::loadElement(const char *fn)
+
+Loads some element from a file, automatically detecting its type.
+Meshes are interpreted as terrains. The ID is returned, or -1 if
+loading failed. ";
 
 %feature("docstring")  WorldModel::getName "std::string
-WorldModel::getName(int id) ";
+WorldModel::getName(int id)
+
+Retrieves a name for a given element ID. ";
 
 %feature("docstring")  WorldModel::geometry "Geometry3D
-WorldModel::geometry(int id) ";
+WorldModel::geometry(int id)
+
+Retrieves a geometry for a given element ID. ";
 
 %feature("docstring")  WorldModel::appearance "Appearance
-WorldModel::appearance(int id) ";
+WorldModel::appearance(int id)
+
+Retrieves an appearance for a given element ID. ";
 
 %feature("docstring")  WorldModel::drawGL "void WorldModel::drawGL()
-";
+
+Draws the entire world. ";
 
 %feature("docstring")  WorldModel::enableGeometryLoading "void
-WorldModel::enableGeometryLoading(bool enabled) ";
+WorldModel::enableGeometryLoading(bool enabled)
+
+If geometry loading is set to false, then only the kinematics are
+loaded from disk, and no geometry / visualization / collision
+detection structures will be loaded. Useful for quick scripts that
+just use kinematics / dynamics of a robot. ";
 
 
 // File: namespacestd.xml

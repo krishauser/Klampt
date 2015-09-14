@@ -158,7 +158,7 @@ class FreeBaseRobotMotionModel(MotionModel):
             Jfs = []
             Jas = []
             for link in self.linksInContact:
-                Jl = np.array(self.robot.getLink(link).getJacobian((0,0,0)))
+                Jl = np.array(self.robot.link(link).getJacobian((0,0,0)))
                 Jfs.append(Jl[:,0:6])
                 Jas.append(Jl[:,6:])
             Jf = np.vstack(Jfs)
@@ -497,7 +497,7 @@ class DebugMotionModelController(BaseController):
             print "Motion model error:",np.linalg.norm(self.dqpredlast - np.array(dq))
             (v,i) = max(zip(np.abs(self.dqpredlast - np.array(dq)).tolist(),range(len(dq))))
             print "  Max error:",v,"at",i,
-            if self.robot!=None: print self.robot.getLink(i).getName()
+            if self.robot!=None: print self.robot.link(i).getName()
             else: print
             print "  Command:",self.ulast[i],"Predicted:",self.dqpredlast[i],"Actual:",dq[i]
             print "  pred:",self.Alast[i,i],"*u +",self.blast[i]

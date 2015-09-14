@@ -37,8 +37,9 @@ def toGlutModifiers(modifiers):
     return res
 
 class GLProgram(QGLWidget):
-    """A basic OpenGL program using GLUT.  Set up your window parameters,
-    then call run() to start the GLUT main loop.
+    """A basic OpenGL program using Qt.  Set up your window parameters,
+    then call run() to start the Qt main loop.  This function can also be
+    passed a main window / application as a parent.
 
     Attributes:
         - name: title of the window (only has an effect before calling
@@ -57,10 +58,15 @@ class GLProgram(QGLWidget):
         self.modifiers = 0
         #mouse state information
         self.lastx,self.lasty = None,None
+        self.initialized = False
+        self.refreshed = False
 
-    def initWindow(self,parent=None):
+    def initWindow(self,parent=None,shared=None):
         """ Open a window and initialize """
-        QGLWidget.__init__(self,parent)
+        if self.initialized:
+            raw_input("initWindow called twice... this may invalidate textures and display lists... are you sure you want to continue?")
+        QGLWidget.__init__(self,parent,shared)
+        self.setFocusPolicy(Qt.StrongFocus)
         self.setWindowTitle(self.name)
         self.idleTimer = QTimer()
         self.idleTimer.timeout.connect(lambda:self.idlefunc())
@@ -75,6 +81,10 @@ class GLProgram(QGLWidget):
         self.setMouseTracking(True)
         #init function
         self.initialize()
+        self.initialized = True
+
+    def sizeHint(self):
+        return QSize(self.width,self.height)
 
     def run(self,parent=None):
         """Starts the main loop"""
@@ -95,12 +105,20 @@ class GLProgram(QGLWidget):
         self.idleTimer.stop()
 
     def refresh(self):
-        QTimer.singleShot(0,lambda:self.updateGL());
+        if not self.refreshed:
+            self.refreshed = False
+            #TODO: resolve whether it's better to call updateGL here or to schedule
+            # a timer event
+            self.updateGL()
+            #QTimer.singleShot(0,lambda:self.updateGL());
 
     #QtGLWidget bindings
     def initializeGL(self): return self.initialize()
     def resizeGL(self,w,h): return self.reshapefunc(w,h)
-    def paintGL(self) : return self.displayfunc()
+    def paintGL(self) :
+        self.refreshed = False
+        res = self.displayfunc()
+        return res
     #QWidget bindings
     def mouseMoveEvent(self,e):
         x,y = e.pos().x(),e.pos().y()
@@ -327,7 +345,7 @@ class GLNavigationProgram(GLProgram):
                 self.camera.dist *= math.exp(dy*0.01)
             else:
                 self.camera.rot[2] += float(dx)*0.01
-                self.camera.rot[1] += float(dy)*0.01        
+                self.camera.rot[1] += float(dy)*0.01
         self.refresh()
     
     def mousefunc(self,button,state,x,y):
@@ -374,4 +392,52 @@ class GLRealtimeProgram(GLNavigationProgram):
         pass
 
 
+class GLPluginProgram(GLRealtimeProgram):
+    """This base class should be used with a GLPluginBase object to handle the
+    GUI functionality (see glcommon.py.  Call setPlugin() on this object to set
+    the currently used plugin."""
+    def __init__(self,name="GLWidget"):
+        GLRealtimeProgram.__init__(self,name)
+        self.iface = None
+    def setPlugin(self,iface):
+        if self.iface:
+            self.iface.widget = None
+        self.iface = iface
+        if iface:
+            iface.widget = self
+            iface.reshapefunc(self.width,self.height)
+        self.refresh()
+    def initialize(self):
+        if self.iface: self.iface.initialize()
+        GLRealtimeProgram.initialize(self)
+    def reshapefunc(self,w,h):
+        if self.iface==None or not self.iface.reshapefunc(w,h):
+            GLRealtimeProgram.reshapefunc(self,w,h)
+    def keyboardfunc(self,c,x,y):
+        if self.iface==None or not self.iface.keyboardfunc(c,x,y):
+            GLRealtimeProgram.keyboardfunc(self,c,x,y)
+    def keyboardupfunc(self,c,x,y):
+        if self.iface==None or not self.iface.keyboardupfunc(c,x,y):
+            GLRealtimeProgram.keyboardupfunc(self,c,x,y)
+    def specialfunc(self,c,x,y):
+        if self.iface==None or not self.iface.specialfunc(c,x,y):
+            GLRealtimeProgram.specialfunc(self,c,x,y)
+    def specialupfunc(self,c,x,y):
+        if self.iface==None or not self.iface.specialupfunc(c,x,y):
+            GLRealtimeProgram.specialupfunc(self,c,x,y)
+    def motionfunc(self,x,y,dx,dy):
+        if self.iface==None or not self.iface.motionfunc(x,y,dx,dy):
+            GLRealtimeProgram.motionfunc(self,x,y,dx,dy)
+    def mousefunc(self,button,state,x,y):
+        if self.iface==None or not self.iface.mousefunc(button,state,x,y):
+            GLRealtimeProgram.mousefunc(self,button,state,x,y)
+    def idlefunc(self):
+        if self.iface!=None: self.iface.idlefunc()
+        GLRealtimeProgram.idlefunc(self)
+    def display(self):
+        if self.iface!=None:
+            self.iface.display()
+    def display_screen(self):
+        if self.iface!=None:
+            self.iface.display_screen()
 

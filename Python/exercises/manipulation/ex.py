@@ -166,11 +166,11 @@ class GLTransitPlanProgram(GLRealtimeProgram):
         glDisable(GL_DEPTH_TEST)
         glBegin(GL_POINTS)
         glColor3f(0,1,0)
-        glVertex3fv(se3.apply(self.world.robot(0).getLink(lh.link).getTransform(),lh.localPosition1))
-        glVertex3fv(se3.apply(self.world.robot(0).getLink(rh.link).getTransform(),rh.localPosition1))
+        glVertex3fv(se3.apply(self.world.robot(0).link(lh.link).getTransform(),lh.localPosition1))
+        glVertex3fv(se3.apply(self.world.robot(0).link(rh.link).getTransform(),rh.localPosition1))
         glColor3f(0,0,1)
-        glVertex3fv(se3.apply(self.world.robot(0).getLink(lh.link).getTransform(),lh.localPosition2))
-        glVertex3fv(se3.apply(self.world.robot(0).getLink(rh.link).getTransform(),rh.localPosition2))
+        glVertex3fv(se3.apply(self.world.robot(0).link(lh.link).getTransform(),lh.localPosition2))
+        glVertex3fv(se3.apply(self.world.robot(0).link(rh.link).getTransform(),rh.localPosition2))
         glColor3f(1,0,0)
         glVertex3fv(self.world.rigidObject(0).getTransform()[1])
         glEnd()
@@ -218,10 +218,10 @@ def graspedObjectTransform(robot,hand,qrobot0,Tobj0,qrobot):
     returns the object transformation corresponding to new configuration
     qrobot assuming the object is rigidly attached to the hand"""
     robot.setConfig(qrobot0)
-    Thand0 = robot.getLink(hand.link).getTransform()
+    Thand0 = robot.link(hand.link).getTransform()
     Tgrasp = se3.mul(se3.inv(Thand0),Tobj0)
     robot.setConfig(qrobot)
-    Thand = robot.getLink(hand.link).getTransform()
+    Thand = robot.link(hand.link).getTransform()
     return se3.mul(Thand,Tgrasp)
 
 
@@ -233,7 +233,7 @@ class TransferCSpace(CSpace):
         self.hand = hand
         self.object = object
         #setup initial object-robot transform
-        Thand0 = self.robot.getLink(hand.link).getTransform()
+        Thand0 = self.robot.link(hand.link).getTransform()
         Tobj0 = object.getTransform()
         self.Tgrasp = se3.mul(se3.inv(Thand0),Tobj0)
         #initial whole-body configuratoin
@@ -250,7 +250,7 @@ class TransferCSpace(CSpace):
         for i,xi in zip(self.hand.armIndices,x):
             q[i] = xi
         self.robot.setConfig(q)
-        Thand = self.robot.getLink(self.hand.link).getTransform()
+        Thand = self.robot.link(self.hand.link).getTransform()
         return se3.mul(Thand,self.Tgrasp)
 
     def feasible(self,x):

@@ -70,6 +70,7 @@ void WorldPlannerSettings::InitializeDefault(RobotWorld& world)
     robotSettings[i].worldBounds = bounds;
     //1cm or 0.57 degrees movement allowed between checked points
     robotSettings[i].collisionEpsilon = 0.01;
+
     robotSettings[i].distanceWeights.clear();
     robotSettings[i].worldBounds = bounds;
     robotSettings[i].contactEpsilon = 0.001;
@@ -152,6 +153,123 @@ bool WorldPlannerSettings::CheckCollision(RobotWorld& world,int id1,int id2,Real
     }
     return false;
   }
+}
+
+void GetGeometries(RobotWorld& world,const vector<int>& ids,vector<Geometry::AnyCollisionGeometry3D*>& geoms,vector<int>& activeids)
+{
+  geoms.reserve(ids.size());
+  activeids.reserve(ids.size());
+  for(size_t i=0;i<ids.size();i++) {
+    int robotindex = world.IsRobot(ids[i]);;
+    if(robotindex >=0) {
+      //crud, have to expand
+      Robot* robot = world.robots[robotindex].robot;
+      for(size_t j=0;j<robot->links.size();j++) {
+	Geometry::AnyCollisionGeometry3D* g=&robot->geometry[j];
+	if(!g->Empty()) {
+	  geoms.push_back(g);
+	  activeids.push_back(world.RobotLinkID(robotindex,j));
+	}
+      }
+    }
+    else {
+      Geometry::AnyCollisionGeometry3D* g=&world.GetGeometry(ids[i]);
+      if(!g->Empty()) {
+	geoms.push_back(g);
+	activeids.push_back(ids[i]);
+      }
+    }
+  }
+}
+
+pair<int,int> WorldPlannerSettings::CheckCollision(RobotWorld& world,const vector<int>& ids,Real tol)
+{
+  //first, get all the geometries
+  vector<Geometry::AnyCollisionGeometry3D*> geoms;
+  vector<int> activeids;
+  GetGeometries(world,ids,geoms,activeids);
+
+  Vector3 d(tol*0.5); //adjustment
+  vector<AABB3D> bbs(geoms.size());
+  for(size_t i=0;i<geoms.size();i++) {
+    bbs[i]=geoms[i]->GetAABB();
+    bbs[i].bmin -= d;
+    bbs[i].bmax += d;
+  }
+
+  for(size_t i=0;i<activeids.size();i++) {
+    for(size_t j=i+1;j<activeids.size();j++) {
+      if(!collisionEnabled(activeids[i],activeids[j])) continue;
+      if(bbs[i].intersects(bbs[j])) {
+	if(::CheckCollision(*geoms[i],*geoms[j],tol))
+	  return pair<int,int>(activeids[i],activeids[j]);
+      }
+    }
+  }
+  return pair<int,int>(-1,-1);
+}
+
+pair<int,int> WorldPlannerSettings::CheckCollision(RobotWorld& world,const vector<int>& ids1,const vector<int>& ids2,Real tol)
+{
+  //first, get all the geometries
+  vector<Geometry::AnyCollisionGeometry3D*> geoms1,geoms2;
+  vector<int> activeids1,activeids2;
+  GetGeometries(world,ids1,geoms1,activeids1);
+  GetGeometries(world,ids2,geoms2,activeids2);
+
+  Vector3 d(tol*0.5); //adjustment
+  vector<AABB3D> bbs1(geoms1.size()),bbs2(geoms2.size());
+  for(size_t i=0;i<geoms1.size();i++) {
+    bbs1[i]=geoms1[i]->GetAABB();
+    bbs1[i].bmin -= d;
+    bbs1[i].bmax += d;
+  }
+  for(size_t i=0;i<geoms2.size();i++) {
+    bbs2[i]=geoms2[i]->GetAABB();
+    bbs2[i].bmin -= d;
+    bbs2[i].bmax += d;
+  }
+
+  //quick reject: anything in set2 that doesn't intersect entire set1 bb can be erased from consideration
+  AABB3D bb;
+  bb.minimize();
+  for(size_t i=0;i<bbs1.size();i++)
+    bb.setUnion(bbs1[i]);
+  for(size_t i=0;i<bbs2.size();i++)
+    if(!bbs2[i].intersects(bb)) { //erase
+      activeids2[i] = activeids2.back();
+      geoms2[i] = geoms2.back();
+      bbs2[i] = bbs2.back();
+      activeids2.resize(activeids2.size()-1);
+      geoms2.resize(geoms2.size()-1);
+      bbs2.resize(bbs2.size()-1);
+      i--;
+    }
+  bb.minimize();
+  for(size_t i=0;i<bbs2.size();i++)
+    bb.setUnion(bbs2[i]);
+  for(size_t i=0;i<bbs1.size();i++)
+    if(!bbs1[i].intersects(bb)) { //erase
+      activeids1[i] = activeids1.back();
+      geoms1[i] = geoms1.back();
+      bbs1[i] = bbs1.back();
+      activeids1.resize(activeids1.size()-1);
+      geoms1.resize(geoms1.size()-1);
+      bbs1.resize(bbs1.size()-1);
+      i--;
+    }
+  
+
+  for(size_t i=0;i<activeids1.size();i++) {
+    for(size_t j=0;j<activeids2.size();j++) {
+      if(!collisionEnabled(activeids1[i],activeids2[j])) continue;
+      if(bbs1[i].intersects(bbs2[j])) {
+	if(::CheckCollision(*geoms1[i],*geoms2[j],tol))
+	  return pair<int,int>(activeids1[i],activeids2[j]);
+      }
+    }
+  }
+  return pair<int,int>(-1,-1);
 }
 
 bool WorldPlannerSettings::CheckCollision(RobotWorld& world,AnyCollisionGeometry3D& mesh,int id,Real tol)
@@ -249,10 +367,10 @@ Real WorldPlannerSettings::DistanceLowerBound(RobotWorld& world,int id1,int id2,
       Real d=DistanceLowerBound(world,robot->geometry[linkid.second],id2,eps,minDist);
       //printf("Link %d on robot %d to object %d has distance %g\n",linkid.second,linkid.first,id2,d);
       //printf("Object %s\n",world.GetName(id2).c_str());
-      if(d<=0) {
-	Assert(CheckCollision(world,robot->geometry[linkid.second],id2,0));
+      //if(d<=0) {
+      //Assert(CheckCollision(world,robot->geometry[linkid.second],id2,0));
 	//printf("It collides!\n");
-      }
+      //}
       return d;
     }
     return Inf;
@@ -295,8 +413,143 @@ Real WorldPlannerSettings::DistanceLowerBound(RobotWorld& world,AnyCollisionGeom
       assert(linkid.second >= 0 && linkid.second < (int)robot->links.size());
       return ::DistanceLowerBound(mesh,robot->geometry[linkid.second],eps,minDist);
     }
-    return false;
+    return minDist;
   }
+}
+
+Real MaxDistance2(const AABB3D& a,const Vector3& pt)
+{
+  Vector3 furthest;
+  if(pt.x < a.bmin.x) furthest.x=a.bmax.x;
+  else if(pt.x > a.bmax.x) furthest.x=a.bmin.x;
+  else if(Abs(pt.x-a.bmin.x) < Abs(pt.x-a.bmax.x)) furthest.x = a.bmax.x;
+  else furthest.x = a.bmin.x;
+  if(pt.y < a.bmin.y) furthest.y=a.bmax.y;
+  else if(pt.y > a.bmax.y) furthest.y=a.bmin.y;
+  else if(Abs(pt.y-a.bmin.y) < Abs(pt.y-a.bmax.y)) furthest.y = a.bmax.y;
+  else furthest.y = a.bmin.y;
+  if(pt.z < a.bmin.z) furthest.z=a.bmax.z;
+  else if(pt.z > a.bmax.z) furthest.z=a.bmin.z;
+  else if(Abs(pt.z-a.bmin.z) < Abs(pt.z-a.bmax.z)) furthest.z = a.bmax.z;
+  else furthest.z = a.bmin.z;
+  return furthest.distanceSquared(pt);
+}
+
+Real MaxDistance(const AABB3D& a,const AABB3D& b)
+{
+  Vector3 fa,fb;
+  if(a.bmax.x < b.bmin.x) { fa.x = a.bmax.x; fb.x=b.bmin.x; }  //a to left of b
+  else if(b.bmax.x < b.bmin.x) { fa.x = a.bmin.x; fb.x=b.bmax.x; } //b to left of a
+  else if(Abs(b.bmax.x-a.bmin.x) > Abs(b.bmin.x-a.bmax.x)) { fa.x = a.bmin.x; fb.x=b.bmax.x; }  //ranges intersect
+  else { fa.x = a.bmax.x; fb.x=b.bmin.x; } //ranges intersect
+  if(a.bmax.y < b.bmin.y) { fa.y = a.bmax.y; fb.y=b.bmin.y; }  //a to left of b
+  else if(b.bmax.y < b.bmin.y) { fa.y = a.bmin.y; fb.y=b.bmax.y; } //b to left of a
+  else if(Abs(b.bmax.y-a.bmin.y) > Abs(b.bmin.y-a.bmax.y)) { fa.y = a.bmin.y; fb.y=b.bmax.y; }  //ranges intersect
+  else { fa.y = a.bmax.y; fb.y=b.bmin.y; } //ranges intersect
+  if(a.bmax.z < b.bmin.z) { fa.z = a.bmax.z; fb.z=b.bmin.z; }  //a to left of b
+  else if(b.bmax.z < b.bmin.z) { fa.z = a.bmin.z; fb.z=b.bmax.z; } //b to left of a
+  else if(Abs(b.bmax.z-a.bmin.z) > Abs(b.bmin.z-a.bmax.z)) { fa.z = a.bmin.z; fb.z=b.bmax.z; }  //ranges intersect
+  else { fa.z = a.bmax.z; fb.z=b.bmin.z; } //ranges intersect
+  return fa.distance(fb);
+}
+
+Real WorldPlannerSettings::DistanceLowerBound(RobotWorld& world,const vector<int>& ids,Real eps,Real bound,int* closest1,int* closest2)
+{
+  //first, get all the geometries
+  vector<Geometry::AnyCollisionGeometry3D*> geoms;
+  vector<int> activeids;
+  GetGeometries(world,ids,geoms,activeids);
+
+  vector<AABB3D> bbs(geoms.size());
+  for(size_t i=0;i<geoms.size();i++) {
+    bbs[i]=geoms[i]->GetAABB();
+  }
+
+  //reduce upper bound based on upper bound on inter-object distance
+  for(size_t i=0;i<activeids.size();i++) {
+    for(size_t j=i+1;j<activeids.size();j++) {
+      if(!collisionEnabled(activeids[i],activeids[j])) continue;
+      Real maxd=MaxDistance(bbs[i],bbs[j]);
+      if(maxd < bound) bound=maxd;
+    }
+  }
+  //hopefully sorting pairs is cheaper than collision testing
+  vector<pair<Real,pair<int,int> > > sorter;
+  for(size_t i=0;i<activeids.size();i++) {
+    for(size_t j=i+1;j<activeids.size();j++) {
+      if(!collisionEnabled(activeids[i],activeids[j])) continue;
+      Real d=bbs[i].distance(bbs[j]);
+      if(d > bound) continue;
+      sorter.push_back(pair<Real,pair<int,int> >(d,pair<int,int>(i,j)));
+    }
+  }
+  sort(sorter.begin(),sorter.end());
+  for(size_t i=0;i<sorter.size();i++) {
+    if(sorter[i].first > bound) break;
+    int a = sorter[i].second.first;
+    int b = sorter[i].second.second;
+    Real d=::DistanceLowerBound(*geoms[a],*geoms[b],eps,bound);
+    if(d < bound) {
+      bound = d;
+      if(closest1 && closest2) {
+	*closest1 = activeids[a];
+	*closest2 = activeids[b];
+      }
+    }
+  }
+  return bound;
+}
+
+Real WorldPlannerSettings::DistanceLowerBound(RobotWorld& world,const vector<int>& ids1,const vector<int>& ids2,Real eps,Real bound,int* closest1,int* closest2)
+{
+  //first, get all the geometries
+  vector<Geometry::AnyCollisionGeometry3D*> geoms1,geoms2;
+  vector<int> activeids1,activeids2;
+  GetGeometries(world,ids1,geoms1,activeids1);
+  GetGeometries(world,ids2,geoms2,activeids2);
+
+  vector<AABB3D> bbs1(geoms1.size()),bbs2(geoms2.size());
+  for(size_t i=0;i<geoms1.size();i++) {
+    bbs1[i]=geoms1[i]->GetAABB();
+  }
+  for(size_t i=0;i<geoms2.size();i++) {
+    bbs2[i]=geoms2[i]->GetAABB();
+  }
+
+  //reduce upper bound based on upper bound on inter-object distance
+  for(size_t i=0;i<activeids1.size();i++) {
+    for(size_t j=0;j<activeids2.size();j++) {
+      if(!collisionEnabled(activeids1[i],activeids2[j])) continue;
+      Real maxd=MaxDistance(bbs1[i],bbs1[j]);
+      if(maxd < bound) bound=maxd;
+    }
+  }
+  //hopefully sorting pairs is cheaper than collision testing
+  vector<pair<Real,pair<int,int> > > sorter;
+  for(size_t i=0;i<activeids1.size();i++) {
+    for(size_t j=0;j<activeids2.size();j++) {
+      if(!collisionEnabled(activeids1[i],activeids2[j])) continue;
+      Real d=bbs1[i].distance(bbs2[j]);
+      if(d > bound) continue;
+      sorter.push_back(pair<Real,pair<int,int> >(d,pair<int,int>(i,j)));
+    }
+  }
+  sort(sorter.begin(),sorter.end());
+  for(size_t i=0;i<sorter.size();i++) {
+    if(sorter[i].first > bound) break;
+    int a = sorter[i].second.first;
+    int b = sorter[i].second.second;
+    Real d=::DistanceLowerBound(*geoms1[a],*geoms2[b],eps,bound);
+    if(d < bound) {
+      bound = d;
+      if(closest1 && closest2) {
+	*closest1 = activeids1[a];
+	*closest2 = activeids2[b];
+      }
+    }
+  }
+  return bound;
+
 }
 
 void WorldPlannerSettings::EnumerateCollisionPairs(RobotWorld& world,vector<pair<int,int> >& pairs) const

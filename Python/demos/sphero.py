@@ -86,8 +86,8 @@ class Emulator:
     def __init__(self,sim,robotIndex = 0):
         self.sim = sim
         self.robotIndex = robotIndex
-        self.controller = sim.getController(robotIndex)
-        self.robot = sim.getWorld().robot(robotIndex)
+        self.controller = sim.controller(robotIndex)
+        self.robot = sim.world().robot(robotIndex)
         #indices: turn and drive, respectively
         self.velocityLimits = [180*math.pi/180,1080*math.pi/180]
         self.accelLimits = [360*math.pi/180,2080*math.pi/180]
@@ -102,8 +102,8 @@ class Emulator:
     def send_command(self,twist):
         assert twist[1] == 0
         #compute the angular velocity of the shell in the motor frame
-        motorBody = self.sim.getBody(self.robot.getLink(5))
-        shellBody = self.sim.getBody(self.robot.getLink(8))
+        motorBody = self.sim.getBody(self.robot.link(5))
+        shellBody = self.sim.getBody(self.robot.link(8))
         motorTwist = motorBody.getVelocity()
         shellTwist = shellBody.getVelocity()
         motorXform = motorBody.getTransform()

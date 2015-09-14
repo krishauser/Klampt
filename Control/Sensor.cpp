@@ -1301,6 +1301,10 @@ bool RobotSensors::LoadSettings(TiXmlElement* node)
       }
       else if(!sensor->SetSetting(attr->Name(),attr->Value())) {
 	fprintf(stderr,"Error setting sensor %s attribute %s, doesn't exist?\n",e->Value(),attr->Name());
+	map<string,string> s = sensor->Settings();
+	fprintf(stderr,"Candidates:\n");
+	for(map<string,string>::const_iterator i=s.begin();i!=s.end();i++)
+	  fprintf(stderr,"  %s : %s by default\n",i->first.c_str(),i->second.c_str());
 	return false;
       }
       attr = attr->Next();

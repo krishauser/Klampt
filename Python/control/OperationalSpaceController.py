@@ -364,7 +364,7 @@ class COMTask(Task):
 		self.robot.setConfig(q)
 		com = self.robot.getCom()
 		if self.baseLinkNo >= 0:
-			Tb = self.robot.getLink(self.baseLinkNo).getTransform()
+			Tb = self.robot.link(self.baseLinkNo).getTransform()
 			Tbinv = se3.inv(Tb)
 			com = se3.apply(Tbinv,com)
 		return com
@@ -378,9 +378,9 @@ class COMTask(Task):
 		Jcom = np.array(self.robot.getComJacobian())
 		#if relative positioning task, subtract out COM jacobian w.r.t. base
 		if self.baseLinkNo >= 0:
-			Tb = self.robot.getLink(self.baseLinkNo).getTransform()
+			Tb = self.robot.link(self.baseLinkNo).getTransform()
 			pb = se3.apply(se3.inv(Tb),self.robot.getCom())
-			Jb = np.array(self.robot.getLink(self.baseLinkNo).getPositionJacobian(pb))
+			Jb = np.array(self.robot.link(self.baseLinkNo).getPositionJacobian(pb))
 			Jcom -= Jb
 		if self.activeDofs != None:
 			Jcom = select_cols(Jcom,self.activeDofs)
@@ -391,7 +391,7 @@ class COMTask(Task):
 		xdes = self.xdes
 		#invert the transformations from task to world coordinates
 		if self.baseLinkNo >= 0:
-			Tb = self.robot.getLink(self.baseLinkNo).getTransform()
+			Tb = self.robot.link(self.baseLinkNo).getTransform()
 			xdes = se3.apply(Tb,self.xdes)
 			x = se3.apply(Tb,x)
 		glPointSize(10)
@@ -423,9 +423,9 @@ class LinkTask(Task):
 		"""
 		Task.__init__(self)
 		self.linkNo = linkNo
-		self.link = robot.getLink(self.linkNo)
+		self.link = robot.link(self.linkNo)
 		self.baseLinkNo = baseLinkNo
-		self.baseLink = (None if baseLinkNo < 0 else robot.getLink(baseLinkNo))
+		self.baseLink = (None if baseLinkNo < 0 else robot.link(baseLinkNo))
 		self.activeDofs = None
 		self.robot = robot
 		self.hP, self.hD, self.hI = -1, 0, 0
@@ -600,7 +600,7 @@ class JointLimitTask(Task):
 				        #j+ dj^2 / 2a  = jmax
 				        #dj^2 / 2(jmax-j)   = a
 					if j >= jmax:
-						print "Joint",self.robot.getLink(i).getName(),"exceeded max",j,">=",jmax
+						print "Joint",self.robot.link(i).getName(),"exceeded max",j,">=",jmax
 						ades = -amax
 						w = maxw
 					else:
@@ -611,7 +611,7 @@ class JointLimitTask(Task):
 						else:
 							ades = -alim
 							w = wscale*(alim-a)/(amax-alim)
-						#print "Joint",self.robot.getLink(i).getName(),j,dj,"near upper limit",jmax,", desired accel:",ades," weight",w
+						#print "Joint",self.robot.link(i).getName(),j,dj,"near upper limit",jmax,", desired accel:",ades," weight",w
 			else:
 				t = -dj / a
 			        #j + t*dj + t^2*a/2
@@ -622,7 +622,7 @@ class JointLimitTask(Task):
 				        #j - dj^2 / 2a  = jmin
 				        #dj^2 / 2(j-jmin)   = a
 					if j <= jmin:
-						print "Joint",self.robot.getLink(i).getName(),"exceeded min",j,"<=",jmin
+						print "Joint",self.robot.link(i).getName(),"exceeded min",j,"<=",jmin
 						ades = amax
 						w = maxw
 					else:
@@ -633,7 +633,7 @@ class JointLimitTask(Task):
 						else:
 							ades = alim
 							w = wscale*(alim-a)/(amax-alim)
-						#print "Joint",self.robot.getLink(i).getName(),j,dj,"near lower limit",jmin,", desired accel:",ades," weight",w
+						#print "Joint",self.robot.link(i).getName(),j,dj,"near lower limit",jmin,", desired accel:",ades," weight",w
 			if w > maxw:
 				w = maxw
 			self.active.append(i)
@@ -834,7 +834,7 @@ class OperationalSpaceController:
 		qmin,qmax = self.robot.getJointLimits()
 		for i,(a,b) in enumerate(zip(qmin,qmax)):
 			if a == b:
-				#print "Fixed link",self.robot.getLink(i).getName()
+				#print "Fixed link",self.robot.link(i).getName()
 				J = zero_col(J,i)
 		return J
 
@@ -910,7 +910,7 @@ class OperationalSpaceController:
 		for i,(l,u) in enumerate(zip(vmin,vmax)):
 			assert l <= u
 			if l > 0 or u < 0:
-				print "Moving link:",self.robot.getLink(i).getName(),"speed",vref[i]
+				print "Moving link:",self.robot.link(i).getName(),"speed",vref[i]
 		#print zip(vmin,vmax)
 		Aumin = np.array(vmin) - b
 		Aumax = np.array(vmax) - b
@@ -950,7 +950,7 @@ class OperationalSpaceController:
 			if len(active)>0:
 				print "Priority 1 active constraints:"
 				for a in active:
-					print self.robot.getLink(a).getName(),vmin[a],dq1[a],vmax[a]
+					print self.robot.link(a).getName(),vmin[a],dq1[a],vmax[a]
 
 			r1 = J1.dot(dq1)-v1
 			print "Op space controller solve"
@@ -985,7 +985,7 @@ class OperationalSpaceController:
 			if len(active)>0:
 				print "Priority 2 active constraints:"
 				for a in active:
-					print self.robot.getLink(a).getName(),vmin[a],dq2[a],vmax[a]
+					print self.robot.link(a).getName(),vmin[a],dq2[a],vmax[a]
 
 		#compose the velocities together
 		u = np.ravel((u1 + u2))

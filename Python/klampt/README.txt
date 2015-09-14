@@ -57,7 +57,7 @@ provide convenience routines built on top of robotsim.py.
     wm = map.map(world)
     wm.robots[0].links[4].transform
   instead of
-    world.robot(0).getLink(4).getTransform().
+    world.robot(0).link(4).getTransform().
 
 - robotcollide.py defines a WorldCollider class that enables querying the
   collision status of the world and subsets of bodies in the world.

@@ -4,7 +4,6 @@ import sys
 from klampt import *
 from klampt.glprogram import *
 import importlib
-from IPython.core.debugger import Tracer
 
 class MyGLViewer(GLRealtimeProgram):
     def __init__(self,world):
@@ -23,6 +22,10 @@ class MyGLViewer(GLRealtimeProgram):
         #can be modified in the world's XML file
         self.dt = 0.01
 
+        #press 'c' to toggle display contact points / forces
+        self.drawContacts = False
+
+        #press 'm' to toggle screenshot saving
         self.saveScreenshots = False
         self.nextScreenshotTime = 0
         self.screenshotCount = 0
@@ -40,10 +43,9 @@ class MyGLViewer(GLRealtimeProgram):
         glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,[0,1,0,0.5])
         for i in xrange(self.world.numRobots()):
             r = self.world.robot(i)
-            #Tracer()()
-            mode = self.sim.getController(i).getControlType()
+            mode = self.sim.controller(i).getControlType()
             if mode == "PID":
-                q = self.sim.getController(i).getCommandedConfig()
+                q = self.sim.controller(i).getCommandedConfig()
                 r.setConfig(q)
                 r.drawGL(False)
         glDisable(GL_BLEND)
@@ -67,10 +69,36 @@ class MyGLViewer(GLRealtimeProgram):
             glLineWidth(1.0)
             glEnable(GL_DEPTH_TEST)
 
+        #draw contacts, if enabled
+        if self.drawContacts:
+            glDisable(GL_LIGHTING)
+            glDisable(GL_DEPTH_TEST)
+            glEnable(GL_POINT_SMOOTH)
+            glColor3f(1,1,0)
+            glLineWidth(1.0)
+            glPointSize(5.0)
+            forceLen = 0.1  #scale of forces
+            maxid = self.world.numIDs()
+            for i in xrange(maxid):
+                for j in xrange(i+1,maxid):
+                    points = self.sim.getContacts(i,j)
+                    if len(points) > 0:
+                        forces = self.sim.getContactForces(i,j)
+                        glBegin(GL_POINTS)
+                        for p in points:
+                            glVertex3f(*p[0:3])
+                        glEnd()
+                        glBegin(GL_LINES)
+                        for p,f in zip(points,forces):
+                            glVertex3f(*p[0:3])
+                            glVertex3f(*vectorops.madd(p[0:3],f,forceLen))
+                        glEnd()                        
+            glEnable(GL_DEPTH_TEST)
+
     def control_loop(self):
         for i in xrange(self.world.numRobots()):
             if i >= len(self.controllers): break
-            c = self.sim.getController(i)
+            c = self.sim.controller(i)
             #build measurement dict
             measurements = {'t':self.sim.getTime(),'dt':self.dt}
             mode = self.sim.getController(i).getControlType()
@@ -133,7 +161,7 @@ class MyGLViewer(GLRealtimeProgram):
     def mousefunc(self,button,state,x,y):
         #Put your mouse handler here
         #the current example prints out the list of objects clicked whenever
-        #you right click
+        #you right click, and applies forces
         if button==2:
             if state==0:
                 self.sim.updateWorld()
@@ -175,7 +203,7 @@ class MyGLViewer(GLRealtimeProgram):
     def simulateForceSpring(self,kP = 100.0):
         if not self.forceApplicationMode: return
         self.sim.updateWorld()
-        body = self.sim.getBody(self.forceObject)
+        body = self.sim.body(self.forceObject)
         T = self.forceObject.getTransform()
         wp = se3.apply(T,self.forceLocalPoint)
         #since we're not applying this force over sub-steps, we have to make it big!
@@ -204,6 +232,10 @@ class MyGLViewer(GLRealtimeProgram):
             print "Movie mode:",self.saveScreenshots
             if self.nextScreenshotTime < self.sim.getTime():
                 self.nextScreenshotTime = self.sim.getTime()
+        elif c == 'c':
+            self.drawContacts = not self.drawContacts
+            if self.drawContacts:
+                self.sim.enableContactFeedbackAll()
         glutPostRedisplay()
 
     def click_world(self,x,y):
@@ -211,12 +243,11 @@ class MyGLViewer(GLRealtimeProgram):
         sorted in order of increasing distance."""
         #get the viewport ray
         (s,d) = self.click_ray(x,y)
-        
+        self.sim.updateWorld()        
         #run the collision tests
-        self.collider.updateFrames()
         collided = []
         for g in self.collider.geomList:
-            (hit,pt) = collide.rayCast(g[1],s,d)
+            (hit,pt) = g[1].rayCast(s,d)
             if hit:
                 dist = vectorops.dot(vectorops.sub(pt,s),d)
                 collided.append((dist,g[0],pt))

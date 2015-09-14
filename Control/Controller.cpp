@@ -127,7 +127,14 @@ bool RobotController::GetSensedConfig(Config& q)
       fprintf(stderr,"  %s: %s\n",sensors->sensors[i]->Type(),sensors->sensors[i]->name.c_str());
     return false;
   }
-  q = s->q;
+  if(s->indices.empty())
+    q = s->q;
+  else {
+    q.resize(robot.q.size());
+    q.set(0.0);
+    for(size_t i=0;i<s->indices.size();i++)
+      q[s->indices[i]] = s->q[i];
+  }
   return true;
 }
 
@@ -141,7 +148,14 @@ bool RobotController::GetSensedVelocity(Config& dq)
       fprintf(stderr,"  %s: %s\n",sensors->sensors[i]->Type(),sensors->sensors[i]->name.c_str());
     return false;
   }
-  dq = s->dq;
+  if(s->indices.empty())
+    dq = s->dq;
+  else {
+    dq.resize(robot.q.size());
+    dq.set(0.0);
+    for(size_t i=0;i<s->indices.size();i++)
+      dq[s->indices[i]] = s->dq[i];
+  }
   return true;
 }
 

@@ -4,11 +4,17 @@
 #include <QSettings>
 
 #include "mainwindow.h"
+
+#ifdef __APPLE__
+#include <GLUT/glut.h>
+#else
 #include <GL/glut.h>
+#endif
 
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
+    //needed for GLUTBitmapCharacter
     glutInit(&argc,argv);
     QString filename;
 

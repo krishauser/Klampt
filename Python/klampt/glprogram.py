@@ -228,7 +228,7 @@ class GLNavigationProgram(GLProgram):
         R,t = se3.inv(self.camera.matrix())
         #from x and y compute ray direction
         u = float(x-self.width/2)/self.width
-        v = float(self.height-y-self.height/2)/self.height
+        v = float(self.height-y-self.height/2)/self.width
         aspect = float(self.width)/float(self.height)
         rfov = self.fov*math.pi/180.0
         scale = 2.0*math.tan(rfov*0.5/aspect)*aspect
@@ -328,3 +328,55 @@ class GLRealtimeProgram(GLNavigationProgram):
 
     def idle(self):
         pass
+
+class GLPluginProgram(GLRealtimeProgram):
+    """This base class should be used with a GLPluginBase object to handle the
+    GUI functionality (see glcommon.py.  Call setPlugin() on this object to set
+    the currently used plugin."""
+    def __init__(self,name="GLWidget"):
+        GLRealtimeProgram.__init__(self,name)
+        self.iface = None
+    def setPlugin(self,iface):
+        if self.iface:
+            self.iface.widget = None
+        self.iface = iface
+        if iface:
+            iface.widget = self
+            iface.reshapefunc(self.width,self.height)
+        self.refresh()
+    def initialize(self):
+        if self.iface: self.iface.initialize()
+        GLRealtimeProgram.initialize(self)
+    def reshapefunc(self,w,h):
+        if self.iface==None or not self.iface.reshapefunc(w,h):
+            GLRealtimeProgram.reshapefunc(self,w,h)
+    def keyboardfunc(self,c,x,y):
+        if self.iface==None or not self.iface.keyboardfunc(c,x,y):
+            GLRealtimeProgram.keyboardfunc(self,c,x,y)
+    def keyboardupfunc(self,c,x,y):
+        if self.iface==None or not self.iface.keyboardupfunc(c,x,y):
+            GLRealtimeProgram.keyboardupfunc(self,c,x,y)
+    def specialfunc(self,c,x,y):
+        if self.iface==None or not self.iface.specialfunc(c,x,y):
+            GLRealtimeProgram.specialfunc(self,c,x,y)
+    def specialupfunc(self,c,x,y):
+        if self.iface==None or not self.iface.specialupfunc(c,x,y):
+            GLRealtimeProgram.specialupfunc(self,c,x,y)
+    def motionfunc(self,x,y):
+        dx = x - self.lastx
+        dy = y - self.lasty
+        if self.iface==None or not self.iface.motionfunc(x,y,dx,dy):
+            GLRealtimeProgram.motionfunc(self,x,y)
+        self.lastx,self.lasty = x,y
+    def mousefunc(self,button,state,x,y):
+        if self.iface==None or not self.iface.mousefunc(button,state,x,y):
+            GLRealtimeProgram.mousefunc(self,button,state,x,y)
+    def idlefunc(self):
+        if self.iface!=None: self.iface.idlefunc()
+        GLRealtimeProgram.idlefunc(self)
+    def display(self):
+        if self.iface!=None:
+            self.iface.display()
+    def display_screen(self):
+        if self.iface!=None:
+            self.iface.display_screen()

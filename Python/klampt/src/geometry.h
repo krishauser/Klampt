@@ -6,9 +6,11 @@
 
 /** @brief A 3D indexed triangle mesh class.
  *
- * vertices is a list of vertices, given as a list [x1, y1, z1, x2, y2, ...]
- * indices is a list of triangle vertices given as indices into the
- *    vertices list, i.e., [a1,b1,c2, a2,b2,c2, ...]
+ * Attributes:
+ * - vertices:  a list of vertices, given as a flattened coordinate list
+ *   [x1, y1, z1, x2, y2, ...]
+ * - indices: a list of triangle vertices given as indices into the
+ *   vertices list, i.e., [a1,b1,c2, a2,b2,c2, ...]
  */
 struct TriangleMesh
 {
@@ -20,8 +22,10 @@ struct TriangleMesh
 };
 
 /** @brief A 3D point cloud class.  
- * vertices is a list of vertices, given as a list [x1, y1, z1, x2, y2, ... zn]
- * properties is a list of vertex properties, given as a list
+ *
+ * Attributes:
+ * - vertices: a list of vertices, given as a list [x1, y1, z1, x2, y2, ... zn]
+ * - properties: a list of vertex properties, given as a list
  * [p11, p21, ..., pk1,  p12, p22, ..., pk2, ... , pn1, pn2, ..., pn2]
  * where each vertex has k properties.  The name of each property is given
  * by the propertyNames member.
@@ -53,10 +57,20 @@ struct GeometricPrimitive
  * world item's geometry, in which case modifiers change the 
  * world item's geometry, or it can be a standalone geometry.
  *
+ * If you want to set a world item's geometry to be equal to a standalone
+ * geometry, use the set(rhs) function rather than the assignment (=)
+ * operator.
+ *
  * Modifiers include any setX() functions, translate(), and transform().
  *
  * Proximity queries include collides(), withinDistance(), distance(), and
  * rayCast().
+ *
+ * Each object also has a "collision margin" which may virtually fatten the
+ * object, as far as proximity queries are concerned. This is useful
+ * for setting collision avoidance margins in motion planning. By
+ * default it is zero.  (Note that this is NOT the same thing as simulation
+ * body collision padding!)
  */
 class Geometry3D
 {
@@ -74,6 +88,8 @@ class Geometry3D
   ///Returns the type of geometry: TriangleMesh, PointCloud, or
   ///GeometricPrimitive
   std::string type();
+  ///Returns true if this has no contents
+  bool empty();
   ///Returns a TriangleMesh if this geometry is of type TriangleMesh
   TriangleMesh getTriangleMesh();
   ///Returns a PointCloud if this geometry is of type PointCloud
@@ -93,6 +109,7 @@ class Geometry3D
   void transform(const double R[9],const double t[3]);
   void setCollisionMargin(double margin);
   double getCollisionMargin();
+  ///Returns the axis-aligned bounding box of the object
   void getBB(double out[3],double out2[3]);
   bool collides(const Geometry3D& other);
   bool withinDistance(const Geometry3D& other,double tol);

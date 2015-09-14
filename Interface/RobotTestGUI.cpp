@@ -56,6 +56,12 @@ void RobotTestBackend::UpdateConfig()
   for(size_t i=0;i<robot->links.size();i++)
     self_colliding[i]=false;
   robot->UpdateGeometry();
+  //test: built-in self collision testing, which may be faster
+  vector<pair<int,int> > collpairs;
+  robot->SelfCollisions(collpairs);
+  for(size_t i=0;i<collpairs.size();i++)
+    self_colliding[collpairs[i].first] = self_colliding[collpairs[i].second] = true;
+  /*
   for(size_t i=0;i<robot->links.size();i++) {
     for(size_t j=i+1;j<robot->links.size();j++) {
       if(robot->SelfCollision(i,j)) {
@@ -63,6 +69,7 @@ void RobotTestBackend::UpdateConfig()
       }
     }
   }
+  */
   SendCommand("update_config","");
 }
 

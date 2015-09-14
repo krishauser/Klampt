@@ -134,10 +134,16 @@ int Robot::LinkIndex(const char* name) const
 bool Robot::Load(const char* fn) {
 	bool res = false;
 	const char* ext = FileExtension(fn);
-	if (0 == strcmp(ext, "rob")) {
+	if(ext == NULL) {
+	  fprintf(stderr,"Robot::Load(%s): no extension, file must have .rob or .urdf extension\n",fn);
+	}
+	else if (0 == strcmp(ext, "rob")) {
 		res = LoadRob(fn);
 	} else if (0 == strcmp(ext, "urdf")) {
 		res = LoadURDF(fn);
+	}
+	else {
+	  fprintf(stderr,"Robot::Load(%s): unknown extension %s, only .rob or .urdf supported\n",fn,ext);
 	}
 	return res;
 }
@@ -189,18 +195,18 @@ bool Robot::LoadRob(const char* fn) {
 	}
 	printf("Reading robot file %s...\n", fn);
 	int lineno = 0;
-	string name;
-	while (in >> name) {
-		Lowercase(name);
+	while (in) {
 		//cout<<"Reading line "<<name<<"..."<<endl;
 		//read the rest of the line
-		string line;
+		string line,name;
 		char buf[1025];
 		buf[1024] = 0;
 		bool foundEndline = false, comment = false;
+		bool foundEof = false;
 		while (!foundEndline) {
 			for (int i = 0; i < 1024; i++) {
 				int c = in.get();
+				if(!in || c == EOF) { buf[i] = 0; foundEndline=true; foundEof=true; break; }
 				if (c == '\n') {
 					buf[i] = 0;
 					foundEndline = true;
@@ -211,6 +217,8 @@ bool Robot::LoadRob(const char* fn) {
 					comment = true;
 				} else if (c == '\\') { //read escape characters (e.g., end of line)
 					c = in.get();
+					if (c == '\r') //possibly windows-encoded file
+					  c = in.get();
 					if (c == '\n')
 						lineno++;
 					c = TranslateEscape(c);
@@ -221,6 +229,13 @@ bool Robot::LoadRob(const char* fn) {
 		}
 		stringstream ss;
 		ss.str(line);
+		ss>>name;
+		if(!ss) {
+		  if(foundEof) break;
+		  continue; //empty line
+		}
+		Lowercase(name);
+		//cout<<"Reading line "<<name<<" line "<<lineno<<endl;
 		string stemp;
 		int itemp;
 		Real ftemp;
@@ -571,9 +586,12 @@ bool Robot::LoadRob(const char* fn) {
 			  }
 			}
 			if(name.empty()) {
+			  mountNames.push_back(string());
+			  /*
 			  string robotName = stemp;
 			  StripExtension(robotName);
 			  mountNames.push_back(robotName);
+			  */
 			}
 			else mountNames.push_back(name);
 		} else {
@@ -616,91 +634,91 @@ bool Robot::LoadRob(const char* fn) {
 	//joints.resize(0);
 	bool sizeErr = false;
 	if (!parents.empty() && n != parents.size()) {
-		fprintf(stderr, "   Wrong number of parents specified\n");
+		fprintf(stderr, "   Wrong number of parents specified (%d)\n",parents.size());
 		sizeErr = true;
 	}
 	if (!linkNames.empty() && n != linkNames.size()) {
-		fprintf(stderr, "   Wrong number of link names specified\n");
+		fprintf(stderr, "   Wrong number of link names specified (%d)\n",linkNames.size());
 		sizeErr = true;
 	}
 	if (!driverNames.empty() && nd != driverNames.size()) {
-		fprintf(stderr, "   Wrong number of driver names specified\n");
+		fprintf(stderr, "   Wrong number of driver names specified (%d)\n",driverNames.size());
 		sizeErr = true;
 	}
 	if (!drivers.empty() && nd != drivers.size()) {
-		fprintf(stderr, "   Wrong number of drivers specified\n");
+		fprintf(stderr, "   Wrong number of drivers specified (%d)\n",drivers.size());
 		sizeErr = true;
 	}
 	if (!jointType.empty() && n != jointType.size()) {
-		fprintf(stderr, "   Wrong number of joint types specified\n");
+		fprintf(stderr, "   Wrong number of joint types specified (%d)\n",jointType.size());
 		sizeErr = true;
 	}
 	if (!joints.empty() && nj != joints.size()) {
-		fprintf(stderr, "   Wrong number of joints specified\n");
+		fprintf(stderr, "   Wrong number of joints specified (%d)\n",joints.size());
 		sizeErr = true;
 	}
 	if (!massVec.empty() && n != massVec.size()) {
-		fprintf(stderr, "   Wrong number of masses specified\n");
+		fprintf(stderr, "   Wrong number of masses specified (%d)\n",massVec.size());
 		sizeErr = true;
 	}
 	if (!comVec.empty() && n != comVec.size()) {
-		fprintf(stderr, "   Wrong number of COMs specified\n");
+	  fprintf(stderr, "   Wrong number of COMs specified (%d)\n",comVec.size());
 		sizeErr = true;
 	}
 	if (!inertiaVec.empty() && n != inertiaVec.size()) {
-		fprintf(stderr, "   Wrong number of inertia components specified\n");
+	  fprintf(stderr, "   Wrong number of inertia components specified (%d)\n",inertiaVec.size());
 		sizeErr = true;
 	}
 	if (!a.empty() && n != a.size()) {
-		fprintf(stderr, "   Wrong number of DH-parameters specified\n");
+	  fprintf(stderr, "   Wrong number of DH-parameters specified (%d)\n",a.size());
 		sizeErr = true;
 	}
 	if (!d.empty() && n != d.size()) {
-		fprintf(stderr, "   Wrong number of DH-parameters specified\n");
+		fprintf(stderr, "   Wrong number of DH-parameters specified (%d)\n",d.size());
 		sizeErr = true;
 	}
 	if (!alpha.empty() && n != alpha.size()) {
-		fprintf(stderr, "   Wrong number of DH-parameters specified\n");
+		fprintf(stderr, "   Wrong number of DH-parameters specified (%d)\n",alpha.size());
 		sizeErr = true;
 	}
 	if (!theta.empty() && n != theta.size()) {
-		fprintf(stderr, "   Wrong number of DH-parameters specified\n");
+		fprintf(stderr, "   Wrong number of DH-parameters specified (%d)\n",theta.size());
 		sizeErr = true;
 	}
 	if (!TParent.empty() && n != TParent.size()) {
-		fprintf(stderr, "   Wrong number of link transforms specified\n");
+		fprintf(stderr, "   Wrong number of link transforms specified (%d)\n",TParent.size());
 		sizeErr = true;
 	}
 	if (!axes.empty() && n != axes.size()) {
-		fprintf(stderr, "   Wrong number of axes specified\n");
+		fprintf(stderr, "   Wrong number of axes specified (%d)\n",axes.size());
 		sizeErr = true;
 	}
 	if (!qVec.empty() && n != qVec.size()) {
-		fprintf(stderr, "   Wrong number of configuration variables specified\n");
+		fprintf(stderr, "   Wrong number of configuration variables specified (%d)\n",qVec.size());
 		sizeErr = true;
 	}
 	if (!qMaxVec.empty() && n != qMaxVec.size()) {
-		fprintf(stderr, "   Wrong number of joint limit variables specified\n");
+		fprintf(stderr, "   Wrong number of joint limit variables specified (%d)\n",qMaxVec.size());
 		sizeErr = true;
 	}
 	if (!qMinVec.empty() && n != qMinVec.size()) {
-		fprintf(stderr, "   Wrong number of joint limit variables specified\n");
+		fprintf(stderr, "   Wrong number of joint limit variables specified (%d)\n",qMinVec.size());
 		sizeErr = true;
 	}
 	if (!vMaxVec.empty() && n != vMaxVec.size()) {
-		fprintf(stderr, "   Wrong number of velocity limit variables specified\n");
+		fprintf(stderr, "   Wrong number of velocity limit variables specified (%d)\n",vMaxVec.size());
 		sizeErr = true;
 	}
 	if (!vMinVec.empty() && n != vMinVec.size()) {
-		fprintf(stderr, "   Wrong number of velocity limit variables specified\n");
+		fprintf(stderr, "   Wrong number of velocity limit variables specified (%d)\n",vMinVec.size());
 		sizeErr = true;
 	}
 	if (!tMaxVec.empty() && n != tMaxVec.size()) {
-		fprintf(stderr, "   Wrong number of torque limit variables specified\n");
+		fprintf(stderr, "   Wrong number of torque limit variables specified (%d)\n",tMaxVec.size());
 		sizeErr = true;
 	}
 	if (!pMaxVec.empty() && n != pMaxVec.size()) {
-		fprintf(stderr, "   Wrong number of power limit variables specified\n");
+		fprintf(stderr, "   Wrong number of power limit variables specified (%d)\n",pMaxVec.size());
 		sizeErr = true;
 	}
 	if (!geomFn.empty() && n != geomFn.size()) {
@@ -712,11 +730,11 @@ bool Robot::LoadRob(const char* fn) {
 		sizeErr = true;
 	}
 	if (!geomscale.empty() && n != geomscale.size() && 1 != geomscale.size()) {
-		fprintf(stderr, "   Wrong number of geometry scale variables specified\n");
+		fprintf(stderr, "   Wrong number of geometry scale variables specified (%d)\n",geomscale.size());
 		sizeErr = true;
 	}
 	if (!geommargin.empty() && n != geommargin.size() && 1 != geommargin.size()) {
-		fprintf(stderr, "   Wrong number of geometry margin variables specified\n");
+		fprintf(stderr, "   Wrong number of geometry margin variables specified (%d)\n",geommargin.size());
 		sizeErr = true;
 	}
 
@@ -981,19 +999,19 @@ bool Robot::LoadRob(const char* fn) {
 		return false;
 	}
 	if (!servoI.empty() && servoI.size() != nd) {
-		fprintf(stderr, "   Wrong number of servo I parameters specified\n");
+		fprintf(stderr, "   Wrong number of servo I parameters specified (%d)\n",servoI.size());
 		return false;
 	}
 	if (!servoD.empty() && servoD.size() != nd) {
-		fprintf(stderr, "   Wrong number of servo D parameters specified\n");
+		fprintf(stderr, "   Wrong number of servo D parameters specified (%d)\n",servoD.size());
 		return false;
 	}
 	if (!dryFriction.empty() && dryFriction.size() != nd) {
-		fprintf(stderr, "   Wrong number of dry friction parameters specified\n");
+		fprintf(stderr, "   Wrong number of dry friction parameters specified (%d)\n",dryFriction.size());
 		return false;
 	}
 	if (!viscousFriction.empty() &&  viscousFriction.size() != nd) {
-		fprintf(stderr, "   Wrong number of viscous friction parameters specified\n");
+	  fprintf(stderr, "   Wrong number of viscous friction parameters specified (%d)\n",viscousFriction.size());
 		return false;
 	}
 	for (size_t i = 0; i < servoP.size(); i++) {
@@ -1109,10 +1127,18 @@ bool Robot::LoadRob(const char* fn) {
 			size_t dstart = drivers.size();
 			Mount(mountLinks[i], subchain, mountT[i]);
 
-			for (size_t k = lstart; k < links.size(); k++) 
-				linkNames[k] = mountNames[i] + ":" + linkNames[k];
-			for (size_t k = dstart; k < drivers.size(); k++)
-				driverNames[k] = mountNames[i] + ":" + driverNames[k];
+			if(mountNames[i].empty()) {
+			  for (size_t k = lstart; k < links.size(); k++) 
+			    linkNames[k] = linkNames[k];
+			  for (size_t k = dstart; k < drivers.size(); k++)
+			    driverNames[k] = driverNames[k];
+			}
+			else {
+			  for (size_t k = lstart; k < links.size(); k++) 
+			    linkNames[k] = mountNames[i] + ":" + linkNames[k];
+			  for (size_t k = dstart; k < drivers.size(); k++)
+			    driverNames[k] = mountNames[i] + ":" + driverNames[k];
+			}
 		}
 	}
 	if (!CheckValid())
@@ -1151,7 +1177,7 @@ bool Robot::LoadRob(const char* fn) {
 	  SafeDelete(selfCollisions(link1,link2));
 	}
 
-	printf("Done loading robot file.\n");
+	printf("Done loading robot file %s.\n",fn);
 	return true;
 }
 
@@ -1446,8 +1472,8 @@ bool Robot::CheckValid() const {
 		}
 	}
 	*/
-	vector<bool> matchedLink(links.size(), false);
-	vector<bool> drivenLink(links.size(), false);
+	vector<int> matchedLink(links.size(), -1);
+	vector<int> drivenLink(links.size(), -1);
 
 	//check joint definitions
 	for (size_t i = 0; i < joints.size(); i++) {
@@ -1455,12 +1481,12 @@ bool Robot::CheckValid() const {
 		case RobotJoint::Weld:
 		case RobotJoint::Normal:
 		case RobotJoint::Spin:
-			if (matchedLink[joints[i].linkIndex]) {
-				printf("Joint %d controls an already controlled link, %d\n", i,
-						joints[i].linkIndex);
+			if (matchedLink[joints[i].linkIndex]>=0) {
+				printf("Joint %d controls an already controlled link, %d controlled by %d\n", i,
+				       joints[i].linkIndex,matchedLink[joints[i].linkIndex]);
 				return false;
 			}
-			matchedLink[joints[i].linkIndex] = true;
+			matchedLink[joints[i].linkIndex] = (int)i;
 			if (joints[i].linkIndex < 0
 					|| joints[i].linkIndex >= (int) links.size()) {
 				printf("Invalid joint %d index %d\n", i, joints[i].linkIndex);
@@ -1475,12 +1501,12 @@ bool Robot::CheckValid() const {
 					printf("Invalid floating chain\n");
 					return false;
 				}
-				if (matchedLink[link]) {
-					printf("Joint %d controls an already controlled link, %d\n",
-							i, link);
+				if (matchedLink[link] >= 0) {
+					printf("Joint %d controls an already controlled link, %d controlled by %d\n",
+					       i, link, matchedLink[link]);
 					return false;
 				}
-				matchedLink[link] = true;
+				matchedLink[link] = (int)i;
 				link = parents[link];
 				numLinks++;
 			}
@@ -1498,12 +1524,12 @@ bool Robot::CheckValid() const {
 					printf("Invalid floatingplanar chain\n");
 					return false;
 				}
-				if (matchedLink[link]) {
-					printf("Joint %d controls an already controlled link, %d\n",
-							i, link);
+				if (matchedLink[link] >= 0) {
+					printf("Joint %d controls an already controlled link, %d controlled by %d\n",
+					       i, link, matchedLink[link]);
 					return false;
 				}
-				matchedLink[link] = true;
+				matchedLink[link] = (int)i;
 				link = parents[link];
 				numLinks++;
 			}
@@ -1521,12 +1547,12 @@ bool Robot::CheckValid() const {
 					printf("Invalid ballandsocket chain\n");
 					return false;
 				}
-				if (matchedLink[link]) {
-					printf("Joint %d controls an already controlled link, %d\n",
-							i, link);
+				if (matchedLink[link] >= 0) {
+					printf("Joint %d controls an already controlled link, %d controlled by %d\n",
+					       i, link, matchedLink[link]);
 					return false;
 				}
-				matchedLink[link] = true;
+				matchedLink[link] = (int)i;
 				link = parents[link];
 				numLinks++;
 			}
@@ -1542,7 +1568,7 @@ bool Robot::CheckValid() const {
 		}
 	}
 	for (size_t i = 0; i < matchedLink.size(); i++) {
-		if (!matchedLink[i]) {
+		if (matchedLink[i] < 0) {
 			printf("Link %d not matched by a joint\n", i);
 		}
 	}
@@ -1556,20 +1582,20 @@ bool Robot::CheckValid() const {
 		if (drivers[i].type == RobotJointDriver::Normal
 				|| drivers[i].type == RobotJointDriver::Affine) {
 			for (size_t j = 0; j < drivers[i].linkIndices.size(); j++) {
-				if (drivenLink[drivers[i].linkIndices[j]]) {
-					printf("Driver %d affects an already driven link\n", i);
+				if (drivenLink[drivers[i].linkIndices[j]] >= 0) {
+				  printf("Driver %d affects an already driven link, %d driven by %d\n", i, drivers[i].linkIndices[j],drivenLink[drivers[i].linkIndices[j]]);
 					return false;
 				}
-				drivenLink[drivers[i].linkIndices[j]] = true;
+				drivenLink[drivers[i].linkIndices[j]] = (int)i;
 			}
 		} else if (drivers[i].type == RobotJointDriver::Translation
 				|| drivers[i].type == RobotJointDriver::Rotation) {
 			//only the first linkindex is actually driven
-			if (drivenLink[drivers[i].linkIndices[0]]) {
-				printf("Driver %d affects an already driven link\n", i);
+			if (drivenLink[drivers[i].linkIndices[0]] >= 0) {
+			  printf("Driver %d affects an already driven link, %d driven by %d\n", i, drivers[i].linkIndices[0],drivenLink[drivers[i].linkIndices[0]]);
 				return false;
 			}
-			drivenLink[drivers[i].linkIndices[0]] = true;
+			drivenLink[drivers[i].linkIndices[0]] = (int)i;
 		}
 	}
 	return true;
@@ -1711,8 +1737,8 @@ bool Robot::DoesJointAffect(int joint, int dof) const {
 		return false;
 	}
 	default:
-		FatalError("TODO");
-		return false;
+	  FatalError("TODO joint type %d",joints[joint].type);
+	  return false;
 	}
 }
 
@@ -1737,8 +1763,8 @@ void Robot::GetJointIndices(int joint, vector<int>& indices) const {
 		break;
 	}
 	default:
-		FatalError("TODO");
-		break;
+	  FatalError("TODO joint type %d",joints[joint].type);
+	  break;
 	}
 }
 
@@ -1780,8 +1806,8 @@ Real Robot::GetDriverValue(int d) const {
 		return vavg / drivers[d].linkIndices.size();
 	}
 	default:
-		FatalError("TODO");
-		return 0;
+	  FatalError("TODO driver type %d",drivers[d].type);
+	  return 0;
 	}
 }
 
@@ -1801,8 +1827,7 @@ void Robot::SetDriverValue(int d, Real value) {
 		break;
 	}
 	default:
-		FatalError("TODO");
-		break;
+	  FatalError("TODO driver type %d",drivers[d].type);
 	}
 }
 
@@ -1823,7 +1848,7 @@ void Robot::SetJointByTransform(int j, int link, const RigidTransform& Tl) {
 	case RobotJoint::Normal:
 	case RobotJoint::Spin:
 		Assert(joints[j].linkIndex == link);
-		FatalError("TODO: infer link parameter from transform");
+		FatalError("TODO: infer Normal/Spin link parameter from transform");
 		break;
 	case RobotJoint::BallAndSocket:
 		SetJointByOrientation(j, link, Tl.R);
@@ -1877,13 +1902,13 @@ void Robot::SetJointByTransform(int j, int link, const RigidTransform& Tl) {
 			//rotation
 			Vector3 x, y;
 			GetCanonicalBasis(links[indices[2]].w, x, y);
-			Vector3 desx = T.R * x;
+			Vector3 desx = -(T.R * y);
 			q(indices[2]) = Atan2(desx.y, desx.x);
 		}
 		break;
 	default:
-		FatalError("TODO");
-		break;
+	  FatalError("TODO joint type %d",joints[j].type);
+	  break;
 	}
 }
 
@@ -1940,9 +1965,10 @@ void Robot::SetJointByOrientation(int j, int link, const Matrix3& Rl) {
 			Assert(links[indices[1]].type == RobotLink3D::Prismatic);
 			Assert(links[indices[2]].type == RobotLink3D::Revolute);
 			//rotation
+			//rotation
 			Vector3 x, y;
 			GetCanonicalBasis(links[indices[2]].w, x, y);
-			Vector3 desx = R * x;
+			Vector3 desx = -(R * y);
 			q(indices[2]) = Atan2(desx.y, desx.x);
 		}
 		break;
@@ -1971,8 +1997,8 @@ void Robot::SetJointByOrientation(int j, int link, const Matrix3& Rl) {
 		}
 		break;
 	default:
-		FatalError("TODO");
-		break;
+	  FatalError("TODO joint type %d",joints[j].type);
+	  break;
 	}
 }
 
@@ -1992,8 +2018,8 @@ Real Robot::GetDriverVelocity(int d) const {
 		return vavg / drivers[d].linkIndices.size();
 	}
 	default:
-		FatalError("TODO");
-		return 0;
+	  FatalError("TODO driver type %d",drivers[d].type);
+	  return 0;
 	}
 }
 
@@ -2014,8 +2040,8 @@ void Robot::SetDriverVelocity(int d, Real value) {
 	}
 		break;
 	default:
-		FatalError("TODO");
-		break;
+	  FatalError("TODO driver type %d",drivers[d].type);
+	  break;
 	}
 }
 
@@ -2055,7 +2081,7 @@ void Robot::SetJointVelocityByMoment(int j, int link, const Vector3& w,
 	case RobotJoint::Normal:
 	case RobotJoint::Spin:
 		Assert(joints[j].linkIndex == link);
-		FatalError("TODO: infer link parameter from transform");
+		FatalError("TODO: infer Normal/Spin link velocity from twist");
 		break;
 	case RobotJoint::Floating: {
 		//TODO: only know how to do translation then RPY, make this more sophisticated
@@ -2138,8 +2164,8 @@ void Robot::SetJointVelocityByMoment(int j, int link, const Vector3& w,
 	}
 		break;
 	default:
-		FatalError("TODO");
-		break;
+	  FatalError("TODO joint type %d",joints[j].type);
+	  break;
 	}
 }
 
@@ -2157,8 +2183,8 @@ void Robot::GetDriverJacobian(int d, Vector& J) {
 	}
 		break;
 	default:
-		FatalError("TODO");
-		break;
+	  FatalError("TODO driver type %d",drivers[d].type);
+	  break;
 	}
 }
 
@@ -2712,7 +2738,7 @@ bool Robot::LoadURDF(const char* fn)
 
 	this->UpdateConfig(q);
 
-	printf("Done loading robot file.\n");
+	printf("Done loading robot file %s.\n",fn);
 	return true;
 }
 

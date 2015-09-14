@@ -35,7 +35,7 @@ dryFriction 20 20 10 2.5 0.5 0.1
 #dryFriction 0.5 0.5 0.5 0.1 0.1 0.1
 
 
-mount -1 "tx90ball.rob"  -1 0 0 0 -1 0 0 0 1    0.7 0 0
+mount -1 "tx90ball.rob"  -1 0 0 0 -1 0 0 0 1    0.7 0 0  as "tx90-right"
 
 noselfcollision 0 2
 noselfcollision 0 3

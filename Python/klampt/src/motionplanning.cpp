@@ -57,15 +57,17 @@ class PyCSpace : public CSpace
 {
 public:
   PyCSpace()
-    :sample(NULL),sampleNeighborhood(NULL),feasible(NULL),visible(NULL),
+    :sample(NULL),sampleNeighborhood(NULL),
      distance(NULL),interpolate(NULL),edgeResolution(0.001)
   {}
 
   virtual ~PyCSpace() {
     Py_XDECREF(sample);
     Py_XDECREF(sampleNeighborhood);
-    Py_XDECREF(feasible);
-    Py_XDECREF(visible);
+    for(size_t i=0;i<feasibleTests.size();i++)
+      Py_XDECREF(feasibleTests[i]);
+    for(size_t i=0;i<visibleTests.size();i++)
+      Py_XDECREF(visibleTests[i]);
     Py_XDECREF(distance);
     Py_XDECREF(interpolate);
   }
@@ -74,15 +76,18 @@ public:
   {
     sample = rhs.sample;
     sampleNeighborhood = rhs.sampleNeighborhood;
-    feasible = rhs.feasible;
-    visible = rhs.visible;
+    feasibleTests = rhs.feasibleTests;
+    visibleTests = rhs.visibleTests;
+    constraintNames = rhs.constraintNames;
     distance = rhs.distance;
     interpolate = rhs.interpolate;
     edgeResolution = rhs.edgeResolution;
     Py_XINCREF(sample);
     Py_XINCREF(sampleNeighborhood);
-    Py_XINCREF(feasible);
-    Py_XINCREF(visible);
+    for(size_t i=0;i<feasibleTests.size();i++)
+      Py_XINCREF(feasibleTests[i]);
+    for(size_t i=0;i<visibleTests.size();i++)
+      Py_XINCREF(visibleTests[i]);
     Py_XINCREF(distance);
     Py_XINCREF(interpolate);
   }
@@ -146,29 +151,42 @@ public:
 
   virtual bool IsFeasible(const Config& x)
   {
-    if(!feasible) {
+    if(feasibleTests.empty()) {
       throw PyException("Python feasible method not defined");
     }
     PyObject* pyx = PyListFromVector(x);
-    PyObject* result = PyObject_CallFunctionObjArgs(feasible,pyx,NULL);
-    if(result == NULL) {
-      Py_DECREF(pyx);
-      if(!PyErr_Occurred()) {
-	throw PyException("An error occurred when calling feasible");
+    for(size_t i=0;i<feasibleTests.size();i++) {
+      if(feasibleTests[i] == NULL) {
+	stringstream ss;
+	ss<<"Python feasible test for constraint "<<constraintNames[i]<<"not defined"<<endl;
+	Py_DECREF(pyx);
+	throw PyException(ss.str().c_str());
       }
-      else {
-	throw PyPyErrorException();
+
+      PyObject* result = PyObject_CallFunctionObjArgs(feasibleTests[i],pyx,NULL);
+      if(result == NULL) {
+	Py_DECREF(pyx);
+	if(!PyErr_Occurred()) {
+	  throw PyException("An error occurred when calling feasible");
+	}
+	else {
+	  throw PyPyErrorException();
+	}
+      }
+      if(!PyBool_Check(result)) {
+	Py_DECREF(pyx);
+	Py_DECREF(result);
+	throw PyException("Python feasible test method didn't return bool");
+      }
+      bool res=(result == Py_True);
+      if(!res) {
+	Py_DECREF(pyx);
+	Py_DECREF(result);
+	return false;
       }
     }
-    if(!PyBool_Check(result)) {
-      Py_DECREF(pyx);
-      Py_DECREF(result);
-      throw PyException("Python feasible method didn't return bool");
-    }
-    bool res=(result == Py_True);
     Py_DECREF(pyx);
-    Py_DECREF(result);
-    return res;
+    return true;
   }
 
   virtual EdgePlanner* LocalPlanner(const Config& a,const Config& b);
@@ -249,10 +267,11 @@ public:
 
   PyObject *sample,
     *sampleNeighborhood,
-    *feasible,
-    *visible,
     *distance,
     *interpolate;
+  vector<PyObject*> feasibleTests;
+  vector<PyObject*> visibleTests;
+  vector<string> constraintNames;
   double edgeResolution;
   PropertyMap properties;
 };
@@ -269,29 +288,42 @@ public:
   {}
   virtual ~PyEdgePlanner() {}
   virtual bool IsVisible() {
-    assert(space->visible!=false);
+    assert(space->visibleTests.size() == space->feasibleTests.size());
     PyObject* args = PyTuple_New(2);
     PyTuple_SetItem(args, 0, PyListFromVector(a));
     PyTuple_SetItem(args, 1, PyListFromVector(b));
-    PyObject* result = PyObject_CallObject(space->visible,args);
-    if(!result) {
-      Py_DECREF(args);
-      if(!PyErr_Occurred()) {
-	throw PyException("Python visible method failed");
+    for(size_t i=0;i<space->visibleTests.size();i++) {
+      if(space->visibleTests[i] == NULL) {
+	stringstream ss;
+	ss<<"Python visible test for constraint "<<space->constraintNames[i]<<"not defined"<<endl;
+	Py_DECREF(args);
+	throw PyException(ss.str().c_str());
       }
-      else {
-	throw PyPyErrorException();
+
+      PyObject* result = PyObject_CallObject(space->visibleTests[i],args);
+      if(!result) {
+	Py_DECREF(args);
+	if(!PyErr_Occurred()) {
+	  throw PyException("Python visible method failed");
+	}
+	else {
+	  throw PyPyErrorException();
+	}
+      }
+      if(!PyBool_Check(result)) {
+	Py_DECREF(args);
+	Py_DECREF(result);
+	throw PyException("Python visible test didn't return bool");
+      }
+      bool res=(result == Py_True);
+      if(!res) {
+	Py_DECREF(args);
+	Py_DECREF(result);
+	return res;
       }
     }
-    if(!PyBool_Check(result)) {
-      Py_DECREF(args);
-      Py_DECREF(result);
-      throw PyException("Python visible didn't return bool");
-    }
-    bool res=(result == Py_True);
-    Py_DECREF(args);
-    Py_DECREF(result);
-    return res;
+    Py_DECREF(args);    
+    return true;
   }
   virtual void Eval(double u,Config& x) const
   {
@@ -307,7 +339,7 @@ public:
 
 EdgePlanner* PyCSpace::LocalPlanner(const Config& a,const Config& b)
 {
-  if(!visible) {
+  if(visibleTests.empty()) {
     return new StraightLineEpsilonPlanner(this,a,b,edgeResolution); 
   }
   else {
@@ -376,18 +408,71 @@ void CSpaceInterface::setFeasibility(PyObject* pyFeas)
 {
   if(index < 0 || index >= (int)spaces.size() || spaces[index]==NULL) 
     throw PyException("Invalid cspace index");
-  Py_XDECREF(spaces[index]->feasible);
+  for(size_t i=0;i<spaces[index]->feasibleTests.size();i++)
+    Py_XDECREF(spaces[index]->feasibleTests[i]);
   Py_XINCREF(pyFeas);
-  spaces[index]->feasible = pyFeas;
+  spaces[index]->feasibleTests.resize(1);
+  spaces[index]->constraintNames.resize(1);
+  spaces[index]->constraintNames[0] = "feasible";
+  spaces[index]->feasibleTests[0] = pyFeas;
+}
+
+
+void CSpaceInterface::addFeasibilityTest(const char* name,PyObject* pyFeas)
+{
+  if(index < 0 || index >= (int)spaces.size() || spaces[index]==NULL) 
+    throw PyException("Invalid cspace index");
+  int cindex = -1;
+  for(size_t i=0;i<spaces[index]->constraintNames.size();i++)
+    if(0==strcmp(spaces[index]->constraintNames[i].c_str(),name)) {
+      cindex = (int)i;
+      break;
+    }
+  spaces[index]->feasibleTests.resize(spaces[index]->constraintNames.size(),NULL);
+  if(cindex < 0) {
+    Py_XINCREF(pyFeas);
+    spaces[index]->feasibleTests.push_back(pyFeas);
+    spaces[index]->constraintNames.push_back(name);
+  }
+  else {
+    Py_XDECREF(spaces[index]->feasibleTests[cindex]);
+    Py_XINCREF(pyFeas);
+    spaces[index]->feasibleTests[cindex] = pyFeas;
+  }
 }
 
 void CSpaceInterface::setVisibility(PyObject* pyVisible)
 {
   if(index < 0 || index >= (int)spaces.size() || spaces[index]==NULL) 
     throw PyException("Invalid cspace index");
-  Py_XDECREF(spaces[index]->visible);
+  for(size_t i=0;i<spaces[index]->visibleTests.size();i++)
+    Py_XDECREF(spaces[index]->visibleTests[i]);
   Py_XINCREF(pyVisible);
-  spaces[index]->visible = pyVisible;
+  spaces[index]->visibleTests.resize(1);
+  spaces[index]->visibleTests[0] = pyVisible;
+}
+
+void CSpaceInterface::addVisibilityTest(const char* name,PyObject* pyVis)
+{
+  if(index < 0 || index >= (int)spaces.size() || spaces[index]==NULL) 
+    throw PyException("Invalid cspace index");
+  int cindex = -1;
+  for(size_t i=0;i<spaces[index]->constraintNames.size();i++)
+    if(0==strcmp(spaces[index]->constraintNames[i].c_str(),name)) {
+      cindex = (int)i;
+      break;
+    }
+  spaces[index]->visibleTests.resize(spaces[index]->constraintNames.size(),NULL);
+  if(cindex < 0) {
+    Py_XINCREF(pyVis);
+    spaces[index]->visibleTests.push_back(pyVis);
+    spaces[index]->constraintNames.push_back(name);
+  }
+  else {
+    Py_XDECREF(spaces[index]->visibleTests[cindex]);
+    Py_XINCREF(pyVis);
+    spaces[index]->visibleTests[cindex] = pyVis;
+  }
 }
 
 void CSpaceInterface::setVisibilityEpsilon(double eps)
@@ -396,8 +481,9 @@ void CSpaceInterface::setVisibilityEpsilon(double eps)
     throw PyException("Invalid cspace index");
   if(eps <= 0) 
     throw PyException("Invalid epsilon");
-  Py_XDECREF(spaces[index]->visible);
-  spaces[index]->visible = NULL;
+  for(size_t i=0;i<spaces[index]->visibleTests.size();i++)
+    Py_XDECREF(spaces[index]->visibleTests[i]);
+  spaces[index]->visibleTests.resize(0);
   spaces[index]->edgeResolution = eps;
 }
 

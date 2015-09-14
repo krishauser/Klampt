@@ -33,7 +33,7 @@ def diff(a,b):
     range [-pi,pi]"""
     d = normalize(a)-normalize(b)
     if d < -math.pi: return d+twopi
-    if d > math.pi: return d+twopi
+    if d > math.pi: return d-twopi
     return d
 
 def interp(a,b,u):

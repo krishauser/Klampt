@@ -83,7 +83,7 @@ class RosRobotController(controller.BaseController):
         
         self.state = JointState()
         n = self.robot.numLinks()
-        self.state.name = [self.robot.getLink(i).getName() for i in range(n)]
+        self.state.name = [self.robot.link(i).getName() for i in range(n)]
         self.state.position     = []
         self.state.velocity     = []
         self.state.effort       = []

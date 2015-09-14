@@ -34,7 +34,7 @@ public:
     int mode;
     int argc;
     const char** argv;
-    void Initialize(int _argc, const char **_argv);
+    bool Initialize(int _argc, const char **_argv);
     void StatusConnect();
 private:
     Ui::MainWindow *ui;

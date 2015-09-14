@@ -431,6 +431,14 @@ string Geometry3D::type()
   return geom->TypeName();
 }
 
+bool Geometry3D::empty()
+{
+  if(!geomPtr) return true;
+  AnyCollisionGeometry3D* geom = reinterpret_cast<AnyCollisionGeometry3D*>(geomPtr);
+  if(geom->Empty()) return true;
+  return false;
+}
+
 TriangleMesh Geometry3D::getTriangleMesh()
 {
   TriangleMesh mesh;
@@ -1079,7 +1087,7 @@ RobotModelLink WorldModel::robotLink(int robot,int link)
   RobotModelLink r;
   r.world = index;
   r.robotIndex = robot;
-  r.robot = worlds[index]->world.robots[robot].robot;
+  r.robotPtr = worlds[index]->world.robots[robot].robot;
   r.index = link;
   return r;
 }
@@ -1090,8 +1098,8 @@ RobotModelLink WorldModel::robotLink(const char* robotname,const char* link)
   RobotModel rob=robot(robotname);
   r.world = index;
   r.robotIndex = rob.index;
-  r.robot = rob.robot;
-  if(rob.index < 0)
+  r.robotPtr = rob.robot;
+  if(rob.index < 0) 
     return r;
   r.index = -1;
   for(size_t i=0;i<rob.robot->links.size();i++)
@@ -1283,22 +1291,28 @@ Appearance WorldModel::appearance(int id)
 
 
 RobotModelLink::RobotModelLink()
-  :world(-1),robotIndex(-1),robot(NULL),index(-1)
+  :world(-1),robotIndex(-1),robotPtr(NULL),index(-1)
 {}
 
 RobotModel RobotModelLink::getRobot()
 {
+  fprintf(stderr,"RobotModelLink::getRobot() will be deprecated, please use robot() instead\n");
+  return robot();
+}
+
+RobotModel RobotModelLink::robot()
+{
   RobotModel r;
   r.world = world;
   r.index = robotIndex;
-  r.robot = robot;
+  r.robot = robotPtr;
   return r;
 }
 
 const char* RobotModelLink::getName()
 {
   if(index < 0) return "";
-  return robot->linkNames[index].c_str();
+  return robotPtr->linkNames[index].c_str();
 }
 
 int RobotModelLink::getIndex()
@@ -1308,16 +1322,16 @@ int RobotModelLink::getIndex()
 
 int RobotModelLink::getParent()
 {
-  return robot->parents[index];
+  return robotPtr->parents[index];
 }
 
 void RobotModelLink::setParent(int p)
 {
-  if(p < 0 || p >= (int)robot->links.size())
+  if(p < 0 || p >= (int)robotPtr->links.size())
     throw PyException("Invalid parent index");
 
   //TODO: check for circular references
-  robot->parents[index] = p;
+  robotPtr->parents[index] = p;
 }
 
 int RobotModelLink::getID()
@@ -1347,7 +1361,7 @@ Appearance RobotModelLink::appearance()
 Mass RobotModelLink::getMass()
 {
   Mass mass;
-  const RobotLink3D& link=robot->links[index];
+  const RobotLink3D& link=robotPtr->links[index];
   mass.mass=link.mass;
   mass.com.resize(3);
   mass.inertia.resize(9);
@@ -1365,7 +1379,7 @@ void RobotModelLink::setMass(const Mass& mass)
     throw PyException("Mass inertia does not have length 3 or 9");
   }
   Assert(mass.com.size()==3);
-  RobotLink3D& link=robot->links[index];
+  RobotLink3D& link=robotPtr->links[index];
   link.mass=mass.mass;
   link.com.set(&mass.com[0]);
   if(mass.inertia.size()==3) {
@@ -1381,19 +1395,19 @@ void RobotModelLink::setMass(const Mass& mass)
 
 void RobotModelLink::getWorldPosition(const double plocal[3],double pworld[3])
 {
-  RobotLink3D& link=robot->links[index];
+  RobotLink3D& link=robotPtr->links[index];
   (link.T_World*Vector3(plocal)).get(pworld);
 }
 
 void RobotModelLink::getWorldDirection(const double vlocal[3],double vworld[3])
 {
-  RobotLink3D& link=robot->links[index];
+  RobotLink3D& link=robotPtr->links[index];
   (link.T_World.R*Vector3(vlocal)).get(vworld);
 }
 
 void RobotModelLink::getLocalPosition(const double pworld[3],double plocal[3])
 {
-  RobotLink3D& link=robot->links[index];
+  RobotLink3D& link=robotPtr->links[index];
   Vector3 temp;
   link.T_World.mulInverse(Vector3(pworld),temp);
   temp.get(plocal);
@@ -1401,7 +1415,7 @@ void RobotModelLink::getLocalPosition(const double pworld[3],double plocal[3])
 
 void RobotModelLink::getLocalDirection(const double vworld[3],double vlocal[3])
 {
-  RobotLink3D& link=robot->links[index];
+  RobotLink3D& link=robotPtr->links[index];
   Vector3 temp;
   link.T_World.R.mulTranspose(Vector3(vworld),temp);
   temp.get(vlocal);
@@ -1410,69 +1424,69 @@ void RobotModelLink::getLocalDirection(const double vworld[3],double vlocal[3])
 
 void RobotModelLink::getTransform(double R[9],double t[3])
 {
-  const RobotLink3D& link=robot->links[index];
+  const RobotLink3D& link=robotPtr->links[index];
   link.T_World.R.get(R);
   link.T_World.t.get(t);
 }
 
 void RobotModelLink::setTransform(const double R[9],const double t[3])
 {
-  RobotLink3D& link=robot->links[index];
+  RobotLink3D& link=robotPtr->links[index];
   link.T_World.R.set(R);
   link.T_World.t.set(t);
-  robot->geometry[index].SetTransform(link.T_World);
+  robotPtr->geometry[index].SetTransform(link.T_World);
 }
 
 void RobotModelLink::getParentTransform(double R[9],double t[3])
 {
-  const RobotLink3D& link=robot->links[index];
+  const RobotLink3D& link=robotPtr->links[index];
   link.T0_Parent.R.get(R);
   link.T0_Parent.t.get(t);
 }
 
 void RobotModelLink::setParentTransform(const double R[9],const double t[3])
 {
-  RobotLink3D& link=robot->links[index];
+  RobotLink3D& link=robotPtr->links[index];
   link.T0_Parent.R.set(R);
   link.T0_Parent.t.set(t);
 }
 
 void RobotModelLink::getAxis(double axis[3])
 {
-  const RobotLink3D& link=robot->links[index];
+  const RobotLink3D& link=robotPtr->links[index];
   link.w.get(axis);
 }
 
 void RobotModelLink::setAxis(const double axis[3])
 {
-  RobotLink3D& link=robot->links[index];
+  RobotLink3D& link=robotPtr->links[index];
   link.w.set(axis);
 }
 
 void RobotModelLink::getJacobian(const double p[3],vector<vector<double> >& J)
 {
   Matrix Jmat;
-  robot->GetFullJacobian(Vector3(p),index,Jmat);
+  robotPtr->GetFullJacobian(Vector3(p),index,Jmat);
   copy(Jmat,J);
 }
 
 void RobotModelLink::getPositionJacobian(const double p[3],vector<vector<double> >& J)
 {
   Matrix Jmat;
-  robot->GetPositionJacobian(Vector3(p),index,Jmat);
+  robotPtr->GetPositionJacobian(Vector3(p),index,Jmat);
   copy(Jmat,J);
 }
 
 void RobotModelLink::getOrientationJacobian(vector<vector<double> >& J)
 {
   Matrix Jmat;
-  Jmat.resize(3,robot->links.size(),Zero);
+  Jmat.resize(3,robotPtr->links.size(),Zero);
   int j=index;
   while(j!=-1) {
     Vector3 w;
-    robot->GetOrientationJacobian(index,j,w);
+    robotPtr->GetOrientationJacobian(index,j,w);
     Jmat(0,j)=w.x; Jmat(1,j)=w.y; Jmat(2,j)=w.z;
-    j=robot->parents[j];
+    j=robotPtr->parents[j];
   }
   copy(Jmat,J);
 }
@@ -1480,21 +1494,21 @@ void RobotModelLink::getOrientationJacobian(vector<vector<double> >& J)
 void RobotModelLink::getVelocity(double out[3])
 {
   Vector3 v;
-  robot->GetWorldVelocity(Vector3(Zero),index,robot->dq,v);
+  robotPtr->GetWorldVelocity(Vector3(Zero),index,robotPtr->dq,v);
   v.get(out);
 }
 
 void RobotModelLink::getAngularVelocity(double out[3])
 {
   Vector3 v;
-  robot->GetWorldAngularVelocity(index,robot->dq,v);
+  robotPtr->GetWorldAngularVelocity(index,robotPtr->dq,v);
   v.get(out);
 }
 
 void RobotModelLink::getPointVelocity(const double plocal[3],double out[3])
 {
   Vector3 v;
-  robot->GetWorldVelocity(Vector3(plocal),index,robot->dq,v);
+  robotPtr->GetWorldVelocity(Vector3(plocal),index,robotPtr->dq,v);
   v.get(out);
 }
 
@@ -1512,34 +1526,40 @@ void RobotModelLink::drawWorldGL(bool keepAppearance)
 {
   glMatrixMode(GL_MODELVIEW);
   glPushMatrix();
-  GLDraw::glMultMatrix(Matrix4(robot->links[index].T_World));
+  GLDraw::glMultMatrix(Matrix4(robotPtr->links[index].T_World));
   drawLocalGL(keepAppearance);
   glPopMatrix();
 }
 
 RobotModelDriver::RobotModelDriver()
-  :world(-1),robotIndex(-1),robot(NULL),index(-1)
+  :world(-1),robotIndex(-1),robotPtr(NULL),index(-1)
 {}
 
 RobotModel RobotModelDriver::getRobot()
 {
+  fprintf(stderr,"RobotModelDriver::getRobot() will be deprecated, please use robot() instead\n");
+  return robot();
+}
+
+RobotModel RobotModelDriver::robot()
+{
   RobotModel r;
   r.world = world;
   r.index = robotIndex;
-  r.robot = robot;
+  r.robot = robotPtr;
   return r;
 }
 
 const char* RobotModelDriver::getName()
 {
   if(index < 0) return "";
-  return robot->driverNames[index].c_str();
+  return robotPtr->driverNames[index].c_str();
 }
 
 const char* RobotModelDriver::getType()
 {
   if(index < 0) return "";
-  switch(robot->drivers[index].type) {
+  switch(robotPtr->drivers[index].type) {
   case RobotJointDriver::Normal: return "normal";
   case RobotJointDriver::Affine: return "affine";
   case RobotJointDriver::Translation: return "translation";
@@ -1551,13 +1571,13 @@ const char* RobotModelDriver::getType()
 int RobotModelDriver::getAffectedLink()
 {
   if(index < 0) return -1;
-  return robot->drivers[index].linkIndices[0];
+  return robotPtr->drivers[index].linkIndices[0];
 }
 
 void RobotModelDriver::getAffectedLinks(std::vector<int>& links)
 {
-  if(index < 0) links.resize(0);
-  else links = robot->drivers[index].linkIndices;
+  if(index < 0) links.resize(0); 
+  else links = robotPtr->drivers[index].linkIndices;
 }
 
 void RobotModelDriver::getAffineCoeffs(std::vector<double>& scale,std::vector<double>& offset)
@@ -1567,28 +1587,28 @@ void RobotModelDriver::getAffineCoeffs(std::vector<double>& scale,std::vector<do
     offset.resize(0);
   }
   else {
-    scale = robot->drivers[index].affScaling;
-    offset = robot->drivers[index].affOffset;
+    scale = robotPtr->drivers[index].affScaling;
+    offset = robotPtr->drivers[index].affOffset;
   }
 }
 
 void RobotModelDriver::setValue(double val)
 {
-  robot->SetDriverValue(index,val);
+  robotPtr->SetDriverValue(index,val);
 }
 
 double RobotModelDriver::getValue()
 {
-  return robot->GetDriverValue(index);
+  return robotPtr->GetDriverValue(index);
 }
 void RobotModelDriver::setVelocity(double val)
 {
-  robot->SetDriverVelocity(index,val);
+  robotPtr->SetDriverVelocity(index,val);
 }
 
 double RobotModelDriver::getVelocity()
 {
-  return robot->GetDriverVelocity(index);
+  return robotPtr->GetDriverVelocity(index);
 }
 
 
@@ -1617,23 +1637,35 @@ int RobotModel::numLinks()
 
 RobotModelLink RobotModel::getLink(int linkindex)
 {
+  fprintf(stderr,"RobotModel::getLink() will be deprecated, please use link() instead\n");
+  return link(linkindex);
+}
+
+RobotModelLink RobotModel::link(int linkindex)
+{
   RobotModelLink link;
   link.world = world;
   link.robotIndex = index;
-  link.robot = robot;
+  link.robotPtr = robot;
   link.index = linkindex;
   return link;
 }
 
 RobotModelLink RobotModel::getLink(const char* name)
 {
+  fprintf(stderr,"RobotModel::getLink() will be deprecated, please use link() instead\n");
+  return link(name);
+}
+
+RobotModelLink RobotModel::link(const char* name)
+{
   for(size_t i=0;i<robot->linkNames.size();i++)
     if(string(name) == robot->linkNames[i]) {
-      return getLink((int)i);
+      return link((int)i);
     }
   RobotModelLink link;
   link.world = this->world;
-  link.robot = robot;
+  link.robotPtr = robot;
   link.robotIndex = index;
   link.index = -1;
   return link;
@@ -1648,15 +1680,27 @@ int RobotModel::numDrivers()
 
 RobotModelDriver RobotModel::getDriver(int driverindex)
 {
+  fprintf(stderr,"RobotModel::getDriver() will be deprecated, please use driver() instead\n");
+  return driver(driverindex);
+}
+
+RobotModelDriver RobotModel::driver(int driverindex)
+{
   RobotModelDriver link;
   link.world = world;
   link.robotIndex = index;
-  link.robot = robot;
+  link.robotPtr = robot;
   link.index = driverindex;
   return link;
 }
 
 RobotModelDriver RobotModel::getDriver(const char* name)
+{
+  fprintf(stderr,"RobotModel::getDriver() will be deprecated, please use driver() instead\n");
+  return driver(name);
+}
+
+RobotModelDriver RobotModel::driver(const char* name)
 {
   for(size_t i=0;i<robot->driverNames.size();i++)
     if(name == robot->driverNames[i]) {
@@ -1664,7 +1708,7 @@ RobotModelDriver RobotModel::getDriver(const char* name)
     }
   RobotModelDriver link;
   link.world = this->world;
-  link.robot = robot;
+  link.robotPtr = robot;
   link.robotIndex = index;
   link.index = -1;
   return link;
@@ -1779,6 +1823,17 @@ void RobotModel::enableSelfCollision(int link1,int link2,bool value)
     if(robot->selfCollisions(link1,link2))
       SafeDelete(robot->selfCollisions(link1,link2));
   }
+}
+
+bool RobotModel::selfCollides()
+{
+  /* old version
+  for(size_t i=0;i<robot->links.size();i++)
+    for(size_t j=0;j<robot->links.size();j++)
+      if(robot->SelfCollision(i,j)) return true;
+  return false;
+  */
+  return robot->SelfCollision();
 }
 
 void RobotModel::drawGL(bool keepAppearance)
@@ -2114,6 +2169,7 @@ Simulator::~Simulator()
 
 WorldModel Simulator::getWorld() const
 {
+  fprintf(stderr,"Simulator::getWorld() will be deprecated, please use world instead\n");
   return world;
 }
 
@@ -2184,8 +2240,14 @@ bool Simulator::inContact(int aid,int bid)
 
 void Simulator::contactForce(int aid,int bid,double res[3])
 {
-  sim->ContactForce(aid,bid).get(res);
+  sim->MeanContactForce(aid,bid).get(res);
 }
+
+void Simulator::contactTorque(int aid,int bid,double res[3])
+{
+  sim->MeanContactTorque(aid,bid).get(res);
+}
+
 
 void Simulator::getContacts(int aid,int bid,std::vector<std::vector<double> >& out)
 {
@@ -2304,13 +2366,27 @@ void Simulator::setSimStep(double dt)
 
 SimRobotController Simulator::getController(int robot)
 {
+  fprintf(stderr,"Simulator::getController() will be deprecated, please use controller() instead\n");
+  return controller(robot);
+}
+
+
+SimRobotController Simulator::controller(int robot)
+{
   SimRobotController c;
   c.sim = sim;
   c.index = robot;
   return c;
 }
 
+
 SimRobotController Simulator::getController(const RobotModel& robot)
+{
+  fprintf(stderr,"Simulator::getController() will be deprecated, please use controller() instead\n");
+  return controller(robot);
+}
+
+SimRobotController Simulator::controller(const RobotModel& robot)
 {
   SimRobotController c;
   c.sim = sim;
@@ -2431,29 +2507,46 @@ void SimBody::setSurface(const ContactParameters& res)
 }
 
 
-
 SimBody Simulator::getBody(const RobotModelLink& link)
 {
-  SimBody body;
-  body.body = sim->odesim.robot(link.robotIndex)->body(link.index);
-  body.geometry = sim->odesim.robot(link.robotIndex)->triMesh(link.index);
-  return body;
+  fprintf(stderr,"Simulator::getBody() will be deprecated, please use body() instead\n");
+  return body(link);
 }
 
 SimBody Simulator::getBody(const RigidObjectModel& object)
 {
-  SimBody body;
-  body.body = sim->odesim.object(object.index)->body();
-  body.geometry = sim->odesim.object(object.index)->triMesh();
-  return body;
+  fprintf(stderr,"Simulator::getBody() will be deprecated, please use body() instead\n");
+  return body(object);
 }
 
 SimBody Simulator::getBody(const TerrainModel& terrain)
 {
-  SimBody body;
-  body.body = NULL;
-  body.geometry = sim->odesim.envGeom(terrain.index);
-  return body;
+  fprintf(stderr,"Simulator::getBody() will be deprecated, please use body() instead\n");
+  return body(terrain);
+}
+
+SimBody Simulator::body(const RobotModelLink& link)
+{
+  SimBody b;
+  b.body = sim->odesim.robot(link.robotIndex)->body(link.index);
+  b.geometry = sim->odesim.robot(link.robotIndex)->triMesh(link.index);
+  return b;
+}
+
+SimBody Simulator::body(const RigidObjectModel& object)
+{
+  SimBody b;
+  b.body = sim->odesim.object(object.index)->body();
+  b.geometry = sim->odesim.object(object.index)->triMesh();
+  return b; 
+}
+
+SimBody Simulator::body(const TerrainModel& terrain)
+{
+  SimBody b;
+  b.body = NULL;
+  b.geometry = sim->odesim.envGeom(terrain.index);
+  return b;
 }
 
 void Simulator::getJointForces(const RobotModelLink& link,double out[6])
@@ -2465,8 +2558,8 @@ void Simulator::getJointForces(const RobotModelLink& link,double out[6])
   oderobot->GetLinkTransform(link.index,T);
   Vector3 mcomw = Vector3(fb.t1[0],fb.t1[1],fb.t1[2]);
   //convert moment about link's com to moment about localpos
-  //mp_w = (p-com) x f_w + mcom_w
-  Vector3 comw = T*link.robot->links[link.index].com;
+  //mp_w = (p-com) x f_w + mcom_w 
+  Vector3 comw = T*link.robotPtr->links[link.index].com;
   Vector3 mw = cross(comw,fw) + mcomw;
   //convert to local frame
   Vector3 f,m;
@@ -2555,8 +2648,18 @@ void SimRobotSensor::getMeasurements(std::vector<double>& out)
   sensor->GetMeasurements(out);
 }
 
-
 SimRobotSensor SimRobotController::getSensor(int sensorIndex)
+{
+  fprintf(stderr,"SimRobotController::getSensor() will be deprecated, please use sensor() instead\n");
+  return sensor(sensorIndex);
+}
+
+SimRobotSensor SimRobotController::getNamedSensor(const std::string& name)
+{
+  fprintf(stderr,"SimRobotController::getNamedSensor() will be deprecated, please use sensor() instead\n");
+  return sensor(name.c_str());
+}
+SimRobotSensor SimRobotController::sensor(int sensorIndex)
 {
   RobotSensors& sensors = sim->controlSimulators[index].sensors;
   if(sensorIndex < 0 || sensorIndex >= (int)sensors.sensors.size())
@@ -2564,12 +2667,12 @@ SimRobotSensor SimRobotController::getSensor(int sensorIndex)
   return SimRobotSensor(sensors.sensors[sensorIndex]);
 }
 
-SimRobotSensor SimRobotController::getNamedSensor(const std::string& name)
+SimRobotSensor SimRobotController::sensor(const char* name)
 {
   RobotSensors& sensors = sim->controlSimulators[index].sensors;
   SmartPointer<SensorBase> sensor = sensors.GetNamedSensor(name);
   if(sensor==NULL) {
-    fprintf(stderr,"Warning, sensor %s does not exist\n",name.c_str());
+    fprintf(stderr,"Warning, sensor %s does not exist\n",name);
   }
   return SimRobotSensor(sensor);
 }

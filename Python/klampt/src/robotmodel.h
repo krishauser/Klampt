@@ -42,27 +42,38 @@ struct ContactParameters
 };
 
 /** @brief A reference to a link of a RobotModel.
- *
- * Note that the mass is given local to the link frame, not about the COM.
  */
 class RobotModelLink
 {
  public:
   RobotModelLink();
+  ///Returns the ID of the robot link in its world (Note: not the same as getIndex())
   int getID();
   const char* getName();
+  ///Returns a reference to the link's robot.
+  RobotModel robot();
+  ///Old-style: will be deprecated
   RobotModel getRobot();
+  ///Returns the index of the link (on its robot).
   int getIndex();
+  ///Returns the index of the link's parent (on its robot).
   int getParent();
+  ///Sets the index of the link's parent (on its robot).
   void setParent(int p);
+  ///Returns a reference to the link's geometry
   Geometry3D geometry();
+  ///Returns a reference to the link's appearance
   Appearance appearance();
+  ///Retrieves the inertial properties of the link. (Note that the Mass is given with
+  ///origin at the link frame, not about the COM.)
   Mass getMass();
+  ///Sets the inertial proerties of the link. (Note that the Mass is given with origin
+  ///at the link frame, not about the COM.)
   void setMass(const Mass& mass);
   ///Gets transformation (R,t) to the parent link
   void getParentTransform(double out[9],double out2[3]);
   void setParentTransform(const double R[9],const double t[3]);
-  ///Gets the local rotational axis
+  ///Gets the local rotational / translational axis
   void getAxis(double out[3]);
   void setAxis(const double axis[3]);
 
@@ -93,12 +104,16 @@ class RobotModelLink
   void getAngularVelocity(double out[3]);
   ///Returns the world velocity of the point given the robot's current velocity
   void getPointVelocity(const double plocal[3],double out[3]);
+  ///Draws the link's geometry in its local frame.  If keepAppearance=true, the
+  ///current Appearance is honored.  Otherwise, just the geometry is drawn.
   void drawLocalGL(bool keepAppearance=true);
+  ///Draws the link's geometry in the world frame.  If keepAppearance=true, the
+  ///current Appearance is honored.  Otherwise, just the geometry is drawn.
   void drawWorldGL(bool keepAppearance=true);
 
   int world;
   int robotIndex;
-  Robot* robot;
+  Robot* robotPtr;
   int index;
 };
 
@@ -109,6 +124,9 @@ class RobotModelDriver
  public:
   RobotModelDriver();
   const char* getName();
+  ///Returns a reference to the driver's robot.
+  RobotModel robot();
+  ///Old-style: will be deprecated
   RobotModel getRobot();
   ///Currently can be "normal", "affine", "rotation", "translation", or "custom"
   const char* getType();
@@ -129,7 +147,7 @@ class RobotModelDriver
 
   int world;
   int robotIndex;
-  Robot* robot;
+  Robot* robotPtr;
   int index;
 };
 
@@ -151,13 +169,24 @@ class RobotModel
 {
  public:
   RobotModel();
+  ///Returns the ID of the robot in its world (Note: not the same as the robot index)
   int getID();
   const char* getName();
   int numLinks();
+  ///Returns a reference to the indexed link
+  RobotModelLink link(int index);
+  ///Returns a reference to the named link
+  RobotModelLink link(const char* name);
+  ///Old-style: will be deprecated
   RobotModelLink getLink(int index);
+  ///Old-style: will be deprecated
   RobotModelLink getLink(const char* name);
   int numDrivers();
+  RobotModelDriver driver(int index);
+  RobotModelDriver driver(const char* name);
+  ///Old-style: will be deprecated
   RobotModelDriver getDriver(int index);
+  ///Old-style: will be deprecated
   RobotModelDriver getDriver(const char* name);
 
   //kinematic and dynamic properties
@@ -175,24 +204,42 @@ class RobotModel
   void setTorqueLimits(const std::vector<double>& tmax);
 
   //dynamics functions
+  ///Returns the 3D center of mass at the current config
   void getCom(double out[3]);
+  ///Returns the 3xn Jacobian matrix of the current center of mass
   void getComJacobian(std::vector<std::vector<double> >& out);
+  ///Returns the nxn mass matrix B(q)
   void getMassMatrix(std::vector<std::vector<double> >& out);
+  ///Returns the inverse of the nxn mass matrix B(q)^-1 (faster than inverting result of getMassMatrix)
   void getMassMatrixInv(std::vector<std::vector<double> >& out);
+  ///Returns the Coriolis force matrix C(q,dq) for current config and velocity
   void getCoriolisForceMatrix(std::vector<std::vector<double> >& out);
+  ///Returns the Coriolis forces C(q,dq)*dq for current config and velocity (faster than computing matrix and doing product)
   void getCoriolisForces(std::vector<double>& out);
+  ///Returns the gravity force vector G(q) for the given workspace gravity vector g (usually (0,0,-9.8))
   void getGravityForces(const double g[3],std::vector<double>& out);
+  ///Computes the inverse dynamics (using Recursive Newton Euler solver)
   void torquesFromAccel(const std::vector<double>& ddq,std::vector<double>& out);
+  ///Computes the foward dynamics (using Recursive Newton Euler solver)
   void accelFromTorques(const std::vector<double>& t,std::vector<double>& out);
 
   //interpolation functions
+  ///Interpolates smoothly between two configurations, properly taking into account nonstandard joints
   void interpolate(const std::vector<double>& a,const std::vector<double>& b,double u,std::vector<double>& out);
+  ///Computes a distance between two configurations, properly taking into account nonstandard joints
   double distance(const std::vector<double>& a,const std::vector<double>& b);
+  ///Returns the configuration derivative at a as you interpolate toward b at unit speed.
   void interpolate_deriv(const std::vector<double>& a,const std::vector<double>& b,std::vector<double>& out);
 
   //geometry functions
+  ///Queries whether self collisions between two links is enabled
   bool selfCollisionEnabled(int link1,int link2);
+  ///Enables/disables self collisions between two links (depending on value)
   void enableSelfCollision(int link1,int link2,bool value);
+  ///Returns true if the robot is in self collision (faster than manual testing)
+  bool selfCollides();
+  ///Draws the robot geometry. If keepAppearance=true, the current appearance is honored.
+  ///Otherwise, only the raw geometry is drawn.
   void drawGL(bool keepAppearance=true);
 
   int world;
@@ -271,6 +318,7 @@ class WorldModel
   WorldModel(const WorldModel& w);
   ~WorldModel();
   const WorldModel& operator = (const WorldModel& w);
+  ///Reads from a world XML file.
   bool readFile(const char* fn);
   int numRobots();
   int numRobotLinks(int robot);
@@ -285,17 +333,32 @@ class WorldModel
   RigidObjectModel rigidObject(const char* name);
   TerrainModel terrain(int index);
   TerrainModel terrain(const char* name);
+  ///Creates a new empty robot. (Not terribly useful now since you can't resize the number of links yet)
   RobotModel makeRobot(const char* name);
+  ///Creates a new empty rigid object.
   RigidObjectModel makeRigidObject(const char* name);
+  ///Creates a new empty terrain 
   TerrainModel makeTerrain(const char* name);
+  ///Loads a robot from a .rob or .urdf file.  An empty robot is returned if loading fails.
   RobotModel loadRobot(const char* fn);
+  ///Loads a rigid object from a .obj or a mesh file.  An empty rigid object is returned if loading fails.
   RigidObjectModel loadRigidObject(const char* fn);
+  ///Loads a rigid object from a mesh file.  An empty terrain is returned if loading fails.
   TerrainModel loadTerrain(const char* fn);
+  ///Loads some element from a file, automatically detecting its type.  Meshes are interpreted
+  ///as terrains.  The ID is returned, or -1 if loading failed.
   int loadElement(const char* fn);
+  ///Retrieves a name for a given element ID
   std::string getName(int id);
+  ///Retrieves a geometry for a given element ID
   Geometry3D geometry(int id);
+  ///Retrieves an appearance for a given element ID
   Appearance appearance(int id);
+  ///Draws the entire world
   void drawGL();
+  ///If geometry loading is set to false, then only the kinematics are loaded from
+  ///disk, and no geometry / visualization / collision detection structures will be
+  ///loaded.  Useful for quick scripts that just use kinematics / dynamics of a robot.
   void enableGeometryLoading(bool enabled);
 
   //WARNING: do not modify this member directly

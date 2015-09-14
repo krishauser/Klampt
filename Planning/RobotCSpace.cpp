@@ -19,7 +19,7 @@ RobotCSpace::RobotCSpace(Robot& _robot)
 
 void RobotCSpace::Sample(Config& q)
 {
-  for(int i=0;i<robot.joints.size();i++) {
+  for(size_t i=0;i<robot.joints.size();i++) {
     int link = robot.joints[i].linkIndex;
     switch(robot.joints[i].type) {
     case RobotJoint::Weld:
@@ -137,7 +137,7 @@ void RobotCSpace::Properties(PropertyMap& map) const
   vector<Real> weights;
   if(jointWeights.empty()) weights.resize(robot.q.n,1.0);
   else weights = jointWeights;
-  for(int i=0;i<robot.joints.size();i++) {
+  for(size_t i=0;i<robot.joints.size();i++) {
     int link = robot.joints[i].linkIndex;
     switch(robot.joints[i].type) {
     case RobotJoint::Normal:
@@ -721,6 +721,7 @@ bool SingleRobotCSpace::CheckCollisionFree()
   Robot* robot = GetRobot();
   robot->UpdateGeometry();
 
+  /*
   if(!collisionPairsInitialized) InitializeCollisionPairs();
 
   for(size_t i=0;i<collisionQueries.size();i++) {
@@ -728,6 +729,26 @@ bool SingleRobotCSpace::CheckCollisionFree()
       return false;
     }
   }
+  return true;
+  */
+  //this method may be faster for many-DOF robots because it does broad-phase checking first to eliminate candidate collisions
+  int id = world.RobotID(index);
+  vector<int> idrobot(1,id);
+  vector<int> idothers;
+  for(size_t i=0;i<world.terrains.size();i++)
+    idothers.push_back(world.TerrainID(i));
+  for(size_t i=0;i<world.rigidObjects.size();i++)
+    idothers.push_back(world.RigidObjectID(i));
+  for(size_t i=0;i<world.robots.size();i++) {
+    if((int)i != index)
+      idothers.push_back(world.RobotID(i));
+  }
+  //environment collision check
+  pair<int,int> res = settings->CheckCollision(world,idrobot,idothers);
+  if(res.first >= 0) return false;
+  //self collision check
+  res = settings->CheckCollision(world,idrobot,idrobot);
+  if(res.first >= 0) return false;
   return true;
 }
 
@@ -856,7 +877,7 @@ void SingleRobotCSpace::Properties(PropertyMap& map) const
   vector<Real> weights;
   if(w.empty()) weights.resize(robot->q.n,1.0);
   else weights = w;
-  for(int i=0;i<robot->joints.size();i++) {
+  for(size_t i=0;i<robot->joints.size();i++) {
     int link = robot->joints[i].linkIndex;
     switch(robot->joints[i].type) {
     case RobotJoint::Normal:

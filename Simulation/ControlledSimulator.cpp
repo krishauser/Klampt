@@ -178,38 +178,40 @@ void ControlledRobotSimulator::Step(Real dt)
     oderobot->SetDriverFixedVelocity(i,cmd.desiredVelocity,cmd.torque);
       }
       else {
-    if(d.type == RobotJointDriver::Normal || d.type == RobotJointDriver::Translation || d.type == RobotJointDriver::Rotation) {
-      oderobot->AddDriverTorque(i,t(i));
-    }
-    else if(d.type == RobotJointDriver::Affine) {
-      Real q=cmd.qdes;
-      Real dq=cmd.dqdes;
-      Vector tjoints(d.linkIndices.size());
-      Vector driverBasis(d.linkIndices.size());
-      robot->SetDriverValue(i,q);
-      robot->SetDriverVelocity(i,dq);
-      //TODO: don't hard-code these!  But how to encode arbitrary drive
-      //trains?
-      Real mechStiffness = 20;
-      Real mechDamping = 0.2;
-      Real mechMaxTorque = 2;
-      for(size_t j=0;j<d.linkIndices.size();j++) {
-        int link = d.linkIndices[j];
-        driverBasis[j] = d.affScaling[j]; //todo: should be a transmission parameter in the joint driver
-        tjoints[j] = mechStiffness*(robot->q(link)-oderobot->GetLinkAngle(link)) + mechDamping*(robot->dq(link)-oderobot->GetLinkVelocity(link));
-      }
-      tjoints.madd(driverBasis,-tjoints.dot(driverBasis)/driverBasis.normSquared());
-      if(tjoints.norm() > mechMaxTorque)
-        tjoints *= mechMaxTorque/tjoints.norm();
-      //cout<<"Stabilizing torques: "<<tjoints<<endl;
-      tjoints.madd(driverBasis,t[i]);
-      //cout<<"Torques: "<<tjoints<<endl;
-      for(size_t j=0;j<d.linkIndices.size();j++)
-        oderobot->AddLinkTorque(d.linkIndices[j],tjoints[j]);
-    }
-    else {
-      FatalError("Unknown driver type");
-    }
+	if(d.type == RobotJointDriver::Normal || d.type == RobotJointDriver::Translation || d.type == RobotJointDriver::Rotation) {
+	  oderobot->AddDriverTorque(i,t(i));
+	}
+	else if(d.type == RobotJointDriver::Affine) {
+	  //figure out how the drive mechanism affects torques on the links
+	  Real q=cmd.qdes;
+	  Real dq=cmd.dqdes;
+	  Vector tjoints(d.linkIndices.size());
+	  Vector driverBasis(d.linkIndices.size());
+	  //robot joints now have desired q and dq
+	  robot->SetDriverValue(i,q);
+	  robot->SetDriverVelocity(i,dq);
+	  //TODO: don't hard-code these!  But how to encode arbitrary drive
+	  //trains?
+	  Real mechStiffness = 20;
+	  Real mechDamping = 0.2;
+	  Real mechMaxTorque = 2;
+	  for(size_t j=0;j<d.linkIndices.size();j++) {
+	    int link = d.linkIndices[j];
+	    driverBasis[j] = d.affScaling[j]; //todo: should be a transmission parameter in the joint driver
+	    tjoints[j] = mechStiffness*(robot->q(link)-oderobot->GetLinkAngle(link)) + mechDamping*(robot->dq(link)-oderobot->GetLinkVelocity(link));
+	  }
+	  tjoints.madd(driverBasis,-tjoints.dot(driverBasis)/driverBasis.normSquared());
+	  if(tjoints.norm() > mechMaxTorque)
+	    tjoints *= mechMaxTorque/tjoints.norm();
+	  //cout<<"Stabilizing torques: "<<tjoints<<endl;
+	  tjoints.madd(driverBasis,t[i]);
+	  //cout<<"Torques: "<<tjoints<<endl;
+	  for(size_t j=0;j<d.linkIndices.size();j++) 
+	    oderobot->AddLinkTorque(d.linkIndices[j],tjoints[j]);
+	}
+	else {
+	  FatalError("Unknown driver type");
+	}
       }
       if(cmd.mode == ActuatorCommand::PID) {
     //advance PID controller

@@ -1,6 +1,8 @@
 #include "ODEGeometry.h"
 #include "ODECommon.h"
 #include "ODECustomGeometry.h"
+#include <meshing/TriMeshOperators.h>
+#include <meshing/VolumeGrid.h>
 #include <ode/ode.h>
 #include <ode/common.h>
 #include <GLdraw/GL.h>
@@ -10,7 +12,7 @@ using namespace Meshing;
 #define USING_GIMPACT 0
 
 ODEGeometry::ODEGeometry()
-  :triMeshDataID(0),geomID(0),verts(NULL),indices(NULL),normals(NULL),numVerts(0),numTris(0)
+  :triMeshDataID(0),geomID(0),verts(NULL),indices(NULL),normals(NULL),numVerts(0),numTris(0),geometrySelfAllocated(false)
 {
   surface.kRestitution = 0;
   surface.kFriction = 0;
@@ -122,6 +124,10 @@ void ODEGeometry::Clear()
   SafeArrayDelete(indices);
   SafeArrayDelete(normals);
   numTris = numVerts = 0;
+  if(geometrySelfAllocated) {
+    geometrySelfAllocated = false;
+    delete collisionGeometry;
+  }
   collisionGeometry = NULL;
 }
 
@@ -174,7 +180,7 @@ void ODEGeometry::SetPadding(Real padding)
     dGetCustomGeometryData(geom())->outerMargin = padding;
   }
   else {
-    //printf("Not using boundary layer, setting padding %g has no effect\n",padding);
+    //fprintf(stderr,"Not using boundary layer, setting padding %g has no effect\n",padding);
   }
 }
 
@@ -184,4 +190,95 @@ Real ODEGeometry::GetPadding()
     return dGetCustomGeometryData(geom())->outerMargin;
   else
     return 0;
+}
+
+AnyCollisionGeometry3D* _Preshrink(AnyCollisionGeometry3D* geom,Real padding) {
+  if(padding==0) return geom;
+  switch(geom->type) {
+  case AnyCollisionGeometry3D::Primitive:
+    fprintf(stderr,"SetPaddingWithPreshink: Cannot shrink geometric primitives\n");
+    return geom;
+  case AnyCollisionGeometry3D::PointCloud:
+    fprintf(stderr,"SetPaddingWithPreshink: Cannot shrink point clouds\n");
+    return geom;
+  case AnyCollisionGeometry3D::TriangleMesh:
+    {
+      const Meshing::TriMesh& morig = geom->AsTriangleMesh();
+      Meshing::TriMeshWithTopology mnew;
+      mnew.verts = morig.verts;
+      mnew.tris = morig.tris;
+      int numflips = Meshing::ApproximateShrink(mnew,padding);
+      if(numflips > 0) {
+	fprintf(stderr,"SetPaddingWithPreshink: Warning, mesh shrinkage by amount %g created %d triangle flips\n",padding,numflips);
+      }
+      AnyCollisionGeometry3D* res = new AnyCollisionGeometry3D(mnew);
+      res->margin = geom->margin;
+      res->InitCollisions();
+      return res;
+    }
+    break;
+  case AnyCollisionGeometry3D::ImplicitSurface:
+    {
+      //this doesn't really make sense to do, but if the user wants it...
+      const Meshing::VolumeGrid& vgrid = geom->AsImplicitSurface();
+      Meshing::VolumeGrid vgridnew = vgrid;
+      vgridnew.Add(-padding);
+      AnyCollisionGeometry3D* res = new AnyCollisionGeometry3D(vgridnew);
+      res->margin = geom->margin;
+      return res;
+    }
+  case AnyCollisionGeometry3D::Group:
+    {
+      fprintf(stderr,"TODO: Can't do preshrink for group geometries yet\n");
+      return geom;
+    }
+    break;
+  default: 
+    FatalError("Invalid geometry type %s\n",geom->TypeName());
+    return geom;
+  }
+}
+
+
+AnyCollisionGeometry3D* ODEGeometry::SetPaddingWithPreshrink(Real padding,bool inplace)
+{
+  if(collisionGeometry) {
+    printf("ODEGeometry::SetPaddingWithPreshrink: Working...");
+    fflush(stdout);
+    AnyCollisionGeometry3D* newgeom = _Preshrink(collisionGeometry,padding);
+    printf(" Done.\n");
+    if(collisionGeometry != newgeom) {
+      if(inplace) {
+	//modify original geometry
+	collisionGeometry->data = newgeom->data;
+	collisionGeometry->collisionData = newgeom->collisionData;
+      }
+      else {
+	//changing geometry without touching original pointer, need to re-add to the geom's space
+	collisionGeometry = newgeom;
+	geometrySelfAllocated = true;
+	//get old data
+	Vector3 offset = dGetCustomGeometryData(geomID)->odeOffset;
+	dSpaceID space = dGeomGetSpace(geomID);
+	dBodyID body = dGeomGetBody(geomID);
+	void* data = dGeomGetData(geomID);
+	dSpaceRemove(space,geomID);
+	//deallocate old geometry
+	dGeomDestroy(geomID);
+	if(collisionGeometry != NULL) {
+	  geomID = dCreateCustomGeometry(collisionGeometry,0.0);
+	  dGetCustomGeometryData(geomID)->odeOffset = offset;
+	  dGeomSetBody(geomID,body);
+	  dGeomSetData(geomID,data);
+	  dSpaceAdd(space,geomID);
+	}
+      }
+    }
+    SetPadding(padding);
+    return collisionGeometry;
+  }
+  else {
+    fprintf(stderr,"ODEGeometry::SetPaddingWithPreshrink: Not using boundary layer, setting padding/preshrink %g has no effect\n",padding);
+    return NULL;
+  }
 }

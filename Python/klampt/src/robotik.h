@@ -20,9 +20,9 @@ class IKObjective
 {
  public:
   IKObjective();
-  ///The link that is constrained
+  ///The index of the robot link that is constrained
   int link() const;
-  ///The destination link, or -1 if fixed to the world
+  ///The index of the destination link, or -1 if fixed to the world
   int destLink() const;
   ///Returns the number of position dimensions constrained (0-3)
   int numPosDims() const;
@@ -83,6 +83,10 @@ class IKSolver
   void setActiveDofs(const std::vector<int>& active);
   /// Gets the active degrees of freedom
   void getActiveDofs(std::vector<int>& out);
+  /// Sets limits on the robot's configuration.  If empty, this turns off joint limits.
+  void setJointLimits(const std::vector<double>& qmin,const std::vector<double>& qmax);
+  /// Gets the limits on the robot's configuration (by default this is the robot's joint limits
+  void getJointLimits(std::vector<double>& out,std::vector<double>& out2);
 
   /// Returns a vector describing the error of the objective
   void getResidual(std::vector<double>& out);
@@ -101,8 +105,9 @@ class IKSolver
 
   RobotModel robot;
   std::vector<IKObjective> objectives;
-  bool useJointLimits;
   std::vector<int> activeDofs;
+  bool useJointLimits;
+  std::vector<double> qmin,qmax;
 };
 
 

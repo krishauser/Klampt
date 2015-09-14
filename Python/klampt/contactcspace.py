@@ -25,12 +25,12 @@ class ContactCSpace(AdaptiveCSpace):
             #construct from the contact list
             objs = set()
             for (o1,o2) in self.contactMap.iterKeys():
-                if hasattr(o1,'getRobot'): #it's a RobotModelLink
-                    objs.insert(o1.getRobot())
+                if hasattr(o1,'robot'): #it's a RobotModelLink
+                    objs.insert(o1.robot())
                 elif o1 != None:
                     objs.insert(o1)
-                if hasattr(o2,'getRobot'): #it's a RobotModelLink
-                    objs.insert(o2.getRobot())
+                if hasattr(o2,'robot'): #it's a RobotModelLink
+                    objs.insert(o2.robot())
                 elif o2 != None:
                     objs.insert(o2)
             movingObjects = list(objs)

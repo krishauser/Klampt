@@ -261,7 +261,7 @@ def make(klampt_robot_model):
     """
     global ros_initialized
     robotName = klampt_robot_model.getName()
-    linkNames = [klampt_robot_model.getLink(i).getName() for i in range(klampt_robot_model.numLinks())]
+    linkNames = [klampt_robot_model.link(i).getName() for i in range(klampt_robot_model.numLinks())]
     if not ros_initialized:
         ros_initialized = True
         rospy.init_node('klampt_sim')
