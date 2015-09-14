@@ -155,7 +155,10 @@ bool RigidObject::Load(const char* fn)
       f.erase("kDamping");
     }
     if(f.count("autoMass")!=0) {
-      SetMassFromGeometry(mass);
+      if(f.count("com")!=0) //com specified, compute inertia about given com
+	inertia = Inertia(geometry,com,mass);
+      else
+	SetMassFromGeometry(mass);
       f.erase("autoMass");
     }
     if(!f.empty()) {
