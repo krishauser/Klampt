@@ -563,6 +563,8 @@ void setPlanSetting(const char* setting,double value)
     factory.gridResolution = value;
   else if(0==strcmp(setting,"suboptimalityFactor")) 
     factory.suboptimalityFactor = value;
+  else if(0==strcmp(setting,"ignoreConnectedComponents")) 
+    factory.ignoreConnectedComponents = (bool)(int)(value);
   else if(0==strcmp(setting,"randomizeFrequency"))
     factory.randomizeFrequency = (int)value;
   else if(0==strcmp(setting,"shortcut"))

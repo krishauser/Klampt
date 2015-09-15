@@ -12,6 +12,10 @@ endif(COMMAND cmake_policy)
 
 SET (CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/CMakeModules")
 
+IF(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+  SET (GLUI_INCLUDE_DIR "/usr/local/include")
+ENDIF(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+
 # COMPILER SETTINGS (default: Release) and flags
 INCLUDE(CompilerSettings)
 

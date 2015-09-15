@@ -2,6 +2,7 @@ from distutils.core import setup,Extension
 import distutils.util
 import os
 import glob
+import sys
 
 #Parse settings from CMake
 includeDirs = """${KLAMPT_INCLUDE_DIRS}""".split(';')
@@ -45,6 +46,10 @@ rssourcefiles = commonfiles + ['robotsim.cpp','robotik.cpp','robotsim_wrap.cxx']
 mpsourcefiles = commonfiles + ['motionplanning.cpp','motionplanning_wrap.cxx']
 rfsourcefiles = commonfiles + ['rootfind.cpp','pyvectorfield.cpp','rootfind_wrap.cxx']
 
+extra_link_args = []
+if sys.platform == 'darwin':
+  extra_link_args = ['-framework', 'OpenGL']
+
 setup(name='Klampt',
       version='@KLAMPT_VERSION@',
       description="PyKlamp't",
@@ -57,6 +62,7 @@ setup(name='Klampt',
                              define_macros=commondefines,
                              library_dirs=libdirs,
                              libraries=libs,
+                             extra_link_args=extra_link_args,
                              language='c++'),
                    Extension('klampt._motionplanning',
                              [os.path.join('klampt/src',f) for f in mpsourcefiles],
@@ -64,6 +70,7 @@ setup(name='Klampt',
                              define_macros=commondefines,
                              library_dirs=libdirs,
                              libraries=libs,
+                             extra_link_args=extra_link_args,
                              language='c++'),
                    Extension('klampt._rootfind',
                              [os.path.join('klampt/src',f) for f in rfsourcefiles],
@@ -71,6 +78,7 @@ setup(name='Klampt',
                              define_macros=commondefines,
                              library_dirs=libdirs,
                              libraries=libs,
+                             extra_link_args=extra_link_args,
                              language='c++')],
       py_modules=['klampt.robotsim','klampt.motionplanning','klampt.rootfind'],
       packages=['klampt']
