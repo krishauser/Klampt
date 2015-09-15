@@ -361,7 +361,7 @@ if glcommon._PyQtAvailable:
             QDialog.__init__(self)
             glwidget.setMinimumSize(glwidget.width,glwidget.height)
             glwidget.setMaximumSize(4000,4000)
-            glwidget.setSizePolicy(QSizePolicy(QSizePolicy.Maximum))
+            glwidget.setSizePolicy(QSizePolicy(QSizePolicy.Maximum,QSizePolicy.Maximum))
             self.instructions = QLabel()
             self.description = QLabel()
             self.description2 = QLabel("Press OK to save, Cancel to continue without saving")
