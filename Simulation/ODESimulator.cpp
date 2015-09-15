@@ -464,7 +464,7 @@ void ClusterContactsMerge(vector<dContactGeom>& contacts,int maxClusters,Real cl
     pts[i][6] = contacts[i].depth;
   }
 
-  Timer timer;
+  //Timer timer;
   Statistics::HierarchicalClustering clust;
   clust.Build(pts,maxClusters,Statistics::HierarchicalClustering::AverageLinkage);
   //cout<<"Clustering time: "<<timer.ElapsedTime()<<endl;
@@ -602,13 +602,19 @@ void ClusterContacts(vector<dContactGeom>& contacts,int maxClusters,Real cluster
   if(contacts.size()*maxClusters > gMaxKMeansSize && contacts.size()*contacts.size() > gMaxHClusterSize) {
     int minsize = Max((int)gMaxKMeansSize/maxClusters,(int)Sqrt(Real(gMaxHClusterSize)));
     printf("ClusterContacts: subsampling %d to %d contacts\n",(int)contacts.size(),minsize);
-    //subsample
+    vector<dContactGeom> subcontacts(minsize);
+    //random subsample
+    /*
     vector<int> subsample(contacts.size());
     RandomPermutation(subsample);
     subsample.resize(minsize);
-    vector<dContactGeom> subcontacts(subsample.size());
     for(size_t i=0;i<subsample.size();i++)
       subcontacts[i] = contacts[subsample[i]];
+    */
+    //deterministic subsample
+    for(int i=0;i<minsize;i++) {
+      subcontacts[i] = contacts[(i*minsize)/contacts.size()];
+    }
     swap(subcontacts,contacts);
   }
   size_t hclusterSize = contacts.size()*contacts.size();
