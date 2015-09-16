@@ -201,7 +201,7 @@ class Simulator
  public:
   /// Constructs the simulator from a WorldModel.  If the WorldModel was
   /// loaded from an XML file, then the simulation setup is loaded from it.
-  Simulator(const WorldModel& model);
+  Simulator(const WorldModel& model,const char* settings=NULL);
   ~Simulator();
 
   /// Resets to the initial state (same as setState(initialState))

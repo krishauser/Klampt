@@ -4837,8 +4837,9 @@ class Simulator(_object):
     __getattr__ = lambda self, name: _swig_getattr(self, Simulator, name)
     __repr__ = _swig_repr
 
-    def __init__(self, model):
+    def __init__(self, model, settings=None):
         """
+        __init__(Simulator self, WorldModel model, char const * settings=None) -> Simulator
         __init__(Simulator self, WorldModel model) -> Simulator
 
         Simulator::Simulator(const WorldModel &model)
@@ -4847,7 +4848,7 @@ class Simulator(_object):
         loaded from an XML file, then the simulation setup is loaded from it.
 
         """
-        this = _robotsim.new_Simulator(model)
+        this = _robotsim.new_Simulator(model, settings)
         try:
             self.this.append(this)
         except:

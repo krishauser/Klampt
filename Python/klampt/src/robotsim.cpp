@@ -2110,8 +2110,7 @@ void TerrainModel::drawGL(bool keepAppearance)
 }
 
 
-
-Simulator::Simulator(const WorldModel& model)
+Simulator::Simulator(const WorldModel& model,const char* settings)
 {
 #ifdef dDOUBLE
   if(dCheckConfiguration("ODE_double_precision")!=1) {
@@ -2127,6 +2126,10 @@ Simulator::Simulator(const WorldModel& model)
   index = createSim();
   world = model;
   sim = &sims[index]->sim;
+  if(settings && 0==strcmp(settings,"no_blem")) {
+    printf("Turning off boundary layer collisions\n");
+    sim->odesim.GetSettings().boundaryLayerCollisions = false;
+  }
 
   //initialize simulation
   printf("Initializing simulation...\n");
@@ -2156,8 +2159,8 @@ Simulator::Simulator(const WorldModel& model)
   }
 
   //TEMP: play around with auto disable of rigid objects
-  for(size_t i=0;i<sim->odesim.numObjects();i++)
-    dBodySetAutoDisableFlag(sim->odesim.object(i)->body(),1);
+  //for(size_t i=0;i<sim->odesim.numObjects();i++)
+  //    dBodySetAutoDisableFlag(sim->odesim.object(i)->body(),1);
 
   sim->WriteState(initialState);
 }
