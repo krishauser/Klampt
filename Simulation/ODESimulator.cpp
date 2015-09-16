@@ -594,6 +594,13 @@ void ClusterContactsKMeans(vector<dContactGeom>& contacts,int maxClusters,Real c
   }
 }
 
+
+bool depthGreater(const dContactGeom& a,const dContactGeom& b)
+{
+  return a.depth > b.depth;
+}
+
+
 void ClusterContacts(vector<dContactGeom>& contacts,int maxClusters,Real clusterNormalScale)
 {
   gPreclusterContacts += contacts.size();
@@ -619,10 +626,17 @@ void ClusterContacts(vector<dContactGeom>& contacts,int maxClusters,Real cluster
   }
   size_t hclusterSize = contacts.size()*contacts.size();
   size_t kmeansSize = contacts.size()*maxClusters;
-  if(hclusterSize < gMaxHClusterSize)
-    ClusterContactsMerge(contacts,maxClusters,clusterNormalScale);
-  else 
-    ClusterContactsKMeans(contacts,maxClusters,clusterNormalScale);
+  //if(hclusterSize < gMaxHClusterSize)
+  //ClusterContactsMerge(contacts,maxClusters,clusterNormalScale);
+  //else 
+  ClusterContactsKMeans(contacts,maxClusters,clusterNormalScale);
+  /*
+  //TEST: contact depth sorting
+  if(contacts.size() > maxClusters) {
+    sort(contacts.begin(),contacts.end(),depthGreater);
+    contacts.resize(maxClusters);
+  }
+  */
 }
 
 void MergeContacts(vector<dContactGeom>& contacts,double posTolerance,double oriTolerance)
