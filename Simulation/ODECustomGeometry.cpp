@@ -92,7 +92,13 @@ int VertexIndex(const Vector3& b)
 
 Vector3 VertexNormal(const CollisionMesh& m,int tri,int vnum)
 {
-  Assert(!m.incidentTris.empty());
+  if(m.incidentTris.empty()) {
+    fprintf(stderr,"VertexNormal: mesh is not properly initialized with incidentTris array?\n");
+    return Vector3(0.0);
+    FatalError("VertexNormal: mesh is not properly initialized with incidentTris array?");
+  }
+  Assert(tri >= 0 && tri < m.incidentTris.size());
+  Assert(vnum >= 0 && vnum < 3);
   int v=m.tris[tri][vnum];
   Vector3 n(Zero);
   for(size_t i=0;i<m.incidentTris[v].size();i++)
@@ -103,6 +109,10 @@ Vector3 VertexNormal(const CollisionMesh& m,int tri,int vnum)
 
 Vector3 EdgeNormal(const CollisionMesh& m,int tri,int e)
 {
+  if(m.triNeighbors.empty()) {
+    fprintf(stderr,"EdgeNormal: Warning, mesh is not properly initialized with triNeighbors\n");
+    return Vector3(0.0);
+  }
   Assert(!m.triNeighbors.empty());
   Vector3 n=m.TriangleNormal(tri);
   if(m.triNeighbors[tri][e] != -1) {
