@@ -1076,6 +1076,7 @@ bool Robot::LoadRob(const char* fn) {
 		}
 	}
 
+
 	//Initialize self collisions -- pre subchain mounting
 	CleanupSelfCollisions();
 	vector<pair<string,string> > residualSelfCollisions,residualNoSelfCollisions;
@@ -1112,6 +1113,7 @@ bool Robot::LoadRob(const char* fn) {
 	}
 
 
+	timer.Reset();
 	//do the mounting of subchains
 	for (size_t i = 0; i < mountLinks.size(); i++) {
 		if (!Geometry::AnyGeometry3D::CanLoadExt(FileExtension(mountFiles[i].c_str()))) {
@@ -1176,7 +1178,6 @@ bool Robot::LoadRob(const char* fn) {
 	  Assert(link1 < link2);
 	  SafeDelete(selfCollisions(link1,link2));
 	}
-
 	printf("Done loading robot file %s.\n",fn);
 	return true;
 }
@@ -1668,7 +1669,12 @@ void Robot::Mount(int link, const Robot& subchain, const RigidTransform& T) {
 	concat(accMax, subchain.accMax);
 	ArrayUtils::concat(geometry, subchain.geometry);
 	ArrayUtils::concat(geomFiles, subchain.geomFiles);
-	InitCollisions();
+	for(size_t i=0;i<geometry.size();i++) {
+	  //do we need to re-init collisions?
+	  if(geometry[i].collisionData.empty()) {
+	    geometry[i].InitCollisions();
+	  }
+	}
 	ArrayUtils::concat(envCollisions, subchain.envCollisions);
 	concat(selfCollisions, subchain.selfCollisions);
 	//need to re-initialize the self collision pointers
