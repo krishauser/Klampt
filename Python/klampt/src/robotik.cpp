@@ -244,18 +244,32 @@ void IKSolver::getActiveDofs(std::vector<int>& out)
 
 void IKSolver::setJointLimits(const std::vector<double>& _qmin,const std::vector<double>& _qmax)
 {
-  qmin = _qmin;
-  qmax = _qmax;
+  if(_qmin.empty()) {
+    useJointLimits=false;
+    qmin.resize(0);
+    qmax.resize(0);
+  }
+  else {
+    qmin = _qmin;
+    qmax = _qmax;
+    useJointLimits = true;
+  }
 }
 
 void IKSolver::getJointLimits(std::vector<double>& out,std::vector<double>& out2)
 {
-  if(qmin.empty()) {
-    robot.getJointLimits(out,out2);
+  if(!useJointLimits) {
+    out.resize(0);
+    out2.resize(0);
   }
   else {
-    out = qmin;
-    out2 = qmax;
+    if(qmin.empty()) {
+      robot.getJointLimits(out,out2);
+    }
+    else {
+      out = qmin;
+      out2 = qmax;
+    }
   }
 }
 
