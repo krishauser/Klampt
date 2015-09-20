@@ -97,7 +97,7 @@ Vector3 VertexNormal(const CollisionMesh& m,int tri,int vnum)
     return Vector3(0.0);
     FatalError("VertexNormal: mesh is not properly initialized with incidentTris array?");
   }
-  Assert(tri >= 0 && tri < m.incidentTris.size());
+  Assert(tri >= 0 && tri < (int)m.incidentTris.size());
   Assert(vnum >= 0 && vnum < 3);
   int v=m.tris[tri][vnum];
   Vector3 n(Zero);
