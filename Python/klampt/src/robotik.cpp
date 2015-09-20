@@ -353,8 +353,14 @@ void IKSolver::sampleInitial()
 {
   vector<int> active;
   getActiveDofs(active);
-  for(size_t i=0;i<active.size();i++)
-    robot.robot->q(active[i]) = Rand(robot.robot->qMin(active[i]),robot.robot->qMax(active[i]));
+  if(qmin.empty()) {
+    for(size_t i=0;i<active.size();i++)
+      robot.robot->q(active[i]) = Rand(robot.robot->qMin(active[i]),robot.robot->qMax(active[i]));
+  }
+  else {
+    for(size_t i=0;i<active.size();i++)
+      robot.robot->q(active[i]) = Rand(qmin[active[i]],qmax[active[i]]);
+  }
   robot.robot->UpdateFrames();
 }
 
