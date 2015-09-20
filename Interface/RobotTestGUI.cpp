@@ -109,10 +109,14 @@ void RobotTestBackend::RenderWorld()
     }
     //this will set the hover colors
     allWidgets.DrawGL(viewport);
-    viewRobot.Draw();
+    //viewRobot.Draw();
   }
   else {
+    for(size_t i=0;i<robotWidgets.size();i++)
+      robotWidgets[i].linkPoser.draw = 0;
     allWidgets.DrawGL(viewport);
+    for(size_t i=0;i<robotWidgets.size();i++)
+      robotWidgets[i].linkPoser.draw = 1;
   }
   if(draw_com) {
     viewRobot.DrawCenterOfMass();

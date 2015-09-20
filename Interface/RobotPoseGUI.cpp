@@ -158,7 +158,8 @@ void RobotPoseBackend::RenderWorld()
     }
     if(draw_poser)
       allWidgets.DrawGL(viewport);
-    viewRobot.Draw();
+    else
+      viewRobot.Draw();
   }
   else {
     if(draw_frame && draw_poser) {
