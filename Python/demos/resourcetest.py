@@ -15,30 +15,28 @@ print "Showing robot in modal dialog box"
 visualization.add("robot",world.robot(0))
 visualization.add("ee",world.robot(0).link(11).getTransform())
 visualization.dialog()
-
-import threading
 import time
 
 print "Showing threaded visualization"
-lock = threading.Lock()
-visualization.show(lock)
+visualization.show()
 for i in range(3):
-    lock.acquire()
+    visualization.lock()
     q = world.robot(0).getConfig()
     q[9] = 3.0
     world.robot(0).setConfig(q)
-    lock.release()
+    visualization.unlock()
     time.sleep(1.0)
     if not visualization.shown():
         break
-    lock.acquire()
+    visualization.lock()
     q = world.robot(0).getConfig()
     q[9] = -1.0
     world.robot(0).setConfig(q)
-    lock.release()
+    visualization.unlock()
     time.sleep(1.0)
     if not visualization.shown():
         break
+print "Hiding visualization window"
 visualization.show(False)
 
 #look in resources/athlete/
