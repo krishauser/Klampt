@@ -130,11 +130,13 @@ def show(visible=True):
     global _vis,_globalLock
     if visible == False:
         _hide()
-        return
-    if _vis==None:
-        print "Visualization disabled"
-        return
-    _show()
+    else:
+        if _vis==None:
+            print "Visualization disabled"
+            return
+        else:
+            _show()
+    return
 
 def lock():
     global _globalLock
@@ -960,10 +962,10 @@ if glcommon._PyQtAvailable:
                 if _showwindow:
                     _window.show()
                 else:
+                    _widget.setParent(None)
                     _window.hide()
                     _showwindow = False
                     _window = None
-                    _widget.setParent(None)
             else:
                 if _showwindow:
                     _window=_MyWindow()
