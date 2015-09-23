@@ -3,7 +3,10 @@ from contact import *
 from cspaceutils import AdaptiveCSpace
 
 class ContactCSpace(AdaptiveCSpace):
-    """A cspace with contacts that impose closed-chain constraints."""
+    """A cspace with contacts that impose closed-chain constraints.
+
+    TODO: IMPLEMENTATION IS NOT DONE YET
+    """
     
     def __init__(self,world,contacts,movingObjects=None,collider=None):
         """Initializes the ContactCSpace.  The members solver, contactMap,
