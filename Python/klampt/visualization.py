@@ -37,9 +37,9 @@ def remove(name): removes an item from the visualization.
 def hide(name,hidden=True): hides/unhides an item.  The item is not removed,
     it just becomes invisible.
 def hideLabel(name,hidden=True): hides/unhides an item's text label.
-def animate(name,animation,speed=1.0): TODO: implement me. Should send
-    an animation to the object.  May be a Trajectory or a list of
-    configurations
+def animate(name,animation,speed=1.0): Sends an animation to the object.
+    May be a Trajectory or a list of configurations.  Works with points,
+    so3 elements, se3 elements, rigid objects, or robots.
 def setAppearance(name,appearance): changes the Appearance of an item.
 def revertAppearance(name): restores the Appearance of an item
 def setAttribute(name,attribute,value): sets an attribute of the appearance
