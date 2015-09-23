@@ -194,6 +194,7 @@ bool Robot::LoadRob(const char* fn) {
 	  return false;
 	}
 	printf("Reading robot file %s...\n", fn);
+	string lastValidName;
 	int lineno = 0;
 	while (in) {
 		//cout<<"Reading line "<<name<<"..."<<endl;
@@ -595,10 +596,11 @@ bool Robot::LoadRob(const char* fn) {
 			}
 			else mountNames.push_back(name);
 		} else {
-			fprintf(stderr, "   Invalid robot property %s on line %d\n",
-					name.c_str(), lineno);
+			fprintf(stderr, "   Invalid robot property %s on line %d, preceded by property \"%s\"\n",
+				name.c_str(), lineno,lastValidName.c_str());
 			return false;
 		}
+		lastValidName = name;
 		if (ss.bad()) {
 			fprintf(stderr,
 					"   Error encountered while reading robot property %s on line %d\n",
