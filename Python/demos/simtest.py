@@ -4,6 +4,7 @@ import sys
 from klampt import *
 from klampt.glprogram import *
 import importlib
+from klampt.simlog import *
 
 class MyGLViewer(GLRealtimeProgram):
     def __init__(self,world):
@@ -29,6 +30,9 @@ class MyGLViewer(GLRealtimeProgram):
         self.saveScreenshots = False
         self.nextScreenshotTime = 0
         self.screenshotCount = 0
+
+        self.logger = None
+        #self.logger = SimLogger(self.sim,"simtest_state.csv","simtest_contact.csv")
 
     def display(self):
         #Put your display handler here
@@ -153,6 +157,7 @@ class MyGLViewer(GLRealtimeProgram):
                 self.nextScreenshotTime += 1.0/30.0;
 
         if self.simulate:
+            if self.logger: self.logger.saveStep()
             self.control_loop()
             self.simulateForceSpring()
             self.sim.simulate(self.dt)
