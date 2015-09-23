@@ -95,6 +95,50 @@ void IKObjective::setRelativeTransform(int link,int linkTgt,const double R[9],co
   goal.SetFixedPosition(Vector3(t));
 }
 
+void IKObjective::setLinks(int link,int link2)
+{
+  goal.link = link;
+  goal.destLink = link2;
+}
+
+void IKObjective::setFreePosition()
+{
+  goal.SetFreePosition();
+}
+
+void IKObjective::setFixedPosConstraint(const double tlocal[3],const double tworld[3])
+{
+  goal.localPosition.set(tlocal);
+  goal.SetFixedPosition(tworld);
+}
+
+void IKObjective::setPlanarPosConstraint(const double tlocal[3],const double nworld[3],double oworld)
+{
+  goal.localPosition.set(tlocal);
+  goal.SetPlanarPosition(Vector3(nworld)*oworld,Vector3(nworld));
+}
+
+void IKObjective::setLinearPosConstraint(const double tlocal[3],const double sworld[3],const double dworld[3])
+{
+  goal.localPosition.set(tlocal);
+  goal.SetLinearPosition(sworld,dworld);
+}
+
+void IKObjective::setFreeRotConstraint()
+{
+  goal.SetFreeRotation();
+}
+
+void IKObjective::setFixedRotConstraint(const double R[9])
+{
+  goal.SetFixedRotation(Matrix3(R));
+}
+
+void IKObjective::setAxialRotConstraint(const double alocal[3],const double aworld[3])
+{
+  goal.SetAxisRotation(alocal,aworld);
+}
+
 int IKObjective::numPosDims() const
 {
   return IKGoal::NumDims(goal.posConstraint);
@@ -214,7 +258,7 @@ IKSolver::IKSolver(const RobotModel& _robot)
 {}
 
 IKSolver::IKSolver(const IKSolver& solver)
-  :robot(solver.robot),objectives(solver.objectives),useJointLimits(solver.useJointLimits),activeDofs(solver.activeDofs),qmin(solver.qmin),qmax(solver.qmax)
+  :robot(solver.robot),objectives(solver.objectives),activeDofs(solver.activeDofs),useJointLimits(solver.useJointLimits),qmin(solver.qmin),qmax(solver.qmax)
 {}
 
 void IKSolver::add(const IKObjective& objective)

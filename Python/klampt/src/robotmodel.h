@@ -19,7 +19,7 @@ struct RigidObject;
 struct Environment;
 struct Robot;
 
-/** @brief Stores mass information for a rigid body. */
+/** @brief Stores mass information for a rigid body or robot link. */
 struct Mass
 {
   void setMass(double _mass) { mass=_mass; }
@@ -34,6 +34,9 @@ struct Mass
   std::vector<double> inertia;  ///<local inertia matrix, size 3 or 9
 };
 
+/** @brief Stores contact parameters for an entity.  Currently only
+ * used for simulation, but could be used for contact mechanics in the
+ * future. */
 struct ContactParameters
 {
   double kFriction;
@@ -42,6 +45,8 @@ struct ContactParameters
 };
 
 /** @brief A reference to a link of a RobotModel.
+ *
+ * 
  */
 class RobotModelLink
 {
@@ -172,21 +177,25 @@ class RobotModel
   ///Returns the ID of the robot in its world (Note: not the same as the robot index)
   int getID();
   const char* getName();
+  ///Returns the number of links = number of DOF's.
   int numLinks();
   ///Returns a reference to the indexed link
   RobotModelLink link(int index);
   ///Returns a reference to the named link
   RobotModelLink link(const char* name);
-  ///Old-style: will be deprecated
+  ///Old-style: will be deprecated.  Returns a reference to the indexed link.
   RobotModelLink getLink(int index);
-  ///Old-style: will be deprecated
+  ///Old-style: will be deprecated.  Returns a reference to the named link.
   RobotModelLink getLink(const char* name);
+  ///Returns the number of drivers.
   int numDrivers();
+  ///Returns a reference to the indexed driver.
   RobotModelDriver driver(int index);
+  ///Returns a reference to the named driver.
   RobotModelDriver driver(const char* name);
-  ///Old-style: will be deprecated
+  ///Old-style: will be deprecated. Returns a reference to the indexed driver.
   RobotModelDriver getDriver(int index);
-  ///Old-style: will be deprecated
+  ///Old-style: will be deprecated. Returns a reference to a RobotModelDriver.
   RobotModelDriver getDriver(const char* name);
 
   //kinematic and dynamic properties
@@ -202,6 +211,14 @@ class RobotModel
   void setAccelerationLimits(const std::vector<double>& amax);
   void getTorqueLimits(std::vector<double>& out);
   void setTorqueLimits(const std::vector<double>& tmax);
+  ///Sets a single DOF's position.  Note: if you are setting several joints 
+  ///at once, use setConfig because this function computes forward kinematics
+  ///every time.
+  void setDOFPosition(int i,double qi);
+  void setDOFPosition(const char* name,double qi);
+  ///Returns a single DOF's position
+  double getDOFPosition(int i);
+  double getDOFPosition(const char* name);
 
   //dynamics functions
   ///Returns the 3D center of mass at the current config
