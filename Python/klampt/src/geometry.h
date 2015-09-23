@@ -14,7 +14,9 @@
  */
 struct TriangleMesh
 {
+  ///Translates all the vertices by v=v+t
   void translate(const double t[3]);
+  ///Transforms all the vertices by the rigid transform v=R*v+t
   void transform(const double R[9],const double t[3]);
 
   std::vector<int> indices;
@@ -32,7 +34,9 @@ struct TriangleMesh
  */
 struct PointCloud
 {
+  ///Translates all the points by v=v+t
   void translate(const double t[3]);
+  ///Transforms all the points by the rigid transform v=R*v+t
   void transform(const double R[9],const double t[3]);
 
   std::vector<double> vertices;
@@ -40,6 +44,9 @@ struct PointCloud
   std::vector<double> properties;
 };
 
+/** @brief A geometric primitive.  So far only points, spheres, segments,
+ * and AABBs can be constructed manually in the Python API. 
+ */
 struct GeometricPrimitive
 {
   void setPoint(const double pt[3]);
@@ -57,14 +64,20 @@ struct GeometricPrimitive
  * world item's geometry, in which case modifiers change the 
  * world item's geometry, or it can be a standalone geometry.
  *
+ * Each geometry stores a "current" transform, which is automatically updated
+ * for world items' geometries.  The proximity queries are performed with 
+ * respect to the transformed geometries (note the underlying geometry is 
+ * not changed, which could be computationally expensive.  The query is
+ * performed, however, as though they were).
+ *
  * If you want to set a world item's geometry to be equal to a standalone
  * geometry, use the set(rhs) function rather than the assignment (=)
  * operator.
  *
  * Modifiers include any setX() functions, translate(), and transform().
  *
- * Proximity queries include collides(), withinDistance(), distance(), and
- * rayCast().
+ * Proximity queries include collides(), withinDistance(), distance(), 
+ * closestPoint(), and rayCast().
  *
  * Each object also has a "collision margin" which may virtually fatten the
  * object, as far as proximity queries are concerned. This is useful
@@ -99,7 +112,11 @@ class Geometry3D
   void setTriangleMesh(const TriangleMesh&);
   void setPointCloud(const PointCloud&);
   void setGeometricPrimitive(const GeometricPrimitive&);
+  ///Loads from file.  Standard mesh types, PCD files, and .geom files are
+  ///supported.
   bool loadFile(const char* fn);
+  ///Saves to file.  Standard mesh types, PCD files, and .geom files are
+  ///supported.
   bool saveFile(const char* fn);
   ///Sets the current transformation (not modifying the underlying data)
   void setCurrentTransform(const double R[9],const double t[3]);
@@ -107,12 +124,18 @@ class Geometry3D
   void translate(const double t[3]);
   ///Translates/rotates the geometry data 
   void transform(const double R[9],const double t[3]);
+  ///Sets a padding around the base geometry which affects the results of
+  ///proximity queries
   void setCollisionMargin(double margin);
+  ///Returns the padding around the base geometry.  Default 0
   double getCollisionMargin();
   ///Returns the axis-aligned bounding box of the object
   void getBB(double out[3],double out2[3]);
+  ///Returns true if this geometry collides with the other
   bool collides(const Geometry3D& other);
+  ///Returns true if this geometry is within distance tol to other
   bool withinDistance(const Geometry3D& other,double tol);
+  ///Returns the distance from this geometry to the other
   double distance(const Geometry3D& other,double relErr=0,double absErr=0);
   ///Returns (success,cp) giving the closest point to the input point.
   ///success is false if that operation is not supported with the given
