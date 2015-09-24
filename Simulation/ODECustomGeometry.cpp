@@ -411,7 +411,7 @@ int MeshMeshCollide(CollisionMesh& m1,Real outerMargin1,CollisionMesh& m2,Real o
     }
   }
   if(t1.size() != imax) {
-    printf("ODECustomMesh: %d candidate points were removed due to collision\n",t1.size()-imax);
+    printf("ODECustomMesh: %d candidate points were removed due to mesh collision\n",t1.size()-imax);
     t1.resize(imax);
     t2.resize(imax);
     cp1.resize(imax);
