@@ -856,6 +856,7 @@ void ODESimulator::GetSurfaceParameters(const ODEObjectID& a,const ODEObjectID& 
   //correction to account for pyramid shaped friction cone
   surface.mu *= 0.707;
   surface.bounce = 0.5*(propa.kRestitution+propb.kRestitution);
+  surface.bounce_vel = 1e-2;
   if(surface.bounce != 0)
     surface.mode |= dContactBounce;
 }

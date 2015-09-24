@@ -97,9 +97,10 @@ Vector3 VertexNormal(const CollisionMesh& m,int tri,int vnum)
     return Vector3(0.0);
     FatalError("VertexNormal: mesh is not properly initialized with incidentTris array?");
   }
-  Assert(tri >= 0 && tri < (int)m.incidentTris.size());
   Assert(vnum >= 0 && vnum < 3);
   int v=m.tris[tri][vnum];
+  Assert(v >= 0 && v < m.incidentTris.size());
+  if(m.incidentTris[v].empty()) return Vector3(0.0);
   Vector3 n(Zero);
   for(size_t i=0;i<m.incidentTris[v].size();i++)
     n += m.TriangleNormal(m.incidentTris[v][i]);
@@ -395,7 +396,7 @@ int MeshMeshCollide(CollisionMesh& m1,Real outerMargin1,CollisionMesh& m2,Real o
     tri1loc.c = T12*tri1.c;
     if(tri1loc.intersects(tri2)) { 
       if(warnedCount % 1000 == 0) {
-	printf("ODECustomMesh: Triangles penetrate margin %g: can't trust contact detector\n",tol);
+	printf("ODECustomMesh: Triangles penetrate margin %g+%g: can't trust contact detector\n",outerMargin1,outerMargin2);
       }
       warnedCount++;
       /*
