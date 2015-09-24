@@ -11,8 +11,6 @@ QSimTestGUI::QSimTestGUI(QKlamptDisplay* _display,SimTestBackend *_backend) :
   assert(_backend != NULL);
   assert(sim != NULL);
   assert(sim->world != NULL);
-  assert(sim->world->robots.size()>0);
-  assert(sim->controlSimulators.size()>0);
   _backend->gui = this;
 
   driver_tool=new DriverEdit(sim->world);
@@ -24,8 +22,10 @@ QSimTestGUI::QSimTestGUI(QKlamptDisplay* _display,SimTestBackend *_backend) :
   connect(log_options,SIGNAL(HideSensor(int)),this,SLOT(HideSensor(int)));
   connect(log_options,SIGNAL(toggle_measurement(int,int,bool)),this,SLOT(SendMeasurement(int,int,bool)));
   connect(log_options,SIGNAL(toggle_measurement(int,int,bool)),this,SLOT(SendMeasurement(int,int,bool)));
-  RobotSensors sensors=sim->controlSimulators[0].sensors;
-  log_options->robotsensors=sensors;
+  if(sim->controlSimulators.size() > 0) {
+    RobotSensors sensors=sim->controlSimulators[0].sensors;
+    log_options->robotsensors=sensors;
+  }
   log_options->GetSensors();
   //log_options->show();
   //UpdateMeasurements();
