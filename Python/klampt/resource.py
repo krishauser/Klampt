@@ -233,11 +233,14 @@ class _VisualEditorBase(glcommon.GLWidgetPlugin):
         self.value = value
         self.description = description
         self.world = world
+        #can create a Qt object to assist in editing
     def instructions(self):
         return None
     def display(self):
         if self.world: self.world.drawGL()
         self.klamptwidgetmaster.drawGL(self.viewport())
+    def addDialogItems(self,parent,ui='qt'):
+        return
     def display_screen(self):
         glDisable(GL_LIGHTING)
         glColor3f(0,0,0)
@@ -283,6 +286,133 @@ class _ConfigVisualEditor(_VisualEditorBase):
         #this line will draw the robot
         self.klamptwidgetmaster.drawGL(self.viewport())
 
+class _ConfigsVisualEditor(_VisualEditorBase):
+    def __init__(self,name,value,description,world):
+        _VisualEditorBase.__init__(self,name,value,description,world)
+        if len(value) > 0:
+            world.robot(0).setConfig(value[0])
+        self.editingIndex = len(value)-1
+        self.clicked = None
+        self.hovered = None
+        self.robotposer = RobotPoser(world.robot(0))
+        self.addWidget(self.robotposer)
+    
+    def instructions(self):
+        return 'Right-click and drag on the robot links to pose the robot.\nKeyboard i: insert, d: delete, < to select previous, > to select next'
+
+    def addDialogItems(self,parent,ui='qt'):
+        self.indexSpinBox = QSpinBox()
+        self.indexSpinBox.setRange(0,len(self.value)-1)
+        layout = QHBoxLayout(parent)
+        label = QLabel("Index")
+        label.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
+        layout.addWidget(label)
+        layout.addWidget(self.indexSpinBox)
+        self.insertButton = QPushButton("Insert")
+        self.deleteButton = QPushButton("Delete")
+        layout.addWidget(self.insertButton)
+        layout.addWidget(self.deleteButton)
+        self.insertButton.clicked.connect(self.insert)
+        self.deleteButton.clicked.connect(self.delete)
+        self.indexSpinBox.valueChanged.connect(self.indexChanged)
+
+    def insert(self):
+        if self.editingIndex < 0:
+            self.value.append(self.robotposer.get())
+            self.editingIndex = len(self.value)-1
+        else:
+            self.value.insert(self.editingIndex+1,self.robotposer.get())
+            self.editingIndex += 1
+        if hasattr(self,'indexSpinBox'):
+            self.indexSpinBox.setRange(0,len(self.value)-1)
+            self.indexSpinBox.setValue(self.editingIndex)
+        self.refresh()
+
+    def delete(self):
+        if self.editingIndex >= 0:
+            del self.value[self.editingIndex]
+            if self.editingIndex >= len(self.value):
+                self.editingIndex = len(self.value)-1
+            if self.editingIndex >= 0:
+                self.robotposer.set(self.value[self.editingIndex])
+            print "Now has",len(self.value),"configs, editing index",self.editingIndex
+        if hasattr(self,'indexSpinBox'):
+            self.indexSpinBox.setRange(0,len(self.value)-1)
+            self.indexSpinBox.setValue(self.editingIndex)
+        self.refresh()
+
+    def indexChanged(self,index):
+        self.editingIndex = index
+        if index >= 0 and index < len(self.value):
+            self.robotposer.set(self.value[self.editingIndex]) 
+        self.refresh()
+
+    def mousefunc(self,button,state,x,y):
+        if _VisualEditorBase.mousefunc(self,button,state,x,y):
+            if self.editingIndex >= 0:
+                self.value[self.editingIndex] = self.robotposer.get()
+            return True
+        return False
+    
+    def keyboardfunc(self,c,x,y):
+        if c=='i':
+            self.insert()
+            return True
+        elif c=='d':
+            self.delete()
+            return True
+        elif c==',' or c=='<':
+            self.editingIndex -= 1
+            if self.editingIndex < 0:
+                self.editingIndex = min(len(self.value)-1,0)
+            if self.editingIndex >= 0:
+                self.robotposer.set(self.value[self.editingIndex]) 
+                self.refresh()
+            return True
+        elif c=='.' or c=='>':
+            self.editingIndex += 1
+            self.editingIndex = min(len(self.value)-1,self.editingIndex)
+            if self.editingIndex >= 0:
+                self.robotposer.set(self.value[self.editingIndex]) 
+                self.refresh()
+            return True
+
+    def display(self):
+        #Override display handler since the widget draws the robot
+        #the next few lines draw everything but the robot
+        for i in xrange(self.world.numTerrains()):
+            self.world.terrain(i).drawGL()
+        for i in xrange(self.world.numRigidObjects()):
+            self.world.rigidObject(i).drawGL()
+        for i in xrange(1,self.world.numRobots()):
+            self.world.robot(i).drawGL()
+        glEnable(GL_BLEND)
+        glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA)
+        #draw most opaque first
+        order = []
+        if self.editingIndex < 0:
+            order = range(len(self.value))
+        else:
+            order = [self.editingIndex]
+            n = max(self.editingIndex,len(self.value)-self.editingIndex)
+            for i in range(1,n+1):
+                if self.editingIndex + i < len(self.value): order.append(self.editingIndex +i)
+                if self.editingIndex - i >= 0: order.append(self.editingIndex -i)
+        for i in order:
+            #draw transparent
+            opacity = pow(0.5,abs(i-self.editingIndex))
+            for j in xrange(self.world.robot(0).numLinks()):
+                self.world.robot(0).link(j).appearance().setColor(0.5,0.5,0.5,opacity)
+            if i == self.editingIndex:
+                #this line will draw the robot at the current editing config
+                self.klamptwidgetmaster.drawGL(self.viewport())
+            else:
+                self.world.robot(0).setConfig(self.value[i])
+                self.world.robot(0).drawGL()
+        for j in xrange(self.world.robot(0).numLinks()):
+            self.world.robot(0).link(j).appearance().setColor(0.5,0.5,0.5,1)
+        glDisable(GL_BLEND)
+
 class _PointVisualEditor(_VisualEditorBase):
     def __init__(self,name,value,description,world,frame=None):
         _VisualEditorBase.__init__(self,name,value,description,world)
@@ -291,7 +421,7 @@ class _PointVisualEditor(_VisualEditorBase):
         self.pointposer.set(se3.apply(self.frame,value))
         self.pointposer.setFrame(self.frame[0])
         self.addWidget(self.pointposer)
-    
+   
     def instructions(self):
         return 'Right-click and drag on the widget to pose the point'
 
@@ -365,9 +495,15 @@ if glcommon._PyQtAvailable:
             self.instructions = QLabel()
             self.description = QLabel()
             self.description2 = QLabel("Press OK to save, Cancel to continue without saving")
+            self.topBox = QFrame()
+            self.topBoxLayout = QVBoxLayout(self.topBox)
+            self.topBoxLayout.addWidget(self.description)
+            self.topBoxLayout.addWidget(self.instructions)
+            self.extraDialog = QFrame()
+            self.extraDialog.setSizePolicy(QSizePolicy(QSizePolicy.Minimum,QSizePolicy.Minimum))
+            self.topBoxLayout.addWidget(self.extraDialog)
             self.layout = QVBoxLayout(self)
-            self.layout.addWidget(self.description)
-            self.layout.addWidget(self.instructions)
+            self.layout.addWidget(self.topBox)
             self.layout.addWidget(glwidget)
             self.layout.addWidget(self.description2)
             self.layout.setStretchFactor(glwidget,10)
@@ -384,9 +520,27 @@ if glcommon._PyQtAvailable:
             else:
                 self.description.setText(editorObject.description)
             self.instructions.setText(editorObject.instructions())
+            editorObject.addDialogItems(self.extraDialog,ui='qt')
+
+        def closeEvent(self,event):
+            reply = QtGui.QMessageBox.question(self, 'Message',
+                 "Are you sure to quit the program?", QtGui.QMessageBox.Yes | 
+                 QtGui.QMessageBox.No, QtGui.QMessageBox.No)
+
+            if reply == QtGui.QMessageBox.Yes:
+                event.accept()
+                exit()
+            else:
+                event.ignore()     
+            
         def finish(self):
             visualization.setPlugin(None)
             res = self.editorObject.value
+            self.topBoxLayout.removeWidget(self.extraDialog)
+            self.extraDialog.setParent(None)
+            self.extraDialog = QFrame()
+            self.extraDialog.setSizePolicy(QSizePolicy(QSizePolicy.Minimum,QSizePolicy.Minimum))
+            self.topBoxLayout.addWidget(self.extraDialog)
             self.editorObject = None
             return res
 
@@ -520,7 +674,8 @@ def edit(name,value,type='auto',description=None,editor='visual',world=None,fram
                 raise RuntimeError("Cannot visually edit a Config resource without a world")
             value = world.robot(0).getConfig()
         elif type == 'Configs':
-            raise RuntimeError("Cannot visually edit a Configs resource without a world")
+            if world==None:
+                raise RuntimeError("Cannot visually edit a Configs resource without a world")
             value = [world.robot(0).getConfig()]
         elif type == 'IKGoal':
             value = IKObjective()
@@ -555,7 +710,7 @@ def edit(name,value,type='auto',description=None,editor='visual',world=None,fram
                 frame = frame.getTransform()
             return _launch(_RigidTransformVisualEditor(name,value,description,world,frame))
         else:
-            raise RuntimeError("Don't know how to edit objects of type "+type)
+            raise RuntimeError("Visual editing of objects of type "+type+" not supported yet")
     else:
         raise ValueError("Invalid value for argument 'editor', must be either 'visual' or 'console'")
 
