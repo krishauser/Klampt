@@ -40,7 +40,7 @@ def readVectorRaw(text):
 
 def writeVectorList(x):
     """Writes a list of vectors to string"""
-    return '\n'.join(loader.writeVector(xi) for xi in x)
+    return '\n'.join(writeVector(xi) for xi in x)
 
 
 def readVectorList(text):
