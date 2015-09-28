@@ -134,7 +134,11 @@ def objective(body,ref=None,local=None,world=None,R=None,t=None):
 
 def fixed_objective(link,ref=None,local=None,world=None):
     """Convenience function for fixing the given link at the current position
-    in space.  If local and world are not provided, the entire"""
+    in space.  If local and world are not provided, the entire link is
+    constrained.  If only local is provided, these points are fixed
+    to their current positions in space.  If only world is provided,
+    the points on the link with the given world position are constrained in
+    place."""
     refcoords = ref.getTransform() if ref != None else se3.identity()
     Tw = link.getTransform()
     Trel = se3.mul(se3.inv(refcoords),Tw)

@@ -464,7 +464,7 @@ void ClusterContactsMerge(vector<dContactGeom>& contacts,int maxClusters,Real cl
     pts[i][6] = contacts[i].depth;
   }
 
-  Timer timer;
+  //Timer timer;
   Statistics::HierarchicalClustering clust;
   clust.Build(pts,maxClusters,Statistics::HierarchicalClustering::AverageLinkage);
   //cout<<"Clustering time: "<<timer.ElapsedTime()<<endl;
@@ -594,6 +594,13 @@ void ClusterContactsKMeans(vector<dContactGeom>& contacts,int maxClusters,Real c
   }
 }
 
+
+bool depthGreater(const dContactGeom& a,const dContactGeom& b)
+{
+  return a.depth > b.depth;
+}
+
+
 void ClusterContacts(vector<dContactGeom>& contacts,int maxClusters,Real clusterNormalScale)
 {
   gPreclusterContacts += contacts.size();
@@ -602,21 +609,34 @@ void ClusterContacts(vector<dContactGeom>& contacts,int maxClusters,Real cluster
   if(contacts.size()*maxClusters > gMaxKMeansSize && contacts.size()*contacts.size() > gMaxHClusterSize) {
     int minsize = Max((int)gMaxKMeansSize/maxClusters,(int)Sqrt(Real(gMaxHClusterSize)));
     printf("ClusterContacts: subsampling %d to %d contacts\n",(int)contacts.size(),minsize);
-    //subsample
+    vector<dContactGeom> subcontacts(minsize);
+    //random subsample
+    /*
     vector<int> subsample(contacts.size());
     RandomPermutation(subsample);
     subsample.resize(minsize);
-    vector<dContactGeom> subcontacts(subsample.size());
     for(size_t i=0;i<subsample.size();i++)
       subcontacts[i] = contacts[subsample[i]];
+    */
+    //deterministic subsample
+    for(int i=0;i<minsize;i++) {
+      subcontacts[i] = contacts[(i*minsize)/contacts.size()];
+    }
     swap(subcontacts,contacts);
   }
   size_t hclusterSize = contacts.size()*contacts.size();
   size_t kmeansSize = contacts.size()*maxClusters;
-  if(hclusterSize < gMaxHClusterSize)
-    ClusterContactsMerge(contacts,maxClusters,clusterNormalScale);
-  else 
-    ClusterContactsKMeans(contacts,maxClusters,clusterNormalScale);
+  //if(hclusterSize < gMaxHClusterSize)
+  //ClusterContactsMerge(contacts,maxClusters,clusterNormalScale);
+  //else 
+  ClusterContactsKMeans(contacts,maxClusters,clusterNormalScale);
+  /*
+  //TEST: contact depth sorting
+  if(contacts.size() > maxClusters) {
+    sort(contacts.begin(),contacts.end(),depthGreater);
+    contacts.resize(maxClusters);
+  }
+  */
 }
 
 void MergeContacts(vector<dContactGeom>& contacts,double posTolerance,double oriTolerance)
@@ -836,6 +856,7 @@ void ODESimulator::GetSurfaceParameters(const ODEObjectID& a,const ODEObjectID& 
   //correction to account for pyramid shaped friction cone
   surface.mu *= 0.707;
   surface.bounce = 0.5*(propa.kRestitution+propb.kRestitution);
+  surface.bounce_vel = 1e-2;
   if(surface.bounce != 0)
     surface.mode |= dContactBounce;
 }

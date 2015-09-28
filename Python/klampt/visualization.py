@@ -37,9 +37,9 @@ def remove(name): removes an item from the visualization.
 def hide(name,hidden=True): hides/unhides an item.  The item is not removed,
     it just becomes invisible.
 def hideLabel(name,hidden=True): hides/unhides an item's text label.
-def animate(name,animation,speed=1.0): TODO: implement me. Should send
-    an animation to the object.  May be a Trajectory or a list of
-    configurations
+def animate(name,animation,speed=1.0): Sends an animation to the object.
+    May be a Trajectory or a list of configurations.  Works with points,
+    so3 elements, se3 elements, rigid objects, or robots.
 def setAppearance(name,appearance): changes the Appearance of an item.
 def revertAppearance(name): restores the Appearance of an item
 def setAttribute(name,attribute,value): sets an attribute of the appearance
@@ -130,11 +130,13 @@ def show(visible=True):
     global _vis,_globalLock
     if visible == False:
         _hide()
-        return
-    if _vis==None:
-        print "Visualization disabled"
-        return
-    _show()
+    else:
+        if _vis==None:
+            print "Visualization disabled"
+            return
+        else:
+            _show()
+    return
 
 def lock():
     global _globalLock
@@ -960,10 +962,10 @@ if glcommon._PyQtAvailable:
                 if _showwindow:
                     _window.show()
                 else:
+                    _widget.setParent(None)
                     _window.hide()
                     _showwindow = False
                     _window = None
-                    _widget.setParent(None)
             else:
                 if _showwindow:
                     _window=_MyWindow()

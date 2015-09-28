@@ -260,6 +260,119 @@ def intArray_frompointer(t):
     return _robotsim.intArray_frompointer(t)
 intArray_frompointer = _robotsim.intArray_frompointer
 
+class stringVector(_object):
+    __swig_setmethods__ = {}
+    __setattr__ = lambda self, name, value: _swig_setattr(self, stringVector, name, value)
+    __swig_getmethods__ = {}
+    __getattr__ = lambda self, name: _swig_getattr(self, stringVector, name)
+    __repr__ = _swig_repr
+
+    def iterator(self):
+        return _robotsim.stringVector_iterator(self)
+    def __iter__(self):
+        return self.iterator()
+
+    def __nonzero__(self):
+        return _robotsim.stringVector___nonzero__(self)
+
+    def __bool__(self):
+        return _robotsim.stringVector___bool__(self)
+
+    def __len__(self):
+        return _robotsim.stringVector___len__(self)
+
+    def pop(self):
+        return _robotsim.stringVector_pop(self)
+
+    def __getslice__(self, i, j):
+        return _robotsim.stringVector___getslice__(self, i, j)
+
+    def __setslice__(self, *args):
+        return _robotsim.stringVector___setslice__(self, *args)
+
+    def __delslice__(self, i, j):
+        return _robotsim.stringVector___delslice__(self, i, j)
+
+    def __delitem__(self, *args):
+        return _robotsim.stringVector___delitem__(self, *args)
+
+    def __getitem__(self, *args):
+        return _robotsim.stringVector___getitem__(self, *args)
+
+    def __setitem__(self, *args):
+        return _robotsim.stringVector___setitem__(self, *args)
+
+    def append(self, x):
+        return _robotsim.stringVector_append(self, x)
+
+    def empty(self):
+        return _robotsim.stringVector_empty(self)
+
+    def size(self):
+        return _robotsim.stringVector_size(self)
+
+    def clear(self):
+        return _robotsim.stringVector_clear(self)
+
+    def swap(self, v):
+        return _robotsim.stringVector_swap(self, v)
+
+    def get_allocator(self):
+        return _robotsim.stringVector_get_allocator(self)
+
+    def begin(self):
+        return _robotsim.stringVector_begin(self)
+
+    def end(self):
+        return _robotsim.stringVector_end(self)
+
+    def rbegin(self):
+        return _robotsim.stringVector_rbegin(self)
+
+    def rend(self):
+        return _robotsim.stringVector_rend(self)
+
+    def pop_back(self):
+        return _robotsim.stringVector_pop_back(self)
+
+    def erase(self, *args):
+        return _robotsim.stringVector_erase(self, *args)
+
+    def __init__(self, *args):
+        this = _robotsim.new_stringVector(*args)
+        try:
+            self.this.append(this)
+        except:
+            self.this = this
+
+    def push_back(self, x):
+        return _robotsim.stringVector_push_back(self, x)
+
+    def front(self):
+        return _robotsim.stringVector_front(self)
+
+    def back(self):
+        return _robotsim.stringVector_back(self)
+
+    def assign(self, n, x):
+        return _robotsim.stringVector_assign(self, n, x)
+
+    def resize(self, *args):
+        return _robotsim.stringVector_resize(self, *args)
+
+    def insert(self, *args):
+        return _robotsim.stringVector_insert(self, *args)
+
+    def reserve(self, n):
+        return _robotsim.stringVector_reserve(self, n)
+
+    def capacity(self):
+        return _robotsim.stringVector_capacity(self)
+    __swig_destroy__ = _robotsim.delete_stringVector
+    __del__ = lambda self: None
+stringVector_swigregister = _robotsim.stringVector_swigregister
+stringVector_swigregister(stringVector)
+
 class doubleVector(_object):
     __swig_setmethods__ = {}
     __setattr__ = lambda self, name, value: _swig_setattr(self, doubleVector, name, value)
@@ -735,7 +848,9 @@ class TriangleMesh(_object):
         translate(TriangleMesh self, double const [3] t)
 
         void
-        TriangleMesh::translate(const double t[3]) 
+        TriangleMesh::translate(const double t[3])
+
+        Translates all the vertices by v=v+t. 
         """
         return _robotsim.TriangleMesh_translate(self, t)
 
@@ -745,7 +860,9 @@ class TriangleMesh(_object):
         transform(TriangleMesh self, double const [9] R, double const [3] t)
 
         void
-        TriangleMesh::transform(const double R[9], const double t[3]) 
+        TriangleMesh::transform(const double R[9], const double t[3])
+
+        Transforms all the vertices by the rigid transform v=R*v+t. 
         """
         return _robotsim.TriangleMesh_transform(self, R, t)
 
@@ -807,7 +924,9 @@ class PointCloud(_object):
         translate(PointCloud self, double const [3] t)
 
         void
-        PointCloud::translate(const double t[3]) 
+        PointCloud::translate(const double t[3])
+
+        Translates all the points by v=v+t. 
         """
         return _robotsim.PointCloud_translate(self, t)
 
@@ -817,7 +936,9 @@ class PointCloud(_object):
         transform(PointCloud self, double const [9] R, double const [3] t)
 
         void
-        PointCloud::transform(const double R[9], const double t[3]) 
+        PointCloud::transform(const double R[9], const double t[3])
+
+        Transforms all the points by the rigid transform v=R*v+t. 
         """
         return _robotsim.PointCloud_transform(self, R, t)
 
@@ -861,7 +982,12 @@ PointCloud_swigregister = _robotsim.PointCloud_swigregister
 PointCloud_swigregister(PointCloud)
 
 class GeometricPrimitive(_object):
-    """Proxy of C++ GeometricPrimitive class"""
+    """
+    A geometric primitive. So far only points, spheres, segments, and
+    AABBs can be constructed manually in the Python API.
+
+    C++ includes: geometry.h 
+    """
     __swig_setmethods__ = {}
     __setattr__ = lambda self, name, value: _swig_setattr(self, GeometricPrimitive, name, value)
     __swig_getmethods__ = {}
@@ -939,7 +1065,14 @@ class GeometricPrimitive(_object):
         properties = _swig_property(_robotsim.GeometricPrimitive_properties_get, _robotsim.GeometricPrimitive_properties_set)
 
     def __init__(self):
-        """__init__(GeometricPrimitive self) -> GeometricPrimitive"""
+        """
+        __init__(GeometricPrimitive self) -> GeometricPrimitive
+
+        A geometric primitive. So far only points, spheres, segments, and
+        AABBs can be constructed manually in the Python API.
+
+        C++ includes: geometry.h 
+        """
         this = _robotsim.new_GeometricPrimitive()
         try:
             self.this.append(this)
@@ -956,6 +1089,12 @@ class Geometry3D(_object):
     geometry, in which case modifiers change the world item's geometry, or
     it can be a standalone geometry.
 
+    Each geometry stores a "current" transform, which is automatically
+    updated for world items' geometries. The proximity queries are
+    performed with respect to the transformed geometries (note the
+    underlying geometry is not changed, which could be computationally
+    expensive. The query is performed, however, as though they were).
+
     If you want to set a world item's geometry to be equal to a standalone
     geometry, use the set(rhs) function rather than the assignment (=)
     operator.
@@ -963,7 +1102,7 @@ class Geometry3D(_object):
     Modifiers include any setX() functions, translate(), and transform().
 
     Proximity queries include collides(), withinDistance(), distance(),
-    and rayCast().
+    closestPoint(), and rayCast().
 
     Each object also has a "collision margin" which may virtually fatten
     the object, as far as proximity queries are concerned. This is useful
@@ -1134,7 +1273,10 @@ class Geometry3D(_object):
         loadFile(Geometry3D self, char const * fn) -> bool
 
         bool
-        Geometry3D::loadFile(const char *fn) 
+        Geometry3D::loadFile(const char *fn)
+
+        Loads from file. Standard mesh types, PCD files, and .geom files are
+        supported. 
         """
         return _robotsim.Geometry3D_loadFile(self, fn)
 
@@ -1144,7 +1286,10 @@ class Geometry3D(_object):
         saveFile(Geometry3D self, char const * fn) -> bool
 
         bool
-        Geometry3D::saveFile(const char *fn) 
+        Geometry3D::saveFile(const char *fn)
+
+        Saves to file. Standard mesh types, PCD files, and .geom files are
+        supported. 
         """
         return _robotsim.Geometry3D_saveFile(self, fn)
 
@@ -1190,7 +1335,10 @@ class Geometry3D(_object):
         setCollisionMargin(Geometry3D self, double margin)
 
         void
-        Geometry3D::setCollisionMargin(double margin) 
+        Geometry3D::setCollisionMargin(double margin)
+
+        Sets a padding around the base geometry which affects the results of
+        proximity queries 
         """
         return _robotsim.Geometry3D_setCollisionMargin(self, margin)
 
@@ -1200,7 +1348,9 @@ class Geometry3D(_object):
         getCollisionMargin(Geometry3D self) -> double
 
         double
-        Geometry3D::getCollisionMargin() 
+        Geometry3D::getCollisionMargin()
+
+        Returns the padding around the base geometry. Default 0. 
         """
         return _robotsim.Geometry3D_getCollisionMargin(self)
 
@@ -1222,7 +1372,9 @@ class Geometry3D(_object):
         collides(Geometry3D self, Geometry3D other) -> bool
 
         bool
-        Geometry3D::collides(const Geometry3D &other) 
+        Geometry3D::collides(const Geometry3D &other)
+
+        Returns true if this geometry collides with the other. 
         """
         return _robotsim.Geometry3D_collides(self, other)
 
@@ -1232,7 +1384,9 @@ class Geometry3D(_object):
         withinDistance(Geometry3D self, Geometry3D other, double tol) -> bool
 
         bool
-        Geometry3D::withinDistance(const Geometry3D &other, double tol) 
+        Geometry3D::withinDistance(const Geometry3D &other, double tol)
+
+        Returns true if this geometry is within distance tol to other. 
         """
         return _robotsim.Geometry3D_withinDistance(self, other, tol)
 
@@ -1245,7 +1399,9 @@ class Geometry3D(_object):
 
         double
         Geometry3D::distance(const Geometry3D &other, double relErr=0, double
-        absErr=0) 
+        absErr=0)
+
+        Returns the distance from this geometry to the other. 
         """
         return _robotsim.Geometry3D_distance(self, other, relErr, absErr)
 
@@ -1759,7 +1915,7 @@ RobotPoser_swigregister(RobotPoser)
 
 class Mass(_object):
     """
-    Stores mass information for a rigid body.
+    Stores mass information for a rigid body or robot link.
 
     C++ includes: robotmodel.h 
     """
@@ -1844,7 +2000,7 @@ class Mass(_object):
         """
         __init__(Mass self) -> Mass
 
-        Stores mass information for a rigid body.
+        Stores mass information for a rigid body or robot link.
 
         C++ includes: robotmodel.h 
         """
@@ -1859,7 +2015,12 @@ Mass_swigregister = _robotsim.Mass_swigregister
 Mass_swigregister(Mass)
 
 class ContactParameters(_object):
-    """Proxy of C++ ContactParameters class"""
+    """
+    Stores contact parameters for an entity. Currently only used for
+    simulation, but could be used for contact mechanics in the future.
+
+    C++ includes: robotmodel.h 
+    """
     __swig_setmethods__ = {}
     __setattr__ = lambda self, name, value: _swig_setattr(self, ContactParameters, name, value)
     __swig_getmethods__ = {}
@@ -1883,7 +2044,14 @@ class ContactParameters(_object):
         kDamping = _swig_property(_robotsim.ContactParameters_kDamping_get, _robotsim.ContactParameters_kDamping_set)
 
     def __init__(self):
-        """__init__(ContactParameters self) -> ContactParameters"""
+        """
+        __init__(ContactParameters self) -> ContactParameters
+
+        Stores contact parameters for an entity. Currently only used for
+        simulation, but could be used for contact mechanics in the future.
+
+        C++ includes: robotmodel.h 
+        """
         this = _robotsim.new_ContactParameters()
         try:
             self.this.append(this)
@@ -2544,7 +2712,9 @@ class RobotModel(_object):
         numLinks(RobotModel self) -> int
 
         int
-        RobotModel::numLinks() 
+        RobotModel::numLinks()
+
+        Returns the number of links = number of DOF's. 
         """
         return _robotsim.RobotModel_numLinks(self)
 
@@ -2570,7 +2740,8 @@ class RobotModel(_object):
         RobotModelLink
         RobotModel::getLink(const char *name)
 
-        Old-style: will be deprecated. 
+        Old-style: will be deprecated. Returns a reference to the named link.
+
         """
         return _robotsim.RobotModel_getLink(self, *args)
 
@@ -2580,7 +2751,9 @@ class RobotModel(_object):
         numDrivers(RobotModel self) -> int
 
         int
-        RobotModel::numDrivers() 
+        RobotModel::numDrivers()
+
+        Returns the number of drivers. 
         """
         return _robotsim.RobotModel_numDrivers(self)
 
@@ -2591,7 +2764,9 @@ class RobotModel(_object):
         driver(RobotModel self, char const * name) -> RobotModelDriver
 
         RobotModelDriver
-        RobotModel::driver(const char *name) 
+        RobotModel::driver(const char *name)
+
+        Returns a reference to the named driver. 
         """
         return _robotsim.RobotModel_driver(self, *args)
 
@@ -2604,7 +2779,8 @@ class RobotModel(_object):
         RobotModelDriver
         RobotModel::getDriver(const char *name)
 
-        Old-style: will be deprecated. 
+        Old-style: will be deprecated. Returns a reference to a
+        RobotModelDriver. 
         """
         return _robotsim.RobotModel_getDriver(self, *args)
 
@@ -2730,6 +2906,28 @@ class RobotModel(_object):
         RobotModel::setTorqueLimits(const std::vector< double > &tmax) 
         """
         return _robotsim.RobotModel_setTorqueLimits(self, tmax)
+
+
+    def setDOFPosition(self, *args):
+        """
+        setDOFPosition(RobotModel self, int i, double qi)
+        setDOFPosition(RobotModel self, char const * name, double qi)
+
+        void
+        RobotModel::setDOFPosition(const char *name, double qi) 
+        """
+        return _robotsim.RobotModel_setDOFPosition(self, *args)
+
+
+    def getDOFPosition(self, *args):
+        """
+        getDOFPosition(RobotModel self, int i) -> double
+        getDOFPosition(RobotModel self, char const * name) -> double
+
+        double
+        RobotModel::getDOFPosition(const char *name) 
+        """
+        return _robotsim.RobotModel_getDOFPosition(self, *args)
 
 
     def getCom(self):
@@ -3680,6 +3878,109 @@ class IKObjective(_object):
         return _robotsim.IKObjective_setRelativeTransform(self, link, linkTgt, R, t)
 
 
+    def setLinks(self, link, link2=-1):
+        """
+        setLinks(IKObjective self, int link, int link2=-1)
+        setLinks(IKObjective self, int link)
+
+        void
+        IKObjective::setLinks(int link, int link2=-1)
+
+        Manual construction. 
+        """
+        return _robotsim.IKObjective_setLinks(self, link, link2)
+
+
+    def setFreePosition(self):
+        """
+        setFreePosition(IKObjective self)
+
+        void
+        IKObjective::setFreePosition()
+
+        Manual: Sets a free position constraint. 
+        """
+        return _robotsim.IKObjective_setFreePosition(self)
+
+
+    def setFixedPosConstraint(self, tlocal, tworld):
+        """
+        setFixedPosConstraint(IKObjective self, double const [3] tlocal, double const [3] tworld)
+
+        void
+        IKObjective::setFixedPosConstraint(const double tlocal[3], const
+        double tworld[3])
+
+        Manual: Sets a fixed position constraint. 
+        """
+        return _robotsim.IKObjective_setFixedPosConstraint(self, tlocal, tworld)
+
+
+    def setPlanarPosConstraint(self, tlocal, nworld, oworld):
+        """
+        setPlanarPosConstraint(IKObjective self, double const [3] tlocal, double const [3] nworld, double oworld)
+
+        void
+        IKObjective::setPlanarPosConstraint(const double tlocal[3], const
+        double nworld[3], double oworld)
+
+        Manual: Sets a planar position constraint nworld^T T(link)*tlocal +
+        oworld = 0 
+        """
+        return _robotsim.IKObjective_setPlanarPosConstraint(self, tlocal, nworld, oworld)
+
+
+    def setLinearPosConstraint(self, tlocal, sworld, dworld):
+        """
+        setLinearPosConstraint(IKObjective self, double const [3] tlocal, double const [3] sworld, double const [3] dworld)
+
+        void
+        IKObjective::setLinearPosConstraint(const double tlocal[3], const
+        double sworld[3], const double dworld[3])
+
+        Manual: Sets a linear position constraint T(link)*tlocal = sworld +
+        u*dworld for some real value u 
+        """
+        return _robotsim.IKObjective_setLinearPosConstraint(self, tlocal, sworld, dworld)
+
+
+    def setFreeRotConstraint(self):
+        """
+        setFreeRotConstraint(IKObjective self)
+
+        void
+        IKObjective::setFreeRotConstraint()
+
+        Manual: Sets a free rotation constraint. 
+        """
+        return _robotsim.IKObjective_setFreeRotConstraint(self)
+
+
+    def setFixedRotConstraint(self, R):
+        """
+        setFixedRotConstraint(IKObjective self, double const [9] R)
+
+        void
+        IKObjective::setFixedRotConstraint(const double R[9])
+
+        Manual: Sets a fixed rotation constraint. 
+        """
+        return _robotsim.IKObjective_setFixedRotConstraint(self, R)
+
+
+    def setAxialRotConstraint(self, alocal, aworld):
+        """
+        setAxialRotConstraint(IKObjective self, double const [3] alocal, double const [3] aworld)
+
+        void
+        IKObjective::setAxialRotConstraint(const double alocal[3], const
+        double aworld[3])
+
+        Manual: Sets an axial rotation constraint. 
+        """
+        return _robotsim.IKObjective_setAxialRotConstraint(self, alocal, aworld)
+
+
     def getPosition(self):
         """
         getPosition(IKObjective self)
@@ -4200,7 +4501,7 @@ class SimRobotSensor(_object):
 
     def measurementNames(self):
         """
-        measurementNames(SimRobotSensor self) -> std::vector< std::string,std::allocator< std::string > >
+        measurementNames(SimRobotSensor self) -> stringVector
 
         std::vector<
         std::string > SimRobotSensor::measurementNames() 
@@ -4368,7 +4669,7 @@ class SimRobotController(_object):
 
     def commands(self):
         """
-        commands(SimRobotController self) -> std::vector< std::string,std::allocator< std::string > >
+        commands(SimRobotController self) -> stringVector
 
         std::vector<
         std::string > SimRobotController::commands()
@@ -4776,7 +5077,7 @@ class SimBody(_object):
         ContactParameters
         SimBody::getSurface()
 
-        Gets/sets the surface properties. 
+        Gets (a copy of) the surface properties. 
         """
         return _robotsim.SimBody_getSurface(self)
 
@@ -4786,7 +5087,9 @@ class SimBody(_object):
         setSurface(SimBody self, ContactParameters params)
 
         void
-        SimBody::setSurface(const ContactParameters &params) 
+        SimBody::setSurface(const ContactParameters &params)
+
+        Sets the surface properties. 
         """
         return _robotsim.SimBody_setSurface(self, params)
 
@@ -4837,17 +5140,19 @@ class Simulator(_object):
     __getattr__ = lambda self, name: _swig_getattr(self, Simulator, name)
     __repr__ = _swig_repr
 
-    def __init__(self, model):
+    def __init__(self, model, settings=None):
         """
+        __init__(Simulator self, WorldModel model, char const * settings=None) -> Simulator
         __init__(Simulator self, WorldModel model) -> Simulator
 
-        Simulator::Simulator(const WorldModel &model)
+        Simulator::Simulator(const WorldModel &model, const char
+        *settings=NULL)
 
         Constructs the simulator from a WorldModel. If the WorldModel was
         loaded from an XML file, then the simulation setup is loaded from it.
 
         """
-        this = _robotsim.new_Simulator(model)
+        this = _robotsim.new_Simulator(model, settings)
         try:
             self.this.append(this)
         except:
@@ -5146,7 +5451,9 @@ class Simulator(_object):
         body(Simulator self, TerrainModel terrain) -> SimBody
 
         SimBody Simulator::body(const
-        TerrainModel &terrain) 
+        TerrainModel &terrain)
+
+        Returns the SimBody corresponding to the given terrain. 
         """
         return _robotsim.Simulator_body(self, *args)
 

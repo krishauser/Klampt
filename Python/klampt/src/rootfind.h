@@ -14,6 +14,10 @@ void setXTolerance(double tolx);
 /// Sets the vector field object, returns 0 if pVFObj = NULL, 1 otherwise
 int setVectorField(PyObject* pVFObj);
 
+/// Sets the function object, returns 0 if pVFObj = NULL, 1 otherwise
+/// Equivalent to setVectorField; just a more intuitive name.
+int setFunction(PyObject* pVFObj);
+
 /**
  * Performs unconstrained root finding for up to iter iterations
  * Return values is a tuple indicating:

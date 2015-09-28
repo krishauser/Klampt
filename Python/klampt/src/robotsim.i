@@ -19,6 +19,7 @@
 %array_class(int, intArray);
 
 namespace std {
+   %template(stringVector) vector<string>;
    %template(doubleVector) vector<double>;
    %template(floatVector) vector<float>;
    %template(intVector) vector<int>;
@@ -381,6 +382,19 @@ static PyObject* convert_dmatrix_obj(const std::vector<std::vector<double> >& ma
         Py_DECREF(o2);
         Py_DECREF(o3);
     }
+}
+
+%typemap(argout) std::vector<std::string> {
+  int size = $1.size();
+  $result = PyList_New(size);
+  if(!res) {
+      PyErr_SetString(PyExc_RuntimeError,"Couldn't allocate list of requested size");
+  }
+  else {
+    for (i=0; i < size; i++) {
+      PyList_SetItem($result,i,PyString_FromString($1[i].c_str()));
+    }
+  }
 }
 
 %feature("autodoc","1");

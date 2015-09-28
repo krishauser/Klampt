@@ -186,8 +186,9 @@ class SimBody
   void setCollisionPadding(double padding);
   double getCollisionPadding();
 
-  /// Gets/sets the surface properties
+  /// Gets (a copy of) the surface properties
   ContactParameters getSurface();
+  /// Sets the surface properties
   void setSurface(const ContactParameters& params);
 
   ODEGeometry* geometry;
@@ -201,7 +202,7 @@ class Simulator
  public:
   /// Constructs the simulator from a WorldModel.  If the WorldModel was
   /// loaded from an XML file, then the simulation setup is loaded from it.
-  Simulator(const WorldModel& model);
+  Simulator(const WorldModel& model,const char* settings=NULL);
   ~Simulator();
 
   /// Resets to the initial state (same as setState(initialState))
@@ -270,8 +271,11 @@ class Simulator
   /// Returns a controller for the indicated robot
   SimRobotController controller(int robot);
   SimRobotController controller(const RobotModel& robot);
+  ///Returns the SimBody corresponding to the given link
   SimBody body(const RobotModelLink& link);
+  ///Returns the SimBody corresponding to the given object
   SimBody body(const RigidObjectModel& object);
+  ///Returns the SimBody corresponding to the given terrain
   SimBody body(const TerrainModel& terrain);
   ///Old-style: will be deprecated
   SimRobotController getController(int robot);
