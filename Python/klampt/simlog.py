@@ -2,7 +2,8 @@ from klampt import vectorops,so3,se3
 
 
 class SimLogger:
-    def __init__(self,sim,state_fn,contact_fn=None,colliding='all'):
+    """A CSV logger for a simulation. """
+    def __init__(self,sim,state_fn,contact_fn=None,colliding='all',saveheader=True):
         """
         Logs a simulation to a CSV file.
 
@@ -16,9 +17,11 @@ class SimLogger:
         self.fn = state_fn
         self.f = None
         if state_fn != None:
+            print "SimLogger: Saving state to",state_fn
             self.f = open(state_fn,'w')
         self.f_contact = None
         if contact_fn != None:
+            print "SimLogger: Saving contacts to",contact_fn
             self.f_contact = open(contact_fn,'w')
         self.colliding = []
         if colliding=='all':
@@ -35,11 +38,15 @@ class SimLogger:
                     raise NotImplementedError("Lookup id from entity name")
                 else:
                     raise ValueError("Invalid object given in the colliding list")
-        self.saveHeader()
-        self.saveContactHeader()
+        if saveheader:
+            self.saveHeader()
+            self.saveContactHeader()
         return
 
     def saveHeader(self,extra=[]):
+        if self.f is None:
+            print "SimLogger: No state file specified"
+            return
         world = self.sim.world
         elements = ['time']
         for i in xrange(world.numRobots()):
@@ -53,17 +60,15 @@ class SimLogger:
                 elements.append(n+'_dq['+world.robot(i).link(j).getName()+']')
             for j in xrange(world.robot(i).numDrivers()):
                 elements.append(n+'_t['+str(i)+']')
-            """
             j = 0
             while True:
-                s = self.sim.controller(i).getSensor(j)
+                s = self.sim.controller(i).sensor(j)
                 if len(s.name())==0:
                     break
                 names = s.measurementNames()
                 for sn in range(len(names)):
                     elements.append(n+'_'+s.name()+'['+names[sn]+']')
                 j += 1
-            """
         for i in xrange(world.numRigidObjects()):
             n = world.rigidObject(i).getName()
             elements += [n+'_'+suffix for suffix in ['comx','comy','comz','x','y','z','rx','ry','rz','dx','dy','dz','wx','wy','wz']]
@@ -73,11 +78,13 @@ class SimLogger:
         self.f.write('\n')
         return
 
-    def saveContactHeader(self,extra=[]):
+    def saveContactHeader(self):
+        if self.f_contact is None:
+            print "SimLogger: No contact file specified"
+            return
         elements = ['time','body1','body2']
         elements += ['numContacts']
         elements += ['cpx_avg','cpy_avg','cpz_avg','cnx_avg','cny_avg','cnz_avg','fx_avg','fy_avg','fz_avg','mx_avg','my_avg','mz_avg']
-        elements += extra
         self.f_contact.write(','.join(elements))
         self.f_contact.write('\n')
 
@@ -91,8 +98,8 @@ class SimLogger:
             robot = world.robot(i)
             values += robot.getCom()
             values += robot.getConfig()
+            values += robot.getVelocity()
             values += sim.getActualTorques(i)
-            """
             j = 0
             while True:
                 s = self.sim.controller(i).getSensor(j)
@@ -101,13 +108,12 @@ class SimLogger:
                 meas = s.measurements()
                 values += meas
                 j += 1
-            """
         for i in xrange(world.numRigidObjects()):
             obj = world.rigidObject(i)
             T = obj.getTransform()
             values += se3.apply(T,obj.getMass().getCom())
             values += T[1]
-            values += so3.moment(T)
+            values += so3.moment(T[0])
             values += sim.body(obj).getVelocity()[1]
             values += sim.body(obj).getVelocity()[0]
         
@@ -129,18 +135,21 @@ class SimLogger:
                             navg = vectorops.div(navg,len(clist))
                         body1 = world.getName(id)
                         body2 = world.getName(id2)
-                        values = [sim.getTime(),body1,body2,len(clist)]
-                        values += pavg
-                        values += navg
-                        values += f
-                        values += m
-                        self.f_contact.write(','.join(str(v) for v in values))
+                        cvalues = [sim.getTime(),body1,body2,len(clist)]
+                        cvalues += pavg
+                        cvalues += navg
+                        cvalues += f
+                        cvalues += m
+                        self.f_contact.write(','.join(str(v) for v in cvalues))
                         self.f_contact.write('\n')
         if extra:
             values += extra
-        self.f.write(','.join([str(v) for v in values]))
-        self.f.write('\n')
+        if not (self.f is None):
+            self.f.write(','.join([str(v) for v in values]))
+            self.f.write('\n')
 
     def close(self):
-        self.f.close()
-        self.f_contact.close()
+        if not (self.f is None):
+            self.f.close()
+        if not (self.f_contact is None):
+            self.f_contact.close()

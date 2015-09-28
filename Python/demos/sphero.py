@@ -87,7 +87,7 @@ class Emulator:
         self.sim = sim
         self.robotIndex = robotIndex
         self.controller = sim.controller(robotIndex)
-        self.robot = sim.world().robot(robotIndex)
+        self.robot = sim.getWorld().robot(robotIndex)
         #indices: turn and drive, respectively
         self.velocityLimits = [180*math.pi/180,1080*math.pi/180]
         self.accelLimits = [360*math.pi/180,2080*math.pi/180]
@@ -102,8 +102,8 @@ class Emulator:
     def send_command(self,twist):
         assert twist[1] == 0
         #compute the angular velocity of the shell in the motor frame
-        motorBody = self.sim.getBody(self.robot.link(5))
-        shellBody = self.sim.getBody(self.robot.link(8))
+        motorBody = self.sim.body(self.robot.link(5))
+        shellBody = self.sim.body(self.robot.link(8))
         motorTwist = motorBody.getVelocity()
         shellTwist = shellBody.getVelocity()
         motorXform = motorBody.getTransform()
@@ -216,7 +216,7 @@ class MyGLViewer(GLRealtimeProgram):
         #Put your keyboard special character handler here
         if c in glutspecialmap:
             name = glutspecialmap[c]
-            #print name,"pressed"
+            print name,"pressed"
             if name in self.keymap:
                 self.current_velocities[name]=self.keymap[name]
         pass

@@ -1659,8 +1659,9 @@ RobotModelLink RobotModel::getLink(const char* name)
 
 RobotModelLink RobotModel::link(const char* name)
 {
+  string sname(name);
   for(size_t i=0;i<robot->linkNames.size();i++)
-    if(string(name) == robot->linkNames[i]) {
+    if(sname == robot->linkNames[i]) {
       return link((int)i);
     }
   RobotModelLink link;
@@ -1702,8 +1703,9 @@ RobotModelDriver RobotModel::getDriver(const char* name)
 
 RobotModelDriver RobotModel::driver(const char* name)
 {
+  string sname(name);
   for(size_t i=0;i<robot->driverNames.size();i++)
-    if(name == robot->driverNames[i]) {
+    if(sname == robot->driverNames[i]) {
       return getDriver((int)i);
     }
   RobotModelDriver link;
@@ -1785,6 +1787,41 @@ void RobotModel::setTorqueLimits(const vector<double>& tmax)
 {
   robot->torqueMax.copy(&tmax[0]);
 }
+
+void RobotModel::setDOFPosition(int i,double qi)
+{
+  robot->q(i) = qi;
+  robot->UpdateFrames();
+}
+
+void RobotModel::setDOFPosition(const char* name,double qi)
+{
+  string sname(name);
+  for(size_t i=0;i<robot->linkNames.size();i++)
+    if(sname == robot->linkNames[i]) {
+      robot->q(i) = qi;
+      robot->UpdateFrames();
+      return;
+    }
+  throw PyException("Invalid link name");
+}
+
+double RobotModel::getDOFPosition(int i)
+{
+  return robot->q(i);
+}
+
+double RobotModel::getDOFPosition(const char* name)
+{
+  string sname(name);
+  for(size_t i=0;i<robot->linkNames.size();i++)
+    if(sname == robot->linkNames[i]) {
+      return robot->q(i);
+    }
+  throw PyException("Invalid link name");
+  return 0;
+}
+
 
 void RobotModel::interpolate(const std::vector<double>& a,const std::vector<double>& b,double u,std::vector<double>& out)
 {
@@ -2110,8 +2147,7 @@ void TerrainModel::drawGL(bool keepAppearance)
 }
 
 
-
-Simulator::Simulator(const WorldModel& model)
+Simulator::Simulator(const WorldModel& model,const char* settings)
 {
 #ifdef dDOUBLE
   if(dCheckConfiguration("ODE_double_precision")!=1) {
@@ -2127,6 +2163,10 @@ Simulator::Simulator(const WorldModel& model)
   index = createSim();
   world = model;
   sim = &sims[index]->sim;
+  if(settings && 0==strcmp(settings,"no_blem")) {
+    printf("Turning off boundary layer collisions\n");
+    sim->odesim.GetSettings().boundaryLayerCollisions = false;
+  }
 
   //initialize simulation
   printf("Initializing simulation...\n");
@@ -2156,8 +2196,8 @@ Simulator::Simulator(const WorldModel& model)
   }
 
   //TEMP: play around with auto disable of rigid objects
-  for(size_t i=0;i<sim->odesim.numObjects();i++)
-    dBodySetAutoDisableFlag(sim->odesim.object(i)->body(),1);
+  //for(size_t i=0;i<sim->odesim.numObjects();i++)
+  //    dBodySetAutoDisableFlag(sim->odesim.object(i)->body(),1);
 
   sim->WriteState(initialState);
 }

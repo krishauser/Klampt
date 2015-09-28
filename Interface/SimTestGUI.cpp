@@ -199,8 +199,6 @@ void SimTestBackend::RenderWorld()
   BaseT::RenderWorld();
 
   glEnable(GL_BLEND);
-  Robot* robot=world->robots[0].robot;
-  RobotController* rc=sim.robotControllers[0];
   allWidgets.Enable(&allRobotWidgets,drawPoser==1);
   allWidgets.DrawGL(viewport);
 
@@ -211,15 +209,20 @@ void SimTestBackend::RenderWorld()
 
   //draw commanded setpoint
   if(drawDesired) {
-    robot->UpdateConfig(robotWidgets[0].Pose());
-    sim.controlSimulators[0].GetCommandedConfig(robot->q);
-    robot->UpdateFrames();
-    AnyCollection desiredColorSetting = settings["desired"]["color"];
-    GLColor desiredColor(desiredColorSetting[0],desiredColorSetting[1],desiredColorSetting[2],desiredColorSetting[3]);
-    vector<GeometryAppearance> oldAppearance = world->robots[0].view.linkAppearance;
-    world->robots[0].view.SetColors(desiredColor);
-    world->robots[0].view.Draw();
-    world->robots[0].view.linkAppearance = oldAppearance;
+    for(size_t r=0;r<world->robots.size();r++) {
+      Robot* robot=world->robots[r].robot;
+      RobotController* rc = sim.robotControllers[r];
+      
+      robot->UpdateConfig(robotWidgets[r].Pose());
+      sim.controlSimulators[r].GetCommandedConfig(robot->q);
+      robot->UpdateFrames();
+      AnyCollection desiredColorSetting = settings["desired"]["color"];
+      GLColor desiredColor(desiredColorSetting[0],desiredColorSetting[1],desiredColorSetting[2],desiredColorSetting[3]);
+      vector<GeometryAppearance> oldAppearance = world->robots[r].view.linkAppearance;
+      world->robots[r].view.SetColors(desiredColor);
+      world->robots[r].view.Draw();
+      world->robots[r].view.linkAppearance = oldAppearance;
+    }
   }
   if(drawEstimated) {
   }
@@ -238,7 +241,10 @@ void SimTestBackend::RenderWorld()
 
   if(drawWrenches) {
     Real robotsize = 1.5;
-    Real fscale = robotsize/(robot->GetTotalMass()*9.8);
+    Real robotmass = 1.5;
+    if(world->robots.size() > 1)
+      robotmass = world->robots[0].robot->GetTotalMass();
+    Real fscale = robotsize/(robotmass*9.8);
     DrawWrenches(fscale);
   }
 
@@ -377,9 +383,14 @@ bool SimTestBackend::OnCommand(const string& cmd,const string& args)
     }
   }
   else if(cmd=="command_config") {
-    RobotController* rc=sim.robotControllers[0];
-    if(!rc->SendCommand("set_q",args)) {
-      fprintf(stderr,"set_q command does not work with the robot's controller\n");
+    if(sim.robotControllers.size() == 0) {
+	fprintf(stderr,"set_q command does not work when there is no robot\n");
+    }
+    else {
+      RobotController* rc=sim.robotControllers[0];
+      if(!rc->SendCommand("set_q",args)) {
+	fprintf(stderr,"set_q command does not work with the robot's controller\n");
+      }
     }
   }
   else if(cmd=="load_file") {
@@ -443,9 +454,11 @@ bool SimTestBackend::OnCommand(const string& cmd,const string& args)
   else if(cmd=="set_link_value") {
     double value;
     ss>>value;
-    Vector q = robotWidgets[0].Pose();
-    q(cur_link)=value;
-    robotWidgets[0].SetPose(q);
+    if(world->robots.size()>0) {
+      Vector q = robotWidgets[0].Pose();
+      q(cur_link)=value;
+      robotWidgets[0].SetPose(q);
+    }
   }
   else if(cmd=="set_driver") {
     ss >> cur_driver;
@@ -453,10 +466,12 @@ bool SimTestBackend::OnCommand(const string& cmd,const string& args)
   else if(cmd=="set_driver_value") {
     double driver_value;
     ss>>driver_value;
-    Robot* robot = world->robots[0].robot;
-    robot->UpdateConfig(robotWidgets[0].Pose());
-    robot->SetDriverValue(cur_driver,driver_value);
-    robotWidgets[0].SetPose(robot->q);
+    if(world->robots.size()>0) {
+      Robot* robot = world->robots[0].robot;
+      robot->UpdateConfig(robotWidgets[0].Pose());
+      robot->SetDriverValue(cur_driver,driver_value);
+      robotWidgets[0].SetPose(robot->q);
+    }
   }
   else if(cmd=="log_sim") {
     simLogFile = args;
@@ -532,7 +547,6 @@ void SimTestBackend::BeginDrag(int x,int y,int button,int modifiers)
   allWidgets.Enable(&allObjectWidgets,((click_mode != ModeForceApplication) && (pose_objects == 1)));
   allWidgets.Enable(&allRobotWidgets,(click_mode != ModeForceApplication && drawPoser==1));
 
-  Robot* robot = world->robots[0].robot;
   if(button == GLUT_RIGHT_BUTTON) {
     double d;
     if(allWidgets.BeginDrag(x,viewport.h-y,viewport,d))
@@ -568,7 +582,6 @@ void SimTestBackend::EndDrag(int x,int y,int button,int modifiers)
 
 void SimTestBackend::DoFreeDrag(int dx,int dy,int button)
 {
-  Robot* robot = world->robots[0].robot;
   if(button == GLUT_LEFT_BUTTON)  DragRotate(dx,dy);
   else if(button == GLUT_RIGHT_BUTTON) {
     //dragging widgets
@@ -758,6 +771,10 @@ bool GLUISimTestGUI::Initialize()
 {
   if(!BaseT::Initialize()) return false;
 
+  if(world->robots.size() == 0) {
+    FatalError("In GLUI interface, must have at least one robot in the world\n");
+  }
+
   settings["movieWidth"] = 640;
   settings["movieHeight"] = 480;
   if(!settings.read("simtest.settings")) {
@@ -865,7 +882,7 @@ bool GLUISimTestGUI::Initialize()
     driver_listbox->add_item(i,buf);
   }
   AddControl(driver_listbox,"driver");
-
+  
   driver_value_spinner = glui->add_spinner_to_panel(panel,"Value",GLUI_SPINNER_FLOAT);
   AddControl(driver_value_spinner,"driver_value");
   AddControl(glui->add_button_to_panel(panel,"Set milestone"),"set_milestone");

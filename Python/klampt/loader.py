@@ -40,7 +40,7 @@ def readVectorRaw(text):
 
 def writeVectorList(x):
     """Writes a list of vectors to string"""
-    return '\n'.join(loader.writeVector(xi) for xi in x)
+    return '\n'.join(writeVector(xi) for xi in x)
 
 
 def readVectorList(text):
@@ -184,20 +184,31 @@ def readIKObjective(text):
         ind += 3
     else:
         raise ValueError("Invalid rot type "+rotType+", must be N,T,A or F")
-    if posType != 'F':
-        raise NotImplementedError("Python API can only do point and fixed IK goals")
+
+    if posLocal: posLocal = [float(v) for v in posLocal]
+    if posWorld: posWorld = [float(v) for v in posWorld]
+    if posDirection: posDirection = [float(v) for v in posDirection]
+    if rotLocal: rotLocal = [float(v) for v in rotLocal]
+    if rotWorld: rotWorld = [float(v) for v in rotWorld]
+    
     obj = IKObjective()
+    obj.setLinks(link,destLink);
+    if posType=='N':
+        obj.setFreePosConstraint()
+    elif posType=='F':
+        obj.setFixedPosConstraint(posLocal,posWorld)
+    elif posType=='P':
+        obj.setPlanePosConstraint(posLocal,posDirection,vectorops.dot(posDirection,posWorld))
+    else:
+        obj.setLinearePosConstraint(posLocal,posWorld,posDirection)
     if rotType == 'N':
-        #point constraint
-        obj.setRelativePoint(link,destlink,[float(v) for v in posLocal],[float(v) for v in posWorld])
+        obj.setFreeRotConstraint()
     elif rotType == 'F':
         #fixed constraint
-        R = so3.from_moment([float(v) for v in rotWorld])
-        t = vectorops.sub([float(v) for v in posWorld],so3.apply(R,[float(v) for v in posLocal]))
-        obj.setRelativeTransform(link,destlink,R,t)
+        R = so3.from_moment(rotWorld)
+        obj.setFixedRotConstraint(R)
     elif rotType == 'A':
-        #TODO: rotational axis constraints actually can be set in the python API
-        raise NotImplementedError("Axis rotations not yet implemented")
+        obj.setAxialRotConstraint(rotLocal,rotWorld)
     else:
         raise NotImplementedError("Two-axis rotational constraints not supported")
     return obj

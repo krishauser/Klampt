@@ -36,7 +36,9 @@ class Appearance
   void setDraw(bool draw);
   ///Turns on/off visibility of the given primitive
   void setDraw(int primitive,bool draw);
+  ///Returns whether this object is visible
   bool getDraw();
+  ///Returns whether this primitive is visible
   bool getDraw(int primitive);
   ///Sets color of the object
   void setColor(float r,float g, float b,float a);

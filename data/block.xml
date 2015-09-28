@@ -9,11 +9,10 @@
   </rigidObject> 
 
   <simulation>
-    <globals> 
-      <object index="0">
-         <geometry kRestitution="0.000000" kFriction="0.500000" kStiffness="10000.000000" kDamping="1000.000000" padding="0.002000"/>
-      </object>
-    </globals>
+    <globals /> 
+    <object index="0">
+       <geometry kRestitution="0.000000" kFriction="0.500000" kStiffness="10000.000000" kDamping="1000.000000" padding="0.002000"/>
+    </object>
   </simulation>
 </world>
 

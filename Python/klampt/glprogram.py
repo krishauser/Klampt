@@ -297,7 +297,7 @@ class GLRealtimeProgram(GLNavigationProgram):
     """A GLNavigationProgram that refreshes the screen at a given frame rate.
 
     Attributes:
-        - ttotal: total elapsed time
+        - ttotal: total elapsed time assuming a constant frame rate
         - fps: the frame rate in Hz
         - dt: 1.0/fps
         - counter: a frame counter
