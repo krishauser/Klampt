@@ -29,6 +29,7 @@ ControllerDialog::~ControllerDialog()
 void ControllerDialog::OnRobotChange(int robot)
 {
   if(sim==NULL) return;
+  if(sim->robotControllers.empty()) return;
 
   blockSignals(true);
     refreshing=1;

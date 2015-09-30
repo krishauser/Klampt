@@ -6,9 +6,11 @@ DriverEdit::DriverEdit(RobotWorld* _world,QWidget *parent) :
     ui(new Ui::DriverEdit),
     world(_world),current(0)
 {
-    Robot* robot=world->robots[0].robot;
     ui->setupUi(this);
-        addDrivers(robot->driverNames);
+    if(world->robots.size() > 0) {
+      Robot* robot=world->robots[0].robot;
+      addDrivers(robot->driverNames);
+    }
     RequestDriverParameters();
     ui->slider->setValue(500);
 }
@@ -19,17 +21,21 @@ DriverEdit::~DriverEdit()
 }
 
 void DriverEdit::RequestDriverValue(){
-    Robot* robot=world->robots[0].robot;
-    value=robot->GetDriverValue(current);
-    ui->doubleSpinBox->setValue(value);
-    HandleSpinBox(value);
+    if(world->robots.size() > 0) {
+      Robot* robot=world->robots[0].robot;
+      value=robot->GetDriverValue(current);
+      ui->doubleSpinBox->setValue(value);
+      HandleSpinBox(value);
+    }
 }
 
 void DriverEdit::RequestDriverParameters(){
    //emit GetDriverValues(index);
-    Robot* robot=world->robots[0].robot;
-    Vector2 limits=robot->GetDriverLimits(current);
-    GetDriverParameters(limits[0],limits[1],robot->GetDriverValue(current));
+    if(world->robots.size() > 0) {
+      Robot* robot=world->robots[0].robot;
+      Vector2 limits=robot->GetDriverLimits(current);
+      GetDriverParameters(limits[0],limits[1],robot->GetDriverValue(current));
+    }
     //current=index;
 }
 
