@@ -140,8 +140,10 @@ void SimGUIBackend::InitContactFeedbackAll()
     sim.EnableContactFeedback(world->RigidObjectID(i),world->TerrainID(0));
   //robot-object
   for(size_t i=0;i<world->rigidObjects.size();i++) {
-    for(size_t j=0;j<world->robots[0].robot->links.size();j++) {
-      sim.EnableContactFeedback(world->RigidObjectID(i),world->RobotLinkID(0,j));
+    for(size_t r=0;r<world->robots.size();r++) {
+      for(size_t j=0;j<world->robots[r].robot->links.size();j++) {
+	sim.EnableContactFeedback(world->RigidObjectID(i),world->RobotLinkID(r,j));
+      }
     }
   }
   for(size_t i=0;i<world->rigidObjects.size();i++) {
@@ -150,8 +152,10 @@ void SimGUIBackend::InitContactFeedbackAll()
     }
   }
   for(size_t i=0;i<world->terrains.size();i++) {
-    for(size_t j=0;j<world->robots[0].robot->links.size();j++) {
-      sim.EnableContactFeedback(world->TerrainID(i),world->RobotLinkID(0,j));
+    for(size_t r=0;r<world->robots.size();r++) {
+      for(size_t j=0;j<world->robots[r].robot->links.size();j++) {
+	sim.EnableContactFeedback(world->TerrainID(i),world->RobotLinkID(r,j));
+      }
     }
   }
 }
@@ -618,6 +622,10 @@ bool SimGUIBackend::LoadState(const char* fn)
 
 bool SimGUIBackend::LoadMultiPath(const char* fn,bool constrainedInterpolate,Real interpolateTolerance,Real durationScale)
 {
+  if(world->robots.size()==0) {
+    fprintf(stderr,"Cannot match path to a robot, no robots in world\n");
+    return false;
+  }
   //load and convert MultiPath
   MultiPath path;
   if(!path.Load(fn)) {
