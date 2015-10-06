@@ -182,6 +182,8 @@ def solver(objectives):
         robs = dict()
         for obj in objectives:
             if isinstance(obj,IKObjective):
+                if not hasattr(obj,'robot'):
+                    raise ValueError("IKObjective objects must have 'robot' member for use in ik.solver. Either set this manually or use the ik.objective function")
                 robs.getdefault(obj.robot,[]).append(obj)
             elif isinstance(obj,GeneralizedIKObjective):
                 generalized.append(obj)
@@ -213,6 +215,8 @@ def solver(objectives):
             return res
     else:
         if isinstance(objectives,IKObjective):
+            if not hasattr(objectives,'robot'):
+                raise ValueError("IKObjective object must have 'robot' member for use in ik.solver. Either set this manually or use the ik.objective function")
             s = IKSolver(objectives.robot)
             s.add(objectives)
             return s
