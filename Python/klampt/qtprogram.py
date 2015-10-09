@@ -138,7 +138,7 @@ class GLProgram(QGLWidget):
         self.lastx,self.lasty = x,y
         return self.mousefunc(toGlutButton(e.button()),GLUT_UP,x,y)
     def keyPressEvent(self,e):
-        c = e.text()
+        c = str(e.text())
         if len(c)==0: return #some empty press, like shift/control
         return self.keyboardfunc(c,self.lastx,self.lasty)
     def keyReleaseEvent(self,e):

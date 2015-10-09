@@ -1296,7 +1296,11 @@ RobotModelLink::RobotModelLink()
 
 RobotModel RobotModelLink::getRobot()
 {
-  fprintf(stderr,"RobotModelLink::getRobot() will be deprecated, please use robot() instead\n");
+  static bool warned = false;
+  if(!warned) {
+    fprintf(stderr,"RobotModelLink::getRobot() will be deprecated, please use robot() instead\n");
+    warned = true;
+  }
   return robot();
 }
 
@@ -1537,7 +1541,11 @@ RobotModelDriver::RobotModelDriver()
 
 RobotModel RobotModelDriver::getRobot()
 {
-  fprintf(stderr,"RobotModelDriver::getRobot() will be deprecated, please use robot() instead\n");
+  static bool warned = false;
+  if(!warned) {
+    fprintf(stderr,"RobotModelDriver::getRobot() will be deprecated, please use robot() instead\n");
+    warned = true;
+  }
   return robot();
 }
 
@@ -1637,7 +1645,11 @@ int RobotModel::numLinks()
 
 RobotModelLink RobotModel::getLink(int linkindex)
 {
-  fprintf(stderr,"RobotModel::getLink() will be deprecated, please use link() instead\n");
+  static bool warned = false;
+  if(!warned) {
+    fprintf(stderr,"RobotModel::getLink() will be deprecated, please use link() instead\n");
+    warned = true;
+  }
   return link(linkindex);
 }
 
@@ -1653,7 +1665,11 @@ RobotModelLink RobotModel::link(int linkindex)
 
 RobotModelLink RobotModel::getLink(const char* name)
 {
-  fprintf(stderr,"RobotModel::getLink() will be deprecated, please use link() instead\n");
+  static bool warned = false;
+  if(!warned) {
+    fprintf(stderr,"RobotModel::getLink() will be deprecated, please use link() instead\n");
+    warned = true;
+  }
   return link(name);
 }
 
@@ -1681,7 +1697,11 @@ int RobotModel::numDrivers()
 
 RobotModelDriver RobotModel::getDriver(int driverindex)
 {
-  fprintf(stderr,"RobotModel::getDriver() will be deprecated, please use driver() instead\n");
+  static bool warned = false;
+  if(!warned) {
+    fprintf(stderr,"RobotModel::getDriver() will be deprecated, please use driver() instead\n");
+    warned = true;
+  }
   return driver(driverindex);
 }
 
@@ -1697,7 +1717,11 @@ RobotModelDriver RobotModel::driver(int driverindex)
 
 RobotModelDriver RobotModel::getDriver(const char* name)
 {
-  fprintf(stderr,"RobotModel::getDriver() will be deprecated, please use driver() instead\n");
+  static bool warned = false;
+  if(!warned) {
+    fprintf(stderr,"RobotModel::getDriver() will be deprecated, please use driver() instead\n");
+    warned = true;
+  }
   return driver(name);
 }
 
@@ -2209,7 +2233,11 @@ Simulator::~Simulator()
 
 WorldModel Simulator::getWorld() const
 {
-  fprintf(stderr,"Simulator::getWorld() will be deprecated, please use world instead\n");
+  static bool warned = false;
+  if(!warned) {
+    fprintf(stderr,"Simulator::getWorld() will be deprecated, please use world instead\n");
+    warned = true;
+  }
   return world;
 }
 
@@ -2406,7 +2434,11 @@ void Simulator::setSimStep(double dt)
 
 SimRobotController Simulator::getController(int robot)
 {
-  fprintf(stderr,"Simulator::getController() will be deprecated, please use controller() instead\n");
+  static bool warned = false;
+  if(!warned) {
+    fprintf(stderr,"Simulator::getController() will be deprecated, please use controller() instead\n");
+    warned = true;
+  }
   return controller(robot);
 }
 
@@ -2422,7 +2454,11 @@ SimRobotController Simulator::controller(int robot)
 
 SimRobotController Simulator::getController(const RobotModel& robot)
 {
-  fprintf(stderr,"Simulator::getController() will be deprecated, please use controller() instead\n");
+  static bool warned = false;
+  if(!warned) {
+    fprintf(stderr,"Simulator::getController() will be deprecated, please use controller() instead\n");
+    warned = true;
+  }
   return controller(robot);
 }
 
@@ -2549,19 +2585,31 @@ void SimBody::setSurface(const ContactParameters& res)
 
 SimBody Simulator::getBody(const RobotModelLink& link)
 {
-  fprintf(stderr,"Simulator::getBody() will be deprecated, please use body() instead\n");
+  static bool warned = false;
+  if(!warned) {
+    fprintf(stderr,"Simulator::getBody() will be deprecated, please use body() instead\n");
+    warned = true;
+  }
   return body(link);
 }
 
 SimBody Simulator::getBody(const RigidObjectModel& object)
 {
-  fprintf(stderr,"Simulator::getBody() will be deprecated, please use body() instead\n");
+  static bool warned = false;
+  if(!warned) {
+    fprintf(stderr,"Simulator::getBody() will be deprecated, please use body() instead\n");
+    warned = true;
+  }
   return body(object);
 }
 
 SimBody Simulator::getBody(const TerrainModel& terrain)
 {
-  fprintf(stderr,"Simulator::getBody() will be deprecated, please use body() instead\n");
+  static bool warned = false;
+  if(!warned) {
+    fprintf(stderr,"Simulator::getBody() will be deprecated, please use body() instead\n");
+    warned = true;
+  }
   return body(terrain);
 }
 
@@ -2690,13 +2738,21 @@ void SimRobotSensor::getMeasurements(std::vector<double>& out)
 
 SimRobotSensor SimRobotController::getSensor(int sensorIndex)
 {
-  fprintf(stderr,"SimRobotController::getSensor() will be deprecated, please use sensor() instead\n");
+  static bool warned = false;
+  if(!warned) {
+    fprintf(stderr,"SimRobotController::getSensor() will be deprecated, please use sensor() instead\n");
+    warned = true;
+  }
   return sensor(sensorIndex);
 }
 
 SimRobotSensor SimRobotController::getNamedSensor(const std::string& name)
 {
-  fprintf(stderr,"SimRobotController::getNamedSensor() will be deprecated, please use sensor() instead\n");
+  static bool warned = false;
+  if(!warned) {
+    fprintf(stderr,"SimRobotController::getNamedSensor() will be deprecated, please use sensor() instead\n");
+    warned = true;
+  }
   return sensor(name.c_str());
 }
 SimRobotSensor SimRobotController::sensor(int sensorIndex)

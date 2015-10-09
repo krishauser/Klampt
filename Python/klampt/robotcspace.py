@@ -25,6 +25,11 @@ class RobotCSpace(AdaptiveCSpace):
         #tests
         self.addFeasibleTest(lambda(x): not self.selfCollision(),"self collision")
         self.addFeasibleTest(lambda(x): not self.envCollision(),"env collision")
+        self.properties['geodesic'] = 1
+        volume = 1
+        for b in self.bound:
+            if b[0] != b[1]: volume *= b[1]-b[0]
+        self.properties['volume'] = volume
 
     def sample(self):
         """Overload this to implement custom sampling strategies or to handle

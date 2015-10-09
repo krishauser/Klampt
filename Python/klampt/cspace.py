@@ -94,7 +94,7 @@ class CSpace:
             self.cspace.setDistance(getattr(self,'distance'))
         if hasattr(self,'interpolate'):
             self.cspace.setInterpolate(getattr(self,'interpolate'))
-        for (k,v) in self.properties:
+        for (k,v) in self.properties.iteritems():
             if isinstance(v,(list,tuple)):
                 self.cspace.setPropety(k," ".join([str(item) for item in v]))
             else:
@@ -107,6 +107,13 @@ class CSpace:
         to the desired bound.
         """
         return [random.uniform(*b) for b in self.bound]
+
+    def sampleneighborhood(self,c,r):
+        """Overload this to define a nonuniform sampler.
+        By default, it will sample from the axis-aligned box of radius r
+        around c, but clamped to the bound.
+        """
+        return [random.uniform(max(b[0],ci-r),min(b[1],ci+r)) for ci,b in zip(c,self.bound)]
 
     def feasible(self,x):
         """Overload this to define your new feasibility test"""
