@@ -1443,17 +1443,17 @@ void Convert(const IKGoal& g,AnyCollection& c)
   case IKGoal::RotNone:
     break;
   case IKGoal::RotTwoAxis:
-    c["posConstraint"] = string("twoaxis");
+    c["rotConstraint"] = string("twoaxis");
     Convert(g.localAxis,c["localAxis"]);
     Convert(g.endRotation,c["endRotation"]);
     break;
   case IKGoal::RotAxis:
-    c["posConstraint"] = string("axis");
+    c["rotConstraint"] = string("axis");
     Convert(g.localAxis,c["localAxis"]);
     Convert(g.endRotation,c["endRotation"]);
     break;
   case IKGoal::RotFixed:
-    c["posConstraint"] = string("fixed");
+    c["rotConstraint"] = string("fixed");
     Convert(g.endRotation,c["endRotation"]);
     break;
   }
