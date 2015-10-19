@@ -163,7 +163,7 @@ def from_quaternion(q):
 
 def quaternion(R):
     """Given a Klamp't rotation representation, produces the corresponding
-    unit quaternion (x,y,z,w)."""
+    unit quaternion (w,x,y,z)."""
     tr = trace(R) + 1.0;
     a11,a21,a31,a12,a22,a32,a13,a23,a33 = R
 
@@ -198,7 +198,7 @@ def quaternion(R):
             q[3] = (M[k][j] - M[j][k]) * s;
             q[j] = (M[i][j] + M[j][i]) * s;
             q[k] = (M[i][k] + M[i][k]) * s;
-        x,y,z,w = q[3],q[0],q[1],q[2]
+        w,x,y,z = q[3],q[0],q[1],q[2]
         return vectorops.unit([w,x,y,z])
     
 def distance(R1,R2):
