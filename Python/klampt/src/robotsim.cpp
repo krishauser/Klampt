@@ -3326,7 +3326,7 @@ void ObjectPoser::get(double out[9],double out2[3])
 
 RobotPoser::RobotPoser(RobotModel& robot)
 {
-  Assert(worlds[robot.world]->world != NULL)
+  Assert(worlds[robot.world]->world != NULL);
   RobotWorld& world = *worlds[robot.world]->world;
   Assert(robot.index >= 0 && robot.index < world.robots.size());
   Robot* rob = world.robots[robot.index].robot;
