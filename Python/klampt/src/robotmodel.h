@@ -330,7 +330,13 @@ class TerrainModel
 class WorldModel
 {
  public:
+  ///Creates a WorldModel.  With no arguments, creates a new world.  With
+  ///an integer or another WorldModel instance, creates a reference to an
+  ///existing world.  If passed a pointer to a C++ RobotWorld structure,
+  ///a reference is returned. (This is used pretty much only when
+  ///interfacing C++ and Python code)
   WorldModel();
+  WorldModel(void* ptrRobotWorld);
   WorldModel(int index);
   WorldModel(const WorldModel& w);
   ~WorldModel();
@@ -365,6 +371,16 @@ class WorldModel
   ///Loads some element from a file, automatically detecting its type.  Meshes are interpreted
   ///as terrains.  The ID is returned, or -1 if loading failed.
   int loadElement(const char* fn);
+  ///Removes a robot.  It must be in this world or an exception is raised.
+  ///IMPORTANT: all other references to robots will be invalidated.
+  void remove(const RobotModel& robot);
+  ///Removes a rigid object.  It must be in this world or an exception is
+  ///raised.
+  ///IMPORTANT: all other references to rigid objects will be invalidated.
+  void remove(const RigidObjectModel& object);
+  ///Removes a terrain.  It must be in this world or an exception is raised.
+  ///IMPORTANT: all other references to terrains will be invalidated.
+  void remove(const TerrainModel& terrain);
   ///Retrieves a name for a given element ID
   std::string getName(int id);
   ///Retrieves a geometry for a given element ID

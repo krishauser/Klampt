@@ -8,7 +8,7 @@ class GLPluginBase:
     class's methods and calling setPlugin.  Each method should return True
     if the user event was processed."""
     def __init__(self):
-        self.widget = None
+        self.window = None
         self.width = 100
         self.height = 100
     def display(self):
@@ -16,13 +16,13 @@ class GLPluginBase:
     def display_screen(self):
         return False
     def viewport(self):
-        return self.widget.viewport()
+        return self.window.viewport()
     def idlesleep(self,seconds):
-        self.widget.idlesleep(seconds)
+        self.window.idlesleep(seconds)
     def refresh(self):
-        self.widget.refresh()
+        self.window.refresh()
     def click_ray(self,x,y):
-        return self.widget.click_ray(x,y)
+        return self.window.click_ray(x,y)
     def initialize(self):
         return False
     def reshapefunc(self,w,h):
@@ -42,6 +42,9 @@ class GLPluginBase:
         return False
     def idlefunc(self):
         return True
+    def eventfunc(self,type,args=""):
+        """Generic hook for other events, e.g., button presses, from the GUI"""
+        return False
 
 class GLWidgetPlugin(GLPluginBase):
     """A GL plugin that sends user events to one or more Klamp't widgets"""    

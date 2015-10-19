@@ -167,7 +167,7 @@ class GLProgram(QGLWidget):
         """Called on special character keypress down.  May be overridden"""
         pass
     def specialupfunc(self,c,x,y):
-        """Called on special character keypress up up (if your system allows
+        """Called on special character keypress up (if your system allows
         it).  May be overridden"""
         pass
     def motionfunc(self,x,y,dx,dy):
@@ -401,10 +401,10 @@ class GLPluginProgram(GLRealtimeProgram):
         self.iface = None
     def setPlugin(self,iface):
         if self.iface:
-            self.iface.widget = None
+            self.iface.window = None
         self.iface = iface
         if iface:
-            iface.widget = self
+            iface.window = self
             iface.reshapefunc(self.width,self.height)
         self.refresh()
     def initialize(self):

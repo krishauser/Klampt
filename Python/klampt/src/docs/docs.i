@@ -1351,6 +1351,16 @@ Sets the simulation of this body on/off. ";
 
 Returns true if this body is being simulated. ";
 
+%feature("docstring")  SimBody::enableDynamics "void
+SimBody::enableDynamics(bool enabled=true)
+
+Sets the dynamic simulation of the body on/off. If false, velocities
+will simply be integrated forward, and forces will not affect velocity
+i.e., it will be pure kinematic simulation. ";
+
+%feature("docstring")  SimBody::isDynamicsEnabled "bool
+SimBody::isDynamicsEnabled() ";
+
 %feature("docstring")  SimBody::applyWrench "void
 SimBody::applyWrench(const double f[3], const double t[3])
 
@@ -1944,11 +1954,22 @@ copies of the states of whichever objects you wish to save/restore.
 
 C++ includes: robotmodel.h ";
 
-%feature("docstring")  WorldModel::WorldModel "WorldModel::WorldModel() ";
+%feature("docstring")  WorldModel::WorldModel "WorldModel::WorldModel()
 
-%feature("docstring")  WorldModel::WorldModel "WorldModel::WorldModel(int index) ";
+Creates a new WorldModel. ";
 
-%feature("docstring")  WorldModel::WorldModel "WorldModel::WorldModel(const WorldModel &w) ";
+%feature("docstring")  WorldModel::WorldModel "WorldModel::WorldModel(int index)
+
+Creates a WorldModel by reference to an existing world. ";
+
+%feature("docstring")  WorldModel::WorldModel "WorldModel::WorldModel(const WorldModel &w)
+
+Creates a WorldModel by reference to an existing world. ";
+
+%feature("docstring")  WorldModel::WorldModel "WorldModel::WorldModel(void *ptrRobotWorld)
+
+Creates a WorldModel by pointer to a C++ RobotWorld structure (used
+pretty much only when interfacing C++ and Python code) ";
 
 %feature("docstring")  WorldModel::~WorldModel "WorldModel::~WorldModel() ";
 
@@ -2036,6 +2057,25 @@ WorldModel::loadElement(const char *fn)
 Loads some element from a file, automatically detecting its type.
 Meshes are interpreted as terrains. The ID is returned, or -1 if
 loading failed. ";
+
+%feature("docstring")  WorldModel::remove "void
+WorldModel::remove(const RobotModel &robot)
+
+Removes a robot. It must be in this world or an exception is raised.
+IMPORTANT: all other references to robots will be invalidated. ";
+
+%feature("docstring")  WorldModel::remove "void
+WorldModel::remove(const RigidObjectModel &object)
+
+Removes a rigid object. It must be in this world or an exception is
+raised. IMPORTANT: all other references to rigid objects will be
+invalidated. ";
+
+%feature("docstring")  WorldModel::remove "void
+WorldModel::remove(const TerrainModel &terrain)
+
+Removes a terrain. It must be in this world or an exception is raised.
+IMPORTANT: all other references to terrains will be invalidated. ";
 
 %feature("docstring")  WorldModel::getName "std::string
 WorldModel::getName(int id)
@@ -2312,7 +2352,8 @@ GeneralizedIKObjective &obj, double out[9], double out2[3]) ";
 
 
 // File: robotsim_8cpp.xml
-%feature("docstring")  createWorld "int createWorld() ";
+%feature("docstring")  createWorld "int createWorld(RobotWorld
+*ptr=NULL) ";
 
 %feature("docstring")  derefWorld "void derefWorld(int index) ";
 

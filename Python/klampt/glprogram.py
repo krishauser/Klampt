@@ -256,7 +256,7 @@ class GLNavigationProgram(GLProgram):
         pack = sum((list(c) for c in cols),[])
         glMultMatrixf(pack)
 
-        # Light source
+        # Default light source
         glLightfv(GL_LIGHT0,GL_POSITION,[0,-1,2,0])
         glLightfv(GL_LIGHT0,GL_DIFFUSE,[1,1,1,1])
         glLightfv(GL_LIGHT0,GL_SPECULAR,[1,1,1,1])
@@ -339,10 +339,10 @@ class GLPluginProgram(GLRealtimeProgram):
         self.iface = None
     def setPlugin(self,iface):
         if self.iface:
-            self.iface.widget = None
+            self.iface.window = None
         self.iface = iface
         if iface:
-            iface.widget = self
+            iface.window = self
             iface.reshapefunc(self.width,self.height)
         self.refresh()
     def initialize(self):
