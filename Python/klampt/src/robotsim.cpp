@@ -28,7 +28,8 @@
 /// Internally used.
 struct WorldData
 {
-  RobotWorld world;
+  RobotWorld* world;
+  bool worldExternal;
   XmlWorld xmlWorld;
   int refCount;
 };
@@ -57,10 +58,18 @@ static list<int> simDeleteList;
 static vector<WidgetData> widgets;
 static list<int> widgetDeleteList;
 
-int createWorld()
+int createWorld(RobotWorld* ptr=NULL)
 {
   if(worldDeleteList.empty()) {
     worlds.push_back(new WorldData);
+    if(ptr) {
+      worlds.back()->world = ptr;
+      worlds.back()->worldExternal = true;
+    }
+    else {
+      worlds.back()->world = new RobotWorld;
+      worlds.back()->worldExternal = false;
+    }
     worlds.back()->refCount = 1;
     return (int)(worlds.size()-1);
   }
@@ -68,6 +77,14 @@ int createWorld()
     int index = worldDeleteList.front();
     worldDeleteList.erase(worldDeleteList.begin());
     worlds[index] = new WorldData;
+    if(ptr) {
+      worlds[index]->world = ptr;
+      worlds[index]->worldExternal = true;
+    }
+    else {
+      worlds[index]->world = new RobotWorld;
+      worlds[index]->worldExternal = false;
+    }
     worlds[index]->refCount = 1;
     return index;
   }
@@ -86,6 +103,8 @@ void derefWorld(int index)
   //printf("Deref world %d: count %d\n",index,worlds[index]->refCount);
   if(worlds[index]->refCount == 0) {
     //printf("Deleting world %d\n",index);
+    if(!worlds[index]->worldExternal)
+      delete worlds[index]->world;
     worlds[index] = NULL;
     worldDeleteList.push_back(index);
   }
@@ -406,7 +425,7 @@ void Geometry3D::set(const Geometry3D& g)
   geom->InitCollisions();
   if(!isStandalone()) {
     //update the display list
-    RobotWorld& world=worlds[this->world]->world;
+    RobotWorld& world=*worlds[this->world]->world;
     world.GetAppearance(id).Set(*geom);
   }
 }
@@ -474,7 +493,7 @@ void Geometry3D::setTriangleMesh(const TriangleMesh& mesh)
   GetMesh(mesh,*geom);
   if(!isStandalone()) {
     //update the display list
-    RobotWorld& world=worlds[this->world]->world;
+    RobotWorld& world=*worlds[this->world]->world;
     world.GetAppearance(id).Set(*geom);
   }
 }
@@ -498,7 +517,7 @@ void Geometry3D::setPointCloud(const PointCloud& pc)
   GetPointCloud(pc,*geom);
   if(!isStandalone()) {
     //update the display list
-    RobotWorld& world=worlds[this->world]->world;
+    RobotWorld& world=*worlds[this->world]->world;
     world.GetAppearance(id).Set(*geom);
   }
 }
@@ -518,7 +537,7 @@ void Geometry3D::setGeometricPrimitive(const GeometricPrimitive& prim)
   *geom = g;
   geom->InitCollisions();
   if(!isStandalone()) {
-    RobotWorld& world=worlds[this->world]->world;
+    RobotWorld& world=*worlds[this->world]->world;
     world.GetAppearance(id).Set(*geom);
   }
 }
@@ -535,7 +554,7 @@ bool Geometry3D::loadFile(const char* fn)
 
   if(!isStandalone()) {
     //update the display list
-    RobotWorld& world=worlds[this->world]->world;
+    RobotWorld& world=*worlds[this->world]->world;
     world.GetAppearance(id).Set(*geom);
   }
   return true;
@@ -571,7 +590,7 @@ void Geometry3D::translate(const double t[3])
 
   if(!isStandalone()) {
     //update the display list
-    RobotWorld& world=worlds[this->world]->world;
+    RobotWorld& world=*worlds[this->world]->world;
     world.GetAppearance(id).Set(*geom);
   }
 }
@@ -588,7 +607,7 @@ void Geometry3D::transform(const double R[9],const double t[3])
 
   if(!isStandalone()) {
     //update the display list
-    RobotWorld& world=worlds[this->world]->world;
+    RobotWorld& world=*worlds[this->world]->world;
     world.GetAppearance(id).Set(*geom);
   }
 }
@@ -950,6 +969,12 @@ WorldModel::WorldModel(const WorldModel& w)
   refWorld(index);
 }
 
+WorldModel::WorldModel(void* ptrRobotWorld)
+{
+  index = createWorld((RobotWorld*)ptrRobotWorld);
+}
+
+
 const WorldModel& WorldModel::operator = (const WorldModel& w)
 {
   index = w.index;
@@ -967,7 +992,7 @@ WorldModel::~WorldModel()
 
 bool WorldModel::readFile(const char* fn)
 {
-  RobotWorld& world = worlds[index]->world;
+  RobotWorld& world = *worlds[index]->world;
 
   const char* ext=FileExtension(fn);
   if(0==strcmp(ext,"rob")) {
@@ -1026,48 +1051,48 @@ bool WorldModel::readFile(const char* fn)
 
 int WorldModel::numRobots()
 {
-  RobotWorld& world = worlds[index]->world;
+  RobotWorld& world = *worlds[index]->world;
   return world.robots.size();
 }
 
 int WorldModel::numRobotLinks(int robot)
 {
-  RobotWorld& world = worlds[index]->world;
+  RobotWorld& world = *worlds[index]->world;
   return world.robots[robot].robot->links.size();
 }
 
 int WorldModel::numRigidObjects()
 {
-  RobotWorld& world = worlds[index]->world;
+  RobotWorld& world = *worlds[index]->world;
   return world.rigidObjects.size();
 }
 
 int WorldModel::numTerrains()
 {
-  RobotWorld& world = worlds[index]->world;
+  RobotWorld& world = *worlds[index]->world;
   return world.terrains.size();
 }
 
 int WorldModel::numIDs()
 {
-  RobotWorld& world = worlds[index]->world;
+  RobotWorld& world = *worlds[index]->world;
   return world.NumIDs();
 }
 
 RobotModel WorldModel::robot(int robot)
 {
-  if(robot < 0  || robot >= (int)worlds[index]->world.robots.size())
+  if(robot < 0  || robot >= (int)worlds[index]->world->robots.size())
     throw PyException("Invalid robot index");
   RobotModel r;
   r.world = index;
   r.index = robot;
-  r.robot = worlds[index]->world.robots[robot].robot;
+  r.robot = worlds[index]->world->robots[robot].robot;
   return r;
 }
 
 RobotModel WorldModel::robot(const char* robot)
 {
-  RobotWorld& world = worlds[index]->world;
+  RobotWorld& world = *worlds[index]->world;
   RobotModel r;
   r.world = index;
   for(size_t i=0;i<world.robots.size();i++)
@@ -1082,12 +1107,12 @@ RobotModel WorldModel::robot(const char* robot)
 
 RobotModelLink WorldModel::robotLink(int robot,int link)
 {
-  if(robot < 0  || robot >= (int)worlds[index]->world.robots.size())
+  if(robot < 0  || robot >= (int)worlds[index]->world->robots.size())
     throw PyException("Invalid robot index");
   RobotModelLink r;
   r.world = index;
   r.robotIndex = robot;
-  r.robotPtr = worlds[index]->world.robots[robot].robot;
+  r.robotPtr = worlds[index]->world->robots[robot].robot;
   r.index = link;
   return r;
 }
@@ -1113,24 +1138,24 @@ RobotModelLink WorldModel::robotLink(const char* robotname,const char* link)
 
 RigidObjectModel WorldModel::rigidObject(int object)
 {
-  if(object < 0  || object >= (int)worlds[index]->world.rigidObjects.size())
+  if(object < 0  || object >= (int)worlds[index]->world->rigidObjects.size())
     throw PyException("Invalid rigid object index");
   RigidObjectModel obj;
   obj.world = index;
   obj.index = object;
-  obj.object = worlds[index]->world.rigidObjects[object].object;
+  obj.object = worlds[index]->world->rigidObjects[object].object;
   return obj;
 }
 
 RigidObjectModel WorldModel::rigidObject(const char* object)
 {
-  RobotWorld& world = worlds[index]->world;
+  RobotWorld& world = *worlds[index]->world;
   RigidObjectModel obj;
   obj.world = index;
   for(size_t i=0;i<world.rigidObjects.size();i++)
     if(world.rigidObjects[i].name == object) {
       obj.index = (int)i;
-      obj.object = worlds[index]->world.rigidObjects[i].object;
+      obj.object = world.rigidObjects[i].object;
       return obj;
     }
   throw PyException("Invalid rigid object name");
@@ -1139,13 +1164,13 @@ RigidObjectModel WorldModel::rigidObject(const char* object)
 
 TerrainModel WorldModel::terrain(int terrain)
 {
-  if(terrain < 0  || terrain >= (int)worlds[index]->world.terrains.size())
+  if(terrain < 0  || terrain >= (int)worlds[index]->world->terrains.size())
     throw PyException("Invalid terrain index");
 
   TerrainModel t;
   t.world = index;
   t.index = terrain;
-  t.terrain = worlds[index]->world.terrains[terrain].terrain;
+  t.terrain = worlds[index]->world->terrains[terrain].terrain;
   return t;
 }
 
@@ -1153,11 +1178,11 @@ TerrainModel WorldModel::terrain(const char* terrain)
 {
   TerrainModel t;
   t.world = index;
-  RobotWorld& world = worlds[index]->world;
+  RobotWorld& world = *worlds[index]->world;
   for(size_t i=0;i<world.terrains.size();i++)
     if(world.terrains[i].name == terrain) {
       t.index = (int)i;
-      t.terrain = worlds[index]->world.terrains[i].terrain;
+      t.terrain = world.terrains[i].terrain;
       return t;
     }
   return t;
@@ -1165,7 +1190,7 @@ TerrainModel WorldModel::terrain(const char* terrain)
 
 RobotModel WorldModel::makeRobot(const char* name)
 {
-  RobotWorld& world = worlds[index]->world;
+  RobotWorld& world = *worlds[index]->world;
   RobotModel robot;
   robot.world = index;
   robot.index = (int)world.robots.size();
@@ -1176,7 +1201,7 @@ RobotModel WorldModel::makeRobot(const char* name)
 
 RigidObjectModel WorldModel::makeRigidObject(const char* name)
 {
-  RobotWorld& world = worlds[index]->world;
+  RobotWorld& world = *worlds[index]->world;
   RigidObjectModel object;
   object.world = index;
   object.index = (int)world.rigidObjects.size();
@@ -1187,7 +1212,7 @@ RigidObjectModel WorldModel::makeRigidObject(const char* name)
 
 TerrainModel WorldModel::makeTerrain(const char* name)
 {
-  RobotWorld& world = worlds[index]->world;
+  RobotWorld& world = *worlds[index]->world;
   TerrainModel terrain;
   terrain.world = index;
   terrain.index = world.terrains.size();
@@ -1198,7 +1223,7 @@ TerrainModel WorldModel::makeTerrain(const char* name)
 
 RobotModel WorldModel::loadRobot(const char* fn)
 {
-  RobotWorld& world = worlds[index]->world;
+  RobotWorld& world = *worlds[index]->world;
   int oindex=world.LoadRobot(fn);
   if(oindex < 0) return RobotModel();
   RobotModel robot;
@@ -1210,7 +1235,7 @@ RobotModel WorldModel::loadRobot(const char* fn)
 
 RigidObjectModel WorldModel::loadRigidObject(const char* fn)
 {
-  RobotWorld& world = worlds[index]->world;
+  RobotWorld& world = *worlds[index]->world;
   int oindex=world.LoadRigidObject(fn);
   if(oindex < 0) return RigidObjectModel();
   RigidObjectModel obj;
@@ -1222,7 +1247,7 @@ RigidObjectModel WorldModel::loadRigidObject(const char* fn)
 
 TerrainModel WorldModel::loadTerrain(const char* fn)
 {
-  RobotWorld& world = worlds[index]->world;
+  RobotWorld& world = *worlds[index]->world;
   int oindex=world.LoadTerrain(fn);
   if(oindex < 0) return TerrainModel();
   TerrainModel obj;
@@ -1234,14 +1259,39 @@ TerrainModel WorldModel::loadTerrain(const char* fn)
 
 int WorldModel::loadElement(const char* fn)
 {
-  RobotWorld& world = worlds[index]->world;
+  RobotWorld& world = *worlds[index]->world;
   int id = world.LoadElement(fn);
   return id;
 }
 
+void WorldModel::remove(const RobotModel& obj)
+{
+  if(obj.world != index) 
+    throw PyException("Robot does not belong to this world");
+  RobotWorld& world = *worlds[index]->world;
+  world.robots.erase(world.robots.begin()+obj.index);
+}
+
+void WorldModel::remove(const RigidObjectModel& obj)
+{
+  if(obj.world != index) 
+    throw PyException("Rigid object does not belong to this world");
+  RobotWorld& world = *worlds[index]->world;
+  world.rigidObjects.erase(world.rigidObjects.begin()+obj.index);
+}
+
+void WorldModel::remove(const TerrainModel& obj)
+{
+  if(obj.world != index) 
+    throw PyException("Rigid object does not belong to this world");
+  RobotWorld& world = *worlds[index]->world;
+  world.terrains.erase(world.terrains.begin()+obj.index);
+}
+
+
 void WorldModel::drawGL()
 {
-  RobotWorld& world = worlds[index]->world;
+  RobotWorld& world = *worlds[index]->world;
   world.DrawGL();
 }
 
@@ -1252,13 +1302,13 @@ void WorldModel::enableGeometryLoading(bool enabled)
 
 std::string WorldModel::getName(int id)
 {
-  RobotWorld& world = worlds[index]->world;
+  RobotWorld& world = *worlds[index]->world;
   return world.GetName(id);
 }
 
 Geometry3D WorldModel::geometry(int id)
 {
-  RobotWorld& world = worlds[index]->world;
+  RobotWorld& world = *worlds[index]->world;
   if(world.IsTerrain(id)>=0 || world.IsRigidObject(id)>=0 || world.IsRobotLink(id).first>=0) {
     Geometry3D geom;
     geom.world = index;
@@ -1274,7 +1324,7 @@ Geometry3D WorldModel::geometry(int id)
 
 Appearance WorldModel::appearance(int id)
 {
-  RobotWorld& world = worlds[index]->world;
+  RobotWorld& world = *worlds[index]->world;
   if(world.IsTerrain(id)>=0 || world.IsRigidObject(id)>=0 || world.IsRobotLink(id).first>=0) {
     Appearance geom;
     geom.world = index;
@@ -1340,7 +1390,7 @@ void RobotModelLink::setParent(int p)
 
 int RobotModelLink::getID()
 {
-  RobotWorld& world = worlds[this->world]->world;
+  RobotWorld& world = *worlds[this->world]->world;
   return world.RobotLinkID(robotIndex,index);
 }
 
@@ -1349,7 +1399,7 @@ Geometry3D RobotModelLink::geometry()
   Geometry3D res;
   res.world = world;
   res.id = getID();
-  res.geomPtr = &worlds[world]->world.GetGeometry(res.id);
+  res.geomPtr = &worlds[world]->world->GetGeometry(res.id);
   return res;
 }
 
@@ -1358,7 +1408,7 @@ Appearance RobotModelLink::appearance()
   Appearance res;
   res.world = world;
   res.id = getID();
-  res.appearancePtr = &worlds[world]->world.GetAppearance(res.id);
+  res.appearancePtr = &worlds[world]->world->GetAppearance(res.id);
   return res;
 }
 
@@ -1518,7 +1568,7 @@ void RobotModelLink::getPointVelocity(const double plocal[3],double out[3])
 
 void RobotModelLink::drawLocalGL(bool keepAppearance)
 {
-  RobotWorld& world = worlds[this->world]->world;
+  RobotWorld& world = *worlds[this->world]->world;
   if(keepAppearance) {
     world.robots[robotIndex].view.DrawLink_Local(index);
   }
@@ -1628,13 +1678,13 @@ RobotModel::RobotModel()
 
 const char* RobotModel::getName()
 {
-  RobotWorld& world = worlds[this->world]->world;
+  RobotWorld& world = *worlds[this->world]->world;
   return world.robots[index].name.c_str();
 }
 
 int RobotModel::getID()
 {
-  RobotWorld& world = worlds[this->world]->world;
+  RobotWorld& world = *worlds[this->world]->world;
   return world.RobotID(index);
 }
 
@@ -1899,7 +1949,7 @@ bool RobotModel::selfCollides()
 
 void RobotModel::drawGL(bool keepAppearance)
 {
-  RobotWorld& world = worlds[this->world]->world;
+  RobotWorld& world = *worlds[this->world]->world;
   if(keepAppearance) {
     world.robots[index].view.Draw();
   }
@@ -2005,13 +2055,13 @@ RigidObjectModel::RigidObjectModel()
 
 const char* RigidObjectModel::getName()
 {
-  RobotWorld& world = worlds[this->world]->world;
+  RobotWorld& world = *worlds[this->world]->world;
   return world.rigidObjects[index].name.c_str();
 }
 
 int RigidObjectModel::getID()
 {
-  RobotWorld& world = worlds[this->world]->world;
+  RobotWorld& world = *worlds[this->world]->world;
   return world.RigidObjectID(index);
 }
 
@@ -2020,7 +2070,7 @@ Geometry3D RigidObjectModel::geometry()
   Geometry3D res;
   res.world = world;
   res.id = getID();
-  res.geomPtr = &worlds[world]->world.GetGeometry(res.id);
+  res.geomPtr = &worlds[world]->world->GetGeometry(res.id);
   return res;
 }
 
@@ -2029,7 +2079,7 @@ Appearance RigidObjectModel::appearance()
   Appearance res;
   res.world = world;
   res.id = getID();
-  res.appearancePtr = &worlds[world]->world.GetAppearance(res.id);
+  res.appearancePtr = &worlds[world]->world->GetAppearance(res.id);
   return res;
 }
 
@@ -2104,7 +2154,7 @@ void RigidObjectModel::setTransform(const double R[9],const double t[3])
 
 void RigidObjectModel::drawGL(bool keepAppearance)
 {
-  RobotWorld& world = worlds[this->world]->world;
+  RobotWorld& world = *worlds[this->world]->world;
   if(keepAppearance) {
     world.rigidObjects[index].view.Draw();
   }
@@ -2125,13 +2175,13 @@ TerrainModel::TerrainModel()
 
 const char* TerrainModel::getName()
 {
-  RobotWorld& world = worlds[this->world]->world;
+  RobotWorld& world = *worlds[this->world]->world;
   return world.terrains[index].name.c_str();
 }
 
 int TerrainModel::getID()
 {
-  RobotWorld& world = worlds[this->world]->world;
+  RobotWorld& world = *worlds[this->world]->world;
   return world.TerrainID(index);
 }
 
@@ -2140,7 +2190,7 @@ Geometry3D TerrainModel::geometry()
   Geometry3D res;
   res.world = world;
   res.id = getID();
-  res.geomPtr = &worlds[world]->world.GetGeometry(res.id);
+  res.geomPtr = &worlds[world]->world->GetGeometry(res.id);
   return res;
 }
 
@@ -2150,7 +2200,7 @@ Appearance TerrainModel::appearance()
   Appearance res;
   res.world = world;
   res.id = getID();
-  res.appearancePtr = &worlds[world]->world.GetAppearance(res.id);
+  res.appearancePtr = &worlds[world]->world->GetAppearance(res.id);
   return res;
 }
 
@@ -2161,7 +2211,7 @@ void TerrainModel::setFriction(double friction)
 
 void TerrainModel::drawGL(bool keepAppearance)
 {
-  RobotWorld& world = worlds[this->world]->world;
+  RobotWorld& world = *worlds[this->world]->world;
   if(keepAppearance) {
     world.terrains[index].view.Draw();
   }
@@ -2194,7 +2244,7 @@ Simulator::Simulator(const WorldModel& model,const char* settings)
 
   //initialize simulation
   printf("Initializing simulation...\n");
-  RobotWorld& rworld=worlds[model.index]->world;
+  RobotWorld& rworld=*worlds[model.index]->world;
   sim->Init(&rworld);
 
   //setup controllers
@@ -2380,7 +2430,7 @@ void Simulator::enableContactFeedback(int obj1,int obj2)
 void Simulator::enableContactFeedbackAll()
 {
   //setup feedback
-  RobotWorld& rworld=worlds[world.index]->world;
+  RobotWorld& rworld=*worlds[world.index]->world;
   //world-object
   const ODESimulatorSettings& settings = sim->odesim.GetSettings();
   if(settings.rigidObjectCollisions) {
@@ -2480,6 +2530,18 @@ bool SimBody::isEnabled()
 {
   return dBodyIsEnabled(body) != 0;
 }
+
+void SimBody::enableDynamics(bool enabled)
+{
+  if(!enabled) dBodySetKinematic(body);
+  else dBodySetDynamic(body);
+}
+
+bool SimBody::isDynamicsEnabled()
+{
+  return dBodyIsKinematic(body) == 0;
+}
+
 
 void SimBody::applyWrench(const double f[3],const double t[3])
 {
@@ -2966,7 +3028,7 @@ void SimRobotController::setPIDCommand(const std::vector<double>& qdes,const std
 {
   setPIDCommand(qdes,dqdes);
   RobotMotorCommand& command = sim->controlSimulators[index].command;
-  Robot* robot=sim->controlSimulators[index].robot;
+  //Robot* robot=sim->controlSimulators[index].robot;
   if(tfeedforward.size() != command.actuators.size())
      throw PyException("Invalid command sizes");
   for(size_t i=0;i<command.actuators.size();i++) {
@@ -3239,7 +3301,7 @@ void TransformPoser::enableRotation(bool enable)
 ObjectPoser::ObjectPoser(RigidObjectModel& object)
   :Widget()
 {
-  RobotWorld& world = worlds[object.world]->world;
+  RobotWorld& world = *worlds[object.world]->world;
   RigidObject* obj = world.rigidObjects[object.index].object;
   ViewRigidObject* view = &world.rigidObjects[object.index].view;
   widgets[index].widget = new RigidObjectPoseWidget(obj,view);
@@ -3264,9 +3326,13 @@ void ObjectPoser::get(double out[9],double out2[3])
 
 RobotPoser::RobotPoser(RobotModel& robot)
 {
-  RobotWorld& world = worlds[robot.world]->world;
+  Assert(worlds[robot.world]->world != NULL)
+  RobotWorld& world = *worlds[robot.world]->world;
+  Assert(robot.index >= 0 && robot.index < world.robots.size());
   Robot* rob = world.robots[robot.index].robot;
   ViewRobot* view = &world.robots[robot.index].view;
+  Assert(rob != NULL);
+  Assert(view != NULL);
   widgets[index].widget = new RobotPoseWidget(rob,view);
 }
 

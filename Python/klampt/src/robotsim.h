@@ -161,6 +161,12 @@ class SimBody
   /// Returns true if this body is being simulated
   bool isEnabled();
 
+  /// Sets the dynamic simulation of the body on/off.  If false, velocities
+  /// will simply be integrated forward, and forces will not affect velocity
+  /// i.e., it will be pure kinematic simulation.
+  void enableDynamics(bool enabled=true);
+  bool isDynamicsEnabled();
+
   /// Applies a force and torque about the COM at the current simulation
   /// time step.
   void applyWrench(const double f[3],const double t[3]);
