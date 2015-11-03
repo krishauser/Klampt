@@ -2248,9 +2248,11 @@ bool Robot::LoadURDF(const char* fn)
 	map<string,bool> virtualLinks;
 	map<string,Real> kP,kI,kD,dryFriction,viscousFriction,customAccMax;
 	TiXmlDocument xml_doc;
-	bool loaded=xml_doc.LoadFile(s.c_str());
+	bool loaded=xml_doc.LoadFile(fn);
 	if(!loaded) {
-	  printf("Strange, unable to re-open robot file %s\n",fn);
+	  fprintf(stderr,"Strange, unable to re-open URDF robot file %s to read klampt XML elements\n",fn);
+	  printf("Press Enter to continue\n");
+	  getchar();
 	}
 	TiXmlElement *robot_xml = xml_doc.FirstChildElement("robot");
 	TiXmlElement *klampt_xml = NULL;
