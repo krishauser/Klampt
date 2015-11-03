@@ -231,13 +231,19 @@ class RobotModel
   void getMassMatrixInv(std::vector<std::vector<double> >& out);
   ///Returns the Coriolis force matrix C(q,dq) for current config and velocity
   void getCoriolisForceMatrix(std::vector<std::vector<double> >& out);
-  ///Returns the Coriolis forces C(q,dq)*dq for current config and velocity (faster than computing matrix and doing product)
+  ///Returns the Coriolis forces C(q,dq)*dq for current config and velocity
+  ///(faster than computing matrix and doing product). ("Forces" is somewhat
+  ///of a misnomer; the result is a joint torque vector)
   void getCoriolisForces(std::vector<double>& out);
-  ///Returns the gravity force vector G(q) for the given workspace gravity vector g (usually (0,0,-9.8))
+  ///Returns the generalized gravity vector G(q) for the given workspace
+  ///gravity vector g (usually (0,0,-9.8)).  ("Forces" is somewhat of a
+  ///misnomer; the result is a joint torque vector)
   void getGravityForces(const double g[3],std::vector<double>& out);
-  ///Computes the inverse dynamics (using Recursive Newton Euler solver)
+  ///Computes the inverse dynamics (using Recursive Newton Euler solver).
+  ///Note: does not include gravity term G(q)
   void torquesFromAccel(const std::vector<double>& ddq,std::vector<double>& out);
   ///Computes the foward dynamics (using Recursive Newton Euler solver)
+  ///Note: does not include gravity term G(q)
   void accelFromTorques(const std::vector<double>& t,std::vector<double>& out);
 
   //interpolation functions
