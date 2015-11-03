@@ -1,5 +1,6 @@
 #include "XmlWorld.h"
 #include <utils/stringutils.h>
+#include <fstream>
 
 ///reads a transformation matrix from attributes of an XML element
 bool ReadTransform(TiXmlElement* e,RigidTransform& xform)
@@ -120,8 +121,23 @@ bool XmlRobot::GetRobot(Robot& robot)
   Vector q;
   if(e->QueryValueAttribute("config",&q)==TIXML_SUCCESS) {
     if(q.n != robot.q.n) {
-      printf("%d!=%d\n",q.n,robot.q.n);
+      fprintf(stderr,"%d!=%d\n",q.n,robot.q.n);
       fprintf(stderr,"XmlRobot: element's configuration doesnt match size with the robot\n");
+      return false;
+    }
+    robot.UpdateConfig(q);
+  }
+  if(e->Attribute("configfile")!= NULL) {
+    ifstream in (e->Attribute("configfile"),ios::in);
+    if(!in) {
+      fprintf(stderr,"XmlRobot: could not open robot config file %s\n",e->Attribute("configfile"));
+      return false;
+    }
+    Vector q;
+    in >> q;
+    if(q.n != robot.q.n) {
+      fprintf(stderr,"%d!=%d\n",q.n,robot.q.n);
+      fprintf(stderr,"XmlRobot: configuration file %s vector  doesnt match size with the robot\n",e->Attribute("configfile"));
       return false;
     }
     robot.UpdateConfig(q);
