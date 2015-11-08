@@ -34,10 +34,37 @@ struct TriangleMesh
  */
 struct PointCloud
 {
+  ///Returns the number of points
+  int numPoints() const;
+  ///Returns the number of properties
+  int numProperties() const;
+  ///Sets all the points to the given list (a 3n-list)
+  void setPoints(int num,const double plist[]);
+  ///Adds a point. Sets all its properties to 0.  Returns the index.
+  int addPoint(const double p[3]);
+  ///Sets the position of a point
+  void setPoint(int index,const double p[3]);
+  ///Retrieves the position of a point
+  void getPoint(int index,double out[3]) const;
+  ///Sets all the properties of all points to the given list (a kn-list)
+  void setProperties(const double properties[]);
+  ///Sets property pindex of all points to the given list (a n-list)
+  void setProperties(int pindex,const double properties[]);
+  ///Sets property pindex of point index to the given value
+  void setProperty(int index,int pindex,double value);
+  ///Sets the property named pname of point index to the given value
+  void setProperty(int index,const std::string& pname,double value);
+  ///Gets property pindex of point index 
+  double getProperty(int index,int pindex) const;
+  ///Gets the property named pname of point index
+  double getProperty(int index,const std::string& pname) const;
   ///Translates all the points by v=v+t
   void translate(const double t[3]);
   ///Transforms all the points by the rigid transform v=R*v+t
   void transform(const double R[9],const double t[3]);
+  ///Adds the given point cloud to this one.  They must share the same
+  ///properties or else an exception is raised
+  void join(const PointCloud& pc);
 
   std::vector<double> vertices;
   std::vector<std::string> propertyNames;

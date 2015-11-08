@@ -930,6 +930,112 @@ void TriangleMesh::transform(const double R[9],const double t[3])
   }
 }
 
+int PointCloud::numPoints() const { return vertices.size()/3; }
+int PointCloud::numProperties() const { return propertyNames.size(); }
+void PointCloud::setPoints(int num,const double plist[])
+{
+  vertices.resize(num*3);
+  copy(plist,plist+num*3,&vertices[0]);
+  properties.resize(num*propertyNames.size());
+  fill(properties.begin(),properties.end(),0.0);
+}
+
+int PointCloud::addPoint(const double p[3])
+{
+  int ofs = (int)vertices.size();
+  vertices.resize(vertices.size()+3);
+  vertices[ofs] = p[0];
+  vertices[ofs+1] = p[1];
+  vertices[ofs+2] = p[2];
+  properties.resize(properties.size()+propertyNames.size(),0.0);
+  return ofs/3;
+}
+
+void PointCloud::setPoint(int index,const double p[3])
+{
+  if(index < 0 || index*3 >= (int)vertices.size())
+    throw PyException("Invalid point index");  
+  vertices[index*3] = p[0];
+  vertices[index*3+1] = p[1];
+  vertices[index*3+2] = p[2];
+}
+
+void PointCloud::getPoint(int index,double out[3]) const
+{
+  if(index < 0 || index*3 >= (int)vertices.size())
+    throw PyException("Invalid point index");  
+  out[0] = vertices[index*3];
+  out[1] = vertices[index*3+1];
+  out[2] = vertices[index*3+2];
+}
+
+void PointCloud::setProperties(const double vproperties[])
+{
+  int n = numPoints();
+  copy(vproperties,vproperties+propertyNames.size()*n,properties.begin());
+}
+
+void PointCloud::setProperties(int pindex,const double vproperties[])
+{
+  if(pindex < 0 || pindex >= (int)propertyNames.size())
+    throw PyException("Invalid property index");  
+  int n = numPoints();
+  for(int i=0;i<n;i++)
+    properties[i*propertyNames.size()+pindex] = vproperties[i];
+}
+
+void PointCloud::setProperty(int index,int pindex,double value)
+{
+  if(index < 0 || index*3 >= (int)vertices.size())
+    throw PyException("Invalid point index");  
+  if(pindex < 0 || pindex >= (int)propertyNames.size())
+    throw PyException("Invalid property index");  
+  properties[index*propertyNames.size()+pindex] = value;
+}
+
+void PointCloud::setProperty(int index,const std::string& pname,double value)
+{
+  int pindex = -1;
+  for(size_t i=0;i<propertyNames.size();i++)
+    if(propertyNames[i] == pname) {
+      pindex = (int)i;
+      break;
+    }
+  if(pindex < 0)
+    throw PyException("Invalid property name");  
+  setProperty(index,pindex,value);
+}
+
+double PointCloud::getProperty(int index,int pindex) const
+{
+  if(index < 0 || index*3 >= (int)vertices.size())
+    throw PyException("Invalid point index");  
+  if(pindex < 0 || pindex >= (int)propertyNames.size())
+    throw PyException("Invalid property index");  
+  return properties[index*propertyNames.size()+pindex];
+}
+
+double PointCloud::getProperty(int index,const std::string& pname) const
+{
+  int pindex = -1;
+  for(size_t i=0;i<propertyNames.size();i++)
+    if(propertyNames[i] == pname) {
+      pindex = (int)i;
+      break;
+    }
+  if(pindex < 0)
+    throw PyException("Invalid property name");  
+  return getProperty(index,pindex);
+}
+
+void PointCloud::join(const PointCloud& pc)
+{
+  if(propertyNames != pc.propertyNames) 
+    throw PyException("PointCloud::join can't join two PCs with dissimilar property names");
+  vertices.insert(vertices.end(),pc.vertices.begin(),pc.vertices.end());
+  properties.insert(properties.end(),pc.properties.begin(),pc.properties.end());
+}
+
 void PointCloud::translate(const double t[3])
 {
   for(size_t i=0;i<vertices.size();i+=3) {
@@ -1001,7 +1107,7 @@ bool WorldModel::readFile(const char* fn)
       return false;
     }
   }
-  else if(0==strcmp(ext,"env") || 0==strcmp(ext,"tri")) {
+  else if(0==strcmp(ext,"env") || 0==strcmp(ext,"tri") || 0==strcmp(ext,"pcd")) {
     if(world.LoadTerrain(fn)<0) {
       printf("Error loading terrain file %s\n",fn);
       return false;
