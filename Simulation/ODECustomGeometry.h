@@ -24,5 +24,11 @@ dGeomID dCreateCustomGeometry(AnyCollisionGeometry3D* geom,Real outerMargin=0);
 CustomGeometryData* dGetCustomGeometryData(dGeomID o);
 void InitODECustomGeometry();
 
+///if the underlying meshes had a collision, the result is flagged as
+///unreliable in a global flag.
+bool GetCustomGeometryCollisionReliableFlag();
+///Resets the reliability flag to true
+void ClearCustomGeometryCollisionReliableFlag();
+
 #endif
 
