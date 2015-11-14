@@ -164,6 +164,7 @@ static list<ODEContactResult> gContacts;
 ODESimulator::ODESimulator()
 {
   timestep = 0;
+  lastStateTimestep = 0;
 
   g_ODE_object.Init();
   worldID = dWorldCreate();
@@ -307,58 +308,88 @@ void ODESimulator::Step(Real dt)
     //    //line 10
     //13. step(dt)
     //14. lastdt = dt
-    timestep=lastStateTimestep;
-    Real validTime = -lastStateTimestep, desiredTime = 0;
-    bool didRollback = false;
-    while(true) {
-      gContacts.clear();
-      DetectCollisions();
-#if DO_TIMING
-      collisionTime += timer.ElapsedTime();
-      timer.Reset();
-#endif // DO_TIMING
-      //determine whether to rollback
-      bool rollback = false;
-      for(list<ODEContactResult>::iterator i=gContacts.begin();i!=gContacts.end();i++)
-	if(i->meshOverlap) { 
-	  rollback = true;
-	  break;
-	}
-      //TODO: if two bodies had overlap on the prior timestep, don't
-      //keep rolling back
-      if(rollback && !lastState.IsOpen()) {
-	printf("ODESimulation: Rollback rejected because last state not saved\n");
-	rollback = false;
-      }
-      if(rollback && timestep < 1e-6) {
-	printf("ODESimulation: Rollback rejected because timestep %g below minimum threshold\n");
-	rollback = false;
-      }
+	if(lastStateTimestep > 0) {
+		timestep=lastStateTimestep;
+		Real validTime = -lastStateTimestep, desiredTime = 0;
+		bool didRollback = false;
+		while(true) {
+		  gContacts.clear();
+		  DetectCollisions();
+	#if DO_TIMING
+		  collisionTime += timer.ElapsedTime();
+		  timer.Reset();
+	#endif // DO_TIMING
+		  //determine whether to rollback
+		  bool rollback = false;
+		  for(list<ODEContactResult>::iterator i=gContacts.begin();i!=gContacts.end();i++)
+		if(i->meshOverlap) { 
+		  rollback = true;
+		  break;
+		}
+		  //TODO: if two bodies had overlap on the prior timestep, don't
+		  //keep rolling back
+		  if(rollback && !lastState.IsOpen()) {
+		printf("ODESimulation: Rollback rejected because last state not saved\n");
+		rollback = false;
+		  }
+		  if(rollback && timestep < 1e-6) {
+		printf("ODESimulation: Rollback rejected because timestep %g below minimum threshold\n");
+		rollback = false;
+		  }
 	
-      if(rollback) {
-	printf("ODESimulation: Rolling back, time step halved to %g\n",timestep*0.5);
-	didRollback = true;
-	lastState.Seek(0,FILESEEKSTART);
-	ReadState(lastState);
-	timestep *= 0.5;
-      }
-      else {
-	//accept step
-	lastState.Close();
-	bool res = lastState.OpenData(FILEREAD | FILEWRITE);
-	Assert(res);
-	Assert(lastState.IsOpen());
-	WriteState(lastState);
+		  if(rollback) {
+		printf("ODESimulation: Rolling back, time step halved to %g\n",timestep*0.5);
+		didRollback = true;
+		lastState.Seek(0,FILESEEKSTART);
+		ReadState(lastState);
+		timestep *= 0.5;
+		  }
+		  else {
+		//accept step
+		lastState.Close();
+		bool res = lastState.OpenData(FILEREAD | FILEWRITE);
+		Assert(res);
+		Assert(lastState.IsOpen());
+		WriteState(lastState);
 
-	validTime += timestep;
-	timestep = desiredTime-validTime;
-      }
-      if(validTime >= desiredTime) break;
-      StepDynamics(timestep);
-    }
-    if(didRollback) {
-      printf("ODESimulation: Adaptive time step done.\n");
-    }
+		validTime += timestep;
+		timestep = desiredTime-validTime;
+		  }
+		  if(validTime >= desiredTime) break;
+		  StepDynamics(timestep);
+		}
+		if(didRollback) {
+		  printf("ODESimulation: Adaptive time step done.\n");
+		}
+	}
+	else {
+		//first step
+		timestep=dt;
+		gContacts.clear();
+		DetectCollisions();
+	#if DO_TIMING
+		collisionTime += timer.ElapsedTime();
+		timer.Reset();
+	#endif // DO_TIMING
+		//determine whether to rollback
+		bool rollback = false;
+		for(list<ODEContactResult>::iterator i=gContacts.begin();i!=gContacts.end();i++)
+		  if(i->meshOverlap) { 
+		  rollback = true;
+		  break;
+		}
+		if(rollback) {
+			printf("ODESimulation: Warning, initial state has underlying meshes overlapping\n");
+		}
+		else {
+			//save state
+			lastState.Close();
+			bool res = lastState.OpenData(FILEREAD | FILEWRITE);
+			Assert(res);
+			Assert(lastState.IsOpen());
+			WriteState(lastState);
+		}
+	}
     lastStateTimestep = dt;
     StepDynamics(dt);
   }
