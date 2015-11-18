@@ -75,9 +75,11 @@ class GLSimulationProgram(GLRealtimeProgram):
             glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,self.commanded_config_color)
             for i in xrange(self.world.numRobots()):
                 r = self.world.robot(i)
-                q = self.sim.controller(i).getCommandedConfig()
-                r.setConfig(q)
-                r.drawGL(False)
+                mode = self.sim.controller(i).getControlType()
+                if mode == "PID":
+                    q = self.sim.controller(i).getCommandedConfig()
+                    r.setConfig(q)
+                    r.drawGL(False)
             glDisable(GL_BLEND)
 
         #draw contacts, if enabled

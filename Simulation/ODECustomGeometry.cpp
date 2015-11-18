@@ -25,6 +25,8 @@ const static bool gDoTriangleTriangleCollisionDetection = false;
 //doesn't consider unique contact points if they are between this tolerance
 const static Real cptol=1e-5;
 
+static bool gCustomGeometryMeshesIntersect = false;
+
 int gdCustomGeometryClass = 0;
 
 void ReverseContact(dContactGeom& contact)
@@ -395,6 +397,7 @@ int MeshMeshCollide(CollisionMesh& m1,Real outerMargin1,CollisionMesh& m2,Real o
     tri1loc.b = T12*tri1.b;
     tri1loc.c = T12*tri1.c;
     if(tri1loc.intersects(tri2)) { 
+      gCustomGeometryMeshesIntersect = true;
       if(warnedCount % 1000 == 0) {
 	printf("ODECustomMesh: Triangles penetrate margin %g+%g: can't trust contact detector\n",outerMargin1,outerMargin2);
       }
@@ -859,4 +862,14 @@ void InitODECustomGeometry()
   mmclass.aabb_test = NULL;
   mmclass.dtor = dCustomGeometryDtor;
   gdCustomGeometryClass = dCreateGeomClass(&mmclass);
+}
+
+bool GetCustomGeometryCollisionReliableFlag()
+{
+  return !gCustomGeometryMeshesIntersect;
+}
+
+void ClearCustomGeometryCollisionReliableFlag()
+{
+  gCustomGeometryMeshesIntersect = false;
 }
