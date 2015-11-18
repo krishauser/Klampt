@@ -3151,7 +3151,7 @@ Camera::Viewport GetCameraViewport(const Viewport& viewport)
 
 bool Widget::hover(int x,int y,const Viewport& viewport)
 {
-  double distance;
+  double distance = Inf;
   Camera::Viewport vp = GetCameraViewport(viewport);
   bool res=widgets[index].widget->Hover(x,y,vp,distance);
   if(res) widgets[index].widget->SetHighlight(true);
@@ -3161,7 +3161,7 @@ bool Widget::hover(int x,int y,const Viewport& viewport)
 
 bool Widget::beginDrag(int x,int y,const Viewport& viewport)
 {
-  double distance;
+  double distance = Inf;
   Camera::Viewport vp = GetCameraViewport(viewport);
   bool res=widgets[index].widget->BeginDrag(x,y,vp,distance);
   if(res) widgets[index].widget->SetFocus(true);
