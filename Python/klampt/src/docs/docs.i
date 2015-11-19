@@ -729,6 +729,67 @@ propertyNames member.
 
 C++ includes: geometry.h ";
 
+%feature("docstring")  PointCloud::numPoints "int
+PointCloud::numPoints() const
+
+Returns the number of points. ";
+
+%feature("docstring")  PointCloud::numProperties "int
+PointCloud::numProperties() const
+
+Returns the number of properties. ";
+
+%feature("docstring")  PointCloud::setPoints "void
+PointCloud::setPoints(int num, const double plist[])
+
+Sets all the points to the given list (a 3n-list) ";
+
+%feature("docstring")  PointCloud::addPoint "int
+PointCloud::addPoint(const double p[3])
+
+Adds a point. Sets all its properties to 0. Returns the index. ";
+
+%feature("docstring")  PointCloud::setPoint "void
+PointCloud::setPoint(int index, const double p[3])
+
+Sets the position of a point. ";
+
+%feature("docstring")  PointCloud::getPoint "void
+PointCloud::getPoint(int index, double out[3]) const
+
+Retrieves the position of a point. ";
+
+%feature("docstring")  PointCloud::setProperties "void
+PointCloud::setProperties(const double properties[])
+
+Sets all the properties of all points to the given list (a kn-list) ";
+
+%feature("docstring")  PointCloud::setProperties "void
+PointCloud::setProperties(int pindex, const double properties[])
+
+Sets property pindex of all points to the given list (a n-list) ";
+
+%feature("docstring")  PointCloud::setProperty "void
+PointCloud::setProperty(int index, int pindex, double value)
+
+Sets property pindex of point index to the given value. ";
+
+%feature("docstring")  PointCloud::setProperty "void
+PointCloud::setProperty(int index, const std::string &pname, double
+value)
+
+Sets the property named pname of point index to the given value. ";
+
+%feature("docstring")  PointCloud::getProperty "double
+PointCloud::getProperty(int index, int pindex) const
+
+Gets property pindex of point index. ";
+
+%feature("docstring")  PointCloud::getProperty "double
+PointCloud::getProperty(int index, const std::string &pname) const
+
+Gets the property named pname of point index. ";
+
 %feature("docstring")  PointCloud::translate "void
 PointCloud::translate(const double t[3])
 
@@ -738,6 +799,12 @@ Translates all the points by v=v+t. ";
 PointCloud::transform(const double R[9], const double t[3])
 
 Transforms all the points by the rigid transform v=R*v+t. ";
+
+%feature("docstring")  PointCloud::join "void PointCloud::join(const
+PointCloud &pc)
+
+Adds the given point cloud to this one. They must share the same
+properties or else an exception is raised ";
 
 
 // File: classPyCSpace.xml
@@ -1024,26 +1091,30 @@ velocity. ";
 RobotModel::getCoriolisForces(std::vector< double > &out)
 
 Returns the Coriolis forces C(q,dq)*dq for current config and velocity
-(faster than computing matrix and doing product) ";
+(faster than computing matrix and doing product). (\"Forces\" is
+somewhat of a misnomer; the result is a joint torque vector) ";
 
 %feature("docstring")  RobotModel::getGravityForces "void
 RobotModel::getGravityForces(const double g[3], std::vector< double >
 &out)
 
-Returns the gravity force vector G(q) for the given workspace gravity
-vector g (usually (0,0,-9.8)) ";
+Returns the generalized gravity vector G(q) for the given workspace
+gravity vector g (usually (0,0,-9.8)). (\"Forces\" is somewhat of a
+misnomer; the result is a joint torque vector) ";
 
 %feature("docstring")  RobotModel::torquesFromAccel "void
 RobotModel::torquesFromAccel(const std::vector< double > &ddq,
 std::vector< double > &out)
 
-Computes the inverse dynamics (using Recursive Newton Euler solver) ";
+Computes the inverse dynamics (using Recursive Newton Euler solver).
+Note: does not include gravity term G(q) ";
 
 %feature("docstring")  RobotModel::accelFromTorques "void
 RobotModel::accelFromTorques(const std::vector< double > &t,
 std::vector< double > &out)
 
-Computes the foward dynamics (using Recursive Newton Euler solver) ";
+Computes the foward dynamics (using Recursive Newton Euler solver)
+Note: does not include gravity term G(q) ";
 
 %feature("docstring")  RobotModel::interpolate "void
 RobotModel::interpolate(const std::vector< double > &a, const
@@ -1956,20 +2027,17 @@ C++ includes: robotmodel.h ";
 
 %feature("docstring")  WorldModel::WorldModel "WorldModel::WorldModel()
 
-Creates a new WorldModel. ";
+Creates a WorldModel. With no arguments, creates a new world. With an
+integer or another WorldModel instance, creates a reference to an
+existing world. If passed a pointer to a C++ RobotWorld structure, a
+reference is returned. (This is used pretty much only when interfacing
+C++ and Python code) ";
 
-%feature("docstring")  WorldModel::WorldModel "WorldModel::WorldModel(int index)
+%feature("docstring")  WorldModel::WorldModel "WorldModel::WorldModel(void *ptrRobotWorld) ";
 
-Creates a WorldModel by reference to an existing world. ";
+%feature("docstring")  WorldModel::WorldModel "WorldModel::WorldModel(int index) ";
 
-%feature("docstring")  WorldModel::WorldModel "WorldModel::WorldModel(const WorldModel &w)
-
-Creates a WorldModel by reference to an existing world. ";
-
-%feature("docstring")  WorldModel::WorldModel "WorldModel::WorldModel(void *ptrRobotWorld)
-
-Creates a WorldModel by pointer to a C++ RobotWorld structure (used
-pretty much only when interfacing C++ and Python code) ";
+%feature("docstring")  WorldModel::WorldModel "WorldModel::WorldModel(const WorldModel &w) ";
 
 %feature("docstring")  WorldModel::~WorldModel "WorldModel::~WorldModel() ";
 
