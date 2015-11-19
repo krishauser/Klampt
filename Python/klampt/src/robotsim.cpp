@@ -932,10 +932,11 @@ void TriangleMesh::transform(const double R[9],const double t[3])
 
 int PointCloud::numPoints() const { return vertices.size()/3; }
 int PointCloud::numProperties() const { return propertyNames.size(); }
-void PointCloud::setPoints(int num,const double plist[])
+void PointCloud::setPoints(int num,const vector<double>& plist)
 {
   vertices.resize(num*3);
-  copy(plist,plist+num*3,&vertices[0]);
+  assert(plist.size() >= num+3);
+  copy(plist.begin(),plist.begin()+num*3,&vertices[0]);
   properties.resize(num*propertyNames.size());
   fill(properties.begin(),properties.end(),0.0);
 }
@@ -969,17 +970,19 @@ void PointCloud::getPoint(int index,double out[3]) const
   out[2] = vertices[index*3+2];
 }
 
-void PointCloud::setProperties(const double vproperties[])
+void PointCloud::setProperties(const vector<double>& vproperties)
 {
   int n = numPoints();
-  copy(vproperties,vproperties+propertyNames.size()*n,properties.begin());
+  assert(vproperties.size() >= n*propertyNames.size());
+  copy(vproperties.begin(),vproperties.begin()+propertyNames.size()*n,properties.begin());
 }
 
-void PointCloud::setProperties(int pindex,const double vproperties[])
+void PointCloud::setProperties(int pindex,const vector<double>& vproperties)
 {
   if(pindex < 0 || pindex >= (int)propertyNames.size())
-    throw PyException("Invalid property index");  
+    throw PyException("Invalid property index"); 
   int n = numPoints();
+  assert((int)vproperties.size() >= n);
   for(int i=0;i<n;i++)
     properties[i*propertyNames.size()+pindex] = vproperties[i];
 }

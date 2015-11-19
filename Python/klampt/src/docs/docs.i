@@ -740,7 +740,7 @@ PointCloud::numProperties() const
 Returns the number of properties. ";
 
 %feature("docstring")  PointCloud::setPoints "void
-PointCloud::setPoints(int num, const double plist[])
+PointCloud::setPoints(int num, const vector< double > &plist[])
 
 Sets all the points to the given list (a 3n-list) ";
 
@@ -760,12 +760,13 @@ PointCloud::getPoint(int index, double out[3]) const
 Retrieves the position of a point. ";
 
 %feature("docstring")  PointCloud::setProperties "void
-PointCloud::setProperties(const double properties[])
+PointCloud::setProperties(const vector< double > &properties)
 
 Sets all the properties of all points to the given list (a kn-list) ";
 
 %feature("docstring")  PointCloud::setProperties "void
-PointCloud::setProperties(int pindex, const double properties[])
+PointCloud::setProperties(int pindex, const vector< double >
+&properties)
 
 Sets property pindex of all points to the given list (a n-list) ";
 

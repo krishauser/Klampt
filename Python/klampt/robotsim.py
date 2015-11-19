@@ -519,10 +519,10 @@ class PointCloud(_object):
 
     def setPoints(self, *args):
         """
-        setPoints(PointCloud self, int num, double const [] plist)
+        setPoints(PointCloud self, int num, doubleVector plist)
 
         void
-        PointCloud::setPoints(int num, const double plist[])
+        PointCloud::setPoints(int num, const vector< double > &plist[])
 
         Sets all the points to the given list (a 3n-list) 
         """
@@ -563,11 +563,12 @@ class PointCloud(_object):
 
     def setProperties(self, *args):
         """
-        setProperties(PointCloud self, double const [] properties)
-        setProperties(PointCloud self, int pindex, double const [] properties)
+        setProperties(PointCloud self, doubleVector properties)
+        setProperties(PointCloud self, int pindex, doubleVector properties)
 
         void
-        PointCloud::setProperties(int pindex, const double properties[])
+        PointCloud::setProperties(int pindex, const vector< double >
+        &properties)
 
         Sets property pindex of all points to the given list (a n-list) 
         """

@@ -16955,12 +16955,12 @@ SWIGINTERN PyObject *_wrap_PointCloud_setPoints(PyObject *SWIGUNUSEDPARM(self), 
   PyObject *resultobj = 0;
   PointCloud *arg1 = (PointCloud *) 0 ;
   int arg2 ;
-  double *arg3 ;
+  std::vector< double,std::allocator< double > > *arg3 = 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
   int val2 ;
   int ecode2 = 0 ;
-  double temp3[] ;
+  int res3 = SWIG_OLDOBJ ;
   PyObject * obj0 = 0 ;
   PyObject * obj1 = 0 ;
   PyObject * obj2 = 0 ;
@@ -16977,14 +16977,19 @@ SWIGINTERN PyObject *_wrap_PointCloud_setPoints(PyObject *SWIGUNUSEDPARM(self), 
   } 
   arg2 = static_cast< int >(val2);
   {
-    if (!convert_darray(obj2,temp3,)) {
-      return NULL;
+    std::vector<double,std::allocator< double > > *ptr = (std::vector<double,std::allocator< double > > *)0;
+    res3 = swig::asptr(obj2, &ptr);
+    if (!SWIG_IsOK(res3)) {
+      SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "PointCloud_setPoints" "', argument " "3"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
     }
-    arg3 = &temp3[0];
+    if (!ptr) {
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "PointCloud_setPoints" "', argument " "3"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
+    }
+    arg3 = ptr;
   }
   {
     try {
-      (arg1)->setPoints(arg2,(double const (*))arg3);
+      (arg1)->setPoints(arg2,(std::vector< double,std::allocator< double > > const &)*arg3);
     }
     catch(PyException& e) {
       e.setPyErr();
@@ -16996,8 +17001,10 @@ SWIGINTERN PyObject *_wrap_PointCloud_setPoints(PyObject *SWIGUNUSEDPARM(self), 
     }
   }
   resultobj = SWIG_Py_Void();
+  if (SWIG_IsNewObj(res3)) delete arg3;
   return resultobj;
 fail:
+  if (SWIG_IsNewObj(res3)) delete arg3;
   return NULL;
 }
 
@@ -17165,10 +17172,10 @@ fail:
 SWIGINTERN PyObject *_wrap_PointCloud_setProperties__SWIG_0(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   PointCloud *arg1 = (PointCloud *) 0 ;
-  double *arg2 ;
+  std::vector< double,std::allocator< double > > *arg2 = 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
-  double temp2[] ;
+  int res2 = SWIG_OLDOBJ ;
   PyObject * obj0 = 0 ;
   PyObject * obj1 = 0 ;
   
@@ -17179,14 +17186,19 @@ SWIGINTERN PyObject *_wrap_PointCloud_setProperties__SWIG_0(PyObject *SWIGUNUSED
   }
   arg1 = reinterpret_cast< PointCloud * >(argp1);
   {
-    if (!convert_darray(obj1,temp2,)) {
-      return NULL;
+    std::vector<double,std::allocator< double > > *ptr = (std::vector<double,std::allocator< double > > *)0;
+    res2 = swig::asptr(obj1, &ptr);
+    if (!SWIG_IsOK(res2)) {
+      SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "PointCloud_setProperties" "', argument " "2"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
     }
-    arg2 = &temp2[0];
+    if (!ptr) {
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "PointCloud_setProperties" "', argument " "2"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
+    }
+    arg2 = ptr;
   }
   {
     try {
-      (arg1)->setProperties((double const (*))arg2);
+      (arg1)->setProperties((std::vector< double,std::allocator< double > > const &)*arg2);
     }
     catch(PyException& e) {
       e.setPyErr();
@@ -17198,8 +17210,10 @@ SWIGINTERN PyObject *_wrap_PointCloud_setProperties__SWIG_0(PyObject *SWIGUNUSED
     }
   }
   resultobj = SWIG_Py_Void();
+  if (SWIG_IsNewObj(res2)) delete arg2;
   return resultobj;
 fail:
+  if (SWIG_IsNewObj(res2)) delete arg2;
   return NULL;
 }
 
@@ -17208,12 +17222,12 @@ SWIGINTERN PyObject *_wrap_PointCloud_setProperties__SWIG_1(PyObject *SWIGUNUSED
   PyObject *resultobj = 0;
   PointCloud *arg1 = (PointCloud *) 0 ;
   int arg2 ;
-  double *arg3 ;
+  std::vector< double,std::allocator< double > > *arg3 = 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
   int val2 ;
   int ecode2 = 0 ;
-  double temp3[] ;
+  int res3 = SWIG_OLDOBJ ;
   PyObject * obj0 = 0 ;
   PyObject * obj1 = 0 ;
   PyObject * obj2 = 0 ;
@@ -17230,14 +17244,19 @@ SWIGINTERN PyObject *_wrap_PointCloud_setProperties__SWIG_1(PyObject *SWIGUNUSED
   } 
   arg2 = static_cast< int >(val2);
   {
-    if (!convert_darray(obj2,temp3,)) {
-      return NULL;
+    std::vector<double,std::allocator< double > > *ptr = (std::vector<double,std::allocator< double > > *)0;
+    res3 = swig::asptr(obj2, &ptr);
+    if (!SWIG_IsOK(res3)) {
+      SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "PointCloud_setProperties" "', argument " "3"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
     }
-    arg3 = &temp3[0];
+    if (!ptr) {
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "PointCloud_setProperties" "', argument " "3"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
+    }
+    arg3 = ptr;
   }
   {
     try {
-      (arg1)->setProperties(arg2,(double const (*))arg3);
+      (arg1)->setProperties(arg2,(std::vector< double,std::allocator< double > > const &)*arg3);
     }
     catch(PyException& e) {
       e.setPyErr();
@@ -17249,8 +17268,10 @@ SWIGINTERN PyObject *_wrap_PointCloud_setProperties__SWIG_1(PyObject *SWIGUNUSED
     }
   }
   resultobj = SWIG_Py_Void();
+  if (SWIG_IsNewObj(res3)) delete arg3;
   return resultobj;
 fail:
+  if (SWIG_IsNewObj(res3)) delete arg3;
   return NULL;
 }
 
@@ -17271,8 +17292,7 @@ SWIGINTERN PyObject *_wrap_PointCloud_setProperties(PyObject *self, PyObject *ar
     int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_PointCloud, 0);
     _v = SWIG_CheckState(res);
     if (_v) {
-      void *vptr = 0;
-      int res = SWIG_ConvertPtr(argv[1], &vptr, SWIGTYPE_p_double, 0);
+      int res = swig::asptr(argv[1], (std::vector<double,std::allocator< double > >**)(0));
       _v = SWIG_CheckState(res);
       if (_v) {
         return _wrap_PointCloud_setProperties__SWIG_0(self, args);
@@ -17290,8 +17310,7 @@ SWIGINTERN PyObject *_wrap_PointCloud_setProperties(PyObject *self, PyObject *ar
         _v = SWIG_CheckState(res);
       }
       if (_v) {
-        void *vptr = 0;
-        int res = SWIG_ConvertPtr(argv[2], &vptr, SWIGTYPE_p_double, 0);
+        int res = swig::asptr(argv[2], (std::vector<double,std::allocator< double > >**)(0));
         _v = SWIG_CheckState(res);
         if (_v) {
           return _wrap_PointCloud_setProperties__SWIG_1(self, args);
@@ -17303,8 +17322,8 @@ SWIGINTERN PyObject *_wrap_PointCloud_setProperties(PyObject *self, PyObject *ar
 fail:
   SWIG_SetErrorMsg(PyExc_NotImplementedError,"Wrong number or type of arguments for overloaded function 'PointCloud_setProperties'.\n"
     "  Possible C/C++ prototypes are:\n"
-    "    PointCloud::setProperties(double const [])\n"
-    "    PointCloud::setProperties(int,double const [])\n");
+    "    PointCloud::setProperties(std::vector< double,std::allocator< double > > const &)\n"
+    "    PointCloud::setProperties(int,std::vector< double,std::allocator< double > > const &)\n");
   return 0;
 }
 
@@ -43670,10 +43689,10 @@ static PyMethodDef SwigMethods[] = {
 		"Returns the number of properties. \n"
 		""},
 	 { (char *)"PointCloud_setPoints", _wrap_PointCloud_setPoints, METH_VARARGS, (char *)"\n"
-		"PointCloud_setPoints(PointCloud self, int num, double const [] plist)\n"
+		"PointCloud_setPoints(PointCloud self, int num, doubleVector plist)\n"
 		"\n"
 		"void\n"
-		"PointCloud::setPoints(int num, const double plist[])\n"
+		"PointCloud::setPoints(int num, const vector< double > &plist[])\n"
 		"\n"
 		"Sets all the points to the given list (a 3n-list) \n"
 		""},
@@ -43702,11 +43721,12 @@ static PyMethodDef SwigMethods[] = {
 		"Retrieves the position of a point. \n"
 		""},
 	 { (char *)"PointCloud_setProperties", _wrap_PointCloud_setProperties, METH_VARARGS, (char *)"\n"
-		"setProperties(double const [] properties)\n"
-		"PointCloud_setProperties(PointCloud self, int pindex, double const [] properties)\n"
+		"setProperties(doubleVector properties)\n"
+		"PointCloud_setProperties(PointCloud self, int pindex, doubleVector properties)\n"
 		"\n"
 		"void\n"
-		"PointCloud::setProperties(int pindex, const double properties[])\n"
+		"PointCloud::setProperties(int pindex, const vector< double >\n"
+		"&properties)\n"
 		"\n"
 		"Sets property pindex of all points to the given list (a n-list) \n"
 		""},
