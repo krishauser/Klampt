@@ -28,6 +28,8 @@ class WorldCollider:
 
     Methods:
       - getGeom(obj): finds the geometry corresponding to an object
+      - ignoreCollision(obj or obj pair): ignores collisions corresponding to
+        an object or pair of objects
       - collisionTests(filter1,filter2): returns an iterator over potential
         colliding pairs
       - collisions(filter1,filter2): yields an iterator over collision pairs
@@ -45,10 +47,11 @@ class WorldCollider:
         first robot link intersected by a ray
     """
     
-    def __init__(self,world):
+    def __init__(self,world,ignore=[]):
         """Initializes the collision detection structure given a WorldModel
         as input."""
-        
+
+        world.enableInitCollisions(True)
         self.world = world
         #a list of (object,geom) pairs
         self.geomList = []
@@ -133,12 +136,38 @@ class WorldCollider:
                     if rob.selfCollisionEnabled(i,j):
                         self.mask[r[i]].add(r[j])
                         self.mask[r[j]].add(r[i])
+                        
+        for i in ignore:
+            self.ignoreCollisions(i)
                 
     def getGeom(self,object):
         for (o,g) in self.geomList:
             if o==object:
                 return g
         return None
+
+
+    def ignoreCollision(self,ign):
+        """Permanently removes an object or a pair of objects from
+        consideration.
+        ign can be either a single body in the world or a pair of bodies."""
+        if hasattr(ign,'__iter__'):
+            (a,b) = ign
+            ageom = self.getGeom(a)
+            bgeom = self.getGeom(b)
+            if ageom == None or bgeom == None:
+                raise ValueError("Invalid ignore collision item, must be a body in the world")
+            self.mask[ageom].discard(bgeom)
+            self.mask[bgeom].discard(ageom)
+        else:
+            #ignore all collisions with the given geometry
+            geom = self.getGeom(ign)
+            if geom == None:
+                raise ValueError("Invalid ignore collision item, must be a body in the world")
+            for i in self.mask[geom]:
+                #remove it from the list
+                self.mask[i].discard(geom)
+            self.mask[geom]=set()
 
     def collisionTests(self,filter1=None,filter2=None,bb_reject=True):
         """Iterates over ((object,geom),(object,geom)) pairs indicating
