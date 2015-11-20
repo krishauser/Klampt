@@ -603,7 +603,7 @@ void Geometry3D::transform(const double R[9],const double t[3])
   T.R.set(R);
   T.t.set(t);
   geom->Transform(T);
-  geom->InitCollisions();
+  geom->ReinitCollisions();
 
   if(!isStandalone()) {
     //update the display list
