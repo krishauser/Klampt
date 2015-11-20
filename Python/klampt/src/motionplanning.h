@@ -104,6 +104,18 @@ class CSpaceInterface
   void setDistance(PyObject* pyDist);
   void setInterpolate(PyObject* pyInterp);
   void setProperty(const char* key,const char* value);
+  const char* getProperty(const char* key);
+
+  ///queries
+  bool isFeasible(PyObject* q);
+  bool isVisible(PyObject* a,PyObject* b);
+  bool testFeasibility(const char* name,PyObject* q);
+  bool testVisibility(const char* name,PyObject* a,PyObject* b);
+  PyObject* feasibilityFailures(PyObject* q);
+  PyObject* visibilityFailures(PyObject* a,PyObject* b);
+  PyObject* sample();
+  double distance(PyObject* a,PyObject* b);
+  PyObject* interpolate(PyObject* a,PyObject* b,double u);
 
   int index;
 };
@@ -114,9 +126,18 @@ class CSpaceInterface
  * On construction, uses the planner type specified by setPlanType
  * and the settings currently specified by calls to setPlanSetting.
  *
- * Point-to-point planning is enabled using the setEndpoints method.
- * This is mandatory for RRT and SBL planners.  The start and end
+ * Point-to-point planning is enabled by sending two configurations to
+ * the setEndpoints method.
+ * This is mandatory for RRT and SBL-style planners.  The start and end
  * milestones are given by indices 0 and 1, respectively
+ *
+ * Point-to-set planning is enabled by sending a *goal test* as
+ * the second argument to the setEndpoints method.  It is possible also
+ * to send a special goal sampler by providing a *pair of functions* as the
+ * second argument consisting of the two functions (goaltest,goalsample).
+ * The first in this pair  tests whether a configuration is a goal, and
+ * the second returns a sampled configuration in a superset of the goal.
+ * Ideally the goal sampler generates as many goals as possible.
  *
  * PRM can be used in either point-to-point or multi-query mode.  In 
  * multi-query mode, you may call addMilestone(q) to add a new milestone.
@@ -150,6 +171,7 @@ class PlannerInterface
   void dump(const char* fn);
 
   int index;
+  int spaceIndex;
 };
 
 #endif
