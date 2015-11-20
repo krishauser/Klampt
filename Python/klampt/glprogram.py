@@ -38,7 +38,7 @@ class GLProgram:
 
     def initWindow(self):
         """ Open a window and initialize """
-        glutInitDisplayMode (GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH)
+        glutInitDisplayMode (GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH | GLUT_MULTISAMPLE)
 
         x = 0
         y = 0
@@ -73,6 +73,7 @@ class GLProgram:
         """Called after GLUT is initialized, but before main loop.
         May be overridden."""
         glutPostRedisplay()
+        glEnable(GL_MULTISAMPLE)
         pass
 
     def refresh(self):

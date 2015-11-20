@@ -21,11 +21,17 @@ int main(int argc, char *argv[])
     //load settings from qsetings ini
     QCoreApplication::setOrganizationName("Klampt");
     QCoreApplication::setOrganizationDomain("klampt.org");
-    QCoreApplication::setApplicationName("RobotTest");
-    QCoreApplication::setApplicationVersion("0.6");
+    QCoreApplication::setApplicationName("RobotPose");
+    QCoreApplication::setApplicationVersion("0.6.2");
     QSettings ini(QSettings::IniFormat, QSettings::UserScope,
           QCoreApplication::organizationName(),
           QCoreApplication::applicationName());
+
+    QGLFormat glf = QGLFormat::defaultFormat();
+    glf.setSampleBuffers(true);
+    glf.setSamples(4);
+    QGLFormat::setDefaultFormat(glf);
+
     QString dir = QFileInfo(ini.fileName()).absolutePath();
     if(argc==1){
         QFileDialog f;

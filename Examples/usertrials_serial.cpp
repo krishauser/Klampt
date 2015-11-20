@@ -99,6 +99,7 @@ public:
     robotInterface = new DefaultMotionQueueInterface(controller);
     connected = false;
     CopyWorld(*world,planningWorld);
+    planningWorld.InitCollisions();
     Robot* robot = planningWorld.robots[0].robot;
     for(size_t i=0;i<robot->geometry.size();i++) {
       robot->geometry[i].margin += collisionMargin;
