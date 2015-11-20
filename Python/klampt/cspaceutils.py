@@ -123,6 +123,9 @@ class EmbeddedCSpace(CSpace):
             self.distance = distance
         if hasattr(s,'interpolate'):
             self.interpolate = interpolate
+        self.eps = self.ambientspace.eps
+        self.bound = [self.ambientspace.bound[i] for i in self.mapping]
+        self.properties = self.ambientspace.properties
 
     def project(self,xamb):
         """Ambient space -> embedded space"""
