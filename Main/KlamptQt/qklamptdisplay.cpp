@@ -17,6 +17,7 @@ void QKlamptDisplay::SetGUI(GenericGUIBase* _gui)
 
 void QKlamptDisplay::initializeGL(){
     glClearColor(.4,.4,1,1);
+    glEnable(GL_MULTISAMPLE);
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
     glShadeModel(GL_SMOOTH);

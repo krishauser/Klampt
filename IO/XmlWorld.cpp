@@ -205,7 +205,8 @@ bool XmlRigidObject::GetObject(RigidObject& obj)
     if(geom->QueryValueAttribute("margin",&temp) == TIXML_SUCCESS) {
       obj.geometry.margin = temp;
     }
-    obj.geometry.InitCollisions();
+    //TESTING: don't need this with dynamic collision initialization
+    //obj.geometry.InitCollisionData();
   }
   if(obj.geometry.Empty()) {
     fprintf(stderr,"XmlRigidObject: element does not contain geometry attribute\n");
@@ -282,7 +283,8 @@ bool XmlTerrain::GetTerrain(Environment& env)
   Matrix4 xform;
   if(ReadTransform(e,xform)) {
     env.geometry.Transform(xform);
-    env.geometry.InitCollisions();
+    ///TESTING: don't need this with dynamic collision initialization
+    //env.geometry.InitCollisionData();
   }
   Real margin;
   if(e->QueryValueAttribute("margin",&margin) == TIXML_SUCCESS) {

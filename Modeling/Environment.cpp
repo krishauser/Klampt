@@ -6,6 +6,16 @@
 #include <string.h>
 #include <fstream>
 
+
+void Environment::InitCollisions()
+{
+  Timer timer;
+  geometry.InitCollisionData();
+  double t = timer.ElapsedTime();
+  if(t > 0.2) 
+    printf("Initialized environment %s collision data structures in time %gs\n",geomFile.c_str(),t);
+}
+
 bool Environment::Load(const char* fn)
 {
   const char* ext=FileExtension(fn);
@@ -22,6 +32,7 @@ bool Environment::Load(const char* fn)
     if(!f.CheckSize("mesh",1,fn)) return false;
     string fnPath = GetFilePath(fn);
     string geomfn = fnPath + f["mesh"][0].AsString();
+    this->geomFile = geomfn;
     Timer timer;
     if(!geometry.Load(geomfn.c_str())) {
       cout<<"Environment::Load error loading "<<geomfn<<endl;
@@ -30,7 +41,8 @@ bool Environment::Load(const char* fn)
     if(timer.ElapsedTime() > 1.0)
       printf("Env %s load took time %gs\n",fn,timer.ElapsedTime());
     timer.Reset();
-    geometry.InitCollisions();
+    //TESTING: don't need this with dynamic initialization
+    //geometry.InitCollisions();
     if(timer.ElapsedTime() > 1.0)
       printf("Env %s collision init took time %gs\n",geomfn.c_str(),timer.ElapsedTime());
     if(f.count("kFriction")!=0) {
@@ -49,12 +61,13 @@ bool Environment::Load(const char* fn)
     return true;
   }
   else if(Geometry::AnyGeometry3D::CanLoadExt(ext)) {
+    this->geomFile = fn;
     Timer timer;
     if(!geometry.Load(fn)) return false;
     if(timer.ElapsedTime() > 1.0)
       printf("Env %s load took time %gs\n",fn,timer.ElapsedTime());
     timer.Reset();
-    geometry.InitCollisions();
+    //geometry.InitCollisions();
     if(timer.ElapsedTime() > 1.0)
       printf("Env %s collision init took time %gs\n",fn,timer.ElapsedTime());
     SetUniformFriction(0.5);
