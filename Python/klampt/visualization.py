@@ -21,6 +21,8 @@ def dialog(): pops up a dialog box (does not return to calling
     thread until closed).
 def show(visible=True): shows or hides a visualization window run
     simultaneously with the calling thread.  To hide the window, pass False.
+def spin(duration): shows the visualization window for the desired amount
+    of time before returning, or until the user closes the window.
 def shown(): returns true if the window is shown.
 def clear(): clears the visualization world.
 def dirty(item_name='all'): marks the given item as dirty and recreates the
@@ -84,6 +86,8 @@ def setPlugin(plugin):
     if _vis==None:
         print "Visualization disabled"
         return
+    if plugin  == None:
+        plugin = _vis
     if glcommon._PyQtAvailable:
         global _widget
         _widget.setPlugin(plugin)
@@ -138,6 +142,15 @@ def show(visible=True):
             _show()
     return
 
+def spin(duration):
+    show()
+    t = 0
+    while t < duration:
+        if not shown(): break
+        time.sleep(min(0.1,duration-t))
+        t += 0.1
+    return
+
 def lock():
     global _globalLock
     _globalLock.acquire()
@@ -183,6 +196,7 @@ def animate(name,animation,speed=1.0):
     _globalLock.acquire()
     if hasattr(animation,'__iter__'):
         #a list of milestones -- loop through them with 1s delay
+        print "Making a Trajectory with unit durations between",len(animation),"milestones"
         animation = Trajectory(range(len(animation)),animation)
     _vis.items[name].animation = animation
     _vis.items[name].animationStartTime = _vis.animationTime
@@ -512,6 +526,7 @@ class VisAppearance:
         self.widget.addLabel(text,point,[0,0,0])
 
     def update(self,t):
+        """Updates the configuration, if it's being animated"""
         if not self.animation:
             self.drawConfig = None
         else:
@@ -522,7 +537,8 @@ class VisAppearance:
             app.update(t)
 
     def swapDrawConfig(self):
-        """Given self.drawConfig, swaps out the item in """
+        """Given self.drawConfig!=None, swaps out the item's curren
+        configuration  with self.drawConfig.  Used for animations"""
         if self.drawConfig: 
             try:
                 newDrawConfig = getItemConfig(self.item)
