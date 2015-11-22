@@ -196,7 +196,7 @@ def animate(name,animation,speed=1.0):
     _globalLock.acquire()
     if hasattr(animation,'__iter__'):
         #a list of milestones -- loop through them with 1s delay
-        print "Making a Trajectory with unit durations between",len(animation),"milestones"
+        print "visualization.animate(): Making a Trajectory with unit durations between",len(animation),"milestones"
         animation = Trajectory(range(len(animation)),animation)
     _vis.items[name].animation = animation
     _vis.items[name].animationStartTime = _vis.animationTime

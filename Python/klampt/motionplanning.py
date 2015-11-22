@@ -587,6 +587,10 @@ class PlannerInterface(_object):
     __swig_getmethods__["index"] = _motionplanning.PlannerInterface_index_get
     if _newclass:
         index = _swig_property(_motionplanning.PlannerInterface_index_get, _motionplanning.PlannerInterface_index_set)
+    __swig_setmethods__["spaceIndex"] = _motionplanning.PlannerInterface_spaceIndex_set
+    __swig_getmethods__["spaceIndex"] = _motionplanning.PlannerInterface_spaceIndex_get
+    if _newclass:
+        spaceIndex = _swig_property(_motionplanning.PlannerInterface_spaceIndex_get, _motionplanning.PlannerInterface_spaceIndex_set)
 PlannerInterface_swigregister = _motionplanning.PlannerInterface_swigregister
 PlannerInterface_swigregister(PlannerInterface)
 

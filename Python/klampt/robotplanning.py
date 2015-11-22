@@ -1,4 +1,5 @@
-import cspace
+from cspace import *
+from cspaceutils import *
 import robotcspace
 import robotcollide
 from klampt import IKObjective
@@ -14,6 +15,24 @@ def preferredPlanOptions(robot,movingSubset=None,optimizing=False):
         return { 'type':"rrt", 'perturbationRadius':0.5, 'bidirectional':1, 'shortcut':1, 'restart':1, 'restartTermCond':"{foundSolution:1,maxIters:1000}" }
     else:
         return { 'type':"sbl", 'perturbationRadius':0.5, 'randomizeFrequency':1000, shortcut:1 }
+
+class SubsetMotionPlan (MotionPlan):
+    def __init__(self,space,subset,q0,type=None,**options):
+        MotionPlan.__init__(self,space,type,**options)
+        self.subset = subset
+        self.q0 = q0
+    def getPath(self,milestone1=None,milestone2=None):
+        spath = MotionPlan.getPath(self,milestone1,milestone2)
+        if spath == None: return None
+        path = []
+        for sq in spath:
+            assert len(sq)==len(self.subset),"Subset must be same size of space dimensionality"
+            q = self.q0[:]
+            for s,v in zip(self.subset,sq):
+                q[s] = v
+            path.append(q)
+        return path
+
 
 def makeSpace(world,robot,
               edgeCheckResolution=1e-2,
@@ -49,7 +68,7 @@ def makeSpace(world,robot,
     else:
         subset = movingSubset
         
-    collider = WorldCollider(world,ignore=ignoreCollisions)
+    collider = robotcollide.WorldCollider(world,ignore=ignoreCollisions)
 
     implicitManifold = []
     for c in equalityConstraints:
@@ -65,20 +84,30 @@ def makeSpace(world,robot,
             space = robotcspace.ClosedLoopRobotCSpace(robot,equalityConstraints,collider)
             space.tol = equalityTolerance
     space.eps = edgeCheckResolution
-        
-    if subset is not None and len(subset) <= robot.numLinks():
+
+    for c in extraConstraints:
+        space.addConstraint(c)
+
+    if subset is not None and len(subset) < robot.numLinks():
         #choose a subset
-        space = EmbeddedCSpace(space,xinit=robot.getConfig())
+        sspace = EmbeddedCSpace(space,subset,xinit=robot.getConfig())
+        active = [False]*robot.numLinks()
+        for i in subset:
+            active[i] = True
+        for i in range(robot.numLinks()):
+            if active[robot.link(i).getParent()]:
+                active[i] = True
         inactive = []
         for i in range(robot.numLinks()):
-            if i not in subset: inactive.append(i)
+            if not active[i]:
+                inactive.append(i)
         #disable self-collisions for inactive objects
         for i in inactive:
             rindex = space.collider.robots[robot.index][i]
             space.collider.mask[rindex] = set()
+        space = sspace
     
-    for c in extraConstraints:
-        space.addConstraint(c)
+    space.setup()
     return space
 
 def planToConfig(world,robot,target,
@@ -141,9 +170,18 @@ def planToConfig(world,robot,target,
                       ignoreCollisions=ignoreCollisions,
                       movingSubset=subset)
     
-    plan = MotionPlan(space,**planOptions)
-    plan.setEndpoints([q0[s] for s in subset],
-                      [target[s] for s in subset])
+    plan = SubsetMotionPlan(space,subset,q0,**planOptions)
+    try:
+        plan.setEndpoints([q0[s] for s in subset],
+                          [target[s] for s in subset])
+    except RuntimeError:
+        #one of the endpoints is infeasible, print it out
+        if space.cspace==None: space.setup()
+        sfailures = space.cspace.feasibilityFailures([q0[s] for s in subset])
+        gfailures = space.cspace.feasibilityFailures([target[s] for s in subset])
+        print "Start configuration fails",sfailures
+        print "Goal configuration fails",gfailures
+        return None
     return plan
 
 
@@ -190,8 +228,15 @@ def planToSet(world,robot,target,
                       ignoreCollisions=ignoreCollisions,
                       movingSubset=subset)
 
-    plan = MotionPlan(space,**planOptions)
-    plan.setEndpoints([q0[s] for s in subset],target)
+    plan = SubsetMotionPlan(space,subset,q0,**planOptions)
+    try:
+        plan.setEndpoints([q0[s] for s in subset],target)
+    except RuntimeError:
+        #the start configuration is infeasible, print it out
+        if space.cspace==None: space.setup()
+        sfailures = space.cspace.feasibilityFailures([q0[s] for s in subset])
+        print "Start configuration fails",sfailures
+        return None
     return plan
 
 def planToCartesianObjective(world,robot,iktargets,iktolerance=1e-3,

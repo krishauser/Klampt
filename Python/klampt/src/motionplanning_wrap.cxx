@@ -3390,12 +3390,10 @@ SWIGINTERN PyObject *_wrap_setRandomSeed(PyObject *SWIGUNUSEDPARM(self), PyObjec
     }
     catch(PyException& e) {
       e.setPyErr();
-      destroy();
       return NULL;
     }
     catch(std::exception& e) {
       PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
-      destroy();
       return NULL;
     }
   }
@@ -3426,12 +3424,10 @@ SWIGINTERN PyObject *_wrap_setPlanJSONString(PyObject *SWIGUNUSEDPARM(self), PyO
     }
     catch(PyException& e) {
       e.setPyErr();
-      destroy();
       return NULL;
     }
     catch(std::exception& e) {
       PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
-      destroy();
       return NULL;
     }
   }
@@ -3455,12 +3451,10 @@ SWIGINTERN PyObject *_wrap_getPlanJSONString(PyObject *SWIGUNUSEDPARM(self), PyO
     }
     catch(PyException& e) {
       e.setPyErr();
-      destroy();
       return NULL;
     }
     catch(std::exception& e) {
       PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
-      destroy();
       return NULL;
     }
   }
@@ -3491,12 +3485,10 @@ SWIGINTERN PyObject *_wrap_setPlanType(PyObject *SWIGUNUSEDPARM(self), PyObject 
     }
     catch(PyException& e) {
       e.setPyErr();
-      destroy();
       return NULL;
     }
     catch(std::exception& e) {
       PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
-      destroy();
       return NULL;
     }
   }
@@ -3538,12 +3530,10 @@ SWIGINTERN PyObject *_wrap_setPlanSetting__SWIG_0(PyObject *SWIGUNUSEDPARM(self)
     }
     catch(PyException& e) {
       e.setPyErr();
-      destroy();
       return NULL;
     }
     catch(std::exception& e) {
       PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
-      destroy();
       return NULL;
     }
   }
@@ -3586,12 +3576,10 @@ SWIGINTERN PyObject *_wrap_setPlanSetting__SWIG_1(PyObject *SWIGUNUSEDPARM(self)
     }
     catch(PyException& e) {
       e.setPyErr();
-      destroy();
       return NULL;
     }
     catch(std::exception& e) {
       PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
-      destroy();
       return NULL;
     }
   }
@@ -3664,12 +3652,10 @@ SWIGINTERN PyObject *_wrap_destroy(PyObject *SWIGUNUSEDPARM(self), PyObject *arg
     }
     catch(PyException& e) {
       e.setPyErr();
-      destroy();
       return NULL;
     }
     catch(std::exception& e) {
       PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
-      destroy();
       return NULL;
     }
   }
@@ -3691,12 +3677,10 @@ SWIGINTERN PyObject *_wrap_new_CSpaceInterface__SWIG_0(PyObject *SWIGUNUSEDPARM(
     }
     catch(PyException& e) {
       e.setPyErr();
-      destroy();
       return NULL;
     }
     catch(std::exception& e) {
       PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
-      destroy();
       return NULL;
     }
   }
@@ -3730,12 +3714,10 @@ SWIGINTERN PyObject *_wrap_new_CSpaceInterface__SWIG_1(PyObject *SWIGUNUSEDPARM(
     }
     catch(PyException& e) {
       e.setPyErr();
-      destroy();
       return NULL;
     }
     catch(std::exception& e) {
       PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
-      destroy();
       return NULL;
     }
   }
@@ -3798,12 +3780,10 @@ SWIGINTERN PyObject *_wrap_delete_CSpaceInterface(PyObject *SWIGUNUSEDPARM(self)
     }
     catch(PyException& e) {
       e.setPyErr();
-      destroy();
       return NULL;
     }
     catch(std::exception& e) {
       PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
-      destroy();
       return NULL;
     }
   }
@@ -3833,12 +3813,10 @@ SWIGINTERN PyObject *_wrap_CSpaceInterface_destroy(PyObject *SWIGUNUSEDPARM(self
     }
     catch(PyException& e) {
       e.setPyErr();
-      destroy();
       return NULL;
     }
     catch(std::exception& e) {
       PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
-      destroy();
       return NULL;
     }
   }
@@ -3871,12 +3849,10 @@ SWIGINTERN PyObject *_wrap_CSpaceInterface_setFeasibility(PyObject *SWIGUNUSEDPA
     }
     catch(PyException& e) {
       e.setPyErr();
-      destroy();
       return NULL;
     }
     catch(std::exception& e) {
       PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
-      destroy();
       return NULL;
     }
   }
@@ -3919,12 +3895,10 @@ SWIGINTERN PyObject *_wrap_CSpaceInterface_addFeasibilityTest(PyObject *SWIGUNUS
     }
     catch(PyException& e) {
       e.setPyErr();
-      destroy();
       return NULL;
     }
     catch(std::exception& e) {
       PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
-      destroy();
       return NULL;
     }
   }
@@ -3959,12 +3933,10 @@ SWIGINTERN PyObject *_wrap_CSpaceInterface_setVisibility(PyObject *SWIGUNUSEDPAR
     }
     catch(PyException& e) {
       e.setPyErr();
-      destroy();
       return NULL;
     }
     catch(std::exception& e) {
       PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
-      destroy();
       return NULL;
     }
   }
@@ -4007,12 +3979,10 @@ SWIGINTERN PyObject *_wrap_CSpaceInterface_addVisibilityTest(PyObject *SWIGUNUSE
     }
     catch(PyException& e) {
       e.setPyErr();
-      destroy();
       return NULL;
     }
     catch(std::exception& e) {
       PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
-      destroy();
       return NULL;
     }
   }
@@ -4053,12 +4023,10 @@ SWIGINTERN PyObject *_wrap_CSpaceInterface_setVisibilityEpsilon(PyObject *SWIGUN
     }
     catch(PyException& e) {
       e.setPyErr();
-      destroy();
       return NULL;
     }
     catch(std::exception& e) {
       PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
-      destroy();
       return NULL;
     }
   }
@@ -4091,12 +4059,10 @@ SWIGINTERN PyObject *_wrap_CSpaceInterface_setSampler(PyObject *SWIGUNUSEDPARM(s
     }
     catch(PyException& e) {
       e.setPyErr();
-      destroy();
       return NULL;
     }
     catch(std::exception& e) {
       PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
-      destroy();
       return NULL;
     }
   }
@@ -4129,12 +4095,10 @@ SWIGINTERN PyObject *_wrap_CSpaceInterface_setNeighborhoodSampler(PyObject *SWIG
     }
     catch(PyException& e) {
       e.setPyErr();
-      destroy();
       return NULL;
     }
     catch(std::exception& e) {
       PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
-      destroy();
       return NULL;
     }
   }
@@ -4167,12 +4131,10 @@ SWIGINTERN PyObject *_wrap_CSpaceInterface_setDistance(PyObject *SWIGUNUSEDPARM(
     }
     catch(PyException& e) {
       e.setPyErr();
-      destroy();
       return NULL;
     }
     catch(std::exception& e) {
       PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
-      destroy();
       return NULL;
     }
   }
@@ -4205,12 +4167,10 @@ SWIGINTERN PyObject *_wrap_CSpaceInterface_setInterpolate(PyObject *SWIGUNUSEDPA
     }
     catch(PyException& e) {
       e.setPyErr();
-      destroy();
       return NULL;
     }
     catch(std::exception& e) {
       PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
-      destroy();
       return NULL;
     }
   }
@@ -4260,12 +4220,10 @@ SWIGINTERN PyObject *_wrap_CSpaceInterface_setProperty(PyObject *SWIGUNUSEDPARM(
     }
     catch(PyException& e) {
       e.setPyErr();
-      destroy();
       return NULL;
     }
     catch(std::exception& e) {
       PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
-      destroy();
       return NULL;
     }
   }
@@ -4310,12 +4268,10 @@ SWIGINTERN PyObject *_wrap_CSpaceInterface_getProperty(PyObject *SWIGUNUSEDPARM(
     }
     catch(PyException& e) {
       e.setPyErr();
-      destroy();
       return NULL;
     }
     catch(std::exception& e) {
       PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
-      destroy();
       return NULL;
     }
   }
@@ -4351,12 +4307,10 @@ SWIGINTERN PyObject *_wrap_CSpaceInterface_isFeasible(PyObject *SWIGUNUSEDPARM(s
     }
     catch(PyException& e) {
       e.setPyErr();
-      destroy();
       return NULL;
     }
     catch(std::exception& e) {
       PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
-      destroy();
       return NULL;
     }
   }
@@ -4393,12 +4347,10 @@ SWIGINTERN PyObject *_wrap_CSpaceInterface_isVisible(PyObject *SWIGUNUSEDPARM(se
     }
     catch(PyException& e) {
       e.setPyErr();
-      destroy();
       return NULL;
     }
     catch(std::exception& e) {
       PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
-      destroy();
       return NULL;
     }
   }
@@ -4442,12 +4394,10 @@ SWIGINTERN PyObject *_wrap_CSpaceInterface_testFeasibility(PyObject *SWIGUNUSEDP
     }
     catch(PyException& e) {
       e.setPyErr();
-      destroy();
       return NULL;
     }
     catch(std::exception& e) {
       PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
-      destroy();
       return NULL;
     }
   }
@@ -4496,12 +4446,10 @@ SWIGINTERN PyObject *_wrap_CSpaceInterface_testVisibility(PyObject *SWIGUNUSEDPA
     }
     catch(PyException& e) {
       e.setPyErr();
-      destroy();
       return NULL;
     }
     catch(std::exception& e) {
       PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
-      destroy();
       return NULL;
     }
   }
@@ -4537,12 +4485,10 @@ SWIGINTERN PyObject *_wrap_CSpaceInterface_feasibilityFailures(PyObject *SWIGUNU
     }
     catch(PyException& e) {
       e.setPyErr();
-      destroy();
       return NULL;
     }
     catch(std::exception& e) {
       PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
-      destroy();
       return NULL;
     }
   }
@@ -4579,12 +4525,10 @@ SWIGINTERN PyObject *_wrap_CSpaceInterface_visibilityFailures(PyObject *SWIGUNUS
     }
     catch(PyException& e) {
       e.setPyErr();
-      destroy();
       return NULL;
     }
     catch(std::exception& e) {
       PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
-      destroy();
       return NULL;
     }
   }
@@ -4615,12 +4559,10 @@ SWIGINTERN PyObject *_wrap_CSpaceInterface_sample(PyObject *SWIGUNUSEDPARM(self)
     }
     catch(PyException& e) {
       e.setPyErr();
-      destroy();
       return NULL;
     }
     catch(std::exception& e) {
       PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
-      destroy();
       return NULL;
     }
   }
@@ -4657,12 +4599,10 @@ SWIGINTERN PyObject *_wrap_CSpaceInterface_distance(PyObject *SWIGUNUSEDPARM(sel
     }
     catch(PyException& e) {
       e.setPyErr();
-      destroy();
       return NULL;
     }
     catch(std::exception& e) {
       PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
-      destroy();
       return NULL;
     }
   }
@@ -4708,12 +4648,10 @@ SWIGINTERN PyObject *_wrap_CSpaceInterface_interpolate(PyObject *SWIGUNUSEDPARM(
     }
     catch(PyException& e) {
       e.setPyErr();
-      destroy();
       return NULL;
     }
     catch(std::exception& e) {
       PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
-      destroy();
       return NULL;
     }
   }
@@ -4806,12 +4744,10 @@ SWIGINTERN PyObject *_wrap_new_PlannerInterface(PyObject *SWIGUNUSEDPARM(self), 
     }
     catch(PyException& e) {
       e.setPyErr();
-      destroy();
       return NULL;
     }
     catch(std::exception& e) {
       PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
-      destroy();
       return NULL;
     }
   }
@@ -4841,12 +4777,10 @@ SWIGINTERN PyObject *_wrap_delete_PlannerInterface(PyObject *SWIGUNUSEDPARM(self
     }
     catch(PyException& e) {
       e.setPyErr();
-      destroy();
       return NULL;
     }
     catch(std::exception& e) {
       PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
-      destroy();
       return NULL;
     }
   }
@@ -4876,12 +4810,10 @@ SWIGINTERN PyObject *_wrap_PlannerInterface_destroy(PyObject *SWIGUNUSEDPARM(sel
     }
     catch(PyException& e) {
       e.setPyErr();
-      destroy();
       return NULL;
     }
     catch(std::exception& e) {
       PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
-      destroy();
       return NULL;
     }
   }
@@ -4918,12 +4850,10 @@ SWIGINTERN PyObject *_wrap_PlannerInterface_setEndpoints(PyObject *SWIGUNUSEDPAR
     }
     catch(PyException& e) {
       e.setPyErr();
-      destroy();
       return NULL;
     }
     catch(std::exception& e) {
       PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
-      destroy();
       return NULL;
     }
   }
@@ -4957,12 +4887,10 @@ SWIGINTERN PyObject *_wrap_PlannerInterface_addMilestone(PyObject *SWIGUNUSEDPAR
     }
     catch(PyException& e) {
       e.setPyErr();
-      destroy();
       return NULL;
     }
     catch(std::exception& e) {
       PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
-      destroy();
       return NULL;
     }
   }
@@ -5001,12 +4929,10 @@ SWIGINTERN PyObject *_wrap_PlannerInterface_planMore(PyObject *SWIGUNUSEDPARM(se
     }
     catch(PyException& e) {
       e.setPyErr();
-      destroy();
       return NULL;
     }
     catch(std::exception& e) {
       PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
-      destroy();
       return NULL;
     }
   }
@@ -5037,12 +4963,10 @@ SWIGINTERN PyObject *_wrap_PlannerInterface_getPathEndpoints(PyObject *SWIGUNUSE
     }
     catch(PyException& e) {
       e.setPyErr();
-      destroy();
       return NULL;
     }
     catch(std::exception& e) {
       PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
-      destroy();
       return NULL;
     }
   }
@@ -5091,12 +5015,10 @@ SWIGINTERN PyObject *_wrap_PlannerInterface_getPath(PyObject *SWIGUNUSEDPARM(sel
     }
     catch(PyException& e) {
       e.setPyErr();
-      destroy();
       return NULL;
     }
     catch(std::exception& e) {
       PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
-      destroy();
       return NULL;
     }
   }
@@ -5137,12 +5059,10 @@ SWIGINTERN PyObject *_wrap_PlannerInterface_getData(PyObject *SWIGUNUSEDPARM(sel
     }
     catch(PyException& e) {
       e.setPyErr();
-      destroy();
       return NULL;
     }
     catch(std::exception& e) {
       PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
-      destroy();
       return NULL;
     }
   }
@@ -5175,12 +5095,10 @@ SWIGINTERN PyObject *_wrap_PlannerInterface_getStats(PyObject *SWIGUNUSEDPARM(se
     }
     catch(PyException& e) {
       e.setPyErr();
-      destroy();
       return NULL;
     }
     catch(std::exception& e) {
       PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
-      destroy();
       return NULL;
     }
   }
@@ -5211,12 +5129,10 @@ SWIGINTERN PyObject *_wrap_PlannerInterface_getRoadmap(PyObject *SWIGUNUSEDPARM(
     }
     catch(PyException& e) {
       e.setPyErr();
-      destroy();
       return NULL;
     }
     catch(std::exception& e) {
       PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
-      destroy();
       return NULL;
     }
   }
@@ -5256,12 +5172,10 @@ SWIGINTERN PyObject *_wrap_PlannerInterface_dump(PyObject *SWIGUNUSEDPARM(self),
     }
     catch(PyException& e) {
       e.setPyErr();
-      destroy();
       return NULL;
     }
     catch(std::exception& e) {
       PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
-      destroy();
       return NULL;
     }
   }
@@ -5319,6 +5233,58 @@ SWIGINTERN PyObject *_wrap_PlannerInterface_index_get(PyObject *SWIGUNUSEDPARM(s
   }
   arg1 = reinterpret_cast< PlannerInterface * >(argp1);
   result = (int) ((arg1)->index);
+  resultobj = SWIG_From_int(static_cast< int >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_PlannerInterface_spaceIndex_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  PlannerInterface *arg1 = (PlannerInterface *) 0 ;
+  int arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:PlannerInterface_spaceIndex_set",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_PlannerInterface, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "PlannerInterface_spaceIndex_set" "', argument " "1"" of type '" "PlannerInterface *""'"); 
+  }
+  arg1 = reinterpret_cast< PlannerInterface * >(argp1);
+  ecode2 = SWIG_AsVal_int(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "PlannerInterface_spaceIndex_set" "', argument " "2"" of type '" "int""'");
+  } 
+  arg2 = static_cast< int >(val2);
+  if (arg1) (arg1)->spaceIndex = arg2;
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_PlannerInterface_spaceIndex_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  PlannerInterface *arg1 = (PlannerInterface *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  int result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:PlannerInterface_spaceIndex_get",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_PlannerInterface, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "PlannerInterface_spaceIndex_get" "', argument " "1"" of type '" "PlannerInterface *""'"); 
+  }
+  arg1 = reinterpret_cast< PlannerInterface * >(argp1);
+  result = (int) ((arg1)->spaceIndex);
   resultobj = SWIG_From_int(static_cast< int >(result));
   return resultobj;
 fail:
@@ -5602,6 +5568,8 @@ static PyMethodDef SwigMethods[] = {
 		""},
 	 { (char *)"PlannerInterface_index_set", _wrap_PlannerInterface_index_set, METH_VARARGS, (char *)"PlannerInterface_index_set(PlannerInterface self, int index)"},
 	 { (char *)"PlannerInterface_index_get", _wrap_PlannerInterface_index_get, METH_VARARGS, (char *)"PlannerInterface_index_get(PlannerInterface self) -> int"},
+	 { (char *)"PlannerInterface_spaceIndex_set", _wrap_PlannerInterface_spaceIndex_set, METH_VARARGS, (char *)"PlannerInterface_spaceIndex_set(PlannerInterface self, int spaceIndex)"},
+	 { (char *)"PlannerInterface_spaceIndex_get", _wrap_PlannerInterface_spaceIndex_get, METH_VARARGS, (char *)"PlannerInterface_spaceIndex_get(PlannerInterface self) -> int"},
 	 { (char *)"PlannerInterface_swigregister", PlannerInterface_swigregister, METH_VARARGS, NULL},
 	 { NULL, NULL, 0, NULL }
 };
