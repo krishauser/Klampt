@@ -163,6 +163,7 @@ class MotionPlan:
             motionplanning.setPlanType(type)
         if len(options) > 0:
             MotionPlan.setOptions(**options)
+        self.space = space
         self.planner = motionplanning.PlannerInterface(space.cspace)
 
     def close(self):

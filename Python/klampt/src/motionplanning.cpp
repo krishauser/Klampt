@@ -627,7 +627,7 @@ CSpaceInterface::CSpaceInterface(const CSpaceInterface& space)
 
 CSpaceInterface::~CSpaceInterface()
 {
-  destroy();
+  this->destroy();
 }
 
 void CSpaceInterface::destroy()
@@ -831,8 +831,10 @@ bool CSpaceInterface::testVisibility(const char* name,PyObject* a,PyObject* b)
 
 PyObject* CSpaceInterface::feasibilityFailures(PyObject* q)
 {
-  if(index < 0 || index >= (int)spaces.size() || spaces[index]==NULL) 
+  if(index < 0 || index >= (int)spaces.size() || spaces[index]==NULL) {
+    printf("CSpace index %d is out of range [%d,%d) or was previously destroyed\n",index,0,spaces.size());
     throw PyException("Invalid cspace index");
+  }
   Config vq;
   if(!PyListToConfig(q,vq)) {
     throw PyException("Invalid configuration (must be list)");    
@@ -989,7 +991,7 @@ PlannerInterface::PlannerInterface(const CSpaceInterface& cspace)
 
 PlannerInterface::~PlannerInterface()
 {
-  destroy();
+  this->destroy();
 }
 
 void PlannerInterface::destroy()
