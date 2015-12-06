@@ -277,6 +277,7 @@ void RobotWorld::DrawGL()
 int RobotWorld::LoadRobot(const string& fn)
 {
   Robot* robot = new Robot;
+  printf("RobotWorld::LoadRobot: %s\n",fn.c_str());
   if(!robot->Load(fn.c_str())) {
     delete robot;
     return -1;
