@@ -19,7 +19,7 @@ void QKlamptDisplay::initializeGL(){
     glClearColor(.4,.4,1,1);
 #ifdef GL_MULTISAMPLE
     glEnable(GL_MULTISAMPLE);
-#else if defined(GL_MULTISAMPLE_ARB)
+#elif defined(GL_MULTISAMPLE_ARB)
 	glEnable(GL_MULTISAMPLE_ARB);
 #endif //GL_MULTISAMPLE
     glEnable(GL_DEPTH_TEST);
