@@ -11,12 +11,10 @@
 	}
 	catch(PyException& e) {
 		e.setPyErr();
-		destroy();
 		return NULL;
 	}
 	catch(std::exception& e) {
 		PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
-		destroy();
 		return NULL;
 	}
 }

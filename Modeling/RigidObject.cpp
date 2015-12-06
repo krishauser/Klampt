@@ -1,4 +1,5 @@
 #include "RigidObject.h"
+#include <Timer.h>
 #include "Mass.h"
 #include "robotics/Inertia.h"
 #include <utils/SimpleFile.h>
@@ -167,12 +168,14 @@ bool RigidObject::Load(const char* fn)
       for(map<string,vector<PrimitiveValue> >::const_iterator i=f.entries.begin();i!=f.entries.end();i++)
 	fprintf(stderr,"Unknown entry %s in object file %s\n",i->first.c_str(),fn);
     }
-    geometry.InitCollisions();
+    //TESTING: don't need this with dynamic initialization
+    //geometry.InitCollisionData();
     return true;
   }
   else if(Geometry::AnyGeometry3D::CanLoadExt(ext)) {
     if(!geometry.Load(fn)) return false;
-    geometry.InitCollisions();
+    //TESTING: don't need this with dynamic initialization
+    //geometry.InitCollisionData();
     T.setIdentity();
     mass=1.0;
     com.setZero();
@@ -213,6 +216,15 @@ void RigidObject::SetMassFromBB(Real totalMass)
   mass = totalMass;
   com = 0.5*(bb.bmin+bb.bmax);
   BoxInertiaMatrix(bb.bmax.x-bb.bmin.x,bb.bmax.y-bb.bmin.y,bb.bmax.z-bb.bmin.z,mass,inertia);
+}
+
+void RigidObject::InitCollisions()
+{
+  Timer timer;
+  geometry.InitCollisionData();
+  double t = timer.ElapsedTime();
+  if(t > 0.2) 
+    printf("Initialized rigid object %s collision data structures in time %gs\n",geomFile.c_str(),t);
 }
 
 void RigidObject::UpdateGeometry()

@@ -925,6 +925,119 @@ class PointCloud(_object):
     __getattr__ = lambda self, name: _swig_getattr(self, PointCloud, name)
     __repr__ = _swig_repr
 
+    def numPoints(self):
+        """
+        numPoints(PointCloud self) -> int
+
+        int
+        PointCloud::numPoints() const
+
+        Returns the number of points. 
+        """
+        return _robotsim.PointCloud_numPoints(self)
+
+
+    def numProperties(self):
+        """
+        numProperties(PointCloud self) -> int
+
+        int
+        PointCloud::numProperties() const
+
+        Returns the number of properties. 
+        """
+        return _robotsim.PointCloud_numProperties(self)
+
+
+    def setPoints(self, num, plist):
+        """
+        setPoints(PointCloud self, int num, doubleVector plist)
+
+        void
+        PointCloud::setPoints(int num, const std::vector< double > &plist)
+
+        Sets all the points to the given list (a 3n-list) 
+        """
+        return _robotsim.PointCloud_setPoints(self, num, plist)
+
+
+    def addPoint(self, p):
+        """
+        addPoint(PointCloud self, double const [3] p) -> int
+
+        int
+        PointCloud::addPoint(const double p[3])
+
+        Adds a point. Sets all its properties to 0. Returns the index. 
+        """
+        return _robotsim.PointCloud_addPoint(self, p)
+
+
+    def setPoint(self, index, p):
+        """
+        setPoint(PointCloud self, int index, double const [3] p)
+
+        void
+        PointCloud::setPoint(int index, const double p[3])
+
+        Sets the position of a point. 
+        """
+        return _robotsim.PointCloud_setPoint(self, index, p)
+
+
+    def getPoint(self, index):
+        """
+        getPoint(PointCloud self, int index)
+
+        void
+        PointCloud::getPoint(int index, double out[3]) const
+
+        Retrieves the position of a point. 
+        """
+        return _robotsim.PointCloud_getPoint(self, index)
+
+
+    def setProperties(self, *args):
+        """
+        setProperties(PointCloud self, doubleVector properties)
+        setProperties(PointCloud self, int pindex, doubleVector properties)
+
+        void
+        PointCloud::setProperties(int pindex, const std::vector< double >
+        &properties)
+
+        Sets property pindex of all points to the given list (a n-list) 
+        """
+        return _robotsim.PointCloud_setProperties(self, *args)
+
+
+    def setProperty(self, *args):
+        """
+        setProperty(PointCloud self, int index, int pindex, double value)
+        setProperty(PointCloud self, int index, std::string const & pname, double value)
+
+        void
+        PointCloud::setProperty(int index, const std::string &pname, double
+        value)
+
+        Sets the property named pname of point index to the given value. 
+        """
+        return _robotsim.PointCloud_setProperty(self, *args)
+
+
+    def getProperty(self, *args):
+        """
+        getProperty(PointCloud self, int index, int pindex) -> double
+        getProperty(PointCloud self, int index, std::string const & pname) -> double
+
+        double
+        PointCloud::getProperty(int index, const std::string &pname) const
+
+        Gets the property named pname of point index. 
+        """
+        return _robotsim.PointCloud_getProperty(self, *args)
+
+
     def translate(self, t):
         """
         translate(PointCloud self, double const [3] t)
@@ -947,6 +1060,19 @@ class PointCloud(_object):
         Transforms all the points by the rigid transform v=R*v+t. 
         """
         return _robotsim.PointCloud_transform(self, R, t)
+
+
+    def join(self, pc):
+        """
+        join(PointCloud self, PointCloud pc)
+
+        void PointCloud::join(const
+        PointCloud &pc)
+
+        Adds the given point cloud to this one. They must share the same
+        properties or else an exception is raised 
+        """
+        return _robotsim.PointCloud_join(self, pc)
 
     __swig_setmethods__["vertices"] = _robotsim.PointCloud_vertices_set
     __swig_getmethods__["vertices"] = _robotsim.PointCloud_vertices_get
@@ -3030,7 +3156,8 @@ class RobotModel(_object):
         RobotModel::getCoriolisForces(std::vector< double > &out)
 
         Returns the Coriolis forces C(q,dq)*dq for current config and velocity
-        (faster than computing matrix and doing product) 
+        (faster than computing matrix and doing product). ("Forces" is
+        somewhat of a misnomer; the result is a joint torque vector) 
         """
         return _robotsim.RobotModel_getCoriolisForces(self)
 
@@ -3043,8 +3170,9 @@ class RobotModel(_object):
         RobotModel::getGravityForces(const double g[3], std::vector< double >
         &out)
 
-        Returns the gravity force vector G(q) for the given workspace gravity
-        vector g (usually (0,0,-9.8)) 
+        Returns the generalized gravity vector G(q) for the given workspace
+        gravity vector g (usually (0,0,-9.8)). ("Forces" is somewhat of a
+        misnomer; the result is a joint torque vector) 
         """
         return _robotsim.RobotModel_getGravityForces(self, g)
 
@@ -3057,7 +3185,8 @@ class RobotModel(_object):
         RobotModel::torquesFromAccel(const std::vector< double > &ddq,
         std::vector< double > &out)
 
-        Computes the inverse dynamics (using Recursive Newton Euler solver) 
+        Computes the inverse dynamics (using Recursive Newton Euler solver).
+        Note: does not include gravity term G(q) 
         """
         return _robotsim.RobotModel_torquesFromAccel(self, ddq)
 
@@ -3070,7 +3199,8 @@ class RobotModel(_object):
         RobotModel::accelFromTorques(const std::vector< double > &t,
         std::vector< double > &out)
 
-        Computes the foward dynamics (using Recursive Newton Euler solver) 
+        Computes the foward dynamics (using Recursive Newton Euler solver)
+        Note: does not include gravity term G(q) 
         """
         return _robotsim.RobotModel_accelFromTorques(self, t)
 
@@ -3480,14 +3610,11 @@ class WorldModel(_object):
     def __init__(self, *args):
         """
         __init__(WorldModel self) -> WorldModel
+        __init__(WorldModel self, void * ptrRobotWorld) -> WorldModel
         __init__(WorldModel self, int index) -> WorldModel
         __init__(WorldModel self, WorldModel w) -> WorldModel
-        __init__(WorldModel self, void * ptrRobotWorld) -> WorldModel
 
-        WorldModel::WorldModel(void *ptrRobotWorld)
-
-        Creates a WorldModel by pointer to a C++ RobotWorld structure (used
-        pretty much only when interfacing C++ and Python code) 
+        WorldModel::WorldModel(const WorldModel &w) 
         """
         this = _robotsim.new_WorldModel(*args)
         try:
@@ -3768,6 +3895,24 @@ class WorldModel(_object):
         just use kinematics / dynamics of a robot. 
         """
         return _robotsim.WorldModel_enableGeometryLoading(self, enabled)
+
+
+    def enableInitCollisions(self, enabled):
+        """
+        enableInitCollisions(WorldModel self, bool enabled)
+
+        void
+        WorldModel::enableInitCollisions(bool enabled)
+
+        If collision detection is set to true, then collision acceleration
+        data structures will be automatically initialized, with debugging
+        information. Useful for scripts that do planning and for which
+        collision initialization may take a long time. Note that even when
+        this flag is off, the collision acceleration data structures will
+        indeed be initialized whenever geometry collision, distance, or ray-
+        casting routines are called. 
+        """
+        return _robotsim.WorldModel_enableInitCollisions(self, enabled)
 
     __swig_setmethods__["index"] = _robotsim.WorldModel_index_set
     __swig_getmethods__["index"] = _robotsim.WorldModel_index_get

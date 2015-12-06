@@ -376,6 +376,56 @@ class CSpaceInterface(_object):
         """
         return _motionplanning.CSpaceInterface_setProperty(self, key, value)
 
+
+    def getProperty(self, key):
+        """getProperty(CSpaceInterface self, char const * key) -> char const *"""
+        return _motionplanning.CSpaceInterface_getProperty(self, key)
+
+
+    def isFeasible(self, q):
+        """isFeasible(CSpaceInterface self, PyObject * q) -> bool"""
+        return _motionplanning.CSpaceInterface_isFeasible(self, q)
+
+
+    def isVisible(self, a, b):
+        """isVisible(CSpaceInterface self, PyObject * a, PyObject * b) -> bool"""
+        return _motionplanning.CSpaceInterface_isVisible(self, a, b)
+
+
+    def testFeasibility(self, name, q):
+        """testFeasibility(CSpaceInterface self, char const * name, PyObject * q) -> bool"""
+        return _motionplanning.CSpaceInterface_testFeasibility(self, name, q)
+
+
+    def testVisibility(self, name, a, b):
+        """testVisibility(CSpaceInterface self, char const * name, PyObject * a, PyObject * b) -> bool"""
+        return _motionplanning.CSpaceInterface_testVisibility(self, name, a, b)
+
+
+    def feasibilityFailures(self, q):
+        """feasibilityFailures(CSpaceInterface self, PyObject * q) -> PyObject *"""
+        return _motionplanning.CSpaceInterface_feasibilityFailures(self, q)
+
+
+    def visibilityFailures(self, a, b):
+        """visibilityFailures(CSpaceInterface self, PyObject * a, PyObject * b) -> PyObject *"""
+        return _motionplanning.CSpaceInterface_visibilityFailures(self, a, b)
+
+
+    def sample(self):
+        """sample(CSpaceInterface self) -> PyObject *"""
+        return _motionplanning.CSpaceInterface_sample(self)
+
+
+    def distance(self, a, b):
+        """distance(CSpaceInterface self, PyObject * a, PyObject * b) -> double"""
+        return _motionplanning.CSpaceInterface_distance(self, a, b)
+
+
+    def interpolate(self, a, b, u):
+        """interpolate(CSpaceInterface self, PyObject * a, PyObject * b, double u) -> PyObject *"""
+        return _motionplanning.CSpaceInterface_interpolate(self, a, b, u)
+
     __swig_setmethods__["index"] = _motionplanning.CSpaceInterface_index_set
     __swig_getmethods__["index"] = _motionplanning.CSpaceInterface_index_get
     if _newclass:
@@ -537,6 +587,10 @@ class PlannerInterface(_object):
     __swig_getmethods__["index"] = _motionplanning.PlannerInterface_index_get
     if _newclass:
         index = _swig_property(_motionplanning.PlannerInterface_index_get, _motionplanning.PlannerInterface_index_set)
+    __swig_setmethods__["spaceIndex"] = _motionplanning.PlannerInterface_spaceIndex_set
+    __swig_getmethods__["spaceIndex"] = _motionplanning.PlannerInterface_spaceIndex_get
+    if _newclass:
+        spaceIndex = _swig_property(_motionplanning.PlannerInterface_spaceIndex_get, _motionplanning.PlannerInterface_spaceIndex_set)
 PlannerInterface_swigregister = _motionplanning.PlannerInterface_swigregister
 PlannerInterface_swigregister(PlannerInterface)
 

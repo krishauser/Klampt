@@ -39,7 +39,7 @@ struct PointCloud
   ///Returns the number of properties
   int numProperties() const;
   ///Sets all the points to the given list (a 3n-list)
-  void setPoints(int num,const double plist[]);
+  void setPoints(int num,const std::vector<double>& plist);
   ///Adds a point. Sets all its properties to 0.  Returns the index.
   int addPoint(const double p[3]);
   ///Sets the position of a point
@@ -47,9 +47,9 @@ struct PointCloud
   ///Retrieves the position of a point
   void getPoint(int index,double out[3]) const;
   ///Sets all the properties of all points to the given list (a kn-list)
-  void setProperties(const double properties[]);
+  void setProperties(const std::vector<double>& properties);
   ///Sets property pindex of all points to the given list (a n-list)
-  void setProperties(int pindex,const double properties[]);
+  void setProperties(int pindex,const std::vector<double>& properties);
   ///Sets property pindex of point index to the given value
   void setProperty(int index,int pindex,double value);
   ///Sets the property named pname of point index to the given value

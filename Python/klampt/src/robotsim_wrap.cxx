@@ -17029,6 +17029,827 @@ SWIGINTERN PyObject *TriangleMesh_swigregister(PyObject *SWIGUNUSEDPARM(self), P
   return SWIG_Py_Void();
 }
 
+SWIGINTERN PyObject *_wrap_PointCloud_numPoints(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  PointCloud *arg1 = (PointCloud *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  int result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:PointCloud_numPoints",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_PointCloud, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "PointCloud_numPoints" "', argument " "1"" of type '" "PointCloud const *""'"); 
+  }
+  arg1 = reinterpret_cast< PointCloud * >(argp1);
+  {
+    try {
+      result = (int)((PointCloud const *)arg1)->numPoints();
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_From_int(static_cast< int >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_PointCloud_numProperties(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  PointCloud *arg1 = (PointCloud *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  int result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:PointCloud_numProperties",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_PointCloud, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "PointCloud_numProperties" "', argument " "1"" of type '" "PointCloud const *""'"); 
+  }
+  arg1 = reinterpret_cast< PointCloud * >(argp1);
+  {
+    try {
+      result = (int)((PointCloud const *)arg1)->numProperties();
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_From_int(static_cast< int >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_PointCloud_setPoints(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  PointCloud *arg1 = (PointCloud *) 0 ;
+  int arg2 ;
+  std::vector< double,std::allocator< double > > *arg3 = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  int res3 = SWIG_OLDOBJ ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  PyObject * obj2 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OOO:PointCloud_setPoints",&obj0,&obj1,&obj2)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_PointCloud, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "PointCloud_setPoints" "', argument " "1"" of type '" "PointCloud *""'"); 
+  }
+  arg1 = reinterpret_cast< PointCloud * >(argp1);
+  ecode2 = SWIG_AsVal_int(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "PointCloud_setPoints" "', argument " "2"" of type '" "int""'");
+  } 
+  arg2 = static_cast< int >(val2);
+  {
+    std::vector<double,std::allocator< double > > *ptr = (std::vector<double,std::allocator< double > > *)0;
+    res3 = swig::asptr(obj2, &ptr);
+    if (!SWIG_IsOK(res3)) {
+      SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "PointCloud_setPoints" "', argument " "3"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
+    }
+    if (!ptr) {
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "PointCloud_setPoints" "', argument " "3"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
+    }
+    arg3 = ptr;
+  }
+  {
+    try {
+      (arg1)->setPoints(arg2,(std::vector< double,std::allocator< double > > const &)*arg3);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  if (SWIG_IsNewObj(res3)) delete arg3;
+  return resultobj;
+fail:
+  if (SWIG_IsNewObj(res3)) delete arg3;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_PointCloud_addPoint(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  PointCloud *arg1 = (PointCloud *) 0 ;
+  double *arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double temp2[3] ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  int result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:PointCloud_addPoint",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_PointCloud, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "PointCloud_addPoint" "', argument " "1"" of type '" "PointCloud *""'"); 
+  }
+  arg1 = reinterpret_cast< PointCloud * >(argp1);
+  {
+    if (!convert_darray(obj1,temp2,3)) {
+      return NULL;
+    }
+    arg2 = &temp2[0];
+  }
+  {
+    try {
+      result = (int)(arg1)->addPoint((double const (*))arg2);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_From_int(static_cast< int >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_PointCloud_setPoint(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  PointCloud *arg1 = (PointCloud *) 0 ;
+  int arg2 ;
+  double *arg3 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  double temp3[3] ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  PyObject * obj2 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OOO:PointCloud_setPoint",&obj0,&obj1,&obj2)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_PointCloud, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "PointCloud_setPoint" "', argument " "1"" of type '" "PointCloud *""'"); 
+  }
+  arg1 = reinterpret_cast< PointCloud * >(argp1);
+  ecode2 = SWIG_AsVal_int(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "PointCloud_setPoint" "', argument " "2"" of type '" "int""'");
+  } 
+  arg2 = static_cast< int >(val2);
+  {
+    if (!convert_darray(obj2,temp3,3)) {
+      return NULL;
+    }
+    arg3 = &temp3[0];
+  }
+  {
+    try {
+      (arg1)->setPoint(arg2,(double const (*))arg3);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_PointCloud_getPoint(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  PointCloud *arg1 = (PointCloud *) 0 ;
+  int arg2 ;
+  double *arg3 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  double temp3[3] ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  {
+    arg3 = &temp3[0];
+  }
+  if (!PyArg_ParseTuple(args,(char *)"OO:PointCloud_getPoint",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_PointCloud, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "PointCloud_getPoint" "', argument " "1"" of type '" "PointCloud const *""'"); 
+  }
+  arg1 = reinterpret_cast< PointCloud * >(argp1);
+  ecode2 = SWIG_AsVal_int(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "PointCloud_getPoint" "', argument " "2"" of type '" "int""'");
+  } 
+  arg2 = static_cast< int >(val2);
+  {
+    try {
+      ((PointCloud const *)arg1)->getPoint(arg2,arg3);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  {
+    PyObject *o, *o2, *o3;
+    o = convert_darray_obj(arg3,3);
+    if ((!resultobj) || (resultobj == Py_None)) {
+      resultobj = o;
+    } else {
+      if (!PyTuple_Check(resultobj)) {
+        PyObject *o2 = resultobj;
+        resultobj = PyTuple_New(1);
+        PyTuple_SetItem(resultobj,0,o2);
+      }
+      o3 = PyTuple_New(1);
+      PyTuple_SetItem(o3,0,o);
+      o2 = resultobj;
+      resultobj = PySequence_Concat(o2,o3);
+      Py_DECREF(o2);
+      Py_DECREF(o3);
+    }
+  }
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_PointCloud_setProperties__SWIG_0(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  PointCloud *arg1 = (PointCloud *) 0 ;
+  std::vector< double,std::allocator< double > > *arg2 = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int res2 = SWIG_OLDOBJ ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:PointCloud_setProperties",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_PointCloud, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "PointCloud_setProperties" "', argument " "1"" of type '" "PointCloud *""'"); 
+  }
+  arg1 = reinterpret_cast< PointCloud * >(argp1);
+  {
+    std::vector<double,std::allocator< double > > *ptr = (std::vector<double,std::allocator< double > > *)0;
+    res2 = swig::asptr(obj1, &ptr);
+    if (!SWIG_IsOK(res2)) {
+      SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "PointCloud_setProperties" "', argument " "2"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
+    }
+    if (!ptr) {
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "PointCloud_setProperties" "', argument " "2"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
+    }
+    arg2 = ptr;
+  }
+  {
+    try {
+      (arg1)->setProperties((std::vector< double,std::allocator< double > > const &)*arg2);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  if (SWIG_IsNewObj(res2)) delete arg2;
+  return resultobj;
+fail:
+  if (SWIG_IsNewObj(res2)) delete arg2;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_PointCloud_setProperties__SWIG_1(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  PointCloud *arg1 = (PointCloud *) 0 ;
+  int arg2 ;
+  std::vector< double,std::allocator< double > > *arg3 = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  int res3 = SWIG_OLDOBJ ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  PyObject * obj2 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OOO:PointCloud_setProperties",&obj0,&obj1,&obj2)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_PointCloud, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "PointCloud_setProperties" "', argument " "1"" of type '" "PointCloud *""'"); 
+  }
+  arg1 = reinterpret_cast< PointCloud * >(argp1);
+  ecode2 = SWIG_AsVal_int(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "PointCloud_setProperties" "', argument " "2"" of type '" "int""'");
+  } 
+  arg2 = static_cast< int >(val2);
+  {
+    std::vector<double,std::allocator< double > > *ptr = (std::vector<double,std::allocator< double > > *)0;
+    res3 = swig::asptr(obj2, &ptr);
+    if (!SWIG_IsOK(res3)) {
+      SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "PointCloud_setProperties" "', argument " "3"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
+    }
+    if (!ptr) {
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "PointCloud_setProperties" "', argument " "3"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
+    }
+    arg3 = ptr;
+  }
+  {
+    try {
+      (arg1)->setProperties(arg2,(std::vector< double,std::allocator< double > > const &)*arg3);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  if (SWIG_IsNewObj(res3)) delete arg3;
+  return resultobj;
+fail:
+  if (SWIG_IsNewObj(res3)) delete arg3;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_PointCloud_setProperties(PyObject *self, PyObject *args) {
+  int argc;
+  PyObject *argv[4] = {
+    0
+  };
+  int ii;
+  
+  if (!PyTuple_Check(args)) SWIG_fail;
+  argc = args ? (int)PyObject_Length(args) : 0;
+  for (ii = 0; (ii < 3) && (ii < argc); ii++) {
+    argv[ii] = PyTuple_GET_ITEM(args,ii);
+  }
+  if (argc == 2) {
+    int _v;
+    void *vptr = 0;
+    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_PointCloud, 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      int res = swig::asptr(argv[1], (std::vector<double,std::allocator< double > >**)(0));
+      _v = SWIG_CheckState(res);
+      if (_v) {
+        return _wrap_PointCloud_setProperties__SWIG_0(self, args);
+      }
+    }
+  }
+  if (argc == 3) {
+    int _v;
+    void *vptr = 0;
+    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_PointCloud, 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      {
+        int res = SWIG_AsVal_int(argv[1], NULL);
+        _v = SWIG_CheckState(res);
+      }
+      if (_v) {
+        int res = swig::asptr(argv[2], (std::vector<double,std::allocator< double > >**)(0));
+        _v = SWIG_CheckState(res);
+        if (_v) {
+          return _wrap_PointCloud_setProperties__SWIG_1(self, args);
+        }
+      }
+    }
+  }
+  
+fail:
+  SWIG_SetErrorMsg(PyExc_NotImplementedError,"Wrong number or type of arguments for overloaded function 'PointCloud_setProperties'.\n"
+    "  Possible C/C++ prototypes are:\n"
+    "    PointCloud::setProperties(std::vector< double,std::allocator< double > > const &)\n"
+    "    PointCloud::setProperties(int,std::vector< double,std::allocator< double > > const &)\n");
+  return 0;
+}
+
+
+SWIGINTERN PyObject *_wrap_PointCloud_setProperty__SWIG_0(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  PointCloud *arg1 = (PointCloud *) 0 ;
+  int arg2 ;
+  int arg3 ;
+  double arg4 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  int val3 ;
+  int ecode3 = 0 ;
+  double val4 ;
+  int ecode4 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  PyObject * obj2 = 0 ;
+  PyObject * obj3 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OOOO:PointCloud_setProperty",&obj0,&obj1,&obj2,&obj3)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_PointCloud, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "PointCloud_setProperty" "', argument " "1"" of type '" "PointCloud *""'"); 
+  }
+  arg1 = reinterpret_cast< PointCloud * >(argp1);
+  ecode2 = SWIG_AsVal_int(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "PointCloud_setProperty" "', argument " "2"" of type '" "int""'");
+  } 
+  arg2 = static_cast< int >(val2);
+  ecode3 = SWIG_AsVal_int(obj2, &val3);
+  if (!SWIG_IsOK(ecode3)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "PointCloud_setProperty" "', argument " "3"" of type '" "int""'");
+  } 
+  arg3 = static_cast< int >(val3);
+  ecode4 = SWIG_AsVal_double(obj3, &val4);
+  if (!SWIG_IsOK(ecode4)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode4), "in method '" "PointCloud_setProperty" "', argument " "4"" of type '" "double""'");
+  } 
+  arg4 = static_cast< double >(val4);
+  {
+    try {
+      (arg1)->setProperty(arg2,arg3,arg4);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_PointCloud_setProperty__SWIG_1(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  PointCloud *arg1 = (PointCloud *) 0 ;
+  int arg2 ;
+  std::string *arg3 = 0 ;
+  double arg4 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  int res3 = SWIG_OLDOBJ ;
+  double val4 ;
+  int ecode4 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  PyObject * obj2 = 0 ;
+  PyObject * obj3 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OOOO:PointCloud_setProperty",&obj0,&obj1,&obj2,&obj3)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_PointCloud, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "PointCloud_setProperty" "', argument " "1"" of type '" "PointCloud *""'"); 
+  }
+  arg1 = reinterpret_cast< PointCloud * >(argp1);
+  ecode2 = SWIG_AsVal_int(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "PointCloud_setProperty" "', argument " "2"" of type '" "int""'");
+  } 
+  arg2 = static_cast< int >(val2);
+  {
+    std::string *ptr = (std::string *)0;
+    res3 = SWIG_AsPtr_std_string(obj2, &ptr);
+    if (!SWIG_IsOK(res3)) {
+      SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "PointCloud_setProperty" "', argument " "3"" of type '" "std::string const &""'"); 
+    }
+    if (!ptr) {
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "PointCloud_setProperty" "', argument " "3"" of type '" "std::string const &""'"); 
+    }
+    arg3 = ptr;
+  }
+  ecode4 = SWIG_AsVal_double(obj3, &val4);
+  if (!SWIG_IsOK(ecode4)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode4), "in method '" "PointCloud_setProperty" "', argument " "4"" of type '" "double""'");
+  } 
+  arg4 = static_cast< double >(val4);
+  {
+    try {
+      (arg1)->setProperty(arg2,(std::string const &)*arg3,arg4);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  if (SWIG_IsNewObj(res3)) delete arg3;
+  return resultobj;
+fail:
+  if (SWIG_IsNewObj(res3)) delete arg3;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_PointCloud_setProperty(PyObject *self, PyObject *args) {
+  int argc;
+  PyObject *argv[5] = {
+    0
+  };
+  int ii;
+  
+  if (!PyTuple_Check(args)) SWIG_fail;
+  argc = args ? (int)PyObject_Length(args) : 0;
+  for (ii = 0; (ii < 4) && (ii < argc); ii++) {
+    argv[ii] = PyTuple_GET_ITEM(args,ii);
+  }
+  if (argc == 4) {
+    int _v;
+    void *vptr = 0;
+    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_PointCloud, 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      {
+        int res = SWIG_AsVal_int(argv[1], NULL);
+        _v = SWIG_CheckState(res);
+      }
+      if (_v) {
+        {
+          int res = SWIG_AsVal_int(argv[2], NULL);
+          _v = SWIG_CheckState(res);
+        }
+        if (_v) {
+          {
+            int res = SWIG_AsVal_double(argv[3], NULL);
+            _v = SWIG_CheckState(res);
+          }
+          if (_v) {
+            return _wrap_PointCloud_setProperty__SWIG_0(self, args);
+          }
+        }
+      }
+    }
+  }
+  if (argc == 4) {
+    int _v;
+    void *vptr = 0;
+    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_PointCloud, 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      {
+        int res = SWIG_AsVal_int(argv[1], NULL);
+        _v = SWIG_CheckState(res);
+      }
+      if (_v) {
+        int res = SWIG_AsPtr_std_string(argv[2], (std::string**)(0));
+        _v = SWIG_CheckState(res);
+        if (_v) {
+          {
+            int res = SWIG_AsVal_double(argv[3], NULL);
+            _v = SWIG_CheckState(res);
+          }
+          if (_v) {
+            return _wrap_PointCloud_setProperty__SWIG_1(self, args);
+          }
+        }
+      }
+    }
+  }
+  
+fail:
+  SWIG_SetErrorMsg(PyExc_NotImplementedError,"Wrong number or type of arguments for overloaded function 'PointCloud_setProperty'.\n"
+    "  Possible C/C++ prototypes are:\n"
+    "    PointCloud::setProperty(int,int,double)\n"
+    "    PointCloud::setProperty(int,std::string const &,double)\n");
+  return 0;
+}
+
+
+SWIGINTERN PyObject *_wrap_PointCloud_getProperty__SWIG_0(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  PointCloud *arg1 = (PointCloud *) 0 ;
+  int arg2 ;
+  int arg3 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  int val3 ;
+  int ecode3 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  PyObject * obj2 = 0 ;
+  double result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OOO:PointCloud_getProperty",&obj0,&obj1,&obj2)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_PointCloud, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "PointCloud_getProperty" "', argument " "1"" of type '" "PointCloud const *""'"); 
+  }
+  arg1 = reinterpret_cast< PointCloud * >(argp1);
+  ecode2 = SWIG_AsVal_int(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "PointCloud_getProperty" "', argument " "2"" of type '" "int""'");
+  } 
+  arg2 = static_cast< int >(val2);
+  ecode3 = SWIG_AsVal_int(obj2, &val3);
+  if (!SWIG_IsOK(ecode3)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "PointCloud_getProperty" "', argument " "3"" of type '" "int""'");
+  } 
+  arg3 = static_cast< int >(val3);
+  {
+    try {
+      result = (double)((PointCloud const *)arg1)->getProperty(arg2,arg3);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_PointCloud_getProperty__SWIG_1(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  PointCloud *arg1 = (PointCloud *) 0 ;
+  int arg2 ;
+  std::string *arg3 = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  int res3 = SWIG_OLDOBJ ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  PyObject * obj2 = 0 ;
+  double result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OOO:PointCloud_getProperty",&obj0,&obj1,&obj2)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_PointCloud, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "PointCloud_getProperty" "', argument " "1"" of type '" "PointCloud const *""'"); 
+  }
+  arg1 = reinterpret_cast< PointCloud * >(argp1);
+  ecode2 = SWIG_AsVal_int(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "PointCloud_getProperty" "', argument " "2"" of type '" "int""'");
+  } 
+  arg2 = static_cast< int >(val2);
+  {
+    std::string *ptr = (std::string *)0;
+    res3 = SWIG_AsPtr_std_string(obj2, &ptr);
+    if (!SWIG_IsOK(res3)) {
+      SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "PointCloud_getProperty" "', argument " "3"" of type '" "std::string const &""'"); 
+    }
+    if (!ptr) {
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "PointCloud_getProperty" "', argument " "3"" of type '" "std::string const &""'"); 
+    }
+    arg3 = ptr;
+  }
+  {
+    try {
+      result = (double)((PointCloud const *)arg1)->getProperty(arg2,(std::string const &)*arg3);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  if (SWIG_IsNewObj(res3)) delete arg3;
+  return resultobj;
+fail:
+  if (SWIG_IsNewObj(res3)) delete arg3;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_PointCloud_getProperty(PyObject *self, PyObject *args) {
+  int argc;
+  PyObject *argv[4] = {
+    0
+  };
+  int ii;
+  
+  if (!PyTuple_Check(args)) SWIG_fail;
+  argc = args ? (int)PyObject_Length(args) : 0;
+  for (ii = 0; (ii < 3) && (ii < argc); ii++) {
+    argv[ii] = PyTuple_GET_ITEM(args,ii);
+  }
+  if (argc == 3) {
+    int _v;
+    void *vptr = 0;
+    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_PointCloud, 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      {
+        int res = SWIG_AsVal_int(argv[1], NULL);
+        _v = SWIG_CheckState(res);
+      }
+      if (_v) {
+        {
+          int res = SWIG_AsVal_int(argv[2], NULL);
+          _v = SWIG_CheckState(res);
+        }
+        if (_v) {
+          return _wrap_PointCloud_getProperty__SWIG_0(self, args);
+        }
+      }
+    }
+  }
+  if (argc == 3) {
+    int _v;
+    void *vptr = 0;
+    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_PointCloud, 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      {
+        int res = SWIG_AsVal_int(argv[1], NULL);
+        _v = SWIG_CheckState(res);
+      }
+      if (_v) {
+        int res = SWIG_AsPtr_std_string(argv[2], (std::string**)(0));
+        _v = SWIG_CheckState(res);
+        if (_v) {
+          return _wrap_PointCloud_getProperty__SWIG_1(self, args);
+        }
+      }
+    }
+  }
+  
+fail:
+  SWIG_SetErrorMsg(PyExc_NotImplementedError,"Wrong number or type of arguments for overloaded function 'PointCloud_getProperty'.\n"
+    "  Possible C/C++ prototypes are:\n"
+    "    PointCloud::getProperty(int,int) const\n"
+    "    PointCloud::getProperty(int,std::string const &) const\n");
+  return 0;
+}
+
+
 SWIGINTERN PyObject *_wrap_PointCloud_translate(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   PointCloud *arg1 = (PointCloud *) 0 ;
@@ -17105,6 +17926,51 @@ SWIGINTERN PyObject *_wrap_PointCloud_transform(PyObject *SWIGUNUSEDPARM(self), 
   {
     try {
       (arg1)->transform((double const (*))arg2,(double const (*))arg3);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_PointCloud_join(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  PointCloud *arg1 = (PointCloud *) 0 ;
+  PointCloud *arg2 = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:PointCloud_join",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_PointCloud, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "PointCloud_join" "', argument " "1"" of type '" "PointCloud *""'"); 
+  }
+  arg1 = reinterpret_cast< PointCloud * >(argp1);
+  res2 = SWIG_ConvertPtr(obj1, &argp2, SWIGTYPE_p_PointCloud,  0  | 0);
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "PointCloud_join" "', argument " "2"" of type '" "PointCloud const &""'"); 
+  }
+  if (!argp2) {
+    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "PointCloud_join" "', argument " "2"" of type '" "PointCloud const &""'"); 
+  }
+  arg2 = reinterpret_cast< PointCloud * >(argp2);
+  {
+    try {
+      (arg1)->join((PointCloud const &)*arg2);
     }
     catch(PyException& e) {
       e.setPyErr();
@@ -31046,6 +31912,38 @@ fail:
 
 SWIGINTERN PyObject *_wrap_new_WorldModel__SWIG_1(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
+  void *arg1 = (void *) 0 ;
+  int res1 ;
+  PyObject * obj0 = 0 ;
+  WorldModel *result = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:new_WorldModel",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0,SWIG_as_voidptrptr(&arg1), 0, 0);
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "new_WorldModel" "', argument " "1"" of type '" "void *""'"); 
+  }
+  {
+    try {
+      result = (WorldModel *)new WorldModel(arg1);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_WorldModel, SWIG_POINTER_NEW |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_new_WorldModel__SWIG_2(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
   int arg1 ;
   int val1 ;
   int ecode1 = 0 ;
@@ -31078,7 +31976,7 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_new_WorldModel__SWIG_2(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_new_WorldModel__SWIG_3(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   WorldModel *arg1 = 0 ;
   void *argp1 = 0 ;
@@ -31115,38 +32013,6 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_new_WorldModel__SWIG_3(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  void *arg1 = (void *) 0 ;
-  int res1 ;
-  PyObject * obj0 = 0 ;
-  WorldModel *result = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"O:new_WorldModel",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0,SWIG_as_voidptrptr(&arg1), 0, 0);
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "new_WorldModel" "', argument " "1"" of type '" "void *""'"); 
-  }
-  {
-    try {
-      result = (WorldModel *)new WorldModel(arg1);
-    }
-    catch(PyException& e) {
-      e.setPyErr();
-      return NULL;
-    }
-    catch(std::exception& e) {
-      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
-      return NULL;
-    }
-  }
-  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_WorldModel, SWIG_POINTER_NEW |  0 );
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
 SWIGINTERN PyObject *_wrap_new_WorldModel(PyObject *self, PyObject *args) {
   int argc;
   PyObject *argv[2] = {
@@ -31164,8 +32030,7 @@ SWIGINTERN PyObject *_wrap_new_WorldModel(PyObject *self, PyObject *args) {
   }
   if (argc == 1) {
     int _v;
-    void *ptr = 0;
-    int res = SWIG_ConvertPtr(argv[0], &ptr, 0, 0);
+    int res = SWIG_ConvertPtr(argv[0], 0, SWIGTYPE_p_WorldModel, 0);
     _v = SWIG_CheckState(res);
     if (_v) {
       return _wrap_new_WorldModel__SWIG_3(self, args);
@@ -31173,10 +32038,11 @@ SWIGINTERN PyObject *_wrap_new_WorldModel(PyObject *self, PyObject *args) {
   }
   if (argc == 1) {
     int _v;
-    int res = SWIG_ConvertPtr(argv[0], 0, SWIGTYPE_p_WorldModel, 0);
+    void *ptr = 0;
+    int res = SWIG_ConvertPtr(argv[0], &ptr, 0, 0);
     _v = SWIG_CheckState(res);
     if (_v) {
-      return _wrap_new_WorldModel__SWIG_2(self, args);
+      return _wrap_new_WorldModel__SWIG_1(self, args);
     }
   }
   if (argc == 1) {
@@ -31186,7 +32052,7 @@ SWIGINTERN PyObject *_wrap_new_WorldModel(PyObject *self, PyObject *args) {
       _v = SWIG_CheckState(res);
     }
     if (_v) {
-      return _wrap_new_WorldModel__SWIG_1(self, args);
+      return _wrap_new_WorldModel__SWIG_2(self, args);
     }
   }
   
@@ -31194,9 +32060,9 @@ fail:
   SWIG_SetErrorMsg(PyExc_NotImplementedError,"Wrong number or type of arguments for overloaded function 'new_WorldModel'.\n"
     "  Possible C/C++ prototypes are:\n"
     "    WorldModel::WorldModel()\n"
+    "    WorldModel::WorldModel(void *)\n"
     "    WorldModel::WorldModel(int)\n"
-    "    WorldModel::WorldModel(WorldModel const &)\n"
-    "    WorldModel::WorldModel(void *)\n");
+    "    WorldModel::WorldModel(WorldModel const &)\n");
   return 0;
 }
 
@@ -32752,6 +33618,48 @@ SWIGINTERN PyObject *_wrap_WorldModel_enableGeometryLoading(PyObject *SWIGUNUSED
   {
     try {
       (arg1)->enableGeometryLoading(arg2);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_WorldModel_enableInitCollisions(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  WorldModel *arg1 = (WorldModel *) 0 ;
+  bool arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  bool val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:WorldModel_enableInitCollisions",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_WorldModel, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "WorldModel_enableInitCollisions" "', argument " "1"" of type '" "WorldModel *""'"); 
+  }
+  arg1 = reinterpret_cast< WorldModel * >(argp1);
+  ecode2 = SWIG_AsVal_bool(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "WorldModel_enableInitCollisions" "', argument " "2"" of type '" "bool""'");
+  } 
+  arg2 = static_cast< bool >(val2);
+  {
+    try {
+      (arg1)->enableInitCollisions(arg2);
     }
     catch(PyException& e) {
       e.setPyErr();
@@ -43042,6 +43950,83 @@ static PyMethodDef SwigMethods[] = {
 		""},
 	 { (char *)"delete_TriangleMesh", _wrap_delete_TriangleMesh, METH_VARARGS, (char *)"delete_TriangleMesh(TriangleMesh self)"},
 	 { (char *)"TriangleMesh_swigregister", TriangleMesh_swigregister, METH_VARARGS, NULL},
+	 { (char *)"PointCloud_numPoints", _wrap_PointCloud_numPoints, METH_VARARGS, (char *)"\n"
+		"PointCloud_numPoints(PointCloud self) -> int\n"
+		"\n"
+		"int\n"
+		"PointCloud::numPoints() const\n"
+		"\n"
+		"Returns the number of points. \n"
+		""},
+	 { (char *)"PointCloud_numProperties", _wrap_PointCloud_numProperties, METH_VARARGS, (char *)"\n"
+		"PointCloud_numProperties(PointCloud self) -> int\n"
+		"\n"
+		"int\n"
+		"PointCloud::numProperties() const\n"
+		"\n"
+		"Returns the number of properties. \n"
+		""},
+	 { (char *)"PointCloud_setPoints", _wrap_PointCloud_setPoints, METH_VARARGS, (char *)"\n"
+		"PointCloud_setPoints(PointCloud self, int num, doubleVector plist)\n"
+		"\n"
+		"void\n"
+		"PointCloud::setPoints(int num, const std::vector< double > &plist)\n"
+		"\n"
+		"Sets all the points to the given list (a 3n-list) \n"
+		""},
+	 { (char *)"PointCloud_addPoint", _wrap_PointCloud_addPoint, METH_VARARGS, (char *)"\n"
+		"PointCloud_addPoint(PointCloud self, double const [3] p) -> int\n"
+		"\n"
+		"int\n"
+		"PointCloud::addPoint(const double p[3])\n"
+		"\n"
+		"Adds a point. Sets all its properties to 0. Returns the index. \n"
+		""},
+	 { (char *)"PointCloud_setPoint", _wrap_PointCloud_setPoint, METH_VARARGS, (char *)"\n"
+		"PointCloud_setPoint(PointCloud self, int index, double const [3] p)\n"
+		"\n"
+		"void\n"
+		"PointCloud::setPoint(int index, const double p[3])\n"
+		"\n"
+		"Sets the position of a point. \n"
+		""},
+	 { (char *)"PointCloud_getPoint", _wrap_PointCloud_getPoint, METH_VARARGS, (char *)"\n"
+		"PointCloud_getPoint(PointCloud self, int index)\n"
+		"\n"
+		"void\n"
+		"PointCloud::getPoint(int index, double out[3]) const\n"
+		"\n"
+		"Retrieves the position of a point. \n"
+		""},
+	 { (char *)"PointCloud_setProperties", _wrap_PointCloud_setProperties, METH_VARARGS, (char *)"\n"
+		"setProperties(doubleVector properties)\n"
+		"PointCloud_setProperties(PointCloud self, int pindex, doubleVector properties)\n"
+		"\n"
+		"void\n"
+		"PointCloud::setProperties(int pindex, const std::vector< double >\n"
+		"&properties)\n"
+		"\n"
+		"Sets property pindex of all points to the given list (a n-list) \n"
+		""},
+	 { (char *)"PointCloud_setProperty", _wrap_PointCloud_setProperty, METH_VARARGS, (char *)"\n"
+		"setProperty(int index, int pindex, double value)\n"
+		"PointCloud_setProperty(PointCloud self, int index, std::string const & pname, double value)\n"
+		"\n"
+		"void\n"
+		"PointCloud::setProperty(int index, const std::string &pname, double\n"
+		"value)\n"
+		"\n"
+		"Sets the property named pname of point index to the given value. \n"
+		""},
+	 { (char *)"PointCloud_getProperty", _wrap_PointCloud_getProperty, METH_VARARGS, (char *)"\n"
+		"getProperty(int index, int pindex) -> double\n"
+		"PointCloud_getProperty(PointCloud self, int index, std::string const & pname) -> double\n"
+		"\n"
+		"double\n"
+		"PointCloud::getProperty(int index, const std::string &pname) const\n"
+		"\n"
+		"Gets the property named pname of point index. \n"
+		""},
 	 { (char *)"PointCloud_translate", _wrap_PointCloud_translate, METH_VARARGS, (char *)"\n"
 		"PointCloud_translate(PointCloud self, double const [3] t)\n"
 		"\n"
@@ -43057,6 +44042,15 @@ static PyMethodDef SwigMethods[] = {
 		"PointCloud::transform(const double R[9], const double t[3])\n"
 		"\n"
 		"Transforms all the points by the rigid transform v=R*v+t. \n"
+		""},
+	 { (char *)"PointCloud_join", _wrap_PointCloud_join, METH_VARARGS, (char *)"\n"
+		"PointCloud_join(PointCloud self, PointCloud pc)\n"
+		"\n"
+		"void PointCloud::join(const\n"
+		"PointCloud &pc)\n"
+		"\n"
+		"Adds the given point cloud to this one. They must share the same\n"
+		"properties or else an exception is raised \n"
 		""},
 	 { (char *)"PointCloud_vertices_set", _wrap_PointCloud_vertices_set, METH_VARARGS, (char *)"PointCloud_vertices_set(PointCloud self, doubleVector vertices)"},
 	 { (char *)"PointCloud_vertices_get", _wrap_PointCloud_vertices_get, METH_VARARGS, (char *)"PointCloud_vertices_get(PointCloud self) -> doubleVector"},
@@ -44121,7 +45115,8 @@ static PyMethodDef SwigMethods[] = {
 		"RobotModel::getCoriolisForces(std::vector< double > &out)\n"
 		"\n"
 		"Returns the Coriolis forces C(q,dq)*dq for current config and velocity\n"
-		"(faster than computing matrix and doing product) \n"
+		"(faster than computing matrix and doing product). (\"Forces\" is\n"
+		"somewhat of a misnomer; the result is a joint torque vector) \n"
 		""},
 	 { (char *)"RobotModel_getGravityForces", _wrap_RobotModel_getGravityForces, METH_VARARGS, (char *)"\n"
 		"RobotModel_getGravityForces(RobotModel self, double const [3] g)\n"
@@ -44130,8 +45125,9 @@ static PyMethodDef SwigMethods[] = {
 		"RobotModel::getGravityForces(const double g[3], std::vector< double >\n"
 		"&out)\n"
 		"\n"
-		"Returns the gravity force vector G(q) for the given workspace gravity\n"
-		"vector g (usually (0,0,-9.8)) \n"
+		"Returns the generalized gravity vector G(q) for the given workspace\n"
+		"gravity vector g (usually (0,0,-9.8)). (\"Forces\" is somewhat of a\n"
+		"misnomer; the result is a joint torque vector) \n"
 		""},
 	 { (char *)"RobotModel_torquesFromAccel", _wrap_RobotModel_torquesFromAccel, METH_VARARGS, (char *)"\n"
 		"RobotModel_torquesFromAccel(RobotModel self, doubleVector ddq)\n"
@@ -44140,7 +45136,8 @@ static PyMethodDef SwigMethods[] = {
 		"RobotModel::torquesFromAccel(const std::vector< double > &ddq,\n"
 		"std::vector< double > &out)\n"
 		"\n"
-		"Computes the inverse dynamics (using Recursive Newton Euler solver) \n"
+		"Computes the inverse dynamics (using Recursive Newton Euler solver).\n"
+		"Note: does not include gravity term G(q) \n"
 		""},
 	 { (char *)"RobotModel_accelFromTorques", _wrap_RobotModel_accelFromTorques, METH_VARARGS, (char *)"\n"
 		"RobotModel_accelFromTorques(RobotModel self, doubleVector t)\n"
@@ -44149,7 +45146,8 @@ static PyMethodDef SwigMethods[] = {
 		"RobotModel::accelFromTorques(const std::vector< double > &t,\n"
 		"std::vector< double > &out)\n"
 		"\n"
-		"Computes the foward dynamics (using Recursive Newton Euler solver) \n"
+		"Computes the foward dynamics (using Recursive Newton Euler solver)\n"
+		"Note: does not include gravity term G(q) \n"
 		""},
 	 { (char *)"RobotModel_interpolate", _wrap_RobotModel_interpolate, METH_VARARGS, (char *)"\n"
 		"RobotModel_interpolate(RobotModel self, doubleVector a, doubleVector b, double u)\n"
@@ -44358,14 +45356,11 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"TerrainModel_swigregister", TerrainModel_swigregister, METH_VARARGS, NULL},
 	 { (char *)"new_WorldModel", _wrap_new_WorldModel, METH_VARARGS, (char *)"\n"
 		"WorldModel()\n"
+		"WorldModel(void * ptrRobotWorld)\n"
 		"WorldModel(int index)\n"
-		"WorldModel(WorldModel w)\n"
-		"new_WorldModel(void * ptrRobotWorld) -> WorldModel\n"
+		"new_WorldModel(WorldModel w) -> WorldModel\n"
 		"\n"
-		"WorldModel::WorldModel(void *ptrRobotWorld)\n"
-		"\n"
-		"Creates a WorldModel by pointer to a C++ RobotWorld structure (used\n"
-		"pretty much only when interfacing C++ and Python code) \n"
+		"WorldModel::WorldModel(const WorldModel &w) \n"
 		""},
 	 { (char *)"delete_WorldModel", _wrap_delete_WorldModel, METH_VARARGS, (char *)"\n"
 		"delete_WorldModel(WorldModel self)\n"
@@ -44552,6 +45547,20 @@ static PyMethodDef SwigMethods[] = {
 		"loaded from disk, and no geometry / visualization / collision\n"
 		"detection structures will be loaded. Useful for quick scripts that\n"
 		"just use kinematics / dynamics of a robot. \n"
+		""},
+	 { (char *)"WorldModel_enableInitCollisions", _wrap_WorldModel_enableInitCollisions, METH_VARARGS, (char *)"\n"
+		"WorldModel_enableInitCollisions(WorldModel self, bool enabled)\n"
+		"\n"
+		"void\n"
+		"WorldModel::enableInitCollisions(bool enabled)\n"
+		"\n"
+		"If collision detection is set to true, then collision acceleration\n"
+		"data structures will be automatically initialized, with debugging\n"
+		"information. Useful for scripts that do planning and for which\n"
+		"collision initialization may take a long time. Note that even when\n"
+		"this flag is off, the collision acceleration data structures will\n"
+		"indeed be initialized whenever geometry collision, distance, or ray-\n"
+		"casting routines are called. \n"
 		""},
 	 { (char *)"WorldModel_index_set", _wrap_WorldModel_index_set, METH_VARARGS, (char *)"WorldModel_index_set(WorldModel self, int index)"},
 	 { (char *)"WorldModel_index_get", _wrap_WorldModel_index_get, METH_VARARGS, (char *)"WorldModel_index_get(WorldModel self) -> int"},

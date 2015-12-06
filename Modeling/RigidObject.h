@@ -14,6 +14,7 @@ struct RigidObject
   bool Save(const char* fn);
   void SetMassFromGeometry(Real totalMass);
   void SetMassFromBB(Real totalMass);
+  void InitCollisions();
   void UpdateGeometry(); ///< Call this before collision detection if the transform is changed
 
   std::string geomFile;
