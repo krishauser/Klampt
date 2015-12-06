@@ -17,13 +17,16 @@ void QKlamptDisplay::SetGUI(GenericGUIBase* _gui)
 
 void QKlamptDisplay::initializeGL(){
     glClearColor(.4,.4,1,1);
+#ifdef GL_MULTISAMPLE
     glEnable(GL_MULTISAMPLE);
+#else if defined(GL_MULTISAMPLE_ARB)
+	glEnable(GL_MULTISAMPLE_ARB);
+#endif //GL_MULTISAMPLE
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
     glShadeModel(GL_SMOOTH);
     glEnable(GL_LIGHTING);
     glEnable(GL_LIGHT0);
-    //glEnable(GL_MULTISAMPLE);
     static GLfloat lightPosition[4] = { 0.5, 5.0, 7.0, 1.0 };
     glLightfv(GL_LIGHT0, GL_POSITION, lightPosition);
 }
