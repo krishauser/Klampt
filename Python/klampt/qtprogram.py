@@ -50,6 +50,7 @@ class GLProgram(QGLWidget):
         - clearColor: the RGBA floating point values of the background color.
     """
     def __init__(self,name="OpenGL Program"):
+        QGLWidget.__init__(self)
         self.name = name
         self.width = 640
         self.height = 480
