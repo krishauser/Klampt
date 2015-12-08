@@ -184,7 +184,9 @@ def solver(objectives):
             if isinstance(obj,IKObjective):
                 if not hasattr(obj,'robot'):
                     raise ValueError("IKObjective objects must have 'robot' member for use in ik.solver. Either set this manually or use the ik.objective function")
-                robs.getdefault(obj.robot,[]).append(obj)
+                robot = obj.robot
+                key = (robot.getName(),robot.getID())
+                robs.setdefault(key,[robot,[]])[1].append(obj)
             elif isinstance(obj,GeneralizedIKObjective):
                 generalized.append(obj)
             else:
@@ -199,13 +201,13 @@ def solver(objectives):
             s = GeneralizedIKSolver(world)
             for obj in generalized:
                 s.add(obj)
-            for (r,objs) in robs.iteritems():
+            for (key,(r,objs)) in robs.iteritems():
                 for obj in objs:
                     s.add(GeneralizedIKObjective(r,obj))
             return s
         else:
             res = []
-            for (r,objs) in robs:
+            for key,(r,objs) in robs.iteritems():
                 s = IKSolver(r)
                 for obj in objs:
                     s.add(obj)
