@@ -328,11 +328,14 @@ void GetPointCloud(const PointCloud& pc,Geometry::AnyCollisionGeometry3D& geom)
   for(size_t i=0;i<gpc.points.size();i++)
     gpc.points[i].set(pc.vertices[i*3],pc.vertices[i*3+1],pc.vertices[i*3+2]);
   gpc.propertyNames = pc.propertyNames;
-  gpc.properties.resize(pc.properties.size() / pc.propertyNames.size());
-  for(size_t i=0;i<gpc.properties.size();i++) {
-    gpc.properties[i].resize(pc.propertyNames.size());
-    gpc.properties[i].copy(&pc.properties[i*pc.propertyNames.size()]);
+  if(pc.propertyNames.size() > 0) {
+    gpc.properties.resize(pc.properties.size() / pc.propertyNames.size());
+    for(size_t i=0;i<gpc.properties.size();i++) {
+      gpc.properties[i].resize(pc.propertyNames.size());
+      gpc.properties[i].copy(&pc.properties[i*pc.propertyNames.size()]);
+    }
   }
+  printf("Copying PointCloud to geometry, %g points\n",gpc.points.size());
   geom = gpc;
   geom.InitCollisions();
 }
@@ -944,10 +947,10 @@ void PointCloud::setPoints(int num,const vector<double>& plist)
 int PointCloud::addPoint(const double p[3])
 {
   int ofs = (int)vertices.size();
-  vertices.resize(vertices.size()+3);
-  vertices[ofs] = p[0];
-  vertices[ofs+1] = p[1];
-  vertices[ofs+2] = p[2];
+
+  vertices.push_back(p[0]);
+  vertices.push_back(p[1]);
+  vertices.push_back(p[2]);
   properties.resize(properties.size()+propertyNames.size(),0.0);
   return ofs/3;
 }
