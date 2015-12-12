@@ -1,4 +1,5 @@
 #include "WorldGUI.h"
+#include "IO/ROS.h"
 #include <string.h>
 #include <utils/stringutils.h>
 #include <GLdraw/GL.h>
@@ -9,6 +10,19 @@ using namespace GLDraw;
 WorldGUIBackend::WorldGUIBackend(RobotWorld* _world)
   :world(_world)
 {
+}
+
+bool WorldGUIBackend::OnIdle()
+{
+  if(ROSNumSubscribedTopics() > 0) {
+    if(ROSSubscribeUpdate())
+      SendPauseIdle();
+    else
+      SendPauseIdle(0.05);
+  }
+  else
+    SendPauseIdle();
+  return true;
 }
 
 bool WorldGUIBackend::OnCommand(const string& cmd,const string& args)
