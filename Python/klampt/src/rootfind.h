@@ -11,8 +11,16 @@ void setFTolerance(double tolf);
 /// Sets the termination threshold for the change in x
 void setXTolerance(double tolx);
 
-/// Sets the vector field object, returns 0 if pVFObj = NULL, 1 otherwise
+/// Sets the vector field object, returns 0 if pVFObj = NULL, 1 otherwise.
+/// See vectorfield.py for an abstract base class that can be overridden to
+/// produce one of these objects.
 int setVectorField(PyObject* pVFObj);
+
+/// Sets the function object, returns 0 if pVFObj = NULL, 1 otherwise.
+/// See vectorfield.py for an abstract base class that can be overridden to
+/// produce one of these objects.
+/// Equivalent to setVectorField; just a more intuitive name.
+int setFunction(PyObject* pVFObj);
 
 /**
  * Performs unconstrained root finding for up to iter iterations

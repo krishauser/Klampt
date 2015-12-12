@@ -91,6 +91,8 @@ ODESimulatorSettings::ODESimulatorSettings()
   robotSelfCollisions = gRobotSelfCollisionsEnabled;
   robotRobotCollisions = gRobotRobotCollisionsEnabled;
 
+  adaptiveTimeStepping = gAdaptiveTimeStepping;
+
   maxContacts = 20;
   clusterNormalScale = 0.1;
 
@@ -150,6 +152,7 @@ struct ODEContactResult
   dGeomID o1,o2;
   vector<dContactGeom> contacts;
   vector<dJointFeedback> feedback;
+  bool meshOverlap;
 };
 
 const static int max_contacts = 1000;
@@ -161,6 +164,7 @@ static list<ODEContactResult> gContacts;
 ODESimulator::ODESimulator()
 {
   timestep = 0;
+  lastStateTimestep = 0;
 
   g_ODE_object.Init();
   worldID = dWorldCreate();
@@ -259,25 +263,158 @@ void ODESimulator::Step(Real dt)
   gPreclusterContacts = 0;
 #endif // DO_TIMING
 
-  gContacts.clear();
+  if(settings.adaptiveTimeStepping) {
+#if DO_TIMING
+    collisionTime = 0;
+    stepTime = 0;
+#endif
 
-  timestep=dt;
-  DetectCollisions();
+    //normal adaptive time step method:
+    //ATS(dt)
+    //1. valid_time <- 0, timestep <- dt, desired_time = dt
+    //2. last <- save_state()
+    //3. while(valid_time < desired_time) 
+    //4.   step(timestep)
+    //5.   detectcollisions()
+    //6.   if(rollback) 
+    //7.     load_state(last)
+    //8.     timestep *= 0.5
+    //9.   else
+    //10.    valid_time += timestep
+    //11.    timestep = desired_time - valid_time
+    //12.    last <- save_state()
+    //but to be stateless we need to detect collisions first. 
+    //hence, the normal loop is
+    //TS(dt)
+    //1. detect collisions
+    //2. step(dt)
+    //for adaptive time stepping, we need a modified loop where we cut the
+    //ATS loop right after the first instance of line 4. The first step
+    //performs the ATS loop after the first instance of line 4 for the PRIOR
+    //step, and then it performs the first instance up to line 4.
+    //1. valid_time <- -lastdt, timestep <- lastdt, desired_time = 0
+    //2. while(true)
+    //3.   detectcollisions()
+    //4.   if(rollback) 
+    //5.     load_state(last)
+    //6.     timestep *= 0.5
+    //7.   else
+    //8.     valid_time += timestep
+    //9.     timestep = desired_time - valid_time
+    //10.    last <- save_state()
+    //11.  if(valid_time >= desired_time) break
+    //11.  step(timestep)
+    //12. //last <- save_state() can skip this step since it was saved on
+    //    //line 10
+    //13. step(dt)
+    //14. lastdt = dt
+	if(lastStateTimestep > 0) {
+		timestep=lastStateTimestep;
+		Real validTime = -lastStateTimestep, desiredTime = 0;
+		bool didRollback = false;
+		while(true) {
+		  gContacts.clear();
+		  DetectCollisions();
+	#if DO_TIMING
+		  collisionTime += timer.ElapsedTime();
+		  timer.Reset();
+	#endif // DO_TIMING
+		  //determine whether to rollback
+		  bool rollback = false;
+		  for(list<ODEContactResult>::iterator i=gContacts.begin();i!=gContacts.end();i++)
+		if(i->meshOverlap) { 
+		  rollback = true;
+		  break;
+		}
+		  //TODO: if two bodies had overlap on the prior timestep, don't
+		  //keep rolling back
+		  if(rollback && !lastState.IsOpen()) {
+		printf("ODESimulation: Rollback rejected because last state not saved\n");
+		rollback = false;
+		  }
+		  if(rollback && timestep < 1e-6) {
+		printf("ODESimulation: Rollback rejected because timestep %g below minimum threshold\n");
+		rollback = false;
+		  }
+	
+		  if(rollback) {
+		printf("ODESimulation: Rolling back, time step halved to %g\n",timestep*0.5);
+		didRollback = true;
+		lastState.Seek(0,FILESEEKSTART);
+		ReadState(lastState);
+		timestep *= 0.5;
+		  }
+		  else {
+		//accept step
+		lastState.Close();
+		bool res = lastState.OpenData(FILEREAD | FILEWRITE);
+		Assert(res);
+		Assert(lastState.IsOpen());
+		WriteState(lastState);
+
+		validTime += timestep;
+		timestep = desiredTime-validTime;
+		  }
+		  if(validTime >= desiredTime) break;
+		  StepDynamics(timestep);
+		}
+		if(didRollback) {
+		  printf("ODESimulation: Adaptive time step done.\n");
+		}
+	}
+	else {
+		//first step
+		timestep=dt;
+		gContacts.clear();
+		DetectCollisions();
+	#if DO_TIMING
+		collisionTime += timer.ElapsedTime();
+		timer.Reset();
+	#endif // DO_TIMING
+		//determine whether to rollback
+		bool rollback = false;
+		for(list<ODEContactResult>::iterator i=gContacts.begin();i!=gContacts.end();i++)
+		  if(i->meshOverlap) { 
+		  rollback = true;
+		  break;
+		}
+		if(rollback) {
+			printf("ODESimulation: Warning, initial state has underlying meshes overlapping\n");
+		}
+		else {
+			//save state
+			lastState.Close();
+			bool res = lastState.OpenData(FILEREAD | FILEWRITE);
+			Assert(res);
+			Assert(lastState.IsOpen());
+			WriteState(lastState);
+		}
+	}
+    lastStateTimestep = dt;
+    StepDynamics(dt);
+  }
+  else {
+    gContacts.clear();
+    
+    timestep=dt;
+    DetectCollisions();
 
   //printf("  %d contacts detected\n",gContacts.size());
 
 #if DO_TIMING
-  collisionTime = timer.ElapsedTime();
-  timer.Reset();
+    collisionTime = timer.ElapsedTime();
+    timer.Reset();
 #endif // DO_TIMING
 
-  StepDynamics(dt);
+    StepDynamics(dt);
 
 #if DO_TIMING
-  stepTime = timer.ElapsedTime();
-  timer.Reset();
+    stepTime = timer.ElapsedTime();
+    timer.Reset();
 #endif // DO_TIMING
+  }
 
+  //copy out feedback forces
   for(map<pair<ODEObjectID,ODEObjectID>,ODEContactList>::iterator i=contactList.begin();i!=contactList.end();i++) {  
     ODEContactList& cl=i->second;
     cl.forces.clear();
@@ -286,6 +423,7 @@ void ODESimulator::Step(Real dt)
       Assert(k >= 0 && k < (int)gContacts.size());
       list<ODEContactResult>::iterator cres=gContacts.begin();
       advance(cres,k);
+      Assert(cres != gContacts.end());
       Vector3 temp;
       for(size_t i=0;i<cres->feedback.size();i++) {
 	CopyVector(temp,cres->feedback[i].f1);
@@ -678,6 +816,7 @@ void collisionCallback(void *data, dGeomID o1, dGeomID o2)
   if( b1 && b2 && !dBodyIsEnabled(b1) && !dBodyIsEnabled(b2) )
    return; // both b1 and b2 are disabled
   
+  ClearCustomGeometryCollisionReliableFlag();
   int num = dCollide (o1,o2,max_contacts,gContactTemp,sizeof(dContactGeom));
   vector<dContactGeom> vcontact(num);
   int numOk = 0;
@@ -706,6 +845,7 @@ void collisionCallback(void *data, dGeomID o1, dGeomID o2)
     gContacts.back().o1 = o1;
     gContacts.back().o2 = o2;
     swap(gContacts.back().contacts,vcontact);
+    gContacts.back().meshOverlap = !GetCustomGeometryCollisionReliableFlag();
   }
 }
 
@@ -809,7 +949,7 @@ void ProcessContacts(list<ODEContactResult>::iterator start,list<ODEContactResul
 void ODESimulator::ClearCollisions()
 {
   dJointGroupEmpty(contactGroupID);
-  contactList.clear();
+  ClearContactFeedback();
 }
 
 void ODESimulator::GetSurfaceParameters(const ODEObjectID& a,const ODEObjectID& b,dSurfaceParameters& surface) const
@@ -857,8 +997,9 @@ void ODESimulator::GetSurfaceParameters(const ODEObjectID& a,const ODEObjectID& 
   surface.mu *= 0.707;
   surface.bounce = 0.5*(propa.kRestitution+propb.kRestitution);
   surface.bounce_vel = 1e-2;
-  if(surface.bounce != 0)
+  if(surface.bounce != 0) {
     surface.mode |= dContactBounce;
+  }
 }
 
 void ODESimulator::SetupContactResponse(const ODEObjectID& a,const ODEObjectID& b,int feedbackIndex,ODEContactResult& c)
@@ -937,13 +1078,10 @@ void ODESimulator::DetectCollisions()
   Timer timer;
 #endif //DO_TIMING
 
-  dJointGroupEmpty(contactGroupID);
   //clear feedback structure
-  for(map<pair<ODEObjectID,ODEObjectID>,ODEContactList>::iterator i=contactList.begin();i!=contactList.end();i++) {
-    i->second.points.clear();
-    i->second.forces.clear();
-    i->second.feedbackIndices.clear();
-  }
+  ClearContactFeedback();
+  //clear global ODE collider feedback stuff
+  dJointGroupEmpty(contactGroupID);
   gContacts.clear();
 
   pair<ODEObjectID,ODEObjectID> cindex;
@@ -1324,8 +1462,17 @@ bool ODESimulator::ReadState(File& f)
       return false;
     }
   }
-  contactList.clear();
+  ClearContactFeedback();
   return true;
+}
+
+void ODESimulator::ClearContactFeedback()
+{
+  for(map<pair<ODEObjectID,ODEObjectID>,ODEContactList>::iterator i=contactList.begin();i!=contactList.end();i++) {
+    i->second.points.clear();
+    i->second.forces.clear();
+    i->second.feedbackIndices.clear();
+  }
 }
 
 bool ODESimulator::WriteState(File& f) const

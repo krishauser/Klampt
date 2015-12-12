@@ -38,7 +38,7 @@ class GLProgram:
 
     def initWindow(self):
         """ Open a window and initialize """
-        glutInitDisplayMode (GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH)
+        glutInitDisplayMode (GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH | GLUT_MULTISAMPLE)
 
         x = 0
         y = 0
@@ -65,6 +65,8 @@ class GLProgram:
         """Starts the main loop"""
         # Initialize Glut
         glutInit ([])
+        if bool(glutSetOption):
+           glutSetOption(GLUT_ACTION_ON_WINDOW_CLOSE,GLUT_ACTION_GLUTMAINLOOP_RETURNS)
         self.initWindow()
         glutMainLoop ()
 
@@ -72,6 +74,7 @@ class GLProgram:
         """Called after GLUT is initialized, but before main loop.
         May be overridden."""
         glutPostRedisplay()
+        glEnable(GL_MULTISAMPLE)
         pass
 
     def refresh(self):
@@ -255,7 +258,7 @@ class GLNavigationProgram(GLProgram):
         pack = sum((list(c) for c in cols),[])
         glMultMatrixf(pack)
 
-        # Light source
+        # Default light source
         glLightfv(GL_LIGHT0,GL_POSITION,[0,-1,2,0])
         glLightfv(GL_LIGHT0,GL_DIFFUSE,[1,1,1,1])
         glLightfv(GL_LIGHT0,GL_SPECULAR,[1,1,1,1])
@@ -297,7 +300,7 @@ class GLRealtimeProgram(GLNavigationProgram):
     """A GLNavigationProgram that refreshes the screen at a given frame rate.
 
     Attributes:
-        - ttotal: total elapsed time
+        - ttotal: total elapsed time assuming a constant frame rate
         - fps: the frame rate in Hz
         - dt: 1.0/fps
         - counter: a frame counter
@@ -338,10 +341,10 @@ class GLPluginProgram(GLRealtimeProgram):
         self.iface = None
     def setPlugin(self,iface):
         if self.iface:
-            self.iface.widget = None
+            self.iface.window = None
         self.iface = iface
         if iface:
-            iface.widget = self
+            iface.window = self
             iface.reshapefunc(self.width,self.height)
         self.refresh()
     def initialize(self):

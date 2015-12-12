@@ -63,10 +63,13 @@ bool XmlODESettings::GetSettings(ODESimulator& sim)
     int maxContacts;
     if(c->QueryValueAttribute("maxContacts",&maxContacts)==TIXML_SUCCESS)
       sim.GetSettings().maxContacts = maxContacts;
-    int boundaryLayer,rigidObjectCollisions,robotSelfCollisions,robotRobotCollisions;
+    int boundaryLayer,adaptiveTimeStepping,rigidObjectCollisions,robotSelfCollisions,robotRobotCollisions;
     if(c->QueryValueAttribute("boundaryLayer",&boundaryLayer)==TIXML_SUCCESS) {
-      printf("XML simulator: warning, boundary layer settings don't have an effect\n");
+      printf("XML simulator: warning, boundary layer settings don't have an effect after world is loaded\n");
       sim.GetSettings().boundaryLayerCollisions = boundaryLayer;
+    }
+    if(c->QueryValueAttribute("adaptiveTimeStepping",&adaptiveTimeStepping)==TIXML_SUCCESS) {
+      sim.GetSettings().adaptiveTimeStepping = adaptiveTimeStepping;
     }
     if(c->QueryValueAttribute("rigidObjectCollisions",&rigidObjectCollisions)==TIXML_SUCCESS)
       sim.GetSettings().rigidObjectCollisions = rigidObjectCollisions;

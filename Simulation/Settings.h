@@ -22,5 +22,6 @@ const static bool gBoundaryLayerCollisionsEnabled = true;
 const static bool gRigidObjectCollisionsEnabled = true;
 const static bool gRobotSelfCollisionsEnabled = false;
 const static bool gRobotRobotCollisionsEnabled = true;
+const static bool gAdaptiveTimeStepping = true;
 
 #endif

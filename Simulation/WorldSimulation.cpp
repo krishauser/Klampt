@@ -327,7 +327,7 @@ void WorldSimulation::Advance(Real dt)
   for(ContactFeedbackMap::iterator i=contactFeedback.begin();i!=contactFeedback.end();i++) {
     Reset(i->second);
   }
-  Timer timer;
+  //Timer timer;
   Real timeLeft=dt;
   Real accumTime=0;
   int numSteps = 0;

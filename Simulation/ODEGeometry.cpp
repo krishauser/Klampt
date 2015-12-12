@@ -1,6 +1,7 @@
 #include "ODEGeometry.h"
 #include "ODECommon.h"
 #include "ODECustomGeometry.h"
+#include <Timer.h>
 #include <meshing/TriMeshOperators.h>
 #include <meshing/VolumeGrid.h>
 #include <ode/ode.h>
@@ -35,6 +36,10 @@ void ODEGeometry::Create(AnyCollisionGeometry3D* geom,dSpaceID space,Vector3 off
 {
   //printf("ODEGeometry: Collision detection method: %s\n",(useCustomMesh?"custom":"GIMPACT"));
   Clear();
+  Timer timer;
+  geom->InitCollisionData();
+  double t = timer.ElapsedTime();
+  if(t > 0.1) printf("ODEGeometry: initializing collision data took time %gs\n",t);
   if(!useCustomMesh) {
     Assert(geom->type == AnyGeometry3D::TriangleMesh);
     const TriMesh& mesh = *AnyCast<TriMesh>(&geom->data);
@@ -213,7 +218,7 @@ AnyCollisionGeometry3D* _Preshrink(AnyCollisionGeometry3D* geom,Real padding) {
       }
       AnyCollisionGeometry3D* res = new AnyCollisionGeometry3D(mnew);
       res->margin = geom->margin;
-      res->InitCollisions();
+      res->InitCollisionData();
       return res;
     }
     break;

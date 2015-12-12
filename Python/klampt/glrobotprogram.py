@@ -2,6 +2,7 @@ from OpenGL.GL import *
 from robotsim import Simulator,WidgetSet,RobotPoser
 from glprogram import *
 import robotcollide
+import simlog
 import sys
 
 class GLSimulationProgram(GLRealtimeProgram):
@@ -15,9 +16,12 @@ class GLSimulationProgram(GLRealtimeProgram):
     - commanded_config_color: an RGBA tuple defining the color of the
       commanded configuration, or None if it should not be drawn.
     - verbose: set to 1 if you wish to get printouts of the event loop
+    - logging, logger: set to True and the logger if you wish to save a
+      CSV log file to disk. Easier to use beginLogging(), pauseLogging(),
+      and endLogging().
 
     Subclasses should overload self.control_loop() and put whatever control
-    loop you desire inside.  Note: should interact with
+    loop you desire inside.  Note: in this loop you should interact with
     self.sim.controller(0), not self.world.robot(0).  self.world is simply
     a model and does not have a direct relation to the simulation.
     """
@@ -35,7 +39,6 @@ class GLSimulationProgram(GLRealtimeProgram):
         self.simulate = False
         self.commanded_config_color = [0,1,0,0.5]
 
-
         #turn this on to draw contact points
         self.drawContacts = False
 
@@ -45,6 +48,19 @@ class GLSimulationProgram(GLRealtimeProgram):
         self.screenshotCount = 0
         self.verbose = 0
 
+        #turn this on to save log to disk
+        self.logging = False
+        self.logger = None
+
+    def beginLogging(self,state_fn="simulation_state.csv",contact_fn="simulation_contact.csv"):
+        self.logging = True
+        self.logger = SimLogger(self.sim,state_fn,contact_fn)
+    def endLogging(self):
+        self.logging = False
+        self.logger = None
+    def pauseLogging(self,paused=True):
+        self.logging=not paused
+        
     def display(self):
         #Put your display handler here
         #the current example draws the simulated world in grey and the
@@ -59,9 +75,11 @@ class GLSimulationProgram(GLRealtimeProgram):
             glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,self.commanded_config_color)
             for i in xrange(self.world.numRobots()):
                 r = self.world.robot(i)
-                q = self.sim.controller(i).getCommandedConfig()
-                r.setConfig(q)
-                r.drawGL(False)
+                mode = self.sim.controller(i).getControlType()
+                if mode == "PID":
+                    q = self.sim.controller(i).getCommandedConfig()
+                    r.setConfig(q)
+                    r.drawGL(False)
             glDisable(GL_BLEND)
 
         #draw contacts, if enabled
@@ -97,16 +115,21 @@ class GLSimulationProgram(GLRealtimeProgram):
     def idle(self):
         #Put your idle loop handler here
         #the current example simulates with the current time step self.dt
-        if self.simulate and self.saveScreenshots:
-            #The following line saves movies on simulation time
-            if self.sim.getTime() >= self.nextScreenshotTime:
-            #The following line saves movies on wall clock time
-            #if self.ttotal >= self.nextScreenshotTime:
-                self.save_screen("image%04d.ppm"%(self.screenshotCount,))
-            self.screenshotCount += 1
-            self.nextScreenshotTime += 1.0/30.0;
-
         if self.simulate:
+            #Handle screenshots
+            if self.saveScreenshots:
+                #The following line saves movies on simulation time
+                if self.sim.getTime() >= self.nextScreenshotTime:
+                #The following line saves movies on wall clock time
+                #if self.ttotal >= self.nextScreenshotTime:
+                    self.save_screen("image%04d.ppm"%(self.screenshotCount,))
+                self.screenshotCount += 1
+                self.nextScreenshotTime += 1.0/30.0;
+
+            #Handle logging
+            if self.logger: self.logger.saveStep()
+
+            #Advance simulation
             self.control_loop()
             self.sim.simulate(self.dt)
             self.refresh()
@@ -136,6 +159,14 @@ class GLSimulationProgram(GLRealtimeProgram):
         elif c == 'm':
             self.saveScreenshots = not self.saveScreenshots
             print "Movie mode:",self.saveScreenshots
+        elif c == 'l':
+            if self.logging:
+                self.pauseLogging()
+            else:
+                if self.logger==None:
+                    self.beginLogging()
+                else:
+                    self.pauseLogging(False)
         elif c == 'c':
             self.drawContacts = not self.drawContacts
             if self.drawContacts:
@@ -175,6 +206,7 @@ class GLWidgetProgram(GLRealtimeProgram):
 
     def display(self):
         #Put your display handler here
+        """
         #the next few lines draw everything but the robot
         for i in xrange(self.world.numTerrains()):
             self.world.terrain(i).drawGL()
@@ -182,7 +214,10 @@ class GLWidgetProgram(GLRealtimeProgram):
             self.world.rigidObject(i).drawGL()
         for i in xrange(1,self.world.numRobots()):
             self.world.robot(i).drawGL()
-        #this line will draw the robot
+        #TEMP: the widget master will draw the robot if a RobotPoseWidget
+        #is added... but what if there is no such widget?
+        """
+        self.world.drawGL()
         self.widgetMaster.drawGL(self.viewport())
 
     def idle(self):

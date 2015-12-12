@@ -1543,7 +1543,7 @@ bool OrXmlRobot::GetFixedBaseRobot(Robot& robot) {
 	}
 	robot.selfCollisions.resize(nBody, nBody, NULL);
 	robot.envCollisions.resize(nBody, NULL);
-	robot.InitCollisions();
+	//robot.InitCollisions();
 	robot.InitAllSelfCollisions();
 
 	return true;

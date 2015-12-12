@@ -596,7 +596,7 @@ void PolynomialMotionQueue::Append(const ParabolicRamp::DynamicPath& _path)
 
 void PolynomialMotionQueue::AppendLinear(const Config& config,Real dt)
 {
-  if(path.elements.empty()) FatalError("PolynomialMotionQueue::AppendLinear: motion queue is uninitialized\n");
+  if(path.elements.empty()) FatalError("PolynomialMotionQueue::AppendLinear: motion queue is uninitialized.  Wait until after the control loop or call SetMilestone() first\n");
   if(dt == 0 && config != Endpoint()) {
     //want a continuous jump?
     printf("PolynomialMotionQueue::AppendLinear: Warning, discontinuous jump requested\n");
@@ -609,7 +609,7 @@ void PolynomialMotionQueue::AppendLinear(const Config& config,Real dt)
 
 void PolynomialMotionQueue::AppendCubic(const Config& x,const Vector& v,Real dt)
 {
-  if(path.elements.empty()) FatalError("PolynomialMotionQueue::AppendCubic: motion queue is uninitialized\n");
+  if(path.elements.empty()) FatalError("PolynomialMotionQueue::AppendCubic: motion queue is uninitialized.  Wait until after the control loop or call SetMilestone() first\n");
   if(dt == 0) {
     if(x != Endpoint()) {
       //want a continuous jump?
@@ -645,7 +645,7 @@ void PolynomialMotionQueue::AppendRamp(const Config& x)
 
 void PolynomialMotionQueue::AppendRamp(const Config& x,const Vector& v)
 {
-  if(path.elements.empty()) FatalError("PolynomialMotionQueue::AppendRamp: motion queue is uninitialized\n");
+  if(path.elements.empty()) FatalError("PolynomialMotionQueue::AppendRamp: motion queue is uninitialized.  Wait until after the control loop or call SetMilestone() first\n");
   if(accMax.empty()) 
     FatalError("Cannot append ramp without acceleration limits");
   if(accMax.size() != path.elements.size()) 
@@ -703,7 +703,7 @@ void PolynomialMotionQueue::AppendRamp(const Config& x,const Vector& v)
 
 void PolynomialMotionQueue::AppendLinearRamp(const Config& x)
 {
-  if(path.elements.empty()) FatalError("PolynomialMotionQueue::AppendLinearRamp: motion queue is uninitialized\n");
+  if(path.elements.empty()) FatalError("PolynomialMotionQueue::AppendLinearRamp: motion queue is uninitialized.  Wait until after the control loop or call SetMilestone() first\n");
   if(accMax.empty()) 
     FatalError("Cannot append ramp without acceleration limits");
   if(accMax.size() != path.elements.size()) 
@@ -927,6 +927,10 @@ bool PolynomialPathController::SendCommand(const string& name,const string& str)
       fprintf(stderr,"append_tq: warning, append time %g is less than path's endtime %g\n",t,path.EndTime());
       return false;
     }
+    if(path.elements.empty()) {
+      fprintf(stderr,"append_tq: warning, the motion queue has not been set up yet.  Call any of the setX commands first or wait until the first control loop has passed.\n");    
+      return false;
+    }
     AppendLinear(q,t-path.EndTime());
     return true;
   }
@@ -945,12 +949,20 @@ bool PolynomialPathController::SendCommand(const string& name,const string& str)
   else if(name == "append_q") {
     ss>>q;
     if(!ss) return false;
+    if(path.elements.empty()) {
+      fprintf(stderr,"append_q: warning, the motion queue has not been set up yet.  Call any of the setX commands first or wait until the first control loop has passed.\n");    
+      return false;
+    }
     AppendRamp(q);
     return true;
   }
   else if(name == "append_q_linear") {
     ss>>q;
     if(!ss) return false;
+    if(path.elements.empty()) {
+      fprintf(stderr,"append_q_linear: warning, the motion queue has not been set up yet.  Call any of the setX commands first or wait until the first control loop has passed.\n");    
+      return false;
+    }
     AppendLinearRamp(q);
     return true;
   }
@@ -969,6 +981,10 @@ bool PolynomialPathController::SendCommand(const string& name,const string& str)
   else if(name == "append_qv") {
     ss>>q>>v;
     if(!ss) return false;
+    if(path.elements.empty()) {
+      fprintf(stderr,"append_qv: warning, the motion queue has not been set up yet.  Call any of the setX commands first or wait until the first control loop has passed.\n");    
+      return false;
+    }
     AppendRamp(q,v);
     return true;
   }
@@ -989,7 +1005,14 @@ bool PolynomialPathController::SendCommand(const string& name,const string& str)
   else if(name == "append_tqv") {
     ss>>t>>q>>v;
     if(!ss) return false;
-    Assert(t >= path.EndTime());
+    if(path.elements.empty()) {
+      fprintf(stderr,"append_tqv: warning, the motion queue has not been set up yet.  Call any of the setX commands first or wait until the first control loop has passed.\n");    
+      return false;
+    }
+    if(t < path.EndTime()) {
+      fprintf(stderr,"append_tqv: requested time %g is not after end of existing path %g.\n",t,path.EndTime());    
+      return false;
+    }
     AppendCubic(q,v,t-path.EndTime());
     return true;
   }

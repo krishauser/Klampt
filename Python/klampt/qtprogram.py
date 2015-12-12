@@ -50,6 +50,7 @@ class GLProgram(QGLWidget):
         - clearColor: the RGBA floating point values of the background color.
     """
     def __init__(self,name="OpenGL Program"):
+        QGLWidget.__init__(self)
         self.name = name
         self.width = 640
         self.height = 480
@@ -138,7 +139,7 @@ class GLProgram(QGLWidget):
         self.lastx,self.lasty = x,y
         return self.mousefunc(toGlutButton(e.button()),GLUT_UP,x,y)
     def keyPressEvent(self,e):
-        c = e.text()
+        c = str(e.text())
         if len(c)==0: return #some empty press, like shift/control
         return self.keyboardfunc(c,self.lastx,self.lasty)
     def keyReleaseEvent(self,e):
@@ -167,7 +168,7 @@ class GLProgram(QGLWidget):
         """Called on special character keypress down.  May be overridden"""
         pass
     def specialupfunc(self,c,x,y):
-        """Called on special character keypress up up (if your system allows
+        """Called on special character keypress up (if your system allows
         it).  May be overridden"""
         pass
     def motionfunc(self,x,y,dx,dy):
@@ -401,10 +402,10 @@ class GLPluginProgram(GLRealtimeProgram):
         self.iface = None
     def setPlugin(self,iface):
         if self.iface:
-            self.iface.widget = None
+            self.iface.window = None
         self.iface = iface
         if iface:
-            iface.widget = self
+            iface.window = self
             iface.reshapefunc(self.width,self.height)
         self.refresh()
     def initialize(self):

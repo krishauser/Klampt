@@ -19,7 +19,7 @@ struct RigidObject;
 struct Environment;
 struct Robot;
 
-/** @brief Stores mass information for a rigid body. */
+/** @brief Stores mass information for a rigid body or robot link. */
 struct Mass
 {
   void setMass(double _mass) { mass=_mass; }
@@ -34,6 +34,9 @@ struct Mass
   std::vector<double> inertia;  ///<local inertia matrix, size 3 or 9
 };
 
+/** @brief Stores contact parameters for an entity.  Currently only
+ * used for simulation, but could be used for contact mechanics in the
+ * future. */
 struct ContactParameters
 {
   double kFriction;
@@ -42,6 +45,8 @@ struct ContactParameters
 };
 
 /** @brief A reference to a link of a RobotModel.
+ *
+ * 
  */
 class RobotModelLink
 {
@@ -172,21 +177,25 @@ class RobotModel
   ///Returns the ID of the robot in its world (Note: not the same as the robot index)
   int getID();
   const char* getName();
+  ///Returns the number of links = number of DOF's.
   int numLinks();
   ///Returns a reference to the indexed link
   RobotModelLink link(int index);
   ///Returns a reference to the named link
   RobotModelLink link(const char* name);
-  ///Old-style: will be deprecated
+  ///Old-style: will be deprecated.  Returns a reference to the indexed link.
   RobotModelLink getLink(int index);
-  ///Old-style: will be deprecated
+  ///Old-style: will be deprecated.  Returns a reference to the named link.
   RobotModelLink getLink(const char* name);
+  ///Returns the number of drivers.
   int numDrivers();
+  ///Returns a reference to the indexed driver.
   RobotModelDriver driver(int index);
+  ///Returns a reference to the named driver.
   RobotModelDriver driver(const char* name);
-  ///Old-style: will be deprecated
+  ///Old-style: will be deprecated. Returns a reference to the indexed driver.
   RobotModelDriver getDriver(int index);
-  ///Old-style: will be deprecated
+  ///Old-style: will be deprecated. Returns a reference to a RobotModelDriver.
   RobotModelDriver getDriver(const char* name);
 
   //kinematic and dynamic properties
@@ -202,6 +211,14 @@ class RobotModel
   void setAccelerationLimits(const std::vector<double>& amax);
   void getTorqueLimits(std::vector<double>& out);
   void setTorqueLimits(const std::vector<double>& tmax);
+  ///Sets a single DOF's position.  Note: if you are setting several joints 
+  ///at once, use setConfig because this function computes forward kinematics
+  ///every time.
+  void setDOFPosition(int i,double qi);
+  void setDOFPosition(const char* name,double qi);
+  ///Returns a single DOF's position
+  double getDOFPosition(int i);
+  double getDOFPosition(const char* name);
 
   //dynamics functions
   ///Returns the 3D center of mass at the current config
@@ -214,13 +231,19 @@ class RobotModel
   void getMassMatrixInv(std::vector<std::vector<double> >& out);
   ///Returns the Coriolis force matrix C(q,dq) for current config and velocity
   void getCoriolisForceMatrix(std::vector<std::vector<double> >& out);
-  ///Returns the Coriolis forces C(q,dq)*dq for current config and velocity (faster than computing matrix and doing product)
+  ///Returns the Coriolis forces C(q,dq)*dq for current config and velocity
+  ///(faster than computing matrix and doing product). ("Forces" is somewhat
+  ///of a misnomer; the result is a joint torque vector)
   void getCoriolisForces(std::vector<double>& out);
-  ///Returns the gravity force vector G(q) for the given workspace gravity vector g (usually (0,0,-9.8))
+  ///Returns the generalized gravity vector G(q) for the given workspace
+  ///gravity vector g (usually (0,0,-9.8)).  ("Forces" is somewhat of a
+  ///misnomer; the result is a joint torque vector)
   void getGravityForces(const double g[3],std::vector<double>& out);
-  ///Computes the inverse dynamics (using Recursive Newton Euler solver)
+  ///Computes the inverse dynamics (using Recursive Newton Euler solver).
+  ///Note: does not include gravity term G(q)
   void torquesFromAccel(const std::vector<double>& ddq,std::vector<double>& out);
   ///Computes the foward dynamics (using Recursive Newton Euler solver)
+  ///Note: does not include gravity term G(q)
   void accelFromTorques(const std::vector<double>& t,std::vector<double>& out);
 
   //interpolation functions
@@ -313,7 +336,13 @@ class TerrainModel
 class WorldModel
 {
  public:
+  ///Creates a WorldModel.  With no arguments, creates a new world.  With
+  ///an integer or another WorldModel instance, creates a reference to an
+  ///existing world.  If passed a pointer to a C++ RobotWorld structure,
+  ///a reference is returned. (This is used pretty much only when
+  ///interfacing C++ and Python code)
   WorldModel();
+  WorldModel(void* ptrRobotWorld);
   WorldModel(int index);
   WorldModel(const WorldModel& w);
   ~WorldModel();
@@ -348,6 +377,16 @@ class WorldModel
   ///Loads some element from a file, automatically detecting its type.  Meshes are interpreted
   ///as terrains.  The ID is returned, or -1 if loading failed.
   int loadElement(const char* fn);
+  ///Removes a robot.  It must be in this world or an exception is raised.
+  ///IMPORTANT: all other references to robots will be invalidated.
+  void remove(const RobotModel& robot);
+  ///Removes a rigid object.  It must be in this world or an exception is
+  ///raised.
+  ///IMPORTANT: all other references to rigid objects will be invalidated.
+  void remove(const RigidObjectModel& object);
+  ///Removes a terrain.  It must be in this world or an exception is raised.
+  ///IMPORTANT: all other references to terrains will be invalidated.
+  void remove(const TerrainModel& terrain);
   ///Retrieves a name for a given element ID
   std::string getName(int id);
   ///Retrieves a geometry for a given element ID
@@ -360,6 +399,14 @@ class WorldModel
   ///disk, and no geometry / visualization / collision detection structures will be
   ///loaded.  Useful for quick scripts that just use kinematics / dynamics of a robot.
   void enableGeometryLoading(bool enabled);
+  ///If collision detection is set to true, then collision acceleration data
+  ///structures will be automatically initialized, with debugging information.
+  ///Useful for scripts that do planning and for which collision
+  ///initialization may take a long time.  Note that even when this flag
+  ///is off, the collision acceleration data structures will indeed be
+  ///initialized whenever geometry collision, distance, or ray-casting
+  ///routines are called.
+  void enableInitCollisions(bool enabled);
 
   //WARNING: do not modify this member directly
   int index;

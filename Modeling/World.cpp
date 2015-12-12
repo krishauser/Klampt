@@ -240,6 +240,16 @@ void RobotWorld::SetTransform(int id,const RigidTransform& T)
   FatalError("SetTransform: Invalid ID: %d\n",id);
 }
 
+void RobotWorld::InitCollisions()
+{
+  for(size_t j=0;j<robots.size();j++) 
+    robots[j].robot->InitCollisions();
+  for(size_t j=0;j<rigidObjects.size();j++) 
+    rigidObjects[j].object->InitCollisions();
+  for(size_t j=0;j<terrains.size();j++) 
+    terrains[j].terrain->InitCollisions();
+}
+
 void RobotWorld::UpdateGeometry()
 {
   for(size_t i=0;i<robots.size();i++) {
@@ -277,6 +287,7 @@ void RobotWorld::DrawGL()
 int RobotWorld::LoadRobot(const string& fn)
 {
   Robot* robot = new Robot;
+  printf("RobotWorld::LoadRobot: %s\n",fn.c_str());
   if(!robot->Load(fn.c_str())) {
     delete robot;
     return -1;
@@ -441,6 +452,13 @@ ViewRigidObject* RobotWorld::GetRigidObjectView(const string& name)
 
 RobotInfo* RobotWorld::ClickRobot(const Ray3D& r,int& body,Vector3& localpt)
 {
+  //doing it this way rather than dynamic initialization gives better 
+  //debug printing info
+  for(size_t j=0;j<robots.size();j++) {
+    Robot* robot = robots[j].robot;
+    robot->InitCollisions();
+  }
+
   RobotInfo* closestRobot=NULL;
   Real closestDist = Inf;
   Vector3 closestPoint;
@@ -470,6 +488,12 @@ RobotInfo* RobotWorld::ClickRobot(const Ray3D& r,int& body,Vector3& localpt)
 
 RigidObjectInfo* RobotWorld::ClickObject(const Ray3D& r,Vector3& localpt)
 {
+  //doing it this way rather than dynamic initialization gives better 
+  //debug printing info
+  for(size_t j=0;j<rigidObjects.size();j++) {
+    rigidObjects[j].object->InitCollisions();
+  }
+
   RigidObjectInfo* closest=NULL;
   Real closestDist = Inf;
   Vector3 closestPoint;

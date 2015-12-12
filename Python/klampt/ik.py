@@ -134,7 +134,11 @@ def objective(body,ref=None,local=None,world=None,R=None,t=None):
 
 def fixed_objective(link,ref=None,local=None,world=None):
     """Convenience function for fixing the given link at the current position
-    in space.  If local and world are not provided, the entire"""
+    in space.  If local and world are not provided, the entire link is
+    constrained.  If only local is provided, these points are fixed
+    to their current positions in space.  If only world is provided,
+    the points on the link with the given world position are constrained in
+    place."""
     refcoords = ref.getTransform() if ref != None else se3.identity()
     Tw = link.getTransform()
     Trel = se3.mul(se3.inv(refcoords),Tw)
@@ -178,7 +182,11 @@ def solver(objectives):
         robs = dict()
         for obj in objectives:
             if isinstance(obj,IKObjective):
-                robs.getdefault(obj.robot,[]).append(obj)
+                if not hasattr(obj,'robot'):
+                    raise ValueError("IKObjective objects must have 'robot' member for use in ik.solver. Either set this manually or use the ik.objective function")
+                robot = obj.robot
+                key = (robot.getName(),robot.getID())
+                robs.setdefault(key,[robot,[]])[1].append(obj)
             elif isinstance(obj,GeneralizedIKObjective):
                 generalized.append(obj)
             else:
@@ -193,13 +201,13 @@ def solver(objectives):
             s = GeneralizedIKSolver(world)
             for obj in generalized:
                 s.add(obj)
-            for (r,objs) in robs.iteritems():
+            for (key,(r,objs)) in robs.iteritems():
                 for obj in objs:
                     s.add(GeneralizedIKObjective(r,obj))
             return s
         else:
             res = []
-            for (r,objs) in robs:
+            for key,(r,objs) in robs.iteritems():
                 s = IKSolver(r)
                 for obj in objs:
                     s.add(obj)
@@ -209,6 +217,8 @@ def solver(objectives):
             return res
     else:
         if isinstance(objectives,IKObjective):
+            if not hasattr(objectives,'robot'):
+                raise ValueError("IKObjective object must have 'robot' member for use in ik.solver. Either set this manually or use the ik.objective function")
             s = IKSolver(objectives.robot)
             s.add(objectives)
             return s

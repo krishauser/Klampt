@@ -10,56 +10,8 @@
 #include <ode/contact.h>
 #include <map>
 
-/** @ingroup Simulation
- * @brief An index that identifies some ODE object in the world.
- * Environments, robots, robot bodies, or rigid objects are supported.
- */
-struct ODEObjectID
-{
-  inline ODEObjectID(int _t=-1,int _i=-1,int _b=-1)
-    :type(_t),index(_i),bodyIndex(_b) {}
-  inline void SetEnv(int _index=0) { type = 0; index = _index; }
-  inline void SetRobot(int _index=0) { type = 1; index = _index; bodyIndex = -1; }
-  inline void SetRobotBody(int _index,int _bodyIndex=-1) { type = 1; index = _index; bodyIndex = _bodyIndex; }
-  inline void SetRigidObject(int _index=0) { type = 2; index = _index; }
-  inline bool IsEnv() const { return type == 0; }
-  inline bool IsRobot() const { return type == 1; }
-  inline bool IsRigidObject() const { return type == 2; }
-  inline bool operator == (const ODEObjectID& rhs) const {
-    if(type != rhs.type) return false;
-    if(index != rhs.index) return false;
-    if(type == 1 && bodyIndex!=rhs.bodyIndex) return false;
-    return true;
-  }
-  inline bool operator < (const ODEObjectID& rhs) const {
-    if(type < rhs.type) return true;
-    else if(type > rhs.type) return false;
-    if(index < rhs.index) return true;
-    else if(index > rhs.index) return false;
-    return (bodyIndex<rhs.bodyIndex);
-  }
-
-  int type;       //0: static environment, 1: robot, 2: movable object
-  int index;      //index in world
-  int bodyIndex;  //for robots, this identifies a link
-};
-
-/** @ingroup Simulation
- * @brief A list of contacts between two objects, returned as feedback 
- * from the simulation.
- *
- * Note: are o1 and o2 actually used?
- */
-struct ODEContactList
-{
-  ODEObjectID o1,o2;
-  //the contact points
-  vector<ContactPoint> points;
-  vector<Vector3> forces;
-
-  vector<int> feedbackIndices;           //internally used
-};
-
+struct ODEObjectID;
+struct ODEContactList;
 struct ODEContactResult;
 
 /** @ingroup Simulation
@@ -78,6 +30,7 @@ struct ODESimulatorSettings
   bool rigidObjectCollisions;
   bool robotSelfCollisions;
   bool robotRobotCollisions;
+  bool adaptiveTimeStepping;
 
   //contact detection settings
   int maxContacts;
@@ -137,6 +90,7 @@ class ODESimulator
   void EnableContactFeedback(const ODEObjectID& a,const ODEObjectID& b);
   ODEContactList* GetContactFeedback(const ODEObjectID& a,const ODEObjectID& b);
   void GetContactFeedback(const ODEObjectID& a,vector<ODEContactList*>& contacts);
+  void ClearContactFeedback();
   bool InContact(const ODEObjectID& a) const;
   bool InContact(const ODEObjectID& a,const ODEObjectID& b) const;
   void SetupContactResponse(const ODEObjectID& a,const ODEObjectID& b,int feedbackIndex,ODEContactResult& c);
@@ -155,6 +109,61 @@ class ODESimulator
   map<pair<ODEObjectID,ODEObjectID>,ODEContactList> contactList;
   dJointGroupID contactGroupID;
   Real timestep;
+
+  //for adaptive time stepping
+  File lastState;
+  Real lastStateTimestep;
+};
+
+
+/** @ingroup Simulation
+ * @brief An index that identifies some ODE object in the world.
+ * Environments, robots, robot bodies, or rigid objects are supported.
+ */
+struct ODEObjectID
+{
+  inline ODEObjectID(int _t=-1,int _i=-1,int _b=-1)
+    :type(_t),index(_i),bodyIndex(_b) {}
+  inline void SetEnv(int _index=0) { type = 0; index = _index; }
+  inline void SetRobot(int _index=0) { type = 1; index = _index; bodyIndex = -1; }
+  inline void SetRobotBody(int _index,int _bodyIndex=-1) { type = 1; index = _index; bodyIndex = _bodyIndex; }
+  inline void SetRigidObject(int _index=0) { type = 2; index = _index; }
+  inline bool IsEnv() const { return type == 0; }
+  inline bool IsRobot() const { return type == 1; }
+  inline bool IsRigidObject() const { return type == 2; }
+  inline bool operator == (const ODEObjectID& rhs) const {
+    if(type != rhs.type) return false;
+    if(index != rhs.index) return false;
+    if(type == 1 && bodyIndex!=rhs.bodyIndex) return false;
+    return true;
+  }
+  inline bool operator < (const ODEObjectID& rhs) const {
+    if(type < rhs.type) return true;
+    else if(type > rhs.type) return false;
+    if(index < rhs.index) return true;
+    else if(index > rhs.index) return false;
+    return (bodyIndex<rhs.bodyIndex);
+  }
+
+  int type;       //0: static environment, 1: robot, 2: movable object
+  int index;      //index in world
+  int bodyIndex;  //for robots, this identifies a link
+};
+
+/** @ingroup Simulation
+ * @brief A list of contacts between two objects, returned as feedback 
+ * from the simulation.
+ *
+ * Note: are o1 and o2 actually used?
+ */
+struct ODEContactList
+{
+  ODEObjectID o1,o2;
+  //the contact points
+  vector<ContactPoint> points;
+  vector<Vector3> forces;
+
+  vector<int> feedbackIndices;           //internally used
 };
 
 #endif

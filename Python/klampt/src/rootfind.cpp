@@ -61,6 +61,10 @@ int setVectorField(PyObject* pVFObj) {
 	return 1;
 }
 
+int setFunction(PyObject* pVFObj) {
+  return setVectorField(pVFObj); 
+}
+
 PyObject* PyListFromVector(const Vector& x) {
 	// HACK: gcc doesn't recognize the existence of x.size() (?!)
 	PyObject* ls = PyList_New(x.n);

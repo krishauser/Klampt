@@ -1,4 +1,14 @@
-"""A module to help manage coordinate frames and objects attached to them."""
+"""A module to help manage coordinate frames and objects attached to them.
+Similar to the tf module in ROS.
+
+The coordinates module is set up with a default coordinate manager so that
+if you call coordinates.[X], where [X] is a method of Manager, such as
+setWorldModel(), addPoint(), addFrame(), etc., then the default Manager
+instance gets called.
+
+Power users might create their own Managers, or swap top-level managers
+in/out using setManager().
+"""
 
 import so3,se3,vectorops
 import ik
@@ -514,6 +524,16 @@ def manager():
     """Retrieves the default top-level manager"""
     global _defaultManager
     return _defaultManager
+
+def setManager(manager):
+    """Sets the new top-level manager to a new Manager instance, and
+    returns the old top-level manager."""
+    assert isinstance(manager,Manager),"setManager must be called with a Manager instance"
+    global _defaultManager
+    res = _defaultManager
+    _defaultManager = manager
+    return res
+
 
 destroy = _callfn("destroy")
 setWorldModel = _callfn("setWorldModel")

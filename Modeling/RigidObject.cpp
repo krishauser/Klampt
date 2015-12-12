@@ -1,4 +1,5 @@
 #include "RigidObject.h"
+#include <Timer.h>
 #include "Mass.h"
 #include "robotics/Inertia.h"
 #include <utils/SimpleFile.h>
@@ -103,10 +104,12 @@ bool RigidObject::Load(const char* fn)
       mass = f["mass"][0].AsDouble();
       f.erase("mass");
     }
+    bool hasCOM = false;
     if(f.count("com")==0) { com.setZero();  }
     else {
       if(!f.CheckSize("com",3)) return false;
       if(!f.CheckType("com",PrimitiveValue::Double)) return false;
+      hasCOM = true;
       com.set(f["com"][0].AsDouble(),f["com"][1].AsDouble(),f["com"][2].AsDouble());
       f.erase("com");
     }
@@ -155,19 +158,24 @@ bool RigidObject::Load(const char* fn)
       f.erase("kDamping");
     }
     if(f.count("autoMass")!=0) {
-      SetMassFromGeometry(mass);
+      if(hasCOM) //com specified, compute inertia about given com
+	inertia = Inertia(geometry,com,mass);
+      else
+	SetMassFromGeometry(mass);
       f.erase("autoMass");
     }
     if(!f.empty()) {
       for(map<string,vector<PrimitiveValue> >::const_iterator i=f.entries.begin();i!=f.entries.end();i++)
 	fprintf(stderr,"Unknown entry %s in object file %s\n",i->first.c_str(),fn);
     }
-    geometry.InitCollisions();
+    //TESTING: don't need this with dynamic initialization
+    //geometry.InitCollisionData();
     return true;
   }
   else if(Geometry::AnyGeometry3D::CanLoadExt(ext)) {
     if(!geometry.Load(fn)) return false;
-    geometry.InitCollisions();
+    //TESTING: don't need this with dynamic initialization
+    //geometry.InitCollisionData();
     T.setIdentity();
     mass=1.0;
     com.setZero();
@@ -208,6 +216,15 @@ void RigidObject::SetMassFromBB(Real totalMass)
   mass = totalMass;
   com = 0.5*(bb.bmin+bb.bmax);
   BoxInertiaMatrix(bb.bmax.x-bb.bmin.x,bb.bmax.y-bb.bmin.y,bb.bmax.z-bb.bmin.z,mass,inertia);
+}
+
+void RigidObject::InitCollisions()
+{
+  Timer timer;
+  geometry.InitCollisionData();
+  double t = timer.ElapsedTime();
+  if(t > 0.2) 
+    printf("Initialized rigid object %s collision data structures in time %gs\n",geomFile.c_str(),t);
 }
 
 void RigidObject::UpdateGeometry()

@@ -464,6 +464,7 @@ string IKPlannerCommandInterface::ActivateEvent(bool enabled)
 string RRTCommandInterface::ActivateEvent(bool enabled)
 {
   if(!planner) {
+    planningWorld->InitCollisions();
     cspace = new SingleRobotCSpace(*planningWorld,0,settings);
     
     planner = new RealTimePlanner;
@@ -612,6 +613,7 @@ string MTIKPlannerCommandInterface::ActivateEvent(bool enabled)
 {
   if (!cspace) {
     Assert(planningWorld != NULL);
+    planningWorld->InitCollisions();
     cspace = new SingleRobotCSpace(*planningWorld, 0, settings);
     
     RealTimePlanner* planner = new RealTimePlanner;
@@ -630,6 +632,7 @@ string MTRRTCommandInterface::ActivateEvent(bool enabled)
 {
   if (!cspace) {
     Assert(planningWorld != NULL);
+    planningWorld->InitCollisions();
     cspace = new SingleRobotCSpace(*planningWorld, 0, settings);
     
     //DynamicRRTPlanner* p = new DynamicRRTPlanner;
