@@ -701,6 +701,7 @@ Vector3 WorldSimulation::MeanContactForce(int aid,int bid)
   }
   else {
     ContactFeedbackInfo* info=GetContactFeedback(aid,bid);
+    if(!info) return Vector3(0.0);
     if(aid<bid) return info->meanForce;
     else return info->meanForce;
   }
@@ -756,6 +757,7 @@ Vector3 WorldSimulation::MeanContactTorque(int aid,int bid)
   }
   else {
     ContactFeedbackInfo* info=GetContactFeedback(aid,bid);
+    if(!info) return Vector3(0.0);
     if(aid<bid) return info->meanTorque;
     else return info->meanTorque;
   }
