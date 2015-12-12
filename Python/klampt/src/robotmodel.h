@@ -399,6 +399,14 @@ class WorldModel
   ///disk, and no geometry / visualization / collision detection structures will be
   ///loaded.  Useful for quick scripts that just use kinematics / dynamics of a robot.
   void enableGeometryLoading(bool enabled);
+  ///If collision detection is set to true, then collision acceleration data
+  ///structures will be automatically initialized, with debugging information.
+  ///Useful for scripts that do planning and for which collision
+  ///initialization may take a long time.  Note that even when this flag
+  ///is off, the collision acceleration data structures will indeed be
+  ///initialized whenever geometry collision, distance, or ray-casting
+  ///routines are called.
+  void enableInitCollisions(bool enabled);
 
   //WARNING: do not modify this member directly
   int index;

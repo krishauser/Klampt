@@ -913,8 +913,8 @@ bool Robot::LoadRob(const char* fn) {
 	}
 
 	if (collision.empty()) {
-		InitCollisions();
-		printf("Initialized robot collision data structures in time %gs\n",timer.ElapsedTime());
+	  //TESTING: don't need to do this with dynamic initialization
+	  //InitCollisions();
 	}
 	else {
 		FatalError("So far, no mechanism to select environment collisions");
@@ -1038,6 +1038,23 @@ bool Robot::LoadRob(const char* fn) {
 	if (!CheckValid())
 		return false;
 
+
+	//first mount the geometries, they affect whether a link is included in self collision testing
+	for (size_t i = 0; i < mountLinks.size(); i++) {
+		if (Geometry::AnyGeometry3D::CanLoadExt(FileExtension(mountFiles[i].c_str()))) {
+		  string fn = path + mountFiles[i];
+		  printf("   Mounting geometry file %s\n", mountFiles[i].c_str());
+		  //mount a triangle mesh on top of another triangle mesh
+		  Geometry::AnyGeometry3D geom;
+		  if(!geom.Load(fn.c_str())) {
+		    fprintf(stderr, "   Error loading mount geometry file %s\n",
+			    fn.c_str());
+		    return false;
+		  }
+		  Mount(mountLinks[i], geom, mountT[i]);
+		}
+	}
+
 	//automatically compute mass parameters from geometry
 	if (autoMass) {
 		for (size_t i = 0; i < links.size(); i++) {
@@ -1059,23 +1076,6 @@ bool Robot::LoadRob(const char* fn) {
 			}
 		}
 	}
-
-	//first mount the geometries, they affect whether a link is included in self collision testing
-	for (size_t i = 0; i < mountLinks.size(); i++) {
-		if (Geometry::AnyGeometry3D::CanLoadExt(FileExtension(mountFiles[i].c_str()))) {
-		  string fn = path + mountFiles[i];
-		  printf("   Mounting geometry file %s\n", mountFiles[i].c_str());
-		  //mount a triangle mesh on top of another triangle mesh
-		  Geometry::AnyGeometry3D geom;
-		  if(!geom.Load(fn.c_str())) {
-		    fprintf(stderr, "   Error loading mount geometry file %s\n",
-			    fn.c_str());
-		    return false;
-		  }
-		  Mount(mountLinks[i], geom, mountT[i]);
-		}
-	}
-
 
 	//Initialize self collisions -- pre subchain mounting
 	CleanupSelfCollisions();
@@ -1628,7 +1628,8 @@ void Robot::Mount(int link, const Geometry::AnyGeometry3D& mesh,
 	mergeMeshes[1] = mesh;
 	mergeMeshes[1].Transform(Matrix4(T));
 	geometry[link].Merge(mergeMeshes);
-	geometry[link].InitCollisions();
+	//TESTING: don't need this with dynamic initialization
+	//geometry[link].InitCollisions();
 	//need to reinitialize all self collisions with this mesh
 	
 }
@@ -1671,9 +1672,12 @@ void Robot::Mount(int link, const Robot& subchain, const RigidTransform& T) {
 	ArrayUtils::concat(geomFiles, subchain.geomFiles);
 	for(size_t i=0;i<geometry.size();i++) {
 	  //do we need to re-init collisions?
+	  /*
 	  if(geometry[i].collisionData.empty()) {
+	    //TESTING: don't need to do this with dynamic initialization
 	    geometry[i].InitCollisions();
 	  }
+	  */
 	}
 	ArrayUtils::concat(envCollisions, subchain.envCollisions);
 	concat(selfCollisions, subchain.selfCollisions);
@@ -2703,7 +2707,8 @@ bool Robot::LoadURDF(const char* fn)
 	selfCollisions.resize(links_size, links_size, NULL);
 	envCollisions.resize(links_size, NULL);
 
-	InitCollisions();
+	//TESTING: don't need to do this with dynamic collision initialization
+	//InitCollisions();
 	CleanupSelfCollisions();
 	if (selfCollision.empty()) {
 		InitAllSelfCollisions();

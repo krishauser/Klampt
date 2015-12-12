@@ -40,9 +40,9 @@ struct RobotJointDriver
   Normal: normal 
   Affine: scaling/offset of a single control to multiple outputs
      linkIndices stores the mapping
-  Translation: controls are a direct force applied to the body. 
+  Translation: controls are a direct force applied to the body.  (not implemented yet)
      linkIndices[0] is the "driver" link, linkIndices[1] is the affected link
-  Rotation: controls are a direct moment applied to the body
+  Rotation: controls are a direct moment applied to the body.  (not implemented yet)
      linkIndices[0] is the "driver" link, linkIndices[1] is the affected link
   Custom: in the future will hold more sophisticated mappings
   */

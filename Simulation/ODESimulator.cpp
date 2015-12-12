@@ -997,8 +997,9 @@ void ODESimulator::GetSurfaceParameters(const ODEObjectID& a,const ODEObjectID& 
   surface.mu *= 0.707;
   surface.bounce = 0.5*(propa.kRestitution+propb.kRestitution);
   surface.bounce_vel = 1e-2;
-  if(surface.bounce != 0)
+  if(surface.bounce != 0) {
     surface.mode |= dContactBounce;
+  }
 }
 
 void ODESimulator::SetupContactResponse(const ODEObjectID& a,const ODEObjectID& b,int feedbackIndex,ODEContactResult& c)

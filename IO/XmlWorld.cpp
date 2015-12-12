@@ -185,15 +185,15 @@ bool XmlRigidObject::GetObject(RigidObject& obj)
   }
   TiXmlElement* geom=e->FirstChildElement("geometry");
   if(geom) {
-    const char* fn = geom->Attribute("mesh");
+    const char* fn = geom->Attribute("file");
+    if(!fn)
+      fn = geom->Attribute("mesh");
     if(fn) {
       obj.geomFile = fn;
       string sfn = path + obj.geomFile;
-      if(!obj.geometry.Load(sfn.c_str())) {
-	if(!obj.geometry.Load(fn)) {
-	  fprintf(stderr,"XmlRigidObject: error loading geom %s from both absolute and relative paths\n",sfn.c_str());
-	  return false;
-	}
+      if(!obj.LoadGeometry(sfn.c_str())) {
+        fprintf(stderr,"XmlRigidObject: error loading geometry from %s\n",sfn.c_str());
+        return false;
       }
     }
     Matrix4 xform;
@@ -205,7 +205,8 @@ bool XmlRigidObject::GetObject(RigidObject& obj)
     if(geom->QueryValueAttribute("margin",&temp) == TIXML_SUCCESS) {
       obj.geometry.margin = temp;
     }
-    obj.geometry.InitCollisions();
+    //TESTING: don't need this with dynamic collision initialization
+    //obj.geometry.InitCollisionData();
   }
   if(obj.geometry.Empty()) {
     fprintf(stderr,"XmlRigidObject: element does not contain geometry attribute\n");
@@ -282,7 +283,8 @@ bool XmlTerrain::GetTerrain(Environment& env)
   Matrix4 xform;
   if(ReadTransform(e,xform)) {
     env.geometry.Transform(xform);
-    env.geometry.InitCollisions();
+    ///TESTING: don't need this with dynamic collision initialization
+    //env.geometry.InitCollisionData();
   }
   Real margin;
   if(e->QueryValueAttribute("margin",&margin) == TIXML_SUCCESS) {

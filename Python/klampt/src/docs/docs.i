@@ -740,7 +740,7 @@ PointCloud::numProperties() const
 Returns the number of properties. ";
 
 %feature("docstring")  PointCloud::setPoints "void
-PointCloud::setPoints(int num, const vector< double > &plist[])
+PointCloud::setPoints(int num, const std::vector< double > &plist)
 
 Sets all the points to the given list (a 3n-list) ";
 
@@ -760,12 +760,12 @@ PointCloud::getPoint(int index, double out[3]) const
 Retrieves the position of a point. ";
 
 %feature("docstring")  PointCloud::setProperties "void
-PointCloud::setProperties(const vector< double > &properties)
+PointCloud::setProperties(const std::vector< double > &properties)
 
 Sets all the properties of all points to the given list (a kn-list) ";
 
 %feature("docstring")  PointCloud::setProperties "void
-PointCloud::setProperties(int pindex, const vector< double >
+PointCloud::setProperties(int pindex, const std::vector< double >
 &properties)
 
 Sets property pindex of all points to the given list (a n-list) ";
@@ -2172,6 +2172,17 @@ If geometry loading is set to false, then only the kinematics are
 loaded from disk, and no geometry / visualization / collision
 detection structures will be loaded. Useful for quick scripts that
 just use kinematics / dynamics of a robot. ";
+
+%feature("docstring")  WorldModel::enableInitCollisions "void
+WorldModel::enableInitCollisions(bool enabled)
+
+If collision detection is set to true, then collision acceleration
+data structures will be automatically initialized, with debugging
+information. Useful for scripts that do planning and for which
+collision initialization may take a long time. Note that even when
+this flag is off, the collision acceleration data structures will
+indeed be initialized whenever geometry collision, distance, or ray-
+casting routines are called. ";
 
 
 // File: namespacestd.xml

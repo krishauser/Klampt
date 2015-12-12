@@ -1,6 +1,9 @@
 #include "RigidObject.h"
+#include <Timer.h>
 #include "Mass.h"
-#include "robotics/Inertia.h"
+#include "IO/ROS.h"
+#include <robotics/Inertia.h>
+#include <meshing/PointCloud.h>
 #include <utils/SimpleFile.h>
 #include <utils/stringutils.h>
 #include <meshing/IO.h>
@@ -20,14 +23,13 @@ RigidObject::RigidObject()
   kStiffness = kDamping = Inf;
 }
 
+
+bool LoadGeometry(const char* fn);
+
 bool RigidObject::Load(const char* fn)
 {
   const char* ext=FileExtension(fn);
-  if(!ext) {
-    fprintf(stderr,"Unknown (no) file extension on file %s\n",fn);
-    return false;
-  }
-  if(strcmp(ext,"obj")==0) {
+  if(ext && strcmp(ext,"obj")==0) {
     SimpleFile f(fn);
     if(!fn) return false;
 
@@ -37,13 +39,8 @@ bool RigidObject::Load(const char* fn)
     string fnPath = GetFilePath(fn);
     geomFile = f["mesh"][0].AsString();
     string geomfn = fnPath + geomFile;
-    if(!geometry.Load(geomfn.c_str())) {
-      fprintf(stderr,"Error loading geometry file %s\n",geomfn.c_str());
+    if(!LoadGeometry(geomfn.c_str()))
       return false;
-    }
-    else {
-      //fprintf(stderr,"Unable to load object %s\n",geomfn.c_str());
-    }
     f.erase("mesh");
 
     Matrix4 geomT; geomT.setIdentity();
@@ -167,26 +164,65 @@ bool RigidObject::Load(const char* fn)
       for(map<string,vector<PrimitiveValue> >::const_iterator i=f.entries.begin();i!=f.entries.end();i++)
 	fprintf(stderr,"Unknown entry %s in object file %s\n",i->first.c_str(),fn);
     }
-    geometry.InitCollisions();
-    return true;
-  }
-  else if(Geometry::AnyGeometry3D::CanLoadExt(ext)) {
-    if(!geometry.Load(fn)) return false;
-    geometry.InitCollisions();
-    T.setIdentity();
-    mass=1.0;
-    com.setZero();
-    inertia.setZero();
-    kFriction = 0.5;
-    kRestitution = 0.5;
-    kStiffness=Inf;
-    kDamping=Inf;
-    fprintf(stderr,"Warning, loading object from .%s file %s.  Setting COM and inertia matrix from geometry.\n",ext,fn);
-    SetMassFromGeometry(1.0);
+    //TESTING: don't need this with dynamic initialization
+    //geometry.InitCollisionData();
     return true;
   }
   else {
-    fprintf(stderr,"RigidObject: Unknown file extension %s on file %s\n",ext,fn);
+    return LoadGeometry(fn);
+  }
+}
+
+bool RigidObject::LoadGeometry(const char* fn)
+{
+  if(geomFile.empty()) geomFile = fn;
+
+  if(0==strncmp(fn,"ros://",6)) {
+    //it's a ROS topic
+    if(!ROSInit()) return false;
+    this->geometry = Geometry::AnyCollisionGeometry3D(Meshing::PointCloud3D());
+    Meshing::PointCloud3D& pc = this->geometry.AsPointCloud();
+    printf("RigidObject subscribing to point cloud on ROS topic %s\n",fn+5);
+    return ROSSubscribePointCloud(pc,fn+5);
+  }
+  else if(0==strncmp(fn,"ros://PointCloud/",17)) {
+    //it's a ROS topic
+    if(!ROSInit()) return false;
+    this->geometry = Geometry::AnyCollisionGeometry3D(Meshing::PointCloud3D());
+    Meshing::PointCloud3D& pc = this->geometry.AsPointCloud();
+    printf("RigidObject subscribing to point cloud on ROS topic %s\n",fn+16);
+    return ROSSubscribePointCloud(pc,fn+16);
+  }
+  //TODO: ROS Mesh messages?
+
+  const char* ext=FileExtension(fn);
+  if(ext) {
+    if(Geometry::AnyGeometry3D::CanLoadExt(ext)) {
+       if(!geometry.Load(fn)) {
+        fprintf(stderr,"Error loading geometry file %s\n",fn);
+        return false;
+      }
+      //TESTING: don't need this with dynamic initialization
+      //geometry.InitCollisionData();
+      T.setIdentity();
+      mass=1.0;
+      com.setZero();
+      inertia.setZero();
+      kFriction = 0.5;
+      kRestitution = 0.5;
+      kStiffness=Inf;
+      kDamping=Inf;
+      fprintf(stderr,"Warning, loading object from .%s file %s.  Setting COM and inertia matrix from geometry.\n",ext,fn);
+      SetMassFromGeometry(1.0);
+      return true;
+    }
+    else {
+      fprintf(stderr,"RigidObject: Unknown file extension %s on file %s\n",ext,fn);
+      return false;
+    }
+  }
+  else {
+    fprintf(stderr,"RigidObject: No file extension on file %s\n",fn);
     return false;
   }
 }
@@ -213,6 +249,15 @@ void RigidObject::SetMassFromBB(Real totalMass)
   mass = totalMass;
   com = 0.5*(bb.bmin+bb.bmax);
   BoxInertiaMatrix(bb.bmax.x-bb.bmin.x,bb.bmax.y-bb.bmin.y,bb.bmax.z-bb.bmin.z,mass,inertia);
+}
+
+void RigidObject::InitCollisions()
+{
+  Timer timer;
+  geometry.InitCollisionData();
+  double t = timer.ElapsedTime();
+  if(t > 0.2) 
+    printf("Initialized rigid object %s collision data structures in time %gs\n",geomFile.c_str(),t);
 }
 
 void RigidObject::UpdateGeometry()

@@ -9,6 +9,7 @@
 #include "Modeling/Interpolate.h"
 #include "IO/XmlWorld.h"
 #include "IO/XmlODE.h"
+#include "IO/ROS.h"
 #include <robotics/NewtonEuler.h>
 #include <meshing/PointCloud.h>
 #include <GLdraw/drawextra.h>
@@ -57,6 +58,8 @@ static list<int> simDeleteList;
 
 static vector<WidgetData> widgets;
 static list<int> widgetDeleteList;
+
+static bool gEnableCollisionInitialization = false;
 
 int createWorld(RobotWorld* ptr=NULL)
 {
@@ -304,7 +307,7 @@ void GetMesh(const TriangleMesh& tmesh,Geometry::AnyCollisionGeometry3D& geom)
   for(size_t i=0;i<mesh.verts.size();i++)
     mesh.verts[i].set(tmesh.vertices[i*3],tmesh.vertices[i*3+1],tmesh.vertices[i*3+2]);
   geom = mesh;
-  geom.InitCollisions();
+  geom.ClearCollisionData();
 }
 
 
@@ -337,7 +340,7 @@ void GetPointCloud(const PointCloud& pc,Geometry::AnyCollisionGeometry3D& geom)
   }
   printf("Copying PointCloud to geometry, %g points\n",gpc.points.size());
   geom = gpc;
-  geom.InitCollisions();
+  geom.ClearCollisionData();
 }
 
 void GeometricPrimitive::setPoint(const double pt[3])
@@ -425,7 +428,7 @@ void Geometry3D::set(const Geometry3D& g)
     *geom = *ggeom;
   }
   AnyCollisionGeometry3D* geom = reinterpret_cast<AnyCollisionGeometry3D*>(geomPtr);
-  geom->InitCollisions();
+  geom->ClearCollisionData();
   if(!isStandalone()) {
     //update the display list
     RobotWorld& world=*worlds[this->world]->world;
@@ -538,7 +541,7 @@ void Geometry3D::setGeometricPrimitive(const GeometricPrimitive& prim)
     throw PyException("Internal error");
   }
   *geom = g;
-  geom->InitCollisions();
+  geom->ClearCollisionData();
   if(!isStandalone()) {
     RobotWorld& world=*worlds[this->world]->world;
     world.GetAppearance(id).Set(*geom);
@@ -553,7 +556,6 @@ bool Geometry3D::loadFile(const char* fn)
   }
   AnyCollisionGeometry3D* geom = reinterpret_cast<AnyCollisionGeometry3D*>(geomPtr);
   if(!geom->Load(fn)) return false;
-  geom->InitCollisions();
 
   if(!isStandalone()) {
     //update the display list
@@ -561,6 +563,26 @@ bool Geometry3D::loadFile(const char* fn)
     world.GetAppearance(id).Set(*geom);
   }
   return true;
+}
+
+bool Geometry3D::attachToStream(const char* protocol,const char* name,const char* type)
+{
+  if(0==strcmp(protocol,"ros")) {
+    if(0==strcmp(type,""))
+      type = "PointCloud";
+    if(0 == strcmp(type,"PointCloud")) {
+      if(!geomPtr) 
+        geomPtr = new AnyCollisionGeometry3D();
+      AnyCollisionGeometry3D* geom = reinterpret_cast<AnyCollisionGeometry3D*>(geomPtr);
+      (*geom) = AnyCollisionGeometry3D(Meshing::PointCloud3D());
+      ROSSubscribePointCloud(geom->AsPointCloud(),name);
+      //TODO: update the appearance every time the point cloud changes
+    }
+  }
+  else {
+    throw PyException("Geometry3D::attachToStream: Unsupported protocol argument");
+    return false;
+  }
 }
 
 bool Geometry3D::saveFile(const char* fn)
@@ -589,7 +611,7 @@ void Geometry3D::translate(const double t[3])
   T.R.setIdentity();
   T.t.set(t);
   geom->Transform(T);
-  geom->InitCollisions();
+  geom->ClearCollisionData();
 
   if(!isStandalone()) {
     //update the display list
@@ -606,7 +628,7 @@ void Geometry3D::transform(const double R[9],const double t[3])
   T.R.set(R);
   T.t.set(t);
   geom->Transform(T);
-  geom->InitCollisions();
+  geom->ClearCollisionData();
 
   if(!isStandalone()) {
     //update the display list
@@ -703,12 +725,14 @@ Appearance::~Appearance()
   free();
 }
 
-void Appearance::refresh()
+void Appearance::refresh(bool deep)
 {
   if(!appearancePtr) return;
   GLDraw::GeometryAppearance* app = reinterpret_cast<GLDraw::GeometryAppearance*>(appearancePtr);
-  printf("Calling GeometryAppearance::Refresh()\n");
-  app->Refresh();
+  if(deep && app->geom != NULL)
+    app->Set(*app->geom);
+  else
+    app->Refresh();
 }
 
 bool Appearance::isStandalone()
@@ -1112,18 +1136,21 @@ bool WorldModel::readFile(const char* fn)
       printf("Error loading robot file %s\n",fn);
       return false;
     }
+    if(gEnableCollisionInitialization) world.robots.back().robot->InitCollisions();
   }
   else if(0==strcmp(ext,"env") || 0==strcmp(ext,"tri") || 0==strcmp(ext,"pcd")) {
     if(world.LoadTerrain(fn)<0) {
       printf("Error loading terrain file %s\n",fn);
       return false;
     }
+    if(gEnableCollisionInitialization) world.terrains.back().terrain->InitCollisions();
   }
   else if(0==strcmp(ext,"obj")) {
     if(world.LoadRigidObject(fn)<0) {
       printf("Error loading rigid object file %s\n",fn);
       return false;
     }
+    if(gEnableCollisionInitialization) world.rigidObjects.back().object->InitCollisions();
   }
   else if(0==strcmp(ext,"xml")) {
     /*
@@ -1152,6 +1179,7 @@ bool WorldModel::readFile(const char* fn)
       printf("Error opening or parsing world file %s\n",fn);
       return false;
     }
+    if(gEnableCollisionInitialization) world.InitCollisions();
     return true;
   }
   else {
@@ -1342,6 +1370,7 @@ RobotModel WorldModel::loadRobot(const char* fn)
   robot.world = index;
   robot.index = oindex;
   robot.robot = world.robots.back().robot;
+  if(gEnableCollisionInitialization) world.robots.back().robot->InitCollisions();
   return robot;
 }
 
@@ -1354,6 +1383,7 @@ RigidObjectModel WorldModel::loadRigidObject(const char* fn)
   obj.world = index;
   obj.index = oindex;
   obj.object = world.rigidObjects.back().object;
+  if(gEnableCollisionInitialization) world.rigidObjects.back().object->InitCollisions();
   return obj;
 }
 
@@ -1366,6 +1396,7 @@ TerrainModel WorldModel::loadTerrain(const char* fn)
   obj.world = index;
   obj.index = oindex;
   obj.terrain = world.terrains.back().terrain;
+  if(gEnableCollisionInitialization) world.terrains.back().terrain->InitCollisions();
   return obj;
 }
 
@@ -1411,6 +1442,14 @@ void WorldModel::enableGeometryLoading(bool enabled)
 {
   Robot::disableGeometryLoading = !enabled;
 }
+
+void WorldModel::enableInitCollisions(bool enabled)
+{
+  gEnableCollisionInitialization = !enabled;
+  if(enabled)
+    worlds[index]->world->InitCollisions();
+}
+
 
 std::string WorldModel::getName(int id)
 {

@@ -63,6 +63,7 @@ void RobotPoseBackend::Start()
   }
 
   WorldGUIBackend::Start();
+  world->InitCollisions();
   robot = world->robots[0].robot;
   cur_link=0;
   cur_driver=0;

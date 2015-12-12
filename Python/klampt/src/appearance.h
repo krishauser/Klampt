@@ -22,8 +22,9 @@ class Appearance
   Appearance();
   ~Appearance();
   ///call this to rebuild internal buffers, e.g., when the OpenGL context
-  ///changes
-  void refresh();
+  ///changes. If deep=True, the entire data structure will be revised. Use this
+  ///for streaming data, for example.
+  void refresh(bool deep=true);
   ///Creates a standalone appearance from this appearance
   Appearance clone();
   ///Copies the appearance of the argument into this appearance

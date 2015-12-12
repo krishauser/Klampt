@@ -163,6 +163,7 @@ class MotionPlan:
             motionplanning.setPlanType(type)
         if len(options) > 0:
             MotionPlan.setOptions(**options)
+        self.space = space
         self.planner = motionplanning.PlannerInterface(space.cspace)
 
     def close(self):
@@ -212,7 +213,10 @@ class MotionPlan:
                 motionplanning.setPlanSetting(a,float(b))
 
     def setEndpoints(self,start,goal):
-        """Sets the start and goal configuration."""
+        """Sets the start and goal configuration.  goal can also be a
+        *goal test*, which is a function taking one argument f(q) that
+        returns true if the configuration is at the goal and false
+        otherwise."""
         self.planner.setEndpoints(start,goal)
 
     def addMilestone(self,x):

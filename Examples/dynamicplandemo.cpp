@@ -60,6 +60,12 @@ void DynamicShortcut(RobotWorld& world,int robot,const MilestonePath& path,int m
 bool SimplePlan(RobotWorld& world,int robot,const Config& qstart,const Config& qgoal,MilestonePath& path,
 		const HaltingCondition& cond,const string& plannerSettings="")
 {
+  ///If you don't call this, everything will run fine due to on-demand
+  ///collision initialization, but at least here you get some debug information
+  ///if your world is really complex and the collision detection structures
+  ///take a long time to initialize.
+  world.InitCollisions();
+
   WorldPlannerSettings settings;
   settings.InitializeDefault(world);
   SingleRobotCSpace cspace(world,robot,&settings); 

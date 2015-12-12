@@ -6,6 +6,7 @@
 #include "Modeling/MultiPath.h"
 #include "IO/XmlWorld.h"
 #include "IO/XmlODE.h"
+#include "IO/ROS.h"
 #include "Planning/RobotTimeScaling.h"
 #include <GLdraw/drawextra.h>
 #include <GLdraw/drawgeometry.h>
@@ -116,6 +117,18 @@ bool SimGUIBackend::OnCommand(const string& cmd,const string& args)
       return false;
     }
     ConnectSerialController(robot,port,rate);
+    return true;
+  }
+  else if(cmd == "output_ros") {
+    stringstream ss(args);
+    string prefix;
+    ss >> prefix;
+    if(ss) {
+      if(!OutputROS(prefix.c_str())) { fprintf(stderr,"Error starting ROS output\n"); }
+    }
+    else {
+      if(!OutputROS()) { fprintf(stderr,"Error starting ROS output\n"); }
+    }
     return true;
   }
   else {
@@ -785,6 +798,17 @@ bool SimGUIBackend::SendLinearPath(const vector<Real>& times,const vector<Config
       }
     }
   }
+  return true;
+}
+
+bool SimGUIBackend::OutputROS(const char* prefix)
+{
+  if(!ROSInit()) return false;
+  for(size_t i=0;i<world->robots.size();i++) {
+    if(!ROSPublishCommandedJointState(sim.controlSimulators[i],(string(prefix)+"/"+world->robots[i].name+"/commanded_joint_state").c_str())) return false;
+    if(!ROSPublishSensedJointState(sim.controlSimulators[i],(string(prefix)+"/"+world->robots[i].name+"/sensed_joint_state").c_str())) return false;
+  }
+  if(!ROSPublishTransforms(sim,prefix)) return false;
   return true;
 }
 
