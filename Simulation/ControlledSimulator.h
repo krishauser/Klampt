@@ -26,7 +26,10 @@ class ControlledRobotSimulator
   void GetSensedVelocity(Config& dq);
   void GetSimulatedConfig(Config& q);
   void GetSimulatedVelocity(Config& dq);
+  ///Returns a list of torques commanded at the actuator (driver) level
   void GetActuatorTorques(Vector& t) const;
+  ///Returns a list of torques commanded at the link level
+  void GetLinkTorques(Vector& t) const;
   RobotMotorCommand* GetCommands() { return &command; }
 
   bool ReadState(File& f);

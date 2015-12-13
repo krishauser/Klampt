@@ -9,6 +9,7 @@
 #include "Modeling/Interpolate.h"
 #include "IO/XmlWorld.h"
 #include "IO/XmlODE.h"
+#include "IO/ROS.h"
 #include <robotics/NewtonEuler.h>
 #include <meshing/PointCloud.h>
 #include <GLdraw/drawextra.h>
@@ -330,11 +331,14 @@ void GetPointCloud(const PointCloud& pc,Geometry::AnyCollisionGeometry3D& geom)
   for(size_t i=0;i<gpc.points.size();i++)
     gpc.points[i].set(pc.vertices[i*3],pc.vertices[i*3+1],pc.vertices[i*3+2]);
   gpc.propertyNames = pc.propertyNames;
-  gpc.properties.resize(pc.properties.size() / pc.propertyNames.size());
-  for(size_t i=0;i<gpc.properties.size();i++) {
-    gpc.properties[i].resize(pc.propertyNames.size());
-    gpc.properties[i].copy(&pc.properties[i*pc.propertyNames.size()]);
+  if(pc.propertyNames.size() > 0) {
+    gpc.properties.resize(pc.properties.size() / pc.propertyNames.size());
+    for(size_t i=0;i<gpc.properties.size();i++) {
+      gpc.properties[i].resize(pc.propertyNames.size());
+      gpc.properties[i].copy(&pc.properties[i*pc.propertyNames.size()]);
+    }
   }
+  printf("Copying PointCloud to geometry, %g points\n",gpc.points.size());
   geom = gpc;
   geom.ClearCollisionData();
 }
@@ -561,6 +565,26 @@ bool Geometry3D::loadFile(const char* fn)
   return true;
 }
 
+bool Geometry3D::attachToStream(const char* protocol,const char* name,const char* type)
+{
+  if(0==strcmp(protocol,"ros")) {
+    if(0==strcmp(type,""))
+      type = "PointCloud";
+    if(0 == strcmp(type,"PointCloud")) {
+      if(!geomPtr) 
+        geomPtr = new AnyCollisionGeometry3D();
+      AnyCollisionGeometry3D* geom = reinterpret_cast<AnyCollisionGeometry3D*>(geomPtr);
+      (*geom) = AnyCollisionGeometry3D(Meshing::PointCloud3D());
+      ROSSubscribePointCloud(geom->AsPointCloud(),name);
+      //TODO: update the appearance every time the point cloud changes
+    }
+  }
+  else {
+    throw PyException("Geometry3D::attachToStream: Unsupported protocol argument");
+    return false;
+  }
+}
+
 bool Geometry3D::saveFile(const char* fn)
 {
   if(!geomPtr) return false;
@@ -701,12 +725,14 @@ Appearance::~Appearance()
   free();
 }
 
-void Appearance::refresh()
+void Appearance::refresh(bool deep)
 {
   if(!appearancePtr) return;
   GLDraw::GeometryAppearance* app = reinterpret_cast<GLDraw::GeometryAppearance*>(appearancePtr);
-  printf("Calling GeometryAppearance::Refresh()\n");
-  app->Refresh();
+  if(deep && app->geom != NULL)
+    app->Set(*app->geom);
+  else
+    app->Refresh();
 }
 
 bool Appearance::isStandalone()
@@ -952,10 +978,10 @@ void PointCloud::setPoints(int num,const vector<double>& plist)
 int PointCloud::addPoint(const double p[3])
 {
   int ofs = (int)vertices.size();
-  vertices.resize(vertices.size()+3);
-  vertices[ofs] = p[0];
-  vertices[ofs+1] = p[1];
-  vertices[ofs+2] = p[2];
+
+  vertices.push_back(p[0]);
+  vertices.push_back(p[1]);
+  vertices.push_back(p[2]);
   properties.resize(properties.size()+propertyNames.size(),0.0);
   return ofs/3;
 }

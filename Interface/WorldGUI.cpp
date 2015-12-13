@@ -1,4 +1,5 @@
 #include "WorldGUI.h"
+#include "IO/ROS.h"
 #include <string.h>
 #include <utils/stringutils.h>
 #include <GLdraw/GL.h>
@@ -9,6 +10,34 @@ using namespace GLDraw;
 WorldGUIBackend::WorldGUIBackend(RobotWorld* _world)
   :world(_world)
 {
+}
+
+WorldGUIBackend::~WorldGUIBackend()
+{
+  if(ROSNumSubscribedTopics() > 0) ROSShutdown();
+}
+
+bool WorldGUIBackend::OnIdle()
+{
+  if(ROSNumSubscribedTopics() > 0) {
+    if(ROSSubscribeUpdate()) {
+      //need to refresh appearances
+      for(size_t i=0;i<world->rigidObjects.size();i++)
+        if(0==strncmp(world->rigidObjects[i].object->geomFile.c_str(),"ros://",6)) {
+          world->rigidObjects[i].view.appearance.Set(world->rigidObjects[i].object->geometry);
+        }
+      for(size_t i=0;i<world->terrains.size();i++)
+        if(0==strncmp(world->terrains[i].terrain->geomFile.c_str(),"ros://",6)) {
+          world->terrains[i].view.appearance.Set(world->terrains[i].terrain->geometry);
+        }
+      SendRefresh();
+    }
+    else
+      SendPauseIdle(0.05);
+  }
+  else
+    SendPauseIdle();
+  return true;
 }
 
 bool WorldGUIBackend::OnCommand(const string& cmd,const string& args)

@@ -8,6 +8,9 @@ using namespace Math3D;
 
 /** @brief A generic gui with a RobotWorld which allows clicking on entities
  * and loading files.
+ *
+ * Note: if anything is connected to a ROS topic, OnIdle will call the ROSUpdate() hook
+ * and request a redraw.
  * 
  * Accepts commands:
  * - load_file fn: loads a file into the world.
@@ -16,12 +19,13 @@ class WorldGUIBackend : public GLNavigationBackend
 {
 public:
   WorldGUIBackend(RobotWorld* world);
-  virtual ~WorldGUIBackend() {}
+  virtual ~WorldGUIBackend();
 
   bool LoadCommandLine(int argc,const char** argv);
   bool LoadFile(const char* fn);
   //backend overloads
   virtual void Start();
+  virtual bool OnIdle();
   virtual bool OnCommand(const string& cmd,const string& args);
   //GLNavigationBackend overloads
   virtual void SetWorldLights() { world->SetGLLights(); }
