@@ -1,11 +1,12 @@
 #include "Environment.h"
 #include <Timer.h>
 #include <meshing/IO.h>
+#include <meshing/PointCloud.h>
 #include <utils/SimpleFile.h>
 #include <utils/stringutils.h>
 #include <string.h>
 #include <fstream>
-
+#include "IO/ROS.h"
 
 void Environment::InitCollisions()
 {
@@ -19,7 +20,7 @@ void Environment::InitCollisions()
 bool Environment::Load(const char* fn)
 {
   const char* ext=FileExtension(fn);
-  if(0==strcmp(ext,"env")) {
+  if(ext && 0==strcmp(ext,"env")) {
     SimpleFile f(fn);
     if(!f) {
       fprintf(stderr,"SimpleFile read failed\n");
@@ -32,15 +33,8 @@ bool Environment::Load(const char* fn)
     if(!f.CheckSize("mesh",1,fn)) return false;
     string fnPath = GetFilePath(fn);
     string geomfn = fnPath + f["mesh"][0].AsString();
-    this->geomFile = geomfn;
+    if(!LoadGeometry(geomfn.c_str())) return false;
     Timer timer;
-    if(!geometry.Load(geomfn.c_str())) {
-      cout<<"Environment::Load error loading "<<geomfn<<endl;
-      return false;
-    }
-    if(timer.ElapsedTime() > 1.0)
-      printf("Env %s load took time %gs\n",fn,timer.ElapsedTime());
-    timer.Reset();
     //TESTING: don't need this with dynamic initialization
     //geometry.InitCollisions();
     if(timer.ElapsedTime() > 1.0)
@@ -60,10 +54,44 @@ bool Environment::Load(const char* fn)
     }
     return true;
   }
-  else if(Geometry::AnyGeometry3D::CanLoadExt(ext)) {
+  else 
+    return LoadGeometry(fn);
+  return false;
+}
+
+bool Environment::LoadGeometry(const char* fn)
+{
+  this->geomFile = fn;
+
+  if(0==strncmp(fn,"ros://",6)) {
+    //it's a ROS topic
+    if(!ROSInit()) return false;
+    this->geomFile = fn;
+    this->geometry = Geometry::AnyCollisionGeometry3D(Meshing::PointCloud3D());
+    Meshing::PointCloud3D& pc = this->geometry.AsPointCloud();
+    printf("Environment subscribing to point cloud on ROS topic %s\n",fn+5);
+    return ROSSubscribePointCloud(pc,fn+5);
+  }
+  else if(0==strncmp(fn,"ros://PointCloud/",17)) {
+    //it's a ROS topic
+    if(!ROSInit()) return false;
+    this->geomFile = fn;
+    this->geometry = Geometry::AnyCollisionGeometry3D(Meshing::PointCloud3D());
+    Meshing::PointCloud3D& pc = this->geometry.AsPointCloud();
+    printf("Environment subscribing to point cloud on ROS topic %s\n",fn+16);
+    return ROSSubscribePointCloud(pc,fn+16);
+  }
+  //TODO: ROS Mesh messages?
+
+  Timer timer;
+  const char* ext=FileExtension(fn);
+  if(ext && Geometry::AnyGeometry3D::CanLoadExt(ext)) {
     this->geomFile = fn;
     Timer timer;
-    if(!geometry.Load(fn)) return false;
+    if(!geometry.Load(fn)) {
+      cout<<"Environment::Load error loading geometry from "<<fn<<endl;
+      return false;
+    }
     if(timer.ElapsedTime() > 1.0)
       printf("Env %s load took time %gs\n",fn,timer.ElapsedTime());
     timer.Reset();
@@ -73,7 +101,6 @@ bool Environment::Load(const char* fn)
     SetUniformFriction(0.5);
     return true;
   }
-  return false;
 }
 
 //bool Environment::Save(const char* fn);

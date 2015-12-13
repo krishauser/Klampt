@@ -511,6 +511,7 @@ if glcommon._PyQtAvailable:
             self.buttons.accepted.connect(self.accept)
             self.buttons.rejected.connect(self.reject)
             self.layout.addWidget(self.buttons)
+            self.doexit = False
         def setEditor(self,editorObject):
             self.editorObject = editorObject
             self.setWindowTitle("Editing "+editorObject.name)
@@ -523,13 +524,13 @@ if glcommon._PyQtAvailable:
             editorObject.addDialogItems(self.extraDialog,ui='qt')
 
         def closeEvent(self,event):
-            reply = QtGui.QMessageBox.question(self, 'Message',
-                 "Are you sure to quit the program?", QtGui.QMessageBox.Yes | 
-                 QtGui.QMessageBox.No, QtGui.QMessageBox.No)
+            reply = QMessageBox.question(self, 'Message',
+                 "Are you sure to quit the program?", QMessageBox.Yes | 
+                 QMessageBox.No, QMessageBox.No)
 
-            if reply == QtGui.QMessageBox.Yes:
+            if reply == QMessageBox.Yes:
+                self.doexit = True
                 event.accept()
-                exit()
             else:
                 event.ignore()     
             
@@ -550,10 +551,13 @@ if glcommon._PyQtAvailable:
             _dialog=_MyDialog(visualization._widget)
         _dialog.setEditor(editorObject)
         res = _dialog.exec_()
+        if _dialog.doexit:
+            return None,None
         retVal = _dialog.finish()
         return res,retVal
 
     def _launch(editorObject):
+        global _dialog
         olditems = visualization._vis.items.copy()
         visualization._vis.items = {}
 
@@ -561,6 +565,12 @@ if glcommon._PyQtAvailable:
         visualization.setWindowTitle("Resource Editor")
         res,retVal = visualization.customRun(_makeDialog,args=(editorObject,))
         visualization.setWindowTitle(oldtitle)
+
+        if _dialog.doexit:
+            visualization.kill()
+            print "Exiting program."
+            exit(0)
+
 
         visualization._vis.items = olditems
         return res,retVal

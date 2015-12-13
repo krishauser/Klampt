@@ -8,6 +8,7 @@ import time
 
 class MyGLPlugin(GLPluginBase):
     def __init__(self,world):
+        GLPluginBase.__init__(self)
         self.world = world
         self.quit = False
 
@@ -33,7 +34,7 @@ class MyGLPlugin(GLPluginBase):
         return False
 
 if __name__ == "__main__":
-    print "visplugin.py: This example demonstrates how to simulate a world and read user input using the visualization framework"
+    print "visplugin.py: This example demonstrates how to simulate a world and read user input using the klampt.visualization framework"
     if len(sys.argv)<=1:
         print "USAGE: visplugin.py [world_file]"
         exit()
@@ -43,6 +44,7 @@ if __name__ == "__main__":
         res = world.readFile(fn)
         if not res:
             raise RuntimeError("Unable to load model "+fn)
+    world.enableInitCollisions(True)
 
     print "Press 'q' to exit"
     #the plugin is used to get interactivity with the visualizer... if you

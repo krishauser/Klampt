@@ -7,11 +7,16 @@ using namespace Math3D;
 /** @ingroup Modeling
  * @brief A (static) rigid object that may be manipulated.
  */
-struct RigidObject
+class RigidObject
 {
+public:
   RigidObject();
   bool Load(const char* fn);
   bool Save(const char* fn);
+  ///Supports anything the AnyGeometry class uses, and also
+  ///ROS PointCloud2 topics (use prefix ros://[topic_name] or
+  ///ros://PointCloud/[topic_name])
+  bool LoadGeometry(const char* fn);
   void SetMassFromGeometry(Real totalMass);
   void SetMassFromBB(Real totalMass);
   void InitCollisions();

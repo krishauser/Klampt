@@ -193,7 +193,7 @@ class WorldCollider:
         """
         res = []
         if filter1 == None: #all pairs
-            if bb_reject: bblist = [g.getBB() for g in self.geomList]
+            if bb_reject: bblist = [g[1].getBB() for g in self.geomList]
             for (i,(g,objs)) in enumerate(zip(self.geomList,self.mask)):
                 for objIndex in objs:
                     #already checked

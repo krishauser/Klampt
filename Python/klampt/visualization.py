@@ -77,23 +77,27 @@ from trajectory import *
 _baseClass = None
 _globalLock = Lock()
 _viz = None
+_plugin = None
 _window_title = "Klamp't visualizer"
 
 def setPlugin(plugin):
     """Lets the user capture input via a glcommon.GLPluginBase class.
     Set plugin to None to disable plugins"""
-    global _vis
+    global _vis,_plugin
     if _vis==None:
         print "Visualization disabled"
         return
     if plugin  == None:
         plugin = _vis
+    _plugin = plugin
     if glcommon._PyQtAvailable:
         global _widget
-        _widget.setPlugin(plugin)
+        if _widget != None:
+            _widget.setPlugin(plugin)
     elif glcommon._GLUTAvailable:
         global _app
-        _app.setPlugin(plugin)
+        if _app != None:
+            _app.setPlugin(plugin)
 
 def dialog():
     global _vis
@@ -160,8 +164,8 @@ def unlock():
     _globalLock.release()
 
 def shown():
-    global _showwindow
-    return _showwindow
+    global _thread_running,_showwindow
+    return _thread_running and _showwindow
 
 def customRun(function,args=()):
     return _customRun(lambda : function(*args))
@@ -922,14 +926,14 @@ if glcommon._PyQtAvailable:
     from PyQt4.QtGui import *
     #Qt specific startup
     #need to set up a QDialog and an QApplication
-    _widget = _BaseClass()
+    _widget = None
     #_vis.initWindow(self)
     _window = None
     _app = None
     _quit = False
+    _thread_running = False
     _showdialog = False
     _showwindow = False
-    _thread_running = False
     _custom_run_method = None
     _custom_run_retval = None
     class _MyDialog(QDialog):
@@ -969,8 +973,12 @@ if glcommon._PyQtAvailable:
         _thread_running = True
         #Do Qt setup
         _app = QApplication([_window_title])
+        _widget = _BaseClass()
         _widget.initWindow()
-        _widget.setPlugin(_vis)
+        if _plugin == None:
+            _widget.setPlugin(_vis)
+        else:
+            _widget.setPlugin(_plugin)
         #res = _app.exec_()
         res = None
         while not _quit:
@@ -1009,12 +1017,15 @@ if glcommon._PyQtAvailable:
     def _kill():
         global _quit
         _quit = True
+        while _thread_running:
+            time.sleep(0.01)
 
     def _show():
         global _window,_showwindow,_thread_running
         if not _thread_running:
             signal.signal(signal.SIGINT, signal.SIG_DFL)
             thread = Thread(target=_run_app_thread)
+            thread.setDaemon(True)
             thread.start()
         _showwindow = True
 
@@ -1056,9 +1067,9 @@ elif glcommon._GLUTAvailable:
     from glprogram import GLPluginProgram
     _app = None
     _quit = False
+    _thread_running = False
     _showdialog = False
     _showwindow = False
-    _thread_running = False
     _custom_run_method = None
     _custom_run_retval = None
     class GLUTVisualization(GLPluginProgram):
@@ -1068,7 +1079,6 @@ elif glcommon._GLUTAvailable:
             self.inDialog = False
         def initialize(self):
             GLPluginProgram.initialize(self)
-            self.setPlugin(_vis)
         def display_screen(self):
             GLPluginProgram.display_screen(self)
             glColor3f(1,1,1)
@@ -1111,6 +1121,10 @@ elif glcommon._GLUTAvailable:
         global _thread_running,_app,_vis
         _thread_running = True
         _app = GLUTVisualization()
+        if _plugin != None:
+            _app.setPlugin(_plugin)
+        else:
+            _app.setPlugin(_vis)
         _app.run()
         print "Visualization thread closing..."
         for (name,itemvis) in _vis.items.iteritems():
@@ -1121,6 +1135,9 @@ elif glcommon._GLUTAvailable:
     def _kill():
         global _quit
         _quit = True
+        while _thread_running:
+            time.sleep(0.01)
+
 
     def _show():
         global _showwindow,_thread_running

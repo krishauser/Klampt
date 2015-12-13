@@ -65,7 +65,8 @@ class GLProgram:
         """Starts the main loop"""
         # Initialize Glut
         glutInit ([])
-        glutSetOption(GLUT_ACTION_ON_WINDOW_CLOSE,GLUT_ACTION_GLUTMAINLOOP_RETURNS)
+        if bool(glutSetOption):
+           glutSetOption(GLUT_ACTION_ON_WINDOW_CLOSE,GLUT_ACTION_GLUTMAINLOOP_RETURNS)
         self.initWindow()
         glutMainLoop ()
 

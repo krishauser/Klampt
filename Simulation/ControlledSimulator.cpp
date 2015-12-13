@@ -94,8 +94,35 @@ void ControlledRobotSimulator::GetSimulatedVelocity(Config& dq)
   oderobot->GetVelocities(dq);
 }
 
+void ControlledRobotSimulator::GetLinkTorques(Vector& t) const
+{
+  Vector tact(robot->drivers.size());
+  t.resize(robot->links.size());
+  GetActuatorTorques(tact);
+  for(size_t i=0;i<robot->drivers.size();i++)
+    switch(robot->drivers[i].type) {
+      case RobotJointDriver::Affine:
+      {
+        for (size_t j=0;j<robot->drivers[i].linkIndices.size();j++)
+          t[robot->drivers[i].linkIndices[j]] = tact[i]*robot->drivers[i].affScaling[j];
+        break;
+      }
+      default:
+      {
+        for (size_t j=0;j<robot->drivers[i].linkIndices.size();j++)
+          t[robot->drivers[i].linkIndices[j]] = tact[i];
+      }
+    }
+}
+
 void ControlledRobotSimulator::GetActuatorTorques(Vector& t) const
 {
+  if(t.empty()) t.resize(robot->drivers.size());
+  if(t.n != (int)robot->drivers.size()) {
+    fprintf(stderr,"ControlledRobotSimulator::GetActuatorTorques: Warning, vector isn't sized to the number of drivers %d (got %d)\n",robot->drivers.size(),t.n);
+    if(t.n == (int)robot->links.size())
+      fprintf(stderr,"  (Did you mean GetLinkTorques()?\n");
+  }
   Assert(command.actuators.size() == robot->drivers.size());
   t.resize(command.actuators.size());
   for(size_t i=0;i<command.actuators.size();i++) {

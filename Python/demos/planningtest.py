@@ -8,6 +8,7 @@ from klampt import robotplanning
 import time
 import sys
 
+#load the robot / world file
 fn = "../../data/robots/jaco.rob"
 if len(sys.argv) > 1:
     fn = sys.argv[1]
@@ -18,19 +19,25 @@ if not res:
     exit(0)
 
 def simplify(robot):
+    """Utility function: replaces a robot's geometry with simplified bounding
+    boxes."""
     for i in range(robot.numLinks()):
         geom = robot.link(i).geometry()
         if geom.empty(): continue
         BB = geom.getBB()
+        print BB[0],BB[1]
         BBgeom = GeometricPrimitive()
         BBgeom.setAABB(BB[0],BB[1])
         geom.setGeometricPrimitive(BBgeom)
 
 robot = world.robot(0)
-#replace the robot's normal geometry with bounding boxes? makes planning
-#faster
+#this line replaces the robot's normal geometry with bounding boxes.
+#it makes planning faster but sacrifices accuracy.  Uncomment the line
+#visualization.dialog() below to examine whether the simplified robot looks
+#ok
 simplify(robot)
 
+#add the world elements individually to the visualization
 visualization.add("robot",robot)
 for i in range(1,world.numRobots()):
     visualization.add("robot"+str(i),world.robot(i))
@@ -41,7 +48,7 @@ for i in range(world.numTerrains()):
 #if you want to just see the robot in a pop up (blocking call)...
 #visualization.dialog()
 
-#testing
+#Automatic construction of space
 space = robotplanning.makeSpace(world=world,robot=robot,
                                 edgeCheckResolution=1e-2,
                                 movingSubset='all')
@@ -69,7 +76,8 @@ while True:
 if len(configs)==0:
     exit(0)
 
-
+#set up a settings dictionary here.  This is a random-restart + shortcutting
+#SBL planner.
 settings = { 'type':"sbl", 'perturbationRadius':0.5, 'bidirectional':1, 'shortcut':1, 'restart':1, 'restartTermCond':"{foundSolution:1,maxIters:1000}" }
 
 #This code generates a PRM with no specific endpoints
@@ -81,6 +89,8 @@ settings = { 'type':"sbl", 'perturbationRadius':0.5, 'bidirectional':1, 'shortcu
 
 
 #Generate a path connecting the edited configurations
+#You might edit the value 500 to play with how many iterations to give the
+#planner.
 wholepath = [configs[0]]
 for i in range(len(configs)-1):
     #Manual construction of planner
@@ -102,7 +112,8 @@ for i in range(len(configs)-1):
     path = plan.getPath()
     if path is None or len(path)==0:
         print "Failed to plan path between configuration",i,"and",i+1
-        print V[0:10]
+        #debug some sampled configurations
+        print V[0:max(10,len(V))]
         break
     wholepath += path[1:]
 
@@ -112,6 +123,7 @@ for i in range(len(configs)-1):
 
 if len(wholepath)>1:
     print "Path:",wholepath
+    #show the path in the visualizer, repeating 5 times
     visualization.animate("robot",wholepath)
     visualization.spin((len(wholepath)-1)*5)
 else:

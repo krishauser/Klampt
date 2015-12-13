@@ -27,8 +27,11 @@
  * - connect_serial_controller(robot,port,rate): connects a robot (index) to a SerialController on the given
  *   port (listens for open TCP connections on localhost:port).  The controller will write at the indicated
  *   rate (in Hz).
+ * - output_ros([prefix]): outputs the simulation information to ROS with the given prefix under the tf
+ *   module, and the robot's commanded / sensed JointState under [prefix]/[robot name]/commanded_joint_state
+ *   / sensed_joint_state.
  *
- * In the current format, the world should not be changed after initialization.
+ * In the current format, elements in the world should not be added/deleted after initialization.
  */
 class SimGUIBackend : public WorldGUIBackend
 {
@@ -104,6 +107,9 @@ public:
   ///Sends a linear path to the controller.  The path starts pathDelay
   ///seconds after the current time
   bool SendLinearPath(const vector<Real>& times,const vector<Config>& milestones,Real pathDelay=0.1); 
+
+  ///Outputs simulation data to ROS with the given prefix
+  bool OutputROS(const char* prefix="klampt");
 
   ///Logs the state of all objects in the world to the given CSV file
   void DoLogging(const char* fn="simtest_log.csv");

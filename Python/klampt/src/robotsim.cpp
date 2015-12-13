@@ -9,6 +9,7 @@
 #include "Modeling/Interpolate.h"
 #include "IO/XmlWorld.h"
 #include "IO/XmlODE.h"
+#include "IO/ROS.h"
 #include <robotics/NewtonEuler.h>
 #include <meshing/PointCloud.h>
 #include <GLdraw/drawextra.h>
@@ -561,6 +562,26 @@ bool Geometry3D::loadFile(const char* fn)
   return true;
 }
 
+bool Geometry3D::attachToStream(const char* protocol,const char* name,const char* type)
+{
+  if(0==strcmp(protocol,"ros")) {
+    if(0==strcmp(type,""))
+      type = "PointCloud";
+    if(0 == strcmp(type,"PointCloud")) {
+      if(!geomPtr) 
+        geomPtr = new AnyCollisionGeometry3D();
+      AnyCollisionGeometry3D* geom = reinterpret_cast<AnyCollisionGeometry3D*>(geomPtr);
+      (*geom) = AnyCollisionGeometry3D(Meshing::PointCloud3D());
+      ROSSubscribePointCloud(geom->AsPointCloud(),name);
+      //TODO: update the appearance every time the point cloud changes
+    }
+  }
+  else {
+    throw PyException("Geometry3D::attachToStream: Unsupported protocol argument");
+    return false;
+  }
+}
+
 bool Geometry3D::saveFile(const char* fn)
 {
   if(!geomPtr) return false;
@@ -701,12 +722,14 @@ Appearance::~Appearance()
   free();
 }
 
-void Appearance::refresh()
+void Appearance::refresh(bool deep)
 {
   if(!appearancePtr) return;
   GLDraw::GeometryAppearance* app = reinterpret_cast<GLDraw::GeometryAppearance*>(appearancePtr);
-  printf("Calling GeometryAppearance::Refresh()\n");
-  app->Refresh();
+  if(deep && app->geom != NULL)
+    app->Set(*app->geom);
+  else
+    app->Refresh();
 }
 
 bool Appearance::isStandalone()
