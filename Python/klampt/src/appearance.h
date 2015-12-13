@@ -66,6 +66,8 @@ class Appearance
   ///u2, v2, ..., un, vn.  If uvs is empty, turns off texture mapping
   ///altogether.
   void setTexcoords(const std::vector<double>& uvs);
+  ///For point clouds, sets the point size.
+  void setPointSize(float size);
   ///Draws the currently associated geometry with this appearance.  A geometry
   ///is assocated with this appearance if this appearance comes from an
   ///element of the WorldMode, or if drawGL(geom) was previously called.
