@@ -14,7 +14,7 @@ class Environment
 public:
   ///Can support .env files, anything the AnyGeometry class uses, and
   ///also ROS PointCloud2 topics (use prefix ros://[topic_name] or
-  ///ros://PointCloud/[topic_name])
+  ///ros:PointCloud2/[topic_name])
   bool Load(const char* fn);
   bool Save(const char* fn);
   ///Loads just the geometry of the environment
