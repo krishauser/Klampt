@@ -572,8 +572,12 @@ bool Geometry3D::attachToStream(const char* protocol,const char* name,const char
         geomPtr = new AnyCollisionGeometry3D();
       AnyCollisionGeometry3D* geom = reinterpret_cast<AnyCollisionGeometry3D*>(geomPtr);
       (*geom) = AnyCollisionGeometry3D(Meshing::PointCloud3D());
-      ROSSubscribePointCloud(geom->AsPointCloud(),name);
+      return ROSSubscribePointCloud(geom->AsPointCloud(),name);
       //TODO: update the appearance every time the point cloud changes
+    }
+    else {
+      throw PyException("Geometry3D::attachToStream: Unsupported type argument");
+      return false;
     }
   }
   else {
@@ -581,6 +585,18 @@ bool Geometry3D::attachToStream(const char* protocol,const char* name,const char
     return false;
   }
 }
+
+bool Geometry3D::detachFromStream(const char* protocol,const char* name)
+{
+  if(0==strcmp(protocol,"ros")) {
+    return ROSDetach(name);
+  }
+  else {
+    throw PyException("Geometry3D::detachFromStream: Unsupported protocol argument");
+    return false;
+  }
+}
+
 
 bool Geometry3D::saveFile(const char* fn)
 {
