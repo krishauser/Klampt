@@ -847,6 +847,13 @@ void Appearance::setTexcoords(const std::vector<double>& uvs)
   FatalError("Not implemented yet");
 }
 
+void Appearance::setPointSize(float size)
+{
+  if(!appearancePtr) return;
+  GLDraw::GeometryAppearance* app = reinterpret_cast<GLDraw::GeometryAppearance*>(appearancePtr);
+  app->vertexSize = size;
+}
+
 void Appearance::drawGL()
 {
   if(!appearancePtr) return;
