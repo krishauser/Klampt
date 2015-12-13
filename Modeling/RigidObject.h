@@ -15,7 +15,7 @@ public:
   bool Save(const char* fn);
   ///Supports anything the AnyGeometry class uses, and also
   ///ROS PointCloud2 topics (use prefix ros://[topic_name] or
-  ///ros://PointCloud/[topic_name])
+  ///ros:PointCloud2/[topic_name])
   bool LoadGeometry(const char* fn);
   void SetMassFromGeometry(Real totalMass);
   void SetMassFromBB(Real totalMass);

@@ -19,7 +19,7 @@ class WorldGUIBackend : public GLNavigationBackend
 {
 public:
   WorldGUIBackend(RobotWorld* world);
-  virtual ~WorldGUIBackend() {}
+  virtual ~WorldGUIBackend();
 
   bool LoadCommandLine(int argc,const char** argv);
   bool LoadFile(const char* fn);

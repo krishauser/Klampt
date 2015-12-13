@@ -63,16 +63,7 @@ bool Environment::LoadGeometry(const char* fn)
 {
   this->geomFile = fn;
 
-  if(0==strncmp(fn,"ros://",6)) {
-    //it's a ROS topic
-    if(!ROSInit()) return false;
-    this->geomFile = fn;
-    this->geometry = Geometry::AnyCollisionGeometry3D(Meshing::PointCloud3D());
-    Meshing::PointCloud3D& pc = this->geometry.AsPointCloud();
-    printf("Environment subscribing to point cloud on ROS topic %s\n",fn+5);
-    return ROSSubscribePointCloud(pc,fn+5);
-  }
-  else if(0==strncmp(fn,"ros://PointCloud/",17)) {
+  if(0==strncmp(fn,"ros:PointCloud2//",17)) {
     //it's a ROS topic
     if(!ROSInit()) return false;
     this->geomFile = fn;
@@ -80,6 +71,15 @@ bool Environment::LoadGeometry(const char* fn)
     Meshing::PointCloud3D& pc = this->geometry.AsPointCloud();
     printf("Environment subscribing to point cloud on ROS topic %s\n",fn+16);
     return ROSSubscribePointCloud(pc,fn+16);
+  }
+  else if(0==strncmp(fn,"ros://",6)) {
+    //it's a ROS topic
+    if(!ROSInit()) return false;
+    this->geomFile = fn;
+    this->geometry = Geometry::AnyCollisionGeometry3D(Meshing::PointCloud3D());
+    Meshing::PointCloud3D& pc = this->geometry.AsPointCloud();
+    printf("Environment subscribing to point cloud on ROS topic %s\n",fn+5);
+    return ROSSubscribePointCloud(pc,fn+5);
   }
   //TODO: ROS Mesh messages?
 

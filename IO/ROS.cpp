@@ -255,6 +255,7 @@ bool KlamptToROS(const Robot& robot,const vector<int>& indices,const LinearPath&
 #define Swap4If(val,cond) (cond ? Swap4Bytes(val) : val)
 #define Swap8If(val,cond) (cond ? Swap8Bytes(val) : val)
 
+
 template <class T> 
 void UNPACK(const sensor_msgs::PointField& field,const unsigned char* data,T* out,bool swap_bigendian)
 {
@@ -303,15 +304,26 @@ void UNPACK(const sensor_msgs::PointField& field,const unsigned char* data,T* ou
 bool ROSToKlampt(const sensor_msgs::PointCloud2& pc,Meshing::PointCloud3D& kpc)
 {
   int xfield=-1,yfield=-1,zfield=-1;
+  int rgbfloat_field=-1;
+  int rgbproperty=-1;
+  vector<int> fieldmap(pc.fields.size(),-1);
   kpc.points.resize(0);
   kpc.propertyNames.resize(0);
   kpc.properties.resize(0);
   bool swap_bigendian = (IsBigEndian() != pc.is_bigendian);
   for(size_t i=0;i<pc.fields.size();i++) {
     if(pc.fields[i].name == "x") { xfield=(int)i; Assert(pc.fields[i].count==1); }
-    if(pc.fields[i].name == "y") { yfield=(int)i; Assert(pc.fields[i].count==1); }
-    if(pc.fields[i].name == "z") { zfield=(int)i; Assert(pc.fields[i].count==1); }
+    else if(pc.fields[i].name == "y") { yfield=(int)i; Assert(pc.fields[i].count==1); }
+    else if(pc.fields[i].name == "z") { zfield=(int)i; Assert(pc.fields[i].count==1); }
     else {
+      fieldmap[i] = (int)kpc.propertyNames.size();
+      if((pc.fields[i].name == "rgb" || pc.fields[i].name == "rgba" ) && pc.fields[i].datatype == sensor_msgs::PointField::FLOAT32) {
+        //custom crap for Kinect2 bridge sending UINTs in float format
+        rgbfloat_field = (int)i;
+        rgbproperty = kpc.propertyNames.size();
+        Assert(pc.fields[i].count == 1);
+        fieldmap[i] = -1;
+      }
       if(pc.fields[i].count==1) kpc.propertyNames.push_back(pc.fields[i].name);
       else {
         for(size_t j=0;j<pc.fields[i].count;j++) {
@@ -321,11 +333,11 @@ bool ROSToKlampt(const sensor_msgs::PointCloud2& pc,Meshing::PointCloud3D& kpc)
       }
     }
   }
+  Assert(pc.data.size() >= pc.row_step*pc.height);
   int ofs = 0;
   Vector3 pt(0.0);
   Vector propertyTemp(kpc.propertyNames.size());
   for(unsigned int i=0;i<pc.height;i++) {
-    ofs += pc.row_step;
     int vofs = ofs;
     for(unsigned int j=0;j<pc.width;j++) {
       if(xfield >=0) UNPACK<Real>(pc.fields[xfield],&pc.data[vofs],&pt.x,swap_bigendian);
@@ -333,17 +345,26 @@ bool ROSToKlampt(const sensor_msgs::PointCloud2& pc,Meshing::PointCloud3D& kpc)
       if(zfield >=0) UNPACK<Real>(pc.fields[zfield],&pc.data[vofs],&pt.z,swap_bigendian);
       if(IsFinite(pt.x) && IsFinite(pt.y) && IsFinite(pt.z)) {
         kpc.points.push_back(pt);
+        if(rgbfloat_field >= 0) {
+          //hack
+          const unsigned char* data = &pc.data[vofs]+pc.fields[rgbfloat_field].offset;
+          unsigned int rgb = Swap4If(*((unsigned int*)data),swap_bigendian);
+          Real* out = &propertyTemp[rgbproperty];
+          *out = Real(rgb);
+        }
+        int pofs = 0;
+        for(size_t k=0;k<pc.fields.size();k++) {
+          if(fieldmap[k] < 0) continue;
+          UNPACK<Real>(pc.fields[k],&pc.data[vofs],&propertyTemp[pofs],swap_bigendian);
+          pofs +=pc.fields[k].count;
+        }
+        kpc.properties.push_back(propertyTemp);
       }
-      int pofs = 0;
-      for(int k=0;k<(int)pc.fields.size();k++) {
-        if(k == xfield || k == yfield || k==zfield) continue;
-        UNPACK<Real>(pc.fields[k],&pc.data[vofs],&propertyTemp[pofs],swap_bigendian);
-        pofs +=pc.fields[k].count;
-      }
-      kpc.properties.push_back(propertyTemp);
       vofs += pc.point_step;
     }
+    ofs += pc.row_step;
   }
+  //printf("Read %d points from ROS\n",kpc.points.size());
   return true;
 }
 
@@ -406,7 +427,7 @@ bool KlamptToROS(const RigidTransform& kT,tf::Transform& T)
 
 
 SmartPointer<ros::NodeHandle> gRosNh;
-int gRosQueueSize = 10;
+int gRosQueueSize = 1;
 bool gRosSubscribeError = false;
 string gRosSubscribeErrorWhere;
 
@@ -420,6 +441,7 @@ public:
     this->numMessages = 0;
     sub = ros::Subscriber();
   }
+  virtual void endUpdate() {}
 
   ros::Subscriber sub;
   string topic;
@@ -449,18 +471,29 @@ class ROSSubscriber : public ROSSubscriberBase
 {
 public:
   Type& obj;
+  Msg msg;
   ROSSubscriber(Type& _obj,const std::string& _topic):obj(_obj) {
-    this->topic = topic;
-    sub = gRosNh->subscribe(topic,gRosQueueSize,&ROSSubscriber<Type,Msg>::callback, this);
+    this->topic = _topic;
+    sub = gRosNh->subscribe(_topic,gRosQueueSize,&ROSSubscriber<Type,Msg>::callback, this);
   }
   void callback(const Msg& msg) {
     numMessages++;
     header = msg.header;
-    error = ROSToKlampt(msg,obj);
+    //this->msg = msg;
+    error = (!ROSToKlampt(msg,obj));
     if(error) {
       gRosSubscribeError = true;
       gRosSubscribeErrorWhere = this->topic;
     }
+  }
+  virtual void endUpdate() {
+    /*
+    error = (!ROSToKlampt(msg,obj));
+    if(error) {
+      gRosSubscribeError = true;
+      gRosSubscribeErrorWhere = this->topic;
+    }
+    */
   }
 };
 
@@ -555,6 +588,7 @@ bool RosSubscribe(Type& obj,const string& topic)
   if(!ROSInit()) return false;
   SubscriberList::iterator i=gSubscribers.find(topic); 
   if(i!=gSubscribers.end()) { 
+    printf("ROSSubscribe: Unsubscribing old subscriber to topic %s\n",topic.c_str());
     i->second->unsubscribe();
     i->second = NULL;
   }
@@ -830,6 +864,7 @@ bool ROSSubscribeJointState(Robot& robot,const char* topic)
 }
 bool ROSSubscribePointCloud(Meshing::PointCloud3D& pc,const char* topic)
 {
+  printf("ROSSubscribePointCLoud %s\n",topic);
   return RosSubscribe<Meshing::PointCloud3D,sensor_msgs::PointCloud2>(pc,topic);
 }
 
@@ -841,6 +876,7 @@ bool ROSSubscribeTrajectory(LinearPath& path,const char* topic)
 bool ROSSubscribeUpdate()
 {
   if(gSubscribers.empty() && gPublishers.empty()) return false; 
+  //Timer timer;
   for(SubscriberList::iterator i=gSubscribers.begin();i!=gSubscribers.end();i++)
     i->second->numMessages = 0;
   gRosSubscribeError = false;
@@ -850,13 +886,19 @@ bool ROSSubscribeUpdate()
     ROSTfSubscriber* tf=dynamic_cast<ROSTfSubscriber*>((ROSSubscriberBase*)gSubscribers["tf"]);
     if(tf != NULL) tf->update();
   }
+  bool updated = false;
+  for(SubscriberList::iterator i=gSubscribers.begin();i!=gSubscribers.end();i++)
+    if(i->second->numMessages > 0) {
+      //printf("%d updates to %s\n",i->second->numMessages,i->second->topic.c_str());
+      updated = true;
+      i->second->endUpdate();
+    }
+  //printf("ROS Update in time %gs\n",timer.ElapsedTime());
   if(gRosSubscribeError) {
     fprintf(stderr,"ROS: Error converting topic %s to Klampt format\n",gRosSubscribeErrorWhere.c_str());
     return false;
   }
-  for(SubscriberList::iterator i=gSubscribers.begin();i!=gSubscribers.end();i++)
-    if(i->second->numMessages > 0) return true;
-  return false;
+  return updated;
 }
 
 bool ROSDetach(const char* topic)

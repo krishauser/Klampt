@@ -177,15 +177,7 @@ bool RigidObject::LoadGeometry(const char* fn)
 {
   if(geomFile.empty()) geomFile = fn;
 
-  if(0==strncmp(fn,"ros://",6)) {
-    //it's a ROS topic
-    if(!ROSInit()) return false;
-    this->geometry = Geometry::AnyCollisionGeometry3D(Meshing::PointCloud3D());
-    Meshing::PointCloud3D& pc = this->geometry.AsPointCloud();
-    printf("RigidObject subscribing to point cloud on ROS topic %s\n",fn+5);
-    return ROSSubscribePointCloud(pc,fn+5);
-  }
-  else if(0==strncmp(fn,"ros://PointCloud/",17)) {
+  if(0==strncmp(fn,"ros:PointCloud2//",17)) {
     //it's a ROS topic
     if(!ROSInit()) return false;
     this->geometry = Geometry::AnyCollisionGeometry3D(Meshing::PointCloud3D());
@@ -193,6 +185,15 @@ bool RigidObject::LoadGeometry(const char* fn)
     printf("RigidObject subscribing to point cloud on ROS topic %s\n",fn+16);
     return ROSSubscribePointCloud(pc,fn+16);
   }
+  else if(0==strncmp(fn,"ros://",6)) {
+    //it's a ROS topic
+    if(!ROSInit()) return false;
+    this->geometry = Geometry::AnyCollisionGeometry3D(Meshing::PointCloud3D());
+    Meshing::PointCloud3D& pc = this->geometry.AsPointCloud();
+    printf("RigidObject subscribing to point cloud on ROS topic %s\n",fn+5);
+    return ROSSubscribePointCloud(pc,fn+5);
+  }
+  
   //TODO: ROS Mesh messages?
 
   const char* ext=FileExtension(fn);
