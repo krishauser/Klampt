@@ -947,6 +947,13 @@ bool ROSWaitForUpdate(const char* topic,double timeout)
   return false;
 }
 
+bool ROSHadUpdate(const char* topic)
+{
+  if(gSubscribers.count(topic) == 0) return false;
+  ROSSubscriberBase* s = gSubscribers[topic];
+  return s->numMessages > 0;
+}
+
 #else
 
 bool ROSInit() { fprintf(stderr,"ROSInit(): Klamp't was not built with ROS support\n"); return false; }
@@ -979,6 +986,7 @@ int ROSNumPublishedTopics() { return 0; }
 bool ROSIsConnected(const char* topic) { return false; }
 std::string ROSFrame(const char* topic) { return ""; }
 bool ROSWaitForUpdate(const char* topic,double timeout) { return false; }
+bool ROSHadUpdate(const char* topic) { return false; }
 
 #endif //HAVE_ROS
 

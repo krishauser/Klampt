@@ -36,6 +36,8 @@ std::string ROSFrame(const char* topic);
 ///If this is not subscribed to, it returns false immediately.
 ///Note: does not work for the "tf" topic yet.
 bool ROSWaitForUpdate(const char* topic,double timeout=0);
+///Returns true if the ROS topic had an update on the past ROSSubscribeUpdate step
+bool ROSHadUpdate(const char* topic);
 ///Sets the global queue size
 bool ROSSetQueueSize(int size);
 
