@@ -956,7 +956,8 @@ bool ROSHadUpdate(const char* topic)
 
 #else
 
-bool ROSInit() { fprintf(stderr,"ROSInit(): Klamp't was not built with ROS support\n"); return false; }
+#include "Modeling/World.h"
+bool ROSInit(const char* nodename) { fprintf(stderr,"ROSInit(): Klamp't was not built with ROS support\n"); return false; }
 bool ROSShutdown() { return false; }
 bool ROSSetQueueSize(int size) { return false; }
 bool ROSPublishTransforms(const RobotWorld& world,const char* frameprefix) { return false; }
