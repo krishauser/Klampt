@@ -97,6 +97,7 @@ class GLWidgetPlugin(GLPluginBase):
 
 try:
     from PyQt4.QtCore import *
+    from PyQt4.QtGui import *
     _PyQtAvailable = True
 except ImportError:
     print "QT is not available... try sudo apt-get install python-qt4 python-qt4-gl"
