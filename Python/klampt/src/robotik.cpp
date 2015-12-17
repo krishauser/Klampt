@@ -191,6 +191,20 @@ void IKObjective::getTransform(double out[9],double out2[3]) const
   }
 }
 
+bool IKObjective::loadString(const char* str)
+{
+  stringstream ss(str);
+  ss>>goal;
+  if(ss) return true;
+  return false;
+}
+
+std::string IKObjective::saveString() const
+{
+  stringstream ss;
+  ss<<goal;
+  return ss.str();
+}
 
 GeneralizedIKObjective::GeneralizedIKObjective(const GeneralizedIKObjective& obj)
   :link1(obj.link1),link2(obj.link2),obj1(obj.obj1),obj2(obj.obj2),
