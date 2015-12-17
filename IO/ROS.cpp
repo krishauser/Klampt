@@ -970,8 +970,8 @@ bool ROSPublishPointCloud(const Meshing::PointCloud3D& pc,const char* topic) { r
 bool ROSPublishTrajectory(const LinearPath& T,const char* topic) { return false; }
 bool ROSPublishTrajectory(const Robot& robot,const LinearPath& path,const char* topic) { return false; }
 bool ROSPublishTrajectory(const Robot& robot,const vector<int>& indices,const LinearPath& path,const char* topic) { return false; }
-bool ROSPublishCommandedJointState(const ControlledRobotSimulator& robot,const char* topic) { return false; }
-bool ROSPublishSensedJointState(const ControlledRobotSimulator& robot,const char* topic) { return false; }
+bool ROSPublishCommandedJointState(ControlledRobotSimulator& robot,const char* topic) { return false; }
+bool ROSPublishSensedJointState(ControlledRobotSimulator& robot,const char* topic) { return false; }
 bool ROSSubscribeTransforms(RobotWorld& world,const char* frameprefix) { return false; }
 bool ROSSubscribeTransforms(Robot& robot,const char* frameprefix) { return false; }
 bool ROSSubscribeTransform(RigidTransform& T,const char* frameprefix) { return false; }
