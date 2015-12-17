@@ -605,6 +605,7 @@ def console_edit(name,value,type,description=None,world=None,frame=None):
         print "Enter the new desired value below.  You may use native text,"
         print "JSON strings, or file(fn) to indicate a file name."
         print "New value >",
+        import json
         data = raw_input()
         if data.startswith('{') or data.startswith('['):
             jsonobj = json.loads(data)
