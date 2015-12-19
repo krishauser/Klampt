@@ -1649,7 +1649,9 @@ void Robot::Mount(int link, const Geometry::AnyGeometry3D& mesh,
     mergeMeshes[0] = *geometry[link];
     mergeMeshes[1] = mesh;
     mergeMeshes[1].Transform(Matrix4(T));
+    geomManagers[link].RemoveFromCache();
     geometry[link]->Merge(mergeMeshes);
+    geomManagers[link].SetUniqueAppearance();
     geomManagers[link].Appearance()->Set(*geometry[link]);
   }
   //need to reinitialize all self collisions with this mesh
@@ -2721,17 +2723,17 @@ bool Robot::LoadURDF(const char* fn)
 		    //return false;
 		  }
 		  if(this->geometry[link_index]) {
-		    cout<<"Geometry "<<geomFiles[link_index]<<" has "<<this->geometry[link_index]->NumElements()<<" triangles"<<endl;
+		    //cout<<"Geometry "<<geomFiles[link_index]<<" has "<<this->geometry[link_index]->NumElements()<<" triangles"<<endl;
 		    
 		    //set up color
 		    if(linkNode->link->visual && linkNode->link->visual->material) {
 		      urdf::Color c=linkNode->link->visual->material->color;
+		      this->geomManagers[link_index].SetUniqueAppearance();
 		      this->geomManagers[link_index].Appearance()->faceColor.set(c.r,c.g,c.b,c.a);
 		    }
 		    Matrix4 ident; ident.setIdentity();
-		    if(linkNode->geomScale != ident) {
+		    if(!linkNode->geomScale.isEqual(ident)) {
 		      this->geomManagers[link_index].TransformGeometry(linkNode->geomScale);
-		      //this->geometry[link_index]->Transform(linkNode->geomScale);
 		    }
 		  }
 		}
