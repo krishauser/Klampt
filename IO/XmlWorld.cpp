@@ -296,6 +296,7 @@ class XmlViewTerrain
   XmlViewTerrain(TiXmlElement* element,const string& _path) : e(element),path(_path) {}
   bool Get(Terrain& terrain)
   {
+    terrain.geometry.SetUniqueAppearance();
     Texturizer tex;
     //checker by default
     tex.texture = "checker";
@@ -366,6 +367,7 @@ class XmlAppearance
   XmlAppearance(TiXmlElement* element) : e(element) {}
   bool Get(ManagedGeometry& geom)
   {
+    geom.SetUniqueAppearance();
     if(e->Attribute("color")) {
       Vector3 rgb;
       stringstream ss(e->Attribute("color"));
@@ -373,7 +375,6 @@ class XmlAppearance
       Real a=1.0;
       if(ss >> a) { }
       else a=1.0;
-      geom.SetUniqueAppearance();
       geom.Appearance()->faceColor.set(rgb.x,rgb.y,rgb.z,a);
       geom.Appearance()->vertexColor.set(rgb.x,rgb.y,rgb.z,a);
     }
