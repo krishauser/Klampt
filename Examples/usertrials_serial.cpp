@@ -95,14 +95,14 @@ public:
     drawPath = 0;
     drawUI = 1;
 
-    controller = new PolynomialPathController(*world->robots[0].robot);
+    controller = new PolynomialPathController(*world->robots[0]);
     robotInterface = new DefaultMotionQueueInterface(controller);
     connected = false;
     CopyWorld(*world,planningWorld);
     planningWorld.InitCollisions();
-    Robot* robot = planningWorld.robots[0].robot;
+    Robot* robot = planningWorld.robots[0];
     for(size_t i=0;i<robot->geometry.size();i++) {
-      robot->geometry[i].margin += collisionMargin;
+      robot->geometry[i]->margin += collisionMargin;
     }
 
     uis.resize(0);
@@ -152,7 +152,7 @@ public:
 
   virtual void RenderWorld()
   {
-    Robot* robot=world->robots[0].robot;
+    Robot* robot=world->robots[0];
 
     //update actual configuration from sensors
     if(connected && controller->sensors != NULL) {
@@ -326,11 +326,11 @@ public:
       break;
     case COLLISION_MARGIN_SPINNER_ID:
       {
-	Robot* robot = planningWorld.robots[0].robot;
+	Robot* robot = planningWorld.robots[0];
 	for(size_t i=0;i<robot->geometry.size();i++)
-	  robot->geometry[i].margin -= oldCollisionMargin;
+	  robot->geometry[i]->margin -= oldCollisionMargin;
 	for(size_t i=0;i<robot->geometry.size();i++)
-	  robot->geometry[i].margin += collisionMargin;
+	  robot->geometry[i]->margin += collisionMargin;
 	oldCollisionMargin = collisionMargin;
       }
       break;
