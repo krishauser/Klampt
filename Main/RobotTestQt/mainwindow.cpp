@@ -43,7 +43,7 @@ bool MainWindow::Initialize(int _argc,const char** _argv)
     connect(ui->spn_driver,SIGNAL(valueChanged(double)),gui,SLOT(SetDriverValue(double)));
     connect(ui->spn_link,SIGNAL(valueChanged(double)),gui,SLOT(SetLinkValue(double)));
 
-    rob=world.robots[0].robot;
+    rob=world.robots[0];
 
     //fill GUI info
     for(int i=0;i<rob->linkNames.size();i++)

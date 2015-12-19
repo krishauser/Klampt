@@ -27,7 +27,6 @@ void MainWindow::Initialize(int argc,const char** argv)
 
   gui=new QRobotPoseGUI(ui->displaywidget,backend);
   ui->displaywidget->SetGUI(gui);
-
     backend->Start();
 
     gui->resource_frame=ui->frame_resources;
@@ -46,7 +45,7 @@ void MainWindow::Initialize(int argc,const char** argv)
     connect(ui->spn_driver,SIGNAL(valueChanged(double)),gui,SLOT(SetDriverValue(double)));
     connect(ui->spn_link,SIGNAL(valueChanged(double)),gui,SLOT(SetLinkValue(double)));
 
-    Robot* rob=world.robots[0].robot;
+    Robot* rob=world.robots[0];
 
     //fill GUI info
     for(int i=0;i<rob->linkNames.size();i++)
@@ -148,7 +147,7 @@ void MainWindow::SetDriver(int index){
 
 //this information is shared via pointer, not message passing
 void MainWindow::UpdateDriverParameters(){
-    Robot* rob=world.robots[0].robot;
+    Robot* rob=world.robots[0];
     bool oldState = ui->spn_driver->blockSignals(true);
 #define NUM(x) QString::number(x)
   RobotJointDriver dr=rob->drivers[gui->driver_index];
@@ -170,7 +169,7 @@ void MainWindow::SetLink(int index){
 }
 
 void MainWindow::UpdateLinkValue(){
-    Robot* rob=world.robots[0].robot;
+    Robot* rob=world.robots[0];
     bool oldState = ui->spn_link->blockSignals(true);
     ui->spn_link->setValue(rob->q[gui->link_index]);
     UpdateLinkSlider(rob->q[gui->link_index]);
@@ -178,7 +177,7 @@ void MainWindow::UpdateLinkValue(){
 }
 
 void MainWindow::UpdateDriverValue(){
-    Robot* rob=world.robots[0].robot;
+    Robot* rob=world.robots[0];
     bool oldState = ui->spn_driver->blockSignals(true);
     ui->spn_driver->setValue(rob->GetDriverValue(gui->driver_index));
     UpdateDriverSlider(rob->GetDriverValue(gui->driver_index));
@@ -203,7 +202,7 @@ void MainWindow::UpdateDriverSlider(double value){
 
 //this information is shared via pointer, not message passing
 void MainWindow::UpdateLinkParameters(){
-    Robot* rob=world.robots[0].robot;
+    Robot* rob=world.robots[0];
 #define NUM(x) QString::number(x)
   QString link_info=QString("[%1 %2], T [%3,%4]").arg(NUM(rob->velMin(gui->link_index)),NUM(rob->velMax(gui->link_index)),NUM(-rob->torqueMax(gui->link_index)),NUM(rob->torqueMax(gui->link_index)));
   ui->lbl_link_info->setText(link_info);
