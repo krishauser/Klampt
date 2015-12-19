@@ -13,10 +13,14 @@ struct ViewRobot
 {
   ViewRobot(Robot* robot=NULL);
   ~ViewRobot();
+  ///Draws the whole robot
   void Draw(Robot* robot);
+  ///Draws the whole robot
   void Draw();
-  void DrawLink_Local(int i,bool keepAppearance=true);  //draws the geometry in its local frame
-  void DrawLink_World(int i,bool keepAppearance=true);  //draws the geometry in the world frame
+  ///draws link i's geometry in its local frame
+  void DrawLink_Local(int i,bool keepAppearance=true); 
+  ///draws link i's geometry in the world frame
+  void DrawLink_World(int i,bool keepAppearance=true); 
   void DrawCenterOfMass(Real radius = 0.05);
   void DrawLinkCenterOfMass(int i,Real radius = 0.05);
   void DrawLinkFrames(Real size = 0.1);
@@ -26,9 +30,21 @@ struct ViewRobot
   void SetColor(int i,const GLDraw::GLColor& c);
   void SetGrey();
   void SetTorqueColors(const Vector& t);
+  ///gets the currently active appearance
+  GLDraw::GeometryAppearance& Appearance(int link);
+  ///pushes a new active appearance
+  void PushAppearance();
+  ///pops the last active appearance
+  void PopAppearance();
+  ///restores the base appearance
+  void RestoreAppearance();
+  ///easy way to save/restore appearance
+  vector<GLDraw::GeometryAppearance> GetAppearance();
+  ///easy way to save/restore appearance
+  void SetAppearance(const vector<GLDraw::GeometryAppearance>& );
 
   Robot* robot;
-  vector<GLDraw::GeometryAppearance> linkAppearance;
+  vector< vector<GLDraw::GeometryAppearance> > appearanceStack;
 };
 
 #endif

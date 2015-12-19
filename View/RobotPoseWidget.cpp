@@ -6,6 +6,13 @@
 #include <map>
 using namespace GLDraw;
 
+void Modulate(GLDraw::GeometryAppearance& app,const GLColor& color,Real fraction)
+{
+  //TODO: implement blending with vertex colors?
+  app.faceColor.blend(GLColor(app.faceColor),color,fraction);
+  app.vertexColor.blend(GLColor(app.vertexColor),color,fraction);
+}
+
 RobotLinkPoseWidget::RobotLinkPoseWidget()
   :robot(NULL),viewRobot(NULL),highlightColor(1,1,0,1),hoverLink(-1),draw(true)
 {}
@@ -36,9 +43,9 @@ bool RobotLinkPoseWidget::Hover(int x,int y,Camera::Viewport& viewport,double& d
   robot->UpdateConfig(poseConfig);
   robot->UpdateGeometry();
   for(size_t i=0;i<robot->links.size();i++) {
-    if(robot->geometry[i].Empty()) continue;
+    if(robot->IsGeometryEmpty(i)) continue;
     Real dist;
-    if(robot->geometry[i].RayCast(r,&dist)) {
+    if(robot->geometry[i]->RayCast(r,&dist)) {
       if(dist < distance) {
 	distance = dist;
 	Vector3 worldpt = r.source + dist*r.direction;
@@ -112,20 +119,20 @@ void RobotLinkPoseWidget::DrawGL(Camera::Viewport& viewport)
 {
   if(draw) {
     robot->UpdateConfig(poseConfig);
-    if(!poserAppearance.empty()) 
-      swap(poserAppearance,viewRobot->linkAppearance);
-    vector<GLColor> oldColors(highlightedLinks.size());
-    for(size_t i=0;i<highlightedLinks.size();i++)
-      oldColors[i] = viewRobot->linkAppearance[highlightedLinks[i]].faceColor;
+    viewRobot->PushAppearance();
+    for(size_t i=0;i<poserAppearance.size();i++)
+      viewRobot->Appearance(i) = poserAppearance[i];
     if(hasHighlight || hasFocus) {
       for(size_t i=0;i<highlightedLinks.size();i++)
-	viewRobot->linkAppearance[highlightedLinks[i]].faceColor = highlightColor;
+	Modulate(viewRobot->Appearance(highlightedLinks[i]),highlightColor,0.5);
     }
     viewRobot->Draw();
-    for(size_t i=0;i<highlightedLinks.size();i++)
-      viewRobot->linkAppearance[highlightedLinks[i]].faceColor = oldColors[i];
-    if(!poserAppearance.empty()) 
-      swap(poserAppearance,viewRobot->linkAppearance);
+    //copy display lists, if not already initialized
+    for(size_t i=0;i<poserAppearance.size();i++) {
+      if(!poserAppearance[i].vertexDisplayList)
+	poserAppearance[i] = viewRobot->Appearance(i);
+    }
+    viewRobot->PopAppearance();
 
     if(affectedLink >= 0 && (hasHighlight || hasFocus)) {
       //draw joint position widget
