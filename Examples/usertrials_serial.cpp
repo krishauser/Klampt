@@ -161,23 +161,25 @@ public:
       if(controller->GetSensedConfig(q))
 	robot->UpdateConfig(q);
       communicationData.mutex.unlock();
-      world->robots[0].view.SetGrey();
+      world->robotViews[0].RestoreAppearance();
     }
     WorldViewProgram::RenderWorld();
 
     //draw current commanded configuration -- transparent
     if(connected && controller->command != NULL) {
       GLColor newColor(0,1,0,0.5);
-      world->robots[0].view.SetColors(newColor);
+      world->robotViews[0].PushAppearance();
+      world->robotViews[0].SetColors(newColor);
       Config q;
       communicationData.mutex.lock();
       if(controller->GetCommandedConfig(q)) {
 	communicationData.mutex.unlock();
 	robot->UpdateConfig(q);
-	world->robots[0].view.Draw();
+	world->robotViews[0].Draw();
       }
       else
 	communicationData.mutex.unlock();
+      world->robotViews[0].PopAppearance();
     }
 
     if(drawDesired && connected) {
@@ -185,8 +187,10 @@ public:
       Config curBest;
       robotInterface->GetEndConfig(curBest);
       robot->UpdateConfig(curBest); 
-      world->robots[0].view.SetColors(GLColor(1,1,0,0.5));
-      world->robots[0].view.Draw();
+      world->robotViews[0].PushAppearance();
+      world->robotViews[0].SetColors(GLColor(1,1,0,0.5));
+      world->robotViews[0].Draw();
+      world->robotViews[0].PopAppearance();
       communicationData.mutex.unlock();
       /*
       if(curGoal) {
