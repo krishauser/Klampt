@@ -1434,6 +1434,19 @@ class Geometry3D(_object):
         return _robotsim.Geometry3D_saveFile(self, fn)
 
 
+    def attachToStream(self, *args):
+        """
+        attachToStream(Geometry3D self, char const * protocol, char const * name, char const * type) -> bool
+        attachToStream(Geometry3D self, char const * protocol, char const * name) -> bool
+        """
+        return _robotsim.Geometry3D_attachToStream(self, *args)
+
+
+    def detachFromStream(self, protocol, name):
+        """detachFromStream(Geometry3D self, char const * protocol, char const * name) -> bool"""
+        return _robotsim.Geometry3D_detachFromStream(self, protocol, name)
+
+
     def setCurrentTransform(self, R, t):
         """
         setCurrentTransform(Geometry3D self, double const [9] R, double const [3] t)
@@ -1611,9 +1624,12 @@ class Appearance(_object):
     __swig_destroy__ = _robotsim.delete_Appearance
     __del__ = lambda self: None
 
-    def refresh(self):
-        """refresh(Appearance self)"""
-        return _robotsim.Appearance_refresh(self)
+    def refresh(self, deep=True):
+        """
+        refresh(Appearance self, bool deep=True)
+        refresh(Appearance self)
+        """
+        return _robotsim.Appearance_refresh(self, deep)
 
 
     def clone(self):
@@ -1689,6 +1705,11 @@ class Appearance(_object):
     def setTexcoords(self, uvs):
         """setTexcoords(Appearance self, doubleVector uvs)"""
         return _robotsim.Appearance_setTexcoords(self, uvs)
+
+
+    def setPointSize(self, size):
+        """setPointSize(Appearance self, float size)"""
+        return _robotsim.Appearance_setPointSize(self, size)
 
 
     def drawGL(self, *args):
@@ -4239,6 +4260,16 @@ class IKObjective(_object):
         For fixed-transform constraints, returns the transform (R,T) 
         """
         return _robotsim.IKObjective_getTransform(self)
+
+
+    def loadString(self, str):
+        """loadString(IKObjective self, char const * str) -> bool"""
+        return _robotsim.IKObjective_loadString(self, str)
+
+
+    def saveString(self):
+        """saveString(IKObjective self) -> std::string"""
+        return _robotsim.IKObjective_saveString(self)
 
     __swig_setmethods__["goal"] = _robotsim.IKObjective_goal_set
     __swig_getmethods__["goal"] = _robotsim.IKObjective_goal_get

@@ -2972,31 +2972,31 @@ SWIG_Python_NonDynamicSetAttr(PyObject *obj, PyObject *name, PyObject *value) {
 
 #define SWIGTYPE_p_Appearance swig_types[0]
 #define SWIGTYPE_p_ContactParameters swig_types[1]
-#define SWIGTYPE_p_Environment swig_types[2]
-#define SWIGTYPE_p_GeneralizedIKObjective swig_types[3]
-#define SWIGTYPE_p_GeneralizedIKSolver swig_types[4]
-#define SWIGTYPE_p_GeometricPrimitive swig_types[5]
-#define SWIGTYPE_p_Geometry3D swig_types[6]
-#define SWIGTYPE_p_IKGoal swig_types[7]
-#define SWIGTYPE_p_IKObjective swig_types[8]
-#define SWIGTYPE_p_IKSolver swig_types[9]
-#define SWIGTYPE_p_Mass swig_types[10]
-#define SWIGTYPE_p_ODEGeometry swig_types[11]
-#define SWIGTYPE_p_ObjectPoser swig_types[12]
-#define SWIGTYPE_p_PointCloud swig_types[13]
-#define SWIGTYPE_p_PointPoser swig_types[14]
-#define SWIGTYPE_p_RigidObject swig_types[15]
-#define SWIGTYPE_p_RigidObjectModel swig_types[16]
-#define SWIGTYPE_p_Robot swig_types[17]
-#define SWIGTYPE_p_RobotModel swig_types[18]
-#define SWIGTYPE_p_RobotModelDriver swig_types[19]
-#define SWIGTYPE_p_RobotModelLink swig_types[20]
-#define SWIGTYPE_p_RobotPoser swig_types[21]
-#define SWIGTYPE_p_SensorBase swig_types[22]
-#define SWIGTYPE_p_SimBody swig_types[23]
-#define SWIGTYPE_p_SimRobotController swig_types[24]
-#define SWIGTYPE_p_SimRobotSensor swig_types[25]
-#define SWIGTYPE_p_Simulator swig_types[26]
+#define SWIGTYPE_p_GeneralizedIKObjective swig_types[2]
+#define SWIGTYPE_p_GeneralizedIKSolver swig_types[3]
+#define SWIGTYPE_p_GeometricPrimitive swig_types[4]
+#define SWIGTYPE_p_Geometry3D swig_types[5]
+#define SWIGTYPE_p_IKGoal swig_types[6]
+#define SWIGTYPE_p_IKObjective swig_types[7]
+#define SWIGTYPE_p_IKSolver swig_types[8]
+#define SWIGTYPE_p_Mass swig_types[9]
+#define SWIGTYPE_p_ODEGeometry swig_types[10]
+#define SWIGTYPE_p_ObjectPoser swig_types[11]
+#define SWIGTYPE_p_PointCloud swig_types[12]
+#define SWIGTYPE_p_PointPoser swig_types[13]
+#define SWIGTYPE_p_RigidObject swig_types[14]
+#define SWIGTYPE_p_RigidObjectModel swig_types[15]
+#define SWIGTYPE_p_Robot swig_types[16]
+#define SWIGTYPE_p_RobotModel swig_types[17]
+#define SWIGTYPE_p_RobotModelDriver swig_types[18]
+#define SWIGTYPE_p_RobotModelLink swig_types[19]
+#define SWIGTYPE_p_RobotPoser swig_types[20]
+#define SWIGTYPE_p_SensorBase swig_types[21]
+#define SWIGTYPE_p_SimBody swig_types[22]
+#define SWIGTYPE_p_SimRobotController swig_types[23]
+#define SWIGTYPE_p_SimRobotSensor swig_types[24]
+#define SWIGTYPE_p_Simulator swig_types[25]
+#define SWIGTYPE_p_Terrain swig_types[26]
 #define SWIGTYPE_p_TerrainModel swig_types[27]
 #define SWIGTYPE_p_TransformPoser swig_types[28]
 #define SWIGTYPE_p_TriangleMesh swig_types[29]
@@ -19261,6 +19261,252 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_Geometry3D_attachToStream__SWIG_0(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Geometry3D *arg1 = (Geometry3D *) 0 ;
+  char *arg2 = (char *) 0 ;
+  char *arg3 = (char *) 0 ;
+  char *arg4 = (char *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int res2 ;
+  char *buf2 = 0 ;
+  int alloc2 = 0 ;
+  int res3 ;
+  char *buf3 = 0 ;
+  int alloc3 = 0 ;
+  int res4 ;
+  char *buf4 = 0 ;
+  int alloc4 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  PyObject * obj2 = 0 ;
+  PyObject * obj3 = 0 ;
+  bool result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OOOO:Geometry3D_attachToStream",&obj0,&obj1,&obj2,&obj3)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Geometry3D, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Geometry3D_attachToStream" "', argument " "1"" of type '" "Geometry3D *""'"); 
+  }
+  arg1 = reinterpret_cast< Geometry3D * >(argp1);
+  res2 = SWIG_AsCharPtrAndSize(obj1, &buf2, NULL, &alloc2);
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "Geometry3D_attachToStream" "', argument " "2"" of type '" "char const *""'");
+  }
+  arg2 = reinterpret_cast< char * >(buf2);
+  res3 = SWIG_AsCharPtrAndSize(obj2, &buf3, NULL, &alloc3);
+  if (!SWIG_IsOK(res3)) {
+    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "Geometry3D_attachToStream" "', argument " "3"" of type '" "char const *""'");
+  }
+  arg3 = reinterpret_cast< char * >(buf3);
+  res4 = SWIG_AsCharPtrAndSize(obj3, &buf4, NULL, &alloc4);
+  if (!SWIG_IsOK(res4)) {
+    SWIG_exception_fail(SWIG_ArgError(res4), "in method '" "Geometry3D_attachToStream" "', argument " "4"" of type '" "char const *""'");
+  }
+  arg4 = reinterpret_cast< char * >(buf4);
+  {
+    try {
+      result = (bool)(arg1)->attachToStream((char const *)arg2,(char const *)arg3,(char const *)arg4);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_From_bool(static_cast< bool >(result));
+  if (alloc2 == SWIG_NEWOBJ) delete[] buf2;
+  if (alloc3 == SWIG_NEWOBJ) delete[] buf3;
+  if (alloc4 == SWIG_NEWOBJ) delete[] buf4;
+  return resultobj;
+fail:
+  if (alloc2 == SWIG_NEWOBJ) delete[] buf2;
+  if (alloc3 == SWIG_NEWOBJ) delete[] buf3;
+  if (alloc4 == SWIG_NEWOBJ) delete[] buf4;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Geometry3D_attachToStream__SWIG_1(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Geometry3D *arg1 = (Geometry3D *) 0 ;
+  char *arg2 = (char *) 0 ;
+  char *arg3 = (char *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int res2 ;
+  char *buf2 = 0 ;
+  int alloc2 = 0 ;
+  int res3 ;
+  char *buf3 = 0 ;
+  int alloc3 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  PyObject * obj2 = 0 ;
+  bool result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OOO:Geometry3D_attachToStream",&obj0,&obj1,&obj2)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Geometry3D, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Geometry3D_attachToStream" "', argument " "1"" of type '" "Geometry3D *""'"); 
+  }
+  arg1 = reinterpret_cast< Geometry3D * >(argp1);
+  res2 = SWIG_AsCharPtrAndSize(obj1, &buf2, NULL, &alloc2);
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "Geometry3D_attachToStream" "', argument " "2"" of type '" "char const *""'");
+  }
+  arg2 = reinterpret_cast< char * >(buf2);
+  res3 = SWIG_AsCharPtrAndSize(obj2, &buf3, NULL, &alloc3);
+  if (!SWIG_IsOK(res3)) {
+    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "Geometry3D_attachToStream" "', argument " "3"" of type '" "char const *""'");
+  }
+  arg3 = reinterpret_cast< char * >(buf3);
+  {
+    try {
+      result = (bool)(arg1)->attachToStream((char const *)arg2,(char const *)arg3);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_From_bool(static_cast< bool >(result));
+  if (alloc2 == SWIG_NEWOBJ) delete[] buf2;
+  if (alloc3 == SWIG_NEWOBJ) delete[] buf3;
+  return resultobj;
+fail:
+  if (alloc2 == SWIG_NEWOBJ) delete[] buf2;
+  if (alloc3 == SWIG_NEWOBJ) delete[] buf3;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Geometry3D_attachToStream(PyObject *self, PyObject *args) {
+  int argc;
+  PyObject *argv[5] = {
+    0
+  };
+  int ii;
+  
+  if (!PyTuple_Check(args)) SWIG_fail;
+  argc = args ? (int)PyObject_Length(args) : 0;
+  for (ii = 0; (ii < 4) && (ii < argc); ii++) {
+    argv[ii] = PyTuple_GET_ITEM(args,ii);
+  }
+  if (argc == 3) {
+    int _v;
+    void *vptr = 0;
+    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_Geometry3D, 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      int res = SWIG_AsCharPtrAndSize(argv[1], 0, NULL, 0);
+      _v = SWIG_CheckState(res);
+      if (_v) {
+        int res = SWIG_AsCharPtrAndSize(argv[2], 0, NULL, 0);
+        _v = SWIG_CheckState(res);
+        if (_v) {
+          return _wrap_Geometry3D_attachToStream__SWIG_1(self, args);
+        }
+      }
+    }
+  }
+  if (argc == 4) {
+    int _v;
+    void *vptr = 0;
+    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_Geometry3D, 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      int res = SWIG_AsCharPtrAndSize(argv[1], 0, NULL, 0);
+      _v = SWIG_CheckState(res);
+      if (_v) {
+        int res = SWIG_AsCharPtrAndSize(argv[2], 0, NULL, 0);
+        _v = SWIG_CheckState(res);
+        if (_v) {
+          int res = SWIG_AsCharPtrAndSize(argv[3], 0, NULL, 0);
+          _v = SWIG_CheckState(res);
+          if (_v) {
+            return _wrap_Geometry3D_attachToStream__SWIG_0(self, args);
+          }
+        }
+      }
+    }
+  }
+  
+fail:
+  SWIG_SetErrorMsg(PyExc_NotImplementedError,"Wrong number or type of arguments for overloaded function 'Geometry3D_attachToStream'.\n"
+    "  Possible C/C++ prototypes are:\n"
+    "    Geometry3D::attachToStream(char const *,char const *,char const *)\n"
+    "    Geometry3D::attachToStream(char const *,char const *)\n");
+  return 0;
+}
+
+
+SWIGINTERN PyObject *_wrap_Geometry3D_detachFromStream(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Geometry3D *arg1 = (Geometry3D *) 0 ;
+  char *arg2 = (char *) 0 ;
+  char *arg3 = (char *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int res2 ;
+  char *buf2 = 0 ;
+  int alloc2 = 0 ;
+  int res3 ;
+  char *buf3 = 0 ;
+  int alloc3 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  PyObject * obj2 = 0 ;
+  bool result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OOO:Geometry3D_detachFromStream",&obj0,&obj1,&obj2)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Geometry3D, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Geometry3D_detachFromStream" "', argument " "1"" of type '" "Geometry3D *""'"); 
+  }
+  arg1 = reinterpret_cast< Geometry3D * >(argp1);
+  res2 = SWIG_AsCharPtrAndSize(obj1, &buf2, NULL, &alloc2);
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "Geometry3D_detachFromStream" "', argument " "2"" of type '" "char const *""'");
+  }
+  arg2 = reinterpret_cast< char * >(buf2);
+  res3 = SWIG_AsCharPtrAndSize(obj2, &buf3, NULL, &alloc3);
+  if (!SWIG_IsOK(res3)) {
+    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "Geometry3D_detachFromStream" "', argument " "3"" of type '" "char const *""'");
+  }
+  arg3 = reinterpret_cast< char * >(buf3);
+  {
+    try {
+      result = (bool)(arg1)->detachFromStream((char const *)arg2,(char const *)arg3);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_From_bool(static_cast< bool >(result));
+  if (alloc2 == SWIG_NEWOBJ) delete[] buf2;
+  if (alloc3 == SWIG_NEWOBJ) delete[] buf3;
+  return resultobj;
+fail:
+  if (alloc2 == SWIG_NEWOBJ) delete[] buf2;
+  if (alloc3 == SWIG_NEWOBJ) delete[] buf3;
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_Geometry3D_setCurrentTransform(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   Geometry3D *arg1 = (Geometry3D *) 0 ;
@@ -20270,7 +20516,49 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_Appearance_refresh(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_Appearance_refresh__SWIG_0(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Appearance *arg1 = (Appearance *) 0 ;
+  bool arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  bool val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:Appearance_refresh",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Appearance, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Appearance_refresh" "', argument " "1"" of type '" "Appearance *""'"); 
+  }
+  arg1 = reinterpret_cast< Appearance * >(argp1);
+  ecode2 = SWIG_AsVal_bool(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Appearance_refresh" "', argument " "2"" of type '" "bool""'");
+  } 
+  arg2 = static_cast< bool >(val2);
+  {
+    try {
+      (arg1)->refresh(arg2);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Appearance_refresh__SWIG_1(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   Appearance *arg1 = (Appearance *) 0 ;
   void *argp1 = 0 ;
@@ -20300,6 +20588,52 @@ SWIGINTERN PyObject *_wrap_Appearance_refresh(PyObject *SWIGUNUSEDPARM(self), Py
   return resultobj;
 fail:
   return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Appearance_refresh(PyObject *self, PyObject *args) {
+  int argc;
+  PyObject *argv[3] = {
+    0
+  };
+  int ii;
+  
+  if (!PyTuple_Check(args)) SWIG_fail;
+  argc = args ? (int)PyObject_Length(args) : 0;
+  for (ii = 0; (ii < 2) && (ii < argc); ii++) {
+    argv[ii] = PyTuple_GET_ITEM(args,ii);
+  }
+  if (argc == 1) {
+    int _v;
+    void *vptr = 0;
+    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_Appearance, 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      return _wrap_Appearance_refresh__SWIG_1(self, args);
+    }
+  }
+  if (argc == 2) {
+    int _v;
+    void *vptr = 0;
+    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_Appearance, 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      {
+        int res = SWIG_AsVal_bool(argv[1], NULL);
+        _v = SWIG_CheckState(res);
+      }
+      if (_v) {
+        return _wrap_Appearance_refresh__SWIG_0(self, args);
+      }
+    }
+  }
+  
+fail:
+  SWIG_SetErrorMsg(PyExc_NotImplementedError,"Wrong number or type of arguments for overloaded function 'Appearance_refresh'.\n"
+    "  Possible C/C++ prototypes are:\n"
+    "    Appearance::refresh(bool)\n"
+    "    Appearance::refresh()\n");
+  return 0;
 }
 
 
@@ -21510,6 +21844,48 @@ SWIGINTERN PyObject *_wrap_Appearance_setTexcoords(PyObject *SWIGUNUSEDPARM(self
   return resultobj;
 fail:
   if (SWIG_IsNewObj(res2)) delete arg2;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Appearance_setPointSize(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Appearance *arg1 = (Appearance *) 0 ;
+  float arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  float val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:Appearance_setPointSize",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Appearance, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Appearance_setPointSize" "', argument " "1"" of type '" "Appearance *""'"); 
+  }
+  arg1 = reinterpret_cast< Appearance * >(argp1);
+  ecode2 = SWIG_AsVal_float(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Appearance_setPointSize" "', argument " "2"" of type '" "float""'");
+  } 
+  arg2 = static_cast< float >(val2);
+  {
+    try {
+      (arg1)->setPointSize(arg2);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
   return NULL;
 }
 
@@ -31796,7 +32172,7 @@ fail:
 SWIGINTERN PyObject *_wrap_TerrainModel_terrain_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   TerrainModel *arg1 = (TerrainModel *) 0 ;
-  Environment *arg2 = (Environment *) 0 ;
+  Terrain *arg2 = (Terrain *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
   void *argp2 = 0 ;
@@ -31810,11 +32186,11 @@ SWIGINTERN PyObject *_wrap_TerrainModel_terrain_set(PyObject *SWIGUNUSEDPARM(sel
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "TerrainModel_terrain_set" "', argument " "1"" of type '" "TerrainModel *""'"); 
   }
   arg1 = reinterpret_cast< TerrainModel * >(argp1);
-  res2 = SWIG_ConvertPtr(obj1, &argp2,SWIGTYPE_p_Environment, SWIG_POINTER_DISOWN |  0 );
+  res2 = SWIG_ConvertPtr(obj1, &argp2,SWIGTYPE_p_Terrain, SWIG_POINTER_DISOWN |  0 );
   if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "TerrainModel_terrain_set" "', argument " "2"" of type '" "Environment *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "TerrainModel_terrain_set" "', argument " "2"" of type '" "Terrain *""'"); 
   }
-  arg2 = reinterpret_cast< Environment * >(argp2);
+  arg2 = reinterpret_cast< Terrain * >(argp2);
   if (arg1) (arg1)->terrain = arg2;
   resultobj = SWIG_Py_Void();
   return resultobj;
@@ -31829,7 +32205,7 @@ SWIGINTERN PyObject *_wrap_TerrainModel_terrain_get(PyObject *SWIGUNUSEDPARM(sel
   void *argp1 = 0 ;
   int res1 = 0 ;
   PyObject * obj0 = 0 ;
-  Environment *result = 0 ;
+  Terrain *result = 0 ;
   
   if (!PyArg_ParseTuple(args,(char *)"O:TerrainModel_terrain_get",&obj0)) SWIG_fail;
   res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_TerrainModel, 0 |  0 );
@@ -31837,8 +32213,8 @@ SWIGINTERN PyObject *_wrap_TerrainModel_terrain_get(PyObject *SWIGUNUSEDPARM(sel
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "TerrainModel_terrain_get" "', argument " "1"" of type '" "TerrainModel *""'"); 
   }
   arg1 = reinterpret_cast< TerrainModel * >(argp1);
-  result = (Environment *) ((arg1)->terrain);
-  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_Environment, 0 |  0 );
+  result = (Terrain *) ((arg1)->terrain);
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_Terrain, 0 |  0 );
   return resultobj;
 fail:
   return NULL;
@@ -35092,6 +35468,86 @@ SWIGINTERN PyObject *_wrap_IKObjective_getTransform(PyObject *SWIGUNUSEDPARM(sel
       Py_DECREF(o3);
     }
   }
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_IKObjective_loadString(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  IKObjective *arg1 = (IKObjective *) 0 ;
+  char *arg2 = (char *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int res2 ;
+  char *buf2 = 0 ;
+  int alloc2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  bool result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:IKObjective_loadString",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_IKObjective, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IKObjective_loadString" "', argument " "1"" of type '" "IKObjective *""'"); 
+  }
+  arg1 = reinterpret_cast< IKObjective * >(argp1);
+  res2 = SWIG_AsCharPtrAndSize(obj1, &buf2, NULL, &alloc2);
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "IKObjective_loadString" "', argument " "2"" of type '" "char const *""'");
+  }
+  arg2 = reinterpret_cast< char * >(buf2);
+  {
+    try {
+      result = (bool)(arg1)->loadString((char const *)arg2);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_From_bool(static_cast< bool >(result));
+  if (alloc2 == SWIG_NEWOBJ) delete[] buf2;
+  return resultobj;
+fail:
+  if (alloc2 == SWIG_NEWOBJ) delete[] buf2;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_IKObjective_saveString(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  IKObjective *arg1 = (IKObjective *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  std::string result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:IKObjective_saveString",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_IKObjective, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IKObjective_saveString" "', argument " "1"" of type '" "IKObjective const *""'"); 
+  }
+  arg1 = reinterpret_cast< IKObjective * >(argp1);
+  {
+    try {
+      result = ((IKObjective const *)arg1)->saveString();
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_From_std_string(static_cast< std::string >(result));
   return resultobj;
 fail:
   return NULL;
@@ -44247,6 +44703,11 @@ static PyMethodDef SwigMethods[] = {
 		"Saves to file. Standard mesh types, PCD files, and .geom files are\n"
 		"supported. \n"
 		""},
+	 { (char *)"Geometry3D_attachToStream", _wrap_Geometry3D_attachToStream, METH_VARARGS, (char *)"\n"
+		"attachToStream(char const * protocol, char const * name, char const * type) -> bool\n"
+		"Geometry3D_attachToStream(Geometry3D self, char const * protocol, char const * name) -> bool\n"
+		""},
+	 { (char *)"Geometry3D_detachFromStream", _wrap_Geometry3D_detachFromStream, METH_VARARGS, (char *)"Geometry3D_detachFromStream(Geometry3D self, char const * protocol, char const * name) -> bool"},
 	 { (char *)"Geometry3D_setCurrentTransform", _wrap_Geometry3D_setCurrentTransform, METH_VARARGS, (char *)"\n"
 		"Geometry3D_setCurrentTransform(Geometry3D self, double const [9] R, double const [3] t)\n"
 		"\n"
@@ -44353,7 +44814,10 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"Geometry3D_swigregister", Geometry3D_swigregister, METH_VARARGS, NULL},
 	 { (char *)"new_Appearance", _wrap_new_Appearance, METH_VARARGS, (char *)"new_Appearance() -> Appearance"},
 	 { (char *)"delete_Appearance", _wrap_delete_Appearance, METH_VARARGS, (char *)"delete_Appearance(Appearance self)"},
-	 { (char *)"Appearance_refresh", _wrap_Appearance_refresh, METH_VARARGS, (char *)"Appearance_refresh(Appearance self)"},
+	 { (char *)"Appearance_refresh", _wrap_Appearance_refresh, METH_VARARGS, (char *)"\n"
+		"refresh(bool deep=True)\n"
+		"Appearance_refresh(Appearance self)\n"
+		""},
 	 { (char *)"Appearance_clone", _wrap_Appearance_clone, METH_VARARGS, (char *)"Appearance_clone(Appearance self) -> Appearance"},
 	 { (char *)"Appearance_set", _wrap_Appearance_set, METH_VARARGS, (char *)"Appearance_set(Appearance self, Appearance arg3)"},
 	 { (char *)"Appearance_isStandalone", _wrap_Appearance_isStandalone, METH_VARARGS, (char *)"Appearance_isStandalone(Appearance self) -> bool"},
@@ -44381,6 +44845,7 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"Appearance_setTexture1D", _wrap_Appearance_setTexture1D, METH_VARARGS, (char *)"Appearance_setTexture1D(Appearance self, int w, char const * format, std::vector< unsigned char,std::allocator< unsigned char > > const & bytes)"},
 	 { (char *)"Appearance_setTexture2D", _wrap_Appearance_setTexture2D, METH_VARARGS, (char *)"Appearance_setTexture2D(Appearance self, int w, int h, char const * format, std::vector< unsigned char,std::allocator< unsigned char > > const & bytes)"},
 	 { (char *)"Appearance_setTexcoords", _wrap_Appearance_setTexcoords, METH_VARARGS, (char *)"Appearance_setTexcoords(Appearance self, doubleVector uvs)"},
+	 { (char *)"Appearance_setPointSize", _wrap_Appearance_setPointSize, METH_VARARGS, (char *)"Appearance_setPointSize(Appearance self, float size)"},
 	 { (char *)"Appearance_drawGL", _wrap_Appearance_drawGL, METH_VARARGS, (char *)"\n"
 		"drawGL()\n"
 		"Appearance_drawGL(Appearance self, Geometry3D geom)\n"
@@ -45350,8 +45815,8 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"TerrainModel_world_get", _wrap_TerrainModel_world_get, METH_VARARGS, (char *)"TerrainModel_world_get(TerrainModel self) -> int"},
 	 { (char *)"TerrainModel_index_set", _wrap_TerrainModel_index_set, METH_VARARGS, (char *)"TerrainModel_index_set(TerrainModel self, int index)"},
 	 { (char *)"TerrainModel_index_get", _wrap_TerrainModel_index_get, METH_VARARGS, (char *)"TerrainModel_index_get(TerrainModel self) -> int"},
-	 { (char *)"TerrainModel_terrain_set", _wrap_TerrainModel_terrain_set, METH_VARARGS, (char *)"TerrainModel_terrain_set(TerrainModel self, Environment * terrain)"},
-	 { (char *)"TerrainModel_terrain_get", _wrap_TerrainModel_terrain_get, METH_VARARGS, (char *)"TerrainModel_terrain_get(TerrainModel self) -> Environment *"},
+	 { (char *)"TerrainModel_terrain_set", _wrap_TerrainModel_terrain_set, METH_VARARGS, (char *)"TerrainModel_terrain_set(TerrainModel self, Terrain * terrain)"},
+	 { (char *)"TerrainModel_terrain_get", _wrap_TerrainModel_terrain_get, METH_VARARGS, (char *)"TerrainModel_terrain_get(TerrainModel self) -> Terrain *"},
 	 { (char *)"delete_TerrainModel", _wrap_delete_TerrainModel, METH_VARARGS, (char *)"delete_TerrainModel(TerrainModel self)"},
 	 { (char *)"TerrainModel_swigregister", TerrainModel_swigregister, METH_VARARGS, NULL},
 	 { (char *)"new_WorldModel", _wrap_new_WorldModel, METH_VARARGS, (char *)"\n"
@@ -45767,6 +46232,8 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"For fixed-transform constraints, returns the transform (R,T) \n"
 		""},
+	 { (char *)"IKObjective_loadString", _wrap_IKObjective_loadString, METH_VARARGS, (char *)"IKObjective_loadString(IKObjective self, char const * str) -> bool"},
+	 { (char *)"IKObjective_saveString", _wrap_IKObjective_saveString, METH_VARARGS, (char *)"IKObjective_saveString(IKObjective self) -> std::string"},
 	 { (char *)"IKObjective_goal_set", _wrap_IKObjective_goal_set, METH_VARARGS, (char *)"IKObjective_goal_set(IKObjective self, IKGoal goal)"},
 	 { (char *)"IKObjective_goal_get", _wrap_IKObjective_goal_get, METH_VARARGS, (char *)"IKObjective_goal_get(IKObjective self) -> IKGoal"},
 	 { (char *)"delete_IKObjective", _wrap_delete_IKObjective, METH_VARARGS, (char *)"delete_IKObjective(IKObjective self)"},
@@ -46722,7 +47189,6 @@ static void *_p_intArrayTo_p_int(void *x, int *SWIGUNUSEDPARM(newmemory)) {
 }
 static swig_type_info _swigt__p_Appearance = {"_p_Appearance", "Appearance *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_ContactParameters = {"_p_ContactParameters", "ContactParameters *", 0, 0, (void*)0, 0};
-static swig_type_info _swigt__p_Environment = {"_p_Environment", "Environment *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_GeneralizedIKObjective = {"_p_GeneralizedIKObjective", "GeneralizedIKObjective *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_GeneralizedIKSolver = {"_p_GeneralizedIKSolver", "GeneralizedIKSolver *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_GeometricPrimitive = {"_p_GeometricPrimitive", "GeometricPrimitive *", 0, 0, (void*)0, 0};
@@ -46747,6 +47213,7 @@ static swig_type_info _swigt__p_SimBody = {"_p_SimBody", "SimBody *", 0, 0, (voi
 static swig_type_info _swigt__p_SimRobotController = {"_p_SimRobotController", "SimRobotController *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_SimRobotSensor = {"_p_SimRobotSensor", "SimRobotSensor *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_Simulator = {"_p_Simulator", "Simulator *", 0, 0, (void*)0, 0};
+static swig_type_info _swigt__p_Terrain = {"_p_Terrain", "Terrain *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_TerrainModel = {"_p_TerrainModel", "TerrainModel *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_TransformPoser = {"_p_TransformPoser", "TransformPoser *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_TriangleMesh = {"_p_TriangleMesh", "TriangleMesh *", 0, 0, (void*)0, 0};
@@ -46789,7 +47256,6 @@ static swig_type_info _swigt__p_void = {"_p_void", "void *", 0, 0, (void*)0, 0};
 static swig_type_info *swig_type_initial[] = {
   &_swigt__p_Appearance,
   &_swigt__p_ContactParameters,
-  &_swigt__p_Environment,
   &_swigt__p_GeneralizedIKObjective,
   &_swigt__p_GeneralizedIKSolver,
   &_swigt__p_GeometricPrimitive,
@@ -46814,6 +47280,7 @@ static swig_type_info *swig_type_initial[] = {
   &_swigt__p_SimRobotController,
   &_swigt__p_SimRobotSensor,
   &_swigt__p_Simulator,
+  &_swigt__p_Terrain,
   &_swigt__p_TerrainModel,
   &_swigt__p_TransformPoser,
   &_swigt__p_TriangleMesh,
@@ -46856,7 +47323,6 @@ static swig_type_info *swig_type_initial[] = {
 
 static swig_cast_info _swigc__p_Appearance[] = {  {&_swigt__p_Appearance, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_ContactParameters[] = {  {&_swigt__p_ContactParameters, 0, 0, 0},{0, 0, 0, 0}};
-static swig_cast_info _swigc__p_Environment[] = {  {&_swigt__p_Environment, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_GeneralizedIKObjective[] = {  {&_swigt__p_GeneralizedIKObjective, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_GeneralizedIKSolver[] = {  {&_swigt__p_GeneralizedIKSolver, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_GeometricPrimitive[] = {  {&_swigt__p_GeometricPrimitive, 0, 0, 0},{0, 0, 0, 0}};
@@ -46881,6 +47347,7 @@ static swig_cast_info _swigc__p_SimBody[] = {  {&_swigt__p_SimBody, 0, 0, 0},{0,
 static swig_cast_info _swigc__p_SimRobotController[] = {  {&_swigt__p_SimRobotController, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_SimRobotSensor[] = {  {&_swigt__p_SimRobotSensor, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_Simulator[] = {  {&_swigt__p_Simulator, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_Terrain[] = {  {&_swigt__p_Terrain, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_TerrainModel[] = {  {&_swigt__p_TerrainModel, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_TransformPoser[] = {  {&_swigt__p_TransformPoser, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_TriangleMesh[] = {  {&_swigt__p_TriangleMesh, 0, 0, 0},{0, 0, 0, 0}};
@@ -46923,7 +47390,6 @@ static swig_cast_info _swigc__p_void[] = {  {&_swigt__p_void, 0, 0, 0},{0, 0, 0,
 static swig_cast_info *swig_cast_initial[] = {
   _swigc__p_Appearance,
   _swigc__p_ContactParameters,
-  _swigc__p_Environment,
   _swigc__p_GeneralizedIKObjective,
   _swigc__p_GeneralizedIKSolver,
   _swigc__p_GeometricPrimitive,
@@ -46948,6 +47414,7 @@ static swig_cast_info *swig_cast_initial[] = {
   _swigc__p_SimRobotController,
   _swigc__p_SimRobotSensor,
   _swigc__p_Simulator,
+  _swigc__p_Terrain,
   _swigc__p_TerrainModel,
   _swigc__p_TransformPoser,
   _swigc__p_TriangleMesh,

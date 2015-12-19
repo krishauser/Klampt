@@ -16,6 +16,7 @@ IF(PYTHON)
   SET(OUTPUT CMakeFiles)
   add_custom_command(
     OUTPUT ${OUTPUT}/python_timestamp
+    COMMAND rm -rf build/
     COMMAND ${PYTHON} setup.py build_ext
     COMMAND ${CMAKE_COMMAND} -E touch ${TEMPOUTPUT}/python_timestamp
     DEPENDS ${DEPS}
