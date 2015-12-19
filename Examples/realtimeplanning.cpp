@@ -127,9 +127,9 @@ public:
     //choose and set the collision avoidance margin
     collisionMargin = 0.0;
     CopyWorld(*world,planningWorld);
-    Robot* robot = planningWorld.robots[0].robot;
+    Robot* robot = planningWorld.robots[0];
     for(size_t i=0;i<robot->geometry.size();i++) {
-      robot->geometry[i].margin += collisionMargin;
+      if(robot->geometry[i]) robot->geometry[i]->margin += collisionMargin;
     }
 
     settings.InitializeDefault(planningWorld);
@@ -176,7 +176,7 @@ public:
 
   virtual void RenderWorld()
   {
-    Robot* robot=world->robots[0].robot;
+    Robot* robot=world->robots[0];
     RobotController* rc=sim.robotControllers[0];
 
     SimGUIBackend::SetForceColors();
@@ -185,19 +185,25 @@ public:
     //draw current commanded configuration -- transparent
     if(drawCommanded) {
       GLColor newColor(0,1,0,0.5);
-      world->robots[0].view.SetColors(newColor);
+      world->robotViews[0].RestoreAppearance();
+      world->robotViews[0].PushAppearance();
+      world->robotViews[0].SetColors(newColor);
       Config q;
       sim.controlSimulators[0].GetCommandedConfig(q);
       robot->UpdateConfig(q);
-      world->robots[0].view.Draw();
+      world->robotViews[0].Draw();
+      world->robotViews[0].PopAppearance();
     }
 
     if(drawDesired) {
       Config curBest;
       robotInterface->GetEndConfig(curBest);
       robot->UpdateConfig(curBest); 
-      world->robots[0].view.SetColors(GLColor(1,1,0,0.5));
-      world->robots[0].view.Draw();
+      world->robotViews[0].RestoreAppearance();
+      world->robotViews[0].PushAppearance();
+      world->robotViews[0].SetColors(GLColor(1,1,0,0.5));
+      world->robotViews[0].Draw();
+      world->robotViews[0].PopAppearance();
       /*
       if(curGoal) {
 	glPointSize(5.0);
@@ -265,18 +271,18 @@ public:
   virtual bool OnCommand(const string& cmd,const string& args)
   {
     if(cmd=="new_target") {
-      dynamic_cast<MyInputProcessor*>(&*inputProcessor)->Randomize(world->robots[0].robot);
+      dynamic_cast<MyInputProcessor*>(&*inputProcessor)->Randomize(world->robots[0]);
     }
     else if(cmd=="set_collision_margin") {
       double newmargin;
       bool res = LexicalCast<double>(args,newmargin);
       Assert(res != false);
-      Robot* robot = planningWorld.robots[0].robot;
+      Robot* robot = planningWorld.robots[0];
       for(size_t i=0;i<robot->geometry.size();i++)
-	robot->geometry[i].margin -= collisionMargin;
+	robot->geometry[i]->margin -= collisionMargin;
       collisionMargin = newmargin;
       for(size_t i=0;i<robot->geometry.size();i++)
-	robot->geometry[i].margin += collisionMargin;
+	robot->geometry[i]->margin += collisionMargin;
     }
     else
       return false;

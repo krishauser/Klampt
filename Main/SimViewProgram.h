@@ -120,7 +120,7 @@ void SimViewProgram::InitSim()
 
     sim.robotControllers.resize(world->robots.size());
     for(size_t i=0;i<sim.robotControllers.size();i++) {    
-      Robot* robot=world->robots[i].robot;
+      Robot* robot=world->robots[i];
       sim.SetController(i,MakeDefaultController(robot)); 
       MakeDefaultSensors(robot,sim.controlSimulators[i].sensors);
     }
@@ -130,7 +130,7 @@ void SimViewProgram::InitSim()
       sim.EnableContactFeedback(world->RigidObjectID(i),world->TerrainID(0));
     //robot-object
     for(size_t i=0;i<world->rigidObjects.size();i++) {
-      for(size_t j=0;j<world->robots[0].robot->links.size();j++) {
+      for(size_t j=0;j<world->robots[0]->links.size();j++) {
 	sim.EnableContactFeedback(world->RigidObjectID(i),world->RobotLinkID(0,j));
       }
     }
@@ -140,7 +140,7 @@ void SimViewProgram::InitSim()
       }
     }
     for(size_t i=0;i<world->terrains.size();i++) {
-      for(size_t j=0;j<world->robots[0].robot->links.size();j++) {
+      for(size_t j=0;j<world->robots[0]->links.size();j++) {
 	sim.EnableContactFeedback(world->TerrainID(i),world->RobotLinkID(0,j));
       }
     }
@@ -227,11 +227,11 @@ bool SimViewProgram::LoadAndInitSim(int argc,const char** argv)
     Vector temp;
     in >> temp;
     if(!in) printf("Error reading config file %s\n",configs[i].c_str());
-    if(temp.n != (int)world->robots[i].robot->links.size()) {
+    if(temp.n != (int)world->robots[i]->links.size()) {
       printf("Incorrect number of DOFs in config %d\n",i);
       continue;
     }
-    world->robots[i].robot->UpdateConfig(temp);
+    world->robots[i]->UpdateConfig(temp);
   }
 
   //initialize the simulation defaults
@@ -294,18 +294,19 @@ void SimViewProgram::RenderWorld()
   drawCoords(0.1);
   glEnable(GL_LIGHTING);
   for(size_t i=0;i<world->terrains.size();i++)
-    world->terrains[i].view.Draw();
+    world->terrains[i]->DrawGL();
   for(size_t i=0;i<world->rigidObjects.size();i++)
-    world->rigidObjects[i].view.Draw();
+    world->rigidObjects[i]->DrawGL();
 
   for(size_t i=0;i<world->robots.size();i++) {
-    for(size_t j=0;j<world->robots[i].robot->links.size();j++) {
-      sim.odesim.robot(i)->GetLinkTransform(j,world->robots[i].robot->links[j].T_World);
+    world->robotViews[i].PushAppearance();
+    for(size_t j=0;j<world->robots[i]->links.size();j++) {
+      sim.odesim.robot(i)->GetLinkTransform(j,world->robots[i]->links[j].T_World);
       float color[4] = {0.5,0.5,0.5,1.0};
       if(i==0) {
 	Real kg=sim.ContactForce(world->RobotLinkID(i,j)).norm()/9.8;
 	Assert(!(kg < 0.0));
-	kg /= world->robots[i].robot->GetTotalMass();
+	kg /= world->robots[i]->GetTotalMass();
 	Real green = 0.1, yellow = 1.0, red = 1.5; 
 	if(kg < green) { //grey->green
 	  color[0]=0.5-0.5*kg/green;
@@ -330,9 +331,10 @@ void SimViewProgram::RenderWorld()
 	  color[2]=0;
 	}
       }
-      world->robots[i].view.SetColor(j,GLColor(color));
-      world->robots[i].view.DrawLink_World(j);
+      world->robotViews[i].SetColor(j,GLColor(color));
+      world->robotViews[i].DrawLink_World(j);
     }
+    world->robotViews[i].PopAppearance();
   }
 }
 
@@ -470,7 +472,7 @@ bool SimViewProgram::LoadMilestones(const char* fn)
   /*
     MyMilestoneController* c=GetMilestoneController();
     ParabolicRamp::DynamicPath path;
-    path.Init(world->robots[0].robot->velMax,world->robots[0].robot->accMax);
+    path.Init(world->robots[0]->velMax,world->robots[0]->accMax);
     path.SetMilestones(milestones,dmilestones);
     c->SetPath(path);
   */
@@ -513,7 +515,7 @@ bool SimViewProgram::LoadMultiPath(const char* fn,bool constrainedInterpolate,Re
   if(!timed && timeOptimizePath) {
     //this function both discretizes and optimizes at once
     printf("Discretizing MultiPath by resolution %g and time-optimizing with res %g\n",interpolateTolerance,0.05);
-    if(!GenerateAndTimeOptimizeMultiPath(*world->robots[0].robot,path,interpolateTolerance,0.05)) {
+    if(!GenerateAndTimeOptimizeMultiPath(*world->robots[0],path,interpolateTolerance,0.05)) {
       printf("   failed!\n");
       return false;
     }
@@ -525,7 +527,7 @@ bool SimViewProgram::LoadMultiPath(const char* fn,bool constrainedInterpolate,Re
     if(constrainedInterpolate) {
       MultiPath dpath;
       printf("Discretizing MultiPath by resolution %g\n",interpolateTolerance);
-      if(!DiscretizeConstrainedMultiPath(*world->robots[0].robot,path,dpath,interpolateTolerance)) {
+      if(!DiscretizeConstrainedMultiPath(*world->robots[0],path,dpath,interpolateTolerance)) {
 	printf("   failed!\n");
 	return false;
       }
@@ -619,26 +621,26 @@ void SimViewProgram::DoLogging(const char* fn)
     cout<<"Saving simulation state to "<<fn<<endl;
     out<<"time,";
     for(size_t i=0;i<world->robots.size();i++) {
-      for(size_t j=0;j<world->robots[i].robot->links.size();j++)
-	out<<world->robots[i].name<<"_q["<<world->robots[i].robot->linkNames[j]<<"],";
+      for(size_t j=0;j<world->robots[i]->links.size();j++)
+	out<<world->robots[i]->name<<"_q["<<world->robots[i]->linkNames[j]<<"],";
       out<<",";
-      for(size_t j=0;j<world->robots[i].robot->links.size();j++)
-	out<<world->robots[i].name<<"_dq["<<world->robots[i].robot->linkNames[j]<<"],";
+      for(size_t j=0;j<world->robots[i]->links.size();j++)
+	out<<world->robots[i]->name<<"_dq["<<world->robots[i]->linkNames[j]<<"],";
       out<<",";
-      for(size_t j=0;j<world->robots[i].robot->drivers.size();j++)
-	out<<world->robots[i].name<<"_t["<<world->robots[i].robot->linkNames[world->robots[i].robot->drivers[j].linkIndices[0]]<<"],";
+      for(size_t j=0;j<world->robots[i]->drivers.size();j++)
+	out<<world->robots[i]->name<<"_t["<<world->robots[i]->linkNames[world->robots[i]->drivers[j].linkIndices[0]]<<"],";
       out<<",";
       for(size_t j=0;j<sim.controlSimulators[i].sensors.sensors.size();j++) {
 	SensorBase* s=sim.controlSimulators[i].sensors.sensors[j];
 	vector<string> mnames;
 	s->MeasurementNames(mnames);
 	for(size_t k=0;k<mnames.size();k++)
-	  out<<world->robots[i].name<<"_"<<s->name<<"["<<mnames[k]<<"],";
+	  out<<world->robots[i]->name<<"_"<<s->name<<"["<<mnames[k]<<"],";
 	out<<",";
       }
     }
     for(size_t i=0;i<world->rigidObjects.size();i++) {
-      out<<world->rigidObjects[i].name<<"_x,"<<world->rigidObjects[i].name<<"_y,"<<world->rigidObjects[i].name<<"_z,"<<world->rigidObjects[i].name<<"_rz,"<<world->rigidObjects[i].name<<"_ry,"<<world->rigidObjects[i].name<<"_rx,"<<world->rigidObjects[i].name<<"_dx,"<<world->rigidObjects[i].name<<"_dy,"<<world->rigidObjects[i].name<<"_dz,"<<world->rigidObjects[i].name<<"_wz,"<<world->rigidObjects[i].name<<"_wy,"<<world->rigidObjects[i].name<<"_wx,";
+      out<<world->rigidObjects[i]->name<<"_x,"<<world->rigidObjects[i]->name<<"_y,"<<world->rigidObjects[i]->name<<"_z,"<<world->rigidObjects[i]->name<<"_rz,"<<world->rigidObjects[i]->name<<"_ry,"<<world->rigidObjects[i]->name<<"_rx,"<<world->rigidObjects[i]->name<<"_dx,"<<world->rigidObjects[i]->name<<"_dy,"<<world->rigidObjects[i]->name<<"_dz,"<<world->rigidObjects[i]->name<<"_wz,"<<world->rigidObjects[i]->name<<"_wy,"<<world->rigidObjects[i]->name<<"_wx,";
       out<<",";
     }
     out<<endl;
@@ -649,13 +651,13 @@ void SimViewProgram::DoLogging(const char* fn)
     sim.controlSimulators[i].GetSimulatedConfig(q);
     sim.controlSimulators[i].GetSimulatedVelocity(dq);
     sim.controlSimulators[i].GetActuatorTorques(t);
-    for(size_t j=0;j<world->robots[i].robot->links.size();j++)
+    for(size_t j=0;j<world->robots[i]->links.size();j++)
       out<<q[j]<<",";
     out<<",";
-    for(size_t j=0;j<world->robots[i].robot->links.size();j++)
+    for(size_t j=0;j<world->robots[i]->links.size();j++)
       out<<dq[j]<<",";
     out<<",";
-    for(size_t j=0;j<world->robots[i].robot->drivers.size();j++)
+    for(size_t j=0;j<world->robots[i]->drivers.size();j++)
       out<<t[j]<<",";
     out<<",";
     for(size_t j=0;j<sim.controlSimulators[i].sensors.sensors.size();j++) {
