@@ -51,7 +51,7 @@ struct WorldPlannerSettings
   ///custom collision margins.
   bool CheckCollision(RobotWorld& world,int id1,int id2=-1,Real tol=0);
   ///Same as the other CheckCollision, except a collision geometry is given.
-  bool CheckCollision(RobotWorld& world,Geometry::AnyCollisionGeometry3D& mesh,int id=-1,Real tol=0);
+  bool CheckCollision(RobotWorld& world,Geometry::AnyCollisionGeometry3D* mesh,int id=-1,Real tol=0);
 
   ///Checks self-collisions of all objects in a set of objects. 
   ///tol indicates an extra collision margin on top of the
@@ -70,7 +70,7 @@ struct WorldPlannerSettings
   Real DistanceLowerBound(RobotWorld& world,int id1,int id2=-1,Real eps=0,Real bound=Inf);
   ///Same as the other DistanceLowerBound, except a collision geometry is
   ///given.
-  Real DistanceLowerBound(RobotWorld& world,Geometry::AnyCollisionGeometry3D& mesh,int id,Real eps=0,Real bound=Inf);
+  Real DistanceLowerBound(RobotWorld& world,Geometry::AnyCollisionGeometry3D* mesh,int id,Real eps=0,Real bound=Inf);
 
   ///Returns a self-distance for all pairs in a set of objects, with the possibility of
   ///early termination if the closest pair of objects in the set is farther
@@ -92,7 +92,7 @@ struct WorldPlannerSettings
 				 vector<pair<int,int> >& pairs,
 				 vector<Geometry::AnyCollisionQuery>& queries);
   ///Same as EnumerateCollisionQueries, but a collision geometry is given.
-  void EnumerateCollisionQueries(RobotWorld& world,Geometry::AnyCollisionGeometry3D& mesh,int id,
+  void EnumerateCollisionQueries(RobotWorld& world,Geometry::AnyCollisionGeometry3D* mesh,int id,
 				 vector<int>& checkedIDs,
 				 vector<Geometry::AnyCollisionQuery>& queries);
 

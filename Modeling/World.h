@@ -2,45 +2,25 @@
 #define ROBOT_WORLD_H
 
 #include "Robot.h"
-#include "Environment.h"
+#include "Terrain.h"
 #include "RigidObject.h"
 #include "View/ViewRobot.h"
-#include "View/ViewEnvironment.h"
-#include "View/ViewRigidObject.h"
 #include <camera/camera.h>
 #include <camera/viewport.h>
 #include <GLdraw/GLLight.h>
 #include <utils/SmartPointer.h>
 
-struct RobotInfo
-{
-  string name;
-  SmartPointer<Robot> robot;
-  ViewRobot view;
-};
-
-struct TerrainInfo
-{
-  string name;
-  SmartPointer<Environment> terrain;
-  ViewEnvironment view;
-};
-
-struct RigidObjectInfo
-{
-  string name;
-  SmartPointer<RigidObject> object;
-  ViewRigidObject view;
-};
-
 /** @ingroup Modeling
  * @brief The main world class containing multiple robots, objects, and
- * static geometries.  Lights and other viewport information may also be
- * stored here.
+ * static geometries (terrains).  Lights and other viewport information
+ * may also be stored here.
  */
 class RobotWorld
 {
  public:
+  typedef SmartPointer<Geometry::AnyCollisionGeometry3D> GeometryPtr;
+  typedef SmartPointer<GLDraw::GeometryAppearance> AppearancePtr;
+
   RobotWorld();
   bool LoadXML(const char* fn);
   bool SaveXML(const char* fn,const char* elementDir);
@@ -65,9 +45,8 @@ class RobotWorld
   int RigidObjectID(int index) const;
   int RobotID(int index) const;
   int RobotLinkID(int index,int link) const;
-  Geometry::AnyCollisionGeometry3D& GetGeometry(int id);
-  const Geometry::AnyCollisionGeometry3D& GetGeometry(int id) const;
-  GLDraw::GeometryAppearance& GetAppearance(int id);
+  GeometryPtr GetGeometry(int id);
+  AppearancePtr GetAppearance(int id);
   RigidTransform GetTransform(int id) const;
   void SetTransform(int id,const RigidTransform& T);
 
@@ -78,19 +57,17 @@ class RobotWorld
   ViewRobot* GetRobotView(const string& name);
 
   int LoadTerrain(const string& fn);
-  int AddTerrain(const string& name,Environment* terrain=NULL);
+  int AddTerrain(const string& name,Terrain* terrain=NULL);
   void DeleteTerrain(const string& name);
-  Environment* GetTerrain(const string& name);
-  ViewEnvironment* GetTerrainView(const string& name);
+  Terrain* GetTerrain(const string& name);
 
   int LoadRigidObject(const string& fn);
   int AddRigidObject(const string& name,RigidObject* obj=NULL);
   void DeleteRigidObject(const string& name);
   RigidObject* GetRigidObject(const string& name);
-  ViewRigidObject* GetRigidObjectView(const string& name);
 
-  RobotInfo* ClickRobot(const Ray3D& r,int& body,Vector3& localpt);
-  RigidObjectInfo* ClickObject(const Ray3D& r,Vector3& localpt);
+  Robot* ClickRobot(const Ray3D& r,int& body,Vector3& localpt);
+  RigidObject* ClickObject(const Ray3D& r,Vector3& localpt);
 
   ///Loads an element from the file, using its extension to figure out what
   ///type it is.
@@ -105,9 +82,11 @@ class RobotWorld
   GLDraw::GLColor background;
 
   //world occupants
-  vector<RobotInfo> robots;
-  vector<TerrainInfo> terrains;
-  vector<RigidObjectInfo> rigidObjects;
+  vector<SmartPointer<Robot> > robots;
+  vector<SmartPointer<Terrain> > terrains;
+  vector<SmartPointer<RigidObject> > rigidObjects;
+
+  vector<ViewRobot> robotViews;
 };
 
 void CopyWorld(const RobotWorld& a,RobotWorld& b);

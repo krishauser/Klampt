@@ -85,16 +85,16 @@ bool ConstraintChecker::HasSupportPolygon_Robust(const Robot& robot,const Stance
 }
 
 
-bool ConstraintChecker::HasEnvCollision(Robot& robot,Environment& env)
+bool ConstraintChecker::HasEnvCollision(Robot& robot,Terrain& env)
 {
   robot.UpdateGeometry();
-  return robot.MeshCollision(env.geometry);
+  return robot.MeshCollision(*env.geometry);
 }
 
-bool ConstraintChecker::HasEnvCollision(Robot& robot,Environment& env,const Stance& stance, const vector<int>& ignoreList)
+bool ConstraintChecker::HasEnvCollision(Robot& robot,Terrain& env,const Stance& stance, const vector<int>& ignoreList)
 {
 	robot.UpdateGeometry();
-	robot.InitMeshCollision(env.geometry);
+	robot.InitMeshCollision(*env.geometry);
 	vector<bool> fixed(robot.links.size(), false);
 	for (Stance::const_iterator i = stance.begin(); i != stance.end(); i++)
 		fixed[i->first] = true;
@@ -112,10 +112,10 @@ bool ConstraintChecker::HasEnvCollision(Robot& robot,Environment& env,const Stan
 	return false;
 }
 
-bool ConstraintChecker::HasEnvCollision(Robot& robot,Environment& env,const vector<IKGoal>& constraints, const vector<int>& ignoreList)
+bool ConstraintChecker::HasEnvCollision(Robot& robot,Terrain& env,const vector<IKGoal>& constraints, const vector<int>& ignoreList)
 {
 	robot.UpdateGeometry();
-	robot.InitMeshCollision(env.geometry);
+	robot.InitMeshCollision(*env.geometry);
 	vector<bool> fixed(robot.links.size(), false);
 	for (size_t i=0;i<constraints.size();i++) {
 	  if(constraints[i].destLink == -1)
@@ -137,10 +137,10 @@ bool ConstraintChecker::HasEnvCollision(Robot& robot,Environment& env,const vect
 }
 
 
-bool ConstraintChecker::HasEnvCollision(Robot& robot,Environment& env,const vector<IKGoal>& constraints)
+bool ConstraintChecker::HasEnvCollision(Robot& robot,Terrain& env,const vector<IKGoal>& constraints)
 {
 	robot.UpdateGeometry();
-	robot.InitMeshCollision(env.geometry);
+	robot.InitMeshCollision(*env.geometry);
 	vector<bool> fixed(robot.links.size(), false);
 	for ( int i = 0;i < constraints.size(); i++)
 	{

@@ -64,7 +64,7 @@ void RobotPoseBackend::Start()
 
   WorldGUIBackend::Start();
   world->InitCollisions();
-  robot = world->robots[0].robot;
+  robot = world->robots[0];
   cur_link=0;
   cur_driver=0;
   draw_geom = 1;
@@ -77,14 +77,14 @@ void RobotPoseBackend::Start()
 
   robotWidgets.resize(world->robots.size());
   for(size_t i=0;i<world->robots.size();i++) {
-    robotWidgets[i].Set(world->robots[i].robot,&world->robots[i].view);
+    robotWidgets[i].Set(world->robots[i],&world->robotViews[i]);
     robotWidgets[i].linkPoser.highlightColor.set(0.75,0.75,0);
   }
   objectWidgets.resize(world->rigidObjects.size());
 
 
   for(size_t i=0;i<world->rigidObjects.size();i++)
-    objectWidgets[i].Set(world->rigidObjects[i].object,&world->rigidObjects[i].view);
+    objectWidgets[i].Set(world->rigidObjects[i]);
   for(size_t i=0;i<world->robots.size();i++)
     allWidgets.widgets.push_back(&robotWidgets[i]);
   for(size_t i=0;i<world->rigidObjects.size();i++)
@@ -108,7 +108,7 @@ void RobotPoseBackend::Start()
 void RobotPoseBackend::UpdateConfig()
 {
   for(size_t i=0;i<robotWidgets.size();i++)
-    world->robots[i].robot->UpdateConfig(robotWidgets[i].Pose());
+    world->robots[i]->UpdateConfig(robotWidgets[i].Pose());
 
   //update collisions
   for(size_t i=0;i<robot->links.size();i++)
@@ -134,14 +134,14 @@ void RobotPoseBackend::UpdateConfig()
 
 void RobotPoseBackend::RenderWorld()
 {
-  Robot* robot = world->robots[0].robot;
-  ViewRobot& viewRobot = world->robots[0].view;
+  Robot* robot = world->robots[0];
+  ViewRobot& viewRobot = world->robotViews[0];
   //want conditional drawing of the robot geometry
   //ResourceBrowserProgram::RenderWorld();
   for(size_t i=0;i<world->terrains.size();i++)
-    world->terrains[i].view.Draw();
+    world->terrains[i]->DrawGL();
   for(size_t i=0;i<world->rigidObjects.size();i++)
-    world->rigidObjects[i].view.Draw();
+    world->rigidObjects[i]->DrawGL();
 
   if(draw_geom) {
     //set the robot colors
@@ -195,9 +195,9 @@ void RobotPoseBackend::RenderWorld()
   if(draw_bbs) {
     //    sim.UpdateModel();
     for(size_t i=0;i<world->robots.size();i++) {
-      for(size_t j=0;j<world->robots[i].robot->geometry.size();j++) {
-	if(world->robots[i].robot->geometry[j].Empty()) continue;
-	Box3D bbox = world->robots[i].robot->geometry[j].GetBB();
+      for(size_t j=0;j<world->robots[i]->geometry.size();j++) {
+	if(world->robots[i]->IsGeometryEmpty(j)) continue;
+	Box3D bbox = world->robots[i]->geometry[j]->GetBB();
 	Matrix4 basis;
 	bbox.getBasis(basis);
 	glColor3f(1,0,0);
@@ -205,14 +205,14 @@ void RobotPoseBackend::RenderWorld()
       }
     }
     for(size_t i=0;i<world->rigidObjects.size();i++) {
-      Box3D bbox = world->rigidObjects[i].object->geometry.GetBB();
+      Box3D bbox = world->rigidObjects[i]->geometry->GetBB();
       Matrix4 basis;
       bbox.getBasis(basis);
       glColor3f(1,0,0);
       drawOrientedWireBox(bbox.dims.x,bbox.dims.y,bbox.dims.z,basis);
     }
     for(size_t i=0;i<world->terrains.size();i++) {
-      Box3D bbox = world->terrains[i].terrain->geometry.GetBB();
+      Box3D bbox = world->terrains[i]->geometry->GetBB();
       Matrix4 basis;
       bbox.getBasis(basis);
       glColor3f(1,0.5,0);
@@ -226,7 +226,7 @@ Stance RobotPoseBackend::GetFlatStance(Real tolerance)
 {
   if(tolerance==0)
     tolerance = settings["flatContactTolerance"];
-  Robot* robot = world->robots[0].robot;
+  Robot* robot = world->robots[0];
   Stance s;
   if(robotWidgets[0].ikPoser.poseGoals.empty()) {
     printf("Storing flat ground stance\n");
@@ -264,7 +264,7 @@ Stance RobotPoseBackend::GetFlatStance(Real tolerance)
 
 ResourcePtr RobotPoseBackend::PoserToResource(const string& type)
 {
-  Robot* robot = world->robots[0].robot;
+  Robot* robot = world->robots[0];
   if(type == "Config") 
     return MakeResource("",robot->q);
   else if(type == "IKGoal") {
@@ -340,7 +340,7 @@ void RobotPoseBackend::CleanContacts(Hold& h,Real xtol,Real ntol)
 
 bool RobotPoseBackend::OnCommand(const string& cmd,const string& args)
 {
-  Robot* robot = world->robots[0].robot;
+  Robot* robot = world->robots[0];
   stringstream ss(args);
   if(cmd=="pose_mode") {
     for(size_t i=0;i<robotWidgets.size();i++)
@@ -497,7 +497,7 @@ bool RobotPoseBackend::OnCommand(const string& cmd,const string& args)
       configs = milestones;
       }
       else {
-      Robot* robot=world->robots[0].robot;
+      Robot* robot=world->robots[0];
       Timer timer;
       if(!InterpolateConstrainedPath(*robot,milestones,robotWidgets[0].Constraints(),configs,1e-2)) return;
       
@@ -693,7 +693,7 @@ bool RobotPoseBackend::OnCommand(const string& cmd,const string& args)
   else if(cmd=="set_driver_value") {
     double driver_value;
     ss>>driver_value;
-    Robot* robot = world->robots[0].robot;
+    Robot* robot = world->robots[0];
     robot->UpdateConfig(robotWidgets[0].Pose());
     robot->SetDriverValue(cur_driver,driver_value);
     robotWidgets[0].SetPose(robot->q);
@@ -707,7 +707,7 @@ bool RobotPoseBackend::OnCommand(const string& cmd,const string& args)
 
 void RobotPoseBackend::BeginDrag(int x,int y,int button,int modifiers)
 { 
-  Robot* robot = world->robots[0].robot;
+  Robot* robot = world->robots[0];
   if(button == GLUT_RIGHT_BUTTON) {
     double d;
     if(allWidgets.BeginDrag(x,viewport.h-y,viewport,d))
@@ -730,7 +730,6 @@ void RobotPoseBackend::EndDrag(int x,int y,int button,int modifiers)
 
 void RobotPoseBackend::DoFreeDrag(int dx,int dy,int button)
 {  
-  Robot* robot = world->robots[0].robot;
   if(button == GLUT_LEFT_BUTTON)  DragRotate(dx,dy);
   else if(button == GLUT_RIGHT_BUTTON) {
     if(allWidgets.hasFocus) {

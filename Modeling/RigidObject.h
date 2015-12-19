@@ -2,6 +2,9 @@
 #define RIGID_OBJECT_H
 
 #include <geometry/AnyGeometry.h>
+#include <string>
+#include "ManagedGeometry.h"
+using namespace std;
 using namespace Math3D;
 
 /** @ingroup Modeling
@@ -21,9 +24,11 @@ public:
   void SetMassFromBB(Real totalMass);
   void InitCollisions();
   void UpdateGeometry(); ///< Call this before collision detection if the transform is changed
+  void DrawGL();
 
-  std::string geomFile;
-  Geometry::AnyCollisionGeometry3D geometry;
+  string name;
+  string geomFile;
+  ManagedGeometry geometry;
   RigidTransform T;    //current transform
   Real mass;           //mass
   Vector3 com;         //center of mass in local frame

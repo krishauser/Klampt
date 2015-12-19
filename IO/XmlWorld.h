@@ -30,7 +30,7 @@ class XmlTerrain
 {
  public:
   XmlTerrain(TiXmlElement* element,string path=string());
-  bool GetTerrain(Environment& env);
+  bool GetTerrain(Terrain& env);
 
   TiXmlElement* e;
   string path;

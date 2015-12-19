@@ -55,9 +55,9 @@ GeneralizedRobot::GeneralizedRobot()
 GeneralizedRobot::GeneralizedRobot(RobotWorld& world)
 {
   for(size_t i=0;i<world.robots.size();i++)
-    Add(world.robots[i].robot,world.robots[i].name.c_str());
+    Add(world.robots[i],world.robots[i]->name.c_str());
   for(size_t i=0;i<world.rigidObjects.size();i++)
-    Add(world.rigidObjects[i].object,world.rigidObjects[i].name.c_str());
+    Add(world.rigidObjects[i],world.rigidObjects[i]->name.c_str());
 }
 
 int GeneralizedRobot::NumDof() const
@@ -73,6 +73,8 @@ int GeneralizedRobot::Add(Robot* robot,const char* name)
   e.object = NULL;
   if(name)
     e.name = name;
+  else
+    e.name = robot->name;
   int lastid = 0, lastend = 0;
   if(!elements.empty()) {
     lastid = (--elements.end())->first;
@@ -91,6 +93,8 @@ int GeneralizedRobot::Add(RigidObject* object,const char* name)
   e.object = object;
   if(name)
     e.name = name;
+  else
+    e.name = object->name;
   int lastid = 0, lastend = 0;
   if(!elements.empty()) {
     lastid = (--elements.end())->first;

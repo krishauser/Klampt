@@ -2,6 +2,7 @@
 #define MODELING_ROBOT_H
 
 #include <robotics/RobotWithGeometry.h>
+#include "ManagedGeometry.h"
 using namespace std;
 
 /** @ingroup Modeling 
@@ -81,6 +82,7 @@ public:
   bool LoadRob(const char* fn);
   bool LoadURDF(const char* fn);
   bool Save(const char* fn);
+  bool LoadGeometry(int i,const char* file);
   void SetGeomFiles(const char* geomPrefix="",const char* geomExt="tri");  ///< Sets the geometry file names to geomPrefix+[linkName].[geomExt]
   void SetGeomFiles(const vector<string>& geomFiles);
   bool SaveGeometry(const char* prefix="");  
@@ -119,7 +121,9 @@ public:
   ///It is used by exact collision checkers, and is uninitialized by default.
   void ComputeLipschitzMatrix();
 
+  string name;
   vector<string> geomFiles;   ///< geometry file names (used in saving)
+  vector<ManagedGeometry> geomManagers; ///< geometry loaders (speeds up loading)
   Vector accMax;   ///< conservative acceleration limits, used by DynamicPath
   vector<RobotJoint> joints;
   vector<RobotJointDriver> drivers;

@@ -886,16 +886,16 @@ bool Robot::LoadRob(const char* fn) {
 			Matrix4 mscale;
 			mscale.setIdentity();
 			mscale(0, 0) = mscale(1, 1) = mscale(2, 2) = geomscale[i];
-			geometry[i].Transform(mscale);
+			geomManagers[i].TransformGeometry(mscale);
 		}
 		if (geommargin.size() == 1)
-		  geometry[i].margin = geommargin[0];
+		  geometry[i]->margin = geommargin[0];
 		else if(i < geommargin.size())
-		  geometry[i].margin = geommargin[i];
+		  geometry[i]->margin = geommargin[i];
 	}
 	int numGeomElements = 0;
 	for(size_t i=0;i<geometry.size();i++)
-	  numGeomElements += geometry[i].NumElements();
+	  numGeomElements += (geometry[i] ? geometry[i]->NumElements() : 0);
 	printf("Loaded geometries in time %gs, %d total primitive elements\n",timer.ElapsedTime(),numGeomElements);
 	timer.Reset();
 
@@ -905,11 +905,12 @@ bool Robot::LoadRob(const char* fn) {
 		return false;
 	}
 	for(size_t i = 0; i < geomTransformIndex.size(); i++){
-		int geomIndex = geomTransformIndex[i];
-		if (geomFn[geomIndex].empty()) {
-			continue;
-		}
-		geometry[geomIndex].Transform(geomTransform[i]);
+	  int geomIndex = geomTransformIndex[i];
+	  if (!geometry[geomIndex]) continue;
+	  if (geomFn[geomIndex].empty()) {
+	    continue;
+	  }
+	  geomManagers[geomIndex].TransformGeometry(geomTransform[i]);
 	}
 
 	if (collision.empty()) {
@@ -1041,32 +1042,36 @@ bool Robot::LoadRob(const char* fn) {
 
 	//first mount the geometries, they affect whether a link is included in self collision testing
 	for (size_t i = 0; i < mountLinks.size(); i++) {
-		if (Geometry::AnyGeometry3D::CanLoadExt(FileExtension(mountFiles[i].c_str()))) {
-		  string fn = path + mountFiles[i];
-		  printf("   Mounting geometry file %s\n", mountFiles[i].c_str());
-		  //mount a triangle mesh on top of another triangle mesh
-		  Geometry::AnyGeometry3D geom;
-		  if(!geom.Load(fn.c_str())) {
-		    fprintf(stderr, "   Error loading mount geometry file %s\n",
-			    fn.c_str());
-		    return false;
-		  }
-		  Mount(mountLinks[i], geom, mountT[i]);
-		}
+	  const char* ext = FileExtension(mountFiles[i].c_str());
+	  if(ext && (0==strcmp(ext,"rob") || 0==strcmp(ext,"urdf"))) {
+	    //its a robot, delay til later
+	  }
+	  else {
+	    string fn = path + mountFiles[i];
+	    printf("   Mounting geometry file %s\n", mountFiles[i].c_str());
+	    //mount a triangle mesh on top of another triangle mesh
+	    ManagedGeometry loader;
+	    if(!loader.Load(fn.c_str())) {
+	      fprintf(stderr, "   Error loading mount geometry file %s\n",
+		      fn.c_str());
+	      return false;
+	    }
+	    Mount(mountLinks[i], *loader, mountT[i]);
+	  }
 	}
 
 	//automatically compute mass parameters from geometry
 	if (autoMass) {
 		for (size_t i = 0; i < links.size(); i++) {
 			if (comVec.empty()) {
-				if (!geometry[i].Empty())
-					links[i].com = CenterOfMass(geometry[i]);
+				if (geometry[i] && !geometry[i]->Empty())
+					links[i].com = CenterOfMass(*geometry[i]);
 				else
 					links[i].com.setZero();
 			}
 			if (inertiaVec.empty()) {
-				if (!geometry[i].Empty() && links[i].mass != 0.0) {
-					links[i].inertia = Inertia(geometry[i], links[i].com,
+			  if (!IsGeometryEmpty(i) && links[i].mass != 0.0) {
+					links[i].inertia = Inertia(*geometry[i], links[i].com,
 							links[i].mass);
 					//cout<<"Automass inertia for "<<linkNames[i]<<": "<<endl<<links[i].inertia<<endl;
 				} else {
@@ -1116,7 +1121,8 @@ bool Robot::LoadRob(const char* fn) {
 	timer.Reset();
 	//do the mounting of subchains
 	for (size_t i = 0; i < mountLinks.size(); i++) {
-		if (!Geometry::AnyGeometry3D::CanLoadExt(FileExtension(mountFiles[i].c_str()))) {
+	  const char* ext = FileExtension(mountFiles[i].c_str());
+	  if(ext && (0==strcmp(ext,"rob") || 0==strcmp(ext,"urdf"))) {
 		  string fn = path + mountFiles[i];
 		  printf("   Mounting subchain file %s\n", mountFiles[i].c_str());
 			Robot subchain;
@@ -1236,14 +1242,27 @@ void Robot::SetGeomFiles(const vector<string>& files)
   geomFiles = files;
 }
 
+bool Robot::LoadGeometry(int i,const char* file)
+{
+  if(i >= (int)geomManagers.size())
+    geomManagers.resize(geometry.size());
+  //make the default appearance be grey, so that loader may override it
+  geomManagers[i].Appearance()->faceColor.set(0.5,0.5,0.5);
+  if(geomManagers[i].Load(file)) {
+    geometry[i] = geomManagers[i];
+    return true;
+  }
+  return false;
+}
+
 bool Robot::SaveGeometry(const char* prefix) {
 	for (size_t i = 0; i < links.size(); i++) {
-		if (!geometry[i].Empty()) {
+	  if (!IsGeometryEmpty(i)) {
 		  if(geomFiles[i].empty()) {
 		    cerr<<"Robot::SaveGeometry: warning, link "<<i<<" has empty file name"<<endl;
 		    continue;
 		  }
-		  if(!geometry[i].Save((string(prefix)+geomFiles[i]).c_str())) {
+		  if(!geometry[i]->Save((string(prefix)+geomFiles[i]).c_str())) {
 		       cerr << "Robot::SaveGeometry: Unable to save to geometry file " << string(prefix)+geomFiles[i] << endl;
 		       return false;
 		     }
@@ -1311,7 +1330,7 @@ bool Robot::Save(const char* fn) {
 
 	file << "geometry\t";
 	for (int i = 0; i < nLinks; i++) {
-		if (geometry[i].Empty())
+		if (!geometry[i] || geometry[i]->Empty())
 			file << "\"\" ";
 		else
 			file << "\"" << geomFiles[i] << "\" ";
@@ -1361,10 +1380,10 @@ bool Robot::Save(const char* fn) {
 	file << endl << endl;
 
 	for(int i=0;i<nLinks;i++) {
-	  if(geometry[i].Empty()) continue;
+	  if(!geometry[i] || geometry[i]->Empty()) continue;
 	  vector<int> nocollision;
 	  for(int j=i+1;j<nLinks;j++) {
-	    if(geometry[j].Empty()) continue;
+	    if(!geometry[j] || geometry[j]->Empty()) continue;
 	    if(parents[i] != j && parents[j] != i)
 	      if(selfCollisions(i,j) == NULL)
 		nocollision.push_back(j);
@@ -1623,15 +1642,17 @@ void concat(Array2D<T>& x, const Array2D<T>& y, T emptyVal = 0) {
 
 void Robot::Mount(int link, const Geometry::AnyGeometry3D& mesh,
 		const RigidTransform& T) {
-        vector<Geometry::AnyGeometry3D> mergeMeshes(2);
-	mergeMeshes[0] = geometry[link];
-	mergeMeshes[1] = mesh;
-	mergeMeshes[1].Transform(Matrix4(T));
-	geometry[link].Merge(mergeMeshes);
-	//TESTING: don't need this with dynamic initialization
-	//geometry[link].InitCollisions();
-	//need to reinitialize all self collisions with this mesh
-	
+  if(!geometry[link]) 
+    geometry[link] = new Geometry::AnyCollisionGeometry3D(mesh);
+  else {
+    vector<Geometry::AnyGeometry3D> mergeMeshes(2);
+    mergeMeshes[0] = *geometry[link];
+    mergeMeshes[1] = mesh;
+    mergeMeshes[1].Transform(Matrix4(T));
+    geometry[link]->Merge(mergeMeshes);
+    geomManagers[link].Appearance()->Set(*geometry[link]);
+  }
+  //need to reinitialize all self collisions with this mesh
 }
 
 void Robot::Mount(int link, const Robot& subchain, const RigidTransform& T) {
@@ -1669,6 +1690,7 @@ void Robot::Mount(int link, const Robot& subchain, const RigidTransform& T) {
 	concat(powerMax, subchain.powerMax);
 	concat(accMax, subchain.accMax);
 	ArrayUtils::concat(geometry, subchain.geometry);
+	ArrayUtils::concat(geomManagers, subchain.geomManagers);
 	ArrayUtils::concat(geomFiles, subchain.geomFiles);
 	for(size_t i=0;i<geometry.size();i++) {
 	  //do we need to re-init collisions?
@@ -1692,7 +1714,7 @@ void Robot::Mount(int link, const Robot& subchain, const RigidTransform& T) {
 	}
 	//init collisions between subchain and existing links
 	for (size_t j = 0; j < subchain.links.size(); j++) {
-		if (subchain.parents[j] < 0 && !geometry[link].Empty()) {
+		if (subchain.parents[j] < 0 && geometry[link] && !geometry[link]->Empty()) {
 			//rigidly attached to 'link' -- dont check self collision with link
 			for (size_t i = 0; i < norig; i++) {
 				if ((int) i != link)
@@ -2698,9 +2720,20 @@ bool Robot::LoadURDF(const char* fn)
 		    cout<< "Temporarily ignoring error..."<<endl;
 		    //return false;
 		  }
-		  cout<<"Geometry "<<geomFiles[link_index]<<" has "<<this->geometry[link_index].NumElements()<<" triangles"<<endl;
-
-		  this->geometry[link_index].Transform(linkNode->geomScale);
+		  if(this->geometry[link_index]) {
+		    cout<<"Geometry "<<geomFiles[link_index]<<" has "<<this->geometry[link_index]->NumElements()<<" triangles"<<endl;
+		    
+		    //set up color
+		    if(linkNode->link->visual && linkNode->link->visual->material) {
+		      urdf::Color c=linkNode->link->visual->material->color;
+		      this->geomManagers[link_index].Appearance()->faceColor.set(c.r,c.g,c.b,c.a);
+		    }
+		    Matrix4 ident; ident.setIdentity();
+		    if(linkNode->geomScale != ident) {
+		      this->geomManagers[link_index].TransformGeometry(linkNode->geomScale);
+		      //this->geometry[link_index]->Transform(linkNode->geomScale);
+		    }
+		  }
 		}
 	}
 
@@ -2759,7 +2792,7 @@ void Robot::ComputeLipschitzMatrix() {
 	Timer timer;
 	lipschitzMatrix.resize(links.size(), links.size(), 0.0);
 	for (size_t i = 0; i < links.size(); i++) {
-		if (geometry[i].Empty())
+		if (!geometry[i] || geometry[i]->Empty())
 			continue;
 
 		//translate workspace distance of link i into c-space distance
@@ -2767,13 +2800,13 @@ void Robot::ComputeLipschitzMatrix() {
 		Box3D b;
 		RigidTransform temp,ident;
 		ident.setIdentity();
-		temp = geometry[i].GetTransform();
-		geometry[i].SetTransform(ident);
-		b = geometry[i].GetBB();
-		geometry[i].SetTransform(temp);
+		temp = geometry[i]->GetTransform();
+		geometry[i]->SetTransform(ident);
+		b = geometry[i]->GetBB();
+		geometry[i]->SetTransform(temp);
 		s.center = b.origin + 0.5 * b.dims.x * b.xbasis
 				+ 0.5 * b.dims.y * b.ybasis + 0.5 * b.dims.z * b.zbasis;
-		s.radius = Radius(geometry[i]);
+		s.radius = Radius(*geometry[i]);
 
 		//s.radius = b.dims.norm()*0.5;
 		Real lipschitz = 0;
