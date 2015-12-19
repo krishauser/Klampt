@@ -64,6 +64,7 @@ bool ManagedGeometry::Load(const std::string& filename)
     }
     geometry = new Geometry::AnyCollisionGeometry3D(*prev->geometry);
     appearance = prev->appearance;
+    appearance->geom = geometry;
     cachedGeoms[filename].geoms.push_back(this);
     return true;
   }
@@ -122,6 +123,7 @@ bool ManagedGeometry::LoadNoCache(const std::string& filename)
 	if(geometry->TriangleMeshAppearanceData() != NULL) {
 	  printf("ManagedGeometry: Got texture information with file %s\n",filename.c_str());
 	  appearance = new GLDraw::GeometryAppearance(*geometry->TriangleMeshAppearanceData());
+	  appearance->Set(*geometry);
 	}
 	else {
 	  appearance->Set(*geometry);
@@ -195,6 +197,8 @@ void ManagedGeometry::TransformGeometry(const Math3D::Matrix4& xform)
     RemoveFromCache();
     geometry->Transform(xform);
     geometry->ClearCollisionData();
+    //may need to refresh appearance?
+    appearance->geom = geometry;
   }
 }
 
