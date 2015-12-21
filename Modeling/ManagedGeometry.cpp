@@ -113,12 +113,16 @@ bool ManagedGeometry::LoadNoCache(const std::string& filename)
   const char* ext=FileExtension(fn);
   if(ext) {
     if(Geometry::AnyGeometry3D::CanLoadExt(ext)) {
+      Timer timer;
       geometry = new Geometry::AnyCollisionGeometry3D();
       if(!geometry->Load(fn)) {
         fprintf(stderr,"ManagedGeometry: Error loading geometry file %s\n",fn);
 	geometry = NULL;
         return false;
       }
+      double t = timer.ElapsedTime();
+      if(t > 0.2) 
+	printf("ManagedGeometry: loaded %s in time %gs\n",filename.c_str(),t);
       if(geometry->type == Geometry::AnyGeometry3D::TriangleMesh) {
 	if(geometry->TriangleMeshAppearanceData() != NULL) {
 	  printf("ManagedGeometry: Got texture information with file %s\n",filename.c_str());
