@@ -189,6 +189,22 @@ void refWidget(int index)
 }
 
 
+ManagedGeometry& GetManagedGeometry(RobotWorld& world,int id)
+{
+  int terrain = world.IsTerrain(id);
+  if(terrain >= 0)
+    return world.terrains[terrain]->geometry;
+  int rigidObject = world.IsRigidObject(id);
+  if(rigidObject >= 0)
+    return world.rigidObjects[rigidObject]->geometry;
+  pair<int,int> robotLink = world.IsRobotLink(id);
+  if(robotLink.first >= 0) {
+    return world.robots[robotLink.first]->geomManagers[robotLink.second];
+  }
+  fprintf(stderr,"GetManagedGeometry(): Invalid ID: %d\n",id);
+  return world.robots[0]->geomManagers[0];
+}
+
 
 class ManualOverrideController : public RobotController
 {
@@ -430,9 +446,10 @@ void Geometry3D::set(const Geometry3D& g)
   AnyCollisionGeometry3D* geom = reinterpret_cast<AnyCollisionGeometry3D*>(geomPtr);
   geom->ClearCollisionData();
   if(!isStandalone()) {
-    //update the display list
+    //update the display list / cache
     RobotWorld& world=*worlds[this->world]->world;
     world.GetAppearance(id)->Set(*geom);
+    GetManagedGeometry(world,id).RemoveFromCache();
   }
 }
 
@@ -498,9 +515,10 @@ void Geometry3D::setTriangleMesh(const TriangleMesh& mesh)
   AnyCollisionGeometry3D* geom = reinterpret_cast<AnyCollisionGeometry3D*>(geomPtr);
   GetMesh(mesh,*geom);
   if(!isStandalone()) {
-    //update the display list
+    //update the display list / cache
     RobotWorld& world=*worlds[this->world]->world;
     world.GetAppearance(id)->Set(*geom);
+    GetManagedGeometry(world,id).RemoveFromCache();
   }
 }
 
@@ -522,9 +540,10 @@ void Geometry3D::setPointCloud(const PointCloud& pc)
   AnyCollisionGeometry3D* geom = reinterpret_cast<AnyCollisionGeometry3D*>(geomPtr);
   GetPointCloud(pc,*geom);
   if(!isStandalone()) {
-    //update the display list
+    //update the display list / cache
     RobotWorld& world=*worlds[this->world]->world;
     world.GetAppearance(id)->Set(*geom);
+    GetManagedGeometry(world,id).RemoveFromCache();
   }
 }
 
@@ -543,8 +562,10 @@ void Geometry3D::setGeometricPrimitive(const GeometricPrimitive& prim)
   *geom = g;
   geom->ClearCollisionData();
   if(!isStandalone()) {
+    //update the display list / cache
     RobotWorld& world=*worlds[this->world]->world;
     world.GetAppearance(id)->Set(*geom);
+    GetManagedGeometry(world,id).RemoveFromCache();
   }
 }
 
@@ -554,13 +575,14 @@ bool Geometry3D::loadFile(const char* fn)
   if(!geomPtr) {
     geomPtr = new AnyCollisionGeometry3D();
   }
-  AnyCollisionGeometry3D* geom = reinterpret_cast<AnyCollisionGeometry3D*>(geomPtr);
-  if(!geom->Load(fn)) return false;
-
-  if(!isStandalone()) {
-    //update the display list
+  if(isStandalone()) {
+    AnyCollisionGeometry3D* geom = reinterpret_cast<AnyCollisionGeometry3D*>(geomPtr);
+    if(!geom->Load(fn)) return false;
+  }
+  else {
+    //use the manager, this will automatically figure out caching stuff
     RobotWorld& world=*worlds[this->world]->world;
-    world.GetAppearance(id)->Set(*geom);
+    return GetManagedGeometry(world,id).Load(fn);
   }
   return true;
 }
@@ -575,6 +597,10 @@ bool Geometry3D::attachToStream(const char* protocol,const char* name,const char
         geomPtr = new AnyCollisionGeometry3D();
       AnyCollisionGeometry3D* geom = reinterpret_cast<AnyCollisionGeometry3D*>(geomPtr);
       (*geom) = AnyCollisionGeometry3D(Meshing::PointCloud3D());
+      if(!isStandalone()) {
+	RobotWorld& world=*worlds[this->world]->world;
+	GetManagedGeometry(world,id).RemoveFromCache();
+      }
       return ROSSubscribePointCloud(geom->AsPointCloud(),name);
       //TODO: update the appearance every time the point cloud changes
     }
@@ -630,9 +656,10 @@ void Geometry3D::translate(const double t[3])
   geom->ClearCollisionData();
 
   if(!isStandalone()) {
-    //update the display list
+    //update the display list / cache
     RobotWorld& world=*worlds[this->world]->world;
     world.GetAppearance(id)->Set(*geom);
+    GetManagedGeometry(world,id).RemoveFromCache();
   }
 }
 
@@ -647,9 +674,10 @@ void Geometry3D::transform(const double R[9],const double t[3])
   geom->ClearCollisionData();
 
   if(!isStandalone()) {
-    //update the display list
+    //update the display list / cache
     RobotWorld& world=*worlds[this->world]->world;
     world.GetAppearance(id)->Set(*geom);
+    GetManagedGeometry(world,id).RemoveFromCache();
   }
 }
 
@@ -768,6 +796,10 @@ Appearance Appearance::clone()
 
 void Appearance::set(const Appearance& g)
 {
+  if(!isStandalone()) {
+    RobotWorld& world=*worlds[this->world]->world;
+    GetManagedGeometry(world,id).SetUniqueAppearance();
+  }
   GLDraw::GeometryAppearance* gapp = reinterpret_cast<GLDraw::GeometryAppearance*>(appearancePtr);
   if(appearancePtr == NULL) {
     appearancePtr = new GLDraw::GeometryAppearance(*gapp);
@@ -793,6 +825,10 @@ void Appearance::free()
 void Appearance::setDraw(bool draw)
 {
   if(!appearancePtr) return;
+  if(!isStandalone()) {
+    RobotWorld& world=*worlds[this->world]->world;
+    GetManagedGeometry(world,id).SetUniqueAppearance();
+  }
   GLDraw::GeometryAppearance* app = reinterpret_cast<GLDraw::GeometryAppearance*>(appearancePtr);
   if(draw) {
     app->drawFaces = true;
@@ -808,6 +844,10 @@ void Appearance::setDraw(bool draw)
 void Appearance::setDraw(int primitive,bool draw)
 {
   if(!appearancePtr) return;
+  if(!isStandalone()) {
+    RobotWorld& world=*worlds[this->world]->world;
+    GetManagedGeometry(world,id).SetUniqueAppearance();
+  }
   GLDraw::GeometryAppearance* app = reinterpret_cast<GLDraw::GeometryAppearance*>(appearancePtr);
   switch(primitive) {
   case ALL: app->drawFaces = app->drawVertices = app->drawEdges = draw; break;
@@ -840,6 +880,10 @@ bool Appearance::getDraw(int primitive)
 void Appearance::setColor(float r,float g,float b,float a)
 {
   if(!appearancePtr) return;
+  if(!isStandalone()) {
+    RobotWorld& world=*worlds[this->world]->world;
+    GetManagedGeometry(world,id).SetUniqueAppearance();
+  }
   GLDraw::GeometryAppearance* app = reinterpret_cast<GLDraw::GeometryAppearance*>(appearancePtr);
   app->vertexColor.set(r,g,b,a);
   app->edgeColor.set(r,g,b,a);
@@ -849,6 +893,10 @@ void Appearance::setColor(float r,float g,float b,float a)
 void Appearance::setColor(int primitive,float r,float g,float b,float a)
 {
   if(!appearancePtr) return;
+  if(!isStandalone()) {
+    RobotWorld& world=*worlds[this->world]->world;
+    GetManagedGeometry(world,id).SetUniqueAppearance();
+  }
   GLDraw::GeometryAppearance* app = reinterpret_cast<GLDraw::GeometryAppearance*>(appearancePtr);
   switch(primitive) {
   case ALL:
@@ -892,6 +940,10 @@ void Appearance::setTexcoords(const std::vector<double>& uvs)
 void Appearance::setPointSize(float size)
 {
   if(!appearancePtr) return;
+  if(!isStandalone()) {
+    RobotWorld& world=*worlds[this->world]->world;
+    GetManagedGeometry(world,id).SetUniqueAppearance();
+  }
   GLDraw::GeometryAppearance* app = reinterpret_cast<GLDraw::GeometryAppearance*>(appearancePtr);
   app->vertexSize = size;
 }
