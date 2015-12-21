@@ -29,8 +29,20 @@ bool RigidObject::Load(const char* fn)
 {
   const char* ext=FileExtension(fn);
   if(ext && strcmp(ext,"obj")==0) {
-    SimpleFile f(fn);
-    if(!fn) return false;
+    SimpleFile f;
+    f.AllowItem("mesh");
+    f.AllowItem("geomscale");
+    f.AllowItem("geomtranslate");
+    f.AllowItem("T");
+    f.AllowItem("mass");
+    f.AllowItem("inertia");
+    f.AllowItem("com");
+    f.AllowItem("kFriction");
+    f.AllowItem("kRestitution");
+    f.AllowItem("kStiffness");
+    f.AllowItem("kDamping");
+    f.AllowItem("autoMass");
+    if(!f.Load(fn)) return false;
 
     if(!f.CheckSize("mesh",1,fn)) return false;
     if(!f.CheckType("mesh",PrimitiveValue::String,fn)) return false;
