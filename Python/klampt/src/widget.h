@@ -38,6 +38,8 @@ class Widget
   void drawGL(const Viewport& viewport);
   void idle();
   bool wantsRedraw();
+  bool hasHighlight();
+  bool hasFocus();
 
   int index;
 };
