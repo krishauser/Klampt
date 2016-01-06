@@ -153,6 +153,7 @@ int createWidget()
   if(widgetDeleteList.empty()) {
     widgets.resize(widgets.size()+1);
     widgets.back().refCount = 1;
+    //printf("Creating widget %d, ref count %d\n",widgets.size()-1,1);
     return (int)(widgets.size()-1);
   }
   else {
@@ -160,6 +161,7 @@ int createWidget()
     widgetDeleteList.erase(widgetDeleteList.begin());
     widgets[index].widget = NULL;
     widgets[index].refCount = 1;
+    //printf("Creating widget %d, ref count %d\n",index,1);
     return index;
   }
 }
@@ -172,7 +174,7 @@ void derefWidget(int index)
     throw PyException("Invalid dereference");
 
   widgets[index].refCount--;
-  //printf("Deref widget %d: count %d\n",index,widgets[index]->refCount);
+  //printf("Deref widget %d: count %d\n",index,widgets[index].refCount);
   if(widgets[index].refCount == 0) {
     //printf("Deleting widget %d\n",index);
     widgets[index].widget = NULL;
@@ -185,7 +187,7 @@ void refWidget(int index)
   if(index < 0 || index >= (int)widgets.size())
     throw PyException("Invalid widget index");
   widgets[index].refCount++;
-  //printf("Ref widget %d: count %d\n",index,widgets[index]->refCount);
+  //printf("Ref widget %d: count %d\n",index,widgets[index].refCount);
 }
 
 
@@ -1211,7 +1213,10 @@ bool WorldModel::readFile(const char* fn)
       printf("Error loading robot file %s\n",fn);
       return false;
     }
-    if(gEnableCollisionInitialization) world.robots.back()->InitCollisions();
+    if(gEnableCollisionInitialization) {
+      world.robots.back()->InitCollisions();
+      world.robots.back()->UpdateGeometry();
+    }
   }
   else if(0==strcmp(ext,"env") || 0==strcmp(ext,"tri") || 0==strcmp(ext,"pcd")) {
     if(world.LoadTerrain(fn)<0) {
@@ -1225,7 +1230,10 @@ bool WorldModel::readFile(const char* fn)
       printf("Error loading rigid object file %s\n",fn);
       return false;
     }
-    if(gEnableCollisionInitialization) world.rigidObjects.back()->InitCollisions();
+    if(gEnableCollisionInitialization) {
+      world.rigidObjects.back()->InitCollisions();
+      world.rigidObjects.back()->UpdateGeometry();
+    }
   }
   else if(0==strcmp(ext,"xml")) {
     /*
@@ -1254,7 +1262,10 @@ bool WorldModel::readFile(const char* fn)
       printf("Error opening or parsing world file %s\n",fn);
       return false;
     }
-    if(gEnableCollisionInitialization) world.InitCollisions();
+    if(gEnableCollisionInitialization) {
+      world.InitCollisions();
+      world.UpdateGeometry();
+    }
     return true;
   }
   else {
@@ -1445,7 +1456,10 @@ RobotModel WorldModel::loadRobot(const char* fn)
   robot.world = index;
   robot.index = oindex;
   robot.robot = world.robots.back();
-  if(gEnableCollisionInitialization) world.robots.back()->InitCollisions();
+  if(gEnableCollisionInitialization) {
+    world.robots.back()->InitCollisions();
+    world.robots.back()->UpdateGeometry();
+  }
   return robot;
 }
 
@@ -1458,7 +1472,10 @@ RigidObjectModel WorldModel::loadRigidObject(const char* fn)
   obj.world = index;
   obj.index = oindex;
   obj.object = world.rigidObjects.back();
-  if(gEnableCollisionInitialization) world.rigidObjects.back()->InitCollisions();
+  if(gEnableCollisionInitialization) {
+    world.rigidObjects.back()->InitCollisions();
+    world.rigidObjects.back()->UpdateGeometry();
+  }
   return obj;
 }
 
@@ -1521,8 +1538,10 @@ void WorldModel::enableGeometryLoading(bool enabled)
 void WorldModel::enableInitCollisions(bool enabled)
 {
   gEnableCollisionInitialization = !enabled;
-  if(enabled)
+  if(enabled) {
     worlds[index]->world->InitCollisions();
+    worlds[index]->world->UpdateGeometry();
+  }
 }
 
 
@@ -3379,6 +3398,7 @@ bool Widget::hover(int x,int y,const Viewport& viewport)
 {
   double distance = Inf;
   Camera::Viewport vp = GetCameraViewport(viewport);
+  Assert(widgets[index].widget != NULL);
   bool res=widgets[index].widget->Hover(x,y,vp,distance);
   if(res) widgets[index].widget->SetHighlight(true);
   else widgets[index].widget->SetHighlight(false);
@@ -3429,6 +3449,16 @@ bool Widget::wantsRedraw()
   return widgets[index].widget->requestRedraw;
 }
 
+bool Widget::hasHighlight()
+{
+  return widgets[index].widget->hasHighlight;
+}
+
+bool Widget::hasFocus()
+{
+  return widgets[index].widget->hasFocus;
+}
+
 WidgetSet::WidgetSet()
   :Widget()
 {
@@ -3450,7 +3480,13 @@ void WidgetSet::remove(const Widget& subwidget)
       //delete it
       ws->widgets.erase(ws->widgets.begin()+i);
       ws->widgetEnabled.erase(ws->widgetEnabled.begin()+i);
+      if(ws->activeWidget == widgets[subwidget.index].widget)
+	ws->activeWidget = NULL;
+      if(ws->closestWidget == widgets[subwidget.index].widget)
+	ws->closestWidget = NULL;
       derefWidget(subwidget.index);
+      if(widgets[subwidget.index].widget == NULL) 
+	return;
       i--;
     }
 }
@@ -3460,6 +3496,10 @@ void WidgetSet::enable(const Widget& subwidget,bool enabled)
   GLDraw::WidgetSet* ws=dynamic_cast<GLDraw::WidgetSet*>(&*widgets[index].widget);
   for(size_t i=0;i<ws->widgets.size();i++)
     if(ws->widgets[i] == widgets[subwidget.index].widget) {
+      if(ws->activeWidget == widgets[subwidget.index].widget)
+	ws->activeWidget = NULL;
+      if(ws->closestWidget == widgets[subwidget.index].widget)
+	ws->closestWidget = NULL;
       ws->widgetEnabled[i] = enabled;
     }
 }

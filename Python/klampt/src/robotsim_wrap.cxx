@@ -23401,6 +23401,74 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_Widget_hasHighlight(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Widget *arg1 = (Widget *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  bool result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:Widget_hasHighlight",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Widget, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Widget_hasHighlight" "', argument " "1"" of type '" "Widget *""'"); 
+  }
+  arg1 = reinterpret_cast< Widget * >(argp1);
+  {
+    try {
+      result = (bool)(arg1)->hasHighlight();
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_From_bool(static_cast< bool >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Widget_hasFocus(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Widget *arg1 = (Widget *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  bool result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:Widget_hasFocus",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Widget, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Widget_hasFocus" "', argument " "1"" of type '" "Widget *""'"); 
+  }
+  arg1 = reinterpret_cast< Widget * >(argp1);
+  {
+    try {
+      result = (bool)(arg1)->hasFocus();
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_From_bool(static_cast< bool >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_Widget_index_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   Widget *arg1 = (Widget *) 0 ;
@@ -44893,6 +44961,8 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"Widget_drawGL", _wrap_Widget_drawGL, METH_VARARGS, (char *)"Widget_drawGL(Widget self, Viewport viewport)"},
 	 { (char *)"Widget_idle", _wrap_Widget_idle, METH_VARARGS, (char *)"Widget_idle(Widget self)"},
 	 { (char *)"Widget_wantsRedraw", _wrap_Widget_wantsRedraw, METH_VARARGS, (char *)"Widget_wantsRedraw(Widget self) -> bool"},
+	 { (char *)"Widget_hasHighlight", _wrap_Widget_hasHighlight, METH_VARARGS, (char *)"Widget_hasHighlight(Widget self) -> bool"},
+	 { (char *)"Widget_hasFocus", _wrap_Widget_hasFocus, METH_VARARGS, (char *)"Widget_hasFocus(Widget self) -> bool"},
 	 { (char *)"Widget_index_set", _wrap_Widget_index_set, METH_VARARGS, (char *)"Widget_index_set(Widget self, int index)"},
 	 { (char *)"Widget_index_get", _wrap_Widget_index_get, METH_VARARGS, (char *)"Widget_index_get(Widget self) -> int"},
 	 { (char *)"Widget_swigregister", Widget_swigregister, METH_VARARGS, NULL},
