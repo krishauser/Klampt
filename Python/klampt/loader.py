@@ -200,7 +200,7 @@ def readIKObjective(text):
     elif posType=='P':
         obj.setPlanePosConstraint(posLocal,posDirection,vectorops.dot(posDirection,posWorld))
     else:
-        obj.setLinearePosConstraint(posLocal,posWorld,posDirection)
+        obj.setLinearPosConstraint(posLocal,posWorld,posDirection)
     if rotType == 'N':
         obj.setFreeRotConstraint()
     elif rotType == 'F':
@@ -461,7 +461,7 @@ def toJson(obj,type='auto'):
     elif type == 'Trajectory':
         return {'times':obj.times,'milestones':obj.milestones}
     elif type == 'IKObjective':
-        res = {'link':obj.link()}
+        res = {'type':type,'link':obj.link()}
         if obj.destLink() >= 0:
             res['destLink'] = obj.destLink()
         if obj.numPosDims()==3:
@@ -476,7 +476,9 @@ def toJson(obj,type='auto'):
             res['localPosition'],res['endPosition']=obj.getPosition()
             res['direction']=obj.getPositionDirection()
         else:
-            res['posConstraint']='free'
+            #less verbose to just eliminate this 
+            #res['posConstraint']='free'
+            pass
         if obj.numRotDims()==3:
             res['rotConstraint']='fixed'
             res['endRotation']=so3.moment(obj.getRotation())
@@ -486,7 +488,9 @@ def toJson(obj,type='auto'):
         elif obj.numRotDims()==1:
             raise NotImplementedError("twoaxis constraints are not implemented in Klampt")
         else:
-            res['rotConstraint']='free'
+            #less verbose to just eliminate this
+            #res['rotConstraint']='free'
+            pass
         return res
     elif type in writers:
         return {'type':type,'data':write(obj,type)}
@@ -571,7 +575,7 @@ def fromJson(jsonobj,type='auto'):
             obj = IKObjective()
             R = so3.from_moment(endRotation)
             t = vectorops.sub(endPosition,so3.apply(R,localPosition))
-            obj.setFixedTransform(R,t)
+            obj.setFixedTransform(link,R,t)
             return obj
         else:
             raise RuntimeError("Invalid IK rotation constraint "+rotConstraint)
