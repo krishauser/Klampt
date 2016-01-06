@@ -1872,6 +1872,16 @@ class Widget(_object):
         """wantsRedraw(Widget self) -> bool"""
         return _robotsim.Widget_wantsRedraw(self)
 
+
+    def hasHighlight(self):
+        """hasHighlight(Widget self) -> bool"""
+        return _robotsim.Widget_hasHighlight(self)
+
+
+    def hasFocus(self):
+        """hasFocus(Widget self) -> bool"""
+        return _robotsim.Widget_hasFocus(self)
+
     __swig_setmethods__["index"] = _robotsim.Widget_index_set
     __swig_getmethods__["index"] = _robotsim.Widget_index_get
     if _newclass:
