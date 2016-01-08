@@ -378,52 +378,105 @@ class CSpaceInterface(_object):
 
 
     def getProperty(self, key):
-        """getProperty(CSpaceInterface self, char const * key) -> char const *"""
+        """
+        getProperty(CSpaceInterface self, char const * key) -> char const *
+
+        const char *
+        CSpaceInterface::getProperty(const char *key) 
+        """
         return _motionplanning.CSpaceInterface_getProperty(self, key)
 
 
     def isFeasible(self, q):
-        """isFeasible(CSpaceInterface self, PyObject * q) -> bool"""
+        """
+        isFeasible(CSpaceInterface self, PyObject * q) -> bool
+
+        bool
+        CSpaceInterface::isFeasible(PyObject *q)
+
+        queries 
+        """
         return _motionplanning.CSpaceInterface_isFeasible(self, q)
 
 
     def isVisible(self, a, b):
-        """isVisible(CSpaceInterface self, PyObject * a, PyObject * b) -> bool"""
+        """
+        isVisible(CSpaceInterface self, PyObject * a, PyObject * b) -> bool
+
+        bool
+        CSpaceInterface::isVisible(PyObject *a, PyObject *b) 
+        """
         return _motionplanning.CSpaceInterface_isVisible(self, a, b)
 
 
     def testFeasibility(self, name, q):
-        """testFeasibility(CSpaceInterface self, char const * name, PyObject * q) -> bool"""
+        """
+        testFeasibility(CSpaceInterface self, char const * name, PyObject * q) -> bool
+
+        bool
+        CSpaceInterface::testFeasibility(const char *name, PyObject *q) 
+        """
         return _motionplanning.CSpaceInterface_testFeasibility(self, name, q)
 
 
     def testVisibility(self, name, a, b):
-        """testVisibility(CSpaceInterface self, char const * name, PyObject * a, PyObject * b) -> bool"""
+        """
+        testVisibility(CSpaceInterface self, char const * name, PyObject * a, PyObject * b) -> bool
+
+        bool
+        CSpaceInterface::testVisibility(const char *name, PyObject *a,
+        PyObject *b) 
+        """
         return _motionplanning.CSpaceInterface_testVisibility(self, name, a, b)
 
 
     def feasibilityFailures(self, q):
-        """feasibilityFailures(CSpaceInterface self, PyObject * q) -> PyObject *"""
+        """
+        feasibilityFailures(CSpaceInterface self, PyObject * q) -> PyObject *
+
+        PyObject
+        * CSpaceInterface::feasibilityFailures(PyObject *q) 
+        """
         return _motionplanning.CSpaceInterface_feasibilityFailures(self, q)
 
 
     def visibilityFailures(self, a, b):
-        """visibilityFailures(CSpaceInterface self, PyObject * a, PyObject * b) -> PyObject *"""
+        """
+        visibilityFailures(CSpaceInterface self, PyObject * a, PyObject * b) -> PyObject *
+
+        PyObject
+        * CSpaceInterface::visibilityFailures(PyObject *a, PyObject *b) 
+        """
         return _motionplanning.CSpaceInterface_visibilityFailures(self, a, b)
 
 
     def sample(self):
-        """sample(CSpaceInterface self) -> PyObject *"""
+        """
+        sample(CSpaceInterface self) -> PyObject *
+
+        PyObject *
+        CSpaceInterface::sample() 
+        """
         return _motionplanning.CSpaceInterface_sample(self)
 
 
     def distance(self, a, b):
-        """distance(CSpaceInterface self, PyObject * a, PyObject * b) -> double"""
+        """
+        distance(CSpaceInterface self, PyObject * a, PyObject * b) -> double
+
+        double
+        CSpaceInterface::distance(PyObject *a, PyObject *b) 
+        """
         return _motionplanning.CSpaceInterface_distance(self, a, b)
 
 
     def interpolate(self, a, b, u):
-        """interpolate(CSpaceInterface self, PyObject * a, PyObject * b, double u) -> PyObject *"""
+        """
+        interpolate(CSpaceInterface self, PyObject * a, PyObject * b, double u) -> PyObject *
+
+        PyObject *
+        CSpaceInterface::interpolate(PyObject *a, PyObject *b, double u) 
+        """
         return _motionplanning.CSpaceInterface_interpolate(self, a, b, u)
 
     __swig_setmethods__["index"] = _motionplanning.CSpaceInterface_index_set
@@ -443,9 +496,18 @@ class PlannerInterface(_object):
     On construction, uses the planner type specified by setPlanType and
     the settings currently specified by calls to setPlanSetting.
 
-    Point-to-point planning is enabled using the setEndpoints method. This
-    is mandatory for RRT and SBL planners. The start and end milestones
-    are given by indices 0 and 1, respectively
+    Point-to-point planning is enabled by sending two configurations to
+    the setEndpoints method. This is mandatory for RRT and SBL-style
+    planners. The start and end milestones are given by indices 0 and 1,
+    respectively
+
+    Point-to-set planning is enabled by sending a goal test as the second
+    argument to the setEndpoints method. It is possible also to send a
+    special goal sampler by providing a pair of functions as the second
+    argument consisting of the two functions (goaltest,goalsample). The
+    first in this pair tests whether a configuration is a goal, and the
+    second returns a sampled configuration in a superset of the goal.
+    Ideally the goal sampler generates as many goals as possible.
 
     PRM can be used in either point-to-point or multi-query mode. In
     multi-query mode, you may call addMilestone(q) to add a new milestone.
