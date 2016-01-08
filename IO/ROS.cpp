@@ -658,10 +658,10 @@ bool ROSPublishTransforms(const RobotWorld& world,const char* frameprefix)
     if(tf==NULL) return false;
   }
   for(size_t i=0;i<world.rigidObjects.size();i++)
-    tf->send(prefix+"/"+world.rigidObjects[i].name,world.rigidObjects[i].object->T);
+    tf->send(prefix+"/"+world.rigidObjects[i]->name,world.rigidObjects[i]->T);
   for(size_t i=0;i<world.robots.size();i++) {
-    for(size_t j=0;j<world.robots[i].robot->links.size();j++) {
-      tf->send(prefix+"/"+world.robots[i].name+"/"+world.robots[i].robot->linkNames[j],world.robots[i].robot->links[i].T_World);
+    for(size_t j=0;j<world.robots[i]->links.size();j++) {
+      tf->send(prefix+"/"+world.robots[i]->name+"/"+world.robots[i]->linkNames[j],world.robots[i]->links[i].T_World);
     }
   }
   return true;
@@ -683,13 +683,13 @@ bool ROSPublishTransforms(const WorldSimulation& sim,const char* frameprefix)
   for(size_t i=0;i<sim.world->rigidObjects.size();i++) {
     RigidTransform T;
     sim.odesim.object(i)->GetTransform(T);
-    tf->send(prefix+"/"+sim.world->rigidObjects[i].name,T);
+    tf->send(prefix+"/"+sim.world->rigidObjects[i]->name,T);
   }
   for(size_t i=0;i<sim.world->robots.size();i++) {
-    for(size_t j=0;j<sim.world->robots[i].robot->links.size();j++) {
+    for(size_t j=0;j<sim.world->robots[i]->links.size();j++) {
       RigidTransform T;
       sim.odesim.robot(i)->GetLinkTransform(j,T);
-      tf->send(prefix+"/"+sim.world->robots[i].name+"/"+sim.world->robots[i].robot->linkNames[j],T);
+      tf->send(prefix+"/"+sim.world->robots[i]->name+"/"+sim.world->robots[i]->linkNames[j],T);
     }
   }
   return true;
