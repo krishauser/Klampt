@@ -96,13 +96,6 @@ void InitDisplayLists(Robot& robot,vector<GLDisplayList>& displayLists)
 ViewRobot::ViewRobot(Robot* _robot)
   :robot(_robot)
 {
-  if(robot) {
-    linkAppearance.resize(robot->links.size());
-    for(size_t i=0;i<linkAppearance.size();i++) {
-      linkAppearance[i].Set(robot->geometry[i]);
-      linkAppearance[i].faceColor = grey;
-    }
-  }
 }
 
 ViewRobot::~ViewRobot()
@@ -113,37 +106,25 @@ void ViewRobot::Draw(Robot* _robot)
 {
   robot = _robot;
   if(!robot) return;
-  SetGrey();
   Draw();
 }
 
 void ViewRobot::SetColors(const GLColor& c)
 {
   if(robot) {
-    if(linkAppearance.empty()) {
-      linkAppearance.resize(robot->links.size());
-      for(size_t i=0;i<linkAppearance.size();i++) 
-	linkAppearance[i].Set(robot->geometry[i]);
-    }
-    for(size_t i=0;i<linkAppearance.size();i++) {
-      linkAppearance[i].faceColor = c;
-      linkAppearance[i].vertexColor = c;
+    for(size_t i=0;i<robot->links.size();i++) {
+      Appearance(i).faceColor = c;
+      Appearance(i).vertexColor = c;
     }
   }
 }
 
 void ViewRobot::SetColor(int link,const GLColor& c)
 {
-  if(linkAppearance.empty()) {
-    linkAppearance.resize(robot->links.size());
-    for(size_t i=0;i<linkAppearance.size();i++) {
-      linkAppearance[i].Set(robot->geometry[i]);
-      linkAppearance[i].faceColor = grey;
-      linkAppearance[i].vertexColor = grey;
-    }
+  if(robot) {
+    Appearance(link).faceColor = c;
+    Appearance(link).vertexColor = c;
   }
-  linkAppearance[link].faceColor = c;
-  linkAppearance[link].vertexColor = c;
 }
 
 void ViewRobot::SetGrey() { SetColors(grey); }
@@ -153,21 +134,27 @@ void ViewRobot::Draw()
   if(!robot) return;
 
   for(size_t i=0;i<robot->links.size();i++) {
+    if(robot->IsGeometryEmpty(i)) continue;
     Matrix4 mat = robot->links[i].T_World;
     glPushMatrix();
     glMultMatrix(mat);
-    linkAppearance[i].DrawGL();
+    if(Appearance(i).geom != robot->geometry[i])
+      Appearance(i).Set(*robot->geometry[i]);
+    Appearance(i).DrawGL();
     glPopMatrix();
   }
 }
 
 void ViewRobot::DrawLink_Local(int i,bool keepAppearance)
 {
-  if(!robot) return;
-  if(keepAppearance)
-    linkAppearance[i].DrawGL();
+  if(!robot || robot->IsGeometryEmpty(i)) return;
+  if(keepAppearance) {
+    if(Appearance(i).geom != robot->geometry[i])
+      Appearance(i).Set(*robot->geometry[i]);
+    Appearance(i).DrawGL();
+  }
   else 
-    draw(robot->geometry[i]);
+    draw(*robot->geometry[i]);
 }
 
 void ViewRobot::DrawLink_World(int i,bool keepAppearance)
@@ -216,7 +203,7 @@ void ViewRobot::DrawLinkFrames(Real size)
 {
   if(!robot) return;
   glDisable(GL_LIGHTING);
-  for(int i=0;i<robot->links.size();i++) {
+  for(size_t i=0;i<robot->links.size();i++) {
     glPushMatrix();
     glMultMatrix((Matrix4)robot->links[i].T_World);
     drawCoords(size);
@@ -231,7 +218,7 @@ void ViewRobot::DrawLinkSkeleton()
   glColor3f(1,0.5,0);
   glLineWidth(3.0);
   glBegin(GL_LINES);
-  for(int i=0;i<robot->links.size();i++) {
+  for(size_t i=0;i<robot->links.size();i++) {
     if(robot->parents[i] >= 0) {
       glVertex3v(robot->links[robot->parents[i]].T_World.t);
       glVertex3v(robot->links[i].T_World.t);
@@ -272,7 +259,7 @@ void ViewRobot::SetTorqueColors(const Vector& T)
   Assert(T.n == (int)robot->links.size() || T.n == (int)robot->drivers.size());
   if(T.n == (int)robot->links.size()) {
     for(int i=0;i<T.n;i++) {
-      GetTorqueColor(T[i],linkAppearance[i].faceColor);
+      GetTorqueColor(T[i],Appearance(i).faceColor);
     }
   }
   else {
@@ -280,8 +267,53 @@ void ViewRobot::SetTorqueColors(const Vector& T)
       GLColor c;
       GetTorqueColor(T[i],c);
       for(size_t k=0;k<robot->drivers[i].linkIndices.size();k++)
-	linkAppearance[robot->drivers[i].linkIndices[k]].faceColor = c;
+	Appearance(robot->drivers[i].linkIndices[k]).faceColor = c;
     }
   }
 }
 
+GLDraw::GeometryAppearance& ViewRobot::Appearance(int link)
+{
+  Assert(robot!=NULL);
+  if(appearanceStack.empty()) 
+    return *robot->geomManagers[link].Appearance();
+  return appearanceStack.back()[link];
+}
+
+void ViewRobot::PushAppearance()
+{
+  if(robot==NULL) return;
+  vector<GLDraw::GeometryAppearance> app(robot->links.size());
+  for(size_t i=0;i<robot->links.size();i++)
+    app[i] = Appearance(i);
+  appearanceStack.push_back(app);
+}
+
+void ViewRobot::PopAppearance()
+{
+  if(!appearanceStack.empty()) appearanceStack.resize(appearanceStack.size()-1);
+}
+void ViewRobot::RestoreAppearance()
+
+{
+  appearanceStack.resize(0);
+}
+
+vector<GLDraw::GeometryAppearance> ViewRobot::GetAppearance()
+{
+  vector<GLDraw::GeometryAppearance> res;
+  if(!robot) return res;
+  res.resize(robot->links.size());
+  for(size_t i=0;i<res.size();i++)
+    res[i] = Appearance(i);
+  return res;
+}
+
+void ViewRobot::SetAppearance(const vector<GLDraw::GeometryAppearance>& app)
+{
+  if(!robot) return;
+  Assert(app.size()==robot->links.size());
+  for(size_t i=0;i<app.size();i++) {
+    Appearance(i) = app[i];
+  }
+}

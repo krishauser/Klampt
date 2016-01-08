@@ -200,7 +200,7 @@ def readIKObjective(text):
     elif posType=='P':
         obj.setPlanePosConstraint(posLocal,posDirection,vectorops.dot(posDirection,posWorld))
     else:
-        obj.setLinearePosConstraint(posLocal,posWorld,posDirection)
+        obj.setLinearPosConstraint(posLocal,posWorld,posDirection)
     if rotType == 'N':
         obj.setFreeRotConstraint()
     elif rotType == 'F':
@@ -212,6 +212,9 @@ def readIKObjective(text):
     else:
         raise NotImplementedError("Two-axis rotational constraints not supported")
     return obj
+
+def writeIKObjective(obj):
+    return obj.saveString()
 
 def readHold(text):
     """Loads a Hold from a string"""
@@ -273,12 +276,12 @@ def readHold(text):
 def writeHold(h):
     """Writes a Hold to a string"""
     text = "begin hold\n"
-    text += "link = "+str(h.link)+"\n"
-    text += "contacts = ";
+    text += "  link = "+str(h.link)+"\n"
+    text += "  contacts = ";
     text += " \\\n    ".join([writeContactPoint(c) for c in h.contacts])
     text += "\n"
     localPos, worldPos = h.ikConstraint.getPosition()
-    text += "position = "+" ".join(str(v) for v in localPos)+"  \\\n"
+    text += "  position = "+" ".join(str(v) for v in localPos)+"  \\\n"
     text += "    "+" ".join(str(v) for v in worldPos)+"\n"
     #TODO: write ik constraint rotation
     if h.ikConstraint.numRotDims()==3:
@@ -343,6 +346,7 @@ writers = {'Config':writeVector,
            'Matrix3':writeMatrix3,
            'RotationMatrix':writeSo3,
            'RigidTransform':writeSe3,
+           'IKObjective':writeIKObjective,
            'Hold':writeHold,
            'GeometricPrimitive':writeGeometricPrimitive,
            }
@@ -456,6 +460,38 @@ def toJson(obj,type='auto'):
         return {'x':obj.x,'n':obj.n,'kFriction':kFriction}
     elif type == 'Trajectory':
         return {'times':obj.times,'milestones':obj.milestones}
+    elif type == 'IKObjective':
+        res = {'type':type,'link':obj.link()}
+        if obj.destLink() >= 0:
+            res['destLink'] = obj.destLink()
+        if obj.numPosDims()==3:
+            res['posConstraint']='fixed'
+            res['localPosition'],res['endPosition']=obj.getPosition()
+        elif obj.numPosDims()==2:
+            res['posConstraint']='linear'
+            res['localPosition'],res['endPosition']=obj.getPosition()
+            res['direction']=obj.getPositionDirection()
+        elif obj.numPosDims()==1:
+            res['posConstraint']='planar'
+            res['localPosition'],res['endPosition']=obj.getPosition()
+            res['direction']=obj.getPositionDirection()
+        else:
+            #less verbose to just eliminate this 
+            #res['posConstraint']='free'
+            pass
+        if obj.numRotDims()==3:
+            res['rotConstraint']='fixed'
+            res['endRotation']=so3.moment(obj.getRotation())
+        elif obj.numRotDims()==2:
+            res['rotConstraint']='axis'
+            res['localAxis'],res['endRotation']=obj.getRotationAxis()
+        elif obj.numRotDims()==1:
+            raise NotImplementedError("twoaxis constraints are not implemented in Klampt")
+        else:
+            #less verbose to just eliminate this
+            #res['rotConstraint']='free'
+            pass
+        return res
     elif type in writers:
         return {'type':type,'data':write(obj,type)}
     else:
@@ -508,9 +544,9 @@ def fromJson(jsonobj,type='auto'):
             localPosition = jsonobj['localPosition']
             endPosition = jsonobj['endPosition']
         if rotConstraint != 'free':
-            endRotation = jsonObject['endRotation']
+            endRotation = jsonobj['endRotation']
         if rotConstraint == 'axis' or rotConstraint == 'twoaxis':
-            localAxis = jsonObject['localAxis']
+            localAxis = jsonobj['localAxis']
         if posConstraint == 'free' and rotConstraint == 'free':
             #empty
             return IKObjective()
@@ -539,7 +575,7 @@ def fromJson(jsonobj,type='auto'):
             obj = IKObjective()
             R = so3.from_moment(endRotation)
             t = vectorops.sub(endPosition,so3.apply(R,localPosition))
-            obj.setFixedTransform(R,t)
+            obj.setFixedTransform(link,R,t)
             return obj
         else:
             raise RuntimeError("Invalid IK rotation constraint "+rotConstraint)

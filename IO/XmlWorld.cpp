@@ -1,4 +1,5 @@
 #include "XmlWorld.h"
+#include "View/Texturizer.h"
 #include <utils/stringutils.h>
 #include <fstream>
 
@@ -198,17 +199,15 @@ bool XmlRigidObject::GetObject(RigidObject& obj)
     }
     Matrix4 xform;
     if(ReadTransform(geom,xform)) {
-      obj.geometry.Transform(xform);
+      obj.geometry.TransformGeometry(xform);
     }
     xform.setIdentity();
     Real temp;
     if(geom->QueryValueAttribute("margin",&temp) == TIXML_SUCCESS) {
-      obj.geometry.margin = temp;
+      obj.geometry->margin = temp;
     }
-    //TESTING: don't need this with dynamic collision initialization
-    //obj.geometry.InitCollisionData();
   }
-  if(obj.geometry.Empty()) {
+  if(obj.geometry->Empty()) {
     fprintf(stderr,"XmlRigidObject: element does not contain geometry attribute\n");
     return false;
   }
@@ -257,7 +256,7 @@ XmlTerrain::XmlTerrain(TiXmlElement* _element,string _path)
   :e(_element),path(_path)
 {}
 
-bool XmlTerrain::GetTerrain(Environment& env)
+bool XmlTerrain::GetTerrain(Terrain& env)
 {
   const char* fn = e->Attribute("file");
   if(!fn) {
@@ -282,13 +281,11 @@ bool XmlTerrain::GetTerrain(Environment& env)
 
   Matrix4 xform;
   if(ReadTransform(e,xform)) {
-    env.geometry.Transform(xform);
-    ///TESTING: don't need this with dynamic collision initialization
-    //env.geometry.InitCollisionData();
+    env.geometry.TransformGeometry(xform);
   }
   Real margin;
   if(e->QueryValueAttribute("margin",&margin) == TIXML_SUCCESS) {
-    env.geometry.margin = margin;
+    env.geometry->margin = margin;
   }
   return true;
 }
@@ -296,9 +293,15 @@ bool XmlTerrain::GetTerrain(Environment& env)
 class XmlViewTerrain
 {
  public:
-  XmlViewTerrain(TiXmlElement* element) : e(element) {}
-  bool GetView(ViewEnvironment& view)
+  XmlViewTerrain(TiXmlElement* element,const string& _path) : e(element),path(_path) {}
+  bool Get(Terrain& terrain)
   {
+    terrain.geometry.SetUniqueAppearance();
+    Texturizer tex;
+    //checker by default
+    tex.texture = "checker";
+    tex.texCoordAutoScale = false;
+    terrain.geometry.Appearance()->texWrap = true;
     if(e->Attribute("color")) {
       Vector3 rgb;
       stringstream ss(e->Attribute("color"));
@@ -306,34 +309,80 @@ class XmlViewTerrain
       Real a=1.0;
       if(ss >> a) { }
       else a=1.0;
-      view.texture = ViewEnvironment::NoTexture;
-      view.appearance.faceColor.set(rgb.x,rgb.y,rgb.z,a);
+      tex.texture = "";
+      terrain.geometry.Appearance()->faceColor.set(rgb.x,rgb.y,rgb.z,a);
     }
+    else
+      terrain.geometry.Appearance()->faceColor.set(0.8,0.6,0.2);
     if(e->Attribute("texture")) {
+      tex.texture = e->Attribute("texture");
       if(0==strcmp(e->Attribute("texture"),"checker")) {
-	view.texture = ViewEnvironment::CheckerTexture;
-	view.texCoords = ViewEnvironment::XYTexCoords;
+	tex.texCoords = Texturizer::XYTexCoords;
       }
       else if(0==strcmp(e->Attribute("texture"),"noise")) {
-	view.texture = ViewEnvironment::NoiseTexture;
-	view.texCoords = ViewEnvironment::XYTexCoords;
+	tex.texCoords = Texturizer::XYTexCoords;
       }
       else if(0==strcmp(e->Attribute("texture"),"gradient")) {
-	view.texture = ViewEnvironment::GradientTexture;
-	view.texCoords = ViewEnvironment::ZTexCoord;
+	tex.texCoords = Texturizer::ZTexCoord;
+	tex.texCoordAutoScale = true;
+	terrain.geometry.Appearance()->texWrap = false;
       }
       else if(0==strcmp(e->Attribute("texture"),"colorgradient")) {
-	view.texture = ViewEnvironment::ColorGradientTexture;
-	view.texCoords = ViewEnvironment::ZTexCoord;
+	tex.texCoords = Texturizer::ZTexCoord;
+	tex.texCoordAutoScale = true;
+	terrain.geometry.Appearance()->texWrap = false;
       }
+      else {
+	tex.texture = path+string(e->Attribute("texture"));
+	tex.texCoordAutoScale = true;
+      }
+    }
+    if(e->Attribute("texture_projection")) {
+      if(0==strcmp(e->Attribute("texture_projection"),"z")) {
+	tex.texCoords = Texturizer::ZTexCoord;
+      }
+      else if(0==strcmp(e->Attribute("texture_projection"),"xy")) {
+	tex.texCoords = Texturizer::XYTexCoords;
+      }
+      else if(0==strcmp(e->Attribute("texture_projection"),"conformal")) {
+	tex.texCoords = Texturizer::ParameterizedTexCoord;
+      }
+      else {
+	printf("Unsupported value for texture_projection: %s\n",e->Attribute("texture_projection"));
+	tex.texCoords = Texturizer::XYTexCoords;
+      }
+    }
+    tex.Set(terrain.geometry);
+    return true;
+  }
+
+  TiXmlElement* e;
+  string path;
+};
+
+
+class XmlAppearance
+{
+ public:
+  XmlAppearance(TiXmlElement* element) : e(element) {}
+  bool Get(ManagedGeometry& geom)
+  {
+    geom.SetUniqueAppearance();
+    if(e->Attribute("color")) {
+      Vector3 rgb;
+      stringstream ss(e->Attribute("color"));
+      ss >> rgb;
+      Real a=1.0;
+      if(ss >> a) { }
+      else a=1.0;
+      geom.Appearance()->faceColor.set(rgb.x,rgb.y,rgb.z,a);
+      geom.Appearance()->vertexColor.set(rgb.x,rgb.y,rgb.z,a);
     }
     return true;
   }
 
   TiXmlElement* e;
 };
-
-
 
 
 XmlWorld::XmlWorld()
@@ -361,10 +410,12 @@ bool XmlWorld::GetWorld(RobotWorld& world)
   string object="rigidObject";
   string terrain="terrain";
   string display="display";
+  string appearance="appearance";
   string goal="goal";
   TiXmlElement* e;
   //parse display
   e = GetElement(display);
+  if(!e) e = GetElement(appearance);
   if(e) {
     Vector4 rgba;
     if(e->QueryValueAttribute("background",&rgba)==TIXML_SUCCESS)
@@ -408,6 +459,13 @@ bool XmlWorld::GetWorld(RobotWorld& world)
       return false;
     }
     int i = world.AddRigidObject(sname,o);
+    TiXmlElement* d = e->FirstChildElement(display);
+    if(!d) d = e->FirstChildElement(appearance);
+    if(d) {
+      if(!XmlAppearance(d).Get(world.rigidObjects[i]->geometry)) {
+	printf("XmlWorld: Warning, unable to load geometry appearance %s\n",sname.c_str());
+      }
+    }
     e = e->NextSiblingElement(object);
   }
   //parse objects
@@ -416,7 +474,7 @@ bool XmlWorld::GetWorld(RobotWorld& world)
     const char* name = e->Attribute("name");
     string sname = "Terrain";
     if(name) sname=name;
-    Environment* t = new Environment;
+    Terrain* t = new Terrain;
     if(!XmlTerrain(e,path).GetTerrain(*t)) {
       printf("XmlWorld: Unable to load terrain %s\n",sname.c_str());
       delete t;
@@ -424,9 +482,10 @@ bool XmlWorld::GetWorld(RobotWorld& world)
     }
     int i = world.AddTerrain(sname,t);
     TiXmlElement* d = e->FirstChildElement(display);
+    if(!d) d = e->FirstChildElement(appearance);
     if(d) {
-      if(!XmlViewTerrain(d).GetView(world.terrains[i].view)) {
-	printf("XmlWorld: Warning, unable to load terrain view %s\n",sname.c_str());
+      if(!XmlViewTerrain(d,path).Get(*world.terrains[i])) {
+	printf("XmlWorld: Warning, unable to load terrain appearance %s\n",sname.c_str());
       }
     }
     e = e->NextSiblingElement(terrain);

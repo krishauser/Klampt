@@ -118,7 +118,7 @@ void rotationMat2RPY(const Matrix3& mat, Vector3& vec){
 //	cout<<"rotationMat2RPY:\n";cout<<"mat:"<<mat<<"\nvec:"<<vec<<endl<<flush;getchar();
 }
 
-//TiXmlElement* getFirstChild(TiXmlElement* e, char* value){
+//TiXmlElement* getFirstChild(TiXmlElement* e, const char* value){
 //	if(!value)
 //		cout<<"Error: value is empty in getChild!\n";
 //	TiXmlElement* c = e->FirstChildElement(value);
@@ -203,7 +203,7 @@ int lcstrcmp(const char* a,const char* b)
 	return tolower(*a)-tolower(*b);
 }
 
-TiXmlElement* getFirstChild(TiXmlElement* e, char* value){
+TiXmlElement* getFirstChild(TiXmlElement* e, const char* value){
 	if(!value)
 		cout<<"Error: value is empty in getChild!\n";
 
@@ -216,7 +216,7 @@ TiXmlElement* getFirstChild(TiXmlElement* e, char* value){
 	return NULL;
 }
 
-TiXmlElement* getNextSibling(TiXmlElement* e, char* value){
+TiXmlElement* getNextSibling(TiXmlElement* e, const char* value){
 	if(!value)
 		cout<<"Error: value is empty in getChild!\n";
 

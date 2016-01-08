@@ -4,7 +4,7 @@
 #include "ODERobot.h"
 #include "ODERigidObject.h"
 #include "ODESurface.h"
-#include "Modeling/Environment.h"
+#include "Modeling/Terrain.h"
 #include "Modeling/RigidObject.h"
 #include <robotics/Contact.h>
 #include <ode/contact.h>
@@ -68,7 +68,7 @@ class ODESimulator
   void SetERP(double erp);   //global error reduction  -- see ODE docs
   void SetCFM(double erp);   //global constraint force mixing -- see ODE docs
   ODESimulatorSettings& GetSettings() { return settings; }
-  void AddEnvironment(Environment& env);
+  void AddTerrain(Terrain& terr);
   void AddRobot(Robot& robot);
   void AddObject(RigidObject& object);
   void Step(Real dt);
@@ -76,12 +76,12 @@ class ODESimulator
   bool ReadState(File& f);
   bool WriteState(File& f) const;
 
-  size_t numEnvs() const { return envs.size(); }
+  size_t numTerrains() const { return terrains.size(); }
   size_t numRobots() const { return robots.size(); }
   size_t numObjects() const { return objects.size(); }
   inline dWorldID world() const { return worldID; }
-  const Environment* env(int i) const { return envs[i]; }
-  ODEGeometry* envGeom(int i) const { return envGeoms[i]; }
+  const Terrain* terrain(int i) const { return terrains[i]; }
+  ODEGeometry* terrainGeom(int i) const { return terrainGeoms[i]; }
   ODERobot* robot(int i) const { return robots[i]; }
   ODERigidObject* object(int i) const { return objects[i]; }
   
@@ -102,8 +102,8 @@ class ODESimulator
   ODESimulatorSettings settings;
   dWorldID worldID;
   dSpaceID envSpaceID;
-  vector<ODEGeometry*> envGeoms;
-  vector<const Environment*> envs;
+  vector<ODEGeometry*> terrainGeoms;
+  vector<const Terrain*> terrains;
   vector<ODERobot*> robots;
   vector<ODERigidObject*> objects;
   map<pair<ODEObjectID,ODEObjectID>,ODEContactList> contactList;

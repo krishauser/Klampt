@@ -51,8 +51,8 @@ bool SimplePlan(RobotWorld& world,int robot,const Config& qstart,const Config& q
   //adding margins onto the geometries in the world. For example, to avoid
   //collisions by 0.05 units, you can use the following code:
   //  Real margin = 0.05
-  //  for(size_t i=0;i<world.robots[robot].robot->geometry.size();i++)
-  //    world.robots[robot].robot->geometry[i].margin += margin;
+  //  for(size_t i=0;i<world.robots[robot]->geometry.size();i++)
+  //    world.robots[robot]->geometry[i].margin += margin;
   //(make sure to restore the old margins if you want to perform multiple
   // planning runs)
 
@@ -218,7 +218,7 @@ int main(int argc,const char** argv)
     cmdline += argv[i];
   }
   MultiPath path;
-  path.settings["robot"] = world.robots[robot].name;
+  path.settings["robot"] = world.robots[robot]->name;
   path.settings["command"] = cmdline;
   //begin planning
   bool feasible = true;

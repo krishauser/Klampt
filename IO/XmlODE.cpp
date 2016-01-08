@@ -86,11 +86,11 @@ bool XmlODESettings::GetSettings(ODESimulator& sim)
     if(0 == strcmp(name,"terrain")) {
       int index;
       if(c->QueryValueAttribute("index",&index)==TIXML_SUCCESS) {
-	Assert(index < (int)sim.numEnvs());
+	Assert(index < (int)sim.numTerrains());
 	TiXmlElement* eg=c->FirstChildElement("geometry");
 	if(eg) {
 	  XmlODEGeometry g(eg);
-	  if(!g.Get(*sim.envGeom(index))) {
+	  if(!g.Get(*sim.terrainGeom(index))) {
 	    fprintf(stderr,"Error reading terrain geometry from XML\n");
 	    return false;
 	  }

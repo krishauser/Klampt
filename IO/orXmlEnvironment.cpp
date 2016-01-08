@@ -36,19 +36,19 @@ OrXmlKinbody::~OrXmlKinbody() {
 		delete mass;
 	if (transformation)
 		delete transformation;
-	for (int i = 0; i < this->xmlBodys.size(); i++) {
+	for (size_t i = 0; i < this->xmlBodys.size(); i++) {
 		if (xmlBodys[i])
 			delete xmlBodys[i];
 	}
-	for (int i = 0; i < this->xmlJoints.size(); i++) {
+	for (size_t i = 0; i < this->xmlJoints.size(); i++) {
 		if (xmlJoints[i])
 			delete xmlJoints[i];
 	}
-	for (int i = 0; i < this->xmlAdjacents.size(); i++) {
+	for (size_t i = 0; i < this->xmlAdjacents.size(); i++) {
 		if (xmlAdjacents[i])
 			delete xmlAdjacents[i];
 	}
-	for (int i = 0; i < this->xmlKinbodys.size(); i++) {
+	for (size_t i = 0; i < this->xmlKinbodys.size(); i++) {
 		if (xmlKinbodys[i])
 			delete xmlKinbodys[i];
 	}
@@ -56,9 +56,9 @@ OrXmlKinbody::~OrXmlKinbody() {
 
 bool OrXmlKinbody::RemoveSameBody() {
 	vector<OrXmlBody*> newBodys;
-	for (int i = 0; i < xmlBodys.size(); i++) {
+	for (size_t i = 0; i < xmlBodys.size(); i++) {
 		bool repeat = false;
-		for (int j = 0; j < newBodys.size(); j++) {
+		for (size_t j = 0; j < newBodys.size(); j++) {
 			if (0
 					== strcmp(xmlBodys[i]->name.c_str(),
 							newBodys[j]->name.c_str())) {
@@ -72,7 +72,7 @@ bool OrXmlKinbody::RemoveSameBody() {
 			newBodys.push_back(xmlBodys[i]);
 	}
 	xmlBodys.clear();
-	for (int i = 0; i < newBodys.size(); i++) {
+	for (size_t i = 0; i < newBodys.size(); i++) {
 		xmlBodys.push_back(newBodys[i]);
 	}
 	return true;
@@ -116,23 +116,23 @@ void OrXmlKinbody::combineTwoBody(OrXmlBody* b1, OrXmlBody* b2) {
 	if (!b2->type.empty() && b1->type.empty())
 		b1->type = b2->type;
 	if (b2->xmlGeoms.size() > 0 && b1->xmlGeoms.size() == 0) {
-		for (int i = 0; i < b2->xmlGeoms.size(); i++) {
+		for (size_t i = 0; i < b2->xmlGeoms.size(); i++) {
 			b1->xmlGeoms.push_back(b2->xmlGeoms[i]);
 			b2->xmlGeoms[i] = 0;
 		}
 	}
 	if (b2->vispoints.size() > 0 && b1->vispoints.size() == 0) {
-		for (int i = 0; i < b2->vispoints.size(); i++)
+		for (size_t i = 0; i < b2->vispoints.size(); i++)
 			b1->vispoints.push_back(b2->vispoints[i]);
-		for (int i = 0; i < b2->visindexes.size(); i++)
+		for (size_t i = 0; i < b2->visindexes.size(); i++)
 			b1->visindexes.push_back(b2->visindexes[i]);
 		b2->vispoints.clear();
 		b2->visindexes.clear();
 	}
 	if (b2->colpoints.size() > 0 && b1->colpoints.size() == 0) {
-		for (int i = 0; i < b2->colpoints.size(); i++)
+		for (size_t i = 0; i < b2->colpoints.size(); i++)
 			b1->colpoints.push_back(b2->colpoints[i]);
-		for (int i = 0; i < b2->colindexes.size(); i++)
+		for (size_t i = 0; i < b2->colindexes.size(); i++)
 			b1->colindexes.push_back(b2->colindexes[i]);
 		b2->colpoints.clear();
 		b2->colindexes.clear();
@@ -154,7 +154,7 @@ bool OrXmlKinbody::appyTran2Tparent(OrXmlTransformation* tran) {
 		return false;
 	}
 	tran->ComputeTransform();
-	for (int i = 0; i < this->xmlBodys.size(); i++) {
+	for (size_t i = 0; i < this->xmlBodys.size(); i++) {
 //		if(0==strcmp(xmlBodys[i]->name.c_str(),"rightIndexProximal")){
 //			cout<<"here1! "<<name<<":"<<xmlBodys[i]->name<<endl;
 //			if(xmlBodys[i]->transformation){
@@ -168,7 +168,7 @@ bool OrXmlKinbody::appyTran2Tparent(OrXmlTransformation* tran) {
 			xmlBodys[i]->applyTran2Tparent(tran);
 		}else {
 			bool offsetfromhere = false;
-			for (int j = 0; j < this->xmlBodys.size(); j++) {
+			for (size_t j = 0; j < this->xmlBodys.size(); j++) {
 				if (i != j
 						&& 0
 								== strcmp(xmlBodys[i]->offsetfrom.c_str(),
@@ -202,7 +202,7 @@ void OrXmlKinbody::GetAllBodyGeom() {
 		cout << "Should call GetAllBodyJoints first!\n" << flush;
 		getchar();
 	}
-	for (int i = 0; i < this->xmlBodys.size(); i++) {
+	for (size_t i = 0; i < this->xmlBodys.size(); i++) {
 		xmlBodys[i]->GetMimicGeomMass();
 		xmlBodys[i]->GetFinalGeom();
 		if (xmlBodys[i]->transformation)
@@ -216,12 +216,12 @@ void OrXmlKinbody::setPrefixName() {
 		hasSetPrefix = true;
 		return;
 	}
-	for (int i = 0; i < this->xmlKinbodys.size(); i++) {
+	for (size_t i = 0; i < this->xmlKinbodys.size(); i++) {
 		string tmp = prefix;
 		tmp.append(xmlKinbodys[i]->prefix.c_str());
 		xmlKinbodys[i]->prefix = tmp;
 	}
-	for (int i = 0; i < this->xmlBodys.size(); i++) {
+	for (size_t i = 0; i < this->xmlBodys.size(); i++) {
 		string tmp = prefix;
 		tmp.append(xmlBodys[i]->name.c_str());
 		xmlBodys[i]->name = tmp;
@@ -231,8 +231,8 @@ void OrXmlKinbody::setPrefixName() {
 			xmlBodys[i]->offsetfrom = tmp;
 		}
 	}
-	for (int i = 0; i < this->xmlJoints.size(); i++) {
-		for (int j = 0; j < this->xmlJoints[i]->bodys.size(); j++) {
+	for (size_t i = 0; i < this->xmlJoints.size(); i++) {
+		for (size_t j = 0; j < this->xmlJoints[i]->bodys.size(); j++) {
 			string tmp = prefix;
 			tmp.append(xmlJoints[i]->bodys[j].c_str());
 			xmlJoints[i]->bodys[j] = tmp;
@@ -249,24 +249,24 @@ void OrXmlKinbody::setPrefixName() {
 bool OrXmlKinbody::GetAllCleanBodyJoints() {
 	this->setPrefixName();
 
-	for (int i = 0; i < this->xmlKinbodys.size(); i++) {
+	for (size_t i = 0; i < this->xmlKinbodys.size(); i++) {
 		xmlKinbodys[i]->GetAllCleanBodyJoints();
-		for (int j = 0; j < xmlKinbodys[i]->xmlBodys.size(); j++) {
+		for (size_t j = 0; j < xmlKinbodys[i]->xmlBodys.size(); j++) {
 			OrXmlBody* body = xmlKinbodys[i]->xmlBodys[j];
 			xmlBodys.push_back(body);
 			xmlKinbodys[i]->xmlBodys[j] = 0;
 		}
-		for (int j = 0; j < xmlKinbodys[i]->xmlJoints.size(); j++) {
+		for (size_t j = 0; j < xmlKinbodys[i]->xmlJoints.size(); j++) {
 			OrXmlJoint* joint = xmlKinbodys[i]->xmlJoints[j];
 			xmlJoints.push_back(joint);
 			xmlKinbodys[i]->xmlJoints[j] = 0;
 		}
-		for (int j = 0; j < xmlKinbodys[i]->xmlAdjacents.size(); j++) {
+		for (size_t j = 0; j < xmlKinbodys[i]->xmlAdjacents.size(); j++) {
 			OrXmlAdjacent* adjacent = xmlKinbodys[i]->xmlAdjacents[j];
 			xmlAdjacents.push_back(adjacent);
 			xmlKinbodys[i]->xmlAdjacents[j] = 0;
 		}
-		for (int j = 0; j < xmlKinbodys[i]->jointvalues.size(); j++) {
+		for (size_t j = 0; j < xmlKinbodys[i]->jointvalues.size(); j++) {
 			double jv = xmlKinbodys[i]->jointvalues[j];
 			jointvalues.push_back(jv);
 			xmlKinbodys[i]->jointvalues[j] = 0;
@@ -398,10 +398,10 @@ bool OrXmlKinbody::getRealContent() {
 	}
 	c = getFirstChild(e, "jointvalues");
 	if (c) {
-		int nJoints = this->xmlJoints.size();
+		size_t nJoints = this->xmlJoints.size();
 		stringstream ss;
 		ss << c->GetText();
-		for (int i = 0; i < nJoints; i++) {
+		for (size_t i = 0; i < nJoints; i++) {
 			double tmp;
 			ss >> tmp;
 			this->jointvalues.push_back(tmp);
@@ -418,7 +418,7 @@ bool OrXmlKinbody::GetObjectOrTerrain(RobotWorld& world) {
 		getchar();
 		return false;
 	}
-	for (int i = 0; i < this->xmlBodys.size(); i++) {
+	for (size_t i = 0; i < this->xmlBodys.size(); i++) {
 //		if()
 	}
 //	if(0 == strcmp(xmlKinbodys[i]->type.c_str(), "static")){
@@ -451,7 +451,7 @@ OrXmlBody::~OrXmlBody() {
 		delete Tworld;
 	if (Tparent)
 		delete Tparent;
-	for (int i = 0; i < xmlGeoms.size(); i++) {
+	for (size_t i = 0; i < xmlGeoms.size(); i++) {
 		if (xmlGeoms[i])
 			delete xmlGeoms[i];
 	}
@@ -520,7 +520,7 @@ void OrXmlBody::output2Wrl() {
 		file << "\t\t\t geometry IndexedFaceSet { \n";
 		file << "\t\t\t\t coord Coordinate { \n";
 		file << "\t\t\t\t\t point [ \n";
-		for (int i = 0; i < this->vispoints.size(); i++) {
+		for (size_t i = 0; i < this->vispoints.size(); i++) {
 			MyPoint3D p(vispoints[i]);
 			file << "\t\t\t\t\t" << p.data[0] << "\t" << p.data[1] << "\t"
 					<< p.data[2] << ",\n";
@@ -528,7 +528,7 @@ void OrXmlBody::output2Wrl() {
 		file << "\t\t\t\t\t ] \n";
 		file << "\t\t\t\t } \n";
 		file << "\t\t\t\t coordIndex [ \n";
-		for (int i = 0; i < this->visindexes.size(); i++) {
+		for (size_t i = 0; i < this->visindexes.size(); i++) {
 			TriFaceIndex fi(visindexes[i]);
 			file << "\t\t\t\t\t";
 			for (int j = 0; j < 3; j++) {
@@ -565,7 +565,7 @@ void OrXmlBody::output2Wrl() {
 		file << "\t\t\t geometry IndexedFaceSet { \n";
 		file << "\t\t\t\t coord Coordinate { \n";
 		file << "\t\t\t\t\t point [ \n";
-		for (int i = 0; i < this->colpoints.size(); i++) {
+		for (size_t i = 0; i < this->colpoints.size(); i++) {
 			MyPoint3D p(colpoints[i]);
 			file << "\t\t\t\t\t" << p.data[0] << "\t" << p.data[1] << "\t"
 					<< p.data[2] << ",\n";
@@ -573,7 +573,7 @@ void OrXmlBody::output2Wrl() {
 		file << "\t\t\t\t\t ] \n";
 		file << "\t\t\t\t } \n";
 		file << "\t\t\t\t coordIndex [ \n";
-		for (int i = 0; i < this->colindexes.size(); i++) {
+		for (size_t i = 0; i < this->colindexes.size(); i++) {
 			TriFaceIndex fi(colindexes[i]);
 			file << "\t\t\t\t\t";
 			for (int j = 0; j < 3; j++) {
@@ -603,12 +603,12 @@ void OrXmlBody::output2Tri() {
 
 		file.open(vis_filename.c_str());
 		file << this->vispoints.size() << endl;
-		for (int i = 0; i < vispoints.size(); i++) {
+		for (size_t i = 0; i < vispoints.size(); i++) {
 			file << vispoints[i].data[0] << "\t" << vispoints[i].data[1] << "\t"
 					<< vispoints[i].data[2] << endl;
 		}
 		file << this->visindexes.size() << endl;
-		for (int i = 0; i < visindexes.size(); i++) {
+		for (size_t i = 0; i < visindexes.size(); i++) {
 			file << visindexes[i].data[0] << "\t" << visindexes[i].data[1]
 					<< "\t" << visindexes[i].data[2] << endl;
 		}
@@ -620,12 +620,12 @@ void OrXmlBody::output2Tri() {
 		col_filename.append("_col.tri");
 		file.open(col_filename.c_str());
 		file << this->colpoints.size() << endl;
-		for (int i = 0; i < colpoints.size(); i++) {
+		for (size_t i = 0; i < colpoints.size(); i++) {
 			file << colpoints[i].data[0] << "\t" << colpoints[i].data[1] << "\t"
 					<< colpoints[i].data[2] << endl;
 		}
 		file << this->colindexes.size() << endl;
-		for (int i = 0; i < colindexes.size(); i++) {
+		for (size_t i = 0; i < colindexes.size(); i++) {
 			file << colindexes[i].data[0] << "\t" << colindexes[i].data[1]
 					<< "\t" << colindexes[i].data[2] << endl;
 		}
@@ -644,7 +644,7 @@ void OrXmlBody::GetMimicGeomMass() {
 		finalMass->total = new double;
 		*(finalMass->total) = 0.0;
 
-		for (int i = 0; i < this->xmlGeoms.size(); i++) {
+		for (size_t i = 0; i < this->xmlGeoms.size(); i++) {
 			OrXmlMass* tmpmass = new OrXmlMass();
 			tmpmass->com = new Vector3;
 			tmpmass->com->setZero();
@@ -707,11 +707,11 @@ bool OrXmlBody::GetFinalGeom() {
 		return true;
 	}
 
-	for (int i = 0; i < xmlGeoms.size(); i++) {
+	for (size_t i = 0; i < xmlGeoms.size(); i++) {
 		xmlGeoms[i]->Convert2Tri();
 	}
 //	int count = 0;
-	for (int i = 0; i < xmlGeoms.size(); i++) {
+	for (size_t i = 0; i < xmlGeoms.size(); i++) {
 //		if (xmlGeoms[i]->visindexes.size() > 0)
 //			count++;
 		addMesh(xmlGeoms[i]->vispoints, xmlGeoms[i]->visindexes, true);
@@ -749,10 +749,10 @@ void OrXmlBody::addMesh(const vector<MyPoint3D>& pts,
 		const vector<TriFaceIndex>& tis, bool visible) {
 	if (visible) {
 		int baseIndex = vispoints.size();
-		for (int i = 0; i < pts.size(); i++) {
+		for (size_t i = 0; i < pts.size(); i++) {
 			vispoints.push_back(pts[i]);
 		}
-		for (int i = 0; i < tis.size(); i++) {
+		for (size_t i = 0; i < tis.size(); i++) {
 			TriFaceIndex t1(tis[i]);
 			TriFaceIndex t2(t1.data[0] + baseIndex, t1.data[1] + baseIndex,
 					t1.data[2] + baseIndex);
@@ -760,10 +760,10 @@ void OrXmlBody::addMesh(const vector<MyPoint3D>& pts,
 		}
 	} else {
 		int baseIndex = colpoints.size();
-		for (int i = 0; i < pts.size(); i++) {
+		for (size_t i = 0; i < pts.size(); i++) {
 			colpoints.push_back(pts[i]);
 		}
-		for (int i = 0; i < tis.size(); i++) {
+		for (size_t i = 0; i < tis.size(); i++) {
 			TriFaceIndex t1(tis[i]);
 			TriFaceIndex t2(t1.data[0] + baseIndex, t1.data[1] + baseIndex,
 					t1.data[2] + baseIndex);
@@ -786,24 +786,24 @@ OrXmlRobot::~OrXmlRobot() {
 	if (transformation)
 		delete transformation;
 	////////////////////////////
-	for (int i = 0; i < this->xmlAdjacents.size(); i++) {
+	for (size_t i = 0; i < this->xmlAdjacents.size(); i++) {
 		if (xmlAdjacents[i])
 			delete xmlAdjacents[i];
 	}
-	for (int i = 0; i < this->xmlJoints.size(); i++) {
+	for (size_t i = 0; i < this->xmlJoints.size(); i++) {
 		if (xmlJoints[i])
 			delete xmlJoints[i];
 	}
-	for (int i = 0; i < this->xmlBodys.size(); i++) {
+	for (size_t i = 0; i < this->xmlBodys.size(); i++) {
 		if (xmlBodys[i])
 			delete xmlBodys[i];
 	}
 	////////////////////////////
-	for (int i = 0; i < this->xmlKinbodys.size(); i++) {
+	for (size_t i = 0; i < this->xmlKinbodys.size(); i++) {
 		if (xmlKinbodys[i])
 			delete xmlKinbodys[i];
 	}
-	for (int i = 0; i < this->xmlRobots.size(); i++) {
+	for (size_t i = 0; i < this->xmlRobots.size(); i++) {
 		if (xmlRobots[i])
 			delete xmlRobots[i];
 	}
@@ -821,24 +821,24 @@ bool OrXmlRobot::ReSetBodyJointOrder() {
 
 		newbodys.push_back(xmlBodys[bodyindex]);
 
-		for (int i = 0; i < children[bodyindex].size(); i++) {
+		for (size_t i = 0; i < children[bodyindex].size(); i++) {
 			bodystack.push_back(children[bodyindex][i]);
 		}
 	}
 
-	int nbody = xmlBodys.size();
+	size_t nbody = xmlBodys.size();
 	vector<int> newparents;
 	vector<vector<int> > newchildren;
 	newparents.resize(nbody);
 	newchildren.resize(nbody);
 
-	for (int i = 0; i < nbody; i++) {
+	for (size_t i = 0; i < nbody; i++) {
 		int bodyindex = this->getLinkIndex(newbodys[i]->name);
 		if (parents[bodyindex] == -1) {
 			newparents[i] = -1;
 		} else {
 			string parentname = xmlBodys[parents[bodyindex]]->name;
-			for (int j = 0; j < nbody; j++) {
+			for (size_t j = 0; j < nbody; j++) {
 				if (0
 						== strcmp(newbodys[j]->name.c_str(),
 								parentname.c_str())) {
@@ -847,9 +847,9 @@ bool OrXmlRobot::ReSetBodyJointOrder() {
 				}
 			}
 		}
-		for (int j = 0; j < children[bodyindex].size(); j++) {
+		for (size_t j = 0; j < children[bodyindex].size(); j++) {
 			string childname = xmlBodys[children[bodyindex][j]]->name;
-			for (int k = 0; k < nbody; k++) {
+			for (size_t k = 0; k < nbody; k++) {
 				if (0 == strcmp(newbodys[k]->name.c_str(), childname.c_str())) {
 					newchildren[i].push_back(k);
 					break;
@@ -860,19 +860,19 @@ bool OrXmlRobot::ReSetBodyJointOrder() {
 
 	xmlBodys.clear();
 	parents.clear();
-	for (int i = 0; i < children.size(); i++)
+	for (size_t i = 0; i < children.size(); i++)
 		children[i].clear();
 	children.clear();
 	children.resize(nbody);
 
-	for (int i = 0; i < nbody; i++) {
+	for (size_t i = 0; i < nbody; i++) {
 		xmlBodys.push_back(newbodys[i]);
 		parents.push_back(newparents[i]);
-		for (int j = 0; j < newchildren[i].size(); j++)
+		for (size_t j = 0; j < newchildren[i].size(); j++)
 			children[i].push_back(newchildren[i][j]);
 	}
 ///////////////////////////////////////Reset Joints Order
-	for (int i = 0; i < xmlJoints.size(); i++) {
+	for (size_t i = 0; i < xmlJoints.size(); i++) {
 		assert(xmlJoints[i]->bodys.size() == 2);
 		int b1 = getLinkIndex(xmlJoints[i]->bodys[0]);
 		int b2 = getLinkIndex(xmlJoints[i]->bodys[1]);
@@ -890,9 +890,9 @@ bool OrXmlRobot::ReSetBodyJointOrder() {
 			return false;
 		}
 	}
-	int nJoint = xmlJoints.size();
-	for (int i = 0; i < nJoint; i++) {
-		for (int j = 0; j < i; j++) {
+	size_t nJoint = xmlJoints.size();
+	for (size_t i = 0; i < nJoint; i++) {
+		for (size_t j = 0; j < i; j++) {
 			if (xmlJoints[i]->linkI < xmlJoints[j]->linkI) {
 				OrXmlJoint* tmp = xmlJoints[i];
 				xmlJoints[i] = xmlJoints[j];
@@ -909,13 +909,13 @@ bool OrXmlRobot::GetParentChildRelation() {
 		return true;
 	parents.resize(xmlBodys.size());
 	children.resize(xmlBodys.size());
-	for (int i = 0; i < this->xmlBodys.size(); i++) {
+	for (size_t i = 0; i < this->xmlBodys.size(); i++) {
 		parents[i] = -1;
 	}
-	for (int i = 0; i < this->xmlBodys.size(); i++) {
+	for (size_t i = 0; i < this->xmlBodys.size(); i++) {
 		if (xmlBodys[i]->offsetfrom.empty())
 			continue;
-		for (int j = 0; j < this->xmlBodys.size(); j++) {
+		for (size_t j = 0; j < this->xmlBodys.size(); j++) {
 			if (strcmp(xmlBodys[i]->offsetfrom.c_str(),
 					xmlBodys[j]->name.c_str()) == 0) {
 				parents[i] = j;
@@ -925,7 +925,7 @@ bool OrXmlRobot::GetParentChildRelation() {
 		}
 	}
 	//infer parent children relationship from joints
-	for (int i = 0; i < this->xmlJoints.size(); i++) {
+	for (size_t i = 0; i < this->xmlJoints.size(); i++) {
 		if (xmlJoints[i]->bodys.size() != 2) {
 			cout << "Error: joint " << xmlJoints[i]->name << " bodys size="\
 
@@ -937,7 +937,7 @@ bool OrXmlRobot::GetParentChildRelation() {
 		string b2 = xmlJoints[i]->bodys[1];
 		int index1 = -1;
 		int index2 = -1;
-		for (int j = 0; j < this->xmlBodys.size(); j++) {
+		for (size_t j = 0; j < this->xmlBodys.size(); j++) {
 			if (0 == strcmp(xmlBodys[j]->name.c_str(), b1.c_str()))
 				index1 = j;
 			if (0 == strcmp(xmlBodys[j]->name.c_str(), b2.c_str()))
@@ -962,7 +962,7 @@ bool OrXmlRobot::GetParentChildRelation() {
 	}
 
 	linkroot = -1;
-	for (int i = 0; i < parents.size(); i++) {
+	for (size_t i = 0; i < parents.size(); i++) {
 		if (parents[i] == -1) {
 			linkroot = i;
 			break;
@@ -982,7 +982,7 @@ bool OrXmlRobot::applyTran2Tparent() {
 		return false;
 	}
 	transformation->ComputeTransform();
-	for (int i = 0; i < this->xmlBodys.size(); i++) {
+	for (size_t i = 0; i < this->xmlBodys.size(); i++) {
 		if (parents[i] == -1) {
 			RigidTransform oldT(*xmlBodys[i]->Tparent);
 			xmlBodys[i]->Tparent->mul(*(transformation->T), oldT);
@@ -1052,12 +1052,12 @@ bool OrXmlRobot::getRealContent() {
 void OrXmlRobot::setPrefixName() {
 	if (this->hasSetPrefix || prefix.empty())
 		return;
-	for (int i = 0; i < this->xmlKinbodys.size(); i++) {
+	for (size_t i = 0; i < this->xmlKinbodys.size(); i++) {
 		string tmp = prefix;
 		tmp.append(xmlKinbodys[i]->prefix.c_str());
 		xmlKinbodys[i]->prefix = tmp;
 	}
-	for (int i = 0; i < this->xmlRobots.size(); i++) {
+	for (size_t i = 0; i < this->xmlRobots.size(); i++) {
 		string tmp = prefix;
 		tmp.append(xmlRobots[i]->prefix.c_str());
 		xmlRobots[i]->prefix = tmp;
@@ -1103,23 +1103,23 @@ void OrXmlRobot::combineTwoBody(OrXmlBody* b1, OrXmlBody* b2) {
 	if (!b2->type.empty() && b1->type.empty())
 		b1->type = b2->type;
 	if (b2->xmlGeoms.size() > 0 && b1->xmlGeoms.size() == 0) {
-		for (int i = 0; i < b2->xmlGeoms.size(); i++) {
+		for (size_t i = 0; i < b2->xmlGeoms.size(); i++) {
 			b1->xmlGeoms.push_back(b2->xmlGeoms[i]);
 			b2->xmlGeoms[i] = 0;
 		}
 	}
 	if (b2->vispoints.size() > 0 && b1->vispoints.size() == 0) {
-		for (int i = 0; i < b2->vispoints.size(); i++)
+		for (size_t i = 0; i < b2->vispoints.size(); i++)
 			b1->vispoints.push_back(b2->vispoints[i]);
-		for (int i = 0; i < b2->visindexes.size(); i++)
+		for (size_t i = 0; i < b2->visindexes.size(); i++)
 			b1->visindexes.push_back(b2->visindexes[i]);
 		b2->vispoints.clear();
 		b2->visindexes.clear();
 	}
 	if (b2->colpoints.size() > 0 && b1->colpoints.size() == 0) {
-		for (int i = 0; i < b2->colpoints.size(); i++)
+		for (size_t i = 0; i < b2->colpoints.size(); i++)
 			b1->colpoints.push_back(b2->colpoints[i]);
-		for (int i = 0; i < b2->colindexes.size(); i++)
+		for (size_t i = 0; i < b2->colindexes.size(); i++)
 			b1->colindexes.push_back(b2->colindexes[i]);
 		b2->colpoints.clear();
 		b2->colindexes.clear();
@@ -1128,9 +1128,9 @@ void OrXmlRobot::combineTwoBody(OrXmlBody* b1, OrXmlBody* b2) {
 
 bool OrXmlRobot::RemoveSameBody() {
 	vector<OrXmlBody*> newBodys;
-	for (int i = 0; i < xmlBodys.size(); i++) {
+	for (size_t i = 0; i < xmlBodys.size(); i++) {
 		bool repeat = false;
-		for (int j = 0; j < newBodys.size(); j++) {
+		for (size_t j = 0; j < newBodys.size(); j++) {
 			if (0
 					== strcmp(xmlBodys[i]->name.c_str(),
 							newBodys[j]->name.c_str())) {
@@ -1144,7 +1144,7 @@ bool OrXmlRobot::RemoveSameBody() {
 			newBodys.push_back(xmlBodys[i]);
 	}
 	xmlBodys.clear();
-	for (int i = 0; i < newBodys.size(); i++) {
+	for (size_t i = 0; i < newBodys.size(); i++) {
 		xmlBodys.push_back(newBodys[i]);
 	}
 	return true;
@@ -1152,55 +1152,55 @@ bool OrXmlRobot::RemoveSameBody() {
 
 bool OrXmlRobot::GetAllCleanBodyJoints() {
 	this->setPrefixName();
-	for (int i = 0; i < this->xmlKinbodys.size(); i++) {
+	for (size_t i = 0; i < this->xmlKinbodys.size(); i++) {
 		xmlKinbodys[i]->GetAllCleanBodyJoints();
-		for (int j = 0; j < xmlKinbodys[i]->xmlBodys.size(); j++) {
+		for (size_t j = 0; j < xmlKinbodys[i]->xmlBodys.size(); j++) {
 			OrXmlBody* body = xmlKinbodys[i]->xmlBodys[j];
 			xmlBodys.push_back(body);
 			xmlKinbodys[i]->xmlBodys[j] = 0;
 		}
-		for (int j = 0; j < xmlKinbodys[i]->xmlJoints.size(); j++) {
+		for (size_t j = 0; j < xmlKinbodys[i]->xmlJoints.size(); j++) {
 			OrXmlJoint* joint = xmlKinbodys[i]->xmlJoints[j];
 			xmlJoints.push_back(joint);
 			xmlKinbodys[i]->xmlJoints[j] = 0;
 		}
-		for (int j = 0; j < xmlKinbodys[i]->xmlAdjacents.size(); j++) {
+		for (size_t j = 0; j < xmlKinbodys[i]->xmlAdjacents.size(); j++) {
 			OrXmlAdjacent* adjacent = xmlKinbodys[i]->xmlAdjacents[j];
 			xmlAdjacents.push_back(adjacent);
 			xmlKinbodys[i]->xmlAdjacents[j] = 0;
 		}
 		if (jointvalues.size() == 0) {
-			for (int j = 0; j < xmlKinbodys[i]->jointvalues.size(); j++) {
+			for (size_t j = 0; j < xmlKinbodys[i]->jointvalues.size(); j++) {
 				double jv = xmlKinbodys[i]->jointvalues[j];
 				jointvalues.push_back(jv);
 				xmlKinbodys[i]->jointvalues[j] = 0;
 			}
 		}
 	}
-	for (int i = 0; i < this->xmlRobots.size(); i++) {
+	for (size_t i = 0; i < this->xmlRobots.size(); i++) {
 		xmlRobots[i]->GetAllCleanBodyJoints();
-		for (int j = 0; j < xmlRobots[i]->xmlBodys.size(); j++) {
+		for (size_t j = 0; j < xmlRobots[i]->xmlBodys.size(); j++) {
 			OrXmlBody* body = xmlRobots[i]->xmlBodys[j];
 			xmlBodys.push_back(body);
 			xmlRobots[i]->xmlBodys[j] = 0;
 		}
-		for (int j = 0; j < xmlRobots[i]->xmlJoints.size(); j++) {
+		for (size_t j = 0; j < xmlRobots[i]->xmlJoints.size(); j++) {
 			OrXmlJoint* joint = xmlRobots[i]->xmlJoints[j];
 			xmlJoints.push_back(joint);
 			xmlRobots[i]->xmlJoints[j] = 0;
 		}
-		for (int j = 0; j < xmlRobots[i]->xmlAdjacents.size(); j++) {
+		for (size_t j = 0; j < xmlRobots[i]->xmlAdjacents.size(); j++) {
 			OrXmlAdjacent* adjacent = xmlRobots[i]->xmlAdjacents[j];
 			xmlAdjacents.push_back(adjacent);
 			xmlRobots[i]->xmlAdjacents[j] = 0;
 		}
-		for (int j = 0; j < xmlRobots[i]->jointvalues.size(); j++) {
+		for (size_t j = 0; j < xmlRobots[i]->jointvalues.size(); j++) {
 			double jv = xmlRobots[i]->jointvalues[j];
 			jointvalues.push_back(jv);
 			xmlRobots[i]->jointvalues[j] = 0;
 		}
 	}
-	for (int i = 0; i < this->xmlJoints.size(); i++) {
+	for (size_t i = 0; i < this->xmlJoints.size(); i++) {
 		xmlJoints[i]->GetCleanJointInfo();
 	}
 	this->RemoveSameBody();
@@ -1212,7 +1212,7 @@ bool OrXmlRobot::GetAllCleanBodyJoints() {
 	this->applyTran2Tparent();
 
 	nDOF = xmlJoints.size();
-	for (int i = 0; i < this->xmlJoints.size(); i++) {
+	for (size_t i = 0; i < this->xmlJoints.size(); i++) {
 		if (xmlJoints[i]->cleanLimits.size() == 2) {
 			if (xmlJoints[i]->cleanLimits[0] == xmlJoints[i]->cleanLimits[1])
 				nDOF--;
@@ -1253,11 +1253,11 @@ OrXmlEnvironment::~OrXmlEnvironment() {
 }
 
 void OrXmlEnvironment::clear() {
-	for (int i = 0; i < xmlKinbodys.size(); i++) {
+	for (size_t i = 0; i < xmlKinbodys.size(); i++) {
 		if (xmlKinbodys[i])
 			delete xmlKinbodys[i];
 	}
-	for (int i = 0; i < xmlRobots.size(); i++) {
+	for (size_t i = 0; i < xmlRobots.size(); i++) {
 		if (xmlRobots[i])
 			delete xmlRobots[i];
 	}
@@ -1328,7 +1328,7 @@ bool OrXmlEnvironment::Convert2URDF() {
 		return false;
 	}
 	cout << "*************Read in OR xml info!*************\n" << flush;
-	for (int i = 0; i < this->xmlRobots.size(); i++) {
+	for (size_t i = 0; i < this->xmlRobots.size(); i++) {
 		if (TOURDF) {
 			cout << "Write to URDF format!\n" << endl;
 			if (!xmlRobots[i]->ConvertToURDF()) {
@@ -1348,7 +1348,7 @@ bool OrXmlEnvironment::GetWorld(RobotWorld& world) {
 		return false;
 	}
 	cout << "*************Read in OR xml info!*************\n" << flush;
-	for (int i = 0; i < this->xmlRobots.size(); i++) {
+	for (size_t i = 0; i < this->xmlRobots.size(); i++) {
 		Robot* r = new Robot;
 		if (!xmlRobots[i]->GetRobot(*r)) {
 			cout << "Get robot failed!\n" << flush;
@@ -1369,7 +1369,7 @@ bool OrXmlEnvironment::Convert2Rob() {
 		return false;
 	}
 	//create the world
-	for (int i = 0; i < this->xmlRobots.size(); i++) {
+	for (size_t i = 0; i < this->xmlRobots.size(); i++) {
 		Robot* r = new Robot;
 		if (!xmlRobots[i]->GetRobot(*r)) {
 			cout << "Get robot failed!\n" << flush;
@@ -1382,7 +1382,7 @@ bool OrXmlEnvironment::Convert2Rob() {
 }
 
 bool OrXmlRobot::GetFixedBaseRobot(Robot& robot) {
-	int nBody = xmlBodys.size();
+	size_t nBody = xmlBodys.size();
 
 	robot.accMax.resize(nBody);
 	robot.accMax.setZero();
@@ -1408,7 +1408,7 @@ bool OrXmlRobot::GetFixedBaseRobot(Robot& robot) {
 	robot.linkNames.resize(nBody);
 	robot.links.resize(nBody);
 
-	for (int i = 0; i < nBody; i++) {
+	for (size_t i = 0; i < nBody; i++) {
 		robot.parents[i] = parents[i];
 //		if (!xmlBodys[i]->vis_filename.empty()) {
 //			robot.LoadGeometry(i, xmlBodys[i]->vis_filename.c_str());
@@ -1448,16 +1448,16 @@ bool OrXmlRobot::GetFixedBaseRobot(Robot& robot) {
 				robot.links[i].mass = 0;
 		}
 	}
-	int nJoint = xmlJoints.size();
+	size_t nJoint = xmlJoints.size();
 	robot.joints.resize(0);
-	for (int i = 0; i < nJoint; i++) {
+	for (size_t i = 0; i < nJoint; i++) {
 		if (xmlJoints[i]->enabled == false)
 			continue;
 		RobotJoint robjoint;
 		robjoint.type = RobotJoint::Normal;
 		int b1 = -1, b2 = -1;
 		assert(xmlJoints[i]->bodys.size() == 2);
-		for (int j = 0; j < xmlBodys.size(); j++) {
+		for (size_t j = 0; j < xmlBodys.size(); j++) {
 			if (0
 					== strcmp(xmlBodys[j]->name.c_str(),
 							xmlJoints[i]->bodys[0].c_str()))
@@ -1519,7 +1519,7 @@ bool OrXmlRobot::GetFixedBaseRobot(Robot& robot) {
 
 	robot.driverNames.resize(0);
 	robot.drivers.resize(0);
-	for (int i = 0; i < nJoint; i++) {
+	for (size_t i = 0; i < nJoint; i++) {
 		if (robot.joints[i].type == RobotJoint::Normal) {
 			robot.driverNames.push_back(xmlJoints[i]->name);
 			int linkI = robot.joints[i].linkIndex;
@@ -1550,7 +1550,7 @@ bool OrXmlRobot::GetFixedBaseRobot(Robot& robot) {
 }
 
 int OrXmlRobot::getLinkIndex(const string& linkname) {
-	for (int i = 0; i < xmlBodys.size(); i++) {
+	for (size_t i = 0; i < xmlBodys.size(); i++) {
 		if (0 == strcmp(linkname.c_str(), xmlBodys[i]->name.c_str()))
 			return i;
 	}
@@ -1603,11 +1603,11 @@ void OrXmlRobot::GetTransformAnchorAxis() {
 			body->Tworld->mul(*parentbody->Tworld, *body->Tparent);
 		}
 
-		for (int i = 0; i < children[bodyindex].size(); i++) {
+		for (size_t i = 0; i < children[bodyindex].size(); i++) {
 			needprocess.push_back(children[bodyindex][i]);
 		}
 	}
-	for (int i = 0; i < xmlBodys.size(); i++) {
+	for (size_t i = 0; i < xmlBodys.size(); i++) {
 		if (!xmlBodys[i]->Tparent || !xmlBodys[i]->Tworld) {
 			cout << "Error: body " << xmlBodys[i]->name
 					<< " no Tparent or Tworld!\n" << flush;
@@ -1617,9 +1617,9 @@ void OrXmlRobot::GetTransformAnchorAxis() {
 
 //	ofstream file;
 //	file.open("bodylist.txt");
-//	for(int i = 0; i < parents.size(); i++){
+//	for(size_t i = 0; i < parents.size(); i++){
 //		file<<i<<" "<<xmlBodys[i]->name<<":offsetfrom="<<xmlBodys[i]->offsetfrom<<": parent="<<parents[i]<<";children=(";
-//		for(int j = 0; j < children[i].size(); j++)
+//		for(size_t j = 0; j < children[i].size(); j++)
 //			file<<children[i][j]<<",";
 //		file<<")"<<endl;
 //		if(0==strcmp(xmlBodys[i]->name.c_str(),"rightIndexProximal")){
@@ -1630,7 +1630,7 @@ void OrXmlRobot::GetTransformAnchorAxis() {
 //	file.close();
 
 	//////////////////////////////////////////////////////
-	for (int i = 0; i < xmlJoints.size(); i++) {
+	for (size_t i = 0; i < xmlJoints.size(); i++) {
 		int b1 = this->getLinkIndex(xmlJoints[i]->bodys[0]);
 		int b2 = this->getLinkIndex(xmlJoints[i]->bodys[1]);
 		if (xmlJoints[i]->anchor) {
@@ -1679,7 +1679,7 @@ void OrXmlRobot::GetTransformAnchorAxis() {
 
 void OrXmlRobot::ProcessJointAnchorInitial() {
 	//////////////////////////////////////////////////////
-	for (int i = 0; i < xmlJoints.size(); i++) {
+	for (size_t i = 0; i < xmlJoints.size(); i++) {
 		int b1 = this->getLinkIndex(xmlJoints[i]->bodys[0]);
 		int b2 = this->getLinkIndex(xmlJoints[i]->bodys[1]);
 		int tmpparent = b1;
@@ -1765,7 +1765,7 @@ void OrXmlRobot::setNewRelativeTran(int tmpchild, const Vector3& an) {
 		xmlBodys[tmpchild]->mass->inertia->set(tmpInertia);
 	}
 
-	for (int j = 0; j < children[tmpchild].size(); j++) {
+	for (size_t j = 0; j < children[tmpchild].size(); j++) {
 		int bodyindex = children[tmpchild][j];
 		oldT.set(*xmlBodys[bodyindex]->Tparent);
 		xmlBodys[bodyindex]->Tparent->set(oldT - an);
@@ -1834,7 +1834,7 @@ void OrXmlRobot::WriteMesh2Wrl() {
 	string tmpfname(URDF_DIR);
 	tmpfname.append("cmd.txt");
 	cmdfile.open(tmpfname.c_str());
-	for (int i = 0; i < xmlBodys.size(); i++) {
+	for (size_t i = 0; i < xmlBodys.size(); i++) {
 		OrXmlBody* body = xmlBodys[i];
 		//render file
 		if (!body->vis_filename.empty()) {
@@ -1900,7 +1900,7 @@ void OrXmlRobot::WriteMesh2Wrl() {
 			outfile << "\t\t\t geometry IndexedFaceSet { \n";
 			outfile << "\t\t\t\t coord Coordinate { \n";
 			outfile << "\t\t\t\t\t point [ \n";
-			for (int i = 0; i < points.size(); i++) {
+			for (size_t i = 0; i < points.size(); i++) {
 				MyPoint3D p(points[i]);
 				outfile << "\t\t\t\t\t" << p.data[0] << "\t" << p.data[1]
 						<< "\t" << p.data[2] << ",\n";
@@ -1908,7 +1908,7 @@ void OrXmlRobot::WriteMesh2Wrl() {
 			outfile << "\t\t\t\t\t ] \n";
 			outfile << "\t\t\t\t } \n";
 			outfile << "\t\t\t\t coordIndex [ \n";
-			for (int i = 0; i < indexes.size(); i++) {
+			for (size_t i = 0; i < indexes.size(); i++) {
 				TriFaceIndex fi(indexes[i]);
 				outfile << "\t\t\t\t\t";
 				for (int j = 0; j < 3; j++) {
@@ -2061,16 +2061,16 @@ void OrXmlRobot::recomputeTworld() {
 		}
 //		cout<<body->name<<":\n"<<"Tparent:"<<*body->Tparent<<"\nTworld:"<<*body->Tworld<<endl<<flush;getchar();
 
-		for (int i = 0; i < children[bodyindex].size(); i++) {
+		for (size_t i = 0; i < children[bodyindex].size(); i++) {
 			needprocess.push_back(children[bodyindex][i]);
 		}
 	}
 }
 
 void OrXmlRobot::getDiffJointNames() {
-	for (int i = 0; i < xmlJoints.size(); i++) {
+	for (size_t i = 0; i < xmlJoints.size(); i++) {
 		string strname = xmlJoints[i]->name;
-		for (int j = 0; j < xmlJoints.size(); j++) {
+		for (size_t j = 0; j < xmlJoints.size(); j++) {
 			if (i == j)
 				continue;
 			if (0 == strcmp(strname.c_str(), xmlJoints[j]->name.c_str())) {
@@ -2101,8 +2101,8 @@ void OrXmlRobot::writeToURDF() {
 	file << "<xacro:property name=\"upper\" value=\"3.14\" />" << endl;
 	file << "<xacro:property name=\"velocity\" value=\"1.0\" />" << endl;
 	//links
-	int nLink = xmlBodys.size();
-	for (int i = 0; i < nLink; i++) {
+	size_t nLink = xmlBodys.size();
+	for (size_t i = 0; i < nLink; i++) {
 		OrXmlBody* body = xmlBodys[i];
 		file << "<link name=\"" << body->name << "\">" << endl;
 
@@ -2174,8 +2174,8 @@ void OrXmlRobot::writeToURDF() {
 		file << "</link>" << endl;
 	}
 	//joints
-	int nJoint = this->xmlJoints.size();
-	for (int i = 0; i < nJoint; i++) {
+	size_t nJoint = this->xmlJoints.size();
+	for (size_t i = 0; i < nJoint; i++) {
 		OrXmlJoint* joint = xmlJoints[i];
 		string typestr;
 		if (!joint->enabled)
@@ -2267,12 +2267,12 @@ void OrXmlRobot::WriteHubo(Robot& robot, bool isjaemi) {
 		return;
 	}
 	cout<<"write "<<filename<<endl<<flush;
-	int nLinks = robot.links.size();
+	size_t nLinks = robot.links.size();
 	assert(linkgroups.back().back()+1 == nLinks);
 
 	file << "links\t";
-	for (int i = 0; i < linkgroups.size(); i++) {
-		for (int j = 0; j < linkgroups[i].size(); j++)
+	for (size_t i = 0; i < linkgroups.size(); i++) {
+		for (size_t j = 0; j < linkgroups[i].size(); j++)
 			file << "\t\"" << robot.linkNames[linkgroups[i][j]] << "\" ";
 		if (i < linkgroups.size() - 1)
 			file << "\\" << endl;
@@ -2280,19 +2280,19 @@ void OrXmlRobot::WriteHubo(Robot& robot, bool isjaemi) {
 	file << endl << endl;
 
 	file << "parents\t";
-	for (int i = 0; i < robot.parents.size(); i++) {
+	for (size_t i = 0; i < robot.parents.size(); i++) {
 		file << robot.parents[i] << " ";
 	}
 	file << endl << endl;
 
 	file << "axis\t";
-	for (int i = 0; i < nLinks; i++)
+	for (size_t i = 0; i < nLinks; i++)
 		file << robot.links[i].w[0] << " " << robot.links[i].w[1] << " "
 				<< robot.links[i].w[2] << "\t";
 	file << endl << endl;
 
 	file << "jointtype\t";
-	for (int i = 0; i < nLinks; i++) {
+	for (size_t i = 0; i < nLinks; i++) {
 		if (robot.links[i].type == RobotLink3D::Prismatic)
 			file << "p ";
 		else if (robot.links[i].type == RobotLink3D::Revolute)
@@ -2301,7 +2301,7 @@ void OrXmlRobot::WriteHubo(Robot& robot, bool isjaemi) {
 	file << endl << endl;
 
 	file << "Tparent\t";
-	for (int i = 0; i < nLinks; i++) {
+	for (size_t i = 0; i < nLinks; i++) {
 		RigidTransform T(robot.links[i].T0_Parent);
 		file << T.R(0, 0) << " " << T.R(0, 1) << " " << T.R(0, 2) << "\t";
 		file << T.R(1, 0) << " " << T.R(1, 1) << " " << T.R(1, 2) << "\t";
@@ -2313,8 +2313,8 @@ void OrXmlRobot::WriteHubo(Robot& robot, bool isjaemi) {
 	file << endl << endl;
 
 	file << "qmin\t";
-	for (int i = 0; i < linkgroups.size(); i++) {
-		for (int j = 0; j < linkgroups[i].size(); j++)
+	for (size_t i = 0; i < linkgroups.size(); i++) {
+		for (size_t j = 0; j < linkgroups[i].size(); j++)
 			file << robot.qMin[linkgroups[i][j]] << " ";
 		if (i < linkgroups.size() - 1)
 			file << "\\" << endl << "\t";
@@ -2322,8 +2322,8 @@ void OrXmlRobot::WriteHubo(Robot& robot, bool isjaemi) {
 	file << endl << endl;
 
 	file << "qmax\t";
-	for (int i = 0; i < linkgroups.size(); i++) {
-		for (int j = 0; j < linkgroups[i].size(); j++)
+	for (size_t i = 0; i < linkgroups.size(); i++) {
+		for (size_t j = 0; j < linkgroups[i].size(); j++)
 			file << robot.qMax[linkgroups[i][j]] << " ";
 		if (i < linkgroups.size() - 1)
 			file << "\\" << endl << "\t";
@@ -2331,7 +2331,7 @@ void OrXmlRobot::WriteHubo(Robot& robot, bool isjaemi) {
 	file << endl << endl;
 
 	file << "geometry\t";
-	for (int i = 0; i < nLinks; i++) {
+	for (size_t i = 0; i < nLinks; i++) {
 		if (i < 5)
 			file << "\"\" ";
 		else {
@@ -2354,14 +2354,14 @@ void OrXmlRobot::WriteHubo(Robot& robot, bool isjaemi) {
 	file << endl << endl;
 
 	file << "mass\t";
-	for (int i = 0; i < nLinks; i++) {
+	for (size_t i = 0; i < nLinks; i++) {
 		file << robot.links[i].mass << " ";
 	}
 	file << endl << endl;
 
 	file << "com\t";
-	for (int i = 0; i < linkgroups.size(); i++) {
-		for (int j = 0; j < linkgroups[i].size(); j++){
+	for (size_t i = 0; i < linkgroups.size(); i++) {
+		for (size_t j = 0; j < linkgroups[i].size(); j++){
 			file << robot.links[linkgroups[i][j]].com[0] << " " << robot.links[linkgroups[i][j]].com[1] << " "<< robot.links[linkgroups[i][j]].com[2] << "\t";
 		}
 		if (i < linkgroups.size() - 1)
@@ -2370,8 +2370,8 @@ void OrXmlRobot::WriteHubo(Robot& robot, bool isjaemi) {
 	file << endl << endl;
 
 	file << "inertia\t";
-	for (int i = 0; i < linkgroups.size(); i++) {
-		for (int j = 0; j < linkgroups[i].size(); j++){
+	for (size_t i = 0; i < linkgroups.size(); i++) {
+		for (size_t j = 0; j < linkgroups[i].size(); j++){
 			Matrix3 inertia(robot.links[linkgroups[i][j]].inertia);
 			file << inertia(0, 0) << " " << inertia(0, 1) << " " << inertia(0, 2)
 					<< " ";
@@ -2383,7 +2383,7 @@ void OrXmlRobot::WriteHubo(Robot& robot, bool isjaemi) {
 		if (i < linkgroups.size() - 1)
 			file << "\\" << endl << "\t";
 	}
-//	for (int i = 0; i < nLinks; i++) {
+//	for (size_t i = 0; i < nLinks; i++) {
 //		Matrix3 inertia(robot.links[i].inertia);
 //		file << inertia(0, 0) << " " << inertia(0, 1) << " " << inertia(0, 2)
 //				<< " ";
@@ -2395,8 +2395,8 @@ void OrXmlRobot::WriteHubo(Robot& robot, bool isjaemi) {
 	file << endl << endl;
 
 	file << "torquemax\t";
-	for (int i = 0; i < linkgroups.size(); i++) {
-		for (int j = 0; j < linkgroups[i].size(); j++)
+	for (size_t i = 0; i < linkgroups.size(); i++) {
+		for (size_t j = 0; j < linkgroups[i].size(); j++)
 			file << robot.torqueMax[linkgroups[i][j]] << " ";
 		if (i < linkgroups.size() - 1)
 			file << "\\" << endl << "\t";
@@ -2404,8 +2404,8 @@ void OrXmlRobot::WriteHubo(Robot& robot, bool isjaemi) {
 	file << endl << endl;
 
 	file << "velmax\t";
-	for (int i = 0; i < linkgroups.size(); i++) {
-		for (int j = 0; j < linkgroups[i].size(); j++)
+	for (size_t i = 0; i < linkgroups.size(); i++) {
+		for (size_t j = 0; j < linkgroups[i].size(); j++)
 			file << robot.velMax[linkgroups[i][j]] << " ";
 		if (i < linkgroups.size() - 1)
 			file << "\\" << endl << "\t";
@@ -2413,16 +2413,16 @@ void OrXmlRobot::WriteHubo(Robot& robot, bool isjaemi) {
 	file << endl << endl;
 
 	file << "accmax\t";
-	for (int i = 0; i < linkgroups.size(); i++) {
-		for (int j = 0; j < linkgroups[i].size(); j++)
+	for (size_t i = 0; i < linkgroups.size(); i++) {
+		for (size_t j = 0; j < linkgroups[i].size(); j++)
 			file << robot.accMax[linkgroups[i][j]] << " ";
 		if (i < linkgroups.size() - 1)
 			file << "\\" << endl << "\t";
 	}
 	file << endl << endl;
 
-	int nJoints = robot.joints.size();
-	for (int i = 0; i < nJoints; i++) {
+	size_t nJoints = robot.joints.size();
+	for (size_t i = 0; i < nJoints; i++) {
 		file << "joint ";
 		if (robot.joints[i].type == RobotJoint::Floating)
 			file << "floating " << robot.joints[i].linkIndex << " "
@@ -2435,8 +2435,8 @@ void OrXmlRobot::WriteHubo(Robot& robot, bool isjaemi) {
 	}
 	file << endl << endl;
 
-	int nDrivers = robot.drivers.size();
-	for (int i = 0; i < nDrivers; i++) {
+	size_t nDrivers = robot.drivers.size();
+	for (size_t i = 0; i < nDrivers; i++) {
 		if (robot.drivers[i].type == RobotJointDriver::Normal) {
 			file << "driver normal " << robot.drivers[i].linkIndices[0] << endl;
 		}
@@ -2444,8 +2444,8 @@ void OrXmlRobot::WriteHubo(Robot& robot, bool isjaemi) {
 	file << endl << endl;
 
 	file << "servoP\t";
-	for (int i = 0; i < drivergroups.size(); i++) {
-		for (int j = 0; j < drivergroups[i].size(); j++)
+	for (size_t i = 0; i < drivergroups.size(); i++) {
+		for (size_t j = 0; j < drivergroups[i].size(); j++)
 			if (robot.drivers[drivergroups[i][j]].type
 					== RobotJointDriver::Normal) {
 				file << robot.drivers[drivergroups[i][j]].servoP << " ";
@@ -2455,8 +2455,8 @@ void OrXmlRobot::WriteHubo(Robot& robot, bool isjaemi) {
 	}
 	file << endl;
 	file << "servoI\t";
-	for (int i = 0; i < drivergroups.size(); i++) {
-		for (int j = 0; j < drivergroups[i].size(); j++)
+	for (size_t i = 0; i < drivergroups.size(); i++) {
+		for (size_t j = 0; j < drivergroups[i].size(); j++)
 			if (robot.drivers[drivergroups[i][j]].type
 					== RobotJointDriver::Normal) {
 				file << robot.drivers[drivergroups[i][j]].servoI << " ";
@@ -2466,8 +2466,8 @@ void OrXmlRobot::WriteHubo(Robot& robot, bool isjaemi) {
 	}
 	file << endl;
 	file << "servoD\t";
-	for (int i = 0; i < drivergroups.size(); i++) {
-		for (int j = 0; j < drivergroups[i].size(); j++)
+	for (size_t i = 0; i < drivergroups.size(); i++) {
+		for (size_t j = 0; j < drivergroups[i].size(); j++)
 			if (robot.drivers[drivergroups[i][j]].type
 					== RobotJointDriver::Normal) {
 				file << robot.drivers[drivergroups[i][j]].servoD << " ";
@@ -2478,8 +2478,8 @@ void OrXmlRobot::WriteHubo(Robot& robot, bool isjaemi) {
 	file << endl << endl;
 
 	file << "dryFriction\t";
-	for (int i = 0; i < drivergroups.size(); i++) {
-		for (int j = 0; j < drivergroups[i].size(); j++)
+	for (size_t i = 0; i < drivergroups.size(); i++) {
+		for (size_t j = 0; j < drivergroups[i].size(); j++)
 			if (robot.drivers[drivergroups[i][j]].type
 					== RobotJointDriver::Normal) {
 				file << robot.drivers[drivergroups[i][j]].dryFriction << " ";
@@ -2518,7 +2518,7 @@ void OrXmlRobot::Write2Rob(Robot& robot) {
 		}
 	}else{
 		cout<<"write fixed base robot"<<endl;
-		for(int i = 0; i < robot.links.size(); i++){
+		for(size_t i = 0; i < robot.links.size(); i++){
 			if(false == LOADSimpleGEOM)
 				geomFiles[i] = xmlBodys[i]->vis_filename;
 			else
@@ -2532,7 +2532,7 @@ void OrXmlRobot::Write2Rob(Robot& robot) {
 }
 
 bool OrXmlRobot::GetFloatingBaseRobot(Robot& robot) {
-	int nBody = xmlBodys.size();
+	size_t nBody = xmlBodys.size();
 
 	assert(parents.size() == nBody);
 	assert(children.size() == nBody);
@@ -2610,7 +2610,7 @@ bool OrXmlRobot::GetFloatingBaseRobot(Robot& robot) {
 		robot.LoadGeometry(5, xmlBodys[0]->vis_filename.c_str());
 
 	//other links
-	for (int i = 1; i < nBody; i++) {
+	for (size_t i = 1; i < nBody; i++) {
 		robot.parents[i + 5] = parents[i] + 5;
 		if (LOADSimpleGEOM && !(xmlBodys[i]->col_filename.empty()))
 			robot.LoadGeometry(i + 5, xmlBodys[i]->col_filename.c_str());
@@ -2664,7 +2664,7 @@ bool OrXmlRobot::GetFloatingBaseRobot(Robot& robot) {
 	robot.joints[0].linkIndex = 5;
 	robot.joints[0].baseIndex = -1;
 
-	for (int i = 0; i < xmlJoints.size(); i++) {
+	for (size_t i = 0; i < xmlJoints.size(); i++) {
 		RobotJoint robjoint;
 		robjoint.type = RobotJoint::Normal;
 		if (xmlJoints[i]->enabled == false) {
@@ -2719,10 +2719,10 @@ bool OrXmlRobot::GetFloatingBaseRobot(Robot& robot) {
 		robot.joints.push_back(robjoint);
 	}
 
-	int nJoint = robot.joints.size();
+	size_t nJoint = robot.joints.size();
 	robot.driverNames.resize(0);
 	robot.drivers.resize(0);
-	for (int i = 0; i < nJoint; i++) {
+	for (size_t i = 0; i < nJoint; i++) {
 		if (robot.joints[i].type == RobotJoint::Normal) {
 			int linkI = robot.joints[i].linkIndex;
 			robot.driverNames.push_back(robot.linkNames[linkI]);
@@ -2761,7 +2761,7 @@ bool OrXmlRobot::GetFloatingBaseRobot(Robot& robot) {
 //	robot.UpdateFrames();
 //	ofstream outfile;
 //	outfile.open("RobotSim_GlobalCOM.txt");
-//	for(int i = 0; i < robot.links.size(); i++){
+//	for(size_t i = 0; i < robot.links.size(); i++){
 //		Vector3 v;
 //		robot.links[i].T_World.mul(robot.links[i].com, v);
 //		outfile <<"link "<<i<<" "<<robot.linkNames[i]<<": "<<v<<endl;
@@ -2772,12 +2772,12 @@ bool OrXmlRobot::GetFloatingBaseRobot(Robot& robot) {
 //	robot.UpdateFrames();
 //	ofstream outfile;
 //	outfile.open("RobotSim_GlobalTransform.txt");
-//	for(int i = 0; i < robot.links.size(); i++){
+//	for(size_t i = 0; i < robot.links.size(); i++){
 //		outfile <<"link "<<i<<" "<<robot.linkNames[i]<<":\n"<<robot.links[i].T_World<<endl;
 //	}
 //	outfile.close();
 
-//	for(int i = 0; i < robot.links.size(); i++){
+//	for(size_t i = 0; i < robot.links.size(); i++){
 //		if(0==strcmp(robot.linkNames[i].c_str(), "Body_LSY")||0==strcmp(robot.linkNames[i].c_str(), "Body_RSY")){
 //			cout<<robot.linkNames[i]<<":"<<robot.links[i].inertia<<endl;
 //		}
@@ -2825,8 +2825,8 @@ void OrXmlRobot::setJaemihuboProperty(Robot& robot) {
 		}
 
 //		cout << "set torques, velmax, accmax" << flush;
-		for (int i = 0; i < linkgroups.size(); i++) {
-			for (int j = 0; j < linkgroups[i].size(); j++) {
+		for (size_t i = 0; i < linkgroups.size(); i++) {
+			for (size_t j = 0; j < linkgroups[i].size(); j++) {
 				robot.torqueMax[linkgroups[i][j]] = defaultTorqueMax[i];
 				robot.velMax[linkgroups[i][j]] = defaultVelMax[i];
 				robot.accMax[linkgroups[i][j]] = defaultAccMax[i];
@@ -2846,8 +2846,8 @@ void OrXmlRobot::setJaemihuboProperty(Robot& robot) {
 		robot.accMax[linkgroups[18][1]] = 0;
 
 //		cout << " set servo PID dryFriction\n" << flush;
-		for (int i = 0; i < drivergroups.size(); i++) {
-			for (int j = 0; j < drivergroups[i].size(); j++) {
+		for (size_t i = 0; i < drivergroups.size(); i++) {
+			for (size_t j = 0; j < drivergroups[i].size(); j++) {
 				robot.drivers[drivergroups[i][j]].servoP = defaultSP[i];
 				robot.drivers[drivergroups[i][j]].servoI = defaultSI[i];
 				robot.drivers[drivergroups[i][j]].servoD = defaultSD[i];
@@ -2909,8 +2909,8 @@ void OrXmlRobot::setHuboplusProperty(Robot& robot) {
 		}
 
 //		cout << "set torques, velmax, accmax" << flush;
-		for (int i = 0; i < linkgroups.size(); i++) {
-			for (int j = 0; j < linkgroups[i].size(); j++) {
+		for (size_t i = 0; i < linkgroups.size(); i++) {
+			for (size_t j = 0; j < linkgroups[i].size(); j++) {
 				robot.torqueMax[linkgroups[i][j]] = defaultTorqueMax[i];
 				robot.velMax[linkgroups[i][j]] = defaultVelMax[i];
 				robot.accMax[linkgroups[i][j]] = defaultAccMax[i];
@@ -2926,8 +2926,8 @@ void OrXmlRobot::setHuboplusProperty(Robot& robot) {
 		robot.torqueMax[linkgroups[8][5]] = 10;
 
 //		cout << " set servo PID dryFriction\n" << flush;
-		for (int i = 0; i < drivergroups.size(); i++) {
-			for (int j = 0; j < drivergroups[i].size(); j++) {
+		for (size_t i = 0; i < drivergroups.size(); i++) {
+			for (size_t j = 0; j < drivergroups[i].size(); j++) {
 				robot.drivers[drivergroups[i][j]].servoP = defaultSP[i];
 				robot.drivers[drivergroups[i][j]].servoI = defaultSI[i];
 				robot.drivers[drivergroups[i][j]].servoD = defaultSD[i];
@@ -2969,17 +2969,17 @@ void OrXmlRobot::setHuboplusProperty(Robot& robot) {
 
 std::ostream& operator <<(std::ostream& out, const OrXmlEnvironment& env) {
 	out << "**************Start Environment*******************" << endl;
-	int nRob = env.xmlRobots.size();
-	int nKin = env.xmlKinbodys.size();
+	size_t nRob = env.xmlRobots.size();
+	size_t nKin = env.xmlKinbodys.size();
 	if (nRob > 0) {
 		out << "-num of robot:" << nRob << endl;
-		for (int i = 0; i < nRob; i++) {
+		for (size_t i = 0; i < nRob; i++) {
 			out << *(env.xmlRobots[i]) << endl;
 		}
 	}
 	if (nKin > 0) {
 		out << "-num of KinBody:" << nKin << endl;
-		for (int i = 0; i < nKin; i++) {
+		for (size_t i = 0; i < nKin; i++) {
 			out << *(env.xmlKinbodys[i]) << endl;
 		}
 	}
@@ -2990,31 +2990,31 @@ std::ostream& operator <<(std::ostream& out, const OrXmlKinbody& kin) {
 	out << "--KinBody name:" << kin.name << endl;
 	if (kin.transformation)
 		out << *kin.transformation << endl;
-	int nbody = kin.xmlBodys.size();
+	size_t nbody = kin.xmlBodys.size();
 	if (nbody > 0) {
 		out << "--number of Body:" << nbody << endl;
-		for (int i = 0; i < nbody; i++) {
+		for (size_t i = 0; i < nbody; i++) {
 			out << *(kin.xmlBodys[i]) << endl;
 		}
 	}
-	int nkinbody = kin.xmlKinbodys.size();
+	size_t nkinbody = kin.xmlKinbodys.size();
 	if (nkinbody > 0) {
 		out << "--number of KinBody:" << nkinbody << endl;
-		for (int i = 0; i < nkinbody; i++) {
+		for (size_t i = 0; i < nkinbody; i++) {
 			out << *(kin.xmlKinbodys[i]) << endl;
 		}
 	}
-	int nJoint = kin.xmlJoints.size();
+	size_t nJoint = kin.xmlJoints.size();
 	if (nJoint > 0) {
 		out << "--number of Joints:" << nJoint << endl;
-		for (int i = 0; i < nJoint; i++) {
+		for (size_t i = 0; i < nJoint; i++) {
 			out << *(kin.xmlJoints[i]) << endl;
 		}
 	}
-	int nAdjacent = kin.xmlAdjacents.size();
+	size_t nAdjacent = kin.xmlAdjacents.size();
 	if (nAdjacent > 0) {
 		out << "--number of Adjacent:" << nAdjacent << endl;
-		for (int i = 0; i < nAdjacent; i++) {
+		for (size_t i = 0; i < nAdjacent; i++) {
 			out << *(kin.xmlAdjacents[i]) << endl;
 		}
 	}
@@ -3028,9 +3028,9 @@ std::ostream& operator <<(std::ostream& out, const OrXmlBody& body) {
 		out << "---body offsetfrom:" << body.offsetfrom << endl;
 	if (body.mass)
 		out << *body.mass << endl;
-	int nGeom = body.xmlGeoms.size();
+	size_t nGeom = body.xmlGeoms.size();
 	out << "---num of Geom in body " << body.name << ":" << nGeom << endl;
-	for (int i = 0; i < nGeom; i++) {
+	for (size_t i = 0; i < nGeom; i++) {
 		if (body.xmlGeoms[i])
 			out << *(body.xmlGeoms[i]) << endl;
 	}
@@ -3043,22 +3043,22 @@ std::ostream& operator <<(std::ostream& out, const OrXmlRobot& robot) {
 	out << "---robot type:" << robot.type << endl;
 	out << "---robot file:" << robot.file << endl;
 	out << "---robot prefix:" << robot.prefix << endl;
-	int nKinbody = robot.xmlKinbodys.size();
+	size_t nKinbody = robot.xmlKinbodys.size();
 	out << "---num of Kinbody in robot " << robot.name << ":" << nKinbody
 			<< endl;
-	for (int i = 0; i < nKinbody; i++) {
+	for (size_t i = 0; i < nKinbody; i++) {
 		if (robot.xmlKinbodys[i])
 			out << *(robot.xmlKinbodys[i]) << endl;
 	}
-	int nRobot = robot.xmlRobots.size();
+	size_t nRobot = robot.xmlRobots.size();
 	out << "---num of Robots in robot " << robot.name << ":" << nRobot << endl;
-	for (int i = 0; i < nRobot; i++) {
+	for (size_t i = 0; i < nRobot; i++) {
 		if (robot.xmlRobots[i])
 			out << *(robot.xmlRobots[i]) << endl;
 	}
 	if (robot.jointvalues.size() > 0)
 		out << "----joint values:" << endl;
-	for (int i = 0; i < robot.jointvalues.size(); i++)
+	for (size_t i = 0; i < robot.jointvalues.size(); i++)
 		out << robot.jointvalues[i] << " ";
 	out << endl;
 	if (robot.transformation)

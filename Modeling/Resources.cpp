@@ -286,8 +286,8 @@ bool WorldResource::Extract(const char* subtype,vector<ResourcePtr>& subobjects)
   if(0==strcmp(subtype,"Robot")) {
     for(size_t i=0;i<world.robots.size();i++) {
       RobotResource* rr = new RobotResource;
-      rr->name = world.robots[i].name;
-      rr->robot = *world.robots[i].robot;
+      rr->name = world.robots[i]->name;
+      rr->robot = *world.robots[i];
       subobjects.push_back(rr);
     }
     return true;
@@ -295,8 +295,8 @@ bool WorldResource::Extract(const char* subtype,vector<ResourcePtr>& subobjects)
   else if(0==strcmp(subtype,"RigidObject")) {
     for(size_t i=0;i<world.rigidObjects.size();i++) {
       RigidObjectResource* rr = new RigidObjectResource;
-      rr->name = world.rigidObjects[i].name;
-      rr->object = *world.rigidObjects[i].object;
+      rr->name = world.rigidObjects[i]->name;
+      rr->object = *world.rigidObjects[i];
       subobjects.push_back(rr);
     }
     return true;
@@ -304,9 +304,9 @@ bool WorldResource::Extract(const char* subtype,vector<ResourcePtr>& subobjects)
   else if(0==strcmp(subtype,"ResourceLibrary")) {
     for(size_t i=0;i<world.terrains.size();i++) {
       ResourceLibraryResource* r = new ResourceLibraryResource;
-      r->name = world.terrains[i].name;
-      r->library.Add(MakeResource("geometry",world.terrains[i].terrain->geometry));
-      r->library.Add(MakeResource("kFriction",world.terrains[i].terrain->kFriction));
+      r->name = world.terrains[i]->name;
+      r->library.Add(MakeResource("geometry",*world.terrains[i]->geometry));
+      r->library.Add(MakeResource("kFriction",world.terrains[i]->kFriction));
       subobjects.push_back(r);
     }
     return true;
@@ -324,21 +324,21 @@ bool WorldResource::Unpack(vector<ResourcePtr>& subobjects,bool* incomplete)
   subobjects.resize(0);
   for(size_t i=0;i<world.robots.size();i++) {
     RobotResource* rr = new RobotResource;
-    rr->name = world.robots[i].name;
-    rr->robot = *world.robots[i].robot;
+    rr->name = world.robots[i]->name;
+    rr->robot = *world.robots[i];
     subobjects.push_back(rr);
   }
   for(size_t i=0;i<world.rigidObjects.size();i++) {
     RigidObjectResource* rr = new RigidObjectResource;
-    rr->name = world.rigidObjects[i].name;
-    rr->object = *world.rigidObjects[i].object;
+    rr->name = world.rigidObjects[i]->name;
+    rr->object = *world.rigidObjects[i];
     subobjects.push_back(rr);
   }
   for(size_t i=0;i<world.terrains.size();i++) {
     ResourceLibraryResource* r = new ResourceLibraryResource;
-    r->name = world.terrains[i].name;
-    r->library.Add(MakeResource("geometry",world.terrains[i].terrain->geometry));
-    r->library.Add(MakeResource("kFriction",world.terrains[i].terrain->kFriction));
+    r->name = world.terrains[i]->name;
+    r->library.Add(MakeResource("geometry",*world.terrains[i]->geometry));
+    r->library.Add(MakeResource("kFriction",world.terrains[i]->kFriction));
     subobjects.push_back(r);
   }
   if(incomplete) *incomplete = true;

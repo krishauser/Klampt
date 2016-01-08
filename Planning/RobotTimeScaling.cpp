@@ -202,6 +202,10 @@ bool TimeOptimizePath(Robot& robot,const vector<Real>& oldtimes,const vector<Con
   traj.path.durations.resize(oldconfigs.size()-1);
   for(size_t i=0;i+1<oldconfigs.size();i++) {
     traj.path.durations[i] = oldtimes[i+1]-oldtimes[i];
+    if(!(traj.path.durations[i] > 0)) {
+      fprintf(stderr,"TimeOptimizePath: input path does not have monotonically increasing time: segment %d range [%g,%g]\n",i,oldtimes[i],oldtimes[i+1]);
+      return false;
+    }
     Assert(traj.path.durations[i] > 0);
   }
   traj.path.segments.resize(oldconfigs.size()-1);

@@ -23,7 +23,7 @@ class RobotUserInterface
  public:
   RobotUserInterface();
   virtual ~RobotUserInterface() { }
-  Robot* GetRobot() const { return world->robots[0].robot; }
+  Robot* GetRobot() const { return world->robots[0]; }
   void GetClickRay(int mx,int my,Ray3D& ray) const;
 
   //Subclasses overload these functions

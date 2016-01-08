@@ -2,6 +2,9 @@
 #define RIGID_OBJECT_H
 
 #include <geometry/AnyGeometry.h>
+#include <string>
+#include "ManagedGeometry.h"
+using namespace std;
 using namespace Math3D;
 
 /** @ingroup Modeling
@@ -15,15 +18,17 @@ public:
   bool Save(const char* fn);
   ///Supports anything the AnyGeometry class uses, and also
   ///ROS PointCloud2 topics (use prefix ros://[topic_name] or
-  ///ros://PointCloud/[topic_name])
+  ///ros:PointCloud2/[topic_name])
   bool LoadGeometry(const char* fn);
   void SetMassFromGeometry(Real totalMass);
   void SetMassFromBB(Real totalMass);
   void InitCollisions();
   void UpdateGeometry(); ///< Call this before collision detection if the transform is changed
+  void DrawGL();
 
-  std::string geomFile;
-  Geometry::AnyCollisionGeometry3D geometry;
+  string name;
+  string geomFile;
+  ManagedGeometry geometry;
   RigidTransform T;    //current transform
   Real mass;           //mass
   Vector3 com;         //center of mass in local frame

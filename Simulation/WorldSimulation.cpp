@@ -207,20 +207,21 @@ WorldSimulation::WorldSimulation()
 
 void WorldSimulation::Init(RobotWorld* _world)
 {
+  printf("Creating WorldSimulation\n");
   time = 0;
   world = _world;
   odesim.SetGravity(Vector3(0,0,-9.8));
   for(size_t i=0;i<world->terrains.size();i++)
-    odesim.AddEnvironment(*world->terrains[i].terrain);
+    odesim.AddTerrain(*world->terrains[i]);
   for(size_t i=0;i<world->robots.size();i++)
-    odesim.AddRobot(*world->robots[i].robot);
+    odesim.AddRobot(*world->robots[i]);
   for(size_t i=0;i<world->rigidObjects.size();i++) 
-    odesim.AddObject(*world->rigidObjects[i].object);
+    odesim.AddObject(*world->rigidObjects[i]);
   controlSimulators.resize(world->robots.size());
 
   //setup control simulators
   for(size_t i=0;i<controlSimulators.size();i++) {
-    Robot* robot=world->robots[i].robot;
+    Robot* robot=world->robots[i];
     RobotMotorCommand& command=controlSimulators[i].command;
     controlSimulators[i].Init(robot,odesim.robot(i),(i < robotControllers.size() ? robotControllers[i] : NULL));
 
@@ -254,20 +255,21 @@ void WorldSimulation::Init(RobotWorld* _world)
       command.actuators[j].qdes = robot->GetDriverValue(j);
     }
   }
+  printf("Done.\n");
 }
 
 void WorldSimulation::OnAddModel()
 {
-  for(size_t i=odesim.numEnvs();i<world->terrains.size();i++)
-    odesim.AddEnvironment(*world->terrains[i].terrain);
+  for(size_t i=odesim.numTerrains();i<world->terrains.size();i++)
+    odesim.AddTerrain(*world->terrains[i]);
   for(size_t i=0;i<world->rigidObjects.size();i++) 
-    odesim.AddObject(*world->rigidObjects[i].object);
+    odesim.AddObject(*world->rigidObjects[i]);
   for(size_t i=odesim.numRobots();i<world->robots.size();i++) {
-    odesim.AddRobot(*world->robots[i].robot);
+    odesim.AddRobot(*world->robots[i]);
 
     //set up control simulator
     controlSimulators.resize(i+1);
-    Robot* robot=world->robots[i].robot;
+    Robot* robot=world->robots[i];
     RobotMotorCommand& command=controlSimulators[i].command;
     controlSimulators[i].Init(robot,odesim.robot(i),(i < robotControllers.size() ? robotControllers[i] : NULL));
 
@@ -341,7 +343,7 @@ void WorldSimulation::Advance(Real dt)
 
     //update viscous friction approximation as dry friction from current velocity
     for(size_t i=0;i<controlSimulators.size();i++) {
-      Robot* robot=world->robots[i].robot;
+      Robot* robot=world->robots[i];
       for(size_t j=0;j<robot->drivers.size();j++) {
 	//setup viscous friction
 	if(robot->drivers[j].viscousFriction != 0) {
@@ -438,18 +440,18 @@ void WorldSimulation::UpdateModel()
     for(size_t i=0;i<world->robots.size();i++) {
       Config q;
       controlSimulators[i].GetCommandedConfig(q);
-      world->robots[i].robot->UpdateConfig(q);
-      world->robots[i].robot->UpdateGeometry();
+      world->robots[i]->UpdateConfig(q);
+      world->robots[i]->UpdateGeometry();
       odesim.robot(i)->SetConfig(q);
     }
   }
   else {
     for(size_t i=0;i<world->robots.size();i++) {
-      odesim.robot(i)->GetConfig(world->robots[i].robot->q);
-      world->robots[i].robot->UpdateFrames();
+      odesim.robot(i)->GetConfig(world->robots[i]->q);
+      world->robots[i]->UpdateFrames();
     }
     for(size_t i=0;i<world->rigidObjects.size();i++) {
-      odesim.object(i)->GetTransform(world->rigidObjects[i].object->T);  
+      odesim.object(i)->GetTransform(world->rigidObjects[i]->T);  
     }
     world->UpdateGeometry();
   }
@@ -460,14 +462,14 @@ void WorldSimulation::UpdateRobot(int i)
   if(fakeSimulation) {
     Config q;
     controlSimulators[i].GetCommandedConfig(q);
-    world->robots[i].robot->UpdateConfig(q);
-    world->robots[i].robot->UpdateGeometry();
+    world->robots[i]->UpdateConfig(q);
+    world->robots[i]->UpdateGeometry();
     odesim.robot(i)->SetConfig(q);
   }
   else {
-    odesim.robot(i)->GetConfig(world->robots[i].robot->q);
-    world->robots[i].robot->UpdateFrames();
-    world->robots[i].robot->UpdateGeometry();
+    odesim.robot(i)->GetConfig(world->robots[i]->q);
+    world->robots[i]->UpdateFrames();
+    world->robots[i]->UpdateGeometry();
   }
 }
 

@@ -6,7 +6,7 @@ RigidObjectPoseWidget::RigidObjectPoseWidget()
 {
 }
 
-RigidObjectPoseWidget::RigidObjectPoseWidget(RigidObject* object,ViewRigidObject* viewRigidObject)
+RigidObjectPoseWidget::RigidObjectPoseWidget(RigidObject* object)
   :rigidObject(object)
 {
   poser.T = object->T;
@@ -14,7 +14,7 @@ RigidObjectPoseWidget::RigidObjectPoseWidget(RigidObject* object,ViewRigidObject
   widgets[0] = &poser;
 }
 
-void RigidObjectPoseWidget::Set(RigidObject* object,ViewRigidObject* viewRigidObject)
+void RigidObjectPoseWidget::Set(RigidObject* object)
 {
   rigidObject = object;
   poser.T = object->T;

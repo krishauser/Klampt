@@ -16,7 +16,7 @@ class TerrainModel;
 
 //forward definitions for pointers to internal objects
 struct RigidObject;
-struct Environment;
+struct Terrain;
 struct Robot;
 
 /** @brief Stores mass information for a rigid body or robot link. */
@@ -310,7 +310,7 @@ class TerrainModel
 
   int world;
   int index;
-  Environment* terrain;
+  Terrain* terrain;
 };
 
 /** @brief The main world class, containing robots, rigid objects, and static

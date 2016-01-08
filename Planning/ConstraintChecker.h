@@ -2,7 +2,7 @@
 #define CONSTRAINT_CHECKER_H
 
 #include "Modeling/Robot.h"
-#include "Modeling/Environment.h"
+#include "Modeling/Terrain.h"
 #include "Contact/Stance.h"
 
 /** @ingroup Planning
@@ -17,11 +17,11 @@ struct ConstraintChecker
   static bool HasVelocityLimits(const Robot& robot);
   static bool HasSupportPolygon(const Robot& robot,const Stance& stance,const Vector3& gravity,int numFCEdges=4);
   static bool HasSupportPolygon_Robust(const Robot& robot,const Stance& stance,const Vector3& gravity,Real robustnessFactor,int numFCEdges=4);
-  static bool HasEnvCollision(Robot& robot,Environment& env);
+  static bool HasEnvCollision(Robot& robot,Terrain& env);
   //same as above, but ignores fixed links
-  static bool HasEnvCollision(Robot& robot,Environment& env,const Stance& stance, const vector<int>& ignoreList);
-  static bool HasEnvCollision(Robot& robot,Environment& env,const vector<IKGoal>& fixedLinks, const vector<int>& ignoreList);
-  static bool HasEnvCollision(Robot& robot,Environment& env,const vector<IKGoal>& fixedLinks);
+  static bool HasEnvCollision(Robot& robot,Terrain& env,const Stance& stance, const vector<int>& ignoreList);
+  static bool HasEnvCollision(Robot& robot,Terrain& env,const vector<IKGoal>& fixedLinks, const vector<int>& ignoreList);
+  static bool HasEnvCollision(Robot& robot,Terrain& env,const vector<IKGoal>& fixedLinks);
   static bool HasSelfCollision(Robot& robot);
   static bool HasTorqueLimits(Robot& robot,const Stance& stance,const Vector3& gravity,int numFCEdges=4);
 };

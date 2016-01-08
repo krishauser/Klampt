@@ -19,7 +19,7 @@ class WorldGUIBackend : public GLNavigationBackend
 {
 public:
   WorldGUIBackend(RobotWorld* world);
-  virtual ~WorldGUIBackend() {}
+  virtual ~WorldGUIBackend();
 
   bool LoadCommandLine(int argc,const char** argv);
   bool LoadFile(const char* fn);
@@ -29,10 +29,10 @@ public:
   virtual bool OnCommand(const string& cmd,const string& args);
   //GLNavigationBackend overloads
   virtual void SetWorldLights() { world->SetGLLights(); }
-  RobotInfo* ClickRobot(int x,int y,int& body,Vector3& localpt) const;
-  RobotInfo* ClickRobot(const Ray3D& r,int& body,Vector3& localpt) const;
-  RigidObjectInfo* ClickObject(int x,int y,Vector3& localpt) const;
-  RigidObjectInfo* ClickObject(const Ray3D& r,Vector3& localpt) const;
+  Robot* ClickRobot(int x,int y,int& body,Vector3& localpt) const;
+  Robot* ClickRobot(const Ray3D& r,int& body,Vector3& localpt) const;
+  RigidObject* ClickObject(int x,int y,Vector3& localpt) const;
+  RigidObject* ClickObject(const Ray3D& r,Vector3& localpt) const;
   virtual void RefreshIdle() { SendPauseIdle(0); }
   virtual void RenderWorld();
 

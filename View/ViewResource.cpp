@@ -181,11 +181,12 @@ void ViewResource::SetRobot(Robot* robot)
   configViewer.robot = robot;
   configsViewer.robot = robot;
   pathViewer.robot = robot;
-  /*
-  configViewer.SetGrey();
-  configsViewer.SetGrey();
-  pathViewer.SetGrey();
-  */
+  configViewer.RestoreAppearance();
+  configsViewer.RestoreAppearance();
+  pathViewer.RestoreAppearance();
+  configViewer.PushAppearance();
+  configsViewer.PushAppearance();
+  pathViewer.PushAppearance();
   configViewer.SetColors(GLColor(0.5,0.5,0.5,0.7));
   configsViewer.SetColors(GLColor(0.5,0.5,0.5,0.7));
   pathViewer.SetColors(GLColor(0.5,0.5,0.5,0.7));

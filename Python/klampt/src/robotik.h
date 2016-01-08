@@ -70,6 +70,15 @@ class IKObjective
   ///For fixed-transform constraints, returns the transform (R,T)
   void getTransform(double out[9],double out2[3]) const;
 
+  ///Loads the objective from a Klamp't-native formatted string. For a
+  ///more readable but verbose format, try the JSON IO routines
+  ///loader.toJson/fromJson()
+  bool loadString(const char* str);
+  ///Saves the objective to a Klamp't-native formatted string.  For a
+  ///more readable but verbose format, try the JSON IO routines
+  ///loader.toJson/fromJson()
+  std::string saveString() const;
+
   IKGoal goal;
 };
 

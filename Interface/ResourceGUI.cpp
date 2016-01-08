@@ -292,7 +292,7 @@ void ResourceGUIBackend::RenderCurResource()
     viewResource.DrawGL(current);
   */
   //separate open?
-  viewResource.SetRobot(world->robots[0].robot);
+  viewResource.SetRobot(world->robots[0]);
   if(resources && resources->selected)
     viewResource.DrawGL(resources->selected->resource);
 }

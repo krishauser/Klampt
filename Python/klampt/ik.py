@@ -293,11 +293,12 @@ def solve_global(objectives,iters=1000,tol=1e-3,numRestarts=100,feasibilityCheck
     if feasibilityCheck==None: feasibilityCheck=lambda : True
     s = solver(objectives)
     if hasattr(s,'__iter__'):
-        if not startRandom:
-            res = [si.solve(iters,tol)[0] for si in s]
-            if all(res):
-                if feasibilityCheck():
-                    return True
+        if startRandom:
+            s.sampleInitial()
+        res = [si.solve(iters,tol)[0] for si in s]
+        if all(res):
+            if feasibilityCheck():
+                return True
         for i in xrange(numRestarts):
             for si in s:
                 si.sampleInitial()
@@ -307,10 +308,11 @@ def solve_global(objectives,iters=1000,tol=1e-3,numRestarts=100,feasibilityCheck
                     return True
         return False
     else:
-        if not startRandom:
-            if s.solve(iters,tol)[0]:
-                if feasibilityCheck():
-                    return True
+        if startRandom:
+            s.sampleInitial()
+        if s.solve(iters,tol)[0]:
+            if feasibilityCheck():
+                return True
         for i in xrange(numRestarts):
             s.sampleInitial()
             if s.solve(iters,tol)[0]:

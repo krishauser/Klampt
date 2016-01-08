@@ -12,7 +12,7 @@ InputProcessorBase::InputProcessorBase()
 
 Robot* InputProcessorBase::GetRobot() const
 {
-  return world->robots[0].robot;
+  return world->robots[0];
 }
 
 void InputProcessorBase::GetClickRay(int mx, int my, Ray3D& ray) const
@@ -43,16 +43,17 @@ void StandardInputProcessor::Hover(int mx,int my)
   
   int link;
   Vector3 localPos;
-  RobotInfo* rob = world->ClickRobot( ray, link, localPos);
+  Robot* rob = world->ClickRobot( ray, link, localPos);
   Robot* robot = GetRobot();
   if (rob) {
     currentLink = link;
     currentPoint = localPos;
     currentDestination = robot->links[currentLink].T_World*localPos;
-    rob->view.SetGrey();
-    rob->view.SetColor(currentLink,GLColor(1, 1, 0));
+    world->robotViews[0].RestoreAppearance();
+    world->robotViews[0].PushAppearance();
+    world->robotViews[0].SetColor(currentLink,GLColor(1, 1, 0));
   } else {
-    world->robots[0].view.SetGrey();
+    world->robotViews[0].RestoreAppearance();
     currentLink = -1;
   }
 }

@@ -534,12 +534,12 @@ SingleRobotCSpace::SingleRobotCSpace(const SingleRobotCSpace& space)
 
 int SingleRobotCSpace::NumDimensions() const
 {
-  return (int)world.robots[index].robot->links.size();
+  return (int)world.robots[index]->links.size();
 }
 
 Robot* SingleRobotCSpace::GetRobot() const
 {
-  return world.robots[index].robot;
+  return world.robots[index];
 }
 
 bool SingleRobotCSpace::CheckJointLimits(const Config& x)
@@ -802,7 +802,7 @@ Real SingleRobotCSpace::Distance(const Config& x, const Config& y)
 {
   //Real sum = 0;
   Real vmax = 0;
-  Robot* robot = world.robots[index].robot;
+  Robot* robot = world.robots[index];
   const Vector& w=settings->robotSettings[index].distanceWeights;
   for(size_t i=0;i<robot->joints.size();i++) {
     switch(robot->joints[i].type) {
@@ -857,7 +857,7 @@ Real SingleRobotCSpace::Distance(const Config& x, const Config& y)
 
 void SingleRobotCSpace::Interpolate(const Config& x,const Config& y,Real u,Config& out)
 {
-  Robot* robot = world.robots[index].robot;
+  Robot* robot = world.robots[index];
   ::Interpolate(*robot,x,y,u,out);
 }
 
@@ -868,7 +868,7 @@ void SingleRobotCSpace::Midpoint(const Config& x,const Config& y,Config& out)
 
 void SingleRobotCSpace::Properties(PropertyMap& map) const
 {
-  Robot* robot = world.robots[index].robot;
+  Robot* robot = world.robots[index];
   int euclidean = 1;
   Real v = 1;
   int dim = robot->q.n;
@@ -930,9 +930,9 @@ vector<vector<Geometry::CollisionMeshQueryEnhanced> > linkCollisions;
 void GetCollisionList(RobotWorld& world,int robot,WorldPlannerSettings* settings)
 {
   if(linkCollisions.empty()) {
-    linkIndices.resize(world.robots[robot].robot->links.size());
-    linkCollisions.resize(world.robots[robot].robot->links.size());
-    for(size_t i=0;i<world.robots[robot].robot->links.size();i++) {
+    linkIndices.resize(world.robots[robot]->links.size());
+    linkCollisions.resize(world.robots[robot]->links.size());
+    for(size_t i=0;i<world.robots[robot]->links.size();i++) {
       linkIndices[i].first = (int)i;
       linkIndices[i].second = -1;
     }
@@ -1242,7 +1242,7 @@ Real SingleRigidObjectCSpace::Distance(const Config& x,const Config& y)
 
 RigidObject* SingleRigidObjectCSpace::GetObject() const
 {
-  return world.rigidObjects[index].object;
+  return world.rigidObjects[index];
 }
 
 bool SingleRigidObjectCSpace::IsFeasible(const Config& q)
@@ -1331,7 +1331,7 @@ void MultiRobotCSpace::InitRobots(const vector<int>& indices)
   robotElementIDs.resize(indices.size());
   elementSpaces.resize(indices.size());
   for(size_t i=0;i<indices.size();i++) {
-    robot.Add(world.robots[indices[i]].robot,world.robots[indices[i]].name.c_str());
+    robot.Add(world.robots[indices[i]],world.robots[indices[i]]->name.c_str());
     robotElementIDs[i] = world.RobotID(indices[i]);
     elementSpaces[i] = new SingleRobotCSpace(world,indices[i],settings);
   }
@@ -1339,14 +1339,14 @@ void MultiRobotCSpace::InitRobots(const vector<int>& indices)
 
 void MultiRobotCSpace::AddRobot(int index)
 {
-  int element = robot.Add(world.robots[index].robot,world.robots[index].name.c_str());
+  int element = robot.Add(world.robots[index],world.robots[index]->name.c_str());
   robotElementIDs.push_back(world.RobotID(index));
   elementSpaces.push_back(new SingleRobotCSpace(world,index,settings));
 }
 
 void MultiRobotCSpace::AddRigidObject(int index)
 {
-  int element = robot.Add(world.rigidObjects[index].object,world.rigidObjects[index].name.c_str());
+  int element = robot.Add(world.rigidObjects[index],world.rigidObjects[index]->name.c_str());
   robotElementIDs.push_back(world.RigidObjectID(index));
   elementSpaces.push_back(new SingleRigidObjectCSpace(world,index,settings));
 }

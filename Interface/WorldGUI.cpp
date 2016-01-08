@@ -12,11 +12,25 @@ WorldGUIBackend::WorldGUIBackend(RobotWorld* _world)
 {
 }
 
+WorldGUIBackend::~WorldGUIBackend()
+{
+  if(ROSNumSubscribedTopics() > 0 || ROSNumPublishedTopics() > 0) ROSShutdown();
+}
+
 bool WorldGUIBackend::OnIdle()
 {
   if(ROSNumSubscribedTopics() > 0) {
-    if(ROSSubscribeUpdate())
-      SendPauseIdle();
+    if(ROSSubscribeUpdate()) {
+      //need to refresh appearances
+      for(size_t i=0;i<world->robots.size();i++)
+	for(size_t j=0;j<world->robots[i]->links.size();j++)
+	  world->robots[i]->geomManagers[j].DynamicGeometryUpdate();
+      for(size_t i=0;i<world->rigidObjects.size();i++)
+	world->rigidObjects[i]->geometry.DynamicGeometryUpdate();
+      for(size_t i=0;i<world->terrains.size();i++)
+	world->terrains[i]->geometry.DynamicGeometryUpdate();
+      SendRefresh();
+    }
     else
       SendPauseIdle(0.05);
   }
@@ -108,11 +122,11 @@ bool WorldGUIBackend::LoadCommandLine(int argc,const char** argv)
     Vector temp;
     in >> temp;
     if(!in) printf("Error reading config file %s\n",configs[i].c_str());
-    if(temp.n != (int)world->robots[i].robot->links.size()) {
+    if(temp.n != (int)world->robots[i]->links.size()) {
       printf("Incorrect number of DOFs in config %d\n",i);
       continue;
     }
-    world->robots[i].robot->UpdateConfig(temp);
+    world->robots[i]->UpdateConfig(temp);
   }
   return true;
 }
@@ -140,12 +154,12 @@ void WorldGUIBackend::Start()
   return GLNavigationBackend::Start();
 }
 
-RobotInfo* WorldGUIBackend::ClickRobot(const Ray3D& r,int& body,Vector3& localpt) const
+Robot* WorldGUIBackend::ClickRobot(const Ray3D& r,int& body,Vector3& localpt) const
 {
   return world->ClickRobot(r,body,localpt);
 }
 
-RigidObjectInfo* WorldGUIBackend::ClickObject(const Ray3D& r,Vector3& localpt) const
+RigidObject* WorldGUIBackend::ClickObject(const Ray3D& r,Vector3& localpt) const
 {
   return world->ClickObject(r,localpt);
 }

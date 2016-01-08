@@ -199,28 +199,28 @@ void ODESimulator::SetCFM(double cfm)
 ODESimulator::~ODESimulator()
 {
   dJointGroupDestroy(contactGroupID);
-  for(size_t i=0;i<envGeoms.size();i++)
-    delete envGeoms[i];
+  for(size_t i=0;i<terrainGeoms.size();i++)
+    delete terrainGeoms[i];
   for(size_t i=0;i<robots.size();i++)
     delete robots[i];
   dSpaceDestroy(envSpaceID);
   dWorldDestroy(worldID);
 }
 
-void ODESimulator::AddEnvironment(Environment& env)
+void ODESimulator::AddTerrain(Terrain& terr)
 {
-  envs.push_back(&env);
-  envGeoms.resize(envGeoms.size()+1);
-  envGeoms.back() = new ODEGeometry;
-  envGeoms.back()->Create(&env.geometry,envSpaceID,Vector3(Zero),settings.boundaryLayerCollisions);
-  envGeoms.back()->surf() = settings.defaultEnvSurface;
-  envGeoms.back()->SetPadding(settings.defaultEnvPadding);
-  if(!env.kFriction.empty())
-    envGeoms.back()->surf().kFriction = env.kFriction[0];
+  terrains.push_back(&terr);
+  terrainGeoms.resize(terrainGeoms.size()+1);
+  terrainGeoms.back() = new ODEGeometry;
+  terrainGeoms.back()->Create(&*terr.geometry,envSpaceID,Vector3(Zero),settings.boundaryLayerCollisions);
+  terrainGeoms.back()->surf() = settings.defaultEnvSurface;
+  terrainGeoms.back()->SetPadding(settings.defaultEnvPadding);
+  if(!terr.kFriction.empty())
+    terrainGeoms.back()->surf().kFriction = terr.kFriction[0];
   //the index of the environment is encoded as -1-index
-  dGeomSetData(envGeoms.back()->geom(),(void*)(-(int)envs.size()));
-  dGeomSetCategoryBits(envGeoms.back()->geom(),0x1);
-  dGeomSetCollideBits(envGeoms.back()->geom(),0xffffffff ^ 0x1);
+  dGeomSetData(terrainGeoms.back()->geom(),(void*)(-(int)terrains.size()));
+  dGeomSetCategoryBits(terrainGeoms.back()->geom(),0x1);
+  dGeomSetCollideBits(terrainGeoms.back()->geom(),0xffffffff ^ 0x1);
 }
 
 void ODESimulator::AddRobot(Robot& robot)
@@ -964,8 +964,8 @@ void ODESimulator::GetSurfaceParameters(const ODEObjectID& a,const ODEObjectID& 
   //printf("GetSurfaceParameters a = %d,%d, b = %d,%d\n",a.type,a.index,b.type,b.index);
   ODEGeometry *ma,*mb;
   if(a.type == 0) {
-    Assert(a.index < (int)envs.size());
-    ma = envGeoms[a.index];
+    Assert(a.index < (int)terrains.size());
+    ma = terrainGeoms[a.index];
   }
   else if(a.type == 1) 
     ma = robots[a.index]->triMesh(a.bodyIndex);
@@ -973,8 +973,8 @@ void ODESimulator::GetSurfaceParameters(const ODEObjectID& a,const ODEObjectID& 
     ma = objects[a.index]->triMesh();
   else Abort();
   if(b.type == 0) {
-    Assert(b.index < (int)envs.size());
-    mb=envGeoms[b.index];
+    Assert(b.index < (int)terrains.size());
+    mb=terrainGeoms[b.index];
   }
   else if(b.type == 1) 
     mb=robots[b.index]->triMesh(b.bodyIndex);
@@ -1180,13 +1180,13 @@ void ODESimulator::DetectCollisions()
       }
       //printf("Collision between body %d and obj %d\n",body,obj);
       Assert(body >= 0 && body < (int)robots[i]->robot.links.size());
-      Assert(obj >= -(int)envs.size() && obj < (int)objects.size());
+      Assert(obj >= -(int)terrains.size() && obj < (int)objects.size());
       if(robots[i]->robot.parents[body] == -1 && obj < 0) { //fixed links
 	fprintf(stderr,"Warning, colliding a fixed link and the terrain\n");
 	continue;
       }
       cindex.first.bodyIndex = body;
-      if(obj < 0) {  //it's an environment
+      if(obj < 0) {  //it's a terrain
 	cindex.second = ODEObjectID(0,(-obj-1));
       }
       else {
@@ -1351,7 +1351,7 @@ void GetContacts(dBodyID a,vector<ODEContactList>& contacts)
 
 bool HasContact(dBodyID a,dBodyID b)
 {
-  if(a == 0 && b == 0) return false; //two environments
+  if(a == 0 && b == 0) return false; //two terrains
   if(a == 0) Swap(a,b);
   int n = dBodyGetNumJoints (a);
   for(int i=0;i<n;i++) {
@@ -1367,7 +1367,7 @@ bool HasContact(dBodyID a,dBodyID b)
 
 bool ODESimulator::InContact(const ODEObjectID& a) const
 {
-  if(a.type == 0) { //environment
+  if(a.type == 0) { //terrain
     //must loop through all objects to see what is in contact with the
     //environment
     for(size_t i=0;i<objects.size();i++) {

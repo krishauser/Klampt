@@ -120,15 +120,15 @@ string JointCommandInterface::MouseInputEvent(int mx,int my,bool drag)
     robot->UpdateConfig(q);
     int link;
     Vector3 localPos;
-    RobotInfo* rob=world->ClickRobot(ray,link,localPos);
+    Robot* rob=world->ClickRobot(ray,link,localPos);
 
     if(rob) {
       currentLink = link;
-      world->robots[0].view.SetGrey();
-      world->robots[0].view.SetColor(currentLink,GLColor(1,1,0));
+      world->robotViews[0].PushAppearance();
+      world->robotViews[0].SetColor(currentLink,GLColor(1,1,0));
     }
     else {
-      world->robots[0].view.SetGrey();
+      world->robotViews[0].RestoreAppearance();
       currentLink = -1;
     }
     return "";
@@ -221,10 +221,10 @@ void InputProcessingInterface::DrawGL()
     }
     ConfigObjective* qobj = dynamic_cast<ConfigObjective*>(&*currentObjective);
     if(qobj) {
-      world->robots[0].view.SetColors(GLColor(1,0.5,0,0.5));
+      world->robotViews[0].SetColors(GLColor(1,0.5,0,0.5));
       glEnable(GL_LIGHTING);
       robot->UpdateConfig(qobj->qgoal);
-      world->robots[0].view.Draw();
+      world->robotViews[0].Draw();
       glDisable(GL_LIGHTING);
     }
     CartesianTrackingObjective* ptrack = dynamic_cast<CartesianTrackingObjective*>(&*currentObjective);
@@ -583,9 +583,9 @@ string MTPlannerCommandInterface::UpdateEvent()
   bool changedObjective = false;
   if(ObjectiveChanged()) {
     changedObjective = true;
-    obj = inputProcessor->MakeObjective(planningWorld->robots[0].robot);
+    obj = inputProcessor->MakeObjective(planningWorld->robots[0]);
     //this is the visualization objective -- must be a different pointer
-    currentObjective = inputProcessor->MakeObjective(planningWorld->robots[0].robot);
+    currentObjective = inputProcessor->MakeObjective(planningWorld->robots[0]);
     //evaluate the objective
     PlannerObjectiveBase* oldObj = planningThread.GetObjective();
     if((oldObj && !obj) || (oldObj && oldObj->Delta(obj) > gPlannerStopDeltaThreshold)) {

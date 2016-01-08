@@ -153,26 +153,30 @@ public:
 
   virtual void RenderWorld()
   {
-    Robot* robot=world->robots[0].robot;
+    Robot* robot=world->robots[0];
     RobotController* rc=sim.robotControllers[0];
 
     SimViewProgram::RenderWorld();
 
     //draw current commanded configuration -- transparent
     GLColor newColor(0,1,0,0.5);
-    world->robots[0].view.SetColors(newColor);
+    world->robotViews[0].PushAppearance();
+    world->robotViews[0].SetColors(newColor);
     Config q;
     sim.controlSimulators[0].GetCommandedConfig(q);
     robot->UpdateConfig(q);
-    world->robots[0].view.Draw();
+    world->robotViews[0].Draw();
+    world->robotViews[0].PopAppearance();
 
     if(drawDesired) {
       Config curBest;
       robotInterface->GetEndConfig(curBest);
       if(!curBest.empty()) {
 	robot->UpdateConfig(curBest); 
-	world->robots[0].view.SetColors(GLColor(1,1,0,0.5));
-	world->robots[0].view.Draw();
+	world->robotViews[0].PushAppearance();
+	world->robotViews[0].SetColors(GLColor(1,1,0,0.5));
+	world->robotViews[0].Draw();
+	world->robotViews[0].PopAppearance();
       }
       /*
       if(curGoal) {

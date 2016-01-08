@@ -27,10 +27,10 @@ void DynamicShortcut(RobotWorld& world,int robot,const MilestonePath& path,int m
 {
   //1. Make initial start-and-stop path.
   //set up joint/velocity/acceleration limits
-  dynamicPath.xMin = world.robots[robot].robot->qMin;
-  dynamicPath.xMax = world.robots[robot].robot->qMax;
-  dynamicPath.velMax = world.robots[robot].robot->velMax;
-  dynamicPath.accMax = world.robots[robot].robot->accMax;
+  dynamicPath.xMin = world.robots[robot]->qMin;
+  dynamicPath.xMax = world.robots[robot]->qMax;
+  dynamicPath.velMax = world.robots[robot]->velMax;
+  dynamicPath.accMax = world.robots[robot]->accMax;
   //extract milestones from MilestonePath
   vector<ParabolicRamp::Vector> milestones(path.NumMilestones());
   for(size_t i=0;i<milestones.size();i++)
@@ -216,7 +216,7 @@ int main(int argc,const char** argv)
     cmdline += argv[i];
   }
   MultiPath path;
-  path.settings["robot"] = world.robots[robot].name;
+  path.settings["robot"] = world.robots[robot]->name;
   path.settings["command"] = cmdline;
   //begin planning
   bool feasible = true;

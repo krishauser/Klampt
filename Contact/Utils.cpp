@@ -16,8 +16,8 @@ void GetFlatContacts(RobotWithGeometry& robot,Real tol,ContactFormation& contact
   vector<pair<Real,int> > order;
   robot.UpdateGeometry();
   for(size_t i=0;i<robot.geometry.size();i++)
-    if(!robot.geometry[i].Empty()) {
-      AABB3D aabb = robot.geometry[i].GetAABB();
+    if(!robot.IsGeometryEmpty(i)) {
+      AABB3D aabb = robot.geometry[i]->GetAABB();
       bbs[i] = aabb;
       order.push_back(pair<Real,int>(aabb.bmin.z,(int)i));
     }
@@ -26,7 +26,7 @@ void GetFlatContacts(RobotWithGeometry& robot,Real tol,ContactFormation& contact
   for(size_t i=0;i<order.size();i++) {
     if(order[i].first > best) break; //done
     int k=order[i].second;
-    switch(robot.geometry[k].type) {
+    switch(robot.geometry[k]->type) {
     case AnyGeometry3D::Primitive:
       FatalError("Can't get flat contacts for primitives");
       break;
@@ -38,9 +38,9 @@ void GetFlatContacts(RobotWithGeometry& robot,Real tol,ContactFormation& contact
       break;
     case AnyGeometry3D::TriangleMesh:
       {
-	const TriMesh* m=AnyCast<TriMesh>(&robot.geometry[k].data);
-	for(size_t v=0;v<m->verts.size();v++) {
-	  Vector3 pw = robot.links[k].T_World*m->verts[v];
+	const TriMesh& m=robot.geometry[k]->AsTriangleMesh();
+	for(size_t v=0;v<m.verts.size();v++) {
+	  Vector3 pw = robot.links[k].T_World*m.verts[v];
 	  if(pw.z < best)
 	    best = pw.z;
 	  assert(pw.z >= order[i].first);
@@ -49,9 +49,9 @@ void GetFlatContacts(RobotWithGeometry& robot,Real tol,ContactFormation& contact
       break;
     case AnyGeometry3D::PointCloud:
       {
-	const PointCloud3D* pc=AnyCast<PointCloud3D>(&robot.geometry[k].data);
-	for(size_t v=0;v<pc->points.size();v++) {
-	  Vector3 pw = robot.links[k].T_World*pc->points[v];
+	const PointCloud3D& pc=robot.geometry[k]->AsPointCloud();
+	for(size_t v=0;v<pc.points.size();v++) {
+	  Vector3 pw = robot.links[k].T_World*pc.points[v];
 	  if(pw.z < best)
 	    best = pw.z;
 	  assert(pw.z >= order[i].first);
@@ -73,12 +73,12 @@ void GetFlatContacts(RobotWithGeometry& robot,Real tol,ContactFormation& contact
     contacts.links.back()=k;
     contacts.contacts.resize(contacts.contacts.size()+1);
     vector<Vector3> pts;
-    switch(robot.geometry[k].type) {
+    switch(robot.geometry[k]->type) {
     case AnyGeometry3D::TriangleMesh:
       {
-	const TriMesh* m=AnyCast<TriMesh>(&robot.geometry[k].data);
-	for(size_t v=0;v<m->verts.size();v++) {
-	  Vector3 pw = robot.links[k].T_World*m->verts[v];
+	const TriMesh& m=robot.geometry[k]->AsTriangleMesh();
+	for(size_t v=0;v<m.verts.size();v++) {
+	  Vector3 pw = robot.links[k].T_World*m.verts[v];
 	  if(pw.z < best+tol) {
 	    pts.push_back(pw);
 	  }
@@ -87,9 +87,9 @@ void GetFlatContacts(RobotWithGeometry& robot,Real tol,ContactFormation& contact
       break;
     case AnyGeometry3D::PointCloud:
       {
-	const PointCloud3D* pc=AnyCast<PointCloud3D>(&robot.geometry[k].data);
-	for(size_t v=0;v<pc->points.size();v++) {
-	  Vector3 pw = robot.links[k].T_World*pc->points[v];
+	const PointCloud3D& pc=robot.geometry[k]->AsPointCloud();
+	for(size_t v=0;v<pc.points.size();v++) {
+	  Vector3 pw = robot.links[k].T_World*pc.points[v];
 	  if(pw.z < best+tol) {
 	    pts.push_back(pw);
 	  }
@@ -125,7 +125,7 @@ void GetFlatContacts(RobotWithGeometry& robot,int link,Real tol,vector<ContactPo
 {
   Real best = Inf;
   const vector<Vector3>* points = NULL;
-  switch(robot.geometry[link].type) {
+  switch(robot.geometry[link]->type) {
   case AnyGeometry3D::Primitive:
     FatalError("Can't get flat contacts for primitives");
     break;
@@ -136,10 +136,10 @@ void GetFlatContacts(RobotWithGeometry& robot,int link,Real tol,vector<ContactPo
     FatalError("Can't get flat contacts for geometry group");
     break;
   case AnyGeometry3D::TriangleMesh:
-    points = &AnyCast<TriMesh>(&robot.geometry[link].data)->verts;
+    points = &robot.geometry[link]->AsTriangleMesh().verts;
     break;
   case AnyGeometry3D::PointCloud:
-    points = &AnyCast<PointCloud3D>(&robot.geometry[link].data)->points;
+    points = &robot.geometry[link]->AsPointCloud().points;
     break;
   }
 

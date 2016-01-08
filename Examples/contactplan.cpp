@@ -304,11 +304,11 @@ int main(int argc,const char** argv)
     cmdline += argv[i];
   }
   MultiPath path;
-  path.settings["robot"] = world.robots[robot].name;
+  path.settings["robot"] = world.robots[robot]->name;
   path.settings["command"] = cmdline;
   //begin planning
   bool feasible = true;
-  Config qstart = world.robots[robot].robot->q;
+  Config qstart = world.robots[robot]->q;
   for(size_t i=0;i+1<configs.size();i++) {
     MilestonePath mpath;
     bool res = false;

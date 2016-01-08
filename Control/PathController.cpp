@@ -659,6 +659,16 @@ void PolynomialMotionQueue::AppendRamp(const Config& x,const Vector& v)
   milestones[1] = x;
   dmilestones[0] = EndpointVelocity();
   dmilestones[1] = v;
+  for(int i=0;i<x.n;i++)
+    if(milestones[0][i] != Clamp(milestones[0][i],qMin[i],qMax[i])) {
+  printf("  Warning, current config[%d] is out of joint limits: %g <= %g <= %g, clamping\n",i,qMin[i],milestones[0][i],qMax[i]);
+      milestones[0][i] = Clamp(milestones[0][i],qMin[i],qMax[i]);
+    }
+  for(int i=0;i<v.n;i++)
+    if(dmilestones[0][i] != Clamp(dmilestones[0][i],velMax[i],qMax[i])) {
+  printf("  Warning, current vel[%d] is out of velMax limits: |%g| <= %g, clamping\n",i,dmilestones[0][i],velMax[i]);
+      dmilestones[0][i] = Clamp(dmilestones[0][i],-velMax[i],velMax[i]);
+    }
 
   if(!qMin.empty()) {
     for(int i=0;i<x.n;i++) {
