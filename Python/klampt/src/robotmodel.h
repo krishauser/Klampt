@@ -338,15 +338,21 @@ class WorldModel
  public:
   ///Creates a WorldModel.  With no arguments, creates a new world.  With
   ///an integer or another WorldModel instance, creates a reference to an
-  ///existing world.  If passed a pointer to a C++ RobotWorld structure,
-  ///a reference is returned. (This is used pretty much only when
+  ///existing world.  (To create a copy, use the copy() method.)
+  ///
+  ///If passed a pointer to a C++ RobotWorld structure, a reference to that
+  ///structure is returned. (This is used pretty much only when
   ///interfacing C++ and Python code)
   WorldModel();
   WorldModel(void* ptrRobotWorld);
   WorldModel(int index);
   WorldModel(const WorldModel& w);
   ~WorldModel();
+  ///Sets this WorldModel to a reference to w
   const WorldModel& operator = (const WorldModel& w);
+  ///Creates a copy of the world model.  Note that geometries and appearances
+  ///are shared...
+  WorldModel copy();
   ///Reads from a world XML file.
   bool readFile(const char* fn);
   int numRobots();
@@ -377,6 +383,15 @@ class WorldModel
   ///Loads some element from a file, automatically detecting its type.  Meshes are interpreted
   ///as terrains.  The ID is returned, or -1 if loading failed.
   int loadElement(const char* fn);
+  ///Adds a copy of the given robot to this world, either from this WorldModel
+  ///or another.
+  RobotModel add(const char* name,const RobotModel& robot);
+  ///Adds a copy of the given rigid object to this world, either from this
+  ///WorldModel or another.
+  RigidObjectModel add(const char* name,const RigidObjectModel& obj);
+  ///Adds a copy of the given terrain to this world, either from this
+  ///WorldModel or another.
+  TerrainModel add(const char* name,const TerrainModel& terrain);
   ///Removes a robot.  It must be in this world or an exception is raised.
   ///IMPORTANT: all other references to robots will be invalidated.
   void remove(const RobotModel& robot);
