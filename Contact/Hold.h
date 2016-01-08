@@ -1,8 +1,8 @@
 #ifndef HOLD_H
 #define HOLD_H
 
-#include <robotics/Contact.h>
-#include <robotics/IK.h>
+#include <KrisLibrary/robotics/Contact.h>
+#include <KrisLibrary/robotics/IK.h>
 using namespace std;
 
 /** @file Contact/Hold.h

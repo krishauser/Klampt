@@ -1,5 +1,5 @@
 #include "ContactDistance.h"
-#include <math/angle.h>
+#include <KrisLibrary/math/angle.h>
 
 ContactDistanceMetric::ContactDistanceMetric()
   :normalWeight(0.3),angleWeight(0.7),wheelRollWeight(0.2),fixedWheelWeight(0.5)

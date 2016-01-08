@@ -1,7 +1,7 @@
 #ifndef INTERFACE_GLUT_GUI_H
 #define INTERFACE_GLUT_GUI_H
 
-#include <GLdraw/GLUTProgram.h>
+#include <KrisLibrary/GLdraw/GLUTProgram.h>
 #include "GenericGUI.h"
 
 class GLUTGUI : public GenericGUIBase, public GLUTProgramBase

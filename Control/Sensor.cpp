@@ -1,8 +1,8 @@
 #include "Sensor.h"
 #include "Simulation/ControlledSimulator.h"
 #include "Simulation/ODESimulator.h"
-#include <utils/PropertyMap.h>
-#include <math/random.h>
+#include <KrisLibrary/utils/PropertyMap.h>
+#include <KrisLibrary/math/random.h>
 #include <tinyxml.h>
 #include <sstream>
 

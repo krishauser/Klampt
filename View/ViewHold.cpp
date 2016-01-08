@@ -1,8 +1,8 @@
 #include "ViewHold.h"
 #include "ViewIK.h"
-#include <GLdraw/drawextra.h>
-#include <GLdraw/GL.h>
-#include <GLdraw/GLUTString.h>
+#include <KrisLibrary/GLdraw/drawextra.h>
+#include <KrisLibrary/GLdraw/GL.h>
+#include <KrisLibrary/GLdraw/GLUTString.h>
 using namespace GLDraw;
 
 ViewContact::ViewContact()

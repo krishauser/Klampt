@@ -2,7 +2,7 @@
 #define ROBOTIK_H
 
 #include "robotmodel.h"
-#include <robotics/IK.h>
+#include <KrisLibrary/robotics/IK.h>
 
 // Forward declaration of C-type PyObject
 struct _object;

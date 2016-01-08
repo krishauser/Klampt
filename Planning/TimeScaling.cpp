@@ -1,16 +1,16 @@
 #include "TimeScaling.h"
 #include "ContactTimeScaling.h"
-#include <math/misc.h>
-#include <math/function.h>
-#include <math3d/primitives.h>
-#include <math3d/Plane2D.h>
-#include <math3d/Segment2D.h>
-#include <optimization/LinearProgram.h>
-#include <optimization/GLPKInterface.h>
+#include <KrisLibrary/math/misc.h>
+#include <KrisLibrary/math/function.h>
+#include <KrisLibrary/math3d/primitives.h>
+#include <KrisLibrary/math3d/Plane2D.h>
+#include <KrisLibrary/math3d/Segment2D.h>
+#include <KrisLibrary/optimization/LinearProgram.h>
+#include <KrisLibrary/optimization/GLPKInterface.h>
 #include "Modeling/Interpolate.h"
 #include "Modeling/SplineInterpolate.h"
 #include "RobotCSpace.h"
-#include <errors.h>
+#include <KrisLibrary/errors.h>
 #include <fstream>
 using namespace Math3D;
 using namespace Optimization;

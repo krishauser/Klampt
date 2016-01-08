@@ -4,7 +4,7 @@
 #include "PathController.h"
 #include "JointTrackingController.h"
 #include "SerialController.h"
-#include <utils/PropertyMap.h>
+#include <KrisLibrary/utils/PropertyMap.h>
 #include <tinyxml.h>
 
 RobotController::RobotController(Robot& _robot)

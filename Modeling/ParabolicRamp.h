@@ -31,7 +31,7 @@
 #ifndef PARABOLIC_RAMP_H
 #define PARABOLIC_RAMP_H
 
-#include <math/math.h>
+#include <KrisLibrary/math/math.h>
 #include <vector>
 
 namespace ParabolicRamp {

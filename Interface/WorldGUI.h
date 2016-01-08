@@ -3,7 +3,7 @@
 
 #include "Modeling/World.h"
 #include "NavigationGUI.h"
-#include <math3d/Ray3D.h>
+#include <KrisLibrary/math3d/Ray3D.h>
 using namespace Math3D;
 
 /** @brief A generic gui with a RobotWorld which allows clicking on entities

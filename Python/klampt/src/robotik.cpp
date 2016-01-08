@@ -1,9 +1,9 @@
 #include <string>
 #include <vector>
 #include "robotik.h"
-#include <robotics/IKFunctions.h>
-#include <math/random.h>
-#include <math3d/random.h>
+#include <KrisLibrary/robotics/IKFunctions.h>
+#include <KrisLibrary/math/random.h>
+#include <KrisLibrary/math3d/random.h>
 #include <Python.h>
 #include "Modeling/World.h"
 #include "pyerr.h"

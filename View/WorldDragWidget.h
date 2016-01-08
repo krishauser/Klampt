@@ -1,7 +1,7 @@
 #ifndef WORLD_DRAG_WIDGET
 #define WORLD_DRAG_WIDGET
 
-#include <GLdraw/Widget.h>
+#include <KrisLibrary/GLdraw/Widget.h>
 #include "Modeling/World.h"
 
 class WorldDragWidget : public GLDraw::Widget

@@ -1,10 +1,10 @@
 #include "TabulatedController.h"
-#include <robotics/NewtonEuler.h>
-#include <math/sparsematrix.h>
-#include <math/misc.h>
-#include <math/angle.h>
-#include <math/random.h>
-#include <optimization/LSQRInterface.h>
+#include <KrisLibrary/robotics/NewtonEuler.h>
+#include <KrisLibrary/math/sparsematrix.h>
+#include <KrisLibrary/math/misc.h>
+#include <KrisLibrary/math/angle.h>
+#include <KrisLibrary/math/random.h>
+#include <KrisLibrary/optimization/LSQRInterface.h>
 #include <fstream>
 
 TabulatedController::TabulatedController(Robot& robot)

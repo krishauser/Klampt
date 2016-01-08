@@ -4,10 +4,10 @@
 #include "Modeling/World.h"
 #include "Modeling/GeneralizedRobot.h"
 #include "PlannerSettings.h"
-#include <planning/ExplicitCSpace.h>
-#include <planning/GeodesicSpace.h>
-#include <utils/ArrayMapping.h>
-#include <utils/SmartPointer.h>
+#include <KrisLibrary/planning/ExplicitCSpace.h>
+#include <KrisLibrary/planning/GeodesicSpace.h>
+#include <KrisLibrary/utils/ArrayMapping.h>
+#include <KrisLibrary/utils/SmartPointer.h>
 
 /** @defgroup Planning */
 

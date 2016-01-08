@@ -30,12 +30,11 @@ FOREACH(f ${EXAMPLES})
 	  ADD_DEPENDENCIES(${f} Klampt)
 ENDFOREACH( )
 
-ADD_CUSTOM_TARGET(examples ALL
-		DEPENDS ${EXAMPLES})
 
 #examples install targets
+SET(EXAMPLES  CartPole ContactPlan PlanDemo DynamicPlanDemo RealTimePlanning SafeSerialClient UserTrials UserTrialsSerial)
 install(TARGETS ${EXAMPLES}
-    DESTINATION Examples
+    DESTINATION Examples/bin
     COMPONENT examples)
 file(GLOB EXAMPLEFILES *.cpp )
 install(FILES ${EXAMPLEFILES}
@@ -50,3 +49,7 @@ install(DIRECTORY MotorCalibrateBaxter
 install(DIRECTORY PlanDemo
     DESTINATION Examples
     COMPONENT examples)
+
+ADD_CUSTOM_TARGET(examples ALL
+		DEPENDS ${EXAMPLES})
+

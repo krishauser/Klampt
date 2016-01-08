@@ -11,8 +11,8 @@
 #include <vector>
 #include <string>
 #include <tinyxml.h>
-#include <math3d/primitives.h>
-#include <utils/stringutils.h>
+#include <KrisLibrary/math3d/primitives.h>
+#include <KrisLibrary/utils/stringutils.h>
 #include "PrimitiveShape.h"
 #include "Constants.h"
 using namespace Math3D;

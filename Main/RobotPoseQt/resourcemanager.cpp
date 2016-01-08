@@ -1,7 +1,7 @@
 #include <resourcemanager.h>
 #include <Modeling/Resources.h>
 #include <string.h>
-#include <utils/ioutils.h>
+#include <KrisLibrary/utils/ioutils.h>
 
 #include <boost/foreach.hpp>
 

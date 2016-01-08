@@ -1,10 +1,10 @@
 #include "ContactFeature.h"
 #include "TriangleSampler.h"
-#include <robotics/Rotation.h>
-#include <math3d/rotation.h>
-#include <math3d/Cylinder3D.h>
-#include <utils/ioutils.h>
-#include <math/random.h>
+#include <KrisLibrary/robotics/Rotation.h>
+#include <KrisLibrary/math3d/rotation.h>
+#include <KrisLibrary/math3d/Cylinder3D.h>
+#include <KrisLibrary/utils/ioutils.h>
+#include <KrisLibrary/math/random.h>
 #include "LineReader.h"
 #include "Polygon2DSampler.h"
 #include <fstream>

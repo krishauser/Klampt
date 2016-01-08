@@ -5,7 +5,7 @@
  *      Author: jingru
  */
 #include "Constants.h"
-#include <math/math.h>
+#include <KrisLibrary/math/math.h>
 bool TOURDF = false;
 bool LOADSimpleGEOM = false;
 string ROBOT_DIR = "";

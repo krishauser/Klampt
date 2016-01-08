@@ -1,7 +1,7 @@
 #ifndef ODE_INTERFACE_COMMON_H
 #define ODE_INTERFACE_COMMON_H
 
-#include <math3d/primitives.h>
+#include <KrisLibrary/math3d/primitives.h>
 using namespace Math3D;
 
 inline void CopyVector(dVector4 x,const Vector3& v)

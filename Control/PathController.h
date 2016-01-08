@@ -3,7 +3,7 @@
 
 #include "JointTrackingController.h"
 #include "Modeling/DynamicPath.h"
-#include <spline/PiecewisePolynomial.h>
+#include <KrisLibrary/spline/PiecewisePolynomial.h>
 #include <list>
 
 

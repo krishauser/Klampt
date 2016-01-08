@@ -32,7 +32,7 @@
 #define DYNAMIC_PATH_H
 
 #include "ParabolicRamp.h"
-#include <math/random.h>
+#include <KrisLibrary/math/random.h>
 
 namespace ParabolicRamp {
 

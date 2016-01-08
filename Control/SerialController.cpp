@@ -1,6 +1,6 @@
 #include "SerialController.h"
-#include <utils/threadutils.h>
-#include <utils/AnyCollection.h>
+#include <KrisLibrary/utils/threadutils.h>
+#include <KrisLibrary/utils/AnyCollection.h>
 #include <signal.h>
 
 SerialController::SerialController(Robot& robot,const string& _servAddr,Real _writeRate)

@@ -1,7 +1,7 @@
 #ifndef RANDOMIZED_SELF_COLLISIONS_H
 #define RANDOMIZED_SELF_COLLISIONS_H
 
-#include <structs/array2d.h>
+#include <KrisLibrary/structs/array2d.h>
 #include "Modeling/Robot.h"
 
 /** @file RandomizedSelfCollisions.h

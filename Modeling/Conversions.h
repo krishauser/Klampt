@@ -1,4 +1,4 @@
-#include <spline/PiecewisePolynomial.h>
+#include <KrisLibrary/spline/PiecewisePolynomial.h>
 #include "ParabolicRamp.h"
 #include "DynamicPath.h"
 

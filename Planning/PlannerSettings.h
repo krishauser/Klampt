@@ -2,9 +2,9 @@
 #define PLANNER_SETTINGS_H
 
 #include "Modeling/World.h"
-#include <structs/array2d.h>
-#include <geometry/CollisionMesh.h>
-#include <utils/PropertyMap.h>
+#include <KrisLibrary/structs/array2d.h>
+#include <KrisLibrary/geometry/CollisionMesh.h>
+#include <KrisLibrary/utils/PropertyMap.h>
 
 struct RobotPlannerSettings
 {

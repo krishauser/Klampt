@@ -1,7 +1,7 @@
 #ifndef RIGID_OBJECT_H
 #define RIGID_OBJECT_H
 
-#include <geometry/AnyGeometry.h>
+#include <KrisLibrary/geometry/AnyGeometry.h>
 #include <string>
 #include "ManagedGeometry.h"
 using namespace std;

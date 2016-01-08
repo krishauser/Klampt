@@ -1,6 +1,6 @@
 #include "XmlWorld.h"
 #include "View/Texturizer.h"
-#include <utils/stringutils.h>
+#include <KrisLibrary/utils/stringutils.h>
 #include <fstream>
 
 ///reads a transformation matrix from attributes of an XML element

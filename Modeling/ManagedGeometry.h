@@ -1,9 +1,9 @@
 #ifndef MODELING_MANAGED_GEOMETRY_H
 #define MODELING_MANAGED_GEOMETRY_H
 
-#include <geometry/AnyGeometry.h>
-#include <GLdraw/GeometryAppearance.h>
-#include <utils/SmartPointer.h>
+#include <KrisLibrary/geometry/AnyGeometry.h>
+#include <KrisLibrary/GLdraw/GeometryAppearance.h>
+#include <KrisLibrary/utils/SmartPointer.h>
 #include <map>
 #include <string>
 

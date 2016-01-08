@@ -1,9 +1,9 @@
 #include "ContactTimeScaling.h"
-#include <robotics/NewtonEuler.h>
-#include <robotics/TorqueSolver.h>
-#include <optimization/LinearProgram.h>
-#include <optimization/GLPKInterface.h>
-#include <geometry/PolytopeProjection.h>
+#include <KrisLibrary/robotics/NewtonEuler.h>
+#include <KrisLibrary/robotics/TorqueSolver.h>
+#include <KrisLibrary/optimization/LinearProgram.h>
+#include <KrisLibrary/optimization/GLPKInterface.h>
+#include <KrisLibrary/geometry/PolytopeProjection.h>
 using namespace Math3D;
 using namespace Optimization;
 

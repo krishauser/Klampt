@@ -2,8 +2,8 @@
 #define VIEW_GRASP_H
 
 #include "Contact/Grasp.h"
-#include <robotics/Stability.h>
-#include <GLdraw/GLColor.h>
+#include <KrisLibrary/robotics/Stability.h>
+#include <KrisLibrary/GLdraw/GLColor.h>
 #include "ViewHold.h"
 
 

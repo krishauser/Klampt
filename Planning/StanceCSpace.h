@@ -3,8 +3,8 @@
 
 #include "ContactCSpace.h"
 #include "Contact/Stance.h"
-#include <robotics/Stability.h>
-#include <robotics/TorqueSolver.h>
+#include <KrisLibrary/robotics/Stability.h>
+#include <KrisLibrary/robotics/TorqueSolver.h>
 
 /** @brief A configuration space that constrains a robot to the IK constraints
  * in a stance, and checks for stability against gravity.

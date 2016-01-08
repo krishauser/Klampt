@@ -2,7 +2,7 @@
 #define IO_JSON_H
 
 #include "Modeling/Resources.h"
-#include <utils/AnyCollection.h>
+#include <KrisLibrary/utils/AnyCollection.h>
 
 ///Default conversion to collection
 template <class T>

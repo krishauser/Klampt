@@ -1,7 +1,7 @@
 #include "Planning/StanceCSpace.h"
-#include <planning/AnyMotionPlanner.h>
-#include <utils/ioutils.h>
-#include <utils/stringutils.h>
+#include <KrisLibrary/planning/AnyMotionPlanner.h>
+#include <KrisLibrary/utils/ioutils.h>
+#include <KrisLibrary/utils/stringutils.h>
 #include "Modeling/Paths.h"
 #include "Modeling/MultiPath.h"
 #include "IO/XmlWorld.h"

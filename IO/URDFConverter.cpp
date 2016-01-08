@@ -7,7 +7,7 @@
 
 #include "URDFConverter.h"
 #include <fstream>
-#include <utils/stringutils.h>
+#include <KrisLibrary/utils/stringutils.h>
 #include <string.h>
 using namespace std;
 using namespace PrimitiveShape;

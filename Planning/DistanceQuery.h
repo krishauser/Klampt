@@ -1,7 +1,7 @@
 #ifndef GEOMETRY_DISTANCE_QUERY_H
 #define GEOMETRY_DISTANCE_QUERY_H
 
-#include <geometry/AnyGeometry.h>
+#include <KrisLibrary/geometry/AnyGeometry.h>
 using namespace Math3D;
 using namespace Geometry;
 

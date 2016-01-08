@@ -6,7 +6,7 @@
 #include "Control/SerialControlledRobot.h"
 #include "Main/WorldViewProgram.h"
 #include <GL/glui.h>
-#include <GLdraw/GLUTString.h>
+#include <KrisLibrary/GLdraw/GLUTString.h>
 #include <fstream>
 using namespace Math3D;
 using namespace GLDraw;

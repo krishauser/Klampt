@@ -1,7 +1,7 @@
 #include "dialog.h"
 #include "ui_dialog.h"
 #include "Main/urdftorob.h"
-#include <utils/AnyCollection.h>
+#include <KrisLibrary/utils/AnyCollection.h>
 
 Dialog::Dialog(QWidget *parent) :
     QDialog(parent),

@@ -1,9 +1,9 @@
 #ifndef DYNAMICS_SENSORS_H
 #define DYNAMICS_SENSORS_H
 
-#include <math/vector.h>
-#include <math3d/primitives.h>
-#include <utils/SmartPointer.h>
+#include <KrisLibrary/math/vector.h>
+#include <KrisLibrary/math3d/primitives.h>
+#include <KrisLibrary/utils/SmartPointer.h>
 #include <map>
 #include <vector>
 #include <string>

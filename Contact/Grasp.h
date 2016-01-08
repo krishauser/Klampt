@@ -1,8 +1,8 @@
 #ifndef GRASP_H
 #define GRASP_H
 
-#include <robotics/Contact.h>
-#include <robotics/IK.h>
+#include <KrisLibrary/robotics/Contact.h>
+#include <KrisLibrary/robotics/IK.h>
 #include "Contact/Hold.h"
 #include "Contact/Stance.h"
 #include <vector>

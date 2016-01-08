@@ -1,9 +1,9 @@
 #ifndef ROBOT_POSE_WIDGET_H
 #define ROBOT_POSE_WIDGET_H
 
-#include <GLdraw/Widget.h>
-#include <GLdraw/TransformWidget.h>
-#include <robotics/IK.h>
+#include <KrisLibrary/GLdraw/Widget.h>
+#include <KrisLibrary/GLdraw/TransformWidget.h>
+#include <KrisLibrary/robotics/IK.h>
 #include "ViewRobot.h"
 
 /* @defgroup View

@@ -1,5 +1,5 @@
 #include "WorldDragWidget.h"
-#include <GLdraw/drawextra.h>
+#include <KrisLibrary/GLdraw/drawextra.h>
 using namespace GLDraw;
 
 WorldDragWidget::WorldDragWidget(RobotWorld* _world)

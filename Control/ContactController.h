@@ -3,7 +3,7 @@
 
 #include "OperationalSpaceController.h"
 #include "JointTrackingController.h"
-#include <robotics/TorqueSolver.h>
+#include <KrisLibrary/robotics/TorqueSolver.h>
 
 /** @brief Makes a joint tracking controller 'aware' of a contact formation.
  */

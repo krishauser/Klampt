@@ -1,8 +1,8 @@
 #include "RobotPoseGUI.h"
-#include <GLdraw/drawMesh.h>
-#include <GLdraw/drawgeometry.h>
+#include <KrisLibrary/GLdraw/drawMesh.h>
+#include <KrisLibrary/GLdraw/drawgeometry.h>
 #include "Modeling/MultiPath.h"
-#include <robotics/IKFunctions.h>
+#include <KrisLibrary/robotics/IKFunctions.h>
 #include "Contact/Utils.h"
 #include "Planning/RobotCSpace.h"
 #include "Planning/RobotConstrainedInterpolator.h"

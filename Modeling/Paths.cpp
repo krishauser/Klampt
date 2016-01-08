@@ -2,8 +2,8 @@
 #include "Robot.h"
 #include "Interpolate.h"
 #include "MultiPath.h"
-#include <spline/TimeSegmentation.h>
-#include <spline/PiecewisePolynomial.h>
+#include <KrisLibrary/spline/TimeSegmentation.h>
+#include <KrisLibrary/spline/PiecewisePolynomial.h>
 #include "ParabolicRamp.h"
 #include "DynamicPath.h"
 #include "Conversions.h"

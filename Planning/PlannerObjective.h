@@ -4,8 +4,8 @@
 #include "Modeling/Robot.h"
 #include "Modeling/ParabolicRamp.h"
 #include "Modeling/DynamicPath.h"
-#include <robotics/IK.h>
-#include <utils/SmartPointer.h>
+#include <KrisLibrary/robotics/IK.h>
+#include <KrisLibrary/utils/SmartPointer.h>
 
 /** @ingroup Planning
  * @brief A base class for objective functionals in time/config/velocity

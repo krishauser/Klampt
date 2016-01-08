@@ -1,5 +1,5 @@
 #include "qrobottestbackend.h"
-#include "GLdraw/GLView.h"
+#include "KrisLibrary/GLdraw/GLView.h"
 
 QRobotTestBackend::QRobotTestBackend(QWidget *parent) :
       QGLWidget(parent),RobotTestBackend(new RobotWorld())//,GLScreenshotPlugin()

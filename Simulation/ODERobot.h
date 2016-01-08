@@ -4,9 +4,9 @@
 #include "Modeling/Robot.h"
 #include "ODEGeometry.h"
 #include "ODESurface.h"
-#include <utils/SmartPointer.h>
+#include <KrisLibrary/utils/SmartPointer.h>
 #include <ode/common.h>
-#include <myfile.h>
+#include <KrisLibrary/myfile.h>
 using namespace Math;
 using namespace std;
 

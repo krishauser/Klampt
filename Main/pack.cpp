@@ -1,5 +1,5 @@
 #include "Modeling/Resources.h"
-#include <utils/stringutils.h>
+#include <KrisLibrary/utils/stringutils.h>
 #include <fstream>
 #include <algorithm>
 #include <map>

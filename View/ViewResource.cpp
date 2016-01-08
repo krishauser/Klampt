@@ -1,12 +1,12 @@
 #include "ViewResource.h"
 #include "Planning/RobotCSpace.h"
 #include "Planning/RobotTimeScaling.h"
-#include <math/interpolate.h>
+#include <KrisLibrary/math/interpolate.h>
 #include "Modeling/Interpolate.h"
-#include <GLdraw/drawgeometry.h>
-#include <GLdraw/GL.h>
-#include <GLdraw/drawextra.h>
-#include <robotics/IKFunctions.h>
+#include <KrisLibrary/GLdraw/drawgeometry.h>
+#include <KrisLibrary/GLdraw/GL.h>
+#include <KrisLibrary/GLdraw/drawextra.h>
+#include <KrisLibrary/robotics/IKFunctions.h>
 #include <sstream>
 using namespace GLDraw;
 

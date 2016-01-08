@@ -1,7 +1,7 @@
 #include "RandomizedSelfCollisions.h"
-#include <math/random.h>
-#include <utils/ProgressPrinter.h>
-#include <utils/SmartPointer.h>
+#include <KrisLibrary/math/random.h>
+#include <KrisLibrary/utils/ProgressPrinter.h>
+#include <KrisLibrary/utils/SmartPointer.h>
 #include "Planning/DistanceQuery.h"
 
 void SampleRobot(RobotWithGeometry& robot)

@@ -2,7 +2,7 @@
 #define ODE_INTERFACE_TRI_MESH_H
 
 #include "ODESurface.h"
-#include <geometry/AnyGeometry.h>
+#include <KrisLibrary/geometry/AnyGeometry.h>
 #include <ode/common.h>
 #include <ode/collision_trimesh.h>
 using namespace Math3D;

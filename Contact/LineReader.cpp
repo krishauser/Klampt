@@ -1,6 +1,6 @@
 #include "LineReader.h"
-#include <utils/ioutils.h>
-#include <errors.h>
+#include <KrisLibrary/utils/ioutils.h>
+#include <KrisLibrary/errors.h>
 #include <sstream>
 
 //reads a c-style token, getting rid of whitespace in front

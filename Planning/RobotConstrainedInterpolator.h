@@ -3,7 +3,7 @@
 
 #include "ConstrainedInterpolator.h"
 #include "RobotCSpace.h"
-#include <robotics/IKFunctions.h>
+#include <KrisLibrary/robotics/IKFunctions.h>
 
 
 /** @ingroup Planning

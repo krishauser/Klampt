@@ -2,7 +2,7 @@
 #include "Planning/RobotCSpace.h"
   //defines WorldPlannerSettings and SingleRobotCSpace
   //includes definitions for RobotWorld, Config
-#include <planning/AnyMotionPlanner.h>
+#include <KrisLibrary/planning/AnyMotionPlanner.h>
   //defines MotionPlannerFactory
   //includes MilestonePath, HaltingCondition
 
@@ -11,11 +11,11 @@
   //defines XmlWorld for loading RobotWorlds from .xml files
 #include "Modeling/Paths.h"
 #include "Modeling/MultiPath.h"
-  //defines paths and conversion routines
-#include <utils/ioutils.h>
-#include <utils/stringutils.h>
+  //defines file paths and conversion routines
+#include <KrisLibrary/utils/ioutils.h>
+#include <KrisLibrary/utils/stringutils.h>
   //for easy timing 
-#include <Timer.h>
+#include <KrisLibrary/Timer.h>
 #include <string.h>
 #include <time.h>
 #include <fstream>

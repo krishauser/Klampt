@@ -1,9 +1,9 @@
 #ifndef VIEW_TEXTURES_H
 #define VIEW_TEXTURES_H
 
-#include <GLdraw/GLTextureObject.h>
-#include <utils/SmartPointer.h>
-#include <image/image.h>
+#include <KrisLibrary/GLdraw/GLTextureObject.h>
+#include <KrisLibrary/utils/SmartPointer.h>
+#include <KrisLibrary/image/image.h>
 #include <map>
 #include <string>
 using namespace std;

@@ -2,9 +2,9 @@
 #define INTERFACE_NAVIGATION_GUI_H
 
 #include "GenericGUI.h"
-#include <math3d/geometry3d.h>
-#include <camera/viewport.h>
-#include <Timer.h>
+#include <KrisLibrary/math3d/geometry3d.h>
+#include <KrisLibrary/camera/viewport.h>
+#include <KrisLibrary/Timer.h>
 
 /** @brief A backend that processes mouse motion calls into dragging
  * callbacks.  Makes it a bit easier to determine free-dragging,

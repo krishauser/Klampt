@@ -1,8 +1,8 @@
 #ifndef INTERPOLATE_CUBIC_SPLINES_H
 #define INTERPOLATE_CUBIC_SPLINES_H
 
-#include <planning/GeneralizedBezierCurve.h>
-#include <math/misc.h>
+#include <KrisLibrary/planning/GeneralizedBezierCurve.h>
+#include <KrisLibrary/math/misc.h>
 #include <vector>
 using namespace Math;
 using namespace std;

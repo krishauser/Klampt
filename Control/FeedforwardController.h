@@ -3,8 +3,8 @@
 
 #include "Controller.h"
 #include "StateEstimator.h"
-#include <robotics/Wrench.h>
-#include <utils/SmartPointer.h>
+#include <KrisLibrary/robotics/Wrench.h>
+#include <KrisLibrary/utils/SmartPointer.h>
 
 /** @ingroup Control
  * @brief A class that adds a feedforward torque to the basic

@@ -5,10 +5,10 @@
 #include "Terrain.h"
 #include "RigidObject.h"
 #include "View/ViewRobot.h"
-#include <camera/camera.h>
-#include <camera/viewport.h>
-#include <GLdraw/GLLight.h>
-#include <utils/SmartPointer.h>
+#include <KrisLibrary/camera/camera.h>
+#include <KrisLibrary/camera/viewport.h>
+#include <KrisLibrary/GLdraw/GLLight.h>
+#include <KrisLibrary/utils/SmartPointer.h>
 
 /** @ingroup Modeling
  * @brief The main world class containing multiple robots, objects, and

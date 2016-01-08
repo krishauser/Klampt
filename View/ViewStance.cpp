@@ -1,6 +1,6 @@
 #include "ViewStance.h"
-#include <GLdraw/GL.h>
-#include <GLdraw/drawextra.h>
+#include <KrisLibrary/GLdraw/GL.h>
+#include <KrisLibrary/GLdraw/drawextra.h>
 using namespace GLDraw;
 
 ViewPolytope::ViewPolytope()

@@ -2,9 +2,9 @@
 #define CONTACT_FEATURE_H
 
 #include "Hold.h"
-#include <utils/SmartPointer.h>
-#include <math3d/Polygon3D.h>
-#include <math3d/geometry3d.h>
+#include <KrisLibrary/utils/SmartPointer.h>
+#include <KrisLibrary/math3d/Polygon3D.h>
+#include <KrisLibrary/math3d/geometry3d.h>
 
 struct Triangle3DSampler;
 

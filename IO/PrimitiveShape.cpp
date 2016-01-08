@@ -4,7 +4,7 @@
  *  Created on: Aug 29, 2012
  *      Author: jingru
  */
-#include <math3d/primitives.h>
+#include <KrisLibrary/math3d/primitives.h>
 #include "PrimitiveShape.h"
 #include <fstream>
 #include <iostream>

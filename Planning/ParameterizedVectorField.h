@@ -1,7 +1,7 @@
 #ifndef PARAMETERIZED_VECTOR_FIELD_H
 #define PARAMETERIZED_VECTOR_FIELD_H
 
-#include <math/function.h>
+#include <KrisLibrary/math/function.h>
 using namespace Math;
 
 /** @brief A VectorFieldFunction that depends on a parameter theta

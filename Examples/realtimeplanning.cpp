@@ -2,12 +2,12 @@
 #include "Interface/SimulationGUI.h"
 #include "Interface/GLUIGUI.h"
 #include "Interface/SimTestGUI.h"
-#include <Control/LoggingController.h>
-#include <Control/FeedforwardController.h>
-#include <Control/PathController.h>
-#include <GLdraw/GLScreenshotProgram.h>
-#include <utils/StatCollector.h>
-#include <GLdraw/drawextra.h>
+#include "Control/LoggingController.h"
+#include "Control/FeedforwardController.h"
+#include "Control/PathController.h"
+#include <KrisLibrary/GLdraw/GLScreenshotProgram.h>
+#include <KrisLibrary/utils/StatCollector.h>
+#include <KrisLibrary/GLdraw/drawextra.h>
 #include <GL/glui.h>
 #include <fstream>
 using namespace Math3D;

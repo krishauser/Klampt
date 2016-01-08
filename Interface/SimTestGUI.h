@@ -6,7 +6,7 @@
 #include "View/WorldDragWidget.h"
 #include "View/RobotPoseWidget.h"
 #include "View/ObjectPoseWidget.h"
-#include <utils/stringutils.h>
+#include <KrisLibrary/utils/stringutils.h>
 #include <fstream>
 using namespace Math3D;
 using namespace GLDraw;
@@ -157,7 +157,7 @@ public:
 
 #ifdef HAVE_GLUI
 
-#include <GLdraw/GLScreenshotProgram.h>
+#include <KrisLibrary/GLdraw/GLScreenshotProgram.h>
 #include "GLUIGUI.h"
 #include <GL/glui.h>
 

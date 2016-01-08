@@ -1,11 +1,11 @@
 #include "ContactFeatureMapping.h"
-#include "robotics/Rotation.h"
-#include <math3d/Plane3D.h>
-#include <math3d/misc.h>
-#include <math/random.h>
-#include <math/angle.h>
+#include "KrisLibrary/robotics/Rotation.h"
+#include <KrisLibrary/math3d/Plane3D.h>
+#include <KrisLibrary/math3d/misc.h>
+#include <KrisLibrary/math/random.h>
+#include <KrisLibrary/math/angle.h>
 #include "LineReader.h"
-#include <utils/ioutils.h>
+#include <KrisLibrary/utils/ioutils.h>
 #include <sstream>
 using namespace std;
 

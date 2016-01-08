@@ -2,7 +2,7 @@
 #define REAL_TIME_RRT_PLANNER_H
 
 #include "RealTimePlanner.h"
-#include <planning/MotionPlanner.h>
+#include <KrisLibrary/planning/MotionPlanner.h>
 
 /** @brief Dynamic RRT planner -- not recently tested
  */

@@ -2,7 +2,7 @@
 #define SERIAL_CONTROLLED_ROBOT_H
 
 #include "ControlledRobot.h"
-#include <utils/AsyncIO.h>
+#include <KrisLibrary/utils/AsyncIO.h>
 
 /** @brief A Klamp't controlled robot that communicates to a robot (either
  * real or virtual) using the Klamp't controller serialization mechanism.

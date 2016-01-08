@@ -1,7 +1,7 @@
 #ifndef MODELING_ROBOT_H
 #define MODELING_ROBOT_H
 
-#include <robotics/RobotWithGeometry.h>
+#include <KrisLibrary/robotics/RobotWithGeometry.h>
 #include "ManagedGeometry.h"
 using namespace std;
 

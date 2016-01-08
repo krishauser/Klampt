@@ -1,10 +1,10 @@
 #ifndef TIME_SCALING_H
 #define TIME_SCALING_H
 
-#include <planning/GeneralizedBezierCurve.h>
-#include <spline/TimeSegmentation.h>
-#include <spline/PiecewisePolynomial.h>
-#include <math/vector.h>
+#include <KrisLibrary/planning/GeneralizedBezierCurve.h>
+#include <KrisLibrary/spline/TimeSegmentation.h>
+#include <KrisLibrary/spline/PiecewisePolynomial.h>
+#include <KrisLibrary/math/vector.h>
 #include <vector>
 using namespace Math;
 using namespace std;

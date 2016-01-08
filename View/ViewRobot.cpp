@@ -1,5 +1,5 @@
 #include "ViewRobot.h"
-#include <GLdraw/drawextra.h>
+#include <KrisLibrary/GLdraw/drawextra.h>
 using namespace GLDraw;
 
 const static GLColor grey(0.5,0.5,0.5);

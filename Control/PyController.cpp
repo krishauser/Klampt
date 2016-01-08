@@ -1,5 +1,5 @@
 #include "PyController.h"
-#include <errors.h>
+#include <KrisLibrary/errors.h>
 
 #if HAVE_PYTHON
 

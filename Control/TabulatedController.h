@@ -2,7 +2,7 @@
 #define TABULATED_CONTROLLER_H
 
 #include "Controller.h"
-#include <geometry/GridTable.h>
+#include <KrisLibrary/geometry/GridTable.h>
 
 /** @ingroup Control
  * @brief A controller that reads from a grid of torque/desired

@@ -1,7 +1,7 @@
 #ifndef VIEW_HOLD_H
 #define VIEW_HOLD_H
 
-#include <GLdraw/GLColor.h>
+#include <KrisLibrary/GLdraw/GLColor.h>
 #include "Contact/Hold.h"
 #include "ViewRobot.h"
 

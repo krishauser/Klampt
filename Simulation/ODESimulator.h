@@ -6,7 +6,7 @@
 #include "ODESurface.h"
 #include "Modeling/Terrain.h"
 #include "Modeling/RigidObject.h"
-#include <robotics/Contact.h>
+#include <KrisLibrary/robotics/Contact.h>
 #include <ode/contact.h>
 #include <map>
 

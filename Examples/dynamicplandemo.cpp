@@ -1,9 +1,9 @@
 #include "Planning/RobotCSpace.h"
-#include <planning/AnyMotionPlanner.h>
+#include <KrisLibrary/planning/AnyMotionPlanner.h>
 #include "IO/XmlWorld.h"
 #include "Modeling/MultiPath.h"
-#include <utils/ioutils.h>
-#include <utils/stringutils.h>
+#include <KrisLibrary/utils/ioutils.h>
+#include <KrisLibrary/utils/stringutils.h>
 #include <string.h>
 #include <time.h>
 #include <fstream>

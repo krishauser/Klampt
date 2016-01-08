@@ -1,7 +1,7 @@
 #include "Interface/UserInterface.h"
 #include "Interface/RobotInterface.h"
 #include "Main/SimViewProgram.h"
-#include <utils/StatCollector.h>
+#include <KrisLibrary/utils/StatCollector.h>
 #include <GL/glui.h>
 #include <fstream>
 using namespace Math3D;

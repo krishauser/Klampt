@@ -1,9 +1,9 @@
 #ifndef OBJECT_POSE_WIDGET_H
 #define OBJECT_POSE_WIDGET_H
 
-#include <GLdraw/Widget.h>
-#include <GLdraw/TransformWidget.h>
-#include <robotics/IK.h>
+#include <KrisLibrary/GLdraw/Widget.h>
+#include <KrisLibrary/GLdraw/TransformWidget.h>
+#include <KrisLibrary/robotics/IK.h>
 #include "Modeling/RigidObject.h"
 
 /** @addtogroup View */

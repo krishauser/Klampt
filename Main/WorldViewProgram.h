@@ -1,14 +1,14 @@
 #ifndef WORLD_VIEW_PROGRAM_H
 #define WORLD_VIEW_PROGRAM_H
 
-#include <math3d/Ray3D.h>
+#include <KrisLibrary/math3d/Ray3D.h>
 #include "Modeling/World.h"
 #include "IO/XmlWorld.h"
-#include <GLdraw/GLUINavigationProgram.h>
-#include <GLdraw/GLScreenshotProgram.h>
-#include <GLdraw/GL.h>
-#include <GLdraw/drawextra.h>
-#include <GLdraw/Widget.h>
+#include <KrisLibrary/GLdraw/GLUINavigationProgram.h>
+#include <KrisLibrary/GLdraw/GLScreenshotProgram.h>
+#include <KrisLibrary/GLdraw/GL.h>
+#include <KrisLibrary/GLdraw/drawextra.h>
+#include <KrisLibrary/GLdraw/Widget.h>
 #include <GL/glui.h>
 #include <fstream>
 using namespace Math3D;

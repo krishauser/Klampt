@@ -1,6 +1,6 @@
 #include "FeedforwardController.h"
 //#include "Modeling/ParabolicRamp.h"
-#include <robotics/NewtonEuler.h>
+#include <KrisLibrary/robotics/NewtonEuler.h>
 #include <sstream>
 
 FeedforwardController::FeedforwardController(Robot& _robot,SmartPointer<RobotController> _base)

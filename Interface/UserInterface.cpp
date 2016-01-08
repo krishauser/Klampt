@@ -2,9 +2,9 @@
 #include "Planning/RealTimePlanner.h"
 #include "Planning/RealTimeRRTPlanner.h"
 #include "Planning/RealTimeIKPlanner.h"
-#include <robotics/IKFunctions.h>
-#include <GLdraw/GL.h>
-#include <GLdraw/drawextra.h>
+#include <KrisLibrary/robotics/IKFunctions.h>
+#include <KrisLibrary/GLdraw/GL.h>
+#include <KrisLibrary/GLdraw/drawextra.h>
 #include <sstream>
 #ifndef WIN32
 #include <unistd.h>

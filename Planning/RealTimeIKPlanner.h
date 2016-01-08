@@ -2,7 +2,7 @@
 #define REAL_TIME_IK_PLANNER_H
 
 #include "RealTimePlanner.h"
-#include <robotics/IK.h>
+#include <KrisLibrary/robotics/IK.h>
 
 /** @brief A planner that uses numerical inverse kinematics to reach the
  * goal.  The goal must be of CartesianObjective or IKObjective type, or

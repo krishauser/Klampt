@@ -1,7 +1,7 @@
 #ifndef POLYGON_SAMPLER_H
 #define POLYGON_SAMPLER_H
 
-#include <geometry/rayprimitives.h>
+#include <KrisLibrary/geometry/rayprimitives.h>
 #include "TriangleSampler.h"
 using Geometry::PointRay2D;
 

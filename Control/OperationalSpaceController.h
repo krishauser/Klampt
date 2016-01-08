@@ -3,9 +3,9 @@
 
 #include "Controller.h"
 #include "StateEstimator.h"
-#include <robotics/IK.h>
-#include <robotics/Contact.h>
-#include <utils/SmartPointer.h>
+#include <KrisLibrary/robotics/IK.h>
+#include <KrisLibrary/robotics/Contact.h>
+#include <KrisLibrary/utils/SmartPointer.h>
 
 //task is q''[indices] = ddqdes
 struct JointAccelTask

@@ -4,7 +4,7 @@
 #include "Modeling/Robot.h"
 #include "Sensor.h"
 #include "Command.h"
-#include <myfile.h>
+#include <KrisLibrary/myfile.h>
 #include <map>
 
 /** @ingroup Control

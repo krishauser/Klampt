@@ -1,10 +1,10 @@
 #include "World.h"
-#include <utils/stringutils.h>
-#include <GLdraw/GL.h>
-#include <GLdraw/GLError.h>
+#include <KrisLibrary/utils/stringutils.h>
+#include <KrisLibrary/GLdraw/GL.h>
+#include <KrisLibrary/GLdraw/GLError.h>
 #include <string.h>
-#include <meshing/IO.h>
-#include <IO/XmlWorld.h>
+#include <KrisLibrary/meshing/IO.h>
+#include "IO/XmlWorld.h"
 
 RobotWorld::RobotWorld()
 {

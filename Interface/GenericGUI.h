@@ -1,8 +1,8 @@
 #ifndef GENERIC_GUI_H
 #define GENERIC_GUI_H
 
-#include <utils/AnyCollection.h>
-#include <math3d/primitives.h>
+#include <KrisLibrary/utils/AnyCollection.h>
+#include <KrisLibrary/math3d/primitives.h>
 #include <string>
 #include <sstream>
 using namespace std;

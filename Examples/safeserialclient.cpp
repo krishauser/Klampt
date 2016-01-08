@@ -4,7 +4,7 @@
 #include "Interface/UserInterface.h"
 #include "Interface/RobotInterface.h"
 #include "Main/SimViewProgram.h"
-#include <utils/AnyCollection.h>
+#include <KrisLibrary/utils/AnyCollection.h>
 #include <GL/glui.h>
 #include <fstream>
 using namespace Math3D;

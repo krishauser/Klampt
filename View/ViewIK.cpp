@@ -1,6 +1,6 @@
 #include "ViewIK.h"
-#include <robotics/Rotation.h>
-#include <GLdraw/drawextra.h>
+#include <KrisLibrary/robotics/Rotation.h>
+#include <KrisLibrary/GLdraw/drawextra.h>
 using namespace GLDraw;
 
 ViewIKGoal::ViewIKGoal()

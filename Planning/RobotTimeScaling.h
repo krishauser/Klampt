@@ -1,7 +1,7 @@
 #ifndef ROBOT_TIME_SCALING_H
 #define ROBOT_TIME_SCALING_H
 
-#include <planning/GeneralizedBezierCurve.h>
+#include <KrisLibrary/planning/GeneralizedBezierCurve.h>
 #include "Modeling/Robot.h"
 #include "Modeling/MultiPath.h"
 

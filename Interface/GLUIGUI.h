@@ -2,7 +2,7 @@
 #define INTERFACE_GLUI_GUI_H
 
 #include "GenericGUI.h"
-#include <GLdraw/GLUIProgram.h>
+#include <KrisLibrary/GLdraw/GLUIProgram.h>
 
 class GLUI_Control;
 

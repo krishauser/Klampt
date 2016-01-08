@@ -2,15 +2,14 @@
 #include "Modeling/Resources.h"
 #include "Modeling/Robot.h"
 #include "Modeling/Interpolate.h"
-#include <robotics/ConstrainedDynamics.h>
-#include <robotics/NewtonEuler.h>
-#include <math/differentiation.h>
-#include <optimization/Minimization.h>
-#include <utils/AnyCollection.h>
-#include <utils/stringutils.h>
+#include <KrisLibrary/robotics/ConstrainedDynamics.h>
+#include <KrisLibrary/robotics/NewtonEuler.h>
+#include <KrisLibrary/math/differentiation.h>
+#include <KrisLibrary/optimization/Minimization.h>
+#include <KrisLibrary/utils/AnyCollection.h>
+#include <KrisLibrary/utils/stringutils.h>
 #include <string.h>
 #include <fstream>
-#include <Timer.h>
 using namespace std;
 using namespace Math;
 

@@ -1,8 +1,8 @@
 #ifndef VIEW_PLOT_H
 #define VIEW_PLOT_H
 
-#include <GLdraw/drawextra.h>
-#include <GLdraw/GLColor.h>
+#include <KrisLibrary/GLdraw/drawextra.h>
+#include <KrisLibrary/GLdraw/GLColor.h>
 #include <deque>
 #include <vector>
 using namespace std;

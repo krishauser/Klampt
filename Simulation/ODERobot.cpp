@@ -3,9 +3,9 @@
 #include "ODECustomGeometry.h"
 #include "Modeling/RigidObject.h"
 #include <ode/ode.h>
-#include <math/angle.h>
-#include <math3d/interpolate.h>
-#include <robotics/Rotation.h>
+#include <KrisLibrary/math/angle.h>
+#include <KrisLibrary/math3d/interpolate.h>
+#include <KrisLibrary/robotics/Rotation.h>
 #include "Settings.h"
 
 double ODERobot::defaultPadding = gDefaultRobotPadding;

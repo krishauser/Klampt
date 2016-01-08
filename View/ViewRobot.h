@@ -1,9 +1,9 @@
 #ifndef VIEW_ROBOT_H
 #define VIEW_ROBOT_H
 
-#include <GLdraw/GLColor.h>
-#include <GLdraw/GLDisplayList.h>
-#include <GLdraw/GeometryAppearance.h>
+#include <KrisLibrary/GLdraw/GLColor.h>
+#include <KrisLibrary/GLdraw/GLDisplayList.h>
+#include <KrisLibrary/GLdraw/GeometryAppearance.h>
 #include "Modeling/Robot.h"
 
 /** @ingroup View

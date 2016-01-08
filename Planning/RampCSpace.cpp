@@ -1,6 +1,6 @@
 #include "RampCSpace.h"
 #include "Modeling/DynamicPath.h"
-#include <math/random.h>
+#include <KrisLibrary/math/random.h>
 using namespace std;
 
 

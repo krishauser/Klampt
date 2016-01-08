@@ -1,6 +1,6 @@
 #include "SelfTest.h"
 #include "RampCSpace.h"
-#include <Timer.h>
+#include <KrisLibrary/Timer.h>
 #include <time.h>
 
 //tests shortcutting on randomly generated paths between a and b

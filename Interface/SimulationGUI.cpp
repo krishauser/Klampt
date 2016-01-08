@@ -8,12 +8,12 @@
 #include "IO/XmlODE.h"
 #include "IO/ROS.h"
 #include "Planning/RobotTimeScaling.h"
-#include <GLdraw/drawextra.h>
-#include <GLdraw/drawgeometry.h>
-#include <GLdraw/GL.h>
-#include <GLdraw/GLLight.h>
-#include <GLdraw/GLUTString.h>
-#include <utils/stringutils.h>
+#include <KrisLibrary/GLdraw/drawextra.h>
+#include <KrisLibrary/GLdraw/drawgeometry.h>
+#include <KrisLibrary/GLdraw/GL.h>
+#include <KrisLibrary/GLdraw/GLLight.h>
+#include <KrisLibrary/GLdraw/GLUTString.h>
+#include <KrisLibrary/utils/stringutils.h>
 #include <fstream>
 #include <iomanip>
 using namespace GLDraw;

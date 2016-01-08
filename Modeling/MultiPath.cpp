@@ -1,9 +1,9 @@
 #include "MultiPath.h"
 //#include "Resources.h"
 #include <tinyxml.h>
-#include <utils/ioutils.h>
-#include <spline/TimeSegmentation.h>
-#include <spline/Hermite.h>
+#include <KrisLibrary/utils/ioutils.h>
+#include <KrisLibrary/spline/TimeSegmentation.h>
+#include <KrisLibrary/spline/Hermite.h>
 #include <fstream>
 
 

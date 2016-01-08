@@ -2,7 +2,7 @@
 #define VIEW_TEXTURIZER_H
 
 #include "Modeling/ManagedGeometry.h"
-#include <GLdraw/GeometryAppearance.h>
+#include <KrisLibrary/GLdraw/GeometryAppearance.h>
 #include <string>
 
 /** @ingroup View 

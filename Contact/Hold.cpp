@@ -1,6 +1,6 @@
 #include "Hold.h"
 #include "HoldReader.h"
-#include <math3d/rotation.h>
+#include <KrisLibrary/math3d/rotation.h>
 //#include <Robotics/IKUtils.h>
 #include <sstream>
 

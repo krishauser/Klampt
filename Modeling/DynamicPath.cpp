@@ -29,10 +29,10 @@
  ***************************************************************************/
 
 #include "DynamicPath.h"
-#include "Timer.h"
+#include <KrisLibrary/Timer.h>
 #include "Config.h"
-#include <math/math.h>
-#include <math/infnan.h>
+#include <KrisLibrary/math/math.h>
+#include <KrisLibrary/math/infnan.h>
 #include <assert.h>
 #include <stdlib.h>
 #include <stdio.h>

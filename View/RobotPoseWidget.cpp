@@ -1,8 +1,8 @@
 #include "RobotPoseWidget.h"
-#include <math/angle.h>
-#include <math3d/basis.h>
-#include <GLdraw/drawextra.h>
-#include <robotics/IKFunctions.h>
+#include <KrisLibrary/math/angle.h>
+#include <KrisLibrary/math3d/basis.h>
+#include <KrisLibrary/GLdraw/drawextra.h>
+#include <KrisLibrary/robotics/IKFunctions.h>
 #include <map>
 using namespace GLDraw;
 

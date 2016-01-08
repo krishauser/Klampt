@@ -7,7 +7,7 @@
 struct _object;
 typedef _object PyObject;
 
-#include <math/function.h>
+#include <KrisLibrary/math/function.h>
 
 // Useful constants for interfacing with Python
 //#define PY_PROXY_MODULE "vectorfield"

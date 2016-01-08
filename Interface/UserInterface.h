@@ -3,13 +3,13 @@
 
 #include "Modeling/World.h"
 #include "Modeling/DynamicPath.h"
-#include <camera/viewport.h>
+#include <KrisLibrary/camera/viewport.h>
 #include "Planning/RobotCSpace.h"
 #include "Planning/PlannerSettings.h"
 #include "Planning/RealTimePlanner.h"
 #include "RobotInterface.h"
 #include "InputProcessor.h"
-#include <utils/threadutils.h>
+#include <KrisLibrary/utils/threadutils.h>
 
 
 

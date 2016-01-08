@@ -1,6 +1,6 @@
 #include "GeneralizedRobot.h"
 #include "Interpolate.h"
-#include <math3d/interpolate.h>
+#include <KrisLibrary/math3d/interpolate.h>
 
 void ConfigToTransform(const Vector& q,RigidTransform& T)
 {

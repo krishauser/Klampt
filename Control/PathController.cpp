@@ -1,6 +1,6 @@
 #include "PathController.h"
 #include "Modeling/Conversions.h"
-#include <spline/Hermite.h>
+#include <KrisLibrary/spline/Hermite.h>
 #include <sstream>
 #include <fstream>
 

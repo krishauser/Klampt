@@ -1,9 +1,9 @@
 #include "Interpolate.h"
-#include <math/angle.h>
-#include <math/metric.h>
-#include <math3d/rotation.h>
-#include <math3d/interpolate.h>
-#include <robotics/Rotation.h>
+#include <KrisLibrary/math/angle.h>
+#include <KrisLibrary/math/metric.h>
+#include <KrisLibrary/math3d/rotation.h>
+#include <KrisLibrary/math3d/interpolate.h>
+#include <KrisLibrary/robotics/Rotation.h>
 
 void Interpolate(Robot& robot,const Config& x,const Config& y,Real u,Config& out)
 {

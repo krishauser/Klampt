@@ -5,7 +5,7 @@
 #include "Modeling/MultiPath.h"
 #include "Modeling/Robot.h"
 #include "RobotCSpace.h"
-#include <math3d/Polygon2D.h>
+#include <KrisLibrary/math3d/Polygon2D.h>
 
 /** @brief A base class for a time scaling with colocation point constraints.
  * Subclasses should fill in dsmax, ds2ddsConstraintNormals, and

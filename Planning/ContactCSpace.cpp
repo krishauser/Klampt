@@ -1,8 +1,8 @@
 #include "ContactCSpace.h"
-#include <robotics/IKFunctions.h>
-#include <robotics/JointStructure.h>
-#include <math3d/random.h>
-#include <Timer.h>
+#include <KrisLibrary/robotics/IKFunctions.h>
+#include <KrisLibrary/robotics/JointStructure.h>
+#include <KrisLibrary/math3d/random.h>
+#include <KrisLibrary/Timer.h>
 
 #define TEST_NO_JOINT_LIMITS 0
 #define DO_TIMING 1

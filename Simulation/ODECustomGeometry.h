@@ -1,7 +1,7 @@
 #ifndef ODE_CUSTOM_MESH_H
 #define ODE_CUSTOM_MESH_H
 
-#include <geometry/AnyGeometry.h>
+#include <KrisLibrary/geometry/AnyGeometry.h>
 #include <ode/common.h>
 using namespace Geometry;
 

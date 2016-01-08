@@ -1,10 +1,10 @@
 #include "ViewTextures.h"
-#include <GLdraw/GLTexture1D.h>
-#include <GLdraw/GLTexture2D.h>
-#include <GLdraw/GLColor.h>
-#include <math/random.h>
-#include <image/import.h>
-#include <math/infnan.h>
+#include <KrisLibrary/GLdraw/GLTexture1D.h>
+#include <KrisLibrary/GLdraw/GLTexture2D.h>
+#include <KrisLibrary/GLdraw/GLColor.h>
+#include <KrisLibrary/math/random.h>
+#include <KrisLibrary/image/import.h>
+#include <KrisLibrary/math/infnan.h>
 using namespace Math;
 using namespace GLDraw;
 

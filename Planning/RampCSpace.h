@@ -3,8 +3,8 @@
 
 #include "Modeling/ParabolicRamp.h"
 #include "Modeling/DynamicPath.h"
-#include <planning/CSpace.h>
-#include <planning/KinodynamicCSpace.h>
+#include <KrisLibrary/planning/CSpace.h>
+#include <KrisLibrary/planning/KinodynamicCSpace.h>
 
 /** @brief A CSpace where configurations are given by (q,dq) config, velocity
  * pairs.  Local paths are time-optimal acceleration bounded curves.

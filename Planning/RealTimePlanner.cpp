@@ -2,10 +2,10 @@
 #include "RealTimeIKPlanner.h"
 #include "RealTimeRRTPlanner.h"
 #include "Interface/RobotInterface.h"
-#include <robotics/IKFunctions.h>
-#include <math/random.h>
-#include <math/differentiation.h>
-#include <optimization/Minimization.h>
+#include <KrisLibrary/robotics/IKFunctions.h>
+#include <KrisLibrary/math/random.h>
+#include <KrisLibrary/math/differentiation.h>
+#include <KrisLibrary/optimization/Minimization.h>
 #include <string.h>
 #include <typeinfo>
 

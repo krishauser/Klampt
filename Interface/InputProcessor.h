@@ -3,8 +3,8 @@
 
 #include "Modeling/World.h"
 #include "Planning/PlannerObjective.h"
-#include <utils/AsyncIO.h>
-#include <Timer.h>
+#include <KrisLibrary/utils/AsyncIO.h>
+#include <KrisLibrary/Timer.h>
 
 /** @brief An abstract base class for processing user input through a 2D
  * mouse driven gui into PlannerObjectives used for planning.

@@ -1,9 +1,9 @@
 #include "Texturizer.h"
 #include "ViewTextures.h"
-#include <errors.h>
-#include <GLdraw/GLColor.h>
-#include <math/random.h>
-#include <meshing/LSConformalMapping.h>
+#include <KrisLibrary/errors.h>
+#include <KrisLibrary/GLdraw/GLColor.h>
+#include <KrisLibrary/math/random.h>
+#include <KrisLibrary/meshing/LSConformalMapping.h>
 #include <map>
 using namespace std;
 using namespace Math;

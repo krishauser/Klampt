@@ -4,9 +4,9 @@
 #include "Contact/Hold.h"
 #include "Contact/Stance.h"
 #include "Modeling/DynamicPath.h"
-#include <planning/GeneralizedBezierCurve.h>
-#include <utils/PropertyMap.h>
-#include <math/vector.h>
+#include <KrisLibrary/planning/GeneralizedBezierCurve.h>
+#include <KrisLibrary/utils/PropertyMap.h>
+#include <KrisLibrary/math/vector.h>
 using namespace std;
 
 class TiXmlElement;

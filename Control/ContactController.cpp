@@ -1,7 +1,7 @@
 #include "ContactController.h"
 #include "Modeling/Interpolate.h"
 #include "Contact/Utils.h"
-#include <math/angle.h>
+#include <KrisLibrary/math/angle.h>
 
 #define TORQUE_CONTROL_ONLY 0
 #define NO_VELOCITY_FEEDBACK 0

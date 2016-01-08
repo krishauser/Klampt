@@ -3,7 +3,7 @@
 
 /* TODO: add support for this */
 
-#include <utils/ResourceLibrary.h>
+#include <KrisLibrary/utils/ResourceLibrary.h>
 
 class Resource
 {

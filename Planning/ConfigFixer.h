@@ -1,7 +1,7 @@
 #ifndef CONFIG_FIXER_H
 #define CONFIG_FIXER_H
 
-#include <planning/CSpace.h>
+#include <KrisLibrary/planning/CSpace.h>
 
 /** @brief A class for "fixing" a configuration by sampling a feasible
  * configuration near it. 

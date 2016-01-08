@@ -1,7 +1,7 @@
 #include "InputProcessor.h"
-#include <GLdraw/GL.h>
-#include <GLdraw/drawextra.h>
-#include <utils/AnyCollection.h>
+#include <KrisLibrary/GLdraw/GL.h>
+#include <KrisLibrary/GLdraw/drawextra.h>
+#include <KrisLibrary/utils/AnyCollection.h>
 #include <sstream>
 using namespace GLDraw;
 using namespace std;

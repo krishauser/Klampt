@@ -1,9 +1,9 @@
 #ifndef CONSTRAINED_INTERPOLATOR_H
 #define CONSTRAINED_INTERPOLATOR_H
 
-#include <math/function.h>
-#include <planning/GeneralizedBezierCurve.h>
-#include <optimization/Newton.h>
+#include <KrisLibrary/math/function.h>
+#include <KrisLibrary/planning/GeneralizedBezierCurve.h>
+#include <KrisLibrary/optimization/Newton.h>
 using namespace std;
 
 /** @ingroup Planning

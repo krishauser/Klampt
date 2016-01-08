@@ -2,7 +2,7 @@
 #define PLANNING_SELF_TEST_H
 
 #include "RobotCSpace.h"
-#include <planning/AnyMotionPlanner.h>
+#include <KrisLibrary/planning/AnyMotionPlanner.h>
 #include "Modeling/DynamicPath.h"
 
 

@@ -1,8 +1,8 @@
 #include "OperationalSpaceController.h"
-#include <robotics/NewtonEuler.h>
-#include <robotics/IKFunctions.h>
-#include <math/indexing.h>
-#include <optimization/MinNormProblem.h>
+#include <KrisLibrary/robotics/NewtonEuler.h>
+#include <KrisLibrary/robotics/IKFunctions.h>
+#include <KrisLibrary/math/indexing.h>
+#include <KrisLibrary/optimization/MinNormProblem.h>
 using namespace Optimization;
 
 #define OPTIMIZE_DRIVER_TORQUES 0

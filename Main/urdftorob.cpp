@@ -6,9 +6,9 @@
  */
 #include "Modeling/Robot.h"
 #include <string.h>
-#include <utils/stringutils.h>
+#include <KrisLibrary/utils/stringutils.h>
 #include "IO/URDFConverter.h"
-#include <utils/AnyCollection.h>
+#include <KrisLibrary/utils/AnyCollection.h>
 #include <fstream>
 #include <string.h>
 
@@ -36,7 +36,7 @@ public:
   }
 };
 
-int URDFtoRob(AnyCollection settings,string infile,string outfile){
+int URDFtoRob(AnyCollection& settings,string infile,string outfile){
   string path = GetFilePath(outfile.c_str());
 
 

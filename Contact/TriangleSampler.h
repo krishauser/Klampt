@@ -1,10 +1,10 @@
 #ifndef TRIANGLE_SAMPLER_H
 #define TRIANGLE_SAMPLER_H
 
-#include <math3d/Triangle2D.h>
-#include <math3d/Triangle3D.h>
+#include <KrisLibrary/math3d/Triangle2D.h>
+#include <KrisLibrary/math3d/Triangle3D.h>
 #include <vector>
-#include <math/sample.h>
+#include <KrisLibrary/math/sample.h>
 using namespace std;
 using namespace Math3D;
 

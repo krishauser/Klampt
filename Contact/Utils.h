@@ -1,8 +1,8 @@
 #ifndef CONTACT_UTILS_H
 #define CONTACT_UTILS_H
 
-#include <robotics/Contact.h>
-#include <robotics/RobotWithGeometry.h>
+#include <KrisLibrary/robotics/Contact.h>
+#include <KrisLibrary/robotics/RobotWithGeometry.h>
 #include "Stance.h"
 
 /** @addtogroup Contact */

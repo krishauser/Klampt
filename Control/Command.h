@@ -2,8 +2,8 @@
 #define CONTROL_MOTOR_COMMAND_H
 
 #include <vector>
-#include <math/vector.h>
-#include <math/math.h>
+#include <KrisLibrary/math/vector.h>
+#include <KrisLibrary/math/math.h>
 using namespace std;
 using namespace Math;
 

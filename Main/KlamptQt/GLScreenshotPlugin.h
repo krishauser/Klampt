@@ -1,11 +1,11 @@
 #ifndef GL_SCREENSHOT_PLUGIN_H
 #define GL_SCREENSHOT_PLUGIN_H
 
-#include <utils/stringutils.h>
-#include <Timer.h>
+#include <KrisLibrary/utils/stringutils.h>
+#include <KrisLibrary/Timer.h>
 #include <string>
-#include <GLdraw/GLScreenshot.h>
-#include <math/math.h>
+#include <KrisLibrary/GLdraw/GLScreenshot.h>
+#include <KrisLibrary/math/math.h>
 #include <stdio.h>
 
 /** @ingroup GLDraw

@@ -1,9 +1,9 @@
 #include "WorldGUI.h"
 #include "IO/ROS.h"
 #include <string.h>
-#include <utils/stringutils.h>
-#include <GLdraw/GL.h>
-#include <GLdraw/drawextra.h>
+#include <KrisLibrary/utils/stringutils.h>
+#include <KrisLibrary/GLdraw/GL.h>
+#include <KrisLibrary/GLdraw/drawextra.h>
 #include <fstream>
 using namespace GLDraw;
 

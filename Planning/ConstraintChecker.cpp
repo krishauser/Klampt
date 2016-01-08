@@ -1,7 +1,7 @@
 #include "ConstraintChecker.h"
-#include <robotics/IKFunctions.h>
-#include <robotics/Stability.h>
-#include <robotics/TorqueSolver.h>
+#include <KrisLibrary/robotics/IKFunctions.h>
+#include <KrisLibrary/robotics/Stability.h>
+#include <KrisLibrary/robotics/TorqueSolver.h>
 
 Real ConstraintChecker::ContactDistance(const Robot& robot,const Stance& stance)
 {

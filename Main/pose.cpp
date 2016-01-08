@@ -5,15 +5,15 @@
 #include "Modeling/MultiPath.h"
 #include "Modeling/Interpolate.h"
 #include "Contact/Utils.h"
-#include <utils/AnyCollection.h>
-#include <robotics/IKFunctions.h>
-#include <meshing/Voxelize.h>
-#include <meshing/MarchingCubes.h>
-#include <GLdraw/GLLight.h>
+#include <KrisLibrary/utils/AnyCollection.h>
+#include <KrisLibrary/robotics/IKFunctions.h>
+#include <KrisLibrary/meshing/Voxelize.h>
+#include <KrisLibrary/meshing/MarchingCubes.h>
+#include <KrisLibrary/GLdraw/GLLight.h>
 #include "View/RobotPoseWidget.h"
 #include "View/ObjectPoseWidget.h"
 //#include <GL/glut.h>
-#include <math/random.h>
+#include <KrisLibrary/math/random.h>
 #include <fstream>
 using namespace Math3D;
 using namespace GLDraw;

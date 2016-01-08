@@ -4,13 +4,13 @@
 #include "Modeling/Resources.h"
 #include "Modeling/Robot.h"
 #include "Modeling/Interpolate.h"
-#include <robotics/ConstrainedDynamics.h>
-#include <math/differentiation.h>
-#include <math/LDL.h>
-#include <optimization/Minimization.h>
-#include <utils/AnyCollection.h>
+#include <KrisLibrary/robotics/ConstrainedDynamics.h>
+#include <KrisLibrary/math/differentiation.h>
+#include <KrisLibrary/math/LDL.h>
+#include <KrisLibrary/optimization/Minimization.h>
+#include <KrisLibrary/utils/AnyCollection.h>
 #include <fstream>
-#include <Timer.h>
+#include <KrisLibrary/Timer.h>
 
 //set this to something small if you want this to be faster
 //const static size_t gMaxMilestones = 100;

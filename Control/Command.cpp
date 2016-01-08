@@ -1,6 +1,6 @@
 #include "Command.h"
-#include <math/angle.h>
-#include <errors.h>
+#include <KrisLibrary/math/angle.h>
+#include <KrisLibrary/errors.h>
 
 ActuatorCommand::ActuatorCommand()
   :mode(OFF),measureAngleAbsolute(true),

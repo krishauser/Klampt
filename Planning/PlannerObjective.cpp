@@ -1,6 +1,6 @@
 #include "PlannerObjective.h"
-#include <utils/AnyCollection.h>
-#include <robotics/IKFunctions.h>
+#include <KrisLibrary/utils/AnyCollection.h>
+#include <KrisLibrary/robotics/IKFunctions.h>
 #include <IO/JSON.h>
 #include <string.h>
 

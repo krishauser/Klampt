@@ -1,8 +1,8 @@
 #include "SimTestGUI.h"
-#include <GLdraw/GLError.h>
-#include <utils/AnyValue.h>
-#include <utils/ioutils.h>
-#include <math/random.h>
+#include <KrisLibrary/GLdraw/GLError.h>
+#include <KrisLibrary/utils/AnyValue.h>
+#include <KrisLibrary/utils/ioutils.h>
+#include <KrisLibrary/math/random.h>
 
 
 SimTestBackend::SimTestBackend(RobotWorld* world)

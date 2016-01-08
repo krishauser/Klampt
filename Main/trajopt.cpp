@@ -1,15 +1,15 @@
 #include "Planning/ConstrainedInterpolator.h"
-#include <math3d/primitives.h>
-#include <math/random.h>
-#include <math/differentiation.h>
-#include <utils/AnyCollection.h>
+#include <KrisLibrary/math3d/primitives.h>
+#include <KrisLibrary/math/random.h>
+#include <KrisLibrary/math/differentiation.h>
+#include <KrisLibrary/utils/AnyCollection.h>
 #include "Planning/TimeScaling.h"
 #include "Planning/RobotTimeScaling.h"
 #include "Planning/RobotConstrainedInterpolator.h"
 #include "Planning/ContactTimeScaling.h"
 #include "Contact/Utils.h"
 #include "Modeling/MultiPath.h"
-#include <Timer.h>
+#include <KrisLibrary/Timer.h>
 #include <fstream>
 using namespace std;
 using namespace Math3D;

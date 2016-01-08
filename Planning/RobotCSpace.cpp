@@ -1,13 +1,13 @@
 #include "RobotCSpace.h"
 #include "Modeling/Interpolate.h"
-#include <math/angle.h>
-#include <math/random.h>
-#include <math3d/rotation.h>
-#include <math3d/random.h>
-#include <math3d/interpolate.h>
-#include <robotics/Rotation.h>
-#include <planning/EdgePlanner.h>
-#include <Timer.h>
+#include <KrisLibrary/math/angle.h>
+#include <KrisLibrary/math/random.h>
+#include <KrisLibrary/math3d/rotation.h>
+#include <KrisLibrary/math3d/random.h>
+#include <KrisLibrary/math3d/interpolate.h>
+#include <KrisLibrary/robotics/Rotation.h>
+#include <KrisLibrary/planning/EdgePlanner.h>
+#include <KrisLibrary/Timer.h>
 #include <sstream>
 
 RobotCSpace::RobotCSpace(Robot& _robot)

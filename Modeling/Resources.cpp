@@ -1,6 +1,6 @@
 #include "Resources.h"
-#include <utils/stringutils.h>
-#include <utils/fileutils.h>
+#include <KrisLibrary/utils/stringutils.h>
+#include <KrisLibrary/utils/fileutils.h>
 #include <tinyxml.h>
 #include "IO/XmlWorld.h"
 #include "IO/JSON.h"

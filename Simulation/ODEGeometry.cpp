@@ -1,13 +1,13 @@
 #include "ODEGeometry.h"
 #include "ODECommon.h"
 #include "ODECustomGeometry.h"
-#include <Timer.h>
-#include <meshing/TriMeshOperators.h>
-#include <meshing/VolumeGrid.h>
+#include <KrisLibrary/Timer.h>
+#include <KrisLibrary/meshing/TriMeshOperators.h>
+#include <KrisLibrary/meshing/VolumeGrid.h>
 #include <ode/ode.h>
 #include <ode/common.h>
-#include <GLdraw/GL.h>
-#include <errors.h>
+#include <KrisLibrary/GLdraw/GL.h>
+#include <KrisLibrary/errors.h>
 using namespace Meshing;
 
 #define USING_GIMPACT 0

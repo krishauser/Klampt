@@ -4,7 +4,7 @@
 #include "RobotCSpace.h"
 #include "Modeling/GeneralizedRobot.h"
 #include "Contact/Stance.h"
-#include <robotics/IK.h>
+#include <KrisLibrary/robotics/IK.h>
 
 /** @brief A SingleRobotCSpace for a robot maintaining contact.
  *

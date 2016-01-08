@@ -1,7 +1,7 @@
 #include "dialog.h"
 #include "ui_dialog.h"
 #include "Modeling/Robot.h"
-#include <utils/AnyCollection.h>
+#include <KrisLibrary/utils/AnyCollection.h>
 #include <Main/motorcalibrate.h>
 #include "showtext.h"
 

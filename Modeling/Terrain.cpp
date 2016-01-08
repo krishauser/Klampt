@@ -1,8 +1,8 @@
 #include "Terrain.h"
-#include <Timer.h>
-#include <meshing/IO.h>
-#include <utils/SimpleFile.h>
-#include <utils/stringutils.h>
+#include <KrisLibrary/Timer.h>
+#include <KrisLibrary/meshing/IO.h>
+#include <KrisLibrary/utils/SimpleFile.h>
+#include <KrisLibrary/utils/stringutils.h>
 #include <string.h>
 #include <fstream>
 #include "IO/ROS.h"

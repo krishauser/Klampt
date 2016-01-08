@@ -1,13 +1,13 @@
 #include "RigidObject.h"
-#include <Timer.h>
+#include <KrisLibrary/Timer.h>
 #include "Mass.h"
 #include "IO/ROS.h"
-#include <robotics/Inertia.h>
-#include <utils/SimpleFile.h>
-#include <utils/stringutils.h>
-#include <GLdraw/GL.h>
-#include <GLdraw/drawextra.h>
-#include <meshing/IO.h>
+#include <KrisLibrary/robotics/Inertia.h>
+#include <KrisLibrary/utils/SimpleFile.h>
+#include <KrisLibrary/utils/stringutils.h>
+#include <KrisLibrary/GLdraw/GL.h>
+#include <KrisLibrary/GLdraw/drawextra.h>
+#include <KrisLibrary/meshing/IO.h>
 #include <string.h>
 #include <fstream>
 using namespace Math3D;

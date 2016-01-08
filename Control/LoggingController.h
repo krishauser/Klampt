@@ -2,7 +2,7 @@
 #define LOGGING_CONTROLLER_H
 
 #include "Controller.h"
-#include <utils/SmartPointer.h>
+#include <KrisLibrary/utils/SmartPointer.h>
 
 /** @brief A controllre that saves/replays low-level commands from disk.
  *

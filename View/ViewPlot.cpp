@@ -1,8 +1,8 @@
 #include "ViewPlot.h"
-#include <utils.h>
-#include <math/random.h>
+#include <KrisLibrary/utils.h>
+#include <KrisLibrary/math/random.h>
 #include <stdio.h>
-#include <GLdraw/GLUTString.h>
+#include <KrisLibrary/GLdraw/GLUTString.h>
 using namespace GLDraw;
 
 ViewPlot::ViewPlot()

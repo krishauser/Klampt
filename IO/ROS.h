@@ -2,7 +2,7 @@
 #define IO_ROS_H
 
 #include <vector>
-#include <math3d/primitives.h>
+#include <KrisLibrary/math3d/primitives.h>
 //forward declarations
 namespace Meshing { class PointCloud3D; }
 class RobotWorld;

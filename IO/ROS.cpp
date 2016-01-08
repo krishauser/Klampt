@@ -5,9 +5,9 @@
 #include "Modeling/World.h"
 #include "Modeling/Paths.h"
 #include "Simulation/WorldSimulation.h"
-#include <meshing/PointCloud.h>
+#include <KrisLibrary/meshing/PointCloud.h>
 #include "Simulation/ControlledSimulator.h"
-#include <Timer.h>
+#include <KrisLibrary/Timer.h>
 #include <ros/ros.h>
 #include <ros/time.h>
 #include <tf/transform_listener.h>

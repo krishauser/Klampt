@@ -4,8 +4,8 @@
 #include "Simulation/WorldSimulation.h"
 #include "IO/XmlWorld.h"
 #include "IO/XmlODE.h"
-#include <utils/stringutils.h>
-#include <robotics/IKFunctions.h>
+#include <KrisLibrary/utils/stringutils.h>
+#include <KrisLibrary/robotics/IKFunctions.h>
 #include <fstream>
 using namespace Math3D;
 

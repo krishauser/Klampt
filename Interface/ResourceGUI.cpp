@@ -1,7 +1,7 @@
 #include "ResourceGUI.h"
 #include "IO/XmlWorld.h"
-#include "utils/stringutils.h"
-#include "utils/ioutils.h"
+#include <KrisLibrary/utils/stringutils.h>
+#include <KrisLibrary/utils/ioutils.h>
 
 ResourceGUIBackend::ResourceGUIBackend(RobotWorld* world,ResourceManager* library)
   :WorldGUIBackend(world),resources(library)

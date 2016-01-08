@@ -1,6 +1,6 @@
 #include "RobotTestGUI.h"
-#include <GLdraw/drawMesh.h>
-#include <GLdraw/drawgeometry.h>
+#include <KrisLibrary/GLdraw/drawMesh.h>
+#include <KrisLibrary/GLdraw/drawgeometry.h>
 #include <sstream>
 
 #ifndef GLUT_LEFT_BUTTON

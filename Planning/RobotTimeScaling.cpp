@@ -4,8 +4,8 @@
 #include "Modeling/Interpolate.h"
 #include "TimeScaling.h"
 #include "ConstrainedInterpolator.h"
-#include <robotics/IKFunctions.h>
-#include <Timer.h>
+#include <KrisLibrary/robotics/IKFunctions.h>
+#include <KrisLibrary/Timer.h>
 #include <sstream>
 #include <fstream>
 

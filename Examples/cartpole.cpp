@@ -1,8 +1,8 @@
 #include "Interface/SimulationGUI.h"
 #include "Control/TabulatedController.h"
 #include "Control/SerialControlledRobot.h"
-#include <utils/indexing.h>
-#include <utils/stringutils.h>
+#include <KrisLibrary/utils/indexing.h>
+#include <KrisLibrary/utils/stringutils.h>
 #include <fstream>
 
 void OptimizeCartPole(Robot& robot)

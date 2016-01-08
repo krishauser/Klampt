@@ -1,8 +1,8 @@
 #include "NavigationGUI.h"
-#include <GLdraw/GL.h>
-#include <GLdraw/GLView.h>
-#include <GLdraw/GLError.h>
-#include <GLdraw/drawextra.h>
+#include <KrisLibrary/GLdraw/GL.h>
+#include <KrisLibrary/GLdraw/GLView.h>
+#include <KrisLibrary/GLdraw/GLError.h>
+#include <KrisLibrary/GLdraw/drawextra.h>
 #include <iostream>
 #include <string>
 #include <fstream>

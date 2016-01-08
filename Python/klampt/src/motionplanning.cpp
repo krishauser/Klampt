@@ -1,10 +1,10 @@
 #include "motionplanning.h"
-#include <planning/AnyMotionPlanner.h>
-#include <planning/ExplicitCSpace.h>
-#include <planning/CSpaceHelpers.h>
+#include <KrisLibrary/planning/AnyMotionPlanner.h>
+#include <KrisLibrary/planning/ExplicitCSpace.h>
+#include <KrisLibrary/planning/CSpaceHelpers.h>
 #include "pyerr.h"
-#include <graph/IO.h>
-#include <math/random.h>
+#include <KrisLibrary/graph/IO.h>
+#include <KrisLibrary/math/random.h>
 #include <Python.h>
 #include <iostream>
 #include <fstream>

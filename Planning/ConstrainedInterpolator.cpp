@@ -1,7 +1,7 @@
 #include "ConstrainedInterpolator.h"
 #include "Modeling/SplineInterpolate.h"
-#include <math3d/primitives.h>
-#include <errors.h>
+#include <KrisLibrary/math3d/primitives.h>
+#include <KrisLibrary/errors.h>
 #include <list>
 #include <queue>
 using namespace Math3D;

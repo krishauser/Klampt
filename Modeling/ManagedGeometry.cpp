@@ -1,9 +1,9 @@
 #include "ManagedGeometry.h"
 #include "IO/ROS.h"
-#include <meshing/PointCloud.h>
+#include <KrisLibrary/meshing/PointCloud.h>
 #include <string.h>
-#include <Timer.h>
-#include <utils/stringutils.h>
+#include <KrisLibrary/Timer.h>
+#include <KrisLibrary/utils/stringutils.h>
 using namespace Math3D;
 
 ManagedGeometry::ManagedGeometry()

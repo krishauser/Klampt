@@ -6,9 +6,9 @@
 #include "PlannerObjective.h"
 #include "RampCSpace.h"
 #include "Modeling/DynamicPath.h"
-#include <utils/StatCollector.h>
-#include <utils/threadutils.h>
-#include <Timer.h>
+#include <KrisLibrary/utils/StatCollector.h>
+#include <KrisLibrary/utils/threadutils.h>
+#include <KrisLibrary/Timer.h>
 
 class MotionQueueInterface;
 

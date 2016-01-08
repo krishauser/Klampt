@@ -1,5 +1,5 @@
 #include "SerialControlledRobot.h"
-#include <utils/AnyCollection.h>
+#include <KrisLibrary/utils/AnyCollection.h>
 
 SerialControlledRobot::SerialControlledRobot(const char* _host,double timeout)
   :host(_host),robotTime(0),timeStep(0),numOverruns(0),stopFlag(false),controllerMutex(NULL)

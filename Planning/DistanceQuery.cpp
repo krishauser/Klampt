@@ -1,5 +1,5 @@
 #include "DistanceQuery.h"
-#include <errors.h>
+#include <KrisLibrary/errors.h>
 using namespace std;
 
 const static Real defaultTolerance=0.2,defaultAbsErr=0.05,defaultRelErr=0.1;

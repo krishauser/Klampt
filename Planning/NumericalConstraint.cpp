@@ -1,5 +1,5 @@
 #include "NumericalConstraint.h"
-#include <math/differentiation.h>
+#include <KrisLibrary/math/differentiation.h>
 
 string JointLimitConstraint::Label() const { return "JointLimit"; }
 string JointLimitConstraint::Label(int i) const 

@@ -1,7 +1,7 @@
 #ifndef VIEW_IK_H
 #define VIEW_IK_H
 
-#include <robotics/IK.h>
+#include <KrisLibrary/robotics/IK.h>
 #include "ViewRobot.h"
 
 struct ViewIKGoal

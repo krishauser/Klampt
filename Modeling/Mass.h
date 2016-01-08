@@ -1,7 +1,7 @@
 #ifndef OBJECT_MASS_H
 #define OBJECT_MASS_H
 
-#include <geometry/AnyGeometry.h>
+#include <KrisLibrary/geometry/AnyGeometry.h>
 using namespace Math3D;
 
 ///Computes the first moment integrated over the mesh (assuming the mesh

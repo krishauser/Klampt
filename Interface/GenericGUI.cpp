@@ -1,5 +1,5 @@
 #include "GenericGUI.h"
-#include <utils/AnyMapper.h>
+#include <KrisLibrary/utils/AnyMapper.h>
 #include <fstream>
 
 #define DEBUG_GUI 0

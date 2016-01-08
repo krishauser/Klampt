@@ -5,11 +5,11 @@
 #include "Modeling/Environment.h"
 #include "View/ViewEnvironment.h"
 #include "View/ViewRobot.h"
-#include <math3d/Ray3D.h>
-#include <GLdraw/GLUINavigationProgram.h>
-#include <GLdraw/drawextra.h>
-#include <GLdraw/GL.h>
-#include <GLdraw/GLLight.h>
+#include <KrisLibrary/math3d/Ray3D.h>
+#include <KrisLibrary/GLdraw/GLUINavigationProgram.h>
+#include <KrisLibrary/GLdraw/drawextra.h>
+#include <KrisLibrary/GLdraw/GL.h>
+#include <KrisLibrary/GLdraw/GLLight.h>
 #include <GL/glui.h>
 
 class RobotViewProgram : public GLUINavigationProgram

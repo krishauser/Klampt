@@ -1,5 +1,5 @@
 #include "TriangleSampler.h"
-#include <math/sample.h>
+#include <KrisLibrary/math/sample.h>
 
 
 

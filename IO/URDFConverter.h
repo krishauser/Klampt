@@ -9,7 +9,7 @@
 #define URDFCONVERTER_H_
 
 #include <vector>
-#include <math3d/primitives.h>
+#include <KrisLibrary/math3d/primitives.h>
 #include "Modeling/Robot.h"
 #include "PrimitiveShape.h"
 #include "urdf_link.h"

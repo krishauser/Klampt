@@ -4,7 +4,7 @@
 #include "Sensor.h"
 #include "Command.h"
 #include "Modeling/Robot.h"
-#include <robotics/Wrench.h>
+#include <KrisLibrary/robotics/Wrench.h>
 
 class ODERobot;
 

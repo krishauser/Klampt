@@ -3,9 +3,9 @@
 
 #include "Modeling/RigidObject.h"
 #include "ODEGeometry.h"
-#include <math/vector.h>
+#include <KrisLibrary/math/vector.h>
 #include <ode/common.h>
-#include <myfile.h>
+#include <KrisLibrary/myfile.h>
 using namespace Math;
 
 /** @ingroup Simulation

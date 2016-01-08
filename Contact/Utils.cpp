@@ -1,9 +1,9 @@
 #include "Utils.h"
-#include <math3d/basis.h>
-#include <meshing/PointCloud.h>
-#include <geometry/ConvexHull2D.h>
-#include <statistics/KMeans.h>
-#include <utils/EquivalenceMap.h>
+#include <KrisLibrary/math3d/basis.h>
+#include <KrisLibrary/meshing/PointCloud.h>
+#include <KrisLibrary/geometry/ConvexHull2D.h>
+#include <KrisLibrary/statistics/KMeans.h>
+#include <KrisLibrary/utils/EquivalenceMap.h>
 using namespace Geometry;
 using namespace Meshing;
 

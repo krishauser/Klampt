@@ -1,12 +1,12 @@
 #ifndef NUMERICAL_CSPACE_CONSTRAINT_H
 #define NUMERICAL_CSPACE_CONSTRAINT_H
 
-#include <math/InequalityConstraint.h>
-#include <robotics/Stability.h>
-#include <robotics/TorqueSolver.h>
+#include <KrisLibrary/math/InequalityConstraint.h>
+#include <KrisLibrary/robotics/Stability.h>
+#include <KrisLibrary/robotics/TorqueSolver.h>
 #include "DistanceQuery.h"
 #include "Modeling/Robot.h"
-#include <utils/ArrayMapping.h>
+#include <KrisLibrary/utils/ArrayMapping.h>
 
 /** @ingroup Continuous
  * @file NumericalConstraint.h

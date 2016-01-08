@@ -1,6 +1,6 @@
 #include "XmlODE.h"
 #include "Control/Controller.h"
-#include <utils/stringutils.h>
+#include <KrisLibrary/utils/stringutils.h>
 
 XmlODEGeometry::XmlODEGeometry(TiXmlElement* _element)
   :e(_element)

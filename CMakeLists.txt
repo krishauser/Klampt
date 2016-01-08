@@ -109,7 +109,6 @@ configure_file(
 add_custom_target(uninstall
     COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake)
 
-
 #install targets
 install(TARGETS Klampt
   ARCHIVE
@@ -132,6 +131,10 @@ IF(WIN32)
 	install(FILES Library/Assimp32.dll Library/glpk_4_52.dll Library/glut32.dll
 		DESTINATION bin
 		COMPONENT apps)
+ELSE(WIN32)
+	#install to /opt/klampt-X.Y
+    SET(CMAKE_INSTALL_PREFIX "/opt/klampt-${KLAMPT_MAJOR_VERSION}.${KLAMPT_MINOR_VERSION}.${KLAMPT_PATCH_VERSION}" CACHE INTERNAL "Prefix prepended to install directories" FORCE)
+
 ENDIF(WIN32)
 
 #python demos
@@ -147,6 +150,11 @@ install(DIRECTORY Python/control
 install(DIRECTORY Python/utils
     DESTINATION Python
     COMPONENT pythonexamples)
+
+
+IF(PYTHON)
+  install(CODE "execute_process(COMMAND \"cd Python; ${PYTHON} setup.py install\")" COMPONENT python)
+ENDIF(PYTHON)
 
 
 # Needs to be last statement:

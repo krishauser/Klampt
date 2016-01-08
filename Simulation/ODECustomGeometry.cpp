@@ -1,9 +1,9 @@
 #include "ODECustomGeometry.h"
 #include "ODECommon.h"
-#include <geometry/CollisionPointCloud.h>
+#include <KrisLibrary/geometry/CollisionPointCloud.h>
 #include <ode/collision.h>
-#include <Timer.h>
-#include <errors.h>
+#include <KrisLibrary/Timer.h>
+#include <KrisLibrary/errors.h>
 using namespace std;
 
 //if a normal has this length then it is ignored

@@ -2,8 +2,8 @@
 #define STANCE_H
 
 #include "Hold.h"
-#include <math3d/Plane3D.h>
-#include <math/matrix.h>
+#include <KrisLibrary/math3d/Plane3D.h>
+#include <KrisLibrary/math/matrix.h>
 #include <map>
 #include <vector>
 using namespace std;
