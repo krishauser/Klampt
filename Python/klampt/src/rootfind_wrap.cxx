@@ -3463,7 +3463,8 @@ static PyMethodDef SwigMethods[] = {
 		"*pVFObj)\n"
 		"\n"
 		"Sets the vector field object, returns 0 if pVFObj = NULL, 1 otherwise.\n"
-		"\n"
+		"See vectorfield.py for an abstract base class that can be overridden\n"
+		"to produce one of these objects. \n"
 		""},
 	 { (char *)"findRoots", _wrap_findRoots, METH_VARARGS, (char *)"\n"
 		"findRoots(PyObject * startVals, int iter) -> PyObject *\n"

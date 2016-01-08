@@ -5483,16 +5483,69 @@ static PyMethodDef SwigMethods[] = {
 		"void\n"
 		"CSpaceInterface::setProperty(const char *key, const char *value) \n"
 		""},
-	 { (char *)"CSpaceInterface_getProperty", _wrap_CSpaceInterface_getProperty, METH_VARARGS, (char *)"CSpaceInterface_getProperty(CSpaceInterface self, char const * key) -> char const *"},
-	 { (char *)"CSpaceInterface_isFeasible", _wrap_CSpaceInterface_isFeasible, METH_VARARGS, (char *)"CSpaceInterface_isFeasible(CSpaceInterface self, PyObject * q) -> bool"},
-	 { (char *)"CSpaceInterface_isVisible", _wrap_CSpaceInterface_isVisible, METH_VARARGS, (char *)"CSpaceInterface_isVisible(CSpaceInterface self, PyObject * a, PyObject * b) -> bool"},
-	 { (char *)"CSpaceInterface_testFeasibility", _wrap_CSpaceInterface_testFeasibility, METH_VARARGS, (char *)"CSpaceInterface_testFeasibility(CSpaceInterface self, char const * name, PyObject * q) -> bool"},
-	 { (char *)"CSpaceInterface_testVisibility", _wrap_CSpaceInterface_testVisibility, METH_VARARGS, (char *)"CSpaceInterface_testVisibility(CSpaceInterface self, char const * name, PyObject * a, PyObject * b) -> bool"},
-	 { (char *)"CSpaceInterface_feasibilityFailures", _wrap_CSpaceInterface_feasibilityFailures, METH_VARARGS, (char *)"CSpaceInterface_feasibilityFailures(CSpaceInterface self, PyObject * q) -> PyObject *"},
-	 { (char *)"CSpaceInterface_visibilityFailures", _wrap_CSpaceInterface_visibilityFailures, METH_VARARGS, (char *)"CSpaceInterface_visibilityFailures(CSpaceInterface self, PyObject * a, PyObject * b) -> PyObject *"},
-	 { (char *)"CSpaceInterface_sample", _wrap_CSpaceInterface_sample, METH_VARARGS, (char *)"CSpaceInterface_sample(CSpaceInterface self) -> PyObject *"},
-	 { (char *)"CSpaceInterface_distance", _wrap_CSpaceInterface_distance, METH_VARARGS, (char *)"CSpaceInterface_distance(CSpaceInterface self, PyObject * a, PyObject * b) -> double"},
-	 { (char *)"CSpaceInterface_interpolate", _wrap_CSpaceInterface_interpolate, METH_VARARGS, (char *)"CSpaceInterface_interpolate(CSpaceInterface self, PyObject * a, PyObject * b, double u) -> PyObject *"},
+	 { (char *)"CSpaceInterface_getProperty", _wrap_CSpaceInterface_getProperty, METH_VARARGS, (char *)"\n"
+		"CSpaceInterface_getProperty(CSpaceInterface self, char const * key) -> char const *\n"
+		"\n"
+		"const char *\n"
+		"CSpaceInterface::getProperty(const char *key) \n"
+		""},
+	 { (char *)"CSpaceInterface_isFeasible", _wrap_CSpaceInterface_isFeasible, METH_VARARGS, (char *)"\n"
+		"CSpaceInterface_isFeasible(CSpaceInterface self, PyObject * q) -> bool\n"
+		"\n"
+		"bool\n"
+		"CSpaceInterface::isFeasible(PyObject *q)\n"
+		"\n"
+		"queries \n"
+		""},
+	 { (char *)"CSpaceInterface_isVisible", _wrap_CSpaceInterface_isVisible, METH_VARARGS, (char *)"\n"
+		"CSpaceInterface_isVisible(CSpaceInterface self, PyObject * a, PyObject * b) -> bool\n"
+		"\n"
+		"bool\n"
+		"CSpaceInterface::isVisible(PyObject *a, PyObject *b) \n"
+		""},
+	 { (char *)"CSpaceInterface_testFeasibility", _wrap_CSpaceInterface_testFeasibility, METH_VARARGS, (char *)"\n"
+		"CSpaceInterface_testFeasibility(CSpaceInterface self, char const * name, PyObject * q) -> bool\n"
+		"\n"
+		"bool\n"
+		"CSpaceInterface::testFeasibility(const char *name, PyObject *q) \n"
+		""},
+	 { (char *)"CSpaceInterface_testVisibility", _wrap_CSpaceInterface_testVisibility, METH_VARARGS, (char *)"\n"
+		"CSpaceInterface_testVisibility(CSpaceInterface self, char const * name, PyObject * a, PyObject * b) -> bool\n"
+		"\n"
+		"bool\n"
+		"CSpaceInterface::testVisibility(const char *name, PyObject *a,\n"
+		"PyObject *b) \n"
+		""},
+	 { (char *)"CSpaceInterface_feasibilityFailures", _wrap_CSpaceInterface_feasibilityFailures, METH_VARARGS, (char *)"\n"
+		"CSpaceInterface_feasibilityFailures(CSpaceInterface self, PyObject * q) -> PyObject *\n"
+		"\n"
+		"PyObject\n"
+		"* CSpaceInterface::feasibilityFailures(PyObject *q) \n"
+		""},
+	 { (char *)"CSpaceInterface_visibilityFailures", _wrap_CSpaceInterface_visibilityFailures, METH_VARARGS, (char *)"\n"
+		"CSpaceInterface_visibilityFailures(CSpaceInterface self, PyObject * a, PyObject * b) -> PyObject *\n"
+		"\n"
+		"PyObject\n"
+		"* CSpaceInterface::visibilityFailures(PyObject *a, PyObject *b) \n"
+		""},
+	 { (char *)"CSpaceInterface_sample", _wrap_CSpaceInterface_sample, METH_VARARGS, (char *)"\n"
+		"CSpaceInterface_sample(CSpaceInterface self) -> PyObject *\n"
+		"\n"
+		"PyObject *\n"
+		"CSpaceInterface::sample() \n"
+		""},
+	 { (char *)"CSpaceInterface_distance", _wrap_CSpaceInterface_distance, METH_VARARGS, (char *)"\n"
+		"CSpaceInterface_distance(CSpaceInterface self, PyObject * a, PyObject * b) -> double\n"
+		"\n"
+		"double\n"
+		"CSpaceInterface::distance(PyObject *a, PyObject *b) \n"
+		""},
+	 { (char *)"CSpaceInterface_interpolate", _wrap_CSpaceInterface_interpolate, METH_VARARGS, (char *)"\n"
+		"CSpaceInterface_interpolate(CSpaceInterface self, PyObject * a, PyObject * b, double u) -> PyObject *\n"
+		"\n"
+		"PyObject *\n"
+		"CSpaceInterface::interpolate(PyObject *a, PyObject *b, double u) \n"
+		""},
 	 { (char *)"CSpaceInterface_index_set", _wrap_CSpaceInterface_index_set, METH_VARARGS, (char *)"CSpaceInterface_index_set(CSpaceInterface self, int index)"},
 	 { (char *)"CSpaceInterface_index_get", _wrap_CSpaceInterface_index_get, METH_VARARGS, (char *)"CSpaceInterface_index_get(CSpaceInterface self) -> int"},
 	 { (char *)"CSpaceInterface_swigregister", CSpaceInterface_swigregister, METH_VARARGS, NULL},

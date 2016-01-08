@@ -32544,6 +32544,40 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_WorldModel_copy(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  WorldModel *arg1 = (WorldModel *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  WorldModel result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:WorldModel_copy",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_WorldModel, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "WorldModel_copy" "', argument " "1"" of type '" "WorldModel *""'"); 
+  }
+  arg1 = reinterpret_cast< WorldModel * >(argp1);
+  {
+    try {
+      result = (arg1)->copy();
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_NewPointerObj((new WorldModel(static_cast< const WorldModel& >(result))), SWIGTYPE_p_WorldModel, SWIG_POINTER_OWN |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_WorldModel_readFile(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   WorldModel *arg1 = (WorldModel *) 0 ;
@@ -33675,6 +33709,254 @@ SWIGINTERN PyObject *_wrap_WorldModel_loadElement(PyObject *SWIGUNUSEDPARM(self)
 fail:
   if (alloc2 == SWIG_NEWOBJ) delete[] buf2;
   return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_WorldModel_add__SWIG_0(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  WorldModel *arg1 = (WorldModel *) 0 ;
+  char *arg2 = (char *) 0 ;
+  RobotModel *arg3 = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int res2 ;
+  char *buf2 = 0 ;
+  int alloc2 = 0 ;
+  void *argp3 = 0 ;
+  int res3 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  PyObject * obj2 = 0 ;
+  RobotModel result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OOO:WorldModel_add",&obj0,&obj1,&obj2)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_WorldModel, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "WorldModel_add" "', argument " "1"" of type '" "WorldModel *""'"); 
+  }
+  arg1 = reinterpret_cast< WorldModel * >(argp1);
+  res2 = SWIG_AsCharPtrAndSize(obj1, &buf2, NULL, &alloc2);
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "WorldModel_add" "', argument " "2"" of type '" "char const *""'");
+  }
+  arg2 = reinterpret_cast< char * >(buf2);
+  res3 = SWIG_ConvertPtr(obj2, &argp3, SWIGTYPE_p_RobotModel,  0  | 0);
+  if (!SWIG_IsOK(res3)) {
+    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "WorldModel_add" "', argument " "3"" of type '" "RobotModel const &""'"); 
+  }
+  if (!argp3) {
+    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "WorldModel_add" "', argument " "3"" of type '" "RobotModel const &""'"); 
+  }
+  arg3 = reinterpret_cast< RobotModel * >(argp3);
+  {
+    try {
+      result = (arg1)->add((char const *)arg2,(RobotModel const &)*arg3);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_NewPointerObj((new RobotModel(static_cast< const RobotModel& >(result))), SWIGTYPE_p_RobotModel, SWIG_POINTER_OWN |  0 );
+  if (alloc2 == SWIG_NEWOBJ) delete[] buf2;
+  return resultobj;
+fail:
+  if (alloc2 == SWIG_NEWOBJ) delete[] buf2;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_WorldModel_add__SWIG_1(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  WorldModel *arg1 = (WorldModel *) 0 ;
+  char *arg2 = (char *) 0 ;
+  RigidObjectModel *arg3 = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int res2 ;
+  char *buf2 = 0 ;
+  int alloc2 = 0 ;
+  void *argp3 = 0 ;
+  int res3 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  PyObject * obj2 = 0 ;
+  RigidObjectModel result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OOO:WorldModel_add",&obj0,&obj1,&obj2)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_WorldModel, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "WorldModel_add" "', argument " "1"" of type '" "WorldModel *""'"); 
+  }
+  arg1 = reinterpret_cast< WorldModel * >(argp1);
+  res2 = SWIG_AsCharPtrAndSize(obj1, &buf2, NULL, &alloc2);
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "WorldModel_add" "', argument " "2"" of type '" "char const *""'");
+  }
+  arg2 = reinterpret_cast< char * >(buf2);
+  res3 = SWIG_ConvertPtr(obj2, &argp3, SWIGTYPE_p_RigidObjectModel,  0  | 0);
+  if (!SWIG_IsOK(res3)) {
+    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "WorldModel_add" "', argument " "3"" of type '" "RigidObjectModel const &""'"); 
+  }
+  if (!argp3) {
+    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "WorldModel_add" "', argument " "3"" of type '" "RigidObjectModel const &""'"); 
+  }
+  arg3 = reinterpret_cast< RigidObjectModel * >(argp3);
+  {
+    try {
+      result = (arg1)->add((char const *)arg2,(RigidObjectModel const &)*arg3);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_NewPointerObj((new RigidObjectModel(static_cast< const RigidObjectModel& >(result))), SWIGTYPE_p_RigidObjectModel, SWIG_POINTER_OWN |  0 );
+  if (alloc2 == SWIG_NEWOBJ) delete[] buf2;
+  return resultobj;
+fail:
+  if (alloc2 == SWIG_NEWOBJ) delete[] buf2;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_WorldModel_add__SWIG_2(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  WorldModel *arg1 = (WorldModel *) 0 ;
+  char *arg2 = (char *) 0 ;
+  TerrainModel *arg3 = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int res2 ;
+  char *buf2 = 0 ;
+  int alloc2 = 0 ;
+  void *argp3 = 0 ;
+  int res3 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  PyObject * obj2 = 0 ;
+  TerrainModel result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OOO:WorldModel_add",&obj0,&obj1,&obj2)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_WorldModel, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "WorldModel_add" "', argument " "1"" of type '" "WorldModel *""'"); 
+  }
+  arg1 = reinterpret_cast< WorldModel * >(argp1);
+  res2 = SWIG_AsCharPtrAndSize(obj1, &buf2, NULL, &alloc2);
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "WorldModel_add" "', argument " "2"" of type '" "char const *""'");
+  }
+  arg2 = reinterpret_cast< char * >(buf2);
+  res3 = SWIG_ConvertPtr(obj2, &argp3, SWIGTYPE_p_TerrainModel,  0  | 0);
+  if (!SWIG_IsOK(res3)) {
+    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "WorldModel_add" "', argument " "3"" of type '" "TerrainModel const &""'"); 
+  }
+  if (!argp3) {
+    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "WorldModel_add" "', argument " "3"" of type '" "TerrainModel const &""'"); 
+  }
+  arg3 = reinterpret_cast< TerrainModel * >(argp3);
+  {
+    try {
+      result = (arg1)->add((char const *)arg2,(TerrainModel const &)*arg3);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_NewPointerObj((new TerrainModel(static_cast< const TerrainModel& >(result))), SWIGTYPE_p_TerrainModel, SWIG_POINTER_OWN |  0 );
+  if (alloc2 == SWIG_NEWOBJ) delete[] buf2;
+  return resultobj;
+fail:
+  if (alloc2 == SWIG_NEWOBJ) delete[] buf2;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_WorldModel_add(PyObject *self, PyObject *args) {
+  int argc;
+  PyObject *argv[4] = {
+    0
+  };
+  int ii;
+  
+  if (!PyTuple_Check(args)) SWIG_fail;
+  argc = args ? (int)PyObject_Length(args) : 0;
+  for (ii = 0; (ii < 3) && (ii < argc); ii++) {
+    argv[ii] = PyTuple_GET_ITEM(args,ii);
+  }
+  if (argc == 3) {
+    int _v;
+    void *vptr = 0;
+    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_WorldModel, 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      int res = SWIG_AsCharPtrAndSize(argv[1], 0, NULL, 0);
+      _v = SWIG_CheckState(res);
+      if (_v) {
+        int res = SWIG_ConvertPtr(argv[2], 0, SWIGTYPE_p_RobotModel, 0);
+        _v = SWIG_CheckState(res);
+        if (_v) {
+          return _wrap_WorldModel_add__SWIG_0(self, args);
+        }
+      }
+    }
+  }
+  if (argc == 3) {
+    int _v;
+    void *vptr = 0;
+    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_WorldModel, 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      int res = SWIG_AsCharPtrAndSize(argv[1], 0, NULL, 0);
+      _v = SWIG_CheckState(res);
+      if (_v) {
+        int res = SWIG_ConvertPtr(argv[2], 0, SWIGTYPE_p_RigidObjectModel, 0);
+        _v = SWIG_CheckState(res);
+        if (_v) {
+          return _wrap_WorldModel_add__SWIG_1(self, args);
+        }
+      }
+    }
+  }
+  if (argc == 3) {
+    int _v;
+    void *vptr = 0;
+    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_WorldModel, 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      int res = SWIG_AsCharPtrAndSize(argv[1], 0, NULL, 0);
+      _v = SWIG_CheckState(res);
+      if (_v) {
+        int res = SWIG_ConvertPtr(argv[2], 0, SWIGTYPE_p_TerrainModel, 0);
+        _v = SWIG_CheckState(res);
+        if (_v) {
+          return _wrap_WorldModel_add__SWIG_2(self, args);
+        }
+      }
+    }
+  }
+  
+fail:
+  SWIG_SetErrorMsg(PyExc_NotImplementedError,"Wrong number or type of arguments for overloaded function 'WorldModel_add'.\n"
+    "  Possible C/C++ prototypes are:\n"
+    "    WorldModel::add(char const *,RobotModel const &)\n"
+    "    WorldModel::add(char const *,RigidObjectModel const &)\n"
+    "    WorldModel::add(char const *,TerrainModel const &)\n");
+  return 0;
 }
 
 
@@ -44470,6 +44752,18 @@ static PyMethodDef SwigMethods[] = {
 		"indices: a list of triangle vertices given as indices into the\n"
 		"vertices list, i.e., [a1,b1,c2, a2,b2,c2, ...]\n"
 		"\n"
+		"Note: because the bindings are generated by SWIG, you can access the\n"
+		"indices / vertices members via some automatically generated accessors\n"
+		"/ modifiers. In particular len(), append(), and indexing via [] are\n"
+		"useful. Some other methods like resize() are also provided. However,\n"
+		"you CANNOT set these items via assignment.\n"
+		"\n"
+		"Examples:\n"
+		"\n"
+		"m = TriangleMesh() m.vertices.append(0) m.vertices.append(0)\n"
+		"m.vertices.append(0) print len(m.vertices) #prints 3 m.vertices =\n"
+		"[0,0,0] #this is an error m.vertices += [1,2,3] #this is also an error\n"
+		"\n"
 		"C++ includes: geometry.h \n"
 		""},
 	 { (char *)"delete_TriangleMesh", _wrap_delete_TriangleMesh, METH_VARARGS, (char *)"delete_TriangleMesh(TriangleMesh self)"},
@@ -44512,7 +44806,7 @@ static PyMethodDef SwigMethods[] = {
 		"void\n"
 		"PointCloud::setPoint(int index, const double p[3])\n"
 		"\n"
-		"Sets the position of a point. \n"
+		"Sets the position of the point at the given index to p. \n"
 		""},
 	 { (char *)"PointCloud_getPoint", _wrap_PointCloud_getPoint, METH_VARARGS, (char *)"\n"
 		"PointCloud_getPoint(PointCloud self, int index)\n"
@@ -44520,7 +44814,7 @@ static PyMethodDef SwigMethods[] = {
 		"void\n"
 		"PointCloud::getPoint(int index, double out[3]) const\n"
 		"\n"
-		"Retrieves the position of a point. \n"
+		"Retrieves the position of the point at the given index. \n"
 		""},
 	 { (char *)"PointCloud_setProperties", _wrap_PointCloud_setProperties, METH_VARARGS, (char *)"\n"
 		"setProperties(doubleVector properties)\n"
@@ -44596,6 +44890,22 @@ static PyMethodDef SwigMethods[] = {
 		"..., pk1, p12, p22, ..., pk2, ... , pn1, pn2, ..., pn2] where each\n"
 		"vertex has k properties. The name of each property is given by the\n"
 		"propertyNames member.\n"
+		"\n"
+		"Note: because the bindings are generated by SWIG, you can access the\n"
+		"vertices/properties/propertyName members via some automatically\n"
+		"generated accessors / modifiers. In particular len(), append(), and\n"
+		"indexing via [] are useful. Some other methods like resize() are also\n"
+		"provided. However, you CANNOT set these items via assignment.\n"
+		"\n"
+		"Examples:\n"
+		"\n"
+		"pc = PointCloud() pc.propertyNames.append('rgb') pc.vertices.append(0)\n"
+		"pc.vertices.append(0) pc.vertices.append(0) pc.properties.append(0)\n"
+		"print len(pc.vertices) #prints 3 print pc.numPoints() #prints 1\n"
+		"pc.addPoint([1,2,3]) print pc.numPoints() #prints 2 print\n"
+		"len(pc.properties.size()) #prints 2: 1 property category x 2 points\n"
+		"print pc.getProperty(1,0) #prints 0; this is the default value added\n"
+		"when addPoint is called\n"
 		"\n"
 		"C++ includes: geometry.h \n"
 		""},
@@ -44774,8 +45084,31 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"Geometry3D_attachToStream", _wrap_Geometry3D_attachToStream, METH_VARARGS, (char *)"\n"
 		"attachToStream(char const * protocol, char const * name, char const * type) -> bool\n"
 		"Geometry3D_attachToStream(Geometry3D self, char const * protocol, char const * name) -> bool\n"
+		"\n"
+		"bool\n"
+		"Geometry3D::attachToStream(const char *protocol, const char *name,\n"
+		"const char *type=\"\")\n"
+		"\n"
+		"Attaches this geometry to a given stream.\n"
+		"\n"
+		"Currently only \"ros\" protocol is supported. For \"ros\" protocol,\n"
+		"name is the ROS topic to attach to. type indicates the datatype that\n"
+		"the stream source should have, and this will return false if that type\n"
+		"is not obeyed. Currently only the \"PointCloud\" or default empty\n"
+		"(\"\") types are supported.\n"
+		"\n"
+		"Note: you will need to call Appearance.refresh(True) to get the\n"
+		"appearance to update. \n"
 		""},
-	 { (char *)"Geometry3D_detachFromStream", _wrap_Geometry3D_detachFromStream, METH_VARARGS, (char *)"Geometry3D_detachFromStream(Geometry3D self, char const * protocol, char const * name) -> bool"},
+	 { (char *)"Geometry3D_detachFromStream", _wrap_Geometry3D_detachFromStream, METH_VARARGS, (char *)"\n"
+		"Geometry3D_detachFromStream(Geometry3D self, char const * protocol, char const * name) -> bool\n"
+		"\n"
+		"bool\n"
+		"Geometry3D::detachFromStream(const char *protocol, const char *name)\n"
+		"\n"
+		"Detaches this geometry from a given stream. This must be called before\n"
+		"deleting a piece of geometry. \n"
+		""},
 	 { (char *)"Geometry3D_setCurrentTransform", _wrap_Geometry3D_setCurrentTransform, METH_VARARGS, (char *)"\n"
 		"Geometry3D_setCurrentTransform(Geometry3D self, double const [9] R, double const [3] t)\n"
 		"\n"
@@ -45885,8 +46218,18 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"TerrainModel_world_get", _wrap_TerrainModel_world_get, METH_VARARGS, (char *)"TerrainModel_world_get(TerrainModel self) -> int"},
 	 { (char *)"TerrainModel_index_set", _wrap_TerrainModel_index_set, METH_VARARGS, (char *)"TerrainModel_index_set(TerrainModel self, int index)"},
 	 { (char *)"TerrainModel_index_get", _wrap_TerrainModel_index_get, METH_VARARGS, (char *)"TerrainModel_index_get(TerrainModel self) -> int"},
-	 { (char *)"TerrainModel_terrain_set", _wrap_TerrainModel_terrain_set, METH_VARARGS, (char *)"TerrainModel_terrain_set(TerrainModel self, Terrain * terrain)"},
-	 { (char *)"TerrainModel_terrain_get", _wrap_TerrainModel_terrain_get, METH_VARARGS, (char *)"TerrainModel_terrain_get(TerrainModel self) -> Terrain *"},
+	 { (char *)"TerrainModel_terrain_set", _wrap_TerrainModel_terrain_set, METH_VARARGS, (char *)"\n"
+		"TerrainModel_terrain_set(TerrainModel self, Terrain * terrain)\n"
+		"\n"
+		"return\n"
+		"terrain(world.terrains.size()-1) \n"
+		""},
+	 { (char *)"TerrainModel_terrain_get", _wrap_TerrainModel_terrain_get, METH_VARARGS, (char *)"\n"
+		"TerrainModel_terrain_get(TerrainModel self) -> Terrain *\n"
+		"\n"
+		"return\n"
+		"terrain(world.terrains.size()-1) \n"
+		""},
 	 { (char *)"delete_TerrainModel", _wrap_delete_TerrainModel, METH_VARARGS, (char *)"delete_TerrainModel(TerrainModel self)"},
 	 { (char *)"TerrainModel_swigregister", TerrainModel_swigregister, METH_VARARGS, NULL},
 	 { (char *)"new_WorldModel", _wrap_new_WorldModel, METH_VARARGS, (char *)"\n"
@@ -45901,6 +46244,15 @@ static PyMethodDef SwigMethods[] = {
 		"delete_WorldModel(WorldModel self)\n"
 		"\n"
 		"WorldModel::~WorldModel() \n"
+		""},
+	 { (char *)"WorldModel_copy", _wrap_WorldModel_copy, METH_VARARGS, (char *)"\n"
+		"WorldModel_copy(WorldModel self) -> WorldModel\n"
+		"\n"
+		"WorldModel\n"
+		"WorldModel::copy()\n"
+		"\n"
+		"Creates a copy of the world model. Note that geometries and\n"
+		"appearances are shared... \n"
 		""},
 	 { (char *)"WorldModel_readFile", _wrap_WorldModel_readFile, METH_VARARGS, (char *)"\n"
 		"WorldModel_readFile(WorldModel self, char const * fn) -> bool\n"
@@ -46029,6 +46381,17 @@ static PyMethodDef SwigMethods[] = {
 		"Loads some element from a file, automatically detecting its type.\n"
 		"Meshes are interpreted as terrains. The ID is returned, or -1 if\n"
 		"loading failed. \n"
+		""},
+	 { (char *)"WorldModel_add", _wrap_WorldModel_add, METH_VARARGS, (char *)"\n"
+		"add(char const * name, RobotModel robot) -> RobotModel\n"
+		"add(char const * name, RigidObjectModel obj) -> RigidObjectModel\n"
+		"WorldModel_add(WorldModel self, char const * name, TerrainModel terrain) -> TerrainModel\n"
+		"\n"
+		"TerrainModel\n"
+		"WorldModel::add(const char *name, const TerrainModel &terrain)\n"
+		"\n"
+		"Adds a copy of the given terrain to this world, either from this\n"
+		"WorldModel or another. \n"
 		""},
 	 { (char *)"WorldModel_remove", _wrap_WorldModel_remove, METH_VARARGS, (char *)"\n"
 		"remove(RobotModel robot)\n"
@@ -46302,8 +46665,26 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"For fixed-transform constraints, returns the transform (R,T) \n"
 		""},
-	 { (char *)"IKObjective_loadString", _wrap_IKObjective_loadString, METH_VARARGS, (char *)"IKObjective_loadString(IKObjective self, char const * str) -> bool"},
-	 { (char *)"IKObjective_saveString", _wrap_IKObjective_saveString, METH_VARARGS, (char *)"IKObjective_saveString(IKObjective self) -> std::string"},
+	 { (char *)"IKObjective_loadString", _wrap_IKObjective_loadString, METH_VARARGS, (char *)"\n"
+		"IKObjective_loadString(IKObjective self, char const * str) -> bool\n"
+		"\n"
+		"bool\n"
+		"IKObjective::loadString(const char *str)\n"
+		"\n"
+		"Loads the objective from a Klamp't-native formatted string. For a more\n"
+		"readable but verbose format, try the JSON IO routines\n"
+		"loader.toJson/fromJson() \n"
+		""},
+	 { (char *)"IKObjective_saveString", _wrap_IKObjective_saveString, METH_VARARGS, (char *)"\n"
+		"IKObjective_saveString(IKObjective self) -> std::string\n"
+		"\n"
+		"std::string\n"
+		"IKObjective::saveString() const\n"
+		"\n"
+		"Saves the objective to a Klamp't-native formatted string. For a more\n"
+		"readable but verbose format, try the JSON IO routines\n"
+		"loader.toJson/fromJson() \n"
+		""},
 	 { (char *)"IKObjective_goal_set", _wrap_IKObjective_goal_set, METH_VARARGS, (char *)"IKObjective_goal_set(IKObjective self, IKGoal goal)"},
 	 { (char *)"IKObjective_goal_get", _wrap_IKObjective_goal_get, METH_VARARGS, (char *)"IKObjective_goal_get(IKObjective self) -> IKGoal"},
 	 { (char *)"delete_IKObjective", _wrap_delete_IKObjective, METH_VARARGS, (char *)"delete_IKObjective(IKObjective self)"},

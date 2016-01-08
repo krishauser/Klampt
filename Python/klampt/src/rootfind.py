@@ -123,7 +123,8 @@ def setVectorField(pVFObj):
     *pVFObj)
 
     Sets the vector field object, returns 0 if pVFObj = NULL, 1 otherwise.
-
+    See vectorfield.py for an abstract base class that can be overridden
+    to produce one of these objects. 
     """
     return _rootfind.setVectorField(pVFObj)
 

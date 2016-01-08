@@ -1190,9 +1190,33 @@ WorldModel::WorldModel(void* ptrRobotWorld)
 
 const WorldModel& WorldModel::operator = (const WorldModel& w)
 {
+  if(index >= 0) 
+    derefWorld(index);
   index = w.index;
   refWorld(index);
   return *this;
+}
+
+WorldModel WorldModel::copy()
+{
+  WorldModel res;
+  RobotWorld& myworld = *worlds[index]->world;
+  RobotWorld& otherworld = *worlds[res.index]->world;
+  otherworld = myworld;
+  //world occupants -- copy everything but geometry
+  for(size_t i=0;i<otherworld.robots.size();i++) {
+    otherworld.robots[i] = new Robot;
+    *otherworld.robots[i] = *myworld.robots[i];
+  }
+  for(size_t i=0;i<otherworld.terrains.size();i++) {
+    otherworld.terrains[i] = new Terrain;
+    *otherworld.terrains[i] = *myworld.terrains[i];
+  }
+  for(size_t i=0;i<otherworld.rigidObjects.size();i++) {
+    otherworld.rigidObjects[i] = new RigidObject;
+    *otherworld.rigidObjects[i] = *myworld.rigidObjects[i];
+  }
+  return res;
 }
 
 WorldModel::~WorldModel()
@@ -1497,6 +1521,36 @@ int WorldModel::loadElement(const char* fn)
   RobotWorld& world = *worlds[index]->world;
   int id = world.LoadElement(fn);
   return id;
+}
+
+RobotModel WorldModel::add(const char* name,const RobotModel& robot)
+{
+  if(robot.robot == NULL)
+    throw PyException("add(RobotModel): robot refers to NULL object");
+  RobotWorld& world = *worlds[index]->world;
+  world.robots.push_back(new Robot);
+  *world.robots.back() = *robot.robot;
+  return this->robot((int)world.robots.size()-1);
+}
+
+RigidObjectModel WorldModel::add(const char* name,const RigidObjectModel& obj)
+{
+  if(obj.object == NULL)
+    throw PyException("add(RigidObjectModel): obj refers to NULL object");
+  RobotWorld& world = *worlds[index]->world;
+  world.rigidObjects.push_back(new RigidObject);
+  *world.rigidObjects.back() = *obj.object;
+  return this->rigidObject((int)world.rigidObjects.size()-1);
+}
+ 
+TerrainModel WorldModel::add(const char* name,const TerrainModel& terrain)
+{
+  if(terrain.terrain == NULL)
+    throw PyException("add(TerrianModel): terrain refers to NULL object");
+  RobotWorld& world = *worlds[index]->world;
+  world.terrains.push_back(new Terrain);
+  *world.terrains.back() = *terrain.terrain;
+  return this->terrain((int)world.terrains.size()-1);
 }
 
 void WorldModel::remove(const RobotModel& obj)
