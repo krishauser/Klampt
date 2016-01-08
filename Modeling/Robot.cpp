@@ -1098,7 +1098,10 @@ bool Robot::LoadRob(const char* fn) {
 		    continue;
 		  }
 		  if(link1 > link2) Swap(link1,link2);
-		  Assert(link1 < link2);
+		  if(!(link1 < link2)) {
+		    cerr<<"Robot::Load(): Invalid self collision pair "<<selfCollision[i].first<<", "<<selfCollision[i].second<<endl;
+		      return false;
+		  }
 		  InitSelfCollisionPair(link1,link2);
 		}
 	}
@@ -1113,7 +1116,10 @@ bool Robot::LoadRob(const char* fn) {
 		    continue;
 		}
 		  if(link1 > link2) Swap(link1,link2);
-		Assert(link1 < link2);
+		  if(!(link1 < link2)) {
+		    cerr<<"Robot::Load(): Invalid no-self collision pair "<<noSelfCollision[i].first<<", "<<noSelfCollision[i].second<<endl;
+		    return false;
+		  }
 		SafeDelete(selfCollisions(link1,link2));
 	}
 
@@ -1166,7 +1172,10 @@ bool Robot::LoadRob(const char* fn) {
 	    return false;
 	  }
 	  if(link1 > link2) Swap(link1,link2);
-	  Assert(link1 < link2);
+	  if(!(link1 < link2)) {
+	    cerr<<"Robot::Load(): Invalid self collision pair "<<selfCollision[i].first<<", "<<selfCollision[i].second<<endl;
+	    return false;
+	  }
 	  InitSelfCollisionPair(link1,link2);
 	}
 
@@ -1181,7 +1190,10 @@ bool Robot::LoadRob(const char* fn) {
 	    return false;
 	  }
 	  if(link1 > link2) Swap(link1,link2);
-	  Assert(link1 < link2);
+	  if(!(link1 < link2)) {
+	    cerr<<"Robot::Load(): Invalid no-self collision pair "<<noSelfCollision[i].first<<", "<<noSelfCollision[i].second<<endl;
+	    return false;
+	  }
 	  SafeDelete(selfCollisions(link1,link2));
 	}
 	printf("Done loading robot file %s.\n",fn);
