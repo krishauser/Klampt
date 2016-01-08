@@ -625,8 +625,14 @@ void SimTestBackend::SimStep(Real dt)
       body = sim.odesim.robot(obj.index)->baseBody(obj.bodyIndex);
       sim.odesim.robot(obj.index)->GetLinkTransform(obj.bodyIndex,T);
     }
-    Vector3 wp = T*dragWidget.hoverPt;
-    sim.hooks.push_back(new SpringHook(body,wp,dragWidget.dragPt,dragForce));
+    else {
+      fprintf(stderr,"Trying to drag terrain?\n");
+      body = NULL;
+    }
+    if(body != NULL) {
+      Vector3 wp = T*dragWidget.hoverPt;
+      sim.hooks.push_back(new SpringHook(body,wp,dragWidget.dragPt,dragForce));
+    }
   }
   else
     forceSpringActive = false;
