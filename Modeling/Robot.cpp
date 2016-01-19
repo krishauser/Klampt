@@ -1654,17 +1654,35 @@ void concat(Array2D<T>& x, const Array2D<T>& y, T emptyVal = 0) {
 
 void Robot::Mount(int link, const Geometry::AnyGeometry3D& mesh,
 		const RigidTransform& T) {
-  if(!geometry[link]) 
-    geometry[link] = new Geometry::AnyCollisionGeometry3D(mesh);
+  if(!geometry[link]) {
+    if(link >= (int)geomManagers.size()) {
+      printf("Mount: Need to add geometry managers?\n");
+      geomManagers.resize(geometry.size());
+    }
+    geomManagers[link].CreateEmpty();
+    *geomManagers[link] = mesh;
+    geomManagers[link]->Transform(Matrix4(T));
+    geometry[link] = geomManagers[link];
+    geomManagers[link].Appearance()->Set(*geometry[link]);
+  }
   else {
     vector<Geometry::AnyGeometry3D> mergeMeshes(2);
     mergeMeshes[0] = *geometry[link];
     mergeMeshes[1] = mesh;
     mergeMeshes[1].Transform(Matrix4(T));
-    geomManagers[link].RemoveFromCache();
-    geometry[link]->Merge(mergeMeshes);
-    geomManagers[link].SetUniqueAppearance();
+    if(link < (int)geomManagers.size()) {
+      geomManagers[link].RemoveFromCache();
+      geomManagers[link].SetUniqueAppearance();
+    }
+    else {
+      printf("Mount: Need to add geometry managers?\n");
+      geomManagers.resize(geometry.size());
+    }
+    geomManagers[link].CreateEmpty();
+    geomManagers[link]->Merge(mergeMeshes);
+    geometry[link] = geomManagers[link];
     geomManagers[link].Appearance()->Set(*geometry[link]);
+
   }
   //need to reinitialize all self collisions with this mesh
 }
@@ -2478,6 +2496,7 @@ bool Robot::LoadURDF(const char* fn)
 	this->parents.resize(links_size);
 	this->linkNames.resize(links_size);
 	this->geometry.resize(links_size);
+	this->geomManagers.resize(links_size);
 	this->geomFiles.resize(links_size);
 	this->q.resize(links_size);
 	this->q.setZero();
