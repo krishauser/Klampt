@@ -229,8 +229,8 @@ void ManagedGeometry::SetUniqueAppearance()
 {
   if(appearance) {
     appearance = new GLDraw::GeometryAppearance(*appearance);
-    if(geometry)
-      appearance->Set(*geometry);
+    //if(geometry)
+     //appearance->Set(*geometry);
   }
 }
 
