@@ -1,7 +1,7 @@
 #include "TriangleSampler.h"
 #include <KrisLibrary/math/sample.h>
-
-
+#include <iostream>
+#include <stdio.h>
 
 void Triangle2DSampler::InitAreas()
 {

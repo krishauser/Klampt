@@ -28,11 +28,11 @@ Real DistanceQuery::UpdateQuery()
   Real d;
   switch(s) {
   case Far:
-    //cout<<"Warning: we seem to have already evaluated distance"<<endl;
+    //printf("Warning: we seem to have already evaluated distance\n");
     return distanceTolerance;
 
   case Close:
-    //cout<<"Warning: we seem to have already evaluated distance"<<endl;
+    //printf("Warning: we seem to have already evaluated distance\n");
     //return query->Distance_Cached();
     return query->Distance(distanceAbsErr,distanceRelErr);
 
@@ -81,7 +81,7 @@ bool DistanceQuery::ClosestPoints(Vector3& cp1, Vector3& cp2, Vector3& dir)
   switch(s) {
   case Far: case Close: case Contact: break;
   default:
-    cout<<"Warning: querying closest points without an updated query"<<endl;
+    printf("Warning: querying closest points without an updated query\n");
     UpdateQuery();
     break;
   }
