@@ -18,22 +18,22 @@ import hold
 
 
 def writeVector(q):
-    """Writes a vector to text in the length-prepended format 'n v1 ... vn'"""
+    """Writes a vector to a string in the length-prepended format 'n v1 ... vn'"""
     return str(len(q))+'\t'+' '.join(str(v) for v in q)
 
 def readVector(text):
-    """Reads a length-prepended vector from text 'n v1 ... vn'"""
+    """Reads a length-prepended vector from a string 'n v1 ... vn'"""
     items = text.split()
     if int(items[0])+1 != len(items):
         raise ValueError("Invalid number of items")
     return [float(v) for v in items[1:]]
 
 def writeVectorRaw(x):
-    """Writes a vector to text in the raw format 'v1 ... vn'"""
+    """Writes a vector to a string in the raw format 'v1 ... vn'"""
     return ' '.join(str(xi) for xi in x)
 
 def readVectorRaw(text):
-    """Reads a vector from raw text 'v1 ... vn'"""
+    """Reads a vector from a raw string 'v1 ... vn'"""
     items = text.split()
     return [float(v) for v in items]
 
@@ -56,7 +56,7 @@ def readVectorList(text):
 
 
 def writeMatrix(x):
-    """Writes a matrix to text in the format
+    """Writes a matrix to a string in the format
     m n
     x11 x12 ... x1n
     ...
@@ -65,7 +65,7 @@ def writeMatrix(x):
     return '\n'.join([str(len(x))+' '+str(len(x[0]))]+[writeVectorRaw(xi) for xi in x])
 
 def readMatrix(text):
-    """Reads a matrix from text in the format
+    """Reads a matrix from a string in the format
     m n
     x11 x12 ... x1n
     ...
@@ -112,11 +112,11 @@ def readSe3(text):
     return (so3.inv([float(v) for v in items[:9]]),[float(v) for v in items[9:]])
 
 def writeMatrix3(x):
-    """Writes a 3x3 matrix from text"""
+    """Writes a 3x3 matrix to a string"""
     return writeSo3(so3.from_matrix(text))
 
 def readMatrix3(text):
-    """Reads a 3x3 matrix from text"""
+    """Reads a 3x3 matrix from a string"""
     return so3.matrix(readSo3(text))
 
 def writeContactPoint(cp):
@@ -124,18 +124,50 @@ def writeContactPoint(cp):
     return ' '.join(str(v) for v in (cp.x+cp.n+[cp.kFriction]))
 
 def readContactPoint(text):
-    """Reads a contact point from text 'x1 x2 x3 n1 n2 n3 kFriction'"""
+    """Reads a contact point from a string 'x1 x2 x3 n1 n2 n3 kFriction'"""
     items = text.split()
     if len(items)!=7:
         raise ValueError("Invalid number of items, should be 7")
     return ContactPoint([float(v) for v in items[0:3]],[float(v) for v in items[3:6]],float(items[6]))
 
 def writeContactPoint(cp):
-    """Writes a contact point to text 'x1 x2 x3 n1 n2 n3 kFriction'"""
+    """Writes a contact point to a string 'x1 x2 x3 n1 n2 n3 kFriction'"""
     return ' '.join([str(v) for v in cp.x+cp.n+[cp.kFriction]]) 
     
 def readIKObjective(text):
-    """Reads an IKObjective from text"""
+    """Reads an IKObjective from a string in the Klamp't native format
+    
+    'link destLink posConstraintType [pos constraint items] ...
+    rotConstraintType [rot constraint items]'
+    
+    where link and destLink are integers, posConstraintType is one of
+    - N: no constraint
+    - P: position constrained to a plane
+    - L: position constrained to a line
+    - F: position constrained to a point
+    and rotConstraintType is one of
+    - N: no constraint
+    - T: two-axis constraint (not supported)
+    - A: rotation constrained about axis 
+    - F: fixed rotation
+
+    The [pos constraint items] contain a variable number of whitespace-
+    separated items, dependending on posConstraintType:
+    - N: 0 items
+    - P: the local position xl yl zl, world position x y z on the plane, and
+      plane normal nx,ny,nz
+    - L: the local position xl yl zl, world position x y z on the line, and
+      line axis direction nx,ny,nz
+    - F: the local position xl yl zl and world position x y z
+
+    The [rot constraint items] contain a variable number of whitespace-
+    separated items, dependending on rotConstraintType:
+    - N: 0 items
+    - T: not supported
+    - A: the local axis xl yl zl and the world axis x y z
+    - F: the world rotation matrix, in moment (aka exponential map) form
+      mx my mz (see so3.from_moment()
+    """
     items = text.split()
     if len(items) < 4:
         raise ValueError("Not enough items to unpack")
@@ -386,7 +418,7 @@ loaders = {'Trajectory':loadTrajectory,
            }
 
 savers = {'Trajectory':lambda x,fn:x.save(fn),
-           'MultiPath':lambda x,fn:x.save(fn),
+          'MultiPath':lambda x,fn:x.save(fn),
           'Geometry3D':lambda x,fn:x.saveFile(fn),
           }
 
