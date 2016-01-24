@@ -1207,6 +1207,7 @@ WorldModel WorldModel::copy()
   for(size_t i=0;i<otherworld.robots.size();i++) {
     otherworld.robots[i] = new Robot;
     *otherworld.robots[i] = *myworld.robots[i];
+    otherworld.robotViews[i].robot = otherworld.robots[i];
   }
   for(size_t i=0;i<otherworld.terrains.size();i++) {
     otherworld.terrains[i] = new Terrain;
