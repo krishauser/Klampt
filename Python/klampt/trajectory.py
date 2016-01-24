@@ -322,7 +322,7 @@ class SE3Trajectory(GeodesicTrajectory):
 		if localPt is None:
 			return Trajectory(times,[m[9:] for m in self.milestones])
 		else:
-			return Trajectory(times,[se3.apply((m[:9],m[9:],localPt) for m in self.milestones])
+			return Trajectory(times,[se3.apply((m[:9],m[9:]),localPt) for m in self.milestones])
 	def constructor(self):
 		return SE3Trajectory
 
