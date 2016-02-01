@@ -1,5 +1,6 @@
 #include "Command.h"
 #include <KrisLibrary/math/angle.h>
+#include <KrisLibrary/myfile.h>
 #include <KrisLibrary/errors.h>
 
 ActuatorCommand::ActuatorCommand()
