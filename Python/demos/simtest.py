@@ -41,17 +41,18 @@ class MyGLViewer(GLRealtimeProgram):
         self.sim.updateWorld()
         self.world.drawGL()
 
-        #draw commanded configurations
-        glEnable(GL_BLEND)
-        glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA)
-        glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,[0,1,0,0.5])
+        #draw commanded configurations in transparent green
         for i in xrange(self.world.numRobots()):
             r = self.world.robot(i)
             mode = self.sim.controller(i).getControlType()
             if mode == "PID":
                 q = self.sim.controller(i).getCommandedConfig()
                 r.setConfig(q)
-                r.drawGL(False)
+                for j in range(r.numLinks()):
+                    r.link(j).appearance().setColor(0,1,0,0.5)
+                r.drawGL()
+                for j in range(r.numLinks()):
+                    r.link(j).appearance().setColor(0.5,0.5,0.5,1)
         glDisable(GL_BLEND)
 
         #draw controller
