@@ -885,11 +885,10 @@ void Appearance::setColor(float r,float g,float b,float a)
   if(!isStandalone()) {
     RobotWorld& world=*worlds[this->world]->world;
     GetManagedGeometry(world,id).SetUniqueAppearance();
+    appearancePtr = GetManagedGeometry(world,id).Appearance();
   }
   GLDraw::GeometryAppearance* app = reinterpret_cast<GLDraw::GeometryAppearance*>(appearancePtr);
-  app->vertexColor.set(r,g,b,a);
-  app->edgeColor.set(r,g,b,a);
-  app->faceColor.set(r,g,b,a);
+  app->SetColor(r,g,b,a);
 }
 
 void Appearance::setColor(int primitive,float r,float g,float b,float a)
@@ -902,13 +901,25 @@ void Appearance::setColor(int primitive,float r,float g,float b,float a)
   GLDraw::GeometryAppearance* app = reinterpret_cast<GLDraw::GeometryAppearance*>(appearancePtr);
   switch(primitive) {
   case ALL:
-    app->vertexColor.set(r,g,b,a);
-    app->edgeColor.set(r,g,b,a);
-    app->faceColor.set(r,g,b,a);
+    app->SetColor(r,g,b,a);
     break;
-  case VERTICES: app->vertexColor.set(r,g,b,a); break;
-  case EDGES: app->edgeColor.set(r,g,b,a);  break;
-  case FACES: app->faceColor.set(r,g,b,a); break;
+  case VERTICES:
+    app->vertexColor.set(r,g,b,a);
+    if(!app->vertexColors.empty()) {
+      app->vertexColors.clear();
+      app->Refresh();
+    }
+    break;
+  case EDGES:
+    app->edgeColor.set(r,g,b,a); 
+    break;
+  case FACES:
+    app->faceColor.set(r,g,b,a);
+    if(!app->faceColors.empty()) {
+      app->faceColors.clear();
+      app->Refresh();
+    }
+    break;
   }
 }
 
