@@ -801,6 +801,7 @@ void Appearance::set(const Appearance& g)
   if(!isStandalone()) {
     RobotWorld& world=*worlds[this->world]->world;
     GetManagedGeometry(world,id).SetUniqueAppearance();
+    appearancePtr = GetManagedGeometry(world,id).Appearance();
   }
   GLDraw::GeometryAppearance* gapp = reinterpret_cast<GLDraw::GeometryAppearance*>(appearancePtr);
   if(appearancePtr == NULL) {
@@ -830,6 +831,7 @@ void Appearance::setDraw(bool draw)
   if(!isStandalone()) {
     RobotWorld& world=*worlds[this->world]->world;
     GetManagedGeometry(world,id).SetUniqueAppearance();
+    appearancePtr = GetManagedGeometry(world,id).Appearance();
   }
   GLDraw::GeometryAppearance* app = reinterpret_cast<GLDraw::GeometryAppearance*>(appearancePtr);
   if(draw) {
@@ -849,6 +851,7 @@ void Appearance::setDraw(int primitive,bool draw)
   if(!isStandalone()) {
     RobotWorld& world=*worlds[this->world]->world;
     GetManagedGeometry(world,id).SetUniqueAppearance();
+    appearancePtr = GetManagedGeometry(world,id).Appearance();
   }
   GLDraw::GeometryAppearance* app = reinterpret_cast<GLDraw::GeometryAppearance*>(appearancePtr);
   switch(primitive) {
@@ -897,6 +900,7 @@ void Appearance::setColor(int primitive,float r,float g,float b,float a)
   if(!isStandalone()) {
     RobotWorld& world=*worlds[this->world]->world;
     GetManagedGeometry(world,id).SetUniqueAppearance();
+    appearancePtr = GetManagedGeometry(world,id).Appearance();
   }
   GLDraw::GeometryAppearance* app = reinterpret_cast<GLDraw::GeometryAppearance*>(appearancePtr);
   switch(primitive) {
@@ -956,6 +960,7 @@ void Appearance::setPointSize(float size)
   if(!isStandalone()) {
     RobotWorld& world=*worlds[this->world]->world;
     GetManagedGeometry(world,id).SetUniqueAppearance();
+    appearancePtr = GetManagedGeometry(world,id).Appearance();
   }
   GLDraw::GeometryAppearance* app = reinterpret_cast<GLDraw::GeometryAppearance*>(appearancePtr);
   app->vertexSize = size;
