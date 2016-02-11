@@ -217,7 +217,7 @@ void ODERobot::Create(dWorldID worldID,bool useBoundaryLayer)
 	bodyObjects[i].inertia += (inertiaLink*robot.links[link].mass);
 
 	//get transformed mesh
-	meshes[j] = *robot.geometry[link];
+	meshes[j] = Geometry::AnyGeometry3D(*robot.geometry[link]);
 	meshes[j].Transform(Trel);
       }
       bodyObjects[i].com /= bodyObjects[i].mass;
