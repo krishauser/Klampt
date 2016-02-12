@@ -5,6 +5,7 @@
 #include <KrisLibrary/GLdraw/GLColor.h>
 #include <deque>
 #include <vector>
+#include <string>
 using namespace std;
 
 class ViewPlot

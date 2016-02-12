@@ -5,6 +5,7 @@
 #include <KrisLibrary/math/random.h>
 #include <KrisLibrary/meshing/LSConformalMapping.h>
 #include <map>
+#include <iostream>
 using namespace std;
 using namespace Math;
 using namespace Meshing;

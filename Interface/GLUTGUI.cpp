@@ -6,6 +6,7 @@
 #endif
 #include <limits.h>
 #include <assert.h>
+#include <iostream>
 #include <stdio.h>
 
 const char* special_map(int k) {

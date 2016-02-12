@@ -36,10 +36,6 @@ void ODEGeometry::Create(AnyCollisionGeometry3D* geom,dSpaceID space,Vector3 off
 {
   //printf("ODEGeometry: Collision detection method: %s\n",(useCustomMesh?"custom":"GIMPACT"));
   Clear();
-  Timer timer;
-  geom->InitCollisionData();
-  double t = timer.ElapsedTime();
-  if(t > 0.1) printf("ODEGeometry: initializing collision data took time %gs\n",t);
   if(!useCustomMesh) {
     Assert(geom->type == AnyGeometry3D::TriangleMesh);
     const TriMesh& mesh = *AnyCast<TriMesh>(&geom->data);
@@ -113,6 +109,11 @@ void ODEGeometry::Create(AnyCollisionGeometry3D* geom,dSpaceID space,Vector3 off
   */
   }
   else {
+    Timer timer;
+    geom->InitCollisionData();
+    double t = timer.ElapsedTime();
+    if(t > 0.1) printf("ODEGeometry: initializing collision data took time %gs\n",t);
+
     //add offsets
     collisionGeometry = geom;
     geomID = dCreateCustomGeometry(collisionGeometry,0.0);

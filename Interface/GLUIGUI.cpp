@@ -3,6 +3,7 @@
 #include <sstream>
 #include <assert.h>
 #include <stdio.h>
+#include <iostream>
 
 #include <GL/glui.h>
 

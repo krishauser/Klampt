@@ -3,6 +3,7 @@
 #include <KrisLibrary/math/random.h>
 #include <stdio.h>
 #include <KrisLibrary/GLdraw/GLUTString.h>
+#include <iostream>
 using namespace GLDraw;
 
 ViewPlot::ViewPlot()

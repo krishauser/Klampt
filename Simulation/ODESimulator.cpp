@@ -12,6 +12,7 @@
 #include <KrisLibrary/utils/permutation.h>
 #include <ode/ode.h>
 #include <KrisLibrary/Timer.h>
+#include <KrisLibrary/myfile.h>
 #ifndef WIN32
 #include <unistd.h>
 #endif //WIN32

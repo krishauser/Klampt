@@ -2,6 +2,7 @@
 #include "HoldReader.h"
 #include <KrisLibrary/math3d/rotation.h>
 //#include <Robotics/IKUtils.h>
+#include <iostream>
 #include <sstream>
 
 void Hold::Transform(const RigidTransform& T)

@@ -6,12 +6,6 @@
 #include <map>
 using namespace GLDraw;
 
-void Modulate(GLDraw::GeometryAppearance& app,const GLColor& color,Real fraction)
-{
-  //TODO: implement blending with vertex colors?
-  app.faceColor.blend(GLColor(app.faceColor),color,fraction);
-  app.vertexColor.blend(GLColor(app.vertexColor),color,fraction);
-}
 
 RobotLinkPoseWidget::RobotLinkPoseWidget()
   :robot(NULL),viewRobot(NULL),highlightColor(1,1,0,1),hoverLink(-1),draw(true)
@@ -124,7 +118,7 @@ void RobotLinkPoseWidget::DrawGL(Camera::Viewport& viewport)
       viewRobot->Appearance(i) = poserAppearance[i];
     if(hasHighlight || hasFocus) {
       for(size_t i=0;i<highlightedLinks.size();i++)
-	Modulate(viewRobot->Appearance(highlightedLinks[i]),highlightColor,0.5);
+	viewRobot->Appearance(highlightedLinks[i]).ModulateColor(highlightColor,0.5);
     }
     viewRobot->Draw();
     //copy display lists, if not already initialized

@@ -211,7 +211,7 @@ class Trajectory:
 		suffix(t0)=path(t0) where t0 is the absolute start time
 		of the suffix."""
 		offset = 0
-		if time==None:
+		if time is None:
 			time = suffix.times[0]
 		if relative and len(self.times) > 0:
 			offset = self.times[-1]
@@ -220,8 +220,8 @@ class Trajectory:
 		return before.concat(suffix,relative,jumpPolicy)
 	def constructor(self):
 		"""Returns a "standard" constructor for the split / concat
-		routines, a function that takes a list of times and
-		milestones."""
+		routines.  The result should be a function that takes two
+		arguments: a list of times and a list of milestones."""
 		return Trajectory
 
 class RobotTrajectory(Trajectory):
@@ -259,6 +259,20 @@ class SO3Trajectory(GeodesicTrajectory):
 	is a 9-D klampt.so3 element."""
 	def __init__(self,times=[],milestones=[]):
 		GeodesicTrajectory.__init__(self,SO3Space(),times,milestones)
+	def preTransform(self,R):
+		"""Premultiplies every rotation in here by the so3 element
+		R. In other words, if R rotates a local frame F to frame F',
+		this method converts this SO3Trajectory from coordinates in F
+		to coordinates in F'"""
+		for i,m in enumerate(self.milestones):
+			self.milestones[i] = so3.mul(R,m)
+	def postTransform(self,R):
+		"""Postmultiplies every rotation in here by the se3 element
+		R. In other words, if R rotates a local frame F to frame F',
+		this method converts this SO3Trajectory from describing how F'
+		rotates to how F rotates."""
+		for i,m in enumerate(self.milestones):
+			self.milestones[i] = se3.mul(m,T)
 	def constructor(self):
 		return SO3Trajectory
 
@@ -282,6 +296,33 @@ class SE3Trajectory(GeodesicTrajectory):
 		element"""
 		res = self.deriv(t,endBehavior)
 		return (res[:9],res[9:])
+	def preTransform(self,T):
+		"""Premultiplies every transform in here by the se3 element
+		T. In other words, if T transforms a local frame F to frame F',
+		this method converts this SE3Trajectory from coordinates in F
+		to coordinates in F'"""
+		for i,m in enumerate(self.milestones):
+			Tm = (m[:9],m[9:])
+			self.milestones[i] = se3.mul(T,Tm)
+	def postTransform(self,T):
+		"""Postmultiplies every transform in here by the se3 element
+		T. In other words, if T transforms a local frame F to frame F',
+		this method converts this SE3Trajectory from describing how F'
+		moves to how F moves."""
+		for i,m in enumerate(self.milestones):
+			Tm = (m[:9],m[9:])
+			self.milestones[i] = se3.mul(Tm,T)
+	def getRotationTrajectory(self):
+		"""Returns an SO3Trajectory describing the rotation
+		trajectory."""
+		return SO3Trajectory(times,[m[:9] for m in self.milestones])
+	def getPositionTrajectory(self,localPt=None):
+		"""Returns a Trajectory describing the movement of the given
+		local point localPt (or the origin, if none is provided)."""
+		if localPt is None:
+			return Trajectory(times,[m[9:] for m in self.milestones])
+		else:
+			return Trajectory(times,[se3.apply((m[:9],m[9:]),localPt) for m in self.milestones])
 	def constructor(self):
 		return SE3Trajectory
 
@@ -298,7 +339,7 @@ class HermiteTrajectory(Trajectory):
 		
 		Otherwise, the milestones are interpreted as states (x,dx)
 		"""
-		if dmilestones==None:
+		if dmilestones is None:
 			Trajectory.__init__(self,times,milestones)
 		else:
 			#interpret as config/velocity

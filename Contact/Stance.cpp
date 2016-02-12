@@ -1,9 +1,9 @@
 #include "Stance.h"
 #include "HoldReader.h"
 #include <KrisLibrary/statistics/OLS.h>
-//#include "Environment.h"
 #include <KrisLibrary/utils/SimpleParser.h>
 #include <string>
+#include <iostream>
 
 bool Stance::remove(int link)
 {

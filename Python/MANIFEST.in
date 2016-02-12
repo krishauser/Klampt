@@ -1,0 +1,3 @@
+ recursive-include klampt/ *.py
+ recursive-include klampt/src *.h
+ recursive-include klampt/src *.cpp

@@ -1,6 +1,7 @@
 #include "Polygon2DSampler.h"
 #include <KrisLibrary/math/random.h>
 #include <KrisLibrary/errors.h>
+#include <iostream>
 using namespace Math;
 
 //rayBound caps rays at the given distance

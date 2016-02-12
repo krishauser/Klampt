@@ -801,6 +801,7 @@ void Appearance::set(const Appearance& g)
   if(!isStandalone()) {
     RobotWorld& world=*worlds[this->world]->world;
     GetManagedGeometry(world,id).SetUniqueAppearance();
+    appearancePtr = GetManagedGeometry(world,id).Appearance();
   }
   GLDraw::GeometryAppearance* gapp = reinterpret_cast<GLDraw::GeometryAppearance*>(appearancePtr);
   if(appearancePtr == NULL) {
@@ -830,6 +831,7 @@ void Appearance::setDraw(bool draw)
   if(!isStandalone()) {
     RobotWorld& world=*worlds[this->world]->world;
     GetManagedGeometry(world,id).SetUniqueAppearance();
+    appearancePtr = GetManagedGeometry(world,id).Appearance();
   }
   GLDraw::GeometryAppearance* app = reinterpret_cast<GLDraw::GeometryAppearance*>(appearancePtr);
   if(draw) {
@@ -849,6 +851,7 @@ void Appearance::setDraw(int primitive,bool draw)
   if(!isStandalone()) {
     RobotWorld& world=*worlds[this->world]->world;
     GetManagedGeometry(world,id).SetUniqueAppearance();
+    appearancePtr = GetManagedGeometry(world,id).Appearance();
   }
   GLDraw::GeometryAppearance* app = reinterpret_cast<GLDraw::GeometryAppearance*>(appearancePtr);
   switch(primitive) {
@@ -885,11 +888,10 @@ void Appearance::setColor(float r,float g,float b,float a)
   if(!isStandalone()) {
     RobotWorld& world=*worlds[this->world]->world;
     GetManagedGeometry(world,id).SetUniqueAppearance();
+    appearancePtr = GetManagedGeometry(world,id).Appearance();
   }
   GLDraw::GeometryAppearance* app = reinterpret_cast<GLDraw::GeometryAppearance*>(appearancePtr);
-  app->vertexColor.set(r,g,b,a);
-  app->edgeColor.set(r,g,b,a);
-  app->faceColor.set(r,g,b,a);
+  app->SetColor(r,g,b,a);
 }
 
 void Appearance::setColor(int primitive,float r,float g,float b,float a)
@@ -898,17 +900,30 @@ void Appearance::setColor(int primitive,float r,float g,float b,float a)
   if(!isStandalone()) {
     RobotWorld& world=*worlds[this->world]->world;
     GetManagedGeometry(world,id).SetUniqueAppearance();
+    appearancePtr = GetManagedGeometry(world,id).Appearance();
   }
   GLDraw::GeometryAppearance* app = reinterpret_cast<GLDraw::GeometryAppearance*>(appearancePtr);
   switch(primitive) {
   case ALL:
-    app->vertexColor.set(r,g,b,a);
-    app->edgeColor.set(r,g,b,a);
-    app->faceColor.set(r,g,b,a);
+    app->SetColor(r,g,b,a);
     break;
-  case VERTICES: app->vertexColor.set(r,g,b,a); break;
-  case EDGES: app->edgeColor.set(r,g,b,a);  break;
-  case FACES: app->faceColor.set(r,g,b,a); break;
+  case VERTICES:
+    app->vertexColor.set(r,g,b,a);
+    if(!app->vertexColors.empty()) {
+      app->vertexColors.clear();
+      app->Refresh();
+    }
+    break;
+  case EDGES:
+    app->edgeColor.set(r,g,b,a); 
+    break;
+  case FACES:
+    app->faceColor.set(r,g,b,a);
+    if(!app->faceColors.empty()) {
+      app->faceColors.clear();
+      app->Refresh();
+    }
+    break;
   }
 }
 
@@ -945,6 +960,7 @@ void Appearance::setPointSize(float size)
   if(!isStandalone()) {
     RobotWorld& world=*worlds[this->world]->world;
     GetManagedGeometry(world,id).SetUniqueAppearance();
+    appearancePtr = GetManagedGeometry(world,id).Appearance();
   }
   GLDraw::GeometryAppearance* app = reinterpret_cast<GLDraw::GeometryAppearance*>(appearancePtr);
   app->vertexSize = size;
@@ -1207,6 +1223,7 @@ WorldModel WorldModel::copy()
   for(size_t i=0;i<otherworld.robots.size();i++) {
     otherworld.robots[i] = new Robot;
     *otherworld.robots[i] = *myworld.robots[i];
+    otherworld.robotViews[i].robot = otherworld.robots[i];
   }
   for(size_t i=0;i<otherworld.terrains.size();i++) {
     otherworld.terrains[i] = new Terrain;

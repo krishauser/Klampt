@@ -80,7 +80,7 @@ bool RigidObject::Load(const char* fn)
       geomT(2,3)=trans[2];
       f.erase("geomtranslate");
     }
-    if(ident != geomT) {
+    if(!(ident == geomT)) {
       geometry.TransformGeometry(geomT);  
     }
     if(f.count("T")==0) { T.setIdentity(); }
