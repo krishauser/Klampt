@@ -595,16 +595,19 @@ bool Geometry3D::attachToStream(const char* protocol,const char* name,const char
     if(0==strcmp(type,""))
       type = "PointCloud";
     if(0 == strcmp(type,"PointCloud")) {
+      if(!isStandalone()) {
+	RobotWorld& world=*worlds[this->world]->world;
+	GetManagedGeometry(world,id).RemoveFromCache();
+	return GetManagedGeometry(world,id).Load((string("ros:PointCloud2//")+string(name)).c_str());
+      }
+      printf("Warning, attaching to a ROS stream without a ManagedGeometry.\n");
+      printf("You will not be able to automatically get updates from ROS.\n");
       if(!geomPtr) 
         geomPtr = new AnyCollisionGeometry3D();
       AnyCollisionGeometry3D* geom = reinterpret_cast<AnyCollisionGeometry3D*>(geomPtr);
       (*geom) = AnyCollisionGeometry3D(Meshing::PointCloud3D());
-      if(!isStandalone()) {
-	RobotWorld& world=*worlds[this->world]->world;
-	GetManagedGeometry(world,id).RemoveFromCache();
-      }
       return ROSSubscribePointCloud(geom->AsPointCloud(),name);
-      //TODO: update the appearance every time the point cloud changes
+      //TODO: update ROS, update the appearance every time the point cloud changes
     }
     else {
       throw PyException("Geometry3D::attachToStream: Unsupported type argument");
@@ -775,7 +778,14 @@ void Appearance::refresh(bool deep)
 {
   if(!appearancePtr) return;
   GLDraw::GeometryAppearance* app = reinterpret_cast<GLDraw::GeometryAppearance*>(appearancePtr);
-  if(deep && app->geom != NULL)
+  if(!isStandalone()) {
+    ManagedGeometry& geom = GetManagedGeometry(*worlds[this->world]->world,id);
+    if(geom.IsDynamicGeometry()) {
+      if(geom.DynamicGeometryUpdate()) return;
+      return;
+    }
+  }
+  if(deep && app->geom != NULL) 
     app->Set(*app->geom);
   else
     app->Refresh();
