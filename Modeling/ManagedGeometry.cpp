@@ -201,9 +201,15 @@ void ManagedGeometry::TransformGeometry(const Math3D::Matrix4& xform)
     RemoveFromCache();
     geometry->Transform(xform);
     geometry->ClearCollisionData();
-    //may need to refresh appearance?
-    appearance->geom = geometry;
+    OnGeometryChange();
   }
+}
+
+void ManagedGeometry::OnGeometryChange()
+{
+  //may need to refresh appearance?
+  if(geometry && appearance)
+     appearance->Set(*geometry);
 }
 
 ManagedGeometry::AppearancePtr ManagedGeometry::Appearance()
@@ -229,8 +235,6 @@ void ManagedGeometry::SetUniqueAppearance()
 {
   if(appearance) {
     appearance = new GLDraw::GeometryAppearance(*appearance);
-    //if(geometry)
-     //appearance->Set(*geometry);
   }
 }
 
@@ -265,7 +269,7 @@ bool ManagedGeometry::DynamicGeometryUpdate()
 {
   if(0==strncmp(dynamicGeometrySource.c_str(),"ros://",6)) {
     if(ROSHadUpdate(dynamicGeometrySource.c_str())) {
-      appearance->Set(*geometry);
+      OnGeometryChange();
       return true;
     }
   }

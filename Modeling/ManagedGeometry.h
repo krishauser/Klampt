@@ -64,6 +64,8 @@ class ManagedGeometry
   ///Makes this item have its own appearance data separate from all other
   ///instances of this object.
   void SetUniqueAppearance();
+  ///If the geometry is changed, call this to update the appearance
+  void OnGeometryChange();
   ///Renders the object using OpenGL
   void DrawGL();
   ///Returns true if this geometry is connected to a dynamic source
