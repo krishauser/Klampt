@@ -864,7 +864,7 @@ bool ROSSubscribeJointState(Robot& robot,const char* topic)
 }
 bool ROSSubscribePointCloud(Meshing::PointCloud3D& pc,const char* topic)
 {
-  printf("ROSSubscribePointCLoud %s\n",topic);
+  printf("ROSSubscribePointCloud %s\n",topic);
   return RosSubscribe<Meshing::PointCloud3D,sensor_msgs::PointCloud2>(pc,topic);
 }
 
