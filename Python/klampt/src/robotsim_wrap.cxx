@@ -32474,19 +32474,19 @@ SWIGINTERN PyObject *_wrap_new_WorldModel(PyObject *self, PyObject *args) {
   }
   if (argc == 1) {
     int _v;
-    int res = SWIG_ConvertPtr(argv[0], 0, SWIGTYPE_p_WorldModel, 0);
-    _v = SWIG_CheckState(res);
-    if (_v) {
-      return _wrap_new_WorldModel__SWIG_3(self, args);
-    }
-  }
-  if (argc == 1) {
-    int _v;
     void *ptr = 0;
     int res = SWIG_ConvertPtr(argv[0], &ptr, 0, 0);
     _v = SWIG_CheckState(res);
     if (_v) {
       return _wrap_new_WorldModel__SWIG_1(self, args);
+    }
+  }
+  if (argc == 1) {
+    int _v;
+    int res = SWIG_ConvertPtr(argv[0], 0, SWIGTYPE_p_WorldModel, 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      return _wrap_new_WorldModel__SWIG_3(self, args);
     }
   }
   if (argc == 1) {
