@@ -10,6 +10,15 @@
  * @brief A class that adds a feedforward torque to the basic
  * control.  The necessary feedforward torque is estimated assuming the
  * robot is fixed-base.
+ *
+ * Settings:
+ * - enableGravityCompensation (boolean, default true): true if gravity
+ *   compensation should be turned on.
+ * - enableFeedforwardAcceleration (boolean, default true): true if feedforward
+ *   estimation of the inertial and coriolis terms, based on the finite
+ *   differencing of the sensed velocity, should be turned on.
+ * - gravity (Vector3, default (0,0,-9.8)) the gravity vector estimate for
+ *   gravity compensation.
  */
 class FeedforwardController : public RobotController
 {
