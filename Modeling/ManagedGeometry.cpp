@@ -125,7 +125,6 @@ bool ManagedGeometry::LoadNoCache(const std::string& filename)
 	printf("ManagedGeometry: loaded %s in time %gs\n",filename.c_str(),t);
       if(geometry->type == Geometry::AnyGeometry3D::TriangleMesh) {
 	if(geometry->TriangleMeshAppearanceData() != NULL) {
-	  printf("ManagedGeometry: Got texture information with file %s\n",filename.c_str());
 	  appearance = new GLDraw::GeometryAppearance(*geometry->TriangleMeshAppearanceData());
 	  appearance->Set(*geometry);
 	}
