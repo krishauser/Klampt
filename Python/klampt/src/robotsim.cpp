@@ -438,20 +438,23 @@ Geometry3D Geometry3D::clone()
 void Geometry3D::set(const Geometry3D& g)
 {
   AnyCollisionGeometry3D* ggeom = reinterpret_cast<AnyCollisionGeometry3D*>(g.geomPtr);
+  RobotWorld& world = *worlds[this->world]->world;
+  ManagedGeometry* mgeom = NULL;
+  if(!isStandalone()) mgeom = &GetManagedGeometry(world,id);
   if(geomPtr == NULL) {
-    geomPtr = new AnyCollisionGeometry3D(*ggeom);
-  }
-  else {
-    AnyCollisionGeometry3D* geom = reinterpret_cast<AnyCollisionGeometry3D*>(geomPtr);
-    *geom = *ggeom;
+    if(mgeom) {
+      geomPtr = mgeom->CreateEmpty();
+    }
+    else
+      geomPtr = new AnyCollisionGeometry3D();
   }
   AnyCollisionGeometry3D* geom = reinterpret_cast<AnyCollisionGeometry3D*>(geomPtr);
+  *geom = *ggeom;
   geom->ClearCollisionData();
-  if(!isStandalone()) {
+  if(mgeom) {
     //update the display list / cache
-    RobotWorld& world=*worlds[this->world]->world;
-    world.GetAppearance(id)->Set(*geom);
-    GetManagedGeometry(world,id).RemoveFromCache();
+    mgeom->OnGeometryChange();
+    mgeom->RemoveFromCache();
   }
 }
 
@@ -511,16 +514,21 @@ GeometricPrimitive Geometry3D::getGeometricPrimitive()
 
 void Geometry3D::setTriangleMesh(const TriangleMesh& mesh)
 {
-  if(!geomPtr) {
-    geomPtr = new AnyCollisionGeometry3D();
+  RobotWorld& world = *worlds[this->world]->world;
+  ManagedGeometry* mgeom = NULL;
+  if(!isStandalone()) mgeom = &GetManagedGeometry(world,id);
+  if(geomPtr == NULL) {
+    if(mgeom) 
+      geomPtr = mgeom->CreateEmpty();
+    else
+      geomPtr = new AnyCollisionGeometry3D();
   }
   AnyCollisionGeometry3D* geom = reinterpret_cast<AnyCollisionGeometry3D*>(geomPtr);
   GetMesh(mesh,*geom);
-  if(!isStandalone()) {
+  if(mgeom) {
     //update the display list / cache
-    RobotWorld& world=*worlds[this->world]->world;
-    world.GetAppearance(id)->Set(*geom);
-    GetManagedGeometry(world,id).RemoveFromCache();
+    mgeom->OnGeometryChange();
+    mgeom->RemoveFromCache();
   }
 }
 
@@ -536,38 +544,52 @@ PointCloud Geometry3D::getPointCloud()
 
 void Geometry3D::setPointCloud(const PointCloud& pc)
 {
-  if(!geomPtr) {
-    geomPtr = new AnyCollisionGeometry3D();
+  RobotWorld& world = *worlds[this->world]->world;
+  ManagedGeometry* mgeom = NULL;
+  if(!isStandalone()) mgeom = &GetManagedGeometry(world,id);
+  if(geomPtr == NULL) {
+    if(mgeom) {
+      geomPtr = mgeom->CreateEmpty();
+    }
+    else
+      geomPtr = new AnyCollisionGeometry3D();
   }
   AnyCollisionGeometry3D* geom = reinterpret_cast<AnyCollisionGeometry3D*>(geomPtr);
   GetPointCloud(pc,*geom);
-  if(!isStandalone()) {
+  //this is already called
+  //geom->ClearCollisionData();
+  if(mgeom) {
     //update the display list / cache
-    RobotWorld& world=*worlds[this->world]->world;
-    world.GetAppearance(id)->Set(*geom);
-    GetManagedGeometry(world,id).RemoveFromCache();
+    mgeom->OnGeometryChange();
+    mgeom->RemoveFromCache();
   }
 }
 
 void Geometry3D::setGeometricPrimitive(const GeometricPrimitive& prim)
 {
-  if(!geomPtr) {
-    geomPtr = new AnyCollisionGeometry3D();
+  RobotWorld& world = *worlds[this->world]->world;
+  ManagedGeometry* mgeom = NULL;
+  if(!isStandalone()) mgeom = &GetManagedGeometry(world,id);
+  if(geomPtr == NULL) {
+    if(mgeom) {
+      geomPtr = mgeom->CreateEmpty();
+    }
+    else
+      geomPtr = new AnyCollisionGeometry3D();
   }
   AnyCollisionGeometry3D* geom = reinterpret_cast<AnyCollisionGeometry3D*>(geomPtr);
   stringstream ss(prim.saveString());
   GeometricPrimitive3D g;
   ss>>g;
   if(!ss) {
-    throw PyException("Internal error");
+    throw PyException("Internal error, can't read geometric primitive?");
   }
   *geom = g;
   geom->ClearCollisionData();
-  if(!isStandalone()) {
+  if(mgeom) {
     //update the display list / cache
-    RobotWorld& world=*worlds[this->world]->world;
-    world.GetAppearance(id)->Set(*geom);
-    GetManagedGeometry(world,id).RemoveFromCache();
+    mgeom->OnGeometryChange();
+    mgeom->RemoveFromCache();
   }
 }
 
@@ -582,7 +604,8 @@ bool Geometry3D::loadFile(const char* fn)
     if(!geom->Load(fn)) return false;
   }
   else {
-    //use the manager, this will automatically figure out caching stuff
+    //use the manager, this will automatically figure out caching and
+    //appearance stuff
     RobotWorld& world=*worlds[this->world]->world;
     return GetManagedGeometry(world,id).Load(fn);
   }
@@ -595,16 +618,19 @@ bool Geometry3D::attachToStream(const char* protocol,const char* name,const char
     if(0==strcmp(type,""))
       type = "PointCloud";
     if(0 == strcmp(type,"PointCloud")) {
+      if(!isStandalone()) {
+	RobotWorld& world=*worlds[this->world]->world;
+	GetManagedGeometry(world,id).RemoveFromCache();
+	return GetManagedGeometry(world,id).Load((string("ros:PointCloud2//")+string(name)).c_str());
+      }
+      printf("Warning, attaching to a ROS stream without a ManagedGeometry.\n");
+      printf("You will not be able to automatically get updates from ROS.\n");
       if(!geomPtr) 
         geomPtr = new AnyCollisionGeometry3D();
       AnyCollisionGeometry3D* geom = reinterpret_cast<AnyCollisionGeometry3D*>(geomPtr);
       (*geom) = AnyCollisionGeometry3D(Meshing::PointCloud3D());
-      if(!isStandalone()) {
-	RobotWorld& world=*worlds[this->world]->world;
-	GetManagedGeometry(world,id).RemoveFromCache();
-      }
       return ROSSubscribePointCloud(geom->AsPointCloud(),name);
-      //TODO: update the appearance every time the point cloud changes
+      //TODO: update ROS, update the appearance every time the point cloud changes
     }
     else {
       throw PyException("Geometry3D::attachToStream: Unsupported type argument");
@@ -660,8 +686,9 @@ void Geometry3D::translate(const double t[3])
   if(!isStandalone()) {
     //update the display list / cache
     RobotWorld& world=*worlds[this->world]->world;
-    world.GetAppearance(id)->Set(*geom);
-    GetManagedGeometry(world,id).RemoveFromCache();
+    ManagedGeometry* mgeom = &GetManagedGeometry(world,id);
+    mgeom->OnGeometryChange();
+    mgeom->RemoveFromCache();
   }
 }
 
@@ -678,8 +705,9 @@ void Geometry3D::transform(const double R[9],const double t[3])
   if(!isStandalone()) {
     //update the display list / cache
     RobotWorld& world=*worlds[this->world]->world;
-    world.GetAppearance(id)->Set(*geom);
-    GetManagedGeometry(world,id).RemoveFromCache();
+    ManagedGeometry* mgeom = &GetManagedGeometry(world,id);
+    mgeom->OnGeometryChange();
+    mgeom->RemoveFromCache();
   }
 }
 
@@ -775,7 +803,14 @@ void Appearance::refresh(bool deep)
 {
   if(!appearancePtr) return;
   GLDraw::GeometryAppearance* app = reinterpret_cast<GLDraw::GeometryAppearance*>(appearancePtr);
-  if(deep && app->geom != NULL)
+  if(!isStandalone()) {
+    ManagedGeometry& geom = GetManagedGeometry(*worlds[this->world]->world,id);
+    if(geom.IsDynamicGeometry()) {
+      if(geom.DynamicGeometryUpdate()) return;
+      return;
+    }
+  }
+  if(deep && app->geom != NULL) 
     app->Set(*app->geom);
   else
     app->Refresh();

@@ -125,7 +125,6 @@ bool ManagedGeometry::LoadNoCache(const std::string& filename)
 	printf("ManagedGeometry: loaded %s in time %gs\n",filename.c_str(),t);
       if(geometry->type == Geometry::AnyGeometry3D::TriangleMesh) {
 	if(geometry->TriangleMeshAppearanceData() != NULL) {
-	  printf("ManagedGeometry: Got texture information with file %s\n",filename.c_str());
 	  appearance = new GLDraw::GeometryAppearance(*geometry->TriangleMeshAppearanceData());
 	  appearance->Set(*geometry);
 	}
@@ -201,9 +200,15 @@ void ManagedGeometry::TransformGeometry(const Math3D::Matrix4& xform)
     RemoveFromCache();
     geometry->Transform(xform);
     geometry->ClearCollisionData();
-    //may need to refresh appearance?
-    appearance->geom = geometry;
+    OnGeometryChange();
   }
+}
+
+void ManagedGeometry::OnGeometryChange()
+{
+  //may need to refresh appearance?
+  if(geometry && appearance)
+     appearance->Set(*geometry);
 }
 
 ManagedGeometry::AppearancePtr ManagedGeometry::Appearance()
@@ -229,8 +234,6 @@ void ManagedGeometry::SetUniqueAppearance()
 {
   if(appearance) {
     appearance = new GLDraw::GeometryAppearance(*appearance);
-    //if(geometry)
-     //appearance->Set(*geometry);
   }
 }
 
@@ -265,7 +268,7 @@ bool ManagedGeometry::DynamicGeometryUpdate()
 {
   if(0==strncmp(dynamicGeometrySource.c_str(),"ros://",6)) {
     if(ROSHadUpdate(dynamicGeometrySource.c_str())) {
-      appearance->Set(*geometry);
+      OnGeometryChange();
       return true;
     }
   }
