@@ -1284,7 +1284,7 @@ bool WorldModel::readFile(const char* fn)
   RobotWorld& world = *worlds[index]->world;
 
   const char* ext=FileExtension(fn);
-  if(0==strcmp(ext,"rob")) {
+  if(0==strcmp(ext,"rob") || 0==strcmp(ext,"urdf")) {
     if(world.LoadRobot(fn)<0) {
       printf("Error loading robot file %s\n",fn);
       return false;
