@@ -366,7 +366,6 @@ public:
 
   RobotWorld* world;
   WorldSimulation* sim;
-  ProgramSettings settings;
 
   //GUI state
   GLUI* glui;

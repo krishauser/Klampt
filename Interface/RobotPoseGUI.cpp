@@ -12,7 +12,7 @@
 #include <sstream>
 
 RobotPoseBackend::RobotPoseBackend(RobotWorld* world,ResourceManager* library)
-: ResourceGUIBackend(world,library){
+  : ResourceGUIBackend(world,library),settings("Klampt") {
   settings["cleanContactsNTol"]= 0.01;
   settings["pathOptimize"]["contactTol"] = 0.05;
   settings["pathOptimize"]["outputResolution"] = 0.01; 
@@ -57,9 +57,11 @@ RobotPoseBackend::RobotPoseBackend(RobotWorld* world,ResourceManager* library)
 void RobotPoseBackend::Start()
 {
   if(!settings.read("robotpose.settings")) {
-    printf("Didn't read settings from robotpose.settings\n");
-    printf("Writing default settings to robotpose_default.settings\n");
-    settings.write("robotpose_default.settings");
+    printf("Didn't read settings from [APPDATA]/robotpose.settings\n");
+    if(!settings.write("robotpose.settings")) 
+      printf("ERROR: couldn't write default settings to [APPDATA]/robotpose.settings\n");
+    else
+      printf("Wrote default settings to [APPDATA]/robotpose.settings\n");
   }
 
   WorldGUIBackend::Start();

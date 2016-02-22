@@ -315,15 +315,21 @@ void MainWindow::Encode(){
 }
 
 void MainWindow::DefaultViewport(){
-    gui->SendCommand("load_view","defaultview.txt");
+  string appdataPath = AppUtils::GetApplicationDataPath("Klampt");
+  string viewFile = appdataPath + string("/simtest_defaultview.txt");
+    gui->SendCommand("load_view",viewFile);
 }
 
 void MainWindow::LoadViewport(){
-    gui->SendCommand("load_view","view.txt");
+  string appdataPath = AppUtils::GetApplicationDataPath("Klampt");
+  string viewFile = appdataPath + string("/simtest_view.txt");
+    gui->SendCommand("load_view",viewFile);
 }
 
 void MainWindow::SaveViewport(){
-    gui->SendCommand("save_view","view.txt");
+  string appdataPath = AppUtils::GetApplicationDataPath("Klampt");
+  string viewFile = appdataPath + string("/simtest_view.txt");
+    gui->SendCommand("save_view",viewFile);
 }
 
 void MainWindow::ShowHelp(){

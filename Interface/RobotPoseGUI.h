@@ -4,6 +4,7 @@
 #include "ResourceGUI.h"
 #include "View/RobotPoseWidget.h"
 #include "View/ObjectPoseWidget.h"
+#include <KrisLibrary/utils/apputils.h>
 #include <fstream>
 
 using namespace Math3D;
@@ -12,27 +13,6 @@ using namespace GLDraw;
 #define GLUT_LEFT_BUTTON 0
 #define GLUT_MIDDLE_BUTTON 1
 #define GLUT_RIGHT_BUTTON 2
-
-class ProgramSettings : public AnyCollection
-{
-public:
-  ProgramSettings() {  }
-  bool read(const char* fn) {
-    ifstream in(fn,ios::in);
-    if(!in) return false;
-    AnyCollection newEntries;
-    if(!newEntries.read(in)) return false;
-    merge(newEntries);
-    return true;
-  }
-  bool write(const char* fn) {
-    ofstream out(fn,ios::out);
-    if(!out) return false;
-    AnyCollection::write(out);
-    out.close();
-    return true;
-  }
-};
 
 /** @brief Contains the functionality for the RobotPose program
  *
@@ -78,7 +58,7 @@ public:
 class RobotPoseBackend : public ResourceGUIBackend
 {
  public:
-  ProgramSettings settings;
+  AppUtils::ProgramSettings settings;
   Robot* robot;
   int cur_link,cur_driver;
   vector<bool> self_colliding, env_colliding;

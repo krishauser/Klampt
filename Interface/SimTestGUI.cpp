@@ -2,11 +2,12 @@
 #include <KrisLibrary/GLdraw/GLError.h>
 #include <KrisLibrary/utils/AnyValue.h>
 #include <KrisLibrary/utils/ioutils.h>
+#include <KrisLibrary/utils/apputils.h>
 #include <KrisLibrary/math/random.h>
 
 
 SimTestBackend::SimTestBackend(RobotWorld* world)
-  :SimGUIBackend(world)
+  :SimGUIBackend(world),settings("Klampt")
 {
   settings["movieWidth"] = 640;
   settings["movieHeight"] = 480;
@@ -36,9 +37,11 @@ SimTestBackend::SimTestBackend(RobotWorld* world)
 void SimTestBackend::Start()
 {
   if(!settings.read("simtest.settings")) {
-    printf("Didn't read settings from simtest.settings\n");
-    printf("Writing default settings to simtest_default.settings\n");
-    settings.write("simtest_default.settings");
+    printf("Didn't read settings from [APPDATA]/simtest.settings\n");
+    if(!settings.write("simtest.settings")) 
+      printf("ERROR: couldn't write default settings to [APPDATA]/simtest.settings\n");
+    else
+      printf("Wrote default settings to [APPDATA]/simtest.settings\n");
   }
 
   cur_link=0;
@@ -761,7 +764,7 @@ void delete_all(GLUI_Listbox* listbox)
 }
 
 GLUISimTestGUI::GLUISimTestGUI(GenericBackendBase* _backend,RobotWorld* _world,int w,int h)
-  :world(_world)
+  :world(_world),settings("Klampt")
 {
   BaseT::backend = _backend;
   BaseT::width = w;
@@ -894,14 +897,16 @@ bool GLUISimTestGUI::Initialize()
 
   UpdateGUI();
 
+  string appdataPath = AppUtils::GetApplicationDataPath("Klampt");
+  string viewFile = appdataPath + string("/simtest_view.txt");
   const static int NR = 24;
   const static char* rules [NR*3]= {"{type:key_down,key:c}","constrain_link","",
 				    "{type:key_down,key:d}","delete_constraint","",
 				    "{type:key_down,key:p}","print_config","",
 				    "{type:key_down,key:a}","advance","",
 				    "{type:key_down,key:\" \"}","command_pose","",
-				    "{type:key_down,key:v}","save_view","view.txt",
-				    "{type:key_down,key:V}","load_view","view.txt",
+				    "{type:key_down,key:v}","save_view",viewFile.c_str(),
+				    "{type:key_down,key:V}","load_view",viewFile.c_str(),
 				    "{type:button_press,button:simulate}","toggle_simulate","",
 				    "{type:button_press,button:reset}","reset","",
 				    "{type:button_press,button:set_milestone}","command_pose","",
