@@ -3,6 +3,7 @@
 
 #include <KrisLibrary/robotics/RobotWithGeometry.h>
 #include "ManagedGeometry.h"
+
 using namespace std;
 
 /** @ingroup Modeling 

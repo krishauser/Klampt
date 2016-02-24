@@ -38,6 +38,8 @@ void ODEGeometry::Create(AnyCollisionGeometry3D* geom,dSpaceID space,Vector3 off
   Clear();
   if(!useCustomMesh) {
     Assert(geom->type == AnyGeometry3D::TriangleMesh);
+	const TriMesh* meshp = AnyCast<TriMesh>(&geom->data);
+    if(!meshp) FatalError("Geometry is not a triangle mesh");
     const TriMesh& mesh = *AnyCast<TriMesh>(&geom->data);
     Assert(numVertComponents == 3 || numVertComponents == 4);
 #if USING_GIMPACT

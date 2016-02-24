@@ -126,12 +126,12 @@ void SerialControlledRobot::SetMutex(Mutex* mutex)
 
 void SerialControlledRobot::ReadSensorData(RobotSensors& sensors)
 {
-  if(controllerPipe && controllerPipe->NewMessageCount() > 0) {
-    if(controllerPipe->NewMessageCount() > 1) {
-      fprintf(stderr,"SerialControlledRobot: Warning, skipping %d sensor messages\n",controllerPipe->NewMessageCount()-1);
+  if(controllerPipe && controllerPipe->UnreadCount() > 0) {
+    if(controllerPipe->UnreadCount() > 1) {
+      fprintf(stderr,"SerialControlledRobot: Warning, skipping %d sensor messages\n",controllerPipe->UnreadCount()-1);
       fprintf(stderr,"  TODO: debug the controller pipe?\n");
     }
-    string msg = controllerPipe->NewestMessage();
+    string msg = controllerPipe->Newest();
 
     AnyCollection c;
     if(!c.read(msg.c_str())) {
@@ -258,6 +258,6 @@ void SerialControlledRobot::WriteCommandData(const RobotMotorCommand& command)
     stringstream ss;
     c.write(ss);
     cout<<"Writing message: "<<ss.str()<<endl;
-    controllerPipe->SendMessage(ss.str());
+    controllerPipe->Send(ss.str());
   }
 }

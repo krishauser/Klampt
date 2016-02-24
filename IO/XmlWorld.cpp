@@ -160,7 +160,7 @@ XmlRigidObject::XmlRigidObject(TiXmlElement* _element,string _path)
   :e(_element),path(_path)
 {}
 
-bool XmlRigidObject::GetObject(RigidObject& obj)
+bool XmlRigidObject::GetRigidObject(RigidObject& obj)
 {
   obj.T.setIdentity();
   obj.mass=1.0;
@@ -453,7 +453,7 @@ bool XmlWorld::GetWorld(RobotWorld& world)
     string sname = "Object";
     if(name) sname=name;
     RigidObject* o = new RigidObject;
-    if(!XmlRigidObject(e,path).GetObject(*o)) {
+    if(!XmlRigidObject(e,path).GetRigidObject(*o)) {
       printf("XmlWorld: Unable to load rigid object %s\n",sname.c_str());
       delete o;
       return false;

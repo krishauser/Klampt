@@ -255,13 +255,13 @@ void SerializedObjectiveProcessor::Activate(bool enabled)
  
 bool SerializedObjectiveProcessor::HasUpdate()
 {
-  return reader!=NULL && reader->NewMessageCount() > 0;
+  return reader!=NULL && reader->UnreadCount() > 0;
 }
 
 PlannerObjectiveBase* SerializedObjectiveProcessor::MakeObjective(Robot* robot)
 {
   if(!reader) return NULL;
-  string payload = reader->NewestMessage();
+  string payload = reader->Newest();
   //cout<<"SerializedObjectiveProcessor: Got a message: "<<payload<<endl;
   if(payload.length()==0) return NULL;
   stringstream ss(payload);

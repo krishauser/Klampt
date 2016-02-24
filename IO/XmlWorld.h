@@ -19,7 +19,7 @@ class XmlRigidObject
 {
  public:
   XmlRigidObject(TiXmlElement* element,string path=string());
-  bool GetObject(RigidObject& object);
+  bool GetRigidObject(RigidObject& object);
   //void GetGraspGenerator();
 
   TiXmlElement* e;

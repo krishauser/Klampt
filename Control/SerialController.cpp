@@ -75,11 +75,11 @@ void SerialController::Update(Real dt)
     stringstream ss;
     ss << sensorData;
     if(controllerPipe && controllerPipe->transport->WriteReady()) {
-      controllerPipe->SendMessage(ss.str());
+      controllerPipe->Send(ss.str());
     }
   }
-  if(controllerPipe && controllerPipe->NewMessageCount() > 0) {
-    string scmd = controllerPipe->NewestMessage();
+  if(controllerPipe && controllerPipe->UnreadCount() > 0) {
+    string scmd = controllerPipe->Newest();
     if(scmd.empty()) return;
     AnyCollection cmd;
     if(!cmd.read(scmd.c_str())) {
