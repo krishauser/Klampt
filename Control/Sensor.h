@@ -383,7 +383,7 @@ T* RobotSensors::GetTypedSensor(int index)
   if(name == #membername) { \
     stringstream ss(str);   \
     ss >> membername;       \
-    return ss;              \
+    return bool(ss);              \
   }
 
 #define FILL_ARRAY_SENSOR_SETTING(res,membername,count)	\
@@ -406,7 +406,7 @@ T* RobotSensors::GetTypedSensor(int index)
     stringstream ss(str);	  \
     for(int _i=0;_i<count;_i++)     \
       ss >> membername[_i];	  \
-    return ss;              \
+    return bool(ss);              \
   }
 
 
