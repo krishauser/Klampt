@@ -2,6 +2,7 @@
 #include <KrisLibrary/robotics/NewtonEuler.h>
 #include <KrisLibrary/robotics/IKFunctions.h>
 #include <KrisLibrary/math/indexing.h>
+#include <KrisLibrary/math/VectorPrinter.h>
 #include <KrisLibrary/optimization/MinNormProblem.h>
 using namespace Optimization;
 
