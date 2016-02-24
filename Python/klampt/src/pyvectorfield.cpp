@@ -56,7 +56,7 @@
 
 #include "pyvectorfield.h"
 #include "pyerr.h"
-
+#include <KrisLibrary/math/matrix.h>
 #include <Python.h>
 
 #include <iostream>
