@@ -877,13 +877,13 @@ StanceResource::StanceResource(const Stance& val)
 bool StanceResource::Load(istream& in)
 {
   in>>stance;
-  return (in);
+  return bool(in);
 }
 
 bool StanceResource::Save(ostream& out)
 {
   out<<stance;
-  return (out);
+  return bool(out);
 }
 
 bool StanceResource::Load(TiXmlElement* in)
