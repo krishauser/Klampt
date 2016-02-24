@@ -32,17 +32,17 @@ int main(int argc, char *argv[])
     glf.setSamples(4);
     QGLFormat::setDefaultFormat(glf);
 
-    if(argc==1){
-      QFileDialog f;
-      QString openDir = ini.value("last_open_robot_directory",".").toString();
-      filename = f.getOpenFileName(0,"Open Robot",openDir,"Robot (*.rob);;Scenario (*.xml);;All Files (*)");
-      if(filename.isNull()) return 0;
-      ini.setValue("last_open_robot_directory",QFileInfo(filename).absolutePath());
-    }
     MainWindow w;
     if(argc==1){
-      //do not simplify the proceeding lines, this makes it work somehow
-      string s = filename.toStdString();
+		a.setQuitOnLastWindowClosed(false);
+		QString openDir = ini.value("last_open_robot_directory", ".").toString();
+		filename = QFileDialog::getOpenFileName(0, "Open Robot", openDir, "Robot (*.rob *.urdf);;Scenario (*.xml);;All Files (*)");
+		if (filename.isNull()) return 0;
+		ini.setValue("last_open_robot_directory", QFileInfo(filename).absolutePath());
+
+		//workaround for Qt 4.8.x crash on Windows
+	  QByteArray arr = filename.toUtf8();
+	  string s (arr.data());
       const char* c = s.c_str();
       const char* args[3] = {"RobotTest",c,""};
       if(!w.Initialize(2,(const char**)args)) {
@@ -56,6 +56,7 @@ int main(int argc, char *argv[])
 	return 1;
       }
     }
+	a.setQuitOnLastWindowClosed(true);
     w.directory=dir;
     w.show();
     return a.exec();
