@@ -101,7 +101,7 @@ class RobotControllerFactory
   if(name == #membername) { \
     stringstream ss(str);   \
     ss >> membername;       \
-    return ss;              \
+    return bool(ss);              \
   }
 
 
