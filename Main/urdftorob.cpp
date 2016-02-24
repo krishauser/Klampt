@@ -9,32 +9,12 @@
 #include <KrisLibrary/utils/stringutils.h>
 #include "IO/URDFConverter.h"
 #include <KrisLibrary/utils/AnyCollection.h>
+#include <KrisLibrary/utils/apputils.h>
 #include <fstream>
 #include <string.h>
 
 using namespace std;
 
-class ProgramSettings : public AnyCollection
-{
-public:
-  ProgramSettings() { }
-
-  bool read(const char* fn) {
-    ifstream in(fn,ios::in);
-    if(!in) return false;
-    AnyCollection newEntries;
-    if(!newEntries.read(in)) return false;
-    merge(newEntries);
-    return true;
-  }
-  bool write(const char* fn) {
-    ofstream out(fn,ios::out);
-    if(!out) return false;
-    AnyCollection::write(out);
-    out.close();
-    return true;
-  }
-};
 
 int URDFtoRob(AnyCollection& settings,string infile,string outfile){
   string path = GetFilePath(outfile.c_str());
@@ -64,16 +44,16 @@ int URDFtoRob(AnyCollection& settings,string infile,string outfile){
 
 int main_shell(int argc, char** argv)
 {
-  ProgramSettings settings;
+  ProgramSettings settings("Klampt");
   settings["useVisGeom"] = false;
   settings["flipYZ"] = false;
   settings["outputGeometryExtension"] = string("tri");
   settings["outputGeometryPrefix"] = string("");
   settings["packageRootPath"] = string("");
   if(!settings.read("urdftorob.settings")) {
-    printf("Didn't read settings from urdftorob.settings\n");
-    printf("Writing default settings to urdftorob_default.settings\n");
-    settings.write("urdftorob_default.settings");
+    printf("Didn't read settings from [APPDATA]/urdftorob.settings\n");
+    printf("Writing default settings to [APPDATA]/urdftorob.settings\n");
+    settings.write("urdftorob.settings");
   }
 
   if (argc < 2 || argc > 3) {

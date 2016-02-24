@@ -7,6 +7,7 @@
 #include "Contact/Utils.h"
 #include <KrisLibrary/utils/AnyCollection.h>
 #include <KrisLibrary/robotics/IKFunctions.h>
+#include <KrisLibrary/utils/apputils.h>
 #include <KrisLibrary/meshing/Voxelize.h>
 #include <KrisLibrary/meshing/MarchingCubes.h>
 #include <KrisLibrary/GLdraw/GLLight.h>
@@ -40,32 +41,11 @@ enum {
 
 enum { CONFIG_TYPE, CONFIGS_TYPE, IK_TYPE, STANCE_TYPE, GRASP_TYPE, MULTIPATH_TYPE, LINEAR_PATH_TYPE };
 
-class ProgramSettings : public AnyCollection
-{
-public:
-  ProgramSettings() { }
-  bool read(const char* fn) {
-    ifstream in(fn,ios::in);
-    if(!in) return false;
-    AnyCollection newEntries;
-    if(!newEntries.read(in)) return false;
-    merge(newEntries);
-    return true;
-  }
-  bool write(const char* fn) {
-    ofstream out(fn,ios::out);
-    if(!out) return false;
-    AnyCollection::write(out);
-    out.close();
-    return true;
-  }
-};
-
 
 class RobotPoseProgram : public ResourceBrowserProgram
 {
 public:
-  ProgramSettings settings;
+  AppUtils::ProgramSettings settings;
 
   //internal state
   int cur_link,cur_driver;
@@ -88,7 +68,7 @@ public:
   int draw_geom,draw_com,draw_frame;
 
   RobotPoseProgram(RobotWorld* world)
-    :ResourceBrowserProgram(world)
+    :ResourceBrowserProgram(world),settings("Klampt")
   {
     settings["movieWidth"] = 640;
     settings["movieHeight"] = 480;
@@ -132,9 +112,13 @@ public:
   virtual bool Initialize()
   {
     if(!settings.read("robotpose.settings")) {
-      printf("Didn't read settings from robotpose.settings\n");
-      printf("Writing default settings to robotpose_default.settings\n");
-      settings.write("robotpose_default.settings");
+      printf("Didn't read settings from [APPDATA]/robotpose.settings\n");
+      if(settings.write("robotpose.settings")) {
+	printf("Wrote default settings to [APPDATA]/robotpose.settings\n");
+      }
+      else {
+	printf("Error writing default settings to [APPDATA]/robotpose.settings\n");
+      }
     }
 
     poseWidget.Set(world->robots[0].robot,&world->robots[0].view);
@@ -904,17 +888,19 @@ public:
       break;
     case 'v':
       {
-	printf("Saving viewport to view.txt\n");
-	ofstream out("view.txt",ios::out);
+	string viewFile = AppUtils::GetApplicationDataPath("Klampt")+string("/robotpose_view.txt");
+	printf("Saving viewport to %s\n",viewFile.c_str());
+	ofstream out(viewFile.c_str(),ios::out);
 	WriteDisplaySettings(out);
 	break;
       }
     case 'V':
       {
-	printf("Loading viewport from view.txt...\n");
-	ifstream in("view.txt",ios::in);
+	string viewFile = AppUtils::GetApplicationDataPath("Klampt")+string("/robotpose_view.txt");
+	printf("Loading viewport from %s...\n",viewFile.c_str());
+	ifstream in(viewFile.c_str(),ios::in);
 	if(!in) {
-	  printf("Unable to open view.txt\n");
+	  printf("Unable to open %s\n",viewFile.c_str());
 	}
 	else {
 	  ReadDisplaySettings(in);

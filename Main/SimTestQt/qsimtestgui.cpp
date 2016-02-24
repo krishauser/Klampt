@@ -1,4 +1,5 @@
 #include "qsimtestgui.h"
+#include <KrisLibrary/utils/apputils.h>
 
 QSimTestGUI::QSimTestGUI(QKlamptDisplay* _display,SimTestBackend *_backend) :
   QtGUIBase(_backend), display(_display)
@@ -37,6 +38,8 @@ QSimTestGUI::QSimTestGUI(QKlamptDisplay* _display,SimTestBackend *_backend) :
 
   UpdateGUI();
 
+  string appdataPath = AppUtils::GetApplicationDataPath("Klampt");
+  string viewFile = appdataPath + string("/simtest_view.txt");
   const static int NR = 9;
   const static char* rules [NR*3]= {"{type:key_down,key:c}","constrain_link","",
                     "{type:key_down,key:C}","constrain_link_point","",
@@ -44,8 +47,8 @@ QSimTestGUI::QSimTestGUI(QKlamptDisplay* _display,SimTestBackend *_backend) :
 				    "{type:key_down,key:p}","print_config","",
 				    "{type:key_down,key:a}","advance","",
 				    "{type:key_down,key:\" \"}","command_pose","",
-				    "{type:key_down,key:v}","save_view","view.txt",
-				    "{type:key_down,key:V}","load_view","view.txt",
+				    "{type:key_down,key:v}","save_view",viewFile.c_str(),
+				    "{type:key_down,key:V}","load_view",viewFile.c_str(),
 				    "{type:button_toggle,button:simulate,checked:_0}","toggle_simulate","",
   };
   for(int i=0;i<NR;i++) {
