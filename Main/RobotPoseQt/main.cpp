@@ -34,17 +34,16 @@ int main(int argc, char *argv[])
 
     QString dir = QFileInfo(ini.fileName()).absolutePath();
     if(argc==1){
-        QFileDialog f;
         QString openDir = ini.value("last_open_scenario_directory",".").toString();
-        filename = f.getOpenFileName(0,"Open Robot",openDir,"Robot (*.rob);;Scenario (*.xml);;All Files (*)");
+        filename = QFileDialog::getOpenFileName(0,"Open Robot",openDir,"Robot (*.rob *.urdf);;Rigid Object (*.obj);;Scenario (*.xml);;All Files (*)");
         if(filename.isNull()) return 0;
         ini.setValue("last_open_scenario_directory",QFileInfo(filename).absolutePath());
       }
       MainWindow w;
       if(argc==1){
-          string s = filename.toStdString();
-          const char* c = s.c_str();
-          const char* args[3] = {"RobotTest",c,""};
+          QByteArray arr = filename.toUtf8();
+		  string s(arr.data());
+          const char* args[3] = {"RobotPose",s.c_str(),""};
           w.Initialize(2,(const char**)args);
       }
       else

@@ -32,18 +32,17 @@ int main(int argc, char *argv[])
     glf.setSamples(4);
     QGLFormat::setDefaultFormat(glf);
 
-    if(argc==1){
-      QFileDialog f;
-      QString openDir = ini.value("last_open_scenario_directory",".").toString();
-      filename = f.getOpenFileName(0,"Open Scenario",openDir,"Scenario (*.xml);;Robot (*.rob);;All Files (*)");
-      if(filename.isNull()) return 0;
-      ini.setValue("last_open_scenario_directory",QFileInfo(filename).absolutePath());
-    }
     MainWindow w;
     w.ini=&ini;
     if(argc==1){
-      string fn = filename.toStdString();
-      const char* args[3] = {"SimTest",fn.c_str(),""};
+		QString openDir = ini.value("last_open_scenario_directory", ".").toString();
+		filename = QFileDialog::getOpenFileName(0, "Open Scenario", openDir, "Scenario (*.xml);;Robot (*.rob *.urdf);;Rigid Object (*.obj);;All Files (*)");
+		if (filename.isNull()) return 0;
+		ini.setValue("last_open_scenario_directory", QFileInfo(filename).absolutePath());
+		//workaround for Qt 4.8.x crash on Windows
+		QByteArray arr = filename.toUtf8();
+		string s(arr.data());
+      const char* args[3] = {"SimTest",s.c_str(),""};
       if(!w.Initialize(2,(const char**)args)) return 1;
     }
     else {

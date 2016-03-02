@@ -44,7 +44,7 @@ int URDFtoRob(AnyCollection& settings,string infile,string outfile){
 
 int main_shell(int argc, char** argv)
 {
-  ProgramSettings settings("Klampt");
+  AppUtils::ProgramSettings settings("Klampt");
   settings["useVisGeom"] = false;
   settings["flipYZ"] = false;
   settings["outputGeometryExtension"] = string("tri");

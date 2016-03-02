@@ -47,8 +47,7 @@ bool MainWindow::Initialize(int _argc,const char** _argv)
 
     //fill GUI info
     for(int i=0;i<rob->linkNames.size();i++)
-        ui->cb_link->addItem(QString::fromStdString(rob->linkNames[i]))
-                ;
+        ui->cb_link->addItem(QString::fromStdString(rob->linkNames[i]));
     for(int i=0;i<rob->drivers.size();i++)
         ui->cb_driver->addItem(QString::fromStdString(rob->driverNames[i]));
 
@@ -57,6 +56,7 @@ bool MainWindow::Initialize(int _argc,const char** _argv)
 
     ui->displaywidget->installEventFilter(this);
     ui->displaywidget->setFocusPolicy(Qt::WheelFocus);    
+	
     return true;
 }
 
