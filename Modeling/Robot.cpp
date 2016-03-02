@@ -2258,10 +2258,14 @@ bool Robot::LoadURDF(const char* fn)
 
 	//Get content from the Willow Garage parser
 	boost::shared_ptr<urdf::ModelInterface> parser = urdf::parseURDF(s);
+	if(!parser) {
+	  fprintf(stderr,"Robot::LoadURDF: error parsing XML\n");
+	  return false;
+	}
 	boost::shared_ptr<urdf::Link> root_link = parser->root_link_;
 	if (!root_link) {
-		cout << "Root link is NULL!" << endl;
-		return false;
+	  fprintf(stderr,"Robot::LoadURDF: Root link is NULL\n");
+	  return false;
 	}
 
 	//parse Klamp't extras
@@ -2623,7 +2627,7 @@ bool Robot::LoadURDF(const char* fn)
 		    Matrix3 ori_inertia = URDFConverter::convertInertial(
 									 *linkNode->link->inertial);
 		    this->links[link_index].inertia.mul(
-							linkNode->T_link_to_inertia_inverse.R, ori_inertia);
+							linkNode->T_link_to_inertia_inverse.R, ori_inertia * transpose(linkNode->T_link_to_inertia_inverse.R));
 		  }
 		//Otherwise, set it to default value
 		  else {
