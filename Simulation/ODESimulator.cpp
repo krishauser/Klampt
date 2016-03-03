@@ -26,6 +26,40 @@ static size_t gPreclusterContacts = 0;
 static double gClusterTime = 0;
 static double gContactDetectTime = 0;
 
+//Method for identifying objects via dGeomSetData/dGeomGetData
+//max objects: 500 million =(
+const static int terrainMarker = 0x80000000;
+const static int rigidObjectMarker = 0x40000000;
+const static int robotMarker = 0x20000000;
+const static int markerMask = 0xf0000000;
+const static int robotIndexMask = 0x0fff0000;
+const static int robotIndexShift = 16;
+const static int robotLinkIndexMask = 0x0000ffff;
+const static int robotLinkIndexShift = 0;
+void* TerrainIndexToGeomData(int terrain) { return (void*)(terrainMarker | terrain); }
+void* ObjectIndexToGeomData(int object) { return (void*)(rigidObjectMarker | object); }
+void* RobotIndexToGeomData(int robot,int link) { assert(robot <= 0xfff && link <= 0xffff); return (void*)(robotMarker | (robot << robotIndexShift) | link); }
+int GeomDataToTerrainIndex(void* p) { intptr_t d = (intptr_t)p; if(!(d & terrainMarker)) return -1; return int(d & ~terrainMarker); }
+int GeomDataToObjectIndex(void* p) { intptr_t d = (intptr_t)p; if(!(d & rigidObjectMarker)) return -1; return int(d & ~rigidObjectMarker); }
+int GeomDataToRobotIndex(void* p) { intptr_t d = (intptr_t)p; if(!(d & robotMarker)) return -1; return int((d & ~robotMarker) >> robotIndexShift); }
+int GeomDataToRobotLinkIndex(void* p) { intptr_t d = (intptr_t)p; if(!(d & robotMarker)) return -1; return int((d & ~robotMarker) & robotLinkIndexMask); }
+void* ObjectIDToGeomData(const ODEObjectID& id)
+{
+  if(id.IsEnv()) return TerrainIndexToGeomData(id.index);
+  if(id.IsRigidObject()) return ObjectIndexToGeomData(id.index);
+  if(id.IsRobot()) return RobotIndexToGeomData(id.index,id.bodyIndex);
+  return NULL;
+}
+ODEObjectID GeomDataToObjectID(void* p)
+{
+  intptr_t d = (intptr_t)p;
+  if(d & terrainMarker) return ODEObjectID(0,GeomDataToTerrainIndex(p));
+  if(d & rigidObjectMarker) return ODEObjectID(2,GeomDataToObjectIndex(p));
+  if(d & robotMarker) return ODEObjectID(1,GeomDataToRobotIndex(p),GeomDataToRobotLinkIndex(p));
+  FatalError("Invalid ODE geom data pointer %x",(int)d);
+  return ODEObjectID();
+}
+
 template <class T>
 bool TestReadWriteState(T& obj,const char* name="")
 {
@@ -219,7 +253,7 @@ void ODESimulator::AddTerrain(Terrain& terr)
   if(!terr.kFriction.empty())
     terrainGeoms.back()->surf().kFriction = terr.kFriction[0];
   //the index of the environment is encoded as -1-index
-  dGeomSetData(terrainGeoms.back()->geom(),(void*)(-(int)terrains.size()));
+  dGeomSetData(terrainGeoms.back()->geom(),TerrainIndexToGeomData((int)terrains.size()-1));
   dGeomSetCategoryBits(terrainGeoms.back()->geom(),0x1);
   dGeomSetCollideBits(terrainGeoms.back()->geom(),0xffffffff ^ 0x1);
 }
@@ -228,7 +262,7 @@ void ODESimulator::AddRobot(Robot& robot)
 {
   robots.push_back(new ODERobot(robot));
   //For some reason, self collisions don't work with hash spaces
-  robots.back()->Create(worldID,settings.boundaryLayerCollisions);
+  robots.back()->Create(robots.size()-1,worldID,settings.boundaryLayerCollisions);
   //robotStances.resize(robots.size());
   for(size_t i=0;i<robot.links.size();i++)
     if(robots.back()->triMesh(i) && robots.back()->geom(i)) {
@@ -247,7 +281,7 @@ void ODESimulator::AddObject(RigidObject& object)
 {
   objects.push_back(new ODERigidObject(object));
   objects.back()->Create(worldID,envSpaceID,settings.boundaryLayerCollisions);
-  dGeomSetData(objects.back()->geom(),(void*)(objects.size()-1));
+  dGeomSetData(objects.back()->geom(),ObjectIndexToGeomData(objects.size()-1));
   dGeomSetCategoryBits(objects.back()->geom(),0x2);
   dGeomSetCollideBits(objects.back()->geom(),0xffffffff);
 }
@@ -322,19 +356,23 @@ void ODESimulator::Step(Real dt)
 	#endif // DO_TIMING
 		  //determine whether to rollback
 		  bool rollback = false;
-		  for(list<ODEContactResult>::iterator i=gContacts.begin();i!=gContacts.end();i++)
-		if(i->meshOverlap) { 
-		  rollback = true;
-		  break;
-		}
-		  //TODO: if two bodies had overlap on the prior timestep, don't
-		  //keep rolling back
+		  set<pair<ODEObjectID,ODEObjectID> > penetrating;
+		  for(list<ODEContactResult>::iterator i=gContacts.begin();i!=gContacts.end();i++) {
+		    pair<ODEObjectID,ODEObjectID> collpair(GeomDataToObjectID(i->o1),GeomDataToObjectID(i->o2));
+		    //if two bodies had overlap on the prior timestep, don't
+		    //keep rolling back
+		    if(i->meshOverlap) { 
+		      if(lastPenetrating.count(collpair) == 0)
+			rollback = true;
+		      penetrating.insert(collpair);
+		    }
+		  }
 		  if(rollback && !lastState.IsOpen()) {
 		printf("ODESimulation: Rollback rejected because last state not saved\n");
 		rollback = false;
 		  }
 		  if(rollback && timestep < 1e-6) {
-		printf("ODESimulation: Rollback rejected because timestep %g below minimum threshold\n");
+		    printf("ODESimulation: Rollback rejected because timestep %g below minimum threshold\n",timestep);
 		rollback = false;
 		  }
 	
@@ -352,6 +390,7 @@ void ODESimulator::Step(Real dt)
 		Assert(res);
 		Assert(lastState.IsOpen());
 		WriteState(lastState);
+		lastPenetrating = penetrating;
 
 		validTime += timestep;
 		timestep = desiredTime-validTime;
@@ -374,22 +413,26 @@ void ODESimulator::Step(Real dt)
 	#endif // DO_TIMING
 		//determine whether to rollback
 		bool rollback = false;
-		for(list<ODEContactResult>::iterator i=gContacts.begin();i!=gContacts.end();i++)
+		set<pair<ODEObjectID,ODEObjectID> > penetrating;
+		for(list<ODEContactResult>::iterator i=gContacts.begin();i!=gContacts.end();i++) {
+		  pair<ODEObjectID,ODEObjectID> collpair(GeomDataToObjectID(i->o1),GeomDataToObjectID(i->o2));
 		  if(i->meshOverlap) { 
-		  rollback = true;
-		  break;
+		    rollback = true;
+		    penetrating.insert(collpair);
+		  }
 		}
 		if(rollback) {
 			printf("ODESimulation: Warning, initial state has underlying meshes overlapping\n");
+			//NO ROLLBACK ON FIRST
+			rollback = false;
 		}
-		else {
-			//save state
-			lastState.Close();
-			bool res = lastState.OpenData(FILEREAD | FILEWRITE);
-			Assert(res);
-			Assert(lastState.IsOpen());
-			WriteState(lastState);
-		}
+		//save state
+		lastState.Close();
+		bool res = lastState.OpenData(FILEREAD | FILEWRITE);
+		Assert(res);
+		Assert(lastState.IsOpen());
+		WriteState(lastState);
+		lastPenetrating = penetrating;
 	}
     lastStateTimestep = dt;
     StepDynamics(dt);
@@ -854,10 +897,10 @@ void selfCollisionCallback(void *data, dGeomID o1, dGeomID o2)
 {
   ODERobot* robot = reinterpret_cast<ODERobot*>(data);
   Assert(!dGeomIsSpace(o1) && !dGeomIsSpace(o2));
-  intptr_t link1 = (intptr_t)dGeomGetData(o1);
-  intptr_t link2 = (intptr_t)dGeomGetData(o2);
-  Assert(link1 >= 0 && (int)link1 < (int)robot->robot.links.size());
-  Assert(link2 >= 0 && (int)link2 < (int)robot->robot.links.size());
+  int link1 = GeomDataToRobotLinkIndex(dGeomGetData(o1));
+  int link2 = GeomDataToRobotLinkIndex(dGeomGetData(o2));
+  Assert(link1 >= 0 && link1 < (int)robot->robot.links.size());
+  Assert(link2 >= 0 && link2 < (int)robot->robot.links.size());
   if(robot->robot.selfCollisions(link1,link2)==NULL) {
     return;
   }
@@ -894,7 +937,7 @@ void selfCollisionCallback(void *data, dGeomID o1, dGeomID o2)
     if(numOk != (int)vcontact.size())
     	//// The int type is not guaranteed to be big enough, use intptr_t
 		//cout<<numOk<<" contacts between env "<<(int)dGeomGetData(o2)<<" and body "<<(int)dGeomGetData(o1)<<"  (clustered to "<<vcontact.size()<<")"<<endl;
-		cout<<numOk<<" contacts between link "<<(intptr_t)dGeomGetData(o2)<<" and link "<<(intptr_t)dGeomGetData(o1)<<"  (clustered to "<<vcontact.size()<<")"<<endl;
+      cout<<numOk<<" contacts between link "<<GeomDataToRobotLinkIndex(dGeomGetData(o2))<<" and link "<<GeomDataToRobotLinkIndex(dGeomGetData(o1))<<"  (clustered to "<<vcontact.size()<<")"<<endl;
     gContacts.push_back(ODEContactResult());
     gContacts.back().o1 = o1;
     gContacts.back().o2 = o2;
@@ -1105,23 +1148,9 @@ void ODESimulator::DetectCollisions()
 
     for(list<ODEContactResult>::iterator j=gContacts.begin();j!=gContacts.end();j++,jcount++) {
       //// int is not necessarily big enough, use intptr_t
-      //int o1 = (int)dGeomGetData(j->o1);
-      //int o2 = (int)dGeomGetData(j->o2);
-      intptr_t o1 = (intptr_t)dGeomGetData(j->o1);
-      intptr_t o2 = (intptr_t)dGeomGetData(j->o2);
-      if(o1 < 0) {  //it's an environment
-	cindex.first = ODEObjectID(0,(-o1-1));
-      }
-      else {
-	cindex.first = ODEObjectID(2,o1);
-      }
-      if(o2 < 0) {  //it's an environment
-	cindex.second = ODEObjectID(0,(-o2-1));
-      }
-      else {
-	cindex.second = ODEObjectID(2,o2);
-      }
-      if(o1 < 0 && o2 < 0) {
+      cindex.first = GeomDataToObjectID(dGeomGetData(j->o1));
+      cindex.second = GeomDataToObjectID(dGeomGetData(j->o2));
+      if(cindex.first.IsEnv() && cindex.second.IsEnv()) {
 	fprintf(stderr,"Warning, detecting terrain-terrain collisions?\n");
       }
       else {
@@ -1133,8 +1162,6 @@ void ODESimulator::DetectCollisions()
 
   //do robot-environment collisions
   for(size_t i=0;i<robots.size();i++) {
-    cindex.first = ODEObjectID(1,i);
-
 #if DO_TIMING
     timer.Reset();
 #endif //DO_TIMING
@@ -1161,38 +1188,12 @@ void ODESimulator::DetectCollisions()
 
     //setup the contact "joints" and contactLists
     for(list<ODEContactResult>::iterator j=gContactStart;j!=gContacts.end();j++,jcount++) {
-      bool isBodyo1 = false, isBodyo2 = false;
-      for(size_t k=0;k<robots[i]->robot.links.size();k++) {
-	if(robots[i]->triMesh(k) && j->o1 == robots[i]->geom(k)) isBodyo1=true;
-	if(robots[i]->triMesh(k) && j->o2 == robots[i]->geom(k)) isBodyo2=true;
-      }
-      intptr_t body,obj;
-      if(isBodyo2) {
-	printf("Warning, ODE collision result lists bodies in reverse order\n");
-	Assert(!isBodyo1);
-	body = (intptr_t)dGeomGetData(j->o2);
-	obj = (intptr_t)dGeomGetData(j->o1);
-      }
-      else {
-	Assert(!isBodyo2);
-	Assert(isBodyo1);
-	body = (intptr_t)dGeomGetData(j->o1);
-	obj = (intptr_t)dGeomGetData(j->o2);
-      }
+      cindex.first = GeomDataToObjectID(dGeomGetData(j->o1));
+      cindex.second = GeomDataToObjectID(dGeomGetData(j->o2));
       //printf("Collision between body %d and obj %d\n",body,obj);
-      Assert(body >= 0 && body < (int)robots[i]->robot.links.size());
-      Assert(obj >= -(int)terrains.size() && obj < (int)objects.size());
-      if(robots[i]->robot.parents[body] == -1 && obj < 0) { //fixed links
-	fprintf(stderr,"Warning, colliding a fixed link and the terrain\n");
-	continue;
-      }
-      cindex.first.bodyIndex = body;
-      if(obj < 0) {  //it's a terrain
-	cindex.second = ODEObjectID(0,(-obj-1));
-      }
-      else {
-	cindex.second = ODEObjectID(2,obj);
-      }
+      assert(cindex.first.IsRobot() && (cindex.second.IsRigidObject() || cindex.second.IsEnv()));
+      Assert(cindex.first.index == (int)i);
+      Assert(cindex.first.bodyIndex >= 0 && cindex.first.bodyIndex < (int)robots[i]->robot.links.size());
       SetupContactResponse(cindex.first,cindex.second,jcount,*j);
     }
 
@@ -1203,7 +1204,6 @@ void ODESimulator::DetectCollisions()
       timer.Reset();
 #endif
 
-      cindex.second = ODEObjectID(1,i);
       gContactsEmpty = gContacts.empty();
 	  if(!gContactsEmpty) gContactStart = --gContacts.end();
       //call the self collision routine for the robot
@@ -1225,13 +1225,13 @@ void ODESimulator::DetectCollisions()
 
       //setup the contact "joints" and contactLists
       for(list<ODEContactResult>::iterator j=gContactStart;j!=gContacts.end();j++,jcount++) {
-	intptr_t body1 = (intptr_t)dGeomGetData(j->o1);
-	intptr_t body2 = (intptr_t)dGeomGetData(j->o2);
-	//printf("Collision between body %d and body %d\n",body1,body2);
-	Assert(body1 >= 0 && body1 < (int)robots[i]->robot.links.size());
-	Assert(body2 >= 0 && body2 < (int)robots[i]->robot.links.size());
-	cindex.first.bodyIndex = body1;
-	cindex.second.bodyIndex = body2;
+	cindex.first = GeomDataToObjectID(dGeomGetData(j->o1));
+	cindex.second = GeomDataToObjectID(dGeomGetData(j->o2));
+	Assert(cindex.first.index == (int)i);
+	Assert(cindex.second.index == (int)i);
+	Assert(cindex.first.bodyIndex >= 0 && cindex.first.bodyIndex < (int)robots[i]->robot.links.size());
+	Assert(cindex.second.bodyIndex >= 0 && cindex.second.bodyIndex < (int)robots[i]->robot.links.size());
+
 	SetupContactResponse(cindex.first,cindex.second,jcount,*j);
       }
     }
@@ -1264,13 +1264,13 @@ void ODESimulator::DetectCollisions()
 
 	//setup the contact "joints" and contactLists
 	for(list<ODEContactResult>::iterator j=gContactStart;j!=gContacts.end();j++,jcount++) {
-	  intptr_t body1 = (intptr_t)dGeomGetData(j->o1);
-	  intptr_t body2 = (intptr_t)dGeomGetData(j->o2);
+	  cindex.first = GeomDataToObjectID(dGeomGetData(j->o1));
+	  cindex.second = GeomDataToObjectID(dGeomGetData(j->o2));
+	  Assert(cindex.first.index == (int)i);
+	  Assert(cindex.second.index == (int)i);
 	  //printf("Collision between robot %d and robot %d\n",i,k);
-	  Assert(body1 >= 0 && body1 < (int)robots[i]->robot.links.size());
-	  Assert(body2 >= 0 && body2 < (int)robots[k]->robot.links.size());
-	  cindex.first.bodyIndex = body1;
-	  cindex.second.bodyIndex = body2;
+	  Assert(cindex.first.bodyIndex >= 0 && cindex.first.bodyIndex < (int)robots[i]->robot.links.size());
+	  Assert(cindex.second.bodyIndex >= 0 && cindex.second.bodyIndex < (int)robots[k]->robot.links.size());
 	  SetupContactResponse(cindex.first,cindex.second,jcount,*j);
 	}
       }

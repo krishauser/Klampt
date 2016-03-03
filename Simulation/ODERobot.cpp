@@ -9,7 +9,11 @@
 #include "Settings.h"
 
 double ODERobot::defaultPadding = gDefaultRobotPadding;
+//k restitution of 0.1, friction of 1, infinite stiffness
 ODESurfaceProperties ODERobot::defaultSurface = {0.1,1.0,Inf,Inf};
+
+//defined in ODESimulator.cpp
+void* RobotIndexToGeomData(int robot,int link);
 
 //given inertia matrix Hc about c, returns inertia matrix around origin
 Matrix3 TranslateInertia(const Matrix3& Hc,const Vector3& c,Real mass)
@@ -95,7 +99,7 @@ bool ODERobot::SelfCollisionsEnabled() const
   else return false;
 }
 
-void ODERobot::Create(dWorldID worldID,bool useBoundaryLayer)
+void ODERobot::Create(int robotIndex,dWorldID worldID,bool useBoundaryLayer)
 {
   Clear();
 
@@ -305,7 +309,7 @@ void ODERobot::Create(dWorldID worldID,bool useBoundaryLayer)
     geometry[primaryLink] = bodyGeometry[i];    
     if(geometry[primaryLink] != NULL) {
       dGeomSetBody(geometry[primaryLink]->geom(),bodyID[primaryLink]);
-      dGeomSetData(geometry[primaryLink]->geom(),(void*)primaryLink);
+      dGeomSetData(geometry[primaryLink]->geom(),RobotIndexToGeomData(robotIndex,primaryLink));
       //set defaults
       geometry[primaryLink]->SetPadding(defaultPadding);
       geometry[primaryLink]->surf() = defaultSurface;

@@ -113,6 +113,7 @@ class ODESimulator
   //for adaptive time stepping
   File lastState;
   Real lastStateTimestep;
+  set<pair<ODEObjectID,ODEObjectID> > lastPenetrating;
 };
 
 

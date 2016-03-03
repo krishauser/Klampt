@@ -31,7 +31,7 @@ class ODERobot
 
   ODERobot(Robot& robot);
   ~ODERobot();
-  void Create(dWorldID worldID,bool useBoundaryLayer=true);
+  void Create(int index,dWorldID worldID,bool useBoundaryLayer=true);
   void Clear();
   void EnableSelfCollisions(bool enabled);
   bool SelfCollisionsEnabled() const;
