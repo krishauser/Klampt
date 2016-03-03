@@ -310,6 +310,8 @@ void ODERobot::Create(int robotIndex,dWorldID worldID,bool useBoundaryLayer)
     if(geometry[primaryLink] != NULL) {
       dGeomSetBody(geometry[primaryLink]->geom(),bodyID[primaryLink]);
       dGeomSetData(geometry[primaryLink]->geom(),RobotIndexToGeomData(robotIndex,primaryLink));
+
+      //printf("Robot %d link %d GeomData set to %p\n",robotIndex,primaryLink,RobotIndexToGeomData(robotIndex,primaryLink));
       //set defaults
       geometry[primaryLink]->SetPadding(defaultPadding);
       geometry[primaryLink]->surf() = defaultSurface;

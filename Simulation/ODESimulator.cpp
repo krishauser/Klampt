@@ -56,7 +56,7 @@ ODEObjectID GeomDataToObjectID(void* p)
   if(d & terrainMarker) return ODEObjectID(0,GeomDataToTerrainIndex(p));
   if(d & rigidObjectMarker) return ODEObjectID(2,GeomDataToObjectIndex(p));
   if(d & robotMarker) return ODEObjectID(1,GeomDataToRobotIndex(p),GeomDataToRobotLinkIndex(p));
-  FatalError("Invalid ODE geom data pointer %x",(int)d);
+  FatalError("Invalid ODE geom data pointer %p",p);
   return ODEObjectID();
 }
 
@@ -252,8 +252,9 @@ void ODESimulator::AddTerrain(Terrain& terr)
   terrainGeoms.back()->SetPadding(settings.defaultEnvPadding);
   if(!terr.kFriction.empty())
     terrainGeoms.back()->surf().kFriction = terr.kFriction[0];
-  //the index of the environment is encoded as -1-index
+  //set the geom data pointer
   dGeomSetData(terrainGeoms.back()->geom(),TerrainIndexToGeomData((int)terrains.size()-1));
+  //printf("Terrain %d GeomData set to %p\n",terrains.size()-1,TerrainIndexToGeomData((int)terrains.size()-1));
   dGeomSetCategoryBits(terrainGeoms.back()->geom(),0x1);
   dGeomSetCollideBits(terrainGeoms.back()->geom(),0xffffffff ^ 0x1);
 }
@@ -282,6 +283,7 @@ void ODESimulator::AddObject(RigidObject& object)
   objects.push_back(new ODERigidObject(object));
   objects.back()->Create(worldID,envSpaceID,settings.boundaryLayerCollisions);
   dGeomSetData(objects.back()->geom(),ObjectIndexToGeomData(objects.size()-1));
+  //printf("Rigid object %d GeomData set to %p\n",objects.size()-1,ObjectIndexToGeomData((int)objects.size()-1));
   dGeomSetCategoryBits(objects.back()->geom(),0x2);
   dGeomSetCollideBits(objects.back()->geom(),0xffffffff);
 }
@@ -358,7 +360,7 @@ void ODESimulator::Step(Real dt)
 		  bool rollback = false;
 		  set<pair<ODEObjectID,ODEObjectID> > penetrating;
 		  for(list<ODEContactResult>::iterator i=gContacts.begin();i!=gContacts.end();i++) {
-		    pair<ODEObjectID,ODEObjectID> collpair(GeomDataToObjectID(i->o1),GeomDataToObjectID(i->o2));
+		    pair<ODEObjectID,ODEObjectID> collpair(GeomDataToObjectID(dGeomGetData(i->o1)),GeomDataToObjectID(dGeomGetData(i->o2)));
 		    //if two bodies had overlap on the prior timestep, don't
 		    //keep rolling back
 		    if(i->meshOverlap) { 
@@ -415,7 +417,7 @@ void ODESimulator::Step(Real dt)
 		bool rollback = false;
 		set<pair<ODEObjectID,ODEObjectID> > penetrating;
 		for(list<ODEContactResult>::iterator i=gContacts.begin();i!=gContacts.end();i++) {
-		  pair<ODEObjectID,ODEObjectID> collpair(GeomDataToObjectID(i->o1),GeomDataToObjectID(i->o2));
+		  pair<ODEObjectID,ODEObjectID> collpair(GeomDataToObjectID(dGeomGetData(i->o1)),GeomDataToObjectID(dGeomGetData(i->o2)));
 		  if(i->meshOverlap) { 
 		    rollback = true;
 		    penetrating.insert(collpair);
