@@ -208,21 +208,24 @@ void ODERobot::Create(int robotIndex,dWorldID worldID,bool useBoundaryLayer)
       bodyObjects[i].inertia.setZero();
       for(size_t j=0;j<bodyLinks[i].size();j++) {
 	int link = bodyLinks[i][j];
-	if(robot.links[link].mass==0 || robot.IsGeometryEmpty(link)) continue;
-	bodyObjects[i].mass += robot.links[link].mass;
 	RigidTransform Trel;
 	Trel.mulInverseA(robot.links[baseLink].T_World,robot.links[link].T_World);
-	bodyObjects[i].com += robot.links[link].mass*(Trel*robot.links[link].com);
-	//transform inertia matrix
-	Matrix3 temp,inertiaLink;
-	temp.mulTransposeB(robot.links[link].inertia,Trel.R);
-	inertiaLink.mul(Trel.R,temp);
-	inertiaLink = TranslateInertia(inertiaLink,Trel.t,robot.links[link].mass);
-	bodyObjects[i].inertia += (inertiaLink*robot.links[link].mass);
+	if(robot.links[link].mass > 0) {
+	  bodyObjects[i].mass += robot.links[link].mass;
+	  bodyObjects[i].com += robot.links[link].mass*(Trel*robot.links[link].com);
+	  //transform inertia matrix
+	  Matrix3 temp,inertiaLink;
+	  temp.mulTransposeB(robot.links[link].inertia,Trel.R);
+	  inertiaLink.mul(Trel.R,temp);
+	  inertiaLink = TranslateInertia(inertiaLink,Trel.t,robot.links[link].mass);
+	  bodyObjects[i].inertia += (inertiaLink*robot.links[link].mass);
+	}
 
-	//get transformed mesh
-	meshes[j] = Geometry::AnyGeometry3D(*robot.geometry[link]);
-	meshes[j].Transform(Trel);
+	if(!robot.IsGeometryEmpty(link)) {
+	  //get transformed mesh
+	  meshes[j] = Geometry::AnyGeometry3D(*robot.geometry[link]);
+	  meshes[j].Transform(Trel);
+	}
       }
       bodyObjects[i].com /= bodyObjects[i].mass;
       bodyObjects[i].inertia /= bodyObjects[i].mass;
@@ -302,6 +305,10 @@ void ODERobot::Create(int robotIndex,dWorldID worldID,bool useBoundaryLayer)
     if(res != 1) {
       fprintf(stderr,"Uh... mass of body %d is not considered to be valid by ODE?\n",i);
       std::cerr<<"Inertia: "<<body.inertia<<std::endl;
+      body.inertia.setIdentity(); body.inertia *= 0.01;
+      CopyMatrix(mass.I,body.inertia);
+      fprintf(stderr,"Setting inertia to 0.01*identity. Press enter to continue...\n");
+      getchar();
     }
     dBodySetMass(bodyID[primaryLink],&mass);
 
