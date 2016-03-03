@@ -193,6 +193,10 @@ void refWidget(int index)
 
 ManagedGeometry& GetManagedGeometry(RobotWorld& world,int id)
 {
+  if(id < 0) {
+    fprintf(stderr,"GetManagedGeometry(): Invalid ID: %d\n",id);
+    return world.robots[0]->geomManagers[0];
+  }
   int terrain = world.IsTerrain(id);
   if(terrain >= 0)
     return world.terrains[terrain]->geometry;
@@ -422,7 +426,7 @@ Geometry3D::~Geometry3D()
 
 bool Geometry3D::isStandalone()
 {
-  return(geomPtr != NULL && world < 0);
+  return (world < 0);
 }
 
 Geometry3D Geometry3D::clone()
@@ -438,9 +442,11 @@ Geometry3D Geometry3D::clone()
 void Geometry3D::set(const Geometry3D& g)
 {
   AnyCollisionGeometry3D* ggeom = reinterpret_cast<AnyCollisionGeometry3D*>(g.geomPtr);
-  RobotWorld& world = *worlds[this->world]->world;
   ManagedGeometry* mgeom = NULL;
-  if(!isStandalone()) mgeom = &GetManagedGeometry(world,id);
+  if(!isStandalone()) {
+    RobotWorld& world = *worlds[this->world]->world;
+    mgeom = &GetManagedGeometry(world,id);
+  }
   if(geomPtr == NULL) {
     if(mgeom) {
       geomPtr = mgeom->CreateEmpty();
@@ -460,7 +466,7 @@ void Geometry3D::set(const Geometry3D& g)
 
 void Geometry3D::free()
 {
-  if(isStandalone()) {
+  if(isStandalone() && geomPtr) {
     printf("Geometry3D(): Freeing standalone geometry\n");
     AnyCollisionGeometry3D* ptr = reinterpret_cast<AnyCollisionGeometry3D*>(geomPtr);
     delete ptr;
@@ -514,9 +520,11 @@ GeometricPrimitive Geometry3D::getGeometricPrimitive()
 
 void Geometry3D::setTriangleMesh(const TriangleMesh& mesh)
 {
-  RobotWorld& world = *worlds[this->world]->world;
   ManagedGeometry* mgeom = NULL;
-  if(!isStandalone()) mgeom = &GetManagedGeometry(world,id);
+  if(!isStandalone()) {
+    RobotWorld& world = *worlds[this->world]->world;
+    mgeom = &GetManagedGeometry(world,id);
+  }
   if(geomPtr == NULL) {
     if(mgeom) 
       geomPtr = mgeom->CreateEmpty();
@@ -544,9 +552,11 @@ PointCloud Geometry3D::getPointCloud()
 
 void Geometry3D::setPointCloud(const PointCloud& pc)
 {
-  RobotWorld& world = *worlds[this->world]->world;
   ManagedGeometry* mgeom = NULL;
-  if(!isStandalone()) mgeom = &GetManagedGeometry(world,id);
+  if(!isStandalone()) {
+    RobotWorld& world = *worlds[this->world]->world;
+    mgeom = &GetManagedGeometry(world,id);
+  }
   if(geomPtr == NULL) {
     if(mgeom) {
       geomPtr = mgeom->CreateEmpty();
@@ -567,9 +577,11 @@ void Geometry3D::setPointCloud(const PointCloud& pc)
 
 void Geometry3D::setGeometricPrimitive(const GeometricPrimitive& prim)
 {
-  RobotWorld& world = *worlds[this->world]->world;
   ManagedGeometry* mgeom = NULL;
-  if(!isStandalone()) mgeom = &GetManagedGeometry(world,id);
+  if(!isStandalone()) {
+    RobotWorld& world = *worlds[this->world]->world;
+    mgeom = &GetManagedGeometry(world,id);
+  }
   if(geomPtr == NULL) {
     if(mgeom) {
       geomPtr = mgeom->CreateEmpty();
@@ -596,20 +608,27 @@ void Geometry3D::setGeometricPrimitive(const GeometricPrimitive& prim)
 
 bool Geometry3D::loadFile(const char* fn)
 {
-  if(!geomPtr) {
-    geomPtr = new AnyCollisionGeometry3D();
-  }
   if(isStandalone()) {
+    if(!geomPtr) {
+      geomPtr = new AnyCollisionGeometry3D();
+    }
     AnyCollisionGeometry3D* geom = reinterpret_cast<AnyCollisionGeometry3D*>(geomPtr);
     if(!geom->Load(fn)) return false;
+    return true;
   }
   else {
+    assert(id >= 0);
     //use the manager, this will automatically figure out caching and
     //appearance stuff
-    RobotWorld& world=*worlds[this->world]->world;
-    return GetManagedGeometry(world,id).Load(fn);
+    RobotWorld& world = *worlds[this->world]->world;
+    ManagedGeometry* mgeom = NULL;
+    mgeom = &GetManagedGeometry(world,id);
+    if(mgeom->Load(fn)) {
+      geomPtr = (Geometry::AnyCollisionGeometry3D*)SmartPointer<Geometry::AnyCollisionGeometry3D>(*mgeom);
+      return true;
+    }
+    return false;
   }
-  return true;
 }
 
 bool Geometry3D::attachToStream(const char* protocol,const char* name,const char* type)
@@ -818,7 +837,7 @@ void Appearance::refresh(bool deep)
 
 bool Appearance::isStandalone()
 {
-  return(appearancePtr != NULL && world < 0);
+  return (world < 0);
 }
 
 Appearance Appearance::clone()
@@ -850,7 +869,7 @@ void Appearance::set(const Appearance& g)
 
 void Appearance::free()
 {
-  if(isStandalone()) {
+  if(isStandalone() && appearancePtr) {
     printf("Appearance(): Freeing standalone appearance\n");
     GLDraw::GeometryAppearance* app = reinterpret_cast<GLDraw::GeometryAppearance*>(appearancePtr);
     delete app;
@@ -1509,6 +1528,7 @@ RigidObjectModel WorldModel::makeRigidObject(const char* name)
   object.index = (int)world.rigidObjects.size();
   world.AddRigidObject(name,new RigidObject());
   object.object = world.rigidObjects.back();
+  object.object->geometry.CreateEmpty();
   return object;
 }
 
@@ -1520,6 +1540,7 @@ TerrainModel WorldModel::makeTerrain(const char* name)
   terrain.index = world.terrains.size();
   world.AddTerrain(name,new Terrain());
   terrain.terrain = world.terrains.back();
+  terrain.terrain->geometry.CreateEmpty();
   return terrain;
 }
 
@@ -1750,6 +1771,7 @@ Geometry3D RobotModelLink::geometry()
   Geometry3D res;
   res.world = world;
   res.id = getID();
+  assert(res.id >= 0);
   res.geomPtr = worlds[world]->world->GetGeometry(res.id);
   return res;
 }
@@ -1759,6 +1781,7 @@ Appearance RobotModelLink::appearance()
   Appearance res;
   res.world = world;
   res.id = getID();
+  assert(res.id >= 0);
   res.appearancePtr = worlds[world]->world->GetAppearance(res.id);
   return res;
 }
@@ -2421,6 +2444,7 @@ Geometry3D RigidObjectModel::geometry()
   Geometry3D res;
   res.world = world;
   res.id = getID();
+  assert(res.id >= 0);
   res.geomPtr = worlds[world]->world->GetGeometry(res.id);
   return res;
 }
@@ -2430,6 +2454,7 @@ Appearance RigidObjectModel::appearance()
   Appearance res;
   res.world = world;
   res.id = getID();
+  assert(res.id >= 0);
   res.appearancePtr = worlds[world]->world->GetAppearance(res.id);
   return res;
 }
@@ -2541,6 +2566,7 @@ Geometry3D TerrainModel::geometry()
   Geometry3D res;
   res.world = world;
   res.id = getID();
+  assert(res.id >= 0);
   res.geomPtr = worlds[world]->world->GetGeometry(res.id);
   return res;
 }
@@ -2551,6 +2577,7 @@ Appearance TerrainModel::appearance()
   Appearance res;
   res.world = world;
   res.id = getID();
+  assert(res.id >= 0);
   res.appearancePtr = worlds[world]->world->GetAppearance(res.id);
   return res;
 }
