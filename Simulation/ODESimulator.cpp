@@ -364,8 +364,19 @@ void ODESimulator::Step(Real dt)
 		    //if two bodies had overlap on the prior timestep, don't
 		    //keep rolling back
 		    if(i->meshOverlap) { 
-		      if(lastPenetrating.count(collpair) == 0)
+		      if(lastPenetrating.count(collpair) == 0) {
+			if(!didRollback) {
+			  string id1,id2;
+			  if(collpair.first.IsEnv()) id1 = "terrain";
+			  if(collpair.first.IsRigidObject()) id1 = objects[collpair.first.index]->obj.name;
+			  if(collpair.first.IsRobot()) id1 = robots[collpair.first.index]->robot.LinkName(collpair.first.bodyIndex);
+			  if(collpair.second.IsEnv()) id2 = "terrain";
+			  if(collpair.second.IsRigidObject()) id2 = objects[collpair.second.index]->obj.name;
+			  if(collpair.second.IsRobot()) id2 = robots[collpair.second.index]->robot.LinkName(collpair.second.bodyIndex);
+			  printf("ODESimulation: rolling back due to new penetration between bodies %s and %s\n",id1.c_str(),id2.c_str());
+			}
 			rollback = true;
+		      }
 		      penetrating.insert(collpair);
 		    }
 		  }
@@ -425,6 +436,19 @@ void ODESimulator::Step(Real dt)
 		}
 		if(rollback) {
 			printf("ODESimulation: Warning, initial state has underlying meshes overlapping\n");
+			for(set<pair<ODEObjectID,ODEObjectID> >::const_iterator i=penetrating.begin();i!=penetrating.end();i++) {
+			  pair<ODEObjectID,ODEObjectID> collpair = *i;
+			  string id1,id2;
+			  if(collpair.first.IsEnv()) id1 = "terrain";
+			  if(collpair.first.IsRigidObject()) id1 = objects[collpair.first.index]->obj.name;
+			  if(collpair.first.IsRobot()) id1 = robots[collpair.first.index]->robot.LinkName(collpair.first.bodyIndex);
+			  if(collpair.second.IsEnv()) id2 = "terrain";
+			  if(collpair.second.IsRigidObject()) id2 = objects[collpair.second.index]->obj.name;
+			  if(collpair.second.IsRobot()) id2 = robots[collpair.second.index]->robot.LinkName(collpair.second.bodyIndex);
+			  printf("  %s - %s\n",id1.c_str(),id2.c_str());
+			}
+			printf("Press enter to continue...\n");
+			getchar();
 			//NO ROLLBACK ON FIRST
 			rollback = false;
 		}
