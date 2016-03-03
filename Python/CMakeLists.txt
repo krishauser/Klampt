@@ -9,7 +9,9 @@ endif( )
 find_program(PYTHON "python")
 
 SET(TEMPOUTPUT CMakeFiles)
-SET(DEPS Klampt)
+#make these dependent on all klampt module source files, Klampt, and Klampt's dependency libraries
+FILE(GLOB DEPS klampt/src/*.h klampt/src/*.cpp klampt/*.py)
+SET(DEPS ${DEPS} ${KLAMPT_LIBRARIES} Klampt)
 
 IF(PYTHON)
   configure_file(setup.py.in setup.py)
@@ -36,4 +38,5 @@ IF(PYTHON)
   add_custom_target(python ALL DEPENDS ${OUTPUT}/python_timestamp)
   add_custom_target(python-docs DEPENDS ${OUTPUT}/python_docs_timestamp)
   add_custom_target(python-install DEPENDS ${OUTPUT}/python_install_timestamp)
+  add_dependencies(python-install python)
 ENDIF(PYTHON)
