@@ -1073,7 +1073,12 @@ bool Robot::LoadRob(const char* fn) {
 			  if (!IsGeometryEmpty(i) && links[i].mass != 0.0) {
 					links[i].inertia = Inertia(*geometry[i], links[i].com,
 							links[i].mass);
-					//cout<<"Automass inertia for "<<linkNames[i]<<": "<<endl<<links[i].inertia<<endl;
+					//check for infinity
+					if(!links[i].inertia.isZero(1e300)) {
+					  cout<<"Huge automass inertia for "<<linkNames[i]<<": "<<endl<<links[i].inertia<<endl;
+					  cout<<"Press enter to continue..."<<endl;
+					  getchar();
+					}
 				} else {
 					links[i].inertia.setZero();
 					//cout<<"Automass setting zero inertia for "<<linkNames[i]<<endl;
