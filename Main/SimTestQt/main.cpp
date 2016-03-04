@@ -10,6 +10,12 @@
 #include "QDebug"
 #include <QSettings>
 
+string toStdString(const QString& s)
+{
+	QByteArray arr = s.toUtf8();
+	return string(arr.data());
+}
+
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
@@ -40,8 +46,7 @@ int main(int argc, char *argv[])
 		if (filename.isNull()) return 0;
 		ini.setValue("last_open_scenario_directory", QFileInfo(filename).absolutePath());
 		//workaround for Qt 4.8.x crash on Windows
-		QByteArray arr = filename.toUtf8();
-		string s(arr.data());
+		string s = toStdString(filename);
       const char* args[3] = {"SimTest",s.c_str(),""};
       if(!w.Initialize(2,(const char**)args)) return 1;
     }
