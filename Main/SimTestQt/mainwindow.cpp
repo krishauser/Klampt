@@ -6,6 +6,8 @@
 #include <QFileInfo>
 #include <QInputDialog>
 
+string toStdString(const QString& s);
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
@@ -28,8 +30,8 @@ bool  MainWindow::Initialize(int argc,const char** argv)
     ui->displaywidget->gui = gui;
 
     //set the system calls for encoding video
-    ui->displaywidget->moviefile = ini->value("video_record_file","klampt_record.mp4").toString().toStdString();
-    ui->displaywidget->SetVideoEncoding(ini->value("video_encoding_command","ffmpeg -y -f image2 -i image%04d.ppm").toString().toStdString());
+    ui->displaywidget->moviefile = toStdString(ini->value("video_record_file","klampt_record.mp4").toString());
+    ui->displaywidget->SetVideoEncoding(toStdString(ini->value("video_encoding_command","ffmpeg -y -f image2 -i image%04d.ppm").toString()));
 
     ui->displaywidget->installEventFilter(this);
     ui->displaywidget->setFocusPolicy(Qt::WheelFocus);
@@ -116,34 +118,34 @@ void MainWindow::ChangeEncoderCommand(){
     QString preset = ini->value("video_encoding_command","ffmpeg -y -f image2 -i image%04d.ppm").toString();
     QString value = QInputDialog::getText(this,"Record Command","enter the system command for the encoder using input files *.ppm",
                           QLineEdit::Normal,preset);
-    string tmp = value.toStdString();
+    string tmp = toStdString(value);
     const char* cstr = tmp.c_str();
-    ui->displaywidget->SetVideoEncoding(value.toStdString());
+    ui->displaywidget->SetVideoEncoding(toStdString(value));
     ini->setValue("video_encoding_command",value);
 }
 
 void MainWindow::LogSimulation(bool status){
   string file;
-  if(status) file = ini->value("log_simulation_file","simtest_log.csv").toString().toStdString();
+  if(status) file = toStdString(ini->value("log_simulation_file","simtest_log.csv").toString());
   gui->SendCommand("log_sim",file);
 }
 
 void MainWindow::LogContactState(bool status){
   string file;
-  if(status) file = ini->value("log_contact_state_file","simtest_contact_log.csv").toString().toStdString();
+  if(status) file = toStdString(ini->value("log_contact_state_file","simtest_contact_log.csv").toString());
   gui->SendCommand("log_contact_state",file);
 }
 
 void MainWindow::LogContactWrenches(bool status){
   string file;
-  if(status) file = ini->value("log_contact_wrenches_file","simtest_wrenches_log.csv").toString().toStdString();
+  if(status) file = toStdString(ini->value("log_contact_wrenches_file","simtest_wrenches_log.csv").toString());
   gui->SendCommand("log_contact_wrenches",file);
 }
 
 void MainWindow::LogSensedPath(bool status){
   string file;
   stringstream ss;
-  if(status) file = ini->value("log_sensed_path_file","simtest_sensed_path_log.csv").toString().toStdString();
+  if(status) file = toStdString(ini->value("log_sensed_path_file","simtest_sensed_path_log.csv").toString());
   ss<<"0 "<<file;//multiple robots what do we do?
   gui->SendCommand("log_sensed_path",ss.str());
 }
@@ -151,7 +153,7 @@ void MainWindow::LogSensedPath(bool status){
 void MainWindow::LogCommandedPath(bool status){
   string file;
   stringstream ss;
-  if(status) file = ini->value("log_commanded_path_file","simtest_commanded_path_log.csv").toString().toStdString();
+  if(status) file = toStdString(ini->value("log_commanded_path_file","simtest_commanded_path_log.csv").toString());
   ss<<"0 "<<file;//multiple robots what do we do?
   gui->SendCommand("log_commanded_path",ss.str());
 }
@@ -287,7 +289,7 @@ void MainWindow::ChangeRecordFile(){
     QString recordfilename = QFileDialog::getSaveFileName(this,"Recording Output",recordPath,filter,&filter);
     if(!recordfilename.isNull()) {
       ini->setValue("video_record_file",QFileInfo(recordfilename).absoluteFilePath());
-      string str = recordfilename.toStdString();
+      string str = toStdString(recordfilename);
       ui->displaywidget->moviefile = str;
     }
 }
