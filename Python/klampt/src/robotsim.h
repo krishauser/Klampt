@@ -167,14 +167,14 @@ class SimBody
   void enableDynamics(bool enabled=true);
   bool isDynamicsEnabled();
 
-  /// Applies a force and torque about the COM at the current simulation
-  /// time step.
+  /// Applies a force and torque about the COM over the duration of the
+  /// next Simulator.simulate(t) call.
   void applyWrench(const double f[3],const double t[3]);
-  /// Applies a force at a given point (in world coordinates) at the
-  ///current simulation time step.
+  /// Applies a force at a given point (in world coordinates) over the
+  /// duration of the next Simulator.simulate(t) call.
   void applyForceAtPoint(const double f[3],const double pworld[3]);
-  /// Applies a force at a given point (in local coordinates) at the
-  ///current simulation time step.
+  /// Applies a force at a given point (in local coordinates) over
+  /// the duration of the next Simulator.simulate(t) call.
   void applyForceAtLocalPoint(const double f[3],const double plocal[3]);
 
   /// Sets the body's transformation at the current
@@ -197,6 +197,7 @@ class SimBody
   /// Sets the surface properties
   void setSurface(const ContactParameters& params);
 
+  Simulator* sim;
   ODEGeometry* geometry;
   dBodyID body;
 };

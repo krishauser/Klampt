@@ -5,11 +5,6 @@
   <simulation>
     <robot index="0">
        <controller type="SerialController" writeRate="20" servAddr="tcp://localhost:3456" />
-       <sensors>
-          <JointPositionSensor name="q" />
-          <JointVelocitySensor name="dq" />
-          <DriverTorqueSensor name="torque" />
-       </sensors>
     </robot>
   </simulation>
 </world>

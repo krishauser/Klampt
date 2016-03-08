@@ -1,4 +1,5 @@
 #include "FeedforwardController.h"
+#include "JointSensors.h"
 //#include "Modeling/ParabolicRamp.h"
 #include <KrisLibrary/robotics/NewtonEuler.h>
 #include <string>

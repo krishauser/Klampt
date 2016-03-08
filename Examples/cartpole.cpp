@@ -1,6 +1,7 @@
 #include "Interface/SimulationGUI.h"
 #include "Control/TabulatedController.h"
 #include "Control/SerialControlledRobot.h"
+#include "Control/JointSensors.h"
 #include <KrisLibrary/utils/indexing.h>
 #include <KrisLibrary/utils/stringutils.h>
 #include <fstream>
