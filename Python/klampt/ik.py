@@ -60,6 +60,7 @@ is not yet implemented and will result in a thrown exception.
 """
 
 from robotsim import *
+import se3
 from coordinates import Point,Direction,Frame,Transform
 
 def objective(body,ref=None,local=None,world=None,R=None,t=None):
