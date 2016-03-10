@@ -1088,29 +1088,34 @@ elif glcommon._GLUTAvailable:
                 glColor3f(1,1,0)
                 glRasterPos(20,80)
                 gldraw.glutBitmapString(GLUT_BITMAP_HELVETICA_18,"In Dialog mode. Press 'q' to return to normal mode")
-        def handle_keypress(self,c,x,y):
+        def keyboardfunc(self,c,x,y):
             if self.inDialog and c=='q':
+                print "Q pressed, hiding dialog"
                 self.inDialog = False
-                self.refresh()
                 global _showwindow,_showdialog
                 _showdialog = False
                 if not _showwindow:
                     glutIconifyWindow()
             else:
-                GLPluginProgram.handle_keypress(self,c,x,y)
+                GLPluginProgram.keyboardfunc(self,c,x,y)
 
         def idlefunc(self):
             global _thread_running,_app,_vis,_quit,_showdialog,_showwindow
             global _custom_run_method,_custom_run_retval
+            if _quit:
+                if bool(glutLeaveMainLoop):
+                    glutLeaveMainLoop()
+                else:
+                    print "Not compiled with freeglut, can't exit main loop safely. Killing."
+                    exit(0)
             if not self.inDialog:
                 if _showwindow:
                     glutShowWindow()
-                else:
-                    glutIconifyWindow()
-
-                if _showdialog:
+                elif _showdialog:
                     self.inDialog = True
                     glutShowWindow()
+                else:
+                    glutIconifyWindow()
 
                 if _custom_run_method:
                     pass
@@ -1121,11 +1126,18 @@ elif glcommon._GLUTAvailable:
         global _thread_running,_app,_vis
         _thread_running = True
         _app = GLUTVisualization()
+        #avoid calling _app.setPlugin, it calls refresh() which should not be
+        #called until after GLUT is initialized on run()
         if _plugin != None:
-            _app.setPlugin(_plugin)
+            _app.iface = _plugin
+            _plugin.window = _app
+            #_app.setPlugin(_plugin)
         else:
-            _app.setPlugin(_vis)
+            _app.iface = _vis
+            _vis.window = _app
+            #_app.setPlugin(_vis)
         _app.run()
+        _app.setPlugin(None)
         print "Visualization thread closing..."
         for (name,itemvis) in _vis.items.iteritems():
             itemvis.destroy()

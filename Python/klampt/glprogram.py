@@ -29,15 +29,18 @@ class GLProgram:
           before calling run(), and these are updated when the user resizes
           the window.
         - clearColor: the RGBA floating point values of the background color.
+        - glutInitialized: true if GLUT has been initialized
     """
     def __init__(self,name="OpenGL Program"):
         self.name = name
         self.width = 640
         self.height = 480
         self.clearColor = [1.0,1.0,1.0,0.0]
+        self.glutInitialized = False
 
     def initWindow(self):
-        """ Open a window and initialize """
+        """ Open a window and initialize. Users should not call this
+        directly! Call run() instead. """
         glutInitDisplayMode (GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH | GLUT_MULTISAMPLE)
 
         x = 0
@@ -60,6 +63,7 @@ class GLProgram:
 
         #init function
         self.initialize()
+        self.glutInitialized = True
 
     def run(self):
         """Starts the main loop"""
@@ -72,14 +76,15 @@ class GLProgram:
 
     def initialize(self):
         """Called after GLUT is initialized, but before main loop.
-        May be overridden."""
+        May be overridden.  Users should not call this directly!"""
         glutPostRedisplay()
         glEnable(GL_MULTISAMPLE)
         pass
 
     def refresh(self):
         """Call this to redraw the screen on the next event loop"""
-        glutPostRedisplay()
+        if self.glutInitialized:
+            glutPostRedisplay()
 
     def reshapefunc(self,w,h):
         """Called on window resize.  May be overridden."""
@@ -110,6 +115,10 @@ class GLProgram:
     def displayfunc(self):
         """All OpenGL calls go here.  May be overridden, although you
         may wish to override display() and display_screen() instead."""
+        if self.width == 0 or self.height == 0:
+            #hidden?
+            print "GLProgram.displayfunc called on hidden window?"
+            return
         self.prepare_GL()
         self.display()
         self.prepare_screen_GL()
@@ -209,8 +218,9 @@ class GLNavigationProgram(GLProgram):
         """Sets the viewport to a tuple previously returned by get_view(),
         e.g. a prior view that was saved to file."""
         self.width,self.height,self.camera,self.fov,self.clippingplanes = v
-        glutReshapeWindow(self.width,self.height)
-        self.refresh()
+        if self.glutInitialized:
+            glutReshapeWindow(self.width,self.height)
+            self.refresh()
 
     def viewport(self):
         """Gets a Viewport instance corresponding to the current view.
