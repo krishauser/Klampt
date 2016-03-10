@@ -555,6 +555,22 @@ class VisAppearance:
         for n,app in self.subAppearances.iteritems():
             app.swapDrawConfig()        
 
+    def clearDisplayLists(self):
+        if isinstance(self.item,WorldModel):
+            for r in range(self.item.numRobots()):
+                for link in range(self.item.robot(r).numLinks()):
+                    self.item.robot(r).link(link).appearance().refresh()
+            for i in range(self.item.numRigidObjects()):
+                self.item.rigidObject(i).appearance().refresh()
+            for i in range(self.item.numTerrains()):
+                self.item.terrain(i).appearance().refresh()
+        elif hasattr(self.item,'appearance'):
+            self.item.appearance().refresh()
+        elif isinstance(self.item,RobotModel):
+            for link in range(self.item.numLinks()):
+                self.item.link(link).appearance().refresh()
+        self.markChanged()
+
     def draw(self,world=None):
         """Draws the specified item in the specified world.  If name
         is given and text_hidden != False, then the name of the item is
@@ -567,8 +583,10 @@ class VisAppearance:
         if not self.useDefaultAppearance and hasattr(item,'appearance'):
             oldAppearance = item.appearance().clone()
             if self.customAppearance != None:
+                print "Changing appearance of",name
                 item.appearance().set(self.customAppearance)
             elif "color" in self.attributes:
+                print "Changing color of",name
                 item.appearance().setColor(*self.attributes["color"])
 
         if hasattr(item,'drawGL'):
@@ -725,7 +743,10 @@ class VisAppearance:
                     #Otherwise, can't determine the correct transforms
                     robot = item.robot
                 elif world:
-                    robot = world.robot(0)
+                    if world.numRobots() >= 1:
+                        robot = world.robot(0)
+                    else:
+                        robot = None
                 else:
                     robot = None
                 if robot != None:
@@ -733,6 +754,8 @@ class VisAppearance:
                     dest = robot.link(item.destLink()) if item.destLink()>=0 else None
                     while len(self.displayCache) < 3:
                         self.displayCache.append(CachedGLObject())
+                    self.displayCache[1].name = self.name+" target position"
+                    self.displayCache[2].name = self.name+" curve"
                     if item.numPosDims() != 0:
                         lp,wp = item.getPosition()
                         #set up parameters of connector
@@ -910,6 +933,10 @@ if glcommon._PyQtAvailable or glcommon._GLUTAvailable:
                     glEnable(GL_DEPTH_TEST)
                 point = vectorops.add(point,[0,0,-0.05])
 
+        def clearDisplayLists(self):
+            for i in self.items.itervalues():
+                i.clearDisplayLists()
+
         def idlefunc(self):
             oldt = self.t
             self.t = time.time()
@@ -1065,6 +1092,10 @@ if glcommon._PyQtAvailable:
 elif glcommon._GLUTAvailable:
     from OpenGL.GLUT import *
     from glprogram import GLPluginProgram
+    print "klampt.visualization: QT is not available, falling back to poorer"
+    print "GLUT interface.  Returning to another GLUT thread will not work"
+    print "properly."
+    print ""
     _app = None
     _quit = False
     _thread_running = False
@@ -1072,6 +1103,7 @@ elif glcommon._GLUTAvailable:
     _showwindow = False
     _custom_run_method = None
     _custom_run_retval = None
+    _old_glut_window = None
     class GLUTVisualization(GLPluginProgram):
         def __init__(self):
             global _vis,_window_title
@@ -1100,14 +1132,14 @@ elif glcommon._GLUTAvailable:
                 GLPluginProgram.keyboardfunc(self,c,x,y)
 
         def idlefunc(self):
-            global _thread_running,_app,_vis,_quit,_showdialog,_showwindow
+            global _thread_running,_app,_vis,_quit,_showdialog,_showwindow,_old_glut_window
             global _custom_run_method,_custom_run_retval
             if _quit:
                 if bool(glutLeaveMainLoop):
                     glutLeaveMainLoop()
                 else:
-                    print "Not compiled with freeglut, can't exit main loop safely. Killing."
-                    exit(0)
+                    print "Not compiled with freeglut, can't exit main loop safely. Press Ctrl+C instead"
+                    raw_input()
             if not self.inDialog:
                 if _showwindow:
                     glutShowWindow()
@@ -1116,6 +1148,10 @@ elif glcommon._GLUTAvailable:
                     glutShowWindow()
                 else:
                     glutIconifyWindow()
+                    if _old_glut_window is not None:
+                        glutSetWindow(_old_glut_window)
+                        #need to refresh all appearances of objects for changed opengl context
+                        _vis.clearDisplayLists()
 
                 if _custom_run_method:
                     pass
@@ -1123,8 +1159,12 @@ elif glcommon._GLUTAvailable:
 
 
     def _run_app_thread():
-        global _thread_running,_app,_vis
+        global _thread_running,_app,_vis,_old_glut_window,_quit
         _thread_running = True
+        if glutGetWindow() != 0:
+            _old_glut_window = glutGetWindow()
+            #need to refresh all appearances of objects for changed opengl context
+            _vis.clearDisplayLists()
         _app = GLUTVisualization()
         #avoid calling _app.setPlugin, it calls refresh() which should not be
         #called until after GLUT is initialized on run()
