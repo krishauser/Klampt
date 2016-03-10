@@ -15,9 +15,9 @@ class RigidObjectModel;
 class TerrainModel;
 
 //forward definitions for pointers to internal objects
-struct RigidObject;
-struct Terrain;
-struct Robot;
+class RigidObject;
+class Terrain;
+class Robot;
 
 /** @brief Stores mass information for a rigid body or robot link. */
 struct Mass
