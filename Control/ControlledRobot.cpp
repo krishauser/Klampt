@@ -1,4 +1,5 @@
 #include "ControlledRobot.h"
+#include "JointSensors.h"
 
 ControlledRobot::ControlledRobot()
   :klamptRobotModel(NULL),klamptController(NULL)

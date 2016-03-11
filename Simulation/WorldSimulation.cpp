@@ -337,7 +337,7 @@ void WorldSimulation::Advance(Real dt)
   while(timeLeft > 0.0) {
     Real step = Min(timeLeft,simStep);
     for(size_t i=0;i<controlSimulators.size();i++) 
-      controlSimulators[i].Step(step);
+      controlSimulators[i].Step(step,this);
     for(size_t i=0;i<hooks.size();i++)
       hooks[i]->Step(step);
 
@@ -408,6 +408,20 @@ void WorldSimulation::Advance(Real dt)
   time += dt;
   UpdateModel();
 
+  //kill any autokill hooks at end of timestep
+  bool anyKilled = false;
+  vector<SmartPointer<WorldSimulationHook> > newhooks;
+  for(size_t i=0;i<hooks.size();i++) {
+    if(hooks[i]->autokill) {
+      if(!anyKilled) 
+	newhooks.insert(newhooks.end(),hooks.begin(),hooks.begin()+i);
+      else 
+	anyKilled = true;
+    }
+    else if(anyKilled) newhooks.push_back(hooks[i]);
+  }
+  if(anyKilled)
+    swap(hooks,newhooks);
   /*
   //convert sums to means
   for(ContactFeedbackMap::iterator i=contactFeedback.begin();i!=contactFeedback.end();i++) {
@@ -426,12 +440,27 @@ void WorldSimulation::AdvanceFake(Real dt)
   bool oldFake = fakeSimulation;
   fakeSimulation = true;
   for(size_t i=0;i<controlSimulators.size();i++) 
-    controlSimulators[i].Step(dt);
+    controlSimulators[i].Step(dt,this);
   for(size_t i=0;i<hooks.size();i++)
     hooks[i]->Step(dt);
   time += dt;
   UpdateModel();
   fakeSimulation = oldFake;
+
+  //kill any autokill hooks at end of timestep
+  bool anyKilled = false;
+  vector<SmartPointer<WorldSimulationHook> > newhooks;
+  for(size_t i=0;i<hooks.size();i++) {
+    if(hooks[i]->autokill) {
+      if(!anyKilled) 
+	newhooks.insert(newhooks.end(),hooks.begin(),hooks.begin()+i);
+      else 
+	anyKilled = true;
+    }
+    else if(anyKilled) newhooks.push_back(hooks[i]);
+  }
+  if(anyKilled)
+    swap(hooks,newhooks);
 }
 
 void WorldSimulation::UpdateModel()
@@ -822,6 +851,51 @@ bool ForceHook::WriteState(File& f) const
   FatalError("Not implemented yet");
   return false;
 }
+
+
+LocalForceHook::LocalForceHook(dBodyID _body,const Vector3& _localpt,const Vector3& _f)
+  :body(_body),localpt(_localpt),f(_f)
+{}
+
+void LocalForceHook::Step(Real dt)
+{
+  dBodyAddForceAtRelPos(body,f.x,f.y,f.z,localpt.x,localpt.y,localpt.z);
+}
+
+bool LocalForceHook::ReadState(File& f)
+{
+  FatalError("Not implemented yet");
+  return false;
+}
+
+bool LocalForceHook::WriteState(File& f) const
+{
+  FatalError("Not implemented yet");
+  return false;
+}
+
+WrenchHook::WrenchHook(dBodyID _body,const Vector3& _f,const Vector3& _m)
+  :body(_body),f(_f),m(_m)
+{}
+
+void WrenchHook::Step(Real dt)
+{
+  dBodyAddForce(body,f.x,f.y,f.z);
+  dBodyAddTorque(body,m.x,m.y,m.z);
+}
+
+bool WrenchHook::ReadState(File& f)
+{
+  FatalError("Not implemented yet");
+  return false;
+}
+
+bool WrenchHook::WriteState(File& f) const
+{
+  FatalError("Not implemented yet");
+  return false;
+}
+
 
 
 SpringHook::SpringHook(dBodyID _body,const Vector3& _worldpt,const Vector3& _target,Real _k)

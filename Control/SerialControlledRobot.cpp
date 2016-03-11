@@ -1,4 +1,5 @@
 #include "SerialControlledRobot.h"
+#include "JointSensors.h"
 #include <KrisLibrary/utils/AnyCollection.h>
 
 SerialControlledRobot::SerialControlledRobot(const char* _host,double timeout)

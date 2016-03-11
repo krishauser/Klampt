@@ -1,4 +1,6 @@
 #include "StateEstimator.h"
+#include "JointSensors.h"
+#include "InertialSensors.h"
 #include "Simulation/ODERobot.h"
 #include <KrisLibrary/math/angle.h>
 

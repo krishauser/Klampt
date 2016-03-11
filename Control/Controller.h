@@ -56,10 +56,16 @@ public:
 
   Robot& robot;
   Real time;
+  Real nominalTimeStep;   ///< a "desired" time step, by default 0, which acts as a hint to the simulator.  Note that it doesn't have to abide the hint.
 
   RobotSensors* sensors;  ///<sensor input (filled in by simulator)
   RobotMotorCommand* command;  ///<motor command output (output to simulator)
 };
+
+///Makes a default controller used in all the Klamp't simulation apps.
+///First, reads from the file given by robot->properties["controller"].
+///If this fails, makes a Logging, Feedforward, PolynomialPath controller.
+SmartPointer<RobotController> MakeDefaultController(Robot* robot);
 
 /** @ingroup Control
  * @brief A class to simplify the loading of different controllers at run time.
@@ -77,6 +83,8 @@ class RobotControllerFactory
   static void Register(const char* name,RobotController* controller);
   static SmartPointer<RobotController> CreateByName(const char* name);
   static SmartPointer<RobotController> CreateByName(const char* name,Robot& robot);
+  static SmartPointer<RobotController> Load(const char* fn,Robot& robot);
+  static bool Save(RobotController* controller,const char* fn);
   static SmartPointer<RobotController> Load(TiXmlElement* in,Robot& robot);
   static bool Save(RobotController* controller,TiXmlElement* out);
 

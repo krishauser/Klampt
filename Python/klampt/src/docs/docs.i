@@ -38,79 +38,55 @@ KrisLibrary/planning/CSpace.h.
 
 C++ includes: motionplanning.h ";
 
-%feature("docstring")  CSpaceInterface::CSpaceInterface "CSpaceInterface::CSpaceInterface() ";
+%feature("docstring")  CSpaceInterface::CSpaceInterface "";
 
-%feature("docstring")  CSpaceInterface::CSpaceInterface "CSpaceInterface::CSpaceInterface(const CSpaceInterface &) ";
+%feature("docstring")  CSpaceInterface::CSpaceInterface "";
 
-%feature("docstring")  CSpaceInterface::~CSpaceInterface "CSpaceInterface::~CSpaceInterface() ";
+%feature("docstring")  CSpaceInterface::~CSpaceInterface "";
 
-%feature("docstring")  CSpaceInterface::destroy "void
-CSpaceInterface::destroy() ";
+%feature("docstring")  CSpaceInterface::destroy "";
 
-%feature("docstring")  CSpaceInterface::setFeasibility "void
-CSpaceInterface::setFeasibility(PyObject *pyFeas) ";
+%feature("docstring")  CSpaceInterface::setFeasibility "";
 
-%feature("docstring")  CSpaceInterface::addFeasibilityTest "void
-CSpaceInterface::addFeasibilityTest(const char *name, PyObject
-*pyFeas) ";
+%feature("docstring")  CSpaceInterface::addFeasibilityTest "";
 
-%feature("docstring")  CSpaceInterface::setVisibility "void
-CSpaceInterface::setVisibility(PyObject *pyVisible) ";
+%feature("docstring")  CSpaceInterface::setVisibility "";
 
-%feature("docstring")  CSpaceInterface::addVisibilityTest "void
-CSpaceInterface::addVisibilityTest(const char *name, PyObject
-*pyVisible) ";
+%feature("docstring")  CSpaceInterface::addVisibilityTest "";
 
-%feature("docstring")  CSpaceInterface::setVisibilityEpsilon "void
-CSpaceInterface::setVisibilityEpsilon(double eps) ";
+%feature("docstring")  CSpaceInterface::setVisibilityEpsilon "";
 
-%feature("docstring")  CSpaceInterface::setSampler "void
-CSpaceInterface::setSampler(PyObject *pySamp) ";
+%feature("docstring")  CSpaceInterface::setSampler "";
 
-%feature("docstring")  CSpaceInterface::setNeighborhoodSampler "void
-CSpaceInterface::setNeighborhoodSampler(PyObject *pySamp) ";
+%feature("docstring")  CSpaceInterface::setNeighborhoodSampler "";
 
-%feature("docstring")  CSpaceInterface::setDistance "void
-CSpaceInterface::setDistance(PyObject *pyDist) ";
+%feature("docstring")  CSpaceInterface::setDistance "";
 
-%feature("docstring")  CSpaceInterface::setInterpolate "void
-CSpaceInterface::setInterpolate(PyObject *pyInterp) ";
+%feature("docstring")  CSpaceInterface::setInterpolate "";
 
-%feature("docstring")  CSpaceInterface::setProperty "void
-CSpaceInterface::setProperty(const char *key, const char *value) ";
+%feature("docstring")  CSpaceInterface::setProperty "";
 
-%feature("docstring")  CSpaceInterface::getProperty "const char *
-CSpaceInterface::getProperty(const char *key) ";
+%feature("docstring")  CSpaceInterface::getProperty "";
 
-%feature("docstring")  CSpaceInterface::isFeasible "bool
-CSpaceInterface::isFeasible(PyObject *q)
+%feature("docstring")  CSpaceInterface::isFeasible "
 
 queries ";
 
-%feature("docstring")  CSpaceInterface::isVisible "bool
-CSpaceInterface::isVisible(PyObject *a, PyObject *b) ";
+%feature("docstring")  CSpaceInterface::isVisible "";
 
-%feature("docstring")  CSpaceInterface::testFeasibility "bool
-CSpaceInterface::testFeasibility(const char *name, PyObject *q) ";
+%feature("docstring")  CSpaceInterface::testFeasibility "";
 
-%feature("docstring")  CSpaceInterface::testVisibility "bool
-CSpaceInterface::testVisibility(const char *name, PyObject *a,
-PyObject *b) ";
+%feature("docstring")  CSpaceInterface::testVisibility "";
 
-%feature("docstring")  CSpaceInterface::feasibilityFailures "PyObject
-* CSpaceInterface::feasibilityFailures(PyObject *q) ";
+%feature("docstring")  CSpaceInterface::feasibilityFailures "";
 
-%feature("docstring")  CSpaceInterface::visibilityFailures "PyObject
-* CSpaceInterface::visibilityFailures(PyObject *a, PyObject *b) ";
+%feature("docstring")  CSpaceInterface::visibilityFailures "";
 
-%feature("docstring")  CSpaceInterface::sample "PyObject *
-CSpaceInterface::sample() ";
+%feature("docstring")  CSpaceInterface::sample "";
 
-%feature("docstring")  CSpaceInterface::distance "double
-CSpaceInterface::distance(PyObject *a, PyObject *b) ";
+%feature("docstring")  CSpaceInterface::distance "";
 
-%feature("docstring")  CSpaceInterface::interpolate "PyObject *
-CSpaceInterface::interpolate(PyObject *a, PyObject *b, double u) ";
+%feature("docstring")  CSpaceInterface::interpolate "";
 
 
 // File: classGeneralizedIKObjective.xml
@@ -133,43 +109,31 @@ the nature of the constraint.
 C++ includes: robotik.h ";
 
 %feature("docstring")  GeneralizedIKObjective::GeneralizedIKObjective
-"GeneralizedIKObjective::GeneralizedIKObjective(const
-GeneralizedIKObjective &obj) ";
+"";
 
 %feature("docstring")  GeneralizedIKObjective::GeneralizedIKObjective
-"GeneralizedIKObjective::GeneralizedIKObjective(const RobotModelLink
-&link) ";
+"";
 
 %feature("docstring")  GeneralizedIKObjective::GeneralizedIKObjective
-"GeneralizedIKObjective::GeneralizedIKObjective(const
-RigidObjectModel &obj) ";
+"";
 
 %feature("docstring")  GeneralizedIKObjective::GeneralizedIKObjective
-"GeneralizedIKObjective::GeneralizedIKObjective(const RobotModelLink
-&link, const RobotModelLink &link2) ";
+"";
 
 %feature("docstring")  GeneralizedIKObjective::GeneralizedIKObjective
-"GeneralizedIKObjective::GeneralizedIKObjective(const RobotModelLink
-&link, const RigidObjectModel &obj2) ";
+"";
 
 %feature("docstring")  GeneralizedIKObjective::GeneralizedIKObjective
-"GeneralizedIKObjective::GeneralizedIKObjective(const
-RigidObjectModel &obj, const RobotModelLink &link2) ";
+"";
 
 %feature("docstring")  GeneralizedIKObjective::GeneralizedIKObjective
-"GeneralizedIKObjective::GeneralizedIKObjective(const
-RigidObjectModel &obj, const RigidObjectModel &obj2) ";
+"";
 
-%feature("docstring")  GeneralizedIKObjective::setPoint "void
-GeneralizedIKObjective::setPoint(const double p1[3], const double
-p2[3]) ";
+%feature("docstring")  GeneralizedIKObjective::setPoint "";
 
-%feature("docstring")  GeneralizedIKObjective::setPoints "void
-GeneralizedIKObjective::setPoints(PyObject *p1s, PyObject *p2s) ";
+%feature("docstring")  GeneralizedIKObjective::setPoints "";
 
-%feature("docstring")  GeneralizedIKObjective::setTransform "void
-GeneralizedIKObjective::setTransform(const double R[9], const double
-t[3]) ";
+%feature("docstring")  GeneralizedIKObjective::setTransform "";
 
 
 // File: classGeneralizedIKSolver.xml
@@ -179,34 +143,28 @@ An inverse kinematics solver between multiple robots and/or objects.
 
 C++ includes: robotik.h ";
 
-%feature("docstring")  GeneralizedIKSolver::GeneralizedIKSolver "GeneralizedIKSolver::GeneralizedIKSolver(const WorldModel &world) ";
+%feature("docstring")  GeneralizedIKSolver::GeneralizedIKSolver "";
 
-%feature("docstring")  GeneralizedIKSolver::add "void
-GeneralizedIKSolver::add(const GeneralizedIKObjective &objective)
+%feature("docstring")  GeneralizedIKSolver::add "
 
 Adds a new simultaneous objective. ";
 
-%feature("docstring")  GeneralizedIKSolver::getResidual "void
-GeneralizedIKSolver::getResidual(std::vector< double > &out)
+%feature("docstring")  GeneralizedIKSolver::getResidual "
 
 Returns a vector describing the error of the objective. ";
 
-%feature("docstring")  GeneralizedIKSolver::getJacobian "void
-GeneralizedIKSolver::getJacobian(std::vector< std::vector< double > >
-&out)
+%feature("docstring")  GeneralizedIKSolver::getJacobian "
 
 Returns a matrix describing the instantaneous derivative of the
-objective with respect to the active parameters ";
+objective with respect to the active parameters. ";
 
-%feature("docstring")  GeneralizedIKSolver::solve "PyObject *
-GeneralizedIKSolver::solve(int iters, double tol=1e-3)
+%feature("docstring")  GeneralizedIKSolver::solve "
 
 Tries to find a configuration that satifies all simultaneous
 objectives up to the desired tolerance. Returns (res,iters) where res
 indicates whether x converged. ";
 
-%feature("docstring")  GeneralizedIKSolver::sampleInitial "void
-GeneralizedIKSolver::sampleInitial()
+%feature("docstring")  GeneralizedIKSolver::sampleInitial "
 
 Samples an initial random configuration. ";
 
@@ -219,25 +177,17 @@ AABBs can be constructed manually in the Python API.
 
 C++ includes: geometry.h ";
 
-%feature("docstring")  GeometricPrimitive::setPoint "void
-GeometricPrimitive::setPoint(const double pt[3]) ";
+%feature("docstring")  GeometricPrimitive::setPoint "";
 
-%feature("docstring")  GeometricPrimitive::setSphere "void
-GeometricPrimitive::setSphere(const double c[3], double r) ";
+%feature("docstring")  GeometricPrimitive::setSphere "";
 
-%feature("docstring")  GeometricPrimitive::setSegment "void
-GeometricPrimitive::setSegment(const double a[3], const double b[3])
-";
+%feature("docstring")  GeometricPrimitive::setSegment "";
 
-%feature("docstring")  GeometricPrimitive::setAABB "void
-GeometricPrimitive::setAABB(const double bmin[3], const double
-bmax[3]) ";
+%feature("docstring")  GeometricPrimitive::setAABB "";
 
-%feature("docstring")  GeometricPrimitive::loadString "bool
-GeometricPrimitive::loadString(const char *str) ";
+%feature("docstring")  GeometricPrimitive::loadString "";
 
-%feature("docstring")  GeometricPrimitive::saveString "std::string
-GeometricPrimitive::saveString() const ";
+%feature("docstring")  GeometricPrimitive::saveString "";
 
 
 // File: classGeometry3D.xml
@@ -270,77 +220,65 @@ collision padding!)
 
 C++ includes: geometry.h ";
 
-%feature("docstring")  Geometry3D::Geometry3D "Geometry3D::Geometry3D() ";
+%feature("docstring")  Geometry3D::Geometry3D "";
 
-%feature("docstring")  Geometry3D::~Geometry3D "Geometry3D::~Geometry3D() ";
+%feature("docstring")  Geometry3D::~Geometry3D "";
 
-%feature("docstring")  Geometry3D::clone "Geometry3D
-Geometry3D::clone()
+%feature("docstring")  Geometry3D::clone "
 
 Creates a standalone geometry from this geometry. ";
 
-%feature("docstring")  Geometry3D::set "void Geometry3D::set(const
-Geometry3D &)
+%feature("docstring")  Geometry3D::set "
 
 Copies the geometry of the argument into this geometry. ";
 
-%feature("docstring")  Geometry3D::isStandalone "bool
-Geometry3D::isStandalone()
+%feature("docstring")  Geometry3D::isStandalone "
 
 Returns true if this is a standalone geometry. ";
 
-%feature("docstring")  Geometry3D::free "void Geometry3D::free()
+%feature("docstring")  Geometry3D::free "
 
 Frees the data associated with this geometry, if standalone. ";
 
-%feature("docstring")  Geometry3D::type "string Geometry3D::type()
+%feature("docstring")  Geometry3D::type "
 
 Returns the type of geometry: TriangleMesh, PointCloud, or
-GeometricPrimitive ";
+GeometricPrimitive. ";
 
-%feature("docstring")  Geometry3D::empty "bool Geometry3D::empty()
+%feature("docstring")  Geometry3D::empty "
 
 Returns true if this has no contents. ";
 
-%feature("docstring")  Geometry3D::getTriangleMesh "TriangleMesh
-Geometry3D::getTriangleMesh()
+%feature("docstring")  Geometry3D::getTriangleMesh "
 
 Returns a TriangleMesh if this geometry is of type TriangleMesh. ";
 
-%feature("docstring")  Geometry3D::getPointCloud "PointCloud
-Geometry3D::getPointCloud()
+%feature("docstring")  Geometry3D::getPointCloud "
 
 Returns a PointCloud if this geometry is of type PointCloud. ";
 
-%feature("docstring")  Geometry3D::getGeometricPrimitive "GeometricPrimitive Geometry3D::getGeometricPrimitive()
+%feature("docstring")  Geometry3D::getGeometricPrimitive "
 
 Returns a GeometricPrimitive if this geometry is of type
 GeometricPrimitive. ";
 
-%feature("docstring")  Geometry3D::setTriangleMesh "void
-Geometry3D::setTriangleMesh(const TriangleMesh &) ";
+%feature("docstring")  Geometry3D::setTriangleMesh "";
 
-%feature("docstring")  Geometry3D::setPointCloud "void
-Geometry3D::setPointCloud(const PointCloud &) ";
+%feature("docstring")  Geometry3D::setPointCloud "";
 
-%feature("docstring")  Geometry3D::setGeometricPrimitive "void
-Geometry3D::setGeometricPrimitive(const GeometricPrimitive &) ";
+%feature("docstring")  Geometry3D::setGeometricPrimitive "";
 
-%feature("docstring")  Geometry3D::loadFile "bool
-Geometry3D::loadFile(const char *fn)
+%feature("docstring")  Geometry3D::loadFile "
 
 Loads from file. Standard mesh types, PCD files, and .geom files are
 supported. ";
 
-%feature("docstring")  Geometry3D::saveFile "bool
-Geometry3D::saveFile(const char *fn)
+%feature("docstring")  Geometry3D::saveFile "
 
 Saves to file. Standard mesh types, PCD files, and .geom files are
 supported. ";
 
-%feature("docstring")  Geometry3D::attachToStream "bool
-Geometry3D::attachToStream(const char *protocol, const char *name,
-const char *type=\"\")
+%feature("docstring")  Geometry3D::attachToStream "
 
 Attaches this geometry to a given stream.
 
@@ -353,69 +291,55 @@ is not obeyed. Currently only the \"PointCloud\" or default empty
 Note: you will need to call Appearance.refresh(True) to get the
 appearance to update. ";
 
-%feature("docstring")  Geometry3D::detachFromStream "bool
-Geometry3D::detachFromStream(const char *protocol, const char *name)
+%feature("docstring")  Geometry3D::detachFromStream "
 
 Detaches this geometry from a given stream. This must be called before
 deleting a piece of geometry. ";
 
-%feature("docstring")  Geometry3D::setCurrentTransform "void
-Geometry3D::setCurrentTransform(const double R[9], const double t[3])
+%feature("docstring")  Geometry3D::setCurrentTransform "
 
 Sets the current transformation (not modifying the underlying data) ";
 
-%feature("docstring")  Geometry3D::translate "void
-Geometry3D::translate(const double t[3])
+%feature("docstring")  Geometry3D::translate "
 
 Translates the geometry data. ";
 
-%feature("docstring")  Geometry3D::transform "void
-Geometry3D::transform(const double R[9], const double t[3])
+%feature("docstring")  Geometry3D::transform "
 
 Translates/rotates the geometry data. ";
 
-%feature("docstring")  Geometry3D::setCollisionMargin "void
-Geometry3D::setCollisionMargin(double margin)
+%feature("docstring")  Geometry3D::setCollisionMargin "
 
 Sets a padding around the base geometry which affects the results of
-proximity queries ";
+proximity queries. ";
 
-%feature("docstring")  Geometry3D::getCollisionMargin "double
-Geometry3D::getCollisionMargin()
+%feature("docstring")  Geometry3D::getCollisionMargin "
 
 Returns the padding around the base geometry. Default 0. ";
 
-%feature("docstring")  Geometry3D::getBB "void
-Geometry3D::getBB(double out[3], double out2[3])
+%feature("docstring")  Geometry3D::getBB "
 
 Returns the axis-aligned bounding box of the object. ";
 
-%feature("docstring")  Geometry3D::collides "bool
-Geometry3D::collides(const Geometry3D &other)
+%feature("docstring")  Geometry3D::collides "
 
 Returns true if this geometry collides with the other. ";
 
-%feature("docstring")  Geometry3D::withinDistance "bool
-Geometry3D::withinDistance(const Geometry3D &other, double tol)
+%feature("docstring")  Geometry3D::withinDistance "
 
 Returns true if this geometry is within distance tol to other. ";
 
-%feature("docstring")  Geometry3D::distance "double
-Geometry3D::distance(const Geometry3D &other, double relErr=0, double
-absErr=0)
+%feature("docstring")  Geometry3D::distance "
 
 Returns the distance from this geometry to the other. ";
 
-%feature("docstring")  Geometry3D::closestPoint "bool
-Geometry3D::closestPoint(const double pt[3], double out[3])
+%feature("docstring")  Geometry3D::closestPoint "
 
 Returns (success,cp) giving the closest point to the input point.
 success is false if that operation is not supported with the given
 geometry type. cp are given in world coordinates. ";
 
-%feature("docstring")  Geometry3D::rayCast "bool
-Geometry3D::rayCast(const double s[3], const double d[3], double
-out[3])
+%feature("docstring")  Geometry3D::rayCast "
 
 Returns (hit,pt) where hit is true if the ray starting at s and
 pointing in direction d hits the geometry (given in world
@@ -434,144 +358,109 @@ are implemented in the Python API.
 
 C++ includes: robotik.h ";
 
-%feature("docstring")  IKObjective::IKObjective "IKObjective::IKObjective() ";
+%feature("docstring")  IKObjective::IKObjective "";
 
-%feature("docstring")  IKObjective::link "int IKObjective::link()
-const
+%feature("docstring")  IKObjective::link "
 
 The index of the robot link that is constrained. ";
 
-%feature("docstring")  IKObjective::destLink "int
-IKObjective::destLink() const
+%feature("docstring")  IKObjective::destLink "
 
 The index of the destination link, or -1 if fixed to the world. ";
 
-%feature("docstring")  IKObjective::numPosDims "int
-IKObjective::numPosDims() const
+%feature("docstring")  IKObjective::numPosDims "
 
 Returns the number of position dimensions constrained (0-3) ";
 
-%feature("docstring")  IKObjective::numRotDims "int
-IKObjective::numRotDims() const
+%feature("docstring")  IKObjective::numRotDims "
 
 Returns the number of rotation dimensions constrained (0-3) ";
 
-%feature("docstring")  IKObjective::setFixedPoint "void
-IKObjective::setFixedPoint(int link, const double plocal[3], const
-double pworld[3])
+%feature("docstring")  IKObjective::setFixedPoint "
 
 Sets a fixed-point constraint. ";
 
-%feature("docstring")  IKObjective::setFixedPoints "void
-IKObjective::setFixedPoints(int link, PyObject *plocals, PyObject
-*pworlds)
+%feature("docstring")  IKObjective::setFixedPoints "
 
 Sets a multiple fixed-point constraint. ";
 
-%feature("docstring")  IKObjective::setFixedTransform "void
-IKObjective::setFixedTransform(int link, const double R[9], const
-double t[3])
+%feature("docstring")  IKObjective::setFixedTransform "
 
 Sets a fixed-transform constraint (R,t) ";
 
-%feature("docstring")  IKObjective::setRelativePoint "void
-IKObjective::setRelativePoint(int link1, int link2, const double
-p1[3], const double p2[3])
+%feature("docstring")  IKObjective::setRelativePoint "
 
 Sets a fixed-point constraint relative to link2. ";
 
-%feature("docstring")  IKObjective::setRelativePoints "void
-IKObjective::setRelativePoints(int link1, int link2, PyObject *p1s,
-PyObject *p2s)
+%feature("docstring")  IKObjective::setRelativePoints "
 
 Sets a multiple fixed-point constraint relative to link2. ";
 
-%feature("docstring")  IKObjective::setRelativeTransform "void
-IKObjective::setRelativeTransform(int link, int linkTgt, const double
-R[9], const double t[3])
+%feature("docstring")  IKObjective::setRelativeTransform "
 
 Sets a fixed-transform constraint (R,t) relative to linkTgt. ";
 
-%feature("docstring")  IKObjective::setLinks "void
-IKObjective::setLinks(int link, int link2=-1)
+%feature("docstring")  IKObjective::setLinks "
 
 Manual construction. ";
 
-%feature("docstring")  IKObjective::setFreePosition "void
-IKObjective::setFreePosition()
+%feature("docstring")  IKObjective::setFreePosition "
 
 Manual: Sets a free position constraint. ";
 
-%feature("docstring")  IKObjective::setFixedPosConstraint "void
-IKObjective::setFixedPosConstraint(const double tlocal[3], const
-double tworld[3])
+%feature("docstring")  IKObjective::setFixedPosConstraint "
 
 Manual: Sets a fixed position constraint. ";
 
-%feature("docstring")  IKObjective::setPlanarPosConstraint "void
-IKObjective::setPlanarPosConstraint(const double tlocal[3], const
-double nworld[3], double oworld)
+%feature("docstring")  IKObjective::setPlanarPosConstraint "
 
 Manual: Sets a planar position constraint nworld^T T(link)*tlocal +
-oworld = 0 ";
+oworld = 0. ";
 
-%feature("docstring")  IKObjective::setLinearPosConstraint "void
-IKObjective::setLinearPosConstraint(const double tlocal[3], const
-double sworld[3], const double dworld[3])
+%feature("docstring")  IKObjective::setLinearPosConstraint "
 
 Manual: Sets a linear position constraint T(link)*tlocal = sworld +
-u*dworld for some real value u ";
+u*dworld for some real value u. ";
 
-%feature("docstring")  IKObjective::setFreeRotConstraint "void
-IKObjective::setFreeRotConstraint()
+%feature("docstring")  IKObjective::setFreeRotConstraint "
 
 Manual: Sets a free rotation constraint. ";
 
-%feature("docstring")  IKObjective::setFixedRotConstraint "void
-IKObjective::setFixedRotConstraint(const double R[9])
+%feature("docstring")  IKObjective::setFixedRotConstraint "
 
 Manual: Sets a fixed rotation constraint. ";
 
-%feature("docstring")  IKObjective::setAxialRotConstraint "void
-IKObjective::setAxialRotConstraint(const double alocal[3], const
-double aworld[3])
+%feature("docstring")  IKObjective::setAxialRotConstraint "
 
 Manual: Sets an axial rotation constraint. ";
 
-%feature("docstring")  IKObjective::getPosition "void
-IKObjective::getPosition(double out[3], double out2[3]) const
+%feature("docstring")  IKObjective::getPosition "
 
 Returns the local and global position of the position constraint. ";
 
-%feature("docstring")  IKObjective::getPositionDirection "void
-IKObjective::getPositionDirection(double out[3]) const
+%feature("docstring")  IKObjective::getPositionDirection "
 
 For linear and planar constraints, returns the direction. ";
 
-%feature("docstring")  IKObjective::getRotation "void
-IKObjective::getRotation(double out[9]) const
+%feature("docstring")  IKObjective::getRotation "
 
 For fixed rotation constraints, returns the orientation. ";
 
-%feature("docstring")  IKObjective::getRotationAxis "void
-IKObjective::getRotationAxis(double out[3], double out2[3]) const
+%feature("docstring")  IKObjective::getRotationAxis "
 
 For axis rotation constraints, returns the local and global axes. ";
 
-%feature("docstring")  IKObjective::getTransform "void
-IKObjective::getTransform(double out[9], double out2[3]) const
+%feature("docstring")  IKObjective::getTransform "
 
 For fixed-transform constraints, returns the transform (R,T) ";
 
-%feature("docstring")  IKObjective::loadString "bool
-IKObjective::loadString(const char *str)
+%feature("docstring")  IKObjective::loadString "
 
 Loads the objective from a Klamp't-native formatted string. For a more
 readable but verbose format, try the JSON IO routines
 loader.toJson/fromJson() ";
 
-%feature("docstring")  IKObjective::saveString "std::string
-IKObjective::saveString() const
+%feature("docstring")  IKObjective::saveString "
 
 Saves the objective to a Klamp't-native formatted string. For a more
 readable but verbose format, try the JSON IO routines
@@ -595,61 +484,48 @@ can be sampled in case the prior configs lead to local minima.
 
 C++ includes: robotik.h ";
 
-%feature("docstring")  IKSolver::IKSolver "IKSolver::IKSolver(const
-RobotModel &robot) ";
+%feature("docstring")  IKSolver::IKSolver "";
 
-%feature("docstring")  IKSolver::IKSolver "IKSolver::IKSolver(const
-IKSolver &solver) ";
+%feature("docstring")  IKSolver::IKSolver "";
 
-%feature("docstring")  IKSolver::add "void IKSolver::add(const
-IKObjective &objective)
+%feature("docstring")  IKSolver::add "
 
 Adds a new simultaneous objective. ";
 
-%feature("docstring")  IKSolver::setActiveDofs "void
-IKSolver::setActiveDofs(const std::vector< int > &active)
+%feature("docstring")  IKSolver::setActiveDofs "
 
 Sets the active degrees of freedom. ";
 
-%feature("docstring")  IKSolver::getActiveDofs "void
-IKSolver::getActiveDofs(std::vector< int > &out)
+%feature("docstring")  IKSolver::getActiveDofs "
 
 Gets the active degrees of freedom. ";
 
-%feature("docstring")  IKSolver::setJointLimits "void
-IKSolver::setJointLimits(const std::vector< double > &qmin, const
-std::vector< double > &qmax)
+%feature("docstring")  IKSolver::setJointLimits "
 
 Sets limits on the robot's configuration. If empty, this turns off
 joint limits. ";
 
-%feature("docstring")  IKSolver::getJointLimits "void
-IKSolver::getJointLimits(std::vector< double > &out, std::vector<
-double > &out2)
+%feature("docstring")  IKSolver::getJointLimits "
 
 Gets the limits on the robot's configuration (by default this is the
 robot's joint limits. ";
 
-%feature("docstring")  IKSolver::getResidual "void
-IKSolver::getResidual(std::vector< double > &out)
+%feature("docstring")  IKSolver::getResidual "
 
 Returns a vector describing the error of the objective. ";
 
-%feature("docstring")  IKSolver::getJacobian "void
-IKSolver::getJacobian(std::vector< std::vector< double > > &out)
+%feature("docstring")  IKSolver::getJacobian "
 
 Returns a matrix describing the instantaneous derivative of the
-objective with respect to the active Dofs ";
+objective with respect to the active Dofs. ";
 
-%feature("docstring")  IKSolver::solve "PyObject *
-IKSolver::solve(int iters, double tol=1e-3)
+%feature("docstring")  IKSolver::solve "
 
 Tries to find a configuration that satifies all simultaneous
 objectives up to the desired tolerance. Returns (res,iters) where res
 indicates whether x converged. ";
 
-%feature("docstring")  IKSolver::sampleInitial "void
-IKSolver::sampleInitial()
+%feature("docstring")  IKSolver::sampleInitial "
 
 Samples an initial random configuration. ";
 
@@ -658,38 +534,25 @@ Samples an initial random configuration. ";
 %feature("docstring") ManualOverrideController "";
 
 %feature("docstring")
-ManualOverrideController::ManualOverrideController "ManualOverrideController::ManualOverrideController(Robot &robot, const
-SmartPointer< RobotController > &_base) ";
+ManualOverrideController::ManualOverrideController "";
 
-%feature("docstring")  ManualOverrideController::Type "virtual const
-char* ManualOverrideController::Type() const ";
+%feature("docstring")  ManualOverrideController::Type "";
 
-%feature("docstring")  ManualOverrideController::Update "void
-ManualOverrideController::Update(Real dt) ";
+%feature("docstring")  ManualOverrideController::Update "";
 
-%feature("docstring")  ManualOverrideController::ReadState "bool
-ManualOverrideController::ReadState(File &f) ";
+%feature("docstring")  ManualOverrideController::ReadState "";
 
-%feature("docstring")  ManualOverrideController::WriteState "bool
-ManualOverrideController::WriteState(File &f) const ";
+%feature("docstring")  ManualOverrideController::WriteState "";
 
-%feature("docstring")  ManualOverrideController::Settings "virtual
-map<string,string> ManualOverrideController::Settings() const ";
+%feature("docstring")  ManualOverrideController::Settings "";
 
-%feature("docstring")  ManualOverrideController::GetSetting "virtual
-bool ManualOverrideController::GetSetting(const string &name, string
-&str) const ";
+%feature("docstring")  ManualOverrideController::GetSetting "";
 
-%feature("docstring")  ManualOverrideController::SetSetting "virtual
-bool ManualOverrideController::SetSetting(const string &name, const
-string &str) ";
+%feature("docstring")  ManualOverrideController::SetSetting "";
 
-%feature("docstring")  ManualOverrideController::Commands "virtual
-vector<string> ManualOverrideController::Commands() const ";
+%feature("docstring")  ManualOverrideController::Commands "";
 
-%feature("docstring")  ManualOverrideController::SendCommand "virtual
-bool ManualOverrideController::SendCommand(const string &name, const
-string &str) ";
+%feature("docstring")  ManualOverrideController::SendCommand "";
 
 
 // File: structMass.xml
@@ -699,22 +562,17 @@ Stores mass information for a rigid body or robot link.
 
 C++ includes: robotmodel.h ";
 
-%feature("docstring")  Mass::setMass "void Mass::setMass(double
-_mass) ";
+%feature("docstring")  Mass::setMass "";
 
-%feature("docstring")  Mass::getMass "double Mass::getMass() const ";
+%feature("docstring")  Mass::getMass "";
 
-%feature("docstring")  Mass::setCom "void Mass::setCom(const
-std::vector< double > &_com) ";
+%feature("docstring")  Mass::setCom "";
 
-%feature("docstring")  Mass::getCom "void Mass::getCom(std::vector<
-double > &out) const ";
+%feature("docstring")  Mass::getCom "";
 
-%feature("docstring")  Mass::setInertia "void Mass::setInertia(const
-std::vector< double > &_inertia) ";
+%feature("docstring")  Mass::setInertia "";
 
-%feature("docstring")  Mass::getInertia "void
-Mass::getInertia(std::vector< double > &out) const ";
+%feature("docstring")  Mass::getInertia "";
 
 
 // File: classPlannerInterface.xml
@@ -756,39 +614,29 @@ Graph Format (TGF) format.
 
 C++ includes: motionplanning.h ";
 
-%feature("docstring")  PlannerInterface::PlannerInterface "PlannerInterface::PlannerInterface(const CSpaceInterface &cspace) ";
+%feature("docstring")  PlannerInterface::PlannerInterface "";
 
-%feature("docstring")  PlannerInterface::~PlannerInterface "PlannerInterface::~PlannerInterface() ";
+%feature("docstring")  PlannerInterface::~PlannerInterface "";
 
-%feature("docstring")  PlannerInterface::destroy "void
-PlannerInterface::destroy() ";
+%feature("docstring")  PlannerInterface::destroy "";
 
-%feature("docstring")  PlannerInterface::setEndpoints "bool
-PlannerInterface::setEndpoints(PyObject *start, PyObject *goal) ";
+%feature("docstring")  PlannerInterface::setEndpoints "";
 
-%feature("docstring")  PlannerInterface::addMilestone "int
-PlannerInterface::addMilestone(PyObject *milestone) ";
+%feature("docstring")  PlannerInterface::addMilestone "";
 
-%feature("docstring")  PlannerInterface::planMore "void
-PlannerInterface::planMore(int iterations) ";
+%feature("docstring")  PlannerInterface::planMore "";
 
-%feature("docstring")  PlannerInterface::getPathEndpoints "PyObject *
-PlannerInterface::getPathEndpoints() ";
+%feature("docstring")  PlannerInterface::getPathEndpoints "";
 
-%feature("docstring")  PlannerInterface::getPath "PyObject *
-PlannerInterface::getPath(int milestone1, int milestone2) ";
+%feature("docstring")  PlannerInterface::getPath "";
 
-%feature("docstring")  PlannerInterface::getData "double
-PlannerInterface::getData(const char *setting) ";
+%feature("docstring")  PlannerInterface::getData "";
 
-%feature("docstring")  PlannerInterface::getStats "PyObject *
-PlannerInterface::getStats() ";
+%feature("docstring")  PlannerInterface::getStats "";
 
-%feature("docstring")  PlannerInterface::getRoadmap "PyObject *
-PlannerInterface::getRoadmap() ";
+%feature("docstring")  PlannerInterface::getRoadmap "";
 
-%feature("docstring")  PlannerInterface::dump "void
-PlannerInterface::dump(const char *fn) ";
+%feature("docstring")  PlannerInterface::dump "";
 
 
 // File: structPointCloud.xml
@@ -822,83 +670,66 @@ when addPoint is called
 
 C++ includes: geometry.h ";
 
-%feature("docstring")  PointCloud::numPoints "int
-PointCloud::numPoints() const
+%feature("docstring")  PointCloud::numPoints "
 
 Returns the number of points. ";
 
-%feature("docstring")  PointCloud::numProperties "int
-PointCloud::numProperties() const
+%feature("docstring")  PointCloud::numProperties "
 
 Returns the number of properties. ";
 
-%feature("docstring")  PointCloud::setPoints "void
-PointCloud::setPoints(int num, const std::vector< double > &plist)
+%feature("docstring")  PointCloud::setPoints "
 
 Sets all the points to the given list (a 3n-list) ";
 
-%feature("docstring")  PointCloud::addPoint "int
-PointCloud::addPoint(const double p[3])
+%feature("docstring")  PointCloud::addPoint "
 
 Adds a point. Sets all its properties to 0. Returns the index. ";
 
-%feature("docstring")  PointCloud::setPoint "void
-PointCloud::setPoint(int index, const double p[3])
+%feature("docstring")  PointCloud::setPoint "
 
 Sets the position of the point at the given index to p. ";
 
-%feature("docstring")  PointCloud::getPoint "void
-PointCloud::getPoint(int index, double out[3]) const
+%feature("docstring")  PointCloud::getPoint "
 
 Retrieves the position of the point at the given index. ";
 
-%feature("docstring")  PointCloud::setProperties "void
-PointCloud::setProperties(const std::vector< double > &properties)
+%feature("docstring")  PointCloud::setProperties "
 
 Sets all the properties of all points to the given list (a kn-list) ";
 
-%feature("docstring")  PointCloud::setProperties "void
-PointCloud::setProperties(int pindex, const std::vector< double >
-&properties)
+%feature("docstring")  PointCloud::setProperties "
 
 Sets property pindex of all points to the given list (a n-list) ";
 
-%feature("docstring")  PointCloud::setProperty "void
-PointCloud::setProperty(int index, int pindex, double value)
+%feature("docstring")  PointCloud::setProperty "
 
 Sets property pindex of point index to the given value. ";
 
-%feature("docstring")  PointCloud::setProperty "void
-PointCloud::setProperty(int index, const std::string &pname, double
-value)
+%feature("docstring")  PointCloud::setProperty "
 
 Sets the property named pname of point index to the given value. ";
 
-%feature("docstring")  PointCloud::getProperty "double
-PointCloud::getProperty(int index, int pindex) const
+%feature("docstring")  PointCloud::getProperty "
 
 Gets property pindex of point index. ";
 
-%feature("docstring")  PointCloud::getProperty "double
-PointCloud::getProperty(int index, const std::string &pname) const
+%feature("docstring")  PointCloud::getProperty "
 
 Gets the property named pname of point index. ";
 
-%feature("docstring")  PointCloud::translate "void
-PointCloud::translate(const double t[3])
+%feature("docstring")  PointCloud::translate "
 
 Translates all the points by v=v+t. ";
 
-%feature("docstring")  PointCloud::transform "void
-PointCloud::transform(const double R[9], const double t[3])
+%feature("docstring")  PointCloud::transform "
 
 Transforms all the points by the rigid transform v=R*v+t. ";
 
-%feature("docstring")  PointCloud::join "void PointCloud::join(const
-PointCloud &pc)
+%feature("docstring")  PointCloud::join "
 
 Adds the given point cloud to this one. They must share the same
-properties or else an exception is raised ";
+properties or else an exception is raised. ";
 
 
 // File: classPyCSpace.xml
@@ -906,98 +737,69 @@ properties or else an exception is raised ";
 
 A CSpace that calls python routines for its functionality ";
 
-%feature("docstring")  PyCSpace::PyCSpace "PyCSpace::PyCSpace() ";
+%feature("docstring")  PyCSpace::PyCSpace "";
 
-%feature("docstring")  PyCSpace::~PyCSpace "virtual
-PyCSpace::~PyCSpace() ";
+%feature("docstring")  PyCSpace::~PyCSpace "";
 
-%feature("docstring")  PyCSpace::Sample "virtual void
-PyCSpace::Sample(Config &x) ";
+%feature("docstring")  PyCSpace::Sample "";
 
-%feature("docstring")  PyCSpace::SampleNeighborhood "virtual void
-PyCSpace::SampleNeighborhood(const Config &c, double r, Config &x) ";
+%feature("docstring")  PyCSpace::SampleNeighborhood "";
 
-%feature("docstring")  PyCSpace::NumObstacles "virtual int
-PyCSpace::NumObstacles() ";
+%feature("docstring")  PyCSpace::NumObstacles "";
 
-%feature("docstring")  PyCSpace::ObstacleName "virtual std::string
-PyCSpace::ObstacleName(int obstacle) ";
+%feature("docstring")  PyCSpace::ObstacleName "";
 
-%feature("docstring")  PyCSpace::IsFeasible "virtual bool
-PyCSpace::IsFeasible(const Config &x, int obstacle) ";
+%feature("docstring")  PyCSpace::IsFeasible "";
 
-%feature("docstring")  PyCSpace::IsFeasible "virtual bool
-PyCSpace::IsFeasible(const Config &x) ";
+%feature("docstring")  PyCSpace::IsFeasible "";
 
-%feature("docstring")  PyCSpace::IsVisible "virtual bool
-PyCSpace::IsVisible(const Config &a, const Config &b) ";
+%feature("docstring")  PyCSpace::IsVisible "";
 
-%feature("docstring")  PyCSpace::IsVisible "virtual bool
-PyCSpace::IsVisible(const Config &a, const Config &b, int obstacle) ";
+%feature("docstring")  PyCSpace::IsVisible "";
 
-%feature("docstring")  PyCSpace::LocalPlanner "EdgePlanner *
-PyCSpace::LocalPlanner(const Config &a, const Config &b, int obstacle)
-";
+%feature("docstring")  PyCSpace::LocalPlanner "";
 
-%feature("docstring")  PyCSpace::LocalPlanner "EdgePlanner *
-PyCSpace::LocalPlanner(const Config &a, const Config &b) ";
+%feature("docstring")  PyCSpace::LocalPlanner "";
 
-%feature("docstring")  PyCSpace::Distance "virtual double
-PyCSpace::Distance(const Config &x, const Config &y) ";
+%feature("docstring")  PyCSpace::Distance "";
 
-%feature("docstring")  PyCSpace::Interpolate "virtual void
-PyCSpace::Interpolate(const Config &x, const Config &y, double u,
-Config &out) ";
+%feature("docstring")  PyCSpace::Interpolate "";
 
-%feature("docstring")  PyCSpace::Properties "virtual void
-PyCSpace::Properties(PropertyMap &props) const ";
+%feature("docstring")  PyCSpace::Properties "";
 
 
 // File: classPyEdgePlanner.xml
 %feature("docstring") PyEdgePlanner "";
 
-%feature("docstring")  PyEdgePlanner::PyEdgePlanner "PyEdgePlanner::PyEdgePlanner(PyCSpace *_space, const Config &_a, const
-Config &_b, int _obstacle=-1) ";
+%feature("docstring")  PyEdgePlanner::PyEdgePlanner "";
 
-%feature("docstring")  PyEdgePlanner::~PyEdgePlanner "virtual
-PyEdgePlanner::~PyEdgePlanner() ";
+%feature("docstring")  PyEdgePlanner::~PyEdgePlanner "";
 
-%feature("docstring")  PyEdgePlanner::IsVisible "virtual bool
-PyEdgePlanner::IsVisible() ";
+%feature("docstring")  PyEdgePlanner::IsVisible "";
 
-%feature("docstring")  PyEdgePlanner::Eval "virtual void
-PyEdgePlanner::Eval(double u, Config &x) const ";
+%feature("docstring")  PyEdgePlanner::Eval "";
 
-%feature("docstring")  PyEdgePlanner::Start "virtual const Config&
-PyEdgePlanner::Start() const ";
+%feature("docstring")  PyEdgePlanner::Start "";
 
-%feature("docstring")  PyEdgePlanner::Goal "virtual const Config&
-PyEdgePlanner::Goal() const ";
+%feature("docstring")  PyEdgePlanner::Goal "";
 
-%feature("docstring")  PyEdgePlanner::Space "virtual CSpace*
-PyEdgePlanner::Space() const ";
+%feature("docstring")  PyEdgePlanner::Space "";
 
-%feature("docstring")  PyEdgePlanner::Copy "virtual EdgePlanner*
-PyEdgePlanner::Copy() const ";
+%feature("docstring")  PyEdgePlanner::Copy "";
 
-%feature("docstring")  PyEdgePlanner::ReverseCopy "virtual
-EdgePlanner* PyEdgePlanner::ReverseCopy() const ";
+%feature("docstring")  PyEdgePlanner::ReverseCopy "";
 
 
 // File: classPyGoalSet.xml
 %feature("docstring") PyGoalSet "";
 
-%feature("docstring")  PyGoalSet::PyGoalSet "PyGoalSet::PyGoalSet(CSpace *baseSpace, PyObject *_goalTest, PyObject
-*_sampler=NULL) ";
+%feature("docstring")  PyGoalSet::PyGoalSet "";
 
-%feature("docstring")  PyGoalSet::~PyGoalSet "PyGoalSet::~PyGoalSet()
-";
+%feature("docstring")  PyGoalSet::~PyGoalSet "";
 
-%feature("docstring")  PyGoalSet::Sample "virtual void
-PyGoalSet::Sample(Config &x) ";
+%feature("docstring")  PyGoalSet::Sample "";
 
-%feature("docstring")  PyGoalSet::IsFeasible "virtual bool
-PyGoalSet::IsFeasible(const Config &q) ";
+%feature("docstring")  PyGoalSet::IsFeasible "";
 
 
 // File: classRigidObjectModel.xml
@@ -1010,41 +812,29 @@ stored.
 
 C++ includes: robotmodel.h ";
 
-%feature("docstring")  RigidObjectModel::RigidObjectModel "RigidObjectModel::RigidObjectModel() ";
+%feature("docstring")  RigidObjectModel::RigidObjectModel "";
 
-%feature("docstring")  RigidObjectModel::getID "int
-RigidObjectModel::getID() ";
+%feature("docstring")  RigidObjectModel::getID "";
 
-%feature("docstring")  RigidObjectModel::getName "const char *
-RigidObjectModel::getName() ";
+%feature("docstring")  RigidObjectModel::getName "";
 
-%feature("docstring")  RigidObjectModel::geometry "Geometry3D
-RigidObjectModel::geometry() ";
+%feature("docstring")  RigidObjectModel::geometry "";
 
-%feature("docstring")  RigidObjectModel::appearance "Appearance
-RigidObjectModel::appearance() ";
+%feature("docstring")  RigidObjectModel::appearance "";
 
-%feature("docstring")  RigidObjectModel::getMass "Mass
-RigidObjectModel::getMass() ";
+%feature("docstring")  RigidObjectModel::getMass "";
 
-%feature("docstring")  RigidObjectModel::setMass "void
-RigidObjectModel::setMass(const Mass &mass) ";
+%feature("docstring")  RigidObjectModel::setMass "";
 
-%feature("docstring")  RigidObjectModel::getContactParameters "ContactParameters RigidObjectModel::getContactParameters() ";
+%feature("docstring")  RigidObjectModel::getContactParameters "";
 
-%feature("docstring")  RigidObjectModel::setContactParameters "void
-RigidObjectModel::setContactParameters(const ContactParameters
-&params) ";
+%feature("docstring")  RigidObjectModel::setContactParameters "";
 
-%feature("docstring")  RigidObjectModel::getTransform "void
-RigidObjectModel::getTransform(double out[9], double out2[3]) ";
+%feature("docstring")  RigidObjectModel::getTransform "";
 
-%feature("docstring")  RigidObjectModel::setTransform "void
-RigidObjectModel::setTransform(const double R[9], const double t[3])
-";
+%feature("docstring")  RigidObjectModel::setTransform "";
 
-%feature("docstring")  RigidObjectModel::drawGL "void
-RigidObjectModel::drawGL(bool keepAppearance=true) ";
+%feature("docstring")  RigidObjectModel::drawGL "";
 
 
 // File: classRobotModel.xml
@@ -1066,225 +856,171 @@ and is set using setConfig/setVelocity.
 
 C++ includes: robotmodel.h ";
 
-%feature("docstring")  RobotModel::RobotModel "RobotModel::RobotModel() ";
+%feature("docstring")  RobotModel::RobotModel "";
 
-%feature("docstring")  RobotModel::getID "int RobotModel::getID()
+%feature("docstring")  RobotModel::getID "
 
 Returns the ID of the robot in its world (Note: not the same as the
 robot index) ";
 
-%feature("docstring")  RobotModel::getName "const char *
-RobotModel::getName() ";
+%feature("docstring")  RobotModel::getName "";
 
-%feature("docstring")  RobotModel::numLinks "int
-RobotModel::numLinks()
+%feature("docstring")  RobotModel::numLinks "
 
 Returns the number of links = number of DOF's. ";
 
-%feature("docstring")  RobotModel::link "RobotModelLink
-RobotModel::link(int index)
+%feature("docstring")  RobotModel::link "
 
 Returns a reference to the indexed link. ";
 
-%feature("docstring")  RobotModel::link "RobotModelLink
-RobotModel::link(const char *name)
+%feature("docstring")  RobotModel::link "
 
 Returns a reference to the named link. ";
 
-%feature("docstring")  RobotModel::getLink "RobotModelLink
-RobotModel::getLink(int index)
+%feature("docstring")  RobotModel::getLink "
 
 Old-style: will be deprecated. Returns a reference to the indexed
 link. ";
 
-%feature("docstring")  RobotModel::getLink "RobotModelLink
-RobotModel::getLink(const char *name)
+%feature("docstring")  RobotModel::getLink "
 
 Old-style: will be deprecated. Returns a reference to the named link.
 ";
 
-%feature("docstring")  RobotModel::numDrivers "int
-RobotModel::numDrivers()
+%feature("docstring")  RobotModel::numDrivers "
 
 Returns the number of drivers. ";
 
-%feature("docstring")  RobotModel::driver "RobotModelDriver
-RobotModel::driver(int index)
+%feature("docstring")  RobotModel::driver "
 
 Returns a reference to the indexed driver. ";
 
-%feature("docstring")  RobotModel::driver "RobotModelDriver
-RobotModel::driver(const char *name)
+%feature("docstring")  RobotModel::driver "
 
 Returns a reference to the named driver. ";
 
-%feature("docstring")  RobotModel::getDriver "RobotModelDriver
-RobotModel::getDriver(int index)
+%feature("docstring")  RobotModel::getDriver "
 
 Old-style: will be deprecated. Returns a reference to the indexed
 driver. ";
 
-%feature("docstring")  RobotModel::getDriver "RobotModelDriver
-RobotModel::getDriver(const char *name)
+%feature("docstring")  RobotModel::getDriver "
 
 Old-style: will be deprecated. Returns a reference to a
 RobotModelDriver. ";
 
-%feature("docstring")  RobotModel::getConfig "void
-RobotModel::getConfig(std::vector< double > &out) ";
+%feature("docstring")  RobotModel::getConfig "";
 
-%feature("docstring")  RobotModel::getVelocity "void
-RobotModel::getVelocity(std::vector< double > &out) ";
+%feature("docstring")  RobotModel::getVelocity "";
 
-%feature("docstring")  RobotModel::setConfig "void
-RobotModel::setConfig(const std::vector< double > &q) ";
+%feature("docstring")  RobotModel::setConfig "";
 
-%feature("docstring")  RobotModel::setVelocity "void
-RobotModel::setVelocity(const std::vector< double > &dq) ";
+%feature("docstring")  RobotModel::setVelocity "";
 
-%feature("docstring")  RobotModel::getJointLimits "void
-RobotModel::getJointLimits(std::vector< double > &out, std::vector<
-double > &out2) ";
+%feature("docstring")  RobotModel::getJointLimits "";
 
-%feature("docstring")  RobotModel::setJointLimits "void
-RobotModel::setJointLimits(const std::vector< double > &qmin, const
-std::vector< double > &qmax) ";
+%feature("docstring")  RobotModel::setJointLimits "";
 
-%feature("docstring")  RobotModel::getVelocityLimits "void
-RobotModel::getVelocityLimits(std::vector< double > &out) ";
+%feature("docstring")  RobotModel::getVelocityLimits "";
 
-%feature("docstring")  RobotModel::setVelocityLimits "void
-RobotModel::setVelocityLimits(const std::vector< double > &vmax) ";
+%feature("docstring")  RobotModel::setVelocityLimits "";
 
-%feature("docstring")  RobotModel::getAccelerationLimits "void
-RobotModel::getAccelerationLimits(std::vector< double > &out) ";
+%feature("docstring")  RobotModel::getAccelerationLimits "";
 
-%feature("docstring")  RobotModel::setAccelerationLimits "void
-RobotModel::setAccelerationLimits(const std::vector< double > &amax)
-";
+%feature("docstring")  RobotModel::setAccelerationLimits "";
 
-%feature("docstring")  RobotModel::getTorqueLimits "void
-RobotModel::getTorqueLimits(std::vector< double > &out) ";
+%feature("docstring")  RobotModel::getTorqueLimits "";
 
-%feature("docstring")  RobotModel::setTorqueLimits "void
-RobotModel::setTorqueLimits(const std::vector< double > &tmax) ";
+%feature("docstring")  RobotModel::setTorqueLimits "";
 
-%feature("docstring")  RobotModel::setDOFPosition "void
-RobotModel::setDOFPosition(int i, double qi)
+%feature("docstring")  RobotModel::setDOFPosition "
 
 Sets a single DOF's position. Note: if you are setting several joints
 at once, use setConfig because this function computes forward
 kinematics every time. ";
 
-%feature("docstring")  RobotModel::setDOFPosition "void
-RobotModel::setDOFPosition(const char *name, double qi) ";
+%feature("docstring")  RobotModel::setDOFPosition "";
 
-%feature("docstring")  RobotModel::getDOFPosition "double
-RobotModel::getDOFPosition(int i)
+%feature("docstring")  RobotModel::getDOFPosition "
 
 Returns a single DOF's position. ";
 
-%feature("docstring")  RobotModel::getDOFPosition "double
-RobotModel::getDOFPosition(const char *name) ";
+%feature("docstring")  RobotModel::getDOFPosition "";
 
-%feature("docstring")  RobotModel::getCom "void
-RobotModel::getCom(double out[3])
+%feature("docstring")  RobotModel::getCom "
 
 Returns the 3D center of mass at the current config. ";
 
-%feature("docstring")  RobotModel::getComJacobian "void
-RobotModel::getComJacobian(std::vector< std::vector< double > > &out)
+%feature("docstring")  RobotModel::getComJacobian "
 
 Returns the 3xn Jacobian matrix of the current center of mass. ";
 
-%feature("docstring")  RobotModel::getMassMatrix "void
-RobotModel::getMassMatrix(std::vector< std::vector< double > > &out)
+%feature("docstring")  RobotModel::getMassMatrix "
 
 Returns the nxn mass matrix B(q) ";
 
-%feature("docstring")  RobotModel::getMassMatrixInv "void
-RobotModel::getMassMatrixInv(std::vector< std::vector< double > >
-&out)
+%feature("docstring")  RobotModel::getMassMatrixInv "
 
 Returns the inverse of the nxn mass matrix B(q)^-1 (faster than
 inverting result of getMassMatrix) ";
 
-%feature("docstring")  RobotModel::getCoriolisForceMatrix "void
-RobotModel::getCoriolisForceMatrix(std::vector< std::vector< double >
-> &out)
+%feature("docstring")  RobotModel::getCoriolisForceMatrix "
 
 Returns the Coriolis force matrix C(q,dq) for current config and
 velocity. ";
 
-%feature("docstring")  RobotModel::getCoriolisForces "void
-RobotModel::getCoriolisForces(std::vector< double > &out)
+%feature("docstring")  RobotModel::getCoriolisForces "
 
 Returns the Coriolis forces C(q,dq)*dq for current config and velocity
 (faster than computing matrix and doing product). (\"Forces\" is
 somewhat of a misnomer; the result is a joint torque vector) ";
 
-%feature("docstring")  RobotModel::getGravityForces "void
-RobotModel::getGravityForces(const double g[3], std::vector< double >
-&out)
+%feature("docstring")  RobotModel::getGravityForces "
 
 Returns the generalized gravity vector G(q) for the given workspace
 gravity vector g (usually (0,0,-9.8)). (\"Forces\" is somewhat of a
 misnomer; the result is a joint torque vector) ";
 
-%feature("docstring")  RobotModel::torquesFromAccel "void
-RobotModel::torquesFromAccel(const std::vector< double > &ddq,
-std::vector< double > &out)
+%feature("docstring")  RobotModel::torquesFromAccel "
 
 Computes the inverse dynamics (using Recursive Newton Euler solver).
 Note: does not include gravity term G(q) ";
 
-%feature("docstring")  RobotModel::accelFromTorques "void
-RobotModel::accelFromTorques(const std::vector< double > &t,
-std::vector< double > &out)
+%feature("docstring")  RobotModel::accelFromTorques "
 
 Computes the foward dynamics (using Recursive Newton Euler solver)
 Note: does not include gravity term G(q) ";
 
-%feature("docstring")  RobotModel::interpolate "void
-RobotModel::interpolate(const std::vector< double > &a, const
-std::vector< double > &b, double u, std::vector< double > &out)
+%feature("docstring")  RobotModel::interpolate "
 
 Interpolates smoothly between two configurations, properly taking into
 account nonstandard joints. ";
 
-%feature("docstring")  RobotModel::distance "double
-RobotModel::distance(const std::vector< double > &a, const
-std::vector< double > &b)
+%feature("docstring")  RobotModel::distance "
 
 Computes a distance between two configurations, properly taking into
 account nonstandard joints. ";
 
-%feature("docstring")  RobotModel::interpolate_deriv "void
-RobotModel::interpolate_deriv(const std::vector< double > &a, const
-std::vector< double > &b, std::vector< double > &out)
+%feature("docstring")  RobotModel::interpolate_deriv "
 
 Returns the configuration derivative at a as you interpolate toward b
 at unit speed. ";
 
-%feature("docstring")  RobotModel::selfCollisionEnabled "bool
-RobotModel::selfCollisionEnabled(int link1, int link2)
+%feature("docstring")  RobotModel::selfCollisionEnabled "
 
 Queries whether self collisions between two links is enabled. ";
 
-%feature("docstring")  RobotModel::enableSelfCollision "void
-RobotModel::enableSelfCollision(int link1, int link2, bool value)
+%feature("docstring")  RobotModel::enableSelfCollision "
 
 Enables/disables self collisions between two links (depending on
 value) ";
 
-%feature("docstring")  RobotModel::selfCollides "bool
-RobotModel::selfCollides()
+%feature("docstring")  RobotModel::selfCollides "
 
 Returns true if the robot is in self collision (faster than manual
 testing) ";
 
-%feature("docstring")  RobotModel::drawGL "void
-RobotModel::drawGL(bool keepAppearance=true)
+%feature("docstring")  RobotModel::drawGL "
 
 Draws the robot geometry. If keepAppearance=true, the current
 appearance is honored. Otherwise, only the raw geometry is drawn. ";
@@ -1297,62 +1033,50 @@ A reference to a driver of a RobotModel.
 
 C++ includes: robotmodel.h ";
 
-%feature("docstring")  RobotModelDriver::RobotModelDriver "RobotModelDriver::RobotModelDriver() ";
+%feature("docstring")  RobotModelDriver::RobotModelDriver "";
 
-%feature("docstring")  RobotModelDriver::getName "const char *
-RobotModelDriver::getName() ";
+%feature("docstring")  RobotModelDriver::getName "";
 
-%feature("docstring")  RobotModelDriver::robot "RobotModel
-RobotModelDriver::robot()
+%feature("docstring")  RobotModelDriver::robot "
 
 Returns a reference to the driver's robot. ";
 
-%feature("docstring")  RobotModelDriver::getRobot "RobotModel
-RobotModelDriver::getRobot()
+%feature("docstring")  RobotModelDriver::getRobot "
 
 Old-style: will be deprecated. ";
 
-%feature("docstring")  RobotModelDriver::getType "const char *
-RobotModelDriver::getType()
+%feature("docstring")  RobotModelDriver::getType "
 
 Currently can be \"normal\", \"affine\", \"rotation\",
 \"translation\", or \"custom\". ";
 
-%feature("docstring")  RobotModelDriver::getAffectedLink "int
-RobotModelDriver::getAffectedLink()
+%feature("docstring")  RobotModelDriver::getAffectedLink "
 
 Returns the single affected link for \"normal\" links. ";
 
-%feature("docstring")  RobotModelDriver::getAffectedLinks "void
-RobotModelDriver::getAffectedLinks(std::vector< int > &links)
+%feature("docstring")  RobotModelDriver::getAffectedLinks "
 
 Returns the driver's affected links. ";
 
-%feature("docstring")  RobotModelDriver::getAffineCoeffs "void
-RobotModelDriver::getAffineCoeffs(std::vector< double > &scale,
-std::vector< double > &offset)
+%feature("docstring")  RobotModelDriver::getAffineCoeffs "
 
 For \"affine\" links, returns the scale and offset of the driver value
 mapped to the world. ";
 
-%feature("docstring")  RobotModelDriver::setValue "void
-RobotModelDriver::setValue(double val)
+%feature("docstring")  RobotModelDriver::setValue "
 
 Sets the robot's config to correspond to the given driver value. ";
 
-%feature("docstring")  RobotModelDriver::getValue "double
-RobotModelDriver::getValue()
+%feature("docstring")  RobotModelDriver::getValue "
 
 Gets the current driver value from the robot's config. ";
 
-%feature("docstring")  RobotModelDriver::setVelocity "void
-RobotModelDriver::setVelocity(double val)
+%feature("docstring")  RobotModelDriver::setVelocity "
 
 Sets the robot's velocity to correspond to the given driver velocity
 value. ";
 
-%feature("docstring")  RobotModelDriver::getVelocity "double
-RobotModelDriver::getVelocity()
+%feature("docstring")  RobotModelDriver::getVelocity "
 
 Gets the current driver velocity value from the robot's velocity. ";
 
@@ -1364,163 +1088,125 @@ A reference to a link of a RobotModel.
 
 C++ includes: robotmodel.h ";
 
-%feature("docstring")  RobotModelLink::RobotModelLink "RobotModelLink::RobotModelLink() ";
+%feature("docstring")  RobotModelLink::RobotModelLink "";
 
-%feature("docstring")  RobotModelLink::getID "int
-RobotModelLink::getID()
+%feature("docstring")  RobotModelLink::getID "
 
 Returns the ID of the robot link in its world (Note: not the same as
 getIndex()) ";
 
-%feature("docstring")  RobotModelLink::getName "const char *
-RobotModelLink::getName() ";
+%feature("docstring")  RobotModelLink::getName "";
 
-%feature("docstring")  RobotModelLink::robot "RobotModel
-RobotModelLink::robot()
+%feature("docstring")  RobotModelLink::robot "
 
 Returns a reference to the link's robot. ";
 
-%feature("docstring")  RobotModelLink::getRobot "RobotModel
-RobotModelLink::getRobot()
+%feature("docstring")  RobotModelLink::getRobot "
 
 Old-style: will be deprecated. ";
 
-%feature("docstring")  RobotModelLink::getIndex "int
-RobotModelLink::getIndex()
+%feature("docstring")  RobotModelLink::getIndex "
 
 Returns the index of the link (on its robot). ";
 
-%feature("docstring")  RobotModelLink::getParent "int
-RobotModelLink::getParent()
+%feature("docstring")  RobotModelLink::getParent "
 
 Returns the index of the link's parent (on its robot). ";
 
-%feature("docstring")  RobotModelLink::setParent "void
-RobotModelLink::setParent(int p)
+%feature("docstring")  RobotModelLink::setParent "
 
 Sets the index of the link's parent (on its robot). ";
 
-%feature("docstring")  RobotModelLink::geometry "Geometry3D
-RobotModelLink::geometry()
+%feature("docstring")  RobotModelLink::geometry "
 
 Returns a reference to the link's geometry. ";
 
-%feature("docstring")  RobotModelLink::appearance "Appearance
-RobotModelLink::appearance()
+%feature("docstring")  RobotModelLink::appearance "
 
 Returns a reference to the link's appearance. ";
 
-%feature("docstring")  RobotModelLink::getMass "Mass
-RobotModelLink::getMass()
+%feature("docstring")  RobotModelLink::getMass "
 
 Retrieves the inertial properties of the link. (Note that the Mass is
 given with origin at the link frame, not about the COM.) ";
 
-%feature("docstring")  RobotModelLink::setMass "void
-RobotModelLink::setMass(const Mass &mass)
+%feature("docstring")  RobotModelLink::setMass "
 
 Sets the inertial proerties of the link. (Note that the Mass is given
 with origin at the link frame, not about the COM.) ";
 
-%feature("docstring")  RobotModelLink::getParentTransform "void
-RobotModelLink::getParentTransform(double out[9], double out2[3])
+%feature("docstring")  RobotModelLink::getParentTransform "
 
 Gets transformation (R,t) to the parent link. ";
 
-%feature("docstring")  RobotModelLink::setParentTransform "void
-RobotModelLink::setParentTransform(const double R[9], const double
-t[3]) ";
+%feature("docstring")  RobotModelLink::setParentTransform "";
 
-%feature("docstring")  RobotModelLink::getAxis "void
-RobotModelLink::getAxis(double out[3])
+%feature("docstring")  RobotModelLink::getAxis "
 
 Gets the local rotational / translational axis. ";
 
-%feature("docstring")  RobotModelLink::setAxis "void
-RobotModelLink::setAxis(const double axis[3]) ";
+%feature("docstring")  RobotModelLink::setAxis "";
 
-%feature("docstring")  RobotModelLink::getWorldPosition "void
-RobotModelLink::getWorldPosition(const double plocal[3], double
-out[3])
+%feature("docstring")  RobotModelLink::getWorldPosition "
 
 Converts point from local to world coordinates. ";
 
-%feature("docstring")  RobotModelLink::getWorldDirection "void
-RobotModelLink::getWorldDirection(const double vlocal[3], double
-out[3])
+%feature("docstring")  RobotModelLink::getWorldDirection "
 
 Converts direction from local to world coordinates. ";
 
-%feature("docstring")  RobotModelLink::getLocalPosition "void
-RobotModelLink::getLocalPosition(const double pworld[3], double
-out[3])
+%feature("docstring")  RobotModelLink::getLocalPosition "
 
 Converts point from world to local coordinates. ";
 
-%feature("docstring")  RobotModelLink::getLocalDirection "void
-RobotModelLink::getLocalDirection(const double vworld[3], double
-out[3])
+%feature("docstring")  RobotModelLink::getLocalDirection "
 
 Converts direction from world to local coordinates. ";
 
-%feature("docstring")  RobotModelLink::getTransform "void
-RobotModelLink::getTransform(double out[9], double out2[3])
+%feature("docstring")  RobotModelLink::getTransform "
 
 Gets transformation (R,t) to the world frame. ";
 
-%feature("docstring")  RobotModelLink::setTransform "void
-RobotModelLink::setTransform(const double R[9], const double t[3])
+%feature("docstring")  RobotModelLink::setTransform "
 
 Sets transformation (R,t) to the world frame. Note: this does NOT
 perform inverse kinematics. The transform is overwritten when the
 robot's setConfig() method is called. ";
 
-%feature("docstring")  RobotModelLink::getJacobian "void
-RobotModelLink::getJacobian(const double p[3], std::vector<
-std::vector< double > > &out)
+%feature("docstring")  RobotModelLink::getJacobian "
 
 Returns the total jacobian of the local point p (row-major matrix)
 (orientation jacobian is stacked on position jacobian) ";
 
-%feature("docstring")  RobotModelLink::getPositionJacobian "void
-RobotModelLink::getPositionJacobian(const double p[3], std::vector<
-std::vector< double > > &out)
+%feature("docstring")  RobotModelLink::getPositionJacobian "
 
 Returns the jacobian of the local point p (row-major matrix) ";
 
-%feature("docstring")  RobotModelLink::getOrientationJacobian "void
-RobotModelLink::getOrientationJacobian(std::vector< std::vector<
-double > > &out)
+%feature("docstring")  RobotModelLink::getOrientationJacobian "
 
 Returns the orientation jacobian of the link (row-major matrix) ";
 
-%feature("docstring")  RobotModelLink::getVelocity "void
-RobotModelLink::getVelocity(double out[3])
+%feature("docstring")  RobotModelLink::getVelocity "
 
 Returns the velocity of the origin given the robot's current velocity.
 ";
 
-%feature("docstring")  RobotModelLink::getAngularVelocity "void
-RobotModelLink::getAngularVelocity(double out[3])
+%feature("docstring")  RobotModelLink::getAngularVelocity "
 
 Returns the angular velocity given the robot's current velocity. ";
 
-%feature("docstring")  RobotModelLink::getPointVelocity "void
-RobotModelLink::getPointVelocity(const double plocal[3], double
-out[3])
+%feature("docstring")  RobotModelLink::getPointVelocity "
 
 Returns the world velocity of the point given the robot's current
 velocity. ";
 
-%feature("docstring")  RobotModelLink::drawLocalGL "void
-RobotModelLink::drawLocalGL(bool keepAppearance=true)
+%feature("docstring")  RobotModelLink::drawLocalGL "
 
 Draws the link's geometry in its local frame. If keepAppearance=true,
 the current Appearance is honored. Otherwise, just the geometry is
 drawn. ";
 
-%feature("docstring")  RobotModelLink::drawWorldGL "void
-RobotModelLink::drawWorldGL(bool keepAppearance=true)
+%feature("docstring")  RobotModelLink::drawWorldGL "
 
 Draws the link's geometry in the world frame. If keepAppearance=true,
 the current Appearance is honored. Otherwise, just the geometry is
@@ -1542,79 +1228,64 @@ value provided to Simulation.setSimStep() (this is 0.001s by default).
 
 C++ includes: robotsim.h ";
 
-%feature("docstring")  SimBody::enable "void SimBody::enable(bool
-enabled=true)
+%feature("docstring")  SimBody::enable "
 
 Sets the simulation of this body on/off. ";
 
-%feature("docstring")  SimBody::isEnabled "bool SimBody::isEnabled()
+%feature("docstring")  SimBody::isEnabled "
 
 Returns true if this body is being simulated. ";
 
-%feature("docstring")  SimBody::enableDynamics "void
-SimBody::enableDynamics(bool enabled=true)
+%feature("docstring")  SimBody::enableDynamics "
 
 Sets the dynamic simulation of the body on/off. If false, velocities
 will simply be integrated forward, and forces will not affect velocity
 i.e., it will be pure kinematic simulation. ";
 
-%feature("docstring")  SimBody::isDynamicsEnabled "bool
-SimBody::isDynamicsEnabled() ";
+%feature("docstring")  SimBody::isDynamicsEnabled "";
 
-%feature("docstring")  SimBody::applyWrench "void
-SimBody::applyWrench(const double f[3], const double t[3])
+%feature("docstring")  SimBody::applyWrench "
 
 Applies a force and torque about the COM at the current simulation
 time step. ";
 
-%feature("docstring")  SimBody::applyForceAtPoint "void
-SimBody::applyForceAtPoint(const double f[3], const double pworld[3])
+%feature("docstring")  SimBody::applyForceAtPoint "
 
 Applies a force at a given point (in world coordinates) at the current
 simulation time step. ";
 
-%feature("docstring")  SimBody::applyForceAtLocalPoint "void
-SimBody::applyForceAtLocalPoint(const double f[3], const double
-plocal[3])
+%feature("docstring")  SimBody::applyForceAtLocalPoint "
 
 Applies a force at a given point (in local coordinates) at the current
 simulation time step. ";
 
-%feature("docstring")  SimBody::setTransform "void
-SimBody::setTransform(const double R[9], const double t[3])
+%feature("docstring")  SimBody::setTransform "
 
 Sets the body's transformation at the current simulation time step. ";
 
-%feature("docstring")  SimBody::getTransform "void
-SimBody::getTransform(double out[9], double out2[3]) ";
+%feature("docstring")  SimBody::getTransform "";
 
-%feature("docstring")  SimBody::setVelocity "void
-SimBody::setVelocity(const double w[3], const double v[3])
+%feature("docstring")  SimBody::setVelocity "
 
 Sets the angular velocity and translational velocity at the current
 simulation time step. ";
 
-%feature("docstring")  SimBody::getVelocity "void
-SimBody::getVelocity(double out[3], double out2[3])
+%feature("docstring")  SimBody::getVelocity "
 
 Returns the angular velocity and translational velocity. ";
 
-%feature("docstring")  SimBody::setCollisionPadding "void
-SimBody::setCollisionPadding(double padding)
+%feature("docstring")  SimBody::setCollisionPadding "
 
 Sets the collision padding (useful for thin objects). Default is
 0.0025. ";
 
-%feature("docstring")  SimBody::getCollisionPadding "double
-SimBody::getCollisionPadding() ";
+%feature("docstring")  SimBody::getCollisionPadding "";
 
-%feature("docstring")  SimBody::getSurface "ContactParameters
-SimBody::getSurface()
+%feature("docstring")  SimBody::getSurface "
 
 Gets (a copy of) the surface properties. ";
 
-%feature("docstring")  SimBody::setSurface "void
-SimBody::setSurface(const ContactParameters &params)
+%feature("docstring")  SimBody::setSurface "
 
 Sets the surface properties. ";
 
@@ -1648,170 +1319,131 @@ override mode. To reset back to regular motion queue control,
 
 C++ includes: robotsim.h ";
 
-%feature("docstring")  SimRobotController::SimRobotController "SimRobotController::SimRobotController() ";
+%feature("docstring")  SimRobotController::SimRobotController "";
 
-%feature("docstring")  SimRobotController::~SimRobotController "SimRobotController::~SimRobotController() ";
+%feature("docstring")  SimRobotController::~SimRobotController "";
 
-%feature("docstring")  SimRobotController::setRate "void
-SimRobotController::setRate(double dt)
+%feature("docstring")  SimRobotController::setRate "
 
 Sets the current feedback control rate. ";
 
-%feature("docstring")  SimRobotController::getCommandedConfig "void
-SimRobotController::getCommandedConfig(std::vector< double > &out)
+%feature("docstring")  SimRobotController::getCommandedConfig "
 
 Returns the current commanded configuration. ";
 
-%feature("docstring")  SimRobotController::getCommandedVelocity "void
-SimRobotController::getCommandedVelocity(std::vector< double > &out)
+%feature("docstring")  SimRobotController::getCommandedVelocity "
 
 Returns the current commanded velocity. ";
 
-%feature("docstring")  SimRobotController::getSensedConfig "void
-SimRobotController::getSensedConfig(std::vector< double > &out)
+%feature("docstring")  SimRobotController::getSensedConfig "
 
 Returns the current \"sensed\" configuration from the simulator. ";
 
-%feature("docstring")  SimRobotController::getSensedVelocity "void
-SimRobotController::getSensedVelocity(std::vector< double > &out)
+%feature("docstring")  SimRobotController::getSensedVelocity "
 
 Returns the current \"sensed\" velocity from the simulator. ";
 
-%feature("docstring")  SimRobotController::sensor "SimRobotSensor
-SimRobotController::sensor(int index)
+%feature("docstring")  SimRobotController::sensor "
 
 Returns a sensor by index. If out of bounds, a null sensor is
 returned. ";
 
-%feature("docstring")  SimRobotController::sensor "SimRobotSensor
-SimRobotController::sensor(const char *name)
+%feature("docstring")  SimRobotController::sensor "
 
 Returns a sensor by name. If unavailable, a null sensor is returned.
 ";
 
-%feature("docstring")  SimRobotController::getSensor "SimRobotSensor
-SimRobotController::getSensor(int index)
+%feature("docstring")  SimRobotController::getSensor "
 
 Old-style: will be deprecated. ";
 
-%feature("docstring")  SimRobotController::getNamedSensor "SimRobotSensor SimRobotController::getNamedSensor(const std::string
-&name)
+%feature("docstring")  SimRobotController::getNamedSensor "
 
 Old-style: will be deprecated. ";
 
-%feature("docstring")  SimRobotController::commands "std::vector<
-std::string > SimRobotController::commands()
+%feature("docstring")  SimRobotController::commands "
 
 gets a command list ";
 
-%feature("docstring")  SimRobotController::sendCommand "bool
-SimRobotController::sendCommand(const std::string &name, const
-std::string &args)
+%feature("docstring")  SimRobotController::sendCommand "
 
 sends a command to the controller ";
 
-%feature("docstring")  SimRobotController::getSetting "std::string
-SimRobotController::getSetting(const std::string &name)
+%feature("docstring")  SimRobotController::getSetting "
 
 gets/sets settings of the controller ";
 
-%feature("docstring")  SimRobotController::setSetting "bool
-SimRobotController::setSetting(const std::string &name, const
-std::string &val) ";
+%feature("docstring")  SimRobotController::setSetting "";
 
-%feature("docstring")  SimRobotController::setMilestone "void
-SimRobotController::setMilestone(const std::vector< double > &q)
+%feature("docstring")  SimRobotController::setMilestone "
 
 Uses a dynamic interpolant to get from the current state to the
 desired milestone (with optional ending velocity). This interpolant is
 time-optimal with respect to the velocity and acceleration bounds. ";
 
-%feature("docstring")  SimRobotController::setMilestone "void
-SimRobotController::setMilestone(const std::vector< double > &q, const
-std::vector< double > &dq) ";
+%feature("docstring")  SimRobotController::setMilestone "";
 
-%feature("docstring")  SimRobotController::addMilestone "void
-SimRobotController::addMilestone(const std::vector< double > &q)
+%feature("docstring")  SimRobotController::addMilestone "
 
 Same as setMilestone, but appends an interpolant onto an internal
 motion queue starting at the current queued end state. ";
 
-%feature("docstring")  SimRobotController::addMilestone "void
-SimRobotController::addMilestone(const std::vector< double > &q, const
-std::vector< double > &dq) ";
+%feature("docstring")  SimRobotController::addMilestone "";
 
-%feature("docstring")  SimRobotController::addMilestoneLinear "void
-SimRobotController::addMilestoneLinear(const std::vector< double > &q)
+%feature("docstring")  SimRobotController::addMilestoneLinear "
 
 Same as addMilestone, but enforces that the motion should move along a
-straight-line joint-space path ";
+straight-line joint-space path. ";
 
-%feature("docstring")  SimRobotController::setLinear "void
-SimRobotController::setLinear(const std::vector< double > &q, double
-dt)
+%feature("docstring")  SimRobotController::setLinear "
 
 Uses linear interpolation to get from the current configuration to the
-desired configuration after time dt ";
+desired configuration after time dt. ";
 
-%feature("docstring")  SimRobotController::setCubic "void
-SimRobotController::setCubic(const std::vector< double > &q, const
-std::vector< double > &v, double dt)
+%feature("docstring")  SimRobotController::setCubic "
 
 Uses cubic (Hermite) interpolation to get from the current
 configuration/velocity to the desired configuration/velocity after
-time dt ";
+time dt. ";
 
-%feature("docstring")  SimRobotController::appendLinear "void
-SimRobotController::appendLinear(const std::vector< double > &q,
-double dt)
+%feature("docstring")  SimRobotController::appendLinear "
 
 Same as setLinear but appends an interpolant onto the motion queue. ";
 
-%feature("docstring")  SimRobotController::addCubic "void
-SimRobotController::addCubic(const std::vector< double > &q, const
-std::vector< double > &v, double dt)
+%feature("docstring")  SimRobotController::addCubic "
 
 Same as setCubic but appends an interpolant onto the motion queue. ";
 
-%feature("docstring")  SimRobotController::remainingTime "double
-SimRobotController::remainingTime() const
+%feature("docstring")  SimRobotController::remainingTime "
 
 Returns the remaining duration of the motion queue. ";
 
-%feature("docstring")  SimRobotController::setVelocity "void
-SimRobotController::setVelocity(const std::vector< double > &dq,
-double dt)
+%feature("docstring")  SimRobotController::setVelocity "
 
 Sets a rate controller from the current commanded config to move at
 rate dq for time dt. ";
 
-%feature("docstring")  SimRobotController::setTorque "void
-SimRobotController::setTorque(const std::vector< double > &t)
+%feature("docstring")  SimRobotController::setTorque "
 
 Sets a torque command controller. ";
 
-%feature("docstring")  SimRobotController::setPIDCommand "void
-SimRobotController::setPIDCommand(const std::vector< double > &qdes,
-const std::vector< double > &dqdes)
+%feature("docstring")  SimRobotController::setPIDCommand "
 
 Sets a PID command controller. ";
 
-%feature("docstring")  SimRobotController::setPIDCommand "void
-SimRobotController::setPIDCommand(const std::vector< double > &qdes,
-const std::vector< double > &dqdes, const std::vector< double >
-&tfeedforward)
+%feature("docstring")  SimRobotController::setPIDCommand "
 
 Sets a PID command controller with feedforward torques. ";
 
-%feature("docstring")  SimRobotController::setManualMode "void
-SimRobotController::setManualMode(bool enabled)
+%feature("docstring")  SimRobotController::setManualMode "
 
 Turns on/off manual mode, if either the setTorque or setPID command
 were previously set. ";
 
-%feature("docstring")  SimRobotController::getControlType "std::string SimRobotController::getControlType()
+%feature("docstring")  SimRobotController::getControlType "
 
 Returns the control type for the active controller valid values are:
+
 unknown
 
 off
@@ -1822,9 +1454,7 @@ PID
 
 locked_velocity ";
 
-%feature("docstring")  SimRobotController::setPIDGains "void
-SimRobotController::setPIDGains(const std::vector< double > &kP, const
-std::vector< double > &kI, const std::vector< double > &kD)
+%feature("docstring")  SimRobotController::setPIDGains "
 
 Sets the PID gains. ";
 
@@ -1840,19 +1470,15 @@ gives you a list of names for the measurements.
 
 C++ includes: robotsim.h ";
 
-%feature("docstring")  SimRobotSensor::SimRobotSensor "SimRobotSensor::SimRobotSensor(SensorBase *sensor) ";
+%feature("docstring")  SimRobotSensor::SimRobotSensor "";
 
-%feature("docstring")  SimRobotSensor::name "std::string
-SimRobotSensor::name() ";
+%feature("docstring")  SimRobotSensor::name "";
 
-%feature("docstring")  SimRobotSensor::type "std::string
-SimRobotSensor::type() ";
+%feature("docstring")  SimRobotSensor::type "";
 
-%feature("docstring")  SimRobotSensor::measurementNames "std::vector<
-std::string > SimRobotSensor::measurementNames() ";
+%feature("docstring")  SimRobotSensor::measurementNames "";
 
-%feature("docstring")  SimRobotSensor::getMeasurements "void
-SimRobotSensor::getMeasurements(std::vector< double > &out) ";
+%feature("docstring")  SimRobotSensor::getMeasurements "";
 
 
 // File: classSimulator.xml
@@ -1862,204 +1488,167 @@ A dynamics simulator for a WorldModel.
 
 C++ includes: robotsim.h ";
 
-%feature("docstring")  Simulator::Simulator "Simulator::Simulator(const WorldModel &model, const char
-*settings=NULL)
+%feature("docstring")  Simulator::Simulator "
 
 Constructs the simulator from a WorldModel. If the WorldModel was
 loaded from an XML file, then the simulation setup is loaded from it.
 ";
 
-%feature("docstring")  Simulator::~Simulator "Simulator::~Simulator()
-";
+%feature("docstring")  Simulator::~Simulator "";
 
-%feature("docstring")  Simulator::reset "void Simulator::reset()
+%feature("docstring")  Simulator::reset "
 
 Resets to the initial state (same as setState(initialState)) ";
 
-%feature("docstring")  Simulator::getWorld "WorldModel
-Simulator::getWorld() const
+%feature("docstring")  Simulator::getWorld "
 
 Old-style: will be deprecated. ";
 
-%feature("docstring")  Simulator::getState "string
-Simulator::getState()
+%feature("docstring")  Simulator::getState "
 
 Returns a Base64 string representing the binary data for the current
 simulation state, including controller parameters, etc. ";
 
-%feature("docstring")  Simulator::setState "void
-Simulator::setState(const std::string &str)
+%feature("docstring")  Simulator::setState "
 
 Sets the current simulation state from a Base64 string returned by a
 prior getState call. ";
 
-%feature("docstring")  Simulator::simulate "void
-Simulator::simulate(double t)
+%feature("docstring")  Simulator::simulate "
 
 Advances the simulation by time t, and updates the world model from
 the simulation state. ";
 
-%feature("docstring")  Simulator::fakeSimulate "void
-Simulator::fakeSimulate(double t)
+%feature("docstring")  Simulator::fakeSimulate "
 
 Advances a faked simulation by time t, and updates the world model
 from the faked simulation state. ";
 
-%feature("docstring")  Simulator::getTime "double
-Simulator::getTime()
+%feature("docstring")  Simulator::getTime "
 
 Returns the simulation time. ";
 
-%feature("docstring")  Simulator::updateWorld "void
-Simulator::updateWorld()
+%feature("docstring")  Simulator::updateWorld "
 
 Updates the world model from the current simulation state. This only
 needs to be called if you change the world model and want to revert
 back to the simulation state. ";
 
-%feature("docstring")  Simulator::getActualConfig "void
-Simulator::getActualConfig(int robot, std::vector< double > &out)
+%feature("docstring")  Simulator::getActualConfig "
 
 Returns the current actual configuration of the robot from the
 simulator. ";
 
-%feature("docstring")  Simulator::getActualVelocity "void
-Simulator::getActualVelocity(int robot, std::vector< double > &out)
+%feature("docstring")  Simulator::getActualVelocity "
 
 Returns the current actual velocity of the robot from the simulator.
 ";
 
-%feature("docstring")  Simulator::getActualTorques "void
-Simulator::getActualTorques(int robot, std::vector< double > &out)
+%feature("docstring")  Simulator::getActualTorques "
 
 Returns the current actual torques on the robot's drivers from the
-simulator ";
+simulator. ";
 
-%feature("docstring")  Simulator::enableContactFeedback "void
-Simulator::enableContactFeedback(int obj1, int obj2)
+%feature("docstring")  Simulator::enableContactFeedback "
 
 Call this to enable contact feedback between the two objects
 (arguments are indexes returned by object.getID()). Contact feedback
 has a small overhead so you may want to do this selectively. ";
 
-%feature("docstring")  Simulator::enableContactFeedbackAll "void
-Simulator::enableContactFeedbackAll()
+%feature("docstring")  Simulator::enableContactFeedbackAll "
 
 Call this to enable contact feedback between all pairs of objects.
 Contact feedback has a small overhead so you may want to do this
 selectively. ";
 
-%feature("docstring")  Simulator::inContact "bool
-Simulator::inContact(int aid, int bid)
+%feature("docstring")  Simulator::inContact "
 
 Returns true if the objects (indexes returned by object.getID()) are
-in contact on the current time step ";
+in contact on the current time step. ";
 
-%feature("docstring")  Simulator::getContacts "void
-Simulator::getContacts(int aid, int bid, std::vector< std::vector<
-double > > &out)
+%feature("docstring")  Simulator::getContacts "
 
 Returns the list of contacts (x,n,kFriction) at the last time step.
 Normals point into object a. ";
 
-%feature("docstring")  Simulator::getContactForces "void
-Simulator::getContactForces(int aid, int bid, std::vector<
-std::vector< double > > &out)
+%feature("docstring")  Simulator::getContactForces "
 
 Returns the list of contact forces on object a at the last time step.
 ";
 
-%feature("docstring")  Simulator::contactForce "void
-Simulator::contactForce(int aid, int bid, double out[3])
+%feature("docstring")  Simulator::contactForce "
 
 Returns the contact force on object a at the last time step. ";
 
-%feature("docstring")  Simulator::contactTorque "void
-Simulator::contactTorque(int aid, int bid, double out[3])
+%feature("docstring")  Simulator::contactTorque "
 
 Returns the contact force on object a (about a's origin) at the last
 time step. ";
 
-%feature("docstring")  Simulator::hadContact "bool
-Simulator::hadContact(int aid, int bid)
+%feature("docstring")  Simulator::hadContact "
 
 Returns true if the objects had contact over the last simulate() call.
 ";
 
-%feature("docstring")  Simulator::hadSeparation "bool
-Simulator::hadSeparation(int aid, int bid)
+%feature("docstring")  Simulator::hadSeparation "
 
 Returns true if the objects had ever separated during the last
-simulate() call ";
+simulate() call. ";
 
-%feature("docstring")  Simulator::meanContactForce "void
-Simulator::meanContactForce(int aid, int bid, double out[3])
+%feature("docstring")  Simulator::meanContactForce "
 
 Returns the average contact force on object a over the last simulate()
-call ";
+call. ";
 
-%feature("docstring")  Simulator::controller "SimRobotController
-Simulator::controller(int robot)
+%feature("docstring")  Simulator::controller "
 
 Returns a controller for the indicated robot. ";
 
-%feature("docstring")  Simulator::controller "SimRobotController
-Simulator::controller(const RobotModel &robot) ";
+%feature("docstring")  Simulator::controller "";
 
-%feature("docstring")  Simulator::body "SimBody Simulator::body(const
-RobotModelLink &link)
+%feature("docstring")  Simulator::body "
 
 Returns the SimBody corresponding to the given link. ";
 
-%feature("docstring")  Simulator::body "SimBody Simulator::body(const
-RigidObjectModel &object)
+%feature("docstring")  Simulator::body "
 
 Returns the SimBody corresponding to the given object. ";
 
-%feature("docstring")  Simulator::body "SimBody Simulator::body(const
-TerrainModel &terrain)
+%feature("docstring")  Simulator::body "
 
 Returns the SimBody corresponding to the given terrain. ";
 
-%feature("docstring")  Simulator::getController "SimRobotController
-Simulator::getController(int robot)
+%feature("docstring")  Simulator::getController "
 
 Old-style: will be deprecated. ";
 
-%feature("docstring")  Simulator::getController "SimRobotController
-Simulator::getController(const RobotModel &robot)
+%feature("docstring")  Simulator::getController "
 
 Old-style: will be deprecated. ";
 
-%feature("docstring")  Simulator::getBody "SimBody
-Simulator::getBody(const RobotModelLink &link)
+%feature("docstring")  Simulator::getBody "
 
 Old-style: will be deprecated. ";
 
-%feature("docstring")  Simulator::getBody "SimBody
-Simulator::getBody(const RigidObjectModel &object)
+%feature("docstring")  Simulator::getBody "
 
 Old-style: will be deprecated. ";
 
-%feature("docstring")  Simulator::getBody "SimBody
-Simulator::getBody(const TerrainModel &terrain)
+%feature("docstring")  Simulator::getBody "
 
 Old-style: will be deprecated. ";
 
-%feature("docstring")  Simulator::getJointForces "void
-Simulator::getJointForces(const RobotModelLink &link, double out[6])
+%feature("docstring")  Simulator::getJointForces "
 
 Returns the joint force and torque local to the link, as would be read
 by a force-torque sensor mounted at the given link's origin. The 6
 entries are (fx,fy,fz,mx,my,mz) ";
 
-%feature("docstring")  Simulator::setGravity "void
-Simulator::setGravity(const double g[3])
+%feature("docstring")  Simulator::setGravity "
 
 Sets the overall gravity vector. ";
 
-%feature("docstring")  Simulator::setSimStep "void
-Simulator::setSimStep(double dt)
+%feature("docstring")  Simulator::setSimStep "
 
 Sets the internal simulation substep. Values < 0.01 are recommended.
 ";
@@ -2072,25 +1661,19 @@ Static environment geometry.
 
 C++ includes: robotmodel.h ";
 
-%feature("docstring")  TerrainModel::TerrainModel "TerrainModel::TerrainModel() ";
+%feature("docstring")  TerrainModel::TerrainModel "";
 
-%feature("docstring")  TerrainModel::getID "int TerrainModel::getID()
-";
+%feature("docstring")  TerrainModel::getID "";
 
-%feature("docstring")  TerrainModel::getName "const char *
-TerrainModel::getName() ";
+%feature("docstring")  TerrainModel::getName "";
 
-%feature("docstring")  TerrainModel::geometry "Geometry3D
-TerrainModel::geometry() ";
+%feature("docstring")  TerrainModel::geometry "";
 
-%feature("docstring")  TerrainModel::appearance "Appearance
-TerrainModel::appearance() ";
+%feature("docstring")  TerrainModel::appearance "";
 
-%feature("docstring")  TerrainModel::setFriction "void
-TerrainModel::setFriction(double friction) ";
+%feature("docstring")  TerrainModel::setFriction "";
 
-%feature("docstring")  TerrainModel::drawGL "void
-TerrainModel::drawGL(bool keepAppearance=true) ";
+%feature("docstring")  TerrainModel::drawGL "";
 
 
 // File: structTriangleMesh.xml
@@ -2118,13 +1701,11 @@ m.vertices.append(0) print len(m.vertices) #prints 3 m.vertices =
 
 C++ includes: geometry.h ";
 
-%feature("docstring")  TriangleMesh::translate "void
-TriangleMesh::translate(const double t[3])
+%feature("docstring")  TriangleMesh::translate "
 
 Translates all the vertices by v=v+t. ";
 
-%feature("docstring")  TriangleMesh::transform "void
-TriangleMesh::transform(const double R[9], const double t[3])
+%feature("docstring")  TriangleMesh::transform "
 
 Transforms all the vertices by the rigid transform v=R*v+t. ";
 
@@ -2166,7 +1747,7 @@ copies of the states of whichever objects you wish to save/restore.
 
 C++ includes: robotmodel.h ";
 
-%feature("docstring")  WorldModel::WorldModel "WorldModel::WorldModel()
+%feature("docstring")  WorldModel::WorldModel "
 
 Creates a WorldModel. With no arguments, creates a new world. With an
 integer or another WorldModel instance, creates a reference to an
@@ -2176,171 +1757,138 @@ If passed a pointer to a C++ RobotWorld structure, a reference to that
 structure is returned. (This is used pretty much only when interfacing
 C++ and Python code) ";
 
-%feature("docstring")  WorldModel::WorldModel "WorldModel::WorldModel(void *ptrRobotWorld) ";
+%feature("docstring")  WorldModel::WorldModel "";
 
-%feature("docstring")  WorldModel::WorldModel "WorldModel::WorldModel(int index) ";
+%feature("docstring")  WorldModel::WorldModel "";
 
-%feature("docstring")  WorldModel::WorldModel "WorldModel::WorldModel(const WorldModel &w) ";
+%feature("docstring")  WorldModel::WorldModel "";
 
-%feature("docstring")  WorldModel::~WorldModel "WorldModel::~WorldModel() ";
+%feature("docstring")  WorldModel::~WorldModel "";
 
-%feature("docstring")  WorldModel::copy "WorldModel
-WorldModel::copy()
+%feature("docstring")  WorldModel::copy "
 
 Creates a copy of the world model. Note that geometries and
 appearances are shared... ";
 
-%feature("docstring")  WorldModel::readFile "bool
-WorldModel::readFile(const char *fn)
+%feature("docstring")  WorldModel::readFile "
 
 Reads from a world XML file. ";
 
-%feature("docstring")  WorldModel::numRobots "int
-WorldModel::numRobots() ";
+%feature("docstring")  WorldModel::numRobots "";
 
-%feature("docstring")  WorldModel::numRobotLinks "int
-WorldModel::numRobotLinks(int robot) ";
+%feature("docstring")  WorldModel::numRobotLinks "";
 
-%feature("docstring")  WorldModel::numRigidObjects "int
-WorldModel::numRigidObjects() ";
+%feature("docstring")  WorldModel::numRigidObjects "";
 
-%feature("docstring")  WorldModel::numTerrains "int
-WorldModel::numTerrains() ";
+%feature("docstring")  WorldModel::numTerrains "";
 
-%feature("docstring")  WorldModel::numIDs "int WorldModel::numIDs()
-";
+%feature("docstring")  WorldModel::numIDs "";
 
-%feature("docstring")  WorldModel::robot "RobotModel
-WorldModel::robot(int index) ";
+%feature("docstring")  WorldModel::robot "";
 
-%feature("docstring")  WorldModel::robot "RobotModel
-WorldModel::robot(const char *name) ";
+%feature("docstring")  WorldModel::robot "";
 
-%feature("docstring")  WorldModel::robotLink "RobotModelLink
-WorldModel::robotLink(int robot, int index) ";
+%feature("docstring")  WorldModel::robotLink "";
 
-%feature("docstring")  WorldModel::robotLink "RobotModelLink
-WorldModel::robotLink(const char *robot, const char *name) ";
+%feature("docstring")  WorldModel::robotLink "";
 
-%feature("docstring")  WorldModel::rigidObject "RigidObjectModel
-WorldModel::rigidObject(int index) ";
+%feature("docstring")  WorldModel::rigidObject "";
 
-%feature("docstring")  WorldModel::rigidObject "RigidObjectModel
-WorldModel::rigidObject(const char *name) ";
+%feature("docstring")  WorldModel::rigidObject "";
 
-%feature("docstring")  WorldModel::terrain "TerrainModel
-WorldModel::terrain(int index) ";
+%feature("docstring")  WorldModel::terrain "";
 
-%feature("docstring")  WorldModel::terrain "TerrainModel
-WorldModel::terrain(const char *name) ";
+%feature("docstring")  WorldModel::terrain "";
 
-%feature("docstring")  WorldModel::makeRobot "RobotModel
-WorldModel::makeRobot(const char *name)
+%feature("docstring")  WorldModel::makeRobot "
 
 Creates a new empty robot. (Not terribly useful now since you can't
 resize the number of links yet) ";
 
-%feature("docstring")  WorldModel::makeRigidObject "RigidObjectModel
-WorldModel::makeRigidObject(const char *name)
+%feature("docstring")  WorldModel::makeRigidObject "
 
 Creates a new empty rigid object. ";
 
-%feature("docstring")  WorldModel::makeTerrain "TerrainModel
-WorldModel::makeTerrain(const char *name)
+%feature("docstring")  WorldModel::makeTerrain "
 
 Creates a new empty terrain. ";
 
-%feature("docstring")  WorldModel::loadRobot "RobotModel
-WorldModel::loadRobot(const char *fn)
+%feature("docstring")  WorldModel::loadRobot "
 
 Loads a robot from a .rob or .urdf file. An empty robot is returned if
 loading fails. ";
 
-%feature("docstring")  WorldModel::loadRigidObject "RigidObjectModel
-WorldModel::loadRigidObject(const char *fn)
+%feature("docstring")  WorldModel::loadRigidObject "
 
 Loads a rigid object from a .obj or a mesh file. An empty rigid object
 is returned if loading fails. ";
 
-%feature("docstring")  WorldModel::loadTerrain "TerrainModel
-WorldModel::loadTerrain(const char *fn)
+%feature("docstring")  WorldModel::loadTerrain "
 
 Loads a rigid object from a mesh file. An empty terrain is returned if
 loading fails. ";
 
-%feature("docstring")  WorldModel::loadElement "int
-WorldModel::loadElement(const char *fn)
+%feature("docstring")  WorldModel::loadElement "
 
 Loads some element from a file, automatically detecting its type.
 Meshes are interpreted as terrains. The ID is returned, or -1 if
 loading failed. ";
 
-%feature("docstring")  WorldModel::add "RobotModel
-WorldModel::add(const char *name, const RobotModel &robot)
+%feature("docstring")  WorldModel::add "
 
 Adds a copy of the given robot to this world, either from this
 WorldModel or another. ";
 
-%feature("docstring")  WorldModel::add "RigidObjectModel
-WorldModel::add(const char *name, const RigidObjectModel &obj)
+%feature("docstring")  WorldModel::add "
 
 Adds a copy of the given rigid object to this world, either from this
 WorldModel or another. ";
 
-%feature("docstring")  WorldModel::add "TerrainModel
-WorldModel::add(const char *name, const TerrainModel &terrain)
+%feature("docstring")  WorldModel::add "
 
 Adds a copy of the given terrain to this world, either from this
 WorldModel or another. ";
 
-%feature("docstring")  WorldModel::remove "void
-WorldModel::remove(const RobotModel &robot)
+%feature("docstring")  WorldModel::remove "
 
 Removes a robot. It must be in this world or an exception is raised.
 IMPORTANT: all other references to robots will be invalidated. ";
 
-%feature("docstring")  WorldModel::remove "void
-WorldModel::remove(const RigidObjectModel &object)
+%feature("docstring")  WorldModel::remove "
 
 Removes a rigid object. It must be in this world or an exception is
 raised. IMPORTANT: all other references to rigid objects will be
 invalidated. ";
 
-%feature("docstring")  WorldModel::remove "void
-WorldModel::remove(const TerrainModel &terrain)
+%feature("docstring")  WorldModel::remove "
 
 Removes a terrain. It must be in this world or an exception is raised.
 IMPORTANT: all other references to terrains will be invalidated. ";
 
-%feature("docstring")  WorldModel::getName "std::string
-WorldModel::getName(int id)
+%feature("docstring")  WorldModel::getName "
 
 Retrieves a name for a given element ID. ";
 
-%feature("docstring")  WorldModel::geometry "Geometry3D
-WorldModel::geometry(int id)
+%feature("docstring")  WorldModel::geometry "
 
 Retrieves a geometry for a given element ID. ";
 
-%feature("docstring")  WorldModel::appearance "Appearance
-WorldModel::appearance(int id)
+%feature("docstring")  WorldModel::appearance "
 
 Retrieves an appearance for a given element ID. ";
 
-%feature("docstring")  WorldModel::drawGL "void WorldModel::drawGL()
+%feature("docstring")  WorldModel::drawGL "
 
 Draws the entire world. ";
 
-%feature("docstring")  WorldModel::enableGeometryLoading "void
-WorldModel::enableGeometryLoading(bool enabled)
+%feature("docstring")  WorldModel::enableGeometryLoading "
 
 If geometry loading is set to false, then only the kinematics are
 loaded from disk, and no geometry / visualization / collision
 detection structures will be loaded. Useful for quick scripts that
 just use kinematics / dynamics of a robot. ";
 
-%feature("docstring")  WorldModel::enableInitCollisions "void
-WorldModel::enableInitCollisions(bool enabled)
+%feature("docstring")  WorldModel::enableInitCollisions "
 
 If collision detection is set to true, then collision acceleration
 data structures will be automatically initialized, with debugging
@@ -2358,51 +1906,41 @@ casting routines are called. ";
 
 
 // File: motionplanning_8cpp.xml
-%feature("docstring")  std::setRandomSeed "void setRandomSeed(int
-seed)
+%feature("docstring")  std::setRandomSeed "
 
 Sets the random seed used by the motion planner. ";
 
-%feature("docstring")  std::ToPy "PyObject* ToPy(int x) ";
+%feature("docstring")  std::ToPy "";
 
-%feature("docstring")  std::ToPy "PyObject* ToPy(double x) ";
+%feature("docstring")  std::ToPy "";
 
-%feature("docstring")  std::ToPy "PyObject* ToPy(const string &x) ";
+%feature("docstring")  std::ToPy "";
 
-%feature("docstring")  std::ToPy "PyObject* ToPy(const std::vector< T
-> &x) ";
+%feature("docstring")  std::ToPy "";
 
-%feature("docstring")  std::ToPy "PyObject* ToPy(const Config &x) ";
+%feature("docstring")  std::ToPy "";
 
-%feature("docstring")  std::PyListFromVector "PyObject*
-PyListFromVector(const std::vector< double > &x) ";
+%feature("docstring")  std::PyListFromVector "";
 
-%feature("docstring")  std::PyListToVector "bool
-PyListToVector(PyObject *seq, std::vector< double > &x) ";
+%feature("docstring")  std::PyListToVector "";
 
-%feature("docstring")  std::PyListFromConfig "PyObject*
-PyListFromConfig(const Config &x) ";
+%feature("docstring")  std::PyListFromConfig "";
 
-%feature("docstring")  std::PyListToConfig "bool
-PyListToConfig(PyObject *seq, Config &x) ";
+%feature("docstring")  std::PyListToConfig "";
 
-%feature("docstring")  std::makeNewCSpace "int makeNewCSpace() ";
+%feature("docstring")  std::makeNewCSpace "";
 
-%feature("docstring")  std::destroyCSpace "void destroyCSpace(int
-cspace) ";
+%feature("docstring")  std::destroyCSpace "";
 
-%feature("docstring")  std::setPlanJSONString "void
-setPlanJSONString(const char *string)
+%feature("docstring")  std::setPlanJSONString "
 
 Loads planner values from a JSON string. ";
 
-%feature("docstring")  std::getPlanJSONString "std::string
-getPlanJSONString()
+%feature("docstring")  std::getPlanJSONString "
 
 Saves planner values to a JSON string. ";
 
-%feature("docstring")  std::setPlanType "void setPlanType(const char
-*type)
+%feature("docstring")  std::setPlanType "
 
 Sets the planner type.
 
@@ -2429,11 +1967,9 @@ optimal motion planning
 fmm*: an anytime fast marching method algorithm for optimal motion
 planning ";
 
-%feature("docstring")  std::setPlanSetting "void setPlanSetting(const
-char *setting, double value) ";
+%feature("docstring")  std::setPlanSetting "";
 
-%feature("docstring")  std::setPlanSetting "void setPlanSetting(const
-char *setting, const char *value)
+%feature("docstring")  std::setPlanSetting "
 
 Sets a numeric or string-valued setting for the planner.
 
@@ -2470,16 +2006,13 @@ followed by a weight vector (for PRM, RRT*, PRM*, LazyPRM*, LazyRRG*)
 a JSON string defining the termination condition (default value:
 \"{foundSolution:1;maxIters:1000}\") ";
 
-%feature("docstring")  std::makeNewPlan "int makeNewPlan(int cspace)
-";
+%feature("docstring")  std::makeNewPlan "";
 
-%feature("docstring")  std::destroyPlan "void destroyPlan(int plan)
-";
+%feature("docstring")  std::destroyPlan "";
 
-%feature("docstring")  std::DumpPlan "void
-DumpPlan(MotionPlannerInterface *planner, const char *fn) ";
+%feature("docstring")  std::DumpPlan "";
 
-%feature("docstring")  std::destroy "void destroy()
+%feature("docstring")  std::destroy "
 
 destroys internal data structures
 
@@ -2487,22 +2020,19 @@ Performs cleanup of all created spaces and planners. ";
 
 
 // File: motionplanning_8h.xml
-%feature("docstring")  setRandomSeed "void setRandomSeed(int seed)
+%feature("docstring")  setRandomSeed "
 
 Sets the random seed used by the motion planner. ";
 
-%feature("docstring")  setPlanJSONString "void
-setPlanJSONString(const char *string)
+%feature("docstring")  setPlanJSONString "
 
 Loads planner values from a JSON string. ";
 
-%feature("docstring")  getPlanJSONString "std::string
-getPlanJSONString()
+%feature("docstring")  getPlanJSONString "
 
 Saves planner values to a JSON string. ";
 
-%feature("docstring")  setPlanType "void setPlanType(const char
-*type)
+%feature("docstring")  setPlanType "
 
 Sets the planner type.
 
@@ -2529,11 +2059,9 @@ optimal motion planning
 fmm*: an anytime fast marching method algorithm for optimal motion
 planning ";
 
-%feature("docstring")  setPlanSetting "void setPlanSetting(const char
-*setting, double value) ";
+%feature("docstring")  setPlanSetting "";
 
-%feature("docstring")  setPlanSetting "void setPlanSetting(const char
-*setting, const char *value)
+%feature("docstring")  setPlanSetting "
 
 Sets a numeric or string-valued setting for the planner.
 
@@ -2570,7 +2098,7 @@ followed by a weight vector (for PRM, RRT*, PRM*, LazyPRM*, LazyRRG*)
 a JSON string defining the termination condition (default value:
 \"{foundSolution:1;maxIters:1000}\") ";
 
-%feature("docstring")  destroy "void destroy()
+%feature("docstring")  destroy "
 
 Performs cleanup of all created spaces and planners.
 
@@ -2578,139 +2106,106 @@ Performs cleanup of all created spaces and planners. ";
 
 
 // File: robotik_8cpp.xml
-%feature("docstring")  copy "void copy(const Matrix &mat, vector<
-vector< double > > &v) ";
+%feature("docstring")  copy "";
 
-%feature("docstring")  PySequence_ToVector3 "bool
-PySequence_ToVector3(PyObject *seq, Vector3 &val) ";
+%feature("docstring")  PySequence_ToVector3 "";
 
-%feature("docstring")  PySequence_ToVector3Array "bool
-PySequence_ToVector3Array(PyObject *seq, vector< Vector3 > &array) ";
+%feature("docstring")  PySequence_ToVector3Array "";
 
-%feature("docstring")  SampleTransform "void SampleTransform(const
-IKGoal &goal, RigidTransform &T) ";
+%feature("docstring")  SampleTransform "";
 
-%feature("docstring")  SampleTransform "void SampleTransform(const
-IKObjective &obj, double out[9], double out2[3])
+%feature("docstring")  SampleTransform "
 
 Returns a transformation (R,t) from link to link2 sampled at random
 from the space of transforms that satisfies the objective. ";
 
-%feature("docstring")  SampleTransform "void SampleTransform(const
-GeneralizedIKObjective &obj, double out[9], double out2[3]) ";
+%feature("docstring")  SampleTransform "";
 
 
 // File: robotik_8h.xml
-%feature("docstring")  SampleTransform "void SampleTransform(const
-IKObjective &obj, double out[9], double out2[3])
+%feature("docstring")  SampleTransform "
 
 Returns a transformation (R,t) from link to link2 sampled at random
 from the space of transforms that satisfies the objective. ";
 
-%feature("docstring")  SampleTransform "void SampleTransform(const
-GeneralizedIKObjective &obj, double out[9], double out2[3]) ";
+%feature("docstring")  SampleTransform "";
 
 
 // File: robotmodel_8h.xml
 
 
 // File: robotsim_8cpp.xml
-%feature("docstring")  createWorld "int createWorld(RobotWorld
-*ptr=NULL) ";
+%feature("docstring")  createWorld "";
 
-%feature("docstring")  derefWorld "void derefWorld(int index) ";
+%feature("docstring")  derefWorld "";
 
-%feature("docstring")  refWorld "void refWorld(int index) ";
+%feature("docstring")  refWorld "";
 
-%feature("docstring")  createSim "int createSim() ";
+%feature("docstring")  createSim "";
 
-%feature("docstring")  destroySim "void destroySim(int index) ";
+%feature("docstring")  destroySim "";
 
-%feature("docstring")  createWidget "int createWidget() ";
+%feature("docstring")  createWidget "";
 
-%feature("docstring")  derefWidget "void derefWidget(int index) ";
+%feature("docstring")  derefWidget "";
 
-%feature("docstring")  refWidget "void refWidget(int index) ";
+%feature("docstring")  refWidget "";
 
-%feature("docstring")  GetManagedGeometry "ManagedGeometry&
-GetManagedGeometry(RobotWorld &world, int id) ";
+%feature("docstring")  GetManagedGeometry "";
 
-%feature("docstring")  MakeController "MyController*
-MakeController(Robot *robot) ";
+%feature("docstring")  MakeController "";
 
-%feature("docstring")  GetMotionQueue "PolynomialMotionQueue*
-GetMotionQueue(RobotController *controller) ";
+%feature("docstring")  GetMotionQueue "";
 
-%feature("docstring")  MakeSensors "void MakeSensors(Robot *robot,
-RobotSensors &sensors) ";
+%feature("docstring")  MakeSensors "";
 
-%feature("docstring")  GetMesh "void GetMesh(const
-Geometry::AnyCollisionGeometry3D &geom, TriangleMesh &tmesh) ";
+%feature("docstring")  GetMesh "";
 
-%feature("docstring")  GetMesh "void GetMesh(const TriangleMesh
-&tmesh, Geometry::AnyCollisionGeometry3D &geom) ";
+%feature("docstring")  GetMesh "";
 
-%feature("docstring")  GetPointCloud "void GetPointCloud(const
-Geometry::AnyCollisionGeometry3D &geom, PointCloud &pc) ";
+%feature("docstring")  GetPointCloud "";
 
-%feature("docstring")  GetPointCloud "void GetPointCloud(const
-PointCloud &pc, Geometry::AnyCollisionGeometry3D &geom) ";
+%feature("docstring")  GetPointCloud "";
 
-%feature("docstring")  copy "void copy(const Vector &vec, vector<
-double > &v) ";
+%feature("docstring")  copy "";
 
-%feature("docstring")  copy "void copy(const vector< double > &vec,
-Vector &v) ";
+%feature("docstring")  copy "";
 
-%feature("docstring")  copy "void copy(const Matrix &mat, vector<
-double > &v) ";
+%feature("docstring")  copy "";
 
-%feature("docstring")  copy "void copy(const Matrix &mat, vector<
-vector< double > > &v) ";
+%feature("docstring")  copy "";
 
-%feature("docstring")  push_back "world terrains push_back(new
-Terrain) ";
-
-%feature("docstring")  back "* world terrains back() ";
-
-%feature("docstring")  terrain "return
-terrain(world.terrains.size()-1) ";
-
-%feature("docstring")  GetCameraViewport "Camera::Viewport
-GetCameraViewport(const Viewport &viewport) ";
+%feature("docstring")  GetCameraViewport "";
 
 
 // File: robotsim_8h.xml
 
 
 // File: rootfind_8cpp.xml
-%feature("docstring")  setFTolerance "void setFTolerance(double tolf)
+%feature("docstring")  setFTolerance "
 
 Sets the termination threshold for the change in f. ";
 
-%feature("docstring")  setXTolerance "void setXTolerance(double tolx)
+%feature("docstring")  setXTolerance "
 
 Sets the termination threshold for the change in x. ";
 
-%feature("docstring")  setVectorField "int setVectorField(PyObject
-*pVFObj)
+%feature("docstring")  setVectorField "
 
 Sets the vector field object, returns 0 if pVFObj = NULL, 1 otherwise.
 See vectorfield.py for an abstract base class that can be overridden
 to produce one of these objects. ";
 
-%feature("docstring")  setFunction "int setFunction(PyObject *pVFObj)
+%feature("docstring")  setFunction "
 
 Sets the function object, returns 0 if pVFObj = NULL, 1 otherwise. See
 vectorfield.py for an abstract base class that can be overridden to
 produce one of these objects. Equivalent to setVectorField; just a
 more intuitive name. ";
 
-%feature("docstring")  PyListFromVector "PyObject*
-PyListFromVector(const Vector &x) ";
+%feature("docstring")  PyListFromVector "";
 
-%feature("docstring")  findRoots "PyObject* findRoots(PyObject
-*startVals, int iter)
+%feature("docstring")  findRoots "
 
 Performs unconstrained root finding for up to iter iterations Return
 values is a tuple indicating: (0,x,n) : convergence reached in x
@@ -2726,12 +2221,11 @@ values is a tuple indicating: (0,x,n) : convergence reached in x
 (5,x,n) : numerical error occurred where x is the final point and n is
 the number of iterations used ";
 
-%feature("docstring")  findRootsBounded "PyObject*
-findRootsBounded(PyObject *startVals, PyObject *boundVals, int iter)
+%feature("docstring")  findRootsBounded "
 
 Same as findRoots, but with given bounds (xmin,xmax) ";
 
-%feature("docstring")  destroy "void destroy()
+%feature("docstring")  destroy "
 
 destroys internal data structures
 
@@ -2739,30 +2233,28 @@ Performs cleanup of all created spaces and planners. ";
 
 
 // File: rootfind_8h.xml
-%feature("docstring")  setFTolerance "void setFTolerance(double tolf)
+%feature("docstring")  setFTolerance "
 
 Sets the termination threshold for the change in f. ";
 
-%feature("docstring")  setXTolerance "void setXTolerance(double tolx)
+%feature("docstring")  setXTolerance "
 
 Sets the termination threshold for the change in x. ";
 
-%feature("docstring")  setVectorField "int setVectorField(PyObject
-*pVFObj)
+%feature("docstring")  setVectorField "
 
 Sets the vector field object, returns 0 if pVFObj = NULL, 1 otherwise.
 See vectorfield.py for an abstract base class that can be overridden
 to produce one of these objects. ";
 
-%feature("docstring")  setFunction "int setFunction(PyObject *pVFObj)
+%feature("docstring")  setFunction "
 
 Sets the function object, returns 0 if pVFObj = NULL, 1 otherwise. See
 vectorfield.py for an abstract base class that can be overridden to
 produce one of these objects. Equivalent to setVectorField; just a
 more intuitive name. ";
 
-%feature("docstring")  findRoots "PyObject* findRoots(PyObject
-*startVals, int iter)
+%feature("docstring")  findRoots "
 
 Performs unconstrained root finding for up to iter iterations Return
 values is a tuple indicating: (0,x,n) : convergence reached in x
@@ -2778,12 +2270,11 @@ values is a tuple indicating: (0,x,n) : convergence reached in x
 (5,x,n) : numerical error occurred where x is the final point and n is
 the number of iterations used ";
 
-%feature("docstring")  findRootsBounded "PyObject*
-findRootsBounded(PyObject *startVals, PyObject *boundVals, int iter)
+%feature("docstring")  findRootsBounded "
 
 Same as findRoots, but with given bounds (xmin,xmax) ";
 
-%feature("docstring")  destroy "void destroy()
+%feature("docstring")  destroy "
 
 destroys internal data structures ";
 

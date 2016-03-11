@@ -1,4 +1,5 @@
 #include "PathController.h"
+#include "JointSensors.h"
 #include "Modeling/Conversions.h"
 #include <KrisLibrary/spline/Hermite.h>
 #include <sstream>

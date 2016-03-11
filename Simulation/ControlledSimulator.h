@@ -4,6 +4,8 @@
 #include "Control/Controller.h"
 #include "ODERobot.h"
 
+class WorldSimulation;
+
 /** @brief A class containing information about an ODE-simulated and
  * controlled robot.
  *
@@ -16,10 +18,9 @@ class ControlledRobotSimulator
  public:
   ControlledRobotSimulator();
   void Init(Robot* robot,ODERobot* oderobot,RobotController* controller=NULL);
-  void Step(Real dt);
+  void Step(Real dt,WorldSimulation* sim);
   void UpdateRobot();
 
-  void SimulateSensors();
   void GetCommandedConfig(Config& q);
   void GetCommandedVelocity(Config& dq);
   void GetSensedConfig(Config& q);
@@ -46,6 +47,7 @@ class ControlledRobotSimulator
   Real nextControlTime;
   RobotMotorCommand command;
   RobotSensors sensors;
+  vector<Real> nextSenseTime;
 };
 
 #endif
