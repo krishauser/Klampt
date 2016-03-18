@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<world>
+  <terrain file="../terrains/block.tri" />
+
+
+  <rigidObject name="ball_soft" file="../objects/sphere.obj"  position="-0.5 0 1">
+  </rigidObject> 
+
+  <rigidObject name="ball_medium" file="../objects/sphere.obj"  position="0 0 1">
+  </rigidObject> 
+
+  <rigidObject name="ball_hard" file="../objects/sphere.obj"  position="0.5 0 1">
+  </rigidObject> 
+
+  <rigidObject name="ball_soft" file="../objects/sphere.obj"  position="-0.5 0.5 1">
+  </rigidObject> 
+
+  <rigidObject name="ball_medium" file="../objects/sphere.obj"  position="0 0.5 1">
+  </rigidObject> 
+
+  <rigidObject name="ball_hard" file="../objects/sphere.obj"  position="0.5 0.5 1">
+  </rigidObject> 
+
+  <rigidObject name="ball_soft" file="../objects/sphere.obj"  position="-0.5 1 1">
+  </rigidObject> 
+
+  <rigidObject name="ball_medium" file="../objects/sphere.obj"  position="0 1 1">
+  </rigidObject> 
+
+  <rigidObject name="ball_hard" file="../objects/sphere.obj"  position="0.5 1 1">
+  </rigidObject> 
+
+  <rigidObject name="ball_rigid" file="../objects/sphere.obj"  position="1 0 1">
+  </rigidObject> 
+
+  <simulation>
+    <globals /> 
+    <!-- object parameters -->
+    <object index="0">
+       <geometry kFriction="0.5" kRestitution="0.7" kStiffness="50" kDamping="4" padding="0.04" preshrink="1"/>
+    </object>
+    <object index="1">
+       <geometry kFriction="0.5" kRestitution="0.7" kStiffness="500" kDamping="1" padding="0.04" preshrink="1"/>
+    </object>
+    <object index="2">
+       <geometry kFriction="0.5" kRestitution="0.7" kStiffness="5000" kDamping="1" padding="0.04" preshrink="1"/>
+    </object>
+    <object index="3">
+       <geometry kFriction="0.5" kRestitution="0.7" kStiffness="50" kDamping="10" padding="0.04" preshrink="1"/>
+    </object>
+    <object index="4">
+       <geometry kFriction="0.5" kRestitution="0.7" kStiffness="500" kDamping="10" padding="0.04" preshrink="1"/>
+    </object>
+    <object index="5">
+       <geometry kFriction="0.5" kRestitution="0.7" kStiffness="5000" kDamping="10" padding="0.04" preshrink="1"/>
+    </object>
+    <object index="6">
+       <geometry kFriction="0.5" kRestitution="0.7" kStiffness="50" kDamping="100" padding="0.04" preshrink="1"/>
+    </object>
+    <object index="7">
+       <geometry kFriction="0.5" kRestitution="0.7" kStiffness="500" kDamping="100" padding="0.04" preshrink="1"/>
+    </object>
+    <object index="8">
+       <geometry kFriction="0.5" kRestitution="0.7" kStiffness="5000" kDamping="100" padding="0.04" preshrink="1"/>
+    </object>
+    <object index="9">
+       <geometry kFriction="0.5" kRestitution="0.7" kStiffness="inf" kDamping="inf" padding="0.04" preshrink="1"/>
+    </object>
+
+  </simulation>
+</world>
