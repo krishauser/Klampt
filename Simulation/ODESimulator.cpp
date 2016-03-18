@@ -26,6 +26,26 @@ static size_t gPreclusterContacts = 0;
 static double gClusterTime = 0;
 static double gContactDetectTime = 0;
 
+//if at the beginning of the timestep, the two objects are touching with depth d in the boundary layer
+//of size m, but after the timestep, they are penetrating the boundary layer, the sim will roll back
+//until the new depth d' gives a remaining margin of (m-d') >= c*(m-d) where c<1 is this fraction.
+const static double gRollbackPenetrationFraction = 0.5;  
+
+//stuff for contact detection callbacks
+struct ODEContactResult
+{
+  dGeomID o1,o2;
+  vector<dContactGeom> contacts;
+  vector<dJointFeedback> feedback;
+  bool meshOverlap;
+};
+
+const static int max_contacts = 1000;
+static dContactGeom gContactTemp[max_contacts];
+static list<ODEContactResult> gContacts;
+static vector<ODEContactResult*> gContactsVector;
+
+
 //Method for identifying objects via dGeomSetData/dGeomGetData
 //max objects: 500 million =(
 const static int terrainMarker = 0x80000000;
@@ -116,8 +136,8 @@ ODESimulatorSettings::ODESimulatorSettings()
   defaultEnvPadding = gDefaultEnvPadding;
   defaultEnvSurface.kFriction = 0.3;
   defaultEnvSurface.kRestitution = 0.1;
-  defaultEnvSurface.kStiffness = 80000;
-  defaultEnvSurface.kDamping = 20000;
+  defaultEnvSurface.kStiffness = 800000;
+  defaultEnvSurface.kDamping = 200000;
   //defaultEnvSurface.kStiffness = Inf;
   //defaultEnvSurface.kDamping = Inf;
 
@@ -181,23 +201,11 @@ ODEObject g_ODE_object;
 
 
 
-//stuff for contact detection callbacks
-struct ODEContactResult
-{
-  dGeomID o1,o2;
-  vector<dContactGeom> contacts;
-  vector<dJointFeedback> feedback;
-  bool meshOverlap;
-};
-
-const static int max_contacts = 1000;
-static dContactGeom gContactTemp[max_contacts];
-static list<ODEContactResult> gContacts;
-
 
 
 ODESimulator::ODESimulator()
 {
+  simTime = 0;
   timestep = 0;
   lastStateTimestep = 0;
 
@@ -288,6 +296,106 @@ void ODESimulator::AddObject(RigidObject& object)
   dGeomSetCollideBits(objects.back()->geom(),0xffffffff);
 }
 
+string ODESimulator::ObjectName(const ODEObjectID& obj) const
+{
+  if(obj.IsEnv()) return terrains[obj.index]->name.c_str();
+  if(obj.IsRigidObject()) return objects[obj.index]->obj.name;
+  if(obj.IsRobot()) return robots[obj.index]->robot.LinkName(obj.bodyIndex);
+  return "invalid object";
+}
+
+dBodyID ODESimulator::ObjectBody(const ODEObjectID& obj) const
+{
+  if(obj.IsEnv()) return NULL;
+  if(obj.IsRigidObject()) return objects[obj.index]->body();
+  if(obj.IsRobot()) return robots[obj.index]->body(obj.bodyIndex);
+  return NULL;
+}
+
+dGeomID ODESimulator::ObjectGeom(const ODEObjectID& obj) const
+{
+  if(obj.IsEnv()) return terrainGeoms[obj.index]->geom();
+  if(obj.IsRigidObject()) return objects[obj.index]->geom();
+  if(obj.IsRobot()) return robots[obj.index]->geom(obj.bodyIndex);
+  return NULL;
+}
+
+typedef pair<ODEObjectID,ODEObjectID> CollisionPair;
+
+//call this after DetectCollisions() to update the collision margin state, determine a list of objects to be concerned about
+//for adaptive time stepping.
+void GetCurrentCollisionStatus(ODESimulator* sim,
+    map<CollisionPair,double>& marginsRemaining,
+    vector<CollisionPair >& concernedObjects)
+{
+  for(list<ODEContactResult>::iterator i=gContacts.begin();i!=gContacts.end();i++) {
+    CollisionPair collpair(GeomDataToObjectID(dGeomGetData(i->o1)),GeomDataToObjectID(dGeomGetData(i->o2)));
+    if(collpair.second < collpair.first) 
+      swap(collpair.first,collpair.second);
+
+    //if two bodies had overlap on the prior timestep, don't
+    //keep rolling back
+    if(i->meshOverlap) { 
+      if(sim->lastMarginsRemaining.count(collpair) == 0 || sim->lastMarginsRemaining[collpair] > 0) {
+        concernedObjects.push_back(collpair);
+      }
+      marginsRemaining[collpair] = 0;
+    }
+    else {
+      //no overlap, still we should consider rolling back if the remaining margin drops significantly 
+      //get the closest pair of points
+      CustomGeometryData* g1 = dGetCustomGeometryData(i->o1);
+      CustomGeometryData* g2 = dGetCustomGeometryData(i->o2);
+      double margin = g1->outerMargin + g2->outerMargin;
+      double depth = 0;
+      string id1=sim->ObjectName(collpair.first),id2=sim->ObjectName(collpair.second);
+      for(size_t j=0;j<i->contacts.size();j++)
+        depth = Max(depth,i->contacts[j].depth);
+      //printf("ODESimulation: normal penetration depth between bodies %s and %s is %g/%g\n",id1.c_str(),id2.c_str(),depth,margin);
+      double oldmargin = (sim->lastMarginsRemaining.count(collpair) == 0 ? margin : sim->lastMarginsRemaining[collpair]);
+      if((margin - depth) < gRollbackPenetrationFraction*oldmargin) {
+        //if there was some previous collision margin, we should do a rollback if the margins were reduced even further
+        concernedObjects.push_back(collpair); 
+      }
+      marginsRemaining[collpair] = margin-depth;
+    }
+  }
+}
+
+void PrintStatus(ODESimulator* sim,const CollisionPair& collpair,const char* predescription="Concerned objects",const char* postdescription="have")
+{
+  printf("  %s %s - %s %s position ",predescription,sim->ObjectName(collpair.first).c_str(),sim->ObjectName(collpair.second).c_str(),postdescription);
+
+  const dReal* p1 = sim->ObjectBody(collpair.first) ? dBodyGetPosition(sim->ObjectBody(collpair.first)) : NULL;
+  const dReal* p2 = sim->ObjectBody(collpair.second) ? dBodyGetPosition(sim->ObjectBody(collpair.second)) : NULL;
+  const dReal* v1 = sim->ObjectBody(collpair.first) ? dBodyGetLinearVel(sim->ObjectBody(collpair.first)) : NULL;
+  const dReal* v2 = sim->ObjectBody(collpair.second) ? dBodyGetLinearVel(sim->ObjectBody(collpair.second)) : NULL;
+  if(p1)
+    printf("%g %g %g and ",p1[0],p1[1],p1[2]);
+  else 
+    printf("NONE and");
+  if(p2)
+    printf("%g %g %g\n",p2[0],p2[1],p2[2]);
+  else
+    printf("NONE\n");
+  printf("  velocity ");
+  if(p1)
+    printf("%g %g %g and ",v1[0],v1[1],v1[2]);
+  else 
+    printf("NONE and");
+  if(p2)
+    printf("%g %g %g\n",v2[0],v2[1],v2[2]);
+  else
+    printf("NONE\n");
+
+}
+
+void PrintStatus(ODESimulator* sim,const vector<CollisionPair >& concernedObjects,const char* predescription="Concerned objects",const char* postdescription="have")
+{
+  for(size_t i=0;i<concernedObjects.size();i++) {
+    ::PrintStatus(sim,concernedObjects[i],predescription,postdescription);
+  }
+}
 
 void ODESimulator::Step(Real dt)
 {
@@ -345,129 +453,195 @@ void ODESimulator::Step(Real dt)
     //    //line 10
     //13. step(dt)
     //14. lastdt = dt
-	if(lastStateTimestep > 0) {
-		timestep=lastStateTimestep;
-		Real validTime = -lastStateTimestep, desiredTime = 0;
-		bool didRollback = false;
-		while(true) {
-		  gContacts.clear();
-		  DetectCollisions();
-	#if DO_TIMING
-		  collisionTime += timer.ElapsedTime();
-		  timer.Reset();
-	#endif // DO_TIMING
-		  //determine whether to rollback
-		  bool rollback = false;
-		  set<pair<ODEObjectID,ODEObjectID> > penetrating;
-		  for(list<ODEContactResult>::iterator i=gContacts.begin();i!=gContacts.end();i++) {
-		    pair<ODEObjectID,ODEObjectID> collpair(GeomDataToObjectID(dGeomGetData(i->o1)),GeomDataToObjectID(dGeomGetData(i->o2)));
-		    //if two bodies had overlap on the prior timestep, don't
-		    //keep rolling back
-		    if(i->meshOverlap) { 
-		      if(lastPenetrating.count(collpair) == 0) {
-			if(!didRollback) {
-			  string id1,id2;
-			  if(collpair.first.IsEnv()) id1 = "terrain";
-			  if(collpair.first.IsRigidObject()) id1 = objects[collpair.first.index]->obj.name;
-			  if(collpair.first.IsRobot()) id1 = robots[collpair.first.index]->robot.LinkName(collpair.first.bodyIndex);
-			  if(collpair.second.IsEnv()) id2 = "terrain";
-			  if(collpair.second.IsRigidObject()) id2 = objects[collpair.second.index]->obj.name;
-			  if(collpair.second.IsRobot()) id2 = robots[collpair.second.index]->robot.LinkName(collpair.second.bodyIndex);
-			  printf("ODESimulation: rolling back due to new penetration between bodies %s and %s\n",id1.c_str(),id2.c_str());
-			}
-			rollback = true;
-		      }
-		      penetrating.insert(collpair);
-		    }
-		  }
-		  if(rollback && !lastState.IsOpen()) {
-		printf("ODESimulation: Rollback rejected because last state not saved\n");
-		rollback = false;
-		  }
-		  if(rollback && timestep < 1e-6) {
-		    printf("ODESimulation: Rollback rejected because timestep %g below minimum threshold\n",timestep);
-		rollback = false;
-		  }
-	
-		  if(rollback) {
-		printf("ODESimulation: Rolling back, time step halved to %g\n",timestep*0.5);
-		didRollback = true;
-		lastState.Seek(0,FILESEEKSTART);
-		ReadState(lastState);
-		timestep *= 0.5;
-		  }
-		  else {
-		//accept step
-		lastState.Close();
-		bool res = lastState.OpenData(FILEREAD | FILEWRITE);
-		Assert(res);
-		Assert(lastState.IsOpen());
-		WriteState(lastState);
-		lastPenetrating = penetrating;
+    vector<CollisionPair > concernedObjects;
+  	if(lastStateTimestep > 0) {
+  		timestep=lastStateTimestep;
+  		Real validTime = -lastStateTimestep, desiredTime = 0;
+  		bool didRollback = false;
+  		while(true) {
+  		  DetectCollisions();
+  	#if DO_TIMING
+  		  collisionTime += timer.ElapsedTime();
+  		  timer.Reset();
+  	#endif // DO_TIMING
+  		  //determine whether to rollback
+        bool rollback = false;
+        map<CollisionPair,double> marginsRemaining;
+        vector<CollisionPair > newConcernedObjects;
+        GetCurrentCollisionStatus(this,marginsRemaining,newConcernedObjects);
+        rollback = !newConcernedObjects.empty();
+        for(size_t i=0;i<newConcernedObjects.size();i++) {
+          const CollisionPair& collpair = newConcernedObjects[i];
+          if(marginsRemaining[collpair] == 0) {
+            if(!didRollback) {
+              string id1=ObjectName(collpair.first),id2=ObjectName(collpair.second);
+              printf("ODESimulation: rolling back due to new penetration between bodies %s and %s\n",id1.c_str(),id2.c_str());
+              if(lastMarginsRemaining.count(collpair) == 0)
+                printf("  no previous contact\n");
+              else
+                printf("  previously had depth %g\n",lastMarginsRemaining[collpair]);
+            }
+            //PrintStatus(this,collpair,"Colliding objects","found collision at");
+          }
+          else {
+            if(true || !didRollback) {
+              string id1=ObjectName(collpair.first),id2=ObjectName(collpair.second);
+              printf("ODESimulation: rolling back due to increasing penetration between bodies %s and %s\n",id1.c_str(),id2.c_str());
+              printf("  margin shrank %g to %g\n",lastMarginsRemaining[collpair],marginsRemaining[collpair]);
+            }
+          }
+        }
+  		  if(rollback && !lastState.IsOpen()) {
+          printf("ODESimulation: Rollback rejected because last state not saved\n");
+          getchar();
+          rollback = false;
+  		  }
+  		  if(rollback && timestep < 1e-6) {
+  		    printf("ODESimulation: Rollback rejected because timestep %g below minimum threshold\n",timestep);
+          //getchar();
 
-		validTime += timestep;
-		timestep = desiredTime-validTime;
-		  }
-		  if(validTime >= desiredTime) break;
-		  StepDynamics(timestep);
-		}
-		if(didRollback) {
-		  printf("ODESimulation: Adaptive time step done.\n");
-		}
-	}
-	else {
-		//first step
-		timestep=dt;
-		gContacts.clear();
-		DetectCollisions();
-	#if DO_TIMING
-		collisionTime += timer.ElapsedTime();
-		timer.Reset();
-	#endif // DO_TIMING
-		//determine whether to rollback
-		bool rollback = false;
-		set<pair<ODEObjectID,ODEObjectID> > penetrating;
-		for(list<ODEContactResult>::iterator i=gContacts.begin();i!=gContacts.end();i++) {
-		  pair<ODEObjectID,ODEObjectID> collpair(GeomDataToObjectID(dGeomGetData(i->o1)),GeomDataToObjectID(dGeomGetData(i->o2)));
-		  if(i->meshOverlap) { 
-		    rollback = true;
-		    penetrating.insert(collpair);
-		  }
-		}
-		if(rollback) {
-			printf("ODESimulation: Warning, initial state has underlying meshes overlapping\n");
-			for(set<pair<ODEObjectID,ODEObjectID> >::const_iterator i=penetrating.begin();i!=penetrating.end();i++) {
-			  pair<ODEObjectID,ODEObjectID> collpair = *i;
-			  string id1,id2;
-			  if(collpair.first.IsEnv()) id1 = "terrain";
-			  if(collpair.first.IsRigidObject()) id1 = objects[collpair.first.index]->obj.name;
-			  if(collpair.first.IsRobot()) id1 = robots[collpair.first.index]->robot.LinkName(collpair.first.bodyIndex);
-			  if(collpair.second.IsEnv()) id2 = "terrain";
-			  if(collpair.second.IsRigidObject()) id2 = objects[collpair.second.index]->obj.name;
-			  if(collpair.second.IsRobot()) id2 = robots[collpair.second.index]->robot.LinkName(collpair.second.bodyIndex);
-			  printf("  %s - %s\n",id1.c_str(),id2.c_str());
-			}
-			printf("Press enter to continue...\n");
-			getchar();
-			//NO ROLLBACK ON FIRST
-			rollback = false;
-		}
-		//save state
-		lastState.Close();
-		bool res = lastState.OpenData(FILEREAD | FILEWRITE);
-		Assert(res);
-		Assert(lastState.IsOpen());
-		WriteState(lastState);
-		lastPenetrating = penetrating;
-	}
+          //TEMP: print out starting configuration
+          lastState.Seek(0,FILESEEKSTART);
+          ReadState(lastState);
+          lastMarginsRemaining = marginsRemaining;
+          //printf("STARTING CONFIGURATION:\n");
+          //PrintStatus(this,concernedObjects,"Concerned objects","had");
+          //DetectCollisions();
+          //GetCurrentCollisionStatus(this,marginsRemaining,concernedObjects);
+          //for(size_t i=0;i<concernedObjects.size();i++)
+          //  printf("%s %s margin %g\n",ObjectName(concernedObjects[i].first).c_str(),ObjectName(concernedObjects[i].second).c_str(),marginsRemaining[concernedObjects[i]]);
+          //getchar();
+          rollback = false;
+  		  }
+  	
+  		  if(rollback) {
+          printf("ODESimulation: Rolling back at time %g, time step halved to %g\n",simTime,timestep*0.5);
+          //PrintStatus(this,concernedObjects,"Backing up colliding objects","from");
+          
+          didRollback = true;
+          lastState.Seek(0,FILESEEKSTART);
+          ReadState(lastState);
+          timestep *= 0.5;
+
+          //PrintStatus(this,concernedObjects,"Backed up colliding objects","to previous");
+
+          concernedObjects = newConcernedObjects;
+          Assert(concernedObjects.size() > 0);
+  		  }
+  		  else {
+          //accept prior step
+          lastState.Close();
+          bool res = lastState.OpenData(FILEREAD | FILEWRITE);
+          Assert(res);
+          Assert(lastState.IsOpen());
+          WriteState(lastState);
+          for(size_t i=0;i<concernedObjects.size();i++) {
+            if(marginsRemaining.count(concernedObjects[i]) == 0) {
+              printf("ODESimulation: collision %s - %s erased entirely\n",ObjectName(concernedObjects[i].first).c_str(),ObjectName(concernedObjects[i].second).c_str());
+            }
+            else {
+              double d=marginsRemaining[concernedObjects[i]];
+              if(lastMarginsRemaining.count(concernedObjects[i])) 
+                printf("ODESimulation: collision %s - %s changed from no contact to depth %g\n",ObjectName(concernedObjects[i].first).c_str(),ObjectName(concernedObjects[i].second).c_str(),d);
+              else
+                printf("ODESimulation: collision %s - %s changed from depth %g to depth %g\n",ObjectName(concernedObjects[i].first).c_str(),ObjectName(concernedObjects[i].second).c_str(),lastMarginsRemaining[concernedObjects[i]],d);
+            }
+          }
+          if(didRollback)
+            printf("ODESimulation: Adaptive sub-step of size %g is valid, arriving at time %g.\n",timestep,simTime);
+          //if(didRollback) {
+          //  PrintStatus(this,concernedObjects,"Colliding objects","now at");
+          //}
+          concernedObjects.resize(0);
+          swap(lastMarginsRemaining,marginsRemaining);
+       
+          validTime += timestep;
+          simTime += timestep;
+          timestep = desiredTime-validTime;
+          if(didRollback)
+            printf("   reset time step to %g.\n",timestep);
+          didRollback = false;
+  		  }
+  		  if(validTime >= desiredTime) break;
+
+        //heres where we make the tentative step, to be checked for collisions at the start of the next loop
+        //if(didRollback) printf("Trying step of size %g\n",timestep);
+        //NOW set up the contact response for the previous timestep
+        SetupContactResponse();
+        //PrintStatus(this,concernedObjects,"Colliding objects","pre-step");
+  		  StepDynamics(timestep);
+        //PrintStatus(this,concernedObjects,"Colliding objects","post-step");
+  		}
+  		if(didRollback) {
+  		  printf("ODESimulation: Adaptive time step done, arrived at time %g.\n",simTime);
+  		}
+  	}
+  	else {
+  		//first step
+  		timestep=dt;
+  		DetectCollisions();
+  	#if DO_TIMING
+  		collisionTime += timer.ElapsedTime();
+  		timer.Reset();
+  	#endif // DO_TIMING
+  		//determine whether to rollback
+  		bool rollback = false;
+  		map<CollisionPair,double> marginsRemaining;
+  		for(list<ODEContactResult>::iterator i=gContacts.begin();i!=gContacts.end();i++) {
+  		  CollisionPair collpair(GeomDataToObjectID(dGeomGetData(i->o1)),GeomDataToObjectID(dGeomGetData(i->o2)));
+  		  if(i->meshOverlap) { 
+  		    rollback = true;
+  		    marginsRemaining[collpair] = 0;
+  		  }
+        else {
+          //no overlap, still we should consider rolling back if the remaining margin drops significantly 
+          //get the closest pair of points
+          CustomGeometryData* g1 = dGetCustomGeometryData(i->o1);
+          CustomGeometryData* g2 = dGetCustomGeometryData(i->o2);
+          double margin = g1->outerMargin + g2->outerMargin;
+          double depth = 0;
+          for(size_t j=0;j<i->contacts.size();j++)
+            depth = Max(depth,i->contacts[j].depth);
+          marginsRemaining[collpair] = margin - depth;
+        }
+  		}
+  		if(rollback) {
+  			printf("ODESimulation: Warning, initial state has underlying meshes overlapping\n");
+  			for(map<CollisionPair,double>::const_iterator i=marginsRemaining.begin();i!=marginsRemaining.end();i++) {
+          if(i->second <= 0) {
+    			  CollisionPair collpair = i->first;
+            string id1=ObjectName(collpair.first),id2=ObjectName(collpair.second);
+            printf("  %s - %s\n",id1.c_str(),id2.c_str());
+          }
+  			}
+  			printf("Press enter to continue...\n");
+  			getchar();
+  			//NO ROLLBACK ON FIRST
+  			rollback = false;
+  		}
+      
+  		//save state
+  		lastState.Close();
+  		bool res = lastState.OpenData(FILEREAD | FILEWRITE);
+  		Assert(lastState.IsOpen());
+  		WriteState(lastState);
+  		lastMarginsRemaining = marginsRemaining;
+  	}
+    //do the prospective time step for the next call
+    timestep = dt;
+    SetupContactResponse();
     lastStateTimestep = dt;
     StepDynamics(dt);
   }
   else {
+    //plain old constant time-stepping
+
     gContacts.clear();
+    gContactsVector.resize(0);
     
     timestep=dt;
     DetectCollisions();
+    SetupContactResponse();
 
   //printf("  %d contacts detected\n",gContacts.size());
 
@@ -477,6 +651,7 @@ void ODESimulator::Step(Real dt)
 #endif // DO_TIMING
 
     StepDynamics(dt);
+    simTime += dt;
 
 #if DO_TIMING
     stepTime = timer.ElapsedTime();
@@ -485,15 +660,13 @@ void ODESimulator::Step(Real dt)
   }
 
   //copy out feedback forces
-  for(map<pair<ODEObjectID,ODEObjectID>,ODEContactList>::iterator i=contactList.begin();i!=contactList.end();i++) {  
+  for(map<CollisionPair,ODEContactList>::iterator i=contactList.begin();i!=contactList.end();i++) {  
     ODEContactList& cl=i->second;
     cl.forces.clear();
     for(size_t j=0;j<cl.feedbackIndices.size();j++) {
       int k=cl.feedbackIndices[j];
-      Assert(k >= 0 && k < (int)gContacts.size());
-      list<ODEContactResult>::iterator cres=gContacts.begin();
-      advance(cres,k);
-      Assert(cres != gContacts.end());
+      Assert(k >= 0 && k < (int)gContactsVector.size());
+      ODEContactResult* cres = gContactsVector[k];
       Vector3 temp;
       for(size_t i=0;i<cres->feedback.size();i++) {
 	CopyVector(temp,cres->feedback[i].f1);
@@ -760,6 +933,7 @@ void ClusterContactsKMeans(vector<dContactGeom>& contacts,int maxClusters,Real c
     contacts[i].normal[0] = kmeans.centers[i][3]/clusterNormalScale;
     contacts[i].normal[1] = kmeans.centers[i][4]/clusterNormalScale;
     contacts[i].normal[2] = kmeans.centers[i][5]/clusterNormalScale;
+    contacts[i].depth = kmeans.centers[i][6];
     Real len = Vector3(contacts[i].normal[0],contacts[i].normal[1],contacts[i].normal[2]).length();
     if(FuzzyZero(len) || !IsFinite(len)) {
       printf("ODESimulator: Warning, clustered normal became zero/infinite\n");
@@ -931,6 +1105,7 @@ void selfCollisionCallback(void *data, dGeomID o1, dGeomID o2)
     return;
   }
   
+  ClearCustomGeometryCollisionReliableFlag();
   int num = dCollide (o1,o2,max_contacts,gContactTemp,sizeof(dContactGeom));
   vector<dContactGeom> vcontact(num);
   int numOk = 0;
@@ -968,6 +1143,7 @@ void selfCollisionCallback(void *data, dGeomID o1, dGeomID o2)
     gContacts.back().o1 = o1;
     gContacts.back().o2 = o2;
     swap(gContacts.back().contacts,vcontact);
+    gContacts.back().meshOverlap = !GetCustomGeometryCollisionReliableFlag();
   }
 }
 
@@ -1024,6 +1200,7 @@ void ODESimulator::ClearCollisions()
 
 void ODESimulator::GetSurfaceParameters(const ODEObjectID& a,const ODEObjectID& b,dSurfaceParameters& surface) const
 {
+  Assert(timestep > 0);
   //TODO: base the friction on the properties of the contact point
   //completely rigid contact
   surface.mode = dContactApprox1;
@@ -1059,7 +1236,7 @@ void ODESimulator::GetSurfaceParameters(const ODEObjectID& a,const ODEObjectID& 
     Real kDamping = 1.0/(1.0/propa.kDamping+1.0/propb.kDamping);
     surface.soft_erp = ERPFromSpring(timestep,kStiffness,kDamping);
     surface.soft_cfm = CFMFromSpring(timestep,kStiffness,kDamping);
-    //printf("Joint stiffness %g, damping %g\n",kStiffness,kDamping);
+    //printf("Joint stiffness %g, damping %g, time step %g\n",kStiffness,kDamping,timestep);
     //printf("ERP = %g, CFM = %g\n",surface.soft_erp,surface.soft_cfm);
   }
   surface.mu = 2.0/(1.0/propa.kFriction+1.0/propb.kFriction);
@@ -1069,6 +1246,22 @@ void ODESimulator::GetSurfaceParameters(const ODEObjectID& a,const ODEObjectID& 
   surface.bounce_vel = 1e-2;
   if(surface.bounce != 0) {
     surface.mode |= dContactBounce;
+  }
+}
+
+void ODESimulator::SetupContactResponse()
+{
+  //clear feedback structure
+  ClearContactFeedback();
+  //clear global ODE collider feedback stuff
+  dJointGroupEmpty(contactGroupID);
+
+  int index=0;
+  gContactsVector.resize(gContacts.size());
+  for(list<ODEContactResult>::iterator i=gContacts.begin();i!=gContacts.end();i++) {
+    gContactsVector[index] = &(*i);
+    SetupContactResponse(GeomDataToObjectID(dGeomGetData(i->o1)),GeomDataToObjectID(dGeomGetData(i->o2)),index,*i);
+    index++;
   }
 }
 
@@ -1095,7 +1288,7 @@ void ODESimulator::SetupContactResponse(const ODEObjectID& a,const ODEObjectID& 
       dJointAttach(joint,b1,b2);
   }
   //if contact feedback is enabled, do it!
-  pair<ODEObjectID,ODEObjectID> cindex;
+  CollisionPair cindex;
   bool reverse = false;
   if(b < a) {
     cindex.first = b;
@@ -1148,13 +1341,10 @@ void ODESimulator::DetectCollisions()
   Timer timer;
 #endif //DO_TIMING
 
-  //clear feedback structure
-  ClearContactFeedback();
-  //clear global ODE collider feedback stuff
-  dJointGroupEmpty(contactGroupID);
   gContacts.clear();
+  gContactsVector.resize(0);
 
-  pair<ODEObjectID,ODEObjectID> cindex;
+  CollisionPair cindex;
   int jcount=0;
   if(settings.rigidObjectCollisions) {
     //call the collision routine between objects and the world
@@ -1171,19 +1361,6 @@ void ODESimulator::DetectCollisions()
     gClusterTime += timer.ElapsedTime();
     timer.Reset();
 #endif //DO_TIMING
-
-    for(list<ODEContactResult>::iterator j=gContacts.begin();j!=gContacts.end();j++,jcount++) {
-      //// int is not necessarily big enough, use intptr_t
-      cindex.first = GeomDataToObjectID(dGeomGetData(j->o1));
-      cindex.second = GeomDataToObjectID(dGeomGetData(j->o2));
-      if(cindex.first.IsEnv() && cindex.second.IsEnv()) {
-	fprintf(stderr,"Warning, detecting terrain-terrain collisions?\n");
-      }
-      else {
-	j->feedback.resize(j->contacts.size());
-	SetupContactResponse(cindex.first,cindex.second,jcount,*j);
-      }
-    }
   }
 
   //do robot-environment collisions
@@ -1212,17 +1389,6 @@ void ODESimulator::DetectCollisions()
     timer.Reset();
 #endif //DO_TIMING
 
-    //setup the contact "joints" and contactLists
-    for(list<ODEContactResult>::iterator j=gContactStart;j!=gContacts.end();j++,jcount++) {
-      cindex.first = GeomDataToObjectID(dGeomGetData(j->o1));
-      cindex.second = GeomDataToObjectID(dGeomGetData(j->o2));
-      //printf("Collision between body %d and obj %d\n",body,obj);
-      assert(cindex.first.IsRobot() && (cindex.second.IsRigidObject() || cindex.second.IsEnv()));
-      Assert(cindex.first.index == (int)i);
-      Assert(cindex.first.bodyIndex >= 0 && cindex.first.bodyIndex < (int)robots[i]->robot.links.size());
-      SetupContactResponse(cindex.first,cindex.second,jcount,*j);
-    }
-
     if(settings.robotSelfCollisions) {
       robots[i]->EnableSelfCollisions(true);
 
@@ -1248,18 +1414,6 @@ void ODESimulator::DetectCollisions()
     gClusterTime += timer.ElapsedTime();
     timer.Reset();
 #endif //DO_TIMING
-
-      //setup the contact "joints" and contactLists
-      for(list<ODEContactResult>::iterator j=gContactStart;j!=gContacts.end();j++,jcount++) {
-	cindex.first = GeomDataToObjectID(dGeomGetData(j->o1));
-	cindex.second = GeomDataToObjectID(dGeomGetData(j->o2));
-	Assert(cindex.first.index == (int)i);
-	Assert(cindex.second.index == (int)i);
-	Assert(cindex.first.bodyIndex >= 0 && cindex.first.bodyIndex < (int)robots[i]->robot.links.size());
-	Assert(cindex.second.bodyIndex >= 0 && cindex.second.bodyIndex < (int)robots[i]->robot.links.size());
-
-	SetupContactResponse(cindex.first,cindex.second,jcount,*j);
-      }
     }
 
     if(settings.robotRobotCollisions) {    
@@ -1287,18 +1441,6 @@ void ODESimulator::DetectCollisions()
     gClusterTime += timer.ElapsedTime();
     timer.Reset();
 #endif //DO_TIMING
-
-	//setup the contact "joints" and contactLists
-	for(list<ODEContactResult>::iterator j=gContactStart;j!=gContacts.end();j++,jcount++) {
-	  cindex.first = GeomDataToObjectID(dGeomGetData(j->o1));
-	  cindex.second = GeomDataToObjectID(dGeomGetData(j->o2));
-	  Assert(cindex.first.index == (int)i);
-	  Assert(cindex.second.index == (int)i);
-	  //printf("Collision between robot %d and robot %d\n",i,k);
-	  Assert(cindex.first.bodyIndex >= 0 && cindex.first.bodyIndex < (int)robots[i]->robot.links.size());
-	  Assert(cindex.second.bodyIndex >= 0 && cindex.second.bodyIndex < (int)robots[k]->robot.links.size());
-	  SetupContactResponse(cindex.first,cindex.second,jcount,*j);
-	}
       }
     }
   }
@@ -1306,7 +1448,7 @@ void ODESimulator::DetectCollisions()
 
 void ODESimulator::EnableContactFeedback(const ODEObjectID& a,const ODEObjectID& b)
 {
-  pair<ODEObjectID,ODEObjectID> index;
+  CollisionPair index;
   if(a < b) {
     index.first=a;
     index.second=b;
@@ -1320,7 +1462,7 @@ void ODESimulator::EnableContactFeedback(const ODEObjectID& a,const ODEObjectID&
 
 ODEContactList* ODESimulator::GetContactFeedback(const ODEObjectID& a,const ODEObjectID& b)
 {
-  pair<ODEObjectID,ODEObjectID> index;
+  CollisionPair index;
   if(a < b) {
     index.first=a;
     index.second=b;
@@ -1495,7 +1637,7 @@ bool ODESimulator::ReadState(File& f)
 
 void ODESimulator::ClearContactFeedback()
 {
-  for(map<pair<ODEObjectID,ODEObjectID>,ODEContactList>::iterator i=contactList.begin();i!=contactList.end();i++) {
+  for(map<CollisionPair,ODEContactList>::iterator i=contactList.begin();i!=contactList.end();i++) {
     i->second.points.clear();
     i->second.forces.clear();
     i->second.feedbackIndices.clear();
