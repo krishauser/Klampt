@@ -226,8 +226,9 @@ Vector3 ContactNormal(const CollisionMesh& m1,const CollisionMesh& m2,const Vect
     }
     break;
   case 3:  //face
-    if(type2 == 3)
-      printf("ODECustomMesh: Warning, face-face contact?\n");
+    if(type2 == 3) {
+      //printf("ODECustomMesh: Warning, face-face contact?\n");
+    }
     return m1.currentTransform.R*(-tri1.normal());
   }
   static int warnedCount = 0;
@@ -394,15 +395,28 @@ int MeshMeshCollide(CollisionMesh& m1,Real outerMargin1,CollisionMesh& m2,Real o
     m1.GetTriangle(t1[i],tri1);
     m2.GetTriangle(t2[i],tri2);
 
-    tri1loc.a = T12*tri1.a;
-    tri1loc.b = T12*tri1.b;
-    tri1loc.c = T12*tri1.c;
+    //tri1loc.a = T12*tri1.a;
+    //tri1loc.b = T12*tri1.b;
+    //tri1loc.c = T12*tri1.c;
+    tri2loc.a = T21*tri2.a;
+    tri2loc.b = T21*tri2.b;
+    tri2loc.c = T21*tri2.c;
     Segment3D s;
-    if(tri1loc.intersects(tri2,s)) { 
+    if(tri2loc.intersects(tri1,s)) { 
       gCustomGeometryMeshesIntersect = true;
       if(warnedCount % 1000 == 0) {
 	printf("ODECustomMesh: Triangles penetrate margin %g+%g: can't trust contact detector\n",outerMargin1,outerMargin2);
       }
+      /*
+      cout<<"Triangle 1"<<endl;
+      cout<<"  "<<tri1.a<<endl;
+      cout<<"  "<<tri1.b<<endl;
+      cout<<"  "<<tri1.c<<endl;
+      cout<<"intersects triangle 2"<<endl;
+      cout<<"  "<<tri2loc.a<<endl;
+      cout<<"  "<<tri2loc.b<<endl;
+      cout<<"  "<<tri2loc.c<<endl;
+      */
       warnedCount++;
       /*
       //the two triangles intersect! can't trust results of PQP
@@ -433,12 +447,20 @@ int MeshMeshCollide(CollisionMesh& m1,Real outerMargin1,CollisionMesh& m2,Real o
       n = ContactNormal(m1,m2,cp1[i],cp2[i],t1[i],t2[i]);
     }
     else if(d > tol) {  //some penetration -- we can't trust the result of PQP
+      printf("Skipping contact due to irregular distance between points %g\n",d);
+      cout<<"  cp 1 "<<p1<<endl;
+      cout<<"  cp 2 "<<p2<<endl;
+      cout<<"  local cp 1 "<<cp1[i]<<endl;
+      cout<<"  local cp 2 "<<cp2[i]<<endl;
       continue;
     }
     else n /= d;
     //check for invalid normals
     Real len=n.length();
-    if(len < gZeroNormalTolerance || !IsFinite(len)) continue;
+    if(len < gZeroNormalTolerance || !IsFinite(len)) {
+      printf("Skipping contact due to irregular normal length %g\n",len);
+      continue;
+    }
     //cout<<"Local Points "<<cp1[i]<<", "<<cp2[i]<<endl;
     //cout<<"Points "<<p1<<", "<<p2<<endl;
     //Real utol = (tol)*0.5/d + 0.5;
