@@ -38,6 +38,8 @@ class ManagedGeometry
   ~ManagedGeometry();
   ///Erases the items in this geometry
   void Clear();
+  ///Returns true if the pointer is NULL or the geometry itself is empty
+  bool Empty() const;
   ///Creates an empty geometry
   GeometryPtr CreateEmpty();
   ///Loads a geometry, with caching
@@ -57,7 +59,7 @@ class ManagedGeometry
   ///re-initializing collision data). 
   void TransformGeometry(const Math3D::Matrix4& xform);
   ///Returns the shared appearance data
-  AppearancePtr Appearance();
+  AppearancePtr Appearance() const;
   ///Returns true if there are multiple objects sharing the appearance data.
   ///If it is shared, then changing one appearance affects multiple objects.
   bool IsAppearanceShared() const;
