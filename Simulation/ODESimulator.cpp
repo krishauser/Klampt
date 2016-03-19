@@ -328,6 +328,8 @@ void GetCurrentCollisionStatus(ODESimulator* sim,
     map<CollisionPair,double>& marginsRemaining,
     vector<CollisionPair >& concernedObjects)
 {
+  marginsRemaining.clear();
+  concernedObjects.resize(0);
   for(list<ODEContactResult>::iterator i=gContacts.begin();i!=gContacts.end();i++) {
     CollisionPair collpair(GeomDataToObjectID(dGeomGetData(i->o1)),GeomDataToObjectID(dGeomGetData(i->o2)));
     if(collpair.second < collpair.first) 
@@ -370,10 +372,12 @@ void PrintStatus(ODESimulator* sim,const CollisionPair& collpair,const char* pre
   const dReal* p2 = sim->ObjectBody(collpair.second) ? dBodyGetPosition(sim->ObjectBody(collpair.second)) : NULL;
   const dReal* v1 = sim->ObjectBody(collpair.first) ? dBodyGetLinearVel(sim->ObjectBody(collpair.first)) : NULL;
   const dReal* v2 = sim->ObjectBody(collpair.second) ? dBodyGetLinearVel(sim->ObjectBody(collpair.second)) : NULL;
+  const dReal* w1 = sim->ObjectBody(collpair.first) ? dBodyGetAngularVel(sim->ObjectBody(collpair.first)) : NULL;
+  const dReal* w2 = sim->ObjectBody(collpair.second) ? dBodyGetAngularVel(sim->ObjectBody(collpair.second)) : NULL;
   if(p1)
     printf("%g %g %g and ",p1[0],p1[1],p1[2]);
   else 
-    printf("NONE and");
+    printf("NONE and ");
   if(p2)
     printf("%g %g %g\n",p2[0],p2[1],p2[2]);
   else
@@ -382,12 +386,20 @@ void PrintStatus(ODESimulator* sim,const CollisionPair& collpair,const char* pre
   if(p1)
     printf("%g %g %g and ",v1[0],v1[1],v1[2]);
   else 
-    printf("NONE and");
+    printf("NONE and ");
   if(p2)
     printf("%g %g %g\n",v2[0],v2[1],v2[2]);
   else
     printf("NONE\n");
-
+  printf("  angular vel ");
+  if(p1)
+    printf("%g %g %g and ",w1[0],w1[1],w1[2]);
+  else 
+    printf("NONE and ");
+  if(p2)
+    printf("%g %g %g\n",w2[0],w2[1],w2[2]);
+  else
+    printf("NONE\n");
 }
 
 void PrintStatus(ODESimulator* sim,const vector<CollisionPair >& concernedObjects,const char* predescription="Concerned objects",const char* postdescription="have")
@@ -487,7 +499,10 @@ void ODESimulator::Step(Real dt)
             if(true || !didRollback) {
               string id1=ObjectName(collpair.first),id2=ObjectName(collpair.second);
               printf("ODESimulation: rolling back due to increasing penetration between bodies %s and %s\n",id1.c_str(),id2.c_str());
-              printf("  margin shrank %g to %g\n",lastMarginsRemaining[collpair],marginsRemaining[collpair]);
+              if(lastMarginsRemaining.count(collpair) == 0)
+                printf("  margin shrank from no-contact to %g\n",marginsRemaining[collpair]);
+              else
+                printf("  margin shrank from %g to %g\n",lastMarginsRemaining[collpair],marginsRemaining[collpair]);
             }
           }
         }
@@ -500,17 +515,42 @@ void ODESimulator::Step(Real dt)
   		    printf("ODESimulation: Rollback rejected because timestep %g below minimum threshold\n",timestep);
           //getchar();
 
-          //TEMP: print out starting configuration
+          //TEMP: print out remaining configuration
+          printf("POST TINY STEP CONFIGURATION:\n");
+          PrintStatus(this,concernedObjects,"Concerned objects after step","had");
+          for(size_t i=0;i<concernedObjects.size();i++) {
+            if(marginsRemaining.count(concernedObjects[i]) == 0)
+              printf("%s %s not even close\n",ObjectName(concernedObjects[i].first).c_str(),ObjectName(concernedObjects[i].second).c_str());
+            else
+              printf("%s %s margin %g\n",ObjectName(concernedObjects[i].first).c_str(),ObjectName(concernedObjects[i].second).c_str(),marginsRemaining[concernedObjects[i]]);
+          }
+
+          //TEMP: print out starting configuration (make sure to save current state to temp then load it back)
+          File temp;
+          bool res = temp.OpenData(FILEREAD | FILEWRITE);
+          Assert(res);
+          Assert(temp.IsOpen());
+          WriteState(temp);
+          
           lastState.Seek(0,FILESEEKSTART);
           ReadState(lastState);
-          lastMarginsRemaining = marginsRemaining;
-          //printf("STARTING CONFIGURATION:\n");
-          //PrintStatus(this,concernedObjects,"Concerned objects","had");
-          //DetectCollisions();
-          //GetCurrentCollisionStatus(this,marginsRemaining,concernedObjects);
-          //for(size_t i=0;i<concernedObjects.size();i++)
-          //  printf("%s %s margin %g\n",ObjectName(concernedObjects[i].first).c_str(),ObjectName(concernedObjects[i].second).c_str(),marginsRemaining[concernedObjects[i]]);
-          //getchar();
+          printf("STARTING CONFIGURATION:\n");
+          PrintStatus(this,concernedObjects,"Concerned objects originally","had");
+          DetectCollisions();
+          GetCurrentCollisionStatus(this,marginsRemaining,newConcernedObjects);
+          for(size_t i=0;i<concernedObjects.size();i++) {
+            if(marginsRemaining.count(concernedObjects[i]) == 0)
+              printf("%s %s not even close\n",ObjectName(concernedObjects[i].first).c_str(),ObjectName(concernedObjects[i].second).c_str());
+            else
+              printf("%s %s margin %g\n",ObjectName(concernedObjects[i].first).c_str(),ObjectName(concernedObjects[i].second).c_str(),marginsRemaining[concernedObjects[i]]);
+          }
+          getchar();
+
+          temp.Seek(0,FILESEEKSTART);
+          ReadState(temp);
+          DetectCollisions();
+          GetCurrentCollisionStatus(this,marginsRemaining,concernedObjects);
+
           rollback = false;
   		  }
   	
@@ -524,9 +564,19 @@ void ODESimulator::Step(Real dt)
           timestep *= 0.5;
 
           //PrintStatus(this,concernedObjects,"Backed up colliding objects","to previous");
-
           concernedObjects = newConcernedObjects;
           Assert(concernedObjects.size() > 0);
+
+          //TEMP: verify collision status wasn't changed by reading last state?
+          DetectCollisions();
+          GetCurrentCollisionStatus(this,marginsRemaining,newConcernedObjects);
+          /*
+          if(marginsRemaining != lastMarginsRemaining) {
+            printf("ODESimulation: Warning, difference between rolled-back re-detected margins and previous margins?\n");
+            printf("Press enter to continue\n");
+            getchar();
+          }
+          */
   		  }
   		  else {
           //accept prior step
@@ -1090,6 +1140,16 @@ void collisionCallback(void *data, dGeomID o1, dGeomID o2)
     gContacts.back().o2 = o2;
     swap(gContacts.back().contacts,vcontact);
     gContacts.back().meshOverlap = !GetCustomGeometryCollisionReliableFlag();
+  }
+  else {
+    if(!GetCustomGeometryCollisionReliableFlag()) {
+      printf("collision callback: meshes overlapped, but no contacts were generated?\n");
+      gContacts.push_back(ODEContactResult());
+      gContacts.back().o1 = o1;
+      gContacts.back().o2 = o2;
+      swap(gContacts.back().contacts,vcontact);
+      gContacts.back().meshOverlap = !GetCustomGeometryCollisionReliableFlag();
+    }
   }
 }
 
