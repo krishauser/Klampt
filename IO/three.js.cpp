@@ -238,11 +238,12 @@ void ThreeJSExport(const Geometry::AnyCollisionGeometry3D& geom,AnyCollection& o
       vertices[int(i*3+1)] = float(mesh.verts[i].y);
       vertices[int(i*3+2)] = float(mesh.verts[i].z);
     }
-    faces.resize(mesh.tris.size()*3);
+    faces.resize(mesh.tris.size()*4);
     for(size_t i=0;i<mesh.tris.size();i++) {
-      faces[int(i*3)] = mesh.tris[i].a;
-      faces[int(i*3+1)] = mesh.tris[i].b;
-      faces[int(i*3+2)] = mesh.tris[i].c;
+      faces[int(i*4)] = 0;
+      faces[int(i*4+1)] = mesh.tris[i].a;
+      faces[int(i*4+2)] = mesh.tris[i].b;
+      faces[int(i*4+3)] = mesh.tris[i].c;
     }
     out["vertices"] = vertices;
     out["faces"] = faces;
