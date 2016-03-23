@@ -258,7 +258,8 @@ class Simulator
   /// contact on the current time step
   bool inContact(int aid,int bid);
   /// Returns the list of contacts (x,n,kFriction) at the last time step.
-  /// Normals point into object a.
+  /// Normals point into object a.  The contact point (x,n,kFriction) is 
+  /// represented as a 7-element vector
   void getContacts(int aid,int bid,std::vector<std::vector<double> >& out);
   /// Returns the list of contact forces on object a at the last time step
   void getContactForces(int aid,int bid,std::vector<std::vector<double> >& out);
