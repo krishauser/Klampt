@@ -1,4 +1,5 @@
 #include "ControlledSimulator.h"
+#include "Control/JointSensors.h"
 
 //Set these values to 0 to get all warnings
 
@@ -28,17 +29,9 @@ void ControlledRobotSimulator::Init(Robot* _robot,ODERobot* _oderobot,RobotContr
   }
   curTime = 0;
   nextControlTime = 0;
+  nextSenseTime.resize(0);
 }
 
-void ControlledRobotSimulator::SimulateSensors()
-{
-  if(!controller) return;
-
-  for(size_t i=0;i<sensors.sensors.size();i++) {
-    sensors.sensors[i]->Simulate(this);
-    sensors.sensors[i]->Advance(controlTimeStep);
-  }
-}
 
 void ControlledRobotSimulator::GetCommandedConfig(Config& q)
 {
@@ -177,15 +170,41 @@ void ControlledRobotSimulator::GetActuatorTorques(Vector& t) const
   }
 }
 
-void ControlledRobotSimulator::Step(Real dt)
+void ControlledRobotSimulator::Step(Real dt,WorldSimulation* sim)
 {
   Real endOfTimeStep = curTime + dt;
+
+  //process sensors, which don't operate on the same loop as the controller,
+  //necessarily.
+  if(nextSenseTime.empty()) {
+    //make sure the sensors get updated
+    nextSenseTime.resize(sensors.sensors.size(),0);
+  }
+  for(size_t i=0;i<sensors.sensors.size();i++) {
+    Real delay = 0;
+    if(sensors.sensors[i]->rate == 0)
+      delay = controlTimeStep;
+    else
+      delay = 1.0/sensors.sensors[i]->rate;
+    if(delay < dt) {
+      printf("Sensor %s set to rate higher than internal simulation time step\n",sensors.sensors[i]->name.c_str());
+      printf("  ... Limiting sensor rate to %s\n",1.0/dt);
+      sensors.sensors[i]->rate = 1.0/dt;
+      //todo: handle numerical errors in inversion...
+      delay = dt;
+    }
+
+    if(curTime >= nextSenseTime[i]) {
+      //trigger a sensing action
+      sensors.sensors[i]->Simulate(this,sim);
+      sensors.sensors[i]->Advance(delay);
+      nextSenseTime[i] += delay;
+    }
+  }
 
   if(controller) {
     //the controller update happens less often than the PID update loop
     if(nextControlTime < endOfTimeStep) {
-      //simulate sensors
-      SimulateSensors();
       //update controller
       controller->sensors = &sensors;
       controller->command = &command;

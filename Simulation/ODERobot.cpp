@@ -912,15 +912,21 @@ bool ODERobot::ReadState(File& f)
     dReal w[3],v[3];
     dReal pos[3];
     dReal q[4];
+    dReal frc[3];
+    dReal trq[3];
     if(!ReadArrayFile(f,pos,3)) return false;
     if(!ReadArrayFile(f,q,4)) return false;
     if(!ReadArrayFile(f,w,3)) return false;
     if(!ReadArrayFile(f,v,3)) return false;
+    if(!ReadArrayFile(f,frc,3)) return false;
+    if(!ReadArrayFile(f,trq,3)) return false;
 
     dBodySetPosition(bodyID[i],pos[0],pos[1],pos[2]);
     dBodySetQuaternion(bodyID[i],q);
     dBodySetLinearVel(bodyID[i],v[0],v[1],v[2]);
     dBodySetAngularVel(bodyID[i],w[0],w[1],w[2]);
+    dBodySetForce(bodyID[i],frc[0],frc[1],frc[2]);
+    dBodySetTorque(bodyID[i],trq[0],trq[1],trq[2]);
   }
 
   /*
@@ -952,11 +958,16 @@ bool ODERobot::WriteState(File& f) const
     const dReal* q=dBodyGetQuaternion(bodyID[i]);
     const dReal* v=dBodyGetLinearVel(bodyID[i]);
     const dReal* w=dBodyGetAngularVel(bodyID[i]);
+    //do we need this?
+    const dReal* frc=dBodyGetForce(bodyID[i]);
+    const dReal* trq=dBodyGetTorque(bodyID[i]);
 
     if(!WriteArrayFile(f,pos,3)) return false;
     if(!WriteArrayFile(f,q,4)) return false;
     if(!WriteArrayFile(f,w,3)) return false;
     if(!WriteArrayFile(f,v,3)) return false;
+    if(!WriteArrayFile(f,frc,3)) return false;
+    if(!WriteArrayFile(f,trq,3)) return false;
   }
   return true;
 }

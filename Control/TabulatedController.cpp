@@ -1,4 +1,5 @@
 #include "TabulatedController.h"
+#include "JointSensors.h"
 #include <KrisLibrary/robotics/NewtonEuler.h>
 #include <KrisLibrary/math/sparsematrix.h>
 #include <KrisLibrary/math/misc.h>

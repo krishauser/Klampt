@@ -4,7 +4,7 @@ default: cpp-docs swig docs
 
 cpp-docs: 
 	cd src; doxygen doxygen.conf
-	cd src; ./doxy2swig.py docs/xml/index.xml docs/docs.i
+	cd src; ./doxy2swig.py -n docs/xml/index.xml docs/docs.i
 
 docs:
 	doxygen doxygen.conf

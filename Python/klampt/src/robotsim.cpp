@@ -5,6 +5,7 @@
 #include "Control/Command.h"
 #include "Control/PathController.h"
 #include "Control/FeedforwardController.h"
+#include "Control/LoggingController.h"
 #include "Simulation/WorldSimulation.h"
 #include "Modeling/Interpolate.h"
 #include "IO/XmlWorld.h"
@@ -269,15 +270,7 @@ void ManualOverrideController::Update(Real dt)
 typedef ManualOverrideController MyController;
 inline MyController* MakeController(Robot* robot)
 {
-  PolynomialPathController* c = new PolynomialPathController(*robot);
-  FeedforwardController* fc = new FeedforwardController(*robot,c);
-  ManualOverrideController* lc=new ManualOverrideController(*robot,fc);
-  //defaults -- gravity compensation is better off with free-floating robots
-  if(robot->joints[0].type == RobotJoint::Floating)
-    fc->enableGravityCompensation=false;  //feedforward capability
-  else
-    fc->enableGravityCompensation=true;  //feedforward capability
-  fc->enableFeedforwardAcceleration=false;  //feedforward capability
+  ManualOverrideController* lc=new ManualOverrideController(*robot,MakeDefaultController(robot));
   return lc;
 }
 inline PolynomialMotionQueue* GetMotionQueue(RobotController* controller)
@@ -286,20 +279,13 @@ inline PolynomialMotionQueue* GetMotionQueue(RobotController* controller)
   if(!mc) {
     throw PyException("Not using the default manual override controller");
   }
-  FeedforwardController* ffc=dynamic_cast<FeedforwardController*>((RobotController*)mc->base);
+  LoggingController* lc=dynamic_cast<LoggingController*>((RobotController*)mc->base);
+  if(!lc) {
+    throw PyException("Not using the default robot controller");
+  }
+  FeedforwardController* ffc=dynamic_cast<FeedforwardController*>((RobotController*)lc->base);
   PolynomialPathController* pc=dynamic_cast<PolynomialPathController*>((RobotController*)ffc->base);
   return pc;
-}
-inline void MakeSensors(Robot* robot,RobotSensors& sensors)
-{
-  JointPositionSensor* jp = new JointPositionSensor;
-  JointVelocitySensor* jv = new JointVelocitySensor;
-  jp->name = "q";
-  jv->name = "dq";
-  jp->q.resize(robot->q.n,Zero);
-  jv->dq.resize(robot->q.n,Zero);
-  sensors.sensors.push_back(jp);
-  sensors.sensors.push_back(jv);
 }
 
 
@@ -2631,7 +2617,7 @@ Simulator::Simulator(const WorldModel& model,const char* settings)
     Robot* robot=rworld.robots[i];
     sim->SetController(i,MakeController(robot));
 
-    MakeSensors(robot,sim->controlSimulators[i].sensors);
+    sim->controlSimulators[i].sensors.MakeDefault(robot);
   }
   printf("Done\n");
 
@@ -2924,20 +2910,26 @@ bool SimBody::isDynamicsEnabled()
 void SimBody::applyWrench(const double f[3],const double t[3])
 {
   if(!body) return;
-  dBodyAddForce(body,f[0],f[1],f[2]);
-  dBodyAddTorque(body,t[0],t[1],t[2]);
+  sim->sim->hooks.push_back(new WrenchHook(body,Vector3(f),Vector3(t)));
+  sim->sim->hooks.back()->autokill = true;
+  //dBodyAddForce(body,f[0],f[1],f[2]);
+  //dBodyAddTorque(body,t[0],t[1],t[2]);
 }
 
 void SimBody::applyForceAtPoint(const double f[3],const double pworld[3])
 {
   if(!body) return;
-  dBodyAddForceAtPos(body,f[0],f[1],f[2],pworld[0],pworld[1],pworld[2]);
+  sim->sim->hooks.push_back(new ForceHook(body,Vector3(f),Vector3(pworld)));
+  sim->sim->hooks.back()->autokill = true;
+  //dBodyAddForceAtPos(body,f[0],f[1],f[2],pworld[0],pworld[1],pworld[2]);
 }
 
 void SimBody::applyForceAtLocalPoint(const double f[3],const double plocal[3])
 {
   if(!body) return;
-  dBodyAddForceAtRelPos(body,f[0],f[1],f[2],plocal[0],plocal[1],plocal[2]);
+  sim->sim->hooks.push_back(new LocalForceHook(body,Vector3(f),Vector3(plocal)));
+  sim->sim->hooks.back()->autokill = true;
+  //dBodyAddForceAtRelPos(body,f[0],f[1],f[2],plocal[0],plocal[1],plocal[2]);
 }
 
 void SimBody::setVelocity(const double w[3],const double v[3])
@@ -3056,6 +3048,7 @@ SimBody Simulator::getBody(const TerrainModel& terrain)
 SimBody Simulator::body(const RobotModelLink& link)
 {
   SimBody b;
+  b.sim = this;
   b.body = sim->odesim.robot(link.robotIndex)->body(link.index);
   b.geometry = sim->odesim.robot(link.robotIndex)->triMesh(link.index);
   return b;
@@ -3064,6 +3057,7 @@ SimBody Simulator::body(const RobotModelLink& link)
 SimBody Simulator::body(const RigidObjectModel& object)
 {
   SimBody b;
+  b.sim = this;
   b.body = sim->odesim.object(object.index)->body();
   b.geometry = sim->odesim.object(object.index)->triMesh();
   return b; 
@@ -3072,6 +3066,7 @@ SimBody Simulator::body(const RigidObjectModel& object)
 SimBody Simulator::body(const TerrainModel& terrain)
 {
   SimBody b;
+  b.sim = this;
   b.body = NULL;
   b.geometry = sim->odesim.terrainGeom(terrain.index);
   return b;

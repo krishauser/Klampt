@@ -46,8 +46,8 @@ struct ODESimulatorSettings
 /** @ingroup Simulation
  * @brief An interface to the ODE simulator.
  * 
- * Step() performs collision detection, calls StepDynamics(), and computes
- * collision feedback.
+ * Step() performs collision detection, sets up contact response,
+ * calls StepDynamics(), and computes collision feedback.
  *
  * StepDynamics() integrates the dynamics without setting up collision
  * detection structures.  This probably should not be used externally.
@@ -84,8 +84,12 @@ class ODESimulator
   ODEGeometry* terrainGeom(int i) const { return terrainGeoms[i]; }
   ODERobot* robot(int i) const { return robots[i]; }
   ODERigidObject* object(int i) const { return objects[i]; }
-  
+
+  string ObjectName(const ODEObjectID& obj) const;
+  dBodyID ObjectBody(const ODEObjectID& obj) const;
+  dGeomID ObjectGeom(const ODEObjectID& obj) const;
   void DetectCollisions();
+  void SetupContactResponse(); 
   void ClearCollisions();
   void EnableContactFeedback(const ODEObjectID& a,const ODEObjectID& b);
   ODEContactList* GetContactFeedback(const ODEObjectID& a,const ODEObjectID& b);
@@ -109,11 +113,13 @@ class ODESimulator
   map<pair<ODEObjectID,ODEObjectID>,ODEContactList> contactList;
   dJointGroupID contactGroupID;
   Real timestep;
+  Real simTime;
 
+public:
   //for adaptive time stepping
   File lastState;
   Real lastStateTimestep;
-  set<pair<ODEObjectID,ODEObjectID> > lastPenetrating;
+  map<pair<ODEObjectID,ODEObjectID>,double> lastMarginsRemaining;
 };
 
 

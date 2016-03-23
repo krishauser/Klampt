@@ -1,4 +1,8 @@
 #include "Sensor.h"
+#include "JointSensors.h"
+#include "ForceSensors.h"
+#include "InertialSensors.h"
+#include "OtherSensors.h"
 #include "Simulation/ControlledSimulator.h"
 #include "Simulation/ODESimulator.h"
 #include <KrisLibrary/utils/PropertyMap.h>
@@ -81,11 +85,18 @@ bool ReadFile(File& f,vector<T>& v)
 }
 
 
+SensorBase::SensorBase()
+  :name("Unnamed sensor"),rate(0)
+{}
+
 bool SensorBase::ReadState(File& f)
 {
   vector<double> values;
   if(!ReadFile(f,values)) return false;
   SetMeasurements(values);
+  vector<double> state;
+  if(!ReadFile(f,state)) return false;
+  SetState(state);
   size_t n;
   if(!ReadFile(f,n)) return false;
   for(size_t i=0;i<n;i++) {
@@ -102,6 +113,9 @@ bool SensorBase::WriteState(File& f) const
   vector<double> values;
   GetMeasurements(values);
   if(!WriteFile(f,values)) return false;
+  vector<double> state;
+  GetState(state);
+  if(!WriteFile(f,state)) return false;
   map<string,string> settings;
   size_t n=settings.size();
   if(!WriteFile(f,n)) return false;
@@ -112,10 +126,28 @@ bool SensorBase::WriteState(File& f) const
   return true;
 }
 
+map<string,string> SensorBase::Settings() const
+{
+  map<string,string> settings;
+  FILL_SENSOR_SETTING(settings,rate);
+  return settings;
+}
+bool SensorBase::GetSetting(const string& name,string& str) const
+{
+  GET_SENSOR_SETTING(rate);
+  return false;
+}
+
+bool SensorBase::SetSetting(const string& name,const string& str)
+{
+  SET_SENSOR_SETTING(rate);
+  return false;
+}
+
 JointPositionSensor::JointPositionSensor()
 {}
 
-void JointPositionSensor::Simulate(ControlledRobotSimulator* robot)
+void JointPositionSensor::Simulate(ControlledRobotSimulator* robot,WorldSimulation* sim)
 {
   robot->oderobot->GetConfig(q);
   if(!qvariance.empty()) {
@@ -179,7 +211,7 @@ void JointPositionSensor::SetMeasurements(const std::vector<double>& values)
 
 map<string,string> JointPositionSensor::Settings() const
 {
-  map<string,string> settings;
+  map<string,string> settings = SensorBase::Settings();
   FILL_SENSOR_SETTING(settings,qvariance);
   FILL_SENSOR_SETTING(settings,qresolution);
   GetSetting("indices",settings["indices"]);
@@ -188,6 +220,7 @@ map<string,string> JointPositionSensor::Settings() const
 
 bool JointPositionSensor::GetSetting(const string& name,string& str) const
 {
+  if(SensorBase::GetSetting(name,str)) return true;
   GET_SENSOR_SETTING(qvariance);
   GET_SENSOR_SETTING(qresolution);
   if(name == "indices") {
@@ -202,6 +235,7 @@ bool JointPositionSensor::GetSetting(const string& name,string& str) const
 
 bool JointPositionSensor::SetSetting(const string& name,const string& str)
 {
+  if(SensorBase::SetSetting(name,str)) return true;
   SET_SENSOR_SETTING(qvariance);
   SET_SENSOR_SETTING(qresolution);
   if(name == "indices") {
@@ -222,7 +256,7 @@ bool JointPositionSensor::SetSetting(const string& name,const string& str)
 JointVelocitySensor::JointVelocitySensor()
 {}
 
-void JointVelocitySensor::Simulate(ControlledRobotSimulator* robot)
+void JointVelocitySensor::Simulate(ControlledRobotSimulator* robot,WorldSimulation* sim)
 {
   robot->oderobot->GetVelocities(dq);
   if(!dqvariance.empty()) {
@@ -286,7 +320,7 @@ void JointVelocitySensor::SetMeasurements(const std::vector<double>& values)
 
 map<string,string> JointVelocitySensor::Settings() const
 {
-  map<string,string> settings;
+  map<string,string> settings = SensorBase::Settings();
   FILL_SENSOR_SETTING(settings,dqvariance);
   FILL_SENSOR_SETTING(settings,dqresolution);
   GetSetting("indices",settings["indices"]);
@@ -295,6 +329,7 @@ map<string,string> JointVelocitySensor::Settings() const
 
 bool JointVelocitySensor::GetSetting(const string& name,string& str) const
 {
+  if(SensorBase::GetSetting(name,str)) return true;
   GET_SENSOR_SETTING(dqvariance);
   GET_SENSOR_SETTING(dqresolution);
   if(name == "indices") {
@@ -309,6 +344,7 @@ bool JointVelocitySensor::GetSetting(const string& name,string& str) const
 
 bool JointVelocitySensor::SetSetting(const string& name,const string& str)
 {
+  if(SensorBase::SetSetting(name,str)) return true;
   SET_SENSOR_SETTING(dqvariance);
   SET_SENSOR_SETTING(dqresolution);
   if(name == "indices") {
@@ -327,7 +363,7 @@ bool JointVelocitySensor::SetSetting(const string& name,const string& str)
 DriverTorqueSensor::DriverTorqueSensor()
 {}
 
-void DriverTorqueSensor::Simulate(ControlledRobotSimulator* robot)
+void DriverTorqueSensor::Simulate(ControlledRobotSimulator* robot,WorldSimulation* sim)
 {
   Assert(robot->command.actuators.size() == robot->robot->drivers.size());
   robot->GetActuatorTorques(t);
@@ -392,7 +428,7 @@ void DriverTorqueSensor::SetMeasurements(const std::vector<double>& values)
 
 map<string,string> DriverTorqueSensor::Settings() const
 {
-  map<string,string> settings;
+  map<string,string> settings = SensorBase::Settings();
   FILL_SENSOR_SETTING(settings,tvariance);
   FILL_SENSOR_SETTING(settings,tresolution);
   GetSetting("indices",settings["indices"]);
@@ -401,6 +437,7 @@ map<string,string> DriverTorqueSensor::Settings() const
 
 bool DriverTorqueSensor::GetSetting(const string& name,string& str) const
 {
+  if(SensorBase::GetSetting(name,str)) return true;
   GET_SENSOR_SETTING(tvariance);
   GET_SENSOR_SETTING(tresolution);
   if(name == "indices") {
@@ -415,6 +452,7 @@ bool DriverTorqueSensor::GetSetting(const string& name,string& str) const
 
 bool DriverTorqueSensor::SetSetting(const string& name,const string& str)
 {
+  if(SensorBase::SetSetting(name,str)) return true;
   SET_SENSOR_SETTING(tvariance);
   SET_SENSOR_SETTING(tresolution);
   if(name == "indices") {
@@ -438,7 +476,7 @@ ContactSensor::ContactSensor()
   hasForce[0] = hasForce[1] = hasForce[2] = false;
 }
 
-void ContactSensor::Simulate(ControlledRobotSimulator* robot)
+void ContactSensor::Simulate(ControlledRobotSimulator* robot,WorldSimulation* sim)
 {
   RigidTransform Tlink;
   robot->oderobot->GetLinkTransform(link,Tlink);
@@ -505,7 +543,7 @@ void ContactSensor::SetMeasurements(const std::vector<double>& values)
 
 map<string,string> ContactSensor::Settings() const
 {
-  map<string,string> settings;
+  map<string,string> settings = SensorBase::Settings();
   FILL_SENSOR_SETTING(settings,link);
   FILL_SENSOR_SETTING(settings,Tsensor);
   FILL_SENSOR_SETTING(settings,patchMin);
@@ -518,6 +556,7 @@ map<string,string> ContactSensor::Settings() const
 
 bool ContactSensor::GetSetting(const string& name,string& str) const
 {
+  if(SensorBase::GetSetting(name,str)) return true;
   GET_SENSOR_SETTING(link);
   GET_SENSOR_SETTING(Tsensor);
   GET_SENSOR_SETTING(patchMin);
@@ -530,6 +569,7 @@ bool ContactSensor::GetSetting(const string& name,string& str) const
 
 bool ContactSensor::SetSetting(const string& name,const string& str)
 {
+  if(SensorBase::SetSetting(name,str)) return true;
   SET_SENSOR_SETTING(link);
   SET_SENSOR_SETTING(Tsensor);
   SET_SENSOR_SETTING(patchMin);
@@ -547,7 +587,7 @@ ForceTorqueSensor::ForceTorqueSensor()
   hasMoment[0] = hasMoment[1] = hasMoment[2] = false;
 }
 
-void ForceTorqueSensor::Simulate(ControlledRobotSimulator* robot) 
+void ForceTorqueSensor::Simulate(ControlledRobotSimulator* robot,WorldSimulation* sim) 
 {
   dJointFeedback fb = robot->oderobot->feedback(link);
   Vector3 fw(fb.f1[0],fb.f1[1],fb.f1[2]);
@@ -606,7 +646,7 @@ void ForceTorqueSensor::SetMeasurements(const vector<double>& values)
 
 map<string,string> ForceTorqueSensor::Settings() const
 {
-  map<string,string> settings;
+  map<string,string> settings = SensorBase::Settings();
   FILL_SENSOR_SETTING(settings,link);
   FILL_SENSOR_SETTING(settings,localPos);
   FILL_ARRAY_SENSOR_SETTING(settings,hasForce,3);
@@ -618,6 +658,7 @@ map<string,string> ForceTorqueSensor::Settings() const
 
 bool ForceTorqueSensor::GetSetting(const string& name,string& str) const
 {
+  if(SensorBase::GetSetting(name,str)) return true;
   GET_SENSOR_SETTING(link);
   GET_SENSOR_SETTING(localPos);
   GET_ARRAY_SENSOR_SETTING(hasForce,3);
@@ -629,6 +670,7 @@ bool ForceTorqueSensor::GetSetting(const string& name,string& str) const
 
 bool ForceTorqueSensor::SetSetting(const string& name,const string& str)
 {
+  if(SensorBase::SetSetting(name,str)) return true;
   SET_SENSOR_SETTING(link);
   SET_SENSOR_SETTING(localPos);
   SET_ARRAY_SENSOR_SETTING(hasForce,3);
@@ -652,7 +694,7 @@ void Accelerometer::Advance(Real dt)
   last_dt = dt;
 }
 
-void Accelerometer::Simulate(ControlledRobotSimulator* robot)
+void Accelerometer::Simulate(ControlledRobotSimulator* robot,WorldSimulation* sim)
 {
   RigidTransform T;
   Vector3 w,v,vp;
@@ -687,22 +729,6 @@ void Accelerometer::Reset()
   last_v.setZero();
 }
 
-bool Accelerometer::ReadState(File& f)
-{
-  if(!SensorBase::ReadState(f)) return false;
-  if(!ReadFile(f,last_dt)) return false;
-  if(!ReadFile(f,last_v)) return false;
-  return true;
-}
-
-bool Accelerometer::WriteState(File& f) const
-{
-  if(!SensorBase::WriteState(f)) return false;
-  if(!WriteFile(f,last_dt)) return false;
-  if(!WriteFile(f,last_v)) return false;
-  return true;
-}
-
 void Accelerometer::MeasurementNames(vector<string>& names) const
 {
   names.resize(3);
@@ -723,9 +749,23 @@ void Accelerometer::SetMeasurements(const vector<double>& values)
   accel.set(values[0],values[1],values[2]);
 }
 
+void Accelerometer::GetState(vector<double>& state) const
+{
+  state.resize(4);
+  state[0] = last_dt;
+  last_v.get(state[1],state[2],state[3]);
+}
+
+void Accelerometer::SetState(const vector<double>& state)
+{
+  Assert(state.size()==4);
+  last_dt = state[0];
+  last_v.set(state[1],state[2],state[3]);
+}
+
 map<string,string> Accelerometer::Settings() const
 {
-  map<string,string> settings;
+  map<string,string> settings = SensorBase::Settings();
   FILL_SENSOR_SETTING(settings,link);
   FILL_SENSOR_SETTING(settings,Tsensor);
   FILL_ARRAY_SENSOR_SETTING(settings,hasAxis,3);
@@ -735,6 +775,7 @@ map<string,string> Accelerometer::Settings() const
 
 bool Accelerometer::GetSetting(const string& name,string& str) const
 {
+  if(SensorBase::GetSetting(name,str)) return true;
   GET_SENSOR_SETTING(link);
   GET_SENSOR_SETTING(Tsensor);
   GET_ARRAY_SENSOR_SETTING(hasAxis,3);
@@ -744,6 +785,7 @@ bool Accelerometer::GetSetting(const string& name,string& str) const
 
 bool Accelerometer::SetSetting(const string& name,const string& str)
 {
+  if(SensorBase::SetSetting(name,str)) return true;
   SET_SENSOR_SETTING(link);
   SET_SENSOR_SETTING(Tsensor);
   SET_ARRAY_SENSOR_SETTING(hasAxis,3);
@@ -764,7 +806,7 @@ void TiltSensor::Advance(Real dt)
 {
 }
 
-void TiltSensor::Simulate(ControlledRobotSimulator* robot)
+void TiltSensor::Simulate(ControlledRobotSimulator* robot,WorldSimulation* sim)
 {
   RigidTransform T;
   Vector3 w,v;
@@ -799,18 +841,6 @@ void TiltSensor::Reset()
 {
 }
 
-bool TiltSensor::ReadState(File& f)
-{
-  if(!SensorBase::ReadState(f)) return false;
-  return true;
-}
-
-bool TiltSensor::WriteState(File& f) const
-{
-  if(!SensorBase::WriteState(f)) return false;
-  return true;
-}
-
 void TiltSensor::MeasurementNames(vector<string>& names) const
 {
   names.resize(6);
@@ -842,7 +872,7 @@ void TiltSensor::SetMeasurements(const vector<double>& values)
 
 map<string,string> TiltSensor::Settings() const
 {
-  map<string,string> settings;
+  map<string,string> settings=Settings();
   FILL_SENSOR_SETTING(settings,link);
   FILL_SENSOR_SETTING(settings,referenceDir);
   FILL_SENSOR_SETTING(settings,Rsensor);
@@ -855,6 +885,7 @@ map<string,string> TiltSensor::Settings() const
 
 bool TiltSensor::GetSetting(const string& name,string& str) const
 {
+  if(SensorBase::GetSetting(name,str)) return true;
   GET_SENSOR_SETTING(link);
   GET_SENSOR_SETTING(referenceDir);
   GET_SENSOR_SETTING(Rsensor);
@@ -867,6 +898,7 @@ bool TiltSensor::GetSetting(const string& name,string& str) const
 
 bool TiltSensor::SetSetting(const string& name,const string& str)
 {
+  if(SensorBase::SetSetting(name,str)) return true;
   SET_SENSOR_SETTING(link);
   SET_SENSOR_SETTING(referenceDir);
   SET_SENSOR_SETTING(Rsensor);
@@ -885,7 +917,7 @@ GyroSensor::GyroSensor()
   last_w.setZero();
 }
 
-void GyroSensor::Simulate(ControlledRobotSimulator* robot)
+void GyroSensor::Simulate(ControlledRobotSimulator* robot,WorldSimulation* sim)
 {
   RigidTransform T;
   Vector3 w,v;
@@ -929,22 +961,6 @@ void GyroSensor::Reset()
 }
 
 
-bool GyroSensor::ReadState(File& f)
-{
-  if(!SensorBase::ReadState(f)) return false;
-  if(!ReadFile(f,last_dt)) return false;
-  if(!ReadFile(f,last_w)) return false;
-  return true;
-}
-
-bool GyroSensor::WriteState(File& f) const
-{
-  if(!SensorBase::WriteState(f)) return false;
-  if(!WriteFile(f,last_dt)) return false;
-  if(!WriteFile(f,last_w)) return false;
-  return true;
-}
-
 void GyroSensor::MeasurementNames(vector<string>& names) const
 {
   names.resize(15);
@@ -985,9 +1001,25 @@ void GyroSensor::SetMeasurements(const vector<double>& values)
   angAccel.set(values[12],values[13],values[14]);
 }
 
+void GyroSensor::GetState(vector<double>& state) const
+{
+  state.resize(0);
+  state.push_back(last_dt);
+  state.push_back(last_w.x);
+  state.push_back(last_w.y);
+  state.push_back(last_w.z);
+}
+
+void GyroSensor::SetState(const vector<double>& state)
+{
+  Assert(state.size()==4);
+  last_dt = state[0];
+  last_w.set(state[1],state[2],state[3]);
+}
+
 map<string,string> GyroSensor::Settings() const
 {
-  map<string,string> settings;
+  map<string,string> settings = SensorBase::Settings();
   FILL_SENSOR_SETTING(settings,link);
   FILL_SENSOR_SETTING(settings,angAccelVariance);
   FILL_SENSOR_SETTING(settings,angVelVariance);
@@ -1000,6 +1032,7 @@ map<string,string> GyroSensor::Settings() const
 
 bool GyroSensor::GetSetting(const string& name,string& str) const
 {
+  if(SensorBase::GetSetting(name,str)) return true;
   GET_SENSOR_SETTING(link);
   GET_SENSOR_SETTING(angAccelVariance);
   GET_SENSOR_SETTING(angVelVariance);
@@ -1012,6 +1045,7 @@ bool GyroSensor::GetSetting(const string& name,string& str) const
 
 bool GyroSensor::SetSetting(const string& name,const string& str)
 {
+  if(SensorBase::SetSetting(name,str)) return true;
   SET_SENSOR_SETTING(link);
   SET_SENSOR_SETTING(angAccelVariance);
   SET_SENSOR_SETTING(angVelVariance);
@@ -1027,15 +1061,15 @@ IMUSensor::IMUSensor()
   Reset();
 }
 
-void IMUSensor::Simulate(ControlledRobotSimulator* robot)
+void IMUSensor::Simulate(ControlledRobotSimulator* robot,WorldSimulation* sim)
 {
-  accelerometer.Simulate(robot);
+  accelerometer.Simulate(robot,sim);
   accel = accelerometer.accel;
   translation.madd(velocity,accelerometer.last_dt);
   translation.madd(accel,0.5*Sqr(accelerometer.last_dt));
   velocity.madd(accel,accelerometer.last_dt);
 
-  gyro.Simulate(robot);
+  gyro.Simulate(robot,sim);
   if(gyro.hasAngAccel) angAccel = gyro.angAccel;
   if(gyro.hasAngVel) {
     angVel = gyro.angAccel;
@@ -1142,18 +1176,43 @@ void IMUSensor::SetMeasurements(const vector<double>& values)
   rotation(2,2) = values[23];
 }
 
+void IMUSensor::GetState(vector<double>& state) const
+{
+  vector<double> astate,gstate;
+  accelerometer.GetState(astate);
+  gyro.GetState(gstate);
+  state.resize(0);
+  state.insert(state.end(),astate.begin(),astate.end());
+  state.insert(state.end(),gstate.begin(),gstate.end());
+}
+
+void IMUSensor::SetState(const vector<double>& state)
+{
+  Assert(state.size()==8);
+  vector<double> astate,gstate;
+  astate.resize(4);
+  gstate.resize(4);
+  copy(state.begin(),state.begin()+4,astate.begin());
+  copy(state.begin()+4,state.end()+4,gstate.begin());
+  accelerometer.SetState(astate);
+  gyro.SetState(gstate);
+}
+
 map<string,string> IMUSensor::Settings() const
 {
-  map<string,string> s1,s2;
+  map<string,string> s0 = SensorBase::Settings(),s1,s2;
   s1=accelerometer.Settings();
   s2=gyro.Settings();
+  for(map<string,string>::iterator i=s1.begin();i!=s1.end();i++)
+    s0[i->first] = i->second;
   for(map<string,string>::iterator i=s2.begin();i!=s2.end();i++)
-    s1[i->first] = i->second;
-  return s1;
+    s0[i->first] = i->second;
+  return s0;
 }
 
 bool IMUSensor::GetSetting(const string& name,string& str) const
 {
+  if(SensorBase::GetSetting(name,str)) return true;
   if(accelerometer.GetSetting(name,str)) return true;
   if(gyro.GetSetting(name,str)) return true;
   return false;
@@ -1161,6 +1220,7 @@ bool IMUSensor::GetSetting(const string& name,string& str) const
 
 bool IMUSensor::SetSetting(const string& name,const string& str)
 {
+  if(SensorBase::SetSetting(name,str)) return true;
   if(accelerometer.SetSetting(name,str)) return true;
   if(gyro.SetSetting(name,str)) return true;
   return false;
@@ -1170,11 +1230,18 @@ FilteredSensor::FilteredSensor()
   :smoothing(0)
 {}
 
-void FilteredSensor::Simulate(ControlledRobotSimulator* robot)
+void FilteredSensor::Simulate(ControlledRobotSimulator* robot,WorldSimulation* sim)
+{
+  if(!sensor) return;
+  sensor->Simulate(robot,sim);
+}
+
+void FilteredSensor::Advance(Real dt)
 {
   if(!sensor) return;
   vector<double> newMeasurements;
   sensor->GetMeasurements(newMeasurements);
+  sensor->Advance(dt);
   if(measurements.empty()) {
     measurements.resize(newMeasurements.size(),0.0);
   }
@@ -1183,13 +1250,10 @@ void FilteredSensor::Simulate(ControlledRobotSimulator* robot)
   }
 }
 
-void FilteredSensor::Advance(Real dt)
-{
-}
-
 void FilteredSensor::Reset()
 {
   fill(measurements.begin(),measurements.end(),0.0);
+  if(sensor) sensor->Reset();
 }
 
 void FilteredSensor::MeasurementNames(vector<string>& names) const
@@ -1208,25 +1272,176 @@ void FilteredSensor::SetMeasurements(const vector<double>& values)
   measurements = values;
 }
 
+void FilteredSensor::GetState(vector<double>& values) const
+{
+  if(sensor) {
+    sensor->GetState(values);
+  }
+}
+void FilteredSensor::SetState(const vector<double>& state)
+{
+  if(sensor) sensor->SetState(state);
+}
+
 map<string,string> FilteredSensor::Settings() const
 {
-  map<string,string> settings;
+  map<string,string> settings = SensorBase::Settings();
   FILL_SENSOR_SETTING(settings,smoothing);
   return settings;
 }
 
 bool FilteredSensor::GetSetting(const string& name,string& str) const
 {
+  if(SensorBase::GetSetting(name,str)) return true;
   GET_SENSOR_SETTING(smoothing);
   return false;
 }
 
 bool FilteredSensor::SetSetting(const string& name,const string& str)
 {
+  if(SensorBase::SetSetting(name,str)) return true;
   SET_SENSOR_SETTING(smoothing);
   return false;
 }
 
+
+TimeDelayedSensor::TimeDelayedSensor()
+  :delay(0),jitter(0)
+{}
+
+void TimeDelayedSensor::Simulate(ControlledRobotSimulator* robot,WorldSimulation* sim)
+{
+  if(!sensor) return;
+  sensor->Simulate(robot,sim);
+  vector<double> newMeasurements;
+  sensor->GetMeasurements(newMeasurements);
+  double delivTime = robot->curTime + delay + Rand(-jitter,jitter);
+  measurementsInTransit.push_back(newMeasurements);
+  deliveryTimes.push_back(delivTime);
+
+  while(!deliveryTimes.empty() && deliveryTimes.front() <= robot->curTime) {
+    swap(arrivedMeasurement,measurementsInTransit.front());
+    measurementsInTransit.pop_front();
+    deliveryTimes.pop_front();
+  }
+}
+
+void TimeDelayedSensor::Advance(Real dt)
+{
+  if(!sensor) return;
+  sensor->Advance(dt);
+}
+
+void TimeDelayedSensor::Reset()
+{
+  if(sensor) sensor->Reset();
+  measurementsInTransit.clear();
+  deliveryTimes.clear();
+  arrivedMeasurement.clear();
+}
+
+void TimeDelayedSensor::MeasurementNames(vector<string>& names) const
+{
+  if(sensor)
+    sensor->MeasurementNames(names);
+}
+
+void TimeDelayedSensor::GetMeasurements(vector<double>& values) const
+{
+  values = arrivedMeasurement;
+}
+
+
+void TimeDelayedSensor::SetMeasurements(const vector<double>& values)
+{
+  arrivedMeasurement = values;
+}
+
+void TimeDelayedSensor::GetState(vector<double>& state) const
+{
+  if(!sensor) return;
+  vector<double> sstate;
+  sensor->GetState(sstate);
+  size_t n = 0;
+  if(!measurementsInTransit.empty()) n = measurementsInTransit.front().size();
+  state = sstate;
+  state.push_back(double(deliveryTimes.size()));
+  state.push_back(double(n));
+  for(deque<vector<double> >::const_iterator i=measurementsInTransit.begin();i!=measurementsInTransit.end();i++) {
+    Assert(i->size()==n);
+    for(size_t j=0;j<i->size();j++)
+      state.push_back((*i)[j]);
+  }
+  for(deque<double>::const_iterator i=deliveryTimes.begin();i!=deliveryTimes.end();i++)
+    state.push_back(*i);
+}
+
+void TimeDelayedSensor::SetState(const vector<double>& state)
+{
+  if(!sensor) return;
+  //just to get the size
+  vector<double> sstate;
+  sensor->GetState(sstate);
+  copy(state.begin(),state.begin()+sstate.size(),sstate.begin());
+  sensor->SetState(sstate);
+  vector<double>::const_iterator readpos = state.begin()+sstate.size();
+  int k = int(*readpos); readpos++;
+  int n = int(*readpos); readpos++;
+  Assert(k >= 0);
+  Assert(n >= 0);
+  deliveryTimes.resize(0);
+  measurementsInTransit.resize(0);
+  for(int i=0;i<k;i++) {
+    vector<double> meas;
+    for(int j=0;j<n;j++) {
+      meas.push_back(double(*readpos));
+      readpos++;
+    }
+    measurementsInTransit.push_back(meas);
+  }
+  for(int i=0;i<k;i++) {
+    deliveryTimes.push_back(double(*readpos));
+    readpos++;
+  }
+}
+
+map<string,string> TimeDelayedSensor::Settings() const
+{
+  map<string,string> settings = SensorBase::Settings();
+  FILL_SENSOR_SETTING(settings,delay);
+  FILL_SENSOR_SETTING(settings,jitter);
+  return settings;
+}
+
+bool TimeDelayedSensor::GetSetting(const string& name,string& str) const
+{
+  if(SensorBase::GetSetting(name,str)) return true;
+  GET_SENSOR_SETTING(delay);
+  GET_SENSOR_SETTING(jitter);
+  return false;
+}
+
+bool TimeDelayedSensor::SetSetting(const string& name,const string& str)
+{
+  if(SensorBase::SetSetting(name,str)) return true;
+  SET_SENSOR_SETTING(delay);
+  SET_SENSOR_SETTING(jitter);
+  return false;
+}
+
+bool RobotSensors::LoadSettings(const char* fn)
+{
+  TiXmlDocument doc;
+  if(!doc.LoadFile(fn)) return false;
+  return LoadSettings(doc.RootElement());
+}
+
+bool RobotSensors::SaveSettings(const char* fn)
+{
+  TiXmlDocument doc;
+  SaveSettings(doc.RootElement());
+  return doc.SaveFile(fn);
+}
 
 bool RobotSensors::LoadSettings(TiXmlElement* node)
 {
@@ -1275,12 +1490,27 @@ bool RobotSensors::LoadSettings(TiXmlElement* node)
     else if(0==strcmp(e->Value(),"FilteredSensor")) {
       FilteredSensor* fs = new FilteredSensor;
       if(!e->Attribute("sensor")) {
-	fprintf(stderr,"Filtered sensor doesn't have a sensor attribute\n");
+	fprintf(stderr,"Filtered sensor doesn't have a \"sensor\" attribute\n");
 	return false;
       }
       fs->sensor = GetNamedSensor(e->Attribute("sensor"));
       if(fs->sensor == NULL) {
-	fprintf(stderr,"Filtered sensor link %s does not exist\n",e->Attribute("sensor"));
+	fprintf(stderr,"Filtered sensor has unknown sensor type \"%s\"\n",e->Attribute("sensor"));
+	return false;
+      }
+      sensor = fs;
+      sensors.push_back(sensor);
+      processedAttributes.insert("sensor");
+    }
+    else if(0==strcmp(e->Value(),"TimeDelayedSensor")) {
+      TimeDelayedSensor* fs = new TimeDelayedSensor;
+      if(!e->Attribute("sensor")) {
+	fprintf(stderr,"Time-delayed sensor doesn't have a \"sensor\" attribute\n");
+	return false;
+      }
+      fs->sensor = GetNamedSensor(e->Attribute("sensor"));
+      if(fs->sensor == NULL) {
+	fprintf(stderr,"Time-delayed sensor has unknown sensor type \"%s\"\n",e->Attribute("sensor"));
 	return false;
       }
       sensor = fs;
@@ -1349,7 +1579,7 @@ bool RobotSensors::LoadMeasurements(TiXmlElement* node)
       stringstream ss(attrs[measurementNames[i]]);
       ss >> measurementValues[i];
     }
-    s->SetMeasurements(measurementValues);
+    s->SetState(measurementValues);
 
     e = e->NextSiblingElement();
   }
@@ -1394,3 +1624,42 @@ SmartPointer<SensorBase> RobotSensors::GetNamedSensor(const string& name)
   return NULL;
 }
 
+
+
+void RobotSensors::MakeDefault(Robot* robot)
+{
+  sensors.resize(0);
+  string sensorFn;
+  if(robot->properties.get("sensors",sensorFn)) {
+    if(LoadSettings(sensorFn.c_str())) {
+      //be sure to resize any empty JointPositionSensor's and 
+      //JointVelocitySensor's 
+      vector<JointPositionSensor*> jps;
+      GetTypedSensors(jps);
+      for(size_t i=0;i<jps.size();i++)
+	if(jps[i]->indices.empty())
+	  jps[i]->q.resize(robot->q.n,Zero);
+      vector<JointVelocitySensor*> jvs;
+      GetTypedSensors(jvs);
+      for(size_t i=0;i<jvs.size();i++)
+	if(jvs[i]->indices.empty())
+	  jvs[i]->dq.resize(robot->q.n,Zero);
+      return;
+    }
+    else {
+      printf("RobotSensors::MakeDefault: could not load sensor file %s\n",sensorFn.c_str());
+      printf("  Making the standard sensors instead.\n");
+      printf("  Press enter to continue.\n");
+      getchar();
+      sensors.resize(0);
+    }
+  }
+  JointPositionSensor* jp = new JointPositionSensor;
+  JointVelocitySensor* jv = new JointVelocitySensor;
+  jp->name = "q";
+  jv->name = "dq";
+  jp->q.resize(robot->q.n,Zero);
+  jv->dq.resize(robot->q.n,Zero);
+  sensors.push_back(jp);
+  sensors.push_back(jv);
+}

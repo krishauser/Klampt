@@ -6,327 +6,89 @@
 #include <KrisLibrary/utils/SmartPointer.h>
 #include <map>
 #include <vector>
+#include <deque>
 #include <string>
 #include <typeinfo>
 using namespace Math3D;
 using namespace std;
 
+class Robot;
 class ControlledRobotSimulator;
+class WorldSimulation;
 class TiXmlElement;
 
 /** @ingroup Control
- * @brief A sensor base class.
+ * @brief A sensor base class.  A SensorBase should allow a Controller to 
+ * both connect to a simulation as well as a real sensor. 
  *
- * To be XML read/writeable, override the Settings, Get/SetSetting methods.
- * To be loggable/replayable, override the MeasurementNames and
- * Get/SetMeasurements methods.
+ * The mapping from simulation -> SensorBase is given by the Simulate
+ * and Advance calls which are called immediately in succession.
+ *
+ * The mapping from a sensor to this structure can be given by the
+ * SetMeasurements function.
+ *
+ * Default settings:
+ * - rate: the number of time per second this should be called, in Hz.  If 0,
+ *   the sensor is updated every time the controller is called (default)
+ *
+ * FOR IMPLEMENTERS: at a minimum, you must overload the Type(),
+ * MeasurementNames and Get/SetMeasurements methods. 
+ *
+ * If the sensor simulator manages any internal state, such as a state
+ * estimate, then you will also need to override
+ * Get/SetState in order for the simulator state to be properly saved and
+ * loaded during rewind/replay.
+ * If you want the simulator to be resettable, you will need to overload
+ * Reset() to reset the state when necessary.
+ *
+ * If your sensor is reconfigurable, you will want to also override the
+ * Settings and Get/SetSetting methods.  The macros FILL_SENSOR_SETTING,
+ * GET_SENSOR_SETTING, and SET_SENSOR_SETTING are helpful for doing this.
  */
 class SensorBase
 {
  public:
-  SensorBase() {}
+  SensorBase();
   virtual ~SensorBase() {}
   virtual const char* Type() const { return "SensorBase"; }
-  virtual void Simulate(ControlledRobotSimulator* robot) {}
+  virtual void Simulate(ControlledRobotSimulator* robot,WorldSimulation* sim) {}
   virtual void Advance(Real dt) {}
   virtual void Reset() {}
   virtual bool ReadState(File& f);
   virtual bool WriteState(File& f) const;
   virtual void MeasurementNames(vector<string>& names) const { names.resize(0); }
   virtual void GetMeasurements(vector<double>& values) const { values.resize(0); }
-  virtual void SetMeasurements(const vector<double>& values) { }
-  virtual map<string,string> Settings() const { return map<string,string>(); }
-  virtual bool GetSetting(const string& name,string& str) const { return false; }
-  virtual bool SetSetting(const string& name,const string& str) { return false; }
+  virtual void SetMeasurements(const vector<double>& values) const { }
+  //Any other state that you might want to store.  Used in ReadState
+  virtual void GetState(vector<double>& state) const {  }
+  //Any other state that you might want to store.  Used in WriteState
+  virtual void SetState(const vector<double>& state) { }
+  virtual map<string,string> Settings() const;
+  virtual bool GetSetting(const string& name,string& str) const;
+  virtual bool SetSetting(const string& name,const string& str);
 
   string name;
-};
-
-/** @ingroup Control
- * @brief Simulates a joint encoder.
- */
-class JointPositionSensor : public SensorBase
-{
- public:
-  JointPositionSensor();
-  virtual const char* Type() const { return "JointPositionSensor"; }
-  virtual void Simulate(ControlledRobotSimulator* robot);
-  virtual void Reset();
-  virtual void MeasurementNames(vector<string>& names) const;
-  virtual void GetMeasurements(vector<double>& values) const;
-  virtual void SetMeasurements(const vector<double>& values);
-  virtual map<string,string> Settings() const;
-  virtual bool GetSetting(const string& name,string& str) const;
-  virtual bool SetSetting(const string& name,const string& str);
-
-  vector<int> indices;   ///< The indices on which the position sensors are located
-  Vector qvariance;      ///< Estimated variance of the encoder values
-  Vector qresolution;    ///< Estimate on the encoder resolution
-  Vector q;              ///< Measurement: joint angles
-};
-
-/** @ingroup Control
- * @brief Simulates a "true" velocity sensor
- */
-class JointVelocitySensor : public SensorBase
-{
- public:
-  JointVelocitySensor();
-  virtual const char* Type() const { return "JointVelocitySensor"; }
-  virtual void Simulate(ControlledRobotSimulator* robot);
-  virtual void Reset();
-  virtual void MeasurementNames(vector<string>& names) const;
-  virtual void GetMeasurements(vector<double>& values) const;
-  virtual void SetMeasurements(const vector<double>& values);
-  virtual map<string,string> Settings() const;
-  virtual bool GetSetting(const string& name,string& str) const;
-  virtual bool SetSetting(const string& name,const string& str);
-
-  vector<int> indices;   ///< The indices on which the velocity sensors are located
-  Vector dqvariance;     ///< Estimated variance of the encoder values
-  Vector dqresolution;   ///< Estimate on the encoder resolution
-  Vector dq;             ///< Measurement: joint velocities
-};
-
-/** @ingroup Control
- * @brief Simulates a torque sensor.
- * 
- * Motors typically provide current/voltage information, and this assumes
- * that it is transformed into torque units.
- */
-class DriverTorqueSensor : public SensorBase
-{
- public:
-  DriverTorqueSensor();
-  virtual const char* Type() const { return "DriverTorqueSensor"; }
-  virtual void Simulate(ControlledRobotSimulator* robot);
-  virtual void Reset();
-  virtual void MeasurementNames(vector<string>& names) const;
-  virtual void GetMeasurements(vector<double>& values) const;
-  virtual void SetMeasurements(const vector<double>& values);
-  virtual map<string,string> Settings() const;
-  virtual bool GetSetting(const string& name,string& str) const;
-  virtual bool SetSetting(const string& name,const string& str);
-
-  vector<int> indices;   ///< The indices on which the torque sensors are located
-  Vector tvariance;     ///< Estimated variance of the torque values
-  Vector tresolution;   ///< Estimate on the torque resolution
-  Vector t;             ///< Measurement: joint torques
-};
-
-/** @ingroup Control
- * @brief Simulates a pressure sensor.  Not currently functional.
- */
-class ContactSensor : public SensorBase
-{
- public:
-  ContactSensor();
-  virtual const char* Type() const { return "ContactSensor"; }
-  virtual void Simulate(ControlledRobotSimulator* robot);
-  virtual void Reset();
-  virtual void MeasurementNames(vector<string>& names) const;
-  virtual void GetMeasurements(vector<double>& values) const;
-  virtual void SetMeasurements(const vector<double>& values);
-  virtual map<string,string> Settings() const;
-  virtual bool GetSetting(const string& name,string& str) const;
-  virtual bool SetSetting(const string& name,const string& str);
-
-  int link;                ///< The link on which the sensor is located
-  RigidTransform Tsensor;  ///< Local frame of the sensor (by convention, origin is at contact patch, z is normal to surface, into robot)
-  Vector2 patchMin,patchMax;///< The 2D contact patch in the local frame of the sensor 
-  Real patchTolerance;     ///< The deformation tolerance of the contact patch
-  bool hasForce[3];        ///< If an element is true, that component of force is measured
-  Vector3 fVariance;       ///< Estimated variance of the sensor
-
-  bool contact;            ///< Measurement: true if contact has been made
-  Vector3 force;           ///< Measurement: the force magnitude
-};
-
-/** @ingroup Control
- * @brief Simulates a force-torque sensor mounted between a link and its
- * parent.
- * Can be configured to be up to 6DOF.
- */
-class ForceTorqueSensor : public SensorBase
-{
- public:
-  ForceTorqueSensor();
-  virtual const char* Type() const { return "ForceTorqueSensor"; }
-  virtual void Simulate(ControlledRobotSimulator* robot);
-  virtual void Reset();
-  virtual void MeasurementNames(vector<string>& names) const;
-  virtual void GetMeasurements(vector<double>& values) const;
-  virtual void SetMeasurements(const vector<double>& values);
-  virtual map<string,string> Settings() const;
-  virtual bool GetSetting(const string& name,string& str) const;
-  virtual bool SetSetting(const string& name,const string& str);
-
-  int link;                ///< The link on which the sensor is located (between link and parent)
-  Vector3 localPos;        ///< The position of the sensor, in the local frame
-  bool hasForce[3];        ///< true if force is measured along the given axis
-  bool hasMoment[3];       ///< true if moment is measured along the given axis
-  Vector3 fVariance, mVariance; ///< Estimated variance of the sensor
-
-  Vector3 f,m;             ///< Measurement: the force/moment at the given position, on the link (negative on the parent link)
-};
-
-/** @ingroup Control
- * @brief Simulates an accelerometer.
- */
-class Accelerometer : public SensorBase
-{
- public:
-  Accelerometer();
-  virtual const char* Type() const { return "Accelerometer"; }
-  virtual void Simulate(ControlledRobotSimulator* robot);
-  virtual void Advance(Real dt);
-  virtual void Reset();
-  virtual bool ReadState(File& f);
-  virtual bool WriteState(File& f) const;
-  virtual void MeasurementNames(vector<string>& names) const;
-  virtual void GetMeasurements(vector<double>& values) const;
-  virtual void SetMeasurements(const vector<double>& values);
-  virtual map<string,string> Settings() const;
-  virtual bool GetSetting(const string& name,string& str) const;
-  virtual bool SetSetting(const string& name,const string& str);
-
-  int link;
-  RigidTransform Tsensor;  ///< Position of unit on link
-  bool hasAxis[3];         ///< true if accel is measured along the given axis
-  Vector3 accelVariance;   ///< Estimated variances of the sensor
-
-  Vector3 accel;           ///< Measurement: acceleration value
-
-  Real last_dt;            ///< Temporary: needed to derive accel from ODE
-  Vector3 last_v;          ///< Temporary: needed to derive accel from ODE
-};
-
-/** @ingroup Control
- * @brief Simulates a tilt sensor that measures the angle of
- * a reference direction about certain axes.
- */
-class TiltSensor : public SensorBase
-{
- public:
-  TiltSensor();
-  virtual const char* Type() const { return "TiltSensor"; }
-  virtual void Simulate(ControlledRobotSimulator* robot);
-  virtual void Advance(Real dt);
-  virtual void Reset();
-  virtual bool ReadState(File& f);
-  virtual bool WriteState(File& f) const;
-  virtual void MeasurementNames(vector<string>& names) const;
-  virtual void GetMeasurements(vector<double>& values) const;
-  virtual void SetMeasurements(const vector<double>& values);
-  virtual map<string,string> Settings() const;
-  virtual bool GetSetting(const string& name,string& str) const;
-  virtual bool SetSetting(const string& name,const string& str);
-
-  int link;
-  Vector3 referenceDir;
-  Matrix3 Rsensor;  ///< Position of unit on link
-  bool hasAxis[3];  ///< true if tilt is measured on the x, y, z axes
-  Vector3 resolution,variance;
-  bool hasVelocity;
-
-  Vector3 alocal,wlocal;
+  double rate;
 };
 
 
-/** @ingroup Control
- * @brief Simulates a gyroscope.
- */
-class GyroSensor : public SensorBase
-{
- public:
-  GyroSensor();
-  virtual const char* Type() const { return "GyroSensor"; }
-  virtual void Simulate(ControlledRobotSimulator* robot);
-  virtual void Reset();
-  virtual void Advance(Real dt);
-  virtual bool ReadState(File& f);
-  virtual bool WriteState(File& f) const;
-  virtual void MeasurementNames(vector<string>& names) const;
-  virtual void GetMeasurements(vector<double>& values) const;
-  virtual void SetMeasurements(const vector<double>& values);
-  virtual map<string,string> Settings() const;
-  virtual bool GetSetting(const string& name,string& str) const;
-  virtual bool SetSetting(const string& name,const string& str);
-
-  int link;                ///< The link on which the sensor is located
-  bool hasAngAccel;        ///< True if angular accel is directly measured
-  bool hasAngVel;          ///< True if angular velocity is directly measured
-  bool hasRotation;        ///< True if rotation is directly measured
-  Matrix3 angAccelVariance;///< The variance associated with the measurement
-  Matrix3 angVelVariance;  ///< The variance associated with the measurement
-  Matrix3 rotationVariance;///< The variance associated with the measurement
-
-  Vector3 angAccel;        ///< Measurement: the angular accel reading
-  Vector3 angVel;          ///< Measurement: the angular velocity reading
-  Matrix3 rotation;        ///< Measurement: the rotation matrix reading
-
-  Real last_dt;            ///< Temporary: needed to derive accel from ODE
-  Vector3 last_w;          ///< Temporary: needed to derive accel from ODE
-};
-
-/** @ingroup Control
- * @brief An inertial measurement unit.  May provide all or some of a 
- * rigid body's state.
- */
-class IMUSensor : public SensorBase
-{
- public:
-  IMUSensor();
-  virtual const char* Type() const { return "IMUSensor"; }
-  virtual void Simulate(ControlledRobotSimulator* robot);
-  virtual void Advance(Real dt);
-  virtual void Reset();
-  virtual void MeasurementNames(vector<string>& names) const;
-  virtual void GetMeasurements(vector<double>& values) const;
-  virtual void SetMeasurements(const vector<double>& values);
-  virtual map<string,string> Settings() const;
-  virtual bool GetSetting(const string& name,string& str) const;
-  virtual bool SetSetting(const string& name,const string& str);
-
-  Accelerometer accelerometer;
-  GyroSensor gyro;
-  Vector3 accel,velocity,translation;
-  Vector3 angAccel,angVel;
-  Matrix3 rotation;
-};
-
-/** @ingroup Control
- * @brief An exponentially smoothed "piggyback" filter.
- */
-class FilteredSensor : public SensorBase
-{
- public:
-  FilteredSensor();
-  virtual const char* Type() const { return "FilteredSensor"; }
-  virtual void Simulate(ControlledRobotSimulator* robot);
-  virtual void Advance(Real dt);
-  virtual void Reset();
-  virtual void MeasurementNames(vector<string>& names) const;
-  virtual void GetMeasurements(vector<double>& values) const;
-  virtual void SetMeasurements(const vector<double>& values);
-  virtual map<string,string> Settings() const;
-  virtual bool GetSetting(const string& name,string& str) const;
-  virtual bool SetSetting(const string& name,const string& str);
-
-  SmartPointer<SensorBase> sensor;
-  vector<double> measurements;
-  Real smoothing;
-};
 
 
 /** @ingroup Control
  * @brief A set of sensors for the robot.
  *
  * Accepts saving/loading to XML format.
+ *
+ * MakeDefault first looks in the robot->properties["sensors"]
+ * element to load an XML file.  If this fails, then it will
+ * add joint position and joint velocity sensors to the robot.
  */
 class RobotSensors
 {
  public:
+  void MakeDefault(Robot* robot);
+  bool LoadSettings(const char* fn);
+  bool SaveSettings(const char* fn);
   bool LoadSettings(TiXmlElement* in);
   void SaveSettings(TiXmlElement* out);
   bool LoadMeasurements(TiXmlElement* in);
@@ -341,6 +103,8 @@ class RobotSensors
 
   vector<SmartPointer<SensorBase> > sensors;
 };
+
+
 
 template <class T>
 void RobotSensors::GetTypedSensors(vector<T*>& _sensors)
