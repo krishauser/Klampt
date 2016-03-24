@@ -6,7 +6,8 @@ _GLUTAvailable = False
 class GLPluginBase:
     """Users can add their own hooks into the visualizer by overloading this
     class's methods and calling setPlugin.  Each method should return True
-    if the user event was processed."""
+    if the user event was processed.  A return value of True stops cascading
+    events to parent."""
     def __init__(self):
         self.window = None
         self.width = 100
