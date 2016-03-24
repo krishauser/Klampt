@@ -515,6 +515,8 @@ void ODESimulator::Step(Real dt)
   		    printf("ODESimulation: Rollback rejected because timestep %g below minimum threshold\n",timestep);
           //getchar();
 
+          //TODO: DEBUG THIS PRINTOUT STUFF -- it changes the state of the adaptive time stepper
+          /*
           //TEMP: print out remaining configuration
           printf("POST TINY STEP CONFIGURATION:\n");
           PrintStatus(this,concernedObjects,"Concerned objects after step","had");
@@ -544,12 +546,23 @@ void ODESimulator::Step(Real dt)
             else
               printf("%s %s margin %g\n",ObjectName(concernedObjects[i].first).c_str(),ObjectName(concernedObjects[i].second).c_str(),marginsRemaining[concernedObjects[i]]);
           }
-          getchar();
 
           temp.Seek(0,FILESEEKSTART);
           ReadState(temp);
           DetectCollisions();
           GetCurrentCollisionStatus(this,marginsRemaining,concernedObjects);
+
+          printf("DOUBLE CHECKING THATPOST TINY STEP CONFIGURATION RESTORED:\n");
+          PrintStatus(this,concernedObjects,"Concerned objects after step","had");
+          for(size_t i=0;i<concernedObjects.size();i++) {
+            if(marginsRemaining.count(concernedObjects[i]) == 0)
+              printf("%s %s not even close\n",ObjectName(concernedObjects[i].first).c_str(),ObjectName(concernedObjects[i].second).c_str());
+            else
+              printf("%s %s margin %g\n",ObjectName(concernedObjects[i].first).c_str(),ObjectName(concernedObjects[i].second).c_str(),marginsRemaining[concernedObjects[i]]);
+          }
+          printf("Press enter to continue...\n");
+          getchar();
+          */
 
           rollback = false;
   		  }

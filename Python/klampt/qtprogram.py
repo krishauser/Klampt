@@ -396,49 +396,66 @@ class GLRealtimeProgram(GLNavigationProgram):
 class GLPluginProgram(GLRealtimeProgram):
     """This base class should be used with a GLPluginBase object to handle the
     GUI functionality (see glcommon.py.  Call setPlugin() on this object to set
-    the currently used plugin."""
+    the currently used plugin.  pushPlugin()/popPlugin() can also be used to
+    set a hierarchy of plugins."""
     def __init__(self,name="GLWidget"):
         GLRealtimeProgram.__init__(self,name)
-        self.iface = None
-    def setPlugin(self,iface):
-        if self.iface:
-            self.iface.window = None
-        self.iface = iface
-        if iface:
-            iface.window = self
-            iface.reshapefunc(self.width,self.height)
+        self.plugins = []
+    def setPlugin(self,plugin):
+        for plugin in self.plugins:
+            plugin.window = None
+        self.plugins = []
+        if plugin:
+            self.pushPlugin(plugin)
+    def pushPlugin(self,plugin):
+        self.plugins.append(plugin)
+        plugin.window = self
+        plugin.reshapefunc(self.width,self.height)
         self.refresh()
+    def popPlugin(self):
+        if len(self.plugins)==0: return None
+        res = self.plugins[-1]
+        self.plugins.pop(-1)
+        res.window = None
+        return res
     def initialize(self):
-        if self.iface: self.iface.initialize()
+        for plugin in self.plugins:
+            plugin.initialize()
         GLRealtimeProgram.initialize(self)
     def reshapefunc(self,w,h):
-        if self.iface==None or not self.iface.reshapefunc(w,h):
-            GLRealtimeProgram.reshapefunc(self,w,h)
+        for plugin in self.plugins[::-1]:
+            if plugin.reshapefunc(w,h): return
+        GLRealtimeProgram.reshapefunc(self,w,h)
     def keyboardfunc(self,c,x,y):
-        if self.iface==None or not self.iface.keyboardfunc(c,x,y):
-            GLRealtimeProgram.keyboardfunc(self,c,x,y)
+        for plugin in self.plugins[::-1]:
+            if plugin.keyboardfunc(c,x,y): return
+        GLRealtimeProgram.keyboardfunc(self,c,x,y)
     def keyboardupfunc(self,c,x,y):
-        if self.iface==None or not self.iface.keyboardupfunc(c,x,y):
-            GLRealtimeProgram.keyboardupfunc(self,c,x,y)
+        for plugin in self.plugins[::-1]:
+            if plugin.keyboardupfunc(c,x,y): return
+        GLRealtimeProgram.keyboardupfunc(self,c,x,y)
     def specialfunc(self,c,x,y):
-        if self.iface==None or not self.iface.specialfunc(c,x,y):
-            GLRealtimeProgram.specialfunc(self,c,x,y)
+        for plugin in self.plugins[::-1]:
+            if plugin.specialfunc(c,x,y): return
+        GLRealtimeProgram.specialfunc(self,c,x,y)
     def specialupfunc(self,c,x,y):
-        if self.iface==None or not self.iface.specialupfunc(c,x,y):
-            GLRealtimeProgram.specialupfunc(self,c,x,y)
+        for plugin in self.plugins[::-1]:
+            if plugin.specialupfunc(c,x,y): return
+        GLRealtimeProgram.specialupfunc(self,c,x,y)
     def motionfunc(self,x,y,dx,dy):
-        if self.iface==None or not self.iface.motionfunc(x,y,dx,dy):
-            GLRealtimeProgram.motionfunc(self,x,y,dx,dy)
+        for plugin in self.plugins[::-1]:
+            if plugin.motionfunc(x,y,dx,dy): return
     def mousefunc(self,button,state,x,y):
-        if self.iface==None or not self.iface.mousefunc(button,state,x,y):
-            GLRealtimeProgram.mousefunc(self,button,state,x,y)
+        for plugin in self.plugins[::-1]:
+            if plugin.mousefunc(button,state,x,y): return
+        GLRealtimeProgram.mousefunc(self,button,state,x,y)
     def idlefunc(self):
-        if self.iface!=None: self.iface.idlefunc()
+        for plugin in self.plugins:
+            if plugin.idlefunc(): return
         GLRealtimeProgram.idlefunc(self)
     def display(self):
-        if self.iface!=None:
-            self.iface.display()
+        for plugin in self.plugins:
+            if plugin.display(): return
     def display_screen(self):
-        if self.iface!=None:
-            self.iface.display_screen()
-
+        for plugin in self.plugins:
+            if plugin.display_screen(): return

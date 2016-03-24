@@ -262,7 +262,9 @@ class RobotModel
   ///Returns true if the robot is in self collision (faster than manual testing)
   bool selfCollides();
   ///Draws the robot geometry. If keepAppearance=true, the current appearance is honored.
-  ///Otherwise, only the raw geometry is drawn.
+  ///Otherwise, only the raw geometry is drawn.  PERFORMANCE WARNING: if keepAppearance is
+  ///false, then this does not properly reuse OpenGL display lists.  A better approach
+  ///to changing the robot's appearances is to set the link Appearance's directly.
   void drawGL(bool keepAppearance=true);
 
   int world;
@@ -272,7 +274,7 @@ class RobotModel
 
 /** @brief A rigid movable object.
  *
- * State is retrieved/set using get/setTransform.  No velocities are stored.
+ * State is retrieved/set using get/setTransform.  Note: no velocities are stored.
  */
 class RigidObjectModel
 {
@@ -288,6 +290,10 @@ class RigidObjectModel
   void setContactParameters(const ContactParameters& params);
   void getTransform(double out[9],double out2[3]);
   void setTransform(const double R[9],const double t[3]);
+  ///Draws the object's geometry. If keepAppearance=true, the current appearance is honored.
+  ///Otherwise, only the raw geometry is drawn.  PERFORMANCE WARNING: if keepAppearance is
+  ///false, then this does not properly reuse OpenGL display lists.  A better approach
+  ///to changing object's Appearance directly.
   void drawGL(bool keepAppearance=true);
 
   int world;
@@ -306,6 +312,10 @@ class TerrainModel
   Geometry3D geometry();
   Appearance appearance();
   void setFriction(double friction);
+  ///Draws the object's geometry. If keepAppearance=true, the current appearance is honored.
+  ///Otherwise, only the raw geometry is drawn.  PERFORMANCE WARNING: if keepAppearance is
+  ///false, then this does not properly reuse OpenGL display lists.  A better approach
+  ///to changing object's Appearance directly.
   void drawGL(bool keepAppearance=true);
 
   int world;
@@ -408,7 +418,7 @@ class WorldModel
   Geometry3D geometry(int id);
   ///Retrieves an appearance for a given element ID
   Appearance appearance(int id);
-  ///Draws the entire world
+  ///Draws the entire world using OpenGL
   void drawGL();
   ///If geometry loading is set to false, then only the kinematics are loaded from
   ///disk, and no geometry / visualization / collision detection structures will be
