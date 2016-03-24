@@ -712,11 +712,10 @@ class VisAppearance:
                         oldAppearance = [robot.link(i).appearance().clone() for i in xrange(robot.numLinks())]
                         for i in xrange(robot.numLinks()):
                             robot.link(i).appearance().set(self.customAppearance)
-
                     oldconfig = robot.getConfig()
                     robot.setConfig(item)
-                    for i in xrange(robot.numLinks()):
-                        robot.link(i).drawGL()
+                    robot.drawGL()
+                    robot.setConfig(oldconfig)
                     if not self.useDefaultAppearance:
                         for (i,app) in enumerate(oldAppearance):
                             robot.link(i).appearance().set(app)
@@ -932,7 +931,7 @@ if glcommon._PyQtAvailable or glcommon._GLUTAvailable:
                 elif glcommon._PyQtAvailable:
                     glColor3f(0,0,0)
                     glDisable(GL_DEPTH_TEST)
-                    self.widget.renderText(point[0],point[1],point[2],text)
+                    self.window.renderText(point[0],point[1],point[2],text)
                     glEnable(GL_DEPTH_TEST)
                 point = vectorops.add(point,[0,0,-0.05])
 

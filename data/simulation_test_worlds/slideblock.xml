@@ -2,7 +2,7 @@
 <!-- test of siding on low-friction surfaces with different meshing resolutions- high resolutions lead to some extra friction artifacts -->
 <world>
   <terrain file="../terrains/plane.tri"  translation="0 -5 0" />
-  <terrain file="../terrains/plane_10.tri"  translation="0 5 0" />
+  <terrain file="plane_10.tri"  translation="0 5 0" />
 
   <rigidObject name="block"  position="0 -0.2 0.0530000">
      <geometry mesh="../objects/cube.tri" scale="0.100000 0.100000 0.100000" translation="-0.050000 -0.050000 -0.050000" />

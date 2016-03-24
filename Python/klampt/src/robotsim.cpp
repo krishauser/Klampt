@@ -5,6 +5,7 @@
 #include "Control/Command.h"
 #include "Control/PathController.h"
 #include "Control/FeedforwardController.h"
+#include "Control/LoggingController.h"
 #include "Simulation/WorldSimulation.h"
 #include "Modeling/Interpolate.h"
 #include "IO/XmlWorld.h"

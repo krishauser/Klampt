@@ -94,6 +94,7 @@ void RobotTestBackend::RenderWorld()
     GLColor highlight(1,1,0);
     GLColor driven(1,0.5,0);
     GLColor colliding(1,0,0);
+    GLColor blue(0,0,1);
     viewRobot.RestoreAppearance();
     viewRobot.PushAppearance();
     for(size_t i=0;i<robot->links.size();i++) {
@@ -106,9 +107,8 @@ void RobotTestBackend::RenderWorld()
       if(draw_self_collision_tests) {
 	//draw a little blue
     	if(robot->selfCollisions(i,cur_link) || robot->selfCollisions(cur_link,i) )  {
-	  GLDraw::GeometryAppearance *app  = robot->geomManagers[i].Appearance();
-	  app->faceColor[2] = (1.0+app->faceColor[2])*0.5;
-	  app->vertexColor[2] = (1.0+app->vertexColor[2])*0.5;
+	  GLDraw::GeometryAppearance &app  = viewRobot.Appearance(i);
+    app.ModulateColor(blue,0.5);
 	}
       }
     }
