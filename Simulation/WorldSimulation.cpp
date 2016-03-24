@@ -414,14 +414,14 @@ void WorldSimulation::Advance(Real dt)
   for(size_t i=0;i<hooks.size();i++) {
     if(hooks[i]->autokill) {
       if(!anyKilled) 
-	newhooks.insert(newhooks.end(),hooks.begin(),hooks.begin()+i);
-      else 
-	anyKilled = true;
+        newhooks.insert(newhooks.end(),hooks.begin(),hooks.begin()+i);
+      anyKilled = true;
     }
     else if(anyKilled) newhooks.push_back(hooks[i]);
   }
-  if(anyKilled)
+  if(anyKilled) {
     swap(hooks,newhooks);
+  }
   /*
   //convert sums to means
   for(ContactFeedbackMap::iterator i=contactFeedback.begin();i!=contactFeedback.end();i++) {
