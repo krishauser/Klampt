@@ -180,7 +180,7 @@ class ClosedLoopRobotCSpace(RobotCSpace):
     def closedLoop(self,tol=None):
         """Returns true if the closed loop constraint has been met at the
         robot's current configuration."""
-        e = self.solver.getError()
+        e = self.solver.getResidual()
         if tol==None: tol = self.tol
         return max(abs(ei) for ei in e) <= tol
 
