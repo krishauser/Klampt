@@ -345,121 +345,234 @@ void ODESimulator::Step(Real dt)
     //    //line 10
     //13. step(dt)
     //14. lastdt = dt
-	if(lastStateTimestep > 0) {
-		timestep=lastStateTimestep;
-		Real validTime = -lastStateTimestep, desiredTime = 0;
-		bool didRollback = false;
-		while(true) {
-		  gContacts.clear();
-		  DetectCollisions();
-	#if DO_TIMING
-		  collisionTime += timer.ElapsedTime();
-		  timer.Reset();
-	#endif // DO_TIMING
-		  //determine whether to rollback
-		  bool rollback = false;
-		  set<pair<ODEObjectID,ODEObjectID> > penetrating;
-		  for(list<ODEContactResult>::iterator i=gContacts.begin();i!=gContacts.end();i++) {
-		    pair<ODEObjectID,ODEObjectID> collpair(GeomDataToObjectID(dGeomGetData(i->o1)),GeomDataToObjectID(dGeomGetData(i->o2)));
-		    //if two bodies had overlap on the prior timestep, don't
-		    //keep rolling back
-		    if(i->meshOverlap) { 
-		      if(lastPenetrating.count(collpair) == 0) {
-			if(!didRollback) {
-			  string id1,id2;
-			  if(collpair.first.IsEnv()) id1 = "terrain";
-			  if(collpair.first.IsRigidObject()) id1 = objects[collpair.first.index]->obj.name;
-			  if(collpair.first.IsRobot()) id1 = robots[collpair.first.index]->robot.LinkName(collpair.first.bodyIndex);
-			  if(collpair.second.IsEnv()) id2 = "terrain";
-			  if(collpair.second.IsRigidObject()) id2 = objects[collpair.second.index]->obj.name;
-			  if(collpair.second.IsRobot()) id2 = robots[collpair.second.index]->robot.LinkName(collpair.second.bodyIndex);
-			  printf("ODESimulation: rolling back due to new penetration between bodies %s and %s\n",id1.c_str(),id2.c_str());
-			}
-			rollback = true;
-		      }
-		      penetrating.insert(collpair);
-		    }
-		  }
-		  if(rollback && !lastState.IsOpen()) {
-		printf("ODESimulation: Rollback rejected because last state not saved\n");
-		rollback = false;
-		  }
-		  if(rollback && timestep < 1e-6) {
-		    printf("ODESimulation: Rollback rejected because timestep %g below minimum threshold\n",timestep);
-		rollback = false;
-		  }
-	
-		  if(rollback) {
-		printf("ODESimulation: Rolling back, time step halved to %g\n",timestep*0.5);
-		didRollback = true;
-		lastState.Seek(0,FILESEEKSTART);
-		ReadState(lastState);
-		timestep *= 0.5;
-		  }
-		  else {
-		//accept step
-		lastState.Close();
-		bool res = lastState.OpenData(FILEREAD | FILEWRITE);
-		Assert(res);
-		Assert(lastState.IsOpen());
-		WriteState(lastState);
-		lastPenetrating = penetrating;
+    vector<CollisionPair > concernedObjects;
+  	if(lastStateTimestep > 0) {
+  		timestep=lastStateTimestep;
+  		Real validTime = -lastStateTimestep, desiredTime = 0;
+  		bool didRollback = false;
+  		while(true) {
+  		  DetectCollisions();
+  	#if DO_TIMING
+  		  collisionTime += timer.ElapsedTime();
+  		  timer.Reset();
+  	#endif // DO_TIMING
+  		  //determine whether to rollback
+        bool rollback = false;
+        map<CollisionPair,double> marginsRemaining;
+        vector<CollisionPair > newConcernedObjects;
+        GetCurrentCollisionStatus(this,marginsRemaining,newConcernedObjects);
+        rollback = !newConcernedObjects.empty();
+        for(size_t i=0;i<newConcernedObjects.size();i++) {
+          const CollisionPair& collpair = newConcernedObjects[i];
+          if(marginsRemaining[collpair] == 0) {
+            if(!didRollback) {
+              string id1=ObjectName(collpair.first),id2=ObjectName(collpair.second);
+              printf("ODESimulation: rolling back due to new penetration between bodies %s and %s\n",id1.c_str(),id2.c_str());
+              if(lastMarginsRemaining.count(collpair) == 0)
+                printf("  no previous contact\n");
+              else
+                printf("  previously had depth %g\n",lastMarginsRemaining[collpair]);
+            }
+            //PrintStatus(this,collpair,"Colliding objects","found collision at");
+          }
+          else {
+            if(true || !didRollback) {
+              string id1=ObjectName(collpair.first),id2=ObjectName(collpair.second);
+              printf("ODESimulation: rolling back due to increasing penetration between bodies %s and %s\n",id1.c_str(),id2.c_str());
+              if(lastMarginsRemaining.count(collpair) == 0)
+                printf("  margin shrank from no-contact to %g\n",marginsRemaining[collpair]);
+              else
+                printf("  margin shrank from %g to %g\n",lastMarginsRemaining[collpair],marginsRemaining[collpair]);
+            }
+          }
+        }
+  		  if(rollback && !lastState.IsOpen()) {
+          printf("ODESimulation: Rollback rejected because last state not saved\n");
+          getchar();
+          rollback = false;
+  		  }
+  		  if(rollback && timestep < 1e-6) {
+  		    printf("ODESimulation: Rollback rejected because timestep %g below minimum threshold\n",timestep);
+          //getchar();
 
-		validTime += timestep;
-		timestep = desiredTime-validTime;
-		  }
-		  if(validTime >= desiredTime) break;
-		  StepDynamics(timestep);
-		}
-		if(didRollback) {
-		  printf("ODESimulation: Adaptive time step done.\n");
-		}
-	}
-	else {
-		//first step
-		timestep=dt;
-		gContacts.clear();
-		DetectCollisions();
-	#if DO_TIMING
-		collisionTime += timer.ElapsedTime();
-		timer.Reset();
-	#endif // DO_TIMING
-		//determine whether to rollback
-		bool rollback = false;
-		set<pair<ODEObjectID,ODEObjectID> > penetrating;
-		for(list<ODEContactResult>::iterator i=gContacts.begin();i!=gContacts.end();i++) {
-		  pair<ODEObjectID,ODEObjectID> collpair(GeomDataToObjectID(dGeomGetData(i->o1)),GeomDataToObjectID(dGeomGetData(i->o2)));
-		  if(i->meshOverlap) { 
-		    rollback = true;
-		    penetrating.insert(collpair);
-		  }
-		}
-		if(rollback) {
-			printf("ODESimulation: Warning, initial state has underlying meshes overlapping\n");
-			for(set<pair<ODEObjectID,ODEObjectID> >::const_iterator i=penetrating.begin();i!=penetrating.end();i++) {
-			  pair<ODEObjectID,ODEObjectID> collpair = *i;
-			  string id1,id2;
-			  if(collpair.first.IsEnv()) id1 = "terrain";
-			  if(collpair.first.IsRigidObject()) id1 = objects[collpair.first.index]->obj.name;
-			  if(collpair.first.IsRobot()) id1 = robots[collpair.first.index]->robot.LinkName(collpair.first.bodyIndex);
-			  if(collpair.second.IsEnv()) id2 = "terrain";
-			  if(collpair.second.IsRigidObject()) id2 = objects[collpair.second.index]->obj.name;
-			  if(collpair.second.IsRobot()) id2 = robots[collpair.second.index]->robot.LinkName(collpair.second.bodyIndex);
-			  printf("  %s - %s\n",id1.c_str(),id2.c_str());
-			}
-			printf("Press enter to continue...\n");
-			getchar();
-			//NO ROLLBACK ON FIRST
-			rollback = false;
-		}
-		//save state
-		lastState.Close();
-		bool res = lastState.OpenData(FILEREAD | FILEWRITE);
-		Assert(res);
-		Assert(lastState.IsOpen());
-		WriteState(lastState);
-		lastPenetrating = penetrating;
-	}
+          //TODO: DEBUG THIS PRINTOUT STUFF -- it changes the state of the adaptive time stepper
+          /*
+          //TEMP: print out remaining configuration
+          printf("POST TINY STEP CONFIGURATION:\n");
+          PrintStatus(this,concernedObjects,"Concerned objects after step","had");
+          for(size_t i=0;i<concernedObjects.size();i++) {
+            if(marginsRemaining.count(concernedObjects[i]) == 0)
+              printf("%s %s not even close\n",ObjectName(concernedObjects[i].first).c_str(),ObjectName(concernedObjects[i].second).c_str());
+            else
+              printf("%s %s margin %g\n",ObjectName(concernedObjects[i].first).c_str(),ObjectName(concernedObjects[i].second).c_str(),marginsRemaining[concernedObjects[i]]);
+          }
+
+          //TEMP: print out starting configuration (make sure to save current state to temp then load it back)
+          File temp;
+          bool res = temp.OpenData(FILEREAD | FILEWRITE);
+          Assert(res);
+          Assert(temp.IsOpen());
+          WriteState(temp);
+          
+          lastState.Seek(0,FILESEEKSTART);
+          ReadState(lastState);
+          printf("STARTING CONFIGURATION:\n");
+          PrintStatus(this,concernedObjects,"Concerned objects originally","had");
+          DetectCollisions();
+          GetCurrentCollisionStatus(this,marginsRemaining,newConcernedObjects);
+          for(size_t i=0;i<concernedObjects.size();i++) {
+            if(marginsRemaining.count(concernedObjects[i]) == 0)
+              printf("%s %s not even close\n",ObjectName(concernedObjects[i].first).c_str(),ObjectName(concernedObjects[i].second).c_str());
+            else
+              printf("%s %s margin %g\n",ObjectName(concernedObjects[i].first).c_str(),ObjectName(concernedObjects[i].second).c_str(),marginsRemaining[concernedObjects[i]]);
+          }
+
+          temp.Seek(0,FILESEEKSTART);
+          ReadState(temp);
+          DetectCollisions();
+          GetCurrentCollisionStatus(this,marginsRemaining,concernedObjects);
+
+          printf("DOUBLE CHECKING THATPOST TINY STEP CONFIGURATION RESTORED:\n");
+          PrintStatus(this,concernedObjects,"Concerned objects after step","had");
+          for(size_t i=0;i<concernedObjects.size();i++) {
+            if(marginsRemaining.count(concernedObjects[i]) == 0)
+              printf("%s %s not even close\n",ObjectName(concernedObjects[i].first).c_str(),ObjectName(concernedObjects[i].second).c_str());
+            else
+              printf("%s %s margin %g\n",ObjectName(concernedObjects[i].first).c_str(),ObjectName(concernedObjects[i].second).c_str(),marginsRemaining[concernedObjects[i]]);
+          }
+          printf("Press enter to continue...\n");
+          getchar();
+          */
+
+          rollback = false;
+  		  }
+  	
+  		  if(rollback) {
+          printf("ODESimulation: Rolling back at time %g, time step halved to %g\n",simTime,timestep*0.5);
+          //PrintStatus(this,concernedObjects,"Backing up colliding objects","from");
+          
+          didRollback = true;
+          lastState.Seek(0,FILESEEKSTART);
+          ReadState(lastState);
+          timestep *= 0.5;
+
+          //PrintStatus(this,concernedObjects,"Backed up colliding objects","to previous");
+          concernedObjects = newConcernedObjects;
+          Assert(concernedObjects.size() > 0);
+
+          //TEMP: verify collision status wasn't changed by reading last state?
+          DetectCollisions();
+          GetCurrentCollisionStatus(this,marginsRemaining,newConcernedObjects);
+          /*
+          if(marginsRemaining != lastMarginsRemaining) {
+            printf("ODESimulation: Warning, difference between rolled-back re-detected margins and previous margins?\n");
+            printf("Press enter to continue\n");
+            getchar();
+          }
+          */
+  		  }
+  		  else {
+          //accept prior step
+          lastState.Close();
+          bool res = lastState.OpenData(FILEREAD | FILEWRITE);
+          Assert(res);
+          Assert(lastState.IsOpen());
+          WriteState(lastState);
+          for(size_t i=0;i<concernedObjects.size();i++) {
+            if(marginsRemaining.count(concernedObjects[i]) == 0) {
+              printf("ODESimulation: collision %s - %s erased entirely\n",ObjectName(concernedObjects[i].first).c_str(),ObjectName(concernedObjects[i].second).c_str());
+            }
+            else {
+              double d=marginsRemaining[concernedObjects[i]];
+              if(lastMarginsRemaining.count(concernedObjects[i])) 
+                printf("ODESimulation: collision %s - %s changed from no contact to depth %g\n",ObjectName(concernedObjects[i].first).c_str(),ObjectName(concernedObjects[i].second).c_str(),d);
+              else
+                printf("ODESimulation: collision %s - %s changed from depth %g to depth %g\n",ObjectName(concernedObjects[i].first).c_str(),ObjectName(concernedObjects[i].second).c_str(),lastMarginsRemaining[concernedObjects[i]],d);
+            }
+          }
+          if(didRollback)
+            printf("ODESimulation: Adaptive sub-step of size %g is valid, arriving at time %g.\n",timestep,simTime);
+          //if(didRollback) {
+          //  PrintStatus(this,concernedObjects,"Colliding objects","now at");
+          //}
+          concernedObjects.resize(0);
+          swap(lastMarginsRemaining,marginsRemaining);
+       
+          validTime += timestep;
+          simTime += timestep;
+          timestep = desiredTime-validTime;
+          if(didRollback)
+            printf("   reset time step to %g.\n",timestep);
+          didRollback = false;
+  		  }
+  		  if(validTime >= desiredTime) break;
+
+        //heres where we make the tentative step, to be checked for collisions at the start of the next loop
+        //if(didRollback) printf("Trying step of size %g\n",timestep);
+        //NOW set up the contact response for the previous timestep
+        SetupContactResponse();
+        //PrintStatus(this,concernedObjects,"Colliding objects","pre-step");
+  		  StepDynamics(timestep);
+        //PrintStatus(this,concernedObjects,"Colliding objects","post-step");
+  		}
+  		if(didRollback) {
+  		  printf("ODESimulation: Adaptive time step done, arrived at time %g.\n",simTime);
+  		}
+  	}
+  	else {
+  		//first step
+  		timestep=dt;
+  		DetectCollisions();
+  	#if DO_TIMING
+  		collisionTime += timer.ElapsedTime();
+  		timer.Reset();
+  	#endif // DO_TIMING
+  		//determine whether to rollback
+  		bool rollback = false;
+  		map<CollisionPair,double> marginsRemaining;
+  		for(list<ODEContactResult>::iterator i=gContacts.begin();i!=gContacts.end();i++) {
+  		  CollisionPair collpair(GeomDataToObjectID(dGeomGetData(i->o1)),GeomDataToObjectID(dGeomGetData(i->o2)));
+  		  if(i->meshOverlap) { 
+  		    rollback = true;
+  		    marginsRemaining[collpair] = 0;
+  		  }
+        else {
+          //no overlap, still we should consider rolling back if the remaining margin drops significantly 
+          //get the closest pair of points
+          CustomGeometryData* g1 = dGetCustomGeometryData(i->o1);
+          CustomGeometryData* g2 = dGetCustomGeometryData(i->o2);
+          double margin = g1->outerMargin + g2->outerMargin;
+          double depth = 0;
+          for(size_t j=0;j<i->contacts.size();j++)
+            depth = Max(depth,i->contacts[j].depth);
+          marginsRemaining[collpair] = margin - depth;
+        }
+  		}
+  		if(rollback) {
+  			printf("ODESimulation: Warning, initial state has underlying meshes overlapping\n");
+  			for(map<CollisionPair,double>::const_iterator i=marginsRemaining.begin();i!=marginsRemaining.end();i++) {
+          if(i->second <= 0) {
+    			  CollisionPair collpair = i->first;
+            string id1=ObjectName(collpair.first),id2=ObjectName(collpair.second);
+            printf("  %s - %s\n",id1.c_str(),id2.c_str());
+          }
+  			}
+  			printf("Press enter to continue...\n");
+  			getchar();
+  			//NO ROLLBACK ON FIRST
+  			rollback = false;
+  		}
+      
+  		//save state
+  		lastState.Close();
+  		bool res = lastState.OpenData(FILEREAD | FILEWRITE);
+  		Assert(lastState.IsOpen());
+  		WriteState(lastState);
+  		lastMarginsRemaining = marginsRemaining;
+  	}
+    //do the prospective time step for the next call
+    timestep = dt;
+    SetupContactResponse();
     lastStateTimestep = dt;
     StepDynamics(dt);
   }
