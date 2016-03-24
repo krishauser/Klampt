@@ -1408,7 +1408,9 @@ bool ParabolicRamp1D::SolveMinAccel(Real endTime,Real vmax)
   if(pres && FuzzyEquals(endTime,p.ttotal,EpsilonT) && Abs(p.MaxVelocity()) <= vmax) {
     if(FuzzyEquals(p.Evaluate(endTime),x1,EpsilonX) && FuzzyEquals(p.Derivative(endTime),dx1,EpsilonV)) {
       a1 = p.a;
-      v = 0;
+      //calculate velocity at tswitch rather than using 0
+      //v = 0;
+      v = dx0 + p.a*endTime;
       //tswitch1 = tswitch2 = p.ttotal;
       //ttotal = p.ttotal;
       tswitch1 = tswitch2 = endTime;
@@ -1417,7 +1419,9 @@ bool ParabolicRamp1D::SolveMinAccel(Real endTime,Real vmax)
   }
   if(ppres && Abs(pp.MaxVelocity()) <= vmax && Abs(pp.a) < Abs(a1)) {
     a1 = pp.a;
-    v = 0;
+    //calculate velocity at tswitch rather than using 0
+    //v = 0;
+    v = dx0 + pp.a*pp.tswitch;
     tswitch1 = tswitch2 = pp.tswitch;
     ttotal = pp.ttotal;
   }
@@ -1442,7 +1446,9 @@ bool ParabolicRamp1D::SolveMinAccel(Real endTime,Real vmax)
       //some slight numerical error caused velocity to exceed maximum
       a1 = pp.a;
       a2 = -pp.a;
-      v = 0;
+      //calculate velocity at tswitch rather than using 0
+      //v = 0;
+      v = dx0 + a1*pp.tswitch;
       tswitch1 = tswitch2 = pp.tswitch;
       ttotal = pp.ttotal;
       if(IsValid()) return true;
@@ -1534,7 +1540,9 @@ bool ParabolicRamp1D::SolveMinTime(Real amax,Real vmax)
   if(pres && Abs(p.a) <= amax+EpsilonA && p.ttotal < ttotal) {
     if(Abs(p.a) <= amax) {
       a1 = p.a;
-      v = 0;
+      //calculate velocity at tswitch rather than using 0
+      //v = 0;
+      v = dx0 + p.a*p.ttotal;
       tswitch1 = tswitch2 = p.ttotal;
       ttotal = p.ttotal;
     }
@@ -1543,7 +1551,9 @@ bool ParabolicRamp1D::SolveMinTime(Real amax,Real vmax)
       p.a = Sign(p.a)*amax;
       if(FuzzyEquals(p.Evaluate(p.ttotal),x1,EpsilonX) && FuzzyEquals(p.Derivative(p.ttotal),dx1,EpsilonV)) {
 	a1 = p.a;
-	v = 0;
+	//calculate velocity at ttotal rather than using 0
+  //v = 0;
+  v = dx0 + p.a*p.ttotal;
 	tswitch1=tswitch2=p.ttotal;
 	ttotal = p.ttotal;
       }
@@ -1551,7 +1561,9 @@ bool ParabolicRamp1D::SolveMinTime(Real amax,Real vmax)
   }
   if(ppres && Abs(pp.MaxVelocity()) <= vmax && pp.ttotal < ttotal) {
     a1 = pp.a;
-    v = 0;
+    //calculate velocity at tswitch rather than using 0
+    //v = 0;
+    v = dx0 + pp.a*pp.tswitch;
     tswitch1 = tswitch2 = pp.tswitch;
     ttotal = pp.ttotal;
   }
@@ -1620,7 +1632,9 @@ bool ParabolicRamp1D::SolveMinTime2(Real amax,Real vmax,Real tLowerBound)
   if(pres && Abs(p.a) <= amax+EpsilonA && p.ttotal < ttotal && p.ttotal >= tLowerBound) {
     if(Abs(p.a) <= amax) {
       a1 = p.a;
-      v = 0;
+      //calculate velocity at tswitch rather than using 0
+      //v = 0;
+      v = dx0 + p.a*p.ttotal;
       tswitch1 = tswitch2 = p.ttotal;
       ttotal = p.ttotal;
     }
@@ -1629,7 +1643,9 @@ bool ParabolicRamp1D::SolveMinTime2(Real amax,Real vmax,Real tLowerBound)
       p.a = Sign(p.a)*amax;
       if(FuzzyEquals(p.Evaluate(p.ttotal),x1,EpsilonX) && FuzzyEquals(p.Derivative(p.ttotal),dx1,EpsilonV)) {
 	a1 = p.a;
-	v = 0;
+	//calculate velocity at tswitch rather than using 0
+  //v = 0;
+  v = dx0 + p.a*p.ttotal;
 	tswitch1=tswitch2=p.ttotal;
 	ttotal = p.ttotal;
       }
@@ -1637,7 +1653,9 @@ bool ParabolicRamp1D::SolveMinTime2(Real amax,Real vmax,Real tLowerBound)
   }
   if(ppres && Abs(pp.MaxVelocity()) <= vmax && pp.ttotal < ttotal) {
     a1 = pp.a;
-    v = 0;
+    //calculate velocity at tswitch rather than using 0
+    //v = 0;
+    v = dx0 + pp.a*pp.tswitch;
     tswitch1 = tswitch2 = pp.tswitch;
     ttotal = pp.ttotal;
   }
@@ -1699,7 +1717,9 @@ void ParabolicRamp1D::SolveBraking(Real amax)
   tswitch1 = 0;
   tswitch2 = 0;
   a1 = Sign(dx0)*amax;
-  v = 0;
+  //use initial velocity rather than 0
+  //v = 0;
+  v = dx0;
   a2 = -Sign(dx0)*amax;
   ttotal = Abs(dx0)/amax;
   x1 = x0 + dx0*ttotal + 0.5*Sqr(ttotal)*a2;
@@ -2545,7 +2565,9 @@ bool SolveMinAccelBounded(Real x0,Real v0,Real x1,Real v1,Real endTime,Real vmax
     temp[0].x1 = bx0;
     temp[0].dx1 = 0;
     temp[0].a1 = ba0;
-    temp[0].v = 0;
+    //use actual velocity at tswitch rather than 0
+    //temp[0].v = 0;
+    temp[0].v = v0 + bt0*ba0;
     temp[0].a2 = 0;
     temp[0].tswitch1 = bt0;
     temp[0].tswitch2 = bt0;
@@ -2584,7 +2606,9 @@ bool SolveMinAccelBounded(Real x0,Real v0,Real x1,Real v1,Real endTime,Real vmax
     temp[1].x1 = x1;
     temp[1].dx1 = v1;
     temp[1].a1 = ba1;
-    temp[1].v = 0;
+    //use actual velocity at tswitch rather than 0
+    //temp[1].v = 0;
+    temp[1].v = bt1*ba1;
     temp[1].a2 = 0;
     temp[1].tswitch1 = bt1;
     temp[1].tswitch2 = bt1;
@@ -2614,7 +2638,7 @@ bool SolveMinAccelBounded(Real x0,Real v0,Real x1,Real v1,Real endTime,Real vmax
       temp[0].x1 = x1;
       temp[0].dx1 = v1;
       temp[0].a1 = ba0;
-      temp[0].v = 0;
+      temp[0].v = v0;
       temp[0].a2 = ba1;
       temp[0].tswitch1 = bt0;
       temp[0].tswitch2 = endTime-bt1;
@@ -2636,7 +2660,9 @@ bool SolveMinAccelBounded(Real x0,Real v0,Real x1,Real v1,Real endTime,Real vmax
       temp[0].x1 = bx0;
       temp[0].dx1 = 0;
       temp[0].a1 = ba0;
-      temp[0].v = 0;
+      //calculate velocity at tswitch rather than using 0
+      //temp[0].v = 0;
+      temp[0].v = v0 + bt0*ba0;
       temp[0].a2 = 0;
       temp[0].tswitch1 = bt0;
       temp[0].tswitch2 = bt0;
@@ -2647,7 +2673,9 @@ bool SolveMinAccelBounded(Real x0,Real v0,Real x1,Real v1,Real endTime,Real vmax
       temp[2].x1 = x1;
       temp[2].dx1 = v1;
       temp[2].a1 = ba1;
-      temp[2].v = 0;
+      //calculate velocity at tswitch rather than using 0
+      //temp[2].v = 0;
+      temp[2].v = v1 + bt1*ba1;
       temp[2].a2 = 0;
       temp[2].tswitch1 = bt1;
       temp[2].tswitch2 = bt1;
