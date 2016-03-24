@@ -21,6 +21,11 @@ ManagedGeometry::~ManagedGeometry()
   RemoveFromCache();
 }
 
+bool ManagedGeometry::Empty() const
+{
+  return geometry == NULL || geometry->Empty();
+}
+
 SmartPointer<Geometry::AnyCollisionGeometry3D> ManagedGeometry::CreateEmpty()
 {
   RemoveFromCache();
@@ -211,7 +216,7 @@ void ManagedGeometry::OnGeometryChange()
      appearance->Set(*geometry);
 }
 
-ManagedGeometry::AppearancePtr ManagedGeometry::Appearance()
+ManagedGeometry::AppearancePtr ManagedGeometry::Appearance() const
 {
   return appearance; 
 }
