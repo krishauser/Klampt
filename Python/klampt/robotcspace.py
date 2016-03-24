@@ -139,20 +139,20 @@ class ClosedLoopRobotCSpace(RobotCSpace):
     """A closed loop cspace.  Allows one or more IK constraints to be
     maintained during the robot's motion."""
     def __init__(self,robot,iks,collider=None):
-        RobotCSpace.__init__self(robot,collider)
+        RobotCSpace.__init__(self,robot,collider)
         self.solver = robotsim.IKSolver(robot)
         if hasattr(iks,'__iter__'):
             for ik in iks:
                 self.solver.add(ik)
         else:
-            self.solver.add(ik)
+            self.solver.add(iks)
 
         #IK solve iterations
         self.maxIters = 100
         self.tol = 1e-3
 
         #adaptive checker
-        self.addFeasibleTest(lambda(x): self.closedLoop())
+        self.addFeasibleTest(lambda x: self.closedLoop(),'closed loop constraint')
 
     def sample(self):
         """Samples directly on the contact manifold"""
@@ -196,7 +196,7 @@ class ImplicitManifoldRobotCSpace(RobotCSpace):
         self.tol = 1e-3
 
         #adaptive checker
-        self.addFeasibleTest(lambda(x): self.onManifold(x))
+        self.addFeasibleTest(lambda x: self.onManifold(x),'implicit manifold constraint')
 
     def sample(self):
         """Samples directly on the contact manifold"""
