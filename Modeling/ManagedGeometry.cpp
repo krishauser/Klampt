@@ -232,7 +232,7 @@ bool ManagedGeometry::IsAppearanceShared() const
 
 void ManagedGeometry::SetUniqueAppearance()
 {
-  if(appearance) {
+  if(appearance && appearance.getRefCount() > 1) {
     appearance = new GLDraw::GeometryAppearance(*appearance);
   }
 }
