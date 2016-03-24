@@ -281,7 +281,7 @@ class Emulator:
                             range(handLinkIndex+7,handLinkIndex+10),
                             range(handLinkIndex+10,handLinkIndex+13)]
 
-        world = sim.getWorld()
+        world = sim.world
         #get the IDs of the gripper links 
         self.fingerids = [[world.robotLink(robotIndex,i).getID() for i in self.fingerlinks[f]] for f in range(3)]
         self.robotIndex = robotIndex

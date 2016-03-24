@@ -581,7 +581,8 @@ class VisAppearance:
         name = self.name
         #set appearance
         if not self.useDefaultAppearance and hasattr(item,'appearance'):
-            oldAppearance = item.appearance().clone()
+            if not hasattr(self,'oldAppearance'):
+                self.oldAppearance = item.appearance().clone()
             if self.customAppearance != None:
                 print "Changing appearance of",name
                 item.appearance().set(self.customAppearance)
@@ -711,11 +712,13 @@ class VisAppearance:
                         oldAppearance = [robot.link(i).appearance().clone() for i in xrange(robot.numLinks())]
                         for i in xrange(robot.numLinks()):
                             robot.link(i).appearance().set(self.customAppearance)
+
+                    oldconfig = robot.getConfig()
                     robot.setConfig(item)
                     for i in xrange(robot.numLinks()):
                         robot.link(i).drawGL()
                     if not self.useDefaultAppearance:
-                        for i,app in enumerate(oldAppearance):
+                        for (i,app) in enumerate(oldAppearance):
                             robot.link(i).appearance().set(app)
                 else:
                     print "Unable to draw Config's without a world"
@@ -869,7 +872,7 @@ class VisAppearance:
 
         #revert appearance
         if not self.useDefaultAppearance and hasattr(item,'appearance'):
-            item.appearance().set(oldAppearance)
+            item.appearance().set(self.oldAppearance)
 
 
 if glcommon._PyQtAvailable or glcommon._GLUTAvailable:

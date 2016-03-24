@@ -93,9 +93,9 @@ class Emulator:
         self.accelLimits = [360*math.pi/180,2080*math.pi/180]
         self.motorSpeeds = [0,0]
         #velocity locking gain
-        self.velocityLockGain = 0.1
+        self.velocityLockGain = 0.01
         #rolling friction
-        self.rollingFrictionCoeff = 0.1
+        self.rollingFrictionCoeff = 0.01
         #timestep
         self.dt = 0.01
     
