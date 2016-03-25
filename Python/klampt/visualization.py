@@ -87,17 +87,20 @@ def setPlugin(plugin):
     if _vis==None:
         print "Visualization disabled"
         return
-    if plugin  == None:
-        plugin = _vis
     _plugin = plugin
     if glcommon._PyQtAvailable:
         global _widget
         if _widget != None:
-            _widget.setPlugin(plugin)
+            #already running
+            _widget.setPlugin(_vis)
+            if plugin:
+                _widget.pushPlugin(plugin)
     elif glcommon._GLUTAvailable:
         global _app
         if _app != None:
-            _app.setPlugin(plugin)
+            _app.setPlugin(_vis)
+            if plugin:
+                _app.pushPlugin(plugin)
 
 def dialog():
     global _vis
@@ -581,7 +584,8 @@ class VisAppearance:
         name = self.name
         #set appearance
         if not self.useDefaultAppearance and hasattr(item,'appearance'):
-            oldAppearance = item.appearance().clone()
+            if not hasattr(self,'oldAppearance'):
+                self.oldAppearance = item.appearance().clone()
             if self.customAppearance != None:
                 print "Changing appearance of",name
                 item.appearance().set(self.customAppearance)
@@ -711,11 +715,12 @@ class VisAppearance:
                         oldAppearance = [robot.link(i).appearance().clone() for i in xrange(robot.numLinks())]
                         for i in xrange(robot.numLinks()):
                             robot.link(i).appearance().set(self.customAppearance)
+                    oldconfig = robot.getConfig()
                     robot.setConfig(item)
-                    for i in xrange(robot.numLinks()):
-                        robot.link(i).drawGL()
+                    robot.drawGL()
+                    robot.setConfig(oldconfig)
                     if not self.useDefaultAppearance:
-                        for i,app in enumerate(oldAppearance):
+                        for (i,app) in enumerate(oldAppearance):
                             robot.link(i).appearance().set(app)
                 else:
                     print "Unable to draw Config's without a world"
@@ -869,7 +874,7 @@ class VisAppearance:
 
         #revert appearance
         if not self.useDefaultAppearance and hasattr(item,'appearance'):
-            item.appearance().set(oldAppearance)
+            item.appearance().set(self.oldAppearance)
 
 
 if glcommon._PyQtAvailable or glcommon._GLUTAvailable:
@@ -929,7 +934,7 @@ if glcommon._PyQtAvailable or glcommon._GLUTAvailable:
                 elif glcommon._PyQtAvailable:
                     glColor3f(0,0,0)
                     glDisable(GL_DEPTH_TEST)
-                    self.widget.renderText(point[0],point[1],point[2],text)
+                    self.window.renderText(point[0],point[1],point[2],text)
                     glEnable(GL_DEPTH_TEST)
                 point = vectorops.add(point,[0,0,-0.05])
 
@@ -944,7 +949,7 @@ if glcommon._PyQtAvailable or glcommon._GLUTAvailable:
                 _globalLock.acquire()
                 self.animationTime += (self.t - oldt)
                 _globalLock.release()
-            return True
+            return False
 
     _vis = VisualizationPlugin()        
 
@@ -1002,10 +1007,9 @@ if glcommon._PyQtAvailable:
         _app = QApplication([_window_title])
         _widget = _BaseClass()
         _widget.initWindow()
-        if _plugin == None:
-            _widget.setPlugin(_vis)
-        else:
-            _widget.setPlugin(_plugin)
+        _widget.setPlugin(_vis)
+        if _plugin is not None:
+            _widget.pushPlugin(_plugin)
         #res = _app.exec_()
         res = None
         while not _quit:
@@ -1168,14 +1172,9 @@ elif glcommon._GLUTAvailable:
         _app = GLUTVisualization()
         #avoid calling _app.setPlugin, it calls refresh() which should not be
         #called until after GLUT is initialized on run()
-        if _plugin != None:
-            _app.iface = _plugin
-            _plugin.window = _app
-            #_app.setPlugin(_plugin)
-        else:
-            _app.iface = _vis
-            _vis.window = _app
-            #_app.setPlugin(_vis)
+        _app.setPlugin(_vis)
+        if _plugin is not None:
+            _app.pushPlugin(_plugin)
         _app.run()
         _app.setPlugin(None)
         print "Visualization thread closing..."

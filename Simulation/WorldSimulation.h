@@ -33,16 +33,23 @@ struct ContactFeedbackInfo
  * needs to be a WorldSimulationHook subclass and added to the
  * WorldSimulation.hooks member.
  *
+ * If the flag autokill = true, the hook is removed at the end of the
+ * Advance() call.
+ *
  * @sa ForceHook
+ * @sa LocalForceHook
+ * @sa WrenchHook
  * @sa SpringHook
  */
 class WorldSimulationHook
 {
  public:
+  WorldSimulationHook() : autokill(false) {}
   virtual ~WorldSimulationHook() {}
   virtual void Step(Real dt) {}
   virtual bool ReadState(File& f) { return true; }
   virtual bool WriteState(File& f) const { return true; }
+  bool autokill;
 };
 
 /** @brief A physical simulator for a RobotWorld.
@@ -127,6 +134,37 @@ class ForceHook : public WorldSimulationHook
 
   dBodyID body;
   Vector3 worldpt,f;
+};
+
+/** @brief A hook that adds a constant force in world coordinates to a point
+ * on a body given in local coordinates
+ */
+class LocalForceHook : public WorldSimulationHook
+{
+ public:
+  LocalForceHook(dBodyID body,const Vector3& localpt,const Vector3& f);
+  virtual void Step(Real dt);
+  virtual bool ReadState(File& f);
+  virtual bool WriteState(File& f) const;
+
+  dBodyID body;
+  Vector3 localpt,f;
+};
+
+
+/** @brief A hook that adds a constant wrench (force f and moment m) to
+ * the body
+ */
+class WrenchHook : public WorldSimulationHook
+{
+ public:
+  WrenchHook(dBodyID body,const Vector3& f,const Vector3& m);
+  virtual void Step(Real dt);
+  virtual bool ReadState(File& f);
+  virtual bool WriteState(File& f) const;
+
+  dBodyID body;
+  Vector3 f,m;
 };
 
 /** @brief A hook that acts as a Hookean spring to a given fixed target point.

@@ -153,7 +153,9 @@ class Geometry3D
 {
  public:
   Geometry3D();
+  Geometry3D(const Geometry3D&);
   ~Geometry3D();
+  const Geometry3D& operator = (const Geometry3D& rhs);
   ///Creates a standalone geometry from this geometry
   Geometry3D clone();
   ///Copies the geometry of the argument into this geometry.

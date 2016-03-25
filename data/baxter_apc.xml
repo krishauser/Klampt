@@ -6,15 +6,4 @@
     <display color="0.3 0.3 0.3" />
   </terrain>
   <rigidObject name="genuine_joe_stir_sticks" file="objects/genuine_joe_stir_sticks.pcd" translation="1.0 -0.2 1.6"/>
-
-
-  <simulation>
-    <robot index="0">
-       <sensors>
-          <JointPositionSensor name="q" />
-          <JointVelocitySensor name="dq" />
-          <DriverTorqueSensor name="torque" />
-       </sensors>
-    </robot>
-  </simulation>
 </world>

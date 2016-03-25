@@ -12,6 +12,12 @@ class RobotCSpace(AdaptiveCSpace):
     floating base or continuously rotating (spin) joints, you will need to
     overload the sample() method."""
     def __init__(self,robot,collider=None):
+        """Arguments:
+        - robot: the robot which should move.
+        - collider: optional: a robotcollide.WorldCollider instance containing
+          the world in which the robot lives.  Any ignored collisions will be
+          respected in the collision checker.
+        """
         AdaptiveCSpace.__init__(self)
         self.robot = robot
         self.bound = zip(*robot.getJointLimits())
@@ -103,11 +109,22 @@ class RobotSubsetCSpace(EmbeddedCSpace):
     provided to the constructor.  The configuration space is R^k where k
     is the number of DOFs in the subset.
 
+    This class will automatically disable all collisions for inactive robot links
+    in the collider.
+
+    Note: to convert from start/goal robot configurations to the CSpace, call
+    the project(qrobot) method for the start and goal. (see EmbeddedCSpace.project())
+
+    Note: to convert from a planned path back to the robot's full configuration space,
+    you will need to call the lift(q) method for all configurations q in the planned
+    path. (see EmbeddedCSpace.lift()) 
+
     Warning: if your robot has non-standard joints, like a free-
     floating base or continuously rotating (spin) joints, you will need to
     overload the sample() method."""
     def __init__(self,robot,subset,collider=None):
-        EmbeddedCSpace.__init__(self,RobotCSpace(self,collider),xinit=robot.getConfig())
+        EmbeddedCSpace.__init__(self,RobotCSpace(robot,collider),subset,xinit=robot.getConfig())
+        self.collider = collider
         if self.collider:
             inactive = []
             for i in range(robot.numLinks()):
@@ -122,20 +139,20 @@ class ClosedLoopRobotCSpace(RobotCSpace):
     """A closed loop cspace.  Allows one or more IK constraints to be
     maintained during the robot's motion."""
     def __init__(self,robot,iks,collider=None):
-        RobotCSpace.__init__self(robot,collider)
+        RobotCSpace.__init__(self,robot,collider)
         self.solver = robotsim.IKSolver(robot)
         if hasattr(iks,'__iter__'):
             for ik in iks:
                 self.solver.add(ik)
         else:
-            self.solver.add(ik)
+            self.solver.add(iks)
 
         #IK solve iterations
         self.maxIters = 100
         self.tol = 1e-3
 
         #adaptive checker
-        self.addFeasibleTest(lambda(x): self.closedLoop())
+        self.addFeasibleTest(lambda x: self.closedLoop(),'closed loop constraint')
 
     def sample(self):
         """Samples directly on the contact manifold"""
@@ -163,7 +180,7 @@ class ClosedLoopRobotCSpace(RobotCSpace):
     def closedLoop(self,tol=None):
         """Returns true if the closed loop constraint has been met at the
         robot's current configuration."""
-        e = self.solver.getError()
+        e = self.solver.getResidual()
         if tol==None: tol = self.tol
         return max(abs(ei) for ei in e) <= tol
 
@@ -179,7 +196,7 @@ class ImplicitManifoldRobotCSpace(RobotCSpace):
         self.tol = 1e-3
 
         #adaptive checker
-        self.addFeasibleTest(lambda(x): self.onManifold(x))
+        self.addFeasibleTest(lambda x: self.onManifold(x),'implicit manifold constraint')
 
     def sample(self):
         """Samples directly on the contact manifold"""

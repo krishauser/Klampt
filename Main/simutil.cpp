@@ -1,9 +1,11 @@
 #include "Control/PathController.h"
 #include "Control/FeedforwardController.h"
 #include "Control/LoggingController.h"
+#include "Control/JointSensors.h"
 #include "Simulation/WorldSimulation.h"
 #include "IO/XmlWorld.h"
 #include "IO/XmlODE.h"
+#include "IO/three.js.h"
 #include <KrisLibrary/utils/stringutils.h>
 #include <KrisLibrary/robotics/IKFunctions.h>
 #include <fstream>
@@ -26,31 +28,7 @@ string ReadFileAsString(const char* fn)
 
 typedef LoggingController MyController;
 typedef PolynomialPathController MyMilestoneController;
-inline RobotController* MakeDefaultController(Robot* robot)
-{
-  PolynomialPathController* c = new PolynomialPathController(*robot);
-  FeedforwardController* fc = new FeedforwardController(*robot,c);
-  LoggingController* lc=new LoggingController(*robot,fc);
-  //defaults -- gravity compensation is better off with free-floating robots
-  if(robot->joints[0].type == RobotJoint::Floating)
-    fc->enableGravityCompensation=false;  //feedforward capability
-  else
-    fc->enableGravityCompensation=true;  //feedforward capability
-  fc->enableFeedforwardAcceleration=false;  //feedforward capability
-  lc->save = false;
-  return lc;
-}
-inline void MakeDefaultSensors(Robot* robot,RobotSensors& sensors)
-{
-  JointPositionSensor* jp = new JointPositionSensor;
-  JointVelocitySensor* jv = new JointVelocitySensor;
-  jp->name = "q";
-  jv->name = "dq";
-  jp->q.resize(robot->q.n,Zero);
-  jv->dq.resize(robot->q.n,Zero);
-  sensors.sensors.push_back(jp);
-  sensors.sensors.push_back(jv);
-}
+
 
 /*
 	char buf[256];
@@ -158,16 +136,51 @@ bool SetupCommands(WorldSimulation& sim,const string& fn)
   return true;
 }
 
-enum Format { Raw, Base64 };
-string Decode(const string& str,Format format)
+enum Format { None, Raw, Base64, ThreeJS };
+
+const char* FormatExtension(Format format)
 {
+  if(format == None) return "";
+  else if(format == ThreeJS) return "json";
+  else return "state";
+}
+
+string ReadSimState(const char* fn,Format format)
+{
+  string str = ReadFileAsString(fn);
   if(format == Raw) return str;
   else return FromBase64(str);
 }
-string Encode(const string& str,Format format)
+bool WriteSimState(WorldSimulation& sim,const char* fn,Format format)
 {
-  if(format == Raw) return str;
-  else return ToBase64(str);
+  if(format == None) return true;
+  else if(format == ThreeJS) {
+    sim.UpdateModel();
+    AnyCollection obj;
+    ThreeJSExport(sim,obj);
+    ofstream out(fn,ios::out|ios::binary);
+    if(!out) {
+      fprintf(stderr,"Unable to open file %s for writing\n",fn);
+      return false;
+    }
+    out<<obj<<endl;
+    out.close();
+    return true;
+  }
+  else {
+    string finalState;
+    sim.WriteState(finalState);
+    ofstream out(fn,ios::out|ios::binary);
+    if(!out) {
+      fprintf(stderr,"Unable to open file %s for writing\n",fn);
+      return false;
+    }
+    string data;
+    if(format == Raw) data = finalState;
+    else data = ToBase64(finalState);
+    out.write(data.c_str(),data.length());
+    out.close();
+  }
 }
 
 
@@ -182,7 +195,7 @@ const char* OPTIONS_STRING = "Options:\n\
 \t-prefix p: save states to files using the prefix p. \n\
 \t-log file: save log files of the low-level robot commands. \n\
 \t-step s: sets the simulation time step (default 1/1000)\n\
-\t-format f: state encoding format (raw, base64 default base64)\n\
+\t-format f: state encoding format (raw, base64, three.js default base64)\n\
 ";
 
 
@@ -236,7 +249,18 @@ int main(int argc, char** argv)
 	i++;
       }
       else if(0==strcmp(argv[i],"-init")) {
-	initialStates.push_back(Decode(ReadFileAsString(argv[i+1]),format));
+	initialStates.push_back(ReadSimState(argv[i+1],format));
+	i++;
+      }
+      else if(0==strcmp(argv[i],"-format")) {
+	if(0==strcmp(argv[i+1],"none"))
+	  format = None;
+	else if(0==strcmp(argv[i+1],"raw"))
+	  format = Raw;
+	else if(0==strcmp(argv[i+1],"base64"))
+	  format = Base64;
+	else if(0==strcmp(argv[i+1],"three.js"))
+	  format = ThreeJS;
 	i++;
       }
       else {
@@ -275,7 +299,7 @@ int main(int argc, char** argv)
   for(size_t i=0;i<sim.robotControllers.size();i++) {    
     Robot* robot=world.robots[i];
     sim.SetController(i,MakeDefaultController(robot)); 
-    MakeDefaultSensors(robot,sim.controlSimulators[i].sensors);
+    sim.controlSimulators[i].sensors.MakeDefault(robot);
   }
 
   //setup ODE settings, if any
@@ -314,9 +338,11 @@ int main(int argc, char** argv)
   //allow the objects to settle and save that state
   if(settlingTime > 0) {
     for(size_t i=0;i<initialStates.size();i++) {
-      if(!sim.ReadState(initialStates[i])) {
-	fprintf(stderr,"Warning, ReadState didn't work\n");
-	abort();
+      if(initialStates.size() > 1) {
+	if(!sim.ReadState(initialStates[i])) {
+	  fprintf(stderr,"Warning, ReadState didn't work\n");
+	  abort();
+	}
       }
 
       sim.Advance(settlingTime);
@@ -330,9 +356,11 @@ int main(int argc, char** argv)
   //run the commands
   for(size_t init=0;init<initialStates.size();init++) {
     for(size_t trial=0;trial<commandFiles.size();trial++) {
-      if(!sim.ReadState(initialStates[init])) {
-	fprintf(stderr,"Warning, ReadState didn't work\n");
-	abort();
+      if(initialStates.size() > 1 || trial > 0) {
+	if(!sim.ReadState(initialStates[init])) {
+	  fprintf(stderr,"Warning, ReadState didn't work\n");
+	  abort();
+	}
       }
       Real time0 = sim.time;
 
@@ -349,27 +377,20 @@ int main(int argc, char** argv)
       }
       
       //write the final state
-      string finalState;
       char buf[256];
       if(commandFiles.size()==1) {
-	if(initialStates.size()==1) sprintf(buf,"%s.state",prefix.c_str());
-	else sprintf(buf,"%s%04d.state",prefix.c_str(),init);
+	if(initialStates.size()==1) sprintf(buf,"%s.%s",prefix.c_str(),FormatExtension(format));
+	else sprintf(buf,"%s%04d.%s",prefix.c_str(),init,FormatExtension(format));
       }
       else {
-	if(initialStates.size()==1) sprintf(buf,"%s%04d.state",prefix.c_str(),trial);
-	else sprintf(buf,"%s_%04d_%04d.state",prefix.c_str(),init,trial);
+	if(initialStates.size()==1) sprintf(buf,"%s%04d.%s",prefix.c_str(),trial,FormatExtension(format));
+	else sprintf(buf,"%s_%04d_%04d.%s",prefix.c_str(),init,trial,FormatExtension(format));
       }
 
       printf("Writing state at time %g to file %s\n",sim.time,buf);
-      sim.WriteState(finalState);
-      ofstream out(buf,ios::out|ios::binary);
-      if(!out) {
-	fprintf(stderr,"Unable to open file %s for writing\n",buf);
+      if(!WriteSimState(sim,buf,format)) {
 	return 1;
       }
-      string data = Encode(finalState,format);
-      out.write(data.c_str(),data.length());
-      out.close();
     }
   }
   return 0;

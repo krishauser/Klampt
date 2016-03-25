@@ -206,14 +206,12 @@ class MyGLViewer(GLRealtimeProgram):
         self.forceAnchorPoint = worldpt
         self.forceLocalPoint = se3.apply(se3.inv((Ro,to)),self.forceAnchorPoint)
 
-    def simulateForceSpring(self,kP = 100.0):
+    def simulateForceSpring(self,kP = 10.0):
         if not self.forceApplicationMode: return
         self.sim.updateWorld()
         body = self.sim.body(self.forceObject)
         T = self.forceObject.getTransform()
         wp = se3.apply(T,self.forceLocalPoint)
-        #since we're not applying this force over sub-steps, we have to make it big!
-        kP *= self.dt/0.001
         f = vectorops.mul(vectorops.sub(self.forceAnchorPoint,wp),kP)
         #get wrench about com
         momentArmLocal = vectorops.sub(self.forceLocalPoint,self.forceObject.getMass().getCom())

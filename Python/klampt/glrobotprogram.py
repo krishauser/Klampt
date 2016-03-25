@@ -70,16 +70,21 @@ class GLSimulationProgram(GLRealtimeProgram):
 
         #draw commanded configurations
         if self.commanded_config_color != None:
-            glEnable(GL_BLEND)
-            glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA)
-            glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,self.commanded_config_color)
             for i in xrange(self.world.numRobots()):
                 r = self.world.robot(i)
                 mode = self.sim.controller(i).getControlType()
                 if mode == "PID":
                     q = self.sim.controller(i).getCommandedConfig()
+                    #save old appearance
+                    oldapps = [r.link(j).appearance().clone() for j in xrange(r.numLinks())]
+                    #set new appearance
+                    for j in xrange(r.numLinks()):
+                        r.link(j).appearance().setColor(*self.commanded_config_color)
                     r.setConfig(q)
-                    r.drawGL(False)
+                    r.drawGL()
+                    #restore old appearance
+                    for j in xrange(r.numLinks()):
+                        r.link(j).appearance().set(oldapps[j])
             glDisable(GL_BLEND)
 
         #draw contacts, if enabled

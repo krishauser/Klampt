@@ -2,6 +2,7 @@
 #define MODELING_ROBOT_H
 
 #include <KrisLibrary/robotics/RobotWithGeometry.h>
+#include <KrisLibrary/utils/PropertyMap.h>
 #include "ManagedGeometry.h"
 
 using namespace std;
@@ -130,6 +131,11 @@ public:
   vector<RobotJointDriver> drivers;
   vector<string> linkNames;
   vector<string> driverNames;
+
+  ///Any extra properties that might be useful
+  PropertyMap properties;
+
+  ///A matrix of lipschitz constants (see ComputeLipschitzMatrix)
   Matrix lipschitzMatrix;
 
   ///Set this to true if you want to disable loading of geometry -- saves time

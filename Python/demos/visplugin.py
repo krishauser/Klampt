@@ -4,12 +4,14 @@ import sys
 from klampt import *
 from klampt import visualization
 from klampt.glcommon import *
+from klampt import robotcollide
 import time
 
 class MyGLPlugin(GLPluginBase):
     def __init__(self,world):
         GLPluginBase.__init__(self)
         self.world = world
+        self.collider = robotcollide.WorldCollider(world)
         self.quit = False
 
     def mousefunc(self,button,state,x,y):
@@ -32,6 +34,23 @@ class MyGLPlugin(GLPluginBase):
             self.quit = True
             return True
         return False
+
+    def click_world(self,x,y):
+        """Helper: returns a list of world objects sorted in order of
+        increasing distance."""
+        #get the viewport ray
+        (s,d) = self.click_ray(x,y)
+        print self.window.width,self.window.height
+        print s,d
+
+        #run the collision tests
+        collided = []
+        for g in self.collider.geomList:
+            (hit,pt) = g[1].rayCast(s,d)
+            if hit:
+                dist = vectorops.dot(vectorops.sub(pt,s),d)
+                collided.append((dist,g[0]))
+        return [g[1] for g in sorted(collided)]
 
 if __name__ == "__main__":
     print "visplugin.py: This example demonstrates how to simulate a world and read user input using the klampt.visualization framework"

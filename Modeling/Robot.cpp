@@ -149,6 +149,7 @@ bool Robot::Load(const char* fn) {
 }
 
 bool Robot::LoadRob(const char* fn) {
+	string path = GetFilePath(fn);
 	links.resize(0);
 	parents.resize(0);
 	qMin.clear();
@@ -158,6 +159,8 @@ bool Robot::LoadRob(const char* fn) {
 	driverNames.resize(0);
 	joints.resize(0);
 	drivers.resize(0);
+	lipschitzMatrix.clear();
+	properties.clear();
 	vector<Real> massVec;
 	vector<Vector3> comVec;
 	vector<Matrix3> inertiaVec;
@@ -594,6 +597,22 @@ bool Robot::LoadRob(const char* fn) {
 			  */
 			}
 			else mountNames.push_back(name);
+		}
+		else if(name == "property") {
+		  string value;
+		  SafeInputString(ss,stemp);
+		  getline(ss, value);
+		  if(ss.fail() || ss.bad()) {
+			fprintf(stderr, "   Explicit property on line %d could not be read\n",
+					name.c_str(), lineno);
+			return false;
+		  }
+		  if(stemp == "controller" || stemp == "sensors") {
+		    //prepend the robot path
+		    properties[stemp] = path + value;
+		  }
+		  else 
+		    properties[stemp] = value;
 		} else {
 			fprintf(stderr, "   Invalid robot property %s on line %d\n",
 					name.c_str(), lineno);
@@ -869,7 +888,6 @@ bool Robot::LoadRob(const char* fn) {
 		geomscale.resize(n, geomscale[0]);
 	geomFiles.resize(n);
 	Timer timer;
-	string path = GetFilePath(fn);
 	for (size_t i = 0; i < geomFn.size(); i++) {
 		if (geomFn[i].empty()) {
 			continue;
@@ -2768,7 +2786,8 @@ bool Robot::LoadURDF(const char* fn)
 		    if(linkNode->link->visual && linkNode->link->visual->material) {
 		      urdf::Color c=linkNode->link->visual->material->color;
 		      this->geomManagers[link_index].SetUniqueAppearance();
-		      this->geomManagers[link_index].Appearance()->faceColor.set(c.r,c.g,c.b,c.a);
+		      this->geomManagers[link_index].Appearance()->SetColor(c.r,c.g,c.b,c.a);
+		       
 		    }
 		    Matrix4 ident; ident.setIdentity();
 		    if(!linkNode->geomScale.isEqual(ident)) {

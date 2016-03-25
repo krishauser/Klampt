@@ -5,6 +5,7 @@
 #include "Control/Command.h"
 #include "Control/PathController.h"
 #include "Control/FeedforwardController.h"
+#include "Control/LoggingController.h"
 #include "Simulation/WorldSimulation.h"
 #include "Modeling/Interpolate.h"
 #include "IO/XmlWorld.h"
@@ -269,15 +270,7 @@ void ManualOverrideController::Update(Real dt)
 typedef ManualOverrideController MyController;
 inline MyController* MakeController(Robot* robot)
 {
-  PolynomialPathController* c = new PolynomialPathController(*robot);
-  FeedforwardController* fc = new FeedforwardController(*robot,c);
-  ManualOverrideController* lc=new ManualOverrideController(*robot,fc);
-  //defaults -- gravity compensation is better off with free-floating robots
-  if(robot->joints[0].type == RobotJoint::Floating)
-    fc->enableGravityCompensation=false;  //feedforward capability
-  else
-    fc->enableGravityCompensation=true;  //feedforward capability
-  fc->enableFeedforwardAcceleration=false;  //feedforward capability
+  ManualOverrideController* lc=new ManualOverrideController(*robot,MakeDefaultController(robot));
   return lc;
 }
 inline PolynomialMotionQueue* GetMotionQueue(RobotController* controller)
@@ -286,20 +279,13 @@ inline PolynomialMotionQueue* GetMotionQueue(RobotController* controller)
   if(!mc) {
     throw PyException("Not using the default manual override controller");
   }
-  FeedforwardController* ffc=dynamic_cast<FeedforwardController*>((RobotController*)mc->base);
+  LoggingController* lc=dynamic_cast<LoggingController*>((RobotController*)mc->base);
+  if(!lc) {
+    throw PyException("Not using the default robot controller");
+  }
+  FeedforwardController* ffc=dynamic_cast<FeedforwardController*>((RobotController*)lc->base);
   PolynomialPathController* pc=dynamic_cast<PolynomialPathController*>((RobotController*)ffc->base);
   return pc;
-}
-inline void MakeSensors(Robot* robot,RobotSensors& sensors)
-{
-  JointPositionSensor* jp = new JointPositionSensor;
-  JointVelocitySensor* jv = new JointVelocitySensor;
-  jp->name = "q";
-  jv->name = "dq";
-  jp->q.resize(robot->q.n,Zero);
-  jv->dq.resize(robot->q.n,Zero);
-  sensors.sensors.push_back(jp);
-  sensors.sensors.push_back(jv);
 }
 
 
@@ -360,7 +346,7 @@ void GetPointCloud(const PointCloud& pc,Geometry::AnyCollisionGeometry3D& geom)
       gpc.properties[i].copy(&pc.properties[i*pc.propertyNames.size()]);
     }
   }
-  printf("Copying PointCloud to geometry, %d points\n",gpc.points.size());
+  //printf("Copying PointCloud to geometry, %d points\n",(int)gpc.points.size());
   geom = gpc;
   geom.ClearCollisionData();
 }
@@ -417,12 +403,34 @@ std::string GeometricPrimitive::saveString() const
 
 Geometry3D::Geometry3D()
   :world(-1),id(-1),geomPtr(NULL)
-{}
+{
+  geomPtr = new SmartPointer<AnyCollisionGeometry3D>();
+}
+
+Geometry3D::Geometry3D(const Geometry3D& rhs)
+  :world(rhs.world),id(rhs.id),geomPtr(NULL)
+{
+  SmartPointer<AnyCollisionGeometry3D>* geom = reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(rhs.geomPtr);
+  geomPtr = new SmartPointer<AnyCollisionGeometry3D>(*geom);
+}
 
 Geometry3D::~Geometry3D()
 {
   free();
+  SmartPointer<AnyCollisionGeometry3D>* geom = reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(geomPtr);
+  delete geom;
 }
+
+const Geometry3D& Geometry3D::operator = (const Geometry3D& rhs)
+{
+  free();
+  world = rhs.world;
+  id = rhs.id;
+  SmartPointer<AnyCollisionGeometry3D>* geom = reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(geomPtr);
+  SmartPointer<AnyCollisionGeometry3D>* geom2 = reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(rhs.geomPtr);
+  *geom = *geom2;
+  return *this;
+} 
 
 bool Geometry3D::isStandalone()
 {
@@ -432,29 +440,30 @@ bool Geometry3D::isStandalone()
 Geometry3D Geometry3D::clone()
 {
   Geometry3D res;
-  if(geomPtr != NULL) {
-    AnyCollisionGeometry3D* geom = reinterpret_cast<AnyCollisionGeometry3D*>(geomPtr);
-    res.geomPtr = new AnyCollisionGeometry3D(*geom);
+  SmartPointer<AnyCollisionGeometry3D>& geom = *reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(geomPtr);
+  SmartPointer<AnyCollisionGeometry3D>& resgeom = *reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(res.geomPtr);
+  if(geom != NULL) {
+    resgeom = new AnyCollisionGeometry3D(*geom);
   }
   return res;
 }
 
 void Geometry3D::set(const Geometry3D& g)
 {
-  AnyCollisionGeometry3D* ggeom = reinterpret_cast<AnyCollisionGeometry3D*>(g.geomPtr);
+  SmartPointer<AnyCollisionGeometry3D>& geom = *reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(geomPtr);
+  const SmartPointer<AnyCollisionGeometry3D>& ggeom = *reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(g.geomPtr);
   ManagedGeometry* mgeom = NULL;
   if(!isStandalone()) {
     RobotWorld& world = *worlds[this->world]->world;
     mgeom = &GetManagedGeometry(world,id);
   }
-  if(geomPtr == NULL) {
+  if(geom == NULL) {
     if(mgeom) {
-      geomPtr = mgeom->CreateEmpty();
+      geom = mgeom->CreateEmpty();
     }
     else
-      geomPtr = new AnyCollisionGeometry3D();
+      geom = new AnyCollisionGeometry3D();
   }
-  AnyCollisionGeometry3D* geom = reinterpret_cast<AnyCollisionGeometry3D*>(geomPtr);
   *geom = *ggeom;
   geom->ClearCollisionData();
   if(mgeom) {
@@ -466,37 +475,39 @@ void Geometry3D::set(const Geometry3D& g)
 
 void Geometry3D::free()
 {
-  if(isStandalone() && geomPtr) {
+  SmartPointer<AnyCollisionGeometry3D>* geom = reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(geomPtr);  
+  if(isStandalone() && *geom) {
     printf("Geometry3D(): Freeing standalone geometry\n");
-    AnyCollisionGeometry3D* ptr = reinterpret_cast<AnyCollisionGeometry3D*>(geomPtr);
-    delete ptr;
+    *geom = NULL;
   }
   world = -1;
   id = -1;
-  geomPtr = NULL;
+
+  delete geom;
+  geomPtr = new SmartPointer<AnyCollisionGeometry3D>;
 }
 
 string Geometry3D::type()
 {
-  if(!geomPtr) return "";
-  AnyCollisionGeometry3D* geom = reinterpret_cast<AnyCollisionGeometry3D*>(geomPtr);
+  SmartPointer<AnyCollisionGeometry3D>& geom = *reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(geomPtr);
+  if(!geom) return "";
   if(geom->Empty()) return "";
   return geom->TypeName();
 }
 
 bool Geometry3D::empty()
 {
-  if(!geomPtr) return true;
-  AnyCollisionGeometry3D* geom = reinterpret_cast<AnyCollisionGeometry3D*>(geomPtr);
+  SmartPointer<AnyCollisionGeometry3D>& geom = *reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(geomPtr);  
+  if(!geom) return true;
   if(geom->Empty()) return true;
   return false;
 }
 
 TriangleMesh Geometry3D::getTriangleMesh()
 {
+  SmartPointer<AnyCollisionGeometry3D>& geom = *reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(geomPtr);
   TriangleMesh mesh;
-  if(geomPtr) {
-    AnyCollisionGeometry3D* geom = reinterpret_cast<AnyCollisionGeometry3D*>(geomPtr);
+  if(geom) {
     GetMesh(*geom,mesh);
   }
   return mesh;
@@ -505,8 +516,8 @@ TriangleMesh Geometry3D::getTriangleMesh()
 
 GeometricPrimitive Geometry3D::getGeometricPrimitive()
 {
-  if(!geomPtr) return GeometricPrimitive();
-  AnyCollisionGeometry3D* geom = reinterpret_cast<AnyCollisionGeometry3D*>(geomPtr);
+  SmartPointer<AnyCollisionGeometry3D>& geom = *reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(geomPtr);
+  if(!geom) return GeometricPrimitive();
   stringstream ss;
   ss<<geom->AsPrimitive();
   GeometricPrimitive prim;
@@ -520,18 +531,18 @@ GeometricPrimitive Geometry3D::getGeometricPrimitive()
 
 void Geometry3D::setTriangleMesh(const TriangleMesh& mesh)
 {
+  SmartPointer<AnyCollisionGeometry3D>& geom = *reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(geomPtr);
   ManagedGeometry* mgeom = NULL;
   if(!isStandalone()) {
     RobotWorld& world = *worlds[this->world]->world;
     mgeom = &GetManagedGeometry(world,id);
   }
-  if(geomPtr == NULL) {
+  if(geom == NULL) {
     if(mgeom) 
-      geomPtr = mgeom->CreateEmpty();
+      geom = mgeom->CreateEmpty();
     else
-      geomPtr = new AnyCollisionGeometry3D();
+      geom = new AnyCollisionGeometry3D();
   }
-  AnyCollisionGeometry3D* geom = reinterpret_cast<AnyCollisionGeometry3D*>(geomPtr);
   GetMesh(mesh,*geom);
   if(mgeom) {
     //update the display list / cache
@@ -542,9 +553,9 @@ void Geometry3D::setTriangleMesh(const TriangleMesh& mesh)
 
 PointCloud Geometry3D::getPointCloud()
 {
+  SmartPointer<AnyCollisionGeometry3D>& geom = *reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(geomPtr);
   PointCloud pc;
-  if(geomPtr) {
-    AnyCollisionGeometry3D* geom = reinterpret_cast<AnyCollisionGeometry3D*>(geomPtr);
+  if(geom) {
     GetPointCloud(*geom,pc);
   }
   return pc;
@@ -552,19 +563,19 @@ PointCloud Geometry3D::getPointCloud()
 
 void Geometry3D::setPointCloud(const PointCloud& pc)
 {
+  SmartPointer<AnyCollisionGeometry3D> geom = *reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(geomPtr);
   ManagedGeometry* mgeom = NULL;
   if(!isStandalone()) {
     RobotWorld& world = *worlds[this->world]->world;
     mgeom = &GetManagedGeometry(world,id);
   }
-  if(geomPtr == NULL) {
+  if(geom == NULL) {
     if(mgeom) {
-      geomPtr = mgeom->CreateEmpty();
+      geom = mgeom->CreateEmpty();
     }
     else
-      geomPtr = new AnyCollisionGeometry3D();
+      geom = new AnyCollisionGeometry3D();
   }
-  AnyCollisionGeometry3D* geom = reinterpret_cast<AnyCollisionGeometry3D*>(geomPtr);
   GetPointCloud(pc,*geom);
   //this is already called
   //geom->ClearCollisionData();
@@ -577,19 +588,19 @@ void Geometry3D::setPointCloud(const PointCloud& pc)
 
 void Geometry3D::setGeometricPrimitive(const GeometricPrimitive& prim)
 {
+  SmartPointer<AnyCollisionGeometry3D> geom = *reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(geomPtr);  
   ManagedGeometry* mgeom = NULL;
   if(!isStandalone()) {
     RobotWorld& world = *worlds[this->world]->world;
     mgeom = &GetManagedGeometry(world,id);
   }
-  if(geomPtr == NULL) {
+  if(geom == NULL) {
     if(mgeom) {
-      geomPtr = mgeom->CreateEmpty();
+      geom = mgeom->CreateEmpty();
     }
     else
-      geomPtr = new AnyCollisionGeometry3D();
+      geom = new AnyCollisionGeometry3D();
   }
-  AnyCollisionGeometry3D* geom = reinterpret_cast<AnyCollisionGeometry3D*>(geomPtr);
   stringstream ss(prim.saveString());
   GeometricPrimitive3D g;
   ss>>g;
@@ -608,11 +619,11 @@ void Geometry3D::setGeometricPrimitive(const GeometricPrimitive& prim)
 
 bool Geometry3D::loadFile(const char* fn)
 {
+  SmartPointer<AnyCollisionGeometry3D>& geom = *reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(geomPtr);
   if(isStandalone()) {
-    if(!geomPtr) {
-      geomPtr = new AnyCollisionGeometry3D();
+    if(!geom) {
+      geom = new AnyCollisionGeometry3D();
     }
-    AnyCollisionGeometry3D* geom = reinterpret_cast<AnyCollisionGeometry3D*>(geomPtr);
     if(!geom->Load(fn)) return false;
     return true;
   }
@@ -624,7 +635,7 @@ bool Geometry3D::loadFile(const char* fn)
     ManagedGeometry* mgeom = NULL;
     mgeom = &GetManagedGeometry(world,id);
     if(mgeom->Load(fn)) {
-      geomPtr = (Geometry::AnyCollisionGeometry3D*)SmartPointer<Geometry::AnyCollisionGeometry3D>(*mgeom);
+      geom = SmartPointer<Geometry::AnyCollisionGeometry3D>(*mgeom);
       return true;
     }
     return false;
@@ -633,6 +644,7 @@ bool Geometry3D::loadFile(const char* fn)
 
 bool Geometry3D::attachToStream(const char* protocol,const char* name,const char* type)
 {
+  SmartPointer<AnyCollisionGeometry3D>& geom = *reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(geomPtr);
   if(0==strcmp(protocol,"ros")) {
     if(0==strcmp(type,""))
       type = "PointCloud";
@@ -644,9 +656,8 @@ bool Geometry3D::attachToStream(const char* protocol,const char* name,const char
       }
       printf("Warning, attaching to a ROS stream without a ManagedGeometry.\n");
       printf("You will not be able to automatically get updates from ROS.\n");
-      if(!geomPtr) 
-        geomPtr = new AnyCollisionGeometry3D();
-      AnyCollisionGeometry3D* geom = reinterpret_cast<AnyCollisionGeometry3D*>(geomPtr);
+      if(!geom) 
+        geom = new AnyCollisionGeometry3D();
       (*geom) = AnyCollisionGeometry3D(Meshing::PointCloud3D());
       return ROSSubscribePointCloud(geom->AsPointCloud(),name);
       //TODO: update ROS, update the appearance every time the point cloud changes
@@ -676,16 +687,16 @@ bool Geometry3D::detachFromStream(const char* protocol,const char* name)
 
 bool Geometry3D::saveFile(const char* fn)
 {
-  if(!geomPtr) return false;
-  AnyCollisionGeometry3D* geom = reinterpret_cast<AnyCollisionGeometry3D*>(geomPtr);
+  SmartPointer<AnyCollisionGeometry3D>& geom = *reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(geomPtr);
+  if(!geom) return false;
   return geom->Save(fn);
 }
 
 
 void Geometry3D::setCurrentTransform(const double R[9],const double t[3])
 {
-  if(!geomPtr) return;
-  AnyCollisionGeometry3D* geom = reinterpret_cast<AnyCollisionGeometry3D*>(geomPtr);
+  SmartPointer<AnyCollisionGeometry3D>& geom = *reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(geomPtr);
+  if(!geom) return;
   RigidTransform T;
   T.R.set(R);
   T.t.set(t);
@@ -694,8 +705,8 @@ void Geometry3D::setCurrentTransform(const double R[9],const double t[3])
 
 void Geometry3D::translate(const double t[3])
 {
-  if(!geomPtr) return;
-  AnyCollisionGeometry3D* geom = reinterpret_cast<AnyCollisionGeometry3D*>(geomPtr);
+  SmartPointer<AnyCollisionGeometry3D>& geom = *reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(geomPtr);
+  if(!geom) return;
   RigidTransform T;
   T.R.setIdentity();
   T.t.set(t);
@@ -713,8 +724,7 @@ void Geometry3D::translate(const double t[3])
 
 void Geometry3D::transform(const double R[9],const double t[3])
 {
-  if(!geomPtr) return;
-  AnyCollisionGeometry3D* geom = reinterpret_cast<AnyCollisionGeometry3D*>(geomPtr);
+  SmartPointer<AnyCollisionGeometry3D>& geom = *reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(geomPtr);
   RigidTransform T;
   T.R.set(R);
   T.t.set(t);
@@ -732,26 +742,26 @@ void Geometry3D::transform(const double R[9],const double t[3])
 
 void Geometry3D::setCollisionMargin(double margin)
 {
-  if(!geomPtr) return;
-  AnyCollisionGeometry3D* geom = reinterpret_cast<AnyCollisionGeometry3D*>(geomPtr);
+  SmartPointer<AnyCollisionGeometry3D>& geom = *reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(geomPtr);
+  if(!geom) return;
   geom->margin = margin;
 }
 
 double Geometry3D::getCollisionMargin()
 {
-  if(!geomPtr) return 0;
-  AnyCollisionGeometry3D* geom = reinterpret_cast<AnyCollisionGeometry3D*>(geomPtr);
+  SmartPointer<AnyCollisionGeometry3D>& geom = *reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(geomPtr);
+  if(!geom) return 0;
   return geom->margin;
 }
 
 void Geometry3D::getBB(double out[3],double out2[3])
 {
-  if(!geomPtr) {
+  SmartPointer<AnyCollisionGeometry3D>& geom = *reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(geomPtr);
+  if(!geom) {
     out[0] = out[1] = out[2] = Inf;
     out2[0] = out2[1] = out2[2] = -Inf;
     return;
   }
-  AnyCollisionGeometry3D* geom = reinterpret_cast<AnyCollisionGeometry3D*>(geomPtr);
   AABB3D bb = geom->GetAABB();
   bb.bmin.get(out);
   bb.bmax.get(out2);
@@ -759,33 +769,33 @@ void Geometry3D::getBB(double out[3],double out2[3])
 
 bool Geometry3D::collides(const Geometry3D& other)
 {
-  if(!geomPtr || !other.geomPtr) return false;
-  AnyCollisionGeometry3D* geom = reinterpret_cast<AnyCollisionGeometry3D*>(geomPtr);
-  AnyCollisionGeometry3D* geom2 = reinterpret_cast<AnyCollisionGeometry3D*>(other.geomPtr);
+  SmartPointer<AnyCollisionGeometry3D>& geom = *reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(geomPtr);
+  SmartPointer<AnyCollisionGeometry3D>& geom2 = *reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(other.geomPtr);
+  if(!geom || !geom2) return false;
   return geom->Collides(*geom2);
 }
 
 bool Geometry3D::withinDistance(const Geometry3D& other,double tol)
 {
-  if(!geomPtr || !other.geomPtr) return false;
-  AnyCollisionGeometry3D* geom = reinterpret_cast<AnyCollisionGeometry3D*>(geomPtr);
-  AnyCollisionGeometry3D* geom2 = reinterpret_cast<AnyCollisionGeometry3D*>(other.geomPtr);
+  SmartPointer<AnyCollisionGeometry3D>& geom = *reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(geomPtr);
+  SmartPointer<AnyCollisionGeometry3D>& geom2 = *reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(other.geomPtr);
+  if(!geom || !geom2) return false;
   return geom->WithinDistance(*geom2,tol);
 }
 
 double Geometry3D::distance(const Geometry3D& other,double relErr,double absErr)
 {
-  if(!geomPtr || !other.geomPtr) return false;
-  AnyCollisionGeometry3D* geom = reinterpret_cast<AnyCollisionGeometry3D*>(geomPtr);
-  AnyCollisionGeometry3D* geom2 = reinterpret_cast<AnyCollisionGeometry3D*>(other.geomPtr);
+  SmartPointer<AnyCollisionGeometry3D>& geom = *reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(geomPtr);
+  SmartPointer<AnyCollisionGeometry3D>& geom2 = *reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(other.geomPtr);
+  if(!geom || !geom2) return 0;
   AnyCollisionQuery q(*geom,*geom2);
   return q.Distance(relErr,absErr);
 }
 
 bool Geometry3D::closestPoint(const double pt[3],double out[3])
 {
-  if(!geomPtr) return false;
-  AnyCollisionGeometry3D* geom = reinterpret_cast<AnyCollisionGeometry3D*>(geomPtr);
+  SmartPointer<AnyCollisionGeometry3D>& geom = *reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(geomPtr);
+  if(!geom) return false;
   Vector3 vout;
   Real d = geom->Distance(Vector3(pt),vout);
   if(IsInf(d)) return false;
@@ -795,8 +805,8 @@ bool Geometry3D::closestPoint(const double pt[3],double out[3])
 
 bool Geometry3D::rayCast(const double s[3],const double d[3],double out[3])
 {
-  if(!geomPtr) return false;
-  AnyCollisionGeometry3D* geom = reinterpret_cast<AnyCollisionGeometry3D*>(geomPtr);
+  SmartPointer<AnyCollisionGeometry3D>& geom = *reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(geomPtr);
+  if(!geom) return false;
   Ray3D r;
   r.source.set(s);
   r.direction.set(d);
@@ -809,19 +819,44 @@ bool Geometry3D::rayCast(const double s[3],const double d[3],double out[3])
   return false;
 }
 
+//KH: note: pointer gymnastics necessary to allow appearances to refer to temporary appearances as well as references to world, while also
+//exposing an opaque pointer in appearance.h
 Appearance::Appearance()
   :world(-1),id(-1),appearancePtr(NULL)
-{}
+{
+  appearancePtr = new SmartPointer<GLDraw::GeometryAppearance>;
+}
+
+Appearance::Appearance(const Appearance& rhs)
+  :world(rhs.world),id(rhs.id),appearancePtr(NULL)
+{
+  SmartPointer<GLDraw::GeometryAppearance>* geom = reinterpret_cast<SmartPointer<GLDraw::GeometryAppearance>*>(rhs.appearancePtr);
+  appearancePtr = new SmartPointer<GLDraw::GeometryAppearance>(*geom);
+}
 
 Appearance::~Appearance()
 {
   free();
+  SmartPointer<GLDraw::GeometryAppearance>* app = reinterpret_cast<SmartPointer<GLDraw::GeometryAppearance>*>(appearancePtr);
+  delete app;
 }
+
+const Appearance& Appearance::operator = (const Appearance& rhs)
+{
+  free();
+  world = rhs.world;
+  id = rhs.id;
+  SmartPointer<GLDraw::GeometryAppearance>* geom = reinterpret_cast<SmartPointer<GLDraw::GeometryAppearance>*>(appearancePtr);
+  SmartPointer<GLDraw::GeometryAppearance>* geom2 = reinterpret_cast<SmartPointer<GLDraw::GeometryAppearance>*>(rhs.appearancePtr);
+  *geom = *geom2;
+  return *this;
+} 
+
 
 void Appearance::refresh(bool deep)
 {
-  if(!appearancePtr) return;
-  GLDraw::GeometryAppearance* app = reinterpret_cast<GLDraw::GeometryAppearance*>(appearancePtr);
+  SmartPointer<GLDraw::GeometryAppearance>& app = *reinterpret_cast<SmartPointer<GLDraw::GeometryAppearance>*>(appearancePtr);
+  if(!app) return;
   if(!isStandalone()) {
     ManagedGeometry& geom = GetManagedGeometry(*worlds[this->world]->world,id);
     if(geom.IsDynamicGeometry()) {
@@ -843,51 +878,59 @@ bool Appearance::isStandalone()
 Appearance Appearance::clone()
 {
   Appearance res;
-  if(appearancePtr != NULL) {
-    GLDraw::GeometryAppearance* app = reinterpret_cast<GLDraw::GeometryAppearance*>(appearancePtr);
-    res.appearancePtr = new GLDraw::GeometryAppearance(*app);
+  SmartPointer<GLDraw::GeometryAppearance>& app = *reinterpret_cast<SmartPointer<GLDraw::GeometryAppearance>*>(appearancePtr);
+  SmartPointer<GLDraw::GeometryAppearance>& resapp = *reinterpret_cast<SmartPointer<GLDraw::GeometryAppearance>*>(res.appearancePtr);
+  if(app != NULL) {
+    resapp = new GLDraw::GeometryAppearance(*app);
   }
   return res;
 }
 
 void Appearance::set(const Appearance& g)
 {
+  SmartPointer<GLDraw::GeometryAppearance>& app = *reinterpret_cast<SmartPointer<GLDraw::GeometryAppearance>*>(appearancePtr);
+  SmartPointer<GLDraw::GeometryAppearance>& gapp = *reinterpret_cast<SmartPointer<GLDraw::GeometryAppearance>*>(g.appearancePtr);
+
   if(!isStandalone()) {
+    //need to detach from other geometries that might be sharing this appearance
     RobotWorld& world=*worlds[this->world]->world;
     GetManagedGeometry(world,id).SetUniqueAppearance();
-    appearancePtr = GetManagedGeometry(world,id).Appearance();
+    app = GetManagedGeometry(world,id).Appearance();
   }
-  GLDraw::GeometryAppearance* gapp = reinterpret_cast<GLDraw::GeometryAppearance*>(appearancePtr);
-  if(appearancePtr == NULL) {
-    appearancePtr = new GLDraw::GeometryAppearance(*gapp);
+  if(app == NULL) {
+    app = new GLDraw::GeometryAppearance(*gapp);
   }
   else {
-    GLDraw::GeometryAppearance* app = reinterpret_cast<GLDraw::GeometryAppearance*>(appearancePtr);
-    *app = *gapp;
+    app->CopyMaterial(*gapp);
   }
 }
 
 void Appearance::free()
 {
-  if(isStandalone() && appearancePtr) {
-    printf("Appearance(): Freeing standalone appearance\n");
-    GLDraw::GeometryAppearance* app = reinterpret_cast<GLDraw::GeometryAppearance*>(appearancePtr);
-    delete app;
+  SmartPointer<GLDraw::GeometryAppearance>* app = reinterpret_cast<SmartPointer<GLDraw::GeometryAppearance>*>(appearancePtr);
+
+  if(isStandalone() && *app) {
+    //printf("Appearance(): Freeing standalone appearance for %p\n",this);
+    *app = NULL;
   }
+  else if(*app)
+    //printf("Appearance(): Releasing reference to world appearance %d %d for %p\n",world,id,this);
+    ;
+    
   world = -1;
   id = -1;
-  appearancePtr = NULL;
+  *app = NULL;
 }
 
 void Appearance::setDraw(bool draw)
 {
-  if(!appearancePtr) return;
+  SmartPointer<GLDraw::GeometryAppearance>& app = *reinterpret_cast<SmartPointer<GLDraw::GeometryAppearance>*>(appearancePtr);
+  if(!app) return;
   if(!isStandalone()) {
     RobotWorld& world=*worlds[this->world]->world;
     GetManagedGeometry(world,id).SetUniqueAppearance();
-    appearancePtr = GetManagedGeometry(world,id).Appearance();
+    app = GetManagedGeometry(world,id).Appearance();
   }
-  GLDraw::GeometryAppearance* app = reinterpret_cast<GLDraw::GeometryAppearance*>(appearancePtr);
   if(draw) {
     app->drawFaces = true;
     app->drawVertices = false;
@@ -901,13 +944,13 @@ void Appearance::setDraw(bool draw)
 }
 void Appearance::setDraw(int primitive,bool draw)
 {
-  if(!appearancePtr) return;
+  SmartPointer<GLDraw::GeometryAppearance>& app = *reinterpret_cast<SmartPointer<GLDraw::GeometryAppearance>*>(appearancePtr);
+  if(!app) return;
   if(!isStandalone()) {
     RobotWorld& world=*worlds[this->world]->world;
     GetManagedGeometry(world,id).SetUniqueAppearance();
-    appearancePtr = GetManagedGeometry(world,id).Appearance();
+    app = GetManagedGeometry(world,id).Appearance();
   }
-  GLDraw::GeometryAppearance* app = reinterpret_cast<GLDraw::GeometryAppearance*>(appearancePtr);
   switch(primitive) {
   case ALL: app->drawFaces = app->drawVertices = app->drawEdges = draw; break;
   case VERTICES: app->drawVertices = draw; break;
@@ -918,15 +961,15 @@ void Appearance::setDraw(int primitive,bool draw)
 
 bool Appearance::getDraw()
 {
-  if(!appearancePtr) return false;
-  GLDraw::GeometryAppearance* app = reinterpret_cast<GLDraw::GeometryAppearance*>(appearancePtr);
+  SmartPointer<GLDraw::GeometryAppearance>& app = *reinterpret_cast<SmartPointer<GLDraw::GeometryAppearance>*>(appearancePtr);
+  if(!app) return false;
   return app->drawFaces || app->drawVertices || app->drawEdges;
 }
 
 bool Appearance::getDraw(int primitive)
 {
-  if(!appearancePtr) return false;
-  GLDraw::GeometryAppearance* app = reinterpret_cast<GLDraw::GeometryAppearance*>(appearancePtr);
+  SmartPointer<GLDraw::GeometryAppearance>& app = *reinterpret_cast<SmartPointer<GLDraw::GeometryAppearance>*>(appearancePtr);
+  if(!app) return false;
   switch(primitive) {
   case ALL: return app->drawFaces || app->drawVertices || app->drawEdges;
   case VERTICES: return app->drawVertices;
@@ -938,25 +981,25 @@ bool Appearance::getDraw(int primitive)
 
 void Appearance::setColor(float r,float g,float b,float a)
 {
-  if(!appearancePtr) return;
+  SmartPointer<GLDraw::GeometryAppearance>& app = *reinterpret_cast<SmartPointer<GLDraw::GeometryAppearance>*>(appearancePtr);
+  if(!app) return;
   if(!isStandalone()) {
     RobotWorld& world=*worlds[this->world]->world;
     GetManagedGeometry(world,id).SetUniqueAppearance();
-    appearancePtr = GetManagedGeometry(world,id).Appearance();
+    app = GetManagedGeometry(world,id).Appearance();
   }
-  GLDraw::GeometryAppearance* app = reinterpret_cast<GLDraw::GeometryAppearance*>(appearancePtr);
   app->SetColor(r,g,b,a);
 }
 
 void Appearance::setColor(int primitive,float r,float g,float b,float a)
 {
-  if(!appearancePtr) return;
+  SmartPointer<GLDraw::GeometryAppearance>& app = *reinterpret_cast<SmartPointer<GLDraw::GeometryAppearance>*>(appearancePtr);
+  if(!app) return;
   if(!isStandalone()) {
     RobotWorld& world=*worlds[this->world]->world;
     GetManagedGeometry(world,id).SetUniqueAppearance();
-    appearancePtr = GetManagedGeometry(world,id).Appearance();
+    app = GetManagedGeometry(world,id).Appearance();
   }
-  GLDraw::GeometryAppearance* app = reinterpret_cast<GLDraw::GeometryAppearance*>(appearancePtr);
   switch(primitive) {
   case ALL:
     app->SetColor(r,g,b,a);
@@ -1010,37 +1053,38 @@ void Appearance::setTexcoords(const std::vector<double>& uvs)
 
 void Appearance::setPointSize(float size)
 {
-  if(!appearancePtr) return;
+  SmartPointer<GLDraw::GeometryAppearance>& app = *reinterpret_cast<SmartPointer<GLDraw::GeometryAppearance>*>(appearancePtr);
+  if(!app) return;
   if(!isStandalone()) {
     RobotWorld& world=*worlds[this->world]->world;
     GetManagedGeometry(world,id).SetUniqueAppearance();
-    appearancePtr = GetManagedGeometry(world,id).Appearance();
+    app = GetManagedGeometry(world,id).Appearance();
   }
-  GLDraw::GeometryAppearance* app = reinterpret_cast<GLDraw::GeometryAppearance*>(appearancePtr);
   app->vertexSize = size;
 }
 
 void Appearance::drawGL()
 {
-  if(!appearancePtr) return;
-  GLDraw::GeometryAppearance* app = reinterpret_cast<GLDraw::GeometryAppearance*>(appearancePtr);
+  SmartPointer<GLDraw::GeometryAppearance>& app = *reinterpret_cast<SmartPointer<GLDraw::GeometryAppearance>*>(appearancePtr);
+  if(!app) return;
   if(!app->geom) return;
   app->DrawGL();
 }
 
-void Appearance::drawGL(Geometry3D& geom)
+void Appearance::drawGL(Geometry3D& g)
 {
-  if(!appearancePtr) return;
-  if(!geom.geomPtr) return;
-  GLDraw::GeometryAppearance* app = reinterpret_cast<GLDraw::GeometryAppearance*>(appearancePtr);
+  SmartPointer<GLDraw::GeometryAppearance>& app = *reinterpret_cast<SmartPointer<GLDraw::GeometryAppearance>*>(appearancePtr);
+  SmartPointer<AnyCollisionGeometry3D>& geom = *reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(g.geomPtr);
+  if(!app) return;
+  if(!geom) return;
   if(app->geom) {
-    if(app->geom != geom.geomPtr) {
+    if(app->geom != geom) {
       fprintf(stderr,"Appearance::drawGL(): performance warning, setting to a different geometry\n");
-      app->Set(*reinterpret_cast<Geometry::AnyCollisionGeometry3D*>(geom.geomPtr));
+      app->Set(*geom);
     }
   }
   else {
-    app->Set(*reinterpret_cast<Geometry::AnyCollisionGeometry3D*>(geom.geomPtr));
+    app->Set(*geom);
   }
 
   app->DrawGL();
@@ -1685,7 +1729,7 @@ Geometry3D WorldModel::geometry(int id)
     Geometry3D geom;
     geom.world = index;
     geom.id = id;
-    geom.geomPtr = world.GetGeometry(id);
+    *reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(geom.geomPtr) = world.GetGeometry(id);
     return geom;
   }
   Geometry3D geom;
@@ -1701,7 +1745,7 @@ Appearance WorldModel::appearance(int id)
     Appearance geom;
     geom.world = index;
     geom.id = id;
-    geom.appearancePtr = world.GetAppearance(id);
+    *reinterpret_cast<SmartPointer<GLDraw::GeometryAppearance>*>(geom.appearancePtr) = world.GetAppearance(id);
     return geom;
   }
   Appearance geom;
@@ -1772,7 +1816,7 @@ Geometry3D RobotModelLink::geometry()
   res.world = world;
   res.id = getID();
   assert(res.id >= 0);
-  res.geomPtr = worlds[world]->world->GetGeometry(res.id);
+  *reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(res.geomPtr) = worlds[world]->world->GetGeometry(res.id); 
   return res;
 }
 
@@ -1782,7 +1826,7 @@ Appearance RobotModelLink::appearance()
   res.world = world;
   res.id = getID();
   assert(res.id >= 0);
-  res.appearancePtr = worlds[world]->world->GetAppearance(res.id);
+  *reinterpret_cast<SmartPointer<GLDraw::GeometryAppearance>*>(res.appearancePtr) = worlds[world]->world->GetAppearance(res.id);
   return res;
 }
 
@@ -2445,7 +2489,7 @@ Geometry3D RigidObjectModel::geometry()
   res.world = world;
   res.id = getID();
   assert(res.id >= 0);
-  res.geomPtr = worlds[world]->world->GetGeometry(res.id);
+  *reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(res.geomPtr) = worlds[world]->world->GetGeometry(res.id); 
   return res;
 }
 
@@ -2455,7 +2499,8 @@ Appearance RigidObjectModel::appearance()
   res.world = world;
   res.id = getID();
   assert(res.id >= 0);
-  res.appearancePtr = worlds[world]->world->GetAppearance(res.id);
+  *reinterpret_cast<SmartPointer<GLDraw::GeometryAppearance>*>(res.appearancePtr) = worlds[world]->world->GetAppearance(res.id);
+  printf("Copying ptr to rigid object appearance to %p\n",&res);
   return res;
 }
 
@@ -2567,7 +2612,7 @@ Geometry3D TerrainModel::geometry()
   res.world = world;
   res.id = getID();
   assert(res.id >= 0);
-  res.geomPtr = worlds[world]->world->GetGeometry(res.id);
+  *reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(res.geomPtr) = worlds[world]->world->GetGeometry(res.id); 
   return res;
 }
 
@@ -2578,7 +2623,8 @@ Appearance TerrainModel::appearance()
   res.world = world;
   res.id = getID();
   assert(res.id >= 0);
-  res.appearancePtr = worlds[world]->world->GetAppearance(res.id);
+  *reinterpret_cast<SmartPointer<GLDraw::GeometryAppearance>*>(res.appearancePtr) = worlds[world]->world->GetAppearance(res.id);
+  printf("Copying ptr to terrain appearance to %p\n",&res);
   return res;
 }
 
@@ -2631,7 +2677,7 @@ Simulator::Simulator(const WorldModel& model,const char* settings)
     Robot* robot=rworld.robots[i];
     sim->SetController(i,MakeController(robot));
 
-    MakeSensors(robot,sim->controlSimulators[i].sensors);
+    sim->controlSimulators[i].sensors.MakeDefault(robot);
   }
   printf("Done\n");
 
@@ -2924,20 +2970,26 @@ bool SimBody::isDynamicsEnabled()
 void SimBody::applyWrench(const double f[3],const double t[3])
 {
   if(!body) return;
-  dBodyAddForce(body,f[0],f[1],f[2]);
-  dBodyAddTorque(body,t[0],t[1],t[2]);
+  sim->sim->hooks.push_back(new WrenchHook(body,Vector3(f),Vector3(t)));
+  sim->sim->hooks.back()->autokill = true;
+  //dBodyAddForce(body,f[0],f[1],f[2]);
+  //dBodyAddTorque(body,t[0],t[1],t[2]);
 }
 
 void SimBody::applyForceAtPoint(const double f[3],const double pworld[3])
 {
   if(!body) return;
-  dBodyAddForceAtPos(body,f[0],f[1],f[2],pworld[0],pworld[1],pworld[2]);
+  sim->sim->hooks.push_back(new ForceHook(body,Vector3(f),Vector3(pworld)));
+  sim->sim->hooks.back()->autokill = true;
+  //dBodyAddForceAtPos(body,f[0],f[1],f[2],pworld[0],pworld[1],pworld[2]);
 }
 
 void SimBody::applyForceAtLocalPoint(const double f[3],const double plocal[3])
 {
   if(!body) return;
-  dBodyAddForceAtRelPos(body,f[0],f[1],f[2],plocal[0],plocal[1],plocal[2]);
+  sim->sim->hooks.push_back(new LocalForceHook(body,Vector3(f),Vector3(plocal)));
+  sim->sim->hooks.back()->autokill = true;
+  //dBodyAddForceAtRelPos(body,f[0],f[1],f[2],plocal[0],plocal[1],plocal[2]);
 }
 
 void SimBody::setVelocity(const double w[3],const double v[3])
@@ -3056,6 +3108,7 @@ SimBody Simulator::getBody(const TerrainModel& terrain)
 SimBody Simulator::body(const RobotModelLink& link)
 {
   SimBody b;
+  b.sim = this;
   b.body = sim->odesim.robot(link.robotIndex)->body(link.index);
   b.geometry = sim->odesim.robot(link.robotIndex)->triMesh(link.index);
   return b;
@@ -3064,6 +3117,7 @@ SimBody Simulator::body(const RobotModelLink& link)
 SimBody Simulator::body(const RigidObjectModel& object)
 {
   SimBody b;
+  b.sim = this;
   b.body = sim->odesim.object(object.index)->body();
   b.geometry = sim->odesim.object(object.index)->triMesh();
   return b; 
@@ -3072,6 +3126,7 @@ SimBody Simulator::body(const RigidObjectModel& object)
 SimBody Simulator::body(const TerrainModel& terrain)
 {
   SimBody b;
+  b.sim = this;
   b.body = NULL;
   b.geometry = sim->odesim.terrainGeom(terrain.index);
   return b;
@@ -3221,7 +3276,7 @@ std::vector<std::string> SimRobotController::commands()
 void SimRobotController::setManualMode(bool enabled)
 {
   RobotController* c=sim->robotControllers[index];
-  MyController* mc=dynamic_cast<MyController*>(c);
+  MyController* mc=reinterpret_cast<MyController*>(c);
   if(mc)
     mc->override = enabled;
   else {

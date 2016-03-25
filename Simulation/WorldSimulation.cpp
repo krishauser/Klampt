@@ -3,6 +3,18 @@
 #include <ode/ode.h>
 #include "ODECommon.h"
 
+#define READ_FILE_DEBUG(file,object,prefix)		\
+  if(!ReadFile(file,object)) { \
+    fprintf(stderr,"%s: ReadFile failed to read item %s\n",prefix,#object); \
+    return false; \
+  }
+
+#define READ_ARRAY_FILE_DEBUG(file,object,count,prefix)	\
+  if(!ReadArrayFile(file,object,count)) {					\
+    fprintf(stderr,"%s: ReadArrayFile failed to read item %s, size %d\n",prefix,#object,count); \
+    return false; \
+  }
+
 #define TEST_READ_WRITE 0
 
 template <class T>
@@ -98,6 +110,7 @@ void Reset(ContactFeedbackInfo& info)
 template <class T>
 bool WriteFile(File& f,const vector<T>& v)
 {
+  printf("Trying WriteFile(vector<T>)\n");
   if(!WriteFile(f,int(v.size()))) return false;
   if(!v.empty()) 
 	if(!WriteArrayFile(f,&v[0],v.size())) return false;
@@ -108,12 +121,16 @@ bool WriteFile(File& f,const vector<T>& v)
 template <class T>
 bool ReadFile(File& f,vector<T>& v)
 {
+  printf("Trying ReadFile(vector<T>)\n");
   int n;
-  if(!ReadFile(f,n)) return false;
-  if(n < 0) return false;
+  READ_FILE_DEBUG(f,n,"ReadFile(vector<T>)");
+  if(n < 0) {
+    fprintf(stderr,"ReadFile(vector<T>): invalid size %d\n",n);
+    return false;
+  }
   v.resize(n);
   if(n != 0)
-    if(!ReadArrayFile(f,&v[0],n)) return false;
+    READ_ARRAY_FILE_DEBUG(f,&v[0],n,"ReadFile(vector<T>)")
   return true;
 }
 
@@ -128,9 +145,9 @@ bool WriteFile(File& f,const ContactPoint& cp)
 
 bool ReadFile(File& f,ContactPoint& cp)
 {
-  if(!ReadFile(f,cp.x)) return false;
-  if(!ReadFile(f,cp.n)) return false;
-  if(!ReadFile(f,cp.kFriction)) return false;
+  READ_FILE_DEBUG(f,cp.x,"ReadFile(ContactPoint)");
+  READ_FILE_DEBUG(f,cp.n,"ReadFile(ContactPoint)");
+  READ_FILE_DEBUG(f,cp.kFriction,"ReadFile(ContactPoint)");
   return true;
 }
 
@@ -144,9 +161,9 @@ bool WriteFile(File& f,const ODEObjectID& obj)
 
 bool ReadFile(File& f,ODEObjectID& obj)
 {
-  if(!ReadFile(f,obj.type)) return false;
-  if(!ReadFile(f,obj.index)) return false;
-  if(!ReadFile(f,obj.bodyIndex)) return false;
+  READ_FILE_DEBUG(f,obj.type,"ReadFile(ODEObjectID)");
+  READ_FILE_DEBUG(f,obj.index,"ReadFile(ODEObjectID)");
+  READ_FILE_DEBUG(f,obj.bodyIndex,"ReadFile(ODEObjectID)");
   return true;
 }
 
@@ -162,11 +179,11 @@ bool WriteFile(File& f,const ODEContactList& list)
 
 bool ReadFile(File& f,ODEContactList& list)
 {
-  if(!ReadFile(f,list.o1)) return false;
-  if(!ReadFile(f,list.o2)) return false;
-  if(!ReadFile(f,list.points)) return false;
-  if(!ReadFile(f,list.forces)) return false;
-  if(!ReadFile(f,list.feedbackIndices)) return false;
+  READ_FILE_DEBUG(f,list.o1,"ReadFile(ODEContactList)");
+  READ_FILE_DEBUG(f,list.o2,"ReadFile(ODEContactList)");
+  READ_FILE_DEBUG(f,list.points,"ReadFile(ODEContactList)");
+  READ_FILE_DEBUG(f,list.forces,"ReadFile(ODEContactList)");
+  READ_FILE_DEBUG(f,list.feedbackIndices,"ReadFile(ODEContactList)");
   return true;
 }
 
@@ -187,16 +204,16 @@ bool WriteFile(File& f,const ContactFeedbackInfo& info)
 
 bool ReadFile(File& f,ContactFeedbackInfo& info)
 {
-  if(!ReadFile(f,info.accum)) return false;
-  if(!ReadFile(f,info.contactCount)) return false;
-  if(!ReadFile(f,info.separationCount)) return false;
-  if(!ReadFile(f,info.inContact)) return false;
-  if(!ReadFile(f,info.meanForce)) return false;
-  if(!ReadFile(f,info.meanTorque)) return false;
-  if(!ReadFile(f,info.meanPoint)) return false;
-  if(!ReadFile(f,info.accumFull)) return false;
-  if(!ReadFile(f,info.times)) return false;
-  if(!ReadFile(f,info.contactLists)) return false;
+  READ_FILE_DEBUG(f,info.accum,"ReadFile(ContactFeedbackInfo)");
+  READ_FILE_DEBUG(f,info.contactCount,"ReadFile(ContactFeedbackInfo)");
+  READ_FILE_DEBUG(f,info.separationCount,"ReadFile(ContactFeedbackInfo)");
+  READ_FILE_DEBUG(f,info.inContact,"ReadFile(ContactFeedbackInfo)");
+  READ_FILE_DEBUG(f,info.meanForce,"ReadFile(ContactFeedbackInfo)");
+  READ_FILE_DEBUG(f,info.meanTorque,"ReadFile(ContactFeedbackInfo)");
+  READ_FILE_DEBUG(f,info.meanPoint,"ReadFile(ContactFeedbackInfo)");
+  READ_FILE_DEBUG(f,info.accumFull,"ReadFile(ContactFeedbackInfo)");
+  READ_FILE_DEBUG(f,info.times,"ReadFile(ContactFeedbackInfo)");
+  READ_FILE_DEBUG(f,info.contactLists,"ReadFile(ContactFeedbackInfo)");
   return true;
 }
 
@@ -337,7 +354,7 @@ void WorldSimulation::Advance(Real dt)
   while(timeLeft > 0.0) {
     Real step = Min(timeLeft,simStep);
     for(size_t i=0;i<controlSimulators.size();i++) 
-      controlSimulators[i].Step(step);
+      controlSimulators[i].Step(step,this);
     for(size_t i=0;i<hooks.size();i++)
       hooks[i]->Step(step);
 
@@ -408,6 +425,20 @@ void WorldSimulation::Advance(Real dt)
   time += dt;
   UpdateModel();
 
+  //kill any autokill hooks at end of timestep
+  bool anyKilled = false;
+  vector<SmartPointer<WorldSimulationHook> > newhooks;
+  for(size_t i=0;i<hooks.size();i++) {
+    if(hooks[i]->autokill) {
+      if(!anyKilled) 
+        newhooks.insert(newhooks.end(),hooks.begin(),hooks.begin()+i);
+      anyKilled = true;
+    }
+    else if(anyKilled) newhooks.push_back(hooks[i]);
+  }
+  if(anyKilled) {
+    swap(hooks,newhooks);
+  }
   /*
   //convert sums to means
   for(ContactFeedbackMap::iterator i=contactFeedback.begin();i!=contactFeedback.end();i++) {
@@ -426,12 +457,27 @@ void WorldSimulation::AdvanceFake(Real dt)
   bool oldFake = fakeSimulation;
   fakeSimulation = true;
   for(size_t i=0;i<controlSimulators.size();i++) 
-    controlSimulators[i].Step(dt);
+    controlSimulators[i].Step(dt,this);
   for(size_t i=0;i<hooks.size();i++)
     hooks[i]->Step(dt);
   time += dt;
   UpdateModel();
   fakeSimulation = oldFake;
+
+  //kill any autokill hooks at end of timestep
+  bool anyKilled = false;
+  vector<SmartPointer<WorldSimulationHook> > newhooks;
+  for(size_t i=0;i<hooks.size();i++) {
+    if(hooks[i]->autokill) {
+      if(!anyKilled) 
+	newhooks.insert(newhooks.end(),hooks.begin(),hooks.begin()+i);
+      else 
+	anyKilled = true;
+    }
+    else if(anyKilled) newhooks.push_back(hooks[i]);
+  }
+  if(anyKilled)
+    swap(hooks,newhooks);
 }
 
 void WorldSimulation::UpdateModel()
@@ -483,7 +529,7 @@ bool WorldSimulation::ReadState(File& f)
     TestReadWriteState(*hooks[i],"hook");
 #endif
 
-  if(!ReadFile(f,time)) return false;
+  READ_FILE_DEBUG(f,time,"WorldSimulation::ReadState");
   if(!odesim.ReadState(f)) {
     fprintf(stderr,"WorldSimulation::ReadState: ODE sim failed to read\n");
     return false;
@@ -502,15 +548,27 @@ bool WorldSimulation::ReadState(File& f)
     }
   }
   int n;
-  if(!ReadFile(f,n)) return false;
-  if(n < 0) return false;
+  READ_FILE_DEBUG(f,n,"WorldSimulation::ReadState: reading number of contactFeadback items");
+  if(n < 0) {
+    fprintf(stderr,"Invalid number %d of contactFeedback items\n",n);
+    return false;
+  }
   contactFeedback.clear();
-  for(size_t i=0;i<n;i++) {
+  for(int i=0;i<n;i++) {
     pair<ODEObjectID,ODEObjectID> key;
     ContactFeedbackInfo info;
-    if(!ReadFile(f,key.first)) return false;
-    if(!ReadFile(f,key.second)) return false;
-    if(!ReadFile(f,info)) return false;
+    if(!ReadFile(f,key.first)) {
+      fprintf(stderr,"Unable to read contact feedback %d object 1\n",i);
+      return false;
+    }
+    if(!ReadFile(f,key.second)) {
+      fprintf(stderr,"Unable to read contact feedback %d object 2\n",i);
+      return false;
+    }
+    if(!ReadFile(f,info)) {
+      fprintf(stderr,"Unable to read contact feedback %d info\n",i);
+      return false;
+    }
     contactFeedback[key] = info;
   }
   UpdateModel();
@@ -822,6 +880,51 @@ bool ForceHook::WriteState(File& f) const
   FatalError("Not implemented yet");
   return false;
 }
+
+
+LocalForceHook::LocalForceHook(dBodyID _body,const Vector3& _localpt,const Vector3& _f)
+  :body(_body),localpt(_localpt),f(_f)
+{}
+
+void LocalForceHook::Step(Real dt)
+{
+  dBodyAddForceAtRelPos(body,f.x,f.y,f.z,localpt.x,localpt.y,localpt.z);
+}
+
+bool LocalForceHook::ReadState(File& f)
+{
+  FatalError("Not implemented yet");
+  return false;
+}
+
+bool LocalForceHook::WriteState(File& f) const
+{
+  FatalError("Not implemented yet");
+  return false;
+}
+
+WrenchHook::WrenchHook(dBodyID _body,const Vector3& _f,const Vector3& _m)
+  :body(_body),f(_f),m(_m)
+{}
+
+void WrenchHook::Step(Real dt)
+{
+  dBodyAddForce(body,f.x,f.y,f.z);
+  dBodyAddTorque(body,m.x,m.y,m.z);
+}
+
+bool WrenchHook::ReadState(File& f)
+{
+  FatalError("Not implemented yet");
+  return false;
+}
+
+bool WrenchHook::WriteState(File& f) const
+{
+  FatalError("Not implemented yet");
+  return false;
+}
+
 
 
 SpringHook::SpringHook(dBodyID _body,const Vector3& _worldpt,const Vector3& _target,Real _k)

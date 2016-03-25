@@ -1,4 +1,5 @@
 #include "SimulationGUI.h"
+#include "Control/JointSensors.h"
 #include "Control/PathController.h"
 #include "Control/FeedforwardController.h"
 #include "Control/LoggingController.h"
@@ -20,31 +21,6 @@ using namespace GLDraw;
 
 typedef LoggingController MyController;
 typedef PolynomialPathController MyMilestoneController;
-inline RobotController* MakeDefaultController(Robot* robot)
-{
-  PolynomialPathController* c = new PolynomialPathController(*robot);
-  FeedforwardController* fc = new FeedforwardController(*robot,c);
-  LoggingController* lc=new LoggingController(*robot,fc);
-  //defaults -- gravity compensation is better off with free-floating robots
-  if(robot->joints[0].type == RobotJoint::Floating)
-    fc->enableGravityCompensation=false;  //feedforward capability
-  else
-    fc->enableGravityCompensation=true;  //feedforward capability
-  fc->enableFeedforwardAcceleration=false;  //feedforward capability
-  lc->save = false;
-  return lc;
-}
-inline void MakeDefaultSensors(Robot* robot,RobotSensors& sensors)
-{
-  JointPositionSensor* jp = new JointPositionSensor;
-  JointVelocitySensor* jv = new JointVelocitySensor;
-  jp->name = "q";
-  jv->name = "dq";
-  jp->q.resize(robot->q.n,Zero);
-  jv->dq.resize(robot->q.n,Zero);
-  sensors.sensors.push_back(jp);
-  sensors.sensors.push_back(jv);
-}
 
 bool SimGUIBackend::OnCommand(const string& cmd,const string& args)
 {
@@ -143,7 +119,7 @@ void SimGUIBackend::InitController(int i)
 {
   Robot* robot=world->robots[i];
   sim.SetController(i,MakeDefaultController(robot)); 
-  MakeDefaultSensors(robot,sim.controlSimulators[i].sensors);
+  sim.controlSimulators[i].sensors.MakeDefault(robot);
 }
 
 void SimGUIBackend::InitContactFeedbackAll()

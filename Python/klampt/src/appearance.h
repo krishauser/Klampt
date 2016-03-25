@@ -12,6 +12,12 @@
  * OpenGL display lists, so repeated calls are fast.
  *
  * For more complex appearances, you will need to call your own OpenGL calls.
+ *
+ * Appearances can be either references to appearances of objects in the world,
+ * or they can be standalone. 
+ *
+ * Performance note: Avoid  buffer rebuilding (e.g., via refresh()) as 
+ * much as possible.
  */
 class Appearance
 {
@@ -20,7 +26,9 @@ class Appearance
   enum { ALL=0,VERTICES=1,EDGES=2,FACES=3};
 
   Appearance();
+  Appearance(const Appearance& app);
   ~Appearance();
+  const Appearance& operator = (const Appearance& rhs); 
   ///call this to rebuild internal buffers, e.g., when the OpenGL context
   ///changes. If deep=True, the entire data structure will be revised. Use this
   ///for streaming data, for example.

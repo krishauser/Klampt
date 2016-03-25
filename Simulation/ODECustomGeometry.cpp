@@ -4,6 +4,7 @@
 #include <ode/collision.h>
 #include <KrisLibrary/Timer.h>
 #include <KrisLibrary/errors.h>
+#include <iostream>
 using namespace std;
 
 //if a normal has this length then it is ignored
@@ -225,8 +226,9 @@ Vector3 ContactNormal(const CollisionMesh& m1,const CollisionMesh& m2,const Vect
     }
     break;
   case 3:  //face
-    if(type2 == 3)
-      printf("ODECustomMesh: Warning, face-face contact?\n");
+    if(type2 == 3) {
+      //printf("ODECustomMesh: Warning, face-face contact?\n");
+    }
     return m1.currentTransform.R*(-tri1.normal());
   }
   static int warnedCount = 0;
@@ -393,14 +395,28 @@ int MeshMeshCollide(CollisionMesh& m1,Real outerMargin1,CollisionMesh& m2,Real o
     m1.GetTriangle(t1[i],tri1);
     m2.GetTriangle(t2[i],tri2);
 
-    tri1loc.a = T12*tri1.a;
-    tri1loc.b = T12*tri1.b;
-    tri1loc.c = T12*tri1.c;
-    if(tri1loc.intersects(tri2)) { 
+    //tri1loc.a = T12*tri1.a;
+    //tri1loc.b = T12*tri1.b;
+    //tri1loc.c = T12*tri1.c;
+    tri2loc.a = T21*tri2.a;
+    tri2loc.b = T21*tri2.b;
+    tri2loc.c = T21*tri2.c;
+    Segment3D s;
+    if(tri2loc.intersects(tri1,s)) { 
       gCustomGeometryMeshesIntersect = true;
       if(warnedCount % 1000 == 0) {
 	printf("ODECustomMesh: Triangles penetrate margin %g+%g: can't trust contact detector\n",outerMargin1,outerMargin2);
       }
+      /*
+      cout<<"Triangle 1"<<endl;
+      cout<<"  "<<tri1.a<<endl;
+      cout<<"  "<<tri1.b<<endl;
+      cout<<"  "<<tri1.c<<endl;
+      cout<<"intersects triangle 2"<<endl;
+      cout<<"  "<<tri2loc.a<<endl;
+      cout<<"  "<<tri2loc.b<<endl;
+      cout<<"  "<<tri2loc.c<<endl;
+      */
       warnedCount++;
       /*
       //the two triangles intersect! can't trust results of PQP
@@ -431,12 +447,20 @@ int MeshMeshCollide(CollisionMesh& m1,Real outerMargin1,CollisionMesh& m2,Real o
       n = ContactNormal(m1,m2,cp1[i],cp2[i],t1[i],t2[i]);
     }
     else if(d > tol) {  //some penetration -- we can't trust the result of PQP
+      printf("Skipping contact due to irregular distance between points %g\n",d);
+      cout<<"  cp 1 "<<p1<<endl;
+      cout<<"  cp 2 "<<p2<<endl;
+      cout<<"  local cp 1 "<<cp1[i]<<endl;
+      cout<<"  local cp 2 "<<cp2[i]<<endl;
       continue;
     }
     else n /= d;
     //check for invalid normals
     Real len=n.length();
-    if(len < gZeroNormalTolerance || !IsFinite(len)) continue;
+    if(len < gZeroNormalTolerance || !IsFinite(len)) {
+      printf("Skipping contact due to irregular normal length %g\n",len);
+      continue;
+    }
     //cout<<"Local Points "<<cp1[i]<<", "<<cp2[i]<<endl;
     //cout<<"Points "<<p1<<", "<<p2<<endl;
     //Real utol = (tol)*0.5/d + 0.5;
@@ -645,6 +669,59 @@ int PointCloudPrimitiveCollide(CollisionPointCloud& pc1,Real outerMargin1,Geomet
   return k;
 }
 
+int PrimitivePrimitiveCollide(GeometricPrimitive3D& g1,const RigidTransform& T1,Real outerMargin1,GeometricPrimitive3D& g2,const RigidTransform& T2,Real outerMargin2,dContactGeom* contact,int maxcontacts)
+{
+  if(maxcontacts==0) return 0;
+  if(!g1.SupportsDistance(g2.type)) {
+    fprintf(stderr,"TODO: primitive collisions of type %s to %s\n",g1.TypeName(),g2.TypeName());
+    return 0;
+  }
+  if((g1.type != GeometricPrimitive3D::Point && g1.type != GeometricPrimitive3D::Point) && (g2.type == GeometricPrimitive3D::Point || g2.type == GeometricPrimitive3D::Point)) {
+    //do this the other way around
+    int res = PrimitivePrimitiveCollide(g2,T2,outerMargin2,g1,T1,outerMargin1,contact,maxcontacts);
+    for(int i=0;i<res;i++)
+      ReverseContact(contact[i]);
+    return res;
+  }
+  GeometricPrimitive3D tg1=g1,tg2=g2;
+  tg1.Transform(T1);
+  tg2.Transform(T2);
+  if(g1.type != GeometricPrimitive3D::Point && g1.type != GeometricPrimitive3D::Sphere) {
+    //TODO: try copying into ODE data structures?
+    fprintf(stderr,"Contact computations between primitives %s and %s not yet supported\n",g1.TypeName(),g2.TypeName());
+    return 0;
+  }
+  else {
+    Sphere3D s;
+    if(g1.type == GeometricPrimitive3D::Point) {
+      s.center = *AnyCast<Point3D>(&tg1.data);
+      s.radius = 0;
+    }
+    else {
+      s = *AnyCast<Sphere3D>(&tg1.data);
+    }
+    if(tg2.Distance(s.center) > s.radius + outerMargin1 + outerMargin2) return 0;
+    vector<double> params = tg2.ClosestPointParameters(s.center);
+    Vector3 p2 = tg2.ParametersToPoint(params);
+    //normal out from sphere to g2
+    Vector3 n = p2 - s.center;
+    Real d = n.norm();
+    if(FuzzyZero(d)) { 
+      //penetrating all the way to center?
+      n = tg2.ParametersToNormal(params);
+    }
+    else
+      n /= d;
+    Vector3 p1 = s.center + n*s.radius;
+    p2 -= outerMargin2*n;
+    p1 += outerMargin1*n;
+    contact[0].depth = p1.distance(p2);
+    CopyVector(contact[0].pos,(p1+p2)*0.5);
+    CopyVector(contact[0].normal,-n);
+    return 1;
+  }
+}
+
 
 int PrimitiveMeshCollide(GeometricPrimitive3D& g1,const RigidTransform& T1,Real outerMargin1,CollisionMesh& m2,Real outerMargin2,dContactGeom* contact,int maxcontacts)
 {
@@ -666,7 +743,8 @@ int PrimitiveGeometryCollide(GeometricPrimitive3D& g1,const RigidTransform& T, R
 {
   switch(g2.type) {
   case AnyGeometry3D::Primitive:
-    fprintf(stderr,"TODO: primitive-primitive collisions\n");
+    return PrimitivePrimitiveCollide(g1,T,outerMargin1,
+        g2.AsPrimitive(),g2.PrimitiveCollisionData(),g2.margin+outerMargin2,contact,m);
     break;
   case AnyGeometry3D::TriangleMesh:
     return PrimitiveMeshCollide(g1,T,outerMargin1,
