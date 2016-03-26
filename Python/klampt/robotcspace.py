@@ -30,11 +30,11 @@ class RobotCSpace(AdaptiveCSpace):
         self.extraFeasibilityTests = []
 
         #adaptive tests
-        self.addFeasibleTest(lambda(x): self.inJointLimits(x),"joint limits")
+        self.addFeasibleTest(lambda x: self.inJointLimits(x),"joint limits")
         #TODO explode these into individual self collision / env collision
         #tests
-        self.addFeasibleTest(lambda(x): not self.selfCollision(),"self collision")
-        self.addFeasibleTest(lambda(x): not self.envCollision(),"env collision")
+        self.addFeasibleTest(lambda x : not self.selfCollision(),"self collision")
+        self.addFeasibleTest(lambda x: not self.envCollision(),"env collision")
         self.properties['geodesic'] = 1
         volume = 1
         for b in self.bound:
