@@ -1190,8 +1190,8 @@ bool Robot::LoadRob(const char* fn) {
 	  link2 = LinkIndex(selfCollision[i].second.c_str());
 	  if (link1 < 0 || link1 >= (int) links.size() ||
 	      link2 < 0 || link2 >= (int) links.size()) {
-	    printf("   Error, invalid self-collision index %s-%s\n",
-		   selfCollision[i].first.c_str(),selfCollision[i].second.c_str());
+	    printf("   Error, invalid self-collision index %s-%s (range is 0,...,%d)\n",
+		   selfCollision[i].first.c_str(),selfCollision[i].second.c_str(),(int)links.size()-1);
 	    return false;
 	  }
 	  if(link1 > link2) Swap(link1,link2);
@@ -1208,8 +1208,8 @@ bool Robot::LoadRob(const char* fn) {
 	  link2 = LinkIndex(noSelfCollision[i].second.c_str());
 	  if (link1 < 0 || link1 >= (int) links.size() ||
 	      link2 < 0 || link2 >= (int) links.size()) {
-	    printf("  Error, invalid no-collision index %s-%s\n",
-		   noSelfCollision[i].first.c_str(), noSelfCollision[i].second.c_str());
+	    printf("  Error, invalid no-collision index %s-%s (range is 0,...,%d)\n",
+		   noSelfCollision[i].first.c_str(), noSelfCollision[i].second.c_str(),(int)links.size()-1);
 	    return false;
 	  }
 	  if(link1 > link2) Swap(link1,link2);
@@ -2812,8 +2812,8 @@ bool Robot::LoadURDF(const char* fn)
 		  link2 = LinkIndex(selfCollision[i].second.c_str());
 		  if (link1 < 0 || link1 >= (int) links.size() ||
 		      link2 < 0 || link2 >= (int) links.size()) {
-		    printf("   Error, invalid self-collision index %s-%s\n",
-			   selfCollision[i].first.c_str(),selfCollision[i].second.c_str());
+		    printf("   Error, invalid self-collision index %s-%s (range is 0,...,%d)\n",
+			   selfCollision[i].first.c_str(),selfCollision[i].second.c_str(),(int)links.size()-1);
 		    return false;
 		  }
 		  if(link1 == link2) continue;
@@ -2831,8 +2831,8 @@ bool Robot::LoadURDF(const char* fn)
 		  if (link1 < 0 || link1 >= (int) links.size() ||
 		      link2 < 0 || link2 >= (int) links.size()) {
 
-			printf("  Error, invalid no-collision index %s-%s\n",
-			       noSelfCollision[i].first.c_str(), noSelfCollision[i].second.c_str());
+			printf("  Error, invalid no-collision index %s-%s (range is 0,...,%d)\n",
+			       noSelfCollision[i].first.c_str(), noSelfCollision[i].second.c_str(),(int)links.size()-1);
 			return false;
 		}
 		  if(link1 == link2) continue;
