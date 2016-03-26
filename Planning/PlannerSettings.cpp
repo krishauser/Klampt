@@ -101,9 +101,40 @@ Real DistanceLowerBound(AnyCollisionGeometry3D* m1,AnyCollisionGeometry3D* m2,Re
 
 bool WorldPlannerSettings::CheckCollision(RobotWorld& world,int id1,int id2,Real tol)
 {
+  printf("CheckCollision id %d %d\n",id1,id2);
   if(id2 < 0) {  //check all
-    for(int i=0;i<collisionEnabled.n;i++) {
-      if(CheckCollision(world,id1,i,tol)) return true;
+    vector<int> ids(collisionEnabled.n);
+    for(int i=0;i<collisionEnabled.n;i++)
+      ids[i] = i;
+    if(id1 < 0) {  //check all vs all
+      return CheckCollision(world,ids,tol).first >= 0;
+    }
+    else {
+      //if id1 is a robot, we'd want to speed up the testing (and separate self collision checking from environment collision checking)
+      int index1;
+      index1 = world.IsRobot(id1);
+      if(index1 >= 0) {
+        Robot* robot = world.robots[index1];
+        vector<int> r1links(robot->links.size());
+        for(size_t j=0;j<robot->links.size();j++)
+          r1links[j] = world.RobotLinkID(index1,j);
+        vector<int> idothers;
+        for(size_t i=0;i<world.terrains.size();i++)
+          idothers.push_back(world.TerrainID(i));
+        for(size_t i=0;i<world.rigidObjects.size();i++)
+          idothers.push_back(world.RigidObjectID(i));
+        for(size_t i=0;i<world.robots.size();i++) {
+          if((int)i != index1)
+            idothers.push_back(world.RobotID(i));
+        }
+        return CheckCollision(world,r1links,tol).first >=0 || CheckCollision(world,r1links,idothers,tol).first >= 0;
+      }
+      else {
+        //not a robot, just check everything
+        for(int i=0;i<collisionEnabled.n;i++) {
+          if(CheckCollision(world,id1,i,tol)) return true;
+        }
+      }
     }
     return false;
   }
@@ -116,12 +147,20 @@ bool WorldPlannerSettings::CheckCollision(RobotWorld& world,int id1,int id2,Real
     if(index1 >= 0) {
       Robot* robot = world.robots[index1];
       if(index2 >= 0) {
-	Robot* robot2 = world.robots[index2];
-	for(size_t j=0;j<robot->links.size();j++)
-	  for(size_t k=0;k<robot2->links.size();k++)
-	    if(collisionEnabled(world.RobotLinkID(index1,j),world.RobotLinkID(index2,k))) {
-	      if(::CheckCollision(&*robot->geometry[j],&*robot2->geometry[k],tol)) return true;
-	    }
+        Robot* robot2 = world.robots[index2];
+        vector<int> r1links(robot->links.size());
+        for(size_t j=0;j<robot->links.size();j++)
+          r1links[j] = world.RobotLinkID(index1,j);
+        if(robot == robot2)
+          //self collision
+          return CheckCollision(world,r1links,tol).first >= 0;
+        else {
+          //this uses BB quick reject tests and is faster than checking all pairs 
+          vector<int> r2links(robot2->links.size());
+          for(size_t j=0;j<robot2->links.size();j++)
+            r2links[j] = world.RobotLinkID(index2,j);
+          return CheckCollision(world,r1links,r2links,tol).first >= 0;
+        }
       }
       else {
 	for(size_t j=0;j<robot->links.size();j++)
@@ -201,10 +240,11 @@ pair<int,int> WorldPlannerSettings::CheckCollision(RobotWorld& world,const vecto
 
   for(size_t i=0;i<activeids.size();i++) {
     for(size_t j=i+1;j<activeids.size();j++) {
-      if(!collisionEnabled(activeids[i],activeids[j])) continue;
-      if(bbs[i].intersects(bbs[j])) {
-	if(::CheckCollision(geoms[i],geoms[j],tol))
-	  return pair<int,int>(activeids[i],activeids[j]);
+      if(collisionEnabled(activeids[i],activeids[j]) || collisionEnabled(activeids[i],activeids[i])) {
+        if(bbs[i].intersects(bbs[j])) {
+          if(::CheckCollision(geoms[i],geoms[j],tol))
+            return pair<int,int>(activeids[i],activeids[j]);
+        }
       }
     }
   }
@@ -264,10 +304,11 @@ pair<int,int> WorldPlannerSettings::CheckCollision(RobotWorld& world,const vecto
 
   for(size_t i=0;i<activeids1.size();i++) {
     for(size_t j=0;j<activeids2.size();j++) {
-      if(!collisionEnabled(activeids1[i],activeids2[j])) continue;
-      if(bbs1[i].intersects(bbs2[j])) {
-	if(::CheckCollision(geoms1[i],geoms2[j],tol))
-	  return pair<int,int>(activeids1[i],activeids2[j]);
+      if(collisionEnabled(activeids1[i],activeids2[j]) || collisionEnabled(activeids2[j],activeids1[i])) {
+        if(bbs1[i].intersects(bbs2[j])) {
+          if(::CheckCollision(geoms1[i],geoms2[j],tol))
+            return pair<int,int>(activeids1[i],activeids2[j]);
+        }
       }
     }
   }

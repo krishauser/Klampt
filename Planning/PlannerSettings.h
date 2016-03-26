@@ -49,6 +49,9 @@ struct WorldPlannerSettings
   ///object id2.  The default id2=-1 indicates checking with all other
   ///objects.  tol indicates an extra collision margin on top of the
   ///custom collision margins.
+  ///
+  ///Note that if id1 indicates a robot and id2 is -1, the robot is checked against
+  ///for self collisions AND collisions with all non-robot objects
   bool CheckCollision(RobotWorld& world,int id1,int id2=-1,Real tol=0);
   ///Same as the other CheckCollision, except a collision geometry is given.
   bool CheckCollision(RobotWorld& world,Geometry::AnyCollisionGeometry3D* mesh,int id=-1,Real tol=0);

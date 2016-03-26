@@ -747,7 +747,7 @@ bool SingleRobotCSpace::CheckCollisionFree()
   pair<int,int> res = settings->CheckCollision(world,idrobot,idothers);
   if(res.first >= 0) return false;
   //self collision check
-  res = settings->CheckCollision(world,idrobot,idrobot);
+  res = settings->CheckCollision(world,idrobot);
   if(res.first >= 0) return false;
   return true;
 }
