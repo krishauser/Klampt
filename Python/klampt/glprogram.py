@@ -396,6 +396,7 @@ class GLPluginProgram(GLRealtimeProgram):
         dy = y - self.lasty
         for plugin in self.plugins[::-1]:
             if plugin.motionfunc(x,y,dx,dy): return
+        GLRealtimeProgram.motionfunc(self,x,y)
         self.lastx,self.lasty = x,y
     def mousefunc(self,button,state,x,y):
         for plugin in self.plugins[::-1]:
@@ -408,6 +409,8 @@ class GLPluginProgram(GLRealtimeProgram):
     def display(self):
         for plugin in self.plugins:
             if plugin.display(): return
+        GLRealtimeProgram.display(self)
     def display_screen(self):
         for plugin in self.plugins:
             if plugin.display_screen(): return
+        GLRealtimeProgram.display_screen(self)
