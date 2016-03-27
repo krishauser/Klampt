@@ -442,9 +442,13 @@ class GLPluginProgram(GLRealtimeProgram):
         for plugin in self.plugins[::-1]:
             if plugin.specialupfunc(c,x,y): return
         GLRealtimeProgram.specialupfunc(self,c,x,y)
-    def motionfunc(self,x,y,dx,dy):
+    def motionfunc(self,x,y):
+        dx = x - self.lastx
+        dy = y - self.lasty
         for plugin in self.plugins[::-1]:
             if plugin.motionfunc(x,y,dx,dy): return
+        GLRealtimeProgram.motionfunc(self,x,y)
+        self.lastx,self.lasty = x,y
     def mousefunc(self,button,state,x,y):
         for plugin in self.plugins[::-1]:
             if plugin.mousefunc(button,state,x,y): return
@@ -456,6 +460,8 @@ class GLPluginProgram(GLRealtimeProgram):
     def display(self):
         for plugin in self.plugins:
             if plugin.display(): return
+        GLRealtimeProgram.display(self)
     def display_screen(self):
         for plugin in self.plugins:
             if plugin.display_screen(): return
+        GLRealtimeProgram.display_screen(self)
