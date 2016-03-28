@@ -245,8 +245,8 @@ void ThreeJSExport(const Geometry::AnyCollisionGeometry3D& geom,AnyCollection& o
       faces[int(i*4+2)] = mesh.tris[i].b;
       faces[int(i*4+3)] = mesh.tris[i].c;
     }
-    out["vertices"] = vertices;
-    out["faces"] = faces;
+    out["data"]["vertices"] = vertices;
+    out["data"]["faces"] = faces;
   }
   else {
     //can't export files of that type
