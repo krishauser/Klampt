@@ -352,7 +352,7 @@ void GetCurrentCollisionStatus(ODESimulator* sim,
       double depth = 0;
       string id1=sim->ObjectName(collpair.first),id2=sim->ObjectName(collpair.second);
       for(size_t j=0;j<i->contacts.size();j++)
-        depth = Max(depth,i->contacts[j].depth);
+        depth = Max(depth,(double)i->contacts[j].depth);
       //printf("ODESimulation: normal penetration depth between bodies %s and %s is %g/%g\n",id1.c_str(),id2.c_str(),depth,margin);
       double oldmargin = (sim->lastMarginsRemaining.count(collpair) == 0 ? margin : sim->lastMarginsRemaining[collpair]);
       if((margin - depth) < gRollbackPenetrationFraction*oldmargin) {
@@ -664,7 +664,7 @@ void ODESimulator::Step(Real dt)
           double margin = g1->outerMargin + g2->outerMargin;
           double depth = 0;
           for(size_t j=0;j<i->contacts.size();j++)
-            depth = Max(depth,i->contacts[j].depth);
+            depth = Max(depth,(double)i->contacts[j].depth);
           marginsRemaining[collpair] = margin - depth;
         }
   		}
