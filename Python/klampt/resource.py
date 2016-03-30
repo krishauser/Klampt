@@ -15,7 +15,7 @@ import robotsim
 import vectorops,se3,so3
 import os
 import time
-from robotsim import WidgetSet,RobotPoser,ObjectPoser,TransformPoser,WorldModel,RobotModelLink,RigidObjectModel,IKObjective
+from robotsim import WidgetSet,RobotPoser,ObjectPoser,TransformPoser,PointPoser,WorldModel,RobotModelLink,RigidObjectModel,IKObjective
 from contact import ContactPoint
 from hold import Hold
 import visualization
@@ -239,6 +239,7 @@ class _VisualEditorBase(glcommon.GLWidgetPlugin):
     def display(self):
         if self.world: self.world.drawGL()
         self.klamptwidgetmaster.drawGL(self.viewport())
+        return True
     def addDialogItems(self,parent,ui='qt'):
         return
     def display_screen(self):
@@ -257,6 +258,8 @@ class _VisualEditorBase(glcommon.GLWidgetPlugin):
         glRasterPos(20,h)
         gldraw.glutBitmapString(GLUT_BITMAP_HELVETICA_12,"Press 'x' to exit without saving, 'q' to save+exit")
         """
+        return True
+
 
 class _ConfigVisualEditor(_VisualEditorBase):
     def __init__(self,name,value,description,world):
@@ -273,6 +276,8 @@ class _ConfigVisualEditor(_VisualEditorBase):
     def mousefunc(self,button,state,x,y):
         if _VisualEditorBase.mousefunc(self,button,state,x,y):
             self.value = self.robotposer.get()
+            return True
+        return False
 
     def display(self):
         #Override display handler since the widget draws the robot
@@ -285,6 +290,7 @@ class _ConfigVisualEditor(_VisualEditorBase):
             self.world.robot(i).drawGL()
         #this line will draw the robot
         self.klamptwidgetmaster.drawGL(self.viewport())
+        return False
 
 class _ConfigsVisualEditor(_VisualEditorBase):
     def __init__(self,name,value,description,world):
@@ -419,7 +425,7 @@ class _PointVisualEditor(_VisualEditorBase):
         self.frame = se3.identity() if frame==None else frame
         self.pointposer = PointPoser()
         self.pointposer.set(se3.apply(self.frame,value))
-        self.pointposer.setFrame(self.frame[0])
+        self.pointposer.setAxes(self.frame[0])
         self.addWidget(self.pointposer)
    
     def instructions(self):
@@ -428,6 +434,8 @@ class _PointVisualEditor(_VisualEditorBase):
     def mousefunc(self,button,state,x,y):
         if _VisualEditorBase.mousefunc(self,button,state,x,y):
             self.value = se3.apply(se3.inv(self.frame),self.pointposer.get())
+            return True
+        return False
 
 class _RotationVisualEditor(_VisualEditorBase):
     def __init__(self,name,value,description,world,frame=None):
@@ -445,6 +453,8 @@ class _RotationVisualEditor(_VisualEditorBase):
     def mousefunc(self,button,state,x,y):
         if _VisualEditorBase.mousefunc(self,button,state,x,y):
             self.value = se3.mul(se3.inv(self.frame),self.xformposer.get())[0]
+            return True
+        return False
 
 class _RigidTransformVisualEditor(_VisualEditorBase):
     def __init__(self,name,value,description,world,frame=None):
@@ -462,6 +472,8 @@ class _RigidTransformVisualEditor(_VisualEditorBase):
     def mousefunc(self,button,state,x,y):
         if _VisualEditorBase.mousefunc(self,button,state,x,y):
             self.value = se3.mul(se3.inv(self.frame),self.xformposer.get())
+            return True
+        return False
 
 
 class _ObjectTransformVisualEditor(_VisualEditorBase):
@@ -477,7 +489,8 @@ class _ObjectTransformVisualEditor(_VisualEditorBase):
     def mousefunc(self,button,state,x,y):
         if _VisualEditorBase.mousefunc(self,button,state,x,y):
             self.value = self.objposer.get()
-
+            return True
+        return False
 
 #Qt stuff
 if glcommon._PyQtAvailable:
@@ -652,7 +665,11 @@ def edit(name,value,type='auto',description=None,editor='visual',world=None,fram
     if name == None:
         name = 'Anonymous'
     if type == 'auto':
-        type = nameToType(name)
+        type = objectToTypes(value)
+        if type is None:
+            raise RuntimeError("Could not autodetect type of object "+name)
+        if isinstance(type,(list,tuple)):
+            type = type[0]
     if not glcommon._PyQtAvailable and editor=='visual':
         print "PyQt is not available, defaulting to console editor"
         editor = 'console'
