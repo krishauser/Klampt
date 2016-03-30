@@ -659,7 +659,7 @@ void CSpaceInterface::addFeasibilityTest(const char* name,PyObject* pyFeas)
   if(index < 0 || index >= (int)spaces.size() || spaces[index]==NULL) 
     throw PyException("Invalid cspace index");
   int cindex = -1;
-  if(spaces[index]->constraintMap.count(name) > 0);
+  if(spaces[index]->constraintMap.count(name) > 0)
     cindex = spaces[index]->constraintMap[name];
   spaces[index]->feasibleTests.resize(spaces[index]->constraintNames.size(),NULL);
   if(cindex < 0) {
@@ -668,7 +668,7 @@ void CSpaceInterface::addFeasibilityTest(const char* name,PyObject* pyFeas)
     spaces[index]->constraintNames.push_back(name);
   }
   else {
-    Py_XDECREF(spaces[index]->feasibleTests[cindex]);
+    Py_DECREF(spaces[index]->feasibleTests[cindex]);
     Py_XINCREF(pyFeas);
     spaces[index]->feasibleTests[cindex] = pyFeas;
   }
@@ -690,7 +690,7 @@ void CSpaceInterface::addVisibilityTest(const char* name,PyObject* pyVis)
   if(index < 0 || index >= (int)spaces.size() || spaces[index]==NULL) 
     throw PyException("Invalid cspace index");
   int cindex = -1;
-  if(spaces[index]->constraintMap.count(name) > 0);
+  if(spaces[index]->constraintMap.count(name) > 0)
     cindex = spaces[index]->constraintMap[name];
   spaces[index]->visibleTests.resize(spaces[index]->constraintNames.size(),NULL);
   if(cindex < 0) {
@@ -699,7 +699,7 @@ void CSpaceInterface::addVisibilityTest(const char* name,PyObject* pyVis)
     spaces[index]->constraintNames.push_back(name);
   }
   else {
-    Py_XDECREF(spaces[index]->visibleTests[cindex]);
+    Py_DECREF(spaces[index]->visibleTests[cindex]);
     Py_XINCREF(pyVis);
     spaces[index]->visibleTests[cindex] = pyVis;
   }
