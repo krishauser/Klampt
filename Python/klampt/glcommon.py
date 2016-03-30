@@ -58,6 +58,7 @@ class GLWidgetPlugin(GLPluginBase):
         self.klamptwidgetmaster.add(widget)
     def display(self):
         self.klamptwidgetmaster.drawGL(self.viewport())
+        return False
     def keyboardfunc(self,c,x,y):
         self.klamptwidgetmaster.keypress(c)
         return False
