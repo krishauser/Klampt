@@ -8,9 +8,29 @@ class CSpace:
     """Used alongside MotionPlan to define a configuration space for
     motion planning.
 
+    Attributes:
+    - eps: the collision tolerance used for checking edges, in the units
+      defined by the distance(a,b) method.  (by default, euclidean distance)
+    - bound: a list of lower and upper bounds on the space [(l1,u1),...,(ld,ud)]
+      where d is the dimension of the configuration space.
+    - properties: a map of properties that may be used by a planner.  See below
+      documentation for more detail. 
+    Internally used attributes:
+    - cspace: a motionplanning module CSpaceInterface object
+    - feasibilityTests: a list of one-argument functions that test feasibility
+      of this configuration space's constraints.  E.g.,
+      if you have a collision tester that returns True if a configuration is in
+      collision, and also want to check bounds, you can set this to a list:
+      [self.in_bounds,lambda x not self.collides(x)]
+      You should not write this directly but instead use addFeasibilityTest.
+    - feasibilityTestNames: a list of names of feasibility tests.  You should
+      not write this directly but instead use addFeasibilityTest.
+
     To define a custom CSpace, subclasses will need to override:
         
-    - feasible(x): returns true if the vector x is in the feasible space
+    - *feasible(x): returns true if the vector x is in the feasible space.  By
+      default calls each function in self.feasibilityTests, which by default
+      only tests bound constraints.
     - *sample(): returns a new vector x from a superset of the feasible space
     - *sampleneighborhood(c,r): returns a new vector x from a neighborhood of c
       with radius r
@@ -52,6 +72,8 @@ class CSpace:
     """
     def __init__(self):
         self.cspace = None
+        self.feasibilityTests = None
+        self.feasibilityTestNames = None
         self.eps = 1e-3
         self.bound = [(0,1)]
         self.properties = {}
@@ -67,19 +89,29 @@ class CSpace:
         """This method must be called to free the memory associated with the
         planner.  Alternatively, motionplanning.destroy() can be called to
         free all previously constructed CSpace and MotionPlan objects."""
-        if self.cspace != None:
+        if self.cspace is not None:
             self.cspace.destroy()
             self.cspace = None
     
-    def setup(self):
+    def setup(self,reinit = False):
         """Called internally by the MotionPlan class to set up planning
-        hooks."""
-        assert self.cspace == None
+        hooks. 
+
+        If reinit is not set to True, and the setup() method has been called before,
+        a warning message will be printed.  Set it to True to suppress this message."""
+        if self.cspace is not None:
+            if not reinit:
+                print "CSpace.setup(): Performance warning, called twice, destroying previous CSpaceInterface object"
+            self.cspace.destroy()
         self.cspace = motionplanning.CSpaceInterface()
-        if hasattr(self,'feasible'):
-            self.cspace.setFeasibility(getattr(self,'feasible'))
+        if self.feasibilityTests is not None:
+            for n,f in zip(self.feasibilityTestNames,self.feasibilityTests):
+                self.cspace.addFeasibilityTest(n,f)
         else:
-            raise 'Need feasible method'
+            if hasattr(self,'feasible'):
+                self.cspace.setFeasibility(getattr(self,'feasible'))
+            else:
+                raise 'Need feasible method or addFeasibilityTests'
         if hasattr(self,'visible'):
             self.cspace.setVisibility(getattr(self,'visible'))
         else:
@@ -115,9 +147,29 @@ class CSpace:
         """
         return [random.uniform(max(b[0],ci-r),min(b[1],ci+r)) for ci,b in zip(c,self.bound)]
 
+    def addFeasibilityTest(self,func,name=None):
+        """Adds a new feasibility test with the given function func(x) and the specified name.
+        If name is not provided (default) a default name is generated."""
+        if self.feasibilityTests is None:
+            self.feasibilityTests = []
+            self.feasibilityTestNames = []
+        self.feasibilityTests.append(func)
+        if name is None:
+            name = "test_"+str(len(self.feasibilityTests)-1)
+        self.feasibilityTestNames.append(name)
+
+    def inBounds(self,x):
+        """Returns true if x is within the given bounds"""
+        return all(a<=xi<=b for (xi,(a,b)) in zip(x,self.bound))
+
     def feasible(self,x):
         """Overload this to define your new feasibility test"""
-        return all(a<=xi<=b for (xi,(a,b)) in zip(x,self.bound))
+        if self.feasibilityTests is None:
+            return self.inBounds(x)
+        else:
+            for test in self.feasibilityTests:
+                if not test(x): return False
+            return True
 
 
 class MotionPlan:
@@ -157,7 +209,7 @@ class MotionPlan:
         (this list may be out-of-date; the most current documentation
         is listed in src/motionplanning.h)
         """
-        if space.cspace == None:
+        if space.cspace is None:
             space.setup()
         if type != None:
             motionplanning.setPlanType(type)

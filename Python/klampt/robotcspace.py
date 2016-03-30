@@ -1,11 +1,11 @@
-import cspace
+from cspace import CSpace
 import robotsim
 import robotcollide
 from cspaceutils import AdaptiveCSpace,EmbeddedCSpace
 import math
 import random
 
-class RobotCSpace(AdaptiveCSpace):
+class RobotCSpace(CSpace):
     """A basic robot cspace that allows collision free motion.
 
     Warning: if your robot has non-standard joints, like a free-
@@ -18,62 +18,39 @@ class RobotCSpace(AdaptiveCSpace):
           the world in which the robot lives.  Any ignored collisions will be
           respected in the collision checker.
         """
-        AdaptiveCSpace.__init__(self)
+        CSpace.__init__(self)
         self.robot = robot
         self.bound = zip(*robot.getJointLimits())
         self.collider = collider
+        self.addFeasibilityTest(lambda x: self.inJointLimits(x),"joint limits")
 
-        #set this to false to turn off the adaptive tester, which may
-        #have some overhead
-        self.adaptive = True
-
-        self.extraFeasibilityTests = []
-
-        #adaptive tests
-        self.addFeasibleTest(lambda x: self.inJointLimits(x),"joint limits")
         #TODO explode these into individual self collision / env collision
         #tests
-        self.addFeasibleTest(lambda x : not self.selfCollision(),"self collision")
-        self.addFeasibleTest(lambda x: not self.envCollision(),"env collision")
+        def setconfig(x):
+            self.robot.setConfig(x)
+            return True
+        if collider:
+            self.addFeasibilityTest(setconfig,"dummy")
+            self.addFeasibilityTest(lambda x : not self.selfCollision(),"self collision")
+            self.addFeasibilityTest(lambda x: not self.envCollision(),"env collision")
         self.properties['geodesic'] = 1
         volume = 1
         for b in self.bound:
             if b[0] != b[1]: volume *= b[1]-b[0]
         self.properties['volume'] = volume
 
-    def addConstraint(self,checker):
-        self.extraFeasibilityTests.append(checker)
-        self.addFeasibleTest(checker)
+    def addConstraint(self,checker,name=None):
+        self.addFeasiblilityTest(checker,name)
 
     def sample(self):
         """Overload this to implement custom sampling strategies or to handle
         non-standard joints.  This one will handle spin joints and
         rotational axes of floating bases."""
-        res = AdaptiveCSpace.sample(self)
+        res = CSpace.sample(self)
         for i,x in enumerate(res):
             if math.isnan(x):
                 res[i] = random.uniform(0,math.pi*2.0)
         return res
-
-    def feasible(self,x):
-        """Feasibility test.  If self.adaptive=True, uses the adaptive
-        feasibility tester which may speed up collision testing."""
-        if self.adaptive:
-            #Use the adaptive tester
-            self.robot.setConfig(x)
-            return AdaptiveCSpace.feasible(self,x)
-
-        #Use the regular tester
-        if not self.inJointLimits(x): return False
-        #check extras
-        for f in self.extraFeasibilityTesters:
-            if not f(x): return False
-        #check collisions
-        if self.collider:
-            self.robot.setConfig(x)
-            if self.selfCollision(): return False
-            if self.envCollision(): return False
-        return True
 
     def inJointLimits(self,x):
         """Checks joint limits of the configuration x"""
@@ -101,6 +78,20 @@ class RobotCSpace(AdaptiveCSpace):
             if any(self.collider.robotTerrainCollisions(self.robot.index,o)):
                 return True;
         return False
+
+    def interpolate(self,a,b,u):
+        return self.robot.interpolate(a,b,u)
+
+    def distance(self,a,b):
+        return self.robot.distance(a,b)
+
+    def sendPathToController(self,path,controller):
+        """Given a planned CSpace path 'path' and a SimRobotController 'controller',
+        sends the path so that it is executed correctly by the controller (this assumes
+        a fully actuated robot)."""
+        controller.setMilestone(path[0])
+        for q in path[1:]:
+            controller.appendMilestoneLinear(q)
 
                   
 class RobotSubsetCSpace(EmbeddedCSpace):
@@ -134,6 +125,18 @@ class RobotSubsetCSpace(EmbeddedCSpace):
                 rindex = self.collider.robots[robot.index][i]
                 self.collider.mask[rindex] = set()
 
+    def liftPath(self,path):
+        """Given a CSpace path path, lifts this to the full robot configuration"""
+        return [self.lift(q) for q in path]
+
+    def sendPathToController(self,path,controller):
+        """Given a planned CSpace path 'path' and a SimRobotController 'controller',
+        sends the path so that it is executed correctly by the controller (this assumes
+        a fully actuated robot)."""
+        lpath = self.liftPath(path)
+        controller.setMilestone(lpath[0])
+        for q in lpath[1:]:
+            controller.appendMilestoneLinear(q)
 
 class ClosedLoopRobotCSpace(RobotCSpace):
     """A closed loop cspace.  Allows one or more IK constraints to be
@@ -151,8 +154,12 @@ class ClosedLoopRobotCSpace(RobotCSpace):
         self.maxIters = 100
         self.tol = 1e-3
 
-        #adaptive checker
-        self.addFeasibleTest(lambda x: self.closedLoop(),'closed loop constraint')
+        self.addFeasibilityTest(lambda x: self.closedLoop(),'closed loop constraint')
+
+    def setIKActiveDofs(self,activeSet):
+        """Marks that only a subset of the DOFs of the robot are to be used for solving
+        the IK constraint."""
+        self.solver.setActiveDofs(activeSet)
 
     def sample(self):
         """Samples directly on the contact manifold"""
@@ -160,22 +167,13 @@ class ClosedLoopRobotCSpace(RobotCSpace):
         (res,iters) = self.solver.solve(self.maxIters,self.tol)
         return self.robot.getConfig()
 
-    def feasible(self,x):
-        if self.adaptive:
-            #Use the adaptive tester
-            self.robot.setConfig(x)
-            return AdaptiveCSpace.feasible(self,x)
-            
-        if not self.inJointLimits(x): return False
+    def solveConstraints(self,x):
+        """Given an initial configuration of the robot x, attempts to solve the IK constraints 
+        given in this space.  Return value is the best configuration found via local optimization."""
         self.robot.setConfig(x)
-        if not self.closedLoop(): return False;
-        #check extras
-        for f in self.extraFeasibilityTesters:
-            if not f(x): return False
-        #check collisions
-        if self.selfCollision(): return False
-        if self.envCollision(): return False
-        return True
+        (res,iters) = self.solver.solve(self.maxIters,self.tol)
+        if not res: print "IK failed solve"
+        return self.robot.getConfig()
 
     def closedLoop(self,tol=None):
         """Returns true if the closed loop constraint has been met at the
@@ -183,6 +181,34 @@ class ClosedLoopRobotCSpace(RobotCSpace):
         e = self.solver.getResidual()
         if tol==None: tol = self.tol
         return max(abs(ei) for ei in e) <= tol
+
+    def interpolate(self,a,b,u):
+        """Interpolates on the manifold.  Used by edge collision checking"""
+        x = RobotCSpace.interpolate(self,a,b,u)
+        return self.solveConstraints(x)
+
+    def interpolationPath(self,a,b,epsilon=1e-2):
+        """Creates a discretized path on the contact manifold between the points a and b, with
+        resolution epsilon"""
+        d = self.distance(a,b)
+        nsegs = int(math.ceil(d/epsilon))
+        if nsegs <= 1: return [a,b]
+        res = [a]
+        for i in xrange(nsegs-1):
+            u = float(i+1)/float(nsegs)
+            res.append(self.interpolate(a,b,u))
+        res.append(b)
+        return res
+
+    def discretizePath(self,path,epsilon=1e-2):
+        """Given a CSpace path path, generates a path that satisfies closed-loop constraints
+        up to the given distance between milestones"""
+        if path is None: return None
+        if len(path)==0: return []
+        respath = [path[0]]
+        for a,b in zip(path[:-1],path[1:]):
+            respath += self.interpolationPath(a,b,epsilon)[1:]
+        return respath
 
 class ImplicitManifoldRobotCSpace(RobotCSpace):
     """A closed loop cspace with an arbitrary numerical manifold f(q)=0
@@ -195,30 +221,12 @@ class ImplicitManifoldRobotCSpace(RobotCSpace):
         self.maxIters = 100
         self.tol = 1e-3
 
-        #adaptive checker
-        self.addFeasibleTest(lambda x: self.onManifold(x),'implicit manifold constraint')
+        self.addFeasibilityTest(lambda x: self.onManifold(x),'implicit manifold constraint')
 
     def sample(self):
         """Samples directly on the contact manifold"""
         x = RobotCSpace.sample()
         return self.solveManifold(x)
-
-    def feasible(self,x):
-        if self.adaptive:
-            #Use the adaptive tester
-            self.robot.setConfig(x)
-            return AdaptiveCSpace.feasible(self,x)
-            
-        if not self.inJointLimits(x): return False
-        self.robot.setConfig(x)
-        if not self.closedLoop(): return False;
-        #check extras
-        for f in self.extraFeasibilityTesters:
-            if not f(x): return False
-        #check collisions
-        if self.selfCollision(): return False
-        if self.envCollision(): return False
-        return True
 
     def onManifold(self,x,tol=None):
         """Returns true if the manifold constraint has been met at x."""
@@ -239,3 +247,8 @@ class ImplicitManifoldRobotCSpace(RobotCSpace):
         rootfind.setVectorField(self.implicitConstraint)
         (res,x,val) = rootfind.findRootsBounded(x,self.bound)
         return x
+
+    def interpolate(self,a,b,u):
+        """Interpolates on the manifold.  Used by edge collision checking"""
+        x = RobotCSpace.interpolate(self,a,b,u)
+        return self.solveManifold(x)

@@ -5,8 +5,16 @@ from klampt import *
 from klampt import visualization
 from klampt import resource
 from klampt import robotplanning
+from klampt import trajectory
 import time
 import sys
+
+#settings
+DO_SIMPLIFY = 0
+DEBUG_SIMPLIFY = 0
+MANUAL_SPACE_CREATION = 0
+CLOSED_LOOP_TEST = 1
+MANUAL_PLAN_CREATION = 0
 
 #load the robot / world file
 fn = "../../data/robots/jaco.rob"
@@ -35,7 +43,8 @@ robot = world.robot(0)
 #it makes planning faster but sacrifices accuracy.  Uncomment the line
 #visualization.dialog() below to examine whether the simplified robot looks
 #ok
-simplify(robot)
+if DO_SIMPLIFY:
+    simplify(robot)
 
 #add the world elements individually to the visualization
 visualization.add("robot",robot)
@@ -45,19 +54,31 @@ for i in range(world.numRigidObjects()):
     visualization.add("rigidObject"+str(i),world.rigidObject(i))
 for i in range(world.numTerrains()):
     visualization.add("terrain"+str(i),world.terrain(i))
-#if you want to just see the robot in a pop up (blocking call)...
-#visualization.dialog()
+#if you want to just see the robot in a pop up window...
+if DO_SIMPLIFY and DEBUG_SIMPLIFY:
+    visualization.dialog()
 
 #Automatic construction of space
-space = robotplanning.makeSpace(world=world,robot=robot,
-                                edgeCheckResolution=1e-2,
-                                movingSubset='all')
-
-#Manual construction of space
-#collider = WorldCollider(world)
-#space = robotcspace.RobotCSpace(robot,collider)
-#space.eps = 1e-2
-#space.setup()
+if not CLOSED_LOOP_TEST:
+    if not MANUAL_SPACE_CREATION:
+        space = robotplanning.makeSpace(world=world,robot=robot,
+                                        edgeCheckResolution=1e-2,
+                                        movingSubset='all')
+    else:
+        #Manual construction of space
+        collider = WorldCollider(world)
+        space = robotcspace.RobotCSpace(robot,collider)
+        space.eps = 1e-2
+        space.setup()
+else:
+    #TESTING: closed loop robot cspace
+    collider = WorldCollider(world)
+    obj = ik.objective(robot.link(robot.numLinks()-1),local=[0,0,0],world=[0.5,0,0.5])
+    visualization.add("IK goal",obj)
+    visualization.dialog()
+    space = robotcspace.ClosedLoopRobotCSpace(robot,obj,collider)
+    space.eps = 1e-2
+    space.setup()
 
 #Generate some waypoint configurations using the resource editor
 configs = []
@@ -76,6 +97,12 @@ while True:
 if len(configs)==0:
     exit(0)
 
+if CLOSED_LOOP_TEST:
+    #need to project those onto the manifold
+    for i,q in enumerate(configs):
+        configs[i] = space.solveConstraints(q)
+    resource.edit("IK solved configs",configs,"Configs",description="These configurations try to solve the IK constraint",world=world)
+
 #set up a settings dictionary here.  This is a random-restart + shortcutting
 #SBL planner.
 settings = { 'type':"sbl", 'perturbationRadius':0.5, 'bidirectional':1, 'shortcut':1, 'restart':1, 'restartTermCond':"{foundSolution:1,maxIters:1000}" }
@@ -93,20 +120,21 @@ settings = { 'type':"sbl", 'perturbationRadius':0.5, 'bidirectional':1, 'shortcu
 #planner.
 wholepath = [configs[0]]
 for i in range(len(configs)-1):
-    #Manual construction of planner
-    #plan = cspace.MotionPlan(space, **settings)
-    #plan.setEndpoints(configs[0],configs[1])
-
-    #this code uses the robotplanning module's convenience functions
-    robot.setConfig(configs[i])
-    plan = robotplanning.planToConfig(world,robot,configs[i+1],
-                                      movingSubset='all',
-                                      **settings)
+    if MANUAL_PLAN_CREATION:
+        #Manual construction of planner
+        plan = cspace.MotionPlan(space, **settings)
+        plan.setEndpoints(configs[0],configs[1])
+    else:
+        #this code uses the robotplanning module's convenience functions
+        robot.setConfig(configs[i])
+        plan = robotplanning.planToConfig(world,robot,configs[i+1],
+                                          movingSubset='all',
+                                          **settings)
     if plan is None:
         break
     print "Planning..."
     plan.planMore(500)
-    #this code just gives some debugging information
+    #this code just gives some debugging information. it may get expensive
     V,E = plan.getRoadmap()
     print len(V),"feasible milestones sampled,",len(E),"edges connected"
     path = plan.getPath()
@@ -115,6 +143,9 @@ for i in range(len(configs)-1):
         #debug some sampled configurations
         print V[0:max(10,len(V))]
         break
+    if CLOSED_LOOP_TEST:
+        #the path is currently a set of milestones: discretize it so that it stays near the contact surface
+        path = space.discretizePath(path)
     wholepath += path[1:]
 
     #to be nice to the C++ module, do this to free up memory
@@ -122,10 +153,19 @@ for i in range(len(configs)-1):
     plan.close()
 
 if len(wholepath)>1:
-    print "Path:",wholepath
-    #show the path in the visualizer, repeating 5 times
-    visualization.animate("robot",wholepath)
-    visualization.spin((len(wholepath)-1)*5)
+    #print "Path:"
+    #for q in wholepath:
+    #    print "  ",q
+    #if you want to save the path to disk, uncomment the following line
+    #wholepath.save("test.path")
+
+    #draw the path as a RobotTrajectory (you could just animate wholepath, but for robots with non-standard joints
+    #the results will often look odd).  Animate with 5-second duration
+    times = [i*5.0/(len(wholepath)-1) for i in range(len(wholepath))]
+    traj = trajectory.RobotTrajectory(robot,times=times,milestones=wholepath)
+    #show the path in the visualizer, repeating for 60 seconds
+    visualization.animate("robot",traj)
+    visualization.spin(60)
 else:
     print "Failed to generate a plan"
 

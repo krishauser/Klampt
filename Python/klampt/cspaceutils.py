@@ -134,6 +134,9 @@ class EmbeddedCSpace(CSpace):
         self.eps = self.ambientspace.eps
         self.bound = [self.ambientspace.bound[i] for i in self.mapping]
         self.properties = self.ambientspace.properties
+        if self.ambientspace.feasibilityTests is not None:
+            self.feasibilityTests = [(lambda x:f(self.lift(x))) for f in self.ambientspace.feasibilityTests]
+            self.feasibilityTestNames = [(lambda x:f(self.lift(x))) for f in self.ambientspace.feasibilityTestNames]
 
     def project(self,xamb):
         """Ambient space -> embedded space"""
@@ -161,8 +164,8 @@ class ZeroTest:
         self.type = 'constant'
         self.dist = lambda(x): 1 if x != 0 else 0
 
-    def __call__(self,obj):
-        return self.dist(obj)
+    def __call__(self,*args):
+        return self.dist(*args)
 
     def setConstant(self,val):
         self.name = str(val)
@@ -213,14 +216,23 @@ class AdaptiveZeroTester:
     """
     def __init__(self):
         self.tests = []
+        self.test_ids = []
 
-    def add_test(self,f):
+    def add_test(self,f,id=None):
+        """Adds an instance of the ZeroTest f to the AdaptiveZeroTester"""
+        if id is None:
+            id = len(self.tests)
         self.tests.append(f)
+        self.test_ids.append(id)
         self.reset_history(self.tests[-1])
 
     def update_order(self):
-        thelist = [(f._sum_cost/f._num_fail,f) for f in self.tests]
-        self.tests = [t for (ec,t) in sorted(thelist)]
+        """Given the empirical costs / failures of testing, returns the optimal
+        order to find the first failure."""
+        thelist = [(f._sum_cost/f._num_fail,id,f) for f,id in zip(self.tests,self.test_ids)]
+        thelist = sorted(thelist)
+        self.tests = [item[2] for item in thelist]
+        self.test_ids = [item[1] for item in thelist]
 
     def testmax(self,*args):
         """Tests all tests, returning the max absolute deviation from 0."""
@@ -310,7 +322,7 @@ class AdaptiveCSpace(CSpace,AdaptiveZeroTester):
     def addFeasibleTest(self,f,name):
         t = ZeroTest()
         t.setCondition(f,name)
-        self.add_test(t)
+        self.add_test(t,name)
 
     def addFeasibleComp(self,f,cmp,val,name):
         t = ZeroTest()
@@ -321,7 +333,7 @@ class AdaptiveCSpace(CSpace,AdaptiveZeroTester):
         return self.test(x)
 
     def stats(self):
-        """Retreives the zero tester stats."""
+        """Retreives the feasibility test stats."""
         res = dict()
         for t in self.tests:
             res[t.name] = AdaptiveZeroTester.stats(self,t)
