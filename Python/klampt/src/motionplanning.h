@@ -83,9 +83,9 @@ void destroy();
  * regardless of its arguments).
  *
  * Supported properties include "euclidean" (boolean), "metric" (string),
- * "geodesic" (boolean).  These may be used by planners to make planning
- * faster or more accurate.  For a more complete list
- * see KrisLibrary/planning/CSpace.h.
+ * "geodesic" (boolean), "minimum" (vector), and "maximum" (vector). 
+ * These may be used by planners to make planning faster or more accurate.
+ * For a complete list see KrisLibrary/planning/CSpace.h.
  */
 class CSpaceInterface
 {
