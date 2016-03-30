@@ -351,8 +351,8 @@ class GLPluginProgram(GLRealtimeProgram):
         GLRealtimeProgram.__init__(self,name)
         self.plugins = []
     def setPlugin(self,plugin):
-        for plugin in self.plugins:
-            plugin.window = None
+        for p in self.plugins:
+            p.window = None
         self.plugins = []
         if plugin:
             self.pushPlugin(plugin)
