@@ -76,11 +76,14 @@ def moment(R):
     that e^[w] = R.  Equivalent to axis-angle representation with
     w/||w||=axis, ||w||=angle."""
     theta = angle(R)
-    if abs(theta-math.pi)<1e-5:
+    if abs(theta-math.pi)<1e-2:
         #can't do normal version because the scale factor reaches a singularity
-        x2=(R[0]+1.)*0.5
-        y2=(R[4]+1.)*0.5
-        z2=(R[8]+1.)*0.5
+        #OR it's close enough to pi that this alternate technique has better numerical
+        #performance
+        c = math.cos(theta)
+        x2=(R[0]-c)/(1.0 - c)
+        y2=(R[4]-c)/(1.0 - c)
+        z2=(R[8]-c)/(1.0 - c)
         if x2 < 0:
             assert(x2>-1e-5)
             x2=0
@@ -90,31 +93,41 @@ def moment(R):
         if z2 < 0:
             assert(z2>-1e-5)
             z2=0
-        x = math.pi*math.sqrt(x2)
-        y = math.pi*math.sqrt(y2)
-        z = math.pi*math.sqrt(z2)
-        #determined up to sign changes, we know r12=2xy,r13=2xz,r23=2yz
-        xy=R[3]
-        xz=R[6]
-        yz=R[7]
-        if(x > y):
-            if(x > z):
-                #x is largest
-                if(xy < 0): y=-y
-                if(xz < 0): z=-z
+        x = theta*math.sqrt(x2)
+        y = theta*math.sqrt(y2)
+        z = theta*math.sqrt(z2)
+        if abs(theta-math.pi) < 1e-5:
+            #determined up to sign changes, we know r12=2xy,r13=2xz,r23=2yz
+            xy=R[3]
+            xz=R[6]
+            yz=R[7]
+            if(x > y):
+                if(x > z):
+                    #x is largest
+                    if(xy < 0): y=-y
+                    if(xz < 0): z=-z
+                else:
+                    #z is largest
+                    if(yz < 0): y=-y
+                    if(xz < 0): x=-x
             else:
-                #z is largest
-                if(yz < 0): y=-y
-                if(xz < 0): x=-x
+                if(y > z):
+                    #y is largest
+                    if(xy < 0): x=-x
+                    if(yz < 0): z=-z
+                else:
+                    #z is largest
+                    if(yz < 0): y=-y
+                    if(xz < 0): x=-x
         else:
-            if(y > z):
-                #y is largest
-                if(xy < 0): x=-x
-                if(yz < 0): z=-z
-            else:
-                #z is largest
-                if(yz < 0): y=-y
-                if(xz < 0): x=-x
+            #alternate technique: use sign of anti-cross product
+            eps = theta-math.pi
+            if eps*(R[3+2]-R[6+1]) > 0:
+                x = -x
+            if eps*(R[6+0]-R[0+2]) > 0:
+                y = -y
+            if eps*(R[0+1]-R[3+0]) > 0:
+                z = -z
         return [x,y,z]
     #normal
     scale = 0.5
@@ -289,3 +302,18 @@ def interpolate(R1,R2,u):
     if angle==0: return R1
     axis = vectorops.div(m,angle)
     return mul(R1,rotation(axis,angle*u))
+
+def det(R):
+    """Returns the determinant of the 3x3 matrix R"""
+    m = matrix(R)
+    return m[0][0]*m[1][1]*m[2][2]+m[0][1]*m[1][2]*m[2][0]+m[0][2]*m[1][0]*m[2][1]-m[0][0]*m[1][2]*m[2][1]-m[0][1]*m[1][0]*m[2][2]-m[0][2]*m[1][1]*m[2][0]
+
+def is_rotation(R,tol=1e-5):
+    """Returns true if R is a rotation matrix, i.e. is orthogonal to the given tolerance and has + determinant"""
+    RRt = mul(R,inv(R))
+    err = vectorops.sub(RRt,identity())
+    if any(abs(v) > tol for v in err):
+        return False
+    if det(R) < 0: 
+        return False
+    return True
