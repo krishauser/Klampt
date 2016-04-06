@@ -140,16 +140,25 @@ def fixed_objective(link,ref=None,local=None,world=None):
     to their current positions in space.  If only world is provided,
     the points on the link with the given world position are constrained in
     place."""
-    refcoords = ref.getTransform() if ref != None else se3.identity()
+    refcoords = ref.getTransform() if ref is not None else se3.identity()
     Tw = link.getTransform()
     Trel = se3.mul(se3.inv(refcoords),Tw)
-    if local == None and world == None:
+    if local is not None and not hasattr(local[0],'__iter__'):
+        #just a single point, make it a list of points
+        local = [local]
+    if world is not None and not hasattr(world[0],'__iter__'):
+        #just a single point, make it a list of points
+        world = [world]
+    if local is None and world is None:
+        #fixed rotation/position objective
         return objective(link,ref,R=Trel[0],t=Trel[1])
-    elif local == None:
+    elif local is None:
+        #fixed point, given by world coordinates
         Trelinv = se3.inv(Trel)
         local = [se3.apply(trelinv,p) for p in world]
         return objective(link,ref,local=local,world=world)
-    elif world == None:
+    elif world is None:
+        #fixed point, given by local coordinates
         world = [se3.apply(Trel,p) for p in local]
         return objective(link,ref,local=local,world=world)
     else:
@@ -291,7 +300,7 @@ def solve_global(objectives,iters=1000,tol=1e-3,numRestarts=100,feasibilityCheck
     Returns true if a feasible solution is successfully found to the given
     tolerance, within the provided number of iterations.
     """
-    if feasibilityCheck==None: feasibilityCheck=lambda : True
+    if feasibilityCheck is None: feasibilityCheck=lambda : True
     s = solver(objectives)
     if hasattr(s,'__iter__'):
         if startRandom:
