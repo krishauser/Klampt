@@ -518,7 +518,7 @@ class Manager(Group):
 _defaultManager = Manager()
 def _callfn(name):
     global _defaultManager
-    return lambda *args:getattr(_defaultManager,name)(*args)
+    return lambda *args,**kwargs:getattr(_defaultManager,name)(*args,**kwargs)
 
 def manager():
     """Retrieves the default top-level manager"""
