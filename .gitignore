@@ -81,3 +81,24 @@ _CPack*
 # Log files
 *.log
 *.csv
+
+#binary files
+CartPole
+ContactPlan
+DynamicPlanDemo
+Library/KrisLibrary/
+Library/glui-2.36/
+Library/ode-0.11.1/
+Merge
+MotorCalibrate
+PlanDemo
+RealTimePlanning
+RobotPose
+RobotTest
+SafeSerialClient
+SimTest
+SimUtil
+TrajOpt
+URDFtoRob
+UserTrials
+UserTrialsSerial
