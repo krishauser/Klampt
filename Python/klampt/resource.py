@@ -201,6 +201,8 @@ def get(name,type='auto',directory=None,default=None,doedit='auto',description=N
             else:
                 print "Cancel pressed, not saving resource to disk"
             return value
+        elif default is not None:
+            return default
         else:
             raise RuntimeError("Resource "+name+" does not exist")
     return
