@@ -2939,72 +2939,73 @@ SWIG_Python_NonDynamicSetAttr(PyObject *obj, PyObject *name, PyObject *value) {
 
 #define SWIGTYPE_p_Appearance swig_types[0]
 #define SWIGTYPE_p_ContactParameters swig_types[1]
-#define SWIGTYPE_p_GeneralizedIKObjective swig_types[2]
-#define SWIGTYPE_p_GeneralizedIKSolver swig_types[3]
-#define SWIGTYPE_p_GeometricPrimitive swig_types[4]
-#define SWIGTYPE_p_Geometry3D swig_types[5]
-#define SWIGTYPE_p_IKGoal swig_types[6]
-#define SWIGTYPE_p_IKObjective swig_types[7]
-#define SWIGTYPE_p_IKSolver swig_types[8]
-#define SWIGTYPE_p_Mass swig_types[9]
-#define SWIGTYPE_p_ODEGeometry swig_types[10]
-#define SWIGTYPE_p_ObjectPoser swig_types[11]
-#define SWIGTYPE_p_PointCloud swig_types[12]
-#define SWIGTYPE_p_PointPoser swig_types[13]
-#define SWIGTYPE_p_RigidObject swig_types[14]
-#define SWIGTYPE_p_RigidObjectModel swig_types[15]
-#define SWIGTYPE_p_Robot swig_types[16]
-#define SWIGTYPE_p_RobotModel swig_types[17]
-#define SWIGTYPE_p_RobotModelDriver swig_types[18]
-#define SWIGTYPE_p_RobotModelLink swig_types[19]
-#define SWIGTYPE_p_RobotPoser swig_types[20]
-#define SWIGTYPE_p_SensorBase swig_types[21]
-#define SWIGTYPE_p_SimBody swig_types[22]
-#define SWIGTYPE_p_SimRobotController swig_types[23]
-#define SWIGTYPE_p_SimRobotSensor swig_types[24]
-#define SWIGTYPE_p_Simulator swig_types[25]
-#define SWIGTYPE_p_Terrain swig_types[26]
-#define SWIGTYPE_p_TerrainModel swig_types[27]
-#define SWIGTYPE_p_TransformPoser swig_types[28]
-#define SWIGTYPE_p_TriangleMesh swig_types[29]
-#define SWIGTYPE_p_Viewport swig_types[30]
-#define SWIGTYPE_p_Widget swig_types[31]
-#define SWIGTYPE_p_WidgetSet swig_types[32]
-#define SWIGTYPE_p_WorldModel swig_types[33]
-#define SWIGTYPE_p_WorldSimulation swig_types[34]
-#define SWIGTYPE_p__object swig_types[35]
-#define SWIGTYPE_p_allocator_type swig_types[36]
-#define SWIGTYPE_p_char swig_types[37]
-#define SWIGTYPE_p_difference_type swig_types[38]
-#define SWIGTYPE_p_double swig_types[39]
-#define SWIGTYPE_p_doubleArray swig_types[40]
-#define SWIGTYPE_p_dxBody swig_types[41]
-#define SWIGTYPE_p_float swig_types[42]
-#define SWIGTYPE_p_floatArray swig_types[43]
-#define SWIGTYPE_p_int swig_types[44]
-#define SWIGTYPE_p_intArray swig_types[45]
-#define SWIGTYPE_p_p__object swig_types[46]
-#define SWIGTYPE_p_size_type swig_types[47]
-#define SWIGTYPE_p_std__allocatorT_double_t swig_types[48]
-#define SWIGTYPE_p_std__allocatorT_float_t swig_types[49]
-#define SWIGTYPE_p_std__allocatorT_int_t swig_types[50]
-#define SWIGTYPE_p_std__allocatorT_std__string_t swig_types[51]
-#define SWIGTYPE_p_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t swig_types[52]
-#define SWIGTYPE_p_std__invalid_argument swig_types[53]
-#define SWIGTYPE_p_std__vectorT_GeneralizedIKObjective_std__allocatorT_GeneralizedIKObjective_t_t swig_types[54]
-#define SWIGTYPE_p_std__vectorT_IKObjective_std__allocatorT_IKObjective_t_t swig_types[55]
-#define SWIGTYPE_p_std__vectorT__Tp__Alloc_t swig_types[56]
-#define SWIGTYPE_p_std__vectorT_double_std__allocatorT_double_t_t swig_types[57]
-#define SWIGTYPE_p_std__vectorT_float_std__allocatorT_float_t_t swig_types[58]
-#define SWIGTYPE_p_std__vectorT_int_std__allocatorT_int_t_t swig_types[59]
-#define SWIGTYPE_p_std__vectorT_std__string_std__allocatorT_std__string_t_t swig_types[60]
-#define SWIGTYPE_p_std__vectorT_std__vectorT_double_std__allocatorT_double_t_t_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t_t swig_types[61]
-#define SWIGTYPE_p_std__vectorT_unsigned_char_std__allocatorT_unsigned_char_t_t swig_types[62]
-#define SWIGTYPE_p_swig__SwigPyIterator swig_types[63]
-#define SWIGTYPE_p_value_type swig_types[64]
-#define SWIGTYPE_p_void swig_types[65]
-static swig_type_info *swig_types[67];
-static swig_module_info swig_module = {swig_types, 66, 0, 0, 0, 0};
+#define SWIGTYPE_p_ControlledRobotSimulator swig_types[2]
+#define SWIGTYPE_p_GeneralizedIKObjective swig_types[3]
+#define SWIGTYPE_p_GeneralizedIKSolver swig_types[4]
+#define SWIGTYPE_p_GeometricPrimitive swig_types[5]
+#define SWIGTYPE_p_Geometry3D swig_types[6]
+#define SWIGTYPE_p_IKGoal swig_types[7]
+#define SWIGTYPE_p_IKObjective swig_types[8]
+#define SWIGTYPE_p_IKSolver swig_types[9]
+#define SWIGTYPE_p_Mass swig_types[10]
+#define SWIGTYPE_p_ODEGeometry swig_types[11]
+#define SWIGTYPE_p_ObjectPoser swig_types[12]
+#define SWIGTYPE_p_PointCloud swig_types[13]
+#define SWIGTYPE_p_PointPoser swig_types[14]
+#define SWIGTYPE_p_RigidObject swig_types[15]
+#define SWIGTYPE_p_RigidObjectModel swig_types[16]
+#define SWIGTYPE_p_Robot swig_types[17]
+#define SWIGTYPE_p_RobotModel swig_types[18]
+#define SWIGTYPE_p_RobotModelDriver swig_types[19]
+#define SWIGTYPE_p_RobotModelLink swig_types[20]
+#define SWIGTYPE_p_RobotPoser swig_types[21]
+#define SWIGTYPE_p_SensorBase swig_types[22]
+#define SWIGTYPE_p_SimBody swig_types[23]
+#define SWIGTYPE_p_SimRobotController swig_types[24]
+#define SWIGTYPE_p_SimRobotSensor swig_types[25]
+#define SWIGTYPE_p_Simulator swig_types[26]
+#define SWIGTYPE_p_Terrain swig_types[27]
+#define SWIGTYPE_p_TerrainModel swig_types[28]
+#define SWIGTYPE_p_TransformPoser swig_types[29]
+#define SWIGTYPE_p_TriangleMesh swig_types[30]
+#define SWIGTYPE_p_Viewport swig_types[31]
+#define SWIGTYPE_p_Widget swig_types[32]
+#define SWIGTYPE_p_WidgetSet swig_types[33]
+#define SWIGTYPE_p_WorldModel swig_types[34]
+#define SWIGTYPE_p_WorldSimulation swig_types[35]
+#define SWIGTYPE_p__object swig_types[36]
+#define SWIGTYPE_p_allocator_type swig_types[37]
+#define SWIGTYPE_p_char swig_types[38]
+#define SWIGTYPE_p_difference_type swig_types[39]
+#define SWIGTYPE_p_double swig_types[40]
+#define SWIGTYPE_p_doubleArray swig_types[41]
+#define SWIGTYPE_p_dxBody swig_types[42]
+#define SWIGTYPE_p_float swig_types[43]
+#define SWIGTYPE_p_floatArray swig_types[44]
+#define SWIGTYPE_p_int swig_types[45]
+#define SWIGTYPE_p_intArray swig_types[46]
+#define SWIGTYPE_p_p__object swig_types[47]
+#define SWIGTYPE_p_size_type swig_types[48]
+#define SWIGTYPE_p_std__allocatorT_double_t swig_types[49]
+#define SWIGTYPE_p_std__allocatorT_float_t swig_types[50]
+#define SWIGTYPE_p_std__allocatorT_int_t swig_types[51]
+#define SWIGTYPE_p_std__allocatorT_std__string_t swig_types[52]
+#define SWIGTYPE_p_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t swig_types[53]
+#define SWIGTYPE_p_std__invalid_argument swig_types[54]
+#define SWIGTYPE_p_std__vectorT_GeneralizedIKObjective_std__allocatorT_GeneralizedIKObjective_t_t swig_types[55]
+#define SWIGTYPE_p_std__vectorT_IKObjective_std__allocatorT_IKObjective_t_t swig_types[56]
+#define SWIGTYPE_p_std__vectorT__Tp__Alloc_t swig_types[57]
+#define SWIGTYPE_p_std__vectorT_double_std__allocatorT_double_t_t swig_types[58]
+#define SWIGTYPE_p_std__vectorT_float_std__allocatorT_float_t_t swig_types[59]
+#define SWIGTYPE_p_std__vectorT_int_std__allocatorT_int_t_t swig_types[60]
+#define SWIGTYPE_p_std__vectorT_std__string_std__allocatorT_std__string_t_t swig_types[61]
+#define SWIGTYPE_p_std__vectorT_std__vectorT_double_std__allocatorT_double_t_t_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t_t swig_types[62]
+#define SWIGTYPE_p_std__vectorT_unsigned_char_std__allocatorT_unsigned_char_t_t swig_types[63]
+#define SWIGTYPE_p_swig__SwigPyIterator swig_types[64]
+#define SWIGTYPE_p_value_type swig_types[65]
+#define SWIGTYPE_p_void swig_types[66]
+static swig_type_info *swig_types[68];
+static swig_module_info swig_module = {swig_types, 67, 0, 0, 0, 0};
 #define SWIG_TypeQuery(name) SWIG_TypeQueryModule(&swig_module, &swig_module, name)
 #define SWIG_MangledTypeQuery(name) SWIG_MangledTypeQueryModule(&swig_module, &swig_module, name)
 
@@ -25686,7 +25687,41 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_RobotModelLink_setParent(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_RobotModelLink_parent(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  RobotModelLink *arg1 = (RobotModelLink *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  RobotModelLink result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:RobotModelLink_parent",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_RobotModelLink, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "RobotModelLink_parent" "', argument " "1"" of type '" "RobotModelLink *""'"); 
+  }
+  arg1 = reinterpret_cast< RobotModelLink * >(argp1);
+  {
+    try {
+      result = (arg1)->parent();
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_NewPointerObj((new RobotModelLink(static_cast< const RobotModelLink& >(result))), SWIGTYPE_p_RobotModelLink, SWIG_POINTER_OWN |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_RobotModelLink_setParent__SWIG_0(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   RobotModelLink *arg1 = (RobotModelLink *) 0 ;
   int arg2 ;
@@ -25725,6 +25760,99 @@ SWIGINTERN PyObject *_wrap_RobotModelLink_setParent(PyObject *SWIGUNUSEDPARM(sel
   return resultobj;
 fail:
   return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_RobotModelLink_setParent__SWIG_1(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  RobotModelLink *arg1 = (RobotModelLink *) 0 ;
+  RobotModelLink *arg2 = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:RobotModelLink_setParent",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_RobotModelLink, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "RobotModelLink_setParent" "', argument " "1"" of type '" "RobotModelLink *""'"); 
+  }
+  arg1 = reinterpret_cast< RobotModelLink * >(argp1);
+  res2 = SWIG_ConvertPtr(obj1, &argp2, SWIGTYPE_p_RobotModelLink,  0  | 0);
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "RobotModelLink_setParent" "', argument " "2"" of type '" "RobotModelLink const &""'"); 
+  }
+  if (!argp2) {
+    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "RobotModelLink_setParent" "', argument " "2"" of type '" "RobotModelLink const &""'"); 
+  }
+  arg2 = reinterpret_cast< RobotModelLink * >(argp2);
+  {
+    try {
+      (arg1)->setParent((RobotModelLink const &)*arg2);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_RobotModelLink_setParent(PyObject *self, PyObject *args) {
+  int argc;
+  PyObject *argv[3];
+  int ii;
+  
+  if (!PyTuple_Check(args)) SWIG_fail;
+  argc = args ? (int)PyObject_Length(args) : 0;
+  for (ii = 0; (ii < 2) && (ii < argc); ii++) {
+    argv[ii] = PyTuple_GET_ITEM(args,ii);
+  }
+  if (argc == 2) {
+    int _v;
+    void *vptr = 0;
+    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_RobotModelLink, 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      int res = SWIG_ConvertPtr(argv[1], 0, SWIGTYPE_p_RobotModelLink, 0);
+      _v = SWIG_CheckState(res);
+      if (_v) {
+        return _wrap_RobotModelLink_setParent__SWIG_1(self, args);
+      }
+    }
+  }
+  if (argc == 2) {
+    int _v;
+    void *vptr = 0;
+    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_RobotModelLink, 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      {
+        int res = SWIG_AsVal_int(argv[1], NULL);
+        _v = SWIG_CheckState(res);
+      }
+      if (_v) {
+        return _wrap_RobotModelLink_setParent__SWIG_0(self, args);
+      }
+    }
+  }
+  
+fail:
+  SWIG_SetErrorMsg(PyExc_NotImplementedError,"Wrong number or type of arguments for overloaded function 'RobotModelLink_setParent'.\n"
+    "  Possible C/C++ prototypes are:\n"
+    "    RobotModelLink::setParent(int)\n"
+    "    RobotModelLink::setParent(RobotModelLink const &)\n");
+  return 0;
 }
 
 
@@ -39089,6 +39217,40 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_SimRobotController_model(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  SimRobotController *arg1 = (SimRobotController *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  RobotModel result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:SimRobotController_model",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_SimRobotController, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SimRobotController_model" "', argument " "1"" of type '" "SimRobotController *""'"); 
+  }
+  arg1 = reinterpret_cast< SimRobotController * >(argp1);
+  {
+    try {
+      result = (arg1)->model();
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_NewPointerObj((new RobotModel(static_cast< const RobotModel& >(result))), SWIGTYPE_p_RobotModel, SWIG_POINTER_OWN |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_SimRobotController_setRate(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   SimRobotController *arg1 = (SimRobotController *) 0 ;
@@ -41003,7 +41165,7 @@ fail:
 SWIGINTERN PyObject *_wrap_SimRobotController_sim_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   SimRobotController *arg1 = (SimRobotController *) 0 ;
-  WorldSimulation *arg2 = (WorldSimulation *) 0 ;
+  Simulator *arg2 = (Simulator *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
   void *argp2 = 0 ;
@@ -41017,11 +41179,11 @@ SWIGINTERN PyObject *_wrap_SimRobotController_sim_set(PyObject *SWIGUNUSEDPARM(s
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SimRobotController_sim_set" "', argument " "1"" of type '" "SimRobotController *""'"); 
   }
   arg1 = reinterpret_cast< SimRobotController * >(argp1);
-  res2 = SWIG_ConvertPtr(obj1, &argp2,SWIGTYPE_p_WorldSimulation, SWIG_POINTER_DISOWN |  0 );
+  res2 = SWIG_ConvertPtr(obj1, &argp2,SWIGTYPE_p_Simulator, SWIG_POINTER_DISOWN |  0 );
   if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "SimRobotController_sim_set" "', argument " "2"" of type '" "WorldSimulation *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "SimRobotController_sim_set" "', argument " "2"" of type '" "Simulator *""'"); 
   }
-  arg2 = reinterpret_cast< WorldSimulation * >(argp2);
+  arg2 = reinterpret_cast< Simulator * >(argp2);
   if (arg1) (arg1)->sim = arg2;
   resultobj = SWIG_Py_Void();
   return resultobj;
@@ -41036,7 +41198,7 @@ SWIGINTERN PyObject *_wrap_SimRobotController_sim_get(PyObject *SWIGUNUSEDPARM(s
   void *argp1 = 0 ;
   int res1 = 0 ;
   PyObject * obj0 = 0 ;
-  WorldSimulation *result = 0 ;
+  Simulator *result = 0 ;
   
   if (!PyArg_ParseTuple(args,(char *)"O:SimRobotController_sim_get",&obj0)) SWIG_fail;
   res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_SimRobotController, 0 |  0 );
@@ -41044,8 +41206,60 @@ SWIGINTERN PyObject *_wrap_SimRobotController_sim_get(PyObject *SWIGUNUSEDPARM(s
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SimRobotController_sim_get" "', argument " "1"" of type '" "SimRobotController *""'"); 
   }
   arg1 = reinterpret_cast< SimRobotController * >(argp1);
-  result = (WorldSimulation *) ((arg1)->sim);
-  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_WorldSimulation, 0 |  0 );
+  result = (Simulator *) ((arg1)->sim);
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_Simulator, 0 |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_SimRobotController_controller_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  SimRobotController *arg1 = (SimRobotController *) 0 ;
+  ControlledRobotSimulator *arg2 = (ControlledRobotSimulator *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:SimRobotController_controller_set",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_SimRobotController, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SimRobotController_controller_set" "', argument " "1"" of type '" "SimRobotController *""'"); 
+  }
+  arg1 = reinterpret_cast< SimRobotController * >(argp1);
+  res2 = SWIG_ConvertPtr(obj1, &argp2,SWIGTYPE_p_ControlledRobotSimulator, SWIG_POINTER_DISOWN |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "SimRobotController_controller_set" "', argument " "2"" of type '" "ControlledRobotSimulator *""'"); 
+  }
+  arg2 = reinterpret_cast< ControlledRobotSimulator * >(argp2);
+  if (arg1) (arg1)->controller = arg2;
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_SimRobotController_controller_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  SimRobotController *arg1 = (SimRobotController *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  ControlledRobotSimulator *result = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:SimRobotController_controller_get",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_SimRobotController, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SimRobotController_controller_get" "', argument " "1"" of type '" "SimRobotController *""'"); 
+  }
+  arg1 = reinterpret_cast< SimRobotController * >(argp1);
+  result = (ControlledRobotSimulator *) ((arg1)->controller);
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_ControlledRobotSimulator, 0 |  0 );
   return resultobj;
 fail:
   return NULL;
@@ -43356,6 +43570,58 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_Simulator_hadPenetration(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Simulator *arg1 = (Simulator *) 0 ;
+  int arg2 ;
+  int arg3 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  int val3 ;
+  int ecode3 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  PyObject * obj2 = 0 ;
+  bool result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OOO:Simulator_hadPenetration",&obj0,&obj1,&obj2)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Simulator, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Simulator_hadPenetration" "', argument " "1"" of type '" "Simulator *""'"); 
+  }
+  arg1 = reinterpret_cast< Simulator * >(argp1);
+  ecode2 = SWIG_AsVal_int(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Simulator_hadPenetration" "', argument " "2"" of type '" "int""'");
+  } 
+  arg2 = static_cast< int >(val2);
+  ecode3 = SWIG_AsVal_int(obj2, &val3);
+  if (!SWIG_IsOK(ecode3)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "Simulator_hadPenetration" "', argument " "3"" of type '" "int""'");
+  } 
+  arg3 = static_cast< int >(val3);
+  {
+    try {
+      result = (bool)(arg1)->hadPenetration(arg2,arg3);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_From_bool(static_cast< bool >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_Simulator_meanContactForce(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   Simulator *arg1 = (Simulator *) 0 ;
@@ -45194,8 +45460,10 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"Returns the index of the link's parent (on its robot). \n"
 		""},
+	 { (char *)"RobotModelLink_parent", _wrap_RobotModelLink_parent, METH_VARARGS, (char *)"RobotModelLink_parent(RobotModelLink self) -> RobotModelLink"},
 	 { (char *)"RobotModelLink_setParent", _wrap_RobotModelLink_setParent, METH_VARARGS, (char *)"\n"
-		"RobotModelLink_setParent(RobotModelLink self, int p)\n"
+		"setParent(int p)\n"
+		"RobotModelLink_setParent(RobotModelLink self, RobotModelLink l)\n"
 		"\n"
 		"Sets the index of the link's parent (on its robot). \n"
 		""},
@@ -46022,6 +46290,7 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"SimRobotSensor_swigregister", SimRobotSensor_swigregister, METH_VARARGS, NULL},
 	 { (char *)"new_SimRobotController", _wrap_new_SimRobotController, METH_VARARGS, (char *)"new_SimRobotController() -> SimRobotController"},
 	 { (char *)"delete_SimRobotController", _wrap_delete_SimRobotController, METH_VARARGS, (char *)"delete_SimRobotController(SimRobotController self)"},
+	 { (char *)"SimRobotController_model", _wrap_SimRobotController_model, METH_VARARGS, (char *)"SimRobotController_model(SimRobotController self) -> RobotModel"},
 	 { (char *)"SimRobotController_setRate", _wrap_SimRobotController_setRate, METH_VARARGS, (char *)"\n"
 		"SimRobotController_setRate(SimRobotController self, double dt)\n"
 		"\n"
@@ -46167,8 +46436,10 @@ static PyMethodDef SwigMethods[] = {
 		""},
 	 { (char *)"SimRobotController_index_set", _wrap_SimRobotController_index_set, METH_VARARGS, (char *)"SimRobotController_index_set(SimRobotController self, int index)"},
 	 { (char *)"SimRobotController_index_get", _wrap_SimRobotController_index_get, METH_VARARGS, (char *)"SimRobotController_index_get(SimRobotController self) -> int"},
-	 { (char *)"SimRobotController_sim_set", _wrap_SimRobotController_sim_set, METH_VARARGS, (char *)"SimRobotController_sim_set(SimRobotController self, WorldSimulation * sim)"},
-	 { (char *)"SimRobotController_sim_get", _wrap_SimRobotController_sim_get, METH_VARARGS, (char *)"SimRobotController_sim_get(SimRobotController self) -> WorldSimulation *"},
+	 { (char *)"SimRobotController_sim_set", _wrap_SimRobotController_sim_set, METH_VARARGS, (char *)"SimRobotController_sim_set(SimRobotController self, Simulator sim)"},
+	 { (char *)"SimRobotController_sim_get", _wrap_SimRobotController_sim_get, METH_VARARGS, (char *)"SimRobotController_sim_get(SimRobotController self) -> Simulator"},
+	 { (char *)"SimRobotController_controller_set", _wrap_SimRobotController_controller_set, METH_VARARGS, (char *)"SimRobotController_controller_set(SimRobotController self, ControlledRobotSimulator * controller)"},
+	 { (char *)"SimRobotController_controller_get", _wrap_SimRobotController_controller_get, METH_VARARGS, (char *)"SimRobotController_controller_get(SimRobotController self) -> ControlledRobotSimulator *"},
 	 { (char *)"SimRobotController_swigregister", SimRobotController_swigregister, METH_VARARGS, NULL},
 	 { (char *)"SimBody_enable", _wrap_SimBody_enable, METH_VARARGS, (char *)"\n"
 		"enable(bool enabled=True)\n"
@@ -46393,6 +46664,7 @@ static PyMethodDef SwigMethods[] = {
 		"Returns true if the objects had ever separated during the last\n"
 		"simulate() call. \n"
 		""},
+	 { (char *)"Simulator_hadPenetration", _wrap_Simulator_hadPenetration, METH_VARARGS, (char *)"Simulator_hadPenetration(Simulator self, int aid, int bid) -> bool"},
 	 { (char *)"Simulator_meanContactForce", _wrap_Simulator_meanContactForce, METH_VARARGS, (char *)"\n"
 		"Simulator_meanContactForce(Simulator self, int aid, int bid)\n"
 		"\n"
@@ -46482,6 +46754,7 @@ static void *_p_intArrayTo_p_int(void *x, int *SWIGUNUSEDPARM(newmemory)) {
 }
 static swig_type_info _swigt__p_Appearance = {"_p_Appearance", "Appearance *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_ContactParameters = {"_p_ContactParameters", "ContactParameters *", 0, 0, (void*)0, 0};
+static swig_type_info _swigt__p_ControlledRobotSimulator = {"_p_ControlledRobotSimulator", "ControlledRobotSimulator *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_GeneralizedIKObjective = {"_p_GeneralizedIKObjective", "GeneralizedIKObjective *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_GeneralizedIKSolver = {"_p_GeneralizedIKSolver", "GeneralizedIKSolver *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_GeometricPrimitive = {"_p_GeometricPrimitive", "GeometricPrimitive *", 0, 0, (void*)0, 0};
@@ -46550,6 +46823,7 @@ static swig_type_info _swigt__p_void = {"_p_void", "void *", 0, 0, (void*)0, 0};
 static swig_type_info *swig_type_initial[] = {
   &_swigt__p_Appearance,
   &_swigt__p_ContactParameters,
+  &_swigt__p_ControlledRobotSimulator,
   &_swigt__p_GeneralizedIKObjective,
   &_swigt__p_GeneralizedIKSolver,
   &_swigt__p_GeometricPrimitive,
@@ -46618,6 +46892,7 @@ static swig_type_info *swig_type_initial[] = {
 
 static swig_cast_info _swigc__p_Appearance[] = {  {&_swigt__p_Appearance, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_ContactParameters[] = {  {&_swigt__p_ContactParameters, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_ControlledRobotSimulator[] = {  {&_swigt__p_ControlledRobotSimulator, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_GeneralizedIKObjective[] = {  {&_swigt__p_GeneralizedIKObjective, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_GeneralizedIKSolver[] = {  {&_swigt__p_GeneralizedIKSolver, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_GeometricPrimitive[] = {  {&_swigt__p_GeometricPrimitive, 0, 0, 0},{0, 0, 0, 0}};
@@ -46686,6 +46961,7 @@ static swig_cast_info _swigc__p_void[] = {  {&_swigt__p_void, 0, 0, 0},{0, 0, 0,
 static swig_cast_info *swig_cast_initial[] = {
   _swigc__p_Appearance,
   _swigc__p_ContactParameters,
+  _swigc__p_ControlledRobotSimulator,
   _swigc__p_GeneralizedIKObjective,
   _swigc__p_GeneralizedIKSolver,
   _swigc__p_GeometricPrimitive,
