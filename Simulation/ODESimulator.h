@@ -169,6 +169,8 @@ struct ODEContactList
   //the contact points
   vector<ContactPoint> points;
   vector<Vector3> forces;
+  //whether the contact detector found excessive penetration
+  bool penetrating;   
 
   vector<int> feedbackIndices;           //internally used
 };

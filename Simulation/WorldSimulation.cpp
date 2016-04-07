@@ -99,7 +99,9 @@ void Reset(ContactFeedbackInfo& info)
 {
   info.contactCount = 0;
   info.separationCount = 0;
+  info.penetrationCount = 0;
   info.inContact = false;
+  info.penetrating = false;
   info.meanForce.setZero();
   info.meanTorque.setZero();
   info.meanPoint.setZero();
@@ -190,9 +192,11 @@ bool ReadFile(File& f,ODEContactList& list)
 bool WriteFile(File& f,const ContactFeedbackInfo& info)
 {
   if(!WriteFile(f,info.accum)) return false;
+  if(!WriteFile(f,info.inContact)) return false;
   if(!WriteFile(f,info.contactCount)) return false;
   if(!WriteFile(f,info.separationCount)) return false;
-  if(!WriteFile(f,info.inContact)) return false;
+  if(!WriteFile(f,info.penetrating)) return false;
+  if(!WriteFile(f,info.penetrationCount)) return false;
   if(!WriteFile(f,info.meanForce)) return false;
   if(!WriteFile(f,info.meanTorque)) return false;
   if(!WriteFile(f,info.meanPoint)) return false;
@@ -205,9 +209,11 @@ bool WriteFile(File& f,const ContactFeedbackInfo& info)
 bool ReadFile(File& f,ContactFeedbackInfo& info)
 {
   READ_FILE_DEBUG(f,info.accum,"ReadFile(ContactFeedbackInfo)");
+  READ_FILE_DEBUG(f,info.inContact,"ReadFile(ContactFeedbackInfo)");
   READ_FILE_DEBUG(f,info.contactCount,"ReadFile(ContactFeedbackInfo)");
   READ_FILE_DEBUG(f,info.separationCount,"ReadFile(ContactFeedbackInfo)");
-  READ_FILE_DEBUG(f,info.inContact,"ReadFile(ContactFeedbackInfo)");
+  READ_FILE_DEBUG(f,info.penetrating,"ReadFile(ContactFeedbackInfo)");
+  READ_FILE_DEBUG(f,info.penetrationCount,"ReadFile(ContactFeedbackInfo)");
   READ_FILE_DEBUG(f,info.meanForce,"ReadFile(ContactFeedbackInfo)");
   READ_FILE_DEBUG(f,info.meanTorque,"ReadFile(ContactFeedbackInfo)");
   READ_FILE_DEBUG(f,info.meanPoint,"ReadFile(ContactFeedbackInfo)");
@@ -387,6 +393,8 @@ void WorldSimulation::Advance(Real dt)
 	  if(list->forces.empty()) i->second.separationCount++;
 	  else i->second.contactCount++;
 	  i->second.inContact = !list->forces.empty();
+    i->second.penetrating = list->penetrating;
+    if(list->penetrating) i->second.penetrationCount++;
 	  Vector3 meanPoint(Zero),meanForce(Zero),meanTorque(Zero);
 	  if(!list->forces.empty()) {
 	    Real wsum = 0;
@@ -708,6 +716,31 @@ bool WorldSimulation::HadSeparation(int aid,int bid)
     ContactFeedbackInfo* info=GetContactFeedback(aid,bid);
     if(!info) return false;
     return (info->separationCount>0);
+  }
+}
+
+
+bool WorldSimulation::HadPenetration(int aid,int bid)
+{
+  if(aid < 0) {
+    for(ContactFeedbackMap::iterator i=contactFeedback.begin();i!=contactFeedback.end();i++) {
+  if(i->second.penetrationCount>0) return true;
+    }
+    return false;
+  }
+  else if(bid < 0) { 
+    ODEObjectID a=WorldToODEID(aid);
+    for(ContactFeedbackMap::iterator i=contactFeedback.begin();i!=contactFeedback.end();i++) {
+      if(i->first.first == a || i->first.second == a) {
+  if(i->second.penetrationCount>0) return true;
+      }
+    }
+    return false;
+  }
+  else {
+    ContactFeedbackInfo* info=GetContactFeedback(aid,bid);
+    if(!info) return false;
+    return (info->penetrationCount>0);
   }
 }
 

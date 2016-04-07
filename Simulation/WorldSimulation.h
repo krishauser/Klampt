@@ -23,6 +23,9 @@ struct ContactFeedbackInfo
   bool inContact; ///< true if contact exists at the end of the outer simulation interval
   Vector3 meanForce,meanTorque,meanPoint;
 
+  bool penetrating;  ///< true if the objects are currently penetrating
+  int penetrationCount;   ///< the number of sub-steps in which the objects were penetrating during the outer simulation interval
+
   //full contact information over sub-steps
   bool accumFull;  //set to true if all ODEContactLists should be stored
   vector<double> times;
@@ -93,6 +96,11 @@ public:
   bool HadContact(int aid,int bid=-1);
   ///Returns true if the objects had no contact during past Advance call
   bool HadSeparation(int aid,int bid=-1);
+  ///Returns true if the objects had penetration during past Advance call.
+  ///Penetration indicates that there may be simulation artifacts due to poor
+  ///contact handling.  Can also set both aid=bid=-1 to determine whether the
+  ///simulation is generally functioning properly.
+  bool HadPenetration(int aid,int bid=-1);
   ///Returns the ContactFeedback structure for the two objects
   ContactFeedbackInfo* GetContactFeedback(int aid,int bid);
   ///Returns the contact list for the prior time step

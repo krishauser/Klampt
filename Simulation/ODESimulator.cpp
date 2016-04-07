@@ -726,10 +726,12 @@ void ODESimulator::Step(Real dt)
   for(map<CollisionPair,ODEContactList>::iterator i=contactList.begin();i!=contactList.end();i++) {  
     ODEContactList& cl=i->second;
     cl.forces.clear();
+    cl.penetrating = false;
     for(size_t j=0;j<cl.feedbackIndices.size();j++) {
       int k=cl.feedbackIndices[j];
       Assert(k >= 0 && k < (int)gContactsVector.size());
       ODEContactResult* cres = gContactsVector[k];
+      if(cres->meshOverlap) cl.penetrating = true;
       Vector3 temp;
       for(size_t i=0;i<cres->feedback.size();i++) {
 	CopyVector(temp,cres->feedback[i].f1);
@@ -1393,6 +1395,7 @@ void ODESimulator::SetupContactResponse(const ODEObjectID& a,const ODEObjectID& 
     }
   }
   if(cl) {
+    //user requested contact feedback, now copy it out
     size_t start=cl->points.size();
     cl->points.resize(start+c.contacts.size());
     for(size_t k=0;k<c.contacts.size();k++) {
@@ -1573,6 +1576,7 @@ void GetContacts(dBodyID a,vector<ODEContactList>& contacts)
       bool reverse = false;
       if(b == a) { b = dGeomGetBody(i->o1); reverse = true; }
       contacts.resize(contacts.size()+1);
+      contacts.back().penetrating = i->meshOverlap;
       contacts.back().points.resize(i->contacts.size());
       contacts.back().forces.resize(i->feedback.size());
       for(size_t j=0;j<i->feedback.size();j++) {
