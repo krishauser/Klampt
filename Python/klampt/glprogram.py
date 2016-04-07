@@ -183,6 +183,33 @@ class GLProgram:
         print "Saving screen to",fn
         im.save(fn)
 
+    def draw_text(self,x,y,text,size=12,color=None):
+        """If called in the display_screen method, renders text at the given x,y position.
+        If size is given, it renders a font in the given size. If color is given, then it
+        is an RGB or RGBA color value."""
+        import ctypes
+        if size <= 10:
+            font = GLUT_BITMAP_HELVETICA_10
+        elif size <= 12:
+            font = GLUT_BITMAP_HELVETICA_12
+        elif size <= 13:
+            font = GLUT_BITMAP_8_BY_13
+        elif size <= 16:
+            font = GLUT_BITMAP_9_BY_15
+        elif size <= 21:
+            font = GLUT_BITMAP_HELVETICA_12
+        else:
+            font = GLUT_TIMES_NEW_ROMAN_24
+        if color is None:
+            glColor3f(0,0,0)
+        elif len(color)==3:
+            glColor3f(color[0],color[1],color[2])
+        else:
+            glColor4f(color[0],color[1],color[2],color[3])
+        glRasterPos2i(x,y)
+        for c in text:
+            glutBitmapCharacter(font, ctypes.c_int( ord(c) ))
+
     
 class GLNavigationProgram(GLProgram):
     """A more advanced form of GLProgram that allows you to navigate a
