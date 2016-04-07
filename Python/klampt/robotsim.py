@@ -1574,9 +1574,14 @@ class RobotModelLink(_object):
         """
         return _robotsim.RobotModelLink_getParent(self)
 
+    def parent(self):
+        """parent(RobotModelLink self) -> RobotModelLink"""
+        return _robotsim.RobotModelLink_parent(self)
+
     def setParent(self, *args):
         """
         setParent(RobotModelLink self, int p)
+        setParent(RobotModelLink self, RobotModelLink l)
 
         Sets the index of the link's parent (on its robot). 
         """
@@ -3203,6 +3208,10 @@ class SimRobotController(_object):
         except: self.this = this
     __swig_destroy__ = _robotsim.delete_SimRobotController
     __del__ = lambda self : None;
+    def model(self):
+        """model(SimRobotController self) -> RobotModel"""
+        return _robotsim.SimRobotController_model(self)
+
     def setRate(self, *args):
         """
         setRate(SimRobotController self, double dt)
@@ -3430,6 +3439,9 @@ class SimRobotController(_object):
     __swig_setmethods__["sim"] = _robotsim.SimRobotController_sim_set
     __swig_getmethods__["sim"] = _robotsim.SimRobotController_sim_get
     if _newclass:sim = _swig_property(_robotsim.SimRobotController_sim_get, _robotsim.SimRobotController_sim_set)
+    __swig_setmethods__["controller"] = _robotsim.SimRobotController_controller_set
+    __swig_getmethods__["controller"] = _robotsim.SimRobotController_controller_get
+    if _newclass:controller = _swig_property(_robotsim.SimRobotController_controller_get, _robotsim.SimRobotController_controller_set)
 SimRobotController_swigregister = _robotsim.SimRobotController_swigregister
 SimRobotController_swigregister(SimRobotController)
 
@@ -3805,6 +3817,10 @@ class Simulator(_object):
         simulate() call. 
         """
         return _robotsim.Simulator_hadSeparation(self, *args)
+
+    def hadPenetration(self, *args):
+        """hadPenetration(Simulator self, int aid, int bid) -> bool"""
+        return _robotsim.Simulator_hadPenetration(self, *args)
 
     def meanContactForce(self, *args):
         """

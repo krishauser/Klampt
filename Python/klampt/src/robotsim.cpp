@@ -1795,6 +1795,19 @@ int RobotModelLink::getParent()
   return robotPtr->parents[index];
 }
 
+RobotModelLink RobotModelLink::parent()
+{
+  if(robotPtr->parents[index] < 0) return RobotModelLink();
+  else {
+    RobotModelLink res;
+    res.world = world;
+    res.robotIndex = robotIndex;
+    res.robotPtr = robotPtr;
+    res.index = robotPtr->parents[index];
+    return res;
+  }
+}
+
 void RobotModelLink::setParent(int p)
 {
   if(p < 0 || p >= (int)robotPtr->links.size())
@@ -1802,6 +1815,17 @@ void RobotModelLink::setParent(int p)
 
   //TODO: check for circular references
   robotPtr->parents[index] = p;
+}
+
+void RobotModelLink::setParent(const RobotModelLink& link)
+{
+  if(link.robotPtr == NULL)
+    setParent(-1);
+  else {
+    if(link.robotPtr != robotPtr)
+      throw PyException("Can't set a link to have a parent on a different robot");
+    setParent(link.index);
+  }
 }
 
 int RobotModelLink::getID()
@@ -2841,6 +2865,11 @@ bool Simulator::hadSeparation(int aid,int bid)
   return sim->HadSeparation(aid,bid);
 }
 
+bool Simulator::hadPenetration(int aid,int bid)
+{
+  return sim->HadPenetration(aid,bid);
+}
+
 void Simulator::meanContactForce(int aid,int bid,double out[3])
 {
   sim->MeanContactForce(aid,bid).get(out);
@@ -2920,7 +2949,8 @@ SimRobotController Simulator::getController(int robot)
 SimRobotController Simulator::controller(int robot)
 {
   SimRobotController c;
-  c.sim = sim;
+  c.sim = this;
+  c.controller = &sim->controlSimulators[robot];
   c.index = robot;
   return c;
 }
@@ -2939,7 +2969,8 @@ SimRobotController Simulator::getController(const RobotModel& robot)
 SimRobotController Simulator::controller(const RobotModel& robot)
 {
   SimRobotController c;
-  c.sim = sim;
+  c.sim = this;
+  c.controller = &sim->controlSimulators[robot.index];
   c.index = robot.index;
   return c;
 }
@@ -3154,21 +3185,27 @@ void Simulator::getJointForces(const RobotModelLink& link,double out[6])
 
 
 SimRobotController::SimRobotController()
-:index(-1),sim(NULL)
+:index(-1),sim(NULL),controller(NULL)
 {}
 
 SimRobotController::~SimRobotController()
 {}
 
+RobotModel SimRobotController::model()
+{
+  if(!sim) return RobotModel();
+  return sim->world.robot(index);
+}
+
 void SimRobotController::setRate(double dt)
 {
-  sim->controlSimulators[index].controlTimeStep = dt;
+  controller->controlTimeStep = dt;
 }
 
 void SimRobotController::getCommandedConfig(vector<double>& q)
 {
   Vector qv;
-  sim->controlSimulators[index].GetCommandedConfig(qv);
+  controller->GetCommandedConfig(qv);
   q.resize(qv.n);
   qv.getCopy(&q[0]);
 }
@@ -3176,7 +3213,7 @@ void SimRobotController::getCommandedConfig(vector<double>& q)
 void SimRobotController::getCommandedVelocity(vector<double>& dq)
 {
   Vector qv;
-  sim->controlSimulators[index].GetCommandedVelocity(qv);
+  controller->GetCommandedVelocity(qv);
   dq.resize(qv.n);
   qv.getCopy(&dq[0]);
 }
@@ -3184,7 +3221,7 @@ void SimRobotController::getCommandedVelocity(vector<double>& dq)
 void SimRobotController::getSensedConfig(vector<double>& q)
 {
   Vector qv;
-  sim->controlSimulators[index].GetSensedConfig(qv);
+  controller->GetSensedConfig(qv);
   if(!qv.empty()) {
     q.resize(qv.n);
     qv.getCopy(&q[0]);
@@ -3194,7 +3231,7 @@ void SimRobotController::getSensedConfig(vector<double>& q)
 void SimRobotController::getSensedVelocity(vector<double>& dq)
 {
   Vector qv;
-  sim->controlSimulators[index].GetSensedVelocity(qv);
+  controller->GetSensedVelocity(qv);
   if(!qv.empty()) {
     dq.resize(qv.n);
     qv.getCopy(&dq[0]);
@@ -3252,7 +3289,7 @@ SimRobotSensor SimRobotController::getNamedSensor(const std::string& name)
 }
 SimRobotSensor SimRobotController::sensor(int sensorIndex)
 {
-  RobotSensors& sensors = sim->controlSimulators[index].sensors;
+  RobotSensors& sensors = controller->sensors;
   if(sensorIndex < 0 || sensorIndex >= (int)sensors.sensors.size())
     return SimRobotSensor(NULL);
   return SimRobotSensor(sensors.sensors[sensorIndex]);
@@ -3260,7 +3297,7 @@ SimRobotSensor SimRobotController::sensor(int sensorIndex)
 
 SimRobotSensor SimRobotController::sensor(const char* name)
 {
-  RobotSensors& sensors = sim->controlSimulators[index].sensors;
+  RobotSensors& sensors = controller->sensors;
   SmartPointer<SensorBase> sensor = sensors.GetNamedSensor(name);
   if(sensor==NULL) {
     fprintf(stderr,"Warning, sensor %s does not exist\n",name);
@@ -3270,12 +3307,12 @@ SimRobotSensor SimRobotController::sensor(const char* name)
 
 std::vector<std::string> SimRobotController::commands()
 {
-  return sim->controlSimulators[index].controller->Commands();
+  return controller->controller->Commands();
 }
 
 void SimRobotController::setManualMode(bool enabled)
 {
-  RobotController* c=sim->robotControllers[index];
+  RobotController* c=sim->sim->robotControllers[index];
   MyController* mc=reinterpret_cast<MyController*>(c);
   if(mc)
     mc->override = enabled;
@@ -3289,7 +3326,7 @@ std::string SimRobotController::getControlType()
 {
   std::vector<int> res;
   typedef std::vector<ActuatorCommand>::iterator it_ac;
-  RobotMotorCommand& command = sim->controlSimulators[index].command;
+  RobotMotorCommand& command = controller->command;
   int mode = -1;
   for(it_ac it = command.actuators.begin();
             it != command.actuators.end();
@@ -3316,112 +3353,112 @@ std::string SimRobotController::getControlType()
 
 bool SimRobotController::sendCommand(const std::string& name,const std::string& args)
 {
-  return sim->controlSimulators[index].controller->SendCommand(name,args);
+  return controller->controller->SendCommand(name,args);
 }
 
 std::string SimRobotController::getSetting(const std::string& name)
 {
   std::string val;
-  if(!sim->controlSimulators[index].controller->GetSetting(name,val)) return "";
+  if(!controller->controller->GetSetting(name,val)) return "";
   return val;
 }
 
 bool SimRobotController::setSetting(const std::string& name,const std::string& val)
 {
-  return sim->controlSimulators[index].controller->SetSetting(name,val);
+  return controller->controller->SetSetting(name,val);
 }
 
 void SimRobotController::setMilestone(const vector<double>& q)
 {
-  Config qv(sim->controlSimulators[index].robot->links.size(),&q[0]);
+  Config qv(controller->robot->links.size(),&q[0]);
   stringstream ss;
   ss<<qv;
-  sim->controlSimulators[index].controller->SendCommand("set_q",ss.str());
+  controller->controller->SendCommand("set_q",ss.str());
 }
 
 void SimRobotController::setMilestone(const vector<double>& q,const vector<double>& dq)
 {
-  Config qv(sim->controlSimulators[index].robot->links.size(),&q[0]);
-  Config dqv(sim->controlSimulators[index].robot->links.size(),&dq[0]);
+  Config qv(controller->robot->links.size(),&q[0]);
+  Config dqv(controller->robot->links.size(),&dq[0]);
   stringstream ss;
   ss<<qv<<"\t"<<dqv;
-  sim->controlSimulators[index].controller->SendCommand("set_qv",ss.str());
+  controller->controller->SendCommand("set_qv",ss.str());
 }
 
 
 void SimRobotController::addMilestone(const vector<double>& q)
 {
-  Config qv(sim->controlSimulators[index].robot->links.size(),&q[0]);
+  Config qv(controller->robot->links.size(),&q[0]);
   stringstream ss;
   ss<<qv;
-  sim->controlSimulators[index].controller->SendCommand("append_q",ss.str());
+  controller->controller->SendCommand("append_q",ss.str());
 }
 
 void SimRobotController::addMilestoneLinear(const vector<double>& q)
 {
-  Config qv(sim->controlSimulators[index].robot->links.size(),&q[0]);
+  Config qv(controller->robot->links.size(),&q[0]);
   stringstream ss;
   ss<<qv;
-  sim->controlSimulators[index].controller->SendCommand("append_q_linear",ss.str());
+  controller->controller->SendCommand("append_q_linear",ss.str());
 }
 
 void SimRobotController::setLinear(const std::vector<double>& q,double dt)
 {
-  PolynomialMotionQueue* mq = GetMotionQueue(sim->controlSimulators[index].controller);
+  PolynomialMotionQueue* mq = GetMotionQueue(controller->controller);
   mq->Cut(0);
   mq->AppendLinear(q,dt);
 }
 void SimRobotController::setCubic(const std::vector<double>& q,const std::vector<double>& v,double dt)
 {
-  PolynomialMotionQueue* mq = GetMotionQueue(sim->controlSimulators[index].controller);
+  PolynomialMotionQueue* mq = GetMotionQueue(controller->controller);
   mq->Cut(0);
   mq->AppendCubic(q,v,dt);
 }
 void SimRobotController::appendLinear(const std::vector<double>& q,double dt)
 {
-  PolynomialMotionQueue* mq = GetMotionQueue(sim->controlSimulators[index].controller);
+  PolynomialMotionQueue* mq = GetMotionQueue(controller->controller);
   mq->AppendLinear(q,dt);
 }
 void SimRobotController::addCubic(const std::vector<double>& q,const std::vector<double>& v,double dt)
 {
-  PolynomialMotionQueue* mq = GetMotionQueue(sim->controlSimulators[index].controller);
+  PolynomialMotionQueue* mq = GetMotionQueue(controller->controller);
   mq->AppendCubic(q,v,dt);
 }
 
 void SimRobotController::addMilestone(const vector<double>& q,const vector<double>& dq)
 {
-  Config qv(sim->controlSimulators[index].robot->links.size(),&q[0]);
-  Config dqv(sim->controlSimulators[index].robot->links.size(),&dq[0]);
+  Config qv(controller->robot->links.size(),&q[0]);
+  Config dqv(controller->robot->links.size(),&dq[0]);
   stringstream ss;
   ss<<qv<<"\t"<<dqv;
-  sim->controlSimulators[index].controller->SendCommand("append_qv",ss.str());
+  controller->controller->SendCommand("append_qv",ss.str());
 }
 
 void SimRobotController::setVelocity(const vector<double>& dq,double dt)
 {
-  Config qv(sim->controlSimulators[index].robot->links.size(),&dq[0]);
+  Config qv(controller->robot->links.size(),&dq[0]);
   stringstream ss;
   ss<<dt<<"\t"<<qv;
-  sim->controlSimulators[index].controller->SendCommand("set_tv",ss.str());
+  controller->controller->SendCommand("set_tv",ss.str());
 }
 
 double SimRobotController::remainingTime() const
 {
-  PolynomialMotionQueue* mq = GetMotionQueue(sim->controlSimulators[index].controller);
+  PolynomialMotionQueue* mq = GetMotionQueue(controller->controller);
   return mq->TimeRemaining();
 }
 
 
 void SimRobotController::setTorque(const std::vector<double>& t)
 {
-  RobotMotorCommand& command = sim->controlSimulators[index].command;
+  RobotMotorCommand& command = controller->command;
   if(t.size() != command.actuators.size()) {
     throw PyException("Invalid command size, must be equal to driver size");
   }
   for(size_t i=0;i<command.actuators.size();i++) {
     command.actuators[i].SetTorque(t[i]);
   }
-  RobotController* c=sim->robotControllers[index];
+  RobotController* c=sim->sim->robotControllers[index];
   MyController* mc=dynamic_cast<MyController*>(c);
   if(!mc) {
     throw PyException("Not using the default manual override controller");
@@ -3431,8 +3468,8 @@ void SimRobotController::setTorque(const std::vector<double>& t)
 
 void SimRobotController::setPIDCommand(const std::vector<double>& qdes,const std::vector<double>& dqdes)
 {
-  RobotMotorCommand& command = sim->controlSimulators[index].command;
-  Robot* robot=sim->controlSimulators[index].robot;
+  RobotMotorCommand& command = controller->command;
+  Robot* robot=controller->robot;
   if(qdes.size() != command.actuators.size() || dqdes.size() != command.actuators.size()) {
     if(qdes.size() != robot->links.size() || dqdes.size() != robot->links.size())
       throw PyException("Invalid command sizes");
@@ -3449,7 +3486,7 @@ void SimRobotController::setPIDCommand(const std::vector<double>& qdes,const std
       command.actuators[i].SetPID(qdes[i],dqdes[i],command.actuators[i].iterm);
     }
   }
-  RobotController* c=sim->robotControllers[index];
+  RobotController* c=sim->sim->robotControllers[index];
   MyController* mc=dynamic_cast<MyController*>(c);
   if(!mc) {
     throw PyException("Not using the default manual override controller");
@@ -3460,8 +3497,8 @@ void SimRobotController::setPIDCommand(const std::vector<double>& qdes,const std
 void SimRobotController::setPIDCommand(const std::vector<double>& qdes,const std::vector<double>& dqdes,const std::vector<double>& tfeedforward)
 {
   setPIDCommand(qdes,dqdes);
-  RobotMotorCommand& command = sim->controlSimulators[index].command;
-  //Robot* robot=sim->controlSimulators[index];
+  RobotMotorCommand& command = controller->command;
+  //Robot* robot=sim->sim->controlSimulators[index];
   if(tfeedforward.size() != command.actuators.size())
      throw PyException("Invalid command sizes");
   for(size_t i=0;i<command.actuators.size();i++) {
@@ -3473,7 +3510,7 @@ void SimRobotController::setPIDCommand(const std::vector<double>& qdes,const std
 
 void SimRobotController::setPIDGains(const std::vector<double>& kP,const std::vector<double>& kI,const std::vector<double>& kD)
 {
-  RobotMotorCommand& command = sim->controlSimulators[index].command;
+  RobotMotorCommand& command = controller->command;
   if(kP.size() != command.actuators.size() || kI.size() != command.actuators.size() || kD.size() != command.actuators.size()) {
     throw PyException("Invalid gain sizes");
   }

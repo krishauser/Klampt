@@ -54,6 +54,7 @@ class RobotModelLink
   RobotModelLink();
   ///Returns the ID of the robot link in its world (Note: not the same as getIndex())
   int getID();
+  ///Returns the name of the robot link
   const char* getName();
   ///Returns a reference to the link's robot.
   RobotModel robot();
@@ -63,8 +64,12 @@ class RobotModelLink
   int getIndex();
   ///Returns the index of the link's parent (on its robot).
   int getParent();
+  ///Returns a reference to the link's parent, or a NULL link if it has no parent
+  RobotModelLink parent();
   ///Sets the index of the link's parent (on its robot).
   void setParent(int p);
+  ///Sets the link's parent (must be on the same robot).
+  void setParent(const RobotModelLink& l);
   ///Returns a reference to the link's geometry
   Geometry3D geometry();
   ///Returns a reference to the link's appearance

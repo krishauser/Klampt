@@ -13,8 +13,15 @@ class SimRobotController;
 //declarations for internal objects
 class SensorBase;
 class WorldSimulation;
+class ControlledRobotSimulator;
 class ODEGeometry;
 typedef struct dxBody *dBodyID;
+
+//forward declarations
+class SimRobotSensor;
+class SimRobotController;
+class SimBody;
+class Simulator;
 
 /** @brief A sensor on a simulated robot.  Retreive this from the controller,
  * and use getMeasurements to get the currently simulated measurement vector.
@@ -57,6 +64,8 @@ class SimRobotController
  public:
   SimRobotController();
   ~SimRobotController();
+  ///Retrieves the robot model associated with this controller
+  RobotModel model();
   /// Sets the current feedback control rate
   void setRate(double dt);
 
@@ -140,7 +149,8 @@ class SimRobotController
   void setPIDGains(const std::vector<double>& kP,const std::vector<double>& kI,const std::vector<double>& kD);
 
   int index;
-  WorldSimulation* sim;
+  Simulator* sim;
+  ControlledRobotSimulator* controller;
 };
 
 /** @brief A reference to a rigid body inside a Simulator (either a
@@ -249,13 +259,17 @@ class Simulator
   /// Call this to enable contact feedback between the two objects
   /// (arguments are indexes returned by object.getID()).  Contact feedback
   /// has a small overhead so you may want to do this selectively.
+  /// This must be called before using inContact, getContacts, getContactForces,
+  /// contactForce, contactTorque, hadContact, hadSeparation, hadPenetration,
+  /// and meanContactForce.
   void enableContactFeedback(int obj1,int obj2);
   /// Call this to enable contact feedback between all pairs of objects.
   /// Contact feedback has a small overhead so you may want to do this
   /// selectively.
   void enableContactFeedbackAll();
   /// Returns true if the objects (indexes returned by object.getID()) are in
-  /// contact on the current time step
+  /// contact on the current time step.  You can set bid=-1 to tell if object a
+  /// is in contact with any object. 
   bool inContact(int aid,int bid);
   /// Returns the list of contacts (x,n,kFriction) at the last time step.
   /// Normals point into object a.  The contact point (x,n,kFriction) is 
@@ -263,15 +277,26 @@ class Simulator
   void getContacts(int aid,int bid,std::vector<std::vector<double> >& out);
   /// Returns the list of contact forces on object a at the last time step
   void getContactForces(int aid,int bid,std::vector<std::vector<double> >& out);
-  /// Returns the contact force on object a at the last time step
+  /// Returns the contact force on object a at the last time step.  You can set
+  /// bid to -1 to get the overall contact force on object a.
   void contactForce(int aid,int bid,double out[3]);
-  /// Returns the contact force on object a (about a's origin) at the last time step
+  /// Returns the contact force on object a (about a's origin) at the last time step.
+  /// You can set bid to -1 to get the overall contact force on object a.
   void contactTorque(int aid,int bid,double out[3]);
-  /// Returns true if the objects had contact over the last simulate() call
+  /// Returns true if the objects had contact over the last simulate() call.  You
+  /// can set bid to -1 to determine if object a had contact with any other object.
   bool hadContact(int aid,int bid);
   /// Returns true if the objects had ever separated during the last
-  /// simulate() call
+  /// simulate() call. You can set bid to -1 to determine if object a had no contact
+  /// with any other object.
   bool hadSeparation(int aid,int bid);
+  /// Returns true if the objects interpenetrated during the last simulate()
+  /// call.  If so, the simulation may lead to very inaccurate results or
+  /// artifacts.  You can set bid to -1 to determine if object a penetrated
+  /// any object, or you can set aid=bid=-1 to determine whether any object
+  /// is penetrating any other (indicating that the simulation will not be
+  /// functioning properly in general).
+  bool hadPenetration(int aid,int bid);
   /// Returns the average contact force on object a over the last simulate()
   /// call
   void meanContactForce(int aid,int bid,double out[3]);
