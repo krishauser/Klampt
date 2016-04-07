@@ -15,6 +15,8 @@ class MyGLViewer(GLRealtimeProgram):
         #simulation flag, and screenshot flags
         self.collider = robotcollide.WorldCollider(world)
         self.sim = Simulator(world)
+        #contact feedback is enabled, needed to detect penetration situations
+        self.sim.enableContactFeedbackAll()
         self.simulate = False
         self.controllers = []
         self.forceApplicationMode = False
@@ -100,6 +102,12 @@ class MyGLViewer(GLRealtimeProgram):
                         glEnd()                        
             glEnable(GL_DEPTH_TEST)
 
+    def display_screen(self):
+        glDisable(GL_LIGHTING)
+        self.draw_text(20,20,str(self.sim.getTime()))
+        if self.sim.hadPenetration(-1,-1):
+            self.draw_text(20,40,"Meshes penetrating, simulation may be unstable",color=[1,0,0])
+
     def control_loop(self):
         for i in xrange(self.world.numRobots()):
             if i >= len(self.controllers): break
@@ -175,7 +183,7 @@ class MyGLViewer(GLRealtimeProgram):
                 if len(objs) > 0:
                     print "Clicked:",[o[0].getName() for o in objs]
                     (s,d) = self.click_ray(x,y)
-                    if isinstance(objs[0][0],RobotModelLink):
+                    if isinstance(objs[0][0],(RobotModelLink,RigidObjectModel)):
                         print "Clicked, turning on force application mode",objs[0][0].getName()
                         self.forceApplicationMode = True
                         self.addForceSpring(objs[0][0],objs[0][1])
@@ -238,8 +246,9 @@ class MyGLViewer(GLRealtimeProgram):
                 self.nextScreenshotTime = self.sim.getTime()
         elif c == 'c':
             self.drawContacts = not self.drawContacts
-            if self.drawContacts:
-                self.sim.enableContactFeedbackAll()
+            #this is being done automatically now to detect penetration situations
+            #if self.drawContacts:
+            #    self.sim.enableContactFeedbackAll()
         glutPostRedisplay()
 
     def click_world(self,x,y):
