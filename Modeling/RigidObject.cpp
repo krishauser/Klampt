@@ -253,6 +253,7 @@ void RigidObject::UpdateGeometry()
 
 void RigidObject::DrawGL()
 {
+#ifndef NO_OPENGL
   if(!geometry) return;
 
   glDisable(GL_CULL_FACE);
@@ -263,4 +264,5 @@ void RigidObject::DrawGL()
 
   glPopMatrix();
   glEnable(GL_CULL_FACE);
+#endif //NO_OPENGL
 }

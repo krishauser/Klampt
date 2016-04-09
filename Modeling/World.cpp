@@ -246,6 +246,7 @@ void RobotWorld::UpdateGeometry()
 
 void RobotWorld::SetGLLights()
 {
+#ifndef NO_OPENGL
   for(size_t i=0;i<lights.size();i++) 
     lights[i].setCurrentGL(i);
   DEBUG_GL_ERRORS()
@@ -256,6 +257,7 @@ void RobotWorld::SetGLLights()
     DEBUG_GL_ERRORS()
       }
     */
+#endif //NO_OPENGL
 }
 
 void RobotWorld::DrawGL()

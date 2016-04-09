@@ -32,6 +32,7 @@ GLCheckeredSphere::GLCheckeredSphere()
 //theta is the vertical range, phi is the rotational range
 void DrawSphereArc(Real r,Real theta0,Real theta1,Real phi0,Real phi1,int numSlices,int numStacks)
 {
+#ifndef NO_OPENGL
   Real thetaInc = (theta1-theta0)/Real(numStacks);
   Real phiInc = (phi1-phi0)/Real(numSlices);
   Real phi=phi0;
@@ -53,10 +54,12 @@ void DrawSphereArc(Real r,Real theta0,Real theta1,Real phi0,Real phi1,int numSli
     }
     glEnd();
   }
+#endif //NO_OPENGL
 }
 
 void GLCheckeredSphere::Draw()
 {
+#ifndef NO_OPENGL
   glEnable(GL_LIGHTING);
   glPushMatrix();
   {
@@ -73,25 +76,11 @@ void GLCheckeredSphere::Draw()
     DrawSphereArc(radius, Pi_2,Pi, Pi,3*Pi_2, numSlices/4,numStacks/2);
   }
   glPopMatrix();
+#endif //NO_OPENGL
 }
 
 
 
-
-void InitDisplayLists(Robot& robot,vector<GLDisplayList>& displayLists)
-{
-  displayLists.resize(robot.links.size());
-  for(size_t i=0;i<robot.links.size();i++) {
-    if(!displayLists[i].isCompiled()) {
-      displayLists[i].beginCompile();
-      glBegin(GL_POINTS);
-      glVertex3f(0,0,0);
-      glEnd();
-      robot.DrawLinkGL(i);
-      displayLists[i].endCompile();
-    }
-  }
-}
 
 ViewRobot::ViewRobot(Robot* _robot)
   :robot(_robot)
@@ -131,6 +120,7 @@ void ViewRobot::SetGrey() { SetColors(grey); }
 
 void ViewRobot::Draw() 
 {
+#ifndef NO_OPENGL
   if(!robot) return;
 
   for(size_t i=0;i<robot->links.size();i++) {
@@ -143,10 +133,12 @@ void ViewRobot::Draw()
     Appearance(i).DrawGL();
     glPopMatrix();
   }
+#endif //NO_OPENGL
 }
 
 void ViewRobot::DrawLink_Local(int i,bool keepAppearance)
 {
+#ifndef NO_OPENGL
   if(!robot || robot->IsGeometryEmpty(i)) return;
   if(keepAppearance) {
     if(Appearance(i).geom != robot->geometry[i])
@@ -155,21 +147,25 @@ void ViewRobot::DrawLink_Local(int i,bool keepAppearance)
   }
   else 
     draw(*robot->geometry[i]);
+#endif //NO_OPENGL
 }
 
 void ViewRobot::DrawLink_World(int i,bool keepAppearance)
 {
+#ifndef NO_OPENGL
   if(!robot) return;
   Matrix4 mat = robot->links[i].T_World;
   glPushMatrix();
   glMultMatrix(mat);
   DrawLink_Local(i,keepAppearance);
   glPopMatrix();
+#endif //NO_OPENGL
 }
 
 
 void ViewRobot::DrawCenterOfMass(Real radius)
 {
+#ifndef NO_OPENGL
   if(!robot) return;
   Vector3 com = robot->GetCOM();
 
@@ -186,6 +182,7 @@ void ViewRobot::DrawCenterOfMass(Real radius)
   glVertex3f(com.x,com.y,com.z);
   glVertex3f(com.x,com.y,0);
   glEnd();
+#endif //NO_OPENGL
 }
 
 void ViewRobot::DrawLinkCenterOfMass(int i,Real radius)
@@ -201,6 +198,7 @@ void ViewRobot::DrawLinkCenterOfMass(int i,Real radius)
 
 void ViewRobot::DrawLinkFrames(Real size)
 {
+#ifndef NO_OPENGL
   if(!robot) return;
   glDisable(GL_LIGHTING);
   for(size_t i=0;i<robot->links.size();i++) {
@@ -209,10 +207,12 @@ void ViewRobot::DrawLinkFrames(Real size)
     drawCoords(size);
     glPopMatrix();
   }
+#endif //NO_OPENGL
 }
 
 void ViewRobot::DrawLinkSkeleton()
 {
+#ifndef NO_OPENGL
   if(!robot) return;
   glDisable(GL_LIGHTING);
   glColor3f(1,0.5,0);
@@ -226,6 +226,7 @@ void ViewRobot::DrawLinkSkeleton()
   }
   glEnd();
   glLineWidth(1.0);
+#endif //NO_OPENGL
 }
 
 void ViewRobot::DrawTorques(const Vector& T)

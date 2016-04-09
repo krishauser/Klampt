@@ -141,6 +141,7 @@ void ODEGeometry::Clear()
 
 void ODEGeometry::DrawGL()
 {
+#ifndef NO_OPENGL
   if(!verts) return;
 
   glColor3f(1,1,0);
@@ -179,6 +180,7 @@ void ODEGeometry::DrawGL()
 #endif //dDOUBLE
   }
   glEnd();
+#endif
 }
 
 void ODEGeometry::SetPadding(Real padding)
