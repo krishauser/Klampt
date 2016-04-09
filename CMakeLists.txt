@@ -30,20 +30,6 @@ INCLUDE_DIRECTORIES(${INCLUDE_DIRS})
 
 LINK_DIRECTORIES(${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
 
-# define the Klamp't library subdirectories in the SUBDIRS variable
-SET(SUBDIRS Contact Control IO Interface Modeling Planning Simulation View)
-
-# Get all compilation files in subdirectories
-foreach(s ${SUBDIRS})
-  file(GLOB SUBDIR_SRCS  ${PROJECT_SOURCE_DIR}/${s}/*.cpp )
-  SET(Klampt_SRCS ${Klampt_SRCS} ${SUBDIR_SRCS})
-  SET(Klampt_${s}_SRCS ${SUBDIR_SRCS})
-endforeach(s)
-
-#add all compilation files to the Klamp't library
-ADD_LIBRARY( Klampt STATIC ${Klampt_SRCS})
-
-
 
 
 ##### External libraries: KrisLibrary, its dependencies, and ODE #####
@@ -69,6 +55,33 @@ IF(WIN32)
 ELSE(WIN32)
   SET(KLAMPT_ABSOLUTE_LIBRARIES ${CMAKE_BINARY_DIR}/lib/libKlampt.lib ${KLAMPT_LIBRARIES})
 ENDIF(WIN32)
+
+# define the Klamp't library subdirectories in the SUBDIRS variable
+SET(SUBDIRS Contact Control IO Modeling Planning Simulation)
+SET(SUBDIRS ${SUBDIRS} IO/URDF)
+IF(OPENGL_FOUND)
+  SET(SUBDIRS ${SUBDIRS} Interface View)
+ELSE(OPENGL_FOUND)
+  MESSAGE("Klamp't: No OpenGL, not compiling Interface or View folders")
+ENDIF(OPENGL_FOUND)
+
+# Get all compilation files in subdirectories
+foreach(s ${SUBDIRS})
+  file(GLOB SUBDIR_SRCS  ${PROJECT_SOURCE_DIR}/${s}/*.cpp )
+  SET(Klampt_SRCS ${Klampt_SRCS} ${SUBDIR_SRCS})
+  SET(Klampt_${s}_SRCS ${SUBDIR_SRCS})
+endforeach(s)
+
+#extras in the View directory that are necessary for compiling
+IF(NOT OPENGL_FOUND)
+  SET(Klampt_SRCS ${Klampt_SRCS} View/ViewRobot.cpp View/Texturizer.cpp View/ViewTextures.cpp)
+ENDIF(NOT OPENGL_FOUND)
+
+
+#add all compilation files to the Klamp't library
+ADD_LIBRARY( Klampt STATIC ${Klampt_SRCS})
+
+
 
 ####### Klamp't Applications #########
 IF(NOT USE_QT4_APPS)
