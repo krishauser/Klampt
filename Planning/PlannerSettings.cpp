@@ -38,10 +38,12 @@ void WorldPlannerSettings::InitializeDefault(RobotWorld& world)
   bounds.minimize();
   for(size_t i=0;i<world.rigidObjects.size();i++) {
     world.rigidObjects[i]->geometry->SetTransform(world.rigidObjects[i]->T);
-    bounds.setUnion(world.rigidObjects[i]->geometry->GetAABB());
+    if(world.rigidObjects[i]->geometry.Empty())
+      bounds.setUnion(world.rigidObjects[i]->geometry->GetAABB());
   }
   for(size_t i=0;i<world.terrains.size();i++) {
-    bounds.setUnion(world.terrains[i]->geometry->GetAABB());
+    if(world.terrains[i]->geometry.Empty())
+      bounds.setUnion(world.terrains[i]->geometry->GetAABB());
   }
   for(size_t i=0;i<world.robots.size();i++) {
     for(size_t j=0;j<world.robots[i]->links.size();j++) {
@@ -64,7 +66,10 @@ void WorldPlannerSettings::InitializeDefault(RobotWorld& world)
     //1cm or 0.57 degrees movement allowed between checked points
     objectSettings[i].collisionEpsilon = 0.01;
     objectSettings[i].translationWeight = 1.0;
-    objectSettings[i].rotationWeight = Radius(*world.rigidObjects[i]->geometry);
+    if(world.rigidObjects[i]->geometry.Empty())
+      objectSettings[i].rotationWeight = 1;
+    else
+      objectSettings[i].rotationWeight = Radius(*world.rigidObjects[i]->geometry);
   }
 
   robotSettings.resize(world.robots.size());
@@ -101,7 +106,6 @@ Real DistanceLowerBound(AnyCollisionGeometry3D* m1,AnyCollisionGeometry3D* m2,Re
 
 bool WorldPlannerSettings::CheckCollision(RobotWorld& world,int id1,int id2,Real tol)
 {
-  printf("CheckCollision id %d %d\n",id1,id2);
   if(id2 < 0) {  //check all
     vector<int> ids(collisionEnabled.n);
     for(int i=0;i<collisionEnabled.n;i++)
@@ -179,17 +183,20 @@ bool WorldPlannerSettings::CheckCollision(RobotWorld& world,int id1,int id2,Real
     //non-robots
     index1 = world.IsTerrain(id1);
     if(index1 >= 0) {
+      if(world.terrains[index1]->geometry.Empty()) return false;
       return CheckCollision(world,world.terrains[index1]->geometry,id2,tol);
     }
     index1 = world.IsRigidObject(id1);
     if(index1 >= 0) {
       RigidObject* obj = world.rigidObjects[index1];
+      if(obj->geometry.Empty()) return false;
       obj->geometry->SetTransform(obj->T);
       return CheckCollision(world,obj->geometry,id2,tol);
     }
     pair<int,int> linkid = world.IsRobotLink(id1);
     if(linkid.first >= 0) {
       Robot* robot = world.robots[linkid.first];
+      if(robot->IsGeometryEmpty(linkid.second)) return false;
       return CheckCollision(world,robot->geometry[linkid.second],id2,tol);
     }
     return false;
