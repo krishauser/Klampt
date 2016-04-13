@@ -37,12 +37,13 @@ void WorldPlannerSettings::InitializeDefault(RobotWorld& world)
   AABB3D bounds;
   bounds.minimize();
   for(size_t i=0;i<world.rigidObjects.size();i++) {
-    world.rigidObjects[i]->geometry->SetTransform(world.rigidObjects[i]->T);
-    if(world.rigidObjects[i]->geometry.Empty())
+    if(!world.rigidObjects[i]->geometry.Empty()) {
+      world.rigidObjects[i]->geometry->SetTransform(world.rigidObjects[i]->T);
       bounds.setUnion(world.rigidObjects[i]->geometry->GetAABB());
+    }
   }
   for(size_t i=0;i<world.terrains.size();i++) {
-    if(world.terrains[i]->geometry.Empty())
+    if(!world.terrains[i]->geometry.Empty())
       bounds.setUnion(world.terrains[i]->geometry->GetAABB());
   }
   for(size_t i=0;i<world.robots.size();i++) {
@@ -87,6 +88,7 @@ void WorldPlannerSettings::InitializeDefault(RobotWorld& world)
 
 bool CheckCollision(AnyCollisionGeometry3D* m1,AnyCollisionGeometry3D* m2,Real tol)
 {
+  if(!m1 || !m2) return false;
   Assert(tol >= 0);
   AnyCollisionQuery q(*m1,*m2);
   if(tol == 0) {
@@ -99,6 +101,7 @@ bool CheckCollision(AnyCollisionGeometry3D* m1,AnyCollisionGeometry3D* m2,Real t
 
 Real DistanceLowerBound(AnyCollisionGeometry3D* m1,AnyCollisionGeometry3D* m2,Real epsilon,Real bound=Inf)
 {
+  if(!m1 || !m2) return Inf;
   Assert(epsilon >= 0);
   AnyCollisionQuery q(*m1,*m2);
   return q.Distance(0.0,epsilon,bound);
@@ -183,7 +186,6 @@ bool WorldPlannerSettings::CheckCollision(RobotWorld& world,int id1,int id2,Real
     //non-robots
     index1 = world.IsTerrain(id1);
     if(index1 >= 0) {
-      if(world.terrains[index1]->geometry.Empty()) return false;
       return CheckCollision(world,world.terrains[index1]->geometry,id2,tol);
     }
     index1 = world.IsRigidObject(id1);
@@ -196,7 +198,6 @@ bool WorldPlannerSettings::CheckCollision(RobotWorld& world,int id1,int id2,Real
     pair<int,int> linkid = world.IsRobotLink(id1);
     if(linkid.first >= 0) {
       Robot* robot = world.robots[linkid.first];
-      if(robot->IsGeometryEmpty(linkid.second)) return false;
       return CheckCollision(world,robot->geometry[linkid.second],id2,tol);
     }
     return false;
@@ -322,11 +323,12 @@ pair<int,int> WorldPlannerSettings::CheckCollision(RobotWorld& world,const vecto
   return pair<int,int>(-1,-1);
 }
 
-bool WorldPlannerSettings::CheckCollision(RobotWorld& world,AnyCollisionGeometry3D* mesh,int id,Real tol)
+bool WorldPlannerSettings::CheckCollision(RobotWorld& world,AnyCollisionGeometry3D* geom,int id,Real tol)
 {
+  if(!geom) return false;
   if(id < 0) {  //check all
     for(int i=0;i<collisionEnabled.n;i++) {
-      if(CheckCollision(world,mesh,i,tol)) return true;
+      if(CheckCollision(world,geom,i,tol)) return true;
     }
     return false;
   }
@@ -334,25 +336,27 @@ bool WorldPlannerSettings::CheckCollision(RobotWorld& world,AnyCollisionGeometry
     int index;
     index = world.IsTerrain(id);
     if(index >= 0) {
-      return ::CheckCollision(mesh,&*world.terrains[index]->geometry,tol);
+      return ::CheckCollision(geom,&*world.terrains[index]->geometry,tol);
     }
     index = world.IsRigidObject(id);
     if(index >= 0) {
       RigidObject* obj = world.rigidObjects[index];
+      if(obj->geometry.Empty()) return false;
       obj->geometry->SetTransform(obj->T);
-      return ::CheckCollision(mesh,&*obj->geometry,tol);
+      return ::CheckCollision(geom,&*obj->geometry,tol);
     }
     index = world.IsRobot(id);
     if(index >= 0) {
       Robot* robot = world.robots[index];
-      for(size_t j=0;j<robot->links.size();j++)
-	if(::CheckCollision(mesh,&*robot->geometry[j],tol)) return true;
+      for(size_t j=0;j<robot->links.size();j++) {
+	if(::CheckCollision(geom,&*robot->geometry[j],tol)) return true;
+      }
       return false;
     }
     pair<int,int> linkid = world.IsRobotLink(id);
     if(linkid.first >= 0) {
       Robot* robot = world.robots[linkid.first];
-      return ::CheckCollision(mesh,&*robot->geometry[linkid.second],tol);
+      return ::CheckCollision(geom,&*robot->geometry[linkid.second],tol);
     }
     return false;
   }
@@ -406,6 +410,7 @@ Real WorldPlannerSettings::DistanceLowerBound(RobotWorld& world,int id1,int id2,
     index1 = world.IsRigidObject(id1);
     if(index1 >= 0) {
       RigidObject* obj = world.rigidObjects[index1];
+      if(obj->geometry.Empty()) return false;
       obj->geometry->SetTransform(obj->T);
       return DistanceLowerBound(world,obj->geometry,id2,eps,minDist);
     }
@@ -440,11 +445,13 @@ Real WorldPlannerSettings::DistanceLowerBound(RobotWorld& world,AnyCollisionGeom
     int index;
     index = world.IsTerrain(id);
     if(index >= 0) {
+      if(world.terrains[index]->geometry.Empty()) return Inf;
       return ::DistanceLowerBound(mesh,&*world.terrains[index]->geometry,eps,minDist);
     }
     index = world.IsRigidObject(id);
     if(index >= 0) {
       RigidObject* obj = world.rigidObjects[index];
+      if(obj->geometry.Empty()) return Inf;
       obj->geometry->SetTransform(obj->T);
       return ::DistanceLowerBound(mesh,&*obj->geometry,eps);
     }
@@ -461,6 +468,7 @@ Real WorldPlannerSettings::DistanceLowerBound(RobotWorld& world,AnyCollisionGeom
       assert(linkid.first < (int)world.robots.size());
       Robot* robot = world.robots[linkid.first];
       assert(linkid.second >= 0 && linkid.second < (int)robot->links.size());
+
       return ::DistanceLowerBound(mesh,&*robot->geometry[linkid.second],eps,minDist);
     }
     return minDist;
@@ -674,6 +682,7 @@ void WorldPlannerSettings::EnumerateCollisionQueries(RobotWorld& world,int id1,i
     index1 = world.IsRigidObject(id1);
     if(index1 >= 0) {
       RigidObject* obj = world.rigidObjects[index1];
+      if(obj->geometry.Empty()) return;
       obj->geometry->SetTransform(obj->T);
       EnumerateCollisionQueries(world,&*obj->geometry,id2,ids,queries);
       for(size_t i=0;i<ids.size();i++)
@@ -693,6 +702,7 @@ void WorldPlannerSettings::EnumerateCollisionQueries(RobotWorld& world,int id1,i
 
 void WorldPlannerSettings::EnumerateCollisionQueries(RobotWorld& world,AnyCollisionGeometry3D* mesh,int id,vector<int>& collisionIds,vector<AnyCollisionQuery>& queries)
 {
+  if(mesh == NULL) return;
   if(id < 0) {  //check all
     for(int i=0;i<collisionEnabled.n;i++) {
       EnumerateCollisionQueries(world,mesh,i,collisionIds,queries);
@@ -703,6 +713,7 @@ void WorldPlannerSettings::EnumerateCollisionQueries(RobotWorld& world,AnyCollis
     int index;
     index = world.IsTerrain(id);
     if(index >= 0) {
+      if(world.terrains[index]->geometry.Empty()) return;
       queries.push_back(AnyCollisionQuery(*mesh,*world.terrains[index]->geometry));
       collisionIds.push_back(id);
       return;
@@ -710,6 +721,7 @@ void WorldPlannerSettings::EnumerateCollisionQueries(RobotWorld& world,AnyCollis
     index = world.IsRigidObject(id);
     if(index >= 0) {
       RigidObject* obj = world.rigidObjects[index];
+      if(obj->geometry.Empty()) return;
       obj->geometry->SetTransform(obj->T);
       queries.push_back(AnyCollisionQuery(*mesh,*obj->geometry));
       collisionIds.push_back(id);
@@ -719,6 +731,7 @@ void WorldPlannerSettings::EnumerateCollisionQueries(RobotWorld& world,AnyCollis
     if(index >= 0) {
       Robot* robot = world.robots[index];
       for(size_t j=0;j<robot->links.size();j++) {
+	if(robot->IsGeometryEmpty(j)) continue;
 	queries.push_back(AnyCollisionQuery(*mesh,*robot->geometry[j]));
 	collisionIds.push_back(world.RobotLinkID(index,j));
       }
@@ -727,6 +740,7 @@ void WorldPlannerSettings::EnumerateCollisionQueries(RobotWorld& world,AnyCollis
     pair<int,int> linkid = world.IsRobotLink(id);
     if(linkid.first >= 0) {
       Robot* robot = world.robots[linkid.first];
+      if(robot->IsGeometryEmpty(linkid.second)) return;
       queries.push_back(AnyCollisionQuery(*mesh,*robot->geometry[linkid.second]));
       collisionIds.push_back(id);
     }
