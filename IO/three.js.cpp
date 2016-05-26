@@ -74,10 +74,14 @@ void ThreeJSExport(const RigidTransform& T,AnyCollection& out)
       out[j*4+i] = mat(i,j);
 }
 
+
+
+
 void ThreeJSExport(const RobotWorld& world,AnyCollection& out,ThreeJSCache& cache)
 {
   out["metadata"]["version"] = 4.4;
   out["metadata"]["type"] = "Object";
+  out["metadata"]["fullscene"] = true;
   out["metadata"]["generator"] = "Klampt three.js export";
   AnyCollection& geometries = out["geometries"];
   AnyCollection& materials = out["materials"];
@@ -117,7 +121,7 @@ void ThreeJSExport(const RobotWorld& world,AnyCollection& out,ThreeJSCache& cach
   rootobject["uuid"] = MakeRandomUUID();
   rootobject["type"] = "Scene";
   RigidTransform T; T.setIdentity();
-  ThreeJSExport(T,rootobject["matrix"]);
+  //ThreeJSExport(T,rootobject["matrix"]);
   AnyCollection& clist = rootobject["children"];
   for(size_t i=0;i<world.robots.size();i++) 
     ThreeJSExport(*world.robots[i],clist[clist.size()],cache);
@@ -125,6 +129,125 @@ void ThreeJSExport(const RobotWorld& world,AnyCollection& out,ThreeJSCache& cach
     ThreeJSExport(*world.rigidObjects[i],clist[clist.size()],cache);
   for(size_t i=0;i<world.terrains.size();i++) 
     ThreeJSExport(*world.terrains[i],clist[clist.size()],cache);
+
+  AnyCollection light;
+  light["uuid"] = MakeRandomUUID();
+  light["name"] = "DirectionalLight 1";
+  light["type"] = "DirectionalLight";
+  light["color"] = 16777215;
+  light["intensity"]=1;
+
+  AnyCollection lightMatrix;
+  lightMatrix[0]=1;
+  lightMatrix[1]=0;
+  lightMatrix[2]=0;
+  lightMatrix[3]=0;
+  lightMatrix[4]=0;
+  lightMatrix[5]=1;
+  lightMatrix[6]=0;
+  lightMatrix[7]=0;
+  lightMatrix[8]=0;
+  lightMatrix[9]=0;
+  lightMatrix[10]=1;
+  lightMatrix[11]=0;
+  lightMatrix[12]=2;
+  lightMatrix[13]=0;
+  lightMatrix[14]=9;
+  lightMatrix[15]=1;
+
+  light["matrix"]=lightMatrix;
+  clist[clist.size()]=light;
+
+  AnyCollection sceneMatrix; //adjust to match view in three.js
+  sceneMatrix[0]=1;
+  sceneMatrix[1]=0;
+  sceneMatrix[2]=0;
+  sceneMatrix[3]=0;
+  sceneMatrix[4]=0;
+  sceneMatrix[5]=0;
+  sceneMatrix[6]=-1;
+  sceneMatrix[7]=0;
+  sceneMatrix[8]=0;
+  sceneMatrix[9]=1;
+  sceneMatrix[10]=0;
+  sceneMatrix[11]=0;
+  sceneMatrix[12]=0;
+  sceneMatrix[13]=0;
+  sceneMatrix[14]=0;
+  sceneMatrix[15]=1;
+
+  rootobject["matrix"]=sceneMatrix;
+}
+
+void ThreeJSExportTransforms(const RobotWorld& world,AnyCollection& out)
+{
+  out["metadata"]["version"] = 4.4;
+  out["metadata"]["type"] = "Object";
+  out["metadata"]["fullscene"] = false;
+  out["metadata"]["generator"] = "Klampt three.js export";
+
+  //now loop through all objects
+  AnyCollection& clist = out["object"];
+
+  //AnyCollection& clist = rootobject["object"];
+
+  AnyCollection sceneMatrix; //adjust to match view in three.js
+  sceneMatrix[0]=1;
+  sceneMatrix[1]=0;
+  sceneMatrix[2]=0;
+  sceneMatrix[3]=0;
+  sceneMatrix[4]=0;
+  sceneMatrix[5]=0;
+  sceneMatrix[6]=-1;
+  sceneMatrix[7]=0;
+  sceneMatrix[8]=0;
+  sceneMatrix[9]=1;
+  sceneMatrix[10]=0;
+  sceneMatrix[11]=0;
+  sceneMatrix[12]=0;
+  sceneMatrix[13]=0;
+  sceneMatrix[14]=0;
+  sceneMatrix[15]=1;
+
+  AnyCollection worldUpdate;
+  worldUpdate["name"]="world";
+  worldUpdate["matrix"]=sceneMatrix;
+
+  clist[clist.size()]=worldUpdate;
+
+  //AnyCollection& clist = rootobject["children"];
+  for(size_t i=0;i<world.robots.size();i++) 
+    ThreeJSExportTransforms(*world.robots[i],clist);
+  for(size_t i=0;i<world.rigidObjects.size();i++) 
+    ThreeJSExportTransforms(*world.rigidObjects[i],clist[clist.size()]);
+  for(size_t i=0;i<world.terrains.size();i++) 
+    ThreeJSExportTransforms(*world.terrains[i],clist[clist.size()]);
+
+  AnyCollection lightUpdate;
+  
+  AnyCollection lightMatrix;
+  lightMatrix[0]=1;
+  lightMatrix[1]=0;
+  lightMatrix[2]=0;
+  lightMatrix[3]=0;
+  lightMatrix[4]=0;
+  lightMatrix[5]=1;
+  lightMatrix[6]=0;
+  lightMatrix[7]=0;
+  lightMatrix[8]=0;
+  lightMatrix[9]=0;
+  lightMatrix[10]=1;
+  lightMatrix[11]=0;
+  lightMatrix[12]=2;
+  lightMatrix[13]=0;
+  lightMatrix[14]=9;
+  lightMatrix[15]=1;
+
+  lightUpdate["name"] = "DirectionalLight 1";
+  lightUpdate["matrix"]=lightMatrix;
+  clist[clist.size()]=lightUpdate;
+
+
 }
 
 void ThreeJSExport(WorldSimulation& sim,AnyCollection& out,ThreeJSCache& cache)
@@ -133,6 +256,14 @@ void ThreeJSExport(WorldSimulation& sim,AnyCollection& out,ThreeJSCache& cache)
   ThreeJSExport(*sim.world,out,cache);
   //TODO: export commanded config
 }
+
+void ThreeJSExportTransforms(WorldSimulation& sim,AnyCollection& out)
+{
+  sim.UpdateModel();
+  ThreeJSExportTransforms(*sim.world,out);
+  //TODO: export commanded config
+}
+
 
 void ThreeJSExport(const Robot& robot,AnyCollection& out,ThreeJSCache& cache)
 {
@@ -174,6 +305,48 @@ void ThreeJSExport(const Robot& robot,AnyCollection& out,ThreeJSCache& cache)
     ThreeJSExport(Trel,me["matrix"]);
   }
 }
+
+void ThreeJSExportTransforms(const Robot& robot,AnyCollection& out)
+{  
+  AnyCollection robotUpdate;
+  
+  robotUpdate["name"] = robot.name;
+  RigidTransform T; T.setIdentity();
+  ThreeJSExport(T,robotUpdate["matrix"]);
+
+  out[out.size()]=robotUpdate;
+
+  vector<AnyCollection*> llists(robot.links.size(),NULL);
+  vector<AnyCollection*> clists(robot.links.size(),NULL);
+
+  for(size_t i=0;i<robot.links.size();i++) {
+    //AnyCollection* clist = NULL;
+    //if(robot.parents[i] < 0) 
+      //clist = &out["children"];
+    //else {
+    //  if(!clists[robot.parents[i]])
+	//add children element
+    //clists[robot.parents[i]] = &(*llists[robot.parents[i]])["children"];
+    //  clist = clists[robot.parents[i]];
+    //}
+
+    //this accessor automatically appends to the array
+    //nyCollection& me = (*clist)[clist->size()];
+    //llists[i] = &me;
+    AnyCollection robotLinkUpdate;
+   
+    robotLinkUpdate["name"] = robot.LinkName(i);
+    
+    RigidTransform Tparent,Trel;
+    if(robot.parents[i] < 0) Tparent.setIdentity();
+    else Tparent = robot.links[robot.parents[i]].T_World;
+    Trel.mulInverseA(Tparent,robot.links[i].T_World);
+    ThreeJSExport(Trel,robotLinkUpdate["matrix"]);
+
+    out[out.size()]=robotLinkUpdate;
+  }
+}
+
 void ThreeJSExport(const RigidObject& object,AnyCollection& out,ThreeJSCache& cache)
 {
   out["uuid"] = MakeRandomUUID();
@@ -188,6 +361,22 @@ void ThreeJSExport(const RigidObject& object,AnyCollection& out,ThreeJSCache& ca
   }
   ThreeJSExport(object.T,out["matrix"]);
 }
+
+void ThreeJSExportTransforms(const RigidObject& object,AnyCollection& out)
+{
+  //out["uuid"] = MakeRandomUUID();
+  out["name"] = object.name;
+  if(object.geometry.Empty()) {
+    //out["type"] = "Group";
+  }
+  else {
+    //out["type"] = "Mesh";
+    //ThreeJSExportGeometry(object.geometry,out["geometry"],cache);
+    //ThreeJSExportAppearance(object.geometry,out["material"],cache);
+  }
+  ThreeJSExport(object.T,out["matrix"]);
+}
+
 void ThreeJSExport(const Terrain& terrain,AnyCollection& out,ThreeJSCache& cache)
 {
   out["uuid"] = MakeRandomUUID();
@@ -199,6 +388,22 @@ void ThreeJSExport(const Terrain& terrain,AnyCollection& out,ThreeJSCache& cache
     out["type"] = "Mesh";
     ThreeJSExportGeometry(terrain.geometry,out["geometry"],cache);
     ThreeJSExportAppearance(terrain.geometry,out["material"],cache);
+  }
+  RigidTransform T; T.setIdentity();
+  ThreeJSExport(T,out["matrix"]);
+}
+
+void ThreeJSExportTransforms(const Terrain& terrain,AnyCollection& out)
+{
+  //out["uuid"] = MakeRandomUUID();
+  out["name"] = terrain.name;
+  if(terrain.geometry.Empty()) {
+    //out["type"] = "Group";
+  }
+  else {
+    //out["type"] = "Mesh";
+    //ThreeJSExportGeometry(terrain.geometry,out["geometry"],cache);
+    //ThreeJSExportAppearance(terrain.geometry,out["material"],cache);
   }
   RigidTransform T; T.setIdentity();
   ThreeJSExport(T,out["matrix"]);
@@ -289,6 +494,13 @@ void ThreeJSExport(WorldSimulation& sim,AnyCollection& out)
   ThreeJSCache cache;
   ThreeJSExport(sim,out,cache);
 }
+
+//void ThreeJSExportTransforms(WorldSimulation& sim,AnyCollection& out) //DJZ - not using cache for transforms, so don't need this function 
+//{
+//  ThreeJSCache cache;
+//  ThreeJSExportTransforms(sim,out,cache);
+//}
+
 ///Exports a robot to a JSON object that can be used in the three.js editor.
 ///The result is a hierarchical set of Mesh or Group objects.
 void ThreeJSExport(const Robot& robot,AnyCollection& out)
