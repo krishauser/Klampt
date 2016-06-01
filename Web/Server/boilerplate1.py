@@ -108,6 +108,7 @@ boilerplate_frame_precomputed = False
 def boilerplate_advance():
 	global viewer	
 	global boilerplate_setup
+	global boilerplate_frame_precomputed
 
 	if boilerplate_setup == False:
 		viewer = MyWebViewer(["../data/athlete_fractal_1.xml"])
@@ -126,11 +127,13 @@ def boilerplate_advance():
 def boilerplate_advance_no_precompute():
 	global viewer	
 	global boilerplate_setup
+	global boilerplate_frame_precomputed
+
 	if boilerplate_setup == False:
 		viewer = MyWebViewer(["../data/athlete_fractal_1.xml"])
 		boilerplate_setup = True
 
-	if boilerplate_frame_precomputed = False:
+	if boilerplate_frame_precomputed == False:
 		viewer.internal_control_loop()
 		viewer.internal_display()
 

@@ -120,6 +120,13 @@ bool mval=false;
 std::string load_file(std::string filename)
 {
   std::ifstream ifs(filename.c_str());
+
+  if(ifs.good()==false)
+  {
+     printf("  file %s doesn't exist!\n",filename.c_str());
+     return std::string("");
+  }
+
   std::string content( (std::istreambuf_iterator<char>(ifs) ),
                        (std::istreambuf_iterator<char>()    ) );
   //std::cout << content;
@@ -130,14 +137,26 @@ void PythonWrapper::initialize()
 {
   printf("Initializating python interpreter\n");
   currentServer=this; 
-  Py_SetProgramName("KlamptWebPython");  /* optional but recommended */
+  //Py_SetProgramName("KlamptWebPython");  /* optional but recommended */
   Py_Initialize();
   
   Py_InitModule("emb", EmbMethods); //setup embedded methods
   Py_InitModule("log", logMethods); //setup stdio capture
 
-  PyRun_SimpleString(load_file("boilerplate1.py").c_str());
- 
+  printf("running boilerplate code\n");
+  std::string boiler_plate=load_file("boilerplate1.py");
+
+  if(boiler_plate.size()==0)
+  {
+      boiler_plate=load_file("./Web/Server/boilerplate1.py");
+  }
+  if(boiler_plate.size()!=0)
+  {
+     printf("  found the boiler plate!\n");
+     PyRun_SimpleString(boiler_plate.c_str());
+  }
+  else
+     printf("  We weren't able to properly load the boiler plate\n");
 }
 
 void PythonWrapper::incomingMessage(QString message)
