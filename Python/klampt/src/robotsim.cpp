@@ -23,6 +23,7 @@
 #include <KrisLibrary/utils/stringutils.h>
 #include <ode/ode.h>
 #include <fstream>
+#include "IO/three.js.h" //to get JSON - DJZ
 #ifndef WIN32
 #include <unistd.h>
 #endif //WIN32
@@ -1412,6 +1413,30 @@ bool WorldModel::readFile(const char* fn)
     return false;
   }
   return true;
+}
+
+std::string WorldModel::getSceneJSON()
+{
+   RobotWorld& world = *worlds[index]->world;
+
+   //sim.UpdateModel();
+   AnyCollection obj;
+   ThreeJSExport(world,obj);
+   std::ostringstream stream;
+   stream<<obj;
+   return stream.str();
+}
+
+std::string WorldModel::getTransformsJSON()
+{
+   RobotWorld& world = *worlds[index]->world;
+
+   //sim.UpdateModel();
+   AnyCollection obj;
+   ThreeJSExportTransforms(world,obj);
+   std::ostringstream stream;
+   stream<<obj;
+   return stream.str();
 }
 
 int WorldModel::numRobots()
