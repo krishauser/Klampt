@@ -22,7 +22,7 @@ set(CMAKE_CXX_FLAGS        "-fpermissive")
 SET(CMAKE_CXX_FLAGS        "${CMAKE_CXX_FLAGS} ${PY_CXX}")
 
 #Hack to force QT 5.5 on my system. TODO - make more robust
-SET(CMAKE_PREFIX_PATH /opt/Qt/5.5/gcc_64)
+SET(CMAKE_PREFIX_PATH /home/motion/Qt/5.6/gcc_64)
 find_package(Qt5WebSockets REQUIRED)
 set(CMAKE_AUTOMOC ON)
 

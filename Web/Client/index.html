@@ -106,7 +106,7 @@
       
             editor.setTheme("ace/theme/eclipse"); 
             editor.getSession().setMode("ace/mode/python");
-            editor.getSession().setValue("nextTime = 1\n\ndef init(robot_model):\n\tpass\n\ndef control_loop(t,controller):\n\tglobal nextTime\n\tif t >= nextTime:\n\t\tq = controller.getCommandedConfig()\n\t\tq[8] += 0.5\n\t\tcontroller.setMilestone(q)\n\t\tnextTime += 1.0");
+            editor.getSession().setValue("nextTime = 1\n\ndef init(robot_model):\n    pass\n\ndef control_loop(t,controller):\n    global nextTime\n    if t >= nextTime:\n        q = controller.getCommandedConfig()\n        q[8] -= 0.5\n        controller.setMilestone(q)\n        nextTime += 1.0");
  
             //var editor = CodeMirror( document.getElementById("editor"), { //use codemirror as text editor
             //value: "print 'hello world'\n",
@@ -142,7 +142,7 @@
                 controls.keys = [ 65, 83, 68 ];
             controls.addEventListener( 'change', render );   
             
-            network = new Network("ws://l33t.egr.duke.edu:1234",newSceneArrivedCallback,consoleTextArrivedCallback,consoleTextArrivedCallback);
+            network = new Network("ws://localhost:1234",newSceneArrivedCallback,consoleTextArrivedCallback,consoleTextArrivedCallback);
     
             onWindowResize();
             animate();       
@@ -173,8 +173,6 @@
          
          function consoleTextArrivedCallback(data)
          {
-
-            
             console.log("new console text has arrived: " + data);
             
             //TODO: add it to text window here. 
@@ -266,6 +264,21 @@
                } 
                var t1 = performance.now();
                console.log("Call to load tranforms " + (t1 - t0) + " milliseconds.")
+
+               var changes =dataJ.changes
+               for(i=0; i<changes.length; i++)
+               {  
+                  if(changes[i].type == "delete") {
+                  }
+                  else if(changes[i].type == "change") {
+                     console.log("change "+changes[i].path+" to "+changes[i].value)
+                  }
+               }
+               var t2 = performance.now();
+               if(changes.length > 0)
+               {
+                  console.log("Call to update changes " + (t2 - t1) + " milliseconds.")
+               }
             }
             data=null;
             dataJ=null;

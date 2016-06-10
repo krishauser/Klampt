@@ -5,6 +5,8 @@ import sys
 import time
 from klampt import *
 from klampt.webrobotprogram import *
+sys.path.append("Web/Server")
+import kviz
 
 class StdoutCatcher:
 	def write(self, str):
@@ -28,6 +30,7 @@ class MyWebViewer(WebSimulationProgram):
                 raise RuntimeError("Unable to load model "+fn)
 
         WebSimulationProgram.__init__(self,world,"My Web program")
+        kviz._init(world)
 	self.frame = 0 
 	self.student_init = False
 
@@ -35,13 +38,13 @@ class MyWebViewer(WebSimulationProgram):
         self.sim.updateWorld()
 	if self.frame==1:
 		self.starttime=time.time();
-        	self.jString=self.world.getSceneJSON()
+        	self.jString=kviz._getInitialJSON()
 	 	self.secs = time.time()- self.starttime
         	self.msecs = self.secs * 1000  # millisecs
 		print "Getting the scene in JSON format took: " + "{:.2f}".format(self.msecs) + " ms"
 	else:	
 		self.starttime=time.time();
-		self.jString=self.world.getTransformsJSON()
+		self.jString=kviz._getUpdateJSON()
 		self.secs = time.time() - self.starttime
         	self.msecs = self.secs * 1000  # millisecs
 		print "Getting the transforms in JSON format took: " + "{:.2f}".format(self.msecs) + " ms"
@@ -67,19 +70,20 @@ class MyWebViewer(WebSimulationProgram):
 	if self.student_init == False:
 		try:
 			global init
-	    		init(world.robot(0))
-		except:
-			pass
+	    		init(self.world.robot(0))
+		except Exception as e:
+			print "Exception in init code"
+			raise
 		self.student_init = True
 
 	self.starttime=time.time()
 	
-	self.sim.controller(0)
         try:
 		global control_loop
     		control_loop(self.sim.getTime(),self.sim.controller(0))  #call student code
-	except:
-		pass
+	except Exception as e:
+		print "Exception in control_loop code"
+		raise
 	
 	self.sim.simulate(self.dt)
 
