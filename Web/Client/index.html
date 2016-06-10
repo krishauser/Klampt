@@ -82,7 +82,7 @@
             $('#myLayout').w2layout({
                name: 'layout',
                panels: [
-                  { type: 'top',  size: 50, resizable: true, style: pstyle, content: '<button onclick="doCodeSubmit()">Submit Code</button><button onclick="requestAdvance()">Advance Frame</button><button onclick="requestFreeRun()">Run</button><button onclick="requestStop()">Stop</button> '},
+                  { type: 'top',  size: "5%", resizable: true, style: pstyle, content: '<button onclick="doCodeSubmit()">Submit Code</button><button onclick="requestAdvance()">Advance Frame</button><button onclick="requestFreeRun()">Run</button><button onclick="requestStop()">Stop</button> <div style=" width:20px;display:inline-block;" />Klampt Server URL:<input type="text" id="serverURL" value="ws://l33t.egr.duke.edu:1234" size="50"><button onclick="doConnect()">Connect</button>'},
                   { type: 'main', style: pstyle, content: '<div id="canvas" style="width:100%; height:100%; margin:0; padding:0"></div>' },
                   { type: 'preview', size: "15%", resizable: true, style: pstyle, content: '<textarea readonly id="myTextarea" style="background-color: black;color:white;width:100%;height:100%">> </textarea></div></div>' },
                   { type: 'right', size: '50%', resizable: true, style: pstyle, content: 
@@ -141,12 +141,17 @@
                 controls.dynamicDampingFactor = 0.3;
                 controls.keys = [ 65, 83, 68 ];
             controls.addEventListener( 'change', render );   
-            
-            network = new Network("ws://localhost:1234",newSceneArrivedCallback,consoleTextArrivedCallback,consoleTextArrivedCallback);
-    
+                
             onWindowResize();
             animate();       
          });
+         
+         function doConnect()
+         {
+            var URL=$('#serverURL').val();
+            console.log("trying to connect to URL: " + URL);
+            network = new Network(URL,newSceneArrivedCallback,consoleTextArrivedCallback,consoleTextArrivedCallback);         
+         }
    
          function sendCode() //send python code back to server
          {
