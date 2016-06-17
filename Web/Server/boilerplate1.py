@@ -39,12 +39,14 @@ class MyWebViewer(WebSimulationProgram):
 	if self.frame==1:
 		self.starttime=time.time();
         	self.jString=kviz._getInitialJSON()
+		#print self.jString		
 	 	self.secs = time.time()- self.starttime
         	self.msecs = self.secs * 1000  # millisecs
 		print "Getting the scene in JSON format took: " + "{:.2f}".format(self.msecs) + " ms"
 	else:	
 		self.starttime=time.time();
 		self.jString=kviz._getUpdateJSON()
+		#print self.jString;
 		self.secs = time.time() - self.starttime
         	self.msecs = self.secs * 1000  # millisecs
 		print "Getting the transforms in JSON format took: " + "{:.2f}".format(self.msecs) + " ms"
@@ -52,11 +54,11 @@ class MyWebViewer(WebSimulationProgram):
     def internal_display(self):
 	self.compute_JSON()
 
-	try:
-		global display  #so user can add to display, haven't worked this out completely yet...
-    		display()
-	except:
-		pass
+	#try:
+	#	global display  #so user can add to display, haven't worked this out completely yet...
+    	#	display()
+	#except:
+	#	pass
 
 
     def send_JSON(self):
