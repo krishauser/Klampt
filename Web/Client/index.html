@@ -106,7 +106,7 @@
       
             editor.setTheme("ace/theme/eclipse"); 
             editor.getSession().setMode("ace/mode/python");
-            editor.getSession().setValue("nextTime = 1\n\ndef init(robot_model):\n    pass\n\ndef control_loop(t,controller):\n    global nextTime\n    if t >= nextTime:\n        q = controller.getCommandedConfig()\n        q[8] -= 0.5\n        controller.setMilestone(q)\n        nextTime += 1.0");
+            editor.getSession().setValue("nextTime = 1\n\ndef init(robot_model):\n    pass\n\ndef control_loop(t,controller):\n    global nextTime\n    kviz.set_link_color(5,[1.0,0.0,1.0])\n    if t >= nextTime:\n        q = controller.getCommandedConfig()\n        q[8] -= 0.5\n        controller.setMilestone(q)\n        nextTime += 1.0");
  
             //var editor = CodeMirror( document.getElementById("editor"), { //use codemirror as text editor
             //value: "print 'hello world'\n",
@@ -268,25 +268,58 @@
                   } 
                } 
                var t1 = performance.now();
-               console.log("Call to load tranforms " + (t1 - t0) + " milliseconds.")
+               console.log("Call to load tranforms " + (t1 - t0) + " milliseconds.");
+            }
+            
+            var t1 = performance.now();
 
-               var changes =dataJ.changes
-               for(i=0; i<changes.length; i++)
-               {  
-                  if(changes[i].type == "delete") {
-                  }
-                  else if(changes[i].type == "change") {
-                     console.log("change "+changes[i].path+" to "+changes[i].value)
-                  }
-               }
-               var t2 = performance.now();
-               if(changes.length > 0)
+            var rpc =dataJ.RPC;
+            for(i=0; i<rpc.length; i++)
+            {  
+               var request=rpc[i];
+               if(request.type == "linkcolor") 
                {
-                  console.log("Call to update changes " + (t2 - t1) + " milliseconds.")
+                  object_name=request.object;
+                  rgba=request.rgba;
+                    
+                  console.log("linkcolor requested. object: " + object_name + " rgba: " + rgba); 
+                    
+                  var object = scene.getObjectByName(object_name, true );
+                  if(object != null)
+                  { 
+                     console.log("we found the object in the tree");
+                     if(object.material!=null)
+                     {
+                        object.material.color.setRGB(rgba[0],rgba[1],rgba[2]);
+                        if(rgba[3]!=1.0)
+                        {
+                           object.material.transparent=true;
+                           object.material.opacity=rgba[3];
+                        }
+                        else
+                        {
+                           object.material.transparent=false;
+                        }
+                        console.log("succesfully set link color");
+                     }
+                     else
+                     {
+                        console.log("ERROR: no material associated with object: " + object_name);                     
+                     }
+                  }
                }
             }
+            var t2 = performance.now();
+            if(rpc.length > 0)
+            {
+               console.log("Call to do RPC's " + (t2 - t1) + " milliseconds.")
+            }
+            else
+               console.log("no RPC's present");
+            
             data=null;
             dataJ=null;
+            rpc=null;
            
             var t0 = performance.now();
             render();
