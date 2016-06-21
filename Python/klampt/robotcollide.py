@@ -15,6 +15,81 @@ def bb_intersect(a,b):
             return False
     return True
 
+def self_collision_iter(geomlist,pairs='all'):
+    """For a list of Geometry3D's, performs efficient self collision testing.
+    Yields an iterator over pairs (i,j) where i and j are indices
+    of the colliding geometries.
+
+    If pairs == 'all', all pairs are tested.  If it's a function, it's
+    a 2-argument function taking geometry indices and returning true if 
+    they should be tested.  Otherwise it can be a list of collision indices.
+
+    Uses a quick bounding box reject test."""
+    bblist = [g[1].getBB() for g in geomlist]
+    if pairs=='all':
+        for i,g in enumerate(geomlist):
+            for j in range(i+1,len(geomlist)):
+                if not bb_intersect(bblist[i],bblist[j]): continue
+                g2 = geomlist[j]
+                if g.collides(g2):
+                    yield (i,j)
+    elif callable(pairs):
+        for i,g in enumerate(geomlist):
+            for j in range(i+1,len(geomlist)):
+                if not pairs(i,j): continue
+                if not bb_intersect(bblist[i],bblist[j]): continue
+                g2 = geomlist[j]
+                if g.collides(g2):
+                    yield (i,j)
+    else:
+        for (i,j) in pairs:
+            if not bb_intersect(bblist[i],bblist[j]): continue
+            g  =geomlist[i]
+            g2 = geomlist[j]
+            if g.collides(g2):
+                yield (i,j)
+
+def group_collision_iter(geomlist,alist,blist,pairs='all'):
+    """Tests whether two subsets of geometries collide.
+
+    If pairs == 'all', all pairs are tested.  If it's a function, it's
+    a 2-argument function taking geometry indices and returning true if 
+    they should be tested.  Otherwise it can be a list of collision indices.
+
+    Uses a quick bounding box reject test.
+    """
+    bblist = [None]*len(geomlist)
+    for id in alist:
+        bblist[id] = geomlist[id].getBB()
+    for id in blist:
+        if bblist[id] is not None:
+            bblist[id] = geomlist[id].getBB()
+    if pairs=='all':
+        for i in alist:
+            for j in blist:
+                if not bb_intersect(bblist[i],bblist[j]): continue
+                g = geomlist[i]
+                g2 = geomlist[j]
+                if g.collides(g2):
+                    yield (i,j)
+    elif callable(pairs):
+        for i in alist:
+            for j in blist:
+                if not pairs(i,j): continue
+                if not bb_intersect(bblist[i],bblist[j]): continue
+                g = geomlist[i]
+                g2 = geomlist[j]
+                if g.collides(g2):
+                    yield (i,j)
+    else:
+        for (i,j) in pairs:
+            if not bb_intersect(bblist[i],bblist[j]): continue
+            g  =geomlist[i]
+            g2 = geomlist[j]
+            if g.collides(g2):
+                yield (i,j)
+
+
 class WorldCollider:
     """
     Attributes:
