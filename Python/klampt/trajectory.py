@@ -345,6 +345,7 @@ class HermiteTrajectory(Trajectory):
 			#interpret as config/velocity
 			self.times = times
 			self.milestones = [q+dq for (q,dq) in zip(milestones,dmilestones)]
+
 	def makeSpline(self,waypointTrajectory):
 		"""Computes natural velocities for a standard configuration-
 		space Trajectory to make it smoother."""
@@ -419,3 +420,100 @@ class HermiteTrajectory(Trajectory):
 
 	def constructor(self):
 		return HermiteTrajectory
+
+
+def execute_path(path,controller,speed=1.0,smoothing=None,activeDofs=None):
+	"""Sends an untimed trajectory on a controller.
+	
+	Arguments:
+	- path: a list of milestones
+	- controller: a SimRobotController
+	- smoothing: any smoothing applied to the path.  Valid values are:
+	  * None: starts / stops at each milestone, moves in linear joint-space paths
+	  * 'spline': interpolates milestones smoothly with some differenced velocity
+	  * 'ramp': starts / stops at each milestone, moves in minimum-time / minimum-
+	    acceleration paths.
+	- activeDofs: if not None, a list of dofs that are moved by the trajectory.  Each
+	  entry may be an integer or a string.
+	"""
+	if activeDofs is not None:
+		indices = [controller.model().link(d).getIndex for d in activeDofs]
+		q0 = controller.getCommandedConfig()
+		liftedMilestones = []
+		for m in path:
+			assert(len(m)==len(indices))
+			q = q0[:]
+			for i,v in zip(indices,m):
+				q[i] = v
+			liftedMilestones.append(q)
+		return execute_path(liftedMilestones,controller,speed,smoothing)
+
+	if smoothing == None:
+		controller.setMilestone(path[0])
+		for i in range(1,len(path)):
+			controller.addMilestoneLinear(path[i])
+	elif smoothing == 'spline':
+		raise NotImplementedError("Spline interpolation")
+	elif smoothing == 'ramp':
+		controller.setMilestone(path[0])
+		for i in range(1,len(path)):
+			controller.addMilestone(path[i])
+	else:
+		raise ValueError("Invalid smoothing method specified")
+
+def execute_trajectory(trajectory,controller,speed=1.0,smoothing=None,activeDofs=None):
+	"""Sends a timed trajectory to a controller.
+
+	Arguments:
+	- trajectory: a Trajectory, RobotTrajectory, or HermiteTrajectory instance
+	- controller: a SimRobotController
+	- smoothing: any smoothing applied to the path.  Only valid for piecewise
+	  linear trajectories.  Valid values are
+	  * None: no smoothing, just do a piecewise linear trajectory
+	  * 'spline': interpolate tangents to the curve
+	  * 'pause': smoothly speed up and slow down
+	- activeDofs: if not None, a list of dofs that are moved by the trajectory.  Each
+	  entry may be an integer or a string.
+	"""
+	if activeDofs is not None:
+		indices = [controller.model().link(d).getIndex for d in activeDofs]
+		q0 = controller.getCommandedConfig()
+		liftedMilestones = []
+		assert not isinstance(trajectory,HermiteTrajectory),"TODO: hermite trajectory lifting"
+		for m in trajectory.milestones:
+			assert(len(m)==len(indices))
+			q = q0[:]
+			for i,v in zip(indices,m):
+				q[i] = v
+			liftedMilestones.append(q)
+		tfull = trajectory.constructor()(trajectory.times,liftedMilestones)
+		return execute_trajectory(tfull,controller,speed,smoothing)
+
+	if isinstance(trajectory,HermiteTrajectory):
+		assert smoothing == None,"Smoothing cannot be applied to hermite trajectories"
+		ts = trajectory.startTime()
+		controller.setMilestone(trajectory.eval(ts),trajectory.deriv(ts))
+		n = len(trajectory.milestones[0])/2
+		for i in range(1,len(trajectory.times)):
+			q,v = trajectory.milestones[i][:n],trajectory.milestones[i][n:]
+			controller.addCubic(q,v,(trajectory.times[i]-trajectory.times[i-1])/speed)
+	else:
+		if smoothing == None:
+			ts = trajectory.startTime()
+			controller.setMilestone(trajectory.eval(ts))
+			for i in range(1,len(trajectory.times)):
+				q = trajectory.milestones[i]
+				controller.addLinear(q,(trajectory.times[i]-trajectory.times[i-1])/speed)
+		elif smoothing == 'spline':
+			t = HermiteTrajectory()
+			t.makeSpline(trajectory)
+			return execute_trajectory(t,controller)
+		elif smoothing == 'pause':
+			ts = trajectory.startTime()
+			controller.setMilestone(trajectory.eval(ts))
+			zero = [0.0]*len(trajectory.milestones[0])
+			for i in range(1,len(trajectory.times)):
+				q = trajectory.milestones[i]
+				controller.addCubic(q,zero,(trajectory.times[i]-trajectory.times[i-1])/speed)
+		else:
+			raise ValueError("Invalid smoothing method specified")
