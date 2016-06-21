@@ -3348,13 +3348,9 @@ class SimRobotController(_object):
         """
         return _robotsim.SimRobotController_setCubic(self, *args)
 
-    def appendLinear(self, *args):
-        """
-        appendLinear(SimRobotController self, doubleVector q, double dt)
-
-        Same as setLinear but appends an interpolant onto the motion queue. 
-        """
-        return _robotsim.SimRobotController_appendLinear(self, *args)
+    def addLinear(self, *args):
+        """addLinear(SimRobotController self, doubleVector q, double dt)"""
+        return _robotsim.SimRobotController_addLinear(self, *args)
 
     def addCubic(self, *args):
         """
