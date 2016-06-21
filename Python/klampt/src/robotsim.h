@@ -116,7 +116,7 @@ class SimRobotController
   /// configuration/velocity to the desired configuration/velocity after time dt
   void setCubic(const std::vector<double>& q,const std::vector<double>& v,double dt);
   /// Same as setLinear but appends an interpolant onto the motion queue
-  void appendLinear(const std::vector<double>& q,double dt);
+  void addLinear(const std::vector<double>& q,double dt);
   /// Same as setCubic but appends an interpolant onto the motion queue
   void addCubic(const std::vector<double>& q,const std::vector<double>& v,double dt);
 
