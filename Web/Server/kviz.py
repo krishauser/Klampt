@@ -38,7 +38,7 @@ _RPC = []
 #def _to_threejs_color(color):
 #	return int(color[0]*0xff) << 16 | int(color[1]*0xff)<<8 | int(color[2]*0xff)
 
-def set_color(target,rgba_color,robot=0):
+def set_color(target,rgba_color,recursive=False,robot=0):
 	"""Sets the given RobotModelLink or named link or indexed link to
 	some color."""
 
@@ -58,10 +58,16 @@ def set_color(target,rgba_color,robot=0):
 		return;
 
 	if len(rgba_color) == 3:
-		rgba_color.append(1.0);
+		rgba_color.append(1.0)
 
-	_RPC.append({'type':'set_color','object':target_name,'rgba':rgba_color})
+	_RPC.append({'type':'set_color','object':target_name,'rgba':rgba_color,'recursive':recursive})
 	#print "Setting link color!",('object',target_name,'rgba'),rgba_color
+
+#def add_ghost(prefixname="ghost",robot=0):
+#	global _world
+#	target_name=_world.robot(robot).getName()	
+#	_RPC.append({'type':'add_ghost','object':target_name,'prefix_name':prefixname})
+
 
 #def add_config(q,color=(0,1,0,0.5),name="ghost",robot=0):
 #	"""Draws the configuration q using a ghosted robot.  Multiple ghosted
