@@ -106,7 +106,7 @@
       
             editor.setTheme("ace/theme/eclipse"); 
             editor.getSession().setMode("ace/mode/python");
-            editor.getSession().setValue("nextTime = 1\ntoggle = 0\ndef init(robot_model):\n    pass\n\ndef control_loop(t,controller):\n    global nextTime, toggle\n    if t >= nextTime:\n        q = controller.getCommandedConfig()\n        q[8] -= 0.5\n        controller.setMilestone(q)\n        nextTime += 1.0\n        if toggle==0:\n            kviz.set_link_color(5,[1.0,0.0,0.0])\n            toggle=1\n        else:\n            kviz.set_link_color(5,[0.0,0.0,1.0]) \n            toggle=0");
+            editor.getSession().setValue("nextTime = 1\ntoggle = 0\ndef init(robot_model):\n    pass\n\ndef control_loop(t,controller):\n    global nextTime, toggle\n    if t >= nextTime:\n        q = controller.getCommandedConfig()\n        q[8] -= 0.5\n        controller.setMilestone(q)\n        nextTime += 1.0\n        if toggle==0:\n            kviz.set_color(5,[1.0,0.0,0.0])\n            toggle=1\n        else:\n            kviz.set_color(5,[0.0,0.0,1.0]) \n            toggle=0");
  
             //var editor = CodeMirror( document.getElementById("editor"), { //use codemirror as text editor
             //value: "print 'hello world'\n",
@@ -292,7 +292,7 @@
                      if(object.material!=null)
                      {
                         console.log("first checking if we've working this this material before");
-                        \                                                
+                                                                        
                         if(typeof object.userData.customMaterialSetup == "undefined")
                         {
                            console.log("looks like we haven't used it before");
