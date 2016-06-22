@@ -279,9 +279,10 @@
                var request=rpc[i];
                if(request.type == "set_color") 
                {
-                  object_name=request.object;
-                  rgba=request.rgba;
-                    
+                  var object_name=request.object;
+                  var rgba=request.rgba;
+                  var recursive=request.recursive;
+                                                             
                   console.log("set_color requested. object: " + object_name + " rgba: " + rgba); 
                   
                              
@@ -289,19 +290,33 @@
                   if(object != null)
                   { 
                      console.log("we found the object in the tree");
-                     if(object.material!=null)
-                     {
-                        console.log("first checking if we've working this this material before");
+                     //if(typeof object.material !== 'undefined')
+                     //{
+                      //  console.log("first checking if we've working this this material before");
                                                                         
-                        if(typeof object.userData.customMaterialSetup == "undefined")
+                        if(recursive==false)
                         {
-                           console.log("looks like we haven't used it before");
-                           basicMaterial = new THREE.MeshBasicMaterial();
-                           object.material=basicMaterial;
-                           //linkMaterials.push(object_name);
-                           object.userData.customMaterialSetup=true;
+                           if(typeof object.userData.customSingleMaterialSetup === 'undefined')
+                           {                          
+                              basicMaterial = new THREE.MeshBasicMaterial();
+                              object.material=basicMaterial;
+                              object.userData.customSingleMaterialSetup=true;
+                           }
                         }
-                        
+                        else
+                        {
+                           if(typeof object.userData.customSharedMaterialSetup === 'undefined')
+                           {                          
+                              basicMaterial = new THREE.MeshBasicMaterial();
+                              object.material=basicMaterial;
+                              object.userData.customSharedMaterialSetup=true;
+                              
+                              object.traverse( function ( child ) { 
+                              if (typeof child.material !== 'undefined') 
+                                 child.material=object.material;
+                              } );
+                           }                        
+                        }                    
                   
                         object.material.color.setRGB(rgba[0],rgba[1],rgba[2]);
                         if(rgba[3]!=1.0)
@@ -314,11 +329,12 @@
                            object.material.transparent=false;
                         }
                         console.log("succesfully set link color");
-                     }
-                     else
-                     {
-                        console.log("ERROR: no material associated with object: " + object_name);                     
-                     }
+                     //}
+                     //else
+                     //{
+                     //   console.log("ERROR: no material associated with object: " + object_name);  
+                     //   alert("ERROR: kviz.set_color is trying to set an object with no material");
+                     //}
                   }
                }
             }
@@ -333,6 +349,7 @@
             data=null;
             dataJ=null;
             rpc=null;
+            
            
             var t0 = performance.now();
             render();
