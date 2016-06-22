@@ -51,10 +51,7 @@
          var editor;
          var visPanel;
          var freeRun=false;
-         // Bad
-         var linkMaterials = [];                 
-
-        
+                 
          function doCodeSubmit()
          {
             var textArea=document.getElementById("myTextarea");
@@ -280,12 +277,12 @@
             for(i=0; i<rpc.length; i++)
             {  
                var request=rpc[i];
-               if(request.type == "linkcolor") 
+               if(request.type == "set_color") 
                {
                   object_name=request.object;
                   rgba=request.rgba;
                     
-                  console.log("linkcolor requested. object: " + object_name + " rgba: " + rgba); 
+                  console.log("set_color requested. object: " + object_name + " rgba: " + rgba); 
                   
                              
                   var object = scene.getObjectByName(object_name, true );
@@ -295,12 +292,14 @@
                      if(object.material!=null)
                      {
                         console.log("first checking if we've working this this material before");
-                        if(jQuery.inArray(object_name, linkMaterials )==-1)
+                        \                                                
+                        if(typeof object.userData.customMaterialSetup == "undefined")
                         {
                            console.log("looks like we haven't used it before");
                            basicMaterial = new THREE.MeshBasicMaterial();
                            object.material=basicMaterial;
-                           linkMaterials.push(object_name);
+                           //linkMaterials.push(object_name);
+                           object.userData.customMaterialSetup=true;
                         }
                         
                   
