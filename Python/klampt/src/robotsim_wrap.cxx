@@ -40476,7 +40476,7 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_SimRobotController_appendLinear(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_SimRobotController_addLinear(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   SimRobotController *arg1 = (SimRobotController *) 0 ;
   std::vector< double,std::allocator< double > > *arg2 = 0 ;
@@ -40490,31 +40490,31 @@ SWIGINTERN PyObject *_wrap_SimRobotController_appendLinear(PyObject *SWIGUNUSEDP
   PyObject * obj1 = 0 ;
   PyObject * obj2 = 0 ;
   
-  if (!PyArg_ParseTuple(args,(char *)"OOO:SimRobotController_appendLinear",&obj0,&obj1,&obj2)) SWIG_fail;
+  if (!PyArg_ParseTuple(args,(char *)"OOO:SimRobotController_addLinear",&obj0,&obj1,&obj2)) SWIG_fail;
   res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_SimRobotController, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SimRobotController_appendLinear" "', argument " "1"" of type '" "SimRobotController *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SimRobotController_addLinear" "', argument " "1"" of type '" "SimRobotController *""'"); 
   }
   arg1 = reinterpret_cast< SimRobotController * >(argp1);
   {
     std::vector<double,std::allocator< double > > *ptr = (std::vector<double,std::allocator< double > > *)0;
     res2 = swig::asptr(obj1, &ptr);
     if (!SWIG_IsOK(res2)) {
-      SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "SimRobotController_appendLinear" "', argument " "2"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
+      SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "SimRobotController_addLinear" "', argument " "2"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
     }
     if (!ptr) {
-      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "SimRobotController_appendLinear" "', argument " "2"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "SimRobotController_addLinear" "', argument " "2"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
     }
     arg2 = ptr;
   }
   ecode3 = SWIG_AsVal_double(obj2, &val3);
   if (!SWIG_IsOK(ecode3)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "SimRobotController_appendLinear" "', argument " "3"" of type '" "double""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "SimRobotController_addLinear" "', argument " "3"" of type '" "double""'");
   } 
   arg3 = static_cast< double >(val3);
   {
     try {
-      (arg1)->appendLinear((std::vector< double,std::allocator< double > > const &)*arg2,arg3);
+      (arg1)->addLinear((std::vector< double,std::allocator< double > > const &)*arg2,arg3);
     }
     catch(PyException& e) {
       e.setPyErr();
@@ -46376,11 +46376,7 @@ static PyMethodDef SwigMethods[] = {
 		"configuration/velocity to the desired configuration/velocity after\n"
 		"time dt. \n"
 		""},
-	 { (char *)"SimRobotController_appendLinear", _wrap_SimRobotController_appendLinear, METH_VARARGS, (char *)"\n"
-		"SimRobotController_appendLinear(SimRobotController self, doubleVector q, double dt)\n"
-		"\n"
-		"Same as setLinear but appends an interpolant onto the motion queue. \n"
-		""},
+	 { (char *)"SimRobotController_addLinear", _wrap_SimRobotController_addLinear, METH_VARARGS, (char *)"SimRobotController_addLinear(SimRobotController self, doubleVector q, double dt)"},
 	 { (char *)"SimRobotController_addCubic", _wrap_SimRobotController_addCubic, METH_VARARGS, (char *)"\n"
 		"SimRobotController_addCubic(SimRobotController self, doubleVector q, doubleVector v, double dt)\n"
 		"\n"

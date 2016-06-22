@@ -3433,7 +3433,7 @@ void SimRobotController::setCubic(const std::vector<double>& q,const std::vector
   mq->Cut(0);
   mq->AppendCubic(q,v,dt);
 }
-void SimRobotController::appendLinear(const std::vector<double>& q,double dt)
+void SimRobotController::addLinear(const std::vector<double>& q,double dt)
 {
   PolynomialMotionQueue* mq = GetMotionQueue(controller->controller);
   mq->AppendLinear(q,dt);

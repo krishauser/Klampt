@@ -3,6 +3,7 @@
 import sys
 from klampt import *
 from klampt import visualization
+from klampt import resource
 from klampt import coordinates
 from klampt import so3,se3
 from klampt import trajectory
@@ -25,6 +26,7 @@ if __name__ == "__main__":
     print "trajectorytest.py: This example demonstrates several types of trajectory"
     if len(sys.argv)<=1:
         print "USAGE: trajectorytest.py [robot or world file]"
+        print "With no arguments, shows some 3D trajectories"
         
         #add a point to the visualizer and animate it
         point = coordinates.addPoint("point")
@@ -75,6 +77,7 @@ if __name__ == "__main__":
             q[i] = qmax[i]
             traj.milestones.append(q)
 
+        save,traj.milestones = resource.edit("trajectory",traj.milestones,world=world)
         visualization.animate("robot",traj)
     
     visualization.show()
@@ -87,6 +90,27 @@ if __name__ == "__main__":
         #time.sleep(0.01)
         #animationTime = visualization.animationTime()
         iteration += 1
+
+    if len(sys.argv)>1:
+        visualization.animate("robot",None)
+        sim = Simulator(world)
+        sim.simulate(0)
+        trajectory.execute_path(traj.milestones,sim.controller(0))
+        #for some tricky Qt reason, need to sleep before showing a window again
+        #Perhaps the event loop must complete some extra cycles?
+        time.sleep(0.01)
+        visualization.show()
+        t0 = time.time()
+        while visualization.shown():
+            #print "Time",sim.getTime()
+            sim.simulate(0.01)
+            if sim.controller(0).remainingTime() <= 0:
+                print "Executing timed trajectory"
+                trajectory.execute_trajectory(traj,sim.controller(0),smoothing='pause')
+            visualization.setItemConfig("config",sim.controller(0).getCommandedConfig())
+            t1 = time.time()
+            time.sleep(max(0.01-(t1-t0),0.0))
+            t0 = t1
     
     print "Ending visualization."
     visualization.kill()

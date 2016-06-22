@@ -244,7 +244,7 @@ def solver(objectives):
         else:
             raise TypeError("Objective is of wrong type")
 
-def solve(objectives,iters=1000,tol=1e-3):
+def solve(objectives,iters=1000,tol=1e-3,activeDofs=None):
     """Attempts to solve the given objective(s). Either a single objective
     or a list of simultaneous objectives can be provided.
 
@@ -252,6 +252,7 @@ def solve(objectives,iters=1000,tol=1e-3):
         - objectives: either a single IKObjective or a list of IKObjectives.
         - iters: a maximum number of iterations.
         - tol: a maximum error tolerance on satisfying the objectives
+        - activeDofs: a list of link indices or names to use for IK solving.
 
     Returns True if a solution is successfully found to the given tolerance,
     within the provided number of iterations.  The robot(s) are then set
@@ -268,6 +269,13 @@ def solve(objectives,iters=1000,tol=1e-3):
     must be set).
     """
     s = solver(objectives)
+    if activeDofs is not None:
+        links = activeDofs[:]
+        for i,l in enumerate(links):
+            if isinstance(l,str):
+                links[i] = s.robot.link(l).getIndex()
+        s.setActiveDofs(links)
+
     if hasattr(s,'__iter__'):
         res = [si.solve(iters,tol)[0] for si in s]
         return all(res)
@@ -283,7 +291,7 @@ def jacobian(objectives):
     return solver(objectives).getJacobian()
 
 
-def solve_global(objectives,iters=1000,tol=1e-3,numRestarts=100,feasibilityCheck=None,startRandom=False):
+def solve_global(objectives,iters=1000,tol=1e-3,activeDofs=None,numRestarts=100,feasibilityCheck=None,startRandom=False):
     """Attempts to solve the given objective(s) but avoids local minima
     to some extent using a random-restart technique.  
         
@@ -302,6 +310,12 @@ def solve_global(objectives,iters=1000,tol=1e-3,numRestarts=100,feasibilityCheck
     """
     if feasibilityCheck is None: feasibilityCheck=lambda : True
     s = solver(objectives)
+    if activeDofs is not None:
+        links = activeDofs[:]
+        for i,l in enumerate(links):
+            if isinstance(l,str):
+                links[i] = s.robot.link(l).getIndex()
+        s.setActiveDofs(links)
     if hasattr(s,'__iter__'):
         if startRandom:
             s.sampleInitial()
@@ -330,7 +344,7 @@ def solve_global(objectives,iters=1000,tol=1e-3,numRestarts=100,feasibilityCheck
                     return True
         return False
 
-def solve_nearby(objectives,maxDeviation,iters=1000,tol=1e-3,numRestarts=0,feasibilityCheck=None):
+def solve_nearby(objectives,maxDeviation,iters=1000,tol=1e-3,activeDofs=None,numRestarts=0,feasibilityCheck=None):
     """Solves for an IK solution that does not deviate too far from the
     initial configuration.
 
@@ -348,6 +362,12 @@ def solve_nearby(objectives,maxDeviation,iters=1000,tol=1e-3,numRestarts=0,feasi
         robot = objectives[0].robot
     else:
         robot = objectives.robot
+    if activeDofs is not None:
+        links = activeDofs[:]
+        for i,l in enumerate(links):
+            if isinstance(l,str):
+                links[i] = s.robot.link(l).getIndex()
+        s.setActiveDofs(links)
     #set up the joint limits
     dofs = s.getActiveDofs()
     q = robot.getConfig()

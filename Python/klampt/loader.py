@@ -483,7 +483,7 @@ def toJson(obj,type='auto'):
                 if len(obj)==2 and len(obj[0])==9 and len(obj[1])==3:
                     type = 'RigidTransform'
                 else:
-                    isconfigs = true
+                    isconfigs = True
                     for item in obj:
                         if not all([isinstance(v,(bool,int,float)) for v in item]):
                             isconfigs = False
