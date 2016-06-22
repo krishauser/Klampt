@@ -63,10 +63,11 @@ def set_color(target,rgba_color,recursive=False,robot=0):
 	_RPC.append({'type':'set_color','object':target_name,'rgba':rgba_color,'recursive':recursive})
 	#print "Setting link color!",('object',target_name,'rgba'),rgba_color
 
-#def add_ghost(prefixname="ghost",robot=0):
-#	global _world
-#	target_name=_world.robot(robot).getName()	
-#	_RPC.append({'type':'add_ghost','object':target_name,'prefix_name':prefixname})
+def add_ghost(prefixname="ghost",robot=0):
+	global _world
+	target_name=_world.robot(robot).getName()	
+	_RPC.append({'type':'add_ghost','object':target_name,'prefix_name':prefixname})
+	return prefixname+target_name
 
 
 #def add_config(q,color=(0,1,0,0.5),name="ghost",robot=0):
