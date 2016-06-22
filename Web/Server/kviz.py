@@ -38,23 +38,30 @@ _RPC = []
 #def _to_threejs_color(color):
 #	return int(color[0]*0xff) << 16 | int(color[1]*0xff)<<8 | int(color[2]*0xff)
 
-def set_link_color(link,rgba_color,robot=0):
+def set_color(target,rgba_color,robot=0):
 	"""Sets the given RobotModelLink or named link or indexed link to
 	some color."""
 
-	if not isinstance(link,RobotModelLink):
+	if isinstance(target, (int, long, float, complex)):
 		global _world
 		robot = _world.robot(robot)
-		link = robot.link(link)
-	numLinks=robot.numLinks()
-        print "Number of Links",numLinks
+		target_as_link = robot.link(target)
+		target_name=target_as_link.getName()
+
+	elif isinstance(target,RobotModelLink): 
+		target_name=target.getName()
+
+	elif isinstance(target, basestring):
+		target_name=target
+	else:
+		print "ERROR: kviz.set_color requires target of either link, index, or string name of object!"
+		return;
 
 	if len(rgba_color) == 3:
 		rgba_color.append(1.0);
 
-	link_name=link.getName();
-	_RPC.append({'type':'linkcolor','object':link_name,'rgba':rgba_color})
-	print "Setting link color!",('object',link_name,'rgba'),rgba_color
+	_RPC.append({'type':'set_color','object':target_name,'rgba':rgba_color})
+	#print "Setting link color!",('object',target_name,'rgba'),rgba_color
 
 #def add_config(q,color=(0,1,0,0.5),name="ghost",robot=0):
 #	"""Draws the configuration q using a ghosted robot.  Multiple ghosted
