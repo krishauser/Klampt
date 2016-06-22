@@ -106,7 +106,7 @@
       
             editor.setTheme("ace/theme/eclipse"); 
             editor.getSession().setMode("ace/mode/python");
-            editor.getSession().setValue("nextTime = 1\ntoggle = 0\ndef init(robot_model):\n    pass\n\ndef control_loop(t,controller):\n    global nextTime, toggle\n    if t >= nextTime:\n        q = controller.getCommandedConfig()\n        q[8] -= 0.5\n        controller.setMilestone(q)\n        nextTime += 1.0\n        if toggle==0:\n            kviz.set_color(5,[1.0,0.0,0.0])\n            toggle=1\n        else:\n            kviz.set_color(5,[0.0,0.0,1.0]) \n            toggle=0");
+            editor.getSession().setValue("nextTime = 1\ntoggle = 0\ndef init(robot_model):\n    global ghost\n    ghost=kviz.add_ghost('myGhost')\n    kviz.set_color(ghost,[1,0,0,0.25],True);\n\ndef control_loop(t,controller):\n    global nextTime, toggle\n    if t >= nextTime:\n        q = controller.getCommandedConfig()\n        q[8] -= 0.5\n        controller.setMilestone(q)\n        nextTime += 1.0\n        ");
  
             //var editor = CodeMirror( document.getElementById("editor"), { //use codemirror as text editor
             //value: "print 'hello world'\n",
@@ -234,7 +234,7 @@
    			      if ( child.geometry !== undefined ) child.geometry.dispose();
 	               if ( child.material !== undefined ) child.material.dispose();
                } );
-
+               scene=null;
             
                scene = loader.parse( dataJ );
                var t1 = performance.now();
@@ -335,6 +335,27 @@
                      //   console.log("ERROR: no material associated with object: " + object_name);  
                      //   alert("ERROR: kviz.set_color is trying to set an object with no material");
                      //}
+                  }
+               }
+               if(request.type == "add_ghost") 
+               {
+                  var object_name=request.object;
+                  var prefix=request.prefix_name;
+                                                             
+                  console.log("add_ghost requested. object: " + object_name + " prefix: " + prefix); 
+                                               
+                  var object = scene.getObjectByName(object_name, true );
+                  if(object != null)
+                  { 
+                     console.log("we found the object in the tree");
+                    
+                     var clone_object=object.clone(true);
+                     scene.add(clone_object);
+                     
+                     clone_object.traverse( function ( child ) { 
+                              if (typeof child.name !== 'undefined') 
+                                 child.name=prefix+child.name;
+                              } );
                   }
                }
             }
