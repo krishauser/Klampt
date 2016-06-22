@@ -15,6 +15,10 @@ RobotLinkPoseWidget::RobotLinkPoseWidget(Robot* _robot,ViewRobot* _viewRobot)
   :robot(_robot),viewRobot(_viewRobot),poseConfig(_robot->q),highlightColor(1,1,0,1),hoverLink(-1),affectedLink(-1),affectedDriver(-1),draw(true)
 {}
 
+void RobotLinkPoseWidget::SetActiveDofs(const vector<int>& _activeDofs)
+{
+  activeDofs = _activeDofs;
+}
 
 void RobotLinkPoseWidget::Set(Robot* _robot,ViewRobot* _viewRobot)
 {
@@ -36,7 +40,13 @@ bool RobotLinkPoseWidget::Hover(int x,int y,Camera::Viewport& viewport,double& d
   Config oldConfig = robot->q;
   robot->UpdateConfig(poseConfig);
   robot->UpdateGeometry();
-  for(size_t i=0;i<robot->links.size();i++) {
+  vector<int> dofs;
+  if(activeDofs.empty()) 
+    for(size_t i=0;i<robot->links.size();i++) dofs.push_back((int)i);
+  else
+    dofs = activeDofs;
+  for(size_t j=0;j<dofs.size();j++) {
+    int i=dofs[j];
     if(robot->IsGeometryEmpty(i)) continue;
     Real dist;
     if(robot->geometry[i]->RayCast(r,&dist)) {
@@ -119,6 +129,12 @@ void RobotLinkPoseWidget::DrawGL(Camera::Viewport& viewport)
     if(hasHighlight || hasFocus) {
       for(size_t i=0;i<highlightedLinks.size();i++)
 	viewRobot->Appearance(highlightedLinks[i]).ModulateColor(highlightColor,0.5);
+    }
+    if(!activeDofs.empty()) {
+      GLColor black(0,0,0,0);
+      for(size_t i=0;i<robot->links.size();i++)
+        if(find(activeDofs.begin(),activeDofs.end(),(int)i) == activeDofs.end())
+          viewRobot->Appearance(i).ModulateColor(black,0.5);
     }
     viewRobot->Draw();
     //copy display lists, if not already initialized
@@ -711,7 +727,26 @@ bool RobotPoseWidget::SolveIK(int iters,Real tol)
   //solve the IK problem    
   Robot* robot=linkPoser.robot;
   robot->UpdateConfig(linkPoser.poseConfig);
-  bool res=::SolveIK(*robot,ikPoser.poseGoals,tol,iters,0);
+  
+  RobotIKFunction f(*robot);
+  f.UseIK(Constraints());
+  GetDefaultIKDofs(*robot,Constraints(),f.activeDofs);
+  //take out the fixed DOF
+  set<int> dofs(f.activeDofs.mapping.begin(),f.activeDofs.mapping.end());
+  if(!linkPoser.activeDofs.empty()) {
+    //take out non-active dofs
+    set<int> intersect;
+    for(size_t i=0;i<linkPoser.activeDofs.size();i++)
+      if(dofs.count(linkPoser.activeDofs[i]) != 0)
+        intersect.insert(linkPoser.activeDofs[i]);
+    dofs = intersect;
+  }
+  f.activeDofs.mapping = vector<int>(dofs.begin(),dofs.end());
+
+  RobotIKSolver solver(f);
+  solver.UseJointLimits(TwoPi);
+  bool res = solver.Solve(tol,iters);
+
   linkPoser.poseConfig = robot->q;
   if(useBase)
     basePoser.T = robot->links[robot->joints[0].linkIndex].T_World;
@@ -735,6 +770,14 @@ bool RobotPoseWidget::SolveIKFixedBase(int iters,Real tol)
   set<int> dofs(f.activeDofs.mapping.begin(),f.activeDofs.mapping.end());
   for(int i=0;i<6;i++)
     dofs.erase(i);
+  if(!linkPoser.activeDofs.empty()) {
+    //take out non-active dofs
+    set<int> intersect;
+    for(size_t i=0;i<linkPoser.activeDofs.size();i++)
+      if(dofs.count(linkPoser.activeDofs[i]) != 0)
+        intersect.insert(linkPoser.activeDofs[i]);
+    dofs = intersect;
+  }
   f.activeDofs.mapping = vector<int>(dofs.begin(),dofs.end());
 
   RobotIKSolver solver(f);
@@ -763,6 +806,14 @@ bool RobotPoseWidget::SolveIKFixedJoint(int fixedJoint,int iters,Real tol)
   //take out the fixed DOF
   set<int> dofs(f.activeDofs.mapping.begin(),f.activeDofs.mapping.end());
   dofs.erase(fixedJoint);
+  if(!linkPoser.activeDofs.empty()) {
+    //take out non-active dofs
+    set<int> intersect;
+    for(size_t i=0;i<linkPoser.activeDofs.size();i++)
+      if(dofs.count(linkPoser.activeDofs[i]) != 0)
+        intersect.insert(linkPoser.activeDofs[i]);
+    dofs = intersect;
+  }
   f.activeDofs.mapping = vector<int>(dofs.begin(),dofs.end());
 
   RobotIKSolver solver(f);

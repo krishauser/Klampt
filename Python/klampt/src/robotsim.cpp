@@ -1026,11 +1026,30 @@ void Appearance::setColor(int primitive,float r,float g,float b,float a)
 
 void Appearance::getColor(float out[4])
 {
-  FatalError("Not implemented yet");
+  SmartPointer<GLDraw::GeometryAppearance>& app = *reinterpret_cast<SmartPointer<GLDraw::GeometryAppearance>*>(appearancePtr);
+  if(!app) throw PyException("Invalid appearance");
+  for(int i=0;i<4;i++) out[i] = app->faceColor.rgba[i];
 }
 void Appearance::getColor(int primitive,float out[4])
 {
-  FatalError("Not implemented yet");
+  SmartPointer<GLDraw::GeometryAppearance>& app = *reinterpret_cast<SmartPointer<GLDraw::GeometryAppearance>*>(appearancePtr);
+  if(!app) throw PyException("Invalid appearance");
+  GLDraw::GLColor c;
+  switch(primitive) {
+  case ALL:
+  case FACES:
+    c = app->faceColor;
+    break;
+  case VERTICES:
+    c = app->vertexColor;
+    break;
+  case EDGES:
+    c = app->edgeColor;
+    break;
+  default:
+    throw PyException("Invalid primitive");
+  }
+  for(int i=0;i<4;i++) out[i] = c.rgba[i];
 }
 void Appearance::setColors(int primitive,const std::vector<float>& colors,bool alpha)
 {
@@ -3824,6 +3843,12 @@ RobotPoser::RobotPoser(RobotModel& robot)
   Assert(rob != NULL);
   Assert(view != NULL);
   widgets[index].widget = new RobotPoseWidget(rob,view);
+}
+
+void RobotPoser::setActiveDofs(const std::vector<int>& dofs)
+{
+  RobotPoseWidget* tw=dynamic_cast<RobotPoseWidget*>(&*widgets[index].widget);
+  tw->SetActiveDofs(dofs);
 }
 
 void RobotPoser::set(const std::vector<double>& q)

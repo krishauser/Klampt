@@ -65,9 +65,9 @@ class GLSimulationProgram(GLRealtimeProgram):
         #Put your display handler here
         #the current example draws the simulated world in grey and the
         #commanded configurations in transparent green
-        self.sim.updateWorld()
-        self.world.drawGL()
+        self.sim.drawGL()
 
+        """
         #draw commanded configurations
         if self.commanded_config_color != None:
             for i in xrange(self.world.numRobots()):
@@ -86,6 +86,7 @@ class GLSimulationProgram(GLRealtimeProgram):
                     for j in xrange(r.numLinks()):
                         r.link(j).appearance().set(oldapps[j])
             glDisable(GL_BLEND)
+        """
 
         #draw contacts, if enabled
         if self.drawContacts:
