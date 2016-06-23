@@ -71,6 +71,47 @@ def angle(R):
     ctheta = (trace(R) - 1.0)*0.5
     return math.acos(max(min(ctheta,1.0),-1.0))
 
+def rpy(R):
+    """Converts a rotation matrix to a roll,pitch,yaw angle triple.
+    The result is given in radians."""
+    sign = lambda x: 1 if x > 0 else (-1 if x < 0 else 0)
+
+    m = matrix(R)
+    b = -math.asin(m[2][0]) # m(2,0)=-sb
+    cb = math.cos(b)
+    if abs(cb) > 1e-7:
+        ca = m[0][0]/cb   #m(0,0)=ca*cb
+        ca = min(1.0,max(ca,-1.0))
+        if sign(m[1][0]) == sign(cb): #m(1,0)=sa*cb
+            a = math.acos(ca);
+        else:
+            a = 2*math.pi - math.acos(ca)
+
+        cc = m[2][2] / cb  #m(2,2)=cb*cc
+        cc = min(1.0,max(cc,-1.0))
+        if sign(m[2][1]) == sign(cb): #m(2,1)=cb*sc
+            c = math.acos(cc)
+        else:
+            c = math.pi*2 - math.acos(cc)
+    else: 
+        #b is close to 90 degrees, i.e. cb=0
+        #this reduces the degrees of freedom, so we can set c=0
+        c = 0
+        #m(0,1)=-sa
+        a = -math.asin(m[0][1]);
+        if sign(math.cos(a)) != sign(m[1][1]): #m(1,1)=ca
+            a = math.pi - a;
+    return c,b,a
+    
+def from_rpy(rollpitchyaw):
+    """Converts from roll,pitch,yaw angle triple to a rotation
+    matrix.  The triple is given in radians.  The x axis is "roll",
+    y is "pitch", and z is "yaw".
+    """
+    roll,pitch,yaw = rollpitchyaw
+    Rx,Ry,Rz = from_axis_angle((1,0,0),roll),from_axis_angle((0,1,0),pitch),from_axis_angle((0,0,1),yaw)
+    return mul(Rz,mul(Ry,Rx))
+
 def moment(R):
     """Returns the moment w (exponential map) representation of R such
     that e^[w] = R.  Equivalent to axis-angle representation with
