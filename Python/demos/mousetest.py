@@ -11,13 +11,13 @@ class GLTest(GLRealtimeProgram):
     def display(self):
         self.world.drawGL()
 
-    def motionfunc(self,x,y):
+    def motionfunc(self,x,y,dx,dy):
         if self.modifiers & GLUT_ACTIVE_SHIFT:
             self.q[2] = float(y)/400
             self.q[3] = float(x)/400
             self.world.robot(0).setConfig(self.q)
         else:
-            GLRealtimeProgram.motionfunc(self,x,y)
+            GLRealtimeProgram.motionfunc(self,x,y,dx,dy)
         
     def idle(self):
         pass

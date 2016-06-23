@@ -129,12 +129,12 @@ class MyGLViewer(GLRealtimeProgram):
                 return
         GLRealtimeProgram.mousefunc(self,button,state,x,y)
         
-    def motionfunc(self,x,y):
+    def motionfunc(self,x,y,dx,dy):
         if self.forceApplicationMode:
             self.moveForceSpring(x,y)
             glutPostRedisplay()
         else:
-            GLRealtimeProgram.motionfunc(self,x,y)
+            GLRealtimeProgram.motionfunc(self,x,y,dx,dy)
 
     def moveForceSpring(self,x,y):
         self.sim.updateWorld()
