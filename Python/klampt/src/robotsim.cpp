@@ -3029,7 +3029,7 @@ void SimBody::applyWrench(const double f[3],const double t[3])
 void SimBody::applyForceAtPoint(const double f[3],const double pworld[3])
 {
   if(!body) return;
-  sim->sim->hooks.push_back(new ForceHook(body,Vector3(f),Vector3(pworld)));
+  sim->sim->hooks.push_back(new ForceHook(body,Vector3(pworld),Vector3(f)));
   sim->sim->hooks.back()->autokill = true;
   //dBodyAddForceAtPos(body,f[0],f[1],f[2],pworld[0],pworld[1],pworld[2]);
 }
@@ -3037,7 +3037,7 @@ void SimBody::applyForceAtPoint(const double f[3],const double pworld[3])
 void SimBody::applyForceAtLocalPoint(const double f[3],const double plocal[3])
 {
   if(!body) return;
-  sim->sim->hooks.push_back(new LocalForceHook(body,Vector3(f),Vector3(plocal)));
+  sim->sim->hooks.push_back(new LocalForceHook(body,Vector3(plocal),Vector3(f)));
   sim->sim->hooks.back()->autokill = true;
   //dBodyAddForceAtRelPos(body,f[0],f[1],f[2],plocal[0],plocal[1],plocal[2]);
 }
