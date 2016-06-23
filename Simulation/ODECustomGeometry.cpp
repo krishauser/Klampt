@@ -41,12 +41,6 @@ dGeomID dCreateCustomGeometry(AnyCollisionGeometry3D* geometry,Real outerMargin)
 {
   dGeomID geom = dCreateGeom(gdCustomGeometryClass);
   CustomGeometryData* data = dGetCustomGeometryData(geom);
-
-  if(geometry->type == AnyGeometry3D::TriangleMesh) {
-    AnyCast<CollisionMesh>(&geometry->collisionData)->CalcIncidentTris();
-    AnyCast<CollisionMesh>(&geometry->collisionData)->CalcTriNeighbors();
-  }
-
   data->geometry = geometry;
   data->outerMargin = outerMargin;
   data->odeOffset.setZero();
@@ -93,12 +87,13 @@ int VertexIndex(const Vector3& b)
   return -1;
 }
 
-Vector3 VertexNormal(const CollisionMesh& m,int tri,int vnum)
+Vector3 VertexNormal(CollisionMesh& m,int tri,int vnum)
 {
   if(m.incidentTris.empty()) {
     fprintf(stderr,"VertexNormal: mesh is not properly initialized with incidentTris array?\n");
-    return Vector3(0.0);
-    FatalError("VertexNormal: mesh is not properly initialized with incidentTris array?");
+    m.CalcIncidentTris();
+    //return Vector3(0.0);
+    //FatalError("VertexNormal: mesh is not properly initialized with incidentTris array?");
   }
   Assert(vnum >= 0 && vnum < 3);
   int v=m.tris[tri][vnum];
@@ -111,11 +106,12 @@ Vector3 VertexNormal(const CollisionMesh& m,int tri,int vnum)
   return m.currentTransform.R*n;
 }
 
-Vector3 EdgeNormal(const CollisionMesh& m,int tri,int e)
+Vector3 EdgeNormal(CollisionMesh& m,int tri,int e)
 {
   if(m.triNeighbors.empty()) {
     fprintf(stderr,"EdgeNormal: Warning, mesh is not properly initialized with triNeighbors\n");
-    return Vector3(0.0);
+    m.CalcTriNeighbors();
+    //return Vector3(0.0);
   }
   Assert(!m.triNeighbors.empty());
   Vector3 n=m.TriangleNormal(tri);
@@ -129,7 +125,7 @@ Vector3 EdgeNormal(const CollisionMesh& m,int tri,int e)
 ///Compute normal from mesh geometry: returns the local normal needed for
 ///triangle 1 on m1 to get out of triangle 2 on m2.
 ///p1 and p2 are given in local coordinates
-Vector3 ContactNormal(const CollisionMesh& m1,const CollisionMesh& m2,const Vector3& p1,const Vector3& p2,int t1,int t2)
+Vector3 ContactNormal(CollisionMesh& m1,CollisionMesh& m2,const Vector3& p1,const Vector3& p2,int t1,int t2)
 {
   Triangle3D tri1,tri2;
   m1.GetTriangle(t1,tri1);
@@ -241,7 +237,7 @@ Vector3 ContactNormal(const CollisionMesh& m1,const CollisionMesh& m2,const Vect
 
 //Returns a contact normal for the closest point to the triangle t.  p is the point on the triangle.
 //The direction is the one in which triangle 1 can move to get away from closestpt
-Vector3 ContactNormal(const CollisionMesh& m,const Vector3& p,int t,const Vector3& closestPt)
+Vector3 ContactNormal(CollisionMesh& m,const Vector3& p,int t,const Vector3& closestPt)
 {
   Triangle3D tri;
   m.GetTriangle(t,tri);
