@@ -609,7 +609,10 @@ bool Robot::LoadRob(const char* fn) {
 		  }
 		  if(stemp == "controller" || stemp == "sensors") {
 		    //prepend the robot path
-		    properties[stemp] = path + value;
+		    stringstream ss(value);
+		    string file;
+		    SafeInputString(ss,file);
+		    properties[stemp] = path + file;
 		  }
 		  else 
 		    properties[stemp] = value;
