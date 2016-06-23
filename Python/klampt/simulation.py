@@ -28,7 +28,7 @@ class DefaultSensorEmulator(SensorEmulator):
             measurements['dqcmd'] = self.controller.getCommandedVelocity()
         k = 0
         while True:
-            s = self.controller.getSensor(k)
+            s = self.controller.sensor(k)
             if s.type()=='':
                 break;
             measurements[s.name()] = s.getMeasurements()
