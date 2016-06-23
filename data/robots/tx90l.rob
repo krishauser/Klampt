@@ -21,9 +21,10 @@ geometry   "tx90l/part6.tri" "tx90l/part5.tri" "tx90l/part4.tri" "tx90l/part3.tr
 geomscale 1 1 1 1 1 1 0.05
 mass       20 10 10 5 5 1 0.1
 automass
-torqueMax  inf 800 600 400 200 200 100
-servoP  40000 50000 20000 10000 2000 1000
-servoI  100 100 100 100 40 20
-servoD  1000 2000 700 400 50 20
+torqueMax  inf 800 600 400 200 100 50
+servoP  40000 50000 20000 10000 2000 400
+servoI  100 100 100 100 40 10
+servoD  1000 2000 700 400 50 2
 dryFriction 5 5 3 1 0.1 0.05
-viscousFriction 100 100 70 40 5 2
+viscousFriction 100 100 70 40 5 1
+

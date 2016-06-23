@@ -19,16 +19,16 @@ velMaxDeg  0    400    400      430    540    475    760
 accMaxDeg  0    400    400      400    400     400    400
 geometry   "tx90l/part6.tri" "tx90l/part5.tri" "tx90l/part4.tri" "tx90l/part3.tri" "tx90l/part2.tri" "tx90l/part1.tri" "../objects/sphere.tri"
 geomscale 1 1 1 1 1 1 0.03
-mass       20 10 10 5 5 1 0.1
+mass       20 10 10 5 5 1 0.2
 automass
 torqueMax  0 800 600 400 100 50 20
 
 # simulation parameters
-servoP  40000 50000 20000 10000 2000 1000
-servoI  8000 10000 4000 2000 400 200
-#servoI  0 0 0 0 0 0
-servoD  100 100 70 20 40 2
-dryFriction 20 20 10 2.5 0.5 0.1
+servoP  40000 50000 20000 10000 2000 400
+servoI  100 100 100 100 40 10
+servoD  1000 2000 700 400 50 2
+dryFriction 5 5 3 1 0.1 0.05
+viscousFriction 100 100 70 40 5 1
 #servoP  40000 30000 20000 20000 10000 5000
 #servoI  80000 60000 40000 20000 20000 10000
 #servoD  80 60 40 20 20 10
