@@ -2,8 +2,8 @@
 <world>
   <robot name="Baxter" file="robots/baxter_with_parallel_gripper_col.rob" translation="0 0 0.95"/>
   <terrain name="floor" file="terrains/plane.env"/>
-  <terrain name="pod" file="objects/kiva_pod/meshes/pod_lowres.stl" rotateRPY="1.5708 0 1.5708" translation="1.3 -0.2 0.01">
+  <terrain name="pod" file="objects/apc/kiva_pod/meshes/pod_lowres.stl" rotateRPY="1.5708 0 1.5708" translation="1.3 -0.2 0.01">
     <display color="0.3 0.3 0.3" />
   </terrain>
-  <rigidObject name="genuine_joe_stir_sticks" file="objects/genuine_joe_stir_sticks.pcd" translation="1.0 -0.2 1.6"/>
+  <rigidObject name="genuine_joe_stir_sticks" file="objects/apc/genuine_joe_stir_sticks.obj" translation="1.0 -0.2 1.6"/>
 </world>

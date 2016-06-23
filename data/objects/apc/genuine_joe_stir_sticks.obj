@@ -1,0 +1,7 @@
+mesh "genuine_joe_stir_sticks.pcd"
+mass 0.2
+autoMass
+kStiffness 100000
+kDamping 30000
+kRestitution 0
+kFriction 0.5
