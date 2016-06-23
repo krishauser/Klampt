@@ -66,6 +66,7 @@ class SensorBase
   virtual map<string,string> Settings() const;
   virtual bool GetSetting(const string& name,string& str) const;
   virtual bool SetSetting(const string& name,const string& str);
+  virtual void DrawGL() {}
 
   string name;
   double rate;

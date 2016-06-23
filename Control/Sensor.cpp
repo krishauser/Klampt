@@ -1065,6 +1065,12 @@ void IMUSensor::Simulate(ControlledRobotSimulator* robot,WorldSimulation* sim)
 {
   accelerometer.Simulate(robot,sim);
   accel = accelerometer.accel;
+  //translate to global frame and remove gravity from acceleration reading
+  RigidTransform T;
+  robot->oderobot->GetLinkTransform(accelerometer.link,T);
+  accel = T.R*accel;
+  accel += Vector3(0,0,9.8);
+  //integrate velocity and position
   translation.madd(velocity,accelerometer.last_dt);
   translation.madd(accel,0.5*Sqr(accelerometer.last_dt));
   velocity.madd(accel,accelerometer.last_dt);
