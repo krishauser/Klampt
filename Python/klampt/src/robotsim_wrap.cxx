@@ -24457,6 +24457,55 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_RobotPoser_setActiveDofs(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  RobotPoser *arg1 = (RobotPoser *) 0 ;
+  std::vector< int,std::allocator< int > > *arg2 = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int res2 = SWIG_OLDOBJ ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:RobotPoser_setActiveDofs",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_RobotPoser, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "RobotPoser_setActiveDofs" "', argument " "1"" of type '" "RobotPoser *""'"); 
+  }
+  arg1 = reinterpret_cast< RobotPoser * >(argp1);
+  {
+    std::vector<int,std::allocator< int > > *ptr = (std::vector<int,std::allocator< int > > *)0;
+    res2 = swig::asptr(obj1, &ptr);
+    if (!SWIG_IsOK(res2)) {
+      SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "RobotPoser_setActiveDofs" "', argument " "2"" of type '" "std::vector< int,std::allocator< int > > const &""'"); 
+    }
+    if (!ptr) {
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "RobotPoser_setActiveDofs" "', argument " "2"" of type '" "std::vector< int,std::allocator< int > > const &""'"); 
+    }
+    arg2 = ptr;
+  }
+  {
+    try {
+      (arg1)->setActiveDofs((std::vector< int,std::allocator< int > > const &)*arg2);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  if (SWIG_IsNewObj(res2)) delete arg2;
+  return resultobj;
+fail:
+  if (SWIG_IsNewObj(res2)) delete arg2;
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_RobotPoser_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   RobotPoser *arg1 = (RobotPoser *) 0 ;
@@ -42072,6 +42121,125 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_SimBody_setCollisionPreshrink__SWIG_0(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  SimBody *arg1 = (SimBody *) 0 ;
+  bool arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  bool val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:SimBody_setCollisionPreshrink",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_SimBody, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SimBody_setCollisionPreshrink" "', argument " "1"" of type '" "SimBody *""'"); 
+  }
+  arg1 = reinterpret_cast< SimBody * >(argp1);
+  ecode2 = SWIG_AsVal_bool(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "SimBody_setCollisionPreshrink" "', argument " "2"" of type '" "bool""'");
+  } 
+  arg2 = static_cast< bool >(val2);
+  {
+    try {
+      (arg1)->setCollisionPreshrink(arg2);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_SimBody_setCollisionPreshrink__SWIG_1(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  SimBody *arg1 = (SimBody *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:SimBody_setCollisionPreshrink",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_SimBody, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SimBody_setCollisionPreshrink" "', argument " "1"" of type '" "SimBody *""'"); 
+  }
+  arg1 = reinterpret_cast< SimBody * >(argp1);
+  {
+    try {
+      (arg1)->setCollisionPreshrink();
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_SimBody_setCollisionPreshrink(PyObject *self, PyObject *args) {
+  int argc;
+  PyObject *argv[3];
+  int ii;
+  
+  if (!PyTuple_Check(args)) SWIG_fail;
+  argc = args ? (int)PyObject_Length(args) : 0;
+  for (ii = 0; (ii < 2) && (ii < argc); ii++) {
+    argv[ii] = PyTuple_GET_ITEM(args,ii);
+  }
+  if (argc == 1) {
+    int _v;
+    void *vptr = 0;
+    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_SimBody, 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      return _wrap_SimBody_setCollisionPreshrink__SWIG_1(self, args);
+    }
+  }
+  if (argc == 2) {
+    int _v;
+    void *vptr = 0;
+    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_SimBody, 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      {
+        int res = SWIG_AsVal_bool(argv[1], NULL);
+        _v = SWIG_CheckState(res);
+      }
+      if (_v) {
+        return _wrap_SimBody_setCollisionPreshrink__SWIG_0(self, args);
+      }
+    }
+  }
+  
+fail:
+  SWIG_SetErrorMsg(PyExc_NotImplementedError,"Wrong number or type of arguments for overloaded function 'SimBody_setCollisionPreshrink'.\n"
+    "  Possible C/C++ prototypes are:\n"
+    "    SimBody::setCollisionPreshrink(bool)\n"
+    "    SimBody::setCollisionPreshrink()\n");
+  return 0;
+}
+
+
 SWIGINTERN PyObject *_wrap_SimBody_getSurface(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   SimBody *arg1 = (SimBody *) 0 ;
@@ -45388,6 +45556,7 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"delete_ObjectPoser", _wrap_delete_ObjectPoser, METH_VARARGS, (char *)"delete_ObjectPoser(ObjectPoser self)"},
 	 { (char *)"ObjectPoser_swigregister", ObjectPoser_swigregister, METH_VARARGS, NULL},
 	 { (char *)"new_RobotPoser", _wrap_new_RobotPoser, METH_VARARGS, (char *)"new_RobotPoser(RobotModel robot) -> RobotPoser"},
+	 { (char *)"RobotPoser_setActiveDofs", _wrap_RobotPoser_setActiveDofs, METH_VARARGS, (char *)"RobotPoser_setActiveDofs(RobotPoser self, intVector dofs)"},
 	 { (char *)"RobotPoser_set", _wrap_RobotPoser_set, METH_VARARGS, (char *)"RobotPoser_set(RobotPoser self, doubleVector q)"},
 	 { (char *)"RobotPoser_get", _wrap_RobotPoser_get, METH_VARARGS, (char *)"RobotPoser_get(RobotPoser self)"},
 	 { (char *)"RobotPoser_getConditioned", _wrap_RobotPoser_getConditioned, METH_VARARGS, (char *)"RobotPoser_getConditioned(RobotPoser self, doubleVector qref)"},
@@ -46499,6 +46668,10 @@ static PyMethodDef SwigMethods[] = {
 		"0.0025. \n"
 		""},
 	 { (char *)"SimBody_getCollisionPadding", _wrap_SimBody_getCollisionPadding, METH_VARARGS, (char *)"SimBody_getCollisionPadding(SimBody self) -> double"},
+	 { (char *)"SimBody_setCollisionPreshrink", _wrap_SimBody_setCollisionPreshrink, METH_VARARGS, (char *)"\n"
+		"setCollisionPreshrink(bool shrinkVisualization=False)\n"
+		"SimBody_setCollisionPreshrink(SimBody self)\n"
+		""},
 	 { (char *)"SimBody_getSurface", _wrap_SimBody_getSurface, METH_VARARGS, (char *)"\n"
 		"SimBody_getSurface(SimBody self) -> ContactParameters\n"
 		"\n"

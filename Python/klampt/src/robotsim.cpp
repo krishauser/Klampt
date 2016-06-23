@@ -3098,6 +3098,12 @@ double SimBody::getCollisionPadding()
   return geometry->GetPadding();
 }
 
+void SimBody::setCollisionPreshrink(bool shrinkVisualization)
+{
+  if(!geometry) return;
+  geometry->SetPaddingWithPreshrink(geometry->GetPadding(),shrinkVisualization);
+}
+
 ContactParameters SimBody::getSurface()
 {
   ContactParameters res;
