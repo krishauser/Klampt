@@ -152,7 +152,7 @@ bool ContactTimeScaling::SetParams(const MultiPath& path,const vector<Real>& par
       //rows 2n+1 + 2n+numFCEdges*nc are the force constraints
       //vel max is encoded in the velocity variable
       int n = (int)robot.links.size();
-      int nc = NumContactPoints(formation);
+      int nc = formation.numContactPoints();
 #if TEST_NO_CONTACT
       nc = 0;
 #endif // TEST_NO_CONTACT
@@ -225,7 +225,7 @@ bool ContactTimeScaling::SetParams(const MultiPath& path,const vector<Real>& par
 	}
       }
     }
-    Assert(ccount == NumContactPoints(formation));
+    Assert(ccount == formation.numContactPoints());
 #endif //TEST_NO_CONTACT
 
     //fill out acceleration constraint |ddx*ds^2 + dx*dds| <= amax
