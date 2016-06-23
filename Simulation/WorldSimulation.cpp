@@ -112,7 +112,6 @@ void Reset(ContactFeedbackInfo& info)
 template <class T>
 bool WriteFile(File& f,const vector<T>& v)
 {
-  printf("Trying WriteFile(vector<T>)\n");
   if(!WriteFile(f,int(v.size()))) return false;
   if(!v.empty()) 
 	if(!WriteArrayFile(f,&v[0],v.size())) return false;
@@ -123,7 +122,6 @@ bool WriteFile(File& f,const vector<T>& v)
 template <class T>
 bool ReadFile(File& f,vector<T>& v)
 {
-  printf("Trying ReadFile(vector<T>)\n");
   int n;
   READ_FILE_DEBUG(f,n,"ReadFile(vector<T>)");
   if(n < 0) {
