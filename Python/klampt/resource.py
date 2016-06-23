@@ -33,8 +33,10 @@ import glcommon
 #    print "QT is not available... try sudo apt-get install python-qt4 python-qt4-gl"
 #    pass
 
-
+global _directory
+global _editTemporaryWorlds
 _directory = 'resources'
+_editTemporaryWorlds = {}
 
 def getDirectory():
     """Returns the current resource directory."""
@@ -109,9 +111,9 @@ def objectToTypes(object,world=None):
                 dtypes.append('str')
             vtypes = []
             if not str in dtypes:
+                vtypes.append('Config')
                 if not float in dtypes:
                     vtypes.append('IntArray')
-                vtypes.append('Config')
                 if len(object)==2:
                     #2d point
                     vtypes.append('Vector2')
@@ -473,6 +475,7 @@ class _SelectorVisualEditor(_VisualEditorBase):
     def selectAll(self):
         if self.robot == None:
             #select all ids in the world
+            pass
         else:
             self.value = [l for l in range(self.robot.numLinks())]
         self.refresh()        
@@ -531,7 +534,7 @@ class _SelectorVisualEditor(_VisualEditorBase):
             else:
                 self.click_robot(x,y)
             return True
-        return _VisualEditorBase.mousefunc(self,button,state,x,y):
+        return _VisualEditorBase.mousefunc(self,button,state,x,y)
     
     def keyboardfunc(self,c,x,y):
         if c==',' or c=='<':
@@ -565,7 +568,7 @@ class _SelectorVisualEditor(_VisualEditorBase):
                 self.world.rigidObject(i).drawGL()
             for i in xrange(self.world.numRobots()):
                 self.world.robot(i).drawGL()
-        else if self.robot != None:
+        elif self.robot != None:
             self.robot.drawGL()
         glDisable(GL_BLEND)
 
@@ -805,7 +808,6 @@ def console_edit(name,value,type,description=None,world=None,frame=None):
     elif choice=='q':
         return False,None
 
-_editTemporaryWorlds = {}
 
 def edit(name,value,type='auto',description=None,editor='visual',world=None,robot=None,frame=None):
     """Launches an editor for the given value.  Returns a pair (save,result)
