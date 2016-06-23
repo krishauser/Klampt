@@ -8,17 +8,15 @@ import robotiq
 class MyGLViewer(GLSimulationProgram):
     def __init__(self,world):
         GLSimulationProgram.__init__(self,world,"RobotiQ test program")
-        #Put your initialization code here
-        #the current example creates a collision class, simulator, 
-        #simulation flag, and screenshot flags
-        self.collider = robotcollide.WorldCollider(world)
-        self.robotiq_emulator = robotiq.Emulator(self.sim)
+        #Put any controller modules or sensor / actuator emulators here
+        self.robotiqEmulator = robotiq.Emulator(self.sim)
+        self.sim.addEmulator(0,self.robotiqEmulator)
 
     def control_loop(self):
         #Put your control handler here
         
-        #TODO: right now, just sets g to an oscillation between 0 and 199
-        controller = self.sim.controller(0)
+        #right now, just sets g to an oscillation between 0 and 199
+        #TODO: build a BaseController that outputs qcmd to the emulator
         g = int(self.sim.getTime()*50.0)
         maxval = 120
         if int(g/maxval)%2 == 1:
@@ -27,7 +25,8 @@ class MyGLViewer(GLSimulationProgram):
             g = g % maxval
         print g
         g = [g,g,g]
-        qdes = self.robotiq_emulator.send_command(g,scissor=30)
+
+        self.robotiqEmulator.send_command(g,scissor=30)
 
 
 if __name__ == "__main__":

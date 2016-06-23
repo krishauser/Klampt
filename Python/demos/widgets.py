@@ -52,17 +52,16 @@ class GLWidgetProgram(GLRealtimeProgram):
             return
         GLRealtimeProgram.mousefunc(self,button,state,x,y)
 
-    def motionfunc(self,x,y):
+    def motionfunc(self,x,y,dx,dy):
         if self.draggingWidget:
-            self.widgetMaster.drag(x-self.lastx,self.lasty-y,self.viewport())
+            self.widgetMaster.drag(dx,-dy,self.viewport())
             if self.widgetMaster.wantsRedraw():
                 self.refresh()
-            self.lastx,self.lasty = x,y
         else:
             res = self.widgetMaster.hover(x,self.height-y,self.viewport())
             if self.widgetMaster.wantsRedraw():
                 self.refresh()
-            GLRealtimeProgram.motionfunc(self,x,y)
+            GLRealtimeProgram.motionfunc(self,x,y,dx,dy)
 
     def specialfunc(self,c,x,y):
         #Put your keyboard special character handler here

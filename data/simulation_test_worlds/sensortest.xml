@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<world>
+  <terrain file="../terrains/plane.tri"  translation="0 0 0"/>
+  <robot file="../robots/tx90ball.rob"/>
+
+  <simulation>
+    <robot index=0> 
+      <sensors>
+        <JointPositionSensor name="encoders" />
+        <JointVelocitySensor name="dencoders" />
+        <ContactSensor name="contact" link="6" Tsensor="1 0 0  1 0 0  0 1 0  0 0 0.04" patchMin="-0.02 -0.02" patchMax="0.02 0.02" patchTolerance="0.02" hasForce="0 0 1"/>
+        <ForceTorqueSensor name="f/t" link="6" hasForce="1 1 1" hasMoment="1 1 1"/>
+        <Accelerometer name="accelerometer" link="6" hasAxis="1 1 1"/>
+        <IMUSensor name="imu" link="6" hasAxis="1 1 1" hasAngAccel="1" hasAngVel="1"/>
+      </sensors>
+    </robot>
+    <!-- these override the rigidObject parameters -->
+    <!--
+    <object index="0">
+       <geometry kFriction="0.500000" kStiffness="inf" kDamping="inf"/>
+    </object>
+    <object index="1">
+       <geometry kFriction="0.500000" kStiffness="inf" kDamping="inf"/>
+    </object>
+    -->
+
+    <terrain index="0">
+       <geometry kRestitution="0.500000" kFriction="0.500000" kStiffness="inf" kDamping="inf" padding="0.001" preshink="1"/>
+    </terrain>
+  </simulation>
+</world>

@@ -37,6 +37,8 @@ class GLProgram:
         self.height = 480
         self.clearColor = [1.0,1.0,1.0,0.0]
         self.glutInitialized = False
+        self.lastx = 0
+        self.lasty = 0
 
     def initWindow(self):
         """ Open a window and initialize. Users should not call this
@@ -55,9 +57,9 @@ class GLProgram:
         glutKeyboardUpFunc (self.keyboardupfunc)
         glutSpecialFunc (self.specialfunc)
         glutSpecialUpFunc (self.specialupfunc)
-        glutMotionFunc (self.motionfunc)
-        glutPassiveMotionFunc (self.motionfunc)
-        glutMouseFunc (self.mousefunc)
+        glutMotionFunc (self._motionfunc)
+        glutPassiveMotionFunc (self._motionfunc)
+        glutMouseFunc (self._mousefunc)
         glutDisplayFunc (self.displayfunc)
         glutIdleFunc(self.idlefunc)
 
@@ -105,7 +107,8 @@ class GLProgram:
         """Called on special character keypress up up (if your system allows
         it).  May be overridden"""
         pass
-    def motionfunc(self,x,y):
+
+    def motionfunc(self,x,y,dx,dy):
         """Called when the mouse moves on screen.  May be overridden."""
         pass
     def mousefunc(self,button,state,x,y):
@@ -210,6 +213,18 @@ class GLProgram:
         for c in text:
             glutBitmapCharacter(font, ctypes.c_int( ord(c) ))
 
+    def _motionfunc(self,x,y):
+        """Internal use"""
+        dx = x - self.lastx
+        dy = y - self.lasty
+        self.motionfunc(x,y,dx,dy)
+        self.lastx = x
+        self.lasty = y
+    def _mousefunc(self,button,state,x,y):
+        """Internal use"""
+        self.mousefunc(button,state,x,y)
+        self.lastx = x
+        self.lasty = y
     
 class GLNavigationProgram(GLProgram):
     """A more advanced form of GLProgram that allows you to navigate a
@@ -230,8 +245,6 @@ class GLNavigationProgram(GLProgram):
         #near and far clipping planes
         self.clippingplanes = (0.2,20)
         #mouse state information
-        self.lastx = 0
-        self.lasty = 0
         self.modifiers = 0
         self.dragging = False
         self.clearColor = [0.8,0.8,0.9,0]        
@@ -306,9 +319,7 @@ class GLNavigationProgram(GLProgram):
         glLightfv(GL_LIGHT1,GL_SPECULAR,[0.5,0.5,0.5,1])
         glEnable(GL_LIGHT1)
 
-    def motionfunc(self,x,y):
-        dx = x - self.lastx
-        dy = y - self.lasty
+    def motionfunc(self,x,y,dx,dy):
         if self.dragging:
             if self.modifiers & GLUT_ACTIVE_CTRL:
                 R,t = self.camera.matrix()
@@ -318,9 +329,7 @@ class GLNavigationProgram(GLProgram):
                 self.camera.dist *= math.exp(dy*0.01)
             else:
                 self.camera.rot[2] += float(dx)*0.01
-                self.camera.rot[1] += float(dy)*0.01        
-        self.lastx = x
-        self.lasty = y
+                self.camera.rot[1] += float(dy)*0.01 
         self.refresh()
     
     def mousefunc(self,button,state,x,y):
@@ -329,8 +338,6 @@ class GLNavigationProgram(GLProgram):
         else:
             self.dragging = False
         self.modifiers = glutGetModifiers()
-        self.lastx = x
-        self.lasty = y
 
 
 class GLRealtimeProgram(GLNavigationProgram):
@@ -418,13 +425,10 @@ class GLPluginProgram(GLRealtimeProgram):
         for plugin in self.plugins[::-1]:
             if plugin.specialupfunc(c,x,y): return
         GLRealtimeProgram.specialupfunc(self,c,x,y)
-    def motionfunc(self,x,y):
-        dx = x - self.lastx
-        dy = y - self.lasty
+    def motionfunc(self,x,y,dx,dy):
         for plugin in self.plugins[::-1]:
             if plugin.motionfunc(x,y,dx,dy): return
-        GLRealtimeProgram.motionfunc(self,x,y)
-        self.lastx,self.lasty = x,y
+        GLRealtimeProgram.motionfunc(self,x,y,dx,dy)
     def mousefunc(self,button,state,x,y):
         for plugin in self.plugins[::-1]:
             if plugin.mousefunc(button,state,x,y): return

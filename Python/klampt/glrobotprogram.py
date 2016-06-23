@@ -1,5 +1,6 @@
 from OpenGL.GL import *
-from robotsim import Simulator,WidgetSet,RobotPoser
+from robotsim import WidgetSet,RobotPoser
+from simulation import SimpleSimulator
 from glprogram import *
 import robotcollide
 import simlog
@@ -35,7 +36,7 @@ class GLSimulationProgram(GLRealtimeProgram):
         #the current example creates a collision class, simulator, 
         #simulation flag, and screenshot flags
         self.collider = robotcollide.WorldCollider(world)
-        self.sim = Simulator(world)
+        self.sim = SimpleSimulator(world)
         self.simulate = False
         self.commanded_config_color = [0,1,0,0.5]
 
@@ -65,9 +66,9 @@ class GLSimulationProgram(GLRealtimeProgram):
         #Put your display handler here
         #the current example draws the simulated world in grey and the
         #commanded configurations in transparent green
-        self.sim.updateWorld()
-        self.world.drawGL()
+        self.sim.drawGL()
 
+        """
         #draw commanded configurations
         if self.commanded_config_color != None:
             for i in xrange(self.world.numRobots()):
@@ -86,6 +87,7 @@ class GLSimulationProgram(GLRealtimeProgram):
                     for j in xrange(r.numLinks()):
                         r.link(j).appearance().set(oldapps[j])
             glDisable(GL_BLEND)
+        """
 
         #draw contacts, if enabled
         if self.drawContacts:
@@ -146,8 +148,8 @@ class GLSimulationProgram(GLRealtimeProgram):
         if self.verbose: print "mouse",button,state,x,y
         GLRealtimeProgram.mousefunc(self,button,state,x,y)
 
-    def motionfunc(self,x,y):
-        GLRealtimeProgram.motionfunc(self,x,y)
+    def motionfunc(self,x,y,dx,dy):
+        GLRealtimeProgram.motionfunc(self,x,y,dx,dy)
 
     def specialfunc(self,c,x,y):
         #Put your keyboard special character handler here
@@ -246,17 +248,16 @@ class GLWidgetProgram(GLRealtimeProgram):
             return
         GLRealtimeProgram.mousefunc(self,button,state,x,y)
 
-    def motionfunc(self,x,y):
+    def motionfunc(self,x,y,dx,dy):
         if self.draggingWidget:
-            self.widgetMaster.drag(x-self.lastx,self.lasty-y,self.viewport())
+            self.widgetMaster.drag(dx,-dy,self.viewport())
             if self.widgetMaster.wantsRedraw():
                 self.refresh()
-            self.lastx,self.lasty = x,y
         else:
             res = self.widgetMaster.hover(x,self.height-y,self.viewport())
             if self.widgetMaster.wantsRedraw():
                 self.refresh()
-            GLRealtimeProgram.motionfunc(self,x,y)
+            GLRealtimeProgram.motionfunc(self,x,y,dx,dy)
 
     def specialfunc(self,c,x,y):
         #Put your keyboard special character handler here

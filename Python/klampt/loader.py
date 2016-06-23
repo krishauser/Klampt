@@ -336,6 +336,20 @@ def readGeometricPrimitive(text):
         raise RuntimeError("Error reading GeometricPrimitive from string")
     return g
 
+def readIntArray(text):
+    """Reads a length-prepended vector from a string 'n v1 ... vn'"""
+    items = text.split()
+    if int(items[0])+1 != len(items):
+        raise ValueError("Invalid number of items")
+    return [int(v) for v in items[1:]]
+
+def readStringArray(text):
+    """Reads a length-prepended vector from a string 'n v1 ... vn'"""
+    items = text.split()
+    if int(items[0])+1 != len(items):
+        raise ValueError("Invalid number of items")
+    return items[1:]
+
 def parseLines(text):
     """Returns a list of lines from the given text.  Understands end-of-line escapes '\\n'"""
     lines = text.strip().split('\n')
@@ -368,6 +382,8 @@ readers = {'Config':readVector,
            'IKObjective':readIKObjective,
            'Hold':readHold,
            'GeometricPrimitive':readGeometricPrimitive,
+           'IntArray':readIntArray,
+           'StringArray':readStringArray,
            }
 
 writers = {'Config':writeVector,
@@ -381,6 +397,8 @@ writers = {'Config':writeVector,
            'IKObjective':writeIKObjective,
            'Hold':writeHold,
            'GeometricPrimitive':writeGeometricPrimitive,
+           'IntArray':writeVector,
+           'StringArray':writeVector,
            }
 
 
@@ -484,7 +502,7 @@ def toJson(obj,type='auto'):
         else:
             raise RuntimeError("Unknown object of type "+obj.__class__.__name)
 
-    if type=='Config' or type=='Configs' or type=='Vector' or type == 'Matrix' or type == 'RotationMatrix' or type == 'Value':
+    if type in ['Config','Configs','Vector','Matrix','Matrix3','RotationMatrix','Value','IntArray','StringArray']:
         return obj
     elif type == 'RigidTransform':
         return obj
@@ -549,7 +567,7 @@ def fromJson(jsonobj,type='auto'):
         else:
             raise RuntimeError("Unknown JSON object of type "+jsonobj.__class__.__name)
 
-    if type=='Config' or type=='Configs' or type=='Vector' or type == 'Matrix' or type == 'RotationMatrix' or type == 'Value':
+    if type in ['Config','Configs','Vector','Matrix','Matrix3','RotationMatrix','Value','IntArray','StringArray']:
         return jsonobj
     elif type == 'RigidTransform':
         return jsonobj

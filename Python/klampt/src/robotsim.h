@@ -201,6 +201,10 @@ class SimBody
   /// Sets the collision padding (useful for thin objects).  Default is 0.0025
   void setCollisionPadding(double padding);
   double getCollisionPadding();
+  /// If set, preshrinks the geometry so that the padded geometry better matches
+  /// the original mesh.  If shrinkVisualization=true, the underlying mesh is
+  /// also shrunk (helps debug)
+  void setCollisionPreshrink(bool shrinkVisualization=false);
 
   /// Gets (a copy of) the surface properties
   ContactParameters getSurface();

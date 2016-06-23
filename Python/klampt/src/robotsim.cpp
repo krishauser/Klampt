@@ -1026,11 +1026,30 @@ void Appearance::setColor(int primitive,float r,float g,float b,float a)
 
 void Appearance::getColor(float out[4])
 {
-  FatalError("Not implemented yet");
+  SmartPointer<GLDraw::GeometryAppearance>& app = *reinterpret_cast<SmartPointer<GLDraw::GeometryAppearance>*>(appearancePtr);
+  if(!app) throw PyException("Invalid appearance");
+  for(int i=0;i<4;i++) out[i] = app->faceColor.rgba[i];
 }
 void Appearance::getColor(int primitive,float out[4])
 {
-  FatalError("Not implemented yet");
+  SmartPointer<GLDraw::GeometryAppearance>& app = *reinterpret_cast<SmartPointer<GLDraw::GeometryAppearance>*>(appearancePtr);
+  if(!app) throw PyException("Invalid appearance");
+  GLDraw::GLColor c;
+  switch(primitive) {
+  case ALL:
+  case FACES:
+    c = app->faceColor;
+    break;
+  case VERTICES:
+    c = app->vertexColor;
+    break;
+  case EDGES:
+    c = app->edgeColor;
+    break;
+  default:
+    throw PyException("Invalid primitive");
+  }
+  for(int i=0;i<4;i++) out[i] = c.rgba[i];
 }
 void Appearance::setColors(int primitive,const std::vector<float>& colors,bool alpha)
 {
@@ -3010,7 +3029,7 @@ void SimBody::applyWrench(const double f[3],const double t[3])
 void SimBody::applyForceAtPoint(const double f[3],const double pworld[3])
 {
   if(!body) return;
-  sim->sim->hooks.push_back(new ForceHook(body,Vector3(f),Vector3(pworld)));
+  sim->sim->hooks.push_back(new ForceHook(body,Vector3(pworld),Vector3(f)));
   sim->sim->hooks.back()->autokill = true;
   //dBodyAddForceAtPos(body,f[0],f[1],f[2],pworld[0],pworld[1],pworld[2]);
 }
@@ -3018,7 +3037,7 @@ void SimBody::applyForceAtPoint(const double f[3],const double pworld[3])
 void SimBody::applyForceAtLocalPoint(const double f[3],const double plocal[3])
 {
   if(!body) return;
-  sim->sim->hooks.push_back(new LocalForceHook(body,Vector3(f),Vector3(plocal)));
+  sim->sim->hooks.push_back(new LocalForceHook(body,Vector3(plocal),Vector3(f)));
   sim->sim->hooks.back()->autokill = true;
   //dBodyAddForceAtRelPos(body,f[0],f[1],f[2],plocal[0],plocal[1],plocal[2]);
 }
@@ -3077,6 +3096,12 @@ double SimBody::getCollisionPadding()
 {
   if(!geometry) return 0;
   return geometry->GetPadding();
+}
+
+void SimBody::setCollisionPreshrink(bool shrinkVisualization)
+{
+  if(!geometry) return;
+  geometry->SetPaddingWithPreshrink(geometry->GetPadding(),shrinkVisualization);
 }
 
 ContactParameters SimBody::getSurface()
@@ -3824,6 +3849,12 @@ RobotPoser::RobotPoser(RobotModel& robot)
   Assert(rob != NULL);
   Assert(view != NULL);
   widgets[index].widget = new RobotPoseWidget(rob,view);
+}
+
+void RobotPoser::setActiveDofs(const std::vector<int>& dofs)
+{
+  RobotPoseWidget* tw=dynamic_cast<RobotPoseWidget*>(&*widgets[index].widget);
+  tw->SetActiveDofs(dofs);
 }
 
 void RobotPoser::set(const std::vector<double>& q)

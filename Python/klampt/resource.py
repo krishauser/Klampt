@@ -33,8 +33,10 @@ import glcommon
 #    print "QT is not available... try sudo apt-get install python-qt4 python-qt4-gl"
 #    pass
 
-
+global _directory
+global _editTemporaryWorlds
 _directory = 'resources'
+_editTemporaryWorlds = {}
 
 def getDirectory():
     """Returns the current resource directory."""
@@ -100,17 +102,32 @@ def objectToTypes(object,world=None):
                     return 'RigidTransform'
             return 'Configs'
         else:
-            if len(object)==2:
-                #2d point
-                return ['Vector2','Config']
-            elif len(object)==3:
-                #3d point
-                return ['Vector3','Config']
-            elif len(object)==9:
-                #so3 or 9d point?
-                return ['Matrix3','Config']
+            dtypes = []
+            if any(isinstance(v,int) for v in object):
+                dtypes.append('int')
+            if any(isinstance(v,float) for v in object):
+                dtypes.append('float')
+            if any(isinstance(v,str) for v in object):
+                dtypes.append('str')
+            vtypes = []
+            if not str in dtypes:
+                vtypes.append('Config')
+                if not float in dtypes:
+                    vtypes.append('IntArray')
+                if len(object)==2:
+                    #2d point
+                    vtypes.append('Vector2')
+                elif len(object)==3:
+                    #3d point
+                    vtypes.append('Vector3')
+                elif len(object)==9:
+                    #so3 or 9d point?
+                    vtypes.append('Matrix3')
             else:
-                return 'Config'
+                vtypes.append("StringArray")
+            if len(vtypes)==1:
+                return vtypes[0]
+            return vtypes
     else:
         raise ValueError("Unknown object passed to objectToTypes")
 
@@ -264,12 +281,15 @@ class _VisualEditorBase(glcommon.GLWidgetPlugin):
 
 
 class _ConfigVisualEditor(_VisualEditorBase):
-    def __init__(self,name,value,description,world):
+    def __init__(self,name,value,description,world,robot=None):
         _VisualEditorBase.__init__(self,name,value,description,world)
-        world.robot(0).setConfig(value)
+        if robot is None:
+            robot = world.robot(0)
+        robot.setConfig(value)
+        self.robot = robot
         self.clicked = None
         self.hovered = None
-        self.robotposer = RobotPoser(world.robot(0))
+        self.robotposer = RobotPoser(robot)
         self.addWidget(self.robotposer)
     
     def instructions(self):
@@ -284,25 +304,30 @@ class _ConfigVisualEditor(_VisualEditorBase):
     def display(self):
         #Override display handler since the widget draws the robot
         #the next few lines draw everything but the robot
-        for i in xrange(self.world.numTerrains()):
-            self.world.terrain(i).drawGL()
-        for i in xrange(self.world.numRigidObjects()):
-            self.world.rigidObject(i).drawGL()
-        for i in xrange(1,self.world.numRobots()):
-            self.world.robot(i).drawGL()
+        if self.world:
+            for i in xrange(self.world.numTerrains()):
+                self.world.terrain(i).drawGL()
+            for i in xrange(self.world.numRigidObjects()):
+                self.world.rigidObject(i).drawGL()
+            for i in xrange(self.world.numRobots()):
+                if i != self.robot.index:
+                    self.world.robot(i).drawGL()
         #this line will draw the robot
         self.klamptwidgetmaster.drawGL(self.viewport())
         return False
 
 class _ConfigsVisualEditor(_VisualEditorBase):
-    def __init__(self,name,value,description,world):
+    def __init__(self,name,value,description,world,robot=None):
         _VisualEditorBase.__init__(self,name,value,description,world)
+        if robot is None:
+            robot = world.robot(0)
         if len(value) > 0:
-            world.robot(0).setConfig(value[0])
+            robot.setConfig(value[0])
+        self.robot = robot
         self.editingIndex = len(value)-1
         self.clicked = None
         self.hovered = None
-        self.robotposer = RobotPoser(world.robot(0))
+        self.robotposer = RobotPoser(robot)
         self.addWidget(self.robotposer)
     
     def instructions(self):
@@ -388,12 +413,14 @@ class _ConfigsVisualEditor(_VisualEditorBase):
     def display(self):
         #Override display handler since the widget draws the robot
         #the next few lines draw everything but the robot
-        for i in xrange(self.world.numTerrains()):
-            self.world.terrain(i).drawGL()
-        for i in xrange(self.world.numRigidObjects()):
-            self.world.rigidObject(i).drawGL()
-        for i in xrange(1,self.world.numRobots()):
-            self.world.robot(i).drawGL()
+        if self.world != None:
+            for i in xrange(self.world.numTerrains()):
+                self.world.terrain(i).drawGL()
+            for i in xrange(self.world.numRigidObjects()):
+                self.world.rigidObject(i).drawGL()
+            for i in xrange(self.world.numRobots()):
+                if i != self.robot.index:
+                    self.world.robot(i).drawGL()
         glEnable(GL_BLEND)
         glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA)
         #draw most opaque first
@@ -409,17 +436,142 @@ class _ConfigsVisualEditor(_VisualEditorBase):
         for i in order:
             #draw transparent
             opacity = pow(0.5,abs(i-self.editingIndex))
-            for j in xrange(self.world.robot(0).numLinks()):
-                self.world.robot(0).link(j).appearance().setColor(0.5,0.5,0.5,opacity)
+            for j in xrange(self.robot.numLinks()):
+                self.robot.link(j).appearance().setColor(0.5,0.5,0.5,opacity)
             if i == self.editingIndex:
                 #this line will draw the robot at the current editing config
                 self.klamptwidgetmaster.drawGL(self.viewport())
             else:
-                self.world.robot(0).setConfig(self.value[i])
-                self.world.robot(0).drawGL()
-        for j in xrange(self.world.robot(0).numLinks()):
-            self.world.robot(0).link(j).appearance().setColor(0.5,0.5,0.5,1)
+                self.robot.setConfig(self.value[i])
+                self.robot.drawGL()
+        for j in xrange(self.robot.numLinks()):
+            self.robot.link(j).appearance().setColor(0.5,0.5,0.5,1)
         glDisable(GL_BLEND)
+
+class _SelectorVisualEditor(_VisualEditorBase):
+    def __init__(self,name,value,description,world,robot=None):
+        _VisualEditorBase.__init__(self,name,value,description,world)
+        self.robot = robot
+        self.lastClicked = -1
+        self.clicked = None
+        self.hovered = None
+    
+    def instructions(self):
+        return 'Right-click to toggle selection of robot links / objects in the world.\nKeyboard: < to select previous, > to select next'
+
+    def addDialogItems(self,parent,ui='qt'):
+        layout = QHBoxLayout(parent)
+        self.clearButton = QPushButton("Clear")
+        self.selectAllButton = QPushButton("Select all")
+        layout.addWidget(self.clearButton)
+        layout.addWidget(self.selectAllButton)
+        self.insertButton.clicked.connect(self.clear)
+        self.deleteButton.clicked.connect(self.selectAll)
+
+    def clear(self):
+        self.value = []
+        self.refresh()
+
+    def selectAll(self):
+        if self.robot == None:
+            #select all ids in the world
+            pass
+        else:
+            self.value = [l for l in range(self.robot.numLinks())]
+        self.refresh()        
+
+    def click_world(self,x,y):
+        """Helper: returns a list of world objects sorted in order of
+        increasing distance."""
+        #get the viewport ray
+        (s,d) = self.click_ray(x,y)
+
+        #run the collision tests
+        collided = []
+        for g in self.collider.geomList:
+            (hit,pt) = g[1].rayCast(s,d)
+            if hit:
+                dist = vectorops.dot(vectorops.sub(pt,s),d)
+                collided.append((dist,g[0]))
+        if len(collided) == 0:
+            return
+        id = collided[0][1].getID()
+        if id in self.value:
+            self.value.remove(id)
+        else:
+            self.value.append(id)
+        self.lastClicked = id
+        self.refresh()
+
+    def click_robot(self,x,y):
+        """Helper: returns a list of robot objects sorted in order of
+        increasing distance."""
+        #get the viewport ray
+        (s,d) = self.click_ray(x,y)
+
+        #run the collision tests
+        collided = []
+        for l in range(self.robot.numLinks()):
+            (hit,pt) = self.robot.link(l).geometry().rayCast(s,d)
+            if hit:
+                dist = vectorops.dot(vectorops.sub(pt,s),d)
+                collided.append((dist,l))
+        if len(collided) == 0:
+            return
+        id = collided[0][1]
+        if id in self.value:
+            self.value.remove(id)
+        else:
+            self.value.append(id)
+        self.lastClicked = id
+        self.refresh()
+
+
+    def mousefunc(self,button,state,x,y):
+        if button==1 and state==0:
+            if self.robot == None:
+                self.click_world(x,y)
+            else:
+                self.click_robot(x,y)
+            return True
+        return _VisualEditorBase.mousefunc(self,button,state,x,y)
+    
+    def keyboardfunc(self,c,x,y):
+        if c==',' or c=='<':
+            if self.lastClicked >= 0:
+                self.lastClicked -= 1
+            if self.lastClicked >= 0:
+                if self.lastClicked not in self.value:
+                    self.value.append(self.lastClicked)
+                else:
+                    self.value.remove(self.lastClicked)
+            self.refresh()
+            return True
+        elif c=='.' or c=='>':
+            Nmax = (self.robot.numLinks() if self.robot else self.world.numIDs())
+            if self.lastClicked < Nmax:
+                self.lastClicked += 1
+            if self.lastClicked < Nmax:
+                if self.lastClicked not in self.value:
+                    self.value.append(self.lastClicked)
+                else:
+                    self.value.remove(self.lastClicked)
+            self.refresh()
+            return True
+
+    def display(self):
+        #Override display handler to highlight selected links
+        if self.world != None:
+            for i in xrange(self.world.numTerrains()):
+                self.world.terrain(i).drawGL()
+            for i in xrange(self.world.numRigidObjects()):
+                self.world.rigidObject(i).drawGL()
+            for i in xrange(self.world.numRobots()):
+                self.world.robot(i).drawGL()
+        elif self.robot != None:
+            self.robot.drawGL()
+        glDisable(GL_BLEND)
+
 
 class _PointVisualEditor(_VisualEditorBase):
     def __init__(self,name,value,description,world,frame=None):
@@ -656,9 +808,8 @@ def console_edit(name,value,type,description=None,world=None,frame=None):
     elif choice=='q':
         return False,None
 
-_editTemporaryWorlds = {}
 
-def edit(name,value,type='auto',description=None,editor='visual',world=None,frame=None):
+def edit(name,value,type='auto',description=None,editor='visual',world=None,robot=None,frame=None):
     """Launches an editor for the given value.  Returns a pair (save,result)
     where save indicates what the user wanted to do with the edited value
     and result is the edited value."""
@@ -690,8 +841,12 @@ def edit(name,value,type='auto',description=None,editor='visual',world=None,fram
             frame = oframe
         except RuntimeError:
             try:
-                oframe = world.robot(0).link(frame)
-                frame = oframe
+                if robot != None:
+                    oframe = robot.link(frame)
+                    frame = oframe
+                else:
+                    oframe = world.robot(0).link(frame)
+                    frame = oframe
             except RuntimeError:
                 try:
                     oframe = world.terrain(frame)
@@ -700,13 +855,17 @@ def edit(name,value,type='auto',description=None,editor='visual',world=None,fram
                     raise RuntimeError('Named frame "'+frame+'" is not a valid frame')
     if value==None:
         if type == 'Config':
-            if world==None:
-                raise RuntimeError("Cannot visually edit a Config resource without a world")
-            value = world.robot(0).getConfig()
+            if world==None and robot==None:
+                raise RuntimeError("Cannot visually edit a Config resource without a world/robot")
+            if robot==None:
+                robot = world.robot(0)
+            value = robot.getConfig()
         elif type == 'Configs':
-            if world==None:
-                raise RuntimeError("Cannot visually edit a Configs resource without a world")
-            value = [world.robot(0).getConfig()]
+            if world==None and robot==None:
+                raise RuntimeError("Cannot visually edit a Configs resource without a world/robot")
+            if robot==None:
+                robot = world.robot(0)
+            value = [robot.getConfig()]
         elif type == 'IKGoal':
             value = IKObjective()
         elif type == 'Vector3' or type == 'Point':
@@ -722,9 +881,9 @@ def edit(name,value,type='auto',description=None,editor='visual',world=None,fram
         return console_edit(name,value,type,description,world,frame)
     elif editor == 'visual':
         if type == 'Config':
-            return _launch(_ConfigVisualEditor(name,value,description,world))
+            return _launch(_ConfigVisualEditor(name,value,description,world,robot))
         elif type == 'Configs':
-            return _launch(_ConfigsVisualEditor(name,value,description,world))
+            return _launch(_ConfigsVisualEditor(name,value,description,world,robot))
         elif type == 'Vector3' or type == 'Point':
             if isinstance(frame,(RigidObjectModel,RobotModelLink)):
                 frame = frame.getTransform()

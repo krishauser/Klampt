@@ -5,6 +5,8 @@ from klampt import *
 from klampt.glprogram import *
 import importlib
 from klampt.simlog import *
+from klampt.simulation import *
+
 
 class MyGLViewer(GLRealtimeProgram):
     def __init__(self,world):
@@ -14,11 +16,10 @@ class MyGLViewer(GLRealtimeProgram):
         #the current example creates a collision class, simulator, 
         #simulation flag, and screenshot flags
         self.collider = robotcollide.WorldCollider(world)
-        self.sim = Simulator(world)
+        self.sim = SimpleSimulator(world)
         #contact feedback is enabled, needed to detect penetration situations
         self.sim.enableContactFeedbackAll()
         self.simulate = False
-        self.controllers = []
         self.forceApplicationMode = False
         
         #this is the controller time step.  The internal simulation time step
@@ -40,28 +41,7 @@ class MyGLViewer(GLRealtimeProgram):
         #Put your display handler here
         #the current example draws the simulated world in grey and the
         #commanded configurations in transparent green
-        self.sim.updateWorld()
-        self.world.drawGL()
-
-        #draw commanded configurations in transparent green
-        for i in xrange(self.world.numRobots()):
-            r = self.world.robot(i)
-            mode = self.sim.controller(i).getControlType()
-            if mode == "PID":
-                q = self.sim.controller(i).getCommandedConfig()
-                r.setConfig(q)
-                for j in range(r.numLinks()):
-                    r.link(j).appearance().setColor(0,1,0,0.5)
-                r.drawGL()
-                for j in range(r.numLinks()):
-                    r.link(j).appearance().setColor(0.5,0.5,0.5,1)
-        glDisable(GL_BLEND)
-
-        #draw controller
-        self.sim.updateWorld()
-        for i in xrange(self.world.numRobots()):
-            if i >= len(self.controllers): break
-            self.controllers[i].drawGL()
+        self.sim.drawGL()
             
         #draw force springs if using
         if self.forceApplicationMode:
@@ -109,52 +89,7 @@ class MyGLViewer(GLRealtimeProgram):
             self.draw_text(20,40,"Meshes penetrating, simulation may be unstable",color=[1,0,0])
 
     def control_loop(self):
-        for i in xrange(self.world.numRobots()):
-            if i >= len(self.controllers): break
-            c = self.sim.controller(i)
-            #build measurement dict
-            measurements = {'t':self.sim.getTime(),'dt':self.dt}
-            mode = self.sim.getController(i).getControlType()
-            if mode == "PID":
-                measurements['qcmd'] = c.getCommandedConfig()
-                measurements['dqcmd'] = c.getCommandedVelocity()
-
-            k = 0
-            while True:
-                s = c.getSensor(k)
-                if s.type()=='':
-                    break;
-                measurements[s.name()] = s.getMeasurements()
-                k+=1
-            """
-            #debug: print measurements
-            for (k,v) in measurements.iteritems():
-                print k,":",
-                if hasattr(v,'__iter__'):
-                    print ' '.join("%.2f"%(vi,) for vi in v)
-                else:
-                    print v
-            """
-            #compute controller output, advance
-            output = self.controllers[i].output_and_advance(**measurements)
-            #process output depending on type
-            if output==None: continue
-            defaultVals = set(['torquecmd','qcmd','dqcmd','tcmd'])
-            if 'qcmd' in output:
-                dqcmd = output['dqcmd'] if 'dqcmd' in output else [0.0]*len(output['qcmd'])
-                if 'torquecmd' in output:
-                    c.setPIDCommand(output['qcmd'],dqcmd,output['torquecmd'])
-                else:
-                    c.setPIDCommand(output['qcmd'],dqcmd)
-            elif 'dqcmd' in output:
-                assert 'tcmd' in output
-                c.setVelocityCommand(output['dqcmd'],output['tcmd'])
-            elif 'torquecmd' in output:
-                c.setTorque(output['torquecmd'])
-            for (k,v) in output.iteritems():
-                if k not in defaultVals:
-                    print "Sending command",k,v,"to low level controller"
-                    c.sendCommand(k,v)
+        pass
 
     def idle(self):
         #Put your idle loop handler here
@@ -194,12 +129,12 @@ class MyGLViewer(GLRealtimeProgram):
                 return
         GLRealtimeProgram.mousefunc(self,button,state,x,y)
         
-    def motionfunc(self,x,y):
+    def motionfunc(self,x,y,dx,dy):
         if self.forceApplicationMode:
             self.moveForceSpring(x,y)
             glutPostRedisplay()
         else:
-            GLRealtimeProgram.motionfunc(self,x,y)
+            GLRealtimeProgram.motionfunc(self,x,y,dx,dy)
 
     def moveForceSpring(self,x,y):
         self.sim.updateWorld()
@@ -236,7 +171,14 @@ class MyGLViewer(GLRealtimeProgram):
         #Put your keyboard handler here
         #the current example toggles simulation / movie mode
         print c,"pressed"
-        if c == 's':
+        if c == 'h':
+            print "************** Help **************"
+            print "s: toggle simulation"
+            print "m: toggle movie mode"
+            print "l: toggle logging"
+            print "c: toggle contact drawing"
+            print "**********************************"
+        elif c == 's':
             self.simulate = not self.simulate
             print "Simulating:",self.simulate
         elif c == 'm':
@@ -244,6 +186,10 @@ class MyGLViewer(GLRealtimeProgram):
             print "Movie mode:",self.saveScreenshots
             if self.nextScreenshotTime < self.sim.getTime():
                 self.nextScreenshotTime = self.sim.getTime()
+        elif c == 'l':
+            self.sim.toggleLogging()
+            if not self.sim.logging:
+                print "Turned off logging"
         elif c == 'c':
             self.drawContacts = not self.drawContacts
             #this is being done automatically now to detect penetration situations
@@ -302,6 +248,6 @@ if __name__ == "__main__":
                 print "Module",c.__name__,"must have a make() method"
                 raise
             controller = maker(world.robot(i))
-        viewer.controllers.append(controller)
+        viewer.sim.setController(i,controller)
     
     viewer.run()

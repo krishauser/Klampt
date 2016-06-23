@@ -793,8 +793,16 @@ Real ODERobot::GetDriverValue(int driver) const
     {
       RigidTransform T;
       GetLinkTransform(d.linkIndices[1],T);
-      FatalError("What to do with rotation?");
-      return 0;
+      Vector3 axis = robot.links[d.linkIndices[0]].w;
+      EulerAngleRotation ea;
+      ea.setMatrixZYX(T.R);
+      if(axis.x == 1) return ea.z;
+      else if(axis.y == 1) return ea.y;
+      else if(axis.z == 1) return ea.x;
+      else {
+        fprintf(stderr,"ODERobot: Invalid axis for rotation driver, simulation will likely be unstable!\n");
+        return MatrixAngleAboutAxis(T.R,axis);
+      }
     }
     break;
   case RobotJointDriver::Affine: 
