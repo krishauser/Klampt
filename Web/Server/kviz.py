@@ -69,6 +69,38 @@ def add_ghost(prefixname="ghost",robot=0):
 	_RPC.append({'type':'add_ghost','object':target_name,'prefix_name':prefixname})
 	return prefixname+target_name
 
+def get_robot_config(robot=0):
+	global _world,_namedItems
+	robot = _world.robot(robot)	
+	q = robot.getConfig()
+	return q
+
+def set_ghost_config(q,prefixname="ghost",robot=0):
+	global _world,_namedItems
+	robot = _world.robot(robot)	
+
+	q_original = robot.getConfig()
+
+	assert len(q) == robot.numLinks(),"Config must be correct size"
+	robot.setConfig(q)
+
+	for i in range(robot.numLinks()):
+		T = robot.link(i).getTransform()
+		p = robot.link(i).getParent()
+
+		if p>=0:
+			Tp = robot.link(p).getTransform()
+  			T = se3.mul(se3.inv(Tp),T)
+
+		mat = se3.homogeneous(T)
+  		#mat is now a 4x4 homogeneous matrix 
+
+  		name = prefixname+robot.link(i).getName()
+  		#send to the ghost link with name "name"...
+		_RPC.append({'type':'set_position','object':name,'matrix':[mat[0][0],mat[0][1],mat[0][2],mat[0][3],mat[1][0],mat[1][1],mat[1][2],mat[1][3],mat[2][0],mat[2][1],mat[2][2],mat[2][3],mat[3][0],mat[3][1],mat[3][2],mat[3][3]]})
+
+	robot.setConfig(q_original) #restore original config
+
 
 #def add_config(q,color=(0,1,0,0.5),name="ghost",robot=0):
 #	"""Draws the configuration q using a ghosted robot.  Multiple ghosted
