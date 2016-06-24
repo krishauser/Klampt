@@ -106,7 +106,7 @@
       
             editor.setTheme("ace/theme/eclipse"); 
             editor.getSession().setMode("ace/mode/python");
-            editor.getSession().setValue("nextTime = 1\ntoggle = 0\ndef init(robot_model):\n    global ghost\n    ghost=kviz.add_ghost('myGhost')\n    kviz.set_color(ghost,[1,0,0,0.25],True);\n\ndef control_loop(t,controller):\n    global nextTime, toggle\n    if t >= nextTime:\n        q = controller.getCommandedConfig()\n        q[8] -= 0.5\n        controller.setMilestone(q)\n        nextTime += 1.0\n        ");
+            editor.getSession().setValue("nextTime = 1\ntoggle = 0\ndef init(robot_model):\n    global ghost\n    ghost=kviz.add_ghost('myGhost')\n    kviz.set_color(ghost,[1,0,0,0.25],True)\n    q=kviz.get_robot_config()\n    q[8]-=2.0\n    kviz.set_ghost_config(q,'myGhost')\n\ndef control_loop(t,controller):\n    global nextTime, toggle\n    if t >= nextTime:\n        q = controller.getCommandedConfig()\n        q[8] -= 0.5\n        controller.setMilestone(q)\n        nextTime += 1.0\n        ");
  
             //var editor = CodeMirror( document.getElementById("editor"), { //use codemirror as text editor
             //value: "print 'hello world'\n",
@@ -357,6 +357,21 @@
                                  child.name=prefix+child.name;
                               } );
                   }
+               }
+               if(request.type == "set_position")
+               {                 
+                  console.log("got a set_position RPC request for: " + request.object);
+                  var object = scene.getObjectByName(request.object, true );
+                  if(object != null)
+                  {            
+                    object.matrixAutoUpdate=false;
+                    object.matrixWorldNeedsUpdate=true;
+                  
+                    var m=request.matrix;     
+                    object.matrix.set(m[0],m[1],m[2],m[3],m[4],m[5],m[6],m[7],m[8],m[9],m[10],m[11],m[12],m[13],m[14],m[15]);
+                  } 
+                  else
+                     console.log("  couldn't find object: " + request.object);
                }
             }
             var t2 = performance.now();
