@@ -135,6 +135,13 @@ def set_ghost_config(q,prefixname="ghost",robot=0):
 #	_set_path(path,{'text':text,'position':[x,y],'color':color,'size':size})
 #	_namedItems[('text',name)] = path
 #
+
+def add_text(name="HUD_Text1",x=0,y=0,text=""):
+	_RPC.append({'type':'add_text','name':name,'x':x,'y':y,'text':text})	
+
+def update_text(name="HUD_Text1",text=""):
+	_RPC.append({'type':'update_text','name':name,'text':text})	
+
 #def remove_text(name="_"):
 #	"""Deletes the drawing of the given text"""
 #	global _world,_namedItems
