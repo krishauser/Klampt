@@ -106,7 +106,7 @@
       
             editor.setTheme("ace/theme/eclipse"); 
             editor.getSession().setMode("ace/mode/python");
-            editor.getSession().setValue("nextTime = 1\ntoggle = 0\ndef init(robot_model):\n    global ghost\n    ghost=kviz.add_ghost('myGhost')\n    kviz.set_color(ghost,[1,0,0,0.25],True)\n    q=kviz.get_robot_config()\n    q[8]-=2.0\n    kviz.set_ghost_config(q,'myGhost')\n\ndef control_loop(t,controller):\n    global nextTime, toggle\n    if t >= nextTime:\n        q = controller.getCommandedConfig()\n        q[8] -= 0.5\n        controller.setMilestone(q)\n        nextTime += 1.0\n        ");
+            editor.getSession().setValue("nextTime = 1\ntoggle = 0\ndef init(robot_model):\n    global ghost\n    ghost=kviz.add_ghost('myGhost')\n    kviz.set_color(ghost,[1,0,0,0.25],True)\n    q=kviz.get_robot_config()\n    q[8]-=2.0\n    kviz.set_ghost_config(q,'myGhost')\n    kviz.add_text('HUD1',1,1)\n    kviz.update_text('HUD1','hello world')\n\ndef control_loop(t,controller):\n    global nextTime, toggle\n    if t >= nextTime:\n        q = controller.getCommandedConfig()\n        q[8] -= 0.5\n        controller.setMilestone(q)\n        nextTime += 1.0\n        ");
  
             //var editor = CodeMirror( document.getElementById("editor"), { //use codemirror as text editor
             //value: "print 'hello world'\n",
@@ -141,7 +141,7 @@
                 controls.dynamicDampingFactor = 0.3;
                 controls.keys = [ 65, 83, 68 ];
             controls.addEventListener( 'change', render );   
-                
+                         
             onWindowResize();
             animate();       
          });
@@ -372,6 +372,28 @@
                   } 
                   else
                      console.log("  couldn't find object: " + request.object);
+               }
+               if(request.type == "add_text")
+               {
+                        
+                  var text2 = document.createElement('div');
+                  text2.style.position = 'absolute';
+                  text2.id=request.name;
+                  //text2.style.zIndex = 1;    // if you still don't see the label, try uncommenting this
+                  //text2.style.width = 100;
+                  //text2.style.height = 100;
+                  //text2.style.backgroundColor = "blue";
+                  if(request.text!=null)
+                     text2.innerHTML = request.text;
+                     
+                  text2.style.top = request.x + '%';
+                  text2.style.left = request.y + '%';
+                  document.getElementById("canvas").appendChild(text2);
+               }
+               if(request.type == "update_text")
+               {
+                  var text2 = document.getElementById(request.name);
+                  text2.innerHTML = request.text;
                }
             }
             var t2 = performance.now();
