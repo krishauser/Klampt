@@ -5,6 +5,7 @@
 #include "floatarrayframe.h"
 #include "holdframe.h"
 #include "stanceframe.h"
+#include "qrobotposegui.h"
 
 #include <QSettings>
 #include <QDebug>
@@ -101,6 +102,7 @@ void ResourceFrame::onResourceEdit()
   }
   ui->treeWidget->updateProperties(item);
   ui->treeWidget->updateDecorator(item);
+  gui->backend->SendRefresh();
 }
 
 bool ResourceFrame::doBackup(QTreeWidgetItem* it)
@@ -205,14 +207,17 @@ void ResourceFrame::ChangeSelectedItem(QTreeWidgetItem* it){
   }
   manager->selected = ui->treeWidget->itemToNode(it);
 
-  //attempt backup if selected
-  if(manager->selected->IsDirty()) {
-    doBackup(it);
-  }
+  if(manager->selected) {
+    //attempt backup if selected
+    if(manager->selected->IsDirty()) {
+      doBackup(it);
+    }
 
-  updateConvertBox(manager->selected->resource);
-  updateSelectedResourcePane(manager->selected->resource);
-  updateToFromPoser(manager->selected->resource);
+    updateConvertBox(manager->selected->resource);
+    updateSelectedResourcePane(manager->selected->resource);
+    updateToFromPoser(manager->selected->resource);
+  }
+  gui->backend->SendRefresh();
 }
 
 void ResourceFrame::PressedDelete(){

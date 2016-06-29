@@ -14,8 +14,35 @@
 using namespace std;
 using namespace Math3D;
 
-///Warning, the space's and manifold's in traj.path.segments will be
-///bogus pointers
+/** @brief Completely interpolates, optimizes, and time-scales the
+ * given MultiPath to satisfy its contact constraints.
+ *
+ * Arguments
+ * - robot: the robot
+ * - path: the MultiPath containing the milestones / stances of the motion
+ * - interpTol: the tolerance that must be met for contact constraints for the
+ *   interpolated path.
+ * - numdivs: the number of grid points used for time-scaling
+ * - traj (out): the output timed trajectory. (Warning, the spaces and manifolds in
+ *   traj.path.segments will be bogus pointers.)
+ * - torqueRobustness: a parameter in [0,1] determining the robustness margin 
+ *   added to the torque constraint.  The robot's torques are scaled by a factor
+ *   of (1-torqueRobustness).
+ * - frictionRobustness: a parameter in [0,1] determinining the robustness margin
+ *   added to the friction constraint.  The friction coefficients are scaled by
+ *   a factor of (1-frictionRobustness).  Helps the path avoid slipping.
+ * - forceRobustness: a minimum normal contact force that must be applied
+ *   *at each contact point* (in Newtons).  Helps the trajectory avoid contact
+ *   separation.
+ * - savePath: if true, saves the interpolated MultiPath to disk.
+ * - saveConstraints: if true, saves the time scaling convex program constraints
+ *   to disk.
+ * 
+ * Return value is true if interpolation / time scaling was successful.
+ * Failure indicates that the milestones could not be interpolated, or 
+ * the path is not dynamically feasible.  For example, the milestones or
+ * interpolated path might violate stability constraints.
+ */
 bool ContactOptimizeMultipath(Robot& robot,const MultiPath& path,
 			      Real interpTol,int numdivs,
 			      TimeScaledBezierCurve& traj,
@@ -108,9 +135,9 @@ public:
     (*this)["xtol"]=0.05;
     (*this)["ignoreForces"]=false;
     (*this)["torqueRobustness"]=0.0;
+    (*this)["frictionRobustness"]=0;
     //(*this)["frictionRobustness"]=0.25;
     (*this)["forceRobustness"]=0.5;
-    (*this)["frictionRobustness"]=0;
     //(*this)["forceRobustness"]=0;
     //(*this)["forceRobustness"]=5;
     (*this)["outputPath"] = string("trajopt.path");

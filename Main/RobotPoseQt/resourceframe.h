@@ -5,7 +5,6 @@
 #include <QFileDialog>
 #include <QTreeWidgetItem>
 
-#include <Interface/GenericGUI.h>
 #include <Modeling/Resources.h>
 //#include <qresourcetreemodel.h>
 
@@ -15,6 +14,7 @@
 namespace Ui {
   class ResourceFrame;
 }
+
 
 class ResourceFrame : public QFrame
 {

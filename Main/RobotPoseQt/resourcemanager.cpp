@@ -234,8 +234,25 @@ bool ResourceTree::SaveFolder(const string& path)
 
 ResourceNodePtr ResourceTree::Add(ResourcePtr r,ResourceNodePtr parent)
 {
-  if(parent)
+  vector<SmartPointer<ResourceNode> >& siblings = (parent ? parent->children : topLevel);
+  int samenamecount = 0;
+  string origName = r->name;
+  if(r->name[r->name.length()-1] == ']') {
+    //look at base name
+    size_t pos = r->name.rfind('[');
+    if(pos!=string::npos)
+      origName = r->name.substr(0,pos);
+  }
+  for(size_t i=0;i<siblings.size();i++) 
+    if(r->name == siblings[i]->resource->name) {
+      samenamecount++;
+      char buf[64];
+      sprintf(buf,"[%d]",samenamecount+1);
+      r->name = origName + buf;
+    }
+  if(parent) {
     return parent->AddChild(r);
+  }
   else {
     topLevel.push_back(new ResourceNode(r));
     library.Add(r);
@@ -247,13 +264,13 @@ ResourceNodePtr ResourceTree::Add(ResourcePtr r,ResourceNodePtr parent)
 
 void ResourceTree::Delete(ResourceNode* r){
   if(r->parent == NULL) { //top level
+    library.Erase(r->resource);
     int index = ChildIndex(r);
     if(index < 0)
       fprintf(stderr,"ResourceTree::Delete: inconsistency found, resource %s has no parent but is not in topLevel list\n",r->Identifier().c_str());
     assert(index >= 0);
     assert(index < (int)topLevel.size());
     topLevel.erase(topLevel.begin()+index);
-    library.Erase(r->resource);
   }
   else {
     int index = ChildIndex(r);
