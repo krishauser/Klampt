@@ -19,6 +19,7 @@ WorldGUIBackend::~WorldGUIBackend()
 
 bool WorldGUIBackend::OnIdle()
 {
+  bool res = GLNavigationBackend::OnIdle();
   if(ROSNumSubscribedTopics() > 0) {
     if(ROSSubscribeUpdate()) {
       //need to refresh appearances
@@ -36,7 +37,7 @@ bool WorldGUIBackend::OnIdle()
   }
   else
     SendPauseIdle();
-  return true;
+  return res;
 }
 
 bool WorldGUIBackend::OnCommand(const string& cmd,const string& args)
