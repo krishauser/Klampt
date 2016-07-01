@@ -153,7 +153,6 @@ void ViewRobot::DrawLink_Local(int i,bool keepAppearance)
     GLDraw::GeometryAppearance& a = Appearance(i);
     if(a.geom != robot->geometry[i])
       a.Set(*robot->geometry[i]);
-    printf("Color on %d: %p %g %g %g\n",i,&a,a.faceColor.rgba[0],a.faceColor.rgba[1],a.faceColor.rgba[2]);
     a.DrawGL();
   }
   else 
