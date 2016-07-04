@@ -2173,6 +2173,13 @@ class RobotModel(_object):
         """
         return _robotsim.RobotModel_interpolate_deriv(self, *args)
 
+    def randomizeConfig(self, unboundedScale=1.0):
+        """
+        randomizeConfig(RobotModel self, double unboundedScale=1.0)
+        randomizeConfig(RobotModel self)
+        """
+        return _robotsim.RobotModel_randomizeConfig(self, unboundedScale)
+
     def selfCollisionEnabled(self, *args):
         """
         selfCollisionEnabled(RobotModel self, int link1, int link2) -> bool

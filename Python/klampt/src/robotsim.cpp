@@ -6,6 +6,7 @@
 #include "Control/PathController.h"
 #include "Control/FeedforwardController.h"
 #include "Control/LoggingController.h"
+#include "Planning/RobotCSpace.h"
 #include "Simulation/WorldSimulation.h"
 #include "Modeling/Interpolate.h"
 #include "IO/XmlWorld.h"
@@ -2406,6 +2407,26 @@ bool RobotModel::selfCollides()
   return false;
   */
   return robot->SelfCollision();
+}
+
+void RobotModel::randomizeConfig(double unboundedStdDeviation)
+{
+  RobotCSpace space(*robot);
+  space.Sample(robot->q);
+  for(size_t i=0;i<robot->joints.size();i++)
+    if(robot->joints[i].type == RobotJoint::Floating) {
+      int base = robot->joints[i].baseIndex;
+      robot->q[base] *= unboundedStdDeviation;
+      robot->q[base+1] *= unboundedStdDeviation;
+      robot->q[base+2] *= unboundedStdDeviation;
+    }
+    else if(robot->joints[i].type == RobotJoint::FloatingPlanar) {
+      int base = robot->joints[i].baseIndex;
+      robot->q[base] *= unboundedStdDeviation;
+      robot->q[base+1] *= unboundedStdDeviation;
+    }
+  robot->UpdateFrames();
+  robot->UpdateGeometry();
 }
 
 void RobotModel::drawGL(bool keepAppearance)
