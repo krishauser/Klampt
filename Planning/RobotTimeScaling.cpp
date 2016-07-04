@@ -353,7 +353,7 @@ bool InterpolateConstrainedMultiPath(Robot& robot,const MultiPath& path,vector<G
     //see if the resolution is high enough to just interpolate directly
     Real res=path.settings.as<Real>("resolution");
     if(res <= xtol) {
-      printf("Direct interpolating trajectory with res %g\n",res);
+      printf("InterpolateConstrainedMultiPath: Direct interpolating trajectory with res %g\n",res);
       //just interpolate directly
       RobotCSpace space(robot);
       RobotGeodesicManifold manifold(robot);
@@ -380,7 +380,7 @@ bool InterpolateConstrainedMultiPath(Robot& robot,const MultiPath& path,vector<G
       return true;
     }
   }
-  printf("Discretizing constrained trajectory at res %g\n",xtol);
+  printf("InterpolateConstrainedMultiPath: Discretizing constrained trajectory at res %g\n",xtol);
 
   RobotCSpace cspace(robot);
   RobotGeodesicManifold manifold(robot);
@@ -397,7 +397,7 @@ bool InterpolateConstrainedMultiPath(Robot& robot,const MultiPath& path,vector<G
     for(size_t j=0;j<stanceConstraints[i+1].size();j++) {
       bool res=AddGoalNonredundant(stanceConstraints[i+1][j],transitionConstraints[i]);
       if(!res) {
-	fprintf(stderr,"Conflict between goal %d of stance %d and stance %d\n",j,i+1,i);
+	fprintf(stderr,"InterpolateConstrainedMultiPath: Conflict between goal %d of stance %d and stance %d\n",j,i+1,i);
 	fprintf(stderr,"  Link %d\n",stanceConstraints[i+1][j].link);
 	return false;
       }
@@ -468,12 +468,14 @@ bool InterpolateConstrainedMultiPath(Robot& robot,const MultiPath& path,vector<G
       //Note: discretizeSpline will fill in the spline durations
     }
     else {
+      printf("Trying MultiSmoothInterpolate...\n");
       RobotSmoothConstrainedInterpolator interp(robot,stanceConstraints[i]);
+      interp.ftol = xtol*gConstraintToleranceScale;
       interp.xtol = xtol;
       if(!MultiSmoothInterpolate(interp,path.sections[i].milestones,dxprev,dxnext,paths[i])) {
 	/** TEMP - test no inter-section smoothing**/
 	//if(!MultiSmoothInterpolate(interp,path.sections[i].milestones,paths[i])) {
-	fprintf(stderr,"Unable to interpolate section %d\n",i);
+	fprintf(stderr,"InterpolateConstrainedMultiPath: Unable to interpolate section %d\n",i);
 	return false;
       }
     }
