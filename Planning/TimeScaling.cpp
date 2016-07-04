@@ -196,7 +196,7 @@ bool GetActiveBounds(Vector2& l,Vector2& u,const Vector& ax,const Vector& ay,con
   fill(active.begin(),active.end(),false);
   l = u = pts[0];
   for(size_t i=0;i<pts.size();i++) {
-    if(ids[i] >= 0)
+    if(ids[i] >= 0) 
       active[ids[i]]=true;
     if(pts[i].x < l.x) l.x = pts[i].x;
     else if(pts[i].x > u.x) u.x = pts[i].x;
@@ -246,6 +246,14 @@ public:
 
   //debugging
   void CheckSolution();
+  //after solving,  gets the list of velocity^2 variables that are at their velocity limits, 
+  //and the list of constraints active for each of the segments.  In other words, the i'th entry of
+  //activeSegmentConstraints is a list of constraint indices on segment i.  The constraint index is
+  //in the range 0,...,Nc where Nc is the number of constraints on that segment (not the LP)
+  void GetLimitingConstraints(vector<int>& velocityLimitedVariables,vector<vector<int> >& activeSegmentConstraints);
+  //after solving, gets the list of lagrange multipliers for the velocity^2 limits and each of the
+  //segments' constraints
+  void GetLagrangeMultipliers(vector<double>& velocityLimits,vector<vector<double> >& segmentConstraints);
 
   const vector<Real>& paramdivs;
   LinearProgram_Sparse lp;
@@ -258,13 +266,22 @@ public:
 };
 
 ///Given a grid and a list of constraint normals and offsets in the ds2-dds
-///plane, solves for the time scaling of the given trajectory (traj.path
-///is assumed given, and the remaining members are filled in.)
+///plane, solves for the time scaling of the given trajectory 
+///
+///Each constraint is given at a particular time of the parameter vector
+///
+///traj.path is assumed given, but its remaining members are filled in by the
+///sime scaling
+///
+///if variableLagrangeMultipliers and constraintLagrangeMultipliers are given,
+///the lagrange multipliers are returned on success.
 bool SolveSLP(const vector<Real>& paramDivs,
 	      const vector<Real>& dsmaxs,
 	      const vector<vector<Vector2> >& ds2ddsConstraintNormals,
 	      const vector<vector<Real> >& ds2ddsConstraintOffsets,
-	      TimeScaledBezierCurve& traj)
+	      TimeScaledBezierCurve& traj,
+        vector<Real>* variableLagrangeMultipliers=NULL,
+        vector<vector<Real > >* constraintLagrangeMultipliers=NULL)
 {
   Assert(ds2ddsConstraintNormals.size()==paramDivs.size());
   Assert(ds2ddsConstraintOffsets.size()==paramDivs.size());
@@ -273,8 +290,13 @@ bool SolveSLP(const vector<Real>& paramDivs,
     slp.SetVelBound(i,dsmaxs[i]);
   int numTotalConstraints = 0;
   for(size_t i=0;i+1<paramDivs.size();i++) {
-    int nc=ds2ddsConstraintNormals[i].size();
-    if(i+2 < paramDivs.size())
+    //find the coefficients of the pair ds^2[i], ds^2[i+1]
+    //the start of the interval is constrained by ds2dds[i] and
+    //uses the values of ds^2[i], dds[i] = f(ds^2[i], ds^2[i+1])
+    //the end of the interval is constrained by ds2dds[i+1] and is affected by 
+    //ds^2[i+1] and dds[i]  = f(ds^2[i], ds^2[i+1])
+    int nc = ds2ddsConstraintNormals[i].size();
+    if(i+2<paramDivs.size())
       nc += ds2ddsConstraintNormals[i+1].size();
     Vector ai(nc),an(nc),b(nc);
     int k=0;
@@ -285,7 +307,7 @@ bool SolveSLP(const vector<Real>& paramDivs,
       b(k) = ds2ddsConstraintOffsets[i][j];
     }
     if(i+2 < paramDivs.size()) {
-      Real scale = 0.5/(paramDivs[i+2]-paramDivs[i+1]);
+      //Real scale = 0.5/(paramDivs[i+1]-paramDivs[i]);
       for(size_t j=0;j<ds2ddsConstraintNormals[i+1].size();j++,k++) {
 	ai(k) = -ds2ddsConstraintNormals[i+1][j].y*scale;
 	an(k) = ds2ddsConstraintNormals[i+1][j].x + ds2ddsConstraintNormals[i+1][j].y*scale;
@@ -299,7 +321,10 @@ bool SolveSLP(const vector<Real>& paramDivs,
     for(int j=0;j<nc;j++)
       slp.AddVel2Bound(i,ai[j],an[j],b[j]);
     */
-    slp.AddVel2Bounds(i,ai,an,b);
+    if(!slp.AddVel2Bounds(i,ai,an,b)) {
+      printf("SLP bounds were found to be infeasible on segment %d\n",i);
+      return false;
+    }
 
     /*
     cout<<i<<" vmax "<<dsmaxs[i]<<endl;
@@ -337,6 +362,10 @@ bool SolveSLP(const vector<Real>& paramDivs,
   traj.pathSegments[0] = 0;
   for(size_t i=0;i<traj.path.durations.size();i++)
     traj.pathSegments[i+1] = traj.pathSegments[i]+traj.path.durations[i];
+
+  if(variableLagrangeMultipliers && constraintLagrangeMultipliers) {
+    slp.GetLagrangeMultipliers(*variableLagrangeMultipliers,*constraintLagrangeMultipliers);
+  }
   return true;
 }
 
@@ -352,6 +381,48 @@ TimeScalingSLP::TimeScalingSLP(const vector<Real>& _paramdivs)
   ds.resize(n+1,0.0);
   T = Inf;
 }
+
+void TimeScalingSLP::GetLimitingConstraints(vector<int>& velocityLimitedVariables,vector<vector<int> >& activeSegmentConstraints)
+{
+  int n=(int)ds.size()-1;
+  velocityLimitedVariables.resize(0);
+  activeSegmentConstraints.resize(n);
+  for(int i=0;i<=n;i++) {
+    if(!glpk.GetVariableBasic(i)) {
+      velocityLimitedVariables.push_back(i);
+    }
+  }
+  for(int i=0;i<n;i++) {
+    activeSegmentConstraints[i].resize(0);
+    int cfirst=segToConstraints[i].first;
+    int cend=segToConstraints[i].second;
+    for(int c=cfirst;c<cend;c++) {
+      if(glpk.GetRowBasic(c) == false) {
+        activeSegmentConstraints[i].push_back(c-cfirst);
+      }
+    }
+  }
+}
+
+
+void TimeScalingSLP::GetLagrangeMultipliers(vector<double>& velocityLimits,vector<vector<double> >& segmentConstraints)
+{
+  int n=(int)ds.size()-1;
+  velocityLimits.resize(n+1);
+  segmentConstraints.resize(n);
+  for(int i=0;i<=n;i++) {
+    velocityLimits[i] = glpk.GetVariableDual(i);
+  }
+  for(int i=0;i<n;i++) {
+    int cfirst=segToConstraints[i].first;
+    int cend=segToConstraints[i].second;
+    segmentConstraints[i].resize(cend-cfirst);
+    for(int c=cfirst;c<cend;c++) {
+      segmentConstraints[i][c-cfirst] = glpk.GetRowDual(c);
+    }
+  }
+}
+
 
 void TimeScalingSLP::CheckSolution()
 {
@@ -424,8 +495,7 @@ bool TimeScalingSLP::AddVel2Bounds(int i,const Vector& Ai,const Vector& An,const
 
   /*
   //TEMP: test no pruning
-  for(int num=0;num<Ai.n;num++)
-    nonredundant[num]=true;
+  fill(nonredundant.begin(),nonredundant.end(),true);
   */
   
   int nactive = 0;
@@ -600,12 +670,12 @@ bool TimeScalingSLP::Solve(int& maxIters,Real xtol,Real ftol)
       //found a feasible solution -- test convergence
       Real xdist = x.distance(xnext);
       if(xdist < xtol) {
-	if(T < Told)
+	if(T < Told-ftol)
 	  x = xnext;
 	else 
 	  ComputeObjective(x);
 	maxIters = numIters;
-	printf("SLP step %d converged on x, dist %g with time %g\n",numIters,xdist,T);
+	printf("SLP step %d converged on x and f, dist %g, delta %g with time %g\n",numIters,xdist,Told-T,T);
 	return true;
       }
 
@@ -613,6 +683,11 @@ bool TimeScalingSLP::Solve(int& maxIters,Real xtol,Real ftol)
       if(feasible) {
 	//check if the step reduces the objective value; if so, increase the TR
 	if(T <= Told) {
+    if(T >= Told-ftol) {
+      maxIters = numIters;
+      printf("SLP step %d converged on f, delta %g with time %g\n",numIters,Told-T,T);
+      return true;
+    }
 	  printf("SLP step %d size %g changed time from %g to %g\n",numIters,trustRegionSize,Told,T);
 	  //printf("Distance %g\n",xdist);
 	  trustRegionSize *= 1.5;
@@ -761,6 +836,11 @@ bool TimeScalingSLP::SolveCustom(ScalarFieldFunction* f,int& maxIters,Real xtol,
       if(feasible) {
 	//check if the step reduces the objective value; if so, increase the TR
 	if(T <= Told) {
+    if(T >= Told-ftol) {
+      maxIters = numIters;
+      printf("SLP step %d converged on f, delta %g with time %g\n",numIters,Told-T,T);
+      return true;
+    }
 	  printf("SLP step %d size %g changed time from %g to %g\n",numIters,trustRegionSize,Told,T);
 	  //printf("Distance %g\n",xdist);
 	  trustRegionSize *= 1.5;
@@ -1459,7 +1539,9 @@ bool TimeScaling::SolveMinTime(const Vector& vmin,const Vector& vmax,
 			       const vector<Real>& paramdivs,
 			       const vector<Vector>& dxMins,const vector<Vector>& dxMaxs,
 			       const vector<Vector>& ddxMins,const vector<Vector>& ddxMaxs,
-			       Real ds0,Real dsEnd)
+			       Real ds0,Real dsEnd,
+             vector<pair<int,int> >* velocityLimitedVariables,
+             vector<pair<int,int> >* accelerationLimitedSegments)
 {
   Assert(paramdivs.size() == dxMins.size()+1);
   Assert(paramdivs.size() == dxMaxs.size()+1);
@@ -1557,6 +1639,9 @@ bool TimeScaling::SolveMinTime(const Vector& vmin,const Vector& vmax,
       //a2.x * x[i] + b2.y *x[i+1] >= abnd.x
       //a2.y * x[i] + b2.x *x[i+1] <= abnd.y
       //a2.y * x[i] + b2.y *x[i+1] <= abnd.y
+      //NOTE: if both a and b coefficients are positive for >= constraints, or both are negative for a <=
+      //constraint, then the constraint is automatically guaranteed.  However, this makes it a bit more
+      //difficult to identify the segment / dof from an indexed constraint.
       Ai[num] = -a1.x; An[num] = -b1.x; bi[num] = -abnd.x; num++;
       Ai[num] = -a1.y; An[num] = -b1.x; bi[num] = -abnd.x; num++;
       Ai[num] = a1.x; An[num] = b1.y; bi[num] = abnd.y; num++;
@@ -1575,7 +1660,7 @@ bool TimeScaling::SolveMinTime(const Vector& vmin,const Vector& vmax,
       */
     }
     if(!slp.AddVel2Bounds(i,Ai,An,bi)) {
-      printf("Error setting bounds on segment %d\n",i);
+      cout<<"Error setting bounds on segment "<<i<<endl;
       cout<<slp.lp.l(i)<<"<= x[i] <= "<<slp.lp.u(i)<<endl;
       cout<<slp.lp.l(i+1)<<"<= x[i+1] <= "<<slp.lp.u(i+1)<<endl;
       for(int j=0;j<Ai.n;j++)
@@ -1585,7 +1670,7 @@ bool TimeScaling::SolveMinTime(const Vector& vmin,const Vector& vmax,
   }
   cout<<dxMins.size()<<" segments, "<<d<<" dimensions, "<<slp.lp.A.m<<" constraints"<<endl;
 
-  printf("Reduced %d constraints to %d\n",dxMins.size()*d*8,slp.lp.A.m);
+  printf("Reduced %d constraints to %d\n",(int)dxMins.size()*d*8,slp.lp.A.m);
 
   int maxIters = SLP_SOLVE_ITERS;
   bool res = slp.Solve(maxIters);
@@ -1752,6 +1837,45 @@ bool TimeScaling::SolveMinTime(const Vector& vmin,const Vector& vmax,
   }
   */
   }
+  if(velocityLimitedVariables != NULL || accelerationLimitedSegments != NULL) {
+    vector<int> limitingVariables;
+    vector<vector<int> > segmentLimits;
+    slp.GetLimitingConstraints(limitingVariables,segmentLimits);
+    if(velocityLimitedVariables) {
+      velocityLimitedVariables->resize(0);
+      for(size_t k=0;k<limitingVariables.size();k++) {
+        int param = limitingVariables[k];
+        int dim=-1;
+        Real dsmax = Inf;
+        int i=param;
+        for(int j=0;j<d;j++) {
+          if(dxMaxs[i][j] >= 0 && dxMins[i][j] <= 0) continue;
+          Real dsj = Max(vmax[j]/dxMaxs[i][j],vmin[j]/dxMins[i][j]);
+          if(dsj < dsmax) {
+            dim = j;
+            dsmax = dsj;
+          }
+        }
+        velocityLimitedVariables->push_back(pair<int,int>(param,dim));
+      }
+    }
+    if(accelerationLimitedSegments) {
+      accelerationLimitedSegments->resize(0);
+      vector<bool> dofLimited(d);
+      for(size_t i=0;i<segmentLimits.size();i++) {
+        fill(dofLimited.begin(),dofLimited.end(),false);
+        for(size_t j=0;j<segmentLimits[i].size();j++) {
+          int k=segmentLimits[i][j];
+          assert(k < d*8);
+          dofLimited[k/8] = true;
+        }
+        for(int j=0;j<d;j++) {
+          if(dofLimited[j])
+            accelerationLimitedSegments->push_back(pair<int,int>((int)i,j));
+        }
+      }
+    }
+  }
   return res;
 }
 
@@ -1856,7 +1980,7 @@ bool TimeScaling::SolveMinTime(const Vector& vmin,const Vector& vmax,
     int cprev = slp.lp.A.m;
     bool res=slp.AddVel2Bounds(i,Ai,An,bi);
     if(!res) {
-      printf("LP was found to be infeasible on segment %d\n",i);
+      printf("LP was found to be infeasible on segment %d\n",(int)i);
       //printf("Infeasible LP!\n");
       //getchar();
       return false;
@@ -2682,8 +2806,74 @@ void TimeScaledBezierCurve::Plot(const char* fn,const Vector& vmin,const Vector&
 
 
 CustomTimeScaling::CustomTimeScaling(Robot& robot)
-  :cspace(robot),manifold(robot)
+  :cspace(robot),manifold(robot),saveConstraintNames(false),computeLagrangeMultipliers(false)
 {
+}
+
+bool CustomTimeScaling::IsFeasible(const vector<Real>& ds) const
+{
+  if(ds.empty())
+    FatalError("CustomTimeScaling::IsCurrentFeasible: trajectory time scaling is empty");
+  if(ds.size() != paramDivs.size())
+    FatalError("CustomTimeScaling::IsCurrentFeasible: trajectory time scaling has inappropriate size %d != %d",ds.size(),paramDivs.size());
+  Vector dx,ddx;
+  bool res = true;
+  const char* name = "";
+  Real minMargin = Inf;
+  for(size_t i=0;i<paramDivs.size();i++) {
+    if(ds[i] < 0 || ds[i] > dsmax[i]) {
+      printf("CustomTimeScaling::IsCurrentFeasible: velocity %d exceeds bound %g > %g\n",i,ds[i],dsmax[i]);
+      //return false;
+      res = false;
+    }
+    else {
+      minMargin = Min(minMargin,dsmax[i]-ds[i]);
+      minMargin = Min(minMargin,ds[i]);
+    }
+    if(i+1<paramDivs.size()) {
+      Real a = 0.5*(Sqr(ds[i+1])-Sqr(ds[i]))/(paramDivs[i+1]-paramDivs[i]);
+      Vector2 ds2dds(Sqr(ds[i]),a);
+      for(size_t j=0;j<ds2ddsConstraintNormals[i].size();j++) {
+        if(ds2ddsConstraintNormals[i][j].dot(ds2dds) > ds2ddsConstraintOffsets[i][j] + Epsilon) {
+          if(!ds2ddsConstraintNames.empty()) name = ds2ddsConstraintNames[i][j].c_str();
+          printf("CustomTimeScaling::IsCurrentFeasible: start acceleration on segment %d exceeds bound %d %s: %g*%g + %g*%g = %g <= %g\n",i,j,name,
+            ds2dds.x,ds2ddsConstraintNormals[i][j].x,
+            ds2dds.y,ds2ddsConstraintNormals[i][j].y,
+            ds2dds.dot(ds2ddsConstraintNormals[i][j]),
+            ds2ddsConstraintOffsets[i][j]);
+          //return false;
+          getchar();
+          res = false;
+        }
+        else {
+          minMargin = Min(minMargin,ds2ddsConstraintOffsets[i][j] - ds2ddsConstraintNormals[i][j].dot(ds2dds));
+        }
+      }
+    }
+    if(i > 0) {
+      Real a = 0.5*(Sqr(ds[i])-Sqr(ds[i-1]))/(paramDivs[i]-paramDivs[i-1]);
+      Vector2 ds2dds(Sqr(ds[i]),a);
+      for(size_t j=0;j<ds2ddsConstraintNormals[i].size();j++) {
+        if(ds2ddsConstraintNormals[i][j].dot(ds2dds) > ds2ddsConstraintOffsets[i][j] + Epsilon) {
+          if(!ds2ddsConstraintNames.empty()) name = ds2ddsConstraintNames[i][j].c_str();
+          printf("CustomTimeScaling::IsCurrentFeasible: end acceleration on segment %d exceeds bound %d %s: %g*%g + %g*%g = %g <= %g\n",i,j,name,
+            ds2dds.x,ds2ddsConstraintNormals[i][j].x,
+            ds2dds.y,ds2ddsConstraintNormals[i][j].y,
+            ds2dds.dot(ds2ddsConstraintNormals[i][j]),
+            ds2ddsConstraintOffsets[i][j]);
+          //return false;
+          getchar();
+          res = false;
+        }
+        else {
+          minMargin = Min(minMargin,ds2ddsConstraintOffsets[i][j] - ds2ddsConstraintNormals[i][j].dot(ds2dds));
+        }
+      }
+    }
+  }
+  printf("CustomTimeScaling::IsFeasible: Minimum margin is %g\n",minMargin);
+  return res;
+  return true;
 }
 
 void CustomTimeScaling::SetPath(const GeneralizedCubicBezierSpline& path,const vector<Real>& paramDivs)
@@ -2799,6 +2989,7 @@ void CustomTimeScaling::SetPath(const MultiPath& path,const vector<Real>& paramD
 
   ds2ddsConstraintNormals.resize(paramDivs.size());
   ds2ddsConstraintOffsets.resize(paramDivs.size());
+  if(saveConstraintNames) ds2ddsConstraintNames.resize(paramDivs.size());
   dsmax.resize(paramDivs.size());
   fill(dsmax.begin(),dsmax.end(),Inf);
 
@@ -2853,14 +3044,55 @@ void CustomTimeScaling::SetDefaultBounds()
       ds2ddsConstraintOffsets[i].push_back(amax[j]);
       ds2ddsConstraintNormals[i].push_back(Vector2(-ddx,-dx));
       ds2ddsConstraintOffsets[i].push_back(amax[j]);
+      if(saveConstraintNames) {
+        stringstream ss;
+        ss<<"amax_"<<j;
+        ds2ddsConstraintNames[i].push_back(ss.str());
+      }
+      if(saveConstraintNames) {
+        stringstream ss;
+        ss<<"amin_"<<j;
+        ds2ddsConstraintNames[i].push_back(ss.str());
+      }
     }
   }
 }
 
 bool CustomTimeScaling::Optimize()
 {
-  return SolveSLP(paramDivs,dsmax,ds2ddsConstraintNormals,ds2ddsConstraintOffsets,traj);
+  if(computeLagrangeMultipliers)
+    return SolveSLP(paramDivs,dsmax,ds2ddsConstraintNormals,ds2ddsConstraintOffsets,traj,&variableLagrangeMultipliers,&constraintLagrangeMultipliers);
+  else
+    return SolveSLP(paramDivs,dsmax,ds2ddsConstraintNormals,ds2ddsConstraintOffsets,traj);
 }
 
-
-
+void CustomTimeScaling::PrintActiveConstraints(ostream& out)
+{
+  if(!computeLagrangeMultipliers) {
+    printf("CustomTimeScaling: Warning, have to re-solve to get lagrange multipliers.\n");
+    computeLagrangeMultipliers = true;
+    Optimize();
+  }
+  if(traj.timeScaling.ds.empty()) {
+    printf("CustomTimeScaling: Warning, haven't solved yet, or no feasible prior solution.\n");
+    Optimize();
+  }
+  if(traj.timeScaling.ds.empty()) {
+    out<<"Infeasible problem"<<endl;
+    return;
+  }
+  out<<"Active constraints:"<<endl;
+  if(variableLagrangeMultipliers[0] != 0) 
+    out<<paramDivs[0]<<": "<<"vmax"<<endl;
+  for(size_t i=0;i<constraintLagrangeMultipliers.size();i++) {
+    for(size_t j=0;j<constraintLagrangeMultipliers[i].size();j++) {
+      if(constraintLagrangeMultipliers[i][j] != 0) {
+        out<<"["<<paramDivs[i]<<","<<paramDivs[i+1]<<"]: ";
+        if(!ds2ddsConstraintNames.empty()) out<<ds2ddsConstraintNames[i][j]<<endl;
+        else out<<"constraint_"<<j<<endl;
+      }
+    }
+    if(variableLagrangeMultipliers[i+1] != 0)
+      out<<paramDivs[i+1]<<": "<<"vmax"<<endl;
+  }
+}

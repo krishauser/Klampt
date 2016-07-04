@@ -1,4 +1,5 @@
 #include "ContactTimeScaling.h"
+#include "ZMP.h"
 #include <KrisLibrary/robotics/NewtonEuler.h>
 #include <KrisLibrary/robotics/TorqueSolver.h>
 #include <KrisLibrary/optimization/LinearProgram.h>
@@ -9,9 +10,25 @@ using namespace Optimization;
 
 #define TEST_NO_CONTACT 0
 
+
+
 ZMPTimeScaling::ZMPTimeScaling(Robot& robot)
   :CustomTimeScaling(robot)
 {
+}
+
+void ZMPTimeScaling::SetParams(const MultiPath& path,const vector<Real>& colocationParams,
+          const vector<Vector2>& supportPoly,Real groundHeight)
+{
+  Assert(path.sections.size()==1);
+  vector<ConvexPolygon2D> sps(1);
+  sps[0].vertices = supportPoly;
+  if(!sps[0].isValid()) {
+    FatalError("Convex hull must be given in CCW order\n");
+  }
+  vector<Real> groundHeights(1);
+  groundHeights[0] = groundHeight;
+  SetParams(path,colocationParams,sps,groundHeights);
 }
 
 void ZMPTimeScaling::SetParams(const MultiPath& path,const vector<Real>& paramDivs,const vector<ConvexPolygon2D>& supportPolys,const vector<Real>& groundHeights)
@@ -25,25 +42,9 @@ void ZMPTimeScaling::SetParams(const MultiPath& path,const vector<Real>& paramDi
   CustomTimeScaling::SetDefaultBounds();
   CustomTimeScaling::SetStartStop();
   NewtonEulerSolver ne(robot);
-  Real mtotal = robot.GetTotalMass();
-  Vector zero(robot.links.size(),0.0);
   for(size_t i=0;i<xs.size();i++) {
-    robot.UpdateConfig(xs[i]);
-    robot.dq = dxs[i];
-    Vector3 cm = robot.GetCOM();
-    Vector3 dcm0,ddcm0;
-    ne.CalcLinkAccel(zero);
-    dcm0.setZero();
-    ddcm0.setZero();
-    for(size_t j=0;j<ne.velocities.size();j++) {
-      Vector3 cmofs = robot.links[j].T_World.R*robot.links[j].com;
-      Vector3 vcmj = ne.velocities[j].v + cross(ne.velocities[j].w,cmofs);
-      Vector3 acmj = ne.accelerations[j].v + cross(ne.accelerations[j].w,cmofs) + cross(ne.velocities[j].w,cross(ne.velocities[j].w,cmofs));
-      dcm0 += robot.links[j].mass*vcmj;
-      ddcm0 += robot.links[j].mass*acmj;
-    }
-    dcm0 /= mtotal;
-    ddcm0 /= mtotal;
+    Vector3 cm,dcm0,ddcm0;
+    GetCOMDerivs(robot,xs[i],dxs[i],ddxs[i],cm,dcm0,ddcm0,ne);
     int s = paramSections[i];
     //ZMP.x = cm.x - (cm.z - groundHeights[s])/9.8 * ddcm.x 
     //ZMP.y = cm.y - (cm.z - groundHeights[s])/9.8 * ddcm.y
@@ -52,17 +53,20 @@ void ZMPTimeScaling::SetParams(const MultiPath& path,const vector<Real>& paramDi
     Plane2D p;
     for(size_t j=0;j<supportPolys[s].vertices.size();j++) {
       supportPolys[s].getPlane(j,p);
-      //p.normal.x * ZMP.x + p.normal.y * ZMP.y >= p.offset
-      //p.normal.x * (cm.x - ddcmScale * ddcm.x ) + p.normal.y * (cm.y - ddcmScale * ddcm.y ) >= p.offset
-      //p.normal.x * ZMP.x + p.normal.y * ZMP.y >= p.offset
-      //p.normal.x * (cm.x - ddcmScale * ddcm.x ) + p.normal.y * (cm.y - ddcmScale * ddcm.y ) >= p.offset
-      //(p.normal.x * ddcmScale * ddcm0.x - p.normal.y * ddcmScale * ddcm0.y)*ds2 
-      //  + (p.normal.x * ddcmScale * dcm0.x + p.normal.y * ddcmScale * dcm0.y)*dds 
-      //  <= -p.offset + p.normal.x * cm.x + p.normal.y * cm.y)
-      Real ds2term = p.normal.x * ddcmScale * ddcm0.x - p.normal.y * ddcmScale * ddcm0.y;
-      Real ddsterm = p.normal.x * ddcmScale * dcm0.x - p.normal.y * ddcmScale * dcm0.y;
+      //p.normal.x * ZMP.x + p.normal.y * ZMP.y <= p.offset
+      //p.normal.x * (cm.x - ddcmScale * ddcm.x ) + p.normal.y * (cm.y - ddcmScale * ddcm.y ) <= p.offset
+      //(-p.normal.x * ddcmScale * ddcm0.x - p.normal.y * ddcmScale * ddcm0.y)*ds2 
+      //  + (-p.normal.x * ddcmScale * dcm0.x - p.normal.y * ddcmScale * dcm0.y)*dds 
+      //  <= p.offset - p.normal.x * cm.x - p.normal.y * cm.y)
+      Real ds2term = - p.normal.x * ddcmScale * ddcm0.x - p.normal.y * ddcmScale * ddcm0.y;
+      Real ddsterm = - p.normal.x * ddcmScale * dcm0.x - p.normal.y * ddcmScale * dcm0.y;
       ds2ddsConstraintNormals[i].push_back(Vector2(ds2term,ddsterm));
-      ds2ddsConstraintOffsets[i].push_back(- p.offset + p.normal.x * cm.x + p.normal.x * cm.y);
+      ds2ddsConstraintOffsets[i].push_back(p.offset - p.normal.x * cm.x - p.normal.y * cm.y);
+      if(saveConstraintNames) {
+        stringstream ss;
+        ss<<"sp_"<<s<<"_"<<j;
+        ds2ddsConstraintNames[i].push_back(ss.str());
+      }
     }
   }
 }
@@ -105,6 +109,16 @@ void TorqueTimeScaling::SetParams(const MultiPath& path,const vector<Real>& colo
       ds2ddsConstraintOffsets[i].push_back(tmax-c(j));
       ds2ddsConstraintNormals[i].push_back(Vector2(-b(j),-a(j)));
       ds2ddsConstraintOffsets[i].push_back(tmax+c(j));
+      if(saveConstraintNames) {
+        stringstream ss;
+        ss<<"tmax_"<<j;
+        ds2ddsConstraintNames[i].push_back(ss.str());
+      }
+      if(saveConstraintNames) {
+        stringstream ss;
+        ss<<"tmin_"<<j;
+        ds2ddsConstraintNames[i].push_back(ss.str());
+      }
     }
   }
 }
@@ -280,6 +294,11 @@ bool ContactTimeScaling::SetParams(const MultiPath& path,const vector<Real>& par
     for(size_t j=0;j<poly.planes.size();j++) {
       ds2ddsConstraintNormals[i][j] = poly.planes[j].normal;
       ds2ddsConstraintOffsets[i][j] = poly.planes[j].offset;
+      if(saveConstraintNames) {
+        stringstream ss;
+        ss<<"projected_constraint_plane_"<<j;
+        ds2ddsConstraintNames[i].push_back(ss.str());
+      }
     }
   }
   //done!
