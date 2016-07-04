@@ -29,6 +29,10 @@ class CustomTimeScaling
   void SetDefaultBounds();
   ///Runs the optimizer with the custom constraints
   bool Optimize();
+  ///Returns true if the time scaling derivatives are feasible under the current constraints
+  bool IsFeasible(const vector<Real>& ds) const;
+  ///After running Optimize, prints out all the active constraints 
+  void PrintActiveConstraints(ostream& out);
 
   RobotCSpace cspace;
   RobotGeodesicManifold manifold;
@@ -47,6 +51,20 @@ class CustomTimeScaling
   ///(squared-rate, acceleration) plane
   vector<vector<Vector2> > ds2ddsConstraintNormals;
   vector<vector<Real> > ds2ddsConstraintOffsets;
+  ///Names of each constraint plane
+  bool saveConstraintNames;
+  vector<vector<string> > ds2ddsConstraintNames;
+
+  ///Whether the lagrange multipliers of a solution are requested
+  bool computeLagrangeMultipliers;
+  ///Lagrange multipliers for each velocity^2 variable's velocity^2 limit.
+  ///Gives the amount by which the execution time would be reduced if the
+  ///velocity^2 limit is increased.
+  vector<Real> variableLagrangeMultipliers;
+  ///Lagrange multipliers for each constraint plane.  Gives the amount by
+  ///which the execution time would be reduced if the constraint plane is
+  ///shifted outward.
+  vector<vector<Real> > constraintLagrangeMultipliers;
 };
 
 /** @brief A time scaling with torque constraints |t| <= tmax.
@@ -87,8 +105,12 @@ class ZMPTimeScaling : public CustomTimeScaling
 {
  public:
   ZMPTimeScaling(Robot& robot);
+  ///Sets a multi-stance ZMP optimization problem
   void SetParams(const MultiPath& path,const vector<Real>& colocationParams,
-		 const vector<ConvexPolygon2D>& supportPolys,const vector<Real>& groundHeights);
+     const vector<ConvexPolygon2D>& supportPolys,const vector<Real>& groundHeights);
+  ///1-stance convenience version of the above
+  void SetParams(const MultiPath& path,const vector<Real>& colocationParams,
+		 const vector<Vector2>& supportPoly,Real groundHeight=0);
 
   ///double-check whether the solution is actually feasible
   bool Check(const MultiPath& path);
