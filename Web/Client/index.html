@@ -51,15 +51,34 @@
          var editor;
          var visPanel;
          var freeRun=false;
+         var localStorageAvailable=false;
+         var localStorage;
+         
+         function storageAvailable()
+         {
+            try {
+               localStorage = window['localStorage'],
+                  x = '__storage_test__';
+               localStorage.setItem(x, x);
+               localStorage.removeItem(x);
+               return true;
+            }
+            catch(e) {
+               console.log("looks like storage is not setup: " + e);
+               return false;
+            }
+         }        
                  
          function doCodeSubmit()
          {
             var textArea=document.getElementById("myTextarea");
             textArea.value="> ";
              
-            sendCode();
-         
-         
+            if(localStorageAvailable)
+            {
+             localStorage.setItem('KlamptExample1', editor.getValue());           
+            }
+            sendCode();     
          }
          function requestStop()
          {
@@ -77,6 +96,9 @@
      
          $( document ).ready(function() {
             console.log("page is ready, lets setup some stuff");
+            console.log("first testing if local storage is available");
+            localStorageAvailable=storageAvailable();
+            console.log("  local storage test determined: " + localStorageAvailable);
  
             var pstyle = 'background-color: #F5F6F7; border: 1px solid #dfdfdf; padding: 5px;';
             $('#myLayout').w2layout({
@@ -106,8 +128,18 @@
       
             editor.setTheme("ace/theme/eclipse"); 
             editor.getSession().setMode("ace/mode/python");
+            
             editor.getSession().setValue("nextTime = 1\ntoggle = 0\ndef init(robot_model):\n    global ghost\n    ghost=kviz.add_ghost('myGhost')\n    kviz.set_color(ghost,[1,0,0,0.25],True)\n    q=kviz.get_robot_config()\n    q[8]-=2.0\n    kviz.set_ghost_config(q,'myGhost')\n    kviz.add_text('HUD1',1,1)\n    kviz.update_text('HUD1','hello world')\n\ndef control_loop(t,controller):\n    global nextTime, toggle\n    if t >= nextTime:\n        q = controller.getCommandedConfig()\n        q[8] -= 0.5\n        controller.setMilestone(q)\n        nextTime += 1.0\n        ");
- 
+            
+            if(localStorageAvailable) //lets see if we have worked on this previously
+            {
+               var example1Text=localStorage.getItem('KlamptExample1');
+               if(example1Text!=null)
+               {
+                  editor.getSession().setValue(example1Text);
+               }
+            }
+                       
             //var editor = CodeMirror( document.getElementById("editor"), { //use codemirror as text editor
             //value: "print 'hello world'\n",
             //mode:  "python",
