@@ -274,7 +274,7 @@ inline MyController* MakeController(Robot* robot)
   ManualOverrideController* lc=new ManualOverrideController(*robot,MakeDefaultController(robot));
   return lc;
 }
-inline PolynomialMotionQueue* GetMotionQueue(RobotController* controller)
+inline PolynomialPathController* GetPathController(RobotController* controller)
 {
   MyController* mc=dynamic_cast<MyController*>(controller);
   if(!mc) {
@@ -287,6 +287,10 @@ inline PolynomialMotionQueue* GetMotionQueue(RobotController* controller)
   FeedforwardController* ffc=dynamic_cast<FeedforwardController*>((RobotController*)lc->base);
   PolynomialPathController* pc=dynamic_cast<PolynomialPathController*>((RobotController*)ffc->base);
   return pc;
+}
+inline PolynomialMotionQueue* GetMotionQueue(RobotController* controller)
+{
+  return GetPathController(controller);
 }
 
 
@@ -3412,8 +3416,33 @@ bool SimRobotController::setSetting(const std::string& name,const std::string& v
   return controller->controller->SetSetting(name,val);
 }
 
+void EnablePathControl(RobotController* c)
+{
+  MyController* mc=dynamic_cast<MyController*>(c);
+  if(!mc) {
+    throw PyException("Not using the default manual override controller");
+  }
+  mc->override = false;
+  PolynomialPathController* pc = GetPathController(c);
+  if(pc->path.elements.empty()) {
+    Config q;
+    if(mc->GetCommandedConfig(q)) {
+      pc->SetConstant(q);
+    }
+    else {
+      if(mc->GetSensedConfig(q)) {
+        pc->SetConstant(q);
+      }
+      else {
+        fprintf(stderr,"First simulation cycle: the path controller needs to read from the encoders before motion commands can be issued\n");
+      }
+    }
+  }
+}
+
 void SimRobotController::setMilestone(const vector<double>& q)
 {
+  EnablePathControl(sim->sim->robotControllers[index]);
   Config qv(controller->robot->links.size(),&q[0]);
   stringstream ss;
   ss<<qv;
@@ -3422,6 +3451,7 @@ void SimRobotController::setMilestone(const vector<double>& q)
 
 void SimRobotController::setMilestone(const vector<double>& q,const vector<double>& dq)
 {
+  EnablePathControl(sim->sim->robotControllers[index]);
   Config qv(controller->robot->links.size(),&q[0]);
   Config dqv(controller->robot->links.size(),&dq[0]);
   stringstream ss;
@@ -3432,6 +3462,7 @@ void SimRobotController::setMilestone(const vector<double>& q,const vector<doubl
 
 void SimRobotController::addMilestone(const vector<double>& q)
 {
+  EnablePathControl(sim->sim->robotControllers[index]);
   Config qv(controller->robot->links.size(),&q[0]);
   stringstream ss;
   ss<<qv;
@@ -3440,6 +3471,7 @@ void SimRobotController::addMilestone(const vector<double>& q)
 
 void SimRobotController::addMilestoneLinear(const vector<double>& q)
 {
+  EnablePathControl(sim->sim->robotControllers[index]);
   Config qv(controller->robot->links.size(),&q[0]);
   stringstream ss;
   ss<<qv;
@@ -3448,29 +3480,34 @@ void SimRobotController::addMilestoneLinear(const vector<double>& q)
 
 void SimRobotController::setLinear(const std::vector<double>& q,double dt)
 {
+  EnablePathControl(sim->sim->robotControllers[index]);
   PolynomialMotionQueue* mq = GetMotionQueue(controller->controller);
   mq->Cut(0);
   mq->AppendLinear(q,dt);
 }
 void SimRobotController::setCubic(const std::vector<double>& q,const std::vector<double>& v,double dt)
 {
+  EnablePathControl(sim->sim->robotControllers[index]);
   PolynomialMotionQueue* mq = GetMotionQueue(controller->controller);
   mq->Cut(0);
   mq->AppendCubic(q,v,dt);
 }
 void SimRobotController::addLinear(const std::vector<double>& q,double dt)
 {
+  EnablePathControl(sim->sim->robotControllers[index]);
   PolynomialMotionQueue* mq = GetMotionQueue(controller->controller);
   mq->AppendLinear(q,dt);
 }
 void SimRobotController::addCubic(const std::vector<double>& q,const std::vector<double>& v,double dt)
 {
+  EnablePathControl(sim->sim->robotControllers[index]);
   PolynomialMotionQueue* mq = GetMotionQueue(controller->controller);
   mq->AppendCubic(q,v,dt);
 }
 
 void SimRobotController::addMilestone(const vector<double>& q,const vector<double>& dq)
 {
+  EnablePathControl(sim->sim->robotControllers[index]);
   Config qv(controller->robot->links.size(),&q[0]);
   Config dqv(controller->robot->links.size(),&dq[0]);
   stringstream ss;
@@ -3480,6 +3517,7 @@ void SimRobotController::addMilestone(const vector<double>& q,const vector<doubl
 
 void SimRobotController::setVelocity(const vector<double>& dq,double dt)
 {
+  EnablePathControl(sim->sim->robotControllers[index]);
   Config qv(controller->robot->links.size(),&dq[0]);
   stringstream ss;
   ss<<dt<<"\t"<<qv;
