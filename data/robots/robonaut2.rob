@@ -284,3 +284,8 @@ noselfcollision 5 6
 noselfcollision 6 73 
 noselfcollision 16 36 16 37 
 noselfcollision 48 54 48 68 48 69 
+#added 7/7/2016
+noselfcollision 6 9 
+noselfcollision 11 13 
+noselfcollision 43 45 
+
