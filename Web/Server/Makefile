@@ -1,6 +1,6 @@
 TARGETS=WebServer
 #-fPIC
-CXXFLAGS +=  -w -fpermissive -Wwrite-strings
+CXXFLAGS += -O3 -w -fpermissive -Wwrite-strings
 CC=g++
 
 CXXFLAGS += $(shell python2.7-config --includes)

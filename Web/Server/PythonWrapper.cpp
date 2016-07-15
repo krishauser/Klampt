@@ -127,14 +127,6 @@ void initialize_python_interpreter()
   
   Py_InitModule("emb", EmbMethods); //setup embedded methods
   Py_InitModule("log", logMethods); //setup stdio capture  
-}
-
-void handleIncomingMessage(string message)
-{
-   printf("received incoming message!\n"); 
-
-   if(message.size()>1) //TODO, actually have prefix to route message
-      PyRun_SimpleString(message.c_str());
 
    printf("running boilerplate code\n"); //TODO, allow client to specify boiler plate
    std::string boiler_plate=load_file("boilerplate1.py");
@@ -150,6 +142,20 @@ void handleIncomingMessage(string message)
    }
    else
       printf("  We weren't able to properly load the boiler plate\n");
+}
+
+void shutdown_python_interpreter()
+{
+   printf("Shutting down Python interpreter\n");
+   Py_Finalize();
+}
+
+void handleIncomingMessage(string message)
+{
+   printf("received incoming message!\n"); 
+
+   if(message.size()>1) //TODO, actually have prefix to route message
+      PyRun_SimpleString(message.c_str());  
 
    PyRun_SimpleString("boilerplate_advance()\n");
 }

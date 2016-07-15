@@ -220,7 +220,7 @@ void do_process_incoming(ws_ctx_t *ws_ctx)
        }        
     }
 
-    //TODO, shutdown python interpreter here
+    shutdown_python_interpreter();
 }
 
 int main(int argc, char *argv[])

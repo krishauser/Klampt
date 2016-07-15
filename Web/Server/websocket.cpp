@@ -54,6 +54,8 @@ void fatal(char *msg)
     exit(1);
 }
 
+ws_ctx_t *global_ws_ctx;
+
 /* resolve host with also IP address parsing */ 
 int resolve_host(struct in_addr *sin_addr, const char *hostname) 
 { 
@@ -265,10 +267,71 @@ int decode_hixie(char *src, size_t srclength,
     return retlen;
 }
 
+#include <vector>
+using namespace std;
+vector<unsigned char> packedMessage;
+
 void websocket_send(std::string message)
 {
-   printf("TODO: send websocket message here!");
+   printf("packing up websocket message!\n");
 
+   unsigned char out_byte=128+1; //final fragment, and text message
+   packedMessage.push_back(out_byte);
+
+   unsigned int payload_size=message.size();
+  
+   if(payload_size<126)
+   {
+      printf("  we can use the single byte to indicate payload size (%u)\n",payload_size);
+      out_byte=payload_size;
+      packedMessage.push_back(out_byte);
+   }
+   else if(payload_size<=65535)
+   {
+      printf("  going to need to represent payload size (%u) as two bytes\n",payload_size);
+
+      out_byte=126;
+      packedMessage.push_back(out_byte);
+
+      unsigned short network_order=htons(payload_size);
+      unsigned char *as_bytes=(unsigned char *)&network_order;
+
+      for(int i=0;i<2;i++)
+        packedMessage.push_back(as_bytes[i]);
+   }
+   else
+   {
+      printf("  going to need to represent payload size (%u) as 8 bytes!!\n",payload_size);
+      out_byte=127;
+      packedMessage.push_back(out_byte);
+
+      int64_t network_order=htobe64(payload_size);
+      unsigned char *as_bytes=(unsigned char *)&network_order;
+
+      for(int i=0;i<8;i++)
+      {
+         //printf("byte i: %d\n",as_bytes[i]); fflush(stdout);
+         packedMessage.push_back(as_bytes[i]);
+      }
+   }
+
+   for(int i=0;i<message.size();i++) //might be better ways to do this, hmmm
+      packedMessage.push_back(message[i]);
+
+   printf("  payload size is: %u\n",payload_size);
+   printf("  total message size is: %u\n",packedMessage.size());
+
+   unsigned int bytes_to_send=packedMessage.size();
+   unsigned char * data=&packedMessage.front();
+   unsigned int bytes_sent=0;
+
+   while(bytes_to_send>0)
+   {
+      bytes_sent+=ws_send(global_ws_ctx, data+bytes_sent, bytes_to_send);
+      bytes_to_send-=bytes_sent;
+   }
+
+   packedMessage.clear();
 }
 
 int encode_hybi(u_char const *src, size_t srclength,
@@ -818,7 +881,9 @@ void start_server() {
                 break;   // Child process exits
             }
 
+            global_ws_ctx=ws_ctx;
             settings.handler(ws_ctx);
+
             if (pipe_error) {
                 handler_emsg("Closing due to SIGPIPE\n");
             }
