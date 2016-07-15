@@ -148,3 +148,9 @@ def boilerplate_advance_no_precompute():
 	viewer.send_JSON()
 	boilerplate_frame_precomputed=False
 
+
+def init(robot_model):
+	pass
+def control_loop(t,controller):
+	pass
+

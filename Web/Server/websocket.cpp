@@ -271,9 +271,17 @@ int decode_hixie(char *src, size_t srclength,
 using namespace std;
 vector<unsigned char> packedMessage;
 
+//#define DEBUG 1
+
+#ifdef DEBUG
+   #define DEBUG_PRINT(...) printf(__VA_ARGS__);
+#else
+   #define DEBUG_PRINT(...);
+#endif
+
 void websocket_send(std::string message)
 {
-   printf("packing up websocket message!\n");
+   DEBUG_PRINT("packing up websocket message!\n");
 
    unsigned char out_byte=128+1; //final fragment, and text message
    packedMessage.push_back(out_byte);
@@ -282,13 +290,13 @@ void websocket_send(std::string message)
   
    if(payload_size<126)
    {
-      printf("  we can use the single byte to indicate payload size (%u)\n",payload_size);
+      DEBUG_PRINT("  we can use the single byte to indicate payload size (%u)\n",payload_size);
       out_byte=payload_size;
       packedMessage.push_back(out_byte);
    }
    else if(payload_size<=65535)
    {
-      printf("  going to need to represent payload size (%u) as two bytes\n",payload_size);
+      DEBUG_PRINT("  going to need to represent payload size (%u) as two bytes\n",payload_size);
 
       out_byte=126;
       packedMessage.push_back(out_byte);
@@ -301,7 +309,7 @@ void websocket_send(std::string message)
    }
    else
    {
-      printf("  going to need to represent payload size (%u) as 8 bytes!!\n",payload_size);
+      DEBUG_PRINT("  going to need to represent payload size (%u) as 8 bytes!!\n",payload_size);
       out_byte=127;
       packedMessage.push_back(out_byte);
 
@@ -315,11 +323,15 @@ void websocket_send(std::string message)
       }
    }
 
-   for(int i=0;i<message.size();i++) //might be better ways to do this, hmmm
-      packedMessage.push_back(message[i]);
+   //for(int i=0;i<message.size();i++) //might be better ways to do this, hmmm
+   //   packedMessage.push_back(message[i]);
+   const char *values=message.c_str();
+   const char* end = values + message.size();
+   packedMessage.insert(packedMessage.end(),values,end);
 
-   printf("  payload size is: %u\n",payload_size);
-   printf("  total message size is: %u\n",packedMessage.size());
+
+   DEBUG_PRINT("  payload size is: %u\n",payload_size);
+   DEBUG_PRINT("  total message size is: %u\n",packedMessage.size());
 
    unsigned int bytes_to_send=packedMessage.size();
    unsigned char * data=&packedMessage.front();

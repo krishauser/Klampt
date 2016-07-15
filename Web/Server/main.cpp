@@ -66,14 +66,22 @@ int header_length;
 unsigned char mask[4];
 int payload_size;
 
+//#define DEBUG 1
+
+#ifdef DEBUG
+   #define DEBUG_PRINT(...) printf(__VA_ARGS__);
+#else
+   #define DEBUG_PRINT(...);
+#endif
+
 
 int dave_decode_hybi()
 {
-   printf("decoding hybi\n");   
+   DEBUG_PRINT("decoding hybi\n");   
 
    if(state==0)
    {
-      printf("  Trying to process header\n");
+      DEBUG_PRINT("  Trying to process header\n");
       
       is_final_fragment=false;
       opcode=0;
@@ -81,36 +89,36 @@ int dave_decode_hybi()
 
       if(incomingMessage.size()<2) 
       {
-         printf("  need at least 2 bytes to begin processing!\n");
+         DEBUG_PRINT("  need at least 2 bytes to begin processing!\n");
          return 0;
       }
       
       if(incomingMessage[0] & 128)
       {
          is_final_fragment=true;
-         printf("    final fragment: %s\n",is_final_fragment ? "true" : "false");
+         DEBUG_PRINT("    final fragment: %s\n",is_final_fragment ? "true" : "false");
       }
       else
       {
-         printf("    detected this is not the final fragment\n");
+         DEBUG_PRINT("    detected this is not the final fragment\n");
       }
 
       opcode=incomingMessage[0] & 15; //get 4 bits   
-      printf("    opcode is: %d\n", opcode);
+      DEBUG_PRINT("    opcode is: %d\n", opcode);
       if(opcode==8)
       { 
-         printf("    connection close\n");
+         DEBUG_PRINT("    connection close\n");
          return -1;
       }
 
       if(incomingMessage[1]&128)
       {
          is_masked=true;
-         printf("    payload is masked\n");
+         DEBUG_PRINT("    payload is masked\n");
       }
       else
       {
-         printf("    payload from client to server has to be masked!\n");
+         DEBUG_PRINT("    payload from client to server has to be masked!\n");
          return -1;
       }
       
@@ -120,19 +128,19 @@ int dave_decode_hybi()
       if(psize<126)
       {
          payload_size=psize;
-         printf("    size of payload is: %d\n",payload_size);
+         DEBUG_PRINT("    size of payload is: %d\n",payload_size);
          header_length=2;
       }
       if(psize==126)
       {
          if(incomingMessage.size()<4)
          {
-            printf("    need at least 4 bytes to for next processing!\n");
+            DEBUG_PRINT("    need at least 4 bytes to for next processing!\n");
             return 0;
          }
-         printf("    message is bigger, size is defined by 2bytes\n");
+         DEBUG_PRINT("    message is bigger, size is defined by 2bytes\n");
          payload_size=(incomingMessage[2] << 8) + incomingMessage[3];
-         printf("    size of payload is: %d\n",payload_size);
+         DEBUG_PRINT("    size of payload is: %d\n",payload_size);
 
          header_length=2+2;
 
@@ -141,26 +149,26 @@ int dave_decode_hybi()
       {
          if(incomingMessage.size()<10)
          {
-            printf("  need at least 10 bytes for next processing!\n");
+            DEBUG_PRINT("  need at least 10 bytes for next processing!\n");
             return 0;
          }
-         printf("    message is real big, size is defined by 8bytes\n");
+         DEBUG_PRINT("    message is real big, size is defined by 8bytes\n");
          payload_size=(incomingMessage[2] << 56) + (incomingMessage[3] << 48) + (incomingMessage[4] << 40) + incomingMessage[5]<<32 +
                       (incomingMessage[6] << 24) + (incomingMessage[7] << 16) + (incomingMessage[8] << 8) + incomingMessage[9];
-         printf("    size of payload is: %d\n",payload_size);
+         DEBUG_PRINT("    size of payload is: %d\n",payload_size);
 
          header_length=2+8;
       }
       if(incomingMessage.size()<(header_length+4))
       {
-          printf("    need more bytes for next processing!\n");
+          DEBUG_PRINT("    need more bytes for next processing!\n");
           return 0;
       }
       
       for(int i=0;i<4;i++)
          mask[i]=incomingMessage[header_length+i];     
 
-      printf("    mask has value: %d %d %d %d\n",mask[0],mask[1],mask[2],mask[3]);
+      DEBUG_PRINT("    mask has value: %d %d %d %d\n",mask[0],mask[1],mask[2],mask[3]);
 
       state=1; //finished getting all data out of header
    }
@@ -168,11 +176,11 @@ int dave_decode_hybi()
    {
       if(incomingMessage.size()<header_length+4+payload_size)
       {
-         printf("  need more bytes to process payload");
+         DEBUG_PRINT("  need more bytes to process payload");
          return 0; 
       }
       
-      printf("  processing payload (size=%d)\n",payload_size);
+      DEBUG_PRINT("  processing payload (size=%d)\n",payload_size);
  
       for(unsigned int i=0;i<payload_size;i++)
       {
@@ -182,13 +190,19 @@ int dave_decode_hybi()
 
       if(is_final_fragment)
       {
-         printf("    final unpacked message is:\n=============================\n%s\n=============================\n",unpackedMessage.c_str());
+         DEBUG_PRINT("    final unpacked message is:\n=============================\n%s\n=============================\n",unpackedMessage.c_str());
          handleIncomingMessage(unpackedMessage); //hand over to python wrapper
       }
       incomingMessage.erase (incomingMessage.begin(),incomingMessage.begin()+header_length+4+payload_size);
-
+            
       state=0;
+
+      if(incomingMessage.size()>0) 
+      {
+         return 1;
+      }
    }
+   return 0;
 }
 
 void do_process_incoming(ws_ctx_t *ws_ctx)
@@ -197,24 +211,26 @@ void do_process_incoming(ws_ctx_t *ws_ctx)
 
     while (1)
     {
-       unsigned int bytes = ws_recv(ws_ctx, ws_ctx->tin_buf, BUFSIZE-1);
-       if (bytes <= 0) {
-          handler_emsg("client closed connection\n");
+       ssize_t bytes_read = ws_recv(ws_ctx, ws_ctx->tin_buf, BUFSIZE-1);
+       if (bytes_read <= 0) {
+          handler_emsg("client closed connection (ws_recv return %d bytes)\n",bytes_read);
           break;
        }
+       printf("received %d bytes from client!\n",bytes_read);
 
-       for(unsigned int i=0;i<bytes;i++)
+       for(unsigned int i=0;i<bytes_read;i++)
           incomingMessage.push_back(ws_ctx->tin_buf[i]);
            
-       int len=0;
+       int more_processing_needed=1;
        if (ws_ctx->hybi) {            
-          len = dave_decode_hybi();
+          while(more_processing_needed==1)
+              more_processing_needed=dave_decode_hybi();
        } else {
           printf("can't decode hixi\n");
           break;
        }
             
-       if (len < 0) {
+       if (more_processing_needed < 0) {
           handler_emsg("decoding error\n");
           break;
        }        

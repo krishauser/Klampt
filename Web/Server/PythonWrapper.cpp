@@ -67,7 +67,7 @@ PyObject* log_CaptureStdout(PyObject* self, PyObject* args)
    if(PyString_Check(a))
    {
       char *data=PyString_AsString(a);
-      printf("from stdout length: %ld text: %s\n",strlen(data),data);
+      printf("[python stdout] %s\n",data);
       websocket_send("C"+string(data));
    }
 
@@ -86,7 +86,7 @@ PyObject* log_CaptureStderr(PyObject* self, PyObject* args)
    if(PyString_Check(a))
    {
       char *data=PyString_AsString(a);
-      printf("from stderr length: %ld text: %s\n",strlen(data),data);
+      printf("[python stderr] %s\n",data);
       websocket_send("E"+string(data));
    }
 
@@ -109,7 +109,7 @@ std::string load_file(std::string filename)
 
   if(ifs.good()==false)
   {
-     printf("  file %s doesn't exist!\n",filename.c_str());
+     //printf("  file %s doesn't exist!\n",filename.c_str());
      return std::string("");
   }
 
@@ -127,21 +127,29 @@ void initialize_python_interpreter()
   
   Py_InitModule("emb", EmbMethods); //setup embedded methods
   Py_InitModule("log", logMethods); //setup stdio capture  
+}
 
-   printf("running boilerplate code\n"); //TODO, allow client to specify boiler plate
-   std::string boiler_plate=load_file("boilerplate1.py");
+string boilerplates[]={"boilerplate1.py","boilerplate1.py","boilerplate1.py","boilerplate1.py"};
 
-   if(boiler_plate.size()==0)
+void run_boiler_plate(int which)
+{
+   string boilerplate=boilerplates[which];
+
+   printf("  running boilerplate code\n"); //TODO, allow client to specify boiler plate
+   std::string boiler_plate=load_file(boilerplate);
+
+   if(boiler_plate.size()==0) //okay now lets try to find the file in a different place
    {
-      boiler_plate=load_file("./Web/Server/boilerplate1.py");
+      boiler_plate=load_file("./Web/Server/"+boilerplate);
    }
+
    if(boiler_plate.size()!=0)
    {
-      printf("  found the boiler plate!\n");
+      printf("    found the boiler plate!\n");
       PyRun_SimpleString(boiler_plate.c_str());
    }
    else
-      printf("  We weren't able to properly load the boiler plate\n");
+      printf("    We weren't able to properly load the boiler plate\n");
 }
 
 void shutdown_python_interpreter()
@@ -154,8 +162,24 @@ void handleIncomingMessage(string message)
 {
    printf("received incoming message!\n"); 
 
-   if(message.size()>1) //TODO, actually have prefix to route message
-      PyRun_SimpleString(message.c_str());  
+   if(message.size()>=1) //TODO, actually have prefix to route message
+   {
+      char routing=message[0];
+      message.erase(0, 1); //remove routing prefix
 
-   PyRun_SimpleString("boilerplate_advance()\n");
+      if(routing=='A')
+      {
+         printf("  user would like to advance frame\n");
+         PyRun_SimpleString("boilerplate_advance()\n");
+      }
+      if(routing=='C')
+      {  
+         printf("  user would like to add some student code\n");
+         PyRun_SimpleString(message.c_str());
+      }
+      if(routing=='B')
+      {
+         run_boiler_plate(atoi(message.c_str()));
+      }
+   }
 }
