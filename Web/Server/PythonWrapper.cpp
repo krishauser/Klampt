@@ -1,22 +1,13 @@
 // http://motion.pratt.duke.edu/klampt/tutorial_simulation.html
-#include <QtCore/QDebug>
+
 #include "PythonWrapper.h"
 #include <unistd.h> //to get sleep function TODO: not cross-platform
 #include <iostream>
 #include <fstream>
+#include <string> 
+using namespace std;
 
-
-PythonWrapper *currentServer; //this breaks thread safe-ness. will need to fork to seperate processes
-
-PythonWrapper::~PythonWrapper() {
-}
-
-PythonWrapper::PythonWrapper(int argc, char **argv)
-{
-   this->argc=argc;
-   this->argv=argv;
-}
-
+#include "websocket.h"
 
 /*
 // http://faq.cprogramming.com/cgi-bin/smartfaq.cgi?answer=1045689663&id=1043284385
@@ -49,7 +40,7 @@ static PyObject* emb_send(PyObject *self, PyObject *args)
    {
       char *data=PyString_AsString(a);
       //printf("from python got data: %s\n",data);
-      currentServer->send("S"+QString(data));
+      websocket_send("S"+string(data));
    }
 
    Py_INCREF(Py_None);
@@ -66,11 +57,6 @@ static PyMethodDef EmbMethods[] = {
 // http://www.ragestorm.net/tutorial?id=21#9
 //////////////////////////////////////////////////
 
-void PythonWrapper::send(QString message)
-{
-   emit sendData(message);
-}
-
 PyObject* log_CaptureStdout(PyObject* self, PyObject* args)
 {
    PyObject *a;
@@ -82,7 +68,7 @@ PyObject* log_CaptureStdout(PyObject* self, PyObject* args)
    {
       char *data=PyString_AsString(a);
       printf("from stdout length: %ld text: %s\n",strlen(data),data);
-      currentServer->send("C"+QString(data));
+      websocket_send("C"+string(data));
    }
 
   
@@ -101,7 +87,7 @@ PyObject* log_CaptureStderr(PyObject* self, PyObject* args)
    {
       char *data=PyString_AsString(a);
       printf("from stderr length: %ld text: %s\n",strlen(data),data);
-      currentServer->send("E"+QString(data));
+      websocket_send("E"+string(data));
    }
 
    Py_INCREF(Py_None);
@@ -133,39 +119,43 @@ std::string load_file(std::string filename)
   return content;
 }
 
-void PythonWrapper::initialize()
+void initialize_python_interpreter()
 {
   printf("Initializating python interpreter\n");
-  currentServer=this; 
   //Py_SetProgramName("KlamptWebPython");  /* optional but recommended */
   Py_Initialize();
   
   Py_InitModule("emb", EmbMethods); //setup embedded methods
-  Py_InitModule("log", logMethods); //setup stdio capture
+  Py_InitModule("log", logMethods); //setup stdio capture  
 
-  printf("running boilerplate code\n");
-  std::string boiler_plate=load_file("boilerplate1.py");
+   printf("running boilerplate code\n"); //TODO, allow client to specify boiler plate
+   std::string boiler_plate=load_file("boilerplate1.py");
 
-  if(boiler_plate.size()==0)
-  {
+   if(boiler_plate.size()==0)
+   {
       boiler_plate=load_file("./Web/Server/boilerplate1.py");
-  }
-  if(boiler_plate.size()!=0)
-  {
-     printf("  found the boiler plate!\n");
-     PyRun_SimpleString(boiler_plate.c_str());
-  }
-  else
-     printf("  We weren't able to properly load the boiler plate\n");
+   }
+   if(boiler_plate.size()!=0)
+   {
+      printf("  found the boiler plate!\n");
+      PyRun_SimpleString(boiler_plate.c_str());
+   }
+   else
+      printf("  We weren't able to properly load the boiler plate\n");
 }
 
-void PythonWrapper::incomingMessage(QString message)
+void shutdown_python_interpreter()
+{
+   printf("Shutting down Python interpreter\n");
+   Py_Finalize();
+}
+
+void handleIncomingMessage(string message)
 {
    printf("received incoming message!\n"); 
 
    if(message.size()>1) //TODO, actually have prefix to route message
-      PyRun_SimpleString(message.toStdString().c_str());
-   
-   PyRun_SimpleString("boilerplate_advance()\n");
+      PyRun_SimpleString(message.c_str());  
 
+   PyRun_SimpleString("boilerplate_advance()\n");
 }
