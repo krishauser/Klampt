@@ -39,7 +39,7 @@ Network.prototype.connect = function()
          WebSocket = MozWebSocket;
       }
 		
-      this.websocket = new WebSocket(this.URI);
+      this.websocket = new WebSocket(this.URI, ['binary','base64']);
       
       this.websocket.onopen = function(evt)
       {
