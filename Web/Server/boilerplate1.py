@@ -6,7 +6,9 @@ import time
 from klampt import *
 from klampt.webrobotprogram import *
 sys.path.append("Web/Server")
+#sys.path.append(".")
 import kviz
+#from kviz import *
 
 class StdoutCatcher:
 	def write(self, str):

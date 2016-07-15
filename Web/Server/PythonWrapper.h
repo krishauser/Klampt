@@ -1,31 +1,15 @@
 #ifndef DJZ_PYTHON_WRAPPER
 #define DJZ_PYTHON_WRAPPER
 
-#include <QObject>
+#include <string>
+using namespace std;
+
 #include <Python.h>
 
-class PythonWrapper : public QObject {
-    Q_OBJECT
- 
-public:
-    PythonWrapper(int argc, char **argv);
-    ~PythonWrapper();
+void initialize_python_interpreter();
+void shutdown_python_interpreter();
 
-    void send(QString data);
+void handleIncomingMessage(string message);
 
-public slots:
-    void initialize();
-    void incomingMessage(QString message);
-   
-signals:
-    void finished();
-    void sendData(QString data);
-    void error(QString err);
- 
-private:
-    // add your variables here
-    int argc;
-    char **argv;
-};
 
 #endif
