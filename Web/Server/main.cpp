@@ -288,10 +288,15 @@ int main(int argc, char *argv[])
     settings.daemon       = daemon;
     settings.run_once     = run_once;
 
-    if ((argc-optind) != 1) {
-        usage("Invalid number of arguments\n");
+    if(argc==1)
+    {
+        settings.listen_host[0] = '\0';
+        settings.listen_port = 1234;
+        printf("no port specified as argument. setting to default of: 1234\n");
     }
-
+    else
+    {
+    //printf("argc %d optind %d\n",argc,optind);
     found = strstr(argv[optind], ":");
     if (found) {
         memcpy(settings.listen_host, argv[optind], found-argv[optind]);
@@ -302,7 +307,9 @@ int main(int argc, char *argv[])
     }
     optind++;
     if (settings.listen_port == 0) {
-        usage("Could not parse listen_port\n");
+        printf("Could not parse listen_port\n");
+        return 0;
+    }
     }
 
     /*if (ssl_only) {
