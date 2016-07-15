@@ -1,5 +1,5 @@
 
-function Network(URI, newSceneArrivedCallback, consoleTextArrivedCallback,consoleErrorArrivedCallback)
+function Network(URI, newSceneArrivedCallback, consoleTextArrivedCallback, consoleErrorArrivedCallback)
 {
    console.log("creating new network object for websocket use");		
 
@@ -90,7 +90,7 @@ Network.prototype.connect = function()
                newSceneArrivedCallback(slicedMessage);
             if(message[0]=='C')
                consoleTextArrivedCallback(slicedMessage);      
-            if(message[0]=='E')
+            if(message[0]=='E') //console error
                consoleTextArrivedCallback(slicedMessage);      
          }
 				
