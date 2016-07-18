@@ -2394,6 +2394,12 @@ bool Robot::LoadURDF(const char* fn)
 	    default_inertia.setIdentity(); 
 	    default_inertia *= 1e-8; 
 	  }
+	  if(klampt_xml->Attribute("sensors") != NULL) {
+		  properties["sensors"] = path + klampt_xml->Attribute("sensors");
+	  }
+	  if(klampt_xml->Attribute("controller") != NULL) {
+		  properties["controller"] = path + klampt_xml->Attribute("controller");
+	  }
 	  TiXmlElement* e = klampt_xml->FirstChildElement("link");
 	  while(e != NULL) {
 	    string name;
