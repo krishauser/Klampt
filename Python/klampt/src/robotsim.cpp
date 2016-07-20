@@ -3603,6 +3603,20 @@ void SimRobotController::setPIDGains(const std::vector<double>& kP,const std::ve
   }
 }
 
+void SimRobotController::getPIDGains(std::vector<double>& kP,std::vector<double>& kI,std::vector<double>& kD)
+{
+  RobotMotorCommand& command = controller->command;
+  int size = command.actuators.size();
+  kP.resize(size, 0.0);
+  kI.resize(size, 0.0);
+  kD.resize(size, 0.0);
+  for(size_t i=0;i<command.actuators.size();i++) {
+    kP[i] = command.actuators[i].kP;
+    kI[i] = command.actuators[i].kI;
+    kD[i] = command.actuators[i].kD;
+  }
+}
+
 
 
 

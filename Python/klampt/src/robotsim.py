@@ -3440,6 +3440,10 @@ class SimRobotController(_object):
         """
         return _robotsim.SimRobotController_setPIDGains(self, *args)
 
+    def getPIDGains(self):
+        """getPIDGains(SimRobotController self)"""
+        return _robotsim.SimRobotController_getPIDGains(self)
+
     __swig_setmethods__["index"] = _robotsim.SimRobotController_index_set
     __swig_getmethods__["index"] = _robotsim.SimRobotController_index_get
     if _newclass:index = _swig_property(_robotsim.SimRobotController_index_get, _robotsim.SimRobotController_index_set)
