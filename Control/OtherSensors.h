@@ -17,11 +17,12 @@ class FilteredSensor : public SensorBase
   virtual void MeasurementNames(vector<string>& names) const;
   virtual void GetMeasurements(vector<double>& values) const;
   virtual void SetMeasurements(const vector<double>& values);
-  virtual void GetState(vector<double>& state) const;
-  virtual void SetState(const vector<double>& state);
+  virtual void GetInternalState(vector<double>& state) const;
+  virtual void SetInternalState(const vector<double>& state);
   virtual map<string,string> Settings() const;
   virtual bool GetSetting(const string& name,string& str) const;
   virtual bool SetSetting(const string& name,const string& str);
+  virtual void DrawGL(const Robot& robot,const vector<double>& measurements);
 
   SmartPointer<SensorBase> sensor;
   vector<double> measurements;
@@ -42,11 +43,12 @@ class TimeDelayedSensor : public SensorBase
   virtual void MeasurementNames(vector<string>& names) const;
   virtual void GetMeasurements(vector<double>& values) const;
   virtual void SetMeasurements(const vector<double>& values);
-  virtual void GetState(vector<double>& state) const;
-  virtual void SetState(const vector<double>& state);
+  virtual void GetInternalState(vector<double>& state) const;
+  virtual void SetInternalState(const vector<double>& state);
   virtual map<string,string> Settings() const;
   virtual bool GetSetting(const string& name,string& str) const;
   virtual bool SetSetting(const string& name,const string& str);
+  virtual void DrawGL(const Robot& robot,const vector<double>& measurements);
 
   SmartPointer<SensorBase> sensor;
   deque<vector<double> > measurementsInTransit;
