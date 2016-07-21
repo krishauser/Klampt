@@ -70,7 +70,7 @@ bool RobotViewProgram::Initialize()
   camera.dist = 10;
   viewport.n = 0.1;
   viewport.f = 100;
-  viewport.setLensAngle(DtoR(30.0));
+  viewport.setLensAngle(DtoR(60.0));
 
   
   glEnable(GL_CULL_FACE);
