@@ -19,6 +19,7 @@ class ContactSensor : public SensorBase
   virtual map<string,string> Settings() const;
   virtual bool GetSetting(const string& name,string& str) const;
   virtual bool SetSetting(const string& name,const string& str);
+  virtual void DrawGL(const Robot& robot,const vector<double>& measurements);
 
   int link;                ///< The link on which the sensor is located
   RigidTransform Tsensor;  ///< Local frame of the sensor (by convention, origin is at contact patch, z is normal to surface, into robot)
@@ -49,6 +50,7 @@ class ForceTorqueSensor : public SensorBase
   virtual map<string,string> Settings() const;
   virtual bool GetSetting(const string& name,string& str) const;
   virtual bool SetSetting(const string& name,const string& str);
+  virtual void DrawGL(const Robot& robot,const vector<double>& measurements);
 
   int link;                ///< The link on which the sensor is located (between link and parent)
   Vector3 localPos;        ///< The position of the sensor, in the local frame
