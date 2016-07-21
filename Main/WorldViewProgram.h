@@ -140,13 +140,13 @@ class WorldViewWidget : public Widget
     Ray3D r;
     viewport.getClickSource(x,y,r.source);
     viewport.getClickVector(x,y,r.direction);
-    clickedRobot = world->ClickRobot(r,body,localpt);
+    clickedRobot = world->RayCastRobot(r,body,localpt);
     if(clickedRobot) {
       Vector3 worldpt = clickedRobot->links[body].T_World*localpt;
       distance = r.direction.dot(worldpt-r.source);
     }
     Vector3 localpt2;
-    clickedObject = world->ClickObject(r,localpt2);
+    clickedObject = world->RayCastObject(r,localpt2);
     if(clickedObject) {
       Vector3 worldpt2 = clickedObject->T*localpt2;
       Real distance2 = r.direction.dot(worldpt2-r.source);      
@@ -188,7 +188,7 @@ bool WorldViewProgram::Initialize()
   camera.dist = 6;
   viewport.n = 0.1;
   viewport.f = 100;
-  viewport.setLensAngle(DtoR(30.0));
+  viewport.setLensAngle(DtoR(60.0));
 
   glEnable(GL_CULL_FACE);
   glEnable(GL_DEPTH_TEST);
@@ -208,12 +208,12 @@ void WorldViewProgram::ClickRay(int x,int y,Ray3D& r) const
 
 Robot* WorldViewProgram::ClickRobot(const Ray3D& r,int& body,Vector3& localpt) const
 {
-  return world->ClickRobot(r,body,localpt);
+  return world->RayCastRobot(r,body,localpt);
 }
 
 RigidObject* WorldViewProgram::ClickObject(const Ray3D& r,Vector3& localpt) const
 {
-  return world->ClickObject(r,localpt);
+  return world->RayCastObject(r,localpt);
 }
 
 #endif
