@@ -2,13 +2,27 @@
 #include "JointSensors.h"
 #include "ForceSensors.h"
 #include "InertialSensors.h"
+#include "VisualSensors.h"
 #include "OtherSensors.h"
 #include "Simulation/ControlledSimulator.h"
 #include "Simulation/ODESimulator.h"
+#include "Simulation/WorldSimulation.h"
 #include <KrisLibrary/utils/PropertyMap.h>
 #include <KrisLibrary/math/random.h>
+#if HAVE_GLEW
+#include <GL/glew.h>
+#else
+  #error "New GLEW to render depth cameras"
+#endif
+#include <KrisLibrary/GLdraw/drawextra.h>
+#include <KrisLibrary/GLdraw/GLView.h>
+#include <KrisLibrary/GLdraw/GLError.h>
+#include "View/ViewWrench.h"
+#include "View/ViewCamera.h"
 #include <tinyxml.h>
 #include <sstream>
+
+using namespace GLDraw;
 
 #ifdef WIN32
 static inline double round(double val) { return floor(val + 0.5); }
@@ -96,7 +110,7 @@ bool SensorBase::ReadState(File& f)
   SetMeasurements(values);
   vector<double> state;
   if(!ReadFile(f,state)) return false;
-  SetState(state);
+  SetInternalState(state);
   size_t n;
   if(!ReadFile(f,n)) return false;
   for(size_t i=0;i<n;i++) {
@@ -114,7 +128,7 @@ bool SensorBase::WriteState(File& f) const
   GetMeasurements(values);
   if(!WriteFile(f,values)) return false;
   vector<double> state;
-  GetState(state);
+  GetInternalState(state);
   if(!WriteFile(f,state)) return false;
   map<string,string> settings;
   size_t n=settings.size();
@@ -580,6 +594,46 @@ bool ContactSensor::SetSetting(const string& name,const string& str)
   return false;
 }
 
+void ContactSensor::DrawGL(const Robot& robot,const vector<double>& measurements)
+{
+  glPushMatrix();
+  glMultMatrix(Matrix4(robot.links[link].T_World));
+  glDisable(GL_LIGHTING);
+  glColor3f(1,0,0);
+  Vector3 x,y,z;
+  Tsensor.R.get(x,y,z);
+  Vector3 o = Tsensor.t;
+  if(measurements.empty() || measurements[0] == 0) {
+    drawQuad(o + patchMin.x*x + patchMin.y*y,
+      o + patchMax.x*x + patchMin.y*y,
+      o + patchMax.x*x + patchMax.y*y,
+      o + patchMin.x*x + patchMax.y*y);
+  }
+  else {
+    glBegin(GL_LINE_LOOP);
+    glVertex3v(o + patchMin.x*x + patchMin.y*y);
+    glVertex3v(o + patchMax.x*x + patchMin.y*y);
+    glVertex3v(o + patchMax.x*x + patchMax.y*y);
+    glVertex3v(o + patchMin.x*x + patchMax.y*y);
+    glEnd();
+  }
+  if(measurements.empty() || (!hasForce[0] && !hasForce[1] && !hasForce[2]))  {
+    glPopMatrix();
+    return;
+  }
+  Vector3 f(0.0);
+  int i=1;
+  if(hasForce[0]) { f.x=measurements[i]; i++; }
+  if(hasForce[1]) { f.y=measurements[i]; i++; }
+  if(hasForce[2]) { f.z=measurements[i]; i++; }
+  glColor3f(1,0.5,0);
+  glBegin(GL_LINES);
+  glVertex3v(Tsensor.t);
+  glVertex3v(Tsensor.t+f/9.8);
+  glEnd();
+  glPopMatrix();
+}
+
 ForceTorqueSensor::ForceTorqueSensor()
   :link(0),localPos(Zero),fVariance(Zero),mVariance(Zero),f(Zero),m(Zero)
 {
@@ -596,14 +650,18 @@ void ForceTorqueSensor::Simulate(ControlledRobotSimulator* robot,WorldSimulation
   Vector3 mcomw = Vector3(fb.t1[0],fb.t1[1],fb.t1[2]);
   //convert moment about link's com to moment about localpos
   //mp_w = (p-com) x f_w + mcom_w 
-  Vector3 comw = T*robot->robot->links[link].com;
-  Vector3 pw = T*localPos;
+  //Vector3 comw = T*robot->robot->links[link].com;
+  //Vector3 pw = T*localPos;
   //TEMP: is the moment measured about the joint axis?
   //Vector3 mw = cross(comw-pw,fw) + mcomw;
   Vector3 mw = mcomw;
   //convert to local frame
   T.R.mulTranspose(fw,f);
   T.R.mulTranspose(mw,m);
+
+  //flip from internally imposed force to externally applied force
+  f.inplaceNegative();
+  m.inplaceNegative();
 
   f = Discretize(f,Vector3(0.0),fVariance);
   m = Discretize(m,Vector3(0.0),mVariance);
@@ -680,6 +738,29 @@ bool ForceTorqueSensor::SetSetting(const string& name,const string& str)
   return false;
 }
 
+void ForceTorqueSensor::DrawGL(const Robot& robot,const vector<double>& measurements)
+{
+  glPushMatrix();
+  glMultMatrix(Matrix4(robot.links[link].T_World));
+  if(measurements.size()!=6) {
+    //just draw a box
+    glEnable(GL_LIGHTING);
+    GLDraw::GLColor orange(1,0.5,0);
+    glMaterialfv(GL_FRONT,GL_AMBIENT_AND_DIFFUSE,orange);
+    drawBox(0.05,0.05,0.05);
+  }
+  else {
+    Vector3 f(0.0),m(0.0);
+    for(int i=0;i<3;i++) if(hasForce[i]) f[i] = measurements[i];
+    for(int i=0;i<3;i++) if(hasMoment[i]) m[i] = measurements[i+3];
+    ViewWrench view;
+    view.fscale = 1.0/9.8;
+    view.mscale = 1.0/9.8;
+    view.DrawGL(localPos,f,m);
+  }
+  glPopMatrix();
+}
+
 Accelerometer::Accelerometer()
   :link(0),accelVariance(Zero),accel(Zero)
 {
@@ -749,14 +830,14 @@ void Accelerometer::SetMeasurements(const vector<double>& values)
   accel.set(values[0],values[1],values[2]);
 }
 
-void Accelerometer::GetState(vector<double>& state) const
+void Accelerometer::GetInternalState(vector<double>& state) const
 {
   state.resize(4);
   state[0] = last_dt;
   last_v.get(state[1],state[2],state[3]);
 }
 
-void Accelerometer::SetState(const vector<double>& state)
+void Accelerometer::SetInternalState(const vector<double>& state)
 {
   Assert(state.size()==4);
   last_dt = state[0];
@@ -1001,7 +1082,7 @@ void GyroSensor::SetMeasurements(const vector<double>& values)
   angAccel.set(values[12],values[13],values[14]);
 }
 
-void GyroSensor::GetState(vector<double>& state) const
+void GyroSensor::GetInternalState(vector<double>& state) const
 {
   state.resize(0);
   state.push_back(last_dt);
@@ -1010,7 +1091,7 @@ void GyroSensor::GetState(vector<double>& state) const
   state.push_back(last_w.z);
 }
 
-void GyroSensor::SetState(const vector<double>& state)
+void GyroSensor::SetInternalState(const vector<double>& state)
 {
   Assert(state.size()==4);
   last_dt = state[0];
@@ -1182,17 +1263,17 @@ void IMUSensor::SetMeasurements(const vector<double>& values)
   rotation(2,2) = values[23];
 }
 
-void IMUSensor::GetState(vector<double>& state) const
+void IMUSensor::GetInternalState(vector<double>& state) const
 {
   vector<double> astate,gstate;
-  accelerometer.GetState(astate);
-  gyro.GetState(gstate);
+  accelerometer.GetInternalState(astate);
+  gyro.GetInternalState(gstate);
   state.resize(0);
   state.insert(state.end(),astate.begin(),astate.end());
   state.insert(state.end(),gstate.begin(),gstate.end());
 }
 
-void IMUSensor::SetState(const vector<double>& state)
+void IMUSensor::SetInternalState(const vector<double>& state)
 {
   Assert(state.size()==8);
   vector<double> astate,gstate;
@@ -1200,8 +1281,8 @@ void IMUSensor::SetState(const vector<double>& state)
   gstate.resize(4);
   copy(state.begin(),state.begin()+4,astate.begin());
   copy(state.begin()+4,state.end()+4,gstate.begin());
-  accelerometer.SetState(astate);
-  gyro.SetState(gstate);
+  accelerometer.SetInternalState(astate);
+  gyro.SetInternalState(gstate);
 }
 
 map<string,string> IMUSensor::Settings() const
@@ -1278,15 +1359,15 @@ void FilteredSensor::SetMeasurements(const vector<double>& values)
   measurements = values;
 }
 
-void FilteredSensor::GetState(vector<double>& values) const
+void FilteredSensor::GetInternalState(vector<double>& values) const
 {
   if(sensor) {
-    sensor->GetState(values);
+    sensor->GetInternalState(values);
   }
 }
-void FilteredSensor::SetState(const vector<double>& state)
+void FilteredSensor::SetInternalState(const vector<double>& state)
 {
-  if(sensor) sensor->SetState(state);
+  if(sensor) sensor->SetInternalState(state);
 }
 
 map<string,string> FilteredSensor::Settings() const
@@ -1308,6 +1389,11 @@ bool FilteredSensor::SetSetting(const string& name,const string& str)
   if(SensorBase::SetSetting(name,str)) return true;
   SET_SENSOR_SETTING(smoothing);
   return false;
+}
+
+void FilteredSensor::DrawGL(const Robot& robot,const vector<double>& measurements)
+{
+  if(sensor) sensor->DrawGL(robot,measurements);
 }
 
 
@@ -1363,11 +1449,11 @@ void TimeDelayedSensor::SetMeasurements(const vector<double>& values)
   arrivedMeasurement = values;
 }
 
-void TimeDelayedSensor::GetState(vector<double>& state) const
+void TimeDelayedSensor::GetInternalState(vector<double>& state) const
 {
   if(!sensor) return;
   vector<double> sstate;
-  sensor->GetState(sstate);
+  sensor->GetInternalState(sstate);
   size_t n = 0;
   if(!measurementsInTransit.empty()) n = measurementsInTransit.front().size();
   state = sstate;
@@ -1382,14 +1468,14 @@ void TimeDelayedSensor::GetState(vector<double>& state) const
     state.push_back(*i);
 }
 
-void TimeDelayedSensor::SetState(const vector<double>& state)
+void TimeDelayedSensor::SetInternalState(const vector<double>& state)
 {
   if(!sensor) return;
   //just to get the size
   vector<double> sstate;
-  sensor->GetState(sstate);
+  sensor->GetInternalState(sstate);
   copy(state.begin(),state.begin()+sstate.size(),sstate.begin());
-  sensor->SetState(sstate);
+  sensor->SetInternalState(sstate);
   vector<double>::const_iterator readpos = state.begin()+sstate.size();
   int k = int(*readpos); readpos++;
   int n = int(*readpos); readpos++;
@@ -1434,6 +1520,659 @@ bool TimeDelayedSensor::SetSetting(const string& name,const string& str)
   SET_SENSOR_SETTING(jitter);
   return false;
 }
+
+void TimeDelayedSensor::DrawGL(const Robot& robot,const vector<double>& measurements)
+{
+  if(sensor) sensor->DrawGL(robot,measurements);
+}
+
+
+
+
+
+
+
+LaserRangeSensor::LaserRangeSensor()
+:link(-1),measurementCount(180),depthResolution(0),depthMinimum(0.1),depthMaximum(Inf),
+ depthVarianceLinear(0),depthVarianceConstant(0),
+ xSweepMagnitude(DtoR(90.0)),xSweepPeriod(0),xSweepPhase(0),xSweepType(SweepSawtooth),
+ ySweepMagnitude(0),ySweepPeriod(0),ySweepPhase(0),ySweepType(SweepSinusoid),
+ last_dt(0),last_t(0)
+{
+  Tsensor.setIdentity();
+}
+
+void LaserRangeSensor::Advance(Real dt)
+{
+  last_dt = dt;
+}
+
+double EvalPattern(int type,double x,double correction=1.0)
+{
+  if(type == LaserRangeSensor::SweepSinusoid)
+    return Sin(x*TwoPi);
+  else if(type == LaserRangeSensor::SweepTriangular)
+    return 2.0*(1.0+Abs(Mod(x,2.0) - 1.0))-1.0;
+  return 2.0*(Mod(x/correction,1.0)*correction)-1.0;
+}
+
+void LaserRangeSensor::Simulate(ControlledRobotSimulator* robot,WorldSimulation* sim)
+{
+  last_t = sim->time;
+  depthReadings.resize(measurementCount);
+  //need to make sure that the sawtooth pattern hits the last measurement: scale the time domain so last measurement before
+  //loop gets 1
+  Real xscale = 1, yscale = 1;
+  if(xSweepType == SweepSawtooth && last_dt > 0 && measurementCount > 1) 
+    xscale =  1.0 + 1.0/Real(measurementCount-1);
+  if(ySweepType == SweepSawtooth && last_dt > 0 && measurementCount > 1) 
+    xscale =  1.0 + 1.0/Real(measurementCount-1);
+  Real ux0 = (xSweepPeriod == 0 ? 0 : (sim->time - last_dt + xSweepPhase)/xSweepPeriod);
+  Real ux1 = (xSweepPeriod == 0 ? 1 : (sim->time + xSweepPhase)/xSweepPeriod);
+  Real uy0 = (ySweepPeriod == 0 ? 0 : (sim->time - last_dt + ySweepPhase)/ySweepPeriod);
+  Real uy1 = (ySweepPeriod == 0 ? 1 : (sim->time + ySweepPhase)/ySweepPeriod);
+  //skip previous measurement
+  if(xSweepPeriod != 0 && measurementCount > 1) ux0 += (ux1-ux0)/(measurementCount-1);
+  if(ySweepPeriod != 0 && measurementCount > 1) uy0 += (uy1-uy0)/(measurementCount-1);
+  Ray3D ray;
+  RigidTransform T;
+  if(link >= 0) {
+    robot->oderobot->GetLinkTransform(link,T);
+    T = T*Tsensor;
+  }
+  else
+    T = Tsensor;
+  Real xmin=0,xmax=0;
+  Real ymin=0,ymax=0;
+  for(int i=0;i<measurementCount;i++) {
+    Real xtheta,ytheta;
+    if(i+1 < measurementCount) {
+      xtheta = xSweepMagnitude*EvalPattern(xSweepType,(ux0+Real(i)/Real(measurementCount-1)*(ux1-ux0)),xscale);
+      ytheta = ySweepMagnitude*EvalPattern(ySweepType,(uy0+Real(i)/Real(measurementCount-1)*(uy1-uy0)),yscale);
+    }
+    else {
+      xtheta = xSweepMagnitude*EvalPattern(xSweepType,ux1,xscale);
+      ytheta = ySweepMagnitude*EvalPattern(ySweepType,uy1,yscale);
+    }
+
+    xmin = Min(xtheta,xmin);
+    xmax = Max(xtheta,xmax);
+    ymin = Min(ytheta,ymin);
+    ymax = Max(ytheta,ymax);
+    Real x = Sin(xtheta);
+    Real y = Cos(xtheta)*Sin(ytheta);
+    Real z = Cos(xtheta)*Cos(ytheta);
+    ray.source = T*(Vector3(x,y,z)*depthMinimum);
+    ray.direction = T.R*Vector3(x,y,z);
+    Vector3 pt;
+    //need to ignore the robot's link geometry
+    int obj = sim->world->RayCast(ray,pt);
+    if (obj >= 0) 
+      depthReadings[i] = pt.distance(ray.source) + depthMinimum;
+    else 
+      depthReadings[i] = Inf;
+  }
+  //process all depth readings
+  for(size_t i=0;i<depthReadings.size();i++) {
+    if(!IsInf(depthReadings[i])) 
+      depthReadings[i] = Discretize(depthReadings[i],depthResolution,depthReadings[i]*depthVarianceLinear + depthVarianceConstant);
+    if(depthReadings[i] <= depthMinimum || depthReadings[i] >= depthMaximum) depthReadings[i] = depthMaximum;
+  }
+}
+
+void LaserRangeSensor::Reset()
+{
+  depthReadings.resize(0);
+}
+
+void LaserRangeSensor::MeasurementNames(vector<string>& names) const
+{
+  names.resize(measurementCount);
+  for(int i=0;i<measurementCount;i++) {
+    stringstream ss;
+    ss<<"d["<<i<<"]";
+    names[i] = ss.str();
+  }
+}
+
+void LaserRangeSensor::GetMeasurements(vector<double>& values) const
+{
+  values = depthReadings;
+}
+
+void LaserRangeSensor::SetMeasurements(const vector<double>& values)
+{
+  depthReadings = values;
+}
+
+map<string,string> LaserRangeSensor::Settings() const
+{
+  map<string,string> res = SensorBase::Settings();
+  FILL_SENSOR_SETTING(res,link);
+  FILL_SENSOR_SETTING(res,Tsensor);
+  FILL_SENSOR_SETTING(res,measurementCount);
+  FILL_SENSOR_SETTING(res,depthResolution);
+  FILL_SENSOR_SETTING(res,depthMinimum);
+  FILL_SENSOR_SETTING(res,depthMaximum);
+  FILL_SENSOR_SETTING(res,depthVarianceLinear);
+  FILL_SENSOR_SETTING(res,depthVarianceConstant);
+  FILL_SENSOR_SETTING(res,xSweepMagnitude);
+  FILL_SENSOR_SETTING(res,xSweepPeriod);
+  FILL_SENSOR_SETTING(res,xSweepPhase);
+  FILL_SENSOR_SETTING(res,xSweepType);
+  FILL_SENSOR_SETTING(res,ySweepMagnitude);
+  FILL_SENSOR_SETTING(res,ySweepPeriod);
+  FILL_SENSOR_SETTING(res,ySweepPhase);
+  FILL_SENSOR_SETTING(res,ySweepType);
+  return res;
+}
+bool LaserRangeSensor::GetSetting(const string& name,string& str) const
+{
+  GET_SENSOR_SETTING(link);
+  GET_SENSOR_SETTING(Tsensor);
+  GET_SENSOR_SETTING(measurementCount);
+  GET_SENSOR_SETTING(depthResolution);
+  GET_SENSOR_SETTING(depthMinimum);
+  GET_SENSOR_SETTING(depthMaximum);
+  GET_SENSOR_SETTING(depthVarianceLinear);
+  GET_SENSOR_SETTING(depthVarianceConstant);
+  GET_SENSOR_SETTING(xSweepMagnitude);
+  GET_SENSOR_SETTING(xSweepPeriod);
+  GET_SENSOR_SETTING(xSweepPhase);
+  GET_SENSOR_SETTING(xSweepType);
+  GET_SENSOR_SETTING(ySweepMagnitude);
+  GET_SENSOR_SETTING(ySweepPeriod);
+  GET_SENSOR_SETTING(ySweepPhase);
+  GET_SENSOR_SETTING(ySweepType);
+  return false;
+}
+bool LaserRangeSensor::SetSetting(const string& name,const string& str)
+{
+  SET_SENSOR_SETTING(link);
+  SET_SENSOR_SETTING(Tsensor);
+  SET_SENSOR_SETTING(measurementCount);
+  SET_SENSOR_SETTING(depthResolution);
+  SET_SENSOR_SETTING(depthMinimum);
+  SET_SENSOR_SETTING(depthMaximum);
+  SET_SENSOR_SETTING(depthVarianceLinear);
+  SET_SENSOR_SETTING(depthVarianceConstant);
+  SET_SENSOR_SETTING(xSweepMagnitude);
+  SET_SENSOR_SETTING(xSweepPeriod);
+  SET_SENSOR_SETTING(xSweepPhase);
+  SET_SENSOR_SETTING(xSweepType);
+  SET_SENSOR_SETTING(ySweepMagnitude);
+  SET_SENSOR_SETTING(ySweepPeriod);
+  SET_SENSOR_SETTING(ySweepPhase);
+  SET_SENSOR_SETTING(ySweepType);
+  return false;
+}
+
+void LaserRangeSensor::DrawGL(const Robot& robot,const vector<double>& measurements) 
+{
+  glDisable(GL_LIGHTING);
+  glEnable(GL_BLEND);
+  glBlendFunc(GL_SRC_ALPHA,GL_ONE);
+  glBegin(GL_LINES);
+  //need to make sure that the sawtooth pattern hits the last measurement: scale the time domain so last measurement before
+  //loop gets 1
+  Real xscale = 1, yscale = 1;
+  if(xSweepType == SweepSawtooth && last_dt > 0 && measurementCount > 1) 
+    xscale =  1.0 + 1.0/Real(measurementCount-1);
+  if(ySweepType == SweepSawtooth && last_dt > 0 && measurementCount > 1) 
+    xscale =  1.0 + 1.0/Real(measurementCount-1);
+  Real ux0 = (xSweepPeriod == 0 ? 0 : (last_t - last_dt + xSweepPhase)/(xSweepPeriod));
+  Real ux1 = (xSweepPeriod == 0 ? 1 : (last_t + xSweepPhase)/(xSweepPeriod));
+  Real uy0 = (ySweepPeriod == 0 ? 0 : (last_t - last_dt + ySweepPhase)/(ySweepPeriod));
+  Real uy1 = (ySweepPeriod == 0 ? 1.0 : (last_t + ySweepPhase)/(ySweepPeriod));
+  if(xSweepPeriod != 0) ux0 += (ux1-ux0)/(measurementCount);
+  if(ySweepPeriod != 0) uy0 += (uy1-uy0)/(measurementCount);
+  RigidTransform T = (link >= 0 ? robot.links[link].T_World*Tsensor : Tsensor);
+  for(int i=0;i<measurementCount;i++) {
+    if(!measurements.empty())
+      if(IsInf(depthReadings[i])) continue;
+    Real xtheta,ytheta;
+    if(i+1 < measurementCount) {
+      xtheta = xSweepMagnitude*EvalPattern(xSweepType,(ux0+Real(i)/Real(measurementCount-1)*(ux1-ux0)),xscale);
+      ytheta = ySweepMagnitude*EvalPattern(ySweepType,(uy0+Real(i)/Real(measurementCount-1)*(uy1-uy0)),yscale);
+    }
+    else {
+      xtheta = xSweepMagnitude*EvalPattern(xSweepType,ux1,xscale);
+      ytheta = ySweepMagnitude*EvalPattern(ySweepType,uy1,yscale);
+    }
+    Real x = Sin(xtheta);
+    Real y = Cos(xtheta)*Sin(ytheta);
+    Real z = Cos(xtheta)*Cos(ytheta);
+    Vector3 dir = T.R*Vector3(x,y,z);
+    glColor4f(1,0,0,0);
+    glVertex3v(T.t + depthMinimum*dir);
+    glColor4f(1,0,0,1);
+    if(measurements.empty())
+      glVertex3v(T.t + depthMaximum*dir);
+    else
+      glVertex3v(T.t + depthReadings[i]*dir);
+  }
+  glEnd();
+  glDisable(GL_BLEND);
+}
+
+
+
+CameraSensor::CameraSensor()
+:link(-1),xres(640),yres(480),
+ rgb(true),depth(true),
+ xfov(DtoR(56.0)),yfov(DtoR(43.0)),
+ zmin(0.4),zmax(4.0),zresolution(0),
+ zvarianceLinear(0),zvarianceConstant(0),
+ useGLFramebuffers(true),color_tex(0),fb(0),depth_rb(0)
+{
+  Tsensor.setIdentity();
+}
+
+CameraSensor::~CameraSensor()
+{
+  if(color_tex) glDeleteTextures(1, &color_tex);
+  if(depth_rb) glDeleteRenderbuffersEXT(1, &depth_rb);
+  if(fb) glDeleteFramebuffersEXT(1, &fb);
+  color_tex = 0;
+  depth_rb = 0;
+  fb = 0;
+}
+
+void CameraSensor::Simulate(ControlledRobotSimulator* robot,WorldSimulation* sim)
+{
+  RigidTransform Tlink;
+  if(link >= 0) robot->oderobot->GetLinkTransform(link,Tlink);
+  else Tlink.setIdentity();
+
+  if(useGLFramebuffers) {
+    if(!GLEW_EXT_framebuffer_object) {
+      if (GLEW_OK != glewInit())
+      {
+        fprintf(stderr,"CameraSensor: Couldn't initialize GLEW, falling back to slow mode\n");
+        useGLFramebuffers = false;
+      }
+      if(!GLEW_EXT_framebuffer_object) {
+        fprintf(stderr,"CameraSensor: GL framebuffers not supported, falling back to slow mode\n");
+        useGLFramebuffers = false;
+      }
+    }
+  }
+  if(useGLFramebuffers) {
+    if(color_tex == 0) { 
+      //RGBA8 2D texture, 24 bit depth texture, 256x256
+      glGenTextures(1, &color_tex);
+      glBindTexture(GL_TEXTURE_2D, color_tex);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+      //NULL means reserve texture memory, but texels are undefined
+      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, xres, yres, 0, GL_BGRA, GL_UNSIGNED_BYTE, NULL);
+    }
+    if(fb == 0) {
+      //-------------------------
+      glGenFramebuffersEXT(1, &fb);
+      glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fb);
+      //Attach 2D texture to this FBO
+      glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, color_tex, 0);
+    }
+    if(depth_rb == 0) {
+      //-------------------------
+      glGenRenderbuffersEXT(1, &depth_rb);
+      glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, depth_rb);
+      glRenderbufferStorageEXT(GL_RENDERBUFFER_EXT, GL_DEPTH_COMPONENT24, xres, yres);
+      //-------------------------
+      //Attach depth buffer to FBO
+      glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_RENDERBUFFER_EXT, depth_rb);
+    }
+    //-------------------------
+    //Does the GPU support current FBO configuration?
+    GLenum status;
+    status = glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);
+    switch(status)
+    {
+    case GL_FRAMEBUFFER_COMPLETE_EXT:
+      break;
+    default:
+      fprintf(stderr,"CameraSensor: Couldn't initialize GL framebuffers, falling back to slow mode\n");
+      useGLFramebuffers = false;
+      //Delete resources
+      glDeleteTextures(1, &color_tex);
+      glDeleteRenderbuffersEXT(1, &depth_rb);
+      //Bind 0, which means render to back buffer, as a result, fb is unbound
+      glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0); 
+      glDeleteFramebuffersEXT(1, &fb);
+      color_tex = 0;
+      depth_rb = 0;
+      fb = 0;
+      return;
+    }
+    //-------------------------
+    //and now you can render to GL_TEXTURE_2D
+    glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fb);
+    //float oldcolor[4];
+    //glGetFloatv(GL_COLOR_CLEAR_VALUE,oldcolor);
+    //glClearColor(0.0, 0.0, 0.0, 0.0);
+    //glClearDepth(1.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    //-------------------------
+    //set up the POV of the camera
+    Camera::Viewport vp;
+    GetViewport(vp);
+    vp.xform = Tlink*vp.xform;
+    GLDraw::GLView view;
+    view.setViewport(vp);
+    view.setCurrentGL();
+    //-------------------------
+    glDisable(GL_TEXTURE_2D);
+    glDisable(GL_BLEND);
+    glEnable(GL_DEPTH_TEST);
+    //-------------------------
+    //now render the scene from the POV of the camera
+    sim->UpdateModel();
+    sim->world->DrawGL();
+    //DONE: now captured on graphics card in framebuffer
+    //----------------
+    //Bind 0, which means render to back buffer
+    glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+    //restore previous stuff
+    //glClearColor(oldcolor[0],oldcolor[1],oldcolor[2],oldcolor[3]);
+    CheckGLErrors("GL errors during camera sensor simulation: ");
+
+    //extract measurements
+    measurements.resize(0);
+    if(rgb) {
+      pixels.resize(4*xres*yres);
+      glBindTexture(GL_TEXTURE_2D, color_tex);
+      glGetTexImage(GL_TEXTURE_2D,0,GL_RGBA,GL_UNSIGNED_INT_8_8_8_8,&pixels[0]);
+      measurements.resize(xres*yres);
+      int j=0;
+      for(int i=0;i<xres*yres;i++,j+=4) {
+        unsigned int pix = (pixels[j] << 24 ) | (pixels[j+1] << 16 ) | (pixels[j+2] << 8 ) | (pixels[j+3]);
+        measurements[i] = double(pix);
+      }
+    }
+    if(depth) {
+      glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fb); 
+      floats.resize(xres*yres);
+      glReadPixels(0, 0, xres, yres, GL_DEPTH_COMPONENT, GL_FLOAT, &floats[0]);
+      glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0); 
+
+      size_t vstart = measurements.size();
+      measurements.resize(measurements.size() + xres*yres); 
+      for(int i=0;i<xres*yres;i++) {
+        //nonlinear depth normalization
+        //normal linear interpolation would give u = (z - zmin)/(zmax-zmin)
+        //instead we gt u = (1/zmin-1/z)/(1/zmin-1/zmax)
+        //so 1/z = 1/zmin - u(1/zmin-1/zmax)
+        if(floats[i] == 1.0) { //nothing seen
+          floats[i] = zmax;
+        }
+        else {
+          floats[i] = 1.0/(1.0/zmin - floats[i]*(1.0/zmin-1.0/zmax));
+          floats[i] = Discretize(floats[i],zresolution,zvarianceLinear*floats[i] + zvarianceConstant);
+        }
+        measurements[vstart+i] = floats[i];
+      }
+    }
+  }
+  if(!useGLFramebuffers) {
+    //TODO: fallback can use ray casting: (slow!)
+    printf("TODO: fallback from GL rendering\n");
+  }
+}
+
+void CameraSensor::Reset()
+{
+}
+
+void CameraSensor::MeasurementNames(vector<string>& names) const
+{
+  char buf[64];
+  names.resize(0);
+  if(rgb) {
+    for(int i=0;i<xres;i++) {
+      for(int j=0;j<yres;j++) {
+        sprintf(buf,"rgb[%d,%d]",i,j);
+        names.push_back(buf);
+      }
+    }
+  }
+  if(depth) {
+    for(int i=0;i<xres;i++) {
+      for(int j=0;j<yres;j++) {
+        sprintf(buf,"d[%d,%d]",i,j);
+        names.push_back(buf);
+      }
+    }
+  }
+}
+
+void CameraSensor::GetMeasurements(vector<double>& values) const
+{
+  values = measurements;
+}
+
+void CameraSensor::SetMeasurements(const vector<double>& values)
+{
+  measurements = values;
+  //TODO: copy back into pixel buffers?
+}
+
+map<string,string> CameraSensor::Settings() const
+{
+  map<string,string> res = SensorBase::Settings();
+  FILL_SENSOR_SETTING(res,link);
+  FILL_SENSOR_SETTING(res,Tsensor);
+  FILL_SENSOR_SETTING(res,rgb);
+  FILL_SENSOR_SETTING(res,depth);
+  FILL_SENSOR_SETTING(res,xres);
+  FILL_SENSOR_SETTING(res,xfov);
+  FILL_SENSOR_SETTING(res,yres);
+  FILL_SENSOR_SETTING(res,yfov);
+  FILL_SENSOR_SETTING(res,zresolution);
+  FILL_SENSOR_SETTING(res,zmin);
+  FILL_SENSOR_SETTING(res,zmax);
+  FILL_SENSOR_SETTING(res,zvarianceLinear);
+  FILL_SENSOR_SETTING(res,zvarianceConstant);
+  return res;
+}
+bool CameraSensor::GetSetting(const string& name,string& str) const
+{
+  GET_SENSOR_SETTING(link);
+  GET_SENSOR_SETTING(Tsensor);
+  GET_SENSOR_SETTING(rgb);
+  GET_SENSOR_SETTING(depth);
+  GET_SENSOR_SETTING(xres);
+  GET_SENSOR_SETTING(xfov);
+  GET_SENSOR_SETTING(yres);
+  GET_SENSOR_SETTING(yfov);
+  GET_SENSOR_SETTING(zresolution);
+  GET_SENSOR_SETTING(zmin);
+  GET_SENSOR_SETTING(zmax);
+  GET_SENSOR_SETTING(zvarianceLinear);
+  GET_SENSOR_SETTING(zvarianceConstant);
+  return false;
+}
+bool CameraSensor::SetSetting(const string& name,const string& str)
+{
+  SET_SENSOR_SETTING(link);
+  SET_SENSOR_SETTING(Tsensor);
+  SET_SENSOR_SETTING(rgb);
+  SET_SENSOR_SETTING(depth);
+  SET_SENSOR_SETTING(xres);
+  SET_SENSOR_SETTING(xfov);
+  SET_SENSOR_SETTING(yres);
+  SET_SENSOR_SETTING(yfov);
+  SET_SENSOR_SETTING(zresolution);
+  SET_SENSOR_SETTING(zmin);
+  SET_SENSOR_SETTING(zmax);
+  SET_SENSOR_SETTING(zvarianceLinear);
+  SET_SENSOR_SETTING(zvarianceConstant);
+  return false;
+}
+
+void doTriangle(const Vector3& a,const Vector3& b,const Vector3& c)
+{
+  Vector3 n;
+  n.setCross(b-a,c-a);
+  n.inplaceNormalize();
+  glNormal3v(n);
+  glVertex3v(a);
+  glVertex3v(b);
+  glVertex3v(c);
+}
+
+void CameraSensor::DrawGL(const Robot& robot,const vector<double>& measurements) 
+{
+  Camera::Viewport v;
+  GetViewport(v);
+  if(link >= 0) 
+    v.xform = robot.links[link].T_World*v.xform;
+
+  if(color_tex && rgb) {
+    //debugging: draw image in frustum
+    glPushMatrix();
+    glMultMatrix((Matrix4)v.xform);
+    Real d = v.n;
+    Real aspectRatio = Real(xres)/Real(yres);
+    Real xmin = Real(v.x - v.w*0.5)/(Real(v.w)*0.5);
+    Real xmax = Real(v.x + v.w*0.5)/(Real(v.w)*0.5);
+    Real ymax = -Real(v.y - v.h*0.5)/(Real(v.h)*0.5);
+    Real ymin = -Real(v.y + v.h*0.5)/(Real(v.h)*0.5);
+    Real xscale = 0.5*d/v.scale;
+    Real yscale = xscale/aspectRatio;
+    xmin *= xscale;
+    xmax *= xscale;
+    ymin *= yscale;
+    ymax *= yscale;
+    glBindTexture(GL_TEXTURE_2D,color_tex);
+    glDisable(GL_DEPTH_TEST);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
+    glColor4f(1,1,1,0.5);
+    glEnable(GL_TEXTURE_2D);
+    glDisable(GL_LIGHTING);
+    glBegin(GL_TRIANGLE_FAN);
+    glTexCoord2f(0,0);
+    glVertex3f(xmin,ymin,-d);
+    glTexCoord2f(1,0);
+    glVertex3f(xmax,ymin,-d);
+    glTexCoord2f(1,1);
+    glVertex3f(xmax,ymax,-d);
+    glTexCoord2f(0,1);
+    glVertex3f(xmin,ymax,-d);
+    glEnd();
+    glDisable(GL_TEXTURE_2D);
+    glDisable(GL_BLEND);
+    glEnable(GL_DEPTH_TEST);
+    glPopMatrix();
+  }
+
+  if(fb && depth) {
+    if(!floats.empty()) {
+      glPushMatrix();
+      glMultMatrix((Matrix4)v.xform);
+
+      glEnable(GL_LIGHTING);
+      float white[4]={1,1,1,1};
+      glMaterialfv(GL_FRONT,GL_AMBIENT_AND_DIFFUSE,white);
+      Real vscale = 0.5/Tan(xfov*0.5);
+      Real xscale = (0.5/vscale);
+      Real aspectRatio = Real(xres)/Real(yres);
+      Real yscale = xscale/aspectRatio;
+      vector<Vector3> pts(xres*yres);
+      int k=0;
+      for(int i=0;i<yres;i++)
+        for(int j=0;j<xres;j++,k++) {
+          double d = floats[k];
+          double u = Real(j-xres/2)/(xres/2);
+          double v = Real(i-yres/2)/(yres/2);
+          double x = xscale*d*u;
+          double y = yscale*d*v;
+          pts[k].set(x,y,-d);
+        }
+      glBegin(GL_TRIANGLES);
+      k=0;
+      for(int i=0;i<yres;i++) {
+        for(int j=0;j<xres;j++,k++) {
+          if(i+1 >= yres || j+1 >= xres) continue;
+          //decide on discontinuities in this cell
+          int v11 = k;
+          int v12 = k+1;
+          int v21 = k+xres;
+          int v22 = k+xres+1;
+          double z11 = -pts[v11].z;
+          double z12 = -pts[v12].z;
+          double z21 = -pts[v21].z;
+          double z22 = -pts[v22].z;
+          bool d1x = (z11 >= zmax || z12 >= zmax || Abs(z11 - z12) > 0.02*(z11+z12));
+          bool d1y = (z11 >= zmax || z21 >= zmax || Abs(z11 - z21) > 0.02*(z11+z21));
+          bool d2x = (z22 >= zmax || z21 >= zmax || Abs(z22 - z21) > 0.02*(z22+z21));
+          bool d2y = (z22 >= zmax || z12 >= zmax || Abs(z22 - z12) > 0.02*(z22+z12));
+          bool dupperleft = (d1x || d1y);
+          bool dupperright = (d1x || d2y);
+          bool dlowerleft = (d2x || d1y);
+          bool dlowerright = (d2x || d2y);
+
+
+          if(dupperleft && !dlowerright) 
+            //only draw lower right corner
+            doTriangle(pts[v12],pts[v22],pts[v21]);
+          else if(!dupperleft && dlowerright) 
+            //only draw upper left corner
+            doTriangle(pts[v11],pts[v12],pts[v21]);
+          else if(!dupperright && dlowerleft) 
+            //only draw upper right corner
+            doTriangle(pts[v11],pts[v12],pts[v22]);
+          else if(dupperright && !dlowerleft) 
+            //only draw lower left corner
+            doTriangle(pts[v11],pts[v22],pts[v21]);
+          else if (!dupperleft && !dlowerright) {
+            //fully connected -- should draw better conditioned edge, but whatever
+            doTriangle(pts[v12],pts[v22],pts[v21]);
+            doTriangle(pts[v11],pts[v12],pts[v21]);
+          }
+        }
+      }
+      glEnd();
+      glPopMatrix();
+    }
+  }
+
+  ViewCamera view;
+  view.DrawGL(v);
+}
+
+
+void CameraSensor::GetViewport(Camera::Viewport& vp) const
+{
+  vp.x = vp.y = 0;
+  vp.w = xres;
+  vp.h = yres;
+  vp.n = zmin;
+  vp.f = zmax;
+  vp.setLensAngle(xfov);
+  vp.xform = Tsensor;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 bool RobotSensors::LoadSettings(const char* fn)
 {
@@ -1493,6 +2232,14 @@ bool RobotSensors::LoadSettings(TiXmlElement* node)
       sensor = new ForceTorqueSensor;
       sensors.push_back(sensor);
     }
+    else if(0==strcmp(e->Value(),"LaserRangeSensor")) {
+      sensor = new LaserRangeSensor;
+      sensors.push_back(sensor);
+    }
+    else if(0==strcmp(e->Value(),"CameraSensor")) {
+      sensor = new CameraSensor;
+      sensors.push_back(sensor);
+    }
     else if(0==strcmp(e->Value(),"FilteredSensor")) {
       FilteredSensor* fs = new FilteredSensor;
       if(!e->Attribute("sensor")) {
@@ -1501,7 +2248,7 @@ bool RobotSensors::LoadSettings(TiXmlElement* node)
       }
       fs->sensor = GetNamedSensor(e->Attribute("sensor"));
       if(fs->sensor == NULL) {
-	fprintf(stderr,"Filtered sensor has unknown sensor type \"%s\"\n",e->Attribute("sensor"));
+	fprintf(stderr,"Filtered sensor has unknown sensor named \"%s\"\n",e->Attribute("sensor"));
 	return false;
       }
       sensor = fs;
@@ -1516,7 +2263,7 @@ bool RobotSensors::LoadSettings(TiXmlElement* node)
       }
       fs->sensor = GetNamedSensor(e->Attribute("sensor"));
       if(fs->sensor == NULL) {
-	fprintf(stderr,"Time-delayed sensor has unknown sensor type \"%s\"\n",e->Attribute("sensor"));
+	fprintf(stderr,"Time-delayed sensor has unknown sensor named \"%s\"\n",e->Attribute("sensor"));
 	return false;
       }
       sensor = fs;
@@ -1585,7 +2332,7 @@ bool RobotSensors::LoadMeasurements(TiXmlElement* node)
       stringstream ss(attrs[measurementNames[i]]);
       ss >> measurementValues[i];
     }
-    s->SetState(measurementValues);
+    s->SetMeasurements(measurementValues);
 
     e = e->NextSiblingElement();
   }
