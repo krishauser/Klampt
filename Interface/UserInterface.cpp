@@ -120,7 +120,7 @@ string JointCommandInterface::MouseInputEvent(int mx,int my,bool drag)
     robot->UpdateConfig(q);
     int link;
     Vector3 localPos;
-    Robot* rob=world->ClickRobot(ray,link,localPos);
+    Robot* rob=world->RayCastRobot(ray,link,localPos);
 
     if(rob) {
       currentLink = link;
