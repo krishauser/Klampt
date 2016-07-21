@@ -78,6 +78,9 @@ void SimTestBackend::Start()
   drawWrenches = 1;
   drawExpanded = 0;
   drawTime = 1;
+  drawSensors.resize(world->robots.size());
+  for(size_t i=0;i<sim.controlSimulators.size();i++)
+    drawSensors[i].resize(sim.controlSimulators[i].sensors.sensors.size(),false);
   click_mode = 0;
   pose_objects = 0;
   forceSpringActive = false;
@@ -278,6 +281,11 @@ void SimTestBackend::RenderWorld()
       drawOrientedWireBox(bbox.dims.x,bbox.dims.y,bbox.dims.z,basis);
     }
   }
+  for(size_t i=0;i<drawSensors.size();i++) {
+    for(size_t j=0;j<drawSensors[i].size();j++)
+      if(drawSensors[i][j])
+        DrawSensor(i,j);
+  }
   DEBUG_GL_ERRORS()
 }
 
@@ -407,6 +415,12 @@ bool SimTestBackend::OnCommand(const string& cmd,const string& args)
     int index;
     ss>>index;
     ToggleSensorPlot(index,0);
+  }
+  else if(cmd=="draw_sensor") {
+    int index;
+    bool drawn;
+    ss>>index>>drawn;
+    drawSensors[0][index] = drawn;
   }
   else if(cmd=="show_sensor_measurement") {      
     int index,measurement;

@@ -96,6 +96,7 @@ public:
   map<int,string> robotCommandLogFiles, robotSensedLogFiles, robotTorqueLogFiles;
 
   vector<SensorPlot> sensorPlots;
+  vector<vector<bool> > drawSensors;
   vector<GeometryAppearance> originalAppearance,expandedAppearance;
 
   SimTestBackend(RobotWorld* world);
