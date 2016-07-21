@@ -164,6 +164,37 @@ def fixed_objective(link,ref=None,local=None,world=None):
     else:
         raise ValueError("ik.fixed_objective does not accept both local and world keyword arguments")
 
+def fixed_rotation_objective(link,ref=None,local_axis=None,world_axis=None):
+    """Convenience function for fixing the given link at its current orientation
+    in space.  If local_axis and world_axis are not provided, the entire link's orientation
+    is constrained.  If only local_axis is provided, the link is constrained
+    to rotate about this local axis.  If only world_axis is provided,
+    the link is constrained to rotate about this world-space axis."""
+    refcoords = ref.getTransform()[0] if ref is not None else so3.identity()
+    Rw = link.getTransform()
+    Rrel = so3.mul(so3.inv(refcoords),Rw)
+    obj = IKObjective()
+    obj.robot = link.robot()
+    if ref:
+        assert link.robot()==ref.robot(),"Can't do generalized fixed rotation objectives yet"
+    if local_axis is None and world_axis is None:
+        #fixed rotation objective
+        obj.setLinks(link.index,(-1 if ref is None else ref.index))
+        obj.setFixedRotConstraint(Rrel)
+    elif local_axis is None:
+        #fixed axis, given by world coordinates
+        Rrelinv = so3.inv(Rrel)
+        local_axis = so3.apply(Rrelinv,world_axis)
+        obj.setAxialRotConstraint(local_axis,world_axis)
+    elif world_axis is None:
+        #fixed point, given by local coordinates
+        world_axis = so3.apply(Rrel,local_axis)
+        obj.setAxialRotConstraint(local_axis,world_axis)
+    else:
+        raise ValueError("ik.fixed_rotation_objective does not accept both local_axis and world_axis keyword arguments")
+    return obj
+
+
 def objects(objectives):
     """Returns a list of all objects touched by the given objective(s).
     Not currently implemented."""
