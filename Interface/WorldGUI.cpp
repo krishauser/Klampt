@@ -146,7 +146,8 @@ void WorldGUIBackend::Start()
   camera.dist = 6;
   viewport.n = 0.1;
   viewport.f = 100;
-  viewport.setLensAngle(DtoR(30.0));
+  viewport.setLensAngle(DtoR(60.0));
+  //viewport.setLensAngle(DtoR(90.0));
 
   glEnable(GL_CULL_FACE);
   glEnable(GL_DEPTH_TEST);
@@ -157,10 +158,10 @@ void WorldGUIBackend::Start()
 
 Robot* WorldGUIBackend::ClickRobot(const Ray3D& r,int& body,Vector3& localpt) const
 {
-  return world->ClickRobot(r,body,localpt);
+  return world->RayCastRobot(r,body,localpt);
 }
 
 RigidObject* WorldGUIBackend::ClickObject(const Ray3D& r,Vector3& localpt) const
 {
-  return world->ClickObject(r,localpt);
+  return world->RayCastObject(r,localpt);
 }
