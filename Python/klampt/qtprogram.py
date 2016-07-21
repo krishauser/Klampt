@@ -260,7 +260,7 @@ class GLNavigationProgram(GLProgram):
         self.camera = camera.orbit()
         self.camera.dist = 6.0
         #x field of view in degrees
-        self.fov = 30
+        self.fov = 60
         #near and far clipping planes
         self.clippingplanes = (0.2,20)
         #mouse state information
