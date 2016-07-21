@@ -9,9 +9,11 @@
 #include "IO/XmlODE.h"
 #include "IO/ROS.h"
 #include "Planning/RobotTimeScaling.h"
+#include "View/ViewWrench.h"
 #include <KrisLibrary/GLdraw/drawextra.h>
 #include <KrisLibrary/GLdraw/drawgeometry.h>
 #include <KrisLibrary/GLdraw/GL.h>
+#include <KrisLibrary/GLdraw/GLError.h>
 #include <KrisLibrary/GLdraw/GLLight.h>
 #include <KrisLibrary/GLdraw/GLUTString.h>
 #include <KrisLibrary/utils/stringutils.h>
@@ -329,6 +331,34 @@ void SimGUIBackend::DrawClock(int x,int y)
     glEnable(GL_DEPTH_TEST);
 }
 
+void SimGUIBackend::DrawSensor(int robot,int sensor)
+{
+  if(robot < 0) {
+    for(size_t i=0;i<sim.controlSimulators.size();i++) {
+      DrawSensor((int)i);
+    }
+  }
+  else {
+    Assert(robot >= 0 && robot < (int)sim.controlSimulators.size());
+    int i=robot;
+    sim.controlSimulators[i].UpdateRobot();
+    if(sensor < 0) {
+      for(size_t j=0;j<sim.controlSimulators[i].sensors.sensors.size();j++) {
+        vector<double> measurements;
+        sim.controlSimulators[i].sensors.sensors[j]->GetMeasurements(measurements);
+        sim.controlSimulators[i].sensors.sensors[j]->DrawGL(*sim.controlSimulators[i].robot,measurements);
+      }
+    }
+    else {
+      Assert(sensor >= 0 && sensor < (int)sim.controlSimulators[i].sensors.sensors.size());
+      int j=sensor;
+      vector<double> measurements;
+      sim.controlSimulators[i].sensors.sensors[j]->GetMeasurements(measurements);
+      sim.controlSimulators[i].sensors.sensors[j]->DrawGL(*sim.controlSimulators[i].robot,measurements);
+    }
+  }
+}
+
 void SimGUIBackend::SetForceColors()
 {
   for(size_t i=0;i<world->robots.size();i++) {
@@ -453,37 +483,10 @@ void SimGUIBackend::DrawWrenches(Real fscale)
     */
     Vector3 f=i->second.meanForce,m=i->second.meanTorque;
     Vector3 center=i->second.meanPoint;
-      
-    f *= fscale;
-    m *= fscale;
-      
-    GLColor yellow(1,1,0),orange(1,0.5,0),cyan(0,1,1);
-      
-    glPushMatrix();
-    glTranslate(center);
-      
-    Real r=0.01;
-    Real arrowLen = 0.1,arrowWidth=1.7;
-    glMaterialfv(GL_FRONT,GL_AMBIENT_AND_DIFFUSE,orange);
-    Real len = 0.5*Exp(-f.length()*2.0);
-    drawCylinder(f*(1.0-len),r);
-    glPushMatrix();
-    glTranslate(f*(1.0-len));
-    drawCone(f*len,r*arrowWidth,8);
-    glPopMatrix();
-      
-    glMaterialfv(GL_FRONT,GL_AMBIENT_AND_DIFFUSE,cyan);
-    len = 0.5*Exp(-m.length()*2.0);
-    drawCylinder(m*(1.0-len),r);
-    glPushMatrix();
-    glTranslate(m*(1.0-len));
-    drawCone(m*len,r*arrowWidth,8);
-    glPopMatrix();
-      
-    glMaterialfv(GL_FRONT,GL_AMBIENT_AND_DIFFUSE,yellow);
-    drawSphere(0.015,16,8);
-      
-    glPopMatrix();
+    ViewWrench w;
+    w.fscale = fscale;
+    w.mscale = fscale;
+    w.DrawGL(center,f,m);
   }
   glEnable(GL_DEPTH_TEST);
 }
