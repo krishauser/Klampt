@@ -11,9 +11,7 @@
 #include <KrisLibrary/math/random.h>
 #if HAVE_GLEW
 #include <GL/glew.h>
-#else
-  #error "New GLEW to render depth cameras"
-#endif
+#endif //HAVE_GLEW
 #include <KrisLibrary/GLdraw/drawextra.h>
 #include <KrisLibrary/GLdraw/GLView.h>
 #include <KrisLibrary/GLdraw/GLError.h>
@@ -679,10 +677,10 @@ void ContactSensor::DrawGL(const Robot& robot,const vector<double>& measurements
 }
 
 ForceTorqueSensor::ForceTorqueSensor()
-  :link(0),localPos(Zero),fVariance(Zero),mVariance(Zero),f(Zero),m(Zero)
+  :link(0),localPos(Zero),fVariance(Zero),tVariance(Zero),f(Zero),t(Zero)
 {
   hasForce[0] = hasForce[1] = hasForce[2] = false;
-  hasMoment[0] = hasMoment[1] = hasMoment[2] = false;
+  hasTorque[0] = hasTorque[1] = hasTorque[2] = false;
 }
 
 void ForceTorqueSensor::Simulate(ControlledRobotSimulator* robot,WorldSimulation* sim) 
@@ -701,24 +699,24 @@ void ForceTorqueSensor::Simulate(ControlledRobotSimulator* robot,WorldSimulation
   Vector3 mw = mcomw;
   //convert to local frame
   T.R.mulTranspose(fw,f);
-  T.R.mulTranspose(mw,m);
+  T.R.mulTranspose(mw,t);
 
   //flip from internally imposed force to externally applied force
   f.inplaceNegative();
-  m.inplaceNegative();
+  t.inplaceNegative();
 
   f = Discretize(f,Vector3(0.0),fVariance);
-  m = Discretize(m,Vector3(0.0),mVariance);
+  t = Discretize(t,Vector3(0.0),tVariance);
   for(int i=0;i<3;i++)
     if(!hasForce[i]) f[i] = 0;
   for(int i=0;i<3;i++)
-    if(!hasMoment[i]) m[i] = 0;
+    if(!hasTorque[i]) t[i] = 0;
 }
 
 void ForceTorqueSensor::Reset()
 {
   f.setZero();
-  m.setZero();
+  t.setZero();
 }
 
 void ForceTorqueSensor::MeasurementNames(vector<string>& names) const
@@ -727,23 +725,23 @@ void ForceTorqueSensor::MeasurementNames(vector<string>& names) const
   names[0] = "force_x";
   names[1] = "force_y";
   names[2] = "force_z";
-  names[3] = "moment_x";
-  names[4] = "moment_y";
-  names[5] = "moment_z";
+  names[3] = "torque_x";
+  names[4] = "torque_y";
+  names[5] = "torque_z";
 }
 
 void ForceTorqueSensor::GetMeasurements(vector<double>& values) const
 {
   values.resize(6);
   f.get(values[0],values[1],values[2]);
-  m.get(values[3],values[4],values[5]);
+  t.get(values[3],values[4],values[5]);
 }
 
 void ForceTorqueSensor::SetMeasurements(const vector<double>& values)
 {
   Assert(values.size()==6);
   f.set(values[0],values[1],values[2]);
-  m.set(values[3],values[4],values[5]);
+  t.set(values[3],values[4],values[5]);
 }
 
 map<string,string> ForceTorqueSensor::Settings() const
@@ -752,9 +750,9 @@ map<string,string> ForceTorqueSensor::Settings() const
   FILL_SENSOR_SETTING(settings,link);
   FILL_SENSOR_SETTING(settings,localPos);
   FILL_ARRAY_SENSOR_SETTING(settings,hasForce,3);
-  FILL_ARRAY_SENSOR_SETTING(settings,hasMoment,3);
+  FILL_ARRAY_SENSOR_SETTING(settings,hasTorque,3);
   FILL_SENSOR_SETTING(settings,fVariance);
-  FILL_SENSOR_SETTING(settings,mVariance);
+  FILL_SENSOR_SETTING(settings,tVariance);
   return settings;
 }
 
@@ -764,9 +762,9 @@ bool ForceTorqueSensor::GetSetting(const string& name,string& str) const
   GET_SENSOR_SETTING(link);
   GET_SENSOR_SETTING(localPos);
   GET_ARRAY_SENSOR_SETTING(hasForce,3);
-  GET_ARRAY_SENSOR_SETTING(hasMoment,3);
+  GET_ARRAY_SENSOR_SETTING(hasTorque,3);
   GET_SENSOR_SETTING(fVariance);
-  GET_SENSOR_SETTING(mVariance);  
+  GET_SENSOR_SETTING(tVariance);  
   return false;
 }
 
@@ -776,9 +774,9 @@ bool ForceTorqueSensor::SetSetting(const string& name,const string& str)
   SET_SENSOR_SETTING(link);
   SET_SENSOR_SETTING(localPos);
   SET_ARRAY_SENSOR_SETTING(hasForce,3);
-  SET_ARRAY_SENSOR_SETTING(hasMoment,3);
+  SET_ARRAY_SENSOR_SETTING(hasTorque,3);
   SET_SENSOR_SETTING(fVariance);
-  SET_SENSOR_SETTING(mVariance);  
+  SET_SENSOR_SETTING(tVariance);  
   return false;
 }
 
@@ -796,7 +794,7 @@ void ForceTorqueSensor::DrawGL(const Robot& robot,const vector<double>& measurem
   else {
     Vector3 f(0.0),m(0.0);
     for(int i=0;i<3;i++) if(hasForce[i]) f[i] = measurements[i];
-    for(int i=0;i<3;i++) if(hasMoment[i]) m[i] = measurements[i+3];
+    for(int i=0;i<3;i++) if(hasTorque[i]) m[i] = measurements[i+3];
     ViewWrench view;
     view.fscale = 1.0/9.8;
     view.mscale = 1.0/9.8;
@@ -1828,6 +1826,7 @@ void CameraSensor::Simulate(ControlledRobotSimulator* robot,WorldSimulation* sim
   if(link >= 0) robot->oderobot->GetLinkTransform(link,Tlink);
   else Tlink.setIdentity();
 
+#if HAVE_GLEW
   if(useGLFramebuffers) {
     if(!GLEW_EXT_framebuffer_object) {
       if (GLEW_OK != glewInit())
@@ -1960,6 +1959,10 @@ void CameraSensor::Simulate(ControlledRobotSimulator* robot,WorldSimulation* sim
       }
     }
   }
+#else
+  useGLFramebuffers = false;
+#endif //HAVE_GLEW
+
   if(!useGLFramebuffers) {
     //TODO: fallback can use ray casting: (slow!)
     printf("TODO: fallback from GL rendering\n");
@@ -2426,30 +2429,44 @@ SmartPointer<SensorBase> RobotSensors::GetNamedSensor(const string& name)
 void RobotSensors::MakeDefault(Robot* robot)
 {
   sensors.resize(0);
-  string sensorFn;
-  if(robot->properties.get("sensors",sensorFn)) {
-    if(LoadSettings(sensorFn.c_str())) {
-      //be sure to resize any empty JointPositionSensor's and 
-      //JointVelocitySensor's 
-      vector<JointPositionSensor*> jps;
-      GetTypedSensors(jps);
-      for(size_t i=0;i<jps.size();i++)
-	if(jps[i]->indices.empty())
-	  jps[i]->q.resize(robot->q.n,Zero);
-      vector<JointVelocitySensor*> jvs;
-      GetTypedSensors(jvs);
-      for(size_t i=0;i<jvs.size();i++)
-	if(jvs[i]->indices.empty())
-	  jvs[i]->dq.resize(robot->q.n,Zero);
-      return;
+  string sensorXml;
+  if(robot->properties.get("sensors",sensorXml)) {
+    TiXmlElement n("sensors");
+    stringstream ss(sensorXml);
+    ss>>n;
+    if(ss) {
+      //for any named links, convert them to indices
+      TiXmlElement* c = n.FirstChildElement();
+      while(c) {
+        if(c->Attribute("link")) {
+          int ind = robot->LinkIndex(c->Attribute("link"));
+          if(ind >= 0) {
+            c->SetAttribute("link",ind);
+          }
+        }
+        c = c->NextSiblingElement();
+      }
+      if(LoadSettings(&n)) {
+        //be sure to resize any empty JointPositionSensor's and 
+        //JointVelocitySensor's 
+        vector<JointPositionSensor*> jps;
+        GetTypedSensors(jps);
+        for(size_t i=0;i<jps.size();i++)
+  	if(jps[i]->indices.empty())
+  	  jps[i]->q.resize(robot->q.n,Zero);
+        vector<JointVelocitySensor*> jvs;
+        GetTypedSensors(jvs);
+        for(size_t i=0;i<jvs.size();i++)
+  	if(jvs[i]->indices.empty())
+  	  jvs[i]->dq.resize(robot->q.n,Zero);
+        return;
+      }
     }
-    else {
-      printf("RobotSensors::MakeDefault: could not load sensor file %s\n",sensorFn.c_str());
-      printf("  Making the standard sensors instead.\n");
-      printf("  Press enter to continue.\n");
-      getchar();
-      sensors.resize(0);
-    }
+    printf("RobotSensors::MakeDefault: invalid sensor data format %s\n",sensorXml.c_str());
+    printf("  Making the standard sensors instead.\n");
+    printf("  Press enter to continue.\n");
+    getchar();
+    sensors.resize(0);
   }
   JointPositionSensor* jp = new JointPositionSensor;
   JointVelocitySensor* jv = new JointVelocitySensor;
