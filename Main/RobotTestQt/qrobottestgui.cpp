@@ -112,6 +112,14 @@ void QRobotTestGUI::LoadFile(QString filename){
     if(!filename.isEmpty())
       ini.setValue("last_open_resource_directory",f.directory().absolutePath());
     }
-  if(!filename.isEmpty())
+  if(!filename.isEmpty()) {
+    opened_file = filename;
     SendCommand("load_file",filename.toStdString());
+  }
+}
+
+void QRobotTestGUI::ReloadFile()
+{
+  if(opened_file.isEmpty()) return;
+  SendCommand("reload_file",opened_file.toStdString());
 }

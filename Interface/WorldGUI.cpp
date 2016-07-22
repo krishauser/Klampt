@@ -46,6 +46,10 @@ bool WorldGUIBackend::OnCommand(const string& cmd,const string& args)
     LoadFile(args.c_str());
     return true;
   }
+  else if(cmd=="reload_file") {
+    ReloadFile(args.c_str());
+    return true;
+  }
   return GLNavigationBackend::OnCommand(cmd,args);
 }
 
@@ -76,6 +80,85 @@ bool WorldGUIBackend::LoadFile(const char* fn)
     return true;
 }
 
+bool WorldGUIBackend::ReloadFile(const char* fn)
+{
+  printf("Reloading %s\n",fn);
+  const char* ext=FileExtension(fn);
+    if(0==strcmp(ext,"xml")) {
+      if(!world->LoadXML(fn)) {
+  printf("WorldGUIBackend::ReloadFile: Error loading world file %s\n",fn);
+  return false;
+      }
+    }
+    else {
+      int id = world->LoadElement(fn);
+      if(id < 0) {
+        printf("WorldGUIBackend::ReloadFile: Error loading file %s\n",fn);
+        return false;
+      }
+      string name = world->GetName(id);
+      bool found = false;
+      if(world->IsRobot(id) >= 0) {
+        int index = world->IsRobot(id);
+        //check for previous robots of the same filename
+        for(size_t i=0;i<world->robots.size();i++) {
+          if(name == world->robots[i]->name) {
+            SmartPointer<Robot> r = world->robots[index];
+            SmartPointer<Robot> s = world->robots[i];
+            //copy configuration, if possible
+            map<string,int> jqmap;
+            for(size_t j=0;j<r->links.size();j++)
+              jqmap[r->linkNames[j]] = (int)j;
+            for(size_t j=0;j<s->links.size();j++) {
+              string n = s->linkNames[j];
+              if(jqmap.count(n) > 0) {
+                r->q[jqmap[n]] = s->q[j];
+                r->dq[jqmap[n]] = s->dq[j];
+              }
+            }
+            r->UpdateFrames();
+            r->UpdateGeometry();
+            world->robots[i] = r;
+            world->robots.erase(world->robots.begin()+index);
+            world->robotViews[i] = ViewRobot(r);
+            found = true;
+            break;
+          }
+        }
+      }
+      else if(world->IsRigidObject(id) >= 0) {
+        int index = world->IsRigidObject(id);
+        //check for previous rigid objects of the same filename
+        for(size_t i=0;i<world->rigidObjects.size();i++) {
+          if(name == world->rigidObjects[i]->name) {
+            world->rigidObjects[index]->T = world->rigidObjects[i]->T;
+            world->rigidObjects[i] = world->rigidObjects[index];
+            world->rigidObjects.erase(world->rigidObjects.begin()+index);
+            found = true;
+            break;
+          }
+        }
+      }
+      else  {
+        int index = world->IsTerrain(id);
+        Assert(index >= 0);
+        //check for previous rigid objects of the same filename
+        for(size_t i=0;i<world->terrains.size();i++) {
+          if(name == world->terrains[i]->name) {
+            world->terrains[i] = world->terrains[index];
+            world->terrains.erase(world->terrains.begin()+index);
+            found = true;
+            break;
+          }
+        }
+      }
+      if(!found) {
+        printf("WorldGUIBackend::ReloadFile: unable to find a previous item named %s\n",name.c_str());
+        return false;
+      }
+    }
+    return true;
+}
 
 bool WorldGUIBackend::LoadCommandLine(int argc,const char** argv)
 {

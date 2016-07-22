@@ -15,6 +15,7 @@ public:
     void SetDriver(int index);
     void SetLink(int index);
     void LoadFile(QString filename=QString());
+    void ReloadFile();
     virtual bool OnPauseIdle(double secs);
     virtual bool OnCommand(const string &cmd, const string &args);
     virtual bool OnRefresh();
@@ -23,6 +24,7 @@ public:
     QKlamptDisplay* display;
     CollisionOutput* col_out;
     QTimer idle_timer;
+    QString opened_file;
 
     int driver_index;
     int link_index;
