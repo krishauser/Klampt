@@ -2,7 +2,8 @@
 #define CONTROL_INERTIAL_SENSORS_H
 
 #include "Sensor.h"
-
+#include <KrisLibrary/math3d/primitives.h>
+using namespace Math3D;
 
 /** @ingroup Control
  * @brief Simulates an accelerometer.
@@ -13,7 +14,7 @@ class Accelerometer : public SensorBase
   Accelerometer();
   virtual const char* Type() const { return "Accelerometer"; }
   virtual void Simulate(ControlledRobotSimulator* robot,WorldSimulation* sim);
-  virtual void Advance(Real dt);
+  virtual void Advance(double dt);
   virtual void Reset();
   virtual void MeasurementNames(vector<string>& names) const;
   virtual void GetMeasurements(vector<double>& values) const;
@@ -45,7 +46,7 @@ class TiltSensor : public SensorBase
   TiltSensor();
   virtual const char* Type() const { return "TiltSensor"; }
   virtual void Simulate(ControlledRobotSimulator* robot,WorldSimulation* sim);
-  virtual void Advance(Real dt);
+  virtual void Advance(double dt);
   virtual void Reset();
   virtual void MeasurementNames(vector<string>& names) const;
   virtual void GetMeasurements(vector<double>& values) const;

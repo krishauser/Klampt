@@ -2,6 +2,7 @@
 #define CONTROL_OTHER_SENSORS_H
 
 #include "Sensor.h"
+#include <deque>
 
 /** @ingroup Control
  * @brief An exponentially smoothed filter that acts as a "piggyback" sensor.

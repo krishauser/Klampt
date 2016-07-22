@@ -2,6 +2,8 @@
 #define CONTROL_FORCE_SENSORS_H
 
 #include "Sensor.h"
+#include <KrisLibrary/math3d/primitives.h>
+using namespace Math3D;
 
 /** @ingroup Control
  * @brief Simulates a contact sensor / tactile sensor.
@@ -73,10 +75,10 @@ class ForceTorqueSensor : public SensorBase
   int link;                ///< The link on which the sensor is located (between link and parent)
   Vector3 localPos;        ///< The position of the sensor, in the local frame
   bool hasForce[3];        ///< true if force is measured along the given axis (default false)
-  bool hasMoment[3];       ///< true if moment is measured along the given axis (default false)
-  Vector3 fVariance, mVariance; ///< Estimated variance of the sensor (default 0)
+  bool hasTorque[3];       ///< true if torque is measured along the given axis (default false)
+  Vector3 fVariance, tVariance; ///< Estimated variance of the sensor (default 0)
 
-  Vector3 f,m;             ///< Measurement: the force/moment at the given position, on the link (negative on the parent link)
+  Vector3 f,t;             ///< Measurement: the force/torque at the given position, on the link (negative on the parent link)
 };
 
 #endif 

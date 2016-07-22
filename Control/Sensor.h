@@ -1,15 +1,12 @@
-#ifndef DYNAMICS_SENSORS_H
-#define DYNAMICS_SENSORS_H
+#ifndef CONTROL_SENSORS_H
+#define CONTROL_SENSORS_H
 
 #include <KrisLibrary/math/vector.h>
-#include <KrisLibrary/math3d/primitives.h>
 #include <KrisLibrary/utils/SmartPointer.h>
 #include <map>
 #include <vector>
-#include <deque>
 #include <string>
 #include <typeinfo>
-using namespace Math3D;
 using namespace std;
 
 class Robot;
@@ -55,7 +52,7 @@ class SensorBase
   ///Called whenever the sensor is updated from the simulaton
   virtual void Simulate(ControlledRobotSimulator* robot,WorldSimulation* sim) {}
   ///Advances to the next time step with duration dt elapsed
-  virtual void Advance(Real dt) {}
+  virtual void Advance(double dt) {}
   ///Should be overridden if the sensor is stateful to reset to an initial state
   virtual void Reset() {}
   virtual bool ReadState(File& f);

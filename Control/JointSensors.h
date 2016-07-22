@@ -2,7 +2,7 @@
 #define CONTROL_JOINT_SENSORS_H
 
 #include "Sensor.h"
-
+using namespace Math;
 
 /** @ingroup Control
  * @brief Simulates a joint encoder.

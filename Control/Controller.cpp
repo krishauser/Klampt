@@ -278,16 +278,20 @@ map<std::string,SmartPointer<RobotController> > RobotControllerFactory::controll
 
 SmartPointer<RobotController> MakeDefaultController(Robot* robot)
 {
-  string controllerFn;
-  if(robot->properties.get("controller",controllerFn)) {
-    SmartPointer<RobotController> res = RobotControllerFactory::Load(controllerFn.c_str(),*robot);
-    if(res) return res;
-    else {
-      printf("MakeDefaultController: could not load controller file %s\n",controllerFn.c_str());
-      printf("  Making the standard controller instead.\n");
-      printf("  Press enter to continue.\n");
-      getchar();
+  string controllerXml;
+  if(robot->properties.get("controller",controllerXml)) {
+    TiXmlElement n("controller");
+    stringstream ss(controllerXml);
+    ss >> n;
+    if(ss) {
+      SmartPointer<RobotController> res = RobotControllerFactory::Load(&n,*robot);
+      if(res) return res;
     }
+  
+    printf("MakeDefaultController: could not load controller from data %s\n",controllerXml.c_str());
+    printf("  Making the standard controller instead.\n");
+    printf("  Press enter to continue.\n");
+    getchar();
   }
   PolynomialPathController* c = new PolynomialPathController(*robot);
   FeedforwardController* fc = new FeedforwardController(*robot,c);

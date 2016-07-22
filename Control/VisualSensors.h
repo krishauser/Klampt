@@ -3,6 +3,8 @@
 
 #include "Sensor.h"
 #include <KrisLibrary/camera/viewport.h>
+#include <KrisLibrary/math3d/primitives.h>
+using namespace Math3D;
 
 /** @ingroup Control
  * @brief Simulates a laser range sensor, either sweeping or stationary.  Can
@@ -22,7 +24,7 @@ class LaserRangeSensor : public SensorBase
   LaserRangeSensor();
   virtual const char* Type() const { return "LaserRangeSensor"; }
   virtual void Simulate(ControlledRobotSimulator* robot,WorldSimulation* sim);
-  virtual void Advance(Real dt);
+  virtual void Advance(double dt);
   virtual void Reset();
   virtual void MeasurementNames(vector<string>& names) const;
   virtual void GetMeasurements(vector<double>& values) const;
