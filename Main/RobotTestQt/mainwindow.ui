@@ -470,66 +470,6 @@
     <string>Default</string>
    </property>
   </action>
-  <action name="actionDrivers">
-   <property name="text">
-    <string>Drivers</string>
-   </property>
-   <property name="toolTip">
-    <string>ctrl-d</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+D</string>
-   </property>
-  </action>
-  <action name="actionSensor_Plot">
-   <property name="text">
-    <string>Sensor Plot</string>
-   </property>
-   <property name="toolTip">
-    <string>ctrl-p</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+P</string>
-   </property>
-  </action>
-  <action name="actionOptions">
-   <property name="text">
-    <string>Options</string>
-   </property>
-   <property name="toolTip">
-    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;ctrl-r&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+R</string>
-   </property>
-  </action>
-  <action name="actionSave_State_As">
-   <property name="text">
-    <string>Save State As</string>
-   </property>
-   <property name="toolTip">
-    <string>ctrl-shift-s</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+Shift+S</string>
-   </property>
-  </action>
-  <action name="actionRecordFile">
-   <property name="text">
-    <string>Change File</string>
-   </property>
-  </action>
-  <action name="actionMultiple_Parts">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Multiple Parts</string>
-   </property>
-   <property name="statusTip">
-    <string>Does not automatically encode when a recording ends.  Can record 2 parts consecutively into 1 video.</string>
-   </property>
-  </action>
   <action name="action640x480">
    <property name="text">
     <string>640x480</string>
@@ -592,6 +532,9 @@
   <action name="actionReload_file">
    <property name="text">
     <string>Reload File</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+R</string>
    </property>
   </action>
  </widget>
