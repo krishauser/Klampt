@@ -608,14 +608,23 @@ bool Robot::LoadRob(const char* fn) {
 			return false;
 		  }
 		  if(stemp == "controller" || stemp == "sensors") {
-		    //prepend the robot path
-		    stringstream ss(value);
+		  	stringstream ss(value);
 		    string file;
 		    SafeInputString(ss,file);
-		    properties[stemp] = path + file;
+		  	const char* ext = FileExtension(file.c_str());
+		  	if(ext && 0==strcmp(ext,"xml")) {
+			    //prepend the robot path
+			    string fn = path + file;
+			    if(!GetFileContents(fn.c_str(),properties[stemp])) {
+			    	fprintf(stderr,"     Unable to read %s property from file %s\n",stemp.c_str(),fn.c_str());
+			    	return false;
+			    }
+			}
+			else 
+				properties[stemp] = value;
 		  }
 		  else 
-		    properties[stemp] = value;
+		    properties[stemp] = value; 
 		} else {
 			fprintf(stderr, "   Invalid robot property %s on line %d\n",
 					name.c_str(), lineno);
@@ -1163,22 +1172,8 @@ bool Robot::LoadRob(const char* fn) {
 						fn.c_str());
 				return false;
 			}
-			size_t lstart = links.size();
-			size_t dstart = drivers.size();
-			Mount(mountLinks[i], subchain, mountT[i]);
-
-			if(mountNames[i].empty()) {
-			  for (size_t k = lstart; k < links.size(); k++) 
-			    linkNames[k] = linkNames[k];
-			  for (size_t k = dstart; k < drivers.size(); k++)
-			    driverNames[k] = driverNames[k];
-			}
-			else {
-			  for (size_t k = lstart; k < links.size(); k++) 
-			    linkNames[k] = mountNames[i] + ":" + linkNames[k];
-			  for (size_t k = dstart; k < drivers.size(); k++)
-			    driverNames[k] = mountNames[i] + ":" + driverNames[k];
-			}
+			const char* prefix = (mountNames[i].empty() ? NULL : mountNames[i].c_str());
+			Mount(mountLinks[i], subchain, mountT[i], prefix);
 		}
 	}
 	if (!CheckValid())
@@ -1712,9 +1707,13 @@ void Robot::Mount(int link, const Geometry::AnyGeometry3D& mesh,
   //TODO: reinitialize all self collisions with this mesh
 }
 
-void Robot::Mount(int link, const Robot& subchain, const RigidTransform& T) {
+void Robot::Mount(int link, const Robot& subchain, const RigidTransform& T,const char* prefix)
+{
 	Assert(&subchain != this);
 	size_t norig = links.size();
+	size_t lstart = links.size();
+	size_t dstart = drivers.size();
+
 	ArrayUtils::concat(links, subchain.links);
 	//update mounting transform
 	RigidTransform T0;
@@ -1806,9 +1805,73 @@ void Robot::Mount(int link, const Robot& subchain, const RigidTransform& T) {
 				drivers[i + dorig].linkIndices[j] += norig;
 		}
 	}
+
+	//modify names of links and drivers
+	if(prefix == NULL) {
+	  for (size_t k = lstart; k < links.size(); k++) 
+	    linkNames[k] = linkNames[k];
+	  for (size_t k = dstart; k < drivers.size(); k++)
+	    driverNames[k] = driverNames[k];
+	}
+	else {
+		string sprefix(prefix);
+	  for (size_t k = lstart; k < links.size(); k++) 
+	    linkNames[k] = sprefix + ":" + linkNames[k];
+	  for (size_t k = dstart; k < drivers.size(); k++)
+	    driverNames[k] = sprefix + ":" + driverNames[k];
+	}
+
+	//modify sensors 
 	for(PropertyMap::const_iterator i=subchain.properties.begin();i!=subchain.properties.end();i++) {
 		if(i->first == "sensors") {
-			printf("Robot::Mount: Warning, mounted robot will not preserve sensors file %s\n",i->second.c_str());
+			stringstream ss(i->second);
+			TiXmlElement e("sensors");
+			ss >> e;
+			if(!ss) {
+				printf("Robot::Mount: Warning, mounted robot sensors couldn't be loaded %s\n",i->second.c_str());
+				continue;
+			}
+			//go through and modify all links
+			TiXmlElement* c = e.FirstChildElement();
+			while(c != NULL) {
+				if(c->Attribute("link")) {
+					//TODO: if the link is on the root element, transform Tsensor attribute by T
+					int link;
+					if(c->QueryIntAttribute("link",&link) == TIXML_SUCCESS) 
+						c->SetAttribute("link",lstart+link);
+					else {
+						//named link
+						if(prefix)
+							c->SetAttribute("link",(string(prefix)+":"+string(c->Attribute("link"))).c_str());
+					}
+				}
+				c = c->NextSiblingElement();
+			}
+			if(properties.count("sensors") > 0) {
+				cout<<"Robot::Mount: Adding sensors as children of previous sensors"<<endl;
+				//add sensors onto my sensors
+				TiXmlElement emaster("sensors");
+				stringstream ss1(properties["sensors"]);
+				ss1 >> emaster;
+				if(!ss1) {
+					printf("Robot::Mount: Warning, base robot's sensors couldn't be loaded %s\n",properties["sensors"].c_str());
+					continue;
+				}
+				TiXmlElement* c = e.FirstChildElement();
+				while(c != NULL) {
+					emaster.InsertEndChild(*c);
+					c = c->NextSiblingElement();
+				}
+				stringstream ss2;
+				ss2 << emaster;
+				properties["sensors"] = ss2.str();
+			}
+			else {
+				stringstream ss;
+				ss << e;
+				properties["sensors"] = ss.str();
+			}
+
 		}
 		else if(i->first == "controller") {
 			printf("Robot::Mount: Warning, mounted robot will not preserve controller %s\n",i->second.c_str());
