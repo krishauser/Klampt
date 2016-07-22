@@ -484,7 +484,10 @@ bool DriverTorqueSensor::SetSetting(const string& name,const string& str)
 
 
 ContactSensor::ContactSensor()
-  :link(0),patchMin(Zero),patchMax(Zero),patchTolerance(0),fVariance(Zero),contact(false),force(Zero)
+  :link(0),patchMin(Zero),patchMax(Zero),patchTolerance(0.001),
+  fResolution(Zero),fVariance(Zero),fSensitivity(Zero),fSaturation(Inf),
+  falloffCoefficient(0),
+  contact(false),force(Zero)
 {
   Tsensor.setIdentity();
   hasForce[0] = hasForce[1] = hasForce[2] = false;
@@ -512,12 +515,31 @@ void ContactSensor::Simulate(ControlledRobotSimulator* robot,WorldSimulation* si
 	 patchMin.y <= xlocal.y && xlocal.y <= patchMax.y &&
 	 Abs(xlocal.z) <= patchTolerance) {
 	//contact!
-	contact = true;
 	Tsensor.R.mulTranspose(contacts[i].forces[j],flocal);
-	force += flocal;
+  if(falloffCoefficient > 0) {
+    Vector2 patchCenter = 0.5*(patchMin+patchMax);
+    Real weight = 1.0-Abs(4.0*(xlocal.x - patchCenter.x)*(xlocal.y - patchCenter.y))/((patchMax.x - patchMin.x)*(patchMax.y - patchMin.y));
+    weight = Pow(weight,falloffCoefficient);
+    force.madd(flocal,weight);
+  }
+  else
+    force += flocal;
+	
       }
     }
   }
+
+  if(Abs(force.z) > fSensitivity)
+    contact = true;
+  force.x = Discretize(force.x,fResolution.x,fVariance.x);
+  force.y = Discretize(force.y,fResolution.y,fVariance.y);
+  force.z = Discretize(force.z,fResolution.z,fVariance.z);
+  if(Abs(force.x) > fSaturation.x) 
+    force.x = Sign(force.x)*fSaturation.x;
+  if(Abs(force.y) > fSaturation.y) 
+    force.y = Sign(force.y)*fSaturation.y;
+  if(Abs(force.z) > fSaturation.z) 
+    force.z = Sign(force.z)*fSaturation.z;
 }
 
 void ContactSensor::Reset()
@@ -564,7 +586,11 @@ map<string,string> ContactSensor::Settings() const
   FILL_SENSOR_SETTING(settings,patchMax);
   FILL_SENSOR_SETTING(settings,patchTolerance);
   FILL_ARRAY_SENSOR_SETTING(settings,hasForce,3);
+  FILL_SENSOR_SETTING(settings,fResolution);
   FILL_SENSOR_SETTING(settings,fVariance);
+  FILL_SENSOR_SETTING(settings,fSensitivity);
+  FILL_SENSOR_SETTING(settings,fSaturation);
+  FILL_SENSOR_SETTING(settings,falloffCoefficient);
   return settings;
 }
 
@@ -577,7 +603,11 @@ bool ContactSensor::GetSetting(const string& name,string& str) const
   GET_SENSOR_SETTING(patchMax);
   GET_SENSOR_SETTING(patchTolerance);
   GET_ARRAY_SENSOR_SETTING(hasForce,3);
+  GET_SENSOR_SETTING(fResolution);
   GET_SENSOR_SETTING(fVariance);
+  GET_SENSOR_SETTING(fSensitivity);
+  GET_SENSOR_SETTING(fSaturation);
+  GET_SENSOR_SETTING(falloffCoefficient);
   return false;
 }
 
@@ -590,32 +620,46 @@ bool ContactSensor::SetSetting(const string& name,const string& str)
   SET_SENSOR_SETTING(patchMax);
   SET_SENSOR_SETTING(patchTolerance);
   SET_ARRAY_SENSOR_SETTING(hasForce,3);
+  SET_SENSOR_SETTING(fResolution);
   SET_SENSOR_SETTING(fVariance);
+  SET_SENSOR_SETTING(fSensitivity);
+  SET_SENSOR_SETTING(fSaturation);
+  SET_SENSOR_SETTING(falloffCoefficient);
   return false;
 }
 
 void ContactSensor::DrawGL(const Robot& robot,const vector<double>& measurements)
 {
   glPushMatrix();
-  glMultMatrix(Matrix4(robot.links[link].T_World));
+  glMultMatrix(Matrix4(robot.links[link].T_World*Tsensor));
   glDisable(GL_LIGHTING);
   glColor3f(1,0,0);
-  Vector3 x,y,z;
-  Tsensor.R.get(x,y,z);
-  Vector3 o = Tsensor.t;
   if(measurements.empty() || measurements[0] == 0) {
-    drawQuad(o + patchMin.x*x + patchMin.y*y,
-      o + patchMax.x*x + patchMin.y*y,
-      o + patchMax.x*x + patchMax.y*y,
-      o + patchMin.x*x + patchMax.y*y);
+    glBegin(GL_LINE_LOOP);
+    glVertex3f(patchMin.x,patchMin.y,0);
+    glVertex3f(patchMax.x,patchMin.y,0);
+    glVertex3f(patchMax.x,patchMax.y,0);
+    glVertex3f(patchMin.x,patchMax.y,0);
+    glEnd();
+    if(patchTolerance > 0) {
+      glPushMatrix();
+      glTranslatef((patchMax.x+patchMin.x)*0.5,(patchMax.y+patchMin.y)*0.5,0.0);
+      drawWireBox((patchMax.x-patchMin.x),(patchMax.y-patchMin.y),patchTolerance*2.0);
+      glPopMatrix();
+    }
   }
   else {
-    glBegin(GL_LINE_LOOP);
-    glVertex3v(o + patchMin.x*x + patchMin.y*y);
-    glVertex3v(o + patchMax.x*x + patchMin.y*y);
-    glVertex3v(o + patchMax.x*x + patchMax.y*y);
-    glVertex3v(o + patchMin.x*x + patchMax.y*y);
-    glEnd();
+    glPushMatrix();
+    glTranslatef((patchMax.x+patchMin.x)*0.5,(patchMax.y+patchMin.y)*0.5,0.0);
+    glEnable(GL_LIGHTING);
+    GLDraw::GLColor red(1,0,0);
+    glMaterialfv(GL_FRONT,GL_AMBIENT_AND_DIFFUSE,red.rgba);
+    drawBox((patchMax.x-patchMin.x),(patchMax.y-patchMin.y),0.001);
+    glDisable(GL_LIGHTING);
+    if(patchTolerance > 0) {
+      drawWireBox((patchMax.x-patchMin.x),(patchMax.y-patchMin.y),patchTolerance*2.0);
+    }
+    glPopMatrix();
   }
   if(measurements.empty() || (!hasForce[0] && !hasForce[1] && !hasForce[2]))  {
     glPopMatrix();
@@ -628,8 +672,8 @@ void ContactSensor::DrawGL(const Robot& robot,const vector<double>& measurements
   if(hasForce[2]) { f.z=measurements[i]; i++; }
   glColor3f(1,0.5,0);
   glBegin(GL_LINES);
-  glVertex3v(Tsensor.t);
-  glVertex3v(Tsensor.t+f/9.8);
+  glVertex3f(0,0,0);
+  glVertex3v(f/9.8);
   glEnd();
   glPopMatrix();
 }
