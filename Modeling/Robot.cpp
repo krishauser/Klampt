@@ -1806,6 +1806,14 @@ void Robot::Mount(int link, const Robot& subchain, const RigidTransform& T) {
 				drivers[i + dorig].linkIndices[j] += norig;
 		}
 	}
+	for(PropertyMap::const_iterator i=subchain.properties.begin();i!=subchain.properties.end();i++) {
+		if(i->first == "sensors") {
+			printf("Robot::Mount: Warning, mounted robot will not preserve sensors file %s\n",i->second.c_str());
+		}
+		else if(i->first == "controller") {
+			printf("Robot::Mount: Warning, mounted robot will not preserve controller %s\n",i->second.c_str());
+		}
+	}
 }
 
 bool Robot::DoesJointAffect(int joint, int dof) const {
