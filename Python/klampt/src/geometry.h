@@ -128,6 +128,13 @@ struct GeometricPrimitive
  * world item's geometry, in which case modifiers change the 
  * world item's geometry, or it can be a standalone geometry.
  *
+ * There are four currently supported types of geometry:
+ * - primitives (GeometricPrimitive)
+ * - triangle meshes (TriangleMesh)
+ * - point clouds (PointCloud)
+ * - groups (Group)
+ * This class acts as a uniform container of all of these types.
+ *
  * Each geometry stores a "current" transform, which is automatically updated
  * for world items' geometries.  The proximity queries are performed with 
  * respect to the transformed geometries (note the underlying geometry is 
@@ -154,6 +161,9 @@ class Geometry3D
  public:
   Geometry3D();
   Geometry3D(const Geometry3D&);
+  Geometry3D(const GeometricPrimitive&);
+  Geometry3D(const TriangleMesh&);
+  Geometry3D(const PointCloud&);
   ~Geometry3D();
   const Geometry3D& operator = (const Geometry3D& rhs);
   ///Creates a standalone geometry from this geometry
@@ -167,7 +177,7 @@ class Geometry3D
   ///Returns the type of geometry: TriangleMesh, PointCloud, or
   ///GeometricPrimitive
   std::string type();
-  ///Returns true if this has no contents
+  ///Returns true if this has no contents (not the same as numElements()==0)
   bool empty();
   ///Returns a TriangleMesh if this geometry is of type TriangleMesh
   TriangleMesh getTriangleMesh();
@@ -175,9 +185,24 @@ class Geometry3D
   PointCloud getPointCloud();
   ///Returns a GeometricPrimitive if this geometry is of type GeometricPrimitive
   GeometricPrimitive getGeometricPrimitive();
+  ///Sets this Geometry3D to a TriangleMesh
   void setTriangleMesh(const TriangleMesh&);
+  ///Sets this Geometry3D to a PointCloud
   void setPointCloud(const PointCloud&);
+  ///Sets this Geometry3D to a GeometricPrimitive
   void setGeometricPrimitive(const GeometricPrimitive&);
+  ///Sets this Geometry3D to a group geometry.  To add sub-geometries, repeatedly call
+  ///setElement()
+  void setGroup();
+  ///Returns an element of the Geometry3D if it is a group.  Raises an error if this
+  ///is of any other type.
+  Geometry3D getElement(int element);
+  ///Sets an element of the Geometry3D if it is a group.  Raises an error if this is
+  ///of any other type.  
+  void setElement(int element,const Geometry3D& data);
+  ///Returns the number of sub-elements in this geometry
+  int numElements();
+
   ///Loads from file.  Standard mesh types, PCD files, and .geom files are
   ///supported.
   bool loadFile(const char* fn);
@@ -203,7 +228,7 @@ class Geometry3D
   void setCurrentTransform(const double R[9],const double t[3]);
   ///Translates the geometry data 
   void translate(const double t[3]);
-  ///Translates/rotates the geometry data 
+  ///Translates/rotates/scales the geometry data 
   void transform(const double R[9],const double t[3]);
   ///Sets a padding around the base geometry which affects the results of
   ///proximity queries

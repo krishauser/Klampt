@@ -416,7 +416,31 @@ Geometry3D::Geometry3D(const Geometry3D& rhs)
   :world(rhs.world),id(rhs.id),geomPtr(NULL)
 {
   SmartPointer<AnyCollisionGeometry3D>* geom = reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(rhs.geomPtr);
-  geomPtr = new SmartPointer<AnyCollisionGeometry3D>(*geom);
+  if(*geom != NULL)
+    geomPtr = new SmartPointer<AnyCollisionGeometry3D>(*geom);
+  else
+    geomPtr = new SmartPointer<AnyCollisionGeometry3D>();
+}
+
+Geometry3D::Geometry3D(const GeometricPrimitive& rhs)
+  :world(-1),id(-1),geomPtr(NULL)
+{
+  geomPtr = new SmartPointer<AnyCollisionGeometry3D>();
+  setGeometricPrimitive(rhs);
+}
+
+Geometry3D::Geometry3D(const TriangleMesh& rhs)
+  :world(-1),id(-1),geomPtr(NULL)
+{
+  geomPtr = new SmartPointer<AnyCollisionGeometry3D>();
+  setTriangleMesh(rhs);
+}
+
+Geometry3D::Geometry3D(const PointCloud& rhs)
+  :world(-1),id(-1),geomPtr(NULL)
+{
+  geomPtr = new SmartPointer<AnyCollisionGeometry3D>();
+  setPointCloud(rhs);
 }
 
 Geometry3D::~Geometry3D()
@@ -469,8 +493,10 @@ void Geometry3D::set(const Geometry3D& g)
     else
       geom = new AnyCollisionGeometry3D();
   }
+  else
+    Assert(&*geom == &*mgeom);
   *geom = *ggeom;
-  geom->ClearCollisionData();
+  //geom->ClearCollisionData();
   if(mgeom) {
     //update the display list / cache
     mgeom->OnGeometryChange();
@@ -482,7 +508,7 @@ void Geometry3D::free()
 {
   SmartPointer<AnyCollisionGeometry3D>* geom = reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(geomPtr);  
   if(isStandalone() && *geom) {
-    printf("Geometry3D(): Freeing standalone geometry\n");
+    //printf("Geometry3D(): Freeing standalone geometry\n");
     *geom = NULL;
   }
   world = -1;
@@ -556,6 +582,79 @@ void Geometry3D::setTriangleMesh(const TriangleMesh& mesh)
   }
 }
 
+void Geometry3D::setGroup()
+{
+  SmartPointer<AnyCollisionGeometry3D>& geom = *reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(geomPtr);
+  ManagedGeometry* mgeom = NULL;
+  if(!isStandalone()) {
+    RobotWorld& world = *worlds[this->world]->world;
+    mgeom = &GetManagedGeometry(world,id);
+  }
+  if(geom == NULL) {
+    if(mgeom) 
+      geom = mgeom->CreateEmpty();
+    else
+      geom = new AnyCollisionGeometry3D();
+  }
+  *geom = AnyCollisionGeometry3D(vector<Geometry::AnyGeometry3D>());
+  geom->ReinitCollisionData();
+}
+
+Geometry3D Geometry3D::getElement(int element)
+{
+  SmartPointer<AnyCollisionGeometry3D>& geom = *reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(geomPtr);
+  if(!geom) 
+    throw PyException("Geometry is empty");
+  if(geom->type != AnyCollisionGeometry3D::Group)
+    throw PyException("Not a group geometry");
+  vector<AnyCollisionGeometry3D>& data = geom->GroupCollisionData();
+  if(element < 0 || element >= (int)data.size())
+    throw PyException("Invalid element specified");
+  Geometry3D res;
+  SmartPointer<AnyCollisionGeometry3D>& rgeom = *reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(res.geomPtr);
+  *rgeom = data[element];
+  return res;
+}
+
+void Geometry3D::setElement(int element,const Geometry3D& rhs)
+{
+  SmartPointer<AnyCollisionGeometry3D>& rgeom = *reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(rhs.geomPtr);
+  if(rgeom == NULL) 
+    throw PyException("Setting an element to an empty geometry?");
+
+  SmartPointer<AnyCollisionGeometry3D>& geom = *reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(geomPtr);
+  if(!geom) 
+    throw PyException("Geometry is empty");
+  if(geom->type != AnyCollisionGeometry3D::Group)
+    throw PyException("Not a group geometry");
+  vector<AnyGeometry3D>& data = geom->AsGroup();
+  if(element < 0 || element > (int)data.size())
+    throw PyException("Invalid element specified");
+  Assert(rhs.geomPtr != NULL);
+  vector<AnyCollisionGeometry3D>& cdata = geom->GroupCollisionData();
+  
+  if(element == (int)data.size()) {
+    data.push_back(*rgeom);
+    cdata.push_back(*rgeom);
+  }
+  else {
+    data[element] = *rgeom;
+    cdata[element] = *rgeom;
+  }
+}
+
+int Geometry3D::numElements()
+{
+  SmartPointer<AnyCollisionGeometry3D>& geom = *reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(geomPtr);
+  if(!geom) 
+    throw PyException("Geometry is empty");
+  if(geom->type != AnyCollisionGeometry3D::Group)
+    throw PyException("Not a group geometry");
+  vector<AnyGeometry3D>& data = geom->AsGroup();
+  return (int)data.size();
+}
+
+
 PointCloud Geometry3D::getPointCloud()
 {
   SmartPointer<AnyCollisionGeometry3D>& geom = *reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(geomPtr);
@@ -568,7 +667,7 @@ PointCloud Geometry3D::getPointCloud()
 
 void Geometry3D::setPointCloud(const PointCloud& pc)
 {
-  SmartPointer<AnyCollisionGeometry3D> geom = *reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(geomPtr);
+  SmartPointer<AnyCollisionGeometry3D>& geom = *reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(geomPtr);
   ManagedGeometry* mgeom = NULL;
   if(!isStandalone()) {
     RobotWorld& world = *worlds[this->world]->world;
@@ -593,7 +692,7 @@ void Geometry3D::setPointCloud(const PointCloud& pc)
 
 void Geometry3D::setGeometricPrimitive(const GeometricPrimitive& prim)
 {
-  SmartPointer<AnyCollisionGeometry3D> geom = *reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(geomPtr);  
+  SmartPointer<AnyCollisionGeometry3D>& geom = *reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(geomPtr);  
   ManagedGeometry* mgeom = NULL;
   if(!isStandalone()) {
     RobotWorld& world = *worlds[this->world]->world;

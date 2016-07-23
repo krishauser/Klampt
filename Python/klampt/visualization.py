@@ -1020,7 +1020,7 @@ if glcommon._PyQtAvailable:
             if _window:
                 if _showwindow:
                     if not _window.isVisible():
-                        print "Show window, window is not None"
+                        #print "Show window, window is not None"
                         _window.show()
                 else:
                     _widget.setParent(None)
@@ -1029,7 +1029,7 @@ if glcommon._PyQtAvailable:
                     _window = None
             else:
                 if _showwindow:
-                    print "Creating window"
+                    #print "Creating window"
                     _window=_MyWindow()
             
             if _showdialog:

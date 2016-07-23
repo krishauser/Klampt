@@ -18591,6 +18591,117 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_new_Geometry3D__SWIG_2(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  GeometricPrimitive *arg1 = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  Geometry3D *result = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:new_Geometry3D",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1, SWIGTYPE_p_GeometricPrimitive,  0  | 0);
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "new_Geometry3D" "', argument " "1"" of type '" "GeometricPrimitive const &""'"); 
+  }
+  if (!argp1) {
+    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "new_Geometry3D" "', argument " "1"" of type '" "GeometricPrimitive const &""'"); 
+  }
+  arg1 = reinterpret_cast< GeometricPrimitive * >(argp1);
+  {
+    try {
+      result = (Geometry3D *)new Geometry3D((GeometricPrimitive const &)*arg1);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_Geometry3D, SWIG_POINTER_NEW |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_new_Geometry3D__SWIG_3(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  TriangleMesh *arg1 = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  Geometry3D *result = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:new_Geometry3D",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1, SWIGTYPE_p_TriangleMesh,  0  | 0);
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "new_Geometry3D" "', argument " "1"" of type '" "TriangleMesh const &""'"); 
+  }
+  if (!argp1) {
+    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "new_Geometry3D" "', argument " "1"" of type '" "TriangleMesh const &""'"); 
+  }
+  arg1 = reinterpret_cast< TriangleMesh * >(argp1);
+  {
+    try {
+      result = (Geometry3D *)new Geometry3D((TriangleMesh const &)*arg1);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_Geometry3D, SWIG_POINTER_NEW |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_new_Geometry3D__SWIG_4(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  PointCloud *arg1 = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  Geometry3D *result = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:new_Geometry3D",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1, SWIGTYPE_p_PointCloud,  0  | 0);
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "new_Geometry3D" "', argument " "1"" of type '" "PointCloud const &""'"); 
+  }
+  if (!argp1) {
+    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "new_Geometry3D" "', argument " "1"" of type '" "PointCloud const &""'"); 
+  }
+  arg1 = reinterpret_cast< PointCloud * >(argp1);
+  {
+    try {
+      result = (Geometry3D *)new Geometry3D((PointCloud const &)*arg1);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_Geometry3D, SWIG_POINTER_NEW |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_new_Geometry3D(PyObject *self, PyObject *args) {
   int argc;
   PyObject *argv[2];
@@ -18612,12 +18723,39 @@ SWIGINTERN PyObject *_wrap_new_Geometry3D(PyObject *self, PyObject *args) {
       return _wrap_new_Geometry3D__SWIG_1(self, args);
     }
   }
+  if (argc == 1) {
+    int _v;
+    int res = SWIG_ConvertPtr(argv[0], 0, SWIGTYPE_p_GeometricPrimitive, 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      return _wrap_new_Geometry3D__SWIG_2(self, args);
+    }
+  }
+  if (argc == 1) {
+    int _v;
+    int res = SWIG_ConvertPtr(argv[0], 0, SWIGTYPE_p_TriangleMesh, 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      return _wrap_new_Geometry3D__SWIG_3(self, args);
+    }
+  }
+  if (argc == 1) {
+    int _v;
+    int res = SWIG_ConvertPtr(argv[0], 0, SWIGTYPE_p_PointCloud, 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      return _wrap_new_Geometry3D__SWIG_4(self, args);
+    }
+  }
   
 fail:
   SWIG_SetErrorMsg(PyExc_NotImplementedError,"Wrong number or type of arguments for overloaded function 'new_Geometry3D'.\n"
     "  Possible C/C++ prototypes are:\n"
     "    Geometry3D::Geometry3D()\n"
-    "    Geometry3D::Geometry3D(Geometry3D const &)\n");
+    "    Geometry3D::Geometry3D(Geometry3D const &)\n"
+    "    Geometry3D::Geometry3D(GeometricPrimitive const &)\n"
+    "    Geometry3D::Geometry3D(TriangleMesh const &)\n"
+    "    Geometry3D::Geometry3D(PointCloud const &)\n");
   return 0;
 }
 
@@ -19100,6 +19238,170 @@ SWIGINTERN PyObject *_wrap_Geometry3D_setGeometricPrimitive(PyObject *SWIGUNUSED
     }
   }
   resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Geometry3D_setGroup(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Geometry3D *arg1 = (Geometry3D *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:Geometry3D_setGroup",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Geometry3D, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Geometry3D_setGroup" "', argument " "1"" of type '" "Geometry3D *""'"); 
+  }
+  arg1 = reinterpret_cast< Geometry3D * >(argp1);
+  {
+    try {
+      (arg1)->setGroup();
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Geometry3D_getElement(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Geometry3D *arg1 = (Geometry3D *) 0 ;
+  int arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  Geometry3D result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:Geometry3D_getElement",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Geometry3D, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Geometry3D_getElement" "', argument " "1"" of type '" "Geometry3D *""'"); 
+  }
+  arg1 = reinterpret_cast< Geometry3D * >(argp1);
+  ecode2 = SWIG_AsVal_int(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Geometry3D_getElement" "', argument " "2"" of type '" "int""'");
+  } 
+  arg2 = static_cast< int >(val2);
+  {
+    try {
+      result = (arg1)->getElement(arg2);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_NewPointerObj((new Geometry3D(static_cast< const Geometry3D& >(result))), SWIGTYPE_p_Geometry3D, SWIG_POINTER_OWN |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Geometry3D_setElement(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Geometry3D *arg1 = (Geometry3D *) 0 ;
+  int arg2 ;
+  Geometry3D *arg3 = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  void *argp3 = 0 ;
+  int res3 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  PyObject * obj2 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OOO:Geometry3D_setElement",&obj0,&obj1,&obj2)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Geometry3D, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Geometry3D_setElement" "', argument " "1"" of type '" "Geometry3D *""'"); 
+  }
+  arg1 = reinterpret_cast< Geometry3D * >(argp1);
+  ecode2 = SWIG_AsVal_int(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Geometry3D_setElement" "', argument " "2"" of type '" "int""'");
+  } 
+  arg2 = static_cast< int >(val2);
+  res3 = SWIG_ConvertPtr(obj2, &argp3, SWIGTYPE_p_Geometry3D,  0  | 0);
+  if (!SWIG_IsOK(res3)) {
+    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "Geometry3D_setElement" "', argument " "3"" of type '" "Geometry3D const &""'"); 
+  }
+  if (!argp3) {
+    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "Geometry3D_setElement" "', argument " "3"" of type '" "Geometry3D const &""'"); 
+  }
+  arg3 = reinterpret_cast< Geometry3D * >(argp3);
+  {
+    try {
+      (arg1)->setElement(arg2,(Geometry3D const &)*arg3);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Geometry3D_numElements(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Geometry3D *arg1 = (Geometry3D *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  int result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:Geometry3D_numElements",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Geometry3D, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Geometry3D_numElements" "', argument " "1"" of type '" "Geometry3D *""'"); 
+  }
+  arg1 = reinterpret_cast< Geometry3D * >(argp1);
+  {
+    try {
+      result = (int)(arg1)->numElements();
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_From_int(static_cast< int >(result));
   return resultobj;
 fail:
   return NULL;
@@ -21124,6 +21426,66 @@ fail:
 SWIGINTERN PyObject *_wrap_Appearance_setColor__SWIG_1(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   Appearance *arg1 = (Appearance *) 0 ;
+  float arg2 ;
+  float arg3 ;
+  float arg4 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  float val2 ;
+  int ecode2 = 0 ;
+  float val3 ;
+  int ecode3 = 0 ;
+  float val4 ;
+  int ecode4 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  PyObject * obj2 = 0 ;
+  PyObject * obj3 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OOOO:Appearance_setColor",&obj0,&obj1,&obj2,&obj3)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Appearance, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Appearance_setColor" "', argument " "1"" of type '" "Appearance *""'"); 
+  }
+  arg1 = reinterpret_cast< Appearance * >(argp1);
+  ecode2 = SWIG_AsVal_float(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Appearance_setColor" "', argument " "2"" of type '" "float""'");
+  } 
+  arg2 = static_cast< float >(val2);
+  ecode3 = SWIG_AsVal_float(obj2, &val3);
+  if (!SWIG_IsOK(ecode3)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "Appearance_setColor" "', argument " "3"" of type '" "float""'");
+  } 
+  arg3 = static_cast< float >(val3);
+  ecode4 = SWIG_AsVal_float(obj3, &val4);
+  if (!SWIG_IsOK(ecode4)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode4), "in method '" "Appearance_setColor" "', argument " "4"" of type '" "float""'");
+  } 
+  arg4 = static_cast< float >(val4);
+  {
+    try {
+      (arg1)->setColor(arg2,arg3,arg4);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Appearance_setColor__SWIG_2(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Appearance *arg1 = (Appearance *) 0 ;
   int arg2 ;
   float arg3 ;
   float arg4 ;
@@ -21209,6 +21571,33 @@ SWIGINTERN PyObject *_wrap_Appearance_setColor(PyObject *self, PyObject *args) {
   for (ii = 0; (ii < 6) && (ii < argc); ii++) {
     argv[ii] = PyTuple_GET_ITEM(args,ii);
   }
+  if (argc == 4) {
+    int _v;
+    void *vptr = 0;
+    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_Appearance, 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      {
+        int res = SWIG_AsVal_float(argv[1], NULL);
+        _v = SWIG_CheckState(res);
+      }
+      if (_v) {
+        {
+          int res = SWIG_AsVal_float(argv[2], NULL);
+          _v = SWIG_CheckState(res);
+        }
+        if (_v) {
+          {
+            int res = SWIG_AsVal_float(argv[3], NULL);
+            _v = SWIG_CheckState(res);
+          }
+          if (_v) {
+            return _wrap_Appearance_setColor__SWIG_1(self, args);
+          }
+        }
+      }
+    }
+  }
   if (argc == 5) {
     int _v;
     void *vptr = 0;
@@ -21273,7 +21662,7 @@ SWIGINTERN PyObject *_wrap_Appearance_setColor(PyObject *self, PyObject *args) {
                 _v = SWIG_CheckState(res);
               }
               if (_v) {
-                return _wrap_Appearance_setColor__SWIG_1(self, args);
+                return _wrap_Appearance_setColor__SWIG_2(self, args);
               }
             }
           }
@@ -21286,6 +21675,7 @@ fail:
   SWIG_SetErrorMsg(PyExc_NotImplementedError,"Wrong number or type of arguments for overloaded function 'Appearance_setColor'.\n"
     "  Possible C/C++ prototypes are:\n"
     "    Appearance::setColor(float,float,float,float)\n"
+    "    Appearance::setColor(float,float,float)\n"
     "    Appearance::setColor(int,float,float,float,float)\n");
   return 0;
 }
@@ -45406,7 +45796,10 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"GeometricPrimitive_swigregister", GeometricPrimitive_swigregister, METH_VARARGS, NULL},
 	 { (char *)"new_Geometry3D", _wrap_new_Geometry3D, METH_VARARGS, (char *)"\n"
 		"Geometry3D()\n"
-		"new_Geometry3D(Geometry3D arg1) -> Geometry3D\n"
+		"Geometry3D(Geometry3D arg2)\n"
+		"Geometry3D(GeometricPrimitive arg2)\n"
+		"Geometry3D(TriangleMesh arg2)\n"
+		"new_Geometry3D(PointCloud arg1) -> Geometry3D\n"
 		""},
 	 { (char *)"delete_Geometry3D", _wrap_delete_Geometry3D, METH_VARARGS, (char *)"delete_Geometry3D(Geometry3D self)"},
 	 { (char *)"Geometry3D_clone", _wrap_Geometry3D_clone, METH_VARARGS, (char *)"\n"
@@ -45438,7 +45831,8 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"Geometry3D_empty", _wrap_Geometry3D_empty, METH_VARARGS, (char *)"\n"
 		"Geometry3D_empty(Geometry3D self) -> bool\n"
 		"\n"
-		"Returns true if this has no contents. \n"
+		"Returns true if this has no contents (not the same as\n"
+		"numElements()==0) \n"
 		""},
 	 { (char *)"Geometry3D_getTriangleMesh", _wrap_Geometry3D_getTriangleMesh, METH_VARARGS, (char *)"\n"
 		"Geometry3D_getTriangleMesh(Geometry3D self) -> TriangleMesh\n"
@@ -45456,9 +45850,44 @@ static PyMethodDef SwigMethods[] = {
 		"Returns a GeometricPrimitive if this geometry is of type\n"
 		"GeometricPrimitive. \n"
 		""},
-	 { (char *)"Geometry3D_setTriangleMesh", _wrap_Geometry3D_setTriangleMesh, METH_VARARGS, (char *)"Geometry3D_setTriangleMesh(Geometry3D self, TriangleMesh arg2)"},
-	 { (char *)"Geometry3D_setPointCloud", _wrap_Geometry3D_setPointCloud, METH_VARARGS, (char *)"Geometry3D_setPointCloud(Geometry3D self, PointCloud arg2)"},
-	 { (char *)"Geometry3D_setGeometricPrimitive", _wrap_Geometry3D_setGeometricPrimitive, METH_VARARGS, (char *)"Geometry3D_setGeometricPrimitive(Geometry3D self, GeometricPrimitive arg2)"},
+	 { (char *)"Geometry3D_setTriangleMesh", _wrap_Geometry3D_setTriangleMesh, METH_VARARGS, (char *)"\n"
+		"Geometry3D_setTriangleMesh(Geometry3D self, TriangleMesh arg2)\n"
+		"\n"
+		"Sets this Geometry3D to a TriangleMesh. \n"
+		""},
+	 { (char *)"Geometry3D_setPointCloud", _wrap_Geometry3D_setPointCloud, METH_VARARGS, (char *)"\n"
+		"Geometry3D_setPointCloud(Geometry3D self, PointCloud arg2)\n"
+		"\n"
+		"Sets this Geometry3D to a PointCloud. \n"
+		""},
+	 { (char *)"Geometry3D_setGeometricPrimitive", _wrap_Geometry3D_setGeometricPrimitive, METH_VARARGS, (char *)"\n"
+		"Geometry3D_setGeometricPrimitive(Geometry3D self, GeometricPrimitive arg2)\n"
+		"\n"
+		"Sets this Geometry3D to a GeometricPrimitive. \n"
+		""},
+	 { (char *)"Geometry3D_setGroup", _wrap_Geometry3D_setGroup, METH_VARARGS, (char *)"\n"
+		"Geometry3D_setGroup(Geometry3D self)\n"
+		"\n"
+		"Sets this Geometry3D to a group geometry. To add sub-geometries,\n"
+		"repeatedly call setElement() \n"
+		""},
+	 { (char *)"Geometry3D_getElement", _wrap_Geometry3D_getElement, METH_VARARGS, (char *)"\n"
+		"Geometry3D_getElement(Geometry3D self, int element) -> Geometry3D\n"
+		"\n"
+		"Returns an element of the Geometry3D if it is a group. Raises an error\n"
+		"if this is of any other type. \n"
+		""},
+	 { (char *)"Geometry3D_setElement", _wrap_Geometry3D_setElement, METH_VARARGS, (char *)"\n"
+		"Geometry3D_setElement(Geometry3D self, int element, Geometry3D data)\n"
+		"\n"
+		"Sets an element of the Geometry3D if it is a group. Raises an error if\n"
+		"this is of any other type. \n"
+		""},
+	 { (char *)"Geometry3D_numElements", _wrap_Geometry3D_numElements, METH_VARARGS, (char *)"\n"
+		"Geometry3D_numElements(Geometry3D self) -> int\n"
+		"\n"
+		"Returns the number of sub-elements in this geometry. \n"
+		""},
 	 { (char *)"Geometry3D_loadFile", _wrap_Geometry3D_loadFile, METH_VARARGS, (char *)"\n"
 		"Geometry3D_loadFile(Geometry3D self, char const * fn) -> bool\n"
 		"\n"
@@ -45583,7 +46012,8 @@ static PyMethodDef SwigMethods[] = {
 		"Appearance_getDraw(Appearance self, int primitive) -> bool\n"
 		""},
 	 { (char *)"Appearance_setColor", _wrap_Appearance_setColor, METH_VARARGS, (char *)"\n"
-		"setColor(float r, float g, float b, float a)\n"
+		"setColor(float r, float g, float b, float a=1)\n"
+		"setColor(float r, float g, float b)\n"
 		"Appearance_setColor(Appearance self, int primitive, float r, float g, float b, float a)\n"
 		""},
 	 { (char *)"Appearance_getColor", _wrap_Appearance_getColor, METH_VARARGS, (char *)"\n"
@@ -45727,7 +46157,11 @@ static PyMethodDef SwigMethods[] = {
 		"Returns the ID of the robot link in its world (Note: not the same as\n"
 		"getIndex()) \n"
 		""},
-	 { (char *)"RobotModelLink_getName", _wrap_RobotModelLink_getName, METH_VARARGS, (char *)"RobotModelLink_getName(RobotModelLink self) -> char const *"},
+	 { (char *)"RobotModelLink_getName", _wrap_RobotModelLink_getName, METH_VARARGS, (char *)"\n"
+		"RobotModelLink_getName(RobotModelLink self) -> char const *\n"
+		"\n"
+		"Returns the name of the robot link. \n"
+		""},
 	 { (char *)"RobotModelLink_robot", _wrap_RobotModelLink_robot, METH_VARARGS, (char *)"\n"
 		"RobotModelLink_robot(RobotModelLink self) -> RobotModel\n"
 		"\n"
@@ -45748,12 +46182,17 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"Returns the index of the link's parent (on its robot). \n"
 		""},
-	 { (char *)"RobotModelLink_parent", _wrap_RobotModelLink_parent, METH_VARARGS, (char *)"RobotModelLink_parent(RobotModelLink self) -> RobotModelLink"},
+	 { (char *)"RobotModelLink_parent", _wrap_RobotModelLink_parent, METH_VARARGS, (char *)"\n"
+		"RobotModelLink_parent(RobotModelLink self) -> RobotModelLink\n"
+		"\n"
+		"Returns a reference to the link's parent, or a NULL link if it has no\n"
+		"parent. \n"
+		""},
 	 { (char *)"RobotModelLink_setParent", _wrap_RobotModelLink_setParent, METH_VARARGS, (char *)"\n"
 		"setParent(int p)\n"
 		"RobotModelLink_setParent(RobotModelLink self, RobotModelLink l)\n"
 		"\n"
-		"Sets the index of the link's parent (on its robot). \n"
+		"Sets the link's parent (must be on the same robot). \n"
 		""},
 	 { (char *)"RobotModelLink_geometry", _wrap_RobotModelLink_geometry, METH_VARARGS, (char *)"\n"
 		"RobotModelLink_geometry(RobotModelLink self) -> Geometry3D\n"
@@ -46083,6 +46522,11 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"RobotModel_randomizeConfig", _wrap_RobotModel_randomizeConfig, METH_VARARGS, (char *)"\n"
 		"randomizeConfig(double unboundedScale=1.0)\n"
 		"RobotModel_randomizeConfig(RobotModel self)\n"
+		"\n"
+		"Samples a random configuration and updates the robot's pose. Properly\n"
+		"handles non-normal joints and handles DOFs with infinite bounds using\n"
+		"a centered Laplacian distribution with the given scaling term. (Note\n"
+		"that the python random seeding does not affect the result.) \n"
 		""},
 	 { (char *)"RobotModel_selfCollisionEnabled", _wrap_RobotModel_selfCollisionEnabled, METH_VARARGS, (char *)"\n"
 		"RobotModel_selfCollisionEnabled(RobotModel self, int link1, int link2) -> bool\n"
@@ -46106,7 +46550,10 @@ static PyMethodDef SwigMethods[] = {
 		"RobotModel_drawGL(RobotModel self)\n"
 		"\n"
 		"Draws the robot geometry. If keepAppearance=true, the current\n"
-		"appearance is honored. Otherwise, only the raw geometry is drawn. \n"
+		"appearance is honored. Otherwise, only the raw geometry is drawn.\n"
+		"PERFORMANCE WARNING: if keepAppearance is false, then this does not\n"
+		"properly reuse OpenGL display lists. A better approach to changing the\n"
+		"robot's appearances is to set the link Appearance's directly. \n"
 		""},
 	 { (char *)"RobotModel_world_set", _wrap_RobotModel_world_set, METH_VARARGS, (char *)"RobotModel_world_set(RobotModel self, int world)"},
 	 { (char *)"RobotModel_world_get", _wrap_RobotModel_world_get, METH_VARARGS, (char *)"RobotModel_world_get(RobotModel self) -> int"},
@@ -46130,6 +46577,12 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"RigidObjectModel_drawGL", _wrap_RigidObjectModel_drawGL, METH_VARARGS, (char *)"\n"
 		"drawGL(bool keepAppearance=True)\n"
 		"RigidObjectModel_drawGL(RigidObjectModel self)\n"
+		"\n"
+		"Draws the object's geometry. If keepAppearance=true, the current\n"
+		"appearance is honored. Otherwise, only the raw geometry is drawn.\n"
+		"PERFORMANCE WARNING: if keepAppearance is false, then this does not\n"
+		"properly reuse OpenGL display lists. A better approach to changing\n"
+		"object's Appearance directly. \n"
 		""},
 	 { (char *)"RigidObjectModel_world_set", _wrap_RigidObjectModel_world_set, METH_VARARGS, (char *)"RigidObjectModel_world_set(RigidObjectModel self, int world)"},
 	 { (char *)"RigidObjectModel_world_get", _wrap_RigidObjectModel_world_get, METH_VARARGS, (char *)"RigidObjectModel_world_get(RigidObjectModel self) -> int"},
@@ -46148,6 +46601,12 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"TerrainModel_drawGL", _wrap_TerrainModel_drawGL, METH_VARARGS, (char *)"\n"
 		"drawGL(bool keepAppearance=True)\n"
 		"TerrainModel_drawGL(TerrainModel self)\n"
+		"\n"
+		"Draws the object's geometry. If keepAppearance=true, the current\n"
+		"appearance is honored. Otherwise, only the raw geometry is drawn.\n"
+		"PERFORMANCE WARNING: if keepAppearance is false, then this does not\n"
+		"properly reuse OpenGL display lists. A better approach to changing\n"
+		"object's Appearance directly. \n"
 		""},
 	 { (char *)"TerrainModel_world_set", _wrap_TerrainModel_world_set, METH_VARARGS, (char *)"TerrainModel_world_set(TerrainModel self, int world)"},
 	 { (char *)"TerrainModel_world_get", _wrap_TerrainModel_world_get, METH_VARARGS, (char *)"TerrainModel_world_get(TerrainModel self) -> int"},
@@ -46271,7 +46730,7 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"WorldModel_drawGL", _wrap_WorldModel_drawGL, METH_VARARGS, (char *)"\n"
 		"WorldModel_drawGL(WorldModel self)\n"
 		"\n"
-		"Draws the entire world. \n"
+		"Draws the entire world using OpenGL. \n"
 		""},
 	 { (char *)"WorldModel_enableGeometryLoading", _wrap_WorldModel_enableGeometryLoading, METH_VARARGS, (char *)"\n"
 		"WorldModel_enableGeometryLoading(WorldModel self, bool enabled)\n"
@@ -46582,7 +47041,11 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"SimRobotSensor_swigregister", SimRobotSensor_swigregister, METH_VARARGS, NULL},
 	 { (char *)"new_SimRobotController", _wrap_new_SimRobotController, METH_VARARGS, (char *)"new_SimRobotController() -> SimRobotController"},
 	 { (char *)"delete_SimRobotController", _wrap_delete_SimRobotController, METH_VARARGS, (char *)"delete_SimRobotController(SimRobotController self)"},
-	 { (char *)"SimRobotController_model", _wrap_SimRobotController_model, METH_VARARGS, (char *)"SimRobotController_model(SimRobotController self) -> RobotModel"},
+	 { (char *)"SimRobotController_model", _wrap_SimRobotController_model, METH_VARARGS, (char *)"\n"
+		"SimRobotController_model(SimRobotController self) -> RobotModel\n"
+		"\n"
+		"Retrieves the robot model associated with this controller. \n"
+		""},
 	 { (char *)"SimRobotController_setRate", _wrap_SimRobotController_setRate, METH_VARARGS, (char *)"\n"
 		"SimRobotController_setRate(SimRobotController self, double dt)\n"
 		"\n"
@@ -46668,7 +47131,11 @@ static PyMethodDef SwigMethods[] = {
 		"configuration/velocity to the desired configuration/velocity after\n"
 		"time dt. \n"
 		""},
-	 { (char *)"SimRobotController_addLinear", _wrap_SimRobotController_addLinear, METH_VARARGS, (char *)"SimRobotController_addLinear(SimRobotController self, doubleVector q, double dt)"},
+	 { (char *)"SimRobotController_addLinear", _wrap_SimRobotController_addLinear, METH_VARARGS, (char *)"\n"
+		"SimRobotController_addLinear(SimRobotController self, doubleVector q, double dt)\n"
+		"\n"
+		"Same as setLinear but appends an interpolant onto the motion queue. \n"
+		""},
 	 { (char *)"SimRobotController_addCubic", _wrap_SimRobotController_addCubic, METH_VARARGS, (char *)"\n"
 		"SimRobotController_addCubic(SimRobotController self, doubleVector q, doubleVector v, double dt)\n"
 		"\n"
@@ -46752,20 +47219,20 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"SimBody_applyWrench", _wrap_SimBody_applyWrench, METH_VARARGS, (char *)"\n"
 		"SimBody_applyWrench(SimBody self, double const [3] f, double const [3] t)\n"
 		"\n"
-		"Applies a force and torque about the COM at the current simulation\n"
-		"time step. \n"
+		"Applies a force and torque about the COM over the duration of the next\n"
+		"Simulator.simulate(t) call. \n"
 		""},
 	 { (char *)"SimBody_applyForceAtPoint", _wrap_SimBody_applyForceAtPoint, METH_VARARGS, (char *)"\n"
 		"SimBody_applyForceAtPoint(SimBody self, double const [3] f, double const [3] pworld)\n"
 		"\n"
-		"Applies a force at a given point (in world coordinates) at the current\n"
-		"simulation time step. \n"
+		"Applies a force at a given point (in world coordinates) over the\n"
+		"duration of the next Simulator.simulate(t) call. \n"
 		""},
 	 { (char *)"SimBody_applyForceAtLocalPoint", _wrap_SimBody_applyForceAtLocalPoint, METH_VARARGS, (char *)"\n"
 		"SimBody_applyForceAtLocalPoint(SimBody self, double const [3] f, double const [3] plocal)\n"
 		"\n"
-		"Applies a force at a given point (in local coordinates) at the current\n"
-		"simulation time step. \n"
+		"Applies a force at a given point (in local coordinates) over the\n"
+		"duration of the next Simulator.simulate(t) call. \n"
 		""},
 	 { (char *)"SimBody_setTransform", _wrap_SimBody_setTransform, METH_VARARGS, (char *)"\n"
 		"SimBody_setTransform(SimBody self, double const [9] R, double const [3] t)\n"
@@ -46794,6 +47261,10 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"SimBody_setCollisionPreshrink", _wrap_SimBody_setCollisionPreshrink, METH_VARARGS, (char *)"\n"
 		"setCollisionPreshrink(bool shrinkVisualization=False)\n"
 		"SimBody_setCollisionPreshrink(SimBody self)\n"
+		"\n"
+		"If set, preshrinks the geometry so that the padded geometry better\n"
+		"matches the original mesh. If shrinkVisualization=true, the underlying\n"
+		"mesh is also shrunk (helps debug) \n"
 		""},
 	 { (char *)"SimBody_getSurface", _wrap_SimBody_getSurface, METH_VARARGS, (char *)"\n"
 		"SimBody_getSurface(SimBody self) -> ContactParameters\n"
@@ -46906,7 +47377,10 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"Call this to enable contact feedback between the two objects\n"
 		"(arguments are indexes returned by object.getID()). Contact feedback\n"
-		"has a small overhead so you may want to do this selectively. \n"
+		"has a small overhead so you may want to do this selectively. This must\n"
+		"be called before using inContact, getContacts, getContactForces,\n"
+		"contactForce, contactTorque, hadContact, hadSeparation,\n"
+		"hadPenetration, and meanContactForce. \n"
 		""},
 	 { (char *)"Simulator_enableContactFeedbackAll", _wrap_Simulator_enableContactFeedbackAll, METH_VARARGS, (char *)"\n"
 		"Simulator_enableContactFeedbackAll(Simulator self)\n"
@@ -46919,13 +47393,15 @@ static PyMethodDef SwigMethods[] = {
 		"Simulator_inContact(Simulator self, int aid, int bid) -> bool\n"
 		"\n"
 		"Returns true if the objects (indexes returned by object.getID()) are\n"
-		"in contact on the current time step. \n"
+		"in contact on the current time step. You can set bid=-1 to tell if\n"
+		"object a is in contact with any object. \n"
 		""},
 	 { (char *)"Simulator_getContacts", _wrap_Simulator_getContacts, METH_VARARGS, (char *)"\n"
 		"Simulator_getContacts(Simulator self, int aid, int bid)\n"
 		"\n"
 		"Returns the list of contacts (x,n,kFriction) at the last time step.\n"
-		"Normals point into object a. \n"
+		"Normals point into object a. The contact point (x,n,kFriction) is\n"
+		"represented as a 7-element vector. \n"
 		""},
 	 { (char *)"Simulator_getContactForces", _wrap_Simulator_getContactForces, METH_VARARGS, (char *)"\n"
 		"Simulator_getContactForces(Simulator self, int aid, int bid)\n"
@@ -46936,27 +47412,40 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"Simulator_contactForce", _wrap_Simulator_contactForce, METH_VARARGS, (char *)"\n"
 		"Simulator_contactForce(Simulator self, int aid, int bid)\n"
 		"\n"
-		"Returns the contact force on object a at the last time step. \n"
+		"Returns the contact force on object a at the last time step. You can\n"
+		"set bid to -1 to get the overall contact force on object a. \n"
 		""},
 	 { (char *)"Simulator_contactTorque", _wrap_Simulator_contactTorque, METH_VARARGS, (char *)"\n"
 		"Simulator_contactTorque(Simulator self, int aid, int bid)\n"
 		"\n"
 		"Returns the contact force on object a (about a's origin) at the last\n"
-		"time step. \n"
+		"time step. You can set bid to -1 to get the overall contact force on\n"
+		"object a. \n"
 		""},
 	 { (char *)"Simulator_hadContact", _wrap_Simulator_hadContact, METH_VARARGS, (char *)"\n"
 		"Simulator_hadContact(Simulator self, int aid, int bid) -> bool\n"
 		"\n"
 		"Returns true if the objects had contact over the last simulate() call.\n"
-		"\n"
+		"You can set bid to -1 to determine if object a had contact with any\n"
+		"other object. \n"
 		""},
 	 { (char *)"Simulator_hadSeparation", _wrap_Simulator_hadSeparation, METH_VARARGS, (char *)"\n"
 		"Simulator_hadSeparation(Simulator self, int aid, int bid) -> bool\n"
 		"\n"
 		"Returns true if the objects had ever separated during the last\n"
-		"simulate() call. \n"
+		"simulate() call. You can set bid to -1 to determine if object a had no\n"
+		"contact with any other object. \n"
 		""},
-	 { (char *)"Simulator_hadPenetration", _wrap_Simulator_hadPenetration, METH_VARARGS, (char *)"Simulator_hadPenetration(Simulator self, int aid, int bid) -> bool"},
+	 { (char *)"Simulator_hadPenetration", _wrap_Simulator_hadPenetration, METH_VARARGS, (char *)"\n"
+		"Simulator_hadPenetration(Simulator self, int aid, int bid) -> bool\n"
+		"\n"
+		"Returns true if the objects interpenetrated during the last simulate()\n"
+		"call. If so, the simulation may lead to very inaccurate results or\n"
+		"artifacts. You can set bid to -1 to determine if object a penetrated\n"
+		"any object, or you can set aid=bid=-1 to determine whether any object\n"
+		"is penetrating any other (indicating that the simulation will not be\n"
+		"functioning properly in general). \n"
+		""},
 	 { (char *)"Simulator_meanContactForce", _wrap_Simulator_meanContactForce, METH_VARARGS, (char *)"\n"
 		"Simulator_meanContactForce(Simulator self, int aid, int bid)\n"
 		"\n"

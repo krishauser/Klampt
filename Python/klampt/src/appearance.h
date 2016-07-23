@@ -50,7 +50,7 @@ class Appearance
   ///Returns whether this primitive is visible
   bool getDraw(int primitive);
   ///Sets color of the object
-  void setColor(float r,float g, float b,float a);
+  void setColor(float r,float g, float b,float a=1);
   ///Sets color of the given primitive
   void setColor(int primitive,float r,float g, float b,float a);
   void getColor(float out[4]);

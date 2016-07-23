@@ -570,28 +570,13 @@ int PointCloudMeshCollide(CollisionPointCloud& pc1,Real outerMargin1,CollisionMe
   return num;
 }
 
-int MeshPrimitiveCollide(CollisionMesh& m1,Real outerMargin1,GeometricPrimitive3D& g2,const RigidTransform& T2,Real outerMargin2,dContactGeom* contact,int maxcontacts)
+int MeshSphereCollide(CollisionMesh& m1,Real outerMargin1,const Sphere3D& s,Real outerMargin2,dContactGeom* contact,int maxcontacts)
 {
-  GeometricPrimitive3D gworld=g2;
-  gworld.Transform(T2);
-  Sphere3D s;
-  if(gworld.type != GeometricPrimitive3D::Point && gworld.type != GeometricPrimitive3D::Sphere) {
-    fprintf(stderr,"Distance computations between Triangles and %s not supported\n",gworld.TypeName());
-    return 0;
-  }
-  if(gworld.type == GeometricPrimitive3D::Point) {
-    s.center = *AnyCast<Point3D>(&gworld.data);
-    s.radius = 0;
-  }
-  else {
-    s = *AnyCast<Sphere3D>(&gworld.data);
-  }
-    
   Real tol = outerMargin1 + outerMargin2;
   Triangle3D tri;
   vector<int> tris;
   int k=0;
-  NearbyTriangles(m1,gworld,tol,tris,maxcontacts);
+  NearbyTriangles(m1,s.center,s.radius+tol,tris,maxcontacts);
   for(size_t j=0;j<tris.size();j++) {   
     m1.GetTriangle(tris[j],tri);
     tri.a = m1.currentTransform*tri.a;
@@ -623,6 +608,27 @@ int MeshPrimitiveCollide(CollisionMesh& m1,Real outerMargin1,GeometricPrimitive3
     if(k == maxcontacts) break;
   }
   return k;
+}
+
+int MeshPrimitiveCollide(CollisionMesh& m1,Real outerMargin1,GeometricPrimitive3D& g2,const RigidTransform& T2,Real outerMargin2,dContactGeom* contact,int maxcontacts)
+{
+  GeometricPrimitive3D gworld=g2;
+  gworld.Transform(T2);
+  
+  if(gworld.type == GeometricPrimitive3D::Point) {
+    Sphere3D s;
+    s.center = *AnyCast<Point3D>(&gworld.data);
+    s.radius = 0;
+    return MeshSphereCollide(m1,outerMargin1,s,outerMargin2,contact,maxcontacts);
+  }
+  else if(gworld.type == GeometricPrimitive3D::Sphere) {
+    const Sphere3D& s = *AnyCast<Sphere3D>(&gworld.data);
+    return MeshSphereCollide(m1,outerMargin1,s,outerMargin2,contact,maxcontacts);
+  }
+  else {
+    fprintf(stderr,"Distance computations between Triangles and %s not supported\n",gworld.TypeName());
+    return 0;
+  }
 }
 
 int PointCloudPrimitiveCollide(CollisionPointCloud& pc1,Real outerMargin1,GeometricPrimitive3D& g2,const RigidTransform& T2,Real outerMargin2,dContactGeom* contact,int maxcontacts)
@@ -805,6 +811,8 @@ int GeometryGeometryCollide(Geometry::AnyCollisionGeometry3D& g1,Real outerMargi
 			    Geometry::AnyCollisionGeometry3D& g2,Real outerMargin2,
 			    dContactGeom* contact,int m)
 {
+  g1.InitCollisionData();
+  g2.InitCollisionData();
   switch(g1.type) {
   case AnyGeometry3D::Primitive:
     return PrimitiveGeometryCollide(g1.AsPrimitive(),g1.PrimitiveCollisionData(),g1.margin+outerMargin1,g2,outerMargin2,contact,m);
