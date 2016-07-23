@@ -31,14 +31,26 @@ void FeedforwardController::Update(Real dt)
   }
   else {
     if(!sensors->GetTypedSensor<JointPositionSensor>()) {
-      printf("No joint positions, FF disabled\n");
+      printf("FeedforwardController: No joint positions, FF disabled\n");
+      enableGravityCompensation = enableFeedforwardAcceleration = false;
       return;
     }
-    robot.UpdateConfig(sensors->GetTypedSensor<JointPositionSensor>()->q);
+    Config& q = sensors->GetTypedSensor<JointPositionSensor>()->q;
+    if(q.n != robot.q.n) {
+      printf("FeedforwardController: joint encoders don't provide full state information, FF disabled\n");
+      enableGravityCompensation = enableFeedforwardAcceleration = false;
+      return;
+    }    
+    robot.UpdateConfig(q);
     if(!sensors->GetTypedSensor<JointVelocitySensor>()) 
       robot.dq.setZero();
-    else
-      robot.dq = sensors->GetTypedSensor<JointVelocitySensor>()->dq;
+    else {
+      Vector& dq = sensors->GetTypedSensor<JointVelocitySensor>()->dq;
+      if(dq.n != robot.dq.n) 
+        robot.dq.setZero();
+      else
+        robot.dq = dq;
+    }
   }
 
   Vector torques;
