@@ -209,7 +209,7 @@ void QSimTestGUI::ShowAbout(){
     QMessageBox *about = new QMessageBox();
     QString text = "SimTest\n"
       "The main simulation GUI in Klamp't\n"
-      "Authors: Jordan Trittel, Kris Hauser";
+      "Authors: Jordan Tritell, Kris Hauser";
     about->setText(text);
     about->show();
 }
