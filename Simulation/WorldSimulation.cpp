@@ -354,7 +354,7 @@ void WorldSimulation::Advance(Real dt)
   Real timeLeft=dt;
   Real accumTime=0;
   int numSteps = 0;
-  //printf("Advance %g -> %g\n",time,time+dt);
+  //printf("Advance %g -> %g, simulation time step %g\n",time,time+dt,simStep);
   while(timeLeft > 0.0) {
     Real step = Min(timeLeft,simStep);
     for(size_t i=0;i<controlSimulators.size();i++) 
