@@ -14,10 +14,8 @@ ManagedGeometry::ManagedGeometry()
 ManagedGeometry::ManagedGeometry(const ManagedGeometry& rhs)
 {
   operator = (rhs);
-  //argh, if you're not careful with the cache you can copy appearance pointers directly without any record
-  if(!cacheKey.empty()) 
-    cachedGeoms[cacheKey].geoms.push_back(this);
-  else
+  //if you're not careful with the cache you can copy appearance pointers directly without any record
+  if(cacheKey.empty()) 
     appearance = new GLDraw::GeometryAppearance(*appearance);
 }
 
@@ -255,8 +253,9 @@ const ManagedGeometry& ManagedGeometry::operator = (const ManagedGeometry& rhs)
   appearance = rhs.appearance;
   appearance->geom = geometry;
   cacheKey = rhs.cacheKey;
-  if(!cacheKey.empty())
+  if(!cacheKey.empty()) {
     cachedGeoms[cacheKey].geoms.push_back(this);
+  }
   return *this;
 }
 
