@@ -51,17 +51,28 @@ class GLProgram:
         glutInitWindowSize (self.width, self.height);
         glutCreateWindow (self.name)
   
+        def glutsafe(func):
+            def safefunc(*args):
+                try:
+                    return func(*args)
+                except Exception, e:
+                    import traceback
+                    traceback.print_exc()
+                    glutLeaveMainLoop()
+                return 
+            return safefunc
+
         # set window callbacks
-        glutReshapeFunc (self.reshapefunc)
-        glutKeyboardFunc (self.keyboardfunc)
-        glutKeyboardUpFunc (self.keyboardupfunc)
-        glutSpecialFunc (self.specialfunc)
-        glutSpecialUpFunc (self.specialupfunc)
-        glutMotionFunc (self._motionfunc)
-        glutPassiveMotionFunc (self._motionfunc)
-        glutMouseFunc (self._mousefunc)
-        glutDisplayFunc (self.displayfunc)
-        glutIdleFunc(self.idlefunc)
+        glutReshapeFunc (glutsafe(self.reshapefunc))
+        glutKeyboardFunc (glutsafe(self.keyboardfunc))
+        glutKeyboardUpFunc (glutsafe(self.keyboardupfunc))
+        glutSpecialFunc (glutsafe(self.specialfunc))
+        glutSpecialUpFunc (glutsafe(self.specialupfunc))
+        glutMotionFunc (glutsafe(self._motionfunc))
+        glutPassiveMotionFunc (glutsafe(self._motionfunc))
+        glutMouseFunc (glutsafe(self._mousefunc))
+        glutDisplayFunc (glutsafe(self.displayfunc))
+        glutIdleFunc(glutsafe(self.idlefunc))
 
         #init function
         self.initialize()
