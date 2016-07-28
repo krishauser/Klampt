@@ -1677,7 +1677,7 @@ void Robot::Mount(int link, const Geometry::AnyGeometry3D& mesh,
 		const RigidTransform& T) {
   if(!geometry[link]) {
     if(link >= (int)geomManagers.size()) {
-      printf("Robot::Mount: Need to add geometry managers?\n");
+      printf("Robot::Mount (geometry): Need to add geometry managers?\n");
       geomManagers.resize(geometry.size());
     }
     geomManagers[link].CreateEmpty();
@@ -1696,7 +1696,7 @@ void Robot::Mount(int link, const Geometry::AnyGeometry3D& mesh,
       geomManagers[link].SetUniqueAppearance();
     }
     else {
-      printf("Robot::Mount: Need to add geometry managers?\n");
+      printf("Robot::Mount (geometry): Need to add geometry managers?\n");
       geomManagers.resize(geometry.size());
     }
     geomManagers[link].CreateEmpty();
