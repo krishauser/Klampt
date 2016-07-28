@@ -26,18 +26,24 @@ class Simulator;
 /** @brief A sensor on a simulated robot.  Retreive this from the controller,
  * and use getMeasurements to get the currently simulated measurement vector.
  *
- * type() gives you a string defining the sensor type.
- * measurementNames() gives you a list of names for the measurements.
+ * - type() gives you a string defining the sensor type.
+ * - measurementNames() gives you a list of names for the measurements.
+ * - drawGL() draws a sensor indicator using OpenGL
+ * - drawGL(measurements) draws a sensor indicator and its measurements
+ *   using OpenGL.
  */
 class SimRobotSensor
 {
  public:
-  SimRobotSensor(SensorBase* sensor);
+  SimRobotSensor(Robot* robot,SensorBase* sensor);
   std::string name();
   std::string type();
   std::vector<std::string> measurementNames();
   void getMeasurements(std::vector<double>& out);
+  void drawGL();
+  void drawGL(const std::vector<double>& measurements);
 
+  Robot* robot;
   SensorBase* sensor;
 };
 

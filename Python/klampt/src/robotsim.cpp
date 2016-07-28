@@ -3385,8 +3385,8 @@ void SimRobotController::getSensedVelocity(vector<double>& dq)
   }
 }
 
-SimRobotSensor::SimRobotSensor(SensorBase* _sensor)
-  :sensor(_sensor)
+SimRobotSensor::SimRobotSensor(Robot* _robot,SensorBase* _sensor)
+  :robot(_robot),sensor(_sensor)
 {}
 
 std::string SimRobotSensor::name()
@@ -3415,6 +3415,20 @@ void SimRobotSensor::getMeasurements(std::vector<double>& out)
   sensor->GetMeasurements(out);
 }
 
+void SimRobotSensor::drawGL()
+{
+  vector<double> measurements;
+  drawGL(measurements);
+}
+
+void SimRobotSensor::drawGL(const std::vector<double>& measurements)
+{
+  if(!sensor) return;
+  sensor->DrawGL(*robot,measurements);
+}
+
+
+
 SimRobotSensor SimRobotController::getSensor(int sensorIndex)
 {
   static bool warned = false;
@@ -3438,8 +3452,8 @@ SimRobotSensor SimRobotController::sensor(int sensorIndex)
 {
   RobotSensors& sensors = controller->sensors;
   if(sensorIndex < 0 || sensorIndex >= (int)sensors.sensors.size())
-    return SimRobotSensor(NULL);
-  return SimRobotSensor(sensors.sensors[sensorIndex]);
+    return SimRobotSensor(NULL,NULL);
+  return SimRobotSensor(controller->robot,sensors.sensors[sensorIndex]);
 }
 
 SimRobotSensor SimRobotController::sensor(const char* name)
@@ -3449,7 +3463,7 @@ SimRobotSensor SimRobotController::sensor(const char* name)
   if(sensor==NULL) {
     fprintf(stderr,"Warning, sensor %s does not exist\n",name);
   }
-  return SimRobotSensor(sensor);
+  return SimRobotSensor(controller->robot,sensor);
 }
 
 std::vector<std::string> SimRobotController::commands()

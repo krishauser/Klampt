@@ -3248,7 +3248,7 @@ class SimRobotSensor(_object):
     __getattr__ = lambda self, name: _swig_getattr(self, SimRobotSensor, name)
     __repr__ = _swig_repr
     def __init__(self, *args): 
-        """__init__(SimRobotSensor self, SensorBase * sensor) -> SimRobotSensor"""
+        """__init__(SimRobotSensor self, Robot * robot, SensorBase * sensor) -> SimRobotSensor"""
         this = _robotsim.new_SimRobotSensor(*args)
         try: self.this.append(this)
         except: self.this = this
@@ -3268,6 +3268,16 @@ class SimRobotSensor(_object):
         """getMeasurements(SimRobotSensor self)"""
         return _robotsim.SimRobotSensor_getMeasurements(self)
 
+    def drawGL(self, *args):
+        """
+        drawGL(SimRobotSensor self)
+        drawGL(SimRobotSensor self, doubleVector measurements)
+        """
+        return _robotsim.SimRobotSensor_drawGL(self, *args)
+
+    __swig_setmethods__["robot"] = _robotsim.SimRobotSensor_robot_set
+    __swig_getmethods__["robot"] = _robotsim.SimRobotSensor_robot_get
+    if _newclass:robot = _swig_property(_robotsim.SimRobotSensor_robot_get, _robotsim.SimRobotSensor_robot_set)
     __swig_setmethods__["sensor"] = _robotsim.SimRobotSensor_sensor_set
     __swig_getmethods__["sensor"] = _robotsim.SimRobotSensor_sensor_get
     if _newclass:sensor = _swig_property(_robotsim.SimRobotSensor_sensor_get, _robotsim.SimRobotSensor_sensor_set)

@@ -43,6 +43,9 @@ class GLSimulationProgram(GLRealtimeProgram):
         #turn this on to draw contact points
         self.drawContacts = False
 
+        #turn this on to draw sensors
+        self.drawSensors = False
+
         #turn this on to save screenshots
         self.saveScreenshots = False
         self.nextScreenshotTime = 0
@@ -115,6 +118,22 @@ class GLSimulationProgram(GLRealtimeProgram):
                         glEnd()                        
             glEnable(GL_DEPTH_TEST)
 
+        #draw sensors, if enabled
+        if self.drawSensors:
+            for i in xrange(self.world.numRobots()):
+                c = self.sim.controller(i)
+                j = 0
+                while j >= 0:
+                    s = c.sensor(j)
+                    if s.name() == '':
+                        j = -1
+                        break
+                    if self.drawSensors == 'full':
+                        s.drawGL(s.getMeasurements())
+                    else:
+                        s.drawGL()
+                    j += 1
+
     def control_loop(self):
         #Put your control handler here
         pass
@@ -166,6 +185,7 @@ class GLSimulationProgram(GLRealtimeProgram):
             print "m: toggle movie mode"
             print "l: toggle logging"
             print "c: toggle contact drawing"
+            print "v: toggle sensor drawing"
             print "**********************************"
         elif c == 's':
             self.simulate = not self.simulate
@@ -185,6 +205,13 @@ class GLSimulationProgram(GLRealtimeProgram):
             self.drawContacts = not self.drawContacts
             if self.drawContacts:
                 self.sim.enableContactFeedbackAll()
+        elif c == 'v':
+            if self.drawSensors == False:
+                self.drawSensors = True
+            elif self.drawSensors == True:
+                self.drawSensors = 'full'
+            else:
+                self.drawSensors = False
         self.refresh()
 
     def click_world(self,x,y,want_points=False):
