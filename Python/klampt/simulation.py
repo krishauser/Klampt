@@ -111,6 +111,9 @@ class DefaultActuatorEmulator(ActuatorEmulator):
 class SimpleSimulator (Simulator):
     """A convenience class that enables easy logging, definition of simulation hooks, emulators
     of sensors / actuators, and definition of robot controllers.
+
+    Note that for greatest compatibility you should NOT manually apply forces to the simulation
+    except for inside of hooks and emulators.
     """
     def __init__(self,world):
         """Arguments:
@@ -132,6 +135,10 @@ class SimpleSimulator (Simulator):
         self.logger = None
         self.log_state_fn="simulation_state.csv"
         self.log_contact_fn="simulation_contact.csv"
+
+        #save state so controllers don't rely on world state
+        self.robotStates = []
+        self.objectStates = []
 
     def beginLogging(self):
         self.logging = True
@@ -248,7 +255,18 @@ class SimpleSimulator (Simulator):
         if self.logger: self.logger.saveStep()
 
         #Advance controller, emulators
+        #restore state from previous call -- this is done so that simulation data doesn't leak into controllers
+        for i,(q,dq) in enumerate(self.robotStates):
+            self.world.robot(i).setConfig(q)
+            self.world.robot(i).setVelocity(dq)
+        for i,T in enumerate(self.objectStates):
+            self.world.rigidObject(i).setTransform(*T)
+        #advance controller
         self.control_loop(dt)
+        #save post-controller state
+        self.robotStates = [(self.world.robot(i).getConfig(),self.world.robot(i).getVelocity()) for i in range(self.world.numRobots())]
+        self.objectStates = [self.world.rigidObject(i).getTransform() for i in range(self.world.numRigidObjects())]
+
 
         #advance hooks and the physics simulation at the high rate
         assert self.substep_dt > 0
@@ -268,7 +286,15 @@ class SimpleSimulator (Simulator):
                             resolvedArgs.append(substep)
                         else:
                             raise ValueError("Invalid unresolved argument",a)
-                hook(*resolvedArgs)
+                    else:
+                        resolvedArgs.append(a)
+                try:
+                    hook(*resolvedArgs)
+                except Exception, e:
+                    import traceback
+                    print "Hook encountered error with arguments",resolvedArgs
+                    traceback.print_exc()
+                    raise
             #Finally advance the physics simulation
             Simulator.simulate(self,substep)
             t += self.substep_dt
