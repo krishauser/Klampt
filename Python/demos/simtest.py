@@ -248,6 +248,6 @@ if __name__ == "__main__":
                 print "Module",c.__name__,"must have a make() method"
                 raise
             controller = maker(world.robot(i))
-        viewer.sim.setController(i,controller)
+        viewer.sim.setController(world.robot(i),controller)
     
     viewer.run()
