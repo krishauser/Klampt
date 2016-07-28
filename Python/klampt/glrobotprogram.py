@@ -160,7 +160,14 @@ class GLSimulationProgram(GLRealtimeProgram):
         #Put your keyboard handler here
         #the current example toggles simulation / movie mode
         if self.verbose: print c,"pressed"
-        if c == 's':
+        if c == 'h':
+            print "************** Help **************"
+            print "s: toggle simulation"
+            print "m: toggle movie mode"
+            print "l: toggle logging"
+            print "c: toggle contact drawing"
+            print "**********************************"
+        elif c == 's':
             self.simulate = not self.simulate
             print "Simulating:",self.simulate
         elif c == 'm':
@@ -180,8 +187,8 @@ class GLSimulationProgram(GLRealtimeProgram):
                 self.sim.enableContactFeedbackAll()
         self.refresh()
 
-    def click_world(self,x,y):
-        """Helper: returns a list of world objects sorted in order of
+    def click_world(self,x,y,want_points=False):
+        """Helper: returns a list of (world object, point) pairs sorted in order of
         increasing distance."""
         #get the viewport ray
         (s,d) = self.click_ray(x,y)
@@ -192,8 +199,11 @@ class GLSimulationProgram(GLRealtimeProgram):
             (hit,pt) = g[1].rayCast(s,d)
             if hit:
                 dist = vectorops.dot(vectorops.sub(pt,s),d)
-                collided.append((dist,g[0]))
-        return [g[1] for g in sorted(collided)]
+                collided.append((dist,g[0],pt))
+        if want_points:
+            return [(g[1],g[2]) for g in sorted(collided)]
+        else:
+            return [g[1] for g in sorted(collided)]
 
 
 
