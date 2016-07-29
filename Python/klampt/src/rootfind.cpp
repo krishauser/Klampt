@@ -4,6 +4,7 @@
 #include "pyvectorfield.h"
 #include "rootfind.h"
 #include "pyerr.h"
+#include "pyconvert.h"
 
 #include <Python.h>
 #include <iostream>
@@ -65,28 +66,6 @@ int setFunction(PyObject* pVFObj) {
   return setVectorField(pVFObj); 
 }
 
-PyObject* PyListFromVector(const Vector& x) {
-	// HACK: gcc doesn't recognize the existence of x.size() (?!)
-	PyObject* ls = PyList_New(x.n);
-	PyObject* pItem;
-	if(ls == NULL) {
-		goto fail;
-	}
-	
-	for(Py_ssize_t i = 0; i < PySequence_Size(ls); i++) {
-		pItem = PyFloat_FromDouble(x[(int)i]);
-		if(pItem == NULL)
-			goto fail;
-		PyList_SetItem(ls, i, pItem);
-	}
-	
-	return ls;
-	
-	fail:
-		Py_XDECREF(ls);
-		return NULL;
-}
-
 PyObject* findRoots(PyObject* startVals, int iter) {
 	if(root == NULL) {
 	  throw PyException("rootfind.findRoots: no vector field set");
@@ -101,11 +80,10 @@ PyObject* findRoots(PyObject* startVals, int iter) {
 	  throw PyException("rootfind.findRoots: starting value has incorrect size");
 	}
 	
-	root->x.resize(theFn->NumVariables());
-	for(Py_ssize_t i = 0; i < PySequence_Size(startVals); i++) {
-		(root->x)[(int)i] = PyFloat_AsDouble(PySequence_GetItem(startVals, i));
+	if(!FromPy(startVals,root->x)) {
+		throw PyException("rootfind.findRoots: starting value does not consist of floats?");	
 	}
-	
+
 	ConvergenceResult conv = root->Solve(iter);
 	
 	//HACK
@@ -171,8 +149,13 @@ PyObject* findRootsBounded(PyObject* startVals, PyObject* boundVals, int iter) {
 	    throw PyException("rootfind.findRootsBounded: bound element is not a pair");
 	    return NULL;
 	  }
-	  root->bmin[i] = PyFloat_AsDouble(PySequence_GetItem(tup, 0));
-	  root->bmax[i] = PyFloat_AsDouble(PySequence_GetItem(tup, 1));
+	  PyObject* elem1 = PySequence_GetItem(tup, 0);
+	  PyObject* elem2 = PySequence_GetItem(tup, 1);
+	  root->bmin[i] = PyFloat_AsDouble(elem1);
+	  root->bmax[i] = PyFloat_AsDouble(elem2);
+	  Py_DECREF(elem1);
+	  Py_DECREF(elem2);
+	  Py_DECREF(tup);
 	}
 	//cout<<"Parsed bounds:"<<endl;
 	//cout<<root->bmin<<endl;

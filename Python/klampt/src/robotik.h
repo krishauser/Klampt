@@ -67,8 +67,12 @@ class IKObjective
   void getRotation(double out[9]) const;
   ///For axis rotation constraints, returns the local and global axes
   void getRotationAxis(double out[3],double out2[3]) const;
-  ///For fixed-transform constraints, returns the transform (R,T)
+  ///For fixed-transform constraints, returns the transform (R,t)
   void getTransform(double out[9],double out2[3]) const;
+  ///Tranforms the target position/rotation of this IK constraint by transform (R,t)
+  void transform(const double R[9],const double t[3]);
+  ///Tranforms the local position/rotation of this IK constraint by transform (R,t)
+  void transformLocal(const double R[9],const double t[3]);
 
   ///Loads the objective from a Klamp't-native formatted string. For a
   ///more readable but verbose format, try the JSON IO routines

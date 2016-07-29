@@ -229,7 +229,7 @@ class Simulator
  public:
   /// Constructs the simulator from a WorldModel.  If the WorldModel was
   /// loaded from an XML file, then the simulation setup is loaded from it.
-  Simulator(const WorldModel& model,const char* settings=NULL);
+  Simulator(const WorldModel& model);
   ~Simulator();
 
   /// Resets to the initial state (same as setState(initialState))
@@ -340,6 +340,15 @@ class Simulator
   void setGravity(const double g[3]);
   /// Sets the internal simulation substep.  Values < 0.01 are recommended.
   void setSimStep(double dt);
+  /// Retreives some simulation setting.  Valid names are gravity,
+  /// simStep, boundaryLayerCollisions, rigidObjectCollisions, robotSelfCollisions,
+  /// robotRobotCollisions, adaptiveTimeStepping, maxContacts,
+  /// clusterNormalScale, errorReductionParameter, and dampedLeastSquaresParameter
+  std::string getSetting(const std::string& name);
+  /// Sets some simulation setting. Raises an exception if the name is
+  /// unknown or the value is of improper format
+  void setSetting(const std::string& name,const std::string& value);
+
 
   int index;
   WorldModel world;

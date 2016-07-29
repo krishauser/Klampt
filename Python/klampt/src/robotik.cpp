@@ -6,6 +6,7 @@
 #include <KrisLibrary/math3d/random.h>
 #include <Python.h>
 #include "Modeling/World.h"
+#include "Planning/RobotCSpace.h"
 #include "pyerr.h"
 
 //defined in robotsim.cpp
@@ -190,6 +191,21 @@ void IKObjective::getTransform(double out[9],double out2[3]) const
     PyException("getTransform called on non-fixed transform");
   }
 }
+void IKObjective::transform(const double R[9],const double t[3])
+{
+  RigidTransform T;
+  T.R = Matrix3(R);
+  T.t = Vector3(t);
+  goal.Transform(T);
+}
+
+void IKObjective::transformLocal(const double R[9],const double t[3]) 
+{
+  RigidTransform T;
+  T.R = Matrix3(R);
+  T.t = Vector3(t);
+  goal.TransformLocal(T);
+}
 
 bool IKObjective::loadString(const char* str)
 {
@@ -205,6 +221,7 @@ std::string IKObjective::saveString() const
   ss<<goal;
   return ss.str();
 }
+
 
 GeneralizedIKObjective::GeneralizedIKObjective(const GeneralizedIKObjective& obj)
   :link1(obj.link1),link2(obj.link2),obj1(obj.obj1),obj2(obj.obj2),
@@ -412,8 +429,15 @@ void IKSolver::sampleInitial()
   vector<int> active;
   getActiveDofs(active);
   if(qmin.empty()) {
+    //this method correctly updates non-normal joints and handles infinite bounds
+    Config qorig = robot.robot->q;
+    RobotCSpace space(*robot.robot);
+    space.Sample(robot.robot->q);
+    swap(robot.robot->q,qorig);
     for(size_t i=0;i<active.size();i++)
-      robot.robot->q(active[i]) = Rand(robot.robot->qMin(active[i]),robot.robot->qMax(active[i]));
+      robot.robot->q(active[i]) = qorig(active[i]);
+    //for(size_t i=0;i<active.size();i++)
+    //  robot.robot->q(active[i]) = Rand(robot.robot->qMin(active[i]),robot.robot->qMax(active[i]));
   }
   else {
     for(size_t i=0;i<active.size();i++)

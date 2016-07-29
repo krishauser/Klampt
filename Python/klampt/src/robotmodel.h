@@ -257,7 +257,7 @@ class RobotModel
   ///Computes a distance between two configurations, properly taking into account nonstandard joints
   double distance(const std::vector<double>& a,const std::vector<double>& b);
   ///Returns the configuration derivative at a as you interpolate toward b at unit speed.
-  void interpolate_deriv(const std::vector<double>& a,const std::vector<double>& b,std::vector<double>& out);
+  void interpolateDeriv(const std::vector<double>& a,const std::vector<double>& b,std::vector<double>& out);
 
   ///Samples a random configuration and updates the robot's pose.  Properly
   ///handles non-normal joints and handles DOFs with infinite bounds

@@ -2235,14 +2235,16 @@ class RobotModel(_object):
         """
         return _robotsim.RobotModel_distance(self, *args)
 
-    def interpolate_deriv(self, *args):
-        """
-        interpolate_deriv(RobotModel self, doubleVector a, doubleVector b)
+    def interpolateDeriv(self, *args):
+        """interpolateDeriv(RobotModel self, doubleVector a, doubleVector b)"""
+        return _robotsim.RobotModel_interpolateDeriv(self, *args)
 
-        Returns the configuration derivative at a as you interpolate toward b
-        at unit speed. 
+    def randomizeConfig(self, unboundedScale=1.0):
         """
-        return _robotsim.RobotModel_interpolate_deriv(self, *args)
+        randomizeConfig(RobotModel self, double unboundedScale=1.0)
+        randomizeConfig(RobotModel self)
+        """
+        return _robotsim.RobotModel_randomizeConfig(self, unboundedScale)
 
     def randomizeConfig(self, unboundedScale=1.0):
         """
@@ -2915,9 +2917,27 @@ class IKObjective(_object):
         """
         getTransform(IKObjective self)
 
-        For fixed-transform constraints, returns the transform (R,T) 
+        For fixed-transform constraints, returns the transform (R,t) 
         """
         return _robotsim.IKObjective_getTransform(self)
+
+    def transform(self, *args):
+        """
+        transform(IKObjective self, double const [9] R, double const [3] t)
+
+        Tranforms the target position/rotation of this IK constraint by
+        transform (R,t) 
+        """
+        return _robotsim.IKObjective_transform(self, *args)
+
+    def transformLocal(self, *args):
+        """
+        transformLocal(IKObjective self, double const [9] R, double const [3] t)
+
+        Tranforms the local position/rotation of this IK constraint by
+        transform (R,t) 
+        """
+        return _robotsim.IKObjective_transformLocal(self, *args)
 
     def loadString(self, *args):
         """
@@ -3754,7 +3774,6 @@ class Simulator(_object):
     __repr__ = _swig_repr
     def __init__(self, *args): 
         """
-        __init__(Simulator self, WorldModel model, char const * settings=None) -> Simulator
         __init__(Simulator self, WorldModel model) -> Simulator
 
         Constructs the simulator from a WorldModel. If the WorldModel was
@@ -4039,6 +4058,14 @@ class Simulator(_object):
         """
         return _robotsim.Simulator_setSimStep(self, *args)
 
+    def getSetting(self, *args):
+        """getSetting(Simulator self, std::string const & name) -> std::string"""
+        return _robotsim.Simulator_getSetting(self, *args)
+
+    def setSetting(self, *args):
+        """setSetting(Simulator self, std::string const & name, std::string const & value)"""
+        return _robotsim.Simulator_setSetting(self, *args)
+
     __swig_setmethods__["index"] = _robotsim.Simulator_index_set
     __swig_getmethods__["index"] = _robotsim.Simulator_index_get
     if _newclass:index = _swig_property(_robotsim.Simulator_index_get, _robotsim.Simulator_index_set)
@@ -4054,6 +4081,75 @@ class Simulator(_object):
 Simulator_swigregister = _robotsim.Simulator_swigregister
 Simulator_swigregister(Simulator)
 
+
+def setFrictionConeApproximationEdges(*args):
+  """setFrictionConeApproximationEdges(int numEdges)"""
+  return _robotsim.setFrictionConeApproximationEdges(*args)
+
+def forceClosure(*args):
+  """
+    forceClosure(doubleMatrix contacts) -> bool
+    forceClosure(doubleMatrix contactPositions, doubleMatrix frictionCones) -> bool
+    """
+  return _robotsim.forceClosure(*args)
+
+def forceClosure2D(*args):
+  """
+    forceClosure2D(doubleMatrix contacts) -> bool
+    forceClosure2D(doubleMatrix contactPositions, doubleMatrix frictionCones) -> bool
+    """
+  return _robotsim.forceClosure2D(*args)
+
+def comEquilibrium(*args):
+  """
+    comEquilibrium(doubleMatrix contacts, doubleVector fext, PyObject * com) -> PyObject
+    comEquilibrium(doubleMatrix contactPositions, doubleMatrix frictionCones, doubleVector fext, PyObject * com) -> PyObject *
+    """
+  return _robotsim.comEquilibrium(*args)
+
+def comEquilibrium2D(*args):
+  """
+    comEquilibrium2D(doubleMatrix contacts, doubleVector fext, PyObject * com) -> PyObject
+    comEquilibrium2D(doubleMatrix contactPositions, doubleMatrix frictionCones, doubleVector fext, PyObject * com) -> PyObject *
+    """
+  return _robotsim.comEquilibrium2D(*args)
+
+def supportPolygon(*args):
+  """
+    supportPolygon(doubleMatrix contacts) -> PyObject
+    supportPolygon(doubleMatrix contactPositions, doubleMatrix frictionCones) -> PyObject *
+
+    A fancy version of the normal supportPolygon test. contactPositions is
+    a list of 3-lists giving the contact point positions. The i'th element
+    in the list frictionCones has length (k*4), and gives the contact
+    force constraints (ax,ay,az,b) where ax*fx+ay*fy+az*fz <= b limits the
+    contact force (fx,fy,fz) at the i'th contact. Each of the k 4-tuples
+    is laid out sequentially per-contact.
+
+    The return value is a list of 3-tuples giving the sorted plane
+    boundaries of the polygon. The format of a plane is (nx,ny,ofs) where
+    (nx,ny) are the outward facing normals, and ofs is the offset from 0.
+    In other words to test stability of a com [x,y], you can test whether
+    dot([nx,ny],[x,y]) <= ofs for all planes. 
+    """
+  return _robotsim.supportPolygon(*args)
+
+def supportPolygon2D(*args):
+  """
+    supportPolygon2D(doubleMatrix contacts) -> PyObject
+    supportPolygon2D(doubleMatrix contacts, doubleMatrix frictionCones) -> PyObject *
+    """
+  return _robotsim.supportPolygon2D(*args)
+
+def equilibriumTorques(*args):
+  """
+    equilibriumTorques(RobotModel robot, doubleMatrix contacts, intVector links, doubleVector fext, double norm=0) -> PyObject
+    equilibriumTorques(RobotModel robot, doubleMatrix contacts, intVector links, doubleVector fext) -> PyObject
+    equilibriumTorques(RobotModel robot, doubleMatrix contacts, intVector links, doubleVector fext, doubleVector internalTorques, 
+        double norm=0) -> PyObject
+    equilibriumTorques(RobotModel robot, doubleMatrix contacts, intVector links, doubleVector fext, doubleVector internalTorques) -> PyObject *
+    """
+  return _robotsim.equilibriumTorques(*args)
 # This file is compatible with both classic and new-style classes.
 
 

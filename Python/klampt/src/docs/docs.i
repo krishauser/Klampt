@@ -71,23 +71,103 @@ C++ includes: motionplanning.h ";
 
 %feature("docstring")  CSpaceInterface::isFeasible "
 
+Queries whether a given configuration is feasible.
+
 queries ";
 
-%feature("docstring")  CSpaceInterface::isVisible "";
+%feature("docstring")  CSpaceInterface::isVisible "
 
-%feature("docstring")  CSpaceInterface::testFeasibility "";
+Queries whether two configurations are visible. ";
 
-%feature("docstring")  CSpaceInterface::testVisibility "";
+%feature("docstring")  CSpaceInterface::testFeasibility "
 
-%feature("docstring")  CSpaceInterface::feasibilityFailures "";
+Queries whether a given configuration is feasible with respect to a
+given constraint. ";
 
-%feature("docstring")  CSpaceInterface::visibilityFailures "";
+%feature("docstring")  CSpaceInterface::testVisibility "
 
-%feature("docstring")  CSpaceInterface::sample "";
+Queries whether two configurations are visible with respect to a given
+constraint. ";
 
-%feature("docstring")  CSpaceInterface::distance "";
+%feature("docstring")  CSpaceInterface::feasibilityFailures "
 
-%feature("docstring")  CSpaceInterface::interpolate "";
+Returns a list of all failed feasibility constraints. ";
+
+%feature("docstring")  CSpaceInterface::visibilityFailures "
+
+Returns a list of all failed visibility constraints. ";
+
+%feature("docstring")  CSpaceInterface::sample "
+
+Samples a configuration. ";
+
+%feature("docstring")  CSpaceInterface::distance "
+
+Returns the distance between two configurations. ";
+
+%feature("docstring")  CSpaceInterface::interpolate "
+
+Interpolates between two configurations. ";
+
+%feature("docstring")  CSpaceInterface::adaptiveQueriesEnabled "
+
+optional: adaptive queries can be used to automatically minimize the
+total cost of testing feasibility / visibility using empirical
+estimates. Off by default. ";
+
+%feature("docstring")  CSpaceInterface::enableAdaptiveQueries "
+
+Call this to enable adaptive queries. (It has a small overhead.) ";
+
+%feature("docstring")  CSpaceInterface::optimizeQueryOrder "
+
+Call this to optimize the feasibility / visibility testing order. ";
+
+%feature("docstring")  CSpaceInterface::setFeasibilityDependency "
+
+Marks that a certain feasibility test must be performed before
+another. ";
+
+%feature("docstring")  CSpaceInterface::setFeasibilityPrior "
+
+Resets the data for a certain feasibility test. Default values give a
+data-gathering behavior. ";
+
+%feature("docstring")  CSpaceInterface::setVisibilityDependency "
+
+Marks that a certain feasibility test must be performed before
+another. ";
+
+%feature("docstring")  CSpaceInterface::setVisibilityPrior "
+
+Resets the data for a certain visibility test. Default values give a
+data-gathering behavior. ";
+
+%feature("docstring")  CSpaceInterface::feasibilityCost "
+
+Retrieves the empirical average cost of a given feasibility test. ";
+
+%feature("docstring")  CSpaceInterface::feasibilityProbability "
+
+Retrieves the empirical average success rate of a given feasibility
+test. ";
+
+%feature("docstring")  CSpaceInterface::visibilityCost "
+
+Retrieves the empirical average cost of a given visibility test. ";
+
+%feature("docstring")  CSpaceInterface::visibilityProbability "
+
+Retrieves the empirical average success rate of a given visibility
+test. ";
+
+%feature("docstring")  CSpaceInterface::feasibilityQueryOrder "
+
+Retrieves the current order of feasibility tests. ";
+
+%feature("docstring")  CSpaceInterface::visibilityQueryOrder "
+
+Retrieves the current order of visibility tests. ";
 
 
 // File: classGeneralizedIKObjective.xml
@@ -235,12 +315,15 @@ C++ includes: geometry.h ";
 
 %feature("docstring")  Geometry3D::Geometry3D "";
 
+<<<<<<< HEAD
 %feature("docstring")  Geometry3D::Geometry3D "";
 
 %feature("docstring")  Geometry3D::Geometry3D "";
 
 %feature("docstring")  Geometry3D::Geometry3D "";
 
+=======
+>>>>>>> pyplan_devel
 %feature("docstring")  Geometry3D::~Geometry3D "";
 
 %feature("docstring")  Geometry3D::clone "
@@ -497,7 +580,17 @@ For axis rotation constraints, returns the local and global axes. ";
 
 %feature("docstring")  IKObjective::getTransform "
 
-For fixed-transform constraints, returns the transform (R,T) ";
+For fixed-transform constraints, returns the transform (R,t) ";
+
+%feature("docstring")  IKObjective::transform "
+
+Tranforms the target position/rotation of this IK constraint by
+transform (R,t) ";
+
+%feature("docstring")  IKObjective::transformLocal "
+
+Tranforms the local position/rotation of this IK constraint by
+transform (R,t) ";
 
 %feature("docstring")  IKObjective::loadString "
 
@@ -667,6 +760,8 @@ C++ includes: motionplanning.h ";
 
 %feature("docstring")  PlannerInterface::setEndpoints "";
 
+%feature("docstring")  PlannerInterface::setEndpointSet "";
+
 %feature("docstring")  PlannerInterface::addMilestone "";
 
 %feature("docstring")  PlannerInterface::planMore "";
@@ -786,6 +881,10 @@ A CSpace that calls python routines for its functionality ";
 
 %feature("docstring")  PyCSpace::~PyCSpace "";
 
+%feature("docstring")  PyCSpace::UpdateTempConfig "";
+
+%feature("docstring")  PyCSpace::UpdateTempConfig2 "";
+
 %feature("docstring")  PyCSpace::Sample "";
 
 %feature("docstring")  PyCSpace::SampleNeighborhood "";
@@ -811,6 +910,12 @@ A CSpace that calls python routines for its functionality ";
 %feature("docstring")  PyCSpace::Interpolate "";
 
 %feature("docstring")  PyCSpace::Properties "";
+
+%feature("docstring")  PyCSpace::AddFeasibleDependency "";
+
+%feature("docstring")  PyCSpace::AddVisibleDependency "";
+
+%feature("docstring")  PyCSpace::OptimizeQueryOrder "";
 
 
 // File: classPyEdgePlanner.xml
@@ -1780,6 +1885,19 @@ appearance is honored. Otherwise, only the raw geometry is drawn.
 PERFORMANCE WARNING: if keepAppearance is false, then this does not
 properly reuse OpenGL display lists. A better approach to changing
 object's Appearance directly. ";
+<<<<<<< HEAD
+=======
+
+
+// File: structTesterStats.xml
+%feature("docstring") TesterStats "";
+
+%feature("docstring")  TesterStats::TesterStats "";
+
+%feature("docstring")  TesterStats::reset "";
+
+%feature("docstring")  TesterStats::update "";
+>>>>>>> pyplan_devel
 
 
 // File: structTriangleMesh.xml
@@ -2016,23 +2134,7 @@ casting routines are called. ";
 
 Sets the random seed used by the motion planner. ";
 
-%feature("docstring")  std::ToPy "";
-
-%feature("docstring")  std::ToPy "";
-
-%feature("docstring")  std::ToPy "";
-
-%feature("docstring")  std::ToPy "";
-
-%feature("docstring")  std::ToPy "";
-
-%feature("docstring")  std::PyListFromVector "";
-
-%feature("docstring")  std::PyListToVector "";
-
-%feature("docstring")  std::PyListFromConfig "";
-
-%feature("docstring")  std::PyListToConfig "";
+%feature("docstring")  std::OptimizeTestingOrder "";
 
 %feature("docstring")  std::makeNewCSpace "";
 
@@ -2263,8 +2365,11 @@ from the space of transforms that satisfies the objective. ";
 
 %feature("docstring")  GetPathController "";
 
+<<<<<<< HEAD
 %feature("docstring")  GetMotionQueue "";
 
+=======
+>>>>>>> pyplan_devel
 %feature("docstring")  GetMesh "";
 
 %feature("docstring")  GetMesh "";
@@ -2284,6 +2389,69 @@ from the space of transforms that satisfies the objective. ";
 %feature("docstring")  EnablePathControl "";
 
 %feature("docstring")  GetCameraViewport "";
+
+%feature("docstring")  setFrictionConeApproximationEdges "";
+
+%feature("docstring")  Convert "";
+
+%feature("docstring")  Convert "";
+
+%feature("docstring")  Convert "";
+
+%feature("docstring")  Convert "";
+
+%feature("docstring")  forceClosure "";
+
+%feature("docstring")  forceClosure "";
+
+%feature("docstring")  forceClosure2D "";
+
+%feature("docstring")  forceClosure2D "";
+
+%feature("docstring")  ToPy2 "";
+
+%feature("docstring")  ToPy2 "";
+
+%feature("docstring")  comEquilibrium "";
+
+%feature("docstring")  comEquilibrium "";
+
+%feature("docstring")  comEquilibrium2D "";
+
+%feature("docstring")  comEquilibrium2D "";
+
+%feature("docstring")  supportPolygon "";
+
+%feature("docstring")  supportPolygon "
+
+A fancy version of the normal supportPolygon test. contactPositions is
+a list of 3-lists giving the contact point positions. The i'th element
+in the list frictionCones has length (k*4), and gives the contact
+force constraints (ax,ay,az,b) where ax*fx+ay*fy+az*fz <= b limits the
+contact force (fx,fy,fz) at the i'th contact. Each of the k 4-tuples
+is laid out sequentially per-contact.
+
+The return value is a list of 3-tuples giving the sorted plane
+boundaries of the polygon. The format of a plane is (nx,ny,ofs) where
+(nx,ny) are the outward facing normals, and ofs is the offset from 0.
+In other words to test stability of a com [x,y], you can test whether
+dot([nx,ny],[x,y]) <= ofs for all planes. ";
+
+%feature("docstring")  supportPolygon2D "
+
+Calculates the support polygon (interval) for a given set of contacts
+and a downward external force (0,-g). A contact point is given by a
+list of 4 floats, [x,y,theta,k] as usual.
+
+The return value is a 2-tuple giving the min / max extents of the
+support polygon. If they are both infinite, the support polygon is
+empty. ";
+
+%feature("docstring")  supportPolygon2D "";
+
+%feature("docstring")  equilibriumTorques "";
+
+%feature("docstring")  equilibriumTorques "";
 
 
 // File: robotsim_8h.xml
@@ -2310,8 +2478,6 @@ Sets the function object, returns 0 if pVFObj = NULL, 1 otherwise. See
 vectorfield.py for an abstract base class that can be overridden to
 produce one of these objects. Equivalent to setVectorField; just a
 more intuitive name. ";
-
-%feature("docstring")  PyListFromVector "";
 
 %feature("docstring")  findRoots "
 
