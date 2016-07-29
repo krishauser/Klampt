@@ -7,7 +7,11 @@
 #include <KrisLibrary/math3d/interpolate.h>
 #include <KrisLibrary/robotics/Rotation.h>
 #include <KrisLibrary/planning/EdgePlanner.h>
+#include <KrisLibrary/planning/EdgePlannerHelpers.h>
+#include <KrisLibrary/planning/CSetHelpers.h>
+#include <KrisLibrary/planning/CSpaceHelpers.h>
 #include <KrisLibrary/Timer.h>
+#include <boost/functional.hpp>
 #include <sstream>
 
 Real RandLaplacian()
@@ -36,6 +40,29 @@ RobotCSpace::RobotCSpace(Robot& _robot)
 {
   floatingRotationWeight=1;
   floatingRotationRadiusScale=1;
+
+  for(int i=0;i<_robot.q.n;i++) {
+    if(IsInf(_robot.qMin[i])!= -1 || IsInf(_robot.qMax[i]) != 1)
+      AddConstraint(robot.LinkName(i)+"_joint_limit",new AxisRangeSet(i,_robot.qMin[i],_robot.qMax[i]));
+  }
+}
+
+RobotCSpace::RobotCSpace(const RobotCSpace& space)
+:robot(space.robot),norm(space.norm),
+jointWeights(space.jointWeights),floatingRotationWeight(space.floatingRotationWeight),
+jointRadiusScale(space.jointRadiusScale),floatingRotationRadiusScale(space.floatingRotationRadiusScale)
+{
+  CopyConstraints(&space);
+}
+
+int RobotCSpace::NumDimensions() 
+{
+  return robot.q.n;
+}
+
+string RobotCSpace::VariableName(int i)
+{
+  return robot.LinkName(i);
 }
 
 void RobotCSpace::Sample(Config& q)
@@ -94,7 +121,10 @@ void RobotCSpace::SampleNeighborhood(const Config& c,Real r,Config& q)
   robot.q=c;
   for(size_t i=0;i<robot.joints.size();i++) {
     Real ri;
-    if(jointRadiusScale.empty() == 0) ri = r / jointWeights[i];
+    if(jointRadiusScale.empty()) {
+      if(jointWeights.empty()) ri = r;
+      else ri = r / jointWeights[i];
+    } 
     else ri = r / jointRadiusScale[i];
     int link = robot.joints[i].linkIndex;
     switch(robot.joints[i].type) {
@@ -143,24 +173,12 @@ void RobotCSpace::Interpolate(const Config& x,const Config& y,Real u,Config& out
   ::Interpolate(robot,x,y,u,out);
 }
 
-void RobotCSpace::Midpoint(const Config& x,const Config& y,Config& out)
-{
-  ::Interpolate(robot,x,y,0.5,out);
-}
-
 Real RobotCSpace::Distance(const Config& a,const Config& b)
 {
   if(jointWeights.empty())
     return ::Distance(robot,a,b,norm,floatingRotationWeight);
   else
     return ::Distance(robot,a,b,norm,jointWeights,floatingRotationWeight);
-}
-
-bool RobotCSpace::IsFeasible(const Config& x) 
-{
-  for(int i=0;i<x.n;i++)
-    if(x(i) < robot.qMin(i) || x(i) > robot.qMax(i)) return false;
-  return true;
 }
 
 void RobotCSpace::Properties(PropertyMap& map) const
@@ -224,21 +242,12 @@ void RobotCSpace::Properties(PropertyMap& map) const
   map.setArray("metricWeights",weights);
 }
 
-EdgePlanner* RobotCSpace::LocalPlanner(const Config& x,const Config& y) 
-{
-  return new TrueEdgePlanner(this,x,y);
-}
-
-RobotGeodesicManifold::RobotGeodesicManifold(Robot& _robot)
-  :robot(_robot)
-{}
-
-void RobotGeodesicManifold::InterpolateDeriv(const Config& a,const Config& b,Real u,Vector& dx)
+void RobotCSpace::InterpolateDeriv(const Config& a,const Config& b,Real u,Vector& dx)
 { 
   ::InterpolateDerivative(robot,a,b,u,dx);
 }
 
-void RobotGeodesicManifold::InterpolateDerivA(const Config& a,const Config& b,Real u,const Vector& da,Vector& dx) 
+void RobotCSpace::InterpolateDerivA(const Config& a,const Config& b,Real u,const Vector& da,Vector& dx) 
 { 
   dx.mul(da,1-u);
   for(size_t i=0;i<robot.joints.size();i++) {
@@ -293,7 +302,7 @@ void RobotGeodesicManifold::InterpolateDerivA(const Config& a,const Config& b,Re
     }
   }
 }
-void RobotGeodesicManifold::InterpolateDerivB(const Config& a,const Config& b,Real u,const Vector& db,Vector& dx) 
+void RobotCSpace::InterpolateDerivB(const Config& a,const Config& b,Real u,const Vector& db,Vector& dx) 
 { 
   dx.mul(db,u);
   for(size_t i=0;i<robot.joints.size();i++) {
@@ -349,9 +358,9 @@ void RobotGeodesicManifold::InterpolateDerivB(const Config& a,const Config& b,Re
   }
 }
 
-void RobotGeodesicManifold::InterpolateDeriv2(const Config& a,const Config& b,Real u,Vector& ddx) { FatalError("Not implemented"); }
+void RobotCSpace::InterpolateDeriv2(const Config& a,const Config& b,Real u,Vector& ddx) { FatalError("Not implemented"); }
 
-void RobotGeodesicManifold::Integrate(const Config& a,const Vector& da,Config& b)
+void RobotCSpace::Integrate(const Config& a,const Vector& da,Config& b)
 {
   ::Integrate(robot,a,da,b);
 }
@@ -369,8 +378,24 @@ ActiveRobotCSpace::ActiveRobotCSpace(Robot& _robot,const ArrayMapping& _dofs)
   for(size_t i=0;i<dofs.mapping.size();i++)
     invMap[dofs.mapping[i]] = int(i);
   for(size_t i=0;i<robot.joints.size();i++)
-    if(invMap[robot.joints[i].linkIndex] >= 0)
-      joints.push_back(i);
+    if(invMap[robot.joints[i].linkIndex] >= 0) 
+      if(robot.joints[i].type == RobotJoint::Floating || robot.joints[i].type == RobotJoint::Spin || robot.joints[i].type == RobotJoint::FloatingPlanar || robot.joints[i].type == RobotJoint::BallAndSocket)
+  joints.push_back(i);
+
+  for(size_t i=0;i<dofs.mapping.size();i++) {
+    if(IsInf(robot.qMin[dofs.mapping[i]]) != -1 || IsInf(robot.qMax[dofs.mapping[i]]) != 1)
+      AddConstraint(robot.LinkName(dofs.mapping[i])+"_joint_limit",new AxisRangeSet(i,robot.qMin[dofs.mapping[i]],robot.qMax[dofs.mapping[i]]));
+  }
+}
+
+int ActiveRobotCSpace::NumDimensions()
+{
+  return (int)dofs.mapping.size();
+}
+
+string ActiveRobotCSpace::VariableName(int i)
+{
+  return robot.LinkName(dofs.mapping[i]);
 }
 
 void ActiveRobotCSpace::Sample(Config& x)
@@ -415,15 +440,6 @@ void ActiveRobotCSpace::Interpolate(const Config& x,const Config& y,Real u,Confi
   dofs.Map(x,xq);
   dofs.Map(y,yq);
   ::Interpolate(robot,xq,yq,u,tempq);
-  out.resize(dofs.Size());
-  dofs.InvMap(tempq,out);
-}
-
-void ActiveRobotCSpace::Midpoint(const Config& x,const Config& y,Config& out)
-{
-  dofs.Map(x,xq);
-  dofs.Map(y,yq);
-  ::Interpolate(robot,xq,yq,0.5,tempq);
   out.resize(dofs.Size());
   dofs.InvMap(tempq,out);
 }
@@ -481,36 +497,13 @@ Real ActiveRobotCSpace::Distance(const Config& x,const Config& y)
   return norm;
 }
 
-bool ActiveRobotCSpace::IsFeasible(const Config& x) { FatalError("Not implemented"); return true; }
-
-EdgePlanner* ActiveRobotCSpace::LocalPlanner(const Config& x,const Config& y)
-{
-  return new TrueEdgePlanner(this,x,y);
-}
-
 
 void ActiveRobotCSpace::Properties(PropertyMap& map) const
 {
   //TODO
 }
 
-ActiveRobotGeodesicManifold::ActiveRobotGeodesicManifold(Robot& _robot,const ArrayMapping& _dofs)
-  :robot(_robot),dofs(_dofs)
-{
-  xq=yq=tempq=robot.q;
-  invMap.resize(robot.q.n,-1);
-  Assert(!dofs.IsOffset());
-  for(size_t i=0;i<dofs.mapping.size();i++)
-    invMap[dofs.mapping[i]] = int(i);
-  
-  for(size_t i=0;i<robot.joints.size();i++)
-    if(invMap[robot.joints[i].linkIndex] >= 0) {
-      if(robot.joints[i].type == RobotJoint::Floating || robot.joints[i].type == RobotJoint::Spin || robot.joints[i].type == RobotJoint::FloatingPlanar || robot.joints[i].type == RobotJoint::BallAndSocket)
-	joints.push_back(i);
-    }
-}
-
-void ActiveRobotGeodesicManifold::InterpolateDeriv(const Config& a,const Config& b,Real u,Vector& dx) 
+void ActiveRobotCSpace::InterpolateDeriv(const Config& a,const Config& b,Real u,Vector& dx) 
 { 
   if(joints.empty()) {
     dx.sub(b,a);
@@ -524,22 +517,22 @@ void ActiveRobotGeodesicManifold::InterpolateDeriv(const Config& a,const Config&
   dofs.InvMap(tempq,dx);
 }
 
-void ActiveRobotGeodesicManifold::InterpolateDerivA(const Config& a,const Config& b,Real u,const Vector& da,Vector& dx) 
+void ActiveRobotCSpace::InterpolateDerivA(const Config& a,const Config& b,Real u,const Vector& da,Vector& dx) 
 {
   FatalError("Not implemented"); 
 }
 
-void ActiveRobotGeodesicManifold::InterpolateDerivB(const Config& a,const Config& b,Real u,const Vector& db,Vector& dx) 
+void ActiveRobotCSpace::InterpolateDerivB(const Config& a,const Config& b,Real u,const Vector& db,Vector& dx) 
 { 
   FatalError("Not implemented"); 
 }
 
-void ActiveRobotGeodesicManifold::InterpolateDeriv2(const Config& a,const Config& b,Real u,Vector& ddx) 
+void ActiveRobotCSpace::InterpolateDeriv2(const Config& a,const Config& b,Real u,Vector& ddx) 
 { 
   FatalError("Not implemented"); 
 }
 
-void ActiveRobotGeodesicManifold::Integrate(const Config& a,const Vector& da,Config& b)
+void ActiveRobotCSpace::Integrate(const Config& a,const Vector& da,Config& b)
 {
   if(joints.empty()) {
     b.add(a,da); 
@@ -557,215 +550,211 @@ void ActiveRobotGeodesicManifold::Integrate(const Config& a,const Vector& da,Con
 
 
 SingleRobotCSpace::SingleRobotCSpace(RobotWorld& _world,int _index,WorldPlannerSettings* _settings)
-  :world(_world),index(_index),settings(_settings),collisionPairsInitialized(false)
+  :RobotCSpace(*_world.robots[_index]),world(_world),index(_index),settings(_settings),constraintsDirty(true)
 {
   Assert(settings != NULL);
   Assert((int)settings->robotSettings.size() > _index);
+
+  const Vector& w=settings->robotSettings[index].distanceWeights;
+  RobotCSpace::jointWeights = w;
+
+  Init();
 }
 
 SingleRobotCSpace::SingleRobotCSpace(const SingleRobotCSpace& space)
-  :world(space.world),index(space.index),settings(space.settings),collisionPairsInitialized(false)
-{}
-
-int SingleRobotCSpace::NumDimensions() const
+  :RobotCSpace(space),world(space.world),index(space.index),settings(space.settings),fixedDofs(space.fixedDofs),fixedValues(space.fixedValues),ignoreCollisions(space.ignoreCollisions),constraintsDirty(true)
 {
-  return (int)world.robots[index]->links.size();
-}
-
-Robot* SingleRobotCSpace::GetRobot() const
-{
-  return world.robots[index];
+  Init();
 }
 
 bool SingleRobotCSpace::CheckJointLimits(const Config& x)
 {
-  Robot* robot=GetRobot();
-  robot->UpdateConfig(x);
-  for(size_t i=0;i<robot->joints.size();i++) {
-    if(robot->joints[i].type == RobotJoint::Normal || robot->joints[i].type == RobotJoint::Weld) {
-      int k=robot->joints[i].linkIndex;
-      if(x(k) < robot->qMin(k) || x(k) > robot->qMax(k)) {
-	//printf("Joint %d value %g out of bounds [%g,%g]\n",i,x(i),robot->qMin(i),robot->qMax(i));
+  robot.UpdateConfig(x);
+  for(size_t i=0;i<robot.joints.size();i++) {
+    if(robot.joints[i].type == RobotJoint::Normal || robot.joints[i].type == RobotJoint::Weld) {
+      int k=robot.joints[i].linkIndex;
+      if(x(k) < robot.qMin(k) || x(k) > robot.qMax(k)) {
+	//printf("Joint %d value %g out of bounds [%g,%g]\n",i,x(i),robot.qMin(i),robot.qMax(i));
 	return false;
       }
     }
   }
-  for(size_t i=0;i<robot->drivers.size();i++) {
-    Real v=robot->GetDriverValue(i);
-    if(v < robot->drivers[i].qmin || v > robot->drivers[i].qmax) {
-      //printf("Driver %d value %g out of bounds [%g,%g]\n",i,v,robot->drivers[i].qmin,robot->drivers[i].qmax);
+  for(size_t i=0;i<robot.drivers.size();i++) {
+    Real v=robot.GetDriverValue(i);
+    if(v < robot.drivers[i].qmin || v > robot.drivers[i].qmax) {
+      //printf("Driver %d value %g out of bounds [%g,%g]\n",i,v,robot.drivers[i].qmin,robot.drivers[i].qmax);
       return false;
     }
   }
   return true;
 }
 
-void SingleRobotCSpace::InitializeCollisionPairs()
+bool SingleRobotCSpace::UpdateGeometry(const Config& x)
 {
-  collisionPairsInitialized=true;
+  robot.UpdateConfig(x);
+  robot.UpdateGeometry();
+  return true;
+}
+
+
+void SingleRobotCSpace::FixDof(int dof,Real value)
+{
+  fixedDofs.push_back(dof);
+  fixedValues.push_back(value);
+  constraintsDirty = true;
+}
+
+void SingleRobotCSpace::IgnoreCollisions(int a,int b)
+{
+  ignoreCollisions.push_back(pair<int,int>(a,b));
+  constraintsDirty = true;
+}
+
+///NOTE: REQUIRES GEOMETRY TO BE UPDATED AT X
+class CollisionFreeSet : public CSet
+{
+public:
+  Geometry::AnyCollisionQuery& query;
+  Real lipschitzBound;
+
+  CollisionFreeSet(Geometry::AnyCollisionQuery& q,Real _lipschitzBound=Inf):query(q),lipschitzBound(_lipschitzBound) {}
+  virtual bool Contains(const Config& x) { return !query.Collide(); }
+  virtual Real ObstacleDistance(const Config& x) {
+    Real dworkspace = query.Distance(0.0,0.0);
+    return dworkspace / lipschitzBound;
+  }
+};
+
+void SingleRobotCSpace::Init()
+{
+  if(!constraintsDirty) return;
+  constraints.resize(0);
+  constraintNames.resize(0);
+
+  //add in fixed DOF constraints
+  vector<int> isfixed(robot.q.n,-1);
+  for(size_t i=0;i<fixedDofs.size();i++)
+    isfixed[fixedDofs[i]] = (int)i;
+  for(int i=0;i<robot.q.n;i++) {
+    if(isfixed[i] >= 0) {
+      int k=isfixed[i];
+      stringstream ss;
+      ss<<"fixed["<<robot.LinkName(i)<<"]="<<fixedValues[k];
+      AddConstraint(ss.str(),new AxisRangeSet(i,fixedValues[k],fixedValues[k]));
+    }
+    else {
+      if(IsInf(robot.qMin[i])!= -1 || IsInf(robot.qMax[i]) != 1)
+        AddConstraint(robot.LinkName(i)+"_joint_limit",new AxisRangeSet(i,robot.qMin[i],robot.qMax[i]));
+    }
+  }
+  vector<bool> oldCheckCollisions(ignoreCollisions.size());
+  for(size_t i=0;i<ignoreCollisions.size();i++) {
+    oldCheckCollisions[i] = settings->collisionEnabled(ignoreCollisions[i].first,ignoreCollisions[i].second);
+    settings->collisionEnabled(ignoreCollisions[i].first,ignoreCollisions[i].second) = false;
+    settings->collisionEnabled(ignoreCollisions[i].second,ignoreCollisions[i].first) = false;
+  }
+
+  AddConstraint("update_geometry",boost::bind1st(std::mem_fun(&SingleRobotCSpace::UpdateGeometry),this));
+
   int id = world.RobotID(index);
   collisionPairs.resize(0);
   collisionQueries.resize(0);
   settings->EnumerateCollisionQueries(world,id,-1,collisionPairs,collisionQueries);
+
+  /*
+  //compute lipschitz constants
+  if(robot.lipschitzMatrix.isEmpty()) 
+    robot.ComputeLipschitzMatrix();
+  */
+  
+  for(size_t i=0;i<collisionPairs.size();i++)  {
+    stringstream ss;
+    ss<<"coll["<<world.GetName(collisionPairs[i].first)<<","<<world.GetName(collisionPairs[i].second)<<"]";
+
+    /* 
+    //TODO: c-space free movement bounds
+    int link=world.IsRobotLink(collisionPairs[i].first).second;
+    pair<int,int> endid=world.IsRobotLink(collisionPairs[i].second);
+    int endLink = (endid.first==index ? endid.second : -1);
+    int lca = 0;
+    if(endLink >= 0) {
+      //checking self collision, what to do?
+      int lca = robot.LCA(link,endLink);
+      if(link != lca && endLink != lca)
+        FatalError("Can't do branching structures yet\n");
+      if(lca == link) //swap
+        swap(link,endLink);
+    }
+
+    //printf("Getting lipschitz bounds for %d -> %d\n",link,endLink);
+
+    Real d=0;
+    int j=link;
+    while(j != lca && j >= 0) {
+      Assert( j >= 0 && j < (int)robot.links.size());
+      d += Abs(dx(j)) * robot.lipschitzMatrix(j,link);
+      j = robot.parents[j];
+    }
+    j=endLink;
+    while(j != lca && j >= 0) {
+      Assert( j >= 0 && j < (int)robot.links.size());
+      d += Abs(dx(j)) * robot.lipschitzMatrix(j,link);
+      j = robot.parents[j];
+    }
+    */
+
+    AddConstraint(ss.str(),new CollisionFreeSet(collisionQueries[i]));
+  }
+
+  for(size_t i=0;i<ignoreCollisions.size();i++) {
+    settings->collisionEnabled(ignoreCollisions[i].first,ignoreCollisions[i].second) = oldCheckCollisions[i];
+    settings->collisionEnabled(ignoreCollisions[i].second,ignoreCollisions[i].first) = oldCheckCollisions[i];
+  }
+  constraintsDirty = false;
 }
 
 void SingleRobotCSpace::Sample(Config& x)
 {
-  Robot* robot = GetRobot();
+  RobotCSpace::Sample(x);
   const AABB3D& bb=settings->robotSettings[index].worldBounds;
-  x = robot->q;
-  for(size_t i=0;i<robot->joints.size();i++) {
-    if(robot->joints[i].type == RobotJoint::Normal) {
-      int k=robot->joints[i].linkIndex;
-      x(k) = Rand(robot->qMin(k),robot->qMax(k));
-    }
-    else if(robot->joints[i].type == RobotJoint::Spin) {
-      int k=robot->joints[i].linkIndex;
-      x(k) = Rand(0,TwoPi);
-    }
-    else if(robot->joints[i].type == RobotJoint::Floating) {
-      //generate a floating base
-      RigidTransform T;
-      QuaternionRotation qr;
-      RandRotation(qr);
-      qr.getMatrix(T.R);
-      T.t.x = Rand(bb.bmin.x,bb.bmax.x);
-      T.t.y = Rand(bb.bmin.y,bb.bmax.y);
-      T.t.z = Rand(bb.bmin.z,bb.bmax.z);
-      robot->SetJointByTransform(i,robot->joints[i].linkIndex,T);
+  for(size_t i=0;i<robot.joints.size();i++) {
+    if(robot.joints[i].type == RobotJoint::Floating) {
+      //generate a floating base position
+      Vector3 p;
+      p.x = Rand(bb.bmin.x,bb.bmax.x);
+      p.y = Rand(bb.bmin.y,bb.bmax.y);
+      p.z = Rand(bb.bmin.z,bb.bmax.z);
       vector<int> indices;
-      robot->GetJointIndices(i,indices);
-      for(size_t k=0;k<indices.size();k++)
-	x(indices[k]) = robot->q(indices[k]);
+      robot.GetJointIndices(i,indices);
+      for(size_t k=0;k<3;k++)
+	x(indices[k]) = p[k];
     }
   }
-  for(size_t i=0;i<robot->drivers.size();i++) {
-    if(robot->drivers[i].type != RobotJointDriver::Normal) {
-      Real val = Rand(robot->drivers[i].qmin,robot->drivers[i].qmax);
-      robot->SetDriverValue(i,val);
-      for(size_t j=0;j<robot->drivers[i].linkIndices.size();j++)
-	x(robot->drivers[i].linkIndices[j]) = robot->q(robot->drivers[i].linkIndices[j]);
-    }
-  }
-  robot->NormalizeAngles(x);
+  for(size_t j=0;j<fixedDofs.size();j++)
+    x(fixedDofs[j]) = fixedValues[j];
 }
+
 
 void SingleRobotCSpace::SampleNeighborhood(const Config& c,Real r,Config& x)
 {
-  Robot* robot = GetRobot();
-  x = c;
-  const Vector& w=settings->robotSettings[index].distanceWeights;
-  if(w.n==0) {
-    for(int i=0;i<x.n;i++) 
-      x(i) += Rand(-r,r);
-  }
-  else { 
-    for(int i=0;i<x.n;i++) 
-      x(i) += Rand(-r,r)/w(i);
-  }
-  for(size_t i=0;i<robot->joints.size();i++) {
-    if(robot->joints[i].type == RobotJoint::Weld) {
-      int k=robot->joints[i].linkIndex;
-      x(k) = c(k);
-    }
-  }
-  for(size_t i=0;i<robot->drivers.size();i++) {
-    if(robot->drivers[i].type != RobotJointDriver::Normal) {
-      robot->UpdateConfig(c);
-      Real val = robot->GetDriverValue(i);
-      Real scale = 1.0;
-      if(w.n != 0) {
-	scale = 0;
-	for(size_t j=0;j<robot->drivers[i].linkIndices.size();j++)
-	  scale += Sqr(w(robot->drivers[i].linkIndices[j]));
-	scale = Sqrt(scale);
-      }
-      robot->SetDriverValue(i,val + scale*Rand(-r,r));
-      for(size_t j=0;j<robot->drivers[i].linkIndices.size();j++)
-	x(robot->drivers[i].linkIndices[j]) = robot->q(robot->drivers[i].linkIndices[j]);
-    }
-  }
-}
-
-int SingleRobotCSpace::NumObstacles()
-{
-  if(!collisionPairsInitialized) InitializeCollisionPairs();
-  return GetRobot()->joints.size()+collisionPairs.size();
-}
-
-string SingleRobotCSpace::ObstacleName(int obstacle)
-{
-  Robot* robot=GetRobot();
-  if(obstacle < (int)robot->joints.size()) {
-    stringstream ss;
-    int link = robot->joints[obstacle].linkIndex;
-    ss<<"joint_limit["<<robot->LinkName(link)<<"]";
-    return ss.str();
-  }
-  if(!collisionPairsInitialized) InitializeCollisionPairs();
-  obstacle -= robot->links.size();
-
-  stringstream ss;
-  ss<<"coll["<<world.GetName(collisionPairs[obstacle].first)<<","<<world.GetName(collisionPairs[obstacle].second)<<"]";
-  return ss.str();
-}
-
-bool SingleRobotCSpace::IsFeasible(const Config& x,int constraint)
-{
-  FatalError("Don't do IsFeasible per constraint! expensive");
-  Robot* robot=GetRobot();
-  if(constraint < (int)robot->joints.size()) {
-    if(robot->joints[constraint].type == RobotJoint::Normal  || robot->joints[constraint].type == RobotJoint::Weld) {
-      int k=robot->joints[constraint].linkIndex;
-      if(x(k) < robot->qMin(k) || x(k) > robot->qMax(k))
-	return false;
-    }
-    return true;
-  }
-
-  /* TODO: driver limits
-  for(size_t i=0;i<robot->drivers.size();i++) {
-    Real v=robot->GetDriverValue(i);
-    jointLimitDist = Min(jointLimitDist,v-robot->drivers[i].qmin);
-    jointLimitDist = Min(jointLimitDist,robot->drivers[i].qmax-v);
-  }
-  */
-
-  constraint -= robot->joints.size();
-  robot->UpdateConfig(x);
-  robot->UpdateGeometry();
-
-  if(!collisionPairsInitialized) InitializeCollisionPairs();
-  return !collisionQueries[constraint].Collide();
+  RobotCSpace::SampleNeighborhood(c,r,x);
+  for(size_t j=0;j<fixedDofs.size();j++)
+    x(fixedDofs[j]) = fixedValues[j];
 }
 
 
 bool SingleRobotCSpace::IsFeasible(const Config& x)
 {
-  if(!CheckJointLimits(x)) {
-    //printf("Configuration is not in joint limits\n");
-    return false;
-  }
-  //this is already called in CheckJointLimits
-  //robot->UpdateConfig(x);
-  return CheckCollisionFree();
+  ///This is faster than going through all constraints
+  if(!CheckJointLimits(x)) return false;
+
+  return CheckCollisionFree(x);
 }
 
-bool SingleRobotCSpace::CheckCollisionFree()
+bool SingleRobotCSpace::CheckCollisionFree(const Config& x)
 {
-  Robot* robot = GetRobot();
-  robot->UpdateGeometry();
+  UpdateGeometry(x);
 
-  /*
-  if(!collisionPairsInitialized) InitializeCollisionPairs();
-
-  for(size_t i=0;i<collisionQueries.size();i++) {
-    if(collisionQueries[i].Collide()) {
-      return false;
-    }
-  }
-  return true;
-  */
   //this method may be faster for many-DOF robots because it does broad-phase checking first to eliminate candidate collisions
   int id = world.RobotID(index);
   vector<int> idrobot(1,id);
@@ -780,183 +769,36 @@ bool SingleRobotCSpace::CheckCollisionFree()
   }
   //environment collision check
   pair<int,int> res = settings->CheckCollision(world,idrobot,idothers);
-  if(res.first >= 0) return false;
+  if(res.first >= 0) {
+    //printf("Collision found: %s (%d) - %s (%d)\n",world.GetName(res.first).c_str(),res.first,world.GetName(res.second).c_str(),res.second);
+    return false;
+  }
   //self collision check
   res = settings->CheckCollision(world,idrobot);
-  if(res.first >= 0) return false;
+  if(res.first >= 0) {
+    //printf("Self-collision found: %s %s\n",world.GetName(res.first).c_str(),world.GetName(res.second).c_str());
+    return false;
+  }
   return true;
 }
 
-void SingleRobotCSpace::CheckObstacles(const Config& x,vector<bool>& infeasible)
+
+EdgePlanner* SingleRobotCSpace::PathChecker(const Config& a,const Config& b,int obstacle)
 {
-  infeasible.resize(NumObstacles(),false);
-  Robot* robot=GetRobot();
-  robot->UpdateConfig(x);
-  for(size_t i=0;i<robot->joints.size();i++) {
-    if(robot->joints[i].type == RobotJoint::Normal || robot->joints[i].type == RobotJoint::Weld) {
-      int k=robot->joints[i].linkIndex;
-      infeasible[i] = (x(k) < robot->qMin(k) || x(k) > robot->qMax(k));
-    }
+  if(constraints[obstacle]->IsConvex()) {
+    return new TrueEdgeChecker(this,a,b);
   }
-  for(size_t i=0;i<robot->drivers.size();i++) {
-    Real v=robot->GetDriverValue(i);
-    if(v < robot->drivers[i].qmin || v > robot->drivers[i].qmax) {
-      //TODO: what about driver violations
-      //fprintf(stderr,"Warning, driver %d violation...\n");
-      //infeasible[i] = true;
-    }
-  }
-
-  robot->UpdateConfig(x);
-  robot->UpdateGeometry();
-
-  if(!collisionPairsInitialized) InitializeCollisionPairs();
-  for(size_t i=0;i<collisionQueries.size();i++) 
-    infeasible[i+(int)robot->joints.size()]=collisionQueries[i].Collide();
+  SubsetConstraintCSpace* ospace = new SubsetConstraintCSpace(this,obstacle);
+  return new EdgePlannerWithCSpaceContainer(ospace,new EpsilonEdgeChecker(ospace,a,b,settings->robotSettings[index].collisionEpsilon));
 }
 
-
-EdgePlanner* SingleRobotCSpace::LocalPlanner(const Config& a,const Config& b,int obstacle)
+EdgePlanner* SingleRobotCSpace::PathChecker(const Config& a,const Config& b)
 {
-  if(obstacle < (int)GetRobot()->joints.size()) {
-    return new TrueEdgePlanner(this,a,b);
-  }
-  SingleObstacleCSpace* ospace = new SingleObstacleCSpace(this,obstacle);
-  return new EdgePlannerWithCSpaceContainer(ospace,new BisectionEpsilonEdgePlanner(ospace,a,b,settings->robotSettings[index].collisionEpsilon));
-}
-
-EdgePlanner* SingleRobotCSpace::LocalPlanner(const Config& a,const Config& b)
-{
-  return new BisectionEpsilonEdgePlanner(this,a,b,settings->robotSettings[index].collisionEpsilon);
+  return new EpsilonEdgeChecker(this,a,b,settings->robotSettings[index].collisionEpsilon);
   //uncomment this if you need an explicit edge planner
-  //return new BisectionEpsilonExplicitEdgePlanner(this,a,b,settings->robotSettings[index].collisionEpsilon);
   //return new ExplicitEdgePlanner(this,a,b);
 }
 
-Real SingleRobotCSpace::Distance(const Config& x, const Config& y)
-{
-  //Real sum = 0;
-  Real vmax = 0;
-  Robot* robot = world.robots[index];
-  const Vector& w=settings->robotSettings[index].distanceWeights;
-  for(size_t i=0;i<robot->joints.size();i++) {
-    switch(robot->joints[i].type) {
-    case RobotJoint::Weld:
-      break;
-    case RobotJoint::Normal:
-      {
-	int l=robot->joints[i].linkIndex;
-	if(w.n==0)
-	  //sum += Sqr(x(l)-y(l));
-	  vmax = Max(vmax,Abs(x(l)-y(l)));
-	else
-	  //sum += w(l)*Sqr(x(l)-y(l));
-	  vmax = Max(vmax,w(l)*Abs(x(l)-y(l)));
-      }
-      break;
-    case RobotJoint::Floating:
-      {
-	vector<int> indices;
-	robot->GetJointIndices(i,indices);
-	Assert(indices.size()==6);
-	int l = indices.back();
-	int tx = indices[0];
-	int ty = indices[1];
-	int tz = indices[2];
-	int rz = indices[3];
-	//int ry = indices[4];
-	//int rx = indices[5];
-	robot->UpdateConfig(x);
-	RigidTransform Tx = robot->links[l].T_World;
-	robot->UpdateConfig(y);
-	RigidTransform Ty = robot->links[l].T_World;
-	RigidTransform T; T.mulInverseB(Tx,Ty);
-	Real cosangle = Half*(T.R.trace()-One);
-	cosangle=Clamp(cosangle,-One,One);
-	Real rdiff = Acos(cosangle);
-	if(w.n==0)
-	  //sum += T.t.normSquared() + Sqr(rdiff);
-	  vmax = Max(vmax,Sqrt(T.t.normSquared() + Sqr(rdiff)));
-	else 
-	  //sum += w(tx)*Sqr(T.t.x)+w(ty)*Sqr(T.t.y)+w(tz)*Sqr(T.t.z)+w(rz)*Sqr(rdiff);
-	  vmax = Max(vmax,Sqrt(w(tx)*Sqr(T.t.x)+w(ty)*Sqr(T.t.y)+w(tz)*Sqr(T.t.z)+w(rz)*Sqr(rdiff)));
-      }
-      break;
-    default:
-      FatalError("TODO");
-    }
-  }
-    //return Sqrt(sum);
-    return vmax;
-}
-
-void SingleRobotCSpace::Interpolate(const Config& x,const Config& y,Real u,Config& out)
-{
-  Robot* robot = world.robots[index];
-  ::Interpolate(*robot,x,y,u,out);
-}
-
-void SingleRobotCSpace::Midpoint(const Config& x,const Config& y,Config& out)
-{
-  Interpolate(x,y,0.5,out);
-}
-
-void SingleRobotCSpace::Properties(PropertyMap& map) const
-{
-  Robot* robot = world.robots[index];
-  int euclidean = 1;
-  Real v = 1;
-  int dim = robot->q.n;
-  Vector vmin(robot->qMin),vmax(robot->qMax);
-  const Vector& w=settings->robotSettings[index].distanceWeights;
-  vector<Real> weights;
-  if(w.empty()) weights.resize(robot->q.n,1.0);
-  else weights = w;
-  for(size_t i=0;i<robot->joints.size();i++) {
-    int link = robot->joints[i].linkIndex;
-    switch(robot->joints[i].type) {
-    case RobotJoint::Normal:
-      v*=robot->qMax(link)-robot->qMin(link);
-      break;
-    case RobotJoint::Weld:
-      dim--;
-      break;
-    case RobotJoint::Spin:
-      v*=TwoPi;
-      vmin(link) = 0;
-      vmax(link) = TwoPi;
-      euclidean = 0;
-      break;
-    case RobotJoint::Floating:
-    case RobotJoint::BallAndSocket:
-      v*= Pi*4.0/3.0;
-      weights[link] = weights[link-1] = weights[link-2];
-      euclidean = 0;
-      break;
-    case RobotJoint::FloatingPlanar:
-      vmin(link) = 0;
-      vmax(link) = TwoPi;
-      v*= TwoPi;
-      euclidean = 0;
-      break;
-    default:
-      euclidean = 0;
-      break;
-    }
-  }
-
-  map.set("euclidean",euclidean);
-  map.set("geodesic",1);
-  if(dim < robot->q.n) {
-    map.set("submanifold",1);
-    map.set("intrinsicDimension",dim);
-  }
-  map.setArray("minimum",vector<Real>(vmin));
-  map.setArray("maximum",vector<Real>(vmax));
-  map.set("volume",v);
-  map.set("metric","weighted Linf");
-  map.setArray("metricWeights",weights);
-}
 
 
 /*
@@ -1000,223 +842,39 @@ void GetCollisionList(RobotWorld& world,int robot,WorldPlannerSettings* settings
 
 void SingleRobotCSpace::GetJointLimits(Vector& bmin,Vector& bmax)
 {
-  Robot* robot=GetRobot();
-  bmin.resize(robot->links.size(),-Inf);
-  bmax.resize(robot->links.size(),Inf);
-  for(size_t i=0;i<robot->links.size();i++) {
-    if(robot->joints[i].type == RobotJoint::Normal) {
-      int k=robot->joints[i].linkIndex;
-      bmin(k) = robot->qMin(k);
-      bmax(k) = robot->qMax(k);
+  bmin.resize(robot.links.size(),-Inf);
+  bmax.resize(robot.links.size(),Inf);
+  for(size_t i=0;i<robot.links.size();i++) {
+    if(robot.joints[i].type == RobotJoint::Normal) {
+      int k=robot.joints[i].linkIndex;
+      bmin(k) = robot.qMin(k);
+      bmax(k) = robot.qMax(k);
     }
-    else if(robot->joints[i].type == RobotJoint::Spin) {
-      int k=robot->joints[i].linkIndex;
+    else if(robot.joints[i].type == RobotJoint::Spin) {
+      int k=robot.joints[i].linkIndex;
       bmin(k) = 0;
       bmax(k) = TwoPi;
     }
   }
   /* TODO: driver limits
-  robot->UpdateConfig(x);
-  for(size_t i=0;i<robot->drivers.size();i++) {
-    Real v=robot->GetDriverValue(i);
-    jointLimitDist = Min(jointLimitDist,v-robot->drivers[i].qmin);
-    jointLimitDist = Min(jointLimitDist,robot->drivers[i].qmax-v);
+  robot.UpdateConfig(x);
+  for(size_t i=0;i<robot.drivers.size();i++) {
+    Real v=robot.GetDriverValue(i);
+    jointLimitDist = Min(jointLimitDist,v-robot.drivers[i].qmin);
+    jointLimitDist = Min(jointLimitDist,robot.drivers[i].qmax-v);
   }
   */
 }
 
-Real SingleRobotCSpace::FreeWorkspaceBound(const Config& x,int constraint)
+void SingleRobotCSpace::Properties(PropertyMap& map) 
 {
-  Robot* robot=GetRobot();
-  robot->UpdateConfig(x);
-  robot->UpdateGeometry();
-  
-  if(!collisionPairsInitialized) InitializeCollisionPairs();
-
-  constraint -= robot->joints.size();
-  Assert(constraint >= 0 && constraint < (int)collisionPairs.size());
-  return collisionQueries[constraint].Distance(0.0,0.0);
-}
-
-Real SingleRobotCSpace::WorkspaceMovementBound(const Config& x,const Vector& dx,int constraint)
-{
-  Robot* robot=GetRobot();
-
-  if(!collisionPairsInitialized) InitializeCollisionPairs();
-  constraint -= robot->joints.size();
-  Assert(constraint >= 0 && constraint < (int)collisionPairs.size());
-
-  int link=world.IsRobotLink(collisionPairs[constraint].first).second;
-  pair<int,int> endid=world.IsRobotLink(collisionPairs[constraint].second);
-  int endLink = (endid.first==index ? endid.second : -1);
-  if(endLink >= 0) {
-    //checking self collision, what to do?
-    int lca = robot->LCA(link,endLink);
-    if(link != lca && endLink != lca)
-      FatalError("Can't do branching structures yet\n");
-    if(lca == link) //swap
-      swap(link,endLink);
-  }
-
-  //printf("Getting lipschitz bounds for %d -> %d\n",link,endLink);
-
-  //compute lipschitz constants
-  if(robot->lipschitzMatrix.isEmpty()) {
-    robot->ComputeLipschitzMatrix();
-  }
-
-  Real d=0;
-  int j=link;
-  while(j != endLink) {
-    Assert( j >= 0 && j < (int)robot->links.size());
-    d += Abs(dx(j)) * robot->lipschitzMatrix(j,link);
-    j = robot->parents[j];
-  }
-  return d;
-}
-
-
-
-
-
-
-
-SingleRobotCSpace2::SingleRobotCSpace2(RobotWorld& world,int index,
-		    WorldPlannerSettings* settings)
-  :SingleRobotCSpace(world,index,settings)
-{}
-
-SingleRobotCSpace2::SingleRobotCSpace2(const SingleRobotCSpace& space)
-  :SingleRobotCSpace(space)
-{}
-
-int SingleRobotCSpace2::NumDimensions() const
-{
-  return SingleRobotCSpace::NumDimensions();
-}
-
-void SingleRobotCSpace2::FixDof(int dof,Real value)
-{
-  fixedDofs.push_back(dof);
-  fixedValues.push_back(value);
-}
-
-void SingleRobotCSpace2::IgnoreCollisions(int a,int b)
-{
-  ignoreCollisions.push_back(pair<int,int>(a,b));
-  if(!collisionPairsInitialized) {
-    fprintf(stderr,"SingleRobotCSpace2::IgnoreCollisions: warning, collision structure needs reinitialization\n");
-    Init();
-  }
-}
-
-void SingleRobotCSpace2::Init()
-{
-  vector<bool> oldCheckCollisions(ignoreCollisions.size());
-  for(size_t i=0;i<ignoreCollisions.size();i++) {
-    oldCheckCollisions[i] = settings->collisionEnabled(ignoreCollisions[i].first,ignoreCollisions[i].second);
-    settings->collisionEnabled(ignoreCollisions[i].first,ignoreCollisions[i].second) = false;
-    settings->collisionEnabled(ignoreCollisions[i].second,ignoreCollisions[i].first) = false;
-  }
-  InitializeCollisionPairs();
-  for(size_t i=0;i<ignoreCollisions.size();i++) {
-    settings->collisionEnabled(ignoreCollisions[i].first,ignoreCollisions[i].second) = oldCheckCollisions[i];
-    settings->collisionEnabled(ignoreCollisions[i].second,ignoreCollisions[i].first) = oldCheckCollisions[i];
-  }
-}
-
-int SingleRobotCSpace2::NumObstacles()
-{
-  if(!collisionPairsInitialized) Init();
-  return (int)fixedDofs.size()+SingleRobotCSpace::NumObstacles();
-}
-
-std::string SingleRobotCSpace2::ObstacleName(int obstacle)
-{
-  if(obstacle < (int)fixedDofs.size()) {
-    char buf[256];
-    sprintf(buf,"fixed[%d]=%g",fixedDofs[obstacle],fixedValues[obstacle]);
-    return buf;
-  }
-  if(!collisionPairsInitialized) Init();
-  return SingleRobotCSpace::ObstacleName(obstacle-(int)fixedDofs.size());
-}
-
-bool SingleRobotCSpace2::IsFeasible(const Config& x)
-{
-  for(size_t i=0;i<fixedDofs.size();i++) {
-    if(x(fixedDofs[i]) != fixedValues[i]) {
-      printf("Fixed degree of freedom %d does not match its fixed value %g!=%g, error %g\n",fixedDofs[i],x(fixedDofs[i]),fixedValues[i],x(fixedDofs[i])-fixedValues[i]);
-      return false;
-    }
-  }
-  if(!collisionPairsInitialized) Init();
-  bool res=SingleRobotCSpace::IsFeasible(x);
-  return res;
-}
-
-bool SingleRobotCSpace2::IsFeasible(const Config& x,int obstacle)
-{
-  if(obstacle < (int)fixedDofs.size()) {
-    if(x(fixedDofs[obstacle]) != fixedValues[obstacle]) {
-      return false;
-    }
-    return true;
-  }
-  if(!collisionPairsInitialized) Init();
-  bool res=SingleRobotCSpace::IsFeasible(x,obstacle-(int)fixedDofs.size());
-  return res;
-}
-
-void SingleRobotCSpace2::CheckObstacles(const Config& x,vector<bool>& infeasible)
-{
-  vector<bool> otherObstacles;
-  SingleRobotCSpace::CheckObstacles(x,otherObstacles);
-  infeasible.resize(fixedDofs.size());
-  for(size_t i=0;i<infeasible.size();i++)
-    infeasible[i] = (x(fixedDofs[i]) != fixedValues[i]);
-  infeasible.insert(infeasible.end(),otherObstacles.begin(),otherObstacles.end());
-}
-
-EdgePlanner* SingleRobotCSpace2::LocalPlanner(const Config& a,const Config& b,int obstacle)
-{
-  if(obstacle < (int)fixedDofs.size())
-    return new TrueEdgePlanner(this,a,b);
-  return SingleRobotCSpace::LocalPlanner(a,b,obstacle-(int)fixedDofs.size());
-}
-
-EdgePlanner* SingleRobotCSpace2::LocalPlanner(const Config& a,const Config& b)
-{
-  return new BisectionEpsilonExplicitEdgePlanner(this,a,b,settings->robotSettings[index].collisionEpsilon);
-  //return new ExplicitEdgePlanner(this,a,b);
-}
-
-
-void SingleRobotCSpace2::Sample(Config& x)
-{
-  SingleRobotCSpace::Sample(x);
-  for(size_t j=0;j<fixedDofs.size();j++)
-    x(fixedDofs[j]) = fixedValues[j];
-}
-
-void SingleRobotCSpace2::SampleNeighborhood(const Config& c,Real r,Config& x)
-{
-  SingleRobotCSpace::SampleNeighborhood(c,r,x);
-  for(size_t j=0;j<fixedDofs.size();j++)
-    x(fixedDofs[j]) = fixedValues[j];
-}
-
-
-void SingleRobotCSpace2::Properties(PropertyMap& map) const
-{
-  SingleRobotCSpace::Properties(map);
-  Robot* robot = GetRobot();
+  RobotCSpace::Properties(map);
   if(!fixedDofs.empty()) {
     int dim;
     if(map.get("intrinsicDimension",dim))
       ;
     else {
-      dim = robot->q.n;
+      dim = robot.q.n;
       dim -= fixedDofs.size();
     }
     map.set("intrinsicDimension",dim);
@@ -1227,8 +885,8 @@ void SingleRobotCSpace2::Properties(PropertyMap& map) const
     map.getArray("maximum",maximum);
     for(size_t i=0;i<fixedDofs.size();i++) {
       int k=fixedDofs[i];
-      if(robot->qMax[k] != robot->qMin[k])
-	v /= (robot->qMax[k]-robot->qMin[k]);
+      if(robot.qMax[k] != robot.qMin[k])
+	v /= (robot.qMax[k]-robot.qMin[k]);
       minimum[k] = maximum[k] = fixedValues[i];
     }
     map.set("volume",v);
@@ -1240,39 +898,15 @@ void SingleRobotCSpace2::Properties(PropertyMap& map) const
 
 
 SingleRigidObjectCSpace::SingleRigidObjectCSpace(RobotWorld& _world,int _index,WorldPlannerSettings* _settings)
-  :world(_world),index(_index),settings(_settings),collisionPairsInitialized(false)
+  :SE3CSpace(_settings->objectSettings[_index].worldBounds.bmin,_settings->objectSettings[_index].worldBounds.bmax),
+  world(_world),index(_index),settings(_settings),constraintsDirty(true)
 {
   Assert(settings != NULL);
-}
+  if(settings->objectSettings[index].translationWeight != 1.0)
+    fprintf(stderr,"SingleRigidObjectCSpace: translation distance weight is not 1\n");
+  SE3CSpace::SetAngleWeight(settings->objectSettings[index].rotationWeight);
 
-void SingleRigidObjectCSpace::Interpolate(const Config& x,const Config& y,Real u,Config& out)
-{
-  RigidTransform Ta,Tb,Tout;
-  ConfigToTransform(x,Ta);
-  ConfigToTransform(y,Tb);
-  interpolate(Ta,Tb,u,Tout);
-  TransformToConfig(Tout,out);
-}
-
-void SingleRigidObjectCSpace::Midpoint(const Config& x,const Config& y,Config& out)
-{
-  Interpolate(x,y,0.5,out);
-}
-
-Real SingleRigidObjectCSpace::Distance(const Config& x,const Config& y)
-{
-  RigidTransform Ta,Tb;
-  ConfigToTransform(x,Ta);
-  ConfigToTransform(y,Tb);
-  Real d = Ta.t.distance(Tb.t);
-  Matrix3 Rrel;
-  Rrel.mulTransposeB(Ta.R,Tb.R);
-  AngleAxisRotation aa;
-  aa.setMatrix(Rrel);
-  Real wt = settings->objectSettings[index].translationWeight;
-  Real wr = settings->objectSettings[index].rotationWeight;
-  d = Sqrt(d*d*wt + aa.angle*aa.angle*wr);
-  return d;
+  Init();
 }
 
 RigidObject* SingleRigidObjectCSpace::GetObject() const
@@ -1280,200 +914,54 @@ RigidObject* SingleRigidObjectCSpace::GetObject() const
   return world.rigidObjects[index];
 }
 
-bool SingleRigidObjectCSpace::IsFeasible(const Config& q)
+void SingleRigidObjectCSpace::IgnoreCollisions(int id)
+{
+  for(size_t i=0;i<collisionPairs.size();i++) {
+    if(collisionPairs[i].second == id) {
+      collisionPairs[i] = collisionPairs.back();
+      collisionPairs.resize(collisionPairs.size()-1);
+      collisionQueries[i] = collisionQueries.back();
+      collisionQueries.resize(collisionQueries.size()-1);
+    }
+  }
+}
+
+void SingleRigidObjectCSpace::Init()
+{
+  if(!constraintsDirty) return;
+  MultiCSpace::FlattenConstraints();
+  constraints.resize(3);
+  constraintNames.resize(3);
+
+  CSet::CPredicate f = boost::bind1st(std::mem_fun(&SingleRigidObjectCSpace::UpdateGeometry),this);
+  CSpace::AddConstraint("update_geometry",f);
+
+  if(collisionPairs.empty()) {
+    int id = world.RigidObjectID(index);
+    settings->EnumerateCollisionQueries(world,id,-1,collisionPairs,collisionQueries);
+  }
+
+  for(size_t i=0;i<collisionPairs.size();i++) 
+  {
+    stringstream ss;
+    ss<<"coll["<<world.GetName(collisionPairs[i].first)<<","<<world.GetName(collisionPairs[i].second)<<"]";
+    CSpace::AddConstraint(ss.str(),new CollisionFreeSet(collisionQueries[i]));
+  }
+  constraintsDirty = false;
+}
+
+bool SingleRigidObjectCSpace::UpdateGeometry(const Config& q)
 {
   RigidTransform T;
-  ConfigToTransform(q,T);
-  return CheckCollisionFree(T);
-}
-
-
-void SingleRigidObjectCSpace::InitializeCollisionPairs()
-{
-  collisionPairsInitialized=true;
-  int id = world.RigidObjectID(index);
-  collisionPairs.resize(0);
-  collisionQueries.resize(0);
-  settings->EnumerateCollisionQueries(world,id,-1,collisionPairs,collisionQueries);
-}
-
-bool SingleRigidObjectCSpace::CheckCollisionFree(const RigidTransform& T)
-{
-  GetObject()->T = T;
+  SE3CSpace::GetTransform(q,GetObject()->T);
   GetObject()->UpdateGeometry();
-  if(!collisionPairsInitialized) InitializeCollisionPairs();
-  for(size_t i=0;i<collisionQueries.size();i++)
-    if(collisionQueries[i].Collide()) return false;
   return true;
 }
 
-void SingleRigidObjectCSpace::Sample(Config& q)
-{
-  QuaternionRotation quat;
-  RigidTransform T;
-  RandRotation(quat);
-  quat.getMatrix(T.R);
-  SampleAABB(settings->objectSettings[index].worldBounds.bmin,settings->objectSettings[index].worldBounds.bmax,T.t);
-  TransformToConfig(T,q);
-}
 
-void SingleRigidObjectCSpace::SampleNeighborhood(const Config& c,Real r,Config& q)
+EdgePlanner* SingleRigidObjectCSpace::PathChecker(const Config& a,const Config& b)
 {
-  AngleAxisRotation aa;
-  RigidTransform T,T0;
-  aa.angle = Rand(0,r);
-  SampleSphere(1.0,aa.axis);
-  aa.getMatrix(T.R);
-  SampleCube(r,T.t);
-  ConfigToTransform(c,T0);
-  TransformToConfig(T*T0,q);
-}
-
-EdgePlanner* SingleRigidObjectCSpace::LocalPlanner(const Config& a,const Config& b)
-{
-  return new BisectionEpsilonEdgePlanner(this,a,b,settings->objectSettings[index].collisionEpsilon);
-}
-
-void SingleRigidObjectCSpace::Properties(PropertyMap& map) const
-{
-  map.set("euclidean",0);
-  map.set("geodesic",1);
-  map.set("metric","weighted euclidean");
-  vector<Real> weights(6);
-  Real wt = settings->objectSettings[index].translationWeight;
-  Real wr = settings->objectSettings[index].rotationWeight;
-  weights[0] = weights[1] = weights[2] = Sqrt(wt);
-  weights[3] = weights[4] = weights[5] = Sqrt(wr);
-  map.setArray("metricWeights",weights);
+  return new EpsilonEdgeChecker(this,a,b,settings->objectSettings[index].collisionEpsilon);
 }
 
 
-
-MultiRobotCSpace::MultiRobotCSpace(RobotWorld& _world,WorldPlannerSettings* _settings)
-  :world(_world),settings(_settings)
-{
-}
-
-MultiRobotCSpace::MultiRobotCSpace(const MultiRobotCSpace& space)
-  :world(space.world),settings(space.settings)
-{
-}
-
-
-void MultiRobotCSpace::InitRobots(const vector<int>& indices)
-{
-  robot.elements.clear();
-  robotElementIDs.resize(indices.size());
-  elementSpaces.resize(indices.size());
-  for(size_t i=0;i<indices.size();i++) {
-    robot.Add(world.robots[indices[i]],world.robots[indices[i]]->name.c_str());
-    robotElementIDs[i] = world.RobotID(indices[i]);
-    elementSpaces[i] = new SingleRobotCSpace(world,indices[i],settings);
-  }
-}
-
-void MultiRobotCSpace::AddRobot(int index)
-{
-  int element = robot.Add(world.robots[index],world.robots[index]->name.c_str());
-  robotElementIDs.push_back(world.RobotID(index));
-  elementSpaces.push_back(new SingleRobotCSpace(world,index,settings));
-}
-
-void MultiRobotCSpace::AddRigidObject(int index)
-{
-  int element = robot.Add(world.rigidObjects[index],world.rigidObjects[index]->name.c_str());
-  robotElementIDs.push_back(world.RigidObjectID(index));
-  elementSpaces.push_back(new SingleRigidObjectCSpace(world,index,settings));
-}
-
-
-int MultiRobotCSpace::NumDimensions() const
-{
-  return robot.NumDof();
-}
-
-void MultiRobotCSpace::Sample(Config& x)
-{
-  x.resize(NumDimensions());
-  vector<Config> xelements;
-  robot.SplitRefs(x,xelements);
-  for(size_t i=0;i<elementSpaces.size();i++)
-    elementSpaces[i]->Sample(xelements[i]);
-}
-
-void MultiRobotCSpace::SampleNeighborhood(const Config& c,Real r,Config& x)
-{
-  x.resize(NumDimensions());
-  vector<Config> celements,xelements;
-  robot.SplitRefs(c,celements);
-  robot.SplitRefs(x,xelements);
-  for(size_t i=0;i<elementSpaces.size();i++)
-    elementSpaces[i]->SampleNeighborhood(celements[i],r,xelements[i]);
-}
-
-bool MultiRobotCSpace::IsFeasible(const Config& x)
-{
-  vector<Config> xelements;
-  robot.SplitRefs(x,xelements);
-  for(size_t i=0;i<elementSpaces.size();i++) {
-    if(!elementSpaces[i]->IsFeasible(xelements[i])) return false;
-  }
-  //TODO: self-collision checking. 
-  //eliminate some of the collision checks
-  return true;
-}
-
-EdgePlanner* MultiRobotCSpace::LocalPlanner(const Config& a,const Config& b)
-{
-  Real minEps=1.0;
-  for(size_t i=0;i<robotElementIDs.size();i++) {
-    int id = robotElementIDs[i];
-    int rindex = world.IsRobot(id);
-    int oindex = world.IsRigidObject(id);
-    if(rindex >= 0)
-      minEps = Min(minEps,settings->robotSettings[rindex].collisionEpsilon);
-    else
-      minEps = Min(minEps,settings->objectSettings[oindex].collisionEpsilon);
-  }
-  return new BisectionEpsilonEdgePlanner(this,a,b,minEps);
-}
-
-Real MultiRobotCSpace::Distance(const Config& x, const Config& y)
-{
-  vector<Config> xelements,yelements;
-  robot.SplitRefs(x,xelements);
-  robot.SplitRefs(y,yelements);
-
-  Real d=0;
-  for(size_t i=0;i<elementSpaces.size();i++) 
-    d+=Sqr(elementSpaces[i]->Distance(xelements[i],yelements[i]));
-  return Sqrt(d);
-}
-
-void MultiRobotCSpace::Interpolate(const Config& x,const Config& y,Real u,Config& out)
-{
-  vector<Config> xelements,yelements,outelements;
-  robot.SplitRefs(x,xelements);
-  robot.SplitRefs(y,yelements);  
-  robot.SplitRefs(out,outelements);  
-  for(size_t i=0;i<elementSpaces.size();i++) 
-    elementSpaces[i]->Interpolate(xelements[i],yelements[i],u,outelements[i]);
-}
-
-void MultiRobotCSpace::Midpoint(const Config& x,const Config& y,Config& out)
-{
-  vector<Config> xelements,yelements,outelements;
-  robot.SplitRefs(x,xelements);
-  robot.SplitRefs(y,yelements);  
-  robot.SplitRefs(out,outelements);  
-  for(size_t i=0;i<elementSpaces.size();i++) 
-    elementSpaces[i]->Midpoint(xelements[i],yelements[i],outelements[i]);
-}
-
-
-void MultiRobotCSpace::Properties(PropertyMap& map) const
-{
-  map.set("euclidean",0);
-  map.set("geodesic",1);
-  //TODO: inspect the robots and objects
-}

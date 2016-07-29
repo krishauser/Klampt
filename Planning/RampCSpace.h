@@ -4,7 +4,8 @@
 #include "Modeling/ParabolicRamp.h"
 #include "Modeling/DynamicPath.h"
 #include <KrisLibrary/planning/CSpace.h>
-#include <KrisLibrary/planning/KinodynamicCSpace.h>
+#include <KrisLibrary/planning/EdgePlanner.h>
+#include <KrisLibrary/planning/KinodynamicSpace.h>
 
 /** @brief A CSpace where configurations are given by (q,dq) config, velocity
  * pairs.  Local paths are time-optimal acceleration bounded curves.
@@ -16,6 +17,7 @@ class RampCSpaceAdaptor : public CSpace
 {
 public:
   RampCSpaceAdaptor(CSpace* cspace,const Vector& velMax,const Vector& accMax);
+  virtual int NumDimensions() const;
   virtual bool IsFeasible(const State& s);
   virtual void Sample(State& s);
   virtual EdgePlanner* LocalPlanner(const State& a,const State& b);
@@ -30,19 +32,45 @@ public:
   Real visibilityTolerance;
 };
 
-
-///Edge planner class for the RampCSpaceAdaptor
-class RampEdgePlanner : public EdgePlanner
+class RampInterpolator: public Interpolator
 {
 public:
-  RampEdgePlanner(RampCSpaceAdaptor* _space,const State& a,const State& b);
-  RampEdgePlanner(RampCSpaceAdaptor* _space,const ParabolicRamp::ParabolicRampND& ramp);
-  RampEdgePlanner(RampCSpaceAdaptor* _space,const ParabolicRamp::DynamicPath& path);
-  virtual ~RampEdgePlanner() {}
+  RampInterpolator(const ParabolicRamp::ParabolicRampND& ramp);
+  virtual const Config& Start() const;
+  virtual const Config& End() const;
+  virtual CSpace* Space() const;
+  virtual void Eval(Real u,Config& x) const;
+  virtual Real Length() const;
+
+  ParabolicRamp::ParabolicRampND ramp;
+};
+
+class RampPathInterpolator: public Interpolator
+{
+public:
+  RampPathInterpolator(const ParabolicRamp::DynamicPath& ramp);
+  virtual const Config& Start() const;
+  virtual const Config& End() const;
+  virtual CSpace* Space() const;
+  virtual void Eval(Real u,Config& x) const;
+  virtual Real Length() const;
+
+  ParabolicRamp::DynamicPath path;
+};
+
+///Edge planner class for the RampCSpaceAdaptor
+class RampEdgeChecker : public EdgePlanner
+{
+public:
+  RampEdgeChecker(RampCSpaceAdaptor* _space,const State& a,const State& b);
+  RampEdgeChecker(RampCSpaceAdaptor* _space,const ParabolicRamp::ParabolicRampND& ramp);
+  RampEdgeChecker(RampCSpaceAdaptor* _space,const ParabolicRamp::DynamicPath& path);
+  virtual ~RampEdgeChecker() {}
   virtual bool IsVisible();
   virtual void Eval(Real u,Config& x) const;
+  virtual Real Length() const;
   virtual const Config& Start() const { return start; }
-  virtual const Config& Goal() const { return goal; }
+  virtual const Config& End() const { return goal; }
   virtual CSpace* Space() const { return space; }
   virtual EdgePlanner* Copy() const;
   virtual EdgePlanner* ReverseCopy() const;

@@ -197,7 +197,6 @@ bool TimeOptimizePath(Robot& robot,const vector<Real>& oldtimes,const vector<Con
   //make a smooth interpolator
   Vector dx0,dx1,temp;
   RobotCSpace cspace(robot);
-  RobotGeodesicManifold manifold(robot);
   TimeScaledBezierCurve traj;
   traj.path.durations.resize(oldconfigs.size()-1);
   for(size_t i=0;i+1<oldconfigs.size();i++) {
@@ -211,7 +210,7 @@ bool TimeOptimizePath(Robot& robot,const vector<Real>& oldtimes,const vector<Con
   traj.path.segments.resize(oldconfigs.size()-1);
   for(size_t i=0;i+1<oldconfigs.size();i++) {
     traj.path.segments[i].space = &cspace;
-    traj.path.segments[i].manifold = &manifold;
+    traj.path.segments[i].manifold = &cspace;
     traj.path.segments[i].x0 = oldconfigs[i];
     traj.path.segments[i].x3 = oldconfigs[i+1];
     if(i > 0) {
@@ -271,7 +270,6 @@ bool InterpolateConstrainedPath(Robot& robot,const Config& a,const Config& b,con
     f.UseIK(ikGoals[i]);
   GetDefaultIKDofs(robot,ikGoals,f.activeDofs);
   ActiveRobotCSpace space(robot,f.activeDofs);
-  ActiveRobotGeodesicManifold manifold(robot);
   Config activeA(f.activeDofs.Size()),activeB(f.activeDofs.Size());
   f.activeDofs.InvMap(a,activeA);
   f.activeDofs.InvMap(b,activeB);
@@ -318,9 +316,8 @@ void SmoothDiscretizePath(Robot& robot,const vector<Config>& oldconfigs,int n,ve
   times.resize(n);
   configs.resize(n);
   RobotCSpace space(robot);
-  RobotGeodesicManifold geodesic(robot);
   vector<GeneralizedCubicBezierCurve> curves;
-  SPLINE_INTERPOLATE_FUNC(oldconfigs,curves,&space,&geodesic);
+  SPLINE_INTERPOLATE_FUNC(oldconfigs,curves,&space,&space);
 
   times[0] = 0;
   for(int i=1;i<n;i++) 
@@ -356,12 +353,11 @@ bool InterpolateConstrainedMultiPath(Robot& robot,const MultiPath& path,vector<G
       printf("InterpolateConstrainedMultiPath: Direct interpolating trajectory with res %g\n",res);
       //just interpolate directly
       RobotCSpace space(robot);
-      RobotGeodesicManifold manifold(robot);
       paths.resize(path.sections.size());
       for(size_t i=0;i<path.sections.size();i++) {
 	if(path.sections[i].times.empty()) {
 	  SPLINE_INTERPOLATE_FUNC(path.sections[i].milestones,paths[i].segments,
-			       &space,&manifold);
+			       &space,&space);
 	  //uniform timing
 	  paths[i].durations.resize(paths[i].segments.size());
 	  Real dt=1.0/Real(paths[i].segments.size());
@@ -370,7 +366,7 @@ bool InterpolateConstrainedMultiPath(Robot& robot,const MultiPath& path,vector<G
 	}
 	else {
 	  SPLINE_INTERPOLATE_FUNC(path.sections[i].milestones,path.sections[i].times,paths[i].segments,
-			       &space,&manifold);
+			       &space,&space);
 	  //get timing from path
 	  paths[i].durations.resize(paths[i].segments.size());
 	  for(size_t j=0;j<paths[i].segments.size();j++)
@@ -383,7 +379,6 @@ bool InterpolateConstrainedMultiPath(Robot& robot,const MultiPath& path,vector<G
   printf("InterpolateConstrainedMultiPath: Discretizing constrained trajectory at res %g\n",xtol);
 
   RobotCSpace cspace(robot);
-  RobotGeodesicManifold manifold(robot);
 
   //create transition constraints and derivatives
   vector<vector<IKGoal> > stanceConstraints(path.sections.size());
@@ -405,13 +400,13 @@ bool InterpolateConstrainedMultiPath(Robot& robot,const MultiPath& path,vector<G
 
     const Config& prev=path.sections[i].milestones[path.sections[i].milestones.size()-2];
     const Config& next=path.sections[i+1].milestones[1];
-    manifold.InterpolateDeriv(prev,next,0.5,transitionDerivs[i]);
+    cspace.InterpolateDeriv(prev,next,0.5,transitionDerivs[i]);
     transitionDerivs[i] *= 0.5;
 
     //check for overshoots a la MonotonicInterpolate
     Vector inslope,outslope;
-    manifold.InterpolateDeriv(prev,path.sections[i].milestones.back(),1.0,inslope);
-    manifold.InterpolateDeriv(path.sections[i].milestones.back(),next,0.0,outslope);
+    cspace.InterpolateDeriv(prev,path.sections[i].milestones.back(),1.0,inslope);
+    cspace.InterpolateDeriv(path.sections[i].milestones.back(),next,0.0,outslope);
     for(int j=0;j<transitionDerivs[i].n;j++) {
       if(Sign(transitionDerivs[i][j]) != Sign(inslope[j]) || Sign(transitionDerivs[i][j]) != Sign(outslope[j])) transitionDerivs[i][j] = 0;
       else {
@@ -462,7 +457,7 @@ bool InterpolateConstrainedMultiPath(Robot& robot,const MultiPath& path,vector<G
     if(i<transitionDerivs.size()) 
       dxnext.setRef(transitionDerivs[i]); 
     if(stanceConstraints[i].empty()) {
-      SPLINE_INTERPOLATE_FUNC(path.sections[i].milestones,paths[i].segments,&cspace,&manifold);
+      SPLINE_INTERPOLATE_FUNC(path.sections[i].milestones,paths[i].segments,&cspace,&cspace);
       DiscretizeSpline(paths[i],xtol);
 
       //Note: discretizeSpline will fill in the spline durations
@@ -620,11 +615,10 @@ bool GenerateAndTimeOptimizeMultiPath(Robot& robot,MultiPath& multipath,Real xto
   printf("Generated interpolating path in time %gs\n",timer.ElapsedTime());
 
   RobotCSpace cspace(robot);
-  RobotGeodesicManifold manifold(robot);
   for(size_t i=0;i<multipath.sections.size();i++) {
     for(size_t j=0;j<paths[i].segments.size();j++) {
       paths[i].segments[j].space = &cspace;
-      paths[i].segments[j].manifold = &manifold;
+      paths[i].segments[j].manifold = &cspace;
     }
     for(int iters=0;iters<gNumTimescaleBisectIters;iters++)
       paths[i].Bisect();
@@ -690,7 +684,7 @@ bool GenerateAndTimeOptimizeMultiPath(Robot& robot,MultiPath& multipath,Real xto
   for(size_t i=0;i<multipath.sections.size();i++) {
     for(size_t j=0;j<paths[i].segments.size();j++) {
       paths[i].segments[j].space = &cspace;
-      paths[i].segments[j].manifold = &manifold;
+      paths[i].segments[j].manifold = &cspace;
     }
   }
   for(size_t i=0;i<paths.size();i++) {
@@ -749,7 +743,7 @@ bool GenerateAndTimeOptimizeMultiPath(Robot& robot,MultiPath& multipath,Real xto
   for(size_t i=0;i<multipath.sections.size();i++) {
     for(size_t j=0;j<paths[i].segments.size();j++) {
       paths[i].segments[j].space = &cspace;
-      paths[i].segments[j].manifold = &manifold;
+      paths[i].segments[j].manifold = &cspace;
     }
   }
   for(size_t i=0;i<paths.size();i++) {
@@ -808,7 +802,7 @@ bool GenerateAndTimeOptimizeMultiPath(Robot& robot,MultiPath& multipath,Real xto
   for(size_t i=0;i<multipath.sections.size();i++) {
     for(size_t j=0;j<paths[i].segments.size();j++) {
       paths[i].segments[j].space = &cspace;
-      paths[i].segments[j].manifold = &manifold;
+      paths[i].segments[j].manifold = &cspace;
     }
   }
   for(size_t i=0;i<paths.size();i++) {
@@ -964,9 +958,8 @@ bool GenerateAndTimeOptimizeMultiPath(Robot& robot,MultiPath& multipath,Real xto
 
 void EvaluateMultiPath(Robot& robot,const MultiPath& path,Real t,Config& q,Real xtol,Real contactol,int numIKIters)
 {
-  RobotCSpace space(robot);;
-  RobotGeodesicManifold manifold(robot);
-  GeneralizedCubicBezierCurve curve(&space,&manifold);
+  RobotCSpace space(robot);
+  GeneralizedCubicBezierCurve curve(&space,&space);
   Real duration,param;
   int seg=path.Evaluate(t,curve,duration,param,MultiPath::InterpLinear);
   if(seg < 0) seg = 0;

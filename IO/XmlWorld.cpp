@@ -473,12 +473,17 @@ bool XmlWorld::GetWorld(RobotWorld& world)
   while(e) {
     const char* name = e->Attribute("name");
     string sname = "Terrain";
-    if(name) sname=name;
     Terrain* t = new Terrain;
     if(!XmlTerrain(e,path).GetTerrain(*t)) {
       printf("XmlWorld: Unable to load terrain %s\n",sname.c_str());
       delete t;
       return false;
+    }
+    if(name) sname=name;
+    else {
+      stringstream ss;
+      ss<<"Terrain"<<world.terrains.size();
+      sname = ss.str();
     }
     int i = world.AddTerrain(sname,t);
     TiXmlElement* d = e->FirstChildElement(display);

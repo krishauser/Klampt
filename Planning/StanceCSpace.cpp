@@ -1,42 +1,22 @@
 #include "StanceCSpace.h"
+#include <boost/functional.hpp>
 
 StanceCSpace::StanceCSpace(RobotWorld& world,int index,
 			   WorldPlannerSettings* settings)
   :ContactCSpace(world,index,settings),gravity(0,0,-9.8),numFCEdges(4),
-   spCalculated(false),spMargin(0),torqueSolver(*GetRobot(),formation)
+   spCalculated(false),spMargin(0),torqueSolver(robot,formation)
 {}
 
 StanceCSpace::StanceCSpace(const SingleRobotCSpace& space)
   :ContactCSpace(space),gravity(0,0,-9.8),numFCEdges(4),
-   spCalculated(false),spMargin(0),torqueSolver(*GetRobot(),formation)
+   spCalculated(false),spMargin(0),torqueSolver(robot,formation)
 {}
 
 StanceCSpace::StanceCSpace(const StanceCSpace& space)
   :ContactCSpace(space),gravity(0,0,-9.8),numFCEdges(4),
-  spCalculated(false),spMargin(space.spMargin),torqueSolver(*GetRobot(),formation)
+  spCalculated(false),spMargin(space.spMargin),torqueSolver(robot,formation)
 {
   SetStance(space.stance);
-}
-
-void StanceCSpace::Sample(Config& x)
-{
-  ContactCSpace::Sample(x);
-}
-
-void StanceCSpace::SampleNeighborhood(const Config& c,Real r,Config& x)
-{
-  ContactCSpace::SampleNeighborhood(c,r,x);
-}
-
-bool StanceCSpace::IsFeasible(const Config& q)
-{
-  //heuristic testing order
-  if(!CheckJointLimits(q)) return false;
-  if(!CheckContact()) return false;
-  if(!CheckRBStability()) return false;
-  if(!CheckCollisionFree()) return false;
-  if(!CheckTorqueStability()) return false;
-  return true;
 }
 
 void StanceCSpace::SetStance(const Stance& s)
@@ -49,6 +29,9 @@ void StanceCSpace::SetStance(const Stance& s)
   contactIK.resize(0);
   for(Stance::const_iterator i=s.begin();i!=s.end();i++)
     contactIK.push_back(i->second.ikConstraint);
+
+  AddConstraint("rigid_equilibrium",boost::bind1st(std::mem_fun(&StanceCSpace::CheckRBStability),this));
+  AddConstraint("torque_balance",boost::bind1st(std::mem_fun(&StanceCSpace::CheckTorqueStability),this));
 }
 
 void StanceCSpace::SetHold(const Hold& h)
@@ -61,6 +44,9 @@ void StanceCSpace::SetHold(const Hold& h)
   contactIK.resize(0);
   for(Stance::const_iterator i=stance.begin();i!=stance.end();i++)
     contactIK.push_back(i->second.ikConstraint);
+
+  AddConstraint("rigid_equilibrium",boost::bind1st(std::mem_fun(&StanceCSpace::CheckRBStability),this));
+  AddConstraint("torque_balance",boost::bind1st(std::mem_fun(&StanceCSpace::CheckTorqueStability),this));
 }
 
 void StanceCSpace::CalculateSP()
@@ -82,11 +68,12 @@ void StanceCSpace::InitTorqueSolver()
 void StanceCSpace::SetSPMargin(Real margin)
 {
   spMargin = margin;
+  if(!spCalculated) CalculateSP();
 }
 
-bool StanceCSpace::CheckRBStability()
+bool StanceCSpace::CheckRBStability(const Config& x)
 {
-  if(spCalculated) return sp.TestCOM(GetRobot()->GetCOM());
+  if(spCalculated) return sp.TestCOM(robot.GetCOM());
   else {
     if(spMargin != 0) {
       fprintf(stderr,"Warning: spMargin is nonzero but the SP has not been calculated\n");
@@ -94,11 +81,11 @@ bool StanceCSpace::CheckRBStability()
     vector<ContactPoint> cps;
     vector<Vector3> f;
     GetContactPoints(stance,cps);
-    return TestCOMEquilibrium(cps,gravity,numFCEdges,GetRobot()->GetCOM(),f);
+    return TestCOMEquilibrium(cps,gravity,numFCEdges,robot.GetCOM(),f);
   }
 }
 
-bool StanceCSpace::CheckTorqueStability()
+bool StanceCSpace::CheckTorqueStability(const Config& x)
 {
   if(torqueSolver.active.empty() && torqueSolver.passive.empty()) {
     InitTorqueSolver();

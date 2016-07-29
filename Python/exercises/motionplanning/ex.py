@@ -160,6 +160,13 @@ class CSpaceObstacleProgram(GLProgram):
         #random-restart RRT planner
         #MotionPlan.setOptions(type="rrt",perturbationRadius=0.25,bidirectional=True,shortcut=True,restart=True,restartTermCond="{foundSolution:1,maxIters:1000}")
         #self.optimizingPlanner = True
+
+        #OMPL planners:
+        #Tested to work fine with OMPL's prm, lazyprm, prm*, lazyprm*, rrt, rrt*, rrtconnect, lazyrrt, lbtrrt, sbl, bitstar.
+        #Note that lbtrrt doesn't seem to continue after first iteration.
+        #Note that stride, pdst, and fmt do not work properly...
+        #MotionPlan.setOptions(type="ompl:rrt",suboptimalityFactor=0.1,knn=10,connectionThreshold=0.1)
+        #self.optimizingPlanner = True
         
         self.planner = MotionPlan(space)
         self.start=start

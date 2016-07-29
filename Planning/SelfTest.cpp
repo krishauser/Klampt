@@ -46,7 +46,7 @@ void TestShortcutting(SingleRobotCSpace* cspace,MotionPlannerFactory& plannerFac
     
     //shortcuts
     ParabolicRamp::DynamicPath path;
-    path.Init(cspace->GetRobot()->velMax,cspace->GetRobot()->accMax);  
+    path.Init(cspace->robot.velMax,cspace->robot.accMax);  
     vector<ParabolicRamp::Vector> vmilestones(milestones.size());
     copy(milestones.begin(),milestones.end(),vmilestones.begin());
     path.SetMilestones(vmilestones);

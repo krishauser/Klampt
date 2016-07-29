@@ -12,6 +12,8 @@ SET(KRISLIBRARY_LIBRARIES "")
 SET(KRISLIBRARY_INCLUDE_DIRS "")
 SET(KRISLIBRARY_DEFINITIONS "")
 
+list(APPEND CMAKE_MODULE_PATH "${KRISLIBRARY_ROOT}/KrisLibrary/CMakeModules")
+
 #this will get everything but KrisLibrary
 INCLUDE(KrisLibraryDependencies)
 

@@ -31,6 +31,29 @@ void ZMPTimeScaling::SetParams(const MultiPath& path,const vector<Real>& colocat
   SetParams(path,colocationParams,sps,groundHeights);
 }
 
+/*
+ derivation:
+ x'' = fcx / m
+ y'' = fcy / m
+ z'' = fcz / m - g 
+ with no rotational moment, (fcx,fcy,fcz) = f*(x-gx,y-gy,z-gh)
+ where f is some unknown parameter.
+ so gx = x - m x'' / f
+ so gy = y - m y'' / f
+ If z'' is known, then z'' + g = fcz / m = f*(z-gh)/m
+ so m/f = (z-gh)/(z'' + g)
+
+ Finally we have
+   gx = x - x''*(z-gh)/(z'' + g)
+   gy = y - y''*(z-gh)/(z'' + g)
+
+ When z'' is not 0, then both x'' and z'' depend on the time scaling
+ x'' = ax*ds^2 + bx*dds
+ z'' = az*ds^2 + bz*dds
+   gx = x - (ax*ds^2 + bx*dds)(z-gh)/(az*ds^2 + bz*dds + g)
+   Consider 1st order taylor expansion about ds, dds = 0
+   gx = x - (ax*ds^2 + bx*dds)(z-gh)/g
+ */
 void ZMPTimeScaling::SetParams(const MultiPath& path,const vector<Real>& paramDivs,const vector<ConvexPolygon2D>& supportPolys,const vector<Real>& groundHeights)
 {
   Robot& robot = cspace.robot;
@@ -46,10 +69,11 @@ void ZMPTimeScaling::SetParams(const MultiPath& path,const vector<Real>& paramDi
     Vector3 cm,dcm0,ddcm0;
     GetCOMDerivs(robot,xs[i],dxs[i],ddxs[i],cm,dcm0,ddcm0,ne);
     int s = paramSections[i];
-    //ZMP.x = cm.x - (cm.z - groundHeights[s])/9.8 * ddcm.x 
-    //ZMP.y = cm.y - (cm.z - groundHeights[s])/9.8 * ddcm.y
+    //ZMP.x = cm.x - (cm.z - groundHeights[s])/(9.8 - ddcm.z) * ddcm.x 
+    //ZMP.y = cm.y - (cm.z - groundHeights[s])/(9.8 - ddcm.z) * ddcm.y
+    //to first order approximation about speed = 0, ddcm.z does not factor into the ZMP
     //ddcm = ddcm0*ds2 + dcm0*dds
-    Real ddcmScale = (cm.z - groundHeights[s])/9.8;
+    Real ddcmScale = (cm.z - groundHeights[s])/(9.8);
     Plane2D p;
     for(size_t j=0;j<supportPolys[s].vertices.size();j++) {
       supportPolys[s].getPlane(j,p);

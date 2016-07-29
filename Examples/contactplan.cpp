@@ -47,7 +47,7 @@ bool StancePlan(RobotWorld& world,int robot,Config& qstart,Config& qgoal,const S
     }
     else {
       printf("  IK problem was solved, using new start configuration\n");
-      qstart = cspace.GetRobot()->q;
+      qstart = cspace.robot.q;
     }
   }
   if(!cspace.CheckContact(qgoal)) {
@@ -58,23 +58,17 @@ bool StancePlan(RobotWorld& world,int robot,Config& qstart,Config& qgoal,const S
     }
     else {
       printf("  IK problem was solved, using new goal configuration\n");
-      qgoal = cspace.GetRobot()->q;
+      qgoal = cspace.robot.q;
     }
   }
   if(!cspace.IsFeasible(qstart)) {
     cout<<"Start configuration is infeasible, violated constraints:"<<endl;
-    vector<bool> infeasible;
-    cspace.CheckObstacles(qstart,infeasible);
-    for(size_t i=0;i<infeasible.size();i++)
-      if(infeasible[i]) cout<<"  "<<cspace.ObstacleName(i)<<endl;
+    cspace.PrintInfeasibleNames(qstart);
     return false;
   }
   if(!cspace.IsFeasible(qgoal)) {
     cout<<"Goal configuration is infeasible, violated constraints:"<<endl;
-    vector<bool> infeasible;
-    cspace.CheckObstacles(qgoal,infeasible);
-    for(size_t i=0;i<infeasible.size();i++)
-      if(infeasible[i]) cout<<"  "<<cspace.ObstacleName(i)<<endl;
+    cspace.PrintInfeasibleNames(qgoal);
     return false;
   }
 
@@ -88,7 +82,7 @@ bool StancePlan(RobotWorld& world,int robot,Config& qstart,Config& qgoal,const S
   MotionPlannerInterface* planner = factory.Create(&cspace,qstart,qgoal);
   string res = planner->Plan(path,cond);
   cout<<"Planner terminated with condition "<<res<<endl;
-  printf("  Stats: SolveContact %d, %gs. IsFeasible %d, %gs\n",cspace.numSolveContact,cspace.solveContactTime,cspace.numIsFeasible,cspace.isFeasibleTime);
+  printf("  Stats: SolveContact %d, %gs.\n",cspace.numSolveContact,cspace.solveContactTime);
   delete planner;
   return !path.edges.empty();
 }
@@ -125,7 +119,7 @@ bool ContactPlan(RobotWorld& world,int robot,Config& qstart,Config& qgoal,const 
     }
     else {
       printf("  IK problem was solved, using new start configuration\n");
-      qstart = cspace.GetRobot()->q;
+      qstart = cspace.robot.q;
     }
   }
   if(!cspace.CheckContact(qgoal)) {
@@ -136,23 +130,17 @@ bool ContactPlan(RobotWorld& world,int robot,Config& qstart,Config& qgoal,const 
     }
     else {
       printf("  IK problem was solved, using new goal configuration\n");
-      qgoal = cspace.GetRobot()->q;
+      qgoal = cspace.robot.q;
     }
   }
   if(!cspace.IsFeasible(qstart)) {
     cout<<"Start configuration is infeasible, violated constraints:"<<endl;
-    vector<bool> infeasible;
-    cspace.CheckObstacles(qstart,infeasible);
-    for(size_t i=0;i<infeasible.size();i++)
-      if(infeasible[i]) cout<<"  "<<cspace.ObstacleName(i)<<endl;
+    cspace.PrintInfeasibleNames(qstart);
     return false;
   }
   if(!cspace.IsFeasible(qgoal)) {
     cout<<"Goal configuration is infeasible, violated constraints:"<<endl;
-    vector<bool> infeasible;
-    cspace.CheckObstacles(qgoal,infeasible);
-    for(size_t i=0;i<infeasible.size();i++)
-      if(infeasible[i]) cout<<"  "<<cspace.ObstacleName(i)<<endl;
+    cspace.PrintInfeasibleNames(qgoal);
     return false;
   }
 
@@ -168,7 +156,7 @@ bool ContactPlan(RobotWorld& world,int robot,Config& qstart,Config& qgoal,const 
   cout<<"  Create time: "<<timer.ElapsedTime()<<endl;
   string res = planner->Plan(path,cond);
   cout<<"Planner terminated with condition "<<res<<endl;
-  printf("  Stats: SolveContact %d, %gs. IsFeasible %d, %gs\n",cspace.numSolveContact,cspace.solveContactTime,cspace.numIsFeasible,cspace.isFeasibleTime);
+  printf("  Stats: SolveContact %d, %gs\n",cspace.numSolveContact,cspace.solveContactTime);
   delete planner;
   return !path.edges.empty();
 }
