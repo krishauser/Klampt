@@ -1,5 +1,5 @@
-from klampt import resource
-from klampt import visualization
+from klampt.io import resource
+from klampt.vis import visualization
 from klampt import *
 
 print """resourcetest.py: This program gives an example of how to use the

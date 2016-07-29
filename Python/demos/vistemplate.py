@@ -2,9 +2,9 @@
 
 import sys
 from klampt import *
-from klampt import visualization
-from klampt import coordinates
-from klampt import so3
+from klampt import vis
+from klampt.model import ik,coordinates
+from klampt.math import so3
 import time
 import math
 
@@ -24,14 +24,14 @@ if __name__ == "__main__":
     coordinates.setWorldModel(world)
 
     #add the world to the visualizer
-    visualization.add("world",world)
+    vis.add("world",world)
     #add the coordinate Manager to the visualizer
-    visualization.add("coordinates",coordinates.manager())
+    vis.add("coordinates",coordinates.manager())
     #test a point
     pt = [2,5,1]
-    visualization.add("some point",pt)
+    vis.add("some point",pt)
     #test a rigid transform
-    visualization.add("some blinking transform",[so3.identity(),[1,3,0.5]])
+    vis.add("some blinking transform",[so3.identity(),[1,3,0.5]])
     #test an IKObjective
     link = world.robot(0).link(world.robot(0).numLinks()-1)
     #point constraint
@@ -40,26 +40,28 @@ if __name__ == "__main__":
     obj = ik.objective(link,local=[[0,0,0],[0,0,0.1]],world=[pt,[pt[0],pt[1],pt[2]+0.1]])
     #transform constraint
     #obj = ik.objective(link,R=link.getTransform()[0],t=pt)
-    visualization.add("ik objective",obj)
+    vis.add("ik objective",obj)
 
-    print "Starting visualization..."
+    print "Starting klampt.vis visualization..."
+    vis.dialog()
+
     #run the visualizer in a separate thread
-    visualization.show()
+    vis.show()
     iteration = 0
-    while visualization.shown():
-        visualization.lock()
+    while vis.shown():
+        vis.lock()
         #TODO: you may modify the world here.  This line tests a sin wave.
         pt[2] = 1 + math.sin(iteration*0.03)
-        visualization.unlock()
+        vis.unlock()
         #changes to the visualization must be done outside the lock
         if (iteration / 100)%2 == 0:
-            visualization.hide("some blinking transform")
+            vis.hide("some blinking transform")
         else:
-            visualization.hide("some blinking transform",False)
+            vis.hide("some blinking transform",False)
         #this is another way of changing the point's data
-        #visualization.add("some point",[2,5,1 + math.sin(iteration*0.03)],keepAppearance=True)
+        #vis.add("some point",[2,5,1 + math.sin(iteration*0.03)],keepAppearance=True)
         time.sleep(0.01)
         iteration += 1
     
-    print "Ending visualization."
-    visualization.kill()
+    print "Ending klampt.vis visualization."
+    vis.kill()

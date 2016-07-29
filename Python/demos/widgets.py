@@ -4,7 +4,7 @@ import sys
 import math
 from klampt import *
 from klampt import WidgetSet,PointPoser,RobotPoser
-from klampt.glprogram import *
+from klampt.vis.glprogram import *
 
 class GLWidgetProgram(GLRealtimeProgram):
     """A base class for using widgets.  Right-clicks are passed onto widgets.

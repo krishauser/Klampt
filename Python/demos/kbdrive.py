@@ -118,19 +118,17 @@ class MyGLViewer(GLSimulationProgram):
                 del self.current_velocities[name]
         pass
 
+    def print_help(self):
+        GLSimulationProgram.print_help(self)
+        print 'Drive keys:',sorted(self.keymap.keys())
+
     def keyboardfunc(self,c,x,y):
         #Put your keyboard handler here
         #the current example toggles simulation / movie mode
-        if c == 's':
-            self.simulate = not self.simulate
-            print "Simulating:",self.simulate
-        elif c == 'm':
-            self.saveScreenshots = not self.saveScreenshots
-            print "Movie mode:",self.saveScreenshots
-        elif c == 'h':
-            print 'Available keys:',sorted(self.keymap.keys())
-        elif c in self.keymap:
+        if c in self.keymap:
             self.current_velocities[c]=self.keymap[c]
+        else:
+            GLSimulationProgram.keyboardfunc(self,c,x,y)
         glutPostRedisplay()
 
     def keyboardupfunc(self,c,x,y):

@@ -2,7 +2,7 @@
 
 import sys
 from klampt import *
-from klampt.glprogram import *
+from klampt.vis.glprogram import *
 from OpenGL.GLUT import *
 import math
 

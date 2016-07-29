@@ -2,7 +2,7 @@
 
 import sys
 from klampt import *
-from klampt.glrobotprogram import *
+from klampt.vis import GLSimulationProgram
 
 class MyGLViewer(GLSimulationProgram):
     def __init__(self,files):

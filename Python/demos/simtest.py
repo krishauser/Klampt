@@ -2,11 +2,10 @@
 import os
 import sys
 from klampt import *
-from klampt.glrobotprogram import *
+from klampt.vis.glrobotprogram import *
 import importlib
-from klampt.simlog import *
-from klampt.simulation import *
 
+SPLIT_SCREEN_TEST = True
 
 class MyGLViewer(GLSimulationProgram):
     """Simulates some functionality of the SimTest program.
@@ -39,9 +38,9 @@ class MyGLViewer(GLSimulationProgram):
 
     def display_screen(self):
         glDisable(GL_LIGHTING)
-        self.draw_text(20,20,str(self.sim.getTime()))
+        self.draw_text((20,20),str(self.sim.getTime()))
         if self.sim.hadPenetration(-1,-1):
-            self.draw_text(20,40,"Meshes penetrating, simulation may be unstable",color=[1,0,0])
+            self.draw_text((20,40),"Meshes penetrating, simulation may be unstable",color=[1,0,0])
 
     def control_loop(self):
         #you can put more control code here
@@ -77,7 +76,7 @@ class MyGLViewer(GLSimulationProgram):
     def motionfunc(self,x,y,dx,dy):
         if self.forceApplicationMode:
             self.moveForceSpring(x,y)
-            glutPostRedisplay()
+            self.refresh()
         else:
             GLRealtimeProgram.motionfunc(self,x,y,dx,dy)
 
@@ -157,4 +156,9 @@ if __name__ == "__main__":
             controller = maker(world.robot(i))
         viewer.sim.setController(i,controller)
     
+    if SPLIT_SCREEN_TEST:
+        viewer2 = MyGLViewer(world)
+        viewer2.create()
+        viewer.create()
+        viewer.window.broadcast = True
     viewer.run()
