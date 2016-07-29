@@ -3,8 +3,8 @@ PROJECT( Klampt )
 
 # version (e.g. for packaging)
 set(KLAMPT_MAJOR_VERSION 0)
-set(KLAMPT_MINOR_VERSION 6)
-set(KLAMPT_PATCH_VERSION 2)
+set(KLAMPT_MINOR_VERSION 7)
+set(KLAMPT_PATCH_VERSION 0)
 set(KLAMPT_VERSION ${KLAMPT_MAJOR_VERSION}.${KLAMPT_MINOR_VERSION}.${KLAMPT_PATCH_VERSION})
 if(COMMAND cmake_policy)
   cmake_policy(SET CMP0003 NEW)
@@ -102,7 +102,7 @@ ADD_DEPENDENCIES(python Klampt)
 
 # uninstall target
 configure_file(
-    "${CMAKE_MODULE_PATH}/CMakeUninstall.cmake.in"
+    "CMakeModules/CMakeUninstall.cmake.in"
     "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake"
     IMMEDIATE @ONLY)
 
