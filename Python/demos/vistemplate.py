@@ -44,6 +44,11 @@ if __name__ == "__main__":
 
     print "Starting klampt.vis visualization..."
     vis.dialog()
+    print "Delay 10 s"
+    time.sleep(10)
+
+    print "again"
+    vis.dialog()
 
     #run the visualizer in a separate thread
     vis.show()
