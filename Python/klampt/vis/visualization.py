@@ -29,7 +29,10 @@ CHALLENGES:
 - GLUT doesn't allow modal dialog boxes. 
   Solution: disable signals to non-modal windows?
 
-NEW PROBLEM: QT deletes child widgets, including the GL widget that I want to save!
+NEW PROBLEM: 
+- Qt seems to save display lists, so that each gl window has the same GL context?
+  Cannot reuse widgets for new windows.
+- GLUT does not, so things disappear when you create a new window.
 
 Instructions:
 
@@ -1172,12 +1175,14 @@ if _PyQtAvailable:
             self.layout.addWidget(self.buttons)
             self.setWindowTitle(windowinfo.name)
         def accept(self):
-            self.widget.setParent(None)
             print "Closing dialog"
+            self.widget.close()
+            self.widget.setParent(None)
             QDialog.accept(self)
         def reject(self):
-            self.widget.setParent(None)
             print "Closing dialog"
+            self.widget.close()
+            self.widget.setParent(None)
             QDialog.reject(self)
 
     class _MyWindow(QMainWindow):
@@ -1192,6 +1197,7 @@ if _PyQtAvailable:
             self.setWindowTitle(windowinfo.name)
         def closeEvent(self,event):
             self.windowinfo.mode = 'hidden'
+            self.widget.close()
             self.widget.setParent(None)
             print "Closing window"
             self.hide()
@@ -1208,7 +1214,7 @@ if _PyQtAvailable:
         while not _quit:
             _globalLock.acquire()
             for w in _windows:
-                if w.window == None:
+                if w.window == None and w.mode != 'hidden':
                     w.window = _GLBackend.createWindow(w.name)
                     w.window.setPlugin(w.frontend)
                 if w.mode == 'dialog' and w.guidata == None:
@@ -1217,14 +1223,15 @@ if _PyQtAvailable:
                     res = w.guidata.exec_()
                     _globalLock.acquire()
                     w.guidata = None
+                    w.window = None
                     w.mode = 'hidden'
                 if w.mode == 'shown' and w.guidata == None:
                     w.guidata = _MyWindow(w)
                 if w.mode == 'shown' and not w.guidata.isVisible():
                     w.guidata.show()
                 if w.mode == 'hidden' and w.guidata != None and w.guidata.isVisible():
-                    w.window.hide()
-                    w.window.setParent(None)
+                    w.guidata.hide()
+                    w.window = None
                     w.guidata = None
             
             _GLBackend.app.processEvents()
