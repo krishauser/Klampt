@@ -3,6 +3,10 @@
 import sys
 from klampt import *
 from klampt import vis
+from klampt.vis.glrobotprogram import GLSimulationProgram
+from klampt.vis.glprogram import GLPluginProgram
+from klampt.vis.glcommon import GLWidgetPlugin
+from klampt import RobotPoser
 from klampt.model import ik,coordinates
 from klampt.math import so3
 import time
@@ -35,22 +39,21 @@ if __name__ == "__main__":
     #test an IKObjective
     link = world.robot(0).link(world.robot(0).numLinks()-1)
     #point constraint
-    #obj = ik.objective(link,local=[[0,0,0]],world=[pt])
+    obj = ik.objective(link,local=[[0,0,0]],world=[pt])
     #hinge constraint
-    obj = ik.objective(link,local=[[0,0,0],[0,0,0.1]],world=[pt,[pt[0],pt[1],pt[2]+0.1]])
+    #obj = ik.objective(link,local=[[0,0,0],[0,0,0.1]],world=[pt,[pt[0],pt[1],pt[2]+0.1]])
     #transform constraint
     #obj = ik.objective(link,R=link.getTransform()[0],t=pt)
     vis.add("ik objective",obj)
+    vis.edit("some point")
+    vis.edit("some blinking transform")
+    vis.edit("coordinates:ATHLETE:ankle roll 3")
 
-    print "Starting klampt.vis visualization..."
-    vis.dialog()
-    print "Delay 10 s"
-    time.sleep(10)
-
-    print "again"
-    vis.dialog()
+    print "Visualization"
+    vis.listItems(2)
 
     #run the visualizer in a separate thread
+    """
     vis.show()
     iteration = 0
     while vis.shown():
@@ -67,6 +70,39 @@ if __name__ == "__main__":
         #vis.add("some point",[2,5,1 + math.sin(iteration*0.03)],keepAppearance=True)
         time.sleep(0.01)
         iteration += 1
+    """
+
+    #Now testing ability to re-launch windows
+    """
+    print "Showing again..."
+    vis.show()
+    while vis.shown():
+        time.sleep(0.01)
+    """
+
+    print "Doing a dialog..."
+    vis.dialog()
+
+    print "Doing a split screen program..."
+    secondscreen = GLPluginProgram()
+    widgets = GLWidgetPlugin()
+    widgets.addWidget(RobotPoser(world.robot(0)))
+    #update the coordinates every time the widget changes
+    widgets.widgetchangefunc = (lambda self:coordinates.updateFromWorld())
+    secondscreen.pushPlugin(widgets)
+    vis.addPlugin(secondscreen)
+    #vis.setPlugin(secondscreen)
+    vis.show()
+    while vis.shown():
+        time.sleep(0.1)
     
+    print "Showing a dialog, back to normal..."
+    vis.setPlugin(None)
+    vis.dialog()
+    print "Showing again, back to normal..."
+    vis.show()
+    while vis.shown():
+        time.sleep(0.01)
+
     print "Ending klampt.vis visualization."
     vis.kill()
