@@ -14,19 +14,103 @@ from ..robotsim import Viewport
 import math
 import time
 
+class GLViewport:
+    """
+    A class describing an OpenGL camera view.
+        - x,y: upper left hand corner of the view in the OpenGL canvas, in pixels
+        - w,h: width and height of the view, in pixels
+        - orthogonal: if true, does an orthogonal projection. (Not supported)
+        - camera: an orbit camera (see :class:`orbit`)
+        - fov: the camera field of view in x direction
+        - clippingplanes: a pair containing the near and far clipping planes
+    """
+    def __init__(self):
+        self.orthogonal = False
+        self.x,self.y = 0,0
+        self.w,self.h = 640,480
+        self.camera = camera.orbit()
+        self.camera.dist = 6.0
+        #x field of view in degrees
+        self.fov = 30
+        #near and far clipping planes
+        self.clippingplanes = (0.2,20)
+
+    def contains(self,x,y):
+        return x >= self.x and y >= self.y and x < self.x + self.w and y < self.x + self.h
+
+    def fit(self,center,radius):
+        """Fits the viewport to an object filling a sphere of a certain center
+        and radius"""
+        self.camera.tgt = center
+        self.camera.dist = radius*2
+        zmin,zmax = self.clippingplanes
+        if radius < self.clippingplanes[0]:
+            zmin = radius*0.5
+        if radius*3 > self.clippingplanes[1]:
+            zmax =radius*3.5
+        self.clippingplanes = (zmin,zmax)
+
+    def toViewport(self):
+        """Returns a Klampt C++ Viewport() instance corresponding to this view.
+        This is used to interface with the Widget classes"""
+        vp = Viewport()
+        vp.x,vp.y,vp.w,vp.h = self.x,self.y,self.w,self.h
+        vp.n,vp.f = self.clippingplanes
+        vp.perspective = True
+        aspect = float(self.w)/float(self.h)
+        rfov = self.fov*math.pi/180.0
+        vp.scale = 1.0/(2.0*math.tan(rfov*0.5/aspect)*aspect)
+        vp.setRigidTransform(*se3.inv(self.camera.matrix()))
+        return vp
+
+    def click_ray(self,x,y):
+        """Returns a pair of 3-tuples indicating the ray source and direction
+        in world coordinates for a screen-coordinate point (x,y)"""
+        R,t = se3.inv(self.camera.matrix())
+        #from x and y compute ray direction
+        u = float(x-(self.x + self.w/2))/self.w
+        v = float((self.y + self.h/2) -y)/self.w
+        aspect = float(self.w)/float(self.h)
+        rfov = self.fov*math.pi/180.0
+        scale = 2.0*math.tan(rfov*0.5/aspect)*aspect
+        d = (u*scale,v*scale,-1.0)
+        d = vectorops.div(d,vectorops.norm(d))
+        return (t,so3.apply(R,d))
+
+    def setCurrentGL(self):
+        """Sets up the view in the current OpenGL context"""
+        # Projection
+        glMatrixMode(GL_PROJECTION)
+        glLoadIdentity()
+        aspect = float(self.w)/float(self.h)
+        gluPerspective (self.fov/aspect,aspect,self.clippingplanes[0],self.clippingplanes[1])
+
+        # Initialize ModelView matrix
+        glMatrixMode(GL_MODELVIEW)
+        glLoadIdentity()
+        
+        # View transformation
+        mat = se3.homogeneous(self.camera.matrix())
+        cols = zip(*mat)
+        pack = sum((list(c) for c in cols),[])
+        glMultMatrixf(pack)
+
 
 class GLProgram:
-    """A basic OpenGL program using some _GLBackend.  Set up your window parameters,
-    then call run() to create a new window with this program.
+    """A basic OpenGL visualization, run as part of some _GLBackend.
+    For the most part there is a one-to-one correspondence and the
+    backend just relays the input / drawing messages
+
+    The run()
 
     Assumes that glinit.py has been imported to define _GLBackend.
 
     Attributes:
         - name: title of the window (only has an effect before calling
           run())
-        - width, height: width/height of the window (only has an effect
-          before calling run(), and these are updated when the user resizes
-          the window.
+        - view: GLViewport instance.  If this is provided to an empty _GLBackend
+          window, the w,h gives a hint to the size of the window.  It is then updated
+          by the user and setting the viewport size has no effect on the window.
         - clearColor: the RGBA floating point values of the background color.
         - glutInitialized: true if GLUT has been initialized
     """
@@ -34,13 +118,8 @@ class GLProgram:
         global _GLBackend
         self.window = None
         self.name = name
-        self.x,self.y = 0,0
-        self.width = 640
-        self.height = 480
+        self.view = GLViewport()
         self.clearColor = [1.0,1.0,1.0,0.0]
-        self.glutInitialized = False
-        self.lastx = 0
-        self.lasty = 0
 
     def run(self):
         """Starts a new event loop with this object as the main program.
@@ -66,9 +145,8 @@ class GLProgram:
 
     def reshapefunc(self,w,h):
         """Called on window resize.  May be overridden."""
-        assert isinstance(self.x,int) and isinstance(self.y,int)
-        self.width = w
-        self.height = h
+        self.view.w = w
+        self.view.h = h
         self.refresh()
         return True
         
@@ -96,7 +174,7 @@ class GLProgram:
     def displayfunc(self):
         """All OpenGL calls go here.  May be overridden, although you
         may wish to override display() and display_screen() instead."""
-        if self.width == 0 or self.height == 0:
+        if self.view.w == 0 or self.view.h == 0:
             #hidden?
             print "GLProgram.displayfunc called on hidden window?"
             return False
@@ -108,6 +186,7 @@ class GLProgram:
         
     def idlefunc(self):
         """Called on idle.  May be overridden."""
+        #print "Sleeping idle from",self.__class__.__name__
         self.idlesleep()
 
     def idlesleep(self,duration=float('inf')):
@@ -119,11 +198,12 @@ class GLProgram:
         """Prepare drawing in world coordinate frame
         """
         # Viewport
-        glViewport(self.x,self.y,self.width,self.height)
+        view = self.view
+        glViewport(view.x,view.y,view.w,view.h)
         
         # Initialize
         glClearColor(*self.clearColor)
-        glScissor(self.x,self.y,self.width,self.height);
+        glScissor(view.x,view.y,view.w,view.h)
         glEnable(GL_SCISSOR_TEST);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glEnable(GL_DEPTH_TEST)
@@ -136,7 +216,7 @@ class GLProgram:
         """
         glMatrixMode(GL_PROJECTION)
         glLoadIdentity()
-        glOrtho(0,self.width,self.height,0,-1,1);
+        glOrtho(0,self.view.w,self.view.h,0,-1,1);
         glMatrixMode(GL_MODELVIEW)
         glLoadIdentity()
        
@@ -149,7 +229,7 @@ class GLProgram:
         return True
 
     def closefunc(self):
-        """Called when window is closed"""
+        """Called by the window when it is closed"""
         return True
 
     def save_screen(self,fn):
@@ -159,8 +239,8 @@ class GLProgram:
         except ImportError:
             print "Cannot save screens to disk, the Python Imaging Library is not installed"
             return
-        screenshot = glReadPixels( self.x, self.y, self.width, self.height, GL_RGBA, GL_UNSIGNED_BYTE)
-        im = Image.frombuffer("RGBA", (self.width, self.height), screenshot, "raw", "RGBA", 0, 0)
+        screenshot = glReadPixels( self.view.x, self.view.y, self.view.w, self.view.h, GL_RGBA, GL_UNSIGNED_BYTE)
+        im = Image.frombuffer("RGBA", (self.view.w, self.view.h), screenshot, "raw", "RGBA", 0, 0)
         print "Saving screen to",fn
         im.save(fn)
 
@@ -172,80 +252,29 @@ class GLNavigationProgram(GLProgram):
     """A more advanced form of GLProgram that allows you to navigate a
     camera around a 3D world.  Click-drag rotates, Control-drag translates,
     Shift-drag zooms.
-
-    Attributes:
-        - camera: an orbit camera (see :class:`orbit`)
-        - fov: the camera field of view in x direction
-        - clippingplanes: a pair containing the near and far clipping planes
     """
     def __init__(self,name):
         GLProgram.__init__(self,name)
-        self.camera = camera.orbit()
-        self.camera.dist = 6.0
-        #x field of view in degrees
-        self.fov = 30
-        #near and far clipping planes
-        self.clippingplanes = (0.2,20)
         #mouse state information
         self.dragging = False
         self.clearColor = [0.8,0.8,0.9,0]        
 
     def get_view(self):
-        """Returns a tuple describing the viewport, which could be saved to
+        """Returns a GLViewport describing the viewport, which could be saved to
         file."""
-        return (self.x,self.y,self.width,self.height,self.camera,self.fov,self.clippingplanes)
+        return self.view
 
     def set_view(self,v):
         """Sets the viewport to a tuple previously returned by get_view(),
         e.g. a prior view that was saved to file."""
-        self.x,self.y,self.width,self.height,self.camera,self.fov,self.clippingplanes = v
-        self.reshape(self.width,self.height)
+        self.view = v
+        self.reshape(self.view.w,self.view.h)
 
-    def viewport(self):
-        """Gets a Viewport instance corresponding to the current view.
-        This is used to interface with the Widget classes"""
-        vp = Viewport()
-        vp.x,vp.y,vp.w,vp.h = self.x,self.y,self.width,self.height
-        vp.n,vp.f = self.clippingplanes
-        vp.perspective = True
-        aspect = float(self.width)/float(self.height)
-        rfov = self.fov*math.pi/180.0
-        vp.scale = 1.0/(2.0*math.tan(rfov*0.5/aspect)*aspect)
-        vp.setRigidTransform(*se3.inv(self.camera.matrix()))
-        return vp
-
-    def click_ray(self,x,y):
-        """Returns a pair of 3-tuples indicating the ray source and direction
-        in world coordinates for a screen-coordinate point (x,y)"""
-        R,t = se3.inv(self.camera.matrix())
-        #from x and y compute ray direction
-        u = float(x-(self.x + self.width/2))/self.width
-        v = float((self.y + self.height/2) -y)/self.width
-        aspect = float(self.width)/float(self.height)
-        rfov = self.fov*math.pi/180.0
-        scale = 2.0*math.tan(rfov*0.5/aspect)*aspect
-        d = (u*scale,v*scale,-1.0)
-        d = vectorops.div(d,vectorops.norm(d))
-        return (t,so3.apply(R,d))
     
     def prepare_GL(self):
         GLProgram.prepare_GL(self)
 
-        # Projection
-        glMatrixMode(GL_PROJECTION)
-        glLoadIdentity()
-        aspect = float(self.width)/float(self.height)
-        gluPerspective (self.fov/aspect,aspect,self.clippingplanes[0],self.clippingplanes[1])
-
-        # Initialize ModelView matrix
-        glMatrixMode(GL_MODELVIEW)
-        glLoadIdentity()
-        
-        # View transformation
-        mat = se3.homogeneous(self.camera.matrix())
-        cols = zip(*mat)
-        pack = sum((list(c) for c in cols),[])
-        glMultMatrixf(pack)
+        self.view.setCurrentGL()
 
         # Default light source
         glLightfv(GL_LIGHT0,GL_POSITION,[0,-1,2,0])
@@ -261,14 +290,14 @@ class GLNavigationProgram(GLProgram):
     def motionfunc(self,x,y,dx,dy):
         if self.dragging:
             if 'ctrl' in self.modifiers():
-                R,t = self.camera.matrix()
-                delta = so3.apply(so3.inv(R),[float(dx)*self.camera.dist/self.width,-float(dy)*self.camera.dist/self.width,0])
-                self.camera.tgt = vectorops.add(self.camera.tgt,delta)
+                R,t = self.view.camera.matrix()
+                delta = so3.apply(so3.inv(R),[float(dx)*self.view.camera.dist/self.view.w,-float(dy)*self.view.camera.dist/self.view.w,0])
+                self.view.camera.tgt = vectorops.add(self.view.camera.tgt,delta)
             elif 'shift' in self.modifiers():
-                self.camera.dist *= math.exp(dy*0.01)
+                self.view.camera.dist *= math.exp(dy*0.01)
             else:
-                self.camera.rot[2] += float(dx)*0.01
-                self.camera.rot[1] += float(dy)*0.01 
+                self.view.camera.rot[2] += float(dx)*0.01
+                self.view.camera.rot[1] += float(dy)*0.01 
             self.refresh()
             return True
         return False
@@ -303,9 +332,10 @@ class GLRealtimeProgram(GLNavigationProgram):
 
     # idle callback
     def idlefunc (self):
-        t = self.dt - (time.time() - self.lasttime)
-        if (t > 0):
-            time.sleep(t)
+        tcur = time.time()
+        tsleep = self.dt - (tcur - self.lasttime)
+        if (tsleep > 0):
+            time.sleep(tsleep)
         
         self.ttotal += self.dt
         self.counter += 1
@@ -315,6 +345,7 @@ class GLRealtimeProgram(GLNavigationProgram):
         
         self.lasttime = time.time()
         self.refresh()
+        return True
 
     def idle(self):
         pass
@@ -330,14 +361,16 @@ class GLPluginProgram(GLRealtimeProgram):
     def setPlugin(self,plugin):
         for p in self.plugins:
             p.window = None
+            p.view = None
         self.plugins = []
         if plugin:
             self.pushPlugin(plugin)
     def pushPlugin(self,plugin):
         self.plugins.append(plugin)
         plugin.window = self.window
-        plugin.reshapefunc(self.width,self.height)
+        plugin.view = self.view
         if self.window:
+            plugin.reshapefunc(self.view.w,self.view.h)
             self.refresh()
     def popPlugin(self):
         if len(self.plugins)==0: return None
@@ -351,12 +384,22 @@ class GLPluginProgram(GLRealtimeProgram):
         for plugin in self.plugins:
             plugin.window = self.window
             if not plugin.initialize():
+                print "GLPluginProgram.initialize(): Plugin of type",plugin.__class__.__name__,"Did not initialize"
                 return False
         return GLRealtimeProgram.initialize(self)
+    def idle(self):
+        anyhandled = False
+        for plugin in self.plugins:
+            if plugin.idle():
+                anyhandled = True
+        if not anyhandled:
+            return False
+        return True
     def reshapefunc(self,w,h):
-        for plugin in self.plugins[::-1]:
-            if plugin.reshapefunc(w,h): return True
-        return GLRealtimeProgram.reshapefunc(self,w,h)
+        GLRealtimeProgram.reshapefunc(self,w,h)
+        for plugin in self.plugins:
+            plugin.reshapefunc(w,h)
+        return
     def keyboardfunc(self,c,x,y):
         for plugin in self.plugins[::-1]:
             if plugin.keyboardfunc(c,x,y): return True
@@ -381,14 +424,11 @@ class GLPluginProgram(GLRealtimeProgram):
         for plugin in self.plugins[::-1]:
             if plugin.mousefunc(button,state,x,y): return True
         return GLRealtimeProgram.mousefunc(self,button,state,x,y)
-    def idlefunc(self):
-        for plugin in self.plugins:
-            if plugin.idlefunc(): return
-        return GLRealtimeProgram.idlefunc(self)
     def displayfunc(self):
-        for plugin in self.plugins:
-            if plugin.displayfunc(): return True
-        return GLRealtimeProgram.displayfunc(self)
+        for plugin in self.plugins[::-1]:
+            if plugin.displayfunc(): 
+                break
+        GLRealtimeProgram.displayfunc(self)
     def display(self):
         for plugin in self.plugins:
             if plugin.display(): return True

@@ -103,7 +103,7 @@ class GLUTWindow:
     def idlesleep(self,duration=float('inf')):
         """Sleeps the idle callback for t seconds.  If t is not provided,
         the idle callback is slept forever. Called by frontend."""
-        if time==0:
+        if duration==0:
             glutIdleFunc(_idlefunc);
         else:
             glutIdleFunc(None);

@@ -3,7 +3,6 @@ from PyQt4 import QtGui
 from PyQt4.QtCore import *
 from PyQt4.QtOpenGL import *
 import math
-from glcommon import GLMultiProgramInterface
 
 GLUT_UP = 1
 GLUT_DOWN = 0
@@ -43,9 +42,16 @@ class QtGLWindow(QGLWidget):
         - clearColor: the RGBA floating point values of the background color.
     """
     def __init__(self,name="OpenGL window",parent=None,shared=None):
-        QGLWidget.__init__(self)
+        format = QGLFormat()
+        format.setRgba(True)
+        format.setDoubleBuffer(True)
+        format.setDepth(True)
+        format.setSampleBuffers(True)
+        format.setSamples(4)
+        QGLWidget.__init__(self,format)
+
         self.name = name
-        self.plugin = None
+        self.program = None
         self.width = 640
         self.height = 480
         self.sizePolicy = "resize"
@@ -57,56 +63,40 @@ class QtGLWindow(QGLWidget):
         self.initialized = False
         self.refreshed = False 
 
-    def setPlugin(self,plugin):
-        if hasattr(plugin,'name'):
-            self.name = plugin.name
-            if self.initialized:
-                self.window.setWindowTitle(plugin.name)
-        self.plugin = plugin
-        plugin.window = self
-        if self.initialized:
-            self.reshape(plugin,width,plugin.height)
-        else:  
-            self.width,self.height = plugin.width,plugin.height
+        self.setFixedSize(self.width,self.height)
+        self.setWindowTitle(self.name)
+        self.idleTimer = QTimer()
 
-    def addPlugin(self,plugin):
-        if self.plugin == None:
-            self.setPlugin(plugin)
+    def setProgram(self,program):
+        from glprogram import GLProgram
+        assert isinstance(program,GLProgram)
+        if hasattr(program,'name'):
+            self.name = program.name
+            if self.initialized:
+                self.setWindowTitle(program.name)
+        self.program = program
+        program.window = self
+        if self.initialized:
+            program.reshapefunc(self.width,self.height)
+            self.idleTimer.timeout.connect(lambda:self.program.idlefunc())
         else:
-            #create a multi-view widget
-            if isinstance(self.plugin,GLMultiProgramInterface):
-                self.plugin.addPlugin(plugin)
-            else:
-                multiProgram = GLMultiProgramInterface()
-                multiProgram.window = self
-                multiProgram.addPlugin(self.plugin)
-                multiProgram.addPlugin(plugin)
-                self.plugin = multiProgram
-                self.width,self.height = self.plugin.width,self.plugin.height
+            self.reshape(program.view.w,program.view.h)
 
     def setParent(self,parent=None,shared=None):
-        QGLWidget.__init__(self,parent,shared)
+        assert shared == None
+        QGLWidget.setParent(self,parent)
+        
 
     def initialize(self):
         """ Open a window and initialize """
-        if self.initialized:
-            raw_input("initialize called twice... this may invalidate textures and display lists... are you sure you want to continue?")
-        assert self.plugin != None, "QGLWidget initialized without a plugin"
-        self.setFocusPolicy(Qt.StrongFocus)
-        self.setWindowTitle(self.name)
-        self.idleTimer = QTimer()
-        self.idleTimer.timeout.connect(lambda:self.plugin.idlefunc())
-        self.idleTimer.start(0)
-        format = QGLFormat()
-        format.setRgba(True)
-        format.setDoubleBuffer(True)
-        format.setDepth(True)
-        self.setFormat(format)
-        self.setFixedSize(self.width,self.height)
-
+        assert self.program != None, "QGLWidget initialized without a GLProgram"
+        glEnable(GL_MULTISAMPLE)
         self.setMouseTracking(True)
+        self.setFocusPolicy(Qt.StrongFocus)
+        self.idleTimer.timeout.connect(lambda:self.program.idlefunc())
+        self.idleTimer.start(0)
         #init function
-        self.plugin.initialize()
+        self.program.initialize()
         self.initialized = True
 
     def sizeHint(self):
@@ -114,6 +104,7 @@ class QtGLWindow(QGLWidget):
 
     #QtGLWidget bindings
     def initializeGL(self):
+        #print "######### QGLWidget Initialize GL ###############"
         try:
             return self.initialize()
         except Exception,e:
@@ -121,12 +112,12 @@ class QtGLWindow(QGLWidget):
             traceback.print_exc()
             exit(-1)
     def resizeGL(self,w,h): 
-        self.plugin.reshapefunc(w,h)
+        self.program.reshapefunc(w,h)
         return
-    def paintGL(self) :
+    def paintGL(self):
         self.refreshed = False
         try:
-            res = self.plugin.displayfunc()
+            res = self.program.displayfunc()
         except Exception,e:
             import traceback
             traceback.print_exc()
@@ -138,7 +129,7 @@ class QtGLWindow(QGLWidget):
         if self.lastx == None: dx,dy = 0,0
         else: dx, dy = x - self.lastx, y - self.lasty
         try:
-            res = self.plugin.motionfunc(x,y,dx,dy)
+            res = self.program.motionfunc(x,y,dx,dy)
         except Exception,e:
             import traceback
             traceback.print_exc()
@@ -148,22 +139,22 @@ class QtGLWindow(QGLWidget):
         x,y = e.pos().x(),e.pos().y()
         self.modifierList = toModifierList(e.modifiers())
         self.lastx,self.lasty = x,y
-        self.plugin.mousefunc(toGlutButton(e.button()),GLUT_DOWN,x,y)
+        self.program.mousefunc(toGlutButton(e.button()),GLUT_DOWN,x,y)
     def mouseReleaseEvent(self,e):
         x,y = e.pos().x(),e.pos().y()
         self.modifierList = toModifierList(e.modifiers())
         self.lastx,self.lasty = x,y
-        self.plugin.mousefunc(toGlutButton(e.button()),GLUT_UP,x,y)
+        self.program.mousefunc(toGlutButton(e.button()),GLUT_UP,x,y)
     def keyPressEvent(self,e):
         c = str(e.text())
         if len(c)==0: return #some empty press, like shift/control
         self.modifierList = toModifierList(e.modifiers())
-        self.plugin.keyboardfunc(c,self.lastx,self.lasty)
+        self.program.keyboardfunc(c,self.lastx,self.lasty)
     def keyReleaseEvent(self,e):
         c = e.text()
         if len(c)==0: return #some empty press, like shift/control
         self.modifierList = toModifierList(e.modifiers())
-        self.plugin.keyboardupfunc(c,self.lastx,self.lasty)
+        self.program.keyboardupfunc(c,self.lastx,self.lasty)
 
     def modifiers(self):
         """Call this to retrieve modifiers. Called by frontend."""
@@ -172,7 +163,7 @@ class QtGLWindow(QGLWidget):
     def idlesleep(self,duration=float('inf')):
         """Sleeps the idle callback for t seconds.  If t is not provided,
         the idle callback is slept forever"""
-        if time==0:
+        if duration==0:
             self.idleTimer.start(0)
         else:
             self.idleTimer.stop()
@@ -182,20 +173,21 @@ class QtGLWindow(QGLWidget):
     def close(self):
         """Call close() after this widget should be closed down, to stop
         any existing Qt callbacks."""
+        #print "######### QGLWidget close ###############"
         self.idleTimer.stop()
-        self.plugin.window = None
-        self.plugin = None
+        self.program.window = None
+        self.program = None
 
     def refresh(self):
         if not self.refreshed:
-            self.refreshed = False
+            self.refreshed = True
             #TODO: resolve whether it's better to call updateGL here or to schedule
             # a timer event
             self.updateGL()
             #QTimer.singleShot(0,lambda:self.updateGL());
 
     def reshape(self,w,h):
-        self.width,self.height = w,h
+        (self.width,self.height) = (w,h)
         self.setFixedSize(self.width,self.height)
         self.refresh()
 
@@ -213,10 +205,12 @@ class QtBackend:
     To use as a standalone program: Set up your GLProgramInterface, then call run() to start the Qt main loop. 
     
     For more control over windowing, you can use the createWindow function to
-    construct new windows and addPlugin to add plugins to those windows.
+    construct new windows and setProgram to set the program used in that window.
 
-    IMPORTANT NOTE: only one window may be created for a given world.  If you want to
-    use multiple windows, then a new world should be loaded for each world.
+    IMPORTANT NOTE: only one window may be created for a given world due to OpenGL display lists
+    not being shared.  If you want to use multiple windows, then a new world should be loaded for
+    each world.  You can close down and start up a new window with the same world as long as
+    you refresh all appearances in the world.
     """
     def __init__(self):
         self.app = None
@@ -229,15 +223,6 @@ class QtBackend:
     def createWindow(self,name,parent=None):
         self.initialize(name)
         return QtGLWindow(name,parent)
-
-    def addPlugin(self,plugin,window):
-        """ Open a window and initialize. Users should not call this
-        directly! Call create() or run() on the plugin instead. """
-        if window == None:
-            if self.window == None:
-                self.window = self.createWindow(plugin.name)
-            window = self.window
-        window.addPlugin(plugin)
 
     def run(self):
         """Starts the main loop"""

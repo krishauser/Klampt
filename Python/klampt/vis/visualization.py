@@ -3,12 +3,12 @@ example of how to run this module.
 
 WHAT DO WE WANT:
 - Everything visualization-related is goverend by the klampt.vis module.
-- Simple startup: create a GLProgramInterface and run a GUI using a single
+- Simple startup: create a GLPluginInterface and run a GUI using a single
   line of code, or simply add items to the visualization and run the GUI.
 - Parallelize GUI and script code: launch a GUI, modify items of a world /
   simulation through a script, close the GUI or wait for the user to close
   the window.
-- Window customizability with Qt.  Add the GLProgramInterface to an existing window
+- Window customizability with Qt.  Add the GLPluginInterface to an existing window
   and launch it.
 - Add/remove/animate/configure all items in visualization using one-liners
 - Multiple windows, shown either sequentially or simultaneously
@@ -18,7 +18,7 @@ CHALLENGES:
   None.  Possibly demand Qt?  Compatibility vs. complexity tradeoff.
 - Parallel GUI / script execution has locking issues.  Solution: put 
   locks around everything visualization related, and require user to call
-  vis.lock() and vis.unlock().
+  vis.acquire() and vis.release().
 - Multiple windows has the problem of GL display lists not passing from context
   to context. 
   Solutions:
@@ -59,7 +59,7 @@ Instructions:
   ... do stuff afterwards ...
   kill()
 
-- To run a window with a custom plugin (GLProgramInterface) and terminate on
+- To run a window with a custom plugin (GLPluginInterface) and terminate on
   closure: 
   run(plugin)
 
@@ -72,7 +72,7 @@ Instructions:
   ... do stuff afterwards ... 
   kill()
 
-- To add a GLProgramInterface that just customizes a few things on top of
+- To add a GLPluginInterface that just customizes a few things on top of
   the default visualization:
   pushPlugin(plugin)
   dialog()
@@ -154,6 +154,7 @@ def add(name,item,keepAppearance=False): adds an item to the visualization.
     it will no longer be shown.  If keepAppearance=True, then the prior item's
     appearance will be kept, if a prior item exists.
 def clear(): clears the visualization world.
+def listItems(): prints out all names of visualization objects
 def dirty(item_name='all'): marks the given item as dirty and recreates the
     OpenGL display lists.
 def remove(name): removes an item from the visualization.
@@ -161,6 +162,9 @@ def setItemConfig(name,vector): sets the configuration of a named item.
 def getItemConfig(name): returns the configuration of a named item.
 def hide(name,hidden=True): hides/unhides an item.  The item is not removed,
     it just becomes invisible.
+def edit(name,doedit=True): turns on/off visual editing of some item.  Only points,
+    transforms, coordinate.Point's, coordinate.Transform's, coordinate.Frame's,
+    robots, and objects are accepted at this point.
 def hideLabel(name,hidden=True): hides/unhides an item's text label.
 def animate(name,animation,speed=1.0): Sends an animation to the object.
     May be a Trajectory or a list of configurations.  Works with points,
@@ -190,7 +194,7 @@ from ..math import vectorops,so3,se3
 import gldraw
 from glinit import *
 from glinit import _GLBackend,_PyQtAvailable,_GLUTAvailable
-from glinterface import GLProgramInterface
+from glinterface import GLPluginInterface
 from glprogram import GLPluginProgram
 import glcommon
 import time
@@ -220,7 +224,7 @@ class WindowInfo:
 def createWindow(name):
     """Creates a new window."""
     global _globalLock,_frontend,_vis,_window_title,_windows,_current_window
-    _globalLock.lock()
+    _globalLock.acquire()
     if len(_windows) == 0:
         #save the defaults
         _windows.append(WindowInfo(_window_title,_frontend,_vis))
@@ -232,7 +236,7 @@ def createWindow(name):
         _windows.append(WindowInfo(_window_title,_frontend,_vis))
     id = len(_windows)-1
     _current_window = id
-    _globalLock.unlock()
+    _globalLock.release()
     return id
 
 def setWindow(id):
@@ -241,10 +245,10 @@ def setWindow(id):
     assert id >= 0 and id < len(_windows)
     if id == _current_window:
         return
-    _globalLock.lock()
+    _globalLock.acquire()
     _window_title,_frontend,_vis = _windows[id].name,_windows[id].frontend,_windows[id].vis
     _current_window = id
-    _globalLock.unlock()
+    _globalLock.release()
 
 def getWindow():
     """Retrieves ID of currently active window or -1 if no window is active"""
@@ -253,11 +257,14 @@ def getWindow():
     return _current_window
 
 def setPlugin(plugin):
-    """Lets the user capture input via a glinterface.GLProgramInterface class.
+    """Lets the user capture input via a glinterface.GLPluginInterface class.
     Set plugin to None to disable plugins and return to the standard visualization"""
-    global _frontend
+    global _globalLock,_frontend,_windows,_current_window
+    _globalLock.acquire()
     if not isinstance(_frontend,GLPluginProgram):
         _frontend = GLPluginProgram()
+        if _current_window != None and _windows[_current_window].window != None:
+            _frontend.window = _windows[_current_window].window
     if plugin == None:
         global _vis
         if _vis==None:
@@ -266,9 +273,10 @@ def setPlugin(plugin):
     else:
         _frontend.setPlugin(plugin)
     _onFrontendChange()
+    _globalLock.release()
 
 def pushPlugin(plugin):
-    """Adds a new glinterface.GLProgramInterface plugin on top of the old one."""
+    """Adds a new glinterface.GLPluginInterface plugin on top of the old one."""
     global _frontend
     assert isinstance(_frontend,GLPluginProgram),"Can't push a plugin after addPlugin"
     if len(_frontend.plugins) == 0:
@@ -281,23 +289,27 @@ def pushPlugin(plugin):
 
 def popPlugin():
     global _frontend
+    _globalLock.acquire()
     _frontend.popPlugin(plugin)
     _onFrontendChange()
+    _globalLock.release()
 
 def addPlugin(plugin):
     global _frontend
+    _globalLock.acquire()
     #create a multi-view widget
-    if isinstance(_frontend,GLMultiProgramInterface):
-        _frontend.addPlugin(plugin)
+    if isinstance(_frontend,glcommon.GLMultiViewportProgram):
+        _frontend.addView(plugin)
     else:
         if len(_frontend.plugins) == 0:
             setPlugin(None)
-        multiProgram = GLMultiProgramInterface()
+        multiProgram = glcommon.GLMultiViewportProgram()
         multiProgram.window = None
-        multiProgram.addPlugin(_frontend)
-        multiProgram.addPlugin(plugin)
+        multiProgram.addView(_frontend)
+        multiProgram.addView(plugin)
         _frontend = multiProgram
     _onFrontendChange()
+    _globalLock.release()
 
 
 def run(plugin=None):
@@ -375,6 +387,13 @@ def add(name,item,keepAppearance=False):
         return
     _vis.add(name,item,keepAppearance)
 
+def listItems(indent=0):
+    global _vis
+    if _vis==None:
+        print "Visualization disabled"
+        return
+    _vis.listItems(None,indent)
+
 def dirty(item_name='all'):
     global _vis
     if _vis==None:
@@ -439,6 +458,12 @@ def hide(name,hidden=True):
     if _vis==None:
         return
     _vis.hide(name,hidden)
+
+def edit(name,doedit=True):
+    global _vis
+    if _vis==None:
+        return
+    _vis.edit(name,doedit)
 
 def setAppearance(name,appearance):
     global _vis
@@ -518,7 +543,12 @@ class CachedGLObject:
             
             glNewList(self.glDisplayList,GL_COMPILE_AND_EXECUTE)
             self.makingDisplayList = True
-            renderFunction()
+            try:
+                renderFunction()
+            except GLError:
+                import traceback
+                print "Error encountered during draw"
+                traceback.print_exc()
             self.makingDisplayList = False
             glEndList()
 
@@ -531,6 +561,28 @@ class CachedGLObject:
             glCallList(self.glDisplayList)
             if transform:
                 glPopMatrix()
+
+def objectToVisType(item,world):
+    itypes = types.objectToTypes(item,world)
+    if isinstance(itypes,(list,tuple)):
+        #ambiguous, still need to figure out what to draw
+        validtypes = []
+        for t in itypes:
+            if t == 'Config':
+                if world != None and len(t) == world.robot(0).numLinks():
+                    validtypes.append(t)
+            elif t=='Vector3':
+                validtypes.append(t)
+            elif t=='RigidTransform':
+                validtypes.append(t)
+        if len(validtypes) > 1:
+            print "Unable to draw item of ambiguous types",validtypes
+            return
+        if len(validtypes) == 0:
+            print "Unable to draw any of types",itypes
+            return
+        return validtypes[0]
+    return itypes
 
 class VisAppearance:
     def __init__(self,item,name = None):
@@ -546,6 +598,8 @@ class VisAppearance:
         self.attributes = {}
         #used for Qt text rendering
         self.widget = None
+        #used for visual editing of certain items
+        self.editor = None
         #cached drawing
         self.displayCache = [CachedGLObject()]
         self.displayCache[0].name = name
@@ -578,6 +632,7 @@ class VisAppearance:
             c.markChanged()
         for (k,a) in self.subAppearances.iteritems():
             a.markChanged()
+        self.update_editor(True)
 
     def destroy(self):
         for c in self.displayCache:
@@ -660,7 +715,6 @@ class VisAppearance:
                 app.draw(world)
         elif isinstance(item,coordinates.Point):
             def drawRaw():
-                glDisable(GL_DEPTH_TEST)
                 glDisable(GL_LIGHTING)
                 glEnable(GL_POINT_SMOOTH)
                 glPointSize(self.attributes.get("size",5.0))
@@ -668,9 +722,10 @@ class VisAppearance:
                 glBegin(GL_POINTS)
                 glVertex3f(0,0,0)
                 glEnd()
-                glEnable(GL_DEPTH_TEST)
                 #write name
+            glDisable(GL_DEPTH_TEST)
             self.displayCache[0].draw(drawRaw,[so3.identity(),item.worldCoordinates()])
+            glEnable(GL_DEPTH_TEST)
             if name != None:
                 self.drawText(name,vectorops.add(item.worldCoordinates(),[0,0,-0.05]))
         elif isinstance(item,coordinates.Direction):
@@ -712,17 +767,17 @@ class VisAppearance:
                     #glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA)
                     #glColor4f(1,1,0,0.5)
                     glColor3f(1,1,0)
-                    gldraw.hermite_curve(tlocal[1],v1,[0,0,0],v2,0.03)
+                    gldraw.hermite_curve(tlocal[1],v1,[0,0,0],v2,0.03*vectorops.norm(tlocal[1]))
                     #glDisable(GL_BLEND)
                 glEnable(GL_DEPTH_TEST)
 
             #For some reason, cached drawing is causing OpenGL problems
             #when the frame is rapidly changing
-            #self.displayCache[0].draw(drawRaw,transform=tp, parameters = tlocal)
-            glPushMatrix()
-            glMultMatrixf(sum(zip(*se3.homogeneous(tp)),()))
-            drawRaw()
-            glPopMatrix()
+            self.displayCache[0].draw(drawRaw,transform=tp, parameters = tlocal)
+            #glPushMatrix()
+            #glMultMatrixf(sum(zip(*se3.homogeneous(tp)),()))
+            #drawRaw()
+            #glPopMatrix()
             #write name
             if name != None:
                 self.drawText(name,se3.apply(t,[-0.05]*3))
@@ -767,26 +822,10 @@ class VisAppearance:
         elif isinstance(item,Hold):
             pass
         else:
-            itypes = types.objectToTypes(item,world)
-            if isinstance(itypes,(list,tuple)):
-                #ambiguous, still need to figure out what to draw
-                validtypes = []
-                for t in itypes:
-                    if t == 'Config':
-                        if world != None and len(t) == world.robot(0).numLinks():
-                            validtypes.append(t)
-                    elif t=='Vector3':
-                        validtypes.append(t)
-                    elif t=='RigidTransform':
-                        validtypes.append(t)
-                if len(validtypes) > 1:
-                    print "Unable to draw item of ambiguous types",validtypes
-                    return
-                if len(validtypes) == 0:
-                    print "Unable to draw any of types",itypes
-                    return
-                itypes = validtypes[0]
-            if itypes == 'Config':
+            itypes = objectToVisType(item,world)
+            if itypes == None:
+                return
+            elif itypes == 'Config':
                 if world:
                     robot = world.robot(0)
                     if not self.useDefaultAppearance:
@@ -910,12 +949,18 @@ class VisAppearance:
                             #curve in the destination
                             v2 = vectorops.cross((0,0,0.5),d)
                         def drawConnection():
-                            glDisable(GL_DEPTH_TEST)
                             glDisable(GL_LIGHTING)
+                            glDisable(GL_DEPTH_TEST)
                             glColor3f(1,0.5,0)
-                            gldraw.hermite_curve(p1,v1,p2,v2,0.03)
+                            gldraw.hermite_curve(p1,v1,p2,v2,0.03*vectorops.distance(p1,p2))
+                            #glBegin(GL_LINES)
+                            #glVertex3f(*p1)
+                            #glVertex3f(*p2)
+                            #glEnd()
                             glEnable(GL_DEPTH_TEST)
+                        #TEMP for some reason the cached version sometimes gives a GL error
                         self.displayCache[2].draw(drawConnection,transform=None,parameters = (p1,v1,p2,v2))
+                        #drawConnection()
                         if name != None:
                             self.drawText(name,vectorops.add(wp,[-0.05]*3))
                     else:
@@ -955,10 +1000,111 @@ class VisAppearance:
         if not self.useDefaultAppearance and hasattr(item,'appearance'):
             item.appearance().set(self.oldAppearance)
 
+    def getSubItem(self,path):
+        if len(path) == 0: return self
+        for k,v in self.subAppearances.iteritems():
+            if v.name == path[0]:
+                try:
+                    return v.getSubItem(path[1:])
+                except ValueError:
+                    raise ValueError("Invalid sub-path specified "+path)
+        raise ValueError("Invalid sub-item specified "+path[0])
 
-class VisualizationPlugin(GLProgramInterface):
+    def make_editor(self):
+        if self.editor != None:
+            return 
+        item = self.item
+        if isinstance(item,coordinates.Point):
+            res = PointPoser()
+            res.set(self.item.worldCoordinates())
+            res.setAxes(self.item.frame().worldCoordinates()[0])
+        elif isinstance(item,coordinates.Direction):
+            res = PointPoser()
+            res.set(self.item.worldCoordinates())
+            res.setAxes(self.item.frame().worldCoordinates()[0])
+        elif isinstance(item,coordinates.Frame):
+            res = TransformPoser()
+            res.set(*self.item.worldCoordinates())
+        elif isinstance(self.item,RobotModel):
+            res = RobotPoser(self.item)
+            self.hidden = True
+        elif isinstance(self.item,RigidObjectModel):
+            res = ObjectPoser(self.item)
+        elif isinstance(self.item,(list,tuple)):
+            #determine if it's a rotation, transform, or point
+            itype = objectToVisType(self.item,None)
+            if itype == 'Vector3':
+                res = PointPoser()
+            elif itype == 'Matrix3':
+                res = TransformPoser()
+                res.enableRotation(True)
+                res.enableTranslation(False)
+                res.set(self.item)
+            elif itype == 'RigidTransform':
+                res = TransformPoser()
+                res.enableRotation(True)
+                res.enableTranslation(True)
+                res.set(*self.item)
+            else:
+                print "VisAppearance.make_editor(): Warning, editor for object of type",itype,"not defined"
+                return
+        else:
+            print "VisAppearance.make_editor(): Warning, editor for object of type",self.item.__class__.__name__,"not defined"
+            return
+        self.editor = res
+
+    def update_editor(self,item_to_editor=False):
+        for (name,item) in self.subAppearances.iteritems():
+            item.update_editor(item_to_editor)
+        if self.editor == None:
+            return
+        item = self.item
+        if item_to_editor:
+            if isinstance(item,coordinates.Point):
+                self.editor.set(self.item.worldCoordinates())
+            elif isinstance(item,coordinates.Direction):
+                self.editor.set(self.item.worldCoordinates())
+            elif isinstance(item,coordinates.Frame):
+                self.editor.set(*self.item.worldCoordinates())
+            elif isinstance(self.item,RobotModel):
+                self.editor.set(self.item.getConfig())
+            elif isinstance(self.item,RigidObjectModel):
+                self.editor.set(*self.item.getTransform())
+            elif isinstance(self.item,(list,tuple)):
+                itype = objectToVisType(self.item,None)
+                if itype in ('Vector3','Matrix3'):
+                    self.editor.set(self.item)
+                elif itype == 'RigidTransform':
+                    self.editor.set(*self.item)
+            else:
+                raise RuntimeError("Uh... unsupported type with an editor?")
+        else:
+            if not self.editor.hasFocus():
+                return
+            if isinstance(item,coordinates.Point):
+                self.item._localCoordinates = se3.apply(se3.inv(self.item._frame.worldCoordinates()),self.editor.get())
+            elif isinstance(item,coordinates.Direction):
+                self.item._localCoordinates = se3.apply(se3.inv(self.item._frame.worldCoordinates()),self.editor.get())
+            elif isinstance(item,coordinates.Frame):  
+                self.item._worldCoordinates = self.editor.get()
+                self.item._relativeCoordinates = se3.mul(se3.inv(self.item.parent().worldCoordinates()),self.editor.get())
+                #TODO: updating downstream frames?
+            elif isinstance(self.item,RobotModel):
+                self.item.setConfig(self.editor.get_conditioned(self.item.getConfig()))
+            elif isinstance(self.item,RigidObjectModel):
+                self.item.setTransform(self.editor.get())
+            elif isinstance(self.item,(list,tuple)):
+                self.item = self.editor.get()
+            else:
+                raise RuntimeError("Uh... unsupported type with an editor?")
+                
+    def remove_editor(self):
+        self.editor = None
+        self.hidden = False
+
+class VisualizationPlugin(glcommon.GLWidgetPlugin):
     def __init__(self):
-        GLProgramInterface.__init__(self)
+        glcommon.GLWidgetPlugin.__init__(self)
         self.items = {}
         self.labels = []
         self.t = time.time()
@@ -966,7 +1112,9 @@ class VisualizationPlugin(GLProgramInterface):
         self.animationTime = 0
 
     def initialize(self):
-        return True
+        #keep or refresh display lists?
+        #self._clearDisplayLists()
+        return glcommon.GLWidgetPlugin.initialize(self)
 
     def addLabel(self,text,point,color):
         for (p,textList,pcolor) in self.labels:
@@ -976,6 +1124,7 @@ class VisualizationPlugin(GLProgramInterface):
         self.labels.append((point,[text],color))
 
     def display(self):
+        glcommon.GLWidgetPlugin.display(self)
         self.labels = []
         world = self.items.get('world',None)
         if world != None: world=world.item
@@ -1013,6 +1162,16 @@ class VisualizationPlugin(GLProgramInterface):
             self.animationTime += (self.t - oldt)
         return False
 
+    def getItem(self,item_name):
+        if item_name in self.items:
+            return self.items[item_name]
+        components = item_name.split(':')
+        if len(components)<=1: 
+            raise ValueError("Invalid item specified: "+item_name)
+        if components[0] not in self.items:
+            raise ValueError("Invalid top-level item specified: "+item_name)
+        return self.items[components[0]].getSubItem(components[1:])
+
     def dirty(self,item_name='all'):
         global _globalLock
         _globalLock.acquire()
@@ -1020,7 +1179,7 @@ class VisualizationPlugin(GLProgramInterface):
             if (name,itemvis) in self.items.iteritems():
                 itemvis.markChanged()
         else:
-            self.items[item_name].markChanged()
+            self.getItem(item_name).markChanged()
         _globalLock.release()
 
     def clear(self):
@@ -1031,10 +1190,21 @@ class VisualizationPlugin(GLProgramInterface):
         self.items = {}
         _globalLock.release()
 
+    def listItems(self,root=None,indent=0):
+        if root == None:
+            for name,value in self.items.iteritems():
+                self.listItems(value,indent)
+        else:
+            if indent > 0:
+                print " "*(indent-1),
+            print root.name
+            for n,v in root.subAppearances.iteritems():
+                self.listItems(v,indent+2)
 
     def add(self,name,item,keepAppearance=False):
         global _globalLock
         _globalLock.acquire()
+        assert ':' not in name,"Visualization names may not contain delimiter ':'"
         if keepAppearance and name in self.items:
             self.items[name].setItem(item)
         else:
@@ -1043,6 +1213,7 @@ class VisualizationPlugin(GLProgramInterface):
                 self.items[name].destroy()
             app = VisAppearance(item,name)
         self.items[name] = app
+        self.refresh()
         _globalLock.release()
 
     def animate(self,name,animation,speed=1.0):
@@ -1052,10 +1223,11 @@ class VisualizationPlugin(GLProgramInterface):
             #a list of milestones -- loop through them with 1s delay
             print "visualization.animate(): Making a Trajectory with unit durations between",len(animation),"milestones"
             animation = Trajectory(range(len(animation)),animation)
-        self.items[name].animation = animation
-        self.items[name].animationStartTime = self.animationTime
-        self.items[name].animationSpeed = speed
-        self.items[name].markChanged()
+        item = self.getItem(name)
+        item.animation = animation
+        item.animationStartTime = self.animationTime
+        item.animationSpeed = speed
+        item.markChanged()
         _globalLock.release()
 
     def pauseAnimation(self,paused=True):
@@ -1068,6 +1240,7 @@ class VisualizationPlugin(GLProgramInterface):
         global _globalLock
         _globalLock.acquire()
         self.animationTime += amount
+        self.refresh()
         _globalLock.release()
 
     def animationTime(self,newtime=None):
@@ -1084,66 +1257,96 @@ class VisualizationPlugin(GLProgramInterface):
     def remove(self,name):
         global _globalLock
         _globalLock.acquire()
-        self.items[name].destroy()
+        assert name in self.items,"Can only remove top level objects from visualization, try hide() instead"
+        item = self.getItem(name)
+        item.destroy()
         del self.items[name]
+        self.refresh()
         _globalLock.release()
 
     def getItemConfig(self,name):
         global _globalLock
         _globalLock.acquire()
-        res = config.getConfig(self.items[name].item)
+        res = config.getConfig(self.getItem(name).item)
         _globalLock.release()
         return res
 
     def setItemConfig(self,name,value):
         global _globalLock
         _globalLock.acquire()
-        config.getConfig(self.items[name].value,item)
+        config.getConfig(self.getItem(name).value,item)
+        self.refresh()
         _globalLock.release()
 
     def hideLabel(self,name,hidden=True):
         global _globalLock
         _globalLock.acquire()
-        self.items[name].attributes["text_hidden"] = hidden
-        self.items[name].markChanged()
+        item = self.getItem(name)
+        item.attributes["text_hidden"] = hidden
+        item.markChanged()
+        self.refresh()
         _globalLock.release()
+
+    def edit(self,name,doedit=True):
+        global _globalLock
+        _globalLock.acquire()
+        obj = self.getItem(name)
+        if doedit:
+            obj.make_editor()
+            if obj.editor:
+                self.klamptwidgetmaster.add(obj.editor)
+        else:
+            if obj.editor:
+                self.klamptwidgetmaster.remove(obj.editor)
+                obj.remove_editor()
+        self.refresh()
+        _globalLock.release()
+
+    def widgetchangefunc(self,edit):
+        """Called by GLWidgetPlugin on any widget change"""
+        for name,item in self.items.iteritems():
+            item.update_editor()
 
     def hide(self,name,hidden=True):
         global _globalLock
         _globalLock.acquire()
-        self.items[name].hidden = hidden
+        self.getItem(name).hidden = hidden
         _globalLock.release()
 
     def setAppearance(self,name,appearance):
         global _globalLock
         _globalLock.acquire()
-        self.items[name].useDefaultAppearance = False
-        self.items[name].customAppearance = appearance
-        self.items[name].markChanged()
+        item = self.getItem(name)
+        item.useDefaultAppearance = False
+        item.customAppearance = appearance
+        item.markChanged()
         _globalLock.release()
 
     def setAttribute(self,name,attr,value):
         global _globalLock
         _globalLock.acquire()
-        self.items[name].attributes[attr] = value
+        item = self.getItem(name)
+        item.attributes[attr] = value
         if value==None:
-            del self.items[name].attributes[attr]
-        self.items[name].markChanged()
+            del item.attributes[attr]
+        item.markChanged()
         _globalLock.release()
 
     def revertAppearance(self,name):
         global _globalLock
         _globalLock.acquire()
-        self.items[name].useDefaultApperance = True
-        self.items[name].markChanged()
+        item = self.getItem(name)
+        item.useDefaultApperance = True
+        item.markChanged()
         _globalLock.release()
 
     def setColor(self,name,r,g,b,a=1.0):
         global _globalLock
         _globalLock.acquire()
-        self.items[name].attributes["color"] = [r,g,b,a]
-        self.items[name].useDefaultAppearance = False
-        self.items[name].markChanged()
+        item = self.getItem(name)
+        item.attributes["color"] = [r,g,b,a]
+        item.useDefaultAppearance = False
+        item.markChanged()
         _globalLock.release()
 
 
@@ -1161,30 +1364,29 @@ if _PyQtAvailable:
     class _MyDialog(QDialog):
         def __init__(self,windowinfo):
             QDialog.__init__(self)
-            self.widget = windowinfo.window
-            self.widget.setMinimumSize(640,480)
-            self.widget.setMaximumSize(4000,4000)
-            self.widget.setSizePolicy(QSizePolicy(QSizePolicy.Maximum,QSizePolicy.Maximum))
+            self.windowinfo = windowinfo
+            widget = windowinfo.window
+            widget.setMinimumSize(640,480)
+            widget.setMaximumSize(4000,4000)
+            widget.setSizePolicy(QSizePolicy(QSizePolicy.Maximum,QSizePolicy.Maximum))
 
             self.description = QLabel("Press OK to continue")
             self.layout = QVBoxLayout(self)
-            self.layout.addWidget(self.widget)
+            self.layout.addWidget(widget)
             self.layout.addWidget(self.description)
             self.buttons = QDialogButtonBox(QDialogButtonBox.Ok,Qt.Horizontal, self)
             self.buttons.accepted.connect(self.accept)
             self.layout.addWidget(self.buttons)
             self.setWindowTitle(windowinfo.name)
         def accept(self):
-            print "Closing dialog"
-            self.widget.close()
-            self.widget.setParent(None)
-            QDialog.accept(self)
+          self.windowinfo.window.hide()
+          self.windowinfo.window.setParent(None)
+          return QDialog.accept(self)
         def reject(self):
-            print "Closing dialog"
-            self.widget.close()
-            self.widget.setParent(None)
-            QDialog.reject(self)
-
+          self.windowinfo.window.hide()
+          self.windowinfo.window.setParent(None)
+          return QDialog.reject(self)
+        
     class _MyWindow(QMainWindow):
         def __init__(self,windowinfo):
             QMainWindow.__init__(self)
@@ -1197,18 +1399,17 @@ if _PyQtAvailable:
             self.setWindowTitle(windowinfo.name)
         def closeEvent(self,event):
             self.windowinfo.mode = 'hidden'
-            self.widget.close()
-            self.widget.setParent(None)
-            print "Closing window"
-            self.hide()
+            self.windowinfo.window.hide()
 
+    alldlgs = []
     def _run_app_thread():
         global _thread_running,_vis,_widget,_window,_quit,_showdialog,_showwindow,_window_title
         global _custom_run_method,_custom_run_retval
+        global alldlgs
         _thread_running = True
         #Do Qt setup
         _app = _GLBackend.initialize("Klamp't visualization")
-
+        
         #res = _app.exec_()
         res = None
         while not _quit:
@@ -1216,23 +1417,36 @@ if _PyQtAvailable:
             for w in _windows:
                 if w.window == None and w.mode != 'hidden':
                     w.window = _GLBackend.createWindow(w.name)
-                    w.window.setPlugin(w.frontend)
-                if w.mode == 'dialog' and w.guidata == None:
-                    w.guidata = _MyDialog(w)
+                    w.window.setProgram(w.frontend)
+                    w.window.setParent(None)
+                    w.window.refresh()
+                if w.mode == 'dialog':
+                    w.window.show()
+                    w.window.refresh()
+                    dlg = _MyDialog(w)
+                    #need to cache the bastards to avoid deleting the GL object. Not sure why it's being kept around.
+                    #alldlgs.append(dlg)
+                    #here's the crash -- above line deleted the old dialog, which for some reason kills the widget
+                    w.window.refresh()
                     _globalLock.release()
-                    res = w.guidata.exec_()
+                    res = dlg.exec_()
                     _globalLock.acquire()
-                    w.guidata = None
-                    w.window = None
+                    w.window.hide()
+                    w.window.setParent(None)
+                    w.window.idlesleep()
                     w.mode = 'hidden'
                 if w.mode == 'shown' and w.guidata == None:
                     w.guidata = _MyWindow(w)
+                    w.window.show()
                 if w.mode == 'shown' and not w.guidata.isVisible():
+                    w.window.show()
+                    w.guidata.setCentralWidget(w.window)
                     w.guidata.show()
                 if w.mode == 'hidden' and w.guidata != None and w.guidata.isVisible():
+                    w.window.setParent(None)
+                    w.window.idlesleep()
+                    w.window.hide()
                     w.guidata.hide()
-                    w.window = None
-                    w.guidata = None
             
             _GLBackend.app.processEvents()
             _globalLock.release()
@@ -1240,6 +1454,8 @@ if _PyQtAvailable:
         print "Visualization thread closing..."
         for w in _windows:
             w.vis.clear()
+            if w.window:
+                w.window.close()
         _thread_running = False
         return res
 
@@ -1250,9 +1466,9 @@ elif _GLUTAvailable:
     print "properly."
     print ""
     
-    class GLUTHijacker(glinterface.GLProgramInterface):
+    class GLUTHijacker(glinterface.GLPluginInterface):
         def __init__(self,windowinfo):
-            glinterface.GLProgramInterface.__init__(self)
+            glinterface.GLPluginInterface.__init__(self)
             self.windowinfo = windowinfo
             self.name = windowinfo.name
             self.frontend = windowinfo.frontend
@@ -1364,9 +1580,9 @@ def _dialog():
     return
 
 def _onFrontendChange():
-    global _windows,_current_window,_thread_running
+    global _windows,_frontend,_current_window,_thread_running
     if _current_window == None:
         return
     _windows[_current_window].frontend = _frontend
     if _windows[_current_window].window:
-        _windows[_current_window].setPlugin(frontend)
+        _windows[_current_window].window.setProgram(_frontend)
