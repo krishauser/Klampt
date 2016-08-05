@@ -1,5 +1,9 @@
 import glcommon
 import glinit
+import visualization
+from ..math import vectorops,so3,se3
+from ..robotsim import WidgetSet,RobotPoser,ObjectPoser,TransformPoser,PointPoser,WorldModel,RobotModelLink,RigidObjectModel,IKObjective
+from OpenGL.GL import *
 
 class VisualEditorBase(glcommon.GLWidgetPlugin):
     """A base class for editing resources."""
@@ -402,3 +406,115 @@ class ObjectTransformEditor(VisualEditorBase):
             self.value = self.objposer.get()
             return True
         return False
+
+
+
+#Qt stuff
+if glinit._PyQtAvailable:
+    from PyQt4.QtCore import *
+    from PyQt4.QtGui import *
+    _vis_id = None
+    _my_dialog_res = None
+    _my_dialog_retval = None
+    _doexit = False
+
+    class _EditDialog(QDialog):
+        def __init__(self,glwidget):
+            QDialog.__init__(self)
+            glwidget.setMinimumSize(glwidget.width,glwidget.height)
+            glwidget.setMaximumSize(4000,4000)
+            glwidget.setSizePolicy(QSizePolicy(QSizePolicy.Maximum,QSizePolicy.Maximum))
+            self.instructions = QLabel()
+            self.description = QLabel()
+            self.description2 = QLabel("Press OK to save, Cancel to continue without saving")
+            self.topBox = QFrame()
+            self.topBoxLayout = QVBoxLayout(self.topBox)
+            self.topBoxLayout.addWidget(self.description)
+            self.topBoxLayout.addWidget(self.instructions)
+            self.extraDialog = QFrame()
+            self.extraDialog.setSizePolicy(QSizePolicy(QSizePolicy.Minimum,QSizePolicy.Minimum))
+            self.topBoxLayout.addWidget(self.extraDialog)
+            self.layout = QVBoxLayout(self)
+            self.layout.addWidget(self.topBox)
+            self.layout.addWidget(glwidget)
+            self.layout.addWidget(self.description2)
+            self.layout.setStretchFactor(glwidget,10)
+            self.buttons = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel,Qt.Horizontal, self)
+            self.buttons.accepted.connect(self.accept)
+            self.buttons.rejected.connect(self.reject)
+            self.layout.addWidget(self.buttons)
+
+        def setEditor(self,editorObject):
+            self.editorObject = editorObject
+            self.setWindowTitle("Editing "+editorObject.name)
+            if editorObject.description==None:
+                self.description.setText("")
+            else:
+                self.description.setText(editorObject.description)
+            self.instructions.setText(editorObject.instructions())
+            editorObject.addDialogItems(self.extraDialog,ui='qt')
+
+        def closeEvent(self,event):
+            reply = QMessageBox.question(self, 'Message',
+                 "Are you sure to quit the program?", QMessageBox.Yes | 
+                 QMessageBox.No, QMessageBox.No)
+
+            if reply == QMessageBox.Yes:
+                _doexit = True
+                event.accept()
+            else:
+                event.ignore()     
+            
+        def finish(self):
+            global _my_dialog_retval
+            _my_dialog_retval =  self.editorObject.value
+            assert _my_dialog_retval != None
+            #self.topBoxLayout.removeWidget(self.extraDialog)
+            #self.extraDialog.setParent(None)
+            #self.extraDialog = QFrame()
+            #self.extraDialog.setSizePolicy(QSizePolicy(QSizePolicy.Minimum,QSizePolicy.Minimum))
+            #self.topBoxLayout.addWidget(self.extraDialog)
+            self.editorObject = None
+
+            return res
+
+        def accept(self):
+            global _my_dialog_res
+            _my_dialog_res = True
+            QDialog.accept(self)
+        def reject(self):
+            global _my_dialog_res
+            _my_dialog_res = False
+            QDialog.reject(self)
+
+
+    def run(editorObject):
+        """Returns a pair (res,value) where res is True / False if OK / Cancel was pressed, respectively, 
+        and value is the return value of the editor object
+        """
+        assert isinstance(editorObject,VisualEditorBase),"Must provide a VisualEditorBase instance to run()"
+        global _vis_id, _my_dialog_res, _my_dialog_retval
+
+        if _vis_id == None:
+            _vis_id = visualization.createWindow("Resource Editor")
+        else:
+            visualization.setWindow(_vis_id)
+        visualization.setPlugin(editorObject)
+        def makefunc(gl_backend):
+            res = _EditDialog(gl_backend)
+            res.setEditor(editorObject)
+            return res
+        visualization.customUI(makefunc)
+        visualization.dialog()
+        res,retVal = _my_dialog_res,_my_dialog_retval
+
+        if _doexit:
+            visualization.kill()
+            print "Exiting program."
+            exit(0)
+
+        print "Result",res,"return value",retVal
+        return res,retVal
+else:
+    def run(editorObject):
+        raise ValueError("Unable to perform visual editing without PyQt")

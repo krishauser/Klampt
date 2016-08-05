@@ -143,7 +143,10 @@ def lock(): locks the visualization world for editing.  The visualization will
     be paused until unlock() is called.
 def unlock(): unlocks the visualization world.  Must only be called once
     after every lock().
-def customRun(func): internal use... need to deprecate this
+def customUI(make_func): launches a user-defined UI window by calling make_func(gl_backend)
+    in the visualization thread.  This can be used to build custom editors and windows that
+    are compatible with other visualization functionality.  Here gl_backend is an instance of
+    _GLBackend instantiated for the current plugin.
 
 
 The following VisualizationPlugin methods are also added to the klampt.vis namespace
@@ -155,6 +158,7 @@ def add(name,item,keepAppearance=False): adds an item to the visualization.
     appearance will be kept, if a prior item exists.
 def clear(): clears the visualization world.
 def listItems(): prints out all names of visualization objects
+def listItems(name): prints out all names of visualization objects under the given name
 def dirty(item_name='all'): marks the given item as dirty and recreates the
     OpenGL display lists.
 def remove(name): removes an item from the visualization.
@@ -220,6 +224,7 @@ class WindowInfo:
         self.window = window
         self.mode = 'shown'
         self.guidata = None
+        self.custom_ui = None
 
 def createWindow(name):
     """Creates a new window."""
@@ -371,6 +376,13 @@ def shown():
     _globalLock.release()
     return res
 
+def customUI(func):
+  global _globalLock
+  _globalLock.acquire()
+  _set_custom_ui(func)
+  _globalLock.release()
+
+
 
 
 ######### CONVENIENCE ALIASES FOR VisualizationPlugin methods ###########
@@ -387,12 +399,12 @@ def add(name,item,keepAppearance=False):
         return
     _vis.add(name,item,keepAppearance)
 
-def listItems(indent=0):
+def listItems(name=None,indent=0):
     global _vis
     if _vis==None:
         print "Visualization disabled"
         return
-    _vis.listItems(None,indent)
+    _vis.listItems(name,indent)
 
 def dirty(item_name='all'):
     global _vis
@@ -610,7 +622,17 @@ class VisAppearance:
         self.item = item
         self.subAppearances = {}
         #Parse out sub-items which can have their own appearance changed
-        if isinstance(item,coordinates.Group):
+        if isinstance(item,WorldModel):
+            for i in xrange(item.numRobots()):
+                self.subAppearances[("Robot",i)] = VisAppearance(item.robot(i),item.robot(i).getName())
+            for i in xrange(item.numRigidObjects()):
+                self.subAppearances[("RigidObject",i)] = VisAppearance(item.rigidObject(i),item.rigidObject(i).getName())
+            for i in xrange(item.numTerrains()):
+                self.subAppearances[("Terrain",i)] = VisAppearance(item.terrain(i),item.terrain(i).getName())
+        elif isinstance(item,RobotModel):
+            for i in xrange(item.numLinks()):
+                self.subAppearances[("Link",i)] = VisAppearance(item.link(i),item.link(i).getName())
+        elif isinstance(item,coordinates.Group):
             for n,f in item.frames.iteritems():
                 self.subAppearances[("Frame",n)] = VisAppearance(f,n)
             for n,p in item.points.iteritems():
@@ -619,7 +641,7 @@ class VisAppearance:
                 self.subAppearances[("Direction",n)] = VisAppearance(d,n)
             for n,g in item.subgroups.iteritems():
                 self.subAppearances[("Subgroup",n)] = VisAppearance(g,n)
-        if isinstance(item,Hold):
+        elif isinstance(item,Hold):
             if item.ikConstraint is not None:
                 self.subAppearances["ikConstraint"] = VisAppearance(item.ikConstraint,"ik")
             for n,c in enumerate(item.contacts):
@@ -686,6 +708,8 @@ class VisAppearance:
         elif isinstance(self.item,RobotModel):
             for link in range(self.item.numLinks()):
                 self.item.link(link).appearance().refresh()
+        for n,o in self.subAppearances.iteritems():
+            o.clearDisplayLists()
         self.markChanged()
 
     def draw(self,world=None):
@@ -701,18 +725,20 @@ class VisAppearance:
             if not hasattr(self,'oldAppearance'):
                 self.oldAppearance = item.appearance().clone()
             if self.customAppearance != None:
-                print "Changing appearance of",name
+                #print "Changing appearance of",name
                 item.appearance().set(self.customAppearance)
             elif "color" in self.attributes:
-                print "Changing color of",name
+                #print "Changing color of",name
                 item.appearance().setColor(*self.attributes["color"])
 
-        if hasattr(item,'drawGL'):
-            item.drawGL()
-        elif len(self.subAppearances)!=0:
+        if len(self.subAppearances)!=0:
             for n,app in self.subAppearances.iteritems():
                 app.widget = self.widget
                 app.draw(world)
+        elif hasattr(item,'drawGL'):
+            item.drawGL()
+        elif hasattr(item,'drawWorldGL'):
+            item.drawWorldGL()
         elif isinstance(item,coordinates.Point):
             def drawRaw():
                 glDisable(GL_LIGHTING)
@@ -822,7 +848,11 @@ class VisAppearance:
         elif isinstance(item,Hold):
             pass
         else:
-            itypes = objectToVisType(item,world)
+            try:
+                itypes = objectToVisType(item,world)
+            except:
+                print "Unknown object type",item.__class__.__name__
+                return
             if itypes == None:
                 return
             elif itypes == 'Config':
@@ -1006,8 +1036,8 @@ class VisAppearance:
             if v.name == path[0]:
                 try:
                     return v.getSubItem(path[1:])
-                except ValueError:
-                    raise ValueError("Invalid sub-path specified "+path)
+                except ValueError,e:
+                    raise ValueError("Invalid sub-path specified "+str(path)+" at "+str(e))
         raise ValueError("Invalid sub-item specified "+path[0])
 
     def make_editor(self):
@@ -1195,6 +1225,8 @@ class VisualizationPlugin(glcommon.GLWidgetPlugin):
             for name,value in self.items.iteritems():
                 self.listItems(value,indent)
         else:
+            if isinstance(root,str):
+                root = self.getItem(root)
             if indent > 0:
                 print " "*(indent-1),
             print root.name
@@ -1404,7 +1436,6 @@ if _PyQtAvailable:
     alldlgs = []
     def _run_app_thread():
         global _thread_running,_vis,_widget,_window,_quit,_showdialog,_showwindow,_window_title
-        global _custom_run_method,_custom_run_retval
         global alldlgs
         _thread_running = True
         #Do Qt setup
@@ -1423,7 +1454,10 @@ if _PyQtAvailable:
                 if w.mode == 'dialog':
                     w.window.show()
                     w.window.refresh()
-                    dlg = _MyDialog(w)
+                    if w.custom_ui == None:
+                        dlg = _MyDialog(w)
+                    else:
+                        dlg = w.custom_ui(w.window)
                     #need to cache the bastards to avoid deleting the GL object. Not sure why it's being kept around.
                     #alldlgs.append(dlg)
                     #here's the crash -- above line deleted the old dialog, which for some reason kills the widget
@@ -1436,11 +1470,13 @@ if _PyQtAvailable:
                     w.window.idlesleep()
                     w.mode = 'hidden'
                 if w.mode == 'shown' and w.guidata == None:
-                    w.guidata = _MyWindow(w)
+                    if w.custom_ui == None:
+                        w.guidata = _MyWindow(w)
+                    else:
+                        w.guidata = w.custom_ui(w)
                     w.window.show()
                 if w.mode == 'shown' and not w.guidata.isVisible():
                     w.window.show()
-                    w.guidata.setCentralWidget(w.window)
                     w.guidata.show()
                 if w.mode == 'hidden' and w.guidata != None and w.guidata.isVisible():
                     w.window.setParent(None)
@@ -1577,6 +1613,18 @@ def _dialog():
     _windows[_current_window].mode = 'dialog'
     while _windows[_current_window].mode == 'dialog':
         time.sleep(0.1)
+    return
+
+def _set_custom_ui(func):
+    global _windows,_current_window,_thread_running
+    if len(_windows)==0:
+        _windows.append(WindowInfo(_window_title,_frontend,_vis,None))
+        _current_window = 0
+    if not _thread_running:
+        signal.signal(signal.SIGINT, signal.SIG_DFL)
+        thread = Thread(target=_run_app_thread)
+        thread.start()
+    _windows[_current_window].custom_ui = func
     return
 
 def _onFrontendChange():

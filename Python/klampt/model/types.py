@@ -1,6 +1,7 @@
 from ..model.contact import ContactPoint
 from ..model.contact import Hold
-from ..robotsim import WorldModel,RobotModelLink,RigidObjectModel,IKObjective
+from ..math import vectorops,so3,se3
+from ..robotsim import WorldModel,RobotModel,RobotModelLink,RigidObjectModel,IKObjective
 
 def objectToTypes(object,world=None):
     """Returns names of all possible types that could be associated with the given
@@ -50,3 +51,30 @@ def objectToTypes(object,world=None):
             return vtypes
     else:
         raise ValueError("Unknown object passed to objectToTypes")
+
+def make(type,object=None):
+    """Makes a default instance of the given type. If type is 'Config' or 'Configs',
+    you can provide the object for which the instance will be compatible."""
+    if type == 'Config':
+        if isinstance(object,RobotModel):
+            return object.getConfig()
+        elif isinstance(object,WorldModel):
+            import config
+            return config.getConfig(object)
+        return None
+    elif type == 'Configs':
+        return [make('Config',objects)]
+    elif type == 'IKGoal':
+        return IKObjective()
+    elif type == 'Vector3' or type == 'Point':
+        return [0,0,0]
+    elif type == 'Rotation' or type == 'Matrix3':
+        return so3.identity()
+    elif type == 'RigidTransform':
+        return se3.identity()
+    elif type == 'ContactPoint':
+        return ContactPoint()
+    elif type == 'Hold':
+        return ContactPoint()
+    else:
+        return None

@@ -23,6 +23,8 @@ def writeVector(q):
 def readVector(text):
     """Reads a length-prepended vector from a string 'n v1 ... vn'"""
     items = text.split()
+    if len(items) == 0:
+        raise ValueError("Empty text")
     if int(items[0])+1 != len(items):
         raise ValueError("Invalid number of items")
     return [float(v) for v in items[1:]]

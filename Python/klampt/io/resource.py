@@ -11,28 +11,16 @@ Example usage can be seen in demos/resourcetest.py.
 import loader
 from ..model import trajectory
 from ..model import multipath
-from ..model.types import *
+from ..model import types
 from .. import robotsim
 from ..math import vectorops,se3,so3
 import os
 import time
-from ..robotsim import WidgetSet,RobotPoser,ObjectPoser,TransformPoser,PointPoser,WorldModel,RobotModelLink,RigidObjectModel,IKObjective
+from ..robotsim import WorldModel,RobotModelLink,RigidObjectModel,IKObjective
 from ..model.contact import ContactPoint
 from ..model.contact import Hold
-from ..vis import visualization
-from ..vis import glcommon
-#from OpenGL.GL import *
-#import gldraw
+from .. import vis
 
-#_PyQtAvailable = False
-#try:
-#    from PyQt4.QtCore import *
-#    from PyQt4.QtGui import *
-#    import qtprogram
-#    _PyQtAvailable = True
-#except ImportError:
-#    print "QT is not available... try sudo apt-get install python-qt4 python-qt4-gl"
-#    pass
 
 global _directory
 global _editTemporaryWorlds
@@ -139,17 +127,26 @@ def get(name,type='auto',directory=None,default=None,doedit='auto',description=N
     value = None
     try:
         fn = os.path.join(directory,name)
-        if type == 'xml':
-            raise NotImplementedError("TODO: load xml files from Python API")
-        elif type == 'json':
-            f = open(fn,'r')
-            text = ''.join(f.readlines())
-            f.close()
-            value = loader.fromJson(text,type=type)
-        else:
-            value = loader.load(type,fn)
+        try:
+            if type == 'xml':
+                raise NotImplementedError("TODO: load xml files from Python API")
+            elif type == 'json':
+                f = open(fn,'r')
+                text = ''.join(f.readlines())
+                f.close()
+                value = loader.fromJson(text,type=type)
+            else:
+                value = loader.load(type,fn)
+        except IOError:
+            raise
+        except Exception,e:
+            import traceback
+            print "Unable to read object from file "+fn
+            print "Traceback: "
+            traceback.print_exc()
+            raise IOError()
         if value==None:
-            raise IOError
+            raise IOError("Unable to load from file "+fn)
         if doedit==True:
             success,newvalue = edit(name,value=value,type=type,description=description,editor=editor,world=world,frame=frame)
             if success:
@@ -196,106 +193,6 @@ def set(name,value,type='auto',directory=None):
     else:
         return loader.save(value,type,fn)
 
-
-#Qt stuff
-if glinit._PyQtAvailable:
-    from PyQt4.QtCore import *
-    from PyQt4.QtGui import *
-    from OpenGL.GL import *
-    from ..vis import editors 
-    _dialog = None
-
-    class _MyDialog(QDialog):
-        def __init__(self,glwidget):
-            QDialog.__init__(self)
-            glwidget.setMinimumSize(glwidget.width,glwidget.height)
-            glwidget.setMaximumSize(4000,4000)
-            glwidget.setSizePolicy(QSizePolicy(QSizePolicy.Maximum,QSizePolicy.Maximum))
-            self.instructions = QLabel()
-            self.description = QLabel()
-            self.description2 = QLabel("Press OK to save, Cancel to continue without saving")
-            self.topBox = QFrame()
-            self.topBoxLayout = QVBoxLayout(self.topBox)
-            self.topBoxLayout.addWidget(self.description)
-            self.topBoxLayout.addWidget(self.instructions)
-            self.extraDialog = QFrame()
-            self.extraDialog.setSizePolicy(QSizePolicy(QSizePolicy.Minimum,QSizePolicy.Minimum))
-            self.topBoxLayout.addWidget(self.extraDialog)
-            self.layout = QVBoxLayout(self)
-            self.layout.addWidget(self.topBox)
-            self.layout.addWidget(glwidget)
-            self.layout.addWidget(self.description2)
-            self.layout.setStretchFactor(glwidget,10)
-            self.buttons = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel,Qt.Horizontal, self)
-            self.buttons.accepted.connect(self.accept)
-            self.buttons.rejected.connect(self.reject)
-            self.layout.addWidget(self.buttons)
-            self.doexit = False
-        def setEditor(self,editorObject):
-            self.editorObject = editorObject
-            self.setWindowTitle("Editing "+editorObject.name)
-            visualization.setPlugin(editorObject)
-            if editorObject.description==None:
-                self.description.setText("")
-            else:
-                self.description.setText(editorObject.description)
-            self.instructions.setText(editorObject.instructions())
-            editorObject.addDialogItems(self.extraDialog,ui='qt')
-
-        def closeEvent(self,event):
-            reply = QMessageBox.question(self, 'Message',
-                 "Are you sure to quit the program?", QMessageBox.Yes | 
-                 QMessageBox.No, QMessageBox.No)
-
-            if reply == QMessageBox.Yes:
-                self.doexit = True
-                event.accept()
-            else:
-                event.ignore()     
-            
-        def finish(self):
-            visualization.setPlugin(None)
-            res = self.editorObject.value
-            self.topBoxLayout.removeWidget(self.extraDialog)
-            self.extraDialog.setParent(None)
-            self.extraDialog = QFrame()
-            self.extraDialog.setSizePolicy(QSizePolicy(QSizePolicy.Minimum,QSizePolicy.Minimum))
-            self.topBoxLayout.addWidget(self.extraDialog)
-            self.editorObject = None
-            return res
-
-    def _makeDialog(editorObject):
-        global _dialog
-        if _dialog == None:
-            _dialog=_MyDialog(visualization._widget)
-        _dialog.setEditor(editorObject)
-        res = _dialog.exec_()
-        if _dialog.doexit:
-            return None,None
-        retVal = _dialog.finish()
-        return res,retVal
-
-    def _launch(editorObject):
-        global _dialog
-        olditems = visualization._vis.items.copy()
-        visualization._vis.items = {}
-
-        oldtitle = visualization.getWindowTitle()
-        visualization.setWindowTitle("Resource Editor")
-        res,retVal = visualization.customRun(_makeDialog,args=(editorObject,))
-        visualization.setWindowTitle(oldtitle)
-
-        if _dialog.doexit:
-            visualization.kill()
-            print "Exiting program."
-            exit(0)
-
-
-        visualization._vis.items = olditems
-        return res,retVal
-else:
-    def _launch(editorObject):
-        raise ValueError("Unable to perform visual editing without PyQt")
 
 def console_edit(name,value,type,description=None,world=None,frame=None):
     print "*********************************************************"
@@ -370,12 +267,12 @@ def edit(name,value,type='auto',description=None,editor='visual',world=None,robo
     if name == None:
         name = 'Anonymous'
     if type == 'auto':
-        type = objectToTypes(value)
+        type = types.objectToTypes(value)
         if type is None:
             raise RuntimeError("Could not autodetect type of object "+name)
         if isinstance(type,(list,tuple)):
             type = type[0]
-    if not glcommon._PyQtAvailable and editor=='visual':
+    if not vis.glinit._PyQtAvailable and editor=='visual':
         print "PyQt is not available, defaulting to console editor"
         editor = 'console'
             
@@ -418,40 +315,35 @@ def edit(name,value,type='auto',description=None,editor='visual',world=None,robo
             if robot==None:
                 robot = world.robot(0)
             value = [robot.getConfig()]
-        elif type == 'IKGoal':
-            value = IKObjective()
-        elif type == 'Vector3' or type == 'Point':
-            value = [0,0,0]
-        elif type == 'Rotation':
-            value = so3.identity()
-        elif type == 'RigidTransform':
-            value = se3.identity()
         else:
-            raise RuntimeError("Don't know how to edit objects of type "+type)
+            value = types.make(type)
+            if value == None:
+                raise RuntimeError("Don't know how to edit objects of type "+type)
 
     if editor == 'console':
         return console_edit(name,value,type,description,world,frame)
     elif editor == 'visual':
         if type == 'Config':
-            return _launch(editors.ConfigEditor(name,value,description,world,robot))
+            return vis.editors.run(vis.editors.ConfigEditor(name,value,description,world,robot))
         elif type == 'Configs':
-            return _launch(editors.ConfigsEditor(name,value,description,world,robot))
+            return vis.editors.run(vis.editors.ConfigsEditor(name,value,description,world,robot))
         elif type == 'Vector3' or type == 'Point':
-            if isinstance(frame,(RigidObjectModel,RobotModelLink)):
+            if isinstance(frame,(vis.RigidObjectModel,RobotModelLink)):
                 frame = frame.getTransform()
-            return _launch(editors.PointEditor(name,value,description,world,frame))
+            return vis.editors.run(vis.editors.PointEditor(name,value,description,world,frame))
         elif type == 'Rotation':
             if isinstance(frame,(RigidObjectModel,RobotModelLink)):
                 frame = frame.getTransform()
-            return _launch(editors.RotationEditor(name,value,description,world,frame))
+            return vis.editors.run(vis.editors.RotationEditor(name,value,description,world,frame))
         elif type == 'RigidTransform':
             if isinstance(frame,RigidObjectModel):
-                return _launch(editors.ObjectTransformEditor(name,value,description,world,frame))
+                return vis.editors.run(vis.editors.ObjectTransformEditor(name,value,description,world,frame))
             if isinstance(frame,RobotModelLink):
                 frame = frame.getTransform()
-            return _launch(editors.RigidTransformEditor(name,value,description,world,frame))
+            return vis.editors.run(vis.editors.RigidTransformEditor(name,value,description,world,frame))
         else:
             raise RuntimeError("Visual editing of objects of type "+type+" not supported yet")
     else:
         raise ValueError("Invalid value for argument 'editor', must be either 'visual' or 'console'")
+
 
