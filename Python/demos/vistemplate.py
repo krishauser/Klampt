@@ -49,8 +49,8 @@ if __name__ == "__main__":
     vis.edit("some blinking transform")
     vis.edit("coordinates:ATHLETE:ankle roll 3")
 
-    print "Visualization"
-    vis.listItems(2)
+    print "Visualization items:"
+    vis.listItems(indent=2)
 
     #run the visualizer in a separate thread
     """

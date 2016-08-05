@@ -2,14 +2,14 @@
 
 import sys
 from klampt import *
-from klampt import visualization
-from klampt.glcommon import *
-from klampt import robotcollide
+from klampt.math import *
+from klampt import vis
+from klampt.model import robotcollide
 import time
 
-class MyGLPlugin(GLPluginBase):
+class MyGLPlugin(vis.GLPluginInterface):
     def __init__(self,world):
-        GLPluginBase.__init__(self)
+        vis.GLPluginInterface.__init__(self)
         self.world = world
         self.collider = robotcollide.WorldCollider(world)
         self.quit = False
@@ -53,7 +53,7 @@ class MyGLPlugin(GLPluginBase):
         return [g[1] for g in sorted(collided)]
 
 if __name__ == "__main__":
-    print "visplugin.py: This example demonstrates how to simulate a world and read user input using the klampt.visualization framework"
+    print "visplugin.py: This example demonstrates how to simulate a world and read user input using the klampt.vis framework"
     if len(sys.argv)<=1:
         print "USAGE: visplugin.py [world_file]"
         exit()
@@ -66,20 +66,23 @@ if __name__ == "__main__":
     world.enableInitCollisions(True)
 
     print "Press 'q' to exit"
-    #the plugin is used to get interactivity with the visualizer... if you
+    #the plugin is pushed on the visualizer stack to get interactivity with the visualizer... if you
     #don't care about interactivity, you may leave it out.  See vistemplate.py for
     #an example of this
     plugin = MyGLPlugin(world)
-    visualization.setPlugin(plugin)
+    vis.pushPlugin(plugin)
     #add the world to the visualizer
-    visualization.add("world",world)
+    vis.add("world",world)
+    vis.listItems()
+    vis.setColor("world:Terrain0",1,0,0)
+    vis.setColor("world:ATHLETE:hex pitch",0.5,0.5,0.5,0.5)
     #run the visualizer in a separate thread
-    visualization.show()
-    while visualization.shown() and not plugin.quit:
-        visualization.lock()
+    vis.show()
+    while vis.shown() and not plugin.quit:
+        vis.lock()
         #TODO: you may modify the world here
-        visualization.unlock()
+        vis.unlock()
         #changes to the visualization must be done outside the lock
         time.sleep(0.01)
     print "Ending visualization."
-    visualization.kill()
+    vis.kill()
