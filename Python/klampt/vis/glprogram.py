@@ -143,6 +143,13 @@ class GLProgram:
         """
         return self.window.modifiers()
 
+    def reshape(self,w,h):
+        """Asks to resize the GL window"""
+        if self.window:
+            return self.window.reshape(w,h)
+        else:
+            self.view.w,self.view.h = w,h
+
     def reshapefunc(self,w,h):
         """Called on window resize.  May be overridden."""
         self.view.w = w
@@ -368,10 +375,14 @@ class GLPluginProgram(GLRealtimeProgram):
     def pushPlugin(self,plugin):
         self.plugins.append(plugin)
         plugin.window = self.window
-        plugin.view = self.view
         if self.window:
+            plugin.view = self.view
             plugin.reshapefunc(self.view.w,self.view.h)
             self.refresh()
+        elif len(self.plugins) == 1:
+            self.view = plugin.view
+        else:
+            plugin.view = self.view
     def popPlugin(self):
         if len(self.plugins)==0: return None
         res = self.plugins[-1]
