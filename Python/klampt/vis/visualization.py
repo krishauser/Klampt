@@ -326,7 +326,9 @@ def run(plugin=None):
     """A blocking call to start a single window.  If plugin == None,
     the default visualization is used.  Otherwise, the plugin is used."""
     setPlugin(plugin)
-    dialog()
+    show()
+    while shown():
+      time.sleep(0.1)
     kill()
 
 def dialog():
