@@ -208,13 +208,6 @@ from ..model import coordinates
 from ..model.trajectory import *
 from ..model.contact import ContactPoint,Hold
 
-_globalLock = Lock()
-_vis = None
-_frontend = GLPluginProgram()
-_window_title = "Klamp't visualizer"
-_windows = []
-_current_window = None
-
 class WindowInfo:
     """Mode can be hidden, shown, or dialog"""
     def __init__(self,name,frontend,vis,window=None):
@@ -222,23 +215,29 @@ class WindowInfo:
         self.frontend = frontend
         self.vis = vis
         self.window = window
-        self.mode = 'shown'
+        self.mode = 'hidden'
         self.guidata = None
         self.custom_ui = None
+
+_globalLock = Lock()
+_vis = None
+_frontend = GLPluginProgram()
+_window_title = "Klamp't visualizer"
+_windows = []
+_current_window = None
 
 def createWindow(name):
     """Creates a new window."""
     global _globalLock,_frontend,_vis,_window_title,_windows,_current_window
     _globalLock.acquire()
     if len(_windows) == 0:
-        #save the defaults
-        _windows.append(WindowInfo(_window_title,_frontend,_vis))
-    else:
-        #make a new window
-        _window_title = name
-        _frontend = GLPluginProgram()
-        _vis = VisualizationPlugin()
-        _windows.append(WindowInfo(_window_title,_frontend,_vis))
+        #save the defaults in window 0
+        _windows.append(WindowInfo(_window_title,_frontend,_vis))    
+    #make a new window
+    _window_title = name
+    _frontend = GLPluginProgram()
+    _vis = VisualizationPlugin()
+    _windows.append(WindowInfo(_window_title,_frontend,_vis))
     id = len(_windows)-1
     _current_window = id
     _globalLock.release()
@@ -247,10 +246,13 @@ def createWindow(name):
 def setWindow(id):
     """Sets currently active window."""
     global _globalLock,_frontend,_vis,_window_title,_windows,_current_window
-    assert id >= 0 and id < len(_windows)
     if id == _current_window:
         return
     _globalLock.acquire()
+    if len(_windows) == 0:
+        #save the defaults in window 0
+        _windows.append(WindowInfo(_window_title,_frontend,_vis)) 
+    assert id >= 0 and id < len(_windows)
     _window_title,_frontend,_vis = _windows[id].name,_windows[id].frontend,_windows[id].vis
     _current_window = id
     _globalLock.release()
@@ -258,7 +260,7 @@ def setWindow(id):
 def getWindow():
     """Retrieves ID of currently active window or -1 if no window is active"""
     global _current_window
-    if _current_window == None: return -1
+    if _current_window == None: return 0
     return _current_window
 
 def setPlugin(plugin):
@@ -268,8 +270,9 @@ def setPlugin(plugin):
     _globalLock.acquire()
     if not isinstance(_frontend,GLPluginProgram):
         _frontend = GLPluginProgram()
-        if _current_window != None and _windows[_current_window].window != None:
-            _frontend.window = _windows[_current_window].window
+        if _current_window != None:
+            if _windows[_current_window].window != None:
+                _frontend.window = _windows[_current_window].window
     if plugin == None:
         global _vis
         if _vis==None:
@@ -282,7 +285,8 @@ def setPlugin(plugin):
 
 def pushPlugin(plugin):
     """Adds a new glinterface.GLPluginInterface plugin on top of the old one."""
-    global _frontend
+    global _globalLock,_frontend
+    _globalLock.acquire()
     assert isinstance(_frontend,GLPluginProgram),"Can't push a plugin after addPlugin"
     if len(_frontend.plugins) == 0:
         global _vis
@@ -291,6 +295,7 @@ def pushPlugin(plugin):
         _frontend.setPlugin(_vis)
     _frontend.pushPlugin(plugin)
     _onFrontendChange()
+    _globalLock.release()
 
 def popPlugin():
     global _frontend
@@ -332,6 +337,7 @@ def dialog():
 def setWindowTitle(title):
     global _window_title
     _window_title = title
+    _onFrontendChange()
 
 def getWindowTitle():
     global _window_title
@@ -366,7 +372,10 @@ def lock():
     _globalLock.acquire()
 
 def unlock():
-    global _globalLock
+    global _globalLock,_windows
+    for w in _windows:
+        if w.window:
+            w.window.refresh()
     _globalLock.release()
 
 def shown():
@@ -1383,7 +1392,7 @@ class VisualizationPlugin(glcommon.GLWidgetPlugin):
 
 
 
-_vis = VisualizationPlugin()        
+_vis = VisualizationPlugin() 
 _frontend.setPlugin(_vis)
 
 #signals to visualization thread
@@ -1445,13 +1454,16 @@ if _PyQtAvailable:
         res = None
         while not _quit:
             _globalLock.acquire()
-            for w in _windows:
+            for i,w in enumerate(_windows):
                 if w.window == None and w.mode != 'hidden':
                     w.window = _GLBackend.createWindow(w.name)
                     w.window.setProgram(w.frontend)
                     w.window.setParent(None)
                     w.window.refresh()
                 if w.mode == 'dialog':
+                    print "#########################################"
+                    print "Dialog on window",i
+                    print "#########################################"
                     w.window.show()
                     w.window.refresh()
                     if w.custom_ui == None:
@@ -1470,15 +1482,24 @@ if _PyQtAvailable:
                     w.window.idlesleep()
                     w.mode = 'hidden'
                 if w.mode == 'shown' and w.guidata == None:
+                    print "#########################################"
+                    print "Making window",i
+                    print "#########################################"
                     if w.custom_ui == None:
                         w.guidata = _MyWindow(w)
                     else:
                         w.guidata = w.custom_ui(w)
                     w.window.show()
                 if w.mode == 'shown' and not w.guidata.isVisible():
+                    print "#########################################"
+                    print "Showing window",i
+                    print "#########################################"
                     w.window.show()
                     w.guidata.show()
                 if w.mode == 'hidden' and w.guidata != None and w.guidata.isVisible():
+                    print "########################################3"
+                    print "Hiding window",i
+                    print "########################################3"
                     w.window.setParent(None)
                     w.window.idlesleep()
                     w.window.hide()
@@ -1628,9 +1649,10 @@ def _set_custom_ui(func):
     return
 
 def _onFrontendChange():
-    global _windows,_frontend,_current_window,_thread_running
+    global _windows,_frontend,_window_title,_current_window,_thread_running
     if _current_window == None:
         return
+    _windows[_current_window].name = _window_title
     _windows[_current_window].frontend = _frontend
     if _windows[_current_window].window:
         _windows[_current_window].window.setProgram(_frontend)

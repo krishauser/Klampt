@@ -463,21 +463,8 @@ if glinit._PyQtAvailable:
                 _doexit = True
                 event.accept()
             else:
-                event.ignore()     
+                event.ignore() 
             
-        def finish(self):
-            global _my_dialog_retval
-            _my_dialog_retval =  self.editorObject.value
-            assert _my_dialog_retval != None
-            #self.topBoxLayout.removeWidget(self.extraDialog)
-            #self.extraDialog.setParent(None)
-            #self.extraDialog = QFrame()
-            #self.extraDialog.setSizePolicy(QSizePolicy(QSizePolicy.Minimum,QSizePolicy.Minimum))
-            #self.topBoxLayout.addWidget(self.extraDialog)
-            self.editorObject = None
-
-            return res
-
         def accept(self):
             global _my_dialog_res
             _my_dialog_res = True
@@ -495,10 +482,11 @@ if glinit._PyQtAvailable:
         assert isinstance(editorObject,VisualEditorBase),"Must provide a VisualEditorBase instance to run()"
         global _vis_id, _my_dialog_res, _my_dialog_retval
 
-        if _vis_id == None:
-            _vis_id = visualization.createWindow("Resource Editor")
-        else:
-            visualization.setWindow(_vis_id)
+        old_vis_window = visualization.getWindow()
+        #if _vis_id == None:
+        #    _vis_id = visualization.createWindow("Resource Editor")
+        #else:
+        #    visualization.setWindow(_vis_id)
         visualization.setPlugin(editorObject)
         def makefunc(gl_backend):
             res = _EditDialog(gl_backend)
@@ -506,12 +494,16 @@ if glinit._PyQtAvailable:
             return res
         visualization.customUI(makefunc)
         visualization.dialog()
-        res,retVal = _my_dialog_res,_my_dialog_retval
+        res,retVal = _my_dialog_res,editorObject.value
 
         if _doexit:
             visualization.kill()
             print "Exiting program."
             exit(0)
+
+        #visualization.setWindow(old_vis_window)
+        visualization.setPlugin(None)
+        visualization.customUI(None)
 
         print "Result",res,"return value",retVal
         return res,retVal
