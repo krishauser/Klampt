@@ -4,14 +4,14 @@ import sys
 from klampt import *
 from klampt.math import *
 from klampt import vis
-from klampt.model import robotcollide
+from klampt.model import collide
 import time
 
 class MyGLPlugin(vis.GLPluginInterface):
     def __init__(self,world):
         vis.GLPluginInterface.__init__(self)
         self.world = world
-        self.collider = robotcollide.WorldCollider(world)
+        self.collider = collide.WorldCollider(world)
         self.quit = False
 
     def mousefunc(self,button,state,x,y):
