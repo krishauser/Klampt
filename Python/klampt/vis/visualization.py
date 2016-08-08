@@ -325,9 +325,7 @@ def addPlugin(plugin):
 def run(plugin=None):
     """A blocking call to start a single window.  If plugin == None,
     the default visualization is used.  Otherwise, the plugin is used."""
-    _globalLock.acquire()
     setPlugin(plugin)
-    _globalLock.release()
     dialog()
     kill()
 
@@ -1447,7 +1445,7 @@ if _PyQtAvailable:
         global _thread_running,_vis,_widget,_window,_quit,_showdialog,_showwindow,_window_title
         global alldlgs
         _thread_running = True
-        #Do Qt setup
+
         _app = _GLBackend.initialize("Klamp't visualization")
         
         #res = _app.exec_()
@@ -1462,9 +1460,10 @@ if _PyQtAvailable:
                     w.window.refresh()
                 if w.mode == 'dialog':
                     print "#########################################"
-                    print "Dialog on window",i
+                    print "klampt.vis: Dialog on window",i
                     print "#########################################"
                     w.window.show()
+                    w.window.idlesleep(0)
                     w.window.refresh()
                     if w.custom_ui == None:
                         dlg = _MyDialog(w)
@@ -1483,22 +1482,24 @@ if _PyQtAvailable:
                     w.mode = 'hidden'
                 if w.mode == 'shown' and w.guidata == None:
                     print "#########################################"
-                    print "Making window",i
+                    print "klampt.vis: Making window",i
                     print "#########################################"
                     if w.custom_ui == None:
                         w.guidata = _MyWindow(w)
                     else:
                         w.guidata = w.custom_ui(w)
                     w.window.show()
+                    w.window.idlesleep(0)
                 if w.mode == 'shown' and not w.guidata.isVisible():
                     print "#########################################"
-                    print "Showing window",i
+                    print "klampt.vis: Showing window",i
                     print "#########################################"
                     w.window.show()
+                    w.window.idlesleep(0)
                     w.guidata.show()
                 if w.mode == 'hidden' and w.guidata != None and w.guidata.isVisible():
                     print "########################################3"
-                    print "Hiding window",i
+                    print "klampt.vis: Hiding window",i
                     print "########################################3"
                     w.window.setParent(None)
                     w.window.idlesleep()
@@ -1605,7 +1606,7 @@ def _kill():
         time.sleep(0.01)
 
 def _show():
-    global _windows,_current_window,_thread_running
+    global _app,_windows,_current_window,_thread_running
     if len(_windows)==0:
         _windows.append(WindowInfo(_window_title,_frontend,_vis)) 
         _current_window = 0
@@ -1614,6 +1615,7 @@ def _show():
         thread = Thread(target=_run_app_thread)
         thread.setDaemon(True)
         thread.start()
+        time.sleep(0.1)
     _windows[_current_window].mode = 'shown'
 
 def _hide():
@@ -1623,14 +1625,16 @@ def _hide():
     _windows[_current_window].mode = 'hidden'
 
 def _dialog():
-    global _windows,_current_window,_thread_running
+    global _app,_windows,_current_window,_thread_running
     if len(_windows)==0:
         _windows.append(WindowInfo(_window_title,_frontend,_vis,None))
         _current_window = 0
     if not _thread_running:
         signal.signal(signal.SIGINT, signal.SIG_DFL)
         thread = Thread(target=_run_app_thread)
+        thread.setDaemon(True)
         thread.start()
+        time.sleep(0.1)
     _windows[_current_window].mode = 'dialog'
     while _windows[_current_window].mode == 'dialog':
         time.sleep(0.1)
@@ -1641,10 +1645,7 @@ def _set_custom_ui(func):
     if len(_windows)==0:
         _windows.append(WindowInfo(_window_title,_frontend,_vis,None))
         _current_window = 0
-    if not _thread_running:
-        signal.signal(signal.SIGINT, signal.SIG_DFL)
-        thread = Thread(target=_run_app_thread)
-        thread.start()
+    
     _windows[_current_window].custom_ui = func
     return
 
