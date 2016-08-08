@@ -184,7 +184,7 @@ class QtGLWindow(QGLWidget):
             self.program.keyboardupfunc(keymap[e.key()],self.lastx,self.lasty)
             return
         else:
-            c = e.text()
+            c = str(e.text())
             if len(c)==0: return #some empty press, like shift/control
             self.modifierList = toModifierList(e.modifiers())
             self.program.keyboardupfunc(c,self.lastx,self.lasty)
