@@ -1937,6 +1937,14 @@ const char* RobotModelLink::getName()
   return robotPtr->linkNames[index].c_str();
 }
 
+void RobotModelLink::setName(const char* name)
+{
+  if(index < 0) {
+    throw PyException("Cannot set the name of an empty link");
+  }
+  robotPtr->linkNames[index] = name;
+}
+
 int RobotModelLink::getIndex()
 {
   return index;
@@ -2208,6 +2216,17 @@ const char* RobotModelDriver::getName()
   return robotPtr->driverNames[index].c_str();
 }
 
+/*
+void RobotModelDriver::setName(const char* name)
+{
+  if(index < 0) {
+    throw PyException("Cannot set the name of an empty driver");
+  }
+  robotPtr->driverNames[index] = name;
+}
+*/
+
+
 const char* RobotModelDriver::getType()
 {
   if(index < 0) return "";
@@ -2275,6 +2294,16 @@ const char* RobotModel::getName()
   RobotWorld& world = *worlds[this->world]->world;
   return world.robots[index]->name.c_str();
 }
+
+void RobotModel::setName(const char* name)
+{
+  if(index < 0) {
+    throw PyException("Cannot set the name of an empty robot");
+  }
+  RobotWorld& world = *worlds[this->world]->world;
+  world.robots[index]->name = name;
+}
+
 
 int RobotModel::getID()
 {
@@ -2673,6 +2702,15 @@ const char* RigidObjectModel::getName()
   return world.rigidObjects[index]->name.c_str();
 }
 
+void RigidObjectModel::setName(const char* name)
+{
+  if(index < 0) {
+    throw PyException("Cannot set the name of an empty rigid object");
+  }
+  RobotWorld& world = *worlds[this->world]->world;
+  world.rigidObjects[index]->name = name;
+}
+
 int RigidObjectModel::getID()
 {
   RobotWorld& world = *worlds[this->world]->world;
@@ -2794,6 +2832,16 @@ const char* TerrainModel::getName()
   RobotWorld& world = *worlds[this->world]->world;
   return world.terrains[index]->name.c_str();
 }
+
+void TerrainModel::setName(const char* name)
+{
+  if(index < 0) {
+    throw PyException("Cannot set the name of an empty rigid object");
+  }
+  RobotWorld& world = *worlds[this->world]->world;
+  world.terrains[index]->name = name;
+}
+
 
 int TerrainModel::getID()
 {

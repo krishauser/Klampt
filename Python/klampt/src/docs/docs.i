@@ -169,6 +169,11 @@ Retrieves the current order of feasibility tests. ";
 
 Retrieves the current order of visibility tests. ";
 
+%feature("docstring")  CSpaceInterface::getStats "
+
+Returns constraint testing statistics. If adaptive queries are
+enabled, this returns the stats on each constraint. ";
+
 
 // File: classGeneralizedIKObjective.xml
 %feature("docstring") GeneralizedIKObjective "
@@ -315,15 +320,12 @@ C++ includes: geometry.h ";
 
 %feature("docstring")  Geometry3D::Geometry3D "";
 
-<<<<<<< HEAD
 %feature("docstring")  Geometry3D::Geometry3D "";
 
 %feature("docstring")  Geometry3D::Geometry3D "";
 
 %feature("docstring")  Geometry3D::Geometry3D "";
 
-=======
->>>>>>> pyplan_devel
 %feature("docstring")  Geometry3D::~Geometry3D "";
 
 %feature("docstring")  Geometry3D::clone "
@@ -434,7 +436,7 @@ Translates the geometry data. ";
 
 %feature("docstring")  Geometry3D::transform "
 
-Translates/rotates the geometry data. ";
+Translates/rotates/scales the geometry data. ";
 
 %feature("docstring")  Geometry3D::setCollisionMargin "
 
@@ -872,6 +874,18 @@ Adds the given point cloud to this one. They must share the same
 properties or else an exception is raised. ";
 
 
+// File: classPyConstraintSet.xml
+%feature("docstring") PyConstraintSet "";
+
+%feature("docstring")  PyConstraintSet::PyConstraintSet "";
+
+%feature("docstring")  PyConstraintSet::~PyConstraintSet "";
+
+%feature("docstring")  PyConstraintSet::Sample "";
+
+%feature("docstring")  PyConstraintSet::Contains "";
+
+
 // File: classPyCSpace.xml
 %feature("docstring") PyCSpace "
 
@@ -885,14 +899,12 @@ A CSpace that calls python routines for its functionality ";
 
 %feature("docstring")  PyCSpace::UpdateTempConfig2 "";
 
+%feature("docstring")  PyCSpace::ConstraintIndex "";
+
 %feature("docstring")  PyCSpace::Sample "";
 
 %feature("docstring")  PyCSpace::SampleNeighborhood "";
 
-%feature("docstring")  PyCSpace::NumObstacles "";
-
-%feature("docstring")  PyCSpace::ObstacleName "";
-
 %feature("docstring")  PyCSpace::IsFeasible "";
 
 %feature("docstring")  PyCSpace::IsFeasible "";
@@ -901,21 +913,15 @@ A CSpace that calls python routines for its functionality ";
 
 %feature("docstring")  PyCSpace::IsVisible "";
 
-%feature("docstring")  PyCSpace::LocalPlanner "";
+%feature("docstring")  PyCSpace::PathChecker "";
 
-%feature("docstring")  PyCSpace::LocalPlanner "";
+%feature("docstring")  PyCSpace::PathChecker "";
 
 %feature("docstring")  PyCSpace::Distance "";
 
 %feature("docstring")  PyCSpace::Interpolate "";
 
 %feature("docstring")  PyCSpace::Properties "";
-
-%feature("docstring")  PyCSpace::AddFeasibleDependency "";
-
-%feature("docstring")  PyCSpace::AddVisibleDependency "";
-
-%feature("docstring")  PyCSpace::OptimizeQueryOrder "";
 
 
 // File: classPyEdgePlanner.xml
@@ -927,11 +933,13 @@ A CSpace that calls python routines for its functionality ";
 
 %feature("docstring")  PyEdgePlanner::IsVisible "";
 
+%feature("docstring")  PyEdgePlanner::Length "";
+
 %feature("docstring")  PyEdgePlanner::Eval "";
 
 %feature("docstring")  PyEdgePlanner::Start "";
 
-%feature("docstring")  PyEdgePlanner::Goal "";
+%feature("docstring")  PyEdgePlanner::End "";
 
 %feature("docstring")  PyEdgePlanner::Space "";
 
@@ -949,7 +957,17 @@ A CSpace that calls python routines for its functionality ";
 
 %feature("docstring")  PyGoalSet::Sample "";
 
-%feature("docstring")  PyGoalSet::IsFeasible "";
+%feature("docstring")  PyGoalSet::Contains "";
+
+
+// File: classPyUpdateEdgePlanner.xml
+%feature("docstring") PyUpdateEdgePlanner "";
+
+%feature("docstring")  PyUpdateEdgePlanner::PyUpdateEdgePlanner "";
+
+%feature("docstring")  PyUpdateEdgePlanner::UpdateCSpace "";
+
+%feature("docstring")  PyUpdateEdgePlanner::IsVisible "";
 
 
 // File: classRigidObjectModel.xml
@@ -967,6 +985,8 @@ C++ includes: robotmodel.h ";
 %feature("docstring")  RigidObjectModel::getID "";
 
 %feature("docstring")  RigidObjectModel::getName "";
+
+%feature("docstring")  RigidObjectModel::setName "";
 
 %feature("docstring")  RigidObjectModel::geometry "";
 
@@ -1020,6 +1040,8 @@ Returns the ID of the robot in its world (Note: not the same as the
 robot index) ";
 
 %feature("docstring")  RobotModel::getName "";
+
+%feature("docstring")  RobotModel::setName "";
 
 %feature("docstring")  RobotModel::numLinks "
 
@@ -1157,7 +1179,7 @@ account nonstandard joints. ";
 Computes a distance between two configurations, properly taking into
 account nonstandard joints. ";
 
-%feature("docstring")  RobotModel::interpolate_deriv "
+%feature("docstring")  RobotModel::interpolateDeriv "
 
 Returns the configuration derivative at a as you interpolate toward b
 at unit speed. ";
@@ -1264,6 +1286,10 @@ getIndex()) ";
 %feature("docstring")  RobotModelLink::getName "
 
 Returns the name of the robot link. ";
+
+%feature("docstring")  RobotModelLink::setName "
+
+Sets the name of the robot link. ";
 
 %feature("docstring")  RobotModelLink::robot "
 
@@ -1652,8 +1678,14 @@ Sets the PID gains. ";
 A sensor on a simulated robot. Retreive this from the controller, and
 use getMeasurements to get the currently simulated measurement vector.
 
-type() gives you a string defining the sensor type. measurementNames()
-gives you a list of names for the measurements.
+type() gives you a string defining the sensor type.
+
+measurementNames() gives you a list of names for the measurements.
+
+drawGL() draws a sensor indicator using OpenGL
+
+drawGL(measurements) draws a sensor indicator and its measurements
+using OpenGL.
 
 C++ includes: robotsim.h ";
 
@@ -1666,6 +1698,10 @@ C++ includes: robotsim.h ";
 %feature("docstring")  SimRobotSensor::measurementNames "";
 
 %feature("docstring")  SimRobotSensor::getMeasurements "";
+
+%feature("docstring")  SimRobotSensor::drawGL "";
+
+%feature("docstring")  SimRobotSensor::drawGL "";
 
 
 // File: classSimulator.xml
@@ -1858,6 +1894,19 @@ Sets the overall gravity vector. ";
 Sets the internal simulation substep. Values < 0.01 are recommended.
 ";
 
+%feature("docstring")  Simulator::getSetting "
+
+Retreives some simulation setting. Valid names are gravity, simStep,
+boundaryLayerCollisions, rigidObjectCollisions, robotSelfCollisions,
+robotRobotCollisions, adaptiveTimeStepping, maxContacts,
+clusterNormalScale, errorReductionParameter, and
+dampedLeastSquaresParameter. ";
+
+%feature("docstring")  Simulator::setSetting "
+
+Sets some simulation setting. Raises an exception if the name is
+unknown or the value is of improper format. ";
+
 
 // File: classTerrainModel.xml
 %feature("docstring") TerrainModel "
@@ -1872,6 +1921,8 @@ C++ includes: robotmodel.h ";
 
 %feature("docstring")  TerrainModel::getName "";
 
+%feature("docstring")  TerrainModel::setName "";
+
 %feature("docstring")  TerrainModel::geometry "";
 
 %feature("docstring")  TerrainModel::appearance "";
@@ -1885,19 +1936,6 @@ appearance is honored. Otherwise, only the raw geometry is drawn.
 PERFORMANCE WARNING: if keepAppearance is false, then this does not
 properly reuse OpenGL display lists. A better approach to changing
 object's Appearance directly. ";
-<<<<<<< HEAD
-=======
-
-
-// File: structTesterStats.xml
-%feature("docstring") TesterStats "";
-
-%feature("docstring")  TesterStats::TesterStats "";
-
-%feature("docstring")  TesterStats::reset "";
-
-%feature("docstring")  TesterStats::update "";
->>>>>>> pyplan_devel
 
 
 // File: structTriangleMesh.xml
@@ -2134,7 +2172,7 @@ casting routines are called. ";
 
 Sets the random seed used by the motion planner. ";
 
-%feature("docstring")  std::OptimizeTestingOrder "";
+%feature("docstring")  std::UpdateStats "";
 
 %feature("docstring")  std::makeNewCSpace "";
 
@@ -2365,11 +2403,8 @@ from the space of transforms that satisfies the objective. ";
 
 %feature("docstring")  GetPathController "";
 
-<<<<<<< HEAD
 %feature("docstring")  GetMotionQueue "";
 
-=======
->>>>>>> pyplan_devel
 %feature("docstring")  GetMesh "";
 
 %feature("docstring")  GetMesh "";

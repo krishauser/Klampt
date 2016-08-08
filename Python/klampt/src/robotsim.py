@@ -993,7 +993,7 @@ class Geometry3D(_object):
         """
         transform(Geometry3D self, double const [9] R, double const [3] t)
 
-        Translates/rotates the geometry data. 
+        Translates/rotates/scales the geometry data. 
         """
         return _robotsim.Geometry3D_transform(self, *args)
 
@@ -1612,6 +1612,14 @@ class RobotModelLink(_object):
         """
         return _robotsim.RobotModelLink_getName(self)
 
+    def setName(self, *args):
+        """
+        setName(RobotModelLink self, char const * name)
+
+        Sets the name of the robot link. 
+        """
+        return _robotsim.RobotModelLink_setName(self, *args)
+
     def robot(self):
         """
         robot(RobotModelLink self) -> RobotModel
@@ -2021,6 +2029,10 @@ class RobotModel(_object):
         """getName(RobotModel self) -> char const *"""
         return _robotsim.RobotModel_getName(self)
 
+    def setName(self, *args):
+        """setName(RobotModel self, char const * name)"""
+        return _robotsim.RobotModel_setName(self, *args)
+
     def numLinks(self):
         """
         numLinks(RobotModel self) -> int
@@ -2236,15 +2248,13 @@ class RobotModel(_object):
         return _robotsim.RobotModel_distance(self, *args)
 
     def interpolateDeriv(self, *args):
-        """interpolateDeriv(RobotModel self, doubleVector a, doubleVector b)"""
-        return _robotsim.RobotModel_interpolateDeriv(self, *args)
+        """
+        interpolateDeriv(RobotModel self, doubleVector a, doubleVector b)
 
-    def randomizeConfig(self, unboundedScale=1.0):
+        Returns the configuration derivative at a as you interpolate toward b
+        at unit speed. 
         """
-        randomizeConfig(RobotModel self, double unboundedScale=1.0)
-        randomizeConfig(RobotModel self)
-        """
-        return _robotsim.RobotModel_randomizeConfig(self, unboundedScale)
+        return _robotsim.RobotModel_interpolateDeriv(self, *args)
 
     def randomizeConfig(self, unboundedScale=1.0):
         """
@@ -2338,6 +2348,10 @@ class RigidObjectModel(_object):
         """getName(RigidObjectModel self) -> char const *"""
         return _robotsim.RigidObjectModel_getName(self)
 
+    def setName(self, *args):
+        """setName(RigidObjectModel self, char const * name)"""
+        return _robotsim.RigidObjectModel_setName(self, *args)
+
     def geometry(self):
         """geometry(RigidObjectModel self) -> Geometry3D"""
         return _robotsim.RigidObjectModel_geometry(self)
@@ -2420,6 +2434,10 @@ class TerrainModel(_object):
     def getName(self):
         """getName(TerrainModel self) -> char const *"""
         return _robotsim.TerrainModel_getName(self)
+
+    def setName(self, *args):
+        """setName(TerrainModel self, char const * name)"""
+        return _robotsim.TerrainModel_setName(self, *args)
 
     def geometry(self):
         """geometry(TerrainModel self) -> Geometry3D"""
@@ -3257,8 +3275,14 @@ class SimRobotSensor(_object):
     A sensor on a simulated robot. Retreive this from the controller, and
     use getMeasurements to get the currently simulated measurement vector.
 
-    type() gives you a string defining the sensor type. measurementNames()
-    gives you a list of names for the measurements.
+    type() gives you a string defining the sensor type.
+
+    measurementNames() gives you a list of names for the measurements.
+
+    drawGL() draws a sensor indicator using OpenGL
+
+    drawGL(measurements) draws a sensor indicator and its measurements
+    using OpenGL.
 
     C++ includes: robotsim.h 
     """
@@ -4059,11 +4083,24 @@ class Simulator(_object):
         return _robotsim.Simulator_setSimStep(self, *args)
 
     def getSetting(self, *args):
-        """getSetting(Simulator self, std::string const & name) -> std::string"""
+        """
+        getSetting(Simulator self, std::string const & name) -> std::string
+
+        Retreives some simulation setting. Valid names are gravity, simStep,
+        boundaryLayerCollisions, rigidObjectCollisions, robotSelfCollisions,
+        robotRobotCollisions, adaptiveTimeStepping, maxContacts,
+        clusterNormalScale, errorReductionParameter, and
+        dampedLeastSquaresParameter. 
+        """
         return _robotsim.Simulator_getSetting(self, *args)
 
     def setSetting(self, *args):
-        """setSetting(Simulator self, std::string const & name, std::string const & value)"""
+        """
+        setSetting(Simulator self, std::string const & name, std::string const & value)
+
+        Sets some simulation setting. Raises an exception if the name is
+        unknown or the value is of improper format. 
+        """
         return _robotsim.Simulator_setSetting(self, *args)
 
     __swig_setmethods__["index"] = _robotsim.Simulator_index_set

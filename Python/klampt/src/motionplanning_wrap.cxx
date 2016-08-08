@@ -6906,7 +6906,12 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"Retrieves the current order of visibility tests. \n"
 		""},
-	 { (char *)"CSpaceInterface_getStats", _wrap_CSpaceInterface_getStats, METH_VARARGS, (char *)"CSpaceInterface_getStats(CSpaceInterface self) -> PyObject *"},
+	 { (char *)"CSpaceInterface_getStats", _wrap_CSpaceInterface_getStats, METH_VARARGS, (char *)"\n"
+		"CSpaceInterface_getStats(CSpaceInterface self) -> PyObject *\n"
+		"\n"
+		"Returns constraint testing statistics. If adaptive queries are\n"
+		"enabled, this returns the stats on each constraint. \n"
+		""},
 	 { (char *)"CSpaceInterface_index_set", _wrap_CSpaceInterface_index_set, METH_VARARGS, (char *)"CSpaceInterface_index_set(CSpaceInterface self, int index)"},
 	 { (char *)"CSpaceInterface_index_get", _wrap_CSpaceInterface_index_get, METH_VARARGS, (char *)"CSpaceInterface_index_get(CSpaceInterface self) -> int"},
 	 { (char *)"CSpaceInterface_swigregister", CSpaceInterface_swigregister, METH_VARARGS, NULL},

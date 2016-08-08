@@ -56,6 +56,8 @@ class RobotModelLink
   int getID();
   ///Returns the name of the robot link
   const char* getName();
+  ///Sets the name of the robot link
+  void setName(const char* name);
   ///Returns a reference to the link's robot.
   RobotModel robot();
   ///Old-style: will be deprecated
@@ -182,6 +184,7 @@ class RobotModel
   ///Returns the ID of the robot in its world (Note: not the same as the robot index)
   int getID();
   const char* getName();
+  void setName(const char* name);
   ///Returns the number of links = number of DOF's.
   int numLinks();
   ///Returns a reference to the indexed link
@@ -293,6 +296,7 @@ class RigidObjectModel
   RigidObjectModel();
   int getID();
   const char* getName();
+  void setName(const char* name);
   Geometry3D geometry();
   Appearance appearance();
   Mass getMass();
@@ -320,6 +324,7 @@ class TerrainModel
   TerrainModel();
   int getID();
   const char* getName();
+  void setName(const char* name);
   Geometry3D geometry();
   Appearance appearance();
   void setFriction(double friction);

@@ -465,7 +465,12 @@ class CSpaceInterface(_object):
         return _motionplanning.CSpaceInterface_visibilityQueryOrder(self)
 
     def getStats(self):
-        """getStats(CSpaceInterface self) -> PyObject *"""
+        """
+        getStats(CSpaceInterface self) -> PyObject *
+
+        Returns constraint testing statistics. If adaptive queries are
+        enabled, this returns the stats on each constraint. 
+        """
         return _motionplanning.CSpaceInterface_getStats(self)
 
     __swig_setmethods__["index"] = _motionplanning.CSpaceInterface_index_set

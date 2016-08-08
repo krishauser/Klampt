@@ -25991,6 +25991,51 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_RobotModelLink_setName(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  RobotModelLink *arg1 = (RobotModelLink *) 0 ;
+  char *arg2 = (char *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int res2 ;
+  char *buf2 = 0 ;
+  int alloc2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:RobotModelLink_setName",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_RobotModelLink, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "RobotModelLink_setName" "', argument " "1"" of type '" "RobotModelLink *""'"); 
+  }
+  arg1 = reinterpret_cast< RobotModelLink * >(argp1);
+  res2 = SWIG_AsCharPtrAndSize(obj1, &buf2, NULL, &alloc2);
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "RobotModelLink_setName" "', argument " "2"" of type '" "char const *""'");
+  }
+  arg2 = reinterpret_cast< char * >(buf2);
+  {
+    try {
+      (arg1)->setName((char const *)arg2);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  if (alloc2 == SWIG_NEWOBJ) delete[] buf2;
+  return resultobj;
+fail:
+  if (alloc2 == SWIG_NEWOBJ) delete[] buf2;
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_RobotModelLink_robot(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   RobotModelLink *arg1 = (RobotModelLink *) 0 ;
@@ -28711,6 +28756,51 @@ SWIGINTERN PyObject *_wrap_RobotModel_getName(PyObject *SWIGUNUSEDPARM(self), Py
   resultobj = SWIG_FromCharPtr((const char *)result);
   return resultobj;
 fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_RobotModel_setName(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  RobotModel *arg1 = (RobotModel *) 0 ;
+  char *arg2 = (char *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int res2 ;
+  char *buf2 = 0 ;
+  int alloc2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:RobotModel_setName",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_RobotModel, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "RobotModel_setName" "', argument " "1"" of type '" "RobotModel *""'"); 
+  }
+  arg1 = reinterpret_cast< RobotModel * >(argp1);
+  res2 = SWIG_AsCharPtrAndSize(obj1, &buf2, NULL, &alloc2);
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "RobotModel_setName" "', argument " "2"" of type '" "char const *""'");
+  }
+  arg2 = reinterpret_cast< char * >(buf2);
+  {
+    try {
+      (arg1)->setName((char const *)arg2);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  if (alloc2 == SWIG_NEWOBJ) delete[] buf2;
+  return resultobj;
+fail:
+  if (alloc2 == SWIG_NEWOBJ) delete[] buf2;
   return NULL;
 }
 
@@ -31789,6 +31879,51 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_RigidObjectModel_setName(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  RigidObjectModel *arg1 = (RigidObjectModel *) 0 ;
+  char *arg2 = (char *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int res2 ;
+  char *buf2 = 0 ;
+  int alloc2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:RigidObjectModel_setName",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_RigidObjectModel, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "RigidObjectModel_setName" "', argument " "1"" of type '" "RigidObjectModel *""'"); 
+  }
+  arg1 = reinterpret_cast< RigidObjectModel * >(argp1);
+  res2 = SWIG_AsCharPtrAndSize(obj1, &buf2, NULL, &alloc2);
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "RigidObjectModel_setName" "', argument " "2"" of type '" "char const *""'");
+  }
+  arg2 = reinterpret_cast< char * >(buf2);
+  {
+    try {
+      (arg1)->setName((char const *)arg2);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  if (alloc2 == SWIG_NEWOBJ) delete[] buf2;
+  return resultobj;
+fail:
+  if (alloc2 == SWIG_NEWOBJ) delete[] buf2;
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_RigidObjectModel_geometry(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   RigidObjectModel *arg1 = (RigidObjectModel *) 0 ;
@@ -32551,6 +32686,51 @@ SWIGINTERN PyObject *_wrap_TerrainModel_getName(PyObject *SWIGUNUSEDPARM(self), 
   resultobj = SWIG_FromCharPtr((const char *)result);
   return resultobj;
 fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_TerrainModel_setName(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  TerrainModel *arg1 = (TerrainModel *) 0 ;
+  char *arg2 = (char *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int res2 ;
+  char *buf2 = 0 ;
+  int alloc2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:TerrainModel_setName",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_TerrainModel, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "TerrainModel_setName" "', argument " "1"" of type '" "TerrainModel *""'"); 
+  }
+  arg1 = reinterpret_cast< TerrainModel * >(argp1);
+  res2 = SWIG_AsCharPtrAndSize(obj1, &buf2, NULL, &alloc2);
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "TerrainModel_setName" "', argument " "2"" of type '" "char const *""'");
+  }
+  arg2 = reinterpret_cast< char * >(buf2);
+  {
+    try {
+      (arg1)->setName((char const *)arg2);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  if (alloc2 == SWIG_NEWOBJ) delete[] buf2;
+  return resultobj;
+fail:
+  if (alloc2 == SWIG_NEWOBJ) delete[] buf2;
   return NULL;
 }
 
@@ -47725,7 +47905,7 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"Geometry3D_transform", _wrap_Geometry3D_transform, METH_VARARGS, (char *)"\n"
 		"Geometry3D_transform(Geometry3D self, double const [9] R, double const [3] t)\n"
 		"\n"
-		"Translates/rotates the geometry data. \n"
+		"Translates/rotates/scales the geometry data. \n"
 		""},
 	 { (char *)"Geometry3D_setCollisionMargin", _wrap_Geometry3D_setCollisionMargin, METH_VARARGS, (char *)"\n"
 		"Geometry3D_setCollisionMargin(Geometry3D self, double margin)\n"
@@ -47952,6 +48132,11 @@ static PyMethodDef SwigMethods[] = {
 		"RobotModelLink_getName(RobotModelLink self) -> char const *\n"
 		"\n"
 		"Returns the name of the robot link. \n"
+		""},
+	 { (char *)"RobotModelLink_setName", _wrap_RobotModelLink_setName, METH_VARARGS, (char *)"\n"
+		"RobotModelLink_setName(RobotModelLink self, char const * name)\n"
+		"\n"
+		"Sets the name of the robot link. \n"
 		""},
 	 { (char *)"RobotModelLink_robot", _wrap_RobotModelLink_robot, METH_VARARGS, (char *)"\n"
 		"RobotModelLink_robot(RobotModelLink self) -> RobotModel\n"
@@ -48183,6 +48368,7 @@ static PyMethodDef SwigMethods[] = {
 		"robot index) \n"
 		""},
 	 { (char *)"RobotModel_getName", _wrap_RobotModel_getName, METH_VARARGS, (char *)"RobotModel_getName(RobotModel self) -> char const *"},
+	 { (char *)"RobotModel_setName", _wrap_RobotModel_setName, METH_VARARGS, (char *)"RobotModel_setName(RobotModel self, char const * name)"},
 	 { (char *)"RobotModel_numLinks", _wrap_RobotModel_numLinks, METH_VARARGS, (char *)"\n"
 		"RobotModel_numLinks(RobotModel self) -> int\n"
 		"\n"
@@ -48304,10 +48490,11 @@ static PyMethodDef SwigMethods[] = {
 		"Computes a distance between two configurations, properly taking into\n"
 		"account nonstandard joints. \n"
 		""},
-	 { (char *)"RobotModel_interpolateDeriv", _wrap_RobotModel_interpolateDeriv, METH_VARARGS, (char *)"RobotModel_interpolateDeriv(RobotModel self, doubleVector a, doubleVector b)"},
-	 { (char *)"RobotModel_randomizeConfig", _wrap_RobotModel_randomizeConfig, METH_VARARGS, (char *)"\n"
-		"randomizeConfig(double unboundedScale=1.0)\n"
-		"RobotModel_randomizeConfig(RobotModel self)\n"
+	 { (char *)"RobotModel_interpolateDeriv", _wrap_RobotModel_interpolateDeriv, METH_VARARGS, (char *)"\n"
+		"RobotModel_interpolateDeriv(RobotModel self, doubleVector a, doubleVector b)\n"
+		"\n"
+		"Returns the configuration derivative at a as you interpolate toward b\n"
+		"at unit speed. \n"
 		""},
 	 { (char *)"RobotModel_randomizeConfig", _wrap_RobotModel_randomizeConfig, METH_VARARGS, (char *)"\n"
 		"randomizeConfig(double unboundedScale=1.0)\n"
@@ -48356,6 +48543,7 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"new_RigidObjectModel", _wrap_new_RigidObjectModel, METH_VARARGS, (char *)"new_RigidObjectModel() -> RigidObjectModel"},
 	 { (char *)"RigidObjectModel_getID", _wrap_RigidObjectModel_getID, METH_VARARGS, (char *)"RigidObjectModel_getID(RigidObjectModel self) -> int"},
 	 { (char *)"RigidObjectModel_getName", _wrap_RigidObjectModel_getName, METH_VARARGS, (char *)"RigidObjectModel_getName(RigidObjectModel self) -> char const *"},
+	 { (char *)"RigidObjectModel_setName", _wrap_RigidObjectModel_setName, METH_VARARGS, (char *)"RigidObjectModel_setName(RigidObjectModel self, char const * name)"},
 	 { (char *)"RigidObjectModel_geometry", _wrap_RigidObjectModel_geometry, METH_VARARGS, (char *)"RigidObjectModel_geometry(RigidObjectModel self) -> Geometry3D"},
 	 { (char *)"RigidObjectModel_appearance", _wrap_RigidObjectModel_appearance, METH_VARARGS, (char *)"RigidObjectModel_appearance(RigidObjectModel self) -> Appearance"},
 	 { (char *)"RigidObjectModel_getMass", _wrap_RigidObjectModel_getMass, METH_VARARGS, (char *)"RigidObjectModel_getMass(RigidObjectModel self) -> Mass"},
@@ -48385,6 +48573,7 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"new_TerrainModel", _wrap_new_TerrainModel, METH_VARARGS, (char *)"new_TerrainModel() -> TerrainModel"},
 	 { (char *)"TerrainModel_getID", _wrap_TerrainModel_getID, METH_VARARGS, (char *)"TerrainModel_getID(TerrainModel self) -> int"},
 	 { (char *)"TerrainModel_getName", _wrap_TerrainModel_getName, METH_VARARGS, (char *)"TerrainModel_getName(TerrainModel self) -> char const *"},
+	 { (char *)"TerrainModel_setName", _wrap_TerrainModel_setName, METH_VARARGS, (char *)"TerrainModel_setName(TerrainModel self, char const * name)"},
 	 { (char *)"TerrainModel_geometry", _wrap_TerrainModel_geometry, METH_VARARGS, (char *)"TerrainModel_geometry(TerrainModel self) -> Geometry3D"},
 	 { (char *)"TerrainModel_appearance", _wrap_TerrainModel_appearance, METH_VARARGS, (char *)"TerrainModel_appearance(TerrainModel self) -> Appearance"},
 	 { (char *)"TerrainModel_setFriction", _wrap_TerrainModel_setFriction, METH_VARARGS, (char *)"TerrainModel_setFriction(TerrainModel self, double friction)"},
@@ -49301,8 +49490,21 @@ static PyMethodDef SwigMethods[] = {
 		"Sets the internal simulation substep. Values < 0.01 are recommended.\n"
 		"\n"
 		""},
-	 { (char *)"Simulator_getSetting", _wrap_Simulator_getSetting, METH_VARARGS, (char *)"Simulator_getSetting(Simulator self, std::string const & name) -> std::string"},
-	 { (char *)"Simulator_setSetting", _wrap_Simulator_setSetting, METH_VARARGS, (char *)"Simulator_setSetting(Simulator self, std::string const & name, std::string const & value)"},
+	 { (char *)"Simulator_getSetting", _wrap_Simulator_getSetting, METH_VARARGS, (char *)"\n"
+		"Simulator_getSetting(Simulator self, std::string const & name) -> std::string\n"
+		"\n"
+		"Retreives some simulation setting. Valid names are gravity, simStep,\n"
+		"boundaryLayerCollisions, rigidObjectCollisions, robotSelfCollisions,\n"
+		"robotRobotCollisions, adaptiveTimeStepping, maxContacts,\n"
+		"clusterNormalScale, errorReductionParameter, and\n"
+		"dampedLeastSquaresParameter. \n"
+		""},
+	 { (char *)"Simulator_setSetting", _wrap_Simulator_setSetting, METH_VARARGS, (char *)"\n"
+		"Simulator_setSetting(Simulator self, std::string const & name, std::string const & value)\n"
+		"\n"
+		"Sets some simulation setting. Raises an exception if the name is\n"
+		"unknown or the value is of improper format. \n"
+		""},
 	 { (char *)"Simulator_index_set", _wrap_Simulator_index_set, METH_VARARGS, (char *)"Simulator_index_set(Simulator self, int index)"},
 	 { (char *)"Simulator_index_get", _wrap_Simulator_index_get, METH_VARARGS, (char *)"Simulator_index_get(Simulator self) -> int"},
 	 { (char *)"Simulator_world_set", _wrap_Simulator_world_set, METH_VARARGS, (char *)"Simulator_world_set(Simulator self, WorldModel world)"},
