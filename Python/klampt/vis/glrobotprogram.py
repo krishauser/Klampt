@@ -155,11 +155,6 @@ class GLSimulationProgram(GLRealtimeProgram):
     def motionfunc(self,x,y,dx,dy):
         GLRealtimeProgram.motionfunc(self,x,y,dx,dy)
 
-    def specialfunc(self,c,x,y):
-        #Put your keyboard special character handler here
-        if self.verbose: print c,"pressed"
-        pass
-
     def print_help(self):
         #Put your help printouts here
         print "************** Help **************"
