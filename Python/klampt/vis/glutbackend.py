@@ -3,6 +3,29 @@ from OpenGL.GLUT import *
 import weakref
 from glcommon import GLMultiProgramInterface
 
+keymap = {GLUT_KEY_F1:'f1',
+    GLUT_KEY_F2:'f2',
+    GLUT_KEY_F3:'f3',
+    GLUT_KEY_F4:'f4',
+    GLUT_KEY_F5:'f5',
+    GLUT_KEY_F6:'f6',
+    GLUT_KEY_F7:'f7',
+    GLUT_KEY_F8:'f8',
+    GLUT_KEY_F9:'f9',
+    GLUT_KEY_F10:'f10',
+    GLUT_KEY_F11:'f11',
+    GLUT_KEY_F12:'f12',
+    GLUT_KEY_LEFT:'left',
+    GLUT_KEY_UP:'up',
+    GLUT_KEY_RIGHT:'right',
+    GLUT_KEY_DOWN:'down',
+    GLUT_KEY_PAGE_UP:'page up',
+    GLUT_KEY_PAGE_DOWN:'page down',
+    GLUT_KEY_HOME:'home',
+    GLUT_KEY_END:'end',
+    GLUT_KEY_INSERT:'insert'
+}
+
 class GLUTWindow:
     """A GLUT window. Should not be used directly.
 
@@ -53,8 +76,8 @@ class GLUTWindow:
         glutReshapeFunc (glutsafe(plugin.reshapefunc))
         glutKeyboardFunc (glutsafe(plugin.keyboardfunc,update_modifiers=True))
         glutKeyboardUpFunc (glutsafe(plugin.keyboardupfunc,update_modifiers=True))
-        glutSpecialFunc (glutsafe(plugin.specialfunc,update_modifiers=True))
-        glutSpecialUpFunc (glutsafe(plugin.specialupfunc,update_modifiers=True))
+        glutSpecialFunc (glutsafe(self._specialfunc,update_modifiers=True))
+        glutSpecialUpFunc (glutsafe(self._specialupfunc,update_modifiers=True))
         glutMotionFunc (glutsafe(self._motionfunc,update_modifiers=True))
         glutPassiveMotionFunc (glutsafe(self._motionfunc,update_modifiers=True))
         glutMouseFunc (glutsafe(self._mousefunc,update_modifiers=True))
@@ -184,6 +207,15 @@ class GLUTWindow:
         self.plugin.mousefunc(button,state,x,y)
         self.lastx = x
         self.lasty = y
+
+
+    def _specialfunc(self,c,x,y):
+        if c in keymap:
+            self.plugin.keyboardfunc(keymap[c],x,y)
+
+    def _specialupfunc(self,c,x,y):
+        if c in keymap:
+            self.plugin.keyboardupfunc(keymap[c],x,y)
 
     def _displayfunc(self):
         """Internal use."""

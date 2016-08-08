@@ -158,17 +158,12 @@ class GLProgram:
         return True
         
     def keyboardfunc(self,c,x,y):
-        """Called on keypress down. May be overridden."""
+        """Called on keypress down. May be overridden.  c is either the ASCII/unicode
+        character of the key pressed or a string describing the character (up,down,left,right,
+        home,end,delete,enter,f1,...,f12)"""
         return False
     def keyboardupfunc(self,c,x,y):
         """Called on keyboard up (if your system allows it). May be overridden."""
-        return False
-    def specialfunc(self,c,x,y):
-        """Called on special character keypress down.  May be overridden"""
-        return False
-    def specialupfunc(self,c,x,y):
-        """Called on special character keypress up (if your system allows
-        it).  May be overridden"""
         return False
 
     def motionfunc(self,x,y,dx,dy):
@@ -366,9 +361,10 @@ class GLPluginProgram(GLRealtimeProgram):
         GLRealtimeProgram.__init__(self,name)
         self.plugins = []
     def setPlugin(self,plugin):
+        import copy
         for p in self.plugins:
             p.window = None
-            p.view = None
+            p.view = copy.copy(p.view)
         self.plugins = []
         if plugin:
             self.pushPlugin(plugin)
@@ -379,7 +375,7 @@ class GLPluginProgram(GLRealtimeProgram):
             plugin.view = self.view
             plugin.reshapefunc(self.view.w,self.view.h)
             self.refresh()
-        elif len(self.plugins) == 1:
+        elif len(self.plugins) == 1 and hasattr(plugin,'view') and plugin.view != None:
             self.view = plugin.view
         else:
             plugin.view = self.view
@@ -419,14 +415,6 @@ class GLPluginProgram(GLRealtimeProgram):
         for plugin in self.plugins[::-1]:
             if plugin.keyboardupfunc(c,x,y): return True
         return GLRealtimeProgram.keyboardupfunc(self,c,x,y)
-    def specialfunc(self,c,x,y):
-        for plugin in self.plugins[::-1]:
-            if plugin.specialfunc(c,x,y): return True
-        return GLRealtimeProgram.specialfunc(self,c,x,y)
-    def specialupfunc(self,c,x,y):
-        for plugin in self.plugins[::-1]:
-            if plugin.specialupfunc(c,x,y): return True
-        return GLRealtimeProgram.specialupfunc(self,c,x,y)
     def motionfunc(self,x,y,dx,dy):
         for plugin in self.plugins[::-1]:
             if plugin.motionfunc(x,y,dx,dy): return True

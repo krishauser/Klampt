@@ -10,6 +10,29 @@ GLUT_ACTIVE_CTRL = 2
 GLUT_ACTIVE_SHIFT = 1
 GLUT_ACTIVE_ALT = 4
 
+keymap = {Qt.Key_F1:'f1',
+    Qt.Key_F2:'f2',
+    Qt.Key_F3:'f3',
+    Qt.Key_F4:'f4',
+    Qt.Key_F5:'f5',
+    Qt.Key_F6:'f6',
+    Qt.Key_F7:'f7',
+    Qt.Key_F8:'f8',
+    Qt.Key_F9:'f9',
+    Qt.Key_F10:'f10',
+    Qt.Key_F11:'f11',
+    Qt.Key_F12:'f12',
+    Qt.Key_Up:'up',
+    Qt.Key_Left:'left',
+    Qt.Key_Down:'down',
+    Qt.Key_Right:'right',
+    Qt.Key_Home:'home',
+    Qt.Key_End:'end',
+    Qt.Key_Delete:'delete',
+    Qt.Key_Enter:'enter'
+}
+
+
 def toGlutButton(button):
     if button==Qt.LeftButton:
         return 0
@@ -146,15 +169,25 @@ class QtGLWindow(QGLWidget):
         self.lastx,self.lasty = x,y
         self.program.mousefunc(toGlutButton(e.button()),GLUT_UP,x,y)
     def keyPressEvent(self,e):
-        c = str(e.text())
-        if len(c)==0: return #some empty press, like shift/control
-        self.modifierList = toModifierList(e.modifiers())
-        self.program.keyboardfunc(c,self.lastx,self.lasty)
+        if e.key() in keymap:
+            self.modifierList = toModifierList(e.modifiers())
+            self.program.keyboardfunc(keymap[e.key()],self.lastx,self.lasty)
+            return
+        else:
+            c = str(e.text())
+            if len(c)==0: return #some empty press, like shift/control
+            self.modifierList = toModifierList(e.modifiers())
+            self.program.keyboardfunc(c,self.lastx,self.lasty)
     def keyReleaseEvent(self,e):
-        c = e.text()
-        if len(c)==0: return #some empty press, like shift/control
-        self.modifierList = toModifierList(e.modifiers())
-        self.program.keyboardupfunc(c,self.lastx,self.lasty)
+        if e.key() in keymap:
+            self.modifierList = toModifierList(e.modifiers())
+            self.program.keyboardupfunc(keymap[e.key()],self.lastx,self.lasty)
+            return
+        else:
+            c = e.text()
+            if len(c)==0: return #some empty press, like shift/control
+            self.modifierList = toModifierList(e.modifiers())
+            self.program.keyboardupfunc(c,self.lastx,self.lasty)
 
     def modifiers(self):
         """Call this to retrieve modifiers. Called by frontend."""

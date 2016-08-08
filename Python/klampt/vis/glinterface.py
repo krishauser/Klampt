@@ -22,10 +22,6 @@ class GLPluginInterface:
         return False
     def keyboardupfunc(self,c,x,y):
         return False
-    def specialfunc(self,c,x,y):
-        return False
-    def specialupfunc(self,c,x,y):
-        return False
     def mousefunc(self,button,state,x,y):
         return False
     def motionfunc(self,x,y,dx,dy):
