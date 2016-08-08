@@ -174,6 +174,8 @@ class SimpleSimulator (Simulator):
             index = robot.index
         else:
             raise ValueError("Invalid robot specified")
+        if not callable(function):
+            assert hasattr(function,'output_and_advance'),"setController takes either a 1-argument function or a BaseController instance"
         self.robotControllers += [None]*(self.world.numRobots()-len(self.robotControllers))
         self.robotControllers[index] = function
 
@@ -324,6 +326,7 @@ class SimpleSimulator (Simulator):
                         print v
                 """
                 if c:
+                    #assume it's a BaseController instance
                     #compute controller output, advance controller
                     output = c.output_and_advance(**measurements)
                 else:
