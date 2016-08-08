@@ -2,7 +2,7 @@
 
 import sys
 from klampt import *
-from klampt.glrobotprogram import *
+from klampt.vis.glrobotprogram import *
 
 #FOR DEFAULT JOINT-BY-JOINT KEYMAP: set keymap=None
 keymap = None
@@ -10,7 +10,7 @@ keymap = None
 #FOR CUSTOM KEYMAPS: set up keymap to define how keys map to velocities.
 #keymap is a map from key name to (robot index,velocity vector) pairs.
 #Key names can either be single keys or names of special keys
-#'left','up','down','right', 'home', 'insert', 'end', and the function keys.
+#'left','up','down','right', 'home', 'insert', 'end', and the function keys 'f1',...,'f12'.
 #keymap = {'up':(0,[0,1]),'down':(0,[0,-1]),'left':(0,[-1,0]),'right':(0,[1,0])}
 
 def build_default_keymap(world):
@@ -37,29 +37,6 @@ def build_default_keymap(world):
         res[down[i]] = (0,vel)
     return res
 
-glutspecialmap = {
-    GLUT_KEY_F1:'f1',
-    GLUT_KEY_F2:'f2',
-    GLUT_KEY_F3:'f3',
-    GLUT_KEY_F4:'f4',
-    GLUT_KEY_F5:'f5',
-    GLUT_KEY_F6:'f6',
-    GLUT_KEY_F7:'f7',
-    GLUT_KEY_F8:'f8',
-    GLUT_KEY_F9:'f9',
-    GLUT_KEY_F10:'f10',
-    GLUT_KEY_F11:'f11',
-    GLUT_KEY_F12:'f12',
-    GLUT_KEY_LEFT:'left',
-    GLUT_KEY_UP:'up',
-    GLUT_KEY_RIGHT:'right',
-    GLUT_KEY_DOWN:'down',
-    GLUT_KEY_PAGE_UP:'pageup',
-    GLUT_KEY_PAGE_DOWN:'pagedown',
-    GLUT_KEY_HOME:'home',
-    GLUT_KEY_END:'end',
-    GLUT_KEY_INSERT:'insert'
-    }
 
 
 class MyGLViewer(GLSimulationProgram):
@@ -102,22 +79,6 @@ class MyGLViewer(GLSimulationProgram):
                 return
         GLRealtimeProgram.mousefunc(self,button,state,x,y)
 
-    def specialfunc(self,c,x,y):
-        #Put your keyboard special character handler here
-        if c in glutspecialmap:
-            name = glutspecialmap[c]
-            if name in self.keymap:
-                self.current_velocities[name]=self.keymap[name]
-        pass
-
-    def specialupfunc(self,c,x,y):
-        #Put your keyboard special character handler here
-        if c in glutspecialmap:
-            name = glutspecialmap[c]
-            if name in self.current_velocities:
-                del self.current_velocities[name]
-        pass
-
     def print_help(self):
         GLSimulationProgram.print_help(self)
         print 'Drive keys:',sorted(self.keymap.keys())
@@ -129,7 +90,7 @@ class MyGLViewer(GLSimulationProgram):
             self.current_velocities[c]=self.keymap[c]
         else:
             GLSimulationProgram.keyboardfunc(self,c,x,y)
-        glutPostRedisplay()
+        self.refresh()
 
     def keyboardupfunc(self,c,x,y):
         if c in self.current_velocities:
