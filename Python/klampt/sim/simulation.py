@@ -168,7 +168,7 @@ class SimpleSimulator (Simulator):
         """
         if isinstance(robot,int):
             index = robot
-        if isinstance(robot,str):
+        elif isinstance(robot,str):
             index = self.world.robot(robot).index
         elif isinstance(robot,RobotModel):
             index = robot.index
