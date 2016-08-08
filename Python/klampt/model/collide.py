@@ -1,4 +1,6 @@
-"""A class for managing collision tests between all objects in a WorldModel.
+"""Functions and classes for managing collision tests between multiple objects.
+In particular, the WorldCollider class makes it easy to ignore various collision pairs
+in a WorldModel.
 """
 
 from __future__ import generators
@@ -25,7 +27,7 @@ def self_collision_iter(geomlist,pairs='all'):
     they should be tested.  Otherwise it can be a list of collision indices.
 
     Uses a quick bounding box reject test."""
-    bblist = [g[1].getBB() for g in geomlist]
+    bblist = [g.getBB() for g in geomlist]
     if pairs=='all':
         for i,g in enumerate(geomlist):
             for j in range(i+1,len(geomlist)):
@@ -49,12 +51,47 @@ def self_collision_iter(geomlist,pairs='all'):
             if g.collides(g2):
                 yield (i,j)
 
-def group_collision_iter(geomlist,alist,blist,pairs='all'):
-    """Tests whether two subsets of geometries collide.
+def group_collision_iter(geomlist1,geomlist2,pairs='all'):
+    """Tests whether two sets of geometries collide.
 
     If pairs == 'all', all pairs are tested.  If it's a function, it's
     a 2-argument function taking geometry indices and returning true if 
     they should be tested.  Otherwise it can be a list of collision indices.
+
+    Uses a quick bounding box reject test.
+    """
+    bblist1 = [g.getBB() for g in geomlist1]
+    bblist2 = [g.getBB() for g in geomlist2]
+    if pairs=='all':
+        for i,g in enumerate(geomlist1):
+            for j,g2 in enumerate(geomlist2):
+                if not bb_intersect(bblist1[i],bblist2[j]): continue
+                if g.collides(g2):
+                    yield (i,j)
+    elif callable(pairs):
+        for i,g in enumerate(geomlist1):
+            for j,g2 in enumerate(geomlist2):
+                if not pairs(i,j): continue
+                if not bb_intersect(bblist1[i],bblist2[j]): continue
+                if g.collides(g2):
+                    yield (i,j)
+    else:
+        for (i,j) in pairs:
+            if not bb_intersect(bblist1[i],bblist2[j]): continue
+            g  = geomlist1[i]
+            g2 = geomlist2[j]
+            if g.collides(g2):
+                yield (i,j)
+
+
+def group_subset_collision_iter(geomlist,alist,blist,pairs='all'):
+    """Tests whether two subsets of geometries collide.  Can be slightly faster
+    than group_collision_iter if alist and blist overlap.
+
+    If pairs == 'all', all pairs are tested.  If it's a function, it's
+    a 2-argument function taking geometry indices and returning true if 
+    they should be tested.  Otherwise it can be a list of collision indices.
+    In this last case, alist and blist are ignored and can be set to None.
 
     Uses a quick bounding box reject test.
     """
@@ -88,6 +125,23 @@ def group_collision_iter(geomlist,alist,blist,pairs='all'):
             g2 = geomlist[j]
             if g.collides(g2):
                 yield (i,j)
+
+
+def ray_cast(geomlist,s,d):
+    """Finds the first collision among the geometries in geomlist with the ray at source s
+    and direction d.  Returns a pair (index,point) if a collision is found, where index is the
+    index of the geometry in geomlist, and point is the collision point in world coordinates.
+    Returns None if no collision is found.
+    """
+    res = None
+    dmin = 1e300
+    for i,g in geomlist:
+        (coll,pt) = g.rayCast(s,d)
+        if coll:
+            dist = vectorops.dot(d,vectorops,sub(pt,s))
+            if dist < dmin:
+                dmin,res = dist,(i,pt)
+    return res
 
 
 class WorldCollider:

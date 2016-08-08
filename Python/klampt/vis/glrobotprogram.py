@@ -1,7 +1,7 @@
 from OpenGL.GL import *
 from ..robotsim import WidgetSet,RobotPoser
 from glprogram import *
-from ..model import robotcollide
+from ..model import collide
 from ..sim.simulation import SimpleSimulator
 import sys
 
@@ -34,7 +34,7 @@ class GLSimulationProgram(GLRealtimeProgram):
         #Put your initialization code here
         #the current example creates a collision class, simulator, 
         #simulation flag, and screenshot flags
-        self.collider = robotcollide.WorldCollider(world)
+        self.collider = collide.WorldCollider(world)
         self.sim = SimpleSimulator(world)
         self.simulate = False
         self.commanded_config_color = [0,1,0,0.5]
