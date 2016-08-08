@@ -3612,9 +3612,8 @@ void EnablePathControl(RobotController* c)
   if(!mc) {
     throw PyException("Not using the default manual override controller");
   }
-  mc->override = false;
   PolynomialPathController* pc = GetPathController(c);
-  if(pc->path.elements.empty()) {
+  if(pc->path.elements.empty() || mc->override) {
     Config q;
     if(mc->GetCommandedConfig(q)) {
       pc->SetConstant(q);
@@ -3628,6 +3627,7 @@ void EnablePathControl(RobotController* c)
       }
     }
   }
+  mc->override = false;
 }
 
 void SimRobotController::setMilestone(const vector<double>& q)
@@ -3648,7 +3648,6 @@ void SimRobotController::setMilestone(const vector<double>& q,const vector<doubl
   ss<<qv<<"\t"<<dqv;
   controller->controller->SendCommand("set_qv",ss.str());
 }
-
 
 void SimRobotController::addMilestone(const vector<double>& q)
 {
