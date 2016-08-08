@@ -4,7 +4,7 @@ from klampt.plan import robotplanning
 from klampt.vis import visualization
 from klampt.io import resource
 from klampt.model import trajectory
-from klampt.model.robotcollide import WorldCollider
+from klampt.model.collide import WorldCollider
 from klampt import *
 import time
 import sys
