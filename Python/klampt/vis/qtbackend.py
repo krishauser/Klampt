@@ -169,6 +169,8 @@ class QtGLWindow(QGLWidget):
         self.lastx,self.lasty = x,y
         self.program.mousefunc(toGlutButton(e.button()),GLUT_UP,x,y)
     def keyPressEvent(self,e):
+        if e.isAutoRepeat():
+            return
         if e.key() in keymap:
             self.modifierList = toModifierList(e.modifiers())
             self.program.keyboardfunc(keymap[e.key()],self.lastx,self.lasty)
@@ -179,6 +181,8 @@ class QtGLWindow(QGLWidget):
             self.modifierList = toModifierList(e.modifiers())
             self.program.keyboardfunc(c,self.lastx,self.lasty)
     def keyReleaseEvent(self,e):
+        if e.isAutoRepeat():
+            return
         if e.key() in keymap:
             self.modifierList = toModifierList(e.modifiers())
             self.program.keyboardupfunc(keymap[e.key()],self.lastx,self.lasty)
