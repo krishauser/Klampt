@@ -109,10 +109,6 @@ class MyGLViewer(GLSimulationProgram):
         print "Applying wrench",(f,w)
         #body.applyWrench(f,w)
 
-    def specialfunc(self,c,x,y):
-        #Put your keyboard special character handler here
-        GLSimulationProgram.specialfunc(self,c,x,y)
-
     def keyboardfunc(self,c,x,y):
         #Put your keyboard handler here
         #the GLSimulationProgram class uses h,s,m,l,c
