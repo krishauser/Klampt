@@ -2,6 +2,7 @@
 import os
 import sys
 from klampt import *
+from klampt import vis
 from klampt.vis.glrobotprogram import *
 import importlib
 
@@ -154,7 +155,12 @@ if __name__ == "__main__":
     
     if SPLIT_SCREEN_TEST:
         viewer2 = MyGLViewer(world)
-        viewer2.create()
-        viewer.create()
-        viewer.window.broadcast = True
-    viewer.run()
+        vis.setPlugin(viewer)
+        vis.addPlugin(viewer2)
+        viewer2.window.broadcast = True
+        vis.show()
+        while vis.shown():
+            time.sleep(0.01)
+        vis.kill()
+    else:
+        viewer.run()

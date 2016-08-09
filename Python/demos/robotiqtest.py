@@ -1,7 +1,7 @@
 #!/usr/bin/python
 import sys
 from klampt import *
-from klampt.glrobotprogram import GLSimulationProgram
+from klampt.vis.glrobotprogram import GLSimulationProgram
 import robotiq 
 
 
