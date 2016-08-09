@@ -1,6 +1,7 @@
 from klampt import *
+from klampt.math import *
 from klampt.model.contact import *
-from klampt.vis import visualization
+from klampt import vis
 import time
 
 #these form a square + a downward facing point
@@ -34,13 +35,13 @@ print "Support polygon planes (should be invalid)",supportPolygon(unstable_conta
 """
 h = Hold()
 h.contacts = fc_contacts
-visualization.add("Hold",h)
-visualization.dialog()
-visualization.clear();
+vis.add("Hold",h)
+vis.dialog()
+vis.clear();
 h.contacts = unstable_contacts
-visualization.add("Hold",h)
-visualization.dialog()
-visualization.clear();
+vis.add("Hold",h)
+vis.dialog()
+vis.clear();
 """
 
 #load and show a simulation, getting the contacts / holds from it
@@ -49,17 +50,20 @@ world.readFile("../../data/athlete_plane.xml")
 sim = Simulator(world)
 sim.enableContactFeedbackAll()
 
-visualization.add("world",world)
-visualization.show()
-while visualization.shown():
+vis.add("world",world)
+vis.show()
+while vis.shown():
 	sim.simulate(0.0333)
-	visualization.lock()
+	print "Lock"
+	vis.lock()
 	sim.updateWorld()
-	visualization.unlock()
+	print "Unlock"
+	vis.unlock()
 	cm = simContactMap(sim)
 	holds = contactMapHolds(cm)
-	for i,h in enumerate(holds):
-		visualization.add("hold "+str(i),h)
+	#TODO: figure out visualization freeze on this line
+	#for i,h in enumerate(holds):
+		#vis.add("hold "+str(i),h)
 	print "Num contacts",sum(len(h.contacts) for h in holds)
 	res = equilibriumTorques(world.robot(0),holds)
 	if res is None:
@@ -78,7 +82,8 @@ while visualization.shown():
 		print "L1 norm solved",vectorops.norm_L1(t1),"sim",vectorops.norm_L1(ts)
 		print "Linf norm solved",vectorops.norm_Linf(tinf),"sim",vectorops.norm_Linf(ts)
 	print "Simulation time",sim.getTime()
+	print "sleep"
 	time.sleep(0.01)
 
-visualization.kill()
+vis.kill()
 

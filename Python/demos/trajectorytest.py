@@ -2,11 +2,11 @@
 
 import sys
 from klampt import *
-from klampt import visualization
-from klampt import resource
-from klampt import coordinates
-from klampt import so3,se3
-from klampt import trajectory
+from klampt import vis
+from klampt.io import resource
+from klampt.model import coordinates
+from klampt.math import vectorops,so3,se3
+from klampt.model import trajectory
 import random
 import time
 import math
@@ -30,7 +30,7 @@ if __name__ == "__main__":
         
         #add a point to the visualizer and animate it
         point = coordinates.addPoint("point")
-        visualization.add("point",point)
+        vis.add("point",point)
         traj = trajectory.Trajectory()
         for i in range(10):
             traj.times.append(i)
@@ -38,10 +38,10 @@ if __name__ == "__main__":
 
         traj2 = trajectory.HermiteTrajectory()
         traj2.makeSpline(traj)
-        visualization.animate("point",traj2)
+        vis.animate("point",traj2)
 
         #add a transform to the visualizer and animate it
-        xform = visualization.add("xform",se3.identity())
+        xform = vis.add("xform",se3.identity())
         traj3 = trajectory.SE3Trajectory()
         for i in range(10):
             traj3.times.append(i)
@@ -49,7 +49,7 @@ if __name__ == "__main__":
             rpoint = [random.uniform(-1,1),random.uniform(-1,1),random.uniform(-1,1)]
             traj3.milestones.append(rrot+rpoint)
         
-        visualization.animate("xform",traj3)
+        vis.animate("xform",traj3)
     else:
         #creates a world and loads all the items on the command line
         world = WorldModel()
@@ -60,7 +60,7 @@ if __name__ == "__main__":
 
         #add the world to the visualizer
         robot = world.robot(0)
-        visualization.add("robot",robot)
+        vis.add("robot",robot)
         traj = trajectory.RobotTrajectory(robot)
         qmin,qmax = robot.getJointLimits()
         q0 = robot.getConfig()
@@ -78,39 +78,39 @@ if __name__ == "__main__":
             traj.milestones.append(q)
 
         save,traj.milestones = resource.edit("trajectory",traj.milestones,world=world)
-        visualization.animate("robot",traj)
+        vis.animate("robot",traj)
     
-    visualization.show()
+    vis.show()
     
     iteration = 0
-    while visualization.shown():
-        #visualization.lock()
-        #can modify the visualization here
-        #visualization.unlock()
+    while vis.shown():
+        #vis.lock()
+        #can modify the vis here
+        #vis.unlock()
         #time.sleep(0.01)
-        #animationTime = visualization.animationTime()
+        #animationTime = vis.animationTime()
         iteration += 1
 
     if len(sys.argv)>1:
-        visualization.animate("robot",None)
+        vis.animate("robot",None)
         sim = Simulator(world)
         sim.simulate(0)
         trajectory.execute_path(traj.milestones,sim.controller(0))
         #for some tricky Qt reason, need to sleep before showing a window again
         #Perhaps the event loop must complete some extra cycles?
         time.sleep(0.01)
-        visualization.show()
+        vis.show()
         t0 = time.time()
-        while visualization.shown():
+        while vis.shown():
             #print "Time",sim.getTime()
             sim.simulate(0.01)
             if sim.controller(0).remainingTime() <= 0:
                 print "Executing timed trajectory"
                 trajectory.execute_trajectory(traj,sim.controller(0),smoothing='pause')
-            visualization.setItemConfig("config",sim.controller(0).getCommandedConfig())
+            vis.setItemConfig("config",sim.controller(0).getCommandedConfig())
             t1 = time.time()
             time.sleep(max(0.01-(t1-t0),0.0))
             t0 = t1
     
-    print "Ending visualization."
-    visualization.kill()
+    print "Ending vis."
+    vis.kill()
