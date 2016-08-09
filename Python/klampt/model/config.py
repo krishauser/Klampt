@@ -1,4 +1,4 @@
-from ..robotsim import WorldModel,RobotModelLink,RigidObjectModel,IKObjective
+from ..robotsim import WorldModel,RobotModel,RobotModelLink,RigidObjectModel,IKObjective
 import coordinates
 
 def getConfig(item):
