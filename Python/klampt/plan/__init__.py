@@ -1,3 +1,6 @@
 __all__ = ['cspace','robotcspace','robotplanning']
-from motionplanning import *
+import motionplanning
+import cspace
+import robotcspace
+import robotplanning
 

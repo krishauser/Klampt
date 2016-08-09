@@ -1,6 +1,6 @@
 from cspace import CSpace
-import robotsim
-import robotcollide
+from .. import robotsim
+from ..model import collide
 from cspaceutils import AdaptiveCSpace,EmbeddedCSpace
 import math
 import random
@@ -14,7 +14,7 @@ class RobotCSpace(CSpace):
     def __init__(self,robot,world=None,collider=None):
         """Arguments:
         - robot: the robot which should move.
-        - collider (optional): a robotcollide.WorldCollider instance containing
+        - collider (optional): a collide.WorldCollider instance containing
           the world in which the robot lives.  Any ignored collisions will be
           respected in the collision checker.
         """
@@ -42,11 +42,11 @@ class RobotCSpace(CSpace):
                 return True
             def objCollide(o):
                 obb = self.collider.world.rigidObject(o).geometry().getBB()
-                if not robotcollide.bb_intersect(obb,bb): return False
+                if not collide.bb_intersect(obb,bb): return False
                 return any(True for _ in self.collider.robotObjectCollisions(self.robot.index,o))
             def terrCollide(o):
                 obb = self.collider.world.terrain(o).geometry().getBB()
-                if not robotcollide.bb_intersect(obb,bb): return False
+                if not collide.bb_intersect(obb,bb): return False
                 return any(True for _ in self.collider.robotTerrainCollisions(self.robot.index,o))
             self.addFeasibilityTest(setconfig,"setconfig")
             self.addFeasibilityTest(calcbb,"calcbb",dependencies="setconfig")
