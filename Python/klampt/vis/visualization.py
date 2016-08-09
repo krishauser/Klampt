@@ -204,6 +204,7 @@ import glcommon
 import time
 import signal
 from ..model import types
+from ..model import config
 from ..model import coordinates
 from ..model.trajectory import *
 from ..model.contact import ContactPoint,Hold
@@ -698,7 +699,8 @@ class VisAppearance:
                 self.drawConfig = newDrawConfig
             except Exception as e:
                 print "Warning, exception thrown during animation update.  Probably have incorrect length of configuration"
-                print e
+                import traceback
+                traceback.print_exc()
                 pass
         for n,app in self.subAppearances.iteritems():
             app.swapDrawConfig()        
@@ -1147,7 +1149,7 @@ class VisualizationPlugin(glcommon.GLWidgetPlugin):
         self.items = {}
         self.labels = []
         self.t = time.time()
-        self.animate = True
+        self.animating = True
         self.animationTime = 0
 
     def initialize(self):
@@ -1194,10 +1196,10 @@ class VisualizationPlugin(glcommon.GLWidgetPlugin):
         for i in self.items.itervalues():
             i.clearDisplayLists()
 
-    def idlefunc(self):
+    def idle(self):
         oldt = self.t
         self.t = time.time()
-        if self.animate:
+        if self.animating:
             self.animationTime += (self.t - oldt)
         return False
 
@@ -1274,7 +1276,7 @@ class VisualizationPlugin(glcommon.GLWidgetPlugin):
     def pauseAnimation(self,paused=True):
         global _globalLock
         _globalLock.acquire()
-        self.animate = not paused
+        self.animating = not paused
         _globalLock.release()
 
     def stepAnimation(self,amount):
