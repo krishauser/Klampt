@@ -81,6 +81,6 @@ setup(name='Klampt',
                              language='c++'),
                    ],
       py_modules=['klampt.robotsim','klampt.plan.motionplanning','klampt.math.rootfind'],
-      packages=['klampt','klampt.io', 'klampt.math', 'klampt.model', 'klampt.sim', 'klampt.vis'],
+      packages=['klampt','klampt.io', 'klampt.math', 'klampt.model', 'klampt.plan', 'klampt.sim', 'klampt.vis'],
      )
 
