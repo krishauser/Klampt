@@ -496,7 +496,58 @@ class Group:
         f = self.frame(frame)
         local = so3.apply(so3.inv(f._worldCoordinates[0]),worldCoordinates)
         return Direction(local,f)
-
+    def listFrames(self,indent=0):
+        """Prints all the frames in this group and subgroups"""
+        for k,f in self.frames.iteritems():
+            if indent > 0:
+                print " "*(indent-1),
+            if f._parent == None:
+                print k
+            else:
+                print k,"(%s)"%(f._parent._name,)
+        for n,g in self.subgroups.iteritems():
+            if indent > 0:
+                print " "*(indent-1),
+            print n,":"
+            g.listFrames(indent+2)
+    def listItems(self,indent=0):
+        """Prints all the items in this group"""
+        if len(self.frames) > 0:
+            if indent > 0:
+                print " "*(indent-1),
+            print "Frames:"
+            for k,f in self.frames.iteritems():
+                if indent > 0:
+                    print " "*(indent+1),
+                if f._parent == None:
+                    print k
+                else:
+                    print k,"(%s)"%(f._parent._name,)
+        if len(self.points) > 0:
+            if indent > 0:
+                print " "*(indent-1),
+            print "Points:"
+            for k in self.points.iterkeys():
+                if indent > 0:
+                    print " "*(indent+1),
+                print k
+        if len(self.directions) > 0:
+            if indent > 0:
+                print " "*(indent-1),
+            print "Directions:"
+            for k in self.directions.iterkeys():
+                if indent > 0:
+                    print " "*(indent+1),
+                print k
+        if len(self.subgroups) > 0:
+            if indent > 0:
+                print " "*(indent-1),
+            print "Subgroups:"
+            for n,g in self.subgroups.iteritems():
+                if indent > 0:
+                    print " "*(indent+1),
+                print n,":"
+                g.listItems(indent+2)
 
 class Manager(Group):
     """A manager of coordinate frames."""
@@ -562,7 +613,8 @@ point = _callfn("point")
 direction = _callfn("direction")
 pointFromWorld = _callfn("pointFromWorld")
 directionFromWorld = _callfn("directionFromWorld")
-
+listFrames = _callfn("listFrames")
+listItems = _callfn("listItems")
 
 
 
