@@ -192,7 +192,7 @@ def animationTime(newtime=None): Gets/sets the current animation time
 
 
 from OpenGL.GL import *
-from threading import Thread,Lock
+from threading import Thread,RLock
 from ..robotsim import *
 from ..math import vectorops,so3,se3
 import gldraw
@@ -220,7 +220,7 @@ class WindowInfo:
         self.guidata = None
         self.custom_ui = None
 
-_globalLock = Lock()
+_globalLock = RLock()
 _vis = None
 _frontend = GLPluginProgram()
 _window_title = "Klamp't visualizer"
@@ -804,7 +804,7 @@ class VisAppearance:
                     #glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA)
                     #glColor4f(1,1,0,0.5)
                     glColor3f(1,1,0)
-                    gldraw.hermite_curve(tlocal[1],v1,[0,0,0],v2,0.03*vectorops.norm(tlocal[1]))
+                    gldraw.hermite_curve(tlocal[1],v1,[0,0,0],v2,0.03*max(0.1,vectorops.norm(tlocal[1])))
                     #glDisable(GL_BLEND)
                 glEnable(GL_DEPTH_TEST)
 
@@ -993,7 +993,7 @@ class VisAppearance:
                             glDisable(GL_LIGHTING)
                             glDisable(GL_DEPTH_TEST)
                             glColor3f(1,0.5,0)
-                            gldraw.hermite_curve(p1,v1,p2,v2,0.03*vectorops.distance(p1,p2))
+                            gldraw.hermite_curve(p1,v1,p2,v2,0.03*max(0.1,vectorops.distance(p1,p2)))
                             #glBegin(GL_LINES)
                             #glVertex3f(*p1)
                             #glVertex3f(*p2)
@@ -1165,6 +1165,8 @@ class VisualizationPlugin(glcommon.GLWidgetPlugin):
         self.labels.append((point,[text],color))
 
     def display(self):
+        global _globalLock
+        _globalLock.acquire()
         glcommon.GLWidgetPlugin.display(self)
         self.labels = []
         world = self.items.get('world',None)
@@ -1188,6 +1190,50 @@ class VisualizationPlugin(glcommon.GLWidgetPlugin):
                 pointHash[index] = [p,[(text,color) for text in textlist]]
         for (p,items) in pointHash.itervalues():
             self._drawLabelRaw(p,*zip(*items))
+        _globalLock.release()
+
+    def display_screen(self):
+        global _globalLock
+        _globalLock.acquire()
+        glcommon.GLWidgetPlugin.display_screen(self)
+        _globalLock.release()
+
+    def reshapefunc(self,w,h):
+        global _globalLock
+        _globalLock.acquire()
+        glcommon.GLWidgetPlugin.reshapefunc(self,w,h)
+        _globalLock.release()
+    def keyboardfunc(self,c,x,y):
+        global _globalLock
+        _globalLock.acquire()
+        glcommon.GLWidgetPlugin.keyboardfunc(self,c,x,y)
+        _globalLock.release()
+    def keyboardupfunc(self,c,x,y):
+        global _globalLock
+        _globalLock.acquire()
+        glcommon.GLWidgetPlugin.keyboardupfunc(self,c,x,y)
+        _globalLock.release()
+    def mousefunc(self,button,state,x,y):
+        global _globalLock
+        _globalLock.acquire()
+        glcommon.GLWidgetPlugin.mousefunc(self,button,state,x,y)
+        _globalLock.release()
+    def motionfunc(self,x,y,dx,dy):
+        global _globalLock
+        _globalLock.acquire()
+        glcommon.GLWidgetPlugin.motionfunc(self,x,y,dx,dy)
+        _globalLock.release()
+    def eventfunc(self,type,args=""):
+        global _globalLock
+        _globalLock.acquire()
+        glcommon.GLWidgetPlugin.eventfunc(self,type,args)
+        _globalLock.release()
+    def closefunc(self):
+        global _globalLock
+        _globalLock.acquire()
+        glcommon.GLWidgetPlugin.closefunc(self)
+        _globalLock.release()
+
 
     def _drawLabelRaw(self,point,textList,colorList):
         #assert not self.makingDisplayList,"drawText must be called outside of display list"
@@ -1211,10 +1257,13 @@ class VisualizationPlugin(glcommon.GLWidgetPlugin):
             i.clearDisplayLists()
 
     def idle(self):
+        global _globalLock
+        _globalLock.acquire()
         oldt = self.t
         self.t = time.time()
         if self.animating:
             self.animationTime += (self.t - oldt)
+        _globalLock.release()
         return False
 
     def getItem(self,item_name):
@@ -1271,7 +1320,7 @@ class VisualizationPlugin(glcommon.GLWidgetPlugin):
             app = VisAppearance(item,name)
         self.items[name] = app
         _globalLock.release()
-        self.refresh()
+        #self.refresh()
 
     def animate(self,name,animation,speed=1.0):
         global _globalLock
@@ -1523,8 +1572,8 @@ if _PyQtAvailable:
                     w.window.idlesleep()
                     w.window.hide()
                     w.guidata.hide()
-            _GLBackend.app.processEvents()
             _globalLock.release()
+            _GLBackend.app.processEvents()
             time.sleep(0.001)
         print "Visualization thread closing..."
         for w in _windows:
