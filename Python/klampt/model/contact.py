@@ -22,7 +22,7 @@ def idToObject(world,ID):
         if ID < world.numRobotLinks(i):
             return world.robotLink(i,ID)
         ID -= world.numRobotLinks(i)
-    raise RuntimeError("Internal error in idToObject")
+    raise RuntimeError("Internal error in idToObject, invalid ID?")
 
 
 class ContactPoint:
@@ -238,6 +238,8 @@ def simContactMap(sim):
         for b in xrange(a):
             c = sim.getContacts(a,b)
             if len(c) > 0:
+                for ci in c:
+                    assert len(ci) == 7,"Internal error in Simulation.getContacts()?"
                 #figure out the objects corresponding to a and b
                 oa = idToObject(w,a)
                 ob = idToObject(w,b)
