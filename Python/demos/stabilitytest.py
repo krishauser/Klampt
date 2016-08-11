@@ -53,17 +53,12 @@ sim.enableContactFeedbackAll()
 vis.add("world",world)
 vis.show()
 while vis.shown():
-	sim.simulate(0.0333)
-	print "Lock"
 	vis.lock()
+	sim.simulate(0.0333)
 	sim.updateWorld()
-	print "Unlock"
-	vis.unlock()
+
 	cm = simContactMap(sim)
 	holds = contactMapHolds(cm)
-	#TODO: figure out visualization freeze on this line
-	#for i,h in enumerate(holds):
-		#vis.add("hold "+str(i),h)
 	print "Num contacts",sum(len(h.contacts) for h in holds)
 	res = equilibriumTorques(world.robot(0),holds)
 	if res is None:
@@ -82,7 +77,10 @@ while vis.shown():
 		print "L1 norm solved",vectorops.norm_L1(t1),"sim",vectorops.norm_L1(ts)
 		print "Linf norm solved",vectorops.norm_Linf(tinf),"sim",vectorops.norm_Linf(ts)
 	print "Simulation time",sim.getTime()
-	print "sleep"
+	vis.unlock()
+	
+	for i,h in enumerate(holds):
+		vis.add("hold "+str(i),h)
 	time.sleep(0.01)
 
 vis.kill()
