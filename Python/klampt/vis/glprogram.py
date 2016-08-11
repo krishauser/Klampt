@@ -77,6 +77,34 @@ class GLViewport:
         d = vectorops.div(d,vectorops.norm(d))
         return (t,so3.apply(R,d))
 
+    def project(self,pt,clip=True):
+        """Given a point in world space, returns the (x,y,z) coordinates of the projected
+        pixel.  z is given in absolute coordinates, while x,y are given in pixel values.
+
+        If clip=True and the point is out of the viewing volume, then None is returned.
+        Otherwise, if the point is exactly at the focal plane then the middle of the viewport
+        is returned.
+        """
+        ploc = se3.apply(self.camera.matrix(),pt)
+        if clip:
+            if -ploc[2] <= self.clippingplanes[0] or -ploc[2] >= self.clippingplanes[1]:
+                return None
+        if abs(ploc[2]) < 1e-8:
+            return (self.x+self.w/2,self.y+self.h/2)
+        #d = (u*scale,v*scale,-1.0)
+        #ploc.x = ploc.z*d.x
+        #ploc.y = ploc.z*d.y
+        aspect = float(self.w)/float(self.h)
+        rfov = self.fov*math.pi/180.0
+        scale = 2.0*math.tan(rfov*0.5/aspect)*aspect
+        u = -ploc[0]/(ploc[2]*scale)
+        v = -ploc[1]/(ploc[2]*scale)
+        if clip and (abs(u) > 0.5 or abs(v) > 0.5):
+            return None
+        x = u*self.w + (self.x + self.w/2)
+        y = (self.y + self.h/2) - v*self.w
+        return (x,y,-ploc[2])
+
     def setCurrentGL(self):
         """Sets up the view in the current OpenGL context"""
         # Projection

@@ -764,7 +764,7 @@ class VisAppearance:
             self.displayCache[0].draw(drawRaw,[so3.identity(),item.worldCoordinates()])
             glEnable(GL_DEPTH_TEST)
             if name != None:
-                self.drawText(name,vectorops.add(item.worldCoordinates(),[0,0,-0.05]))
+                self.drawText(name,item.worldCoordinates())
         elif isinstance(item,coordinates.Direction):
             def drawRaw():
                 glDisable(GL_LIGHTING)
@@ -780,7 +780,7 @@ class VisAppearance:
                 #write name
             self.displayCache[0].draw(drawRaw,item.frame().worldCoordinates(),parameters = item.localCoordinates())
             if name != None:
-                self.drawText(name,vectorops.add(vectorops.add(item.frame().worldCoordinates()[1],item.worldCoordinates()),[0,0,-0.05]))
+                self.drawText(name,vectorops.add(item.frame().worldCoordinates()[1],item.worldCoordinates()))
         elif isinstance(item,coordinates.Frame):
             t = item.worldCoordinates()
             if item.parent() != None:
@@ -817,7 +817,7 @@ class VisAppearance:
             #glPopMatrix()
             #write name
             if name != None:
-                self.drawText(name,se3.apply(t,[-0.05]*3))
+                self.drawText(name,t[1])
         elif isinstance(item,coordinates.Transform):
             #draw curve between frames
             t1 = item.source().worldCoordinates()
@@ -894,13 +894,13 @@ class VisAppearance:
                     glEnd()
                 self.displayCache[0].draw(drawRaw,[so3.identity(),item])
                 if name != None:
-                    self.drawText(name,vectorops.add(item,[0,0,-0.05]))
+                    self.drawText(name,item)
             elif itypes == 'RigidTransform':
                 def drawRaw():
                     gldraw.xform_widget(se3.identity(),self.attributes.get("length",0.1),self.attributes.get("width",0.01))
                 self.displayCache[0].draw(drawRaw,transform=item)
                 if name != None:
-                    self.drawText(name,se3.apply(item,[-0.05]*3))
+                    self.drawText(name,item)
             elif itypes == 'IKGoal':
                 if hasattr(item,'robot'):
                     #need this to be built with a robot element.
@@ -1003,7 +1003,7 @@ class VisAppearance:
                         self.displayCache[2].draw(drawConnection,transform=None,parameters = (p1,v1,p2,v2))
                         #drawConnection()
                         if name != None:
-                            self.drawText(name,vectorops.add(wp,[-0.05]*3))
+                            self.drawText(name,wp)
                     else:
                         wp = link.getTransform()[1]
                         if item.numRotDims()==3: #full constraint
@@ -1033,7 +1033,7 @@ class VisAppearance:
                             #no drawing
                             pass
                         if name != None:
-                            self.drawText(name,se3.apply(wp,[-0.05]*3))
+                            self.drawText(name,wp)
             else:
                 print "Unable to draw item of type",itypes
 
@@ -1159,7 +1159,7 @@ class VisualizationPlugin(glcommon.GLWidgetPlugin):
 
     def addLabel(self,text,point,color):
         for (p,textList,pcolor) in self.labels:
-            if pcolor == color and vectorops.distance(p,point) < 0.1:
+            if pcolor == color and vectorops.distance(p,point) < 0.001:
                 textList.append(text)
                 return
         self.labels.append((point,[text],color))
@@ -1177,20 +1177,34 @@ class VisualizationPlugin(glcommon.GLWidgetPlugin):
             v.draw(world)
             v.swapDrawConfig()
             v.widget = None #allows garbage collector to delete these objects
+        #cluster label points
+        pointTolerance = self.view.camera.dist*0.03
+        pointHash = {}
         for (p,textlist,color) in self.labels:
-            self._drawLabelRaw(p,textlist,color)
+            index = tuple([int(x/pointTolerance) for x in p])
+            try:
+                pointHash[index][1] += [(text,color) for text in textlist]
+            except KeyError:
+                pointHash[index] = [p,[(text,color) for text in textlist]]
+        for (p,items) in pointHash.itervalues():
+            self._drawLabelRaw(p,*zip(*items))
 
-    def _drawLabelRaw(self,point,textList,color):
+    def _drawLabelRaw(self,point,textList,colorList):
         #assert not self.makingDisplayList,"drawText must be called outside of display list"
         assert self.window != None
-        for i,text in enumerate(textList):
+        for i,(text,c) in enumerate(zip(textList,colorList)):
             if i+1 < len(textList): text = text+","
+
+            projpt = self.view.project(point,clip=False)
+            if projpt[2] > self.view.clippingplanes[0]:
+              d = float(12)/float(self.view.w)*projpt[2]*0.7
+              point = vectorops.add(point,so3.apply(so3.inv(self.view.camera.matrix()[0]),(0,-d,0)))
+
             glDisable(GL_LIGHTING)
             glDisable(GL_DEPTH_TEST)
-            glColor3f(*color)
+            glColor3f(*c)
             self.draw_text(point,text,size=10)
             glEnable(GL_DEPTH_TEST)
-            point = vectorops.add(point,[0,0,-0.05])
 
     def _clearDisplayLists(self):
         for i in self.items.itervalues():
@@ -1256,8 +1270,8 @@ class VisualizationPlugin(glcommon.GLWidgetPlugin):
                 self.items[name].destroy()
             app = VisAppearance(item,name)
         self.items[name] = app
-        self.refresh()
         _globalLock.release()
+        self.refresh()
 
     def animate(self,name,animation,speed=1.0):
         global _globalLock
@@ -1509,7 +1523,6 @@ if _PyQtAvailable:
                     w.window.idlesleep()
                     w.window.hide()
                     w.guidata.hide()
-            
             _GLBackend.app.processEvents()
             _globalLock.release()
             time.sleep(0.001)
