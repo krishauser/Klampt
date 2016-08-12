@@ -212,6 +212,7 @@ int ws_socket_free(ws_ctx_t *ctx) {
 /* ------------------------------------------------------- */
 
 
+/*
 int encode_hixie(u_char const *src, size_t srclength,
                  char *target, size_t targsize) {
     int sz = 0, len = 0;
@@ -248,7 +249,7 @@ int decode_hixie(char *src, size_t srclength,
 
     start = src+1; // Skip '\x00' start
     do {
-        /* We may have more than one frame */
+        // We may have more than one frame 
         end = (char *)memchr(start, '\xff', srclength);
         *end = '\x00';
         len = b64_pton(start, target+retlen, targsize-retlen);
@@ -266,6 +267,7 @@ int decode_hixie(char *src, size_t srclength,
     *left = 0;
     return retlen;
 }
+*/
 
 #include <vector>
 using namespace std;
@@ -346,6 +348,7 @@ void websocket_send(std::string message)
    packedMessage.clear();
 }
 
+/*
 int encode_hybi(u_char const *src, size_t srclength,
                 char *target, size_t targsize, unsigned int opcode)
 {
@@ -383,9 +386,9 @@ int encode_hybi(u_char const *src, size_t srclength,
 
     return len + payload_offset;
 }
+*/
 
-
-
+/*
 int decode_hybi(unsigned char *src, size_t srclength,
                 u_char *target, size_t targsize,
                 unsigned int *opcode, unsigned int *left)
@@ -497,7 +500,7 @@ int decode_hybi(unsigned char *src, size_t srclength,
     *left = remaining;
     return target_offset;
 }
-
+*/
 
 
 int parse_handshake(ws_ctx_t *ws_ctx, char *handshake) {
@@ -526,7 +529,8 @@ int parse_handshake(ws_ctx_t *ws_ctx, char *handshake) {
     headers->host[end-start] = '\0';
 
     headers->origin[0] = '\0';
-    start = strstr(handshake, "\r\nOrigin: ");
+    //lets just skip origin, as it seems some webbrowsers dont send it. 
+    /*start = strstr(handshake, "\r\nOrigin: ");
     if (start) {
         start += 10;
     } else {
@@ -537,7 +541,8 @@ int parse_handshake(ws_ctx_t *ws_ctx, char *handshake) {
     end = strstr(start, "\r\n");
     strncpy(headers->origin, start, end-start);
     headers->origin[end-start] = '\0';
-   
+    */
+
     start = strstr(handshake, "\r\nSec-WebSocket-Version: ");
     if (start) {
         // HyBi/RFC 6455
@@ -616,7 +621,7 @@ int parse_handshake(ws_ctx_t *ws_ctx, char *handshake) {
     return 1;
 }
 
-int parse_hixie76_key(char * key) {
+/*int parse_hixie76_key(char * key) {
     unsigned long i, spaces = 0, num = 0;
     for (i=0; i < strlen(key); i++) {
         if (key[i] == ' ') {
@@ -627,8 +632,9 @@ int parse_hixie76_key(char * key) {
         }
     }
     return num / spaces;
-}
+}*/
 
+/*
 int gen_md5(headers_t *headers, char *target) {
     unsigned long key1 = parse_hixie76_key(headers->key1);
     unsigned long key2 = parse_hixie76_key(headers->key2);
@@ -649,7 +655,7 @@ int gen_md5(headers_t *headers, char *target) {
     target[HIXIE_MD5_DIGEST_LENGTH] = '\0';
 
     return 1;
-}
+}*/
 
 static void gen_sha1(headers_t *headers, char *target) {
     SHA_CTX c;
@@ -739,7 +745,7 @@ ws_ctx_t *do_handshake(int sock) {
         usleep(10);
     }
 
-    //handler_msg("handshake: %s\n", handshake);
+    handler_msg("handshake: %s\n", handshake);
     if (!parse_handshake(ws_ctx, handshake)) {
         handler_emsg("couldn't process handshake - Invalid WS request\n");
         free_ws_ctx(ws_ctx);
@@ -752,7 +758,7 @@ ws_ctx_t *do_handshake(int sock) {
         gen_sha1(headers, sha1);
         sprintf(response, SERVER_HANDSHAKE_HYBI, sha1, "base64");
     } else {
-        if (ws_ctx->hixie == 76) {
+        /*if (ws_ctx->hixie == 76) {
             handler_msg("using protocol Hixie 76\n");
             gen_md5(headers, trailer);
             pre = "Sec-";
@@ -763,6 +769,7 @@ ws_ctx_t *do_handshake(int sock) {
         }
         sprintf(response, SERVER_HANDSHAKE_HIXIE, pre, headers->origin, pre, scheme,
                 headers->host, headers->path, pre, "base64", trailer);
+        */
     }
     
     //handler_msg("response: %s\n", response);
