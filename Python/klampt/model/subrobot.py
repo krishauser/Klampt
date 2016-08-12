@@ -1,5 +1,5 @@
 from ..robotsim import *
-from robotcollide import self_collision_iter
+from collide import self_collision_iter
 
 class SubRobotModel:
 	"""A helper that lets you conveniently set/get quantities for a subset

@@ -1,7 +1,7 @@
 from cspace import *
 from cspaceutils import *
 import robotcspace
-from ..model import robotcollide
+from ..model import collide
 from ..robotsim import IKObjective
 
 def preferredPlanOptions(robot,movingSubset=None,optimizing=False):
@@ -68,7 +68,7 @@ def makeSpace(world,robot,
     else:
         subset = movingSubset
         
-    collider = robotcollide.WorldCollider(world,ignore=ignoreCollisions)
+    collider = collide.WorldCollider(world,ignore=ignoreCollisions)
 
     implicitManifold = []
     for c in equalityConstraints:
