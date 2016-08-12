@@ -219,6 +219,7 @@ class WindowInfo:
         self.mode = 'hidden'
         self.guidata = None
         self.custom_ui = None
+        self.doRefresh = False
 
 _globalLock = RLock()
 _vis = None
@@ -376,7 +377,7 @@ def unlock():
     global _globalLock,_windows
     for w in _windows:
         if w.window:
-            w.window.refresh()
+            w.doRefresh = True
     _globalLock.release()
 
 def shown():
@@ -1151,6 +1152,7 @@ class VisualizationPlugin(glcommon.GLWidgetPlugin):
         self.t = time.time()
         self.animating = True
         self.animationTime = 0
+        self.doRefresh = False
 
     def initialize(self):
         #keep or refresh display lists?
@@ -1233,7 +1235,6 @@ class VisualizationPlugin(glcommon.GLWidgetPlugin):
         _globalLock.acquire()
         glcommon.GLWidgetPlugin.closefunc(self)
         _globalLock.release()
-
 
     def _drawLabelRaw(self,point,textList,colorList):
         #assert not self.makingDisplayList,"drawText must be called outside of display list"
@@ -1525,6 +1526,9 @@ if _PyQtAvailable:
                     w.window.setProgram(w.frontend)
                     w.window.setParent(None)
                     w.window.refresh()
+                if w.doRefresh:
+                    w.window.updateGL()
+                    w.doRefresh = False
                 if w.mode == 'dialog':
                     print "#########################################"
                     print "klampt.vis: Dialog on window",i
