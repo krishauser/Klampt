@@ -203,7 +203,7 @@ def console_edit(name,value,type,description=None,world=None,frame=None):
         print description
         print
     if frame!=None:
-        if isinstance(frame,(RigidObjectModel,RobotModelLink)):
+        if hasattr(frame,'getName'):
             print "Reference frame:",frame.getName()
         else:
             print "Reference frame:",frame
@@ -328,17 +328,17 @@ def edit(name,value,type='auto',description=None,editor='visual',world=None,robo
         elif type == 'Configs':
             return vis.editors.run(vis.editors.ConfigsEditor(name,value,description,world,robot))
         elif type == 'Vector3' or type == 'Point':
-            if isinstance(frame,(vis.RigidObjectModel,RobotModelLink)):
+            if hasattr(frame,'getTransform'):
                 frame = frame.getTransform()
             return vis.editors.run(vis.editors.PointEditor(name,value,description,world,frame))
         elif type == 'Rotation':
-            if isinstance(frame,(RigidObjectModel,RobotModelLink)):
+            if hasattr(frame,'getTransform'):
                 frame = frame.getTransform()
             return vis.editors.run(vis.editors.RotationEditor(name,value,description,world,frame))
         elif type == 'RigidTransform':
             if isinstance(frame,RigidObjectModel):
                 return vis.editors.run(vis.editors.ObjectTransformEditor(name,value,description,world,frame))
-            if isinstance(frame,RobotModelLink):
+            if hasattr(frame,'getTransform'):
                 frame = frame.getTransform()
             return vis.editors.run(vis.editors.RigidTransformEditor(name,value,description,world,frame))
         else:

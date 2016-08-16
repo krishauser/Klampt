@@ -206,6 +206,7 @@ import signal
 from ..model import types
 from ..model import config
 from ..model import coordinates
+from ..model.subrobot import SubRobotModel
 from ..model.trajectory import *
 from ..model.contact import ContactPoint,Hold
 
@@ -901,7 +902,7 @@ class VisAppearance:
                     gldraw.xform_widget(se3.identity(),self.attributes.get("length",0.1),self.attributes.get("width",0.01))
                 self.displayCache[0].draw(drawRaw,transform=item)
                 if name != None:
-                    self.drawText(name,item)
+                    self.drawText(name,item[1])
             elif itypes == 'IKGoal':
                 if hasattr(item,'robot'):
                     #need this to be built with a robot element.
@@ -1070,6 +1071,10 @@ class VisAppearance:
         elif isinstance(self.item,RobotModel):
             res = RobotPoser(self.item)
             self.hidden = True
+        elif isinstance(self.item,SubRobotModel):
+            res = RobotPoser(self.item._robot)
+            res.setActiveDofs(self.item.links);
+            self.hidden = True
         elif isinstance(self.item,RigidObjectModel):
             res = ObjectPoser(self.item)
         elif isinstance(self.item,(list,tuple)):
@@ -1110,6 +1115,8 @@ class VisAppearance:
                 self.editor.set(*self.item.worldCoordinates())
             elif isinstance(self.item,RobotModel):
                 self.editor.set(self.item.getConfig())
+            elif isinstance(self.item,SubRobotModel):
+                self.editor.set(self.item.tofull(self.item.getConfig()))
             elif isinstance(self.item,RigidObjectModel):
                 self.editor.set(*self.item.getTransform())
             elif isinstance(self.item,(list,tuple)):
@@ -1133,6 +1140,8 @@ class VisAppearance:
                 #TODO: updating downstream frames?
             elif isinstance(self.item,RobotModel):
                 self.item.setConfig(self.editor.get_conditioned(self.item.getConfig()))
+            elif isinstance(self.item,SubRobotModel):
+                self.item.setConfig(self.item.fromfull(self.editor.get()))
             elif isinstance(self.item,RigidObjectModel):
                 self.item.setTransform(self.editor.get())
             elif isinstance(self.item,(list,tuple)):

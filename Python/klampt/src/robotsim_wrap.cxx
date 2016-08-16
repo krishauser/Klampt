@@ -26070,40 +26070,6 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_RobotModelLink_getRobot(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  RobotModelLink *arg1 = (RobotModelLink *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject * obj0 = 0 ;
-  RobotModel result;
-  
-  if (!PyArg_ParseTuple(args,(char *)"O:RobotModelLink_getRobot",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_RobotModelLink, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "RobotModelLink_getRobot" "', argument " "1"" of type '" "RobotModelLink *""'"); 
-  }
-  arg1 = reinterpret_cast< RobotModelLink * >(argp1);
-  {
-    try {
-      result = (arg1)->getRobot();
-    }
-    catch(PyException& e) {
-      e.setPyErr();
-      return NULL;
-    }
-    catch(std::exception& e) {
-      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
-      return NULL;
-    }
-  }
-  resultobj = SWIG_NewPointerObj((new RobotModel(static_cast< const RobotModel& >(result))), SWIGTYPE_p_RobotModel, SWIG_POINTER_OWN |  0 );
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
 SWIGINTERN PyObject *_wrap_RobotModelLink_getIndex(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   RobotModelLink *arg1 = (RobotModelLink *) 0 ;
@@ -28063,40 +28029,6 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_RobotModelDriver_getRobot(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  RobotModelDriver *arg1 = (RobotModelDriver *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject * obj0 = 0 ;
-  RobotModel result;
-  
-  if (!PyArg_ParseTuple(args,(char *)"O:RobotModelDriver_getRobot",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_RobotModelDriver, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "RobotModelDriver_getRobot" "', argument " "1"" of type '" "RobotModelDriver *""'"); 
-  }
-  arg1 = reinterpret_cast< RobotModelDriver * >(argp1);
-  {
-    try {
-      result = (arg1)->getRobot();
-    }
-    catch(PyException& e) {
-      e.setPyErr();
-      return NULL;
-    }
-    catch(std::exception& e) {
-      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
-      return NULL;
-    }
-  }
-  resultobj = SWIG_NewPointerObj((new RobotModel(static_cast< const RobotModel& >(result))), SWIGTYPE_p_RobotModel, SWIG_POINTER_OWN |  0 );
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
 SWIGINTERN PyObject *_wrap_RobotModelDriver_getType(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   RobotModelDriver *arg1 = (RobotModelDriver *) 0 ;
@@ -28976,143 +28908,6 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_RobotModel_getLink__SWIG_0(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  RobotModel *arg1 = (RobotModel *) 0 ;
-  int arg2 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  int val2 ;
-  int ecode2 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
-  RobotModelLink result;
-  
-  if (!PyArg_ParseTuple(args,(char *)"OO:RobotModel_getLink",&obj0,&obj1)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_RobotModel, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "RobotModel_getLink" "', argument " "1"" of type '" "RobotModel *""'"); 
-  }
-  arg1 = reinterpret_cast< RobotModel * >(argp1);
-  ecode2 = SWIG_AsVal_int(obj1, &val2);
-  if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "RobotModel_getLink" "', argument " "2"" of type '" "int""'");
-  } 
-  arg2 = static_cast< int >(val2);
-  {
-    try {
-      result = (arg1)->getLink(arg2);
-    }
-    catch(PyException& e) {
-      e.setPyErr();
-      return NULL;
-    }
-    catch(std::exception& e) {
-      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
-      return NULL;
-    }
-  }
-  resultobj = SWIG_NewPointerObj((new RobotModelLink(static_cast< const RobotModelLink& >(result))), SWIGTYPE_p_RobotModelLink, SWIG_POINTER_OWN |  0 );
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_RobotModel_getLink__SWIG_1(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  RobotModel *arg1 = (RobotModel *) 0 ;
-  char *arg2 = (char *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  int res2 ;
-  char *buf2 = 0 ;
-  int alloc2 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
-  RobotModelLink result;
-  
-  if (!PyArg_ParseTuple(args,(char *)"OO:RobotModel_getLink",&obj0,&obj1)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_RobotModel, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "RobotModel_getLink" "', argument " "1"" of type '" "RobotModel *""'"); 
-  }
-  arg1 = reinterpret_cast< RobotModel * >(argp1);
-  res2 = SWIG_AsCharPtrAndSize(obj1, &buf2, NULL, &alloc2);
-  if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "RobotModel_getLink" "', argument " "2"" of type '" "char const *""'");
-  }
-  arg2 = reinterpret_cast< char * >(buf2);
-  {
-    try {
-      result = (arg1)->getLink((char const *)arg2);
-    }
-    catch(PyException& e) {
-      e.setPyErr();
-      return NULL;
-    }
-    catch(std::exception& e) {
-      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
-      return NULL;
-    }
-  }
-  resultobj = SWIG_NewPointerObj((new RobotModelLink(static_cast< const RobotModelLink& >(result))), SWIGTYPE_p_RobotModelLink, SWIG_POINTER_OWN |  0 );
-  if (alloc2 == SWIG_NEWOBJ) delete[] buf2;
-  return resultobj;
-fail:
-  if (alloc2 == SWIG_NEWOBJ) delete[] buf2;
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_RobotModel_getLink(PyObject *self, PyObject *args) {
-  int argc;
-  PyObject *argv[3];
-  int ii;
-  
-  if (!PyTuple_Check(args)) SWIG_fail;
-  argc = args ? (int)PyObject_Length(args) : 0;
-  for (ii = 0; (ii < 2) && (ii < argc); ii++) {
-    argv[ii] = PyTuple_GET_ITEM(args,ii);
-  }
-  if (argc == 2) {
-    int _v;
-    void *vptr = 0;
-    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_RobotModel, 0);
-    _v = SWIG_CheckState(res);
-    if (_v) {
-      {
-        int res = SWIG_AsVal_int(argv[1], NULL);
-        _v = SWIG_CheckState(res);
-      }
-      if (_v) {
-        return _wrap_RobotModel_getLink__SWIG_0(self, args);
-      }
-    }
-  }
-  if (argc == 2) {
-    int _v;
-    void *vptr = 0;
-    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_RobotModel, 0);
-    _v = SWIG_CheckState(res);
-    if (_v) {
-      int res = SWIG_AsCharPtrAndSize(argv[1], 0, NULL, 0);
-      _v = SWIG_CheckState(res);
-      if (_v) {
-        return _wrap_RobotModel_getLink__SWIG_1(self, args);
-      }
-    }
-  }
-  
-fail:
-  SWIG_SetErrorMsg(PyExc_NotImplementedError,"Wrong number or type of arguments for overloaded function 'RobotModel_getLink'.\n"
-    "  Possible C/C++ prototypes are:\n"
-    "    RobotModel::getLink(int)\n"
-    "    RobotModel::getLink(char const *)\n");
-  return 0;
-}
-
-
 SWIGINTERN PyObject *_wrap_RobotModel_numDrivers(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   RobotModel *arg1 = (RobotModel *) 0 ;
@@ -29280,143 +29075,6 @@ fail:
     "  Possible C/C++ prototypes are:\n"
     "    RobotModel::driver(int)\n"
     "    RobotModel::driver(char const *)\n");
-  return 0;
-}
-
-
-SWIGINTERN PyObject *_wrap_RobotModel_getDriver__SWIG_0(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  RobotModel *arg1 = (RobotModel *) 0 ;
-  int arg2 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  int val2 ;
-  int ecode2 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
-  RobotModelDriver result;
-  
-  if (!PyArg_ParseTuple(args,(char *)"OO:RobotModel_getDriver",&obj0,&obj1)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_RobotModel, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "RobotModel_getDriver" "', argument " "1"" of type '" "RobotModel *""'"); 
-  }
-  arg1 = reinterpret_cast< RobotModel * >(argp1);
-  ecode2 = SWIG_AsVal_int(obj1, &val2);
-  if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "RobotModel_getDriver" "', argument " "2"" of type '" "int""'");
-  } 
-  arg2 = static_cast< int >(val2);
-  {
-    try {
-      result = (arg1)->getDriver(arg2);
-    }
-    catch(PyException& e) {
-      e.setPyErr();
-      return NULL;
-    }
-    catch(std::exception& e) {
-      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
-      return NULL;
-    }
-  }
-  resultobj = SWIG_NewPointerObj((new RobotModelDriver(static_cast< const RobotModelDriver& >(result))), SWIGTYPE_p_RobotModelDriver, SWIG_POINTER_OWN |  0 );
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_RobotModel_getDriver__SWIG_1(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  RobotModel *arg1 = (RobotModel *) 0 ;
-  char *arg2 = (char *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  int res2 ;
-  char *buf2 = 0 ;
-  int alloc2 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
-  RobotModelDriver result;
-  
-  if (!PyArg_ParseTuple(args,(char *)"OO:RobotModel_getDriver",&obj0,&obj1)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_RobotModel, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "RobotModel_getDriver" "', argument " "1"" of type '" "RobotModel *""'"); 
-  }
-  arg1 = reinterpret_cast< RobotModel * >(argp1);
-  res2 = SWIG_AsCharPtrAndSize(obj1, &buf2, NULL, &alloc2);
-  if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "RobotModel_getDriver" "', argument " "2"" of type '" "char const *""'");
-  }
-  arg2 = reinterpret_cast< char * >(buf2);
-  {
-    try {
-      result = (arg1)->getDriver((char const *)arg2);
-    }
-    catch(PyException& e) {
-      e.setPyErr();
-      return NULL;
-    }
-    catch(std::exception& e) {
-      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
-      return NULL;
-    }
-  }
-  resultobj = SWIG_NewPointerObj((new RobotModelDriver(static_cast< const RobotModelDriver& >(result))), SWIGTYPE_p_RobotModelDriver, SWIG_POINTER_OWN |  0 );
-  if (alloc2 == SWIG_NEWOBJ) delete[] buf2;
-  return resultobj;
-fail:
-  if (alloc2 == SWIG_NEWOBJ) delete[] buf2;
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_RobotModel_getDriver(PyObject *self, PyObject *args) {
-  int argc;
-  PyObject *argv[3];
-  int ii;
-  
-  if (!PyTuple_Check(args)) SWIG_fail;
-  argc = args ? (int)PyObject_Length(args) : 0;
-  for (ii = 0; (ii < 2) && (ii < argc); ii++) {
-    argv[ii] = PyTuple_GET_ITEM(args,ii);
-  }
-  if (argc == 2) {
-    int _v;
-    void *vptr = 0;
-    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_RobotModel, 0);
-    _v = SWIG_CheckState(res);
-    if (_v) {
-      {
-        int res = SWIG_AsVal_int(argv[1], NULL);
-        _v = SWIG_CheckState(res);
-      }
-      if (_v) {
-        return _wrap_RobotModel_getDriver__SWIG_0(self, args);
-      }
-    }
-  }
-  if (argc == 2) {
-    int _v;
-    void *vptr = 0;
-    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_RobotModel, 0);
-    _v = SWIG_CheckState(res);
-    if (_v) {
-      int res = SWIG_AsCharPtrAndSize(argv[1], 0, NULL, 0);
-      _v = SWIG_CheckState(res);
-      if (_v) {
-        return _wrap_RobotModel_getDriver__SWIG_1(self, args);
-      }
-    }
-  }
-  
-fail:
-  SWIG_SetErrorMsg(PyExc_NotImplementedError,"Wrong number or type of arguments for overloaded function 'RobotModel_getDriver'.\n"
-    "  Possible C/C++ prototypes are:\n"
-    "    RobotModel::getDriver(int)\n"
-    "    RobotModel::getDriver(char const *)\n");
   return 0;
 }
 
@@ -40684,99 +40342,6 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_SimRobotController_getSensor(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  SimRobotController *arg1 = (SimRobotController *) 0 ;
-  int arg2 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  int val2 ;
-  int ecode2 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
-  SwigValueWrapper< SimRobotSensor > result;
-  
-  if (!PyArg_ParseTuple(args,(char *)"OO:SimRobotController_getSensor",&obj0,&obj1)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_SimRobotController, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SimRobotController_getSensor" "', argument " "1"" of type '" "SimRobotController *""'"); 
-  }
-  arg1 = reinterpret_cast< SimRobotController * >(argp1);
-  ecode2 = SWIG_AsVal_int(obj1, &val2);
-  if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "SimRobotController_getSensor" "', argument " "2"" of type '" "int""'");
-  } 
-  arg2 = static_cast< int >(val2);
-  {
-    try {
-      result = (arg1)->getSensor(arg2);
-    }
-    catch(PyException& e) {
-      e.setPyErr();
-      return NULL;
-    }
-    catch(std::exception& e) {
-      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
-      return NULL;
-    }
-  }
-  resultobj = SWIG_NewPointerObj((new SimRobotSensor(static_cast< const SimRobotSensor& >(result))), SWIGTYPE_p_SimRobotSensor, SWIG_POINTER_OWN |  0 );
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_SimRobotController_getNamedSensor(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  SimRobotController *arg1 = (SimRobotController *) 0 ;
-  std::string *arg2 = 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  int res2 = SWIG_OLDOBJ ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
-  SwigValueWrapper< SimRobotSensor > result;
-  
-  if (!PyArg_ParseTuple(args,(char *)"OO:SimRobotController_getNamedSensor",&obj0,&obj1)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_SimRobotController, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SimRobotController_getNamedSensor" "', argument " "1"" of type '" "SimRobotController *""'"); 
-  }
-  arg1 = reinterpret_cast< SimRobotController * >(argp1);
-  {
-    std::string *ptr = (std::string *)0;
-    res2 = SWIG_AsPtr_std_string(obj1, &ptr);
-    if (!SWIG_IsOK(res2)) {
-      SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "SimRobotController_getNamedSensor" "', argument " "2"" of type '" "std::string const &""'"); 
-    }
-    if (!ptr) {
-      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "SimRobotController_getNamedSensor" "', argument " "2"" of type '" "std::string const &""'"); 
-    }
-    arg2 = ptr;
-  }
-  {
-    try {
-      result = (arg1)->getNamedSensor((std::string const &)*arg2);
-    }
-    catch(PyException& e) {
-      e.setPyErr();
-      return NULL;
-    }
-    catch(std::exception& e) {
-      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
-      return NULL;
-    }
-  }
-  resultobj = SWIG_NewPointerObj((new SimRobotSensor(static_cast< const SimRobotSensor& >(result))), SWIGTYPE_p_SimRobotSensor, SWIG_POINTER_OWN |  0 );
-  if (SWIG_IsNewObj(res2)) delete arg2;
-  return resultobj;
-fail:
-  if (SWIG_IsNewObj(res2)) delete arg2;
-  return NULL;
-}
-
-
 SWIGINTERN PyObject *_wrap_SimRobotController_commands(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   SimRobotController *arg1 = (SimRobotController *) 0 ;
@@ -43620,40 +43185,6 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_Simulator_getWorld(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  Simulator *arg1 = (Simulator *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject * obj0 = 0 ;
-  WorldModel result;
-  
-  if (!PyArg_ParseTuple(args,(char *)"O:Simulator_getWorld",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Simulator, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Simulator_getWorld" "', argument " "1"" of type '" "Simulator const *""'"); 
-  }
-  arg1 = reinterpret_cast< Simulator * >(argp1);
-  {
-    try {
-      result = ((Simulator const *)arg1)->getWorld();
-    }
-    catch(PyException& e) {
-      e.setPyErr();
-      return NULL;
-    }
-    catch(std::exception& e) {
-      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
-      return NULL;
-    }
-  }
-  resultobj = SWIG_NewPointerObj((new WorldModel(static_cast< const WorldModel& >(result))), SWIGTYPE_p_WorldModel, SWIG_POINTER_OWN |  0 );
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
 SWIGINTERN PyObject *_wrap_Simulator_getState(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   Simulator *arg1 = (Simulator *) 0 ;
@@ -45084,341 +44615,6 @@ fail:
     "    Simulator::body(RobotModelLink const &)\n"
     "    Simulator::body(RigidObjectModel const &)\n"
     "    Simulator::body(TerrainModel const &)\n");
-  return 0;
-}
-
-
-SWIGINTERN PyObject *_wrap_Simulator_getController__SWIG_0(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  Simulator *arg1 = (Simulator *) 0 ;
-  int arg2 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  int val2 ;
-  int ecode2 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
-  SimRobotController result;
-  
-  if (!PyArg_ParseTuple(args,(char *)"OO:Simulator_getController",&obj0,&obj1)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Simulator, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Simulator_getController" "', argument " "1"" of type '" "Simulator *""'"); 
-  }
-  arg1 = reinterpret_cast< Simulator * >(argp1);
-  ecode2 = SWIG_AsVal_int(obj1, &val2);
-  if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Simulator_getController" "', argument " "2"" of type '" "int""'");
-  } 
-  arg2 = static_cast< int >(val2);
-  {
-    try {
-      result = (arg1)->getController(arg2);
-    }
-    catch(PyException& e) {
-      e.setPyErr();
-      return NULL;
-    }
-    catch(std::exception& e) {
-      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
-      return NULL;
-    }
-  }
-  resultobj = SWIG_NewPointerObj((new SimRobotController(static_cast< const SimRobotController& >(result))), SWIGTYPE_p_SimRobotController, SWIG_POINTER_OWN |  0 );
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_Simulator_getController__SWIG_1(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  Simulator *arg1 = (Simulator *) 0 ;
-  RobotModel *arg2 = 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  void *argp2 = 0 ;
-  int res2 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
-  SimRobotController result;
-  
-  if (!PyArg_ParseTuple(args,(char *)"OO:Simulator_getController",&obj0,&obj1)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Simulator, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Simulator_getController" "', argument " "1"" of type '" "Simulator *""'"); 
-  }
-  arg1 = reinterpret_cast< Simulator * >(argp1);
-  res2 = SWIG_ConvertPtr(obj1, &argp2, SWIGTYPE_p_RobotModel,  0  | 0);
-  if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "Simulator_getController" "', argument " "2"" of type '" "RobotModel const &""'"); 
-  }
-  if (!argp2) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "Simulator_getController" "', argument " "2"" of type '" "RobotModel const &""'"); 
-  }
-  arg2 = reinterpret_cast< RobotModel * >(argp2);
-  {
-    try {
-      result = (arg1)->getController((RobotModel const &)*arg2);
-    }
-    catch(PyException& e) {
-      e.setPyErr();
-      return NULL;
-    }
-    catch(std::exception& e) {
-      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
-      return NULL;
-    }
-  }
-  resultobj = SWIG_NewPointerObj((new SimRobotController(static_cast< const SimRobotController& >(result))), SWIGTYPE_p_SimRobotController, SWIG_POINTER_OWN |  0 );
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_Simulator_getController(PyObject *self, PyObject *args) {
-  int argc;
-  PyObject *argv[3];
-  int ii;
-  
-  if (!PyTuple_Check(args)) SWIG_fail;
-  argc = args ? (int)PyObject_Length(args) : 0;
-  for (ii = 0; (ii < 2) && (ii < argc); ii++) {
-    argv[ii] = PyTuple_GET_ITEM(args,ii);
-  }
-  if (argc == 2) {
-    int _v;
-    void *vptr = 0;
-    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_Simulator, 0);
-    _v = SWIG_CheckState(res);
-    if (_v) {
-      int res = SWIG_ConvertPtr(argv[1], 0, SWIGTYPE_p_RobotModel, 0);
-      _v = SWIG_CheckState(res);
-      if (_v) {
-        return _wrap_Simulator_getController__SWIG_1(self, args);
-      }
-    }
-  }
-  if (argc == 2) {
-    int _v;
-    void *vptr = 0;
-    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_Simulator, 0);
-    _v = SWIG_CheckState(res);
-    if (_v) {
-      {
-        int res = SWIG_AsVal_int(argv[1], NULL);
-        _v = SWIG_CheckState(res);
-      }
-      if (_v) {
-        return _wrap_Simulator_getController__SWIG_0(self, args);
-      }
-    }
-  }
-  
-fail:
-  SWIG_SetErrorMsg(PyExc_NotImplementedError,"Wrong number or type of arguments for overloaded function 'Simulator_getController'.\n"
-    "  Possible C/C++ prototypes are:\n"
-    "    Simulator::getController(int)\n"
-    "    Simulator::getController(RobotModel const &)\n");
-  return 0;
-}
-
-
-SWIGINTERN PyObject *_wrap_Simulator_getBody__SWIG_0(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  Simulator *arg1 = (Simulator *) 0 ;
-  RobotModelLink *arg2 = 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  void *argp2 = 0 ;
-  int res2 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
-  SimBody result;
-  
-  if (!PyArg_ParseTuple(args,(char *)"OO:Simulator_getBody",&obj0,&obj1)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Simulator, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Simulator_getBody" "', argument " "1"" of type '" "Simulator *""'"); 
-  }
-  arg1 = reinterpret_cast< Simulator * >(argp1);
-  res2 = SWIG_ConvertPtr(obj1, &argp2, SWIGTYPE_p_RobotModelLink,  0  | 0);
-  if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "Simulator_getBody" "', argument " "2"" of type '" "RobotModelLink const &""'"); 
-  }
-  if (!argp2) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "Simulator_getBody" "', argument " "2"" of type '" "RobotModelLink const &""'"); 
-  }
-  arg2 = reinterpret_cast< RobotModelLink * >(argp2);
-  {
-    try {
-      result = (arg1)->getBody((RobotModelLink const &)*arg2);
-    }
-    catch(PyException& e) {
-      e.setPyErr();
-      return NULL;
-    }
-    catch(std::exception& e) {
-      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
-      return NULL;
-    }
-  }
-  resultobj = SWIG_NewPointerObj((new SimBody(static_cast< const SimBody& >(result))), SWIGTYPE_p_SimBody, SWIG_POINTER_OWN |  0 );
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_Simulator_getBody__SWIG_1(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  Simulator *arg1 = (Simulator *) 0 ;
-  RigidObjectModel *arg2 = 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  void *argp2 = 0 ;
-  int res2 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
-  SimBody result;
-  
-  if (!PyArg_ParseTuple(args,(char *)"OO:Simulator_getBody",&obj0,&obj1)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Simulator, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Simulator_getBody" "', argument " "1"" of type '" "Simulator *""'"); 
-  }
-  arg1 = reinterpret_cast< Simulator * >(argp1);
-  res2 = SWIG_ConvertPtr(obj1, &argp2, SWIGTYPE_p_RigidObjectModel,  0  | 0);
-  if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "Simulator_getBody" "', argument " "2"" of type '" "RigidObjectModel const &""'"); 
-  }
-  if (!argp2) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "Simulator_getBody" "', argument " "2"" of type '" "RigidObjectModel const &""'"); 
-  }
-  arg2 = reinterpret_cast< RigidObjectModel * >(argp2);
-  {
-    try {
-      result = (arg1)->getBody((RigidObjectModel const &)*arg2);
-    }
-    catch(PyException& e) {
-      e.setPyErr();
-      return NULL;
-    }
-    catch(std::exception& e) {
-      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
-      return NULL;
-    }
-  }
-  resultobj = SWIG_NewPointerObj((new SimBody(static_cast< const SimBody& >(result))), SWIGTYPE_p_SimBody, SWIG_POINTER_OWN |  0 );
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_Simulator_getBody__SWIG_2(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  Simulator *arg1 = (Simulator *) 0 ;
-  TerrainModel *arg2 = 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  void *argp2 = 0 ;
-  int res2 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
-  SimBody result;
-  
-  if (!PyArg_ParseTuple(args,(char *)"OO:Simulator_getBody",&obj0,&obj1)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Simulator, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Simulator_getBody" "', argument " "1"" of type '" "Simulator *""'"); 
-  }
-  arg1 = reinterpret_cast< Simulator * >(argp1);
-  res2 = SWIG_ConvertPtr(obj1, &argp2, SWIGTYPE_p_TerrainModel,  0  | 0);
-  if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "Simulator_getBody" "', argument " "2"" of type '" "TerrainModel const &""'"); 
-  }
-  if (!argp2) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "Simulator_getBody" "', argument " "2"" of type '" "TerrainModel const &""'"); 
-  }
-  arg2 = reinterpret_cast< TerrainModel * >(argp2);
-  {
-    try {
-      result = (arg1)->getBody((TerrainModel const &)*arg2);
-    }
-    catch(PyException& e) {
-      e.setPyErr();
-      return NULL;
-    }
-    catch(std::exception& e) {
-      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
-      return NULL;
-    }
-  }
-  resultobj = SWIG_NewPointerObj((new SimBody(static_cast< const SimBody& >(result))), SWIGTYPE_p_SimBody, SWIG_POINTER_OWN |  0 );
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_Simulator_getBody(PyObject *self, PyObject *args) {
-  int argc;
-  PyObject *argv[3];
-  int ii;
-  
-  if (!PyTuple_Check(args)) SWIG_fail;
-  argc = args ? (int)PyObject_Length(args) : 0;
-  for (ii = 0; (ii < 2) && (ii < argc); ii++) {
-    argv[ii] = PyTuple_GET_ITEM(args,ii);
-  }
-  if (argc == 2) {
-    int _v;
-    void *vptr = 0;
-    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_Simulator, 0);
-    _v = SWIG_CheckState(res);
-    if (_v) {
-      int res = SWIG_ConvertPtr(argv[1], 0, SWIGTYPE_p_RobotModelLink, 0);
-      _v = SWIG_CheckState(res);
-      if (_v) {
-        return _wrap_Simulator_getBody__SWIG_0(self, args);
-      }
-    }
-  }
-  if (argc == 2) {
-    int _v;
-    void *vptr = 0;
-    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_Simulator, 0);
-    _v = SWIG_CheckState(res);
-    if (_v) {
-      int res = SWIG_ConvertPtr(argv[1], 0, SWIGTYPE_p_RigidObjectModel, 0);
-      _v = SWIG_CheckState(res);
-      if (_v) {
-        return _wrap_Simulator_getBody__SWIG_1(self, args);
-      }
-    }
-  }
-  if (argc == 2) {
-    int _v;
-    void *vptr = 0;
-    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_Simulator, 0);
-    _v = SWIG_CheckState(res);
-    if (_v) {
-      int res = SWIG_ConvertPtr(argv[1], 0, SWIGTYPE_p_TerrainModel, 0);
-      _v = SWIG_CheckState(res);
-      if (_v) {
-        return _wrap_Simulator_getBody__SWIG_2(self, args);
-      }
-    }
-  }
-  
-fail:
-  SWIG_SetErrorMsg(PyExc_NotImplementedError,"Wrong number or type of arguments for overloaded function 'Simulator_getBody'.\n"
-    "  Possible C/C++ prototypes are:\n"
-    "    Simulator::getBody(RobotModelLink const &)\n"
-    "    Simulator::getBody(RigidObjectModel const &)\n"
-    "    Simulator::getBody(TerrainModel const &)\n");
   return 0;
 }
 
@@ -48143,11 +47339,6 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"Returns a reference to the link's robot. \n"
 		""},
-	 { (char *)"RobotModelLink_getRobot", _wrap_RobotModelLink_getRobot, METH_VARARGS, (char *)"\n"
-		"RobotModelLink_getRobot(RobotModelLink self) -> RobotModel\n"
-		"\n"
-		"Old-style: will be deprecated. \n"
-		""},
 	 { (char *)"RobotModelLink_getIndex", _wrap_RobotModelLink_getIndex, METH_VARARGS, (char *)"\n"
 		"RobotModelLink_getIndex(RobotModelLink self) -> int\n"
 		"\n"
@@ -48302,11 +47493,6 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"Returns a reference to the driver's robot. \n"
 		""},
-	 { (char *)"RobotModelDriver_getRobot", _wrap_RobotModelDriver_getRobot, METH_VARARGS, (char *)"\n"
-		"RobotModelDriver_getRobot(RobotModelDriver self) -> RobotModel\n"
-		"\n"
-		"Old-style: will be deprecated. \n"
-		""},
 	 { (char *)"RobotModelDriver_getType", _wrap_RobotModelDriver_getType, METH_VARARGS, (char *)"\n"
 		"RobotModelDriver_getType(RobotModelDriver self) -> char const *\n"
 		"\n"
@@ -48380,13 +47566,6 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"Returns a reference to the named link. \n"
 		""},
-	 { (char *)"RobotModel_getLink", _wrap_RobotModel_getLink, METH_VARARGS, (char *)"\n"
-		"getLink(int index) -> RobotModelLink\n"
-		"RobotModel_getLink(RobotModel self, char const * name) -> RobotModelLink\n"
-		"\n"
-		"Old-style: will be deprecated. Returns a reference to the named link.\n"
-		"\n"
-		""},
 	 { (char *)"RobotModel_numDrivers", _wrap_RobotModel_numDrivers, METH_VARARGS, (char *)"\n"
 		"RobotModel_numDrivers(RobotModel self) -> int\n"
 		"\n"
@@ -48397,13 +47576,6 @@ static PyMethodDef SwigMethods[] = {
 		"RobotModel_driver(RobotModel self, char const * name) -> RobotModelDriver\n"
 		"\n"
 		"Returns a reference to the named driver. \n"
-		""},
-	 { (char *)"RobotModel_getDriver", _wrap_RobotModel_getDriver, METH_VARARGS, (char *)"\n"
-		"getDriver(int index) -> RobotModelDriver\n"
-		"RobotModel_getDriver(RobotModel self, char const * name) -> RobotModelDriver\n"
-		"\n"
-		"Old-style: will be deprecated. Returns a reference to a\n"
-		"RobotModelDriver. \n"
 		""},
 	 { (char *)"RobotModel_getConfig", _wrap_RobotModel_getConfig, METH_VARARGS, (char *)"RobotModel_getConfig(RobotModel self)"},
 	 { (char *)"RobotModel_getVelocity", _wrap_RobotModel_getVelocity, METH_VARARGS, (char *)"RobotModel_getVelocity(RobotModel self)"},
@@ -49075,16 +48247,6 @@ static PyMethodDef SwigMethods[] = {
 		"Returns a sensor by name. If unavailable, a null sensor is returned.\n"
 		"\n"
 		""},
-	 { (char *)"SimRobotController_getSensor", _wrap_SimRobotController_getSensor, METH_VARARGS, (char *)"\n"
-		"SimRobotController_getSensor(SimRobotController self, int index) -> SimRobotSensor\n"
-		"\n"
-		"Old-style: will be deprecated. \n"
-		""},
-	 { (char *)"SimRobotController_getNamedSensor", _wrap_SimRobotController_getNamedSensor, METH_VARARGS, (char *)"\n"
-		"SimRobotController_getNamedSensor(SimRobotController self, std::string const & name) -> SimRobotSensor\n"
-		"\n"
-		"Old-style: will be deprecated. \n"
-		""},
 	 { (char *)"SimRobotController_commands", _wrap_SimRobotController_commands, METH_VARARGS, (char *)"\n"
 		"SimRobotController_commands(SimRobotController self) -> stringVector\n"
 		"\n"
@@ -49309,11 +48471,6 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"Resets to the initial state (same as setState(initialState)) \n"
 		""},
-	 { (char *)"Simulator_getWorld", _wrap_Simulator_getWorld, METH_VARARGS, (char *)"\n"
-		"Simulator_getWorld(Simulator self) -> WorldModel\n"
-		"\n"
-		"Old-style: will be deprecated. \n"
-		""},
 	 { (char *)"Simulator_getState", _wrap_Simulator_getState, METH_VARARGS, (char *)"\n"
 		"Simulator_getState(Simulator self) -> std::string\n"
 		"\n"
@@ -49458,19 +48615,6 @@ static PyMethodDef SwigMethods[] = {
 		"Simulator_body(Simulator self, TerrainModel terrain) -> SimBody\n"
 		"\n"
 		"Returns the SimBody corresponding to the given terrain. \n"
-		""},
-	 { (char *)"Simulator_getController", _wrap_Simulator_getController, METH_VARARGS, (char *)"\n"
-		"getController(int robot) -> SimRobotController\n"
-		"Simulator_getController(Simulator self, RobotModel robot) -> SimRobotController\n"
-		"\n"
-		"Old-style: will be deprecated. \n"
-		""},
-	 { (char *)"Simulator_getBody", _wrap_Simulator_getBody, METH_VARARGS, (char *)"\n"
-		"getBody(RobotModelLink link) -> SimBody\n"
-		"getBody(RigidObjectModel object) -> SimBody\n"
-		"Simulator_getBody(Simulator self, TerrainModel terrain) -> SimBody\n"
-		"\n"
-		"Old-style: will be deprecated. \n"
 		""},
 	 { (char *)"Simulator_getJointForces", _wrap_Simulator_getJointForces, METH_VARARGS, (char *)"\n"
 		"Simulator_getJointForces(Simulator self, RobotModelLink link)\n"

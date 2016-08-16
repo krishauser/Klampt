@@ -1628,14 +1628,6 @@ class RobotModelLink(_object):
         """
         return _robotsim.RobotModelLink_robot(self)
 
-    def getRobot(self):
-        """
-        getRobot(RobotModelLink self) -> RobotModel
-
-        Old-style: will be deprecated. 
-        """
-        return _robotsim.RobotModelLink_getRobot(self)
-
     def getIndex(self):
         """
         getIndex(RobotModelLink self) -> int
@@ -1896,14 +1888,6 @@ class RobotModelDriver(_object):
         """
         return _robotsim.RobotModelDriver_robot(self)
 
-    def getRobot(self):
-        """
-        getRobot(RobotModelDriver self) -> RobotModel
-
-        Old-style: will be deprecated. 
-        """
-        return _robotsim.RobotModelDriver_getRobot(self)
-
     def getType(self):
         """
         getType(RobotModelDriver self) -> char const *
@@ -2050,16 +2034,6 @@ class RobotModel(_object):
         """
         return _robotsim.RobotModel_link(self, *args)
 
-    def getLink(self, *args):
-        """
-        getLink(RobotModel self, int index) -> RobotModelLink
-        getLink(RobotModel self, char const * name) -> RobotModelLink
-
-        Old-style: will be deprecated. Returns a reference to the named link.
-
-        """
-        return _robotsim.RobotModel_getLink(self, *args)
-
     def numDrivers(self):
         """
         numDrivers(RobotModel self) -> int
@@ -2076,16 +2050,6 @@ class RobotModel(_object):
         Returns a reference to the named driver. 
         """
         return _robotsim.RobotModel_driver(self, *args)
-
-    def getDriver(self, *args):
-        """
-        getDriver(RobotModel self, int index) -> RobotModelDriver
-        getDriver(RobotModel self, char const * name) -> RobotModelDriver
-
-        Old-style: will be deprecated. Returns a reference to a
-        RobotModelDriver. 
-        """
-        return _robotsim.RobotModel_getDriver(self, *args)
 
     def getConfig(self):
         """getConfig(RobotModel self)"""
@@ -3422,22 +3386,6 @@ class SimRobotController(_object):
         """
         return _robotsim.SimRobotController_sensor(self, *args)
 
-    def getSensor(self, *args):
-        """
-        getSensor(SimRobotController self, int index) -> SimRobotSensor
-
-        Old-style: will be deprecated. 
-        """
-        return _robotsim.SimRobotController_getSensor(self, *args)
-
-    def getNamedSensor(self, *args):
-        """
-        getNamedSensor(SimRobotController self, std::string const & name) -> SimRobotSensor
-
-        Old-style: will be deprecated. 
-        """
-        return _robotsim.SimRobotController_getNamedSensor(self, *args)
-
     def commands(self):
         """
         commands(SimRobotController self) -> stringVector
@@ -3817,14 +3765,6 @@ class Simulator(_object):
         """
         return _robotsim.Simulator_reset(self)
 
-    def getWorld(self):
-        """
-        getWorld(Simulator self) -> WorldModel
-
-        Old-style: will be deprecated. 
-        """
-        return _robotsim.Simulator_getWorld(self)
-
     def getState(self):
         """
         getState(Simulator self) -> std::string
@@ -4035,25 +3975,6 @@ class Simulator(_object):
         Returns the SimBody corresponding to the given terrain. 
         """
         return _robotsim.Simulator_body(self, *args)
-
-    def getController(self, *args):
-        """
-        getController(Simulator self, int robot) -> SimRobotController
-        getController(Simulator self, RobotModel robot) -> SimRobotController
-
-        Old-style: will be deprecated. 
-        """
-        return _robotsim.Simulator_getController(self, *args)
-
-    def getBody(self, *args):
-        """
-        getBody(Simulator self, RobotModelLink link) -> SimBody
-        getBody(Simulator self, RigidObjectModel object) -> SimBody
-        getBody(Simulator self, TerrainModel terrain) -> SimBody
-
-        Old-style: will be deprecated. 
-        """
-        return _robotsim.Simulator_getBody(self, *args)
 
     def getJointForces(self, *args):
         """

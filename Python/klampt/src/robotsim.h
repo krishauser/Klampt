@@ -89,11 +89,7 @@ class SimRobotController
   SimRobotSensor sensor(int index);
   /// Returns a sensor by name.  If unavailable, a null sensor is returned
   SimRobotSensor sensor(const char* name);
-  ///Old-style: will be deprecated
-  SimRobotSensor getSensor(int index);
-  ///Old-style: will be deprecated
-  SimRobotSensor getNamedSensor(const std::string& name);
-
+  
   /// gets a command list
   std::vector<std::string> commands();
   /// sends a command to the controller
@@ -234,8 +230,6 @@ class Simulator
 
   /// Resets to the initial state (same as setState(initialState))
   void reset();
-  /// Old-style: will be deprecated
-  WorldModel getWorld() const;
 
   /// Returns a Base64 string representing the binary data for the current
   /// simulation state, including controller parameters, etc.
@@ -320,16 +314,6 @@ class Simulator
   SimBody body(const RigidObjectModel& object);
   ///Returns the SimBody corresponding to the given terrain
   SimBody body(const TerrainModel& terrain);
-  ///Old-style: will be deprecated
-  SimRobotController getController(int robot);
-  ///Old-style: will be deprecated
-  SimRobotController getController(const RobotModel& robot);
-  ///Old-style: will be deprecated
-  SimBody getBody(const RobotModelLink& link);
-  ///Old-style: will be deprecated
-  SimBody getBody(const RigidObjectModel& object);
-  ///Old-style: will be deprecated
-  SimBody getBody(const TerrainModel& terrain);
 
   /// Returns the joint force and torque local to the link, as would be read
   /// by a force-torque sensor mounted at the given link's origin.  The 6

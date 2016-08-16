@@ -3,6 +3,7 @@ import glinit
 import visualization
 from ..math import vectorops,so3,se3
 from ..robotsim import WidgetSet,RobotPoser,ObjectPoser,TransformPoser,PointPoser,WorldModel,RobotModelLink,RigidObjectModel,IKObjective
+from ..model.subrobot import SubRobotModel
 from OpenGL.GL import *
 
 class VisualEditorBase(glcommon.GLWidgetPlugin):
@@ -50,7 +51,11 @@ class ConfigEditor(VisualEditorBase):
         self.robot = robot
         self.clicked = None
         self.hovered = None
-        self.robotposer = RobotPoser(robot)
+        if isinstance(robot,SubRobotModel):
+            self.robotposer = RobotPoser(robot._robot)
+            self.robotposer.setActiveDofs(robot._links)
+        else:
+            self.robotposer = RobotPoser(robot)
         self.addWidget(self.robotposer)
     
     def instructions(self):

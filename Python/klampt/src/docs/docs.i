@@ -1055,16 +1055,6 @@ Returns a reference to the indexed link. ";
 
 Returns a reference to the named link. ";
 
-%feature("docstring")  RobotModel::getLink "
-
-Old-style: will be deprecated. Returns a reference to the indexed
-link. ";
-
-%feature("docstring")  RobotModel::getLink "
-
-Old-style: will be deprecated. Returns a reference to the named link.
-";
-
 %feature("docstring")  RobotModel::numDrivers "
 
 Returns the number of drivers. ";
@@ -1076,16 +1066,6 @@ Returns a reference to the indexed driver. ";
 %feature("docstring")  RobotModel::driver "
 
 Returns a reference to the named driver. ";
-
-%feature("docstring")  RobotModel::getDriver "
-
-Old-style: will be deprecated. Returns a reference to the indexed
-driver. ";
-
-%feature("docstring")  RobotModel::getDriver "
-
-Old-style: will be deprecated. Returns a reference to a
-RobotModelDriver. ";
 
 %feature("docstring")  RobotModel::getConfig "";
 
@@ -1229,10 +1209,6 @@ C++ includes: robotmodel.h ";
 
 Returns a reference to the driver's robot. ";
 
-%feature("docstring")  RobotModelDriver::getRobot "
-
-Old-style: will be deprecated. ";
-
 %feature("docstring")  RobotModelDriver::getType "
 
 Currently can be \"normal\", \"affine\", \"rotation\",
@@ -1294,10 +1270,6 @@ Sets the name of the robot link. ";
 %feature("docstring")  RobotModelLink::robot "
 
 Returns a reference to the link's robot. ";
-
-%feature("docstring")  RobotModelLink::getRobot "
-
-Old-style: will be deprecated. ";
 
 %feature("docstring")  RobotModelLink::getIndex "
 
@@ -1566,14 +1538,6 @@ returned. ";
 Returns a sensor by name. If unavailable, a null sensor is returned.
 ";
 
-%feature("docstring")  SimRobotController::getSensor "
-
-Old-style: will be deprecated. ";
-
-%feature("docstring")  SimRobotController::getNamedSensor "
-
-Old-style: will be deprecated. ";
-
 %feature("docstring")  SimRobotController::commands "
 
 gets a command list ";
@@ -1723,10 +1687,6 @@ loaded from an XML file, then the simulation setup is loaded from it.
 
 Resets to the initial state (same as setState(initialState)) ";
 
-%feature("docstring")  Simulator::getWorld "
-
-Old-style: will be deprecated. ";
-
 %feature("docstring")  Simulator::getState "
 
 Returns a Base64 string representing the binary data for the current
@@ -1858,26 +1818,6 @@ Returns the SimBody corresponding to the given object. ";
 %feature("docstring")  Simulator::body "
 
 Returns the SimBody corresponding to the given terrain. ";
-
-%feature("docstring")  Simulator::getController "
-
-Old-style: will be deprecated. ";
-
-%feature("docstring")  Simulator::getController "
-
-Old-style: will be deprecated. ";
-
-%feature("docstring")  Simulator::getBody "
-
-Old-style: will be deprecated. ";
-
-%feature("docstring")  Simulator::getBody "
-
-Old-style: will be deprecated. ";
-
-%feature("docstring")  Simulator::getBody "
-
-Old-style: will be deprecated. ";
 
 %feature("docstring")  Simulator::getJointForces "
 

@@ -9,7 +9,7 @@ def getConfig(item):
 
     TODO: IKObjective,ContactPoint
     """
-    if isinstance(item,RobotModel):
+    if hasattr(item,'getConfig'):
         return item.getConfig()
     elif isinstance(item,RigidObjectModel):
         R,t = item.getTransform()
@@ -55,7 +55,7 @@ def setConfig(item,vector):
 
     TODO: IKObjective,ContactPoint
     """
-    if isinstance(item,RobotModel):
+    if hasattr(item,'setConfig'):
         assert len(vector)==item.numLinks(),"Robot model config has %d DOFs"%(item.numLinks(),)
         item.setConfig(vector)
     elif isinstance(item,RigidObjectModel):

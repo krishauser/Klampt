@@ -46,14 +46,13 @@ if __name__ == "__main__":
     #obj = ik.objective(link,R=link.getTransform()[0],t=pt)
     vis.add("ik objective",obj)
     vis.edit("some point")
-    vis.edit("some blinking transform")
+    #vis.edit("some blinking transform")
     vis.edit("coordinates:ATHLETE:ankle roll 3")
 
     print "Visualization items:"
     vis.listItems(indent=2)
 
     #run the visualizer in a separate thread
-    """
     vis.show()
     iteration = 0
     while vis.shown():
@@ -70,7 +69,6 @@ if __name__ == "__main__":
         #vis.add("some point",[2,5,1 + math.sin(iteration*0.03)],keepAppearance=True)
         time.sleep(0.01)
         iteration += 1
-    """
 
     #Now testing ability to re-launch windows
     """

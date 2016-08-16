@@ -61,6 +61,7 @@ is not yet implemented and will result in a thrown exception.
 
 from ..robotsim import *
 from ..math import se3
+from subrobot import SubRobotModel
 from coordinates import Point,Direction,Frame,Transform
 
 def objective(body,ref=None,local=None,world=None,R=None,t=None):
@@ -106,6 +107,8 @@ def objective(body,ref=None,local=None,world=None,R=None,t=None):
     else:
         obj = IKObjective()
         obj.robot = body.robot()
+        if isinstance(obj.robot,SubRobotModel):
+            obj.robot = obj.robot._robot
         if local and world:
             assert(len(local)==len(world))
             if hasattr(local[0],'__iter__'):
@@ -249,9 +252,14 @@ def solver(objectives):
         else:
             res = []
             for key,(r,objs) in robs.iteritems():
-                s = IKSolver(r)
+                if isinstance(r,SubRobotModel):
+                    s = IKSolver(r._robot)
+                else:
+                    s = IKSolver(r)
                 for obj in objs:
                     s.add(obj)
+                if isinstance(r,SubRobotModel):
+                    s.setActiveDofs(r.links)
                 res.append(s)
             if len(res)==1:
                 return res[0]
@@ -284,6 +292,8 @@ def solve(objectives,iters=1000,tol=1e-3,activeDofs=None):
         - iters: a maximum number of iterations.
         - tol: a maximum error tolerance on satisfying the objectives
         - activeDofs: a list of link indices or names to use for IK solving.
+          Note: cannot use sub-robots and activeDofs at the moment.  Undefined
+          behavior will result.
 
     Returns True if a solution is successfully found to the given tolerance,
     within the provided number of iterations.  The robot(s) are then set

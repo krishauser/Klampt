@@ -60,8 +60,6 @@ class RobotModelLink
   void setName(const char* name);
   ///Returns a reference to the link's robot.
   RobotModel robot();
-  ///Old-style: will be deprecated
-  RobotModel getRobot();
   ///Returns the index of the link (on its robot).
   int getIndex();
   ///Returns the index of the link's parent (on its robot).
@@ -138,8 +136,6 @@ class RobotModelDriver
   const char* getName();
   ///Returns a reference to the driver's robot.
   RobotModel robot();
-  ///Old-style: will be deprecated
-  RobotModel getRobot();
   ///Currently can be "normal", "affine", "rotation", "translation", or "custom"
   const char* getType();
   ///Returns the single affected link for "normal" links
@@ -191,20 +187,12 @@ class RobotModel
   RobotModelLink link(int index);
   ///Returns a reference to the named link
   RobotModelLink link(const char* name);
-  ///Old-style: will be deprecated.  Returns a reference to the indexed link.
-  RobotModelLink getLink(int index);
-  ///Old-style: will be deprecated.  Returns a reference to the named link.
-  RobotModelLink getLink(const char* name);
   ///Returns the number of drivers.
   int numDrivers();
   ///Returns a reference to the indexed driver.
   RobotModelDriver driver(int index);
   ///Returns a reference to the named driver.
   RobotModelDriver driver(const char* name);
-  ///Old-style: will be deprecated. Returns a reference to the indexed driver.
-  RobotModelDriver getDriver(int index);
-  ///Old-style: will be deprecated. Returns a reference to a RobotModelDriver.
-  RobotModelDriver getDriver(const char* name);
 
   //kinematic and dynamic properties
   void getConfig(std::vector<double>& out);
