@@ -68,7 +68,16 @@
                return false;
             }
          }        
-                 
+         
+        
+         function sendBoilerPlate()
+         {
+            var codeindex=$('#boilerselctor').prop('selectedIndex');
+            
+            sendMessage("B"+codeindex);
+         
+         }
+                          
          function doCodeSubmit()
          {
             var textArea=document.getElementById("myTextarea");
@@ -76,9 +85,13 @@
              
             if(localStorageAvailable)
             {
-             localStorage.setItem('KlamptExample1', editor.getValue());           
+             localStorage.setItem('KlamptStartingCode_'+$('#boilerselctor').val(), editor.getValue());           
             }
+
+            sendBoilerPlate();
             sendCode();     
+            requestAdvance();
+
          }
          function requestStop()
          {
@@ -93,6 +106,46 @@
             requestAdvance();
             freeRun=true;
          }
+         
+         //the magic of AJAX
+         //http://stackoverflow.com/questions/3567369/reading-server-side-file-with-javascript
+         function loadFileToEditor(file_to_load)
+         {
+            
+            
+            $.ajax({
+               url: file_to_load,
+               async: true,   // asynchronous request? (synchronous requests are discouraged...)
+               cache: false,   // with this, you can force the browser to not make cache of the retrieved data
+               dataType: "text",  // jQuery will infer this, but you can set explicitly
+               success: function( data, textStatus, jqXHR ) {
+                  editor.getSession().setValue(data); 
+               }
+            });
+         }
+   
+         function boilerPlateChanged()
+         {
+         
+            var file_to_load=$('#boilerselctor').val();
+         
+            if(localStorageAvailable) //lets see if we have worked on this previously
+            {
+               var example1Text=localStorage.getItem('KlamptStartingCode_'+file_to_load);
+               if(example1Text!=null)
+               {               
+                  editor.getSession().setValue(example1Text);
+               }
+               else
+               {
+                  loadFileToEditor(file_to_load);
+               }
+            }
+            else
+               loadFileToEditor(file_to_load);
+         }   
+         
+         
      
          $( document ).ready(function() {
             console.log("page is ready, lets setup some stuff");
@@ -104,7 +157,7 @@
             $('#myLayout').w2layout({
                name: 'layout',
                panels: [
-                  { type: 'top',  size: "5%", resizable: true, style: pstyle, content: '<button onclick="doCodeSubmit()">Submit Code</button><button onclick="requestAdvance()">Advance Frame</button><button onclick="requestFreeRun()">Run</button><button onclick="requestStop()">Stop</button> <div style=" width:20px;display:inline-block;" />Klampt Server URL:<input type="text" id="serverURL" value="ws://l33t.egr.duke.edu:1234" size="50"><button onclick="doConnect()">Connect</button>'},
+                  { type: 'top',  size: "5%", resizable: true, style: pstyle, content: '<button onclick="doCodeSubmit()">Reset</button><button onclick="requestAdvance()">Advance Frame</button><button onclick="requestFreeRun()">Run</button><button onclick="requestStop()">Stop</button> <div style=" width:20px;display:inline-block;" />Klampt Server URL:<input type="text" id="serverURL" value="ws://l33t.egr.duke.edu:1234" size="50"><button onclick="doConnect()">Connect</button><div style=" width:20px;display:inline-block;" /><select id="boilerselctor" onchange="boilerPlateChanged()"><option  value="code1.py">HW 1</option><option value="code2.py">HW 2</option><option value="code3.py">HW 3</option><option value="code4.py">HW 4</option></select> '},
                   { type: 'main', style: pstyle, content: '<div id="canvas" style="width:100%; height:100%; margin:0; padding:0"></div>' },
                   { type: 'preview', size: "15%", resizable: true, style: pstyle, content: '<textarea readonly id="myTextarea" style="background-color: black;color:white;width:100%;height:100%">> </textarea></div></div>' },
                   { type: 'right', size: '50%', resizable: true, style: pstyle, content: 
@@ -129,16 +182,10 @@
             editor.setTheme("ace/theme/eclipse"); 
             editor.getSession().setMode("ace/mode/python");
             
-            editor.getSession().setValue("nextTime = 1\ntoggle = 0\ndef init(robot_model):\n    global ghost\n    ghost=kviz.add_ghost('myGhost')\n    kviz.set_color(ghost,[1,0,0,0.25],True)\n    q=kviz.get_robot_config()\n    q[8]-=2.0\n    kviz.set_ghost_config(q,'myGhost')\n    kviz.add_text('HUD1',1,1)\n    kviz.update_text('HUD1','hello world')\n\ndef control_loop(t,controller):\n    global nextTime, toggle\n    if t >= nextTime:\n        q = controller.getCommandedConfig()\n        q[8] -= 0.5\n        controller.setMilestone(q)\n        nextTime += 1.0\n        ");
+            /*editor.getSession().setValue("nextTime = 1\ntoggle = 0\ndef init(robot_model):\n    global ghost\n    ghost=kviz.add_ghost('myGhost')\n    kviz.set_color(ghost,[1,0,0,0.25],True)\n    q=kviz.get_robot_config()\n    q[8]-=2.0\n    kviz.set_ghost_config(q,'myGhost')\n    kviz.add_text('HUD1',1,1)\n    kviz.update_text('HUD1','hello world')\n\ndef control_loop(t,controller):\n    global nextTime, toggle\n    if t >= nextTime:\n        q = controller.getCommandedConfig()\n        q[8] -= 0.5\n        controller.setMilestone(q)\n        nextTime += 1.0\n        ");
+            */
             
-            if(localStorageAvailable) //lets see if we have worked on this previously
-            {
-               var example1Text=localStorage.getItem('KlamptExample1');
-               if(example1Text!=null)
-               {
-                  editor.getSession().setValue(example1Text);
-               }
-            }
+            boilerPlateChanged();
                        
             //var editor = CodeMirror( document.getElementById("editor"), { //use codemirror as text editor
             //value: "print 'hello world'\n",
@@ -189,7 +236,7 @@
          {
             console.log("got request to send code!\n");
             console.log("trying to send: " + editor.getValue());
-            sendMessage(editor.getValue());
+            sendMessage("C"+editor.getValue());
             //sendMessage("hello world");
          }
             
