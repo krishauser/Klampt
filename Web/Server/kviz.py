@@ -38,7 +38,7 @@ _RPC = []
 #def _to_threejs_color(color):
 #	return int(color[0]*0xff) << 16 | int(color[1]*0xff)<<8 | int(color[2]*0xff)
 
-def set_color(target,rgba_color,recursive=False,robot=0):
+def set_color(target,rgba_color,recursive=False):
 	"""Sets the given RobotModelLink or named link or indexed link to
 	some color."""
 
@@ -141,6 +141,12 @@ def add_text(name="HUD_Text1",x=0,y=0,text=""):
 
 def update_text(name="HUD_Text1",text=""):
 	_RPC.append({'type':'update_text','name':name,'text':text})	
+
+def add_sphere(name="KVIZ_Sphere1",x=0,y=0,z=0,r=1):
+	_RPC.append({'type':'add_sphere','name':name,'x':x,'y':y,'z':z,'r':r})	
+
+def update_sphere(name="KVIZ_Sphere1",x=0,y=0,z=0,r=-1):
+	_RPC.append({'type':'update_sphere','name':name,'x':x,'y':y,'z':z,'r':r})	
 
 #def remove_text(name="_"):
 #	"""Deletes the drawing of the given text"""
