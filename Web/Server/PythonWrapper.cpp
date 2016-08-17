@@ -129,7 +129,7 @@ void initialize_python_interpreter()
   Py_InitModule("log", logMethods); //setup stdio capture  
 }
 
-string boilerplates[]={"boilerplate1.py","boilerplate1.py","boilerplate1.py","boilerplate1.py"};
+string boilerplates[]={"boilerplate1.py","boilerplate2.py","boilerplate3.py","boilerplate4.py"};
 
 void run_boiler_plate(int which)
 {
