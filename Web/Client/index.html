@@ -97,6 +97,9 @@
          {
             freeRun=false;
          }
+         //TODO: request interrupt of embedded python
+         // http://stackoverflow.com/questions/1420957/stopping-embedded-python
+         
          function requestAdvance()
          {
             sendMessage("A");
@@ -378,7 +381,7 @@
                         {
                            if(typeof object.userData.customSingleMaterialSetup === 'undefined')
                            {                          
-                              basicMaterial = new THREE.MeshBasicMaterial();
+                              basicMaterial = new THREE.MeshPhongMaterial();
                               object.material=basicMaterial;
                               object.userData.customSingleMaterialSetup=true;
                            }
@@ -387,7 +390,7 @@
                         {
                            if(typeof object.userData.customSharedMaterialSetup === 'undefined')
                            {                          
-                              basicMaterial = new THREE.MeshBasicMaterial();
+                              basicMaterial = new THREE.MeshPhongMaterial();
                               object.material=basicMaterial;
                               object.userData.customSharedMaterialSetup=true;
                               
@@ -478,7 +481,7 @@
                if(request.type == "add_sphere")
                {
                   console.log("RPC to add sphere!"); 
-                  var geometry = new THREE.SphereGeometry(1.0);
+                  var geometry = new THREE.SphereGeometry(1.0,20,20);
                   var material = new THREE.MeshPhongMaterial( {color: 0xAA0000} );
                   var sphere = new THREE.Mesh( geometry, material );
                   
