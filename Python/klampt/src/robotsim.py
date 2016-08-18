@@ -2578,6 +2578,14 @@ class WorldModel(_object):
         """
         return _robotsim.WorldModel_drawGL(self)
 
+    def getSceneJSON(self):
+        """getSceneJSON(WorldModel self) -> std::string"""
+        return _robotsim.WorldModel_getSceneJSON(self)
+
+    def getTransformsJSON(self):
+        """getTransformsJSON(WorldModel self) -> std::string"""
+        return _robotsim.WorldModel_getTransformsJSON(self)
+
     def enableGeometryLoading(self, *args):
         """
         enableGeometryLoading(WorldModel self, bool enabled)
