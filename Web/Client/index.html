@@ -40,7 +40,8 @@
 			//document.body.appendChild( stats.dom );
          
          var scene = new THREE.Scene();
-         var camera = new THREE.PerspectiveCamera( 75, 1.0, 0.1, 1000 );
+         //var camera = new THREE.PerspectiveCamera( 75, 1.0, 0.1, 1000 );
+         var camera = new THREE.PerspectiveCamera( 45, 1.0, 0.1, 1000 );
          camera.position.z = 10;
          camera.position.y = 5;
    
@@ -72,9 +73,9 @@
         
          function sendBoilerPlate()
          {
-            var codeindex=$('#boilerselctor').prop('selectedIndex');
+            var boilerid=$('#boilerselctor').val();
             
-            sendMessage("B"+codeindex);
+            sendMessage("B"+boilerid);
          
          }
                           
@@ -115,7 +116,7 @@
          function loadFileToEditor(file_to_load)
          {
             
-            
+            console.log("trying to load "+file_to_load);
             $.ajax({
                url: file_to_load,
                async: true,   // asynchronous request? (synchronous requests are discouraged...)
@@ -129,12 +130,12 @@
    
          function boilerPlateChanged()
          {
-         
-            var file_to_load=$('#boilerselctor').val();
+            var boilerid=$('#boilerselctor').val();
+            var file_to_load="code_"+boilerid+".py";
          
             if(localStorageAvailable) //lets see if we have worked on this previously
             {
-               var example1Text=localStorage.getItem('KlamptStartingCode_'+file_to_load);
+               var example1Text=localStorage.getItem('KlamptStartingCode_'+boilerid);
                if(example1Text!=null)
                {               
                   editor.getSession().setValue(example1Text);
@@ -160,7 +161,7 @@
             $('#myLayout').w2layout({
                name: 'layout',
                panels: [
-                  { type: 'top',  size: "5%", resizable: true, style: pstyle, content: '<button onclick="doCodeSubmit()">Reset</button><button onclick="requestAdvance()">Advance Frame</button><button onclick="requestFreeRun()">Run</button><button onclick="requestStop()">Stop</button> <div style=" width:20px;display:inline-block;" />Klampt Server URL:<input type="text" id="serverURL" value="ws://l33t.egr.duke.edu:1234" size="50"><button onclick="doConnect()">Connect</button><div style=" width:20px;display:inline-block;" /><select id="boilerselctor" onchange="boilerPlateChanged()"><option  value="code1.py">HW 1</option><option value="code2.py">HW 2</option><option value="code3.py">HW 3</option><option value="code4.py">HW 4</option></select> '},
+                  { type: 'top',  size: "5%", resizable: true, style: pstyle, content: '<button onclick="doCodeSubmit()">Reset</button><button onclick="requestAdvance()">Advance Frame</button><button onclick="requestFreeRun()">Run</button><button onclick="requestStop()">Stop</button> <div style=" width:20px;display:inline-block;" />Klampt Server URL:<input type="text" id="serverURL" value="ws://l33t.egr.duke.edu:1234" size="50"><button onclick="doConnect()">Connect</button><div style=" width:20px;display:inline-block;" /><select id="boilerselctor" onchange="boilerPlateChanged()"><option  value="test_sim">Test Simulation</option><option  value="sandbox">Sandbox</option><option value="hw1">HW 1</option><option value="hw2">HW 2</option><option value="hw3">HW 3</option><option value="hw4">HW 4</option></select> '},
                   { type: 'main', style: pstyle, content: '<div id="canvas" style="width:100%; height:100%; margin:0; padding:0"></div>' },
                   { type: 'preview', size: "15%", resizable: true, style: pstyle, content: '<textarea readonly id="myTextarea" style="background-color: black;color:white;width:100%;height:100%">> </textarea></div></div>' },
                   { type: 'right', size: '50%', resizable: true, style: pstyle, content: 
