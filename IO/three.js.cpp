@@ -85,6 +85,9 @@ void ThreeJSExport(const RobotWorld& world,AnyCollection& out,ThreeJSCache& cach
   out["metadata"]["generator"] = "Klampt three.js export";
   AnyCollection& geometries = out["geometries"];
   AnyCollection& materials = out["materials"];
+  //even if the world is empty, this should be set to an array
+  geometries.resize(0);
+  materials.resize(0);
   //first, loop through all geometries and materials
   for(size_t i=0;i<world.robots.size();i++) {
     for(size_t j=0;j<world.robots[i]->links.size();j++) {
