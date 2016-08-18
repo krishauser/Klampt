@@ -199,6 +199,11 @@ void handleIncomingMessage(string message)
          }
          else {
            PyRun_SimpleString("wrapper_advance()\n");
+           if(PyErr_Occurred()) {
+              printf("  An exception occurred while running client code\n");
+              PyErr_Clear();
+              return;
+           }
          }
       }
       if(routing=='C')
