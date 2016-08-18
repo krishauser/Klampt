@@ -5,17 +5,6 @@ from klampt import vectorops,so3,se3
 import math
 import time
 import kviz
-import emb
-import log
-
-class StdoutCatcher:
-    def write(self, str):
-        log.CaptureStdout(str)
-class StderrCatcher:
-    def write(self, str):
-        log.CaptureStderr(str)
-sys.stdout = StdoutCatcher()
-sys.stderr = StderrCatcher()
 
 
 class WebRobotProgram:

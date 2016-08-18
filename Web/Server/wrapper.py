@@ -1,3 +1,19 @@
+import time
+import kviz
+import emb
+import log
+import sys
+
+class StdoutCatcher:
+    def write(self, str):
+        log.CaptureStdout(str)
+class StderrCatcher:
+    def write(self, str):
+        log.CaptureStderr(str)
+sys.stdout = StdoutCatcher()
+sys.stderr = StderrCatcher()
+
+
 wrapper_frame_precomputed = False
 wrapper_JSON_message_count = 0 
 wrapper_jString = None
