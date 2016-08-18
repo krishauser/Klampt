@@ -87,11 +87,11 @@
              localStorage.setItem('KlamptStartingCode_'+$('#boilerselctor').val(), editor.getValue());           
             }
 
-            if(ensureConnected()) {
+            runConnected(function() {
                sendBoilerPlate();
                sendCode();     
                requestAdvance();
-            }
+            })
 
          }
          function requestStop()
@@ -172,7 +172,7 @@
                name: 'layout',
                panels: [
                   { type: 'top',  size: "5%", resizable: true, style: pstyle, content: '<button onclick="doCodeSubmit()">Reset</button><button onclick="requestAdvance()">Advance Frame</button><button onclick="requestFreeRun()">Run</button><button onclick="requestStop()">Stop</button> <div style=" width:20px;display:inline-block;" />Klampt Server URL:<input type="text" id="serverURL" value="ws://l33t.egr.duke.edu:1234" size="50"><button onclick="doConnect()">Connect</button><div style=" width:20px;display:inline-block;" /><select id="boilerselctor" onchange="boilerPlateChanged()"><option  value="test_sim">Test Simulation</option><option  value="sandbox">Sandbox</option><option value="lab1a">Lab 1a</option><option value="lab1b">Lab 1b</option><option value="lab1c">Lab 1c</option><option value="lab1d">Lab 1d</option><option value="lab2">Lab 2</option><option value="lab3">Lab 3</option><option value="lab4">Lab 4</option></select> '},
-                  { type: 'main', style: pstyle, content: '<div id="canvas" style="width:100%; height:100%; margin:0; padding:0"><div id="text_overlay" style="position:absolute; top:0px; left:0px; width:100%; height:100%; margin:0; padding:0"></div></div>' },
+                  { type: 'main', style: pstyle, content: '<div id="canvas" style="width:100%; height:100%; margin:0; padding:0"></div>' },
                   { type: 'preview', size: "15%", resizable: true, style: pstyle, content: '<textarea readonly id="myTextarea" style="background-color: black;color:white;width:100%;height:100%">> </textarea></div></div>' },
                   { type: 'right', size: '50%', resizable: true, style: pstyle, content: 
                     '<div id="editor" style="width:100%; height:100%; margin:0; padding:0"></div>' },               ]
@@ -180,6 +180,12 @@
             
           
             
+            if(localStorageAvailable) {
+               var url=localStorage.getItem('serverURL');
+               if(url!=null) {
+                  $('#serverURL').val(url);
+               }
+            }
             
           
 
@@ -239,20 +245,25 @@
             animate();       
          });
 
-         function ensureConnected()
+         function runConnected(onconnect)
          {
             if(!isConnected())
             {
                doConnect();
+
             }
-            return isConnected();
+            waitForConnection(1000,onconnect,null);
          }
          
          function doConnect()
          {
             var URL=$('#serverURL').val();
             console.log("trying to connect to URL: " + URL);
-            network = new Network(URL,newSceneArrivedCallback,consoleTextArrivedCallback,consoleTextArrivedCallback);         
+            network = new Network(URL,newSceneArrivedCallback,consoleTextArrivedCallback,consoleTextArrivedCallback);    
+            if(localStorageAvailable)
+            {
+              localStorage.setItem('serverURL', URL);
+            }
          }
    
          function sendCode() //send python code back to server
@@ -340,7 +351,18 @@
                scene=null;
             
                scene = loader.parse( dataJ );
-               $('#text_overlay').empty();
+               //clear anything named _text_overlay_X
+               function remove_text(index) {
+                  if(this.id.startsWith("_text_overlay_")) {
+                     console.log("Removing text item "+this.id);
+                     this.remove();
+                  }
+               }
+               //TODO: make this optional?
+               var axisHelper = new THREE.AxisHelper( 0.2 );
+               scene.add( axisHelper );
+
+               $('#canvas').children().each(remove_text);
                var t1 = performance.now();
                console.log("Call to load scene " + (t1 - t0) + " milliseconds.")
                //scene.traverse ( function (child) {
@@ -492,7 +514,7 @@
                      
                   text2.style.top = request.x + '%';
                   text2.style.left = request.y + '%';
-                  document.getElementById("text_overlay").appendChild(text2);
+                  document.getElementById("canvas").appendChild(text2);
                }
                if(request.type == "update_text")
                {
