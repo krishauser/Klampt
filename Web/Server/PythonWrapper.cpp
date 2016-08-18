@@ -129,13 +129,11 @@ void initialize_python_interpreter()
   Py_InitModule("log", logMethods); //setup stdio capture  
 }
 
-string boilerplates[]={"boilerplate1.py","boilerplate2.py","boilerplate3.py","boilerplate4.py"};
-
-void run_boiler_plate(int which)
+void run_boiler_plate(const string& which)
 {
-   string boilerplate=boilerplates[which];
+   string boilerplate="boilerplate_"+which+".py";
 
-   printf("  running boilerplate code\n"); //TODO, allow client to specify boiler plate
+   printf("  running boilerplate code %s\n",which.c_str()); //TODO, allow client to specify boiler plate
    std::string boiler_plate=load_file(boilerplate);
 
    if(boiler_plate.size()==0) //okay now lets try to find the file in a different place
@@ -148,8 +146,20 @@ void run_boiler_plate(int which)
       printf("    found the boiler plate!\n");
       PyRun_SimpleString(boiler_plate.c_str());
    }
-   else
-      printf("    We weren't able to properly load the boiler plate\n");
+   else {
+      printf("    We weren't able to properly load the boiler plate %s\n",which.c_str());
+      return false;
+   }
+   std::string wrapper=load_file("Web/Server/wrapper.py");
+   if(wrapper.size()!=0)
+   {
+      printf("    found the boiler plate wrapper!\n");
+      PyRun_SimpleString(wrapper.c_str());
+   }
+   else {
+      printf("    We weren't able to properly load the wrapper\n");
+      return false;
+   }
 }
 
 void shutdown_python_interpreter()
@@ -170,16 +180,50 @@ void handleIncomingMessage(string message)
       if(routing=='A')
       {
          printf("  user would like to advance frame\n");
-         PyRun_SimpleString("boilerplate_advance()\n");
+         PyRun_SimpleString("wrapper_advance()\n");
       }
       if(routing=='C')
       {  
-         printf("  user would like to add some student code\n");
-         PyRun_SimpleString(message.c_str());
+        printf("  user would like to add some student code\n");
+
+        PyObject* stub_module = PyImport_ImportModule("stub");
+        PyObject* main_module = PyImport_AddModule("__main__");
+        PyObject_SetAttrString(main_module, "stub", stub_module);
+        PyObject* stub_dict = PyModule_GetDict(stub_module);
+        PyObject *key, *value;
+        Py_ssize_t pos = 0;
+
+        /*
+        printf("Before values\n");
+        while (PyDict_Next(stub_dict, &pos, &key, &value)) {
+            PyObject_Print(key,stdout,Py_PRINT_RAW);
+            printf("\n");
+        }
+        */
+        PyObject* res = PyRun_String(message.c_str(),Py_file_input,stub_dict,stub_dict);
+        /*
+        printf("After values\n");
+        pos = 0;
+        while (PyDict_Next(stub_dict, &pos, &key, &value)) {
+            PyObject_Print(key,stdout,Py_PRINT_RAW);
+            printf("\n");
+        }
+        */
+        if(!res) {
+          printf("Error running submitted code.\n");
+          Py_XDECREF(stub_dict);
+          return;
+        }
+        Py_XDECREF(res);
+        Py_XDECREF(stub_dict);
+        //PyRun_SimpleString(message.c_str());
+
+        printf("Running boilerplate_start()...\n");
+        PyRun_SimpleString("wrapper_start()\n");
       }
       if(routing=='B')
       {
-         run_boiler_plate(atoi(message.c_str()));
+         run_boiler_plate(message);
       }
    }
 }

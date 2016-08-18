@@ -158,6 +158,10 @@ def _init(world):
 	global _world
 	_world = world
 
+def _reset():
+	global _world,_RPC
+	_world = WorldModel()
+	_RPC = []
 
 def _getInitialJSON():
 	global _world,_sceneCurrent,_RPC
