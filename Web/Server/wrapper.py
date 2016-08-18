@@ -5,11 +5,8 @@ wrapper_jString = None
 def wrapper_compute_JSON():
 	global wrapper_JSON_message_count,wrapper_jString
 	if wrapper_JSON_message_count==0:
-		print "Getting initial json string..."
 		starttime=time.time();
 		wrapper_jString=kviz._getInitialJSON()
-		print "Done.."
-		print wrapper_jString
 		secs = time.time()- starttime
 		msecs = secs * 1000  # millisecs
 		print "Getting the scene in JSON format took: " + "{:.2f}".format(msecs) + " ms"
