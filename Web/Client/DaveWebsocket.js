@@ -188,6 +188,11 @@ function sendMessage(value)
 	console.log("Not connected to remote, so no message sent");
 }
 
+function isConnected()
+{
+	return network && network.connected()
+}
+
 function updateSocketState(websocket)
 {
    console.log("in updateSocketState");		

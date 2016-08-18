@@ -42,8 +42,8 @@
          var scene = new THREE.Scene();
          //var camera = new THREE.PerspectiveCamera( 75, 1.0, 0.1, 1000 );
          var camera = new THREE.PerspectiveCamera( 45, 1.0, 0.1, 1000 );
-         camera.position.z = 10;
-         camera.position.y = 5;
+         camera.position.z = 6;
+         camera.position.y = 3;
    
          var renderer = new THREE.WebGLRenderer();  
          var loader = new THREE.ObjectLoader();
@@ -74,9 +74,7 @@
          function sendBoilerPlate()
          {
             var boilerid=$('#boilerselctor').val();
-            
             sendMessage("B"+boilerid);
-         
          }
                           
          function doCodeSubmit()
@@ -89,9 +87,11 @@
              localStorage.setItem('KlamptStartingCode_'+$('#boilerselctor').val(), editor.getValue());           
             }
 
-            sendBoilerPlate();
-            sendCode();     
-            requestAdvance();
+            if(ensureConnected()) {
+               sendBoilerPlate();
+               sendCode();     
+               requestAdvance();
+            }
 
          }
          function requestStop()
@@ -103,7 +103,13 @@
          
          function requestAdvance()
          {
-            sendMessage("A");
+            if(!isConnected())
+            {
+               doCodeSubmit();
+            }
+            if(isConnected()) {
+               sendMessage("A");
+            }
          }
          function requestFreeRun()
          {
@@ -116,7 +122,7 @@
          function loadFileToEditor(file_to_load)
          {
             
-            console.log("trying to load "+file_to_load);
+            console.log("Trying to load stub code "+file_to_load);
             $.ajax({
                url: file_to_load,
                async: true,   // asynchronous request? (synchronous requests are discouraged...)
@@ -124,6 +130,10 @@
                dataType: "text",  // jQuery will infer this, but you can set explicitly
                success: function( data, textStatus, jqXHR ) {
                   editor.getSession().setValue(data); 
+               },
+               error : function( jqXHR, textStatus, errorThrown ) {
+                  console.log("Error loading stub code: "+textStatus)
+                  editor.getSession().setValue(""); 
                }
             });
          }
@@ -131,7 +141,7 @@
          function boilerPlateChanged()
          {
             var boilerid=$('#boilerselctor').val();
-            var file_to_load="code_"+boilerid+".py";
+            var file_to_load="Scenarios/code_"+boilerid+".py";
          
             if(localStorageAvailable) //lets see if we have worked on this previously
             {
@@ -161,8 +171,8 @@
             $('#myLayout').w2layout({
                name: 'layout',
                panels: [
-                  { type: 'top',  size: "5%", resizable: true, style: pstyle, content: '<button onclick="doCodeSubmit()">Reset</button><button onclick="requestAdvance()">Advance Frame</button><button onclick="requestFreeRun()">Run</button><button onclick="requestStop()">Stop</button> <div style=" width:20px;display:inline-block;" />Klampt Server URL:<input type="text" id="serverURL" value="ws://l33t.egr.duke.edu:1234" size="50"><button onclick="doConnect()">Connect</button><div style=" width:20px;display:inline-block;" /><select id="boilerselctor" onchange="boilerPlateChanged()"><option  value="test_sim">Test Simulation</option><option  value="sandbox">Sandbox</option><option value="hw1">HW 1</option><option value="hw2">HW 2</option><option value="hw3">HW 3</option><option value="hw4">HW 4</option></select> '},
-                  { type: 'main', style: pstyle, content: '<div id="canvas" style="width:100%; height:100%; margin:0; padding:0"></div>' },
+                  { type: 'top',  size: "5%", resizable: true, style: pstyle, content: '<button onclick="doCodeSubmit()">Reset</button><button onclick="requestAdvance()">Advance Frame</button><button onclick="requestFreeRun()">Run</button><button onclick="requestStop()">Stop</button> <div style=" width:20px;display:inline-block;" />Klampt Server URL:<input type="text" id="serverURL" value="ws://l33t.egr.duke.edu:1234" size="50"><button onclick="doConnect()">Connect</button><div style=" width:20px;display:inline-block;" /><select id="boilerselctor" onchange="boilerPlateChanged()"><option  value="test_sim">Test Simulation</option><option  value="sandbox">Sandbox</option><option value="lab1a">Lab 1a</option><option value="lab1b">Lab 1b</option><option value="lab1c">Lab 1c</option><option value="lab1d">Lab 1d</option><option value="lab2">Lab 2</option><option value="lab3">Lab 3</option><option value="lab4">Lab 4</option></select> '},
+                  { type: 'main', style: pstyle, content: '<div id="canvas" style="width:100%; height:100%; margin:0; padding:0"><div id="text_overlay" style="position:absolute; top:0px; left:0px; width:100%; height:100%; margin:0; padding:0"></div></div>' },
                   { type: 'preview', size: "15%", resizable: true, style: pstyle, content: '<textarea readonly id="myTextarea" style="background-color: black;color:white;width:100%;height:100%">> </textarea></div></div>' },
                   { type: 'right', size: '50%', resizable: true, style: pstyle, content: 
                     '<div id="editor" style="width:100%; height:100%; margin:0; padding:0"></div>' },               ]
@@ -228,6 +238,15 @@
             onWindowResize();
             animate();       
          });
+
+         function ensureConnected()
+         {
+            if(!isConnected())
+            {
+               doConnect();
+            }
+            return isConnected();
+         }
          
          function doConnect()
          {
@@ -321,6 +340,7 @@
                scene=null;
             
                scene = loader.parse( dataJ );
+               $('#text_overlay').empty();
                var t1 = performance.now();
                console.log("Call to load scene " + (t1 - t0) + " milliseconds.")
                //scene.traverse ( function (child) {
@@ -462,7 +482,7 @@
                   console.log("RPC to add text!");     
                   var text2 = document.createElement('div');
                   text2.style.position = 'absolute';
-                  text2.id=request.name;
+                  text2.id="_text_overlay_"+request.name;
                   //text2.style.zIndex = 1;    // if you still don't see the label, try uncommenting this
                   //text2.style.width = 100;
                   //text2.style.height = 100;
@@ -472,11 +492,11 @@
                      
                   text2.style.top = request.x + '%';
                   text2.style.left = request.y + '%';
-                  document.getElementById("canvas").appendChild(text2);
+                  document.getElementById("text_overlay").appendChild(text2);
                }
                if(request.type == "update_text")
                {
-                  var text2 = document.getElementById(request.name);
+                  var text2 = document.getElementById("_text_overlay_"+request.name);
                   text2.innerHTML = request.text;
                }
                if(request.type == "add_sphere")
