@@ -193,6 +193,30 @@ function isConnected()
 	return network && network.connected()
 }
 
+//note: this doesn't actually pause the code... you need to provide callbacks for things to change on
+//connection success / failure
+function waitForConnection(msecs,callback,failcallback) {
+	if(network.websocket == null || msecs < 0) {
+		if(failcallback != null) {
+			failcallback();
+		}
+		return;
+	}
+    if (network.websocket.readyState === 1) {
+        if(callback != null){
+            callback();
+        }
+        return;
+    }
+
+    setTimeout(
+        function () {
+            console.log("wait for connection...")
+            waitForConnection(msecs-5, callback, failcallback);
+        }, 5); // wait 5 milisecond for the connection...
+}
+
+
 function updateSocketState(websocket)
 {
    console.log("in updateSocketState");		
