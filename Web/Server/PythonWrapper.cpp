@@ -9,6 +9,9 @@ using namespace std;
 
 #include "websocket.h"
 
+bool boilerplate_loaded = false;
+bool student_code_loaded = false;
+
 /*
 // http://faq.cprogramming.com/cgi-bin/smartfaq.cgi?answer=1045689663&id=1043284385
 std::string IntToString ( int number )
@@ -129,7 +132,7 @@ void initialize_python_interpreter()
   Py_InitModule("log", logMethods); //setup stdio capture  
 }
 
-void run_boiler_plate(const string& which)
+bool run_boiler_plate(const string& which)
 {
    string boilerplate="boilerplate_"+which+".py";
 
@@ -138,13 +141,18 @@ void run_boiler_plate(const string& which)
 
    if(boiler_plate.size()==0) //okay now lets try to find the file in a different place
    {
-      boiler_plate=load_file("./Web/Server/"+boilerplate);
+      boiler_plate=load_file("./Web/Client/Scenarios/"+boilerplate);
    }
 
    if(boiler_plate.size()!=0)
    {
       printf("    found the boiler plate!\n");
-      PyRun_SimpleString(boiler_plate.c_str());
+      int res = PyRun_SimpleString(boiler_plate.c_str());
+      if(res < 0 || PyErr_Occurred()) {
+        printf("   error while running boiler plate %s?\n",which.c_str());
+        PyErr_Clear();
+        return false;
+      }
    }
    else {
       printf("    We weren't able to properly load the boiler plate %s\n",which.c_str());
@@ -154,12 +162,18 @@ void run_boiler_plate(const string& which)
    if(wrapper.size()!=0)
    {
       printf("    found the boiler plate wrapper!\n");
-      PyRun_SimpleString(wrapper.c_str());
+      int res = PyRun_SimpleString(wrapper.c_str());
+      if(res < 0 || PyErr_Occurred()) {
+        printf("   error while running wrapper.py?\n");
+        PyErr_Clear();
+        return false;
+      }
    }
    else {
       printf("    We weren't able to properly load the wrapper\n");
       return false;
    }
+   return true;
 }
 
 void shutdown_python_interpreter()
@@ -180,14 +194,28 @@ void handleIncomingMessage(string message)
       if(routing=='A')
       {
          printf("  user would like to advance frame\n");
-         PyRun_SimpleString("wrapper_advance()\n");
+         if(!boilerplate_loaded || !student_code_loaded) {
+           printf("  Code is not updated, returning.\n");
+         }
+         else {
+           PyRun_SimpleString("wrapper_advance()\n");
+         }
       }
       if(routing=='C')
       {  
         printf("  user would like to add some student code\n");
+        student_code_loaded = false;
 
-        PyObject* stub_module = PyImport_ImportModule("stub");
+        PyObject* stub_module = PyImport_ImportModule("stub");\
+        if(stub_module == NULL) {
+          printf("Uh... couldn't load stub.py?\n");
+          return;
+        }
         PyObject* main_module = PyImport_AddModule("__main__");
+        if(main_module == NULL) {
+          printf("Uh... couldn't add __main__ module?\n");
+          return;
+        }
         PyObject_SetAttrString(main_module, "stub", stub_module);
         PyObject* stub_dict = PyModule_GetDict(stub_module);
         PyObject *key, *value;
@@ -210,8 +238,13 @@ void handleIncomingMessage(string message)
         }
         */
         if(!res) {
-          printf("Error running submitted code.\n");
+          printf("   Error running submitted code.\n");
           Py_XDECREF(stub_dict);
+          return;
+        }
+        if(PyErr_Occurred()) {
+          printf("  An exception occurred while running client code\n");
+          PyErr_Clear();
           return;
         }
         Py_XDECREF(res);
@@ -219,11 +252,22 @@ void handleIncomingMessage(string message)
         //PyRun_SimpleString(message.c_str());
 
         printf("Running boilerplate_start()...\n");
-        PyRun_SimpleString("wrapper_start()\n");
+        int res2 = PyRun_SimpleString("wrapper_start()\n");
+        if(res2 >= 0 && !PyErr_Occurred()) {
+          printf("   Loaded.\n");
+          student_code_loaded = true;
+        }
+        else {
+          printf("  Error occurred while running boilerplate_start()\n");
+          PyErr_Clear();
+        }
       }
       if(routing=='B')
       {
-         run_boiler_plate(message);
+         if(run_boiler_plate(message)) {
+           boilerplate_loaded = true;
+           student_code_loaded = false;
+         }
       }
    }
 }
