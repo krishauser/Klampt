@@ -206,6 +206,11 @@ void handleIncomingMessage(string message)
         printf("  user would like to add some student code\n");
         student_code_loaded = false;
 
+        if(!boilerplate_loaded) {
+          printf("Boilerplate failed to load, not proceeding.\n");
+          return;
+        }
+
         PyObject* stub_module = PyImport_ImportModule("stub");\
         if(stub_module == NULL) {
           printf("Uh... couldn't load stub.py?\n");
@@ -267,6 +272,10 @@ void handleIncomingMessage(string message)
          if(run_boiler_plate(message)) {
            boilerplate_loaded = true;
            student_code_loaded = false;
+         }
+         else {
+            boilerplate_loaded = false;
+            student_code_loaded = false;
          }
       }
    }
