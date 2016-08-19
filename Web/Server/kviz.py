@@ -4,6 +4,7 @@ global _world,_sceneCurrent,_sceneChanges,_namedItems
 _world = None
 _sceneCurrent = {}
 _RPC = []
+_ghosts = []
 #_namedItems = {}
 
 
@@ -38,12 +39,12 @@ _RPC = []
 #def _to_threejs_color(color):
 #	return int(color[0]*0xff) << 16 | int(color[1]*0xff)<<8 | int(color[2]*0xff)
 
-def set_color(target,rgba_color,recursive=False):
-	"""Sets the given RobotModelLink or named link or indexed link to
+def set_color(target,rgba_color):
+	"""Sets the given RobotModel, RobotModelLink, named robot, named ghost, named link, or indexed link to
 	some color."""
-
+	global _world,_ghosts
+	recursive=False
 	if isinstance(target, (int, long, float, complex)):
-		global _world
 		robot = _world.robot(robot)
 		target_as_link = robot.link(target)
 		target_name=target_as_link.getName()
@@ -51,10 +52,23 @@ def set_color(target,rgba_color,recursive=False):
 	elif isinstance(target,RobotModelLink): 
 		target_name=target.getName()
 
+	elif isinstance(target,RobotModel): 
+		target_name=target.getName()
+		recursive = True
+
 	elif isinstance(target, basestring):
 		target_name=target
+		if target in _ghosts:
+			recursive = True
+		else:
+			#see if it's the name of a robot
+			try:
+				_world.robot(target).index
+				recursive = True
+			except Exception:
+				pass
 	else:
-		print "ERROR: kviz.set_color requires target of either link, index, or string name of object!"
+		print "ERROR: kviz.set_color requires target of either robot, link, index, or string name of object!"
 		return;
 
 	if len(rgba_color) == 3:
@@ -67,6 +81,7 @@ def add_ghost(prefixname="ghost",robot=0):
 	global _world
 	target_name=_world.robot(robot).getName()	
 	_RPC.append({'type':'add_ghost','object':target_name,'prefix_name':prefixname})
+	_ghosts.append(prefixname+target_name)
 	return prefixname+target_name
 
 def get_robot_config(robot=0):
@@ -155,13 +170,16 @@ def update_sphere(name="KVIZ_Sphere1",x=0,y=0,z=0,r=-1):
 #	del _namedItems[('config',name)]
 #
 def _init(world):
-	global _world
+	global _world,_RPC,_ghosts
 	_world = world
+	_RPC = []
+	_ghosts = []
 
 def _reset():
-	global _world,_RPC
+	global _world,_RPC,_ghosts
 	_world = WorldModel()
 	_RPC = []
+	_ghosts = []
 
 def _getInitialJSON():
 	global _world,_sceneCurrent,_RPC
