@@ -26,8 +26,6 @@ def boilerplate_start():
     wheels['fr'] = world.loadElement("Web/Client/Scenarios/lab1/tire_fr.obj")
     wheels['bl'] = world.loadElement("Web/Client/Scenarios/lab1/tire_bl.obj")
     wheels['br'] = world.loadElement("Web/Client/Scenarios/lab1/tire_br.obj")
-    print car_body
-    print wheels
     car_body = world.rigidObject(car_body)
     car_body.appearance().setColor(1,0,0,1)
     for (k,v) in wheels.iteritems():
@@ -36,8 +34,6 @@ def boilerplate_start():
         wheels[k].geometry().transform(flipzy,[0,0,0])
         wheels[k].appearance().setColor(0.3,0.3,0.3,1)
     kviz._init(world)
-    print car_body
-    print wheels
 
 def update_2d_xform(rigidObject,xform2d):
     """Given an RigidObjectModel and a 2D transform (x,y,theta), sets the object's 3D transform
