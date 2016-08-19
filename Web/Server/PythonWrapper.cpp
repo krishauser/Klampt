@@ -9,6 +9,7 @@ using namespace std;
 
 #include "websocket.h"
 
+bool python_initialized = false;
 bool boilerplate_loaded = false;
 bool student_code_loaded = false;
 
@@ -124,12 +125,13 @@ std::string load_file(std::string filename)
 
 void initialize_python_interpreter()
 {
-  printf("Initializating python interpreter\n");
+  assert(!python_initialized);
   //Py_SetProgramName("KlamptWebPython");  /* optional but recommended */
   Py_Initialize();
-  
   Py_InitModule("emb", EmbMethods); //setup embedded methods
   Py_InitModule("log", logMethods); //setup stdio capture  
+  
+  python_initialized = true;
 }
 
 bool run_boiler_plate(const string& which)
@@ -178,8 +180,10 @@ bool run_boiler_plate(const string& which)
 
 void shutdown_python_interpreter()
 {
-   printf("Shutting down Python interpreter\n");
-   Py_Finalize();
+  if(python_initialized) {
+     printf("Shutting down Python interpreter\n");
+     Py_Finalize();
+   }
 }
 
 void handleIncomingMessage(string message)
@@ -198,8 +202,8 @@ void handleIncomingMessage(string message)
            printf("  Code is not updated, returning.\n");
          }
          else {
-           PyRun_SimpleString("wrapper_advance()\n");
-           if(PyErr_Occurred()) {
+           int res = PyRun_SimpleString("wrapper_advance()\n");
+           if(res < 0 || PyErr_Occurred()) {
               printf("  An exception occurred while running client code\n");
               PyErr_Clear();
               return;
@@ -209,47 +213,54 @@ void handleIncomingMessage(string message)
       if(routing=='C')
       {  
         printf("  user would like to add some student code\n");
-        student_code_loaded = false;
-
         if(!boilerplate_loaded) {
           printf("Boilerplate failed to load, not proceeding.\n");
           return;
         }
 
-        PyObject* stub_module = PyImport_ImportModule("stub");\
-        if(stub_module == NULL) {
-          printf("Uh... couldn't load stub.py?\n");
-          return;
-        }
+        PyObject* stub_module;
         PyObject* main_module = PyImport_AddModule("__main__");
         if(main_module == NULL) {
           printf("Uh... couldn't add __main__ module?\n");
           return;
         }
+        if(student_code_loaded) {
+          PyRun_SimpleString("del sys.modules['stub']");
+          student_code_loaded = false; 
+        }
+        stub_module = PyImport_ImportModule("stub");
+        if(stub_module == NULL) {
+          printf("Uh... couldn't load stub.py?\n");
+          return;
+        }
         PyObject_SetAttrString(main_module, "stub", stub_module);
         PyObject* stub_dict = PyModule_GetDict(stub_module);
-        PyObject *key, *value;
-        Py_ssize_t pos = 0;
 
         /*
-        printf("Before values\n");
+        PyObject *key, *value;
+        Py_ssize_t pos = 0;
+        printf("Stub code: before values\n");
         while (PyDict_Next(stub_dict, &pos, &key, &value)) {
             PyObject_Print(key,stdout,Py_PRINT_RAW);
             printf("\n");
         }
         */
+
         PyObject* res = PyRun_String(message.c_str(),Py_file_input,stub_dict,stub_dict);
+        
         /*
-        printf("After values\n");
+        printf("Stub code: after values\n");
         pos = 0;
         while (PyDict_Next(stub_dict, &pos, &key, &value)) {
             PyObject_Print(key,stdout,Py_PRINT_RAW);
             printf("\n");
         }
         */
+
         if(!res) {
           printf("   Error running submitted code.\n");
           Py_XDECREF(stub_dict);
+          PyErr_Clear();
           return;
         }
         if(PyErr_Occurred()) {
@@ -274,6 +285,8 @@ void handleIncomingMessage(string message)
       }
       if(routing=='B')
       {
+         if(boilerplate_loaded) fprintf(stderr,"  Boilerplate was loaded twice, erroring out...\n");
+         assert(!boilerplate_loaded);
          if(run_boiler_plate(message)) {
            boilerplate_loaded = true;
            student_code_loaded = false;
