@@ -54,6 +54,7 @@
          var freeRun=false;
          var localStorageAvailable=false;
          var localStorage;
+         var newBoilerplate=true;
          
          function storageAvailable()
          {
@@ -87,12 +88,29 @@
              localStorage.setItem('KlamptStartingCode_'+$('#boilerselctor').val(), editor.getValue());           
             }
 
-            runConnected(function() {
-               sendBoilerPlate();
+            if(newBoilerplate || !isConnected()) {
+               console.log("Sending new boiler plate...");
+               if(network) {
+                  network.disconnect();
+               }
+               waitForDisconnection(5000,function() {
+                  console.log("Actually sending new boiler plate message");
+                  runConnected(function() {
+                     sendBoilerPlate(); 
+                     sendCode();     
+                     requestAdvance();
+                     newBoilerplate = false;
+                  });
+               });
+            }
+            else {
+               console.log("No new boiler plate, just sending code");
                sendCode();     
                requestAdvance();
-            })
-
+            }
+            if(newBoilerplate) {
+               console.log("Error sending boiler plate???");
+            }
          }
          function requestStop()
          {
@@ -157,6 +175,8 @@
             }
             else
                loadFileToEditor(file_to_load);
+            newBoilerplate = true;
+            requestStop();
          }   
          
          
@@ -268,8 +288,8 @@
             }
             waitForConnection(1000,onconnect,null);
          }
-         
-         function doConnect()
+
+         function doConnectInternal()
          {
             var URL=$('#serverURL').val();
             console.log("trying to connect to URL: " + URL);
@@ -278,6 +298,15 @@
             {
               localStorage.setItem('serverURL', URL);
             }
+         }
+         
+         function doConnect()
+         {
+            if(isConnected()) {
+               waitForDisconnection(function() {doConnectInternal();});
+            }
+            else 
+               doConnectInternal();
          }
    
          function sendCode() //send python code back to server
