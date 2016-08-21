@@ -5,6 +5,8 @@
 #include <iostream>
 #include <fstream>
 #include <string> 
+#include <node.h> // from python
+#include <compile.h> // from python
 using namespace std;
 
 #include "websocket.h"
@@ -123,6 +125,29 @@ std::string load_file(std::string filename)
   return content;
 }
 
+//// Code to run a string and have the exception information have a filename rather than just <string>
+
+
+// Copied from pythonrun.c
+static PyObject *run_node(struct _node *n, const char *filename, PyObject *globals, PyObject *locals) {
+    PyCodeObject *co;
+    PyObject *v;
+    co = PyNode_Compile(n, filename);
+    PyNode_Free(n);
+    if (co == NULL)
+        return NULL;
+    v = PyEval_EvalCode(co, globals, locals);
+    Py_DECREF(co);
+    return v;
+}
+
+// This is missing from python: a PyRun_String that also takes a filename, to show in backtraces
+static PyObject* MyPyRun_StringFileName(const char *str, const char* filename, int start, PyObject *globals, PyObject *locals) {
+    struct _node* n = PyParser_SimpleParseString(str, start);
+    if (!n) return 0;
+    return run_node( n, filename, globals, locals);
+}
+
 void initialize_python_interpreter()
 {
   assert(!python_initialized);
@@ -226,8 +251,8 @@ void handleIncomingMessage(string message)
         }
         if(student_code_loaded) {
           PyRun_SimpleString("del sys.modules['stub']");
-          student_code_loaded = false; 
         }
+
         stub_module = PyImport_ImportModule("stub");
         if(stub_module == NULL) {
           printf("Uh... couldn't load stub.py?\n");
@@ -235,6 +260,13 @@ void handleIncomingMessage(string message)
         }
         PyObject_SetAttrString(main_module, "stub", stub_module);
         PyObject* stub_dict = PyModule_GetDict(stub_module);
+        if(!student_code_loaded) {
+          //some simple sandboxing
+          //PyRun_SimpleString("print stub.__builtins__.keys()");
+          PyRun_SimpleString("del stub.__builtins__['open']");
+          PyRun_SimpleString("import sys");
+          PyRun_SimpleString("sys.modules['os']=None");
+        }
 
         /*
         PyObject *key, *value;
@@ -246,7 +278,7 @@ void handleIncomingMessage(string message)
         }
         */
 
-        PyObject* res = PyRun_String(message.c_str(),Py_file_input,stub_dict,stub_dict);
+        PyObject* res = MyPyRun_StringFileName(message.c_str(),"client_code",Py_file_input,stub_dict,stub_dict);
         
         /*
         printf("Stub code: after values\n");
@@ -258,13 +290,15 @@ void handleIncomingMessage(string message)
         */
 
         if(!res) {
-          printf("   Error running submitted code.\n");
+          printf("   An exception occurred while running client code.\n");
           Py_XDECREF(stub_dict);
+          PyErr_Print();
           PyErr_Clear();
           return;
         }
         if(PyErr_Occurred()) {
           printf("  An exception occurred while running client code\n");
+          PyErr_Print();
           PyErr_Clear();
           return;
         }
