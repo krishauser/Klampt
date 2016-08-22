@@ -12,6 +12,10 @@
 #if HAVE_GLEW
 #include <GL/glew.h>
 #endif //HAVE_GLEW
+//TEST: fallback with no opengl
+//#undef HAVE_GLEW
+//#define HAVE_GLEW 0
+
 #include <KrisLibrary/GLdraw/drawextra.h>
 #include <KrisLibrary/GLdraw/GLView.h>
 #include <KrisLibrary/GLdraw/GLError.h>
@@ -1813,8 +1817,10 @@ CameraSensor::CameraSensor()
 CameraSensor::~CameraSensor()
 {
   if(color_tex) glDeleteTextures(1, &color_tex);
+#if HAVE_GLEW
   if(depth_rb) glDeleteRenderbuffersEXT(1, &depth_rb);
   if(fb) glDeleteFramebuffersEXT(1, &fb);
+#endif //HAVE_GLEW
   color_tex = 0;
   depth_rb = 0;
   fb = 0;
@@ -1929,10 +1935,13 @@ void CameraSensor::Simulate(ControlledRobotSimulator* robot,WorldSimulation* sim
       glBindTexture(GL_TEXTURE_2D, color_tex);
       glGetTexImage(GL_TEXTURE_2D,0,GL_RGBA,GL_UNSIGNED_INT_8_8_8_8,&pixels[0]);
       measurements.resize(xres*yres);
-      int j=0;
-      for(int i=0;i<xres*yres;i++,j+=4) {
-        unsigned int pix = (pixels[j] << 24 ) | (pixels[j+1] << 16 ) | (pixels[j+2] << 8 ) | (pixels[j+3]);
-        measurements[i] = double(pix);
+      int k=0;
+      //don't forget to flip vertically
+      for(int j=0;j<yres;j++) {
+        for(int i=0;i<xres;i++,k+=4) {
+          unsigned int pix = (pixels[k] << 24 ) | (pixels[k+1] << 16 ) | (pixels[k+2] << 8 ) | (pixels[k+3]);
+          measurements[(yres-j-1)*xres + i] = double(pix);
+        }
       }
     }
     if(depth) {
@@ -1943,19 +1952,23 @@ void CameraSensor::Simulate(ControlledRobotSimulator* robot,WorldSimulation* sim
 
       size_t vstart = measurements.size();
       measurements.resize(measurements.size() + xres*yres); 
-      for(int i=0;i<xres*yres;i++) {
-        //nonlinear depth normalization
-        //normal linear interpolation would give u = (z - zmin)/(zmax-zmin)
-        //instead we gt u = (1/zmin-1/z)/(1/zmin-1/zmax)
-        //so 1/z = 1/zmin - u(1/zmin-1/zmax)
-        if(floats[i] == 1.0) { //nothing seen
-          floats[i] = zmax;
+      //don't forget to flip vertically
+      int k=0;
+      for(int j=0;j<yres;j++) {
+        for(int i=0;i<xres;i++,k++) {
+          //nonlinear depth normalization
+          //normal linear interpolation would give u = (z - zmin)/(zmax-zmin)
+          //instead we gt u = (1/zmin-1/z)/(1/zmin-1/zmax)
+          //so 1/z = 1/zmin - u(1/zmin-1/zmax)
+          if(floats[k] == 1.0) { //nothing seen
+            floats[k] = zmax;
+          }
+          else {
+            floats[k] = 1.0/(1.0/zmin - floats[k]*(1.0/zmin-1.0/zmax));
+            floats[k] = Discretize(floats[k],zresolution,zvarianceLinear*floats[k] + zvarianceConstant);
+          }
+          measurements[vstart+(yres-j-1)*xres + i] = floats[k];
         }
-        else {
-          floats[i] = 1.0/(1.0/zmin - floats[i]*(1.0/zmin-1.0/zmax));
-          floats[i] = Discretize(floats[i],zresolution,zvarianceLinear*floats[i] + zvarianceConstant);
-        }
-        measurements[vstart+i] = floats[i];
       }
     }
   }
@@ -1964,8 +1977,84 @@ void CameraSensor::Simulate(ControlledRobotSimulator* robot,WorldSimulation* sim
 #endif //HAVE_GLEW
 
   if(!useGLFramebuffers) {
-    //TODO: fallback can use ray casting: (slow!)
-    printf("TODO: fallback from GL rendering\n");
+    //fallback will use ray casting: (slow!)
+    //set up the POV of the camera
+    Camera::Viewport vp;
+    GetViewport(vp);
+    vp.xform = Tlink*vp.xform;
+    Ray3D ray;
+    Vector3 vsrc;
+    Vector3 vfwd,dx,dy;
+    vp.getClickSource(0,0,vsrc);
+    vp.getViewVector(vfwd);
+    dx = vp.xDir();
+    dx *= 1.0/(vp.w*vp.scale);
+    dy = vp.yDir();
+    dy *= 1.0/(vp.w*vp.scale);
+    measurements.resize(0);
+    int dstart = 0;
+    if(rgb) measurements.resize(xres*yres);
+    if(depth) {
+      dstart = (int)measurements.size();
+      measurements.resize(measurements.size()+xres*yres);
+    }
+    int k=0;
+    double background = double(0xff96aaff);
+    Vector3 pt;
+    for(int j=0;j<yres;j++) {
+      Real v = 0.5*yres - Real(j);
+      for(int i=0;i<xres;i++,k++) {
+        Real u = Real(i) - 0.5*xres;    
+        ray.direction = vfwd + u*dx + v*dy;
+        ray.direction.inplaceNormalize();
+        ray.source = vsrc + ray.direction * zmin / (vfwd.dot(ray.direction));
+        int obj = sim->world->RayCast(ray,pt);
+        if (obj >= 0) {
+          if(rgb) {
+            //get color of object
+            //TODO: lighting
+            RobotWorld::AppearancePtr app = sim->world->GetAppearance(obj);
+            float* rgba = app->faceColor.rgba;
+            measurements[k] = double(((unsigned char)(rgba[3]*255.0) << 24) | ((unsigned char)(rgba[0]*255.0) << 16) | ((unsigned char)(rgba[1]*255.0) << 8) | ((unsigned char)(rgba[2]*255.0)));
+          }
+          Real d = vfwd.dot(pt - vsrc);
+          if(depth) measurements[dstart+k] = Discretize(d,zresolution,zvarianceLinear*d + zvarianceConstant);
+        }
+        else {
+          //no reading
+          if(rgb) measurements[k] = background;
+          if(depth) measurements[dstart+k] = zmax;
+        }
+      }
+    }
+    static bool warned = false;
+    if(!warned) {
+      printf("DepthCameraSensor: doing fallback from GLEW... %d rays cast, may be slow\n",k);
+      warned = true;
+    }
+
+    //need to upload the texture for sensor visualization
+    if(color_tex == 0) { 
+      //RGBA8 2D texture, 24 bit depth texture, 256x256
+      glGenTextures(1, &color_tex);
+      if(color_tex != 0) {
+        glBindTexture(GL_TEXTURE_2D, color_tex);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+      }
+    }
+    if(color_tex != 0) {
+      //copy measurements into buffer -- don't forget y flip
+      vector<unsigned int> image(xres*yres);
+      int k=0;
+      for(int j=0;j<yres;j++)
+        for(int i=0;i<xres;i++,k++)
+          image[(yres-j-1)*xres + i] = (unsigned int)measurements[k];
+      //NULL means reserve texture memory, but texels are undefined
+      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, xres, yres, 0, GL_BGRA, GL_UNSIGNED_BYTE, &image[0]);
+    }
   }
 }
 
@@ -2077,7 +2166,7 @@ void CameraSensor::DrawGL(const Robot& robot,const vector<double>& measurements)
   if(link >= 0) 
     v.xform = robot.links[link].T_World*v.xform;
 
-  if(color_tex && rgb) {
+  if(rgb && color_tex != 0) {
     //debugging: draw image in frustum
     glPushMatrix();
     glMultMatrix((Matrix4)v.xform);
@@ -2116,75 +2205,75 @@ void CameraSensor::DrawGL(const Robot& robot,const vector<double>& measurements)
     glPopMatrix();
   }
 
-  if(fb && depth) {
-    if(!floats.empty()) {
-      glPushMatrix();
-      glMultMatrix((Matrix4)v.xform);
+  size_t vstart = 0;
+  if(rgb) vstart = xres*yres;
+  if(depth && !measurements.empty()) {
+    glPushMatrix();
+    glMultMatrix((Matrix4)v.xform);
 
-      glEnable(GL_LIGHTING);
-      float white[4]={1,1,1,1};
-      glMaterialfv(GL_FRONT,GL_AMBIENT_AND_DIFFUSE,white);
-      Real vscale = 0.5/Tan(xfov*0.5);
-      Real xscale = (0.5/vscale);
-      Real aspectRatio = Real(xres)/Real(yres);
-      Real yscale = xscale/aspectRatio;
-      vector<Vector3> pts(xres*yres);
-      int k=0;
-      for(int i=0;i<yres;i++)
-        for(int j=0;j<xres;j++,k++) {
-          double d = floats[k];
-          double u = Real(j-xres/2)/(xres/2);
-          double v = Real(i-yres/2)/(yres/2);
-          double x = xscale*d*u;
-          double y = yscale*d*v;
-          pts[k].set(x,y,-d);
-        }
-      glBegin(GL_TRIANGLES);
-      k=0;
-      for(int i=0;i<yres;i++) {
-        for(int j=0;j<xres;j++,k++) {
-          if(i+1 >= yres || j+1 >= xres) continue;
-          //decide on discontinuities in this cell
-          int v11 = k;
-          int v12 = k+1;
-          int v21 = k+xres;
-          int v22 = k+xres+1;
-          double z11 = -pts[v11].z;
-          double z12 = -pts[v12].z;
-          double z21 = -pts[v21].z;
-          double z22 = -pts[v22].z;
-          bool d1x = (z11 >= zmax || z12 >= zmax || Abs(z11 - z12) > 0.02*(z11+z12));
-          bool d1y = (z11 >= zmax || z21 >= zmax || Abs(z11 - z21) > 0.02*(z11+z21));
-          bool d2x = (z22 >= zmax || z21 >= zmax || Abs(z22 - z21) > 0.02*(z22+z21));
-          bool d2y = (z22 >= zmax || z12 >= zmax || Abs(z22 - z12) > 0.02*(z22+z12));
-          bool dupperleft = (d1x || d1y);
-          bool dupperright = (d1x || d2y);
-          bool dlowerleft = (d2x || d1y);
-          bool dlowerright = (d2x || d2y);
+    glEnable(GL_LIGHTING);
+    float white[4]={1,1,1,1};
+    glMaterialfv(GL_FRONT,GL_AMBIENT_AND_DIFFUSE,white);
+    Real vscale = 0.5/Tan(xfov*0.5);
+    Real xscale = (0.5/vscale);
+    Real aspectRatio = Real(xres)/Real(yres);
+    Real yscale = xscale;
+    vector<Vector3> pts(xres*yres);
+    int k=0;
+    for(int i=0;i<yres;i++)
+      for(int j=0;j<xres;j++,k++) {
+        double d = measurements[vstart+k];
+        double u = Real(j-xres/2)/(xres/2);
+        double v = -Real(i-yres/2)/(xres/2);
+        double x = xscale*d*u;
+        double y = yscale*d*v;
+        pts[k].set(x,y,-d);
+      }
+    glBegin(GL_TRIANGLES);
+    k=0;
+    for(int i=0;i<yres;i++) {
+      for(int j=0;j<xres;j++,k++) {
+        if(i+1 >= yres || j+1 >= xres) continue;
+        //decide on discontinuities in this cell
+        int v11 = k;
+        int v12 = k+1;
+        int v21 = k+xres;
+        int v22 = k+xres+1;
+        double z11 = -pts[v11].z;
+        double z12 = -pts[v12].z;
+        double z21 = -pts[v21].z;
+        double z22 = -pts[v22].z;
+        bool d1x = (z11 >= zmax || z12 >= zmax || Abs(z11 - z12) > 0.02*(z11+z12));
+        bool d1y = (z11 >= zmax || z21 >= zmax || Abs(z11 - z21) > 0.02*(z11+z21));
+        bool d2x = (z22 >= zmax || z21 >= zmax || Abs(z22 - z21) > 0.02*(z22+z21));
+        bool d2y = (z22 >= zmax || z12 >= zmax || Abs(z22 - z12) > 0.02*(z22+z12));
+        bool dupperleft = (d1x || d1y);
+        bool dupperright = (d1x || d2y);
+        bool dlowerleft = (d2x || d1y);
+        bool dlowerright = (d2x || d2y);
 
 
-          if(dupperleft && !dlowerright) 
-            //only draw lower right corner
-            doTriangle(pts[v12],pts[v22],pts[v21]);
-          else if(!dupperleft && dlowerright) 
-            //only draw upper left corner
-            doTriangle(pts[v11],pts[v12],pts[v21]);
-          else if(!dupperright && dlowerleft) 
-            //only draw upper right corner
-            doTriangle(pts[v11],pts[v12],pts[v22]);
-          else if(dupperright && !dlowerleft) 
-            //only draw lower left corner
-            doTriangle(pts[v11],pts[v22],pts[v21]);
-          else if (!dupperleft && !dlowerright) {
-            //fully connected -- should draw better conditioned edge, but whatever
-            doTriangle(pts[v12],pts[v22],pts[v21]);
-            doTriangle(pts[v11],pts[v12],pts[v21]);
-          }
+        if(dupperleft && !dlowerright) 
+          //only draw lower right corner
+          doTriangle(pts[v12],pts[v21],pts[v22]);
+        else if(!dupperleft && dlowerright) 
+          //only draw upper left corner
+          doTriangle(pts[v11],pts[v21],pts[v12]);
+        else if(!dupperright && dlowerleft) 
+          //only draw upper right corner
+          doTriangle(pts[v11],pts[v22],pts[v12]);
+        else if(dupperright && !dlowerleft) 
+          //only draw lower left corner
+          doTriangle(pts[v11],pts[v21],pts[v22]);
+        else if (!dupperleft && !dlowerright) {
+          //fully connected -- should draw better conditioned edge, but whatever
+          doTriangle(pts[v12],pts[v21],pts[v22]);
+          doTriangle(pts[v11],pts[v21],pts[v12]);
         }
       }
-      glEnd();
-      glPopMatrix();
     }
+    glEnd();
+    glPopMatrix();
   }
 
   ViewCamera view;
@@ -2194,6 +2283,7 @@ void CameraSensor::DrawGL(const Robot& robot,const vector<double>& measurements)
 
 void CameraSensor::GetViewport(Camera::Viewport& vp) const
 {
+  vp.perspective = true;
   vp.x = vp.y = 0;
   vp.w = xres;
   vp.h = yres;
