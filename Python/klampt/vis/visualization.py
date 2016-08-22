@@ -1139,7 +1139,7 @@ class VisAppearance:
                 self.item._relativeCoordinates = se3.mul(se3.inv(self.item.parent().worldCoordinates()),self.editor.get())
                 #TODO: updating downstream frames?
             elif isinstance(self.item,RobotModel):
-                self.item.setConfig(self.editor.get_conditioned(self.item.getConfig()))
+                self.item.setConfig(self.editor.getConditioned(self.item.getConfig()))
             elif isinstance(self.item,SubRobotModel):
                 self.item.setConfig(self.item.fromfull(self.editor.get()))
             elif isinstance(self.item,RigidObjectModel):

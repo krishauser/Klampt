@@ -35,7 +35,7 @@ class Frame:
             self._relativeCoordinates = relativeCoordinates
             if worldCoordinates == None:
                 if parent == None:
-                    self._worldcoordinates = relativeCoordinates
+                    self._worldCoordinates = relativeCoordinates
                 else:
                     self._worldCoordinates = se3.mul(parent.worldCoordinates(),relativeCoordinates)
     def name(self):
@@ -281,7 +281,8 @@ class Group:
         """For any frames with associated world elements, updates the
         transforms from the world elements."""
         for (n,f) in self.frames.iteritems():
-            if f._data == None: continue
+            if f._data == None:
+                continue
             if hasattr(f._data,'getTransform'):
                 worldCoordinates = f._data.getTransform()
                 if hasattr(f._data,'getParent'):
@@ -297,7 +298,8 @@ class Group:
                 f._worldCoordinates = worldCoordinates
                 #update downstream non-link items
                 for c in self.childLists[f._name]:
-                    if c.data == None or not hasattr(c._data,'getTransform'):
+                    print "Child",c._name,"of",f._name
+                    if c._data == None or not hasattr(c._data,'getTransform'):
                         c._worldCoordinates = se3.mul(f._worldCoordinates,c._relativeCoordinates)
                         self.updateDependentFrames(c)
             if isinstance(f._data,tuple) and isinstance(f._data[0],SimRobotController):
@@ -334,6 +336,7 @@ class Group:
             relativeCoordinates = se3.identity()
         self.frames[name] = Frame(name,worldCoordinates=worldCoordinates,parent=parent,relativeCoordinates=relativeCoordinates)
         self.childLists[parent._name].append(self.frames[name])
+        print "Adding",name,"to",parent._name,"now has",len(self.childLists[parent._name]),"children"
         return self.frames[name]
     def addPoint(self,name,coordinates=[0,0,0],frame='root'):
         if name in self.points:
@@ -425,7 +428,7 @@ class Group:
         setFrameCoordinates but not if you change a Frame's coordinates
         manually."""
         for c in self.childLists[frame._name]:
-            c._worldCoordinates = se3.mul(frame._worldCoordinates,c._relativeCoordinates)
+            c._worldCoordinates = se3.mul(frame.worldCoordinates(),c._relativeCoordinates)
             self.updateDependentFrames(c)
     def frame(self,name):
         """Retrieves a named Frame."""
