@@ -69,10 +69,12 @@ class LaserRangeSensor : public SensorBase
  * you are generally using).
  *
  * The format of the measurements list is a list of rgb[i,j] pixels if rgb=true, 
- * and followed by a list of d[i,j] pixels giving depth in meters (or whatever unit
+ * then followed by a list of d[i,j] pixels giving depth in meters (or whatever unit
  * you are generally using) if depth=true.  The rgb pixels are given as casts from
  * unsigned integers in the pixel format ABGR to doubles.  The depth pixels are given
  * as floats.
+ *
+ * The list of measurements proceeds in scan-line order from the upper-left pixel.
  */
 class CameraSensor : public SensorBase
 {
@@ -93,11 +95,11 @@ class CameraSensor : public SensorBase
   void SetViewport(const Camera::Viewport& view);
 
   int link;
-  RigidTransform Tsensor; ///< z is forward
+  RigidTransform Tsensor; ///< z is backward, x is to the right, and y is "up"
   bool rgb,depth;  ///< If rgb is true, gives color measurements. If depth is true, gives depth measurements.
   int xres,yres;  ///< resolution of camera in x and y directions (# of pixels)
   double xfov,yfov; ///< field of view in x and y directions (radians)
-  double zmin,zmax;  ///< range limits
+  double zmin,zmax;  ///< range limits, > 0
   int zresolution;  ///< resolution in z direction
   double zvarianceLinear;  ///< variance in z estimates, linear term
   double zvarianceConstant;  ///< variance in z estimates, constant term
