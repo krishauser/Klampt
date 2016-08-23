@@ -898,6 +898,8 @@ bool Robot::LoadRob(const char* fn) {
 		FatalError("Scale not done yet");
 	if (geomscale.size() == 1)
 		geomscale.resize(n, geomscale[0]);
+	
+	geomManagers.resize(n);
 	geomFiles.resize(n);
 	Timer timer;
 	for (size_t i = 0; i < geomFn.size(); i++) {
@@ -912,7 +914,7 @@ bool Robot::LoadRob(const char* fn) {
 			  geomFn[i].c_str());
 		  return false;
 		}
-		if (!geomscale.empty()) {
+		if (!geomscale.empty() && geomscale[i] != 1) {
 			Matrix4 mscale;
 			mscale.setIdentity();
 			mscale(0, 0) = mscale(1, 1) = mscale(2, 2) = geomscale[i];
