@@ -298,7 +298,6 @@ class Group:
                 f._worldCoordinates = worldCoordinates
                 #update downstream non-link items
                 for c in self.childLists[f._name]:
-                    print "Child",c._name,"of",f._name
                     if c._data == None or not hasattr(c._data,'getTransform'):
                         c._worldCoordinates = se3.mul(f._worldCoordinates,c._relativeCoordinates)
                         self.updateDependentFrames(c)
