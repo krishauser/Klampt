@@ -1143,7 +1143,7 @@ class VisAppearance:
             elif isinstance(self.item,SubRobotModel):
                 self.item.setConfig(self.item.fromfull(self.editor.get()))
             elif isinstance(self.item,RigidObjectModel):
-                self.item.setTransform(self.editor.get())
+                self.item.setTransform(*self.editor.get())
             elif isinstance(self.item,(list,tuple)):
                 self.item = self.editor.get()
             else:
