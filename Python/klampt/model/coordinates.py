@@ -336,7 +336,6 @@ class Group:
             relativeCoordinates = se3.identity()
         self.frames[name] = Frame(name,worldCoordinates=worldCoordinates,parent=parent,relativeCoordinates=relativeCoordinates)
         self.childLists[parent._name].append(self.frames[name])
-        print "Adding",name,"to",parent._name,"now has",len(self.childLists[parent._name]),"children"
         return self.frames[name]
     def addPoint(self,name,coordinates=[0,0,0],frame='root'):
         if name in self.points:
