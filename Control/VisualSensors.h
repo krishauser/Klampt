@@ -6,6 +6,9 @@
 #include <KrisLibrary/math3d/primitives.h>
 using namespace Math3D;
 
+class RobotWorld;
+class Robot;
+
 /** @ingroup Control
  * @brief Simulates a laser range sensor, either sweeping or stationary.  Can
  * both simulate both 1D sweeping and 2D sweeping.
@@ -93,6 +96,9 @@ class CameraSensor : public SensorBase
   virtual void DrawGL(const Robot& robot,const vector<double>& measurements);
   void GetViewport(Camera::Viewport& view) const;
   void SetViewport(const Camera::Viewport& view);
+
+  ///Updates the measurements for the current state of the world.  Useful for non-simulation debugging.
+  void UpdateMeasurements(RobotWorld& world,const Robot& robot);
 
   int link;
   RigidTransform Tsensor; ///< z is backward, x is to the right, and y is "up"

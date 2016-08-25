@@ -1826,10 +1826,10 @@ CameraSensor::~CameraSensor()
   fb = 0;
 }
 
-void CameraSensor::Simulate(ControlledRobotSimulator* robot,WorldSimulation* sim)
+void CameraSensor::UpdateMeasurements(RobotWorld& world,const Robot& robot)
 {
   RigidTransform Tlink;
-  if(link >= 0) robot->oderobot->GetLinkTransform(link,Tlink);
+  if(link >= 0) Tlink = robot.links[link].T_World;
   else Tlink.setIdentity();
 
 #if HAVE_GLEW
@@ -1918,8 +1918,7 @@ void CameraSensor::Simulate(ControlledRobotSimulator* robot,WorldSimulation* sim
     glEnable(GL_DEPTH_TEST);
     //-------------------------
     //now render the scene from the POV of the camera
-    sim->UpdateModel();
-    sim->world->DrawGL();
+    world.DrawGL();
     //DONE: now captured on graphics card in framebuffer
     //----------------
     //Bind 0, which means render to back buffer
@@ -2008,12 +2007,12 @@ void CameraSensor::Simulate(ControlledRobotSimulator* robot,WorldSimulation* sim
         ray.direction = vfwd + u*dx + v*dy;
         ray.direction.inplaceNormalize();
         ray.source = vsrc + ray.direction * zmin / (vfwd.dot(ray.direction));
-        int obj = sim->world->RayCast(ray,pt);
+        int obj = world.RayCast(ray,pt);
         if (obj >= 0) {
           if(rgb) {
             //get color of object
             //TODO: lighting
-            RobotWorld::AppearancePtr app = sim->world->GetAppearance(obj);
+            RobotWorld::AppearancePtr app = world.GetAppearance(obj);
             float* rgba = app->faceColor.rgba;
             measurements[k] = double(((unsigned char)(rgba[3]*255.0) << 24) | ((unsigned char)(rgba[0]*255.0) << 16) | ((unsigned char)(rgba[1]*255.0) << 8) | ((unsigned char)(rgba[2]*255.0)));
           }
@@ -2056,6 +2055,14 @@ void CameraSensor::Simulate(ControlledRobotSimulator* robot,WorldSimulation* sim
       glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, xres, yres, 0, GL_BGRA, GL_UNSIGNED_BYTE, &image[0]);
     }
   }
+}
+
+void CameraSensor::Simulate(ControlledRobotSimulator* robot,WorldSimulation* sim)
+{
+  sim->UpdateModel();
+  if (link >= 0)  //make sure we get the true simulated link transform
+    robot->oderobot->GetLinkTransform(link,robot->robot->links[link].T_World);
+  UpdateMeasurements(*sim->world,*robot->robot);
 }
 
 void CameraSensor::Reset()
