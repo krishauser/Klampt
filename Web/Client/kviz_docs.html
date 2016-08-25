@@ -1,0 +1,48 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd"> <html lang="en"> <head> <meta http-equiv="content-type" content="text/html; charset=utf-8"> <title>kviz module API docs</title> </head> 
+
+<pre style='color:#000000;background:#ffffff;'><span style='color:#696969; '>"""kviz API docs."""</span>
+
+<span style='color:#800000; font-weight:bold; '>def</span> set_color<span style='color:#808030; '>(</span>target<span style='color:#808030; '>,</span>rgba_color<span style='color:#808030; '>)</span><span style='color:#808030; '>:</span>
+	<span style='color:#696969; '>"""Sets the given RobotModel, RobotModelLink, named link, indexed link,</span>
+<span style='color:#696969; '>	or object name to some color (given as an (r,g,b) or (r,g,b,a) tuple)."""</span>
+	<span style='color:#800000; font-weight:bold; '>pass</span>
+
+<span style='color:#800000; font-weight:bold; '>def</span> add_ghost<span style='color:#808030; '>(</span>prefixname<span style='color:#808030; '>=</span><span style='color:#0000e6; '>"ghost"</span><span style='color:#808030; '>,</span>robot<span style='color:#808030; '>=</span><span style='color:#008c00; '>0</span><span style='color:#808030; '>)</span><span style='color:#808030; '>:</span>
+	<span style='color:#696969; '>"""Adds a ghost configuration of the robot that can be posed independently.</span>
+<span style='color:#696969; '>	prefixname can be set to identify multiple ghosts. </span>
+<span style='color:#696969; '></span>
+<span style='color:#696969; '>	Returns the identifier of the ghost for use in set_color.  The identifier is</span>
+<span style='color:#696969; '>	just prefixname + robot.getName()."""</span>
+	<span style='color:#800000; font-weight:bold; '>pass</span>
+
+<span style='color:#800000; font-weight:bold; '>def</span> get_robot_config<span style='color:#808030; '>(</span>robot<span style='color:#808030; '>=</span><span style='color:#008c00; '>0</span><span style='color:#808030; '>)</span><span style='color:#808030; '>:</span>
+	<span style='color:#696969; '>"""A convenience function.  Gets the robot's configuration in the visualization</span>
+<span style='color:#696969; '>	world."""</span>
+	<span style='color:#800000; font-weight:bold; '>pass</span>
+
+<span style='color:#800000; font-weight:bold; '>def</span> set_ghost_config<span style='color:#808030; '>(</span>q<span style='color:#808030; '>,</span>prefixname<span style='color:#808030; '>=</span><span style='color:#0000e6; '>"ghost"</span><span style='color:#808030; '>,</span>robot<span style='color:#808030; '>=</span><span style='color:#008c00; '>0</span><span style='color:#808030; '>)</span><span style='color:#808030; '>:</span>
+	<span style='color:#696969; '>"""Sets the configuration of the ghost to q.  If the ghost is named, place its name</span>
+<span style='color:#696969; '>	in prefixname."""</span>
+	<span style='color:#800000; font-weight:bold; '>pass</span>
+
+<span style='color:#800000; font-weight:bold; '>def</span> add_text<span style='color:#808030; '>(</span>name<span style='color:#808030; '>=</span><span style='color:#0000e6; '>"HUD_Text1"</span><span style='color:#808030; '>,</span>x<span style='color:#808030; '>=</span><span style='color:#008c00; '>0</span><span style='color:#808030; '>,</span>y<span style='color:#808030; '>=</span><span style='color:#008c00; '>0</span><span style='color:#808030; '>,</span>text<span style='color:#808030; '>=</span><span style='color:#0000e6; '>""</span><span style='color:#808030; '>)</span><span style='color:#808030; '>:</span>
+	<span style='color:#696969; '>"""Adds a new piece of text displayed on the screen.  name is a unique identifier of</span>
+<span style='color:#696969; '>	the text, and x,y are the coordinates of upper left corner of the the text, in percent """</span>
+	<span style='color:#800000; font-weight:bold; '>pass</span>
+
+<span style='color:#800000; font-weight:bold; '>def</span> update_text<span style='color:#808030; '>(</span>name<span style='color:#808030; '>=</span><span style='color:#0000e6; '>"HUD_Text1"</span><span style='color:#808030; '>,</span>text<span style='color:#808030; '>=</span><span style='color:#0000e6; '>""</span><span style='color:#808030; '>)</span><span style='color:#808030; '>:</span>
+	<span style='color:#696969; '>"""Changes string used in the the named piece of text"""</span>
+	<span style='color:#800000; font-weight:bold; '>pass</span>
+
+<span style='color:#800000; font-weight:bold; '>def</span> add_sphere<span style='color:#808030; '>(</span>name<span style='color:#808030; '>=</span><span style='color:#0000e6; '>"KVIZ_Sphere1"</span><span style='color:#808030; '>,</span>x<span style='color:#808030; '>=</span><span style='color:#008c00; '>0</span><span style='color:#808030; '>,</span>y<span style='color:#808030; '>=</span><span style='color:#008c00; '>0</span><span style='color:#808030; '>,</span>z<span style='color:#808030; '>=</span><span style='color:#008c00; '>0</span><span style='color:#808030; '>,</span>r<span style='color:#808030; '>=</span><span style='color:#008c00; '>1</span><span style='color:#808030; '>)</span><span style='color:#808030; '>:</span>
+	<span style='color:#696969; '>"""Adds a new sphere to the world with the given x,y,z position and radius r."""</span>
+	<span style='color:#800000; font-weight:bold; '>pass</span>
+
+<span style='color:#800000; font-weight:bold; '>def</span> update_sphere<span style='color:#808030; '>(</span>name<span style='color:#808030; '>=</span><span style='color:#0000e6; '>"KVIZ_Sphere1"</span><span style='color:#808030; '>,</span>x<span style='color:#808030; '>=</span><span style='color:#008c00; '>0</span><span style='color:#808030; '>,</span>y<span style='color:#808030; '>=</span><span style='color:#008c00; '>0</span><span style='color:#808030; '>,</span>z<span style='color:#808030; '>=</span><span style='color:#008c00; '>0</span><span style='color:#808030; '>,</span>r<span style='color:#808030; '>=</span><span style='color:#44aadd; '>-</span><span style='color:#008c00; '>1</span><span style='color:#808030; '>)</span><span style='color:#808030; '>:</span>
+	<span style='color:#696969; '>"""Changes the position and or radius of the sphere.  If r &lt; 0 then the radius is</span>
+<span style='color:#696969; '>	kept the same."""</span>
+	<span style='color:#800000; font-weight:bold; '>pass</span>
+</pre>
+
+</body>
+</html>
