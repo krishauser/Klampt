@@ -105,7 +105,6 @@ def update_line(name="KVIZ_Line1",x1=0,y1=0,z1=0,x2=1,y2=1,z2=1):
 def set_visible(name="KVIZ_target",value=True):
 	_RPC.append({'type':'set_visible','name':name,'value':value})	
 
-#TODO have deletes paired for all adds, or have toggle visibility at least
 
 def _init(world):
 	global _world,_RPC,_ghosts
