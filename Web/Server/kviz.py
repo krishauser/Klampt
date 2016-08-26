@@ -7,38 +7,6 @@ _RPC = []
 _ghosts = []
 #_namedItems = {}
 
-
-#def _get_path(path,struct=None):
-#	if struct==None:
-#		struct = _sceneCurrent
-#	if len(path)==0:
-#		return struct
-#	else:
-#		if isinstance(struct,(list,tuple)):
-#			assert isinstance(path[0],int) and path[0] >= 0 and path[0] < len(struct),"Invalid list index "+str(path[0])
-#		elif isinstance(struct,dict):
-#			if path[0] not in struct:
-#				return None
-#		else:
-#			print struct,path
-#			raise ValueError("Cannot retrieve sub-element of basic data type")
-#		return _get_path(path[1:],struct[path[0]])
-#
-
-#def _add_rpc(path,value):
-#	global _sceneCurrent,_sceneChanges
-#	v = _get_path(path[:-1])
-#	if value == None:
-#		del v[path[-1]]
-#		_sceneChanges.append({'command':'delete','path':path})
-#	else:
-#		v[path[-1]] = value
-#		_sceneChanges.append({'type':'change','path':path,'value':value})
-
-
-#def _to_threejs_color(color):
-#	return int(color[0]*0xff) << 16 | int(color[1]*0xff)<<8 | int(color[2]*0xff)
-
 def set_color(target,rgba_color):
 	"""Sets the given RobotModel, RobotModelLink, named robot, named ghost, named link, or indexed link to
 	some color."""
@@ -116,41 +84,6 @@ def set_ghost_config(q,prefixname="ghost",robot=0):
 
 	robot.setConfig(q_original) #restore original config
 
-
-#def add_config(q,color=(0,1,0,0.5),name="ghost",robot=0):
-#	"""Draws the configuration q using a ghosted robot.  Multiple ghosted
-#	configurations can be added using the name keyword.  The configuration
-#	is persistent and can be changed using multiple calls with the same name.
-#	To remove the configuration, call kviz.remove_config."""
-#	global _world,_namedItems
-#	robot = _world.robot(robot)
-#	assert len(q) == robot.numLinks(),"Config must be correct size"
-#	iname = ('config',robot.getName(),name)
-#	path = ('object',robot.getName()+"_"+name)
-#	if iname in _namedItems:
-#		#just change the config / color 
-#		pass
-#	else:
-#		#TODO: fill out a three.js structure representing the robot
-#		robotJson = {}
-#		_set_path(path,robotJson)
-#		_namedItems[iname] = path
-#
-#def remove_config(name="ghost",robot=0):
-#	"""Deletes the drawing of the ghosted robot"""
-#	global _world,_namedItems
-#	iname = ('config',_world.robot(robot).getName(),name)
-#	_set_path(_namedItems[iname],None)
-#	del _namedItems[iname]
-#
-#def add_text(text,x,y,color=(0,0,0),size=12,name="_"):
-#	global _world,_namedItems
-#	assert len(q) == _world.robot(robot).numLinks(),"Config must be correct size"
-#	path = ('text',name)
-#	_set_path(path,{'text':text,'position':[x,y],'color':color,'size':size})
-#	_namedItems[('text',name)] = path
-#
-
 def add_text(name="HUD_Text1",x=0,y=0,text=""):
 	_RPC.append({'type':'add_text','name':name,'x':x,'y':y,'text':text})	
 
@@ -167,12 +100,8 @@ def update_sphere(name="KVIZ_Sphere1",x=0,y=0,z=0,r=-1):
 #	_RPC.append({'type':'add_line','name':name,'x1':x1,'y1':y1,'z1':z1,'x2':x2,'y2':y2,'z2':z2})	
 
 
-#def remove_text(name="_"):
-#	"""Deletes the drawing of the given text"""
-#	global _world,_namedItems
-#	_set_path(_namedItems[('config',name)],None)
-#	del _namedItems[('config',name)]
-#
+#TODO have deletes paired for all adds
+
 def _init(world):
 	global _world,_RPC,_ghosts
 	_world = world
