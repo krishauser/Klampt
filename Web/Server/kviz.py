@@ -148,6 +148,10 @@ def add_sphere(name="KVIZ_Sphere1",x=0,y=0,z=0,r=1):
 def update_sphere(name="KVIZ_Sphere1",x=0,y=0,z=0,r=-1):
 	_RPC.append({'type':'update_sphere','name':name,'x':x,'y':y,'z':z,'r':r})	
 
+#def add_line(name="KVIZ_Line1",x1=0,y1=0,z1=0,x2=1,y2=1,z2=1):
+#	_RPC.append({'type':'add_line','name':name,'x1':x1,'y1':y1,'z1':z1,'x2':x2,'y2':y2,'z2':z2})	
+
+
 #def remove_text(name="_"):
 #	"""Deletes the drawing of the given text"""
 #	global _world,_namedItems
