@@ -25,10 +25,11 @@ class WebRobotProgram:
         #create a world from the given files
         world = WorldModel()
         for fn in files:
-            print "trying to load:" + fn;
+            print "Loading file:" + fn;
             res = world.readFile(fn)
             if not res:
                 raise RuntimeError("Unable to load model "+fn)
+            print "Success."
 
         self.world = world
 

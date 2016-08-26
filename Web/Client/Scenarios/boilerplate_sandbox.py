@@ -33,6 +33,8 @@ def boilerplate_advance():
 	viewer.sim.updateWorld()
 	print "Done."
 
-
+def boilerplate_keypress(key):
+	print "boiler plate received key: " + str(key)
+	#TODO call student code here? via stub? -DJZ
 
 

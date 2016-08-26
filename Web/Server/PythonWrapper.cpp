@@ -220,6 +220,15 @@ void handleIncomingMessage(string message)
       char routing=message[0];
       message.erase(0, 1); //remove routing prefix
 
+      if(routing=='K') //key pressed
+      {      
+          std::string wrapper_keypress;
+          wrapper_keypress+="wrapper_keypress(";
+          wrapper_keypress+=message;
+          wrapper_keypress+=")\n";
+          int res = PyRun_SimpleString(wrapper_keypress.c_str());
+      }
+
       if(routing=='A')
       {
          printf("  user would like to advance frame\n");

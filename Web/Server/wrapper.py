@@ -25,13 +25,13 @@ def wrapper_compute_JSON():
 		wrapper_jString=kviz._getInitialJSON()
 		secs = time.time()- starttime
 		msecs = secs * 1000  # millisecs
-		print "Getting the scene in JSON format took: " + "{:.2f}".format(msecs) + " ms"
+		#print "Getting the scene in JSON format took: " + "{:.2f}".format(msecs) + " ms"
 	else:   
 		starttime=time.time();
 		wrapper_jString=kviz._getUpdateJSON()
 		secs = time.time() - starttime
 		msecs = secs * 1000  # millisecs
-		print "Getting the transforms in JSON format took: " + "{:.2f}".format(msecs) + " ms"
+		#print "Getting the transforms in JSON format took: " + "{:.2f}".format(msecs) + " ms"
 
 def wrapper_send_JSON():
 	global wrapper_JSON_message_count,wrapper_jString
@@ -39,7 +39,7 @@ def wrapper_send_JSON():
 	emb.send(wrapper_jString)
 	secs = time.time()- starttime
 	msecs = secs * 1000  # millisecs
-	print "sending JSON took: " + "{:.2f}".format(msecs) + " ms"
+	#print "sending JSON took: " + "{:.2f}".format(msecs) + " ms"
 	wrapper_JSON_message_count+=1
 
 def wrapper_advance_internal():
@@ -48,7 +48,7 @@ def wrapper_advance_internal():
 		boilerplate_advance()
 		secs = time.time() - starttime
 		msecs = secs * 1000  # millisecs
-		print "Advancing took: " + "{:.2f}".format(msecs) + " ms"
+		#print "Advancing took: " + "{:.2f}".format(msecs) + " ms"
 	except Exception as e:
 		print "Exception in advance code",
 		raise
@@ -77,5 +77,12 @@ def wrapper_advance():
 	wrapper_compute_JSON()		
 	wrapper_frame_precomputed = True
 
+def wrapper_keypress(key):
+	#print "got key: " + str(key)
+	try:
+		boilerplate_keypress(key)
+	except Exception as e:
+		print "Exception in init code"
+		raise
 
 
