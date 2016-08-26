@@ -188,6 +188,60 @@ function sendMessage(value)
 	console.log("Not connected to remote, so no message sent");
 }
 
+function isConnected()
+{
+	return network && network.connected()
+}
+
+//note: this doesn't actually pause the code... you need to provide callbacks for things to change on
+//connection success / failure
+function waitForConnection(msecs,callback,failcallback) {
+	if(network == null || network.websocket == null || msecs < 0) {
+		if(failcallback != null) {
+			failcallback();
+		}
+		return;
+	}
+	updateSocketState(network.websocket);
+    if (network.websocket.readyState === 1) {
+        if(callback != null){
+            callback();
+        }
+        return;
+    }
+
+    setTimeout(
+        function () {
+            console.log("wait for connection...");
+            updateSocketState(network.websocket);
+            waitForConnection(msecs-50, callback, failcallback);
+        }, 50); // wait 50 miliseconds for the connection...
+}
+
+function waitForDisconnection(msecs,callback,failcallback) {
+	if(network == null || network.websocket == null || msecs < 0) {
+		if(callback != null) {
+			callback();
+		}
+		return;
+	}
+	updateSocketState(network.websocket);
+    if (network.websocket.readyState == 3) {
+        if(callback != null){
+            callback();
+        }
+        return;
+    }
+
+    setTimeout(
+        function () {
+            console.log("wait for disconnection...");
+            updateSocketState(network.websocket);
+            waitForDisconnection(msecs-50, callback, failcallback);
+        }, 50); // wait 50 milisecond for the connection...
+}
+
+
 function updateSocketState(websocket)
 {
    console.log("in updateSocketState");		

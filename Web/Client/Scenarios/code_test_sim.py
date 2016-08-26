@@ -7,7 +7,7 @@ def init(robot_model):
     
     #demonstrate creating a ghost
     ghost=kviz.add_ghost('myGhost')
-    kviz.set_color(ghost,[1,0,0,0.25],True)
+    kviz.set_color(ghost,[1,0,0,0.25])
     
     #demonstrate changing ghost config
     q=kviz.get_robot_config()
