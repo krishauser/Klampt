@@ -909,6 +909,8 @@ void start_server() {
             break;   // Child process exits
         } else {         // parent process
             settings.handler_id += 1;
+            //release the client socket, it's being handled by the handler process
+            close(csock);
         }
     }
     if (pid == 0) {
