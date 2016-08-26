@@ -61,6 +61,8 @@
                   x = '__storage_test__';
                localStorage.setItem(x, x);
                localStorage.removeItem(x);
+               console.log("looks like local storage is setup");
+
                return true;
             }
             catch(e) {
@@ -114,7 +116,7 @@
          //http://stackoverflow.com/questions/3567369/reading-server-side-file-with-javascript
          function loadFileToEditor(file_to_load)
          {
-            
+            console.log("trying to load stub file from webserver");
             
             $.ajax({
                url: file_to_load,
@@ -122,30 +124,37 @@
                cache: false,   // with this, you can force the browser to not make cache of the retrieved data
                dataType: "text",  // jQuery will infer this, but you can set explicitly
                success: function( data, textStatus, jqXHR ) {
-                  editor.getSession().setValue(data); 
+               console.log("ajax has happened, setting editor text");
+               editor.getSession().setValue(data); 
                }
-            });
+            }); 
          }
    
          function boilerPlateChanged()
          {
          
             var file_to_load=$('#boilerselctor').val();
-         
+            console.log("trying to load file: " + file_to_load);
             if(localStorageAvailable) //lets see if we have worked on this previously
             {
+               console.log("  local storage is available, lets check that");
                var example1Text=localStorage.getItem('KlamptStartingCode_'+file_to_load);
                if(example1Text!=null)
                {               
+                  console.log("it does exist in local storage!");
                   editor.getSession().setValue(example1Text);
                }
                else
                {
+                  console.log("doesn't exist in local storage");
                   loadFileToEditor(file_to_load);
                }
             }
             else
+            {
+               console.log("local storage is not available, trying to load from webserver");
                loadFileToEditor(file_to_load);
+            }
          }   
          
          
@@ -380,9 +389,16 @@
                         if(recursive==false)
                         {
                            if(typeof object.userData.customSingleMaterialSetup === 'undefined')
-                           {                          
-                              basicMaterial = new THREE.MeshPhongMaterial();
-                              object.material=basicMaterial;
+                           {      
+                              if((typeof object.geometry) !== 'undefined' && object.geometry.type == 'LineGeometry')
+                              {
+                                 basicMaterial = new THREE.LineBasicMaterial();                         
+                              }
+                              else
+                                 basicMaterial = new THREE.MeshPhongMaterial();
+                              
+                              object.material=basicMaterial;      
+                              
                               object.userData.customSingleMaterialSetup=true;
                            }
                         }
@@ -390,8 +406,15 @@
                         {
                            if(typeof object.userData.customSharedMaterialSetup === 'undefined')
                            {                          
-                              basicMaterial = new THREE.MeshPhongMaterial();
-                              object.material=basicMaterial;
+                              if((typeof object.geometry) !== 'undefined' && object.geometry.type == 'LineGeometry')
+                              {
+                                 basicMaterial = new THREE.LineBasicMaterial();                         
+                              }
+                              else
+                                 basicMaterial = new THREE.MeshPhongMaterial();
+                              
+                              object.material=basicMaterial;      
+                              
                               object.userData.customSharedMaterialSetup=true;
                               
                               object.traverse( function ( child ) { 
@@ -510,6 +533,20 @@
                   }
                   else
                      console.log("couldn't find sphere named: " + request.name);
+               }
+               if(request.type == "add_line")
+               {
+                  console.log("RPC to add line!"); 
+                  var geometry = new THREE.Geometry();
+                  
+                  geometry.vertices.push(new THREE.Vector3(request.x1,request.y1,request.z1));
+                  geometry.vertices.push(new THREE.Vector3(request.x2,request.y2,request.z2));
+                     
+                  var material = new THREE.LineBasicMaterial( {color: 0xAA0000} );
+                  var line = new THREE.Line( geometry, material );
+                  line.name=request.name;
+                   
+                  scene.add( line );                     
                }
                
             }
