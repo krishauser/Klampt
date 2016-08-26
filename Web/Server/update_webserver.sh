@@ -1,0 +1,2 @@
+killall WebServer
+cp WebServer ../..
