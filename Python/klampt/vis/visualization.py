@@ -1390,7 +1390,13 @@ class VisualizationPlugin(glcommon.GLWidgetPlugin):
     def setItemConfig(self,name,value):
         global _globalLock
         _globalLock.acquire()
-        config.getConfig(self.getItem(name).value,item)
+        item = self.getItem(name)
+        if isinstance(item.item,(list,tuple)):
+            item.item = value
+        else:
+            config.setConfig(item.item,value)
+        if item.editor:
+            item.update_editor(item_to_editor = True)
         self.refresh()
         _globalLock.release()
 
