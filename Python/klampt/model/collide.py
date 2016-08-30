@@ -5,7 +5,7 @@ in a WorldModel.
 
 from __future__ import generators
 from ..robotsim import *
-from ..math import se3
+from ..math import vectorops,se3
 
 
 def bb_intersect(a,b):
@@ -135,10 +135,10 @@ def ray_cast(geomlist,s,d):
     """
     res = None
     dmin = 1e300
-    for i,g in geomlist:
+    for i,g in enumerate(geomlist):
         (coll,pt) = g.rayCast(s,d)
         if coll:
-            dist = vectorops.dot(d,vectorops,sub(pt,s))
+            dist = vectorops.dot(d,vectorops.sub(pt,s))
             if dist < dmin:
                 dmin,res = dist,(i,pt)
     return res
