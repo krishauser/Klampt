@@ -8,6 +8,7 @@ from klampt.vis.glcommon import GLWidgetPlugin
 from klampt import vis
 from klampt.model.subrobot import SubRobotModel
 from klampt.plan import robotplanning
+from klampt.vis import editors
 
 class MyGLViewer(GLWidgetPlugin):
     def __init__(self,world):
@@ -17,6 +18,10 @@ class MyGLViewer(GLWidgetPlugin):
         self.subrobots = []
         for i in range(6):
             self.subrobots.append(SubRobotModel(self.robot,range(6+i*6,12+i*6)))
+        (res,val) = editors.run(editors.SelectorEditor("subrobot",self.subrobots[0]._links,description="sub robot links",world=world,robot=self.robot))
+        if res:
+            print "Return value",val
+            self.subrobots[0]._links = val
         self.startConfig = self.robot.getConfig()
         self.robotWidget = RobotPoser(world.robot(0))
         self.robotWidget.setActiveDofs(self.subrobots[0]._links)
