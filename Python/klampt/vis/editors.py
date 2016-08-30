@@ -4,6 +4,7 @@ import visualization
 from ..math import vectorops,so3,se3
 from ..robotsim import WidgetSet,RobotPoser,ObjectPoser,TransformPoser,PointPoser,WorldModel,RobotModelLink,RigidObjectModel,IKObjective
 from ..model.subrobot import SubRobotModel
+from ..model import collide
 from OpenGL.GL import *
 
 class VisualEditorBase(glcommon.GLWidgetPlugin):
@@ -221,21 +222,37 @@ class SelectorEditor(VisualEditorBase):
         self.lastClicked = -1
         self.clicked = None
         self.hovered = None
-    
+        self.oldAppearances = {}
+        self.newAppearances = {}
+
     def instructions(self):
-        return 'Right-click to toggle selection of robot links / objects in the world.\nKeyboard: < to select previous, > to select next'
+        return 'Right-click to toggle selection of robot links / objects in the world.\nKeyboard: < to deselect previous, > to select next'
 
     def addDialogItems(self,parent,ui='qt'):
         layout = QHBoxLayout(parent)
         self.clearButton = QPushButton("Clear")
         self.selectAllButton = QPushButton("Select all")
+        self.selectionList = QListWidget()
+        self.selectionList.setSelectionMode(QAbstractItemView.MultiSelection)
+        if self.robot != None:
+            for i in xrange(self.robot.numLinks()):
+                self.selectionList.addItem(self.robot.link(i).getName())
+        elif self.world != None:
+            for i in xrange(self.world.numIDs()):
+                self.selectionList.addItem(self.world.getName(i))
+        for i in self.value:
+            self.selectionList.setCurrentItem(self.selectionList.item(i),QItemSelectionModel.Select)
         layout.addWidget(self.clearButton)
         layout.addWidget(self.selectAllButton)
-        self.insertButton.clicked.connect(self.clear)
-        self.deleteButton.clicked.connect(self.selectAll)
+        layout.addWidget(self.selectionList)
+        self.clearButton.clicked.connect(self.clear)
+        self.selectAllButton.clicked.connect(self.selectAll)
+        self.selectionList.itemSelectionChanged.connect(self.selectionListChanged)
+        self.selectionListChangeFlag = False
 
     def clear(self):
         self.value = []
+        self.selectionList.clearSelection()
         self.refresh()
 
     def selectAll(self):
@@ -244,6 +261,10 @@ class SelectorEditor(VisualEditorBase):
             pass
         else:
             self.value = [l for l in range(self.robot.numLinks())]
+        self.selectionListChangeFlag = True
+        for i in self.value:
+            self.selectionList.setCurrentItem(self.selectionList.item(i),QItemSelectionModel.Select)
+        self.selectionListChangeFlag = False
         self.refresh()        
 
     def click_world(self,x,y):
@@ -252,20 +273,12 @@ class SelectorEditor(VisualEditorBase):
         #get the viewport ray
         (s,d) = self.click_ray(x,y)
 
-        #run the collision tests
-        collided = []
-        for g in self.collider.geomList:
-            (hit,pt) = g[1].rayCast(s,d)
-            if hit:
-                dist = vectorops.dot(vectorops.sub(pt,s),d)
-                collided.append((dist,g[0]))
-        if len(collided) == 0:
+        geoms = [self.world.geometry(i) for i in range(self.world.numIDs())]
+        res = collide.ray_cast(geoms,s,d)
+        if not res:
             return
-        id = collided[0][1].getID()
-        if id in self.value:
-            self.value.remove(id)
-        else:
-            self.value.append(id)
+        id,geom = res
+        self.toggle_selection(id)
         self.lastClicked = id
         self.refresh()
 
@@ -275,26 +288,52 @@ class SelectorEditor(VisualEditorBase):
         #get the viewport ray
         (s,d) = self.click_ray(x,y)
 
-        #run the collision tests
-        collided = []
-        for l in range(self.robot.numLinks()):
-            (hit,pt) = self.robot.link(l).geometry().rayCast(s,d)
-            if hit:
-                dist = vectorops.dot(vectorops.sub(pt,s),d)
-                collided.append((dist,l))
-        if len(collided) == 0:
+        geoms = [self.robot.link(i).geometry() for i in range(self.robot.numLinks())]
+        self.robot.setConfig(self.robot.getConfig())
+        print [g.getCurrentTransform() for g in geoms]
+        res = collide.ray_cast(geoms,s,d)
+        if not res:
             return
-        id = collided[0][1]
-        if id in self.value:
-            self.value.remove(id)
-        else:
-            self.value.append(id)
+        id,geom = res
+        self.toggle_selection(id)
         self.lastClicked = id
         self.refresh()
 
+    def selectionListChanged(self):
+        #if the GUI has changed the selection then don't update the selection list
+        if self.selectionListChangeFlag: return
+        self.value = []
+        for item in self.selectionList.selectedItems():
+            row = self.selectionList.row(item)
+            self.value.append(row)
+        self.refresh()
+
+    def add_selection(self,id):
+        self.selectionListChangeFlag = True
+        if id not in self.value:
+            self.selectionList.setCurrentItem(self.selectionList.item(id),QItemSelectionModel.Select)
+            self.value.append(id)
+        self.selectionListChangeFlag = False
+
+    def remove_selection(self,id):
+        self.selectionListChangeFlag = False
+        if id in self.value:
+            self.value.remove(id)
+            self.selectionList.setCurrentItem(self.selectionList.item(id),QItemSelectionModel.Deselect)
+        self.selectionListChangeFlag = True
+
+    def toggle_selection(self,id):
+        self.selectionListChangeFlag = True
+        if id in self.value:
+            self.value.remove(id)
+            self.selectionList.setCurrentItem(self.selectionList.item(id),QItemSelectionModel.Deselect)
+        else:
+            self.selectionList.setCurrentItem(self.selectionList.item(id),QItemSelectionModel.Select)
+            self.value.append(id)
+        self.selectionListChangeFlag = False
 
     def mousefunc(self,button,state,x,y):
-        if button==1 and state==0:
+        if button==2 and state==0:
             if self.robot == None:
                 self.click_world(x,y)
             else:
@@ -305,12 +344,9 @@ class SelectorEditor(VisualEditorBase):
     def keyboardfunc(self,c,x,y):
         if c==',' or c=='<':
             if self.lastClicked >= 0:
-                self.lastClicked -= 1
+                self.remove_selection(self.lastClicked)
             if self.lastClicked >= 0:
-                if self.lastClicked not in self.value:
-                    self.value.append(self.lastClicked)
-                else:
-                    self.value.remove(self.lastClicked)
+                self.lastClicked -= 1
             self.refresh()
             return True
         elif c=='.' or c=='>':
@@ -318,24 +354,40 @@ class SelectorEditor(VisualEditorBase):
             if self.lastClicked < Nmax:
                 self.lastClicked += 1
             if self.lastClicked < Nmax:
-                if self.lastClicked not in self.value:
-                    self.value.append(self.lastClicked)
-                else:
-                    self.value.remove(self.lastClicked)
+                self.add_selection(self.lastClicked)
             self.refresh()
             return True
 
     def display(self):
         #Override display handler to highlight selected links
-        if self.world != None:
-            for i in xrange(self.world.numTerrains()):
-                self.world.terrain(i).drawGL()
-            for i in xrange(self.world.numRigidObjects()):
-                self.world.rigidObject(i).drawGL()
-            for i in xrange(self.world.numRobots()):
-                self.world.robot(i).drawGL()
-        elif self.robot != None:
-            self.robot.drawGL()
+
+        #save old appearance and set new appearance
+        apps = {}
+        if self.robot != None:
+            for i in xrange(self.robot.numLinks()):
+                apps[i] = self.robot.link(i).appearance()
+        elif self.world != None:
+            for i in xrange(self.world.numIDs()):
+                apps[i] = self.world.appearance(i)
+        changed = self.value[:]
+        if self.lastClicked >= 0: changed.append(self.lastClicked)
+        for i in changed:
+            if i not in self.oldAppearances:
+                self.oldAppearances[i] = apps[i].clone()
+                self.newAppearances[i] = apps[i].clone()
+            if i == self.lastClicked:
+                if i in self.value:
+                    self.newAppearances[i].setColor(1,0.5,0)
+                else:
+                    self.newAppearances[i].setColor(1,0,0)
+            else:
+                self.newAppearances[i].setColor(1,1,0)
+            apps[i].set(self.newAppearances[i])
+        #draw
+        self.world.drawGL()
+        #restore old appearance
+        for i in changed:
+            apps[i].set(self.oldAppearances[i])
         glDisable(GL_BLEND)
 
 
