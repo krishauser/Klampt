@@ -820,6 +820,20 @@ void Geometry3D::setCurrentTransform(const double R[9],const double t[3])
   geom->SetTransform(T);
 }
 
+void Geometry3D::getCurrentTransform(double out[9],double out2[3])
+{
+  RigidTransform T;
+  SmartPointer<AnyCollisionGeometry3D>& geom = *reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(geomPtr);
+  if(!geom) {
+    T.setIdentity();
+    return;
+  }
+  else
+    T = geom->GetTransform();
+  T.R.get(out);
+  T.t.get(out2);
+}
+
 void Geometry3D::translate(const double t[3])
 {
   SmartPointer<AnyCollisionGeometry3D>& geom = *reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(geomPtr);

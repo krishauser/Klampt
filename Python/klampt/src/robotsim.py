@@ -981,6 +981,10 @@ class Geometry3D(_object):
         """
         return _robotsim.Geometry3D_setCurrentTransform(self, *args)
 
+    def getCurrentTransform(self):
+        """getCurrentTransform(Geometry3D self)"""
+        return _robotsim.Geometry3D_getCurrentTransform(self)
+
     def translate(self, *args):
         """
         translate(Geometry3D self, double const [3] t)

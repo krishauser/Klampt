@@ -226,6 +226,8 @@ class Geometry3D
   bool detachFromStream(const char* protocol,const char* name);
   ///Sets the current transformation (not modifying the underlying data)
   void setCurrentTransform(const double R[9],const double t[3]);
+  ///Gets the current transformation 
+  void getCurrentTransform(double out[9],double out2[3]);
   ///Translates the geometry data 
   void translate(const double t[3]);
   ///Translates/rotates/scales the geometry data 
