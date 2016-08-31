@@ -285,8 +285,8 @@ SmartPointer<RobotController> MakeDefaultController(Robot* robot)
     else {
       printf("MakeDefaultController: could not load controller file %s\n",controllerFn.c_str());
       printf("  Making the standard controller instead.\n");
-      printf("  Press enter to continue.\n");
-      getchar();
+      //printf("  Press enter to continue.\n");
+      //getchar();
     }
   }
   PolynomialPathController* c = new PolynomialPathController(*robot);
