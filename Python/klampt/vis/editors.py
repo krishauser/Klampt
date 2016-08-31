@@ -290,7 +290,6 @@ class SelectionEditor(VisualEditorBase):
 
         geoms = [self.robot.link(i).geometry() for i in range(self.robot.numLinks())]
         self.robot.setConfig(self.robot.getConfig())
-        print [g.getCurrentTransform() for g in geoms]
         res = collide.ray_cast(geoms,s,d)
         if not res:
             return
