@@ -215,7 +215,7 @@ class ConfigsEditor(VisualEditorBase):
             self.robot.link(j).appearance().setColor(0.5,0.5,0.5,1)
         glDisable(GL_BLEND)
 
-class SelectorEditor(VisualEditorBase):
+class SelectionEditor(VisualEditorBase):
     def __init__(self,name,value,description,world,robot=None):
         VisualEditorBase.__init__(self,name,value,description,world)
         self.robot = robot
