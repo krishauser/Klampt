@@ -1649,8 +1649,8 @@ void RobotSensors::MakeDefault(Robot* robot)
     else {
       printf("RobotSensors::MakeDefault: could not load sensor file %s\n",sensorFn.c_str());
       printf("  Making the standard sensors instead.\n");
-      printf("  Press enter to continue.\n");
-      getchar();
+      //printf("  Press enter to continue.\n");
+      //getchar();
       sensors.resize(0);
     }
   }
