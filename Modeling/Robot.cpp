@@ -88,8 +88,8 @@ void GetAccMax(const Robot& robot, Vector& accMax) {
 		accMax(i) = robot.torqueMax[i] / (sumCom * sumMass * 9.8);
 		if (!IsFinite(accMax(i))) {
 			printf("Warning, infinite acceleration limit for joint %d\n", i);
-			printf("Press enter to continue\n");
-			getchar();
+			//printf("Press enter to continue\n");
+			//getchar();
 		}
 	}
 }
@@ -1094,8 +1094,8 @@ bool Robot::LoadRob(const char* fn) {
 					//check for infinity
 					if(!links[i].inertia.isZero(1e300)) {
 					  cout<<"Huge automass inertia for "<<linkNames[i]<<": "<<endl<<links[i].inertia<<endl;
-					  cout<<"Press enter to continue..."<<endl;
-					  getchar();
+					  //cout<<"Press enter to continue..."<<endl;
+					  //getchar();
 					}
 				} else {
 					links[i].inertia.setZero();
@@ -2335,8 +2335,8 @@ bool Robot::LoadURDF(const char* fn)
 	bool loaded=xml_doc.LoadFile(fn);
 	if(!loaded) {
 	  fprintf(stderr,"Strange, unable to re-open URDF robot file %s to read klampt XML elements\n",fn);
-	  printf("Press Enter to continue\n");
-	  getchar();
+	  //printf("Press Enter to continue\n");
+	  //getchar();
 	}
 	TiXmlElement *robot_xml = xml_doc.FirstChildElement("robot");
 	TiXmlElement *klampt_xml = NULL;
@@ -2633,7 +2633,7 @@ bool Robot::LoadURDF(const char* fn)
 		  this->links[link_index].w.set(linkNode->axis);
 		if(this->links[link_index].w.norm() < 0.1){
 		  cout<<"Axis error: "<<linkNames[link_index]<<";"<<this->links[link_index].w<<endl;
-		  getchar();
+		  //getchar();
 		}
 
 		//If have inertia specified, then, use the specified inertia

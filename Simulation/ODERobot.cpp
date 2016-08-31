@@ -308,7 +308,7 @@ void ODERobot::Create(int robotIndex,dWorldID worldID,bool useBoundaryLayer)
       body.inertia.setIdentity(); body.inertia *= 0.01;
       CopyMatrix(mass.I,body.inertia);
       fprintf(stderr,"Setting inertia to 0.01*identity. Press enter to continue...\n");
-      getchar();
+      //getchar();
     }
     dBodySetMass(bodyID[primaryLink],&mass);
 
@@ -684,7 +684,7 @@ void ODERobot::AddTorques(const Config& t)
   for(int i=0;i<t.n;i++)
     if(!IsFinite(t(i))) {
       printf("Error, commanding link %d to a non-finite torque!\n",i);
-      getchar();
+      //getchar();
       return;
     }
 
@@ -767,7 +767,7 @@ void ODERobot::AddLinkTorque(int i,Real t)
   }
   if(!IsFinite(t)) {
     printf("ODERobot::AddLinkTorque: Error, commanding link %d to a non-finite torque!\n",i);
-    getchar();
+    //getchar();
     return;
   }
   if(robot.links[i].type == RobotLink3D::Revolute)   

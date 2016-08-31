@@ -508,7 +508,7 @@ void ODESimulator::Step(Real dt)
         }
   		  if(rollback && !lastState.IsOpen()) {
           printf("ODESimulation: Rollback rejected because last state not saved\n");
-          getchar();
+          //getchar();
           rollback = false;
   		  }
   		  if(rollback && timestep < 1e-6) {
@@ -677,8 +677,8 @@ void ODESimulator::Step(Real dt)
             printf("  %s - %s\n",id1.c_str(),id2.c_str());
           }
   			}
-  			printf("Press enter to continue...\n");
-  			getchar();
+  			//printf("Press enter to continue...\n");
+  			//getchar();
   			//NO ROLLBACK ON FIRST
   			rollback = false;
   		}
@@ -1239,7 +1239,7 @@ void ProcessContacts(list<ODEContactResult>::iterator start,list<ODEContactResul
       if(settings.maxContacts > 50) {
 	if(!warnedContacts) {
 	  printf("Max contacts > 50, may crash.  Press enter to continue...\n");
-	  getchar();
+	  //getchar();
 	}
 	warnedContacts = true;
       }
@@ -1256,7 +1256,7 @@ void ProcessContacts(list<ODEContactResult>::iterator start,list<ODEContactResul
       if(settings.maxContacts > 50) {
 	if(!warnedContacts) {
 	  printf("Max contacts > 50, may crash.  Press enter to continue...\n");
-	  getchar();
+	  //getchar();
 	}
 	warnedContacts = true;
       }
