@@ -31,6 +31,12 @@ void StanceFrame::CreateFlat()
 
 void StanceFrame::CreateNearby()
 {
-  printf("TODO: CreateNearby\n");
+  frame->gui->SendCommand("get_nearby_contacts",ui->contactToleranceSpin->value());
+  frame->onResourceEdit();
+}
+
+void StanceFrame::Clean()
+{
+  frame->gui->SendCommand("clean_contacts",ui->contactToleranceSpin->value(),ui->contactToleranceSpin->value()*5);
   frame->onResourceEdit();
 }

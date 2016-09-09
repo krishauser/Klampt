@@ -24,6 +24,7 @@ public:
 public slots:
   void CreateFlat();
   void CreateNearby();
+  void Clean();
 private:
   Ui::StanceFrame* ui;
 };

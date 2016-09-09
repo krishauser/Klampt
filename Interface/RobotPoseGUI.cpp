@@ -21,6 +21,7 @@ RobotPoseBackend::RobotPoseBackend(RobotWorld* world,ResourceManager* library)
   settings["contact"]["normalLength"]= 0.05; 
   settings["linkCOMRadius"] = 0.01;
   settings["flatContactTolerance"] = 0.001;
+  settings["nearbyContactTolerance"] = 0.005;
   settings["selfCollideColor"][0] = 1;
   settings["selfCollideColor"][1] = 0;
   settings["selfCollideColor"][2] = 0;
@@ -231,7 +232,7 @@ Stance RobotPoseBackend::GetFlatStance(Real tolerance)
   Robot* robot = world->robots[0];
   Stance s;
   if(robotWidgets[0].ikPoser.poseGoals.empty()) {
-    printf("Storing flat ground stance\n");
+    printf("Computing stance as though robot were standing on flat ground\n");
     ContactFormation cf;
     GetFlatContacts(*robot,tolerance,cf);
 
@@ -246,11 +247,12 @@ Stance RobotPoseBackend::GetFlatStance(Real tolerance)
     }
   }
   else {
-    printf("Storing flat contact stance\n");
+    printf("Computing flat-ground stance only for IK-posed links\n");
     for(size_t i=0;i<robotWidgets[0].ikPoser.poseGoals.size();i++) {
       int link = robotWidgets[0].ikPoser.poseGoals[i].link;
       vector<ContactPoint> cps;
       GetFlatContacts(*robot,link,tolerance,cps);
+      if(cps.empty()) continue;
       Real friction = settings["defaultStanceFriction"];
       //assign default friction
       for(size_t j=0;j<cps.size();j++)
@@ -263,6 +265,48 @@ Stance RobotPoseBackend::GetFlatStance(Real tolerance)
   }
   return s;
 }
+
+Stance RobotPoseBackend::GetNearbyStance(Real tolerance)
+{
+  if(tolerance==0)
+    tolerance = settings["nearbyContactTolerance"];
+  Robot* robot = world->robots[0];
+  Stance s;
+  if(robotWidgets[0].ikPoser.poseGoals.empty()) {
+    printf("Calculating stance from all points on robot near environment / objects\n");
+    ContactFormation cf;
+    GetNearbyContacts(*robot,*world,tolerance,cf);
+
+    Real friction = settings["defaultStanceFriction"];
+    for(size_t i=0;i<cf.links.size();i++) {
+      //assign default friction
+      for(size_t j=0;j<cf.contacts[i].size();j++)
+  cf.contacts[i][j].kFriction = friction;
+      Hold h;
+      LocalContactsToHold(cf.contacts[i],cf.links[i],*robot,h);
+      s.insert(h);
+    }
+  }
+  else {
+    printf("Calculating near-environment stance only for IK-posed links\n");
+    for(size_t i=0;i<robotWidgets[0].ikPoser.poseGoals.size();i++) {
+      int link = robotWidgets[0].ikPoser.poseGoals[i].link;
+      vector<ContactPoint> cps;
+      GetNearbyContacts(*robot,link,*world,tolerance,cps);
+      if(cps.empty()) continue;
+      Real friction = settings["defaultStanceFriction"];
+      //assign default friction
+      for(size_t j=0;j<cps.size();j++)
+  cps[j].kFriction = friction;
+      Hold h;
+      LocalContactsToHold(cps,link,*robot,h);
+      h.ikConstraint = robotWidgets[0].ikPoser.poseGoals[i];
+      s.insert(h);
+    }
+  }
+  return s;
+}
+
 
 ResourcePtr RobotPoseBackend::PoserToResource(const string& type)
 {
@@ -636,6 +680,21 @@ bool RobotPoseBackend::OnCommand(const string& cmd,const string& args)
 	stringstream ss(args); ss>>tolerance; 
       }
       Stance s = GetFlatStance(tolerance);
+      sp->stance = s;
+    }
+    else {
+      printf("Need to be selecting a Stance resource\n");
+    }
+  }
+  else if(cmd == "get_nearby_contacts") {
+    ResourcePtr r=ResourceGUIBackend::CurrentResource();
+    StanceResource* sp = dynamic_cast<StanceResource*>((ResourceBase*)r);
+    if(sp) {
+      Real tolerance = 0;
+      if(!args.empty()) {
+  stringstream ss(args); ss>>tolerance; 
+      }
+      Stance s = GetNearbyStance(tolerance);
       sp->stance = s;
     }
     else {
