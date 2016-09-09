@@ -305,8 +305,8 @@ def canonical(v):
         R[0] = -1.0
         R[4] = -1.0
         return R
-    R = v + [0.]*6
-    (x,y,z) = tuple(v)
+    R = list(v) + [0.]*6
+    x,y,z = v
     scale = (1.0-x)/(1.0-x*x);
     R[3]= -y;
     R[4]= x + scale*z*z;
