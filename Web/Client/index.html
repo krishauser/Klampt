@@ -544,7 +544,7 @@
                      //}
                   }
                }
-               if(request.type == "add_ghost") 
+               else if(request.type == "add_ghost") 
                {
                   var object_name=request.object;
                   var prefix=request.prefix_name;
@@ -565,7 +565,7 @@
                               } );
                   }
                }
-               if(request.type == "set_position")
+               else if(request.type == "set_position")
                {                 
                   console.log("got a set_position RPC request for: " + request.object);
                   var object = scene.getObjectByName(request.object, true );
@@ -580,7 +580,7 @@
                   else
                      console.log("  couldn't find object: " + request.object);
                }
-               if(request.type == "add_text")
+               else if(request.type == "add_text")
                {
                   console.log("RPC to add text!");     
                   var text2 = document.createElement('div');
@@ -597,12 +597,12 @@
                   text2.style.left = request.y + '%';
                   document.getElementById("canvas").appendChild(text2);
                }
-               if(request.type == "update_text")
+               else if(request.type == "update_text")
                {
                   var text2 = document.getElementById("_text_overlay_"+request.name);
                   text2.innerHTML = request.text;
                }
-               if(request.type == "add_sphere")
+               else if(request.type == "add_sphere")
                {
                   console.log("RPC to add sphere!"); 
                   var geometry = new THREE.SphereGeometry(1.0,20,20);
@@ -617,10 +617,8 @@
                   sphere.position.set(request.x,request.y,request.z);
                   scene.add( sphere );                     
                }
-               if(request.type == "update_sphere")
-               {
-                  console.log("RPC to add text!"); 
-                 
+               else if(request.type == "update_sphere")
+               {                 
                   var sphere = scene.getObjectByName(request.name, true );
                   if(sphere != null)
                   { 
@@ -635,13 +633,14 @@
                   else
                      console.log("couldn't find sphere named: " + request.name);
                }
-               if(request.type == "add_line")
+               else if(request.type == "add_line")
                {
                   console.log("RPC to add line!"); 
                   var geometry = new THREE.Geometry();
                   
                   geometry.vertices.push(new THREE.Vector3(request.x1,request.y1,request.z1));
                   geometry.vertices.push(new THREE.Vector3(request.x2,request.y2,request.z2));
+                  geometry.dynamic  = true;
                      
                   var material = new THREE.LineBasicMaterial( {color: 0xAA0000} );
                   var line = new THREE.Line( geometry, material );
@@ -649,7 +648,21 @@
                    
                   scene.add( line );                     
                }
-               
+               else if(request.type == "update_line")
+               {                 console.log("RPC to update line");
+                  var line = scene.getObjectByName(request.name, true );
+                  if(line != null)
+                  { 
+                     line.geometry.vertices[0]=new THREE.Vector3(request.x1,request.y1,request.z1);
+                     line.geometry.vertices[1]=new THREE.Vector3(request.x2,request.y2,request.z2);
+                     line.geometry.verticesNeedUpdate = true;
+                  }
+                  else
+                     console.log("couldn't find line named: " + request.name);
+               } 
+               else {
+                  console.log("Invalid request: "+request.type);
+               }
             }
             var t2 = performance.now();
             if(rpc.length > 0)
