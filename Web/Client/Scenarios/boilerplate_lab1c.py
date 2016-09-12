@@ -19,7 +19,7 @@ steerinc = 2
 xform = [0,0,0]
 
 def boilerplate_start():
-    global world,car_body,wheels
+    global world,car_body,wheels,velocity,xform
     world = WorldModel()
     car_body = world.loadElement("Web/Client/Scenarios/lab1/body.obj")
     wheels['fl'] = world.loadElement("Web/Client/Scenarios/lab1/tire_fl.obj")
@@ -33,6 +33,8 @@ def boilerplate_start():
         flipzy = so3.rotation([1,0,0],math.pi/2)
         wheels[k].geometry().transform(flipzy,[0,0,0])
         wheels[k].appearance().setColor(0.3,0.3,0.3,1)
+    velocity = 0
+    xform = [0,0,0]
     kviz._init(world)
 
 def update_2d_xform(rigidObject,xform2d):
@@ -74,7 +76,8 @@ def update_xform(dt=0.02):
 def boilerplate_advance():
     update_xform()
     update_car()
-    boilerplate_keypress(random.choice(['up','down','left','right']))
+    boilerplate_keypress(stub.control())
+    #boilerplate_keypress(random.choice(['up','down','left','right']))
 
 def boilerplate_keypress(c):
     global velocity,steer,xform
@@ -86,7 +89,6 @@ def boilerplate_keypress(c):
         velocity -= vinc
         if velocity < vmin:
             velocity = vmin
-        print velocity
     elif c=='right':
         steer -= steerinc
         if steer < -steermax:

@@ -168,6 +168,17 @@
             newBoilerplate = true;
             requestStop();
          }
+
+         function doRevertChanges()
+         {
+            if (confirm("Are you sure you want to discard ALL changes?") == true) {
+              var boilerid=$('#boilerselctor').val();
+              var file_to_load="Scenarios/code_"+boilerid+".py";
+              loadFileToEditor(file_to_load);
+              newBoilerplate = true;
+              requestStop();
+            }
+         }
    
          function boilerPlateChanged()
          {
@@ -204,7 +215,7 @@
             $('#myLayout').w2layout({
                name: 'layout',
                panels: [
-                  { type: 'top',  size: "5%", resizable: true, style: pstyle, content: '<button onclick="doCodeSubmit()">Reset</button><button onclick="requestAdvance()">Advance Frame</button><button onclick="requestFreeRun()">Run</button><button onclick="requestStop()">Stop</button> <div style=" width:20px;display:inline-block;" />Klampt Server URL:<select id="serverURL" onchange="serverChanged()"/><div style=" width:20px;display:inline-block;" /><select id="boilerselctor" onchange="boilerPlateChanged()"></select> <a href="http://motion.pratt.duke.edu/klampt/pyklampt_docs/namespaces.html" target="_blank">Klamp&#39;t Python API Docs</a> <a href="kviz_docs.html" target="_blank">kviz module docs</a> '},
+                  { type: 'top',  size: "5%", resizable: true, style: pstyle, content: '<button onclick="doCodeSubmit()">Reset</button><button onclick="requestAdvance()">Advance Frame</button><button onclick="requestFreeRun()">Run</button><button onclick="requestStop()">Stop</button> <div style=" width:20px;display:inline-block;" />Klampt Server URL:<select id="serverURL" onchange="serverChanged()"/><div style=" width:20px;display:inline-block;" /><select id="boilerselctor" onchange="boilerPlateChanged()"></select><button onclick="doRevertChanges()">Revert to Skeleton Code</button> <span style="float:right"> <a href="http://motion.pratt.duke.edu/klampt/pyklampt_docs/namespaces.html" target="_blank">Klamp&#39;t Python API Docs</a> <a href="kviz_docs.html" target="_blank">kviz module docs</a> </span> '},
                   { type: 'main', style: pstyle, content: '<div id="canvas" style="width:100%; height:100%; margin:0; padding:0"></div>' },
                   { type: 'preview', size: "15%", resizable: true, style: pstyle, content: '<textarea readonly id="myTextarea" style="background-color: black;color:white;width:100%;height:100%">> </textarea></div></div>' },
                   { type: 'right', size: '50%', resizable: true, style: pstyle, content: 
@@ -232,11 +243,6 @@
             add_option("lab1b","Lab 1b");
             add_option("lab1c","Lab 1c");
             add_option("lab1d","Lab 1d");
-            add_option("lab2a","Lab 2a");
-            add_option("lab2b","Lab 2b");
-            add_option("lab2c","Lab 2c");
-            add_option("lab3","Lab 3");
-            add_option("lab4","Lab 4");
 
             //if(localStorageAvailable) {
             //   var url=localStorage.getItem('serverURL');

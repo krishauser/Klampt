@@ -1,5 +1,6 @@
 from klampt import *
 import math
+import random
 
 def get_rotation_matrix(xform):
     """TODO: return the 2x2 rotation matrix corresponding to the given xform.
@@ -79,3 +80,5 @@ def selfTest():
     assert fuzzy_veq(lab1c((0,0,180),(20,30,70)),(-20,-30,250))
     return
 
+def control():
+    return random.choice(['left','right','up','down'])
