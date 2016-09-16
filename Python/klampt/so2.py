@@ -50,7 +50,7 @@ def matrix(a):
     angle a"""
     c = math.cos(a)
     s = math.sin(a)
-    return [[c,-s],[s,-c]]
+    return [[c,-s],[s,c]]
 
 def from_matrix(R):
     """Returns the rotation angle of a rotation matrix"""
