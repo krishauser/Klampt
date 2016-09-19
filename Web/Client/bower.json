@@ -1,0 +1,32 @@
+{
+  "name": "kviz-web-client",
+  "homepage": "https://github.com/krishauser/Klampt",
+  "authors": [
+    "Kris Hauser <kris.​hauser@duke.​edu>",
+    "David J. Zielinski <djzielin@duke.edu>",
+    "Jiehan Zheng <jiehan.zheng@duke.edu>"
+  ],
+  "description": "Klamp't simple web client",
+  "main": "index.html",
+  "keywords": [
+    "webgl",
+    "3d",
+    "robotics"
+  ],
+  "license": "BSD-3-Clause",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "ace-builds": "^1.2.5",
+    "stats.js": "r16",
+    "threejs": "r81",
+    "w2ui": "^1.4.3",
+    "jquery": "^2.1.4"
+  }
+}
