@@ -13,10 +13,13 @@ class LinearPath;
 
 
 ///Must call this before all other ROS[X] calls. An optional node name can
-///be provided
+///be provided, otherwise it is just "klampt".  This can safely be called many
+///times
 bool ROSInit(const char* nodename="klampt");
 ///Must call this after all other ROS[X] calls to cleanly shut down ROS
 bool ROSShutdown();
+///Returns true if ROS is initialized
+bool ROSInitialized();
 ///Updates subscribed topics.  Returns true if any topic was updated.
 ///Note: if only "tf" is updated, this will still return false...
 bool ROSSubscribeUpdate();
