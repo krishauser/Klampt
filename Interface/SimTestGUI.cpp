@@ -78,6 +78,7 @@ void SimTestBackend::Start()
   drawWrenches = 1;
   drawExpanded = 0;
   drawTime = 1;
+  output_ros = 1;
   drawSensors.resize(world->robots.size());
   for(size_t i=0;i<sim.controlSimulators.size();i++)
     drawSensors[i].resize(sim.controlSimulators[i].sensors.sensors.size(),false);
@@ -94,6 +95,7 @@ void SimTestBackend::Start()
   MapButtonToggle("draw_expanded",&drawExpanded);
   MapButtonToggle("draw_time",&drawTime);
   MapButtonToggle("pose_objects",&pose_objects);
+  MapButtonToggle("output_ros",&output_ros);
  
   /*
   //TEMP: testing determinism
@@ -700,6 +702,9 @@ void SimTestBackend::SimStep(Real dt)
     out.close();
   }
 
+  if(output_ros) {
+    OutputROS();
+  }
 
   if(forceSpringActive)
     sim.hooks.resize(sim.hooks.size()-1);

@@ -21,7 +21,7 @@ int main(int argc, char *argv[])
     QCoreApplication::setOrganizationName("Klampt");
     QCoreApplication::setOrganizationDomain("klampt.org");
     QCoreApplication::setApplicationName("RobotTest");
-    QCoreApplication::setApplicationVersion("0.6.2");
+    QCoreApplication::setApplicationVersion("0.7");
     QSettings ini(QSettings::IniFormat, QSettings::UserScope,
 		  QCoreApplication::organizationName(),
 		  QCoreApplication::applicationName());

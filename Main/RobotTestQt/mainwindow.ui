@@ -406,7 +406,15 @@
     <addaction name="actionOpen_File"/>
     <addaction name="actionReload_file"/>
    </widget>
+   <widget class="QMenu" name="menuIO">
+    <property name="title">
+     <string>IO</string>
+    </property>
+    <addaction name="actionROS_Broadcast"/>
+    <addaction name="actionPrint_Configuration"/>
+   </widget>
    <addaction name="menuFile"/>
+   <addaction name="menuIO"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <action name="actionOpen">
@@ -535,6 +543,19 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+R</string>
+   </property>
+  </action>
+  <action name="actionROS_Broadcast">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>ROS Broadcast</string>
+   </property>
+  </action>
+  <action name="actionPrint_Configuration">
+   <property name="text">
+    <string>Print Configuration</string>
    </property>
   </action>
  </widget>
@@ -951,6 +972,38 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>actionROS_Broadcast</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>MainWindow</receiver>
+   <slot>SetROS(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>399</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionPrint_Configuration</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>PrintConfig()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>399</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>ShowHelp()</slot>
@@ -975,5 +1028,7 @@
   <slot>LoadFile()</slot>
   <slot>SetSensors(bool)</slot>
   <slot>ReloadFile()</slot>
+  <slot>SetROS(bool)</slot>
+  <slot>PrintConfig()</slot>
  </slots>
 </ui>
