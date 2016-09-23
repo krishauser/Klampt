@@ -550,7 +550,11 @@ public:
   ROSTfPublisher() { this->topic = "tf"; }
   void send(const string& name,const RigidTransform& T,const char* parent="world") {
     tf::Transform transform;
-    KlamptToROS(T,transform);
+    bool valid = KlamptToROS(T,transform);
+    if(!valid) {
+      printf("RosPublishTransforms: transform of %s is not valid?\n",name.c_str());
+      return;
+    }
     broadcaster.sendTransform(tf::StampedTransform(transform, ros::Time::now(), parent, name));
   }
 };
@@ -564,6 +568,11 @@ bool ROSInit(const char* nodeName)
   ros::init(argc, &argv[0], nodeName);
   gRosNh = new ros::NodeHandle;
   return true;
+}
+
+bool ROSInitialized()
+{
+  return (gRosNh != NULL);
 }
 
 bool ROSShutdown()
@@ -661,7 +670,7 @@ bool ROSPublishTransforms(const RobotWorld& world,const char* frameprefix)
     tf->send(prefix+"/"+world.rigidObjects[i]->name,world.rigidObjects[i]->T);
   for(size_t i=0;i<world.robots.size();i++) {
     for(size_t j=0;j<world.robots[i]->links.size();j++) {
-      tf->send(prefix+"/"+world.robots[i]->name+"/"+world.robots[i]->linkNames[j],world.robots[i]->links[i].T_World);
+      tf->send(prefix+"/"+world.robots[i]->name+"/"+world.robots[i]->linkNames[j],world.robots[i]->links[j].T_World);
     }
   }
   return true;
@@ -959,6 +968,7 @@ bool ROSHadUpdate(const char* topic)
 #include "Modeling/World.h"
 bool ROSInit(const char* nodename) { fprintf(stderr,"ROSInit(): Klamp't was not built with ROS support\n"); return false; }
 bool ROSShutdown() { return false; }
+bool ROSInitialized() { return false; }
 bool ROSSetQueueSize(int size) { return false; }
 bool ROSPublishTransforms(const RobotWorld& world,const char* frameprefix) { return false; }
 bool ROSPublishTransforms(const WorldSimulation& sim,const char* frameprefix) { return false; }
