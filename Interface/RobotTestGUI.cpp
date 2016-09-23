@@ -94,10 +94,12 @@ void RobotTestBackend::RenderWorld()
     if(robotSensors.sensors.empty()) {
       robotSensors.MakeDefault(robot);
     }
+    /*
     for(size_t i=0;i<robotSensors.sensors.size();i++) {
       vector<double> measurements;
       robotSensors.sensors[i]->DrawGL(*robot,measurements);
     }
+    */
   }
    
   if(draw_geom) {
