@@ -48,6 +48,7 @@ def boilerplate_start():
     kviz.add_text("HUD5",17,1)
     kviz.add_text("HUD6",21,1)
     kviz.add_text("HUD7",25,1)
+    kviz.set_color("cylinder",[1,0,0,1])
 
 def boilerplate_advance():
     global robot,target,target_axis,configurations,ghosts,t,ee_link,ee_localpos,ee_localdir

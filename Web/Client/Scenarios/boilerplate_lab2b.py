@@ -14,58 +14,58 @@ import math
 
 solutions = (1,[(0,0,0)])
 robot = None
-ghost = ""
+ghosts = []
 t = 0
 
 def boilerplate_start():
-    global robot,ghost,solutions,t
+    global robot,ghosts,solutions,t
     solutions = (1,[(0,0,0)])
     world = kviz._world
-    fn = "Web/Client/Scenarios/lab2/planar3R.rob"
+    fn = "Web/Client/Scenarios/lab2/3R_zyy.rob"
     res = world.loadElement(fn)
     assert res >= 0
     kviz._init(world)
 
     robot = world.robot(0)
-    ghost = kviz.add_ghost("second_solution")
-    #hide it
-    kviz.set_color(ghost,[0,0,0,0])
+    ghosts = []
+    ghosts.append(kviz.add_ghost("solution2"))
+    ghosts.append(kviz.add_ghost("solution3"))
+    ghosts.append(kviz.add_ghost("solution4"))
     kviz.add_sphere("target_point",0,0,0,0.15)
     kviz.set_color("target_point",[1,0,0,1])
-    kviz.add_sphere("target_direction",0,0,0,0.1)
-    kviz.set_color("target_direction",[1,0.5,0,1])
     t = 0
 
 def boilerplate_advance():
-    global robot,ghost,solutions,t
+    global robot,ghosts,solutions,t
 
-    point,angle = stub.ik_goal_motion(t)
-    kviz.update_sphere("target_point",point[0],point[1],0)
-    offset = 0.25
-    kviz.update_sphere("target_direction",point[0]+offset*math.cos(angle),point[1]+offset*math.sin(angle),0)
+    point = stub.ik_goal_motion(t)
+    kviz.update_sphere("target_point",point[0],point[1],point[2])
 
     #solve
-    solutions=stub.lab2b(1,1,1,(point[0],point[1]),angle)
+    solutions=stub.lab2b(0.25,1,1,point)
+    print solutions
 
     #update visualization of solutions
-    if solutions[0] == 0:
+    if solutions[0] == 0 or solutions[0] == float('inf'):
         #no solutions, draw robot in transparent red
         for i in range(robot.numLinks()):
             kviz.set_color(robot.link(i),[1,0,0,0.25])
-        #hide ghost
-        kviz.set_color(ghost,[0,0,0,0])
-    elif solutions[0] == 1:
-        #hide ghost
-        kviz.set_color(ghost,[0,0,0,0])
-        for i in range(robot.numLinks()):
-            kviz.set_color(robot.link(i),1,0,1,1)
-        robot.setConfig(solutions[1][0])
+        #hide ghosts
+        for ghost in ghosts:
+            kviz.set_color(ghost,[0,0,0,0])
     else:
-        kviz.set_color(ghost,[1,0.5,1,1])
+        #show/hide ghosts
+        for i,ghost in enumerate(ghosts):
+            if i+1 >= solutions[0]:
+                print "Hiding ghost",i
+                kviz.set_color(ghost,[0,0,0,0])
+            else:
+                print "Setting ghost",i,"solution",solutions[1][i+1]
+                kviz.set_color(ghost,[1,1.0/(i+2),1,1])
+                kviz.set_ghost_config(solutions[1][i+1],"solution"+str(i+2))
         for i in range(robot.numLinks()):
-            kviz.set_color(robot.link(i),[1,0,1,1])
+            kviz.set_color(robot.link(i),[1,1,1,1])
         robot.setConfig(solutions[1][0])
-        kviz.set_ghost_config(solutions[1][1],"second_solution")
     t += 0.02
 
     
