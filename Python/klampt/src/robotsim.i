@@ -364,6 +364,10 @@ static PyObject* convert_dmatrix_obj(const std::vector<std::vector<double> >& ma
     }
 }
 
+%apply std::vector<double>& out { std::vector<double>& kP };
+%apply std::vector<double>& out { std::vector<double>& kD };
+%apply std::vector<double>& out { std::vector<double>& kI };
+
 %typemap(argout) std::vector<std::vector<double> >& out {
     PyObject *o, *o2, *o3;
     o = convert_dmatrix_obj((*$1));
