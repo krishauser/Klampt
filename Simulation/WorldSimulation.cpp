@@ -504,6 +504,7 @@ void WorldSimulation::UpdateModel()
     }
     for(size_t i=0;i<world->rigidObjects.size();i++) {
       odesim.object(i)->GetTransform(world->rigidObjects[i]->T);  
+      odesim.object(i)->GetVelocity(world->rigidObjects[i]->w,world->rigidObjects[i]->v);
     }
     world->UpdateGeometry();
   }

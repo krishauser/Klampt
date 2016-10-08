@@ -16,6 +16,8 @@ using namespace std;
 RigidObject::RigidObject()
 {
   T.setIdentity();
+  w.setZero();
+  v.setZero();
   mass = 1;
   com.setZero();
   inertia.setIdentity();
@@ -34,6 +36,9 @@ bool RigidObject::Load(const char* fn)
     f.AllowItem("geomscale");
     f.AllowItem("geomtranslate");
     f.AllowItem("T");
+    f.AllowItem("position");
+    f.AllowItem("velocity");
+    f.AllowItem("angularVelocity");
     f.AllowItem("mass");
     f.AllowItem("inertia");
     f.AllowItem("com");
@@ -106,6 +111,27 @@ bool RigidObject::Load(const char* fn)
 	return false;
       }
       f.erase("T");
+    }
+    if(f.count("position") != 0) {
+      if(!f.CheckType("position",PrimitiveValue::Double,fn)) return false;
+      if(!f.CheckSize("position",3,fn)) return false;
+      vector<double> trans = f.AsDouble("position");
+      T.t.set(trans[0],trans[1],trans[2]);
+      f.erase("position");
+    }
+    if(f.count("velocity") != 0) {
+      if(!f.CheckType("velocity",PrimitiveValue::Double,fn)) return false;
+      if(!f.CheckSize("velocity",3,fn)) return false;
+      vector<double> trans = f.AsDouble("velocity");
+      v.set(trans[0],trans[1],trans[2]);
+      f.erase("velocity");
+    }
+    if(f.count("angularVelocity") != 0) {
+      if(!f.CheckType("angularVelocity",PrimitiveValue::Double,fn)) return false;
+      if(!f.CheckSize("angularVelocity",3,fn)) return false;
+      vector<double> trans = f.AsDouble("angularVelocity");
+      w.set(trans[0],trans[1],trans[2]);
+      f.erase("angularVelocity");
     }
     if(f.count("mass")==0) { mass=1.0;  }
     else {
