@@ -19,7 +19,10 @@ class RigidObject;
 class Terrain;
 class Robot;
 
-/** @brief Stores mass information for a rigid body or robot link. */
+/** @brief Stores mass information for a rigid body or robot link.
+ * Note: you should use the set/get functions rather than changing the members
+ * directly due to strangeness in SWIG's handling of vectors.
+*/
 struct Mass
 {
   void setMass(double _mass) { mass=_mass; }
@@ -46,7 +49,12 @@ struct ContactParameters
 
 /** @brief A reference to a link of a RobotModel.
  *
- * 
+ * The link stores many mostly-constant items (id, name, parent, geometry, appearance, mass, joint
+ * axes).  The exception is the link's current transform, which is affected by the RobotModel's
+ * current configuration, i.e., the last RobotModel.setConfig(q) call. The various Jacobians of
+ * points on the link, accessed by getJacobianX, are configuration dependent.
+ *
+ * These are not created by hand, but instead accessed using RobotModel.link([index or name])
  */
 class RobotModelLink
 {
@@ -128,6 +136,9 @@ class RobotModelLink
 };
 
 /** @brief A reference to a driver of a RobotModel.
+ * 
+ * A driver corresponds to one of the robot's actuators and its
+ * transmission.
  */
 class RobotModelDriver
 {
@@ -161,17 +172,33 @@ class RobotModelDriver
 
 /** @brief A model of a dynamic and kinematic robot.
  *
+ * Stores both constant information, like the reference placement of the links,
+ * joint limits, velocity limits, etc, as well as a *current configuration*
+ * and *current velocity* which are state-dependent.  Several functions depend
+ * on the robot's current configuration and/or velocity.  To update that, use
+ * the setConfig() and setVelocity() functions.  setConfig() also update's the
+ * robot's link transforms via forward kinematics.  You may also use setDOFPosition
+ * and setDOFVelocity for individual changes, but this is more expensive because
+ * each call updates all of the affected the link transforms.
+ *
  * It is important to understand that changing the configuration of the model
- * doesn't actually send a command to the robot.  In essence, this model
- * maintains temporary storage for performing kinematics and dynamics
- * computations.
- *
- * The robot maintains configuration/velocity/acceleration/torque bounds
- * which are not enforced by the model, but must rather be enforced by the
- * planner / simulator.
- *
+ * doesn't actually send a command to the physical / simulated robot.  Moreover,
+ * the model does not automatically get updated when the physical / simulated
+ * robot moves.  In essence, the model maintains temporary storage for performing
+ * kinematics, dynamics, and planning computations, as well as for visualization.
+ * 
  * The state of the robot is retrieved using getConfig/getVelocity calls, and
- * is set using setConfig/setVelocity.
+ * is set using setConfig/setVelocity.  Because many routines change the robot's
+ * configuration, like IK and motion planning, a common design pattern is to
+ * save/restore the configuration as follows:
+ * - q = robot.getConfig()
+ * - do some stuff that may touch the robot's configuration...
+ * - robot.setConfig(q)
+ *
+ * The model maintains configuration/velocity/acceleration/torque bounds.
+ * However, these are not enforced by the model, so you can happily set
+ * configurations outside  must rather be enforced by the
+ * planner / simulator.
  */
 class RobotModel
 {
@@ -195,17 +222,30 @@ class RobotModel
   RobotModelDriver driver(const char* name);
 
   //kinematic and dynamic properties
+  ///Returns the model's current configuration
   void getConfig(std::vector<double>& out);
+  ///Returns the model's current velocity
   void getVelocity(std::vector<double>& out);
+  ///Sets the model's current configurtation and performs forward kinematics.  q must
+  ///have length numLinks()
   void setConfig(const std::vector<double>& q);
+  ///Sets the model's current velocity.  dq must have length numLinks().
   void setVelocity(const std::vector<double>& dq);
+  ///Retrieves a pair (qmin,qmax) of min/max joint limit vectors
   void getJointLimits(std::vector<double>& out,std::vector<double>& out2);
+  ///Sets the min/max joint limit vectors (must have length numLinks())
   void setJointLimits(const std::vector<double>& qmin,const std::vector<double>& qmax);
+  ///Retrieve the velocity limit vector vmax, the constraint is |dq[i]| <= vmax[i]
   void getVelocityLimits(std::vector<double>& out);
+  ///Sets the velocity limit vector vmax, the constraint is |dq[i]| <= vmax[i]
   void setVelocityLimits(const std::vector<double>& vmax);
+  ///Retrieve the acceleration limit vector amax, the constraint is |ddq[i]| <= amax[i]
   void getAccelerationLimits(std::vector<double>& out);
+  ///Sets the acceleration limit vector amax, the constraint is |ddq[i]| <= amax[i]
   void setAccelerationLimits(const std::vector<double>& amax);
+  ///Retrieve the torque limit vector tmax, the constraint is |torque[i]| <= tmax[i]
   void getTorqueLimits(std::vector<double>& out);
+  ///Sets the torque limit vector tmax, the constraint is |torque[i]| <= tmax[i]
   void setTorqueLimits(const std::vector<double>& tmax);
   ///Sets a single DOF's position.  Note: if you are setting several joints 
   ///at once, use setConfig because this function computes forward kinematics
@@ -276,7 +316,10 @@ class RobotModel
 
 /** @brief A rigid movable object.
  *
- * State is retrieved/set using get/setTransform.  Note: no velocities are stored.
+ * A rigid object has a name, geometry, appearance, mass, surface properties, and current
+ * transform / velocity.
+ *
+ * State is retrieved/set using get/setTransform, and get/setVelocity
  */
 class RigidObjectModel
 {
@@ -291,8 +334,14 @@ class RigidObjectModel
   void setMass(const Mass& mass);
   ContactParameters getContactParameters();
   void setContactParameters(const ContactParameters& params);
+  ///Retrieves the rotation / translation of the rigid object (R,t)
   void getTransform(double out[9],double out2[3]);
+  ///Sets the rotation / translation (R,t) of the rigid object
   void setTransform(const double R[9],const double t[3]);
+  ///Retrieves the (angular velocity, velocity) of the rigid object.
+  void getVelocity(double out[3],double out2[3]);
+  ///Sets the (angular velocity, velocity) of the rigid object.
+  void setVelocity(const double angularVelocity[3],const double velocity[3]);
   ///Draws the object's geometry. If keepAppearance=true, the current appearance is honored.
   ///Otherwise, only the raw geometry is drawn.  PERFORMANCE WARNING: if keepAppearance is
   ///false, then this does not properly reuse OpenGL display lists.  A better approach

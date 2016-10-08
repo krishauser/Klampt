@@ -32021,6 +32021,138 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_RigidObjectModel_getVelocity(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  RigidObjectModel *arg1 = (RigidObjectModel *) 0 ;
+  double *arg2 ;
+  double *arg3 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double temp2[3] ;
+  double temp23[3] ;
+  PyObject * obj0 = 0 ;
+  
+  {
+    arg2 = &temp2[0];
+  }
+  {
+    arg3 = &temp23[0];
+  }
+  if (!PyArg_ParseTuple(args,(char *)"O:RigidObjectModel_getVelocity",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_RigidObjectModel, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "RigidObjectModel_getVelocity" "', argument " "1"" of type '" "RigidObjectModel *""'"); 
+  }
+  arg1 = reinterpret_cast< RigidObjectModel * >(argp1);
+  {
+    try {
+      (arg1)->getVelocity(arg2,arg3);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  {
+    PyObject *o, *o2, *o3;
+    o = convert_darray_obj(arg2,3);
+    if ((!resultobj) || (resultobj == Py_None)) {
+      resultobj = o;
+    } else {
+      if (!PyTuple_Check(resultobj)) {
+        PyObject *o2 = resultobj;
+        resultobj = PyTuple_New(1);
+        PyTuple_SetItem(resultobj,0,o2);
+      }
+      o3 = PyTuple_New(1);
+      PyTuple_SetItem(o3,0,o);
+      o2 = resultobj;
+      resultobj = PySequence_Concat(o2,o3);
+      Py_DECREF(o2);
+      Py_DECREF(o3);
+    }
+  }
+  {
+    PyObject *o, *o2, *o3;
+    o = convert_darray_obj(arg3,3);
+    if ((!resultobj) || (resultobj == Py_None)) {
+      resultobj = o;
+    } else {
+      if (!PyTuple_Check(resultobj)) {
+        PyObject *o2 = resultobj;
+        resultobj = PyTuple_New(1);
+        PyTuple_SetItem(resultobj,0,o2);
+      }
+      o3 = PyTuple_New(1);
+      PyTuple_SetItem(o3,0,o);
+      o2 = resultobj;
+      resultobj = PySequence_Concat(o2,o3);
+      Py_DECREF(o2);
+      Py_DECREF(o3);
+    }
+  }
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_RigidObjectModel_setVelocity(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  RigidObjectModel *arg1 = (RigidObjectModel *) 0 ;
+  double *arg2 ;
+  double *arg3 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double temp2[3] ;
+  double temp3[3] ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  PyObject * obj2 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OOO:RigidObjectModel_setVelocity",&obj0,&obj1,&obj2)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_RigidObjectModel, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "RigidObjectModel_setVelocity" "', argument " "1"" of type '" "RigidObjectModel *""'"); 
+  }
+  arg1 = reinterpret_cast< RigidObjectModel * >(argp1);
+  {
+    if (!convert_darray(obj1,temp2,3)) {
+      return NULL;
+    }
+    arg2 = &temp2[0];
+  }
+  {
+    if (!convert_darray(obj2,temp3,3)) {
+      return NULL;
+    }
+    arg3 = &temp3[0];
+  }
+  {
+    try {
+      (arg1)->setVelocity((double const (*))arg2,(double const (*))arg3);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_RigidObjectModel_drawGL__SWIG_0(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   RigidObjectModel *arg1 = (RigidObjectModel *) 0 ;
@@ -41782,6 +41914,54 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_SimRobotController_getPIDGains(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  SimRobotController *arg1 = (SimRobotController *) 0 ;
+  std::vector< double,std::allocator< double > > *arg2 = 0 ;
+  std::vector< double,std::allocator< double > > *arg3 = 0 ;
+  std::vector< double,std::allocator< double > > *arg4 = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  std::vector< double > temp22 ;
+  std::vector< double > temp23 ;
+  std::vector< double > temp24 ;
+  PyObject * obj0 = 0 ;
+  
+  {
+    arg2 = &temp22;
+  }
+  {
+    arg3 = &temp23;
+  }
+  {
+    arg4 = &temp24;
+  }
+  if (!PyArg_ParseTuple(args,(char *)"O:SimRobotController_getPIDGains",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_SimRobotController, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SimRobotController_getPIDGains" "', argument " "1"" of type '" "SimRobotController *""'"); 
+  }
+  arg1 = reinterpret_cast< SimRobotController * >(argp1);
+  {
+    try {
+      (arg1)->getPIDGains(*arg2,*arg3,*arg4);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_SimRobotController_index_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   SimRobotController *arg1 = (SimRobotController *) 0 ;
@@ -47174,7 +47354,11 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"Sets the current transformation (not modifying the underlying data) \n"
 		""},
-	 { (char *)"Geometry3D_getCurrentTransform", _wrap_Geometry3D_getCurrentTransform, METH_VARARGS, (char *)"Geometry3D_getCurrentTransform(Geometry3D self)"},
+	 { (char *)"Geometry3D_getCurrentTransform", _wrap_Geometry3D_getCurrentTransform, METH_VARARGS, (char *)"\n"
+		"Geometry3D_getCurrentTransform(Geometry3D self)\n"
+		"\n"
+		"Gets the current transformation. \n"
+		""},
 	 { (char *)"Geometry3D_translate", _wrap_Geometry3D_translate, METH_VARARGS, (char *)"\n"
 		"Geometry3D_translate(Geometry3D self, double const [3] t)\n"
 		"\n"
@@ -47806,6 +47990,8 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"RigidObjectModel_setContactParameters", _wrap_RigidObjectModel_setContactParameters, METH_VARARGS, (char *)"RigidObjectModel_setContactParameters(RigidObjectModel self, ContactParameters params)"},
 	 { (char *)"RigidObjectModel_getTransform", _wrap_RigidObjectModel_getTransform, METH_VARARGS, (char *)"RigidObjectModel_getTransform(RigidObjectModel self)"},
 	 { (char *)"RigidObjectModel_setTransform", _wrap_RigidObjectModel_setTransform, METH_VARARGS, (char *)"RigidObjectModel_setTransform(RigidObjectModel self, double const [9] R, double const [3] t)"},
+	 { (char *)"RigidObjectModel_getVelocity", _wrap_RigidObjectModel_getVelocity, METH_VARARGS, (char *)"RigidObjectModel_getVelocity(RigidObjectModel self)"},
+	 { (char *)"RigidObjectModel_setVelocity", _wrap_RigidObjectModel_setVelocity, METH_VARARGS, (char *)"RigidObjectModel_setVelocity(RigidObjectModel self, double const [3] angularVelocity, double const [3] velocity)"},
 	 { (char *)"RigidObjectModel_drawGL", _wrap_RigidObjectModel_drawGL, METH_VARARGS, (char *)"\n"
 		"drawGL(bool keepAppearance=True)\n"
 		"RigidObjectModel_drawGL(RigidObjectModel self)\n"
@@ -48429,6 +48615,11 @@ static PyMethodDef SwigMethods[] = {
 		"SimRobotController_setPIDGains(SimRobotController self, doubleVector kP, doubleVector kI, doubleVector kD)\n"
 		"\n"
 		"Sets the PID gains. \n"
+		""},
+	 { (char *)"SimRobotController_getPIDGains", _wrap_SimRobotController_getPIDGains, METH_VARARGS, (char *)"\n"
+		"SimRobotController_getPIDGains(SimRobotController self)\n"
+		"\n"
+		"Gets the PID gains for the PID controller. \n"
 		""},
 	 { (char *)"SimRobotController_index_set", _wrap_SimRobotController_index_set, METH_VARARGS, (char *)"SimRobotController_index_set(SimRobotController self, int index)"},
 	 { (char *)"SimRobotController_index_get", _wrap_SimRobotController_index_get, METH_VARARGS, (char *)"SimRobotController_index_get(SimRobotController self) -> int"},

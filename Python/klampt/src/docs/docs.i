@@ -430,6 +430,10 @@ deleting a piece of geometry. ";
 
 Sets the current transformation (not modifying the underlying data) ";
 
+%feature("docstring")  Geometry3D::getCurrentTransform "
+
+Gets the current transformation. ";
+
 %feature("docstring")  Geometry3D::translate "
 
 Translates the geometry data. ";
@@ -1635,6 +1639,10 @@ locked_velocity ";
 
 Sets the PID gains. ";
 
+%feature("docstring")  SimRobotController::getPIDGains "
+
+Gets the PID gains for the PID controller. ";
+
 
 // File: classSimRobotSensor.xml
 %feature("docstring") SimRobotSensor "
@@ -2362,6 +2370,10 @@ from the space of transforms that satisfies the objective. ";
 %feature("docstring")  copy "";
 
 %feature("docstring")  EnablePathControl "";
+
+%feature("docstring")  resize "";
+
+%feature("docstring")  for "";
 
 %feature("docstring")  GetCameraViewport "";
 

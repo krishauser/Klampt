@@ -2760,6 +2760,20 @@ void RigidObjectModel::setTransform(const double R[9],const double t[3])
   obj->geometry->SetTransform(obj->T);
 }
 
+void RigidObjectModel::getVelocity(double out[3],double out2[3])
+{
+  RigidObject* obj=object;
+  obj->w.get(out);
+  obj->v.get(out2);
+}
+
+void RigidObjectModel::setVelocity(const double angularVelocity[3],const double velocity[3])
+{
+  RigidObject* obj=object;
+  obj->w.set(angularVelocity);
+  obj->v.set(velocity);
+}
+
 void RigidObjectModel::drawGL(bool keepAppearance)
 {
   RobotWorld& world = *worlds[this->world]->world;
@@ -3715,8 +3729,19 @@ void SimRobotController::setPIDGains(const std::vector<double>& kP,const std::ve
   }
 }
 
-
-
+void SimRobotController::getPIDGains(std::vector<double>& kPout,std::vector<double>& kIout,std::vector<double>& kDout)
+{
+  RobotMotorCommand& command = controller->command;
+  int size = command.actuators.size();
+  kPout.resize(size, 0.0);
+  kIout.resize(size, 0.0);
+  kDout.resize(size, 0.0);
+  for(size_t i=0;i<command.actuators.size();i++) {
+    kPout[i] = command.actuators[i].kP;
+    kIout[i] = command.actuators[i].kI;
+    kDout[i] = command.actuators[i].kD;
+  }
+}
 
 
 
