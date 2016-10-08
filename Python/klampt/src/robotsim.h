@@ -149,6 +149,8 @@ class SimRobotController
 
   /// Sets the PID gains
   void setPIDGains(const std::vector<double>& kP,const std::vector<double>& kI,const std::vector<double>& kD);
+  /// Gets the PID gains for the PID controller
+  void getPIDGains(std::vector<double>& kPout,std::vector<double>& kIout,std::vector<double>& kDout);
 
   int index;
   Simulator* sim;
