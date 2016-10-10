@@ -55,6 +55,10 @@ def wrapper_advance_internal():
 
 def wrapper_start():
 	global wrapper_JSON_message_count,wrapper_frame_precomputed
+	if wrapper_frame_precomputed != False:
+		#had an old frame -- need to send this before reset
+		wrapper_send_JSON()
+
 	kviz._reset()
 	try:
 		boilerplate_start()
@@ -63,6 +67,10 @@ def wrapper_start():
 		raise
 	wrapper_JSON_message_count = 0
 	wrapper_frame_precomputed = False
+
+	#send the initial scene
+	wrapper_compute_JSON()
+	wrapper_send_JSON()
 	
 def wrapper_advance():
 	global wrapper_frame_precomputed

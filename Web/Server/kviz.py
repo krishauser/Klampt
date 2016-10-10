@@ -13,7 +13,7 @@ def set_color(target,rgba_color):
 	global _world,_ghosts
 	recursive=False
 	if isinstance(target, (int, long, float, complex)):
-		robot = _world.robot(robot)
+		robot = _world.robot(0)
 		target_as_link = robot.link(target)
 		target_name=target_as_link.getName()
 
@@ -118,12 +118,17 @@ def _reset():
 	_RPC = []
 	_ghosts = []
 
+def _encode_float(object):
+	if isinstance(object,float):
+		return "%.3f"%(object)
+	return object
+
 def _getInitialJSON():
 	global _world,_sceneCurrent,_RPC
 	msg = json.loads(_world.getSceneJSON())
 	msg['RPC'] = _RPC
 	_RPC = []
-	return json.dumps(msg)
+	return json.dumps(msg,default=_encode_float)
 
 
 def _getUpdateJSON():
@@ -131,4 +136,4 @@ def _getUpdateJSON():
 	msg = json.loads(_world.getTransformsJSON())
 	msg['RPC'] = _RPC
 	_RPC = []
-	return json.dumps(msg)
+	return json.dumps(msg,default=_encode_float)

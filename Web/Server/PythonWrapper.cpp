@@ -14,6 +14,8 @@ using namespace std;
 bool python_initialized = false;
 bool boilerplate_loaded = false;
 bool student_code_loaded = false;
+string stdout_buffer;
+string stderr_buffer;
 
 /*
 // http://faq.cprogramming.com/cgi-bin/smartfaq.cgi?answer=1045689663&id=1043284385
@@ -41,6 +43,17 @@ static PyObject* emb_send(PyObject *self, PyObject *args)
 	
    if (!PyArg_UnpackTuple(args, "func", 1, 1, &a)) 
       return NULL;
+
+   if(!stdout_buffer.empty()) {
+     printf("[python stdout] %s\n",stdout_buffer.c_str());
+     websocket_send("C"+stdout_buffer);
+     stdout_buffer.clear();
+   }
+   if(!stderr_buffer.empty()) {
+     printf("[python stderr] %s\n",stderr_buffer.c_str());
+     websocket_send("E"+stderr_buffer);
+     stderr_buffer.clear();
+   }
 	        
    if(PyString_Check(a)) //verify data type 
    {
@@ -73,8 +86,9 @@ PyObject* log_CaptureStdout(PyObject* self, PyObject* args)
    if(PyString_Check(a))
    {
       char *data=PyString_AsString(a);
-      printf("[python stdout] %s\n",data);
-      websocket_send("C"+string(data));
+      stdout_buffer += data;
+      //printf("[python stdout] %s\n",data);
+      //websocket_send("C"+string(data));
    }
 
   
@@ -92,8 +106,9 @@ PyObject* log_CaptureStderr(PyObject* self, PyObject* args)
    if(PyString_Check(a))
    {
       char *data=PyString_AsString(a);
-      printf("[python stderr] %s\n",data);
-      websocket_send("E"+string(data));
+      stderr_buffer += data;
+      //printf("[python stderr] %s\n",data);
+      //websocket_send("E"+string(data));
    }
 
    Py_INCREF(Py_None);
@@ -273,8 +288,11 @@ void handleIncomingMessage(string message)
           //some simple sandboxing
           //PyRun_SimpleString("print stub.__builtins__.keys()");
           PyRun_SimpleString("del stub.__builtins__['open']");
+          PyRun_SimpleString("del stub.__builtins__['raw_input']");
           PyRun_SimpleString("import sys");
+          PyRun_SimpleString("sys.path.append('Web/Server')");
           PyRun_SimpleString("sys.modules['os']=None");
+          PyRun_SimpleString("sys.modules['sys']=None");
         }
 
         /*
