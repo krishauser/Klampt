@@ -61,7 +61,7 @@ Network.prototype.connect = function()
 		
       this.websocket.onmessage = function(evt) //this is where the webpage receives data from remote
       {
-         console.log("websocket callback onmessage");		
+         //console.log("websocket callback onmessage");		
                  
 	 if(evt.data instanceof ArrayBuffer)
          {			
@@ -82,16 +82,18 @@ Network.prototype.connect = function()
 	
          else
          {        
-            console.log("  message is text");
+            //console.log("  message is text");
 				var message=evt.data;
             //console.log("raw message is: " + message);
             var slicedMessage=message.slice(1);
             if(message[0]=='S') 
                newSceneArrivedCallback(slicedMessage);
-            if(message[0]=='C')
+            else if(message[0]=='C')
                consoleTextArrivedCallback(slicedMessage);      
-            if(message[0]=='E') //console error
+            else if(message[0]=='E') //console error
                consoleTextArrivedCallback(slicedMessage);      
+            else 
+              console.log("websocket callback onmessage got invalid message "+message);
          }
 				
       }.bind(this);
