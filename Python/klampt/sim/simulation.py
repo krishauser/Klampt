@@ -3,7 +3,11 @@ import simlog
 import weakref
 
 class SensorEmulator:
-    """A generic sensor emulator.  Translates from the physics simulation -> inputs to the Python controller."""
+    """A generic sensor emulator.  Translates from the physics simulation -> inputs to a Python controller.
+
+    The Python controller is assumed to have the structure of BaseController, where it is given as input
+    a dictionary of named items reflecting the most up-to-date readings on each control time-step.
+    """
     def __init__(self):
         pass
     def update(self):
@@ -50,6 +54,9 @@ class DefaultSensorEmulator(SensorEmulator):
 class ActuatorEmulator:
     """A generic actuator emulator.  Translates outputs from the Python controller -> the physics simulation.
     A variety of non-traditional actuators can be simulated here.
+
+    The Python controller is assumed to have the structure of BaseController, where outputs a dictionary
+    of commands every control time step.  The emulator will read these with the process() methods
     """
     def __init__(self):
         pass
@@ -58,13 +65,17 @@ class ActuatorEmulator:
         This may involve applying commands to the low-level motor emulator, 
         or applying forces to the simulator.
 
-        Once a command is processed, the class should remove it from the commands
-        dictionary.
+        Arguments:
+        - commands: a dictionary of commands produced by the controller
+        - dt: the control time step (not the underlying simulation time step)
+
+        To play nicely with other actuators in a nested steup, once a command is processed, the class should
+        remove it from the commands dictionary.
         """
         pass
     def substep(self,dt):
         """This is called every simulation substep, which occurs at a higher rate than
-        process() is called.
+        process() is called.  dt is the simulation substep.
         """
         pass
     def drawGL(self):
@@ -113,7 +124,8 @@ class SimpleSimulator (Simulator):
     of sensors / actuators, and definition of robot controllers.
 
     Note that for greatest compatibility you should NOT manually apply forces to the simulation
-    except for inside of hooks and emulators.
+    except for inside of hooks and emulators.  This is because several simulation sub-steps will be
+    taken, and you will have no control over the forces applied except for the first time step.
     """
     def __init__(self,world):
         """Arguments:
