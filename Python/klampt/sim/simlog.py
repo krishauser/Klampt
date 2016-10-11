@@ -9,10 +9,13 @@ class SimLogger:
 
         Arguments:
         - sim: the klampt.Simulator object you wish to use
-        - fn: the file that you want to save to
+        - state_fn: the file that you want to save state to
+        - contact_fn: the file that you want to save contacts to (or None if you don't want them)
         - colliding: either 'all' (default) or a list of all objects
           / object ids that you want to check self collisions between
+        - saveheader: true if you want a CSV header giving the name of each value
         """
+        self.saveSensors = False
         self.sim = sim
         self.fn = state_fn
         self.f = None
@@ -59,16 +62,17 @@ class SimLogger:
             for j in xrange(world.robot(i).numLinks()):
                 elements.append(n+'_dq['+world.robot(i).link(j).getName()+']')
             for j in xrange(world.robot(i).numDrivers()):
-                elements.append(n+'_t['+str(i)+']')
-            j = 0
-            while True:
-                s = self.sim.controller(i).sensor(j)
-                if len(s.name())==0:
-                    break
-                names = s.measurementNames()
-                for sn in range(len(names)):
-                    elements.append(n+'_'+s.name()+'['+names[sn]+']')
-                j += 1
+                elements.append(n+'_t['+str(j)+']')
+            if self.saveSensors:
+                j = 0
+                while True:
+                    s = self.sim.controller(i).sensor(j)
+                    if len(s.name())==0:
+                        break
+                    names = s.measurementNames()
+                    for sn in range(len(names)):
+                        elements.append(n+'_'+s.name()+'['+names[sn]+']')
+                    j += 1
         for i in xrange(world.numRigidObjects()):
             n = world.rigidObject(i).getName()
             elements += [n+'_'+suffix for suffix in ['comx','comy','comz','x','y','z','rx','ry','rz','dx','dy','dz','wx','wy','wz']]
@@ -99,15 +103,18 @@ class SimLogger:
             values += robot.getCom()
             values += robot.getConfig()
             values += robot.getVelocity()
+            assert len(sim.getActualTorques(i)) == world.robot(i).numDrivers()
             values += sim.getActualTorques(i)
-            j = 0
-            while True:
-                s = self.sim.controller(i).sensor(j)
-                if len(s.name())==0:
-                    break
-                meas = s.getMeasurements()
-                values += meas
-                j += 1
+            if self.saveSensors:
+                j = 0
+                while True:
+                    s = self.sim.controller(i).sensor(j)
+                    if len(s.name())==0:
+                        break
+                    meas = s.getMeasurements()
+                    assert len(meas) == len(s.measurementNames())
+                    values += meas
+                    j += 1
         for i in xrange(world.numRigidObjects()):
             obj = world.rigidObject(i)
             T = obj.getTransform()
@@ -153,3 +160,155 @@ class SimLogger:
             self.f.close()
         if not (self.f_contact is None):
             self.f_contact.close()
+
+
+
+class SimLogPlayback:
+    """A replay class for simulation traces from SimLogger or the SimTest app. """
+    def __init__(self,sim,state_fn,contact_fn=None):
+        """
+        Loads from a CSV file.
+
+        Arguments:
+        - sim: the klampt.Simulator object you wish to use.  This should be instantiated with 
+          all objects that you recorded from.
+        - state_fn: the state file that you want to load
+        - contact_fn: the contact file that you want to load
+        """
+        import csv
+        self.sim = sim
+        self.state_header = []
+        self.state_array = []
+        self.contact_header = []
+        self.contact_array = []
+        self.state_to_index = {}
+        self.contact_to_index = {}
+        if state_fn != None:
+            print "SimLogPlayback: Loading state from",state_fn
+            f = open(state_fn,'r')
+            reader = csv.reader(f)
+            rowno = 0
+            for row in reader:
+                if rowno == 0:
+                    self.state_header = row
+                    self.state_to_index = dict((v,i) for (i,v) in enumerate(self.state_header))
+                else:
+                    self.state_array.append([float(v) for v in row])
+                rowno += 1
+            f.close()
+        if contact_fn != None:
+            print "SimLogPlayback: Loading contacts from",contact_fn
+            self.f_contact = open(contact_fn,'r')
+            reader = csv.reader(f)
+            rowno = 0
+            for row in reader:
+                if rowno == 0:
+                    self.contact_header = row
+                    self.contact_to_index = dict((v,i) for (i,v) in enumerate(self.contact_header))
+                else:
+                    self.contact_array.append([float(v) for v in row])
+                rowno += 1
+            f.close()
+        #check that the simulation matches the log
+        warned = False
+        self.robot_indices = []
+        self.rigid_object_indices = []
+        sim = self.sim
+        world = sim.world
+        if "time" not in self.state_to_index:
+            print "SimLogPlayback: Warning, 'time' column is not present in log file"
+        robot_patterns = {'q':'%s_q[%s]','dq':'%s_dq[%s]'}
+        for i in xrange(world.numRobots()):
+            indices = {}
+            found = True
+            robot = world.robot(i)
+            for name,p in robot_patterns.iteritems():
+                nindices = []
+                for j in xrange(robot.numLinks()):
+                    item = p % (robot.getName(),robot.link(j).getName())
+                    if item not in self.state_to_index:
+                        found=False
+                        break
+                    nindices.append(self.state_to_index[item])
+                if not found:
+                    break
+                indices[name] = nindices
+            if not found:
+                print "SimLogPlayback: Warning, not all elements of robot",robot.getName(),"present in log file"
+                warned = True
+                self.robot_indices.append(None)
+                continue
+            #TODO: load sensor measurements
+            self.robot_indices.append(indices)
+        rigid_object_items = ['x','y','z','rx','ry','rz','dx','dy','dz','wx','wy','wz']
+        for i in xrange(world.numRigidObjects()):
+            indices = {}
+            found = True
+            obj = world.rigidObject(i)
+            for name in rigid_object_items:
+                item = obj.getName()+'_'+name
+                if item not in self.state_to_index:
+                    print "Missing item",item
+                    found=False
+                    break
+                indices[name] = self.state_to_index[item]
+            if not found:
+                print "SimLogPlayback: Warning, not all elements of rigid object",obj.getName(),"present in log file"
+                warned = True
+                self.rigid_object_indices.append(None)
+                continue
+            #TODO: load sensor measurements
+            self.rigid_object_indices.append(indices)
+        if warned:
+            raw_input("Press enter to continue")
+        return
+
+    def updateSim(self,time=-1,timestep=-1):
+        sim = self.sim
+        world = sim.world
+        if time >= 0:
+            try:
+                timeindex = self.state_to_index['time']
+            except IndexError:
+                raise ValueError("'time' column is not present in playback file, can't update by time")
+            timelist = [v[timeindex] for v in self.state_array]
+            for i in xrange(len(timelist)-1):
+                if time < timelist[i]:
+                    break
+            #print "Time",time,"Time step",timestep
+            self.updateSim(timestep = i)
+            return
+        if timestep >= len(self.state_array):
+            timestep = len(self.state_array)-1
+        state = self.state_array[timestep]
+        try:
+            timeindex = self.state_to_index['time']
+            #sim.fakeSimulate(state[timeindex] - sim.getTime())
+            #TODO: change the simulation time
+        except IndexError:
+            pass
+        for i in xrange(world.numRobots()):
+            indices = self.robot_indices[i]
+            if indices == None:
+                continue
+            robot = world.robot(i)
+            robot.setConfig([state[ind] for ind in indices['q']])
+            robot.setVelocity([state[ind] for ind in indices['dq']])
+            for j in xrange(robot.numLinks()):
+                link = robot.link(j)
+                sim.body(link).setTransform(*link.getTransform())
+                sim.body(link).setVelocity(link.getAngularVelocity(),link.getVelocity())
+            #TODO: update sensors
+        for i in xrange(world.numRigidObjects()):
+            obj = world.rigidObject(i)
+            indices = self.rigid_object_indices[i]
+            if indices == None:
+                continue
+            t = (state[indices['x']],state[indices['y']],state[indices['z']])
+            R = so3.from_moment((state[indices['rx']],state[indices['ry']],state[indices['rz']]))
+            v = (state[indices['dx']],state[indices['dy']],state[indices['dz']])
+            w = (state[indices['wx']],state[indices['wy']],state[indices['wz']])
+            obj.setTransform(R,t)
+            obj.setVelocity(w,v)
+            sim.body(obj).setTransform(R,t)
+            sim.body(obj).setVelocity(w,v)
