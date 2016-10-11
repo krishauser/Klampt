@@ -634,6 +634,7 @@ void Geometry3D::setElement(int element,const Geometry3D& rhs)
   SmartPointer<AnyCollisionGeometry3D>& rgeom = *reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(rhs.geomPtr);
   if(rgeom == NULL) 
     throw PyException("Setting an element to an empty geometry?");
+  rgeom->InitCollisionData();
 
   SmartPointer<AnyCollisionGeometry3D>& geom = *reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(geomPtr);
   if(!geom) 
