@@ -1,12 +1,13 @@
 from klampt import *
 from klampt import vectorops
+from klampt.cspace import CSpace,MotionPlan
 
-#attractive force constant
-attractiveConstant = 100
-#repulsive distance
-repulsiveDistance = 0.1
-#time step to limit the distance traveled
-timeStep = 0.01
+#turn this to False if redrawing becomes too slow
+draw_roadmap = True
+#how much planning time to take every frame, in seconds
+max_plan_time = 0.5
+#how many iterations to take per frame
+max_plan_iters = 100
 
 class Circle:
     def __init__(self,x=0,y=0,radius=1):
@@ -19,30 +20,67 @@ class Circle:
     def distance(self,point):
         return (vectorops.distance(point,self.center) - self.radius)
 
-def force(q,target,obstacles):
-    """Returns the potential field force for a robot at configuration q,
-    trying to reach the given target, with the specified obstacles.
-
-    Input:
-    - q: a 2D point giving the robot's configuration
-    - robotRadius: the radius of the robot
-    - target: a 2D point giving the robot's target
-    - obstacles: a list of Circle's giving the obstacles
+class CircleObstacleCSpace(CSpace):
+    """The configuration space being used in Lab3B, C, and D.
+    Consists of a circular robot and circular obstacles.
     """
-    #basic target-tracking potential field implemented here
-    f = vectorops.mul(vectorops.sub(target,q),attractiveConstant)
-    for o in obstacles:
-        d = o.distance(q)
-        #in obstacle: undefined
-        if d <= 0: continue
-        if d > repulsiveDistance: continue
-        mag = (1.0/d - 1.0/repulsiveDistance)
-        direction = vectorops.unit(vectorops.sub(q,o.center))
-        f = vectorops.madd(f,direction,mag)
-    f = vectorops.div(f,attractiveConstant)
-    if vectorops.norm(f) > timeStep:
-        f = vectorops.unit(f)
-    return f
+    def __init__(self):
+        CSpace.__init__(self)
+        #set bounds
+        self.bound = [(0.0,1.0),(0.0,1.0)]
+        #set collision checking resolution
+        self.eps = 1e-3
+        #setup a robot with radius 0.05
+        self.robot = Circle(0,0,0.05)
+        #set obstacles here
+        self.obstacles = []
+
+    def addObstacle(self,circle):
+        self.obstacles.append(circle)
+    
+    def feasible(self,q):
+        """TODO: Implement this feasibility test.  It is used by the motion planner to
+        determine whether the robot at configuration q is feasible."""
+        #bounds test
+        if not CSpace.feasible(self,q): return False
+        #make sure center point at least distance r from obstacles
+        for o in self.obstacles:
+            if o.contains(q): return False
+        return True
+
+
+def makePlanner(space, start, goal):
+    """Creates a MotionPlan object for the given space, start, and goal.
+    Returns (planner,optimizing) where optimizing is True if the planner should
+    continue be run after the first solution path has been found"""
+    #TODO: In lab3c, you should tune these parameters
+    #
+    #This sets a Probabilistic Road Map (PRM) planner that connects
+    #a random point to its 10 nearest neighbors. If knn is set to 0,
+    #the points are connected as long as they lie
+    #within distance 0.1 of one another
+    MotionPlan.setOptions(type="prm",knn=10,connectionThreshold=0.01)
+    #This line sets a Rapidly-exploring Random Tree (RRT) planner that
+    #repeatedly extends the tree toward a random point at maximum
+    #distance 0.25.  It uses the bidirectional=True option, which grows
+    #trees from both the start and the goal
+    #MotionPlan.setOptions(type="rrt",connectionThreshold=0.1,perturbationRadius=0.25,bidirectional=True)
+    optimizing = False
+
+    #Optimizing planners, for use in Lab3D.  Make sure to uncomment optimizing = True below.
+    #This sets the PRM algorithm with shortcutting
+    #MotionPlan.setOptions(type="prm",knn=10,connectionThreshold=0.1,shortcut=True)
+    #This sets the RRT* algorithm
+    #MotionPlan.setOptions(type="rrt*")
+    #This sets a fast-marching method algorithm
+    #MotionPlan.setOptions(type="fmm*")
+    #This sets a random-restart + shortcutting RRT
+    #MotionPlan.setOptions(type="rrt",connectionThreshold=0.1,perturbationRadius=0.25,bidirectional=True,restart=True,shortcut=True)
+    #optimizing = True
+
+    #create the planner and set the termination criteria
+    planner = MotionPlan(space)
+    return planner,optimizing
 
 def start():
     return (0.06,0.6)
@@ -51,5 +89,4 @@ def target():
     return (0.94,0.5)
 
 def obstacles():
-    return [Circle(0.5,0.25,0.2),
-        Circle(0.5,0.75,0.2)]
+    return [Circle(0.5,0.5,0.36)]

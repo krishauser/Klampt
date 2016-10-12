@@ -30,18 +30,8 @@ def force(q,target,obstacles):
     - obstacles: a list of Circle's giving the obstacles
     """
     #basic target-tracking potential field implemented here
+    #TODO: implement your own potential field
     f = vectorops.mul(vectorops.sub(target,q),attractiveConstant)
-    for o in obstacles:
-        d = o.distance(q)
-        #in obstacle: undefined
-        if d <= 0: continue
-        if d > repulsiveDistance: continue
-        mag = (1.0/d - 1.0/repulsiveDistance)
-        direction = vectorops.unit(vectorops.sub(q,o.center))
-        f = vectorops.madd(f,direction,mag)
-    f = vectorops.div(f,attractiveConstant)
-    if vectorops.norm(f) > timeStep:
-        f = vectorops.unit(f)
     return f
 
 def start():
