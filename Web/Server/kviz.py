@@ -42,7 +42,10 @@ def set_color(target,rgba_color):
 	if len(rgba_color) == 3:
 		rgba_color.append(1.0)
 
-	_RPC.append({'type':'set_color','object':target_name,'rgba':rgba_color,'recursive':recursive})
+	if recursive:
+		_RPC.append({'type':'set_color','object':target_name,'rgba':rgba_color,'recursive':True})
+	else:
+		_RPC.append({'type':'set_color','object':target_name,'rgba':rgba_color})
 	#print "Setting link color!",('object',target_name,'rgba'),rgba_color
 
 def add_ghost(prefixname="ghost",robot=0):
@@ -118,17 +121,27 @@ def _reset():
 	_RPC = []
 	_ghosts = []
 
-def _encode_float(object):
-	if isinstance(object,float):
-		return "%.3f"%(object)
-	return object
+
+def make_fixed_precision(obj,digits):
+	if isinstance(obj,float):
+		return round(obj,digits)
+	elif isinstance(obj,(list,tuple)):
+		for i in xrange(len(obj)):
+			obj[i] = make_fixed_precision(obj[i],digits)
+	elif isinstance(obj,dict):
+		for i,v in obj.iteritems():
+			obj[i] = make_fixed_precision(v,digits)
+	return obj
+
+def json_fixed_precision_dump(obj,digits):
+	return json.dumps(make_fixed_precision(obj,digits))
 
 def _getInitialJSON():
 	global _world,_sceneCurrent,_RPC
 	msg = json.loads(_world.getSceneJSON())
 	msg['RPC'] = _RPC
 	_RPC = []
-	return json.dumps(msg,default=_encode_float)
+	return json_fixed_precision_dump(msg,3)
 
 
 def _getUpdateJSON():
@@ -136,4 +149,4 @@ def _getUpdateJSON():
 	msg = json.loads(_world.getTransformsJSON())
 	msg['RPC'] = _RPC
 	_RPC = []
-	return json.dumps(msg,default=_encode_float)
+	return json_fixed_precision_dump(msg,3)
