@@ -29,6 +29,9 @@ def wrapper_compute_JSON():
 	else:   
 		starttime=time.time();
 		wrapper_jString=kviz._getUpdateJSON()
+		if len(wrapper_jString) > 10000:
+			print "Warning, sending a lot of data this frame:",len(wrapper_jString),"bytes"
+			#print wrapper_jString
 		secs = time.time() - starttime
 		msecs = secs * 1000  # millisecs
 		#print "Getting the transforms in JSON format took: " + "{:.2f}".format(msecs) + " ms"
