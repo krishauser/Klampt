@@ -346,24 +346,7 @@ function newSceneArrivedCallback(data)
 	         //{
 	          //  console.log("first checking if we've working this this material before");
 	                                                            
-	            if(recursive==false)
-	            {
-	               if(typeof object.userData.customSingleMaterialSetup === 'undefined')
-	               { 
-	                  if(object.type == 'Line')
-	                  {
-	                  	console.log("Setting line material "+rgba);
-	                     basicMaterial = new THREE.LineBasicMaterial();                         
-	                  }
-	                  else
-	                     basicMaterial = new THREE.MeshPhongMaterial();
-	                  
-	                  object.material=basicMaterial;      
-	                  
-	                  object.userData.customSingleMaterialSetup=true;
-	               }
-	            }
-	            else
+	            if (recursive == true)
 	            {
 	               if(typeof object.userData.customSharedMaterialSetup === 'undefined')
 	               {                          
@@ -383,7 +366,25 @@ function newSceneArrivedCallback(data)
 	                     child.material=object.material;
 	                  } );
 	               }                        
-	            }                    
+	            }
+	            else
+	            {
+	               if(typeof object.userData.customSingleMaterialSetup === 'undefined')
+	               { 
+	                  if(object.type == 'Line')
+	                  {
+	                  	console.log("Setting line material "+rgba);
+	                     basicMaterial = new THREE.LineBasicMaterial();                         
+	                  }
+	                  else
+	                     basicMaterial = new THREE.MeshPhongMaterial();
+	                  
+	                  object.material=basicMaterial;      
+	                  
+	                  object.userData.customSingleMaterialSetup=true;
+	               }
+	            }
+	            
 	      
 	            object.material.color.setRGB(rgba[0],rgba[1],rgba[2]);
 	            if(rgba[3]!=1.0)
