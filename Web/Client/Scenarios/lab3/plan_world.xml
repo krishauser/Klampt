@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<world>
+  <robot name="robot" file="bar.rob" />
+
+  <terrain name="left_wall" file="cube.tri" scale="0.1 10 0.5" translation="-5.1 -5 0" />
+  <terrain name="right_wall" file="cube.tri" scale="0.1 10 0.5" translation="5 -5 0" />
+  <terrain name="bottom_wall" file="cube.tri" scale="10 0.1 0.5" translation="-5 -5.1 0" />
+  <terrain name="top_wall" file="cube.tri" scale="10 0.1 0.5" translation="-5 5 0" />
+
+  <terrain name="barrier1" file="cube.tri" scale="4 4.35 0.5" translation="-2 -5 0" />
+  <terrain name="barrier2" file="cube.tri" scale="4 4.35 0.5" translation="-2 0.65 0" />
+</world>

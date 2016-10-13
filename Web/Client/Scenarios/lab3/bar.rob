@@ -1,0 +1,37 @@
+### Kinematics of a planar box that can translate and rotate
+TParent 1 0 0   0 1 0   0 0 1   0 0 0.07  \
+1 0 0   0 1 0   0 0 1   0 0 0  \
+1 0 0   0 1 0   0 0 1   0 0 0
+links "base_x" "base_y" "base_yaw"
+parents -1 0 1 
+axis 1 0 0   0 1 0    0 0 1   
+jointtype p p r 
+qMin -inf -inf -inf 
+qMax inf inf inf 
+q 0 0 0
+geometry   ""    ""    ""
+geomscale 1 1 1
+#simple collision geometry is mounted on the 3rd link
+mount 2 "cube.tri" 0.54 0 0   0 0.94 0   0 0 0.25  -0.27 -0.47 0.0
+#mount the wheels
+mount 2 "cylinder.tri" 0 0 0.1   0 0.12 0  -0.12 0 0   -0.32 -0.3 0.05
+mount 2 "cylinder.tri" 0 0 0.1   0 0.12 0  -0.12 0 0   0.22 -0.3 0.05
+mount 2 "cylinder.tri" 0 0 0.1   0 0.12 0  -0.12 0 0   -0.32 0.3 0.05
+mount 2 "cylinder.tri" 0 0 0.1   0 0.12 0  -0.12 0 0   0.22 0.3 0.05
+#take off the torso
+#mount 2 "cube.tri" 0.36 0 0   0 0.36 0   0 0 0.6	-0.18 -0.18 0.25
+
+#estop gives a sense of how the robot is oriented
+mount 2 "cube.tri" 0.05 0 0   0 0.05 0   0 0 0.05  -0.32 -0.05 0.2
+mass       0 0 50
+automass
+torqueMax  100 100 100 
+accMax     0.5 0.5 0.25
+velMax     1 1 0.5
+
+joint floatingplanar 2 -1 
+
+driver normal 0
+driver normal 1
+driver normal 2
+
