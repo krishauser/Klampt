@@ -1,1 +1,1 @@
-{ type:"sbl", perturbationRadius:0.5, randomizeFrequency:1000 }
+{ type:"sbl", perturbationRadius:0.5, perturbationIters:5, connectionThreshold:10000, gridResolution:0.1, randomizeFrequency:1000 }
