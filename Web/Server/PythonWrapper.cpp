@@ -32,6 +32,22 @@ std::string IntToString ( int number )
 */
 
 
+///Flushes the stdout and stderr buffers to the client
+void FlushStreams()
+{
+   if(!stdout_buffer.empty()) {
+     printf("[python stdout] %s\n",stdout_buffer.c_str());
+     websocket_send("C"+stdout_buffer);
+     stdout_buffer.clear();
+   }
+   if(!stderr_buffer.empty()) {
+     printf("[python stderr] %s\n",stderr_buffer.c_str());
+     websocket_send("E"+stderr_buffer);
+     stderr_buffer.clear();
+   }
+
+}
+
 ////////////////////////////////////////////////////////
 // Allow python program to call C function 
 // https://docs.python.org/2/extending/embedding.html
@@ -44,16 +60,7 @@ static PyObject* emb_send(PyObject *self, PyObject *args)
    if (!PyArg_UnpackTuple(args, "func", 1, 1, &a)) 
       return NULL;
 
-   if(!stdout_buffer.empty()) {
-     printf("[python stdout] %s\n",stdout_buffer.c_str());
-     websocket_send("C"+stdout_buffer);
-     stdout_buffer.clear();
-   }
-   if(!stderr_buffer.empty()) {
-     printf("[python stderr] %s\n",stderr_buffer.c_str());
-     websocket_send("E"+stderr_buffer);
-     stderr_buffer.clear();
-   }
+   FlushStreams();
 	        
    if(PyString_Check(a)) //verify data type 
    {
@@ -255,6 +262,7 @@ void handleIncomingMessage(string message)
            if(res < 0 || PyErr_Occurred()) {
               printf("  An exception occurred while running client code\n");
               PyErr_Clear();
+              FlushStreams();
               return;
            }
          }
@@ -264,6 +272,7 @@ void handleIncomingMessage(string message)
         printf("  user would like to add some student code\n");
         if(!boilerplate_loaded) {
           printf("Boilerplate failed to load, not proceeding.\n");
+          FlushStreams();
           return;
         }
 
@@ -271,6 +280,7 @@ void handleIncomingMessage(string message)
         PyObject* main_module = PyImport_AddModule("__main__");
         if(main_module == NULL) {
           printf("Uh... couldn't add __main__ module?\n");
+          FlushStreams();
           return;
         }
         if(student_code_loaded) {
@@ -280,6 +290,7 @@ void handleIncomingMessage(string message)
         stub_module = PyImport_ImportModule("stub");
         if(stub_module == NULL) {
           printf("Uh... couldn't load stub.py?\n");
+          FlushStreams();
           return;
         }
         PyObject_SetAttrString(main_module, "stub", stub_module);
@@ -306,7 +317,6 @@ void handleIncomingMessage(string message)
         */
 
         PyObject* res = MyPyRun_StringFileName(message.c_str(),"client_code",Py_file_input,stub_dict,stub_dict);
-        
         /*
         printf("Stub code: after values\n");
         pos = 0;
@@ -321,17 +331,20 @@ void handleIncomingMessage(string message)
           Py_XDECREF(stub_dict);
           PyErr_Print();
           PyErr_Clear();
+          FlushStreams();
           return;
         }
         if(PyErr_Occurred()) {
           printf("  An exception occurred while running client code\n");
           PyErr_Print();
           PyErr_Clear();
+          FlushStreams();
           return;
         }
         Py_XDECREF(res);
         Py_XDECREF(stub_dict);
         //PyRun_SimpleString(message.c_str());
+        FlushStreams();
 
         printf("Running boilerplate_start()...\n");
         int res2 = PyRun_SimpleString("wrapper_start()\n");
@@ -343,6 +356,7 @@ void handleIncomingMessage(string message)
           printf("  Error occurred while running boilerplate_start()\n");
           PyErr_Clear();
         }
+        FlushStreams();
       }
       if(routing=='B')
       {
