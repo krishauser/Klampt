@@ -1,6 +1,7 @@
 import pkg_resources
 pkg_resources.require("klampt==0.6.2")
 from klampt import *
+from klampt.cspace import MotionPlan
 import math
 import sys
 sys.path.append("Web/Server")
@@ -35,6 +36,9 @@ class Circle:
 def boilerplate_start():
     global world,space,start,target,planner,optimizing,path,existing_path_lines,roadmap,existing_roadmap_lines
 
+    #global options that don't get forgotten from instance to instance
+    MotionPlan.setOptions(restart=False,shortcut=False)
+
     start=stub.start()
     target=stub.target()
 
@@ -57,6 +61,20 @@ def boilerplate_start():
         obst = world.terrain(world.numTerrains()-1)
         obst.geometry().transform([o.radius,0,0,0,o.radius,0,0,0,0.05],[o.center[0],o.center[1],0])
         obst.appearance().setColor(0.3,0.3,0.3,1)
+    #make a box around everything
+    world.loadElement("Web/Client/Scenarios/lab3/cube.tri")
+    wall = world.terrain(world.numTerrains()-1)
+    wall.geometry().transform([0.01,0,0,0,1,0,0,0,0.05],[-0.01,0,0])
+    world.loadElement("Web/Client/Scenarios/lab3/cube.tri")
+    wall = world.terrain(world.numTerrains()-1)
+    wall.geometry().transform([0.01,0,0,0,1,0,0,0,0.05],[1,0,0])
+    world.loadElement("Web/Client/Scenarios/lab3/cube.tri")
+    wall = world.terrain(world.numTerrains()-1)
+    wall.geometry().transform([1,0,0,0,0.01,0,0,0,0.05],[0,-0.01,0])
+    world.loadElement("Web/Client/Scenarios/lab3/cube.tri")
+    wall = world.terrain(world.numTerrains()-1)
+    wall.geometry().transform([1,0,0,0,0.11,0,0,0,0.05],[0,1,0])
+    
     radius = space.robot.radius
     kviz._init(world)
     kviz.add_sphere("robot",start[0],start[1],0,radius)
