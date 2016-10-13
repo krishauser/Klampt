@@ -32,6 +32,9 @@ def force(q,target,obstacles):
     #basic target-tracking potential field implemented here
     #TODO: implement your own potential field
     f = vectorops.mul(vectorops.sub(target,q),attractiveConstant)
+    #limit the norm of f
+    if vectorops.norm(f) > 1:
+        f = vectorops.unit(f)
     return f
 
 def start():
