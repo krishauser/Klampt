@@ -67,7 +67,7 @@ def makePlanner(space, start, goal):
     #MotionPlan.setOptions(type="rrt",connectionThreshold=0.1,perturbationRadius=0.25,bidirectional=True)
     optimizing = False
 
-    #Optimizing planners, for use in Lab3D.  Make sure to uncomment optimizing = True below.
+    #Optimizing planners, for use in Lab3C, part 2.  Make sure to uncomment optimizing = True below.
     #This sets the PRM algorithm with shortcutting
     #MotionPlan.setOptions(type="prm",knn=10,connectionThreshold=0.1,shortcut=True)
     #This sets the RRT* algorithm
@@ -78,7 +78,7 @@ def makePlanner(space, start, goal):
     #MotionPlan.setOptions(type="rrt",connectionThreshold=0.1,perturbationRadius=0.25,bidirectional=True,restart=True,shortcut=True)
     #optimizing = True
 
-    #create the planner and set the termination criteria
+    #create the planner and return it along with the termination criterion
     planner = MotionPlan(space)
     return planner,optimizing
 

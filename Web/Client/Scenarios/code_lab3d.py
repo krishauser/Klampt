@@ -14,7 +14,9 @@ class SE2ObstacleCSpace(CSpace):
     """The configuration space being used in Lab 3D.
     Consists of a RobotModel robot and TerrainModel obstacles.
 
-    Note the much larger size of the space!
+    Note: compared to Lab 3B, the translation domain is larger!  This requires
+    some of the parameters (collision checking resolution, for example) to be
+    set higher as well.
     """
     def __init__(self,world):
         CSpace.__init__(self)
@@ -30,7 +32,7 @@ class SE2ObstacleCSpace(CSpace):
     def feasible(self,q):
         """TODO: Implement this feasibility test.  It is used by the motion planner to
         determine whether the robot at configuration q is feasible."""
-        #bounds test: we don't care about angle
+        #modified bounds test: we don't care about angle
         if not CSpace.feasible(self,(q[0],q[1],0)): return False
         self.robot.setConfig(q)
         base = self.robot.link(2)
@@ -60,13 +62,11 @@ def makePlanner(space, start, goal):
     """Creates a MotionPlan object for the given space, start, and goal.
     Returns (planner,optimizing) where optimizing is True if the planner should
     continue be run after the first solution path has been found"""
-    #TODO: In lab3c, you should tune these parameters
-    #
     #This sets a Probabilistic Road Map (PRM) planner that connects
     #a random point to its 10 nearest neighbors. If knn is set to 0,
     #the points are connected as long as they lie
     #within distance 0.1 of one another
-    #MotionPlan.setOptions(type="prm",knn=10,connectionThreshold=1)
+    MotionPlan.setOptions(type="prm",knn=10,connectionThreshold=1)
     #This line sets a Rapidly-exploring Random Tree (RRT) planner that
     #repeatedly extends the tree toward a random point at maximum
     #distance 0.25.  It uses the bidirectional=True option, which grows
@@ -75,7 +75,7 @@ def makePlanner(space, start, goal):
     #MotionPlan.setOptions(type="sbl",connectionThreshold=5.0,gridResolution=1.0,perturbationRadius=1.5,bidirectional=True)
     optimizing = False
 
-    #Optimizing planners, for use in Lab3D.  Make sure to uncomment optimizing = True below.
+    #Optimizing planners.  Make sure to uncomment optimizing = True below.
     #This sets the PRM algorithm with shortcutting
     #MotionPlan.setOptions(type="prm",knn=10,connectionThreshold=1.0,shortcut=True)
     #This sets the RRT* algorithm
@@ -83,10 +83,10 @@ def makePlanner(space, start, goal):
     #This sets a fast-marching method algorithm
     #MotionPlan.setOptions(type="fmm*")
     #This sets a random-restart + shortcutting RRT
-    MotionPlan.setOptions(type="rrt",connectionThreshold=2.0,perturbationRadius=2.5,bidirectional=True,restart=True,shortcut=True,restartTermCond="{foundSolution:1,maxIters:1000}")
-    optimizing = True
+    #MotionPlan.setOptions(type="rrt",connectionThreshold=2.0,perturbationRadius=2.5,bidirectional=True,restart=True,shortcut=True,restartTermCond="{foundSolution:1,maxIters:1000}")
+    #optimizing = True
 
-    #create the planner and set the termination criteria
+    #create the planner, and return it along with the termination criterion
     planner = MotionPlan(space)
     return planner,optimizing
 
