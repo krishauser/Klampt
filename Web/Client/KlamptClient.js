@@ -29,6 +29,12 @@ var textArea;
 ///  kclient.connect(addr,boilerplate,function() { kclient_setCode(code); },null);
 ///
 ///to start up the connection
+///
+///Low level scene control:
+///kclient_set_scene(scene);      //from a Three.js model object, reloads the scene
+///kclient_set_transforms(data);  //from a list of objects containing names / transforms, sets the transforms of the corresponding items in the scene
+///kclient_rpc(request);          //performs an RPC call from a kviz request object
+
 
 var scene = new THREE.Scene();
 //var camera = new THREE.PerspectiveCamera( 75, 1.0, 0.1, 1000 );
@@ -245,6 +251,258 @@ function getObject(name)
 	return object;
 }
 
+//dataJ has a Three.js scene object format
+function kclient_set_scene(dataJ)
+{
+	//loader.setTexturePath( scope.texturePath );
+
+	var scope = this;
+
+     scene.traverse( function ( child ) { //make sure to dispose all old objects
+	      if ( child.geometry !== undefined ) child.geometry.dispose();
+       if ( child.material !== undefined ) child.material.dispose();
+   } );
+   scene=null;
+   sceneCache={};
+
+   scene = loader.parse( dataJ );
+}
+
+///sceneObjects is a list of dictionaries, each containing the members "name" and "matrix"
+function kclient_set_transforms(sceneObjects)
+{
+   for(i=0; i<sceneObjects.length; i++)
+   {  
+      //console.log("Update requested to: " + sceneObjects[i].name);
+      //console.log("  new matrix is: " + sceneObjects[i].matrix);
+
+      var object = getObject(sceneObjects[i].name);
+      if(object != null)
+      { 
+        //console.log("  we found \"" + sceneObjects[i].name + "\" in the Three.js scene");
+                       
+        object.matrixAutoUpdate=false;
+        object.matrixWorldNeedsUpdate=true;
+      
+        var m=sceneObjects[i].matrix;
+   
+        object.matrix.set(m[0],m[4],m[8],m[12],m[1],m[5],m[9],m[13],m[2],m[6],m[10],m[14],m[3],m[7],m[11],m[15]);
+      } 
+   } 
+}
+
+function kclient_rpc(request)
+{
+   if(request.type == "set_color") 
+   {
+      var object_name=request.object;
+      var rgba=request.rgba;
+      var recursive=request.recursive;
+                                                 
+      console.log("set_color requested. object: " + object_name + " rgba: " + rgba); 
+      
+      var object = getObject(object_name)
+      if(object == null) {
+      	console.log("Invalid object name "+object_name+" specified in set_color");
+      }
+      else { 
+         //if(typeof object.material !== 'undefined')
+         //{
+          //  console.log("first checking if we've working this this material before");
+                                                            
+            if (recursive == true)
+            {
+               if(typeof object.userData.customSharedMaterialSetup === 'undefined')
+               {                          
+                  if(object.type == 'Line')
+                  {
+                     basicMaterial = new THREE.LineBasicMaterial();                         
+                  }
+                  else
+                     basicMaterial = new THREE.MeshPhongMaterial();
+                  
+                  object.material=basicMaterial;      
+                  
+                  object.userData.customSharedMaterialSetup=true;
+                  
+                  object.traverse( function ( child ) { 
+                  if (typeof child.material !== 'undefined') 
+                     child.material=object.material;
+                  } );
+               }                        
+            }
+            else
+            {
+               if(typeof object.userData.customSingleMaterialSetup === 'undefined')
+               { 
+                  if(object.type == 'Line')
+                  {
+                  	console.log("Setting line material "+rgba);
+                     basicMaterial = new THREE.LineBasicMaterial();                         
+                  }
+                  else
+                     basicMaterial = new THREE.MeshPhongMaterial();
+                  
+                  object.material=basicMaterial;      
+                  
+                  object.userData.customSingleMaterialSetup=true;
+               }
+            }
+            
+      
+            object.material.color.setRGB(rgba[0],rgba[1],rgba[2]);
+            if(rgba[3]!=1.0)
+            {
+               object.material.transparent=true;
+               object.material.opacity=rgba[3];
+            }
+            else
+            {
+               object.material.transparent=false;
+            }
+         //}
+         //else
+         //{
+         //   console.log("ERROR: no material associated with object: " + object_name);  
+         //   alert("ERROR: kviz.set_color is trying to set an object with no material");
+         //}
+      }
+   }
+   else if(request.type == "set_visible") 
+   {
+      var object_name=request.name;
+      var visible=request.value;
+                                                 
+      console.log("set_visible requested. object: " + object_name + " visible: " + visible); 
+      
+      var object = getObject(object_name);
+      if(object == null) {
+      	console.log("Invalid object name "+object_name+" specified in set_visible");
+      }
+      else {
+      	object.visible = visible;
+      }
+   }
+   else if(request.type == "add_ghost") 
+   {
+      var object_name=request.object;
+      var prefix=request.prefix_name;
+                                                 
+      console.log("add_ghost requested. object: " + object_name + " prefix: " + prefix); 
+                                   
+      var object = getObject(object_name);
+      if(object != null)
+      { 
+         console.log("we found the object in the tree");
+        
+         var clone_object=object.clone(true);
+         scene.add(clone_object);
+         
+         clone_object.traverse( function ( child ) { 
+                  if (typeof child.name !== 'undefined') 
+                     child.name=prefix+child.name;
+                  } );
+      }
+   }
+   else if(request.type == "set_position")
+   {                 
+      console.log("got a set_position RPC request for: " + request.object);
+      var object = getObject(request.object);
+      if(object != null)
+      {            
+        object.matrixAutoUpdate=false;
+        object.matrixWorldNeedsUpdate=true;
+      
+        var m=request.matrix;     
+        object.matrix.set(m[0],m[1],m[2],m[3],m[4],m[5],m[6],m[7],m[8],m[9],m[10],m[11],m[12],m[13],m[14],m[15]);
+      } 
+      else
+         console.log("  couldn't find object: " + request.object);
+   }
+   else if(request.type == "add_text")
+   {
+      console.log("RPC to add text!");     
+      var text2 = document.createElement('div');
+      text2.style.position = 'absolute';
+      text2.id="_text_overlay_"+request.name;
+      //text2.style.zIndex = 1;    // if you still don't see the label, try uncommenting this
+      //text2.style.width = 100;
+      //text2.style.height = 100;
+      //text2.style.backgroundColor = "blue";
+      if(request.text!=null)
+         text2.innerHTML = request.text;
+         
+      text2.style.top = request.x + '%';
+      text2.style.left = request.y + '%';
+      sceneArea.appendChild(text2);
+   }
+   else if(request.type == "update_text")
+   {
+      var text2 = document.getElementById("_text_overlay_"+request.name);
+      text2.innerHTML = request.text;
+   }
+   else if(request.type == "add_sphere")
+   {
+      console.log("RPC to add sphere!"); 
+      var geometry = new THREE.SphereGeometry(1.0,20,20);
+      var material = new THREE.MeshPhongMaterial( {color: 0xAA0000} );
+      var sphere = new THREE.Mesh( geometry, material );
+      
+      sphere.scale.x=request.r;
+      sphere.scale.y=request.r;
+      sphere.scale.z=request.r;
+      
+      sphere.name=request.name;
+      sphere.position.set(request.x,request.y,request.z);
+      scene.add( sphere );                     
+   }
+   else if(request.type == "update_sphere")
+   {                 
+      var sphere = getObject(request.name);
+      if(sphere != null)
+      { 
+         sphere.position.set(request.x,request.y,request.z);
+         if(request.r!=-1)
+         {
+            sphere.scale.x=request.r;
+            sphere.scale.y=request.r;
+            sphere.scale.z=request.r;
+         }
+      }
+      else
+         console.log("couldn't find sphere named: " + request.name);
+   }
+   else if(request.type == "add_line")
+   {
+      var geometry = new THREE.Geometry();
+      
+      geometry.vertices.push(new THREE.Vector3(request.x1,request.y1,request.z1));
+      geometry.vertices.push(new THREE.Vector3(request.x2,request.y2,request.z2));
+      geometry.dynamic  = true;
+         
+      var material = new THREE.LineBasicMaterial( {color: 0xAA0000} );
+      var line = new THREE.Line( geometry, material );
+      line.name=request.name;
+       
+      scene.add( line );                     
+   }
+   else if(request.type == "update_line")
+   {  
+      var line = getObject(request.name);
+      if(line != null)
+      { 
+         line.geometry.vertices[0]=new THREE.Vector3(request.x1,request.y1,request.z1);
+         line.geometry.vertices[1]=new THREE.Vector3(request.x2,request.y2,request.z2);
+         line.geometry.verticesNeedUpdate = true;
+      }
+      else
+         console.log("couldn't find line named: " + request.name);
+   } 
+   else {
+      console.log("Invalid request: "+request.type);
+   }
+}
+
 function newSceneArrivedCallback(data)
 {   
 	console.log("new scene has arrived!");
@@ -260,26 +518,13 @@ function newSceneArrivedCallback(data)
 	{        
 	   var t0 = performance.now();
 
-	   //loader.setTexturePath( scope.texturePath );
+	   kclient_set_scene(dataJ);
 
-		var scope = this;
-		var geometry;
-		var material;
-
-	     scene.traverse( function ( child ) { //make sure to dispose all old objects
-		      if ( child.geometry !== undefined ) child.geometry.dispose();
-	       if ( child.material !== undefined ) child.material.dispose();
-	   } );
-	   scene=null;
-	   sceneCache={};
-
-	   scene = loader.parse( dataJ );
-	   
 	   //TODO: make this optional?
 	   var axisHelper = new THREE.AxisHelper( 0.2 );
 	   scene.add( axisHelper );
 
-		//clear anything named _text_overlay_X
+	   //clear anything named _text_overlay_X
 	   var overlayList = [];
 	   for(var i=0;i<sceneArea.children.length; i++) {
 			if(sceneArea.children[i].id.startsWith("_text_overlay_")) {
@@ -288,7 +533,7 @@ function newSceneArrivedCallback(data)
 			}
 		}
 		for (i=0;i<overlayList.length;i++) {
-         	sceneArea.removeChild(overlayList[i]);
+	     	sceneArea.removeChild(overlayList[i]);
 		}
 	   var t1 = performance.now();
 	   console.log("Call to load scene " + (t1 - t0) + " milliseconds.")
@@ -299,26 +544,7 @@ function newSceneArrivedCallback(data)
 	else //just apply transforms
 	{
 	   var t0 = performance.now();
-	   var sceneObjects=dataJ.object;
-
-	   for(i=0; i<sceneObjects.length; i++)
-	   {  
-	      //console.log("Update requested to: " + sceneObjects[i].name);
-	      //console.log("  new matrix is: " + sceneObjects[i].matrix);
-
-	      var object = getObject(sceneObjects[i].name);
-	      if(object != null)
-	      { 
-	        //console.log("  we found \"" + sceneObjects[i].name + "\" in the Three.js scene");
-	                       
-	        object.matrixAutoUpdate=false;
-	        object.matrixWorldNeedsUpdate=true;
-	      
-	        var m=sceneObjects[i].matrix;
-	   
-	        object.matrix.set(m[0],m[4],m[8],m[12],m[1],m[5],m[9],m[13],m[2],m[6],m[10],m[14],m[3],m[7],m[11],m[15]);
-	      } 
-	   } 
+	   kclient_set_transforms(dataJ.object);
 	   var t1 = performance.now();
 	   console.log("Call to load tranforms " + (t1 - t0) + " milliseconds.");
 	}
@@ -328,215 +554,7 @@ function newSceneArrivedCallback(data)
 	var rpc =dataJ.RPC;
 	for(i=0; i<rpc.length; i++)
 	{  
-	   var request=rpc[i];
-	   if(request.type == "set_color") 
-	   {
-	      var object_name=request.object;
-	      var rgba=request.rgba;
-	      var recursive=request.recursive;
-	                                                 
-	      console.log("set_color requested. object: " + object_name + " rgba: " + rgba); 
-	      
-	      var object = getObject(object_name)
-	      if(object == null) {
-	      	console.log("Invalid object name "+object_name+" specified in set_color");
-	      }
-	      else { 
-	         //if(typeof object.material !== 'undefined')
-	         //{
-	          //  console.log("first checking if we've working this this material before");
-	                                                            
-	            if (recursive == true)
-	            {
-	               if(typeof object.userData.customSharedMaterialSetup === 'undefined')
-	               {                          
-	                  if(object.type == 'Line')
-	                  {
-	                     basicMaterial = new THREE.LineBasicMaterial();                         
-	                  }
-	                  else
-	                     basicMaterial = new THREE.MeshPhongMaterial();
-	                  
-	                  object.material=basicMaterial;      
-	                  
-	                  object.userData.customSharedMaterialSetup=true;
-	                  
-	                  object.traverse( function ( child ) { 
-	                  if (typeof child.material !== 'undefined') 
-	                     child.material=object.material;
-	                  } );
-	               }                        
-	            }
-	            else
-	            {
-	               if(typeof object.userData.customSingleMaterialSetup === 'undefined')
-	               { 
-	                  if(object.type == 'Line')
-	                  {
-	                  	console.log("Setting line material "+rgba);
-	                     basicMaterial = new THREE.LineBasicMaterial();                         
-	                  }
-	                  else
-	                     basicMaterial = new THREE.MeshPhongMaterial();
-	                  
-	                  object.material=basicMaterial;      
-	                  
-	                  object.userData.customSingleMaterialSetup=true;
-	               }
-	            }
-	            
-	      
-	            object.material.color.setRGB(rgba[0],rgba[1],rgba[2]);
-	            if(rgba[3]!=1.0)
-	            {
-	               object.material.transparent=true;
-	               object.material.opacity=rgba[3];
-	            }
-	            else
-	            {
-	               object.material.transparent=false;
-	            }
-	         //}
-	         //else
-	         //{
-	         //   console.log("ERROR: no material associated with object: " + object_name);  
-	         //   alert("ERROR: kviz.set_color is trying to set an object with no material");
-	         //}
-	      }
-	   }
-	   else if(request.type == "set_visible") 
-	   {
-	      var object_name=request.name;
-	      var visible=request.value;
-	                                                 
-	      console.log("set_visible requested. object: " + object_name + " visible: " + visible); 
-	      
-	      var object = getObject(object_name);
-	      if(object == null) {
-	      	console.log("Invalid object name "+object_name+" specified in set_visible");
-	      }
-	      else {
-	      	object.visible = visible;
-	      }
-	   }
-	   else if(request.type == "add_ghost") 
-	   {
-	      var object_name=request.object;
-	      var prefix=request.prefix_name;
-	                                                 
-	      console.log("add_ghost requested. object: " + object_name + " prefix: " + prefix); 
-	                                   
-	      var object = getObject(object_name);
-	      if(object != null)
-	      { 
-	         console.log("we found the object in the tree");
-	        
-	         var clone_object=object.clone(true);
-	         scene.add(clone_object);
-	         
-	         clone_object.traverse( function ( child ) { 
-	                  if (typeof child.name !== 'undefined') 
-	                     child.name=prefix+child.name;
-	                  } );
-	      }
-	   }
-	   else if(request.type == "set_position")
-	   {                 
-	      console.log("got a set_position RPC request for: " + request.object);
-	      var object = getObject(request.object);
-	      if(object != null)
-	      {            
-	        object.matrixAutoUpdate=false;
-	        object.matrixWorldNeedsUpdate=true;
-	      
-	        var m=request.matrix;     
-	        object.matrix.set(m[0],m[1],m[2],m[3],m[4],m[5],m[6],m[7],m[8],m[9],m[10],m[11],m[12],m[13],m[14],m[15]);
-	      } 
-	      else
-	         console.log("  couldn't find object: " + request.object);
-	   }
-	   else if(request.type == "add_text")
-	   {
-	      console.log("RPC to add text!");     
-	      var text2 = document.createElement('div');
-	      text2.style.position = 'absolute';
-	      text2.id="_text_overlay_"+request.name;
-	      //text2.style.zIndex = 1;    // if you still don't see the label, try uncommenting this
-	      //text2.style.width = 100;
-	      //text2.style.height = 100;
-	      //text2.style.backgroundColor = "blue";
-	      if(request.text!=null)
-	         text2.innerHTML = request.text;
-	         
-	      text2.style.top = request.x + '%';
-	      text2.style.left = request.y + '%';
-	      sceneArea.appendChild(text2);
-	   }
-	   else if(request.type == "update_text")
-	   {
-	      var text2 = document.getElementById("_text_overlay_"+request.name);
-	      text2.innerHTML = request.text;
-	   }
-	   else if(request.type == "add_sphere")
-	   {
-	      console.log("RPC to add sphere!"); 
-	      var geometry = new THREE.SphereGeometry(1.0,20,20);
-	      var material = new THREE.MeshPhongMaterial( {color: 0xAA0000} );
-	      var sphere = new THREE.Mesh( geometry, material );
-	      
-	      sphere.scale.x=request.r;
-	      sphere.scale.y=request.r;
-	      sphere.scale.z=request.r;
-	      
-	      sphere.name=request.name;
-	      sphere.position.set(request.x,request.y,request.z);
-	      scene.add( sphere );                     
-	   }
-	   else if(request.type == "update_sphere")
-	   {                 
-	      var sphere = getObject(request.name);
-	      if(sphere != null)
-	      { 
-	         sphere.position.set(request.x,request.y,request.z);
-	         if(request.r!=-1)
-	         {
-	            sphere.scale.x=request.r;
-	            sphere.scale.y=request.r;
-	            sphere.scale.z=request.r;
-	         }
-	      }
-	      else
-	         console.log("couldn't find sphere named: " + request.name);
-	   }
-	   else if(request.type == "add_line")
-	   {
-	      var geometry = new THREE.Geometry();
-	      
-	      geometry.vertices.push(new THREE.Vector3(request.x1,request.y1,request.z1));
-	      geometry.vertices.push(new THREE.Vector3(request.x2,request.y2,request.z2));
-	      geometry.dynamic  = true;
-	         
-	      var material = new THREE.LineBasicMaterial( {color: 0xAA0000} );
-	      var line = new THREE.Line( geometry, material );
-	      line.name=request.name;
-	       
-	      scene.add( line );                     
-	   }
-	   else if(request.type == "update_line")
-	   {  
-	      var line = getObject(request.name);
-	      if(line != null)
-	      { 
-	         line.geometry.vertices[0]=new THREE.Vector3(request.x1,request.y1,request.z1);
-	         line.geometry.vertices[1]=new THREE.Vector3(request.x2,request.y2,request.z2);
-	         line.geometry.verticesNeedUpdate = true;
-	      }
-	      else
-	         console.log("couldn't find line named: " + request.name);
-	   } 
-	   else {
-	      console.log("Invalid request: "+request.type);
-	   }
+		kclient_rpc(rpc[i]);
 	}
 	var t2 = performance.now();
 	if(rpc.length > 0)
@@ -549,7 +567,6 @@ function newSceneArrivedCallback(data)
 	data=null;
 	dataJ=null;
 	rpc=null;
-
 
 	var t0 = performance.now();
 	render();
