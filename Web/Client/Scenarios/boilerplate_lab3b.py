@@ -18,7 +18,9 @@ roadmap = None
 planner = None
 optimizing = False
 existing_path_lines = []
+existing_ghosts = []
 existing_roadmap_lines = set()
+path_height = 0.002
 
 class Circle:
     def __init__(self,x=0,y=0,radius=1):
@@ -34,7 +36,7 @@ class Circle:
 
     
 def boilerplate_start():
-    global world,space,start,target,planner,optimizing,path,existing_path_lines,roadmap,existing_roadmap_lines
+    global world,space,start,target,planner,optimizing,path,existing_path_lines,existing_ghosts,roadmap,existing_roadmap_lines
 
     #global options that don't get forgotten from instance to instance
     MotionPlan.setOptions(restart=False,shortcut=False)
@@ -83,25 +85,31 @@ def boilerplate_start():
     kviz.set_color("target",[1,0,0,1])
     existing_roadmap_lines = set()
     existing_path_lines = []
+    existing_ghosts = []
     refresh_viz()
 
 def refresh_viz():
-    global start,target,path,existing_path_lines,roadmap,existing_roadmap_lines
+    global start,target,path,existing_path_lines,existing_ghosts,roadmap,existing_roadmap_lines
     kviz.update_sphere("robot",start[0],start[1],0)
     kviz.update_sphere("target",target[0],target[1],0)
     for i,name in enumerate(existing_path_lines):
         if i >= len(path):
             kviz.set_visible(name,False)
+            kviz.set_visible(existing_ghosts[i],False)
     for i in xrange(len(path)-1):
         if i >= len(existing_path_lines):
             name = "path"+str(i)
             existing_path_lines.append(name)
-            kviz.add_line(name,path[i][0],path[i][1],0.0,path[i+1][0],path[i+1][1],0.0)
+            kviz.add_line(name,path[i][0],path[i][1],path_height,path[i+1][0],path[i+1][1],path_height)
             kviz.set_visible(name,True)
             kviz.set_color(name,[0,0,1,1])
+            existing_ghosts.append("ghost"+str(i))
+            kviz.add_sphere("ghost"+str(i),path[i][0],path[i][1],0,space.robot.radius)
+            kviz.set_color("ghost"+str(i),[1,1,1,0.5])
         else:
             name = existing_path_lines[i]
-            kviz.update_line(name,path[i][0],path[i][1],0.0,path[i+1][0],path[i+1][1],0.0)
+            kviz.update_line(name,path[i][0],path[i][1],path_height,path[i+1][0],path[i+1][1],path_height)
+            kviz.update_sphere("ghost"+str(i),path[i][0],path[i][1],0,space.robot.radius)
     if stub.draw_roadmap:
         V,E = roadmap
         for i,e in enumerate(E):
@@ -132,6 +140,8 @@ def boilerplate_advance():
         path = planner.getPath()
         if path == None:
             path = []
+        else:
+            print "Found a path containing",len(path),"milestones"
         refresh_viz()
 
 def boilerplate_keypress(c):

@@ -20,10 +20,10 @@ optimizing = False
 existing_path_lines = []
 existing_ghosts = []
 existing_roadmap_lines = set()
-
+path_height = 0.02
     
 def boilerplate_start():
-    global world,space,start,target,planner,optimizing,path,existing_path_lines,roadmap,existing_roadmap_lines
+    global world,space,start,target,planner,optimizing,path,existing_path_lines,existing_ghosts,roadmap,existing_roadmap_lines
 
     #global options that don't get forgotten from instance to instance
     MotionPlan.setOptions(restart=False,shortcut=False)
@@ -61,25 +61,26 @@ def boilerplate_start():
     refresh_viz()
 
 def refresh_viz():
-    global start,target,path,existing_path_lines,roadmap,existing_roadmap_lines
+    global start,target,path,existing_path_lines,existing_ghosts,roadmap,existing_roadmap_lines
     kviz.update_sphere("robot",start[0],start[1],0)
     kviz.update_sphere("target",target[0],target[1],0)
     for i,name in enumerate(existing_path_lines):
         if i >= len(path):
             kviz.set_visible(name,False)
-            kviz.set_visible(existing_ghosts[i])
+            kviz.set_visible(existing_ghosts[i],False)
     for i in xrange(len(path)-1):
         if i >= len(existing_path_lines):
             name = "path"+str(i)
             existing_path_lines.append(name)
-            kviz.add_line(name,path[i][0],path[i][1],0.0,path[i+1][0],path[i+1][1],0.0)
+            kviz.add_line(name,path[i][0],path[i][1],path_height,path[i+1][0],path[i+1][1],path_height)
             kviz.set_visible(name,True)
             kviz.set_color(name,[0,0,1,1])
             existing_ghosts.append(kviz.add_ghost("ghost"+str(i)))
             kviz.set_ghost_config(path[i],"ghost"+str(i))
+            kviz.set_color(existing_ghosts[-1],[1,1,1,0.5])
         else:
             name = existing_path_lines[i]
-            kviz.update_line(name,path[i][0],path[i][1],0.0,path[i+1][0],path[i+1][1],0.0)
+            kviz.update_line(name,path[i][0],path[i][1],path_height,path[i+1][0],path[i+1][1],path_height)
             kviz.set_ghost_config(path[i],"ghost"+str(i))
     if stub.draw_roadmap:
         V,E = roadmap
@@ -111,6 +112,8 @@ def boilerplate_advance():
         path = planner.getPath()
         if path == None:
             path = []
+        else:
+            print "Found a path containing",len(path),"milestones"
         refresh_viz()
 
 def boilerplate_keypress(c):

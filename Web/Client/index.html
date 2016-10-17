@@ -266,9 +266,6 @@
             editor.setTheme("ace/theme/eclipse"); 
             editor.getSession().setMode("ace/mode/python");
             
-            /*editor.getSession().setValue("nextTime = 1\ntoggle = 0\ndef init(robot_model):\n    global ghost\n    ghost=kviz.add_ghost('myGhost')\n    kviz.set_color(ghost,[1,0,0,0.25],True)\n    q=kviz.get_robot_config()\n    q[8]-=2.0\n    kviz.set_ghost_config(q,'myGhost')\n    kviz.add_text('HUD1',1,1)\n    kviz.update_text('HUD1','hello world')\n\ndef control_loop(t,controller):\n    global nextTime, toggle\n    if t >= nextTime:\n        q = controller.getCommandedConfig()\n        q[8] -= 0.5\n        controller.setMilestone(q)\n        nextTime += 1.0\n        ");
-            */
-            
             boilerPlateChanged();
                        
             //var editor = CodeMirror( document.getElementById("editor"), { //use codemirror as text editor
@@ -641,7 +638,6 @@
                }
                else if(request.type == "add_line")
                {
-                  console.log("RPC to add line!"); 
                   var geometry = new THREE.Geometry();
                   
                   geometry.vertices.push(new THREE.Vector3(request.x1,request.y1,request.z1));
@@ -655,7 +651,7 @@
                   scene.add( line );                     
                }
                else if(request.type == "update_line")
-               {                 console.log("RPC to update line");
+               {  
                   var line = scene.getObjectByName(request.name, true );
                   if(line != null)
                   { 
