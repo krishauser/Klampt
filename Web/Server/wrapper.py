@@ -13,8 +13,6 @@ class StderrCatcher:
 sys.stdout = StdoutCatcher()
 sys.stderr = StderrCatcher()
 
-
-wrapper_frame_precomputed = False
 wrapper_JSON_message_count = 0 
 wrapper_jString = None
 
@@ -57,10 +55,7 @@ def wrapper_advance_internal():
 		raise
 
 def wrapper_start():
-	global wrapper_JSON_message_count,wrapper_frame_precomputed
-	if wrapper_frame_precomputed != False:
-		#had an old frame -- need to send this before reset
-		wrapper_send_JSON()
+	global wrapper_JSON_message_count
 
 	kviz._reset()
 	try:
@@ -69,24 +64,15 @@ def wrapper_start():
 		print "Exception in init code"
 		raise
 	wrapper_JSON_message_count = 0
-	wrapper_frame_precomputed = False
 
 	#send the initial scene
 	wrapper_compute_JSON()
 	wrapper_send_JSON()
 	
 def wrapper_advance():
-	global wrapper_frame_precomputed
-
-	if wrapper_frame_precomputed == False:
-		wrapper_advance_internal()
-		wrapper_compute_JSON()
-	
-	wrapper_send_JSON()
-
-	wrapper_advance_internal()  #we'll precompute the next frame to speed things up
+	wrapper_advance_internal() 
 	wrapper_compute_JSON()		
-	wrapper_frame_precomputed = True
+	wrapper_send_JSON()
 
 def wrapper_keypress(key):
 	#print "got key: " + str(key)
