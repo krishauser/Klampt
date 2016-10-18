@@ -14,8 +14,11 @@ using namespace std;
 bool python_initialized = false;
 bool boilerplate_loaded = false;
 bool student_code_loaded = false;
+bool precomputed_response = false;
 string stdout_buffer;
 string stderr_buffer;
+string response_buffer;
+bool pause_io = false;
 
 /*
 // http://faq.cprogramming.com/cgi-bin/smartfaq.cgi?answer=1045689663&id=1043284385
@@ -31,21 +34,31 @@ std::string IntToString ( int number )
 }
 */
 
+///Clears the stdout and stderr buffers
+void ClearStreams()
+{
+  stdout_buffer.clear();
+  stderr_buffer.clear();
+  response_buffer.clear();
+}
 
 ///Flushes the stdout and stderr buffers to the client
 void FlushStreams()
 {
+   if(!response_buffer.empty()) {
+     websocket_send("S"+response_buffer);
+     response_buffer.clear();
+   }
    if(!stdout_buffer.empty()) {
-     printf("[python stdout] %s\n",stdout_buffer.c_str());
+     printf("[python stdout flush] %s\n",stdout_buffer.c_str());
      websocket_send("C"+stdout_buffer);
      stdout_buffer.clear();
    }
    if(!stderr_buffer.empty()) {
-     printf("[python stderr] %s\n",stderr_buffer.c_str());
+     printf("[python stderr flush] %s\n",stderr_buffer.c_str());
      websocket_send("E"+stderr_buffer);
      stderr_buffer.clear();
    }
-
 }
 
 ////////////////////////////////////////////////////////
@@ -59,14 +72,17 @@ static PyObject* emb_send(PyObject *self, PyObject *args)
 	
    if (!PyArg_UnpackTuple(args, "func", 1, 1, &a)) 
       return NULL;
-
-   FlushStreams();
 	        
    if(PyString_Check(a)) //verify data type 
    {
       char *data=PyString_AsString(a);
       //printf("from python got data: %s\n",data);
-      websocket_send("S"+string(data));
+      if(pause_io) {
+        response_buffer += data;
+      }
+      else {
+        websocket_send("S"+string(data));
+      }
    }
 
    Py_INCREF(Py_None);
@@ -94,11 +110,15 @@ PyObject* log_CaptureStdout(PyObject* self, PyObject* args)
    {
       char *data=PyString_AsString(a);
       stdout_buffer += data;
-      //printf("[python stdout] %s\n",data);
-      //websocket_send("C"+string(data));
+      if(!pause_io) {
+        if(stdout_buffer[stdout_buffer.length()-1] == '\n') {
+          printf("[python stdout] %s",stdout_buffer.c_str());
+          websocket_send("C"+stdout_buffer);
+          stdout_buffer.clear();
+        }
+      }
    }
 
-  
    Py_INCREF(Py_None);
    return Py_None;
 }
@@ -114,8 +134,13 @@ PyObject* log_CaptureStderr(PyObject* self, PyObject* args)
    {
       char *data=PyString_AsString(a);
       stderr_buffer += data;
-      //printf("[python stderr] %s\n",data);
-      //websocket_send("E"+string(data));
+      if(!pause_io) {
+        if(stderr_buffer[stderr_buffer.length()-1] == '\n') {
+          printf("[python stderr] %s",stderr_buffer.c_str());
+          websocket_send("E"+stderr_buffer);
+          stderr_buffer.clear();
+        }
+      }
    }
 
    Py_INCREF(Py_None);
@@ -243,12 +268,14 @@ void handleIncomingMessage(string message)
       message.erase(0, 1); //remove routing prefix
 
       if(routing=='K') //key pressed
-      {      
+      {
+        //TODO: if a pre-cached advance call has been made, then this keypress will register on the NEXT frame.
           std::string wrapper_keypress;
           wrapper_keypress+="wrapper_keypress(";
           wrapper_keypress+=message;
           wrapper_keypress+=")\n";
           int res = PyRun_SimpleString(wrapper_keypress.c_str());
+          FlushStreams();
       }
 
       if(routing=='A')
@@ -258,21 +285,62 @@ void handleIncomingMessage(string message)
            printf("  Code is not updated, returning.\n");
          }
          else {
+           if(precomputed_response) {
+             //output previous code
+             FlushStreams();
+             precomputed_response = false;
+             pause_io = false;
+           }
+           else {
+             precomputed_response = false;
+             pause_io = false;
+             int res = PyRun_SimpleString("wrapper_advance()\n");
+             if(res < 0 || PyErr_Occurred()) {
+                printf("  An exception occurred while running client code\n");
+                PyErr_Clear();
+                return;
+             }
+           }
+         }
+      }
+      if(routing=='R')
+      {
+         printf("  user would like to run continuously\n");
+         if(!boilerplate_loaded || !student_code_loaded) {
+           printf("  Code is not updated, returning.\n");
+         }
+         else {
+           if(!precomputed_response) {
+             pause_io = true;
+             int res = PyRun_SimpleString("wrapper_advance()\n");
+             if(res < 0 || PyErr_Occurred()) {
+                printf("  An exception occurred while running client code\n");
+                PyErr_Clear();
+                FlushStreams();
+                return;
+             }
+           }
+           //output previous code
+           FlushStreams();
+           pause_io = true;
+           precomputed_response = true;
            int res = PyRun_SimpleString("wrapper_advance()\n");
            if(res < 0 || PyErr_Occurred()) {
               printf("  An exception occurred while running client code\n");
               PyErr_Clear();
-              FlushStreams();
               return;
            }
          }
       }
       if(routing=='C')
       {  
+        pause_io = false;
+        precomputed_response = false;
+        ClearStreams();
+
         printf("  user would like to add some student code\n");
         if(!boilerplate_loaded) {
           printf("Boilerplate failed to load, not proceeding.\n");
-          FlushStreams();
           return;
         }
 
@@ -280,7 +348,6 @@ void handleIncomingMessage(string message)
         PyObject* main_module = PyImport_AddModule("__main__");
         if(main_module == NULL) {
           printf("Uh... couldn't add __main__ module?\n");
-          FlushStreams();
           return;
         }
         if(student_code_loaded) {
@@ -290,7 +357,6 @@ void handleIncomingMessage(string message)
         stub_module = PyImport_ImportModule("stub");
         if(stub_module == NULL) {
           printf("Uh... couldn't load stub.py?\n");
-          FlushStreams();
           return;
         }
         PyObject_SetAttrString(main_module, "stub", stub_module);
@@ -331,20 +397,17 @@ void handleIncomingMessage(string message)
           Py_XDECREF(stub_dict);
           PyErr_Print();
           PyErr_Clear();
-          FlushStreams();
           return;
         }
         if(PyErr_Occurred()) {
           printf("  An exception occurred while running client code\n");
           PyErr_Print();
           PyErr_Clear();
-          FlushStreams();
           return;
         }
         Py_XDECREF(res);
         Py_XDECREF(stub_dict);
         //PyRun_SimpleString(message.c_str());
-        FlushStreams();
 
         printf("Running boilerplate_start()...\n");
         int res2 = PyRun_SimpleString("wrapper_start()\n");
@@ -356,7 +419,6 @@ void handleIncomingMessage(string message)
           printf("  Error occurred while running boilerplate_start()\n");
           PyErr_Clear();
         }
-        FlushStreams();
       }
       if(routing=='B')
       {

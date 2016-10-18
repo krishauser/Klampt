@@ -133,8 +133,7 @@ function kclient_advance(callback)
 
 function _freeRunCallback() {
 	if(freeRun) { 
-		kclient_advance(_freeRunCallback);
-		freeRun=true;
+		sendMessage("R");
 	}
 }
 
@@ -146,9 +145,15 @@ function kclient_animate(animate)
 		freeRun=false;
 	}
 	else {
-		console.log("starting freeRun...");
-		kclient_advance(_freeRunCallback);
-		freeRun=true;
+      if(!isConnected()) {
+         console.log("not connected, can't start freeRun");
+      }
+      else {
+		  console.log("starting freeRun...");
+        refreshCallback = _freeRunCallback;
+        freeRun=true;
+        sendMessage("R");
+     }
 	}
 }
 //TODO: request interrupt of embedded python
