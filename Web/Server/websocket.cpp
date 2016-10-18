@@ -25,6 +25,13 @@
 #include <openssl/md5.h> /* md5 hash */
 #include <openssl/sha.h> /* sha1 hash */
 #include "websocket.h"
+#include <sys/stat.h>
+#include <sys/wait.h>
+#include <vector>
+
+
+#define SERVER_LOG(...) \
+    fprintf(stdout, __VA_ARGS__); 
 
 /*
  * Global state
@@ -34,7 +41,7 @@
 int ssl_initialized = 0;
 int pipe_error = 0;
 settings_t settings;
-
+std::vector<pid_t> child_pids;
 
 void traffic(char * token) {
     if ((settings.verbose) && (! settings.daemon)) {
@@ -822,6 +829,111 @@ void daemonize(int keepfd)
 */
 }
 
+void init_timeouts()
+{
+    mkdir("active_pids",S_IRWXU|S_IRWXG);
+    system("rm active_pids/*");
+}
+
+int modification_time(const char* fn)
+{
+    struct stat attrib;
+    int success = stat(fn,&attrib);
+    if(success != 0) return -1;
+
+    time_t curtime;
+    time(&curtime);
+    return difftime(curtime,attrib.st_ctime);
+}
+
+void handler_begin()
+{
+    SERVER_LOG("Beginning PID %d\n",settings.pid);
+    char buf[128];
+    sprintf(buf,"touch active_pids/%d",(int)settings.pid);
+    system(buf);
+}
+
+void handler_start_processing()
+{
+    char buf[128];
+    sprintf(buf,"touch active_pids/%d_proc",(int)settings.pid);
+    system(buf);
+}
+
+void handler_end_processing()
+{
+    char buf[128];
+    sprintf(buf,"rm active_pids/%d_proc",(int)settings.pid);
+    system(buf);
+}
+
+bool has_timeout(pid_t pid)
+{
+    char buf[128];
+    sprintf(buf,"active_pids/%d",(int)pid);
+    int alive_time = modification_time(buf);
+    //printf("%d has been alive for %d s\n",pid,alive_time);
+    if(alive_time > 60*60) { //60 minute server timeout
+        SERVER_LOG("Killing PID %d, alive for 60 minutes\n",(int)pid);
+        return true;
+    }
+    sprintf(buf,"active_pids/%d_proc",(int)pid);
+    int processing_time = modification_time(buf);
+    //printf("%d has been processing for %d s\n",pid,processing_time);
+    if(processing_time > 9) { //10 second process timeout
+        SERVER_LOG("Killing PID %d, in processing for >= 10 seconds\n",(int)pid);
+        return true;
+    }
+    return false;
+}
+
+void cleanup_hung_children()
+{
+    for(size_t i=0;i<child_pids.size();i++) {
+        int status;
+        pid_t result = waitpid(child_pids[i], &status, WNOHANG);
+        if (result == 0) {
+          // Child still alive
+        } else if (result == -1) {
+          // Error 
+        } else {
+          // Child exited
+            SERVER_LOG("Child %d killed cleanly\n",child_pids[i]);
+            child_pids.erase(child_pids.begin()+i);
+            i--;
+            continue;
+        }
+        if(has_timeout(child_pids[i])) {
+            kill(child_pids[i],9);
+            child_pids.erase(child_pids.begin()+i);
+            i--;
+        }
+    }
+}
+
+int accept_with_timeout(int s,int timeout_s,
+    sockaddr * cli_addr, int* clilen)
+{
+   int iResult;
+   struct timeval tv;
+   fd_set rfds;
+   FD_ZERO(&rfds);
+   FD_SET(s, &rfds);
+
+   tv.tv_sec = (long)timeout_s;
+   tv.tv_usec = 0;
+
+   iResult = select(s+1, &rfds, (fd_set *) 0, (fd_set *) 0, &tv);
+   if(iResult > 0)
+   {
+      return accept(s, cli_addr, clilen);
+   }
+   else
+   {
+      return 0;
+   }
+}
 
 void start_server() {
     int lsock, csock, pid, clilen, sopt = 1, i;
@@ -857,6 +969,8 @@ void start_server() {
         daemonize(lsock);
     }
 
+    //initialize timeout folder
+    init_timeouts();
 
     // Reep zombies
     signal(SIGCHLD, SIG_IGN);
@@ -864,15 +978,20 @@ void start_server() {
     printf("Waiting for connections on %s:%d\n",
             settings.listen_host, settings.listen_port);
 
+    int cleanup_interval = 5;
     while (1) {
-        clilen = sizeof(cli_addr);
+        cleanup_hung_children();
+
         pipe_error = 0;
         pid = 0;
-        csock = accept(lsock, 
-                       (struct sockaddr *) &cli_addr, 
-                       &clilen);
+        clilen = sizeof(cli_addr);
+        csock = accept_with_timeout(lsock, cleanup_interval, (struct sockaddr *) &cli_addr, &clilen);
         if (csock < 0) {
             error("ERROR on accept");
+            continue;
+        }
+        if(csock == 0) {
+            //timeout was reached
             continue;
         }
         handler_msg("got client connection from %s\n",
@@ -885,6 +1004,8 @@ void start_server() {
 
         if (pid == 0) {  // handler process
             ws_ctx = do_handshake(csock);
+            settings.pid = getpid();
+            ws_ctx->pid = getpid();
             if (settings.run_once) {
                 if (ws_ctx == NULL) {
                     // Not a real WebSocket connection
@@ -900,6 +1021,7 @@ void start_server() {
                 break;   // Child process exits
             }
 
+            handler_begin();
             global_ws_ctx=ws_ctx;
             settings.handler(ws_ctx);
 
@@ -908,7 +1030,7 @@ void start_server() {
             }
             break;   // Child process exits
         } else {         // parent process
-            settings.handler_id += 1;
+            child_pids.push_back(pid);
             //release the client socket, it's being handled by the handler process
             close(csock);
         }
@@ -921,6 +1043,7 @@ void start_server() {
             shutdown(csock, SHUT_RDWR);
             close(csock);
         }
+        SERVER_LOG("Closing handler pid %d",pid)
         handler_msg("handler exit\n");
     } else {
         handler_msg("websockify exit\n");

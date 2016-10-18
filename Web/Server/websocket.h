@@ -1,4 +1,5 @@
 #include <openssl/ssl.h>
+#include <string>
 
 #define BUFSIZE 65536
 #define DBUFSIZE (BUFSIZE * 3) / 4 - 20
@@ -40,6 +41,7 @@ typedef struct {
 
 typedef struct {
     int        sockfd;
+    pid_t      pid;
     SSL_CTX   *ssl_ctx;
     SSL       *ssl;
     int        hixie;
@@ -56,7 +58,7 @@ typedef struct {
     char listen_host[256];
     int listen_port;
     void (*handler)(ws_ctx_t*);
-    int handler_id;
+    pid_t pid;
     char *cert;
     char *key;
     int ssl_only;
@@ -75,7 +77,7 @@ ssize_t ws_send(ws_ctx_t *ctx, const void *buf, size_t len);
 
 #define gen_handler_msg(stream, ...) \
     if (! settings.daemon) { \
-        fprintf(stream, "  %d: ", settings.handler_id); \
+        fprintf(stream, " PID %d: ", settings.pid); \
         fprintf(stream, __VA_ARGS__); \
     }
 
@@ -85,6 +87,8 @@ ssize_t ws_send(ws_ctx_t *ctx, const void *buf, size_t len);
 void start_server();
 void traffic(char * token);
 
-#include<string>
 void websocket_send(std::string message);
-
+//for process control, marks the start of one message handling instance
+void handler_start_processing();
+//for process control, marks the end of one message handling instance
+void handler_end_processing();

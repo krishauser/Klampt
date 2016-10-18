@@ -191,6 +191,8 @@ int dave_decode_hybi()
       if(is_final_fragment)
       {
          DEBUG_PRINT("    final unpacked message is:\n=============================\n%s\n=============================\n",unpackedMessage.c_str());
+
+         handler_start_processing();
          handleIncomingMessage(unpackedMessage); //hand over to python wrapper
       }
       incomingMessage.erase (incomingMessage.begin(),incomingMessage.begin()+header_length+4+payload_size);
@@ -216,7 +218,7 @@ void do_process_incoming(ws_ctx_t *ws_ctx)
           handler_emsg("client closed connection (ws_recv return %d bytes)\n",bytes_read);
           break;
        }
-       printf("received %d bytes from client!\n",bytes_read);
+       //printf("received %d bytes from client!\n",bytes_read);
 
        for(unsigned int i=0;i<bytes_read;i++)
           incomingMessage.push_back(ws_ctx->tin_buf[i]);
@@ -233,7 +235,8 @@ void do_process_incoming(ws_ctx_t *ws_ctx)
        if (more_processing_needed < 0) {
           handler_emsg("decoding error\n");
           break;
-       }        
+       } 
+       handler_end_processing();
     }
 
     shutdown_python_interpreter();
