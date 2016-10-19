@@ -80,6 +80,7 @@ def refresh_viz():
             kviz.set_color(existing_ghosts[-1],[1,1,1,0.5])
         else:
             name = existing_path_lines[i]
+            kviz.set_visible(name,True)
             kviz.update_line(name,path[i][0],path[i][1],path_height,path[i+1][0],path[i+1][1],path_height)
             kviz.set_ghost_config(path[i],"ghost"+str(i))
     if stub.draw_roadmap:
@@ -108,7 +109,7 @@ def boilerplate_advance():
         t1 = time.time()
         V,E = planner.getRoadmap()
         roadmap = V,E
-        print len(V),"feasible milestones sampled,",len(E),"edges connected",t1-t1,"s"
+        print len(V),"feasible milestones sampled,",len(E),"edges connected",t1-t0,"s"
         path = planner.getPath()
         if path == None:
             path = []

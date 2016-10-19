@@ -80,7 +80,7 @@ def makePlanner(space, start, goal):
     #MotionPlan.setOptions(type="prm",knn=10,connectionThreshold=1.0,shortcut=True)
     #This sets the RRT* algorithm
     #MotionPlan.setOptions(type="rrt*",connectionThreshold=2.0,perturbationRadius=2.5)
-    #This sets a fast-marching method algorithm
+    #This sets a fast-marching method algorithm (Note: this does not work properly with rotations)
     #MotionPlan.setOptions(type="fmm*")
     #This sets a random-restart + shortcutting RRT
     #MotionPlan.setOptions(type="rrt",connectionThreshold=2.0,perturbationRadius=2.5,bidirectional=True,restart=True,shortcut=True,restartTermCond="{foundSolution:1,maxIters:1000}")

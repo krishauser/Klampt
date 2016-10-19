@@ -59,7 +59,7 @@ def makePlanner(space, start, goal):
     #a random point to its 10 nearest neighbors. If knn is set to 0,
     #the points are connected as long as they lie
     #within distance 0.1 of one another
-    MotionPlan.setOptions(type="prm",knn=10,connectionThreshold=0.01)
+    MotionPlan.setOptions(type="prm",knn=10,connectionThreshold=0.1)
     #This line sets a Rapidly-exploring Random Tree (RRT) planner that
     #repeatedly extends the tree toward a random point at maximum
     #distance 0.25.  It uses the bidirectional=True option, which grows
@@ -71,7 +71,7 @@ def makePlanner(space, start, goal):
     #This sets the PRM algorithm with shortcutting
     #MotionPlan.setOptions(type="prm",knn=10,connectionThreshold=0.1,shortcut=True)
     #This sets the RRT* algorithm
-    #MotionPlan.setOptions(type="rrt*")
+    #MotionPlan.setOptions(type="rrt*",connectionThreshold=0.1,perturbationRadius=0.25)
     #This sets a fast-marching method algorithm
     #MotionPlan.setOptions(type="fmm*")
     #This sets a random-restart + shortcutting RRT
