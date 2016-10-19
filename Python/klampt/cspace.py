@@ -81,7 +81,7 @@ class CSpace:
     def setBounds(self,bounds):
         """Convenience function: sets the sampling bound and the
         space properties in one line."""
-        self.bounds = bounds
+        self.bound = bounds
         self.properties["minimum"] = [b[0] for b in bounds]
         self.properties["maximum"] = [b[1] for b in bounds]
 
@@ -128,7 +128,7 @@ class CSpace:
             self.cspace.setInterpolate(getattr(self,'interpolate'))
         for (k,v) in self.properties.iteritems():
             if isinstance(v,(list,tuple)):
-                self.cspace.setPropety(k," ".join([str(item) for item in v]))
+                self.cspace.setProperty(k," ".join([str(item) for item in v]))
             else:
                 self.cspace.setProperty(k,str(v))
 
