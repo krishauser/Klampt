@@ -84,6 +84,10 @@ class CSpace:
         self.bound = bounds
         self.properties["minimum"] = [b[0] for b in bounds]
         self.properties["maximum"] = [b[1] for b in bounds]
+        volume = 1
+        for b in self.bound:
+            if b[0] != b[1]: volume *= b[1]-b[0]
+        self.properties['volume'] = volume
 
     def close(self):
         """This method must be called to free the memory associated with the
