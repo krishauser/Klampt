@@ -132,7 +132,7 @@ class CSpace:
             self.cspace.setInterpolate(getattr(self,'interpolate'))
         for (k,v) in self.properties.iteritems():
             if isinstance(v,(list,tuple)):
-                self.cspace.setPropety(k," ".join([str(item) for item in v]))
+                self.cspace.setProperty(k," ".join([str(item) for item in v]))
             else:
                 self.cspace.setProperty(k,str(v))
 
