@@ -304,7 +304,8 @@ class MotionPlan:
 
 
 
-if __name__=="__main__":
+
+def _selfTest():
     c = CSpace()
     c.bound = [(-2,2),(-2,2)]
     c.feasible = lambda(x): pow(x[0],2.0)+pow(x[1],2.0) > 1.0
@@ -322,3 +323,6 @@ if __name__=="__main__":
     print path
     p.close()
     c.close()
+
+if __name__=="__main__":
+    _selfTest()
