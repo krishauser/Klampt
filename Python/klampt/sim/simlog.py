@@ -193,7 +193,11 @@ class SimLogPlayback:
                     self.state_header = row
                     self.state_to_index = dict((v,i) for (i,v) in enumerate(self.state_header))
                 else:
-                    self.state_array.append([float(v) for v in row])
+                    try:
+                        self.state_array.append([float(v) for v in row])
+                    except ValueError:
+                        print "Error in CSV file",state_fn,"on line",rowno+1,"value is not a float"
+                        raise
                 rowno += 1
             f.close()
         if contact_fn != None:
@@ -206,7 +210,11 @@ class SimLogPlayback:
                     self.contact_header = row
                     self.contact_to_index = dict((v,i) for (i,v) in enumerate(self.contact_header))
                 else:
-                    self.contact_array.append([float(v) for v in row])
+                    try:
+                        self.contact_array.append([float(v) for v in row])
+                    except ValueError:
+                        print "Error in CSV file",contact_fn,"on line",rowno+1,"value is not a float"
+                        raise
                 rowno += 1
             f.close()
         #check that the simulation matches the log
