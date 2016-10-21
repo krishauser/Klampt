@@ -50,7 +50,7 @@ if %errorlevel% neq 0 exit /b %errorlevel%
 REM   debug
 mkdir Klampt-%klamptversion%.win32-deps-vs2015d
 cd Library
-for %I in (assimp--3.0.1270-sdk\lib\assimp_debug-dll_win32\* Assimp32d.dll  glpk_4_52.dll glpk_4_52.lib glui32d.lib "glui-2.36\src\msvc\Debug\_glui library.pdb" glut32.dll KrisLibraryd.lib ode_doubled.lib ode-0.11.1\lib\DebugDoubleLib\ode.pdb tinyxmld_STL.lib) do copy /Y %I ..\Klampt-%klamptversion%.win32-deps-vs2015d
+for %I in (assimp--3.0.1270-sdk\lib\assimp_debug-dll_win32\* Assimp32d.dll  glpk_4_52.dll glpk_4_52.lib glui32d.lib "glui-2.36\src\msvc\Debug\_glui library.pdb" glut32.dll KrisLibraryd.lib ode_doubled.lib ode-0.14\lib\DebugDoubleLib\ode.pdb tinyxmld_STL.lib) do copy /Y %I ..\Klampt-%klamptversion%.win32-deps-vs2015d
 if %errorlevel% neq 0 exit /b %errorlevel%
 cd ..\Klampt-%klamptversion%.win32-deps-vs2015d
 zip ..\Klampt-%klamptversion%.win32-deps-vs2015d.zip *
