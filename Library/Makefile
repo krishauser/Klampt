@@ -33,4 +33,4 @@ dep-glui:
 endif
 
 dep-ode:
-	bootstrap; X_EXTRA_LIBS=-lX11 ./configure $(ODECONFIG); make
+	cd ode-0.14; ./bootstrap; X_EXTRA_LIBS=-lX11 ./configure $(ODECONFIG); make
