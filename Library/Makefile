@@ -9,7 +9,7 @@ UNAME = $(shell uname)
 
 unpack-deps:
 	git clone https://github.com/krishauser/KrisLibrary
-	hg clone ssh://hg@bitbucket.org/odedevs/ode
+	hg clone https://bitbucket.org/odedevs/ode
 	mv ode ode-0.14
 	cd ode-0.14; hg checkout 0.14; cd ..
 	tar xvzf glui-2.36.tgz
