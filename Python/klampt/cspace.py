@@ -167,7 +167,9 @@ class CSpace:
         return all(a<=xi<=b for (xi,(a,b)) in zip(x,self.bound))
 
     def feasible(self,x):
-        """Overload this to define your new feasibility test"""
+        """Overload this to define your new feasibility test.   
+        By default the implementation simply tests the bounds constraint, or if self.feasibilityTests
+        is not empty, tests each function in self.feasibilityTests."""
         if self.feasibilityTests is None:
             return self.inBounds(x)
         else:
