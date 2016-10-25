@@ -178,7 +178,9 @@ class CSpace:
         return all(a<=xi<=b for (xi,(a,b)) in zip(x,self.bound))
 
     def feasible(self,x):
-        """Overload this to define your new feasibility test"""
+        """Overload this to define your new feasibility test.
+        By default the implementation simply tests the bounds constraint, or if self.feasibilityTests
+        is not empty, tests each function in self.feasibilityTests."""
         if self.feasibilityTests is None:
             return self.inBounds(x)
         else:
@@ -321,8 +323,7 @@ class MotionPlan:
         return self.planner.getRoadmap()
 
 
-
-if __name__=="__main__":
+def _selfTest():
     c = CSpace()
     c.bound = [(-2,2),(-2,2)]
     c.feasible = lambda(x): pow(x[0],2.0)+pow(x[1],2.0) > 1.0
@@ -340,3 +341,6 @@ if __name__=="__main__":
     print path
     p.close()
     c.close()
+
+if __name__=="__main__":
+    _selfTest()

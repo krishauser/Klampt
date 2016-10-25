@@ -702,7 +702,9 @@ ManualOverrideController::ManualOverrideController "";
 // File: structMass.xml
 %feature("docstring") Mass "
 
-Stores mass information for a rigid body or robot link.
+Stores mass information for a rigid body or robot link. Note: you
+should use the set/get functions rather than changing the members
+directly due to strangeness in SWIG's handling of vectors.
 
 C++ includes: robotmodel.h ";
 
@@ -717,6 +719,16 @@ C++ includes: robotmodel.h ";
 %feature("docstring")  Mass::setInertia "";
 
 %feature("docstring")  Mass::getInertia "";
+
+
+// File: classObjectPoser.xml
+%feature("docstring") ObjectPoser "";
+
+%feature("docstring")  ObjectPoser::ObjectPoser "";
+
+%feature("docstring")  ObjectPoser::set "";
+
+%feature("docstring")  ObjectPoser::get "";
 
 
 // File: classPlannerInterface.xml
@@ -878,6 +890,20 @@ Adds the given point cloud to this one. They must share the same
 properties or else an exception is raised. ";
 
 
+// File: classPointPoser.xml
+%feature("docstring") PointPoser "";
+
+%feature("docstring")  PointPoser::PointPoser "";
+
+%feature("docstring")  PointPoser::set "";
+
+%feature("docstring")  PointPoser::get "";
+
+%feature("docstring")  PointPoser::setAxes "
+
+Sets the reference axes (by default aligned to x,y,z) ";
+
+
 // File: classPyConstraintSet.xml
 %feature("docstring") PyConstraintSet "";
 
@@ -979,8 +1005,10 @@ A CSpace that calls python routines for its functionality ";
 
 A rigid movable object.
 
-State is retrieved/set using get/setTransform. Note: no velocities are
-stored.
+A rigid object has a name, geometry, appearance, mass, surface
+properties, and current transform / velocity.
+
+State is retrieved/set using get/setTransform, and get/setVelocity
 
 C++ includes: robotmodel.h ";
 
@@ -1004,9 +1032,21 @@ C++ includes: robotmodel.h ";
 
 %feature("docstring")  RigidObjectModel::setContactParameters "";
 
-%feature("docstring")  RigidObjectModel::getTransform "";
+%feature("docstring")  RigidObjectModel::getTransform "
 
-%feature("docstring")  RigidObjectModel::setTransform "";
+Retrieves the rotation / translation of the rigid object (R,t) ";
+
+%feature("docstring")  RigidObjectModel::setTransform "
+
+Sets the rotation / translation (R,t) of the rigid object. ";
+
+%feature("docstring")  RigidObjectModel::getVelocity "
+
+Retrieves the (angular velocity, velocity) of the rigid object. ";
+
+%feature("docstring")  RigidObjectModel::setVelocity "
+
+Sets the (angular velocity, velocity) of the rigid object. ";
 
 %feature("docstring")  RigidObjectModel::drawGL "
 
@@ -1022,17 +1062,37 @@ object's Appearance directly. ";
 
 A model of a dynamic and kinematic robot.
 
-It is important to understand that changing the configuration of the
-model doesn't actually send a command to the robot. In essence, this
-model maintains temporary storage for performing kinematics and
-dynamics computations.
+Stores both constant information, like the reference placement of the
+links, joint limits, velocity limits, etc, as well as a current
+configuration and current velocity which are state-dependent. Several
+functions depend on the robot's current configuration and/or velocity.
+To update that, use the setConfig() and setVelocity() functions.
+setConfig() also update's the robot's link transforms via forward
+kinematics. You may also use setDOFPosition and setDOFVelocity for
+individual changes, but this is more expensive because each call
+updates all of the affected the link transforms.
 
-The robot maintains configuration/velocity/acceleration/torque bounds
-which are not enforced by the model, but must rather be enforced by
-the planner / simulator.
+It is important to understand that changing the configuration of the
+model doesn't actually send a command to the physical / simulated
+robot. Moreover, the model does not automatically get updated when the
+physical / simulated robot moves. In essence, the model maintains
+temporary storage for performing kinematics, dynamics, and planning
+computations, as well as for visualization.
 
 The state of the robot is retrieved using getConfig/getVelocity calls,
-and is set using setConfig/setVelocity.
+and is set using setConfig/setVelocity. Because many routines change
+the robot's configuration, like IK and motion planning, a common
+design pattern is to save/restore the configuration as follows: q =
+robot.getConfig()
+
+do some stuff that may touch the robot's configuration...
+
+robot.setConfig(q)
+
+The model maintains configuration/velocity/acceleration/torque bounds.
+However, these are not enforced by the model, so you can happily set
+configurations outside must rather be enforced by the planner /
+simulator.
 
 C++ includes: robotmodel.h ";
 
@@ -1071,29 +1131,60 @@ Returns a reference to the indexed driver. ";
 
 Returns a reference to the named driver. ";
 
-%feature("docstring")  RobotModel::getConfig "";
+%feature("docstring")  RobotModel::getConfig "
 
-%feature("docstring")  RobotModel::getVelocity "";
+Returns the model's current configuration. ";
 
-%feature("docstring")  RobotModel::setConfig "";
+%feature("docstring")  RobotModel::getVelocity "
 
-%feature("docstring")  RobotModel::setVelocity "";
+Returns the model's current velocity. ";
 
-%feature("docstring")  RobotModel::getJointLimits "";
+%feature("docstring")  RobotModel::setConfig "
 
-%feature("docstring")  RobotModel::setJointLimits "";
+Sets the model's current configurtation and performs forward
+kinematics. q must have length numLinks() ";
 
-%feature("docstring")  RobotModel::getVelocityLimits "";
+%feature("docstring")  RobotModel::setVelocity "
 
-%feature("docstring")  RobotModel::setVelocityLimits "";
+Sets the model's current velocity. dq must have length numLinks(). ";
 
-%feature("docstring")  RobotModel::getAccelerationLimits "";
+%feature("docstring")  RobotModel::getJointLimits "
 
-%feature("docstring")  RobotModel::setAccelerationLimits "";
+Retrieves a pair (qmin,qmax) of min/max joint limit vectors. ";
 
-%feature("docstring")  RobotModel::getTorqueLimits "";
+%feature("docstring")  RobotModel::setJointLimits "
 
-%feature("docstring")  RobotModel::setTorqueLimits "";
+Sets the min/max joint limit vectors (must have length numLinks()) ";
+
+%feature("docstring")  RobotModel::getVelocityLimits "
+
+Retrieve the velocity limit vector vmax, the constraint is |dq[i]| <=
+vmax[i]. ";
+
+%feature("docstring")  RobotModel::setVelocityLimits "
+
+Sets the velocity limit vector vmax, the constraint is |dq[i]| <=
+vmax[i]. ";
+
+%feature("docstring")  RobotModel::getAccelerationLimits "
+
+Retrieve the acceleration limit vector amax, the constraint is
+|ddq[i]| <= amax[i]. ";
+
+%feature("docstring")  RobotModel::setAccelerationLimits "
+
+Sets the acceleration limit vector amax, the constraint is |ddq[i]| <=
+amax[i]. ";
+
+%feature("docstring")  RobotModel::getTorqueLimits "
+
+Retrieve the torque limit vector tmax, the constraint is |torque[i]|
+<= tmax[i]. ";
+
+%feature("docstring")  RobotModel::setTorqueLimits "
+
+Sets the torque limit vector tmax, the constraint is |torque[i]| <=
+tmax[i]. ";
 
 %feature("docstring")  RobotModel::setDOFPosition "
 
@@ -1203,6 +1294,9 @@ robot's appearances is to set the link Appearance's directly. ";
 
 A reference to a driver of a RobotModel.
 
+A driver corresponds to one of the robot's actuators and its
+transmission.
+
 C++ includes: robotmodel.h ";
 
 %feature("docstring")  RobotModelDriver::RobotModelDriver "";
@@ -1253,6 +1347,16 @@ Gets the current driver velocity value from the robot's velocity. ";
 %feature("docstring") RobotModelLink "
 
 A reference to a link of a RobotModel.
+
+The link stores many mostly-constant items (id, name, parent,
+geometry, appearance, mass, joint axes). The exception is the link's
+current transform, which is affected by the RobotModel's current
+configuration, i.e., the last RobotModel.setConfig(q) call. The
+various Jacobians of points on the link, accessed by getJacobianX, are
+configuration dependent.
+
+These are not created by hand, but instead accessed using
+RobotModel.link([index or name])
 
 C++ includes: robotmodel.h ";
 
@@ -1390,6 +1494,20 @@ drawn. ";
 Draws the link's geometry in the world frame. If keepAppearance=true,
 the current Appearance is honored. Otherwise, just the geometry is
 drawn. ";
+
+
+// File: classRobotPoser.xml
+%feature("docstring") RobotPoser "";
+
+%feature("docstring")  RobotPoser::RobotPoser "";
+
+%feature("docstring")  RobotPoser::setActiveDofs "";
+
+%feature("docstring")  RobotPoser::set "";
+
+%feature("docstring")  RobotPoser::get "";
+
+%feature("docstring")  RobotPoser::getConditioned "";
 
 
 // File: classSimBody.xml
@@ -1886,6 +2004,20 @@ properly reuse OpenGL display lists. A better approach to changing
 object's Appearance directly. ";
 
 
+// File: classTransformPoser.xml
+%feature("docstring") TransformPoser "";
+
+%feature("docstring")  TransformPoser::TransformPoser "";
+
+%feature("docstring")  TransformPoser::set "";
+
+%feature("docstring")  TransformPoser::get "";
+
+%feature("docstring")  TransformPoser::enableTranslation "";
+
+%feature("docstring")  TransformPoser::enableRotation "";
+
+
 // File: structTriangleMesh.xml
 %feature("docstring") TriangleMesh "
 
@@ -1920,10 +2052,64 @@ Translates all the vertices by v=v+t. ";
 Transforms all the vertices by the rigid transform v=R*v+t. ";
 
 
+// File: classViewport.xml
+%feature("docstring") Viewport "";
+
+%feature("docstring")  Viewport::fromJson "";
+
+%feature("docstring")  Viewport::toJson "";
+
+%feature("docstring")  Viewport::setModelviewMatrix "";
+
+%feature("docstring")  Viewport::setRigidTransform "";
+
+%feature("docstring")  Viewport::getRigidTransform "";
+
+
+// File: classWidget.xml
+%feature("docstring") Widget "";
+
+%feature("docstring")  Widget::Widget "";
+
+%feature("docstring")  Widget::~Widget "";
+
+%feature("docstring")  Widget::hover "";
+
+%feature("docstring")  Widget::beginDrag "";
+
+%feature("docstring")  Widget::drag "";
+
+%feature("docstring")  Widget::endDrag "";
+
+%feature("docstring")  Widget::keypress "";
+
+%feature("docstring")  Widget::drawGL "";
+
+%feature("docstring")  Widget::idle "";
+
+%feature("docstring")  Widget::wantsRedraw "";
+
+%feature("docstring")  Widget::hasHighlight "";
+
+%feature("docstring")  Widget::hasFocus "";
+
+
 // File: structWidgetData.xml
 %feature("docstring") WidgetData "
 
 Internally used. ";
+
+
+// File: classWidgetSet.xml
+%feature("docstring") WidgetSet "";
+
+%feature("docstring")  WidgetSet::WidgetSet "";
+
+%feature("docstring")  WidgetSet::add "";
+
+%feature("docstring")  WidgetSet::remove "";
+
+%feature("docstring")  WidgetSet::enable "";
 
 
 // File: structWorldData.xml
@@ -2371,10 +2557,6 @@ from the space of transforms that satisfies the objective. ";
 
 %feature("docstring")  EnablePathControl "";
 
-%feature("docstring")  resize "";
-
-%feature("docstring")  for "";
-
 %feature("docstring")  GetCameraViewport "";
 
 %feature("docstring")  setFrictionConeApproximationEdges "";
@@ -2538,4 +2720,7 @@ Same as findRoots, but with given bounds (xmin,xmax) ";
 %feature("docstring")  destroy "
 
 destroys internal data structures ";
+
+
+// File: widget_8h.xml
 

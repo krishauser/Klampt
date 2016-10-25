@@ -1381,7 +1381,11 @@ class PointPoser(Widget):
         return _robotsim.PointPoser_get(self)
 
     def setAxes(self, *args):
-        """setAxes(PointPoser self, double const [9] R)"""
+        """
+        setAxes(PointPoser self, double const [9] R)
+
+        Sets the reference axes (by default aligned to x,y,z) 
+        """
         return _robotsim.PointPoser_setAxes(self, *args)
 
     __swig_destroy__ = _robotsim.delete_PointPoser
@@ -1488,7 +1492,9 @@ RobotPoser_swigregister(RobotPoser)
 
 class Mass(_object):
     """
-    Stores mass information for a rigid body or robot link.
+    Stores mass information for a rigid body or robot link. Note: you
+    should use the set/get functions rather than changing the members
+    directly due to strangeness in SWIG's handling of vectors.
 
     C++ includes: robotmodel.h 
     """
@@ -1534,7 +1540,9 @@ class Mass(_object):
         """
         __init__(Mass self) -> Mass
 
-        Stores mass information for a rigid body or robot link.
+        Stores mass information for a rigid body or robot link. Note: you
+        should use the set/get functions rather than changing the members
+        directly due to strangeness in SWIG's handling of vectors.
 
         C++ includes: robotmodel.h 
         """
@@ -1590,6 +1598,16 @@ ContactParameters_swigregister(ContactParameters)
 class RobotModelLink(_object):
     """
     A reference to a link of a RobotModel.
+
+    The link stores many mostly-constant items (id, name, parent,
+    geometry, appearance, mass, joint axes). The exception is the link's
+    current transform, which is affected by the RobotModel's current
+    configuration, i.e., the last RobotModel.setConfig(q) call. The
+    various Jacobians of points on the link, accessed by getJacobianX, are
+    configuration dependent.
+
+    These are not created by hand, but instead accessed using
+    RobotModel.link([index or name])
 
     C++ includes: robotmodel.h 
     """
@@ -1872,6 +1890,9 @@ class RobotModelDriver(_object):
     """
     A reference to a driver of a RobotModel.
 
+    A driver corresponds to one of the robot's actuators and its
+    transmission.
+
     C++ includes: robotmodel.h 
     """
     __swig_setmethods__ = {}
@@ -1984,17 +2005,37 @@ class RobotModel(_object):
     """
     A model of a dynamic and kinematic robot.
 
-    It is important to understand that changing the configuration of the
-    model doesn't actually send a command to the robot. In essence, this
-    model maintains temporary storage for performing kinematics and
-    dynamics computations.
+    Stores both constant information, like the reference placement of the
+    links, joint limits, velocity limits, etc, as well as a current
+    configuration and current velocity which are state-dependent. Several
+    functions depend on the robot's current configuration and/or velocity.
+    To update that, use the setConfig() and setVelocity() functions.
+    setConfig() also update's the robot's link transforms via forward
+    kinematics. You may also use setDOFPosition and setDOFVelocity for
+    individual changes, but this is more expensive because each call
+    updates all of the affected the link transforms.
 
-    The robot maintains configuration/velocity/acceleration/torque bounds
-    which are not enforced by the model, but must rather be enforced by
-    the planner / simulator.
+    It is important to understand that changing the configuration of the
+    model doesn't actually send a command to the physical / simulated
+    robot. Moreover, the model does not automatically get updated when the
+    physical / simulated robot moves. In essence, the model maintains
+    temporary storage for performing kinematics, dynamics, and planning
+    computations, as well as for visualization.
 
     The state of the robot is retrieved using getConfig/getVelocity calls,
-    and is set using setConfig/setVelocity.
+    and is set using setConfig/setVelocity. Because many routines change
+    the robot's configuration, like IK and motion planning, a common
+    design pattern is to save/restore the configuration as follows: q =
+    robot.getConfig()
+
+    do some stuff that may touch the robot's configuration...
+
+    robot.setConfig(q)
+
+    The model maintains configuration/velocity/acceleration/torque bounds.
+    However, these are not enforced by the model, so you can happily set
+    configurations outside must rather be enforced by the planner /
+    simulator.
 
     C++ includes: robotmodel.h 
     """
@@ -2060,51 +2101,106 @@ class RobotModel(_object):
         return _robotsim.RobotModel_driver(self, *args)
 
     def getConfig(self):
-        """getConfig(RobotModel self)"""
+        """
+        getConfig(RobotModel self)
+
+        Returns the model's current configuration. 
+        """
         return _robotsim.RobotModel_getConfig(self)
 
     def getVelocity(self):
-        """getVelocity(RobotModel self)"""
+        """
+        getVelocity(RobotModel self)
+
+        Returns the model's current velocity. 
+        """
         return _robotsim.RobotModel_getVelocity(self)
 
     def setConfig(self, *args):
-        """setConfig(RobotModel self, doubleVector q)"""
+        """
+        setConfig(RobotModel self, doubleVector q)
+
+        Sets the model's current configurtation and performs forward
+        kinematics. q must have length numLinks() 
+        """
         return _robotsim.RobotModel_setConfig(self, *args)
 
     def setVelocity(self, *args):
-        """setVelocity(RobotModel self, doubleVector dq)"""
+        """
+        setVelocity(RobotModel self, doubleVector dq)
+
+        Sets the model's current velocity. dq must have length numLinks(). 
+        """
         return _robotsim.RobotModel_setVelocity(self, *args)
 
     def getJointLimits(self):
-        """getJointLimits(RobotModel self)"""
+        """
+        getJointLimits(RobotModel self)
+
+        Retrieves a pair (qmin,qmax) of min/max joint limit vectors. 
+        """
         return _robotsim.RobotModel_getJointLimits(self)
 
     def setJointLimits(self, *args):
-        """setJointLimits(RobotModel self, doubleVector qmin, doubleVector qmax)"""
+        """
+        setJointLimits(RobotModel self, doubleVector qmin, doubleVector qmax)
+
+        Sets the min/max joint limit vectors (must have length numLinks()) 
+        """
         return _robotsim.RobotModel_setJointLimits(self, *args)
 
     def getVelocityLimits(self):
-        """getVelocityLimits(RobotModel self)"""
+        """
+        getVelocityLimits(RobotModel self)
+
+        Retrieve the velocity limit vector vmax, the constraint is |dq[i]| <=
+        vmax[i]. 
+        """
         return _robotsim.RobotModel_getVelocityLimits(self)
 
     def setVelocityLimits(self, *args):
-        """setVelocityLimits(RobotModel self, doubleVector vmax)"""
+        """
+        setVelocityLimits(RobotModel self, doubleVector vmax)
+
+        Sets the velocity limit vector vmax, the constraint is |dq[i]| <=
+        vmax[i]. 
+        """
         return _robotsim.RobotModel_setVelocityLimits(self, *args)
 
     def getAccelerationLimits(self):
-        """getAccelerationLimits(RobotModel self)"""
+        """
+        getAccelerationLimits(RobotModel self)
+
+        Retrieve the acceleration limit vector amax, the constraint is
+        |ddq[i]| <= amax[i]. 
+        """
         return _robotsim.RobotModel_getAccelerationLimits(self)
 
     def setAccelerationLimits(self, *args):
-        """setAccelerationLimits(RobotModel self, doubleVector amax)"""
+        """
+        setAccelerationLimits(RobotModel self, doubleVector amax)
+
+        Sets the acceleration limit vector amax, the constraint is |ddq[i]| <=
+        amax[i]. 
+        """
         return _robotsim.RobotModel_setAccelerationLimits(self, *args)
 
     def getTorqueLimits(self):
-        """getTorqueLimits(RobotModel self)"""
+        """
+        getTorqueLimits(RobotModel self)
+
+        Retrieve the torque limit vector tmax, the constraint is |torque[i]|
+        <= tmax[i]. 
+        """
         return _robotsim.RobotModel_getTorqueLimits(self)
 
     def setTorqueLimits(self, *args):
-        """setTorqueLimits(RobotModel self, doubleVector tmax)"""
+        """
+        setTorqueLimits(RobotModel self, doubleVector tmax)
+
+        Sets the torque limit vector tmax, the constraint is |torque[i]| <=
+        tmax[i]. 
+        """
         return _robotsim.RobotModel_setTorqueLimits(self, *args)
 
     def setDOFPosition(self, *args):
@@ -2297,8 +2393,10 @@ class RigidObjectModel(_object):
     """
     A rigid movable object.
 
-    State is retrieved/set using get/setTransform. Note: no velocities are
-    stored.
+    A rigid object has a name, geometry, appearance, mass, surface
+    properties, and current transform / velocity.
+
+    State is retrieved/set using get/setTransform, and get/setVelocity
 
     C++ includes: robotmodel.h 
     """
@@ -2349,19 +2447,35 @@ class RigidObjectModel(_object):
         return _robotsim.RigidObjectModel_setContactParameters(self, *args)
 
     def getTransform(self):
-        """getTransform(RigidObjectModel self)"""
+        """
+        getTransform(RigidObjectModel self)
+
+        Retrieves the rotation / translation of the rigid object (R,t) 
+        """
         return _robotsim.RigidObjectModel_getTransform(self)
 
     def setTransform(self, *args):
-        """setTransform(RigidObjectModel self, double const [9] R, double const [3] t)"""
+        """
+        setTransform(RigidObjectModel self, double const [9] R, double const [3] t)
+
+        Sets the rotation / translation (R,t) of the rigid object. 
+        """
         return _robotsim.RigidObjectModel_setTransform(self, *args)
 
     def getVelocity(self):
-        """getVelocity(RigidObjectModel self)"""
+        """
+        getVelocity(RigidObjectModel self)
+
+        Retrieves the (angular velocity, velocity) of the rigid object. 
+        """
         return _robotsim.RigidObjectModel_getVelocity(self)
 
     def setVelocity(self, *args):
-        """setVelocity(RigidObjectModel self, double const [3] angularVelocity, double const [3] velocity)"""
+        """
+        setVelocity(RigidObjectModel self, double const [3] angularVelocity, double const [3] velocity)
+
+        Sets the (angular velocity, velocity) of the rigid object. 
+        """
         return _robotsim.RigidObjectModel_setVelocity(self, *args)
 
     def drawGL(self, keepAppearance=True):

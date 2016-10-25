@@ -20,7 +20,7 @@ class RobotCSpace(CSpace):
         """
         CSpace.__init__(self)
         self.robot = robot
-        self.bound = zip(*robot.getJointLimits())
+        self.setBounds(zip(*robot.getJointLimits()))
         self.collider = collider
         self.addFeasibilityTest((lambda x: self.inJointLimits(x)),"joint limits")
 
@@ -61,10 +61,6 @@ class RobotCSpace(CSpace):
             self.addFeasibilityTest((lambda x: not self.selfCollision()),"self collision",dependencies="setconfig")
 
         self.properties['geodesic'] = 1
-        volume = 1
-        for b in self.bound:
-            if b[0] != b[1]: volume *= b[1]-b[0]
-        self.properties['volume'] = volume
 
     def addConstraint(self,checker,name=None):
         self.addFeasiblilityTest(checker,name)

@@ -47522,7 +47522,11 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"new_PointPoser", _wrap_new_PointPoser, METH_VARARGS, (char *)"new_PointPoser() -> PointPoser"},
 	 { (char *)"PointPoser_set", _wrap_PointPoser_set, METH_VARARGS, (char *)"PointPoser_set(PointPoser self, double const [3] t)"},
 	 { (char *)"PointPoser_get", _wrap_PointPoser_get, METH_VARARGS, (char *)"PointPoser_get(PointPoser self)"},
-	 { (char *)"PointPoser_setAxes", _wrap_PointPoser_setAxes, METH_VARARGS, (char *)"PointPoser_setAxes(PointPoser self, double const [9] R)"},
+	 { (char *)"PointPoser_setAxes", _wrap_PointPoser_setAxes, METH_VARARGS, (char *)"\n"
+		"PointPoser_setAxes(PointPoser self, double const [9] R)\n"
+		"\n"
+		"Sets the reference axes (by default aligned to x,y,z) \n"
+		""},
 	 { (char *)"delete_PointPoser", _wrap_delete_PointPoser, METH_VARARGS, (char *)"delete_PointPoser(PointPoser self)"},
 	 { (char *)"PointPoser_swigregister", PointPoser_swigregister, METH_VARARGS, NULL},
 	 { (char *)"new_TransformPoser", _wrap_new_TransformPoser, METH_VARARGS, (char *)"new_TransformPoser() -> TransformPoser"},
@@ -47559,7 +47563,9 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"new_Mass", _wrap_new_Mass, METH_VARARGS, (char *)"\n"
 		"new_Mass() -> Mass\n"
 		"\n"
-		"Stores mass information for a rigid body or robot link.\n"
+		"Stores mass information for a rigid body or robot link. Note: you\n"
+		"should use the set/get functions rather than changing the members\n"
+		"directly due to strangeness in SWIG's handling of vectors.\n"
 		"\n"
 		"C++ includes: robotmodel.h \n"
 		""},
@@ -47843,18 +47849,73 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"Returns a reference to the named driver. \n"
 		""},
-	 { (char *)"RobotModel_getConfig", _wrap_RobotModel_getConfig, METH_VARARGS, (char *)"RobotModel_getConfig(RobotModel self)"},
-	 { (char *)"RobotModel_getVelocity", _wrap_RobotModel_getVelocity, METH_VARARGS, (char *)"RobotModel_getVelocity(RobotModel self)"},
-	 { (char *)"RobotModel_setConfig", _wrap_RobotModel_setConfig, METH_VARARGS, (char *)"RobotModel_setConfig(RobotModel self, doubleVector q)"},
-	 { (char *)"RobotModel_setVelocity", _wrap_RobotModel_setVelocity, METH_VARARGS, (char *)"RobotModel_setVelocity(RobotModel self, doubleVector dq)"},
-	 { (char *)"RobotModel_getJointLimits", _wrap_RobotModel_getJointLimits, METH_VARARGS, (char *)"RobotModel_getJointLimits(RobotModel self)"},
-	 { (char *)"RobotModel_setJointLimits", _wrap_RobotModel_setJointLimits, METH_VARARGS, (char *)"RobotModel_setJointLimits(RobotModel self, doubleVector qmin, doubleVector qmax)"},
-	 { (char *)"RobotModel_getVelocityLimits", _wrap_RobotModel_getVelocityLimits, METH_VARARGS, (char *)"RobotModel_getVelocityLimits(RobotModel self)"},
-	 { (char *)"RobotModel_setVelocityLimits", _wrap_RobotModel_setVelocityLimits, METH_VARARGS, (char *)"RobotModel_setVelocityLimits(RobotModel self, doubleVector vmax)"},
-	 { (char *)"RobotModel_getAccelerationLimits", _wrap_RobotModel_getAccelerationLimits, METH_VARARGS, (char *)"RobotModel_getAccelerationLimits(RobotModel self)"},
-	 { (char *)"RobotModel_setAccelerationLimits", _wrap_RobotModel_setAccelerationLimits, METH_VARARGS, (char *)"RobotModel_setAccelerationLimits(RobotModel self, doubleVector amax)"},
-	 { (char *)"RobotModel_getTorqueLimits", _wrap_RobotModel_getTorqueLimits, METH_VARARGS, (char *)"RobotModel_getTorqueLimits(RobotModel self)"},
-	 { (char *)"RobotModel_setTorqueLimits", _wrap_RobotModel_setTorqueLimits, METH_VARARGS, (char *)"RobotModel_setTorqueLimits(RobotModel self, doubleVector tmax)"},
+	 { (char *)"RobotModel_getConfig", _wrap_RobotModel_getConfig, METH_VARARGS, (char *)"\n"
+		"RobotModel_getConfig(RobotModel self)\n"
+		"\n"
+		"Returns the model's current configuration. \n"
+		""},
+	 { (char *)"RobotModel_getVelocity", _wrap_RobotModel_getVelocity, METH_VARARGS, (char *)"\n"
+		"RobotModel_getVelocity(RobotModel self)\n"
+		"\n"
+		"Returns the model's current velocity. \n"
+		""},
+	 { (char *)"RobotModel_setConfig", _wrap_RobotModel_setConfig, METH_VARARGS, (char *)"\n"
+		"RobotModel_setConfig(RobotModel self, doubleVector q)\n"
+		"\n"
+		"Sets the model's current configurtation and performs forward\n"
+		"kinematics. q must have length numLinks() \n"
+		""},
+	 { (char *)"RobotModel_setVelocity", _wrap_RobotModel_setVelocity, METH_VARARGS, (char *)"\n"
+		"RobotModel_setVelocity(RobotModel self, doubleVector dq)\n"
+		"\n"
+		"Sets the model's current velocity. dq must have length numLinks(). \n"
+		""},
+	 { (char *)"RobotModel_getJointLimits", _wrap_RobotModel_getJointLimits, METH_VARARGS, (char *)"\n"
+		"RobotModel_getJointLimits(RobotModel self)\n"
+		"\n"
+		"Retrieves a pair (qmin,qmax) of min/max joint limit vectors. \n"
+		""},
+	 { (char *)"RobotModel_setJointLimits", _wrap_RobotModel_setJointLimits, METH_VARARGS, (char *)"\n"
+		"RobotModel_setJointLimits(RobotModel self, doubleVector qmin, doubleVector qmax)\n"
+		"\n"
+		"Sets the min/max joint limit vectors (must have length numLinks()) \n"
+		""},
+	 { (char *)"RobotModel_getVelocityLimits", _wrap_RobotModel_getVelocityLimits, METH_VARARGS, (char *)"\n"
+		"RobotModel_getVelocityLimits(RobotModel self)\n"
+		"\n"
+		"Retrieve the velocity limit vector vmax, the constraint is |dq[i]| <=\n"
+		"vmax[i]. \n"
+		""},
+	 { (char *)"RobotModel_setVelocityLimits", _wrap_RobotModel_setVelocityLimits, METH_VARARGS, (char *)"\n"
+		"RobotModel_setVelocityLimits(RobotModel self, doubleVector vmax)\n"
+		"\n"
+		"Sets the velocity limit vector vmax, the constraint is |dq[i]| <=\n"
+		"vmax[i]. \n"
+		""},
+	 { (char *)"RobotModel_getAccelerationLimits", _wrap_RobotModel_getAccelerationLimits, METH_VARARGS, (char *)"\n"
+		"RobotModel_getAccelerationLimits(RobotModel self)\n"
+		"\n"
+		"Retrieve the acceleration limit vector amax, the constraint is\n"
+		"|ddq[i]| <= amax[i]. \n"
+		""},
+	 { (char *)"RobotModel_setAccelerationLimits", _wrap_RobotModel_setAccelerationLimits, METH_VARARGS, (char *)"\n"
+		"RobotModel_setAccelerationLimits(RobotModel self, doubleVector amax)\n"
+		"\n"
+		"Sets the acceleration limit vector amax, the constraint is |ddq[i]| <=\n"
+		"amax[i]. \n"
+		""},
+	 { (char *)"RobotModel_getTorqueLimits", _wrap_RobotModel_getTorqueLimits, METH_VARARGS, (char *)"\n"
+		"RobotModel_getTorqueLimits(RobotModel self)\n"
+		"\n"
+		"Retrieve the torque limit vector tmax, the constraint is |torque[i]|\n"
+		"<= tmax[i]. \n"
+		""},
+	 { (char *)"RobotModel_setTorqueLimits", _wrap_RobotModel_setTorqueLimits, METH_VARARGS, (char *)"\n"
+		"RobotModel_setTorqueLimits(RobotModel self, doubleVector tmax)\n"
+		"\n"
+		"Sets the torque limit vector tmax, the constraint is |torque[i]| <=\n"
+		"tmax[i]. \n"
+		""},
 	 { (char *)"RobotModel_setDOFPosition", _wrap_RobotModel_setDOFPosition, METH_VARARGS, (char *)"\n"
 		"setDOFPosition(int i, double qi)\n"
 		"RobotModel_setDOFPosition(RobotModel self, char const * name, double qi)\n"
@@ -47988,10 +48049,26 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"RigidObjectModel_setMass", _wrap_RigidObjectModel_setMass, METH_VARARGS, (char *)"RigidObjectModel_setMass(RigidObjectModel self, Mass mass)"},
 	 { (char *)"RigidObjectModel_getContactParameters", _wrap_RigidObjectModel_getContactParameters, METH_VARARGS, (char *)"RigidObjectModel_getContactParameters(RigidObjectModel self) -> ContactParameters"},
 	 { (char *)"RigidObjectModel_setContactParameters", _wrap_RigidObjectModel_setContactParameters, METH_VARARGS, (char *)"RigidObjectModel_setContactParameters(RigidObjectModel self, ContactParameters params)"},
-	 { (char *)"RigidObjectModel_getTransform", _wrap_RigidObjectModel_getTransform, METH_VARARGS, (char *)"RigidObjectModel_getTransform(RigidObjectModel self)"},
-	 { (char *)"RigidObjectModel_setTransform", _wrap_RigidObjectModel_setTransform, METH_VARARGS, (char *)"RigidObjectModel_setTransform(RigidObjectModel self, double const [9] R, double const [3] t)"},
-	 { (char *)"RigidObjectModel_getVelocity", _wrap_RigidObjectModel_getVelocity, METH_VARARGS, (char *)"RigidObjectModel_getVelocity(RigidObjectModel self)"},
-	 { (char *)"RigidObjectModel_setVelocity", _wrap_RigidObjectModel_setVelocity, METH_VARARGS, (char *)"RigidObjectModel_setVelocity(RigidObjectModel self, double const [3] angularVelocity, double const [3] velocity)"},
+	 { (char *)"RigidObjectModel_getTransform", _wrap_RigidObjectModel_getTransform, METH_VARARGS, (char *)"\n"
+		"RigidObjectModel_getTransform(RigidObjectModel self)\n"
+		"\n"
+		"Retrieves the rotation / translation of the rigid object (R,t) \n"
+		""},
+	 { (char *)"RigidObjectModel_setTransform", _wrap_RigidObjectModel_setTransform, METH_VARARGS, (char *)"\n"
+		"RigidObjectModel_setTransform(RigidObjectModel self, double const [9] R, double const [3] t)\n"
+		"\n"
+		"Sets the rotation / translation (R,t) of the rigid object. \n"
+		""},
+	 { (char *)"RigidObjectModel_getVelocity", _wrap_RigidObjectModel_getVelocity, METH_VARARGS, (char *)"\n"
+		"RigidObjectModel_getVelocity(RigidObjectModel self)\n"
+		"\n"
+		"Retrieves the (angular velocity, velocity) of the rigid object. \n"
+		""},
+	 { (char *)"RigidObjectModel_setVelocity", _wrap_RigidObjectModel_setVelocity, METH_VARARGS, (char *)"\n"
+		"RigidObjectModel_setVelocity(RigidObjectModel self, double const [3] angularVelocity, double const [3] velocity)\n"
+		"\n"
+		"Sets the (angular velocity, velocity) of the rigid object. \n"
+		""},
 	 { (char *)"RigidObjectModel_drawGL", _wrap_RigidObjectModel_drawGL, METH_VARARGS, (char *)"\n"
 		"drawGL(bool keepAppearance=True)\n"
 		"RigidObjectModel_drawGL(RigidObjectModel self)\n"
