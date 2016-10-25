@@ -21,9 +21,12 @@ existing_path_lines = []
 existing_ghosts = []
 existing_roadmap_lines = set()
 path_height = 0.02
+accumulated_time = 0
     
 def boilerplate_start():
     global world,space,start,target,planner,optimizing,path,existing_path_lines,existing_ghosts,roadmap,existing_roadmap_lines
+    global accumulated_time
+    accumulated_time = 0
 
     #global options that don't get forgotten from instance to instance
     MotionPlan.setOptions(restart=False,shortcut=False)
@@ -97,7 +100,7 @@ def refresh_viz():
                 kviz.set_visible(name,True)
 
 def boilerplate_advance():
-    global path,optimizing,planner,roadmap
+    global path,optimizing,planner,roadmap,accumulated_time
     if optimizing or not path:
         t0 = time.time()
         iters = 0
@@ -107,9 +110,10 @@ def boilerplate_advance():
             if iters >= stub.max_plan_iters:
                 break
         t1 = time.time()
+        accumulated_time += t1-t0
         V,E = planner.getRoadmap()
         roadmap = V,E
-        print len(V),"feasible milestones sampled,",len(E),"edges connected",t1-t0,"s"
+        print len(V),"feasible milestones sampled,",len(E),"edges connected",t1-t0,"s","total time",accumulated_time
         path = planner.getPath()
         if path == None:
             path = []
