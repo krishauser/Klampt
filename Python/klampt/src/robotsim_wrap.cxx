@@ -45440,7 +45440,11 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"new_PointPoser", _wrap_new_PointPoser, METH_VARARGS, (char *)"new_PointPoser() -> PointPoser"},
 	 { (char *)"PointPoser_set", _wrap_PointPoser_set, METH_VARARGS, (char *)"PointPoser_set(PointPoser self, double const [3] t)"},
 	 { (char *)"PointPoser_get", _wrap_PointPoser_get, METH_VARARGS, (char *)"PointPoser_get(PointPoser self)"},
-	 { (char *)"PointPoser_setAxes", _wrap_PointPoser_setAxes, METH_VARARGS, (char *)"PointPoser_setAxes(PointPoser self, double const [9] R)"},
+	 { (char *)"PointPoser_setAxes", _wrap_PointPoser_setAxes, METH_VARARGS, (char *)"\n"
+		"PointPoser_setAxes(PointPoser self, double const [9] R)\n"
+		"\n"
+		"Sets the reference axes (by default aligned to x,y,z) \n"
+		""},
 	 { (char *)"delete_PointPoser", _wrap_delete_PointPoser, METH_VARARGS, (char *)"delete_PointPoser(PointPoser self)"},
 	 { (char *)"PointPoser_swigregister", PointPoser_swigregister, METH_VARARGS, NULL},
 	 { (char *)"new_TransformPoser", _wrap_new_TransformPoser, METH_VARARGS, (char *)"new_TransformPoser() -> TransformPoser"},
@@ -45507,7 +45511,11 @@ static PyMethodDef SwigMethods[] = {
 		"Returns the ID of the robot link in its world (Note: not the same as\n"
 		"getIndex()) \n"
 		""},
-	 { (char *)"RobotModelLink_getName", _wrap_RobotModelLink_getName, METH_VARARGS, (char *)"RobotModelLink_getName(RobotModelLink self) -> char const *"},
+	 { (char *)"RobotModelLink_getName", _wrap_RobotModelLink_getName, METH_VARARGS, (char *)"\n"
+		"RobotModelLink_getName(RobotModelLink self) -> char const *\n"
+		"\n"
+		"Returns the name of the robot link. \n"
+		""},
 	 { (char *)"RobotModelLink_robot", _wrap_RobotModelLink_robot, METH_VARARGS, (char *)"\n"
 		"RobotModelLink_robot(RobotModelLink self) -> RobotModel\n"
 		"\n"
@@ -45528,12 +45536,17 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"Returns the index of the link's parent (on its robot). \n"
 		""},
-	 { (char *)"RobotModelLink_parent", _wrap_RobotModelLink_parent, METH_VARARGS, (char *)"RobotModelLink_parent(RobotModelLink self) -> RobotModelLink"},
+	 { (char *)"RobotModelLink_parent", _wrap_RobotModelLink_parent, METH_VARARGS, (char *)"\n"
+		"RobotModelLink_parent(RobotModelLink self) -> RobotModelLink\n"
+		"\n"
+		"Returns a reference to the link's parent, or a NULL link if it has no\n"
+		"parent. \n"
+		""},
 	 { (char *)"RobotModelLink_setParent", _wrap_RobotModelLink_setParent, METH_VARARGS, (char *)"\n"
 		"setParent(int p)\n"
 		"RobotModelLink_setParent(RobotModelLink self, RobotModelLink l)\n"
 		"\n"
-		"Sets the index of the link's parent (on its robot). \n"
+		"Sets the link's parent (must be on the same robot). \n"
 		""},
 	 { (char *)"RobotModelLink_geometry", _wrap_RobotModelLink_geometry, METH_VARARGS, (char *)"\n"
 		"RobotModelLink_geometry(RobotModelLink self) -> Geometry3D\n"
@@ -45882,7 +45895,10 @@ static PyMethodDef SwigMethods[] = {
 		"RobotModel_drawGL(RobotModel self)\n"
 		"\n"
 		"Draws the robot geometry. If keepAppearance=true, the current\n"
-		"appearance is honored. Otherwise, only the raw geometry is drawn. \n"
+		"appearance is honored. Otherwise, only the raw geometry is drawn.\n"
+		"PERFORMANCE WARNING: if keepAppearance is false, then this does not\n"
+		"properly reuse OpenGL display lists. A better approach to changing the\n"
+		"robot's appearances is to set the link Appearance's directly. \n"
 		""},
 	 { (char *)"RobotModel_world_set", _wrap_RobotModel_world_set, METH_VARARGS, (char *)"RobotModel_world_set(RobotModel self, int world)"},
 	 { (char *)"RobotModel_world_get", _wrap_RobotModel_world_get, METH_VARARGS, (char *)"RobotModel_world_get(RobotModel self) -> int"},
@@ -45906,6 +45922,12 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"RigidObjectModel_drawGL", _wrap_RigidObjectModel_drawGL, METH_VARARGS, (char *)"\n"
 		"drawGL(bool keepAppearance=True)\n"
 		"RigidObjectModel_drawGL(RigidObjectModel self)\n"
+		"\n"
+		"Draws the object's geometry. If keepAppearance=true, the current\n"
+		"appearance is honored. Otherwise, only the raw geometry is drawn.\n"
+		"PERFORMANCE WARNING: if keepAppearance is false, then this does not\n"
+		"properly reuse OpenGL display lists. A better approach to changing\n"
+		"object's Appearance directly. \n"
 		""},
 	 { (char *)"RigidObjectModel_world_set", _wrap_RigidObjectModel_world_set, METH_VARARGS, (char *)"RigidObjectModel_world_set(RigidObjectModel self, int world)"},
 	 { (char *)"RigidObjectModel_world_get", _wrap_RigidObjectModel_world_get, METH_VARARGS, (char *)"RigidObjectModel_world_get(RigidObjectModel self) -> int"},
@@ -45924,6 +45946,12 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"TerrainModel_drawGL", _wrap_TerrainModel_drawGL, METH_VARARGS, (char *)"\n"
 		"drawGL(bool keepAppearance=True)\n"
 		"TerrainModel_drawGL(TerrainModel self)\n"
+		"\n"
+		"Draws the object's geometry. If keepAppearance=true, the current\n"
+		"appearance is honored. Otherwise, only the raw geometry is drawn.\n"
+		"PERFORMANCE WARNING: if keepAppearance is false, then this does not\n"
+		"properly reuse OpenGL display lists. A better approach to changing\n"
+		"object's Appearance directly. \n"
 		""},
 	 { (char *)"TerrainModel_world_set", _wrap_TerrainModel_world_set, METH_VARARGS, (char *)"TerrainModel_world_set(TerrainModel self, int world)"},
 	 { (char *)"TerrainModel_world_get", _wrap_TerrainModel_world_get, METH_VARARGS, (char *)"TerrainModel_world_get(TerrainModel self) -> int"},
@@ -46047,7 +46075,7 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"WorldModel_drawGL", _wrap_WorldModel_drawGL, METH_VARARGS, (char *)"\n"
 		"WorldModel_drawGL(WorldModel self)\n"
 		"\n"
-		"Draws the entire world. \n"
+		"Draws the entire world using OpenGL. \n"
 		""},
 	 { (char *)"WorldModel_getSceneJSON", _wrap_WorldModel_getSceneJSON, METH_VARARGS, (char *)"WorldModel_getSceneJSON(WorldModel self) -> std::string"},
 	 { (char *)"WorldModel_getTransformsJSON", _wrap_WorldModel_getTransformsJSON, METH_VARARGS, (char *)"WorldModel_getTransformsJSON(WorldModel self) -> std::string"},
@@ -46360,7 +46388,11 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"SimRobotSensor_swigregister", SimRobotSensor_swigregister, METH_VARARGS, NULL},
 	 { (char *)"new_SimRobotController", _wrap_new_SimRobotController, METH_VARARGS, (char *)"new_SimRobotController() -> SimRobotController"},
 	 { (char *)"delete_SimRobotController", _wrap_delete_SimRobotController, METH_VARARGS, (char *)"delete_SimRobotController(SimRobotController self)"},
-	 { (char *)"SimRobotController_model", _wrap_SimRobotController_model, METH_VARARGS, (char *)"SimRobotController_model(SimRobotController self) -> RobotModel"},
+	 { (char *)"SimRobotController_model", _wrap_SimRobotController_model, METH_VARARGS, (char *)"\n"
+		"SimRobotController_model(SimRobotController self) -> RobotModel\n"
+		"\n"
+		"Retrieves the robot model associated with this controller. \n"
+		""},
 	 { (char *)"SimRobotController_setRate", _wrap_SimRobotController_setRate, METH_VARARGS, (char *)"\n"
 		"SimRobotController_setRate(SimRobotController self, double dt)\n"
 		"\n"
@@ -46534,20 +46566,20 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"SimBody_applyWrench", _wrap_SimBody_applyWrench, METH_VARARGS, (char *)"\n"
 		"SimBody_applyWrench(SimBody self, double const [3] f, double const [3] t)\n"
 		"\n"
-		"Applies a force and torque about the COM at the current simulation\n"
-		"time step. \n"
+		"Applies a force and torque about the COM over the duration of the next\n"
+		"Simulator.simulate(t) call. \n"
 		""},
 	 { (char *)"SimBody_applyForceAtPoint", _wrap_SimBody_applyForceAtPoint, METH_VARARGS, (char *)"\n"
 		"SimBody_applyForceAtPoint(SimBody self, double const [3] f, double const [3] pworld)\n"
 		"\n"
-		"Applies a force at a given point (in world coordinates) at the current\n"
-		"simulation time step. \n"
+		"Applies a force at a given point (in world coordinates) over the\n"
+		"duration of the next Simulator.simulate(t) call. \n"
 		""},
 	 { (char *)"SimBody_applyForceAtLocalPoint", _wrap_SimBody_applyForceAtLocalPoint, METH_VARARGS, (char *)"\n"
 		"SimBody_applyForceAtLocalPoint(SimBody self, double const [3] f, double const [3] plocal)\n"
 		"\n"
-		"Applies a force at a given point (in local coordinates) at the current\n"
-		"simulation time step. \n"
+		"Applies a force at a given point (in local coordinates) over the\n"
+		"duration of the next Simulator.simulate(t) call. \n"
 		""},
 	 { (char *)"SimBody_setTransform", _wrap_SimBody_setTransform, METH_VARARGS, (char *)"\n"
 		"SimBody_setTransform(SimBody self, double const [9] R, double const [3] t)\n"
@@ -46684,7 +46716,10 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"Call this to enable contact feedback between the two objects\n"
 		"(arguments are indexes returned by object.getID()). Contact feedback\n"
-		"has a small overhead so you may want to do this selectively. \n"
+		"has a small overhead so you may want to do this selectively. This must\n"
+		"be called before using inContact, getContacts, getContactForces,\n"
+		"contactForce, contactTorque, hadContact, hadSeparation,\n"
+		"hadPenetration, and meanContactForce. \n"
 		""},
 	 { (char *)"Simulator_enableContactFeedbackAll", _wrap_Simulator_enableContactFeedbackAll, METH_VARARGS, (char *)"\n"
 		"Simulator_enableContactFeedbackAll(Simulator self)\n"
@@ -46697,13 +46732,15 @@ static PyMethodDef SwigMethods[] = {
 		"Simulator_inContact(Simulator self, int aid, int bid) -> bool\n"
 		"\n"
 		"Returns true if the objects (indexes returned by object.getID()) are\n"
-		"in contact on the current time step. \n"
+		"in contact on the current time step. You can set bid=-1 to tell if\n"
+		"object a is in contact with any object. \n"
 		""},
 	 { (char *)"Simulator_getContacts", _wrap_Simulator_getContacts, METH_VARARGS, (char *)"\n"
 		"Simulator_getContacts(Simulator self, int aid, int bid)\n"
 		"\n"
 		"Returns the list of contacts (x,n,kFriction) at the last time step.\n"
-		"Normals point into object a. \n"
+		"Normals point into object a. The contact point (x,n,kFriction) is\n"
+		"represented as a 7-element vector. \n"
 		""},
 	 { (char *)"Simulator_getContactForces", _wrap_Simulator_getContactForces, METH_VARARGS, (char *)"\n"
 		"Simulator_getContactForces(Simulator self, int aid, int bid)\n"
@@ -46714,27 +46751,40 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"Simulator_contactForce", _wrap_Simulator_contactForce, METH_VARARGS, (char *)"\n"
 		"Simulator_contactForce(Simulator self, int aid, int bid)\n"
 		"\n"
-		"Returns the contact force on object a at the last time step. \n"
+		"Returns the contact force on object a at the last time step. You can\n"
+		"set bid to -1 to get the overall contact force on object a. \n"
 		""},
 	 { (char *)"Simulator_contactTorque", _wrap_Simulator_contactTorque, METH_VARARGS, (char *)"\n"
 		"Simulator_contactTorque(Simulator self, int aid, int bid)\n"
 		"\n"
 		"Returns the contact force on object a (about a's origin) at the last\n"
-		"time step. \n"
+		"time step. You can set bid to -1 to get the overall contact force on\n"
+		"object a. \n"
 		""},
 	 { (char *)"Simulator_hadContact", _wrap_Simulator_hadContact, METH_VARARGS, (char *)"\n"
 		"Simulator_hadContact(Simulator self, int aid, int bid) -> bool\n"
 		"\n"
 		"Returns true if the objects had contact over the last simulate() call.\n"
-		"\n"
+		"You can set bid to -1 to determine if object a had contact with any\n"
+		"other object. \n"
 		""},
 	 { (char *)"Simulator_hadSeparation", _wrap_Simulator_hadSeparation, METH_VARARGS, (char *)"\n"
 		"Simulator_hadSeparation(Simulator self, int aid, int bid) -> bool\n"
 		"\n"
 		"Returns true if the objects had ever separated during the last\n"
-		"simulate() call. \n"
+		"simulate() call. You can set bid to -1 to determine if object a had no\n"
+		"contact with any other object. \n"
 		""},
-	 { (char *)"Simulator_hadPenetration", _wrap_Simulator_hadPenetration, METH_VARARGS, (char *)"Simulator_hadPenetration(Simulator self, int aid, int bid) -> bool"},
+	 { (char *)"Simulator_hadPenetration", _wrap_Simulator_hadPenetration, METH_VARARGS, (char *)"\n"
+		"Simulator_hadPenetration(Simulator self, int aid, int bid) -> bool\n"
+		"\n"
+		"Returns true if the objects interpenetrated during the last simulate()\n"
+		"call. If so, the simulation may lead to very inaccurate results or\n"
+		"artifacts. You can set bid to -1 to determine if object a penetrated\n"
+		"any object, or you can set aid=bid=-1 to determine whether any object\n"
+		"is penetrating any other (indicating that the simulation will not be\n"
+		"functioning properly in general). \n"
+		""},
 	 { (char *)"Simulator_meanContactForce", _wrap_Simulator_meanContactForce, METH_VARARGS, (char *)"\n"
 		"Simulator_meanContactForce(Simulator self, int aid, int bid)\n"
 		"\n"

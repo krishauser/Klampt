@@ -32,8 +32,9 @@ example, for convex constraints you can set it to the lambda function
 that returns true regardless of its arguments).
 
 Supported properties include \"euclidean\" (boolean), \"metric\"
-(string), \"geodesic\" (boolean). These may be used by planners to
-make planning faster or more accurate. For a more complete list see
+(string), \"geodesic\" (boolean), \"minimum\" (vector), and
+\"maximum\" (vector). These may be used by planners to make planning
+faster or more accurate. For a complete list see
 KrisLibrary/planning/CSpace.h.
 
 C++ includes: motionplanning.h ";
@@ -219,6 +220,8 @@ it is zero. (Note that this is NOT the same thing as simulation body
 collision padding!)
 
 C++ includes: geometry.h ";
+
+%feature("docstring")  Geometry3D::Geometry3D "";
 
 %feature("docstring")  Geometry3D::Geometry3D "";
 
@@ -575,6 +578,16 @@ C++ includes: robotmodel.h ";
 %feature("docstring")  Mass::getInertia "";
 
 
+// File: classObjectPoser.xml
+%feature("docstring") ObjectPoser "";
+
+%feature("docstring")  ObjectPoser::ObjectPoser "";
+
+%feature("docstring")  ObjectPoser::set "";
+
+%feature("docstring")  ObjectPoser::get "";
+
+
 // File: classPlannerInterface.xml
 %feature("docstring") PlannerInterface "
 
@@ -732,6 +745,20 @@ Adds the given point cloud to this one. They must share the same
 properties or else an exception is raised. ";
 
 
+// File: classPointPoser.xml
+%feature("docstring") PointPoser "";
+
+%feature("docstring")  PointPoser::PointPoser "";
+
+%feature("docstring")  PointPoser::set "";
+
+%feature("docstring")  PointPoser::get "";
+
+%feature("docstring")  PointPoser::setAxes "
+
+Sets the reference axes (by default aligned to x,y,z) ";
+
+
 // File: classPyCSpace.xml
 %feature("docstring") PyCSpace "
 
@@ -807,7 +834,7 @@ A CSpace that calls python routines for its functionality ";
 
 A rigid movable object.
 
-State is retrieved/set using get/setTransform. No velocities are
+State is retrieved/set using get/setTransform. Note: no velocities are
 stored.
 
 C++ includes: robotmodel.h ";
@@ -834,7 +861,13 @@ C++ includes: robotmodel.h ";
 
 %feature("docstring")  RigidObjectModel::setTransform "";
 
-%feature("docstring")  RigidObjectModel::drawGL "";
+%feature("docstring")  RigidObjectModel::drawGL "
+
+Draws the object's geometry. If keepAppearance=true, the current
+appearance is honored. Otherwise, only the raw geometry is drawn.
+PERFORMANCE WARNING: if keepAppearance is false, then this does not
+properly reuse OpenGL display lists. A better approach to changing
+object's Appearance directly. ";
 
 
 // File: classRobotModel.xml
@@ -1023,7 +1056,10 @@ testing) ";
 %feature("docstring")  RobotModel::drawGL "
 
 Draws the robot geometry. If keepAppearance=true, the current
-appearance is honored. Otherwise, only the raw geometry is drawn. ";
+appearance is honored. Otherwise, only the raw geometry is drawn.
+PERFORMANCE WARNING: if keepAppearance is false, then this does not
+properly reuse OpenGL display lists. A better approach to changing the
+robot's appearances is to set the link Appearance's directly. ";
 
 
 // File: classRobotModelDriver.xml
@@ -1095,7 +1131,9 @@ C++ includes: robotmodel.h ";
 Returns the ID of the robot link in its world (Note: not the same as
 getIndex()) ";
 
-%feature("docstring")  RobotModelLink::getName "";
+%feature("docstring")  RobotModelLink::getName "
+
+Returns the name of the robot link. ";
 
 %feature("docstring")  RobotModelLink::robot "
 
@@ -1113,9 +1151,18 @@ Returns the index of the link (on its robot). ";
 
 Returns the index of the link's parent (on its robot). ";
 
+%feature("docstring")  RobotModelLink::parent "
+
+Returns a reference to the link's parent, or a NULL link if it has no
+parent. ";
+
 %feature("docstring")  RobotModelLink::setParent "
 
 Sets the index of the link's parent (on its robot). ";
+
+%feature("docstring")  RobotModelLink::setParent "
+
+Sets the link's parent (must be on the same robot). ";
 
 %feature("docstring")  RobotModelLink::geometry "
 
@@ -1213,6 +1260,18 @@ the current Appearance is honored. Otherwise, just the geometry is
 drawn. ";
 
 
+// File: classRobotPoser.xml
+%feature("docstring") RobotPoser "";
+
+%feature("docstring")  RobotPoser::RobotPoser "";
+
+%feature("docstring")  RobotPoser::set "";
+
+%feature("docstring")  RobotPoser::get "";
+
+%feature("docstring")  RobotPoser::getConditioned "";
+
+
 // File: classSimBody.xml
 %feature("docstring") SimBody "
 
@@ -1246,18 +1305,18 @@ i.e., it will be pure kinematic simulation. ";
 
 %feature("docstring")  SimBody::applyWrench "
 
-Applies a force and torque about the COM at the current simulation
-time step. ";
+Applies a force and torque about the COM over the duration of the next
+Simulator.simulate(t) call. ";
 
 %feature("docstring")  SimBody::applyForceAtPoint "
 
-Applies a force at a given point (in world coordinates) at the current
-simulation time step. ";
+Applies a force at a given point (in world coordinates) over the
+duration of the next Simulator.simulate(t) call. ";
 
 %feature("docstring")  SimBody::applyForceAtLocalPoint "
 
-Applies a force at a given point (in local coordinates) at the current
-simulation time step. ";
+Applies a force at a given point (in local coordinates) over the
+duration of the next Simulator.simulate(t) call. ";
 
 %feature("docstring")  SimBody::setTransform "
 
@@ -1322,6 +1381,10 @@ C++ includes: robotsim.h ";
 %feature("docstring")  SimRobotController::SimRobotController "";
 
 %feature("docstring")  SimRobotController::~SimRobotController "";
+
+%feature("docstring")  SimRobotController::model "
+
+Retrieves the robot model associated with this controller. ";
 
 %feature("docstring")  SimRobotController::setRate "
 
@@ -1553,7 +1616,10 @@ simulator. ";
 
 Call this to enable contact feedback between the two objects
 (arguments are indexes returned by object.getID()). Contact feedback
-has a small overhead so you may want to do this selectively. ";
+has a small overhead so you may want to do this selectively. This must
+be called before using inContact, getContacts, getContactForces,
+contactForce, contactTorque, hadContact, hadSeparation,
+hadPenetration, and meanContactForce. ";
 
 %feature("docstring")  Simulator::enableContactFeedbackAll "
 
@@ -1564,12 +1630,14 @@ selectively. ";
 %feature("docstring")  Simulator::inContact "
 
 Returns true if the objects (indexes returned by object.getID()) are
-in contact on the current time step. ";
+in contact on the current time step. You can set bid=-1 to tell if
+object a is in contact with any object. ";
 
 %feature("docstring")  Simulator::getContacts "
 
 Returns the list of contacts (x,n,kFriction) at the last time step.
-Normals point into object a. ";
+Normals point into object a. The contact point (x,n,kFriction) is
+represented as a 7-element vector. ";
 
 %feature("docstring")  Simulator::getContactForces "
 
@@ -1578,22 +1646,35 @@ Returns the list of contact forces on object a at the last time step.
 
 %feature("docstring")  Simulator::contactForce "
 
-Returns the contact force on object a at the last time step. ";
+Returns the contact force on object a at the last time step. You can
+set bid to -1 to get the overall contact force on object a. ";
 
 %feature("docstring")  Simulator::contactTorque "
 
 Returns the contact force on object a (about a's origin) at the last
-time step. ";
+time step. You can set bid to -1 to get the overall contact force on
+object a. ";
 
 %feature("docstring")  Simulator::hadContact "
 
 Returns true if the objects had contact over the last simulate() call.
-";
+You can set bid to -1 to determine if object a had contact with any
+other object. ";
 
 %feature("docstring")  Simulator::hadSeparation "
 
 Returns true if the objects had ever separated during the last
-simulate() call. ";
+simulate() call. You can set bid to -1 to determine if object a had no
+contact with any other object. ";
+
+%feature("docstring")  Simulator::hadPenetration "
+
+Returns true if the objects interpenetrated during the last simulate()
+call. If so, the simulation may lead to very inaccurate results or
+artifacts. You can set bid to -1 to determine if object a penetrated
+any object, or you can set aid=bid=-1 to determine whether any object
+is penetrating any other (indicating that the simulation will not be
+functioning properly in general). ";
 
 %feature("docstring")  Simulator::meanContactForce "
 
@@ -1673,7 +1754,27 @@ C++ includes: robotmodel.h ";
 
 %feature("docstring")  TerrainModel::setFriction "";
 
-%feature("docstring")  TerrainModel::drawGL "";
+%feature("docstring")  TerrainModel::drawGL "
+
+Draws the object's geometry. If keepAppearance=true, the current
+appearance is honored. Otherwise, only the raw geometry is drawn.
+PERFORMANCE WARNING: if keepAppearance is false, then this does not
+properly reuse OpenGL display lists. A better approach to changing
+object's Appearance directly. ";
+
+
+// File: classTransformPoser.xml
+%feature("docstring") TransformPoser "";
+
+%feature("docstring")  TransformPoser::TransformPoser "";
+
+%feature("docstring")  TransformPoser::set "";
+
+%feature("docstring")  TransformPoser::get "";
+
+%feature("docstring")  TransformPoser::enableTranslation "";
+
+%feature("docstring")  TransformPoser::enableRotation "";
 
 
 // File: structTriangleMesh.xml
@@ -1710,10 +1811,64 @@ Translates all the vertices by v=v+t. ";
 Transforms all the vertices by the rigid transform v=R*v+t. ";
 
 
+// File: classViewport.xml
+%feature("docstring") Viewport "";
+
+%feature("docstring")  Viewport::fromJson "";
+
+%feature("docstring")  Viewport::toJson "";
+
+%feature("docstring")  Viewport::setModelviewMatrix "";
+
+%feature("docstring")  Viewport::setRigidTransform "";
+
+%feature("docstring")  Viewport::getRigidTransform "";
+
+
+// File: classWidget.xml
+%feature("docstring") Widget "";
+
+%feature("docstring")  Widget::Widget "";
+
+%feature("docstring")  Widget::~Widget "";
+
+%feature("docstring")  Widget::hover "";
+
+%feature("docstring")  Widget::beginDrag "";
+
+%feature("docstring")  Widget::drag "";
+
+%feature("docstring")  Widget::endDrag "";
+
+%feature("docstring")  Widget::keypress "";
+
+%feature("docstring")  Widget::drawGL "";
+
+%feature("docstring")  Widget::idle "";
+
+%feature("docstring")  Widget::wantsRedraw "";
+
+%feature("docstring")  Widget::hasHighlight "";
+
+%feature("docstring")  Widget::hasFocus "";
+
+
 // File: structWidgetData.xml
 %feature("docstring") WidgetData "
 
 Internally used. ";
+
+
+// File: classWidgetSet.xml
+%feature("docstring") WidgetSet "";
+
+%feature("docstring")  WidgetSet::WidgetSet "";
+
+%feature("docstring")  WidgetSet::add "";
+
+%feature("docstring")  WidgetSet::remove "";
+
+%feature("docstring")  WidgetSet::enable "";
 
 
 // File: structWorldData.xml
@@ -1879,7 +2034,11 @@ Retrieves an appearance for a given element ID. ";
 
 %feature("docstring")  WorldModel::drawGL "
 
-Draws the entire world. ";
+Draws the entire world using OpenGL. ";
+
+%feature("docstring")  WorldModel::getSceneJSON "";
+
+%feature("docstring")  WorldModel::getTransformsJSON "";
 
 %feature("docstring")  WorldModel::enableGeometryLoading "
 
@@ -2157,8 +2316,6 @@ from the space of transforms that satisfies the objective. ";
 
 %feature("docstring")  GetMotionQueue "";
 
-%feature("docstring")  MakeSensors "";
-
 %feature("docstring")  GetMesh "";
 
 %feature("docstring")  GetMesh "";
@@ -2277,4 +2434,7 @@ Same as findRoots, but with given bounds (xmin,xmax) ";
 %feature("docstring")  destroy "
 
 destroys internal data structures ";
+
+
+// File: widget_8h.xml
 
