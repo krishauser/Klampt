@@ -32,6 +32,9 @@ def save_off(points,triangles,fn):
 
 if __name__ == "__main__":
     if len(sys.argv) != 3:
+        print "Converts Klampt's simple .tri triangle mesh file to the more standard"
+        print "Object File Format (OFF)."
+        print
         print "Usage: python tri2off.py in.tri out.off"
         exit()
     

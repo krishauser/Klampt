@@ -16,7 +16,10 @@ pauseTime = 0.25
 #skipcount = 100
 skipcount = 0
 
-
+if len(sys.argv) == 1:
+    print "multipath_to_path.py: Converts a multipath path file to a piecewise linear"
+    print "path file.  Edit the settings at the top of this script to change the timing"
+    exit(0)
 
 #begin code
 
