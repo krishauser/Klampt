@@ -6,7 +6,7 @@ dt = 0.01
 #for I terms
 pid_integrators = [0,0,0,0]
 
-#higher level controller status
+#higher level controller status... you don't need to use these if you wish
 status = "pen up"
 current_stroke = 0
 current_stroke_progress = 0
@@ -74,3 +74,15 @@ def curves():
     K = [[(0.2,0.05),(0.2,-0.05)],[(0.25,0.05),(0.2,0.0),(0.25,-0.05)]]
     H = [[(0.28,0.05),(0.28,-0.05)],[(0.33,0.05),(0.33,-0.05)],[(0.28,0),(0.33,0)]]
     return K+H
+
+#####################################################################
+# Place your written answers here
+#
+#
+#
+#
+#
+#
+#
+#
+#

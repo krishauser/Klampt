@@ -79,8 +79,11 @@ def boilerplate_advance():
 	tmax = world.robot(0).getTorqueLimits()
 	for i in xrange(len(torque)):
 		if abs(torque[i]) > tmax[i]:
-			print "Exceeding torque limit joint %d, |%f| > %f"%(i,torque[i],tmax[i])
+			print "Exceeding torque limit on joint %d, |%f| > %f"%(i,torque[i],tmax[i])
 			torque[i] = torque[i]/abs(torque[i])*tmax[i]
+	for i,dq in enumerate(world.robot(0).getVelocity()):
+		if abs(dq) > 2:
+			print "Exceeding velocity limit on joint %d, |%f| > 2"%(i,dq)
 	sim.controller(0).setTorque(torque)
 	sim.simulate(dt)
 	sim.updateWorld()
