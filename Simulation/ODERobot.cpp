@@ -369,14 +369,19 @@ void ODERobot::Create(int robotIndex,dWorldID worldID,bool useBoundaryLayer)
 	  dJointSetHingeAxis(jointID[link],axis.x,axis.y,axis.z);
 	  if(robot.joints[i].type != RobotJoint::Spin) {
 	    if(USE_JOINT_STOPS) {
-	      //stops are not working correctly if they are out of the range [-pi,pi]
-	      if(robot.qMin(link) < -Pi)
-		printf("ODERobot: Warning, turning off low stop because of ODE range mismatch\n");
-	      else
-		dJointSetHingeParam(jointID[link],dParamLoStop,robot.qMin(link));
-	      if(robot.qMax(link) > Pi)
-		printf("ODERobot: Warning, turning off high stop because of ODE range mismatch\n");
-	      else dJointSetHingeParam(jointID[link],dParamHiStop,robot.qMax(link));
+        //printf("Joint %d (link %s) ODE joint stops %g %g\n",i,robot.LinkName(link).c_str(),robot.qMin(link),robot.qMax(link));
+	      //stops are not working correctly if they are out of the range (-pi,pi) -- ODE flips out
+	      if(robot.qMin(link) <= -Pi || robot.qMax(link) >= Pi) 
+		printf("ODERobot: Warning, turning off joint stops on joint %d (link %s) because of ODE range mismatch\n",i,robot.LinkName(link).c_str());
+	      else {
+          if(robot.qMin(link) <= -Pi+0.1 || robot.qMax(link) >= Pi-0.1) {
+            printf("ODERobot: Warning, robot joint limits on joint %d (link %s) are close to [-pi,pi].\n",i,robot.LinkName(link).c_str());
+            printf("   Due to ODE joint stop handling quirks this may cause the robot to flip out\n");
+            printf("   Turn off USE_JOINT_STOPS in Klampt/Simulation/Settings.h if this becomes an issue\n");
+          }
+          dJointSetHingeParam(jointID[link],dParamLoStop,robot.qMin(link));
+          dJointSetHingeParam(jointID[link],dParamHiStop,robot.qMax(link));
+        }
 	    }
 	    dJointSetHingeParam(jointID[link],dParamBounce,0);
 	  }
