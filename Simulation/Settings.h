@@ -8,7 +8,7 @@ const static double gJointLimitWarningThreshold = Inf;
 //const static double gJointLimitWarningThreshold = 0;
 
 //turn this to 0 to allow joints to go through their stops
-#define USE_JOINT_STOPS 0
+#define USE_JOINT_STOPS 1
 
 //Change the default padding settings.
 //More settings can be found in the ODESimulatorSettings constructor in
