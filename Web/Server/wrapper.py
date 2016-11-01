@@ -79,7 +79,7 @@ def wrapper_keypress(key):
 	try:
 		boilerplate_keypress(key)
 	except Exception as e:
-		print "Exception in init code"
+		print "Exception in keypress code"
 		raise
 
 
