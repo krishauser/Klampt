@@ -1573,7 +1573,7 @@ if _PyQtAvailable:
                     if w.custom_ui == None:
                         w.guidata = _MyWindow(w)
                     else:
-                        w.guidata = w.custom_ui(w)
+                        w.guidata = w.custom_ui(w.window)
                     w.window.show()
                     w.window.idlesleep(0)
                 if w.mode == 'shown' and not w.guidata.isVisible():
