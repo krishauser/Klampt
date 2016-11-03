@@ -11,9 +11,9 @@ Tparent	1 0 0	0 1 0	0 0 1	0 0 0.06 \
 1 0 0	0 9.65894e-14 -1	0 1 9.65894e-14	0 -0.15 0 \
 1 0 0	0 9.65894e-14 -1	0 1 9.65894e-14	0 -0.07 0 
 
-qmin	-1.5708 -1.5708 -1.5708 -0.04 
+qmin	-1.5708 -2.1708 -1.5708 -0.04 
 
-qmax	1.5708 1.5708 1.5708 0.04 
+qmax	1.5708 2.1708 1.5708 0.04 
 
 geometry	"link1.tri" "link2.tri" "link3.tri" "link4.tri" 
 
@@ -51,4 +51,4 @@ servoI	0 0 0 0
 servoD	20 10 5 5
 
 dryFriction	0 0 0 0 
-viscousFriction	1 0.5 0.3 0.1
+viscousFriction	1 1 0.5 0.5
