@@ -23,7 +23,7 @@ bool ROSInitialized();
 ///Updates subscribed topics.  Returns true if any topic was updated.
 ///Note: if only "tf" is updated, this will still return false...
 bool ROSSubscribeUpdate();
-///Deletes topics.  To remove the subscribed TF topics, call
+///Deletes a topics.  [TODO] To remove the subscribed TF topics, call ...
 bool ROSDetach(const char* topic);
 ///Returns the number of subscribed topics
 int ROSNumSubscribedTopics();
@@ -96,8 +96,8 @@ bool ROSPublishTransform(const Math3D::RigidTransform& T,const char* frame="klam
 
 ///Subscribes to world updates from the transform server.  Note: the world
 ///object must not be destroyed while ROSSubscribeUpdate is being called.
-///If you want to detach it from  future updates, call RosDetach("tf");
-///Note: does NOT set robot configurations.
+///If you want to detach it from future updates, call RosDetach("tf");
+///Note: does NOT set robot configurations.  
 bool ROSSubscribeTransforms(RobotWorld& world,const char* frameprefix="klampt");
 ///Subscribes to robot updates from the transform server.  Note: the robot
 ///object must not be destroyed while ROSSubscribeUpdate is being called.
