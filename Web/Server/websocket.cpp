@@ -29,6 +29,10 @@
 #include <sys/wait.h>
 #include <vector>
 
+//in seconds
+#define HANDLER_LIFETIME 60*60
+//#define HANDLER_LIFETIME 15
+#define PROCESSING_TIMEOUT 10
 
 #define SERVER_LOG(...) \
     fprintf(stdout, __VA_ARGS__); 
@@ -874,15 +878,15 @@ bool has_timeout(pid_t pid)
     sprintf(buf,"active_pids/%d",(int)pid);
     int alive_time = modification_time(buf);
     //printf("%d has been alive for %d s\n",pid,alive_time);
-    if(alive_time > 60*60) { //60 minute server timeout
-        SERVER_LOG("Killing PID %d, alive for 60 minutes\n",(int)pid);
+    if(alive_time > HANDLER_LIFETIME) { //60 minute server timeout
+        SERVER_LOG("Killing PID %d, alive for %d minutes\n",(int)pid,HANDLER_LIFETIME/60);
         return true;
     }
     sprintf(buf,"active_pids/%d_proc",(int)pid);
     int processing_time = modification_time(buf);
     //printf("%d has been processing for %d s\n",pid,processing_time);
-    if(processing_time > 9) { //10 second process timeout
-        SERVER_LOG("Killing PID %d, in processing for >= 10 seconds\n",(int)pid);
+    if(processing_time >= PROCESSING_TIMEOUT) { //10 second process timeout
+        SERVER_LOG("Killing PID %d, in processing for >= % dseconds\n",(int)pid,PROCESSING_TIMEOUT);
         return true;
     }
     return false;
