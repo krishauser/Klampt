@@ -495,11 +495,13 @@ void WorldSimulation::UpdateModel()
       world->robots[i]->UpdateConfig(q);
       world->robots[i]->UpdateGeometry();
       odesim.robot(i)->SetConfig(q);
+      odesim.robot(i)->SetVelocities(q);
     }
   }
   else {
     for(size_t i=0;i<world->robots.size();i++) {
       odesim.robot(i)->GetConfig(world->robots[i]->q);
+      odesim.robot(i)->GetVelocities(world->robots[i]->dq);
       world->robots[i]->UpdateFrames();
     }
     for(size_t i=0;i<world->rigidObjects.size();i++) {
