@@ -14,7 +14,6 @@
 
       <script src="stats.js/build/stats.min.js"></script>
 
-      <script src="DaveWebsocket.js"></script> 
       <script src="KlamptClient.js"></script> 
           
       <!--
@@ -72,36 +71,36 @@
               localStorage.setItem('KlamptStartingCode_'+$('#boilerselctor').val(), editor.getValue());           
             }
 
-            if(!kclient_isConnected()) {
+            if(!KLAMPT.isConnected()) {
                var URL=$('#serverURL').val();
-               kclient_connect(URL,$('#boilerselctor').val(),function() { kclient_setCode(editor.getValue()); newBoilerplate = false;},null);
+               KLAMPT.connect(URL,$('#boilerselctor').val(),function() { KLAMPT.setCode(editor.getValue()); newBoilerplate = false;},null);
             }
             else if(newBoilerplate) {
                //connected, but need new boilerplate.  Hence we need to disconnect and then reconnect. 
-               kclient_disconnect(doCodeSubmit);
+               KLAMPT.disconnect(doCodeSubmit);
                newBoilerplate = false;
             }
             else {
                //connected, same boilerplate, just changing code.
-               kclient_setCode(editor.getValue());
+               KLAMPT.setCode(editor.getValue());
             }
          }
 
          function requestAdvance()
          {
-            if(!kclient_isConnected() || newBoilerplate)
+            if(!KLAMPT.isConnected() || newBoilerplate)
             {
                doCodeSubmit();
             }
-            kclient_advance();
+            KLAMPT.advance();
          }
          function requestFreeRun()
          {
-            if(!kclient_isConnected() || newBoilerplate)
+            if(!KLAMPT.isConnected() || newBoilerplate)
             {
                doCodeSubmit();
             }
-            kclient_animate(true);
+            KLAMPT.animate(true);
          }
          
          //the magic of AJAX
@@ -129,7 +128,7 @@
          function serverChanged()
          {
             console.log("Server changed.");
-            kclient_disconnect();
+            KLAMPT.disconnect();
          }
 
          function doRevertChanges()
@@ -139,7 +138,7 @@
               var file_to_load="Scenarios/code_"+boilerid+".py";
               loadFileToEditor(file_to_load);
               
-              kclient_animate(false);
+              KLAMPT.animate(false);
             }
          }
    
@@ -163,7 +162,7 @@
             else
                loadFileToEditor(file_to_load);
             newBoilerplate = true;
-            kclient_animate(false);
+            KLAMPT.animate(false);
          }   
          
          
@@ -178,9 +177,9 @@
             $('#myLayout').w2layout({
                name: 'layout',
                panels: [
-                  { type: 'top',  size: "5%", resizable: true, style: pstyle, content: '<button onclick="doCodeSubmit()">Reset</button><button onclick="requestAdvance()">Advance Frame</button><button onclick="requestFreeRun()">Run</button><button onclick="kclient_animate(false)">Stop</button> <div style=" width:20px;display:inline-block;" />Klampt Server URL:<input type="text" id="serverURL" value="ws://localhost:1234" size="50"><button onclick="doConnect()">Connect</button><div style=" width:20px;display:inline-block;" /><select id="boilerselctor" onchange="boilerPlateChanged()"></select> <button onclick="doRevertChanges()">Revert to Skeleton Code</button>'},
+                  { type: 'top',  size: "5%", resizable: true, style: pstyle, content: '<button onclick="doCodeSubmit()">Reset</button><button onclick="requestAdvance()">Advance Frame</button><button onclick="requestFreeRun()">Run</button><button onclick="KLAMPT.animate(false)">Stop</button> <div style=" width:20px;display:inline-block;" />Klampt Server URL:<input type="text" id="serverURL" value="ws://localhost:1234" size="50"><button onclick="doConnect()">Connect</button><div style=" width:20px;display:inline-block;" /><select id="boilerselctor" onchange="boilerPlateChanged()"></select> <button onclick="doRevertChanges()">Revert to Skeleton Code</button>'},
                   { type: 'main', style: pstyle, content: '<div id="canvas" style="width:100%; height:100%; margin:0; padding:0"></div>' },
-                  { type: 'preview', size: "15%", resizable: true, style: pstyle, content: '<textarea readonly id="myTextarea" style="background-color: black;color:white;width:100%;height:100%">> </textarea></div></div>' },
+                  { type: 'preview', size: "15%", resizable: true, style: pstyle, content: '<textarea readonly id="myTextarea" style="background-color: black;color:white;width:100%;height:100%">> </textarea>' },
                   { type: 'right', size: '50%', resizable: true, style: pstyle, content: 
                     '<div id="editor" style="width:100%; height:100%; margin:0; padding:0"></div>' },               ]
             });
@@ -251,7 +250,7 @@
      
             var container = document.getElementById("canvas");
             var textArea = document.getElementById("myTextarea");
-            kclient_init(container,textArea);
+            KLAMPT.init(container,textArea);
             
             onWindowResize();
          });
@@ -262,7 +261,7 @@
             console.log("onWindowResize");
          
             //account for 5px padding on each side
-            kclient_windowResize(visPanel.width-11,visPanel.height-11);
+            KLAMPT.windowResize(visPanel.width-11,visPanel.height-11);
          }       
 
       </script>

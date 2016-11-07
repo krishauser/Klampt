@@ -1,39 +1,331 @@
+///three.js/build/three.min.js, and three.js/examples/js/controls/TrackballControls.js are required in the HTML code
+///
+///Setup:
+///KLAMPT.init(sceneArea,textArea);  //run this when the document is loaded
+///KLAMPT.windowResize(w,h);    //set the width/height
+///KLAMPT.connect(addr,boilerplate,onconnect,onfailure);  //tries connecting to the given address.  If onconnect or onfailure are not null, they are callbacks that are called on connection success / failure
+///KLAMPT.setCode(code,callback);        //sets the current client code.  The boiler plate must be set first.  callback is called when the scene is available
+///
+///Detailed connection management:
+///KLAMPT.isConnected();
+///KLAMPT.disconnect(ondisconnect); //ondisconnect is either null or a function that is called once disconnected
+///You can also use the functions in DaveWebsocket.js waitForConnection / waitForDisconnection.
+///
+///Animation:
+///KLAMPT.advance(callback);    //requests an advance of the frame.  callback is either null or a function that is called when the frame arrives and is drawn.
+///KLAMPT.animate(running);     //requests continual advancing of frames.  running is either true or false
+///
+///Timing: be careful about calling isConnected, advance, setBoilerplate, and setCode if you do not first verify
+///that the connection is up.  E.g., for startup it is safest to call
+///
+///  KLAMPT.connect(addr,boilerplate,function() { KLAMPT.setCode(code); },null);
+///
+///to start up the connection
+///
+///Low level scene control:
+///KLAMPT.set_scene(scene);      //from a Three.js model object, reloads the scene
+///KLAMPT.set_transforms(data);  //from a list of objects containing names / transforms, sets the transforms of the corresponding items in the scene
+///KLAMPT.rpc(request);          //performs an RPC call from a kviz request object
+
+
+
+var KLAMPT = (function(){
+
+
+
+
+function Network(URI, newSceneArrivedCallback, consoleTextArrivedCallback, consoleErrorArrivedCallback)
+{
+   console.log("creating new network object for websocket use");     
+
+   this.URI = URI;
+   this.websocket = null;
+   this.intervalId = null;
+   this.newSceneArrivedCallback=newSceneArrivedCallback;
+   this.consoleTextArrivedCallback=consoleTextArrivedCallback;
+   this.consoleErrorArrivedCallback=consoleErrorArrivedCallback;
+   
+   //this.editor = editor;
+   this.disconnectionAsked = false;
+   
+   this.connect();
+   net_updateSocketState();    
+}
+
+Network.prototype.connect = function()
+{
+   console.log("Attempting to setup connection to: " + this.URI);
+
+   this.disconnectionAsked = false;
+
+   try
+   {
+      if (this.websocket)
+      {
+         if (this.connected())
+         {
+            this.websocket.close();
+         }
+         delete this.websocket;
+      }
+   
+      if (typeof MozWebSocket === 'function')
+      {
+         WebSocket = MozWebSocket;
+      }
+      
+      this.websocket = new WebSocket(this.URI, ['binary','base64']);
+      
+      this.websocket.onopen = function(evt)
+      {
+         console.log("websocket callback onopen");
+         net_updateSocketState(this.websocket);
+      }.bind(this);
+      
+      this.websocket.onclose = function(evt)
+      {
+         console.log("websocket callback onclose");
+               
+         net_updateSocketState(this.websocket);
+         if (!this.disconnectionAsked)
+         {
+            //setTimeout(this.connect.bind(this), 500);
+         }
+         delete this.websocket;
+      }.bind(this);  
+      
+      this.websocket.onmessage = function(evt) //this is where the webpage receives data from remote
+      {
+         //console.log("websocket callback onmessage");     
+                 
+    if(evt.data instanceof ArrayBuffer)
+         {        
+            console.log("  got an ArrayBuffer");
+            console.log("    data length: " + evt.data.byteLength);           
+         }
+         else if(evt.data instanceof Blob)
+         { 
+            console.log("looks like its a Blob!");              
+     
+            console.log("filename: " + evt.data.name);            
+            editor.loader.loadFile(evt.data);
+         }
+         else if(evt.data instanceof String)
+         {
+            console.log("its a string!");
+         }
+   
+         else
+         {        
+            //console.log("  message is text");
+            var message=evt.data;
+            //console.log("raw message is: " + message);
+            var slicedMessage=message.slice(1);
+            if(message[0]=='S') 
+               newSceneArrivedCallback(slicedMessage);
+            else if(message[0]=='C')
+               consoleTextArrivedCallback(slicedMessage);      
+            else if(message[0]=='E') //console error
+               consoleTextArrivedCallback(slicedMessage);      
+            else 
+              console.log("websocket callback onmessage got invalid message "+message);
+         }
+            
+      }.bind(this);
+      
+      this.websocket.onerror = function(evt)
+      {
+         console.warn("Websocket error:", evt.data);
+      };
+   }
+   catch(exception)
+   {
+      alert("Websocket fatal error, maybe your browser can't use websockets. You can look at the javascript console for more details on the error.");
+      console.error("Websocket fatal error", exception);
+   }
+}
+
+Network.prototype.connected = function()
+{
+   if (this.websocket && this.websocket.readyState == 1)
+   {
+      return true;
+   }
+   return false;
+};
+
+Network.prototype.reconnect = function()
+{
+   if (this.connected())
+   {
+      this.disconnect();
+   }
+   this.connect();
+}
+
+Network.prototype.disconnect = function()
+{
+   this.disconnectionAsked = true;
+   if (this.connected())
+   {
+      this.websocket.close();
+      updateSocketState(this.websocket);
+   }
+}
+
+Network.prototype.send = function(message)
+{
+   if (this.connected())
+   {
+      this.websocket.send(message);
+   }
+};
+
+Network.prototype.checkSocket = function()
+{
+   if (this.websocket)
+   {
+      var stateStr;
+      switch (this.websocket.readyState)
+      {
+      case 0:
+         stateStr = "CONNECTING";
+         break;
+      case 1:
+         stateStr = "OPEN";
+         break;
+      case 2:
+         stateStr = "CLOSING";
+         break;
+      case 3:
+         stateStr = "CLOSED";
+         break;
+      default:
+         stateStr = "UNKNOW";
+         break;
+      }
+      //$("#socketState").text(" (" + stateStr + ")"); 
+      console.log("Websocket state : " + this.websocket.readyState + " (" + stateStr + ")");
+   }
+   else
+   {
+      console.log("Websocket is not initialised");
+   }
+}
+
+function net_sendMessage(value)
+{
+
+   if (network && network.connected())
+   {
+      network.send(value);
+      console.log("Message sent :", '"'+value+'"');
+   }
+   else
+   console.log("Not connected to remote, so no message sent");
+}
+
+function net_isConnected()
+{
+   return network && network.connected()
+}
+
+//note: this doesn't actually pause the code... you need to provide callbacks for things to change on
+//connection success / failure
+function net_waitForConnection(msecs,callback,failcallback) {
+   if(network == null || network.websocket == null || msecs < 0) {
+      if(failcallback != null) {
+         failcallback();
+      }
+      return;
+   }
+   net_updateSocketState(network.websocket);
+    if (network.websocket.readyState === 1) {
+        if(callback != null){
+            callback();
+        }
+        return;
+    }
+
+    setTimeout(
+        function () {
+            console.log("wait for connection...");
+            net_updateSocketState(network.websocket);
+            net_waitForConnection(msecs-50, callback, failcallback);
+        }, 50); // wait 50 miliseconds for the connection...
+}
+
+function net_waitForDisconnection(msecs,callback,failcallback) {
+   if(network == null || network.websocket == null || msecs < 0) {
+      if(callback != null) {
+         callback();
+      }
+      return;
+   }
+   net_updateSocketState(network.websocket);
+    if (network.websocket.readyState == 3) {
+        if(callback != null){
+            callback();
+        }
+        return;
+    }
+
+    setTimeout(
+        function () {
+            console.log("wait for disconnection...");
+            net_updateSocketState(network.websocket);
+            net_waitForDisconnection(msecs-50, callback, failcallback);
+        }, 50); // wait 50 milisecond for the connection...
+}
+
+
+function net_updateSocketState(websocket)
+{
+   console.log("in updateSocketState");      
+
+   if (websocket != null)
+   {
+      var stateStr;
+      switch (websocket.readyState)
+      {
+      case 0:
+         stateStr = "CONNECTING";
+         break;
+      case 1:
+         stateStr = "OPEN";
+         break;
+      case 2:
+         stateStr = "CLOSING";
+         break;
+      case 3:
+         stateStr = "CLOSED";
+         break;
+      default:
+         stateStr = "UNKNOW";
+         break;
+      }
+      //$("#socketState").text(" (" + stateStr + ")"); 
+      
+      console.log("  socket state changed: " + websocket.readyState + " (" + stateStr + ")");
+   }
+   else
+   {
+      console.log("  websocket is null. closed");     
+      //document.querySelector("#socketState").innerText = "3 (CLOSED)";
+   }
+}
+
+
+
+
+
+
 //the server address in the form ws://[IP]:[PORT]
 var serverAddr = "ws://localhost:1234";
 //the DOM element containing the scene
 var sceneArea;
 //the DOM element containing the text output.  Can be null.
 var textArea;
-
-
-///DaveWebsocket.js, three.js/build/three.min.js, and three.js/examples/js/controls/TrackballControls.js are required in the HTML code
-///
-///Setup:
-///kclient_init(sceneArea,textArea);  //run this when the document is loaded
-///kclient_windowResize(w,h);    //set the width/height
-///kclient_connect(addr,boilerplate,onconnect,onfailure);  //tries connecting to the given address.  If onconnect or onfailure are not null, they are callbacks that are called on connection success / failure
-///kclient_setCode(code,callback);        //sets the current client code.  The boiler plate must be set first.  callback is called when the scene is available
-///
-///Detailed connection management:
-///kclient_isConnected();
-///kclient_disconnect(ondisconnect); //ondisconnect is either null or a function that is called once disconnected
-///You can also use the functions in DaveWebsocket.js waitForConnection / waitForDisconnection.
-///
-///Animation:
-///kclient_advance(callback);    //requests an advance of the frame.  callback is either null or a function that is called when the frame arrives and is drawn.
-///kclient_animate(running);     //requests continual advancing of frames.  running is either true or false
-///
-///Timing: be careful about calling isConnected, advance, setBoilerplate, and setCode if you do not first verify
-///that the connection is up.  E.g., for startup it is safest to call
-///
-///  kclient.connect(addr,boilerplate,function() { kclient_setCode(code); },null);
-///
-///to start up the connection
-///
-///Low level scene control:
-///kclient_set_scene(scene);      //from a Three.js model object, reloads the scene
-///kclient_set_transforms(data);  //from a list of objects containing names / transforms, sets the transforms of the corresponding items in the scene
-///kclient_rpc(request);          //performs an RPC call from a kviz request object
 
 
 var scene = new THREE.Scene();
@@ -56,7 +348,8 @@ function kclient_init(dom_sceneArea,dom_textArea)
 {
 	sceneArea = dom_sceneArea;
 	textArea = dom_textArea;
-	renderer.setClearColor(0x88888888);
+	//renderer.setClearColor(0x88888888);
+  renderer.setClearColor(0x888888FF);
 	dom_sceneArea.appendChild( renderer.domElement );  //attach the three.js renderer to the proper div 
 
 	controls=new THREE.TrackballControls( camera, sceneArea);
@@ -68,25 +361,29 @@ function kclient_init(dom_sceneArea,dom_textArea)
 	    controls.staticMoving = true;
 	    controls.dynamicDampingFactor = 0.3;
 	    controls.keys = [ 65, 83, 68 ];
-	controls.addEventListener( 'change', render );   
+	controls.addEventListener( 'change', kclient_render );   
 
-	animate();
+  kclient_windowResize(sceneArea.offsetWidth,sceneArea.offsetHeight);
+
+  var axisHelper = new THREE.AxisHelper( 0.2 );
+  scene.add( axisHelper );
+  animate();
 }
 
 function kclient_connect(addr,boilerid,onconnect,onfailure)
 {
-	if(isConnected()) {
+	if(net_isConnected()) {
 		kclient_disconnect(function() { kclient_connect(addr,boilerid,onconnect,onfailure); });
 		return;
 	}
 	serverAddr = addr;
-	if(!isConnected())
+	if(!net_isConnected())
 	{
 		_doConnect();
 	}
 	if(boilerid!=null || onconnect || onfailure) {
-		waitForConnection(1000,function() {
-			sendMessage("B"+boilerid);
+		net_waitForConnection(1000,function() {
+			net_sendMessage("B"+boilerid);
 			if(onconnect) { onconnect(); }
 		},onfailure);
 	}
@@ -94,7 +391,7 @@ function kclient_connect(addr,boilerid,onconnect,onfailure)
               
 function kclient_setCode(code,callback)
 {
-	if(!isConnected()) {
+	if(!net_isConnected()) {
 		console.log("Error, kclient_setCode called before kclient_connect (or connect failed)...");
 		return;
 	}
@@ -108,7 +405,7 @@ function kclient_setCode(code,callback)
 
 function kclient_isConnected()
 {
-	return isConnected();
+	return net_isConnected();
 }
 
 function kclient_disconnect(ondisconnect)
@@ -118,22 +415,22 @@ function kclient_disconnect(ondisconnect)
 	}
 	freeRun = false;
 	if(ondisconnect) {
-		waitForDisconnection(5000,ondisconnect);
+		net_waitForDisconnection(5000,ondisconnect);
 	}
 }
 
 function kclient_advance(callback)
 {
 	refreshCallback = callback;
-	if(isConnected()) {
-		sendMessage("A");
+	if(net_isConnected()) {
+		net_sendMessage("A");
 	}
 	freeRun = false;
 }
 
 function _freeRunCallback() {
 	if(freeRun) { 
-		sendMessage("R");
+		net_sendMessage("R");
 	}
 }
 
@@ -145,14 +442,14 @@ function kclient_animate(animate)
 		freeRun=false;
 	}
 	else {
-      if(!isConnected()) {
+      if(!net_isConnected()) {
          console.log("not connected, can't start freeRun");
       }
       else {
 		  console.log("starting freeRun...");
         refreshCallback = _freeRunCallback;
         freeRun=true;
-        sendMessage("R");
+        net_sendMessage("R");
      }
 	}
 }
@@ -161,11 +458,11 @@ function kclient_animate(animate)
 
 function _runConnected(onconnect)
 {
-	if(!isConnected())
+	if(!net_isConnected())
 	{
 		_doConnect();
 	}
-	waitForConnection(1000,onconnect,null);
+	net_waitForConnection(1000,onconnect,null);
 }
 
 function _doConnectInternal()
@@ -176,8 +473,8 @@ function _doConnectInternal()
 
 function _doConnect()
 {
-	if(isConnected()) {
-	   waitForDisconnection(5000,function() {_doConnectInternal();});
+	if(net_isConnected()) {
+	   net_waitForDisconnection(5000,function() {_doConnectInternal();});
 	}
 	else 
 	   _doConnectInternal();
@@ -186,24 +483,23 @@ function _doConnect()
 function _sendCode(code) //send python code back to server
 {
 	console.log("got request to send code!\n");
-	sendMessage("C"+code);
-	//sendMessage("hello world");
+	net_sendMessage("C"+code);
+	//net_sendMessage("hello world");
 }
 
 function kclient_windowResize( w,h )
 {
-	console.log("onWindowResize");
+	console.log("onWindowResize width: " + w + " height: " + h);
 
 	mWidth= w; //account for 5px padding on each side
 	mHeight=h;
 
-	console.log("width: " + mWidth + " height: " + mHeight);
-	renderer.setSize(mWidth,mHeight );
+	renderer.setSize(mWidth,mHeight);
 	camera.aspect =mWidth/ mHeight;
-	   
-	camera.updateProjectionMatrix();         
+
+	camera.updateProjectionMatrix();  
 	controls.handleResize();
-	render();
+	kclient_render();
 }       
 
 function consoleTextArrivedCallback(data)
@@ -574,7 +870,7 @@ function newSceneArrivedCallback(data)
 	rpc=null;
 
 	var t0 = performance.now();
-	render();
+	kclient_render();
 	var t1 = performance.now();
 	console.log("Time to render " + (t1 - t0) + " milliseconds.")
 	console.log("finished processing message");
@@ -582,13 +878,34 @@ function newSceneArrivedCallback(data)
 	if(refreshCallback) refreshCallback();
 }
 
-function animate()
-{
-	requestAnimationFrame( animate  );
-	controls.update();
-}
-
-function render()
+function kclient_render()
 {     
 	renderer.render( scene, camera );
+}
+
+function animate()
+{
+        requestAnimationFrame( animate  );
+        controls.update();
+}
+
+
+return {
+   init:kclient_init,
+   windowResize:kclient_windowResize,
+   connect:kclient_connect,
+   setCode:kclient_setCode,
+   isConnected:kclient_isConnected,
+   disconnect:kclient_disconnect,
+   advance:kclient_advance,
+   animate:kclient_animate,
+   set_scene:kclient_set_scene,
+   set_transforms:kclient_set_transforms,
+   rpc:kclient_rpc,
+   render:kclient_render,
+   }
+})();
+
+if (window.klamptAsyncInit) {
+  window.klamptAsyncInit();
 }
