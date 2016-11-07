@@ -1451,11 +1451,13 @@ WorldModel::WorldModel()
   index = createWorld();
 }
 
+/*
 WorldModel::WorldModel(int _index)
 {
   index = _index;
   refWorld(index);
 }
+*/
 
 WorldModel::WorldModel(const WorldModel& w)
 {
@@ -3461,6 +3463,18 @@ void SimRobotSensor::drawGL(const std::vector<double>& measurements)
   sensor->DrawGL(*robot,measurements);
 }
 
+void SimRobotSensor::kinematicSimulate(WorldModel& world,double dt)
+{
+  if(!sensor) return;
+  sensor->SimulateKinematic(*robot,*worlds[world.index]->world);
+  sensor->Advance(dt);
+}
+
+void SimRobotSensor::kinematicReset()
+{
+  if(!sensor) return;
+  sensor->Reset();
+}
 
 
 SimRobotSensor SimRobotController::sensor(int sensorIndex)

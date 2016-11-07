@@ -33090,40 +33090,6 @@ fail:
 
 SWIGINTERN PyObject *_wrap_new_WorldModel__SWIG_2(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  int arg1 ;
-  int val1 ;
-  int ecode1 = 0 ;
-  PyObject * obj0 = 0 ;
-  WorldModel *result = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"O:new_WorldModel",&obj0)) SWIG_fail;
-  ecode1 = SWIG_AsVal_int(obj0, &val1);
-  if (!SWIG_IsOK(ecode1)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "new_WorldModel" "', argument " "1"" of type '" "int""'");
-  } 
-  arg1 = static_cast< int >(val1);
-  {
-    try {
-      result = (WorldModel *)new WorldModel(arg1);
-    }
-    catch(PyException& e) {
-      e.setPyErr();
-      return NULL;
-    }
-    catch(std::exception& e) {
-      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
-      return NULL;
-    }
-  }
-  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_WorldModel, SWIG_POINTER_NEW |  0 );
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_new_WorldModel__SWIG_3(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
   WorldModel *arg1 = 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
@@ -33177,7 +33143,7 @@ SWIGINTERN PyObject *_wrap_new_WorldModel(PyObject *self, PyObject *args) {
     int res = SWIG_ConvertPtr(argv[0], 0, SWIGTYPE_p_WorldModel, 0);
     _v = SWIG_CheckState(res);
     if (_v) {
-      return _wrap_new_WorldModel__SWIG_3(self, args);
+      return _wrap_new_WorldModel__SWIG_2(self, args);
     }
   }
   if (argc == 1) {
@@ -33189,23 +33155,12 @@ SWIGINTERN PyObject *_wrap_new_WorldModel(PyObject *self, PyObject *args) {
       return _wrap_new_WorldModel__SWIG_1(self, args);
     }
   }
-  if (argc == 1) {
-    int _v;
-    {
-      int res = SWIG_AsVal_int(argv[0], NULL);
-      _v = SWIG_CheckState(res);
-    }
-    if (_v) {
-      return _wrap_new_WorldModel__SWIG_2(self, args);
-    }
-  }
   
 fail:
   SWIG_SetErrorMsg(PyExc_NotImplementedError,"Wrong number or type of arguments for overloaded function 'new_WorldModel'.\n"
     "  Possible C/C++ prototypes are:\n"
     "    WorldModel::WorldModel()\n"
     "    WorldModel::WorldModel(void *)\n"
-    "    WorldModel::WorldModel(int)\n"
     "    WorldModel::WorldModel(WorldModel const &)\n");
   return 0;
 }
@@ -39909,6 +39864,93 @@ fail:
     "    SimRobotSensor::drawGL()\n"
     "    SimRobotSensor::drawGL(std::vector< double,std::allocator< double > > const &)\n");
   return 0;
+}
+
+
+SWIGINTERN PyObject *_wrap_SimRobotSensor_kinematicSimulate(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  SimRobotSensor *arg1 = (SimRobotSensor *) 0 ;
+  WorldModel *arg2 = 0 ;
+  double arg3 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  double val3 ;
+  int ecode3 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  PyObject * obj2 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OOO:SimRobotSensor_kinematicSimulate",&obj0,&obj1,&obj2)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_SimRobotSensor, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SimRobotSensor_kinematicSimulate" "', argument " "1"" of type '" "SimRobotSensor *""'"); 
+  }
+  arg1 = reinterpret_cast< SimRobotSensor * >(argp1);
+  res2 = SWIG_ConvertPtr(obj1, &argp2, SWIGTYPE_p_WorldModel,  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "SimRobotSensor_kinematicSimulate" "', argument " "2"" of type '" "WorldModel &""'"); 
+  }
+  if (!argp2) {
+    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "SimRobotSensor_kinematicSimulate" "', argument " "2"" of type '" "WorldModel &""'"); 
+  }
+  arg2 = reinterpret_cast< WorldModel * >(argp2);
+  ecode3 = SWIG_AsVal_double(obj2, &val3);
+  if (!SWIG_IsOK(ecode3)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "SimRobotSensor_kinematicSimulate" "', argument " "3"" of type '" "double""'");
+  } 
+  arg3 = static_cast< double >(val3);
+  {
+    try {
+      (arg1)->kinematicSimulate(*arg2,arg3);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_SimRobotSensor_kinematicReset(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  SimRobotSensor *arg1 = (SimRobotSensor *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:SimRobotSensor_kinematicReset",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_SimRobotSensor, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SimRobotSensor_kinematicReset" "', argument " "1"" of type '" "SimRobotSensor *""'"); 
+  }
+  arg1 = reinterpret_cast< SimRobotSensor * >(argp1);
+  {
+    try {
+      (arg1)->kinematicReset();
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
 }
 
 
@@ -48115,7 +48157,6 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"new_WorldModel", _wrap_new_WorldModel, METH_VARARGS, (char *)"\n"
 		"WorldModel()\n"
 		"WorldModel(void * ptrRobotWorld)\n"
-		"WorldModel(int index)\n"
 		"new_WorldModel(WorldModel w) -> WorldModel\n"
 		""},
 	 { (char *)"delete_WorldModel", _wrap_delete_WorldModel, METH_VARARGS, (char *)"delete_WorldModel(WorldModel self)"},
@@ -48547,6 +48588,8 @@ static PyMethodDef SwigMethods[] = {
 		"drawGL()\n"
 		"SimRobotSensor_drawGL(SimRobotSensor self, doubleVector measurements)\n"
 		""},
+	 { (char *)"SimRobotSensor_kinematicSimulate", _wrap_SimRobotSensor_kinematicSimulate, METH_VARARGS, (char *)"SimRobotSensor_kinematicSimulate(SimRobotSensor self, WorldModel world, double dt)"},
+	 { (char *)"SimRobotSensor_kinematicReset", _wrap_SimRobotSensor_kinematicReset, METH_VARARGS, (char *)"SimRobotSensor_kinematicReset(SimRobotSensor self)"},
 	 { (char *)"SimRobotSensor_robot_set", _wrap_SimRobotSensor_robot_set, METH_VARARGS, (char *)"SimRobotSensor_robot_set(SimRobotSensor self, Robot * robot)"},
 	 { (char *)"SimRobotSensor_robot_get", _wrap_SimRobotSensor_robot_get, METH_VARARGS, (char *)"SimRobotSensor_robot_get(SimRobotSensor self) -> Robot *"},
 	 { (char *)"SimRobotSensor_sensor_set", _wrap_SimRobotSensor_sensor_set, METH_VARARGS, (char *)"SimRobotSensor_sensor_set(SimRobotSensor self, SensorBase * sensor)"},

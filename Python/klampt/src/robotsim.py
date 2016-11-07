@@ -2605,7 +2605,6 @@ class WorldModel(_object):
         """
         __init__(WorldModel self) -> WorldModel
         __init__(WorldModel self, void * ptrRobotWorld) -> WorldModel
-        __init__(WorldModel self, int index) -> WorldModel
         __init__(WorldModel self, WorldModel w) -> WorldModel
         """
         this = _robotsim.new_WorldModel(*args)
@@ -3412,6 +3411,14 @@ class SimRobotSensor(_object):
         drawGL(SimRobotSensor self, doubleVector measurements)
         """
         return _robotsim.SimRobotSensor_drawGL(self, *args)
+
+    def kinematicSimulate(self, *args):
+        """kinematicSimulate(SimRobotSensor self, WorldModel world, double dt)"""
+        return _robotsim.SimRobotSensor_kinematicSimulate(self, *args)
+
+    def kinematicReset(self):
+        """kinematicReset(SimRobotSensor self)"""
+        return _robotsim.SimRobotSensor_kinematicReset(self)
 
     __swig_setmethods__["robot"] = _robotsim.SimRobotSensor_robot_set
     __swig_getmethods__["robot"] = _robotsim.SimRobotSensor_robot_get

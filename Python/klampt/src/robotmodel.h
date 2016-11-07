@@ -400,7 +400,7 @@ class WorldModel
 {
  public:
   ///Creates a WorldModel.  With no arguments, creates a new world.  With
-  ///an integer or another WorldModel instance, creates a reference to an
+  ///another WorldModel instance, creates a reference to an
   ///existing world.  (To create a copy, use the copy() method.)
   ///
   ///If passed a pointer to a C++ RobotWorld structure, a reference to that
@@ -408,7 +408,7 @@ class WorldModel
   ///interfacing C++ and Python code)
   WorldModel();
   WorldModel(void* ptrRobotWorld);
-  WorldModel(int index);
+  //WorldModel(int index);  /// < this constructor was problematic
   WorldModel(const WorldModel& w);
   ~WorldModel();
   ///Sets this WorldModel to a reference to w
