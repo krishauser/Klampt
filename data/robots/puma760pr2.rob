@@ -16,8 +16,9 @@ geomscale 0.5 0.5 0.5 0.5 0.5 0.5 0.5
 mass       20     5       5     3      1     0.5     0.5
 automass
 torqueMax  0    150     120   75     20     20     20
-servoP     6000   4800   3000  800   800   800
-servoI     15000   12000   7500  2000   2000   2000
-servoD     30   25   10  1   1   1
+servoP     15000   9800   6000  1000   200   200
+servoI     500   200   150  50   30   20
+servoD     50   40   20  1   0.5   0.5
 dryFriction   0.5 0.5 0.5 0.5 0.5 0.5 
+viscousFriction   20 20 15 10 3 3
 mount 6 "pr2gripper.rob"   0 0 -1    0 1 0    1 0 0   0 0 0.06  as "gripper"
