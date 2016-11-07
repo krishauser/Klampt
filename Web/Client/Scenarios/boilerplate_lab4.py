@@ -99,6 +99,8 @@ def boilerplate_advance():
 			if vectorops.distance(trace[-1][-1],ee_pos) > 0.005:
 				trace[-1].append(ee_pos)
 				update_trace()
+	else:
+		in_trace = False
 
 def boilerplate_keypress(key):
 	print "boiler plate received key: " + str(key)
