@@ -13,6 +13,7 @@ class FilteredSensor : public SensorBase
   FilteredSensor();
   virtual const char* Type() const { return "FilteredSensor"; }
   virtual void Simulate(ControlledRobotSimulator* robot,WorldSimulation* sim);
+  virtual void SimulateKinematic(Robot& robot,RobotWorld& world);
   virtual void Advance(Real dt);
   virtual void Reset();
   virtual void MeasurementNames(vector<string>& names) const;
@@ -39,6 +40,7 @@ class TimeDelayedSensor : public SensorBase
   TimeDelayedSensor();
   virtual const char* Type() const { return "TimeDelayedSensor"; }
   virtual void Simulate(ControlledRobotSimulator* robot,WorldSimulation* sim);
+  virtual void SimulateKinematic(Robot& robot,RobotWorld& world);
   virtual void Advance(Real dt);
   virtual void Reset();
   virtual void MeasurementNames(vector<string>& names) const;
@@ -55,6 +57,7 @@ class TimeDelayedSensor : public SensorBase
   deque<vector<double> > measurementsInTransit;
   deque<double> deliveryTimes;
   vector<double> arrivedMeasurement;
+  double curTime;
   double delay,jitter;
 };
 

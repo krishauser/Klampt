@@ -10,6 +10,7 @@
 using namespace std;
 
 class Robot;
+class RobotWorld;
 class ControlledRobotSimulator;
 class WorldSimulation;
 class TiXmlElement;
@@ -51,6 +52,8 @@ class SensorBase
   virtual const char* Type() const { return "SensorBase"; }
   ///Called whenever the sensor is updated from the simulaton
   virtual void Simulate(ControlledRobotSimulator* robot,WorldSimulation* sim) {}
+  ///Updates the sensor for a kinematic world.  Useful for non-simulation debugging.
+  virtual void SimulateKinematic(Robot& robot,RobotWorld& world) {}
   ///Advances to the next time step with duration dt elapsed
   virtual void Advance(double dt) {}
   ///Should be overridden if the sensor is stateful to reset to an initial state

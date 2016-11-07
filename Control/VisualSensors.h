@@ -27,6 +27,7 @@ class LaserRangeSensor : public SensorBase
   LaserRangeSensor();
   virtual const char* Type() const { return "LaserRangeSensor"; }
   virtual void Simulate(ControlledRobotSimulator* robot,WorldSimulation* sim);
+  virtual void SimulateKinematic(Robot& robot,RobotWorld& world);
   virtual void Advance(double dt);
   virtual void Reset();
   virtual void MeasurementNames(vector<string>& names) const;
@@ -86,6 +87,7 @@ class CameraSensor : public SensorBase
   virtual ~CameraSensor();
   virtual const char* Type() const { return "CameraSensor"; }
   virtual void Simulate(ControlledRobotSimulator* robot,WorldSimulation* sim);
+  virtual void SimulateKinematic(Robot& robot,RobotWorld& world);
   virtual void Reset();
   virtual void MeasurementNames(vector<string>& names) const;
   virtual void GetMeasurements(vector<double>& values) const;
@@ -96,9 +98,6 @@ class CameraSensor : public SensorBase
   virtual void DrawGL(const Robot& robot,const vector<double>& measurements);
   void GetViewport(Camera::Viewport& view) const;
   void SetViewport(const Camera::Viewport& view);
-
-  ///Updates the measurements for the current state of the world.  Useful for non-simulation debugging.
-  void UpdateMeasurements(RobotWorld& world,const Robot& robot);
 
   int link;
   RigidTransform Tsensor; ///< z is backward, x is to the right, and y is "up"

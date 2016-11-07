@@ -29,6 +29,7 @@ class ContactSensor : public SensorBase
   ContactSensor();
   virtual const char* Type() const { return "ContactSensor"; }
   virtual void Simulate(ControlledRobotSimulator* robot,WorldSimulation* sim);
+  virtual void SimulateKinematic(Robot& robot,RobotWorld& world);
   virtual void Reset();
   virtual void MeasurementNames(vector<string>& names) const;
   virtual void GetMeasurements(vector<double>& values) const;
@@ -63,6 +64,7 @@ class ForceTorqueSensor : public SensorBase
   ForceTorqueSensor();
   virtual const char* Type() const { return "ForceTorqueSensor"; }
   virtual void Simulate(ControlledRobotSimulator* robot,WorldSimulation* sim);
+  virtual void SimulateKinematic(Robot& robot,RobotWorld& world);
   virtual void Reset();
   virtual void MeasurementNames(vector<string>& names) const;
   virtual void GetMeasurements(vector<double>& values) const;

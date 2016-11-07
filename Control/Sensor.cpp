@@ -163,6 +163,31 @@ bool SensorBase::SetSetting(const string& name,const string& str)
 JointPositionSensor::JointPositionSensor()
 {}
 
+void JointPositionSensor::SimulateKinematic(Robot& robot,RobotWorld& world)
+{
+  q = robot.q;
+  if(!qvariance.empty()) {
+    //cout<<"q: "<<qvariance<<endl;
+    for(int i=0;i<q.n;i++)
+      q(i) += RandGaussian()*Sqrt(qvariance(i));
+  }
+  if(!qresolution.empty()) {
+    //cout<<"q: "<<qresolution<<endl;
+    for(int i=0;i<q.n;i++) {
+      if(qresolution(i) > 0) {
+  q(i) = round(q(i)/qresolution(i))*qresolution(i);
+      }
+    }
+  }
+  if(!indices.empty()) {
+    //only read a subset
+    Vector qread(indices.size(),Zero);
+    for(size_t i=0;i<indices.size();i++)
+      qread(i) = q(indices[i]);
+    swap(qread,q);
+  }
+}
+
 void JointPositionSensor::Simulate(ControlledRobotSimulator* robot,WorldSimulation* sim)
 {
   robot->oderobot->GetConfig(q);
@@ -272,6 +297,31 @@ bool JointPositionSensor::SetSetting(const string& name,const string& str)
 JointVelocitySensor::JointVelocitySensor()
 {}
 
+void JointVelocitySensor::SimulateKinematic(Robot& robot,RobotWorld& world)
+{
+  dq = robot.dq;
+  if(!dqvariance.empty()) {
+    //cout<<"dq: "<<qvariance<<endl;
+    for(int i=0;i<dq.n;i++)
+      dq(i) += RandGaussian()*Sqrt(dqvariance(i));
+  }
+  if(!dqresolution.empty()) {
+    //cout<<"dq: "<<dqresolution<<endl;
+    for(int i=0;i<dq.n;i++) {
+      if(dqresolution(i) > 0) {
+  dq(i) = int(dq(i)/dqresolution(i)+0.5)*dqresolution(i);
+      }
+    }
+  }
+  if(!indices.empty()) {
+    //only read a subset
+    Vector dqread(dq.n,Zero);
+    for(size_t i=0;i<indices.size();i++)
+      dqread(indices[i]) = dq(indices[i]);
+    swap(dqread,dq);
+  }
+}
+
 void JointVelocitySensor::Simulate(ControlledRobotSimulator* robot,WorldSimulation* sim)
 {
   robot->oderobot->GetVelocities(dq);
@@ -378,6 +428,29 @@ bool JointVelocitySensor::SetSetting(const string& name,const string& str)
 
 DriverTorqueSensor::DriverTorqueSensor()
 {}
+
+void DriverTorqueSensor::SimulateKinematic(Robot& robot,RobotWorld& world) 
+{
+  t.resize(robot.drivers.size(),0.0);
+  if(!tvariance.empty()) {
+    for(int i=0;i<t.n;i++)
+      t(i) += RandGaussian()*Sqrt(tvariance(i));
+  }
+  if(!tresolution.empty()) {
+    for(int i=0;i<t.n;i++) {
+      if(tresolution(i) > 0) {
+  t(i) = int(t(i)/tresolution(i)+0.5)*tresolution(i);
+      }
+    }
+  }
+  if(!indices.empty()) {
+    //only read a subset
+    Vector tread(t.n,Zero);
+    for(size_t i=0;i<indices.size();i++)
+      tread(indices[i]) = t(indices[i]);
+    swap(tread,t);
+  }
+}
 
 void DriverTorqueSensor::Simulate(ControlledRobotSimulator* robot,WorldSimulation* sim)
 {
@@ -493,6 +566,12 @@ ContactSensor::ContactSensor()
 {
   Tsensor.setIdentity();
   hasForce[0] = hasForce[1] = hasForce[2] = false;
+}
+
+void ContactSensor::SimulateKinematic(Robot& robot,RobotWorld& world)
+{
+  contact = false;
+  force.setZero();
 }
 
 void ContactSensor::Simulate(ControlledRobotSimulator* robot,WorldSimulation* sim)
@@ -687,6 +766,12 @@ ForceTorqueSensor::ForceTorqueSensor()
   hasTorque[0] = hasTorque[1] = hasTorque[2] = false;
 }
 
+void ForceTorqueSensor::SimulateKinematic(Robot& robot,RobotWorld& world)
+{
+  f.setZero();
+  t.setZero();
+}
+
 void ForceTorqueSensor::Simulate(ControlledRobotSimulator* robot,WorldSimulation* sim) 
 {
   dJointFeedback fb = robot->oderobot->feedback(link);
@@ -821,6 +906,36 @@ void Accelerometer::Advance(Real dt)
   last_dt = dt;
 }
 
+void Accelerometer::SimulateKinematic(Robot& robot,RobotWorld& world)
+{
+  RigidTransform T;
+  Vector3 w,v,vp;
+  T = robot.links[link].T_World;
+  robot.GetWorldVelocity(Vector3(0.0),link,robot.dq,v);
+  robot.GetWorldAngularVelocity(link,robot.dq,w);
+  vp = v+cross(w,T.R*Tsensor.t);
+  if(last_dt==0) {
+    accel.setZero();
+  }
+  else {
+    accel = (vp - last_v)/last_dt;
+  }
+  last_v = vp;
+
+  accel += Vector3(0,0,-9.8);
+  accel.x += RandGaussian()*Sqrt(accelVariance.x);
+  accel.y += RandGaussian()*Sqrt(accelVariance.y);
+  accel.z += RandGaussian()*Sqrt(accelVariance.z);
+
+  Vector3 accelw = accel;
+  T.R.mulTranspose(accelw,accel);
+
+  accel = Discretize(accel,Vector3(Zero),accelVariance);
+  for(int i=0;i<3;i++)
+    if(!hasAxis[i]) accel[i] = 0;
+}
+
+
 void Accelerometer::Simulate(ControlledRobotSimulator* robot,WorldSimulation* sim)
 {
   RigidTransform T;
@@ -933,6 +1048,38 @@ void TiltSensor::Advance(Real dt)
 {
 }
 
+void TiltSensor::SimulateKinematic(Robot& robot,RobotWorld& world)
+{
+  RigidTransform T;
+  Vector3 w,v;
+  T = robot.links[link].T_World;
+  robot.GetWorldVelocity(Vector3(0.0),link,robot.dq,v);
+  robot.GetWorldAngularVelocity(link,robot.dq,w);
+
+  Vector3 dlocal,dsensor;
+  T.R.mulTranspose(referenceDir,dlocal);
+  Rsensor.mulTranspose(dlocal,dsensor);
+  //x value = sin alpha
+  //assume reference direction is z
+  alocal.x = Asin(dsensor[1]);
+  alocal.y = Asin(-dsensor[0]);
+  alocal.z = Asin(dsensor[2]);
+
+  //compute local angular velocity value
+  wlocal = w;
+  T.R.mulTranspose(w,wlocal);
+  Rsensor.mulTranspose(wlocal,w);
+  wlocal = w;
+
+  alocal = Discretize(alocal,resolution,variance);
+  wlocal = Discretize(wlocal,resolution,variance);
+
+  for(int i=0;i<3;i++)
+    if(!hasAxis[i]) alocal[i] = 0;
+  for(int i=0;i<3;i++)
+    if(!hasAxis[i]) wlocal[i] = 0;
+}
+
 void TiltSensor::Simulate(ControlledRobotSimulator* robot,WorldSimulation* sim)
 {
   RigidTransform T;
@@ -1042,6 +1189,37 @@ GyroSensor::GyroSensor()
   rotation.setIdentity();
   last_dt = 0;
   last_w.setZero();
+}
+
+void GyroSensor::SimulateKinematic(Robot& robot,RobotWorld& world)
+{
+  RigidTransform T;
+  Vector3 w,v;
+  T = robot.links[link].T_World;
+  robot.GetWorldVelocity(Vector3(0.0),link,robot.dq,v);
+  robot.GetWorldAngularVelocity(link,robot.dq,w);
+
+  if(hasAngAccel) {
+    if(last_dt == 0) 
+      angAccel.setZero();
+    else {
+      angAccel = (w-last_w)/last_dt;
+    }
+    last_w = w;
+    angAccel.x += RandGaussian()*Sqrt(angAccelVariance(0,0));
+    angAccel.y += RandGaussian()*Sqrt(angAccelVariance(1,1));
+    angAccel.z += RandGaussian()*Sqrt(angAccelVariance(2,2));
+  }
+  if(hasAngVel) {
+    angVel = w;
+    angVel.x += RandGaussian()*Sqrt(angVelVariance(0,0));
+    angVel.y += RandGaussian()*Sqrt(angVelVariance(1,1));
+    angVel.z += RandGaussian()*Sqrt(angVelVariance(2,2));
+  }
+  if(hasRotation) {
+    rotation = T.R;
+    //TODO: variance
+  }
 }
 
 void GyroSensor::Simulate(ControlledRobotSimulator* robot,WorldSimulation* sim)
@@ -1187,6 +1365,41 @@ IMUSensor::IMUSensor()
 {
   Reset();
 }
+
+void IMUSensor::SimulateKinematic(Robot& robot,RobotWorld& world)
+{
+  RigidTransform T;
+  T = robot.links[accelerometer.link].T_World;
+
+  accelerometer.SimulateKinematic(robot,world);
+  accel = accelerometer.accel;
+  //translate to global frame and remove gravity from acceleration reading
+  accel = T.R*accel;
+  accel += Vector3(0,0,9.8);
+  //integrate velocity and position
+  translation.madd(velocity,accelerometer.last_dt);
+  translation.madd(accel,0.5*Sqr(accelerometer.last_dt));
+  velocity.madd(accel,accelerometer.last_dt);
+
+  gyro.SimulateKinematic(robot,world);
+  if(gyro.hasAngAccel) angAccel = gyro.angAccel;
+  if(gyro.hasAngVel) {
+    angVel = gyro.angAccel;
+  }
+  else {
+    angVel.madd(angAccel,gyro.last_dt);
+  }
+  if(gyro.hasRotation) {
+    rotation = gyro.rotation;
+  }
+  else {
+    MomentRotation m(angVel*gyro.last_dt);
+    Matrix3 R;
+    m.getMatrix(R);
+    rotation = rotation*R;
+  }
+}
+
 
 void IMUSensor::Simulate(ControlledRobotSimulator* robot,WorldSimulation* sim)
 {
@@ -1363,6 +1576,12 @@ FilteredSensor::FilteredSensor()
   :smoothing(0)
 {}
 
+void FilteredSensor::SimulateKinematic(Robot& robot,RobotWorld& world)
+{
+  if(!sensor) return;
+  sensor->SimulateKinematic(robot,world);
+}
+
 void FilteredSensor::Simulate(ControlledRobotSimulator* robot,WorldSimulation* sim)
 {
   if(!sensor) return;
@@ -1444,8 +1663,26 @@ void FilteredSensor::DrawGL(const Robot& robot,const vector<double>& measurement
 
 
 TimeDelayedSensor::TimeDelayedSensor()
-  :delay(0),jitter(0)
+  :curTime(0),delay(0),jitter(0)
 {}
+
+
+void TimeDelayedSensor::SimulateKinematic(Robot& robot,RobotWorld& world)
+{
+  if(!sensor) return;
+  sensor->SimulateKinematic(robot,world);
+  vector<double> newMeasurements;
+  sensor->GetMeasurements(newMeasurements);
+  double delivTime = curTime + delay + Rand(-jitter,jitter);
+  measurementsInTransit.push_back(newMeasurements);
+  deliveryTimes.push_back(delivTime);
+
+  while(!deliveryTimes.empty() && deliveryTimes.front() <= curTime) {
+    swap(arrivedMeasurement,measurementsInTransit.front());
+    measurementsInTransit.pop_front();
+    deliveryTimes.pop_front();
+  }
+}
 
 void TimeDelayedSensor::Simulate(ControlledRobotSimulator* robot,WorldSimulation* sim)
 {
@@ -1453,11 +1690,11 @@ void TimeDelayedSensor::Simulate(ControlledRobotSimulator* robot,WorldSimulation
   sensor->Simulate(robot,sim);
   vector<double> newMeasurements;
   sensor->GetMeasurements(newMeasurements);
-  double delivTime = robot->curTime + delay + Rand(-jitter,jitter);
+  double delivTime = curTime + delay + Rand(-jitter,jitter);
   measurementsInTransit.push_back(newMeasurements);
   deliveryTimes.push_back(delivTime);
 
-  while(!deliveryTimes.empty() && deliveryTimes.front() <= robot->curTime) {
+  while(!deliveryTimes.empty() && deliveryTimes.front() <= curTime) {
     swap(arrivedMeasurement,measurementsInTransit.front());
     measurementsInTransit.pop_front();
     deliveryTimes.pop_front();
@@ -1466,6 +1703,7 @@ void TimeDelayedSensor::Simulate(ControlledRobotSimulator* robot,WorldSimulation
 
 void TimeDelayedSensor::Advance(Real dt)
 {
+  curTime += dt;
   if(!sensor) return;
   sensor->Advance(dt);
 }
@@ -1476,6 +1714,7 @@ void TimeDelayedSensor::Reset()
   measurementsInTransit.clear();
   deliveryTimes.clear();
   arrivedMeasurement.clear();
+  curTime = 0;
 }
 
 void TimeDelayedSensor::MeasurementNames(vector<string>& names) const
@@ -1503,6 +1742,7 @@ void TimeDelayedSensor::GetInternalState(vector<double>& state) const
   size_t n = 0;
   if(!measurementsInTransit.empty()) n = measurementsInTransit.front().size();
   state = sstate;
+  state.push_back(curTime);
   state.push_back(double(deliveryTimes.size()));
   state.push_back(double(n));
   for(deque<vector<double> >::const_iterator i=measurementsInTransit.begin();i!=measurementsInTransit.end();i++) {
@@ -1523,6 +1763,7 @@ void TimeDelayedSensor::SetInternalState(const vector<double>& state)
   copy(state.begin(),state.begin()+sstate.size(),sstate.begin());
   sensor->SetInternalState(sstate);
   vector<double>::const_iterator readpos = state.begin()+sstate.size();
+  curTime = *readpos; readpos++;
   int k = int(*readpos); readpos++;
   int n = int(*readpos); readpos++;
   Assert(k >= 0);
@@ -1591,6 +1832,7 @@ LaserRangeSensor::LaserRangeSensor()
 void LaserRangeSensor::Advance(Real dt)
 {
   last_dt = dt;
+  last_t += dt;
 }
 
 double EvalPattern(int type,double x,double correction=1.0)
@@ -1604,7 +1846,13 @@ double EvalPattern(int type,double x,double correction=1.0)
 
 void LaserRangeSensor::Simulate(ControlledRobotSimulator* robot,WorldSimulation* sim)
 {
-  last_t = sim->time;
+  if(link >= 0) 
+    robot->oderobot->GetLinkTransform(link,robot->robot->links[link].T_World);
+  SimulateKinematic(*robot->robot,*sim->world);
+}
+
+void LaserRangeSensor::SimulateKinematic(Robot& robot,RobotWorld& world)
+{
   depthReadings.resize(measurementCount);
   //need to make sure that the sawtooth pattern hits the last measurement: scale the time domain so last measurement before
   //loop gets 1
@@ -1613,17 +1861,18 @@ void LaserRangeSensor::Simulate(ControlledRobotSimulator* robot,WorldSimulation*
     xscale =  1.0 + 1.0/Real(measurementCount-1);
   if(ySweepType == SweepSawtooth && last_dt > 0 && measurementCount > 1) 
     xscale =  1.0 + 1.0/Real(measurementCount-1);
-  Real ux0 = (xSweepPeriod == 0 ? 0 : (sim->time - last_dt + xSweepPhase)/xSweepPeriod);
-  Real ux1 = (xSweepPeriod == 0 ? 1 : (sim->time + xSweepPhase)/xSweepPeriod);
-  Real uy0 = (ySweepPeriod == 0 ? 0 : (sim->time - last_dt + ySweepPhase)/ySweepPeriod);
-  Real uy1 = (ySweepPeriod == 0 ? 1 : (sim->time + ySweepPhase)/ySweepPeriod);
+  Real ux0 = (xSweepPeriod == 0 ? 0 : (last_t - last_dt + xSweepPhase)/xSweepPeriod);
+  Real ux1 = (xSweepPeriod == 0 ? 1 : (last_t + xSweepPhase)/xSweepPeriod);
+  Real uy0 = (ySweepPeriod == 0 ? 0 : (last_t - last_dt + ySweepPhase)/ySweepPeriod);
+  Real uy1 = (ySweepPeriod == 0 ? 1 : (last_t + ySweepPhase)/ySweepPeriod);
+
   //skip previous measurement
   if(xSweepPeriod != 0 && measurementCount > 1) ux0 += (ux1-ux0)/(measurementCount-1);
   if(ySweepPeriod != 0 && measurementCount > 1) uy0 += (uy1-uy0)/(measurementCount-1);
   Ray3D ray;
   RigidTransform T;
   if(link >= 0) {
-    robot->oderobot->GetLinkTransform(link,T);
+    T = robot.links[link].T_World;
     T = T*Tsensor;
   }
   else
@@ -1652,7 +1901,7 @@ void LaserRangeSensor::Simulate(ControlledRobotSimulator* robot,WorldSimulation*
     ray.direction = T.R*Vector3(x,y,z);
     Vector3 pt;
     //need to ignore the robot's link geometry
-    int obj = sim->world->RayCast(ray,pt);
+    int obj = world.RayCast(ray,pt);
     if (obj >= 0) 
       depthReadings[i] = pt.distance(ray.source) + depthMinimum;
     else 
@@ -1669,6 +1918,7 @@ void LaserRangeSensor::Simulate(ControlledRobotSimulator* robot,WorldSimulation*
 void LaserRangeSensor::Reset()
 {
   depthReadings.resize(0);
+  last_t = 0;
 }
 
 void LaserRangeSensor::MeasurementNames(vector<string>& names) const
@@ -1826,7 +2076,7 @@ CameraSensor::~CameraSensor()
   fb = 0;
 }
 
-void CameraSensor::UpdateMeasurements(RobotWorld& world,const Robot& robot)
+void CameraSensor::SimulateKinematic(Robot& robot,RobotWorld& world)
 {
   RigidTransform Tlink;
   if(link >= 0) Tlink = robot.links[link].T_World;
@@ -2062,7 +2312,7 @@ void CameraSensor::Simulate(ControlledRobotSimulator* robot,WorldSimulation* sim
   sim->UpdateModel();
   if (link >= 0)  //make sure we get the true simulated link transform
     robot->oderobot->GetLinkTransform(link,robot->robot->links[link].T_World);
-  UpdateMeasurements(*sim->world,*robot->robot);
+  SimulateKinematic(*robot->robot,*sim->world);
 }
 
 void CameraSensor::Reset()

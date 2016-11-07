@@ -13,6 +13,7 @@ class JointPositionSensor : public SensorBase
   JointPositionSensor();
   virtual const char* Type() const { return "JointPositionSensor"; }
   virtual void Simulate(ControlledRobotSimulator* robot,WorldSimulation* sim);
+  virtual void SimulateKinematic(Robot& robot,RobotWorld& world);
   virtual void Reset();
   virtual void MeasurementNames(vector<string>& names) const;
   virtual void GetMeasurements(vector<double>& values) const;
@@ -36,6 +37,7 @@ class JointVelocitySensor : public SensorBase
   JointVelocitySensor();
   virtual const char* Type() const { return "JointVelocitySensor"; }
   virtual void Simulate(ControlledRobotSimulator* robot,WorldSimulation* sim);
+  virtual void SimulateKinematic(Robot& robot,RobotWorld& world);
   virtual void Reset();
   virtual void MeasurementNames(vector<string>& names) const;
   virtual void GetMeasurements(vector<double>& values) const;
@@ -62,6 +64,7 @@ class DriverTorqueSensor : public SensorBase
   DriverTorqueSensor();
   virtual const char* Type() const { return "DriverTorqueSensor"; }
   virtual void Simulate(ControlledRobotSimulator* robot,WorldSimulation* sim);
+  virtual void SimulateKinematic(Robot& robot,RobotWorld& world);
   virtual void Reset();
   virtual void MeasurementNames(vector<string>& names) const;
   virtual void GetMeasurements(vector<double>& values) const;

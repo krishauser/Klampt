@@ -14,6 +14,7 @@ class Accelerometer : public SensorBase
   Accelerometer();
   virtual const char* Type() const { return "Accelerometer"; }
   virtual void Simulate(ControlledRobotSimulator* robot,WorldSimulation* sim);
+  virtual void SimulateKinematic(Robot& robot,RobotWorld& world);
   virtual void Advance(double dt);
   virtual void Reset();
   virtual void MeasurementNames(vector<string>& names) const;
@@ -46,6 +47,7 @@ class TiltSensor : public SensorBase
   TiltSensor();
   virtual const char* Type() const { return "TiltSensor"; }
   virtual void Simulate(ControlledRobotSimulator* robot,WorldSimulation* sim);
+  virtual void SimulateKinematic(Robot& robot,RobotWorld& world);
   virtual void Advance(double dt);
   virtual void Reset();
   virtual void MeasurementNames(vector<string>& names) const;
@@ -75,6 +77,7 @@ class GyroSensor : public SensorBase
   GyroSensor();
   virtual const char* Type() const { return "GyroSensor"; }
   virtual void Simulate(ControlledRobotSimulator* robot,WorldSimulation* sim);
+  virtual void SimulateKinematic(Robot& robot,RobotWorld& world);
   virtual void Reset();
   virtual void Advance(Real dt);
   virtual void MeasurementNames(vector<string>& names) const;
@@ -112,6 +115,7 @@ class IMUSensor : public SensorBase
   IMUSensor();
   virtual const char* Type() const { return "IMUSensor"; }
   virtual void Simulate(ControlledRobotSimulator* robot,WorldSimulation* sim);
+  virtual void SimulateKinematic(Robot& robot,RobotWorld& world);
   virtual void Advance(Real dt);
   virtual void Reset();
   virtual void MeasurementNames(vector<string>& names) const;
