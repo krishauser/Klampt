@@ -993,15 +993,37 @@ class Geometry3D(_object):
         """
         translate(Geometry3D self, double const [3] t)
 
-        Translates the geometry data. 
+        Translates the geometry data. Permanently modifies the data and resets
+        any collision data structures. 
         """
         return _robotsim.Geometry3D_translate(self, *args)
+
+    def scale(self, *args):
+        """
+        scale(Geometry3D self, double s)
+        scale(Geometry3D self, double sx, double sy, double sz)
+
+        Scales the geometry data with different factors on each axis.
+        Permanently modifies the data and resets any collision data
+        structures. 
+        """
+        return _robotsim.Geometry3D_scale(self, *args)
+
+    def rotate(self, *args):
+        """
+        rotate(Geometry3D self, double const [9] R)
+
+        Rotates the geometry data. Permanently modifies the data and resets
+        any collision data structures. 
+        """
+        return _robotsim.Geometry3D_rotate(self, *args)
 
     def transform(self, *args):
         """
         transform(Geometry3D self, double const [9] R, double const [3] t)
 
-        Translates/rotates/scales the geometry data. 
+        Translates/rotates/scales the geometry data. Permanently modifies the
+        data and resets any collision data structures. 
         """
         return _robotsim.Geometry3D_transform(self, *args)
 
@@ -3368,6 +3390,8 @@ class SimRobotSensor(_object):
     A sensor on a simulated robot. Retreive this from the controller, and
     use getMeasurements to get the currently simulated measurement vector.
 
+    name() returns the sensor's name
+
     type() gives you a string defining the sensor type.
 
     measurementNames() gives you a list of names for the measurements.
@@ -3376,6 +3400,25 @@ class SimRobotSensor(_object):
 
     drawGL(measurements) draws a sensor indicator and its measurements
     using OpenGL.
+
+    Sensors are automatically updated through the sim.simulate call, and
+    getMeasurements() retrieves the previously updated values. As a
+    result, you may get garbage measurements before the first sim.simulate
+    call is made.
+
+    There is also a new mode for doing kinematic simulation, which is
+    supported (i.e., makes sensible measurements) for some types of
+    sensors when just a robot / world model is given. This is similar to
+    Simulation.fakeSimulate but the entire controller structure is
+    bypassed. You can randomly set the robot's position, call
+    kinematicReset(), and then call kinematicSimulate(). Subsequent calls
+    assume the robot is being driven along a trajectory until the next
+    kinematicReset() is called. LaserSensor, CameraSensor, TiltSensor,
+    AccelerometerSensor, GyroSensor, JointPositionSensor,
+    JointVelocitySensor support kinematic simulation mode. FilteredSensor
+    and TimeDelayedSensor also work. The force-related sensors
+    (ContactSensor and ForceTorqueSensor) return 0's in kinematic
+    simulation.
 
     C++ includes: robotsim.h 
     """
@@ -3413,11 +3456,20 @@ class SimRobotSensor(_object):
         return _robotsim.SimRobotSensor_drawGL(self, *args)
 
     def kinematicSimulate(self, *args):
-        """kinematicSimulate(SimRobotSensor self, WorldModel world, double dt)"""
+        """
+        kinematicSimulate(SimRobotSensor self, WorldModel world, double dt)
+
+        simulates / advances the kinematic simulation 
+        """
         return _robotsim.SimRobotSensor_kinematicSimulate(self, *args)
 
     def kinematicReset(self):
-        """kinematicReset(SimRobotSensor self)"""
+        """
+        kinematicReset(SimRobotSensor self)
+
+        resets a kinematic simulation so that a new initial condition can be
+        set 
+        """
         return _robotsim.SimRobotSensor_kinematicReset(self)
 
     __swig_setmethods__["robot"] = _robotsim.SimRobotSensor_robot_set

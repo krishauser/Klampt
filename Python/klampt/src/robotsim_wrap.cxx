@@ -19919,6 +19919,212 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_Geometry3D_scale__SWIG_0(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Geometry3D *arg1 = (Geometry3D *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:Geometry3D_scale",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Geometry3D, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Geometry3D_scale" "', argument " "1"" of type '" "Geometry3D *""'"); 
+  }
+  arg1 = reinterpret_cast< Geometry3D * >(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Geometry3D_scale" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = static_cast< double >(val2);
+  {
+    try {
+      (arg1)->scale(arg2);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Geometry3D_scale__SWIG_1(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Geometry3D *arg1 = (Geometry3D *) 0 ;
+  double arg2 ;
+  double arg3 ;
+  double arg4 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  double val3 ;
+  int ecode3 = 0 ;
+  double val4 ;
+  int ecode4 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  PyObject * obj2 = 0 ;
+  PyObject * obj3 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OOOO:Geometry3D_scale",&obj0,&obj1,&obj2,&obj3)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Geometry3D, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Geometry3D_scale" "', argument " "1"" of type '" "Geometry3D *""'"); 
+  }
+  arg1 = reinterpret_cast< Geometry3D * >(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Geometry3D_scale" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = static_cast< double >(val2);
+  ecode3 = SWIG_AsVal_double(obj2, &val3);
+  if (!SWIG_IsOK(ecode3)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "Geometry3D_scale" "', argument " "3"" of type '" "double""'");
+  } 
+  arg3 = static_cast< double >(val3);
+  ecode4 = SWIG_AsVal_double(obj3, &val4);
+  if (!SWIG_IsOK(ecode4)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode4), "in method '" "Geometry3D_scale" "', argument " "4"" of type '" "double""'");
+  } 
+  arg4 = static_cast< double >(val4);
+  {
+    try {
+      (arg1)->scale(arg2,arg3,arg4);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Geometry3D_scale(PyObject *self, PyObject *args) {
+  int argc;
+  PyObject *argv[5];
+  int ii;
+  
+  if (!PyTuple_Check(args)) SWIG_fail;
+  argc = args ? (int)PyObject_Length(args) : 0;
+  for (ii = 0; (ii < 4) && (ii < argc); ii++) {
+    argv[ii] = PyTuple_GET_ITEM(args,ii);
+  }
+  if (argc == 2) {
+    int _v;
+    void *vptr = 0;
+    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_Geometry3D, 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      {
+        int res = SWIG_AsVal_double(argv[1], NULL);
+        _v = SWIG_CheckState(res);
+      }
+      if (_v) {
+        return _wrap_Geometry3D_scale__SWIG_0(self, args);
+      }
+    }
+  }
+  if (argc == 4) {
+    int _v;
+    void *vptr = 0;
+    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_Geometry3D, 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      {
+        int res = SWIG_AsVal_double(argv[1], NULL);
+        _v = SWIG_CheckState(res);
+      }
+      if (_v) {
+        {
+          int res = SWIG_AsVal_double(argv[2], NULL);
+          _v = SWIG_CheckState(res);
+        }
+        if (_v) {
+          {
+            int res = SWIG_AsVal_double(argv[3], NULL);
+            _v = SWIG_CheckState(res);
+          }
+          if (_v) {
+            return _wrap_Geometry3D_scale__SWIG_1(self, args);
+          }
+        }
+      }
+    }
+  }
+  
+fail:
+  SWIG_SetErrorMsg(PyExc_NotImplementedError,"Wrong number or type of arguments for overloaded function 'Geometry3D_scale'.\n"
+    "  Possible C/C++ prototypes are:\n"
+    "    Geometry3D::scale(double)\n"
+    "    Geometry3D::scale(double,double,double)\n");
+  return 0;
+}
+
+
+SWIGINTERN PyObject *_wrap_Geometry3D_rotate(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Geometry3D *arg1 = (Geometry3D *) 0 ;
+  double *arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double temp2[9] ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:Geometry3D_rotate",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Geometry3D, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Geometry3D_rotate" "', argument " "1"" of type '" "Geometry3D *""'"); 
+  }
+  arg1 = reinterpret_cast< Geometry3D * >(argp1);
+  {
+    if (!convert_darray(obj1,temp2,9)) {
+      return NULL;
+    }
+    arg2 = &temp2[0];
+  }
+  {
+    try {
+      (arg1)->rotate((double const (*))arg2);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_Geometry3D_transform(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   Geometry3D *arg1 = (Geometry3D *) 0 ;
@@ -47404,12 +47610,28 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"Geometry3D_translate", _wrap_Geometry3D_translate, METH_VARARGS, (char *)"\n"
 		"Geometry3D_translate(Geometry3D self, double const [3] t)\n"
 		"\n"
-		"Translates the geometry data. \n"
+		"Translates the geometry data. Permanently modifies the data and resets\n"
+		"any collision data structures. \n"
+		""},
+	 { (char *)"Geometry3D_scale", _wrap_Geometry3D_scale, METH_VARARGS, (char *)"\n"
+		"scale(double s)\n"
+		"Geometry3D_scale(Geometry3D self, double sx, double sy, double sz)\n"
+		"\n"
+		"Scales the geometry data with different factors on each axis.\n"
+		"Permanently modifies the data and resets any collision data\n"
+		"structures. \n"
+		""},
+	 { (char *)"Geometry3D_rotate", _wrap_Geometry3D_rotate, METH_VARARGS, (char *)"\n"
+		"Geometry3D_rotate(Geometry3D self, double const [9] R)\n"
+		"\n"
+		"Rotates the geometry data. Permanently modifies the data and resets\n"
+		"any collision data structures. \n"
 		""},
 	 { (char *)"Geometry3D_transform", _wrap_Geometry3D_transform, METH_VARARGS, (char *)"\n"
 		"Geometry3D_transform(Geometry3D self, double const [9] R, double const [3] t)\n"
 		"\n"
-		"Translates/rotates/scales the geometry data. \n"
+		"Translates/rotates/scales the geometry data. Permanently modifies the\n"
+		"data and resets any collision data structures. \n"
 		""},
 	 { (char *)"Geometry3D_setCollisionMargin", _wrap_Geometry3D_setCollisionMargin, METH_VARARGS, (char *)"\n"
 		"Geometry3D_setCollisionMargin(Geometry3D self, double margin)\n"
@@ -48588,8 +48810,17 @@ static PyMethodDef SwigMethods[] = {
 		"drawGL()\n"
 		"SimRobotSensor_drawGL(SimRobotSensor self, doubleVector measurements)\n"
 		""},
-	 { (char *)"SimRobotSensor_kinematicSimulate", _wrap_SimRobotSensor_kinematicSimulate, METH_VARARGS, (char *)"SimRobotSensor_kinematicSimulate(SimRobotSensor self, WorldModel world, double dt)"},
-	 { (char *)"SimRobotSensor_kinematicReset", _wrap_SimRobotSensor_kinematicReset, METH_VARARGS, (char *)"SimRobotSensor_kinematicReset(SimRobotSensor self)"},
+	 { (char *)"SimRobotSensor_kinematicSimulate", _wrap_SimRobotSensor_kinematicSimulate, METH_VARARGS, (char *)"\n"
+		"SimRobotSensor_kinematicSimulate(SimRobotSensor self, WorldModel world, double dt)\n"
+		"\n"
+		"simulates / advances the kinematic simulation \n"
+		""},
+	 { (char *)"SimRobotSensor_kinematicReset", _wrap_SimRobotSensor_kinematicReset, METH_VARARGS, (char *)"\n"
+		"SimRobotSensor_kinematicReset(SimRobotSensor self)\n"
+		"\n"
+		"resets a kinematic simulation so that a new initial condition can be\n"
+		"set \n"
+		""},
 	 { (char *)"SimRobotSensor_robot_set", _wrap_SimRobotSensor_robot_set, METH_VARARGS, (char *)"SimRobotSensor_robot_set(SimRobotSensor self, Robot * robot)"},
 	 { (char *)"SimRobotSensor_robot_get", _wrap_SimRobotSensor_robot_get, METH_VARARGS, (char *)"SimRobotSensor_robot_get(SimRobotSensor self) -> Robot *"},
 	 { (char *)"SimRobotSensor_sensor_set", _wrap_SimRobotSensor_sensor_set, METH_VARARGS, (char *)"SimRobotSensor_sensor_set(SimRobotSensor self, SensorBase * sensor)"},

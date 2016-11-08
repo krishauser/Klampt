@@ -228,9 +228,20 @@ class Geometry3D
   void setCurrentTransform(const double R[9],const double t[3]);
   ///Gets the current transformation 
   void getCurrentTransform(double out[9],double out2[3]);
-  ///Translates the geometry data 
+  ///Translates the geometry data.
+  ///Permanently modifies the data and resets any collision data structures.
   void translate(const double t[3]);
-  ///Translates/rotates/scales the geometry data 
+  ///Scales the geometry data uniformly.
+  ///Permanently modifies the data and resets any collision data structures.
+  void scale(double s);
+  ///Scales the geometry data with different factors on each axis.
+  ///Permanently modifies the data and resets any collision data structures.
+  void scale(double sx,double sy,double sz);
+  ///Rotates the geometry data.
+  ///Permanently modifies the data and resets any collision data structures.
+  void rotate(const double R[9]);
+  ///Translates/rotates/scales the geometry data.
+  ///Permanently modifies the data and resets any collision data structures.
   void transform(const double R[9],const double t[3]);
   ///Sets a padding around the base geometry which affects the results of
   ///proximity queries

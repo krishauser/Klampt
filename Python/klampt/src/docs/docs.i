@@ -436,11 +436,29 @@ Gets the current transformation. ";
 
 %feature("docstring")  Geometry3D::translate "
 
-Translates the geometry data. ";
+Translates the geometry data. Permanently modifies the data and resets
+any collision data structures. ";
+
+%feature("docstring")  Geometry3D::scale "
+
+Scales the geometry data uniformly. Permanently modifies the data and
+resets any collision data structures. ";
+
+%feature("docstring")  Geometry3D::scale "
+
+Scales the geometry data with different factors on each axis.
+Permanently modifies the data and resets any collision data
+structures. ";
+
+%feature("docstring")  Geometry3D::rotate "
+
+Rotates the geometry data. Permanently modifies the data and resets
+any collision data structures. ";
 
 %feature("docstring")  Geometry3D::transform "
 
-Translates/rotates/scales the geometry data. ";
+Translates/rotates/scales the geometry data. Permanently modifies the
+data and resets any collision data structures. ";
 
 %feature("docstring")  Geometry3D::setCollisionMargin "
 
@@ -1768,6 +1786,8 @@ Gets the PID gains for the PID controller. ";
 A sensor on a simulated robot. Retreive this from the controller, and
 use getMeasurements to get the currently simulated measurement vector.
 
+name() returns the sensor's name
+
 type() gives you a string defining the sensor type.
 
 measurementNames() gives you a list of names for the measurements.
@@ -1776,6 +1796,25 @@ drawGL() draws a sensor indicator using OpenGL
 
 drawGL(measurements) draws a sensor indicator and its measurements
 using OpenGL.
+
+Sensors are automatically updated through the sim.simulate call, and
+getMeasurements() retrieves the previously updated values. As a
+result, you may get garbage measurements before the first sim.simulate
+call is made.
+
+There is also a new mode for doing kinematic simulation, which is
+supported (i.e., makes sensible measurements) for some types of
+sensors when just a robot / world model is given. This is similar to
+Simulation.fakeSimulate but the entire controller structure is
+bypassed. You can randomly set the robot's position, call
+kinematicReset(), and then call kinematicSimulate(). Subsequent calls
+assume the robot is being driven along a trajectory until the next
+kinematicReset() is called. LaserSensor, CameraSensor, TiltSensor,
+AccelerometerSensor, GyroSensor, JointPositionSensor,
+JointVelocitySensor support kinematic simulation mode. FilteredSensor
+and TimeDelayedSensor also work. The force-related sensors
+(ContactSensor and ForceTorqueSensor) return 0's in kinematic
+simulation.
 
 C++ includes: robotsim.h ";
 
@@ -1792,6 +1831,15 @@ C++ includes: robotsim.h ";
 %feature("docstring")  SimRobotSensor::drawGL "";
 
 %feature("docstring")  SimRobotSensor::drawGL "";
+
+%feature("docstring")  SimRobotSensor::kinematicSimulate "
+
+simulates / advances the kinematic simulation ";
+
+%feature("docstring")  SimRobotSensor::kinematicReset "
+
+resets a kinematic simulation so that a new initial condition can be
+set ";
 
 
 // File: classSimulator.xml
@@ -2145,15 +2193,13 @@ C++ includes: robotmodel.h ";
 
 %feature("docstring")  WorldModel::WorldModel "
 
-Creates a WorldModel. With no arguments, creates a new world. With an
-integer or another WorldModel instance, creates a reference to an
-existing world. (To create a copy, use the copy() method.)
+Creates a WorldModel. With no arguments, creates a new world. With
+another WorldModel instance, creates a reference to an existing world.
+(To create a copy, use the copy() method.)
 
 If passed a pointer to a C++ RobotWorld structure, a reference to that
 structure is returned. (This is used pretty much only when interfacing
 C++ and Python code) ";
-
-%feature("docstring")  WorldModel::WorldModel "";
 
 %feature("docstring")  WorldModel::WorldModel "";
 

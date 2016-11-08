@@ -835,23 +835,33 @@ void Geometry3D::getCurrentTransform(double out[9],double out2[3])
   T.t.get(out2);
 }
 
+void Geometry3D::scale(double s)
+{
+  scale(s,s,s);
+}
+
+void Geometry3D::scale(double sx,double sy,double sz)
+{
+  Matrix3 R;
+  R.setZero();
+  R(0,0) = sx;
+  R(1,1) = sy;
+  R(2,2) = sz;
+  const double t[3]={0,0,0};
+  transform(R,t);
+}
+
+void Geometry3D::rotate(const double R[9])
+{
+  const double t[3]={0,0,0};
+  transform(R,t);
+}
+
 void Geometry3D::translate(const double t[3])
 {
-  SmartPointer<AnyCollisionGeometry3D>& geom = *reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(geomPtr);
-  if(!geom) return;
-  RigidTransform T;
-  T.R.setIdentity();
-  T.t.set(t);
-  geom->Transform(T);
-  geom->ClearCollisionData();
-
-  if(!isStandalone()) {
-    //update the display list / cache
-    RobotWorld& world=*worlds[this->world]->world;
-    ManagedGeometry* mgeom = &GetManagedGeometry(world,id);
-    mgeom->OnGeometryChange();
-    mgeom->RemoveFromCache();
-  }
+  Matrix3 R;
+  R.setIdentity();
+  transform(R,t);
 }
 
 void Geometry3D::transform(const double R[9],const double t[3])
