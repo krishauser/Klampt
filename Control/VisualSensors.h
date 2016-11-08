@@ -79,6 +79,9 @@ class LaserRangeSensor : public SensorBase
  * as floats.
  *
  * The list of measurements proceeds in scan-line order from the upper-left pixel.
+ *
+ * For optimal performance using the graphics card, you must install the GLEW package
+ * on your system.
  */
 class CameraSensor : public SensorBase
 {
