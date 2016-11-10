@@ -1837,7 +1837,7 @@ void Robot::Mount(int link, const Robot& subchain, const RigidTransform& T,const
 			TiXmlElement* c = e.FirstChildElement();
 			while(c != NULL) {
 				if(c->Attribute("link")) {
-					//TODO: if the link is on the root element, transform Tsensor attribute by T
+					//TODO: if the link is on the root element 0 or -1, transform Tsensor attribute by T
 					int link;
 					if(c->QueryIntAttribute("link",&link) == TIXML_SUCCESS) 
 						c->SetAttribute("link",lstart+link);
@@ -1846,6 +1846,14 @@ void Robot::Mount(int link, const Robot& subchain, const RigidTransform& T,const
 						if(prefix)
 							c->SetAttribute("link",(string(prefix)+":"+string(c->Attribute("link"))).c_str());
 					}
+				}
+				else if(c->Attribute("indices")) {
+					stringstream ss(c->Attribute("indices"));
+					stringstream ssout;
+					int index;
+					while(ss >> index) 
+						ssout << lstart + index <<" ";
+					c->SetAttribute("indices",ssout.str().c_str());
 				}
 				c = c->NextSiblingElement();
 			}
