@@ -78,7 +78,7 @@ void SimTestBackend::Start()
   drawWrenches = 1;
   drawExpanded = 0;
   drawTime = 1;
-  output_ros = 1;
+  output_ros = 0;
   drawSensors.resize(world->robots.size());
   for(size_t i=0;i<sim.controlSimulators.size();i++)
     drawSensors[i].resize(sim.controlSimulators[i].sensors.sensors.size(),false);
