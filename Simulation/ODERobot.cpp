@@ -407,7 +407,7 @@ void ODERobot::Create(int robotIndex,dWorldID worldID,bool useBoundaryLayer)
     case RobotJoint::Floating:
       break;
     default:
-      FatalError("TODO: setup affine and other custom joints\n");
+      FatalError("TODO: setup FloatingPlanar, BallAndSocket, and Custom joints\n");
       break;
     }
   }
