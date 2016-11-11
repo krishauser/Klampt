@@ -8,7 +8,7 @@ LIBS += -L/usr/lib \
 	-L/usr/X11R6/lib \
 	-L/usr/X11R6/lib/modules/extensions \
 	-L/src \
-	-L$${KLAMPTDEPS}/ode-0.11.1/ode/src/.libs \
+	-L$${KLAMPTDEPS}/ode-0.14/ode/src/.libs \
 	-L$${KLAMPTDEPS}/tinyxml \
 	-L$${KLAMPTDEPS}/glui-2.36/src/lib \
 	-L$${KLAMPTDEPS}/assimp--3.0.1270-sdk/lib 
@@ -18,7 +18,7 @@ INCLUDEPATH += $${KLAMPTDIR} \
                .. \
                ../KlamptQt \
 	       $${KLAMPTDEPS}/KrisLibrary \
-	       $${KLAMPTDEPS}/ode-0.11.1/ode/src
+	       $${KLAMPTDEPS}/ode-0.14/ode/src
 
 LIBS += -lKlampt -lKrisLibrary -lode -ltinyxml -lglpk -lglui -lglut -lGLU -lboost_thread-mt -lboost_system-mt
 
