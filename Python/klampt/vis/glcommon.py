@@ -77,6 +77,8 @@ class GLMultiViewportProgram(GLProgram):
         self.dragging = False
         self.sizePolicy = 'fit'
         self.broadcast = False
+        self.defaultSizes = []
+        self.height = self.view.h
     def initialize(self):
         if not GLProgram.initialize(self): return False
         for v in self.views:
@@ -94,6 +96,7 @@ class GLMultiViewportProgram(GLProgram):
         self.views.append(view)
         #spoofs reshape, motion functions
         view.window = self
+        self.defaultSizes.append((view.view.w,view.view.h))
         self.fit()
         return view
     def removeView(self,view):
@@ -101,6 +104,7 @@ class GLMultiViewportProgram(GLProgram):
         for i,p in enumerate(self.views):
             if p is view:
                 self.views.pop(i)
+                self.defaultSizes.pop(i)
                 self.fit()
                 self.activeView = None
                 return
@@ -110,19 +114,20 @@ class GLMultiViewportProgram(GLProgram):
         self.activeView = None
         for i,p in enumerate(self.views):
             if p.view.contains(x,y):
+                #print "Selecting view",x,y,":",i
                 self.activeView = i
                 return
         return
     def fit(self):
         rowlen = int(math.ceil(math.sqrt(len(self.views))))
         assert rowlen > 0
-        rowheights = [0]*int(len(self.views)/rowlen)
+        rowheights = [0]*int(math.ceil(float(len(self.views))/rowlen))
         colwidths = [0]*rowlen
         for i,p in enumerate(self.views):
             col = i % rowlen
             row = int(i / rowlen)
-            rowheights[row] = max(p.view.h,rowheights[row])
-            colwidths[col] = max(p.view.w,colwidths[col])
+            rowheights[row] = max(self.defaultSizes[i][0],rowheights[row])
+            colwidths[col] = max(self.defaultSizes[i][1],colwidths[col])
         cumrowheights = [0]
         cumcolwidths = [0]
         for h in rowheights:
@@ -151,6 +156,7 @@ class GLMultiViewportProgram(GLProgram):
                 p.view.y = self.view.y+int(p.view.y)
                 p.view.w = int(p.view.w)
                 p.view.h = int(p.view.h)
+                #print "View",i,"shape",(p.view.x,p.view.y,p.view.w,p.view.h)
                 p.reshapefunc(p.view.w,p.view.h)
         if self.window != None:
             self.refresh()
@@ -158,6 +164,7 @@ class GLMultiViewportProgram(GLProgram):
     def reshapefunc(self,w,h):
         if (w,h) != (self.view.w,self.view.h):
             self.view.w,self.view.h = w,h
+            self.height = self.view.h
             self.sizePolicy = 'squash'
             self.fit()
         return True
@@ -272,13 +279,13 @@ class GLMultiViewportProgram(GLProgram):
         #    ox,oy = self.pluginOrigins[self.activeView]
         #    self.window.draw_text(ox+x,oy+y,text,size,color)
     def click_ray(self,x,y):
-        print "Getting click ray"
+        #print "Getting click ray"
         if self.activeView == None:
             return self.window.click_ray(x,y)
         else:
             return self.views[self.activeView].click_ray(x,y)
     def viewport(self):
-        print "Getting viewport..."
+        #print "Getting viewport..."
         if self.activeView == None:
             return self.window.viewport()
         else:

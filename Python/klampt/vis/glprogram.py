@@ -36,7 +36,7 @@ class GLViewport:
         self.clippingplanes = (0.2,20)
 
     def contains(self,x,y):
-        return x >= self.x and y >= self.y and x < self.x + self.w and y < self.x + self.h
+        return x >= self.x and y >= self.y and x < self.x + self.w and y < self.y + self.h
 
     def fit(self,center,radius):
         """Fits the viewport to an object filling a sphere of a certain center
@@ -136,6 +136,7 @@ class GLProgram:
     Attributes:
         - name: title of the window (only has an effect before calling
           run())
+        - window: the QtBackend or GLUTBackend instance
         - view: GLViewport instance.  If this is provided to an empty _GLBackend
           window, the w,h gives a hint to the size of the window.  It is then updated
           by the user and setting the viewport size has no effect on the window.
@@ -229,11 +230,12 @@ class GLProgram:
         """
         # Viewport
         view = self.view
-        glViewport(view.x,view.y,view.w,view.h)
+        ydevice = (self.window.height - view.y - view.h)
+        glViewport(view.x,ydevice,view.w,view.h)
         
         # Initialize
         glClearColor(*self.clearColor)
-        glScissor(view.x,view.y,view.w,view.h)
+        glScissor(view.x,ydevice,view.w,view.h)
         glEnable(GL_SCISSOR_TEST);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glEnable(GL_DEPTH_TEST)
