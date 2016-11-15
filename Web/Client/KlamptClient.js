@@ -539,6 +539,13 @@ function consoleErrorArrivedCallback(data)
 	textArea.scrollTop = textArea.scrollHeight;
 }
 
+function addObject(name,object)
+{
+  object.name = name;
+  sceneCache[name] = object;
+  scene.add(object);
+}
+
 function getObject(name) 
 {
 	var object = sceneCache[name];
@@ -697,7 +704,7 @@ function kclient_rpc(request)
          console.log("we found the object in the tree");
         
          var clone_object=object.clone(true);
-         scene.add(clone_object);
+         addObject(object_name,clone_object);
          
          clone_object.traverse( function ( child ) { 
                   if (typeof child.name !== 'undefined') 
@@ -755,7 +762,7 @@ function kclient_rpc(request)
       
       sphere.name=request.name;
       sphere.position.set(request.x,request.y,request.z);
-      scene.add( sphere );                     
+      addObject(request.name,sphere);
    }
    else if(request.type == "update_sphere")
    {                 
@@ -784,8 +791,7 @@ function kclient_rpc(request)
       var material = new THREE.LineBasicMaterial( {color: 0xAA0000} );
       var line = new THREE.Line( geometry, material );
       line.name=request.name;
-       
-      scene.add( line );                     
+      addObject(request.name,line);          
    }
    else if(request.type == "update_line")
    {  
