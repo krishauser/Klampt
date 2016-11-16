@@ -7,6 +7,9 @@
 #include "Simulation/WorldSimulation.h"
 #include <KrisLibrary/meshing/PointCloud.h>
 #include "Simulation/ControlledSimulator.h"
+#include "Control/Sensor.h"
+#include "Control/VisualSensors.h"
+#include "Control/ForceSensors.h"
 #include <KrisLibrary/Timer.h>
 #include <ros/ros.h>
 #include <ros/time.h>
@@ -14,8 +17,12 @@
 #include <tf/transform_broadcaster.h>
 #include <geometry_msgs/Pose.h>
 #include <geometry_msgs/PoseStamped.h>
+#include <geometry_msgs/WrenchStamped.h>
+#include <std_msgs/Float32MultiArray.h>
 #include <sensor_msgs/JointState.h>
 #include <sensor_msgs/PointCloud2.h>
+#include <sensor_msgs/Image.h>
+#include <sensor_msgs/CameraInfo.h>
 #include <trajectory_msgs/JointTrajectory.h>
 
 bool IsBigEndian() {
@@ -120,6 +127,23 @@ bool KlamptToROS(const Robot& krobot,sensor_msgs::JointState& js)
   }
   return true;
 }
+
+bool ROSToKlampt(const std_msgs::Float32MultiArray& msg,vector<double>& kvec)
+{
+  kvec.resize(msg.data.size());
+  for(size_t i=0;i<kvec.size();i++)
+    kvec[i] = msg.data[i];
+  return true;
+}
+
+bool KlamptToROS(const vector<double>& kvec,std_msgs::Float32MultiArray& msg)
+{
+  msg.data.resize(kvec.size());
+  for(size_t i=0;i<kvec.size();i++)
+    msg.data[i] = kvec[i];
+  return true;
+}
+
 
 bool CommandedKlamptToROS(ControlledRobotSimulator& kcontroller,sensor_msgs::JointState& js)
 {
@@ -307,6 +331,10 @@ bool ROSToKlampt(const sensor_msgs::PointCloud2& pc,Meshing::PointCloud3D& kpc)
   int rgbfloat_field=-1;
   int rgbproperty=-1;
   vector<int> fieldmap(pc.fields.size(),-1);
+  if(pc.height > 1) {
+    kpc.settings.set("width",pc.height);
+    kpc.settings.set("height",pc.height);
+  }
   kpc.points.resize(0);
   kpc.propertyNames.resize(0);
   kpc.properties.resize(0);
@@ -371,8 +399,14 @@ bool ROSToKlampt(const sensor_msgs::PointCloud2& pc,Meshing::PointCloud3D& kpc)
 bool KlamptToROS(const Meshing::PointCloud3D& kpc,sensor_msgs::PointCloud2& pc)
 {
   pc.is_bigendian = IsBigEndian();
-  pc.height = 1;
-  pc.width = kpc.points.size();
+  if(kpc.IsStructured()) {
+    pc.height = kpc.GetStructuredHeight();
+    pc.width = kpc.GetStructuredWidth();
+  }
+  else {
+    pc.height = 1;
+    pc.width = kpc.points.size();
+  }
   pc.point_step = 4*(3+kpc.propertyNames.size());
   pc.row_step = pc.width*pc.point_step;
   pc.fields.resize(3+kpc.propertyNames.size());
@@ -521,7 +555,7 @@ public:
 };
 
 
-template <class Type,class Msg>
+template <class Msg>
 class ROSPublisher : public ROSPublisherBase
 {
 public:
@@ -530,18 +564,55 @@ public:
     this->topic = topic;
     pub = gRosNh->advertise<Msg>(topic,gRosQueueSize,false);
     msg.header.seq = 0;
+    msg.header.frame_id = "0";
   }
+  template <class Type>
   void publish(const Type& obj) {
     //ignore if no subscribers
     if(pub.getNumSubscribers () == 0) return;
     //do conversion if there's a subscriber
     msg.header.stamp = ros::Time::now();
     msg.header.seq++;
-    msg.header.frame_id = "0";
     KlamptToROS(obj,msg);
     pub.publish(msg);
   }
+  ///assumes that you've updated the meaningful parts of msg
+  void publish_current() {
+    //ignore if no subscribers
+    if(pub.getNumSubscribers () == 0) return;
+    //do conversion if there's a subscriber
+    msg.header.stamp = ros::Time::now();
+    msg.header.seq++;
+    pub.publish(msg);
+  }
 };
+
+template <class Msg>
+class ROSRawPublisher : public ROSPublisherBase
+{
+public:
+  Msg msg;
+  ROSRawPublisher(const std::string& topic) {
+    this->topic = topic;
+    pub = gRosNh->advertise<Msg>(topic,gRosQueueSize,false);
+  }
+  template <class Type>
+  void publish(const Type& obj) {
+    //ignore if no subscribers
+    if(pub.getNumSubscribers () == 0) return;
+    KlamptToROS(obj,msg);
+    pub.publish(msg);
+  }
+  ///assumes that you've updated the meaningful parts of msg
+  void publish_current() {
+    //ignore if no subscribers
+    if(pub.getNumSubscribers () == 0) return;
+    //do conversion if there's a subscriber
+    pub.publish(msg);
+  }
+
+};
+
 
 class ROSTfPublisher : public ROSPublisherBase
 {
@@ -611,24 +682,6 @@ bool RosSubscribe(Type& obj,const string& topic)
 }
 
 template<class Type,class PubType,class Msg>
-bool RosPublish3(Type& obj,const string& topic)
-{
-  if(!ROSInit()) return false;
-  PublisherList::iterator i=gPublishers.find(topic); 
-  PubType* pub;
-  if(i==gPublishers.end()) { 
-    pub = new PubType(topic); 
-    gPublishers[topic] = pub; 
-  } 
-  else { 
-    pub = dynamic_cast<PubType*>((ROSPublisherBase*)i->second);
-    if(!pub) return false;
-  }
-  pub->publish(obj); 
-  return true; 
-}
-
-template<class Type,class PubType,class Msg>
 bool RosPublish2(const Type& obj,const string& topic)
 {
   if(!ROSInit()) return false;
@@ -646,12 +699,30 @@ bool RosPublish2(const Type& obj,const string& topic)
   return true; 
 }
 
+
+
+template <class Msg>
+ROSPublisher<Msg>* GetPublisher(const char* topic)
+{
+  if(!ROSInit()) return NULL;
+  PublisherList::iterator i=gPublishers.find(topic); 
+  ROSPublisher<Msg>* pub;
+  if(i==gPublishers.end()) { 
+    pub = new ROSPublisher<Msg>(topic); 
+    gPublishers[topic] = pub; 
+  } 
+  else { 
+    pub = dynamic_cast<ROSPublisher<Msg>*>((ROSPublisherBase*)i->second);
+    if(!pub) return NULL;
+  }
+  return pub;
+}
+
 template<class Type,class Msg>
 bool RosPublish(const Type& obj,const string& topic)
 {
-  return RosPublish2<Type,ROSPublisher<Type,Msg>,Msg>(obj,topic);
+  return RosPublish2<Type,ROSPublisher<Msg>,Msg>(obj,topic);
 }
-
 
 bool ROSPublishTransforms(const RobotWorld& world,const char* frameprefix)
 {
@@ -669,8 +740,17 @@ bool ROSPublishTransforms(const RobotWorld& world,const char* frameprefix)
   for(size_t i=0;i<world.rigidObjects.size();i++)
     tf->send(prefix+"/"+world.rigidObjects[i]->name,world.rigidObjects[i]->T);
   for(size_t i=0;i<world.robots.size();i++) {
+    string rprefix = prefix+"/"+world.robots[i]->name;
     for(size_t j=0;j<world.robots[i]->links.size();j++) {
-      tf->send(prefix+"/"+world.robots[i]->name+"/"+world.robots[i]->linkNames[j],world.robots[i]->links[j].T_World);
+      int p = world.robots[i]->parents[j];
+      if(p < 0) {
+        tf->send(rprefix+"/"+world.robots[i]->linkNames[j],world.robots[i]->links[j].T_World);
+      }
+      else {
+        RigidTransform Tparent;
+        Tparent.mulInverseA(world.robots[i]->links[p].T_World,world.robots[i]->links[j].T_World);
+        tf->send(rprefix+"/"+world.robots[i]->linkNames[j],Tparent,(rprefix+"/"+world.robots[i]->linkNames[j]).c_str());
+      }
     }
   }
   return true;
@@ -689,16 +769,24 @@ bool ROSPublishTransforms(const WorldSimulation& sim,const char* frameprefix)
     tf = dynamic_cast<ROSTfPublisher*>((ROSPublisherBase*)gPublishers["tf"]);
     if(tf==NULL) return false;
   }
+  RigidTransform T,Tp;
   for(size_t i=0;i<sim.world->rigidObjects.size();i++) {
-    RigidTransform T;
     sim.odesim.object(i)->GetTransform(T);
     tf->send(prefix+"/"+sim.world->rigidObjects[i]->name,T);
   }
   for(size_t i=0;i<sim.world->robots.size();i++) {
+    string rprefix = prefix+"/"+sim.world->robots[i]->name;
     for(size_t j=0;j<sim.world->robots[i]->links.size();j++) {
-      RigidTransform T;
       sim.odesim.robot(i)->GetLinkTransform(j,T);
-      tf->send(prefix+"/"+sim.world->robots[i]->name+"/"+sim.world->robots[i]->linkNames[j],T);
+      int p = sim.world->robots[i]->parents[j];
+      if(p < 0)
+        tf->send(rprefix+"/"+sim.world->robots[i]->linkNames[j],T);
+      else {
+        sim.odesim.robot(i)->GetLinkTransform(p,Tp);
+        RigidTransform Trel;
+        Trel.mulInverseA(Tp,T);
+        tf->send(rprefix+"/"+sim.world->robots[i]->linkNames[j],Trel,(rprefix+"/"+sim.world->robots[i]->linkNames[p]).c_str());
+      }
     }
   }
   return true;
@@ -717,8 +805,17 @@ bool ROSPublishTransforms(const Robot& robot,const char* frameprefix)
     tf = dynamic_cast<ROSTfPublisher*>((ROSPublisherBase*)gPublishers["tf"]);
     if(tf==NULL) return false;
   }
-  for(size_t j=0;j<robot.links.size();j++) 
-    tf->send(prefix+"/"+robot.linkNames[j],robot.links[j].T_World);
+  for(size_t j=0;j<robot.links.size();j++)  {
+    int p = robot.parents[j];
+    if(p < 0) {
+      tf->send(prefix+"/"+robot.linkNames[j],robot.links[j].T_World);
+    }
+    else {
+      RigidTransform Tparent;
+      Tparent.mulInverseA(robot.links[p].T_World,robot.links[j].T_World);
+      tf->send(prefix+"/"+robot.linkNames[j],Tparent,(prefix+"/"+robot.linkNames[j]).c_str());
+    }
+  }
   return true;
 }
 
@@ -761,23 +858,12 @@ bool ROSPublishTrajectory(const Robot& robot,const LinearPath& path,const char* 
 {
   if(!ROSInit()) return false;
   PublisherList::iterator i=gPublishers.find(topic); 
-  ROSPublisher<LinearPath,trajectory_msgs::JointTrajectory>* pub;
-  if(i==gPublishers.end()) { 
-    pub = new ROSPublisher<LinearPath,trajectory_msgs::JointTrajectory>(topic); 
-    gPublishers[topic] = pub; 
-  } 
-  else { 
-    pub = dynamic_cast<ROSPublisher<LinearPath,trajectory_msgs::JointTrajectory>*>((ROSPublisherBase*)i->second);
-    if(!pub) return false;
-  }
+  ROSPublisher<trajectory_msgs::JointTrajectory>* pub = GetPublisher<trajectory_msgs::JointTrajectory>(topic);
   //ignore if no subscribers
   if(pub->pub.getNumSubscribers () == 0) return true;
   //do conversion if there's a subscriber
-  pub->msg.header.stamp = ros::Time::now();
-  pub->msg.header.seq++;
-  pub->msg.header.frame_id = "0";
   KlamptToROS(robot,path,pub->msg);
-  pub->pub.publish(pub->msg);
+  pub->publish_current();
   return true; 
 }
 
@@ -785,79 +871,147 @@ bool ROSPublishTrajectory(const Robot& robot,const vector<int>& indices,const Li
 {
   if(!ROSInit()) return false;
   PublisherList::iterator i=gPublishers.find(topic); 
-  ROSPublisher<LinearPath,trajectory_msgs::JointTrajectory>* pub;
-  if(i==gPublishers.end()) { 
-    pub = new ROSPublisher<LinearPath,trajectory_msgs::JointTrajectory>(topic); 
-    gPublishers[topic] = pub; 
-  } 
-  else { 
-    pub = dynamic_cast<ROSPublisher<LinearPath,trajectory_msgs::JointTrajectory>*>((ROSPublisherBase*)i->second);
-    if(!pub) return false;
-  }
+  ROSPublisher<trajectory_msgs::JointTrajectory>* pub = GetPublisher<trajectory_msgs::JointTrajectory>(topic);
   //ignore if no subscribers
   if(pub->pub.getNumSubscribers () == 0) return true;
   //do conversion if there's a subscriber
-  pub->msg.header.stamp = ros::Time::now();
-  pub->msg.header.seq++;
-  pub->msg.header.frame_id = "0";
   KlamptToROS(robot,indices,path,pub->msg);
-  pub->pub.publish(pub->msg);
+  pub->publish_current();
   return true; 
 }
 
-
-class ROSCommandedPublisher : public ROSPublisherBase
+void KlamptToROSCameraInfo(const CameraSensor& cam,sensor_msgs::CameraInfo& msg)
 {
-public:
-  typedef sensor_msgs::JointState Msg;
-  Msg msg;
-  ROSCommandedPublisher(const std::string& topic) {
-    this->topic = topic;
-    pub = gRosNh->advertise<Msg>(topic,gRosQueueSize,false);
-    msg.header.seq = 0;
-  }
-  void publish(ControlledRobotSimulator& obj) {
-    //ignore if no subscribers
-    if(pub.getNumSubscribers () == 0) return;
-    //do conversion if there's a subscriber
-    msg.header.stamp = ros::Time::now();
-    msg.header.seq++;
-    msg.header.frame_id = "0";
-    CommandedKlamptToROS(obj,msg);
-    pub.publish(msg);
-  }
-};
+  msg.width = cam.xres;
+  msg.height = cam.yres;
+  msg.distortion_model = "plumb_bob";
+  msg.D.resize(5,0.0);
+  Real fx = 0.5*cam.xres/Tan(cam.xfov*0.5);
+  Real fy = 0.5*cam.xres/Tan(cam.xfov*0.5);
+  Real cx = 0.5*cam.yres;
+  Real cy = 0.5*cam.yres;
+  msg.K[0] = fx;
+  msg.K[4] = fy;
+  msg.K[8] = 1;
+  msg.K[3] = cx;
+  msg.K[7] = cy;
+  msg.R[0] = 1;
+  msg.R[4] = 1;
+  msg.R[8] = 1;
+  msg.P[0] = fx;
+  msg.P[5] = fy;
+  msg.P[10] = 1;
+  msg.P[3] = cx;
+  msg.P[8] = cy;
+}
 
-class ROSSensedPublisher : public ROSPublisherBase
+
+bool ROSPublishSensorMeasurement(const SensorBase* sensor,const char* topic)
 {
-public:
-  typedef sensor_msgs::JointState Msg;
-  Msg msg;
-  ROSSensedPublisher(const std::string& topic) {
-    this->topic = topic;
-    pub = gRosNh->advertise<Msg>(topic,gRosQueueSize,false);
-    msg.header.seq = 0;
+  Robot blank;
+  return ROSPublishSensorMeasurement(sensor,blank,topic,NULL);
+}
+bool ROSPublishSensorMeasurement(const SensorBase* sensor,const Robot& robot,const char* topic,const char* frameprefix)
+{
+  if(!ROSInit()) return false;
+  if(0 == strcmp(sensor->Type(),"CameraSensor")) {
+    const CameraSensor* camera = dynamic_cast<const CameraSensor*>(sensor);
+    string frame = "0";
+    if(frameprefix) 
+      frame = string(frameprefix) + "/" + robot.name + "/" + robot.linkNames[camera->link];
+    
+    vector<double> measurements;
+    camera->GetMeasurements(measurements);
+    if(measurements.empty()) return false;
+    if(camera->rgb) {
+      ROSPublisher<sensor_msgs::CameraInfo>* pubinfo = GetPublisher<sensor_msgs::CameraInfo>((string(topic)+"/rgb/camera_info").c_str());
+      KlamptToROSCameraInfo(*camera,pubinfo->msg);
+      pubinfo->msg.header.frame_id = frame;
+      pubinfo->publish_current();
+      ROSPublisher<sensor_msgs::Image>* pub = GetPublisher<sensor_msgs::Image>((string(topic)+"/rgb/image_rect_color").c_str());
+      pub->msg.header.frame_id = frame;
+      pub->msg.width = camera->xres;
+      pub->msg.height = camera->yres;
+      pub->msg.encoding = "rgb8";
+      pub->msg.is_bigendian = IsBigEndian();
+      pub->msg.step = pub->msg.width*3;
+      pub->msg.data.resize(camera->xres*camera->yres*3);
+      for(int i=0;i<camera->xres*camera->yres;i++) {
+        unsigned int abgr = (unsigned int)measurements[i];
+        unsigned char b = (abgr >> 16) & 0xff;
+        unsigned char g = (abgr >> 8) & 0xff;
+        unsigned char r = (abgr) & 0xff;
+        pub->msg.data[i*3]=r;
+        pub->msg.data[i*3+1]=g;
+        pub->msg.data[i*3+2]=b;
+      }
+      pub->publish_current();
+    }
+    if(camera->depth) {
+      ROSPublisher<sensor_msgs::CameraInfo>* pubinfo = GetPublisher<sensor_msgs::CameraInfo>((string(topic)+"/depth_registered/camera_info").c_str());
+      KlamptToROSCameraInfo(*camera,pubinfo->msg);
+      pubinfo->publish_current();
+      int ofs = 0;
+      if(camera->rgb) ofs = camera->xres*camera->yres;
+      ROSPublisher<sensor_msgs::Image>* pub = GetPublisher<sensor_msgs::Image>((string(topic)+"/depth_registered/image_rect").c_str());
+      pub->msg.width = camera->xres;
+      pub->msg.height = camera->yres;
+      pub->msg.encoding = "32FC1";
+      pub->msg.is_bigendian = IsBigEndian();
+      pub->msg.step = pub->msg.width*4;
+      pub->msg.data.resize(camera->xres*camera->yres*4);
+      for(int i=0;i<camera->xres*camera->yres;i++) {
+        double d = measurements[ofs+i];
+        *((float*)&pub->msg.data[i*4])=float(d);
+      }
+      pub->publish_current();
+    }
   }
-  void publish(ControlledRobotSimulator& obj) {
-    //ignore if no subscribers
-    if(pub.getNumSubscribers () == 0) return;
-    //do conversion if there's a subscriber
-    msg.header.stamp = ros::Time::now();
-    msg.header.seq++;
-    msg.header.frame_id = "0";
-    SensedKlamptToROS(obj,msg);
-    pub.publish(msg);
+  else if(0 == strcmp(sensor->Type(),"ForceTorqueSensor")) {
+    const ForceTorqueSensor* ft = dynamic_cast<const ForceTorqueSensor*>(sensor);
+    string frame = "0";
+    if(frameprefix) 
+      frame = string(frameprefix) + "/" + robot.name + "/" + robot.linkNames[ft->link];
+
+    vector<double> measurements;
+    sensor->GetMeasurements(measurements);
+    if(measurements.size() != 6) return false;
+    ROSPublisher<geometry_msgs::WrenchStamped>* pub = GetPublisher<geometry_msgs::WrenchStamped>(topic);
+    pub->msg.header.frame_id = frame;
+    pub->msg.wrench.force.x = measurements[0];
+    pub->msg.wrench.force.y = measurements[1];
+    pub->msg.wrench.force.z = measurements[2];
+    pub->msg.wrench.torque.x = measurements[3];
+    pub->msg.wrench.torque.y = measurements[4];
+    pub->msg.wrench.torque.z = measurements[5];
+    pub->publish_current();
   }
-};
+  else {
+    vector<double> measurements;
+    sensor->GetMeasurements(measurements);
+    RosPublish2<vector<double>,ROSRawPublisher<std_msgs::Float32MultiArray>,std_msgs::Float32MultiArray>(measurements,topic);
+  }
+  return true;
+}
+
 bool ROSPublishCommandedJointState(ControlledRobotSimulator& robot,const char* topic)
 {
-  return RosPublish3<ControlledRobotSimulator,ROSCommandedPublisher,sensor_msgs::JointState>(robot,topic);
+  ROSPublisher<sensor_msgs::JointState>* pub = GetPublisher<sensor_msgs::JointState>(topic);
+  if(!pub) return false;
+  CommandedKlamptToROS(robot,pub->msg);
+  pub->publish_current();
+  return true;
 }
 
 bool ROSPublishSensedJointState(ControlledRobotSimulator& robot,const char* topic)
 {
-  return RosPublish3<ControlledRobotSimulator,ROSSensedPublisher,sensor_msgs::JointState>(robot,topic);
+  ROSPublisher<sensor_msgs::JointState>* pub = GetPublisher<sensor_msgs::JointState>(topic);
+  if(!pub) return false;
+  SensedKlamptToROS(robot,pub->msg);
+  pub->publish_current();
+  return true;
 }
+
 
 bool ROSSubscribeTransforms(RobotWorld& world,const char* frameprefix);
 bool ROSSubscribeTransforms(Robot& robot,const char* frameprefix);
@@ -982,6 +1136,8 @@ bool ROSPublishTrajectory(const Robot& robot,const LinearPath& path,const char* 
 bool ROSPublishTrajectory(const Robot& robot,const vector<int>& indices,const LinearPath& path,const char* topic) { return false; }
 bool ROSPublishCommandedJointState(ControlledRobotSimulator& robot,const char* topic) { return false; }
 bool ROSPublishSensedJointState(ControlledRobotSimulator& robot,const char* topic) { return false; }
+bool ROSPublishSensorMeasurement(const SensorBase* sensor,const char* topic) { return false; }
+bool ROSPublishSensorMeasurement(const SensorBase* sensor,const Robot& robot,const char* topic,const char* frameprefix) { return false; }
 bool ROSSubscribeTransforms(RobotWorld& world,const char* frameprefix) { return false; }
 bool ROSSubscribeTransforms(Robot& robot,const char* frameprefix) { return false; }
 bool ROSSubscribeTransform(RigidTransform& T,const char* frameprefix) { return false; }
