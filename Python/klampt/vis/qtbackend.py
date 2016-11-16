@@ -226,6 +226,7 @@ class QtGLWindow(QGLWidget):
     def reshape(self,w,h):
         (self.width,self.height) = (w,h)
         self.setFixedSize(self.width,self.height)
+        self.window().resize(self.sizeHint())
         self.refresh()
 
     def draw_text(self,point,text,size=12,color=None):

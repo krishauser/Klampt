@@ -6,7 +6,7 @@ from klampt import vis
 from klampt.vis.glrobotprogram import *
 import importlib
 
-SPLIT_SCREEN_TEST = True
+SPLIT_SCREEN_TEST = False
 
 class MyGLViewer(GLSimulationProgram):
     """Simulates some functionality of the SimTest program.
@@ -83,7 +83,7 @@ class MyGLViewer(GLSimulationProgram):
 
     def moveForceSpring(self,x,y):
         self.sim.updateWorld()
-        (s,d) = self.click_ray(x,y)
+        (s,d) = self.view.click_ray(x,y)
         u = vectorops.dot(vectorops.sub(self.forceAnchorPoint,s),d)
         self.forceAnchorPoint = vectorops.madd(s,d,u)
 

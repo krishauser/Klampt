@@ -197,7 +197,7 @@ class GLSimulationProgram(GLRealtimeProgram):
         """Helper: returns a list of (world object, point) pairs sorted in order of
         increasing distance."""
         #get the viewport ray
-        (s,d) = self.click_ray(x,y)
+        (s,d) = self.view.click_ray(x,y)
 
         #run the collision tests
         collided = []

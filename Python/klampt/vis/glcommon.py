@@ -141,6 +141,7 @@ class GLMultiViewportProgram(GLProgram):
                 col = i % rowlen
                 row = int(i / rowlen)
                 p.view.x,p.view.y = (cumcolwidths[col],cumrowheights[row])
+            self.height = self.view.h
             if self.window != None:
                 self.window.reshape(self.view.w,self.view.h)
         else:
