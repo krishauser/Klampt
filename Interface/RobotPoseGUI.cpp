@@ -1,6 +1,8 @@
 #include "RobotPoseGUI.h"
 #include <KrisLibrary/GLdraw/drawMesh.h>
 #include <KrisLibrary/GLdraw/drawgeometry.h>
+#include <KrisLibrary/geometry/Conversions.h>
+#include <KrisLibrary/meshing/VolumeGrid.h>
 #include "Modeling/MultiPath.h"
 #include <KrisLibrary/robotics/IKFunctions.h>
 #include "Contact/Utils.h"
@@ -567,6 +569,25 @@ bool RobotPoseBackend::OnCommand(const string& cmd,const string& args)
     ResourceGUIBackend::SetLastActive(); 
     ResourceGUIBackend::viewResource.pathTime = 0;
   }
+  else if(cmd == "split_path") {
+    ResourcePtr r=ResourceGUIBackend::CurrentResource();
+    const LinearPathResource* lp = dynamic_cast<const LinearPathResource*>((const ResourceBase*)r);
+    double t = viewResource.pathTime;
+    fprintf(stderr,"TODO: split paths\n");
+    if(lp) {
+      
+      //ResourceGUIBackend::Add("",newtimes,newconfigs);
+      //ResourceGUIBackend::SetLastActive(); 
+      //ResourceGUIBackend::viewResource.pathTime = 0;
+    }
+    const MultiPathResource* mp = dynamic_cast<const MultiPathResource*>((const ResourceBase*)r);
+    if(mp) {
+      
+      //ResourceGUIBackend::Add("",path);
+      //ResourceGUIBackend::SetLastActive(); 
+      //ResourceGUIBackend::viewResource.pathTime = 0;
+    }
+  }
   else if(cmd == "discretize_path") {
     int num;
     stringstream ss(args);
@@ -726,6 +747,28 @@ bool RobotPoseBackend::OnCommand(const string& cmd,const string& args)
       if(r) {
 	ResourceGUIBackend::Add(r);
 	ResourceGUIBackend::SetLastActive();
+      }
+    }
+  }
+  else if(cmd == "resample") {
+    stringstream ss(args);
+    Real res;
+    ss >> res;
+    ResourcePtr r=ResourceGUIBackend::CurrentResource();
+    const TriMeshResource* tr = dynamic_cast<const TriMeshResource*>((const ResourceBase*)r);
+    if(tr) {
+      Meshing::VolumeGrid grid;
+      Geometry::CollisionMesh mesh(tr->data);
+      mesh.CalcTriNeighbors();
+      mesh.InitCollisions();
+      Geometry::MeshToImplicitSurface_SpaceCarving(mesh,grid,res);
+      //Geometry::MeshToImplicitSurface_FMM(mesh,grid,res);
+      Meshing::TriMesh newMesh;
+      Geometry::ImplicitSurfaceToMesh(grid,newMesh);
+      ResourcePtr r = MakeResource(tr->name+"_simplified",newMesh);
+      if(r) {
+        ResourceGUIBackend::Add(r);
+        ResourceGUIBackend::SetLastActive();
       }
     }
   }

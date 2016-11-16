@@ -29,6 +29,7 @@ public:
   LinearPathResource* linearpath;
 
 public slots:
+  void Split();
   void Discretize();
   void Optimize();
   void SetDuration();

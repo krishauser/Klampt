@@ -47,6 +47,8 @@ using namespace GLDraw;
  *   evenly spaced milestones.
  * - optimize_path: optimizes the current LinearPath, MultiPath, Configs
  *   resource.
+ * - split_path: splits the current LinearPath or MultiPath at the current
+ *   time into two paths.
  * - store_flat_contacts [xtol]: gets the stance for the robot standing on
  *   flat ground and adds it as a new resource
  * - get_flat_contacts [xtol]: gets the stance for the robot standing on
@@ -57,6 +59,7 @@ using namespace GLDraw;
  * - clean_contacts [xtol] [ntol]: cleans up the current Stance or Hold
  *   resource. Points and normals within xtol and ntol, respectively, will
  *   be merged.
+ * - resample res: resamples geomery with the given resolution.
  */
 class RobotPoseBackend : public ResourceGUIBackend
 {

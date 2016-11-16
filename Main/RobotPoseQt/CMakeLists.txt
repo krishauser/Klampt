@@ -26,7 +26,7 @@ INCLUDE(${QT_USE_FILE})
 
 # Define the app's UI and MOC items
 
-SET(FRAMES mainwindow collisionoutput playresourceframe resourceframe configsframe floatarrayframe holdframe pathframe stanceframe)
+SET(FRAMES mainwindow collisionoutput playresourceframe resourceframe configsframe floatarrayframe holdframe pathframe stanceframe trimeshframe)
 SET(UI_FRAMES)
 SET(H_FRAMES)
 SET(CPP_FRAMES)
