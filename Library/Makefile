@@ -13,6 +13,7 @@ unpack-deps:
 	git clone https://github.com/krishauser/KrisLibrary
 	tar xvzf ode-0.14.tar.gz
 	tar xvzf glui-2.36.tgz
+	tar xvzf glew-1.13.0.tgz
 
 deps: dep-tinyxml dep-glui dep-ode dep-KrisLibrary
 
@@ -22,6 +23,9 @@ dep-KrisLibrary:
 
 dep-tinyxml:
 	cd tinyxml; make lib
+
+dep-glew:
+	cd glew-1.13.0; make
 
 ifeq ($(UNAME), Darwin)
 dep-glui:
