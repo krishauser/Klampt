@@ -44,7 +44,7 @@ IF(WIN32)
   endif( )
 
   FIND_PATH(ODE_INCLUDE_DIR ode/ode.h
-    PATHS ${KRISLIBRARY_ROOT}/ode-0.11.1/include  )
+    PATHS ${KRISLIBRARY_ROOT}/ode-0.14/include  )
   FIND_LIBRARY(ODE_LIBRARY_DEBUG 
 	NAMES ode_doubled
 	PATHS ${KRISLIBRARY_ROOT})
@@ -135,7 +135,7 @@ ELSE(WIN32)
   SET(KLAMPT_LIBRARIES ${KRISLIBRARY_LIBRARIES})
 
   # ODE
-  SET(ODE_ROOT "${KLAMPT_ROOT}/Library/ode-0.11.1" CACHE PATH "Open Dynamics Engine path" FORCE)
+  SET(ODE_ROOT "${KLAMPT_ROOT}/Library/ode-0.14" CACHE PATH "Open Dynamics Engine path" FORCE)
   FIND_PACKAGE(ODE REQUIRED)
   IF(ODE_FOUND)
     MESSAGE("Open Dynamics Engine library found")
