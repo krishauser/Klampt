@@ -1,6 +1,6 @@
 .PHONY: unpack-deps deps dep-KrisLibrary dep-ode dep-glui dep-tinyxml
 
-ODECONFIG = --with-trimesh=none
+ODECONFIG = --with-trimesh=none --disable-demos
 #Uncomment this if you want to build ODE as a shared library
 #ODECONFIG += --enable-shared 
 #Comment this out if you want to build ODE in single precision
