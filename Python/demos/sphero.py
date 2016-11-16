@@ -64,7 +64,7 @@ class Emulator(ActuatorEmulator):
         self.sim = sim
         self.robotIndex = robotIndex
         self.controller = sim.controller(robotIndex)
-        self.robot = sim.world().robot(robotIndex)
+        self.robot = sim.world.robot(robotIndex)
         #indices: turn and drive, respectively
         self.velocityLimits = [180*math.pi/180,1080*math.pi/180]
         self.accelLimits = [360*math.pi/180,2080*math.pi/180]
