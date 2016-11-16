@@ -786,6 +786,13 @@ bool SimGUIBackend::OutputROS(const char* prefix)
   for(size_t i=0;i<world->robots.size();i++) {
     if(!ROSPublishCommandedJointState(sim.controlSimulators[i],(string(prefix)+"/"+world->robots[i]->name+"/commanded_joint_state").c_str())) return false;
     if(!ROSPublishSensedJointState(sim.controlSimulators[i],(string(prefix)+"/"+world->robots[i]->name+"/sensed_joint_state").c_str())) return false;
+    for(size_t j=0;j<sim.controlSimulators[i].sensors.sensors.size();j++) {
+      SensorBase* s = sim.controlSimulators[i].sensors.sensors[j];
+      if(!ROSPublishSensorMeasurement(s,*world->robots[i],(string(prefix)+"/"+world->robots[i]->name+"/"+s->name).c_str())) {
+        printf("OutputROS: Couldn't publish sensor %s\n",s->name.c_str());
+        return false;
+      }
+    }
   }
   if(!ROSPublishTransforms(sim,prefix)) return false;
   return true;
