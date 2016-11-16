@@ -2584,7 +2584,10 @@ bool RobotSensors::SaveSettings(const char* fn)
 
 bool RobotSensors::LoadSettings(TiXmlElement* node)
 {
-  if(0!=strcmp(node->Value(),"sensors")) return false;
+  if(0!=strcmp(node->Value(),"sensors")){
+    fprintf(stderr,"RobotSensors::LoadSettings: unable to load from xml file, no <sensors> tag\n");
+    return false;
+  }
   TiXmlElement* e=node->FirstChildElement();
   sensors.resize(0);
   while(e != NULL) {
@@ -2665,7 +2668,7 @@ bool RobotSensors::LoadSettings(TiXmlElement* node)
       processedAttributes.insert("sensor");
     }
     else {
-      printf("Unknown sensor type %s\n",e->Value());
+      printf("RobotSensors::LoadSettings: Unknown sensor type %s\n",e->Value());
       return false;
     }
     TiXmlAttribute* attr = e->FirstAttribute();
@@ -2688,6 +2691,7 @@ bool RobotSensors::LoadSettings(TiXmlElement* node)
     }
     e = e->NextSiblingElement();
   }
+  printf("RobotSensors::LoadSettings: loaded %d sensors\n",sensors.size());
   return true;
 }
 
@@ -2815,6 +2819,7 @@ void RobotSensors::MakeDefault(Robot* robot)
     getchar();
     sensors.resize(0);
   }
+  //printf("RobotSensors::MakeDefault: no \"sensors\" property in robot\n");
   JointPositionSensor* jp = new JointPositionSensor;
   JointVelocitySensor* jv = new JointVelocitySensor;
   jp->name = "q";
