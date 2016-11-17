@@ -38,4 +38,4 @@ endif
 
 dep-ode:
 	cd ode-0.14; X_EXTRA_LIBS=-lX11 ./configure $(ODECONFIG)
-	cd ode-0.14/ode/src; make
+	cd ode-0.14; make
