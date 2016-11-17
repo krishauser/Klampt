@@ -1,0 +1,41 @@
+language: cpp
+
+compiler:
+  - gcc
+  - clang
+
+
+matrix:
+  allow_failures:
+    - compiler: clang
+
+install:
+  - sudo apt-get install cmake g++ git libboost-system-dev libboost-thread-dev freeglut3 freeglut3-dev libglpk-dev python-dev python-opengl libxmu-dev libxi-dev libqt4-dev
+
+(optional) Download and install Assimp using the following command line:
+sudo apt-get install libassimp-dev
+
+before_script:
+  - chmod +x .travis_conditional.sh
+  - echo $LD_LIBRARY_PATH
+  - sudo ldconfig
+  # Prepare build
+  - cd Klampt
+  - cmake .
+
+script:
+  - make
+  - ./.travis_conditional.sh
+  - cd Library; make deps;
+  - sudo make python-install
+
+# safelist
+branches:
+  only:
+  - master
+  - v0.7
+
+notifications:
+  email:
+    - kris.hauser@duke.edu
+    - rocchi.alessio@gmail.com
