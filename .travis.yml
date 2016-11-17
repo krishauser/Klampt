@@ -17,18 +17,13 @@ before_script:
   - sudo ldconfig
   # Prepare build
   #- cd Klampt
-  - cd Library
-    make deps-unpack
-  - if [ "$TRAVIS_BRANCH" == "v0.7" ] || [ "$TRAVIS_BRANCH" == "travis" ]; then  
-      cd KrisLibrary
-      git checkout plan_devel
-      cd ..
-      echo "Checking out branch plan_devel for KrisLibrary"
-    fi
-  - cd Library; make deps; cd ..;
-  - cmake .
 
 script:
+  - cd Library
+    make deps-unpack
+  - if [ "$TRAVIS_BRANCH" == "v0.7" ] || [ "$TRAVIS_BRANCH" == "travis" ]; then  cd KrisLibrary && git checkout plan_devel && cd .. && echo "Checking out branch plan_devel for KrisLibrary"; fi
+  - cd Library; make deps; cd ..;
+  - cmake .
   - make
   - sudo make python-install
   - python -m unittest discover tests/
