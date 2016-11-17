@@ -17,7 +17,7 @@ before_script:
   - echo $LD_LIBRARY_PATH
   - sudo ldconfig
   # Prepare build
-  - cd Klampt
+  #- cd Klampt
   - cmake .
 
 script:
