@@ -1,6 +1,6 @@
 #!/bin/bash
 
-if [ $TRAVIS_BRANCH == 'v0.7' ]; then
+if [ $TRAVIS_BRANCH == 'v0.7' ] || [ $TRAVIS_BRANCH == 'travis' ]; then
   cd Library
   make deps-unpack
   cd KrisLibrary
