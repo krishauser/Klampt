@@ -25,6 +25,7 @@ before_script:
 script:
   - make
   - sudo make python-install
+  - python -m unittest discover tests/
 
 # safelist
 branches:
