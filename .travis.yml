@@ -10,10 +10,7 @@ matrix:
     - compiler: clang
 
 install:
-  - sudo apt-get install cmake g++ git libboost-system-dev libboost-thread-dev freeglut3 freeglut3-dev libglpk-dev python-dev python-opengl libxmu-dev libxi-dev libqt4-dev
-
-(optional) Download and install Assimp using the following command line:
-sudo apt-get install libassimp-dev
+  - sudo apt-get install cmake g++ git libboost-system-dev libboost-thread-dev freeglut3 freeglut3-dev libglpk-dev python-dev python-opengl libxmu-dev libxi-dev libqt4-dev libassimp-dev
 
 before_script:
   - chmod +x .travis_conditional.sh
