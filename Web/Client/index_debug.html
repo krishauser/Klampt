@@ -172,12 +172,17 @@
             console.log("first testing if local storage is available");
             localStorageAvailable=storageAvailable();
             console.log("  local storage test determined: " + localStorageAvailable);
+
+            hostname = location.hostname;
+            if(hostname=="") {
+               hostname = "localhost";
+            }
  
             var pstyle = 'background-color: #F5F6F7; border: 1px solid #dfdfdf; padding: 5px;';
             $('#myLayout').w2layout({
                name: 'layout',
                panels: [
-                  { type: 'top',  size: "5%", resizable: true, style: pstyle, content: '<button onclick="doCodeSubmit()">Reset</button><button onclick="requestAdvance()">Advance Frame</button><button onclick="requestFreeRun()">Run</button><button onclick="KLAMPT.animate(false)">Stop</button> <div style=" width:20px;display:inline-block;" />Klampt Server URL:<input type="text" id="serverURL" value="ws://localhost:1234" size="50"><button onclick="doConnect()">Connect</button><div style=" width:20px;display:inline-block;" /><select id="boilerselctor" onchange="boilerPlateChanged()"></select> <button onclick="doRevertChanges()">Revert to Skeleton Code</button>'},
+                  { type: 'top',  size: "5%", resizable: true, style: pstyle, content: '<button onclick="doCodeSubmit()">Reset</button><button onclick="requestAdvance()">Advance Frame</button><button onclick="requestFreeRun()">Run</button><button onclick="KLAMPT.animate(false)">Stop</button> <div style=" width:20px;display:inline-block;" />Klampt Server URL:<input type="text" id="serverURL" value="ws://'+hostname+':1234" size="50"><button onclick="doConnect()">Connect</button><div style=" width:20px;display:inline-block;" /><select id="boilerselctor" onchange="boilerPlateChanged()"></select> <button onclick="doRevertChanges()">Revert to Skeleton Code</button>'},
                   { type: 'main', style: pstyle, content: '<div id="canvas" style="width:100%; height:100%; margin:0; padding:0"></div>' },
                   { type: 'preview', size: "15%", resizable: true, style: pstyle, content: '<textarea readonly id="myTextarea" style="background-color: black;color:white;width:100%;height:100%">> </textarea>' },
                   { type: 'right', size: '50%', resizable: true, style: pstyle, content: 
