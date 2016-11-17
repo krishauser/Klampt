@@ -221,18 +221,11 @@ static PyObject* convert_dmatrix_obj(const std::vector<std::vector<double> >& ma
    $1 = &temp2;
 }
 
-%typemap(in, numinputs=0) std::vector<double>& kPout (std::vector<double> temp2) {
-   $1 = &temp2;
-}
+%apply std::vector<double>& out { std::vector<double>& kPout };
 
-%typemap(in, numinputs=0) std::vector<double>& kIout (std::vector<double> temp2) {
-   $1 = &temp2;
-}
+%apply std::vector<double>& out { std::vector<double>& kIout };
 
-%typemap(in, numinputs=0) std::vector<double>& kDout (std::vector<double> temp2) {
-   $1 = &temp2;
-}
-
+%apply std::vector<double>& out { std::vector<double>& kDout };
 
 %typemap(in, numinputs=0) std::vector<std::vector<double> >& out (std::vector<std::vector<double> > temp) {
    $1 = &temp;
