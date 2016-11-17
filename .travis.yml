@@ -18,12 +18,12 @@ before_script:
   - sudo ldconfig
   # Prepare build
   #- cd Klampt
+  - ./.travis_conditional.sh
+  - cd Library; make deps; cd ..;
   - cmake .
 
 script:
   - make
-  - ./.travis_conditional.sh
-  - cd Library; make deps;
   - sudo make python-install
 
 # safelist
