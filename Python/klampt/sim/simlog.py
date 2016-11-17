@@ -42,8 +42,8 @@ class SimLogger:
                 else:
                     raise ValueError("Invalid object given in the colliding list")
         if saveheader:
-            #need to call advance to get proper sensor readings...
-            self.sim.advance(0)
+            #need to call simulate to get proper sensor readings...
+            self.sim.simulate(0)
             self.saveHeader()
             self.saveContactHeader()
         return
