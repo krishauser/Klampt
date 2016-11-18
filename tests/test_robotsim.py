@@ -5,7 +5,7 @@ class robotsimTest(unittest.TestCase):
 
     def setUp(self):
         self.world = WorldModel()
-        self.world.loadElement('data/athlete_plane.xml')
+        self.world.readFile('data/athlete_plane.xml')
         self.sim = SimpleSimulator(self.world)
 
     def test_getPIDGains(self):
