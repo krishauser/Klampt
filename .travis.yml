@@ -23,6 +23,8 @@ script:
   - if [ "$TRAVIS_BRANCH" == "v0.7" ] || [ "$TRAVIS_BRANCH" == "travis" ]; then  cd KrisLibrary && git checkout plan_devel && cd .. && echo "Checking out branch plan_devel for KrisLibrary"; fi
   - make deps && cd ..
   - cmake .
+  - make Klampt
+  - cmake .
   - make
   - sudo make python-install
   # - python -m unittest discover tests/
