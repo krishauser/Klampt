@@ -109,7 +109,7 @@ def from_rpy(rollpitchyaw):
     y is "pitch", and z is "yaw".
     """
     roll,pitch,yaw = rollpitchyaw
-    Rx,Ry,Rz = from_axis_angle((1,0,0),roll),from_axis_angle((0,1,0),pitch),from_axis_angle((0,0,1),yaw)
+    Rx,Ry,Rz = from_axis_angle(((1,0,0),roll)),from_axis_angle(((0,1,0),pitch)),from_axis_angle(((0,0,1),yaw))
     return mul(Rz,mul(Ry,Rx))
 
 def moment(R):
