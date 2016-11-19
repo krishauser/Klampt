@@ -331,6 +331,7 @@ var textArea;
 var scene = new THREE.Scene();
 //var camera = new THREE.PerspectiveCamera( 75, 1.0, 0.1, 1000 );
 var camera = new THREE.PerspectiveCamera( 45, 1.0, 0.1, 1000 );
+var extras;
 var sceneCache = {};
 camera.position.z = 6;
 camera.position.y = 3;
@@ -364,9 +365,9 @@ function kclient_init(dom_sceneArea,dom_textArea)
 	controls.addEventListener( 'change', kclient_render );   
 
   kclient_windowResize(sceneArea.offsetWidth,sceneArea.offsetHeight);
-
   var axisHelper = new THREE.AxisHelper( 0.2 );
-  scene.add( axisHelper );
+  scene.add(axisHelper);
+  
   animate();
 }
 
@@ -543,7 +544,7 @@ function addObject(name,object)
 {
   object.name = name;
   sceneCache[name] = object;
-  scene.add(object);
+  extras.add(object);
 }
 
 function getObject(name) 
@@ -574,6 +575,11 @@ function kclient_set_scene(dataJ)
    sceneCache={};
 
    scene = loader.parse( dataJ );
+
+  var axisHelper = new THREE.AxisHelper( 0.2 );
+  scene.add( axisHelper );
+  extras = new THREE.Group();
+  scene.add(extras);
 }
 
 ///sceneObjects is a list of dictionaries, each containing the members "name" and "matrix"
@@ -599,9 +605,88 @@ function kclient_set_transforms(sceneObjects)
    } 
 }
 
+
+function _power_of_2(number) {
+  return (number != 0) && (number & (number - 1)) == 0;
+}
+
+function _setupBillboard(name,texture,size) {
+  var material;
+  if (!_power_of_2(texture.image.width) || !_power_of_2(texture.image.height)) {
+    console.log("Warning, texture does not have a power of two width / height: "+texture.image.width+","+texture.image.height);
+    return;
+  }
+  else {
+    if(texture.format == THREE.AlphaFormat || texture.format == THREE.LuminanceFormat ) {
+      material = new THREE.MeshBasicMaterial( {
+        alphaMap : texture,
+        transparent: true,
+        opacity: 1
+      } );
+    }
+    else {
+      material = new THREE.MeshBasicMaterial( {
+        map: texture
+      } );
+    }
+  }
+
+  var obj = getObject(name);
+  obj.material = material;
+  obj.material.needsUpdate = true;
+}
+
+function clone_material(mat)
+{
+  var res;
+  if(mat instanceof THREE.MeshPhongMaterial)
+    res = new THREE.MeshPhongMaterial();
+  else if(mat instanceof THREE.LineBasicMaterial)
+    res = new THREE.LineBasicMaterial();
+  else
+    res = new THREE.MeshBasicMaterial();
+  res.clone(mat);
+  return res;
+}
+
 function kclient_rpc(request)
 {
-   if(request.type == "set_color") 
+   if(request.type == "clear_extras")  {
+     //clear scene
+     toclear = [];
+     extras.traverse(function(child) {
+        if(child.name in sceneCache) 
+          delete sceneCache[child.name];
+        if ( child.geometry !== undefined ) child.geometry.dispose();
+        if ( child.material !== undefined ) child.material.dispose();
+     } );
+     scene.remove(extras);
+     extras = new THREE.Group();
+     scene.add(extras);
+     //clear text
+     var overlayList = [];
+     for(var i=0;i<sceneArea.children.length; i++) {
+      if(sceneArea.children[i].id.startsWith("_text_overlay_")) {
+        overlayList.push(sceneArea.children[i]);
+        //console.log("Removing text item "+sceneArea.children[i].id);
+      }
+    }
+    for (i=0;i<overlayList.length;i++) {
+      console.log("Clearing text "+overlayList[i].id);
+      sceneArea.removeChild(overlayList[i]);
+    }
+   }
+   else if(request.type == "remove") {
+     //remove object from scene
+     var object = getObject(request.name);
+     if(object) {
+        if(object.name in sceneCache) {
+           delete sceneCache[object.name];
+        }
+        scene.remove(object);
+     }
+   }
+   else if(request.type == "set_color") 
    {
       var object_name=request.object;
       var rgba=request.rgba;
@@ -609,64 +694,63 @@ function kclient_rpc(request)
                                                  
       console.log("set_color requested. object: " + object_name + " rgba: " + rgba); 
       
-      var object = getObject(object_name)
-      if(object == null) {
+      var obj = getObject(object_name);
+      if(obj == null) {
       	console.log("Invalid object name "+object_name+" specified in set_color");
       }
       else { 
+        var shared = (typeof obj.userData.customSharedMaterialSetup) === 'undefined';
          //if(typeof object.material !== 'undefined')
          //{
           //  console.log("first checking if we've working this this material before");
                                                             
             if (recursive == true)
             {
-               if(typeof object.userData.customSharedMaterialSetup === 'undefined')
-               {                          
-                  if(object.type == 'Line')
-                  {
-                     basicMaterial = new THREE.LineBasicMaterial();                         
+               if(shared)
+               {
+                  if(obj.material == null) {
+                    obj.material = new THREE.MeshPhongMaterial();
                   }
-                  else
-                     basicMaterial = new THREE.MeshPhongMaterial();
+                  else {
+                    obj.material = clone_material(obj.material);
+                  }
                   
-                  object.material=basicMaterial;      
+                  obj.userData.customSharedMaterialSetup=true;
                   
-                  object.userData.customSharedMaterialSetup=true;
-                  
-                  object.traverse( function ( child ) { 
+                  obj.traverse( function ( child ) { 
                   if (typeof child.material !== 'undefined') 
-                     child.material=object.material;
+                     child.material=obj.material;
                   } );
                }                        
             }
             else
             {
-               if(typeof object.userData.customSingleMaterialSetup === 'undefined')
+               if(shared)
                { 
-                  if(object.type == 'Line')
-                  {
-                  	console.log("Setting line material "+rgba);
-                     basicMaterial = new THREE.LineBasicMaterial();                         
+                  if(obj.material == null) {
+                    obj.material=new THREE.MeshPhongMaterial();
                   }
-                  else
-                     basicMaterial = new THREE.MeshPhongMaterial();
+                  else {
+                    obj.material=clone_material(obj.material);
+                  }
                   
-                  object.material=basicMaterial;      
-                  
-                  object.userData.customSingleMaterialSetup=true;
+                  obj.userData.customSingleMaterialSetup=true;
                }
             }
             
       
-            object.material.color.setRGB(rgba[0],rgba[1],rgba[2]);
+            obj.material.color.setRGB(rgba[0],rgba[1],rgba[2]);
             if(rgba[3]!=1.0)
             {
-               object.material.transparent=true;
-               object.material.opacity=rgba[3];
+               obj.material.transparent=true;
+               obj.material.opacity=rgba[3];
             }
             else
             {
-               object.material.transparent=false;
+              if(obj.material.alphaMap != null) 
+                obj.material.transparent=true;
+              else
+                obj.material.transparent=false;
             }
          //}
          //else
@@ -712,18 +796,22 @@ function kclient_rpc(request)
                   } );
       }
    }
-   else if(request.type == "set_position")
+   else if(request.type == "set_transform")
    {                 
-      console.log("got a set_position RPC request for: " + request.object);
+      console.log("got a set_transform RPC request for: " + request.object);
       var object = getObject(request.object);
       if(object != null)
-      {            
-        object.matrixAutoUpdate=false;
-        object.matrixWorldNeedsUpdate=true;
-      
-        var m=request.matrix;     
-        object.matrix.set(m[0],m[1],m[2],m[3],m[4],m[5],m[6],m[7],m[8],m[9],m[10],m[11],m[12],m[13],m[14],m[15]);
-      } 
+      {
+        if(object.matrix) {
+          object.matrixAutoUpdate=false;
+          object.matrixWorldNeedsUpdate=true;
+        
+          var m=request.matrix;     
+          object.matrix.set(m[0],m[1],m[2],m[3],m[4],m[5],m[6],m[7],m[8],m[9],m[10],m[11],m[12],m[13],m[14],m[15]);
+        } 
+        else 
+          console.log("  object does not have matrix property: " + request.object);
+      }
       else
          console.log("  couldn't find object: " + request.object);
    }
@@ -752,15 +840,19 @@ function kclient_rpc(request)
    else if(request.type == "add_sphere")
    {
       console.log("RPC to add sphere!"); 
-      var geometry = new THREE.SphereGeometry(1.0,20,20);
+      slices = 20;
+      if(request.r < 0.05) slices = 6;
+      else if(request.r < 0.2) slices = 12;
+
+      var geometry = new THREE.SphereGeometry(1.0,slices,slices);
       var material = new THREE.MeshPhongMaterial( {color: 0xAA0000} );
       var sphere = new THREE.Mesh( geometry, material );
+      sphere.userData.customSharedMaterialSetup=true;
       
       sphere.scale.x=request.r;
       sphere.scale.y=request.r;
       sphere.scale.z=request.r;
       
-      sphere.name=request.name;
       sphere.position.set(request.x,request.y,request.z);
       addObject(request.name,sphere);
    }
@@ -790,7 +882,7 @@ function kclient_rpc(request)
          
       var material = new THREE.LineBasicMaterial( {color: 0xAA0000} );
       var line = new THREE.Line( geometry, material );
-      line.name=request.name;
+      line.userData.customSharedMaterialSetup=true;
       addObject(request.name,line);          
    }
    else if(request.type == "update_line")
@@ -805,6 +897,118 @@ function kclient_rpc(request)
       else
          console.log("couldn't find line named: " + request.name);
    } 
+   else if(request.type == 'add_trilist')
+   {
+     var geom = new THREE.Geometry();
+     for(var i=0;i<request.verts.length;i+=3) {
+        geom.vertices.push(new THREE.Vector3(request.verts[i],request.verts[i+1],request.verts[i+2]));
+     }
+     for(var i=0;i<request.verts.length;i+=9) {
+        geom.faces.push( new THREE.Face3( i/3, i/3+1, i/3+2 ) );
+     }
+     geom.computeFaceNormals();
+     var mesh= new THREE.Mesh( geom, new THREE.MeshPhongMaterial() );
+     mesh.userData.customSharedMaterialSetup=true;
+     addObject(request.name,mesh);
+     console.log(typeof getObject(request.name).userData.customSharedMaterialSetup);
+   }
+   else if(request.type == 'update_trilist') {
+     var obj = getObject(request.name);
+     if(obj != null)
+     {
+       obj.geometry.verticesNeedUpdate = true;
+       if(request.verts.length != object.geometries.vertices.length*3) 
+         obj.geometry.elementsNeedUpdate = true;
+
+       obj.geometry.vertices = [];
+       obj.geometry.faces = [];
+       for(var i=0;i<request.verts.length;i+=3) {
+          obj.geometry.vertices.push(new THREE.Vector3(request.verts[i],request.verts[i+1],request.verts[i+2]));
+       }
+       for(var i=0;i<request.verts.length;i+=9) {
+          obj.geometry.faces.push( new THREE.Face3( i/3, i/3+1, i/3+2 ) );
+       }
+     }
+     else
+         console.log("couldn't find trilist named: " + request.name);
+   }
+   else if(request.type == 'add_billboard') {
+     var size = request.size;
+    var geom = new THREE.Geometry();
+    geom.vertices.push(new THREE.Vector3(-size[0]*0.5,-size[1]*0.5,0));
+    geom.vertices.push(new THREE.Vector3(size[0]*0.5,-size[1]*0.5,0));
+    geom.vertices.push(new THREE.Vector3(size[0]*0.5,size[1]*0.5,0));
+    geom.vertices.push(new THREE.Vector3(-size[0]*0.5,size[1]*0.5,0));
+    geom.faces.push(new THREE.Face3(0,1,2));
+    geom.faces.push(new THREE.Face3(0,2,3));
+    geom.faceVertexUvs[0] = [];
+    geom.faceVertexUvs[0][0] = [new THREE.Vector2(0,1),new THREE.Vector2(1,1),new THREE.Vector2(1,0)];
+    geom.faceVertexUvs[0][1] = [new THREE.Vector2(0,1),new THREE.Vector2(1,0),new THREE.Vector2(0,0)];
+    geom.computeFaceNormals();
+    geom.uvsNeedUpdate = true;
+    var mesh = new THREE.Mesh( geom, new THREE.MeshBasicMaterial() );
+    mesh.userData.customSharedMaterialSetup=true;
+    addObject(request.name,mesh);
+
+     var filter = request.filter;
+     var colormap = request.colormap;
+     if(filter == 'nearest') filter = THREE.NearestFilter;
+     else filter = THREE.LinearFilter;
+     if (request.imagedata) {
+       //load from data
+       var w=request.width;
+       var h=request.height;
+       var data = atob(request.imagedata);
+       var format = THREE.LuminanceFormat;
+       if(colormap == 'opacity')
+         format = THREE.LuminanceFormat; //AlphaFormat;
+       if(data.length == 3*w*h)
+         format = THREE.RGBFormat;
+       else if(data.length == 4*w*h)
+         format = THREE.RGBAFormat;
+       else  {
+         if(data.length != w*h)  {
+          console.log("Invalid image data length? "+data.length);
+          return;
+        }
+       }
+       var buffer = new Uint8Array(new ArrayBuffer(data.length));
+       for(i = 0; i < data.length; i++) {
+          buffer[i] = data.charCodeAt(i);
+       }
+       var tex = new THREE.DataTexture(buffer,w,h,format,THREE.UnsignedByteType);
+       tex.needsUpdate = true;
+       //tex.minFilter = filter;
+       //tex.magFilter = filter;
+       _setupBillboard(request.name,tex,size);
+     }
+     else {
+       //load from image
+       // instantiate a loader
+        var loader = new THREE.TextureLoader();
+
+        // load a resource
+        loader.load(
+          // resource URL
+          request.image,
+          // Function when resource is loaded
+          function ( texture ) {
+            texture.minFilter = filter;
+            texture.magFilter = filter;
+            _setupBillboard(request.name,texture,size);
+          },
+          // Function called when download progresses
+          function ( xhr ) {
+            console.log( (xhr.loaded / xhr.total * 100) + '% loaded' );
+          },
+          // Function called when download errors
+          function ( xhr ) {
+            console.log( 'An error happened' );
+          }
+        );
+     }
+     //create the billboard geometry
+   }
    else {
       console.log("Invalid request: "+request.type);
    }
@@ -868,8 +1072,6 @@ function newSceneArrivedCallback(data)
 	{
 	   console.log("Call to do RPC's " + (t2 - t1) + " milliseconds.")
 	}
-	else
-	   console.log("no RPC's present");
 
 	data=null;
 	dataJ=null;
@@ -879,7 +1081,7 @@ function newSceneArrivedCallback(data)
 	kclient_render();
 	var t1 = performance.now();
 	console.log("Time to render " + (t1 - t0) + " milliseconds.")
-	console.log("finished processing message");
+	//console.log("finished processing message");
 
 	if(refreshCallback) refreshCallback();
 }
