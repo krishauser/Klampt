@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<world>
+  <rigidObject name="robot">
+  	<geometry mesh="cylinder.tri" scale="0.2" translation="0 0 0"/>
+  </rigidObject>
+
+  <terrain name="Floor" file="plane.tri"/>
+
+  <terrain name="House" file="luxury house interior.obj" scale="0.03" rotateX="1.5708" translation="-0.4 0 0"/> 
+
+</world>
