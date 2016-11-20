@@ -156,9 +156,10 @@ ODESimulatorSettings::ODESimulatorSettings()
   dampedLeastSquaresParameter = 1e-6;
 
   instabilityConstantEnergyThreshold = 1;
-  instabilityLinearEnergyThreshold = 1.1;
+  instabilityLinearEnergyThreshold = 1.5;
   instabilityMaxEnergyThreshold = 100000;
-  instabilityPostCorrectionEnergy = -0.5;
+  //instabilityPostCorrectionEnergy = -0.9;
+  instabilityPostCorrectionEnergy = 0.8;
 }
 
 inline Real ERPFromSpring(Real timestep,Real kP,Real kD)
@@ -1732,6 +1733,7 @@ void ODESimulator::StepDynamics(Real dt)
 bool ODESimulator::InstabilityCorrection()
 {
   bool corrected = false;
+  double scale = 1.0;
   ODEObjectID id;
   for(size_t i=0;i<objects.size();i++) {
     Real ke = objects[i]->GetKineticEnergy();
@@ -1743,8 +1745,9 @@ bool ODESimulator::InstabilityCorrection()
     }
     if(energies.count(id) != 0) 
     {
-      double stepThreshold = energies[id]*settings.instabilityLinearEnergyThreshold + settings.instabilityConstantEnergyThreshold;
+      double stepThreshold = energies[id]*settings.instabilityLinearEnergyThreshold + settings.instabilityConstantEnergyThreshold*objects[i]->obj.mass;
       if(!(ke < stepThreshold)) {
+        //printf("ODESimulator: Rigid object %s energy %g exceeds linear threshold %g*%g + %g\n",objects[i]->obj.name.c_str(),ke,energies[id],settings.instabilityLinearEnergyThreshold,settings.instabilityConstantEnergyThreshold);
         unstable = true;
         if(stepThreshold < threshold)
           threshold = stepThreshold;
@@ -1762,11 +1765,8 @@ bool ODESimulator::InstabilityCorrection()
         if(settings.instabilityPostCorrectionEnergy < 0)
           newValue = -ke*settings.instabilityPostCorrectionEnergy;
         else if(settings.instabilityPostCorrectionEnergy > 0)
-          newValue = settings.instabilityPostCorrectionEnergy;
-        Real scale = Sqrt(newValue / ke);
-        Vector3 w,v;
-        objects[i]->GetVelocity(w,v);
-        objects[i]->SetVelocity(w*scale,v*scale);
+          newValue = settings.instabilityPostCorrectionEnergy*threshold;
+        scale = Min(scale,Sqrt(newValue / ke));
       }
       corrected = true;
     }
@@ -1783,7 +1783,7 @@ bool ODESimulator::InstabilityCorrection()
     }
     if(energies.count(id) != 0) 
     {
-      double stepThreshold = energies[id]*settings.instabilityLinearEnergyThreshold + settings.instabilityConstantEnergyThreshold;
+      double stepThreshold = energies[id]*settings.instabilityLinearEnergyThreshold + settings.instabilityConstantEnergyThreshold*robots[i]->robot.GetTotalMass();
       if(!(ke < stepThreshold)) {
         unstable = true;
         if(stepThreshold < threshold)
@@ -1803,16 +1803,25 @@ bool ODESimulator::InstabilityCorrection()
         if(settings.instabilityPostCorrectionEnergy < 0)
           newValue = -ke*settings.instabilityPostCorrectionEnergy;
         else if(settings.instabilityPostCorrectionEnergy > 0)
-          newValue = settings.instabilityPostCorrectionEnergy;
-        Real scale = Sqrt(newValue / ke);
-        Vector dq;
-        robots[i]->GetVelocities(dq);
-        robots[i]->SetVelocities(dq*scale);
+          newValue = settings.instabilityPostCorrectionEnergy*threshold;
+        scale = Min(scale,Sqrt(newValue / ke));
       }
       corrected = true;
     }
 
     energies[id] = ke;
+  }
+  if(corrected) {
+    for(size_t i=0;i<objects.size();i++) {
+      Vector3 w,v;
+      objects[i]->GetVelocity(w,v);
+      objects[i]->SetVelocity(w*scale,v*scale);
+    }
+    for(size_t i=0;i<robots.size();i++) {
+      Vector dq;
+      robots[i]->GetVelocities(dq);
+      robots[i]->SetVelocities(dq*scale);
+    }
   }
 }
 
@@ -1865,6 +1874,7 @@ bool ODESimulator::ReadState(File& f)
   lastMarginsRemaining.clear();
   statusHistory.clear();
   statusHistory.push_back(pair<Status,Real>((Status)status,simTime));
+  return true;
 }
 
 bool ODESimulator::WriteState(File& f) const

@@ -63,12 +63,12 @@ struct ODESimulatorSettings
   ///is triggered. Specifically it turns on if
   ///KE[t+1] > instabilityLinearEnergyThreshold*KE[t]+instabilityConstantEnergyThreshold
   ///KE[t+1] > instabilityMaxEnergyThreshold
-  ///for any object.  Default values are 1, 1.1, and 100000.
+  ///for any object.  Default values are 1, 1.5, and 100000.
   double instabilityConstantEnergyThreshold,instabilityLinearEnergyThreshold;
   double instabilityMaxEnergyThreshold;
   ///The kinetic energy threshold enforced for any body going unstable. 
   ///negative values -c means scale current kinetic energy by c.  0 means
-  ///set velocity to 0.  Positive values are constant caps.  (default -0.5)
+  ///set velocity to 0.  Positive values are constants * threshold.  (default -0.9)
   double instabilityPostCorrectionEnergy;
 };
 
