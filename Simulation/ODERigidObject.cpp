@@ -78,14 +78,48 @@ void ODERigidObject::GetTransform(RigidTransform& T) const
 
 void ODERigidObject::SetVelocity(const Vector3& w,const Vector3& v)
 {
-  dBodySetLinearVel(bodyID,v.x,v.y,v.z);
+  //v is the body origin velocity, need the velocity at the body's com
+  //v = x' + w x R*(cm - origin) = v = x' + w x R*cm
+  Vector3 vcom;
+  if(obj.com.maxAbsElement() > 0) {
+    RigidTransform T;
+    GetTransform(T);
+    vcom = v-cross(w,T.R*obj.com);
+  }
+  else
+    vcom = v;
+
+  dBodySetLinearVel(bodyID,vcom.x,vcom.y,vcom.z);
   dBodySetAngularVel(bodyID,w.x,w.y,w.z);
 }
 
 void ODERigidObject::GetVelocity(Vector3& w,Vector3& v) const
 {
+  //TODO: get velocity at com offset
   CopyVector(v,dBodyGetLinearVel(bodyID));
   CopyVector(w,dBodyGetAngularVel(bodyID));
+
+  //v is now the velocity at the body's com, do a correction to get
+  //body origin
+  //v = x' + w x R*(cm - origin) = v = x' + w x R*cm
+  //x' = v - w x R*cm 
+  if(obj.com.maxAbsElement() > 0) {
+    RigidTransform T;
+    GetTransform(T);
+    v = v-cross(w,T.R*obj.com);
+  }
+}
+
+
+Real ODERigidObject::GetKineticEnergy() const
+{
+  Vector3 w,v,wlocal;
+  RigidTransform T;
+  CopyVector(v,dBodyGetLinearVel(bodyID));
+  CopyVector(w,dBodyGetAngularVel(bodyID));
+  GetTransform(T);
+  T.R.mulTranspose(w,wlocal);
+  return obj.mass*v.normSquared() + wlocal.dot(obj.inertia*wlocal);
 }
 
 bool ODERigidObject::ReadState(File& f)

@@ -21,24 +21,55 @@ struct ODESimulatorSettings
 {
   ODESimulatorSettings();
 
+  ///The gravity vector
   double gravity[3];
+  ///The default collision padding for environments
   double defaultEnvPadding;
+  ///The default surface property for environments
   ODESurfaceProperties defaultEnvSurface;
 
   //collision checking settings
+  ///If true, uses boundary layers for collision detection (recommended true)
   bool boundaryLayerCollisions;
+  ///If true, rigid objects collide with one another (default true)
   bool rigidObjectCollisions;
+  ///If true, robot self-collisions are detected (default false)
   bool robotSelfCollisions;
+  ///If true, robots can collide with other robots (default false)
   bool robotRobotCollisions;
+  ///If true, difficult collision situations are resolved using new
+  ///adaptive time stepping methods (default true)
   bool adaptiveTimeStepping;
+  ///The minimum time step used by adaptive time stepping (default 1e-6)
+  double minimumAdaptiveTimeStep;
 
   //contact detection settings
+  ///Maximum number of contacts between each pair of objects after clustering.
+  ///Larger values slow down collision detection (default 20)
   int maxContacts;
-  double clusterNormalScale;;
+  ///During contact clustering, the metric for determining "nearby" contacts
+  ///uses this weight to scale distances in normal space.  Distance in position
+  ///space have weight 1. (default 0.1)
+  double clusterNormalScale;
 
   //ODE constants, mostly relevant to tightness of robot constraints
+  ///ODE's global ERP parameter
   double errorReductionParameter;
+  ///ODE's global DLS parameter
   double dampedLeastSquaresParameter;
+
+  //Instability detection / correction parameters
+  ///If kinetic energy grows too much from step to step, instability correction
+  ///is triggered. Specifically it turns on if
+  ///KE[t+1] > instabilityLinearEnergyThreshold*KE[t]+instabilityConstantEnergyThreshold
+  ///KE[t+1] > instabilityMaxEnergyThreshold
+  ///for any object.  Default values are 1, 1.1, and 100000.
+  double instabilityConstantEnergyThreshold,instabilityLinearEnergyThreshold;
+  double instabilityMaxEnergyThreshold;
+  ///The kinetic energy threshold enforced for any body going unstable. 
+  ///negative values -c means scale current kinetic energy by c.  0 means
+  ///set velocity to 0.  Positive values are constant caps.  (default -0.5)
+  double instabilityPostCorrectionEnergy;
 };
 
 
@@ -62,12 +93,28 @@ struct ODESimulatorSettings
 class ODESimulator
 {
  public:
+  /**Overall simulation status flag.  If a status is:
+   * - Normal: everything is proceeding as normal.
+   * - AdaptiveTimeStepping: everything is proceeding as normal, but simulation may be
+   *   slower than usual because adaptive time stepping needs to be used.
+   * - ContactUnreliable, then some objects have penetrated beyond the
+   *   acceptable limits.  Contact response artifacts, like penetration or jittering,
+   *   may occur. 
+   * - Unstable: then some objects have gone unstable.  Usually this is due to
+   *   poorly tuned motor PIDs or external forces/torques.  Klamp't will try to force
+   *   things back into a stable state, but the results are not guaranteed.
+   * - Error: some unknown error has occurred.  All further simulation will stop.
+   */
+  enum Status { StatusNormal=0, StatusAdaptiveTimeStepping=1, StatusContactUnreliable=2, StatusUnstable=3, StatusError=4 };
+
   ODESimulator();
   virtual ~ODESimulator();
   void SetGravity(const Vector3& g);
   void SetERP(double erp);   //global error reduction  -- see ODE docs
   void SetCFM(double erp);   //global constraint force mixing -- see ODE docs
   ODESimulatorSettings& GetSettings() { return settings; }
+  Status GetStatus() const;
+  void GetStatusHistory(vector<Status>& statuses,vector<Real>& statusChangeTimes) const;
   void AddTerrain(Terrain& terr);
   void AddRobot(Robot& robot);
   void AddObject(RigidObject& object);
@@ -88,9 +135,6 @@ class ODESimulator
   string ObjectName(const ODEObjectID& obj) const;
   dBodyID ObjectBody(const ODEObjectID& obj) const;
   dGeomID ObjectGeom(const ODEObjectID& obj) const;
-  void DetectCollisions();
-  void SetupContactResponse(); 
-  void ClearCollisions();
   void EnableContactFeedback(const ODEObjectID& a,const ODEObjectID& b);
   ODEContactList* GetContactFeedback(const ODEObjectID& a,const ODEObjectID& b);
   void GetContactFeedback(const ODEObjectID& a,vector<ODEContactList*>& contacts);
@@ -98,11 +142,20 @@ class ODESimulator
   bool InContact(const ODEObjectID& a) const;
   bool InContact(const ODEObjectID& a,const ODEObjectID& b) const;
   void SetupContactResponse(const ODEObjectID& a,const ODEObjectID& b,int feedbackIndex,ODEContactResult& c);
+
+  //used internally
+  bool ReadState_Internal(File& f);
+  bool WriteState_Internal(File& f) const;
+  void DetectCollisions();
+  void SetupContactResponse(); 
+  void ClearCollisions();
+  bool InstabilityCorrection();
     
   //overload this to have custom parameters for surface pairs
   virtual void GetSurfaceParameters(const ODEObjectID& a,const ODEObjectID& b,dSurfaceParameters& surface) const;
 
  private:
+  vector<pair<Status,Real> > statusHistory;
   ODESimulatorSettings settings;
   dWorldID worldID;
   dSpaceID envSpaceID;
@@ -114,6 +167,7 @@ class ODESimulator
   dJointGroupID contactGroupID;
   Real timestep;
   Real simTime;
+  map<ODEObjectID,Real> energies;
 
 public:
   //for adaptive time stepping

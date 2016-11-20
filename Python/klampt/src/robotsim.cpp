@@ -2938,6 +2938,23 @@ void Simulator::reset()
   sim->ReadState(initialState);
 }
 
+int Simulator::getStatus()
+{
+  return sim->worstStatus;
+}
+
+std::string Simulator::getStatusString(int s)
+{
+  if(s < 0) s = getStatus();
+  switch(s) {
+    case 0: return "normal";
+    case 1: return "adaptive time stepping";
+    case 2: return "contact unreliable";
+    case 3: return "unstable";
+    default: return "error";
+  }
+}
+
 string Simulator::getState()
 {
   string str;
@@ -3144,10 +3161,15 @@ std::string Simulator::getSetting(const std::string& name)
   else if(name == "robotSelfCollisions") ss << settings.robotSelfCollisions;
   else if(name == "robotRobotCollisions") ss << settings.robotRobotCollisions;
   else if(name == "adaptiveTimeStepping") ss << settings.adaptiveTimeStepping;
+  else if(name == "minimumAdaptiveTimeStep") ss << settings.minimumAdaptiveTimeStep;
   else if(name == "maxContacts") ss << settings.maxContacts;
   else if(name == "clusterNormalScale") ss << settings.clusterNormalScale;
   else if(name == "errorReductionParameter") ss << settings.errorReductionParameter;
   else if(name == "dampedLeastSquaresParameter") ss << settings.dampedLeastSquaresParameter;
+  else if(name == "instabilityConstantEnergyThreshold") ss << settings.instabilityConstantEnergyThreshold;
+  else if(name == "instabilityLinearEnergyThreshold") ss << settings.instabilityLinearEnergyThreshold;
+  else if(name == "instabilityMaxEnergyThreshold") ss << settings.instabilityMaxEnergyThreshold;
+  else if(name == "instabilityPostCorrectionEnergy") ss << settings.instabilityPostCorrectionEnergy;
   else throw PyException("Invalid setting queried in Simulator.getSetting()");
   return ss.str();
 }
@@ -3163,10 +3185,15 @@ void Simulator::setSetting(const std::string& name,const std::string& value)
   else if(name == "robotSelfCollisions") ss >> settings.robotSelfCollisions;
   else if(name == "robotRobotCollisions") ss >> settings.robotRobotCollisions;
   else if(name == "adaptiveTimeStepping") ss >> settings.adaptiveTimeStepping;
+  else if(name == "minimumAdaptiveTimeStep") ss >> settings.minimumAdaptiveTimeStep;
   else if(name == "maxContacts") ss >> settings.maxContacts;
   else if(name == "clusterNormalScale") ss >> settings.clusterNormalScale;
   else if(name == "errorReductionParameter") { ss >> settings.errorReductionParameter; sim->odesim.SetERP(settings.errorReductionParameter); }
   else if(name == "dampedLeastSquaresParameter") { ss >> settings.dampedLeastSquaresParameter; sim->odesim.SetCFM(settings.dampedLeastSquaresParameter); }
+  else if(name == "instabilityConstantEnergyThreshold") ss >> settings.instabilityConstantEnergyThreshold;
+  else if(name == "instabilityLinearEnergyThreshold") ss >> settings.instabilityLinearEnergyThreshold;
+  else if(name == "instabilityMaxEnergyThreshold") ss >> settings.instabilityMaxEnergyThreshold;
+  else if(name == "instabilityPostCorrectionEnergy") ss >> settings.instabilityPostCorrectionEnergy;
   else throw PyException("Invalid setting queried in Simulator.setSetting()");
   if(ss.bad()) throw PyException("Invalid value string argument in Simulator.setSetting()");
 }

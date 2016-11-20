@@ -141,6 +141,7 @@ class SimpleSimulator (Simulator):
         #the rate of applying simulation substeps.  Hooks and actuator emulators are
         #called at this rate.  Note: this should be set at least as large as the simulation time step
         self.substep_dt = 0.001
+        self.worst_status = Simulator.STATUS_NORMAL
 
         #turn this on to save log to disk
         self.logging = False
@@ -151,6 +152,9 @@ class SimpleSimulator (Simulator):
         #save state so controllers don't rely on world state
         self.robotStates = []
         self.objectStates = []
+
+    def getStatus(self):
+        return self.worst_status
 
     def beginLogging(self):
         self.logging = True
@@ -268,6 +272,8 @@ class SimpleSimulator (Simulator):
         #Handle logging
         if self.logger: self.logger.saveStep()
 
+        self.worst_status = Simulator.STATUS_NORMAL
+
         #Advance controller, emulators
         #restore state from previous call -- this is done so that simulation data doesn't leak into controllers
         for i,(q,dq) in enumerate(self.robotStates):
@@ -311,6 +317,9 @@ class SimpleSimulator (Simulator):
                     raise
             #Finally advance the physics simulation
             Simulator.simulate(self,substep)
+            s = Simulator.getStatus(self)
+            if s > self.worst_status:
+                self.worst_status = s
             t += self.substep_dt
             if t >= dt:
                 break

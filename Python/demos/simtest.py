@@ -18,7 +18,7 @@ class MyGLViewer(GLSimulationProgram):
         self.world = world
         self.sim.enableContactFeedbackAll()
         self.forceApplicationMode = False
-        
+        self.statusLog = []
         
     def display(self):
         GLSimulationProgram.display(self)
@@ -39,9 +39,15 @@ class MyGLViewer(GLSimulationProgram):
 
     def display_screen(self):
         glDisable(GL_LIGHTING)
-        self.draw_text((20,20),str(self.sim.getTime()))
+        h = 20
+        self.draw_text((20,h),str(self.sim.getTime()))
+        h += 20
+        for (t,s) in self.statusLog:
+            self.draw_text((20,h),"Sim status "+str(t)+": "+self.sim.getStatusString(s),color=[1,0,0])
+            h += 20
         if self.sim.hadPenetration(-1,-1):
-            self.draw_text((20,40),"Meshes penetrating, simulation may be unstable",color=[1,0,0])
+            self.draw_text((20,h),"Meshes penetrating, simulation may be unstable",color=[1,0,0])
+            h += 20
 
     def control_loop(self):
         #you can put more control code here
@@ -50,6 +56,11 @@ class MyGLViewer(GLSimulationProgram):
     def idle(self):
         #Put your idle loop handler here
         GLSimulationProgram.idle(self)
+        t = self.sim.getTime()
+        if self.sim.getStatus() != 0:
+            self.statusLog.append((t,self.sim.getStatus()))
+        while len(self.statusLog) > 0 and self.statusLog[0][0] < t-1:
+            self.statusLog.pop(0)
 
     def mousefunc(self,button,state,x,y):
         #Put your mouse handler here

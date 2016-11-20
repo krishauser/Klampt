@@ -1861,6 +1861,17 @@ loaded from an XML file, then the simulation setup is loaded from it.
 
 Resets to the initial state (same as setState(initialState)) ";
 
+%feature("docstring")  Simulator::getStatus "
+
+Returns an indicator code for the simulator status. The return result
+is one of the STATUS_X flags. (Technically, this returns the worst
+status over the last simulate() call) ";
+
+%feature("docstring")  Simulator::getStatusString "
+
+Returns a string indicating the simulator's status. If s is provided
+and >= 0, this function maps the indicator code s to a string. ";
+
 %feature("docstring")  Simulator::getState "
 
 Returns a Base64 string representing the binary data for the current
@@ -2009,6 +2020,15 @@ Sets the internal simulation substep. Values < 0.01 are recommended.
 ";
 
 %feature("docstring")  Simulator::getSetting "
+
+Retrieves some simulation setting. Valid names are gravity, simStep,
+boundaryLayerCollisions, rigidObjectCollisions, robotSelfCollisions,
+robotRobotCollisions, adaptiveTimeStepping, minimumAdaptiveTimeStep,
+maxContacts, clusterNormalScale, errorReductionParameter,
+dampedLeastSquaresParameter, instabilityConstantEnergyThreshold,
+instabilityLinearEnergyThreshold, instabilityMaxEnergyThreshold, and
+instabilityPostCorrectionEnergy. See Klampt/Simulation/ODESimulator.h
+for detailed descriptions of these parameters.
 
 Retreives some simulation setting. Valid names are gravity, simStep,
 boundaryLayerCollisions, rigidObjectCollisions, robotSelfCollisions,

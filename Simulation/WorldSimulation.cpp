@@ -223,7 +223,7 @@ bool ReadFile(File& f,ContactFeedbackInfo& info)
 
 
 WorldSimulation::WorldSimulation()
-  :time(0),simStep(0.001),fakeSimulation(false)
+  :time(0),simStep(0.001),fakeSimulation(false),worstStatus(ODESimulator::StatusNormal)
 {}
 
 void WorldSimulation::Init(RobotWorld* _world)
@@ -342,6 +342,7 @@ void WorldSimulation::SetController(int index,SmartPointer<RobotController> c)
 
 void WorldSimulation::Advance(Real dt)
 {
+  worstStatus = ODESimulator::StatusNormal;
   if(fakeSimulation) {
     AdvanceFake(dt);
     return;
@@ -378,6 +379,11 @@ void WorldSimulation::Advance(Real dt)
     }
 
     odesim.Step(step);
+ 
+    if(odesim.GetStatus() > worstStatus) {
+      worstStatus = odesim.GetStatus();
+    }
+ 
     accumTime += step;
     timeLeft -= step;
     numSteps++;
@@ -537,6 +543,8 @@ bool WorldSimulation::ReadState(File& f)
   for(size_t i=0;i<hooks.size();i++) 
     TestReadWriteState(*hooks[i],"hook");
 #endif
+  //TODO: read this too?
+  worstStatus = ODESimulator::StatusNormal;
 
   READ_FILE_DEBUG(f,time,"WorldSimulation::ReadState");
   if(!odesim.ReadState(f)) {

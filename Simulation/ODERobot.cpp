@@ -683,6 +683,36 @@ Real ODERobot::GetLinkVelocity(int i) const
     return dJointGetSliderPositionRate(jointID[i]);
 }
 
+Real ODERobot::GetKineticEnergy() const
+{
+  Real ke = 0;
+  for(size_t i=0;i<robot.links.size();i++)
+    ke += GetKineticEnergy(i);
+  return ke;
+}
+
+Real ODERobot::GetKineticEnergy(int link) const
+{
+  dBodyID bodyid = body(link);
+  if(!bodyid) {
+    bodyid = baseBody(link);
+    if(!bodyid) {
+      //when does this happen?
+      //fprintf(stderr,"ODERobot: baseBody returned NULL\n");
+      return 0;
+    }
+  }
+  Vector3 v,w;
+  CopyVector(v,dBodyGetLinearVel(bodyid));
+  CopyVector(w,dBodyGetAngularVel(bodyid));
+  const dReal* rot = dBodyGetRotation(bodyid);
+  Matrix3 Rbody;
+  CopyMatrix(Rbody,rot);
+  Vector3 wlocal;
+  Rbody.mulTranspose(w,wlocal);
+  return robot.links[link].mass*v.normSquared() + wlocal.dot(robot.links[link].inertia*wlocal);
+}
+
 void ODERobot::AddTorques(const Config& t)
 {
   Assert(t.n == (int)robot.links.size());

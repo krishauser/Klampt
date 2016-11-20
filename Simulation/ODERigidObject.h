@@ -25,6 +25,7 @@ class ODERigidObject
   void GetTransform(RigidTransform& T) const;
   void SetVelocity(const Vector3& w,const Vector3& v);
   void GetVelocity(Vector3& w,Vector3& v) const;
+  Real GetKineticEnergy() const;
   bool ReadState(File& f);
   bool WriteState(File& f) const;
   

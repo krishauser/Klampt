@@ -247,6 +247,10 @@ class SimBody
 class Simulator
 {
  public:
+  ///Status flags
+  enum { STATUS_NORMAL=0, STATUS_ADAPTIVE_TIME_STEPPING=1, STATUS_CONTACT_UNRELIABLE=2,
+    STATUS_UNSTABLE=3, STATUS_ERROR=4 };
+
   /// Constructs the simulator from a WorldModel.  If the WorldModel was
   /// loaded from an XML file, then the simulation setup is loaded from it.
   Simulator(const WorldModel& model);
@@ -254,6 +258,14 @@ class Simulator
 
   /// Resets to the initial state (same as setState(initialState))
   void reset();
+
+  /// Returns an indicator code for the simulator status.  The return result
+  /// is one of the STATUS_X flags.  (Technically, this returns the *worst* status
+  /// over the last simulate() call)
+  int getStatus();
+  /// Returns a string indicating the simulator's status.  If s is provided and >= 0,
+  /// this function maps the indicator code s to a string.
+  std::string getStatusString(int s=-1);
 
   /// Returns a Base64 string representing the binary data for the current
   /// simulation state, including controller parameters, etc.
@@ -348,10 +360,14 @@ class Simulator
   void setGravity(const double g[3]);
   /// Sets the internal simulation substep.  Values < 0.01 are recommended.
   void setSimStep(double dt);
-  /// Retreives some simulation setting.  Valid names are gravity,
+  /// Retrieves some simulation setting.  Valid names are gravity,
   /// simStep, boundaryLayerCollisions, rigidObjectCollisions, robotSelfCollisions,
-  /// robotRobotCollisions, adaptiveTimeStepping, maxContacts,
-  /// clusterNormalScale, errorReductionParameter, and dampedLeastSquaresParameter
+  /// robotRobotCollisions, adaptiveTimeStepping, minimumAdaptiveTimeStep, maxContacts,
+  /// clusterNormalScale, errorReductionParameter, dampedLeastSquaresParameter,
+  /// instabilityConstantEnergyThreshold, instabilityLinearEnergyThreshold,
+  /// instabilityMaxEnergyThreshold, and instabilityPostCorrectionEnergy.
+  /// See Klampt/Simulation/ODESimulator.h for detailed descriptions of these
+  /// parameters.
   std::string getSetting(const std::string& name);
   /// Sets some simulation setting. Raises an exception if the name is
   /// unknown or the value is of improper format
