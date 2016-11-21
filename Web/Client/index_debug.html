@@ -60,6 +60,16 @@
             }
          }        
          
+         function doConnect() 
+         {
+            if(KLAMPT.isConnected()) {
+               KLAMPT.disconnect(doConnect);
+            }
+            else {
+               var URL=$('#serverURL').val();
+               KLAMPT.connect(URL,$('#boilerselctor').val(),function() { KLAMPT.setCode(editor.getValue()); newBoilerplate = false;},null);
+            }
+         }
                                   
          function doCodeSubmit()
          {
@@ -72,8 +82,7 @@
             }
 
             if(!KLAMPT.isConnected()) {
-               var URL=$('#serverURL').val();
-               KLAMPT.connect(URL,$('#boilerselctor').val(),function() { KLAMPT.setCode(editor.getValue()); newBoilerplate = false;},null);
+               doConnect();
             }
             else if(newBoilerplate) {
                //connected, but need new boilerplate.  Hence we need to disconnect and then reconnect. 
@@ -209,6 +218,9 @@
             add_option("dynamics","Dynamics test")
             add_option("lab4","Lab 4")
             add_option("lab5","Lab 5")
+            add_option("finalA","Final A")
+            add_option("finalB","Final B")
+            add_option("finalC","Final C")
 
             if(localStorageAvailable) {
                var url=localStorage.getItem('serverURL');
@@ -231,9 +243,6 @@
       
             editor.setTheme("ace/theme/eclipse"); 
             editor.getSession().setMode("ace/mode/python");
-            
-            /*editor.getSession().setValue("nextTime = 1\ntoggle = 0\ndef init(robot_model):\n    global ghost\n    ghost=kviz.add_ghost('myGhost')\n    kviz.set_color(ghost,[1,0,0,0.25],True)\n    q=kviz.get_robot_config()\n    q[8]-=2.0\n    kviz.set_ghost_config(q,'myGhost')\n    kviz.add_text('HUD1',1,1)\n    kviz.update_text('HUD1','hello world')\n\ndef control_loop(t,controller):\n    global nextTime, toggle\n    if t >= nextTime:\n        q = controller.getCommandedConfig()\n        q[8] -= 0.5\n        controller.setMilestone(q)\n        nextTime += 1.0\n        ");
-            */
             
             boilerPlateChanged();
                        
