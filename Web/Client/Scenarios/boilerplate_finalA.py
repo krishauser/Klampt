@@ -174,6 +174,9 @@ class GLTest:
         #set up camera to get a better vantage point
         #self.camera.dist = 12
         #self.camera.tgt[2] = -1
+
+        self.mode = 'automatic'
+        self.quser = simWorld.robot(0).getConfig()
         
         self.dt = 0.02
         self.sim.simulate(0)
@@ -196,6 +199,8 @@ class GLTest:
             kviz.set_color("cam_fwd",(0,0,1,1))
             kviz.add_polyline("cam_up",[Tsensor[1],se3.apply(Tsensor,[0,0.1,0])])
             kviz.set_color("cam_up",(0,1,0,1))
+        self.ghost = kviz.add_ghost()
+        kviz.set_color(self.ghost,(1,1,0,0.5))
         self.numBlobs = 0
         self.updateVis()
 
@@ -204,6 +209,11 @@ class GLTest:
         kviz.update_text("score","Score: "+str(self.event.score))
         if self.finalScore != None:
             kviz.update_text("final","Final score: "+str(self.finalScore))
+        if self.mode == 'user':
+            kviz.set_visible(self.ghost,True)
+            kviz.set_ghost_config(self.quser)
+        else:
+            kviz.set_visible(self.ghost,False)
         if 'blobdetector' in self.sensors:
             sensor = self.sensors['blobdetector']
             Tsensor = sensor.Tsensor
@@ -244,11 +254,14 @@ class GLTest:
         self.readings = dict()
         for n,s in self.sensors.iteritems():
             self.readings[n] = s.emulate(self.sim)
-        try:
-            self.controller.loop(self.dt,self.sim.controller(0),self.readings)
-        except Exception as e:
-            print "Exception called during controller.loop:"
-            traceback.print_exc()
+        if self.mode == 'user':
+            self.sim.controller(0).setMilestone(self.quser)
+        else:
+            try:
+                self.controller.loop(self.dt,self.sim.controller(0),self.readings)
+            except Exception as e:
+                print "Exception called during controller.loop:"
+                traceback.print_exc()
 
     def step(self):
         t0 = time.time()
@@ -262,10 +275,10 @@ class GLTest:
             self.finalScore = self.event.score
         self.updateVis()
 
-program,world,world2 = None,None,None
+program = None
 
 def boilerplate_start():
-    global program,world,world2
+    global program
     world = WorldModel()
     world2 = WorldModel()
     fn = "Web/Client/Scenarios/final/finalA.xml"
@@ -285,3 +298,31 @@ def boilerplate_advance():
     program.step()
     program.sim.updateWorld()
 
+def boilerplate_event(name):
+    global program
+    if name=="print":
+        print program.quser
+
+def boilerplate_setitem(name,value):
+    global program
+    if name=="mode":
+        program.mode = value
+        program.updateVis()
+    elif name=="q1":
+        program.quser[1] = math.radians(float(value))
+        program.updateVis()
+    elif name=="q2":
+        program.quser[2] = math.radians(float(value))
+        program.updateVis()
+    elif name=="q3":
+        program.quser[3] = math.radians(float(value))
+        program.updateVis()
+    elif name=="q4":
+        program.quser[4] = math.radians(float(value))
+        program.updateVis()
+    elif name=="q5":
+        program.quser[5] = math.radians(float(value))
+        program.updateVis()
+    elif name=="q6":
+        program.quser[6] = math.radians(float(value))
+        program.updateVis()
