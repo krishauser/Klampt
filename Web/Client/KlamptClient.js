@@ -719,12 +719,19 @@ function kclient_rpc(request)
    }
    else if(request.type == "remove") {
      //remove object from scene
-     var object = getObject(request.name);
-     if(object) {
-        if(object.name in sceneCache) {
-           delete sceneCache[object.name];
+     //console.log("Removing item "+request.name);
+     var obj = getObject(request.name);
+     if(obj) {
+        if(request.name in sceneCache) {
+           delete sceneCache[request.name];
         }
-        scene.remove(object);
+        if ( obj.geometry !== undefined ) obj.geometry.dispose();
+        if ( obj.material !== undefined ) obj.material.dispose();
+        obj.visible = false;
+        obj.parent.remove(obj);
+     }
+     else {
+       console.log("Item to be removed "+request.name+" not found");
      }
    }
    else if(request.type == "set_color") 
@@ -910,15 +917,19 @@ function kclient_rpc(request)
             sphere.scale.z=request.r;
          }
       }
-      else
+      else {
          console.log("couldn't find sphere named: " + request.name);
+         request.type = "add_sphere";
+         kclient_rpc(request);
+       }
    }
    else if(request.type == "add_line")
    {
       var geometry = new THREE.Geometry();
       
-      geometry.vertices.push(new THREE.Vector3(request.x1,request.y1,request.z1));
-      geometry.vertices.push(new THREE.Vector3(request.x2,request.y2,request.z2));
+      for(var i=0;i<request.verts.length;i+=3) {
+        geometry.vertices.push(new THREE.Vector3(request.verts[i],request.verts[i+1],request.verts[i+2]));
+      }
       geometry.dynamic  = true;
          
       var material = new THREE.LineBasicMaterial( {color: 0xAA0000} );
@@ -930,17 +941,23 @@ function kclient_rpc(request)
    {  
       var line = getObject(request.name);
       if(line != null)
-      { 
-         line.geometry.vertices[0]=new THREE.Vector3(request.x1,request.y1,request.z1);
-         line.geometry.vertices[1]=new THREE.Vector3(request.x2,request.y2,request.z2);
+      {
+         line.geometry.vertices = []
+         for(var i=0;i<request.verts.length;i+=3) {
+           line.geometry.vertices.push(new THREE.Vector3(request.verts[i],request.verts[i+1],request.verts[i+2]));
+         }
          line.geometry.verticesNeedUpdate = true;
       }
-      else
-         console.log("couldn't find line named: " + request.name);
+      else {
+        console.log("couldn't find line named: " + request.name);
+        request.type = "add_line";
+        kclient_rpc(request);
+      }
    } 
    else if(request.type == 'add_trilist')
    {
      var geom = new THREE.Geometry();
+     geom.dynamic = true;
      for(var i=0;i<request.verts.length;i+=3) {
         geom.vertices.push(new THREE.Vector3(request.verts[i],request.verts[i+1],request.verts[i+2]));
      }
@@ -957,21 +974,35 @@ function kclient_rpc(request)
      var obj = getObject(request.name);
      if(obj != null)
      {
-       obj.geometry.verticesNeedUpdate = true;
-       if(request.verts.length != object.geometries.vertices.length*3) 
-         obj.geometry.elementsNeedUpdate = true;
-
-       obj.geometry.vertices = [];
-       obj.geometry.faces = [];
-       for(var i=0;i<request.verts.length;i+=3) {
-          obj.geometry.vertices.push(new THREE.Vector3(request.verts[i],request.verts[i+1],request.verts[i+2]));
-       }
-       for(var i=0;i<request.verts.length;i+=9) {
-          obj.geometry.faces.push( new THREE.Face3( i/3, i/3+1, i/3+2 ) );
+        if(request.verts.length != obj.geometry.vertices.length*3 || true) {
+          //might as well just completely recreate the geometry
+          var geom = new THREE.Geometry();
+          geom.dynamic = true;
+           for(var i=0;i<request.verts.length;i+=3) {
+              geom.vertices.push(new THREE.Vector3(request.verts[i],request.verts[i+1],request.verts[i+2]));
+           }
+           for(var i=0;i<request.verts.length;i+=9) {
+              geom.faces.push( new THREE.Face3( i/3, i/3+1, i/3+2 ) );
+           }
+          geom.computeFaceNormals();
+          obj.geometry = geom;
+        }
+        else {
+          //for some reason this isn't working
+          //console.log("Updating trilist vertices");
+          obj.geometry.dynamic = true;
+          obj.geometry.verticesNeedUpdate = true;
+         for(var i=0;i<request.verts.length;i+=3) {
+            obj.geometry.vertices[i/3] = new THREE.Vector3(request.verts[i],request.verts[i+1],request.verts[i+2]);
+         }
+          obj.geometry.computeFaceNormals();
        }
      }
-     else
-         console.log("couldn't find trilist named: " + request.name);
+     else {
+       console.log("couldn't find trilist named: " + request.name);
+       request.type = "add_trilist";
+       kclient_rpc(request);
+     }
    }
    else if(request.type == 'add_billboard') {
      var size = request.size;
