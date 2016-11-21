@@ -2549,7 +2549,7 @@ Appearance RigidObjectModel::appearance()
   res.id = getID();
   assert(res.id >= 0);
   *reinterpret_cast<SmartPointer<GLDraw::GeometryAppearance>*>(res.appearancePtr) = worlds[world]->world->GetAppearance(res.id);
-  printf("Copying ptr to rigid object appearance to %p\n",&res);
+  //printf("Copying ptr to rigid object appearance to %p\n",&res);
   return res;
 }
 

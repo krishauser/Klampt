@@ -14,6 +14,12 @@
 ///Animation:
 ///KLAMPT.advance(callback);    //requests an advance of the frame.  callback is either null or a function that is called when the frame arrives and is drawn.
 ///KLAMPT.animate(running);     //requests continual advancing of frames.  running is either true or false
+///KLAMPT.set_shadow(enabled);  //turns shadows on/off
+///
+///Interaction
+///KLAMPT.setitem(item,value);    //sets an item's value in the code
+///KLAMPT.getitem(item,onvalue);  //gets an item's value in the code.  onvalue(value) is called when the return message is received
+///KLAMPT.event(id);              //tells the server an event was called. id is a string.
 ///
 ///Timing: be careful about calling isConnected, advance, setBoilerplate, and setCode if you do not first verify
 ///that the connection is up.  E.g., for startup it is safest to call
@@ -98,7 +104,7 @@ Network.prototype.connect = function()
       {
          //console.log("websocket callback onmessage");     
                  
-    if(evt.data instanceof ArrayBuffer)
+         if(evt.data instanceof ArrayBuffer)
          {        
             console.log("  got an ArrayBuffer");
             console.log("    data length: " + evt.data.byteLength);           
@@ -128,7 +134,7 @@ Network.prototype.connect = function()
             else if(message[0]=='E') //console error
                consoleTextArrivedCallback(slicedMessage);      
             else 
-              console.log("websocket callback onmessage got invalid message "+message);
+               console.log("websocket callback onmessage got invalid message "+message);
          }
             
       }.bind(this);
@@ -351,6 +357,18 @@ function kclient_init(dom_sceneArea,dom_textArea)
 	textArea = dom_textArea;
 	//renderer.setClearColor(0x88888888);
   renderer.setClearColor(0x888888FF);
+  renderer.shadowMapEnabled = false;
+  // to antialias the shadow
+  renderer.shadowMapType = THREE.PCFSoftShadowMap;
+  renderer.shadowMapSoft = true;
+  renderer.shadowCameraNear = 0.5;
+  renderer.shadowCameraFar = 5;
+  renderer.shadowCameraFov = 50;
+  renderer.shadowMapBias = 0.0039;
+  renderer.shadowMapDarkness = 0.5;
+  renderer.shadowMapWidth = 1024;
+  renderer.shadowMapHeight = 1024;
+
 	dom_sceneArea.appendChild( renderer.domElement );  //attach the three.js renderer to the proper div 
 
 	controls=new THREE.TrackballControls( camera, sceneArea);
@@ -369,6 +387,11 @@ function kclient_init(dom_sceneArea,dom_textArea)
   scene.add(axisHelper);
   
   animate();
+}
+
+function kclient_set_shadow(enabled)
+{
+  renderer.shadowMapEnabled = enabled;
 }
 
 function kclient_connect(addr,boilerid,onconnect,onfailure)
@@ -454,6 +477,24 @@ function kclient_animate(animate)
      }
 	}
 }
+
+function kclient_event(event)
+{
+  net_sendMessage("E"+event);
+}
+
+
+function kclient_setitem(item,value)
+{
+  net_sendMessage("S"+item+","+JSON.stringify(value));
+}
+
+function kclient_getitem(item,onvalue)
+{
+  console.log("getitem is not implemented");
+  //net_sendMessage("G"+item);
+}
+
 //TODO: request interrupt of embedded python
 // http://stackoverflow.com/questions/1420957/stopping-embedded-python
 
@@ -575,6 +616,35 @@ function kclient_set_scene(dataJ)
    sceneCache={};
 
    scene = loader.parse( dataJ );
+   if (scene == null) {
+     console.log("Invalid scene sent from server");
+     scene = new THREE.Scene();
+   }
+
+   scene.traverse( function (child) {
+    if(!(child instanceof THREE.Light)) {
+      if(child.name == "Terrain") {
+        child.receiveShadow = true;
+        child.castShadow = true;
+      }
+      else {
+        child.receiveShadow = true;
+        child.castShadow = true;
+      }
+    }
+    else if(child instanceof THREE.DirectionalLight || child instanceof THREE.SpotLight) {
+      child.intensity *= 0.8;
+      child.castShadow = true;
+      //child.shadow.darkness = 0.3;
+      if(child instanceof THREE.DirectionalLight) {
+        child.shadow.camera.right     =  5;
+        child.shadow.camera.left     = -5;
+        child.shadow.camera.top      =  5;
+        child.shadow.camera.bottom   = -5;
+      }
+    }
+   });
+   scene.add(new THREE.AmbientLight(0xffffff,0.2));
 
   var axisHelper = new THREE.AxisHelper( 0.2 );
   scene.add( axisHelper );
@@ -678,12 +748,19 @@ function kclient_rpc(request)
    }
    else if(request.type == "remove") {
      //remove object from scene
-     var object = getObject(request.name);
-     if(object) {
-        if(object.name in sceneCache) {
-           delete sceneCache[object.name];
+     //console.log("Removing item "+request.name);
+     var obj = getObject(request.name);
+     if(obj) {
+        if(request.name in sceneCache) {
+           delete sceneCache[request.name];
         }
-        scene.remove(object);
+        if ( obj.geometry !== undefined ) obj.geometry.dispose();
+        if ( obj.material !== undefined ) obj.material.dispose();
+        obj.visible = false;
+        obj.parent.remove(obj);
+     }
+     else {
+       console.log("Item to be removed "+request.name+" not found");
      }
    }
    else if(request.type == "set_color") 
@@ -798,7 +875,7 @@ function kclient_rpc(request)
    }
    else if(request.type == "set_transform")
    {                 
-      console.log("got a set_transform RPC request for: " + request.object);
+      //console.log("got a set_transform RPC request for: " + request.object);
       var object = getObject(request.object);
       if(object != null)
       {
@@ -828,8 +905,8 @@ function kclient_rpc(request)
       if(request.text!=null)
          text2.innerHTML = request.text;
          
-      text2.style.top = request.x + '%';
-      text2.style.left = request.y + '%';
+      text2.style.top = request.y + '%';
+      text2.style.left = request.x + '%';
       sceneArea.appendChild(text2);
    }
    else if(request.type == "update_text")
@@ -869,15 +946,19 @@ function kclient_rpc(request)
             sphere.scale.z=request.r;
          }
       }
-      else
+      else {
          console.log("couldn't find sphere named: " + request.name);
+         request.type = "add_sphere";
+         kclient_rpc(request);
+       }
    }
    else if(request.type == "add_line")
    {
       var geometry = new THREE.Geometry();
       
-      geometry.vertices.push(new THREE.Vector3(request.x1,request.y1,request.z1));
-      geometry.vertices.push(new THREE.Vector3(request.x2,request.y2,request.z2));
+      for(var i=0;i<request.verts.length;i+=3) {
+        geometry.vertices.push(new THREE.Vector3(request.verts[i],request.verts[i+1],request.verts[i+2]));
+      }
       geometry.dynamic  = true;
          
       var material = new THREE.LineBasicMaterial( {color: 0xAA0000} );
@@ -889,17 +970,23 @@ function kclient_rpc(request)
    {  
       var line = getObject(request.name);
       if(line != null)
-      { 
-         line.geometry.vertices[0]=new THREE.Vector3(request.x1,request.y1,request.z1);
-         line.geometry.vertices[1]=new THREE.Vector3(request.x2,request.y2,request.z2);
+      {
+         line.geometry.vertices = []
+         for(var i=0;i<request.verts.length;i+=3) {
+           line.geometry.vertices.push(new THREE.Vector3(request.verts[i],request.verts[i+1],request.verts[i+2]));
+         }
          line.geometry.verticesNeedUpdate = true;
       }
-      else
-         console.log("couldn't find line named: " + request.name);
+      else {
+        console.log("couldn't find line named: " + request.name);
+        request.type = "add_line";
+        kclient_rpc(request);
+      }
    } 
    else if(request.type == 'add_trilist')
    {
      var geom = new THREE.Geometry();
+     geom.dynamic = true;
      for(var i=0;i<request.verts.length;i+=3) {
         geom.vertices.push(new THREE.Vector3(request.verts[i],request.verts[i+1],request.verts[i+2]));
      }
@@ -916,21 +1003,35 @@ function kclient_rpc(request)
      var obj = getObject(request.name);
      if(obj != null)
      {
-       obj.geometry.verticesNeedUpdate = true;
-       if(request.verts.length != object.geometries.vertices.length*3) 
-         obj.geometry.elementsNeedUpdate = true;
-
-       obj.geometry.vertices = [];
-       obj.geometry.faces = [];
-       for(var i=0;i<request.verts.length;i+=3) {
-          obj.geometry.vertices.push(new THREE.Vector3(request.verts[i],request.verts[i+1],request.verts[i+2]));
-       }
-       for(var i=0;i<request.verts.length;i+=9) {
-          obj.geometry.faces.push( new THREE.Face3( i/3, i/3+1, i/3+2 ) );
+        if(request.verts.length != obj.geometry.vertices.length*3 || true) {
+          //might as well just completely recreate the geometry
+          var geom = new THREE.Geometry();
+          geom.dynamic = true;
+           for(var i=0;i<request.verts.length;i+=3) {
+              geom.vertices.push(new THREE.Vector3(request.verts[i],request.verts[i+1],request.verts[i+2]));
+           }
+           for(var i=0;i<request.verts.length;i+=9) {
+              geom.faces.push( new THREE.Face3( i/3, i/3+1, i/3+2 ) );
+           }
+          geom.computeFaceNormals();
+          obj.geometry = geom;
+        }
+        else {
+          //for some reason this isn't working
+          //console.log("Updating trilist vertices");
+          obj.geometry.dynamic = true;
+          obj.geometry.verticesNeedUpdate = true;
+         for(var i=0;i<request.verts.length;i+=3) {
+            obj.geometry.vertices[i/3] = new THREE.Vector3(request.verts[i],request.verts[i+1],request.verts[i+2]);
+         }
+          obj.geometry.computeFaceNormals();
        }
      }
-     else
-         console.log("couldn't find trilist named: " + request.name);
+     else {
+       console.log("couldn't find trilist named: " + request.name);
+       request.type = "add_trilist";
+       kclient_rpc(request);
+     }
    }
    else if(request.type == 'add_billboard') {
      var size = request.size;
@@ -1019,6 +1120,11 @@ function newSceneArrivedCallback(data)
 	console.log("new scene has arrived!");
 
 	var dataJ=JSON.parse(data); 
+  if(dataJ == null) {
+    console.log("Unable to parse scene JSON!");
+    //console.log(data);
+    return;
+  }
 
 	//need to determine if full scene or just transforms
 	var isFullScene=dataJ.metadata.fullscene;
@@ -1030,10 +1136,6 @@ function newSceneArrivedCallback(data)
 	   var t0 = performance.now();
 
 	   kclient_set_scene(dataJ);
-
-	   //TODO: make this optional?
-	   var axisHelper = new THREE.AxisHelper( 0.2 );
-	   scene.add( axisHelper );
 
 	   //clear anything named _text_overlay_X
 	   var overlayList = [];
@@ -1076,14 +1178,6 @@ function newSceneArrivedCallback(data)
 	data=null;
 	dataJ=null;
 	rpc=null;
-
-	var t0 = performance.now();
-	kclient_render();
-	var t1 = performance.now();
-	console.log("Time to render " + (t1 - t0) + " milliseconds.")
-	//console.log("finished processing message");
-
-	if(refreshCallback) refreshCallback();
 }
 
 function kclient_render()
@@ -1093,8 +1187,16 @@ function kclient_render()
 
 function animate()
 {
-        requestAnimationFrame( animate  );
-        controls.update();
+  //var t0 = performance.now();
+  kclient_render();
+  //var t1 = performance.now();
+  //console.log("Time to render " + (t1 - t0) + " milliseconds.")
+
+  requestAnimationFrame( animate  );
+  controls.update();
+
+  //console.log("finished processing message");
+  if(refreshCallback) refreshCallback();
 }
 
 
@@ -1107,6 +1209,10 @@ return {
    disconnect:kclient_disconnect,
    advance:kclient_advance,
    animate:kclient_animate,
+   set_shadow:kclient_set_shadow,
+   event:kclient_event,
+   getitem:kclient_getitem,
+   setitem:kclient_setitem,
    set_scene:kclient_set_scene,
    set_transforms:kclient_set_transforms,
    rpc:kclient_rpc,

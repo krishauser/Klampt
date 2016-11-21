@@ -1,0 +1,8 @@
+mesh "cube.tri"
+geomscale 0.05 0.5 0.4
+mass 0.4
+autoMass
+kStiffness inf
+kDamping inf
+kRestitution 0.5
+

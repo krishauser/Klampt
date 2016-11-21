@@ -137,11 +137,19 @@ def update_sphere(name="KVIZ_Sphere1",x=0,y=0,z=0,r=-1):
 
 def add_line(name="KVIZ_Line1",x1=0,y1=0,z1=0,x2=1,y2=1,z2=1):
 	"""Adds a new line segment to the world connecting point (x1,y1,z1) to (x2,y2,z2)"""
-	_RPC.append({'type':'add_line','name':name,'x1':x1,'y1':y1,'z1':z1,'x2':x2,'y2':y2,'z2':z2})	
+	_RPC.append({'type':'add_line','name':name,'verts':[x1,y1,z1,x2,y2,z2]})	
 
 def update_line(name="KVIZ_Line1",x1=0,y1=0,z1=0,x2=1,y2=1,z2=1):
 	"""Updates the endpoints of a line segment to be (x1,y1,z1) and (x2,y2,z2)"""
-	_RPC.append({'type':'update_line','name':name,'x1':x1,'y1':y1,'z1':z1,'x2':x2,'y2':y2,'z2':z2})	
+	_RPC.append({'type':'update_line','name':name,'verts':[x1,y1,z1,x2,y2,z2]})	
+
+def add_polyline(name="KVIZ_Line1",pts=[]):
+	"""Adds a new polygonal line segment to the world connecting the given list of 3-tuples"""
+	_RPC.append({'type':'add_line','name':name,'verts':sum(pts,[])})
+
+def update_polyline(name="KVIZ_PolyLine1",pts=[]):
+	"""Updates a polygonal line segment connecting the given list of 3-tuples"""
+	_RPC.append({'type':'update_line','name':name,'verts':sum(pts,[])})
 
 def add_triangle(name="KVIZ_Tri1",a=(0,0,0),b=(1,0,0),c=(0,1,0)):
 	"""Adds a new triangle with vertices a,b,c.  a,b, and c are 3-lists or 3-tuples."""

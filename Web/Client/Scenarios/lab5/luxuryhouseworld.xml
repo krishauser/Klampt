@@ -6,6 +6,6 @@
 
   <terrain name="Floor" file="plane.tri"/>
 
-  <terrain name="House" file="luxury house interior.obj" scale="0.03" rotateX="1.5708" translation="-0.4 0 0"/> 
+  <terrain name="House" file="luxury house interior.obj" scale="0.025" rotateX="1.5708" translation="-0.4 0 0"/> 
 
 </world>

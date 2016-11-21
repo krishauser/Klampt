@@ -60,6 +60,16 @@
             }
          }        
          
+         function doConnect() 
+         {
+            if(KLAMPT.isConnected()) {
+               KLAMPT.disconnect(doConnect);
+            }
+            else {
+               var URL=$('#serverURL').val();
+               KLAMPT.connect(URL,$('#boilerselctor').val(),function() { KLAMPT.setCode(editor.getValue()); newBoilerplate = false;},null);
+            }
+         }
                                   
          function doCodeSubmit()
          {
@@ -72,8 +82,7 @@
             }
 
             if(!KLAMPT.isConnected()) {
-               var URL=$('#serverURL').val();
-               KLAMPT.connect(URL,$('#boilerselctor').val(),function() { KLAMPT.setCode(editor.getValue()); newBoilerplate = false;},null);
+               doConnect();
             }
             else if(newBoilerplate) {
                //connected, but need new boilerplate.  Hence we need to disconnect and then reconnect. 
@@ -124,6 +133,68 @@
             });
          }
 
+         //the magic of AJAX
+         //http://stackoverflow.com/questions/3567369/reading-server-side-file-with-javascript
+         function loadFileToPanel(file_to_load)
+         {
+            
+            console.log("Trying to load button panel "+file_to_load);
+            $.ajax({
+               url: file_to_load,
+               async: true,   // asynchronous request? (synchronous requests are discouraged...)
+               cache: false,   // with this, you can force the browser to not make cache of the retrieved data
+               dataType: "text",  // jQuery will infer this, but you can set explicitly
+               success: function( data, textStatus, jqXHR ) {
+                  $("#buttonpanel_content").empty();
+                  $("#myTextarea").width("94%");
+                  domitems = $.parseHTML(data);
+                  domitems.forEach(function(ei) {
+                     $(ei).find("button").addBack("button").each( function(i) {
+                        $(this).click(function() { KLAMPT.event($(this).attr('name')); })
+                     });
+                     $(ei).find("input, textarea").addBack("input, textarea").each( function(i) {
+                        $(this).change(function() { KLAMPT.setitem($(this).attr('name'),$(this).val()); });
+                     });
+                     $(ei).find("select").addBack("select").each( function(i) {
+                        $(this).on("input change",function() { KLAMPT.setitem($(this).attr('name'),$(this).val()); });
+                     });
+                  });
+                     //if(je.is("button")) {
+                     //   je.click(function() { KLAMPT.event($(ei).attr('name')); });
+                     //}
+                     //else if(je.is("select") || je.is("input") || je.is("textarea")) {
+                      //  console.log("binding to change event");
+                       // je.change(function() {
+                       //    console.log("change");
+                        //   KLAMPT.setitem($(ei).attr('name'),$(ei).val()); 
+                        //});
+                     //}
+                  domitems.forEach(function(ei) {
+                     $("#buttonpanel_content").append(ei);
+                  });
+                  //need to wait for the DOM to update
+                  setTimeout(function(){
+                     var wtext = $("#myTextarea").outerWidth();
+                     var wpanel = $("#buttonpanel_content").outerWidth();
+                     var ftext = Math.floor(wtext/(wtext + wpanel)*100);
+                     var fpanel = Math.ceil(wpanel/(wtext + wpanel)*100);
+                     //console.log(ftext);
+                     //console.log(fpanel);
+                     //why these magic offsets?
+                     $("#myTextarea").width((ftext-6-fpanel/3)+"%");
+                     //$("#buttonpanel").width(fpanel+"%");
+                  },0);
+               },
+               error : function( jqXHR, textStatus, errorThrown ) {
+                  console.log("No button panel: "+textStatus);
+                  $("#buttonpanel_content").empty();
+                  //$("#myTextarea").width("100%");
+                  //why 6% offset?
+                  $("#myTextarea").width("94%");
+                  editor.resize();
+               }
+            });
+         }
 
          function serverChanged()
          {
@@ -162,10 +233,14 @@
             else
                loadFileToEditor(file_to_load);
             newBoilerplate = true;
+            var panel_to_load="Scenarios/panel_"+boilerid+".xml";
+            loadFileToPanel(panel_to_load);
             KLAMPT.animate(false);
          }   
          
-         
+         function toggleShadow(cb) {
+            KLAMPT.set_shadow(cb.checked);
+         }
      
          $( document ).ready(function() {
             console.log("page is ready, lets setup some stuff");
@@ -182,11 +257,11 @@
             $('#myLayout').w2layout({
                name: 'layout',
                panels: [
-                  { type: 'top',  size: "5%", resizable: true, style: pstyle, content: '<button onclick="doCodeSubmit()">Reset</button><button onclick="requestAdvance()">Advance Frame</button><button onclick="requestFreeRun()">Run</button><button onclick="KLAMPT.animate(false)">Stop</button> <div style=" width:20px;display:inline-block;" />Klampt Server URL:<input type="text" id="serverURL" value="ws://'+hostname+':1234" size="50"><button onclick="doConnect()">Connect</button><div style=" width:20px;display:inline-block;" /><select id="boilerselctor" onchange="boilerPlateChanged()"></select> <button onclick="doRevertChanges()">Revert to Skeleton Code</button>'},
+                  { type: 'top',  size: "5%", resizable: true, style: pstyle, content: '<button onclick="doCodeSubmit()">Reset</button><button onclick="requestAdvance()">Advance Frame</button><button onclick="requestFreeRun()">Run</button><button onclick="KLAMPT.animate(false)">Stop</button> <div style=" width:20px;display:inline-block;" />Klampt Server URL:<input type="text" id="serverURL" value="ws://'+hostname+':1234" size="50"><button onclick="doConnect()">Connect</button><div style=" width:20px;display:inline-block;" /><select id="boilerselctor" onchange="boilerPlateChanged()"></select> <button onclick="doRevertChanges()">Revert to Skeleton Code</button><input type="checkbox" id="shadows" onclick="toggleShadow(this);">Shadows</input>'},
                   { type: 'main', style: pstyle, content: '<div id="canvas" style="width:100%; height:100%; margin:0; padding:0"></div>' },
-                  { type: 'preview', size: "15%", resizable: true, style: pstyle, content: '<textarea readonly id="myTextarea" style="background-color: black;color:white;width:100%;height:100%">> </textarea>' },
+                  { type: 'preview', size: "15%", resizable: true, style: pstyle, content: '<textarea readonly id="myTextarea" style="background-color: black;color:white;width:100%;height:100%;float:left;">> </textarea><div id="buttonpanel" style="height:100%; margin:0; padding:0; float:left;"><div id="buttonpanel_content" style="margin:0;padding:0;"></div></div>' },
                   { type: 'right', size: '50%', resizable: true, style: pstyle, content: 
-                    '<div id="editor" style="width:100%; height:100%; margin:0; padding:0"></div>' },               ]
+                    '<div id="editor" style="width:100%; height:100%; margin:0; padding:0"></div>' },  ]
             });
             
 
@@ -209,6 +284,9 @@
             add_option("dynamics","Dynamics test")
             add_option("lab4","Lab 4")
             add_option("lab5","Lab 5")
+            add_option("finalA","Final A")
+            add_option("finalB","Final B")
+            add_option("finalC","Final C")
 
             if(localStorageAvailable) {
                var url=localStorage.getItem('serverURL');
@@ -231,9 +309,6 @@
       
             editor.setTheme("ace/theme/eclipse"); 
             editor.getSession().setMode("ace/mode/python");
-            
-            /*editor.getSession().setValue("nextTime = 1\ntoggle = 0\ndef init(robot_model):\n    global ghost\n    ghost=kviz.add_ghost('myGhost')\n    kviz.set_color(ghost,[1,0,0,0.25],True)\n    q=kviz.get_robot_config()\n    q[8]-=2.0\n    kviz.set_ghost_config(q,'myGhost')\n    kviz.add_text('HUD1',1,1)\n    kviz.update_text('HUD1','hello world')\n\ndef control_loop(t,controller):\n    global nextTime, toggle\n    if t >= nextTime:\n        q = controller.getCommandedConfig()\n        q[8] -= 0.5\n        controller.setMilestone(q)\n        nextTime += 1.0\n        ");
-            */
             
             boilerPlateChanged();
                        

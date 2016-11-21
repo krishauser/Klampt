@@ -173,3 +173,13 @@ class ProbabilisticOccupancyGridMapper(MapperBase):
         #TODO: you may wish to produce a new grid rather than the grid of
         #counts
         return GridMap(self.occupancyCounts,self.bounds)
+
+
+def get_control(t):
+    """Used by the server to determine how the robot should drive. Return value is
+    a tuple (vfwd,vleft,turnrate)"""
+    if t % 2 < 1.5:
+        return (1,0,3)
+    else:
+        return (1,0,-3)
+

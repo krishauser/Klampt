@@ -1,0 +1,8 @@
+mesh "sphere.geom"
+geomscale 0.1 0.1 0.1
+mass 1
+autoMass
+kStiffness inf
+kDamping inf
+kRestitution 0.9
+

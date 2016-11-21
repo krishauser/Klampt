@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<world>
+  <robot name="TX90L-pr2" file="robots/tx90scoop.rob" translation="-1 0 0"/>
+  <terrain file="terrains/block.tri" />
+
+  <!-- the balls -->
+  <rigidObject name="ball1" file="objects/ballB.obj" translation="3 -0.5 0.15"/>
+  <rigidObject name="ball2" file="objects/ballB.obj" translation="3 -0.25 0.15"/>
+  <rigidObject name="ball3" file="objects/ballB.obj" translation="3 0 0.15"/>
+  <rigidObject name="ball4" file="objects/ballB.obj" translation="3 0.25 0.15"/>
+  <rigidObject name="ball5" file="objects/ballB.obj" translation="3 0.5 0.15"/>
+  <rigidObject name="ball6" file="objects/ballB.obj" translation="3.25 -0.5 0.15"/>
+  <rigidObject name="ball7" file="objects/ballB.obj" translation="3.25 -0.25 0.15"/>
+  <rigidObject name="ball8" file="objects/ballB.obj" translation="3.25 0 0.15"/>
+  <rigidObject name="ball9" file="objects/ballB.obj" translation="3.25 0.25 0.15"/>
+  <rigidObject name="ball10" file="objects/ballB.obj" translation="3.25 0.5 0.15"/>
+  <simulation>
+     <globals />
+     <terrain index="0" kStiffness="inf" kDamping="inf" />
+  </simulation>
+</world>

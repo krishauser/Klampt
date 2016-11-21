@@ -125,27 +125,32 @@ class Robot:
 			self.mapper = stub.ProbabilisticOccupancyGridMapper(10,10,128,128)
 		self.map = None
 
+		self.last_viz_point = 0
+
 	def initVis(self):
-		kviz.add_sphere("camera",0,0,0,0.05)
+		kviz.add_sphere("camera",0,0,0,0.03)
 		kviz.add_line("camera_dir")
 		kviz.set_color("camera",(1,1,0,1))
 		kviz.set_color("camera_dir",(1,1,0,1))
+		self.last_viz_point = 0
 		self.updateVis()
 
 	def updateVis(self):
 		Trobot = (so3.rotation((0,0,1),self.state[2]),(self.state[0],self.state[1],0))
 		self.robot.setTransform(Trobot[0],Trobot[1])
+		kviz.update_sphere("camera",*se3.apply(Trobot,self.cameraPos),r=0.03)
+		kviz.update_line("camera_dir",*(se3.apply(Trobot,self.cameraPos)+se3.apply(Trobot,vectorops.add(self.cameraPos,(0.15,0,0)))))
 
-		kviz.clear_extras()
-		kviz.add_sphere("camera",*se3.apply(Trobot,self.cameraPos),r=0.03)
-		kviz.add_line("camera_dir",*(se3.apply(Trobot,self.cameraPos)+se3.apply(Trobot,vectorops.add(self.cameraPos,(0.15,0,0)))))
 		#draw map, if it exists
 		if self.map:
 			height = self.cameraPos[2]
 			if isinstance(self.map,stub.PointCloudMap):
 				for i,p in enumerate(self.map.points):
-					kviz.add_sphere("p"+str(i),p[0],p[1],height,r=0.01)
+					if i >= self.last_viz_point:
+						kviz.add_sphere("p"+str(i),p[0],p[1],height,r=0.01)
+				self.last_viz_point = len(self.map.points)
 			else:
+				kviz.remove("map")
 				w = self.map.bounds[1][0]-self.map.bounds[0][0]
 				h = self.map.bounds[1][1]-self.map.bounds[0][1]
 				cx = 0.5*(self.map.bounds[1][0]+self.map.bounds[0][0])
@@ -202,11 +207,9 @@ def boilerplate_start():
 
 def boilerplate_advance():
 	global world,robot,t
+	u = stub.get_control(t)
 	dt = 0.05
-	if t % 2 < 1.5:
-		robot.drive((1,0,3),dt)
-	else:
-		robot.drive((1,0,-3),dt)
+	robot.drive(u,dt)
 
 	#robot.drive((1,0,0),dt)
 	robot.updateVis()
