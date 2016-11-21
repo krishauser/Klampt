@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<world>
+  <robot name="TX90L-pr2" file="robots/tx90bat.rob" translation="-1 0.5 0"/>
+  <terrain file="terrains/block.tri" />
+
+  <!-- the goal -->
+  <terrain file="terrains/cube.tri" scale="0.05 0.05 1.0" translation="3.25 1.1 0.0">
+     <display color="0.4 0.3 0.2"/>
+  </terrain>
+  <terrain file="terrains/cube.tri" scale="0.05 0.05 1.0" translation="3.25 -1.1 0.0">
+     <display color="0.4 0.3 0.2"/>
+  </terrain>
+  <terrain file="terrains/cube.tri" scale="0.05 2.25 0.05" translation="3.25 -1.1 1.0">
+     <display color="0.4 0.3 0.2"/>
+  </terrain>
+
+  <!-- the ball -->
+  <rigidObject name="ball" file="objects/ballC.obj" translation="-1 -0.5 0.15"/>
+
+  <!-- the obstacles -->
+  <rigidObject name="obstacle1" file="objects/obstacleC.obj" translation="2 -0.5 0.03"/>
+  <rigidObject name="obstacle2" file="objects/obstacleC.obj" translation="2.5 -0.25 0.03"/>
+  <rigidObject name="obstacle3" file="objects/obstacleC.obj" translation="3 0.5 0.03"/>
+  <simulation>
+     <globals />
+     <terrain index="0" kStiffness="inf" kDamping="inf" />
+  </simulation>
+</world>

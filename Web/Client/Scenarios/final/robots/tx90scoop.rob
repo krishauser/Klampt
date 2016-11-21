@@ -1,0 +1,44 @@
+### Kinematics of the Staubli TX90L robot ###
+TParent 1 0 0   0 1 0   0 0 1   0 0 0 
+TParent 0 1 0   -1 0 0   0 0 1   -0.0248 0 0.242   
+TParent 0 0 -1   1 0 0   0 -1 0   -0.16 0.05 0.23  
+TParent 1 0 0   0 -1 0   0 0 -1   -0.0001 -0.5 0  
+TParent 1 0 0   0 0 1   0 -1 0   -0.0002 0.156 0.11 
+TParent 1 0 0   0 0 -1   0 1 0   0.0008 0.0305 0.3952  
+TParent 1 0 0   0 0 1   0 -1 0   0.0 0.145 0.0305 
+parents -1 0 1 2 3 4 5
+axis 0 0 1    0 0 1    0 0 1    0 0 1    0 0 1   0 0 1    0 0 1
+translation  0 0 0
+#qMinDeg    0    -179   -147.5   -145    -270   -140    -270
+#qMaxDeg    0    179    130       145    270    115    270
+qMinDeg    0    -179   -147.5   -145    -179   -140    -179
+qMaxDeg    0    179    130       145    179    115    179
+#velMaxDeg  0    400    400      430    540    475    760
+#accMaxDeg  0    800    800      800    800     800    800
+velMaxDeg  0    200    200      215    270    235    380
+accMaxDeg  0    400    400      400    400     400    400
+geometry   "tx90l/part6.tri" "tx90l/part5.tri" "tx90l/part4.tri" "tx90l/part3.tri" "tx90l/part2.tri" "tx90l/part1.tri" "../objects/sphere.tri"
+geomscale 1 1 1 1 1 1 0.05
+mount 6 "scoop.ply"  0 0 -0.005  0 0.005 0    0.005 0 0   -0.05 0 -0.05
+mass       20 10 10 5 5 1 0.2
+automass
+torqueMax  0 800 600 400 100 50 10
+
+# simulation parameters
+servoP  40000 50000 20000 10000 2000 200
+servoI  100 100 100 100 40 10
+servoD  1000 2000 700 400 50 10
+dryFriction 5 5 3 1 0.1 0.05
+viscousFriction 100 100 70 40 5 2
+
+noselfcollision 0 2
+noselfcollision 0 3
+noselfcollision 1 3
+noselfcollision 1 4
+noselfcollision 1 5
+noselfcollision 2 4
+noselfcollision 2 5
+noselfcollision 2 6
+noselfcollision 3 5
+noselfcollision 3 6
+noselfcollision 4 6
