@@ -267,18 +267,40 @@ void handleIncomingMessage(string message)
       char routing=message[0];
       message.erase(0, 1); //remove routing prefix
 
-      if(routing=='K') //key pressed
+      if(routing=='E') //user event
       {
-        //TODO: if a pre-cached advance call has been made, then this keypress will register on the NEXT frame.
-          std::string wrapper_keypress;
-          wrapper_keypress+="wrapper_keypress(";
-          wrapper_keypress+=message;
-          wrapper_keypress+=")\n";
-          int res = PyRun_SimpleString(wrapper_keypress.c_str());
+        if(precomputed_response) {
+           //output previous code
+           FlushStreams();
+           precomputed_response = false;
+           pause_io = false;
+        }
+          std::string pycode;
+          pycode+="wrapper_event('"+message+"')\n";
+          int res = PyRun_SimpleString(pycode.c_str());
           FlushStreams();
       }
-
-      if(routing=='A')
+      else if(routing=='S') //set item event
+      {
+        if(precomputed_response) {
+           //output previous code
+           FlushStreams();
+           precomputed_response = false;
+           pause_io = false;
+        }
+          size_t i=message.find(',');
+          if(i == std::string::npos) {
+            printf("Error parsing set item message, no comma found\n");
+            return;
+          }
+          std::string item = message.substr(0,i);
+          std::string value = message.substr(i+1,message.length()-i-1);
+          std::string pycode;
+          pycode+="wrapper_setitem('" + item + "',"+value+")\n";
+          int res = PyRun_SimpleString(pycode.c_str());
+          FlushStreams();
+      }
+      else if(routing=='A')
       {
          printf("  user would like to advance frame\n");
          if(!boilerplate_loaded || !student_code_loaded) {
@@ -303,7 +325,7 @@ void handleIncomingMessage(string message)
            }
          }
       }
-      if(routing=='R')
+      else if(routing=='R')
       {
          printf("  user would like to run continuously\n");
          if(!boilerplate_loaded || !student_code_loaded) {
@@ -332,7 +354,7 @@ void handleIncomingMessage(string message)
            }
          }
       }
-      if(routing=='C')
+      else if(routing=='C')
       {  
         pause_io = false;
         precomputed_response = false;
@@ -420,7 +442,7 @@ void handleIncomingMessage(string message)
           PyErr_Clear();
         }
       }
-      if(routing=='B')
+      else if(routing=='B')
       {
          if(boilerplate_loaded) fprintf(stderr,"  Boilerplate was loaded twice, erroring out...\n");
          assert(!boilerplate_loaded);

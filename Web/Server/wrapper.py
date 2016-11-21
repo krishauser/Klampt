@@ -3,6 +3,7 @@ import kviz
 import emb
 import log
 import sys
+import json
 
 class StdoutCatcher:
     def write(self, str):
@@ -74,12 +75,24 @@ def wrapper_advance():
 	wrapper_compute_JSON()		
 	wrapper_send_JSON()
 
-def wrapper_keypress(key):
-	#print "got key: " + str(key)
+def wrapper_event(*args):
+	#print "got event: " + args
 	try:
-		boilerplate_keypress(key)
+		boilerplate_event(*args)
 	except Exception as e:
-		print "Exception in keypress code"
+		print "Exception in event code"
 		raise
+	wrapper_compute_JSON()
+	wrapper_send_JSON()
+
+def wrapper_setitem(item,value):
+	#print "set item: " + item +" = "+ repr(value)
+	try:
+		boilerplate_setitem(item,value)
+	except Exception as e:
+		print "Exception in setitem code"
+		raise
+	wrapper_compute_JSON()		
+	wrapper_send_JSON()
 
 
