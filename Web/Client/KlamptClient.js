@@ -14,6 +14,12 @@
 ///Animation:
 ///KLAMPT.advance(callback);    //requests an advance of the frame.  callback is either null or a function that is called when the frame arrives and is drawn.
 ///KLAMPT.animate(running);     //requests continual advancing of frames.  running is either true or false
+///KLAMPT.set_shadow(enabled);  //turns shadows on/off
+///
+///Interaction
+///KLAMPT.setitem(item,value);    //sets an item's value in the code
+///KLAMPT.getitem(item,onvalue);  //gets an item's value in the code.  onvalue(value) is called when the return message is received
+///KLAMPT.event(id);              //tells the server an event was called. id is a string.
 ///
 ///Timing: be careful about calling isConnected, advance, setBoilerplate, and setCode if you do not first verify
 ///that the connection is up.  E.g., for startup it is safest to call
@@ -98,7 +104,7 @@ Network.prototype.connect = function()
       {
          //console.log("websocket callback onmessage");     
                  
-    if(evt.data instanceof ArrayBuffer)
+         if(evt.data instanceof ArrayBuffer)
          {        
             console.log("  got an ArrayBuffer");
             console.log("    data length: " + evt.data.byteLength);           
@@ -128,7 +134,7 @@ Network.prototype.connect = function()
             else if(message[0]=='E') //console error
                consoleTextArrivedCallback(slicedMessage);      
             else 
-              console.log("websocket callback onmessage got invalid message "+message);
+               console.log("websocket callback onmessage got invalid message "+message);
          }
             
       }.bind(this);
@@ -383,6 +389,11 @@ function kclient_init(dom_sceneArea,dom_textArea)
   animate();
 }
 
+function kclient_set_shadow(enabled)
+{
+  renderer.shadowMapEnabled = enabled;
+}
+
 function kclient_connect(addr,boilerid,onconnect,onfailure)
 {
 	if(net_isConnected()) {
@@ -466,6 +477,24 @@ function kclient_animate(animate)
      }
 	}
 }
+
+function kclient_event(event)
+{
+  net_sendMessage("E"+event);
+}
+
+
+function kclient_setitem(item,value)
+{
+  net_sendMessage("S"+item+","+JSON.stringify(value));
+}
+
+function kclient_getitem(item,onvalue)
+{
+  console.log("getitem is not implemented");
+  //net_sendMessage("G"+item);
+}
+
 //TODO: request interrupt of embedded python
 // http://stackoverflow.com/questions/1420957/stopping-embedded-python
 
@@ -846,7 +875,7 @@ function kclient_rpc(request)
    }
    else if(request.type == "set_transform")
    {                 
-      console.log("got a set_transform RPC request for: " + request.object);
+      //console.log("got a set_transform RPC request for: " + request.object);
       var object = getObject(request.object);
       if(object != null)
       {
@@ -1149,14 +1178,6 @@ function newSceneArrivedCallback(data)
 	data=null;
 	dataJ=null;
 	rpc=null;
-
-	var t0 = performance.now();
-	kclient_render();
-	var t1 = performance.now();
-	console.log("Time to render " + (t1 - t0) + " milliseconds.")
-	//console.log("finished processing message");
-
-	if(refreshCallback) refreshCallback();
 }
 
 function kclient_render()
@@ -1166,8 +1187,16 @@ function kclient_render()
 
 function animate()
 {
-        requestAnimationFrame( animate  );
-        controls.update();
+  //var t0 = performance.now();
+  kclient_render();
+  //var t1 = performance.now();
+  //console.log("Time to render " + (t1 - t0) + " milliseconds.")
+
+  requestAnimationFrame( animate  );
+  controls.update();
+
+  //console.log("finished processing message");
+  if(refreshCallback) refreshCallback();
 }
 
 
@@ -1180,6 +1209,10 @@ return {
    disconnect:kclient_disconnect,
    advance:kclient_advance,
    animate:kclient_animate,
+   set_shadow:kclient_set_shadow,
+   event:kclient_event,
+   getitem:kclient_getitem,
+   setitem:kclient_setitem,
    set_scene:kclient_set_scene,
    set_transforms:kclient_set_transforms,
    rpc:kclient_rpc,
