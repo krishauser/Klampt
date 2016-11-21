@@ -40,7 +40,7 @@ def wrapper_send_JSON():
 	emb.send(wrapper_jString)
 	secs = time.time()- starttime
 	msecs = secs * 1000  # millisecs
-	#print "sending JSON took: " + "{:.2f}".format(msecs) + " ms"
+	#print "sending JSON size " + str(len(wrapper_jString))+" bytes took: " + "{:.2f}".format(msecs) + " ms"
 	wrapper_JSON_message_count+=1
 
 def wrapper_advance_internal():
