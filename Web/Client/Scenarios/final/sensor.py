@@ -47,7 +47,7 @@ class CameraColorDetectorSensor:
             if z < self.dmin or z > self.dmax:
                 continue
             c = objectColors[i%len(objectColors)]
-            o.geometry().setCurrentTransform(*se3.identity())
+            o.geometry().setCurrentTransform(so3.mul(so3.inv(self.Tsensor[0]),Tb[0]),[0]*3)
             bmin,bmax = o.geometry().getBB()
             err = self.pixelError
             dscale = xscale/z

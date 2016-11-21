@@ -191,6 +191,7 @@ class GLTest:
         self.sim.simulate(0)
         self.simulate = True
         self.finalScore = None
+        self.readings = dict()
         self.initVis()
 
     def initVis(self):
@@ -199,7 +200,15 @@ class GLTest:
         kviz.add_text("score",5,10)
         kviz.add_text("final",5,15)
         if 'blobdetector' in self.sensors:
-            gldraw.xform_widget(self.sensors['blobdetector'].Tsensor,0.1,0.01,fancy=True)
+            Tsensor = self.sensors['blobdetector'].Tsensor
+            x,y,z = Tsensor[1]
+            kviz.add_sphere("cam_center",x,y,z,0.03)
+            kviz.set_color("cam_center",(1,1,0,1))
+            kviz.add_polyline("cam_fwd",[Tsensor[1],se3.apply(Tsensor,[0,0,0.2])])
+            kviz.set_color("cam_fwd",(0,0,1,1))
+            kviz.add_polyline("cam_up",[Tsensor[1],se3.apply(Tsensor,[0,0.1,0])])
+            kviz.set_color("cam_up",(0,1,0,1))
+        self.numBlobs = 0
         self.updateVis()
 
     def updateVis(self):
@@ -207,13 +216,48 @@ class GLTest:
         kviz.update_text("score","Score: "+str(self.event.score))
         if self.finalScore != None:
             kviz.update_text("final","Final score: "+str(self.finalScore))
+        if 'blobdetector' in self.sensors:
+            sensor = self.sensors['blobdetector']
+            Tsensor = sensor.Tsensor
+            for n,r in self.readings.iteritems():
+                assert isinstance(r,CameraColorDetectorOutput)
+                for i,blob in enumerate(r.blobs):
+                    xmin = blob.x-blob.w*0.5
+                    xmax = blob.x+blob.w*0.5
+                    ymin = blob.y-blob.h*0.5
+                    ymax = blob.y+blob.h*0.5
+                    umin = (xmin - sensor.w/2)/math.tan(math.radians(sensor.fov*0.5))/(sensor.w/2)
+                    umax = (xmax - sensor.w/2)/math.tan(math.radians(sensor.fov*0.5))/(sensor.w/2)
+                    vmin = (ymin - sensor.h/2)/math.tan(math.radians(sensor.fov*0.5))/(sensor.w/2)
+                    vmax = (ymax - sensor.h/2)/math.tan(math.radians(sensor.fov*0.5))/(sensor.w/2)
+                    depth = 0.2
+                    a = se3.apply(Tsensor,(umin*depth,vmin*depth,depth))
+                    b = se3.apply(Tsensor,(umax*depth,vmin*depth,depth))
+                    c = se3.apply(Tsensor,(umax*depth,vmax*depth,depth))
+                    d = se3.apply(Tsensor,(umin*depth,vmax*depth,depth))
+                    kviz.update_quad("blob"+str(i),a,d,c,b)
+                    kviz.update_quad("blob_back"+str(i),a,b,c,d)
+                    #kviz.update_quad("blob"+str(i),(0,0,2),b=(1,0,2),c=(1,1,2),d=(0,1,2))
+                    kviz.set_color("blob"+str(i),blob.color+(1,))
+                    kviz.set_color("blob_back"+str(i),blob.color+(1,))
+                for i in xrange(len(r.blobs),self.numBlobs):
+                    print "Removing blob",i
+                    kviz.remove("blob"+str(i))
+                    kviz.remove("blob_back"+str(i))
+                self.numBlobs = len(r.blobs)
+            if len(self.readings) == 0:
+                for i in xrange(self.numBlobs):
+                    print "Removing blob",i
+                    kviz.remove("blob"+str(i))
+                    kviz.remove("blob_back"+str(i))
+                self.numBlobs = 0
 
     def control_loop(self):
-        readings = dict()
+        self.readings = dict()
         for n,s in self.sensors.iteritems():
-            readings[n] = s.emulate(self.sim)
+            self.readings[n] = s.emulate(self.sim)
         try:
-            self.controller.loop(self.dt,self.sim.controller(0),readings)
+            self.controller.loop(self.dt,self.sim.controller(0),self.readings)
         except Exception as e:
             print "Exception called during controller.loop:"
             traceback.print_exc()

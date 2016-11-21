@@ -157,6 +157,8 @@ class MyController:
             omniscientObjectState = OmniscientStateEstimator().update(sensorReadings['omniscient'])
             #omniscientObjectStateEstimate is now a MultiObjectStateEstimate (see common.py)
             multiObjectStateEstimate  = omniscientObjectState
+            #if you want to visualize the traces, you can uncomment this
+            #self.objectEstimates = multiObjectStateEstimate
 
         self.myPlayerLogic(dt,
                            sensorReadings,multiObjectStateEstimate,
@@ -185,19 +187,18 @@ class MyController:
         """
         if self.objectEstimates:
             for o in self.objectEstimates.objects:
-                glDisable(GL_LIGHTING)
-                glColor3f(o.name[0],o.name[1],o.name[2])
                 #draw a point
-                glPointSize(5.0)
-                gldraw.point([o.x[0],o.x[1],o.x[2]])
+                kviz.update_sphere("object_est"+str(o.name),o.x[0],o.x[1],o.x[2],0.03)
+                kviz.set_color("object_est"+str(o.name),(o.name[0],o.name[1],o.name[2],1))
                 #draw an arc
-                glBegin(GL_LINE_STRIP)
+                trace = []
                 x = [o.x[0],o.x[1],o.x[2]]
                 v = [o.x[3],o.x[4],o.x[5]]
                 if event=='C': gravity = 0
                 else: gravity = 9.8
                 for i in range(20):
                     t = i*0.05
-                    glVertex3f(*vectorops.sub(vectorops.madd(x,v,t),[0,0,0.5*gravity*t*t]))
-                glEnd()
+                    trace.append(vectorops.sub(vectorops.madd(x,v,t),[0,0,0.5*gravity*t*t]))
+                kviz.update_polyline("object_trace"+str(o.name),trace);
+                kviz.set_color("object_trace"+str(o.name),(o.name[0],o.name[1],o.name[2],1))
 
