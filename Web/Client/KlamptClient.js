@@ -351,6 +351,18 @@ function kclient_init(dom_sceneArea,dom_textArea)
 	textArea = dom_textArea;
 	//renderer.setClearColor(0x88888888);
   renderer.setClearColor(0x888888FF);
+  renderer.shadowMapEnabled = false;
+  // to antialias the shadow
+  renderer.shadowMapType = THREE.PCFSoftShadowMap;
+  renderer.shadowMapSoft = true;
+  renderer.shadowCameraNear = 0.5;
+  renderer.shadowCameraFar = 5;
+  renderer.shadowCameraFov = 50;
+  renderer.shadowMapBias = 0.0039;
+  renderer.shadowMapDarkness = 0.5;
+  renderer.shadowMapWidth = 1024;
+  renderer.shadowMapHeight = 1024;
+
 	dom_sceneArea.appendChild( renderer.domElement );  //attach the three.js renderer to the proper div 
 
 	controls=new THREE.TrackballControls( camera, sceneArea);
@@ -575,6 +587,35 @@ function kclient_set_scene(dataJ)
    sceneCache={};
 
    scene = loader.parse( dataJ );
+   if (scene == null) {
+     console.log("Invalid scene sent from server");
+     scene = new THREE.Scene();
+   }
+
+   scene.traverse( function (child) {
+    if(!(child instanceof THREE.Light)) {
+      if(child.name == "Terrain") {
+        child.receiveShadow = true;
+        child.castShadow = true;
+      }
+      else {
+        child.receiveShadow = true;
+        child.castShadow = true;
+      }
+    }
+    else if(child instanceof THREE.DirectionalLight || child instanceof THREE.SpotLight) {
+      child.intensity *= 0.8;
+      child.castShadow = true;
+      //child.shadow.darkness = 0.3;
+      if(child instanceof THREE.DirectionalLight) {
+        child.shadow.camera.right     =  5;
+        child.shadow.camera.left     = -5;
+        child.shadow.camera.top      =  5;
+        child.shadow.camera.bottom   = -5;
+      }
+    }
+   });
+   scene.add(new THREE.AmbientLight(0xffffff,0.2));
 
   var axisHelper = new THREE.AxisHelper( 0.2 );
   scene.add( axisHelper );
@@ -828,8 +869,8 @@ function kclient_rpc(request)
       if(request.text!=null)
          text2.innerHTML = request.text;
          
-      text2.style.top = request.x + '%';
-      text2.style.left = request.y + '%';
+      text2.style.top = request.y + '%';
+      text2.style.left = request.x + '%';
       sceneArea.appendChild(text2);
    }
    else if(request.type == "update_text")
@@ -1019,6 +1060,11 @@ function newSceneArrivedCallback(data)
 	console.log("new scene has arrived!");
 
 	var dataJ=JSON.parse(data); 
+  if(dataJ == null) {
+    console.log("Unable to parse scene JSON!");
+    //console.log(data);
+    return;
+  }
 
 	//need to determine if full scene or just transforms
 	var isFullScene=dataJ.metadata.fullscene;
@@ -1030,10 +1076,6 @@ function newSceneArrivedCallback(data)
 	   var t0 = performance.now();
 
 	   kclient_set_scene(dataJ);
-
-	   //TODO: make this optional?
-	   var axisHelper = new THREE.AxisHelper( 0.2 );
-	   scene.add( axisHelper );
 
 	   //clear anything named _text_overlay_X
 	   var overlayList = [];
