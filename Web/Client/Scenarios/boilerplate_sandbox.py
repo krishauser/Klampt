@@ -28,10 +28,10 @@ def boilerplate_advance():
 	global viewer
 	if viewer.world.numRobots() > 0:
 		stub.control_loop(viewer.sim.getTime(),viewer.sim.controller(0))  #call student code
-	print "Simulating...",viewer.dt
+	#print "Simulating...",viewer.dt
 	viewer.sim.simulate(viewer.dt)
 	viewer.sim.updateWorld()
-	print "Done."
+	#print "Done."
 
 def boilerplate_keypress(key):
 	print "boiler plate received key: " + str(key)
