@@ -84,7 +84,7 @@ void ODERigidObject::SetVelocity(const Vector3& w,const Vector3& v)
   if(obj.com.maxAbsElement() > 0) {
     RigidTransform T;
     GetTransform(T);
-    vcom = v-cross(w,T.R*obj.com);
+    vcom = v+cross(w,T.R*obj.com);
   }
   else
     vcom = v;

@@ -10,6 +10,8 @@ if(COMMAND cmake_policy)
   cmake_policy(SET CMP0003 NEW)
 endif(COMMAND cmake_policy)
 
+option(KLAMPT_COMPILE_TESTS "Compile Klampt tests" FALSE)
+
 SET (CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/CMakeModules")
 
 IF(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
@@ -151,6 +153,10 @@ install(DIRECTORY Python/utils
     DESTINATION Python
     COMPONENT pythonexamples)
 
+if((NOT WIN32) AND KLAMPT_COMPILE_TESTS)
+  enable_testing()
+  add_subdirectory(tests)
+endif()
 
 IF(PYTHON)
   install(CODE "execute_process(COMMAND \"cd Python; ${PYTHON} setup.py install\")" COMPONENT python)
