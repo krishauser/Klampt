@@ -1823,6 +1823,7 @@ bool ODESimulator::InstabilityCorrection()
       robots[i]->SetVelocities(dq*scale);
     }
   }
+  return corrected;
 }
 
 void ODESimulator::ClearContactFeedback()
