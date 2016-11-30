@@ -24,7 +24,7 @@ class robotsimTest(unittest.TestCase):
         sim.controller(0).setTorque([1e6])
         sim.simulate(0.01)
         self.assertEqual(Simulator.STATUS_UNSTABLE, sim.getStatus(), '%f is the final velocity for the joint, should be infinite'%sim.getActualVelocity(0)[0])
-        
+
 
 
     def test_getStatus_adaptive_time_stepping(self):

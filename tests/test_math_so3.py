@@ -10,3 +10,6 @@ class so3Test(unittest.TestCase):
 
     def test_from_rpy(self):
         R = so3.from_rpy((0,0,0))
+
+if __name__ == '__main__':
+    unittest.main()
