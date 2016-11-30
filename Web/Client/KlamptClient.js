@@ -382,7 +382,9 @@ function kclient_init(dom_sceneArea,dom_textArea)
 	    controls.keys = [ 65, 83, 68 ];
 	controls.addEventListener( 'change', kclient_render );   
 
-  kclient_windowResize(sceneArea.offsetWidth,sceneArea.offsetHeight);
+  //kclient_windowResize(sceneArea.offsetWidth,sceneArea.offsetHeight);
+  window.addEventListener('resize',function() { kclient_windowResize(sceneArea.clientWidth,sceneArea.clientHeight); })
+  kclient_windowResize(sceneArea.clientWidth,sceneArea.clientHeight);
   var axisHelper = new THREE.AxisHelper( 0.2 );
   scene.add(axisHelper);
   
@@ -1132,7 +1134,7 @@ function newSceneArrivedCallback(data)
 	console.log("full scene is: " + isFullScene);
 
 	if(isFullScene)
-	{        
+	{
 	   var t0 = performance.now();
 
 	   kclient_set_scene(dataJ);
@@ -1185,15 +1187,21 @@ function kclient_render()
 	renderer.render( scene, camera );
 }
 
+function kclient_render_and_update()
+{
+  controls.update();
+  kclient_render();
+}
+
 function animate()
 {
+  controls.update();
   //var t0 = performance.now();
   kclient_render();
   //var t1 = performance.now();
   //console.log("Time to render " + (t1 - t0) + " milliseconds.")
 
   requestAnimationFrame( animate  );
-  controls.update();
 
   //console.log("finished processing message");
   if(refreshCallback) refreshCallback();
@@ -1216,7 +1224,8 @@ return {
    set_scene:kclient_set_scene,
    set_transforms:kclient_set_transforms,
    rpc:kclient_rpc,
-   render:kclient_render,
+   //render:kclient_render,
+   render:kclient_render_and_update,
    }
 })();
 
