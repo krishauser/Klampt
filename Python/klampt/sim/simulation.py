@@ -158,8 +158,8 @@ class SimpleSimulator (Simulator):
 
     def getStatusString(self, status = -1):
         if status > 0:
-            return Simulator.getStatusString(status)
-        return Simulator.getStatusString(self.getStatus())
+            return Simulator.getStatusString(self, status)
+        return Simulator.getStatusString(self, self.getStatus())
 
     def beginLogging(self):
         self.logging = True
