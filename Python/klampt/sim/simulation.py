@@ -156,6 +156,11 @@ class SimpleSimulator (Simulator):
     def getStatus(self):
         return self.worst_status
 
+    def getStatusString(self, status = -1):
+        if status > 0:
+            return Simulator.getStatusString(self, status)
+        return Simulator.getStatusString(self, self.getStatus())
+
     def beginLogging(self):
         self.logging = True
         self.logger = simlog.SimLogger(weakref.proxy(self),self.log_state_fn,self.log_contact_fn)

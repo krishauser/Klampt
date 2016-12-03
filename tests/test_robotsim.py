@@ -14,4 +14,5 @@ class robotsimTest(unittest.TestCase):
         self.assertIsNotNone(pid_gains)
         self.assertTrue(len(pid_gains),3)
         
-
+if __name__ == '__main__':
+    unittest.main()

@@ -2417,6 +2417,13 @@ void RobotModel::setJointLimits(const vector<double>& qmin,const vector<double>&
 {
   robot->qMin.copy(&qmin[0]);
   robot->qMax.copy(&qmax[0]);
+
+  for(unsigned int i = 0; i < robot->drivers.size(); ++i)
+  {
+      int link_index = robot->drivers[i].linkIndices[0];
+      robot->drivers[i].qmin = qmin[link_index];
+      robot->drivers[i].qmax = qmax[link_index];
+  }
 }
 
 void RobotModel::getVelocityLimits(vector<double>& vmax)
@@ -2428,6 +2435,13 @@ void RobotModel::getVelocityLimits(vector<double>& vmax)
 void RobotModel::setVelocityLimits(const vector<double>& vmax)
 {
   robot->velMax.copy(&vmax[0]);
+
+  for(unsigned int i = 0; i < robot->drivers.size(); ++i)
+  {
+      int link_index = robot->drivers[i].linkIndices[0];
+      robot->drivers[i].vmin = -vmax[link_index];
+      robot->drivers[i].vmax = vmax[link_index];
+  }
 }
 
 void RobotModel::getAccelerationLimits(vector<double>& amax)
@@ -2439,6 +2453,13 @@ void RobotModel::getAccelerationLimits(vector<double>& amax)
 void RobotModel::setAccelerationLimits(const vector<double>& amax)
 {
   robot->accMax.copy(&amax[0]);
+
+  for(unsigned int i = 0; i < robot->drivers.size(); ++i)
+  {
+      int link_index = robot->drivers[i].linkIndices[0];
+      robot->drivers[i].amin = -amax[link_index];
+      robot->drivers[i].amax = amax[link_index];
+  }
 }
 
 void RobotModel::getTorqueLimits(vector<double>& tmax)
@@ -2450,6 +2471,13 @@ void RobotModel::getTorqueLimits(vector<double>& tmax)
 void RobotModel::setTorqueLimits(const vector<double>& tmax)
 {
   robot->torqueMax.copy(&tmax[0]);
+
+  for(unsigned int i = 0; i < robot->drivers.size(); ++i)
+  {
+      int link_index = robot->drivers[i].linkIndices[0];
+      robot->drivers[i].tmin = -tmax[link_index];
+      robot->drivers[i].tmax = tmax[link_index];
+  }
 }
 
 void RobotModel::setDOFPosition(int i,double qi)
