@@ -154,15 +154,32 @@
                return false;
             }
          }        
-         
-         function doConnect() 
+
+         function onConnect()
          {
+           $('#connection_status').attr({src:'images/connected.png'});
+         }
+
+         function onDisconnect()
+         {
+           $('#connection_status').attr({src:'images/disconnected.png'});
+         }
+         
+
+         function doConnect(connectFunc) 
+         {
+            KLAMPT.setConnectionHooks(onConnect,onDisconnect);
             if(KLAMPT.isConnected()) {
                KLAMPT.disconnect(doConnect);
             }
             else {
                var URL=$('#serverURL').val();
-               KLAMPT.connect(URL,$('#boilerselctor').val(),function() { KLAMPT.setCode(editor.getValue()); newBoilerplate = false;},null);
+               KLAMPT.connect(URL,$('#boilerselctor').val(),
+                function() {
+                  KLAMPT.setCode(editor.getValue());
+                  newBoilerplate = false;
+                  if(connectFunc) connectFunc();
+                },null);
             }
          }
                                   
@@ -190,37 +207,45 @@
             }
          }
 
-         function onClickReset()
+         function stopAnimation()
          {
-            doCodeSubmit();
-            if(animate) {
-               animate = false;
-               make_play('play_pause');
-            }
-         }
-
-         function onClickRequestAdvance()
-         {
-            if(!KLAMPT.isConnected() || newBoilerplate)
-            {
-               doCodeSubmit();
-            }
-            KLAMPT.advance();
-            if(animate) {
-               animate = false;
-               make_play('play_pause');
-            }
-         }
-         function onClickPlayPause()
-         {
-            if(!KLAMPT.isConnected() || newBoilerplate)
-            {
-               doCodeSubmit();
-            }
             if(animate) {
                animate = false;
                KLAMPT.animate(false);
                make_play('play_pause');
+            }
+         }
+
+         function onClickReset()
+         {
+            doCodeSubmit();
+         }
+
+         function onClickRequestAdvance()
+         {
+            if(!KLAMPT.isConnected()) {
+              doConnect(onClickRequestAdvance);
+              return;
+            }
+            if(newBoilerplate)
+            {
+               doCodeSubmit();
+            }
+            stopAnimation();
+            KLAMPT.advance();
+         }
+         function onClickPlayPause()
+         {
+            if(!KLAMPT.isConnected()) {
+              doConnect(onClickPlayPause);
+              return;
+            }
+            if(newBoilerplate)
+            {
+               doCodeSubmit();
+            }
+            if(animate) {
+               stopAnimation();
             }
             else {
                animate = true;
@@ -228,7 +253,7 @@
                make_pause('play_pause');
             }
          }
-         
+                  
          //the magic of AJAX
          //http://stackoverflow.com/questions/3567369/reading-server-side-file-with-javascript
          function loadFileToEditor(file_to_load)
@@ -253,8 +278,7 @@
          //the magic of AJAX
          //http://stackoverflow.com/questions/3567369/reading-server-side-file-with-javascript
          function loadFileToPanel(file_to_load)
-         {
-            
+         {  
             console.log("Trying to load button panel "+file_to_load);
             $.ajax({
                url: file_to_load,
@@ -326,7 +350,7 @@
               var file_to_load="Scenarios/code_"+boilerid+".py";
               loadFileToEditor(file_to_load);
               
-              KLAMPT.animate(false);
+              stopAnimation();
             }
          }
    
@@ -352,7 +376,7 @@
             newBoilerplate = true;
             var panel_to_load="Scenarios/panel_"+boilerid+".xml";
             loadFileToPanel(panel_to_load);
-            KLAMPT.animate(false);
+            stopAnimation();
          }   
          
          function toggleShadow(cb) {
@@ -373,6 +397,7 @@
             var toolbarHTML = '<canvas id="reset" width="30" height="30" class="button" onclick="onClickReset()" alt="Reset"> </canvas> \
                               <canvas id="step" width="30" height="30" class="button" onclick="onClickRequestAdvance()" alt="Advance frame">  </canvas> \
                               <canvas id="play_pause" width="30" height="30" class="button" onclick="onClickPlayPause()" alt="Toggle play">  </canvas> \
+                              <img id="connection_status" src="images/disconnected.png" style="padding-left:20px; vertical-align: middle" alt="Connection status"> \
                               <div style=" width:20px;display:inline-block;" />Klampt Server URL:<input type="text" id="serverURL" value="ws://'+hostname+':1234" size="30"> \
                               <button onclick="doConnect()">Connect</button> \
                               <div style=" width:20px;display:inline-block;" /> \

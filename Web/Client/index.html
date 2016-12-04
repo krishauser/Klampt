@@ -31,6 +31,31 @@
       <script src="ace-builds/src-noconflict/ext-language_tools.js"></script>
    
    </head>
+
+   <style>
+      .stretchedToMargin {
+       -webkit-box-sizing: border-box;
+       -moz-box-sizing: border-box;
+           box-sizing: border-box;
+       margin:10px;
+       width:100%;
+       height:100%;
+      }
+      .button { 
+       display:block;
+       float:left;
+       margin:2px;
+       border:2px solid #000000;
+       box-shadow: 3px 3px 5px #888888;
+      }
+      .button:hover { 
+       cursor:pointer;
+       background-color:#CCF;
+      }
+      .slider:hover { 
+       cursor:pointer;
+      }
+   </style>
     
    <body style="margin: 0px;">
       <div id="myLayout" style="position: absolute; top: 0; right: 0; bottom: 0; left: 0;"></div>
@@ -42,7 +67,84 @@
          var localStorageAvailable=false;
          var localStorage;
          var newBoilerplate=true;
+         var animate = false;
          
+         var editor;
+         var visPanel;
+         var localStorageAvailable=false;
+         var localStorage;
+         var newBoilerplate=true;
+         var animate = false;
+         
+         function make_reset(id) {
+           var c2 =  document.getElementById(id).getContext('2d');
+           c2.fillStyle = '#f00';
+           c2.beginPath();
+           c2.moveTo(22, 10);
+           c2.lineTo(7, 25);
+           c2.lineTo(22, 40);
+           c2.closePath();
+           c2.fill();
+           c2.beginPath();
+           c2.moveTo(42, 10);
+           c2.lineTo(27, 25);
+           c2.lineTo(42, 40);
+           c2.closePath();
+           c2.fill();
+         }
+         function make_step(id) {
+           var canvas = document.getElementById(id);
+           var c2 =  canvas.getContext('2d');
+           c2.clearRect(0, 0, 50, 50);
+           c2.fillStyle = '#ff0';
+           c2.beginPath();
+           c2.moveTo(10, 10);
+           c2.lineTo(20, 10);
+           c2.lineTo(20, 40);
+           c2.lineTo(10, 40);
+           c2.closePath();
+           c2.fill();
+           c2.beginPath();
+           c2.moveTo(25, 10);
+           c2.lineTo(45, 25);
+           c2.lineTo(25, 40);
+           c2.closePath();
+           c2.fill();
+         }
+         function make_play(id) {
+           var canvas = document.getElementById(id);
+           var c2 =  canvas.getContext('2d');
+           c2.clearRect(0, 0, 50, 50);
+           c2.fillStyle = '#0f0';
+           c2.beginPath();
+           c2.moveTo(15, 10);
+           c2.lineTo(35, 25);
+           c2.lineTo(15, 40);
+           c2.closePath();
+           c2.fill();
+         }
+         function make_pause(id) {
+           var canvas = document.getElementById(id);
+           var c2 =  canvas.getContext('2d');
+           c2.clearRect(0, 0, 50, 50);
+           c2.fillStyle = '#ff0';
+           c2.beginPath();
+           c2.moveTo(12, 10);
+           c2.lineTo(22, 10);
+           c2.lineTo(22, 40);
+           c2.lineTo(12, 40);
+           c2.closePath();
+           c2.fill();
+           c2.beginPath();
+           c2.moveTo(28, 10);
+           c2.lineTo(38, 10);
+           c2.lineTo(38, 40);
+           c2.lineTo(28, 40);
+           c2.closePath();
+           c2.fill();
+         }
+
+
          function storageAvailable()
          {
             try {
@@ -50,8 +152,6 @@
                   x = '__storage_test__';
                localStorage.setItem(x, x);
                localStorage.removeItem(x);
-               console.log("looks like local storage is setup");
-
                return true;
             }
             catch(e) {
@@ -59,7 +159,34 @@
                return false;
             }
          }        
+
+         function onConnect()
+         {
+           $('#connection_status').attr({src:'images/connected.png'});
+         }
+
+         function onDisconnect()
+         {
+           $('#connection_status').attr({src:'images/disconnected.png'});
+           stopAnimation();
+         }
          
+         function doConnect(connectFunc) 
+         {
+            KLAMPT.setConnectionHooks(onConnect,onDisconnect);
+            if(KLAMPT.isConnected()) {
+               KLAMPT.disconnect(doConnect);
+            }
+            else {
+               var URL=$('#serverURL').val();
+               KLAMPT.connect(URL,$('#boilerselctor').val(),
+                function() {
+                  KLAMPT.setCode(editor.getValue());
+                  newBoilerplate = false;
+                  if(connectFunc) connectFunc();
+                },null);
+            }
+         }
                                   
          function doCodeSubmit()
          {
@@ -72,8 +199,7 @@
             }
 
             if(!KLAMPT.isConnected()) {
-               var URL=$('#serverURL').val();
-               KLAMPT.connect(URL,$('#boilerselctor').val(),function() { KLAMPT.setCode(editor.getValue()); newBoilerplate = false;},null);
+               doConnect();
             }
             else if(newBoilerplate) {
                //connected, but need new boilerplate.  Hence we need to disconnect and then reconnect. 
@@ -86,21 +212,51 @@
             }
          }
 
-         function requestAdvance()
+         function stopAnimation()
          {
-            if(!KLAMPT.isConnected() || newBoilerplate)
+            if(animate) {
+               animate = false;
+               KLAMPT.animate(false);
+               make_play('play_pause');
+            }
+         }
+
+         function onClickReset()
+         {
+            doCodeSubmit();
+         }
+
+         function onClickRequestAdvance()
+         {
+            if(!KLAMPT.isConnected()) {
+              doConnect(onClickRequestAdvance);
+              return;
+            }
+            if(newBoilerplate)
             {
                doCodeSubmit();
             }
+            stopAnimation();
             KLAMPT.advance();
          }
-         function requestFreeRun()
+         function onClickPlayPause()
          {
-            if(!KLAMPT.isConnected() || newBoilerplate)
+            if(!KLAMPT.isConnected()) {
+              doConnect(onClickPlayPause);
+              return;
+            }
+            if(newBoilerplate)
             {
                doCodeSubmit();
             }
-            KLAMPT.animate(true);
+            if(animate) {
+               stopAnimation();
+            }
+            else {
+               animate = true;
+               KLAMPT.animate(true);
+               make_pause('play_pause');
+            }
          }
          
          //the magic of AJAX
@@ -124,47 +280,6 @@
             });
          }
 
-
-         function serverChanged()
-         {
-            console.log("Server changed.");
-            KLAMPT.disconnect();
-         }
-
-         function doRevertChanges()
-         {
-            if (confirm("Are you sure you want to discard ALL changes?") == true) {
-              var boilerid=$('#boilerselctor').val();
-              var file_to_load="Scenarios/code_"+boilerid+".py";
-              loadFileToEditor(file_to_load);
-              
-              KLAMPT.animate(false);
-            }
-         }
-   
-         function boilerPlateChanged()
-         {
-            var boilerid=$('#boilerselctor').val();
-            var file_to_load="Scenarios/code_"+boilerid+".py";
-         
-            if(localStorageAvailable) //lets see if we have worked on this previously
-            {
-               var example1Text=localStorage.getItem('KlamptStartingCode_'+boilerid);
-               if(example1Text!=null)
-               {               
-                  editor.getSession().setValue(example1Text);
-               }
-               else
-               {
-                  loadFileToEditor(file_to_load);
-               }
-            }
-            else
-               loadFileToEditor(file_to_load);
-            newBoilerplate = true;
-            KLAMPT.animate(false);
-         }   
-         
          //the magic of AJAX
          //http://stackoverflow.com/questions/3567369/reading-server-side-file-with-javascript
          function loadFileToPanel(file_to_load)
@@ -228,6 +343,48 @@
             });
          }
 
+         function serverChanged()
+         {
+            console.log("Server changed.");
+            KLAMPT.disconnect();
+         }
+
+         function doRevertChanges()
+         {
+            if (confirm("Are you sure you want to discard ALL changes?") == true) {
+              var boilerid=$('#boilerselctor').val();
+              var file_to_load="Scenarios/code_"+boilerid+".py";
+              loadFileToEditor(file_to_load);
+              
+              stopAnimation();
+            }
+         }
+   
+         function boilerPlateChanged()
+         {
+            var boilerid=$('#boilerselctor').val();
+            var file_to_load="Scenarios/code_"+boilerid+".py";
+         
+            if(localStorageAvailable) //lets see if we have worked on this previously
+            {
+               var example1Text=localStorage.getItem('KlamptStartingCode_'+boilerid);
+               if(example1Text!=null)
+               {               
+                  editor.getSession().setValue(example1Text);
+               }
+               else
+               {
+                  loadFileToEditor(file_to_load);
+               }
+            }
+            else
+               loadFileToEditor(file_to_load);
+            newBoilerplate = true;
+            var panel_to_load="Scenarios/panel_"+boilerid+".xml";
+            loadFileToPanel(panel_to_load);
+            stopAnimation();
+         }   
+         
          function toggleShadow(cb) {
             KLAMPT.set_shadow(cb.checked);
          }
@@ -239,15 +396,47 @@
             console.log("  local storage test determined: " + localStorageAvailable);
  
             var pstyle = 'background-color: #F5F6F7; border: 1px solid #dfdfdf; padding: 5px;';
+            var toolbarHTML = '<canvas id="reset" width="30" height="30" class="button" onclick="onClickReset()" alt="Reset"> </canvas> \
+                  <canvas id="step" width="30" height="30" class="button" onclick="onClickRequestAdvance()" alt="Advance frame">  </canvas> \
+                  <canvas id="play_pause" width="30" height="30" class="button" onclick="onClickPlayPause()" alt="Toggle play">  </canvas> \
+                  <img id="connection_status" src="images/disconnected.png" style="padding-left:20px; vertical-align: middle" alt="Connection status"> \
+                  <div style=" width:20px;display:inline-block;" />Klampt Server URL:<select id="serverURL" onchange="serverChanged()"/> \
+                  <div style=" width:20px;display:inline-block;" /><select id="boilerselctor" onchange="boilerPlateChanged()"></select> \
+                  <input type="checkbox" id="shadows" onclick="toggleShadow(this);">Shadows</input> \
+                  <span style="float:right"> \
+                    <a href="http://motion.pratt.duke.edu/klampt/pyklampt_docs/namespaces.html" target="_blank">Klamp&#39;t Python API Docs</a> \
+                    <a href="kviz_docs.html" target="_blank">kviz module docs</a> \
+                  </span> ';
             $('#myLayout').w2layout({
                name: 'layout',
                panels: [
-                  { type: 'top',  size: "5%", resizable: true, style: pstyle, content: '<button onclick="doCodeSubmit()">Reset</button><button onclick="requestAdvance()">Advance Frame</button><button onclick="requestFreeRun()">Run</button><button onclick="KLAMPT.animate(false)">Stop</button> <div style=" width:20px;display:inline-block;" />Klampt Server URL:<select id="serverURL" onchange="serverChanged()"/><div style=" width:20px;display:inline-block;" /><select id="boilerselctor" onchange="boilerPlateChanged()"></select><button onclick="doRevertChanges()">Revert to Skeleton Code</button><input type="checkbox" id="shadows" onclick="toggleShadow(this);">Shadows</input> <span style="float:right"> <a href="http://motion.pratt.duke.edu/klampt/pyklampt_docs/namespaces.html" target="_blank">Klamp&#39;t Python API Docs</a> <a href="kviz_docs.html" target="_blank">kviz module docs</a> </span> '},
+                  { type: 'top',  size: "7%", resizable: true, style: pstyle, content: toolbarHTML},
                   { type: 'main', style: pstyle, content: '<div id="canvas" style="width:100%; height:100%; margin:0; padding:0"></div>' },
                   { type: 'preview', size: "15%", resizable: true, style: pstyle, content: '<textarea readonly id="myTextarea" style="background-color: black;color:white;width:100%;height:100%">> </textarea> <div id="buttonpanel" style="height:100%; margin:0; padding:0; float:left;"><div id="buttonpanel_content" style="margin:0;padding:0;"></div></div>' },
                   { type: 'right', size: '50%', resizable: true, style: pstyle, content: 
-                    '<div id="editor" style="width:100%; height:100%; margin:0; padding:0"></div>' },               ]
+                    '<div style="padding-left:40px"> \
+                      <div id="myTabs"></div> \
+                    </div> \
+                    <div id="editor" style="width:100%; height:100%; margin:0; padding:0"></div>' },               ]
             });
+
+            document.getElementById('reset').getContext('2d').scale(0.6,0.6); 
+            document.getElementById('step').getContext('2d').scale(0.6,0.6); 
+            document.getElementById('play_pause').getContext('2d').scale(0.6,0.6); 
+            $('#myTabs').w2tabs({
+              name     : 'editor_tabs',
+              active     : 'stub',
+              right : '<button onclick="doRevertChanges()">Revert to Skeleton</button>',
+              tabs    : [
+                  { id: 'stub', caption: 'stub.py'},
+              ],
+              onClick: function (event) {
+                  console.log(event.target);
+              }
+            });
+            make_reset('reset');
+            make_step('step');
+            make_play('play_pause');
 
             function add_server(val,text) {
 		$('#serverURL').append($('<option>', {value:val}).text(text));
@@ -264,10 +453,9 @@
             function add_option(id,text) {
                $('#boilerselctor').append($('<option>', {value:id}).text(text));
             }
-            //add_option("lab3a","Lab 3a");
-            //add_option("lab3b","Lab 3b");
-            //add_option("lab3d","Lab 3d");
-            add_option("lab5","Lab 5");
+            add_option("finalA","Final A");
+            add_option("finalB","Final B");
+            add_option("finalC","Final C");
             add_option("test_sim","Test Simulation");
             add_option("sandbox","Simulation Sandbox");
             add_option("kinematic_sandbox","Kinematic Sandbox");
@@ -277,8 +465,6 @@
             //      $('#serverURL').val(url);
             //   }
             //}
-            
-          
 
             ace.require("ace/ext/language_tools"); //setup the text editor
             editor = ace.edit("editor");
