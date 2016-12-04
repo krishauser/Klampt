@@ -78,6 +78,7 @@
          
          function make_reset(id) {
            var c2 =  document.getElementById(id).getContext('2d');
+           c2.clearRect(0, 0, 50, 50);
            c2.fillStyle = '#f00';
            c2.beginPath();
            c2.moveTo(22, 10);
@@ -168,12 +169,38 @@
          function onDisconnect()
          {
            $('#connection_status').attr({src:'images/disconnected.png'});
-           stopAnimation();
          }
          
+         function disablePlaybackButtons()
+         {
+           $('#reset').off('click');
+           $('#step').off('click');
+           $('#play_pause').off('click');
+           var ctx = document.getElementById('reset').getContext('2d');
+           ctx.fillStyle = "rgba(128, 128, 128, 0.5)";
+           ctx.fillRect(0,0,50,50);
+           ctx = document.getElementById('step').getContext('2d');
+           ctx.fillStyle = "rgba(128, 128, 128, 0.5)";
+           ctx.fillRect(0,0,50,50);
+           ctx = document.getElementById('play_pause').getContext('2d');
+           ctx.fillStyle = "rgba(128, 128, 128, 0.5)";
+           ctx.fillRect(0,0,50,50);
+         }
+
+         function enablePlaybackButtons()
+         {
+           $('#reset').click(onClickReset);
+           $('#step').click(onClickRequestAdvance);
+           $('#play_pause').click(onClickPlayPause);
+            make_reset('reset');
+            make_step('step');
+            make_play('play_pause');
+         }
+
          function doConnect(connectFunc) 
          {
             KLAMPT.setConnectionHooks(onConnect,onDisconnect);
+            disablePlaybackButtons();
             if(KLAMPT.isConnected()) {
                KLAMPT.disconnect(doConnect);
             }
@@ -181,14 +208,13 @@
                var URL=$('#serverURL').val();
                KLAMPT.connect(URL,$('#boilerselctor').val(),
                 function() {
-                  KLAMPT.setCode(editor.getValue());
+                  KLAMPT.setCode(editor.getValue(),function() { enablePlaybackButtons(); if(connectFunc) connectFunc(); } );
                   newBoilerplate = false;
-                  if(connectFunc) connectFunc();
                 },null);
             }
          }
                                   
-         function doCodeSubmit()
+         function doCodeSubmit(connectFunc)
          {
             var textArea=document.getElementById("myTextarea");
             textArea.value="> ";
@@ -199,7 +225,7 @@
             }
 
             if(!KLAMPT.isConnected()) {
-               doConnect();
+               doConnect(connectFunc);
             }
             else if(newBoilerplate) {
                //connected, but need new boilerplate.  Hence we need to disconnect and then reconnect. 
@@ -208,7 +234,7 @@
             }
             else {
                //connected, same boilerplate, just changing code.
-               KLAMPT.setCode(editor.getValue());
+               KLAMPT.setCode(editor.getValue(),connectFunc);
             }
          }
 
@@ -235,10 +261,12 @@
             }
             if(newBoilerplate)
             {
-               doCodeSubmit();
+               doCodeSubmit(onClickRequestAdvance);
             }
-            stopAnimation();
-            KLAMPT.advance();
+            else {
+              stopAnimation();
+              KLAMPT.advance();
+            }
          }
          function onClickPlayPause()
          {
@@ -248,18 +276,20 @@
             }
             if(newBoilerplate)
             {
-               doCodeSubmit();
-            }
-            if(animate) {
-               stopAnimation();
+               doCodeSubmit(onClickPlayPause);
             }
             else {
-               animate = true;
-               KLAMPT.animate(true);
-               make_pause('play_pause');
+              if(animate) {
+                 stopAnimation();
+              }
+              else {
+                 animate = true;
+                 KLAMPT.animate(true);
+                 make_pause('play_pause');
+              }
             }
          }
-         
+
          //the magic of AJAX
          //http://stackoverflow.com/questions/3567369/reading-server-side-file-with-javascript
          function loadFileToEditor(file_to_load)
@@ -397,9 +427,9 @@
             console.log("  local storage test determined: " + localStorageAvailable);
  
             var pstyle = 'background-color: #F5F6F7; border: 1px solid #dfdfdf; padding: 5px;';
-            var toolbarHTML = '<canvas id="reset" width="30" height="30" class="button" onclick="onClickReset()" alt="Reset"> </canvas> \
-                  <canvas id="step" width="30" height="30" class="button" onclick="onClickRequestAdvance()" alt="Advance frame">  </canvas> \
-                  <canvas id="play_pause" width="30" height="30" class="button" onclick="onClickPlayPause()" alt="Toggle play">  </canvas> \
+            var toolbarHTML = '<canvas id="reset" width="30" height="30" class="button" alt="Reset"> </canvas> \
+                  <canvas id="step" width="30" height="30" class="button" alt="Advance frame">  </canvas> \
+                  <canvas id="play_pause" width="30" height="30" class="button" alt="Toggle play">  </canvas> \
                   <img id="connection_status" src="images/disconnected.png" style="padding-left:20px; vertical-align: middle" alt="Connection status"> \
                   <div style=" width:20px;display:inline-block;" />Klampt Server URL:<select id="serverURL" onchange="serverChanged()"/> \
                   <div style=" width:20px;display:inline-block;" /><select id="boilerselctor" onchange="boilerPlateChanged()"></select> \
@@ -424,6 +454,7 @@
             document.getElementById('reset').getContext('2d').scale(0.6,0.6); 
             document.getElementById('step').getContext('2d').scale(0.6,0.6); 
             document.getElementById('play_pause').getContext('2d').scale(0.6,0.6); 
+            enablePlaybackButtons();
             $('#myTabs').w2tabs({
               name     : 'editor_tabs',
               active     : 'stub',
@@ -435,9 +466,6 @@
                   console.log(event.target);
               }
             });
-            make_reset('reset');
-            make_step('step');
-            make_play('play_pause');
 
             function add_server(val,text) {
 		$('#serverURL').append($('<option>', {value:val}).text(text));
