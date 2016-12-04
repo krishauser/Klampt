@@ -9,7 +9,7 @@
 ///Detailed connection management:
 ///KLAMPT.isConnected();
 ///KLAMPT.disconnect(ondisconnect); //ondisconnect is either null or a function that is called once disconnected
-///You can also use the functions in DaveWebsocket.js waitForConnection / waitForDisconnection.
+///KLAMPT.setConnectionHooks(onconnect,ondisconnect);  //sets hooks that are called with any server connection/disconnection events 
 ///
 ///Animation:
 ///KLAMPT.advance(callback);    //requests an advance of the frame.  callback is either null or a function that is called when the frame arrives and is drawn.
@@ -86,6 +86,7 @@ Network.prototype.connect = function()
       {
          console.log("websocket callback onopen");
          net_updateSocketState(this.websocket);
+         if(this.onconnect) this.onconnect();
       }.bind(this);
       
       this.websocket.onclose = function(evt)
@@ -93,11 +94,8 @@ Network.prototype.connect = function()
          console.log("websocket callback onclose");
                
          net_updateSocketState(this.websocket);
-         if (!this.disconnectionAsked)
-         {
-            //setTimeout(this.connect.bind(this), 500);
-         }
          delete this.websocket;
+         if(this.ondisconnect) this.ondisconnect();
       }.bind(this);  
       
       this.websocket.onmessage = function(evt) //this is where the webpage receives data from remote
@@ -175,7 +173,7 @@ Network.prototype.disconnect = function()
    if (this.connected())
    {
       this.websocket.close();
-      updateSocketState(this.websocket);
+      net_updateSocketState(this.websocket);
    }
 }
 
@@ -287,8 +285,6 @@ function net_waitForDisconnection(msecs,callback,failcallback) {
 
 function net_updateSocketState(websocket)
 {
-   console.log("in updateSocketState");      
-
    if (websocket != null)
    {
       var stateStr;
@@ -312,11 +308,11 @@ function net_updateSocketState(websocket)
       }
       //$("#socketState").text(" (" + stateStr + ")"); 
       
-      console.log("  socket state changed: " + websocket.readyState + " (" + stateStr + ")");
+      console.log("updateSocketState, changed to: " + websocket.readyState + " (" + stateStr + ")");
    }
    else
    {
-      console.log("  websocket is null. closed");     
+      console.log("updateSocketState, websocket is null. closed");     
       //document.querySelector("#socketState").innerText = "3 (CLOSED)";
    }
 }
@@ -347,6 +343,8 @@ var loader = new THREE.ObjectLoader();
 var controls;
 
 var network; 
+var onconnect_hook;
+var ondisconnect_hook;
 var freeRun=false;
 //the function to run when an advance step is complete
 var refreshCallback; 
@@ -445,6 +443,16 @@ function kclient_disconnect(ondisconnect)
 	}
 }
 
+function kclient_setConnectionHooks(onconnect,ondisconnect)
+{
+  if(network) {
+    network.onconnect = onconnect;
+    network.ondisconnect = ondisconnect;
+  }
+  onconnect_hook = onconnect;
+  ondisconnect_hook = ondisconnect;
+}
+
 function kclient_advance(callback)
 {
 	refreshCallback = callback;
@@ -520,6 +528,10 @@ function _doConnectInternal()
 {
 	console.log("trying to connect to URL: " + serverAddr);
 	network = new Network(serverAddr,newSceneArrivedCallback,consoleTextArrivedCallback,consoleTextArrivedCallback);    
+  network.onconnect = onconnect_hook;
+  network.ondisconnect = ondisconnect_hook;
+  console.log(onconnect_hook);
+  console.log(ondisconnect_hook);
 }
 
 function _doConnect()
@@ -1222,6 +1234,7 @@ return {
    setCode:kclient_setCode,
    isConnected:kclient_isConnected,
    disconnect:kclient_disconnect,
+   setConnectionHooks:kclient_setConnectionHooks,
    advance:kclient_advance,
    animate:kclient_animate,
    set_shadow:kclient_set_shadow,
