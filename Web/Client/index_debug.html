@@ -218,6 +218,7 @@
 
          function onClickReset()
          {
+            stopAnimation();
             doCodeSubmit();
          }
 
@@ -253,7 +254,7 @@
                make_pause('play_pause');
             }
          }
-                  
+
          //the magic of AJAX
          //http://stackoverflow.com/questions/3567369/reading-server-side-file-with-javascript
          function loadFileToEditor(file_to_load)
