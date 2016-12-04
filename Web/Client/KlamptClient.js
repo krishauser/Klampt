@@ -456,23 +456,30 @@ function kclient_advance(callback)
 
 function _freeRunCallback() {
 	if(freeRun) { 
+    console.log("calling freeRunCallback...");
 		net_sendMessage("R");
 	}
 }
 
 function kclient_animate(animate)
 {
-	if(freeRun == animate) return;
+	if(freeRun == animate) {
+    console.log("freeRun = animate...");
+    return;
+  }
 	if(!animate) {
 		console.log("stopping freeRun...");
 		freeRun=false;
+    refreshCallback = null;
 	}
 	else {
       if(!net_isConnected()) {
          console.log("not connected, can't start freeRun");
+         freeRun=false;
+         refreshCallback = null;
       }
       else {
-		  console.log("starting freeRun...");
+		    console.log("starting freeRun...");
         refreshCallback = _freeRunCallback;
         freeRun=true;
         net_sendMessage("R");
@@ -1180,6 +1187,9 @@ function newSceneArrivedCallback(data)
 	data=null;
 	dataJ=null;
 	rpc=null;
+  
+  //console.log("finished processing message");
+  if(refreshCallback) refreshCallback();
 }
 
 function kclient_render()
@@ -1202,9 +1212,6 @@ function animate()
   //console.log("Time to render " + (t1 - t0) + " milliseconds.")
 
   requestAnimationFrame( animate  );
-
-  //console.log("finished processing message");
-  if(refreshCallback) refreshCallback();
 }
 
 
