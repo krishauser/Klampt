@@ -348,6 +348,8 @@ var ondisconnect_hook;
 var freeRun=false;
 //the function to run when an advance step is complete
 var refreshCallback; 
+//a function to run once after the server responds
+var serverResponseCallback;
 
 function kclient_init(dom_sceneArea,dom_textArea)
 {
@@ -421,7 +423,7 @@ function kclient_setCode(code,callback)
 	}
 	
 	_sendCode(code); 
-	refreshCallback = callback;
+	serverResponseCallback = callback;
 	freeRun = false;
 	//kclient_advance();
 }
@@ -585,6 +587,8 @@ function consoleTextArrivedCallback(data)
 
 	//textArea.val(currentText+data);
 	textArea.scrollTop = textArea.scrollHeight;
+
+  if(serverResponseCallback) { serverResponseCallback(); serverResponseCallback=null; }
 }
 
 function consoleErrorArrivedCallback(data)
@@ -600,6 +604,8 @@ function consoleErrorArrivedCallback(data)
 
 	//textArea.val(currentText+data);
 	textArea.scrollTop = textArea.scrollHeight;
+
+  if(serverResponseCallback) { serverResponseCallback(); serverResponseCallback=null; }
 }
 
 function addObject(name,object)
@@ -1202,6 +1208,7 @@ function newSceneArrivedCallback(data)
   
   //console.log("finished processing message");
   if(refreshCallback) refreshCallback();
+  if(serverResponseCallback) { serverResponseCallback(); serverResponseCallback=null; }
 }
 
 function kclient_render()

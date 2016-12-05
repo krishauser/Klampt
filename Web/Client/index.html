@@ -200,11 +200,11 @@
          function doConnect(connectFunc) 
          {
             KLAMPT.setConnectionHooks(onConnect,onDisconnect);
-            disablePlaybackButtons();
             if(KLAMPT.isConnected()) {
                KLAMPT.disconnect(doConnect);
             }
             else {
+               disablePlaybackButtons();
                var URL=$('#serverURL').val();
                KLAMPT.connect(URL,$('#boilerselctor').val(),
                 function() {
@@ -378,6 +378,7 @@
          {
             console.log("Server changed.");
             KLAMPT.disconnect();
+            enablePlaybackButtons();
          }
 
          function doRevertChanges()

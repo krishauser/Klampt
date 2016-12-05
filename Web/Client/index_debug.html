@@ -195,11 +195,11 @@
          function doConnect(connectFunc) 
          {
             KLAMPT.setConnectionHooks(onConnect,onDisconnect);
-            disablePlaybackButtons();
             if(KLAMPT.isConnected()) {
                KLAMPT.disconnect(doConnect);
             }
             else {
+               disablePlaybackButtons();
                var URL=$('#serverURL').val();
                KLAMPT.connect(URL,$('#boilerselctor').val(),
                 function() {
@@ -372,6 +372,7 @@
          {
             console.log("Server changed.");
             KLAMPT.disconnect();
+            enablePlaybackButtons();
          }
 
          function doRevertChanges()
@@ -429,7 +430,7 @@
                               <canvas id="step" width="30" height="30" class="button" alt="Advance frame">  </canvas> \
                               <canvas id="play_pause" width="30" height="30" class="button" alt="Toggle play">  </canvas> \
                               <img id="connection_status" src="images/disconnected.png" style="padding-left:20px; vertical-align: middle" alt="Connection status"> \
-                              <div style=" width:20px;display:inline-block;" />Klampt Server URL:<input type="text" id="serverURL" value="ws://'+hostname+':1234" size="30"> \
+                              <div style=" width:20px;display:inline-block;" />Klampt Server URL:<input type="text" id="serverURL" value="ws://'+hostname+':1234" size="30" oninput="serverChanged()"> \
                               <button onclick="doConnect()">Connect</button> \
                               <div style=" width:20px;display:inline-block;" /> \
                               <select id="boilerselctor" onchange="boilerPlateChanged()"></select> \
