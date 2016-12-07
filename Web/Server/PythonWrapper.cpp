@@ -50,12 +50,12 @@ void FlushStreams()
      response_buffer.clear();
    }
    if(!stdout_buffer.empty()) {
-     printf("[python stdout flush] %s\n",stdout_buffer.c_str());
+     //printf("[python stdout flush] %s\n",stdout_buffer.c_str());
      websocket_send("C"+stdout_buffer);
      stdout_buffer.clear();
    }
    if(!stderr_buffer.empty()) {
-     printf("[python stderr flush] %s\n",stderr_buffer.c_str());
+     //printf("[python stderr flush] %s\n",stderr_buffer.c_str());
      websocket_send("E"+stderr_buffer);
      stderr_buffer.clear();
    }
@@ -112,7 +112,7 @@ PyObject* log_CaptureStdout(PyObject* self, PyObject* args)
       stdout_buffer += data;
       if(!pause_io) {
         if(stdout_buffer[stdout_buffer.length()-1] == '\n') {
-          printf("[python stdout] %s",stdout_buffer.c_str());
+          //printf("[python stdout] %s",stdout_buffer.c_str());
           websocket_send("C"+stdout_buffer);
           stdout_buffer.clear();
         }
@@ -136,7 +136,7 @@ PyObject* log_CaptureStderr(PyObject* self, PyObject* args)
       stderr_buffer += data;
       if(!pause_io) {
         if(stderr_buffer[stderr_buffer.length()-1] == '\n') {
-          printf("[python stderr] %s",stderr_buffer.c_str());
+          //printf("[python stderr] %s",stderr_buffer.c_str());
           websocket_send("E"+stderr_buffer);
           stderr_buffer.clear();
         }
@@ -260,7 +260,7 @@ void shutdown_python_interpreter()
 
 void handleIncomingMessage(string message)
 {
-   printf("received incoming message!\n"); 
+   //printf("received incoming message!\n"); 
 
    if(message.size()>=1) //TODO, actually have prefix to route message
    {
@@ -302,7 +302,7 @@ void handleIncomingMessage(string message)
       }
       else if(routing=='A')
       {
-         printf("  user would like to advance frame\n");
+         //printf("  user would like to advance frame\n");
          if(!boilerplate_loaded || !student_code_loaded) {
            printf("  Code is not updated, returning.\n");
          }
@@ -327,7 +327,7 @@ void handleIncomingMessage(string message)
       }
       else if(routing=='R')
       {
-         printf("  user would like to run continuously\n");
+         //printf("  user would like to run continuously\n");
          if(!boilerplate_loaded || !student_code_loaded) {
            printf("  Code is not updated, returning.\n");
          }
