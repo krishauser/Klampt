@@ -234,6 +234,7 @@ void do_process_incoming(ws_ctx_t *ws_ctx)
             
        if (more_processing_needed < 0) {
           handler_emsg("decoding error\n");
+          handler_end_processing();
           break;
        } 
        handler_end_processing();
