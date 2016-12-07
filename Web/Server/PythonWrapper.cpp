@@ -386,12 +386,14 @@ void handleIncomingMessage(string message)
         if(!student_code_loaded) {
           //some simple sandboxing
           //PyRun_SimpleString("print stub.__builtins__.keys()");
-          PyRun_SimpleString("del stub.__builtins__['open']");
+          //ARGH: traceback uses linecache which uses open
+          //PyRun_SimpleString("del stub.__builtins__['open']");
           PyRun_SimpleString("del stub.__builtins__['raw_input']");
           PyRun_SimpleString("import sys");
           PyRun_SimpleString("sys.path.append('Web/Server')");
           PyRun_SimpleString("sys.modules['os']=None");
-          PyRun_SimpleString("sys.modules['sys']=None");
+          //TEMP: allow sys in imports.
+          //PyRun_SimpleString("sys.modules['sys']=None");
         }
 
         /*
@@ -430,6 +432,9 @@ void handleIncomingMessage(string message)
         Py_XDECREF(res);
         Py_XDECREF(stub_dict);
         //PyRun_SimpleString(message.c_str());
+
+        //TEMP: delete access to sys from code
+        PyRun_SimpleString("sys.modules['sys']=None");
 
         printf("Running boilerplate_start()...\n");
         int res2 = PyRun_SimpleString("wrapper_start()\n");
