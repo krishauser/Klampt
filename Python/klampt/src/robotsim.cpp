@@ -2272,6 +2272,9 @@ void RobotModel::getVelocity(vector<double>& dq)
 
 void RobotModel::setConfig(const vector<double>& q)
 {
+  if(robot->links.size() != q.size()) {
+    throw PyException("Invalid size of configuration given");
+  }
   robot->q.copy(&q[0]);
   robot->UpdateFrames();
   robot->UpdateGeometry();
@@ -2279,6 +2282,9 @@ void RobotModel::setConfig(const vector<double>& q)
 
 void RobotModel::setVelocity(const vector<double>& dq)
 {
+  if(robot->links.size() != dq.size()) {
+    throw PyException("Invalid size of velocity given");
+  }
   robot->dq.copy(&dq[0]);
 }
 
@@ -2292,6 +2298,12 @@ void RobotModel::getJointLimits(vector<double>& qmin,vector<double>& qmax)
 
 void RobotModel::setJointLimits(const vector<double>& qmin,const vector<double>& qmax)
 {
+  if(robot->links.size() != qmin.size()) {
+    throw PyException("Invalid size of joint limit given");
+  }
+  if(robot->links.size() != qmax.size()) {
+    throw PyException("Invalid size of joint limit given");
+  }
   robot->qMin.copy(&qmin[0]);
   robot->qMax.copy(&qmax[0]);
 }
@@ -2304,6 +2316,9 @@ void RobotModel::getVelocityLimits(vector<double>& vmax)
 
 void RobotModel::setVelocityLimits(const vector<double>& vmax)
 {
+  if(robot->links.size() != vmax.size()) {
+    throw PyException("Invalid size of velocity limit given");
+  }
   robot->velMax.copy(&vmax[0]);
 }
 
@@ -2315,6 +2330,9 @@ void RobotModel::getAccelerationLimits(vector<double>& amax)
 
 void RobotModel::setAccelerationLimits(const vector<double>& amax)
 {
+  if(robot->links.size() != amax.size()) {
+    throw PyException("Invalid size of acceleration limit given");
+  }
   robot->accMax.copy(&amax[0]);
 }
 
@@ -2326,11 +2344,17 @@ void RobotModel::getTorqueLimits(vector<double>& tmax)
 
 void RobotModel::setTorqueLimits(const vector<double>& tmax)
 {
+  if(robot->links.size() != tmax.size()) {
+    throw PyException("Invalid size of torque limits given");
+  }
   robot->torqueMax.copy(&tmax[0]);
 }
 
 void RobotModel::setDOFPosition(int i,double qi)
 {
+  if(i < 0 || i >= (int)robot->links.size()) {
+    throw PyException("Invalid joint index given");
+  }
   robot->q(i) = qi;
   robot->UpdateFrames();
 }
@@ -3395,6 +3419,9 @@ bool SimRobotController::setSetting(const std::string& name,const std::string& v
 
 void SimRobotController::setMilestone(const vector<double>& q)
 {
+  if(controller->robot->links.size() != q.size()) {
+    throw PyException("Invalid size of configuration given");
+  }
   Config qv(controller->robot->links.size(),&q[0]);
   stringstream ss;
   ss<<qv;
@@ -3403,6 +3430,12 @@ void SimRobotController::setMilestone(const vector<double>& q)
 
 void SimRobotController::setMilestone(const vector<double>& q,const vector<double>& dq)
 {
+  if(controller->robot->links.size() != q.size()) {
+    throw PyException("Invalid size of configuration given");
+  }
+  if(controller->robot->links.size() != dq.size()) {
+    throw PyException("Invalid size of velocity given");
+  }
   Config qv(controller->robot->links.size(),&q[0]);
   Config dqv(controller->robot->links.size(),&dq[0]);
   stringstream ss;
@@ -3413,6 +3446,9 @@ void SimRobotController::setMilestone(const vector<double>& q,const vector<doubl
 
 void SimRobotController::addMilestone(const vector<double>& q)
 {
+  if(controller->robot->links.size() != q.size()) {
+    throw PyException("Invalid size of configuration given");
+  }
   Config qv(controller->robot->links.size(),&q[0]);
   stringstream ss;
   ss<<qv;
@@ -3421,6 +3457,9 @@ void SimRobotController::addMilestone(const vector<double>& q)
 
 void SimRobotController::addMilestoneLinear(const vector<double>& q)
 {
+  if(controller->robot->links.size() != q.size()) {
+    throw PyException("Invalid size of configuration given");
+  }
   Config qv(controller->robot->links.size(),&q[0]);
   stringstream ss;
   ss<<qv;
@@ -3429,29 +3468,53 @@ void SimRobotController::addMilestoneLinear(const vector<double>& q)
 
 void SimRobotController::setLinear(const std::vector<double>& q,double dt)
 {
+  if(controller->robot->links.size() != q.size()) {
+    throw PyException("Invalid size of configuration given");
+  }
   PolynomialMotionQueue* mq = GetMotionQueue(controller->controller);
   mq->Cut(0);
   mq->AppendLinear(q,dt);
 }
 void SimRobotController::setCubic(const std::vector<double>& q,const std::vector<double>& v,double dt)
 {
+  if(controller->robot->links.size() != q.size()) {
+    throw PyException("Invalid size of configuration given");
+  }
+  if(controller->robot->links.size() != v.size()) {
+    throw PyException("Invalid size of velocity given");
+  }
   PolynomialMotionQueue* mq = GetMotionQueue(controller->controller);
   mq->Cut(0);
   mq->AppendCubic(q,v,dt);
 }
 void SimRobotController::appendLinear(const std::vector<double>& q,double dt)
 {
+  if(controller->robot->links.size() != q.size()) {
+    throw PyException("Invalid size of configuration given");
+  }
   PolynomialMotionQueue* mq = GetMotionQueue(controller->controller);
   mq->AppendLinear(q,dt);
 }
 void SimRobotController::addCubic(const std::vector<double>& q,const std::vector<double>& v,double dt)
 {
+  if(controller->robot->links.size() != q.size()) {
+    throw PyException("Invalid size of configuration given");
+  }
+  if(controller->robot->links.size() != v.size()) {
+    throw PyException("Invalid size of velocity given");
+  }
   PolynomialMotionQueue* mq = GetMotionQueue(controller->controller);
   mq->AppendCubic(q,v,dt);
 }
 
 void SimRobotController::addMilestone(const vector<double>& q,const vector<double>& dq)
 {
+  if(controller->robot->links.size() != q.size()) {
+    throw PyException("Invalid size of configuration given");
+  }
+  if(controller->robot->links.size() != dq.size()) {
+    throw PyException("Invalid size of velocity given");
+  }
   Config qv(controller->robot->links.size(),&q[0]);
   Config dqv(controller->robot->links.size(),&dq[0]);
   stringstream ss;
@@ -3461,6 +3524,9 @@ void SimRobotController::addMilestone(const vector<double>& q,const vector<doubl
 
 void SimRobotController::setVelocity(const vector<double>& dq,double dt)
 {
+  if(controller->robot->links.size() != dq.size()) {
+    throw PyException("Invalid size of velocity given");
+  }
   Config qv(controller->robot->links.size(),&dq[0]);
   stringstream ss;
   ss<<dt<<"\t"<<qv;
