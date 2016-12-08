@@ -67,24 +67,28 @@ class EventB:
         tmax = sim.world.robot(0).getTorqueLimits()
         for i in range(7):
             if qrobot[i] < qmin[i] or qrobot[i] > qmax[i]:
-                print "Event supervisor: Out of joint limits"
+                if not hasattr(stub,'verbose') or stub.verbose:
+                    print "Event supervisor: Joint %d value %f out of joint limits [%f,%f]"%(i,qrobot[i],qmin[i],qmax[i])
                 self.score -= dt*10
                 break
         for i in range(1,7):
             if abs(vrobot[i]) > vmax[i]:
-                print "Event supervisor: Out of velocity limits"
-                print vrobot,vmax
+                if not hasattr(stub,'verbose') or stub.verbose:
+                    print "Event supervisor: Joint %d value %f out of velocity limits [%f,%f]"%(i,vrobot[i],-vmax[i],vmax[i])
+                    #print vrobot,vmax
                 self.score -= dt*10
                 break
         for i in range(6):
             if abs(trobot[i]) > tmax[i+1]:
-                print "Event supervisor: Out of torque limits"
-                print trobot,tmax
+                if not hasattr(stub,'verbose') or stub.verbose:
+                    print "Event supervisor: Out of torque limits"
+                    print trobot,tmax
                 self.score -= dt*10
                 break
         #check collisions between robot and terrain
         if self.inContact(sim):
-            print "Event supervisor: in contact with terrain"
+            if not hasattr(stub,'verbose') or stub.verbose:
+                print "Event supervisor: in contact with terrain"
             self.score -= dt*30
             
         #do ball kicking logic

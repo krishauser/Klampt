@@ -18,6 +18,8 @@ omniscient_sensor = True
 random_seed = 12345
 #random_seed = random.seed()
 
+verbose = True
+
 ################ STATE ESTIMATION #####################
 
 class MyObjectStateEstimator:
