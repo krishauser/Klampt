@@ -43,21 +43,35 @@ class SimRobotSensor
 
 /** @brief A controller for a simulated robot.
  *
- * The basic way of using this is in "standard" move-to mode which accepts
+ * By default a SimRobotController has three possible modes:
+ * - Motion queue + PID mode: the controller has an internal trajectory
+ *   queue that may be added to and modified.  This queue supports
+ *   piecewise linear interpolation, cubic interpolation, and time-optimal
+ *   move-to commands.
+ * - PID mode: the user controls the motor's PID setpoints directly
+ * - Torque control: the user controlls the motor torques directly.
+ *
+ * The "standard" way of using this is in move-to mode which accepts
  * a milestone (setMilestone) or list of milestones (repeated calls to
  * addMilestone) and interpolates dynamically from the current
- * configuration/velocity.  To handle disturbances, a PID loop is run.
- * The constants of this loop are initially set in the robot file, or you can
- * perform tuning via setPIDGains.
+ * configuration/velocity.  To handle disturbances, a PID loop is run
+ * automatically at the controller's specified rate.
  *
- * Move-to motions are handled using a motion queue.  To get finer-grained
- * control over the motion queue you may use the setLinear/setCubic/
- * addLinear/addCubic functions.
+ * To get finer-grained control over the motion queue's timing, you may
+ * use the setLinear/setCubic/addLinear/addCubic functions.  In these functions
+ * it is up to the user to respect velocity, acceleration, and torque limits.
+ *  
+ * Whether in motion queue or PID mode, the constants of the PID loop
+ * are initially set in the robot file.  You can programmatically 
+ * tune these via the setPIDGains function.
  *
  * Arbitrary trajectories can be tracked by using setVelocity over short time
  * steps.  Force controllers can be implemented using setTorque, again using
- * short time steps.  These set the controller into manual override mode.
- * To reset back to regular motion queue control,
+ * short time steps. 
+ * 
+ * If setVelocity, setTorque, or setPID command are called, the motion queue behavior
+ * will be completely overridden.  To reset back to motion queue control, the function
+ * setManualMode(False) must be called.
  */
 class SimRobotController
 {
@@ -93,18 +107,24 @@ class SimRobotController
   /// sends a command to the controller
   bool sendCommand(const std::string& name,const std::string& args);
 
-  /// gets/sets settings of the controller
+  /// gets a setting of the controller
   std::string getSetting(const std::string& name);
+  /// sets a setting of the controller
   bool setSetting(const std::string& name,const std::string& val);
 
   /// Uses a dynamic interpolant to get from the current state to the
   /// desired milestone (with optional ending velocity).  This interpolant
   /// is time-optimal with respect to the velocity and acceleration bounds.
   void setMilestone(const std::vector<double>& q);
+  /// Uses a dynamic interpolant to get from the current state to the
+  /// desired milestone (with optional ending velocity).  This interpolant
+  /// is time-optimal with respect to the velocity and acceleration bounds.
   void setMilestone(const std::vector<double>& q,const std::vector<double>& dq);
   /// Same as setMilestone, but appends an interpolant onto an internal
   /// motion queue starting at the current queued end state.
   void addMilestone(const std::vector<double>& q);
+  /// Same as setMilestone, but appends an interpolant onto an internal
+  /// motion queue starting at the current queued end state.
   void addMilestone(const std::vector<double>& q,const std::vector<double>& dq);
   /// Same as addMilestone, but enforces that the motion should move along
   /// a straight-line joint-space path
@@ -116,6 +136,8 @@ class SimRobotController
   /// configuration/velocity to the desired configuration/velocity after time dt
   void setCubic(const std::vector<double>& q,const std::vector<double>& v,double dt);
   /// Same as setLinear but appends an interpolant onto the motion queue
+  void addLinear(const std::vector<double>& q,double dt);
+  /// Same as addLinear (will be deprecated)
   void appendLinear(const std::vector<double>& q,double dt);
   /// Same as setCubic but appends an interpolant onto the motion queue
   void addCubic(const std::vector<double>& q,const std::vector<double>& v,double dt);
@@ -130,19 +152,20 @@ class SimRobotController
   void setTorque(const std::vector<double>& t);
   /// Sets a PID command controller
   void setPIDCommand(const std::vector<double>& qdes,const std::vector<double>& dqdes);
-  /// Sets a PID command controller with feedforward torques
+  /// Sets a PID command controller.  If tfeedforward is used, it is the feedforward torque vector
   void setPIDCommand(const std::vector<double>& qdes,const std::vector<double>& dqdes,const std::vector<double>& tfeedforward);
   /// Turns on/off manual mode, if either the setTorque or setPID command were
   /// previously set.
   void setManualMode(bool enabled);
 
-  /// Returns the control type for the active controller
-  /// valid values are:
-  /// - unknown
-  /// - off
-  /// - torque
-  /// - PID
-  /// - locked_velocity
+  /// Returns the control type for the active controller.
+  ///
+  /// Valid values are:
+  /// * unknown
+  /// * off
+  /// * torque
+  /// * PID
+  /// * locked_velocity
   std::string getControlType();
 
   /// Sets the PID gains
