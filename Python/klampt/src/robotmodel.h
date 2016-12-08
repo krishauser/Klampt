@@ -90,9 +90,11 @@ class RobotModelLink
   void setMass(const Mass& mass);
   ///Gets transformation (R,t) to the parent link
   void getParentTransform(double out[9],double out2[3]);
+  ///Sets transformation (R,t) to the parent link
   void setParentTransform(const double R[9],const double t[3]);
   ///Gets the local rotational / translational axis
   void getAxis(double out[3]);
+  ///Sets the local rotational / translational axis
   void setAxis(const double axis[3]);
 
   ///Converts point from local to world coordinates 
@@ -222,14 +224,17 @@ class RobotModel
   RobotModelDriver driver(const char* name);
 
   //kinematic and dynamic properties
-  ///Returns the model's current configuration
+  ///Retrieves the current configuration of the robot model.
   void getConfig(std::vector<double>& out);
-  ///Returns the model's current velocity
+  ///Retreives the current velocity of the robot model.
   void getVelocity(std::vector<double>& out);
-  ///Sets the model's current configurtation and performs forward kinematics.  q must
-  ///have length numLinks()
+  ///Sets the current configuration of the robot.  Input q is a vector of length numLinks().  This also updates forward kinematics of all links.
+  ///Again, it is important to realize that the RobotModel is not the same as a simulated robot, and this will not change the simulation world.
+  ///Many functions such as IK and motion planning use the RobotModel configuration as a temporary variable, so if you need to keep the
+  ///configuration through a robot-modifying function call, you should call q = robot.getConfig() before the call, and then robot.setConfig(q)
+  ///after it.
   void setConfig(const std::vector<double>& q);
-  ///Sets the model's current velocity.  dq must have length numLinks().
+  ///Sets the current velocity of the robot model.  Like the configuration, this is also essentially a temporary variable. 
   void setVelocity(const std::vector<double>& dq);
   ///Retrieves a pair (qmin,qmax) of min/max joint limit vectors
   void getJointLimits(std::vector<double>& out,std::vector<double>& out2);
@@ -251,9 +256,13 @@ class RobotModel
   ///at once, use setConfig because this function computes forward kinematics
   ///every time.
   void setDOFPosition(int i,double qi);
+  ///Sets a single DOF's position (by name).  Note: if you are setting several joints 
+  ///at once, use setConfig because this function computes forward kinematics
+  ///every time.
   void setDOFPosition(const char* name,double qi);
   ///Returns a single DOF's position
   double getDOFPosition(int i);
+  ///Returns a single DOF's position (by name)
   double getDOFPosition(const char* name);
 
   //dynamics functions

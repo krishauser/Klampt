@@ -348,6 +348,16 @@ void IKSolver::getJointLimits(std::vector<double>& out,std::vector<double>& out2
   }
 }
 
+void IKSolver::setBiasConfig(const std::vector<double>& _biasConfig)
+{
+  biasConfig = _biasConfig;
+}
+
+void IKSolver::getBiasConfig(std::vector<double>& out)
+{
+  out = biasConfig;
+}
+
 void IKSolver::getResidual(std::vector<double>& out)
 {
   int size = 0;
@@ -411,8 +421,15 @@ PyObject* IKSolver::solve(int iters,double tol)
   if(useJointLimits) {
     if(qmin.empty())
       solver.UseJointLimits();
-    else
+    else {
+      if(qmin.size() != robot.robot->links.size()) throw PyException("Invalid size on qmin");
+      if(qmax.size() != robot.robot->links.size()) throw PyException("Invalid size on qmax");
       solver.UseJointLimits(Vector(qmin),Vector(qmax));
+    }
+  }
+  if(!biasConfig.empty()) {
+    if(biasConfig.size() != robot.robot->links.size()) throw PyException("Invalid size on biasConfig");
+    solver.UseBiasConfiguration(Vector(biasConfig));
   }
   solver.solver.verbose = 0;
 

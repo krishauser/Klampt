@@ -118,6 +118,10 @@ class IKSolver
   void setJointLimits(const std::vector<double>& qmin,const std::vector<double>& qmax);
   /// Gets the limits on the robot's configuration (by default this is the robot's joint limits
   void getJointLimits(std::vector<double>& out,std::vector<double>& out2);
+  /// Biases the solver to approach a given configuration.  Setting an empty vector clears the bias term.
+  void setBiasConfig(const std::vector<double>& biasConfig);
+  /// Gets the solvers' bias configuration
+  void getBiasConfig(std::vector<double>& out);
 
   /// Returns a vector describing the error of the objective
   void getResidual(std::vector<double>& out);
@@ -139,6 +143,7 @@ class IKSolver
   std::vector<int> activeDofs;
   bool useJointLimits;
   std::vector<double> qmin,qmax;
+  std::vector<double> biasConfig;
 };
 
 
