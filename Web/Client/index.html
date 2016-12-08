@@ -208,7 +208,7 @@
                var URL=$('#serverURL').val();
                KLAMPT.connect(URL,$('#boilerselctor').val(),
                 function() {
-                  KLAMPT.setCode(editor.getValue(),function() { enablePlaybackButtons(); if(connectFunc) connectFunc(); } );
+                  KLAMPT.setCode(editor.getValue(),function() { enablePlaybackButtons(); if(connectFunc) connectFunc(); buttonPanelToServer(); } );
                   newBoilerplate = false;
                 },null);
             }
@@ -234,7 +234,11 @@
             }
             else {
                //connected, same boilerplate, just changing code.
-               KLAMPT.setCode(editor.getValue(),connectFunc);
+               KLAMPT.setCode(editor.getValue(),function() {
+                if(connectFunc) connectFunc();
+                //now set the default values, if there's a panel
+                buttonPanelToServer();
+              });
             }
          }
 
@@ -372,6 +376,16 @@
                   editor.resize();
                }
             });
+         }
+
+         function buttonPanelToServer()
+         {
+           $('#buttonpanel_content').find("input, textarea").addBack("input, textarea").each( function(i) {
+              KLAMPT.setitem($(this).attr('name'),$(this).val());
+           });
+           $('#buttonpanel_content').find("select").addBack("select").each( function(i) {
+                  KLAMPT.setitem($(this).attr('name'),$(this).val()); 
+           });
          }
 
          function serverChanged()
