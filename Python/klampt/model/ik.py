@@ -417,6 +417,7 @@ def solve_nearby(objectives,maxDeviation,iters=1000,tol=1e-3,activeDofs=None,num
         qmin[d] = max(qmin[d],q[d]-maxDeviation)
         qmax[d] = min(qmax[d],q[d]+maxDeviation)
     s.setJointLimits(qmin,qmax)
+    s.setBiasConfig(q)
     #start solving
     if s.solve(iters,tol)[0]:
         if feasibilityCheck():
