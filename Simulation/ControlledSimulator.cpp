@@ -214,7 +214,7 @@ void ControlledRobotSimulator::Step(Real dt,WorldSimulation* sim)
 
   if(controller) {
     //the controller update happens less often than the PID update loop
-    if(nextControlTime < endOfTimeStep) {
+    if(nextControlTime <= endOfTimeStep) {
       //update controller
       controller->sensors = &sensors;
       controller->command = &command;

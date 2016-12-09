@@ -348,6 +348,15 @@ void WorldSimulation::Advance(Real dt)
     return;
   }
 
+  if(dt == 0) {
+    //just update the control simulators and hooks
+    for(size_t i=0;i<controlSimulators.size();i++) 
+      controlSimulators[i].Step(0,this);
+    for(size_t i=0;i<hooks.size();i++)
+      hooks[i]->Step(0);
+    return;
+  }
+
   for(ContactFeedbackMap::iterator i=contactFeedback.begin();i!=contactFeedback.end();i++) {
     Reset(i->second);
   }
