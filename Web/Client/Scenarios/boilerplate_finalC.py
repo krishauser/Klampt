@@ -216,7 +216,7 @@ class GLTest:
             kviz.set_color("cam_fwd",(0,0,1,1))
             kviz.add_polyline("cam_up",[Tsensor[1],se3.apply(Tsensor,[0,0.1,0])])
             kviz.set_color("cam_up",(0,1,0,1))
-        self.ghost = kviz.add_ghost()
+        self.ghost = kviz.add_ghost("user")
         kviz.set_color(self.ghost,(1,1,0,0.5))
         self.numBlobs = 0
         self.updateVis()
@@ -228,7 +228,7 @@ class GLTest:
             kviz.update_text("final","Final score: "+str(self.finalScore))
         if self.mode == 'user':
             kviz.set_visible(self.ghost,True)
-            kviz.set_ghost_config(self.quser)
+            kviz.set_ghost_config(self.quser,"user")
         else:
             kviz.set_visible(self.ghost,False)
         if 'blobdetector' in self.sensors:
