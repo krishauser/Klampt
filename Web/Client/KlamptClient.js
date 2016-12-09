@@ -810,39 +810,34 @@ function kclient_rpc(request)
                                                             
             if (recursive == true)
             {
-               if(shared)
+              if(obj.material == null) {
+                obj.material=new THREE.MeshPhongMaterial();
+                obj.userData.customSharedMaterialSetup=true;
+              }
+              else if(shared)
                {
-                  if(obj.material == null) {
-                    obj.material = new THREE.MeshPhongMaterial();
-                  }
-                  else {
-                    obj.material = clone_material(obj.material);
-                  }
-                  
+                  obj.material = clone_material(obj.material);                  
                   obj.userData.customSharedMaterialSetup=true;
-                  
-                  obj.traverse( function ( child ) { 
-                  if (typeof child.material !== 'undefined') 
-                     child.material=obj.material;
-                  } );
-               }                        
+               }
+              obj.traverse( function ( child ) { 
+              if (typeof child.material !== 'undefined') 
+                 child.material=obj.material;
+              } );
             }
             else
             {
-               if(shared)
+              if(obj.material == null) {
+                obj.material=new THREE.MeshPhongMaterial();
+                obj.userData.customSingleMaterialSetup=true;
+              }
+              else if(shared)
                { 
-                  if(obj.material == null) {
-                    obj.material=new THREE.MeshPhongMaterial();
-                  }
-                  else {
-                    obj.material=clone_material(obj.material);
-                  }
-                  
+                  obj.material=clone_material(obj.material);
                   obj.userData.customSingleMaterialSetup=true;
                }
             }
             
-      
+
             obj.material.color.setRGB(rgba[0],rgba[1],rgba[2]);
             if(rgba[3]!=1.0)
             {
@@ -892,12 +887,16 @@ function kclient_rpc(request)
          console.log("we found the object in the tree");
         
          var clone_object=object.clone(true);
-         addObject(object_name,clone_object);
          
          clone_object.traverse( function ( child ) { 
                   if (typeof child.name !== 'undefined') 
                      child.name=prefix+child.name;
+                   console.log("changed name "+child.name);
                   } );
+         addObject(prefix+object_name,clone_object);
+      }
+      else {
+         console.log("The ghost of object " + object_name + " could not be made since the object was not found");
       }
    }
    else if(request.type == "set_transform")
@@ -1194,7 +1193,13 @@ function newSceneArrivedCallback(data)
 	var rpc =dataJ.RPC;
 	for(i=0; i<rpc.length; i++)
 	{  
-		kclient_rpc(rpc[i]);
+    try {
+		  kclient_rpc(rpc[i]);
+    }
+    catch(err) {
+      console.log(rpc[i]);
+      throw err;
+    }
 	}
 	var t2 = performance.now();
 	if(rpc.length > 0)
