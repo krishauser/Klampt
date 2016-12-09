@@ -72,7 +72,8 @@ class EventB:
                 self.score -= dt*10
                 break
         for i in range(1,7):
-            if abs(vrobot[i]) > vmax[i]:
+            #10% slop to account for difference between vmax and limits
+            if abs(vrobot[i]) > vmax[i]*1.1:
                 if not hasattr(stub,'verbose') or stub.verbose:
                     print "Event supervisor: Joint %d value %f out of velocity limits [%f,%f]"%(i,vrobot[i],-vmax[i],vmax[i])
                     #print vrobot,vmax
