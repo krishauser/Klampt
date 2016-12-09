@@ -184,7 +184,6 @@ class GLTest:
         else:
             self.sensors['blobdetector'] = sensor.CameraColorDetectorSensor()
             self.sensors['blobdetector'].Tsensor = Tsensor
-        self.controller = stub.MyController(self.planningWorld,self.sim.controller(0))
         
         #set up camera to get a better vantage point
         #self.camera.dist = 12
@@ -199,6 +198,8 @@ class GLTest:
         self.finalScore = None
         self.readings = dict()
         self.initVis()
+        #moved this here because initVis needs to be called first
+        self.controller = stub.MyController(self.planningWorld,self.sim.controller(0))
 
     def initVis(self):
         kviz._init(self.simWorld)

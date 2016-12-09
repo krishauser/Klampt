@@ -176,7 +176,6 @@ class GLTest:
         cameraRot = [0,-1,0,0,0,-1,1,0,0]
         #on ground near robot, pointing up and slightly to the left
         Tsensor = (so3.mul(so3.rotation([1,0,0],-0.10),so3.mul(so3.rotation([0,-1,0],math.radians(90)),cameraRot)),[-1.5,-0.5,0.25])
-        self.controller = stub.MyController(self.planningWorld,self.sim.controller(0))
         if stub.omniscient_sensor:
             self.sensors['omniscient'] = sensor.OmniscientObjectSensor()
         else:
@@ -198,6 +197,9 @@ class GLTest:
         self.finalScore = None
         self.readings = dict()
         self.initVis()
+
+        #moved this here because initVis needs to be called first
+        self.controller = stub.MyController(self.planningWorld,self.sim.controller(0))
 
     def initVis(self):
         kviz._init(self.simWorld)
