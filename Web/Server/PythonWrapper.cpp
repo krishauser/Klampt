@@ -391,7 +391,8 @@ void handleIncomingMessage(string message)
           PyRun_SimpleString("del stub.__builtins__['raw_input']");
           PyRun_SimpleString("import sys");
           PyRun_SimpleString("sys.path.append('Web/Server')");
-          PyRun_SimpleString("sys.modules['os']=None");
+          //TEMP: allow os in imports.
+          //PyRun_SimpleString("sys.modules['os']=None");
           //TEMP: allow sys in imports.
           //PyRun_SimpleString("sys.modules['sys']=None");
         }
