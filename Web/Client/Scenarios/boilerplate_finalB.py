@@ -216,7 +216,7 @@ class GLTest:
             kviz.set_color("cam_fwd",(0,0,1,1))
             kviz.add_polyline("cam_up",[Tsensor[1],se3.apply(Tsensor,[0,0.1,0])])
             kviz.set_color("cam_up",(0,1,0,1))
-        self.ghost = kviz.add_ghost"user")
+        self.ghost = kviz.add_ghost("user")
         kviz.set_color(self.ghost,(1,1,0,0.5))
         self.numBlobs = 0
         self.updateVis()
