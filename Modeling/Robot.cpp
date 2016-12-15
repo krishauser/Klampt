@@ -2475,6 +2475,7 @@ bool Robot::LoadURDF(const char* fn)
 	    default_inertia.setIdentity(); 
 	    default_inertia *= 1e-8; 
 	  }
+	  //check for sensors and controller attribute / children
 	  const char* props[2] = {"sensors","controller"};
 	  for (int i=0;i<2;i++) {
 	  	const char* prop = props[i];
@@ -2497,13 +2498,15 @@ bool Robot::LoadURDF(const char* fn)
 				fprintf(stderr,"<klampt> XML tag \"%s\" attribute is not an XML file? Treating as raw XML string\n",prop);
 				properties[prop] = value;
 			}
+		}
+		else {
 			//or <sensors> / <controller> tags can be placed under the <klampt> tag
 			TiXmlElement* c = klampt_xml->FirstChildElement(prop);
 			if(c != NULL) {
 				stringstream ss;
 				ss<<*c;
 				properties[prop] = ss.str();
-			}
+			}	
 		}
 	  }
 	  TiXmlElement* e = klampt_xml->FirstChildElement("link");
