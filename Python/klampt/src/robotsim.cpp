@@ -3658,6 +3658,7 @@ bool SimRobotController::setSetting(const std::string& name,const std::string& v
 void EnablePathControl(RobotController* c)
 {
   PolynomialPathController* pc = GetPathController(c);
+  MyController* mc=dynamic_cast<MyController*>(c);
   if(pc->path.elements.empty() || mc->override) {
     Config q;
     if(mc->GetCommandedConfig(q)) {
@@ -3760,10 +3761,6 @@ void SimRobotController::addLinear(const std::vector<double>& q,double dt)
   mq->AppendLinear(q,dt);
 }
 
-void SimRobotController::appendLinear(const std::vector<double>& q,double dt)
-{
-  addLinear(q,dt);
-}
 void SimRobotController::addCubic(const std::vector<double>& q,const std::vector<double>& v,double dt)
 {
   if(controller->robot->links.size() != q.size()) {
