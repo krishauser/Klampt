@@ -2475,11 +2475,36 @@ bool Robot::LoadURDF(const char* fn)
 	    default_inertia.setIdentity(); 
 	    default_inertia *= 1e-8; 
 	  }
-	  if(klampt_xml->Attribute("sensors") != NULL) {
-		  properties["sensors"] = path + klampt_xml->Attribute("sensors");
-	  }
-	  if(klampt_xml->Attribute("controller") != NULL) {
-		  properties["controller"] = path + klampt_xml->Attribute("controller");
+	  const char* props[2] = {"sensors","controller"};
+	  for (int i=0;i<2;i++) {
+	  	const char* prop = props[i];
+		  if(klampt_xml->Attribute(prop) != NULL) {
+		  	const char* value = klampt_xml->Attribute(prop);
+		  	//load from file
+		  	stringstream ss(value);
+		    string file;
+		    SafeInputString(ss,file);
+		  	const char* ext = FileExtension(file.c_str());
+		  	if(ext && 0==strcmp(ext,"xml")) {
+			    //prepend the robot path
+			    string fn = path + file;
+			    if(!GetFileContents(fn.c_str(),properties[prop])) {
+			    	fprintf(stderr,"     Unable to read %s property from file %s\n",prop,fn.c_str());
+			    	return false;
+			    }
+			}
+			else {
+				fprintf(stderr,"<klampt> XML tag \"%s\" attribute is not an XML file? Treating as raw XML string\n",prop);
+				properties[prop] = value;
+			}
+			//or <sensors> / <controller> tags can be placed under the <klampt> tag
+			TiXmlElement* c = klampt_xml->FirstChildElement(prop);
+			if(c != NULL) {
+				stringstream ss;
+				ss<<*c;
+				properties[prop] = ss.str();
+			}
+		}
 	  }
 	  TiXmlElement* e = klampt_xml->FirstChildElement("link");
 	  while(e != NULL) {
