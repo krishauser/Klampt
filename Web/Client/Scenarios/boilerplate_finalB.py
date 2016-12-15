@@ -66,7 +66,8 @@ class EventB:
         vmax = sim.world.robot(0).getVelocityLimits()
         tmax = sim.world.robot(0).getTorqueLimits()
         for i in range(7):
-            if qrobot[i] < qmin[i] or qrobot[i] > qmax[i]:
+            #0.1% slop to account for numerical error
+            if qrobot[i] < qmin[i]*1.001 or qrobot[i] > qmax[i]*1.001:
                 if not hasattr(stub,'verbose') or stub.verbose:
                     print "Event supervisor: Joint %d value %f out of joint limits [%f,%f]"%(i,qrobot[i],qmin[i],qmax[i])
                 self.score -= dt*10

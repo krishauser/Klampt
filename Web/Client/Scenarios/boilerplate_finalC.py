@@ -30,6 +30,13 @@ class EventC:
             self.endtime = 40
 
         self.initialStates = None
+        self.phase_shifts = [random.uniform(0,math.pi*2) for i in range(sim.world.numRigidObjects())]
+        #for hard, shift objects more toward middle
+        if self.difficulty == 'hard':
+            for i in range(1,sim.world.numRigidObjects()):
+                Tbody = sim.body(sim.world.rigidObject(i)).getTransform()
+                Tnew = (Tbody[0],(Tbody[1][0],Tbody[1][1]*0.7-0.2,Tbody[1][2]))
+                sim.body(sim.world.rigidObject(i)).setTransform(*Tnew)
 
         #activate collision feedback
         robot = sim.world.robot(0)
@@ -70,7 +77,8 @@ class EventC:
         vmax = sim.world.robot(0).getVelocityLimits()
         tmax = sim.world.robot(0).getTorqueLimits()
         for i in range(7):
-            if qrobot[i] < qmin[i] or qrobot[i] > qmax[i]:
+            #0.1% slop to account for numerical error
+            if qrobot[i] < qmin[i]*1.001 or qrobot[i] > qmax[i]*1.001:
                 if not hasattr(stub,'verbose') or stub.verbose:
                     print "Event supervisor: Joint %d value %f out of joint limits [%f,%f]"%(i,qrobot[i],qmin[i],qmax[i])
                 self.score -= dt*10
@@ -140,9 +148,7 @@ class EventC:
             self.lasttouchtime = None
             self.ball += 1
 
-        #drive obstacles
-        if not hasattr(self,'phase_shifts'):
-            self.phase_shifts = [random.uniform(0,math.pi*2) for i in range(sim.world.numRigidObjects())]
+        #drive obstacles    
         for i in range(1,sim.world.numRigidObjects()):
             Tx = self.initialStates[i]
             period = 5+i*2
@@ -151,8 +157,8 @@ class EventC:
                 period = 4+i*2
                 amplitude = 0.9
             elif self.difficulty == "hard":
-                period = 5+i*1.5
-                amplitude = 0.6
+                period = 3.5+i*1.5
+                amplitude = 0.75
             phase = i + self.phase_shifts[i]
             delta = amplitude*math.sin((t+phase)/period*math.pi*2)
             vdelta = amplitude*math.cos((t+phase)/period*math.pi*2)*math.pi*2/period
@@ -298,6 +304,7 @@ program = None
 
 def boilerplate_start():
     global program
+    random.seed(stub.random_seed)
     world = WorldModel()
     world2 = WorldModel()
     fn = "Web/Client/Scenarios/final/finalC.xml"
@@ -309,7 +316,6 @@ def boilerplate_start():
         world.rigidObject(i).appearance().setColor(*sensor.objectColors[i%len(sensor.objectColors)])
         world2.rigidObject(i).appearance().setColor(*sensor.objectColors[i%len(sensor.objectColors)])
     program = GLTest(world,world2)
-    random.seed(stub.random_seed)
 
 def boilerplate_advance():
     global program
