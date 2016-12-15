@@ -84,6 +84,11 @@ void MainWindow::SetFrame(bool status){
   gui->SendButtonToggle("draw_frame",status);
 }
 
+void MainWindow::SetSensors(bool status){
+  gui->SendButtonToggle("draw_sensors",status);
+}
+
+
 void MainWindow::SetFree() {
   gui->SendCommand("pose_mode");
   ui->btn_free->setChecked(true);

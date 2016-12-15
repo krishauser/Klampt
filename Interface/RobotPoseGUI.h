@@ -4,6 +4,7 @@
 #include "ResourceGUI.h"
 #include "View/RobotPoseWidget.h"
 #include "View/ObjectPoseWidget.h"
+#include "Control/Sensor.h"
 #include <KrisLibrary/utils/apputils.h>
 #include <fstream>
 
@@ -22,6 +23,7 @@ using namespace GLDraw;
  * - draw_com
  * - draw_frame
  * - draw_poser
+ * - draw_sensors
  * 
  * Accepts commands (in addition to ResourceGUIBackend and WorldGUIBackend):
  * - pose_mode: next clicks will pose the robot's joints
@@ -73,7 +75,9 @@ class RobotPoseBackend : public ResourceGUIBackend
   vector<RobotPoseWidget> robotWidgets;
   vector<RigidObjectPoseWidget> objectWidgets;
   WidgetSet allWidgets;
-  int draw_geom,draw_poser,draw_bbs,draw_com,draw_frame;
+  int draw_geom,draw_poser,draw_bbs,draw_com,draw_frame,draw_sensors;
+  //temp: sensors storage
+  RobotSensors robotSensors;
 
   RobotPoseBackend(RobotWorld* world,ResourceManager* library);
   virtual void Start();

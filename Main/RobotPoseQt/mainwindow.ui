@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>890</width>
+    <width>965</width>
     <height>551</height>
    </rect>
   </property>
@@ -84,7 +84,7 @@
             <property name="horizontalSpacing">
              <number>6</number>
             </property>
-            <item row="0" column="6">
+            <item row="0" column="7">
              <spacer name="horizontalSpacer_4">
               <property name="orientation">
                <enum>Qt::Horizontal</enum>
@@ -110,7 +110,7 @@
               </property>
              </spacer>
             </item>
-            <item row="0" column="5">
+            <item row="0" column="6">
              <widget class="QCheckBox" name="chk_bboxes">
               <property name="statusTip">
                <string>Draw geometry bounding boxes</string>
@@ -130,7 +130,7 @@
               </property>
              </widget>
             </item>
-            <item row="1" column="0" colspan="7">
+            <item row="1" column="0" colspan="8">
              <layout class="QHBoxLayout" name="horizontalLayout_4">
               <item>
                <widget class="QRadioButton" name="radioButton">
@@ -363,6 +363,13 @@
               </property>
              </widget>
             </item>
+            <item row="0" column="5">
+             <widget class="QCheckBox" name="chk_sensors">
+              <property name="text">
+               <string>Sensors</string>
+              </property>
+             </widget>
+            </item>
            </layout>
           </item>
           <item>
@@ -534,8 +541,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>890</width>
-     <height>21</height>
+     <width>965</width>
+     <height>25</height>
     </rect>
    </property>
    <property name="nativeMenuBar">
@@ -1154,6 +1161,22 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>chk_sensors</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>MainWindow</receiver>
+   <slot>SetSensors(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>503</x>
+     <y>444</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>482</x>
+     <y>275</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>ShowHelp()</slot>
@@ -1181,5 +1204,6 @@
   <slot>IKConstrainPoint()</slot>
   <slot>IKConstrain()</slot>
   <slot>IKDelete()</slot>
+  <slot>SetSensors(bool)</slot>
  </slots>
 </ui>

@@ -77,8 +77,7 @@ void RobotPoseBackend::Start()
   draw_bbs = 0;
   draw_com = 0;
   draw_frame = 0;
-  self_colliding.resize(robot->links.size(),false);   
-
+  draw_sensors = 0;
 
   robotWidgets.resize(world->robots.size());
   for(size_t i=0;i<world->robots.size();i++) {
@@ -108,6 +107,7 @@ void RobotPoseBackend::Start()
   MapButtonToggle("draw_bbs",&draw_bbs);
   MapButtonToggle("draw_com",&draw_com);
   MapButtonToggle("draw_frame",&draw_frame);
+  MapButtonToggle("draw_sensors",&draw_sensors);
 }
 
 void RobotPoseBackend::UpdateConfig()
@@ -147,6 +147,16 @@ void RobotPoseBackend::RenderWorld()
     world->terrains[i]->DrawGL();
   for(size_t i=0;i<world->rigidObjects.size();i++)
     world->rigidObjects[i]->DrawGL();
+
+  if(draw_sensors) {
+    if(robotSensors.sensors.empty()) {
+      robotSensors.MakeDefault(robot);
+    }
+    for(size_t i=0;i<robotSensors.sensors.size();i++) {
+      vector<double> measurements;
+      robotSensors.sensors[i]->DrawGL(*robot,measurements);
+    }
+  }
 
   if(draw_geom) {
     //set the robot colors
