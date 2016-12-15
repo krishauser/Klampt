@@ -144,6 +144,17 @@ bool XmlRobot::GetRobot(Robot& robot)
     robot.UpdateConfig(q);
   }
 
+  TiXmlElement*es=e->FirstChildElement("sensors");
+  if(es) {
+    if(es->Attribute("file"))
+      robot.properties["sensors"] = es->Attribute("file");
+    else {
+      stringstream ss;
+      ss<<*es;
+      robot.properties["sensors"] = ss.str();
+    }
+  }
+
   RigidTransform T;
   if(ReadTransform(e,T)) {
     for(size_t i=0;i<robot.links.size();i++)
