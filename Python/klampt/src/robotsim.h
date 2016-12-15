@@ -185,6 +185,9 @@ class SimRobotController
  * provided to Simulation.simulate().  If you need fine-grained control,
  * make sure to call simulate() with time steps equal to the value provided
  * to Simulation.setSimStep() (this is 0.001s by default).
+ *
+ * Important: the transform of the object is centered at the *object's center of mass*
+ * rather than the reference frame given in the RobotModelLink or RigidObjectModel.
  */
 class SimBody
 {
@@ -206,13 +209,15 @@ class SimBody
   /// Applies a force at a given point (in world coordinates) over the
   /// duration of the next Simulator.simulate(t) call.
   void applyForceAtPoint(const double f[3],const double pworld[3]);
-  /// Applies a force at a given point (in local coordinates) over
-  /// the duration of the next Simulator.simulate(t) call.
+  /// Applies a force at a given point (in local center-of-mass-centered
+  /// coordinates) over the duration of the next Simulator.simulate(t) call.
   void applyForceAtLocalPoint(const double f[3],const double plocal[3]);
 
   /// Sets the body's transformation at the current
-  /// simulation time step.
+  /// simulation time step (in center-of-mass centered coordinates).
   void setTransform(const double R[9],const double t[3]);
+  /// Gets the body's transformation at the current
+  /// simulation time step (in center-of-mass centered coordinates).
   void getTransform(double out[9],double out2[3]);
 
   /// Sets the angular velocity and translational velocity at the current
