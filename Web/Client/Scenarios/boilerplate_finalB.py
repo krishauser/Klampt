@@ -134,10 +134,12 @@ class EventB:
         
         #determine if any scored
         rob = sim.world.robot(0)
-        ee = sim.body(rob.link(6))
+        rob.setConfig(sim.getActualConfig(0))
+        ee = rob.link(6)
         eeTrans = ee.getTransform()
         scoopmin = [-0.16,-0.16,0.12]
         scoopmax = [0.16,0.16,0.32]
+        
         for i in range(self.ball):
             if self.activeBalls[i]:
                 obj = sim.world.rigidObject(i)
