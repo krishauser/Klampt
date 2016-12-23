@@ -82,6 +82,9 @@ class Transform:
     a parent) is that a Transform is a sort of "read-only" structure whose
     coordinates change as the frames' coordinates change."""
     def __init__(self,source,destination=None):
+        assert isinstance(source,Frame)
+        if destination is not None: 
+            assert isinstance(destination,Frame)
         self._name = None
         self._source = source
         self._destination = destination
@@ -95,7 +98,7 @@ class Transform:
         """Returns the SE(3) coordinates that transform elements from the
         source to the destination Frame."""
         if self._destination==None:
-            return self._source.worldCoodinates()
+            return self._source.worldCoordinates()
         return se3.mul(se3.inv(self._destination.worldCoordinates()),self._source.worldCoordinates())
     def translationCoordinates(self):
         """Returns the coordinates of the origin of this frame in R^3, relative
@@ -122,6 +125,8 @@ class Point:
     """Represents a point in 3D space.  It is attached to a frame, so if the
     frame is changed then its world coordinates will also change."""
     def __init__(self,localCoordinates=[0,0,0],frame=None):
+        if frame is not None: 
+            assert isinstance(frame,Frame)
         self._name = None
         self._localCoordinates = localCoordinates
         self._frame = frame
@@ -162,6 +167,8 @@ class Direction:
     frame, so if the frame is rotated then its world coordinates will also
     change."""
     def __init__(self,localCoordinates=[0,0,0],frame=None):
+        if frame is not None: 
+            assert isinstance(frame,Frame)
         self._name = None
         self._localCoordinates = localCoordinates
         self._frame = frame
@@ -728,10 +735,12 @@ def ik_fixed_objective(obj,ref=None):
 
     TODO: support Direction constraints.
     """
-    if isinstance(obj,(Frame,Point,Direction)):
+    if isinstance(obj,(Point,Direction)):
         return ik_objective(obj,obj.to(ref))
+    elif isinstance(obj,Frame):
+        return ik_fixed_objective(Transform(obj,ref))
     elif isinstance(obj,Transform):
         if ref != None: print "ik_fixed_objective: Warning, ref argument passed with Transform object, ignoring"
-        return ik_objective(obj,obj.coordnates())
+        return ik_objective(obj,obj.coordinates())
     else:
         raise ValueError("Argument to ik_fixed_objective must be an object from the coordinates module")
