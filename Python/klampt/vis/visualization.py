@@ -170,9 +170,12 @@ def edit(name,doedit=True): turns on/off visual editing of some item.  Only poin
     transforms, coordinate.Point's, coordinate.Transform's, coordinate.Frame's,
     robots, and objects are accepted at this point.
 def hideLabel(name,hidden=True): hides/unhides an item's text label.
-def animate(name,animation,speed=1.0): Sends an animation to the object.
-    May be a Trajectory or a list of configurations.  Works with points,
-    so3 elements, se3 elements, rigid objects, or robots.
+def animate(name,animation,speed=1.0,endBehavior='loop'): Sends an animation to the
+    object. May be a Trajectory or a list of configurations.  Works with points,
+    so3 elements, se3 elements, rigid objects, or robots. 
+    - speed: a modulator on the animation speed.  If the animation is a list of
+      milestones, it is by default run at 1 milestone per second.
+    - endBehavior: either 'loop' (animation repeats forever) or 'halt' (plays once).
 def setAppearance(name,appearance): changes the Appearance of an item.
 def revertAppearance(name): restores the Appearance of an item
 def setAttribute(name,attribute,value): sets an attribute of the appearance
@@ -425,12 +428,12 @@ def dirty(item_name='all'):
         return
     _vis.dirty(item_name)
 
-def animate(name,animation,speed=1.0):
+def animate(name,animation,speed=1.0,endBehavior='loop'):
     global _vis
     if _vis==None:
         print "Visualization disabled"
         return
-    _vis.animate(name,animation,speed)
+    _vis.animate(name,animation,speed,endBehavior)
 
 def pauseAnimation(paused=True):
     global _vis
@@ -593,7 +596,7 @@ def objectToVisType(item,world):
         validtypes = []
         for t in itypes:
             if t == 'Config':
-                if world != None and len(t) == world.robot(0).numLinks():
+                if world != None and len(item) == world.robot(0).numLinks():
                     validtypes.append(t)
             elif t=='Vector3':
                 validtypes.append(t)
@@ -686,7 +689,7 @@ class VisAppearance:
             self.drawConfig = None
         else:
             u = self.animationSpeed*(t-self.animationStartTime)
-            q = self.animation.eval(u,'loop')
+            q = self.animation.eval(u,self.animationEndBehavior)
             self.drawConfig = q
         for n,app in self.subAppearances.iteritems():
             app.update(t)
@@ -867,6 +870,7 @@ class VisAppearance:
                 print "Unknown object type",item.__class__.__name__
                 return
             if itypes == None:
+                print "Unable to convert item",item,"to drawable"
                 return
             elif itypes == 'Config':
                 if world:
@@ -874,7 +878,10 @@ class VisAppearance:
                     if not self.useDefaultAppearance:
                         oldAppearance = [robot.link(i).appearance().clone() for i in xrange(robot.numLinks())]
                         for i in xrange(robot.numLinks()):
+                          if self.customAppearance is not None:
                             robot.link(i).appearance().set(self.customAppearance)
+                          elif "color" in self.attributes:
+                            robot.link(i).appearance().setColor(*self.attributes["color"])
 
                     oldconfig = robot.getConfig()
                     robot.setConfig(item)
@@ -1332,7 +1339,7 @@ class VisualizationPlugin(glcommon.GLWidgetPlugin):
         _globalLock.release()
         #self.refresh()
 
-    def animate(self,name,animation,speed=1.0):
+    def animate(self,name,animation,speed=1.0,endBehavior='loop'):
         global _globalLock
         _globalLock.acquire()
         if hasattr(animation,'__iter__'):
@@ -1343,6 +1350,7 @@ class VisualizationPlugin(glcommon.GLWidgetPlugin):
         item.animation = animation
         item.animationStartTime = self.animationTime
         item.animationSpeed = speed
+        item.animationEndBehavior = endBehavior
         item.markChanged()
         _globalLock.release()
 
