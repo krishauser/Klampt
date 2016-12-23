@@ -21,9 +21,13 @@ class Trajectory:
 	Attributes:
 		- times: a list of times at which the milestones are met.
 		- milestones: a list of milestones that are interpolated.
-        """
+    """
         
-	def __init__(self,times=[],milestones=[]):
+	def __init__(self,times=None,milestones=None):
+		if milestones == None:
+			milestones = []
+		if times == None:
+			times = range(len(milestones))
 		self.times = times
 		self.milestones = milestones
 
@@ -80,7 +84,7 @@ class Trajectory:
 	def getSegment(self,t,endBehavior='halt'):
 		"""Returns the index and interpolation parameter for the
 		segment at time t.  If endBehavior='loop' then the trajectory
-		loops forver.  O(log n) time where n is the number of
+		loops forever.  O(log n) time where n is the number of
 		segments."""
 		if len(self.times)==0:
 			raise ValueError("Empty trajectory")
@@ -90,11 +94,14 @@ class Trajectory:
 			if endBehavior == 'loop':
 				t = t % self.times[-1]
 			else:
-				return (len(self.milestones),0)
-		if t < self.times[0]:
+				return (len(self.milestones)-1,0)
+		if t >= self.times[-1]:
+			return (len(self.milestones)-1,0)
+		if t <= self.times[0]:
 			return (0,0)
 		i = bisect.bisect_right(self.times,t)
 		p=i-1
+		assert i > 0 and i < len(self.times),"Invalid time index "+str(t)+" in "+str(self.times)
 		u=(t-self.times[p])/(self.times[i]-self.times[p])
 		if i==0:
 			if endBehavior == 'loop':
@@ -109,20 +116,20 @@ class Trajectory:
 	def eval(self,t,endBehavior='halt'):
 		"""Evaluates the trajectory using piecewise linear
 		interpolation.  If endBehavior='loop' then the trajectory
-		loops forver."""
+		loops forever."""
 		i,u = self.getSegment(t,endBehavior)
 		if i<0: return self.milestones[0]
-		elif i>=len(self.milestones): return self.milestones[-1]
+		elif i+1>=len(self.milestones): return self.milestones[-1]
 		#linear interpolate between milestones[i] and milestones[i+1]
 		return self.interpolate(self.milestones[i],self.milestones[i+1],u)
 
 	def deriv(self,t,endBehavior='halt'):
 		"""Evaluates the trajectory velocity using piecewise linear
 		interpolation.  If endBehavior='loop' then the trajectory
-		loops forver."""
+		loops forever."""
 		i,u = self.getSegment(t,endBehavior)
 		if i<0: return [0.0]*len(self.milestones[0])
-		elif i>=len(self.milestones): return [0.0]*len(self.milestones[-1])
+		elif i+1>=len(self.milestones): return [0.0]*len(self.milestones[-1])
 		return vectorops.mul(self.difference(self.milestones[i+1],self.milestones[i],u),1.0/(self.times[i+1]-self.times[i]))
 
 	def interpolate(self,a,b,u):
@@ -163,6 +170,8 @@ class Trajectory:
 				#keyframe exactly equal; skip the first milestone
 				#check equality with last milestone
 				if jumpPolicy=='strict' and suffix.milestones[0] != self.milestones[-1]:
+					print "Suffix start:",suffix.milestones[0]
+					print "Self end:",self.milestones[-1]
 					raise ValueError("Concatenation would cause a jump in configuration")
 				if jumpPolicy=='strict' or (jumpPolicy=='blend' and suffix.milestones[0] != self.milestones[-1]):
 					#discard last milestone of self
@@ -224,10 +233,31 @@ class Trajectory:
 		arguments: a list of times and a list of milestones."""
 		return Trajectory
 
+	def discretize(self,dt):
+		"""Returns a copy of this but with uniformly defined milestones at
+		resolution dt.  Start and goal are maintained exactly"""
+		assert dt > 0,"dt must be positive"
+		t = self.times[0]
+		new_milestones = [self.milestones[0][:]]
+		new_times = [self.times[0]]
+		#TODO: (T/dt) log n time, can be done in (T/dt) time
+		while t+dt < self.times[-1]:
+			t += dt
+			new_times.append(t)
+			new_milestones.append(self.eval(t))
+		if abs(t-self.times[-1]) > 1e-6:
+			new_times.append(self.times[-1])
+			new_milestones.append(self.milestones[-1][:])
+		else:
+			new_times[-1] = self.times[-1]
+			new_milestones[-1] = self.milestones[-1][:]
+		return self.constructor()(new_times,new_milestones)
+
+
 class RobotTrajectory(Trajectory):
 	"""A trajectory that performs interpolation according to the robot's
 	interpolation scheme."""
-	def __init__(self,robot,times=[],milestones=[]):
+	def __init__(self,robot,times=None,milestones=None):
 		Trajectory.__init__(self,times,milestones)
 		self.robot = robot
 	def interpolate(self,a,b,u):
@@ -236,11 +266,25 @@ class RobotTrajectory(Trajectory):
 		return self.robot.interpolate_deriv(b,a)
 	def constructor(self):
 		return lambda time,milestones: RobotTrajectory(self.robot,time,milestones)
+	def getLinkTrajectory(self,link,discretization=None):
+		"""Returns the SE3Trajectory corresponding to the link's pose along the robot's
+		trajectory.  If discretization = None, only the milestones are extracted.
+		Otherwise, the piecewise linear approximation at dt = discretization is used.
+		"""
+		if discretization != None:
+			return self.discretize(discretization).getLinkTrajectory(link)
+		if isinstance(link,(int,str)):
+			link = self.robot.link(link)
+		Rmilestones = []
+		for m in self.milestones:
+			self.robot.setConfig(m)
+			rmilestones.append(link.getTransform())
+		return SE3Trajectory(self.times[:],Rmilestones)
 
 class GeodesicTrajectory(Trajectory):
 	"""A trajectory that performs interpolation on a GeodesicSpace.
 	See klampt.geodesic for more information."""
-	def __init__(self,geodesic,times=[],milestones=[]):
+	def __init__(self,geodesic,times=None,milestones=None):
 		self.geodesic = geodesic
 		Trajectory.__init__(self,times,milestones)
 	def interpolate(self,a,b,u):
@@ -257,7 +301,7 @@ class GeodesicTrajectory(Trajectory):
 class SO3Trajectory(GeodesicTrajectory):
 	"""A trajectory that performs interpolation in SO3.  Each milestone
 	is a 9-D klampt.so3 element."""
-	def __init__(self,times=[],milestones=[]):
+	def __init__(self,times=None,milestones=None):
 		GeodesicTrajectory.__init__(self,SO3Space(),times,milestones)
 	def preTransform(self,R):
 		"""Premultiplies every rotation in here by the so3 element
@@ -280,13 +324,19 @@ class SE3Trajectory(GeodesicTrajectory):
 	"""A trajectory that performs interpolation in SE3.  Each milestone
 	is a 12-D flattened klampt.se3 element (i.e., the concatenation of
 	R + t for an (R,t) pair)."""
-	def __init__(self,times=[],milestones=[]):
+	def __init__(self,times=None,milestones=None):
 		"""Constructor can take either a list of SE3 elements or
 		12-element vectors."""
 		if len(milestones) > 0 and len(milestones[0])==2:
 			GeodesicTrajectory.__init__(self,SE3Space(),times,[m[0]+m[1] for m in milestones])
 		else:
 			GeodesicTrajectory.__init__(self,SE3Space(),times,milestones)
+	def to_se3(self,milestone):
+		"""Converts a state parameter vector to a klampt.se3 element"""
+		return (milestone[:9],milestone[9:])
+	def from_se3(self,milestone):
+		"""Converts a klampt.se3 element to a state parameter vector"""
+		return (milestone[:9],milestone[9:])
 	def eval_se3(self,t,endBehavior='halt'):
 		"""Returns an SE3 element"""
 		res = self.eval(t,endBehavior)
@@ -333,7 +383,7 @@ class HermiteTrajectory(Trajectory):
 	overloaded to just get the velocity.  To obtain state, use
 	eval_state(t).  To get acceleration, use eval_accel(t).
 	"""
-	def __init__(self,times=[],milestones=[],dmilestones=None):
+	def __init__(self,times=None,milestones=None,dmilestones=None):
 		"""If dmilestones is given, then milestones is interpreted
 		as configurations and dmilestones is interpreted as velocities.
 		
@@ -342,6 +392,7 @@ class HermiteTrajectory(Trajectory):
 		if dmilestones is None:
 			Trajectory.__init__(self,times,milestones)
 		else:
+			assert milestones != None
 			#interpret as config/velocity
 			self.times = times
 			self.milestones = [q+dq for (q,dq) in zip(milestones,dmilestones)]
