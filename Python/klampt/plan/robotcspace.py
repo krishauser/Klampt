@@ -168,9 +168,9 @@ class ClosedLoopRobotCSpace(RobotCSpace):
     maintained during the robot's motion.
 
     Attributes:
-    - maxIters: maximum number of iterations for numerical IK solver
-    - tol: tolerance for IK constraint to be met.  The absolute value of the
-      IK residual must be below this tolerance for a configuration to be feasible.
+    - solver: the IKSolver that is used.
+    - maxIters: the maximum number of iterations for numerical IK solver
+    - tol: how closely the IK constraint must be met, in meters/radians
 
     To satisfy the IK constraint, the motion planner ensures that configuration
     samples are projected to the manifold of closed-loop IK solutions.  To create
@@ -186,10 +186,9 @@ class ClosedLoopRobotCSpace(RobotCSpace):
         else:
             self.solver.add(iks)
 
-        #IK solve iterations
+        #root finding iterations
         self.maxIters = 100
         self.tol = 1e-3
-
         self.addFeasibilityTest((lambda x: self.closedLoop(x)),'closed loop constraint')
 
     def setIKActiveDofs(self,activeSet):
@@ -198,23 +197,25 @@ class ClosedLoopRobotCSpace(RobotCSpace):
         self.solver.setActiveDofs(activeSet)
 
     def sample(self):
-        """Samples directly on the contact manifold"""
-        self.robot.setConfig(RobotCSpace.sample(self))
-        (res,iters) = self.solver.solve(self.maxIters,self.tol)
-        return self.robot.getConfig()
+        """Samples directly on the contact manifold.  The basic method samples arbitrarily in
+        the configuration space and then solves IK constraints.  This may be an ineffective
+        method especially for floating-base robots, since the floating joints may be sampled
+        arbitrarily."""
+        x = RobotCSpace.sample(self)
+        return self.solveConstraints(x)
 
     def sampleneighborhood(self,c,r):
         """Samples a neighborhood in ambient space and then projects onto the contact manifold"""
-        self.robot.setConfig(RobotCSpace.sampleneighborhood(self,c,r))
-        (res,iters) = self.solver.solve(self.maxIters,self.tol)
-        return self.robot.getConfig()
+        x = RobotCSpace.sampleneighborhood(self,c,r)
+        return self.solveConstraints(x)
 
     def solveConstraints(self,x):
         """Given an initial configuration of the robot x, attempts to solve the IK constraints 
         given in this space.  Return value is the best configuration found via local optimization."""
         self.robot.setConfig(x)
-        (res,iters) = self.solver.solve(self.maxIters,self.tol)
-        if not res: print "IK failed solve"
+        self.solver.setMaxIters(self.maxIters)
+        self.solver.setTolerance(self.tol)
+        res = self.solver.solve()
         return self.robot.getConfig()
 
     def closedLoop(self,config=None,tol=None):
