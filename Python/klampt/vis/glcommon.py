@@ -1,5 +1,5 @@
 from glinterface import GLPluginInterface
-from glprogram import GLProgram
+from glprogram import GLProgram,GLPluginProgram
 import math
 
 class GLWidgetPlugin(GLPluginInterface):
@@ -89,9 +89,10 @@ class GLMultiViewportProgram(GLProgram):
     def addView(self,view):
         if isinstance(view,GLPluginInterface):
             plugin = view
-            view = GLPluginProgram()
-            view.window = self.window
-            view.setPlugin(view)
+            pview = GLPluginProgram()
+            pview.window = self.window
+            pview.setPlugin(view)
+            view = pview
         assert isinstance(view,GLProgram)
         self.views.append(view)
         #spoofs reshape, motion functions
