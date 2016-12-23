@@ -1753,7 +1753,11 @@ class RobotModelLink(_object):
         return _robotsim.RobotModelLink_getParentTransform(self)
 
     def setParentTransform(self, *args):
-        """setParentTransform(RobotModelLink self, double const [9] R, double const [3] t)"""
+        """
+        setParentTransform(RobotModelLink self, double const [9] R, double const [3] t)
+
+        Sets transformation (R,t) to the parent link. 
+        """
         return _robotsim.RobotModelLink_setParentTransform(self, *args)
 
     def getAxis(self):
@@ -1765,7 +1769,11 @@ class RobotModelLink(_object):
         return _robotsim.RobotModelLink_getAxis(self)
 
     def setAxis(self, *args):
-        """setAxis(RobotModelLink self, double const [3] axis)"""
+        """
+        setAxis(RobotModelLink self, double const [3] axis)
+
+        Sets the local rotational / translational axis. 
+        """
         return _robotsim.RobotModelLink_setAxis(self, *args)
 
     def getWorldPosition(self, *args):
@@ -2126,7 +2134,7 @@ class RobotModel(_object):
         """
         getConfig(RobotModel self)
 
-        Returns the model's current configuration. 
+        Retrieves the current configuration of the robot model. 
         """
         return _robotsim.RobotModel_getConfig(self)
 
@@ -2134,7 +2142,7 @@ class RobotModel(_object):
         """
         getVelocity(RobotModel self)
 
-        Returns the model's current velocity. 
+        Retreives the current velocity of the robot model. 
         """
         return _robotsim.RobotModel_getVelocity(self)
 
@@ -2142,8 +2150,15 @@ class RobotModel(_object):
         """
         setConfig(RobotModel self, doubleVector q)
 
-        Sets the model's current configurtation and performs forward
-        kinematics. q must have length numLinks() 
+        Sets the current configuration of the robot. Input q is a vector of
+        length numLinks(). This also updates forward kinematics of all links.
+        Again, it is important to realize that the RobotModel is not the same
+        as a simulated robot, and this will not change the simulation world.
+        Many functions such as IK and motion planning use the RobotModel
+        configuration as a temporary variable, so if you need to keep the
+        configuration through a robot-modifying function call, you should call
+        q = robot.getConfig() before the call, and then robot.setConfig(q)
+        after it. 
         """
         return _robotsim.RobotModel_setConfig(self, *args)
 
@@ -2151,7 +2166,8 @@ class RobotModel(_object):
         """
         setVelocity(RobotModel self, doubleVector dq)
 
-        Sets the model's current velocity. dq must have length numLinks(). 
+        Sets the current velocity of the robot model. Like the configuration,
+        this is also essentially a temporary variable. 
         """
         return _robotsim.RobotModel_setVelocity(self, *args)
 
@@ -2229,6 +2245,10 @@ class RobotModel(_object):
         """
         setDOFPosition(RobotModel self, int i, double qi)
         setDOFPosition(RobotModel self, char const * name, double qi)
+
+        Sets a single DOF's position (by name). Note: if you are setting
+        several joints at once, use setConfig because this function computes
+        forward kinematics every time. 
         """
         return _robotsim.RobotModel_setDOFPosition(self, *args)
 
@@ -2236,6 +2256,8 @@ class RobotModel(_object):
         """
         getDOFPosition(RobotModel self, int i) -> double
         getDOFPosition(RobotModel self, char const * name) -> double
+
+        Returns a single DOF's position (by name) 
         """
         return _robotsim.RobotModel_getDOFPosition(self, *args)
 
@@ -3072,6 +3094,18 @@ class IKObjective(_object):
         """
         return _robotsim.IKObjective_transformLocal(self, *args)
 
+    def matchDestination(self, *args):
+        """
+        matchDestination(IKObjective self, double const [9] R, double const [3] t)
+
+        Sets the destination coordinates of this constraint to fit the given
+        target transform. In other words, if (R,t) is the current link
+        transform, this sets the destination position / orientation so that
+        this objective has zero error. The current position/rotation
+        constraint types are kept. 
+        """
+        return _robotsim.IKObjective_matchDestination(self, *args)
+
     def loadString(self, *args):
         """
         loadString(IKObjective self, char const * str) -> bool
@@ -3105,11 +3139,11 @@ class IKSolver(_object):
     An inverse kinematics solver based on the Newton-Raphson technique.
 
     Typical calling pattern is s = IKSolver(robot) s.add(objective1)
-    s.add(objective2) (res,iters) = s.solve(100,1e-4) if res: print "IK
-    solution:",robot.getConfig(),"found in",iters,"iterations,
-    residual",s.getResidual() else: print "IK
-    failed:",robot.getConfig(),"found in",iters,"iterations,
-    residual",s.getResidual()
+    s.add(objective2) s.setMaxIters(100) s.setTolerance(1e-4) res =
+    s.solve() if res: print "IK solution:",robot.getConfig(),"found
+    in",s.lastSolveIters(),"iterations, residual",s.getResidual() else:
+    print "IK failed:",robot.getConfig(),"found
+    in",s.lastSolveIters(),"iterations, residual",s.getResidual()
 
     sampleInitial() is a convenience routine. More initial configurations
     can be sampled in case the prior configs lead to local minima.
@@ -3136,6 +3170,54 @@ class IKSolver(_object):
         Adds a new simultaneous objective. 
         """
         return _robotsim.IKSolver_add(self, *args)
+
+    def set(self, *args):
+        """
+        set(IKSolver self, int i, IKObjective objective)
+
+        Assigns an existing objective added by add. 
+        """
+        return _robotsim.IKSolver_set(self, *args)
+
+    def clear(self):
+        """
+        clear(IKSolver self)
+
+        Clears objectives. 
+        """
+        return _robotsim.IKSolver_clear(self)
+
+    def setMaxIters(self, *args):
+        """
+        setMaxIters(IKSolver self, int iters)
+
+        Sets the max # of iterations (default 100) 
+        """
+        return _robotsim.IKSolver_setMaxIters(self, *args)
+
+    def getMaxIters(self):
+        """
+        getMaxIters(IKSolver self) -> int
+
+        Gets the max # of iterations. 
+        """
+        return _robotsim.IKSolver_getMaxIters(self)
+
+    def setTolerance(self, *args):
+        """
+        setTolerance(IKSolver self, double res)
+
+        Sets the constraint solve tolerance (default 1e-3) 
+        """
+        return _robotsim.IKSolver_setTolerance(self, *args)
+
+    def getTolerance(self):
+        """
+        getTolerance(IKSolver self) -> double
+
+        Gets the constraint solve tolerance. 
+        """
+        return _robotsim.IKSolver_getTolerance(self)
 
     def setActiveDofs(self, *args):
         """
@@ -3171,11 +3253,38 @@ class IKSolver(_object):
         """
         return _robotsim.IKSolver_getJointLimits(self)
 
+    def setBiasConfig(self, *args):
+        """
+        setBiasConfig(IKSolver self, doubleVector biasConfig)
+
+        Biases the solver to approach a given configuration. Setting an empty
+        vector clears the bias term. 
+        """
+        return _robotsim.IKSolver_setBiasConfig(self, *args)
+
+    def getBiasConfig(self):
+        """
+        getBiasConfig(IKSolver self)
+
+        Gets the solvers' bias configuration. 
+        """
+        return _robotsim.IKSolver_getBiasConfig(self)
+
+    def isSolved(self):
+        """
+        isSolved(IKSolver self) -> bool
+
+        Returns true if the current configuration residual is less than tol.
+
+        """
+        return _robotsim.IKSolver_isSolved(self)
+
     def getResidual(self):
         """
         getResidual(IKSolver self)
 
-        Returns a vector describing the error of the objective. 
+        Returns a vector describing the error of the objective at the current
+        configuration. 
         """
         return _robotsim.IKSolver_getResidual(self)
 
@@ -3188,16 +3297,24 @@ class IKSolver(_object):
         """
         return _robotsim.IKSolver_getJacobian(self)
 
-    def solve(self, *args):
+    def solve(self):
         """
-        solve(IKSolver self, int iters, double tol=1e-3) -> PyObject
-        solve(IKSolver self, int iters) -> PyObject *
+        solve(IKSolver self) -> bool
 
         Tries to find a configuration that satifies all simultaneous
-        objectives up to the desired tolerance. Returns (res,iters) where res
-        indicates whether x converged. 
+        objectives up to the desired tolerance. Returns true if x converged.
+
         """
-        return _robotsim.IKSolver_solve(self, *args)
+        return _robotsim.IKSolver_solve(self)
+
+    def lastSolveIters(self):
+        """
+        lastSolveIters(IKSolver self) -> int
+
+        Returns the number of Newton-Raphson iterations used in the last
+        solve() call. 
+        """
+        return _robotsim.IKSolver_lastSolveIters(self)
 
     def sampleInitial(self):
         """
@@ -3213,6 +3330,12 @@ class IKSolver(_object):
     __swig_setmethods__["objectives"] = _robotsim.IKSolver_objectives_set
     __swig_getmethods__["objectives"] = _robotsim.IKSolver_objectives_get
     if _newclass:objectives = _swig_property(_robotsim.IKSolver_objectives_get, _robotsim.IKSolver_objectives_set)
+    __swig_setmethods__["tol"] = _robotsim.IKSolver_tol_set
+    __swig_getmethods__["tol"] = _robotsim.IKSolver_tol_get
+    if _newclass:tol = _swig_property(_robotsim.IKSolver_tol_get, _robotsim.IKSolver_tol_set)
+    __swig_setmethods__["maxIters"] = _robotsim.IKSolver_maxIters_set
+    __swig_getmethods__["maxIters"] = _robotsim.IKSolver_maxIters_get
+    if _newclass:maxIters = _swig_property(_robotsim.IKSolver_maxIters_get, _robotsim.IKSolver_maxIters_set)
     __swig_setmethods__["activeDofs"] = _robotsim.IKSolver_activeDofs_set
     __swig_getmethods__["activeDofs"] = _robotsim.IKSolver_activeDofs_get
     if _newclass:activeDofs = _swig_property(_robotsim.IKSolver_activeDofs_get, _robotsim.IKSolver_activeDofs_set)
@@ -3225,6 +3348,12 @@ class IKSolver(_object):
     __swig_setmethods__["qmax"] = _robotsim.IKSolver_qmax_set
     __swig_getmethods__["qmax"] = _robotsim.IKSolver_qmax_get
     if _newclass:qmax = _swig_property(_robotsim.IKSolver_qmax_get, _robotsim.IKSolver_qmax_set)
+    __swig_setmethods__["biasConfig"] = _robotsim.IKSolver_biasConfig_set
+    __swig_getmethods__["biasConfig"] = _robotsim.IKSolver_biasConfig_get
+    if _newclass:biasConfig = _swig_property(_robotsim.IKSolver_biasConfig_get, _robotsim.IKSolver_biasConfig_set)
+    __swig_setmethods__["lastIters"] = _robotsim.IKSolver_lastIters_set
+    __swig_getmethods__["lastIters"] = _robotsim.IKSolver_lastIters_get
+    if _newclass:lastIters = _swig_property(_robotsim.IKSolver_lastIters_get, _robotsim.IKSolver_lastIters_set)
     __swig_destroy__ = _robotsim.delete_IKSolver
     __del__ = lambda self : None;
 IKSolver_swigregister = _robotsim.IKSolver_swigregister
@@ -3307,6 +3436,7 @@ GeneralizedIKObjective_swigregister(GeneralizedIKObjective)
 class GeneralizedIKSolver(_object):
     """
     An inverse kinematics solver between multiple robots and/or objects.
+    NOT IMPLEMENTED YET.
 
     C++ includes: robotik.h 
     """
@@ -3328,6 +3458,22 @@ class GeneralizedIKSolver(_object):
         """
         return _robotsim.GeneralizedIKSolver_add(self, *args)
 
+    def setMaxIters(self, *args):
+        """
+        setMaxIters(GeneralizedIKSolver self, int iters)
+
+        Sets the max # of iterations (default 100) 
+        """
+        return _robotsim.GeneralizedIKSolver_setMaxIters(self, *args)
+
+    def setTolerance(self, *args):
+        """
+        setTolerance(GeneralizedIKSolver self, double res)
+
+        Sets the constraint solve tolerance (default 1e-3) 
+        """
+        return _robotsim.GeneralizedIKSolver_setTolerance(self, *args)
+
     def getResidual(self):
         """
         getResidual(GeneralizedIKSolver self)
@@ -3345,16 +3491,15 @@ class GeneralizedIKSolver(_object):
         """
         return _robotsim.GeneralizedIKSolver_getJacobian(self)
 
-    def solve(self, *args):
+    def solve(self):
         """
-        solve(GeneralizedIKSolver self, int iters, double tol=1e-3) -> PyObject
-        solve(GeneralizedIKSolver self, int iters) -> PyObject *
+        solve(GeneralizedIKSolver self) -> PyObject *
 
         Tries to find a configuration that satifies all simultaneous
         objectives up to the desired tolerance. Returns (res,iters) where res
         indicates whether x converged. 
         """
-        return _robotsim.GeneralizedIKSolver_solve(self, *args)
+        return _robotsim.GeneralizedIKSolver_solve(self)
 
     def sampleInitial(self):
         """
@@ -3370,6 +3515,12 @@ class GeneralizedIKSolver(_object):
     __swig_setmethods__["objectives"] = _robotsim.GeneralizedIKSolver_objectives_set
     __swig_getmethods__["objectives"] = _robotsim.GeneralizedIKSolver_objectives_get
     if _newclass:objectives = _swig_property(_robotsim.GeneralizedIKSolver_objectives_get, _robotsim.GeneralizedIKSolver_objectives_set)
+    __swig_setmethods__["tol"] = _robotsim.GeneralizedIKSolver_tol_set
+    __swig_getmethods__["tol"] = _robotsim.GeneralizedIKSolver_tol_get
+    if _newclass:tol = _swig_property(_robotsim.GeneralizedIKSolver_tol_get, _robotsim.GeneralizedIKSolver_tol_set)
+    __swig_setmethods__["maxIters"] = _robotsim.GeneralizedIKSolver_maxIters_set
+    __swig_getmethods__["maxIters"] = _robotsim.GeneralizedIKSolver_maxIters_get
+    if _newclass:maxIters = _swig_property(_robotsim.GeneralizedIKSolver_maxIters_get, _robotsim.GeneralizedIKSolver_maxIters_set)
     __swig_setmethods__["useJointLimits"] = _robotsim.GeneralizedIKSolver_useJointLimits_set
     __swig_getmethods__["useJointLimits"] = _robotsim.GeneralizedIKSolver_useJointLimits_get
     if _newclass:useJointLimits = _swig_property(_robotsim.GeneralizedIKSolver_useJointLimits_get, _robotsim.GeneralizedIKSolver_useJointLimits_set)
@@ -3487,21 +3638,37 @@ class SimRobotController(_object):
     """
     A controller for a simulated robot.
 
-    The basic way of using this is in "standard" move-to mode which
-    accepts a milestone (setMilestone) or list of milestones (repeated
-    calls to addMilestone) and interpolates dynamically from the current
-    configuration/velocity. To handle disturbances, a PID loop is run. The
-    constants of this loop are initially set in the robot file, or you can
-    perform tuning via setPIDGains.
+    By default a SimRobotController has three possible modes: Motion queue
+    + PID mode: the controller has an internal trajectory queue that may
+    be added to and modified. This queue supports piecewise linear
+    interpolation, cubic interpolation, and time-optimal move-to commands.
 
-    Move-to motions are handled using a motion queue. To get finer-grained
-    control over the motion queue you may use the setLinear/setCubic/
-    addLinear/addCubic functions.
+    PID mode: the user controls the motor's PID setpoints directly
+
+    Torque control: the user controlls the motor torques directly.
+
+    The "standard" way of using this is in move-to mode which accepts a
+    milestone (setMilestone) or list of milestones (repeated calls to
+    addMilestone) and interpolates dynamically from the current
+    configuration/velocity. To handle disturbances, a PID loop is run
+    automatically at the controller's specified rate.
+
+    To get finer-grained control over the motion queue's timing, you may
+    use the setLinear/setCubic/addLinear/addCubic functions. In these
+    functions it is up to the user to respect velocity, acceleration, and
+    torque limits.
+
+    Whether in motion queue or PID mode, the constants of the PID loop are
+    initially set in the robot file. You can programmatically tune these
+    via the setPIDGains function.
 
     Arbitrary trajectories can be tracked by using setVelocity over short
     time steps. Force controllers can be implemented using setTorque,
-    again using short time steps. These set the controller into manual
-    override mode. To reset back to regular motion queue control,
+    again using short time steps.
+
+    If setVelocity, setTorque, or setPID command are called, the motion
+    queue behavior will be completely overridden. To reset back to motion
+    queue control, the function setManualMode(False) must be called.
 
     C++ includes: robotsim.h 
     """
@@ -3595,18 +3762,26 @@ class SimRobotController(_object):
         """
         getSetting(SimRobotController self, std::string const & name) -> std::string
 
-        gets/sets settings of the controller 
+        gets a setting of the controller 
         """
         return _robotsim.SimRobotController_getSetting(self, *args)
 
     def setSetting(self, *args):
-        """setSetting(SimRobotController self, std::string const & name, std::string const & val) -> bool"""
+        """
+        setSetting(SimRobotController self, std::string const & name, std::string const & val) -> bool
+
+        sets a setting of the controller 
+        """
         return _robotsim.SimRobotController_setSetting(self, *args)
 
     def setMilestone(self, *args):
         """
         setMilestone(SimRobotController self, doubleVector q)
         setMilestone(SimRobotController self, doubleVector q, doubleVector dq)
+
+        Uses a dynamic interpolant to get from the current state to the
+        desired milestone (with optional ending velocity). This interpolant is
+        time-optimal with respect to the velocity and acceleration bounds. 
         """
         return _robotsim.SimRobotController_setMilestone(self, *args)
 
@@ -3614,6 +3789,9 @@ class SimRobotController(_object):
         """
         addMilestone(SimRobotController self, doubleVector q)
         addMilestone(SimRobotController self, doubleVector q, doubleVector dq)
+
+        Same as setMilestone, but appends an interpolant onto an internal
+        motion queue starting at the current queued end state. 
         """
         return _robotsim.SimRobotController_addMilestone(self, *args)
 
@@ -3691,7 +3869,8 @@ class SimRobotController(_object):
         setPIDCommand(SimRobotController self, doubleVector qdes, doubleVector dqdes)
         setPIDCommand(SimRobotController self, doubleVector qdes, doubleVector dqdes, doubleVector tfeedforward)
 
-        Sets a PID command controller with feedforward torques. 
+        Sets a PID command controller. If tfeedforward is used, it is the
+        feedforward torque vector. 
         """
         return _robotsim.SimRobotController_setPIDCommand(self, *args)
 
@@ -3708,9 +3887,9 @@ class SimRobotController(_object):
         """
         getControlType(SimRobotController self) -> std::string
 
-        Returns the control type for the active controller valid values are:
+        Returns the control type for the active controller.
 
-        unknown
+        Valid values are: unknown
 
         off
 
@@ -3761,6 +3940,10 @@ class SimBody(_object):
     duration provided to Simulation.simulate(). If you need fine-grained
     control, make sure to call simulate() with time steps equal to the
     value provided to Simulation.setSimStep() (this is 0.001s by default).
+
+    Important: the transform of the object is centered at the object's
+    center of mass rather than the reference frame given in the
+    RobotModelLink or RigidObjectModel.
 
     C++ includes: robotsim.h 
     """
@@ -3823,8 +4006,9 @@ class SimBody(_object):
         """
         applyForceAtLocalPoint(SimBody self, double const [3] f, double const [3] plocal)
 
-        Applies a force at a given point (in local coordinates) over the
-        duration of the next Simulator.simulate(t) call. 
+        Applies a force at a given point (in local center-of-mass-centered
+        coordinates) over the duration of the next Simulator.simulate(t) call.
+
         """
         return _robotsim.SimBody_applyForceAtLocalPoint(self, *args)
 
@@ -3832,12 +4016,18 @@ class SimBody(_object):
         """
         setTransform(SimBody self, double const [9] R, double const [3] t)
 
-        Sets the body's transformation at the current simulation time step. 
+        Sets the body's transformation at the current simulation time step (in
+        center-of-mass centered coordinates). 
         """
         return _robotsim.SimBody_setTransform(self, *args)
 
     def getTransform(self):
-        """getTransform(SimBody self)"""
+        """
+        getTransform(SimBody self)
+
+        Gets the body's transformation at the current simulation time step (in
+        center-of-mass centered coordinates). 
+        """
         return _robotsim.SimBody_getTransform(self)
 
     def setVelocity(self, *args):
@@ -3919,6 +4109,10 @@ class SimBody(_object):
         duration provided to Simulation.simulate(). If you need fine-grained
         control, make sure to call simulate() with time steps equal to the
         value provided to Simulation.setSimStep() (this is 0.001s by default).
+
+        Important: the transform of the object is centered at the object's
+        center of mass rather than the reference frame given in the
+        RobotModelLink or RigidObjectModel.
 
         C++ includes: robotsim.h 
         """

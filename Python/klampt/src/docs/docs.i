@@ -226,6 +226,7 @@ C++ includes: robotik.h ";
 %feature("docstring") GeneralizedIKSolver "
 
 An inverse kinematics solver between multiple robots and/or objects.
+NOT IMPLEMENTED YET.
 
 C++ includes: robotik.h ";
 
@@ -234,6 +235,14 @@ C++ includes: robotik.h ";
 %feature("docstring")  GeneralizedIKSolver::add "
 
 Adds a new simultaneous objective. ";
+
+%feature("docstring")  GeneralizedIKSolver::setMaxIters "
+
+Sets the max # of iterations (default 100) ";
+
+%feature("docstring")  GeneralizedIKSolver::setTolerance "
+
+Sets the constraint solve tolerance (default 1e-3) ";
 
 %feature("docstring")  GeneralizedIKSolver::getResidual "
 
@@ -616,6 +625,14 @@ transform (R,t) ";
 Tranforms the local position/rotation of this IK constraint by
 transform (R,t) ";
 
+%feature("docstring")  IKObjective::matchDestination "
+
+Sets the destination coordinates of this constraint to fit the given
+target transform. In other words, if (R,t) is the current link
+transform, this sets the destination position / orientation so that
+this objective has zero error. The current position/rotation
+constraint types are kept. ";
+
 %feature("docstring")  IKObjective::loadString "
 
 Loads the objective from a Klamp't-native formatted string. For a more
@@ -635,11 +652,11 @@ loader.toJson/fromJson() ";
 An inverse kinematics solver based on the Newton-Raphson technique.
 
 Typical calling pattern is s = IKSolver(robot) s.add(objective1)
-s.add(objective2) (res,iters) = s.solve(100,1e-4) if res: print \"IK
-solution:\",robot.getConfig(),\"found in\",iters,\"iterations,
-residual\",s.getResidual() else: print \"IK
-failed:\",robot.getConfig(),\"found in\",iters,\"iterations,
-residual\",s.getResidual()
+s.add(objective2) s.setMaxIters(100) s.setTolerance(1e-4) res =
+s.solve() if res: print \"IK solution:\",robot.getConfig(),\"found
+in\",s.lastSolveIters(),\"iterations, residual\",s.getResidual() else:
+print \"IK failed:\",robot.getConfig(),\"found
+in\",s.lastSolveIters(),\"iterations, residual\",s.getResidual()
 
 sampleInitial() is a convenience routine. More initial configurations
 can be sampled in case the prior configs lead to local minima.
@@ -653,6 +670,30 @@ C++ includes: robotik.h ";
 %feature("docstring")  IKSolver::add "
 
 Adds a new simultaneous objective. ";
+
+%feature("docstring")  IKSolver::set "
+
+Assigns an existing objective added by add. ";
+
+%feature("docstring")  IKSolver::clear "
+
+Clears objectives. ";
+
+%feature("docstring")  IKSolver::setMaxIters "
+
+Sets the max # of iterations (default 100) ";
+
+%feature("docstring")  IKSolver::getMaxIters "
+
+Gets the max # of iterations. ";
+
+%feature("docstring")  IKSolver::setTolerance "
+
+Sets the constraint solve tolerance (default 1e-3) ";
+
+%feature("docstring")  IKSolver::getTolerance "
+
+Gets the constraint solve tolerance. ";
 
 %feature("docstring")  IKSolver::setActiveDofs "
 
@@ -672,9 +713,24 @@ joint limits. ";
 Gets the limits on the robot's configuration (by default this is the
 robot's joint limits. ";
 
+%feature("docstring")  IKSolver::setBiasConfig "
+
+Biases the solver to approach a given configuration. Setting an empty
+vector clears the bias term. ";
+
+%feature("docstring")  IKSolver::getBiasConfig "
+
+Gets the solvers' bias configuration. ";
+
+%feature("docstring")  IKSolver::isSolved "
+
+Returns true if the current configuration residual is less than tol.
+";
+
 %feature("docstring")  IKSolver::getResidual "
 
-Returns a vector describing the error of the objective. ";
+Returns a vector describing the error of the objective at the current
+configuration. ";
 
 %feature("docstring")  IKSolver::getJacobian "
 
@@ -684,8 +740,13 @@ objective with respect to the active Dofs. ";
 %feature("docstring")  IKSolver::solve "
 
 Tries to find a configuration that satifies all simultaneous
-objectives up to the desired tolerance. Returns (res,iters) where res
-indicates whether x converged. ";
+objectives up to the desired tolerance. Returns true if x converged.
+";
+
+%feature("docstring")  IKSolver::lastSolveIters "
+
+Returns the number of Newton-Raphson iterations used in the last
+solve() call. ";
 
 %feature("docstring")  IKSolver::sampleInitial "
 
@@ -1151,20 +1212,28 @@ Returns a reference to the named driver. ";
 
 %feature("docstring")  RobotModel::getConfig "
 
-Returns the model's current configuration. ";
+Retrieves the current configuration of the robot model. ";
 
 %feature("docstring")  RobotModel::getVelocity "
 
-Returns the model's current velocity. ";
+Retreives the current velocity of the robot model. ";
 
 %feature("docstring")  RobotModel::setConfig "
 
-Sets the model's current configurtation and performs forward
-kinematics. q must have length numLinks() ";
+Sets the current configuration of the robot. Input q is a vector of
+length numLinks(). This also updates forward kinematics of all links.
+Again, it is important to realize that the RobotModel is not the same
+as a simulated robot, and this will not change the simulation world.
+Many functions such as IK and motion planning use the RobotModel
+configuration as a temporary variable, so if you need to keep the
+configuration through a robot-modifying function call, you should call
+q = robot.getConfig() before the call, and then robot.setConfig(q)
+after it. ";
 
 %feature("docstring")  RobotModel::setVelocity "
 
-Sets the model's current velocity. dq must have length numLinks(). ";
+Sets the current velocity of the robot model. Like the configuration,
+this is also essentially a temporary variable. ";
 
 %feature("docstring")  RobotModel::getJointLimits "
 
@@ -1210,13 +1279,19 @@ Sets a single DOF's position. Note: if you are setting several joints
 at once, use setConfig because this function computes forward
 kinematics every time. ";
 
-%feature("docstring")  RobotModel::setDOFPosition "";
+%feature("docstring")  RobotModel::setDOFPosition "
+
+Sets a single DOF's position (by name). Note: if you are setting
+several joints at once, use setConfig because this function computes
+forward kinematics every time. ";
 
 %feature("docstring")  RobotModel::getDOFPosition "
 
 Returns a single DOF's position. ";
 
-%feature("docstring")  RobotModel::getDOFPosition "";
+%feature("docstring")  RobotModel::getDOFPosition "
+
+Returns a single DOF's position (by name) ";
 
 %feature("docstring")  RobotModel::getCom "
 
@@ -1440,13 +1515,17 @@ with origin at the link frame, not about the COM.) ";
 
 Gets transformation (R,t) to the parent link. ";
 
-%feature("docstring")  RobotModelLink::setParentTransform "";
+%feature("docstring")  RobotModelLink::setParentTransform "
+
+Sets transformation (R,t) to the parent link. ";
 
 %feature("docstring")  RobotModelLink::getAxis "
 
 Gets the local rotational / translational axis. ";
 
-%feature("docstring")  RobotModelLink::setAxis "";
+%feature("docstring")  RobotModelLink::setAxis "
+
+Sets the local rotational / translational axis. ";
 
 %feature("docstring")  RobotModelLink::getWorldPosition "
 
@@ -1541,6 +1620,10 @@ duration provided to Simulation.simulate(). If you need fine-grained
 control, make sure to call simulate() with time steps equal to the
 value provided to Simulation.setSimStep() (this is 0.001s by default).
 
+Important: the transform of the object is centered at the object's
+center of mass rather than the reference frame given in the
+RobotModelLink or RigidObjectModel.
+
 C++ includes: robotsim.h ";
 
 %feature("docstring")  SimBody::enable "
@@ -1571,14 +1654,19 @@ duration of the next Simulator.simulate(t) call. ";
 
 %feature("docstring")  SimBody::applyForceAtLocalPoint "
 
-Applies a force at a given point (in local coordinates) over the
-duration of the next Simulator.simulate(t) call. ";
+Applies a force at a given point (in local center-of-mass-centered
+coordinates) over the duration of the next Simulator.simulate(t) call.
+";
 
 %feature("docstring")  SimBody::setTransform "
 
-Sets the body's transformation at the current simulation time step. ";
+Sets the body's transformation at the current simulation time step (in
+center-of-mass centered coordinates). ";
 
-%feature("docstring")  SimBody::getTransform "";
+%feature("docstring")  SimBody::getTransform "
+
+Gets the body's transformation at the current simulation time step (in
+center-of-mass centered coordinates). ";
 
 %feature("docstring")  SimBody::setVelocity "
 
@@ -1622,21 +1710,37 @@ Internally used. ";
 
 A controller for a simulated robot.
 
-The basic way of using this is in \"standard\" move-to mode which
-accepts a milestone (setMilestone) or list of milestones (repeated
-calls to addMilestone) and interpolates dynamically from the current
-configuration/velocity. To handle disturbances, a PID loop is run. The
-constants of this loop are initially set in the robot file, or you can
-perform tuning via setPIDGains.
+By default a SimRobotController has three possible modes: Motion queue
++ PID mode: the controller has an internal trajectory queue that may
+be added to and modified. This queue supports piecewise linear
+interpolation, cubic interpolation, and time-optimal move-to commands.
 
-Move-to motions are handled using a motion queue. To get finer-grained
-control over the motion queue you may use the setLinear/setCubic/
-addLinear/addCubic functions.
+PID mode: the user controls the motor's PID setpoints directly
+
+Torque control: the user controlls the motor torques directly.
+
+The \"standard\" way of using this is in move-to mode which accepts a
+milestone (setMilestone) or list of milestones (repeated calls to
+addMilestone) and interpolates dynamically from the current
+configuration/velocity. To handle disturbances, a PID loop is run
+automatically at the controller's specified rate.
+
+To get finer-grained control over the motion queue's timing, you may
+use the setLinear/setCubic/addLinear/addCubic functions. In these
+functions it is up to the user to respect velocity, acceleration, and
+torque limits.
+
+Whether in motion queue or PID mode, the constants of the PID loop are
+initially set in the robot file. You can programmatically tune these
+via the setPIDGains function.
 
 Arbitrary trajectories can be tracked by using setVelocity over short
 time steps. Force controllers can be implemented using setTorque,
-again using short time steps. These set the controller into manual
-override mode. To reset back to regular motion queue control,
+again using short time steps.
+
+If setVelocity, setTorque, or setPID command are called, the motion
+queue behavior will be completely overridden. To reset back to motion
+queue control, the function setManualMode(False) must be called.
 
 C++ includes: robotsim.h ";
 
@@ -1688,9 +1792,11 @@ sends a command to the controller ";
 
 %feature("docstring")  SimRobotController::getSetting "
 
-gets/sets settings of the controller ";
+gets a setting of the controller ";
 
-%feature("docstring")  SimRobotController::setSetting "";
+%feature("docstring")  SimRobotController::setSetting "
+
+sets a setting of the controller ";
 
 %feature("docstring")  SimRobotController::setMilestone "
 
@@ -1698,14 +1804,21 @@ Uses a dynamic interpolant to get from the current state to the
 desired milestone (with optional ending velocity). This interpolant is
 time-optimal with respect to the velocity and acceleration bounds. ";
 
-%feature("docstring")  SimRobotController::setMilestone "";
+%feature("docstring")  SimRobotController::setMilestone "
+
+Uses a dynamic interpolant to get from the current state to the
+desired milestone (with optional ending velocity). This interpolant is
+time-optimal with respect to the velocity and acceleration bounds. ";
 
 %feature("docstring")  SimRobotController::addMilestone "
 
 Same as setMilestone, but appends an interpolant onto an internal
 motion queue starting at the current queued end state. ";
 
-%feature("docstring")  SimRobotController::addMilestone "";
+%feature("docstring")  SimRobotController::addMilestone "
+
+Same as setMilestone, but appends an interpolant onto an internal
+motion queue starting at the current queued end state. ";
 
 %feature("docstring")  SimRobotController::addMilestoneLinear "
 
@@ -1750,7 +1863,8 @@ Sets a PID command controller. ";
 
 %feature("docstring")  SimRobotController::setPIDCommand "
 
-Sets a PID command controller with feedforward torques. ";
+Sets a PID command controller. If tfeedforward is used, it is the
+feedforward torque vector. ";
 
 %feature("docstring")  SimRobotController::setManualMode "
 
@@ -1759,9 +1873,9 @@ were previously set. ";
 
 %feature("docstring")  SimRobotController::getControlType "
 
-Returns the control type for the active controller valid values are:
+Returns the control type for the active controller.
 
-unknown
+Valid values are: unknown
 
 off
 
