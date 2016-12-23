@@ -204,9 +204,12 @@ def objects(objectives):
     raise NotImplementedError()
     pass
 
-def solver(objectives):
+def solver(objectives,iters=None,tol=None):
     """Returns a solver for the given objective(s). Either a single objective
     or a list of objectives can be provided. 
+
+    If iters != None / tol != None, the max # of iterations / constraint solving tolerance
+    for the solver is set.  Otherwise, the default values are used
     
     The result is either an IKSolver or a GeneralizedIKSolver corresponding
     to the given objective(s).  (see klampt.robotsim.IKSolver and
@@ -243,6 +246,8 @@ def solver(objectives):
             else:
                 world = WorldModel(generalized[0].link1.world)
             s = GeneralizedIKSolver(world)
+            if iters != None: s.setMaxIters(iters)
+            if tol != None: s.setTolerance(tol)
             for obj in generalized:
                 s.add(obj)
             for (key,(r,objs)) in robs.iteritems():
@@ -256,6 +261,8 @@ def solver(objectives):
                     s = IKSolver(r._robot)
                 else:
                     s = IKSolver(r)
+                if iters != None: s.setMaxIters(iters)
+                if tol != None: s.setTolerance(tol)
                 for obj in objs:
                     s.add(obj)
                 if isinstance(r,SubRobotModel):
@@ -269,6 +276,8 @@ def solver(objectives):
             if not hasattr(objectives,'robot'):
                 raise ValueError("IKObjective object must have 'robot' member for use in ik.solver. Either set this manually or use the ik.objective function")
             s = IKSolver(objectives.robot)
+            if iters != None: s.setMaxIters(iters)
+            if tol != None: s.setTolerance(tol)
             s.add(objectives)
             return s
         elif isinstance(objectives,GeneralizedIKObjective):
@@ -278,6 +287,8 @@ def solver(objectives):
             else:
                 world = WorldModel(objectives.link1.world)
             s = GeneralizedIKSolver(world)
+            if iters != None: s.setMaxIters(iters)
+            if tol != None: s.setTolerance(tol)
             s.add(objectives)
             return s
         else:
@@ -309,7 +320,7 @@ def solve(objectives,iters=1000,tol=1e-3,activeDofs=None):
     constructors from the robotsim module, the .robot member of these goals
     must be set).
     """
-    s = solver(objectives)
+    s = solver(objectives,iters,tol)
     if activeDofs is not None:
         links = activeDofs[:]
         for i,l in enumerate(links):
@@ -318,10 +329,10 @@ def solve(objectives,iters=1000,tol=1e-3,activeDofs=None):
         s.setActiveDofs(links)
 
     if hasattr(s,'__iter__'):
-        res = [si.solve(iters,tol)[0] for si in s]
+        res = [si.solve()[0] for si in s]
         return all(res)
     else:
-        return s.solve(iters,tol)[0]
+        return s.solve()[0]
 
 def residual(objectives):
     """Returns the residual of the given objectives."""
@@ -350,7 +361,7 @@ def solve_global(objectives,iters=1000,tol=1e-3,activeDofs=None,numRestarts=100,
     tolerance, within the provided number of iterations.
     """
     if feasibilityCheck is None: feasibilityCheck=lambda : True
-    s = solver(objectives)
+    s = solver(objectives,iters,tol)
     if activeDofs is not None:
         links = activeDofs[:]
         for i,l in enumerate(links):
@@ -360,14 +371,14 @@ def solve_global(objectives,iters=1000,tol=1e-3,activeDofs=None,numRestarts=100,
     if hasattr(s,'__iter__'):
         if startRandom:
             s.sampleInitial()
-        res = [si.solve(iters,tol)[0] for si in s]
+        res = [si.solve() for si in s]
         if all(res):
             if feasibilityCheck():
                 return True
         for i in xrange(numRestarts):
             for si in s:
                 si.sampleInitial()
-            res = [si.solve(iters,tol)[0] for si in s]
+            res = [si.solve() for si in s]
             if all(res):
                 if feasibilityCheck():
                     return True
@@ -375,12 +386,12 @@ def solve_global(objectives,iters=1000,tol=1e-3,activeDofs=None,numRestarts=100,
     else:
         if startRandom:
             s.sampleInitial()
-        if s.solve(iters,tol)[0]:
+        if s.solve():
             if feasibilityCheck():
                 return True
         for i in xrange(numRestarts):
             s.sampleInitial()
-            if s.solve(iters,tol)[0]:
+            if s.solve():
                 if feasibilityCheck():
                     return True
         return False
@@ -396,7 +407,7 @@ def solve_nearby(objectives,maxDeviation,iters=1000,tol=1e-3,activeDofs=None,num
       each configuration element is allowed to change.
     - numRestarts: same as in solve_global, but is by default set to zero.
     """
-    s = solver(objectives)
+    s = solver(objectives,iters,tol)
     if not isinstance(s,IKSolver):
         raise NotImplementedError("solve_nearby: currently only supports single-robot objectives")
     if hasattr(objectives,'__iter__'):
@@ -419,12 +430,12 @@ def solve_nearby(objectives,maxDeviation,iters=1000,tol=1e-3,activeDofs=None,num
     s.setJointLimits(qmin,qmax)
     s.setBiasConfig(q)
     #start solving
-    if s.solve(iters,tol)[0]:
+    if s.solve():
         if feasibilityCheck():
             return True
     for i in xrange(numRestarts):
         s.sampleInitial()
-        if s.solve(iters,tol)[0]:
+        if s.solve():
             if feasibilityCheck():
                 return True
     return False

@@ -207,6 +207,14 @@ void IKObjective::transformLocal(const double R[9],const double t[3])
   goal.TransformLocal(T);
 }
 
+void IKObjective::matchDestination(const double R[9],const double t[3])
+{
+  RigidTransform T;
+  T.R = Matrix3(R);
+  T.t = Vector3(t);
+  goal.MatchGoalTransform(T);
+}
+
 bool IKObjective::loadString(const char* str)
 {
   stringstream ss(str);
@@ -285,16 +293,47 @@ void GeneralizedIKObjective::setTransform(const double R[9],const double t[3])
 
 
 IKSolver::IKSolver(const RobotModel& _robot)
-  :robot(_robot),useJointLimits(true)
+  :robot(_robot),maxIters(100),tol(1e-3),useJointLimits(true),lastIters(0)
 {}
 
 IKSolver::IKSolver(const IKSolver& solver)
-  :robot(solver.robot),objectives(solver.objectives),activeDofs(solver.activeDofs),useJointLimits(solver.useJointLimits),qmin(solver.qmin),qmax(solver.qmax)
+  :robot(solver.robot),objectives(solver.objectives),maxIters(solver.maxIters),tol(solver.tol),activeDofs(solver.activeDofs),useJointLimits(solver.useJointLimits),qmin(solver.qmin),qmax(solver.qmax),lastIters(solver.lastIters)
 {}
 
 void IKSolver::add(const IKObjective& objective)
 {
   objectives.push_back(objective);
+}
+
+void IKSolver::set(int i,const IKObjective& objective)
+{
+  if(i < 0 || i >= objectives.size()) throw PyException("Invalid index specified in set");
+  objectives[i] = objective;
+}
+
+void IKSolver::clear()
+{
+  objectives.resize(0);
+}
+
+void IKSolver::setMaxIters(int iters)
+{
+  maxIters = iters;
+}
+
+int IKSolver::getMaxIters()
+{
+  return maxIters;
+}
+
+void IKSolver::setTolerance(double res)
+{
+  tol = res;
+}
+
+double IKSolver::getTolerance()
+{
+  return tol;
 }
 
 void IKSolver::setActiveDofs(const std::vector<int>& active)
@@ -358,6 +397,18 @@ void IKSolver::getBiasConfig(std::vector<double>& out)
   out = biasConfig;
 }
 
+bool IKSolver::isSolved()
+{
+  std::vector<double> res,qmin,qmax;
+  getResidual(res);
+  for(size_t i=0;i<res.size();i++)
+    if(Abs(res[i]) > tol) return false;
+  getJointLimits(qmin,qmax);
+  for(size_t i=0;i<qmin.size();i++)
+    if(robot.robot->q(i) < qmin[i] || robot.robot->q(i) > qmax[i]) return false;
+  return true;
+}
+
 void IKSolver::getResidual(std::vector<double>& out)
 {
   int size = 0;
@@ -407,7 +458,7 @@ void IKSolver::getJacobian(std::vector<std::vector<double> >& out)
   copy(J,out);
 }
 
-PyObject* IKSolver::solve(int iters,double tol)
+bool IKSolver::solve()
 {
   RobotIKFunction f(*robot.robot);
   vector<IKGoal> goals(objectives.size());
@@ -433,12 +484,16 @@ PyObject* IKSolver::solve(int iters,double tol)
   }
   solver.solver.verbose = 0;
 
+  int iters=maxIters;
   bool res = solver.Solve(tol,iters);
   robot.robot->UpdateGeometry();
-  PyObject* tuple = PyTuple_New(2);
-  PyTuple_SetItem(tuple,0,PyBool_FromLong(res));
-  PyTuple_SetItem(tuple,1,PyInt_FromLong(iters));
-  return tuple;
+  lastIters = iters;
+  return res;
+}
+
+int IKSolver::lastSolveIters()
+{
+  return lastIters;
 }
 
 void IKSolver::sampleInitial()
@@ -473,6 +528,16 @@ void GeneralizedIKSolver::add(const GeneralizedIKObjective& objective)
   objectives.push_back(objective);
 }
 
+void GeneralizedIKSolver::setMaxIters(int iters)
+{
+  maxIters = iters;
+}
+
+void GeneralizedIKSolver::setTolerance(double res)
+{
+  tol = res;
+}
+
 void GeneralizedIKSolver::getResidual(std::vector<double>& out)
 {
   throw PyException("Not implemented yet");
@@ -483,7 +548,7 @@ void GeneralizedIKSolver::getJacobian(std::vector<std::vector<double> >& out)
   throw PyException("Not implemented yet");
 }
 
-PyObject* GeneralizedIKSolver::solve(int iters,double tol)
+PyObject* GeneralizedIKSolver::solve()
 {
   throw PyException("Not implemented yet");
   return NULL;
