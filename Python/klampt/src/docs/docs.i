@@ -942,13 +942,30 @@ driver. ";
 Old-style: will be deprecated. Returns a reference to a
 RobotModelDriver. ";
 
-%feature("docstring")  RobotModel::getConfig "";
+%feature("docstring")  RobotModel::getConfig "
 
-%feature("docstring")  RobotModel::getVelocity "";
+Retreives the current configuration of the robot. ";
 
-%feature("docstring")  RobotModel::setConfig "";
+%feature("docstring")  RobotModel::getVelocity "
 
-%feature("docstring")  RobotModel::setVelocity "";
+Retreives the current velocity of the robot. ";
+
+%feature("docstring")  RobotModel::setConfig "
+
+Sets the current configuration of the robot. Input q is a vector of
+length numLinks(). This also updates forward kinematics of all links.
+Again, it is important to realize that the RobotModel is not the same
+as a simulated robot, and this will not change the simulation world.
+Many functions such as IK and motion planning use the RobotModel
+configuration as a temporary variable, so if you need to keep the
+configuration through a robot-modifying function call, you should call
+q = robot.getConfig() before the call, and then robot.setConfig(q)
+after it. ";
+
+%feature("docstring")  RobotModel::setVelocity "
+
+Sets the current velocity of the robot. Like the configuration, this
+is also essentially a temporary variable. ";
 
 %feature("docstring")  RobotModel::getJointLimits "";
 
@@ -972,13 +989,19 @@ Sets a single DOF's position. Note: if you are setting several joints
 at once, use setConfig because this function computes forward
 kinematics every time. ";
 
-%feature("docstring")  RobotModel::setDOFPosition "";
+%feature("docstring")  RobotModel::setDOFPosition "
+
+Sets a single DOF's position (by name). Note: if you are setting
+several joints at once, use setConfig because this function computes
+forward kinematics every time. ";
 
 %feature("docstring")  RobotModel::getDOFPosition "
 
 Returns a single DOF's position. ";
 
-%feature("docstring")  RobotModel::getDOFPosition "";
+%feature("docstring")  RobotModel::getDOFPosition "
+
+Returns a single DOF's position (by name) ";
 
 %feature("docstring")  RobotModel::getCom "
 
@@ -1186,13 +1209,17 @@ with origin at the link frame, not about the COM.) ";
 
 Gets transformation (R,t) to the parent link. ";
 
-%feature("docstring")  RobotModelLink::setParentTransform "";
+%feature("docstring")  RobotModelLink::setParentTransform "
+
+Sets transformation (R,t) to the parent link. ";
 
 %feature("docstring")  RobotModelLink::getAxis "
 
 Gets the local rotational / translational axis. ";
 
-%feature("docstring")  RobotModelLink::setAxis "";
+%feature("docstring")  RobotModelLink::setAxis "
+
+Sets the local rotational / translational axis. ";
 
 %feature("docstring")  RobotModelLink::getWorldPosition "
 
@@ -1285,6 +1312,10 @@ duration provided to Simulation.simulate(). If you need fine-grained
 control, make sure to call simulate() with time steps equal to the
 value provided to Simulation.setSimStep() (this is 0.001s by default).
 
+Important: the transform of the object is centered at the object's
+center of mass rather than the reference frame given in the
+RobotModelLink or RigidObjectModel.
+
 C++ includes: robotsim.h ";
 
 %feature("docstring")  SimBody::enable "
@@ -1315,14 +1346,19 @@ duration of the next Simulator.simulate(t) call. ";
 
 %feature("docstring")  SimBody::applyForceAtLocalPoint "
 
-Applies a force at a given point (in local coordinates) over the
-duration of the next Simulator.simulate(t) call. ";
+Applies a force at a given point (in local center-of-mass-centered
+coordinates) over the duration of the next Simulator.simulate(t) call.
+";
 
 %feature("docstring")  SimBody::setTransform "
 
-Sets the body's transformation at the current simulation time step. ";
+Sets the body's transformation at the current simulation time step (in
+center-of-mass centered coordinates). ";
 
-%feature("docstring")  SimBody::getTransform "";
+%feature("docstring")  SimBody::getTransform "
+
+Gets the body's transformation at the current simulation time step (in
+center-of-mass centered coordinates). ";
 
 %feature("docstring")  SimBody::setVelocity "
 
@@ -1360,21 +1396,37 @@ Internally used. ";
 
 A controller for a simulated robot.
 
-The basic way of using this is in \"standard\" move-to mode which
-accepts a milestone (setMilestone) or list of milestones (repeated
-calls to addMilestone) and interpolates dynamically from the current
-configuration/velocity. To handle disturbances, a PID loop is run. The
-constants of this loop are initially set in the robot file, or you can
-perform tuning via setPIDGains.
+By default a SimRobotController has three possible modes: Motion queue
++ PID mode: the controller has an internal trajectory queue that may
+be added to and modified. This queue supports piecewise linear
+interpolation, cubic interpolation, and time-optimal move-to commands.
 
-Move-to motions are handled using a motion queue. To get finer-grained
-control over the motion queue you may use the setLinear/setCubic/
-addLinear/addCubic functions.
+PID mode: the user controls the motor's PID setpoints directly
+
+Torque control: the user controlls the motor torques directly.
+
+The \"standard\" way of using this is in move-to mode which accepts a
+milestone (setMilestone) or list of milestones (repeated calls to
+addMilestone) and interpolates dynamically from the current
+configuration/velocity. To handle disturbances, a PID loop is run
+automatically at the controller's specified rate.
+
+To get finer-grained control over the motion queue's timing, you may
+use the setLinear/setCubic/addLinear/addCubic functions. In these
+functions it is up to the user to respect velocity, acceleration, and
+torque limits.
+
+Whether in motion queue or PID mode, the constants of the PID loop are
+initially set in the robot file. You can programmatically tune these
+via the setPIDGains function.
 
 Arbitrary trajectories can be tracked by using setVelocity over short
 time steps. Force controllers can be implemented using setTorque,
-again using short time steps. These set the controller into manual
-override mode. To reset back to regular motion queue control,
+again using short time steps.
+
+If setVelocity, setTorque, or setPID command are called, the motion
+queue behavior will be completely overridden. To reset back to motion
+queue control, the function setManualMode(False) must be called.
 
 C++ includes: robotsim.h ";
 
@@ -1434,9 +1486,11 @@ sends a command to the controller ";
 
 %feature("docstring")  SimRobotController::getSetting "
 
-gets/sets settings of the controller ";
+gets a setting of the controller ";
 
-%feature("docstring")  SimRobotController::setSetting "";
+%feature("docstring")  SimRobotController::setSetting "
+
+sets a setting of the controller ";
 
 %feature("docstring")  SimRobotController::setMilestone "
 
@@ -1444,14 +1498,21 @@ Uses a dynamic interpolant to get from the current state to the
 desired milestone (with optional ending velocity). This interpolant is
 time-optimal with respect to the velocity and acceleration bounds. ";
 
-%feature("docstring")  SimRobotController::setMilestone "";
+%feature("docstring")  SimRobotController::setMilestone "
+
+Uses a dynamic interpolant to get from the current state to the
+desired milestone (with optional ending velocity). This interpolant is
+time-optimal with respect to the velocity and acceleration bounds. ";
 
 %feature("docstring")  SimRobotController::addMilestone "
 
 Same as setMilestone, but appends an interpolant onto an internal
 motion queue starting at the current queued end state. ";
 
-%feature("docstring")  SimRobotController::addMilestone "";
+%feature("docstring")  SimRobotController::addMilestone "
+
+Same as setMilestone, but appends an interpolant onto an internal
+motion queue starting at the current queued end state. ";
 
 %feature("docstring")  SimRobotController::addMilestoneLinear "
 
@@ -1469,9 +1530,13 @@ Uses cubic (Hermite) interpolation to get from the current
 configuration/velocity to the desired configuration/velocity after
 time dt. ";
 
-%feature("docstring")  SimRobotController::appendLinear "
+%feature("docstring")  SimRobotController::addLinear "
 
 Same as setLinear but appends an interpolant onto the motion queue. ";
+
+%feature("docstring")  SimRobotController::appendLinear "
+
+Same as addLinear (will be deprecated) ";
 
 %feature("docstring")  SimRobotController::addCubic "
 
@@ -1496,7 +1561,8 @@ Sets a PID command controller. ";
 
 %feature("docstring")  SimRobotController::setPIDCommand "
 
-Sets a PID command controller with feedforward torques. ";
+Sets a PID command controller. If tfeedforward is used, it is the
+feedforward torque vector. ";
 
 %feature("docstring")  SimRobotController::setManualMode "
 
@@ -1505,9 +1571,9 @@ were previously set. ";
 
 %feature("docstring")  SimRobotController::getControlType "
 
-Returns the control type for the active controller valid values are:
+Returns the control type for the active controller.
 
-unknown
+Valid values are: unknown
 
 off
 

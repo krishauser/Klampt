@@ -40544,6 +40544,64 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_SimRobotController_addLinear(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  SimRobotController *arg1 = (SimRobotController *) 0 ;
+  std::vector< double,std::allocator< double > > *arg2 = 0 ;
+  double arg3 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int res2 = SWIG_OLDOBJ ;
+  double val3 ;
+  int ecode3 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  PyObject * obj2 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OOO:SimRobotController_addLinear",&obj0,&obj1,&obj2)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_SimRobotController, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SimRobotController_addLinear" "', argument " "1"" of type '" "SimRobotController *""'"); 
+  }
+  arg1 = reinterpret_cast< SimRobotController * >(argp1);
+  {
+    std::vector<double,std::allocator< double > > *ptr = (std::vector<double,std::allocator< double > > *)0;
+    res2 = swig::asptr(obj1, &ptr);
+    if (!SWIG_IsOK(res2)) {
+      SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "SimRobotController_addLinear" "', argument " "2"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
+    }
+    if (!ptr) {
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "SimRobotController_addLinear" "', argument " "2"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
+    }
+    arg2 = ptr;
+  }
+  ecode3 = SWIG_AsVal_double(obj2, &val3);
+  if (!SWIG_IsOK(ecode3)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "SimRobotController_addLinear" "', argument " "3"" of type '" "double""'");
+  } 
+  arg3 = static_cast< double >(val3);
+  {
+    try {
+      (arg1)->addLinear((std::vector< double,std::allocator< double > > const &)*arg2,arg3);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  if (SWIG_IsNewObj(res2)) delete arg2;
+  return resultobj;
+fail:
+  if (SWIG_IsNewObj(res2)) delete arg2;
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_SimRobotController_appendLinear(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   SimRobotController *arg1 = (SimRobotController *) 0 ;
@@ -45575,13 +45633,21 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"Gets transformation (R,t) to the parent link. \n"
 		""},
-	 { (char *)"RobotModelLink_setParentTransform", _wrap_RobotModelLink_setParentTransform, METH_VARARGS, (char *)"RobotModelLink_setParentTransform(RobotModelLink self, double const [9] R, double const [3] t)"},
+	 { (char *)"RobotModelLink_setParentTransform", _wrap_RobotModelLink_setParentTransform, METH_VARARGS, (char *)"\n"
+		"RobotModelLink_setParentTransform(RobotModelLink self, double const [9] R, double const [3] t)\n"
+		"\n"
+		"Sets transformation (R,t) to the parent link. \n"
+		""},
 	 { (char *)"RobotModelLink_getAxis", _wrap_RobotModelLink_getAxis, METH_VARARGS, (char *)"\n"
 		"RobotModelLink_getAxis(RobotModelLink self)\n"
 		"\n"
 		"Gets the local rotational / translational axis. \n"
 		""},
-	 { (char *)"RobotModelLink_setAxis", _wrap_RobotModelLink_setAxis, METH_VARARGS, (char *)"RobotModelLink_setAxis(RobotModelLink self, double const [3] axis)"},
+	 { (char *)"RobotModelLink_setAxis", _wrap_RobotModelLink_setAxis, METH_VARARGS, (char *)"\n"
+		"RobotModelLink_setAxis(RobotModelLink self, double const [3] axis)\n"
+		"\n"
+		"Sets the local rotational / translational axis. \n"
+		""},
 	 { (char *)"RobotModelLink_getWorldPosition", _wrap_RobotModelLink_getWorldPosition, METH_VARARGS, (char *)"\n"
 		"RobotModelLink_getWorldPosition(RobotModelLink self, double const [3] plocal)\n"
 		"\n"
@@ -45782,10 +45848,35 @@ static PyMethodDef SwigMethods[] = {
 		"Old-style: will be deprecated. Returns a reference to a\n"
 		"RobotModelDriver. \n"
 		""},
-	 { (char *)"RobotModel_getConfig", _wrap_RobotModel_getConfig, METH_VARARGS, (char *)"RobotModel_getConfig(RobotModel self)"},
-	 { (char *)"RobotModel_getVelocity", _wrap_RobotModel_getVelocity, METH_VARARGS, (char *)"RobotModel_getVelocity(RobotModel self)"},
-	 { (char *)"RobotModel_setConfig", _wrap_RobotModel_setConfig, METH_VARARGS, (char *)"RobotModel_setConfig(RobotModel self, doubleVector q)"},
-	 { (char *)"RobotModel_setVelocity", _wrap_RobotModel_setVelocity, METH_VARARGS, (char *)"RobotModel_setVelocity(RobotModel self, doubleVector dq)"},
+	 { (char *)"RobotModel_getConfig", _wrap_RobotModel_getConfig, METH_VARARGS, (char *)"\n"
+		"RobotModel_getConfig(RobotModel self)\n"
+		"\n"
+		"Retreives the current configuration of the robot. \n"
+		""},
+	 { (char *)"RobotModel_getVelocity", _wrap_RobotModel_getVelocity, METH_VARARGS, (char *)"\n"
+		"RobotModel_getVelocity(RobotModel self)\n"
+		"\n"
+		"Retreives the current velocity of the robot. \n"
+		""},
+	 { (char *)"RobotModel_setConfig", _wrap_RobotModel_setConfig, METH_VARARGS, (char *)"\n"
+		"RobotModel_setConfig(RobotModel self, doubleVector q)\n"
+		"\n"
+		"Sets the current configuration of the robot. Input q is a vector of\n"
+		"length numLinks(). This also updates forward kinematics of all links.\n"
+		"Again, it is important to realize that the RobotModel is not the same\n"
+		"as a simulated robot, and this will not change the simulation world.\n"
+		"Many functions such as IK and motion planning use the RobotModel\n"
+		"configuration as a temporary variable, so if you need to keep the\n"
+		"configuration through a robot-modifying function call, you should call\n"
+		"q = robot.getConfig() before the call, and then robot.setConfig(q)\n"
+		"after it. \n"
+		""},
+	 { (char *)"RobotModel_setVelocity", _wrap_RobotModel_setVelocity, METH_VARARGS, (char *)"\n"
+		"RobotModel_setVelocity(RobotModel self, doubleVector dq)\n"
+		"\n"
+		"Sets the current velocity of the robot. Like the configuration, this\n"
+		"is also essentially a temporary variable. \n"
+		""},
 	 { (char *)"RobotModel_getJointLimits", _wrap_RobotModel_getJointLimits, METH_VARARGS, (char *)"RobotModel_getJointLimits(RobotModel self)"},
 	 { (char *)"RobotModel_setJointLimits", _wrap_RobotModel_setJointLimits, METH_VARARGS, (char *)"RobotModel_setJointLimits(RobotModel self, doubleVector qmin, doubleVector qmax)"},
 	 { (char *)"RobotModel_getVelocityLimits", _wrap_RobotModel_getVelocityLimits, METH_VARARGS, (char *)"RobotModel_getVelocityLimits(RobotModel self)"},
@@ -45797,10 +45888,16 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"RobotModel_setDOFPosition", _wrap_RobotModel_setDOFPosition, METH_VARARGS, (char *)"\n"
 		"setDOFPosition(int i, double qi)\n"
 		"RobotModel_setDOFPosition(RobotModel self, char const * name, double qi)\n"
+		"\n"
+		"Sets a single DOF's position (by name). Note: if you are setting\n"
+		"several joints at once, use setConfig because this function computes\n"
+		"forward kinematics every time. \n"
 		""},
 	 { (char *)"RobotModel_getDOFPosition", _wrap_RobotModel_getDOFPosition, METH_VARARGS, (char *)"\n"
 		"getDOFPosition(int i) -> double\n"
 		"RobotModel_getDOFPosition(RobotModel self, char const * name) -> double\n"
+		"\n"
+		"Returns a single DOF's position (by name) \n"
 		""},
 	 { (char *)"RobotModel_getCom", _wrap_RobotModel_getCom, METH_VARARGS, (char *)"\n"
 		"RobotModel_getCom(RobotModel self)\n"
@@ -46448,16 +46545,27 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"SimRobotController_getSetting", _wrap_SimRobotController_getSetting, METH_VARARGS, (char *)"\n"
 		"SimRobotController_getSetting(SimRobotController self, std::string const & name) -> std::string\n"
 		"\n"
-		"gets/sets settings of the controller \n"
+		"gets a setting of the controller \n"
 		""},
-	 { (char *)"SimRobotController_setSetting", _wrap_SimRobotController_setSetting, METH_VARARGS, (char *)"SimRobotController_setSetting(SimRobotController self, std::string const & name, std::string const & val) -> bool"},
+	 { (char *)"SimRobotController_setSetting", _wrap_SimRobotController_setSetting, METH_VARARGS, (char *)"\n"
+		"SimRobotController_setSetting(SimRobotController self, std::string const & name, std::string const & val) -> bool\n"
+		"\n"
+		"sets a setting of the controller \n"
+		""},
 	 { (char *)"SimRobotController_setMilestone", _wrap_SimRobotController_setMilestone, METH_VARARGS, (char *)"\n"
 		"setMilestone(doubleVector q)\n"
 		"SimRobotController_setMilestone(SimRobotController self, doubleVector q, doubleVector dq)\n"
+		"\n"
+		"Uses a dynamic interpolant to get from the current state to the\n"
+		"desired milestone (with optional ending velocity). This interpolant is\n"
+		"time-optimal with respect to the velocity and acceleration bounds. \n"
 		""},
 	 { (char *)"SimRobotController_addMilestone", _wrap_SimRobotController_addMilestone, METH_VARARGS, (char *)"\n"
 		"addMilestone(doubleVector q)\n"
 		"SimRobotController_addMilestone(SimRobotController self, doubleVector q, doubleVector dq)\n"
+		"\n"
+		"Same as setMilestone, but appends an interpolant onto an internal\n"
+		"motion queue starting at the current queued end state. \n"
 		""},
 	 { (char *)"SimRobotController_addMilestoneLinear", _wrap_SimRobotController_addMilestoneLinear, METH_VARARGS, (char *)"\n"
 		"SimRobotController_addMilestoneLinear(SimRobotController self, doubleVector q)\n"
@@ -46478,10 +46586,15 @@ static PyMethodDef SwigMethods[] = {
 		"configuration/velocity to the desired configuration/velocity after\n"
 		"time dt. \n"
 		""},
+	 { (char *)"SimRobotController_addLinear", _wrap_SimRobotController_addLinear, METH_VARARGS, (char *)"\n"
+		"SimRobotController_addLinear(SimRobotController self, doubleVector q, double dt)\n"
+		"\n"
+		"Same as setLinear but appends an interpolant onto the motion queue. \n"
+		""},
 	 { (char *)"SimRobotController_appendLinear", _wrap_SimRobotController_appendLinear, METH_VARARGS, (char *)"\n"
 		"SimRobotController_appendLinear(SimRobotController self, doubleVector q, double dt)\n"
 		"\n"
-		"Same as setLinear but appends an interpolant onto the motion queue. \n"
+		"Same as addLinear (will be deprecated) \n"
 		""},
 	 { (char *)"SimRobotController_addCubic", _wrap_SimRobotController_addCubic, METH_VARARGS, (char *)"\n"
 		"SimRobotController_addCubic(SimRobotController self, doubleVector q, doubleVector v, double dt)\n"
@@ -46508,7 +46621,8 @@ static PyMethodDef SwigMethods[] = {
 		"setPIDCommand(doubleVector qdes, doubleVector dqdes)\n"
 		"SimRobotController_setPIDCommand(SimRobotController self, doubleVector qdes, doubleVector dqdes, doubleVector tfeedforward)\n"
 		"\n"
-		"Sets a PID command controller with feedforward torques. \n"
+		"Sets a PID command controller. If tfeedforward is used, it is the\n"
+		"feedforward torque vector. \n"
 		""},
 	 { (char *)"SimRobotController_setManualMode", _wrap_SimRobotController_setManualMode, METH_VARARGS, (char *)"\n"
 		"SimRobotController_setManualMode(SimRobotController self, bool enabled)\n"
@@ -46519,9 +46633,9 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"SimRobotController_getControlType", _wrap_SimRobotController_getControlType, METH_VARARGS, (char *)"\n"
 		"SimRobotController_getControlType(SimRobotController self) -> std::string\n"
 		"\n"
-		"Returns the control type for the active controller valid values are:\n"
+		"Returns the control type for the active controller.\n"
 		"\n"
-		"unknown\n"
+		"Valid values are: unknown\n"
 		"\n"
 		"off\n"
 		"\n"
@@ -46578,15 +46692,22 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"SimBody_applyForceAtLocalPoint", _wrap_SimBody_applyForceAtLocalPoint, METH_VARARGS, (char *)"\n"
 		"SimBody_applyForceAtLocalPoint(SimBody self, double const [3] f, double const [3] plocal)\n"
 		"\n"
-		"Applies a force at a given point (in local coordinates) over the\n"
-		"duration of the next Simulator.simulate(t) call. \n"
+		"Applies a force at a given point (in local center-of-mass-centered\n"
+		"coordinates) over the duration of the next Simulator.simulate(t) call.\n"
+		"\n"
 		""},
 	 { (char *)"SimBody_setTransform", _wrap_SimBody_setTransform, METH_VARARGS, (char *)"\n"
 		"SimBody_setTransform(SimBody self, double const [9] R, double const [3] t)\n"
 		"\n"
-		"Sets the body's transformation at the current simulation time step. \n"
+		"Sets the body's transformation at the current simulation time step (in\n"
+		"center-of-mass centered coordinates). \n"
 		""},
-	 { (char *)"SimBody_getTransform", _wrap_SimBody_getTransform, METH_VARARGS, (char *)"SimBody_getTransform(SimBody self)"},
+	 { (char *)"SimBody_getTransform", _wrap_SimBody_getTransform, METH_VARARGS, (char *)"\n"
+		"SimBody_getTransform(SimBody self)\n"
+		"\n"
+		"Gets the body's transformation at the current simulation time step (in\n"
+		"center-of-mass centered coordinates). \n"
+		""},
 	 { (char *)"SimBody_setVelocity", _wrap_SimBody_setVelocity, METH_VARARGS, (char *)"\n"
 		"SimBody_setVelocity(SimBody self, double const [3] w, double const [3] v)\n"
 		"\n"
@@ -46633,6 +46754,10 @@ static PyMethodDef SwigMethods[] = {
 		"duration provided to Simulation.simulate(). If you need fine-grained\n"
 		"control, make sure to call simulate() with time steps equal to the\n"
 		"value provided to Simulation.setSimStep() (this is 0.001s by default).\n"
+		"\n"
+		"Important: the transform of the object is centered at the object's\n"
+		"center of mass rather than the reference frame given in the\n"
+		"RobotModelLink or RigidObjectModel.\n"
 		"\n"
 		"C++ includes: robotsim.h \n"
 		""},

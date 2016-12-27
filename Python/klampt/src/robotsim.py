@@ -1643,7 +1643,11 @@ class RobotModelLink(_object):
         return _robotsim.RobotModelLink_getParentTransform(self)
 
     def setParentTransform(self, *args):
-        """setParentTransform(RobotModelLink self, double const [9] R, double const [3] t)"""
+        """
+        setParentTransform(RobotModelLink self, double const [9] R, double const [3] t)
+
+        Sets transformation (R,t) to the parent link. 
+        """
         return _robotsim.RobotModelLink_setParentTransform(self, *args)
 
     def getAxis(self):
@@ -1655,7 +1659,11 @@ class RobotModelLink(_object):
         return _robotsim.RobotModelLink_getAxis(self)
 
     def setAxis(self, *args):
-        """setAxis(RobotModelLink self, double const [3] axis)"""
+        """
+        setAxis(RobotModelLink self, double const [3] axis)
+
+        Sets the local rotational / translational axis. 
+        """
         return _robotsim.RobotModelLink_setAxis(self, *args)
 
     def getWorldPosition(self, *args):
@@ -2014,19 +2022,44 @@ class RobotModel(_object):
         return _robotsim.RobotModel_getDriver(self, *args)
 
     def getConfig(self):
-        """getConfig(RobotModel self)"""
+        """
+        getConfig(RobotModel self)
+
+        Retreives the current configuration of the robot. 
+        """
         return _robotsim.RobotModel_getConfig(self)
 
     def getVelocity(self):
-        """getVelocity(RobotModel self)"""
+        """
+        getVelocity(RobotModel self)
+
+        Retreives the current velocity of the robot. 
+        """
         return _robotsim.RobotModel_getVelocity(self)
 
     def setConfig(self, *args):
-        """setConfig(RobotModel self, doubleVector q)"""
+        """
+        setConfig(RobotModel self, doubleVector q)
+
+        Sets the current configuration of the robot. Input q is a vector of
+        length numLinks(). This also updates forward kinematics of all links.
+        Again, it is important to realize that the RobotModel is not the same
+        as a simulated robot, and this will not change the simulation world.
+        Many functions such as IK and motion planning use the RobotModel
+        configuration as a temporary variable, so if you need to keep the
+        configuration through a robot-modifying function call, you should call
+        q = robot.getConfig() before the call, and then robot.setConfig(q)
+        after it. 
+        """
         return _robotsim.RobotModel_setConfig(self, *args)
 
     def setVelocity(self, *args):
-        """setVelocity(RobotModel self, doubleVector dq)"""
+        """
+        setVelocity(RobotModel self, doubleVector dq)
+
+        Sets the current velocity of the robot. Like the configuration, this
+        is also essentially a temporary variable. 
+        """
         return _robotsim.RobotModel_setVelocity(self, *args)
 
     def getJointLimits(self):
@@ -2065,6 +2098,10 @@ class RobotModel(_object):
         """
         setDOFPosition(RobotModel self, int i, double qi)
         setDOFPosition(RobotModel self, char const * name, double qi)
+
+        Sets a single DOF's position (by name). Note: if you are setting
+        several joints at once, use setConfig because this function computes
+        forward kinematics every time. 
         """
         return _robotsim.RobotModel_setDOFPosition(self, *args)
 
@@ -2072,6 +2109,8 @@ class RobotModel(_object):
         """
         getDOFPosition(RobotModel self, int i) -> double
         getDOFPosition(RobotModel self, char const * name) -> double
+
+        Returns a single DOF's position (by name) 
         """
         return _robotsim.RobotModel_getDOFPosition(self, *args)
 
@@ -3214,21 +3253,37 @@ class SimRobotController(_object):
     """
     A controller for a simulated robot.
 
-    The basic way of using this is in "standard" move-to mode which
-    accepts a milestone (setMilestone) or list of milestones (repeated
-    calls to addMilestone) and interpolates dynamically from the current
-    configuration/velocity. To handle disturbances, a PID loop is run. The
-    constants of this loop are initially set in the robot file, or you can
-    perform tuning via setPIDGains.
+    By default a SimRobotController has three possible modes: Motion queue
+    + PID mode: the controller has an internal trajectory queue that may
+    be added to and modified. This queue supports piecewise linear
+    interpolation, cubic interpolation, and time-optimal move-to commands.
 
-    Move-to motions are handled using a motion queue. To get finer-grained
-    control over the motion queue you may use the setLinear/setCubic/
-    addLinear/addCubic functions.
+    PID mode: the user controls the motor's PID setpoints directly
+
+    Torque control: the user controlls the motor torques directly.
+
+    The "standard" way of using this is in move-to mode which accepts a
+    milestone (setMilestone) or list of milestones (repeated calls to
+    addMilestone) and interpolates dynamically from the current
+    configuration/velocity. To handle disturbances, a PID loop is run
+    automatically at the controller's specified rate.
+
+    To get finer-grained control over the motion queue's timing, you may
+    use the setLinear/setCubic/addLinear/addCubic functions. In these
+    functions it is up to the user to respect velocity, acceleration, and
+    torque limits.
+
+    Whether in motion queue or PID mode, the constants of the PID loop are
+    initially set in the robot file. You can programmatically tune these
+    via the setPIDGains function.
 
     Arbitrary trajectories can be tracked by using setVelocity over short
     time steps. Force controllers can be implemented using setTorque,
-    again using short time steps. These set the controller into manual
-    override mode. To reset back to regular motion queue control,
+    again using short time steps.
+
+    If setVelocity, setTorque, or setPID command are called, the motion
+    queue behavior will be completely overridden. To reset back to motion
+    queue control, the function setManualMode(False) must be called.
 
     C++ includes: robotsim.h 
     """
@@ -3338,18 +3393,26 @@ class SimRobotController(_object):
         """
         getSetting(SimRobotController self, std::string const & name) -> std::string
 
-        gets/sets settings of the controller 
+        gets a setting of the controller 
         """
         return _robotsim.SimRobotController_getSetting(self, *args)
 
     def setSetting(self, *args):
-        """setSetting(SimRobotController self, std::string const & name, std::string const & val) -> bool"""
+        """
+        setSetting(SimRobotController self, std::string const & name, std::string const & val) -> bool
+
+        sets a setting of the controller 
+        """
         return _robotsim.SimRobotController_setSetting(self, *args)
 
     def setMilestone(self, *args):
         """
         setMilestone(SimRobotController self, doubleVector q)
         setMilestone(SimRobotController self, doubleVector q, doubleVector dq)
+
+        Uses a dynamic interpolant to get from the current state to the
+        desired milestone (with optional ending velocity). This interpolant is
+        time-optimal with respect to the velocity and acceleration bounds. 
         """
         return _robotsim.SimRobotController_setMilestone(self, *args)
 
@@ -3357,6 +3420,9 @@ class SimRobotController(_object):
         """
         addMilestone(SimRobotController self, doubleVector q)
         addMilestone(SimRobotController self, doubleVector q, doubleVector dq)
+
+        Same as setMilestone, but appends an interpolant onto an internal
+        motion queue starting at the current queued end state. 
         """
         return _robotsim.SimRobotController_addMilestone(self, *args)
 
@@ -3388,11 +3454,19 @@ class SimRobotController(_object):
         """
         return _robotsim.SimRobotController_setCubic(self, *args)
 
+    def addLinear(self, *args):
+        """
+        addLinear(SimRobotController self, doubleVector q, double dt)
+
+        Same as setLinear but appends an interpolant onto the motion queue. 
+        """
+        return _robotsim.SimRobotController_addLinear(self, *args)
+
     def appendLinear(self, *args):
         """
         appendLinear(SimRobotController self, doubleVector q, double dt)
 
-        Same as setLinear but appends an interpolant onto the motion queue. 
+        Same as addLinear (will be deprecated) 
         """
         return _robotsim.SimRobotController_appendLinear(self, *args)
 
@@ -3434,7 +3508,8 @@ class SimRobotController(_object):
         setPIDCommand(SimRobotController self, doubleVector qdes, doubleVector dqdes)
         setPIDCommand(SimRobotController self, doubleVector qdes, doubleVector dqdes, doubleVector tfeedforward)
 
-        Sets a PID command controller with feedforward torques. 
+        Sets a PID command controller. If tfeedforward is used, it is the
+        feedforward torque vector. 
         """
         return _robotsim.SimRobotController_setPIDCommand(self, *args)
 
@@ -3451,9 +3526,9 @@ class SimRobotController(_object):
         """
         getControlType(SimRobotController self) -> std::string
 
-        Returns the control type for the active controller valid values are:
+        Returns the control type for the active controller.
 
-        unknown
+        Valid values are: unknown
 
         off
 
@@ -3496,6 +3571,10 @@ class SimBody(_object):
     duration provided to Simulation.simulate(). If you need fine-grained
     control, make sure to call simulate() with time steps equal to the
     value provided to Simulation.setSimStep() (this is 0.001s by default).
+
+    Important: the transform of the object is centered at the object's
+    center of mass rather than the reference frame given in the
+    RobotModelLink or RigidObjectModel.
 
     C++ includes: robotsim.h 
     """
@@ -3558,8 +3637,9 @@ class SimBody(_object):
         """
         applyForceAtLocalPoint(SimBody self, double const [3] f, double const [3] plocal)
 
-        Applies a force at a given point (in local coordinates) over the
-        duration of the next Simulator.simulate(t) call. 
+        Applies a force at a given point (in local center-of-mass-centered
+        coordinates) over the duration of the next Simulator.simulate(t) call.
+
         """
         return _robotsim.SimBody_applyForceAtLocalPoint(self, *args)
 
@@ -3567,12 +3647,18 @@ class SimBody(_object):
         """
         setTransform(SimBody self, double const [9] R, double const [3] t)
 
-        Sets the body's transformation at the current simulation time step. 
+        Sets the body's transformation at the current simulation time step (in
+        center-of-mass centered coordinates). 
         """
         return _robotsim.SimBody_setTransform(self, *args)
 
     def getTransform(self):
-        """getTransform(SimBody self)"""
+        """
+        getTransform(SimBody self)
+
+        Gets the body's transformation at the current simulation time step (in
+        center-of-mass centered coordinates). 
+        """
         return _robotsim.SimBody_getTransform(self)
 
     def setVelocity(self, *args):
@@ -3643,6 +3729,10 @@ class SimBody(_object):
         duration provided to Simulation.simulate(). If you need fine-grained
         control, make sure to call simulate() with time steps equal to the
         value provided to Simulation.setSimStep() (this is 0.001s by default).
+
+        Important: the transform of the object is centered at the object's
+        center of mass rather than the reference frame given in the
+        RobotModelLink or RigidObjectModel.
 
         C++ includes: robotsim.h 
         """
