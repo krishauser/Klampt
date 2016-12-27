@@ -19,9 +19,9 @@ def set_visible(name,value=True):
 	"""Changes the visibility status of a certain named target"""
 	_RPC.append({'type':'set_visible','name':name,'value':value})	
 
-def set_color(target,rgba_color):
+def set_color(target,r,g,b,a=1.0):
 	"""Sets the given RobotModel, RobotModelLink, named link, indexed link,
-	or object name to some color (given as an (r,g,b) or (r,g,b,a) tuple)."""
+	or object name to some color, given as an (r,g,b) or (r,g,b,a) tuple)."""
 	global _world,_ghosts
 	recursive=False
 	if isinstance(target, (int, long, float, complex)):
@@ -51,14 +51,11 @@ def set_color(target,rgba_color):
 		print "ERROR: kviz.set_color requires target of either robot, link, index, or string name of object!"
 		return;
 
-	if len(rgba_color) == 3:
-		rgba_color.append(1.0)
-
 	if recursive:
-		_RPC.append({'type':'set_color','object':target_name,'rgba':rgba_color,'recursive':True})
+		_RPC.append({'type':'set_color','object':target_name,'rgba':(r,g,b,a),'recursive':True})
 	else:
-		_RPC.append({'type':'set_color','object':target_name,'rgba':rgba_color})
-	#print "Setting link color!",('object',target_name,'rgba'),rgba_color
+		_RPC.append({'type':'set_color','object':target_name,'rgba':(r,g,b,a)})
+	#print "Setting link color!",('object',target_name,'rgba'),(r,g,b,a)
 
 def set_transform(name,R=so3.identity(),t=[0]*3,matrix=None):
 	"""Sets the transform of the target object.  If matrix is given, it's a 16-element 
