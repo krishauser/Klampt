@@ -26,9 +26,9 @@ def boilerplate_start():
     kviz.add_sphere("point2",0,0,0.1,0.05)
     kviz.add_line("line1", 0,0,0.1, 0,0,0.1)
     kviz.add_line("line2", 0,0,0.1, 0,0,0.1)
-    kviz.set_color("center",[1,0,0,1])
-    kviz.set_color("point1",[1,1,0,1])
-    kviz.set_color("point2",[1,0.5,0,1])
+    kviz.set_color("center",1,0,0)
+    kviz.set_color("point1",1,1,0)
+    kviz.set_color("point2",1,0.5,0)
 
 def boilerplate_advance():
     global pos1,pos2local,pos3local,angle

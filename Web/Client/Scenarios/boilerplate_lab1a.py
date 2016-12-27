@@ -29,9 +29,9 @@ def boilerplate_start():
     kviz.add_sphere("source", 0,0,0, 0.05)
     kviz.add_sphere("target", 2,0,0, 0.05)
     kviz.add_line("line", 0,0,0, 2,0,0)
-    kviz.set_color("source",[1,0,0,1])
-    kviz.set_color("target",[0,0,1,1])
-    kviz.set_color("line",[1,1,0,1])
+    kviz.set_color("source",1,0,0)
+    kviz.set_color("target",0,0,1)
+    kviz.set_color("line",1,1,0)
     kviz.add_text("HUD1",2,2)
 
     pos1 = (0,0)

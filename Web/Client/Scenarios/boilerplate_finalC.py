@@ -217,13 +217,13 @@ class GLTest:
             Tsensor = self.sensors['blobdetector'].Tsensor
             x,y,z = Tsensor[1]
             kviz.add_sphere("cam_center",x,y,z,0.03)
-            kviz.set_color("cam_center",(1,1,0,1))
+            kviz.set_color("cam_center",1,1,0)
             kviz.add_polyline("cam_fwd",[Tsensor[1],se3.apply(Tsensor,[0,0,0.2])])
-            kviz.set_color("cam_fwd",(0,0,1,1))
+            kviz.set_color("cam_fwd",0,0,1)
             kviz.add_polyline("cam_up",[Tsensor[1],se3.apply(Tsensor,[0,0.1,0])])
-            kviz.set_color("cam_up",(0,1,0,1))
+            kviz.set_color("cam_up",0,1,0)
         self.ghost = kviz.add_ghost("user")
-        kviz.set_color(self.ghost,(1,1,0,0.5))
+        kviz.set_color(self.ghost,1,1,0,0.5)
         self.numBlobs = 0
         self.updateVis()
 
@@ -259,8 +259,8 @@ class GLTest:
                     kviz.update_quad("blob"+str(i),a,d,c,b)
                     kviz.update_quad("blob_back"+str(i),a,b,c,d)
                     #kviz.update_quad("blob"+str(i),(0,0,2),b=(1,0,2),c=(1,1,2),d=(0,1,2))
-                    kviz.set_color("blob"+str(i),blob.color+(1,))
-                    kviz.set_color("blob_back"+str(i),blob.color+(1,))
+                    kviz.set_color("blob"+str(i),*blob.color
+                    kviz.set_color("blob_back"+str(i),*blob.color
                 for i in xrange(len(r.blobs),self.numBlobs):
                     print "Removing blob",i
                     kviz.remove("blob"+str(i))

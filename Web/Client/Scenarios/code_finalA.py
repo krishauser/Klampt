@@ -191,7 +191,7 @@ class MyController:
             for o in self.objectEstimates.objects:
                 #draw a point
                 kviz.update_sphere("object_est"+str(o.name),o.x[0],o.x[1],o.x[2],0.03)
-                kviz.set_color("object_est"+str(o.name),(o.name[0],o.name[1],o.name[2],1))
+                kviz.set_color("object_est"+str(o.name),o.name[0],o.name[1],o.name[2])
                 #draw an arc
                 trace = []
                 x = [o.x[0],o.x[1],o.x[2]]
@@ -202,5 +202,5 @@ class MyController:
                     t = i*0.05
                     trace.append(vectorops.sub(vectorops.madd(x,v,t),[0,0,0.5*gravity*t*t]))
                 kviz.update_polyline("object_trace"+str(o.name),trace);
-                kviz.set_color("object_trace"+str(o.name),(o.name[0],o.name[1],o.name[2],1))
+                kviz.set_color("object_trace"+str(o.name),o.name[0],o.name[1],o.name[2])
 

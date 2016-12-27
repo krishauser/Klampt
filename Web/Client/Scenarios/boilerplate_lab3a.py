@@ -67,8 +67,8 @@ def boilerplate_start():
     kviz._init(world)
     kviz.add_sphere("robot",start[0],start[1],0,radius)
     kviz.add_sphere("target",field.target[0],field.target[1],0,radius)
-    kviz.set_color("robot",[0,0,1,1])
-    kviz.set_color("target",[1,0,0,1])
+    kviz.set_color("robot",0,0,1)
+    kviz.set_color("target",1,0,0)
     refresh_viz()
 
 def refresh_viz():
@@ -81,7 +81,7 @@ def refresh_viz():
             existing_path_lines.append(name)
             kviz.add_line(name,path[i][0],path[i][1],0.0,path[i+1][0],path[i+1][1],0.0)
             kviz.set_visible(name,True)
-            kviz.set_color(name,[1,1,0,1])
+            kviz.set_color(name,1,1,0)
         else:
             name = existing_path_lines[i]
             #kviz.update_line(name,path[i][0],path[i][1],0.0,path[i+1][0],path[i+1][1],0.0)

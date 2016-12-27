@@ -44,7 +44,7 @@ def boilerplate_start():
         configurations.append(q)
         ghost = kviz.add_ghost("config"+str(i))
         ghosts.append(ghost)
-        kviz.set_color(ghosts[i],[0,1,0,1])
+        kviz.set_color(ghosts[i],0,1,0,1)
     kviz.add_sphere("target",target[0],target[1],target[2],0.1)
     kviz.add_text("HUD1",1,1)
     #hide the robot
@@ -75,9 +75,9 @@ def boilerplate_advance():
             opacity = max(0,min(opacity,1))
         kviz.set_ghost_config(q,"config"+str(i))
         if i == closest:
-            kviz.set_color(ghosts[i],[1,0,0,opacity])
+            kviz.set_color(ghosts[i],1,0,0,opacity)
         else:
-            kviz.set_color(ghosts[i],[0.5,0.5,0.5,opacity])
+            kviz.set_color(ghosts[i],0.5,0.5,0.5,opacity)
 
     kviz.update_text("HUD1","Closest: "+str(closest)+" at distance "+str(distances[closest]))
     t += 0.02

@@ -56,8 +56,8 @@ def boilerplate_start():
     target_ghost = kviz.add_ghost("target")
     kviz.set_ghost_config(start,"start")
     kviz.set_ghost_config(target,"target")
-    kviz.set_color(start_ghost,[0,1,0,1])
-    kviz.set_color(target_ghost,[1,0,0,1])
+    kviz.set_color(start_ghost,0,1,0)
+    kviz.set_color(target_ghost,1,0,0)
     existing_roadmap_lines = set()
     existing_path_lines = []
     existing_ghosts = []
@@ -77,10 +77,10 @@ def refresh_viz():
             existing_path_lines.append(name)
             kviz.add_line(name,path[i][0],path[i][1],path_height,path[i+1][0],path[i+1][1],path_height)
             kviz.set_visible(name,True)
-            kviz.set_color(name,[0,0,1,1])
+            kviz.set_color(name,0,0,1])
             existing_ghosts.append(kviz.add_ghost("ghost"+str(i)))
             kviz.set_ghost_config(path[i],"ghost"+str(i))
-            kviz.set_color(existing_ghosts[-1],[1,1,1,0.5])
+            kviz.set_color(existing_ghosts[-1],1,1,1,0.5)
         else:
             name = existing_path_lines[i]
             kviz.set_visible(name,True)
@@ -94,7 +94,7 @@ def refresh_viz():
             if name not in existing_roadmap_lines:
                 existing_roadmap_lines.add(name)
                 kviz.add_line(name,V[a][0],V[a][1],0.0,V[b][0],V[b][1],0.0)
-                kviz.set_color(name,[1,1,0,1])
+                kviz.set_color(name,1,1,0)
             else:
                 kviz.update_line(name,V[a][0],V[a][1],0.0,V[b][0],V[b][1],0.0)
                 kviz.set_visible(name,True)

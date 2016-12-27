@@ -130,8 +130,8 @@ class Robot:
 	def initVis(self):
 		kviz.add_sphere("camera",0,0,0,0.03)
 		kviz.add_line("camera_dir")
-		kviz.set_color("camera",(1,1,0,1))
-		kviz.set_color("camera_dir",(1,1,0,1))
+		kviz.set_color("camera",1,1,0)
+		kviz.set_color("camera_dir",1,1,0)
 		self.last_viz_point = 0
 		self.updateVis()
 
@@ -156,7 +156,7 @@ class Robot:
 				cx = 0.5*(self.map.bounds[1][0]+self.map.bounds[0][0])
 				cy = 0.5*(self.map.bounds[1][1]+self.map.bounds[0][1])
 				kviz.add_billboard("map",self.map.array,'auto',(self.map.vmin,self.map.vmax),filter='nearest',size=(w,h),colormap='opacity')
-				kviz.set_color("map",(0,1,1,1))
+				kviz.set_color("map",0,1,1)
 				kviz.set_transform("map",R=so3.rotation((0,0,1),math.pi/2),t=(cx,cy,height))
 
 	def doSensing(self):

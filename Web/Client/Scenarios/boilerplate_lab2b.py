@@ -32,7 +32,7 @@ def boilerplate_start():
     ghosts.append(kviz.add_ghost("solution3"))
     ghosts.append(kviz.add_ghost("solution4"))
     kviz.add_sphere("target_point",0,0,0,0.15)
-    kviz.set_color("target_point",[1,0,0,1])
+    kviz.set_color("target_point",1,0,0])
     t = 0
 
 def boilerplate_advance():
@@ -49,7 +49,7 @@ def boilerplate_advance():
     if solutions[0] == 0 or solutions[0] == float('inf'):
         #no solutions, draw robot in transparent red
         for i in range(robot.numLinks()):
-            kviz.set_color(robot.link(i),[1,0,0,0.25])
+            kviz.set_color(robot.link(i),1,0,0,0.25)
         #hide ghosts
         for ghost in ghosts:
             kviz.set_color(ghost,[0,0,0,0])
@@ -61,10 +61,10 @@ def boilerplate_advance():
                 kviz.set_color(ghost,[0,0,0,0])
             else:
                 print "Setting ghost",i,"solution",solutions[1][i+1]
-                kviz.set_color(ghost,[1,1.0/(i+2),1,1])
+                kviz.set_color(ghost,1,1.0/(i+2),1)
                 kviz.set_ghost_config(solutions[1][i+1],"solution"+str(i+2))
         for i in range(robot.numLinks()):
-            kviz.set_color(robot.link(i),[1,1,1,1])
+            kviz.set_color(robot.link(i),1,1,1)
         robot.setConfig(solutions[1][0])
     t += 0.02
 

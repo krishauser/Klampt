@@ -40,7 +40,7 @@ def update_trace():
 						b = trace[i][j+1]
 						kviz.set_visible(name,True)
 						kviz.update_line(name,a[0],a[1],a[2],b[0],b[1],b[2])
-						kviz.set_color(name,[1,0.5,0,1])
+						kviz.set_color(name,1,0.5,0)
 						trace_viz_status[i,j] = (name,'shown')
 					else:
 						pass
@@ -49,7 +49,7 @@ def update_trace():
 					a = trace[i][j]
 					b = trace[i][j+1]
 					kviz.add_line(name,a[0],a[1],a[2],b[0],b[1],b[2])
-					kviz.set_color(name,[1,0.5,0,1])
+					kviz.set_color(name,1,0.5,0)
 					trace_viz_status[i,j] = (name,'shown')
 
 

@@ -84,8 +84,8 @@ def boilerplate_start():
     kviz._init(world)
     kviz.add_sphere("robot",start[0],start[1],0,radius)
     kviz.add_sphere("target",target[0],target[1],0,radius)
-    kviz.set_color("robot",[0,0,1,1])
-    kviz.set_color("target",[1,0,0,1])
+    kviz.set_color("robot",0,0,1)
+    kviz.set_color("target",1,0,0)
     existing_roadmap_lines = set()
     existing_path_lines = []
     existing_ghosts = []
@@ -105,10 +105,10 @@ def refresh_viz():
             existing_path_lines.append(name)
             kviz.add_line(name,path[i][0],path[i][1],path_height,path[i+1][0],path[i+1][1],path_height)
             kviz.set_visible(name,True)
-            kviz.set_color(name,[0,0,1,1])
+            kviz.set_color(name,0,0,1)
             existing_ghosts.append("ghost"+str(i))
             kviz.add_sphere("ghost"+str(i),path[i][0],path[i][1],0,space.robot.radius)
-            kviz.set_color("ghost"+str(i),[1,1,1,0.5])
+            kviz.set_color("ghost"+str(i),1,1,1,0.5)
         else:
             name = existing_path_lines[i]
             kviz.set_visible(name,True)
@@ -122,7 +122,7 @@ def refresh_viz():
             if name not in existing_roadmap_lines:
                 existing_roadmap_lines.add(name)
                 kviz.add_line(name,V[a][0],V[a][1],0.0,V[b][0],V[b][1],0.0)
-                kviz.set_color(name,[1,1,0,1])
+                kviz.set_color(name,1,1,0)
             else:
                 kviz.update_line(name,V[a][0],V[a][1],0.0,V[b][0],V[b][1],0.0)
                 kviz.set_visible(name,True)
