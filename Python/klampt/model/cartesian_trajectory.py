@@ -43,7 +43,7 @@ def _make_canonical(robot,constraints,startConfig,endConfig,solver):
 			constraints = newconstraints
 			solver = newSolver
 			break
-	if solver == None:
+	if solver is None:
 		solver = ik.solver(constraints)
 	if startConfig=='robot':
 		startConfig = robot.getConfig()
@@ -64,12 +64,15 @@ def cartesian_interpolate_linear(robot,a,b,constraints,
 	Arguments:
 	- robot: the RobotModel or SubRobotModel.
 	- a, b: endpoints of the Cartesian trajectory.  Assumed derived from config.getConfig(constraints)
-	- constraints: IKObjectives on the link or links that are constrained.  Or, they can be indices, or strings
-	  in which case they constrain the transform of the link
+	- constraints: one or more link indices, link names, or IKObjective's giving the manner
+	  in which the Cartesian space is defined. If integers or strings are provided, the specified
+	  link's entire pose is constrained. If IKObjective's are given, the links, constraint types,
+	  local positions, and local axes are used, but the world space elements are considered
+	  temporary and will change.
 	- startConfig: either 'robot' (configuration taken from the robot), a configuration, or None (any configuration)
 	- endConfig: same type as startConfig.
 	- delta: the maximum configuration space distance between points on the output path
-	- solver: None, or a configured IKSolver on the given constraints
+	- solver: if provided, this must be an IKSolver configured with the desired parameters for IK constraint solving.
 	- feasibilityTest: None, or a function f(q) that returns false when a configuration q is infeasible
 	- maximize: if true, goes as far as possible along the path.
 
@@ -78,7 +81,7 @@ def cartesian_interpolate_linear(robot,a,b,constraints,
 	assert delta > 0,"Spatial resolution must be positive"
 	constraints,startConfig,endConfig,solver = _make_canonical(robot,constraints,startConfig,endConfig,solver)
 
-	assert startConfig != None,"Unable to cartesian interpolate without a start configuration"
+	assert startConfig is not None,"Unable to cartesian interpolate without a start configuration"
 	robot.setConfig(startConfig)
 	set_cartesian_constraints(a,constraints,solver)
 	if not solver.isSolved():
@@ -90,7 +93,7 @@ def cartesian_interpolate_linear(robot,a,b,constraints,
 	if feasibilityTest is not None and not feasibilityTest(startConfig):
 		print "Error: initial configuration is infeasible"
 		return None
-	if endConfig != None:
+	if endConfig is not None:
 		#doing endpoint-constrained cartesian interpolation
 		set_cartesian_constraints(b,constraints,solver)
 		robot.setConfig(endConfig)
@@ -182,27 +185,18 @@ def cartesian_interpolate_linear(robot,a,b,constraints,
 		t = tend
 	solver.setJointLimits(qmin0,qmax0)
 	solver.setTolerance(tol0)
-	"""
-	dist = config.distance(constraints,a,b)
-	numDivs = int(math.ceil(dist/delta))
-	for j in xrange(numDivs):
-		u = float(j+1) / float(numDivs)
-		x = config.interpolate(constraints,a,b,u)
-		if endConfig is not None:
-			robot.setConfig(robot.interpolate(startConfig,endConfig,u))
-		if not solve_cartesian(x,constraints,solver):
-			print "Failed to solve at time",u
+	if endConfig is not None:
+		if robot.distance(res.milestones[-2],endConfig) > delta:
+			#hit a local minimum, couldn't reach the goal
+			if maximize:
+				res.times.pop(-1)
+				res.milestones.pop(-1)
+				return res
+			#print "Hit a local minimum while trying to reach end configuration"
 			return None
-		#assert solver.isSolved(),"residual "+str(solver.getResidual())
-		if feasibilityTest is not None and not feasibilityTest(robot.getConfig()):
-			print "Infeasibility at time",u
-			return None
-		res.times.append(u)
-		res.milestones.append(robot.getConfig())
-	"""
-	#set_cartesian_constraints(b,constraints,solver)
-	#robot.setConfig(res.milestones[-1])
-	#assert solver.isSolved(),"residual "+str(solver.getResidual())
+		else:
+			#clean up the end configuration
+			res.milestones[-1] = endConfig
 	return res
 
 class BisectNode:
@@ -225,13 +219,16 @@ def cartesian_interpolate_bisect(robot,a,b,constraints,
 	Arguments:
 	- robot: the RobotModel or SubRobotModel.
 	- a, b: endpoints of the Cartesian trajectory.  Assumed derived from config.getConfig(constraints)
-	- constraints: IKObjectives on the link or links that are constrained.  Or, they can be indices, or strings
-	  in which case they constrain the transform of the link
+	- constraints: one or more link indices, link names, or IKObjective's giving the manner
+	  in which the Cartesian space is defined. If integers or strings are provided, the specified
+	  link's entire pose is constrained. If IKObjective's are given, the links, constraint types,
+	  local positions, and local axes are used, but the world space elements are considered
+	  temporary and will change.
 	- startConfig: either 'robot' (configuration taken from the robot), a configuration, or None (any configuration)
 	- endConfig: same type as startConfig.
 	- eps: cartesian error tolerance
 	- delta: the maximum configuration-space resolution of the output path
-	- solver: None, or a configured IKSolver on the given constraints
+	- solver: if provided, this must be an IKSolver configured with the desired parameters for IK constraint solving.
 	- feasibilityTest: None, or a function f(q) that returns false when a configuration q is infeasible
 	- growthTol: the end path can be at most growthTol the length of the length between the start and goal
 	  configurations.
@@ -242,8 +239,8 @@ def cartesian_interpolate_bisect(robot,a,b,constraints,
 	assert growthTol > 1,"Growth parameter must be in range [1,infty]"
 	constraints,startConfig,endConfig,solver = _make_canonical(robot,constraints,startConfig,endConfig,solver)
 
-	assert startConfig != None,"Unable to cartesian bisection interpolate without a start configuration"
-	if endConfig == None:
+	assert startConfig is not None,"Unable to cartesian bisection interpolate without a start configuration"
+	if endConfig is None:
 		#find an end point
 		robot.setConfig(startConfig)
 		if not solve_cartesian(b,constraints,solver):
@@ -351,16 +348,20 @@ def cartesian_path_interpolate(robot,path,constraints,
 	- robot: the RobotModel or SubRobotModel.
 	- path: a list of milestones, or a Trajectory for the parameters of the given constraints.  In the former
 	  case the milestones are spaced 1s apart in time.
-	- constraints: IKObjectives on the link or links that are constrained.  Or, they can be indices, or strings
-	  in which case they constrain the transform of the link.
+	- constraints: one or more link indices, link names, or IKObjective's giving the manner
+	  in which the Cartesian space is defined. If integers or strings are provided, the specified
+	  link's entire pose is constrained. If IKObjective's are given, the links, constraint types,
+	  local positions, and local axes are used, but the world space elements are considered
+	  temporary and will change.
 	- startConfig: either 'robot' (configuration taken from the robot), a configuration, or None (any configuration)
 	- endConfig: same type as startConfig.
 	- delta: the maximum configuration-space resolution of the output path
 	- method: method used: 'any', 'pointwise', or 'roadmap'.
-	- solver: None, or a configured IKSolver on the given constraints
+	- solver: if provided, this must be an IKSolver configured with the desired parameters for IK constraint solving.
 	- feasibilityTest: None, or a function f(q) that returns false when a configuration q is infeasible
 	- numSamples: if 'roadmap' or 'any' method is used, the # of configuration space samples that are used.
-	- maximize: if not resolved, returns the robot trajectory leading to the furthest point along the path
+	- maximize: if not resolved and this is True, the function returns the robot trajectory leading
+	  to the furthest point along the path
 
 	Out: a RobotTrajectory that interpolates the Cartesian path, or None if none can be found
 	"""
@@ -391,7 +392,7 @@ def cartesian_path_interpolate(robot,path,constraints,
 	#now we're at a canonical setup
 	if method == 'any' or method == 'pointwise':
 		#try pointwise resolution first
-		if startConfig == None:
+		if startConfig is None:
 			if ik.solve_global(constraints,solver.getMaxIters(),solver.getTolerance(),solver.getActiveDofs(),max(100,numSamples),feasibilityTest):
 				startConfig = robot.getConfig()
 			else:
@@ -460,12 +461,12 @@ def cartesian_path_interpolate(robot,path,constraints,
 		import random
 		#mark whether we need to sample the end or start
 		pathIndices = range(1,len(path.milestones)-1)
-		if startConfig == None:
+		if startConfig is None:
 			pathIndices = [0] + pathIndices
-		if endConfig == None:
+		if endConfig is None:
 			pathIndices = pathIndices + [len(path.milestones)-1]
 		samp = 0
-		if startConfig == None:
+		if startConfig is None:
 			#need to seed a start configuration
 			while samp < numSamples:
 				samp += 1
@@ -474,7 +475,7 @@ def cartesian_path_interpolate(robot,path,constraints,
 					if feasibilityTest is None or feasibilityTest(robot.getConfig()):
 						startConfig = robot.getConfig()
 						break
-		if endConfig == None:
+		if endConfig is None:
 			#need to seed an end configuration
 			samp = 0
 			while samp < numSamples:
@@ -487,7 +488,7 @@ def cartesian_path_interpolate(robot,path,constraints,
 					if feasibilityTest is None or feasibilityTest(robot.getConfig()):
 						endConfig = robot.getConfig()
 						break
-		if startConfig == None or endConfig == None:
+		if startConfig is None or endConfig is None:
 			print "Exhausted all samples, perhaps endpoints are unreachable"
 			return None
 		selfMotionManifolds = [[] for i in path.milestones]
@@ -511,7 +512,7 @@ def cartesian_path_interpolate(robot,path,constraints,
 			while len(q) > 0:
 				n = q.pop()
 				for c,p in eadj[n]:
-					if parent[c] != None:
+					if parent[c] is not None:
 						continue
 					parent[c] = n
 					if nodes[c][0] == depth:
@@ -519,7 +520,7 @@ def cartesian_path_interpolate(robot,path,constraints,
 						#arrived at goal node, trace parent list back
 						npath = []
 						n = c
-						while c != None:
+						while c is not None:
 							npath.append(c)
 							c = parent[c]
 						npath = [n for n in reversed(npath)]
@@ -599,7 +600,7 @@ def cartesian_path_interpolate(robot,path,constraints,
 				t = resolve_cartesian_trajectory(robot,pij,constraints,
 					startConfig=qi,endConfig=qj,delta=delta,method='pointwise',solver=solver,feasibilityTest=feasibilityTest)
 				#t = cartesian_interpolate_bisect(robot,path.milestones[i],path.milestones[j],constraints,qi,qj,delta=delta,solver=solver,feasibilityTest=feasibilityTest)
-				if t == None:
+				if t is None:
 					print "  Failed edge",nodes[ni],"->",nodes[nj]
 					continue
 				#t.times = [path.times[i] + v*(path.times[j]-path.times[i]) for v in t.times]
@@ -657,3 +658,182 @@ def cartesian_path_interpolate(robot,path,constraints,
 	return None
 
 
+def cartesian_bump(robot,js_path,constraints,bump_paths,
+	delta=1e-2,
+	solver=None,
+	ee_relative=False,
+	maximize=False,
+	closest=False,
+	maxDeviation=None):
+	"""Given the robot and a joint space trajectory, "bumps" the trajectory
+	in cartesian space using a given relative transform (or transform path).  The movement in
+	joint space is approximately minimized to follow the bumped cartesian path.
+
+	For example, to translate the motion of an end effector by [dx,dy,dz] in world coordinates, 
+	call cartesian_bump(robot,traj,ik.fixed_objective(link),se3.from_translation([dx,dy,dz]))
+
+	Arguments:
+	- robot: the robot for which the bump is applied.  Note: if js_path is a 
+	- js_path: the joint space Trajectory of the robot.  May be a RobotTrajectory.
+	- constraints: one or more link indices, link names, or IKObjective's giving the manner
+	  in which the Cartesian space is defined. If integers or strings are provided, the specified
+	  link's entire pose is constrained. If IKObjective's are given, the links, constraint types,
+	  local positions, and local axes are used, but the world space elements are considered
+	  temporary and will change.
+	- bump_paths: one or more transforms or transform paths specifying the world-space relative
+	  "bump" of each cartesian goal.  One bump per constraint must be given as input.  Each bump can
+	  either be a static klampt.se3 element or a SE3Trajectory.
+	- delta: the maximum configuration-space resolution of the output path.
+	- solver: if provided, this must be an IKSolver configured with the desired parameters
+	  for IK constraint solving.
+	- ee_relative: if False (default), bumps are given in world coordinates.  If True, bumps are given in
+	  end-effector local coordinates.
+	- maximize: if not resolved and this is True, the function returns the robot trajectory leading
+	  to the furthest point along the path
+	- closest: if not resolved and this is True, the function returns the robot trajectory whose cartesian
+	  targets get as close as possible (locally) to the bumped trajectory
+	- maxDeviation: if not None, this is a vector giving the max joint space distance by which the 
+	  joint is allowed to move from js_path.
+
+	Out: a bumped RobotTrajectory, or None if none can be found
+	"""
+	#make into canonical form
+	if not hasattr(constraints,'__iter__'):
+		constraints = [constraints]
+	if not hasattr(bump_paths,'__iter__'):
+		bump_paths = [bump_paths]
+	assert len(constraints) == len(bump_paths),"Must specify one bump per constraint"
+	if maxDeviation != None:
+		assert len(maxDeviation) == robot.numLinks()
+	for c in constraints:
+		if isinstance(c,(int,str)):
+			newconstraints = []
+			for d in constraints:
+				if isinstance(d,(int,str)):
+					newconstraints.append(ik.objective(robot,d,R=so3.identity(),t=[0,0,0]))
+				else:
+					assert isinstance(d,IKObjective)
+					newconstraints.append(d)
+	is1xform = any(isinstance(p,(int,float)) for p in bump_paths)
+	if is1xform:
+		bump_paths = [bump_paths]
+	meshpts = []
+	for i,p in enumerate(bump_paths):
+		#it's a static transform, map it to a path
+		if isinstance(p,(list,tuple)):
+			bump_paths[i] = SE3Trajectory(times=[js_path.startTime()],milestones=[p])
+		else:
+			assert hasattr(p,'times'),"bump_paths must contain SE3Trajectory's"
+			meshpts += p.times
+	if solver is None:
+		solver = ik.solver(constraints)
+	#now preprocess the joint space so that everything is initially within delta distance
+	for i in xrange(len(js_path.milestones)-1):
+		d = robot.distance(js_path.milestones[i],js_path.milestones[i+1])
+		if d > delta:
+			#add in subdividing mesh points
+			a,b = js_path.times[i],js_path.times[i+1]
+			numdivs = int(math.ceil(d/delta))
+			for j in xrange(1,numdivs):
+				meshpts.append(a + float(j)/float(numdivs)*(b-a))
+	#ensure that all the movements of the SE3 trajectories are captured
+	if len(meshpts) > 0:
+		js_path = js_path.remesh(meshpts)[0]
+	qmin0,qmax0 = solver.getJointLimits()
+	#OK, now move all the cartesian points
+	numsolved = 0
+	res = RobotTrajectory(robot)
+	res.times = js_path.times
+	closeIntervals = set()
+	for i,q in enumerate(js_path.milestones):
+		t = js_path.times[i]
+		robot.setConfig(q)
+		solver.clear()
+		for c,p in zip(constraints,bump_paths):
+			xform0 = robot.link(c.link()).getTransform()
+			xformrel = p.eval_se3(t)
+			xform = (se3.mul(xform0,xformrel) if ee_relative else se3.mul(xformrel,xform0))
+			c.matchDestination(*xform)
+			solver.add(c)
+		if maxDeviation != None:
+			qmin = [max(v-d,vmin) for (v,d,vmin) in zip(q,maxDeviation,qmin0)]
+			qmax = [min(v+d,vmax) for (v,d,vmax) in zip(q,maxDeviation,qmax0)]
+			solver.setJointLimits(qmin,qmax)
+		if not solver.solve():
+			print "Unable to perform Cartesian solve on milestone at time",t
+			if not closest:
+				if maximize:
+					#going as far as possible, just clip the result
+					res.times = res.times[:len(res.milestones)]
+					break
+				else:
+					solver.setJointLimits(qmin0,qmax0)
+					return None
+			else:
+				closeIntervals.add(i)
+				#otherwise soldier on with an imperfect solution
+		else:
+			numsolved += 1
+		res.milestones.append(robot.getConfig())
+	print "Solved %d/%d milestone configurations along path, now interpolating paths..."%(numsolved,len(res.milestones))
+	numResolved = 0
+	numTotalEdges = len(res.milestones)-1
+	solver.setJointLimits(qmin0,qmax0)
+	i = 0
+	while i+1 < len(res.milestones):
+		q = res.milestones[i]
+		qnext = res.milestones[i+1]
+		d = robot.distance(q,qnext)
+		if d > delta:
+			if i in closeIntervals:
+				i += 1
+				continue
+			#resolve cartesian path
+			ta = res.times[i]
+			tb = res.times[i+1]
+			robot.setConfig(q)
+			for c,p in zip(constraints,bump_paths):
+				xform0 = robot.link(c.link()).getTransform()
+				c.matchDestination(*xform0)
+			xa = config.getConfig(constraints)
+			robot.setConfig(qnext)
+			for c,p in zip(constraints,bump_paths):
+				xform0 = robot.link(c.link()).getTransform()
+				c.matchDestination(*xform0)
+			xb = config.getConfig(constraints)
+			#TODO: add joint limits into the solver?
+			newseg = cartesian_interpolate_bisect(robot,xa,xb,constraints,
+				startConfig=q,endConfig=qnext,
+				delta=delta,solver=solver)
+			if newseg == None:
+				print "Unable to complete bump while subdividing segment at time",ta
+				if closest:
+					i += 1
+					continue
+				if maximize:
+					res.times = res.times[:i+1]
+					res.milestones = res.milestones[:i+1]
+				return None
+			#splice in the results
+			assert newseg.times[0] == 0 and newseg.times[-1] == 1
+			newseg.times = [ta + float(t)*(tb-ta) for t in newseg.times]
+			res.times = res.times[:i+1]+newseg.times[1:-1]+res.times[i+1:]
+			#print "Adding",len(newseg.milestones)-2,"intermediate milestones"
+			assert res.milestones[i] == newseg.milestones[0]
+			assert res.milestones[i+1] == newseg.milestones[-1]
+			res.milestones = res.milestones[:i+1]+newseg.milestones[1:-1]+res.milestones[i+1:]
+			#adjust close intervals
+			newclose = set()
+			for c in closeIntervals:
+				if c > i:
+					newclose.add(c + len(newseg.times)-2)
+			closeIntervals = newclose
+			i += len(newseg.milestones)-2
+			numResolved += 1
+		else:
+			#print "Skipping",i
+			numResolved += 1
+		i += 1
+	print "Resolved %d/%d bumped edges"%(numResolved,numTotalEdges)
+	return res
+	

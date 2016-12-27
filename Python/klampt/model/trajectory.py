@@ -193,7 +193,7 @@ class Trajectory:
 			return self.constructor()([time],[self.milestones[0]]),self.constructor()([time]+self.times,[self.milestones[0]]+self.milestones)
 		if time >= self.times[-1]:
 			#split after end of trajectory
-			return self.constructor()(self.times+[time],self.milestones+[self.milestones[-1]]),trajectory([time],self.milestones[-1])
+			return self.constructor()(self.times+[time],self.milestones+[self.milestones[-1]]),self.constructor()([time],self.milestones[-1])
 		#split in middle of trajectory
 		splitpt = self.interpolate(self.milestones[i],self.milestones[i+1],u)
 		front = self.constructor()(self.times[:i+1],self.milestones[:i+1])
@@ -227,6 +227,7 @@ class Trajectory:
 		time = time+offset
 		before = self.before(time)
 		return before.concat(suffix,relative,jumpPolicy)
+
 	def constructor(self):
 		"""Returns a "standard" constructor for the split / concat
 		routines.  The result should be a function that takes two
@@ -253,6 +254,75 @@ class Trajectory:
 			new_milestones[-1] = self.milestones[-1][:]
 		return self.constructor()(new_times,new_milestones)
 
+	def remesh(self,newtimes,tol=1e-6):
+		"""Returns a path that has milestones at the times given in newtimes, as well
+		as the current milestone times.  Return value is (path,newtimeidx) where
+		path is the remeshed path, and newtimeidx is a list of time indices for which
+		path.times[newtimeidx[i]] = newtimes[i].
+
+		newtimes is an iterable over floats.  It does not need to be sorted. 
+
+		tol is a parameter specifying how closely the returned path must interpolate
+		the original path.  Old milestones will be dropped if they are not needed to follow
+		the path within this tolerance.
+
+		The end behavior is assumed to be 'halt'.
+		"""
+		sorter = [(t,-1-i) for (i,t) in enumerate(self.times)]  + [(t,i) for (i,t) in enumerate(newtimes)]
+		sorter = sorted(sorter)
+		res = self.constructor()(None,None)
+		res.times.append(sorter[0][0])
+		res.milestones.append(self.milestones[0])
+		#maybe a constant first section
+		i = 0
+		while sorter[i][0] < self.startTime():
+			i += 1
+		if i != 0:
+			res.times.append(self.startTime())
+			res.milestones.append(self.milestones[0])
+		resindices = []
+		firstold = 0
+		lastold = 0
+		while i < len(sorter):
+			#check if we should add this
+			t,idx = sorter[i]
+			i+=1
+			if idx >= 0:
+				if t == res.times[-1]:
+					resindices.append(len(res.times)-1)
+					continue
+				#it's a new mesh point, add it and check whether previous old milestones should be added
+				if self.times[lastold] == t:
+					#matched the last old mesh point, no need to call eval()
+					newx = self.milestones[lastold]
+				else:
+					newx = self.eval(t)
+				res.times.append(t)
+				res.milestones.append(newx)
+				for j in range(firstold,lastold):
+					if self.times[j] == t:
+						continue
+					x = res.eval(self.times[j])
+					if vectorops.norm(self.difference(x,self.milestones[j],0)) > tol:
+						#add it
+						res.times[-1] = self.times[j]
+						res.milestones[-1] = self.milestones[j]
+						res.times.append(t)
+						res.milestones.append(newx)
+				resindices.append(len(res.times)-1)
+				firstold = lastold+1
+			else:
+				#mark the range of old milestones to add
+				lastold = -idx-1
+		for j in range(firstold,lastold):
+			res.times.append(self.times[j])
+			res.milestones.append(self.milestones[j])
+		#sanity check
+		for i in xrange(len(res.times)-1):
+			assert res.times[i] < res.times[i+1]
+		for i,idx in enumerate(resindices):
+			assert newtimes[i] == res.times[idx]
+		return (res,resindices)
 
 class RobotTrajectory(Trajectory):
 	"""A trajectory that performs interpolation according to the robot's
@@ -263,7 +333,7 @@ class RobotTrajectory(Trajectory):
 	def interpolate(self,a,b,u):
 		return self.robot.interpolate(a,b,u)
 	def difference(self,a,b,u):
-		return self.robot.interpolate_deriv(b,a)
+		return self.robot.interpolateDeriv(b,a)
 	def constructor(self):
 		return lambda time,milestones: RobotTrajectory(self.robot,time,milestones)
 	def getLinkTrajectory(self,link,discretization=None):
