@@ -50,9 +50,17 @@ def rotation(T):
     return so3.matrix(R)
 
 def from_rotation(mat):
-    """Returns a T corresponding to the 3x3 rotation matrix mat"""
+    """Returns a transformation T corresponding to the 3x3 rotation matrix mat"""
     R = so3.from_matrix(R)
     return (R,[0.,0.,0.])
+
+def translation(T):
+    """Returns the translation vector corresponding to T's translation"""
+    return T[1]
+
+def from_translation(t):
+    """Returns a transformation T that translates points by t"""
+    return (so3.identity(),t[:])
 
 def homogeneous(T):
     """Returns the 4x4 homogeneous transform corresponding to T"""
