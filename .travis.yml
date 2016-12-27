@@ -1,0 +1,42 @@
+language: cpp
+
+compiler:
+  - gcc
+  - clang
+
+
+matrix:
+  allow_failures:
+    - compiler: clang
+
+install:
+  - sudo apt-get install cmake g++ git libboost-system-dev libboost-thread-dev freeglut3 freeglut3-dev libglpk-dev python-dev python-opengl libxmu-dev libxi-dev libqt4-dev libassimp-dev libglui2c2 libglui-dev libgtest-dev
+
+before_script:
+  - echo $LD_LIBRARY_PATH
+  - sudo ldconfig
+  # Prepare build
+  #- cd Klampt
+
+script:
+  - cd Library && make unpack-deps
+  - if [ "$TRAVIS_BRANCH" == "v0.7" ] || [ "$TRAVIS_BRANCH" == "travis" ]; then  cd KrisLibrary && git checkout plan_devel && cd .. && echo "Checking out branch plan_devel for KrisLibrary"; fi
+  - make deps && cd ..
+  - cmake .
+  - make Klampt
+  - cmake . -DKLAMPT_COMPILE_TESTS:BOOL=True
+  - make
+  - sudo make python-install
+  - make test
+
+# safelist
+branches:
+  only:
+  - master
+  - v0.7
+  - travis
+
+notifications:
+  email:
+    - kris.hauser@duke.edu
+    - rocchi.alessio@gmail.com
