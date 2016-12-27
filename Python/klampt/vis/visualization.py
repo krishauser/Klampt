@@ -306,7 +306,7 @@ def pushPlugin(plugin):
 def popPlugin():
     global _frontend
     _globalLock.acquire()
-    _frontend.popPlugin(plugin)
+    _frontend.popPlugin()
     _onFrontendChange()
     _globalLock.release()
 
