@@ -23,7 +23,7 @@ def random_rotation():
         m = vectorops.mul(vectorops.unit(q[0:3]),theta)
     return so3.from_moment(m)
 
-class KeyCapture(vis.GLPluginInterface):
+class InterpKeyCapture(vis.GLPluginInterface):
     def __init__(self,endeffectors,constraints):
         vis.GLPluginInterface.__init__(self)
         self.endeffectors = endeffectors
@@ -34,6 +34,8 @@ class KeyCapture(vis.GLPluginInterface):
         vis.setColor("ghost1",0,1,0,0.5)
         vis.add("ghost2",self.robot.getConfig())
         vis.setColor("ghost2",1,0,0,0.5)
+        vis.show("ghost1")
+        vis.show("ghost2")
     def keyboardfunc(self,c,x,y):
         if c == ' ':
             #first, set all constraints so they are fit at the robot's last solved configuration, and get the
@@ -46,7 +48,6 @@ class KeyCapture(vis.GLPluginInterface):
             wdest = []
             for e in self.endeffectors:
                 xform = vis.getItemConfig("ee_"+robot.link(e).getName())
-                print xform
                 wdest += xform
             print "Current workspace coords",wcur
             print "Dest workspace coords",wdest
@@ -69,6 +70,33 @@ class KeyCapture(vis.GLPluginInterface):
                 vis.setItemConfig("world:"+world.robot(0).getName(),self.goalConfig)
                 vis.animate("world:"+world.robot(0).getName(),traj,speed=0.2,endBehavior='loop')
                 vis.setItemConfig("ghost2",traj.milestones[-1])
+            self.refresh()
+
+class BumpKeyCapture(vis.GLPluginInterface):
+    def __init__(self,endeffectors,constraints,traj):
+        vis.GLPluginInterface.__init__(self)
+        self.endeffectors = endeffectors
+        self.constraints = constraints
+        self.robot = self.constraints[0].robot
+        self.traj = traj
+        self.refConfig = self.robot.getConfig()
+        vis.add("ghost1",self.refConfig)
+        vis.setColor("ghost1",0,1,0,0.5)
+        vis.show("ghost1")
+    def keyboardfunc(self,c,x,y):
+        if c == ' ':
+            relative_xforms = []
+            robot.setConfig(self.refConfig)
+            for e in self.endeffectors:
+                xform = vis.getItemConfig("ee_"+robot.link(e).getName())
+                T = (xform[:9],xform[9:])
+                T0 = robot.link(e).getTransform()
+                Trel = se3.mul(se3.inv(T0),T)
+                print "Relative transform of",e,"is",Trel
+                relative_xforms.append(Trel)
+            bumpTraj = cartesian_trajectory.cartesian_bump(self.robot,self.traj,self.constraints,relative_xforms,ee_relative=True,closest=True)
+            assert bumpTraj != None
+            vis.animate("world:"+world.robot(0).getName(),bumpTraj)
             self.refresh()
 
 if __name__ == "__main__":
@@ -106,11 +134,30 @@ if __name__ == "__main__":
         obj = coordinates.ik_fixed_objective(f)
         eeobjectives.append(obj)
 
-    vis.pushPlugin(KeyCapture(endeffectors,eeobjectives))
+    #this tests the cartesian interpolation stuff
+    print "***** BEGINNING CARTESIAN INTERPOLATION TEST *****"
+    vis.pushPlugin(InterpKeyCapture(endeffectors,eeobjectives))
     vis.show()
     while vis.shown():
         coordinates.updateFromWorld()
         time.sleep(0.1)
+    vis.popPlugin()
+    vis.hide("ghost1")
+    vis.hide("ghost2")
+    vis.animate("world:"+world.robot(0).getName(),None)
+
+    print
+    print 
+    #this tests the "bump" function stuff
+    print "***** BEGINNING BUMP FUNCTION TEST *****"
+    configs = resource.get("cartesian_test"+world.robot(0).getName()+".configs",world=world)
+    traj = trajectory.RobotTrajectory(robot,range(len(configs)),configs)
+    vis.pushPlugin(BumpKeyCapture(endeffectors,eeobjectives,traj))
+    vis.show()
+    while vis.shown():
+        coordinates.updateFromWorld()
+        time.sleep(0.1)
+    vis.popPlugin()
     
     print "Ending vis."
     vis.kill()
