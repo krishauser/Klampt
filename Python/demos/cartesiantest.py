@@ -70,6 +70,7 @@ class InterpKeyCapture(vis.GLPluginInterface):
                 vis.setItemConfig("world:"+world.robot(0).getName(),self.goalConfig)
                 vis.animate("world:"+world.robot(0).getName(),traj,speed=0.2,endBehavior='loop')
                 vis.setItemConfig("ghost2",traj.milestones[-1])
+                vis.add("ee_trajectory",traj)
             self.refresh()
 
 class BumpKeyCapture(vis.GLPluginInterface):

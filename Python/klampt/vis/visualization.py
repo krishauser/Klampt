@@ -755,6 +755,74 @@ class VisAppearance:
             item.drawGL()
         elif hasattr(item,'drawWorldGL'):
             item.drawWorldGL()
+        elif isinstance(item,Trajectory):
+            doDraw = False
+            centroid = None
+            if isinstance(item,RobotTrajectory):
+                ees = self.attributes.get("endeffectors",[-1])
+                if world:
+                    doDraw = (len(ees) > 0)
+                    robot = world.robot(0)
+                    for i,ee in enumerate(ees):
+                        if ee < 0: ees[i] = robot.numLinks()-1
+                    if doDraw:
+                        robot.setConfig(item.milestones[0])
+                        centroid = vectorops.div(vectorops.add(*[robot.link(ee).getTransform()[1] for ee in ees]),len(ees))
+            elif isinstance(item,SE3Trajectory):
+                doDraw = True
+                centroid = item.milestones[0][9:]
+            else:
+                if len(item.milestones[0]) == 3:
+                    #R3 trajectory
+                    doDraw = True
+                    centroid = item.milestones[0]
+                elif len(item.milestones[0]) == 2:
+                    #R2 trajectory
+                    doDraw = True
+                    centroid = item.milestones[0]+[0.0]
+            if doDraw:
+                def drawRaw():
+                    pointTrajectories = []
+                    if isinstance(item,RobotTrajectory):
+                        robot = world.robot(0)
+                        ees = self.attributes.get("endeffectors",[-1])
+                        for i,ee in enumerate(ees):
+                            if ee < 0: ees[i] = robot.numLinks()-1
+                        if world:
+                            for ee in ees:
+                                pointTrajectories.append([])
+                            for m in item.milestones:
+                                robot.setConfig(m)
+                                for ee,eetraj in zip(ees,pointTrajectories):
+                                    eetraj.append(robot.link(ee).getTransform()[1])
+                    elif isinstance(item,SE3Trajectory):
+                        pointTrajectories.append([])
+                        for m in item.milestones:
+                            pointTrajectories[-1].append(m[9:])
+                    else:
+                        if len(item.milestones[0]) == 3:
+                            #R3 trajectory
+                            pointTrajectories.append(item.milestones)
+                        elif len(item.milestones[0]) == 2:
+                            #R2 trajectory
+                            pointTrajectories.append([v + [0.0] for v in item.milestones])
+                    glDisable(GL_LIGHTING)
+                    glLineWidth(self.attributes.get("width",3))
+                    glColor4f(*self.attributes.get("color",[1,0.5,0,1]))
+                    for traj in pointTrajectories:
+                        if len(traj) == 1:
+                            glBegin(GL_POINTS)
+                            glVertex3f(*traj[0])
+                            glEnd()
+                        if len(traj) >= 2:
+                            glBegin(GL_LINE_STRIP)
+                            for p in traj:
+                                glVertex3f(*p)
+                            glEnd()
+                    glLineWidth(1.0)
+                self.displayCache[0].draw(drawRaw,se3.identity())
+                if name != None:
+                    self.drawText(name,centroid)
         elif isinstance(item,coordinates.Point):
             def drawRaw():
                 glDisable(GL_LIGHTING)
@@ -891,7 +959,30 @@ class VisAppearance:
                         for (i,app) in enumerate(oldAppearance):
                             robot.link(i).appearance().set(app)
                 else:
-                    print "Unable to draw Config's without a world"
+                    print "Unable to draw Config tiems without a world"
+            elif itypes == 'Configs':
+                if world:
+                    maxConfigs = self.attributes.get("maxConfigs",min(10,len(item)))
+                    robot = world.robot(0)
+                    if not self.useDefaultAppearance:
+                        oldAppearance = [robot.link(i).appearance().clone() for i in xrange(robot.numLinks())]
+                        for i in xrange(robot.numLinks()):
+                          if self.customAppearance is not None:
+                            robot.link(i).appearance().set(self.customAppearance)
+                          elif "color" in self.attributes:
+                            robot.link(i).appearance().setColor(*self.attributes["color"])
+
+                    oldconfig = robot.getConfig()
+                    for i in xrange(maxConfigs):
+                        idx = int(i*len(item))/maxConfigs
+                        robot.setConfig(item[idx])
+                        robot.drawGL()
+                    robot.setConfig(oldconfig)
+                    if not self.useDefaultAppearance:
+                        for (i,app) in enumerate(oldAppearance):
+                            robot.link(i).appearance().set(app)
+                else:
+                    print "Unable to draw Configs items without a world"
             elif itypes == 'Vector3':
                 def drawRaw():
                     glDisable(GL_LIGHTING)
