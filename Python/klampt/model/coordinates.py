@@ -236,14 +236,14 @@ class Group:
     def setWorldModel(self,worldModel):
         """Sets this group to contain all entities of a world model"""
         for i in xrange(worldModel.numRobots()):
-            rgroup = self.addGroup(worldModel.robot(0).getName())
-            rgroup.setRobotModel(worldModel.robot(0))
+            rgroup = self.addGroup(worldModel.robot(i).getName())
+            rgroup.setRobotModel(worldModel.robot(i))
         for i in xrange(worldModel.numRigidObjects()):
-            f = self.addFrame(worldModel.rigidObject(0).getName(),worldCoordinates=worldModel.rigidObject(0).getTransform())
-            f._data = worldModel.rigidObject(0)
+            f = self.addFrame(worldModel.rigidObject(i).getName(),worldCoordinates=worldModel.rigidObject(0).getTransform())
+            f._data = worldModel.rigidObject(i)
         for i in xrange(worldModel.numTerrains()):
-            f = self.addFrame(worldModel.terrain(0).getName(),worldCoordinates=se3.identity())
-            f._data = worldModel.terrain(0)
+            f = self.addFrame(worldModel.terrain(i).getName(),worldCoordinates=se3.identity())
+            f._data = worldModel.terrain(i)
         return
     def setRobotModel(self,robotModel):
         """Sets this group to contain all links of a robot model"""
