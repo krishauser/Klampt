@@ -239,11 +239,19 @@ class Group:
             rgroup = self.addGroup(worldModel.robot(i).getName())
             rgroup.setRobotModel(worldModel.robot(i))
         for i in xrange(worldModel.numRigidObjects()):
-            f = self.addFrame(worldModel.rigidObject(i).getName(),worldCoordinates=worldModel.rigidObject(i).getTransform())
-            f._data = worldModel.rigidObject(i)
+            try:
+                f = self.addFrame(worldModel.rigidObject(i).getName(),worldCoordinates=worldModel.rigidObject(i).getTransform())
+                f._data = worldModel.rigidObject(i)
+            except ValueError:
+                f = self.addFrame("%s[%d]"%(worldModel.rigidObject(i).getName(),i),worldCoordinates=worldModel.rigidObject(i).getTransform())
+                f._data = worldModel.rigidObject(i)
         for i in xrange(worldModel.numTerrains()):
-            f = self.addFrame(worldModel.terrain(i).getName(),worldCoordinates=se3.identity())
-            f._data = worldModel.terrain(i)
+            try:
+                f = self.addFrame(worldModel.terrain(i).getName(),worldCoordinates=se3.identity())
+                f._data = worldModel.terrain(i)
+            except ValueError:
+                f = self.addFrame("%s[%d]"%(worldModel.terrain(i).getName(),i),worldCoordinates=se3.identity())
+                f._data = worldModel.terrain(i)
         return
     def setRobotModel(self,robotModel):
         """Sets this group to contain all links of a robot model"""
