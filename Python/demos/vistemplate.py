@@ -47,7 +47,7 @@ if __name__ == "__main__":
     vis.add("ik objective",obj)
     vis.edit("some point")
     #vis.edit("some blinking transform")
-    vis.edit("coordinates:ATHLETE:ankle roll 3")
+    #vis.edit("coordinates:ATHLETE:ankle roll 3")
 
     print "Visualization items:"
     vis.listItems(indent=2)
