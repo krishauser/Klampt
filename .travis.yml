@@ -27,7 +27,7 @@ script:
   - cmake .
   - make
   - sudo make python-install
-  - python -m unittest discover tests/
+  - if [ "$TRAVIS_BRANCH" == "v0.7" ] || [ "$TRAVIS_BRANCH" == "travis" ]; then python -m unittest discover tests/ fi
 
 # safelist
 branches:
