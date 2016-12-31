@@ -239,7 +239,7 @@ class Group:
             rgroup = self.addGroup(worldModel.robot(i).getName())
             rgroup.setRobotModel(worldModel.robot(i))
         for i in xrange(worldModel.numRigidObjects()):
-            f = self.addFrame(worldModel.rigidObject(i).getName(),worldCoordinates=worldModel.rigidObject(0).getTransform())
+            f = self.addFrame(worldModel.rigidObject(i).getName(),worldCoordinates=worldModel.rigidObject(i).getTransform())
             f._data = worldModel.rigidObject(i)
         for i in xrange(worldModel.numTerrains()):
             f = self.addFrame(worldModel.terrain(i).getName(),worldCoordinates=se3.identity())
