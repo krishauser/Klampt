@@ -156,6 +156,12 @@ class IKSolver
    * Returns true if x converged.
    */
   bool solve();
+  /** Old-style: will be deprecated.  Specify # of iterations and tolerance.
+   * Tries to find a configuration that satifies all simultaneous objectives
+   * up to the desired tolerance. Returns (res,iterations) where res is true
+   * if x converged.
+   */
+  PyObject* solve(int iters,double tol);
   /// Returns the number of Newton-Raphson iterations used in the last solve() call.
   int lastSolveIters();
 

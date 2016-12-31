@@ -458,6 +458,41 @@ void IKSolver::getJacobian(std::vector<std::vector<double> >& out)
   copy(J,out);
 }
 
+PyObject* IKSolver::solve(int iters,double tol)
+{
+  static bool warned=false;
+  if(!warned) {
+    printf("IKSolver.solve(iters,tol) will be deprecated, use setMaxIters(iters)/setTolerance(tol) and solve() instead\n");
+    warned=true;
+  }
+  RobotIKFunction f(*robot.robot);
+  vector<IKGoal> goals(objectives.size());
+  for(size_t i=0;i<objectives.size();i++)
+    goals[i] = objectives[i].goal;
+  f.UseIK(goals);
+  if(activeDofs.empty()) GetDefaultIKDofs(*robot.robot,goals,f.activeDofs);
+  else f.activeDofs.mapping = activeDofs;
+
+  RobotIKSolver solver(f);
+  if(useJointLimits) {
+    if(qmin.empty())
+      solver.UseJointLimits();
+    else {
+      if(qmin.size() != robot.robot->links.size()) throw PyException("Invalid size on qmin");
+      if(qmax.size() != robot.robot->links.size()) throw PyException("Invalid size on qmax");
+      solver.UseJointLimits(Vector(qmin),Vector(qmax));
+    }
+  }
+  solver.solver.verbose = 0;
+
+  bool res = solver.Solve(tol,iters);
+  robot.robot->UpdateGeometry();
+  PyObject* tuple = PyTuple_New(2);
+  PyTuple_SetItem(tuple,0,PyBool_FromLong(res));
+  PyTuple_SetItem(tuple,1,PyInt_FromLong(iters));
+  return tuple;
+}
+
 bool IKSolver::solve()
 {
   RobotIKFunction f(*robot.robot);
