@@ -3297,15 +3297,17 @@ class IKSolver(_object):
         """
         return _robotsim.IKSolver_getJacobian(self)
 
-    def solve(self):
+    def solve(self, *args):
         """
         solve(IKSolver self) -> bool
+        solve(IKSolver self, int iters, double tol) -> PyObject *
 
+        Old-style: will be deprecated. Specify # of iterations and tolerance.
         Tries to find a configuration that satifies all simultaneous
-        objectives up to the desired tolerance. Returns true if x converged.
-
+        objectives up to the desired tolerance. Returns (res,iterations) where
+        res is true if x converged. 
         """
-        return _robotsim.IKSolver_solve(self)
+        return _robotsim.IKSolver_solve(self, *args)
 
     def lastSolveIters(self):
         """
@@ -3952,6 +3954,14 @@ class SimBody(_object):
     __swig_getmethods__ = {}
     __getattr__ = lambda self, name: _swig_getattr(self, SimBody, name)
     __repr__ = _swig_repr
+    def getID(self):
+        """
+        getID(SimBody self) -> int
+
+        Returns the object ID that this body associated with. 
+        """
+        return _robotsim.SimBody_getID(self)
+
     def enable(self, enabled=True):
         """
         enable(SimBody self, bool enabled=True)
@@ -4030,6 +4040,24 @@ class SimBody(_object):
         """
         return _robotsim.SimBody_getTransform(self)
 
+    def setObjectTransform(self, *args):
+        """
+        setObjectTransform(SimBody self, double const [9] R, double const [3] t)
+
+        Sets the body's transformation at the current simulation time step (in
+        object-native coordinates) 
+        """
+        return _robotsim.SimBody_setObjectTransform(self, *args)
+
+    def getObjectTransform(self):
+        """
+        getObjectTransform(SimBody self)
+
+        Gets the body's transformation at the current simulation time step (in
+        object-native coordinates). 
+        """
+        return _robotsim.SimBody_getObjectTransform(self)
+
     def setVelocity(self, *args):
         """
         setVelocity(SimBody self, double const [3] w, double const [3] v)
@@ -4090,6 +4118,9 @@ class SimBody(_object):
     __swig_setmethods__["sim"] = _robotsim.SimBody_sim_set
     __swig_getmethods__["sim"] = _robotsim.SimBody_sim_get
     if _newclass:sim = _swig_property(_robotsim.SimBody_sim_get, _robotsim.SimBody_sim_set)
+    __swig_setmethods__["objectID"] = _robotsim.SimBody_objectID_set
+    __swig_getmethods__["objectID"] = _robotsim.SimBody_objectID_get
+    if _newclass:objectID = _swig_property(_robotsim.SimBody_objectID_get, _robotsim.SimBody_objectID_set)
     __swig_setmethods__["geometry"] = _robotsim.SimBody_geometry_set
     __swig_getmethods__["geometry"] = _robotsim.SimBody_geometry_get
     if _newclass:geometry = _swig_property(_robotsim.SimBody_geometry_get, _robotsim.SimBody_geometry_set)
