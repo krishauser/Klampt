@@ -1531,10 +1531,9 @@ bool WorldModel::readFile(const char* fn)
       printf("Error loading robot file %s\n",fn);
       return false;
     }
-    if(gEnableCollisionInitialization) {
+    if(gEnableCollisionInitialization) 
       world.robots.back()->InitCollisions();
-      world.robots.back()->UpdateGeometry();
-    }
+    world.robots.back()->UpdateGeometry();
   }
   else if(0==strcmp(ext,"env") || 0==strcmp(ext,"tri") || 0==strcmp(ext,"pcd")) {
     if(world.LoadTerrain(fn)<0) {
@@ -1548,10 +1547,9 @@ bool WorldModel::readFile(const char* fn)
       printf("Error loading rigid object file %s\n",fn);
       return false;
     }
-    if(gEnableCollisionInitialization) {
+    if(gEnableCollisionInitialization) 
       world.rigidObjects.back()->InitCollisions();
-      world.rigidObjects.back()->UpdateGeometry();
-    }
+    world.rigidObjects.back()->UpdateGeometry();
   }
   else if(0==strcmp(ext,"xml")) {
     /*
@@ -1580,10 +1578,9 @@ bool WorldModel::readFile(const char* fn)
       printf("Error opening or parsing world file %s\n",fn);
       return false;
     }
-    if(gEnableCollisionInitialization) {
+    if(gEnableCollisionInitialization) 
       world.InitCollisions();
-      world.UpdateGeometry();
-    }
+    world.UpdateGeometry();
     return true;
   }
   else {
@@ -1776,10 +1773,9 @@ RobotModel WorldModel::loadRobot(const char* fn)
   robot.world = index;
   robot.index = oindex;
   robot.robot = world.robots.back();
-  if(gEnableCollisionInitialization) {
+  if(gEnableCollisionInitialization) 
     world.robots.back()->InitCollisions();
-    world.robots.back()->UpdateGeometry();
-  }
+  world.robots.back()->UpdateGeometry();
   return robot;
 }
 
@@ -1792,10 +1788,9 @@ RigidObjectModel WorldModel::loadRigidObject(const char* fn)
   obj.world = index;
   obj.index = oindex;
   obj.object = world.rigidObjects.back();
-  if(gEnableCollisionInitialization) {
+  if(gEnableCollisionInitialization) 
     world.rigidObjects.back()->InitCollisions();
-    world.rigidObjects.back()->UpdateGeometry();
-  }
+  world.rigidObjects.back()->UpdateGeometry();
   return obj;
 }
 
@@ -1948,7 +1943,7 @@ RobotModel RobotModelLink::robot()
   return r;
 }
 
-const char* RobotModelLink::getName()
+const char* RobotModelLink::getName() const
 {
   if(index < 0) return "";
   return robotPtr->linkNames[index].c_str();
@@ -2005,7 +2000,7 @@ void RobotModelLink::setParent(const RobotModelLink& link)
   }
 }
 
-int RobotModelLink::getID()
+int RobotModelLink::getID() const
 {
   RobotWorld& world = *worlds[this->world]->world;
   return world.RobotLinkID(robotIndex,index);
@@ -2217,7 +2212,7 @@ RobotModel RobotModelDriver::robot()
   return r;
 }
 
-const char* RobotModelDriver::getName()
+const char* RobotModelDriver::getName() const
 {
   if(index < 0) return "";
   return robotPtr->driverNames[index].c_str();
@@ -2296,7 +2291,7 @@ RobotModel::RobotModel()
   :world(-1),index(-1),robot(NULL)
 {}
 
-const char* RobotModel::getName()
+const char* RobotModel::getName() const
 {
   RobotWorld& world = *worlds[this->world]->world;
   return world.robots[index]->name.c_str();
@@ -2312,7 +2307,7 @@ void RobotModel::setName(const char* name)
 }
 
 
-int RobotModel::getID()
+int RobotModel::getID() const
 {
   RobotWorld& world = *worlds[this->world]->world;
   return world.RobotID(index);
@@ -2723,7 +2718,7 @@ RigidObjectModel::RigidObjectModel()
   :world(-1),index(-1),object(NULL)
 {}
 
-const char* RigidObjectModel::getName()
+const char* RigidObjectModel::getName() const
 {
   RobotWorld& world = *worlds[this->world]->world;
   return world.rigidObjects[index]->name.c_str();
@@ -2738,7 +2733,7 @@ void RigidObjectModel::setName(const char* name)
   world.rigidObjects[index]->name = name;
 }
 
-int RigidObjectModel::getID()
+int RigidObjectModel::getID() const
 {
   RobotWorld& world = *worlds[this->world]->world;
   return world.RigidObjectID(index);
@@ -2868,7 +2863,7 @@ TerrainModel::TerrainModel()
 {
 }
 
-const char* TerrainModel::getName()
+const char* TerrainModel::getName() const
 {
   RobotWorld& world = *worlds[this->world]->world;
   return world.terrains[index]->name.c_str();
@@ -2884,7 +2879,7 @@ void TerrainModel::setName(const char* name)
 }
 
 
-int TerrainModel::getID()
+int TerrainModel::getID() const
 {
   RobotWorld& world = *worlds[this->world]->world;
   return world.TerrainID(index);
@@ -3279,25 +3274,34 @@ SimRobotController Simulator::controller(const RobotModel& robot)
   return c;
 }
 
+int SimBody::getID() const
+{
+  return objectID;
+}
+
 void SimBody::enable(bool enabled)
 {
+  if(!body) return;
   if(!enabled) dBodyDisable(body);
   else dBodyEnable(body);
 }
 
 bool SimBody::isEnabled()
 {
+  if(!body) return false;
   return dBodyIsEnabled(body) != 0;
 }
 
 void SimBody::enableDynamics(bool enabled)
 {
+  if(!body) return;
   if(!enabled) dBodySetKinematic(body);
   else dBodySetDynamic(body);
 }
 
 bool SimBody::isDynamicsEnabled()
 {
+  if(!body) return false;
   return dBodyIsKinematic(body) == 0;
 }
 
@@ -3362,13 +3366,44 @@ void SimBody::setTransform(const double R[9],const double t[3])
 void SimBody::getTransform(double out[9],double out2[3])
 {
   //out matrix is 3x3 column major, ODE matrices are 4x4 row major
-  if(!body) return;
+  if(!body) {
+    for(int i=0;i<9;i++) out[i]=0;
+    for(int i=0;i<3;i++) out2[i]=0;
+    out[0] = out[4] = out[8] = 1.0;
+    return;
+  }
   const dReal* t=dBodyGetPosition(body);
   const dReal* R=dBodyGetRotation(body);
   for(int i=0;i<3;i++) out2[i] = t[i];
   for(int i=0;i<3;i++)
     for(int j=0;j<3;j++)
       out[i+j*3] = R[i*4+j];
+}
+
+void SimBody::setObjectTransform(const double R[9],const double t[3])
+{
+  ODEObjectID id = sim->sim->WorldToODEID(objectID);
+  if(id.IsRigidObject()) sim->sim->odesim.object(id.index)->SetTransform(RigidTransform(Matrix3(R),Vector3(t)));
+  else if(id.IsRobot()) sim->sim->odesim.robot(id.index)->SetLinkTransform(id.bodyIndex,RigidTransform(Matrix3(R),Vector3(t)));
+  else setTransform(R,t);
+}
+
+void SimBody::getObjectTransform(double out[9],double out2[3])
+{
+  ODEObjectID id = sim->sim->WorldToODEID(objectID);
+  if(id.IsRigidObject()) {
+    RigidTransform T;
+    sim->sim->odesim.object(id.index)->GetTransform(T);
+    T.R.get(out);
+    T.t.get(out2);
+  }
+  else if(id.IsRobot()) {
+    RigidTransform T;
+    sim->sim->odesim.robot(id.index)->GetLinkTransform(id.bodyIndex,T);
+    T.R.get(out);
+    T.t.get(out2);
+  }
+  else getTransform(out,out2);
 }
 
 void SimBody::setCollisionPadding(double padding)
@@ -3420,6 +3455,7 @@ SimBody Simulator::body(const RobotModelLink& link)
 {
   SimBody b;
   b.sim = this;
+  b.objectID = link.getID();
   b.body = sim->odesim.robot(link.robotIndex)->body(link.index);
   b.geometry = sim->odesim.robot(link.robotIndex)->triMesh(link.index);
   return b;
@@ -3429,6 +3465,7 @@ SimBody Simulator::body(const RigidObjectModel& object)
 {
   SimBody b;
   b.sim = this;
+  b.objectID = object.getID();
   b.body = sim->odesim.object(object.index)->body();
   b.geometry = sim->odesim.object(object.index)->triMesh();
   return b; 
@@ -3438,6 +3475,7 @@ SimBody Simulator::body(const TerrainModel& terrain)
 {
   SimBody b;
   b.sim = this;
+  b.objectID = terrain.getID();
   b.body = NULL;
   b.geometry = sim->odesim.terrainGeom(terrain.index);
   return b;

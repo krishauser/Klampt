@@ -61,9 +61,9 @@ class RobotModelLink
  public:
   RobotModelLink();
   ///Returns the ID of the robot link in its world (Note: not the same as getIndex())
-  int getID();
+  int getID() const;
   ///Returns the name of the robot link
-  const char* getName();
+  const char* getName() const;
   ///Sets the name of the robot link
   void setName(const char* name);
   ///Returns a reference to the link's robot.
@@ -146,7 +146,7 @@ class RobotModelDriver
 {
  public:
   RobotModelDriver();
-  const char* getName();
+  const char* getName() const;
   ///Returns a reference to the driver's robot.
   RobotModel robot();
   ///Currently can be "normal", "affine", "rotation", "translation", or "custom"
@@ -207,8 +207,8 @@ class RobotModel
  public:
   RobotModel();
   ///Returns the ID of the robot in its world (Note: not the same as the robot index)
-  int getID();
-  const char* getName();
+  int getID() const;
+  const char* getName() const;
   void setName(const char* name);
   ///Returns the number of links = number of DOF's.
   int numLinks();
@@ -334,8 +334,8 @@ class RigidObjectModel
 {
  public:
   RigidObjectModel();
-  int getID();
-  const char* getName();
+  int getID() const;
+  const char* getName() const;
   void setName(const char* name);
   Geometry3D geometry();
   Appearance appearance();
@@ -368,8 +368,8 @@ class TerrainModel
 {
  public:
   TerrainModel();
-  int getID();
-  const char* getName();
+  int getID() const;
+  const char* getName() const;
   void setName(const char* name);
   Geometry3D geometry();
   Appearance appearance();

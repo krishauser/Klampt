@@ -743,6 +743,13 @@ Tries to find a configuration that satifies all simultaneous
 objectives up to the desired tolerance. Returns true if x converged.
 ";
 
+%feature("docstring")  IKSolver::solve "
+
+Old-style: will be deprecated. Specify # of iterations and tolerance.
+Tries to find a configuration that satifies all simultaneous
+objectives up to the desired tolerance. Returns (res,iterations) where
+res is true if x converged. ";
+
 %feature("docstring")  IKSolver::lastSolveIters "
 
 Returns the number of Newton-Raphson iterations used in the last
@@ -1626,6 +1633,10 @@ RobotModelLink or RigidObjectModel.
 
 C++ includes: robotsim.h ";
 
+%feature("docstring")  SimBody::getID "
+
+Returns the object ID that this body associated with. ";
+
 %feature("docstring")  SimBody::enable "
 
 Sets the simulation of this body on/off. ";
@@ -1667,6 +1678,16 @@ center-of-mass centered coordinates). ";
 
 Gets the body's transformation at the current simulation time step (in
 center-of-mass centered coordinates). ";
+
+%feature("docstring")  SimBody::setObjectTransform "
+
+Sets the body's transformation at the current simulation time step (in
+object-native coordinates) ";
+
+%feature("docstring")  SimBody::getObjectTransform "
+
+Gets the body's transformation at the current simulation time step (in
+object-native coordinates). ";
 
 %feature("docstring")  SimBody::setVelocity "
 

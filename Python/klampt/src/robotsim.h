@@ -216,6 +216,8 @@ class SimRobotController
 class SimBody
 {
  public:
+  /// Returns the object ID that this body associated with
+  int getID() const;
   /// Sets the simulation of this body on/off
   void enable(bool enabled=true);
   /// Returns true if this body is being simulated
@@ -244,6 +246,13 @@ class SimBody
   /// simulation time step (in center-of-mass centered coordinates).
   void getTransform(double out[9],double out2[3]);
 
+  /// Sets the body's transformation at the current
+  /// simulation time step (in object-native coordinates)
+  void setObjectTransform(const double R[9],const double t[3]);
+  /// Gets the body's transformation at the current
+  /// simulation time step (in object-native coordinates).
+  void getObjectTransform(double out[9],double out2[3]);
+
   /// Sets the angular velocity and translational velocity at the current
   /// simulation time step.
   void setVelocity(const double w[3],const double v[3]);
@@ -264,6 +273,7 @@ class SimBody
   void setSurface(const ContactParameters& params);
 
   Simulator* sim;
+  int objectID;
   ODEGeometry* geometry;
   dBodyID body;
 };
