@@ -256,6 +256,7 @@ class QtBackend:
 
     def initialize(self,program_name):
         if self.app == None:
+            QCoreApplication.setAttribute(Qt.AA_X11InitThreads)
             self.app = QtGui.QApplication([program_name])
 
     def createWindow(self,name,parent=None):
