@@ -21,19 +21,19 @@
      <display color="0.2 0.2 0.2"/>
   </terrain>
 
-  <rigidObject name="srimug" file="objects/srimugsmooth.obj"  position="0.4 0.1 0.75" rotateZ="-0.5">
+  <rigidObject name="srimug1" file="objects/srimugsmooth.obj"  position="0.4 0.1 0.75" rotateZ="-0.5">
      <graspGenerator type="GraspIt" file="solution2.txt" />
   </rigidObject> 
-  <rigidObject name="srimug" file="objects/srimugsmooth.obj"  position="0.55 0.1 0.75" rotateZ="-0.5">
+  <rigidObject name="srimug2" file="objects/srimugsmooth.obj"  position="0.55 0.1 0.75" rotateZ="-0.5">
      <graspGenerator type="GraspIt" file="solution2.txt" />
   </rigidObject> 
-  <rigidObject name="srimug2" file="objects/srimugsmooth.obj"  position="0.7 0.1 0.75" rotateZ="0.1">
+  <rigidObject name="srimug3" file="objects/srimugsmooth.obj"  position="0.7 0.1 0.75" rotateZ="0.1">
      <graspGenerator type="GraspIt" file="solution2.txt" />
   </rigidObject> 
-  <rigidObject name="srimug2" file="objects/srimugsmooth.obj"  position="0.85 0.1 0.75" rotateZ="1.0">
+  <rigidObject name="srimug4" file="objects/srimugsmooth.obj"  position="0.85 0.1 0.75" rotateZ="1.0">
      <graspGenerator type="GraspIt" file="solution2.txt" />
   </rigidObject> 
-  <rigidObject name="srimug2" file="objects/srimugsmooth.obj"  position="1.0 0.1 0.75" rotateZ="2.6">
+  <rigidObject name="srimug5" file="objects/srimugsmooth.obj"  position="1.0 0.1 0.75" rotateZ="2.6">
      <graspGenerator type="GraspIt" file="solution2.txt" />
   </rigidObject> 
   <target position="-0.4 0 0.3" />
