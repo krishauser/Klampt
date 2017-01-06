@@ -446,8 +446,10 @@ void DriverTorqueSensor::SimulateKinematic(Robot& robot,RobotWorld& world)
   if(!indices.empty()) {
     //only read a subset
     Vector tread(t.n,Zero);
-    for(size_t i=0;i<indices.size();i++)
+    for(size_t i=0;i<indices.size();i++) {
+      assert(indices[i] < t.n && indices[i] >= 0);
       tread(indices[i]) = t(indices[i]);
+    }
     swap(tread,t);
   }
 }
@@ -472,8 +474,10 @@ void DriverTorqueSensor::Simulate(ControlledRobotSimulator* robot,WorldSimulatio
   if(!indices.empty()) {
     //only read a subset
     Vector tread(t.n,Zero);
-    for(size_t i=0;i<indices.size();i++)
+    for(size_t i=0;i<indices.size();i++) {
+      assert(indices[i] < t.n && indices[i] >= 0);
       tread(indices[i]) = t(indices[i]);
+    }
     swap(tread,t);
   }
 }
