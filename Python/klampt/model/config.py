@@ -27,7 +27,9 @@ def components(item):
         res += [components(g) for g in item.subgroups.itervalues()]
         return res
     elif hasattr(item,'__iter__'):
-        return sum([components(v) for v in item],[])
+        if all(isinstance(v,(bool,int,float,str)) for v in item):
+            return item
+        return [components(v) for v in item]
     return [item]
 
 def numConfigParams(item):
