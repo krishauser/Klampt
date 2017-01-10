@@ -29,6 +29,8 @@ script:
   - sudo make python-install
   - make test
 
+after_failure: "cat Testing/Temporary/LastTest.log"
+
 # safelist
 branches:
   only:
