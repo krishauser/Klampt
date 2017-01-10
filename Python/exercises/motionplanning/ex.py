@@ -2,9 +2,9 @@ from OpenGL.GL import *
 from OpenGL.GLU import *
 from OpenGL.GLUT import *
 import math
-from klampt.cspace import CSpace,MotionPlan
-from klampt.glprogram import GLProgram
-from klampt import vectorops
+from klampt.plan.cspace import CSpace,MotionPlan
+from klampt.vis.glprogram import GLProgram
+from klampt.math import vectorops
 
 problem = "1"
 #problem = "2"
@@ -182,14 +182,14 @@ class CSpaceObstacleProgram(GLProgram):
                 self.planner.planMore(1)
                 self.path = self.planner.getPath()
                 self.G = self.planner.getRoadmap()
-                glutPostRedisplay()
+                self.refresh()
         elif key=='p':
             if self.optimizingPlanner or not self.path:
                 print "Planning 100..."
                 self.planner.planMore(100)
                 self.path = self.planner.getPath()
                 self.G = self.planner.getRoadmap()
-                glutPostRedisplay()
+                self.refresh()
        
     def display(self):
         glMatrixMode(GL_PROJECTION)
@@ -205,7 +205,6 @@ class CSpaceObstacleProgram(GLProgram):
             glColor3f(0,1,0)
             glBegin(GL_LINE_STRIP)
             for q in self.path:
-                print q
                 glVertex2f(q[0],q[1])
             glEnd()
             for q in self.path:
@@ -249,6 +248,6 @@ if __name__=='__main__':
         goal=(0.9,0.9,6.20)
     program = CSpaceObstacleProgram(space,start,goal)
     program.name = "Lab 5"
-    program.width = program.height = 640
+    program.view.w = program.view.h = 640
     program.run()
     
