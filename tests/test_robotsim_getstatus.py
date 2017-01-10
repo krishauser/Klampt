@@ -61,7 +61,7 @@ class robotsimTest(unittest.TestCase):
         ct = sphere.getTransform()
         sphere.setTransform(ct[0], [0, 0, 0.0263])
         sim = SimpleSimulator(self.world)
-        sim.simulate(0.1)
+        sim.simulate(0.109)
 
         self.assertEqual(Simulator.STATUS_ADAPTIVE_TIME_STEPPING, sim.getStatus())
 
