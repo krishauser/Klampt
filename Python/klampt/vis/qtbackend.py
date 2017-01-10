@@ -135,6 +135,7 @@ class QtGLWindow(QGLWidget):
             traceback.print_exc()
             exit(-1)
     def resizeGL(self,w,h): 
+        (self.width,self.height) = (w,h)
         self.program.reshapefunc(w,h)
         return
     def paintGL(self):

@@ -73,7 +73,7 @@ class GLUTWindow:
             return safefunc
 
         # set window callbacks
-        glutReshapeFunc (glutsafe(plugin.reshapefunc))
+        glutReshapeFunc (glutsafe(self._reshapefunc))
         glutKeyboardFunc (glutsafe(plugin.keyboardfunc,update_modifiers=True))
         glutKeyboardUpFunc (glutsafe(plugin.keyboardupfunc,update_modifiers=True))
         glutSpecialFunc (glutsafe(self._specialfunc,update_modifiers=True))

@@ -427,7 +427,7 @@ class GLPluginProgram(GLRealtimeProgram):
     def idle(self):
         anyhandled = False
         for plugin in self.plugins:
-            if plugin.idle():
+            if hasattr(plugin,'idle') and plugin.idle():
                 anyhandled = True
         if not anyhandled:
             return False
@@ -438,7 +438,9 @@ class GLPluginProgram(GLRealtimeProgram):
             plugin.reshapefunc(w,h)
         return
     def keyboardfunc(self,c,x,y):
+        print "keyboard",c
         for plugin in self.plugins[::-1]:
+            print plugin.__class__.__name__
             if plugin.keyboardfunc(c,x,y): return True
         return GLRealtimeProgram.keyboardfunc(self,c,x,y)
     def keyboardupfunc(self,c,x,y):
