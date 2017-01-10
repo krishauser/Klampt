@@ -1271,7 +1271,7 @@ class VisualizationPlugin(glcommon.GLWidgetPlugin):
         self.labels = []
         self.t = time.time()
         self.animating = True
-        self.animationTime = 0
+        self.currentAnimationTime = 0
         self.doRefresh = False
 
     def initialize(self):
@@ -1292,7 +1292,7 @@ class VisualizationPlugin(glcommon.GLWidgetPlugin):
         for (k,v) in self.items.iteritems():
             v.widget = self
             #do animation updates
-            v.update(self.animationTime)
+            v.update(self.currentAnimationTime)
             v.swapDrawConfig()
             v.draw(world)
             v.swapDrawConfig()
@@ -1379,7 +1379,7 @@ class VisualizationPlugin(glcommon.GLWidgetPlugin):
         oldt = self.t
         self.t = time.time()
         if self.animating:
-            self.animationTime += (self.t - oldt)
+            self.currentAnimationTime += (self.t - oldt)
         _globalLock.release()
         return False
 
@@ -1449,7 +1449,7 @@ class VisualizationPlugin(glcommon.GLWidgetPlugin):
             animation = Trajectory(range(len(animation)),animation)
         item = self.getItem(name)
         item.animation = animation
-        item.animationStartTime = self.animationTime
+        item.animationStartTime = self.currentAnimationTime
         item.animationSpeed = speed
         item.animationEndBehavior = endBehavior
         item.markChanged()
@@ -1464,7 +1464,7 @@ class VisualizationPlugin(glcommon.GLWidgetPlugin):
     def stepAnimation(self,amount):
         global _globalLock
         _globalLock.acquire()
-        self.animationTime += amount
+        self.currentAnimationTime += amount
         self.refresh()
         _globalLock.release()
 
@@ -1475,9 +1475,9 @@ class VisualizationPlugin(glcommon.GLWidgetPlugin):
             return 0
         if newtime != None:
             _globalLock.acquire()
-            self.animationTime = newtime
+            self.currentAnimationTime = newtime
             _globalLock.release()
-        return self.animationTime
+        return self.currentAnimationTime
 
     def remove(self,name):
         global _globalLock
