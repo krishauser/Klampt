@@ -191,6 +191,18 @@ def stepAnimation(amount): Moves forward the animation time by the given amount
 def animationTime(newtime=None): Gets/sets the current animation time
     If newtime == None (default), this gets the animation time.
     If newtime != None, this sets a new animation time.
+
+NAMING CONVENTION:
+
+The world, if one exists, should be given the name 'world'.  Configurations and paths are drawn
+with reference to the first robot in the world.
+
+All items that refer to a name (except add) can either be given a top level item name
+(a string) or a sub-item (a sequence of strings, given a path from the root to the leaf). 
+For example, if you've added a RobotWorld under the name 'world' containing a robot called
+'myRobot', then setColor(('world','myRobot'),0,1,0) will turn the robot green.  If 'link5'
+is the robot's 5th link, then setColor(('world','myRobot','link5'),0,0,1) will turn the 5th
+link blue.
 """
 
 
@@ -335,6 +347,7 @@ def run(plugin=None):
     show()
     while shown():
       time.sleep(0.1)
+    setPlugin(None)
     kill()
 
 def dialog():
@@ -681,7 +694,7 @@ class VisAppearance:
     def drawText(self,text,point):
         """Draws the given text at the given point"""
         if self.attributes.get("text_hidden",False): return
-        self.widget.addLabel(text,point,[0,0,0])
+        self.widget.addLabel(text,point[:],[0,0,0])
 
     def update(self,t):
         """Updates the configuration, if it's being animated"""
@@ -1267,11 +1280,7 @@ class VisualizationPlugin(glcommon.GLWidgetPlugin):
         return glcommon.GLWidgetPlugin.initialize(self)
 
     def addLabel(self,text,point,color):
-        for (p,textList,pcolor) in self.labels:
-            if pcolor == color and vectorops.distance(p,point) < 0.001:
-                textList.append(text)
-                return
-        self.labels.append((point,[text],color))
+        self.labels.append((text,point,color))
 
     def display(self):
         global _globalLock
@@ -1291,12 +1300,12 @@ class VisualizationPlugin(glcommon.GLWidgetPlugin):
         #cluster label points
         pointTolerance = self.view.camera.dist*0.03
         pointHash = {}
-        for (p,textlist,color) in self.labels:
-            index = tuple([int(x/pointTolerance) for x in p])
+        for (text,point,color) in self.labels:
+            index = tuple([int(x/pointTolerance) for x in point])
             try:
-                pointHash[index][1] += [(text,color) for text in textlist]
+                pointHash[index][1].append((text,color))
             except KeyError:
-                pointHash[index] = [p,[(text,color) for text in textlist]]
+                pointHash[index] = [point,[(text,color)]]
         for (p,items) in pointHash.itervalues():
             self._drawLabelRaw(p,*zip(*items))
         _globalLock.release()
@@ -1375,14 +1384,15 @@ class VisualizationPlugin(glcommon.GLWidgetPlugin):
         return False
 
     def getItem(self,item_name):
+        if isinstance(item_name,(list,tuple)):
+            components = item_name
+            if len(components)==1: 
+                return self.getItem(components[0])
+            if components[0] not in self.items:
+                raise ValueError("Invalid top-level item specified: "+item_name)
+            return self.items[components[0]].getSubItem(components[1:])
         if item_name in self.items:
             return self.items[item_name]
-        components = item_name.split(':')
-        if len(components)<=1: 
-            raise ValueError("Invalid item specified: "+item_name)
-        if components[0] not in self.items:
-            raise ValueError("Invalid top-level item specified: "+item_name)
-        return self.items[components[0]].getSubItem(components[1:])
 
     def dirty(self,item_name='all'):
         global _globalLock
@@ -1417,8 +1427,8 @@ class VisualizationPlugin(glcommon.GLWidgetPlugin):
 
     def add(self,name,item,keepAppearance=False):
         global _globalLock
+        assert not isinstance(name,(list,tuple)),"Cannot add sub-path items"
         _globalLock.acquire()
-        assert ':' not in name,"Visualization names may not contain delimiter ':'"
         if keepAppearance and name in self.items:
             self.items[name].setItem(item)
         else:
