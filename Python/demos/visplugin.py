@@ -74,12 +74,12 @@ if __name__ == "__main__":
     #add the world to the visualizer
     vis.add("world",world)
     vis.listItems()
-    vis.setColor("world:Terrain0",1,0,0)
-    vis.setColor("world:ATHLETE:hex pitch",0.5,0.5,0.5,0.5)
+    vis.setColor(("world","Terrain0"),1,0,0)
+    vis.setColor(("world","ATHLETE","hex pitch"),0.5,0.5,0.5,0.5)
     q0 = world.robot(0).getConfig()
     q1 = q0[:]
     q1[0] += 1
-    vis.animate("world:ATHLETE",[q0,q1],speed=0.2)
+    vis.animate(("world","ATHLETE"),[q0,q1],speed=0.2)
     #run the visualizer in a separate thread
     vis.show()
     while vis.shown() and not plugin.quit:
