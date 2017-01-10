@@ -1,5 +1,6 @@
 import unittest
 from klampt.sim import *
+from klampt import vis
 
 class robotsimTest(unittest.TestCase):
 
@@ -56,14 +57,25 @@ class robotsimTest(unittest.TestCase):
         sphere = self.world.rigidObject(0)
         mass = sphere.getMass()
         mass.setMass(100)
+        mass.setInertia([100,100,100])
         sphere.setMass(mass)
+        #need to set up contact parameters so the mesh doesn't just fall through too quickly
+        cparams = sphere.getContactParameters()
+        cparams.kStiffness = 10000.0
+        cparams.kDamping = 2500.0
+        sphere.setContactParameters(cparams)
 
+        hadAdaptiveTimeStepping = False
         ct = sphere.getTransform()
         sphere.setTransform(ct[0], [0, 0, 0.0263])
         sim = SimpleSimulator(self.world)
-        sim.simulate(0.1)
+        for i in range(20):
+            sim.simulate(0.01)
+            print "CURRENT STATUS",sim.getStatus()
+            if sim.getStatus() == Simulator.STATUS_ADAPTIVE_TIME_STEPPING:
+                hadAdaptiveTimeStepping = True
 
-        self.assertEqual(Simulator.STATUS_ADAPTIVE_TIME_STEPPING, sim.getStatus())
+        self.assertEqual(hadAdaptiveTimeStepping,True)
 
     def test_getStatus_unreliable(self):
         self.world.loadTerrain('data/terrains/plane.off')
