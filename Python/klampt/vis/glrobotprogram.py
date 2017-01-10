@@ -150,10 +150,10 @@ class GLSimulationProgram(GLRealtimeProgram):
         #the current example prints out the list of objects clicked whenever
         #you right click
         if self.verbose: print "mouse",button,state,x,y
-        GLRealtimeProgram.mousefunc(self,button,state,x,y)
+        return GLRealtimeProgram.mousefunc(self,button,state,x,y)
 
     def motionfunc(self,x,y,dx,dy):
-        GLRealtimeProgram.motionfunc(self,x,y,dx,dy)
+        return GLRealtimeProgram.motionfunc(self,x,y,dx,dy)
 
     def print_help(self):
         #Put your help printouts here
@@ -191,7 +191,10 @@ class GLSimulationProgram(GLRealtimeProgram):
                 self.drawSensors = 'full'
             else:
                 self.drawSensors = False
+        else:
+            return False
         self.refresh()
+        return True
 
     def click_world(self,x,y,want_points=False):
         """Helper: returns a list of (world object, point) pairs sorted in order of

@@ -31,7 +31,7 @@ class MyGLViewer(GLSimulationProgram):
         GLSimulationProgram.mousefunc(self,button,state,x,y)
 
     def motionfunc(self,x,y,dx,dy):
-        GLSimulationProgram.motionfunc(self,x,y,dx,dy)
+        return GLSimulationProgram.motionfunc(self,x,y,dx,dy)
 
 if __name__ == "__main__":
     print "gltemplate.py: This example demonstrates how to simulate a world and read user input"

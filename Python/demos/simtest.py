@@ -77,20 +77,21 @@ class MyGLViewer(GLSimulationProgram):
                         print "Clicked, turning on force application mode with object",obj.getName()
                         self.forceApplicationMode = True
                         self.addForceSpring(obj,pt)
-                        return
+                        return True
             elif self.forceApplicationMode:
                 print "Turning off force application mode"
                 self.forceApplicationMode = False
                 self.sim.hooks.pop(-1)
-                return
-        GLRealtimeProgram.mousefunc(self,button,state,x,y)
+                return True
+        return GLRealtimeProgram.mousefunc(self,button,state,x,y)
         
     def motionfunc(self,x,y,dx,dy):
         if self.forceApplicationMode:
             self.moveForceSpring(x,y)
             self.refresh()
+            return True
         else:
-            GLRealtimeProgram.motionfunc(self,x,y,dx,dy)
+            return GLRealtimeProgram.motionfunc(self,x,y,dx,dy)
 
     def moveForceSpring(self,x,y):
         self.sim.updateWorld()
