@@ -67,8 +67,8 @@ class InterpKeyCapture(vis.GLPluginInterface):
             if traj:
                 print "Result has",len(traj.milestones),"milestones"
                 self.goalConfig = traj.milestones[-1]
-                vis.setItemConfig("world:"+world.robot(0).getName(),self.goalConfig)
-                vis.animate("world:"+world.robot(0).getName(),traj,speed=0.2,endBehavior='loop')
+                vis.setItemConfig(("world",world.robot(0).getName()),self.goalConfig)
+                vis.animate(("world",world.robot(0).getName()),traj,speed=0.2,endBehavior='loop')
                 vis.setItemConfig("ghost2",traj.milestones[-1])
                 vis.add("ee_trajectory",traj)
             self.refresh()
@@ -97,7 +97,7 @@ class BumpKeyCapture(vis.GLPluginInterface):
                 relative_xforms.append(Trel)
             bumpTraj = cartesian_trajectory.cartesian_bump(self.robot,self.traj,self.constraints,relative_xforms,ee_relative=True,closest=True)
             assert bumpTraj != None
-            vis.animate("world:"+world.robot(0).getName(),bumpTraj)
+            vis.animate(("world",world.robot(0).getName()),bumpTraj)
             self.refresh()
 
 if __name__ == "__main__":
@@ -122,7 +122,7 @@ if __name__ == "__main__":
 
     vis.add("world",world)
     vis.listItems()
-    vis.setColor("world:"+world.robot(0).getName(),1,1,0,1)
+    vis.setColor(("world",world.robot(0).getName()),1,1,0,1)
     coordinates.setRobotModel(robot)
     eenames = [robot.link(e).getName() for e in endeffectors]
     eeobjectives = []
@@ -145,7 +145,7 @@ if __name__ == "__main__":
     vis.popPlugin()
     vis.hide("ghost1")
     vis.hide("ghost2")
-    vis.animate("world:"+world.robot(0).getName(),None)
+    vis.animate(("world",world.robot(0).getName()),None)
 
     print
     print 

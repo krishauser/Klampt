@@ -1,6 +1,7 @@
 from klampt.plan import robotcspace
 from klampt.plan import cspace
 from klampt.plan import robotplanning
+from klampt.math import se3
 from klampt.vis import visualization
 from klampt.io import resource
 from klampt.model import ik
@@ -34,6 +35,7 @@ def simplify(robot):
     for i in range(robot.numLinks()):
         geom = robot.link(i).geometry()
         if geom.empty(): continue
+        geom.setCurrentTransform(*se3.identity())
         BB = geom.getBB()
         print BB[0],BB[1]
         BBgeom = GeometricPrimitive()
