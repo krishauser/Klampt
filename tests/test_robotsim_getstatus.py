@@ -26,7 +26,7 @@ class robotsimTest(unittest.TestCase):
         self.assertEqual(Simulator.STATUS_UNSTABLE, sim.getStatus(), '%f is the final velocity for the joint, should be infinite'%sim.getActualVelocity(0)[0])
 
     def test_getStatus_status_is_matching(self):
-        self.world.loadTerrain('data/terrains/plane.tri')
+        self.world.loadTerrain('data/terrains/plane.off')
         self.world.loadRobot('data/robots/pr2gripper.rob')
         self.world.loadRigidObject('data/objects/sphere_5cm.obj')
         robot = self.world.robot(0)
@@ -51,7 +51,7 @@ class robotsimTest(unittest.TestCase):
             print "Warning, test test_getStatus_status_is_matching is useless as the simulation is now stable"
 
     def test_getStatus_adaptive_time_stepping(self):
-        self.world.loadTerrain('data/terrains/plane.tri')
+        self.world.loadTerrain('data/terrains/plane.off')
         self.world.loadRigidObject('data/objects/sphere_5cm.obj')
         sphere = self.world.rigidObject(0)
         mass = sphere.getMass()
@@ -66,7 +66,7 @@ class robotsimTest(unittest.TestCase):
         self.assertEqual(Simulator.STATUS_ADAPTIVE_TIME_STEPPING, sim.getStatus())
 
     def test_getStatus_unreliable(self):
-        self.world.loadTerrain('data/terrains/plane.tri')
+        self.world.loadTerrain('data/terrains/plane.off')
         self.world.loadRigidObject('data/objects/sphere_5cm.obj')
         sphere = self.world.rigidObject(0)
         mass = sphere.getMass()
