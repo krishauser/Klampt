@@ -1,23 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <world>
   <robot name="tx90pr2" file="robots/tx90pr2.rob" />
-  <terrain file="terrains/block.tri" />
+  <terrain file="terrains/block.off" />
 <!-- The table -->
-  <terrain file="terrains/cube.tri" scale="0.8 0.8 0.03" translation="0.3 -0.275 0.615">
+  <terrain file="terrains/cube.off" scale="0.8 0.8 0.03" translation="0.3 -0.275 0.615">
      <display color="0.4 0.2 0.1"/>
   </terrain>
 
 <!-- The "trash can" box -->
-  <terrain file="terrains/cube.tri" scale="0.01 0.4 0.2" translation="-0.7 -0.2 0.01">
+  <terrain file="terrains/cube.off" scale="0.01 0.4 0.2" translation="-0.7 -0.2 0.01">
      <display color="0.2 0.2 0.2"/>
   </terrain>
-  <terrain file="terrains/cube.tri" scale="0.4 0.01 0.2" translation="-0.7 -0.2 0.01">
+  <terrain file="terrains/cube.off" scale="0.4 0.01 0.2" translation="-0.7 -0.2 0.01">
      <display color="0.2 0.2 0.2"/>
   </terrain>
-  <terrain file="terrains/cube.tri" scale="0.01 0.4 0.2" translation="-0.3 -0.2 0.01">
+  <terrain file="terrains/cube.off" scale="0.01 0.4 0.2" translation="-0.3 -0.2 0.01">
      <display color="0.2 0.2 0.2"/>
   </terrain>
-  <terrain file="terrains/cube.tri" scale="0.4 0.01 0.2" translation="-0.7 0.2 0.01">
+  <terrain file="terrains/cube.off" scale="0.4 0.01 0.2" translation="-0.7 0.2 0.01">
      <display color="0.2 0.2 0.2"/>
   </terrain>
 

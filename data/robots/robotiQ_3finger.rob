@@ -11,12 +11,12 @@ qMaxDeg   0 17 17 0
 velMaxDeg  0 90 90 0 
 accMaxDeg 0 180 180 0
 qDeg 0 0 0 0
-geometry   "RobotiQ/palm.tri"   "RobotiQ/link0.tri"    "RobotiQ/link0.tri"  "RobotiQ/link0.tri" 
+geometry   "RobotiQ/palm.off"   "RobotiQ/link0.off"    "RobotiQ/link0.off"  "RobotiQ/link0.off" 
 #noSelfCollision  1 2  2 3  2 4  3 4  1 4  
 mass       1  0.15   0.15  0.15
 automass
 
-#inertia matrix     [7300   0     -650
+#inertia m.offx     [7300   0     -650
 #                     0     8800    0
 #                    -650  0      7000]kg*mm^2
 

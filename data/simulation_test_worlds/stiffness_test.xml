@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <world>
-  <terrain file="../terrains/block.tri" />
+  <terrain file="../terrains/block.off" />
 
 
   <rigidObject name="ball_soft_1" file="../objects/sphere.obj"  position="-0.5 0 1">

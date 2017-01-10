@@ -15,7 +15,7 @@ qMinDeg    -100     -90    0    -160    -160    0    0   0
 qMaxDeg    100      90    160    160     160    0   0.991    0.991
 velMaxDeg  30      90    90    90    180       0     2.8      2.8
 accMaxDeg  60      180    180   180    240     0     5.8      5.8
-geometry   "AL5D/part5.tri" "AL5D/part4.tri" "AL5D/part3.tri" "AL5D/part2.tri" "AL5D/part1.tri" "AL5D/part1-2.tri" "AL5D/part0.tri"  "AL5D/part0-1.tri"
+geometry   "AL5D/part5.off" "AL5D/part4.off" "AL5D/part3.off" "AL5D/part2.off" "AL5D/part1.off" "AL5D/part1-2.off" "AL5D/part0.off"  "AL5D/part0-1.off"
 mass       0.2     0.2       0.2     0.2      0.1    0.1    0.02   0.02
 automass
 torqueMax  5   5     3   3     1    inf     0.5     0.5

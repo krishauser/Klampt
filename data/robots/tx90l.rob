@@ -17,7 +17,7 @@ velMaxDeg  0    400    400      430    540    475    760
 #accMaxDeg  0    800    800      800    800     800    800
 #velMaxDeg  0    200    200      215    270    235    380
 accMaxDeg  0    400    400      400    400     400    400
-geometry   "tx90l/part6.tri" "tx90l/part5.tri" "tx90l/part4.tri" "tx90l/part3.tri" "tx90l/part2.tri" "tx90l/part1.tri" "objects/sphere.tri"
+geometry   "tx90l/part6.off" "tx90l/part5.off" "tx90l/part4.off" "tx90l/part3.off" "tx90l/part2.off" "tx90l/part1.off" "objects/sphere.off"
 geomscale 1 1 1 1 1 1 0.05
 mass       20 10 10 5 5 1 0.1
 automass

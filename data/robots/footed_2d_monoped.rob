@@ -20,7 +20,7 @@ qMin -inf -inf -inf 0 0 0  \
 	-1.2 0 -2.2  
 qMax inf inf inf 6.2831853 6.2831853 6.2831853 \
 	2.3 2.8 -0.5 
-geometry   "" "" "" "" "" "../objects/centeredcube.tri" "../objects/paddle_cube.tri" "../objects/paddle_cube.tri" "../objects/flat_foot.tri"
+geometry   "" "" "" "" "" "../objects/centeredcube.off" "../objects/paddle_cube.off" "../objects/paddle_cube.off" "../objects/flat_foot.off"
 geomscale 0 0 0 0 0 0.2 0.5 0.5 1 
 mass       0 0 0 0 0 1 0.2 0.2 0.05 
 automass

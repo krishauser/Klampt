@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <world>
-  <terrain file="../terrains/plane.tri"  translation="0 0 0"/>
+  <terrain file="../terrains/plane.off"  translation="0 0 0"/>
   <robot file="../robots/tx90ball.rob">
     <sensors>
       <JointPositionSensor name="encoders" />

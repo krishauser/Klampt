@@ -1,4 +1,4 @@
-mesh "cube.tri"
+mesh "cube.off"
 geomscale 0.08 0.08 0.08
 geomtranslate -0.04 -0.04 -0.04
 T 1 0 0 0 1 0 0 0 1      0.5 0.17 0.1
