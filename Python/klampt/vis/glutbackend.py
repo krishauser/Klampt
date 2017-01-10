@@ -1,7 +1,7 @@
 from OpenGL.GL import *
 from OpenGL.GLUT import *
 import weakref
-from glcommon import GLMultiProgramInterface
+from glcommon import GLMultiViewportProgram
 
 keymap = {GLUT_KEY_F1:'f1',
     GLUT_KEY_F2:'f2',
@@ -105,10 +105,10 @@ class GLUTWindow:
             self.setPlugin(plugin)
         else:
             #create a multi-view widget
-            if isinstance(self.plugin,GLMultiProgramInterface):
+            if isinstance(self.plugin,GLMultiViewportProgram):
                 self.plugin.addPlugin(plugin)
             else:
-                multiProgram = GLMultiProgramInterface()
+                multiProgram = GLMultiViewportProgram()
                 multiProgram.window = self
                 multiProgram.addPlugin(self.plugin)
                 multiProgram.addPlugin(plugin)
