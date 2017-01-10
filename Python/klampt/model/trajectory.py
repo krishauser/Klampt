@@ -397,7 +397,7 @@ class SE3Trajectory(GeodesicTrajectory):
 	def __init__(self,times=None,milestones=None):
 		"""Constructor can take either a list of SE3 elements or
 		12-element vectors."""
-		if len(milestones) > 0 and len(milestones[0])==2:
+		if milestones is not None and len(milestones) > 0 and len(milestones[0])==2:
 			GeodesicTrajectory.__init__(self,SE3Space(),times,[m[0]+m[1] for m in milestones])
 		else:
 			GeodesicTrajectory.__init__(self,SE3Space(),times,milestones)
