@@ -1718,7 +1718,7 @@ elif _GLUTAvailable:
     print "properly."
     print ""
     
-    class GLUTHijacker(glinterface.GLPluginInterface):
+    class GLUTHijacker(GLPluginInterface):
         def __init__(self,windowinfo):
             glinterface.GLPluginInterface.__init__(self)
             self.windowinfo = windowinfo
