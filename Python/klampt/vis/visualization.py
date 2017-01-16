@@ -238,6 +238,7 @@ class WindowInfo:
         self.doRefresh = False
 
 _globalLock = RLock()
+_app = None
 _vis = None
 _frontend = GLPluginProgram()
 _window_title = "Klamp't visualizer"
@@ -1522,6 +1523,9 @@ class VisualizationPlugin(glcommon.GLWidgetPlugin):
         global _globalLock
         _globalLock.acquire()
         obj = self.getItem(name)
+        if obj == None:
+          _globalLock.release()
+          raise ValueError("Object "+name+" does not exist in visualization")
         if doedit:
             obj.make_editor()
             if obj.editor:
@@ -1634,11 +1638,12 @@ if _PyQtAvailable:
 
     alldlgs = []
     def _run_app_thread():
-        global _thread_running,_vis,_widget,_window,_quit,_showdialog,_showwindow,_window_title
+        global _thread_running,_vis,_app,_widget,_window,_quit,_showdialog,_showwindow,_window_title
         global alldlgs
         _thread_running = True
 
-        _app = _GLBackend.initialize("Klamp't visualization")
+        if _app == None:
+            _app = _GLBackend.initialize("Klamp't visualization")
         
         #res = _app.exec_()
         res = None
@@ -1798,6 +1803,7 @@ def _kill():
     _quit = True
     while _thread_running:
         time.sleep(0.01)
+    _quit = False
 
 def _show():
     global _app,_windows,_current_window,_thread_running
