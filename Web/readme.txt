@@ -4,17 +4,12 @@ Building / Setting Up
 
 Server:
 go to /Klampt/Web/Server directory
-cmake .
 make
 
-note: you may have to edit CMakeList.txt so it can properly find QT 5.5, 
-see the hack where I set a path to /opt/..
-
 Client:
-make sure git has setup the submodules
-go to /Klampt/Web/Client directory
-git submodule init
-git submodule update
+make sure you have Bower installed via NPM
+go to /Klampt/Web/Client directory, and run:
+bower install
 
 ================================
 Running
