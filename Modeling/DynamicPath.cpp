@@ -57,7 +57,7 @@ inline bool InBounds(const Vector& x,const Vector& bmin,const Vector& bmax)
   PARABOLIC_RAMP_ASSERT(x.size()==bmin.size());
   PARABOLIC_RAMP_ASSERT(x.size()==bmax.size());
   for(size_t i=0;i<x.size();i++)
-    if(x[i] < bmin[i] || x[i] > bmax[i]) {
+    if(x[i] <= bmin[i] || x[i] >= bmax[i]) {
       printf("x[%d]=%g not in bounds [%g,%g]\n",i,x[i],bmin[i],bmax[i]);
       return false;
     }
