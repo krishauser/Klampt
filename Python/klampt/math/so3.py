@@ -77,7 +77,8 @@ def rpy(R):
     sign = lambda x: 1 if x > 0 else (-1 if x < 0 else 0)
 
     m = matrix(R)
-    b = -math.asin(m[2][0]) # m(2,0)=-sb
+    _sb = min(1.0, max(m[2][0],-1.0))
+    b = -math.asin(_sb) # m(2,0)=-sb
     cb = math.cos(b)
     if abs(cb) > 1e-7:
         ca = m[0][0]/cb   #m(0,0)=ca*cb
@@ -98,7 +99,8 @@ def rpy(R):
         #this reduces the degrees of freedom, so we can set c=0
         c = 0
         #m(0,1)=-sa
-        a = -math.asin(m[0][1]);
+        _sa = min(1.0, max(m[0][1],-1.0))
+        a = -math.asin(_sa);
         if sign(math.cos(a)) != sign(m[1][1]): #m(1,1)=ca
             a = math.pi - a;
     return c,b,a
