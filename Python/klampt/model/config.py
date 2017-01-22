@@ -29,7 +29,7 @@ def components(item):
     elif hasattr(item,'__iter__'):
         if all(isinstance(v,(bool,int,float,str)) for v in item):
             return item
-        return [components(v) for v in item]
+        return sum([components(v) for v in item],[])
     return [item]
 
 def numConfigParams(item):
@@ -115,7 +115,7 @@ def getConfig(item):
     elif isCompound(item):
         return sum([getConfig(v) for v in components(item)],[])
     elif hasattr(item,'__iter__'):
-        if isinstance(item[0],(int,float)):
+        if isinstance(item[0],(bool,int,float,str)):
             return item[:]
         else:
             return sum([getConfig(v) for v in item],[])
@@ -189,7 +189,7 @@ def setConfig(item,vector):
             setConfig(s,vector[k:k+l])
             k += l
     elif hasattr(item,'__iter__'):
-        assert isinstance(item[0],(float,int))
+        assert isinstance(item[0],(bool,float,int))
         assert len(item) == len(vector)
         for i in xrange(len(item)):
             item[i] = vector[i]
