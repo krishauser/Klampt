@@ -1288,7 +1288,6 @@ class VisualizationPlugin(glcommon.GLWidgetPlugin):
 
     def display(self):
         global _globalLock
-        t0 = time.time()
         _globalLock.acquire()
         glcommon.GLWidgetPlugin.display(self)
         self.labels = []
@@ -1314,10 +1313,6 @@ class VisualizationPlugin(glcommon.GLWidgetPlugin):
         for (p,items) in pointHash.itervalues():
             self._drawLabelRaw(p,*zip(*items))
         _globalLock.release()
-        t1 = time.time()
-        print t1
-        if t1-t0 > 0.01:
-          print "Took a long time to draw?"
 
     def display_screen(self):
         global _globalLock
@@ -1507,9 +1502,7 @@ class VisualizationPlugin(glcommon.GLWidgetPlugin):
 
     def setItemConfig(self,name,value):
         global _globalLock
-        t0 = time.time()
         _globalLock.acquire()
-        t1 = time.time()
         item = self.getItem(name)
         if isinstance(item.item,(list,tuple)):
             item.item = value
@@ -1517,10 +1510,8 @@ class VisualizationPlugin(glcommon.GLWidgetPlugin):
             config.setConfig(item.item,value)
         if item.editor:
             item.update_editor(item_to_editor = True)
-        t2 = time.time()
         self.doRefresh = True
         _globalLock.release()
-        t3 = time.time()
 
     def hideLabel(self,name,hidden=True):
         global _globalLock
