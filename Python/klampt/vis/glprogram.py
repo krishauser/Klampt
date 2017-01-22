@@ -370,7 +370,7 @@ class GLRealtimeProgram(GLNavigationProgram):
         tcur = time.time()
         tsleep = self.dt - (tcur - self.lasttime)
         if (tsleep > 0):
-            time.sleep(tsleep)
+            self.idlesleep(tsleep)
         
         self.ttotal += self.dt
         self.counter += 1
