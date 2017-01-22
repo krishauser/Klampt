@@ -206,7 +206,7 @@ class QtGLWindow(QGLWidget):
         else:
             self.idleTimer.stop()
             if duration!=float('inf'):
-                QTimer.singleShot(duration*1000,lambda x:self.idleTimer.start(0));
+                QTimer.singleShot(duration*1000,lambda:self.idleTimer.start(0));
 
     def close(self):
         """Call close() after this widget should be closed down, to stop
