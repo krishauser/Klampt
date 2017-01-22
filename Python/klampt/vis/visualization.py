@@ -150,7 +150,9 @@ def customUI(make_func): launches a user-defined UI window by calling make_func(
 
 
 The following VisualizationPlugin methods are also added to the klampt.vis namespace
-and operate on the default plugin:
+and operate on the default plugin.  If you are calling these methods from an external
+loop (as opposed to inside a plugin) be sure to lock/unlock the visualization before/after
+calling these methods.
 
 def add(name,item,keepAppearance=False): adds an item to the visualization.
     name is a unique identifier.  If an item with the same name already exists,
@@ -684,6 +686,7 @@ class VisAppearance:
         for (k,a) in self.subAppearances.iteritems():
             a.markChanged()
         self.update_editor(True)
+        self.doRefresh = True
 
     def destroy(self):
         for c in self.displayCache:
@@ -1285,6 +1288,7 @@ class VisualizationPlugin(glcommon.GLWidgetPlugin):
 
     def display(self):
         global _globalLock
+        t0 = time.time()
         _globalLock.acquire()
         glcommon.GLWidgetPlugin.display(self)
         self.labels = []
@@ -1310,6 +1314,10 @@ class VisualizationPlugin(glcommon.GLWidgetPlugin):
         for (p,items) in pointHash.itervalues():
             self._drawLabelRaw(p,*zip(*items))
         _globalLock.release()
+        t1 = time.time()
+        print t1
+        if t1-t0 > 0.01:
+          print "Took a long time to draw?"
 
     def display_screen(self):
         global _globalLock
@@ -1466,7 +1474,7 @@ class VisualizationPlugin(glcommon.GLWidgetPlugin):
         global _globalLock
         _globalLock.acquire()
         self.currentAnimationTime += amount
-        self.refresh()
+        self.doRefresh = True
         _globalLock.release()
 
     def animationTime(self,newtime=None):
@@ -1487,7 +1495,7 @@ class VisualizationPlugin(glcommon.GLWidgetPlugin):
         item = self.getItem(name)
         item.destroy()
         del self.items[name]
-        self.refresh()
+        self.doRefresh = True
         _globalLock.release()
 
     def getItemConfig(self,name):
@@ -1499,7 +1507,9 @@ class VisualizationPlugin(glcommon.GLWidgetPlugin):
 
     def setItemConfig(self,name,value):
         global _globalLock
+        t0 = time.time()
         _globalLock.acquire()
+        t1 = time.time()
         item = self.getItem(name)
         if isinstance(item.item,(list,tuple)):
             item.item = value
@@ -1507,8 +1517,10 @@ class VisualizationPlugin(glcommon.GLWidgetPlugin):
             config.setConfig(item.item,value)
         if item.editor:
             item.update_editor(item_to_editor = True)
-        self.refresh()
+        t2 = time.time()
+        self.doRefresh = True
         _globalLock.release()
+        t3 = time.time()
 
     def hideLabel(self,name,hidden=True):
         global _globalLock
@@ -1516,7 +1528,7 @@ class VisualizationPlugin(glcommon.GLWidgetPlugin):
         item = self.getItem(name)
         item.attributes["text_hidden"] = hidden
         item.markChanged()
-        self.refresh()
+        self.doRefresh = True
         _globalLock.release()
 
     def edit(self,name,doedit=True):
@@ -1534,7 +1546,7 @@ class VisualizationPlugin(glcommon.GLWidgetPlugin):
             if obj.editor:
                 self.klamptwidgetmaster.remove(obj.editor)
                 obj.remove_editor()
-        self.refresh()
+        self.doRefresh = True
         _globalLock.release()
 
     def widgetchangefunc(self,edit):
@@ -1546,6 +1558,7 @@ class VisualizationPlugin(glcommon.GLWidgetPlugin):
         global _globalLock
         _globalLock.acquire()
         self.getItem(name).hidden = hidden
+        self.doRefresh = True
         _globalLock.release()
 
     def setAppearance(self,name,appearance):
@@ -1555,6 +1568,7 @@ class VisualizationPlugin(glcommon.GLWidgetPlugin):
         item.useDefaultAppearance = False
         item.customAppearance = appearance
         item.markChanged()
+        self.doRefresh = True
         _globalLock.release()
 
     def setAttribute(self,name,attr,value):
@@ -1565,6 +1579,7 @@ class VisualizationPlugin(glcommon.GLWidgetPlugin):
         if value==None:
             del item.attributes[attr]
         item.markChanged()
+        self.doRefresh = True
         _globalLock.release()
 
     def revertAppearance(self,name):
@@ -1573,6 +1588,7 @@ class VisualizationPlugin(glcommon.GLWidgetPlugin):
         item = self.getItem(name)
         item.useDefaultApperance = True
         item.markChanged()
+        self.doRefresh = True
         _globalLock.release()
 
     def setColor(self,name,r,g,b,a=1.0):
@@ -1582,6 +1598,7 @@ class VisualizationPlugin(glcommon.GLWidgetPlugin):
         item.attributes["color"] = [r,g,b,a]
         item.useDefaultAppearance = False
         item.markChanged()
+        self.doRefresh = True
         _globalLock.release()
 
 
