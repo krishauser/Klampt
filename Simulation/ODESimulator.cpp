@@ -1818,7 +1818,9 @@ bool ODESimulator::InstabilityCorrection()
       objects[i]->SetVelocity(w*scale,v*scale);
     }
     for(size_t i=0;i<robots.size();i++) {
-      Vector dq;
+      Vector q,dq;
+      robots[i]->GetConfig(q);
+      robots[i]->robot.UpdateConfig(q);
       robots[i]->GetVelocities(dq);
       robots[i]->SetVelocities(dq*scale);
     }
