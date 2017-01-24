@@ -41,8 +41,11 @@ def triangle(a,b,c,lighting=True,filled=True):
     otherwise, it is drawn as a wireframe."""
     if lighting:
         n = vectorops.cross(vectorops.sub(b,a),vectorops.sub(c,a))
-        n = vectorops.mul(n,1.0/vectorops.norm(n))
-        glNormal3f(*n)
+        try:
+            n = vectorops.mul(n,1.0/vectorops.norm(n))
+            glNormal3f(*n)
+        except ZeroDivisionError:
+            pass
     if filled:
         glBegin(GL_TRIANGLES)
     else:
