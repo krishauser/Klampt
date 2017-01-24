@@ -626,6 +626,7 @@ void ODERobot::SetVelocities(const Config& dq)
     cout<<"ODERobot::SetVelocities: Error, Get/SetVelocities don't match"<<endl;
     cout<<"dq = "<<dq<<endl;
     cout<<"from GetVelocities = "<<temp<<endl;
+    cout<<"did you remember to set the robot's configuration?"<<endl;
   }
   Assert(temp.isEqual(dq,1e-4));
 }
