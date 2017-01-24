@@ -535,75 +535,6 @@ def setColor(name,r,g,b,a=1.0):
 
 
 
-class CachedGLObject:
-    """An object whose drawing is accelerated by means of a display list.
-    The draw function may draw the object in the local frame, and the
-    object may be transformed without having to recompile the display list.
-    """
-    def __init__(self):
-        self.name = ""
-        #OpenGL display list
-        self.glDisplayList = None
-        #marker for recursive calls
-        self.makingDisplayList = False
-        #parameters for display lists
-        self.displayListParameters = None
-        #dirty bit to indicate whether the display list should be recompiled
-        self.changed = False
-
-    def destroy(self):
-        """Must be called to free up resources used by this object"""
-        if self.glDisplayList != None:
-            glDeleteLists(self.glDisplayList,1)
-            self.glDisplayList = None
-
-    def markChanged(self):
-        """Marked by an outside source to indicate the object has changed and
-        should be redrawn."""
-        self.changed = True
-    
-    def draw(self,renderFunction,transform=None,parameters=None):
-        """Given the function that actually makes OpenGL calls, this
-        will draw the object.
-
-        If parameters is given, the object's local appearance is assumed
-        to be defined deterministically from these parameters.  The display
-        list will be redrawn if the parameters change.
-        """
-        if self.makingDisplayList:
-            renderFunction()
-            return
-        if self.glDisplayList == None or self.changed or parameters != self.displayListParameters:
-            self.displayListParameters = parameters
-            self.changed = False
-            if self.glDisplayList == None:
-                #print "Generating new display list",self.name
-                self.glDisplayList = glGenLists(1)
-            #print "Compiling display list",self.name
-            if transform:
-                glPushMatrix()
-                glMultMatrixf(sum(zip(*se3.homogeneous(transform)),()))
-            
-            glNewList(self.glDisplayList,GL_COMPILE_AND_EXECUTE)
-            self.makingDisplayList = True
-            try:
-                renderFunction()
-            except GLError:
-                import traceback
-                print "Error encountered during draw"
-                traceback.print_exc()
-            self.makingDisplayList = False
-            glEndList()
-
-            if transform:
-                glPopMatrix()
-        else:
-            if transform:
-                glPushMatrix()
-                glMultMatrixf(sum(zip(*se3.homogeneous(transform)),()))
-            glCallList(self.glDisplayList)
-            if transform:
-                glPopMatrix()
 
 def objectToVisType(item,world):
     itypes = types.objectToTypes(item,world)
@@ -644,7 +575,7 @@ class VisAppearance:
         #used for visual editing of certain items
         self.editor = None
         #cached drawing
-        self.displayCache = [CachedGLObject()]
+        self.displayCache = [glcommon.CachedGLObject()]
         self.displayCache[0].name = name
         #temporary configuration of the item
         self.drawConfig = None
@@ -1034,7 +965,7 @@ class VisAppearance:
                     link = robot.link(item.link())
                     dest = robot.link(item.destLink()) if item.destLink()>=0 else None
                     while len(self.displayCache) < 3:
-                        self.displayCache.append(CachedGLObject())
+                        self.displayCache.append(glcommon.CachedGLObject())
                     self.displayCache[1].name = self.name+" target position"
                     self.displayCache[2].name = self.name+" curve"
                     if item.numPosDims() != 0:
@@ -1614,6 +1545,7 @@ if _PyQtAvailable:
             widget.setSizePolicy(QSizePolicy(QSizePolicy.Maximum,QSizePolicy.Maximum))
 
             self.description = QLabel("Press OK to continue")
+            self.description.setSizePolicy(QSizePolicy(QSizePolicy.Preferred,QSizePolicy.Fixed))
             self.layout = QVBoxLayout(self)
             self.layout.addWidget(widget)
             self.layout.addWidget(self.description)

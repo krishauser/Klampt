@@ -1,6 +1,7 @@
 from glinterface import GLPluginInterface
 from glprogram import GLProgram,GLPluginProgram
 import math
+from OpenGL.GL import *
 
 class GLWidgetPlugin(GLPluginInterface):
     """A GL plugin that sends user events to one or more Klamp't widgets.
@@ -292,3 +293,83 @@ class GLMultiViewportProgram(GLProgram):
             return self.window.viewport()
         else:
             return self.views[self.activeView].viewport()
+
+
+class CachedGLObject:
+    """An object whose drawing is accelerated by means of a display list.
+    The draw function may draw the object in the local frame, and the
+    object may be transformed without having to recompile the display list.
+    """
+    def __init__(self):
+        self.name = ""
+        #OpenGL display list
+        self.glDisplayList = None
+        #marker for recursive calls
+        self.makingDisplayList = False
+        #parameters for render function
+        self.displayListRenderArgs = None
+        #other parameters for display lists
+        self.displayListParameters = None
+        #dirty bit to indicate whether the display list should be recompiled
+        self.changed = False
+
+    def __del__(self):
+        self.destroy()
+
+    def destroy(self):
+        """Must be called to free up resources used by this object"""
+        if self.glDisplayList != None:
+            glDeleteLists(self.glDisplayList,1)
+            self.glDisplayList = None
+
+    def markChanged(self):
+        """Marked by an outside source to indicate the object has changed and
+        should be redrawn."""
+        self.changed = True
+    
+    def draw(self,renderFunction,transform=None,args=None,parameters=None):
+        """Given the function that actually makes OpenGL calls, this
+        will draw the object.
+
+        If parameters is given, the object's local appearance is assumed
+        to be defined deterministically from these parameters.  The display
+        list will be redrawn if the parameters change.
+        """
+        from ..math import se3
+        if args == None:
+            args = ()
+        if self.makingDisplayList:
+            renderFunction(*args)
+            return
+        if self.glDisplayList == None or self.changed or parameters != self.displayListParameters or args != self.displayListRenderArgs:
+            self.displayListRenderArgs = args
+            self.displayListParameters = parameters
+            self.changed = False
+            if self.glDisplayList == None:
+                #print "Generating new display list",self.name
+                self.glDisplayList = glGenLists(1)
+            #print "Compiling display list",self.name
+            if transform:
+                glPushMatrix()
+                glMultMatrixf(sum(zip(*se3.homogeneous(transform)),()))
+            
+            glNewList(self.glDisplayList,GL_COMPILE_AND_EXECUTE)
+            self.makingDisplayList = True
+            try:
+                renderFunction(*args)
+            except GLError:
+                import traceback
+                print "Error encountered during draw"
+                traceback.print_exc()
+            self.makingDisplayList = False
+            glEndList()
+
+            if transform:
+                glPopMatrix()
+        else:
+            if transform:
+                glPushMatrix()
+                glMultMatrixf(sum(zip(*se3.homogeneous(transform)),()))
+            glCallList(self.glDisplayList)
+            if transform:
+                glPopMatrix()
