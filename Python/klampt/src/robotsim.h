@@ -416,4 +416,8 @@ class Simulator
   std::string initialState;
 };
 
+///Cleans up all internal data structures.  Useful for multithreaded programs to make sure ODE errors
+///aren't thrown on exit.  This is called for you on exit when importing the Python klampt module.
+void destroy();
+
 #endif

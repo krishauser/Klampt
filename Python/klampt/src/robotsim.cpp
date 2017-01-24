@@ -106,6 +106,10 @@ int createWorld(RobotWorld* ptr=NULL)
 
 void derefWorld(int index)
 {
+  if(worlds.empty()) {
+    //may have already cleared module...
+    return;
+  }
   if(index < 0 || index >= (int)worlds.size())
     throw PyException("Invalid world index");
   if(!worlds[index])
@@ -150,6 +154,10 @@ int createSim()
 
 void destroySim(int index)
 {
+  if(worlds.empty()) {
+    //may have already cleared module...
+    return;
+  }
   if(index < 0 || index >= (int)sims.size())
     throw PyException("Invalid sim index");
   if(!sims[index])
@@ -201,7 +209,18 @@ void refWidget(int index)
   //printf("Ref widget %d: count %d\n",index,widgets[index].refCount);
 }
 
-
+//cleans up internal data structures
+void destroy()
+{
+  for(size_t i=0;i<sims.size();i++)
+    sims[i] = NULL;
+  for(size_t i=0;i<worlds.size();i++)
+    worlds[i] = NULL;
+  simDeleteList.clear();
+  worldDeleteList.clear();
+  sims.resize(0);
+  worlds.resize(0);
+}
 
 
 /***************************  GEOMETRY CODE ***************************************/

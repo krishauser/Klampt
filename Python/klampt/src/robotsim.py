@@ -4496,6 +4496,14 @@ Simulator_swigregister = _robotsim.Simulator_swigregister
 Simulator_swigregister(Simulator)
 
 
+def destroy():
+  """
+    destroy()
+
+    destroys internal data structures 
+    """
+  return _robotsim.destroy()
+
 def setFrictionConeApproximationEdges(*args):
   """setFrictionConeApproximationEdges(int numEdges)"""
   return _robotsim.setFrictionConeApproximationEdges(*args)

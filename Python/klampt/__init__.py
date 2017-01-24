@@ -1,4 +1,6 @@
 from robotsim import *
+import atexit
+atexit.register(destroy)
 
 __all__ = ['WorldModel','RobotModel','RobotModelLink','RigidObjectModel','TerrainModel','Mass','ContactParameters',
            'SimRobotController','SimBody','Simulator',

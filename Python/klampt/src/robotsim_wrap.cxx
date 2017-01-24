@@ -46776,6 +46776,30 @@ SWIGINTERN PyObject *Simulator_swigregister(PyObject *SWIGUNUSEDPARM(self), PyOb
   return SWIG_Py_Void();
 }
 
+SWIGINTERN PyObject *_wrap_destroy(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  
+  if (!PyArg_ParseTuple(args,(char *)":destroy")) SWIG_fail;
+  {
+    try {
+      destroy();
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_setFrictionConeApproximationEdges(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   int arg1 ;
@@ -50612,6 +50636,11 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"Simulator_initialState_set", _wrap_Simulator_initialState_set, METH_VARARGS, (char *)"Simulator_initialState_set(Simulator self, std::string const & initialState)"},
 	 { (char *)"Simulator_initialState_get", _wrap_Simulator_initialState_get, METH_VARARGS, (char *)"Simulator_initialState_get(Simulator self) -> std::string const &"},
 	 { (char *)"Simulator_swigregister", Simulator_swigregister, METH_VARARGS, NULL},
+	 { (char *)"destroy", _wrap_destroy, METH_VARARGS, (char *)"\n"
+		"destroy()\n"
+		"\n"
+		"destroys internal data structures \n"
+		""},
 	 { (char *)"setFrictionConeApproximationEdges", _wrap_setFrictionConeApproximationEdges, METH_VARARGS, (char *)"setFrictionConeApproximationEdges(int numEdges)"},
 	 { (char *)"forceClosure", _wrap_forceClosure, METH_VARARGS, (char *)"\n"
 		"forceClosure(doubleMatrix contacts) -> bool\n"
