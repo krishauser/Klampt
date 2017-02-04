@@ -3605,6 +3605,20 @@ void SimRobotSensor::getMeasurements(std::vector<double>& out)
   sensor->GetMeasurements(out);
 }
 
+std::string SimRobotSensor::getSetting(const std::string& name)
+{
+  if(!sensor) return std::string();
+  std::string val;
+  if(!sensor->GetSetting(name,val)) throw PyException("Setting "+name+" not supported");
+  return val;
+}
+
+void SimRobotSensor::setSetting(const std::string& name,const std::string& val)
+{
+  if(!sensor) return;
+  if(!sensor->SetSetting(name,val)) throw PyException("Setting "+name+" not supported or value not formatted correctly");
+}
+
 void SimRobotSensor::drawGL()
 {
   vector<double> measurements;

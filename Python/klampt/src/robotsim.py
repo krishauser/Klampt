@@ -3543,17 +3543,6 @@ class SimRobotSensor(_object):
     A sensor on a simulated robot. Retreive this from the controller, and
     use getMeasurements to get the currently simulated measurement vector.
 
-    name() returns the sensor's name
-
-    type() gives you a string defining the sensor type.
-
-    measurementNames() gives you a list of names for the measurements.
-
-    drawGL() draws a sensor indicator using OpenGL
-
-    drawGL(measurements) draws a sensor indicator and its measurements
-    using OpenGL.
-
     Sensors are automatically updated through the sim.simulate call, and
     getMeasurements() retrieves the previously updated values. As a
     result, you may get garbage measurements before the first sim.simulate
@@ -3573,6 +3562,10 @@ class SimRobotSensor(_object):
     (ContactSensor and ForceTorqueSensor) return 0's in kinematic
     simulation.
 
+    To use get/setSetting, you will need to know the sensor attribute
+    names and types as described in Klampt/Control/*Sensor.h (same as in
+    the world or sensor XML file).
+
     C++ includes: robotsim.h 
     """
     __swig_setmethods__ = {}
@@ -3586,25 +3579,62 @@ class SimRobotSensor(_object):
         try: self.this.append(this)
         except: self.this = this
     def name(self):
-        """name(SimRobotSensor self) -> std::string"""
+        """
+        name(SimRobotSensor self) -> std::string
+
+        Returns the name of the sensor. 
+        """
         return _robotsim.SimRobotSensor_name(self)
 
     def type(self):
-        """type(SimRobotSensor self) -> std::string"""
+        """
+        type(SimRobotSensor self) -> std::string
+
+        Returns the type of the sensor. 
+        """
         return _robotsim.SimRobotSensor_type(self)
 
     def measurementNames(self):
-        """measurementNames(SimRobotSensor self) -> stringVector"""
+        """
+        measurementNames(SimRobotSensor self) -> stringVector
+
+        Returns a list of names for the measurements (one per measurement). 
+        """
         return _robotsim.SimRobotSensor_measurementNames(self)
 
     def getMeasurements(self):
-        """getMeasurements(SimRobotSensor self)"""
+        """
+        getMeasurements(SimRobotSensor self)
+
+        Returns a list of measurements from the previous simulation (or
+        kinematicSimulate) timestep. 
+        """
         return _robotsim.SimRobotSensor_getMeasurements(self)
+
+    def getSetting(self, *args):
+        """
+        getSetting(SimRobotSensor self, std::string const & name) -> std::string
+
+        Returns the value of the named setting (you will need to manually
+        parse this) 
+        """
+        return _robotsim.SimRobotSensor_getSetting(self, *args)
+
+    def setSetting(self, *args):
+        """
+        setSetting(SimRobotSensor self, std::string const & name, std::string const & val)
+
+        Sets the value of the named setting (you will need to manually cast an
+        int/float/etc to a str) 
+        """
+        return _robotsim.SimRobotSensor_setSetting(self, *args)
 
     def drawGL(self, *args):
         """
         drawGL(SimRobotSensor self)
         drawGL(SimRobotSensor self, doubleVector measurements)
+
+        Draws a sensor indicator and its measurements using OpenGL. 
         """
         return _robotsim.SimRobotSensor_drawGL(self, *args)
 
@@ -4499,6 +4529,8 @@ Simulator_swigregister(Simulator)
 def destroy():
   """
     destroy()
+
+    destroys internal data structures
 
     destroys internal data structures 
     """

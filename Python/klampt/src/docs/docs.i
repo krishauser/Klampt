@@ -1921,17 +1921,6 @@ Gets the PID gains for the PID controller. ";
 A sensor on a simulated robot. Retreive this from the controller, and
 use getMeasurements to get the currently simulated measurement vector.
 
-name() returns the sensor's name
-
-type() gives you a string defining the sensor type.
-
-measurementNames() gives you a list of names for the measurements.
-
-drawGL() draws a sensor indicator using OpenGL
-
-drawGL(measurements) draws a sensor indicator and its measurements
-using OpenGL.
-
 Sensors are automatically updated through the sim.simulate call, and
 getMeasurements() retrieves the previously updated values. As a
 result, you may get garbage measurements before the first sim.simulate
@@ -1951,21 +1940,48 @@ and TimeDelayedSensor also work. The force-related sensors
 (ContactSensor and ForceTorqueSensor) return 0's in kinematic
 simulation.
 
+To use get/setSetting, you will need to know the sensor attribute
+names and types as described in Klampt/Control/*Sensor.h (same as in
+the world or sensor XML file).
+
 C++ includes: robotsim.h ";
 
 %feature("docstring")  SimRobotSensor::SimRobotSensor "";
 
-%feature("docstring")  SimRobotSensor::name "";
+%feature("docstring")  SimRobotSensor::name "
 
-%feature("docstring")  SimRobotSensor::type "";
+Returns the name of the sensor. ";
 
-%feature("docstring")  SimRobotSensor::measurementNames "";
+%feature("docstring")  SimRobotSensor::type "
 
-%feature("docstring")  SimRobotSensor::getMeasurements "";
+Returns the type of the sensor. ";
 
-%feature("docstring")  SimRobotSensor::drawGL "";
+%feature("docstring")  SimRobotSensor::measurementNames "
 
-%feature("docstring")  SimRobotSensor::drawGL "";
+Returns a list of names for the measurements (one per measurement). ";
+
+%feature("docstring")  SimRobotSensor::getMeasurements "
+
+Returns a list of measurements from the previous simulation (or
+kinematicSimulate) timestep. ";
+
+%feature("docstring")  SimRobotSensor::getSetting "
+
+Returns the value of the named setting (you will need to manually
+parse this) ";
+
+%feature("docstring")  SimRobotSensor::setSetting "
+
+Sets the value of the named setting (you will need to manually cast an
+int/float/etc to a str) ";
+
+%feature("docstring")  SimRobotSensor::drawGL "
+
+Draws a sensor indicator using OpenGL. ";
+
+%feature("docstring")  SimRobotSensor::drawGL "
+
+Draws a sensor indicator and its measurements using OpenGL. ";
 
 %feature("docstring")  SimRobotSensor::kinematicSimulate "
 
@@ -2595,9 +2611,13 @@ a JSON string defining the termination condition (default value:
 
 %feature("docstring")  std::destroy "
 
-destroys internal data structures
+Cleans up all internal data structures. Useful for multithreaded
+programs to make sure ODE errors aren't thrown on exit. This is called
+for you on exit when importing the Python klampt module.
 
-Performs cleanup of all created spaces and planners. ";
+Performs cleanup of all created spaces and planners.
+
+destroys internal data structures ";
 
 
 // File: motionplanning_8h.xml
@@ -2683,7 +2703,9 @@ a JSON string defining the termination condition (default value:
 
 Performs cleanup of all created spaces and planners.
 
-Performs cleanup of all created spaces and planners. ";
+Performs cleanup of all created spaces and planners.
+
+destroys internal data structures ";
 
 
 // File: robotik_8cpp.xml
@@ -2731,6 +2753,16 @@ from the space of transforms that satisfies the objective. ";
 %feature("docstring")  derefWidget "";
 
 %feature("docstring")  refWidget "";
+
+%feature("docstring")  destroy "
+
+Cleans up all internal data structures. Useful for multithreaded
+programs to make sure ODE errors aren't thrown on exit. This is called
+for you on exit when importing the Python klampt module.
+
+Performs cleanup of all created spaces and planners.
+
+destroys internal data structures ";
 
 %feature("docstring")  GetManagedGeometry "";
 
@@ -2825,6 +2857,11 @@ empty. ";
 
 
 // File: robotsim_8h.xml
+%feature("docstring")  destroy "
+
+Cleans up all internal data structures. Useful for multithreaded
+programs to make sure ODE errors aren't thrown on exit. This is called
+for you on exit when importing the Python klampt module. ";
 
 
 // File: rootfind_8cpp.xml
@@ -2871,9 +2908,13 @@ Same as findRoots, but with given bounds (xmin,xmax) ";
 
 %feature("docstring")  destroy "
 
-destroys internal data structures
+Cleans up all internal data structures. Useful for multithreaded
+programs to make sure ODE errors aren't thrown on exit. This is called
+for you on exit when importing the Python klampt module.
 
-Performs cleanup of all created spaces and planners. ";
+Performs cleanup of all created spaces and planners.
+
+destroys internal data structures ";
 
 
 // File: rootfind_8h.xml
@@ -2919,6 +2960,8 @@ the number of iterations used ";
 Same as findRoots, but with given bounds (xmin,xmax) ";
 
 %feature("docstring")  destroy "
+
+destroys internal data structures
 
 destroys internal data structures ";
 

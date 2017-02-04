@@ -175,6 +175,8 @@ def destroy():
   """
     destroy()
 
+    destroys internal data structures
+
     destroys internal data structures 
     """
   return _motionplanning.destroy()

@@ -3443,6 +3443,8 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"destroy", _wrap_destroy, METH_VARARGS, (char *)"\n"
 		"destroy()\n"
 		"\n"
+		"destroys internal data structures\n"
+		"\n"
 		"destroys internal data structures \n"
 		""},
 	 { NULL, NULL, 0, NULL }

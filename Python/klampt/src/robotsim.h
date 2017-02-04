@@ -26,13 +26,6 @@ class Simulator;
 /** @brief A sensor on a simulated robot.  Retreive this from the controller,
  * and use getMeasurements to get the currently simulated measurement vector.
  *
- * - name() returns the sensor's name
- * - type() gives you a string defining the sensor type.
- * - measurementNames() gives you a list of names for the measurements.
- * - drawGL() draws a sensor indicator using OpenGL
- * - drawGL(measurements) draws a sensor indicator and its measurements
- *   using OpenGL.
- *
  * Sensors are automatically updated through the sim.simulate call, and
  * getMeasurements() retrieves the previously updated values.  As a result,
  * you may get garbage measurements before the first sim.simulate call is made.
@@ -48,16 +41,30 @@ class Simulator;
  * JointPositionSensor, JointVelocitySensor support kinematic simulation mode.
  * FilteredSensor and TimeDelayedSensor also work.  The force-related sensors 
  * (ContactSensor and ForceTorqueSensor) return 0's in kinematic simulation.
+ *
+ * To use get/setSetting, you will need to know the sensor attribute names
+ * and types as described in Klampt/Control/*Sensor.h (same as in the world or
+ * sensor XML file).
  */
 class SimRobotSensor
 {
  public:
   SimRobotSensor(Robot* robot,SensorBase* sensor);
+  ///Returns the name of the sensor
   std::string name();
+  ///Returns the type of the sensor
   std::string type();
+  ///Returns a list of names for the measurements (one per measurement).
   std::vector<std::string> measurementNames();
+  ///Returns a list of measurements from the previous simulation (or kinematicSimulate) timestep
   void getMeasurements(std::vector<double>& out);
+  ///Returns the value of the named setting (you will need to manually parse this)
+  std::string getSetting(const std::string& name);
+  ///Sets the value of the named setting (you will need to manually cast an int/float/etc to a str)
+  void setSetting(const std::string& name,const std::string& val);
+  ///Draws a sensor indicator using OpenGL
   void drawGL();
+  ///Draws a sensor indicator and its measurements using OpenGL.
   void drawGL(const std::vector<double>& measurements);
 
   ///simulates / advances the kinematic simulation

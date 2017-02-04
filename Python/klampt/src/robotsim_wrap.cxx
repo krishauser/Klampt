@@ -40677,6 +40677,121 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_SimRobotSensor_getSetting(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  SimRobotSensor *arg1 = (SimRobotSensor *) 0 ;
+  std::string *arg2 = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int res2 = SWIG_OLDOBJ ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  std::string result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:SimRobotSensor_getSetting",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_SimRobotSensor, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SimRobotSensor_getSetting" "', argument " "1"" of type '" "SimRobotSensor *""'"); 
+  }
+  arg1 = reinterpret_cast< SimRobotSensor * >(argp1);
+  {
+    std::string *ptr = (std::string *)0;
+    res2 = SWIG_AsPtr_std_string(obj1, &ptr);
+    if (!SWIG_IsOK(res2)) {
+      SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "SimRobotSensor_getSetting" "', argument " "2"" of type '" "std::string const &""'"); 
+    }
+    if (!ptr) {
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "SimRobotSensor_getSetting" "', argument " "2"" of type '" "std::string const &""'"); 
+    }
+    arg2 = ptr;
+  }
+  {
+    try {
+      result = (arg1)->getSetting((std::string const &)*arg2);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_From_std_string(static_cast< std::string >(result));
+  if (SWIG_IsNewObj(res2)) delete arg2;
+  return resultobj;
+fail:
+  if (SWIG_IsNewObj(res2)) delete arg2;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_SimRobotSensor_setSetting(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  SimRobotSensor *arg1 = (SimRobotSensor *) 0 ;
+  std::string *arg2 = 0 ;
+  std::string *arg3 = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int res2 = SWIG_OLDOBJ ;
+  int res3 = SWIG_OLDOBJ ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  PyObject * obj2 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OOO:SimRobotSensor_setSetting",&obj0,&obj1,&obj2)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_SimRobotSensor, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SimRobotSensor_setSetting" "', argument " "1"" of type '" "SimRobotSensor *""'"); 
+  }
+  arg1 = reinterpret_cast< SimRobotSensor * >(argp1);
+  {
+    std::string *ptr = (std::string *)0;
+    res2 = SWIG_AsPtr_std_string(obj1, &ptr);
+    if (!SWIG_IsOK(res2)) {
+      SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "SimRobotSensor_setSetting" "', argument " "2"" of type '" "std::string const &""'"); 
+    }
+    if (!ptr) {
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "SimRobotSensor_setSetting" "', argument " "2"" of type '" "std::string const &""'"); 
+    }
+    arg2 = ptr;
+  }
+  {
+    std::string *ptr = (std::string *)0;
+    res3 = SWIG_AsPtr_std_string(obj2, &ptr);
+    if (!SWIG_IsOK(res3)) {
+      SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "SimRobotSensor_setSetting" "', argument " "3"" of type '" "std::string const &""'"); 
+    }
+    if (!ptr) {
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "SimRobotSensor_setSetting" "', argument " "3"" of type '" "std::string const &""'"); 
+    }
+    arg3 = ptr;
+  }
+  {
+    try {
+      (arg1)->setSetting((std::string const &)*arg2,(std::string const &)*arg3);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  if (SWIG_IsNewObj(res2)) delete arg2;
+  if (SWIG_IsNewObj(res3)) delete arg3;
+  return resultobj;
+fail:
+  if (SWIG_IsNewObj(res2)) delete arg2;
+  if (SWIG_IsNewObj(res3)) delete arg3;
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_SimRobotSensor_drawGL__SWIG_0(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   SimRobotSensor *arg1 = (SimRobotSensor *) 0 ;
@@ -50091,13 +50206,44 @@ static PyMethodDef SwigMethods[] = {
 		"SampleTransform(GeneralizedIKObjective obj)\n"
 		""},
 	 { (char *)"new_SimRobotSensor", _wrap_new_SimRobotSensor, METH_VARARGS, (char *)"new_SimRobotSensor(Robot * robot, SensorBase * sensor) -> SimRobotSensor"},
-	 { (char *)"SimRobotSensor_name", _wrap_SimRobotSensor_name, METH_VARARGS, (char *)"SimRobotSensor_name(SimRobotSensor self) -> std::string"},
-	 { (char *)"SimRobotSensor_type", _wrap_SimRobotSensor_type, METH_VARARGS, (char *)"SimRobotSensor_type(SimRobotSensor self) -> std::string"},
-	 { (char *)"SimRobotSensor_measurementNames", _wrap_SimRobotSensor_measurementNames, METH_VARARGS, (char *)"SimRobotSensor_measurementNames(SimRobotSensor self) -> stringVector"},
-	 { (char *)"SimRobotSensor_getMeasurements", _wrap_SimRobotSensor_getMeasurements, METH_VARARGS, (char *)"SimRobotSensor_getMeasurements(SimRobotSensor self)"},
+	 { (char *)"SimRobotSensor_name", _wrap_SimRobotSensor_name, METH_VARARGS, (char *)"\n"
+		"SimRobotSensor_name(SimRobotSensor self) -> std::string\n"
+		"\n"
+		"Returns the name of the sensor. \n"
+		""},
+	 { (char *)"SimRobotSensor_type", _wrap_SimRobotSensor_type, METH_VARARGS, (char *)"\n"
+		"SimRobotSensor_type(SimRobotSensor self) -> std::string\n"
+		"\n"
+		"Returns the type of the sensor. \n"
+		""},
+	 { (char *)"SimRobotSensor_measurementNames", _wrap_SimRobotSensor_measurementNames, METH_VARARGS, (char *)"\n"
+		"SimRobotSensor_measurementNames(SimRobotSensor self) -> stringVector\n"
+		"\n"
+		"Returns a list of names for the measurements (one per measurement). \n"
+		""},
+	 { (char *)"SimRobotSensor_getMeasurements", _wrap_SimRobotSensor_getMeasurements, METH_VARARGS, (char *)"\n"
+		"SimRobotSensor_getMeasurements(SimRobotSensor self)\n"
+		"\n"
+		"Returns a list of measurements from the previous simulation (or\n"
+		"kinematicSimulate) timestep. \n"
+		""},
+	 { (char *)"SimRobotSensor_getSetting", _wrap_SimRobotSensor_getSetting, METH_VARARGS, (char *)"\n"
+		"SimRobotSensor_getSetting(SimRobotSensor self, std::string const & name) -> std::string\n"
+		"\n"
+		"Returns the value of the named setting (you will need to manually\n"
+		"parse this) \n"
+		""},
+	 { (char *)"SimRobotSensor_setSetting", _wrap_SimRobotSensor_setSetting, METH_VARARGS, (char *)"\n"
+		"SimRobotSensor_setSetting(SimRobotSensor self, std::string const & name, std::string const & val)\n"
+		"\n"
+		"Sets the value of the named setting (you will need to manually cast an\n"
+		"int/float/etc to a str) \n"
+		""},
 	 { (char *)"SimRobotSensor_drawGL", _wrap_SimRobotSensor_drawGL, METH_VARARGS, (char *)"\n"
 		"drawGL()\n"
 		"SimRobotSensor_drawGL(SimRobotSensor self, doubleVector measurements)\n"
+		"\n"
+		"Draws a sensor indicator and its measurements using OpenGL. \n"
 		""},
 	 { (char *)"SimRobotSensor_kinematicSimulate", _wrap_SimRobotSensor_kinematicSimulate, METH_VARARGS, (char *)"\n"
 		"SimRobotSensor_kinematicSimulate(SimRobotSensor self, WorldModel world, double dt)\n"
@@ -50638,6 +50784,8 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"Simulator_swigregister", Simulator_swigregister, METH_VARARGS, NULL},
 	 { (char *)"destroy", _wrap_destroy, METH_VARARGS, (char *)"\n"
 		"destroy()\n"
+		"\n"
+		"destroys internal data structures\n"
 		"\n"
 		"destroys internal data structures \n"
 		""},
