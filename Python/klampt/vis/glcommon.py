@@ -79,7 +79,7 @@ class GLMultiViewportProgram(GLProgram):
         self.sizePolicy = 'fit'
         self.broadcast = False
         self.defaultSizes = []
-        self.height = self.view.h
+        #self.height = self.view.h
     def initialize(self):
         if not GLProgram.initialize(self): return False
         for v in self.views:
@@ -100,6 +100,7 @@ class GLMultiViewportProgram(GLProgram):
         view.window = self
         self.defaultSizes.append((view.view.w,view.view.h))
         self.fit()
+        #print "Added a view, total",len(self.views),"size now",self.view.w,self.view.h
         return view
     def removeView(self,view):
         view.window = None
@@ -128,8 +129,8 @@ class GLMultiViewportProgram(GLProgram):
         for i,p in enumerate(self.views):
             col = i % rowlen
             row = int(i / rowlen)
-            rowheights[row] = max(self.defaultSizes[i][0],rowheights[row])
-            colwidths[col] = max(self.defaultSizes[i][1],colwidths[col])
+            rowheights[row] = max(self.defaultSizes[i][1],rowheights[row])
+            colwidths[col] = max(self.defaultSizes[i][0],colwidths[col])
         cumrowheights = [0]
         cumcolwidths = [0]
         for h in rowheights:

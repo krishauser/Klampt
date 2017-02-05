@@ -64,7 +64,7 @@ class QtGLWindow(QGLWidget):
           the window.
         - clearColor: the RGBA floating point values of the background color.
     """
-    def __init__(self,name="OpenGL window",parent=None,shared=None):
+    def __init__(self,name="OpenGL window",parent=None):
         format = QGLFormat()
         format.setRgba(True)
         format.setDoubleBuffer(True)
@@ -101,12 +101,13 @@ class QtGLWindow(QGLWidget):
         program.window = self
         if self.initialized:
             program.reshapefunc(self.width,self.height)
-            self.idleTimer.timeout.connect(lambda:self.program.idlefunc())
+            def f():
+                if self.program: self.program.idlefunc()
+            self.idleTimer.timeout.connect(f)
         else:
             self.reshape(program.view.w,program.view.h)
 
-    def setParent(self,parent=None,shared=None):
-        assert shared == None
+    def setParent(self,parent=None):
         QGLWidget.setParent(self,parent)
         
 
@@ -116,7 +117,9 @@ class QtGLWindow(QGLWidget):
         glEnable(GL_MULTISAMPLE)
         self.setMouseTracking(True)
         self.setFocusPolicy(Qt.StrongFocus)
-        self.idleTimer.timeout.connect(lambda:self.program.idlefunc())
+        def f():
+            if self.program: self.program.idlefunc()
+        self.idleTimer.timeout.connect(f)
         self.idleTimer.start(0)
         #init function
         self.program.initialize()
@@ -132,23 +135,34 @@ class QtGLWindow(QGLWidget):
             return self.initialize()
         except Exception,e:
             import traceback
+            print "QGLWidget.initializeGL: hit an exception?"
             traceback.print_exc()
             exit(-1)
     def resizeGL(self,w,h): 
+        if self.program == None:
+            print "QGLWidget.resizeGL: called after close?"
+            return
         (self.width,self.height) = (w,h)
         self.program.reshapefunc(w,h)
         return
     def paintGL(self):
+        if self.program == None:
+            print "QGLWidget.paintGL: called after close?"
+            return
         self.refreshed = False
         try:
             res = self.program.displayfunc()
         except Exception,e:
             import traceback
+            print "QGLWidget.paintGL: hit an exception?"
             traceback.print_exc()
             exit(-1)
         return
     #QWidget bindings
     def mouseMoveEvent(self,e):
+        if self.program == None:
+            print "QGLWidget.mouseMoveEvent: called after close?"
+            return
         x,y = e.pos().x(),e.pos().y()
         if self.lastx == None: dx,dy = 0,0
         else: dx, dy = x - self.lastx, y - self.lasty
@@ -213,7 +227,8 @@ class QtGLWindow(QGLWidget):
         any existing Qt callbacks."""
         #print "######### QGLWidget close ###############"
         self.idleTimer.stop()
-        self.program.window = None
+        if self.program:
+            self.program.window = None
         self.program = None
 
     def refresh(self):
@@ -247,9 +262,9 @@ class QtBackend:
     construct new windows and setProgram to set the program used in that window.
 
     IMPORTANT NOTE: only one window may be created for a given world due to OpenGL display lists
-    not being shared.  If you want to use multiple windows, then a new world should be loaded for
-    each world.  You can close down and start up a new window with the same world as long as
-    you refresh all appearances in the world.
+    not being shared between OpenGL contexts.  If you want to use multiple windows, then a new world
+    should be loaded for each world.  You can close down and start up a new window with the same world
+    as long as you refresh all appearances in the world.
     """
     def __init__(self):
         self.app = None
@@ -257,6 +272,7 @@ class QtBackend:
 
     def initialize(self,program_name):
         if self.app == None:
+            #this is needed for some X11 multithreading bug 
             QCoreApplication.setAttribute(Qt.AA_X11InitThreads)
             self.app = QtGui.QApplication([program_name])
 

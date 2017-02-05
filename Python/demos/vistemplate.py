@@ -52,7 +52,8 @@ if __name__ == "__main__":
     print "Visualization items:"
     vis.listItems(indent=2)
 
-    #run the visualizer in a separate thread
+    #run the visualizer, which runs in a separate thread
+    vis.setWindowTitle("Basic visualization test")
     vis.show()
     iteration = 0
     while vis.shown():
@@ -70,8 +71,8 @@ if __name__ == "__main__":
         time.sleep(0.01)
         iteration += 1
 
-    #Now testing ability to re-launch windows
     """
+    #Now testing ability to re-launch windows
     print "Showing again..."
     vis.show()
     while vis.shown():
@@ -79,6 +80,8 @@ if __name__ == "__main__":
     """
 
     print "Doing a dialog..."
+    vis.setWindowTitle("Dialog test")
+    print "calling dialog()"
     vis.dialog()
 
     print "Doing a split screen program..."
@@ -91,6 +94,7 @@ if __name__ == "__main__":
         secondscreen.pushPlugin(widgets)
         vis.addPlugin(secondscreen)
     #vis.setPlugin(secondscreen)
+    vis.setWindowTitle("Split screen test")
     vis.show()
     while vis.shown():
         time.sleep(0.1)
@@ -99,6 +103,7 @@ if __name__ == "__main__":
     vis.setPlugin(None)
     vis.dialog()
     print "Showing again, back to normal..."
+    vis.setWindowTitle("Basic visualization test")
     vis.show()
     while vis.shown():
         time.sleep(0.01)

@@ -477,6 +477,7 @@ if glinit._PyQtAvailable:
     class _EditDialog(QDialog):
         def __init__(self,glwidget):
             QDialog.__init__(self)
+            self.glwidget = glwidget
             glwidget.setMinimumSize(glwidget.width,glwidget.height)
             glwidget.setMaximumSize(4000,4000)
             glwidget.setSizePolicy(QSizePolicy(QSizePolicy.Maximum,QSizePolicy.Maximum))
@@ -524,11 +525,21 @@ if glinit._PyQtAvailable:
         def accept(self):
             global _my_dialog_res
             _my_dialog_res = True
-            QDialog.accept(self)
+            print "Calling GLWidget.close"
+            self.glwidget.close()
+            print "#########################################"
+            print "klampt.vis: Dialog accept"
+            print "#########################################"
+            return QDialog.accept(self)
         def reject(self):
             global _my_dialog_res
             _my_dialog_res = False
-            QDialog.reject(self)
+            print "Calling GLWidget.close"
+            self.glwidget.close()
+            print "#########################################"
+            print "klampt.vis: Dialog reject"
+            print "#########################################"
+            return QDialog.reject(self)
 
 
     def run(editorObject):
@@ -539,14 +550,15 @@ if glinit._PyQtAvailable:
         global _vis_id, _my_dialog_res, _my_dialog_retval
 
         old_vis_window = visualization.getWindow()
-        #if _vis_id == None:
-        #    _vis_id = visualization.createWindow("Resource Editor")
-        #else:
-        #    visualization.setWindow(_vis_id)
+        if _vis_id == None:
+            _vis_id = visualization.createWindow("Resource Editor")
+        else:
+            visualization.setWindow(_vis_id)
         visualization.setPlugin(editorObject)
         def makefunc(gl_backend):
             res = _EditDialog(gl_backend)
             res.setEditor(editorObject)
+            visualization._checkWindowCurrent(editorObject.world)
             return res
         visualization.customUI(makefunc)
         visualization.dialog()
@@ -557,7 +569,7 @@ if glinit._PyQtAvailable:
             print "Exiting program."
             exit(0)
 
-        #visualization.setWindow(old_vis_window)
+        visualization.setWindow(old_vis_window)
         visualization.setPlugin(None)
         visualization.customUI(None)
 
