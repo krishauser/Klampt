@@ -24,10 +24,14 @@ struct ActuatorCommand
   Real GetPIDTorque(Real q,Real dq) const;
   void IntegratePID(Real q,Real dt);
 
+  //setup
   int mode;
   bool measureAngleAbsolute;
+  Real qmin,qmax;
   Real kP,kI,kD;
+  //desired position and velocity
   Real qdes,dqdes;
+  //internal state: integral term
   Real iterm;
   Real torque;   //torque command, feedforward PID torque, or torque limit
   Real desiredVelocity;  //for locked velocity mode

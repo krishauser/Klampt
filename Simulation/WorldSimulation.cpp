@@ -261,6 +261,8 @@ void WorldSimulation::Init(RobotWorld* _world)
       //setup actuator parameters
       if(robot->drivers[j].type == RobotJointDriver::Normal) {
 	int k=robot->drivers[j].linkIndices[0];
+  command.actuators[j].qmin = robot->qMin(k);
+  command.actuators[j].qmax = robot->qMax(k);
 	if(robot->links[k].type == RobotLink3D::Revolute) {
 	  //ODE has problems with joint angles > 2pi
 	  if(robot->qMax(k)-robot->qMin(k) >= TwoPi) {
