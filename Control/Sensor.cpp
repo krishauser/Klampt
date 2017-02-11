@@ -2089,10 +2089,21 @@ void CameraSensor::SimulateKinematic(Robot& robot,RobotWorld& world)
 #if HAVE_GLEW
   if(useGLFramebuffers) {
     if(!GLEW_EXT_framebuffer_object) {
-      if (GLEW_OK != glewInit())
+      GLenum err = glewInit();
+      if (err != GLEW_OK)
       {
-        fprintf(stderr,"CameraSensor: Couldn't initialize GLEW, falling back to slow mode\n");
-        useGLFramebuffers = false;
+        glewExperimental=GL_TRUE;
+        err = glewInit(); 
+        if (GLEW_OK != err)
+        {
+          /* Problem: glewInit failed, something is seriously wrong. */
+          fprintf(stderr,"CameraSensor: Couldn't initialize GLEW, falling back to slow mode\n");
+          fprintf(stderr,"  glewInit() error: %s\n", glewGetErrorString(err));
+          fprintf(stderr,"  This usually happens when an OpenGL context has not been initialized.");
+          fprintf(stderr,"  GL version is: %s\n",glGetString(GL_VERSION));
+          useGLFramebuffers = false;
+        }
+        
       }
       if(!GLEW_EXT_framebuffer_object) {
         fprintf(stderr,"CameraSensor: GL framebuffers not supported, falling back to slow mode\n");
