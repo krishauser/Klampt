@@ -358,3 +358,16 @@ def is_rotation(R,tol=1e-5):
     if det(R) < 0: 
         return False
     return True
+
+
+def sample():
+    """Returns a uniformly distributed rotation matrix."""
+    import random
+    q = [random.gauss(0,1),random.gauss(0,1),random.gauss(0,1),random.gauss(0,1)]
+    q = vectorops.unit(q)
+    theta = math.acos(q[3])*2.0
+    if abs(theta) < 1e-8:
+        m = [0,0,0]
+    else:
+        m = vectorops.mul(vectorops.unit(q[0:3]),theta)
+    return from_moment(m)
