@@ -175,7 +175,7 @@ class map:
             elif name == 'appearance':
                 return self.obj.appearance()
         elif isinstance(self.obj,Simulator):
-            w = self.obj.getWorld()
+            w = self.obj.world
             if name == 'world':
                 return w
             elif name == 'bodies':
@@ -338,11 +338,11 @@ class _SimRobot:
     def getActualTorques(self):
         return self.sim.getActualTorques(self.index)
     def getBodies(self):
-        w = self.sim.getWorld()
+        w = self.sim.world
         r = w.robot(self.index)
         return [self.sim.getBody(r.link(j) ) for j in range(r.numLinks())]
     def getBodyNames(self):
-        w = self.sim.getWorld()
+        w = self.sim.world
         r = w.robot(self.index)
         return [r.link(j).getName() for j in range(r.numLinks())]
 
