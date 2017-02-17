@@ -328,12 +328,19 @@ ResourcePtr RobotPoseBackend::PoserToResource(const string& type)
   else if(type == "IKGoal") {
     int ind = robotWidgets[0].ikPoser.ActiveWidget();
     if(ind < 0) {
-      printf("Not hovering over any IK widget\n");
-      return NULL;
+      vector<IKGoal>& constraints = robotWidgets[0].Constraints();
+      if(constraints.size() == 0) {
+        printf("Not hovering over any IK widget\n");
+        return NULL;
+      }
+      else {
+        return MakeResource("",constraints[0]);
+      }
     }
     return MakeResource("",robotWidgets[0].ikPoser.poseGoals[ind]);
   }
   else if(type == "Stance") {
+    printf("Creating stance from IK goals and contacts from flat-ground assumption\n");
     Stance s = GetFlatStance();
     return MakeResource("",s);
   }
@@ -438,13 +445,15 @@ bool RobotPoseBackend::OnCommand(const string& cmd,const string& args)
       return true;
     }
     ResourcePtr r = PoserToResource(oldr->Type());
-    r->name = oldr->name;
-    r->fileName = oldr->fileName;
+    if(r) {
+      r->name = oldr->name;
+      r->fileName = oldr->fileName;
 
-    resources->selected->resource = r;
-    if(resources->selected->IsExpanded()) {
-      fprintf(stderr,"Warning, don't know how clearing children will be reflected in GUI\n");
-      resources->selected->ClearExpansion();
+      resources->selected->resource = r;
+      if(resources->selected->IsExpanded()) {
+        fprintf(stderr,"Warning, don't know how clearing children will be reflected in GUI\n");
+        resources->selected->ClearExpansion();
+      }
     }
   }
   else if(cmd == "resource_to_poser") {
