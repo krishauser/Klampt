@@ -18,8 +18,8 @@
 
 static const int numtoposertypes = 5;
 static const char* toposertypes [] = {"Config","IKGoal","Stance","LinearPath","MultiPath"};
-static const int numfromposertypes = 2;
-static const char* fromposertypes [] = {"Config","IKGoal"};
+static const int numfromposertypes = 3;
+static const char* fromposertypes [] = {"Config","IKGoal","Stance"};
 
 ResourceFrame::ResourceFrame(QWidget *parent) :
   QFrame(parent), //resourceTreeModel(NULL),
