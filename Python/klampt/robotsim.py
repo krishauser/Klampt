@@ -4526,6 +4526,14 @@ Simulator_swigregister = _robotsim.Simulator_swigregister
 Simulator_swigregister(Simulator)
 
 
+def setRandomSeed(*args):
+  """
+    setRandomSeed(int seed)
+
+    Sets the random seed used by the configuration sampler. 
+    """
+  return _robotsim.setRandomSeed(*args)
+
 def destroy():
   """
     destroy()
