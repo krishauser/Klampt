@@ -46891,6 +46891,39 @@ SWIGINTERN PyObject *Simulator_swigregister(PyObject *SWIGUNUSEDPARM(self), PyOb
   return SWIG_Py_Void();
 }
 
+SWIGINTERN PyObject *_wrap_setRandomSeed(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  int arg1 ;
+  int val1 ;
+  int ecode1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:setRandomSeed",&obj0)) SWIG_fail;
+  ecode1 = SWIG_AsVal_int(obj0, &val1);
+  if (!SWIG_IsOK(ecode1)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "setRandomSeed" "', argument " "1"" of type '" "int""'");
+  } 
+  arg1 = static_cast< int >(val1);
+  {
+    try {
+      setRandomSeed(arg1);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_destroy(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   
@@ -50782,6 +50815,11 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"Simulator_initialState_set", _wrap_Simulator_initialState_set, METH_VARARGS, (char *)"Simulator_initialState_set(Simulator self, std::string const & initialState)"},
 	 { (char *)"Simulator_initialState_get", _wrap_Simulator_initialState_get, METH_VARARGS, (char *)"Simulator_initialState_get(Simulator self) -> std::string const &"},
 	 { (char *)"Simulator_swigregister", Simulator_swigregister, METH_VARARGS, NULL},
+	 { (char *)"setRandomSeed", _wrap_setRandomSeed, METH_VARARGS, (char *)"\n"
+		"setRandomSeed(int seed)\n"
+		"\n"
+		"Sets the random seed used by the configuration sampler. \n"
+		""},
 	 { (char *)"destroy", _wrap_destroy, METH_VARARGS, (char *)"\n"
 		"destroy()\n"
 		"\n"

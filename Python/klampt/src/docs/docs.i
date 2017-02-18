@@ -2521,6 +2521,8 @@ casting routines are called. ";
 // File: motionplanning_8cpp.xml
 %feature("docstring")  std::setRandomSeed "
 
+Sets the random seed used by the configuration sampler.
+
 Sets the random seed used by the motion planner. ";
 
 %feature("docstring")  std::UpdateStats "";
@@ -2622,6 +2624,8 @@ destroys internal data structures ";
 
 // File: motionplanning_8h.xml
 %feature("docstring")  setRandomSeed "
+
+Sets the random seed used by the motion planner.
 
 Sets the random seed used by the motion planner. ";
 
@@ -2764,6 +2768,12 @@ Performs cleanup of all created spaces and planners.
 
 destroys internal data structures ";
 
+%feature("docstring")  setRandomSeed "
+
+Sets the random seed used by the configuration sampler.
+
+Sets the random seed used by the motion planner. ";
+
 %feature("docstring")  GetManagedGeometry "";
 
 %feature("docstring")  MakeController "";
@@ -2857,6 +2867,10 @@ empty. ";
 
 
 // File: robotsim_8h.xml
+%feature("docstring")  setRandomSeed "
+
+Sets the random seed used by the configuration sampler. ";
+
 %feature("docstring")  destroy "
 
 Cleans up all internal data structures. Useful for multithreaded

@@ -222,6 +222,11 @@ void destroy()
   worlds.resize(0);
 }
 
+void setRandomSeed(int seed)
+{
+  Math::Srand(seed);
+}
+
 
 /***************************  GEOMETRY CODE ***************************************/
 

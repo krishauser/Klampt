@@ -6676,7 +6676,7 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"setRandomSeed", _wrap_setRandomSeed, METH_VARARGS, (char *)"\n"
 		"setRandomSeed(int seed)\n"
 		"\n"
-		"Sets the random seed used by the motion planner. \n"
+		"Sets the random seed used by the configuration sampler. \n"
 		""},
 	 { (char *)"setPlanJSONString", _wrap_setPlanJSONString, METH_VARARGS, (char *)"\n"
 		"setPlanJSONString(char const * string)\n"
