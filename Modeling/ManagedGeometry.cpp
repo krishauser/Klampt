@@ -186,6 +186,16 @@ ManagedGeometry* ManagedGeometry::IsCached(const std::string& filename)
   return i->second.geoms[0];
 }
 
+bool ManagedGeometry::IsCached() const
+{
+  return !cacheKey.empty();
+}
+
+const std::string& ManagedGeometry::CachedFilename() const
+{
+  return cacheKey;
+}
+
 void ManagedGeometry::AddToCache(const std::string& filename)
 {
   if(!cacheKey.empty()) {

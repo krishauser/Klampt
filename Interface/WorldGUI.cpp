@@ -50,6 +50,10 @@ bool WorldGUIBackend::OnCommand(const string& cmd,const string& args)
     ReloadFile(args.c_str());
     return true;
   }
+  else if(cmd=="save_world") {
+    SaveWorld(args.c_str());
+    return true;
+  }
   return GLNavigationBackend::OnCommand(cmd,args);
 }
 
@@ -211,6 +215,15 @@ bool WorldGUIBackend::LoadCommandLine(int argc,const char** argv)
       continue;
     }
     world->robots[i]->UpdateConfig(temp);
+  }
+  return true;
+}
+
+bool WorldGUIBackend::SaveWorld(const char* fn,const char* elementPath)
+{
+  if(!world->SaveXML(fn,elementPath)) {
+printf("Error saving world file %s\n",fn);
+return false;
   }
   return true;
 }

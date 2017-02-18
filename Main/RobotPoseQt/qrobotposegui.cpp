@@ -128,3 +128,17 @@ void QRobotPoseGUI::LoadFilePrompt(QString directory_key,QString filter){
     LoadFile(filename);
   }
 }
+
+void QRobotPoseGUI::SaveFilePrompt(QString directory_key){
+  QFileDialog f;
+  QSettings ini(QSettings::IniFormat, QSettings::UserScope,
+    QCoreApplication::organizationName(),
+    QCoreApplication::applicationName());
+  QString openDir = ini.value(directory_key,".").toString();
+  QString filename = f.getSaveFileName(0,"Save World File",openDir,QString("*.xml"));
+  if(!filename.isEmpty()){
+      ini.setValue(directory_key,QFileInfo(filename).absolutePath());
+    string str = filename.toStdString();
+    SendCommand("save_world",str);
+  }
+}

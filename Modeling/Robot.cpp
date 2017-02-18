@@ -1353,6 +1353,11 @@ bool Robot::Save(const char* fn) {
 	}
 	file << endl << endl;
 
+	file <<"q\t";
+	for (int i = 0; i < nLinks; i++)
+		file << q[i] << " ";
+	file << endl << endl;
+
 	file << "qmin\t";
 	for (int i = 0; i < nLinks; i++)
 		file << qMin[i] << " ";

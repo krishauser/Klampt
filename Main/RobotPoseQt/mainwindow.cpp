@@ -276,6 +276,10 @@ void MainWindow::LoadFile(){
     gui->LoadFilePrompt("last_resource_location");
 }
 
+void MainWindow::SaveFile() {
+  gui->SaveFilePrompt("last_resource_location");
+}
+
 MainWindow::~MainWindow()
 {
     delete ui;

@@ -553,6 +553,7 @@
      <string>File</string>
     </property>
     <addaction name="actionOpen_File"/>
+    <addaction name="actionSave_World"/>
    </widget>
    <addaction name="menuFile"/>
   </widget>
@@ -735,6 +736,11 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+O</string>
+   </property>
+  </action>
+  <action name="actionSave_World">
+   <property name="text">
+    <string>Save World...</string>
    </property>
   </action>
  </widget>
@@ -1177,6 +1183,22 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>actionSave_World</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>SaveFile()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>482</x>
+     <y>275</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>ShowHelp()</slot>
@@ -1205,5 +1227,6 @@
   <slot>IKConstrain()</slot>
   <slot>IKDelete()</slot>
   <slot>SetSensors(bool)</slot>
+  <slot>SaveFile()</slot>
  </slots>
 </ui>
