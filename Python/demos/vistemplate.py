@@ -3,6 +3,7 @@
 import sys
 from klampt import *
 from klampt import vis
+from klampt.robotsim import setRandomSeed
 from klampt.vis.glrobotprogram import GLSimulationProgram
 from klampt.vis.glprogram import GLPluginProgram
 from klampt.vis.glcommon import GLWidgetPlugin
@@ -30,7 +31,15 @@ if __name__ == "__main__":
     #add the world to the visualizer
     vis.add("world",world)
     #add the coordinate Manager to the visualizer
-    vis.add("coordinates",coordinates.manager())
+    #vis.add("coordinates",coordinates.manager())
+    vp = vis.getViewport()
+    vp.w,vp.h = 800,800
+    vis.setViewport(vp)
+
+    #do this if you want to test the robot configuration auto-fitting
+    #setRandomSeed(int(time.time()))
+    #world.robot(0).randomizeConfig()
+    
     #test a point
     pt = [2,5,1]
     vis.add("some point",pt)
@@ -51,6 +60,8 @@ if __name__ == "__main__":
 
     print "Visualization items:"
     vis.listItems(indent=2)
+
+    vis.autoFitCamera()
 
     #run the visualizer, which runs in a separate thread
     vis.setWindowTitle("Basic visualization test")
