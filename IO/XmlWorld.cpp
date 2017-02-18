@@ -1,6 +1,7 @@
 #include "XmlWorld.h"
 #include "View/Texturizer.h"
 #include <KrisLibrary/utils/stringutils.h>
+#include <KrisLibrary/utils/fileutils.h>
 #include <fstream>
 
 ///reads a transformation matrix from attributes of an XML element
@@ -301,18 +302,15 @@ bool XmlTerrain::GetTerrain(Terrain& env)
   return true;
 }
 
-class XmlViewTerrain
+class XmlAppearance
 {
  public:
-  XmlViewTerrain(TiXmlElement* element,const string& _path) : e(element),path(_path) {}
-  bool Get(Terrain& terrain)
+  XmlAppearance(TiXmlElement* element,const string& _path) : e(element),path(_path) {}
+  bool Get(ManagedGeometry& geom)
   {
-    terrain.geometry.SetUniqueAppearance();
     Texturizer tex;
-    //checker by default
-    tex.texture = "checker";
     tex.texCoordAutoScale = false;
-    terrain.geometry.Appearance()->texWrap = true;
+    geom.Appearance()->texWrap = true;
     if(e->Attribute("color")) {
       Vector3 rgb;
       stringstream ss(e->Attribute("color"));
@@ -321,79 +319,75 @@ class XmlViewTerrain
       if(ss >> a) { }
       else a=1.0;
       tex.texture = "";
-      terrain.geometry.Appearance()->faceColor.set(rgb.x,rgb.y,rgb.z,a);
+      geom.Appearance()->faceColor.set(rgb.x,rgb.y,rgb.z,a);
+      geom.Appearance()->vertexColor.set(rgb.x,rgb.y,rgb.z,a);
     }
-    else
-      terrain.geometry.Appearance()->faceColor.set(0.8,0.6,0.2);
     if(e->Attribute("texture")) {
       tex.texture = e->Attribute("texture");
       if(0==strcmp(e->Attribute("texture"),"checker")) {
-	tex.texCoords = Texturizer::XYTexCoords;
+  tex.texCoords = Texturizer::XYTexCoords;
       }
       else if(0==strcmp(e->Attribute("texture"),"noise")) {
-	tex.texCoords = Texturizer::XYTexCoords;
+  tex.texCoords = Texturizer::XYTexCoords;
       }
       else if(0==strcmp(e->Attribute("texture"),"gradient")) {
-	tex.texCoords = Texturizer::ZTexCoord;
-	tex.texCoordAutoScale = true;
-	terrain.geometry.Appearance()->texWrap = false;
+  tex.texCoords = Texturizer::ZTexCoord;
+  tex.texCoordAutoScale = true;
+  geom.Appearance()->texWrap = false;
       }
       else if(0==strcmp(e->Attribute("texture"),"colorgradient")) {
-	tex.texCoords = Texturizer::ZTexCoord;
-	tex.texCoordAutoScale = true;
-	terrain.geometry.Appearance()->texWrap = false;
+  tex.texCoords = Texturizer::ZTexCoord;
+  tex.texCoordAutoScale = true;
+  geom.Appearance()->texWrap = false;
       }
       else {
-	tex.texture = path+string(e->Attribute("texture"));
-	tex.texCoordAutoScale = true;
+  tex.texture = path+string(e->Attribute("texture"));
+  tex.texCoordAutoScale = true;
       }
+      if(e->Attribute("texture_projection")) {
+        if(0==strcmp(e->Attribute("texture_projection"),"z")) {
+    tex.texCoords = Texturizer::ZTexCoord;
+        }
+        else if(0==strcmp(e->Attribute("texture_projection"),"xy")) {
+    tex.texCoords = Texturizer::XYTexCoords;
+        }
+        else if(0==strcmp(e->Attribute("texture_projection"),"conformal")) {
+    tex.texCoords = Texturizer::ParameterizedTexCoord;
+        }
+        else {
+    printf("Unsupported value for texture_projection: %s\n",e->Attribute("texture_projection"));
+    tex.texCoords = Texturizer::XYTexCoords;
+        }
+      }
+      tex.Set(geom);
     }
-    if(e->Attribute("texture_projection")) {
-      if(0==strcmp(e->Attribute("texture_projection"),"z")) {
-	tex.texCoords = Texturizer::ZTexCoord;
-      }
-      else if(0==strcmp(e->Attribute("texture_projection"),"xy")) {
-	tex.texCoords = Texturizer::XYTexCoords;
-      }
-      else if(0==strcmp(e->Attribute("texture_projection"),"conformal")) {
-	tex.texCoords = Texturizer::ParameterizedTexCoord;
-      }
-      else {
-	printf("Unsupported value for texture_projection: %s\n",e->Attribute("texture_projection"));
-	tex.texCoords = Texturizer::XYTexCoords;
-      }
-    }
-    tex.Set(terrain.geometry);
     return true;
+  }
+  bool Get(Terrain& terrain)
+  {
+    terrain.geometry.SetUniqueAppearance();
+    terrain.geometry.Appearance()->faceColor.set(0.8,0.6,0.2);
+    Texturizer tex;
+    //checker by default
+    tex.texture = "checker";
+    tex.texCoordAutoScale = false;
+    tex.Set(terrain.geometry);
+    Get(terrain.geometry);
   }
 
   TiXmlElement* e;
   string path;
 };
 
-
-class XmlAppearance
+void WriteAppearance(ManagedGeometry& geom,FILE* out,int indent=0)
 {
- public:
-  XmlAppearance(TiXmlElement* element) : e(element) {}
-  bool Get(ManagedGeometry& geom)
-  {
-    geom.SetUniqueAppearance();
-    if(e->Attribute("color")) {
-      Vector3 rgb;
-      stringstream ss(e->Attribute("color"));
-      ss >> rgb;
-      Real a=1.0;
-      if(ss >> a) { }
-      else a=1.0;
-      geom.Appearance()->faceColor.set(rgb.x,rgb.y,rgb.z,a);
-      geom.Appearance()->vertexColor.set(rgb.x,rgb.y,rgb.z,a);
-    }
-    return true;
-  }
-
-  TiXmlElement* e;
-};
+  float* rgba = geom.Appearance()->faceColor;
+  for(int i=0;i<indent;i++)
+    fprintf(out," ");
+  fprintf(out,"<display color=\"%f %f %f %f\"",rgba[0],rgba[1],rgba[2],rgba[3]);
+  //TODO: any other display stuff?
+  fprintf(out,"/>\n");
+}
 
 
 XmlWorld::XmlWorld()
@@ -473,7 +467,7 @@ bool XmlWorld::GetWorld(RobotWorld& world)
     TiXmlElement* d = e->FirstChildElement(display);
     if(!d) d = e->FirstChildElement(appearance);
     if(d) {
-      if(!XmlAppearance(d).Get(world.rigidObjects[i]->geometry)) {
+      if(!XmlAppearance(d,path).Get(world.rigidObjects[i]->geometry)) {
 	printf("XmlWorld: Warning, unable to load geometry appearance %s\n",sname.c_str());
       }
     }
@@ -500,7 +494,7 @@ bool XmlWorld::GetWorld(RobotWorld& world)
     TiXmlElement* d = e->FirstChildElement(display);
     if(!d) d = e->FirstChildElement(appearance);
     if(d) {
-      if(!XmlViewTerrain(d,path).Get(*world.terrains[i])) {
+      if(!XmlAppearance(d,path).Get(*world.terrains[i])) {
 	printf("XmlWorld: Warning, unable to load terrain appearance %s\n",sname.c_str());
       }
     }
@@ -524,4 +518,224 @@ TiXmlElement* XmlWorld::GetElement(const string& name,int index)
     e = e->NextSiblingElement(name);
   }
   return e;
+}
+
+string GetRelativeFilename(const std::string& filename,const std::string& path)
+{
+  //TODO: this doesn't work on windows
+  if(filename[0] == '/' && path[0] != '/') {
+    string cwd = FileUtils::GetWorkingDirectory();
+    return GetRelativeFilename(filename,cwd+"/"+path);
+  }
+  if(filename[0] != '/' && path[0] == '/') {
+    string cwd = FileUtils::GetWorkingDirectory();
+    return GetRelativeFilename(cwd+"/"+filename,path);
+  }
+  std::vector<std::string> fcomponents,pcomponents;
+
+  SplitPath(filename,fcomponents);
+  SplitPath(path,pcomponents);
+  size_t start=0;
+  for(size_t i=0;i<Min(fcomponents.size(),pcomponents.size());i++) {
+    if(fcomponents[i] != pcomponents[i]) break;
+    start=i+1;
+  }
+  //path shared from start-1 and before. The relative path starts at start
+  std::vector<std::string> res;
+  for(size_t i=start;i<pcomponents.size();i++)
+    res.push_back("..");
+  for(size_t i=start;i<fcomponents.size();i++)
+    res.push_back(fcomponents[i]);
+  return JoinPath(res);
+}
+
+const char* DefaultFileExtension(const Geometry::AnyCollisionGeometry3D& geom)
+{
+  if(geom.type == Geometry::AnyGeometry3D::Primitive)
+    return ".geom";
+  else if(geom.type == Geometry::AnyGeometry3D::TriangleMesh)
+    return ".off";
+  else if(geom.type == Geometry::AnyGeometry3D::PointCloud)
+    return ".pcd";
+  else if(geom.type == Geometry::AnyGeometry3D::ImplicitSurface)
+    return ".vol";
+  else
+    return ".unknown";
+}
+
+bool XmlWorld::Save(RobotWorld& world,const string& fn,string itempath)
+{
+  string filepath = GetFilePath(fn);
+  string filename = GetFileName(fn);
+  string relpath = itempath;
+  if(itempath.length() == 0) {
+    itempath = fn;
+    StripExtension(itempath);
+    relpath = filename;
+    StripExtension(relpath);
+    relpath = relpath + "/";
+  }
+  printf("World::Save(): Saving world item files to %s\n",itempath.c_str());
+  if(!FileUtils::IsDirectory(itempath.c_str())) {
+    if(!FileUtils::MakeDirectoryRecursive(itempath.c_str())) {
+      printf("World::Save(): could not make directory %s for world items\n",itempath.c_str());
+      return false;
+    }
+  }
+  itempath = itempath + "/";
+
+  //start saving world elements
+
+  //get unique names
+  vector<string> robotFileNames(world.robots.size());
+  vector<string> objectFileNames(world.rigidObjects.size());
+  vector<string> terrainFileNames(world.terrains.size());
+  map<string,int> names;
+  for(size_t i=0;i<world.robots.size();i++) {
+    string rfn = world.robots[i]->name + ".rob";
+    if(names.count(world.robots[i]->name) != 0) {
+      names[world.robots[i]->name] += 1;
+      char buf[32];
+      sprintf(buf,"_%d",names[world.robots[i]->name]);
+      rfn = world.robots[i]->name + buf + ".rob";
+    }
+    else names[world.robots[i]->name] = 0;
+    robotFileNames[i] = rfn;
+  }
+  names.clear();
+  for(size_t i=0;i<world.rigidObjects.size();i++) {
+    string rfn = world.rigidObjects[i]->name + ".obj";
+    if(names.count(world.rigidObjects[i]->name) != 0) {
+      names[world.rigidObjects[i]->name] += 1;
+      char buf[32];
+      sprintf(buf,"_%d",names[world.rigidObjects[i]->name]);
+      rfn = world.rigidObjects[i]->name + buf + ".obj";
+    }
+    else names[world.rigidObjects[i]->name] = 0;
+    objectFileNames[i] = rfn;
+  }
+  names.clear();
+  for(size_t i=0;i<world.terrains.size();i++) {
+    string rfn = world.terrains[i]->name + ".env";
+    if(names.count(world.terrains[i]->name) != 0) {
+      names[world.terrains[i]->name] += 1;
+      char buf[32];
+      sprintf(buf,"_%d",names[world.terrains[i]->name]);
+      rfn = world.terrains[i]->name + buf + ".env";
+    }
+    else names[world.terrains[i]->name] = 0;
+    terrainFileNames[i] = rfn;
+  }
+
+  bool geomErrors = false;
+  //first, deal with geometries and relative paths to old cached geomes
+  for(size_t i=0;i<world.robots.size();i++) {
+    for(size_t j=0;j<world.robots[i]->links.size();j++) {
+      if(world.robots[i]->geomManagers[j].Empty()) continue;
+      if(world.robots[i]->geomManagers[j].IsCached()) {
+        //modify geomFiles[j] to point to path of geomfile *relative* to where the robot will be saved
+        const string& geomfile = world.robots[i]->geomManagers[j].CachedFilename();
+        string relfile = GetRelativeFilename(geomfile,itempath);
+        world.robots[i]->geomFiles[j] = relfile;
+      }
+      else {
+        //save the geometry to the item path too
+        string geomdir = robotFileNames[i];
+        StripExtension(geomdir);
+        if(!FileUtils::IsDirectory(((relpath)+geomdir).c_str()))
+          FileUtils::MakeDirectory((relpath+geomdir).c_str());
+        world.robots[i]->geomFiles[j] = geomdir + "/" + FileUtils::SafeFileName(world.robots[i]->linkNames[j]) + DefaultFileExtension(*world.robots[i]->geomManagers[j]);
+        printf("  Saving modified geometry for link %s to %s\n",world.robots[i]->linkNames[j].c_str(),(relpath + world.robots[i]->geomFiles[j]).c_str());
+        world.robots[i]->geomManagers[j]->Save((relpath + world.robots[i]->geomFiles[j]).c_str());
+      }
+    }
+  }
+  for(size_t i=0;i<world.rigidObjects.size();i++) {
+    if(world.rigidObjects[i]->geometry.Empty()) continue;
+    if(world.rigidObjects[i]->geometry.IsCached()) {
+      //modify geomFile to point to path of geomfile *relative* to where the robot will be saved
+      const string& geomfile = world.rigidObjects[i]->geometry.CachedFilename();
+      string relfile = GetRelativeFilename(geomfile,itempath);
+      world.rigidObjects[i]->geomFile = relfile;
+    }
+    else {
+      //save the geometry to the item path too
+      string geomdir = objectFileNames[i];
+      StripExtension(geomdir);
+      if(!FileUtils::IsDirectory((relpath+geomdir).c_str()))
+        FileUtils::MakeDirectory((relpath+geomdir).c_str());
+      world.rigidObjects[i]->geomFile = geomdir + "/" + FileUtils::SafeFileName(world.rigidObjects[i]->name) + DefaultFileExtension(*world.rigidObjects[i]->geometry);
+      printf("  Saving modified geometry for rigid object %s to %s\n",world.rigidObjects[i]->name.c_str(),(relpath + world.rigidObjects[i]->geomFile).c_str());
+      world.rigidObjects[i]->geometry->Save((relpath + world.rigidObjects[i]->geomFile).c_str());
+    }
+  }
+  for(size_t i=0;i<world.terrains.size();i++) {
+    if(world.terrains[i]->geometry.Empty()) continue;
+    if(world.terrains[i]->geometry.IsCached()) {
+      //modify geomFile to point to path of geomfile *relative* to where the robot will be saved
+      const string& geomfile = world.terrains[i]->geometry.CachedFilename();
+      string relfile = GetRelativeFilename(geomfile,itempath);
+      world.terrains[i]->geomFile = relfile;
+    }
+    else {
+      //save the geometry to the item path too
+      string geomdir = terrainFileNames[i];
+      StripExtension(geomdir);
+      if(!FileUtils::IsDirectory((relpath+geomdir).c_str()))
+        FileUtils::MakeDirectory((relpath+geomdir).c_str());
+      world.terrains[i]->geomFile = geomdir + "/" + FileUtils::SafeFileName(world.terrains[i]->name) + DefaultFileExtension(*world.terrains[i]->geometry);
+      printf("  Saving modified geometry for terrain %s to %s\n",world.terrains[i]->name.c_str(),(relpath + world.terrains[i]->geomFile).c_str());
+      world.terrains[i]->geometry->Save((relpath + world.terrains[i]->geomFile).c_str());
+    }
+  }
+
+  for(size_t i=0;i<world.robots.size();i++) {
+    printf("  Saving robot to %s\n",(itempath+robotFileNames[i]).c_str());
+    if(!world.robots[i]->Save((itempath + robotFileNames[i]).c_str())) {
+      printf("  Robot saving failed.\n");
+      return false;
+    }
+  }
+  for(size_t i=0;i<world.rigidObjects.size();i++) {
+    printf("  Saving rigid object to %s\n",(itempath+objectFileNames[i]).c_str());
+    if(!world.rigidObjects[i]->Save((itempath + objectFileNames[i]).c_str())) {
+      printf("  Rigid object saving failed.\n");
+      return false;
+    }
+  }
+  for(size_t i=0;i<world.terrains.size();i++) {
+    printf("  Saving terrain to %s\n",(itempath+terrainFileNames[i]).c_str());
+    if(!world.terrains[i]->Save((itempath + terrainFileNames[i]).c_str())) {
+      printf("  Terrain saving failed.\n");
+      return false;
+    }
+  }
+  FILE* out = fopen(fn.c_str(),"w");
+  if(!out) return false;
+  fprintf(out,"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<world>\n");
+  fprintf(out,"  <display background=\"%f %f %f %f\" />\n",world.background.rgba[0],world.background.rgba[1],world.background.rgba[2],world.background.rgba[3]);
+  for(size_t i=0;i<world.robots.size();i++) {
+    fprintf(out,"  <robot name=\"%s\" file=\"%s\" />\n",world.robots[i]->name.c_str(),(relpath+robotFileNames[i]).c_str());
+  }
+  for(size_t i=0;i<world.rigidObjects.size();i++) {
+    fprintf(out,"  <rigidObject name=\"%s\" file=\"%s\" ",world.rigidObjects[i]->name.c_str(),(relpath+objectFileNames[i]).c_str());
+    if(world.rigidObjects[i]->geometry->margin != 0)
+      fprintf(out,"margin=\"%f\" ",world.rigidObjects[i]->geometry->margin);
+    fprintf(out,">\n");
+    WriteAppearance(world.rigidObjects[i]->geometry,out,4);
+    fprintf(out,"  </rigidObject>\n");
+  }
+  for(size_t i=0;i<world.terrains.size();i++) {
+    fprintf(out,"  <terrain name=\"%s\" file=\"%s\" ",world.terrains[i]->name.c_str(),(relpath+terrainFileNames[i]).c_str());
+    if(world.terrains[i]->geometry->margin != 0)
+      fprintf(out,"margin=\"%f\" ",world.terrains[i]->geometry->margin);
+    fprintf(out,">\n");
+    WriteAppearance(world.terrains[i]->geometry,out,4);
+    fprintf(out,"  </terrain>\n");
+  }
+  fprintf(out,"</world>\n");
+  fclose(out);
+  if(geomErrors)
+    printf("World::Save(): warning: geometry files may not be saved properly\n");
+  return true; 
 }
