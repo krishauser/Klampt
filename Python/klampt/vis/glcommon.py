@@ -288,13 +288,18 @@ class GLMultiViewportProgram(GLProgram):
             return self.window.click_ray(x,y)
         else:
             return self.views[self.activeView].click_ray(x,y)
-    def viewport(self):
+    def get_view(self):
         #print "Getting viewport..."
         if self.activeView == None:
-            return self.window.viewport()
+            return self.window.get_view()
         else:
-            return self.views[self.activeView].viewport()
-
+            return self.views[self.activeView].get_view()
+    def set_view(self,vp):
+        #print "Getting viewport..."
+        if self.activeView == None:
+            return self.window.get_view(vp)
+        else:
+            return self.views[self.activeView].get_view(vp)
 
 class CachedGLObject:
     """An object whose drawing is accelerated by means of a display list.

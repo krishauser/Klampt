@@ -46,7 +46,7 @@ class free:
         Rz = so3.rotation([0.,0.,1.],self.rot[2])
         R = so3.mul(Ry,so3.mul(Rx,Rz))
         R = so3.mul(o,R);
-        raise (R,so3.apply(o,self.pos))
+        raise (R,vectorops.mul(so3.apply(R,self.pos),-1.0))
 
 class target:
     """A look-at camera that is controlled using a translation,
@@ -99,5 +99,5 @@ class orbit:
         R = so3.mul(Ry,so3.mul(Rx,Rz))
         R = so3.mul(o,R);
 
-        t = so3.apply(R,self.tgt)
+        t = vectorops.mul(so3.apply(R,self.tgt),-1.0)
         return (R,vectorops.madd(t,[0.,0.,1.],-self.dist))

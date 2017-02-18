@@ -326,7 +326,7 @@ class GLNavigationProgram(GLProgram):
                 aspect = float(self.view.w)/self.view.h
                 rfov = self.view.fov*math.pi/180.0
                 scale = 2.0*math.tan(rfov*0.5/aspect)*aspect
-                delta = so3.apply(so3.inv(R),[scale*float(dx)*self.view.camera.dist/self.view.w,-scale*float(dy)*self.view.camera.dist/self.view.w,0])
+                delta = so3.apply(so3.inv(R),[-scale*float(dx)*self.view.camera.dist/self.view.w,scale*float(dy)*self.view.camera.dist/self.view.w,0])
                 self.view.camera.tgt = vectorops.add(self.view.camera.tgt,delta)
             elif 'shift' in self.modifiers():
                 self.view.camera.dist *= math.exp(dy*0.01)

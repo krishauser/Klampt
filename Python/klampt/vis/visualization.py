@@ -129,7 +129,10 @@ def setWindow(id): sets the active window for all subsequent calls.  ID 0 is
 def getWindow(): gets the active window ID.
 def setWindowTitle(title): sets the title of the visualization window.
 def getWindowTitle(): returns the title of the visualization window
-def setPlugin(plugin=None): sets the current plugin
+def setPlugin(plugin=None): sets the current plugin (a GLPluginInterface instance).  Set
+    plugin=None if you want to use the default visualization.
+def addPlugin(plugin): adds a second OpenGL viewport governed by the given plugin (a
+    GLPluginInterface instance).
 def run([plugin]): pops up a dialog and then kills the program afterwards.
 def kill(): kills all previously launched visualizations.  Afterwards, you may not
     be able to start new windows. Call this to cleanly quit.
@@ -147,7 +150,7 @@ def customUI(make_func): launches a user-defined UI window by calling make_func(
     in the visualization thread.  This can be used to build custom editors and windows that
     are compatible with other visualization functionality.  Here gl_backend is an instance of
     _GLBackend instantiated for the current plugin.
-
+def getViewport(): Returns the currently active viewport.
 
 The following VisualizationPlugin methods are also added to the klampt.vis namespace
 and operate on the default plugin.  If you are calling these methods from an external
@@ -193,6 +196,12 @@ def stepAnimation(amount): Moves forward the animation time by the given amount
 def animationTime(newtime=None): Gets/sets the current animation time
     If newtime == None (default), this gets the animation time.
     If newtime != None, this sets a new animation time.
+def autoFitCamera(scale=1.0): Automatically fits the camera to all objects in the
+    visualization.  A scale > 1 magnifies the camera zoom.
+
+Utility function:
+def autoFitViewport(viewport,objects): Automatically fits the viewport's camera to 
+    see all the given objects.
 
 NAMING CONVENTION:
 
@@ -292,7 +301,7 @@ def setWindow(id):
     #refresh all worlds' display lists
     for w in _current_worlds:
         if w not in _windows[id].active_worlds:
-            print "vis.setWindow(): world",w,"becoming active in a different window"
+            print "klampt.vis.setWindow(): world",w,"becoming active in a different window"
             _refreshDisplayLists(w)
     _windows[id].active_worlds = _current_worlds[:]
     _current_window = id
@@ -341,6 +350,7 @@ def pushPlugin(plugin):
     _globalLock.release()
 
 def popPlugin():
+    """Reverses a prior pushPlugin() call"""
     global _frontend
     _globalLock.acquire()
     _frontend.popPlugin()
@@ -348,6 +358,8 @@ def popPlugin():
     _globalLock.release()
 
 def addPlugin(plugin):
+    """Adds a second OpenGL viewport in the same window, governed by the given plugin (a
+    glinterface.GLPluginInterface instance)."""
     global _frontend
     _globalLock.acquire()
     #create a multi-view widget
@@ -370,8 +382,9 @@ def addPlugin(plugin):
 
 
 def run(plugin=None):
-    """A blocking call to start a single window.  If plugin == None,
-    the default visualization is used.  Otherwise, the plugin is used."""
+    """A blocking call to start a single window and then kill the visualization
+    when closed.  If plugin == None, the default visualization is used. 
+    Otherwise, plugin is a glinterface.GLPluginInterface object, and it is used."""
     setPlugin(plugin)
     show()
     while shown():
@@ -380,6 +393,8 @@ def run(plugin=None):
     kill()
 
 def dialog():
+    """A blocking call to start a single dialog window with the current plugin.  It is
+    closed by pressing OK or closing the window."""
     _dialog()
 
 def setWindowTitle(title):
@@ -392,13 +407,16 @@ def getWindowTitle():
     return _window_title
 
 def kill():
+    """This should be called at the end of the calling program to cleanly terminate the
+    visualization thread"""
     global _vis,_globalLock
     if _vis==None:
-        print "Visualization disabled"
+        print "vis.kill() Visualization disabled"
         return
     _kill()
 
 def show(hidden=False):
+    """Shows or hides the current window"""
     _globalLock.acquire()
     if hidden:
         _hide()
@@ -407,12 +425,13 @@ def show(hidden=False):
     _globalLock.release()
 
 def spin(duration):
+    """Spin-shows a window for a certain duration or until the window is closed."""
     show()
     t = 0
     while t < duration:
         if not shown(): break
-        time.sleep(min(0.1,duration-t))
-        t += 0.1
+        time.sleep(min(0.04,duration-t))
+        t += 0.04
     return
 
 def lock():
@@ -427,6 +446,7 @@ def unlock():
     _globalLock.release()
 
 def shown():
+    """Returns true if a visualization window is currently shown."""
     global _globalLock,_thread_running,_current_window
     _globalLock.acquire()
     res = (_thread_running and _current_window != None and _windows[_current_window].mode in ['shown','dialog'])
@@ -434,11 +454,16 @@ def shown():
     return res
 
 def customUI(func):
-  global _globalLock
-  _globalLock.acquire()
-  _set_custom_ui(func)
-  _globalLock.release()
+    global _globalLock
+    _globalLock.acquire()
+    _set_custom_ui(func)
+    _globalLock.release()
 
+def getViewport():
+    return _frontend.get_view()
+
+def setViewport(viewport):
+    _frontend.set_view(viewport)
 
 
 
@@ -559,6 +584,138 @@ def setColor(name,r,g,b,a=1.0):
         return
     _vis.setColor(name,r,g,b,a)
 
+def _getOffsets(object):
+    if isinstance(object,WorldModel):
+        res = []
+        for i in range(object.numRobots()):
+            res += _getOffsets(object.robots(i))
+        for i in range(object.numRigidObjects()):
+            res += _getOffsets(object.rigidObject(i))
+        return res
+    elif isinstance(object,RobotModel):
+        q = object.getConfig()
+        object.setConfig([0.0]*len(q))
+        worig = [object.link(i).getTransform()[1] for i in range(object.numLinks())]
+        object.setConfig(q)
+        wnew = [object.link(i).getTransform()[1] for i in range(object.numLinks())]
+        return [vectorops.sub(b,a) for a,b in zip(worig,wnew)]
+    elif isinstance(object,RigidObjectModel):
+        return [object.getTransform()[1]]
+    elif isinstance(object,Geometry3D):
+        return object.getCurrentTransform()[1]
+    elif isinstance(object,VisAppearance):
+        if len(object.subAppearances) == 0:
+            bb = object.getBounds()
+            if bb != None and not aabb_empty(bb):
+                return [vectorops.mul(vectorops.add(bb[0],bb[1]),0.5)]
+        else:
+            res = []
+            for a in object.subAppearances.itervalues():
+                res += _getOffsets(a)
+            return res
+    return []
+
+def _getBounds(object):
+    if isinstance(object,WorldModel):
+        res = []
+        for i in range(object.numRobots()):
+            res += _getBounds(object.robots(i))
+        for i in range(object.numRigidObjects()):
+            res += _getBounds(object.rigidObject(i))
+        return res
+    elif isinstance(object,RobotModel):
+        return sum([object.link(i).geometry().getBB() for i in range(object.numLinks())],[])
+    elif isinstance(object,RigidObjectModel):
+        return object.geometry().getAABB()
+    elif isinstance(object,Geometry3D):
+        return object.getAABB()
+    elif isinstance(object,VisAppearance):
+        if len(object.subAppearances) == 0:
+            if isinstance(object.item,TerrainModel):
+                return []
+            bb = object.getBounds()
+            if bb != None and not aabb_empty(bb):
+                return list(bb)
+        else:
+            res = []
+            for a in object.subAppearances.itervalues():
+                res += _getBounds(a)
+            return res
+    return []
+
+def _fitPlane(pts):
+    import numpy as np
+    if len(pts) < 3:
+        raise ValueError("Point set is degenerate")
+    centroid = vectorops.div(vectorops.add(*pts),len(pts))
+    A = np.array([vectorops.sub(pt,centroid) for pt in pts])
+    U,S,V = np.linalg.svd(A,full_matrices=False)
+    imin = 0
+    smin = S[0]
+    zeros = []
+    for i in xrange(len(S)):
+        if abs(S[i]) < 1e-6:
+            zeros.append(i)
+        if abs(S[i]) < smin:
+            smin = S[i]
+            imin = i
+    if len(zeros) > 1:
+        raise ValueError("Point set is degenerate")
+    assert V.shape == (3,3)
+    #normal is the corresponding row of U
+    normal = V[imin,:]
+    return centroid,normal.tolist()
+
+def autoFitViewport(viewport,objects): 
+    ofs = sum([_getOffsets(o) for o in objects],[])
+    pts = sum([_getBounds(o) for o in objects],[])
+    bb = aabb_create(*pts)
+    center = vectorops.mul(vectorops.add(bb[0],bb[1]),0.5)
+    #print "Bounding box",bb,"center",center
+    #raw_input()
+    #print "Fitting viewport to points",ofs
+    if len(ofs) == 0:
+        return
+    #fit a plane to these points
+    try:
+        centroid,normal = _fitPlane(ofs)
+        if normal[2] > 0:
+            normal = vectorops.mul(normal,-1)
+        z,x,y = so3.matrix(so3.inv(so3.canonical(normal)))
+        #print z,x,y
+        #raw_input()
+        radius = max([abs(vectorops.dot(x,vectorops.sub(center,pt))) for pt in pts] + [abs(vectorops.dot(y,vectorops.sub(center,pt)))*viewport.w/viewport.h for pt in pts])
+        zmin = min([vectorops.dot(z,vectorops.sub(center,pt)) for pt in pts])
+        zmax = max([vectorops.dot(z,vectorops.sub(center,pt)) for pt in pts])
+        #print "Viewing direction",normal,"at point",center,"with scene size",radius
+        #orient camera to point along normal direction
+        viewport.camera.tgt = center
+        viewport.camera.dist = 1.2*radius / math.tan(math.radians(viewport.fov*0.5))
+        near,far = viewport.clippingplanes
+        if viewport.camera.dist + zmin < near:
+            near = max((viewport.camera.dist + zmin)*0.5, radius*0.1)
+        if viewport.camera.dist + zmax > far:
+            far = max((viewport.camera.dist + zmax)*1.5, radius*3)
+        viewport.clippingplanes = (near,far)
+        roll = 0
+        yaw = math.atan2(normal[0],normal[1])
+        pitch = math.atan2(-normal[2],vectorops.norm(normal[0:2]))
+        #print "Roll pitch and yaw",roll,pitch,yaw
+        #print "Distance",viewport.camera.dist
+        viewport.camera.rot = [roll,pitch,yaw]
+    except Exception as e:
+        print "Exception occurred during fitting to points"
+        print ofs
+        print pts
+        raise
+        return
+
+def autoFitCamera(scale=1):
+    global _vis
+    if _vis==None:
+        return
+    print "klampt.vis: auto-fitting camera to scene."
+    _vis.autoFitCamera(scale)
 
 
 
@@ -584,6 +741,26 @@ def objectToVisType(item,world):
             return
         return validtypes[0]
     return itypes
+
+def aabb_create(*ptlist):
+    if len(ptlist) == 0:
+        return [float('inf')]*3,[float('-inf')]*3
+    else:
+        bmin,bmax = list(ptlist[0]),list(ptlist[0])
+        for i in xrange(1,len(ptlist)):
+            x = ptlist[i]
+            bmin = [min(a,b) for (a,b) in zip(bmin,x)]
+            bmax = [max(a,b) for (a,b) in zip(bmax,x)]
+        return bmin,bmax
+
+def aabb_expand(bb,bb2):
+    bmin = [min(a,b) for a,b in zip(bb[0],bb2[0])]
+    bmax = [max(a,b) for a,b in zip(bb[1],bb2[1])]
+    return (bmin,bmax)
+
+def aabb_empty(bb):
+    return any((a > b) for (a,b) in zip(bb[0],bb[1]))
+
 
 class VisAppearance:
     def __init__(self,item,name = None):
@@ -1116,6 +1293,37 @@ class VisAppearance:
         if not self.useDefaultAppearance and hasattr(item,'appearance'):
             item.appearance().set(self.oldAppearance)
 
+    def getBounds(self):
+        """Returns a bounding box (bmin,bmax) or None if it can't be found"""
+        if len(self.subAppearances)!=0:
+            bb = aabb_create()
+            for n,app in self.subAppearances.iteritems():
+                bb = aabb_expand(bb,app.getBounds())
+            return bb
+        item = self.item
+        if isinstance(item,coordinates.Point):
+            return [item.worldCoordinates(),item.worldCoordinates()]
+        elif isinstance(item,coordinates.Direction):
+            T = item.frame().worldCoordinates()
+            d = item.localCoordinates()
+            L = self.attributes.get("length",0.1)
+            return aabb_create(T[1],se3.apply(T,vectorops.mul(d,L)))
+        elif isinstance(item,coordinates.Frame):
+            T = item.worldCoordinates()
+            L = self.attributes.get("length",0.1)
+            return aabb_create(T[1],se3.apply(T,(L,0,0)),se3.apply(T,(0,L,0)),se3.apply(T,(0,0,L)))
+        elif isinstance(item,ContactPoint):
+            L = self.attributes.get("length",0.05)
+            return aabb_create(item.x,vectorops.madd(item.x,item.n,L))
+        elif hasattr(item,'geometry'):
+            return item.geometry().getBB()
+        elif hasattr(item,'__iter__') and len(item) == 3:
+            #assumed to be a point
+            return (item,item)
+        else:
+            print "Empty bound for object",self.name
+        return aabb_create()
+
     def getSubItem(self,path):
         if len(path) == 0: return self
         for k,v in self.subAppearances.iteritems():
@@ -1551,6 +1759,16 @@ class VisualizationPlugin(glcommon.GLWidgetPlugin):
         self.doRefresh = True
         _globalLock.release()
 
+    def autoFitCamera(self,scale=1.0):
+        vp = None
+        if self.window == None:
+            global _frontend
+            vp = _frontend.get_view()
+        else:
+            vp = self.window.get_view()
+        autoFitViewport(vp,self.items.values())
+        vp.camera.dist /= scale
+
 
 
 _vis = VisualizationPlugin() 
@@ -1621,10 +1839,8 @@ if _PyQtAvailable:
             print "#########################################"
             _globalLock.release()
 
-    alldlgs = []
     def _run_app_thread():
-        global _thread_running,_vis,_widget,_window,_quit,_showdialog,_showwindow,_window_title
-        global alldlgs
+        global _thread_running,_vis,_widget,_window,_quit,_showdialog,_showwindow,_window_title,_globalLock
         _thread_running = True
 
         _GLBackend.initialize("Klamp't visualization")
@@ -1886,8 +2102,8 @@ def _checkWindowCurrent(item):
                     w.active_worlds.remove(item)
             _current_worlds.append(item)
             print "klampt.vis: world added to the visualization's world (items:",_current_worlds,")"
-        else:
-          print "klampt.vis: world",item,"is already in the visualization's world"
+        #else:
+        #    print "klampt.vis: world",item,"is already in the visualization's world"
     elif isinstance(item,WorldModel):
         _checkWindowCurrent(item.index)
     elif hasattr(item,'world'):
