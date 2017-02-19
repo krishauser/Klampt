@@ -68,20 +68,33 @@ class SensorTestWorld (GLPluginInterface):
 			robot.randomizeConfig()
 			sim.controller(0).setPIDCommand(robot.getConfig(),[0.0]*7)
 		def plot_rgb():
+			self.rgb,self.depth = processDepthSensor(sensor)
 			if self.rgb is not None:
 				plt.imshow(self.rgb)
 				plt.show()
 		def plot_depth():
+			self.rgb,self.depth = processDepthSensor(sensor)
 			if self.depth is not None:
 				plt.imshow(self.depth)
 				plt.show()
 		def toggle_point_cloud():
 			self.compute_pc = not self.compute_pc
+		def save_point_cloud():
+			if self.pc != None:
+				if isinstance(self.pc,Geometry3D):
+					print "Saving to sensortest_temp.pcd"
+					self.pc.saveFile("sensortest_temp.pcd")
+				else:
+					print "Saving to sensortest_temp.csv"
+					import numpy
+					numpy.savetxt("sensortest_temp.csv",self.pc)
+				raw_input("Saved...")
 
 		self.add_action(randomize,'Randomize configuration',' ')
 		self.add_action(plot_rgb,'Plot color','c')
 		self.add_action(plot_depth,'Plot depth','d')
 		self.add_action(toggle_point_cloud,'Toggle point cloud drawing','p')
+		self.add_action(save_point_cloud,'Save point cloud','s')
 
 	def idle(self):
 		#print "Idle..."
@@ -106,7 +119,7 @@ class SensorTestWorld (GLPluginInterface):
 					#self.pc = sensing.camera_to_points_world(sensor,robot,points_format='numpy')
 					self.pc = sensing.camera_to_points_world(sensor,robot,points_format='Geometry3D',color_format='rgb')
 					self.pc_appearance = Appearance()
-				print "Read and process PC time",time.time()-t0
+				#print "Read and process PC time",time.time()-t0
 		except Exception as e:
 			print e
 			import traceback
@@ -135,7 +148,7 @@ class SensorTestWorld (GLPluginInterface):
 					else:
 						glVertex3fv(pt[0:3])
 				glEnd()
-			print "Draw PC time",time.time()-t0
+			#print "Draw PC time",time.time()-t0
 		return True
 
 vis.pushPlugin(SensorTestWorld())
