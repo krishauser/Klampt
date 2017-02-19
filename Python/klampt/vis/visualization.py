@@ -388,7 +388,7 @@ def run(plugin=None):
     setPlugin(plugin)
     show()
     while shown():
-      time.sleep(0.1)
+        time.sleep(0.1)
     setPlugin(None)
     kill()
 
@@ -1828,6 +1828,11 @@ if _PyQtAvailable:
             self.glwidget.setSizePolicy(QSizePolicy(QSizePolicy.Maximum,QSizePolicy.Maximum))
             self.setCentralWidget(self.glwidget)
             self.setWindowTitle(windowinfo.name)
+            if len(self.glwidget.actions) != 0:
+                mainMenu = self.menuBar()
+                fileMenu = mainMenu.addMenu('&Actions')
+                for a in self.glwidget.actions:
+                    fileMenu.addAction(a)
         def closeEvent(self,event):
             global _globalLock
             _globalLock.acquire()
