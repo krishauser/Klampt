@@ -2487,7 +2487,7 @@ void CameraSensor::DrawGL(const Robot& robot,const vector<double>& measurements)
     float white[4]={1,1,1,1};
     glMaterialfv(GL_FRONT,GL_AMBIENT_AND_DIFFUSE,white);
     Real vscale = 0.5/Tan(xfov*0.5);
-    Real xscale = (0.5/vscale);
+    Real xscale = (0.5/vscale)/(xres/2);
     Real aspectRatio = Real(xres)/Real(yres);
     Real yscale = xscale;
     vector<Vector3> pts(xres*yres);
@@ -2495,8 +2495,8 @@ void CameraSensor::DrawGL(const Robot& robot,const vector<double>& measurements)
     for(int i=0;i<yres;i++)
       for(int j=0;j<xres;j++,k++) {
         double d = measurements[vstart+k];
-        double u = Real(j-xres/2)/(xres/2);
-        double v = -Real(i-yres/2)/(xres/2);
+        double u = Real(j-xres/2);
+        double v = -Real(i-yres/2);
         double x = xscale*d*u;
         double y = yscale*d*v;
         pts[k].set(x,y,-d);
@@ -2563,6 +2563,12 @@ void CameraSensor::GetViewport(Camera::Viewport& vp) const
   vp.f = zmax;
   vp.setLensAngle(xfov);
   vp.xform = Tsensor;
+  Matrix3 flipYZ;
+  flipYZ.setZero();
+  flipYZ(0,0) = 1;
+  flipYZ(1,1) = -1;
+  flipYZ(2,2) = -1;
+  vp.xform.R = flipYZ*vp.xform.R;
 }
 
 

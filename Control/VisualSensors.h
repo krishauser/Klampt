@@ -70,7 +70,8 @@ class LaserRangeSensor : public SensorBase
  *
  * Camera is assumed to be centered at middle of image.  The image
  * is also rectified and depth values are converted to meters (or whatever unit
- * you are generally using).
+ * you are generally using).  The coordinate convention is Z forward, X right, Y *down*
+ * following ROS and other camera standards.
  *
  * The format of the measurements list is a list of rgb[i,j] pixels if rgb=true, 
  * then followed by a list of d[i,j] pixels giving depth in meters (or whatever unit
@@ -103,7 +104,7 @@ class CameraSensor : public SensorBase
   void SetViewport(const Camera::Viewport& view);
 
   int link;
-  RigidTransform Tsensor; ///< z is backward, x is to the right, and y is "up"
+  RigidTransform Tsensor; ///< z is forward, x is to the right of image, and y is *down*
   bool rgb,depth;  ///< If rgb is true, gives color measurements. If depth is true, gives depth measurements.
   int xres,yres;  ///< resolution of camera in x and y directions (# of pixels)
   double xfov,yfov; ///< field of view in x and y directions (radians)
