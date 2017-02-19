@@ -427,6 +427,12 @@ class WorldModel
   WorldModel copy();
   ///Reads from a world XML file.
   bool readFile(const char* fn);
+  ///Alias of readFile
+  bool loadFile(const char* fn);
+  ///Saves to a world XML file.  If elementDir is provided, then robots, terrains, etc.
+  ///will be saved there.  Otherwise they will be saved to a folder with the same base
+  ///name as fn (without the trailing .xml)
+  bool saveFile(const char* fn,const char* elementDir=NULL);
   int numRobots();
   int numRobotLinks(int robot);
   int numRigidObjects();
