@@ -123,6 +123,14 @@ class GLViewport:
         pack = sum((list(c) for c in cols),[])
         glMultMatrixf(pack)
 
+class GLProgramAction:
+    def __init__(self,hook,short_text,key,description=None):
+        self.hook = hook
+        self.short_text = short_text
+        self.key = key
+        self.description = description
+        if description == None:
+            self.description = short_text
 
 class GLProgram:
     """A basic OpenGL visualization, run as part of some _GLBackend.
@@ -149,6 +157,12 @@ class GLProgram:
         self.name = name
         self.view = GLViewport()
         self.clearColor = [1.0,1.0,1.0,0.0]
+        self.actions = []
+
+    def add_action(self,hook,short_text,key,description=None):
+        """Defines a new generic GUI action.  The action will be available in a menu in
+        Qt or as keyboard commands in GLUT."""
+        self.actions.append(GLProgramAction(hook,short_text,key,description))
 
     def run(self):
         """Starts a new event loop with this object as the main program.
@@ -160,6 +174,9 @@ class GLProgram:
     def initialize(self):
         """Called after the GL context is initialized, but before main loop.
         May be overridden.  Users should not call this directly!"""
+        assert self.window != None
+        for a in self.actions:
+            self.window.add_action(a.hook,a.short_text,a.key,a.description)
         return True
 
     def refresh(self):
@@ -185,11 +202,27 @@ class GLProgram:
         self.view.h = h
         self.refresh()
         return True
+
+    def print_help(self):
+        #Put your help printouts here
+        print "************** Help **************"
+        print "?: print this help message"
+        for a in self.actions:
+            print a.key,":",a.description
+        print "**********************************"
         
     def keyboardfunc(self,c,x,y):
         """Called on keypress down. May be overridden.  c is either the ASCII/unicode
         character of the key pressed or a string describing the character (up,down,left,right,
         home,end,delete,enter,f1,...,f12)"""
+        if c == '?':
+            self.print_help()
+            return True
+        for a in self.actions:
+            if c == a.key:
+                a.hook()
+                self.refresh()
+                return True
         return False
     def keyboardupfunc(self,c,x,y):
         """Called on keyboard up (if your system allows it). May be overridden."""
@@ -426,6 +459,9 @@ class GLPluginProgram(GLRealtimeProgram):
             if not plugin.initialize():
                 print "GLPluginProgram.initialize(): Plugin of type",plugin.__class__.__name__,"Did not initialize"
                 return False
+            if hasattr(plugin,'actions'):
+                for a in plugin.actions:
+                    self.add_action(*a)
         return GLRealtimeProgram.initialize(self)
     def idle(self):
         anyhandled = False

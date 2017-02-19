@@ -7,6 +7,7 @@ class GLPluginInterface:
     def __init__(self):
         self.window = None
         self.view = None
+        self.actions = []
     def initialize(self):
         """Called by backend after the GL context is created but before the event loop starts."""
         return True
@@ -33,6 +34,11 @@ class GLPluginInterface:
         return False
     def closefunc(self):
         return False
+
+    def add_action(self,callback,short_name,key,description=None):
+        """Defines a new generic GUI action.  The action will be available in a menu in
+        Qt or as keyboard commands in GLUT."""
+        self.actions.append((callback,short_name,key,description))
 
     #functions to request operations of the backend
     def reshape(self,w,h):

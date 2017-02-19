@@ -15,6 +15,12 @@ class MyGLViewer(GLSimulationProgram):
         #initialize the simulation
         GLSimulationProgram.__init__(self,world,"My GL program")
 
+        #put custom action hooks here
+        self.add_action(self.some_function,'Some random function','f')
+
+    def some_function(self):
+        print "The function is called"
+
     def control_loop(self):
         #Put your control handler here
         pass

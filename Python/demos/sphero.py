@@ -138,6 +138,7 @@ class Emulator(ActuatorEmulator):
 class MyGLViewer(GLSimulationProgram):
     def __init__(self,world):
         global keymap
+        from functools import partial
         GLSimulationProgram.__init__(self,world,"My GL program")
         self.keymap = keymap
         self.current_velocities = {}
@@ -146,6 +147,11 @@ class MyGLViewer(GLSimulationProgram):
         self.spheros = [Emulator(self.sim,r) for r in range(world.numRobots())]
         for (i,s) in enumerate(self.spheros):
             self.sim.addEmulator(i,s)
+
+        for c in self.keymap:
+            def setvel(d):
+                self.current_velocities[d]=self.keymap[d]
+            self.add_action(partial(setvel,c),"Move "+c,c)
 
     def control_loop(self):
         #Calculate the desired velocity for each robot by adding up all
@@ -157,22 +163,6 @@ class MyGLViewer(GLSimulationProgram):
         for r in range(self.world.numRobots()):           
             self.spheros[r].process({'twist':rvels[r]},self.dt)
         return
-
-    def keyboardfunc(self,c,x,y):
-        #Put your keyboard handler here
-        #the current example toggles simulation / movie mode
-        if c == 's':
-            self.simulate = not self.simulate
-            print "Simulating:",self.simulate
-        elif c == 'm':
-            self.saveScreenshots = not self.saveScreenshots
-            print "Movie mode:",self.saveScreenshots
-        elif c == 'h':
-            GLSimulationProgram.keyboardfunc(self,c,x,y)
-            print 'Available keys:',sorted(self.keymap.keys())
-        elif c in self.keymap:
-            self.current_velocities[c]=self.keymap[c]
-        self.refresh()
 
     def keyboardupfunc(self,c,x,y):
         if c in self.current_velocities:

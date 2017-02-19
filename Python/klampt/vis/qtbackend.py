@@ -89,6 +89,7 @@ class QtGLWindow(QGLWidget):
         self.setFixedSize(self.width,self.height)
         self.setWindowTitle(self.name)
         self.idleTimer = QTimer()
+        self.actions = []
 
     def setProgram(self,program):
         from glprogram import GLProgram
@@ -124,6 +125,16 @@ class QtGLWindow(QGLWidget):
         #init function
         self.program.initialize()
         self.initialized = True
+
+    def add_action(self,hook,short_text,key,description=None):
+        a = QtGui.QAction(short_text, self)
+        #a.setShortcut("Ctrl+"+key.upper())
+        a.setShortcut(key)
+        if description == None:
+            description = short_text
+        a.setStatusTip(description)
+        a.triggered.connect(hook)
+        self.actions.append(a)
 
     def sizeHint(self):
         return QSize(self.width,self.height)

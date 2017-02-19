@@ -90,6 +90,9 @@ class GLUTWindow:
         glEnable(GL_MULTISAMPLE)
         glutPostRedisplay()
 
+    def add_action(self,*args):
+        pass
+
     def setPlugin(self,plugin):
         if hasattr(plugin,'name'):
             self.name = plugin.name

@@ -51,6 +51,28 @@ class GLSimulationProgram(GLRealtimeProgram):
         self.screenshotCount = 0
         self.verbose = 0
 
+        def toggle_simulate():
+            self.simulate = not self.simulate
+            print "Simulating:",self.simulate
+        def toggle_movie_mode():
+            self.saveScreenshots = not self.saveScreenshots
+            print "Movie mode:",self.saveScreenshots
+        def toggle_draw_contacts():
+            self.drawContacts = not self.drawContacts
+            if self.drawContacts:
+                self.sim.enableContactFeedbackAll()
+        def toggle_draw_sensors():
+            if self.drawSensors == False:
+                self.drawSensors = True
+            elif self.drawSensors == True:
+                self.drawSensors = 'full'
+            else:
+                self.drawSensors = False
+        self.add_action(toggle_simulate,'Toggle simulation','s')
+        self.add_action(toggle_movie_mode,'Toggle movie mode','m')
+        self.add_action(self.sim.toggleLogging,'Toggle simulation logging','l')
+        self.add_action(toggle_draw_contacts,'Toggle draw contacts','c')
+        self.add_action(toggle_draw_sensors,'Toggle draw sensors','v')
 
     def display(self):
         #Put your display handler here
@@ -154,47 +176,6 @@ class GLSimulationProgram(GLRealtimeProgram):
 
     def motionfunc(self,x,y,dx,dy):
         return GLRealtimeProgram.motionfunc(self,x,y,dx,dy)
-
-    def print_help(self):
-        #Put your help printouts here
-        print "************** Help **************"
-        print "?: print this help message"
-        print "s: toggle simulation"
-        print "m: toggle movie mode"
-        print "l: toggle logging"
-        print "c: toggle contact drawing"
-        print "v: toggle sensor drawing"
-        print "**********************************"
-
-    def keyboardfunc(self,c,x,y):
-        #Put your keyboard handler here
-        #the current example toggles simulation / movie mode
-        if self.verbose: print c,"pressed"
-        if c=='?':
-            self.print_help()
-        elif c == 's':
-            self.simulate = not self.simulate
-            print "Simulating:",self.simulate
-        elif c == 'm':
-            self.saveScreenshots = not self.saveScreenshots
-            print "Movie mode:",self.saveScreenshots
-        elif c == 'l':
-            self.sim.toggleLogging()
-        elif c == 'c':
-            self.drawContacts = not self.drawContacts
-            if self.drawContacts:
-                self.sim.enableContactFeedbackAll()
-        elif c == 'v':
-            if self.drawSensors == False:
-                self.drawSensors = True
-            elif self.drawSensors == True:
-                self.drawSensors = 'full'
-            else:
-                self.drawSensors = False
-        else:
-            return False
-        self.refresh()
-        return True
 
     def click_world(self,x,y,want_points=False):
         """Helper: returns a list of (world object, point) pairs sorted in order of

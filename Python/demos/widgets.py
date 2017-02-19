@@ -24,8 +24,13 @@ class MyGLViewer(GLWidgetPlugin):
             config = self.robotWidget.get()
             print "Config:",config
             self.world.robot(0).setConfig(config)
+        elif c == 's':
+            fn = "widgets_test_world.xml"
+            print "Saving file to",fn
+            self.world.saveFile(fn)
         else:
             GLWidgetPlugin.keyboardfunc(self,c,x,y)
+
 
 
 if __name__ == "__main__":
