@@ -577,6 +577,16 @@ class PointCloud(_object):
         """
         return _robotsim.PointCloud_getPoint(self, *args)
 
+    def addProperty(self, *args):
+        """
+        addProperty(PointCloud self, std::string const & pname)
+        addProperty(PointCloud self, std::string const & pname, doubleVector properties)
+
+        Adds a new property with name pname, and sets values for this property
+        to the given list (a n-list) 
+        """
+        return _robotsim.PointCloud_addProperty(self, *args)
+
     def setProperties(self, *args):
         """
         setProperties(PointCloud self, doubleVector properties)
@@ -629,6 +639,22 @@ class PointCloud(_object):
         """
         return _robotsim.PointCloud_join(self, *args)
 
+    def setSetting(self, *args):
+        """
+        setSetting(PointCloud self, std::string const & key, std::string const & value)
+
+        Sets the given setting. 
+        """
+        return _robotsim.PointCloud_setSetting(self, *args)
+
+    def getSetting(self, *args):
+        """
+        getSetting(PointCloud self, std::string const & key) -> std::string
+
+        Retrieves the given setting. 
+        """
+        return _robotsim.PointCloud_getSetting(self, *args)
+
     __swig_setmethods__["vertices"] = _robotsim.PointCloud_vertices_set
     __swig_getmethods__["vertices"] = _robotsim.PointCloud_vertices_get
     if _newclass:vertices = _swig_property(_robotsim.PointCloud_vertices_get, _robotsim.PointCloud_vertices_set)
@@ -638,6 +664,9 @@ class PointCloud(_object):
     __swig_setmethods__["properties"] = _robotsim.PointCloud_properties_set
     __swig_getmethods__["properties"] = _robotsim.PointCloud_properties_get
     if _newclass:properties = _swig_property(_robotsim.PointCloud_properties_get, _robotsim.PointCloud_properties_set)
+    __swig_setmethods__["settings"] = _robotsim.PointCloud_settings_set
+    __swig_getmethods__["settings"] = _robotsim.PointCloud_settings_get
+    if _newclass:settings = _swig_property(_robotsim.PointCloud_settings_get, _robotsim.PointCloud_settings_set)
     def __init__(self): 
         """
         __init__(PointCloud self) -> PointCloud
@@ -1212,6 +1241,10 @@ class Appearance(_object):
         drawGL(Appearance self, Geometry3D geom)
         """
         return _robotsim.Appearance_drawGL(self, *args)
+
+    def drawWorldGL(self, *args):
+        """drawWorldGL(Appearance self, Geometry3D geom)"""
+        return _robotsim.Appearance_drawWorldGL(self, *args)
 
     __swig_setmethods__["world"] = _robotsim.Appearance_world_set
     __swig_getmethods__["world"] = _robotsim.Appearance_world_get
@@ -2672,6 +2705,25 @@ class WorldModel(_object):
         Reads from a world XML file. 
         """
         return _robotsim.WorldModel_readFile(self, *args)
+
+    def loadFile(self, *args):
+        """
+        loadFile(WorldModel self, char const * fn) -> bool
+
+        Alias of readFile. 
+        """
+        return _robotsim.WorldModel_loadFile(self, *args)
+
+    def saveFile(self, *args):
+        """
+        saveFile(WorldModel self, char const * fn, char const * elementDir=None) -> bool
+        saveFile(WorldModel self, char const * fn) -> bool
+
+        Saves to a world XML file. If elementDir is provided, then robots,
+        terrains, etc. will be saved there. Otherwise they will be saved to a
+        folder with the same base name as fn (without the trailing .xml) 
+        """
+        return _robotsim.WorldModel_saveFile(self, *args)
 
     def numRobots(self):
         """numRobots(WorldModel self) -> int"""

@@ -78,7 +78,7 @@ def setRandomSeed(*args):
   """
     setRandomSeed(int seed)
 
-    Sets the random seed used by the motion planner. 
+    Sets the random seed used by the configuration sampler. 
     """
   return _motionplanning.setRandomSeed(*args)
 
@@ -174,6 +174,8 @@ def setPlanSetting(*args):
 def destroy():
   """
     destroy()
+
+    destroys internal data structures
 
     destroys internal data structures 
     """

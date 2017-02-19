@@ -938,6 +938,15 @@ Sets the position of the point at the given index to p. ";
 
 Retrieves the position of the point at the given index. ";
 
+%feature("docstring")  PointCloud::addProperty "
+
+Adds a new property. All values for this property are set to 0. ";
+
+%feature("docstring")  PointCloud::addProperty "
+
+Adds a new property with name pname, and sets values for this property
+to the given list (a n-list) ";
+
 %feature("docstring")  PointCloud::setProperties "
 
 Sets all the properties of all points to the given list (a kn-list) ";
@@ -974,6 +983,14 @@ Transforms all the points by the rigid transform v=R*v+t. ";
 
 Adds the given point cloud to this one. They must share the same
 properties or else an exception is raised. ";
+
+%feature("docstring")  PointCloud::setSetting "
+
+Sets the given setting. ";
+
+%feature("docstring")  PointCloud::getSetting "
+
+Retrieves the given setting. ";
 
 
 // File: classPointPoser.xml
@@ -2386,6 +2403,16 @@ appearances are shared... ";
 %feature("docstring")  WorldModel::readFile "
 
 Reads from a world XML file. ";
+
+%feature("docstring")  WorldModel::loadFile "
+
+Alias of readFile. ";
+
+%feature("docstring")  WorldModel::saveFile "
+
+Saves to a world XML file. If elementDir is provided, then robots,
+terrains, etc. will be saved there. Otherwise they will be saved to a
+folder with the same base name as fn (without the trailing .xml) ";
 
 %feature("docstring")  WorldModel::numRobots "";
 
