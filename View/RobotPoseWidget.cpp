@@ -3,9 +3,46 @@
 #include <KrisLibrary/math3d/basis.h>
 #include <KrisLibrary/GLdraw/drawextra.h>
 #include <KrisLibrary/robotics/IKFunctions.h>
+#include "Planning/RobotCSpace.h"
 #include <map>
 using namespace GLDraw;
 
+Real RobustSolveIK(Robot& robot,RobotIKFunction& f,int iters,Real tol,int numRestarts)
+{
+  RobotIKSolver solver(f);
+  solver.UseBiasConfiguration(robot.q);
+  solver.UseJointLimits(TwoPi);
+  bool res = solver.Solve(tol,iters);
+  if(!res && numRestarts) {
+    //attempt to do random restarts
+    Config qbest = robot.q;
+    Vector residual(f.NumDimensions());
+    f(solver.solver.x,residual);
+    Real residNorm = residual.normSquared();
+    for(int i=0;i<numRestarts;i++) {
+      //random restarts
+      Config qorig = robot.q;
+      RobotCSpace space(robot);
+      space.Sample(robot.q);
+      swap(robot.q,qorig);
+      for(size_t i=0;i<f.activeDofs.mapping.size();i++)
+        robot.q(f.activeDofs.mapping[i]) = qorig(f.activeDofs.mapping[i]);
+      if(solver.Solve(tol,iters)) {
+        qbest = robot.q;
+        return 0;
+      }
+      f(solver.solver.x,residual);
+      Real newResidNorm = residual.normSquared();
+      if(newResidNorm < residNorm) {
+        residNorm = newResidNorm;
+        qbest = robot.q;
+      }
+    }
+    robot.UpdateConfig(qbest);
+    return residNorm;
+  }
+  return 0;
+}
 
 RobotLinkPoseWidget::RobotLinkPoseWidget()
   :robot(NULL),viewRobot(NULL),highlightColor(1,1,0,1),hoverLink(-1),draw(true)
@@ -743,9 +780,9 @@ bool RobotPoseWidget::SolveIK(int iters,Real tol)
   }
   f.activeDofs.mapping = vector<int>(dofs.begin(),dofs.end());
 
-  RobotIKSolver solver(f);
-  solver.UseJointLimits(TwoPi);
-  bool res = solver.Solve(tol,iters);
+  //define start config
+  robot->q = linkPoser.poseConfig;
+  bool res = (RobustSolveIK(*robot,f,iters,tol,5) == 0);
 
   linkPoser.poseConfig = robot->q;
   if(useBase)
@@ -780,9 +817,8 @@ bool RobotPoseWidget::SolveIKFixedBase(int iters,Real tol)
   }
   f.activeDofs.mapping = vector<int>(dofs.begin(),dofs.end());
 
-  RobotIKSolver solver(f);
-  solver.UseJointLimits(TwoPi);
-  bool res = solver.Solve(tol,iters);
+  robot->q = linkPoser.poseConfig;
+  bool res = (RobustSolveIK(*robot,f,iters,tol,5) == 0);
 
   linkPoser.poseConfig = robot->q;
   if(useBase)
@@ -816,9 +852,8 @@ bool RobotPoseWidget::SolveIKFixedJoint(int fixedJoint,int iters,Real tol)
   }
   f.activeDofs.mapping = vector<int>(dofs.begin(),dofs.end());
 
-  RobotIKSolver solver(f);
-  solver.UseJointLimits(TwoPi);
-  bool res = solver.Solve(tol,iters);
+  robot->q = linkPoser.poseConfig;
+  bool res = (RobustSolveIK(*robot,f,iters,tol,5) == 0);
 
   linkPoser.poseConfig = robot->q;
   if(useBase)
