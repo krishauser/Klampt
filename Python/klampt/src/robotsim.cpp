@@ -372,6 +372,7 @@ void GetPointCloud(const Geometry::AnyCollisionGeometry3D& geom,PointCloud& pc)
     gpc.points[i].get(pc.vertices[i*3],pc.vertices[i*3+1],pc.vertices[i*3+2]);
     gpc.properties[i].getCopy(&pc.properties[i*gpc.propertyNames.size()]);
   }
+  pc.settings = gpc.settings;
 }
 
 void GetPointCloud(const PointCloud& pc,Geometry::AnyCollisionGeometry3D& geom)
@@ -388,6 +389,7 @@ void GetPointCloud(const PointCloud& pc,Geometry::AnyCollisionGeometry3D& geom)
       gpc.properties[i].copy(&pc.properties[i*pc.propertyNames.size()]);
     }
   }
+  gpc.settings = pc.settings;
   //printf("Copying PointCloud to geometry, %d points\n",(int)gpc.points.size());
   geom = gpc;
   geom.ClearCollisionData();
@@ -1256,12 +1258,38 @@ void Appearance::drawGL()
   app->DrawGL();
 }
 
+void Appearance::drawWorldGL(Geometry3D& g)
+{
+  SmartPointer<GLDraw::GeometryAppearance>& app = *reinterpret_cast<SmartPointer<GLDraw::GeometryAppearance>*>(appearancePtr);
+  SmartPointer<AnyCollisionGeometry3D>& geom = *reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(g.geomPtr);
+  if(!geom) return;
+  if(!app) {
+    app = new GLDraw::GeometryAppearance();
+  }
+  if(app->geom) {
+    if(app->geom != geom) {
+      fprintf(stderr,"Appearance::drawGL(): performance warning, setting to a different geometry\n");
+      app->Set(*geom);
+    }
+  }
+  else {
+    app->Set(*geom);
+  }
+
+  glPushMatrix();
+  GLDraw::glMultMatrix(Matrix4(geom->GetTransform()));
+  app->DrawGL();
+  glPopMatrix();
+}
+
 void Appearance::drawGL(Geometry3D& g)
 {
   SmartPointer<GLDraw::GeometryAppearance>& app = *reinterpret_cast<SmartPointer<GLDraw::GeometryAppearance>*>(appearancePtr);
   SmartPointer<AnyCollisionGeometry3D>& geom = *reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(g.geomPtr);
-  if(!app) return;
   if(!geom) return;
+  if(!app) {
+    app = new GLDraw::GeometryAppearance();
+  }
   if(app->geom) {
     if(app->geom != geom) {
       fprintf(stderr,"Appearance::drawGL(): performance warning, setting to a different geometry\n");
@@ -1373,11 +1401,43 @@ void PointCloud::getPoint(int index,double out[3]) const
   out[2] = vertices[index*3+2];
 }
 
+void PointCloud::addProperty(const std::string& pname)
+{
+  int n = numPoints();
+  vector<double> values(n,0.0);
+  addProperty(pname,values);
+}
+
+void PointCloud::addProperty(const std::string& pname,const std::vector<double> & values)
+{
+  int n = numPoints();
+  if(values.size() != n) {
+    throw PyException("Invalid size of properties list, must have size #points");
+  }
+  assert(values.size() == n);
+  size_t m=propertyNames.size();
+  assert(properties.size() == n*m);
+  propertyNames.push_back(pname);
+  vector<double> newprops(n*(m+1));
+  for(int i=0;i<n;i++) {
+    assert ((i+1)*m < (int)properties.size()); 
+    assert (i*(m+1) + m < (int)newprops.size()); 
+    std::copy(properties.begin()+i*m,properties.begin()+(i+1)*m,newprops.begin()+i*(m+1));
+    newprops[i*(m+1) + m] = values[i];
+  }
+  std::swap(newprops,properties);
+  assert(properties.size() == (n*(m+1)));
+}
+
 void PointCloud::setProperties(const vector<double>& vproperties)
 {
   int n = numPoints();
-  assert(vproperties.size() >= n*propertyNames.size());
-  copy(vproperties.begin(),vproperties.begin()+propertyNames.size()*n,properties.begin());
+  size_t m=propertyNames.size();
+  if(vproperties.size() < n*m) {
+    throw PyException("Invalid size of properties list, must have size at least #points * #properties");
+  }
+  assert(properties.size() == n*m);
+  copy(vproperties.begin(),vproperties.begin()+m*n,properties.begin());
 }
 
 void PointCloud::setProperties(int pindex,const vector<double>& vproperties)
@@ -1440,6 +1500,18 @@ void PointCloud::join(const PointCloud& pc)
     throw PyException("PointCloud::join can't join two PCs with dissimilar property names");
   vertices.insert(vertices.end(),pc.vertices.begin(),pc.vertices.end());
   properties.insert(properties.end(),pc.properties.begin(),pc.properties.end());
+}
+
+void PointCloud::setSetting(const std::string& key,const std::string& value)
+{
+  settings[key] = value;
+}
+
+std::string PointCloud::getSetting(const std::string& key) const
+{
+  if(settings.count(key) == 0)
+    throw PyException("PointCloud::getSetting(): key does not exist in settings map");
+  return settings.find(key)->second;
 }
 
 void PointCloud::translate(const double t[3])
@@ -1543,6 +1615,17 @@ WorldModel::~WorldModel()
     derefWorld(index);
     index = -1;
   }
+}
+
+bool WorldModel::loadFile(const char* fn)
+{
+  return readFile(fn);
+}
+
+bool WorldModel::saveFile(const char* fn,const char* elementPath)
+{
+  RobotWorld& world = *worlds[index]->world;
+  return world.SaveXML(fn,elementPath);
 }
 
 bool WorldModel::readFile(const char* fn)

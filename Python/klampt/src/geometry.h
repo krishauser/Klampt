@@ -1,6 +1,9 @@
 #ifndef _GEOMETRY_H
 #define _GEOMETRY_H
 
+#include <vector>
+#include <map>
+
 /** @file geometry.h
  * @brief C++ bindings for geometry modeling. */
 
@@ -83,6 +86,10 @@ struct PointCloud
   void setPoint(int index,const double p[3]);
   ///Retrieves the position of the point at the given index
   void getPoint(int index,double out[3]) const;
+  ///Adds a new property.  All values for this property are set to 0.
+  void addProperty(const std::string& pname);
+  ///Adds a new property with name pname, and sets values for this property to the given list (a n-list)
+  void addProperty(const std::string& pname,const std::vector<double> & properties);
   ///Sets all the properties of all points to the given list (a kn-list)
   void setProperties(const std::vector<double>& properties);
   ///Sets property pindex of all points to the given list (a n-list)
@@ -102,10 +109,15 @@ struct PointCloud
   ///Adds the given point cloud to this one.  They must share the same
   ///properties or else an exception is raised
   void join(const PointCloud& pc);
+  ///Sets the given setting
+  void setSetting(const std::string& key,const std::string& value);
+  ///Retrieves the given setting
+  std::string getSetting(const std::string& key) const;
 
   std::vector<double> vertices;
   std::vector<std::string> propertyNames;
   std::vector<double> properties;
+  std::map<std::string,std::string> settings;
 };
 
 /** @brief A geometric primitive.  So far only points, spheres, segments,

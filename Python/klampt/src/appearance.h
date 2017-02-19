@@ -80,11 +80,24 @@ class Appearance
   ///Draws the currently associated geometry with this appearance.  A geometry
   ///is assocated with this appearance if this appearance comes from an
   ///element of the WorldMode, or if drawGL(geom) was previously called.
+  ///
+  ///Note that the geometry's current transform is NOT respected, and this only draws
+  ///the geometry in its local transform.
   void drawGL();
   ///Draws the given geometry with this appearance.  NOTE: for best
   ///performance, an appearance should only be drawn with a single geometry.
   ///Otherwise, the OpenGL display lists will be completely recreated
+  ///
+  ///Note that the geometry's current transform is NOT respected, and this only draws
+  ///the geometry in its local transform.
   void drawGL(Geometry3D& geom);
+  ///Draws the given geometry with this appearance.  NOTE: for best
+  ///performance, an appearance should only be drawn with a single geometry.
+  ///Otherwise, the OpenGL display lists will be completely recreated
+  ///
+  ///Differs from drawGL in that the geometry's current transform is applied
+  ///before drawing.
+  void drawWorldGL(Geometry3D& geom);
 
   int world;
   int id;
