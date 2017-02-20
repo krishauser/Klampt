@@ -33,7 +33,7 @@ def objectToTypes(object,world=None):
             vtypes = []
             if not str in dtypes:
                 vtypes.append('Config')
-                if not float in dtypes:
+                if not 'float' in dtypes:
                     vtypes.append('IntArray')
                 if len(object)==2:
                     #2d point
