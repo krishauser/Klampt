@@ -1,11 +1,12 @@
 from OpenGL.GL import *
 from ..robotsim import WidgetSet,RobotPoser
-from glprogram import *
+from glinterface import GLPluginInterface
 from ..model import collide
+from ..math import vectorops
 from ..sim.simulation import SimpleSimulator
 import sys
 
-class GLSimulationProgram(GLRealtimeProgram):
+class GLSimulationPlugin(GLPluginInterface):
     """A program that runs a simulation given a world.
     Attributes:
     - world: the RobotWorld instance provided on startup.  All elements
@@ -25,11 +26,11 @@ class GLSimulationProgram(GLRealtimeProgram):
     self.sim.controller(0), not self.world.robot(0).  self.world is simply
     a model and does not have a direct relation to the simulation.
     """
-    def __init__(self,world,name="My GL simulation program"):
+    def __init__(self,world):
         """Arguments:
         - world: a RobotWorld instance.
         """
-        GLRealtimeProgram.__init__(self,name)
+        GLPluginInterface.__init__(self)
         self.world = world
         #Put your initialization code here
         #the current example creates a collision class, simulator, 
@@ -142,6 +143,7 @@ class GLSimulationProgram(GLRealtimeProgram):
                     else:
                         s.drawGL()
                     j += 1
+        return True
 
     def control_loop(self):
         """Overload this to perform custom control handling."""
@@ -164,18 +166,19 @@ class GLSimulationProgram(GLRealtimeProgram):
             if self.sim.getTime() == 0:
                 self.sim.simulate(0)
             self.control_loop()
-            self.sim.simulate(self.dt)
+            self.sim.simulate(self.window.program.dt)
             self.refresh()
+        return True
 
     def mousefunc(self,button,state,x,y):
         #Put your mouse handler here
         #the current example prints out the list of objects clicked whenever
         #you right click
         if self.verbose: print "mouse",button,state,x,y
-        return GLRealtimeProgram.mousefunc(self,button,state,x,y)
+        return GLPluginInterface.mousefunc(self,button,state,x,y)
 
     def motionfunc(self,x,y,dx,dy):
-        return GLRealtimeProgram.motionfunc(self,x,y,dx,dy)
+        return GLPluginInterface.motionfunc(self,x,y,dx,dy)
 
     def click_world(self,x,y,want_points=False):
         """Helper: returns a list of (world object, point) pairs sorted in order of

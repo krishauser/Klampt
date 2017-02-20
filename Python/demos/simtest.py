@@ -8,20 +8,20 @@ import importlib
 
 SPLIT_SCREEN_TEST = False
 
-class MyGLViewer(GLSimulationProgram):
+class MyGLViewer(GLSimulationPlugin):
     """Simulates some functionality of the SimTest program.
-    Shows how to subclass GLSimulationProgram and apply hooks to SimpleSimulation for applying a
+    Shows how to subclass GLSimulationPlugin and apply hooks to SimpleSimulation for applying a
     spring-like force to a simulation body.
     """
     def __init__(self,world):
-        GLSimulationProgram.__init__(self,world,"SimTest")
+        GLSimulationPlugin.__init__(self,world)
         self.world = world
         self.sim.enableContactFeedbackAll()
         self.forceApplicationMode = False
         self.statusLog = []
         
     def display(self):
-        GLSimulationProgram.display(self)
+        GLSimulationPlugin.display(self)
             
         #draw force springs if using
         if self.forceApplicationMode:
@@ -55,12 +55,13 @@ class MyGLViewer(GLSimulationProgram):
 
     def idle(self):
         #Put your idle loop handler here
-        GLSimulationProgram.idle(self)
+        GLSimulationPlugin.idle(self)
         t = self.sim.getTime()
         if self.sim.getStatus() != 0:
             self.statusLog.append((t,self.sim.getStatus()))
         while len(self.statusLog) > 0 and self.statusLog[0][0] < t-1:
             self.statusLog.pop(0)
+        return True
 
     def mousefunc(self,button,state,x,y):
         #Put your mouse handler here
@@ -83,7 +84,7 @@ class MyGLViewer(GLSimulationProgram):
                 self.forceApplicationMode = False
                 self.sim.hooks.pop(-1)
                 return True
-        return GLRealtimeProgram.mousefunc(self,button,state,x,y)
+        return GLSimulationPlugin.mousefunc(self,button,state,x,y)
         
     def motionfunc(self,x,y,dx,dy):
         if self.forceApplicationMode:
@@ -91,7 +92,7 @@ class MyGLViewer(GLSimulationProgram):
             self.refresh()
             return True
         else:
-            return GLRealtimeProgram.motionfunc(self,x,y,dx,dy)
+            return GLSimulationPlugin.motionfunc(self,x,y,dx,dy)
 
     def moveForceSpring(self,x,y):
         self.sim.updateWorld()
@@ -124,8 +125,8 @@ class MyGLViewer(GLSimulationProgram):
 
     def keyboardfunc(self,c,x,y):
         #Put your keyboard handler here
-        #the GLSimulationProgram class uses h,s,m,l,c
-        GLSimulationProgram.keyboardfunc(self,c,x,y)
+        #the GLSimulationPlugin class uses h,s,m,l,c
+        return GLSimulationPlugin.keyboardfunc(self,c,x,y)
 
 
 if __name__ == "__main__":
@@ -175,4 +176,4 @@ if __name__ == "__main__":
             time.sleep(0.01)
         vis.kill()
     else:
-        viewer.run()
+        vis.run(viewer)
