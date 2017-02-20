@@ -220,24 +220,6 @@ class GLMultiViewportProgram(GLProgram):
         if self.activeView != None:
             return True if self.views[self.activeView].keyboardupfunc(c,x,y) else False
         return False
-    def specialfunc(self,c,x,y):
-        if self.broadcast:
-            for p in self.views:
-                p.specialfunc(c,x,y)
-            return True
-        self.updateActive(x,y)
-        if self.activeView != None:
-            return True if self.views[self.activeView].specialfunc(c,x,y) else False
-        return False
-    def specialupfunc(self,c,x,y):
-        if self.broadcast:
-            for p in self.views:
-                p.specialupfunc(c,x,y)
-            return True
-        self.updateActive(x,y)
-        if self.activeView != None:
-            return True if self.views[self.activeView].specialupfunc(c,x,y) else False
-        return False
     def mousefunc(self,button,state,x,y):
         if self.broadcast:
             for p in self.views:
