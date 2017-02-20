@@ -101,6 +101,7 @@ class QtGLWindow(QGLWidget):
         self.program = program
         program.window = self
         if self.initialized:
+            program.initialize()
             program.reshapefunc(self.width,self.height)
             def f():
                 if self.program: self.program.idlefunc()
