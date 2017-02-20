@@ -4,7 +4,6 @@ import sys
 from klampt import *
 from klampt import vis
 from klampt.robotsim import setRandomSeed
-from klampt.vis.glrobotprogram import GLSimulationProgram
 from klampt.vis.glprogram import GLPluginProgram
 from klampt.vis.glcommon import GLWidgetPlugin
 from klampt import RobotPoser
@@ -97,14 +96,11 @@ if __name__ == "__main__":
 
     print "Doing a split screen program..."
     for i in range(3):
-        secondscreen = GLPluginProgram()
         widgets = GLWidgetPlugin()
         widgets.addWidget(RobotPoser(world.robot(0)))
         #update the coordinates every time the widget changes
         widgets.widgetchangefunc = (lambda self:coordinates.updateFromWorld())
-        secondscreen.pushPlugin(widgets)
-        vis.addPlugin(secondscreen)
-    #vis.setPlugin(secondscreen)
+        vis.addPlugin(widgets)
     vis.setWindowTitle("Split screen test")
     vis.show()
     while vis.shown():
