@@ -42,22 +42,25 @@ class GLUTWindow:
     def __init__(self,name):
         """Note: must be called after GLUT is initialized."""
         self.name = name
-        self.plugin = None
+        self.program = None
         self.width = 640
         self.height = 480
         self.clearColor = [1.0,1.0,1.0,0.0]
         self.lastx = 0
         self.lasty = 0
+        self.initialized = False
+        self.glutWindowID = None
         self.modifierList = []
 
     def initialize(self):
-        assert self.plugin != None, "plugin member needs to be set"
-        plugin = self.plugin
-        glutInitWindowPosition (plugin.x, plugin.y);
+        assert self.program != None, "program member needs to be set"
+        assert not self.initialized,"initialized twice?"
+        program = self.program
+        #glutInitWindowPosition (0,0);
         glutInitWindowSize (self.width, self.height);
-        glutCreateWindow (self.name)
-        plugin.x = 0
-        plugin.y = 0
+        self.glutWindowID = glutCreateWindow (self.name)
+        program.view.x = 0
+        program.view.y = 0
   
         def glutsafe(func,update_modifiers=False):
             def safefunc(*args):
@@ -74,49 +77,42 @@ class GLUTWindow:
 
         # set window callbacks
         glutReshapeFunc (glutsafe(self._reshapefunc))
-        glutKeyboardFunc (glutsafe(plugin.keyboardfunc,update_modifiers=True))
-        glutKeyboardUpFunc (glutsafe(plugin.keyboardupfunc,update_modifiers=True))
+        glutKeyboardFunc (glutsafe(program.keyboardfunc,update_modifiers=True))
+        glutKeyboardUpFunc (glutsafe(program.keyboardupfunc,update_modifiers=True))
         glutSpecialFunc (glutsafe(self._specialfunc,update_modifiers=True))
         glutSpecialUpFunc (glutsafe(self._specialupfunc,update_modifiers=True))
         glutMotionFunc (glutsafe(self._motionfunc,update_modifiers=True))
         glutPassiveMotionFunc (glutsafe(self._motionfunc,update_modifiers=True))
         glutMouseFunc (glutsafe(self._mousefunc,update_modifiers=True))
         glutDisplayFunc (glutsafe(self._displayfunc))
-        glutIdleFunc(glutsafe(plugin.idlefunc))
+        glutIdleFunc(glutsafe(program.idlefunc))
         glutCloseFunc(glutsafe(self._closefunc))
 
         #init function
-        self.plugin.initialize()
+        self.program.initialize()
         glEnable(GL_MULTISAMPLE)
         glutPostRedisplay()
+        self.initialized = True
+        print "Initialized"
 
     def add_action(self,*args):
         pass
 
-    def setPlugin(self,plugin):
-        if hasattr(plugin,'name'):
-            self.name = plugin.name
-        self.plugin = plugin
-        plugin.window = self
+    def setProgram(self,program):
+        from glprogram import GLProgram
+        assert isinstance(program,GLProgram)
+        if hasattr(program,'name'):
+            self.name = program.name
+            if self.initialized:
+                glutSetWindowTitle(program.name)
+        self.program = program
+        program.window = self
         if self.initialized:
-            self.reshape(plugin,width,plugin.height)
-        else:  
-            self.width,self.height = plugin.width,plugin.height
-
-    def addPlugin(self,plugin):
-        if self.plugin == None:
-            self.setPlugin(plugin)
+            program.initialize()
+            program.reshapefunc(self.width,self.height)
+            self.idlesleep(0)
         else:
-            #create a multi-view widget
-            if isinstance(self.plugin,GLMultiViewportProgram):
-                self.plugin.addPlugin(plugin)
-            else:
-                multiProgram = GLMultiViewportProgram()
-                multiProgram.window = self
-                multiProgram.addPlugin(self.plugin)
-                multiProgram.addPlugin(plugin)
-                self.plugin = multiProgram
-                self.width,self.height = self.plugin.width,self.plugin.height
+            self.reshape(program.view.w,program.view.h)
 
     def modifiers(self):
         """Call this to retrieve modifiers. Called by frontend."""
@@ -130,17 +126,18 @@ class GLUTWindow:
         """Sleeps the idle callback for t seconds.  If t is not provided,
         the idle callback is slept forever. Called by frontend."""
         if duration==0:
-            glutIdleFunc(_idlefunc);
+            glutIdleFunc(self.program.idlefunc);
         else:
             glutIdleFunc(None);
             if duration!=float('inf'):
-                glutTimerFunc(duration*1000,lambda x:glutIdleFunc(_idlefunc),0);
+                glutTimerFunc(int(duration*1000),lambda x:glutIdleFunc(self.program.idlefunc),0);
 
     def reshape(self,w,h):
         """Resizes the GL window. Called by frontend."""
         print "reshaping",w,h
         self.width,self.height = w,h
-        glutReshapeWindow(self.width,self.height)
+        if self.initialized:
+            glutReshapeWindow(self.width,self.height)
 
     def draw_text(self,point,text,size=12,color=None):
         """If called in the display_screen method, renders text at the given point (may be 2d
@@ -194,31 +191,31 @@ class GLUTWindow:
         """Internal use"""
         self.width = w
         self.height = h
-        self.plugin.reshapefunc(w,h)
+        self.program.reshapefunc(w,h)
         glutPostRedisplay()
 
     def _motionfunc(self,x,y):
         """Internal use"""
         dx = x - self.lastx
         dy = y - self.lasty
-        self.plugin.motionfunc(x,y,dx,dy)
+        self.program.motionfunc(x,y,dx,dy)
         self.lastx = x
         self.lasty = y
 
     def _mousefunc(self,button,state,x,y):
         """Internal use"""
-        self.plugin.mousefunc(button,state,x,y)
+        self.program.mousefunc(button,state,x,y)
         self.lastx = x
         self.lasty = y
 
 
     def _specialfunc(self,c,x,y):
         if c in keymap:
-            self.plugin.keyboardfunc(keymap[c],x,y)
+            self.program.keyboardfunc(keymap[c],x,y)
 
     def _specialupfunc(self,c,x,y):
         if c in keymap:
-            self.plugin.keyboardupfunc(keymap[c],x,y)
+            self.program.keyboardupfunc(keymap[c],x,y)
 
     def _displayfunc(self):
         """Internal use."""
@@ -226,12 +223,12 @@ class GLUTWindow:
             #hidden?
             print "GLProgram.displayfunc called on hidden window?"
             return
-        self.plugin.displayfunc()
+        self.program.displayfunc()
         glutSwapBuffers ()
 
     def _closefunc(self):
-        self.plugin.closefunc()
-        self.plugin.window = None
+        self.program.closefunc()
+        self.program.window = None
 
 class GLUTBackend:
     """A basic OpenGL program using GLUT.  Set up your GLProgramInterface class,
@@ -247,7 +244,7 @@ class GLUTBackend:
     """
     def __init__(self):
         self.glutInitialized = False
-        self.window = None
+        self.windows = []
 
     def initialize(self,program_name):
         if self.glutInitialized == False:
@@ -258,23 +255,17 @@ class GLUTBackend:
             self.glutInitialized = True
 
     def createWindow(self,name):
-        self.initialize()
-        return GLUTWindow(name)
-
-    def addPlugin(self,plugin,window=None):
-        """ Open a window and initialize. Users should not call this
-        directly!  Use the visualization.py functions instead. """
-        if window == None:
-            if not self.window:
-                self.window = self.createWindow(plugin.name)
-            window = self.window
-        window.addPlugin(plugin)    
+        self.initialize(name)
+        w = GLUTWindow(name)
+        self.windows.append(w)
+        return w
 
     def run(self):
         """Starts the main loop.  NOTE: if freeglut is not installed, this
         will not return."""
         # Initialize Glut
-        assert self.window != None,"Need to define at least one GL interface"
-        self.window.initialize()
+        assert len(self.windows) >= 1,"Need to define at least one GL interface"
+        for w in self.windows:
+            w.initialize()
         glutMainLoop ()
 

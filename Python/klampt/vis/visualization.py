@@ -301,8 +301,9 @@ def setWindow(id):
     #refresh all worlds' display lists
     for w in _current_worlds:
         if w not in _windows[id].active_worlds:
-            print "klampt.vis.setWindow(): world",w,"becoming active in a different window"
+            print "klampt.vis.setWindow(): world",w,"becoming active in a different window",id
             _refreshDisplayLists(w)
+        _windows[_current_window].active_worlds.remove(w)
     _windows[id].active_worlds = _current_worlds[:]
     _current_window = id
     _globalLock.release()
@@ -1531,8 +1532,8 @@ class VisualizationPlugin(glcommon.GLWidgetPlugin):
 
             projpt = self.view.project(point,clip=False)
             if projpt[2] > self.view.clippingplanes[0]:
-              d = float(12)/float(self.view.w)*projpt[2]*0.7
-              point = vectorops.add(point,so3.apply(so3.inv(self.view.camera.matrix()[0]),(0,-d,0)))
+                d = float(12)/float(self.view.w)*projpt[2]*0.7
+                point = vectorops.add(point,so3.apply(so3.inv(self.view.camera.matrix()[0]),(0,-d,0)))
 
             glDisable(GL_LIGHTING)
             glDisable(GL_DEPTH_TEST)
@@ -1694,8 +1695,8 @@ class VisualizationPlugin(glcommon.GLWidgetPlugin):
         _globalLock.acquire()
         obj = self.getItem(name)
         if obj == None:
-          _globalLock.release()
-          raise ValueError("Object "+name+" does not exist in visualization")
+            _globalLock.release()
+            raise ValueError("Object "+name+" does not exist in visualization")
         if doedit:
             obj.make_editor()
             if obj.editor:
@@ -1800,23 +1801,23 @@ if _PyQtAvailable:
             self.layout.addWidget(self.buttons)
             self.setWindowTitle(windowinfo.name)
         def accept(self):
-          global _globalLock
-          _globalLock.acquire()
-          self.windowinfo.glwindow.hide()
-          _globalLock.release()
-          print "#########################################"
-          print "klampt.vis: Dialog accept"
-          print "#########################################"
-          return QDialog.accept(self)
+            global _globalLock
+            _globalLock.acquire()
+            self.windowinfo.glwindow.hide()
+            _globalLock.release()
+            print "#########################################"
+            print "klampt.vis: Dialog accept"
+            print "#########################################"
+            return QDialog.accept(self)
         def reject(self):
-          global _globalLock
-          _globalLock.acquire()
-          self.windowinfo.glwindow.hide()
-          print "#########################################"
-          print "klampt.vis: Dialog reject"
-          print "#########################################"
-          _globalLock.release()
-          return QDialog.reject(self)
+            global _globalLock
+            _globalLock.acquire()
+            self.windowinfo.glwindow.hide()
+            print "#########################################"
+            print "klampt.vis: Dialog reject"
+            print "#########################################"
+            _globalLock.release()
+            return QDialog.reject(self)
         
     class _MyWindow(QMainWindow):
         def __init__(self,windowinfo):
@@ -1866,9 +1867,6 @@ if _PyQtAvailable:
                     print "#########################################"
                     print "klampt.vis: Dialog on window",i
                     print "#########################################"
-                    w.glwindow.show()
-                    w.glwindow.idlesleep(0)
-                    w.glwindow.refresh()
                     if w.custom_ui == None:
                         dlg = _MyDialog(w)
                     else:
@@ -1876,10 +1874,14 @@ if _PyQtAvailable:
                     #need to cache the bastards to avoid deleting the GL object. Not sure why it's being kept around.
                     #alldlgs.append(dlg)
                     #here's the crash -- above line deleted the old dialog, which for some reason kills the widget
-                    w.glwindow.refresh()
-                    _globalLock.release()
-                    res = dlg.exec_()
-                    _globalLock.acquire()
+                    if dlg != None:
+                        w.glwindow.show()
+                        w.glwindow.idlesleep(0)
+                        w.glwindow.refresh()
+                        w.glwindow.refresh()
+                        _globalLock.release()
+                        res = dlg.exec_()
+                        _globalLock.acquire()
                     print "#########################################"
                     print "klampt.vis: Dialog done on window",i
                     print "#########################################"
@@ -1935,47 +1937,67 @@ elif _GLUTAvailable:
     print "properly."
     print ""
     
-    class GLUTHijacker(GLPluginInterface):
+    class GLUTHijacker(GLPluginProgram):
         def __init__(self,windowinfo):
-            glinterface.GLPluginInterface.__init__(self)
+            GLPluginProgram.__init__(self)
             self.windowinfo = windowinfo
             self.name = windowinfo.name
+            self.view = windowinfo.frontend.view
+            self.clearColor = windowinfo.frontend.clearColor
+            self.actions = windowinfo.frontend.actions
             self.frontend = windowinfo.frontend
             self.inDialog = False
+            self.hidden = False
         def initialize(self):
-            if not self.frontend.initialize(self): return False
+            self.frontend.window = self.window
+            if not self.frontend.initialize(): return False
             GLPluginProgram.initialize(self)
             return True
         def display(self):
             global _globalLock
             _globalLock.acquire()
-            self.frontend.display(self)
+            self.frontend.display()
             _globalLock.release()
             return True
         def display_screen(self):
             global _globalLock
             _globalLock.acquire()
-            self.frontend.display_screen(self)
+            self.frontend.display_screen()
             glColor3f(1,1,1)
             glRasterPos(20,50)
             gldraw.glutBitmapString(GLUT_BITMAP_HELVETICA_18,"(Do not close this window except to quit)")
             if self.inDialog:
                 glColor3f(1,1,0)
                 glRasterPos(20,80)
-                gldraw.glutBitmapString(GLUT_BITMAP_HELVETICA_18,"In Dialog mode. Press 'q' to return to normal mode")
+                gldraw.glutBitmapString(GLUT_BITMAP_HELVETICA_18,"In Dialog mode. Press 'Esc' to return to normal mode")
+            else:
+                glColor3f(1,1,0)
+                glRasterPos(20,80)
+                gldraw.glutBitmapString(GLUT_BITMAP_HELVETICA_18,"In Window mode. Press 'Esc' to hide window")
             _globalLock.release()
         def keyboardfunc(self,c,x,y):
-            if self.inDialog and c=='q':
-                print "Q pressed, hiding dialog"
-                self.inDialog = False
+            if ord(c)==27:
+                if self.inDialog:
+                    print "Esc pressed, hiding dialog"
+                    self.inDialog = False
+                else:
+                    print "Esc pressed, hiding window"
                 global _globalLock
                 _globalLock.acquire()
                 self.windowinfo.mode = 'hidden'
-                glutIconifyWindow()
+                self.hidden = True
+                glutHideWindow()
                 _globalLock.release()
+                return True
             else:
-                GLPluginProgram.keyboardfunc(self,c,x,y)
-
+                return self.frontend.keyboardfunc(c,x,y)
+        def keyboardupfunc(self,c,x,y):
+            return self.frontend.keyboardupfunc(c,x,y)
+        def motionfunc(self,x,y,dx,dy):
+            return self.frontend.motionfunc(x,y,dx,dy)
+        def mousefunc(self,button,state,x,y):
+            return self.frontend.mousefunc(button,state,x,y)
+        
         def idlefunc(self):
             global _quit,_showdialog
             global _globalLock
@@ -1986,23 +2008,31 @@ elif _GLUTAvailable:
                 else:
                     print "Not compiled with freeglut, can't exit main loop safely. Press Ctrl+C instead"
                     raw_input()
-            if not self.inDialog:
+            if self.hidden:
+                print "hidden, waiting...",self.windowinfo.mode
                 if self.windowinfo.mode == 'shown':
+                    print "Showing window"
+                    glutSetWindow(self.window.glutWindowID)
                     glutShowWindow()
+                    self.hidden = False
                 elif self.windowinfo.mode == 'dialog':
+                    print "Showing window in dialog mode"
                     self.inDialog = True
+                    glutSetWindow(self.window.glutWindowID)
                     glutShowWindow()
-                else:
-                    glutIconifyWindow()
+                    self.hidden = False
             _globalLock.release()
-            GLPluginProgram.idlefunc(self)
-
+            return self.frontend.idlefunc()
 
     def _run_app_thread():
-        global _thread_running,_vis,_old_glut_window,_quit
+        global _thread_running,_vis,_old_glut_window,_quit,_windows
+        import weakref
         _thread_running = True
         _GLBackend.initialize("Klamp't visualization")
-        _GLBackend.addPlugin(GLUTHijacker(windows[0]))
+        w = _GLBackend.createWindow("Klamp't visualization")
+        hijacker = GLUTHijacker(_windows[0])
+        _windows[0].guidata = weakref.proxy(hijacker)
+        w.setProgram(hijacker)
         _GLBackend.run()
         print "Visualization thread closing..."
         for w in _windows:
@@ -2047,8 +2077,12 @@ def _dialog():
         thread.setDaemon(True)
         thread.start()
         #time.sleep(0.1)
-    assert _windows[_current_window].mode == 'hidden'
+    _globalLock.acquire()
+    assert _windows[_current_window].mode == 'hidden',"dialog() called inside dialog?"
     _windows[_current_window].mode = 'dialog'
+    _windows[_current_window].worlds = _current_worlds[:]
+    _windows[_current_window].active_worlds = _current_worlds[:]
+    _globalLock.release()
     while _windows[_current_window].mode == 'dialog':
         time.sleep(0.1)
     return
@@ -2058,7 +2092,6 @@ def _set_custom_ui(func):
     if len(_windows)==0:
         _windows.append(WindowInfo(_window_title,_frontend,_vis,None))
         _current_window = 0
-    
     _windows[_current_window].custom_ui = func
     return
 
@@ -2070,11 +2103,15 @@ def _onFrontendChange():
     _windows[_current_window].frontend = _frontend
     if _windows[_current_window].glwindow:
         _windows[_current_window].glwindow.reshape(_frontend.view.w,_frontend.view.h)
-        _windows[_current_window].glwindow.setProgram(_frontend)
-    if _windows[_current_window].guidata:
+        if _PyQtAvailable:
+            _windows[_current_window].glwindow.setProgram(_frontend)
+    if _windows[_current_window].guidata and _PyQtAvailable:
         _windows[_current_window].guidata.setWindowTitle(_window_title)
         _windows[_current_window].guidata.glwidget = _windows[_current_window].glwindow
         _windows[_current_window].guidata.setCentralWidget(_windows[_current_window].glwindow)
+    if _windows[_current_window].guidata and not _PyQtAvailable:
+        _windows[_current_window].guidata.frontend = _frontend
+        _frontend.window = _windows[_current_window].guidata.window
 
 def _refreshDisplayLists(item):
     if isinstance(item,int):
@@ -2097,7 +2134,8 @@ def _refreshDisplayLists(item):
         item.appearance().refresh(False)
 
 def _checkWindowCurrent(item):
-    global _windows,_current_window,_world_to_window
+    global _windows,_current_window,_world_to_window,_current_worlds
+    print "Worlds active in current window",_current_window,":",_current_worlds
     if isinstance(item,int):
         if item not in _current_worlds:
             for w in _windows:
@@ -2107,8 +2145,8 @@ def _checkWindowCurrent(item):
                     w.active_worlds.remove(item)
             _current_worlds.append(item)
             print "klampt.vis: world added to the visualization's world (items:",_current_worlds,")"
-        #else:
-        #    print "klampt.vis: world",item,"is already in the visualization's world"
+        else:
+            print "klampt.vis: world",item,"is already in the visualization's world"
     elif isinstance(item,WorldModel):
         _checkWindowCurrent(item.index)
     elif hasattr(item,'world'):
