@@ -1,6 +1,8 @@
 """Use the get(), set(), and edit() functions to retrieve / store / edit
 resources dynamically.
 
+load() and save() launch a file browser (Qt only).
+
 Use getDirectory() and setDirectory() to set the directory under which
 resources are stored.  Alternatively, the directory=[DIRNAME] keyword
 argument can be provided to get, set, and edit.
@@ -193,6 +195,103 @@ def set(name,value,type='auto',directory=None):
     else:
         return loader.save(value,type,fn)
 
+class FileGetter:
+    def __init__(self,title="Open file"):
+        self.title = title
+        self.directory = ''
+        self.filetypes = []
+        self.result = None
+    def getOpen(self):
+        from PyQt4.QtGui import QFileDialog
+        patterns = ""
+        if len(self.filetypes) == 0:
+            patterns = "All files (*.*)"
+        else:
+            patternlist = []
+            for (desc,exts) in self.filetypes:
+                pattern = desc + " ("
+                pattern = pattern + ' '.join("*"+ext for ext in exts) + ")"
+                patternlist.append(pattern)
+            #print patternlist
+            patterns = ";;".join(patternlist)
+        self.result = QFileDialog.getOpenFileName(None, self.title, self.directory, patterns)
+    def getSave(self):
+        from PyQt4.QtGui import QFileDialog
+        patterns = ""
+        if len(self.filetypes) == 0:
+            patterns = "All files (*.*)"
+        else:
+            patternlist = []
+            for (desc,exts) in self.filetypes:
+                pattern = desc + " ("
+                pattern = pattern + ' '.join("*"+ext for ext in exts) + ")"
+                patternlist.append(pattern)
+            #print patternlist
+            patterns = ";;".join(patternlist)
+        self.result = QFileDialog.getSaveFileName(None, self.title, self.directory, patterns)
+
+def load(type=None,directory=None):
+    """Asks the user to open a resource file of a given type.  If type is not given, all resource file types
+    are given as options."""
+    
+    fg = FileGetter('Open resource')
+    fg.directory = directory
+    if directory==None:
+        fg.directory = getDirectory()    
+    if type is not None:
+        extensions=[]
+        for (k,v) in extensionToType.iteritems():
+            if v == type:
+                extensions.append(k)
+        extensions.append('.json')
+        fg.filetypes.append((type,extensions))
+
+    def make_getfilename(glbackend):
+        fg.getOpen()
+        return None
+    #These gymnastics are necessary because Qt can only be run in a single thread, and to be compatible 
+    #with the visualization you need to use the customUI functions
+    old_window = vis.getWindow()
+    vis.customUI(make_getfilename)
+    vis.dialog()
+    vis.setWindow(old_window)
+    if len(fg.result) == 0:
+        return None
+    if type == None:
+        return get(str(fg.result),'auto',directory,doedit=False)
+    return get(str(fg.result),type,'',doedit=False)
+
+def save(value,type='auto',directory=None):
+    """Asks the user to save the given resource to a file of the correct type.  If type='auto', the type
+    is determined automatically"""
+    fg = FileGetter('Save resource')
+    fg.directory = directory
+    if directory==None:
+        fg.directory = getDirectory()    
+    if type == 'auto':
+        typelist = types.objectToTypes(value)
+    else:
+        typelist = [type] 
+    for type in typelist:
+        extensions=[]
+        for (k,v) in extensionToType.iteritems():
+            if v == type:
+                extensions.append(k)
+        extensions.append('.json')
+        fg.filetypes.append((type,extensions))
+
+    def make_getfilename(glbackend):
+        fg.getSave()
+        return None
+    #These gymnastics are necessary because Qt can only be run in a single thread, and to be compatible 
+    #with the visualization you need to use the customUI functions
+    old_window = vis.getWindow()
+    vis.customUI(make_getfilename)
+    vis.dialog()
+    vis.setWindow(old_window)
+    if len(fg.result) == 0:
+        return False
+    return set(str(fg.result),value,type,'')
 
 def console_edit(name,value,type,description=None,world=None,frame=None):
     print "*********************************************************"
