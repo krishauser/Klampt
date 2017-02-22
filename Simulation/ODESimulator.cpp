@@ -500,6 +500,7 @@ void ODESimulator::Step(Real dt)
   	if(lastStateTimestep > 0) {
   		timestep=lastStateTimestep;
   		Real validTime = -lastStateTimestep, desiredTime = 0;
+      bool didAnyRollback = false;
   		bool didRollback = false;
   		while(true) {
   		  DetectCollisions();
@@ -605,6 +606,7 @@ void ODESimulator::Step(Real dt)
           //PrintStatus(this,concernedObjects,"Backing up colliding objects","from");
           
           didRollback = true;
+          didAnyRollback = true;
           lastState.Seek(0,FILESEEKSTART);
           ReadState_Internal(lastState);
           timestep *= 0.5;
@@ -654,7 +656,7 @@ void ODESimulator::Step(Real dt)
           validTime += timestep;
           simTime += timestep;
           timestep = desiredTime-validTime;
-          if(didRollback)
+          if(didRollback) 
             printf("   reset time step to %g.\n",timestep);
           didRollback = false;
   		  }
@@ -668,7 +670,7 @@ void ODESimulator::Step(Real dt)
   		  StepDynamics(timestep);
         //PrintStatus(this,concernedObjects,"Colliding objects","post-step");
   		}
-  		if(didRollback) {
+  		if(didAnyRollback) {
   		  printf("ODESimulation: Adaptive time step done, arrived at time %g.\n",simTime);
   		}
   	}
@@ -732,9 +734,6 @@ void ODESimulator::Step(Real dt)
   }
   else {
     //plain old constant time-stepping
-
-    gContacts.clear();
-    gContactsVector.resize(0);
     
     timestep=dt;
     DetectCollisions();
