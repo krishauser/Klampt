@@ -432,11 +432,13 @@ def loadMultiPath(fn):
     return value
 
 loaders = {'Trajectory':loadTrajectory,
+           'LinearPath':loadTrajectory,
            'MultiPath':loadMultiPath,
            'Geometry3D':loadGeometry3D,
            }
 
 savers = {'Trajectory':lambda x,fn:x.save(fn),
+          'LinearPath':lambda x,fn:x.save(fn),
           'MultiPath':lambda x,fn:x.save(fn),
           'Geometry3D':lambda x,fn:x.saveFile(fn),
           }
@@ -509,7 +511,7 @@ def toJson(obj,type='auto'):
         return obj
     elif type == 'ContactPoint':
         return {'x':obj.x,'n':obj.n,'kFriction':kFriction}
-    elif type == 'Trajectory':
+    elif type == 'Trajectory' or type == 'LinearPath':
         return {'times':obj.times,'milestones':obj.milestones}
     elif type == 'IKObjective':
         res = {'type':type,'link':obj.link()}
@@ -574,7 +576,7 @@ def fromJson(jsonobj,type='auto'):
         return jsonobj
     elif type == 'ContactPoint':
         return ContactPoint(jsonobj['x'],jsonobj['n'],jsonobj['kFriction'])
-    elif type == 'Trajectory':
+    elif type == 'Trajectory' or type == 'LinearPath':
         return Trajectory(jsonobj['times'],jsonobj['milestones'])
     elif type == 'IKObjective':
         link = jsonobj['link']

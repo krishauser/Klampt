@@ -26,8 +26,34 @@ from .. import vis
 
 global _directory
 global _editTemporaryWorlds
+global _thumbnail_window
 _directory = 'resources'
-_editTemporaryWorlds = {}
+_thumbnail_window = None
+
+import collections
+
+class LRUCache:
+    def __init__(self, capacity):
+        self.capacity = capacity
+        self.cache = collections.OrderedDict()
+
+    def __getitem__(self, key):
+        try:
+            value = self.cache.pop(key)
+            self.cache[key] = value
+            return value
+        except KeyError:
+            raise
+
+    def __setitem__(self, key, value):
+        try:
+            self.cache.pop(key)
+        except KeyError:
+            if len(self.cache) >= self.capacity:
+                self.cache.popitem(last=False)
+        self.cache[key] = value
+_editTemporaryWorlds = LRUCache(10)
+
 
 def getDirectory():
     """Returns the current resource directory."""
@@ -44,23 +70,41 @@ def _ensure_dir(f):
     if not os.path.exists(d):
         os.makedirs(d)
 
+def _get_world(world):
+    if isinstance(world,str):
+        #a single argument, e.g., a robot file
+        global _editTemporaryWorlds
+        try:
+            return _editTemporaryWorlds[world]
+        except KeyError:
+            w = WorldModel()
+            if not w.readFile(world):
+                raise RuntimeError("Error loading world file "+world)
+            _editTemporaryWorlds[world] = w
+            return w
+    return world
+
 extensionToType = {'.config':'Config',
                    '.configs':'Configs',
                    '.tri':'Geometry3D',
                    '.off':'Geometry3D',
                    '.stl':'Geometry3D',
                    '.poly':'Geometry3D',
-                   '.geom':'GeometricPrimitive',
+                   '.geom':'Geometry3D',
                    '.pcd':'Geometry3D',
                    '.vector3':'Vector3',
                    '.ikgoal':'IKGoal',
                    '.xform':'RigidTransform',
+                   '.path':'Trajectory',
                    '.hold':'Hold',
                    '.stance':'Stance',
                    '.grasp':'Grasp'}
 
 typeToExtension = dict((v,k) for (k,v) in extensionToType.items())
 
+def knownTypes():
+    """Returns all known types"""
+    return extensionToType.keys()
 
 def filenameToType(name):
     fileName, fileExtension = os.path.splitext(name)
@@ -77,7 +121,7 @@ def filenameToType(name):
 def get(name,type='auto',directory=None,default=None,doedit='auto',description=None,editor='visual',world=None,frame=None):
     """Retrieve a resource of the given name from the current resources
     directory.  Resources may be of type Config, Configs, IKGoal, Hold,
-    Stance, MultiPath, LinearPath, etc. (see Klampt/Modeling/Resources.h for
+    Stance, MultiPath, Trajectory/LinearPath, etc. (see Klampt/Modeling/Resources.h for
     a complete list; not all are supported in the Python API).  They can
     also be edited using RobotPose.
 
@@ -159,7 +203,7 @@ def get(name,type='auto',directory=None,default=None,doedit='auto',description=N
                 print "Cancel pressed, not saving resource to disk"
             return value
         return value
-    except IOError:
+    except IOError as e:
         if doedit!=False:
             print "Resource",fn,"does not exist, launching editor..."
             success,newvalue = edit(name,value=default,type=type,description=description,editor=editor,world=world,frame=frame)
@@ -173,6 +217,8 @@ def get(name,type='auto',directory=None,default=None,doedit='auto',description=N
         elif default is not None:
             return default
         else:
+            print "IO error"
+            print e
             raise RuntimeError("Resource "+name+" does not exist")
     return
 
@@ -232,7 +278,7 @@ class FileGetter:
 
 def load(type=None,directory=None):
     """Asks the user to open a resource file of a given type.  If type is not given, all resource file types
-    are given as options."""
+    are given as options.  Returns a (filename,value) pair"""
     
     fg = FileGetter('Open resource')
     fg.directory = directory
@@ -252,18 +298,23 @@ def load(type=None,directory=None):
     #These gymnastics are necessary because Qt can only be run in a single thread, and to be compatible 
     #with the visualization you need to use the customUI functions
     old_window = vis.getWindow()
+    global _thumbnail_window
+    if _thumbnail_window is None:
+        _thumbnail_window = vis.createWindow("")
+    vis.setWindow(_thumbnail_window)
     vis.customUI(make_getfilename)
     vis.dialog()
+    vis.customUI(None)
     vis.setWindow(old_window)
     if len(fg.result) == 0:
         return None
     if type == None:
         return get(str(fg.result),'auto',directory,doedit=False)
-    return get(str(fg.result),type,'',doedit=False)
+    return str(fg.result),get(str(fg.result),type,'',doedit=False)
 
 def save(value,type='auto',directory=None):
     """Asks the user to save the given resource to a file of the correct type.  If type='auto', the type
-    is determined automatically"""
+    is determined automatically.  Returns the selected filename or None on cancellation."""
     fg = FileGetter('Save resource')
     fg.directory = directory
     if directory==None:
@@ -286,12 +337,103 @@ def save(value,type='auto',directory=None):
     #These gymnastics are necessary because Qt can only be run in a single thread, and to be compatible 
     #with the visualization you need to use the customUI functions
     old_window = vis.getWindow()
+    global _thumbnail_window
+    if _thumbnail_window is None:
+        _thumbnail_window = vis.createWindow("")
+    vis.setWindow(_thumbnail_window)
     vis.customUI(make_getfilename)
     vis.dialog()
+    vis.customUI(None)
     vis.setWindow(old_window)
     if len(fg.result) == 0:
-        return False
-    return set(str(fg.result),value,type,'')
+        return None
+    if set(str(fg.result),value,type,''):
+        return str(fg.result)
+    return None
+
+class _ThumbnailPlugin(vis.VisualizationPlugin):
+    def __init__(self,world):
+        vis.VisualizationPlugin.__init__(self)
+        self.world = world
+        self.done = False
+        self.rendered = False
+        self.image = None
+    def display(self):
+        self.rendered = True
+        vis.VisualizationPlugin.display(self)
+    def idle(self):
+        vis.VisualizationPlugin.idle(self)
+        if self.rendered and not self.done:
+            from OpenGL.GL import *
+            view = self.window.program.view
+            screenshot = glReadPixels( view.x, view.y, view.w, view.h, GL_RGBA, GL_UNSIGNED_BYTE)
+            try:
+                import Image
+                self.image = Image.frombuffer("RGBA", (view.w, view.h), screenshot, "raw", "RGBA", 0, 0)
+            except ImportError:
+                self.image = screenshot
+            self.done = True
+        return True
+
+def thumbnail(value,size,type='auto',world=None,frame=None):
+    """Retrieves an image of the given item, resized to the given size.  Return value is a PIL Image if
+    PIL is available, or just a raw RGBA memory buffer otherwise.
+
+    Tip: can just take a snapshot of a world too."""
+    global _thumbnail_window
+    world = _get_world(world)
+    if isinstance(value,WorldModel):
+        world = value
+        value = None
+    if type == 'auto' and value is not None:
+        typelist = types.objectToTypes(value)
+        if isinstance(typelist,(list,tuple)):
+            type = typelist[0]
+        else:
+            type = typelist
+        if type == None:
+            raise ValueError("Un-recognized type")
+        if type=='Config' and world is None and len(value)==3:
+            type = 'Vector3'
+    if type in ['Config','Configs','Trajectory','IKGoal']:
+        if world is None:
+            raise ValueError("Need a world to draw a thumbnail of type "+type)
+    if frame != None:
+        if type not in ['RigidTransform','Vector3','Matrix3']:
+            raise ValueError("Can't accept frame argument for objects of type "+type)
+    old_window = vis.getWindow()
+    if _thumbnail_window is None:
+        _thumbnail_window = vis.createWindow("")
+    vis.setWindow(_thumbnail_window)
+    assert not vis.shown()
+    vp = vis.getViewport()
+    vp.w,vp.h = size
+    if vp.w < 256 or vp.h < 256:
+        vp.w = vp.w *256 / min(vp.w,vp.h)
+        vp.h = vp.h *256 / min(vp.w,vp.h)
+    vis.setViewport(vp)
+    vp = vis.getViewport()
+    plugin = _ThumbnailPlugin(world)
+    if world:
+        plugin.add("world",world)
+    if value is not None:
+        if type == 'Config':
+            world.robot(0).setConfig(value)
+        else:
+            plugin.add("item",value)
+    plugin.autoFitCamera()
+    vis.setPlugin(plugin)
+    vis.show()
+    plugin.rendered = False
+    while not plugin.done:
+        time.sleep(0.1)
+    vis.setPlugin(None)
+    vis.show(False)
+    vis.setWindow(old_window)
+    if (vp.w,vp.h) != size and plugin.image.__class__.__name__=='Image':
+        import Image
+        plugin.image.thumbnail(size,Image.ANTIALIAS)
+    return plugin.image
 
 def console_edit(name,value,type,description=None,world=None,frame=None):
     print "*********************************************************"
@@ -375,14 +517,7 @@ def edit(name,value,type='auto',description=None,editor='visual',world=None,robo
         print "PyQt is not available, defaulting to console editor"
         editor = 'console'
             
-    if isinstance(world,str):
-        #a single argument, e.g., a robot file
-        global _editTemporaryWorlds
-        if world not in _editTemporaryWorlds:
-            _editTemporaryWorlds[world] = WorldModel()
-            if not _editTemporaryWorlds[world].readFile(world):
-                raise RuntimeError("Error loading world file "+world)
-        world = _editTemporaryWorlds[world]    
+    world = _get_world(world)
     if isinstance(frame,str):
         try:
             oframe = world.rigidObject(frame)

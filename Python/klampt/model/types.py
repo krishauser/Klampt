@@ -1,5 +1,6 @@
-from ..model.contact import ContactPoint
-from ..model.contact import Hold
+from ..model.contact import ContactPoint,Hold
+from ..model.trajectory import Trajectory
+from ..model.multipath import MultiPath
 from ..math import vectorops,so3,se3
 from ..robotsim import WorldModel,RobotModel,RobotModelLink,RigidObjectModel,IKObjective
 
@@ -14,6 +15,10 @@ def objectToTypes(object,world=None):
         return 'Hold'
     elif isinstance(object,IKObjective):
         return 'IKGoal'
+    elif isinstance(object,Trajectory):
+        return 'Trajectory'
+    elif isinstance(object,MultiPath):
+        return 'MultiPath'
     elif hasattr(object,'__iter__'):
         if hasattr(object[0],'__iter__'):
             #list of lists or tuples
@@ -58,10 +63,9 @@ def make(type,object=None):
     if type == 'Config':
         if isinstance(object,RobotModel):
             return object.getConfig()
-        elif isinstance(object,WorldModel):
+        else:
             import config
             return config.getConfig(object)
-        return None
     elif type == 'Configs':
         return [make('Config',objects)]
     elif type == 'IKGoal':
@@ -75,6 +79,10 @@ def make(type,object=None):
     elif type == 'ContactPoint':
         return ContactPoint()
     elif type == 'Hold':
-        return ContactPoint()
+        return Hold()
+    elif type == 'Trajectory' or type == 'LinearPath':
+        return Trajectory()
+    elif type == 'MultiPath':
+        return MultiPath()
     else:
         return None
