@@ -1,0 +1,64 @@
+links	"base_link" "base" "shoulder_link" "upper_arm_link" "forearm_link" "wrist_1_link" "wrist_2_link" "wrist_3_link" "ee_link" "tool0" 
+
+parents	-1 0 0 2 3 4 5 6 7 7 
+
+axis	0 0 1	0 0 1	0 0 1	0 1 0	0 1 0	0 1 0	0 0 1	0 1 0	0 0 1	0 0 1	
+
+jointtype	r r r r r r r r r r 
+
+Tparent	1 0 0	0 1 0	0 0 1	0 0 0 \
+-1 3.58979e-09 0	-3.58979e-09 -1 -0	-0 0 1	0 0 0 \
+1 0 0	0 1 0	0 0 1	0 0 0.1519 \
+1.7949e-09 0 1	0 1 0	-1 0 1.7949e-09	0 0.1198 0 \
+1 0 0	0 1 0	0 0 1	0 -0.0925 0.24365 \
+1.7949e-09 0 1	0 1 0	-1 0 1.7949e-09	0 0 0.21325 \
+1 0 0	0 1 0	0 0 1	0 0.08505 0 \
+1 0 0	0 1 0	0 0 1	0 0 0.08535 \
+1.7949e-09 -1 0	1 1.7949e-09 0	0 0 1	0 0.0819 0 \
+1 -0 0	0 1.7949e-09 1	-0 -1 1.7949e-09	0 0.0819 0
+
+qmin	0 0 -6.28319 -6.28319 -6.28319 -6.28319 -6.28319 -6.28319 0 0 
+
+qmax	0 0 6.28319 6.28319 6.28319 6.28319 6.28319 6.28319 0 0 
+
+geometry	"ur3/base_link.tri" "" "ur3/shoulder_link.tri" "ur3/upper_arm_link.tri" "ur3/forearm_link.tri" "ur3/wrist_1_link.tri" "ur3/wrist_2_link.tri" "ur3/wrist_3_link.tri" "ur3/ee_link.tri" "" 
+
+mass	2 0.0001 2 3.42 1.26 0.8 0.8 0.35 0.0001 0.0001 
+
+com	0 0 0	0 0 0	0 0 0	0 0 0.121825	0 0 0.106625	0 0 0	0 0 0	0 0 0	0 0 0	0 0 0	
+
+inertia	0.00305317 0 0 0 0.00305317 0 0 0 0.005625	1e-08 0 0 0 1e-08 0 0 0 1e-08	0.00809316 0 0 0 0.00809316 0 0 0 0.005625	0.0217285 0 0 0 0.0217285 0 0 0 0.00961875	0.00654681 0 0 0 0.00654681 0 0 0 0.00354375	0.002085 0 0 0 0.002085 0 0 0 0.00225	0.002085 0 0 0 0.002085 0 0 0 0.00225	0.000912187 0 0 0 0.000912187 0 0 0 0.000984375	1e-08 0 0 0 1e-08 0 0 0 1e-08	1e-08 0 0 0 1e-08 0 0 0 1e-08	
+
+torquemax	inf inf 330 330 150 54 54 54 inf inf 
+
+velmax	0 0 2.16 2.16 3.15 3.2 3.2 3.2 0 0 
+
+accmax	0 0 100 100 100 100 100 100 0 0 
+
+
+joint weld 0
+joint weld 1
+joint normal 2
+joint normal 3
+joint normal 4
+joint normal 5
+joint normal 6
+joint normal 7
+joint weld 8
+joint weld 9
+
+
+driver normal 2
+driver normal 3
+driver normal 4
+driver normal 5
+driver normal 6
+driver normal 7
+
+
+servoP	100 100 100 100 100 100 
+servoI	0 0 0 0 0 0 
+servoD	10 10 10 10 10 10 
+
+dryFriction	0 0 0 0 0 0 
+viscousFriction	0 0 0 0 0 0 
