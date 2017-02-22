@@ -431,7 +431,10 @@ bool GeometricPrimitive::loadString(const char* str)
   type = items[0];
   properties.resize(items.size()-1);
   for(size_t i=1;i<items.size();i++)
-    if(!LexicalCast<double>(items[i],properties[i-1])) return false;
+    if(!LexicalCast<double>(items[i],properties[i-1])) {
+      fprintf(stderr,"GeometricPrimitive::loadString: could not parse item %d: \"%s\"\n",(int)i,items[i].c_str());
+      return false;
+    }
   return true;
 }
 
