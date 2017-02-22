@@ -248,8 +248,8 @@ class QtGLWindow(QGLWidget):
             self.refreshed = True
             #TODO: resolve whether it's better to call updateGL here or to schedule
             # a timer event
-            self.updateGL()
-            #QTimer.singleShot(0,lambda:self.updateGL());
+            #self.updateGL()
+            QTimer.singleShot(0,lambda:self.updateGL());
 
     def reshape(self,w,h):
         (self.width,self.height) = (w,h)
