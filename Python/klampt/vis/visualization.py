@@ -229,6 +229,7 @@ from glprogram import GLPluginProgram
 import glcommon
 import time
 import signal
+import weakref
 from ..model import types
 from ..model import config
 from ..model import coordinates
@@ -257,8 +258,9 @@ _vis = None
 _frontend = GLPluginProgram()
 #the window title for the next created window
 _window_title = "Klamp't visualizer"
-#a list of world indices in the current window.  A world cannot be used in multiple simultaneous
+#a list of WorldModel's in the current window.  A world cannot be used in multiple simultaneous
 #windows in GLUT.  If a world is reused with a different window, its display lists will be refreshed.
+#Note: must be proxies to allow for deletion
 _current_worlds = []
 #list of WindowInfo's
 _windows = []
@@ -296,13 +298,14 @@ def setWindow(id):
         _windows.append(WindowInfo(_window_title,_frontend,_vis)) 
         _windows[-1].worlds = _current_worlds
         _windows[-1].active_worlds = _current_worlds[:]
-    assert id >= 0 and id < len(_windows)
+    assert id >= 0 and id < len(_windows),"Invalid window id"
     _window_title,_frontend,_vis,_current_worlds = _windows[id].name,_windows[id].frontend,_windows[id].vis,_windows[id].worlds
+    #print "vis.setWindow(",id,") the window has status",_windows[id].mode
     #refresh all worlds' display lists
     for w in _current_worlds:
         if w not in _windows[id].active_worlds:
-            print "klampt.vis.setWindow(): world",w,"becoming active in a different window",id
-            _refreshDisplayLists(w)
+            print "klampt.vis.setWindow(): world",w.index,"becoming active in the new window",id
+            _refreshDisplayLists(w())
         _windows[_current_window].active_worlds.remove(w)
     _windows[id].active_worlds = _current_worlds[:]
     _current_window = id
@@ -416,13 +419,13 @@ def kill():
         return
     _kill()
 
-def show(hidden=False):
+def show(display=True):
     """Shows or hides the current window"""
     _globalLock.acquire()
-    if hidden:
-        _hide()
-    else:
+    if display:
         _show()
+    else:
+        _hide()
     _globalLock.release()
 
 def spin(duration):
@@ -480,7 +483,9 @@ def add(name,item,keepAppearance=False):
     if _vis==None:
         print "Visualization disabled"
         return
+    _globalLock.lock()
     _checkWindowCurrent(item)
+    _globalLock.unlock()
     _vis.add(name,item,keepAppearance)
 
 def listItems(name=None,indent=0):
@@ -589,7 +594,7 @@ def _getOffsets(object):
     if isinstance(object,WorldModel):
         res = []
         for i in range(object.numRobots()):
-            res += _getOffsets(object.robots(i))
+            res += _getOffsets(object.robot(i))
         for i in range(object.numRigidObjects()):
             res += _getOffsets(object.rigidObject(i))
         return res
@@ -605,6 +610,8 @@ def _getOffsets(object):
     elif isinstance(object,Geometry3D):
         return object.getCurrentTransform()[1]
     elif isinstance(object,VisAppearance):
+        res = _getOffsets(object.item)
+        if len(res) != 0: return res
         if len(object.subAppearances) == 0:
             bb = object.getBounds()
             if bb != None and not aabb_empty(bb):
@@ -670,46 +677,60 @@ def _fitPlane(pts):
 def autoFitViewport(viewport,objects): 
     ofs = sum([_getOffsets(o) for o in objects],[])
     pts = sum([_getBounds(o) for o in objects],[])
-    bb = aabb_create(*pts)
-    center = vectorops.mul(vectorops.add(bb[0],bb[1]),0.5)
     #print "Bounding box",bb,"center",center
     #raw_input()
-    #print "Fitting viewport to points",ofs
+    #reset
+    viewport.camera.rot = [0.,0.,0.]
+    viewport.camera.tgt = [0.,0.,0.]
+    viewport.camera.dist = 6.0
+    viewport.clippingplanes = (0.2,20)
     if len(ofs) == 0:
         return
+
+    bb = aabb_create(*pts)
+    center = vectorops.mul(vectorops.add(bb[0],bb[1]),0.5)
+    viewport.camera.tgt = center
+    radius = max(vectorops.distance(bb[0],center),0.1)
+    viewport.camera.dist = 1.2*radius / math.tan(math.radians(viewport.fov*0.5))
+    #default: oblique view
+    viewport.camera.rot = [0,math.radians(30),math.radians(45)]
     #fit a plane to these points
     try:
         centroid,normal = _fitPlane(ofs)
-        if normal[2] > 0:
-            normal = vectorops.mul(normal,-1)
-        z,x,y = so3.matrix(so3.inv(so3.canonical(normal)))
-        #print z,x,y
-        #raw_input()
-        radius = max([abs(vectorops.dot(x,vectorops.sub(center,pt))) for pt in pts] + [abs(vectorops.dot(y,vectorops.sub(center,pt)))*viewport.w/viewport.h for pt in pts])
-        zmin = min([vectorops.dot(z,vectorops.sub(center,pt)) for pt in pts])
-        zmax = max([vectorops.dot(z,vectorops.sub(center,pt)) for pt in pts])
-        #print "Viewing direction",normal,"at point",center,"with scene size",radius
-        #orient camera to point along normal direction
-        viewport.camera.tgt = center
-        viewport.camera.dist = 1.2*radius / math.tan(math.radians(viewport.fov*0.5))
-        near,far = viewport.clippingplanes
-        if viewport.camera.dist + zmin < near:
-            near = max((viewport.camera.dist + zmin)*0.5, radius*0.1)
-        if viewport.camera.dist + zmax > far:
-            far = max((viewport.camera.dist + zmax)*1.5, radius*3)
-        viewport.clippingplanes = (near,far)
-        roll = 0
-        yaw = math.atan2(normal[0],normal[1])
-        pitch = math.atan2(-normal[2],vectorops.norm(normal[0:2]))
-        #print "Roll pitch and yaw",roll,pitch,yaw
-        #print "Distance",viewport.camera.dist
-        viewport.camera.rot = [roll,pitch,yaw]
     except Exception as e:
-        print "Exception occurred during fitting to points"
-        print ofs
-        print pts
-        raise
-        return
+        try:
+            centroid,normal = _fitPlane(pts)
+        except Exception as e:
+            print "Exception occurred during fitting to points"
+            print ofs
+            print pts
+            raise
+            return
+    if normal[2] > 0:
+        normal = vectorops.mul(normal,-1)
+    z,x,y = so3.matrix(so3.inv(so3.canonical(normal)))
+    #print z,x,y
+    #raw_input()
+    radius = max([abs(vectorops.dot(x,vectorops.sub(center,pt))) for pt in pts] + [abs(vectorops.dot(y,vectorops.sub(center,pt)))*viewport.w/viewport.h for pt in pts])
+    zmin = min([vectorops.dot(z,vectorops.sub(center,pt)) for pt in pts])
+    zmax = max([vectorops.dot(z,vectorops.sub(center,pt)) for pt in pts])
+    #print "Viewing direction",normal,"at point",center,"with scene size",radius
+    #orient camera to point along normal direction
+    viewport.camera.tgt = center
+    viewport.camera.dist = 1.2*radius / math.tan(math.radians(viewport.fov*0.5))
+    near,far = viewport.clippingplanes
+    if viewport.camera.dist + zmin < near:
+        near = max((viewport.camera.dist + zmin)*0.5, radius*0.1)
+    if viewport.camera.dist + zmax > far:
+        far = max((viewport.camera.dist + zmax)*1.5, radius*3)
+    viewport.clippingplanes = (near,far)
+    roll = 0
+    yaw = math.atan2(normal[0],normal[1])
+    pitch = math.atan2(-normal[2],vectorops.norm(normal[0:2]))
+    #print "Roll pitch and yaw",roll,pitch,yaw
+    #print "Distance",viewport.camera.dist
+    viewport.camera.rot = [roll,pitch,yaw]
+
 
 def autoFitCamera(scale=1):
     global _vis
@@ -1316,9 +1337,11 @@ class VisAppearance:
         elif isinstance(item,ContactPoint):
             L = self.attributes.get("length",0.05)
             return aabb_create(item.x,vectorops.madd(item.x,item.n,L))
+        elif isinstance(item,WorldModel):
+            pass
         elif hasattr(item,'geometry'):
             return item.geometry().getBB()
-        elif hasattr(item,'__iter__') and len(item) == 3:
+        elif 'Vector3' == objectToVisType(item,None):
             #assumed to be a point
             return (item,item)
         else:
@@ -1767,8 +1790,11 @@ class VisualizationPlugin(glcommon.GLWidgetPlugin):
             vp = _frontend.get_view()
         else:
             vp = self.window.get_view()
-        autoFitViewport(vp,self.items.values())
-        vp.camera.dist /= scale
+        try:
+            autoFitViewport(vp,self.items.values())
+            vp.camera.dist /= scale
+        except Exception:
+            print "Unable to auto-fit camera"
 
 
 
@@ -1824,7 +1850,7 @@ if _PyQtAvailable:
             QMainWindow.__init__(self)
             self.windowinfo = windowinfo
             self.glwidget = windowinfo.glwindow
-            self.glwidget.setMinimumSize(640,480)
+            self.glwidget.setMinimumSize(self.glwidget.width,self.glwidget.height)
             self.glwidget.setMaximumSize(4000,4000)
             self.glwidget.setSizePolicy(QSizePolicy(QSizePolicy.Maximum,QSizePolicy.Maximum))
             self.setCentralWidget(self.glwidget)
@@ -1856,12 +1882,15 @@ if _PyQtAvailable:
             _globalLock.acquire()
             for i,w in enumerate(_windows):
                 if w.glwindow == None and w.mode != 'hidden':
+                    print "vis: creating GL window"
                     w.glwindow = _GLBackend.createWindow(w.name)
                     w.glwindow.setProgram(w.frontend)
                     w.glwindow.setParent(None)
                     w.glwindow.refresh()
                 if w.doRefresh:
-                    w.glwindow.updateGL()
+                    if w.mode != 'hidden':
+                        print "vis: refreshing opengl"
+                        w.glwindow.updateGL()
                     w.doRefresh = False
                 if w.mode == 'dialog':
                     print "#########################################"
@@ -2114,13 +2143,7 @@ def _onFrontendChange():
         _frontend.window = _windows[_current_window].guidata.window
 
 def _refreshDisplayLists(item):
-    if isinstance(item,int):
-        w = WorldModel()
-        w.index = item
-        _refreshDisplayLists(w)
-        #prevents deletion
-        w.index = -1
-    elif isinstance(item,WorldModel):
+    if isinstance(item,WorldModel):
         for i in xrange(item.numRobots()):
             _refreshDisplayLists(item.robot(i))
         for i in xrange(item.numRigidObjects()):
@@ -2135,20 +2158,20 @@ def _refreshDisplayLists(item):
 
 def _checkWindowCurrent(item):
     global _windows,_current_window,_world_to_window,_current_worlds
-    print "Worlds active in current window",_current_window,":",_current_worlds
-    if isinstance(item,int):
+    _current_worlds = [w for w in _current_worlds if w() is not None]
+    print "Worlds active in current window",_current_window,":",[w().index for w in _current_worlds]
+    assert not isinstance(item,int),"Need to have a full WorldModel instance"
+    if isinstance(item,WorldModel):
         if item not in _current_worlds:
             for w in _windows:
                 if item in w.active_worlds:
                     print "klampt.vis: warning, world",item,"was shown in a different window, now refreshing display lists"
                     _refreshDisplayLists(item)
                     w.active_worlds.remove(item)
-            _current_worlds.append(item)
-            print "klampt.vis: world added to the visualization's world (items:",_current_worlds,")"
-        else:
-            print "klampt.vis: world",item,"is already in the visualization's world"
-    elif isinstance(item,WorldModel):
-        _checkWindowCurrent(item.index)
+            _current_worlds.append(weakref.ref(item))
+            print "klampt.vis: world added to the visualization's world (items:",[w().index for w in _current_worlds],")"
+        #else:
+        #    print "klampt.vis: world",item,"is already in the current window's world"
     elif hasattr(item,'world'):
         _checkWindowCurrent(item.world)
 
