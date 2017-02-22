@@ -372,7 +372,7 @@ class XmlAppearance
     tex.texture = "checker";
     tex.texCoordAutoScale = false;
     tex.Set(terrain.geometry);
-    Get(terrain.geometry);
+    return Get(terrain.geometry);
   }
 
   TiXmlElement* e;
