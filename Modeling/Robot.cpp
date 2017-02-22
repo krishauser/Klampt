@@ -1777,7 +1777,7 @@ void Robot::Mount(int link, const Robot& subchain, const RigidTransform& T,const
 	}
 	//init collisions between subchain and existing links
 	for (size_t j = 0; j < subchain.links.size(); j++) {
-		if (subchain.parents[j] < 0 && geometry[link] && !geometry[link]->Empty()) {
+		if (subchain.parents[j] < 0 && link >= 0 && geometry[link] && !geometry[link]->Empty()) {
 			//rigidly attached to 'link' -- dont check self collision with link
 			for (size_t i = 0; i < norig; i++) {
 				if ((int) i != link)
