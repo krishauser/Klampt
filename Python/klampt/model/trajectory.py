@@ -32,7 +32,15 @@ class Trajectory:
 		self.milestones = milestones
 
 	def load(self,fn):
-		"""Reads from a whitespace-separated file"""
+		"""Reads from a whitespace-separated file in the format
+
+		t1 [q1]
+		t2 [q2]
+		...
+
+		where each [qi] is a Klamp't formatted length-n configuration, written
+		in the form "n qi1 ... qin".
+		"""
 		fin = open(fn, 'r')
 		self.times = []
 		self.milestones = []
