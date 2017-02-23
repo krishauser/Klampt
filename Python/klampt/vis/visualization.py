@@ -483,9 +483,9 @@ def add(name,item,keepAppearance=False):
     if _vis==None:
         print "Visualization disabled"
         return
-    _globalLock.lock()
+    _globalLock.acquire()
     _checkWindowCurrent(item)
-    _globalLock.unlock()
+    _globalLock.release()
     _vis.add(name,item,keepAppearance)
 
 def listItems(name=None,indent=0):
