@@ -1,38 +1,42 @@
-"""Klamp't world visualization routines.  See demos/vistemplate.py for an
+"""Klamp't visualization routines.  See Python/demos/vistemplate.py for an
 example of how to run this module.
 
-WHAT DO WE WANT:
-- Everything visualization-related is goverend by the klampt.vis module.
-- Simple startup: create a GLPluginInterface and run a GUI using a single
-  line of code, or simply add items to the visualization and run the GUI.
-- Parallelize GUI and script code: launch a GUI, modify items of a world /
-  simulation through a script, close the GUI or wait for the user to close
-  the window.
-- Window customizability with Qt.  Add the GLPluginInterface to an existing window
-  and launch it.
-- Add/remove/animate/configure all items in visualization using one-liners
-- Multiple windows, shown either sequentially or simultaneously
+The visualization module lets you draw most Klamp't objects in a 3D world 
+using a simple interface.  It also lets you customize the GUI using Qt 
+widgets, OpenGL drawing, and keyboard/mouse intercept routines.  
 
-CHALLENGES:
-- Desire for window customizability breaks abstraction over GLUT / Qt.  Solution:
-  None.  Possibly demand Qt?  Compatibility vs. complexity tradeoff.
-- Parallel GUI / script execution has locking issues.  Solution: put 
-  locks around everything visualization related, and require user to call
-  vis.acquire() and vis.release().
-- Multiple windows has the problem of GL display lists not passing from context
-  to context. 
-  Solutions:
-  - Print warnings if the same world is passed to multiple simultaneous windows.
-  - When windows are closed they become "dormant" and can wake up again:
-    - Qt: simply hide the GL widget but keep it around to be passed to other windows.
-    - GLUT: hide the window rather than closing it. 
-- GLUT doesn't allow modal dialog boxes. 
-  Solution: disable signals to non-modal windows?
+Main features include:
+- Simple interface to modify the visualization
+- Simple interface to animate and render trajectories
+- Simple interface to edit certain Klamp't objects (configurations, points,
+  transforms)
+- Simple interface to drawing text and text labels, and drawing plots
+- Multi-window, multi-viewport support
+- Unified interface to PyQt and GLUT (with loss of resource editing functionality
+  under GLUT)
+- Automatic camera setup
 
-NEW PROBLEM: 
-- Qt seems to save display lists, so that each gl window has the same GL context?
-  Cannot reuse widgets for new windows.
-- GLUT does not, so things disappear when you create a new window.
+The resource editing functionality in the klampt.io.resource module (based on 
+klampt.vis.editors) use this module as well.
+
+Due to weird OpenGL and Qt behavior in multi-threaded programs, you should
+only run visualizations using the methods in this module.
+
+There are two primary ways of setting up a visualization:
+- The first is by adding items to the visualization world and customizing them
+  using the vis.X routines that mirror the methods in VisualizationPlugin (like
+  add, setColor, animate, etc).  See Python/demos/vistemplate.py for more information.
+- The second is by creating a subclass of GLPluginInterface and doing
+  all the necessary drawing / interaction yourself inside its hooks.  In the
+  latter case, you will call vis.setPlugin(plugin) to override the default
+  visualization behavior before creating your window. See Python/demos/visplugin.py
+  for more information.
+
+A third way of setting up a visualization is a hybrid of the two, where you can
+add functionality on top of default the visualization world. You can either use
+vis.pushPlugin(plugin) in which case your plugin adds additional functionality,
+or you can subclass the vis.VisualizationPlugin class, and selectively augment /
+override the default functionality.
 
 Instructions:
 
@@ -40,61 +44,61 @@ Instructions:
   Call the VisualizationPlugin aliases (add, animate, setColor, etc)
 
 - To show the visualization and quit when the user closes the window:
-  run()
+  vis.run()
 
 - To show the visualization and return when the user closes the window:
-  dialog()
+  vis.dialog()
   ... do stuff afterwards ... 
-  kill()
+  vis.kill()
 
 - To show the visualization and be able to run a script alongside it
   until the user closes the window:
-  show()
-  while shown():
-      lock()
+  vis.show()
+  while vis.shown():
+      vis.lock()
       ... do stuff ...
       [to exit the loop call show(False)]
-      unlock()
+      vis.unlock()
       time.sleep(dt)
   ... do stuff afterwards ...
-  kill()
+  vis.kill()
 
 - To run a window with a custom plugin (GLPluginInterface) and terminate on
   closure: 
-  run(plugin)
+  vis.run(plugin)
 
 - To show a dialog or parallel window
-  setPlugin(plugin)
+  vis.setPlugin(plugin)
   ... then call  
-  dialog()
+  vis.dialog()
   ... or
-  show()
+  vis.show()
   ... do stuff afterwards ... 
-  kill()
+  vis.kill()
 
 - To add a GLPluginInterface that just customizes a few things on top of
   the default visualization:
-  pushPlugin(plugin)
-  dialog()
-  popPlugin()
+  vis.pushPlugin(plugin)
+  vis.dialog()
+  vis.popPlugin()
 
 - To run plugins side-by-side in the same window:
-  setPlugin(plugin1)
-  addPlugin(plugin2)  #this creates a new split-screen
-  dialog()
+  vis.setPlugin(plugin1)
+  vis.addPlugin(plugin2)  #this creates a new split-screen
+  vis.dialog()
   ... or
-  show()
+  vis.show()
   ... do stuff afterwards ... 
-  kill()
+  vis.kill()
 
 - To run a custom dialog in a QtWindow
-  setPlugin([desired plugin or None for visualization])
-  setParent(qt_window)
-  dialog()
+  vis.setPlugin([desired plugin or None for visualization])
+  vis.setParent(qt_window)
+  vis.dialog()
   ... or 
-  show()
+  vis.show()
   ... do stuff afterwards ... 
-  kill()
+  vis.kill()
 
 - To launch a second window after the first is closed: just call whatever you
   want again. Note: if show was previously called with a plugin and you wish to
@@ -102,23 +106,20 @@ Instructions:
   restore the default.
 
 - To create a separate window with a given plugin:
-  w1 = createWindow()  #w1=0
+  w1 = vis.createWindow()  #w1=0
   show()
-  w2 = createWindow()  #w2=1
-  setPlugin(plugin)
-  dialog()
+  w2 = vis.createWindow()  #w2=1
+  vis.setPlugin(plugin)
+  vis.dialog()
   #to restore commands to the original window
-  setWindow(w1)
-  while shown():
+  vis.setWindow(w1)
+  while vis.shown():
       ...
-  kill()
-
-Due to weird OpenGL behavior when opening/closing windows, you should only
-run visualizations using the methods in this module.
+  vis.kill()
 
 Note: when changing the data shown by the window (e.g., modifying the
-configurations of robots in a WorldModel) you must call lock() before
-accessing the data and then call unlock() afterwards.
+configurations of robots in a WorldModel) you must call vis.lock() before
+accessing the data and then call vis.unlock() afterwards.
 
 The main interface is as follows:
 
@@ -129,10 +130,12 @@ def setWindow(id): sets the active window for all subsequent calls.  ID 0 is
 def getWindow(): gets the active window ID.
 def setWindowTitle(title): sets the title of the visualization window.
 def getWindowTitle(): returns the title of the visualization window
-def setPlugin(plugin=None): sets the current plugin (a GLPluginInterface instance).  Set
-    plugin=None if you want to use the default visualization.
+def setPlugin(plugin=None): sets the current plugin (a GLPluginInterface instance). 
+    This plugin will now capture input from the visualization and can override
+    any of the default behavior of the visualizer. Set plugin=None if you want to return
+    to the default visualization.
 def addPlugin(plugin): adds a second OpenGL viewport governed by the given plugin (a
-    GLPluginInterface instance).
+    GLPluginInterface instance).    
 def run([plugin]): pops up a dialog and then kills the program afterwards.
 def kill(): kills all previously launched visualizations.  Afterwards, you may not
     be able to start new windows. Call this to cleanly quit.
@@ -165,7 +168,8 @@ def clear(): clears the visualization world.
 def listItems(): prints out all names of visualization objects
 def listItems(name): prints out all names of visualization objects under the given name
 def dirty(item_name='all'): marks the given item as dirty and recreates the
-    OpenGL display lists.
+    OpenGL display lists.  You may need to call this if you modify an item's geometry,
+    for example.
 def remove(name): removes an item from the visualization.
 def setItemConfig(name,vector): sets the configuration of a named item.
 def getItemConfig(name): returns the configuration of a named item.
@@ -173,29 +177,49 @@ def hide(name,hidden=True): hides/unhides an item.  The item is not removed,
     it just becomes invisible.
 def edit(name,doedit=True): turns on/off visual editing of some item.  Only points,
     transforms, coordinate.Point's, coordinate.Transform's, coordinate.Frame's,
-    robots, and objects are accepted at this point.
+    robots, and objects are currently accepted.
 def hideLabel(name,hidden=True): hides/unhides an item's text label.
+def setAppearance(name,appearance): changes the Appearance of an item.
+def revertAppearance(name): restores the Appearance of an item
+def setAttribute(name,attribute,value): sets an attribute of the appearance
+    of an item.  Typical attributes are 'color', 'size', 'length', 'width'...
+    TODO: document all accepted attributes.
+def setColor(name,r,g,b,a=1.0): changes the color of an item.
 def animate(name,animation,speed=1.0,endBehavior='loop'): Sends an animation to the
     object. May be a Trajectory or a list of configurations.  Works with points,
     so3 elements, se3 elements, rigid objects, or robots. 
     - speed: a modulator on the animation speed.  If the animation is a list of
       milestones, it is by default run at 1 milestone per second.
     - endBehavior: either 'loop' (animation repeats forever) or 'halt' (plays once).
-def setAppearance(name,appearance): changes the Appearance of an item.
-def revertAppearance(name): restores the Appearance of an item
-def setAttribute(name,attribute,value): sets an attribute of the appearance
-    of an item.  Typical attributes are color, size, length, width...
-    TODO: document all accepted attributes.
-def setColor(name,r,g,b,a=1.0): changes the color of an item.
-def setPlugin(plugin): plugin must be an instance of a GLPluginBase. 
-    This plugin will now capture input from the visualization and can override
-    any of the default behavior of the visualizer.
 def pauseAnimation(paused=True): Turns on/off animation.
 def stepAnimation(amount): Moves forward the animation time by the given amount
     in seconds
 def animationTime(newtime=None): Gets/sets the current animation time
     If newtime == None (default), this gets the animation time.
     If newtime != None, this sets a new animation time.
+def addText(name,text,position=None): adds text.  You need to give an
+    identifier to all pieces of text, which will be used to access the text as any other
+    vis object.  If position is None, this is added as an on-screen display.  If position
+    is of length 2, it is the (x,y) position of the upper left corner of the text on the
+    screen.  Negative units anchor the text to the right or bottom of the window. 
+    If position is of length 3, the text is drawn in the world coordinates.  You can
+    then set the color, 'size' attribute, and 'position' attribute of the text using the
+    identifier given in 'name'.
+def clearText(): clears all previously added text.
+def addPlot(name): creates a new empty plot.
+def addPlotItem(name,itemname): adds a visualization item to a plot.
+def logPlot(name,itemname,value): logs a custom visualization item to a plot
+def logPlotEvent(name,eventname,color=None): logs an event on the plot.
+def hidePlotItem(name,itemname,hidden=True): hides an item in the plot.  To hide a
+    particular channel of a given item pass a pair (itemname,channelindex).  For example,
+    to hide configurations 0-5 of 'robot', call hidePlotItem('plot',('robot',0)), ...,
+    hidePlotItem('plot',('robot',5)).
+def setPlotDuration(name,time): sets the plot duration.
+def setPlotRange(name,vmin,vmax): sets the y range of a plot.
+def setPlotPosition(name,x,y): sets the upper left position of the plot on the screen.
+def setPlotSize(name,w,h): sets the width and height of the plot.
+def savePlot(name,fn): saves a plot to a CSV (extension .csv) or Trajectory (extension
+    .traj) file.
 def autoFitCamera(scale=1.0): Automatically fits the camera to all objects in the
     visualization.  A scale > 1 magnifies the camera zoom.
 
@@ -439,10 +463,13 @@ def spin(duration):
     return
 
 def lock():
+    """Begins a locked section.  Needs to be called any time you modify a visualization item outside
+    of the visualization thread.  unlock() must be called to let the visualization thread proceed."""
     global _globalLock
     _globalLock.acquire()
 
 def unlock():
+    """Ends a locked section acquired by lock()."""
     global _globalLock,_windows
     for w in _windows:
         if w.glwindow:
@@ -458,34 +485,42 @@ def shown():
     return res
 
 def customUI(func):
+    """Tells the next created window/dialog to use a custom UI function.  func is a 1-argument function that 
+    takes a QtWindow or GLUTWindow as its argument."""
     global _globalLock
     _globalLock.acquire()
     _set_custom_ui(func)
     _globalLock.release()
 
 def getViewport():
+    """Returns the GLViewport of the current window (see klampt.vis.glprogram.GLViewport)"""
     return _frontend.get_view()
 
 def setViewport(viewport):
+    """Sets the current window to use a given GLViewport (see klampt.vis.glprogram.GLViewport)"""
     _frontend.set_view(viewport)
 
 
 
 ######### CONVENIENCE ALIASES FOR VisualizationPlugin methods ###########
 def clear():
+    """Clears the visualization world."""
     global _vis
     if _vis==None:
         return
     _vis.clear()
 
 def add(name,item,keepAppearance=False):
+    """Adds an item to the visualization. name is a unique identifier.  If an item with
+    the same name already exists, it will no longer be shown.  If keepAppearance=True, then
+    the prior item's appearance will be kept, if a prior item exists."""
     global _vis
     if _vis==None:
         print "Visualization disabled"
         return
-    _globalLock.lock()
+    _globalLock.acquire()
     _checkWindowCurrent(item)
-    _globalLock.unlock()
+    _globalLock.release()
     _vis.add(name,item,keepAppearance)
 
 def listItems(name=None,indent=0):
@@ -496,6 +531,9 @@ def listItems(name=None,indent=0):
     _vis.listItems(name,indent)
 
 def dirty(item_name='all'):
+    """Marks the given item as dirty and recreates the OpenGL display lists.  You may need
+    to call this if you modify an item's geometry, for example.  If things start disappearing
+    from your world when you create a new window, you may need to call this too."""
     global _vis
     if _vis==None:
         print "Visualization disabled"
@@ -503,6 +541,16 @@ def dirty(item_name='all'):
     _vis.dirty(item_name)
 
 def animate(name,animation,speed=1.0,endBehavior='loop'):
+    """Sends an animation to the named object.
+    Works with points, so3 elements, se3 elements, rigid objects, or robots, and may work
+    with other objects as well.
+
+    Parameters:
+    - animation: may be a Trajectory or a list of configurations.
+    - speed: a modulator on the animation speed.  If the animation is a list of
+      milestones, it is by default run at 1 milestone per second.
+    - endBehavior: either 'loop' (animation repeats forever) or 'halt' (plays once).
+    """
     global _vis
     if _vis==None:
         print "Visualization disabled"
@@ -524,6 +572,10 @@ def stepAnimation(amount):
     _vis.stepAnimation(amount)
 
 def animationTime(newtime=None):
+    """Gets/sets the current animation time
+    If newtime == None (default), this gets the animation time.
+    If newtime != None, this sets a new animation time.
+    """
     global _vis
     if _vis==None:
         print "Visualization disabled"
@@ -561,6 +613,9 @@ def hide(name,hidden=True):
     _vis.hide(name,hidden)
 
 def edit(name,doedit=True):
+    """Turns on/off visual editing of some item.  Only points, transforms,
+    coordinate.Point's, coordinate.Transform's, coordinate.Frame's, robots,
+    and objects are currently accepted."""
     global _vis
     if _vis==None:
         return
@@ -731,6 +786,79 @@ def autoFitViewport(viewport,objects):
     #print "Distance",viewport.camera.dist
     viewport.camera.rot = [roll,pitch,yaw]
 
+def addText(name,text,pos=None):
+    """Adds text to the visualizer.  You must give an identifier to all pieces of
+    text, which will be used to access the text as any other vis object. 
+
+    Parameters:
+    - name: the text's unique identifier.
+    - text: the string to be drawn
+    - pos: the position of the string. If pos=None, this is added to the on-screen "console" display. 
+      If pos has length 2, it is the (x,y) position of the upper left corner of the text on the
+      screen.  Negative units anchor the text to the right or bottom of the window. 
+      If pos has length 3, the text is drawn in the world coordinates. 
+
+    To customize the text appearance, you can set the color, 'size' attribute, and 'position'
+    attribute of the text using the identifier given in 'name'.
+    """
+    global _vis
+    _vis.add(name,text,True)
+    if pos is not None:
+        _vis.setAttribute(name,'position',pos)
+
+def clearText():
+    """Clears all text in the visualization."""
+    global _vis
+    if _vis==None:
+        return
+    _vis.clearText()
+
+def addPlot(name):
+    add(name,VisPlot())
+
+def addPlotItem(name,itemname):
+    global _vis
+    if _vis==None:
+        return
+    _vis.addPlotItem(name,itemname)
+
+def logPlot(name,itemname,value):
+    """Logs a custom visualization item to a plot"""
+    global _vis
+    if _vis==None:
+        return
+    _vis.logPlot(name,itemname,value)
+
+def logPlotEvent(name,eventname,color=None):
+    """Logs an event on the plot."""
+    global _vis
+    if _vis==None:
+        return
+    _vis.logPlotEvent(name,eventname,color)
+
+def hidePlotItem(name,itemname,hidden=True):
+    global _vis
+    if _vis==None:
+        return
+    _vis.hidePlotItem(name,itemname,hidden)
+
+def setPlotDuration(name,time):
+    setAttribute(name,'duration',time)
+
+def setPlotRange(name,vmin,vmax): 
+    setAttribute(name,'range',(vmin,vmax))
+
+def setPlotPosition(name,x,y):
+    setAttribute(name,'position',(x,y))
+
+def setPlotSize(name,w,h):
+    setAttribute(name,'size',(w,h))
+
+def savePlot(name,fn):
+    global _vis
+    if _vis==None:
+        return
+    _vis.savePlot(fn)
 
 def autoFitCamera(scale=1):
     global _vis
@@ -783,6 +911,305 @@ def aabb_expand(bb,bb2):
 def aabb_empty(bb):
     return any((a > b) for (a,b) in zip(bb[0],bb[1]))
 
+_defaultCompressThreshold = 1e-2
+
+class VisPlotItem:
+    def __init__(self,itemname,linkitem):
+        self.name = itemname
+        self.itemnames = []
+        self.linkitem = linkitem
+        self.traces = []
+        self.hidden = []
+        self.traceRanges = []
+        self.luminosity = []
+        self.compressThreshold = _defaultCompressThreshold
+        if linkitem is not None:
+            q = config.getConfig(linkitem.item)
+            assert q is not None
+            from collections import deque
+            self.traces = [deque() for i in range(len(q))]
+            self.itemnames = config.getConfigNames(linkitem.item)
+
+    def customUpdate(self,item,t,v):
+        for i,trace in enumerate(self.itemnames):
+            if item == itemname:
+                self.updateTrace(i,t,v)
+                self.traceRanges[i] = (min(self.traceRanges[i][0],v),max(self.traceRanges[i][1],v))
+                return    
+        raise ValueError("Invalid item specified: "+str(item))
+
+    def update(self,t):
+        if self.linkitem is None:
+            return
+        q = config.getConfig(self.linkitem.item)
+        assert len(self.traces) == len(q)
+        for i,v in enumerate(q):
+            self.updateTrace(i,t,v)
+            self.traceRanges[i] = (min(self.traceRanges[i][0],v),max(self.traceRanges[i][1],v))
+
+    def discard(self,tstart):
+        for t in self.traces:
+            if len(t)<=1: return
+            while len(t) >= 2:
+                if t[1][0] < tstart:
+                    t.popleft()
+                else:
+                    break
+
+    def updateTrace(self,i,t,v):
+        import random
+        assert i < len(self.traces)
+        assert i <= len(self.hidden)
+        assert i <= len(self.luminosity)
+        while i >= len(self.hidden):
+            self.hidden.append(False)
+        while i >= len(self.traceRanges):
+            self.traceRanges.append((v,v))
+        if i >= len(self.luminosity):
+            initialLuminosity = [0.5,0.25,0.75,1.0]
+            while i >= len(self.luminosity):
+                if len(self.luminosity)<len(initialLuminosity):
+                    self.luminosity.append(initialLuminosity[len(self.luminosity)])
+                else:
+                    self.luminosity.append(random.uniform(0,1))
+        trace = self.traces[i]
+        if self.compressThreshold is None:
+            trace.append((t,v))
+        else:
+            if len(trace) < 2:
+                trace.append((t,v))
+            else:
+                pprev = trace[-2]
+                prev = trace[-1] 
+                assert t > prev[0]
+                slope_old = (prev[1]-pprev[1])/(prev[0]-pprev[0])
+                slope_new = (v-prev[1])/(t-prev[0])
+                if abs(slope_old-slope_new) > self.compressThreshold:
+                    trace.append((t,v))
+                else:
+                    #near-linear, just extend along straight line
+                    trace[-1] = (t,v)
+
+
+class VisPlot:
+    def __init__(self):
+        self.items = []
+        self.colors = []
+        self.events = dict()
+        self.eventColors = dict()
+        self.outfile = None
+        self.outformat = None
+
+    def __del__(self):
+        self.endSave()
+
+    def update(self,t,duration,compressThreshold):
+        for i in self.items:
+            i.compressThreshold = compressThreshold
+            i.update(t)
+        if self.outfile:
+            self.dumpCurrent()
+            self.discard(t-duration)
+        else:
+            self.discard(t-60.0)
+
+    def discard(self,tmin):
+        for i in self.items:
+            i.discard(tmin)
+        delevents = []
+        for e,times in self.events.iteritems():
+            while len(times) > 0 and times[0] < tmin:
+                times.popleft()
+            if len(times)==0: 
+                delevents.append(e)
+        for e in delevents:
+            del self.events[e]
+
+    def addEvent(self,name,t,color=None):
+        if name in self.events:
+            self.events[name].append(t)
+        else:
+            from collections import deque
+            self.events[name] = deque([t])
+            if color == None:
+                import random
+                color = (random.uniform(0.01,1),random.uniform(0.01,1),random.uniform(0.01,1))
+                color = vectorops.mul(color,1.0/max(color))
+        if color != None:
+            self.eventColors[name] = color
+            if len(color)==3:
+                self.eventColors[name] += [1.0]
+
+    def autoRange(self):
+        vmin = float('inf')
+        vmax = -float('inf')
+        for i in self.items:
+            for j in xrange(len(i.traceRanges)):
+                if not i.hidden[j]:
+                    vmin = min(vmin,i.traceRanges[j][0])
+                    vmax = max(vmax,i.traceRanges[j][1])
+        if math.isinf(vmin):
+            return (0.,1.)
+        if vmax == vmin:
+            vmax += 1.0
+        return (float(vmin),float(vmax))
+
+    def render(self,window,x,y,w,h,duration,vmin=None,vmax=None):
+        if vmin == None:
+            vmin,vmax = self.autoRange()
+        import random
+        while len(self.colors) < len(self.items):
+            c = (random.uniform(0.01,1),random.uniform(0.01,1),random.uniform(0.01,1))
+            c = vectorops.mul(c,1.0/max(c))
+            self.colors.append(c)
+        glColor3f(0,0,0)
+        glBegin(GL_LINE_LOOP)
+        glVertex2f(x,y)
+        glVertex2f(x+w,y)
+        glVertex2f(x+w,y+h)
+        glVertex2f(x,y+h)
+        glEnd()
+        window.draw_text((x-18,y+4),'%.2f'%(vmax,),9)
+        window.draw_text((x-18,y+h+4),'%.2f'%(vmin,),9)
+        tmax = 0
+        for i in self.items:
+            for trace in i.traces:
+                if len(trace)==0: continue
+                tmax = max(tmax,trace[-1][0])
+        for i,item in enumerate(self.items):
+            for j,trace in enumerate(item.traces):
+                if len(trace)==0: continue
+                labelheight = trace[-1][1]
+                if len(item.name)==0:
+                    label = item.itemnames[j]
+                else:
+                    label = str(item.name) + '.' + item.itemnames[j]
+                labelheight = (labelheight - vmin)/(vmax-vmin)
+                labelheight = y + h - h*labelheight
+                glColor3fv(vectorops.mul(self.colors[i],item.luminosity[j]))
+                window.draw_text((x+w+3,labelheight+4),label,9)
+                glBegin(GL_LINE_STRIP)
+                for k in xrange(len(trace)-1):
+                    if trace[k+1][0] > tmax-duration:
+                        u,v = trace[k]
+                        if trace[k][0] < tmax-duration:
+                            #interpolate so x is at tmax-duration
+                            u2,v2 = trace[k+1]
+                            #u + s(u2-u) = tmax-duration
+                            s = (tmax-duration-u)/(u2-u)
+                            v = v + s*(v2-v)
+                            u = (tmax-duration)
+                        u = (u-(tmax-duration))/duration
+                        v = (v-vmin)/(vmax-vmin)
+                        glVertex2f(x+w*u,y+(1-v)*h)
+                u,v = trace[-1]
+                u = (u-(tmax-duration))/duration
+                v = (v-vmin)/(vmax-vmin)
+                glVertex2f(x+w*u,y+(1-v)*h)
+                glEnd()
+
+        if len(self.events) > 0:
+            for e,times in self.events.iteritems():
+                for t in times:
+                    if t < tmax-duration: continue
+                    labelx = (t - (tmax-duration))/duration
+                    labelx = x + w*labelx
+                    c = self.eventColors[e]
+                    glColor4f(c[0]*0.5,c[1]*0.5,c[2]*0.5,c[3])
+                    window.draw_text((labelx,y+h+12),e,9)
+            glEnable(GL_BLEND)
+            glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA)
+            glBegin(GL_LINES)
+            for e,times in self.events.iteritems():
+                for t in times:
+                    if t < tmax-duration: continue
+                    labelx = (t - (tmax-duration))/duration
+                    labelx = x + w*labelx
+                    
+                    glColor4f(c[0],c[1],c[2],c[3]*0.5)
+                    glVertex2f(labelx,y)
+                    glVertex2f(labelx,y+h)
+            glEnd()
+            glDisable(GL_BLEND)
+
+    def beginSave(self,fn):
+        import os
+        ext = os.path.splitext(fn)[1]
+        if ext == '.csv' or ext == '.traj':
+            self.outformat = ext
+        else:
+            raise ValueError("Invalid extension for visualization plot, can only accept .csv or .traj")
+        self.outfile = open(fn,'w')
+        if self.outformat == '.csv':
+            #output a header
+            self.outfile.write("time,")
+            for i in self.items:
+                fullitemnames = []
+                if len(i.name) != 0:
+                    fullitemnames = [i.name+'.'+itemname for itemname in i.itemnames]
+                else:
+                    fullitemnames = i.itemnames
+                self.outfile.write(",".join(fullitemnames))
+            self.outfile.write("\n")
+        self.dumpAll()
+
+    def endSave(self):
+        if self.outfile is not None:
+            self.outfile.close()
+
+    def dumpAll(self):
+        assert self.outfile is not None
+        if len(self.items) == 0: return
+        cols = []
+        mindt = float('inf')
+        mint = float('inf')
+        maxt = -float('inf')
+        for i in self.items:
+            if len(i.trace) == 0:
+                continue
+            for j,trace in enumerate(i.trace):
+                traj = Trajectory(*zip(*trace))
+                cols.append(traj)
+                mint = min(mint,traj.times[0])
+                maxt = max(maxt,traj.times[-1])
+                for k in xrange(len(traj.times)-1):
+                    mindt = min(mindt,traj.times[k+1] - traj.times[k])
+        assert mindt > 0
+        N = int((maxt - mint)/mindt)
+        dt = (maxt - mint)/N
+        times = [mint + i*(maxt-mint)/N for i in range(N+1)]
+        for i in xrange(N+1):
+            vals = [col.evaluate(times[i]) for col in cols]
+            if self.outformat == '.csv':
+                self.outfile.write(str(times[i])+',')
+                self.outfile.write(','.join([str(v) for v in vals]))
+                self.outfile.write('\n')
+            else:
+                self.outfile.write(str(times[i])+'\t')
+                self.outfile.write(str(len(vals))+' ')
+                self.outfile.write(' '.join([str(v) for v in vals]))
+                self.outfile.write('\n')
+
+    def dumpCurrent(self):
+        if len(self.items) == 0: return
+        assert len(self.items[0].trace) > 0, "Item has no channels?"
+        assert len(self.items[0].trace[0]) > 0, "Item has no readings yet?"
+        t = self.items[0].trace[0][-1]
+        vals = []
+        for i in self.items:
+            if len(i.trace) == 0:
+                continue
+            for j,trace in enumerate(i.trace):
+                vals.append(trace[-1][1])
+        if self.outformat == '.csv':
+            self.outfile.write(str(t)+',')
+            self.outfile.write(','.join([str(v) for v in vals]))
+            self.outfile.write('\n')
+        else:
+            self.outfile.write(str(t)+'\t')
+            self.outfile.write(str(len(vals))+' ')
+            self.outfile.write(' '.join([str(v) for v in vals]))
+            self.outfile.write('\n')
 
 class VisAppearance:
     def __init__(self,item,name = None):
@@ -857,7 +1284,7 @@ class VisAppearance:
         if self.attributes.get("text_hidden",False): return
         self.widget.addLabel(text,point[:],[0,0,0])
 
-    def update(self,t):
+    def updateAnimation(self,t):
         """Updates the configuration, if it's being animated"""
         if not self.animation:
             self.drawConfig = None
@@ -866,7 +1293,16 @@ class VisAppearance:
             q = self.animation.eval(u,self.animationEndBehavior)
             self.drawConfig = q
         for n,app in self.subAppearances.iteritems():
-            app.update(t)
+            app.updateAnimation(t)
+
+    def updateTime(self,t):
+        """Updates in real time"""
+        if isinstance(self.item,VisPlot):
+            compressThreshold = self.attributes.get('compress',_defaultCompressThreshold)
+            duration = self.attributes.get('duration',5.)
+            self.swapDrawConfig()
+            self.item.update(t,duration,compressThreshold)
+            self.swapDrawConfig()
 
     def swapDrawConfig(self):
         """Given self.drawConfig!=None, swaps out the item's curren
@@ -929,6 +1365,13 @@ class VisAppearance:
             item.drawGL()
         elif hasattr(item,'drawWorldGL'):
             item.drawWorldGL()
+        elif isinstance(item,str):
+            pos = self.attributes.get("position",None)
+            if pos is not None and len(pos)==3:
+                col = self.attributes.get("color",(0,0,0))
+                self.widget.addLabel(self.item,pos,col)
+        elif isinstance(item,VisPlot):
+            pass
         elif isinstance(item,Trajectory):
             doDraw = False
             centroid = None
@@ -1341,11 +1784,20 @@ class VisAppearance:
             pass
         elif hasattr(item,'geometry'):
             return item.geometry().getBB()
-        elif 'Vector3' == objectToVisType(item,None):
-            #assumed to be a point
-            return (item,item)
+        elif isinstance(item,(str,VisPlot)):
+            pass
         else:
-            print "Empty bound for object",self.name
+            try:
+                vtype = objectToVisType(item,None)
+                if 'Vector3' == vtype:
+                    #assumed to be a point
+                    return (item,item)
+                elif 'RigidTransform' == vtype:
+                    #assumed to be a rigid transform
+                    return (item[1],item[1])
+            except Exception:
+                pass
+            print "Empty bound for object",self.name,"type",self.item.__class__.__name__
         return aabb_create()
 
     def getSubItem(self,path):
@@ -1465,6 +1917,7 @@ class VisualizationPlugin(glcommon.GLWidgetPlugin):
         self.items = {}
         self.labels = []
         self.t = time.time()
+        self.startTime = self.t
         self.animating = True
         self.currentAnimationTime = 0
         self.doRefresh = False
@@ -1486,8 +1939,6 @@ class VisualizationPlugin(glcommon.GLWidgetPlugin):
         if world != None: world=world.item
         for (k,v) in self.items.iteritems():
             v.widget = self
-            #do animation updates
-            v.update(self.currentAnimationTime)
             v.swapDrawConfig()
             v.draw(world)
             v.swapDrawConfig()
@@ -1509,6 +1960,45 @@ class VisualizationPlugin(glcommon.GLWidgetPlugin):
         global _globalLock
         _globalLock.acquire()
         glcommon.GLWidgetPlugin.display_screen(self)
+        cx = 20
+        cy = 20
+        glDisable(GL_LIGHTING)
+        glDisable(GL_DEPTH_TEST)
+        for (k,v) in self.items.iteritems():
+            if isinstance(v.item,VisPlot):
+                pos = v.attributes.get('position',None)
+                duration = v.attributes.get('duration',5.)
+                vrange = v.attributes.get('range',(None,None))
+                w,h = v.attributes.get('size',(200,150))
+                if pos is None:
+                    v.item.render(self.window,cx,cy,w,h,duration,vrange[0],vrange[1])
+                    cy += h+18
+                else:
+                    x = pos[0]
+                    y = pos[1]
+                    if x < 0:
+                        x = self.view.w + x
+                    if y < 0:
+                        y = self.view.h + y
+                    v.item.render(self.window,x,y,w,h,duration,vrange[0],vrange[1])
+        for (k,v) in self.items.iteritems():
+            if isinstance(v.item,str):
+                pos = v.attributes.get('position',None)
+                col = v.attributes.get('color',(0,0,0))
+                size = v.attributes.get('size',12)
+                if pos is None:
+                    #draw at console
+                    self.window.draw_text((cx,cy+size),v.item,size,col)
+                    cy += (size*15)/10
+                elif len(pos)==2:
+                    x = pos[0]
+                    y = pos[1]
+                    if x < 0:
+                        x = self.view.w + x
+                    if y < 0:
+                        y = self.view.h + y
+                    self.window.draw_text((x,y+size),v.item,size,col)
+        glEnable(GL_DEPTH_TEST)
         _globalLock.release()
 
     def reshapefunc(self,w,h):
@@ -1561,7 +2051,7 @@ class VisualizationPlugin(glcommon.GLWidgetPlugin):
             glDisable(GL_LIGHTING)
             glDisable(GL_DEPTH_TEST)
             glColor3f(*c)
-            self.draw_text(point,text,size=10)
+            self.draw_text(point,text,size=12)
             glEnable(GL_DEPTH_TEST)
 
     def _clearDisplayLists(self):
@@ -1575,10 +2065,17 @@ class VisualizationPlugin(glcommon.GLWidgetPlugin):
         self.t = time.time()
         if self.animating:
             self.currentAnimationTime += (self.t - oldt)
+            for (k,v) in self.items.iteritems():
+                #do animation updates
+                v.updateAnimation(self.currentAnimationTime)
+        for (k,v) in self.items.iteritems():
+            #do other updates
+            v.updateTime(self.t-self.startTime)
         _globalLock.release()
         return False
 
     def getItem(self,item_name):
+        """Returns an VisAppearance according to the given name or path"""
         if isinstance(item_name,(list,tuple)):
             components = item_name
             if len(components)==1: 
@@ -1590,6 +2087,7 @@ class VisualizationPlugin(glcommon.GLWidgetPlugin):
             return self.items[item_name]
 
     def dirty(self,item_name='all'):
+        """Marks an item or everything as dirty, forcing a deep redraw."""
         global _globalLock
         _globalLock.acquire()
         if item_name == 'all':
@@ -1600,6 +2098,7 @@ class VisualizationPlugin(glcommon.GLWidgetPlugin):
         _globalLock.release()
 
     def clear(self):
+        """Clears the visualization world"""
         global _globalLock
         _globalLock.acquire()
         for (name,itemvis) in self.items.iteritems():
@@ -1607,7 +2106,21 @@ class VisualizationPlugin(glcommon.GLWidgetPlugin):
         self.items = {}
         _globalLock.release()
 
+    def clearText(self):
+        """Clears all text in the visualization."""
+        global _globalLock
+        _globalLock.acquire()
+        del_items = []
+        for (name,itemvis) in self.items.iteritems():
+            if isinstance(itemvis.item,str):
+                itemvis.destroy()
+                del_items.append(name)
+        for n in del_items:
+            del self.items[n]
+        _globalLock.release()
+
     def listItems(self,root=None,indent=0):
+        """Prints out all items in the visualization world."""
         if root == None:
             for name,value in self.items.iteritems():
                 self.listItems(value,indent)
@@ -1621,6 +2134,9 @@ class VisualizationPlugin(glcommon.GLWidgetPlugin):
                 self.listItems(v,indent+2)
 
     def add(self,name,item,keepAppearance=False):
+        """Adds a named item to the visualization world.  If the item already
+        exists, the appearance information will be reinitialized if keepAppearance=False
+        (default) or be kept if keepAppearance=True."""
         global _globalLock
         assert not isinstance(name,(list,tuple)),"Cannot add sub-path items"
         _globalLock.acquire()
@@ -1631,7 +2147,7 @@ class VisualizationPlugin(glcommon.GLWidgetPlugin):
             if name in self.items:
                 self.items[name].destroy()
             app = VisAppearance(item,name)
-        self.items[name] = app
+            self.items[name] = app
         _globalLock.release()
         #self.refresh()
 
@@ -1695,7 +2211,7 @@ class VisualizationPlugin(glcommon.GLWidgetPlugin):
         global _globalLock
         _globalLock.acquire()
         item = self.getItem(name)
-        if isinstance(item.item,(list,tuple)):
+        if isinstance(item.item,(list,tuple,str)):
             item.item = value
         else:
             config.setConfig(item.item,value)
@@ -1741,6 +2257,79 @@ class VisualizationPlugin(glcommon.GLWidgetPlugin):
         _globalLock.acquire()
         self.getItem(name).hidden = hidden
         self.doRefresh = True
+        _globalLock.release()
+
+    def addPlotItem(self,plotname,itemname):
+        global _globalLock
+        _globalLock.acquire()
+        plot = self.getItem(plotname)
+        assert plot != None and isinstance(plot.item,VisPlot),(plotname+" is not a valid plot")
+        plot = plot.item
+        for i in plot.items:
+            assert i.name != itemname,(str(itemname)+" is already in the plot "+plotname)
+        item = self.getItem(itemname)
+        assert item != None,(str(itemname)+" is not a valid item")
+        plot.items.append(VisPlotItem(itemname,item))
+        _globalLock.release()
+
+    def logPlot(self,plotname,itemname,value):
+        global _globalLock
+        _globalLock.acquire()
+        customIndex = -1
+        plot = self.getItem(plotname)
+        assert plot != None and isinstance(plot.item,VisPlot),(plotname+" is not a valid plot")
+        compress = plot.attributes.get('compress',_defaultCompressThreshold)
+        plot = plot.item
+        for i,item in enumerate(plot.items):
+            if len(item.name)==0:
+                customIndex = i
+        if customIndex < 0:
+            customIndex = len(plot.items)
+            plot.items.append(VisPlotItem('',None))
+        plot.items[customItem].compressThreshold = compress
+        plot.items[customItem].customUpdate(itemname,self.t - self.startTime,value)
+        _globalLock.release()
+
+    def logPlotEvent(self,plotname,eventname,color):
+        global _globalLock
+        _globalLock.acquire()
+        plot = self.getItem(plotname)
+        assert plot != None and isinstance(plot.item,VisPlot),(plotname+" is not a valid plot")
+        plot.item.addEvent(eventname,self.t-self.startTime,color)
+        _globalLock.release()
+
+    def hidePlotItem(self,plotname,itemname,hidden=True):
+        global _globalLock
+        _globalLock.acquire()
+        plot = self.getItem(plotname)
+        assert plot != None and isinstance(plot.item,VisPlot),plotname+" is not a valid plot"
+        plot = plot.item
+        identified = False
+        if isinstance(itemname,(tuple,list)):
+            for i in plot.items:
+                if i.name == itemname[0]:
+                    assert itemname[1] < len(i.hidden),("Invalid component index of item "+str(itemname[0]))
+                    identified = True
+                    i.hidden[itemname] = hidden
+        else:
+            for i in plot.items:
+                if i.name == itemname:
+                    for j in xrange(len(i.hidden)):
+                        i.hidden[j] = hidden
+        assert identified,("Invalid item "+str(itemname)+" specified in plot "+plotname)
+        self.doRefresh = True
+        _globalLock.release()
+
+    def savePlot(self,plotname,fn):
+        global _globalLock
+        _globalLock.acquire()
+        plot = self.getItem(plotname)
+        assert plot != None and isinstance(plot.item,VisPlot),plotname+" is not a valid plot"
+        plot = plot.item
+        if fn != None:
+            plot.beginSave(fn)
+        else:
+            plot.endSave(fn)
         _globalLock.release()
 
     def setAppearance(self,name,appearance):
@@ -1793,8 +2382,9 @@ class VisualizationPlugin(glcommon.GLWidgetPlugin):
         try:
             autoFitViewport(vp,self.items.values())
             vp.camera.dist /= scale
-        except Exception:
+        except Exception as e:
             print "Unable to auto-fit camera"
+            print e
 
 
 
@@ -1889,7 +2479,6 @@ if _PyQtAvailable:
                     w.glwindow.refresh()
                 if w.doRefresh:
                     if w.mode != 'hidden':
-                        print "vis: refreshing opengl"
                         w.glwindow.updateGL()
                     w.doRefresh = False
                 if w.mode == 'dialog':
