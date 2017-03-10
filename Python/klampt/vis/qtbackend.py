@@ -90,6 +90,7 @@ class QtGLWindow(QGLWidget):
         self.setWindowTitle(self.name)
         self.idleTimer = QTimer()
         self.actions = []
+        self.actionMenu = None
 
     def setProgram(self,program):
         from glprogram import GLProgram
@@ -125,9 +126,17 @@ class QtGLWindow(QGLWidget):
         self.idleTimer.start(0)
         #init function
         self.program.initialize()
+
+        if self.actionMenu is not None:
+            for a in self.actions:
+                self.actionMenu.addAction(a)
+        else:
+            print "QtGLWidget.initialize: no action menu?"
+
         self.initialized = True
 
     def add_action(self,hook,short_text,key,description=None):
+        print "add_action called",short_text
         a = QtGui.QAction(short_text, self)
         a.setShortcut(key)
         if description == None:
@@ -141,7 +150,9 @@ class QtGLWindow(QGLWidget):
 
     #QtGLWidget bindings
     def initializeGL(self):
-        #print "######### QGLWidget Initialize GL ###############"
+        print "######### QGLWidget Initialize GL ###############"
+        if self.initialized:
+            print "QGLWidget.initializeGL: already initialized?"
         try:
             return self.initialize()
         except Exception,e:
