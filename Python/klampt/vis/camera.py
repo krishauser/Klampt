@@ -12,7 +12,7 @@ basis_vectors = {'x':[1.0,0.0,0.0],
 
 def orientation_matrix(axis1,axis2,axis3):
     """Returns the matrix that maps world axes 1,2,3 to the
-    camera's coordinate system (left,down,forward) (assuming no camera motion).
+    camera's coordinate system (right,down,forward) (assuming no camera motion).
     
     Each axis can be either a 3-tuple or any element of
     ['x','y','z','-x','-y','-z']"""
@@ -76,7 +76,7 @@ class orbit:
 
     Attributes:        
         - tgt: target point
-        - rot: euler angle rotation
+        - rot: euler angle rotation (roll-pitch-yaw entries relative to default view with fwd = +y, right = +x, up = +z)
         - dist: target distance
         - ori: orientation matrix type (see :func:`orientation_matrix`)
     """
@@ -100,4 +100,45 @@ class orbit:
         R = so3.mul(o,R);
 
         t = vectorops.mul(so3.apply(R,self.tgt),-1.0)
-        return (R,vectorops.madd(t,[0.,0.,1.],-self.dist))
+        return (R,vectorops.add(t,[0.,0.,-self.dist]))
+
+    def set_orientation(self,R,ori=None):
+        """Sets the orientation of the camera to the so3 element R. 
+
+        If ori is provided, it is an orientation list (e.g., ['x','y','z'])
+        that tells the function how to interpret the columns of R in terms of
+        the right, down, and fwd axes of the camera.  Its default value is 
+        ['x','y','z']."""
+        if ori is not None:
+            oR = orientation_matrix(*ori)
+            R = so3.mul(R,oR)
+        #Ry = so3.rotation([0,1,0],self.rot[0])
+        #Rx = so3.rotation([1,0,0],self.rot[1])
+        #Rz = so3.rotation([0,0,1],self.rot[2])
+        #set self.rot to fulfill constraint R = Ry*Rx*Rz
+        #     [cy  0 sy][1  0   0][cz -sz 0]   [cy  0 sy][cz   -sz    0]
+        # R = [0   1  0][0 cx -sx][sz  cz 0] = [0   1 0 ][cxsz cxcz -sx]
+        #     [-sy 0 cy][0 sx  cx][0   0  1]   [-sy 0 cy][sxsz sxcz  cx]
+        #    [cycz+sysxsz  -cysz+sysxcz  sycx]
+        #  = [cxsz          cxcz         -sx ]
+        #    [-sycz+cysxsz  sysz+cysxcz cycx ]
+        m = so3.matrix(R)
+        cx = m[1][0]**2 + m[1][1]**2
+        sx = -m[1][2]
+        self.rot[1] = math.atan2(sx,cx)
+        if abs(cx) > 1e-5:
+            sz = m[1][0]
+            cz = m[1][1]
+            sy = m[0][2]
+            cy = m[2][2]
+            self.rot[2] = math.atan2(sz,cz)
+            self.rot[0] = math.atan2(sy,cy)
+        else:
+            #near vertical, have redundancy, set Ry=0 (so cy=1, sy=0)
+            self.rot[0] = 0
+            cz = m[0][0]
+            sz= -m[0][1]
+            self.rot[2] = math.atan2(sz,cz)
+
+
+        
