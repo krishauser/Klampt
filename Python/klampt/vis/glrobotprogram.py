@@ -38,8 +38,6 @@ class GLSimulationPlugin(GLPluginInterface):
         self.collider = collide.WorldCollider(world)
         self.sim = SimpleSimulator(world)
         self.simulate = False
-        self.commanded_config_color = [0,1,0,0.5]
-        self.old_commanded_config_color = [0,1,0,0.5]
 
         #turn this on to draw contact points
         self.drawContacts = False
@@ -70,42 +68,17 @@ class GLSimulationPlugin(GLPluginInterface):
                 self.drawSensors = 'full'
             else:
                 self.drawSensors = False
-        def toggle_draw_commanded():
-            if self.commanded_config_color == None:
-                self.commanded_config_color = self.old_commanded_config_color
-            else:
-                self.commanded_config_color = None
         self.add_action(toggle_simulate,'Toggle simulation','s')
         self.add_action(toggle_movie_mode,'Toggle movie mode','m')
         self.add_action(self.sim.toggleLogging,'Toggle simulation logging','l')
         self.add_action(toggle_draw_contacts,'Toggle draw contacts','c')
         self.add_action(toggle_draw_sensors,'Toggle draw sensors','v')
-        self.add_action(toggle_draw_commanded,'Toggle draw PID commanded configurations','p')
 
     def display(self):
         #Put your display handler here
         #the current example draws the simulated world in grey and the
         #commanded configurations in transparent green
         self.sim.drawGL()
-
-        #draw commanded configurations
-        if self.commanded_config_color != None:
-            for i in xrange(self.world.numRobots()):
-                r = self.world.robot(i)
-                mode = self.sim.controller(i).getControlType()
-                if mode == "PID":
-                    q = self.sim.controller(i).getCommandedConfig()
-                    #save old appearance
-                    oldapps = [r.link(j).appearance().clone() for j in xrange(r.numLinks())]
-                    #set new appearance
-                    for j in xrange(r.numLinks()):
-                        r.link(j).appearance().setColor(*self.commanded_config_color)
-                    r.setConfig(q)
-                    r.drawGL()
-                    #restore old appearance
-                    for j in xrange(r.numLinks()):
-                        r.link(j).appearance().set(oldapps[j])
-            glDisable(GL_BLEND)
 
         #draw contacts, if enabled
         if self.drawContacts:
