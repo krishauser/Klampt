@@ -364,7 +364,7 @@ class _ThumbnailPlugin(vis.VisualizationPlugin):
     def idle(self):
         vis.VisualizationPlugin.idle(self)
         if self.rendered and not self.done:
-            from OpenGL.GL import *
+            from OpenGL.GL import glReadPixels,GL_RGBA,GL_UNSIGNED_BYTE
             view = self.window.program.view
             screenshot = glReadPixels( view.x, view.y, view.w, view.h, GL_RGBA, GL_UNSIGNED_BYTE)
             try:
