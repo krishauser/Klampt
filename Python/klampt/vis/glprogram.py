@@ -218,6 +218,10 @@ class GLProgram:
         if c == '?':
             self.print_help()
             return True
+        if 'alt' in self.modifiers():
+            c = 'Alt+'+c
+        if 'ctrl' in self.modifiers():
+            c = 'Ctrl+'+c
         for a in self.actions:
             if c == a.key:
                 a.hook()
