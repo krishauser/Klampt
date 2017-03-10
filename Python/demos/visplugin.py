@@ -21,7 +21,7 @@ class MyGLPlugin(vis.GLPluginInterface):
         print "mouse",button,state,x,y
         if button==2:
             if state==0:
-                print [o.getName() for o in self.click_world(x,y)]
+                print "Click list...",[o.getName() for o in self.click_world(x,y)]
             return True
         return False
 
@@ -40,8 +40,6 @@ class MyGLPlugin(vis.GLPluginInterface):
         increasing distance."""
         #get the viewport ray
         (s,d) = self.click_ray(x,y)
-        print self.window.width,self.window.height
-        print s,d
 
         #run the collision tests
         collided = []
@@ -65,7 +63,6 @@ if __name__ == "__main__":
             raise RuntimeError("Unable to load model "+fn)
     world.enableInitCollisions(True)
 
-    print "Press 'q' to exit"
     #the plugin is pushed on the visualizer stack to get interactivity with the visualizer... if you
     #don't care about interactivity, you may leave it out.  See vistemplate.py for
     #an example of this
@@ -80,6 +77,8 @@ if __name__ == "__main__":
     q1 = q0[:]
     q1[0] += 1
     vis.animate(("world","ATHLETE"),[q0,q1],speed=0.2)
+
+    print "Press 'q' to exit"
     #run the visualizer in a separate thread
     vis.show()
     while vis.shown() and not plugin.quit:
