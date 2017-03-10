@@ -2445,11 +2445,10 @@ if _PyQtAvailable:
             self.glwidget.setSizePolicy(QSizePolicy(QSizePolicy.Maximum,QSizePolicy.Maximum))
             self.setCentralWidget(self.glwidget)
             self.setWindowTitle(windowinfo.name)
-            if len(self.glwidget.actions) != 0:
-                mainMenu = self.menuBar()
-                fileMenu = mainMenu.addMenu('&Actions')
-                for a in self.glwidget.actions:
-                    fileMenu.addAction(a)
+            #TODO: for action-free programs, don't add this... but this has to be detected after initializeGL()?
+            mainMenu = self.menuBar()
+            fileMenu = mainMenu.addMenu('&Actions')
+            self.glwidget.actionMenu = fileMenu
         def closeEvent(self,event):
             global _globalLock
             _globalLock.acquire()
