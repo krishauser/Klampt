@@ -129,7 +129,6 @@ class QtGLWindow(QGLWidget):
 
     def add_action(self,hook,short_text,key,description=None):
         a = QtGui.QAction(short_text, self)
-        #a.setShortcut("Ctrl+"+key.upper())
         a.setShortcut(key)
         if description == None:
             description = short_text
@@ -259,11 +258,17 @@ class QtGLWindow(QGLWidget):
 
     def draw_text(self,point,text,size=12,color=None):
         if color:
-            glColor3f(*color)
+            if len(color)==3:
+                glColor3f(*color)
+            else:
+                glColor4f(*color)
+
+        font = QtGui.QFont()
+        font.setPixelSize(size)
         if len(point) == 2:
-            self.renderText(point[0],point[1],0,text)
+            self.renderText(point[0],point[1],0,text,font)
         else:
-            self.renderText(point[0],point[1],point[2],text)
+            self.renderText(point[0],point[1],point[2],text,font)
 
 
 class QtBackend:
