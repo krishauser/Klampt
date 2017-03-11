@@ -11,8 +11,8 @@ basis_vectors = {'x':[1.0,0.0,0.0],
                  '-z':[0.0,0.0,-1.0]}
 
 def orientation_matrix(axis1,axis2,axis3):
-    """Returns the matrix that maps world axes 1,2,3 to the
-    camera's coordinate system (right,down,forward) (assuming no camera motion).
+    """Returns the matrix that maps the camera's identity coordinate system (right,down,forward)
+    to world axes 1,2,3 (assuming no camera translation).
     
     Each axis can be either a 3-tuple or any element of
     ['x','y','z','-x','-y','-z']"""
@@ -22,7 +22,7 @@ def orientation_matrix(axis1,axis2,axis3):
         axis2 = basis_vectors[axis2]
     if isinstance(axis3,str):
         axis3 = basis_vectors[axis3]
-    return so3.inv(so3.from_matrix([axis1,axis2,axis3]))
+    return so3.from_matrix([axis1,axis2,axis3])
 
 class free:
     """A free-floating camera that is controlled using a translation and
@@ -39,14 +39,15 @@ class free:
         self.ori = ['x','-z','y']
 
     def matrix(self):
-        """Returns the camera transform."""
+        """Returns the camera transform.  Applying this transform converts points in OpenGL camera
+        coordinates (x right, y up, -z forward), to points in world coordinates."""
         o = orientation_matrix(*self.ori)
-        Ry = so3.rotation([0.,1.,0.],self.rot[0])
-        Rx = so3.rotation([1.,0.,0.],self.rot[1])
         Rz = so3.rotation([0.,0.,1.],self.rot[2])
-        R = so3.mul(Ry,so3.mul(Rx,Rz))
-        R = so3.mul(o,R);
-        raise (R,vectorops.mul(so3.apply(R,self.pos),-1.0))
+        Rx = so3.rotation([1.,0.,0.],self.rot[1])
+        Ry = so3.rotation([0.,1.,0.],self.rot[0])
+        R = so3.mul(Rz,so3.mul(Rx,Ry))
+        R = so3.mul(R,o);
+        raise (R,self.pos)
 
 class target:
     """A look-at camera that is controlled using a translation,
@@ -67,7 +68,8 @@ class target:
         self.up = [0.,0.,1.]
 
     def matrix(self):
-        """Returns the camera transform."""
+        """Returns the camera transform.  Applying this transform converts points in OpenGL camera
+        coordinates (x right, y up, -z forward), to points in world coordinates."""
         raise NotImplementedError()
 
 class orbit:
@@ -91,16 +93,16 @@ class orbit:
         self.ori = ['x','-z','y']
 
     def matrix(self):
-        """Returns the camera transform."""
+        """Returns the camera transform.  Applying this transform converts points in OpenGL camera
+        coordinates (x right, y up, -z forward), to points in world coordinates."""
         o = orientation_matrix(*self.ori)
-        Ry = so3.rotation([0.,1.,0.],self.rot[0])
-        Rx = so3.rotation([1.,0.,0.],self.rot[1])
         Rz = so3.rotation([0.,0.,1.],self.rot[2])
-        R = so3.mul(Ry,so3.mul(Rx,Rz))
-        R = so3.mul(o,R);
+        Rx = so3.rotation([1.,0.,0.],self.rot[1])
+        Ry = so3.rotation([0.,1.,0.],self.rot[0])
+        R = so3.mul(Rz,so3.mul(Rx,Ry))
+        R = so3.mul(R,o)
 
-        t = vectorops.mul(so3.apply(R,self.tgt),-1.0)
-        return (R,vectorops.add(t,[0.,0.,-self.dist]))
+        return (R,vectorops.add(self.tgt,so3.apply(R,[0.,0.,self.dist])))
 
     def set_orientation(self,R,ori=None):
         """Sets the orientation of the camera to the so3 element R. 
@@ -108,36 +110,40 @@ class orbit:
         If ori is provided, it is an orientation list (e.g., ['x','y','z'])
         that tells the function how to interpret the columns of R in terms of
         the right, down, and fwd axes of the camera.  Its default value is 
-        ['x','y','z']."""
+        ['x','y','z'].
+        """
+        import math
+        #Rdes*oR*[right,down,fwd] = R_euler(rot)*o*[right,down,fwd]
         if ori is not None:
+            o = orientation_matrix(*self.ori)
             oR = orientation_matrix(*ori)
-            R = so3.mul(R,oR)
+            R = so3.mul(R,so3.mul(so3.inv(oR),o))
         #Ry = so3.rotation([0,1,0],self.rot[0])
         #Rx = so3.rotation([1,0,0],self.rot[1])
         #Rz = so3.rotation([0,0,1],self.rot[2])
         #set self.rot to fulfill constraint R = Ry*Rx*Rz
-        #     [cy  0 sy][1  0   0][cz -sz 0]   [cy  0 sy][cz   -sz    0]
-        # R = [0   1  0][0 cx -sx][sz  cz 0] = [0   1 0 ][cxsz cxcz -sx]
-        #     [-sy 0 cy][0 sx  cx][0   0  1]   [-sy 0 cy][sxsz sxcz  cx]
-        #    [cycz+sysxsz  -cysz+sysxcz  sycx]
-        #  = [cxsz          cxcz         -sx ]
-        #    [-sycz+cysxsz  sysz+cysxcz cycx ]
+        #     [cz -sz 0][1  0   0][cy  0 sy]   [cz -szcx  szsx][cy  0 sy]
+        # R = [sz  cz 0][0 cx -sx][0   1  0] = [sz  czcx -czsx][0   1 0 ]
+        #     [0   0  1][0 sx  cx][-sy 0 cy]   [0    sx     cx][-sy 0 cy]
+        #    [czcy-szsxsy   -szcx  czsy+szsxcy ]
+        #  = [szcy+czsxsy    czcx  szsy-czsxcy ]
+        #    [-cxsy           sx   cxcy        ]
         m = so3.matrix(R)
-        cx = m[1][0]**2 + m[1][1]**2
-        sx = -m[1][2]
+        cx = m[0][1]**2 + m[1][1]**2
+        sx = m[2][1]
         self.rot[1] = math.atan2(sx,cx)
         if abs(cx) > 1e-5:
-            sz = m[1][0]
+            sz = -m[0][1]
             cz = m[1][1]
-            sy = m[0][2]
+            sy = -m[2][0]
             cy = m[2][2]
             self.rot[2] = math.atan2(sz,cz)
             self.rot[0] = math.atan2(sy,cy)
         else:
-            #near vertical, have redundancy, set Ry=0 (so cy=1, sy=0)
+            #near vertical, have redundancy, have cx=0,sx = +/-1, set Ry=0 (so cy=1, sy=0)
             self.rot[0] = 0
             cz = m[0][0]
-            sz= -m[0][1]
+            sz = m[1][0]
             self.rot[2] = math.atan2(sz,cz)
 
 
