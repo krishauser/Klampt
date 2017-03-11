@@ -114,6 +114,8 @@ if __name__ == "__main__":
     vis.dialog()
 
     print "Doing a split screen program..."
+    vp.w,vp.h = 640,480
+    vis.setViewport(vp)
     for i in range(3):
         widgets = GLWidgetPlugin()
         widgets.addWidget(RobotPoser(world.robot(0)))
