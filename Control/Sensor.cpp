@@ -2568,7 +2568,7 @@ void CameraSensor::GetViewport(Camera::Viewport& vp) const
   flipYZ(0,0) = 1;
   flipYZ(1,1) = -1;
   flipYZ(2,2) = -1;
-  vp.xform.R = flipYZ*vp.xform.R;
+  vp.xform.R = vp.xform.R*flipYZ;
 }
 
 
