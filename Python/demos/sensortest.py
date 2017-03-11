@@ -43,7 +43,7 @@ sensor = sim.controller(0).sensor("rgbd_camera")
 print sensor.getSetting("link")
 print sensor.getSetting("Tsensor")
 #T = (so3.sample(),[0,0,1.0])
-T = ([1,0,0, 0,0,-1,  0,1,0],[0,-2.0,0.5])
+T = (so3.mul(so3.rotation([1,0,0],math.radians(-10)),[1,0,0, 0,0,-1,  0,1,0]),[0,-2.0,0.5])
 sensing.set_sensor_xform(sensor,T,link=-1)
 
 vis.add("sensor",sensor)
@@ -63,6 +63,7 @@ class SensorTestWorld (GLPluginInterface):
 		self.compute_pc = False
 		self.pc = None
 		self.pc_appearance = None
+		self.original_view = None
 
 		def randomize():
 			robot.randomizeConfig()
@@ -89,12 +90,27 @@ class SensorTestWorld (GLPluginInterface):
 					import numpy
 					numpy.savetxt("sensortest_temp.csv",self.pc)
 				raw_input("Saved...")
+		def toggle_view():
+			if self.original_view is None:
+				self.original_view = self.view
+				v = sensing.camera_to_viewport(sensor,robot)
+				self.window.program.set_view(v)
+				self.view = v
+			else:
+				self.window.program.set_view(self.original_view)
+				self.original_view = None
+				self.view = self.original_view
+		def print_view():
+			print "Tgt",self.view.camera.tgt
+			print "Rot",self.view.camera.rot
 
 		self.add_action(randomize,'Randomize configuration',' ')
 		self.add_action(plot_rgb,'Plot color','c')
 		self.add_action(plot_depth,'Plot depth','d')
 		self.add_action(toggle_point_cloud,'Toggle point cloud drawing','p')
 		self.add_action(save_point_cloud,'Save point cloud','s')
+		self.add_action(toggle_view,'Toggle views','v')
+		self.add_action(print_view,'Print current view','p')
 
 	def idle(self):
 		#print "Idle..."
