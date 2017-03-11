@@ -332,7 +332,7 @@ def solve(objectives,iters=1000,tol=1e-3,activeDofs=None):
         res = [si.solve()[0] for si in s]
         return all(res)
     else:
-        return s.solve()[0]
+        return s.solve()
 
 def residual(objectives):
     """Returns the residual of the given objectives."""
