@@ -136,6 +136,7 @@ if __name__ == "__main__":
         print "USAGE: simtest.py [world_file] [controller files (.py)]"
         exit()
     world = WorldModel()
+    #load up any world items, control modules, or paths
     control_modules = []
     for fn in sys.argv[1:]:
         path,base = os.path.split(fn)
