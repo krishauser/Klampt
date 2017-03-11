@@ -60,13 +60,13 @@ class GLViewport:
         aspect = float(self.w)/float(self.h)
         rfov = self.fov*math.pi/180.0
         vp.scale = 1.0/(2.0*math.tan(rfov*0.5/aspect)*aspect)
-        vp.setRigidTransform(*se3.inv(self.camera.matrix()))
+        vp.setRigidTransform(*self.camera.matrix())
         return vp
 
     def click_ray(self,x,y):
         """Returns a pair of 3-tuples indicating the ray source and direction
         in world coordinates for a screen-coordinate point (x,y)"""
-        R,t = se3.inv(self.camera.matrix())
+        R,t = self.camera.matrix()
         #from x and y compute ray direction
         u = float(x-(self.x + self.w/2))/self.w
         v = float((self.y + self.h/2) -y)/self.w
@@ -85,7 +85,7 @@ class GLViewport:
         Otherwise, if the point is exactly at the focal plane then the middle of the viewport
         is returned.
         """
-        ploc = se3.apply(self.camera.matrix(),pt)
+        ploc = se3.apply(se3.inv(self.camera.matrix()),pt)
         if clip:
             if -ploc[2] <= self.clippingplanes[0] or -ploc[2] >= self.clippingplanes[1]:
                 return None
@@ -118,7 +118,7 @@ class GLViewport:
         glLoadIdentity()
         
         # View transformation
-        mat = se3.homogeneous(self.camera.matrix())
+        mat = se3.homogeneous(se3.inv(self.camera.matrix()))
         cols = zip(*mat)
         pack = sum((list(c) for c in cols),[])
         glMultMatrixf(pack)
@@ -136,8 +136,6 @@ class GLProgram:
     """A basic OpenGL visualization, run as part of some _GLBackend.
     For the most part there is a one-to-one correspondence and the
     backend just relays the input / drawing messages
-
-    The run()
 
     Assumes that glinit.py has been imported to define _GLBackend.
 
@@ -363,13 +361,13 @@ class GLNavigationProgram(GLProgram):
                 aspect = float(self.view.w)/self.view.h
                 rfov = self.view.fov*math.pi/180.0
                 scale = 2.0*math.tan(rfov*0.5/aspect)*aspect
-                delta = so3.apply(so3.inv(R),[-scale*float(dx)*self.view.camera.dist/self.view.w,scale*float(dy)*self.view.camera.dist/self.view.w,0])
+                delta = so3.apply(R,[-scale*float(dx)*self.view.camera.dist/self.view.w,scale*float(dy)*self.view.camera.dist/self.view.w,0])
                 self.view.camera.tgt = vectorops.add(self.view.camera.tgt,delta)
             elif 'shift' in self.modifiers():
                 self.view.camera.dist *= math.exp(dy*0.01)
             else:
-                self.view.camera.rot[2] += float(dx)*0.01
-                self.view.camera.rot[1] += float(dy)*0.01 
+                self.view.camera.rot[2] -= float(dx)*0.01
+                self.view.camera.rot[1] -= float(dy)*0.01 
             self.refresh()
             return True
         return False
