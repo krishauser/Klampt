@@ -136,7 +136,6 @@ class QtGLWindow(QGLWidget):
         self.initialized = True
 
     def add_action(self,hook,short_text,key,description=None):
-        print "add_action called",short_text
         a = QtGui.QAction(short_text, self)
         a.setShortcut(key)
         if description == None:
@@ -265,6 +264,7 @@ class QtGLWindow(QGLWidget):
         (self.width,self.height) = (w,h)
         self.setFixedSize(self.width,self.height)
         self.window().resize(self.sizeHint())
+        self.window().adjustSize()
         self.refresh()
 
     def draw_text(self,point,text,size=12,color=None):
