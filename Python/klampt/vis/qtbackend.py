@@ -91,6 +91,7 @@ class QtGLWindow(QGLWidget):
         self.idleTimer = QTimer()
         self.actions = []
         self.actionMenu = None
+        self.inpaint = False
 
     def setProgram(self,program):
         from glprogram import GLProgram
@@ -170,6 +171,9 @@ class QtGLWindow(QGLWidget):
         if self.program == None:
             print "QGLWidget.paintGL: called after close?"
             return
+        if self.inpaint:
+            return
+        self.inpaint = True
         self.refreshed = False
         try:
             res = self.program.displayfunc()
@@ -178,6 +182,7 @@ class QtGLWindow(QGLWidget):
             print "QGLWidget.paintGL: hit an exception?"
             traceback.print_exc()
             exit(-1)
+        self.inpaint = False
         return
     #QWidget bindings
     def mouseMoveEvent(self,e):
