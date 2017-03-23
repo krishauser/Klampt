@@ -836,4 +836,35 @@ def cartesian_bump(robot,js_path,constraints,bump_paths,
 		i += 1
 	print "Resolved %d/%d bumped edges"%(numResolved,numTotalEdges)
 	return res
-	
+
+def cartesian_move_to(robot,constraints,
+	delta=1e-2,
+	method='any',
+	solver=None,
+	feasibilityTest=None,
+	numSamples=1000,
+	maximize=False):
+	"""A convenience function that generates a path that performs a linear cartesian interpolation
+	starting from the robot's current configuration and ending at the desired IK constraints.
+	This is a bit more convenient than cartesian_interpolate_linear since you only need to pass in
+	the target objective, rather than the start and end Cartesian parameters as well. Typical calling
+	is path = cartesian_move_to(robot,goal). 
+
+	Other arguments are equivalent to those in cartesian_interpolate_linear.
+	"""
+	if not hasattr(constraints,'__iter__'):
+		constraints = [constraints]
+	for c in constraints:
+		assert isinstance(c,IKObjective)
+	#extract the task space coordinates of the constraints
+	taskEnd = config.getConfig(constraints)
+	#extract the task space coordinates of the current robot
+	for c in constraints:
+		xforml = robot.link(c.link()).getTransform()
+		xformr = robot.link(c.destLink()).getTransform() if c.destLink() >= 0 else se3.identity()
+		c.matchDestination(se3.mul(se3.inv(xformr),xforml))
+	taskStart = config.getConfig(constraints)
+	#just call the solver
+	return cartesian_interpolate_linear(robot,taskStart,taskEnd,
+		delta=delta,method=method,solver=solver,feasibilityTest=feasibilityTest,
+		numSamples=numSamples,maximize=maximize)
