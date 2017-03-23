@@ -41,3 +41,8 @@ endif
 dep-ode:
 	cd ode-0.14; X_EXTRA_LIBS=-lX11 CXXFLAGS=-fPIC ./configure $(ODECONFIG)
 	cd ode-0.14; make
+
+#NOTE: call sudo make ldconfig-ode if you have set --enable-shared in ODECONFIG
+ldconfig-ode:
+	echo "$(CURDIR)/ode-0.14/ode/src/.libs" > /etc/ld.so.conf.d/ode.conf
+	ldconfig
