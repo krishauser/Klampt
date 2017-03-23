@@ -60,7 +60,7 @@ is not yet implemented and will result in a thrown exception.
 """
 
 from ..robotsim import *
-from ..math import se3
+from ..math import so3,se3
 from subrobot import SubRobotModel
 from coordinates import Point,Direction,Frame,Transform
 
@@ -175,7 +175,7 @@ def fixed_rotation_objective(link,ref=None,local_axis=None,world_axis=None):
     the link is constrained to rotate about this world-space axis."""
     refcoords = ref.getTransform()[0] if ref is not None else so3.identity()
     Rw = link.getTransform()
-    Rrel = so3.mul(so3.inv(refcoords),Rw)
+    Rrel = so3.mul(so3.inv(refcoords),Rw[0])
     obj = IKObjective()
     obj.robot = link.robot()
     if ref:
