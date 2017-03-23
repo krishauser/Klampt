@@ -6,7 +6,12 @@ from klampt.model import sensing
 import time
 import random
 
-import matplotlib.pyplot as plt
+try:
+	import matplotlib.pyplot as plt
+	HAVE_PYPLOT = True
+except ImportError:
+	HAVE_PYPLOT = False
+	print "**** Matplotlib not available, can't plot color/depth images ***"
 
 firsttime = True
 images = []
@@ -105,8 +110,9 @@ class SensorTestWorld (GLPluginInterface):
 			print "Rot",self.view.camera.rot
 
 		self.add_action(randomize,'Randomize configuration',' ')
-		self.add_action(plot_rgb,'Plot color','c')
-		self.add_action(plot_depth,'Plot depth','d')
+		if HAVE_PYPLOT:
+			self.add_action(plot_rgb,'Plot color','c')
+			self.add_action(plot_depth,'Plot depth','d')
 		self.add_action(toggle_point_cloud,'Toggle point cloud drawing','p')
 		self.add_action(save_point_cloud,'Save point cloud','s')
 		self.add_action(toggle_view,'Toggle views','v')
