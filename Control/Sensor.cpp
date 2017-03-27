@@ -15,7 +15,6 @@
 //TEST: fallback with no opengl
 //#undef HAVE_GLEW
 //#define HAVE_GLEW 0
-
 #include <KrisLibrary/GLdraw/drawextra.h>
 #include <KrisLibrary/GLdraw/GLView.h>
 #include <KrisLibrary/GLdraw/GLError.h>
@@ -23,6 +22,12 @@
 #include "View/ViewCamera.h"
 #include <tinyxml.h>
 #include <sstream>
+#ifndef GL_BGRA
+#ifndef GL_BGRA_EXT
+#error "GL_BGRA is not defined on your system?"
+#endif //GL_BGRA_EXT
+#define GL_BGRA GL_BGRA_EXT
+#endif //GL_BGRA
 
 using namespace GLDraw;
 
