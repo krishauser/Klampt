@@ -164,12 +164,17 @@ class QtGLWindow(QGLWidget):
         if self.program == None:
             print "QGLWidget.resizeGL: called after close?"
             return
+        if not self.isVisible():
+            return
         (self.width,self.height) = (w,h)
         self.program.reshapefunc(w,h)
         return
     def paintGL(self):
         if self.program == None:
             print "QGLWidget.paintGL: called after close?"
+            return
+        if not self.isVisible():
+            print "QGLWidget.paintGL: called while invisible?"
             return
         if self.inpaint:
             return
@@ -260,17 +265,23 @@ class QtGLWindow(QGLWidget):
     def refresh(self):
         if not self.refreshed:
             self.refreshed = True
+            if not self.isVisible():
+                return
             #TODO: resolve whether it's better to call updateGL here or to schedule
             # a timer event
             #self.updateGL()
-            QTimer.singleShot(0,lambda:self.updateGL());
+            QTimer.singleShot(0,lambda:self.updateGL())
 
     def reshape(self,w,h):
         (self.width,self.height) = (w,h)
-        self.setFixedSize(self.width,self.height)
-        self.window().resize(self.sizeHint())
-        self.window().adjustSize()
-        self.refresh()
+        def doreshape():
+            self.setFixedSize(self.width,self.height)
+            self.window().resize(self.sizeHint())
+            self.window().adjustSize()
+            if self.isVisible():
+                self.refresh()
+        if not self.initialized: doreshape()
+        else: QTimer.singleShot(0,doreshape)
 
     def draw_text(self,point,text,size=12,color=None):
         if color:
