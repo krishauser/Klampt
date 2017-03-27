@@ -480,7 +480,7 @@ def shown():
     """Returns true if a visualization window is currently shown."""
     global _globalLock,_thread_running,_current_window
     _globalLock.acquire()
-    res = (_thread_running and _current_window != None and _windows[_current_window].mode in ['shown','dialog'])
+    res = (_thread_running and _current_window != None and _windows[_current_window].mode in ['shown','dialog'] or _windows[_current_window].guidata is not None)
     _globalLock.release()
     return res
 
@@ -2664,6 +2664,16 @@ def _kill():
         time.sleep(0.01)
     _quit = False
 
+if _PyQtAvailable:
+    from PyQt4 import QtCore
+    class MyQThread(QtCore.QThread):
+        def __init__(self,func,*args):
+            self.func = func
+            self.args = args
+            QtCore.QThread.__init__(self)
+        def run(self):
+            self.func(*self.args)
+
 def _show():
     global _windows,_current_window,_thread_running
     if len(_windows)==0:
@@ -2671,9 +2681,13 @@ def _show():
         _current_window = 0
     if not _thread_running:
         signal.signal(signal.SIGINT, signal.SIG_DFL)
-        thread = Thread(target=_run_app_thread)
-        thread.setDaemon(True)
-        thread.start()
+        if _PyQtAvailable:
+            thread = MyQThread(_run_app_thread)
+            thread.start()
+        else:
+            thread = Thread(target=_run_app_thread)
+            thread.setDaemon(True)
+            thread.start()
         time.sleep(0.1)
     _windows[_current_window].mode = 'shown'
 
