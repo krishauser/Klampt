@@ -4,17 +4,17 @@
 StanceCSpace::StanceCSpace(RobotWorld& world,int index,
 			   WorldPlannerSettings* settings)
   :ContactCSpace(world,index,settings),gravity(0,0,-9.8),numFCEdges(4),
-   spCalculated(false),spMargin(0),torqueSolver(robot,formation)
+   spCalculated(false),spMargin(0),torqueSolver(robot,formation,numFCEdges)
 {}
 
 StanceCSpace::StanceCSpace(const SingleRobotCSpace& space)
   :ContactCSpace(space),gravity(0,0,-9.8),numFCEdges(4),
-   spCalculated(false),spMargin(0),torqueSolver(robot,formation)
+   spCalculated(false),spMargin(0),torqueSolver(robot,formation,numFCEdges)
 {}
 
 StanceCSpace::StanceCSpace(const StanceCSpace& space)
   :ContactCSpace(space),gravity(0,0,-9.8),numFCEdges(4),
-  spCalculated(false),spMargin(space.spMargin),torqueSolver(robot,formation)
+  spCalculated(false),spMargin(space.spMargin),torqueSolver(robot,formation,numFCEdges)
 {
   SetStance(space.stance);
 }
@@ -25,6 +25,7 @@ void StanceCSpace::SetStance(const Stance& s)
   spCalculated = false;
   torqueSolver.Clear();
   ToContactFormation(stance,formation);
+  torqueSolver.contacts.set(formation, numFCEdges);
 
   contactIK.resize(0);
   for(Stance::const_iterator i=s.begin();i!=s.end();i++)
@@ -40,6 +41,7 @@ void StanceCSpace::SetHold(const Hold& h)
   spCalculated = false;
   torqueSolver.Clear();
   ToContactFormation(stance,formation);
+  torqueSolver.contacts.set(formation, numFCEdges);
 
   contactIK.resize(0);
   for(Stance::const_iterator i=stance.begin();i!=stance.end();i++)
@@ -62,7 +64,7 @@ void StanceCSpace::CalculateSP()
 void StanceCSpace::InitTorqueSolver()
 {
   torqueSolver.SetGravity(gravity);
-  torqueSolver.Init(numFCEdges);
+  torqueSolver.Init();
 }
 
 void StanceCSpace::SetSPMargin(Real margin)
