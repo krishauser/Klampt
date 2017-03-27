@@ -99,6 +99,7 @@ if __name__ == "__main__":
         time.sleep(0.01)
         iteration += 1
     vis.clearText()
+    vis.remove("plot")
 
     """
     #Now testing ability to re-launch windows
