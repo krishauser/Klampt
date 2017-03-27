@@ -455,6 +455,10 @@ class GLPluginProgram(GLRealtimeProgram):
         if self.window:
             self.refresh()
         return res
+    def set_view(self,v):
+        GLRealtimeProgram.set_view(self,v)
+        for p in self.plugins:
+            p.view = self.view
     def initialize(self):
         for plugin in self.plugins:
             plugin.window = self.window
