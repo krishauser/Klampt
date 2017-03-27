@@ -121,10 +121,10 @@ public:
       }
     }
 
-    poseWidget.Set(world->robots[0].robot,&world->robots[0].view);
+    poseWidget.Set(world->robots[0],&world->robotViews[0]);
     objectWidgets.resize(world->rigidObjects.size());
     for(size_t i=0;i<world->rigidObjects.size();i++)
-      objectWidgets[i].Set(world->rigidObjects[i].object,&world->rigidObjects[i].view);
+      objectWidgets[i].Set(world->rigidObjects[i]);
     allWidgets.widgets.push_back(&poseWidget);
     for(size_t i=0;i<world->rigidObjects.size();i++)
       allWidgets.widgets.push_back(&objectWidgets[i]);
@@ -139,7 +139,7 @@ public:
     pose_ik = 0;
     attachMode = false;
     if(!ResourceBrowserProgram::Initialize()) return false;
-    Robot* robot = world->robots[0].robot;
+    Robot* robot = world->robots[0];
     viewResource.SetRobot(robot);
     self_colliding.resize(robot->links.size(),false);   
     env_colliding.resize(robot->links.size(),false);   
@@ -211,7 +211,7 @@ public:
   
   void UpdateConfig()
   {
-    Robot* robot = world->robots[0].robot;
+    Robot* robot = world->robots[0];
     robot->UpdateConfig(poseWidget.Pose());
 
     //update collisions
@@ -219,7 +219,7 @@ public:
       self_colliding[i]=env_colliding[i]=false;
     robot->UpdateGeometry();
     if(!world->terrains.empty()) {
-      robot->InitMeshCollision(world->terrains[0].terrain->geometry);
+      robot->InitMeshCollision(*world->terrains[0]->geometry);
       for(size_t i=0;i<robot->links.size();i++) {
 	if(robot->MeshCollision(i))
 	  env_colliding[i] = true;
@@ -254,7 +254,7 @@ public:
 
   void UpdateLinkValueGUI()
   {
-    Robot* robot = world->robots[0].robot;
+    Robot* robot = world->robots[0];
     Vector2 limits(robot->qMin(cur_link),robot->qMax(cur_link));
     link_value_spinner->set_float_limits(limits.x,limits.y);
     link_value = robot->q(cur_link);
@@ -278,7 +278,7 @@ public:
 
   void UpdateDriverValueGUI()
   {
-    Robot* robot = world->robots[0].robot;
+    Robot* robot = world->robots[0];
     Vector2 limits = robot->GetDriverLimits(cur_driver);
     driver_value_spinner->set_float_limits(limits.x,limits.y);
     driver_value = robot->GetDriverValue(cur_driver);
@@ -286,13 +286,13 @@ public:
 
   virtual void RenderWorld()
   {
-    Robot* robot = world->robots[0].robot;
-    ViewRobot& viewRobot = world->robots[0].view;
+    Robot* robot = world->robots[0];
+    ViewRobot& viewRobot = world->robotViews[0];
     //ResourceBrowserProgram::RenderWorld();
     for(size_t i=0;i<world->terrains.size();i++)
-      world->terrains[i].view.Draw();
+      world->terrains[i]->DrawGL();
     for(size_t i=0;i<world->rigidObjects.size();i++)
-      world->rigidObjects[i].view.Draw();
+      world->rigidObjects[i]->DrawGL();
 
     if(draw_geom) {
       //set the robot colors
@@ -378,7 +378,7 @@ public:
 
   Stance GetFlatStance()
   {
-    Robot* robot = world->robots[0].robot;
+    Robot* robot = world->robots[0];
     Stance s;
     if(poseWidget.ikPoser.poseGoals.empty()) {
       printf("Storing flat ground stance\n");
@@ -415,7 +415,7 @@ public:
 
   ResourcePtr PoserToResource()
   {
-    Robot* robot = world->robots[0].robot;
+    Robot* robot = world->robots[0];
     string type = resource_types[ResourceBrowserProgram::cur_resource_type];
     if(type == "Config") 
       return MakeResource("",robot->q);
@@ -488,7 +488,7 @@ public:
 
   virtual void Handle_Control(int id)
   {
-    Robot* robot = world->robots[0].robot;
+    Robot* robot = world->robots[0];
     switch(id) {
     case SAVE_MOVIE_BUTTON_ID:
       //resize for movie
@@ -833,7 +833,7 @@ public:
 
   virtual void Handle_Keypress(unsigned char key,int x,int y)
   {
-    Robot* robot = world->robots[0].robot;
+    Robot* robot = world->robots[0];
     switch(key) {
     case 'h':
       printf("Help:\n");
@@ -875,13 +875,13 @@ public:
 	cout<<robot->q<<endl;
 	for(size_t i=0;i<world->rigidObjects.size();i++) {
 	  cout<<endl;
-	  cout<<world->rigidObjects[i].name<<" pose:"<<endl; 
-	  cout<<world->rigidObjects[i].object->T<<endl;
-	  cout<<world->rigidObjects[i].name<<" translation:"<<endl; 
-	  cout<<world->rigidObjects[i].object->T.t<<endl;
-	  cout<<world->rigidObjects[i].name<<" RPY:"<<endl; 
+	  cout<<world->rigidObjects[i]->name<<" pose:"<<endl; 
+	  cout<<world->rigidObjects[i]->T<<endl;
+	  cout<<world->rigidObjects[i]->name<<" translation:"<<endl; 
+	  cout<<world->rigidObjects[i]->T.t<<endl;
+	  cout<<world->rigidObjects[i]->name<<" RPY:"<<endl; 
 	  EulerAngleRotation ea;
-	  ea.setMatrixZYX(world->rigidObjects[i].object->T.R);
+	  ea.setMatrixZYX(world->rigidObjects[i]->T.R);
 	  cout<<ea.z<<" "<<ea.y<<" "<<ea.x<<endl;
 	}
       }
@@ -926,7 +926,7 @@ public:
 
   virtual void BeginDrag(int x,int y,int button,int modifiers)
   {
-    Robot* robot = world->robots[0].robot;
+    Robot* robot = world->robots[0];
     if(button == GLUT_RIGHT_BUTTON) {
       double d;
       if(allWidgets.BeginDrag(x,viewport.h-y,viewport,d))
@@ -949,7 +949,7 @@ public:
 
   virtual void DoFreeDrag(int dx,int dy,int button)
   {
-    Robot* robot = world->robots[0].robot;
+    Robot* robot = world->robots[0];
     if(button == GLUT_LEFT_BUTTON)  DragRotate(dx,dy);
     else if(button == GLUT_RIGHT_BUTTON) {
       if(allWidgets.hasFocus) {
@@ -984,7 +984,7 @@ const char* OPTIONS_STRING = "Options:\n\
 \t-l [file]: loads the given resource file.\n\
 ";
 
-#include <utils/EquivalenceMap.h>
+#include <Krislibrary/utils/EquivalenceMap.h>
 
 struct EqualVertex
 {
