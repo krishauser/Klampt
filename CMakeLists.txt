@@ -146,12 +146,15 @@ endforeach(s)
 install(DIRECTORY data
     DESTINATION .
     COMPONENT datafiles)
+install(DIRECTORY Documentation
+    DESTINATION .
+    COMPONENT documentation)
 
 #examples and apps already added
 
 IF(WIN32)
 	#need to install Assimp, GLPK, glut32 dlls
-	install(FILES Library/Assimp32.dll Library/glpk_4_52.dll Library/glut32.dll
+	install(FILES Library/Assimp32.dll Library/glpk_4_61.dll Library/glut32.dll Library/glew32.dll
 		DESTINATION bin
 		COMPONENT apps)
 ELSE(WIN32)
