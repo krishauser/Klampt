@@ -22,14 +22,18 @@ IF(USE_QT5_APPS)
 	ADD_SUBDIRECTORY( URDFtoRobQt )
 	IF(WIN32) 
 		#need to install Qt dlls
-		install(FILES ${QT_BINARY_DIR}/QtCore5.dll
-			      ${QT_BINARY_DIR}/QtWidgets5.dll
-			      ${QT_BINARY_DIR}/QtOpenGL5.dll
-			      ${QT_BINARY_DIR}/QtSvg5.dll
-			      ${QT_BINARY_DIR}/QtXml5.dll
+		#QT_BINARY_DIR and QT_PLUGINS_DIR are not defined in Qt5... this is a bit of a hack
+		get_filename_component(QT_BINARY_DIR "${Qt5Core_DIR}/../../../bin" ABSOLUTE)
+		get_filename_component(QT_PLUGINS_DIR "${Qt5Core_DIR}/../../../plugins" ABSOLUTE)
+
+		install(FILES ${QT_BINARY_DIR}/Qt5Core.dll
+			      ${QT_BINARY_DIR}/Qt5Gui.dll
+			      ${QT_BINARY_DIR}/Qt5Widgets.dll
+			      ${QT_BINARY_DIR}/Qt5OpenGL.dll
+			      ${QT_BINARY_DIR}/Qt5Svg.dll
 			DESTINATION bin
 			COMPONENT apps)
-		install(FILES ${QT_PLUGINS_DIR}/iconengines/qsvgicon5.dll
+		install(FILES ${QT_PLUGINS_DIR}/iconengines/qsvgicon.dll
 			      DESTINATION bin/iconengines
 			      COMPONENT apps)
 		install(FILES ${QT_PLUGINS_DIR}/imageformats/qjpeg.dll ${QT_PLUGINS_DIR}/imageformats/qgif.dll ${QT_PLUGINS_DIR}/imageformats/qsvg.dll
