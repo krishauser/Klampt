@@ -3,13 +3,13 @@ REM script that builds and uploads everything on Windows Visual Studio 2015
 REM (assumes CMake is set up properly, Python is installed, etc)
 
 REM configuration variables
-SET buildfolder=msvc14
+SET buildfolder=msvc
 SET python=C:\Python27\python.exe
 SET klamptversion=0.7.0
 
 REM update KrisLibrary, build both release and debug and copy into Library directory
 cd Library\KrisLibrary
-git pull
+REM git pull
 if %errorlevel% neq 0 exit /b %errorlevel%
 devenv %buildfolder%\KrisLibrary.sln /build Release
 if %errorlevel% neq 0 exit /b %errorlevel%
@@ -20,7 +20,7 @@ copy /Y lib\Debug\KrisLibrary.lib ..\KrisLibraryd.lib
 cd ..\..\
 
 REM update and build Klamp't
-git pull
+REM git pull
 if %errorlevel% neq 0 exit /b %errorlevel%
 devenv %buildfolder%\Klampt.sln /build Release
 REM (python doesnt build right here...) if %errorlevel% neq 0 exit /b %errorlevel%
