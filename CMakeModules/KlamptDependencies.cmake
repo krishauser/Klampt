@@ -61,9 +61,9 @@ IF(WIN32)
   endif( )
 
   FIND_PATH(GLPK_INCLUDE_DIR glpk.h
-	PATHS ${KRISLIBRARY_ROOT}/glpk-4.52/src  )
+	PATHS ${KRISLIBRARY_ROOT}/glpk-4.61/src  )
   FIND_LIBRARY(GLPK_LIBRARY
-	NAMES glpk_4_52
+	NAMES glpk_4_61
 	PATHS ${KRISLIBRARY_ROOT})
   find_package_handle_standard_args(GLPK
 	DEFAULT_MSG
