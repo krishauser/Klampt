@@ -95,7 +95,7 @@ bool RobotController::GetCommandedConfig(Config& q)
     if(command->actuators[i].mode == ActuatorCommand::PID)
       robot.SetDriverValue(i,command->actuators[i].qdes);
     else {
-      fprintf(stderr,"GetCommandedConfig: driver %d is not in PID mode",i);
+      fprintf(stderr,"RobotController::GetCommandedConfig: driver %d is not in PID mode",i);
       return false;
     }
   }
@@ -110,7 +110,7 @@ bool RobotController::GetCommandedVelocity(Config& dq)
     if(command->actuators[i].mode == ActuatorCommand::PID)
       robot.SetDriverVelocity(i,command->actuators[i].dqdes);
     else {
-      fprintf(stderr,"GetCommandedVelocity: driver %d is not in PID mode",i);
+      fprintf(stderr,"RobotController::GetCommandedVelocity: driver %d is not in PID mode",i);
       return false;
     }
   }
@@ -122,7 +122,7 @@ bool RobotController::GetSensedConfig(Config& q)
 {
   JointPositionSensor* s = sensors->GetTypedSensor<JointPositionSensor>();
   if(s==NULL) {
-    fprintf(stderr,"Warning, robot has no joint position sensor\n");
+    fprintf(stderr,"RobotController: Warning, robot has no joint position sensor\n");
     fprintf(stderr,"Sensor list:\n");
     for(size_t i=0;i<sensors->sensors.size();i++)
       fprintf(stderr,"  %s: %s\n",sensors->sensors[i]->Type(),sensors->sensors[i]->name.c_str());
@@ -131,10 +131,20 @@ bool RobotController::GetSensedConfig(Config& q)
   if(s->indices.empty())
     q = s->q;
   else {
-    q.resize(robot.q.size());
-    q.set(0.0);
-    for(size_t i=0;i<s->indices.size();i++)
+    //q.resize(robot.q.size());
+    //q.set(0.0);
+    robot.q.setZero();
+    if(command) {
+      for(size_t i=0;i<command->actuators.size();i++) {
+        if(command->actuators[i].mode == ActuatorCommand::PID)
+          robot.SetDriverValue(i,command->actuators[i].qdes);
+      }
+    }
+    q = robot.q;
+    for(size_t i=0;i<s->indices.size();i++) {
+      Assert(s->indices[i] >= 0 && s->indices[i] < q.n);
       q[s->indices[i]] = s->q[i];
+    }
   }
   return true;
 }
@@ -143,7 +153,7 @@ bool RobotController::GetSensedVelocity(Config& dq)
 {
   JointVelocitySensor* s=sensors->GetTypedSensor<JointVelocitySensor>();
   if(s==NULL) {
-    fprintf(stderr,"Warning, robot has no joint velocity sensor\n");
+    fprintf(stderr,"RobotController: Warning, robot has no joint velocity sensor\n");
     fprintf(stderr,"Sensor list:\n");
     for(size_t i=0;i<sensors->sensors.size();i++)
       fprintf(stderr,"  %s: %s\n",sensors->sensors[i]->Type(),sensors->sensors[i]->name.c_str());
@@ -152,10 +162,20 @@ bool RobotController::GetSensedVelocity(Config& dq)
   if(s->indices.empty())
     dq = s->dq;
   else {
-    dq.resize(robot.q.size());
-    dq.set(0.0);
-    for(size_t i=0;i<s->indices.size();i++)
+    //dq.resize(robot.q.size());
+    //dq.set(0.0);
+    robot.dq.setZero();
+    if(command) {
+      for(size_t i=0;i<command->actuators.size();i++) {
+        if(command->actuators[i].mode == ActuatorCommand::PID)
+          robot.SetDriverVelocity(i,command->actuators[i].dqdes);
+      }
+    }    
+    dq = robot.dq;
+    for(size_t i=0;i<s->indices.size();i++) {
+      Assert(s->indices[i] >= 0 && s->indices[i] < dq.n);
       dq[s->indices[i]] = s->dq[i];
+    }
   }
   return true;
 }
@@ -278,16 +298,20 @@ map<std::string,SmartPointer<RobotController> > RobotControllerFactory::controll
 
 SmartPointer<RobotController> MakeDefaultController(Robot* robot)
 {
-  string controllerFn;
-  if(robot->properties.get("controller",controllerFn)) {
-    SmartPointer<RobotController> res = RobotControllerFactory::Load(controllerFn.c_str(),*robot);
-    if(res) return res;
-    else {
-      printf("MakeDefaultController: could not load controller file %s\n",controllerFn.c_str());
-      printf("  Making the standard controller instead.\n");
-      printf("  Press enter to continue.\n");
-      getchar();
+  string controllerXml;
+  if(robot->properties.get("controller",controllerXml)) {
+    TiXmlElement n("controller");
+    stringstream ss(controllerXml);
+    ss >> n;
+    if(ss) {
+      SmartPointer<RobotController> res = RobotControllerFactory::Load(&n,*robot);
+      if(res) return res;
     }
+  
+    printf("MakeDefaultController: could not load controller from data %s\n",controllerXml.c_str());
+    printf("  Making the standard controller instead.\n");
+    printf("  Press enter to continue.\n");
+    getchar();
   }
   PolynomialPathController* c = new PolynomialPathController(*robot);
   FeedforwardController* fc = new FeedforwardController(*robot,c);

@@ -106,16 +106,56 @@ class CSpaceInterface
   void setProperty(const char* key,const char* value);
   const char* getProperty(const char* key);
 
-  ///queries
+  ///Queries whether a given configuration is feasible 
   bool isFeasible(PyObject* q);
+  ///Queries whether two configurations are visible
   bool isVisible(PyObject* a,PyObject* b);
+  ///Queries whether a given configuration is feasible with respect to a given constraint
   bool testFeasibility(const char* name,PyObject* q);
+  ///Queries whether two configurations are visible with respect to a given constraint
   bool testVisibility(const char* name,PyObject* a,PyObject* b);
+  ///Returns a list of all failed feasibility constraints
   PyObject* feasibilityFailures(PyObject* q);
+  ///Returns a list of all failed visibility constraints
   PyObject* visibilityFailures(PyObject* a,PyObject* b);
+  ///Samples a configuration
   PyObject* sample();
+  ///Returns the distance between two configurations
   double distance(PyObject* a,PyObject* b);
+  ///Interpolates between two configurations
   PyObject* interpolate(PyObject* a,PyObject* b,double u);
+
+  ///optional: adaptive queries can be used to automatically minimize the total
+  ///cost of testing feasibility / visibility using empirical estimates.  Off by default.
+  bool adaptiveQueriesEnabled();
+  ///Call this to enable adaptive queries.  (It has a small overhead.)
+  void enableAdaptiveQueries(bool enabled=true);
+  ///Call this to optimize the feasibility / visibility testing order.
+  void optimizeQueryOrder();
+  ///Marks that a certain feasibility test must be performed before another
+  void setFeasibilityDependency(const char* name,const char* precedingTest);
+  ///Resets the data for a certain feasibility test.  Default values give a data-gathering behavior
+  void setFeasibilityPrior(const char* name,double costPrior=0.0,double feasibilityProbability=0.0,double evidenceStrength=1.0);
+  ///Marks that a certain feasibility test must be performed before another
+  void setVisibilityDependency(const char* name,const char* precedingTest);
+  ///Resets the data for a certain visibility test.  Default values give a data-gathering behavior
+  void setVisibilityPrior(const char* name,double costPrior=0.0,double visibilityProbability=0.0,double evidenceStrength=1.0);
+  ///Retrieves the empirical average cost of a given feasibility test 
+  double feasibilityCost(const char* name);
+  ///Retrieves the empirical average success rate of a given feasibility test
+  double feasibilityProbability(const char* name);
+  ///Retrieves the empirical average cost of a given visibility test
+  double visibilityCost(const char* name);
+  ///Retrieves the empirical average success rate of a given visibility test
+  double visibilityProbability(const char* name);
+  ///Retrieves the current order of feasibility tests
+  PyObject* feasibilityQueryOrder();
+  ///Retrieves the current order of visibility tests
+  PyObject* visibilityQueryOrder();
+
+  ///Returns constraint testing statistics.
+  ///If adaptive queries are enabled, this returns the stats on each constraint
+  PyObject* getStats();
 
   int index;
 };
@@ -161,6 +201,7 @@ class PlannerInterface
   ~PlannerInterface();
   void destroy();
   bool setEndpoints(PyObject* start,PyObject* goal);
+  bool setEndpointSet(PyObject* start,PyObject* goal,PyObject* goalSample=NULL);
   int addMilestone(PyObject* milestone);
   void planMore(int iterations);
   PyObject* getPathEndpoints();

@@ -7,6 +7,7 @@
 #include <Python.h>
 #include "Planning/RobotCSpace.h"
 #include "Modeling/World.h"
+#include "Planning/RobotCSpace.h"
 #include "pyerr.h"
 
 //defined in robotsim.cpp
@@ -191,6 +192,29 @@ void IKObjective::getTransform(double out[9],double out2[3]) const
     PyException("getTransform called on non-fixed transform");
   }
 }
+void IKObjective::transform(const double R[9],const double t[3])
+{
+  RigidTransform T;
+  T.R = Matrix3(R);
+  T.t = Vector3(t);
+  goal.Transform(T);
+}
+
+void IKObjective::transformLocal(const double R[9],const double t[3]) 
+{
+  RigidTransform T;
+  T.R = Matrix3(R);
+  T.t = Vector3(t);
+  goal.TransformLocal(T);
+}
+
+void IKObjective::matchDestination(const double R[9],const double t[3])
+{
+  RigidTransform T;
+  T.R = Matrix3(R);
+  T.t = Vector3(t);
+  goal.MatchGoalTransform(T);
+}
 
 bool IKObjective::loadString(const char* str)
 {
@@ -206,6 +230,7 @@ std::string IKObjective::saveString() const
   ss<<goal;
   return ss.str();
 }
+
 
 GeneralizedIKObjective::GeneralizedIKObjective(const GeneralizedIKObjective& obj)
   :link1(obj.link1),link2(obj.link2),obj1(obj.obj1),obj2(obj.obj2),
@@ -269,16 +294,47 @@ void GeneralizedIKObjective::setTransform(const double R[9],const double t[3])
 
 
 IKSolver::IKSolver(const RobotModel& _robot)
-  :robot(_robot),useJointLimits(true)
+  :robot(_robot),maxIters(100),tol(1e-3),useJointLimits(true),lastIters(0)
 {}
 
 IKSolver::IKSolver(const IKSolver& solver)
-  :robot(solver.robot),objectives(solver.objectives),activeDofs(solver.activeDofs),useJointLimits(solver.useJointLimits),qmin(solver.qmin),qmax(solver.qmax)
+  :robot(solver.robot),objectives(solver.objectives),maxIters(solver.maxIters),tol(solver.tol),activeDofs(solver.activeDofs),useJointLimits(solver.useJointLimits),qmin(solver.qmin),qmax(solver.qmax),lastIters(solver.lastIters)
 {}
 
 void IKSolver::add(const IKObjective& objective)
 {
   objectives.push_back(objective);
+}
+
+void IKSolver::set(int i,const IKObjective& objective)
+{
+  if(i < 0 || i >= objectives.size()) throw PyException("Invalid index specified in set");
+  objectives[i] = objective;
+}
+
+void IKSolver::clear()
+{
+  objectives.resize(0);
+}
+
+void IKSolver::setMaxIters(int iters)
+{
+  maxIters = iters;
+}
+
+int IKSolver::getMaxIters()
+{
+  return maxIters;
+}
+
+void IKSolver::setTolerance(double res)
+{
+  tol = res;
+}
+
+double IKSolver::getTolerance()
+{
+  return tol;
 }
 
 void IKSolver::setActiveDofs(const std::vector<int>& active)
@@ -332,6 +388,28 @@ void IKSolver::getJointLimits(std::vector<double>& out,std::vector<double>& out2
   }
 }
 
+void IKSolver::setBiasConfig(const std::vector<double>& _biasConfig)
+{
+  biasConfig = _biasConfig;
+}
+
+void IKSolver::getBiasConfig(std::vector<double>& out)
+{
+  out = biasConfig;
+}
+
+bool IKSolver::isSolved()
+{
+  std::vector<double> res,qmin,qmax;
+  getResidual(res);
+  for(size_t i=0;i<res.size();i++)
+    if(Abs(res[i]) > tol) return false;
+  getJointLimits(qmin,qmax);
+  for(size_t i=0;i<qmin.size();i++)
+    if(robot.robot->q(i) < qmin[i] || robot.robot->q(i) > qmax[i]) return false;
+  return true;
+}
+
 void IKSolver::getResidual(std::vector<double>& out)
 {
   int size = 0;
@@ -383,6 +461,11 @@ void IKSolver::getJacobian(std::vector<std::vector<double> >& out)
 
 PyObject* IKSolver::solve(int iters,double tol)
 {
+  static bool warned=false;
+  if(!warned) {
+    printf("IKSolver.solve(iters,tol) will be deprecated, use setMaxIters(iters)/setTolerance(tol) and solve() instead\n");
+    warned=true;
+  }
   RobotIKFunction f(*robot.robot);
   vector<IKGoal> goals(objectives.size());
   for(size_t i=0;i<objectives.size();i++)
@@ -395,8 +478,11 @@ PyObject* IKSolver::solve(int iters,double tol)
   if(useJointLimits) {
     if(qmin.empty())
       solver.UseJointLimits();
-    else
+    else {
+      if(qmin.size() != robot.robot->links.size()) throw PyException("Invalid size on qmin");
+      if(qmax.size() != robot.robot->links.size()) throw PyException("Invalid size on qmax");
       solver.UseJointLimits(Vector(qmin),Vector(qmax));
+    }
   }
   solver.solver.verbose = 0;
 
@@ -406,6 +492,44 @@ PyObject* IKSolver::solve(int iters,double tol)
   PyTuple_SetItem(tuple,0,PyBool_FromLong(res));
   PyTuple_SetItem(tuple,1,PyInt_FromLong(iters));
   return tuple;
+}
+
+bool IKSolver::solve()
+{
+  RobotIKFunction f(*robot.robot);
+  vector<IKGoal> goals(objectives.size());
+  for(size_t i=0;i<objectives.size();i++)
+    goals[i] = objectives[i].goal;
+  f.UseIK(goals);
+  if(activeDofs.empty()) GetDefaultIKDofs(*robot.robot,goals,f.activeDofs);
+  else f.activeDofs.mapping = activeDofs;
+
+  RobotIKSolver solver(f);
+  if(useJointLimits) {
+    if(qmin.empty())
+      solver.UseJointLimits();
+    else {
+      if(qmin.size() != robot.robot->links.size()) throw PyException("Invalid size on qmin");
+      if(qmax.size() != robot.robot->links.size()) throw PyException("Invalid size on qmax");
+      solver.UseJointLimits(Vector(qmin),Vector(qmax));
+    }
+  }
+  if(!biasConfig.empty()) {
+    if(biasConfig.size() != robot.robot->links.size()) throw PyException("Invalid size on biasConfig");
+    solver.UseBiasConfiguration(Vector(biasConfig));
+  }
+  solver.solver.verbose = 0;
+
+  int iters=maxIters;
+  bool res = solver.Solve(tol,iters);
+  robot.robot->UpdateGeometry();
+  lastIters = iters;
+  return res;
+}
+
+int IKSolver::lastSolveIters()
+{
+  return lastIters;
 }
 
 void IKSolver::sampleInitial()
@@ -440,6 +564,16 @@ void GeneralizedIKSolver::add(const GeneralizedIKObjective& objective)
   objectives.push_back(objective);
 }
 
+void GeneralizedIKSolver::setMaxIters(int iters)
+{
+  maxIters = iters;
+}
+
+void GeneralizedIKSolver::setTolerance(double res)
+{
+  tol = res;
+}
+
 void GeneralizedIKSolver::getResidual(std::vector<double>& out)
 {
   throw PyException("Not implemented yet");
@@ -450,7 +584,7 @@ void GeneralizedIKSolver::getJacobian(std::vector<std::vector<double> >& out)
   throw PyException("Not implemented yet");
 }
 
-PyObject* GeneralizedIKSolver::solve(int iters,double tol)
+PyObject* GeneralizedIKSolver::solve()
 {
   throw PyException("Not implemented yet");
   return NULL;

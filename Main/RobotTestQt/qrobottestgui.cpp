@@ -1,7 +1,7 @@
 #include "qrobottestgui.h"
 
 #include <QSettings>
-#include <QtGui/QApplication>
+#include <QApplication>
 
 QRobotTestGUI::QRobotTestGUI(GenericBackendBase *_backend,QKlamptDisplay* _display) :
   QtGUIBase(_backend),display(_display),

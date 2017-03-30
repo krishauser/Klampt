@@ -14,7 +14,7 @@ using namespace std;
 /// continuous when connected via a uniform parameterization.
 void SplineInterpolate(const vector<Vector>& pts,
 		       vector<GeneralizedCubicBezierCurve>& paths,
-		       CSpace* space=NULL,GeodesicManifold* manifold=NULL);
+		       CSpace* space=NULL,GeodesicSpace* manifold=NULL);
 /// Interpolates the given points and returns a timed path.  If
 /// coxDeBoorParameter = 0, then a uniform parameterization is used.  If
 /// 1, then the distance between points is used to define the parametrization
@@ -22,23 +22,23 @@ void SplineInterpolate(const vector<Vector>& pts,
 /// used, which has some advantages.
 void SplineInterpolate(const vector<Vector>& pts,
 		       GeneralizedCubicBezierSpline& path,
-		       CSpace* space=NULL,GeodesicManifold* manifold=NULL,
+		       CSpace* space=NULL,GeodesicSpace* manifold=NULL,
 		       Real coxDeBoorParameter=0);
 /// Interpolates the given points at the given times
 void SplineInterpolate(const vector<Vector>& pts,const vector<Real>& times,
 		       vector<GeneralizedCubicBezierCurve>& paths,
-		       CSpace* space=NULL,GeodesicManifold* manifold=NULL);
+		       CSpace* space=NULL,GeodesicSpace* manifold=NULL);
 /// Same as above but outputs a spline, sets the path's durations
 void SplineInterpolate(const vector<Vector>& pts,const vector<Real>& times,
 		       GeneralizedCubicBezierSpline& path,
-		       CSpace* space=NULL,GeodesicManifold* manifold=NULL);
+		       CSpace* space=NULL,GeodesicSpace* manifold=NULL);
 /// Interpolates ensuring that each intermediate segment is monotonically
 /// increasing / decreasing (potentially less oscillation). The resulting
 /// path segments are C1 continuous when connected via a uniform
 ///parameterization.
 void MonotonicInterpolate(const vector<Vector>& pts,
 			  vector<GeneralizedCubicBezierCurve>& paths,
-			  CSpace* space=NULL,GeodesicManifold* manifold=NULL);
+			  CSpace* space=NULL,GeodesicSpace* manifold=NULL);
 /// Interpolates the given points using monotonic interpolation, returning a
 /// timed path.  If coxDeBoorParameter = 0, then a uniform parameterization
 /// is used.  If 1, then the distance between points is used to define
@@ -46,20 +46,20 @@ void MonotonicInterpolate(const vector<Vector>& pts,
 /// parametrization is/ used, which has some advantages.
 void MonotonicInterpolate(const vector<Vector>& pts,
 			  GeneralizedCubicBezierSpline& path,
-			  CSpace* space=NULL,GeodesicManifold* manifold=NULL,
+			  CSpace* space=NULL,GeodesicSpace* manifold=NULL,
 			  Real coxDeBoorParameter=0);
 /// Same as above but with times
 void MonotonicInterpolate(const vector<Vector>& pts,const vector<Real>& times,
 			  vector<GeneralizedCubicBezierCurve>& paths,
-			  CSpace* space=NULL,GeodesicManifold* manifold=NULL);
+			  CSpace* space=NULL,GeodesicSpace* manifold=NULL);
 /// Same as above but outputs a spline, sets the path's durations
 void MonotonicInterpolate(const vector<Vector>& pts,const vector<Real>& times,
 			  GeneralizedCubicBezierSpline& path,
-			  CSpace* space=NULL,GeodesicManifold* manifold=NULL);
+			  CSpace* space=NULL,GeodesicSpace* manifold=NULL);
 ///
 void MonotonicAccelInterpolate(const vector<Vector>& pts,
 			  vector<GeneralizedCubicBezierCurve>& paths,
-			  CSpace* space=NULL,GeodesicManifold* manifold=NULL);
+			  CSpace* space=NULL,GeodesicSpace* manifold=NULL);
 /*@}*/
 
 #endif

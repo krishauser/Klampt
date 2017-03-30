@@ -608,14 +608,23 @@ bool Robot::LoadRob(const char* fn) {
 			return false;
 		  }
 		  if(stemp == "controller" || stemp == "sensors") {
-		    //prepend the robot path
-		    stringstream ss(value);
+		  	stringstream ss(value);
 		    string file;
 		    SafeInputString(ss,file);
-		    properties[stemp] = path + file;
+		  	const char* ext = FileExtension(file.c_str());
+		  	if(ext && 0==strcmp(ext,"xml")) {
+			    //prepend the robot path
+			    string fn = path + file;
+			    if(!GetFileContents(fn.c_str(),properties[stemp])) {
+			    	fprintf(stderr,"     Unable to read %s property from file %s\n",stemp.c_str(),fn.c_str());
+			    	return false;
+			    }
+			}
+			else 
+				properties[stemp] = value;
 		  }
 		  else 
-		    properties[stemp] = value;
+		    properties[stemp] = value; 
 		} else {
 			fprintf(stderr, "   Invalid robot property %s on line %d\n",
 					name.c_str(), lineno);
@@ -889,6 +898,8 @@ bool Robot::LoadRob(const char* fn) {
 		FatalError("Scale not done yet");
 	if (geomscale.size() == 1)
 		geomscale.resize(n, geomscale[0]);
+	
+	geomManagers.resize(n);
 	geomFiles.resize(n);
 	Timer timer;
 	for (size_t i = 0; i < geomFn.size(); i++) {
@@ -903,7 +914,7 @@ bool Robot::LoadRob(const char* fn) {
 			  geomFn[i].c_str());
 		  return false;
 		}
-		if (!geomscale.empty()) {
+		if (!geomscale.empty() && geomscale[i] != 1) {
 			Matrix4 mscale;
 			mscale.setIdentity();
 			mscale(0, 0) = mscale(1, 1) = mscale(2, 2) = geomscale[i];
@@ -1163,22 +1174,8 @@ bool Robot::LoadRob(const char* fn) {
 						fn.c_str());
 				return false;
 			}
-			size_t lstart = links.size();
-			size_t dstart = drivers.size();
-			Mount(mountLinks[i], subchain, mountT[i]);
-
-			if(mountNames[i].empty()) {
-			  for (size_t k = lstart; k < links.size(); k++) 
-			    linkNames[k] = linkNames[k];
-			  for (size_t k = dstart; k < drivers.size(); k++)
-			    driverNames[k] = driverNames[k];
-			}
-			else {
-			  for (size_t k = lstart; k < links.size(); k++) 
-			    linkNames[k] = mountNames[i] + ":" + linkNames[k];
-			  for (size_t k = dstart; k < drivers.size(); k++)
-			    driverNames[k] = mountNames[i] + ":" + driverNames[k];
-			}
+			const char* prefix = (mountNames[i].empty() ? NULL : mountNames[i].c_str());
+			Mount(mountLinks[i], subchain, mountT[i], prefix);
 		}
 	}
 	if (!CheckValid())
@@ -1354,6 +1351,11 @@ bool Robot::Save(const char* fn) {
 		if (i < nLinks - 1)
 			file << " \\" << endl;
 	}
+	file << endl << endl;
+
+	file <<"q\t";
+	for (int i = 0; i < nLinks; i++)
+		file << q[i] << " ";
 	file << endl << endl;
 
 	file << "qmin\t";
@@ -1682,7 +1684,7 @@ void Robot::Mount(int link, const Geometry::AnyGeometry3D& mesh,
 		const RigidTransform& T) {
   if(!geometry[link]) {
     if(link >= (int)geomManagers.size()) {
-      printf("Robot::Mount: Need to add geometry managers?\n");
+      printf("Robot::Mount (geometry): Need to add geometry managers?\n");
       geomManagers.resize(geometry.size());
     }
     geomManagers[link].CreateEmpty();
@@ -1701,7 +1703,7 @@ void Robot::Mount(int link, const Geometry::AnyGeometry3D& mesh,
       geomManagers[link].SetUniqueAppearance();
     }
     else {
-      printf("Robot::Mount: Need to add geometry managers?\n");
+      printf("Robot::Mount (geometry): Need to add geometry managers?\n");
       geomManagers.resize(geometry.size());
     }
     geomManagers[link].CreateEmpty();
@@ -1712,9 +1714,13 @@ void Robot::Mount(int link, const Geometry::AnyGeometry3D& mesh,
   //TODO: reinitialize all self collisions with this mesh
 }
 
-void Robot::Mount(int link, const Robot& subchain, const RigidTransform& T) {
+void Robot::Mount(int link, const Robot& subchain, const RigidTransform& T,const char* prefix)
+{
 	Assert(&subchain != this);
 	size_t norig = links.size();
+	size_t lstart = links.size();
+	size_t dstart = drivers.size();
+
 	ArrayUtils::concat(links, subchain.links);
 	//update mounting transform
 	RigidTransform T0;
@@ -1771,7 +1777,7 @@ void Robot::Mount(int link, const Robot& subchain, const RigidTransform& T) {
 	}
 	//init collisions between subchain and existing links
 	for (size_t j = 0; j < subchain.links.size(); j++) {
-		if (subchain.parents[j] < 0 && geometry[link] && !geometry[link]->Empty()) {
+		if (subchain.parents[j] < 0 && link >= 0 && geometry[link] && !geometry[link]->Empty()) {
 			//rigidly attached to 'link' -- dont check self collision with link
 			for (size_t i = 0; i < norig; i++) {
 				if ((int) i != link)
@@ -1804,6 +1810,86 @@ void Robot::Mount(int link, const Robot& subchain, const RigidTransform& T) {
 				drivers[i + dorig].linkIndices[j] = link;
 			else
 				drivers[i + dorig].linkIndices[j] += norig;
+		}
+	}
+
+	//modify names of links and drivers
+	if(prefix == NULL) {
+	  for (size_t k = lstart; k < links.size(); k++) 
+	    linkNames[k] = linkNames[k];
+	  for (size_t k = dstart; k < drivers.size(); k++)
+	    driverNames[k] = driverNames[k];
+	}
+	else {
+		string sprefix(prefix);
+	  for (size_t k = lstart; k < links.size(); k++) 
+	    linkNames[k] = sprefix + ":" + linkNames[k];
+	  for (size_t k = dstart; k < drivers.size(); k++)
+	    driverNames[k] = sprefix + ":" + driverNames[k];
+	}
+
+	//modify sensors 
+	for(PropertyMap::const_iterator i=subchain.properties.begin();i!=subchain.properties.end();i++) {
+		if(i->first == "sensors") {
+			stringstream ss(i->second);
+			TiXmlElement e("sensors");
+			ss >> e;
+			if(!ss) {
+				printf("Robot::Mount: Warning, mounted robot sensors couldn't be loaded %s\n",i->second.c_str());
+				continue;
+			}
+			//go through and modify all links
+			TiXmlElement* c = e.FirstChildElement();
+			while(c != NULL) {
+				if(c->Attribute("link")) {
+					//TODO: if the link is on the root element 0 or -1, transform Tsensor attribute by T
+					int link;
+					if(c->QueryIntAttribute("link",&link) == TIXML_SUCCESS) 
+						c->SetAttribute("link",lstart+link);
+					else {
+						//named link
+						if(prefix)
+							c->SetAttribute("link",(string(prefix)+":"+string(c->Attribute("link"))).c_str());
+					}
+				}
+				else if(c->Attribute("indices")) {
+					stringstream ss(c->Attribute("indices"));
+					stringstream ssout;
+					int index;
+					while(ss >> index) 
+						ssout << lstart + index <<" ";
+					c->SetAttribute("indices",ssout.str().c_str());
+				}
+				c = c->NextSiblingElement();
+			}
+			if(properties.count("sensors") > 0) {
+				cout<<"Robot::Mount: Adding sensors as children of previous sensors"<<endl;
+				//add sensors onto my sensors
+				TiXmlElement emaster("sensors");
+				stringstream ss1(properties["sensors"]);
+				ss1 >> emaster;
+				if(!ss1) {
+					printf("Robot::Mount: Warning, base robot's sensors couldn't be loaded %s\n",properties["sensors"].c_str());
+					continue;
+				}
+				TiXmlElement* c = e.FirstChildElement();
+				while(c != NULL) {
+					emaster.InsertEndChild(*c);
+					c = c->NextSiblingElement();
+				}
+				stringstream ss2;
+				ss2 << emaster;
+				properties["sensors"] = ss2.str();
+			}
+			else {
+				stringstream ss;
+				ss << e;
+				properties["sensors"] = ss.str();
+			}
+
+		}
+		else if(i->first == "controller") {
+			printf("Robot::Mount: Warning, mounted robot will not preserve controller %s\n",i->second.c_str());
 		}
 	}
 }
@@ -2394,11 +2480,40 @@ bool Robot::LoadURDF(const char* fn)
 	    default_inertia.setIdentity(); 
 	    default_inertia *= 1e-8; 
 	  }
-	  if(klampt_xml->Attribute("sensors") != NULL) {
-		  properties["sensors"] = path + klampt_xml->Attribute("sensors");
-	  }
-	  if(klampt_xml->Attribute("controller") != NULL) {
-		  properties["controller"] = path + klampt_xml->Attribute("controller");
+
+	  //check for sensors and controller attribute / children
+	  const char* props[2] = {"sensors","controller"};
+	  for (int i=0;i<2;i++) {
+	  	const char* prop = props[i];
+		  if(klampt_xml->Attribute(prop) != NULL) {
+		  	const char* value = klampt_xml->Attribute(prop);
+		  	//load from file
+		  	stringstream ss(value);
+		    string file;
+		    SafeInputString(ss,file);
+		  	const char* ext = FileExtension(file.c_str());
+		  	if(ext && 0==strcmp(ext,"xml")) {
+			    //prepend the robot path
+			    string fn = path + file;
+			    if(!GetFileContents(fn.c_str(),properties[prop])) {
+			    	fprintf(stderr,"     Unable to read %s property from file %s\n",prop,fn.c_str());
+			    	return false;
+			    }
+			}
+			else {
+				fprintf(stderr,"<klampt> XML tag \"%s\" attribute is not an XML file? Treating as raw XML string\n",prop);
+				properties[prop] = value;
+			}
+		}
+		else {
+			//or <sensors> / <controller> tags can be placed under the <klampt> tag
+			TiXmlElement* c = klampt_xml->FirstChildElement(prop);
+			if(c != NULL) {
+				stringstream ss;
+				ss<<*c;
+				properties[prop] = ss.str();
+			}	
+		}
 	  }
 	  TiXmlElement* e = klampt_xml->FirstChildElement("link");
 	  while(e != NULL) {

@@ -35,7 +35,6 @@ class CustomTimeScaling
   void PrintActiveConstraints(ostream& out);
 
   RobotCSpace cspace;
-  RobotGeodesicManifold manifold;
 
   ///Output trajectory
   TimeScaledBezierCurve traj;

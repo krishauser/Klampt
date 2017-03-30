@@ -111,13 +111,13 @@ qmaxdeg inf inf inf inf inf inf \
 	170 90 180 160 135 160 180 \
 	170 90 180 160 135 160 180 
 
-geometry   ""   ""   ""   ""    ""    "athlete/hex.tri" \
-	"athlete/hipyaw.tri" "athlete/hippitch.tri" "athlete/kneepitch.tri" "athlete/kneeroll.tri" "athlete/anklepitch.tri" "athlete/ankleroll.tri" "athlete/wheel.tri" \
-	"athlete/hipyaw.tri" "athlete/hippitch.tri" "athlete/kneepitch.tri" "athlete/kneeroll.tri" "athlete/anklepitch.tri" "athlete/ankleroll.tri" "athlete/wheel.tri" \
-	"athlete/hipyaw.tri" "athlete/hippitch.tri" "athlete/kneepitch.tri" "athlete/kneeroll.tri" "athlete/anklepitch.tri" "athlete/ankleroll.tri" "athlete/wheel.tri" \
-	"athlete/hipyaw.tri" "athlete/hippitch.tri" "athlete/kneepitch.tri" "athlete/kneeroll.tri" "athlete/anklepitch.tri" "athlete/ankleroll.tri" "athlete/wheel.tri" \
-	"athlete/hipyaw.tri" "athlete/hippitch.tri" "athlete/kneepitch.tri" "athlete/kneeroll.tri" "athlete/anklepitch.tri" "athlete/ankleroll.tri" "athlete/wheel.tri" \
-	"athlete/hipyaw.tri" "athlete/hippitch.tri" "athlete/kneepitch.tri" "athlete/kneeroll.tri" "athlete/anklepitch.tri" "athlete/ankleroll.tri" "athlete/wheel.tri"
+geometry   ""   ""   ""   ""    ""    "athlete/hex.off" \
+	"athlete/hipyaw.off" "athlete/hippitch.off" "athlete/kneepitch.off" "athlete/kneeroll.off" "athlete/anklepitch.off" "athlete/ankleroll.off" "athlete/wheel.off" \
+	"athlete/hipyaw.off" "athlete/hippitch.off" "athlete/kneepitch.off" "athlete/kneeroll.off" "athlete/anklepitch.off" "athlete/ankleroll.off" "athlete/wheel.off" \
+	"athlete/hipyaw.off" "athlete/hippitch.off" "athlete/kneepitch.off" "athlete/kneeroll.off" "athlete/anklepitch.off" "athlete/ankleroll.off" "athlete/wheel.off" \
+	"athlete/hipyaw.off" "athlete/hippitch.off" "athlete/kneepitch.off" "athlete/kneeroll.off" "athlete/anklepitch.off" "athlete/ankleroll.off" "athlete/wheel.off" \
+	"athlete/hipyaw.off" "athlete/hippitch.off" "athlete/kneepitch.off" "athlete/kneeroll.off" "athlete/anklepitch.off" "athlete/ankleroll.off" "athlete/wheel.off" \
+	"athlete/hipyaw.off" "athlete/hippitch.off" "athlete/kneepitch.off" "athlete/kneeroll.off" "athlete/anklepitch.off" "athlete/ankleroll.off" "athlete/wheel.off"
 
 geomscale 1 1 1 1 1 0.01 \
 	0.01 0.01 0.01 0.01 0.01 0.01 0.01 \

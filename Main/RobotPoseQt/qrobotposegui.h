@@ -18,6 +18,7 @@ public:
     void SetLink(int index);
     void LoadFile(QString filename=QString());
     void LoadFilePrompt(QString directory_key="", QString filter="*");
+    void SaveFilePrompt(QString directory_key="");
     virtual bool OnPauseIdle(double secs);
     virtual bool OnCommand(const string &cmd, const string &args);
     virtual bool OnRefresh();

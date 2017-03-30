@@ -6,6 +6,8 @@
 #include <KrisLibrary/utils/stringutils.h>
 using namespace Math3D;
 
+#define CACHE_DEBUG 0
+
 ManagedGeometry::ManagedGeometry()
 {
   appearance = new GLDraw::GeometryAppearance;
@@ -14,15 +16,23 @@ ManagedGeometry::ManagedGeometry()
 ManagedGeometry::ManagedGeometry(const ManagedGeometry& rhs)
 {
   operator = (rhs);
-  //argh, if you're not careful with the cache you can copy appearance pointers directly without any record
-  if(!cacheKey.empty()) 
-    cachedGeoms[cacheKey].geoms.push_back(this);
-  else
+  //if you're not careful with the cache you can copy appearance pointers directly without any record
+  if(cacheKey.empty()) 
     appearance = new GLDraw::GeometryAppearance(*appearance);
 }
 
 ManagedGeometry::~ManagedGeometry()
 {
+#if CACHE_DEBUG
+  if(Empty()) {
+    assert(appearance.getRefCount() == 1);
+    assert(appearance->geom == NULL || appearance->geom == geometry);
+    assert(cacheKey.empty());
+  }
+  else {
+    printf("Destroying ManagedGeometry %s, appearance ref count %d\n",(cacheKey.empty() ? "uncached " : cacheKey.c_str()), appearance.getRefCount());
+  }
+#endif
   RemoveFromCache();
 }
 
@@ -51,6 +61,7 @@ void ManagedGeometry::Clear()
 
 bool ManagedGeometry::Load(const std::string& filename)
 {
+  //these lines are sort of like Clear(), but the appearance is kept
   RemoveFromCache();
   dynamicGeometrySource.clear();
   geometry = NULL;
@@ -76,10 +87,16 @@ bool ManagedGeometry::Load(const std::string& filename)
     appearance = prev->appearance;
     appearance->geom = geometry;
     cachedGeoms[filename].geoms.push_back(this);
+#if CACHE_DEBUG
+    printf("ManagedGeometry: adding a duplicate of %s to cache.\n",filename.c_str());
+#endif
     return true;
   }
 
-  if(LoadNoCache(filename)) {
+  if(LoadNoCache(filename)) {  
+#if CACHE_DEBUG
+    printf("ManagedGeometry: adding %s to cache.\n",filename.c_str());
+#endif
     cacheKey = filename;
     cachedGeoms[filename].geoms.push_back(this);
     return true;
@@ -163,7 +180,20 @@ ManagedGeometry* ManagedGeometry::IsCached(const std::string& filename)
   std::map<std::string,ManagedGeometry::GeometryInfo>::const_iterator i=cachedGeoms.find(filename);
   if(i==cachedGeoms.end()) return NULL;
   if(i->second.geoms.empty()) return NULL;
+#if CACHE_DEBUG
+  printf("ManagedGeometry: retreiving %s from cache.\n",filename.c_str());
+#endif
   return i->second.geoms[0];
+}
+
+bool ManagedGeometry::IsCached() const
+{
+  return !cacheKey.empty();
+}
+
+const std::string& ManagedGeometry::CachedFilename() const
+{
+  return cacheKey;
 }
 
 void ManagedGeometry::AddToCache(const std::string& filename)
@@ -173,6 +203,9 @@ void ManagedGeometry::AddToCache(const std::string& filename)
       printf("ManagedGeometry::AddToCache(): warning, item was previously cached as %s, now being asked to be cached as %s?\n",cacheKey.c_str(),filename.c_str());
     return;
   }
+#if CACHE_DEBUG
+  printf("ManagedGeometry: adding %s to cache.\n",filename.c_str());
+#endif
   cacheKey = filename;
   cachedGeoms[cacheKey].geoms.push_back(this);
 }
@@ -194,8 +227,12 @@ void ManagedGeometry::RemoveFromCache()
   for(size_t j=0;j<i->second.geoms.size();j++) {
     if(i->second.geoms[j] == this) {
       i->second.geoms.erase(i->second.geoms.begin()+j);
-      if(i->second.geoms.empty())
-	cachedGeoms.erase(i);
+      if(i->second.geoms.empty()) {
+        cachedGeoms.erase(i);
+#if CACHE_DEBUG
+        printf("ManagedGeometry: removing %s from cache.\n",cacheKey.c_str());
+#endif
+      }
       cacheKey.clear();
       return;
     }
@@ -255,8 +292,10 @@ const ManagedGeometry& ManagedGeometry::operator = (const ManagedGeometry& rhs)
   appearance = rhs.appearance;
   appearance->geom = geometry;
   cacheKey = rhs.cacheKey;
-  if(!cacheKey.empty())
+  if(!cacheKey.empty()) {
     cachedGeoms[cacheKey].geoms.push_back(this);
+  }
+
   return *this;
 }
 

@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>825</width>
+    <width>836</width>
     <height>600</height>
    </rect>
   </property>
@@ -618,8 +618,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>825</width>
-     <height>21</height>
+     <width>836</width>
+     <height>25</height>
     </rect>
    </property>
    <property name="nativeMenuBar">
@@ -697,6 +697,8 @@
     <addaction name="actionLog_Sensed_Path"/>
     <addaction name="actionLog_Commanded_Path"/>
     <addaction name="menuSet_Log_File"/>
+    <addaction name="separator"/>
+    <addaction name="actionROS_Broadcast"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuPreferences"/>
@@ -950,6 +952,14 @@
    </property>
    <property name="statusTip">
     <string>Edits the command line for encoding PPM frames into a vide</string>
+   </property>
+  </action>
+  <action name="actionROS_Broadcast">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>ROS Broadcast</string>
    </property>
   </action>
  </widget>
@@ -1782,6 +1792,22 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>actionROS_Broadcast</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>MainWindow</receiver>
+   <slot>SetROS(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>417</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>Reset()</slot>
@@ -1844,5 +1870,6 @@
   <slot>LogCommandedPath(bool)</slot>
   <slot>ChangeEncoderCommand()</slot>
   <slot>SetDrawTime(bool)</slot>
+  <slot>SetROS(bool)</slot>
  </slots>
 </ui>

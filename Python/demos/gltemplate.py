@@ -2,7 +2,7 @@
 
 import sys
 from klampt import *
-from klampt.glrobotprogram import *
+from klampt.vis import GLSimulationProgram
 
 class MyGLViewer(GLSimulationProgram):
     def __init__(self,files):
@@ -14,6 +14,12 @@ class MyGLViewer(GLSimulationProgram):
                 raise RuntimeError("Unable to load model "+fn)
         #initialize the simulation
         GLSimulationProgram.__init__(self,world,"My GL program")
+
+        #put custom action hooks here
+        self.add_action(self.some_function,'Some random function','f')
+
+    def some_function(self):
+        print "The function is called"
 
     def control_loop(self):
         #Put your control handler here
@@ -31,7 +37,7 @@ class MyGLViewer(GLSimulationProgram):
         GLSimulationProgram.mousefunc(self,button,state,x,y)
 
     def motionfunc(self,x,y,dx,dy):
-        GLSimulationProgram.motionfunc(self,x,y,dx,dy)
+        return GLSimulationProgram.motionfunc(self,x,y,dx,dy)
 
 if __name__ == "__main__":
     print "gltemplate.py: This example demonstrates how to simulate a world and read user input"

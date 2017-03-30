@@ -147,12 +147,19 @@ ODESimulatorSettings::ODESimulatorSettings()
   robotRobotCollisions = gRobotRobotCollisionsEnabled;
 
   adaptiveTimeStepping = gAdaptiveTimeStepping;
+  minimumAdaptiveTimeStep = 1e-6;
 
   maxContacts = 20;
   clusterNormalScale = 0.1;
 
   errorReductionParameter = 0.95;
   dampedLeastSquaresParameter = 1e-6;
+
+  instabilityConstantEnergyThreshold = 1;
+  instabilityLinearEnergyThreshold = 1.5;
+  instabilityMaxEnergyThreshold = 100000;
+  //instabilityPostCorrectionEnergy = -0.9;
+  instabilityPostCorrectionEnergy = 0.8;
 }
 
 inline Real ERPFromSpring(Real timestep,Real kP,Real kD)
@@ -205,6 +212,7 @@ ODEObject g_ODE_object;
 
 ODESimulator::ODESimulator()
 {
+  statusHistory.push_back(pair<Status,Real>(StatusNormal,0));
   simTime = 0;
   timestep = 0;
   lastStateTimestep = 0;
@@ -237,6 +245,21 @@ void ODESimulator::SetCFM(double cfm)
 {
   settings.dampedLeastSquaresParameter = cfm;
   dWorldSetCFM(worldID,cfm);
+}
+
+ODESimulator::Status ODESimulator::GetStatus() const
+{
+  return statusHistory.back().first;
+}
+
+void ODESimulator::GetStatusHistory(vector<Status>& statuses,vector<Real>& statusChangeTimes) const
+{
+  statuses.resize(statusHistory.size());
+  statusChangeTimes.resize(statusHistory.size());
+  for(size_t i=0;i<statusHistory.size();i++) {
+    statuses[i] = statusHistory[i].first;
+    statusChangeTimes[i] = statusHistory[i].second;
+  }
 }
 
 ODESimulator::~ODESimulator()
@@ -411,6 +434,10 @@ void PrintStatus(ODESimulator* sim,const vector<CollisionPair >& concernedObject
 
 void ODESimulator::Step(Real dt)
 {
+  if(GetStatus() == StatusError)  {
+    simTime += dt;
+    return;
+  }
   Assert(timestep == 0);
 
 #if DO_TIMING
@@ -419,6 +446,10 @@ void ODESimulator::Step(Real dt)
   gContactDetectTime = gClusterTime = 0;
   gPreclusterContacts = 0;
 #endif // DO_TIMING
+
+  Status status = StatusNormal;
+  if(InstabilityCorrection())
+    status = StatusUnstable;
 
   if(settings.adaptiveTimeStepping) {
 #if DO_TIMING
@@ -469,6 +500,7 @@ void ODESimulator::Step(Real dt)
   	if(lastStateTimestep > 0) {
   		timestep=lastStateTimestep;
   		Real validTime = -lastStateTimestep, desiredTime = 0;
+      bool didAnyRollback = false;
   		bool didRollback = false;
   		while(true) {
   		  DetectCollisions();
@@ -511,8 +543,8 @@ void ODESimulator::Step(Real dt)
           getchar();
           rollback = false;
   		  }
-  		  if(rollback && timestep < 1e-6) {
-  		    printf("ODESimulation: Rollback rejected because timestep %g below minimum threshold\n",timestep);
+  		  if(rollback && timestep < settings.minimumAdaptiveTimeStep) {
+  		    printf("ODESimulation: Rollback rejected because timestep %g below minimum threshold %g\n",timestep,settings.minimumAdaptiveTimeStep);
           //getchar();
 
           //TODO: DEBUG THIS PRINTOUT STUFF -- it changes the state of the adaptive time stepper
@@ -535,7 +567,7 @@ void ODESimulator::Step(Real dt)
           WriteState(temp);
           
           lastState.Seek(0,FILESEEKSTART);
-          ReadState(lastState);
+          ReadState_Internal(lastState);
           printf("STARTING CONFIGURATION:\n");
           PrintStatus(this,concernedObjects,"Concerned objects originally","had");
           DetectCollisions();
@@ -548,7 +580,7 @@ void ODESimulator::Step(Real dt)
           }
 
           temp.Seek(0,FILESEEKSTART);
-          ReadState(temp);
+          ReadState_Internal(temp);
           DetectCollisions();
           GetCurrentCollisionStatus(this,marginsRemaining,concernedObjects);
 
@@ -565,15 +597,18 @@ void ODESimulator::Step(Real dt)
           */
 
           rollback = false;
+          status = StatusContactUnreliable;
   		  }
   	
   		  if(rollback) {
           printf("ODESimulation: Rolling back at time %g, time step halved to %g\n",simTime,timestep*0.5);
+          status = StatusAdaptiveTimeStepping;
           //PrintStatus(this,concernedObjects,"Backing up colliding objects","from");
           
           didRollback = true;
+          didAnyRollback = true;
           lastState.Seek(0,FILESEEKSTART);
-          ReadState(lastState);
+          ReadState_Internal(lastState);
           timestep *= 0.5;
 
           //PrintStatus(this,concernedObjects,"Backed up colliding objects","to previous");
@@ -597,7 +632,7 @@ void ODESimulator::Step(Real dt)
           bool res = lastState.OpenData(FILEREAD | FILEWRITE);
           Assert(res);
           Assert(lastState.IsOpen());
-          WriteState(lastState);
+          WriteState_Internal(lastState);
           for(size_t i=0;i<concernedObjects.size();i++) {
             if(marginsRemaining.count(concernedObjects[i]) == 0) {
               printf("ODESimulation: collision %s - %s erased entirely\n",ObjectName(concernedObjects[i].first).c_str(),ObjectName(concernedObjects[i].second).c_str());
@@ -621,7 +656,7 @@ void ODESimulator::Step(Real dt)
           validTime += timestep;
           simTime += timestep;
           timestep = desiredTime-validTime;
-          if(didRollback)
+          if(didRollback) 
             printf("   reset time step to %g.\n",timestep);
           didRollback = false;
   		  }
@@ -635,7 +670,7 @@ void ODESimulator::Step(Real dt)
   		  StepDynamics(timestep);
         //PrintStatus(this,concernedObjects,"Colliding objects","post-step");
   		}
-  		if(didRollback) {
+  		if(didAnyRollback) {
   		  printf("ODESimulation: Adaptive time step done, arrived at time %g.\n",simTime);
   		}
   	}
@@ -679,6 +714,7 @@ void ODESimulator::Step(Real dt)
   			}
   			printf("Press enter to continue...\n");
   			getchar();
+        status = StatusContactUnreliable;
   			//NO ROLLBACK ON FIRST
   			rollback = false;
   		}
@@ -687,7 +723,7 @@ void ODESimulator::Step(Real dt)
   		lastState.Close();
   		bool res = lastState.OpenData(FILEREAD | FILEWRITE);
   		Assert(lastState.IsOpen());
-  		WriteState(lastState);
+  		WriteState_Internal(lastState);
   		lastMarginsRemaining = marginsRemaining;
   	}
     //do the prospective time step for the next call
@@ -698,9 +734,6 @@ void ODESimulator::Step(Real dt)
   }
   else {
     //plain old constant time-stepping
-
-    gContacts.clear();
-    gContactsVector.resize(0);
     
     timestep=dt;
     DetectCollisions();
@@ -720,7 +753,17 @@ void ODESimulator::Step(Real dt)
     stepTime = timer.ElapsedTime();
     timer.Reset();
 #endif // DO_TIMING
+
+    for(list<ODEContactResult>::iterator i=gContacts.begin();i!=gContacts.end();i++) {
+      if(i->meshOverlap) 
+        status = StatusContactUnreliable;
+    }
   }
+
+  if(GetStatus() != status)  {
+    statusHistory.push_back(pair<Status,Real>(status,simTime));
+  }
+
 
   //copy out feedback forces
   for(map<CollisionPair,ODEContactList>::iterator i=contactList.begin();i!=contactList.end();i++) {  
@@ -1686,8 +1729,116 @@ void ODESimulator::StepDynamics(Real dt)
   //dWorldQuickStep(worldID,dt);
 }
 
+bool ODESimulator::InstabilityCorrection()
+{
+  bool corrected = false;
+  double scale = 1.0;
+  ODEObjectID id;
+  for(size_t i=0;i<objects.size();i++) {
+    Real ke = objects[i]->GetKineticEnergy();
+    id.SetRigidObject(i);
+    bool unstable = false;
+    double threshold = settings.instabilityMaxEnergyThreshold;
+    if(!(ke < settings.instabilityMaxEnergyThreshold)) {
+      unstable = true;
+    }
+    if(energies.count(id) != 0) 
+    {
+      double stepThreshold = energies[id]*settings.instabilityLinearEnergyThreshold + settings.instabilityConstantEnergyThreshold*objects[i]->obj.mass;
+      if(!(ke < stepThreshold)) {
+        //printf("ODESimulator: Rigid object %s energy %g exceeds linear threshold %g*%g + %g\n",objects[i]->obj.name.c_str(),ke,energies[id],settings.instabilityLinearEnergyThreshold,settings.instabilityConstantEnergyThreshold);
+        unstable = true;
+        if(stepThreshold < threshold)
+          threshold = stepThreshold;
+      }
+    }
+    if(unstable) {
+      if(!IsFinite(ke)) {
+        printf("ODESimulator: Rigid object %s has non-finite energy, setting to 0\n",objects[i]->obj.name.c_str());
+        objects[i]->SetVelocity(Vector3(0.0),Vector3(0.0));
+      }
+      else {
+        printf("ODESimulator: Rigid object %s energy %g exceeds threshold %g\n",objects[i]->obj.name.c_str(),ke,threshold);
+        Assert(ke > 0);
+        Real newValue = 0;
+        if(settings.instabilityPostCorrectionEnergy < 0)
+          newValue = -ke*settings.instabilityPostCorrectionEnergy;
+        else if(settings.instabilityPostCorrectionEnergy > 0)
+          newValue = settings.instabilityPostCorrectionEnergy*threshold;
+        scale = Min(scale,Sqrt(newValue / ke));
+      }
+      corrected = true;
+    }
 
-bool ODESimulator::ReadState(File& f)
+    energies[id] = ke;
+  }
+  for(size_t i=0;i<robots.size();i++) {
+    Real ke = robots[i]->GetKineticEnergy();
+    id.SetRobot(i);
+    bool unstable = false;
+    double threshold = settings.instabilityMaxEnergyThreshold;
+    if(!(ke < settings.instabilityMaxEnergyThreshold)) {
+      unstable = true;
+    }
+    if(energies.count(id) != 0) 
+    {
+      double stepThreshold = energies[id]*settings.instabilityLinearEnergyThreshold + settings.instabilityConstantEnergyThreshold*robots[i]->robot.GetTotalMass();
+      if(!(ke < stepThreshold)) {
+        unstable = true;
+        if(stepThreshold < threshold)
+          threshold = stepThreshold;
+      }
+    }
+    if(unstable) {
+      if(!IsFinite(ke)) {
+        printf("ODESimulator: Robot %s has non-finite energy, setting to 0\n",robots[i]->robot.name.c_str());
+        Vector zero(robots[i]->robot.q.n,0.0);
+        robots[i]->SetVelocities(zero);
+      }
+      else {
+        printf("ODESimulator: Robot %s energy %g exceeds threshold %g\n",robots[i]->robot.name.c_str(),ke,threshold);
+        Assert(ke > 0);
+        Real newValue = 0;
+        if(settings.instabilityPostCorrectionEnergy < 0)
+          newValue = -ke*settings.instabilityPostCorrectionEnergy;
+        else if(settings.instabilityPostCorrectionEnergy > 0)
+          newValue = settings.instabilityPostCorrectionEnergy*threshold;
+        scale = Min(scale,Sqrt(newValue / ke));
+      }
+      corrected = true;
+    }
+
+    energies[id] = ke;
+  }
+  if(corrected) {
+    for(size_t i=0;i<objects.size();i++) {
+      Vector3 w,v;
+      objects[i]->GetVelocity(w,v);
+      objects[i]->SetVelocity(w*scale,v*scale);
+    }
+    for(size_t i=0;i<robots.size();i++) {
+      Vector q,dq;
+      robots[i]->GetConfig(q);
+      robots[i]->robot.UpdateConfig(q);
+      robots[i]->GetVelocities(dq);
+      robots[i]->SetVelocities(dq*scale);
+    }
+  }
+  return corrected;
+}
+
+void ODESimulator::ClearContactFeedback()
+{
+  for(map<CollisionPair,ODEContactList>::iterator i=contactList.begin();i!=contactList.end();i++) {
+    i->second.points.clear();
+    i->second.forces.clear();
+    i->second.feedbackIndices.clear();
+  }
+}
+
+
+
+bool ODESimulator::ReadState_Internal(File& f)
 {
 #if TEST_READ_WRITE_STATE
   for(size_t i=0;i<robots.size();i++) 
@@ -1712,16 +1863,33 @@ bool ODESimulator::ReadState(File& f)
   return true;
 }
 
-void ODESimulator::ClearContactFeedback()
+bool ODESimulator::ReadState(File& f)
 {
-  for(map<CollisionPair,ODEContactList>::iterator i=contactList.begin();i!=contactList.end();i++) {
-    i->second.points.clear();
-    i->second.forces.clear();
-    i->second.feedbackIndices.clear();
-  }
+  if(!ReadFile(f,simTime)) return false;
+  if(!ReadFile(f,lastStateTimestep)) return false;
+  int status;
+  if(!ReadFile(f,status)) return false;
+  if(!ReadState_Internal(f)) return false;
+
+  //TODO: maintain instability detection state and 
+  energies.clear();
+  lastMarginsRemaining.clear();
+  statusHistory.clear();
+  statusHistory.push_back(pair<Status,Real>((Status)status,simTime));
+  return true;
 }
 
 bool ODESimulator::WriteState(File& f) const
+{
+  if(!WriteFile(f,simTime)) return false;
+  if(!WriteFile(f,lastStateTimestep)) return false;
+  int status = (int)GetStatus();
+  if(!WriteFile(f,status)) return false;
+  if(!WriteState_Internal(f)) return false;
+  return true;
+}
+
+bool ODESimulator::WriteState_Internal(File& f) const
 {
   for(size_t i=0;i<robots.size();i++) 
     if(!robots[i]->WriteState(f)) return false;

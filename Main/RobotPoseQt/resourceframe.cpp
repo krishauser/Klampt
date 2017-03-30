@@ -5,6 +5,7 @@
 #include "floatarrayframe.h"
 #include "holdframe.h"
 #include "stanceframe.h"
+#include "trimeshframe.h"
 #include "qrobotposegui.h"
 
 #include <QSettings>
@@ -17,8 +18,8 @@
 
 static const int numtoposertypes = 5;
 static const char* toposertypes [] = {"Config","IKGoal","Stance","LinearPath","MultiPath"};
-static const int numfromposertypes = 2;
-static const char* fromposertypes [] = {"Config","IKGoal"};
+static const int numfromposertypes = 3;
+static const char* fromposertypes [] = {"Config","IKGoal","Stance"};
 
 ResourceFrame::ResourceFrame(QWidget *parent) :
   QFrame(parent), //resourceTreeModel(NULL),
@@ -58,6 +59,7 @@ void ResourceFrame::SetManager(ResourceManager* _manager)
   resourceToStackWidgetIndex["Stance"] = ui->selectedResourceWidget->addWidget(new StanceFrame(this));
   resourceToStackWidgetIndex["Hold"] = ui->selectedResourceWidget->addWidget(new HoldFrame(this));
   resourceToStackWidgetIndex["LinearPath"] = resourceToStackWidgetIndex["MultiPath"] = ui->selectedResourceWidget->addWidget(new PathFrame(this));
+  resourceToStackWidgetIndex["TriMesh"] = ui->selectedResourceWidget->addWidget(new TriMeshFrame(this));
   resourceToStackWidgetIndex["vector<double>"] = resourceToStackWidgetIndex["vector<double>"] = ui->selectedResourceWidget->addWidget(new FloatArrayFrame(this));
   ui->selectedResourceWidget->setCurrentIndex(0);
 
@@ -193,6 +195,8 @@ void ResourceFrame::updateSelectedResourcePane(ResourcePtr resource)
       dynamic_cast<PathFrame*>(w)->set(resource);
     else if(0==strcmp(resource->Type(),"MultiPath"))
       dynamic_cast<PathFrame*>(w)->set(resource);
+    else if(0==strcmp(resource->Type(),"TriMesh"))
+      dynamic_cast<TriMeshFrame*>(w)->set(resource);
     else
       fprintf(stderr,"Uh... not handling edit widget for resource of type %s\n",resource->Type());
     ui->selectedResourceWidget->setCurrentIndex(index);

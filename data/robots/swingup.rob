@@ -6,7 +6,7 @@ jointtype r
 qMin 0 
 qMax 6.283185307179586476925286766559
 q 1.57
-geometry   "../objects/thincube.tri"
+geometry   "../objects/thincube.off"
 geomscale 1
 mass       1
 com 	1 0 0

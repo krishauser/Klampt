@@ -1,12 +1,16 @@
 import klampt
-from klampt import vectorops as vops
-from klampt import se3
-from klampt import loader
+from klampt.math import vectorops as vops
+from klampt.math import se3
+from klampt.io import loader
 
 if __name__=="__main__":
     import sys
     if len(sys.argv) != 4:
-        print "Usage: robot_to_mesh robot config mesh"
+        print "robot_to_mesh.py: converts an articulated robot to a simple mesh"
+        print "file.  Outputs in .tri format, which can be converted to OFF using"
+        print "tri2off.py"
+        print
+        print "Usage: python robot_to_mesh.py robot config mesh"
         exit(0)
     robotfn = sys.argv[1]
     configfn = sys.argv[2]

@@ -19,7 +19,10 @@ class RigidObject;
 class Terrain;
 class Robot;
 
-/** @brief Stores mass information for a rigid body or robot link. */
+/** @brief Stores mass information for a rigid body or robot link.
+ * Note: you should use the set/get functions rather than changing the members
+ * directly due to strangeness in SWIG's handling of vectors.
+*/
 struct Mass
 {
   void setMass(double _mass) { mass=_mass; }
@@ -46,20 +49,25 @@ struct ContactParameters
 
 /** @brief A reference to a link of a RobotModel.
  *
- * 
+ * The link stores many mostly-constant items (id, name, parent, geometry, appearance, mass, joint
+ * axes).  The exception is the link's current transform, which is affected by the RobotModel's
+ * current configuration, i.e., the last RobotModel.setConfig(q) call. The various Jacobians of
+ * points on the link, accessed by getJacobianX, are configuration dependent.
+ *
+ * These are not created by hand, but instead accessed using RobotModel.link([index or name])
  */
 class RobotModelLink
 {
  public:
   RobotModelLink();
   ///Returns the ID of the robot link in its world (Note: not the same as getIndex())
-  int getID();
+  int getID() const;
   ///Returns the name of the robot link
-  const char* getName();
+  const char* getName() const;
+  ///Sets the name of the robot link
+  void setName(const char* name);
   ///Returns a reference to the link's robot.
   RobotModel robot();
-  ///Old-style: will be deprecated
-  RobotModel getRobot();
   ///Returns the index of the link (on its robot).
   int getIndex();
   ///Returns the index of the link's parent (on its robot).
@@ -82,9 +90,11 @@ class RobotModelLink
   void setMass(const Mass& mass);
   ///Gets transformation (R,t) to the parent link
   void getParentTransform(double out[9],double out2[3]);
+  ///Sets transformation (R,t) to the parent link
   void setParentTransform(const double R[9],const double t[3]);
   ///Gets the local rotational / translational axis
   void getAxis(double out[3]);
+  ///Sets the local rotational / translational axis
   void setAxis(const double axis[3]);
 
   ///Converts point from local to world coordinates 
@@ -128,16 +138,17 @@ class RobotModelLink
 };
 
 /** @brief A reference to a driver of a RobotModel.
+ * 
+ * A driver corresponds to one of the robot's actuators and its
+ * transmission.
  */
 class RobotModelDriver
 {
  public:
   RobotModelDriver();
-  const char* getName();
+  const char* getName() const;
   ///Returns a reference to the driver's robot.
   RobotModel robot();
-  ///Old-style: will be deprecated
-  RobotModel getRobot();
   ///Currently can be "normal", "affine", "rotation", "translation", or "custom"
   const char* getType();
   ///Returns the single affected link for "normal" links
@@ -163,66 +174,95 @@ class RobotModelDriver
 
 /** @brief A model of a dynamic and kinematic robot.
  *
+ * Stores both constant information, like the reference placement of the links,
+ * joint limits, velocity limits, etc, as well as a *current configuration*
+ * and *current velocity* which are state-dependent.  Several functions depend
+ * on the robot's current configuration and/or velocity.  To update that, use
+ * the setConfig() and setVelocity() functions.  setConfig() also update's the
+ * robot's link transforms via forward kinematics.  You may also use setDOFPosition
+ * and setDOFVelocity for individual changes, but this is more expensive because
+ * each call updates all of the affected the link transforms.
+ *
  * It is important to understand that changing the configuration of the model
- * doesn't actually send a command to the robot.  In essence, this model
- * maintains temporary storage for performing kinematics and dynamics
- * computations.
- *
- * The robot maintains configuration/velocity/acceleration/torque bounds
- * which are not enforced by the model, but must rather be enforced by the
- * planner / simulator.
- *
+ * doesn't actually send a command to the physical / simulated robot.  Moreover,
+ * the model does not automatically get updated when the physical / simulated
+ * robot moves.  In essence, the model maintains temporary storage for performing
+ * kinematics, dynamics, and planning computations, as well as for visualization.
+ * 
  * The state of the robot is retrieved using getConfig/getVelocity calls, and
- * is set using setConfig/setVelocity.
+ * is set using setConfig/setVelocity.  Because many routines change the robot's
+ * configuration, like IK and motion planning, a common design pattern is to
+ * save/restore the configuration as follows:
+ * - q = robot.getConfig()
+ * - do some stuff that may touch the robot's configuration...
+ * - robot.setConfig(q)
+ *
+ * The model maintains configuration/velocity/acceleration/torque bounds.
+ * However, these are not enforced by the model, so you can happily set
+ * configurations outside  must rather be enforced by the
+ * planner / simulator.
  */
 class RobotModel
 {
  public:
   RobotModel();
   ///Returns the ID of the robot in its world (Note: not the same as the robot index)
-  int getID();
-  const char* getName();
+  int getID() const;
+  const char* getName() const;
+  void setName(const char* name);
   ///Returns the number of links = number of DOF's.
   int numLinks();
   ///Returns a reference to the indexed link
   RobotModelLink link(int index);
   ///Returns a reference to the named link
   RobotModelLink link(const char* name);
-  ///Old-style: will be deprecated.  Returns a reference to the indexed link.
-  RobotModelLink getLink(int index);
-  ///Old-style: will be deprecated.  Returns a reference to the named link.
-  RobotModelLink getLink(const char* name);
   ///Returns the number of drivers.
   int numDrivers();
   ///Returns a reference to the indexed driver.
   RobotModelDriver driver(int index);
   ///Returns a reference to the named driver.
   RobotModelDriver driver(const char* name);
-  ///Old-style: will be deprecated. Returns a reference to the indexed driver.
-  RobotModelDriver getDriver(int index);
-  ///Old-style: will be deprecated. Returns a reference to a RobotModelDriver.
-  RobotModelDriver getDriver(const char* name);
 
   //kinematic and dynamic properties
+  ///Retrieves the current configuration of the robot model.
   void getConfig(std::vector<double>& out);
+  ///Retreives the current velocity of the robot model.
   void getVelocity(std::vector<double>& out);
+  ///Sets the current configuration of the robot.  Input q is a vector of length numLinks().  This also updates forward kinematics of all links.
+  ///Again, it is important to realize that the RobotModel is not the same as a simulated robot, and this will not change the simulation world.
+  ///Many functions such as IK and motion planning use the RobotModel configuration as a temporary variable, so if you need to keep the
+  ///configuration through a robot-modifying function call, you should call q = robot.getConfig() before the call, and then robot.setConfig(q)
+  ///after it.
   void setConfig(const std::vector<double>& q);
+  ///Sets the current velocity of the robot model.  Like the configuration, this is also essentially a temporary variable. 
   void setVelocity(const std::vector<double>& dq);
+  ///Retrieves a pair (qmin,qmax) of min/max joint limit vectors
   void getJointLimits(std::vector<double>& out,std::vector<double>& out2);
+  ///Sets the min/max joint limit vectors (must have length numLinks())
   void setJointLimits(const std::vector<double>& qmin,const std::vector<double>& qmax);
+  ///Retrieve the velocity limit vector vmax, the constraint is |dq[i]| <= vmax[i]
   void getVelocityLimits(std::vector<double>& out);
+  ///Sets the velocity limit vector vmax, the constraint is |dq[i]| <= vmax[i]
   void setVelocityLimits(const std::vector<double>& vmax);
+  ///Retrieve the acceleration limit vector amax, the constraint is |ddq[i]| <= amax[i]
   void getAccelerationLimits(std::vector<double>& out);
+  ///Sets the acceleration limit vector amax, the constraint is |ddq[i]| <= amax[i]
   void setAccelerationLimits(const std::vector<double>& amax);
+  ///Retrieve the torque limit vector tmax, the constraint is |torque[i]| <= tmax[i]
   void getTorqueLimits(std::vector<double>& out);
+  ///Sets the torque limit vector tmax, the constraint is |torque[i]| <= tmax[i]
   void setTorqueLimits(const std::vector<double>& tmax);
   ///Sets a single DOF's position.  Note: if you are setting several joints 
   ///at once, use setConfig because this function computes forward kinematics
   ///every time.
   void setDOFPosition(int i,double qi);
+  ///Sets a single DOF's position (by name).  Note: if you are setting several joints 
+  ///at once, use setConfig because this function computes forward kinematics
+  ///every time.
   void setDOFPosition(const char* name,double qi);
   ///Returns a single DOF's position
   double getDOFPosition(int i);
+  ///Returns a single DOF's position (by name)
   double getDOFPosition(const char* name);
 
   //dynamics functions
@@ -257,7 +297,7 @@ class RobotModel
   ///Computes a distance between two configurations, properly taking into account nonstandard joints
   double distance(const std::vector<double>& a,const std::vector<double>& b);
   ///Returns the configuration derivative at a as you interpolate toward b at unit speed.
-  void interpolate_deriv(const std::vector<double>& a,const std::vector<double>& b,std::vector<double>& out);
+  void interpolateDeriv(const std::vector<double>& a,const std::vector<double>& b,std::vector<double>& out);
 
   ///Samples a random configuration and updates the robot's pose.  Properly
   ///handles non-normal joints and handles DOFs with infinite bounds
@@ -285,22 +325,32 @@ class RobotModel
 
 /** @brief A rigid movable object.
  *
- * State is retrieved/set using get/setTransform.  Note: no velocities are stored.
+ * A rigid object has a name, geometry, appearance, mass, surface properties, and current
+ * transform / velocity.
+ *
+ * State is retrieved/set using get/setTransform, and get/setVelocity
  */
 class RigidObjectModel
 {
  public:
   RigidObjectModel();
-  int getID();
-  const char* getName();
+  int getID() const;
+  const char* getName() const;
+  void setName(const char* name);
   Geometry3D geometry();
   Appearance appearance();
   Mass getMass();
   void setMass(const Mass& mass);
   ContactParameters getContactParameters();
   void setContactParameters(const ContactParameters& params);
+  ///Retrieves the rotation / translation of the rigid object (R,t)
   void getTransform(double out[9],double out2[3]);
+  ///Sets the rotation / translation (R,t) of the rigid object
   void setTransform(const double R[9],const double t[3]);
+  ///Retrieves the (angular velocity, velocity) of the rigid object.
+  void getVelocity(double out[3],double out2[3]);
+  ///Sets the (angular velocity, velocity) of the rigid object.
+  void setVelocity(const double angularVelocity[3],const double velocity[3]);
   ///Draws the object's geometry. If keepAppearance=true, the current appearance is honored.
   ///Otherwise, only the raw geometry is drawn.  PERFORMANCE WARNING: if keepAppearance is
   ///false, then this does not properly reuse OpenGL display lists.  A better approach
@@ -318,8 +368,9 @@ class TerrainModel
 {
  public:
   TerrainModel();
-  int getID();
-  const char* getName();
+  int getID() const;
+  const char* getName() const;
+  void setName(const char* name);
   Geometry3D geometry();
   Appearance appearance();
   void setFriction(double friction);
@@ -358,7 +409,7 @@ class WorldModel
 {
  public:
   ///Creates a WorldModel.  With no arguments, creates a new world.  With
-  ///an integer or another WorldModel instance, creates a reference to an
+  ///another WorldModel instance, creates a reference to an
   ///existing world.  (To create a copy, use the copy() method.)
   ///
   ///If passed a pointer to a C++ RobotWorld structure, a reference to that
@@ -366,7 +417,7 @@ class WorldModel
   ///interfacing C++ and Python code)
   WorldModel();
   WorldModel(void* ptrRobotWorld);
-  WorldModel(int index);
+  //WorldModel(int index);  /// < this constructor was problematic
   WorldModel(const WorldModel& w);
   ~WorldModel();
   ///Sets this WorldModel to a reference to w
@@ -376,6 +427,12 @@ class WorldModel
   WorldModel copy();
   ///Reads from a world XML file.
   bool readFile(const char* fn);
+  ///Alias of readFile
+  bool loadFile(const char* fn);
+  ///Saves to a world XML file.  If elementDir is provided, then robots, terrains, etc.
+  ///will be saved there.  Otherwise they will be saved to a folder with the same base
+  ///name as fn (without the trailing .xml)
+  bool saveFile(const char* fn,const char* elementDir=NULL);
   int numRobots();
   int numRobotLinks(int robot);
   int numRigidObjects();

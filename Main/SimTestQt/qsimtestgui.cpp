@@ -19,8 +19,8 @@ QSimTestGUI::QSimTestGUI(QKlamptDisplay* _display,SimTestBackend *_backend) :
   //driver_tool->show();
 
   log_options=new LogOptions();
-  connect(log_options,SIGNAL(ShowSensor(int)),this,SLOT(ShowSensor(int)));
-  connect(log_options,SIGNAL(HideSensor(int)),this,SLOT(HideSensor(int)));
+  connect(log_options,SIGNAL(ShowSensor(int,bool)),this,SLOT(ShowSensor(int,bool)));
+  connect(log_options,SIGNAL(RenderSensor(int,bool)),this,SLOT(RenderSensor(int,bool)));
   connect(log_options,SIGNAL(toggle_measurement(int,int,bool)),this,SLOT(SendMeasurement(int,int,bool)));
   connect(log_options,SIGNAL(toggle_measurement(int,int,bool)),this,SLOT(SendMeasurement(int,int,bool)));
   if(sim->controlSimulators.size() > 0) {
@@ -118,14 +118,15 @@ void QSimTestGUI::SendDriverValue(int dr, float value){
     SendCommand("set_driver_value",value);
 }
 
-void QSimTestGUI::ShowSensor(int sensor){
+void QSimTestGUI::ShowSensor(int sensor,bool shown){
+  if(shown)
     SendCommand("show_sensor",sensor);
-    log_options->sensorDrawn[sensor]=true;
+  else
+    SendCommand("hide_sensor",sensor);
 }
 
-void QSimTestGUI::HideSensor(int sensor){
-    SendCommand("hide_sensor",sensor);
-    log_options->sensorDrawn[sensor]=false;
+void QSimTestGUI::RenderSensor(int sensor,bool rendered){
+    SendCommand("draw_sensor",sensor,rendered);
 }
 
 void QSimTestGUI::SendMeasurement(int sensor,int measurement,bool status){

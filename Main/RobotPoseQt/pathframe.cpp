@@ -73,6 +73,11 @@ void PathFrame::Discretize()
   frame->gui->SendCommand("discretize_path",numdivs);
 }
 
+void PathFrame::Split()
+{
+  frame->gui->SendCommand("split_path");
+}
+
 void PathFrame::SetDuration()
 {
   double value = ui->spin_duration->value();

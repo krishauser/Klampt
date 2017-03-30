@@ -20,13 +20,25 @@ INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR})
 
 ##### Qt Specific stuff ####
 # Configure Qt
-FIND_PACKAGE(Qt4 REQUIRED)
-INCLUDE(${QT_USE_FILE})
+IF(USE_QT5_APPS)
+  cmake_policy(SET CMP0053 OLD)
+  FIND_PACKAGE(Qt5 COMPONENTS Widgets Gui)
+  include_directories(${Qt5Widgets_INCLUDE_DIRS} ${Qt5Gui_INCLUDE_DIRS})
+  add_definitions(${Qt5Widgets_DEFINITIONS} ${Qt5Gui_DEFINITIONS})  
+  set(CMAKE_CXX_FLAGS "${Qt5Widgets_EXECUTABLE_COMPILE_FLAGS}")
+  set(QT_LIBRARIES ${Qt5Widgets_LIBRARIES} ${Qt5Gui_LIBRARIES})
 
-# Define the app's UI and MOC items
+  QT5_WRAP_UI(URDFtoRob_UISrcs dialog.ui)
+  QT5_WRAP_CPP(URDFtoRob_MOCSrcs dialog.h)
 
-QT4_WRAP_UI(URDFtoRob_UISrcs dialog.ui)
-QT4_WRAP_CPP(URDFtoRob_MOCSrcs dialog.h)
+ELSE(USE_QT5_APPS)
+  FIND_PACKAGE(Qt4 REQUIRED)
+  INCLUDE(${QT_USE_FILE})
+
+  # Define the app's UI and MOC items
+  QT4_WRAP_UI(URDFtoRob_UISrcs dialog.ui)
+  QT4_WRAP_CPP(URDFtoRob_MOCSrcs dialog.h)
+ENDIF(USE_QT5_APPS)
 
 ##### Build target ####
 ADD_EXECUTABLE(URDFtoRob main.cpp dialog.cpp ../urdftorob.cpp ${URDFtoRob_MOCSrcs} ${URDFtoRob_UISrcs})

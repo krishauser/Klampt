@@ -1,6 +1,7 @@
 #include "ContactCSpace.h"
 #include <KrisLibrary/robotics/IKFunctions.h>
 #include <KrisLibrary/robotics/JointStructure.h>
+#include <KrisLibrary/planning/EdgePlannerHelpers.h>
 #include <KrisLibrary/math3d/random.h>
 #include <KrisLibrary/Timer.h>
 
@@ -8,53 +9,85 @@
 #define DO_TIMING 1
 
 
+class ContactSet : public CSet
+{
+public:
+  ContactCSpace* space;
+  bool doForwardKinematics;
+  ContactSet(ContactCSpace* _space,bool _doForwardKinematics=true)
+  :space(_space),doForwardKinematics(_doForwardKinematics)
+  {}
+  virtual bool Contains(const Config& x) {
+    if(doForwardKinematics) space->robot.UpdateConfig(x);
+    return space->CheckContact();
+  }
+  virtual bool Project(Config& x) {
+    space->robot.UpdateConfig(x);
+    space->SolveContact();
+    x = space->robot.q;
+    return space->CheckContact();
+  }
+  virtual bool IsSampleable() {
+    return true;
+  }
+  virtual void Sample(Config& x) {
+    space->Sample(x);
+  }
+};
+
 ContactCSpace::ContactCSpace(RobotWorld& world,int index,
 			     WorldPlannerSettings* settings)
-  :SingleRobotCSpace2(world,index,settings),
-   numSolveContact(0),numIsFeasible(0),solveContactTime(0),isFeasibleTime(0)
-{}
+  :SingleRobotCSpace(world,index,settings),
+   numSolveContact(0),solveContactTime(0)
+{
+  //Since SingleRobotCSpace updates the robot's configuration and geometry, you can use a ContactSet without updating the robot's FK
+  AddConstraint("contact",new ContactSet(this,false));
+}
 
 ContactCSpace::ContactCSpace(const SingleRobotCSpace& space)
-  :SingleRobotCSpace2(space),
-   numSolveContact(0),numIsFeasible(0),solveContactTime(0),isFeasibleTime(0)
-{}
+  :SingleRobotCSpace(space),
+   numSolveContact(0),solveContactTime(0)
+{
+  AddConstraint("contact",new ContactSet(this,false));
+}
 
 ContactCSpace::ContactCSpace(const ContactCSpace& space)
-  :SingleRobotCSpace2(space),contactIK(space.contactIK),
-   numSolveContact(0),numIsFeasible(0),solveContactTime(0),isFeasibleTime(0)
-{}
+  :SingleRobotCSpace(space),contactIK(space.contactIK),
+   numSolveContact(0),solveContactTime(0)
+{
+  AddConstraint("contact",new ContactSet(this,false));
+}
 
 void ContactCSpace::Sample(Config& x)
 {
-  SingleRobotCSpace2::Sample(x);
-  Robot* robot = GetRobot();
+  SingleRobotCSpace::Sample(x);
   bool floating = false;
-  for(size_t i=0;i<robot->joints.size();i++)
-    if(robot->joints[i].type == RobotJoint::Floating) {
+  for(size_t i=0;i<robot.joints.size();i++)
+    if(robot.joints[i].type == RobotJoint::Floating) {
       floating = true;
       break;
     }
   if(floating) {
     //need to solve for floating joint structure
-    JointStructure js(*robot);
+    JointStructure js(robot);
     js.Init();
     js.SolveWorkspaceBounds(contactIK);
-    for(size_t i=0;i<robot->joints.size();i++)
-      if(robot->joints[i].type == RobotJoint::Floating) {
+    for(size_t i=0;i<robot.joints.size();i++)
+      if(robot.joints[i].type == RobotJoint::Floating) {
 	vector<int> indices;
-	robot->GetJointIndices(i,indices);
-	if(js.bounds[robot->joints[i].linkIndex].IsEmpty()) {
+	robot.GetJointIndices(i,indices);
+	if(js.bounds[robot.joints[i].linkIndex].IsEmpty()) {
 	  cout<<"Joint structure on joint "<<i<<" was empty"<<endl;
 	  x[indices[0]] = x[indices[1]] = x[indices[2]] = 0;
 	}
 	else {
 	  Sphere3D s;
-	  js.bounds[robot->joints[i].linkIndex].GetBounds(s);
+	  js.bounds[robot.joints[i].linkIndex].GetBounds(s);
 	  Vector3 v;
 	  for(int iters = 0; iters < 10; iters++) {
 	    SampleSphere(s.radius,v);
 	    v += s.center;
-	    if(js.bounds[robot->joints[i].linkIndex].Contains(v)) {
+	    if(js.bounds[robot.joints[i].linkIndex].Contains(v)) {
 	      break;
 	    }
 	  }
@@ -62,62 +95,32 @@ void ContactCSpace::Sample(Config& x)
 	}
       } 
   }
-  robot->UpdateConfig(x);
+  robot.UpdateConfig(x);
   SolveContact();
-  x = robot->q;
+  x = robot.q;
 }
 
 void ContactCSpace::SampleNeighborhood(const Config& c,Real r,Config& x)
 {
-  SingleRobotCSpace2::SampleNeighborhood(c,r,x);
-  GetRobot()->UpdateConfig(x);
+  SingleRobotCSpace::SampleNeighborhood(c,r,x);
+  robot.UpdateConfig(x);
   SolveContact();
-  x = GetRobot()->q;
+  x = robot.q;
 }
 
-bool ContactCSpace::IsFeasible(const Config& q)
-{
-  numIsFeasible++;
-
-#if DO_TIMING
-  Timer timer;
-#endif // DO_TIMING
-
-  GetRobot()->UpdateConfig(q);
-  if(!CheckContact()) {
-    printf("ContactCSpace:: Configuration fails distance check: %g > %g\n",ContactDistance(),settings->robotSettings[index].contactEpsilon*1.1);
-#if DO_TIMING
-    isFeasibleTime += timer.ElapsedTime();
-#endif //DO_TIMING
-    return false;
-  }
-  bool res = SingleRobotCSpace2::IsFeasible(q);
-#if DO_TIMING
-    isFeasibleTime += timer.ElapsedTime();
-#endif //DO_TIMING
-    return res;
-}
-
-EdgePlanner* ContactCSpace::LocalPlanner(const Config& a,const Config& b)
+EdgePlanner* ContactCSpace::PathChecker(const Config& a,const Config& b)
 {
   return new BisectionEpsilonEdgePlanner(this,a,b,settings->robotSettings[index].collisionEpsilon);
 }
 
 void ContactCSpace::Interpolate(const Config& x,const Config& y,Real u,Config& out)
 {
-  SingleRobotCSpace2::Interpolate(x,y,u,out);
-  GetRobot()->UpdateConfig(out);
+  SingleRobotCSpace::Interpolate(x,y,u,out);
+  robot.UpdateConfig(out);
   SolveContact();
-  out = GetRobot()->q;
+  out = robot.q;
 }
 
-void ContactCSpace::Midpoint(const Config& x,const Config& y,Config& out)
-{
-  SingleRobotCSpace2::Midpoint(x,y,out);
-  GetRobot()->UpdateConfig(out);
-  SolveContact();
-  out = GetRobot()->q;
-}
 
 
 void ContactCSpace::AddContact(const IKGoal& goal)
@@ -161,7 +164,7 @@ void ContactCSpace::RemoveContact(int link)
 
 Real ContactCSpace::ContactDistance(const Config& q)
 {
-  GetRobot()->UpdateConfig(q);
+  robot.UpdateConfig(q);
   return ContactDistance();
 }
 
@@ -170,14 +173,14 @@ Real ContactCSpace::ContactDistance()
 {
   Real emax=0;
   for(size_t i=0;i<contactIK.size();i++) {
-    emax = Max(emax,RobotIKError(*GetRobot(),contactIK[i]));
+    emax = Max(emax,RobotIKError(robot,contactIK[i]));
   }
   return emax;
 }
 
 bool ContactCSpace::CheckContact(const Config& q,Real dist)
 {
-  GetRobot()->UpdateConfig(q);
+  robot.UpdateConfig(q);
   return CheckContact(dist);
 }
 
@@ -195,16 +198,15 @@ bool ContactCSpace::SolveContact(int numIters,Real dist)
 #endif // DO_TIMING
   if(dist==0) dist = settings->robotSettings[index].contactEpsilon*0.9;
   if(numIters==0) numIters = settings->robotSettings[index].contactIKMaxIters;
-  Robot* robot=GetRobot();
-  RobotIKFunction equality(*robot);
+  RobotIKFunction equality(robot);
   equality.UseIK(contactIK);
-  GetDefaultIKDofs(*robot,contactIK,equality.activeDofs);
+  GetDefaultIKDofs(robot,contactIK,equality.activeDofs);
   if(!fixedDofs.empty()) {
-    vector<bool> active(robot->links.size(),false);
+    vector<bool> active(robot.links.size(),false);
     for(size_t j=0;j<equality.activeDofs.mapping.size();j++) 
       active[equality.activeDofs.mapping[j]]=true;
     for(size_t i=0;i<fixedDofs.size();i++) {
-      robot->q[fixedDofs[i]] = fixedValues[i];
+      robot.q[fixedDofs[i]] = fixedValues[i];
       active[fixedDofs[i]]=false;
     }
     equality.activeDofs.mapping.resize(0);
@@ -231,20 +233,20 @@ bool ContactCSpace::SolveContact(int numIters,Real dist)
 
   //for some reason the fixed DOFs get moved slightly... TODO debug this
   for(size_t i=0;i<fixedDofs.size();i++) 
-    robot->q(fixedDofs[i]) = fixedValues[i];
+    robot.q(fixedDofs[i]) = fixedValues[i];
 
   return res;
 }
 
-void ContactCSpace::Properties(PropertyMap& map) const
+void ContactCSpace::Properties(PropertyMap& map)
 {
-  SingleRobotCSpace2::Properties(map);
+  SingleRobotCSpace::Properties(map);
   if(!contactIK.empty()) {
     int dim;
     if(map.get("intrinsicDimensionality",dim))
       ;
     else
-      dim = GetRobot()->q.n;
+      dim = robot.q.n;
     for(size_t i=0;i<contactIK.size();i++)
       dim -= IKGoal::NumDims(contactIK[i].posConstraint)+IKGoal::NumDims(contactIK[i].rotConstraint);
     map.set("intrinsicDimensionality",dim);
@@ -254,6 +256,8 @@ void ContactCSpace::Properties(PropertyMap& map) const
   
 
 
+
+/*
 MultiContactCSpace::MultiContactCSpace(RobotWorld& world,WorldPlannerSettings* settings)
   :MultiRobotCSpace(world,settings),
    numSolveContact(0),numIsFeasible(0),solveContactTime(0),isFeasibleTime(0)
@@ -486,3 +490,4 @@ void MultiContactCSpace::Properties(PropertyMap& map) const
     map.set("submanifold",1);
   }
 }
+*/

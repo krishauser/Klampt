@@ -2,7 +2,8 @@
 #define CONTROL_INERTIAL_SENSORS_H
 
 #include "Sensor.h"
-
+#include <KrisLibrary/math3d/primitives.h>
+using namespace Math3D;
 
 /** @ingroup Control
  * @brief Simulates an accelerometer.
@@ -13,13 +14,14 @@ class Accelerometer : public SensorBase
   Accelerometer();
   virtual const char* Type() const { return "Accelerometer"; }
   virtual void Simulate(ControlledRobotSimulator* robot,WorldSimulation* sim);
-  virtual void Advance(Real dt);
+  virtual void SimulateKinematic(Robot& robot,RobotWorld& world);
+  virtual void Advance(double dt);
   virtual void Reset();
   virtual void MeasurementNames(vector<string>& names) const;
   virtual void GetMeasurements(vector<double>& values) const;
   virtual void SetMeasurements(const vector<double>& values);
-  virtual void GetState(vector<double>& state) const;
-  virtual void SetState(const vector<double>& state);
+  virtual void GetInternalState(vector<double>& state) const;
+  virtual void SetInternalState(const vector<double>& state);
   virtual map<string,string> Settings() const;
   virtual bool GetSetting(const string& name,string& str) const;
   virtual bool SetSetting(const string& name,const string& str);
@@ -45,7 +47,8 @@ class TiltSensor : public SensorBase
   TiltSensor();
   virtual const char* Type() const { return "TiltSensor"; }
   virtual void Simulate(ControlledRobotSimulator* robot,WorldSimulation* sim);
-  virtual void Advance(Real dt);
+  virtual void SimulateKinematic(Robot& robot,RobotWorld& world);
+  virtual void Advance(double dt);
   virtual void Reset();
   virtual void MeasurementNames(vector<string>& names) const;
   virtual void GetMeasurements(vector<double>& values) const;
@@ -74,13 +77,14 @@ class GyroSensor : public SensorBase
   GyroSensor();
   virtual const char* Type() const { return "GyroSensor"; }
   virtual void Simulate(ControlledRobotSimulator* robot,WorldSimulation* sim);
+  virtual void SimulateKinematic(Robot& robot,RobotWorld& world);
   virtual void Reset();
   virtual void Advance(Real dt);
   virtual void MeasurementNames(vector<string>& names) const;
   virtual void GetMeasurements(vector<double>& values) const;
   virtual void SetMeasurements(const vector<double>& values);
-  virtual void GetState(vector<double>& state) const;
-  virtual void SetState(const vector<double>& state);
+  virtual void GetInternalState(vector<double>& state) const;
+  virtual void SetInternalState(const vector<double>& state);
   virtual map<string,string> Settings() const;
   virtual bool GetSetting(const string& name,string& str) const;
   virtual bool SetSetting(const string& name,const string& str);
@@ -111,13 +115,14 @@ class IMUSensor : public SensorBase
   IMUSensor();
   virtual const char* Type() const { return "IMUSensor"; }
   virtual void Simulate(ControlledRobotSimulator* robot,WorldSimulation* sim);
+  virtual void SimulateKinematic(Robot& robot,RobotWorld& world);
   virtual void Advance(Real dt);
   virtual void Reset();
   virtual void MeasurementNames(vector<string>& names) const;
   virtual void GetMeasurements(vector<double>& values) const;
   virtual void SetMeasurements(const vector<double>& values);
-  virtual void GetState(vector<double>& state) const;
-  virtual void SetState(const vector<double>& state);
+  virtual void GetInternalState(vector<double>& state) const;
+  virtual void SetInternalState(const vector<double>& state);
   virtual map<string,string> Settings() const;
   virtual bool GetSetting(const string& name,string& str) const;
   virtual bool SetSetting(const string& name,const string& str);

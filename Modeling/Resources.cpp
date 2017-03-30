@@ -1,6 +1,7 @@
 #include "Resources.h"
 #include <KrisLibrary/utils/stringutils.h>
 #include <KrisLibrary/utils/fileutils.h>
+#include <KrisLibrary/meshing/IO.h>
 #include <tinyxml.h>
 #include "IO/XmlWorld.h"
 #include "IO/JSON.h"
@@ -11,9 +12,9 @@ template <> const char* BasicResource<Vector3>::className = "Vector3";
 template <> const char* BasicResource<Matrix3>::className = "Matrix3";
 template <> const char* BasicResource<Matrix>::className = "Matrix";
 template <> const char* BasicResource<RigidTransform>::className = "RigidTransform";
+template <> const char* BasicResource<Meshing::TriMesh>::className = "TriMesh";
 template <> const char* BasicResource<GeometricPrimitive3D>::className = "GeometricPrimitive3D";
 template <> const char* BasicResource<Hold>::className = "Hold";
-template <> const char* BasicResource<Meshing::TriMesh>::className = "TriMesh";
 template <> const char* BasicResource<Camera::Viewport>::className = "Viewport";
 template class BasicResource<Config>;
 template class BasicResource<Vector3>;
@@ -21,7 +22,6 @@ template class BasicResource<Matrix3>;
 template class BasicResource<Matrix>;
 template class BasicResource<RigidTransform>;
 template class BasicResource<Hold>;
-template class BasicResource<Meshing::TriMesh>;
 
 
 void MakeRobotResourceLibrary(ResourceLibrary& library)
@@ -45,6 +45,17 @@ void MakeRobotResourceLibrary(ResourceLibrary& library)
   library.AddLoader<ConfigsResource>("configs");
   library.AddLoader<PointCloudResource>("pcd");
   library.AddLoader<TriMeshResource>("tri");
+  if(Meshing::CanLoadTriMeshExt("obj"))
+    library.AddLoader<TriMeshResource>("obj");
+  if(Meshing::CanLoadTriMeshExt("off"))
+    library.AddLoader<TriMeshResource>("off");
+  if(Meshing::CanLoadTriMeshExt("stl"))
+    library.AddLoader<TriMeshResource>("stl");
+  if(Meshing::CanLoadTriMeshExt("dae"))
+    library.AddLoader<TriMeshResource>("dae");
+  if(Meshing::CanLoadTriMeshExt("ply"))
+    library.AddLoader<TriMeshResource>("ply");
+  library.AddLoader<GeometricPrimitive3DResource>("geom");
   library.AddLoader<RobotResource>("rob");
   library.AddLoader<RigidObjectResource>("obj");
   library.AddLoader<WorldResource>("xml");
@@ -182,6 +193,28 @@ bool ConfigsResource::Unpack(vector<ResourcePtr>& res,bool* incomplete)
 }
 
 
+bool TriMeshResource::Load(const std::string& fn)
+{
+  bool res=Meshing::Import(fn.c_str(),data);
+  if(!res) {
+    printf("TriMeshResource::Load:  Unable to load mesh from file %s\n",fn.c_str());
+  }
+  return res;
+}
+
+bool TriMeshResource::Save(const std::string& fn)
+{
+  return Meshing::Export(fn.c_str(),data);
+}
+
+ResourceBase* TriMeshResource::Copy()
+{
+  TriMeshResource* res = new TriMeshResource;
+  res->name = name;
+  res->data = data;
+  return res;
+}
+
 bool PointCloudResource::Load(istream& in)
 {
   return pointCloud.LoadPCL(in);
@@ -195,6 +228,7 @@ bool PointCloudResource::Save(ostream& out)
 ResourceBase* PointCloudResource::Copy()
 {
   PointCloudResource* res = new PointCloudResource;
+  res->name = name;
   res->pointCloud = pointCloud;
   return res;
 }
@@ -1211,7 +1245,10 @@ ResourcePtr MakeResource(const string& name,const IKGoal& goal)
 
 ResourcePtr MakeResource(const string& name,const Meshing::TriMesh& mesh)
 {
-  return (new TriMeshResource(mesh,name));
+  TriMeshResource* res=new TriMeshResource;
+  res->data = mesh;
+  res->name = name;
+  return res;
 }
 
 ResourcePtr MakeResource(const string& name,const Geometry::AnyGeometry3D& geom)

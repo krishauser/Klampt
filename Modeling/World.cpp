@@ -27,8 +27,11 @@ bool RobotWorld::LoadXML(const char* fn)
 
 bool RobotWorld::SaveXML(const char* fn,const char* elementDir)
 {
-  fprintf(stderr,"RobotWorld::SaveXML: Saving worlds is not implemented yet\n");
-  return false;
+  XmlWorld xmlWorld;
+  if(elementDir)
+    return xmlWorld.Save(*this,fn,elementDir);
+  else
+    return xmlWorld.Save(*this,fn);
 }
 
 int RobotWorld::NumIDs() const

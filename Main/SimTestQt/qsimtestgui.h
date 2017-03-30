@@ -49,8 +49,8 @@ public:
 public slots:
     void OnIdleTimer();
     void SendDriverValue(int index, float value);
-    void ShowSensor(int sensor);
-    void HideSensor(int sensor);
+    void ShowSensor(int sensor,bool shown);
+    void RenderSensor(int sensor,bool rendered);
     void SendMeasurement(int sensor, int measurement, bool status);
     void SendControllerSetting(int robot,string setting, string value);
     void SendControllerCommand(int robot,string setting, string value);

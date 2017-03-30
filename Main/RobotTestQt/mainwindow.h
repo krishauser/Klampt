@@ -46,6 +46,7 @@ public slots:
     void SetCollisions(bool status);
     void SetSensors(bool status);
     void SetIK(bool status);
+    void SetROS(bool status);
 
     void SetDriver(int index);
     void UpdateDriverValue();
@@ -62,6 +63,7 @@ public slots:
     void UpdateLinkSlider(double value);
     void UpdateDriverSlider(double value);
     void PrintCollisions();
+    void PrintConfig();
 
     void LoadFile();
     void ReloadFile();

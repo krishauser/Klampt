@@ -60,6 +60,8 @@ class ODERobot
   void GetLinkTransform(int link,RigidTransform& T) const;
   void SetLinkVelocity(int link,const Vector3& w,const Vector3& v);
   void GetLinkVelocity(int link,Vector3& w,Vector3& v) const;
+  Real GetKineticEnergy() const;
+  Real GetKineticEnergy(int link) const;
   bool ReadState(File& f);
   bool WriteState(File& f) const;
 

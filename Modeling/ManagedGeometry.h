@@ -53,6 +53,8 @@ class ManagedGeometry
   bool IsCached() const;
   ///Adds to cache, if not already in it
   void AddToCache(const std::string& filename);
+  ///Returns the filename to which this object is cached
+  const std::string& CachedFilename() const;
   ///Remove self from cache, if in it
   void RemoveFromCache();
   ///Transforms the geometry (requires removing from cache, and

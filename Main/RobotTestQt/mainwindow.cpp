@@ -91,6 +91,10 @@ void MainWindow::SetSensors(bool status){
 }
 
 
+void MainWindow::SetROS(bool status) {
+  gui->SendButtonToggle("output_ros",status);
+}
+
 void MainWindow::SetIK(bool status){
   if(status) gui->SendCommand("constrain_point_mode");
   else gui->SendCommand("pose_mode");
@@ -223,12 +227,20 @@ void MainWindow::PrintCollisions(){
     gui->SendButtonPress("request_self_collisions");
 }
 
+void MainWindow::PrintConfig()
+{
+    gui->SendButtonPress("print_pose");
+}
+
 void MainWindow::LoadFile(){
     gui->LoadFile();
 }
 
 void MainWindow::ReloadFile(){
+<<<<<<< HEAD
   printf("MainWindow::ReloadFile\n");
+=======
+>>>>>>> v0.7
     gui->ReloadFile();
 }
 

@@ -9,6 +9,7 @@
 	#include "robotmodel.h"
 	#include "robotik.h"
 	#include "robotsim.h"
+  #include "stability.h"
 %}
 %include "carrays.i"
 %include "std_string.i"
@@ -364,9 +365,11 @@ static PyObject* convert_dmatrix_obj(const std::vector<std::vector<double> >& ma
     }
 }
 
-%apply std::vector<double>& out { std::vector<double>& kP };
-%apply std::vector<double>& out { std::vector<double>& kD };
-%apply std::vector<double>& out { std::vector<double>& kI };
+%apply std::vector<double>& out { std::vector<double>& kPout };
+
+%apply std::vector<double>& out { std::vector<double>& kIout };
+
+%apply std::vector<double>& out { std::vector<double>& kDout };
 
 %typemap(argout) std::vector<std::vector<double> >& out {
     PyObject *o, *o2, *o3;
@@ -410,3 +413,4 @@ static PyObject* convert_dmatrix_obj(const std::vector<std::vector<double> >& ma
 %include "robotmodel.h"
 %include "robotik.h"
 %include "robotsim.h"
+%include "stability.h"

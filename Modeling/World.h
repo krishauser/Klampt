@@ -23,7 +23,7 @@ class RobotWorld
 
   RobotWorld();
   bool LoadXML(const char* fn);
-  bool SaveXML(const char* fn,const char* elementDir);
+  bool SaveXML(const char* fn,const char* elementDir=NULL);
   void InitCollisions();
   void UpdateGeometry();
   void SetGLLights();

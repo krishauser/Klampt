@@ -1,6 +1,7 @@
 from klampt import *
-from klampt.glprogram import *
-from klampt import vectorops
+from klampt.vis.glprogram import *
+from klampt import vis
+from klampt.math import vectorops
 
 #uncomment the problem that you're testing
 problem = "1a"
@@ -10,11 +11,11 @@ problem = "1a"
 #problem = "3"
 
 class GLTest(GLRealtimeProgram):
-    def __init__(self,world,sim):
+    def __init__(self,world):
         GLRealtimeProgram.__init__(self,"GLTest")
         self.world = world
-        self.sim = sim
-        controller = sim.getController(0)
+        self.sim = Simulator(world)
+        controller = self.sim.controller(0)
         if problem == "1a" or problem == "1b":
             controller.setPIDCommand([0],[0])
         #set this to true if you want to step through the program manually
@@ -36,7 +37,7 @@ class GLTest(GLRealtimeProgram):
     def control_loop(self):
         sim = self.sim
         world = self.world
-        controller = sim.getController(0)
+        controller = sim.controller(0)
         robotModel = world.robot(0)
         t = self.ttotal
         #Problem 1: tune the values in this line
@@ -76,12 +77,12 @@ class GLTest(GLRealtimeProgram):
     def keyboardfunc(self,c,x,y):
         if self.step:
             self.control_loop()
-            sim.simulate(self.dt)
+            self.sim.simulate(self.dt)
 
     def idle(self):
         if not self.step:
             self.control_loop()
-            sim.simulate(self.dt)
+            self.sim.simulate(self.dt)
 
 if __name__ == "__main__":
     world = WorldModel()
@@ -97,14 +98,16 @@ if __name__ == "__main__":
     res = world.readFile(fn)
     if not res:
         raise RuntimeError("Unable to load world "+fn)
-    sim = Simulator(world)
+
+    program = GLTest(world)
+
     if problem == "2b":
-        m = world.robot(0).link(0).getMass()
         #mass estimated to be 50% lighter
+        m = world.robot(0).link(0).getMass()
         scale = 0.5
         m.mass *= scale
         for i in xrange(9):
             m.inertia[i] *= scale
         world.robot(0).link(0).setMass(m)
-    GLTest(world,sim).run()
+    program.run()
 

@@ -1,18 +1,16 @@
-#ifndef DYNAMICS_SENSORS_H
-#define DYNAMICS_SENSORS_H
+#ifndef CONTROL_SENSORS_H
+#define CONTROL_SENSORS_H
 
 #include <KrisLibrary/math/vector.h>
-#include <KrisLibrary/math3d/primitives.h>
 #include <KrisLibrary/utils/SmartPointer.h>
 #include <map>
 #include <vector>
-#include <deque>
 #include <string>
 #include <typeinfo>
-using namespace Math3D;
 using namespace std;
 
 class Robot;
+class RobotWorld;
 class ControlledRobotSimulator;
 class WorldSimulation;
 class TiXmlElement;
@@ -32,11 +30,12 @@ class TiXmlElement;
  *   the sensor is updated every time the controller is called (default)
  *
  * FOR IMPLEMENTERS: at a minimum, you must overload the Type(),
- * MeasurementNames and Get/SetMeasurements methods. 
+ * MeasurementNames and Get/SetMeasurements methods.  (Note: it is important
+ * that GetMeasurements is idempotent and does not change internal state.)
  *
  * If the sensor simulator manages any internal state, such as a state
  * estimate, then you will also need to override
- * Get/SetState in order for the simulator state to be properly saved and
+ * Get/SetInternalState in order for the simulator state to be properly saved and
  * loaded during rewind/replay.
  * If you want the simulator to be resettable, you will need to overload
  * Reset() to reset the state when necessary.
@@ -51,22 +50,38 @@ class SensorBase
   SensorBase();
   virtual ~SensorBase() {}
   virtual const char* Type() const { return "SensorBase"; }
+  ///Called whenever the sensor is updated from the simulaton
   virtual void Simulate(ControlledRobotSimulator* robot,WorldSimulation* sim) {}
-  virtual void Advance(Real dt) {}
+  ///Updates the sensor for a kinematic world.  Useful for non-simulation debugging.
+  virtual void SimulateKinematic(Robot& robot,RobotWorld& world) {}
+  ///Advances to the next time step with duration dt elapsed
+  virtual void Advance(double dt) {}
+  ///Should be overridden if the sensor is stateful to reset to an initial state
   virtual void Reset() {}
   virtual bool ReadState(File& f);
   virtual bool WriteState(File& f) const;
+  ///Must be overridden to produce a list of names of each measurement
   virtual void MeasurementNames(vector<string>& names) const { names.resize(0); }
+  ///Must be overridden to returns a list of all measurements
   virtual void GetMeasurements(vector<double>& values) const { values.resize(0); }
-  virtual void SetMeasurements(const vector<double>& values) const { }
-  //Any other state that you might want to store.  Used in ReadState
-  virtual void GetState(vector<double>& state) const {  }
-  //Any other state that you might want to store.  Used in WriteState
-  virtual void SetState(const vector<double>& state) { }
+  ///Updates the internal measurement vector.  Should be overridden to
+  ///correctly restore state using ReadState(), or to visualize a physical
+  ///robot's sensors.
+  virtual void SetMeasurements(const vector<double>& values) { }
+  ///Any other state besides measurements/settings that you might want to store.  Used in ReadState
+  virtual void GetInternalState(vector<double>& state) const {  }
+  ///Any other state besides measurements/settings that you might want to store.  Used in WriteState
+  virtual void SetInternalState(const vector<double>& state) { }
+  ///Returns a map of all current name-value pairs of the sensor's settings
   virtual map<string,string> Settings() const;
+  ///Get a named setting.   Returns false if the name is not supported
   virtual bool GetSetting(const string& name,string& str) const;
+  ///Set a named setting.  Returns false if the name is not supported, or the
+  ///value is formatted incorrectly
   virtual bool SetSetting(const string& name,const string& str);
-  virtual void DrawGL() {}
+  ///If the sensor can be drawn, draw the sensor on the robot's current configuration,
+  ///using these measurements, using OpenGL calls.
+  virtual void DrawGL(const Robot& robot,const vector<double>& measurements) {}
 
   string name;
   double rate;

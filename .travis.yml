@@ -27,7 +27,8 @@ script:
   - cmake . -DKLAMPT_COMPILE_TESTS:BOOL=True
   - make
   - sudo make python-install
-  - make test
+  - env CTEST_OUTPUT_ON_FAILURE=1 make test
+
 
 # safelist
 branches:

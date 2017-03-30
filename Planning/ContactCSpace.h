@@ -8,28 +8,25 @@
 
 /** @brief A SingleRobotCSpace for a robot maintaining contact.
  *
- * The loop closure constraints are solved for using the Newton Raphson method.
+ * The loop closure constraints are solved for using the Newton Raphson method
+ * during sampling and interpolation.
  *
- * Note that the current implementation doesn't override any ExplicitCSpace
- * methods, so this should not be used in a planner that expects an
- * ExplicitCSpace.
+ * Note: interpolation is NOT geodesic, so GeodesicCSpace methods should not be
+ * used.
  */
-class ContactCSpace : public SingleRobotCSpace2
+class ContactCSpace : public SingleRobotCSpace
 {
  public:
   ContactCSpace(RobotWorld& world,int index,
 		WorldPlannerSettings* settings);
   ContactCSpace(const SingleRobotCSpace& space);
   ContactCSpace(const ContactCSpace& space);
-  virtual ~ContactCSpace() {}
-  virtual void Sample(Config& x);
-  virtual void SampleNeighborhood(const Config& c,Real r,Config& x);
-  virtual bool IsFeasible(const Config&);
-  virtual EdgePlanner* LocalPlanner(const Config& a,const Config& b);
 
+  virtual void Sample(Config& q);
+  virtual void SampleNeighborhood(const Config& c,Real r,Config& q);
   virtual void Interpolate(const Config& x,const Config& y,Real u,Config& out);
-  virtual void Midpoint(const Config& x,const Config& y,Config& out);
-  virtual void Properties(PropertyMap&) const;
+  virtual EdgePlanner* PathChecker(const Config& a,const Config& b);
+  virtual void Properties(PropertyMap&);
 
   void AddContact(const IKGoal& goal);
   void AddContact(int link,const Vector3& localPos,const Vector3& worldPos);
@@ -49,10 +46,11 @@ class ContactCSpace : public SingleRobotCSpace2
   bool CheckContact(const Config& q,Real dist=0);
 
   vector<IKGoal> contactIK;
-  int numSolveContact,numIsFeasible;
-  double solveContactTime,isFeasibleTime;
+  int numSolveContact;
+  double solveContactTime;
 };
 
+/*
 class MultiContactCSpace : public MultiRobotCSpace
 {
  public:
@@ -97,5 +95,6 @@ class MultiContactCSpace : public MultiRobotCSpace
   int numSolveContact,numIsFeasible;
   double solveContactTime,isFeasibleTime;
 };
+*/
 
 #endif

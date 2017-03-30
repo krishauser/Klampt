@@ -42,6 +42,7 @@ public slots:
     void SetBboxes(bool status);
     void SetCOM(bool status);
     void SetFrame(bool status);
+    void SetSensors(bool status);
     void SetFree();
     void SetIK();
     void IKConstrain();
@@ -65,6 +66,7 @@ public slots:
     void PrintCollisions();
 
     void LoadFile();
+    void SaveFile();
 };
 
 #endif // MAINWINDOW_H

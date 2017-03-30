@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>273</width>
-    <height>180</height>
+    <height>234</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -111,6 +111,13 @@
      </item>
     </layout>
    </item>
+   <item>
+    <widget class="QPushButton" name="btn_split">
+     <property name="text">
+      <string>Split at current time</string>
+     </property>
+    </widget>
+   </item>
   </layout>
  </widget>
  <customwidgets>
@@ -174,10 +181,27 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>btn_split</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>PathFrame</receiver>
+   <slot>Split()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>140</x>
+     <y>209</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>136</x>
+     <y>116</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>Discretize()</slot>
   <slot>Optimize()</slot>
   <slot>SetDuration()</slot>
+  <slot>Split()</slot>
  </slots>
 </ui>

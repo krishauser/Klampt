@@ -101,10 +101,16 @@ void MainWindow::SetSimulate(bool status){
   gui->SendButtonToggle("simulate",status);
 }
 
+void MainWindow::SetROS(bool status)
+{
+  gui->SendButtonToggle("output_ros",status);
+}
+
 void MainWindow::SendMilestone(){
     //gui->SendButtonPress("command_pose");
     gui->SendCommand("command_pose");
 }
+
 
 void MainWindow::SetRecord(bool status){
   //gui->SendCommand("record",status);

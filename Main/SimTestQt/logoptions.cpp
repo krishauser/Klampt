@@ -26,13 +26,14 @@ LogOptions::~LogOptions()
 }
 
 void LogOptions::GetSensors(){
-    sensorDrawn.resize(robotsensors.sensors.size(),false);
-    sensorMeasurementDrawn.resize(robotsensors.sensors.size());
+    sensorPlotted.resize(robotsensors.sensors.size(),false);
+    sensorRendered.resize(robotsensors.sensors.size(),false);
+    sensorMeasurementPlotted.resize(robotsensors.sensors.size());
     for(int i=0;i<robotsensors.sensors.size();i++){
         AddSensor(robotsensors.sensors[i]->name.c_str());
         vector<string> names;
         robotsensors.sensors[i]->MeasurementNames(names);
-        sensorMeasurementDrawn[i].resize(names.size(),true);
+        sensorMeasurementPlotted[i].resize(names.size(),true);
     }
 }
 
@@ -69,10 +70,11 @@ void LogOptions::ChangeSensor(int _sensor){
         robotsensors.sensors[selected_sensor]->MeasurementNames(names);
     ui->list_show->clear();
     AddMeasurements(names);
-    if(sensorDrawn.size()){
-        ui->chk_plot->setChecked(sensorDrawn[selected_sensor]);
-        for(int i=0;i<sensorMeasurementDrawn[selected_sensor].size();i++){
-            if(sensorMeasurementDrawn[selected_sensor][i]){
+    if(selected_sensor < (int)sensorPlotted.size()){
+        ui->chk_plot->setChecked(sensorPlotted[selected_sensor]);
+        ui->chk_render->setChecked(sensorRendered[selected_sensor]);
+        for(int i=0;i<sensorMeasurementPlotted[selected_sensor].size();i++){
+            if(sensorMeasurementPlotted[selected_sensor][i]){
                 ui->list_show->item(i)->setBackgroundColor(Qt::white);
             }
             else{
@@ -84,14 +86,14 @@ void LogOptions::ChangeSensor(int _sensor){
 
 void LogOptions::HideItem(int index){
     ui->list_show->item(index)->setBackgroundColor(Qt::gray);
-    sensorMeasurementDrawn[selected_sensor][index]=false;
+    sensorMeasurementPlotted[selected_sensor][index]=false;
     emit toggle_measurement(selected_sensor,index,false);
     //gui.SendCommand("hide_sensor_measurement",selected_sensor,index);
 }
 
 void LogOptions::ShowItem(int index){
     ui->list_show->item(index)->setBackgroundColor(Qt::white);
-    sensorMeasurementDrawn[selected_sensor][index]=true;
+    sensorMeasurementPlotted[selected_sensor][index]=true;
     emit toggle_measurement(selected_sensor,index,true);
 }
 
@@ -119,14 +121,17 @@ void LogOptions::Isolate(){
 
 void LogOptions::TogglePlot(bool status){
     //emit toggle_plot(status);
-   //if(sensor<(int)gui->sensorDrawn.size()){
-    if(status){
-        //gui->sensorDrawn[sensor]=1;
-        emit ShowSensor(selected_sensor);
-        }
-    else
-        emit HideSensor(selected_sensor);
+    if(selected_sensor < (int)sensorPlotted.size())
+        sensorPlotted[selected_sensor]=status;
+    emit ShowSensor(selected_sensor,status);
 }
+
+void LogOptions::ToggleRender(bool status){
+    if(selected_sensor < (int)sensorPlotted.size())
+        sensorRendered[selected_sensor]=status;
+    emit RenderSensor(selected_sensor,status);
+}
+
 
 void LogOptions::ToggleLogging(bool status){
     emit toggle_logging(status);

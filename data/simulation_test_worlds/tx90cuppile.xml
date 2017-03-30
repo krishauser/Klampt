@@ -1,23 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <world>
   <robot name="tx90pr2" file="../robots/tx90pr2.rob" />
-  <terrain name="floor" file="../terrains/block.tri" />
+  <terrain name="floor" file="../terrains/block.off" />
 <!-- The table -->
-  <terrain name="table" file="../terrains/cube.tri" scale="0.6 0.6 0.03" translation="0.3 -0.175 0.615">
+  <terrain name="table" file="../terrains/cube.off" scale="0.6 0.6 0.03" translation="0.3 -0.175 0.615">
      <display color="0.4 0.2 0.1"/>
   </terrain>
 
 <!-- The "trash can" box -->
-  <terrain name="wall1" file="../terrains/cube.tri" scale="0.01 0.6 0.1" translation="0.3 -0.175 0.645">
+  <terrain name="wall1" file="../terrains/cube.off" scale="0.01 0.6 0.1" translation="0.3 -0.175 0.645">
      <display color="0.2 0.2 0.2"/>
   </terrain>
-  <terrain name="wall2" file="../terrains/cube.tri" scale="0.6 0.01 0.1" translation="0.3 -0.175 0.645">
+  <terrain name="wall2" file="../terrains/cube.off" scale="0.6 0.01 0.1" translation="0.3 -0.175 0.645">
      <display color="0.2 0.2 0.2"/>
   </terrain>
-  <terrain name="wall3" file="../terrains/cube.tri" scale="0.01 0.6 0.1" translation="0.9 -0.175 0.645">
+  <terrain name="wall3" file="../terrains/cube.off" scale="0.01 0.6 0.1" translation="0.9 -0.175 0.645">
      <display color="0.2 0.2 0.2"/>
   </terrain>
-  <terrain name="wall4" file="../terrains/cube.tri" scale="0.6 0.01 0.1" translation="0.3 0.425 0.645">
+  <terrain name="wall4" file="../terrains/cube.off" scale="0.6 0.01 0.1" translation="0.3 0.425 0.645">
      <display color="0.2 0.2 0.2"/>
   </terrain>
 

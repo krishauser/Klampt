@@ -1,5 +1,5 @@
 #include <vector>
-#include "pyerr.h"
+#include <string>
 #include "robotsim.h"
 #include "widget.h"
 #include "Control/Command.h"
@@ -9,10 +9,13 @@
 #include "Planning/RobotCSpace.h"
 #include "Simulation/WorldSimulation.h"
 #include "Modeling/Interpolate.h"
+#include "Planning/RobotCSpace.h"
 #include "IO/XmlWorld.h"
 #include "IO/XmlODE.h"
 #include "IO/ROS.h"
 #include <KrisLibrary/robotics/NewtonEuler.h>
+#include <KrisLibrary/robotics/Stability.h>
+#include <KrisLibrary/robotics/TorqueSolver.h>
 #include <KrisLibrary/meshing/PointCloud.h>
 #include <KrisLibrary/GLdraw/drawextra.h>
 #include <KrisLibrary/GLdraw/drawMesh.h>
@@ -23,10 +26,14 @@
 #include <KrisLibrary/utils/AnyCollection.h>
 #include <KrisLibrary/utils/stringutils.h>
 #include <ode/ode.h>
+#include "pyerr.h"
+#include "pyconvert.h"
 #include <fstream>
 #ifndef WIN32
 #include <unistd.h>
 #endif //WIN32
+
+/***************************  GLOBALS: REFERENCING TO KLAMPT C++ CODE ***************************************/
 
 /// Internally used.
 struct WorldData
@@ -63,6 +70,8 @@ static list<int> widgetDeleteList;
 
 static bool gEnableCollisionInitialization = false;
 
+static int gStabilityNumFCEdges = 4;
+
 int createWorld(RobotWorld* ptr=NULL)
 {
   if(worldDeleteList.empty()) {
@@ -97,6 +106,10 @@ int createWorld(RobotWorld* ptr=NULL)
 
 void derefWorld(int index)
 {
+  if(worlds.empty()) {
+    //may have already cleared module...
+    return;
+  }
   if(index < 0 || index >= (int)worlds.size())
     throw PyException("Invalid world index");
   if(!worlds[index])
@@ -141,6 +154,10 @@ int createSim()
 
 void destroySim(int index)
 {
+  if(worlds.empty()) {
+    //may have already cleared module...
+    return;
+  }
   if(index < 0 || index >= (int)sims.size())
     throw PyException("Invalid sim index");
   if(!sims[index])
@@ -192,6 +209,26 @@ void refWidget(int index)
   //printf("Ref widget %d: count %d\n",index,widgets[index].refCount);
 }
 
+//cleans up internal data structures
+void destroy()
+{
+  for(size_t i=0;i<sims.size();i++)
+    sims[i] = NULL;
+  for(size_t i=0;i<worlds.size();i++)
+    worlds[i] = NULL;
+  simDeleteList.clear();
+  worldDeleteList.clear();
+  sims.resize(0);
+  worlds.resize(0);
+}
+
+void setRandomSeed(int seed)
+{
+  Math::Srand(seed);
+}
+
+
+/***************************  GEOMETRY CODE ***************************************/
 
 ManagedGeometry& GetManagedGeometry(RobotWorld& world,int id)
 {
@@ -335,6 +372,7 @@ void GetPointCloud(const Geometry::AnyCollisionGeometry3D& geom,PointCloud& pc)
     gpc.points[i].get(pc.vertices[i*3],pc.vertices[i*3+1],pc.vertices[i*3+2]);
     gpc.properties[i].getCopy(&pc.properties[i*gpc.propertyNames.size()]);
   }
+  pc.settings = gpc.settings;
 }
 
 void GetPointCloud(const PointCloud& pc,Geometry::AnyCollisionGeometry3D& geom)
@@ -351,6 +389,7 @@ void GetPointCloud(const PointCloud& pc,Geometry::AnyCollisionGeometry3D& geom)
       gpc.properties[i].copy(&pc.properties[i*pc.propertyNames.size()]);
     }
   }
+  gpc.settings = pc.settings;
   //printf("Copying PointCloud to geometry, %d points\n",(int)gpc.points.size());
   geom = gpc;
   geom.ClearCollisionData();
@@ -392,7 +431,10 @@ bool GeometricPrimitive::loadString(const char* str)
   type = items[0];
   properties.resize(items.size()-1);
   for(size_t i=1;i<items.size();i++)
-    if(!LexicalCast<double>(items[i],properties[i-1])) return false;
+    if(!LexicalCast<double>(items[i],properties[i-1])) {
+      fprintf(stderr,"GeometricPrimitive::loadString: could not parse item %d: \"%s\"\n",(int)i,items[i].c_str());
+      return false;
+    }
   return true;
 }
 
@@ -416,7 +458,31 @@ Geometry3D::Geometry3D(const Geometry3D& rhs)
   :world(rhs.world),id(rhs.id),geomPtr(NULL)
 {
   SmartPointer<AnyCollisionGeometry3D>* geom = reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(rhs.geomPtr);
-  geomPtr = new SmartPointer<AnyCollisionGeometry3D>(*geom);
+  if(*geom != NULL)
+    geomPtr = new SmartPointer<AnyCollisionGeometry3D>(*geom);
+  else
+    geomPtr = new SmartPointer<AnyCollisionGeometry3D>();
+}
+
+Geometry3D::Geometry3D(const GeometricPrimitive& rhs)
+  :world(-1),id(-1),geomPtr(NULL)
+{
+  geomPtr = new SmartPointer<AnyCollisionGeometry3D>();
+  setGeometricPrimitive(rhs);
+}
+
+Geometry3D::Geometry3D(const TriangleMesh& rhs)
+  :world(-1),id(-1),geomPtr(NULL)
+{
+  geomPtr = new SmartPointer<AnyCollisionGeometry3D>();
+  setTriangleMesh(rhs);
+}
+
+Geometry3D::Geometry3D(const PointCloud& rhs)
+  :world(-1),id(-1),geomPtr(NULL)
+{
+  geomPtr = new SmartPointer<AnyCollisionGeometry3D>();
+  setPointCloud(rhs);
 }
 
 Geometry3D::~Geometry3D()
@@ -469,8 +535,10 @@ void Geometry3D::set(const Geometry3D& g)
     else
       geom = new AnyCollisionGeometry3D();
   }
+  else
+    Assert(&*geom == &*mgeom);
   *geom = *ggeom;
-  geom->ClearCollisionData();
+  //geom->ClearCollisionData();
   if(mgeom) {
     //update the display list / cache
     mgeom->OnGeometryChange();
@@ -482,7 +550,7 @@ void Geometry3D::free()
 {
   SmartPointer<AnyCollisionGeometry3D>* geom = reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(geomPtr);  
   if(isStandalone() && *geom) {
-    printf("Geometry3D(): Freeing standalone geometry\n");
+    //printf("Geometry3D(): Freeing standalone geometry\n");
     *geom = NULL;
   }
   world = -1;
@@ -556,6 +624,80 @@ void Geometry3D::setTriangleMesh(const TriangleMesh& mesh)
   }
 }
 
+void Geometry3D::setGroup()
+{
+  SmartPointer<AnyCollisionGeometry3D>& geom = *reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(geomPtr);
+  ManagedGeometry* mgeom = NULL;
+  if(!isStandalone()) {
+    RobotWorld& world = *worlds[this->world]->world;
+    mgeom = &GetManagedGeometry(world,id);
+  }
+  if(geom == NULL) {
+    if(mgeom) 
+      geom = mgeom->CreateEmpty();
+    else
+      geom = new AnyCollisionGeometry3D();
+  }
+  *geom = AnyCollisionGeometry3D(vector<Geometry::AnyGeometry3D>());
+  geom->ReinitCollisionData();
+}
+
+Geometry3D Geometry3D::getElement(int element)
+{
+  SmartPointer<AnyCollisionGeometry3D>& geom = *reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(geomPtr);
+  if(!geom) 
+    throw PyException("Geometry is empty");
+  if(geom->type != AnyCollisionGeometry3D::Group)
+    throw PyException("Not a group geometry");
+  vector<AnyCollisionGeometry3D>& data = geom->GroupCollisionData();
+  if(element < 0 || element >= (int)data.size())
+    throw PyException("Invalid element specified");
+  Geometry3D res;
+  SmartPointer<AnyCollisionGeometry3D>& rgeom = *reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(res.geomPtr);
+  *rgeom = data[element];
+  return res;
+}
+
+void Geometry3D::setElement(int element,const Geometry3D& rhs)
+{
+  SmartPointer<AnyCollisionGeometry3D>& rgeom = *reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(rhs.geomPtr);
+  if(rgeom == NULL) 
+    throw PyException("Setting an element to an empty geometry?");
+  rgeom->InitCollisionData();
+
+  SmartPointer<AnyCollisionGeometry3D>& geom = *reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(geomPtr);
+  if(!geom) 
+    throw PyException("Geometry is empty");
+  if(geom->type != AnyCollisionGeometry3D::Group)
+    throw PyException("Not a group geometry");
+  vector<AnyGeometry3D>& data = geom->AsGroup();
+  if(element < 0 || element > (int)data.size())
+    throw PyException("Invalid element specified");
+  Assert(rhs.geomPtr != NULL);
+  vector<AnyCollisionGeometry3D>& cdata = geom->GroupCollisionData();
+  
+  if(element == (int)data.size()) {
+    data.push_back(*rgeom);
+    cdata.push_back(*rgeom);
+  }
+  else {
+    data[element] = *rgeom;
+    cdata[element] = *rgeom;
+  }
+}
+
+int Geometry3D::numElements()
+{
+  SmartPointer<AnyCollisionGeometry3D>& geom = *reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(geomPtr);
+  if(!geom) 
+    throw PyException("Geometry is empty");
+  if(geom->type != AnyCollisionGeometry3D::Group)
+    throw PyException("Not a group geometry");
+  vector<AnyGeometry3D>& data = geom->AsGroup();
+  return (int)data.size();
+}
+
+
 PointCloud Geometry3D::getPointCloud()
 {
   SmartPointer<AnyCollisionGeometry3D>& geom = *reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(geomPtr);
@@ -568,7 +710,7 @@ PointCloud Geometry3D::getPointCloud()
 
 void Geometry3D::setPointCloud(const PointCloud& pc)
 {
-  SmartPointer<AnyCollisionGeometry3D> geom = *reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(geomPtr);
+  SmartPointer<AnyCollisionGeometry3D>& geom = *reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(geomPtr);
   ManagedGeometry* mgeom = NULL;
   if(!isStandalone()) {
     RobotWorld& world = *worlds[this->world]->world;
@@ -593,7 +735,7 @@ void Geometry3D::setPointCloud(const PointCloud& pc)
 
 void Geometry3D::setGeometricPrimitive(const GeometricPrimitive& prim)
 {
-  SmartPointer<AnyCollisionGeometry3D> geom = *reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(geomPtr);  
+  SmartPointer<AnyCollisionGeometry3D>& geom = *reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(geomPtr);  
   ManagedGeometry* mgeom = NULL;
   if(!isStandalone()) {
     RobotWorld& world = *worlds[this->world]->world;
@@ -708,23 +850,47 @@ void Geometry3D::setCurrentTransform(const double R[9],const double t[3])
   geom->SetTransform(T);
 }
 
+void Geometry3D::getCurrentTransform(double out[9],double out2[3])
+{
+  RigidTransform T;
+  SmartPointer<AnyCollisionGeometry3D>& geom = *reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(geomPtr);
+  if(!geom) {
+    T.setIdentity();
+    return;
+  }
+  else
+    T = geom->GetTransform();
+  T.R.get(out);
+  T.t.get(out2);
+}
+
+void Geometry3D::scale(double s)
+{
+  scale(s,s,s);
+}
+
+void Geometry3D::scale(double sx,double sy,double sz)
+{
+  Matrix3 R;
+  R.setZero();
+  R(0,0) = sx;
+  R(1,1) = sy;
+  R(2,2) = sz;
+  const double t[3]={0,0,0};
+  transform(R,t);
+}
+
+void Geometry3D::rotate(const double R[9])
+{
+  const double t[3]={0,0,0};
+  transform(R,t);
+}
+
 void Geometry3D::translate(const double t[3])
 {
-  SmartPointer<AnyCollisionGeometry3D>& geom = *reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(geomPtr);
-  if(!geom) return;
-  RigidTransform T;
-  T.R.setIdentity();
-  T.t.set(t);
-  geom->Transform(T);
-  geom->ClearCollisionData();
-
-  if(!isStandalone()) {
-    //update the display list / cache
-    RobotWorld& world=*worlds[this->world]->world;
-    ManagedGeometry* mgeom = &GetManagedGeometry(world,id);
-    mgeom->OnGeometryChange();
-    mgeom->RemoveFromCache();
-  }
+  Matrix3 R;
+  R.setIdentity();
+  transform(R,t);
 }
 
 void Geometry3D::transform(const double R[9],const double t[3])
@@ -1095,12 +1261,38 @@ void Appearance::drawGL()
   app->DrawGL();
 }
 
+void Appearance::drawWorldGL(Geometry3D& g)
+{
+  SmartPointer<GLDraw::GeometryAppearance>& app = *reinterpret_cast<SmartPointer<GLDraw::GeometryAppearance>*>(appearancePtr);
+  SmartPointer<AnyCollisionGeometry3D>& geom = *reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(g.geomPtr);
+  if(!geom) return;
+  if(!app) {
+    app = new GLDraw::GeometryAppearance();
+  }
+  if(app->geom) {
+    if(app->geom != geom) {
+      fprintf(stderr,"Appearance::drawGL(): performance warning, setting to a different geometry\n");
+      app->Set(*geom);
+    }
+  }
+  else {
+    app->Set(*geom);
+  }
+
+  glPushMatrix();
+  GLDraw::glMultMatrix(Matrix4(geom->GetTransform()));
+  app->DrawGL();
+  glPopMatrix();
+}
+
 void Appearance::drawGL(Geometry3D& g)
 {
   SmartPointer<GLDraw::GeometryAppearance>& app = *reinterpret_cast<SmartPointer<GLDraw::GeometryAppearance>*>(appearancePtr);
   SmartPointer<AnyCollisionGeometry3D>& geom = *reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(g.geomPtr);
-  if(!app) return;
   if(!geom) return;
+  if(!app) {
+    app = new GLDraw::GeometryAppearance();
+  }
   if(app->geom) {
     if(app->geom != geom) {
       fprintf(stderr,"Appearance::drawGL(): performance warning, setting to a different geometry\n");
@@ -1212,11 +1404,43 @@ void PointCloud::getPoint(int index,double out[3]) const
   out[2] = vertices[index*3+2];
 }
 
+void PointCloud::addProperty(const std::string& pname)
+{
+  int n = numPoints();
+  vector<double> values(n,0.0);
+  addProperty(pname,values);
+}
+
+void PointCloud::addProperty(const std::string& pname,const std::vector<double> & values)
+{
+  int n = numPoints();
+  if(values.size() != n) {
+    throw PyException("Invalid size of properties list, must have size #points");
+  }
+  assert(values.size() == n);
+  size_t m=propertyNames.size();
+  assert(properties.size() == n*m);
+  propertyNames.push_back(pname);
+  vector<double> newprops(n*(m+1));
+  for(int i=0;i<n;i++) {
+    assert ((i+1)*m < (int)properties.size()); 
+    assert (i*(m+1) + m < (int)newprops.size()); 
+    std::copy(properties.begin()+i*m,properties.begin()+(i+1)*m,newprops.begin()+i*(m+1));
+    newprops[i*(m+1) + m] = values[i];
+  }
+  std::swap(newprops,properties);
+  assert(properties.size() == (n*(m+1)));
+}
+
 void PointCloud::setProperties(const vector<double>& vproperties)
 {
   int n = numPoints();
-  assert(vproperties.size() >= n*propertyNames.size());
-  copy(vproperties.begin(),vproperties.begin()+propertyNames.size()*n,properties.begin());
+  size_t m=propertyNames.size();
+  if(vproperties.size() < n*m) {
+    throw PyException("Invalid size of properties list, must have size at least #points * #properties");
+  }
+  assert(properties.size() == n*m);
+  copy(vproperties.begin(),vproperties.begin()+m*n,properties.begin());
 }
 
 void PointCloud::setProperties(int pindex,const vector<double>& vproperties)
@@ -1281,6 +1505,18 @@ void PointCloud::join(const PointCloud& pc)
   properties.insert(properties.end(),pc.properties.begin(),pc.properties.end());
 }
 
+void PointCloud::setSetting(const std::string& key,const std::string& value)
+{
+  settings[key] = value;
+}
+
+std::string PointCloud::getSetting(const std::string& key) const
+{
+  if(settings.count(key) == 0)
+    throw PyException("PointCloud::getSetting(): key does not exist in settings map");
+  return settings.find(key)->second;
+}
+
 void PointCloud::translate(const double t[3])
 {
   for(size_t i=0;i<vertices.size();i+=3) {
@@ -1303,16 +1539,34 @@ void PointCloud::transform(const double R[9],const double t[3])
 }
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/***************************  ROBOT / WORLD MODELING CODE ***************************************/
+
 WorldModel::WorldModel()
 {
   index = createWorld();
 }
 
+/*
 WorldModel::WorldModel(int _index)
 {
   index = _index;
   refWorld(index);
 }
+*/
 
 WorldModel::WorldModel(const WorldModel& w)
 {
@@ -1366,6 +1620,17 @@ WorldModel::~WorldModel()
   }
 }
 
+bool WorldModel::loadFile(const char* fn)
+{
+  return readFile(fn);
+}
+
+bool WorldModel::saveFile(const char* fn,const char* elementPath)
+{
+  RobotWorld& world = *worlds[index]->world;
+  return world.SaveXML(fn,elementPath);
+}
+
 bool WorldModel::readFile(const char* fn)
 {
   RobotWorld& world = *worlds[index]->world;
@@ -1376,10 +1641,9 @@ bool WorldModel::readFile(const char* fn)
       printf("Error loading robot file %s\n",fn);
       return false;
     }
-    if(gEnableCollisionInitialization) {
+    if(gEnableCollisionInitialization) 
       world.robots.back()->InitCollisions();
-      world.robots.back()->UpdateGeometry();
-    }
+    world.robots.back()->UpdateGeometry();
   }
   else if(0==strcmp(ext,"env") || 0==strcmp(ext,"tri") || 0==strcmp(ext,"pcd")) {
     if(world.LoadTerrain(fn)<0) {
@@ -1393,10 +1657,9 @@ bool WorldModel::readFile(const char* fn)
       printf("Error loading rigid object file %s\n",fn);
       return false;
     }
-    if(gEnableCollisionInitialization) {
+    if(gEnableCollisionInitialization) 
       world.rigidObjects.back()->InitCollisions();
-      world.rigidObjects.back()->UpdateGeometry();
-    }
+    world.rigidObjects.back()->UpdateGeometry();
   }
   else if(0==strcmp(ext,"xml")) {
     /*
@@ -1425,10 +1688,9 @@ bool WorldModel::readFile(const char* fn)
       printf("Error opening or parsing world file %s\n",fn);
       return false;
     }
-    if(gEnableCollisionInitialization) {
+    if(gEnableCollisionInitialization) 
       world.InitCollisions();
-      world.UpdateGeometry();
-    }
+    world.UpdateGeometry();
     return true;
   }
   else {
@@ -1621,10 +1883,9 @@ RobotModel WorldModel::loadRobot(const char* fn)
   robot.world = index;
   robot.index = oindex;
   robot.robot = world.robots.back();
-  if(gEnableCollisionInitialization) {
+  if(gEnableCollisionInitialization) 
     world.robots.back()->InitCollisions();
-    world.robots.back()->UpdateGeometry();
-  }
+  world.robots.back()->UpdateGeometry();
   return robot;
 }
 
@@ -1637,10 +1898,9 @@ RigidObjectModel WorldModel::loadRigidObject(const char* fn)
   obj.world = index;
   obj.index = oindex;
   obj.object = world.rigidObjects.back();
-  if(gEnableCollisionInitialization) {
+  if(gEnableCollisionInitialization) 
     world.rigidObjects.back()->InitCollisions();
-    world.rigidObjects.back()->UpdateGeometry();
-  }
+  world.rigidObjects.back()->UpdateGeometry();
   return obj;
 }
 
@@ -1784,16 +2044,6 @@ RobotModelLink::RobotModelLink()
   :world(-1),robotIndex(-1),robotPtr(NULL),index(-1)
 {}
 
-RobotModel RobotModelLink::getRobot()
-{
-  static bool warned = false;
-  if(!warned) {
-    fprintf(stderr,"RobotModelLink::getRobot() will be deprecated, please use robot() instead\n");
-    warned = true;
-  }
-  return robot();
-}
-
 RobotModel RobotModelLink::robot()
 {
   RobotModel r;
@@ -1803,10 +2053,18 @@ RobotModel RobotModelLink::robot()
   return r;
 }
 
-const char* RobotModelLink::getName()
+const char* RobotModelLink::getName() const
 {
   if(index < 0) return "";
   return robotPtr->linkNames[index].c_str();
+}
+
+void RobotModelLink::setName(const char* name)
+{
+  if(index < 0) {
+    throw PyException("Cannot set the name of an empty link");
+  }
+  robotPtr->linkNames[index] = name;
 }
 
 int RobotModelLink::getIndex()
@@ -1852,7 +2110,7 @@ void RobotModelLink::setParent(const RobotModelLink& link)
   }
 }
 
-int RobotModelLink::getID()
+int RobotModelLink::getID() const
 {
   RobotWorld& world = *worlds[this->world]->world;
   return world.RobotLinkID(robotIndex,index);
@@ -2055,16 +2313,6 @@ RobotModelDriver::RobotModelDriver()
   :world(-1),robotIndex(-1),robotPtr(NULL),index(-1)
 {}
 
-RobotModel RobotModelDriver::getRobot()
-{
-  static bool warned = false;
-  if(!warned) {
-    fprintf(stderr,"RobotModelDriver::getRobot() will be deprecated, please use robot() instead\n");
-    warned = true;
-  }
-  return robot();
-}
-
 RobotModel RobotModelDriver::robot()
 {
   RobotModel r;
@@ -2074,11 +2322,22 @@ RobotModel RobotModelDriver::robot()
   return r;
 }
 
-const char* RobotModelDriver::getName()
+const char* RobotModelDriver::getName() const
 {
   if(index < 0) return "";
   return robotPtr->driverNames[index].c_str();
 }
+
+/*
+void RobotModelDriver::setName(const char* name)
+{
+  if(index < 0) {
+    throw PyException("Cannot set the name of an empty driver");
+  }
+  robotPtr->driverNames[index] = name;
+}
+*/
+
 
 const char* RobotModelDriver::getType()
 {
@@ -2142,13 +2401,23 @@ RobotModel::RobotModel()
   :world(-1),index(-1),robot(NULL)
 {}
 
-const char* RobotModel::getName()
+const char* RobotModel::getName() const
 {
   RobotWorld& world = *worlds[this->world]->world;
   return world.robots[index]->name.c_str();
 }
 
-int RobotModel::getID()
+void RobotModel::setName(const char* name)
+{
+  if(index < 0) {
+    throw PyException("Cannot set the name of an empty robot");
+  }
+  RobotWorld& world = *worlds[this->world]->world;
+  world.robots[index]->name = name;
+}
+
+
+int RobotModel::getID() const
 {
   RobotWorld& world = *worlds[this->world]->world;
   return world.RobotID(index);
@@ -2159,16 +2428,6 @@ int RobotModel::numLinks()
   return robot->links.size();
 }
 
-RobotModelLink RobotModel::getLink(int linkindex)
-{
-  static bool warned = false;
-  if(!warned) {
-    fprintf(stderr,"RobotModel::getLink() will be deprecated, please use link() instead\n");
-    warned = true;
-  }
-  return link(linkindex);
-}
-
 RobotModelLink RobotModel::link(int linkindex)
 {
   RobotModelLink link;
@@ -2177,16 +2436,6 @@ RobotModelLink RobotModel::link(int linkindex)
   link.robotPtr = robot;
   link.index = linkindex;
   return link;
-}
-
-RobotModelLink RobotModel::getLink(const char* name)
-{
-  static bool warned = false;
-  if(!warned) {
-    fprintf(stderr,"RobotModel::getLink() will be deprecated, please use link() instead\n");
-    warned = true;
-  }
-  return link(name);
 }
 
 RobotModelLink RobotModel::link(const char* name)
@@ -2211,16 +2460,6 @@ int RobotModel::numDrivers()
   return robot->drivers.size();
 }
 
-RobotModelDriver RobotModel::getDriver(int driverindex)
-{
-  static bool warned = false;
-  if(!warned) {
-    fprintf(stderr,"RobotModel::getDriver() will be deprecated, please use driver() instead\n");
-    warned = true;
-  }
-  return driver(driverindex);
-}
-
 RobotModelDriver RobotModel::driver(int driverindex)
 {
   RobotModelDriver link;
@@ -2231,22 +2470,12 @@ RobotModelDriver RobotModel::driver(int driverindex)
   return link;
 }
 
-RobotModelDriver RobotModel::getDriver(const char* name)
-{
-  static bool warned = false;
-  if(!warned) {
-    fprintf(stderr,"RobotModel::getDriver() will be deprecated, please use driver() instead\n");
-    warned = true;
-  }
-  return driver(name);
-}
-
 RobotModelDriver RobotModel::driver(const char* name)
 {
   string sname(name);
   for(size_t i=0;i<robot->driverNames.size();i++)
     if(sname == robot->driverNames[i]) {
-      return getDriver((int)i);
+      return driver((int)i);
     }
   RobotModelDriver link;
   link.world = this->world;
@@ -2271,6 +2500,9 @@ void RobotModel::getVelocity(vector<double>& dq)
 
 void RobotModel::setConfig(const vector<double>& q)
 {
+  if(robot->links.size() != q.size()) {
+    throw PyException("Invalid size of configuration");
+  }
   robot->q.copy(&q[0]);
   robot->UpdateFrames();
   robot->UpdateGeometry();
@@ -2278,6 +2510,9 @@ void RobotModel::setConfig(const vector<double>& q)
 
 void RobotModel::setVelocity(const vector<double>& dq)
 {
+  if(robot->links.size() != dq.size()) {
+    throw PyException("Invalid size of velocity");
+  }
   robot->dq.copy(&dq[0]);
 }
 
@@ -2291,8 +2526,21 @@ void RobotModel::getJointLimits(vector<double>& qmin,vector<double>& qmax)
 
 void RobotModel::setJointLimits(const vector<double>& qmin,const vector<double>& qmax)
 {
+  if(robot->links.size() != qmin.size()) {
+    throw PyException("Invalid size of joint limit");
+  }
+  if(robot->links.size() != qmax.size()) {
+    throw PyException("Invalid size of joint limit");
+  }
   robot->qMin.copy(&qmin[0]);
   robot->qMax.copy(&qmax[0]);
+
+  for(unsigned int i = 0; i < robot->drivers.size(); ++i)
+  {
+      int link_index = robot->drivers[i].linkIndices[0];
+      robot->drivers[i].qmin = qmin[link_index];
+      robot->drivers[i].qmax = qmax[link_index];
+  }
 }
 
 void RobotModel::getVelocityLimits(vector<double>& vmax)
@@ -2303,7 +2551,17 @@ void RobotModel::getVelocityLimits(vector<double>& vmax)
 
 void RobotModel::setVelocityLimits(const vector<double>& vmax)
 {
+  if(robot->links.size() != vmax.size()) {
+    throw PyException("Invalid size of velocity limit");
+  }
   robot->velMax.copy(&vmax[0]);
+
+  for(unsigned int i = 0; i < robot->drivers.size(); ++i)
+  {
+      int link_index = robot->drivers[i].linkIndices[0];
+      robot->drivers[i].vmin = -vmax[link_index];
+      robot->drivers[i].vmax = vmax[link_index];
+  }
 }
 
 void RobotModel::getAccelerationLimits(vector<double>& amax)
@@ -2314,7 +2572,17 @@ void RobotModel::getAccelerationLimits(vector<double>& amax)
 
 void RobotModel::setAccelerationLimits(const vector<double>& amax)
 {
+  if(robot->links.size() != amax.size()) {
+    throw PyException("Invalid size of acceleration limit");
+  }
   robot->accMax.copy(&amax[0]);
+
+  for(unsigned int i = 0; i < robot->drivers.size(); ++i)
+  {
+      int link_index = robot->drivers[i].linkIndices[0];
+      robot->drivers[i].amin = -amax[link_index];
+      robot->drivers[i].amax = amax[link_index];
+  }
 }
 
 void RobotModel::getTorqueLimits(vector<double>& tmax)
@@ -2325,11 +2593,24 @@ void RobotModel::getTorqueLimits(vector<double>& tmax)
 
 void RobotModel::setTorqueLimits(const vector<double>& tmax)
 {
+  if(robot->links.size() != tmax.size()) {
+    throw PyException("Invalid size of torque limits");
+  }
   robot->torqueMax.copy(&tmax[0]);
+
+  for(unsigned int i = 0; i < robot->drivers.size(); ++i)
+  {
+      int link_index = robot->drivers[i].linkIndices[0];
+      robot->drivers[i].tmin = -tmax[link_index];
+      robot->drivers[i].tmax = tmax[link_index];
+  }
 }
 
 void RobotModel::setDOFPosition(int i,double qi)
 {
+  if(i < 0 || i >= (int)robot->links.size()) {
+    throw PyException("Invalid joint index");
+  }
   robot->q(i) = qi;
   robot->UpdateFrames();
 }
@@ -2372,12 +2653,20 @@ void RobotModel::interpolate(const std::vector<double>& a,const std::vector<doub
 
 double RobotModel::distance(const std::vector<double>& a,const std::vector<double>& b)
 {
+  if(robot->links.size() != a.size()) 
+    throw PyException("Invalid size of configuration");
+  if(robot->links.size() != b.size()) 
+    throw PyException("Invalid size of configuration");
   Vector va(a),vb(b);
   return Distance(*robot,va,vb,Inf);
 }
 
-void RobotModel::interpolate_deriv(const std::vector<double>& a,const std::vector<double>& b,std::vector<double>& dout)
+void RobotModel::interpolateDeriv(const std::vector<double>& a,const std::vector<double>& b,std::vector<double>& dout)
 {
+  if(robot->links.size() != a.size()) 
+    throw PyException("Invalid size of configuration");
+  if(robot->links.size() != b.size()) 
+    throw PyException("Invalid size of configuration");
   Vector va(a),vb(b),vout;
   InterpolateDerivative(*robot,va,vb,vout);
   dout = vout;
@@ -2539,13 +2828,22 @@ RigidObjectModel::RigidObjectModel()
   :world(-1),index(-1),object(NULL)
 {}
 
-const char* RigidObjectModel::getName()
+const char* RigidObjectModel::getName() const
 {
   RobotWorld& world = *worlds[this->world]->world;
   return world.rigidObjects[index]->name.c_str();
 }
 
-int RigidObjectModel::getID()
+void RigidObjectModel::setName(const char* name)
+{
+  if(index < 0) {
+    throw PyException("Cannot set the name of an empty rigid object");
+  }
+  RobotWorld& world = *worlds[this->world]->world;
+  world.rigidObjects[index]->name = name;
+}
+
+int RigidObjectModel::getID() const
 {
   RobotWorld& world = *worlds[this->world]->world;
   return world.RigidObjectID(index);
@@ -2640,6 +2938,20 @@ void RigidObjectModel::setTransform(const double R[9],const double t[3])
   obj->geometry->SetTransform(obj->T);
 }
 
+void RigidObjectModel::getVelocity(double out[3],double out2[3])
+{
+  RigidObject* obj=object;
+  obj->w.get(out);
+  obj->v.get(out2);
+}
+
+void RigidObjectModel::setVelocity(const double angularVelocity[3],const double velocity[3])
+{
+  RigidObject* obj=object;
+  obj->w.set(angularVelocity);
+  obj->v.set(velocity);
+}
+
 void RigidObjectModel::drawGL(bool keepAppearance)
 {
   RobotWorld& world = *worlds[this->world]->world;
@@ -2661,13 +2973,23 @@ TerrainModel::TerrainModel()
 {
 }
 
-const char* TerrainModel::getName()
+const char* TerrainModel::getName() const
 {
   RobotWorld& world = *worlds[this->world]->world;
   return world.terrains[index]->name.c_str();
 }
 
-int TerrainModel::getID()
+void TerrainModel::setName(const char* name)
+{
+  if(index < 0) {
+    throw PyException("Cannot set the name of an empty rigid object");
+  }
+  RobotWorld& world = *worlds[this->world]->world;
+  world.terrains[index]->name = name;
+}
+
+
+int TerrainModel::getID() const
 {
   RobotWorld& world = *worlds[this->world]->world;
   return world.TerrainID(index);
@@ -2711,7 +3033,16 @@ void TerrainModel::drawGL(bool keepAppearance)
 }
 
 
-Simulator::Simulator(const WorldModel& model,const char* settings)
+
+
+
+
+
+
+/***************************  SIMULATION CODE ***************************************/
+
+
+Simulator::Simulator(const WorldModel& model)
 {
 #ifdef dDOUBLE
   if(dCheckConfiguration("ODE_double_precision")!=1) {
@@ -2727,10 +3058,6 @@ Simulator::Simulator(const WorldModel& model,const char* settings)
   index = createSim();
   world = model;
   sim = &sims[index]->sim;
-  if(settings && 0==strcmp(settings,"no_blem")) {
-    printf("Turning off boundary layer collisions\n");
-    sim->odesim.GetSettings().boundaryLayerCollisions = false;
-  }
 
   //initialize simulation
   printf("Initializing simulation...\n");
@@ -2771,19 +3098,26 @@ Simulator::~Simulator()
   destroySim(index);
 }
 
-WorldModel Simulator::getWorld() const
-{
-  static bool warned = false;
-  if(!warned) {
-    fprintf(stderr,"Simulator::getWorld() will be deprecated, please use world instead\n");
-    warned = true;
-  }
-  return world;
-}
-
 void Simulator::reset()
 {
   sim->ReadState(initialState);
+}
+
+int Simulator::getStatus()
+{
+  return sim->worstStatus;
+}
+
+std::string Simulator::getStatusString(int s)
+{
+  if(s < 0) s = getStatus();
+  switch(s) {
+    case 0: return "normal";
+    case 1: return "adaptive time stepping";
+    case 2: return "contact unreliable";
+    case 3: return "unstable";
+    default: return "error";
+  }
 }
 
 string Simulator::getState()
@@ -2977,15 +3311,58 @@ void Simulator::setSimStep(double dt)
   sim->simStep = dt;
 }
 
-SimRobotController Simulator::getController(int robot)
+  /// Retreives some simulation setting.  Valid names are gravity,
+  /// simStep, boundaryLayerCollisions, rigidObjectCollisions, robotSelfCollisions,
+  /// robotRobotCollisions, adaptiveTimeStepping, maxContacts,
+  /// clusterNormalScale, errorReductionParameter, and dampedLeastSquaresParameter
+std::string Simulator::getSetting(const std::string& name)
 {
-  static bool warned = false;
-  if(!warned) {
-    fprintf(stderr,"Simulator::getController() will be deprecated, please use controller() instead\n");
-    warned = true;
-  }
-  return controller(robot);
+  ODESimulatorSettings& settings = sim->odesim.GetSettings();
+  stringstream ss;
+  if(name == "gravity") ss << Vector3(settings.gravity);
+  else if(name == "simStep") ss << sim->simStep;
+  else if(name == "boundaryLayerCollisions") ss << settings.boundaryLayerCollisions;
+  else if(name == "rigidObjectCollisions") ss << settings.rigidObjectCollisions;
+  else if(name == "robotSelfCollisions") ss << settings.robotSelfCollisions;
+  else if(name == "robotRobotCollisions") ss << settings.robotRobotCollisions;
+  else if(name == "adaptiveTimeStepping") ss << settings.adaptiveTimeStepping;
+  else if(name == "minimumAdaptiveTimeStep") ss << settings.minimumAdaptiveTimeStep;
+  else if(name == "maxContacts") ss << settings.maxContacts;
+  else if(name == "clusterNormalScale") ss << settings.clusterNormalScale;
+  else if(name == "errorReductionParameter") ss << settings.errorReductionParameter;
+  else if(name == "dampedLeastSquaresParameter") ss << settings.dampedLeastSquaresParameter;
+  else if(name == "instabilityConstantEnergyThreshold") ss << settings.instabilityConstantEnergyThreshold;
+  else if(name == "instabilityLinearEnergyThreshold") ss << settings.instabilityLinearEnergyThreshold;
+  else if(name == "instabilityMaxEnergyThreshold") ss << settings.instabilityMaxEnergyThreshold;
+  else if(name == "instabilityPostCorrectionEnergy") ss << settings.instabilityPostCorrectionEnergy;
+  else throw PyException("Invalid setting queried in Simulator.getSetting()");
+  return ss.str();
 }
+
+void Simulator::setSetting(const std::string& name,const std::string& value)
+{
+  ODESimulatorSettings& settings = sim->odesim.GetSettings();
+  stringstream ss(value);
+  if(name == "gravity") { Vector3 g; ss >> g; sim->odesim.SetGravity(settings.gravity); }
+  else if(name == "simStep") ss >> sim->simStep;
+  else if(name == "boundaryLayerCollisions") ss >> settings.boundaryLayerCollisions;
+  else if(name == "rigidObjectCollisions") ss >> settings.rigidObjectCollisions;
+  else if(name == "robotSelfCollisions") ss >> settings.robotSelfCollisions;
+  else if(name == "robotRobotCollisions") ss >> settings.robotRobotCollisions;
+  else if(name == "adaptiveTimeStepping") ss >> settings.adaptiveTimeStepping;
+  else if(name == "minimumAdaptiveTimeStep") ss >> settings.minimumAdaptiveTimeStep;
+  else if(name == "maxContacts") ss >> settings.maxContacts;
+  else if(name == "clusterNormalScale") ss >> settings.clusterNormalScale;
+  else if(name == "errorReductionParameter") { ss >> settings.errorReductionParameter; sim->odesim.SetERP(settings.errorReductionParameter); }
+  else if(name == "dampedLeastSquaresParameter") { ss >> settings.dampedLeastSquaresParameter; sim->odesim.SetCFM(settings.dampedLeastSquaresParameter); }
+  else if(name == "instabilityConstantEnergyThreshold") ss >> settings.instabilityConstantEnergyThreshold;
+  else if(name == "instabilityLinearEnergyThreshold") ss >> settings.instabilityLinearEnergyThreshold;
+  else if(name == "instabilityMaxEnergyThreshold") ss >> settings.instabilityMaxEnergyThreshold;
+  else if(name == "instabilityPostCorrectionEnergy") ss >> settings.instabilityPostCorrectionEnergy;
+  else throw PyException("Invalid setting queried in Simulator.setSetting()");
+  if(ss.bad()) throw PyException("Invalid value string argument in Simulator.setSetting()");
+}
+
 
 
 SimRobotController Simulator::controller(int robot)
@@ -2998,16 +3375,6 @@ SimRobotController Simulator::controller(int robot)
 }
 
 
-SimRobotController Simulator::getController(const RobotModel& robot)
-{
-  static bool warned = false;
-  if(!warned) {
-    fprintf(stderr,"Simulator::getController() will be deprecated, please use controller() instead\n");
-    warned = true;
-  }
-  return controller(robot);
-}
-
 SimRobotController Simulator::controller(const RobotModel& robot)
 {
   SimRobotController c;
@@ -3017,25 +3384,34 @@ SimRobotController Simulator::controller(const RobotModel& robot)
   return c;
 }
 
+int SimBody::getID() const
+{
+  return objectID;
+}
+
 void SimBody::enable(bool enabled)
 {
+  if(!body) return;
   if(!enabled) dBodyDisable(body);
   else dBodyEnable(body);
 }
 
 bool SimBody::isEnabled()
 {
+  if(!body) return false;
   return dBodyIsEnabled(body) != 0;
 }
 
 void SimBody::enableDynamics(bool enabled)
 {
+  if(!body) return;
   if(!enabled) dBodySetKinematic(body);
   else dBodySetDynamic(body);
 }
 
 bool SimBody::isDynamicsEnabled()
 {
+  if(!body) return false;
   return dBodyIsKinematic(body) == 0;
 }
 
@@ -3100,13 +3476,44 @@ void SimBody::setTransform(const double R[9],const double t[3])
 void SimBody::getTransform(double out[9],double out2[3])
 {
   //out matrix is 3x3 column major, ODE matrices are 4x4 row major
-  if(!body) return;
+  if(!body) {
+    for(int i=0;i<9;i++) out[i]=0;
+    for(int i=0;i<3;i++) out2[i]=0;
+    out[0] = out[4] = out[8] = 1.0;
+    return;
+  }
   const dReal* t=dBodyGetPosition(body);
   const dReal* R=dBodyGetRotation(body);
   for(int i=0;i<3;i++) out2[i] = t[i];
   for(int i=0;i<3;i++)
     for(int j=0;j<3;j++)
       out[i+j*3] = R[i*4+j];
+}
+
+void SimBody::setObjectTransform(const double R[9],const double t[3])
+{
+  ODEObjectID id = sim->sim->WorldToODEID(objectID);
+  if(id.IsRigidObject()) sim->sim->odesim.object(id.index)->SetTransform(RigidTransform(Matrix3(R),Vector3(t)));
+  else if(id.IsRobot()) sim->sim->odesim.robot(id.index)->SetLinkTransform(id.bodyIndex,RigidTransform(Matrix3(R),Vector3(t)));
+  else setTransform(R,t);
+}
+
+void SimBody::getObjectTransform(double out[9],double out2[3])
+{
+  ODEObjectID id = sim->sim->WorldToODEID(objectID);
+  if(id.IsRigidObject()) {
+    RigidTransform T;
+    sim->sim->odesim.object(id.index)->GetTransform(T);
+    T.R.get(out);
+    T.t.get(out2);
+  }
+  else if(id.IsRobot()) {
+    RigidTransform T;
+    sim->sim->odesim.robot(id.index)->GetLinkTransform(id.bodyIndex,T);
+    T.R.get(out);
+    T.t.get(out2);
+  }
+  else getTransform(out,out2);
 }
 
 void SimBody::setCollisionPadding(double padding)
@@ -3154,40 +3561,11 @@ void SimBody::setSurface(const ContactParameters& res)
 }
 
 
-SimBody Simulator::getBody(const RobotModelLink& link)
-{
-  static bool warned = false;
-  if(!warned) {
-    fprintf(stderr,"Simulator::getBody() will be deprecated, please use body() instead\n");
-    warned = true;
-  }
-  return body(link);
-}
-
-SimBody Simulator::getBody(const RigidObjectModel& object)
-{
-  static bool warned = false;
-  if(!warned) {
-    fprintf(stderr,"Simulator::getBody() will be deprecated, please use body() instead\n");
-    warned = true;
-  }
-  return body(object);
-}
-
-SimBody Simulator::getBody(const TerrainModel& terrain)
-{
-  static bool warned = false;
-  if(!warned) {
-    fprintf(stderr,"Simulator::getBody() will be deprecated, please use body() instead\n");
-    warned = true;
-  }
-  return body(terrain);
-}
-
 SimBody Simulator::body(const RobotModelLink& link)
 {
   SimBody b;
   b.sim = this;
+  b.objectID = link.getID();
   b.body = sim->odesim.robot(link.robotIndex)->body(link.index);
   b.geometry = sim->odesim.robot(link.robotIndex)->triMesh(link.index);
   return b;
@@ -3197,6 +3575,7 @@ SimBody Simulator::body(const RigidObjectModel& object)
 {
   SimBody b;
   b.sim = this;
+  b.objectID = object.getID();
   b.body = sim->odesim.object(object.index)->body();
   b.geometry = sim->odesim.object(object.index)->triMesh();
   return b; 
@@ -3206,6 +3585,7 @@ SimBody Simulator::body(const TerrainModel& terrain)
 {
   SimBody b;
   b.sim = this;
+  b.objectID = terrain.getID();
   b.body = NULL;
   b.geometry = sim->odesim.terrainGeom(terrain.index);
   return b;
@@ -3286,8 +3666,8 @@ void SimRobotController::getSensedVelocity(vector<double>& dq)
   }
 }
 
-SimRobotSensor::SimRobotSensor(SensorBase* _sensor)
-  :sensor(_sensor)
+SimRobotSensor::SimRobotSensor(Robot* _robot,SensorBase* _sensor)
+  :robot(_robot),sensor(_sensor)
 {}
 
 std::string SimRobotSensor::name()
@@ -3316,31 +3696,52 @@ void SimRobotSensor::getMeasurements(std::vector<double>& out)
   sensor->GetMeasurements(out);
 }
 
-SimRobotSensor SimRobotController::getSensor(int sensorIndex)
+std::string SimRobotSensor::getSetting(const std::string& name)
 {
-  static bool warned = false;
-  if(!warned) {
-    fprintf(stderr,"SimRobotController::getSensor() will be deprecated, please use sensor() instead\n");
-    warned = true;
-  }
-  return sensor(sensorIndex);
+  if(!sensor) return std::string();
+  std::string val;
+  if(!sensor->GetSetting(name,val)) throw PyException("Setting "+name+" not supported");
+  return val;
 }
 
-SimRobotSensor SimRobotController::getNamedSensor(const std::string& name)
+void SimRobotSensor::setSetting(const std::string& name,const std::string& val)
 {
-  static bool warned = false;
-  if(!warned) {
-    fprintf(stderr,"SimRobotController::getNamedSensor() will be deprecated, please use sensor() instead\n");
-    warned = true;
-  }
-  return sensor(name.c_str());
+  if(!sensor) return;
+  if(!sensor->SetSetting(name,val)) throw PyException("Setting "+name+" not supported or value not formatted correctly");
 }
+
+void SimRobotSensor::drawGL()
+{
+  vector<double> measurements;
+  drawGL(measurements);
+}
+
+void SimRobotSensor::drawGL(const std::vector<double>& measurements)
+{
+  if(!sensor) return;
+  sensor->DrawGL(*robot,measurements);
+}
+
+void SimRobotSensor::kinematicSimulate(WorldModel& world,double dt)
+{
+  if(!sensor) return;
+  sensor->SimulateKinematic(*robot,*worlds[world.index]->world);
+  sensor->Advance(dt);
+}
+
+void SimRobotSensor::kinematicReset()
+{
+  if(!sensor) return;
+  sensor->Reset();
+}
+
+
 SimRobotSensor SimRobotController::sensor(int sensorIndex)
 {
   RobotSensors& sensors = controller->sensors;
   if(sensorIndex < 0 || sensorIndex >= (int)sensors.sensors.size())
-    return SimRobotSensor(NULL);
-  return SimRobotSensor(sensors.sensors[sensorIndex]);
+    return SimRobotSensor(NULL,NULL);
+  return SimRobotSensor(controller->robot,sensors.sensors[sensorIndex]);
 }
 
 SimRobotSensor SimRobotController::sensor(const char* name)
@@ -3350,7 +3751,7 @@ SimRobotSensor SimRobotController::sensor(const char* name)
   if(sensor==NULL) {
     fprintf(stderr,"Warning, sensor %s does not exist\n",name);
   }
-  return SimRobotSensor(sensor);
+  return SimRobotSensor(controller->robot,sensor);
 }
 
 std::vector<std::string> SimRobotController::commands()
@@ -3418,13 +3819,9 @@ bool SimRobotController::setSetting(const std::string& name,const std::string& v
 
 void EnablePathControl(RobotController* c)
 {
-  MyController* mc=dynamic_cast<MyController*>(c);
-  if(!mc) {
-    throw PyException("Not using the default manual override controller");
-  }
-  mc->override = false;
   PolynomialPathController* pc = GetPathController(c);
-  if(pc->path.elements.empty()) {
+  MyController* mc=dynamic_cast<MyController*>(c);
+  if(pc->path.elements.empty() || mc->override) {
     Config q;
     if(mc->GetCommandedConfig(q)) {
       pc->SetConstant(q);
@@ -3438,10 +3835,14 @@ void EnablePathControl(RobotController* c)
       }
     }
   }
+  mc->override = false;
 }
 
 void SimRobotController::setMilestone(const vector<double>& q)
 {
+  if(controller->robot->links.size() != q.size()) {
+    throw PyException("Invalid size of configuration");
+  }
   EnablePathControl(sim->sim->robotControllers[index]);
   Config qv(controller->robot->links.size(),&q[0]);
   stringstream ss;
@@ -3451,6 +3852,12 @@ void SimRobotController::setMilestone(const vector<double>& q)
 
 void SimRobotController::setMilestone(const vector<double>& q,const vector<double>& dq)
 {
+  if(controller->robot->links.size() != q.size()) {
+    throw PyException("Invalid size of configuration");
+  }
+  if(controller->robot->links.size() != dq.size()) {
+    throw PyException("Invalid size of velocity");
+  }
   EnablePathControl(sim->sim->robotControllers[index]);
   Config qv(controller->robot->links.size(),&q[0]);
   Config dqv(controller->robot->links.size(),&dq[0]);
@@ -3459,9 +3866,11 @@ void SimRobotController::setMilestone(const vector<double>& q,const vector<doubl
   controller->controller->SendCommand("set_qv",ss.str());
 }
 
-
 void SimRobotController::addMilestone(const vector<double>& q)
 {
+  if(controller->robot->links.size() != q.size()) {
+    throw PyException("Invalid size of configuration");
+  }
   EnablePathControl(sim->sim->robotControllers[index]);
   Config qv(controller->robot->links.size(),&q[0]);
   stringstream ss;
@@ -3471,6 +3880,9 @@ void SimRobotController::addMilestone(const vector<double>& q)
 
 void SimRobotController::addMilestoneLinear(const vector<double>& q)
 {
+  if(controller->robot->links.size() != q.size()) {
+    throw PyException("Invalid size of configuration");
+  }
   EnablePathControl(sim->sim->robotControllers[index]);
   Config qv(controller->robot->links.size(),&q[0]);
   stringstream ss;
@@ -3480,6 +3892,9 @@ void SimRobotController::addMilestoneLinear(const vector<double>& q)
 
 void SimRobotController::setLinear(const std::vector<double>& q,double dt)
 {
+  if(controller->robot->links.size() != q.size()) {
+    throw PyException("Invalid size of configuration");
+  }
   EnablePathControl(sim->sim->robotControllers[index]);
   PolynomialMotionQueue* mq = GetMotionQueue(controller->controller);
   mq->Cut(0);
@@ -3487,6 +3902,12 @@ void SimRobotController::setLinear(const std::vector<double>& q,double dt)
 }
 void SimRobotController::setCubic(const std::vector<double>& q,const std::vector<double>& v,double dt)
 {
+  if(controller->robot->links.size() != q.size()) {
+    throw PyException("Invalid size of configuration");
+  }
+  if(controller->robot->links.size() != v.size()) {
+    throw PyException("Invalid size of velocity");
+  }
   EnablePathControl(sim->sim->robotControllers[index]);
   PolynomialMotionQueue* mq = GetMotionQueue(controller->controller);
   mq->Cut(0);
@@ -3494,12 +3915,22 @@ void SimRobotController::setCubic(const std::vector<double>& q,const std::vector
 }
 void SimRobotController::addLinear(const std::vector<double>& q,double dt)
 {
+  if(controller->robot->links.size() != q.size()) {
+    throw PyException("Invalid size of configuration");
+  }
   EnablePathControl(sim->sim->robotControllers[index]);
   PolynomialMotionQueue* mq = GetMotionQueue(controller->controller);
   mq->AppendLinear(q,dt);
 }
+
 void SimRobotController::addCubic(const std::vector<double>& q,const std::vector<double>& v,double dt)
 {
+  if(controller->robot->links.size() != q.size()) {
+    throw PyException("Invalid size of configuration");
+  }
+  if(controller->robot->links.size() != v.size()) {
+    throw PyException("Invalid size of velocity");
+  }
   EnablePathControl(sim->sim->robotControllers[index]);
   PolynomialMotionQueue* mq = GetMotionQueue(controller->controller);
   mq->AppendCubic(q,v,dt);
@@ -3507,6 +3938,12 @@ void SimRobotController::addCubic(const std::vector<double>& q,const std::vector
 
 void SimRobotController::addMilestone(const vector<double>& q,const vector<double>& dq)
 {
+  if(controller->robot->links.size() != q.size()) {
+    throw PyException("Invalid size of configuration");
+  }
+  if(controller->robot->links.size() != dq.size()) {
+    throw PyException("Invalid size of velocity");
+  }
   EnablePathControl(sim->sim->robotControllers[index]);
   Config qv(controller->robot->links.size(),&q[0]);
   Config dqv(controller->robot->links.size(),&dq[0]);
@@ -3517,6 +3954,9 @@ void SimRobotController::addMilestone(const vector<double>& q,const vector<doubl
 
 void SimRobotController::setVelocity(const vector<double>& dq,double dt)
 {
+  if(controller->robot->links.size() != dq.size()) {
+    throw PyException("Invalid size of velocity");
+  }
   EnablePathControl(sim->sim->robotControllers[index]);
   Config qv(controller->robot->links.size(),&dq[0]);
   stringstream ss;
@@ -3603,17 +4043,17 @@ void SimRobotController::setPIDGains(const std::vector<double>& kP,const std::ve
   }
 }
 
-void SimRobotController::getPIDGains(std::vector<double>& kP,std::vector<double>& kI,std::vector<double>& kD)
+void SimRobotController::getPIDGains(std::vector<double>& kPout,std::vector<double>& kIout,std::vector<double>& kDout)
 {
   RobotMotorCommand& command = controller->command;
   int size = command.actuators.size();
-  kP.resize(size, 0.0);
-  kI.resize(size, 0.0);
-  kD.resize(size, 0.0);
+  kPout.resize(size, 0.0);
+  kIout.resize(size, 0.0);
+  kDout.resize(size, 0.0);
   for(size_t i=0;i<command.actuators.size();i++) {
-    kP[i] = command.actuators[i].kP;
-    kI[i] = command.actuators[i].kI;
-    kD[i] = command.actuators[i].kD;
+    kPout[i] = command.actuators[i].kP;
+    kIout[i] = command.actuators[i].kI;
+    kDout[i] = command.actuators[i].kD;
   }
 }
 
@@ -3623,6 +4063,8 @@ void SimRobotController::getPIDGains(std::vector<double>& kP,std::vector<double>
 
 
 
+
+/***************************  VISUALIZATION CODE ***************************************/
 
 
 bool Viewport::fromJson(const std::string& str)
@@ -3946,4 +4388,348 @@ void RobotPoser::getConditioned(const std::vector<double>& qref,std::vector<doub
   RobotPoseWidget* tw=dynamic_cast<RobotPoseWidget*>(&*widgets[index].widget);
   out.resize(tw->Pose().size());
   tw->Pose_Conditioned(Config(qref)).getCopy(&out[0]);
+}
+
+
+
+
+
+
+
+/***************************  STABILITY TESTING CODE ***************************************/
+
+void setFrictionConeApproximationEdges(int numEdges)
+{
+  if(numEdges < 3) throw PyException("Invalid number of friction cone approximation edges, must be at least 3");
+  gStabilityNumFCEdges = numEdges;
+}
+
+void Convert(const std::vector<std::vector<double > >& contacts,vector<ContactPoint>& cps)
+{
+  cps.resize(contacts.size());
+  for(size_t i=0;i<contacts.size();i++) {
+    if(contacts[i].size() != 7) throw PyException("Invalid size of contact point, must be in the format (x,y,z,nx,ny,nz,kFriction)");
+    if(contacts[i][6] < 0) throw PyException("Invalid contact point, negative friction coefficient");
+    cps[i].x.set(contacts[i][0],contacts[i][1],contacts[i][2]);
+    cps[i].n.set(contacts[i][3],contacts[i][4],contacts[i][5]);
+    cps[i].kFriction = contacts[i][6];
+  }
+}
+
+void Convert(const std::vector<std::vector<double > >& contacts,vector<ContactPoint2D>& cps)
+{
+  cps.resize(contacts.size());
+  for(size_t i=0;i<contacts.size();i++) {
+    if(contacts[i].size() != 4) throw PyException("Invalid size of contact point, must be in the format (x,y,angle,kFriction)");
+    if(contacts[i][3] < 0) throw PyException("Invalid contact point, negative friction coefficient");
+    cps[i].x.set(contacts[i][0],contacts[i][1]);
+    cps[i].n.set(Cos(contacts[i][2]),Sin(contacts[i][2]));
+    cps[i].kFriction = contacts[i][3];
+  }
+}
+
+void Convert(const std::vector<std::vector<double > >& contactPositions,const std::vector<std::vector<double > >& frictionCones,vector<CustomContactPoint>& cps)
+{
+  cps.resize(contactPositions.size());
+  for(size_t i=0;i<contactPositions.size();i++) {
+    if(contactPositions[i].size() != 3) throw PyException("contactPositions must be a list of 3-lists");
+    if(frictionCones[i].size() % 4 != 0) throw PyException("frictionCones elements must be a multiple of 4");
+    cps[i].x.set(contactPositions[i][0],contactPositions[i][1],contactPositions[i][2]);
+    cps[i].kFriction = 0.0;
+    cps[i].forceMatrix.resize(frictionCones[i].size()/4,3);
+    cps[i].forceOffset.resize(frictionCones[i].size()/4);
+    int k=0;
+    for(int j=0;j<cps[i].forceMatrix.m;j++,k+=4) {
+      cps[i].forceMatrix(j,0) = frictionCones[i][k];
+      cps[i].forceMatrix(j,1) = frictionCones[i][k+1];
+      cps[i].forceMatrix(j,2) = frictionCones[i][k+2];
+      cps[i].forceOffset[j] = frictionCones[i][k+3];
+    }
+  }
+}
+
+void Convert(const std::vector<std::vector<double > >& contactPositions,const std::vector<std::vector<double > >& frictionCones,vector<CustomContactPoint2D>& cps)
+{
+  cps.resize(contactPositions.size());
+  for(size_t i=0;i<contactPositions.size();i++) {
+    if(contactPositions[i].size() != 2) throw PyException("contactPositions must be a list of 2-lists");
+    if(frictionCones[i].size() % 3 != 0) throw PyException("frictionCones elements must be a multiple of 3");
+    cps[i].x.set(contactPositions[i][0],contactPositions[i][1]);
+    cps[i].kFriction = 0.0;
+    cps[i].forceMatrix.resize(frictionCones[i].size()/3,2);
+    cps[i].forceOffset.resize(frictionCones[i].size()/3);
+    int k=0;
+    for(int j=0;j<cps[i].forceMatrix.m;j++,k+=3) {
+      cps[i].forceMatrix(j,0) = frictionCones[i][k];
+      cps[i].forceMatrix(j,1) = frictionCones[i][k+1];
+      cps[i].forceOffset[j] = frictionCones[i][k+2];
+    }
+  }
+}
+
+bool forceClosure(const std::vector<std::vector<double > >& contacts)
+{
+  vector<ContactPoint> cps;
+  Convert(contacts,cps);
+  return TestForceClosure(cps,gStabilityNumFCEdges);
+}
+
+bool forceClosure(const std::vector<std::vector<double> >& contactPositions,const std::vector<std::vector<double > >& frictionCones)
+{
+  vector<CustomContactPoint> cps;
+  Convert(contactPositions,frictionCones,cps);
+  return TestForceClosure(cps);
+}
+
+bool forceClosure2D(const std::vector<std::vector<double > >& contacts)
+{
+  vector<ContactPoint2D> cps;
+  Convert(contacts,cps);
+  return TestForceClosure(cps);
+}
+
+bool forceClosure2D(const std::vector<std::vector<double > >& contactPositions,const std::vector<std::vector<double> >& frictionCones)
+{
+  vector<CustomContactPoint2D> cps;
+  Convert(contactPositions,frictionCones,cps);
+  return TestForceClosure(cps);
+}
+
+PyObject* ToPy2(const vector<Vector3>& x)
+{
+  PyObject* ls = PyList_New(x.size());
+  PyObject* pItem;
+  if(ls == NULL) {
+    goto fail;
+  }
+
+  for(size_t i = 0; i < x.size(); i++) {
+    pItem = ::ToPy(x[i]);
+    if(pItem == NULL)
+      goto fail;
+    PyList_SetItem(ls, i, pItem);
+  }
+
+  return ls;
+
+  fail:
+  Py_XDECREF(ls);
+  throw PyException("Failure during ToPy");
+  return NULL;
+}
+
+PyObject* ToPy2(const vector<Vector2>& x)
+{
+  PyObject* ls = PyList_New(x.size());
+  PyObject* pItem;
+  if(ls == NULL) {
+    goto fail;
+  }
+
+  for(size_t i = 0; i < x.size(); i++) {
+    pItem = ::ToPy(x[i]);
+    if(pItem == NULL)
+      goto fail;
+    PyList_SetItem(ls, i, pItem);
+  }
+
+  return ls;
+
+  fail:
+  Py_XDECREF(ls);
+  throw PyException("Failure during ToPy");
+  return NULL;
+}
+
+
+PyObject* comEquilibrium(const std::vector<std::vector<double> >& contacts,const vector<double>& fext,PyObject* com)
+{
+  if(fext.size() != 3) throw PyException("Invalid external force, must be a 3-list");
+  vector<ContactPoint> cps;
+  Convert(contacts,cps);
+  if(com == Py_None) {
+    //test all 
+    bool res=TestAnyCOMEquilibrium(cps,Vector3(fext[0],fext[1],fext[2]),gStabilityNumFCEdges);
+    if(res) 
+      Py_RETURN_TRUE;
+    else
+      Py_RETURN_FALSE;
+  }
+  Vector3 vcom;
+  if(!FromPy(com,vcom)) throw PyException("Could not convert COM to a 3-list of floats");
+  vector<Vector3> forces(cps.size());
+  if(TestCOMEquilibrium(cps,Vector3(fext[0],fext[1],fext[2]),gStabilityNumFCEdges,vcom,forces)) {
+    return ToPy2(forces);
+  }
+  Py_RETURN_NONE;
+}
+
+PyObject* comEquilibrium(const std::vector<std::vector<double> >& contactPositions,const std::vector<std::vector<double> >& frictionCones,const vector<double>& fext,PyObject* com)
+{
+  if(fext.size() != 3) throw PyException("Invalid external force, must be a 3-list");
+  vector<CustomContactPoint> cps;
+  Convert(contactPositions,frictionCones,cps);
+  if(com == Py_None) {
+    //test all 
+    bool res=TestAnyCOMEquilibrium(cps,Vector3(fext[0],fext[1],fext[2]));
+    if(res) 
+      Py_RETURN_TRUE;
+    else
+      Py_RETURN_FALSE;
+  }
+  Vector3 vcom;
+  if(!FromPy(com,vcom)) throw PyException("Could not convert COM to a 3-list of floats");
+  vector<Vector3> forces(cps.size());
+  if(TestCOMEquilibrium(cps,Vector3(fext[0],fext[1],fext[2]),vcom,forces)) {
+    return ToPy2(forces);
+  }
+  Py_RETURN_NONE;
+}
+
+
+PyObject* comEquilibrium2D(const std::vector<std::vector<double> >& contacts,const vector<double>& fext,PyObject* com)
+{
+  if(fext.size() != 2) throw PyException("Invalid external force, must be a 2-list");
+  vector<ContactPoint2D> cps;
+  Convert(contacts,cps);
+  if(com == Py_None) {
+    //test all 
+    bool res=TestAnyCOMEquilibrium(cps,Vector2(fext[0],fext[1]));
+    if(res) 
+      Py_RETURN_TRUE;
+    else
+      Py_RETURN_FALSE;
+  }
+  Vector2 vcom;
+  if(!FromPy(com,vcom)) throw PyException("Could not convert COM to a 2-list of floats");
+  vector<Vector2> forces(cps.size());
+  if(TestCOMEquilibrium(cps,Vector2(fext[0],fext[1]),vcom,forces)) {
+    return ToPy2(forces);
+  }
+  Py_RETURN_NONE;
+}
+
+PyObject* comEquilibrium2D(const std::vector<std::vector<double> >& contactPositions,const std::vector<std::vector<double> >& frictionCones,const vector<double>& fext,PyObject* com)
+{
+  if(fext.size() != 2) throw PyException("Invalid external force, must be a 2-list");
+  vector<CustomContactPoint2D> cps;
+  Convert(contactPositions,frictionCones,cps);
+  if(com == Py_None) {
+    //test all 
+    bool res=TestAnyCOMEquilibrium(cps,Vector2(fext[0],fext[1]));
+    if(res) 
+      Py_RETURN_TRUE;
+    else
+      Py_RETURN_FALSE;
+  }
+  Vector2 vcom;
+  if(!FromPy(com,vcom)) throw PyException("Could not convert COM to a 2-list of floats");
+  vector<Vector2> forces(cps.size());
+  if(TestCOMEquilibrium(cps,Vector2(fext[0],fext[1]),vcom,forces)) {
+    return ToPy2(forces);
+  }
+  Py_RETURN_NONE;
+}
+
+
+PyObject* supportPolygon(const std::vector<std::vector<double> >& contacts)
+{
+  vector<ContactPoint> cps;
+  Convert(contacts,cps);
+  SupportPolygon sp;
+  if(!sp.Set(cps,Vector3(0,0,-1),gStabilityNumFCEdges)) throw PyException("Numerical problem calculating support polygon?");
+  if(sp.vertices.empty()) {
+    //empty support polygon
+    PyObject* res = PyList_New(1);
+    PyObject* invalid = Py_BuildValue("[fff]",0.0,0.0,-1.0);
+    PyList_SetItem(res,0,invalid);
+    return res;
+  }
+  PyObject* res = PyList_New(sp.planes.size());
+  for(size_t i=0;i<sp.planes.size();i++) {
+    PyObject* plane = Py_BuildValue("[fff]",sp.planes[i].normal.x,sp.planes[i].normal.y,sp.planes[i].offset);
+    PyList_SetItem(res,i,plane);
+  }
+  return res;
+}
+
+/// A fancy version of the normal supportPolygon test.
+/// contactPositions is a list of 3-lists giving the contact point positions. 
+/// The i'th element in the list frictionCones has length (k*4), and gives the contact
+/// force constraints (ax,ay,az,b) where ax*fx+ay*fy+az*fz <= b limits the contact force
+/// (fx,fy,fz) at the i'th contact.  Each of the k 4-tuples is laid out sequentially per-contact.
+/// 
+/// The return value is a list of 3-tuples giving the sorted plane boundaries of the polygon.
+/// The format of a plane is (nx,ny,ofs) where (nx,ny) are the outward facing normals, and
+/// ofs is the offset from 0.  In other words to test stability of a com [x,y], you can test
+/// whether dot([nx,ny],[x,y]) <= ofs  for all planes.
+PyObject* supportPolygon(const std::vector<std::vector<double> >& contactPositions,const std::vector<std::vector<double> >& frictionCones)
+{
+  vector<CustomContactPoint> cps;
+  Convert(contactPositions,frictionCones,cps);
+  SupportPolygon sp;
+  if(!sp.Set(cps,Vector3(0,0,-1))) throw PyException("Numerical problem calculating support polygon?");
+  if(sp.vertices.empty()) {
+    //empty support polygon
+    PyObject* res = PyList_New(1);
+    PyObject* invalid = Py_BuildValue("[fff]",0.0,0.0,-1.0);
+    PyList_SetItem(res,0,invalid);
+    return res;
+  }
+  PyObject* res = PyList_New(sp.planes.size());
+  for(size_t i=0;i<sp.planes.size();i++) {
+    PyObject* plane = Py_BuildValue("[fff]",sp.planes[i].normal.x,sp.planes[i].normal.y,sp.planes[i].offset);
+    PyList_SetItem(res,i,plane);
+  }
+  return res;
+}
+
+
+/// Calculates the support polygon (interval)  for a given set of contacts and a downward
+/// external force (0,-g). A contact point is given by a list of 4 floats, [x,y,theta,k] as usual.
+/// 
+/// The return value is a 2-tuple giving the min / max extents of the support polygon.
+/// If they are both infinite, the support polygon is empty.
+PyObject* supportPolygon2D(const std::vector<std::vector<double> >& contacts)
+{
+  throw PyException("2D support polygons not implemented yet");
+}
+
+PyObject* supportPolygon2D(const std::vector<std::vector<double> >& contacts,const std::vector<std::vector<double> >& frictionCones)
+{
+  throw PyException("2D support polygons not implemented yet");
+}
+
+PyObject* equilibriumTorques(const RobotModel& robot,const std::vector<std::vector<double> >& contacts,const std::vector<int>& links,const std::vector<double>& fext,const std::vector<double>& internalTorques,double norm)
+{
+  if(robot.robot == NULL) throw PyException("Called with empty robot");
+  if(fext.size() != 3) throw PyException("Invalid external force, must be a 3-list");
+  if(!internalTorques.empty()) {
+    if(internalTorques.size() != robot.robot->links.size())
+      throw PyException("Invalid number of internal torques specified");
+  }
+  vector<ContactPoint> cps;
+  CustomContactFormation formation;
+  Convert(contacts,cps);
+  formation.links = links;
+  formation.contacts.resize(cps.size());
+  for(size_t i=0;i<cps.size();i++)
+    formation.contacts[i].set(cps[i],gStabilityNumFCEdges);
+  TorqueSolver ts(*robot.robot,formation);
+  ts.SetGravity(Vector3(fext[0],fext[1],fext[2]));
+  ts.SetNorm((norm == 0? Inf : norm));
+  bool weighted = true;
+  ts.Init(weighted);
+  if(!internalTorques.empty())
+    ts.internalForces.copy(internalTorques);
+  if(!ts.Solve()) {
+    Py_RETURN_NONE;
+  }
+  return Py_BuildValue("(NN)",ToPy(ts.t),ToPy(ts.f));
+}
+
+PyObject* equilibriumTorques(const RobotModel& robot,const std::vector<std::vector<double> >& contacts,const std::vector<int>& links,const vector<double>& fext,double norm)
+{
+  vector<double> internalTorques;
+  return ::equilibriumTorques(robot,contacts,links,fext,internalTorques,norm);
 }

@@ -1,4 +1,4 @@
-mesh "sphere.tri"
+mesh "sphere.off"
 geomscale 0.1 0.1 0.1
 mass 1
 autoMass
