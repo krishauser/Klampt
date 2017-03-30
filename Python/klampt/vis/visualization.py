@@ -2681,7 +2681,8 @@ def _show():
         _current_window = 0
     if not _thread_running:
         signal.signal(signal.SIGINT, signal.SIG_DFL)
-        if _PyQtAvailable:
+        if _PyQtAvailable and False:
+            #for some reason, QThread doesn't allow for mouse events to be posted?
             thread = MyQThread(_run_app_thread)
             thread.start()
         else:
