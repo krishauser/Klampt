@@ -541,8 +541,6 @@
    <property name="text">
     <string>Reload File</string>
    </property>
-<<<<<<< HEAD
-=======
    <property name="shortcut">
     <string>Ctrl+R</string>
    </property>
@@ -559,7 +557,6 @@
    <property name="text">
     <string>Print Configuration</string>
    </property>
->>>>>>> v0.7
   </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
@@ -975,8 +972,6 @@
     </hint>
    </hints>
   </connection>
-<<<<<<< HEAD
-=======
   <connection>
    <sender>actionROS_Broadcast</sender>
    <signal>toggled(bool)</signal>
@@ -1009,7 +1004,6 @@
     </hint>
    </hints>
   </connection>
->>>>>>> v0.7
  </connections>
  <slots>
   <slot>ShowHelp()</slot>
@@ -1034,10 +1028,7 @@
   <slot>LoadFile()</slot>
   <slot>SetSensors(bool)</slot>
   <slot>ReloadFile()</slot>
-<<<<<<< HEAD
-=======
   <slot>SetROS(bool)</slot>
   <slot>PrintConfig()</slot>
->>>>>>> v0.7
  </slots>
 </ui>

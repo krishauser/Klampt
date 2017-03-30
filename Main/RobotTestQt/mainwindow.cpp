@@ -237,10 +237,6 @@ void MainWindow::LoadFile(){
 }
 
 void MainWindow::ReloadFile(){
-<<<<<<< HEAD
-  printf("MainWindow::ReloadFile\n");
-=======
->>>>>>> v0.7
     gui->ReloadFile();
 }
 
