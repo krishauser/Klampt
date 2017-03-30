@@ -1,6 +1,8 @@
 # Make the RobotPose Qt program
 CMAKE_MINIMUM_REQUIRED(VERSION 2.6.4)
-cmake_policy(SET CMP0053 OLD)
+if(POLICY CMP0053)
+  cmake_policy(SET CMP0053 OLD)
+endif(POLICY CMP0053)
 PROJECT(RobotPose)
 
 #Building from within Main/[AppName] folder
