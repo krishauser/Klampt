@@ -1,5 +1,6 @@
 from ..robotsim import *
 from ..model import map
+from simulation import SimpleSimulator
 import time
 
 
@@ -35,13 +36,17 @@ def doSim(world,duration,initialCondition,
           returnItems=None,trace=False,
           simDt=0.01,simInit=None,simStep=None,simTerm=None):
     """Runs a simulation for a given initial condition of a world.
+
     Arguments:
     - world: the world
     - duration: the maximum duration of simulation, in seconds
     - initialCondition: a dictionary mapping named items to values.
-      Each named items is specified by a path as used by the map module, e.g.
+      Each named item is specified by a path as used by the map module, e.g.
       'robot[0].config[4]'.  See the documentation for map.get_item()/
       map.set_item() for details.
+
+      Special items include 'args' which is a tuple provided to each simInit,
+      simStep, and simTerm call.
     - returnItems (optional): a list of named items to return in the final
       state of the simulation.  By default returns everything that is
       variable in the simulator (simulation time, robot and rigid object
@@ -58,9 +63,13 @@ def doSim(world,duration,initialCondition,
     - simTerm (optional): a function f(sim) that returns True if the simulation
       should terminate early.  Called on every outer simulation loop.
 
-    Return value is the list of final states upon termination.  This
-    takes the form of a dictionary mapping named items (specified by
-    the returnItems argument) to their values.
+    Return value is the final state of each returned item upon termination. 
+    This takes the form of a dictionary mapping named items (specified by
+    the returnItems argument) to their values. 
+    Additional returned items are:
+    - 'status', which gives the status string of the simulation
+    - 'time', which gives the time of the simulation, in s
+    - 'wall_clock_time', which gives the time elapsed while computing the simulation, in s
     """
     if returnItems == None:
         #set up default return items
@@ -79,39 +88,55 @@ def doSim(world,duration,initialCondition,
             returnItems.append('robots['+str(i)+'].actualVelocity')
             returnItems.append('robots['+str(i)+'].actualTorques')
     initCond = getWorldSimState(world)
+    args = ()
     for k,v in initialCondition.iteritems():
-        map.set_item(world,k,v)
-    sim = Simulator(world)
-    if simInit: simInit(sim)
+        if k is not 'args':
+            map.set_item(world,k,v)
+        else:
+            args = v
+    sim = SimpleSimulator(world)
+    if simInit: simInit(sim,*args)
     assert simDt > 0,"Time step must be positive"
     res = dict()
     if trace:
         for k in returnItems:
             res[k] = [map.get_item(sim,k)]
+        res['status'] = [sim.getStatusString()]
     print "klampt.batch.doSim(): Running simulation for",duration,"s"
     t0 = time.time()
     t = 0
+    worst_status = 0
     while t < duration:
-        sim.updateWorld()
-        if trace:
-            for k in returnItems:
-                res[k].append(map.get_item(sim,k))
-        if simTerm and simTerm(sim)==True:
+        if simTerm and simTerm(sim,*args)==True:
             if not trace:
                 for k in returnItems:
                     res[k] = map.get_item(sim,k)
+                res['status']=sim.getStatusString(worst_status)
+                res['time']=t
+                res['wall_clock_time']=time.time()-t0
             #restore initial world state
             setWorldSimState(world,initCond)
             print "  Termination condition reached at",t,"s"
             print "  Computation time:",time.time()-t0
             return res
-        if simStep: simStep(sim)
+        if simStep: simStep(sim,*args)
         sim.simulate(simDt)
+        worst_status = max(worst_status,sim.getStatus())
+        if trace:
+            for k in returnItems:
+                res[k].append(map.get_item(sim,k))
+            res['status'].append(sim.getStatusString())
+            res['time']=t
+            res['wall_clock_time']=time.time()-t0
         t += simDt
-    sim.updateWorld()
     if not trace:
+        #just get the terminal stats
         for k in returnItems:
             res[k] = map.get_item(sim,k)
+        res['status']=sim.getStatusString(worst_status)
+        res['time']=t
+        res['wall_clock_time']=time.time()-t0
+
     print "  Done."
     print "  Computation time:",time.time()-t0
     #restore initial world state
@@ -183,8 +208,11 @@ def monteCarloSim(world,duration,initialConditionSamplers,N,returnItems,
         try:
             simRes = doSim(world,duration,initCond,returnItems,trace=False,
                            simDt=simDt,simInit=simInit,simStep=simStep,simTerm=simTerm)
-        except Exception:
+        except Exception as e:
             print "  Exception thrown on trial",sample
+            print "    what:",e
+            import traceback
+            traceback.print_exc()
             simRes = 'error'
         res.append((initCond,simRes))
     return res
