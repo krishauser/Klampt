@@ -220,6 +220,7 @@ void destroy()
   worldDeleteList.clear();
   sims.resize(0);
   worlds.resize(0);
+  ManagedGeometry::manager.Clear();
 }
 
 void setRandomSeed(int seed)

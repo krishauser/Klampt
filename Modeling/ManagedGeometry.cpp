@@ -8,6 +8,32 @@ using namespace Math3D;
 
 #define CACHE_DEBUG 0
 
+GeometryManager::GeometryManager()
+{
+
+}
+
+GeometryManager::~GeometryManager()
+{
+  if(!cache.empty())  {
+    fprintf(stderr,"~GeometryManager: Warning, destruction of global objects is out of order?\n");
+    for(std::map<std::string,GeometryList>::iterator i=cache.begin();i!=cache.end();i++) {
+      fprintf(stderr,"Destroying GeometryManager, have %d items left on name %s\n",(int)i->second.geoms.size(),i->first.c_str());
+    }
+  }
+  Clear();
+}
+
+void GeometryManager::Clear()
+{
+  for(std::map<std::string,GeometryList>::iterator i=cache.begin();i!=cache.end();i++) {
+    for(size_t j=0;j<i->second.geoms.size();j++)
+      i->second.geoms[j]->cacheKey.clear();
+  }
+  cache.clear();
+}
+
+
 ManagedGeometry::ManagedGeometry()
 {
   appearance = new GLDraw::GeometryAppearance;
@@ -86,7 +112,7 @@ bool ManagedGeometry::Load(const std::string& filename)
     geometry = new Geometry::AnyCollisionGeometry3D(*prev->geometry);
     appearance = prev->appearance;
     appearance->geom = geometry;
-    cachedGeoms[filename].geoms.push_back(this);
+    manager.cache[filename].geoms.push_back(this);
 #if CACHE_DEBUG
     printf("ManagedGeometry: adding a duplicate of %s to cache.\n",filename.c_str());
 #endif
@@ -98,7 +124,7 @@ bool ManagedGeometry::Load(const std::string& filename)
     printf("ManagedGeometry: adding %s to cache.\n",filename.c_str());
 #endif
     cacheKey = filename;
-    cachedGeoms[filename].geoms.push_back(this);
+    manager.cache[filename].geoms.push_back(this);
     return true;
   }
   return false;
@@ -177,8 +203,8 @@ bool ManagedGeometry::LoadNoCache(const std::string& filename)
 
 ManagedGeometry* ManagedGeometry::IsCached(const std::string& filename)
 {
-  std::map<std::string,ManagedGeometry::GeometryInfo>::const_iterator i=cachedGeoms.find(filename);
-  if(i==cachedGeoms.end()) return NULL;
+  std::map<std::string,GeometryManager::GeometryList>::const_iterator i=manager.cache.find(filename);
+  if(i==manager.cache.end()) return NULL;
   if(i->second.geoms.empty()) return NULL;
 #if CACHE_DEBUG
   printf("ManagedGeometry: retreiving %s from cache.\n",filename.c_str());
@@ -207,14 +233,14 @@ void ManagedGeometry::AddToCache(const std::string& filename)
   printf("ManagedGeometry: adding %s to cache.\n",filename.c_str());
 #endif
   cacheKey = filename;
-  cachedGeoms[cacheKey].geoms.push_back(this);
+  manager.cache[cacheKey].geoms.push_back(this);
 }
 
 void ManagedGeometry::RemoveFromCache()
 {
   if(cacheKey.empty()) return;
-  std::map<std::string,ManagedGeometry::GeometryInfo>::iterator i=cachedGeoms.find(cacheKey);
-  if(i==cachedGeoms.end()) {
+  std::map<std::string,GeometryManager::GeometryList>::iterator i=manager.cache.find(cacheKey);
+  if(i==manager.cache.end()) {
     printf("ManagedGeometry::RemoveFromCache(): warning, item %s was not previously cached?\n",cacheKey.c_str());
     cacheKey.clear();
     return;
@@ -228,7 +254,7 @@ void ManagedGeometry::RemoveFromCache()
     if(i->second.geoms[j] == this) {
       i->second.geoms.erase(i->second.geoms.begin()+j);
       if(i->second.geoms.empty()) {
-        cachedGeoms.erase(i);
+        manager.cache.erase(i);
 #if CACHE_DEBUG
         printf("ManagedGeometry: removing %s from cache.\n",cacheKey.c_str());
 #endif
@@ -266,8 +292,8 @@ ManagedGeometry::AppearancePtr ManagedGeometry::Appearance() const
 bool ManagedGeometry::IsAppearanceShared() const
 { 
   if(cacheKey.empty()) return false;
-  std::map<std::string,ManagedGeometry::GeometryInfo>::const_iterator i=cachedGeoms.find(cacheKey);
-  if(i==cachedGeoms.end()) 
+  std::map<std::string,GeometryManager::GeometryList>::const_iterator i=manager.cache.find(cacheKey);
+  if(i==manager.cache.end()) 
     return false;
   if(i->second.geoms.empty()) 
     return false;
@@ -293,7 +319,7 @@ const ManagedGeometry& ManagedGeometry::operator = (const ManagedGeometry& rhs)
   appearance->geom = geometry;
   cacheKey = rhs.cacheKey;
   if(!cacheKey.empty()) {
-    cachedGeoms[cacheKey].geoms.push_back(this);
+    manager.cache[cacheKey].geoms.push_back(this);
   }
 
   return *this;
@@ -325,4 +351,4 @@ bool ManagedGeometry::DynamicGeometryUpdate()
 }
 
 
-std::map<std::string,ManagedGeometry::GeometryInfo> ManagedGeometry::cachedGeoms;
+GeometryManager ManagedGeometry::manager;
