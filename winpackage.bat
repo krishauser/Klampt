@@ -1,6 +1,8 @@
 REM 
 REM script that builds and uploads everything on Windows Visual Studio 2015
 REM (assumes CMake is set up properly, Python is installed, etc)
+REM (assumes this is run on an administrator developer command prompt)
+REM (assumes zip and pscp command line tools are available.  See the GnuWin32 zip tool and PuTTy)
 
 REM configuration variables
 SET buildfolder=msvc
@@ -29,6 +31,7 @@ REM (python doesnt build right here...) if %errorlevel% neq 0 exit /b %errorleve
 
 REM build Klamp't Python bindings
 cd Python
+set VS90COMNTOOLS=%VS140COMNTOOLS%
 %python% setup.py build_ext
 if %errorlevel% neq 0 exit /b %errorlevel%
 %python% setup.py install
@@ -50,7 +53,7 @@ if %errorlevel% neq 0 exit /b %errorlevel%
 REM   debug
 mkdir Klampt-%klamptversion%.win32-deps-vs2015d
 cd Library
-for %I in (assimp--3.0.1270-sdk\lib\assimp_debug-dll_win32\* Assimp32d.dll  glpk_4_61.dll glpk_4_52.lib glui32d.lib "glui-2.36\src\msvc\Debug\_glui library.pdb" glut32.dll glew32.dll glew32.lib KrisLibraryd.lib ode_doubled.lib ode-0.14\lib\DebugDoubleLib\ode.pdb tinyxmld_STL.lib) do copy /Y %I ..\Klampt-%klamptversion%.win32-deps-vs2015d
+for %I in (assimp--3.0.1270-sdk\lib\assimp_debug-dll_win32\* Assimp32d.dll  glpk_4_61.dll glpk_4_61.lib glui32d.lib "glui-2.36\src\msvc\Debug\_glui library.pdb" glut32.dll glew32.dll glew32.lib KrisLibraryd.lib ode_doubled.lib ode-0.14\lib\DebugDoubleLib\ode.pdb tinyxmld_STL.lib) do copy /Y %I ..\Klampt-%klamptversion%.win32-deps-vs2015d
 if %errorlevel% neq 0 exit /b %errorlevel%
 cd ..\Klampt-%klamptversion%.win32-deps-vs2015d
 zip ..\Klampt-%klamptversion%.win32-deps-vs2015d.zip *
@@ -59,14 +62,14 @@ if %errorlevel% neq 0 exit /b %errorlevel%
 
 REM upload files to motion website
 cd %buildfolder%
-scp Klampt-%klamptversion%-win32.msi hauser@motion.pratt.duke.edu:software/
+pscp Klampt-%klamptversion%-win32.msi hauser@motion.pratt.duke.edu:software/
 if %errorlevel% neq 0 exit /b %errorlevel%
 cd ..
-scp Klampt-%klamptversion%.win32-deps-vs2015.zip hauser@motion.pratt.duke.edu:software/
-scp Klampt-%klamptversion%.win32-deps-vs2015d.zip hauser@motion.pratt.duke.edu:software/
+pscp Klampt-%klamptversion%.win32-deps-vs2015.zip hauser@motion.pratt.duke.edu:software/
+pscp Klampt-%klamptversion%.win32-deps-vs2015d.zip hauser@motion.pratt.duke.edu:software/
 if %errorlevel% neq 0 exit /b %errorlevel%
 cd Python\dist
-scp Klampt-%klamptversion%.win32-py2.7.exe hauser@motion.pratt.duke.edu:software/
+pscp Klampt-%klamptversion%.win32-py2.7.exe hauser@motion.pratt.duke.edu:software/
 cd ..\..\
 
 
