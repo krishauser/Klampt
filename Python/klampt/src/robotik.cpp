@@ -466,6 +466,19 @@ PyObject* IKSolver::solve(int iters,double tol)
     printf("IKSolver.solve(iters,tol) will be deprecated, use setMaxIters(iters)/setTolerance(tol) and solve() instead\n");
     warned=true;
   }
+  if(useJointLimits) {
+    getJointLimits(qmin,qmax);
+    for(size_t i=0;i<qmin.size();i++) {
+      if(robot.robot->q(i) < qmin[i] || robot.robot->q(i) > qmax[i]) {
+        printf("Joint limit exceeds on joint %i. Clamping to limit...\n", i);
+        if(robot.robot->q(i) < qmin[i]) {
+          robot.robot->q(i) = qmin[i];
+        } else {
+          robot.robot->q(i) = qmax[i];
+        }
+      }
+    }
+  }
   RobotIKFunction f(*robot.robot);
   vector<IKGoal> goals(objectives.size());
   for(size_t i=0;i<objectives.size();i++)
@@ -496,6 +509,19 @@ PyObject* IKSolver::solve(int iters,double tol)
 
 bool IKSolver::solve()
 {
+  if(useJointLimits) {
+    getJointLimits(qmin,qmax);
+    for(size_t i=0;i<qmin.size();i++) {
+      if(robot.robot->q(i) < qmin[i] || robot.robot->q(i) > qmax[i]) {
+        printf("Joint limit exceeds on joint %i. Clamping to limit...\n", i);
+        if(robot.robot->q(i) < qmin[i]) {
+          robot.robot->q(i) = qmin[i];
+        } else {
+          robot.robot->q(i) = qmax[i];
+        }
+      }
+    }
+  }
   RobotIKFunction f(*robot.robot);
   vector<IKGoal> goals(objectives.size());
   for(size_t i=0;i<objectives.size();i++)
