@@ -2762,9 +2762,9 @@ def _refreshDisplayLists(item):
 def _checkWindowCurrent(item):
     global _windows,_current_window,_world_to_window,_current_worlds
     _current_worlds = [w for w in _current_worlds if w() is not None]
-    print "Worlds active in current window",_current_window,":",[w().index for w in _current_worlds]
     assert not isinstance(item,int),"Need to have a full WorldModel instance"
     if isinstance(item,WorldModel):
+        print "Worlds active in current window",_current_window,":",[w().index for w in _current_worlds]
         if item not in _current_worlds:
             for w in _windows:
                 if item in w.active_worlds:
