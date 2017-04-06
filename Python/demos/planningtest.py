@@ -2,7 +2,7 @@ from klampt.plan import robotcspace
 from klampt.plan import cspace
 from klampt.plan import robotplanning
 from klampt.math import se3
-from klampt.vis import visualization
+from klampt import vis 
 from klampt.io import resource
 from klampt.model import ik
 from klampt.model import trajectory
@@ -45,22 +45,22 @@ def simplify(robot):
 robot = world.robot(0)
 #this line replaces the robot's normal geometry with bounding boxes.
 #it makes planning faster but sacrifices accuracy.  Uncomment the line
-#visualization.dialog() below to examine whether the simplified robot looks
+#vis.dialog() below to examine whether the simplified robot looks
 #ok
 if DO_SIMPLIFY:
     simplify(robot)
 
 #add the world elements individually to the visualization
-visualization.add("robot",robot)
+vis.add("robot",robot)
 for i in range(1,world.numRobots()):
-    visualization.add("robot"+str(i),world.robot(i))
+    vis.add("robot"+str(i),world.robot(i))
 for i in range(world.numRigidObjects()):
-    visualization.add("rigidObject"+str(i),world.rigidObject(i))
+    vis.add("rigidObject"+str(i),world.rigidObject(i))
 for i in range(world.numTerrains()):
-    visualization.add("terrain"+str(i),world.terrain(i))
+    vis.add("terrain"+str(i),world.terrain(i))
 #if you want to just see the robot in a pop up window...
 if DO_SIMPLIFY and DEBUG_SIMPLIFY:
-    visualization.dialog()
+    vis.dialog()
 
 #Automatic construction of space
 if not CLOSED_LOOP_TEST:
@@ -78,8 +78,8 @@ else:
     #TESTING: closed loop robot cspace
     collider = WorldCollider(world)
     obj = ik.objective(robot.link(robot.numLinks()-1),local=[0,0,0],world=[0.5,0,0.5])
-    visualization.add("IK goal",obj)
-    visualization.dialog()
+    vis.add("IK goal",obj)
+    vis.dialog()
     space = robotcspace.ClosedLoopRobotCSpace(robot,obj,collider)
     space.eps = 1e-3
     space.setup()
@@ -105,7 +105,7 @@ while True:
     else:
         break
 if cindex==0:
-    visualization.kill()
+    vis.kill()
     exit(0)
 
 configs = configs[:cindex]
@@ -207,9 +207,9 @@ if len(wholepath)>1:
     times = [i*5.0/(len(wholepath)-1) for i in range(len(wholepath))]
     traj = trajectory.RobotTrajectory(robot,times=times,milestones=wholepath)
     #show the path in the visualizer, repeating for 60 seconds
-    visualization.animate("robot",traj)
-    visualization.spin(60)
+    vis.animate("robot",traj)
+    vis.spin(60)
 else:
     print "Failed to generate a plan"
 
-visualization.kill()
+vis.kill()
