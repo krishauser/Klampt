@@ -1300,9 +1300,13 @@ class VisAppearance:
         if isinstance(self.item,VisPlot):
             compressThreshold = self.attributes.get('compress',_defaultCompressThreshold)
             duration = self.attributes.get('duration',5.)
-            self.swapDrawConfig()
+            for items in self.item.items:
+                if items.linkitem:
+                    items.linkitem.swapDrawConfig()
             self.item.update(t,duration,compressThreshold)
-            self.swapDrawConfig()
+            for items in self.item.items:
+                if items.linkitem:
+                    items.linkitem.swapDrawConfig()
 
     def swapDrawConfig(self):
         """Given self.drawConfig!=None, swaps out the item's curren
@@ -2158,6 +2162,8 @@ class VisualizationPlugin(glcommon.GLWidgetPlugin):
             #a list of milestones -- loop through them with 1s delay
             print "visualization.animate(): Making a Trajectory with unit durations between",len(animation),"milestones"
             animation = Trajectory(range(len(animation)),animation)
+        if isinstance(animation,HermiteTrajectory):
+            animation = animation.configTrajectory()
         item = self.getItem(name)
         item.animation = animation
         item.animationStartTime = self.currentAnimationTime
@@ -2762,7 +2768,9 @@ def _refreshDisplayLists(item):
 def _checkWindowCurrent(item):
     global _windows,_current_window,_world_to_window,_current_worlds
     _current_worlds = [w for w in _current_worlds if w() is not None]
-    assert not isinstance(item,int),"Need to have a full WorldModel instance"
+    if isinstance(item,int):
+        if not all(w.index != item for w in _current_worlds):
+            print "Item appears to be in a new world, but doesn't have a full WorldModel instance"
     if isinstance(item,WorldModel):
         print "Worlds active in current window",_current_window,":",[w().index for w in _current_worlds]
         if item not in _current_worlds:
