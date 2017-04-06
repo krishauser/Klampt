@@ -514,7 +514,8 @@ bool IKSolver::solve()
     const Real* usedQmax = (qmax.empty() ? &robot.robot->qMax[0] : &qmax[0]);
     for(size_t i=0;i<robot.robot->q.size();i++) {
       if(robot.robot->q(i) < usedQmin[i] || robot.robot->q(i) > usedQmax[i]) {
-        printf("IKSolver:: Joint limits on joint %i exceeded: %g <= %g <= %g. Clamping to limits...\n", i,usedQmin[i],robot.robot->q(i),usedQmax[i]);
+        if(robot.robot->q(i) < usedQmin[i]-Epsilon || robot.robot->q(i) > usedQmax[i] > Epsilon) 
+          printf("IKSolver:: Joint limits on joint %i exceeded: %g <= %g <= %g. Clamping to limits...\n", i,usedQmin[i],robot.robot->q(i),usedQmax[i]);
         robot.robot->q(i) = Clamp(robot.robot->q(i),usedQmin[i],usedQmax[i]);
       }
     }
