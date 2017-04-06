@@ -129,7 +129,7 @@ class Trajectory:
 		if i<0: return self.milestones[0]
 		elif i+1>=len(self.milestones): return self.milestones[-1]
 		#linear interpolate between milestones[i] and milestones[i+1]
-		return self.interpolate(self.milestones[i],self.milestones[i+1],u)
+		return self.interpolate(self.milestones[i],self.milestones[i+1],u,self.times[i+1]-self.times[i])
 
 	def deriv(self,t,endBehavior='halt'):
 		"""Evaluates the trajectory velocity using piecewise linear
@@ -138,18 +138,19 @@ class Trajectory:
 		i,u = self.getSegment(t,endBehavior)
 		if i<0: return [0.0]*len(self.milestones[0])
 		elif i+1>=len(self.milestones): return [0.0]*len(self.milestones[-1])
-		return vectorops.mul(self.difference(self.milestones[i+1],self.milestones[i],u),1.0/(self.times[i+1]-self.times[i]))
+		return self.difference(self.milestones[i+1],self.milestones[i],u,self.times[i+1]-self.times[i])
 
-	def interpolate(self,a,b,u):
+	def interpolate(self,a,b,u,dt):
 		"""Can override this to implement non-cartesian spaces.
-		Interpolates along the geodesic from a to b."""
+		Interpolates along the geodesic from a to b.  dt is the 
+		duration of the segment from a to b"""
 		return vectorops.interpolate(a,b,u)
 	
-	def difference(self,a,b,u):
+	def difference(self,a,b,u,dt):
 		"""Subclasses can override this to implement non-Cartesian
-		spaces.  Returns the derivative along the geodesic from b to
-		a."""
-		return vectorops.sub(a,b)
+		spaces.  Returns the time derivative along the geodesic from b to
+		a.  dt is the duration of the segment form a to b"""
+		return vectorops.mul(vectorops.sub(a,b),1.0/dt)
 	
 	def concat(self,suffix,relative=False,jumpPolicy='strict'):
 		"""Returns a new trajectory with another trajectory
@@ -190,20 +191,53 @@ class Trajectory:
 		milestones = self.milestones + suffix.milestones
 		return self.constructor()(times,milestones)
 
+	def insert(self,time):
+		"""Inserts a milestone and keyframe at the given time.  Returns the index of the new
+		milestone, or if a milestone already exists, then it returns that milestone index.
+
+		If the path is empty, the milestone is set to an empty list []."""
+		if len(self.times) == 0:
+			self.times = [time]
+			self.milestones = [[]]
+			return 0
+		i,u = self.getSegment(time)
+		if i < 0:
+			self.times.insert(0,time)
+			self.milestones.insert(0,self.milestones[0][:])
+		elif time <= self.times[0]:
+			if time < self.times[0]:
+				self.times.insert(0,time)
+				self.milestones.insert(0,self.milestones[0][:])
+			return 0
+		elif time >= self.times[-1]:
+			if time > self.times[-1]:
+				self.times.append(time)
+				self.milestones.append(self.milestones[-1][:])
+			return len(self.times)-1
+		elif u == 0:
+			return i
+		elif u == 1:
+			return i+1
+		else:
+			q = self.interpolate(self.milestones[i],self.milestones[i+1],u,self.times[i+1]-self.times[i])
+			self.times.insert(i,time)
+			self.milestones.insert(i,q)
+			return i
+
 	def split(self,time):
 		"""Returns a pair of trajectories obtained from splitting this
 		one at the given time"""
 		i,u = self.getSegment(time)
-		if time < 0:
+		if i < 0:
 			return self.constructor()(),self.constructor()()
-		if time <= self.times[0]:
+		elif time <= self.times[0]:
 			#split before start of trajectory
 			return self.constructor()([time],[self.milestones[0]]),self.constructor()([time]+self.times,[self.milestones[0]]+self.milestones)
-		if time >= self.times[-1]:
+		elif time >= self.times[-1]:
 			#split after end of trajectory
 			return self.constructor()(self.times+[time],self.milestones+[self.milestones[-1]]),self.constructor()([time],self.milestones[-1])
 		#split in middle of trajectory
-		splitpt = self.interpolate(self.milestones[i],self.milestones[i+1],u)
+		splitpt = self.interpolate(self.milestones[i],self.milestones[i+1],u,self.times[i+1]-self.times[i])
 		front = self.constructor()(self.times[:i+1],self.milestones[:i+1])
 		back = self.constructor()(self.times[i+1:],self.milestones[i+1:])
 		if u > 0:
@@ -311,7 +345,7 @@ class Trajectory:
 					if self.times[j] == t:
 						continue
 					x = res.eval(self.times[j])
-					if vectorops.norm(self.difference(x,self.milestones[j],0)) > tol:
+					if vectorops.norm(self.difference(x,self.milestones[j],0,1.0)) > tol:
 						#add it
 						res.times[-1] = self.times[j]
 						res.milestones[-1] = self.milestones[j]
@@ -338,12 +372,12 @@ class RobotTrajectory(Trajectory):
 	def __init__(self,robot,times=None,milestones=None):
 		Trajectory.__init__(self,times,milestones)
 		self.robot = robot
-	def interpolate(self,a,b,u):
+	def interpolate(self,a,b,u,dt):
 		return self.robot.interpolate(a,b,u)
-	def difference(self,a,b,u):
-		return self.robot.interpolateDeriv(b,a)
+	def difference(self,a,b,u,dt):
+		return vectorops.mul(self.robot.interpolateDeriv(b,a),1.0/dt)
 	def constructor(self):
-		return lambda time,milestones: RobotTrajectory(self.robot,time,milestones)
+		return lambda times=None,milestones=None: RobotTrajectory(self.robot,times,milestones)
 	def getLinkTrajectory(self,link,discretization=None):
 		"""Returns the SE3Trajectory corresponding to the link's pose along the robot's
 		trajectory.  If discretization = None, only the milestones are extracted.
@@ -365,14 +399,14 @@ class GeodesicTrajectory(Trajectory):
 	def __init__(self,geodesic,times=None,milestones=None):
 		self.geodesic = geodesic
 		Trajectory.__init__(self,times,milestones)
-	def interpolate(self,a,b,u):
+	def interpolate(self,a,b,u,dt):
 		return self.geodesic.interpolate(a,b,u)
-	def difference(self,a,b,u):
+	def difference(self,a,b,u,dt):
 		if u > 0.5:
 			#do this from the b side
-			return vectorops.mul(self.difference(b,a,1.0-u),-1.0)
-		x = self.interpolate(a,b,u)
-		return vectorops.mul(self.geodesic.difference(x,b),1.0/(1.0-u))
+			return vectorops.mul(self.difference(b,a,1.0-u,dt),-1.0/dt)
+		x = self.interpolate(a,b,u,dt)
+		return vectorops.mul(self.geodesic.difference(x,b),1.0/(dt*(1.0-u)))
 	def constructor(self):
 		return lambda times,milestones:GeodesicTrajectory(self.geodesic,times,milestones)
 
@@ -454,12 +488,41 @@ class SE3Trajectory(GeodesicTrajectory):
 	def constructor(self):
 		return SE3Trajectory
 
+class _HermiteConfigAdaptor(Trajectory):
+	def __init__(self,hermite):
+		self.hermite = hermite
+	def eval(self,t,endBehavior='halt'):
+		return self.hermite.eval_config(t,endBehavior)
+	def deriv(self,t,endBehavior='halt'):
+		return self.hermite.eval_velocity(t,endBehavior)
+	def accel(self,t,endBehavior='halt'):
+		return self.hermite.eval_accel(t,endBehavior)
+	def __getattr__(self,item):
+		if item in ['eval','deriv','accel']:
+			return self.__dict__[item]
+		hermite = self.__dict__['hermite']
+		hitem = getattr(hermite,item)
+		if item == 'milestones':
+			return [q[:len(q)/2] for q in hitem]
+		def methodadaptor(*args,**kwargs):
+			res = hitem(*args,**kwargs)
+			if isinstance(res,HermiteTrajectory):
+				return _HermiteConfigAdaptor(res)
+			elif hasattr(res,'__iter__'):
+				return [(_HermiteConfigAdaptor(v) if isinstance(v,HermiteTrajectory) else v) for v in res]
+			return res
+		if callable(hitem):
+			return methodadaptor
+		return hitem
+
 class HermiteTrajectory(Trajectory):
 	"""A trajectory whose milestones are given in phase space (x,dx).
 	
-	eval(t) is overloaded to just get the configuration, and deriv(t) is
-	overloaded to just get the velocity.  To obtain state, use
-	eval_state(t).  To get acceleration, use eval_accel(t).
+	eval_config(t) returns the configuration, and eval_velocity(t) justs
+	get the velocity, and to get acceleration, use eval_accel(t).
+
+	If you want to use one of these trajectories like a normal configuration-space
+	trajectory, so that eval() returns a configuration, call self.configTrajectory()
 	"""
 	def __init__(self,times=None,milestones=None,dmilestones=None):
 		"""If dmilestones is given, then milestones is interpreted
@@ -475,7 +538,10 @@ class HermiteTrajectory(Trajectory):
 			self.times = times
 			self.milestones = [q+dq for (q,dq) in zip(milestones,dmilestones)]
 
-	def makeSpline(self,waypointTrajectory):
+	def configTrajectory(self):
+		return _HermiteConfigAdaptor(self)
+
+	def makeSpline(self,waypointTrajectory,preventOvershoot=True):
 		"""Computes natural velocities for a standard configuration-
 		space Trajectory to make it smoother."""
 		velocities = []
@@ -487,9 +553,19 @@ class HermiteTrajectory(Trajectory):
 			v = vectorops.mul(vectorops.sub(t.milestones[1],t.milestones[0]),1.0/(t.times[1]-t.times[0]))
 			velocities.append(v)
 			velocities.append(v)
-		else :
+		else:
 			for i in range(1,len(waypointTrajectory.milestones)-1):
-				v = vectorops.mul(vectorops.sub(t.milestones[i+1],t.milestones[i]),1.0/(t.times[i+1]-t.times[i-1]))
+				v = vectorops.mul(vectorops.sub(t.milestones[i+1],t.milestones[i-1]),1.0/(t.times[i+1]-t.times[i-1]))
+				if preventOvershoot:
+					for j,(x,a,b) in enumerate(zip(t.milestones[i],t.milestones[i-1],t.milestones[i+1])):
+						if x <= min(a,b):
+							v[j] = 0.0
+						elif x >= max(a,b):
+							v[j] = 0.0
+						elif x + v[j]*3.0 <= min(a,b):
+							v[j] = 1.0/3.0*(min(a,b)-x)
+						elif x + v[j]*3.0 >= max(a,b):
+							v[j] = 1.0/3.0*(max(a,b)-x)
 				velocities.append(v)
 			#start velocity as quadratic
 			x2 = vectorops.madd(t.milestones[1],velocities[0],-1.0/3.0)
@@ -501,16 +577,6 @@ class HermiteTrajectory(Trajectory):
 			vn = vectorops.mul(vectorops.sub(t.milestones[-1],xn_1),3.0)
 			velocities = [v0]+velocities+[vn]
 		self.__init__(waypointTrajectory.times[:],waypointTrajectory.milestones,velocities)
-
-	def eval(self,t,endBehavior='halt'):
-		"""Returns just the configuration component of the result"""
-		res = Trajectory.eval(self,t,endBehavior)
-		return res[:len(res)/2]
-
-	def deriv(self,t,endBehavior='halt'):
-		"""Returns the derivative of configuration"""
-		res = Trajectory.eval(self,t,endBehavior)
-		return res[len(res)/2:]
 
 	def eval_state(self,t,endBehavior='halt'):
 		"""Returns the (configuration,velocity) state at time t."""
@@ -531,24 +597,171 @@ class HermiteTrajectory(Trajectory):
 		res = Trajectory.deriv(self,t,endBehavior)
 		return res[len(res)/2:]
 
-	def interpolate(self,a,b,u):
+	def interpolate(self,a,b,u,dt):
 		assert len(a)==len(b)
-		x1,v1 = a[:len(a)/2],a[len(a)/2:]
-		x2,v2 = b[:len(b)/2],b[len(b)/2:]
+		x1,v1 = a[:len(a)/2],vectorops.mul(a[len(a)/2:],dt)
+		x2,v2 = b[:len(b)/2],vectorops.mul(b[len(b)/2:],dt)
 		x = spline.hermite_eval(x1,v1,x2,v2,u)
-		dx = spline.hermite_deriv(x1,v1,x2,v2,u)
+		dx = vectorops.mul(spline.hermite_deriv(x1,v1,x2,v2,u),1.0/dt)
 		return x+dx
 	
-	def difference(self,a,b,u):
+	def difference(self,a,b,u,dt):
 		assert len(a)==len(b)
-		x1,v1 = a[:len(a)/2],a[len(a)/2:]
-		x2,v2 = b[:len(b)/2],b[len(b)/2:]
-		dx = spline.hermite_deriv(x1,v1,x2,v2,u,order=1)
-		ddx = spline.hermite_deriv(x1,v1,x2,v2,u,order=2)
+		x1,v1 = a[:len(a)/2],vectorops.mul(a[len(a)/2:],dt)
+		x2,v2 = b[:len(b)/2],vectorops.mul(b[len(b)/2:],dt)
+		dx = vectorops.mul(spline.hermite_deriv(x1,v1,x2,v2,u,order=1),1.0/dt)
+		ddx = vectorops.mul(spline.hermite_deriv(x1,v1,x2,v2,u,order=2),1.0/pow(dt,2))
 		return dx+ddx
 
 	def constructor(self):
 		return HermiteTrajectory
+
+def path_to_trajectory(path,velocities='trapezoidal',durations='auto',
+	zerotol=None,speed=1.0,dt=0.01,
+	startvel=0.0,endvel=0.0):
+	"""Converts an untimed path to a timed trajectory.
+
+	Arguments:
+	- path: a list of milestones, a trajectory, or a RobotTrajectory.  In the latter
+	  cases, if durations = 'path' then the durations are extracted from the trajectory's
+	  timing.
+	- velocities: the manner in which velocities are assigned along the path.
+	  * 'trapezoidal' (default): a trapezoidal velocity profile with fixed max velocity.
+	  * 'constant': the path is executed at fixed constant velocity
+	  * 'triangular': similar to trapezoidal but without any max velocity
+	  * 'parabolic': a parabolic curve (output is a Hermite spline)
+	  * 'cosine': velocities follow (1-cosine)/2
+	  * 'minimum-jerk': minimum jerk velocities
+	  * 'optimal': uses time scaling optimization. NOT IMPLEMENTED YET
+	- durations: affects how path segments are normalized by distance traveled
+	  * 'auto': automatically determined.  If path is a RobotTrajectory, the durations are
+	    determined to respect the robot's max velocity and acceleration.  Otherwise,
+	    uses the 'Linf' method
+	  * 'path': only valid if path is a Trajectory object.  Uses the timing in path.times.
+	  * 'L2': uses the L2 distance between subsequent milestones
+	  * 'Linf': uses the Linf distance between subsequent milestones
+	  * a list of floats: each segment is assigned a given distance
+	  * any callable function: assumed to be a function f(qa,qb) that assigns a distance to the
+	    segment qa->qb
+	- zerotol: determines how start/stop segments are determined.  If None, the trajectory only
+	  pauses at the start and end of the path.  If 0, it pauses at every milestone.  Otherwise,
+	  it pauses if the curvature at the milestone exceeds zerotol.
+	- speed: a speed multiplier applied to the resulting path
+	- dt: the resolution of the resulting trajectory.
+	- startvel, endvel: the starting and ending velocities of the path. Specified as multipliers
+	  of path[1]-path[0] and path[-1]-path[-2], respectively.  Must be nonnegative.  Might not be
+	  respected for some velocity profiles.
+	"""
+	if speed != 1.0:
+		assert speed > 0
+		res = path_to_trajectory(path,velocities,durations,
+			zerotol,1.0,0.01*speed,
+			startvel/speed,endvel/speed)
+		res.times = [t/speed for t in res.times]
+		return res
+
+	milestones = path
+	if isinstance(path,Trajectory):
+		milestones = path.milestones
+	_durations = None
+	if isinstance(durations,(list,tuple)):
+		_durations = durations
+	elif callable(durations):
+		_durations = [durations(a,b) for a,b in zip(milestones[:-1],milestones[1:])]
+	else:
+		if isinstance(path,Trajectory):
+			if durations == 'path':
+				_durations = [(b-a) for a,b in zip(path.times[:-1],path.times[1:])]
+		if _durations is None:
+			if isinstance(path,RobotTrajectory):
+				#determine from auto, L2, Linf, etc
+				if durations == 'auto':
+					#figure out from bounds and velocity profile
+					#TODO: use velocity / accel bounds
+					durations = 'Linf'
+			elif durations == 'auto':
+				durations = 'Linf'
+			if isinstance(durations,str):
+				durationfuncs = dict()
+				durationfuncs['L2'] = vectorops.distance
+				durationfuncs['Linf'] = lambda a,b:max(abs(u-v) for (u,v) in zip(a,b))
+				assert durations in durationfuncs,"Invalid duration function specified, valid values are: "+", ".join(durationfuncs.keys())
+				durations = durationfuncs[durations]
+				_durations = [durations(a,b) for a,b in zip(milestones[:-1],milestones[1:])]
+			else:
+				raise ValueError("Invalid durations specifier?")
+	assert _durations is not None,"Hmm... didn't assign durations properly?"
+	#by this time we have all milestones and durations
+	if zerotol is not None:
+		splits = [0]
+		#split the trajectory then reassemble it
+		for i in xrange(1,len(milestones)-1):
+			prev = milestones[i-1]
+			q = milestones[i]
+			next = milestones[i+1]
+			acc = vectorops.madd(vectorops.add(prev,next),q,-2.0)
+			if vectorops.norm(acc) > zerotol*(_durations[i]*_durations[i-1]):
+				splits.append(i)
+		splits.append(len(milestones)-1)
+		if len(splits) > 2:
+			res = None
+			for i in xrange(len(splits)-1):
+				a,b = splits[i],splits[i+1]
+				traj = path_to_trajectory(milestones[a:b+1],velocities,_durations[a:b],
+					None,1.0,dt)
+				if res is None:
+					res = traj
+				else:
+					res = res.concat(traj,relative=True)
+			return res
+	#canonical case:
+	#milestones and _durations are lists
+	#start and stop at beginning / end
+	#speed = 1
+	normalizedPath = Trajectory()
+	if isinstance(path,RobotTrajectory):
+		normalizedPath = RobotTrajectory(path.robot)
+	normalizedPath.milestones = milestones
+	normalizedPath.times = [0]
+	totaldistance = 0
+	for d in _durations:
+		totaldistance += d
+		normalizedPath.times.append(totaldistance)
+	assert dt > 0.0,"dt has to be positive"
+
+	if startvel != 0.0 or endvel != 0.0:
+		print "WARNING: respecting nonzero start/end velocity not implemented yet"
+
+	finalduration = totaldistance
+	if velocities == 'constant':
+		return normalizedPath
+	elif velocities == 'trapezoidal' or velocities == 'triangular':
+		easing = lambda t: 2*t**2 if t < 0.5 else 1.0-(2*(1.0-t)**2)
+		finalduration = math.sqrt(totaldistance)
+	elif velocities == 'cosine':
+		easing = lambda t: 0.5*(1.0-math.cos(t*math.pi))
+		finalduration = math.sqrt(totaldistance)
+	elif velocities == 'parabolic':
+		easing = lambda t: -2*t**3 + 3*t**2
+		finalduration = math.sqrt(totaldistance)
+	elif velocities == 'minimum-jerk':
+		easing = lambda t: 10.0*t**3 - 15.0*t**4 + 6.0*t**5 
+		finalduration = math.pow(totaldistance,1.0/3.0)
+	else:
+		raise NotImplementedError("Can't do velocity profile "+velocities+" yet")
+	res = normalizedPath.constructor()()
+	N = int(math.ceil(finalduration/dt))
+	dt = finalduration / N
+	res.times=[0.0]*(N+1)
+	res.milestones = [None]*(N+1)
+	res.milestones[0] = normalizedPath.milestones[0][:]
+	#print velocities,"easing:"
+	for i in xrange(1,N+1):
+		res.times[i] = float(i)/float(N)*finalduration
+		u = easing(float(i)/float(N))
+		#print float(i)/float(N),"->",u
+		res.milestones[i] = normalizedPath.eval(u*totaldistance)
+	return res
 
 
 def execute_path(path,controller,speed=1.0,smoothing=None,activeDofs=None):
@@ -558,10 +771,15 @@ def execute_path(path,controller,speed=1.0,smoothing=None,activeDofs=None):
 	- path: a list of milestones
 	- controller: a SimRobotController
 	- smoothing: any smoothing applied to the path.  Valid values are:
-	  * None: starts / stops at each milestone, moves in linear joint-space paths
-	  * 'spline': interpolates milestones smoothly with some differenced velocity
+	  * None: starts / stops at each milestone, moves in linear joint-space paths.
+	    Trapezoidal velocity profile used.
+	  * 'linear': interpolates milestones linearly with fixed duration.  Constant velocity
+	    profile used.
+	  * 'cubic': interpolates milestones with cubic spline with fixed duration.  Parabolic
+	    velocity profile used.  Starts/stops at each milestone.
+	  * 'spline': interpolates milestones smoothly with some differenced velocity.
 	  * 'ramp': starts / stops at each milestone, moves in minimum-time / minimum-
-	    acceleration paths.
+	    acceleration paths.  Trapezoidal velocity profile used.
 	- activeDofs: if not None, a list of dofs that are moved by the trajectory.  Each
 	  entry may be an integer or a string.
 	"""
@@ -578,12 +796,25 @@ def execute_path(path,controller,speed=1.0,smoothing=None,activeDofs=None):
 		return execute_path(liftedMilestones,controller,speed,smoothing)
 
 	if smoothing == None:
+		if speed != 1.0: raise ValueError("Can't specify speed with no smoothing")
 		controller.setMilestone(path[0])
 		for i in range(1,len(path)):
 			controller.addMilestoneLinear(path[i])
+	elif smoothing == 'linear':
+		dt = 1.0/speed
+		controller.setLinear(dt,path[0])
+		for i in range(1,len(path)):
+			controller.addLinear(dt,path[i])
+	elif smoothing == 'cubic':
+		dt = 1.0/speed
+		zero = [0.0]*len(path[0])
+		controller.addCubic(dt,path[0],zero)
+		for i in range(1,len(path)):
+			controller.addCubic(dt,path[i],zero)
 	elif smoothing == 'spline':
 		raise NotImplementedError("Spline interpolation")
 	elif smoothing == 'ramp':
+		if speed != 1.0: raise ValueError("Can't specify speed with ramp smoothing")
 		controller.setMilestone(path[0])
 		for i in range(1,len(path)):
 			controller.addMilestone(path[i])
