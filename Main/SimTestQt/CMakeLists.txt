@@ -31,7 +31,7 @@ IF(USE_QT5_APPS)
 
   # Define the app's UI and MOC items
   QT5_WRAP_UI(SimTest_UISrcs logoptions.ui mainwindow.ui driveredit.ui controllerdialog.ui)
-  QT5_WRAP_CPP(SimTest_MOCSrcs driveredit.h controllerdialog.h logoptions.h mainwindow.h qsimtestgui.h ../KlamptQt/qklamptdisplay.h ../KlamptQt/qtguibase.h)
+  QT5_WRAP_CPP(SimTest_MOCSrcs driveredit.h controllerdialog.h logoptions.h mainwindow.h qsimtestgui.h ../KlamptQt/qklamptguibase.h ../KlamptQt/qklamptdisplay.h ../KlamptQt/qtguibase.h)
   QT5_ADD_RESOURCES(SimTest_Resources ../KlamptQt/icons.qrc)
 ELSE(USE_QT5_APPS)
   SET(QT_USE_QTOPENGL TRUE)
@@ -40,12 +40,12 @@ ELSE(USE_QT5_APPS)
 
   # Define the app's UI and MOC items
   QT4_WRAP_UI(SimTest_UISrcs logoptions.ui mainwindow.ui driveredit.ui controllerdialog.ui)
-  QT4_WRAP_CPP(SimTest_MOCSrcs driveredit.h controllerdialog.h logoptions.h mainwindow.h qsimtestgui.h ../KlamptQt/qklamptdisplay.h ../KlamptQt/qtguibase.h)
+  QT4_WRAP_CPP(SimTest_MOCSrcs driveredit.h controllerdialog.h logoptions.h mainwindow.h qsimtestgui.h ../KlamptQt/qklamptguibase.h ../KlamptQt/qklamptdisplay.h ../KlamptQt/qtguibase.h)
   QT4_ADD_RESOURCES(SimTest_Resources ../KlamptQt/icons.qrc)
 ENDIF(USE_QT5_APPS)
 
 ##### Build target ####
-ADD_EXECUTABLE(SimTest main.cpp controllerdialog.cpp driveredit.cpp logoptions.cpp mainwindow.cpp ../KlamptQt/qklamptdisplay.cpp qsimtestgui.cpp ../KlamptQt/qtguibase.cpp ${SimTest_MOCSrcs} ${SimTest_UISrcs} ${SimTest_Resources})
+ADD_EXECUTABLE(SimTest main.cpp controllerdialog.cpp driveredit.cpp logoptions.cpp mainwindow.cpp ../KlamptQt/qklamptguibase.cpp ../KlamptQt/qklamptdisplay.cpp qsimtestgui.cpp ../KlamptQt/qtguibase.cpp ${SimTest_MOCSrcs} ${SimTest_UISrcs} ${SimTest_Resources})
 TARGET_LINK_LIBRARIES(SimTest ${KLAMPT_LIBRARIES} ${QT_LIBRARIES})
 
 install(TARGETS SimTest

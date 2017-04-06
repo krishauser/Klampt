@@ -30,7 +30,7 @@ IF(USE_QT5_APPS)
 
   # Define the app's UI and MOC items
   QT5_WRAP_UI(RobotTest_UISrcs collisionoutput.ui mainwindow.ui)
-  QT5_WRAP_CPP(RobotTest_MOCSrcs collisionoutput.h mainwindow.h ../KlamptQt/qklamptdisplay.h ../KlamptQt/qtguibase.h qrobottestgui.h)
+  QT5_WRAP_CPP(RobotTest_MOCSrcs collisionoutput.h mainwindow.h ../KlamptQt/qklamptguibase.h ../KlamptQt/qklamptdisplay.h ../KlamptQt/qtguibase.h qrobottestgui.h)
   QT5_ADD_RESOURCES(RobotTest_Resources ../KlamptQt/icons.qrc)
 ELSE(USE_QT5_APPS)
   SET(QT_USE_QTOPENGL TRUE)
@@ -39,12 +39,12 @@ ELSE(USE_QT5_APPS)
 
   # Define the app's UI and MOC items
   QT4_WRAP_UI(RobotTest_UISrcs collisionoutput.ui mainwindow.ui)
-  QT4_WRAP_CPP(RobotTest_MOCSrcs collisionoutput.h mainwindow.h ../KlamptQt/qklamptdisplay.h ../KlamptQt/qtguibase.h qrobottestgui.h)
+  QT4_WRAP_CPP(RobotTest_MOCSrcs collisionoutput.h mainwindow.h ../KlamptQt/qklamptguibase.h ../KlamptQt/qklamptdisplay.h ../KlamptQt/qtguibase.h qrobottestgui.h)
   QT4_ADD_RESOURCES(RobotTest_Resources ../KlamptQt/icons.qrc)
 ENDIF(USE_QT5_APPS)
 
 ##### Build target ####
-ADD_EXECUTABLE(RobotTest main.cpp collisionoutput.cpp mainwindow.cpp ../KlamptQt/qklamptdisplay.cpp ../KlamptQt/qtguibase.cpp qrobottestgui.cpp ${RobotTest_MOCSrcs} ${RobotTest_UISrcs} ${RobotTest_Resources})
+ADD_EXECUTABLE(RobotTest main.cpp collisionoutput.cpp mainwindow.cpp ../KlamptQt/qklamptguibase.cpp ../KlamptQt/qklamptdisplay.cpp ../KlamptQt/qtguibase.cpp qrobottestgui.cpp ${RobotTest_MOCSrcs} ${RobotTest_UISrcs} ${RobotTest_Resources})
 TARGET_LINK_LIBRARIES(RobotTest ${KLAMPT_LIBRARIES} ${QT_LIBRARIES})
 
 install(TARGETS RobotTest
