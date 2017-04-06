@@ -510,15 +510,12 @@ PyObject* IKSolver::solve(int iters,double tol)
 bool IKSolver::solve()
 {
   if(useJointLimits) {
-    getJointLimits(qmin,qmax);
-    for(size_t i=0;i<qmin.size();i++) {
-      if(robot.robot->q(i) < qmin[i] || robot.robot->q(i) > qmax[i]) {
-        printf("Joint limit exceeds on joint %i. Clamping to limit...\n", i);
-        if(robot.robot->q(i) < qmin[i]) {
-          robot.robot->q(i) = qmin[i];
-        } else {
-          robot.robot->q(i) = qmax[i];
-        }
+    const Real* usedQmin = (qmin.empty() ? &robot.robot->qMin[0] : &qmin[0]);
+    const Real* usedQmax = (qmax.empty() ? &robot.robot->qMax[0] : &qmax[0]);
+    for(size_t i=0;i<robot.robot->q.size();i++) {
+      if(robot.robot->q(i) < usedQmin[i] || robot.robot->q(i) > usedQmax[i]) {
+        printf("IKSolver:: Joint limits on joint %i exceeded: %g <= %g <= %g. Clamping to limits...\n", i,usedQmin[i],robot.robot->q(i),usedQmax[i]);
+        robot.robot->q(i) = Clamp(robot.robot->q(i),usedQmin[i],usedQmax[i]);
       }
     }
   }
