@@ -117,6 +117,8 @@ class SimRobotController
   RobotModel model();
   /// Sets the current feedback control rate
   void setRate(double dt);
+  /// Gets the current feedback control rate
+  double getRate();
 
   /// Returns the current commanded configuration
   void getCommandedConfig(std::vector<double>& out);

@@ -1794,6 +1794,10 @@ Retrieves the robot model associated with this controller. ";
 
 Sets the current feedback control rate. ";
 
+%feature("docstring")  SimRobotController::getRate "
+
+Gets the current feedback control rate. ";
+
 %feature("docstring")  SimRobotController::getCommandedConfig "
 
 Returns the current commanded configuration. ";

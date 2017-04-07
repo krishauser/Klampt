@@ -3631,6 +3631,11 @@ void SimRobotController::setRate(double dt)
   controller->controlTimeStep = dt;
 }
 
+double SimRobotController::getRate()
+{
+  return controller->controlTimeStep;
+}
+
 void SimRobotController::getCommandedConfig(vector<double>& q)
 {
   Vector qv;
