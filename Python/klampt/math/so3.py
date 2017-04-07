@@ -119,9 +119,8 @@ def moment(R):
     that e^[w] = R.  Equivalent to axis-angle representation with
     w/||w||=axis, ||w||=angle."""
     theta = angle(R)
-    if abs(theta-math.pi)<1e-2:
-        #can't do normal version because the scale factor reaches a singularity
-        #OR it's close enough to pi that this alternate technique has better numerical
+    if abs(theta-math.pi)<0.5:
+        #for values close to pi this alternate technique has better numerical
         #performance
         c = math.cos(theta)
         x2=(R[0]-c)/(1.0 - c)
