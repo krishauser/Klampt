@@ -3784,6 +3784,14 @@ class SimRobotController(_object):
         """
         return _robotsim.SimRobotController_setRate(self, *args)
 
+    def getRate(self):
+        """
+        getRate(SimRobotController self) -> double
+
+        Gets the current feedback control rate. 
+        """
+        return _robotsim.SimRobotController_getRate(self)
+
     def getCommandedConfig(self):
         """
         getCommandedConfig(SimRobotController self)
