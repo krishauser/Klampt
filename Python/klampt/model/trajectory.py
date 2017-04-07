@@ -554,18 +554,26 @@ class HermiteTrajectory(Trajectory):
 			velocities.append(v)
 			velocities.append(v)
 		else:
+			third = 1.0/3.0
 			for i in range(1,len(waypointTrajectory.milestones)-1):
 				v = vectorops.mul(vectorops.sub(t.milestones[i+1],t.milestones[i-1]),1.0/(t.times[i+1]-t.times[i-1]))
 				if preventOvershoot:
+					dtp = t.times[i]-t.times[i-1]
+					dtn = t.times[i]-t.times[i-1]
 					for j,(x,a,b) in enumerate(zip(t.milestones[i],t.milestones[i-1],t.milestones[i+1])):
 						if x <= min(a,b):
 							v[j] = 0.0
 						elif x >= max(a,b):
 							v[j] = 0.0
-						elif x + v[j]*3.0 <= min(a,b):
-							v[j] = 1.0/3.0*(min(a,b)-x)
-						elif x + v[j]*3.0 >= max(a,b):
-							v[j] = 1.0/3.0*(max(a,b)-x)
+						elif v[j] < 0 and x - v[j]*third*dtp >= a:
+							v[j] = 3.0/dtp*(x-a)
+						elif v[j] > 0 and x - v[j]*third*dtp <= a:
+							v[j] = 3.0/dtp*(x-a)
+						elif v[j] < 0 and x + v[j]*third*dtn < b:
+							v[j] = 3.0/dtn*(b-x)
+						elif v[j] > 0 and x + v[j]*third*dtn > b:
+							v[j] = 3.0/dtn*(b-x)
+						
 				velocities.append(v)
 			#start velocity as quadratic
 			x2 = vectorops.madd(t.milestones[1],velocities[0],-1.0/3.0)
@@ -616,8 +624,9 @@ class HermiteTrajectory(Trajectory):
 	def constructor(self):
 		return HermiteTrajectory
 
-def path_to_trajectory(path,velocities='trapezoidal',durations='auto',
-	zerotol=None,speed=1.0,dt=0.01,
+def path_to_trajectory(path,velocities='auto',timing='limited',smoothing='spline',
+	zerotol=None,vmax='auto',amax='auto',
+	speed=1.0,dt=0.01,
 	startvel=0.0,endvel=0.0):
 	"""Converts an untimed path to a timed trajectory.
 
@@ -626,70 +635,129 @@ def path_to_trajectory(path,velocities='trapezoidal',durations='auto',
 	  cases, if durations = 'path' then the durations are extracted from the trajectory's
 	  timing.
 	- velocities: the manner in which velocities are assigned along the path.
-	  * 'trapezoidal' (default): a trapezoidal velocity profile with fixed max velocity.
+	  * 'auto': if timing is limited, this is equivalent to 'constant'. Otherwise, this is equivalent
+	    to trapezoidal.
+	  * 'trapezoidal': a trapezoidal velocity profile with max acceleration and velocity.
+	    If timing is not 'limited' then this is the same as triangular
 	  * 'constant': the path is executed at fixed constant velocity
 	  * 'triangular': similar to trapezoidal but without any max velocity
 	  * 'parabolic': a parabolic curve (output is a Hermite spline)
 	  * 'cosine': velocities follow (1-cosine)/2
 	  * 'minimum-jerk': minimum jerk velocities
 	  * 'optimal': uses time scaling optimization. NOT IMPLEMENTED YET
-	- durations: affects how path segments are normalized by distance traveled
-	  * 'auto': automatically determined.  If path is a RobotTrajectory, the durations are
-	    determined to respect the robot's max velocity and acceleration.  Otherwise,
-	    uses the 'Linf' method
-	  * 'path': only valid if path is a Trajectory object.  Uses the timing in path.times.
-	  * 'L2': uses the L2 distance between subsequent milestones
-	  * 'Linf': uses the Linf distance between subsequent milestones
-	  * a list of floats: each segment is assigned a given distance
-	  * any callable function: assumed to be a function f(qa,qb) that assigns a distance to the
-	    segment qa->qb
+	- timing: affects how path timing between milestones is normalized.  The first step is to assign a
+	  'distance' indicating how much distance is being traveled.  After assigning distances, the overall
+	  length L of the path determines the duration T of the trajectory.  For constant velocity profiles, T=L. 
+	  For trapezoidal, triangular, parabolic, and cosine, T = sqrt(L).  For minimum-jerk, T = L^(1/3).
+	  * 'limited' (default): uses the vmax, amax variables along with the velocity profile
+	    to dynamically determine the duration assigned to each segment.
+	  * 'uniform': base timing between milestones is uniform (1/(|path|*speed))
+	  * 'path': only valid if path is a Trajectory object.  Uses the timing in path.times as the
+	    base timing.
+	  * 'L2': base timing is set proportional to L2 distance between milestones
+	  * 'Linf': base timing is set proportional to L-infinity distance between milestones
+	  * a list or tuple: the base timing is given in this list
+	  * callable function f(a,b): sets the normalization to the function f(a,b).
+	- smoothing: if 'spline', the geometric path is first smoothed before assigning times.  Otherwise, the
+	  geometric path is interpreted as a piecewise linear path.
 	- zerotol: determines how start/stop segments are determined.  If None, the trajectory only
 	  pauses at the start and end of the path.  If 0, it pauses at every milestone.  Otherwise,
 	  it pauses if the curvature at the milestone exceeds zerotol.
+	- vmax: only meaningful if timing=='limited'. Can be:
+	  * 'auto': either 1 or the robot's joint velocity limits if a RobotTrajectory is provided
+	  * a positive number: the L2 norm of the derivative of the result trajectory is limited to this value
+	  * a list of positive floats: the element-wise derivative of the result trajectory is limited
+	    to this value
+	- amax: only meaningful if timing=='limited'. Can be:
+	  * 'auto': either 4 or the robot's joint acceleration limits if a RobotTrajectory is provided
+	  * a positive number: the L2 norm of the acceleration of the result trajectory is limited to this value
+	  * a list of positive floats: the element-wise acceleration of the result trajectory is limited
+	    to this value.
 	- speed: a speed multiplier applied to the resulting path
 	- dt: the resolution of the resulting trajectory.
 	- startvel, endvel: the starting and ending velocities of the path. Specified as multipliers
 	  of path[1]-path[0] and path[-1]-path[-2], respectively.  Must be nonnegative.  Might not be
 	  respected for some velocity profiles.
 	"""
+	assert dt > 0.0,"dt has to be positive"
+	if vmax == 'auto' and timing == 'limited':
+		if isinstance(path,RobotTrajectory):
+			vmax = path.robot.getVelocityLimits()
+		else:
+			vmax = 1.0
+	if amax == 'auto' and timing == 'limited':
+		if isinstance(path,RobotTrajectory):
+			amax = path.robot.getAccelerationLimits()
+		else:
+			amax = 4.0
 	if speed != 1.0:
-		assert speed > 0
-		res = path_to_trajectory(path,velocities,durations,
-			zerotol,1.0,0.01*speed,
-			startvel/speed,endvel/speed)
-		res.times = [t/speed for t in res.times]
-		return res
-
+		dt *= speed
+		startvel /= speed
+		endvel /= speed
+					
 	milestones = path
 	if isinstance(path,Trajectory):
 		milestones = path.milestones
 	_durations = None
-	if isinstance(durations,(list,tuple)):
-		_durations = durations
-	elif callable(durations):
-		_durations = [durations(a,b) for a,b in zip(milestones[:-1],milestones[1:])]
+	if isinstance(timing,(list,tuple)):
+		_durations = timing
+	elif callable(timing):
+		_durations = [timing(a,b) for a,b in zip(milestones[:-1],milestones[1:])]
 	else:
 		if isinstance(path,Trajectory):
-			if durations == 'path':
+			if timing == 'path':
 				_durations = [(b-a) for a,b in zip(path.times[:-1],path.times[1:])]
 		if _durations is None:
-			if isinstance(path,RobotTrajectory):
-				#determine from auto, L2, Linf, etc
-				if durations == 'auto':
-					#figure out from bounds and velocity profile
-					#TODO: use velocity / accel bounds
-					durations = 'Linf'
-			elif durations == 'auto':
-				durations = 'Linf'
-			if isinstance(durations,str):
+			if timing == 'limited':
+				_durations = [0.0]*(len(milestones)-1)
+				for i in xrange(len(milestones)-1):
+					q,n = milestones[i],milestones[i+1]
+					if i == 0: p = q
+					else: p = milestones[i-1]
+					if i+2 == len(milestones): nn = n
+					else: nn = milestones[i+2]
+					if isinstance(path,Trajectory):
+						v = vectorops.mul(path.difference(p,n,0.5,1.0),0.5)
+						a1 = vectorops.sub(path.difference(q,n,0.,1.),path.difference(p,q,1.,1.))
+						a2 = vectorops.sub(path.difference(n,nn,0.,1.),path.difference(q,n,1.,1.))
+					else:
+						v = vectorops.mul(vectorops.sub(n,p),0.5)
+						a1 = vectorops.madd(vectorops.add(p,n),q,-2.0)
+						a2 = vectorops.madd(vectorops.add(q,nn),n,-2.0)
+					if hasattr(vmax,'__iter__'):
+						for j,(x,lim) in enumerate(zip(v,vmax)):
+							if abs(x) > lim*_durations[i]:
+								_durations[i] = abs(x)/lim
+								#print "Segment",i,"limited on axis",j,"path velocity",x,"limit",lim
+					else:
+						_durations[i] = vectorops.norm(v)/vmax
+					if hasattr(amax,'__iter__'):
+						if i > 0:
+							for j,(x,lim) in enumerate(zip(a1,amax)):
+								if abs(x) > lim*_durations[i]**2:
+									_durations[i] = math.sqrt(abs(x)/lim)
+									#print "Segment",i,"limited on axis",j,"path accel",x,"limit",lim
+						if i+2 < len(milestones):
+							for j,(x,lim) in enumerate(zip(a2,amax)):
+								if abs(x) > lim*_durations[i]**2:
+									_durations[i] = math.sqrt(abs(x)/lim)
+									#print "Segment",i,"limited on axis",j,"outgoing path accel",x,"limit",lim
+					else:
+						if i > 0:
+							n = vectorops.norm(a1)
+							if n > amax*_durations[i]**2:
+								_durations[i] = math.sqrt(n/amax)
+						if i+2 < len(milestones):
+							n = vectorops.norm(a2)
+							if n > amax*_durations[i]**2:
+								_durations[i] = math.sqrt(n/amax)
+			else:
 				durationfuncs = dict()
 				durationfuncs['L2'] = vectorops.distance
 				durationfuncs['Linf'] = lambda a,b:max(abs(u-v) for (u,v) in zip(a,b))
-				assert durations in durationfuncs,"Invalid duration function specified, valid values are: "+", ".join(durationfuncs.keys())
-				durations = durationfuncs[durations]
-				_durations = [durations(a,b) for a,b in zip(milestones[:-1],milestones[1:])]
-			else:
-				raise ValueError("Invalid durations specifier?")
+				assert timing in durationfuncs,"Invalid duration function specified, valid values are: "+", ".join(durationfuncs.keys())
+				timing = durationfuncs[timing]
+				_durations = [timing(a,b) for a,b in zip(milestones[:-1],milestones[1:])]
 	assert _durations is not None,"Hmm... didn't assign durations properly?"
 	#by this time we have all milestones and durations
 	if zerotol is not None:
@@ -704,15 +772,19 @@ def path_to_trajectory(path,velocities='trapezoidal',durations='auto',
 				splits.append(i)
 		splits.append(len(milestones)-1)
 		if len(splits) > 2:
+			print "Splitting path into",len(splits)-1,"segments, starting and stopping between"
 			res = None
 			for i in xrange(len(splits)-1):
 				a,b = splits[i],splits[i+1]
-				traj = path_to_trajectory(milestones[a:b+1],velocities,_durations[a:b],
-					None,1.0,dt)
+				traj = path_to_trajectory(milestones[a:b+1],velocities,timing,smoothing,
+					None,vmax,amax,
+					1.0,dt)
 				if res is None:
 					res = traj
 				else:
 					res = res.concat(traj,relative=True)
+			if speed != 1.0:
+				res.times = vectorops.mul(res.times,1.0/speed)
 			return res
 	#canonical case:
 	#milestones and _durations are lists
@@ -727,40 +799,147 @@ def path_to_trajectory(path,velocities='trapezoidal',durations='auto',
 	for d in _durations:
 		totaldistance += d
 		normalizedPath.times.append(totaldistance)
-	assert dt > 0.0,"dt has to be positive"
+
+	if smoothing == 'spline':
+		hpath = HermiteTrajectory()
+		hpath.makeSpline(normalizedPath)
+		normalizedPath = hpath.configTrajectory()
 
 	if startvel != 0.0 or endvel != 0.0:
 		print "WARNING: respecting nonzero start/end velocity not implemented yet"
 
 	finalduration = totaldistance
+	evmax = 1
+	eamax = 0
+	if velocities == 'auto':
+		if timing == 'limited':
+			velocities = 'constant'
+		else:
+			velocities = 'trapezoidal'
 	if velocities == 'constant':
-		return normalizedPath
+		easing = lambda t: t
+		evmax = 1.0
+		eamax = 0.0
 	elif velocities == 'trapezoidal' or velocities == 'triangular':
 		easing = lambda t: 2*t**2 if t < 0.5 else 1.0-(2*(1.0-t)**2)
+		evmax = 2.0
+		eamax = 2.0
+		if velocities == 'trapezoidal' and timing != 'limited':
+			#ramp up c t^2 until 0.25
+			#velocity 2 c t, ending velocity c/2, ending point c/16
+			#continue for 0.5, ending point c/16 + c/4
+			#ramp down for distance c/16, total distance c/8 + c/4 = 1 => c = 8/3
+			easing = lambda t: 8.0/3.0*t**2 if t < 0.25 else (1.0-(8.0/3.0*(1.0-t)**2) if t > 0.75 else 1.0/6.0 + 4.0/3.0*(t-0.25))
 		finalduration = math.sqrt(totaldistance)
 	elif velocities == 'cosine':
 		easing = lambda t: 0.5*(1.0-math.cos(t*math.pi))
+		evmax = math.pi*0.5  #pi/2 sin (t*pi)
+		eamax = math.pi**2*0.5   #pi**2/2 cos(t*pi)
 		finalduration = math.sqrt(totaldistance)
 	elif velocities == 'parabolic':
 		easing = lambda t: -2*t**3 + 3*t**2
+		evmax = 1.5  #-6t*2 + 6t
+		eamax = 6    #-12t + 6
 		finalduration = math.sqrt(totaldistance)
 	elif velocities == 'minimum-jerk':
 		easing = lambda t: 10.0*t**3 - 15.0*t**4 + 6.0*t**5 
+		evmax = 15*0.25   #30t^2 - 60t*3 + 30t^4 => 1/4*(30 - 30 + 30/4)= 30/8
+		t = 1.0 + math.sqrt(1.0/3.0)
+		eamax = 30*t - 45*t**2 + 15*t**3         #60t - 180t*2 + 120t^3 => max at 1/6 - t + t^2 = 0 => t = (1 +/- sqrt(1 - 4/6))/2 = 1/2 +/- 1/2 sqrt(1/3)
+		                                         #30(1 + sqrt(1/3)) - 45(1 + sqrt(1/3))^2 + 15(1 + sqrt(1/3))^3 
 		finalduration = math.pow(totaldistance,1.0/3.0)
 	else:
 		raise NotImplementedError("Can't do velocity profile "+velocities+" yet")
+	if timing == 'limited':
+		#print "Easing velocity max",evmax,"acceleration max",eamax
+		#print "Velocity and acceleration-limited segment distances",_durations
+		#print "Total distance traveled",totaldistance
+		finalduration = totaldistance*evmax
+		#y(t) = p(L*e(t/T))
+		#y'(t) = p'(L*e(t)/T)*e'(t) L/T 
+		#y''(t) = p''(e(t))*e'(t)^2(L/T)^2 + p'(e(t))*e''(t) (L/T)^2
+		#assume |p'(u)| <= vmax, |p''(u)| <= amax
+		#set T so that |p'(u)| e'(t) L/T <= |p'(u)| evmax L/T  <= vmax evmax L/T <= vmax
+		#set T so that |p''(u)| evmax^2 (L/T)^2 + |p'(u)|*e''(t) (L/T)^2 <= (amax evmax^2 + vmax eamax) (L/T)^2 <= amax
+		#T >= L sqrt(evmax^2 + vmax/amax eamax)
+		if finalduration < totaldistance*math.sqrt(evmax**2 + eamax):
+			finalduration = totaldistance*math.sqrt(evmax**2 + eamax)
+		print "Setting first guess of path duration to",finalduration
 	res = normalizedPath.constructor()()
 	N = int(math.ceil(finalduration/dt))
 	dt = finalduration / N
 	res.times=[0.0]*(N+1)
 	res.milestones = [None]*(N+1)
 	res.milestones[0] = normalizedPath.milestones[0][:]
+	dt = finalduration/float(N)
 	#print velocities,"easing:"
 	for i in xrange(1,N+1):
 		res.times[i] = float(i)/float(N)*finalduration
 		u = easing(float(i)/float(N))
 		#print float(i)/float(N),"->",u
 		res.milestones[i] = normalizedPath.eval(u*totaldistance)
+	if timing == 'limited':
+		scaling = 0.0
+		vscaling = 0.0
+		aLimitingTime = 0
+		vLimitingTime = 0
+		for i in xrange(N):
+			q,n = res.milestones[i],res.milestones[i+1]
+			if i == 0: p = q
+			else: p = res.milestones[i-1]
+			if isinstance(path,Trajectory):
+				v = path.difference(p,n,0.5,dt*2.0)
+				a = vectorops.sub(path.difference(q,n,0.,dt),path.difference(p,q,1.,dt))
+				a = vectorops.div(a,dt)
+			else:
+				v = vectorops.div(vectorops.sub(n,p),dt*2.0)	
+				a = vectorops.div(vectorops.madd(vectorops.add(p,n),q,-2.0),dt**2)
+			if not hasattr(vmax,'__iter__'):
+				n = vectorops.norm(v)
+				if n > vmax*scaling:
+					#print "path segment",i,"exceeded scaling",scaling,"by |velocity|",n,' > ',vmax*scaling
+					vscaling = n/vmax
+					vLimitingTime = i
+			else:
+				for x,lim in zip(v,vmax):
+					if abs(x) > lim*vscaling:
+						#print "path segment",i,"exceeded scaling",scaling,"by velocity",x,' > ',lim*scaling
+						#print "Velocity",v
+						vscaling = abs(x)/lim
+						vLimitingTime = i
+			if i == 0:
+				continue
+			if not hasattr(amax,'__iter__'):
+				n = vectorops.norm(a)
+				if n > amax*scaling**2:
+					#print "path segment",i,"exceeded scaling",scaling,"by |acceleration|",n,' > ',amax*scaling**2
+					scaling = math.sqrt(n/amax)
+					aLimitingTime = i
+			else:
+				for x,lim in zip(a,amax):
+					if abs(x) > lim*scaling**2:
+						#print "path segment",i,"exceeded scaling",scaling,"by acceleration",x,' > ',lim*scaling**2
+						#print p,q,n
+						#print "Velocity",v
+						#print "Previous velocity",path.difference(p,q,1.,dt)
+						scaling = math.sqrt(abs(x)/lim)
+						aLimitingTime = i
+		print "Velocity limit exceeded by factor of",vscaling,"at time",res.times[vLimitingTime]*max(scaling,vscaling)
+		print "Acceleration limit exceeded by factor of",scaling,"at time",res.times[aLimitingTime]*max(scaling,vscaling)
+		if velocities == 'trapezoidal':
+			#speed up until vscaling is hit
+			if vscaling < scaling:
+				print "Velocity maximum not hit"
+			else:
+				print "TODO: fiddle with velocity maximum."
+				scaling = max(vscaling,scaling)
+				res.times = [t*scaling for t in res.times]
+		else:
+			scaling = max(vscaling,scaling)
+		print "Velocity / acceleration limiting yields a time expansion of",scaling
+		res.times = vectorops.mul(res.times,scaling)
+	if speed != 1.0:
+		res.times = vectorops.mul(res.times,1.0/speed)
 	return res
 
 
@@ -812,7 +991,14 @@ def execute_path(path,controller,speed=1.0,smoothing=None,activeDofs=None):
 		for i in range(1,len(path)):
 			controller.addCubic(dt,path[i],zero)
 	elif smoothing == 'spline':
-		raise NotImplementedError("Spline interpolation")
+		hpath = HermiteTrajectory()
+		hpath.makeSpline(Trajectory(range(len(path)),path))
+		qpath = hpath.configTrajectory()
+		dt = controller.getRate()
+		traj = qpath.discretize(dt)
+		controller.setLinear(dt,traj.milestones[0])
+		for i in range(1,len(traj.milestones)):
+			controller.addLinear(dt,traj.milestones[i])
 	elif smoothing == 'ramp':
 		if speed != 1.0: raise ValueError("Can't specify speed with ramp smoothing")
 		controller.setMilestone(path[0])
