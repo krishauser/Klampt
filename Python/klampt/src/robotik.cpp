@@ -294,11 +294,11 @@ void GeneralizedIKObjective::setTransform(const double R[9],const double t[3])
 
 
 IKSolver::IKSolver(const RobotModel& _robot)
-  :robot(_robot),maxIters(100),tol(1e-3),useJointLimits(true),lastIters(0)
+  :robot(_robot),tol(1e-3),maxIters(100),useJointLimits(true),lastIters(0)
 {}
 
 IKSolver::IKSolver(const IKSolver& solver)
-  :robot(solver.robot),objectives(solver.objectives),maxIters(solver.maxIters),tol(solver.tol),activeDofs(solver.activeDofs),useJointLimits(solver.useJointLimits),qmin(solver.qmin),qmax(solver.qmax),lastIters(solver.lastIters)
+  :robot(solver.robot),objectives(solver.objectives),tol(solver.tol),maxIters(solver.maxIters),activeDofs(solver.activeDofs),useJointLimits(solver.useJointLimits),qmin(solver.qmin),qmax(solver.qmax),lastIters(solver.lastIters)
 {}
 
 void IKSolver::add(const IKObjective& objective)
@@ -514,7 +514,7 @@ bool IKSolver::solve()
     const Real* usedQmax = (qmax.empty() ? &robot.robot->qMax[0] : &qmax[0]);
     for(size_t i=0;i<robot.robot->q.size();i++) {
       if(robot.robot->q(i) < usedQmin[i] || robot.robot->q(i) > usedQmax[i]) {
-        if(robot.robot->q(i) < usedQmin[i]-Epsilon || robot.robot->q(i) > usedQmax[i] > Epsilon) 
+        if(robot.robot->q(i) < usedQmin[i]-Epsilon || robot.robot->q(i) > usedQmax[i] + Epsilon) 
           printf("IKSolver:: Joint limits on joint %i exceeded: %g <= %g <= %g. Clamping to limits...\n", i,usedQmin[i],robot.robot->q(i),usedQmax[i]);
         robot.robot->q(i) = Clamp(robot.robot->q(i),usedQmin[i],usedQmax[i]);
       }
