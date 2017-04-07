@@ -272,6 +272,7 @@ class WindowInfo:
         self.guidata = None
         self.custom_ui = None
         self.doRefresh = False
+        self.doReload = False
         self.worlds = []
         self.active_worlds = []
 
@@ -328,7 +329,7 @@ def setWindow(id):
     #refresh all worlds' display lists
     for w in _current_worlds:
         if w not in _windows[id].active_worlds:
-            print "klampt.vis.setWindow(): world",w.index,"becoming active in the new window",id
+            print "klampt.vis.setWindow(): world",w().index,"becoming active in the new window",id
             _refreshDisplayLists(w())
         _windows[_current_window].active_worlds.remove(w)
     _windows[id].active_worlds = _current_worlds[:]
@@ -2461,13 +2462,14 @@ if _PyQtAvailable:
             self.windowinfo.glwindow.hide()
             self.windowinfo.mode = 'hidden'
             self.windowinfo.glwindow.idlesleep()
+            self.windowinfo.glwindow.setParent(None)
             print "#########################################"
             print "klampt.vis: Window close"
             print "#########################################"
             _globalLock.release()
 
     def _run_app_thread():
-        global _thread_running,_vis,_widget,_window,_quit,_showdialog,_showwindow,_window_title,_globalLock
+        global _thread_running,_vis,_widget,_window,_quit,_showdialog,_showwindow,_globalLock
         _thread_running = True
 
         _GLBackend.initialize("Klamp't visualization")
@@ -2486,6 +2488,13 @@ if _PyQtAvailable:
                     if w.mode != 'hidden':
                         w.glwindow.updateGL()
                     w.doRefresh = False
+                if w.doReload and w.glwindow != None:
+                    w.glwindow.setProgram(w.frontend)
+                    if w.guidata:
+                        w.guidata.setWindowTitle(w.name)
+                        w.guidata.glwidget = w.glwindow
+                        w.guidata.setCentralWidget(w.glwindow)
+                    w.doReload = False
                 if w.mode == 'dialog':
                     print "#########################################"
                     print "klampt.vis: Dialog on window",i
@@ -2697,6 +2706,8 @@ def _show():
             thread.start()
         time.sleep(0.1)
     _windows[_current_window].mode = 'shown'
+    _windows[_current_window].worlds = _current_worlds[:]
+    _windows[_current_window].active_worlds = _current_worlds[:]
 
 def _hide():
     global _windows,_current_window,_thread_running
@@ -2737,19 +2748,15 @@ def _onFrontendChange():
     global _windows,_frontend,_window_title,_current_window,_thread_running
     if _current_window == None:
         return
-    _windows[_current_window].name = _window_title
-    _windows[_current_window].frontend = _frontend
-    if _windows[_current_window].glwindow:
-        _windows[_current_window].glwindow.reshape(_frontend.view.w,_frontend.view.h)
-        if _PyQtAvailable:
-            _windows[_current_window].glwindow.setProgram(_frontend)
-    if _windows[_current_window].guidata and _PyQtAvailable:
-        _windows[_current_window].guidata.setWindowTitle(_window_title)
-        _windows[_current_window].guidata.glwidget = _windows[_current_window].glwindow
-        _windows[_current_window].guidata.setCentralWidget(_windows[_current_window].glwindow)
-    if _windows[_current_window].guidata and not _PyQtAvailable:
-        _windows[_current_window].guidata.frontend = _frontend
-        _frontend.window = _windows[_current_window].guidata.window
+    w = _windows[_current_window]
+    w.doReload = True
+    w.name = _window_title
+    w.frontend = _frontend
+    if w.glwindow:
+        w.glwindow.reshape(_frontend.view.w,_frontend.view.h)
+    if w.guidata and not _PyQtAvailable:
+        w.guidata.frontend = _frontend
+        _frontend.window = w.guidata.window
 
 def _refreshDisplayLists(item):
     if isinstance(item,WorldModel):
@@ -2770,17 +2777,18 @@ def _checkWindowCurrent(item):
     _current_worlds = [w for w in _current_worlds if w() is not None]
     if isinstance(item,int):
         if not all(w.index != item for w in _current_worlds):
-            print "Item appears to be in a new world, but doesn't have a full WorldModel instance"
+            print "klampt.vis: item appears to be in a new world, but doesn't have a full WorldModel instance"
     if isinstance(item,WorldModel):
-        print "Worlds active in current window",_current_window,":",[w().index for w in _current_worlds]
-        if item not in _current_worlds:
-            for w in _windows:
-                if item in w.active_worlds:
-                    print "klampt.vis: warning, world",item,"was shown in a different window, now refreshing display lists"
+        #print "Worlds active in current window",_current_window,":",[w().index for w in _current_worlds]
+        if all(item != w() for w in _current_worlds):
+            for i,win in enumerate(_windows):
+                #print "Window",i,"active worlds",[w().index for w in win.active_worlds]
+                if any(item == w() for w in win.active_worlds):
+                    print "klampt.vis: world",item.index,"was shown in a different window, now refreshing display lists"
                     _refreshDisplayLists(item)
-                    w.active_worlds.remove(item)
+                    win.active_worlds.remove(weakref.ref(item))
             _current_worlds.append(weakref.ref(item))
-            print "klampt.vis: world added to the visualization's world (items:",[w().index for w in _current_worlds],")"
+            #print "klampt.vis: world added to the visualization's world (items:",[w().index for w in _current_worlds],")"
         #else:
         #    print "klampt.vis: world",item,"is already in the current window's world"
     elif hasattr(item,'world'):
