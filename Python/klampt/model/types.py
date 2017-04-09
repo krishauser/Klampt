@@ -1,12 +1,13 @@
 from ..model.contact import ContactPoint,Hold
-from ..model.trajectory import Trajectory
+from ..model.trajectory import Trajectory,RobotTrajectory,SO3Trajectory,SE3Trajectory
 from ..model.multipath import MultiPath
 from ..math import vectorops,so3,se3
 from ..robotsim import WorldModel,RobotModel,RobotModelLink,RigidObjectModel,IKObjective
 
 def objectToTypes(object,world=None):
-    """Returns names of all possible types that could be associated with the given
-    Python Klamp't object."""
+    """Returns a string defining the type of the given Python Klamp't object.
+    If multiple types could be associated with it, then it returns a list of all
+    possible valid types."""
     if hasattr(object,'type'):
         return object.type
     if isinstance(object,ContactPoint):
@@ -58,8 +59,13 @@ def objectToTypes(object,world=None):
         raise ValueError("Unknown object passed to objectToTypes")
 
 def make(type,object=None):
-    """Makes a default instance of the given type. If type is 'Config' or 'Configs',
-    you can provide the object for which the instance will be compatible."""
+    """Makes a default instance of the given type..
+
+    Arguments:
+    - str: the name of the desired type type 
+    - object: If type is 'Config', 'Configs', or 'Trajectory', can provide the object for
+      which the new instance will be compatible.
+      """
     if type == 'Config':
         if isinstance(object,RobotModel):
             return object.getConfig()
@@ -67,7 +73,18 @@ def make(type,object=None):
             import config
             return config.getConfig(object)
     elif type == 'Configs':
-        return [make('Config',objects)]
+        return [make('Config',object)]
+    elif type == 'Trajectory':
+        if isinstance(object,RobotModel):
+            return RobotTrajectory(object,[0.0],make('Configs',object))
+        else:
+            types = objectToTypes(object)
+            if types == 'Transform':
+                return SE3Trajectory([0.0],make('Configs',object))
+            elif 'Matrix3' in types:
+                return SO3Trajectory([0.0],make('Configs',object))
+            else:
+                return Trajectory([0.0],make('Configs',object))
     elif type == 'IKGoal':
         return IKObjective()
     elif type == 'Vector3' or type == 'Point':
