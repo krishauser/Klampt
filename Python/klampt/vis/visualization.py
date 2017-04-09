@@ -314,7 +314,7 @@ def createWindow(name):
 
 def setWindow(id):
     """Sets currently active window."""
-    global _globalLock,_frontend,_vis,_window_title,_windows,_current_window
+    global _globalLock,_frontend,_vis,_window_title,_windows,_current_window,_current_worlds
     if id == _current_window:
         return
     _globalLock.acquire()
@@ -328,10 +328,10 @@ def setWindow(id):
     #print "vis.setWindow(",id,") the window has status",_windows[id].mode
     #refresh all worlds' display lists
     for w in _current_worlds:
-        if w not in _windows[id].active_worlds:
+        if w in _windows[_current_window].active_worlds:
             print "klampt.vis.setWindow(): world",w().index,"becoming active in the new window",id
             _refreshDisplayLists(w())
-        _windows[_current_window].active_worlds.remove(w)
+            _windows[_current_window].active_worlds.remove(w)
     _windows[id].active_worlds = _current_worlds[:]
     _current_window = id
     _globalLock.release()
@@ -2706,7 +2706,7 @@ def _show():
             thread.start()
         time.sleep(0.1)
     _windows[_current_window].mode = 'shown'
-    _windows[_current_window].worlds = _current_worlds[:]
+    _windows[_current_window].worlds = _current_worlds
     _windows[_current_window].active_worlds = _current_worlds[:]
 
 def _hide():
@@ -2729,7 +2729,7 @@ def _dialog():
     _globalLock.acquire()
     assert _windows[_current_window].mode == 'hidden',"dialog() called inside dialog?"
     _windows[_current_window].mode = 'dialog'
-    _windows[_current_window].worlds = _current_worlds[:]
+    _windows[_current_window].worlds = _current_worlds
     _windows[_current_window].active_worlds = _current_worlds[:]
     _globalLock.release()
     while _windows[_current_window].mode == 'dialog':
@@ -2774,7 +2774,6 @@ def _refreshDisplayLists(item):
 
 def _checkWindowCurrent(item):
     global _windows,_current_window,_world_to_window,_current_worlds
-    _current_worlds = [w for w in _current_worlds if w() is not None]
     if isinstance(item,int):
         if not all(w.index != item for w in _current_worlds):
             print "klampt.vis: item appears to be in a new world, but doesn't have a full WorldModel instance"
