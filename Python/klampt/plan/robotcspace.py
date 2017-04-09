@@ -142,13 +142,18 @@ class RobotSubsetCSpace(EmbeddedCSpace):
         EmbeddedCSpace.__init__(self,RobotCSpace(robot,collider),subset,xinit=robot.getConfig())
         self.collider = collider
         if self.collider:
-            inactive = []
+            #determine moving objects, which includes all links in the subset and descendants
+            moving = [False]*robot.numLinks()
             for i in range(robot.numLinks()):
-                if i not in subset: inactive.append(i)
-            #disable self-collisions for inactive objects
-            for i in inactive:
-                rindex = self.collider.robots[robot.index][i]
-                self.collider.mask[rindex] = set()
+                if i in subset: moving[i] = True
+                else:
+                    p = robot.link(i).getParent()
+                    if p >= 0 and moving[p]: moving[i]=True
+            #disable self-collisions for non moving objects
+            for i,mv in enumerate(moving):
+                if not mv:
+                    rindex = self.collider.robots[robot.index][i]
+                    self.collider.mask[rindex] = set()
 
     def liftPath(self,path):
         """Given a CSpace path path, lifts this to the full robot configuration"""
