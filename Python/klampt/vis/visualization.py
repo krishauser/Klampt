@@ -185,6 +185,9 @@ def setAttribute(name,attribute,value): sets an attribute of the appearance
     of an item.  Typical attributes are 'color', 'size', 'length', 'width'...
     TODO: document all accepted attributes.
 def setColor(name,r,g,b,a=1.0): changes the color of an item.
+def setDrawFunc(name,func): sets a custom OpenGL drawing function for an item.
+    func is a one-argument function that takes the item data as input.  Set
+    func to None to revert to default drawing.
 def animate(name,animation,speed=1.0,endBehavior='loop'): Sends an animation to the
     object. May be a Trajectory or a list of configurations.  Works with points,
     so3 elements, se3 elements, rigid objects, or robots. 
@@ -327,12 +330,14 @@ def setWindow(id):
     assert id >= 0 and id < len(_windows),"Invalid window id"
     _window_title,_frontend,_vis,_current_worlds = _windows[id].name,_windows[id].frontend,_windows[id].vis,_windows[id].worlds
     #print "vis.setWindow(",id,") the window has status",_windows[id].mode
-    #refresh all worlds' display lists
-    for w in _current_worlds:
-        if w in _windows[_current_window].active_worlds:
-            print "klampt.vis.setWindow(): world",w().index,"becoming active in the new window",id
-            _refreshDisplayLists(w())
-            _windows[_current_window].active_worlds.remove(w)
+    if not _PyQtAvailable:
+        #PyQt interface allows sharing display lists but GLUT does not.
+        #refresh all worlds' display lists that were once active.
+        for w in _current_worlds:
+            if w in _windows[_current_window].active_worlds:
+                print "klampt.vis.setWindow(): world",w().index,"becoming active in the new window",id
+                _refreshDisplayLists(w())
+                _windows[_current_window].active_worlds.remove(w)
     _windows[id].active_worlds = _current_worlds[:]
     _current_window = id
     _globalLock.release()
@@ -646,6 +651,12 @@ def setColor(name,r,g,b,a=1.0):
     if _vis==None:
         return
     _vis.setColor(name,r,g,b,a)
+
+def setDrawFunc(name,func):
+    global _vis
+    if _vis==None:
+        return
+    _vis.setDrawFunc(name,func)
 
 def _getOffsets(object):
     if isinstance(object,WorldModel):
@@ -1219,6 +1230,7 @@ class VisAppearance:
         self.hidden = False
         self.useDefaultAppearance = True
         self.customAppearance = None
+        self.customDrawFunc = None
         #For group items, this allows you to customize appearance of sub-items
         self.subAppearances = {}
         self.animation = None
@@ -1349,6 +1361,8 @@ class VisAppearance:
         is given and text_hidden != False, then the name of the item is
         shown."""
         if self.hidden: return
+        if self.customDrawFunc is not None:
+          self.customDrawFunc(self.item)
        
         item = self.item
         name = self.name
@@ -2380,6 +2394,14 @@ class VisualizationPlugin(glcommon.GLWidgetPlugin):
         self.doRefresh = True
         _globalLock.release()
 
+    def setDrawFunc(self,name,func):
+        global _globalLock
+        _globalLock.acquire()
+        item = self.getItem(name)
+        item.customDrawFunc = func
+        self.doRefresh = True
+        _globalLock.release()
+
     def autoFitCamera(self,scale=1.0):
         vp = None
         if self.window == None:
@@ -2424,6 +2446,7 @@ if _PyQtAvailable:
             self.buttons.accepted.connect(self.accept)
             self.layout.addWidget(self.buttons)
             self.setWindowTitle(windowinfo.name)
+            glwidget.name = windowinfo.name
         def accept(self):
             global _globalLock
             _globalLock.acquire()
@@ -2453,6 +2476,7 @@ if _PyQtAvailable:
             self.glwidget.setSizePolicy(QSizePolicy(QSizePolicy.Maximum,QSizePolicy.Maximum))
             self.setCentralWidget(self.glwidget)
             self.setWindowTitle(windowinfo.name)
+            self.glwidget.name = windowinfo.name
             #TODO: for action-free programs, don't add this... but this has to be detected after initializeGL()?
             mainMenu = self.menuBar()
             fileMenu = mainMenu.addMenu('&Actions')
@@ -2781,11 +2805,14 @@ def _checkWindowCurrent(item):
     if isinstance(item,WorldModel):
         #print "Worlds active in current window",_current_window,":",[w().index for w in _current_worlds]
         if all(item != w() for w in _current_worlds):
+            #PyQt interface allows sharing display lists but GLUT does not.
+            #refresh all worlds' display lists that will be shifted to the current window.
             for i,win in enumerate(_windows):
                 #print "Window",i,"active worlds",[w().index for w in win.active_worlds]
                 if any(item == w() for w in win.active_worlds):
-                    print "klampt.vis: world",item.index,"was shown in a different window, now refreshing display lists"
-                    _refreshDisplayLists(item)
+                    if not _PyQtAvailable:
+                        print "klampt.vis: world",item.index,"was shown in a different window, now refreshing display lists"
+                        _refreshDisplayLists(item)
                     win.active_worlds.remove(weakref.ref(item))
             _current_worlds.append(weakref.ref(item))
             #print "klampt.vis: world added to the visualization's world (items:",[w().index for w in _current_worlds],")"
