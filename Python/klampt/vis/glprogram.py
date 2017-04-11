@@ -404,8 +404,10 @@ class GLRealtimeProgram(GLNavigationProgram):
     def idlefunc (self):
         tcur = time.time()
         tsleep = self.dt - (tcur - self.lasttime)
-        if (tsleep > 0):
+        if tsleep > 0.001:
+            #print "Elapsed time",tcur-self.lasttime,"sleep",tsleep,"window",self.window.name
             self.idlesleep(tsleep)
+            return
         
         self.ttotal += self.dt
         self.counter += 1
@@ -413,7 +415,7 @@ class GLRealtimeProgram(GLNavigationProgram):
         #do something random
         self.idle()
         
-        self.lasttime = time.time()
+        self.lasttime = tcur
         self.refresh()
         return True
 
