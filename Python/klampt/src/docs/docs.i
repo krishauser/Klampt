@@ -417,24 +417,6 @@ supported. ";
 Saves to file. Standard mesh types, PCD files, and .geom files are
 supported. ";
 
-%feature("docstring")  Geometry3D::attachToStream "
-
-Attaches this geometry to a given stream.
-
-Currently only \"ros\" protocol is supported. For \"ros\" protocol,
-name is the ROS topic to attach to. type indicates the datatype that
-the stream source should have, and this will return false if that type
-is not obeyed. Currently only the \"PointCloud\" or default empty
-(\"\") types are supported.
-
-Note: you will need to call Appearance.refresh(True) to get the
-appearance to update. ";
-
-%feature("docstring")  Geometry3D::detachFromStream "
-
-Detaches this geometry from a given stream. This must be called before
-deleting a piece of geometry. ";
-
 %feature("docstring")  Geometry3D::setCurrentTransform "
 
 Sets the current transformation (not modifying the underlying data) ";
@@ -1794,6 +1776,10 @@ Retrieves the robot model associated with this controller. ";
 
 Sets the current feedback control rate. ";
 
+%feature("docstring")  SimRobotController::getRate "
+
+Gets the current feedback control rate. ";
+
 %feature("docstring")  SimRobotController::getCommandedConfig "
 
 Returns the current commanded configuration. ";
@@ -2891,6 +2877,20 @@ empty. ";
 %feature("docstring")  equilibriumTorques "";
 
 %feature("docstring")  equilibriumTorques "";
+
+%feature("docstring")  SubscribeToStream "";
+
+%feature("docstring")  DetachFromStream "";
+
+%feature("docstring")  ProcessStreams "";
+
+%feature("docstring")  ThreeJSGetScene "
+
+Exports the WorldModel to a JSON string ready for use in Three.js. ";
+
+%feature("docstring")  ThreeJSGetTransforms "
+
+Exports the WorldModel to a JSON string ready for use in Three.js. ";
 
 
 // File: robotsim_8h.xml

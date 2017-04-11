@@ -1,5 +1,6 @@
 from klampt.io import resource
 from klampt.vis import visualization
+from klampt.model.trajectory import *
 from klampt import *
 
 print """resourcetest.py: This program gives an example of how to use the
@@ -69,8 +70,13 @@ if config3 != None: configs.append(config3)
 print "Configs resource:",configs
 configs = resource.get("resourcetest.configs",default=configs,description="Editing config sequence",doedit=True,editor='visual',world=world)
 
-#testing transform editor
-xform = resource.get(name=None,type='RigidTransform',frame=world.robot(0).link(5).getTransform(),world=world)
+traj = RobotTrajectory(world.robot(0),range(len(configs)),configs)
+traj = resource.edit(name="Timed trajectory",value=traj,description="Editing trajectory",world=world)
+
+#testing transform editor.  The first call doesn't attach any geometry to the frame.  The second call attaches geometry to it.
+#Both return the edited transform *relative* to the base link.
+xform = resource.edit(name="Base link, floating",value=None,type='RigidTransform',frame=world.robot(0).link(5).getTransform(),world=world)
+xform = resource.edit(name="Base link, should be attached to robot",value=None,type='RigidTransform',frame=world.robot(0).link(5),world=world)
 
 
 #this will prompt you to load a Config resource, then ask you to save the edited config

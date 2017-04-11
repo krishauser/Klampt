@@ -164,17 +164,15 @@ class ConfigsEditor(VisualEditorBase):
         elif c==',' or c=='<':
             self.editingIndex -= 1
             if self.editingIndex < 0:
-                self.editingIndex = min(len(self.value)-1,0)
-            if self.editingIndex >= 0:
-                self.robotposer.set(self.value[self.editingIndex]) 
-                self.refresh()
+                self.editingIndex = min(len(self.durations)-1,0)
+            self.indexEditBox.setValue(self.editingIndex)
+            self.indexChanged(self.editingIndex)
             return True
         elif c=='.' or c=='>':
             self.editingIndex += 1
-            self.editingIndex = min(len(self.value)-1,self.editingIndex)
-            if self.editingIndex >= 0:
-                self.robotposer.set(self.value[self.editingIndex]) 
-                self.refresh()
+            self.editingIndex = min(len(self.durations)-1,self.editingIndex)
+            self.indexEditBox.setValue(self.editingIndex)
+            self.indexChanged(self.editingIndex)
             return True
 
     def display(self):
@@ -214,6 +212,284 @@ class ConfigsEditor(VisualEditorBase):
         for j in xrange(self.robot.numLinks()):
             self.robot.link(j).appearance().setColor(0.5,0.5,0.5,1)
         glDisable(GL_BLEND)
+
+class TrajectoryEditor(VisualEditorBase):
+    def __init__(self,name,value,description,world,robot=None):
+        VisualEditorBase.__init__(self,name,value,description,world)
+        if robot is None:
+            robot = world.robot(0)
+        if len(value.milestones) > 0:
+            robot.setConfig(value.milestones[0])
+        self.robot = robot
+        self.editingIndex = len(value.milestones)-1
+        self.durations = []
+        if len(value.times) > 0:
+            self.durations.append(value.times[0])
+            for i in xrange(len(value.times)-1):
+                self.durations.append(value.times[i+1]-value.times[i])
+        self.animTrajectory = None
+        self.animTrajectoryTime = 0.0
+        self.animating = False
+        self.animSelectorValue = 0
+        self.lastAnimTrajectoryTime = None
+        self.clicked = None
+        self.hovered = None
+        self.robotposer = RobotPoser(robot)
+        self.addWidget(self.robotposer)
+        self.updateAnimTrajectory()
+    
+    def instructions(self):
+        return 'Right-click and drag on the robot links to pose the robot.\nKeyboard i: insert, d: delete, < to select previous, > to select next'
+
+    def addDialogItems(self,parent,ui='qt'):
+        vlayout = QVBoxLayout(parent)
+        #adding and editing keyframes
+        self.indexSpinBox = QSpinBox()
+        self.indexSpinBox.setRange(0,len(self.durations)-1)
+        self.durationSpinBox = QDoubleSpinBox()
+        self.durationSpinBox.setRange(0,10.0)
+        self.durationSpinBox.setSingleStep(0.01)
+        self.insertButton = QPushButton("Insert")
+        self.deleteButton = QPushButton("Delete")
+        self.indexSpinBox.valueChanged.connect(self.indexChanged)
+        self.durationSpinBox.valueChanged.connect(self.durationChanged)
+        self.insertButton.clicked.connect(self.insert)
+        self.deleteButton.clicked.connect(self.delete)
+
+        layout = QHBoxLayout()
+        vlayout.addLayout(layout)
+        label = QLabel("Index")
+        label.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
+        layout.addWidget(label)
+        layout.addWidget(self.indexSpinBox)
+        label = QLabel("Duration")
+        label.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
+        layout.addWidget(label)
+        layout.addWidget(self.durationSpinBox)
+        layout.addWidget(self.insertButton)
+        layout.addWidget(self.deleteButton)        
+
+        #playback
+        self.timeDriver = QSlider()
+        self.timeDriver.setOrientation(Qt.Horizontal)
+        self.timeDriver.setRange(0,1000)
+        self.timeDriver.valueChanged.connect(self.timeDriverChanged)
+        self.playButton = QPushButton("Play")
+        self.playButton.setCheckable(True)
+        self.playButton.toggled.connect(self.togglePlay)
+
+        layout = QHBoxLayout()
+        vlayout.addLayout(layout)
+        self.animSelector = QComboBox()
+        self.animSelector.addItem("Linear")
+        self.animSelector.addItem("Spline")
+        #self.animSelector.addItem("Retimed")
+        #self.animSelector.addItem("Retimed-spline")
+        self.animSelector.currentIndexChanged.connect(self.animSelectorChanged)
+
+        label = QLabel("Time")
+        label.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
+        layout.addWidget(label)
+        layout.addWidget(self.timeDriver)
+        layout.addWidget(self.playButton)
+        
+        label = QLabel("Interp.")
+        label.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
+        layout.addWidget(label)
+        layout.addWidget(self.animSelector)
+
+    def insert(self):
+        if self.editingIndex < 0:
+            self.value.times.append(0.0)
+            self.value.milestones.append(self.robotposer.get())
+            self.editingIndex = len(self.durations)-1
+        else:
+            newdur = 1.0
+            if self.editingIndex+1 == len(self.durations):
+                #extrapolate from previous
+                if self.editingIndex > 0:
+                    newdur = self.value.times[self.editingIndex] - self.value.times[self.editingIndex-1]
+            elif self.editingIndex == 0:
+                #shift everything else
+                if len(self.durations) > 1:
+                    newdur = self.value.times[1]-self.value.times[0]
+            else:
+                #subdivide time between milesones
+                newdur = self.value.times[self.editingIndex]-self.value.times[self.editingIndex-1]
+            self.durations.insert(self.editingIndex+1,newdur)
+            self.value.milestones.insert(self.editingIndex+1,self.robotposer.get())
+            self.onDurationsChanged()
+            self.editingIndex += 1
+        if hasattr(self,'indexSpinBox'):
+            self.indexSpinBox.setRange(0,len(self.durations)-1)
+            self.indexSpinBox.setValue(self.editingIndex)
+        self.refresh()
+
+    def delete(self):
+        if self.editingIndex >= 0:
+            del self.durations[self.editingIndex]
+            del self.value.milestones[self.editingIndex]
+            if self.editingIndex >= len(self.durations):
+                self.editingIndex = len(self.durations)-1
+            if self.editingIndex >= 0:
+                self.robotposer.set(self.value.milestones[self.editingIndex])
+            self.onDurationsChanged()
+            print "Now has",len(self.durations),"configs, editing index",self.editingIndex
+        if hasattr(self,'indexSpinBox'):
+            self.indexSpinBox.setRange(0,len(self.durations)-1)
+            self.indexSpinBox.setValue(self.editingIndex)
+            if self.editingIndex >= 0:
+                self.durationSpinBox.setValue(self.durations[self.editingIndex])
+        self.refresh()
+
+    def indexChanged(self,index):
+        self.editingIndex = index
+        if index >= 0 and index < len(self.durations):
+            self.durationSpinBox.setValue(self.durations[self.editingIndex])
+            self.robotposer.set(self.value.milestones[self.editingIndex]) 
+            if not self.animating:
+                self.animTrajectoryTime = self.value.times[index]
+                self.timeDriver.setValue(int(1000*(self.animTrajectoryTime - self.value.times[0])/self.value.duration()))
+        self.refresh()
+
+    def durationChanged(self,value):
+        if self.editingIndex >= 0 and self.editingIndex < len(self.durations):
+            self.durations[self.editingIndex] = max(value,0.0)
+            self.onDurationsChanged()
+        self.refresh()
+
+    def timeDriverChanged(self,value):
+        u = value * 0.001
+        self.animTrajectoryTime = self.animTrajectory.times[0] + u*self.animTrajectory.duration()
+        self.refresh()
+
+    def animSelectorChanged(self,value):
+        self.animSelectorValue = value
+        self.updateAnimTrajectory()
+        self.refresh()
+
+    def togglePlay(self,value):
+        self.animating = value
+        self.refresh()
+        if value:
+            self.idlesleep(0)
+        else:
+            self.idlesleep(float('inf'))
+
+    def onDurationsChanged(self):
+        """Update the trajectory times"""
+        if len(self.durations)==0:
+            self.value.times = []
+        else:
+            self.value.times = [self.durations[0]]
+            for i in range(1,len(self.durations)):
+                self.value.times.append(self.value.times[-1] + self.durations[i])
+        self.updateAnimTrajectory()
+        if not self.animating:
+            if hasattr(self,'timeDriver'):
+                self.timeDriver.setValue(int(1000*(self.animTrajectoryTime - self.value.times[0])/self.value.duration()))
+
+    def updateAnimTrajectory(self):
+        from ..model import trajectory
+        if self.animSelectorValue == 1:
+            traj = trajectory.HermiteTrajectory()
+            traj.makeSpline(self.value)
+            self.animTrajectory = traj.configTrajectory()
+        else:
+            #TODO: other selections
+            self.animTrajectory = self.value
+
+    def mousefunc(self,button,state,x,y):
+        if VisualEditorBase.mousefunc(self,button,state,x,y):
+            if self.editingIndex >= 0:
+                self.value.milestones[self.editingIndex] = self.robotposer.get()
+            return True
+        return False
+    
+    def keyboardfunc(self,c,x,y):
+        if c=='i':
+            self.insert()
+            return True
+        elif c=='d':
+            self.delete()
+            return True
+        elif c==',' or c=='<':
+            self.editingIndex -= 1
+            if self.editingIndex < 0:
+                self.editingIndex = min(len(self.durations)-1,0)
+            if hasattr(self,'indexEditBox'):
+                self.indexEditBox.setValue(self.editingIndex)
+                self.indexChanged(self.editingIndex)
+            return True
+        elif c=='.' or c=='>':
+            self.editingIndex += 1
+            self.editingIndex = min(len(self.durations)-1,self.editingIndex)
+            if hasattr(self,'indexEditBox'):
+                self.indexEditBox.setValue(self.editingIndex)
+                self.indexChanged(self.editingIndex)
+            return True
+
+    def display(self):
+        #Override display handler since the widget draws the robot
+        #the next few lines draw everything but the robot
+        if self.world != None:
+            for i in xrange(self.world.numTerrains()):
+                self.world.terrain(i).drawGL()
+            for i in xrange(self.world.numRigidObjects()):
+                self.world.rigidObject(i).drawGL()
+            for i in xrange(self.world.numRobots()):
+                if i != self.robot.index:
+                    self.world.robot(i).drawGL()
+        glEnable(GL_BLEND)
+        glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA)
+        #draw most opaque first
+        order = []
+        if self.editingIndex < 0:
+            order = range(len(self.durations))
+        else:
+            order = [self.editingIndex]
+            n = max(self.editingIndex,len(self.durations)-self.editingIndex)
+            for i in range(1,n+1):
+                if self.editingIndex + i < len(self.durations): order.append(self.editingIndex +i)
+                if self.editingIndex - i >= 0: order.append(self.editingIndex -i)
+        for i in order:
+            #draw transparent
+            opacity = pow(0.5,abs(i-self.editingIndex))
+            for j in xrange(self.robot.numLinks()):
+                self.robot.link(j).appearance().setColor(0.5,0.5,0.5,opacity)
+            if i == self.editingIndex:
+                #this line will draw the robot at the current editing config
+                self.klamptwidgetmaster.drawGL(self.viewport())
+            else:
+                self.robot.setConfig(self.value.milestones[i])
+                self.robot.drawGL()
+        for j in xrange(self.robot.numLinks()):
+            self.robot.link(j).appearance().setColor(0.5,0.5,0.5,1)
+
+        #draw animation, if available
+        if self.animTrajectoryTime is not None:
+            for j in xrange(self.robot.numLinks()):
+                self.robot.link(j).appearance().setColor(1.0,1.0,0,0.5)
+            q = self.animTrajectory.eval(self.animTrajectoryTime,'loop')
+            self.robot.setConfig(q)
+            self.robot.drawGL()
+            for j in xrange(self.robot.numLinks()):
+                self.robot.link(j).appearance().setColor(0.5,0.5,0.5,1)
+        glDisable(GL_BLEND)
+
+    def idle(self):
+        import time
+        t = time.time()
+        if self.animating:
+            self.animTrajectoryTime += t - self.lastAnimTrajectoryTime
+            if self.animTrajectoryTime > self.value.times[-1]:
+                self.animTrajectoryTime -= self.value.duration()
+            self.timeDriver.setValue(int(1000*(self.animTrajectoryTime - self.value.times[0])/self.value.duration()))
+            self.refresh()
+        self.lastAnimTrajectoryTime = t
+        return False
+
+
 
 class SelectionEditor(VisualEditorBase):
     def __init__(self,name,value,description,world,robot=None):
@@ -408,25 +684,6 @@ class PointEditor(VisualEditorBase):
             return True
         return False
 
-class RotationEditor(VisualEditorBase):
-    def __init__(self,name,value,description,world,frame=None):
-        VisualEditorBase.__init__(self,name,value,description,world)
-        self.frame = se3.identity() if frame==None else frame
-        self.xformposer = TransformPoser()
-        self.xformposer.set(*se3.mul(self.frame,(value,[0,0,0])))
-        self.xformposer.enableRotation(True)
-        self.xformposer.enableTranslation(False)
-        self.addWidget(self.xformposer)
-    
-    def instructions(self):
-        return 'Right-click and drag on the widget to pose the rotation'
-
-    def mousefunc(self,button,state,x,y):
-        if VisualEditorBase.mousefunc(self,button,state,x,y):
-            self.value = se3.mul(se3.inv(self.frame),self.xformposer.get())[0]
-            return True
-        return False
-
 class RigidTransformEditor(VisualEditorBase):
     def __init__(self,name,value,description,world,frame=None):
         VisualEditorBase.__init__(self,name,value,description,world)
@@ -436,15 +693,50 @@ class RigidTransformEditor(VisualEditorBase):
         self.xformposer.enableRotation(True)
         self.xformposer.enableTranslation(True)
         self.addWidget(self.xformposer)
+        self.attachedObjects = []
+        self.attachedRelativePoses = []
+        self.rotationEnabled = True
+        self.translationEnabled = True
+
+    def disableTranslation(self):
+        self.translationEnabled = False
+        self.xformposer.enableTranslation(False)
+
+    def disableRotation(self):
+        self.rotationEnabled = False
+        self.xformposer.enableRotation(False)
+
+    def attach(self,object):
+        assert hasattr(object,'setTransform'),"Can only attach objects with setTransform and getTransform methods"
+        assert hasattr(object,'getTransform'),"Can only attach objects with setTransform and getTransform methods"
+        self.attachedObjects.append(object)
     
     def instructions(self):
-        return 'Right-click and drag on the widget to pose the transform'
+        if self.rotationEnabled and self.translationEnabled:
+            return 'Right-click and drag on the widget to pose the transform'
+        elif self.rotationEnabled:
+            return 'Right-click and drag on the widget to pose the rotation'
+        else:
+            return 'Right-click and drag on the widget to change the translation'
 
     def mousefunc(self,button,state,x,y):
         if VisualEditorBase.mousefunc(self,button,state,x,y):
             self.value = se3.mul(se3.inv(self.frame),self.xformposer.get())
+            if len(self.attachedRelativePoses) < len(self.attachedObjects):
+                for o in self.attachedObjects[len(self.attachedRelativePoses):]:
+                    self.attachedRelativePoses.append(se3.mul(se3.inv(self.xformposer.get()),o.getTransform()))
             return True
         return False
+
+    def motionfunc(self,x,y,dx,dy):
+        if VisualEditorBase.motionfunc(self,x,y,dx,dy):
+            self.value = se3.mul(se3.inv(self.frame),self.xformposer.get())
+            for o,p in zip(self.attachedObjects,self.attachedRelativePoses):
+                o.setTransform(*se3.mul(self.xformposer.get(),p))
+
+    def display(self):
+        VisualEditorBase.display(self)
+        return True
 
 
 class ObjectTransformEditor(VisualEditorBase):

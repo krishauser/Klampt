@@ -3,8 +3,8 @@
 #include <QSettings>
 #include <QApplication>
 
-QRobotTestGUI::QRobotTestGUI(GenericBackendBase *_backend,QKlamptDisplay* _display) :
-  QtGUIBase(_backend),display(_display),
+QRobotTestGUI::QRobotTestGUI(QKlamptDisplay* _display,GenericBackendBase *_backend) :
+  QKlamptGUIBase(_display,_backend),
     col_out(new CollisionOutput)
 
 {
@@ -40,24 +40,6 @@ void QRobotTestGUI::SetDriver(int index){
 void QRobotTestGUI::SetDriverValue(double val){
     SendCommand("set_driver",driver_index);
     SendCommand("set_driver_value",val);
-
-  connect(&idle_timer, SIGNAL(timeout()),this,SLOT(OnIdleTimer()));
-  idle_timer.start(0);
-}
-
-
-void QRobotTestGUI::OnIdleTimer()
-{
-  SendIdle();
-}
-
-bool QRobotTestGUI::OnPauseIdle(double secs) 
-{
-  if(secs > 10000000)
-    idle_timer.stop();
-  else
-    idle_timer.start(int(secs*1000));
-  return true;
 }
 
 
@@ -73,11 +55,6 @@ void QRobotTestGUI::SetLinkValue(double val){
     SendCommand("set_link_value",val);
 }
 
-bool QRobotTestGUI::OnRefresh()
-{
-  display->updateGL();
-  return true;
-}
 
 bool QRobotTestGUI::OnCommand(const string &cmd, const string &args){
   if(cmd=="update_config"){

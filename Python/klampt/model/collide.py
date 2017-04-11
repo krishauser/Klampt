@@ -12,10 +12,7 @@ def bb_intersect(a,b):
     """Returns true if the bounding boxes (a[0]->a[1]) and (b[0]->b[1]) intersect"""
     amin,amax=a
     bmin,bmax=b
-    for i in xrange(len(amin)):
-        if amax[i] < bmin[i] or bmax[i] < amin[i]:
-            return False
-    return True
+    return not any(q < u or v < p for (p,q,u,v) in zip(amin,amax,bmin,bmax))
 
 def self_collision_iter(geomlist,pairs='all'):
     """For a list of Geometry3D's, performs efficient self collision testing.
@@ -50,6 +47,7 @@ def self_collision_iter(geomlist,pairs='all'):
             g2 = geomlist[j]
             if g.collides(g2):
                 yield (i,j)
+    return
 
 def group_collision_iter(geomlist1,geomlist2,pairs='all'):
     """Tests whether two sets of geometries collide.
@@ -60,6 +58,7 @@ def group_collision_iter(geomlist1,geomlist2,pairs='all'):
 
     Uses a quick bounding box reject test.
     """
+    if len(geomlist1) == 0 or len(geomlist2) == 0: return
     bblist1 = [g.getBB() for g in geomlist1]
     bblist2 = [g.getBB() for g in geomlist2]
     if pairs=='all':
@@ -95,6 +94,7 @@ def group_subset_collision_iter(geomlist,alist,blist,pairs='all'):
 
     Uses a quick bounding box reject test.
     """
+    if len(alist) == 0 or len(blist) == 0: return
     bblist = [None]*len(geomlist)
     for id in alist:
         bblist[id] = geomlist[id].getBB()

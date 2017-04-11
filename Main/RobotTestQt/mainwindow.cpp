@@ -28,10 +28,9 @@ bool MainWindow::Initialize(int _argc,const char** _argv)
     }
     backend = new RobotTestBackend(&world);
     printf("BACKEND LOADED\n");
-    gui=new QRobotTestGUI(backend,ui->displaywidget);
+    gui=new QRobotTestGUI(ui->displaywidget,backend);
     gui->opened_file = argv[1];
     backend->Start();
-    ui->displaywidget->gui = gui;
 
     //Receive info from the GUI
     connect(gui,SIGNAL(UpdateDriverValue()),this,SLOT(UpdateDriverValue()));

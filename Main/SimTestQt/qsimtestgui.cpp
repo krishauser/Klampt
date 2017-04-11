@@ -2,7 +2,7 @@
 #include <KrisLibrary/utils/apputils.h>
 
 QSimTestGUI::QSimTestGUI(QKlamptDisplay* _display,SimTestBackend *_backend) :
-  QtGUIBase(_backend), display(_display)
+  QKlamptGUIBase(_display,_backend)
 {
   //BaseT::backend = _backend;
   //  BaseT::width = w;
@@ -12,7 +12,6 @@ QSimTestGUI::QSimTestGUI(QKlamptDisplay* _display,SimTestBackend *_backend) :
   assert(_backend != NULL);
   assert(sim != NULL);
   assert(sim->world != NULL);
-  _backend->gui = this;
 
   driver_tool=new DriverEdit(sim->world);
   connect(driver_tool,SIGNAL(SetDriverValue(int,float)),this,SLOT(SendDriverValue(int,float)));
@@ -57,24 +56,6 @@ QSimTestGUI::QSimTestGUI(QKlamptDisplay* _display,SimTestBackend *_backend) :
     Assert(res == true);
     AddCommandRule(c,rules[i*3+1],rules[i*3+2]);
   }
-
-  connect(&idle_timer, SIGNAL(timeout()),this,SLOT(OnIdleTimer()));
-  idle_timer.start(0);
-}
-
-void QSimTestGUI::OnIdleTimer()
-{
-  SendIdle();
-  idle_timer.start(0);
-}
-
-bool QSimTestGUI::OnPauseIdle(double secs) 
-{
-  if(secs > 10000000)
-    idle_timer.stop();
-  else
-    idle_timer.start(int(secs*1000));
-  return true;
 }
 
 bool QSimTestGUI::OnCommand(const string& cmd,const string& args)
@@ -92,12 +73,6 @@ bool QSimTestGUI::OnCommand(const string& cmd,const string& args)
   }
   else
     return QtGUIBase::OnCommand(cmd,args);
-}
-
-bool QSimTestGUI::OnRefresh()
-{
-  display->updateGL();
-  return true;
 }
 
 QSimTestGUI::~QSimTestGUI(){

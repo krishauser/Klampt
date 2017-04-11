@@ -1,7 +1,7 @@
 from cspace import CSpace
 from .. import robotsim
 from ..model import collide
-from cspaceutils import AdaptiveCSpace,EmbeddedCSpace
+from cspaceutils import EmbeddedCSpace
 import math
 import random
 
@@ -11,7 +11,7 @@ class RobotCSpace(CSpace):
     Warning: if your robot has non-standard joints, like a free-
     floating base or continuously rotating (spin) joints, you will need to
     overload the sample() method."""
-    def __init__(self,robot,world=None,collider=None):
+    def __init__(self,robot,collider=None):
         """Arguments:
         - robot: the robot which should move.
         - collider (optional): a collide.WorldCollider instance containing
@@ -25,8 +25,8 @@ class RobotCSpace(CSpace):
         self.addFeasibilityTest((lambda x: self.inJointLimits(x)),"joint limits")
 
         def setconfig(x):
-                self.robot.setConfig(x)
-                return True
+            self.robot.setConfig(x)
+            return True
         if collider:
             bb0 = ([float('inf')]*3,[float('-inf')]*3)
             bb = [bb0[0],bb0[1]]
@@ -142,17 +142,18 @@ class RobotSubsetCSpace(EmbeddedCSpace):
         EmbeddedCSpace.__init__(self,RobotCSpace(robot,collider),subset,xinit=robot.getConfig())
         self.collider = collider
         if self.collider:
-            inactive = []
+            #determine moving objects, which includes all links in the subset and descendants
+            moving = [False]*robot.numLinks()
             for i in range(robot.numLinks()):
-                if i not in subset: inactive.append(i)
-            #disable self-collisions for inactive objects
-            for i in inactive:
-                rindex = self.collider.robots[robot.index][i]
-                self.collider.mask[rindex] = set()
-
-    def liftPath(self,path):
-        """Given a CSpace path path, lifts this to the full robot configuration"""
-        return [self.lift(q) for q in path]
+                if i in subset: moving[i] = True
+                else:
+                    p = robot.link(i).getParent()
+                    if p >= 0 and moving[p]: moving[i]=True
+            #disable self-collisions for non moving objects
+            for i,mv in enumerate(moving):
+                if not mv:
+                    rindex = self.collider.robots[robot.index][i]
+                    self.collider.mask[rindex] = set()
 
     def sendPathToController(self,path,controller):
         """Given a planned CSpace path 'path' and a SimRobotController 'controller',

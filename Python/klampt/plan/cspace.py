@@ -85,6 +85,10 @@ class CSpace:
         self.bound = bound
         self.properties["minimum"] = [b[0] for b in bound]
         self.properties["maximum"] = [b[1] for b in bound]
+        volume = 1
+        for b in self.bound:
+            if b[0] != b[1]: volume *= b[1]-b[0]
+        self.properties['volume'] = volume
 
     def close(self):
         """This method must be called to free the memory associated with the
@@ -188,6 +192,12 @@ class CSpace:
                 if not test(x): return False
             return True
 
+    def getStats(self):
+        """Returns a dictionary mapping statistic names to values.  Result contains 
+        fraction of feasible configurations, edges, etc.  If feasibility tests are
+        individually specified, returns stats for individual tests as well. """
+        if self.cspace is None: return {}
+        return self.cspace.getStats()
 
 class MotionPlan:
     """A motion planner instantiated on a space.  Currently supports
@@ -322,11 +332,15 @@ class MotionPlan:
         """
         return self.planner.getRoadmap()
 
+    def getStats(self):
+        """Returns a dictionary mapping statistic names to values.  Result is
+        planner-dependent """
+        return self.planner.getStats()
 
 def _selfTest():
     c = CSpace()
     c.bound = [(-2,2),(-2,2)]
-    c.feasible = lambda(x): pow(x[0],2.0)+pow(x[1],2.0) > 1.0
+    c.feasible = lambda x: pow(x[0],2.0)+pow(x[1],2.0) > 1.0
     c.setup()
     MotionPlan.setOptions(type="rrt")
     print "Setup complete"
