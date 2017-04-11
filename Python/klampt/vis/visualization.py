@@ -305,6 +305,7 @@ def createWindow(name):
     _window_title = name
     _frontend = GLPluginProgram()
     _vis = VisualizationPlugin()
+    _frontend.setPlugin(_vis)
     _windows.append(WindowInfo(_window_title,_frontend,_vis))
     _current_worlds = []
     id = len(_windows)-1
