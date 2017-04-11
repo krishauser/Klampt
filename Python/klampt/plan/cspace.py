@@ -188,6 +188,12 @@ class CSpace:
                 if not test(x): return False
             return True
 
+    def getStats(self):
+        """Returns a dictionary mapping statistic names to values.  Result contains 
+        fraction of feasible configurations, edges, etc.  If feasibility tests are
+        individually specified, returns stats for individual tests as well. """
+        if self.cspace is None: return {}
+        return self.cspace.getStats()
 
 class MotionPlan:
     """A motion planner instantiated on a space.  Currently supports
@@ -322,11 +328,15 @@ class MotionPlan:
         """
         return self.planner.getRoadmap()
 
+    def getStats(self):
+        """Returns a dictionary mapping statistic names to values.  Result is
+        planner-dependent """
+        return self.planner.getStats()
 
 def _selfTest():
     c = CSpace()
     c.bound = [(-2,2),(-2,2)]
-    c.feasible = lambda(x): pow(x[0],2.0)+pow(x[1],2.0) > 1.0
+    c.feasible = lambda x: pow(x[0],2.0)+pow(x[1],2.0) > 1.0
     c.setup()
     MotionPlan.setOptions(type="rrt")
     print "Setup complete"
