@@ -4,10 +4,9 @@ import sys
 from klampt import *
 sys.path.append("Web/Server")
 #sys.path.append(".")
-from webrobotprogram import *
 import kviz
 from klampt import *
-from klampt import vectorops,so2,so3,se3
+from klampt.math import vectorops,so2,so3,se3
 import random
 
 #from kviz import *

@@ -1,12 +1,15 @@
+from klampt import *
+from klampt.model.collide import WorldCollider
+from klampt.model.trajectory import RobotTrajectory
+from klampt.vis.glcommon import *
+from klampt import vis
+from klampt.math import vectorops,so3,se3
+from klampt.plan.cspace import CSpace,MotionPlan
+from openhands import openhand
+from OpenGL.GL import *
 import math
 import random
-from klampt import *
-from klampt import robotcollide
-from klampt.glprogram import *
-from klampt import vectorops
-from klampt import so3,se3
-from klampt.cspace import CSpace,MotionPlan
-from openhands import openhand
+import time
 
 class Hand:
     """Defines basic elements of a hand and its arm.
@@ -50,7 +53,7 @@ class Globals:
     def __init__(self,world):
         self.world = world
         self.robot = world.robot(0)
-        self.collider = robotcollide.WorldCollider(world)
+        self.collider = WorldCollider(world)
 
 ############################# Problem 1 ##############################
 
@@ -81,6 +84,7 @@ class TransitCSpace(CSpace):
         self.robot.setConfig(q)
         world = self.globals.world
         collider = self.globals.collider
+        #TODO: this could be much more efficient if you only tested the robot's moving joints
         #test robot-object collisions
         for o in xrange(world.numRigidObjects()):
             if any(collider.robotObjectCollisions(self.robot.index,o)):
@@ -111,15 +115,19 @@ def planTransit(world,objectIndex,hand):
     qpregrasparm = None
     solver = hand.ikSolver(robot,obj.getTransform()[1],[0,0,1])
     print "Trying to find pregrasp config..."
-    (res,iters) = solver.solve(100,1e-3);
+    solver.setMaxIters(100)
+    solver.setTolerance(1e-3)
+    res = solver.solve();
     if res:
         qpregrasp =  robot.getConfig()
         qpregrasparm = [qpregrasp[i] for i in hand.armIndices]
         if not cspace.feasible(qpregrasparm):
             print "Pregrasp config infeasible"
+            cspace.close()
             return None
     if qpregrasp == None:
         print "Pregrasp solve failed"
+        cspace.close()
         return None
 
     print "Planning transit motion to pregrasp config..."
@@ -131,10 +139,11 @@ def planTransit(world,objectIndex,hand):
     while planner.getPath()==None and iters < 1000:
         planner.planMore(step)
         iters += step
+    cspace.close()
     if planner.getPath() == None:
         print "Failed finding transit path"
         return None
-    print "Success"
+    print "Success, found path with",len(planner.getPath()),"milestones"
 
     #lift arm path to whole configuration space path
     path = []
@@ -146,19 +155,17 @@ def planTransit(world,objectIndex,hand):
     #add a path to the grasp configuration
     return path + [hand.open(path[-1],0)]
 
-class GLTransitPlanProgram(GLRealtimeProgram):
+class GLTransitPlanPlugin(GLPluginInterface):
     def __init__(self,world):
-        GLRealtimeProgram.__init__(self,"GLTransitPlanProgram")
+        GLPluginInterface.__init__(self)
         self.world = world
         self.robot = world.robot(0)
         self.qstart = self.robot.getConfig()
         #solution to planning problem
         self.path = None
-        self.animationTime = None
 
     def display(self):
-        #draw the world
-        self.world.drawGL()
+        #draw points on the robot
         lh = Hand('l')
         rh = Hand('r')
         glDisable(GL_LIGHTING)
@@ -180,46 +187,55 @@ class GLTransitPlanProgram(GLRealtimeProgram):
         if key == 'l':
             self.robot.setConfig(self.qstart)
             self.path = planTransit(self.world,0,Hand('l'))
+            if self.path:
+                #convert to a timed path for animation's sake
+                self.path = RobotTrajectory(self.robot,range(len(self.path)),self.path)
             #reset the animation
-            self.animationTime = self.ttotal
-            glutPostRedisplay()
+            vis.animate(("world",self.robot.getName()),self.path)
+            return True
         elif key == 'r':
             self.robot.setConfig(self.qstart)
             self.path = planTransit(self.world,0,Hand('r'))
+            if self.path:
+                #convert to a timed path for animation's sake
+                self.path = RobotTrajectory(self.robot,range(len(self.path)),self.path)
             #reset the animation
-            self.animationTime = self.ttotal
-            glutPostRedisplay()
-
-    def idle(self):
-        if self.path:
-            #loop the path animation
-            u = (self.ttotal - self.animationTime)
-            i = int(math.floor(u))
-            s = u - i
-            i = i%(len(self.path)-1)
-            #set the robot configuration for display
-            q = vectorops.interpolate(self.path[i],self.path[i+1],s)
-            self.robot.setConfig(q)
-            glutPostRedisplay()
+            vis.animate(("world",self.robot.getName()),self.path)
+            return True
+        return False
 
 def run_ex1():
     world = WorldModel()
     res = world.readFile("ex1_file.xml")
     if not res: raise RuntimeError("Unable to load world file")
-    GLTransitPlanProgram(world).run()
+    vis.add("world",world)
+    vis.setWindowTitle("Transit plan test, press l/r to plan with left/right arm")
+    vis.pushPlugin(GLTransitPlanPlugin(world))
+    vis.show()
+    while vis.shown():
+        time.sleep(0.1)
+    vis.setPlugin(None)
+    vis.kill()
 
 
 
 ############################# Problem 2 ##############################
+
+def graspTransform(robot,hand,qrobot0,Tobj0):
+    """Given initial robot configuration qrobot0 and object transform Tobj0,
+    returns the grasp transformation Tgrasp, which produces the object transform
+    via the composition  Tobj = Thand * Tgrasp"""
+    robot.setConfig(qrobot0)
+    Thand0 = robot.link(hand.link).getTransform()
+    Tgrasp = se3.mul(se3.inv(Thand0),Tobj0)
+    return Tgrasp
 
 
 def graspedObjectTransform(robot,hand,qrobot0,Tobj0,qrobot):
     """Given initial robot configuration qrobot0 and object transform Tobj0,
     returns the object transformation corresponding to new configuration
     qrobot assuming the object is rigidly attached to the hand"""
-    robot.setConfig(qrobot0)
-    Thand0 = robot.link(hand.link).getTransform()
-    Tgrasp = se3.mul(se3.inv(Thand0),Tobj0)
+    Tgrasp = graspedObjectTransform(robot,hand,qrobot0,Tobj0)
     robot.setConfig(qrobot)
     Thand = robot.link(hand.link).getTransform()
     return se3.mul(Thand,Tgrasp)
@@ -232,12 +248,11 @@ class TransferCSpace(CSpace):
         self.robot = globals.robot
         self.hand = hand
         self.object = object
-        #setup initial object-robot transform
-        Thand0 = self.robot.link(hand.link).getTransform()
-        Tobj0 = object.getTransform()
-        self.Tgrasp = se3.mul(se3.inv(Thand0),Tobj0)
         #initial whole-body configuratoin
         self.q0 = self.robot.getConfig()
+        #setup initial grasp transform
+        Tobj0 = object.getTransform()
+        self.Tgrasp = graspTransform(self.robot,hand,self.q0,Tobj0)
         #setup CSpace sampling range
         qlimits = zip(*self.robot.getJointLimits())
         self.bound = [qlimits[i] for i in self.hand.armIndices]
@@ -303,6 +318,7 @@ def planTransfer(world,objectIndex,hand,shift):
         print "Warning, arm start configuration is infeasible"
         print "TODO: Complete 2.a to bypass this error"
         raw_input()
+        cspace.close()
         return None
                 
     #TODO: get the ungrasp config using an IK solver
@@ -321,6 +337,7 @@ def planTransfer(world,objectIndex,hand,shift):
     print "TODO: Complete 2.c to find a feasible transfer path"
     raw_input()
     
+    cspace.close()
     #lift arm path to whole configuration space path
     path = []
     for qarm in planner.getPath():
@@ -331,9 +348,9 @@ def planTransfer(world,objectIndex,hand,shift):
     qpostungrasp = hand.open(qungrasp,1.0)
     return path + [qpostungrasp]
 
-class GLTransferPlanProgram(GLRealtimeProgram):
+class GLTransferPlanPlugin(GLPluginInterface):
     def __init__(self,world):
-        GLRealtimeProgram.__init__(self,"GLTransferPlanProgram")
+        GLPluginInterface.__init__(self)
         self.world = world
         self.robot = world.robot(0)
         self.object = world.rigidObject(0)
@@ -341,50 +358,61 @@ class GLTransferPlanProgram(GLRealtimeProgram):
         self.qstart = self.robot.getConfig()
         #start object transform
         self.Tstart = self.object.getTransform()
+        #grasp transform
+        self.Tgrasp = Tgrasp = graspTransform(self.robot,Hand('l'),self.qstart,self.Tstart)
         #solution to planning problem
         self.path = None
-        self.animationTime = None
-
-    def display(self):
-        #draw the world
-        self.world.drawGL()
 
     def keyboardfunc(self,key,x,y):
         if key == 'r':
             self.robot.setConfig(self.qstart)
             self.object.setTransform(*self.Tstart)
             self.path = planTransfer(self.world,0,Hand('l'),(0,-0.15,0))
+            if self.path:
+                #convert to a timed path for animation's sake
+                self.path = RobotTrajectory(self.robot,range(len(self.path)),self.path)
+                #compute object trajectory
+                resolution = 0.05
+                self.objectPath = self.path.getLinkTrajectory(Hand('l').link,resolution)
+                self.objectPath.postTransform(self.Tgrasp)
+            else:
+                self.path = None
             #reset the animation
-            self.animationTime = self.ttotal
-            glutPostRedisplay()
+            vis.animate(("world",self.robot.getName()),self.path)
+            vis.animate(("world",self.object.getName()),self.objectPath)
+            return True
         elif key == 'f':
             self.robot.setConfig(self.qstart)
             self.object.setTransform(*self.Tstart)
             self.path = planTransfer(self.world,0,Hand('l'),(0.15,0,0))
+            if self.path:
+                #convert to a timed path for animation's sake
+                self.path = RobotTrajectory(self.robot,range(len(self.path)),self.path)
+                #compute object trajectory
+                resolution = 0.05
+                self.objectPath = self.path.getLinkTrajectory(Hand('l').link,resolution)
+                self.objectPath.postTransform(self.Tgrasp)
+            else:
+                self.path = None
             #reset the animation
-            self.animationTime = self.ttotal
-            glutPostRedisplay()
+            vis.animate(("world",self.robot.getName()),self.path)
+            vis.animate(("world",self.object.getName()),self.objectPath)
+            return True
+        return False
 
-    def idle(self):
-        if self.path:
-            #loop the path animation
-            u = (self.ttotal - self.animationTime)
-            i = int(math.floor(u))
-            s = u - i
-            i = i%(len(self.path)-1)
-            q = vectorops.interpolate(self.path[i],self.path[i+1],s)
-            #set the robot configuration for display
-            self.robot.setConfig(q)
-            #compute and set object transform for display
-            Tobj = graspedObjectTransform(self.robot,Hand('l'),self.qstart,self.Tstart,q)
-            self.object.setTransform(*Tobj)
-            glutPostRedisplay()
 
 def run_ex2():
     world = WorldModel()
     res = world.readFile("ex2_file.xml")
     if not res: raise RuntimeError("Unable to load world file")
-    GLTransferPlanProgram(world).run()
+    vis.add("world",world)
+    vis.pushPlugin(GLTransferPlanPlugin(world))
+    vis.setWindowTitle("Transfer plan test, press r/f to plan with right/forward target")
+    vis.show()
+    while vis.shown():
+        time.sleep(0.1)
+    vis.setPlugin(None)
+    vis.kill()
 
 ############################# Problem 3 ##############################
 
@@ -416,6 +444,7 @@ def planFree(world,hand,qtarget):
     while planner.getPath()==None and iters < 1000:
         planner.planMore(step)
         iters += step
+    cspace.close()
     if planner.getPath() == None:
         print "Failed finding transit path"
         return None
@@ -429,9 +458,9 @@ def planFree(world,hand,qtarget):
             path[-1][i] = qi
     return path
 
-class GLPickAndPlaceProgram(GLRealtimeProgram):
+class GLPickAndPlacePlugin(GLPluginInterface):
     def __init__(self,world):
-        GLRealtimeProgram.__init__(self,"GLPickAndPlaceProgram")
+        GLPluginInterface.__init__(self)
         self.world = world
         self.robot = world.robot(0)
         self.object = world.rigidObject(0)
@@ -444,11 +473,6 @@ class GLPickAndPlaceProgram(GLRealtimeProgram):
         self.transferPath = None
         self.retractPath = None
         self.animationTime = None
-
-    def display(self):
-        #draw the world
-        self.world.drawGL()
-
 
     def keyboardfunc(self,key,x,y):
         h = 0.932
@@ -463,6 +487,7 @@ class GLPickAndPlaceProgram(GLRealtimeProgram):
             self.transitPath = planTransit(self.world,0,self.hand)
             if self.transitPath:
                 #plan transfer path
+                self.Tgrasp = graspTransform(self.robot,self.hand,self.transitPath[-1],self.Tstart)
                 self.robot.setConfig(self.transitPath[-1])
                 self.transferPath = planTransfer(self.world,0,self.hand,shift)
                 if self.transferPath:
@@ -473,8 +498,23 @@ class GLPickAndPlaceProgram(GLRealtimeProgram):
                     self.retractPath = planFree(self.world,self.hand,self.qstart)
             
             #reset the animation
-            self.animationTime = self.ttotal
-            glutPostRedisplay()
+            if self.transitPath and self.transferPath and self.retractPath:
+                milestones = self.transitPath+self.transferPath+self.retractPath
+                self.path = RobotTrajectory(self.robot,range(len(milestones)),milestones)
+
+                resolution = 0.05
+                xfertraj = RobotTrajectory(self.robot,range(len(self.transferPath)),self.transferPath)
+                xferobj = xfertraj.getLinkTrajectory(self.hand.link,resolution)
+                xferobj.postTransform(self.Tgrasp)
+                #offset times to be just during the transfer stage
+                for i in xrange(len(xferobj.times)):
+                    xferobj.times[i] += len(self.transitPath)
+                self.objectPath = xferobj
+                vis.animate(("world",self.robot.getName()),self.path)
+                vis.animate(("world",self.object.getName()),self.objectPath)
+            else:
+                vis.animate(("world",self.robot.getName()),None)
+                vis.animate(("world",self.object.getName()),None)
         if key=='n':
             print "Moving to next action"
             if self.transitPath and self.transferPath and self.retractPath:
@@ -486,48 +526,29 @@ class GLPickAndPlaceProgram(GLRealtimeProgram):
                 self.transitPath = None
                 self.transferPath = None
                 self.hand = None
-                glutPostRedisplay()
+                self.Tgrasp = None
+                self.refresh()
 
-    def idle(self):
-        if self.transitPath and self.transferPath and self.retractPath:
-            #loop the path animation
-            n = len(self.transitPath)+len(self.transferPath)+len(self.retractPath)-2
-            u = (self.ttotal - self.animationTime)*3.0
-            i = int(math.floor(u))
-            s = u - i
-            i = i%(n-1)
-            if i+1 < len(self.transitPath):
-                q = vectorops.interpolate(self.transitPath[i],self.transitPath[i+1],s)
-                #set the robot configuration for display
-                self.robot.setConfig(q)
-                self.object.setTransform(*self.Tstart)
-            elif i+1 < len(self.transitPath)+len(self.transferPath)-1:
-                #index into the transfer path
-                i = i - (len(self.transitPath)-1)
-                q = vectorops.interpolate(self.transferPath[i],self.transferPath[i+1],s)
-                Tobj = graspedObjectTransform(self.robot,self.hand,self.transferPath[0],self.Tstart,q)
-                self.robot.setConfig(q)
-                self.object.setTransform(*Tobj)
-            else:
-                #index into the transfer path
-                i = i - (len(self.transitPath)-1) - (len(self.transferPath)-1)
-                q = vectorops.interpolate(self.retractPath[i],self.retractPath[i+1],s)
-                self.robot.setConfig(q)
-                self.object.setTransform(*self.Tgoal)
-            glutPostRedisplay()
 
 def run_ex3():
     world = WorldModel()
     res = world.readFile("ex3_file.xml")
     if not res: raise RuntimeError("Unable to load world file")
-    GLPickAndPlaceProgram(world).run()    
+    vis.add("world",world)
+    vis.setWindowTitle("Pick and place test, use a/b/c/d to select target")
+    vis.pushPlugin(GLPickAndPlacePlugin(world))    
+    vis.show()
+    while vis.shown():
+         time.sleep(0.1)
+    vis.setPlugin(None)
+    vis.kill()
 
 if __name__ == "__main__":
     #runs exercise 1
-    run_ex1()
+    #run_ex1()
 
     #runs exercise 2
     #run_ex2()
 
     #runs exercise 3
-    #run_ex3()
+    run_ex3()

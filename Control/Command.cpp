@@ -4,7 +4,7 @@
 #include <KrisLibrary/errors.h>
 
 ActuatorCommand::ActuatorCommand()
-  :mode(OFF),measureAngleAbsolute(true),
+  :mode(OFF),measureAngleAbsolute(true),qmin(-Inf),qmax(Inf),
    kP(0),kI(0),kD(0),qdes(0),dqdes(0),iterm(0),
   torque(0),desiredVelocity(0)
 {}
@@ -16,6 +16,9 @@ void ActuatorCommand::SetOff()
 
 void ActuatorCommand::SetPID(Real _qdes,Real _dqdes,Real _iterm)
 {
+  if(_qdes < qmin || _qdes > qmax) {
+    printf("Command.cpp: Warning, PID desired is out of joint limits: %g <= %g <= %g\n",qmin,_qdes,qmax);
+  }
   mode=PID;
   qdes=_qdes;
   dqdes=_dqdes;
@@ -41,12 +44,14 @@ Real ActuatorCommand::GetPIDTorque(Real q,Real dq) const
   Real deltaq,deltadq;
   if(measureAngleAbsolute) {
     deltaq=qdes-q;
-    if(Abs(AngleDiff(qdes,q)) < Abs(deltaq*0.5)) {
-      printf("PID loop has a possible angle encoder error, using AngleDiff\n");
-      printf("  qdes = %g, q = %g\n",qdes,q);
-      printf("  AngleDiff %g, sub %g\n",AngleDiff(qdes,q),deltaq);
-      //getchar();
-      deltaq = AngleDiff(qdes,q);
+    if(q < qmin || q > qmax) {
+      if(Abs(AngleDiff(qdes,q)) < Abs(deltaq*0.5)) {
+        printf("Command.cpp: Warning, PID loop has a possible angle encoder error, using AngleDiff\n");
+        printf("  qdes = %g, q = %g\n",qdes,q);
+        printf("  AngleDiff %g, sub %g\n",AngleDiff(qdes,q),deltaq);
+        //getchar();
+        deltaq = AngleDiff(qdes,q);
+      }
     }
   }
   else

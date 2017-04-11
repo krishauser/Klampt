@@ -1,3 +1,11 @@
  recursive-include klampt/ *.py
+ recursive-include klampt/model *.py
+ recursive-include klampt/sim *.py
+ recursive-include klampt/io *.py
+ recursive-include klampt/web *.py
+ recursive-include klampt/math *.py
+ recursive-include klampt/plan *.py
+ recursive-include klampt/vis *.py
  recursive-include klampt/src *.h
  recursive-include klampt/src *.cpp
+ recursive-include klampt/data *

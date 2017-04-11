@@ -43,7 +43,7 @@ void StandardInputProcessor::Hover(int mx,int my)
   
   int link;
   Vector3 localPos;
-  Robot* rob = world->ClickRobot( ray, link, localPos);
+  Robot* rob = world->RayCastRobot( ray, link, localPos);
   Robot* robot = GetRobot();
   if (rob) {
     currentLink = link;

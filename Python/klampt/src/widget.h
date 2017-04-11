@@ -86,6 +86,7 @@ class RobotPoser : public Widget
 {
  public:
   RobotPoser(RobotModel& robot);
+  void setActiveDofs(const std::vector<int>& dofs);
   void set(const std::vector<double>& q);
   void get(std::vector<double>& out);
   void getConditioned(const std::vector<double>& qref,std::vector<double>& out);

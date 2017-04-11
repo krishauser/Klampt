@@ -1,4 +1,4 @@
-from klampt import vectorops
+from klampt.math import vectorops
 from controller import BaseController,LambdaController
 from MotionModel import AdaptiveMotionModel
 

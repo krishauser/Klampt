@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <world>
-  <terrain file="../terrains/block.tri"  translation="0 0 0"/>
+  <terrain file="../terrains/block.off"  translation="0 0 0"/>
   <rigidObject name="sphere1"  position="-0.5 0 2.00000">
      <geometry mesh="../objects/sphere.geom" scale="0.1"/>
      <physics mass="1.000000" automass="1" kRestitution="1" kFriction="0.500000" kStiffness="inf" kDamping="inf" />
@@ -23,23 +23,23 @@
   </rigidObject> 
 
   <rigidObject name="sphere6"  position="-0.5 0.5 2.00000">
-     <geometry mesh="../objects/sphere.tri" scale="0.1"/>
+     <geometry mesh="../objects/sphere.off" scale="0.1"/>
      <physics mass="1.000000" automass="1" kRestitution="1" kFriction="0.500000" kStiffness="inf" kDamping="inf" />
   </rigidObject> 
   <rigidObject name="sphere7"  position="-0.25 0.5 2.00000">
-     <geometry mesh="../objects/sphere.tri" scale="0.1"/>
+     <geometry mesh="../objects/sphere.off" scale="0.1"/>
      <physics mass="1.000000" automass="1" kRestitution="0.75" kFriction="0.500000" kStiffness="inf" kDamping="inf" />
   </rigidObject> 
   <rigidObject name="sphere8"  position="0 0.5 2.00000">
-     <geometry mesh="../objects/sphere.tri" scale="0.1"/>
+     <geometry mesh="../objects/sphere.off" scale="0.1"/>
      <physics mass="1.000000" automass="1" kRestitution="0.5" kFriction="0.500000" kStiffness="inf" kDamping="inf" />
   </rigidObject> 
   <rigidObject name="sphere9"  position="0.25 0.5 2.00000">
-     <geometry mesh="../objects/sphere.tri" scale="0.1"/>
+     <geometry mesh="../objects/sphere.off" scale="0.1"/>
      <physics mass="1.000000" automass="1" kRestitution="0.25" kFriction="0.500000" kStiffness="inf" kDamping="inf" />
   </rigidObject> 
   <rigidObject name="sphere10"  position="0.5 0.5 2.00000">
-     <geometry mesh="../objects/sphere.tri" scale="0.1"/>
+     <geometry mesh="../objects/sphere.off" scale="0.1"/>
      <physics mass="1.000000" automass="1" kRestitution="0" kFriction="0.500000" kStiffness="inf" kDamping="inf" />
   </rigidObject> 
 

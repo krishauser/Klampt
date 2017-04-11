@@ -16,6 +16,8 @@ using namespace std;
 RigidObject::RigidObject()
 {
   T.setIdentity();
+  w.setZero();
+  v.setZero();
   mass = 1;
   com.setZero();
   inertia.setIdentity();
@@ -34,6 +36,9 @@ bool RigidObject::Load(const char* fn)
     f.AllowItem("geomscale");
     f.AllowItem("geomtranslate");
     f.AllowItem("T");
+    f.AllowItem("position");
+    f.AllowItem("velocity");
+    f.AllowItem("angularVelocity");
     f.AllowItem("mass");
     f.AllowItem("inertia");
     f.AllowItem("com");
@@ -87,18 +92,18 @@ bool RigidObject::Load(const char* fn)
     else {
       if(!f.CheckType("T",PrimitiveValue::Double,fn)) return false;
       vector<double> items = f.AsDouble("T");
-      if(items.size()==12) { //read 4 columns of 3
-	Vector3 x(items[0],items[1],items[2]);
-	Vector3 y(items[3],items[4],items[5]);
-	Vector3 z(items[6],items[7],items[8]);
+      if(items.size()==12) { //read 4 columns of 3, row major then translation, just like RigidTransform
+	Vector3 x(items[0],items[3],items[6]);
+	Vector3 y(items[1],items[4],items[7]);
+	Vector3 z(items[2],items[5],items[8]);
 	Vector3 t(items[9],items[10],items[11]);
 	T.R.set(x,y,z); T.t=t;
       }
-      else if(items.size()==16) { //read 4 columns of 4
-	Vector3 x(items[0],items[1],items[2]);
-	Vector3 y(items[4],items[5],items[6]);
-	Vector3 z(items[8],items[9],items[10]);
-	Vector3 t(items[12],items[13],items[14]);
+      else if(items.size()==16) { //read 4 rows of a 4 x 4 transform matrix
+	Vector3 x(items[0],items[4],items[8]);
+	Vector3 y(items[1],items[5],items[9]);
+	Vector3 z(items[2],items[6],items[10]);
+	Vector3 t(items[3],items[7],items[11]);
 	T.R.set(x,y,z); T.t=t;
       }
       else {
@@ -106,6 +111,27 @@ bool RigidObject::Load(const char* fn)
 	return false;
       }
       f.erase("T");
+    }
+    if(f.count("position") != 0) {
+      if(!f.CheckType("position",PrimitiveValue::Double,fn)) return false;
+      if(!f.CheckSize("position",3,fn)) return false;
+      vector<double> trans = f.AsDouble("position");
+      T.t.set(trans[0],trans[1],trans[2]);
+      f.erase("position");
+    }
+    if(f.count("velocity") != 0) {
+      if(!f.CheckType("velocity",PrimitiveValue::Double,fn)) return false;
+      if(!f.CheckSize("velocity",3,fn)) return false;
+      vector<double> trans = f.AsDouble("velocity");
+      v.set(trans[0],trans[1],trans[2]);
+      f.erase("velocity");
+    }
+    if(f.count("angularVelocity") != 0) {
+      if(!f.CheckType("angularVelocity",PrimitiveValue::Double,fn)) return false;
+      if(!f.CheckSize("angularVelocity",3,fn)) return false;
+      vector<double> trans = f.AsDouble("angularVelocity");
+      w.set(trans[0],trans[1],trans[2]);
+      f.erase("angularVelocity");
     }
     if(f.count("mass")==0) { mass=1.0;  }
     else {
@@ -217,8 +243,20 @@ bool RigidObject::Save(const char* fn)
 {
   ofstream out(fn);
   if(!out) return false;
-  fprintf(stderr,"RigidObject::Save: not done yet\n");
-  return false;
+  out<<"mesh "<<geomFile<<endl;
+  out<<"T "<<T.R(0,0)<<" "<<T.R(0,1)<<" "<<T.R(0,2)<<" "<<T.R(1,0)<<" "<<T.R(1,1)<<" "<<T.R(1,2)<<" "<<T.R(2,0)<<" "<<T.R(2,1)<<" "<<T.R(2,2)<<" "<<T.t<<endl;
+  if(!v.isZero())
+    out<<"velocity "<<v<<endl;
+  if(!w.isZero())
+    out<<"angularVelocity "<<w<<endl;
+  out<<"mass "<<mass<<endl;
+  out<<"com "<<com<<endl;
+  out<<"inertia "<<inertia(0,0)<<" "<<inertia(0,1)<<" "<<inertia(0,2)<<" "<<inertia(1,0)<<" "<<inertia(1,1)<<" "<<inertia(1,2)<<" "<<inertia(2,0)<<" "<<inertia(2,1)<<" "<<inertia(2,2)<<endl;
+  out<<"kFriction "<<kFriction<<endl;
+  out<<"kRestitution "<<kRestitution<<endl;
+  out<<"kStiffness "<<kStiffness<<endl;
+  out<<"kDamping "<<kDamping<<endl;
+  out.close();
   return true;
 }
 

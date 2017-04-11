@@ -4,9 +4,7 @@ import sys
 from klampt import *
 sys.path.append("Web/Server")
 #sys.path.append(".")
-from webrobotprogram import *
 import kviz
-#from kviz import *
 
 #Stub code module will have these functions defined:
 #def init(world):
@@ -21,13 +19,13 @@ t = 0
 def boilerplate_start():
 	global world,t
 	t = 0
-        world = WorldModel()
+	world = WorldModel()
 	kviz._init(world)
 	stub.init(world)
 
 def boilerplate_advance():
 	global world,t
-        stub.advance(t,world)
+	stub.advance(t,world)
 	t += 0.02
 
 def boilerplate_keypress(key):

@@ -1,5 +1,8 @@
 import sys
 
+print "make_planar_rob.py: Creates a simple ND planar robot with unit length links."""
+print "USAGE: python make_planar_rob.py N"
+
 n = int(sys.argv[1])
 
 #scale = 1.0/n

@@ -18,7 +18,7 @@ jointtype p p p r r r r r r
 qMin -inf -inf -inf 0 0 0 0 0 0
 qMax inf inf inf 6.2832 6.2832 6.2832 6.2832 6.2832 6.2832
 q 0 0 0 0 0 0 0 0 0
-geometry   ""   ""   ""   ""    ""  	"box_ori_center.tri"	""	"" 	"sphere.tri"
+geometry   ""   ""   ""   ""    ""  	"box_ori_center.off"	""	"" 	"sphere.off"
 geomscale 1 1 1 1 1 0.05 1 1 0.04
 mass       0 0 0 0 0 0.50 0.01 0.01 0.02
 com	0 0 0	\

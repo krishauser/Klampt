@@ -1,5 +1,5 @@
 import klampt
-from klampt.trajectory import Trajectory
+from klampt.model.trajectory import Trajectory
 
 def configToDrivers(robot,q):
     """Converts a configuration of the robot's drivers to a configuration of the robot"""
@@ -23,7 +23,11 @@ def configToDriverTrajectory(robot,traj):
 if __name__=="__main__":
     import sys
     if len(sys.argv) != 4:
-        print "Usage: config_to_driver_trajectory robot config_traj driver_traj"
+	print "config_to_driver_trajectory.py: Converts a trajectory file specified in a"
+	print "robot's configuration space into a trajectory in the robot's driver (actuator)"
+	print "space."
+	print
+        print "Usage: python config_to_driver_trajectory.py robot config_traj driver_traj"
         exit(0)
     robotfn = sys.argv[1]
     trajfn = sys.argv[2]

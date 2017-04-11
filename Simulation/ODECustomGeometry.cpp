@@ -41,12 +41,6 @@ dGeomID dCreateCustomGeometry(AnyCollisionGeometry3D* geometry,Real outerMargin)
 {
   dGeomID geom = dCreateGeom(gdCustomGeometryClass);
   CustomGeometryData* data = dGetCustomGeometryData(geom);
-
-  if(geometry->type == AnyGeometry3D::TriangleMesh) {
-    AnyCast<CollisionMesh>(&geometry->collisionData)->CalcIncidentTris();
-    AnyCast<CollisionMesh>(&geometry->collisionData)->CalcTriNeighbors();
-  }
-
   data->geometry = geometry;
   data->outerMargin = outerMargin;
   data->odeOffset.setZero();
@@ -93,12 +87,13 @@ int VertexIndex(const Vector3& b)
   return -1;
 }
 
-Vector3 VertexNormal(const CollisionMesh& m,int tri,int vnum)
+Vector3 VertexNormal(CollisionMesh& m,int tri,int vnum)
 {
   if(m.incidentTris.empty()) {
     fprintf(stderr,"VertexNormal: mesh is not properly initialized with incidentTris array?\n");
-    return Vector3(0.0);
-    FatalError("VertexNormal: mesh is not properly initialized with incidentTris array?");
+    m.CalcIncidentTris();
+    //return Vector3(0.0);
+    //FatalError("VertexNormal: mesh is not properly initialized with incidentTris array?");
   }
   Assert(vnum >= 0 && vnum < 3);
   int v=m.tris[tri][vnum];
@@ -111,11 +106,12 @@ Vector3 VertexNormal(const CollisionMesh& m,int tri,int vnum)
   return m.currentTransform.R*n;
 }
 
-Vector3 EdgeNormal(const CollisionMesh& m,int tri,int e)
+Vector3 EdgeNormal(CollisionMesh& m,int tri,int e)
 {
   if(m.triNeighbors.empty()) {
     fprintf(stderr,"EdgeNormal: Warning, mesh is not properly initialized with triNeighbors\n");
-    return Vector3(0.0);
+    m.CalcTriNeighbors();
+    //return Vector3(0.0);
   }
   Assert(!m.triNeighbors.empty());
   Vector3 n=m.TriangleNormal(tri);
@@ -129,7 +125,7 @@ Vector3 EdgeNormal(const CollisionMesh& m,int tri,int e)
 ///Compute normal from mesh geometry: returns the local normal needed for
 ///triangle 1 on m1 to get out of triangle 2 on m2.
 ///p1 and p2 are given in local coordinates
-Vector3 ContactNormal(const CollisionMesh& m1,const CollisionMesh& m2,const Vector3& p1,const Vector3& p2,int t1,int t2)
+Vector3 ContactNormal(CollisionMesh& m1,CollisionMesh& m2,const Vector3& p1,const Vector3& p2,int t1,int t2)
 {
   Triangle3D tri1,tri2;
   m1.GetTriangle(t1,tri1);
@@ -241,7 +237,7 @@ Vector3 ContactNormal(const CollisionMesh& m1,const CollisionMesh& m2,const Vect
 
 //Returns a contact normal for the closest point to the triangle t.  p is the point on the triangle.
 //The direction is the one in which triangle 1 can move to get away from closestpt
-Vector3 ContactNormal(const CollisionMesh& m,const Vector3& p,int t,const Vector3& closestPt)
+Vector3 ContactNormal(CollisionMesh& m,const Vector3& p,int t,const Vector3& closestPt)
 {
   Triangle3D tri;
   m.GetTriangle(t,tri);
@@ -574,28 +570,13 @@ int PointCloudMeshCollide(CollisionPointCloud& pc1,Real outerMargin1,CollisionMe
   return num;
 }
 
-int MeshPrimitiveCollide(CollisionMesh& m1,Real outerMargin1,GeometricPrimitive3D& g2,const RigidTransform& T2,Real outerMargin2,dContactGeom* contact,int maxcontacts)
+int MeshSphereCollide(CollisionMesh& m1,Real outerMargin1,const Sphere3D& s,Real outerMargin2,dContactGeom* contact,int maxcontacts)
 {
-  GeometricPrimitive3D gworld=g2;
-  gworld.Transform(T2);
-  Sphere3D s;
-  if(gworld.type != GeometricPrimitive3D::Point && gworld.type != GeometricPrimitive3D::Sphere) {
-    fprintf(stderr,"Distance computations between Triangles and %s not supported\n",gworld.TypeName());
-    return 0;
-  }
-  if(gworld.type == GeometricPrimitive3D::Point) {
-    s.center = *AnyCast<Point3D>(&gworld.data);
-    s.radius = 0;
-  }
-  else {
-    s = *AnyCast<Sphere3D>(&gworld.data);
-  }
-    
   Real tol = outerMargin1 + outerMargin2;
   Triangle3D tri;
   vector<int> tris;
   int k=0;
-  NearbyTriangles(m1,gworld,tol,tris,maxcontacts);
+  NearbyTriangles(m1,s.center,s.radius+tol,tris,maxcontacts);
   for(size_t j=0;j<tris.size();j++) {   
     m1.GetTriangle(tris[j],tri);
     tri.a = m1.currentTransform*tri.a;
@@ -627,6 +608,27 @@ int MeshPrimitiveCollide(CollisionMesh& m1,Real outerMargin1,GeometricPrimitive3
     if(k == maxcontacts) break;
   }
   return k;
+}
+
+int MeshPrimitiveCollide(CollisionMesh& m1,Real outerMargin1,GeometricPrimitive3D& g2,const RigidTransform& T2,Real outerMargin2,dContactGeom* contact,int maxcontacts)
+{
+  GeometricPrimitive3D gworld=g2;
+  gworld.Transform(T2);
+  
+  if(gworld.type == GeometricPrimitive3D::Point) {
+    Sphere3D s;
+    s.center = *AnyCast<Point3D>(&gworld.data);
+    s.radius = 0;
+    return MeshSphereCollide(m1,outerMargin1,s,outerMargin2,contact,maxcontacts);
+  }
+  else if(gworld.type == GeometricPrimitive3D::Sphere) {
+    const Sphere3D& s = *AnyCast<Sphere3D>(&gworld.data);
+    return MeshSphereCollide(m1,outerMargin1,s,outerMargin2,contact,maxcontacts);
+  }
+  else {
+    fprintf(stderr,"Distance computations between Triangles and %s not supported\n",gworld.TypeName());
+    return 0;
+  }
 }
 
 int PointCloudPrimitiveCollide(CollisionPointCloud& pc1,Real outerMargin1,GeometricPrimitive3D& g2,const RigidTransform& T2,Real outerMargin2,dContactGeom* contact,int maxcontacts)
@@ -809,6 +811,8 @@ int GeometryGeometryCollide(Geometry::AnyCollisionGeometry3D& g1,Real outerMargi
 			    Geometry::AnyCollisionGeometry3D& g2,Real outerMargin2,
 			    dContactGeom* contact,int m)
 {
+  g1.InitCollisionData();
+  g2.InitCollisionData();
   switch(g1.type) {
   case AnyGeometry3D::Primitive:
     return PrimitiveGeometryCollide(g1.AsPrimitive(),g1.PrimitiveCollisionData(),g1.margin+outerMargin1,g2,outerMargin2,contact,m);

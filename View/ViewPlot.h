@@ -8,6 +8,9 @@
 #include <string>
 using namespace std;
 
+/** @brief An OpenGL x-y auto-scrolling plot.
+ * Used in SimTest (Interface/SimTestGUI.h) to draw sensor data.
+ */
 class ViewPlot
 {
  public:

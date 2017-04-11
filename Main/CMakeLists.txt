@@ -13,7 +13,34 @@ IF(NOT KLAMPT_ROOT)
   INCLUDE_DIRECTORIES(${KLAMPT_INCLUDE_DIRS})
 ENDIF( )
 
-IF(USE_QT4_APPS)
+IF(USE_QT5_APPS)
+	MESSAGE(STATUS "Using Qt versions of main apps")
+	ADD_SUBDIRECTORY( RobotTestQt )
+	ADD_SUBDIRECTORY( SimTestQt )
+	ADD_SUBDIRECTORY( RobotPoseQt )
+	ADD_SUBDIRECTORY( MotorCalibrateQt )
+	ADD_SUBDIRECTORY( URDFtoRobQt )
+	IF(WIN32) 
+		#need to install Qt dlls
+		#QT_BINARY_DIR and QT_PLUGINS_DIR are not defined in Qt5... this is a bit of a hack
+		get_filename_component(QT_BINARY_DIR "${Qt5Core_DIR}/../../../bin" ABSOLUTE)
+		get_filename_component(QT_PLUGINS_DIR "${Qt5Core_DIR}/../../../plugins" ABSOLUTE)
+
+		install(FILES ${QT_BINARY_DIR}/Qt5Core.dll
+			      ${QT_BINARY_DIR}/Qt5Gui.dll
+			      ${QT_BINARY_DIR}/Qt5Widgets.dll
+			      ${QT_BINARY_DIR}/Qt5OpenGL.dll
+			      ${QT_BINARY_DIR}/Qt5Svg.dll
+			DESTINATION bin
+			COMPONENT apps)
+		install(FILES ${QT_PLUGINS_DIR}/iconengines/qsvgicon.dll
+			      DESTINATION bin/iconengines
+			      COMPONENT apps)
+		install(FILES ${QT_PLUGINS_DIR}/imageformats/qjpeg.dll ${QT_PLUGINS_DIR}/imageformats/qgif.dll ${QT_PLUGINS_DIR}/imageformats/qsvg.dll
+			      DESTINATION bin/imageformats
+			      COMPONENT apps)
+	ENDIF(WIN32)
+ELSEIF(USE_QT4_APPS)
 	MESSAGE(STATUS "Using Qt versions of main apps")
 	ADD_SUBDIRECTORY( RobotTestQt )
 	ADD_SUBDIRECTORY( SimTestQt )
@@ -36,7 +63,7 @@ IF(USE_QT4_APPS)
 			      DESTINATION bin/imageformats
 			      COMPONENT apps)
 	ENDIF(WIN32)
-ELSE(USE_QT4_APPS)
+ELSE(USE_QT5_APPS)
 	#GLUI GUIs
 	MESSAGE(STATUS "Using GLUI/console versions of main apps")
 	ADD_EXECUTABLE(RobotTest test.cpp)
@@ -52,7 +79,7 @@ ELSE(USE_QT4_APPS)
 	install(TARGETS RobotTest RobotPose SimTest MotorCalibrate URDFtoRob
 	  DESTINATION bin
 	  COMPONENT apps)
-ENDIF(USE_QT4_APPS)
+ENDIF(USE_QT5_APPS)
 ADD_DEPENDENCIES(RobotTest Klampt)
 ADD_DEPENDENCIES(SimTest Klampt)
 ADD_DEPENDENCIES(RobotPose Klampt)

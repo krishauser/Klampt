@@ -3,6 +3,7 @@
 #include <KrisLibrary/meshing/IO.h>
 #include <KrisLibrary/utils/SimpleFile.h>
 #include <KrisLibrary/utils/stringutils.h>
+#include <KrisLibrary/utils/ioutils.h>
 #include <string.h>
 #include <fstream>
 #include "IO/ROS.h"
@@ -79,8 +80,29 @@ bool Terrain::LoadGeometry(const char* fn)
   return false;
 }
 
-//bool Terrain::Save(const char* fn);
-
+bool Terrain::Save(const char* fn)
+{
+  ofstream out(fn);
+  if(!out) return false;
+  out<<"mesh ";
+  SafeOutputString(out,geomFile);
+  out<<endl;
+  if(kFriction.size() > 0) {
+    bool nonuniform = false;
+    for(size_t i=1;i<kFriction.size();i++)
+      if(kFriction[i] != kFriction[0]) nonuniform = true;
+    if(nonuniform) {
+      out<<"friction ";
+      for(size_t i=0;i<kFriction.size();i++)
+        out<<kFriction[i]<<" ";
+      out<<endl;
+    }
+    else
+      out<<"friction "<<kFriction[0]<<endl;
+  }
+  out.close();
+  return true;
+}
 
 void Terrain::DrawGL()
 {

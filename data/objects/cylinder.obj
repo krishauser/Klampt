@@ -1,4 +1,4 @@
-mesh "cylinder.tri"
+mesh "cylinder.off"
 geomscale 0.025 0.025 0.2
 geomtranslate 0 0 -0.1
 T 1 0 0 0 1 0 0 0 1      0.0 0.0 0.0

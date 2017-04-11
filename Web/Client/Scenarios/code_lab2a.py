@@ -1,4 +1,5 @@
 from klampt import *
+from klampt.math import vectorops,so3,se3
 import math
 
 def lab2a(robot_model,q,ee_link,ee_local_position,target):

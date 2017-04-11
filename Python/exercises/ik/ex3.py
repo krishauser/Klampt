@@ -1,8 +1,8 @@
-import math
 from klampt import *
-from klampt import visualization
-from klampt import coordinates
+from klampt import vis
+from klampt.model import coordinates
 import time
+import math
 #import numpy as np
 
 
@@ -66,23 +66,23 @@ if __name__ == "__main__":
     ptworld = coordinates.addPoint("ik-constraint-world",goalpoint,"world")
     print coordinates.manager().frames.keys()
     
-    visualization.add("robot",robot)
-    visualization.add("coordinates",coordinates.manager())
-    visualization.show()
+    vis.add("robot",robot)
+    vis.add("coordinates",coordinates.manager())
+    vis.show()
     iteration = 0
-    while visualization.shown():
-        visualization.lock()
+    while vis.shown():
+        vis.lock()
         #set the desired position goalpoint to move in a circle
         r = 0.4
-        t = visualization.animationTime()
+        t = vis.animationTime()
         goalpoint[0],goalpoint[1],goalpoint[2] = 0.8,r*math.cos(t),0.7+r*math.sin(t)
         q = solve_ik(link,localpos,goalpoint)
         robot.setConfig(q)
         #this updates the coordinates module
         coordinates.updateFromWorld()
         
-        visualization.unlock()
+        vis.unlock()
         time.sleep(0.05)
         iteration += 1
     #terminate smoothly
-    visualization.kill()
+    vis.kill()

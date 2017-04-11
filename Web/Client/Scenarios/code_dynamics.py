@@ -1,3 +1,4 @@
+from klampt.math import vectorops,so3,se3
 import math
 import random
 robot = None

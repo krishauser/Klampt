@@ -3,6 +3,7 @@
 
 #include <KrisLibrary/robotics/Contact.h>
 #include <KrisLibrary/robotics/RobotWithGeometry.h>
+class RobotWorld;
 #include "Stance.h"
 
 /** @addtogroup Contact */
@@ -31,6 +32,25 @@ void GetFlatContacts(RobotWithGeometry& robot,int link,Real tol,vector<ContactPo
  * All contacts are given friction kFriction.
  */
 void GetFlatStance(RobotWithGeometry& robot,Real tol,Stance& s,Real kFriction=0);
+
+
+/** @brief Produces a list of contacts for all points on the robot within tol of the
+ * other objects in world.
+ * 
+ * tol is the tolerance with which minimum-distance points are generated.
+ * All contacts are given zero friction and in the local frame of the robot's
+ * links.
+ */
+void GetNearbyContacts(RobotWithGeometry& robot,RobotWorld& world,Real tol,ContactFormation& contacts);
+
+
+/** @brief Produces a list of contacts for all points on the link within tol of
+ * other objects in world.
+ * 
+ * tol is the tolerance with which minimum-distance points are generated.
+ * All contacts are given zero friction and in the local frame of the link.
+ */
+void GetNearbyContacts(RobotWithGeometry& robot,int link,RobotWorld& world,Real tol,vector<ContactPoint>& contacts);
 
 
 /** @brief For a set of local contacts on a link, returns a hold for the given robot.

@@ -7,6 +7,8 @@
 #include <map>
 #include <string>
 
+class GeometryManager;
+
 /** @brief A "smart" geometry loading class that caches previous geometries,
  * and does not re-load or re-initialize existing collision detection data
  * structures if the item has already been loaded.
@@ -53,6 +55,8 @@ class ManagedGeometry
   bool IsCached() const;
   ///Adds to cache, if not already in it
   void AddToCache(const std::string& filename);
+  ///Returns the filename to which this object is cached
+  const std::string& CachedFilename() const;
   ///Remove self from cache, if in it
   void RemoveFromCache();
   ///Transforms the geometry (requires removing from cache, and
@@ -88,16 +92,28 @@ class ManagedGeometry
   inline Geometry::AnyCollisionGeometry3D& operator *() { return *geometry; }
   inline const Geometry::AnyCollisionGeometry3D& operator *() const { return *geometry; }
 
+  friend class GeometryManager;
+  static GeometryManager manager;
+
  private:
   std::string cacheKey,dynamicGeometrySource;
   GeometryPtr geometry;
   AppearancePtr appearance;
+};
 
-  struct GeometryInfo
+class GeometryManager
+{
+public:
+  GeometryManager();
+  ~GeometryManager();
+  void Clear();
+  
+  friend class ManagedGeometry;
+  struct GeometryList
   {
     std::vector<ManagedGeometry*> geoms;
   };
-  static std::map<std::string,GeometryInfo> cachedGeoms;
+  std::map<std::string,GeometryList> cache;
 };
 
 #endif

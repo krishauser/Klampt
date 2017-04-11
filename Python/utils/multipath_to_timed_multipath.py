@@ -14,7 +14,11 @@ pauseTime = 0.01
 
 #begin code
 if len(sys.argv) < 3:
-    print "USAGE: multipath_to_timed_multipath.py in.xml out.xml"
+    print "multipath_to_timed_multipath.py: Adds times to a multipath trajectory"
+    print "file based on certain settings.  Can either do a linear timing or smooth"
+    print "each section by a triangular 'velocity' profile."
+    print 
+    print "USAGE: python multipath_to_timed_multipath.py in.xml out.xml"
     print "  (Edit the settings at top of file to change options)"
     exit(0)
 

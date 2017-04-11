@@ -1,4 +1,5 @@
 from klampt import *
+from klampt.math import vectorops,so3,se3
 import math
 
 def lab2b(L1,L2,L3,point):

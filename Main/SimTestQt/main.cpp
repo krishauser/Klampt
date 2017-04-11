@@ -1,4 +1,4 @@
-#include <QtGui/QApplication>
+#include <QApplication>
 
 #include <QFileDialog>
 #include "mainwindow.h"
@@ -27,7 +27,7 @@ int main(int argc, char *argv[])
     QCoreApplication::setOrganizationName("Klampt");
     QCoreApplication::setOrganizationDomain("klampt.org");
     QCoreApplication::setApplicationName("SimTest");
-    QCoreApplication::setApplicationVersion("0.6.2");
+    QCoreApplication::setApplicationVersion("0.7");
     QSettings ini(QSettings::IniFormat, QSettings::UserScope,
 		  QCoreApplication::organizationName(),
 		  QCoreApplication::applicationName());

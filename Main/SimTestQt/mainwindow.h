@@ -45,6 +45,7 @@ public slots:
   void SetLogCheck(bool status);
   void SetSimulate(bool status);
   void SetRecord(bool status);
+  void SetROS(bool status);
 
   void SendMilestone();
   void SetMode(int);

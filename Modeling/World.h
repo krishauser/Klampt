@@ -23,7 +23,7 @@ class RobotWorld
 
   RobotWorld();
   bool LoadXML(const char* fn);
-  bool SaveXML(const char* fn,const char* elementDir);
+  bool SaveXML(const char* fn,const char* elementDir=NULL);
   void InitCollisions();
   void UpdateGeometry();
   void SetGLLights();
@@ -66,8 +66,10 @@ class RobotWorld
   void DeleteRigidObject(const string& name);
   RigidObject* GetRigidObject(const string& name);
 
-  Robot* ClickRobot(const Ray3D& r,int& body,Vector3& localpt);
-  RigidObject* ClickObject(const Ray3D& r,Vector3& localpt);
+  ///Returns the ID of the entity the ray hits, or -1 if nothing was hit
+  int RayCast(const Ray3D& r,Vector3& worldpt);
+  Robot* RayCastRobot(const Ray3D& r,int& body,Vector3& localpt);
+  RigidObject* RayCastObject(const Ray3D& r,Vector3& localpt);
 
   ///Loads an element from the file, using its extension to figure out what
   ///type it is.

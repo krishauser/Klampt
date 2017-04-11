@@ -112,7 +112,6 @@ void Reset(ContactFeedbackInfo& info)
 template <class T>
 bool WriteFile(File& f,const vector<T>& v)
 {
-  //printf("Trying WriteFile(vector<T>)\n");
   if(!WriteFile(f,int(v.size()))) return false;
   if(!v.empty()) 
 	if(!WriteArrayFile(f,&v[0],v.size())) return false;
@@ -123,7 +122,6 @@ bool WriteFile(File& f,const vector<T>& v)
 template <class T>
 bool ReadFile(File& f,vector<T>& v)
 {
-  //printf("Trying ReadFile(vector<T>)\n");
   int n;
   READ_FILE_DEBUG(f,n,"ReadFile(vector<T>)");
   if(n < 0) {
@@ -225,7 +223,7 @@ bool ReadFile(File& f,ContactFeedbackInfo& info)
 
 
 WorldSimulation::WorldSimulation()
-  :time(0),simStep(0.001),fakeSimulation(false)
+  :time(0),simStep(0.001),fakeSimulation(false),worstStatus(ODESimulator::StatusNormal)
 {}
 
 void WorldSimulation::Init(RobotWorld* _world)
@@ -263,6 +261,8 @@ void WorldSimulation::Init(RobotWorld* _world)
       //setup actuator parameters
       if(robot->drivers[j].type == RobotJointDriver::Normal) {
 	int k=robot->drivers[j].linkIndices[0];
+  command.actuators[j].qmin = robot->qMin(k);
+  command.actuators[j].qmax = robot->qMax(k);
 	if(robot->links[k].type == RobotLink3D::Revolute) {
 	  //ODE has problems with joint angles > 2pi
 	  if(robot->qMax(k)-robot->qMin(k) >= TwoPi) {
@@ -344,6 +344,7 @@ void WorldSimulation::SetController(int index,SmartPointer<RobotController> c)
 
 void WorldSimulation::Advance(Real dt)
 {
+  worstStatus = ODESimulator::StatusNormal;
   if(fakeSimulation) {
     AdvanceFake(dt);
     return;
@@ -365,7 +366,7 @@ void WorldSimulation::Advance(Real dt)
   Real timeLeft=dt;
   Real accumTime=0;
   int numSteps = 0;
-  //printf("Advance %g -> %g\n",time,time+dt);
+  //printf("Advance %g -> %g, simulation time step %g\n",time,time+dt,simStep);
   while(timeLeft > 0.0) {
     Real step = Min(timeLeft,simStep);
     for(size_t i=0;i<controlSimulators.size();i++) 
@@ -389,6 +390,11 @@ void WorldSimulation::Advance(Real dt)
     }
 
     odesim.Step(step);
+ 
+    if(odesim.GetStatus() > worstStatus) {
+      worstStatus = odesim.GetStatus();
+    }
+ 
     accumTime += step;
     timeLeft -= step;
     numSteps++;
@@ -506,15 +512,18 @@ void WorldSimulation::UpdateModel()
       world->robots[i]->UpdateConfig(q);
       world->robots[i]->UpdateGeometry();
       odesim.robot(i)->SetConfig(q);
+      odesim.robot(i)->SetVelocities(q);
     }
   }
   else {
     for(size_t i=0;i<world->robots.size();i++) {
       odesim.robot(i)->GetConfig(world->robots[i]->q);
+      odesim.robot(i)->GetVelocities(world->robots[i]->dq);
       world->robots[i]->UpdateFrames();
     }
     for(size_t i=0;i<world->rigidObjects.size();i++) {
       odesim.object(i)->GetTransform(world->rigidObjects[i]->T);  
+      odesim.object(i)->GetVelocity(world->rigidObjects[i]->w,world->rigidObjects[i]->v);
     }
     world->UpdateGeometry();
   }
@@ -545,6 +554,8 @@ bool WorldSimulation::ReadState(File& f)
   for(size_t i=0;i<hooks.size();i++) 
     TestReadWriteState(*hooks[i],"hook");
 #endif
+  //TODO: read this too?
+  worstStatus = ODESimulator::StatusNormal;
 
   READ_FILE_DEBUG(f,time,"WorldSimulation::ReadState");
   if(!odesim.ReadState(f)) {

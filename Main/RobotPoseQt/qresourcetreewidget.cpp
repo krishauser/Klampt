@@ -138,6 +138,7 @@ void QResourceTreeWidget::onDelete(QTreeWidgetItem* n)
   assert(n!=NULL);
   ResourceNode* r = itemToNode(n);
   assert(r!=NULL);
+  assert(r->resource!=NULL);
   manager->Delete(r);
   if(n->parent() != NULL) {
     QTreeWidgetItem* p = n->parent();

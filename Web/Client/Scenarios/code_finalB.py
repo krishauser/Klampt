@@ -1,4 +1,5 @@
 from klampt import *
+from klampt.math import vectorops,so3,se3
 from common import *
 import math
 import random

@@ -4,6 +4,7 @@
 #include "ResourceGUI.h"
 #include "View/RobotPoseWidget.h"
 #include "View/ObjectPoseWidget.h"
+#include "Control/Sensor.h"
 #include <KrisLibrary/utils/apputils.h>
 #include <fstream>
 
@@ -22,6 +23,7 @@ using namespace GLDraw;
  * - draw_com
  * - draw_frame
  * - draw_poser
+ * - draw_sensors
  * 
  * Accepts commands (in addition to ResourceGUIBackend and WorldGUIBackend):
  * - pose_mode: next clicks will pose the robot's joints
@@ -47,13 +49,19 @@ using namespace GLDraw;
  *   evenly spaced milestones.
  * - optimize_path: optimizes the current LinearPath, MultiPath, Configs
  *   resource.
+ * - split_path: splits the current LinearPath or MultiPath at the current
+ *   time into two paths.
  * - store_flat_contacts [xtol]: gets the stance for the robot standing on
  *   flat ground and adds it as a new resource
  * - get_flat_contacts [xtol]: gets the stance for the robot standing on
  *   flat ground and stores it in the current Stance resource.
+ * - get_nearby_contacts [xtol]: gets the stance for the robot touching the
+ *   environment with the given position tolerance, and stores it in the
+ *   current Stance resource.
  * - clean_contacts [xtol] [ntol]: cleans up the current Stance or Hold
  *   resource. Points and normals within xtol and ntol, respectively, will
  *   be merged.
+ * - resample res: resamples geomery with the given resolution.
  */
 class RobotPoseBackend : public ResourceGUIBackend
 {
@@ -67,7 +75,9 @@ class RobotPoseBackend : public ResourceGUIBackend
   vector<RobotPoseWidget> robotWidgets;
   vector<RigidObjectPoseWidget> objectWidgets;
   WidgetSet allWidgets;
-  int draw_geom,draw_poser,draw_bbs,draw_com,draw_frame;
+  int draw_geom,draw_poser,draw_bbs,draw_com,draw_frame,draw_sensors;
+  //temp: sensors storage
+  RobotSensors robotSensors;
 
   RobotPoseBackend(RobotWorld* world,ResourceManager* library);
   virtual void Start();
@@ -83,6 +93,7 @@ class RobotPoseBackend : public ResourceGUIBackend
   void SetDrawExpanded(int value);
 
   Stance GetFlatStance(Real tolerance=0);
+  Stance GetNearbyStance(Real tolerance=0);
   void CleanContacts(Hold&,Real xtol=0,Real ntol=0);
   ResourcePtr PoserToResource(const string& type);
 };

@@ -56,7 +56,7 @@ public:
   struct EdgeData
   {
     Real cost;
-    SmartPointer<RampEdgePlanner> e;
+    SmartPointer<RampEdgeChecker> e;
   };
   typedef Graph::TreeNode<NodeData,EdgeData> Node;
 
@@ -66,7 +66,7 @@ public:
   Node* AddChild(Node* node,const Config& q);
   Node* AddChild(Node* node,const ParabolicRamp::ParabolicRampND& ramp);
   Node* AddChild(Node* node,const ParabolicRamp::DynamicPath& path);
-  Node* AddChild(Node* node,SmartPointer<RampEdgePlanner>& e);
+  Node* AddChild(Node* node,SmartPointer<RampEdgeChecker>& e);
   //uses a local optimization to extend the tree from the given node.
   //if search is true, finds a parent node that gives a good fit, otherwise
   //adds the ik extension as a child of node.

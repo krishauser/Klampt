@@ -26,7 +26,6 @@ void MainWindow::Initialize(int argc,const char** argv)
   }
 
   gui=new QRobotPoseGUI(ui->displaywidget,backend);
-  ui->displaywidget->SetGUI(gui);
     backend->Start();
 
     gui->resource_frame=ui->frame_resources;
@@ -83,6 +82,11 @@ void MainWindow::SetCOM(bool status){
 void MainWindow::SetFrame(bool status){
   gui->SendButtonToggle("draw_frame",status);
 }
+
+void MainWindow::SetSensors(bool status){
+  gui->SendButtonToggle("draw_sensors",status);
+}
+
 
 void MainWindow::SetFree() {
   gui->SendCommand("pose_mode");
@@ -269,6 +273,10 @@ void MainWindow::PrintCollisions(){
 
 void MainWindow::LoadFile(){
     gui->LoadFilePrompt("last_resource_location");
+}
+
+void MainWindow::SaveFile() {
+  gui->SaveFilePrompt("last_resource_location");
 }
 
 MainWindow::~MainWindow()

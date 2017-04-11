@@ -1,5 +1,5 @@
 import math
-from klampt import vectorops,so2
+from klampt.math import vectorops,so2
 
 #CONFIGURATION VARIABLES
 

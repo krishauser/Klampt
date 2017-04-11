@@ -28,6 +28,10 @@ class ViewResource
   ViewHold holdViewer;
   ViewStance stanceViewer;
   ViewGrasp graspViewer;
+  //custom draw
+  vector<const void*> items;
+  vector<SmartPointer<Geometry::AnyGeometry3D> > geometries;
+  vector<GLDraw::GeometryAppearance> appearances;
 };
 
 #endif 

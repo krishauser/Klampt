@@ -113,8 +113,8 @@ void ViewRobot::SetColors(const GLColor& c)
 {
   if(robot) {
     for(size_t i=0;i<robot->links.size();i++) {
-      Appearance(i).faceColor = c;
-      Appearance(i).vertexColor = c;
+      GLDraw::GeometryAppearance& a = Appearance(i);
+      a.SetColor(c);
     }
   }
 }
@@ -122,8 +122,8 @@ void ViewRobot::SetColors(const GLColor& c)
 void ViewRobot::SetColor(int link,const GLColor& c)
 {
   if(robot) {
-    Appearance(link).faceColor = c;
-    Appearance(link).vertexColor = c;
+    GLDraw::GeometryAppearance& a = Appearance(link);
+    a.SetColor(c);
   }
 }
 
@@ -138,9 +138,10 @@ void ViewRobot::Draw()
     Matrix4 mat = robot->links[i].T_World;
     glPushMatrix();
     glMultMatrix(mat);
-    if(Appearance(i).geom != robot->geometry[i])
-      Appearance(i).Set(*robot->geometry[i]);
-    Appearance(i).DrawGL();
+    GLDraw::GeometryAppearance& a = Appearance(i);
+    if(a.geom != robot->geometry[i])
+      a.Set(*robot->geometry[i]);
+    a.DrawGL();
     glPopMatrix();
   }
 }
@@ -149,9 +150,10 @@ void ViewRobot::DrawLink_Local(int i,bool keepAppearance)
 {
   if(!robot || robot->IsGeometryEmpty(i)) return;
   if(keepAppearance) {
-    if(Appearance(i).geom != robot->geometry[i])
-      Appearance(i).Set(*robot->geometry[i]);
-    Appearance(i).DrawGL();
+    GLDraw::GeometryAppearance& a = Appearance(i);
+    if(a.geom != robot->geometry[i])
+      a.Set(*robot->geometry[i]);
+    a.DrawGL();
   }
   else 
     draw(*robot->geometry[i]);
@@ -275,8 +277,11 @@ void ViewRobot::SetTorqueColors(const Vector& T)
 GLDraw::GeometryAppearance& ViewRobot::Appearance(int link)
 {
   Assert(robot!=NULL);
-  if(appearanceStack.empty()) 
+  if(appearanceStack.empty()) {
+    if(robot->geomManagers[link].IsAppearanceShared())
+      robot->geomManagers[link].SetUniqueAppearance();
     return *robot->geomManagers[link].Appearance();
+  }
   return appearanceStack.back()[link];
 }
 

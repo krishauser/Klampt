@@ -56,6 +56,7 @@
 
 #include "pyvectorfield.h"
 #include "pyerr.h"
+#include "pyconvert.h"
 #include <KrisLibrary/math/matrix.h>
 #include <Python.h>
 
@@ -69,38 +70,6 @@ typedef int Py_ssize_t;
 
 namespace PyPlanner {
 
-bool DoubleCast(PyObject* obj,double& val)
-{
-  if(PyFloat_Check(obj))
-    val = PyFloat_AsDouble(obj);
-  else if(PyInt_Check(obj))
-    val = PyInt_AsLong(obj);
-  else 
-    return false;
-  return true;
-}
-
-PyObject* PyListFromVector(const Vector& x)
-{
-  PyObject* ls = PyList_New(x.n);
-  PyObject* pItem;
-  if(ls == NULL) {
-    goto fail;
-  }
-	
-  for(int i = 0; i < x.n; i++) {
-    pItem = PyFloat_FromDouble(x[i]);
-    if(pItem == NULL)
-      goto fail;
-    PyList_SetItem(ls, (Py_ssize_t)i, pItem);
-  }
-  
-  return ls;
-  
- fail:
-  Py_XDECREF(ls);
-  return NULL;
-}
 
 PyObject* PyTupleFromVector(const Vector& x)
 {
@@ -126,22 +95,6 @@ PyObject* PyTupleFromVector(const Vector& x)
 
 
 
-bool PySequenceToVector(PyObject* seq,Vector& x)
-{
-  if(!PySequence_Check(seq))
-    return false;
-  
-  x.resize(PySequence_Size(seq));
-  for(int i = 0; i < x.n; i++) {
-    PyObject* elem = PySequence_GetItem(seq, (Py_ssize_t)i);
-    if(!DoubleCast(elem,x[i])) return false;
-  }
-  return true;
-}
-
-inline bool PyListToVector(PyObject* seq,Vector& x) { return PySequenceToVector(seq,x); }
-inline bool PyTupleToVector(PyObject* seq,Vector& x) { return PySequenceToVector(seq,x); }
-	
 	
 
 PyVectorFieldFunction::PyVectorFieldFunction(PyObject* _pVF) {
@@ -373,8 +326,8 @@ void PyVectorFieldFunction::Eval(const Vector& x, Vector& v)
 			   Type);
       goto fail;
     }
-    bool res=DoubleCast(pResult,v(0));
-    assert(res==true);
+    v(0) = PyFloat_AsDouble(pResult);
+    assert(!PyErr_Occurred());
   }
   else {
     if(PySequence_Size(pResult) != (Py_ssize_t)v.n) {
@@ -383,7 +336,7 @@ void PyVectorFieldFunction::Eval(const Vector& x, Vector& v)
 			   Type);
       goto fail;
     }
-    if(!PySequenceToVector(pResult,v)) {
+    if(!PyListToConfig(pResult,v)) {
       except = PyException("PyVectorFieldFunction::Eval: "		\
 			   "VectorFieldFunction.eval() could not convert result to a vector.",
 			   Type);
@@ -507,6 +460,8 @@ void PyVectorFieldFunction::Jacobian(const Vector& x, Matrix& J)
   }
 
 
+	PyObject* elem, *val;
+	int i,j;
   J.resize(m,n);
 
   //If eval_i is the only method available
@@ -515,8 +470,8 @@ void PyVectorFieldFunction::Jacobian(const Vector& x, Matrix& J)
       throw PyException("PyVectorFieldFunction::Jacobian: object is does not contain jacobian() or jacobian_ij() methods");
     }
 
-    for(int i = 0; i < m; i++) {
-      for(int j = 0; j < n; j++) {
+    for(i = 0; i < m; i++) {
+      for(j = 0; j < n; j++) {
 	J(i,j) = Jacobian_ij(x, i, j);
       }
     }
@@ -566,21 +521,28 @@ void PyVectorFieldFunction::Jacobian(const Vector& x, Matrix& J)
 			 Type);
     goto fail;
   }
-  for(int i=0;i<m;i++) {
-    PyObject* elem = PySequence_GetItem(pResult, Py_ssize_t(i));    
+  for(i=0;i<m;i++) {
+    elem = PySequence_GetItem(pResult, Py_ssize_t(i));    
     if(!PySequence_Check(elem) || PySequence_Size(elem) != (Py_ssize_t)n) {
 	except = PyException("PyVectorFieldFunction::Jacobian: "		\
 			     "VectorFieldFunction.jacobian() is not a list of lists of the right size.",
 			     Type);
+      Py_XDECREF(elem);
 	goto fail;
     }
-    for(int j=0;j<n;j++)
-      if(!DoubleCast(PySequence_GetItem(elem,(Py_ssize_t)j),J(i,j))) {
+    for(j=0;j<n;j++) {
+    	val = PySequence_GetItem(elem,(Py_ssize_t)j);
+	    J(i,j) = PyFloat_AsDouble(val);
+	    Py_XDECREF(val);
+	    if(PyErr_Occurred()) {
 	except = PyException("PyVectorFieldFunction::Jacobian: "		\
 			     "VectorFieldFunction.jacobian() element couldn't be cast to double",
 			     Type);
+      Py_XDECREF(elem);
 	goto fail;
       }
+    }
+    Py_XDECREF(elem);
   }
 	
   // Give away the Python result object
@@ -657,7 +619,8 @@ Real PyVectorFieldFunction::Jacobian_ij(const Vector& x, int i, int j) {
 		goto fail;
 	}
 	// Result should be either a float or an int
-	if(!DoubleCast(pResult,result)) {
+	result = PyFloat_AsDouble(pResult);
+	if(PyErr_Occurred()) {
 		except = PyException("PyVectorFieldFunction::Jacobian_ij: "\
 					"VectorFieldFunction.jacobian_ij() must return an "\
 					"int or float.", Type);

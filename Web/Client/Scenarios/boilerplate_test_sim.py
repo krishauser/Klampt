@@ -4,9 +4,7 @@ import sys
 from klampt import *
 sys.path.append("Web/Server")
 #sys.path.append(".")
-from webrobotprogram import *
 import kviz
-#from kviz import *
 
 #Stub code module will have these functions defined:
 #def init(robot_model):
@@ -15,19 +13,23 @@ import kviz
 #def control_loop(t,controller):
 #	pass
 
-viewer = None
+world = None
+sim = None
+dt = 0.02
 
 def boilerplate_start():
-	global viewer
-	viewer = WebSimulationProgram(["./data/athlete_fractal_1.xml"])
-	kviz._init(viewer.world)
-	stub.init(viewer.world.robot(0))
+	global world,sim
+	world = WorldModel()
+	world.readFile("./data/athlete_fractal_1.xml")
+	kviz._init(world)
+	sim = Simulator(world)
+	stub.init(world.robot(0))
 
 def boilerplate_advance():
-	global viewer	
-	stub.control_loop(viewer.sim.getTime(),viewer.sim.controller(0))  #call student code
-	viewer.sim.simulate(viewer.dt)
-	viewer.sim.updateWorld()
+	global world,sim
+	stub.control_loop(sim.getTime(),sim.controller(0))  #call student code
+	sim.simulate(dt)
+	sim.updateWorld()
 
 
 

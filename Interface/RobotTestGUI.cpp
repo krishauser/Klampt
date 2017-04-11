@@ -1,6 +1,7 @@
 #include "RobotTestGUI.h"
 #include <KrisLibrary/GLdraw/drawMesh.h>
 #include <KrisLibrary/GLdraw/drawgeometry.h>
+#include "IO/ROS.h"
 #include <sstream>
 
 #ifndef GLUT_LEFT_BUTTON
@@ -12,6 +13,14 @@
 RobotTestBackend::RobotTestBackend(RobotWorld* world)
   :WorldGUIBackend(world)
 {
+}
+
+
+bool RobotTestBackend::OnQuit()
+{
+  if(ros_status == 1)
+    ROSShutdown();
+  return true;
 }
 
 void RobotTestBackend::Start()
@@ -26,7 +35,10 @@ void RobotTestBackend::Start()
   draw_com = 0;
   draw_frame = 0;
   draw_expanded = 0;
+  draw_sensors = 0;
   draw_self_collision_tests = 0;
+  output_ros = 0;
+  ros_status = 0;
   pose_ik = 0;
   self_colliding.resize(robot->links.size(),false);   
 
@@ -47,7 +59,9 @@ void RobotTestBackend::Start()
   MapButtonToggle("draw_bbs",&draw_bbs);
   MapButtonToggle("draw_com",&draw_com);
   MapButtonToggle("draw_frame",&draw_frame);
+  MapButtonToggle("draw_sensors",&draw_sensors);
   MapButtonToggle("draw_self_collision_tests",&draw_self_collision_tests);
+  MapButtonToggle("output_ros",&output_ros);
 }
   
 void RobotTestBackend::UpdateConfig()
@@ -73,7 +87,13 @@ void RobotTestBackend::UpdateConfig()
     }
   }
   */
+  //tell the front end that the configuration is updated
   SendCommand("update_config","");
+
+  //If ROS is enabled, broadcast the transforms of the updated world
+  if(output_ros && ros_status == 1) {
+    ROSPublishTransforms(*world);
+  }
 }
 
 void RobotTestBackend::RenderWorld()
@@ -88,6 +108,15 @@ void RobotTestBackend::RenderWorld()
   for(size_t i=0;i<world->rigidObjects.size();i++)
     world->rigidObjects[i]->DrawGL();
 
+  if(draw_sensors) {
+    if(robotSensors.sensors.empty()) {
+      robotSensors.MakeDefault(robot);
+    }
+    for(size_t i=0;i<robotSensors.sensors.size();i++) {
+      vector<double> measurements;
+      robotSensors.sensors[i]->DrawGL(*robot,measurements);
+    }
+  }
    
   if(draw_geom) {
     //set the robot colors
@@ -219,6 +248,23 @@ bool RobotTestBackend::OnButtonToggle(const string& button,int checked)
     SendRefresh();
     return true;
   }
+  else if(button=="output_ros") {
+    if(checked) {
+      //initialize ROS if not initialized
+      if(ros_status == 0) {
+        if(ROSInit()) {
+          ros_status = 1;
+          bool res = ROSPublishTransforms(*world);
+          if(!res) printf("Error publishing transforms?\n");
+        }
+        else ros_status = -1;
+      }
+    }
+    if(!GenericBackendBase::OnButtonToggle(button,checked)) {
+      cout<<"RobotTestBackend: Unknown button: "<<button<<endl;
+      return false;
+    }
+  }
   else if(!GenericBackendBase::OnButtonToggle(button,checked)) {
     cout<<"RobotTestBackend: Unknown button: "<<button<<endl;
     return false;
@@ -229,7 +275,6 @@ bool RobotTestBackend::OnButtonToggle(const string& button,int checked)
 bool RobotTestBackend::OnCommand(const string& cmd,const string& args)
 {
   //cout<<"Command: "<<cmd<<", args "<<args<<endl;
-  Robot* robot = world->robots[0];
   stringstream ss(args);
   if(cmd=="set_link") {
     ss >> cur_link;
@@ -282,6 +327,15 @@ bool RobotTestBackend::OnCommand(const string& cmd,const string& args)
   }
   else if(cmd == "print_pose") {
     cout<<robot->q<<endl;
+  }
+  else if(cmd == "reload_file") {
+    if(!WorldGUIBackend::ReloadFile(args.c_str())) return false;
+    //now update the widgets
+    robotWidgets.resize(world->robots.size());
+    for(size_t i=0;i<world->robots.size();i++) 
+      robotWidgets[i].Set(world->robots[i],&world->robotViews[i]);
+    robotSensors.sensors.resize(0);
+    robot = world->robots[0];
   }
   else {
     return WorldGUIBackend::OnCommand(cmd,args);
@@ -431,6 +485,8 @@ bool GLUIRobotTestGUI::Initialize()
   AddControl(checkbox,"draw_com");
   checkbox = glui->add_checkbox("Draw frame");
   AddControl(checkbox,"draw_frame");
+  checkbox = glui->add_checkbox("Draw sensors");
+  AddControl(checkbox,"draw_sensors");
   checkbox = glui->add_checkbox("Draw bboxes");
   AddControl(checkbox,"draw_bbs");
   checkbox = glui->add_checkbox("Draw expanded");

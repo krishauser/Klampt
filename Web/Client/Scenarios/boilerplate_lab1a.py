@@ -3,7 +3,6 @@ import sys
 sys.path.append("Web/Server")
 import time
 from klampt import *
-from webrobotprogram import *
 import kviz
 
 #To be defined in stub module

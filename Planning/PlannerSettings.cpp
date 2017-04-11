@@ -29,8 +29,10 @@ void WorldPlannerSettings::InitializeDefault(RobotWorld& world)
     //links that are fixed to the terrain
     for(size_t j=0;j<robot->links.size();j++)
       if(robot->parents[j] == -1) {
-	for(size_t k=0;k<world.terrains.size();k++)
+	for(size_t k=0;k<world.terrains.size();k++) {
 	  collisionEnabled(baseid+j,world.TerrainID(k)) = false;
+    collisionEnabled(world.TerrainID(k),baseid+j) = false;
+  }
       }
   }
 

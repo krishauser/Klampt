@@ -2,7 +2,7 @@
 
 void SplineInterpolate(const vector<Vector>& pts,
 		       vector<GeneralizedCubicBezierCurve>& paths,
-		       CSpace* space,GeodesicManifold* manifold)
+		       CSpace* space,GeodesicSpace* manifold)
 {
   paths.resize(pts.size()-1);
   for(size_t i=0;i<paths.size();i++) {
@@ -24,7 +24,7 @@ void SplineInterpolate(const vector<Vector>& pts,
 
 void SplineInterpolate(const vector<Vector>& pts,
 		       GeneralizedCubicBezierSpline& path,
-		       CSpace* space,GeodesicManifold* manifold,
+		       CSpace* space,GeodesicSpace* manifold,
 		       Real coxDeBoorParameter)
 {
   if(coxDeBoorParameter == 0) {
@@ -47,7 +47,7 @@ void SplineInterpolate(const vector<Vector>& pts,
 
 void SplineInterpolate(const vector<Vector>& pts,const vector<Real>& times,
 		       vector<GeneralizedCubicBezierCurve>& paths,
-		       CSpace* space,GeodesicManifold* manifold)
+		       CSpace* space,GeodesicSpace* manifold)
 {
   Assert(pts.size()==times.size());
   paths.resize(pts.size()-1);
@@ -74,7 +74,7 @@ void SplineInterpolate(const vector<Vector>& pts,const vector<Real>& times,
 
 void SplineInterpolate(const vector<Vector>& pts,const vector<Real>& times,
 		       GeneralizedCubicBezierSpline& path,
-		       CSpace* space,GeodesicManifold* manifold)
+		       CSpace* space,GeodesicSpace* manifold)
 {
   SplineInterpolate(pts,times,path.segments,space,manifold);
   Assert(path.segments.size()+1==times.size());
@@ -82,7 +82,7 @@ void SplineInterpolate(const vector<Vector>& pts,const vector<Real>& times,
   for(size_t i=0;i<path.segments.size();i++) path.durations[i] = times[i+1]-times[i];
 }
 
-void MonotonicInterpolate(const vector<Vector>& pts,vector<GeneralizedCubicBezierCurve>& paths,CSpace* space,GeodesicManifold* manifold)
+void MonotonicInterpolate(const vector<Vector>& pts,vector<GeneralizedCubicBezierCurve>& paths,CSpace* space,GeodesicSpace* manifold)
 {
   Assert(pts.size() >= 2);
   
@@ -165,7 +165,7 @@ void MonotonicInterpolate(const vector<Vector>& pts,vector<GeneralizedCubicBezie
 
 void MonotonicInterpolate(const vector<Vector>& pts,
 			  GeneralizedCubicBezierSpline& path,
-			  CSpace* space,GeodesicManifold* manifold,
+			  CSpace* space,GeodesicSpace* manifold,
 			  Real coxDeBoorParameter)
 {
 
@@ -187,7 +187,7 @@ void MonotonicInterpolate(const vector<Vector>& pts,
   }
 }
 
-void MonotonicInterpolate(const vector<Vector>& pts,const vector<Real>& times,vector<GeneralizedCubicBezierCurve>& paths,CSpace* space,GeodesicManifold* manifold)
+void MonotonicInterpolate(const vector<Vector>& pts,const vector<Real>& times,vector<GeneralizedCubicBezierCurve>& paths,CSpace* space,GeodesicSpace* manifold)
 {
   Assert(times.size()==pts.size());
   Assert(pts.size() >= 2);
@@ -301,7 +301,7 @@ void MonotonicInterpolate(const vector<Vector>& pts,const vector<Real>& times,ve
 
 void MonotonicInterpolate(const vector<Vector>& pts,const vector<Real>& times,
 			  GeneralizedCubicBezierSpline& path,
-			  CSpace* space,GeodesicManifold* manifold)
+			  CSpace* space,GeodesicSpace* manifold)
 {
   MonotonicInterpolate(pts,times,path.segments,space,manifold);
   Assert(path.segments.size()+1==times.size());
@@ -309,7 +309,7 @@ void MonotonicInterpolate(const vector<Vector>& pts,const vector<Real>& times,
   for(size_t i=0;i<path.segments.size();i++) path.durations[i] = times[i+1]-times[i];
 }
 
-void MonotonicAccelInterpolate(const vector<Vector>& pts,vector<GeneralizedCubicBezierCurve>& paths,CSpace* space,GeodesicManifold* manifold)
+void MonotonicAccelInterpolate(const vector<Vector>& pts,vector<GeneralizedCubicBezierCurve>& paths,CSpace* space,GeodesicSpace* manifold)
 {
   Assert(pts.size() >= 2);
   

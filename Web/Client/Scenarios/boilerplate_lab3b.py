@@ -1,13 +1,13 @@
 import pkg_resources
 pkg_resources.require("klampt==0.6.2")
 from klampt import *
+from klampt.math import vectorops,so3,se3
 from klampt.cspace import MotionPlan
 import math
 import sys
 sys.path.append("Web/Server")
 import kviz
 import random
-from klampt import vectorops
 
 world = WorldModel()
 space = None

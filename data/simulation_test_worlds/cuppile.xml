@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <world>
-  <terrain file="../terrains/block.tri" />
+  <terrain file="../terrains/block.off" />
 <!-- The table -->
-  <terrain file="../terrains/cube.tri" scale="0.6 0.6 0.03" translation="0.3 -0.175 0.615">
+  <terrain file="../terrains/cube.off" scale="0.6 0.6 0.03" translation="0.3 -0.175 0.615">
      <!-- <display color="0.4 0.2 0.1" /> -->
      <display color="1 1 1 1" texture="hauser.bmp" texture_projection="xy"/>
   </terrain>

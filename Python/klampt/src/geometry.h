@@ -1,6 +1,9 @@
 #ifndef _GEOMETRY_H
 #define _GEOMETRY_H
 
+#include <vector>
+#include <map>
+
 /** @file geometry.h
  * @brief C++ bindings for geometry modeling. */
 
@@ -83,6 +86,10 @@ struct PointCloud
   void setPoint(int index,const double p[3]);
   ///Retrieves the position of the point at the given index
   void getPoint(int index,double out[3]) const;
+  ///Adds a new property.  All values for this property are set to 0.
+  void addProperty(const std::string& pname);
+  ///Adds a new property with name pname, and sets values for this property to the given list (a n-list)
+  void addProperty(const std::string& pname,const std::vector<double> & properties);
   ///Sets all the properties of all points to the given list (a kn-list)
   void setProperties(const std::vector<double>& properties);
   ///Sets property pindex of all points to the given list (a n-list)
@@ -102,10 +109,15 @@ struct PointCloud
   ///Adds the given point cloud to this one.  They must share the same
   ///properties or else an exception is raised
   void join(const PointCloud& pc);
+  ///Sets the given setting
+  void setSetting(const std::string& key,const std::string& value);
+  ///Retrieves the given setting
+  std::string getSetting(const std::string& key) const;
 
   std::vector<double> vertices;
   std::vector<std::string> propertyNames;
   std::vector<double> properties;
+  std::map<std::string,std::string> settings;
 };
 
 /** @brief A geometric primitive.  So far only points, spheres, segments,
@@ -127,6 +139,13 @@ struct GeometricPrimitive
 /** @brief A three-D geometry.  Can either be a reference to a
  * world item's geometry, in which case modifiers change the 
  * world item's geometry, or it can be a standalone geometry.
+ *
+ * There are four currently supported types of geometry:
+ * - primitives (GeometricPrimitive)
+ * - triangle meshes (TriangleMesh)
+ * - point clouds (PointCloud)
+ * - groups (Group)
+ * This class acts as a uniform container of all of these types.
  *
  * Each geometry stores a "current" transform, which is automatically updated
  * for world items' geometries.  The proximity queries are performed with 
@@ -154,6 +173,9 @@ class Geometry3D
  public:
   Geometry3D();
   Geometry3D(const Geometry3D&);
+  Geometry3D(const GeometricPrimitive&);
+  Geometry3D(const TriangleMesh&);
+  Geometry3D(const PointCloud&);
   ~Geometry3D();
   const Geometry3D& operator = (const Geometry3D& rhs);
   ///Creates a standalone geometry from this geometry
@@ -167,7 +189,7 @@ class Geometry3D
   ///Returns the type of geometry: TriangleMesh, PointCloud, or
   ///GeometricPrimitive
   std::string type();
-  ///Returns true if this has no contents
+  ///Returns true if this has no contents (not the same as numElements()==0)
   bool empty();
   ///Returns a TriangleMesh if this geometry is of type TriangleMesh
   TriangleMesh getTriangleMesh();
@@ -175,9 +197,24 @@ class Geometry3D
   PointCloud getPointCloud();
   ///Returns a GeometricPrimitive if this geometry is of type GeometricPrimitive
   GeometricPrimitive getGeometricPrimitive();
+  ///Sets this Geometry3D to a TriangleMesh
   void setTriangleMesh(const TriangleMesh&);
+  ///Sets this Geometry3D to a PointCloud
   void setPointCloud(const PointCloud&);
+  ///Sets this Geometry3D to a GeometricPrimitive
   void setGeometricPrimitive(const GeometricPrimitive&);
+  ///Sets this Geometry3D to a group geometry.  To add sub-geometries, repeatedly call
+  ///setElement()
+  void setGroup();
+  ///Returns an element of the Geometry3D if it is a group.  Raises an error if this
+  ///is of any other type.
+  Geometry3D getElement(int element);
+  ///Sets an element of the Geometry3D if it is a group.  Raises an error if this is
+  ///of any other type.  
+  void setElement(int element,const Geometry3D& data);
+  ///Returns the number of sub-elements in this geometry
+  int numElements();
+
   ///Loads from file.  Standard mesh types, PCD files, and .geom files are
   ///supported.
   bool loadFile(const char* fn);
@@ -201,9 +238,22 @@ class Geometry3D
   bool detachFromStream(const char* protocol,const char* name);
   ///Sets the current transformation (not modifying the underlying data)
   void setCurrentTransform(const double R[9],const double t[3]);
-  ///Translates the geometry data 
+  ///Gets the current transformation 
+  void getCurrentTransform(double out[9],double out2[3]);
+  ///Translates the geometry data.
+  ///Permanently modifies the data and resets any collision data structures.
   void translate(const double t[3]);
-  ///Translates/rotates the geometry data 
+  ///Scales the geometry data uniformly.
+  ///Permanently modifies the data and resets any collision data structures.
+  void scale(double s);
+  ///Scales the geometry data with different factors on each axis.
+  ///Permanently modifies the data and resets any collision data structures.
+  void scale(double sx,double sy,double sz);
+  ///Rotates the geometry data.
+  ///Permanently modifies the data and resets any collision data structures.
+  void rotate(const double R[9]);
+  ///Translates/rotates/scales the geometry data.
+  ///Permanently modifies the data and resets any collision data structures.
   void transform(const double R[9],const double t[3]);
   ///Sets a padding around the base geometry which affects the results of
   ///proximity queries

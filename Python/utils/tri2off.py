@@ -1,4 +1,6 @@
 import sys
+import os
+import fnmatch
 
 def load_tri(fn):
     f = open(fn,'r')
@@ -30,13 +32,31 @@ def save_off(points,triangles,fn):
         f.write("3 %d %d %d\n"%(t[0],t[1],t[2]))
     f.close()
 
+def recursive_glob(folder,pattern):
+    for root, dirnames, filenames in os.walk(folder):
+        for filename in fnmatch.filter(filenames, pattern):
+            yield os.path.join(root, filename)
+    return
+
 if __name__ == "__main__":
-    if len(sys.argv) != 3:
-        print "Usage: python tri2off.py in.tri out.off"
+    if len(sys.argv) < 2:
+        print "Converts Klampt's simple .tri triangle mesh file to the more standard"
+        print "Object File Format (OFF)."
+        print
+        print "Usage: python tri2off.py in.tri out.off (or provide a folder to convert all .tri files)"
         exit()
     
     tri_fn = sys.argv[1]
-    off_fn = sys.argv[2]
-    (p,t) = load_tri(tri_fn)
-    save_off(p,t,off_fn)
+    if os.path.isdir(tri_fn):
+        folder = tri_fn
+        for tri_fn in recursive_glob(folder,"*.tri"):
+            off_fn = os.path.splitext(tri_fn)[0]+'.off'
+            print "Converting",tri_fn,"to",off_fn,"..."
+            (p,t) = load_tri(tri_fn)
+            save_off(p,t,off_fn)
+        print "Done."
+    else:
+        off_fn = sys.argv[2]
+        (p,t) = load_tri(tri_fn)
+        save_off(p,t,off_fn)
     

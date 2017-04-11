@@ -1,6 +1,7 @@
 import pkg_resources
 pkg_resources.require("klampt==0.6.2")
 from klampt import *
+from klampt.math import vectorops,so3,se3
 import math
 import sys
 sys.path.append("Web/Server")

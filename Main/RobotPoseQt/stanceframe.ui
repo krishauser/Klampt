@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>272</width>
-    <height>82</height>
+    <width>291</width>
+    <height>129</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -27,6 +27,29 @@
      </property>
     </widget>
    </item>
+   <item row="2" column="0">
+    <widget class="QLabel" name="label">
+     <property name="text">
+      <string>Contact tolerance (m)</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="1">
+    <widget class="QDoubleSpinBox" name="contactToleranceSpin">
+     <property name="maximum">
+      <double>1.000000000000000</double>
+     </property>
+     <property name="singleStep">
+      <double>0.001000000000000</double>
+     </property>
+     <property name="value">
+      <double>0.000000000000000</double>
+     </property>
+    </widget>
+   </item>
    <item row="0" column="1">
     <widget class="QPushButton" name="btn_createNearby">
      <property name="statusTip">
@@ -38,25 +61,9 @@
     </widget>
    </item>
    <item row="1" column="0">
-    <widget class="QLabel" name="label">
+    <widget class="QPushButton" name="btn_clean">
      <property name="text">
-      <string>Contact tolerance (m)</string>
-     </property>
-     <property name="alignment">
-      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-     </property>
-    </widget>
-   </item>
-   <item row="1" column="1">
-    <widget class="QDoubleSpinBox" name="contactToleranceSpin">
-     <property name="maximum">
-      <double>1.000000000000000</double>
-     </property>
-     <property name="singleStep">
-      <double>0.001000000000000</double>
-     </property>
-     <property name="value">
-      <double>0.000000000000000</double>
+      <string>Clean</string>
      </property>
     </widget>
    </item>
@@ -96,9 +103,26 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>btn_clean</sender>
+   <signal>clicked()</signal>
+   <receiver>StanceFrame</receiver>
+   <slot>Clean()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>89</x>
+     <y>71</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>145</x>
+     <y>64</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>CreateFlat()</slot>
   <slot>CreateNearby()</slot>
+  <slot>Clean()</slot>
  </slots>
 </ui>

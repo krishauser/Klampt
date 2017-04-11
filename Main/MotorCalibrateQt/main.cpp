@@ -1,4 +1,4 @@
-#include <QtGui/QApplication>
+#include <QApplication>
 #include "dialog.h"
 #include "Main/motorcalibrate.h"
 

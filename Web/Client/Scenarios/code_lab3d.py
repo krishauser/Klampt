@@ -1,5 +1,5 @@
 from klampt import *
-from klampt import vectorops,so2,so3
+from klampt.math import vectorops,so2,so3
 from klampt.cspace import CSpace,MotionPlan
 import math
 

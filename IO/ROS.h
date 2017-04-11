@@ -10,17 +10,21 @@ class Robot;
 class ControlledRobotSimulator;
 class WorldSimulation;
 class LinearPath;
+class SensorBase;
 
 
 ///Must call this before all other ROS[X] calls. An optional node name can
-///be provided
+///be provided, otherwise it is just "klampt".  This can safely be called many
+///times
 bool ROSInit(const char* nodename="klampt");
 ///Must call this after all other ROS[X] calls to cleanly shut down ROS
 bool ROSShutdown();
+///Returns true if ROS is initialized
+bool ROSInitialized();
 ///Updates subscribed topics.  Returns true if any topic was updated.
 ///Note: if only "tf" is updated, this will still return false...
 bool ROSSubscribeUpdate();
-///Deletes topics.  To remove the subscribed TF topics, call
+///Deletes a topics.  [TODO] To remove the subscribed TF topics, call ...
 bool ROSDetach(const char* topic);
 ///Returns the number of subscribed topics
 int ROSNumSubscribedTopics();
@@ -54,6 +58,14 @@ bool ROSPublishTrajectory(const Robot& robot,const std::vector<int>& indices,con
 bool ROSPublishCommandedJointState(ControlledRobotSimulator& robot,const char* topic="klampt/joint_state_commanded");
 ///publishes a JointState about the robot's current sensed joint state
 bool ROSPublishSensedJointState(ControlledRobotSimulator& robot,const char* topic="klampt/joint_state_sensed");
+///Pubhlishes a sensor reading to a topic of the appropriate type.
+///- Generically, a FloatArray is published.
+///- CameraSensor publishes two topics if color is available: [topic]/rgb/camera_info and [topic]/rgb/image_color_rect.
+///  If depth is available, publishes to [topic]/depth_registered/camera_info and [topic]/depth_registered/image_rect.
+bool ROSPublishSensorMeasurement(const SensorBase* sensor,const char* topic="klampt/sensor");
+///Same as above, but with the proper tf frame name.  robot is the robot to which the sensor is attached and
+///frameprefix is the tf frame prefix.
+bool ROSPublishSensorMeasurement(const SensorBase* sensor,const Robot& robot,const char* topic="klampt/sensor",const char* frameprefix="klampt");
 
 ///Subscribes to Pose updates from the given topic.  Note: the T
 ///object must not be destroyed while ROSSubscribeUpdate is being called.
@@ -93,8 +105,8 @@ bool ROSPublishTransform(const Math3D::RigidTransform& T,const char* frame="klam
 
 ///Subscribes to world updates from the transform server.  Note: the world
 ///object must not be destroyed while ROSSubscribeUpdate is being called.
-///If you want to detach it from  future updates, call RosDetach("tf");
-///Note: does NOT set robot configurations.
+///If you want to detach it from future updates, call RosDetach("tf");
+///Note: does NOT set robot configurations.  
 bool ROSSubscribeTransforms(RobotWorld& world,const char* frameprefix="klampt");
 ///Subscribes to robot updates from the transform server.  Note: the robot
 ///object must not be destroyed while ROSSubscribeUpdate is being called.
@@ -104,7 +116,7 @@ bool ROSSubscribeTransforms(Robot& robot,const char* frameprefix="klampt");
 ///Subscribes to transform updates from the transform server.  Note: the T
 ///object must not be destroyed while ROSSubscribeUpdate is being called.
 ///If you want to detach it from  future updates, call RosDetach("tf");
-bool ROSSubscribeTransform(Math3D::RigidTransform& T,const char* frameprefix="klampt_transform_state");
+bool ROSSubscribeTransform(Math3D::RigidTransform& T,const char* frameprefix="klampt_transform");
 
 
 #endif

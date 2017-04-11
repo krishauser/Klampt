@@ -1,7 +1,7 @@
 #include "RobotConstrainedInterpolator.h"
 
 RobotConstrainedInterpolator::RobotConstrainedInterpolator(Robot& robot,const vector<IKGoal>& goals)
-  :ConstrainedInterpolator(&space,&f),space(robot),manifold(robot),f(robot)
+  :ConstrainedInterpolator(&space,&f),space(robot),f(robot)
 {
   f.UseIK(goals);
   GetDefaultIKDofs(robot,goals,f.activeDofs);  
@@ -36,9 +36,9 @@ bool RobotConstrainedInterpolator::Project(Config& x)
 
 
 RobotSmoothConstrainedInterpolator::RobotSmoothConstrainedInterpolator(Robot& robot,const vector<IKGoal>& goals)
-  :SmoothConstrainedInterpolator(&space,&f),space(robot),manifold(robot),f(robot)
+  :SmoothConstrainedInterpolator(&space,&f),space(robot),f(robot)
 {
-  SmoothConstrainedInterpolator::manifold = &manifold;
+  SmoothConstrainedInterpolator::manifold = &space;
   f.UseIK(goals);
   GetDefaultIKDofs(robot,goals,f.activeDofs);  
 }

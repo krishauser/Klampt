@@ -51,7 +51,7 @@ COPY View /etc/Klampt/View/
 RUN cd /etc/Klampt/Library && \
 	make unpack-deps && \
 	make deps && \
-	echo "/etc/Klampt/Library/ode-0.11.1/ode/src/.libs/" >> /etc/ld.so.conf && \
+	echo "/etc/Klampt/Library/ode-0.14/ode/src/.libs/" >> /etc/ld.so.conf && \
 	ldconfig
 
 # Install Klamp't

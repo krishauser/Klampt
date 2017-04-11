@@ -93,7 +93,7 @@ public:
   //adds a geometry to the geometry of the given link
   void Mount(int link,const Geometry::AnyGeometry3D& geom,const RigidTransform& T);
   //adds a subchain as descendents of a given link
-  void Mount(int link,const Robot& subchain,const RigidTransform& T);
+  void Mount(int link,const Robot& subchain,const RigidTransform& T,const char* prefix=NULL);
   ///Creates this into a mega-robot from several other robots
   void Merge(const std::vector<Robot*>& robots);
 
@@ -132,7 +132,11 @@ public:
   vector<string> linkNames;
   vector<string> driverNames;
 
-  ///Any extra properties that might be useful
+  ///Any extra properties that might be useful.  Currently, we support the following:
+  ///- sensors: an XML string defining the robot's sensors.  If an xml filename is given,
+  ///     this string is loaded from disk.
+  ///- controller: an XML string defining the robot's controller.  If an xml filename is
+  ///     given, this string is loaded from disk.
   PropertyMap properties;
 
   ///A matrix of lipschitz constants (see ComputeLipschitzMatrix)

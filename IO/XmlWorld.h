@@ -48,6 +48,11 @@ class XmlWorld
   TiXmlElement* GetRigidObject(int index) { return GetElement("rigidObject",index); }
   TiXmlElement* GetTerrain(int index) { return GetElement("terrain",index); }
 
+  ///The save function saves an XML file to fn and saves all robots, rigid objects, and terrains to
+  ///.rob, .obj, and .env files to the folder [itempath]/.  If itempath is not provided, then the
+  ///path [path]/[worldfile]/ will be used, where fn is of the form "[path]/[worldfile].xml"
+  bool Save(RobotWorld& world,const string& fn,string itempath=string());
+
   TiXmlDocument doc;
   TiXmlElement* elem;
   string path;
