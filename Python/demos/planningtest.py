@@ -186,10 +186,10 @@ for i in range(len(configs)-1):
     print plan.space.cspace.feasibilityQueryOrder()
 
     print "Plan stats:"
-    print plan.planner.getStats()
+    print plan.getStats()
 
     print "CSpace stats:"
-    print plan.space.cspace.getStats()
+    print plan.space.getStats()
 
     #to be nice to the C++ module, do this to free up memory
     plan.space.close()
