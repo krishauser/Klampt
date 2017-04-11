@@ -9,6 +9,7 @@
 	#include "robotmodel.h"
 	#include "robotik.h"
 	#include "robotsim.h"
+  #include "robotio.h"
   #include "stability.h"
 %}
 %include "carrays.i"
@@ -413,4 +414,5 @@ static PyObject* convert_dmatrix_obj(const std::vector<std::vector<double> >& ma
 %include "robotmodel.h"
 %include "robotik.h"
 %include "robotsim.h"
+%include "robotio.h"
 %include "stability.h"
