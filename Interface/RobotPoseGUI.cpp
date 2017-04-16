@@ -450,6 +450,7 @@ bool RobotPoseBackend::OnCommand(const string& cmd,const string& args)
       r->fileName = oldr->fileName;
 
       resources->selected->resource = r;
+      resources->selected->SetChanged();
       if(resources->selected->IsExpanded()) {
         fprintf(stderr,"Warning, don't know how clearing children will be reflected in GUI\n");
         resources->selected->ClearExpansion();
@@ -461,15 +462,20 @@ bool RobotPoseBackend::OnCommand(const string& cmd,const string& args)
     const ConfigResource* rc = dynamic_cast<const ConfigResource*>((const ResourceBase*)r);
     if(rc) {
       Vector q = robotWidgets[0].Pose();
-      q=rc->data;
-      robotWidgets[0].SetPose(q);
-      /*
-      robotWidgets[0].SetPose(rc->data);
-      robot->NormalizeAngles(robotWidgets[0].linkPoser.poseConfig);
-      if(robotWidgets[0].linkPoser.poseConfig != rc->data)
-	printf("Warning: config in library is not normalized\n");
-      */
-      UpdateConfig();
+      if(q.n == robot->q.n) {
+        q=rc->data;
+        robotWidgets[0].SetPose(q);
+        /*
+        robotWidgets[0].SetPose(rc->data);
+        robot->NormalizeAngles(robotWidgets[0].linkPoser.poseConfig);
+        if(robotWidgets[0].linkPoser.poseConfig != rc->data)
+    printf("Warning: config in library is not normalized\n");
+        */
+        UpdateConfig();
+      }
+      else {
+        fprintf(stderr,"Can't copy this Config to the poser, it is not the same size\n");
+      }
     }
     else {
       const IKGoalResource* rc = dynamic_cast<const IKGoalResource*>((const ResourceBase*)r);
