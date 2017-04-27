@@ -1926,8 +1926,8 @@ class RobotModelDriver(_object):
     """
     A reference to a driver of a RobotModel.
 
-    A driver corresponds to one of the robot's actuators and its
-    transmission.
+    A driver corresponds to one of the robot's actuators and encodes how
+    its forces are transmitted to joints.
 
     C++ includes: robotmodel.h 
     """
@@ -2135,6 +2135,16 @@ class RobotModel(_object):
         Returns a reference to the named driver. 
         """
         return _robotsim.RobotModel_driver(self, *args)
+
+    def getJointType(self, *args):
+        """
+        getJointType(RobotModel self, int index) -> char const
+        getJointType(RobotModel self, char const * name) -> char const *
+
+        Returns the joint type of the joint connecting the named link to its
+        parent. 
+        """
+        return _robotsim.RobotModel_getJointType(self, *args)
 
     def getConfig(self):
         """

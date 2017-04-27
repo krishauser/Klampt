@@ -1216,6 +1216,16 @@ Returns a reference to the indexed driver. ";
 
 Returns a reference to the named driver. ";
 
+%feature("docstring")  RobotModel::getJointType "
+
+Returns the joint type of the joint connecting the indexed link to its
+parent. ";
+
+%feature("docstring")  RobotModel::getJointType "
+
+Returns the joint type of the joint connecting the named link to its
+parent. ";
+
 %feature("docstring")  RobotModel::getConfig "
 
 Retrieves the current configuration of the robot model. ";
@@ -1393,8 +1403,8 @@ robot's appearances is to set the link Appearance's directly. ";
 
 A reference to a driver of a RobotModel.
 
-A driver corresponds to one of the robot's actuators and its
-transmission.
+A driver corresponds to one of the robot's actuators and encodes how
+its forces are transmitted to joints.
 
 C++ includes: robotmodel.h ";
 
@@ -2883,6 +2893,8 @@ empty. ";
 %feature("docstring")  DetachFromStream "";
 
 %feature("docstring")  ProcessStreams "";
+
+%feature("docstring")  WaitForStream "";
 
 %feature("docstring")  ThreeJSGetScene "
 
