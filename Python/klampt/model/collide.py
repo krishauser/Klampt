@@ -112,8 +112,8 @@ def group_subset_collision_iter(geomlist,alist,blist,pairs='all'):
             bblist[id] = geomlist[id].getBB()
     bb1 = bb_union(*[bblist[i] for i in alist])
     bb2 = bb_union(*[bblist[i] for i in blist])
-    geoms1 = [i,geomlist[i] for i in alist if bb_intersect(bblist[i],bb2)]
-    geoms2 = [i,geomlist[i] for i in blist if bb_intersect(bblist[i],bb1)]
+    geoms1 = [(i,geomlist[i]) for i in alist if bb_intersect(bblist[i],bb2)]
+    geoms2 = [(i,geomlist[i]) for i in blist if bb_intersect(bblist[i],bb1)]
     if pairs=='all':
         for i,g in geoms1:
             for j,g2 in geoms2:
