@@ -38,6 +38,7 @@ class GLSimulationPlugin(GLPluginInterface):
         self.collider = collide.WorldCollider(world)
         self.sim = SimpleSimulator(world)
         self.simulate = False
+        self.dt = 0.02
 
         #turn this on to draw contact points
         self.drawContacts = False
@@ -95,6 +96,11 @@ class GLSimulationPlugin(GLPluginInterface):
         self.add_action(toggle_draw_contacts,'Toggle draw contacts','c')
         self.add_action(toggle_draw_sensors,'Toggle draw sensors','v')
         self.add_action(share_path,'Begin/finalize logging path to HTML','w')
+
+    def initialize(self):
+        #match window refresh rate
+        self.dt = self.window.program.dt
+        return GLPluginInterface.initialize(self)
 
     def display(self):
         #Put your display handler here
@@ -170,7 +176,7 @@ class GLSimulationPlugin(GLPluginInterface):
                 self.htmlSharePath.animate()
 
             self.control_loop()
-            self.sim.simulate(self.window.program.dt)
+            self.sim.simulate(self.dt)
             self.refresh()
         return True
 
