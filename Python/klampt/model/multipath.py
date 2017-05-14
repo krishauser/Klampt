@@ -143,6 +143,7 @@ class MultiPath:
         f.write('<?xml version="1.0"?>\n')
         f.write(_prettify(tree.getroot()))
         #tree.write(fn,pretty_print=True)
+        f.close()
 
     def load(self,fn):
         """Loads this  multipath from a multipath xml file."""
