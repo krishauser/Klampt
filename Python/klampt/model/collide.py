@@ -165,7 +165,7 @@ class WorldCollider:
       - robots: contains the geomList indices of each robot in the world.
 
     Methods:
-      - getGeom(obj): finds the geometry corresponding to an object
+      - getGeomIndex(obj): finds the geomList index corresponding to an object
       - ignoreCollision(obj or obj pair): ignores collisions corresponding to
         an object or pair of objects
       - collisionTests(filter1,filter2): returns an iterator over potential
@@ -276,12 +276,15 @@ class WorldCollider:
                         self.mask[r[j]].add(r[i])
                         
         for i in ignore:
-            self.ignoreCollisions(i)
+            self.ignoreCollision(i)
                 
-    def getGeom(self,object):
-        for (o,g) in self.geomList:
-            if o==object:
-                return g
+    def getGeomIndex(self,object):
+        assert isinstance(object,(RobotModel,RobotModelLink,RigidObjectModel,TerrainModel))
+        for i,(o,g) in enumerate(self.geomList):
+            if o.world==object.world and o.getID()==object.getID():
+                assert o.getName()==object.getName()
+                assert type(o) == type(object)
+                return i
         return None
 
 
@@ -291,15 +294,15 @@ class WorldCollider:
         ign can be either a single body in the world or a pair of bodies."""
         if hasattr(ign,'__iter__'):
             (a,b) = ign
-            ageom = self.getGeom(a)
-            bgeom = self.getGeom(b)
+            ageom = self.getGeomIndex(a)
+            bgeom = self.getGeomIndex(b)
             if ageom is None or bgeom is None:
-                raise ValueError("Invalid ignore collision item, must be a body in the world")
+                raise ValueError("Invalid ignore collision item, must be a pair of bodies in the world")
             self.mask[ageom].discard(bgeom)
             self.mask[bgeom].discard(ageom)
         else:
             #ignore all collisions with the given geometry
-            geom = self.getGeom(ign)
+            geom = self.getGeomIndex(ign)
             if geom is None:
                 raise ValueError("Invalid ignore collision item, must be a body in the world")
             for i in self.mask[geom]:
