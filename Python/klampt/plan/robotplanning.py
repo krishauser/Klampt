@@ -83,6 +83,8 @@ def makeSpace(world,robot,
         else:
             space = robotcspace.ClosedLoopRobotCSpace(robot,equalityConstraints,collider)
             space.tol = equalityTolerance
+            if subset is not None and len(subset) < robot.numLinks():
+              space.setIKActiveDofs(subset)
     space.eps = edgeCheckResolution
 
     for c in extraConstraints:
