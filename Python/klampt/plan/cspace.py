@@ -166,6 +166,8 @@ class CSpace:
             self.feasibilityTests = []
             self.feasibilityTestNames = []
             self.feasibilityTestDependencies = []
+        assert name is None or isinstance(name,str),"Name argument 'name' must be a string"
+        assert callable(func),"Feasibility test 'func' must be a callable object"
         self.feasibilityTests.append(func)
         if name is None:
             name = "test_"+str(len(self.feasibilityTests)-1)
