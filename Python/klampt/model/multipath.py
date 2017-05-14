@@ -13,8 +13,17 @@ from xml.sax.saxutils import escape
 from xml.dom import minidom
 
 class MultiPath:
-    """Contains a list of Sections which are fixed-stance paths or
-    trajectories.
+    """A sophisticated path representation that allows timed/untimed paths, attached
+    velocity information, as well as making and breaking contact.  It also has an
+    unstructured propery map 'settings' which can contain metadata about which robot
+    this path applies to, how the path was created, etc. See Klampt/Model/MultiPath.h
+    for more information about its structure.
+
+    Primarily, a MultiPath consists of a list of Sections, each of which is a path or
+    timed trajectory along a fixed stance.
+
+    A Section can either contain the Holds defining its stance, or its stance could be
+    defined by indices into the holdSet member of MultiPath.
     """
     
     class Section:
@@ -48,17 +57,29 @@ class MultiPath:
         return self.sections[-1].configs[-1]
 
     def startTime(self):
-        if self.sections[0].times==None: return 0
+        if len(self.sections)==0 or self.sections[0].times==None: return 0
         return self.sections[0].times[0]
 
     def endTime(self):
         """Returns the final time parameter"""
+        if len(self.sections)==0: return 0
         if self.sections[-1].times==None: return sum(len(s.configs)-1 for s in self.sections)
         return self.sections[-1].times[-1]
+
+    def duration(self):
+        return self.endTime()-self.startTime()
 
     def hasTiming(self):
         """Returns true if the multipath is timed"""
         return self.sections[0].times!=None
+
+    def isContinuous(self):
+        """Returns true if all the sections are continuous (i.e., the last config of each
+        section matches the start config of the next)."""
+        for i in xrange(len(self.sections)-1):
+            if self.sections[i].configs[-1] != self.sections[i+1].configs[0]:
+                return False
+        return True
 
     def getStance(self,section):
         """Returns the list of Holds that the section should satisfy"""
@@ -79,7 +100,7 @@ class MultiPath:
         return res
 
     def concat(self,path):
-        """Appends the path, making sure times and holds are appropriate set"""
+        """Appends the path, making sure times and holds are appropriately set"""
         newSections = path.sections[:]
         dt = 0.0
         if path.hasTiming() and len(self.sections)>0:
@@ -237,11 +258,62 @@ class MultiPath:
             return (s,p,u)
 
     def eval(self,t):
+        """Evaluates the MultiPath at time t."""
         (s,i,u) = self.getSegment(t)
         if s < 0: return self.startConfig()
         elif s >= len(self.sections): return self.endConfig()
         if u==0: return self.sections[s].milestones[i]
         return vectorops.interpolate(self.sections[s].milestones[i],self.sections[s].milestones[i+1],u)
+
+    def getTrajectory(self,robot=None,eps=None):
+        """Returns a trajectory representation of this MultiPath.  If robot is provided, then a RobotTrajectory
+        is returned.  Otherwise, if velocity information is given, then a HermiteTrajectory is returned.
+        Otherwise, a Trajectory is returned.
+
+        If robot and eps is given, then the IK constraints along the trajectory are solved and the path is
+        discretized at resolution eps.
+        """
+        import trajectory
+        res = trajectory.Trajectory()
+        if robot is not None:
+            res = trajectory.RobotTrajectory(robot)
+            if self.sections[0].velocities is not None:
+                print "MultiPath.getTrajectory: Warning, can't discretize IK constraints with velocities specified"
+        elif self.sections[0].velocities is not None:
+            res = trajectory.HermiteTrajectory()
+
+        if robot is not None and eps is not None:
+            from ..plan.robotcspace import ClosedLoopRobotCSpace
+            for i,s in enumerate(self.sections):
+                space = ClosedLoopRobotCSpace(robot,self.getIKProblem(i))
+                for j in xrange(len(s.configs)-1):
+                    ikpath = space.interpolationPath(s.configs[j],s.configs[j+1],eps)
+                    t0 = len(res.milestones)
+                    t1 = t0 + 1
+                    iktimes = [t0 + float(k)/float(len(ikpath)-1)*(t1-t0) for k in xrange(len(ikpath))]
+                    res.milestones += ikpath[:-1]
+                    res.times += iktimes[:-1]
+            res.milestones.append(self.sections[-1].configs[-1])
+        else:
+            for s in self.sections:
+                res.milestones += s.configs[:-1]
+            res.milestones.append(self.sections[-1].configs[-1])
+            if self.sections[0].velocities is not None:
+                vels = []
+                for s in self.sections:
+                    assert s.velocities is not None,"Some sections have velocities, some don't?"
+                    vels += s.velocities[:-1]
+                vels.append(self.sections[-1].velocities[-1])
+                for i,q in enumerate(res.milestones):
+                    assert len(vels[i]) == len(q),"Velocities don't have the right size?"
+                    res.milestones[i] = q + vels[i]
+            if not self.hasTiming():
+                res.times = range(len(res.milestones))
+            else:
+                for s in self.sections:
+                    res.times += s.times[:-1]
+                res.times.append(self.sections[-1].times[-1])
+        return res
 
 def _escape_nl(text):
     return escape(text).replace('\n','&#x0A;')
