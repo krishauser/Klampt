@@ -446,34 +446,34 @@ class SE3Trajectory(GeodesicTrajectory):
 	def to_se3(self,milestone):
 		"""Converts a state parameter vector to a klampt.se3 element"""
 		return (milestone[:9],milestone[9:])
-	def from_se3(self,milestone):
+	def from_se3(self,T):
 		"""Converts a klampt.se3 element to a state parameter vector"""
-		return (milestone[:9],milestone[9:])
+		return list(T[0]) + list(T[1])
 	def eval_se3(self,t,endBehavior='halt'):
 		"""Returns an SE3 element"""
 		res = self.eval(t,endBehavior)
-		return (res[:9],res[9:])
+		return self.to_se3(res)
 	def deriv_se3(self,t,endBehavior='halt'):
 		"""Returns the derivative as the derivatives of an SE3
 		element"""
 		res = self.deriv(t,endBehavior)
-		return (res[:9],res[9:])
+		return self.to_se3(res)
 	def preTransform(self,T):
 		"""Premultiplies every transform in here by the se3 element
 		T. In other words, if T transforms a local frame F to frame F',
 		this method converts this SE3Trajectory from coordinates in F
 		to coordinates in F'"""
 		for i,m in enumerate(self.milestones):
-			Tm = (m[:9],m[9:])
-			self.milestones[i] = se3.mul(T,Tm)
+			Tm = self.to_se3(m)
+			self.milestones[i] = self.from_se3(se3.mul(T,Tm))
 	def postTransform(self,T):
 		"""Postmultiplies every transform in here by the se3 element
 		T. In other words, if T transforms a local frame F to frame F',
 		this method converts this SE3Trajectory from describing how F'
 		moves to how F moves."""
 		for i,m in enumerate(self.milestones):
-			Tm = (m[:9],m[9:])
-			self.milestones[i] = se3.mul(Tm,T)
+			Tm = self.to_se3(m)
+			self.milestones[i] = self.from_se3(se3.mul(Tm,T))
 	def getRotationTrajectory(self):
 		"""Returns an SO3Trajectory describing the rotation
 		trajectory."""
@@ -484,7 +484,7 @@ class SE3Trajectory(GeodesicTrajectory):
 		if localPt is None:
 			return Trajectory(times,[m[9:] for m in self.milestones])
 		else:
-			return Trajectory(times,[se3.apply((m[:9],m[9:]),localPt) for m in self.milestones])
+			return Trajectory(times,[se3.apply(self.to_se3(m),localPt) for m in self.milestones])
 	def constructor(self):
 		return SE3Trajectory
 
