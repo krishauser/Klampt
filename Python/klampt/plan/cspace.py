@@ -194,6 +194,18 @@ class CSpace:
                 if not test(x): return False
             return True
 
+    def isFeasible(self,x):
+        """An overload for self.cspace.isFeasible.  Use this to test feasibility of a configuration
+        (rather than feasible()) if you wish to take advantage of adaptive feasibility testing and
+        constraint testing statistics."""
+        return self.cspace.isFeasible(x)
+
+    def isVisible(self,x,y):
+        """An overload for self.cspace.isVisible.  Use this to test visibility of a line
+        (rather than visible()) if you want to use the natural visibility tester, wish to take
+        advantage of adaptive visibility testing, or want to use constraint testing statistics."""
+        return self.cspace.isVisible(x,y)
+
     def getStats(self):
         """Returns a dictionary mapping statistic names to values.  Result contains 
         fraction of feasible configurations, edges, etc.  If feasibility tests are
