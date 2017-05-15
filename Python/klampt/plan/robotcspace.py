@@ -63,7 +63,7 @@ class RobotCSpace(CSpace):
         self.properties['geodesic'] = 1
 
     def addConstraint(self,checker,name=None):
-        self.addFeasiblilityTest(checker,name)
+        self.addFeasibilityTest(checker,name)
 
     def sample(self):
         """Overload this to implement custom sampling strategies or to handle
