@@ -467,7 +467,7 @@ def spin(duration):
         if not shown(): break
         time.sleep(min(0.04,duration-t))
         t += 0.04
-    hide()
+    show(False)
     return
 
 def lock():
