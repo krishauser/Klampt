@@ -462,8 +462,8 @@ bool RobotPoseBackend::OnCommand(const string& cmd,const string& args)
     const ConfigResource* rc = dynamic_cast<const ConfigResource*>((const ResourceBase*)r);
     if(rc) {
       Vector q = robotWidgets[0].Pose();
+      q=rc->data;
       if(q.n == robot->q.n) {
-        q=rc->data;
         robotWidgets[0].SetPose(q);
         /*
         robotWidgets[0].SetPose(rc->data);
@@ -827,6 +827,14 @@ bool RobotPoseBackend::OnCommand(const string& cmd,const string& args)
     robot->SetDriverValue(cur_driver,driver_value);
     robotWidgets[0].SetPose(robot->q);
   }
+  else if(cmd == "undo_pose") {
+    for(size_t i=0;i<world->robots.size();i++) 
+      if(lastActiveWidget == &robotWidgets[i]) {
+        printf("Undoing robot poser %d\n",i);
+        robotWidgets[i].Undo();
+        UpdateConfig();
+      }
+  }
   else {
     return ResourceGUIBackend::OnCommand(cmd,args);
   }
@@ -839,8 +847,10 @@ void RobotPoseBackend::BeginDrag(int x,int y,int button,int modifiers)
   Robot* robot = world->robots[0];
   if(button == GLUT_RIGHT_BUTTON) {
     double d;
-    if(allWidgets.BeginDrag(x,viewport.h-y,viewport,d))
+    if(allWidgets.BeginDrag(x,viewport.h-y,viewport,d)) {
       allWidgets.SetFocus(true);
+      lastActiveWidget = allWidgets.activeWidget;
+    }
     else
       allWidgets.SetFocus(false);
     if(allWidgets.requestRedraw) { SendRefresh(); allWidgets.requestRedraw=false; }

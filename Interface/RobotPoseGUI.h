@@ -27,6 +27,7 @@ using namespace GLDraw;
  * 
  * Accepts commands (in addition to ResourceGUIBackend and WorldGUIBackend):
  * - pose_mode: next clicks will pose the robot's joints
+ * - undo_pose: undoes the last robot pose
  * - constrain_link_mode: next clicks will add constraints to a link
  * - constrain_point_mode: next clicks will add point constraints
  * - delete_constraint_mode: next clicks will delete constraints
@@ -75,6 +76,7 @@ class RobotPoseBackend : public ResourceGUIBackend
   vector<RobotPoseWidget> robotWidgets;
   vector<RigidObjectPoseWidget> objectWidgets;
   WidgetSet allWidgets;
+  GLDraw::Widget* lastActiveWidget;
   int draw_geom,draw_poser,draw_bbs,draw_com,draw_frame,draw_sensors;
   //temp: sensors storage
   RobotSensors robotSensors;
