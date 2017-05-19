@@ -755,6 +755,7 @@ void RobotPoseWidget::DrawGL(Camera::Viewport& viewport)
 
 void RobotPoseWidget::Snapshot()
 {
+  assert(undoTransforms.size() == undoConfigs.size());
   undoConfigs.push_back(linkPoser.poseConfig);
   undoTransforms.resize(undoTransforms.size()+1);
   for(size_t i=0;i<ikPoser.poseWidgets.size();i++)
@@ -763,10 +764,12 @@ void RobotPoseWidget::Snapshot()
     undoConfigs.erase(undoConfigs.begin(),undoConfigs.begin() + undoConfigs.size() - 20);
     undoTransforms.erase(undoTransforms.begin(),undoTransforms.begin() + undoTransforms.size() - 20);
   }
+  assert(undoTransforms.size() == undoConfigs.size());
 }
 
 void RobotPoseWidget::Undo()
 {
+  assert(undoTransforms.size() == undoConfigs.size());
   if(!undoConfigs.empty()) {
     SetPose(undoConfigs.back());
     for(size_t i=0;i<undoTransforms.back().size();i++) {
@@ -817,7 +820,7 @@ bool RobotPoseWidget::BeginDrag(int x,int y,Camera::Viewport& viewport,double& d
     return true;
   }
   else if(mode == ModeIKPoseFixed) {
-    undoConfigs.push_back(linkPoser.poseConfig);
+    Snapshot();
     bool res=WidgetSet::BeginDrag(x,y,viewport,distance);
     if(!res) return false;
     if(closestWidget == &linkPoser) {
@@ -835,7 +838,7 @@ bool RobotPoseWidget::BeginDrag(int x,int y,Camera::Viewport& viewport,double& d
     return true;
   }
   else {
-    undoConfigs.push_back(linkPoser.poseConfig);
+    Snapshot();
     return WidgetSet::BeginDrag(x,y,viewport,distance);
   }
 }
