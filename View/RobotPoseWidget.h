@@ -63,6 +63,8 @@ public:
   void Add(const IKGoal& goal);
   ///Sets the destination link of the given widget
   void AttachWidget(int widget,int link);
+  ///Sets the transform of the pose goal and its widget 
+  void SetPoseAndWidgetTransform(int widget,const RigidTransform& T);
   ///Call this after changing the poseGoals and poseWidgets structure.
   void RefreshWidgets();
   ///Returns the index of the hovered widget
@@ -129,6 +131,9 @@ public:
   virtual void EndDrag();
   virtual void Keypress(char c);
 
+  void Snapshot();
+  void Undo();
+
   bool useBase;
   GLDraw::TransformWidget basePoser;
   RobotLinkPoseWidget linkPoser;
@@ -137,6 +142,8 @@ public:
   int mode;
   int attachx,attachy;
   Ray3D attachRay;
+  vector<Config> undoConfigs;
+  vector<vector<pair<int,RigidTransform> > > undoTransforms;
 };
 
 /** @} */
