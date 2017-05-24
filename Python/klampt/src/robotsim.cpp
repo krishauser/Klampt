@@ -29,6 +29,7 @@
 #include <ode/ode.h>
 #include "pyerr.h"
 #include "pyconvert.h"
+#include "robotik.h"
 #include <fstream>
 #ifndef WIN32
 #include <unistd.h>
@@ -4384,6 +4385,20 @@ void RobotPoser::getConditioned(const std::vector<double>& qref,std::vector<doub
   tw->Pose_Conditioned(Config(qref)).getCopy(&out[0]);
 }
 
+void RobotPoser::addIKConstraint(const IKObjective& obj)
+{
+  RobotPoseWidget* tw=dynamic_cast<RobotPoseWidget*>(&*widgets[index].widget);
+  tw->ikPoser.ClearLink(obj.goal.link);
+  tw->ikPoser.Add(obj.goal);
+  tw->ikPoser.Enable(&tw->ikPoser.poseWidgets.back(),false);
+}
+
+void RobotPoser::clearIKConstraints()
+{
+  RobotPoseWidget* tw=dynamic_cast<RobotPoseWidget*>(&*widgets[index].widget);
+  tw->ikPoser.poseGoals.clear();
+  tw->ikPoser.poseWidgets.clear();
+}
 
 
 
