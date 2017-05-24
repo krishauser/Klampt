@@ -501,7 +501,17 @@ are implemented in the Python API.
 
 C++ includes: robotik.h ";
 
-%feature("docstring")  IKObjective::IKObjective "";
+%feature("docstring")  IKObjective::IKObjective "
+
+Constructs a blank IKObjective. ";
+
+%feature("docstring")  IKObjective::IKObjective "
+
+Copy constructor. ";
+
+%feature("docstring")  IKObjective::copy "
+
+Copy constructor. ";
 
 %feature("docstring")  IKObjective::link "
 
@@ -645,9 +655,17 @@ can be sampled in case the prior configs lead to local minima.
 
 C++ includes: robotik.h ";
 
-%feature("docstring")  IKSolver::IKSolver "";
+%feature("docstring")  IKSolver::IKSolver "
 
-%feature("docstring")  IKSolver::IKSolver "";
+Creates an empty solver. ";
+
+%feature("docstring")  IKSolver::IKSolver "
+
+Copy constructor. ";
+
+%feature("docstring")  IKSolver::copy "
+
+Copy constructor. ";
 
 %feature("docstring")  IKSolver::add "
 
@@ -1622,6 +1640,10 @@ drawn. ";
 
 %feature("docstring")  RobotPoser::getConditioned "";
 
+%feature("docstring")  RobotPoser::addIKConstraint "";
+
+%feature("docstring")  RobotPoser::clearIKConstraints "";
+
 
 // File: classSimBody.xml
 %feature("docstring") SimBody "
@@ -2553,6 +2575,8 @@ Sets the random seed used by the motion planner. ";
 %feature("docstring")  std::makeNewCSpace "";
 
 %feature("docstring")  std::destroyCSpace "";
+
+%feature("docstring")  std::getPreferredSpace "";
 
 %feature("docstring")  std::setPlanJSONString "
 
