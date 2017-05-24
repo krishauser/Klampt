@@ -1364,6 +1364,7 @@ class VisAppearance:
         if self.hidden: return
         if self.customDrawFunc is not None:
           self.customDrawFunc(self.item)
+          return
        
         item = self.item
         name = self.name
