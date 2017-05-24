@@ -5,6 +5,7 @@
 
 class RigidObjectModel;
 class RobotModel;
+class IKObjective;
 
 class Viewport
 {
@@ -90,6 +91,8 @@ class RobotPoser : public Widget
   void set(const std::vector<double>& q);
   void get(std::vector<double>& out);
   void getConditioned(const std::vector<double>& qref,std::vector<double>& out);
+  void addIKConstraint(const IKObjective& obj);
+  void clearIKConstraints();
 };
 
 
