@@ -39,6 +39,16 @@ IKObjective::IKObjective()
 {
 }
 
+IKObjective::IKObjective(const IKObjective& rhs)
+:goal(rhs.goal)
+{
+}
+
+IKObjective IKObjective::copy() const
+{
+  return IKObjective(*this);
+}
+
 int IKObjective::link() const
 {
   return goal.link;
@@ -301,6 +311,12 @@ IKSolver::IKSolver(const IKSolver& solver)
   :robot(solver.robot),objectives(solver.objectives),tol(solver.tol),maxIters(solver.maxIters),activeDofs(solver.activeDofs),useJointLimits(solver.useJointLimits),qmin(solver.qmin),qmax(solver.qmax),lastIters(solver.lastIters)
 {}
 
+
+IKSolver IKSolver::copy() const
+{
+  return IKSolver(*this);
+}
+
 void IKSolver::add(const IKObjective& objective)
 {
   objectives.push_back(objective);
@@ -456,7 +472,7 @@ void IKSolver::getJacobian(std::vector<std::vector<double> >& out)
   f.Jacobian(x,J);
 
   //copy to out
-  copy(J,out);
+  ::copy(J,out);
 }
 
 PyObject* IKSolver::solve(int iters,double tol)
