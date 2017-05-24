@@ -52,7 +52,7 @@ class TransitionCSpace(ClosedLoopRobotCSpace):
         if len(space1.holds) > len(space2.holds):
             space1,space2 = space2,space1
         self.space1,self.space2 = space1,space2
-        ClosedLoopRobotCSpace.__init__(self,space1.robot,[h.ikConstraint for h in space1.holds],space2.collider)
+        ClosedLoopRobotCSpace.__init__(self,space1.robot,[h.ikConstraint for h in space2.holds],space2.collider)
         self.addFeasibilityTest(space1.testSupportPolygon,"suppPoly")
 
 class MultiContactCSpace(CompositeCSpace):
