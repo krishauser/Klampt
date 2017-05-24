@@ -23,7 +23,8 @@ class MultiPath:
     timed trajectory along a fixed stance.
 
     A Section can either contain the Holds defining its stance, or its stance could be
-    defined by indices into the holdSet member of MultiPath.
+    defined by indices into the holdSet member of MultiPath.  If all Sections have the
+    latter structure it is known as an "aggregated" MultiPath.
     """
     
     class Section:
@@ -71,7 +72,29 @@ class MultiPath:
 
     def hasTiming(self):
         """Returns true if the multipath is timed"""
-        return self.sections[0].times!=None
+        return self.sections[0].times is not None
+
+    def checkValid(self):
+        """Checks for validity of the path"""
+        if self.hasTiming():
+            t0 = self.startTime()
+            for i,s in enumerate(self.sections):
+                if s.times is None:
+                    raise ValueError("MultiPath section 0 is timed but section "+str(i)+" is not timed")
+                if len(s.times) != len(s.configs):
+                    raise ValueError("MultiPath section "+str(i)+" has invalid number of times")
+                for t in s.times:
+                    if t < t0:
+                        raise ValueError("MultiPath section "+str(i)+" times are not monotonically increasing")
+                    t0 = t
+        else:
+            for i,s in enumerate(self.sections):
+                if s.times is not None:
+                    raise ValueError("MultiPath section 0 is not timed but section "+str(i)+" is timed")
+            for i,s in enumerate(self.sections):
+                if len(s.configs) <= 1:
+                    raise ValueError("Section "+str(i)+" has 0 or 1 configuration, timing may be messed up")
+        return True
 
     def isContinuous(self):
         """Returns true if all the sections are continuous (i.e., the last config of each
@@ -80,6 +103,16 @@ class MultiPath:
             if self.sections[i].configs[-1] != self.sections[i+1].configs[0]:
                 return False
         return True
+
+    def getSectionTiming(self,section):
+        """Returns a pair (tstart,tend) giving the timing of the section"""
+        assert section >= 0 and section < len(self.sections)
+        if self.hasTiming():
+            return self.sections[section].times[0],self.sections[section].times[-1]
+        t0 = 0
+        for i in range(section):
+            t0 += len(self.sections[i].configs)-1
+        return (t0,t0+len(self.sections[section].configs))
 
     def getStance(self,section):
         """Returns the list of Holds that the section should satisfy"""
@@ -98,6 +131,86 @@ class MultiPath:
         res += [self.holdSet[ind].ikConstraint for ind in self.sections[section].holdIndices]
         res += self.sections[section].ikObjectives
         return res
+
+    def aggregateHolds(self,holdSimilarityThreshold=None):
+        """Aggregates holds from all sections to the global holdSet variable, and converts
+        sections to use holdIndices.  If holdSimilarityThreshold is not None, then sections'
+        holds that are the same within the given tolerance are combined into one hold."""
+        def sameHold(h1,h2,tol):
+            from ..math import vectorops,so3
+            if h1.link != h2.link: return False
+            if len(h1.contacts) != len(h2.contacts): return False
+            if h1.ikConstraint.numPosDims() != h2.ikConstraint.numPosDims(): return False
+            if h1.ikConstraint.numRotDims() != h2.ikConstraint.numRotDims(): return False
+            if h1.ikConstraint.numPosDims() == 3:
+                xl1,xw1 = h1.ikConstraint.getPosition()
+                xl2,xw2 = h2.ikConstraint.getPosition()
+                if vectorops.distanceSquared(xl1,xl2) > tol**2 or vectorops.distanceSquared(xw1,xw2) > tol**2:
+                    return False
+            elif h1.ikConstraint.numPosDims() != 0:
+                raise NotImplementedError("Distance detection for non-point or free holds")
+            if h1.ikConstraint.numPosDims() == 3:
+                R1 = h1.ikConstraint.getRotation()
+                R2 = h2.ikConstraint.getRotation()
+                if so3.distance(R1,R2) > tol:
+                    return False
+            for (c1,c2) in zip(h1.contacts,h2.contacts):
+                if vectorops.distanceSquared(c1,c2) > tol**2:
+                    return False
+            return True
+
+        holdsByLink = dict()
+        for s in self.sections:
+            for h in s.holds:
+                found = False
+                if holdSimilarityThreshold is not None:
+                    for oldHold,index in holdsByLink.get(h.link,[]):
+                        if sameHold(h,oldHold,holdSimilarityThreshold):
+                            s.holdIndices.append(index)
+                            found = True
+                            break
+                if not found:
+                    s.holdIndices.append(len(self.holdSet))
+                    self.holdSet[len(self.holdSet)] = h
+                    if holdSimilarityThreshold is not None:
+                        holdsByLink.setdefault(h.link,[]).append((h,s.holdIndices[-1]))
+            s.holds = []
+
+    def deaggregateHolds(self):
+        """De-aggregates holds from the global holdSet variable into the sections' holds."""
+        for s in self.sections:
+            for h in s.holdIndices:
+                s.holds.append(self.holdSet[h])
+            s.holdIndices = []
+        self.holdSet = dict()
+
+    def setConfig(self,section,configIndex,q,v=None,t=None,maintainContinuity=True):
+        """Sets a configuration along the path, maintaining continuity if maintainContinuity is true.
+        Equivalent to self.sections[section].configs[configIndex] = q except that adjacent sections'
+        configurations are also modified."""
+        assert section >= 0 and section < len(self.sections)
+        if configIndex < 0:
+            configIndex = len(self.sections[section].configs)-1
+        self.sections[section].configs[configIndex] = q
+        if v is not None:
+            assert self.sections[section].velocities is not None
+            self.sections[section].velocities[configIndex] = v
+        if t is not None:
+            assert self.sections[section].times is not None
+            self.sections[section].times[configIndex] = t
+        if maintainContinuity:
+            section0 = section
+            configIndex0 = configIndex
+            while section > 0 and configIndex == 0:
+                section = section - 1
+                configIndex = len(self.sections[section].configs)-1
+                self.setConfig(section,configIndex,q,v,t,False)
+            section = section0
+            configIndex = configIndex0
+            while section + 1 < len(self.sections) and configIndex + 1 == len(self.sections[section].configs):
+                section = section + 1
+                configIndex = 0
+                self.setConfig(section,configIndex,q,v,t,False)
 
     def concat(self,path):
         """Appends the path, making sure times and holds are appropriately set"""
@@ -167,7 +280,10 @@ class MultiPath:
                 xh.text = writeHold(h)
             for h in sec.holdIndices:
                 xh = ET.SubElement(xs,"hold")
-                xh.set("name",str(h))
+                if isinstance(h,int):
+                    xh.set("index",str(h))
+                else:
+                    xh.set("name",str(h))
             for i in xrange(len(sec.configs)):
                 xm = ET.Element("milestone")
                 xs.append(xm)
@@ -176,9 +292,11 @@ class MultiPath:
                     xm.set("time",str(sec.times[i]))
                 if sec.velocities != None:
                     xm.set("velocity",writeVector(sec.velocities[i]))
-        for h in self.holdSet:
+        for hkey,h in self.holdSet.iteritems():
             xh = ET.Element("hold")
             root.append(xh)
+            if not isinstance(hkey,int):
+                xh.set('name',str(hkey))
             xh.text = writeHold(h)
         return ET.ElementTree(root)
 
