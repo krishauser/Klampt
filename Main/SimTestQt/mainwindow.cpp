@@ -151,7 +151,7 @@ void MainWindow::LogContactWrenches(bool status){
 void MainWindow::LogSensedPath(bool status){
   string file;
   stringstream ss;
-  if(status) file = toStdString(ini->value("log_sensed_path_file","simtest_sensed_path_log.csv").toString());
+  if(status) file = toStdString(ini->value("log_sensed_path_file","simtest_sensed_path_log.path").toString());
   ss<<"0 "<<file;//multiple robots what do we do?
   gui->SendCommand("log_sensed_path",ss.str());
 }
@@ -159,7 +159,7 @@ void MainWindow::LogSensedPath(bool status){
 void MainWindow::LogCommandedPath(bool status){
   string file;
   stringstream ss;
-  if(status) file = toStdString(ini->value("log_commanded_path_file","simtest_commanded_path_log.csv").toString());
+  if(status) file = toStdString(ini->value("log_commanded_path_file","simtest_commanded_path_log.path").toString());
   ss<<"0 "<<file;//multiple robots what do we do?
   gui->SendCommand("log_commanded_path",ss.str());
 }
@@ -187,15 +187,15 @@ void MainWindow::ChangeContactWrenchesLogFile(){
 
 void MainWindow::ChangeSensedPathLogFile(){
   QFileDialog f;
-  QString openDir = ini->value("log_sensed_path_file","simtest_sensed_path_log.csv").toString();
-  QString filename = f.getSaveFileName(this,"Set Sensed Path Log File",openDir,tr("CSV File (*.csv);;Any File (*)"));
+  QString openDir = ini->value("log_sensed_path_file","simtest_sensed_path_log.path").toString();
+  QString filename = f.getSaveFileName(this,"Set Sensed Path Log File",openDir,tr("Path File (*.path);;Any File (*)"));
   ini->setValue("log_sensed_path_file",QFileInfo(filename).absoluteFilePath());
 }
 
 void MainWindow::ChangeCommandedPathLogFile(){
   QFileDialog f;
-  QString openDir = ini->value("log_commanded_path_file","simtest_commanded_path_log.csv").toString();
-  QString filename = f.getSaveFileName(this,"Set commanded Path Log File",openDir,tr("CSV File (*.csv);;Any File (*)"));
+  QString openDir = ini->value("log_commanded_path_file","simtest_commanded_path_log.path").toString();
+  QString filename = f.getSaveFileName(this,"Set commanded Path Log File",openDir,tr("Path File (*.path);;Any File (*)"));
   ini->setValue("log_commanded_path_file",QFileInfo(filename).absoluteFilePath());
 }
 
