@@ -1,6 +1,8 @@
 #ifndef _GEOMETRY_H
 #define _GEOMETRY_H
 
+#include <log4cxx/logger.h>
+#include <KrisLibrary/Logger.h>
 #include <vector>
 #include <map>
 
@@ -221,21 +223,6 @@ class Geometry3D
   ///Saves to file.  Standard mesh types, PCD files, and .geom files are
   ///supported.
   bool saveFile(const char* fn);
-  ///Attaches this geometry to a given stream. 
-  ///
-  ///Currently only "ros" protocol is supported.
-  ///For "ros" protocol, name is the ROS topic to attach to.
-  //
-  ///type indicates the datatype that the stream source should have, and this will
-  ///return false if that type is not obeyed.  Currently only the "PointCloud" or
-  ///default empty ("") types are supported.
-  ///
-  ///Note: you will need to call Appearance.refresh(True) to get the appearance to
-  ///update.
-  bool attachToStream(const char* protocol,const char* name,const char* type="");
-  ///Detaches this geometry from a given stream.  This must be called before deleting
-  ///a piece of geometry.
-  bool detachFromStream(const char* protocol,const char* name);
   ///Sets the current transformation (not modifying the underlying data)
   void setCurrentTransform(const double R[9],const double t[3]);
   ///Gets the current transformation 

@@ -1,3 +1,5 @@
+#include <log4cxx/logger.h>
+#include <KrisLibrary/Logger.h>
 #include "MultiPath.h"
 //#include "Resources.h"
 #include <tinyxml.h>
@@ -19,7 +21,7 @@ ostream& operator << (ostream& out,const MultiPath& path)
 bool MultiPath::Load(TiXmlElement* node)
 {
   if(0!=strcmp(node->Value(),"multipath")) {
-    fprintf(stderr,"MultiPath Load XML: node \"%s\" not of multipath type\n",node->Value());
+        LOG4CXX_ERROR(KrisLibrary::logger(),"MultiPath Load XML: node \""<<node->Value());
     return false;
   }
 
@@ -42,7 +44,7 @@ bool MultiPath::Load(TiXmlElement* node)
 	  section.ikGoals.resize(section.ikGoals.size()+1);
 	  ss >> section.ikGoals.back();
 	  if(!ss) {
-	    fprintf(stderr,"MultiPath Load XML: error loading ikgoal %d of section %d\n",section.ikGoals.size()-1,sections.size()-1);
+	    	    LOG4CXX_ERROR(KrisLibrary::logger(),"MultiPath Load XML: error loading ikgoal "<<section.ikGoals.size()-1<<" of section "<<sections.size()-1);
 	    return false;
 	  }
 	}
@@ -56,14 +58,14 @@ bool MultiPath::Load(TiXmlElement* node)
 	  }
 	  else {
 	    if(c->GetText()==NULL) {
-	      fprintf(stderr,"Hold has no text\n");
+	      	      LOG4CXX_ERROR(KrisLibrary::logger(),"Hold has no text\n");
 	      return false;
 	    }
 	    stringstream ss(c->GetText());
 	    section.holds.resize(section.holds.size()+1);
 	    ss>>section.holds.back();
 	    if(!ss) {
-	      fprintf(stderr,"MultiPath Load XML: unable to read hold %d of section %d\n",section.holds.size()-1,sections.size()-1);
+	      	      LOG4CXX_ERROR(KrisLibrary::logger(),"MultiPath Load XML: unable to read hold "<<section.holds.size()-1<<" of section "<<sections.size()-1);
 	      return false;
 	    }
 	  }
@@ -71,24 +73,24 @@ bool MultiPath::Load(TiXmlElement* node)
 	else if(0==strcmp(c->Value(),"milestone")) {
 	  section.milestones.resize(section.milestones.size()+1);
 	  if(c->Attribute("config")==NULL) {
-	    fprintf(stderr,"Need a config attribute in milestone\n");
+	    	    LOG4CXX_ERROR(KrisLibrary::logger(),"Need a config attribute in milestone\n");
 	    return false;
 	  }
 	  if(c->QueryValueAttribute("config",&section.milestones.back()) != TIXML_SUCCESS) {
-	    fprintf(stderr,"Error loading config attribute in milestone\n");
+	    	    LOG4CXX_ERROR(KrisLibrary::logger(),"Error loading config attribute in milestone\n");
 	    return false;	    
 	  }
 	  if(c->Attribute("time")!=NULL) {
 	    section.times.resize(section.milestones.size());
 	    if(c->Attribute("time",&section.times.back()) == NULL) {
-	      fprintf(stderr,"Error loading time attribute in milestone\n");
+	      	      LOG4CXX_ERROR(KrisLibrary::logger(),"Error loading time attribute in milestone\n");
 	      return false;	    
 	    }
 	  }
 	  if(c->Attribute("velocity")!=NULL) {
 	    section.velocities.resize(section.milestones.size());
 	    if(c->QueryValueAttribute("velocity",&section.velocities.back()) != TIXML_SUCCESS) {
-	      fprintf(stderr,"Error loading velocity attribute in milestone\n");
+	      	      LOG4CXX_ERROR(KrisLibrary::logger(),"Error loading velocity attribute in milestone\n");
 	      return false;   
 	    }
 	  }
@@ -103,13 +105,13 @@ bool MultiPath::Load(TiXmlElement* node)
 	holdSetNames.back() = e->Attribute("name");
       }
       if(e->GetText()==NULL) {
-	fprintf(stderr,"Hold has no text child\n");
+		LOG4CXX_ERROR(KrisLibrary::logger(),"Hold has no text child\n");
 	return false;
       }
       stringstream ss(e->GetText());
       ss>>holdSet.back();
       if(!ss) {
-	fprintf(stderr,"MultiPath Load XML: unable to read hold %d of hold set\n",holdSet.size()-1);
+		LOG4CXX_ERROR(KrisLibrary::logger(),"MultiPath Load XML: unable to read hold "<<holdSet.size()-1);
 	return false;
       }
     }
@@ -191,7 +193,7 @@ bool MultiPath::IsValid() const
   for(size_t i=0;i<sections.size();i++) {
     for(size_t j=0;j<sections[i].holdIndices.size();j++)
       if(sections[i].holdIndices[j] < 0 || sections[i].holdIndices[j] >= (int)holdSet.size()) {
-	fprintf(stderr,"Invalid hold reference %d on path section %d\n",sections[i].holdIndices[j],i);
+		LOG4CXX_ERROR(KrisLibrary::logger(),"Invalid hold reference "<<sections[i].holdIndices[j]<<" on path section "<<i);
 	return false;
       }
     for(size_t j=0;j<sections[i].holdNames.size();j++) {
@@ -203,25 +205,25 @@ bool MultiPath::IsValid() const
 	}
       }
       if(index < 0) {
-	fprintf(stderr,"Invalid hold name %s on path section %d\n",sections[i].holdNames[j].c_str(),i);
+		LOG4CXX_ERROR(KrisLibrary::logger(),"Invalid hold name "<<sections[i].holdNames[j].c_str()<<" on path section "<<i);
 	return false;
       }
     }
 
     if(sections[i].milestones.empty()) {
-      fprintf(stderr,"Empty milestone list on path section %d\n",i);
+            LOG4CXX_ERROR(KrisLibrary::logger(),"Empty milestone list on path section "<<i);
       return false;
     }
     if(sections[i].milestones.size()==1) {
-      fprintf(stderr,"Singleton milestone on path section %d\n",i);
+            LOG4CXX_ERROR(KrisLibrary::logger(),"Singleton milestone on path section "<<i);
       return false;
     }
     if(!sections[i].times.empty() && sections[i].times.size() != sections[i].milestones.size()) {
-      fprintf(stderr,"Invalid number of times on path section %d\n",i);
+            LOG4CXX_ERROR(KrisLibrary::logger(),"Invalid number of times on path section "<<i);
       return false;
     }
     if(!sections[i].velocities.empty() && sections[i].velocities.size() != sections[i].milestones.size()) {
-      fprintf(stderr,"Invalid number of velocities on path section %d\n",i);
+            LOG4CXX_ERROR(KrisLibrary::logger(),"Invalid number of velocities on path section "<<i);
       return false;
     }
   }
@@ -232,7 +234,7 @@ bool MultiPath::IsContinuous(Real tol) const
 {
   for(size_t i=0;i+1<sections.size();i++) {
     if(!sections[i].milestones.back().isEqual( sections[i+1].milestones.front(),tol)) {
-      fprintf(stderr,"MultiPath: Discontinuity at section %d to %d\n",i,i+1);
+            LOG4CXX_ERROR(KrisLibrary::logger(),"MultiPath: Discontinuity at section "<<i<<" to "<<i+1);
       return false;
     }
     if(!sections[i].times.empty() && !sections[i+1].times.empty()) {

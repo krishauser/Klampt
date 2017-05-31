@@ -1,3 +1,5 @@
+#include <log4cxx/logger.h>
+#include <KrisLibrary/Logger.h>
 #include "SerialControlledRobot.h"
 #include "JointSensors.h"
 #include <KrisLibrary/utils/AnyCollection.h>
@@ -17,7 +19,7 @@ bool SerialControlledRobot::Init(Robot* _robot,RobotController* _controller)
 {
   if(!ControlledRobot::Init(_robot,_controller)) return false;
   if(!controllerPipe->Start()) {
-    fprintf(stderr,"SerialControlledRobot: Error opening socket to %s\n",host.c_str());
+        LOG4CXX_ERROR(KrisLibrary::logger(),"SerialControlledRobot: Error opening socket to "<<host.c_str());
     return false;
   }
   return true;
@@ -26,7 +28,7 @@ bool SerialControlledRobot::Init(Robot* _robot,RobotController* _controller)
 bool SerialControlledRobot::Process(double timeout)
 {
   if(!controllerPipe->initialized) {
-    fprintf(stderr,"SerialControlledRobot::Process(): did you forget to call Init?\n");
+        LOG4CXX_ERROR(KrisLibrary::logger(),"SerialControlledRobot::Process(): did you forget to call Init?\n");
     return false;
   }
 
@@ -43,7 +45,7 @@ bool SerialControlledRobot::Process(double timeout)
       //read next sensor data again to get timing info
       if(controllerMutex) controllerMutex->unlock();
       if(iteration % 100 == 0)
-	printf("SerialControlledRobot(): Error getting timestep? Waiting.\n");
+	LOG4CXX_ERROR(KrisLibrary::logger(),"SerialControlledRobot(): Error getting timestep? Waiting.\n");
       ThreadSleep(0.01);
     }
     else {
@@ -69,7 +71,7 @@ bool SerialControlledRobot::Process(double timeout)
 bool SerialControlledRobot::Run()
 {
   if(!controllerPipe->initialized) {
-    fprintf(stderr,"SerialControlledRobot::Run(): did you forget to call Init?\n");
+        LOG4CXX_ERROR(KrisLibrary::logger(),"SerialControlledRobot::Run(): did you forget to call Init?\n");
     return false;
   }
   Timer timer;
@@ -97,14 +99,14 @@ bool SerialControlledRobot::Run()
       if(controllerMutex) controllerMutex->unlock();
 
       if(!controllerPipe->initialized) {
-	fprintf(stderr,"SerialControlledRobot::Run(): killed by socket disconnect?\n");
+		LOG4CXX_ERROR(KrisLibrary::logger(),"SerialControlledRobot::Run(): killed by socket disconnect?\n");
 	return false;
       }
       WriteCommandData(command);
 
       Real time = timer.ElapsedTime();
       if(time > lastReadTime + timeStep) {
-	printf("Klamp't controller overrun, took time %g which exceeds time step %g\n",time-lastReadTime,timeStep);
+	LOG4CXX_INFO(KrisLibrary::logger(),"Klamp't controller overrun, took time "<<time-lastReadTime<<" which exceeds time step "<<timeStep);
 	numOverruns ++;
       }
       else {
@@ -129,14 +131,14 @@ void SerialControlledRobot::ReadSensorData(RobotSensors& sensors)
 {
   if(controllerPipe && controllerPipe->UnreadCount() > 0) {
     if(controllerPipe->UnreadCount() > 1) {
-      fprintf(stderr,"SerialControlledRobot: Warning, skipping %d sensor messages\n",controllerPipe->UnreadCount()-1);
-      fprintf(stderr,"  TODO: debug the controller pipe?\n");
+            LOG4CXX_ERROR(KrisLibrary::logger(),"SerialControlledRobot: Warning, skipping "<<controllerPipe->UnreadCount()-1);
+            LOG4CXX_ERROR(KrisLibrary::logger(),"  TODO: debug the controller pipe?\n");
     }
     string msg = controllerPipe->Newest();
 
     AnyCollection c;
     if(!c.read(msg.c_str())) {
-      fprintf(stderr,"SerialControlledRobot: Unable to read parse data from robot client\n");
+            LOG4CXX_ERROR(KrisLibrary::logger(),"SerialControlledRobot: Unable to read parse data from robot client\n");
       return;
     }
     
@@ -178,13 +180,14 @@ void SerialControlledRobot::ReadSensorData(RobotSensors& sensors)
 	else {
 	  SmartPointer<SensorBase> s = sensors.GetNamedSensor(key);
 	  if(!s) {
-	    fprintf(stderr,"SerialControlledRobot::ReadSensorData: warning, sensor %s not given in model\n",key.c_str());
+	    	    LOG4CXX_ERROR(KrisLibrary::logger(),"SerialControlledRobot::ReadSensorData: warning, sensor "<<key.c_str());
 	  }
 	  else {
 	    vector<double> values;
 	    bool converted = c[keys[i]].asvector<double>(values);
-	    if(!converted) 
-	      fprintf(stderr,"SerialControlledRobot::ReadSensorData: key %s does not yield a vector\n",key.c_str());
+	    if(!converted) {
+	      LOG4CXX_ERROR(KrisLibrary::logger(),"SerialControlledRobot::ReadSensorData: key "<<key.c_str());
+      }
 	    else 
 	      s->SetMeasurements(values);
 	  }
@@ -212,7 +215,7 @@ void SerialControlledRobot::WriteCommandData(const RobotMotorCommand& command)
 	mode = command.actuators[i].mode;
       else {
 	if(mode != command.actuators[i].mode) {
-	  fprintf(stderr,"SerialControlledRobot: do not support mixed torque / velocity / PID mode\n");
+	  	  LOG4CXX_ERROR(KrisLibrary::logger(),"SerialControlledRobot: do not support mixed torque / velocity / PID mode\n");
 	  Abort();
 	}
       }
@@ -238,27 +241,27 @@ void SerialControlledRobot::WriteCommandData(const RobotMotorCommand& command)
       return;
     }    
     else if(mode == ActuatorCommand::LOCKED_VELOCITY) {
-      //cout<<"Sending locked velocity command"<<endl;
+      //LOG4CXX_INFO(KrisLibrary::logger(),"Sending locked velocity command"<<"\n");
       c["dqcmd"] = dqcmd;
       c["tcmd"] = timeStep;
     }
     else if(mode == ActuatorCommand::PID) {
-      //cout<<"Sending PID command"<<endl;
+      //LOG4CXX_INFO(KrisLibrary::logger(),"Sending PID command"<<"\n");
       c["qcmd"] = qcmd;
       if(anyNonzeroV) c["dqcmd"] = dqcmd;
       if(anyNonzeroTorque) c["torquecmd"] = torquecmd;
     }
     else if(mode == ActuatorCommand::TORQUE) {
-      //cout<<"Sending torque command"<<endl;
+      //LOG4CXX_INFO(KrisLibrary::logger(),"Sending torque command"<<"\n");
       c["torquecmd"] = torquecmd;
     }
     else {
-      cout<<"SerialControlledRobot: Invalid mode?? "<<mode<<endl;
+      LOG4CXX_INFO(KrisLibrary::logger(),"SerialControlledRobot: Invalid mode?? "<<mode<<"\n");
     }
     //write JSON message to socket file
     stringstream ss;
     c.write(ss);
-    cout<<"Writing message: "<<ss.str()<<endl;
+    LOG4CXX_INFO(KrisLibrary::logger(),"Writing message: "<<ss.str()<<"\n");
     controllerPipe->Send(ss.str());
   }
 }

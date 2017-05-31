@@ -1,3 +1,5 @@
+#include <log4cxx/logger.h>
+#include <KrisLibrary/Logger.h>
 #include "Command.h"
 #include <KrisLibrary/math/angle.h>
 #include <KrisLibrary/myfile.h>
@@ -17,7 +19,7 @@ void ActuatorCommand::SetOff()
 void ActuatorCommand::SetPID(Real _qdes,Real _dqdes,Real _iterm)
 {
   if(_qdes < qmin || _qdes > qmax) {
-    printf("Command.cpp: Warning, PID desired is out of joint limits: %g <= %g <= %g\n",qmin,_qdes,qmax);
+    LOG4CXX_WARN(KrisLibrary::logger(),"Command.cpp: Warning, PID desired is out of joint limits: "<<qmin<<" <= "<<_qdes<<" <= "<<qmax);
   }
   mode=PID;
   qdes=_qdes;
@@ -46,10 +48,10 @@ Real ActuatorCommand::GetPIDTorque(Real q,Real dq) const
     deltaq=qdes-q;
     if(q < qmin || q > qmax) {
       if(Abs(AngleDiff(qdes,q)) < Abs(deltaq*0.5)) {
-        printf("Command.cpp: Warning, PID loop has a possible angle encoder error, using AngleDiff\n");
-        printf("  qdes = %g, q = %g\n",qdes,q);
-        printf("  AngleDiff %g, sub %g\n",AngleDiff(qdes,q),deltaq);
-        //getchar();
+        LOG4CXX_WARN(KrisLibrary::logger(),"Command.cpp: Warning, PID loop has a possible angle encoder error, using AngleDiff\n");
+        LOG4CXX_INFO(KrisLibrary::logger(),"  qdes = "<<qdes<<", q = "<<q);
+        LOG4CXX_INFO(KrisLibrary::logger(),"  AngleDiff "<<AngleDiff(qdes,q)<<", sub "<<deltaq<<"\n");
+        //if(KrisLibrary::logger()->isEnabledFor(log4cxx::Level::ERROR_INT)) getchar();
         deltaq = AngleDiff(qdes,q);
       }
     }
@@ -57,7 +59,7 @@ Real ActuatorCommand::GetPIDTorque(Real q,Real dq) const
   else
     deltaq=AngleDiff(qdes,q);
   deltadq=dqdes-dq;
-  //printf("P torque: %g, D torque: %g, I torque %g, FF torque %g\n",kP*deltaq,kD*deltadq,kI*iterm,torque);
+  //LOG4CXX_INFO(KrisLibrary::logger(),"P torque: "<<kP*deltaq<<", D torque: "<<kD*deltadq<<", I torque "<<kI*iterm<<", FF torque "<<torque);
   return kP*deltaq+kD*deltadq+kI*iterm+torque;
 }
 

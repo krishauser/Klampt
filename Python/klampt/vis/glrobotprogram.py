@@ -38,6 +38,7 @@ class GLSimulationPlugin(GLPluginInterface):
         self.collider = collide.WorldCollider(world)
         self.sim = SimpleSimulator(world)
         self.simulate = False
+        self.dt = 0.02
 
         #turn this on to draw contact points
         self.drawContacts = False
@@ -51,6 +52,8 @@ class GLSimulationPlugin(GLPluginInterface):
         self.screenshotCount = 0
         self.verbose = 0
 
+        self.htmlSharePath = None
+        
         def toggle_simulate():
             self.simulate = not self.simulate
             print "Simulating:",self.simulate
@@ -68,11 +71,36 @@ class GLSimulationPlugin(GLPluginInterface):
                 self.drawSensors = 'full'
             else:
                 self.drawSensors = False
+        def share_path():
+            from ..io import html
+            if self.htmlSharePath is None:
+                self.htmlSharePath = html.HTMLSharePath(filename="simulation_path.html",name="Klamp't Simulation Path")
+                #20FPS is sufficient...
+                self.htmlSharePath.dt = 0.05
+                self.htmlSharePath.start(self.sim)
+            else:
+                try:
+                    from PyQt4.QtGui import QFileDialog
+                    patterns = "HTML files (*.html)"
+                    fn = QFileDialog.getSaveFileName(None, "Save path HTML file to...", self.htmlSharePath.fn, patterns)
+                    if fn:
+                        self.htmlSharePath.fn = fn
+                    else:
+                        return
+                except ImportError:
+                    pass
+                self.htmlSharePath.end()
         self.add_action(toggle_simulate,'Toggle simulation','s')
         self.add_action(toggle_movie_mode,'Toggle movie mode','m')
         self.add_action(self.sim.toggleLogging,'Toggle simulation logging','l')
         self.add_action(toggle_draw_contacts,'Toggle draw contacts','c')
         self.add_action(toggle_draw_sensors,'Toggle draw sensors','v')
+        self.add_action(share_path,'Begin/finalize logging path to HTML','w')
+
+    def initialize(self):
+        #match window refresh rate
+        self.dt = self.window.program.dt
+        return GLPluginInterface.initialize(self)
 
     def display(self):
         #Put your display handler here
@@ -131,6 +159,9 @@ class GLSimulationPlugin(GLPluginInterface):
         #Put your idle loop handler here
         #the current example simulates with the current time step self.dt
         if self.simulate:
+            if self.sim.getTime() == 0:
+                self.sim.simulate(0)
+
             #Handle screenshots
             if self.saveScreenshots:
                 #The following line saves movies on simulation time
@@ -141,10 +172,11 @@ class GLSimulationPlugin(GLPluginInterface):
                 self.screenshotCount += 1
                 self.nextScreenshotTime += 1.0/30.0;
 
-            if self.sim.getTime() == 0:
-                self.sim.simulate(0)
+            if self.htmlSharePath:
+                self.htmlSharePath.animate()
+
             self.control_loop()
-            self.sim.simulate(self.window.program.dt)
+            self.sim.simulate(self.dt)
             self.refresh()
         return True
 

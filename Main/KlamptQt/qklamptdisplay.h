@@ -14,6 +14,7 @@ public:
     virtual ~QKlamptDisplay() {}
 
     GenericGUIBase* gui;
+    bool painted;
 
     void SetGUI(GenericGUIBase* gui);
     void SetVideoOutputFile(const std::string& fn);

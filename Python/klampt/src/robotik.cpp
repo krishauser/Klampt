@@ -1,3 +1,5 @@
+#include <log4cxx/logger.h>
+#include <KrisLibrary/Logger.h>
 #include <string>
 #include <vector>
 #include "robotik.h"
@@ -5,6 +7,7 @@
 #include <KrisLibrary/math/random.h>
 #include <KrisLibrary/math3d/random.h>
 #include <Python.h>
+#include "Planning/RobotCSpace.h"
 #include "Modeling/World.h"
 #include "Planning/RobotCSpace.h"
 #include "pyerr.h"
@@ -293,11 +296,11 @@ void GeneralizedIKObjective::setTransform(const double R[9],const double t[3])
 
 
 IKSolver::IKSolver(const RobotModel& _robot)
-  :robot(_robot),maxIters(100),tol(1e-3),useJointLimits(true),lastIters(0)
+  :robot(_robot),tol(1e-3),maxIters(100),useJointLimits(true),lastIters(0)
 {}
 
 IKSolver::IKSolver(const IKSolver& solver)
-  :robot(solver.robot),objectives(solver.objectives),maxIters(solver.maxIters),tol(solver.tol),activeDofs(solver.activeDofs),useJointLimits(solver.useJointLimits),qmin(solver.qmin),qmax(solver.qmax),lastIters(solver.lastIters)
+  :robot(solver.robot),objectives(solver.objectives),tol(solver.tol),maxIters(solver.maxIters),activeDofs(solver.activeDofs),useJointLimits(solver.useJointLimits),qmin(solver.qmin),qmax(solver.qmax),lastIters(solver.lastIters)
 {}
 
 void IKSolver::add(const IKObjective& objective)
@@ -462,8 +465,22 @@ PyObject* IKSolver::solve(int iters,double tol)
 {
   static bool warned=false;
   if(!warned) {
-    printf("IKSolver.solve(iters,tol) will be deprecated, use setMaxIters(iters)/setTolerance(tol) and solve() instead\n");
+    LOG4CXX_INFO(KrisLibrary::logger(),"IKSolver.solve(iters,tol) will be deprecated, use setMaxIters(iters)/setTolerance(tol) and solve() instead\n");
     warned=true;
+  }
+  if(useJointLimits) {
+    getJointLimits(qmin,qmax);
+    for(size_t i=0;i<qmin.size();i++) {
+      if(robot.robot->q(i) < qmin[i] || robot.robot->q(i) > qmax[i]) {
+        if(robot.robot->q(i) < qmin[i]-Epsilon || robot.robot->q(i) > qmax[i]+Epsilon) 
+          LOG4CXX_INFO(KrisLibrary::logger(),"Joint limits "<< qmin[i]<<" < "<<robot.robot->q(i)<<" <"<<qmax[i]<<" exceeded on joint "<<(int)i);
+        if(robot.robot->q(i) < qmin[i]) {
+          robot.robot->q(i) = qmin[i];
+        } else {
+          robot.robot->q(i) = qmax[i];
+        }
+      }
+    }
   }
   RobotIKFunction f(*robot.robot);
   vector<IKGoal> goals(objectives.size());
@@ -495,6 +512,17 @@ PyObject* IKSolver::solve(int iters,double tol)
 
 bool IKSolver::solve()
 {
+  if(useJointLimits) {
+    const Real* usedQmin = (qmin.empty() ? &robot.robot->qMin[0] : &qmin[0]);
+    const Real* usedQmax = (qmax.empty() ? &robot.robot->qMax[0] : &qmax[0]);
+    for(size_t i=0;i<robot.robot->q.size();i++) {
+      if(robot.robot->q(i) < usedQmin[i] || robot.robot->q(i) > usedQmax[i]) {
+        if(robot.robot->q(i) < usedQmin[i]-Epsilon || robot.robot->q(i) > usedQmax[i] + Epsilon) 
+          LOG4CXX_INFO(KrisLibrary::logger(),"IKSolver:: Joint limits on joint "<< i<<" exceeded: "<<usedQmin[i]<<" <= "<<robot.robot->q(i)<<" <= "<<usedQmax[i]);
+        robot.robot->q(i) = Clamp(robot.robot->q(i),usedQmin[i],usedQmax[i]);
+      }
+    }
+  }
   RobotIKFunction f(*robot.robot);
   vector<IKGoal> goals(objectives.size());
   for(size_t i=0;i<objectives.size();i++)

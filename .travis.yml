@@ -20,6 +20,7 @@ before_script:
 
 script:
   - cd Library && make unpack-deps
+  - if [ "$TRAVIS_BRANCH" == "v0.7" ] || [ "$TRAVIS_BRANCH" == "travis" ]; then  cd KrisLibrary && git checkout plan_devel && cd .. && echo "Checking out branch plan_devel for KrisLibrary"; fi
   - make deps && cd ..
   - cmake .
   - make Klampt

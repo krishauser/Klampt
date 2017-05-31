@@ -1,3 +1,5 @@
+#include <log4cxx/logger.h>
+#include <KrisLibrary/Logger.h>
 #include <vector>
 #include <string>
 #include "robotsim.h"
@@ -13,6 +15,7 @@
 #include "IO/XmlWorld.h"
 #include "IO/XmlODE.h"
 #include "IO/ROS.h"
+#include "IO/three.js.h" 
 #include <KrisLibrary/robotics/NewtonEuler.h>
 #include <KrisLibrary/robotics/Stability.h>
 #include <KrisLibrary/robotics/TorqueSolver.h>
@@ -118,9 +121,9 @@ void derefWorld(int index)
     throw PyException("Invalid dereference");
 
   worlds[index]->refCount--;
-  //printf("Deref world %d: count %d\n",index,worlds[index]->refCount);
+  //LOG4CXX_INFO(KrisLibrary::logger(),"Deref world "<<index<<": count "<<worlds[index]->refCount);
   if(worlds[index]->refCount == 0) {
-    //printf("Deleting world %d\n",index);
+    //LOG4CXX_INFO(KrisLibrary::logger(),"Deleting world "<<index);
     if(!worlds[index]->worldExternal)
       delete worlds[index]->world;
     worlds[index] = NULL;
@@ -135,7 +138,7 @@ void refWorld(int index)
   if(!worlds[index])
     throw PyException("Invalid dereference");
   worlds[index]->refCount++;
-  //printf("Ref world %d: count %d\n",index,worlds[index]->refCount);
+  //LOG4CXX_INFO(KrisLibrary::logger(),"Ref world "<<index<<": count "<<worlds[index]->refCount);
 }
 
 int createSim()
@@ -172,7 +175,7 @@ int createWidget()
   if(widgetDeleteList.empty()) {
     widgets.resize(widgets.size()+1);
     widgets.back().refCount = 1;
-    //printf("Creating widget %d, ref count %d\n",widgets.size()-1,1);
+    //LOG4CXX_INFO(KrisLibrary::logger(),"Creating widget "<<widgets.size()-1<<", ref count "<<1);
     return (int)(widgets.size()-1);
   }
   else {
@@ -180,7 +183,7 @@ int createWidget()
     widgetDeleteList.erase(widgetDeleteList.begin());
     widgets[index].widget = NULL;
     widgets[index].refCount = 1;
-    //printf("Creating widget %d, ref count %d\n",index,1);
+    //LOG4CXX_INFO(KrisLibrary::logger(),"Creating widget "<<index<<", ref count "<<1);
     return index;
   }
 }
@@ -193,9 +196,9 @@ void derefWidget(int index)
     throw PyException("Invalid dereference");
 
   widgets[index].refCount--;
-  //printf("Deref widget %d: count %d\n",index,widgets[index].refCount);
+  //LOG4CXX_INFO(KrisLibrary::logger(),"Deref widget "<<index<<": count "<<widgets[index].refCount);
   if(widgets[index].refCount == 0) {
-    //printf("Deleting widget %d\n",index);
+    //LOG4CXX_INFO(KrisLibrary::logger(),"Deleting widget "<<index);
     widgets[index].widget = NULL;
     widgetDeleteList.push_back(index);
   }
@@ -206,7 +209,7 @@ void refWidget(int index)
   if(index < 0 || index >= (int)widgets.size())
     throw PyException("Invalid widget index");
   widgets[index].refCount++;
-  //printf("Ref widget %d: count %d\n",index,widgets[index].refCount);
+  //LOG4CXX_INFO(KrisLibrary::logger(),"Ref widget "<<index<<": count "<<widgets[index].refCount);
 }
 
 //cleans up internal data structures
@@ -220,6 +223,7 @@ void destroy()
   worldDeleteList.clear();
   sims.resize(0);
   worlds.resize(0);
+  ManagedGeometry::manager.Clear();
 }
 
 void setRandomSeed(int seed)
@@ -233,7 +237,7 @@ void setRandomSeed(int seed)
 ManagedGeometry& GetManagedGeometry(RobotWorld& world,int id)
 {
   if(id < 0) {
-    fprintf(stderr,"GetManagedGeometry(): Invalid ID: %d\n",id);
+        LOG4CXX_ERROR(KrisLibrary::logger(),"GetManagedGeometry(): Invalid ID: "<<id);
     return world.robots[0]->geomManagers[0];
   }
   int terrain = world.IsTerrain(id);
@@ -246,7 +250,7 @@ ManagedGeometry& GetManagedGeometry(RobotWorld& world,int id)
   if(robotLink.first >= 0) {
     return world.robots[robotLink.first]->geomManagers[robotLink.second];
   }
-  fprintf(stderr,"GetManagedGeometry(): Invalid ID: %d\n",id);
+    LOG4CXX_ERROR(KrisLibrary::logger(),"GetManagedGeometry(): Invalid ID: "<<id);
   return world.robots[0]->geomManagers[0];
 }
 
@@ -390,7 +394,7 @@ void GetPointCloud(const PointCloud& pc,Geometry::AnyCollisionGeometry3D& geom)
     }
   }
   gpc.settings = pc.settings;
-  //printf("Copying PointCloud to geometry, %d points\n",(int)gpc.points.size());
+  //LOG4CXX_INFO(KrisLibrary::logger(),"Copying PointCloud to geometry, "<<(int)gpc.points.size());
   geom = gpc;
   geom.ClearCollisionData();
 }
@@ -432,7 +436,7 @@ bool GeometricPrimitive::loadString(const char* str)
   properties.resize(items.size()-1);
   for(size_t i=1;i<items.size();i++)
     if(!LexicalCast<double>(items[i],properties[i-1])) {
-      fprintf(stderr,"GeometricPrimitive::loadString: could not parse item %d: \"%s\"\n",(int)i,items[i].c_str());
+            LOG4CXX_ERROR(KrisLibrary::logger(),"GeometricPrimitive::loadString: could not parse item "<<(int)i<<": \""<<items[i].c_str());
       return false;
     }
   return true;
@@ -550,7 +554,7 @@ void Geometry3D::free()
 {
   SmartPointer<AnyCollisionGeometry3D>* geom = reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(geomPtr);  
   if(isStandalone() && *geom) {
-    //printf("Geometry3D(): Freeing standalone geometry\n");
+    //LOG4CXX_INFO(KrisLibrary::logger(),"Geometry3D(): Freeing standalone geometry\n");
     *geom = NULL;
   }
   world = -1;
@@ -788,49 +792,6 @@ bool Geometry3D::loadFile(const char* fn)
     return false;
   }
 }
-
-bool Geometry3D::attachToStream(const char* protocol,const char* name,const char* type)
-{
-  SmartPointer<AnyCollisionGeometry3D>& geom = *reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(geomPtr);
-  if(0==strcmp(protocol,"ros")) {
-    if(0==strcmp(type,""))
-      type = "PointCloud";
-    if(0 == strcmp(type,"PointCloud")) {
-      if(!isStandalone()) {
-	RobotWorld& world=*worlds[this->world]->world;
-	GetManagedGeometry(world,id).RemoveFromCache();
-	return GetManagedGeometry(world,id).Load((string("ros:PointCloud2//")+string(name)).c_str());
-      }
-      printf("Warning, attaching to a ROS stream without a ManagedGeometry.\n");
-      printf("You will not be able to automatically get updates from ROS.\n");
-      if(!geom) 
-        geom = new AnyCollisionGeometry3D();
-      (*geom) = AnyCollisionGeometry3D(Meshing::PointCloud3D());
-      return ROSSubscribePointCloud(geom->AsPointCloud(),name);
-      //TODO: update ROS, update the appearance every time the point cloud changes
-    }
-    else {
-      throw PyException("Geometry3D::attachToStream: Unsupported type argument");
-      return false;
-    }
-  }
-  else {
-    throw PyException("Geometry3D::attachToStream: Unsupported protocol argument");
-    return false;
-  }
-}
-
-bool Geometry3D::detachFromStream(const char* protocol,const char* name)
-{
-  if(0==strcmp(protocol,"ros")) {
-    return ROSDetach(name);
-  }
-  else {
-    throw PyException("Geometry3D::detachFromStream: Unsupported protocol argument");
-    return false;
-  }
-}
-
 
 bool Geometry3D::saveFile(const char* fn)
 {
@@ -1081,11 +1042,11 @@ void Appearance::free()
   SmartPointer<GLDraw::GeometryAppearance>* app = reinterpret_cast<SmartPointer<GLDraw::GeometryAppearance>*>(appearancePtr);
 
   if(isStandalone() && *app) {
-    //printf("Appearance(): Freeing standalone appearance for %p\n",this);
+    //LOG4CXX_INFO(KrisLibrary::logger(),"Appearance(): Freeing standalone appearance for "<<this);
     *app = NULL;
   }
   else if(*app)
-    //printf("Appearance(): Releasing reference to world appearance %d %d for %p\n",world,id,this);
+    //LOG4CXX_INFO(KrisLibrary::logger(),"Appearance(): Releasing reference to world appearance "<<world<<" "<<id<<" for "<<this);
     ;
     
   world = -1;
@@ -1271,7 +1232,7 @@ void Appearance::drawWorldGL(Geometry3D& g)
   }
   if(app->geom) {
     if(app->geom != geom) {
-      fprintf(stderr,"Appearance::drawGL(): performance warning, setting to a different geometry\n");
+            LOG4CXX_ERROR(KrisLibrary::logger(),"Appearance::drawGL(): performance warning, setting to a different geometry\n");
       app->Set(*geom);
     }
   }
@@ -1295,7 +1256,7 @@ void Appearance::drawGL(Geometry3D& g)
   }
   if(app->geom) {
     if(app->geom != geom) {
-      fprintf(stderr,"Appearance::drawGL(): performance warning, setting to a different geometry\n");
+            LOG4CXX_ERROR(KrisLibrary::logger(),"Appearance::drawGL(): performance warning, setting to a different geometry\n");
       app->Set(*geom);
     }
   }
@@ -1638,7 +1599,7 @@ bool WorldModel::readFile(const char* fn)
   const char* ext=FileExtension(fn);
   if(0==strcmp(ext,"rob") || 0==strcmp(ext,"urdf")) {
     if(world.LoadRobot(fn)<0) {
-      printf("Error loading robot file %s\n",fn);
+      LOG4CXX_ERROR(KrisLibrary::logger(),"Error loading robot file "<<fn);
       return false;
     }
     if(gEnableCollisionInitialization) 
@@ -1647,14 +1608,14 @@ bool WorldModel::readFile(const char* fn)
   }
   else if(0==strcmp(ext,"env") || 0==strcmp(ext,"tri") || 0==strcmp(ext,"pcd")) {
     if(world.LoadTerrain(fn)<0) {
-      printf("Error loading terrain file %s\n",fn);
+      LOG4CXX_ERROR(KrisLibrary::logger(),"Error loading terrain file "<<fn);
       return false;
     }
     if(gEnableCollisionInitialization) world.terrains.back()->InitCollisions();
   }
   else if(0==strcmp(ext,"obj")) {
     if(world.LoadRigidObject(fn)<0) {
-      printf("Error loading rigid object file %s\n",fn);
+      LOG4CXX_ERROR(KrisLibrary::logger(),"Error loading rigid object file "<<fn);
       return false;
     }
     if(gEnableCollisionInitialization) 
@@ -1685,7 +1646,7 @@ bool WorldModel::readFile(const char* fn)
     delete [] path;
     */
     if(!result) {
-      printf("Error opening or parsing world file %s\n",fn);
+      LOG4CXX_ERROR(KrisLibrary::logger(),"Error opening or parsing world file "<<fn);
       return false;
     }
     if(gEnableCollisionInitialization) 
@@ -1694,7 +1655,7 @@ bool WorldModel::readFile(const char* fn)
     return true;
   }
   else {
-    printf("Unknown file extension %s on file %s\n",ext,fn);
+    LOG4CXX_INFO(KrisLibrary::logger(),"Unknown file extension "<<ext<<" on file "<<fn);
     return false;
   }
   return true;
@@ -2403,6 +2364,7 @@ RobotModel::RobotModel()
 
 const char* RobotModel::getName() const
 {
+  if(index < 0) throw PyException("Robot is empty");
   RobotWorld& world = *worlds[this->world]->world;
   return world.robots[index]->name.c_str();
 }
@@ -2419,12 +2381,14 @@ void RobotModel::setName(const char* name)
 
 int RobotModel::getID() const
 {
+  if(index < 0) return -1;
   RobotWorld& world = *worlds[this->world]->world;
   return world.RobotID(index);
 }
 
 int RobotModel::numLinks()
 {
+  if(index < 0) return -1;
   return robot->links.size();
 }
 
@@ -2483,6 +2447,33 @@ RobotModelDriver RobotModel::driver(const char* name)
   link.robotIndex = index;
   link.index = -1;
   return link;
+}
+
+const char* RobotModel::getJointType(int dofIndex)
+{
+  if(index < 0) throw PyException("Empty robot");
+  for(size_t i=0;i<robot->joints.size();i++) {
+    if(robot->DoesJointAffect((int)i,dofIndex)) {
+      switch(robot->joints[i].type) {
+      case RobotJoint::Weld: return "weld";
+      case RobotJoint::Normal: return "normal";
+      case RobotJoint::Spin: return "spin";
+      case RobotJoint::Floating: return "floating";
+      case RobotJoint::FloatingPlanar: return "floatingplanar";
+      case RobotJoint::BallAndSocket: return "ballandsocket";
+      default:
+        return "invalid joint type?";
+      }
+    }
+  }
+  throw PyException("DOF is not affected by any joint definition?");
+}
+
+const char* RobotModel::getJointType(const char* name)
+{
+  RobotModelLink l = link(name);
+  if(l.index < 0) throw PyException("Invalid DOF named");
+  return getJointType(l.index);
 }
 
 
@@ -3060,7 +3051,7 @@ Simulator::Simulator(const WorldModel& model)
   sim = &sims[index]->sim;
 
   //initialize simulation
-  printf("Initializing simulation...\n");
+  LOG4CXX_INFO(KrisLibrary::logger(),"Initializing simulation...\n");
   RobotWorld& rworld=*worlds[model.index]->world;
   sim->Init(&rworld);
 
@@ -3072,18 +3063,18 @@ Simulator::Simulator(const WorldModel& model)
 
     sim->controlSimulators[i].sensors.MakeDefault(robot);
   }
-  printf("Done\n");
+  LOG4CXX_INFO(KrisLibrary::logger(),"Done\n");
 
 
   //setup ODE settings, if any
   TiXmlElement* e=worlds[world.index]->xmlWorld.GetElement("simulation");
   if(e) {
-    printf("Reading simulation settings...\n");
+    LOG4CXX_INFO(KrisLibrary::logger(),"Reading simulation settings...\n");
     XmlSimulationSettings s(e);
     if(!s.GetSettings(*sim)) {
-      fprintf(stderr,"Warning, simulation settings not read correctly\n");
+            LOG4CXX_ERROR(KrisLibrary::logger(),"Warning, simulation settings not read correctly\n");
     }
-    printf("Done\n");
+    LOG4CXX_INFO(KrisLibrary::logger(),"Done\n");
   }
 
   //TEMP: play around with auto disable of rigid objects
@@ -3630,6 +3621,11 @@ void SimRobotController::setRate(double dt)
   controller->controlTimeStep = dt;
 }
 
+double SimRobotController::getRate()
+{
+  return controller->controlTimeStep;
+}
+
 void SimRobotController::getCommandedConfig(vector<double>& q)
 {
   Vector qv;
@@ -3749,7 +3745,7 @@ SimRobotSensor SimRobotController::sensor(const char* name)
   RobotSensors& sensors = controller->sensors;
   SmartPointer<SensorBase> sensor = sensors.GetNamedSensor(name);
   if(sensor==NULL) {
-    fprintf(stderr,"Warning, sensor %s does not exist\n",name);
+        LOG4CXX_ERROR(KrisLibrary::logger(),"Warning, sensor "<<name);
   }
   return SimRobotSensor(controller->robot,sensor);
 }
@@ -3831,7 +3827,7 @@ void EnablePathControl(RobotController* c)
         pc->SetConstant(q);
       }
       else {
-        fprintf(stderr,"First simulation cycle: the path controller needs to read from the encoders before motion commands can be issued\n");
+                LOG4CXX_ERROR(KrisLibrary::logger(),"First simulation cycle: the path controller needs to read from the encoders before motion commands can be issued\n");
       }
     }
   }
@@ -4733,3 +4729,99 @@ PyObject* equilibriumTorques(const RobotModel& robot,const std::vector<std::vect
   vector<double> internalTorques;
   return ::equilibriumTorques(robot,contacts,links,fext,internalTorques,norm);
 }
+
+
+
+
+/*************************** IO CODE ***************************************/
+
+bool SubscribeToStream(Geometry3D& g,const char* protocol,const char* name,const char* type)
+{
+  SmartPointer<AnyCollisionGeometry3D>& geom = *reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(g.geomPtr);
+  if(0==strcmp(protocol,"ros")) {
+    if(0==strcmp(type,""))
+      type = "PointCloud";
+    if(0 == strcmp(type,"PointCloud")) {
+      if(!g.isStandalone()) {
+  RobotWorld& world=*worlds[g.world]->world;
+  GetManagedGeometry(world,g.id).RemoveFromCache();
+  return GetManagedGeometry(world,g.id).Load((string("ros:PointCloud2//")+string(name)).c_str());
+      }
+      LOG4CXX_WARN(KrisLibrary::logger(),"Warning, attaching to a ROS stream without a ManagedGeometry.\n");
+      LOG4CXX_INFO(KrisLibrary::logger(),"You will not be able to automatically get updates from ROS.\n");
+      if(!geom) 
+        geom = new AnyCollisionGeometry3D();
+      (*geom) = AnyCollisionGeometry3D(Meshing::PointCloud3D());
+      return ROSSubscribePointCloud(geom->AsPointCloud(),name);
+      //TODO: update ROS, update the appearance every time the point cloud changes
+    }
+    else {
+      throw PyException("AttachToStream(Geometry3D): Unsupported type argument");
+      return false;
+    }
+  }
+  else {
+    throw PyException("AttachToStream(Geometry3D): Unsupported protocol argument");
+    return false;
+  }
+}
+
+bool DetachFromStream(const char* protocol,const char* name)
+{
+  if(0==strcmp(protocol,"ros")) {
+    return ROSDetach(name);
+  }
+  else {
+    throw PyException("DetachFromStream: Unsupported protocol argument");
+    return false;
+  }
+}
+
+bool ProcessStreams(const char* protocol)
+{
+  if((0==strcmp(protocol,"all")&&ROSInitialized()) || 0==strcmp(protocol,"ros"))
+    if(ROSSubscribeUpdate()) return true;
+  return false;
+}
+
+bool WaitForStream(const char* protocol,const char* name,double timeout)
+{
+  if(0==strcmp(protocol,"ros")) {
+    return ROSWaitForUpdate(name,timeout);
+  }
+  return false;
+}
+
+/*
+bool PublishToStream(const Vector& x,const char* protocol,const char* name,const char* type);
+bool PublishToStream(const RobotModel& robot,const char* protocol,const char* name,const char* type);
+bool PublishToStream(const WorldModel& world,const char* protocol,const char* name,const char* type);
+bool PublishToStream(const Geometry3D& g,const char* protocol,const char* name,const char* type);
+*/
+
+///Exports the WorldModel to a JSON string ready for use in Three.js
+std::string ThreeJSGetScene(const WorldModel& w)
+{
+  if(w.index < 0) return "{}";
+  RobotWorld& world = *worlds[w.index]->world;
+
+  AnyCollection obj;
+  ThreeJSExport(world,obj);
+  std::ostringstream stream;
+  stream<<obj;
+  return stream.str();
+}
+
+///Exports the WorldModel to a JSON string ready for use in Three.js
+std::string ThreeJSGetTransforms(const WorldModel& w)
+{
+  if(w.index < 0) return "{}";
+   RobotWorld& world = *worlds[w.index]->world;
+
+   AnyCollection obj;
+   ThreeJSExportTransforms(world,obj);
+   std::ostringstream stream;
+   stream<<obj;
+   return stream.str();
+}
+

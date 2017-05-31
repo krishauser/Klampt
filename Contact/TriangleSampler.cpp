@@ -1,3 +1,5 @@
+#include <log4cxx/logger.h>
+#include <KrisLibrary/Logger.h>
 #include "TriangleSampler.h"
 #include <KrisLibrary/math/sample.h>
 #include <iostream>
@@ -25,9 +27,9 @@ void Triangle2DSampler::SamplePointOnTri(int tri,Vector2& x) const
 void Triangle2DSampler::SamplePoint(Vector2& x) const
 {
   if(tris.empty()) {
-    cerr<<"Triangle2DSampler: tris are empty!"<<endl;
-    cerr<<"Press any key to continue"<<endl;
-    getchar();
+    LOG4CXX_ERROR(KrisLibrary::logger(),"Triangle2DSampler: tris are empty!"<<"\n");
+    LOG4CXX_ERROR(KrisLibrary::logger(),"Press any key to continue"<<"\n");
+    if(KrisLibrary::logger()->isEnabledFor(log4cxx::Level::ERROR_INT)) getchar();
     x.setZero();
     return;
   }
@@ -103,9 +105,9 @@ void Triangle3DSampler::SamplePointOnTri(int tri,Vector3& x) const
 void Triangle3DSampler::SamplePoint(Vector3& x) const
 {
   if(tris.empty()) {
-    cerr<<"Triangle3DSampler: tris are empty!"<<endl;
-    cerr<<"Press any key to continue"<<endl;
-    getchar();
+    LOG4CXX_ERROR(KrisLibrary::logger(),"Triangle3DSampler: tris are empty!"<<"\n");
+    LOG4CXX_ERROR(KrisLibrary::logger(),"Press any key to continue"<<"\n");
+    if(KrisLibrary::logger()->isEnabledFor(log4cxx::Level::ERROR_INT)) getchar();
     x.setZero();
     return;
   }

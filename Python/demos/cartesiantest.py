@@ -34,10 +34,10 @@ class InterpKeyCapture(vis.GLPluginInterface):
         vis.setColor("ghost1",0,1,0,0.5)
         vis.add("ghost2",self.robot.getConfig())
         vis.setColor("ghost2",1,0,0,0.5)
-        vis.show("ghost1")
-        vis.show("ghost2")
-    def keyboardfunc(self,c,x,y):
-        if c == ' ':
+        #vis.hide("ghost1",False)
+        #vis.hide("ghost2",False)
+    
+        def goToWidget():
             #first, set all constraints so they are fit at the robot's last solved configuration, and get the
             #current workspace coordinates
             vis.setItemConfig("ghost1",self.goalConfig)
@@ -59,7 +59,8 @@ class InterpKeyCapture(vis.GLPluginInterface):
             self.robot.setConfig(self.goalConfig)
             #traj3 = cartesian_trajectory.cartesian_path_interpolate(robot,[wcur,wdest],self.constraints,delta=1e-2,method='any',maximize=False)
             traj3 = None
-            print (traj1 != None), (traj2 != None), (traj3 != None)
+            print "Method1 Method2 Method3:"
+            print "  ",(traj1 != None), (traj2 != None), (traj3 != None)
             if traj1: traj = traj1
             elif traj2: traj = traj2
             elif traj3: traj = traj3
@@ -72,6 +73,7 @@ class InterpKeyCapture(vis.GLPluginInterface):
                 vis.setItemConfig("ghost2",traj.milestones[-1])
                 vis.add("ee_trajectory",traj)
             self.refresh()
+        self.add_action(goToWidget,"Go to widget",' ')
 
 class BumpKeyCapture(vis.GLPluginInterface):
     def __init__(self,endeffectors,constraints,traj):
@@ -83,9 +85,9 @@ class BumpKeyCapture(vis.GLPluginInterface):
         self.refConfig = self.robot.getConfig()
         vis.add("ghost1",self.refConfig)
         vis.setColor("ghost1",0,1,0,0.5)
-        vis.show("ghost1")
-    def keyboardfunc(self,c,x,y):
-        if c == ' ':
+        #vis.hide("ghost1",False)
+    
+        def bumpTrajectory():
             relative_xforms = []
             robot.setConfig(self.refConfig)
             for e in self.endeffectors:
@@ -99,6 +101,7 @@ class BumpKeyCapture(vis.GLPluginInterface):
             assert bumpTraj != None
             vis.animate(("world",world.robot(0).getName()),bumpTraj)
             self.refresh()
+        self.add_action(bumpTrajectory,"Bump trajectory",'b')
 
 if __name__ == "__main__":
     print "cartesiantest.py: This example demonstrates cartesian trajectory interpolation"
@@ -137,6 +140,7 @@ if __name__ == "__main__":
 
     #this tests the cartesian interpolation stuff
     print "***** BEGINNING CARTESIAN INTERPOLATION TEST *****"
+    vis.setWindowTitle("Klamp't Cartesian interpolation test")
     vis.pushPlugin(InterpKeyCapture(endeffectors,eeobjectives))
     vis.show()
     while vis.shown():
@@ -152,7 +156,9 @@ if __name__ == "__main__":
     #this tests the "bump" function stuff
     print "***** BEGINNING BUMP FUNCTION TEST *****"
     configs = resource.get("cartesian_test"+world.robot(0).getName()+".configs",world=world)
+    print "Found trajectory with",len(configs),"configurations"
     traj = trajectory.RobotTrajectory(robot,range(len(configs)),configs)
+    vis.setWindowTitle("Klamp't Trajectory bump test")
     vis.pushPlugin(BumpKeyCapture(endeffectors,eeobjectives,traj))
     vis.show()
     while vis.shown():

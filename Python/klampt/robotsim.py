@@ -975,33 +975,6 @@ class Geometry3D(_object):
         """
         return _robotsim.Geometry3D_saveFile(self, *args)
 
-    def attachToStream(self, *args):
-        """
-        attachToStream(Geometry3D self, char const * protocol, char const * name, char const * type="") -> bool
-        attachToStream(Geometry3D self, char const * protocol, char const * name) -> bool
-
-        Attaches this geometry to a given stream.
-
-        Currently only "ros" protocol is supported. For "ros" protocol,
-        name is the ROS topic to attach to. type indicates the datatype that
-        the stream source should have, and this will return false if that type
-        is not obeyed. Currently only the "PointCloud" or default empty
-        ("") types are supported.
-
-        Note: you will need to call Appearance.refresh(True) to get the
-        appearance to update. 
-        """
-        return _robotsim.Geometry3D_attachToStream(self, *args)
-
-    def detachFromStream(self, *args):
-        """
-        detachFromStream(Geometry3D self, char const * protocol, char const * name) -> bool
-
-        Detaches this geometry from a given stream. This must be called before
-        deleting a piece of geometry. 
-        """
-        return _robotsim.Geometry3D_detachFromStream(self, *args)
-
     def setCurrentTransform(self, *args):
         """
         setCurrentTransform(Geometry3D self, double const [9] R, double const [3] t)
@@ -1953,8 +1926,8 @@ class RobotModelDriver(_object):
     """
     A reference to a driver of a RobotModel.
 
-    A driver corresponds to one of the robot's actuators and its
-    transmission.
+    A driver corresponds to one of the robot's actuators and encodes how
+    its forces are transmitted to joints.
 
     C++ includes: robotmodel.h 
     """
@@ -2162,6 +2135,16 @@ class RobotModel(_object):
         Returns a reference to the named driver. 
         """
         return _robotsim.RobotModel_driver(self, *args)
+
+    def getJointType(self, *args):
+        """
+        getJointType(RobotModel self, int index) -> char const
+        getJointType(RobotModel self, char const * name) -> char const *
+
+        Returns the joint type of the joint connecting the named link to its
+        parent. 
+        """
+        return _robotsim.RobotModel_getJointType(self, *args)
 
     def getConfig(self):
         """
@@ -3784,6 +3767,14 @@ class SimRobotController(_object):
         """
         return _robotsim.SimRobotController_setRate(self, *args)
 
+    def getRate(self):
+        """
+        getRate(SimRobotController self) -> double
+
+        Gets the current feedback control rate. 
+        """
+        return _robotsim.SimRobotController_getRate(self)
+
     def getCommandedConfig(self):
         """
         getCommandedConfig(SimRobotController self)
@@ -4595,6 +4586,44 @@ def destroy():
     destroys internal data structures 
     """
   return _robotsim.destroy()
+
+def SubscribeToStream(*args):
+  """
+    SubscribeToStream(Geometry3D g, char const * protocol, char const * name, char const * type="") -> bool
+    SubscribeToStream(Geometry3D g, char const * protocol, char const * name) -> bool
+    """
+  return _robotsim.SubscribeToStream(*args)
+
+def DetachFromStream(*args):
+  """DetachFromStream(char const * protocol, char const * name) -> bool"""
+  return _robotsim.DetachFromStream(*args)
+
+def ProcessStreams(protocol="all"):
+  """
+    ProcessStreams(char const * protocol="all") -> bool
+    ProcessStreams() -> bool
+    """
+  return _robotsim.ProcessStreams(protocol)
+
+def WaitForStream(*args):
+  """WaitForStream(char const * protocol, char const * name, double timeout) -> bool"""
+  return _robotsim.WaitForStream(*args)
+
+def ThreeJSGetScene(*args):
+  """
+    ThreeJSGetScene(WorldModel arg1) -> std::string
+
+    Exports the WorldModel to a JSON string ready for use in Three.js. 
+    """
+  return _robotsim.ThreeJSGetScene(*args)
+
+def ThreeJSGetTransforms(*args):
+  """
+    ThreeJSGetTransforms(WorldModel arg1) -> std::string
+
+    Exports the WorldModel to a JSON string ready for use in Three.js. 
+    """
+  return _robotsim.ThreeJSGetTransforms(*args)
 
 def setFrictionConeApproximationEdges(*args):
   """setFrictionConeApproximationEdges(int numEdges)"""

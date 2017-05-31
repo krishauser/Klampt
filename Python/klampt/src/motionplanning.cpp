@@ -1,3 +1,5 @@
+#include <log4cxx/logger.h>
+#include <KrisLibrary/Logger.h>
 #include "motionplanning.h"
 #include <KrisLibrary/planning/AnyMotionPlanner.h>
 #include <KrisLibrary/planning/CSpaceHelpers.h>
@@ -561,6 +563,15 @@ void destroyCSpace(int cspace)
     adaptiveSpaces[cspace] = NULL;
 }
 
+CSpace* getPreferredSpace(int index)
+{
+  if(index < 0 || index >= (int)spaces.size() || spaces[index]==NULL) 
+    throw PyException("Invalid cspace index");
+  if(index < (int)adaptiveSpaces.size() && adaptiveSpaces[index] != NULL)
+    return adaptiveSpaces[index];
+  return spaces[index];
+}
+
 CSpaceInterface::CSpaceInterface()
 {
   index = makeNewCSpace();
@@ -710,19 +721,15 @@ const char* CSpaceInterface::getProperty(const char* key)
 ///queries
 bool CSpaceInterface::isFeasible(PyObject* q)
 {
-  if(index < 0 || index >= (int)spaces.size() || spaces[index]==NULL) 
-    throw PyException("Invalid cspace index");
   Config vq;
   if(!PyListToConfig(q,vq)) {
     throw PyException("Invalid configuration (must be list)");
   }
-  return spaces[index]->IsFeasible(vq);
+  return getPreferredSpace(index)->IsFeasible(vq);
 }
 
 bool CSpaceInterface::isVisible(PyObject* a,PyObject* b)
 {
-  if(index < 0 || index >= (int)spaces.size() || spaces[index]==NULL) 
-    throw PyException("Invalid cspace index");
   Config va,vb;
   if(!PyListToConfig(a,va)) {
     throw PyException("Invalid configuration a (must be list)");
@@ -730,27 +737,28 @@ bool CSpaceInterface::isVisible(PyObject* a,PyObject* b)
   if(!PyListToConfig(b,vb)) {
     throw PyException("Invalid configuration b (must be list)");
   }
-  return spaces[index]->IsVisible(va,vb);
+  CSpace* s = getPreferredSpace(index);
+  EdgePlanner* e = s->PathChecker(va,vb);
+  bool res = e->IsVisible();
+  delete e;
+  return res;
 }
 
 bool CSpaceInterface::testFeasibility(const char* name,PyObject* q)
 {
-  if(index < 0 || index >= (int)spaces.size() || spaces[index]==NULL) 
-    throw PyException("Invalid cspace index");
   Config vq;
   if(!PyListToConfig(q,vq)) {
     throw PyException("Invalid configuration (must be list)");
   }
-  int cindex = spaces[index]->ConstraintIndex(name);;
+  CSpace* s=getPreferredSpace(index);
+  int cindex = spaces[index]->ConstraintIndex(name);
   if(cindex < 0)
      throw PyException("Invalid constraint name");
-  return spaces[index]->IsFeasible(vq,cindex);
+  return s->IsFeasible(vq,cindex);
 }
 
 bool CSpaceInterface::testVisibility(const char* name,PyObject* a,PyObject* b)
 {
-  if(index < 0 || index >= (int)spaces.size() || spaces[index]==NULL) 
-    throw PyException("Invalid cspace index");
   Config va,vb;
   if(!PyListToConfig(a,va)) {
     throw PyException("Invalid configuration a (must be list)");
@@ -758,25 +766,24 @@ bool CSpaceInterface::testVisibility(const char* name,PyObject* a,PyObject* b)
   if(!PyListToConfig(b,vb)) {
     throw PyException("Invalid configuration b (must be list)");
   }
+  CSpace* s=getPreferredSpace(index);
   int cindex = spaces[index]->ConstraintIndex(name);
   if(cindex < 0)
      throw PyException("Invalid constraint name");
-  index = spaces[index]->ConstraintIndex(name);
-  return spaces[index]->IsVisible(va,vb,cindex);
+  EdgePlanner* e = s->PathChecker(va,vb,cindex);
+  bool res = e->IsVisible();
+  delete e;
+  return res;
 }
 
 PyObject* CSpaceInterface::feasibilityFailures(PyObject* q)
 {
-  if(index < 0 || index >= (int)spaces.size() || spaces[index]==NULL) {
-    printf("CSpace index %d is out of range [%d,%d) or was previously destroyed\n",index,0,spaces.size());
-    throw PyException("Invalid cspace index");
-  }
   Config vq;
   if(!PyListToConfig(q,vq)) {
     throw PyException("Invalid configuration (must be list)");    
   }
   vector<string> infeasible;
-  spaces[index]->GetInfeasibleNames(vq,infeasible);
+  getPreferredSpace(index)->GetInfeasibleNames(vq,infeasible);
   return ToPy(infeasible);
 }
 
@@ -1005,7 +1012,7 @@ void setPlanType(const char* type)
 
 void setPlanSetting(const char* setting,double value)
 {
-  //printf("Setting factory setting %s to %g\n",setting,value);
+  //LOG4CXX_INFO(KrisLibrary::logger(),"Setting factory setting "<<setting<<" to "<<value);
   if(0==strcmp(setting,"knn")) 
     factory.knn = (int)value;
   else if(0==strcmp(setting,"connectionThreshold"))
@@ -1049,14 +1056,15 @@ int makeNewPlan(int cspace)
 {
   if(cspace < 0 || cspace >= (int)spaces.size() || spaces[cspace]==NULL) 
     throw PyException("Invalid cspace index");
+  CSpace* klSpace = getPreferredSpace(cspace);
   if(plansDeleteList.empty()) {
-    plans.push_back(factory.Create(spaces[cspace]));
+    plans.push_back(factory.Create(klSpace));
     return (int)plans.size()-1;
   }
   else {
     int index = plansDeleteList.front();
     plansDeleteList.erase(plansDeleteList.begin());
-    plans[index] = factory.Create(spaces[cspace]);
+    plans[index] = factory.Create(klSpace);
     return index;
   }
 }
@@ -1098,7 +1106,8 @@ bool PlannerInterface::setEndpoints(PyObject* start,PyObject* goal)
   bool res=PyListToConfig(start,qstart);
   if(!res) 
     throw PyException("Invalid start endpoint");
-  if(!spaces[spaceIndex]->IsFeasible(qstart)) {
+  CSpace* s = getPreferredSpace(spaceIndex);
+  if(!s->IsFeasible(qstart)) {
     throw PyException("Start configuration is infeasible");
   }
   int istart=plans[index]->AddMilestone(qstart);
@@ -1112,7 +1121,7 @@ bool PlannerInterface::setEndpoints(PyObject* start,PyObject* goal)
   res=PyListToConfig(goal,qgoal);
   if(!res) 
     throw PyException("Invalid start endpoint");
-  if(!spaces[spaceIndex]->IsFeasible(qgoal)) {
+  if(!s->IsFeasible(qgoal)) {
     throw PyException("Goal configuration is infeasible");
   }
   int igoal=plans[index]->AddMilestone(qgoal);
@@ -1129,7 +1138,8 @@ bool PlannerInterface::setEndpointSet(PyObject* start,PyObject* goal,PyObject* g
   bool res=PyListToConfig(start,qstart);
   if(!res) 
     throw PyException("Invalid start endpoint");
-  if(!spaces[spaceIndex]->IsFeasible(qstart)) {
+  CSpace* s = getPreferredSpace(spaceIndex);
+  if(!s->IsFeasible(qstart)) {
     throw PyException("Start configuration is infeasible");
   }
   //test if it's a goal test
@@ -1138,10 +1148,7 @@ bool PlannerInterface::setEndpointSet(PyObject* start,PyObject* goal,PyObject* g
   }
   goalSets.resize(plans.size());
   goalSets[index] = new PyGoalSet(goal,goalSample);
-  if(spaceIndex < (int)adaptiveSpaces.size() && adaptiveSpaces[spaceIndex] != NULL)
-    plans[index]=factory.Create(adaptiveSpaces[spaceIndex],qstart,goalSets[index]);
-  else
-    plans[index]=factory.Create(spaces[spaceIndex],qstart,goalSets[index]);
+  plans[index]=factory.Create(s,qstart,goalSets[index]);
   return true;
 }
 
@@ -1177,7 +1184,7 @@ void PlannerInterface::planMore(int iterations)
   if(plans[index]->IsPointToPoint() && plans[index]->NumMilestones() < 1) throw PyException("No start or goal set for point-to-point planner, cannot start");
   if(spaceIndex < (int)adaptiveSpaces.size() && adaptiveSpaces[spaceIndex]) adaptiveSpaces[spaceIndex]->OptimizeQueryOrder();
   plans[index]->PlanMore(iterations);
-  //printf("Plan now has %d milestones, %d components\n",plans[plan]->NumMilestones(),plans[plan]->NumComponents());
+  //LOG4CXX_INFO(KrisLibrary::logger(),"Plan now has "<<plans[plan]->NumMilestones()<<" milestones, "<<plans[plan]->NumComponents());
   //DumpPlan(plans[plan],"plan.tgf");
 }
 

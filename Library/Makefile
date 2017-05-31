@@ -28,6 +28,7 @@ dep-tinyxml:
 
 dep-glew:
 	cd glew-2.0.0; make
+	cd glew-2.0.0; sudo make install
 
 ifeq ($(UNAME), Darwin)
 dep-glui:

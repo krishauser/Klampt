@@ -26,7 +26,6 @@ void MainWindow::Initialize(int argc,const char** argv)
   }
 
   gui=new QRobotPoseGUI(ui->displaywidget,backend);
-  ui->displaywidget->SetGUI(gui);
     backend->Start();
 
     gui->resource_frame=ui->frame_resources;

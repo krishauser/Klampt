@@ -1,6 +1,8 @@
 #ifndef ROBOTIK_H
 #define ROBOTIK_H
 
+#include <log4cxx/logger.h>
+#include <KrisLibrary/Logger.h>
 #include "robotmodel.h"
 #include <KrisLibrary/robotics/IK.h>
 

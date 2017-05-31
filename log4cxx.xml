@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">
+
+<log4j:configuration debug="false" xmlns:log4j="http://jakarta.apache.org/log4j/">
+
+	<appender name="console" class="log4cxx.ConsoleAppender">
+		<layout class="log4cxx.PatternLayout">
+		<!--
+			<param name="ConversionPattern" value="[ws] %-5p %c{2} %x - %m %n" />
+		-->
+			<param name="ConversionPattern" value="%m %n"/>
+		</layout>
+		<filter class="log4cxx.StringMatchFilter">
+			<param name="stringToMatch" value="packet #80" />
+			<param name="acceptOnMatch" value="false" />
+		</filter>
+	</appender>
+
+<!--
+
+    <appender name="common_file" class="log4cxx.FileAppender">
+		<layout class="log4cxx.SimpleLayout" />
+		<param name="File" value="../logs/common.log" />
+		<param name="Append" value="false" />
+    </appender>
+
+	<appender name="err"  class="log4cxx.ConsoleAppender">
+		<param name="Target" value="System.err" />
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern" value="[%d{ISO8601}] %-5p %c %m %l %L %n " />
+		</layout>
+
+		<filter class="log4cxx.StringMatchFilter">
+			<param name="stringToMatch" value="bug" />
+			<param name="acceptOnMatch" value="false" />
+		</filter>
+		<filter class="log4cxx.DenyAllFilter"/>
+		<filter class="log4cxx.LevelMatchFilter">
+			<param name="levelToMatch" value="DEBUG" />
+			<param name="acceptOnMatch" value="true" />
+		</filter>
+		<filter class="log4cxx.LevelRangeFilter">
+			<param name="LevelMin" value="WARN"/>
+			<param name="LevelMax" value="FATAL"/>
+		</filter>
+
+	</appender>
+	
+	<KrisLibrary>
+		<priority value ="error" />
+		<appender-ref ref="console" />
+	</KrisLibrary>	
+
+-->
+
+	<root>
+		<priority value="error" />
+		<appender-ref ref="console" />
+	</root>
+	
+
+
+</log4j:configuration>

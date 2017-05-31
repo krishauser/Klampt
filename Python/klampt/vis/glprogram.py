@@ -306,6 +306,9 @@ class GLProgram:
         except ImportError:
             print "Cannot save screens to disk, the Python Imaging Library is not installed"
             return
+        if hasattr(self.window,'makeCurrent'):
+            self.window.makeCurrent()
+        glReadBuffer(GL_FRONT);
         screenshot = glReadPixels( self.view.x, self.view.y, self.view.w, self.view.h, GL_RGBA, GL_UNSIGNED_BYTE)
         im = Image.frombuffer("RGBA", (self.view.w, self.view.h), screenshot, "raw", "RGBA", 0, 0)
         print "Saving screen to",fn
@@ -404,8 +407,10 @@ class GLRealtimeProgram(GLNavigationProgram):
     def idlefunc (self):
         tcur = time.time()
         tsleep = self.dt - (tcur - self.lasttime)
-        if (tsleep > 0):
+        if tsleep > 0.001:
+            #print "Elapsed time",tcur-self.lasttime,"sleep",tsleep,"window",self.window.name
             self.idlesleep(tsleep)
+            return
         
         self.ttotal += self.dt
         self.counter += 1
@@ -413,7 +418,7 @@ class GLRealtimeProgram(GLNavigationProgram):
         #do something random
         self.idle()
         
-        self.lasttime = time.time()
+        self.lasttime = tcur
         self.refresh()
         return True
 
@@ -440,6 +445,8 @@ class GLPluginProgram(GLRealtimeProgram):
         self.plugins.append(plugin)
         plugin.window = self.window
         if self.window:
+            if self.window.initialized:
+                print "GLPluginProgram.pushPlugin called after window was initialized, some actions may not be available"
             plugin.view = self.view
             plugin.reshapefunc(self.view.w,self.view.h)
             self.refresh()
@@ -460,12 +467,14 @@ class GLPluginProgram(GLRealtimeProgram):
         for p in self.plugins:
             p.view = self.view
     def initialize(self):
+        #print "GLPluginProgram initialize:",len(self.plugins),"plugins"
         for plugin in self.plugins:
             plugin.window = self.window
             if not plugin.initialize():
                 print "GLPluginProgram.initialize(): Plugin of type",plugin.__class__.__name__,"Did not initialize"
                 return False
             if hasattr(plugin,'actions'):
+                #print "Adding",len(plugin.actions),"actions for plugin",plugin.__class__.__name__
                 for a in plugin.actions:
                     self.add_action(*a)
         return GLRealtimeProgram.initialize(self)

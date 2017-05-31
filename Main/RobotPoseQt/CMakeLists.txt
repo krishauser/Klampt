@@ -1,6 +1,8 @@
 # Make the RobotPose Qt program
 CMAKE_MINIMUM_REQUIRED(VERSION 2.6.4)
-cmake_policy(SET CMP0053 OLD)
+if(POLICY CMP0053)
+  cmake_policy(SET CMP0053 OLD)
+endif(POLICY CMP0053)
 PROJECT(RobotPose)
 
 #Building from within Main/[AppName] folder
@@ -41,7 +43,7 @@ IF(USE_QT5_APPS)
   set(QT_LIBRARIES ${Qt5Widgets_LIBRARIES} ${Qt5Gui_LIBRARIES} ${Qt5OpenGL_LIBRARIES})
 
   QT5_WRAP_UI(RobotPose_UISrcs ${UI_FRAMES} )
-  QT5_WRAP_CPP(RobotPose_MOCSrcs  ${H_FRAMES} ../KlamptQt/qtguibase.h ../KlamptQt/qklamptdisplay.h qresourcetreewidget.h qrobotposegui.h)
+  QT5_WRAP_CPP(RobotPose_MOCSrcs  ${H_FRAMES} ../KlamptQt/qtguibase.h ../KlamptQt/qklamptguibase.h ../KlamptQt/qklamptdisplay.h qresourcetreewidget.h qrobotposegui.h)
   QT5_ADD_RESOURCES(RobotPose_Resources ../KlamptQt/icons.qrc)
 ELSE(USE_QT5_APPS)
   SET(QT_USE_QTOPENGL TRUE)
@@ -49,12 +51,12 @@ ELSE(USE_QT5_APPS)
   INCLUDE(${QT_USE_FILE})
 
   QT4_WRAP_UI(RobotPose_UISrcs ${UI_FRAMES} )
-  QT4_WRAP_CPP(RobotPose_MOCSrcs  ${H_FRAMES} ../KlamptQt/qtguibase.h ../KlamptQt/qklamptdisplay.h qresourcetreewidget.h qrobotposegui.h)
+  QT4_WRAP_CPP(RobotPose_MOCSrcs  ${H_FRAMES} ../KlamptQt/qtguibase.h ../KlamptQt/qklamptguibase.h ../KlamptQt/qklamptdisplay.h qresourcetreewidget.h qrobotposegui.h)
   QT4_ADD_RESOURCES(RobotPose_Resources ../KlamptQt/icons.qrc)
 ENDIF(USE_QT5_APPS)
 
 ##### Build target ####
-ADD_EXECUTABLE(RobotPose main.cpp ${CPP_FRAMES} qresourcetreewidget.cpp qrobotposegui.cpp ../KlamptQt/qtguibase.cpp ../KlamptQt/qklamptdisplay.cpp resourcemanager.cpp ${RobotPose_MOCSrcs} ${RobotPose_UISrcs} ${RobotPose_Resources})
+ADD_EXECUTABLE(RobotPose main.cpp ${CPP_FRAMES} qresourcetreewidget.cpp qrobotposegui.cpp ../KlamptQt/qklamptguibase.cpp ../KlamptQt/qtguibase.cpp ../KlamptQt/qklamptdisplay.cpp resourcemanager.cpp ${RobotPose_MOCSrcs} ${RobotPose_UISrcs} ${RobotPose_Resources})
 TARGET_LINK_LIBRARIES(RobotPose ${KLAMPT_LIBRARIES} ${QT_LIBRARIES})
 
 install(TARGETS RobotPose

@@ -1,3 +1,5 @@
+#include <log4cxx/logger.h>
+#include <KrisLibrary/Logger.h>
 #include "NavigationGUI.h"
 #include <KrisLibrary/GLdraw/GL.h>
 #include <KrisLibrary/GLdraw/GLView.h>
@@ -209,7 +211,7 @@ void GLNavigationBackend::ClickRay(int x,int y,Math3D::Vector3& src,Math3D::Vect
 {
   viewport.getClickSource(x,viewport.y+viewport.h-y,src);
   viewport.getClickVector(x,viewport.y+viewport.h-y,dir);
-  //cout<<"Ray "<<r.source<<" -> "<<r.direction<<endl;
+  //LOG4CXX_INFO(KrisLibrary::logger(),"Ray "<<r.source<<" -> "<<r.direction<<"\n");
 }
 
 
@@ -225,16 +227,16 @@ bool GLNavigationBackend::OnMouseWheel(int dwheel)
 bool GLNavigationBackend::OnCommand(const string& cmd,const string& args)
 {
   if(cmd == "save_view") {
-    printf("Saving viewport to %s\n",args.c_str());
+    LOG4CXX_INFO(KrisLibrary::logger(),"Saving viewport to "<<args.c_str());
     ofstream out(args.c_str(),ios::out);
     WriteDisplaySettings(out);
     return true;
   }
   else if(cmd == "load_view") {
-    printf("Loading viewport from %s...\n",args.c_str());
+    LOG4CXX_INFO(KrisLibrary::logger(),"Loading viewport from "<<args.c_str());
     ifstream in(args.c_str(),ios::in);
     if(!in) {
-      printf("Unable to open %s\n",args.c_str());
+      LOG4CXX_INFO(KrisLibrary::logger(),"Unable to open "<<args.c_str());
     }
     else {
       ReadDisplaySettings(in);

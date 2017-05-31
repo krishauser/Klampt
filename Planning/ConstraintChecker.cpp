@@ -1,3 +1,5 @@
+#include <log4cxx/logger.h>
+#include <KrisLibrary/Logger.h>
 #include "ConstraintChecker.h"
 #include <KrisLibrary/robotics/IKFunctions.h>
 #include <KrisLibrary/robotics/Stability.h>
@@ -128,7 +130,7 @@ bool ConstraintChecker::HasEnvCollision(Robot& robot,Terrain& env,const vector<I
 	for (size_t i = 0; i < robot.links.size(); i++) {
 		if (!fixed[i]) {
 			if (robot.MeshCollision(i)) {
-			  printf("Collision between robot link %s and env\n",robot.linkNames[i].c_str());
+			  LOG4CXX_INFO(KrisLibrary::logger(),"Collision between robot link "<<robot.linkNames[i].c_str());
 				return true;
 			}
 		}
@@ -149,13 +151,13 @@ bool ConstraintChecker::HasEnvCollision(Robot& robot,Terrain& env,const vector<I
 	}
 	for (size_t i = 0; i < robot.links.size(); i++) {
 		if (!fixed[i]) {
-			cout << "Checking link " << i << ":" << endl;
+			LOG4CXX_INFO(KrisLibrary::logger(), "Checking link " << i << ":" << "\n");
 			if (robot.MeshCollision(i)) {
-				cout << "  Link " << i << " is in collision!" << endl;
+				LOG4CXX_INFO(KrisLibrary::logger(), "  Link " << i << " is in collision!" << "\n");
 				return true;
 			}
 			else{
-				cout << "  Link " << i << " is not in collision!" << endl;
+				LOG4CXX_INFO(KrisLibrary::logger(), "  Link " << i << " is not in collision!" << "\n");
 			}
 		}
 	}

@@ -1,3 +1,5 @@
+#include <log4cxx/logger.h>
+#include <KrisLibrary/Logger.h>
 #include "Hold.h"
 #include "HoldReader.h"
 #include <KrisLibrary/math3d/rotation.h>
@@ -59,10 +61,10 @@ void Hold::SetupIKConstraint(const Vector3& localPos0, const Vector3& rot)
     ikConstraint.endRotation = rot;
   }
   else if(contacts.size()==2) {  //line contact
-    //cout<<"Setting edge rotation example moment "<<rot<<endl;
+    //LOG4CXX_INFO(KrisLibrary::logger(),"Setting edge rotation example moment "<<rot<<"\n");
     Vector3 axis = contacts[1].x-contacts[0].x;
     if(axis.normSquared()==0) { //degenerate, point contact
-      //cout<<"Warning: degenerate point contact"<<endl;
+      //LOG4CXX_WARN(KrisLibrary::logger(),"Warning: degenerate point contact"<<"\n");
       ikConstraint.SetFreeRotation();
       ikConstraint.endRotation = rot;
       return;
@@ -73,8 +75,8 @@ void Hold::SetupIKConstraint(const Vector3& localPos0, const Vector3& rot)
     R.inplaceTranspose();
 
     axis.inplaceNormalize();
-    //cout<<"world-space rotation axis: "<<axis<<endl;
-    //cout<<"local-space rotation axis: "<<R*axis<<endl;
+    //LOG4CXX_INFO(KrisLibrary::logger(),"world-space rotation axis: "<<axis<<"\n");
+    //LOG4CXX_INFO(KrisLibrary::logger(),"local-space rotation axis: "<<R*axis<<"\n");
     ikConstraint.SetAxisRotation(R*axis,axis);
   }
   else {  //plane contact
@@ -199,17 +201,17 @@ bool HoldReader::Assign(const string& item,stringstream& rhs)
     while(rhs >> cp.x) {
       rhs >> cp.n >> cp.kFriction;
       if(rhs.bad()) {
-	cerr<<"Error reading contact point #"<<h.contacts.size()<<endl;
+	LOG4CXX_ERROR(KrisLibrary::logger(),"Error reading contact point #"<<h.contacts.size()<<"\n");
 	return false;
       }
       h.contacts.push_back(cp);
     }
     if(!rhs.eof()) {
-      cerr<<"Error reading contact points?!?!"<<endl;
-      cerr<<"rhs = "<<rhs.str()<<endl;
+      LOG4CXX_ERROR(KrisLibrary::logger(),"Error reading contact points?!?!"<<"\n");
+      LOG4CXX_ERROR(KrisLibrary::logger(),"rhs = "<<rhs.str()<<"\n");
       return false;
     }
-    //cout<<"Read "<<h.contacts.size()<<" contacts"<<endl;
+    //LOG4CXX_INFO(KrisLibrary::logger(),"Read "<<h.contacts.size()<<" contacts"<<"\n");
     return true;
   }
   else if(item == "position") {
@@ -242,23 +244,23 @@ bool HoldReader::Assign(const string& item,stringstream& rhs)
     rhs >> rot;
     h.SetupIKConstraint(localPos0,rot);
   }
-  cout<<"Unknown item "<<item<<endl;
+  LOG4CXX_INFO(KrisLibrary::logger(),"Unknown item "<<item<<"\n");
   return false;
 }
 
 bool HoldReader::End() 
 { 
   if(h.link < 0) {
-    cerr<<"Invalid link!"<<endl;
+    LOG4CXX_ERROR(KrisLibrary::logger(),"Invalid link!"<<"\n");
     return false;
   }
   h.ikConstraint.link = h.link;
   if(h.ikConstraint.posConstraint==IKGoal::PosNone) {
-    cerr<<"Read no ik constraints!"<<endl;
+    LOG4CXX_ERROR(KrisLibrary::logger(),"Read no ik constraints!"<<"\n");
     return false;
   }
   if(h.contacts.empty()) {
-    cerr<<"Hold Load: Warning, empty contacts"<<endl;
+    LOG4CXX_ERROR(KrisLibrary::logger(),"Hold Load: Warning, empty contacts"<<"\n");
     return true;
   }
   return true;
@@ -297,7 +299,7 @@ istream& operator >> (istream& in, Hold& h)
 {
   HoldReader reader(in);
   if(!reader.Read()) {
-    printf("Failed while reading hold\n");
+    LOG4CXX_INFO(KrisLibrary::logger(),"Failed while reading hold\n");
     in.setstate(ios::failbit);
     return in;
   }

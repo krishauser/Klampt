@@ -54,6 +54,8 @@
 *
 **********************************/
 
+#include <log4cxx/logger.h>
+#include <KrisLibrary/Logger.h>
 #include "pyvectorfield.h"
 #include "pyerr.h"
 #include "pyconvert.h"
@@ -515,7 +517,7 @@ void PyVectorFieldFunction::Jacobian(const Vector& x, Matrix& J)
   }
 	
   if(PySequence_Size(pResult) != (Py_ssize_t)m) {
-    printf("Sequence size: %d != %d\n",(int)PySequence_Size(pResult),m);
+    LOG4CXX_INFO(KrisLibrary::logger(),"Sequence size: "<<(int)PySequence_Size(pResult)<<" != "<<m);
     except = PyException("PyVectorFieldFunction::Jacobian: "		\
 			 "VectorFieldFunction.jacobian() returned a list of incorrect size.",
 			 Type);
