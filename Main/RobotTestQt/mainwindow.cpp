@@ -1,3 +1,5 @@
+#include <log4cxx/logger.h>
+#include <KrisLibrary/Logger.h>
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "QDebug"
@@ -23,11 +25,11 @@ bool MainWindow::Initialize(int _argc,const char** _argv)
     const string robname="placeholder";
     //world->AddRobot(robname,&robot);
     if(world.LoadRobot(argv[1]) < 0) {
-      printf("RobotTest: error loading robot file %s, quitting\n",argv[1]);
+      LOG4CXX_ERROR(KrisLibrary::logger(),"RobotTest: error loading robot file "<<argv[1]<<", quitting\n");
       return false;
     }
     backend = new RobotTestBackend(&world);
-    printf("BACKEND LOADED\n");
+    LOG4CXX_INFO(KrisLibrary::logger(),"BACKEND LOADED\n");
     gui=new QRobotTestGUI(ui->displaywidget,backend);
     gui->opened_file = argv[1];
     backend->Start();

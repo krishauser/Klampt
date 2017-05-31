@@ -2,7 +2,7 @@
 subroutines."""
 
 import ik
-from ..math import so3,se3
+from ..math import se3
 from .. import robotsim
 from ..robotsim import RobotModel,RobotModelLink,RigidObjectModel,TerrainModel
 
@@ -61,7 +61,7 @@ class ContactPoint:
     def tolist(self):
         """Returns a 7-list representing this contact point, for use in
         the stability testing routines."""
-        return list(self.x) + list(self.n) + [self.kFriction]
+        return self.x + self.n + [self.kFriction]
 
     def fromlist(self,v):
         """Reads the values x,n, and kFriction from the 7-list v."""

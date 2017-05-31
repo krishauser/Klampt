@@ -1,3 +1,5 @@
+#include <log4cxx/logger.h>
+#include <KrisLibrary/Logger.h>
 #include "Utils.h"
 #include <KrisLibrary/math3d/basis.h>
 #include <KrisLibrary/meshing/PointCloud.h>
@@ -318,7 +320,7 @@ void ClusterContacts(vector<ContactPoint>& contacts,int numClusters,Real normalS
     contacts[i].n.z = kmeans.centers[i][5];
     Real len = contacts[i].n.length();
     if(FuzzyZero(len) || !IsFinite(len)) {
-      printf("ClusterContacts: Warning, clustered normal became zero/infinite\n");
+      LOG4CXX_WARN(KrisLibrary::logger(),"ClusterContacts: Warning, clustered normal became zero/infinite\n");
       //pick any in the cluster
       int found = -1;
       for(size_t k=0;k<kmeans.labels.size();k++) {
@@ -345,8 +347,8 @@ void ClusterContacts(vector<ContactPoint>& contacts,int numClusters,Real normalS
       continue;
     }
     contacts[i].n /= len;
-    //cout<<"Clustered contact "<<contacts[i].pos[0]<<" "<<contacts[i].pos[1]<<" "<<contacts[i].pos[2]<<endl;
-    //cout<<"Clustered normal "<<contacts[i].normal[0]<<" "<<contacts[i].normal[1]<<" "<<contacts[i].normal[2]<<endl;
+    //LOG4CXX_INFO(KrisLibrary::logger(),"Clustered contact "<<contacts[i].pos[0]<<" "<<contacts[i].pos[1]<<" "<<contacts[i].pos[2]<<"\n");
+    //LOG4CXX_INFO(KrisLibrary::logger(),"Clustered normal "<<contacts[i].normal[0]<<" "<<contacts[i].normal[1]<<" "<<contacts[i].normal[2]<<"\n");
     contacts[i].kFriction = kmeans.centers[i][6]/frictionScale;
     Assert(contacts[i].kFriction >= 0);
   }
@@ -371,10 +373,10 @@ void CHContactsPlane(vector<ContactPoint>& cp,const Vector3& n,const Vector3& or
   //all points must be on a plane
   for(size_t i=0;i<cp.size();i++) {
     if(!cp[i].n.isEqual(n,ntol)) {
-      cout<<"CHContactsPlane: Warning: non-equal normal"<<endl;
+      LOG4CXX_WARN(KrisLibrary::logger(),"CHContactsPlane: Warning: non-equal normal"<<"\n");
     }
     if(!FuzzyEquals(n.dot(cp[i].x),ofs,xtol)) {
-      cout<<"CHContactsPlane: Warning: non-equal offset: "<<ofs<<" vs "<<n.dot(cp[i].x)<<endl;
+      LOG4CXX_WARN(KrisLibrary::logger(),"CHContactsPlane: Warning: non-equal offset: "<<ofs<<" vs "<<n.dot(cp[i].x)<<"\n");
     }
   }
   Vector3 x,y;

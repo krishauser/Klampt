@@ -1,3 +1,5 @@
+#include <log4cxx/logger.h>
+#include <KrisLibrary/Logger.h>
 #include "Interface/UserInterface.h"
 #include "Interface/RobotInterface.h"
 #include "Main/SimViewProgram.h"
@@ -147,7 +149,7 @@ public:
     glui->add_checkbox("Draw path",&drawPath);
     glui->add_checkbox("Draw contacts",&drawContacts);
 
-    printf("Done initializing...\n");
+    LOG4CXX_INFO(KrisLibrary::logger(),"Done initializing...\n");
     return true;
   }
 
@@ -377,7 +379,7 @@ public:
 int main(int argc, char** argv)
 {
   if(argc < 2) {
-    printf("USAGE: UserTrials XML_file [log file]\n");
+    LOG4CXX_INFO(KrisLibrary::logger(),"USAGE: UserTrials XML_file [log file]\n");
     return 0;
   }
   RobotWorld world;
@@ -392,29 +394,29 @@ int main(int argc, char** argv)
     const char* ext=FileExtension(argv[i]);
     if(0==strcmp(ext,"rob")) {
       if(world.LoadRobot(argv[i])<0) {
-	printf("Error loading robot file %s\n",argv[i]);
+	LOG4CXX_ERROR(KrisLibrary::logger(),"Error loading robot file "<<argv[i]);
 	return 1;
       }
     }
     else if(0==strcmp(ext,"env") || 0==strcmp(ext,"tri")) {
       if(world.LoadTerrain(argv[i])<0) {
-	printf("Error loading terrain file %s\n",argv[i]);
+	LOG4CXX_ERROR(KrisLibrary::logger(),"Error loading terrain file "<<argv[i]);
 	return 1;
       }
     }
     else if(0==strcmp(ext,"obj")) {
       if(world.LoadRigidObject(argv[i])<0) {
-	printf("Error loading rigid object file %s\n",argv[i]);
+	LOG4CXX_ERROR(KrisLibrary::logger(),"Error loading rigid object file "<<argv[i]);
 	return 1;
       }
     }
     else if(0==strcmp(ext,"xml")) {
       if(!xmlWorld.Load(argv[i])) {
-	printf("Error loading world file %s\n",argv[i]);
+	LOG4CXX_ERROR(KrisLibrary::logger(),"Error loading world file "<<argv[i]);
 	return 1;
       }
       if(!xmlWorld.GetWorld(world)) {
-	printf("Error loading world from %s\n",argv[i]);
+	LOG4CXX_ERROR(KrisLibrary::logger(),"Error loading world from "<<argv[i]);
 	return 1;
       }
     }
@@ -422,7 +424,7 @@ int main(int argc, char** argv)
       logFile = argv[i];
     }
     else {
-      printf("Unknown file extension %s on file %s\n",ext,argv[i]);
+      LOG4CXX_INFO(KrisLibrary::logger(),"Unknown file extension "<<ext<<" on file "<<argv[i]);
       return 1;
     }
   }

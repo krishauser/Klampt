@@ -1,6 +1,8 @@
 #ifndef CONTACT_TIME_SCALING_H
 #define CONTACT_TIME_SCALING_H
 
+#include <log4cxx/logger.h>
+#include <KrisLibrary/Logger.h>
 #include "TimeScaling.h"
 #include "Modeling/MultiPath.h"
 #include "Modeling/Robot.h"

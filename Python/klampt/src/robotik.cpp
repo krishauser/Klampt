@@ -1,3 +1,5 @@
+#include <log4cxx/logger.h>
+#include <KrisLibrary/Logger.h>
 #include <string>
 #include <vector>
 #include "robotik.h"
@@ -463,7 +465,7 @@ PyObject* IKSolver::solve(int iters,double tol)
 {
   static bool warned=false;
   if(!warned) {
-    printf("IKSolver.solve(iters,tol) will be deprecated, use setMaxIters(iters)/setTolerance(tol) and solve() instead\n");
+    LOG4CXX_INFO(KrisLibrary::logger(),"IKSolver.solve(iters,tol) will be deprecated, use setMaxIters(iters)/setTolerance(tol) and solve() instead\n");
     warned=true;
   }
   if(useJointLimits) {
@@ -471,7 +473,7 @@ PyObject* IKSolver::solve(int iters,double tol)
     for(size_t i=0;i<qmin.size();i++) {
       if(robot.robot->q(i) < qmin[i] || robot.robot->q(i) > qmax[i]) {
         if(robot.robot->q(i) < qmin[i]-Epsilon || robot.robot->q(i) > qmax[i]+Epsilon) 
-          printf("Joint limits %f < %f <%f exceeded on joint %i. Clamping to limit...\n", qmin[i],robot.robot->q(i),qmax[i],(int)i);
+          LOG4CXX_INFO(KrisLibrary::logger(),"Joint limits "<< qmin[i]<<" < "<<robot.robot->q(i)<<" <"<<qmax[i]<<" exceeded on joint "<<(int)i);
         if(robot.robot->q(i) < qmin[i]) {
           robot.robot->q(i) = qmin[i];
         } else {
@@ -516,7 +518,7 @@ bool IKSolver::solve()
     for(size_t i=0;i<robot.robot->q.size();i++) {
       if(robot.robot->q(i) < usedQmin[i] || robot.robot->q(i) > usedQmax[i]) {
         if(robot.robot->q(i) < usedQmin[i]-Epsilon || robot.robot->q(i) > usedQmax[i] + Epsilon) 
-          printf("IKSolver:: Joint limits on joint %i exceeded: %g <= %g <= %g. Clamping to limits...\n", i,usedQmin[i],robot.robot->q(i),usedQmax[i]);
+          LOG4CXX_INFO(KrisLibrary::logger(),"IKSolver:: Joint limits on joint "<< i<<" exceeded: "<<usedQmin[i]<<" <= "<<robot.robot->q(i)<<" <= "<<usedQmax[i]);
         robot.robot->q(i) = Clamp(robot.robot->q(i),usedQmin[i],usedQmax[i]);
       }
     }

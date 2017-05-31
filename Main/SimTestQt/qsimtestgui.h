@@ -24,6 +24,7 @@ class QSimTestGUI : public QKlamptGUIBase
 public:
     QSimTestGUI(QKlamptDisplay* display,SimTestBackend* _backend);
     virtual ~QSimTestGUI();
+    QKlamptDisplay* display;
     WorldSimulation* sim;
     DriverEdit *driver_tool;
     LogOptions *log_options;

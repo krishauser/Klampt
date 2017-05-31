@@ -1,3 +1,5 @@
+#include <log4cxx/logger.h>
+#include <KrisLibrary/Logger.h>
 #include "Terrain.h"
 #include <KrisLibrary/Timer.h>
 #include <KrisLibrary/meshing/IO.h>
@@ -15,7 +17,7 @@ void Terrain::InitCollisions()
   geometry->InitCollisionData();
   double t = timer.ElapsedTime();
   if(t > 0.2) 
-    printf("Initialized terrain %s collision data structures in time %gs\n",geomFile.c_str(),t);
+    LOG4CXX_INFO(KrisLibrary::logger(),"Initialized terrain "<<geomFile.c_str()<<" collision data structures in time "<<t);
 }
 
 bool Terrain::Load(const char* fn)
@@ -24,11 +26,11 @@ bool Terrain::Load(const char* fn)
   if(ext && 0==strcmp(ext,"env")) {
     SimpleFile f(fn);
     if(!f) {
-      fprintf(stderr,"SimpleFile read failed\n");
+            LOG4CXX_ERROR(KrisLibrary::logger(),"SimpleFile read failed\n");
       return false;
     }
     if(f.count("mesh")==0) {
-      fprintf(stderr,"Terrain file doesn't contain a mesh file\n");
+            LOG4CXX_ERROR(KrisLibrary::logger(),"Terrain file doesn't contain a mesh file\n");
       return false;
     }
     if(!f.CheckSize("mesh",1,fn)) return false;
@@ -37,7 +39,7 @@ bool Terrain::Load(const char* fn)
     if(!LoadGeometry(geomfn.c_str())) return false;
     Timer timer;
     if(timer.ElapsedTime() > 1.0)
-      printf("Env %s collision init took time %gs\n",geomfn.c_str(),timer.ElapsedTime());
+      LOG4CXX_INFO(KrisLibrary::logger(),"Env "<<geomfn.c_str()<<" collision init took time "<<timer.ElapsedTime());
     if(f.count("kFriction")!=0) {
       if(!f.CheckType("kFriction",PrimitiveValue::Double,fn)) return false;
       vector<double> values=f.AsDouble("kFriction");
@@ -47,7 +49,7 @@ bool Terrain::Load(const char* fn)
 	kFriction = values;
       }
       else {
-	fprintf(stderr,"Terrain file doesn't contain the right number of friction values\n");
+		LOG4CXX_ERROR(KrisLibrary::logger(),"Terrain file doesn't contain the right number of friction values\n");
 	return false;
       }
     }
@@ -57,7 +59,7 @@ bool Terrain::Load(const char* fn)
   }
   else {
     if(!LoadGeometry(fn)) return false;
-    //printf("Terrain %s: Setting uniform friction 0.5\n",fn);
+    //LOG4CXX_INFO(KrisLibrary::logger(),"Terrain "<<fn);
     SetUniformFriction(0.5);
     return true;
   }

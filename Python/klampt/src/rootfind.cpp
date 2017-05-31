@@ -1,3 +1,5 @@
+#include <log4cxx/logger.h>
+#include <KrisLibrary/Logger.h>
 #include <KrisLibrary/math/function.h>
 #include <KrisLibrary/optimization/Newton.h>
 #include <KrisLibrary/math/root.h>
@@ -157,10 +159,10 @@ PyObject* findRootsBounded(PyObject* startVals, PyObject* boundVals, int iter) {
 	  Py_DECREF(elem2);
 	  Py_DECREF(tup);
 	}
-	//cout<<"Parsed bounds:"<<endl;
-	//cout<<root->bmin<<endl;
-	//cout<<root->bmax<<endl;
-	//getchar();
+	//LOG4CXX_INFO(KrisLibrary::logger(),"Parsed bounds:"<<"\n");
+	//LOG4CXX_INFO(KrisLibrary::logger(),root->bmin<<"\n");
+	//LOG4CXX_INFO(KrisLibrary::logger(),root->bmax<<"\n");
+	//if(KrisLibrary::logger()->isEnabledFor(log4cxx::Level::ERROR_INT)) getchar();
 	return findRoots(startVals, iter);
 }
 

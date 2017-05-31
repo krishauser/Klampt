@@ -1,3 +1,5 @@
+#include <log4cxx/logger.h>
+#include <KrisLibrary/Logger.h>
 #include "motorcalibrate.h"
 #include "Modeling/Resources.h"
 #include "Modeling/Robot.h"
@@ -33,8 +35,8 @@ void SimulateDOF(Real minv,Real d,Real k,Real c,
 {
   xT=x0;
   dxT=dx0;
-  //printf("desired (%g,%g)\n",xDes,dxDes);
-  //printf("(%g,%g) ",xT,dxT);
+  //LOG4CXX_INFO(KrisLibrary::logger(),"desired ("<<xDes<<","<<dxDes);
+  //LOG4CXX_INFO(KrisLibrary::logger(),"("<<xT<<","<<dxT);
   Real t=0;
   while(t < T) {
     //in absence of frictional forces, this is the acceleration
@@ -60,15 +62,15 @@ void SimulateDOF(Real minv,Real d,Real k,Real c,
     if(t + timestep > T) {
       xT += dxT*dt + 0.5*ddx*Sqr(dt);
       dxT += ddx*dt;
-      //printf("(%g,%g) ",xT,dxT);
-      //printf("\n");
-      //getchar();
+      //LOG4CXX_INFO(KrisLibrary::logger(),"("<<xT<<","<<dxT);
+      //LOG4CXX_INFO(KrisLibrary::logger(),"\n");
+      //if(KrisLibrary::logger()->isEnabledFor(log4cxx::Level::ERROR_INT)) getchar();
       return;
     }
     xT += dxT*dt + 0.5*ddx*Sqr(dt);
     dxT += ddx*dt;
     t += dt;
-    //printf("(%g,%g) ",xT,dxT);
+    //LOG4CXX_INFO(KrisLibrary::logger(),"("<<xT<<","<<dxT);
   }
 }
 
@@ -162,7 +164,7 @@ public:
     Vector fout;
     Real I=0;
     for(size_t i=0;i<fs.size();i++) {
-      //printf("Result %g,%g\n",x1s[i],dx1s[i]);
+      //LOG4CXX_INFO(KrisLibrary::logger(),"Result "<<x1s[i]<<","<<dx1s[i]);
       if(i > 0) {
 	if(x0s[i] == x1s[i-1]) {
 	  //continuity
@@ -195,10 +197,10 @@ public:
     GradientCenteredDifference(*this,temp,h,grad);
     for(int i=0;i<grad.n;i++)
       if(!IsFinite(grad[i])) {
-	printf("Warning, instability at parameter %d = %g\n",i,params(i));
+	LOG4CXX_WARN(KrisLibrary::logger(),"Warning, instability at parameter "<<i<<" = "<<params(i));
 	grad[i] = 0;
       }
-    //cout<<"Parameter gradient"<<grad<<endl;
+    //LOG4CXX_INFO(KrisLibrary::logger(),"Parameter gradient"<<grad<<"\n");
   }
 };
 
@@ -233,21 +235,21 @@ dts,torquemin,torquemax);
   minProblem.x(3) = dryFriction;
   minProblem.x(4) = viscousFriction;
   Real fx = f(minProblem.x);
-  cout<<"Initial RMSE "<<fx<<endl;
+  LOG4CXX_INFO(KrisLibrary::logger(),"Initial RMSE "<<fx<<"\n");
   bool paused = false;
   if(!IsFinite(fx) || fx > 1e2) {
-    cout<<"Initial instability? "<<endl;
-    printf("%g, %g: x'' = %g*(PID(%g,%g) - %g*x' + %g*x + %g)\n",x0s[0],dx0s[0],minvs[0],xDes[0],dxDes[0],ds[0],ks[0],cs[0]);
+    LOG4CXX_INFO(KrisLibrary::logger(),"Initial instability? "<<"\n");
+    LOG4CXX_INFO(KrisLibrary::logger(),""<<x0s[0]<<", "<<dx0s[0]<<": x'' = "<<minvs[0]<<"*(PID("<<xDes[0]<<","<<dxDes[0]<<") - "<<ds[0]<<"*x' + "<<ks[0]<<"*x + "<<cs[0]);
     Vector res;
     for(size_t i=0;i<f.fs.size();i++) { 
       (*f.fs[i])(minProblem.x,res);
-      printf("%g, %g: x'' = %g*(PID(%g,%g) - %g*x' + %g*x + %g)\n",res[0],res[1],minvs[i],xDes[i],dxDes[i],ds[i],ks[i],cs[i]);
-      if(gErrorGetchar && (i+1)%100 == 0) getchar();
+      LOG4CXX_INFO(KrisLibrary::logger(),""<<res[0]<<", "<<res[1]<<": x'' = "<<minvs[i]<<"*(PID("<<xDes[i]<<","<<dxDes[i]<<") - "<<ds[i]<<"*x' + "<<ks[i]<<"*x + "<<cs[i]);
+      if(gErrorGetchar && (i+1)%100 == 0) if(KrisLibrary::logger()->isEnabledFor(log4cxx::Level::ERROR_INT)) getchar();
       if(!IsFinite(res[0]) || !IsFinite(res[1]) || Abs(res[1]) > 1e2) {
-	printf("Large error on step %d, this may require tuning initial parameters\n",i);
-	if(gErrorGetchar) {
-	  printf("Press enter to continue\n");
-	  getchar();
+	LOG4CXX_ERROR(KrisLibrary::logger(),"Large error on step "<< i<<", this may require tuning initial parameters\n");
+  if(gErrorGetchar) {
+	  LOG4CXX_INFO(KrisLibrary::logger(),"Press enter to continue\n");
+	  if(KrisLibrary::logger()->isEnabledFor(log4cxx::Level::ERROR_INT)) getchar();
 	  paused = true;
 	}
 	break;
@@ -257,10 +259,10 @@ dts,torquemin,torquemax);
   int maxIters = numIters;
   ConvergenceResult res = minProblem.SolveSD(maxIters);
   fx=f(minProblem.x);
-  cout<<"SD result: "<<res<<" after "<<maxIters<<" iters, RMSE "<<fx<<endl;
+  LOG4CXX_INFO(KrisLibrary::logger(),"SD result: "<<res<<" after "<<maxIters<<" iters, RMSE "<<fx<<"\n");
   if(paused) {
-    printf("Press enter to continue\n");
-    getchar();
+    LOG4CXX_INFO(KrisLibrary::logger(),"Press enter to continue\n");
+    if(KrisLibrary::logger()->isEnabledFor(log4cxx::Level::ERROR_INT)) getchar();
   }
   kP = minProblem.x(0);
   kI = minProblem.x(1);
@@ -295,7 +297,7 @@ Real GOptimizeDof(const vector<Real>& minvs,const vector<Real>& ds,const vector<
       params(i) = Rand(0,bound[i]);
     Real f = OptimizeDof(minvs,ds,ks,cs,x0s,dx0s,x1s,dx1s,xDes,dxDes,dts,torquemin,torquemax,params[0],params[1],params[2],params[3],params[4],numIters);
     if(f < f0) {
-      cout<<"Got a better solution with a hop, RMSE "<<f<<endl;
+      LOG4CXX_INFO(KrisLibrary::logger(),"Got a better solution with a hop, RMSE "<<f<<"\n");
       best = params;
       bound = params*2.0;
       for(int i=0;i<params.n;i++) 
@@ -352,8 +354,8 @@ void LinearizeRobot(Robot& robot,const vector<int>& fixedLinks,
     Vector zero(robot.links.size(),Zero);
     res=ConstrainedCalcTorque(robot,fixedLinks,fixedDofs,zero,tsteady);
     if(!res) {
-      cout<<"Warning, unable to solve for constrained torques"<<endl;
-      cout<<"   Calculating free-floating torques instead, may be erroneous..."<<endl;
+      LOG4CXX_WARN(KrisLibrary::logger(),"Warning, unable to solve for constrained torques"<<"\n");
+      LOG4CXX_INFO(KrisLibrary::logger(),"   Calculating free-floating torques instead, may be erroneous..."<<"\n");
       NewtonEulerSolver ne(robot);
       ne.SetGravityWrenches(gGravity);
       ne.CalcResidualTorques(tsteady);
@@ -375,27 +377,27 @@ void LinearizeRobot(Robot& robot,const vector<int>& fixedLinks,
       c(i) /= minv(i);
     }
     else {
-      fprintf(stderr,"Invalid mass matrix inverse, entry %d: %g\n",i,minv(i));
-      fprintf(stderr,"Most likely reason is an invalid setting for the fixed links\n");
+            LOG4CXX_ERROR(KrisLibrary::logger(),"Invalid mass matrix inverse, entry "<<i<<": "<<minv(i));
+            LOG4CXX_ERROR(KrisLibrary::logger(),"Most likely reason is an invalid setting for the fixed links\n");
       //if(gErrorGetchar) {
-      //printf("Press enter to continue\n");
-      //getchar();
+      //LOG4CXX_INFO(KrisLibrary::logger(),"Press enter to continue\n");
+      //if(KrisLibrary::logger()->isEnabledFor(log4cxx::Level::ERROR_INT)) getchar();
       //}
-      fprintf(stderr,"Aborting...\n");
+            LOG4CXX_ERROR(KrisLibrary::logger(),"Aborting...\n");
       Abort();
     }
     if(robot.joints[i].type == RobotJoint::Weld) 
       c(i) = 0;
   }
   if(c.maxAbsElement() > 1000) {
-    fprintf(stderr,"Warning, very high torques?\n");
-    cout<<c<<endl;
-    cout<<"Steady state torques: "<<tsteady<<endl;
-    cout<<"Linearized offset vector: "<<b<<endl;
-    cout<<"Mass matrix inverse diag"<<minv<<endl;
+        LOG4CXX_ERROR(KrisLibrary::logger(),"Warning, very high torques?\n");
+    LOG4CXX_INFO(KrisLibrary::logger(),c<<"\n");
+    LOG4CXX_INFO(KrisLibrary::logger(),"Steady state torques: "<<tsteady<<"\n");
+    LOG4CXX_INFO(KrisLibrary::logger(),"Linearized offset vector: "<<b<<"\n");
+    LOG4CXX_INFO(KrisLibrary::logger(),"Mass matrix inverse diag"<<minv<<"\n");
     if(gErrorGetchar) {
-      printf("Press enter to continue\n");
-      getchar();
+      LOG4CXX_INFO(KrisLibrary::logger(),"Press enter to continue\n");
+      if(KrisLibrary::logger()->isEnabledFor(log4cxx::Level::ERROR_INT)) getchar();
     }
   }
 }
@@ -418,7 +420,7 @@ struct MotorCalibrationProblem
 
 void RunCalibrationInd(MotorCalibrationProblem& problem,int numIters)
 {
-  printf("Beginning calibration...\n");
+  LOG4CXX_INFO(KrisLibrary::logger(),"Beginning calibration...\n");
   vector<Real> dts;
   vector<vector<Real> > minvs,ds,ks,cs,x0s,dx0s,x1s,dx1s,xcmds,dxcmds;
   size_t ndof = problem.robot->links.size();
@@ -453,7 +455,7 @@ void RunCalibrationInd(MotorCalibrationProblem& problem,int numIters)
     }
     dts.resize(istart+n);
     pathIndex.push_back(int(istart+n));
-    printf("Linearizing trial %d\n",trial);
+    LOG4CXX_INFO(KrisLibrary::logger(),"Linearizing trial "<<trial);
     timer.Reset();
     for(size_t i=0;i<n;i++) {
       problem.robot->UpdateConfig(problem.sensedQ[trial].milestones[i]);
@@ -461,11 +463,11 @@ void RunCalibrationInd(MotorCalibrationProblem& problem,int numIters)
       LinearizeRobot(*problem.robot,problem.fixedLinks,
 		     minv,d,k,c);
       /*
-      cout<<"Constrained mass matrix inv"<<endl;
+      LOG4CXX_INFO(KrisLibrary::logger(),"Constrained mass matrix inv"<<"\n");
       for(int j=0;j<minv.n;j++) {
-	cout<<"  "<<problem.robot->linkNames[j]<<": "<<minv(j)<<endl;
+	LOG4CXX_INFO(KrisLibrary::logger(),"  "<<problem.robot->linkNames[j]<<": "<<minv(j)<<"\n");
       }
-      getchar();
+      if(KrisLibrary::logger()->isEnabledFor(log4cxx::Level::ERROR_INT)) getchar();
       */
       dts[istart+i] = problem.sensedQ[trial].times[i+1]-problem.sensedQ[trial].times[i];
       for(int j=0;j<minv.n;j++) {
@@ -481,12 +483,12 @@ void RunCalibrationInd(MotorCalibrationProblem& problem,int numIters)
 	dxcmds[j][istart+i] = problem.commandedV[trial].milestones[i][j];
       }
     }
-    printf("Time: %g, time per milestone: %g\n",timer.ElapsedTime(),timer.ElapsedTime()/n);
+    LOG4CXX_INFO(KrisLibrary::logger(),"Time: "<<timer.ElapsedTime()<<", time per milestone: "<<timer.ElapsedTime()/n);
   }
 
   //save debug info to disk
   if(problem.saveInfo) {
-    cout<<"Saving data to motorcalibrate.csv"<<endl;
+    LOG4CXX_INFO(KrisLibrary::logger(),"Saving data to motorcalibrate.csv"<<"\n");
     ofstream out("motorcalibrate.csv",ios::out);
     out<<"dt,";
     for(size_t k=0;k<problem.estimateDrivers.size();k++) {
@@ -545,7 +547,7 @@ void RunCalibrationInd(MotorCalibrationProblem& problem,int numIters)
       }
       stringstream ss;
       ss<<"motorcalibrate_before_"<<trial<<".path";
-      cout<<"Saving pre-calibration path to "<<ss.str()<<endl;
+      LOG4CXX_INFO(KrisLibrary::logger(),"Saving pre-calibration path to "<<ss.str()<<"\n");
       path.Save(ss.str().c_str());
     }
   }
@@ -562,22 +564,22 @@ void RunCalibrationInd(MotorCalibrationProblem& problem,int numIters)
     Real& kD = problem.robot->drivers[d].servoD;
     Real& dryFriction = problem.robot->drivers[d].dryFriction;
     Real& viscousFriction = problem.robot->drivers[d].viscousFriction;
-    printf("Driver %d, link %d (%s)\n",d,j,problem.robot->linkNames[j].c_str());
-    printf("Initial kP: %g, kI: %g, kD: %g\n",kP,kI,kD);
-    printf("Initial dry friction: %g, viscous friction: %g\n",dryFriction,viscousFriction);
+    LOG4CXX_INFO(KrisLibrary::logger(),"Driver "<<d<<", link "<<j<<" ("<<problem.robot->linkNames[j].c_str());
+    LOG4CXX_INFO(KrisLibrary::logger(),"Initial kP: "<<kP<<", kI: "<<kI<<", kD: "<<kD);
+    LOG4CXX_INFO(KrisLibrary::logger(),"Initial dry friction: "<<dryFriction<<", viscous friction: "<<viscousFriction);
     timer.Reset();
     Real res = GOptimizeDof(minvs[j],ds[j],ks[j],cs[j],
 		x0s[j],dx0s[j],x1s[j],dx1s[j],xcmds[j],dxcmds[j],
 		dts,problem.robot->drivers[d].tmin,problem.robot->drivers[d].tmax,
 		kP,kI,kD,dryFriction,viscousFriction,numIters);   
-    printf("Optimized kP: %g, kI: %g, kD: %g\n",kP,kI,kD);
-    printf("Optimized dry friction: %g, viscous friction: %g\n",dryFriction,viscousFriction);
-    printf("Optimized RMSD: %g\n",res);
-    printf("Time %g\n",timer.ElapsedTime());
-    printf("\n");
+    LOG4CXX_INFO(KrisLibrary::logger(),"Optimized kP: "<<kP<<", kI: "<<kI<<", kD: "<<kD);
+    LOG4CXX_INFO(KrisLibrary::logger(),"Optimized dry friction: "<<dryFriction<<", viscous friction: "<<viscousFriction);
+    LOG4CXX_INFO(KrisLibrary::logger(),"Optimized RMSD: "<<res);
+    LOG4CXX_INFO(KrisLibrary::logger(),"Time "<<timer.ElapsedTime());
+    LOG4CXX_INFO(KrisLibrary::logger(),"\n");
     rmsds[k]=res;
     if(gStepGetchar) {
-      getchar();
+      if(KrisLibrary::logger()->isEnabledFor(log4cxx::Level::ERROR_INT)) getchar();
     }
   }
 
@@ -620,22 +622,22 @@ void RunCalibrationInd(MotorCalibrationProblem& problem,int numIters)
       }
       stringstream ss;
       ss<<"motorcalibrate_after_"<<trial<<".path";
-      cout<<"Saving post-calibration path to "<<ss.str()<<endl;
+      LOG4CXX_INFO(KrisLibrary::logger(),"Saving post-calibration path to "<<ss.str()<<"\n");
       path.Save(ss.str().c_str());
     }
   }
 
-  printf("Final RMSDs:\n");
+  LOG4CXX_INFO(KrisLibrary::logger(),"Final RMSDs:\n");
   for(size_t k=0;k<problem.estimateDrivers.size();k++) {
 	int d = problem.estimateDrivers[k];
 	int j = problem.robot->drivers[d].linkIndices[0];
-    printf("driver %d (%s),",d,problem.robot->linkNames[j].c_str());
+    LOG4CXX_INFO(KrisLibrary::logger(),"driver "<<d<<" ("<<problem.robot->linkNames[j].c_str()<<",");  
   }
-  printf("\n");
+  LOG4CXX_INFO(KrisLibrary::logger(),"\n");
   for(size_t k=0;k<problem.estimateDrivers.size();k++) {
-    printf("%g,",rmsds[k]);
+    LOG4CXX_INFO(KrisLibrary::logger(), rmsds[k]<<",");
   }
-  printf("\n");
+  LOG4CXX_INFO(KrisLibrary::logger(),"\n");
 }
 
 
@@ -842,7 +844,7 @@ void test()
 {
   Robot robot;
   if(!robot.Load("data/free_cube.rob")) {
-    fprintf(stderr,"Failed to load robot\n");
+        LOG4CXX_ERROR(KrisLibrary::logger(),"Failed to load robot\n");
     return;
   }
   vector<int> fixedLinks(1,6),fixedDofs;
@@ -868,7 +870,7 @@ string motorcalibrate(AnyCollection settings){
 
   Robot robot;
   if(!robot.Load(robotfn.c_str())) {
-    fprintf(stderr,"Failed to load robot\n");
+        LOG4CXX_ERROR(KrisLibrary::logger(),"Failed to load robot\n");
     return NULL;
   }
 
@@ -884,7 +886,7 @@ string motorcalibrate(AnyCollection settings){
   if(fixedLinks.empty()) {
     for(size_t i=0;i<robot.joints.size();i++)
       if(robot.joints[i].type == RobotJoint::Floating || robot.joints[i].type == RobotJoint::FloatingPlanar)
-	printf("Warning, fixed links are empty, and this is not a fixed-base robot?\n");
+	LOG4CXX_WARN(KrisLibrary::logger(),"Warning, fixed links are empty, and this is not a fixed-base robot?\n");
   }
   if(drivers.empty()) {
     problem.estimateDrivers.resize(robot.drivers.size());
@@ -898,11 +900,11 @@ string motorcalibrate(AnyCollection settings){
   problem.sensedQ.resize(commandedPaths.size());
   for(size_t i=0;i<commandedPaths.size();i++) {
     if(!problem.commandedQ[i].Load(commandedPaths[i].c_str())) {
-      fprintf(stderr,"Failed to load path %s\n",commandedPaths[i].c_str());
+            LOG4CXX_ERROR(KrisLibrary::logger(),"Failed to load path "<<commandedPaths[i].c_str());
       return NULL;
     }
     if(!problem.sensedQ[i].Load(sensedPaths[i].c_str())) {
-      fprintf(stderr,"Failed to load path %s\n",sensedPaths[i].c_str());
+            LOG4CXX_ERROR(KrisLibrary::logger(),"Failed to load path "<<sensedPaths[i].c_str());
       return NULL;
     }
     if((int)problem.commandedQ[i].times.size() > gMaxMilestones) {
@@ -961,9 +963,9 @@ string motorcalibrate(AnyCollection settings){
       ret_stream<<robot.drivers[i].viscousFriction<<" ";
   }
   string output=ret_stream.str();
-  cout<<endl;
-  cout<<"Copy the following lines into your robot file:"<<endl;
-  cout<<output<<endl;
+  LOG4CXX_INFO(KrisLibrary::logger(),"\n");
+  LOG4CXX_INFO(KrisLibrary::logger(),"Copy the following lines into your robot file:"<<"\n");
+  LOG4CXX_INFO(KrisLibrary::logger(),output<<"\n");
   return output;
 }
 
@@ -982,8 +984,8 @@ int main_shell(int argc,char** argv)
   settings["commandedPaths"]=vector<string>();
   settings["sensedPaths"]=vector<string>();
   if(argc <= 1) {
-    printf("Usage: MotorCalibrate settings_file\n");
-    printf("Writing default settings to motorcalibrate_default.settings");
+    LOG4CXX_INFO(KrisLibrary::logger(),"Usage: MotorCalibrate settings_file\n");
+    LOG4CXX_INFO(KrisLibrary::logger(),"Writing default settings to motorcalibrate_default.settings");
     settings.write("motorcalibrate_default.settings");
     return 0;
   }

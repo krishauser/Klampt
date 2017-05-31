@@ -1,3 +1,5 @@
+#include <log4cxx/logger.h>
+#include <KrisLibrary/Logger.h>
 #include "InputProcessor.h"
 #include <KrisLibrary/GLdraw/GL.h>
 #include <KrisLibrary/GLdraw/drawextra.h>
@@ -234,14 +236,14 @@ void SerializedObjectiveProcessor::Activate(bool enabled)
     if(enabled) {
       bool res=reader->Start();
       if(!res) {
-	fprintf(stderr,"SerializedObjectiveProcessor: Reader thread could not start\n");
-	fprintf(stderr,"Waiting and retrying at 1s intervals...\n");
+		LOG4CXX_ERROR(KrisLibrary::logger(),"SerializedObjectiveProcessor: Reader thread could not start\n");
+		LOG4CXX_ERROR(KrisLibrary::logger(),"Waiting and retrying at 1s intervals...\n");
 	while(!res) {
 	  ThreadSleep(1);
 	  res = reader->Start();
-	  fprintf(stderr,"...\n");
+	  	  LOG4CXX_ERROR(KrisLibrary::logger(),"...\n");
 	}
-	fprintf(stderr,"Done!\n");
+		LOG4CXX_ERROR(KrisLibrary::logger(),"Done!\n");
       }
     }
     else {
@@ -262,7 +264,7 @@ PlannerObjectiveBase* SerializedObjectiveProcessor::MakeObjective(Robot* robot)
 {
   if(!reader) return NULL;
   string payload = reader->Newest();
-  //cout<<"SerializedObjectiveProcessor: Got a message: "<<payload<<endl;
+  //LOG4CXX_INFO(KrisLibrary::logger(),"SerializedObjectiveProcessor: Got a message: "<<payload<<"\n");
   if(payload.length()==0) return NULL;
   stringstream ss(payload);
   return LoadPlannerObjective(ss,robot);

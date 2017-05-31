@@ -1,3 +1,5 @@
+#include <log4cxx/logger.h>
+#include <KrisLibrary/Logger.h>
 #include "NumericalConstraint.h"
 #include <KrisLibrary/math/differentiation.h>
 
@@ -151,12 +153,12 @@ void CollisionConstraint::Eval(const Vector& x, Vector& v)
 	for(size_t i=0;i<robot.links.size();i++)
 		v(i) = Eval_i(x,i);
 
-//	cout << "values:" << endl;
+//	LOG4CXX_INFO(KrisLibrary::logger(), "values:" << "\n");
 //	for( int i = 0; i < v.size(); i++)
 //	{
-//		cout << i << "\t" << v[i] << endl;
+//		LOG4CXX_INFO(KrisLibrary::logger(), i << "\t" << v[i] << "\n");
 //	}
-//	getchar();
+//	if(KrisLibrary::logger()->isEnabledFor(log4cxx::Level::ERROR_INT)) getchar();
 	return;
 }
 
@@ -226,18 +228,18 @@ void CollisionConstraint::Jacobian_i(const Vector& x,int i,Vector& Ji_active)
 				Ji(j) = dot(dir,dv);
 		}
 	}
-//	cout << "Ji ********************* :" << endl;
-//	cout << Ji << endl;
-//	cout << "direction:" << dir << endl;
+//	LOG4CXX_INFO(KrisLibrary::logger(), "Ji ********************* :" << "\n");
+//	LOG4CXX_INFO(KrisLibrary::logger(), Ji << "\n");
+//	LOG4CXX_INFO(KrisLibrary::logger(), "direction:" << dir << "\n");
 	/*
 	Config q; readConfig("q_inCollision.txt", q);
 	Config q_pushout = q + Ji;
 	logConfig("q_pushout.txt", q_pushout);
 	*/
-//	getchar();
+//	if(KrisLibrary::logger()->isEnabledFor(log4cxx::Level::ERROR_INT)) getchar();
 	for( int i = 0; i < this->activeDofs.Size(); i++)
 	{
-//		cout << "mapping " << i << ":" << this->activeDofs.mapping[i] << endl;
+//		LOG4CXX_INFO(KrisLibrary::logger(), "mapping " << i << ":" << this->activeDofs.mapping[i] << "\n");
 		Ji_active[i] = Ji[ this->activeDofs.mapping[i]];
 	}
 //	exit(-1);

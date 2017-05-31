@@ -1,3 +1,5 @@
+#include <log4cxx/logger.h>
+#include <KrisLibrary/Logger.h>
 #include "ContactController.h"
 #include "ForceSensors.h"
 #include "Modeling/Interpolate.h"
@@ -88,7 +90,7 @@ void ContactJointTrackingController::SetFlatContactEstimate(Real kFriction,Real 
   Config qdes(robot.links.size()),dqdes(robot.links.size());
   base->GetDesiredState(qdes,dqdes);
   robot.UpdateConfig(qdes);
-  cout<<"Desired: "<<qdes<<endl;
+  LOG4CXX_INFO(KrisLibrary::logger(),"Desired: "<<qdes<<"\n");
   */
   ContactFormation contacts;
   GetFlatContacts(robot,tol,contacts);
@@ -141,11 +143,11 @@ void ContactJointTrackingController::Update(Real dt)
   DesiredToAccel(dt,qdes,dqdes,opSpaceController.jointTasks[0].ddqdes);
 
   opSpaceController.stateEstimator->UpdateModel();
-  cout<<"Current q: "<<robot.q<<endl;
-  cout<<"Current dq: "<<robot.dq<<endl;
-  cout<<"Desired q: "<<qdes<<endl;
-  cout<<"Desired q': "<<dqdes<<endl;
-  cout<<"Desired q'': "<<opSpaceController.jointTasks[0].ddqdes<<endl;
+  LOG4CXX_INFO(KrisLibrary::logger(),"Current q: "<<robot.q<<"\n");
+  LOG4CXX_INFO(KrisLibrary::logger(),"Current dq: "<<robot.dq<<"\n");
+  LOG4CXX_INFO(KrisLibrary::logger(),"Desired q: "<<qdes<<"\n");
+  LOG4CXX_INFO(KrisLibrary::logger(),"Desired q': "<<dqdes<<"\n");
+  LOG4CXX_INFO(KrisLibrary::logger(),"Desired q'': "<<opSpaceController.jointTasks[0].ddqdes<<"\n");
   /*
   //HACK: set estimated translational velocity to zero
   robot.dq(0) = robot.dq(1) = robot.dq(2) = 0;
@@ -168,7 +170,7 @@ void ContactJointTrackingController::Update(Real dt)
     else {
       robot.q = qdes;
       robot.dq = dqdes;
-      //printf("Desired affine driver value %g, vel %g\n",robot.GetDriverValue(i),robot.GetDriverVelocity(i));
+      //LOG4CXX_INFO(KrisLibrary::logger(),"Desired affine driver value "<<robot.GetDriverValue(i)<<", vel "<<robot.GetDriverVelocity(i));
       command->actuators[i].SetPID(robot.GetDriverValue(i),robot.GetDriverVelocity(i),command->actuators[i].iterm);
     }
     command->actuators[i].torque = feedforwardTorque;

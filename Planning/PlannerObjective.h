@@ -1,6 +1,8 @@
 #ifndef PLANNER_OBJECTIVES_H
 #define PLANNER_OBJECTIVES_H
 
+#include <log4cxx/logger.h>
+#include <KrisLibrary/Logger.h>
 #include "Modeling/Robot.h"
 #include "Modeling/ParabolicRamp.h"
 #include "Modeling/DynamicPath.h"

@@ -1,3 +1,5 @@
+#include <log4cxx/logger.h>
+#include <KrisLibrary/Logger.h>
 #include "Modeling/Resources.h"
 #include <KrisLibrary/utils/stringutils.h>
 #include <fstream>
@@ -70,10 +72,10 @@ bool Unpack(const char* fn,const char* path=NULL)
   ResourcePtr r = lib.LoadItem(fn);
   if(!r) return false;
   if(unpackTypes.find(r->Type()) == unpackTypes.end()) {
-    printf("Type %s is not a compound type\n",r->Type());
+    LOG4CXX_INFO(KrisLibrary::logger(),"Type "<<r->Type());
     return false;
   }
-  cout<<"Resource of type "<<r->Type()<<endl;
+  LOG4CXX_INFO(KrisLibrary::logger(),"Resource of type "<<r->Type()<<"\n");
   vector<string> s = unpackTypes[r->Type()];
   if(0==strcmp(r->Type(),"MultiPath")) {
     //conditional unpack -- if untimed, unpack sections as Configs.  If timed,
@@ -103,9 +105,9 @@ bool Unpack(const char* fn,const char* path=NULL)
 	GetFilePath(fn,path);
 	res[j]->fileName = string(path) + res[j]->fileName;
       }
-      cout<<"Extracted item "<<res[j]->name<<", saving to "<<res[j]->fileName<<endl;
+      LOG4CXX_INFO(KrisLibrary::logger(),"Extracted item "<<res[j]->name<<", saving to "<<res[j]->fileName<<"\n");
       if(!res[j]->Save()) {
-	printf("Could not save %s to %s\n",res[j]->name.c_str(),res[j]->fileName.c_str());
+	LOG4CXX_INFO(KrisLibrary::logger(),"Could not save "<<res[j]->name.c_str()<<" to "<<res[j]->fileName.c_str());
 	return false;
       }
     }
@@ -148,9 +150,9 @@ string AutoTypePack(ResourceLibrary& lib)
     return bestCandidates[0];
 
   //otherwise, have an opportunity for multiple candidates
-  cout<<"Ambiguous pack, items can be composed into types:"<<endl;
+  LOG4CXX_INFO(KrisLibrary::logger(),"Ambiguous pack, items can be composed into types:"<<"\n");
   for(size_t i=0;i<bestCandidates.size();i++)
-    cout<<bestCandidates[i]<<endl;
+    LOG4CXX_INFO(KrisLibrary::logger(),bestCandidates[i]<<"\n");
   return "";
 }
 
@@ -160,7 +162,7 @@ bool Pack(ResourceLibrary& lib,const char* outname,const char* outtype="auto")
   if(strcmp(outtype,"auto")==0) {
     type = AutoTypePack(lib);
     if(type == "") return false;
-    cout<<"Auto-detected type: "<<type<<endl;
+    LOG4CXX_INFO(KrisLibrary::logger(),"Auto-detected type: "<<type<<"\n");
   }
   ResourcePtr r;
   if(type=="xml") {
@@ -170,26 +172,26 @@ bool Pack(ResourceLibrary& lib,const char* outname,const char* outtype="auto")
     string errorMessage;
     r = PackResources(lib,type,&errorMessage);
     if(!r) {
-      printf("Unable to pack type %s\n",type.c_str());
-      printf("  Error message: %s\n",errorMessage.c_str());
+      LOG4CXX_INFO(KrisLibrary::logger(),"Unable to pack type "<<type.c_str());
+      LOG4CXX_ERROR(KrisLibrary::logger(),"  Error message: "<<errorMessage.c_str());
       return false;
     }
   }
 
   r->name = outname;
   r->fileName = lib.DefaultFileName(r);
-  cout<<"Saving to "<<r->fileName<<endl;
+  LOG4CXX_INFO(KrisLibrary::logger(),"Saving to "<<r->fileName<<"\n");
   return r->Save();
 }
 
 int main(int argc,const char** argv)
 {
   if(argc <= 1) {
-    printf("Usage: Pack [options] {files_and_directories}\n");
-    printf("Options: \n");
-    printf(" -u: Unpack one or more files\n");
-    printf(" -o name: Specify output name (default out)\n");
-    printf(" -t type: Specify output type (default auto)\n");
+    LOG4CXX_INFO(KrisLibrary::logger(),"Usage: Pack [options] {files_and_directories}\n");
+    LOG4CXX_INFO(KrisLibrary::logger(),"Options: \n");
+    LOG4CXX_INFO(KrisLibrary::logger()," -u: Unpack one or more files\n");
+    LOG4CXX_INFO(KrisLibrary::logger()," -o name: Specify output name (default out)\n");
+    LOG4CXX_INFO(KrisLibrary::logger()," -t type: Specify output type (default auto)\n");
     return 0;
   }
   bool unpack = false;
@@ -210,7 +212,7 @@ int main(int argc,const char** argv)
 	i++;
       }
       else {
-	printf("Unknown option %s",argv[i]);
+	LOG4CXX_INFO(KrisLibrary::logger(),"Unknown option "<<argv[i]);
 	return 1;
       }
     }
@@ -219,7 +221,7 @@ int main(int argc,const char** argv)
     }
   }
   if(argc - i == 0) {
-    printf("No files specified on command line\n");
+    LOG4CXX_INFO(KrisLibrary::logger(),"No files specified on command line\n");
     return 1;
   }
 
@@ -237,7 +239,7 @@ int main(int argc,const char** argv)
       const char* ext = FileExtension(argv[i]);
       if(ext!=NULL && 0==strcmp(ext,"xml")) {
 	if(!lib.LoadXml(argv[i])) {
-	  printf("Error loading from XML file %s\n",argv[i]);
+	  LOG4CXX_ERROR(KrisLibrary::logger(),"Error loading from XML file "<<argv[i]);
 	  return 1;
 	}
 	if(outname == NULL) {
@@ -248,7 +250,7 @@ int main(int argc,const char** argv)
       }
       else {
 	if(!lib.LoadAll(argv[i])) {
-	  printf("Error loading from directory %s\n",argv[i]);
+	  LOG4CXX_ERROR(KrisLibrary::logger(),"Error loading from directory "<<argv[i]);
 	  return 1;
 	}
 	if(outname == NULL) {
@@ -263,7 +265,7 @@ int main(int argc,const char** argv)
     else {
       for(;i<argc;i++) {
 	if(!lib.LoadItem(argv[i])) {
-	  printf("Error loading file %s\n",argv[i]);
+	  LOG4CXX_ERROR(KrisLibrary::logger(),"Error loading file "<<argv[i]);
 	  return 1;
 	}
       }

@@ -1,6 +1,8 @@
 #ifndef _GEOMETRY_H
 #define _GEOMETRY_H
 
+#include <log4cxx/logger.h>
+#include <KrisLibrary/Logger.h>
 #include <vector>
 #include <map>
 

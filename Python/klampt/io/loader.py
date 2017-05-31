@@ -133,7 +133,7 @@ def readContactPoint(text):
 
 def writeContactPoint(cp):
     """Writes a contact point to a string 'x1 x2 x3 n1 n2 n3 kFriction'"""
-    return ' '.join([str(v) for v in list(cp.x)+list(cp.n)+[cp.kFriction]]) 
+    return ' '.join([str(v) for v in cp.x+cp.n+[cp.kFriction]]) 
     
 def readIKObjective(text):
     """Reads an IKObjective from a string in the Klamp't native format
@@ -295,7 +295,7 @@ def readHold(text):
         if rotWorld==None:
             h.ikConstraint.setFixedPoint(h.link,posLocal,posWorld)
         elif rotAxis==None:
-            R = so3.from_moment(rotWorld)
+            R = momentToMatrix(rotWorld)
             t = vectorops.sub(posWorld,so3.apply(R,posLocal))
             h.ikConstraint.setFixedTransform(h.link,R,t)
         else:

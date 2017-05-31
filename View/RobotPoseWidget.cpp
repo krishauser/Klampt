@@ -1,10 +1,11 @@
+#include <log4cxx/logger.h>
+#include <KrisLibrary/Logger.h>
 #include "RobotPoseWidget.h"
 #include <KrisLibrary/math/angle.h>
 #include <KrisLibrary/math3d/basis.h>
 #include <KrisLibrary/GLdraw/drawextra.h>
 #include <KrisLibrary/robotics/IKFunctions.h>
 #include "Planning/RobotCSpace.h"
-#include <KrisLibrary/Timer.h>
 #include <map>
 using namespace GLDraw;
 
@@ -16,19 +17,18 @@ Real RobustSolveIK(Robot& robot,RobotIKFunction& f,int iters,Real tol,int numRes
   bool res = solver.Solve(tol,iters);
   if(!res && numRestarts) {
     //attempt to do random restarts
-    Timer timer;
     Config qbest = robot.q;
     Vector residual(f.NumDimensions());
     f(solver.solver.x,residual);
     Real residNorm = residual.normSquared();
-    for(int restart=0;restart<numRestarts;restart++) {
+    for(int i=0;i<numRestarts;i++) {
       //random restarts
       Config qorig = robot.q;
       RobotCSpace space(robot);
       space.Sample(robot.q);
       swap(robot.q,qorig);
-      for(size_t j=0;j<f.activeDofs.mapping.size();j++)
-        robot.q(f.activeDofs.mapping[j]) = qorig(f.activeDofs.mapping[j]);
+      for(size_t i=0;i<f.activeDofs.mapping.size();i++)
+        robot.q(f.activeDofs.mapping[i]) = qorig(f.activeDofs.mapping[i]);
       if(solver.Solve(tol,iters)) {
         qbest = robot.q;
         return 0;
@@ -226,11 +226,8 @@ void RobotLinkPoseWidget::DrawGL(Camera::Viewport& viewport)
     }
     if(!activeDofs.empty()) {
       GLColor black(0,0,0,0);
-      vector<bool> active(robot->links.size(),false);
-      for(size_t i=0;i<activeDofs.size();i++)
-        active[activeDofs[i]] = true;
       for(size_t i=0;i<robot->links.size();i++)
-        if(!active[i])
+        if(find(activeDofs.begin(),activeDofs.end(),(int)i) == activeDofs.end())
           viewRobot->Appearance(i).ModulateColor(black,0.5);
     }
     viewRobot->Draw();
@@ -390,7 +387,7 @@ void RobotIKPoseWidget::Add(const IKGoal& goal) {
 }
 void RobotIKPoseWidget::AttachWidget(int widget,int link) 
 {
-  printf("Attaching widget from link %d to %d\n",poseGoals[widget].destLink,link);
+  LOG4CXX_INFO(KrisLibrary::logger(),"Attaching widget from link "<<poseGoals[widget].destLink<<" to "<<link);
   Assert(widget >= 0 && widget < (int)poseGoals.size());
   int oldDest = poseGoals[widget].destLink;
   poseGoals[widget].destLink = link;
@@ -411,11 +408,11 @@ void RobotIKPoseWidget::AttachWidget(int widget,int link)
   if(link >= 0) {
     robot->links[link].T_World.mulInverse(oldp,poseGoals[widget].endPosition);
     if(poseGoals[widget].rotConstraint == IKGoal::RotFixed) {
-      //cout<<"Desired world rotation "<<oldR<<endl;
-      //cout<<"Reference link rotation "<<robot->links[link].T_World.R<<endl;
+      //LOG4CXX_INFO(KrisLibrary::logger(),"Desired world rotation "<<oldR<<"\n");
+      //LOG4CXX_INFO(KrisLibrary::logger(),"Reference link rotation "<<robot->links[link].T_World.R<<"\n");
       Matrix3 Rlocal;
       Rlocal.mulTransposeA(robot->links[link].T_World.R,oldR);
-      //cout<<"Desired local rotation "<<Rlocal<<endl;
+      //LOG4CXX_INFO(KrisLibrary::logger(),"Desired local rotation "<<Rlocal<<"\n");
       poseGoals[widget].SetFixedRotation(Rlocal);
     }
   }
@@ -464,7 +461,7 @@ bool RobotIKPoseWidget::ClearCurrent()
       break;
     }
   if(index != -1) {
-    printf("Deleting IK goal on link %s\n",robot->LinkName(poseGoals[index].link).c_str());
+    LOG4CXX_INFO(KrisLibrary::logger(),"Deleting IK goal on link "<<robot->LinkName(poseGoals[index].link).c_str());
     poseGoals.erase(poseGoals.begin()+index);
     poseWidgets.erase(poseWidgets.begin()+index);
     RefreshWidgets();
@@ -532,18 +529,6 @@ void RobotIKPoseWidget::DrawGL(Camera::Viewport& viewport)
   glDisable(GL_POLYGON_OFFSET_FILL);
 }
 
-void RobotIKPoseWidget::SetPoseAndWidgetTransform(int widget,const RigidTransform& T)
-{
-  poseWidgets[widget].T = T;
-  if(poseGoals[widget].rotConstraint == IKGoal::RotFixed) {
-      poseGoals[widget].SetFixedRotation(T.R);
-      poseGoals[widget].SetFixedPosition(T.t);
-    }
-    else {
-      poseGoals[widget].SetFixedPosition(T.t);
-    }
-}
-
 void RobotIKPoseWidget::Drag(int dx,int dy,Camera::Viewport& viewport)
 {
   if(activeWidget) {
@@ -587,15 +572,6 @@ RobotPoseWidget::RobotPoseWidget(Robot* robot,ViewRobot* viewRobot)
     useBase = true;
     basePoser.T = GetFloatingBase(*robot);
   }
-  vector<bool> active(robot->links.size(),true);
-  for(size_t i=0;i<robot->joints.size();i++)
-    if(robot->joints[i].type == RobotJoint::Weld)
-      active[robot->joints[i].linkIndex] = false;
-  if(useBase)
-    for(size_t i=0;i<6;i++)
-      active[i] = false;
-  for(size_t i=0;i<active.size();i++)
-    if(active[i]) linkPoser.activeDofs.push_back((int)i);
   if(useBase) {
     widgets.resize(3);
     widgets[0]=&basePoser;
@@ -630,15 +606,6 @@ void RobotPoseWidget::Set(Robot* robot,ViewRobot* viewRobot)
     useBase = true;
     basePoser.T = GetFloatingBase(*robot);
   }
-  vector<bool> active(robot->links.size(),true);
-  for(size_t i=0;i<robot->joints.size();i++)
-    if(robot->joints[i].type == RobotJoint::Weld)
-      active[robot->joints[i].linkIndex] = false;
-  if(useBase)
-    for(size_t i=0;i<6;i++)
-      active[i] = false;
-  for(size_t i=0;i<active.size();i++)
-    if(active[i]) linkPoser.activeDofs.push_back((int)i);
   if(useBase) {
     widgets.resize(3);
     widgets[0]=&basePoser;
@@ -753,38 +720,6 @@ void RobotPoseWidget::DrawGL(Camera::Viewport& viewport)
   }
 }
 
-void RobotPoseWidget::Snapshot()
-{
-  assert(undoTransforms.size() == undoConfigs.size());
-  undoConfigs.push_back(linkPoser.poseConfig);
-  undoTransforms.resize(undoTransforms.size()+1);
-  for(size_t i=0;i<ikPoser.poseWidgets.size();i++)
-    undoTransforms.back().push_back(pair<int,RigidTransform>(ikPoser.poseGoals[i].link,ikPoser.poseWidgets[i].T));
-  if(undoConfigs.size() > 20) {
-    undoConfigs.erase(undoConfigs.begin(),undoConfigs.begin() + undoConfigs.size() - 20);
-    undoTransforms.erase(undoTransforms.begin(),undoTransforms.begin() + undoTransforms.size() - 20);
-  }
-  assert(undoTransforms.size() == undoConfigs.size());
-}
-
-void RobotPoseWidget::Undo()
-{
-  assert(undoTransforms.size() == undoConfigs.size());
-  if(!undoConfigs.empty()) {
-    SetPose(undoConfigs.back());
-    for(size_t i=0;i<undoTransforms.back().size();i++) {
-      int link = undoTransforms.back()[i].first;
-      RigidTransform T = undoTransforms.back()[i].second;
-      for(size_t j=0;j<ikPoser.poseWidgets.size();j++)
-        if(ikPoser.poseGoals[j].link == link)
-          ikPoser.SetPoseAndWidgetTransform(j,T);
-    }
-    undoConfigs.resize(undoConfigs.size()-1);
-    undoTransforms.resize(undoTransforms.size()-1);
-    Refresh();
-  }
-}
-
 bool RobotPoseWidget::BeginDrag(int x,int y,Camera::Viewport& viewport,double& distance)
 {
   if(mode == ModeIKAttach) {
@@ -797,16 +732,11 @@ bool RobotPoseWidget::BeginDrag(int x,int y,Camera::Viewport& viewport,double& d
     Refresh();
     return true;
   }
-  else if(mode == ModeIKDelete) {
-    DeleteConstraint();
-    return true;
-  }
   else if(mode == ModeIKPose) {
-    Snapshot();
     bool res=WidgetSet::BeginDrag(x,y,viewport,distance);
     if(!res) return false;
     if(closestWidget == &linkPoser) {
-      printf("Adding new point constraint\n");
+      LOG4CXX_INFO(KrisLibrary::logger(),"Adding new point constraint\n");
       res=FixCurrentPoint();
       ikPoser.poseWidgets.back().Hover(x,y,viewport,distance);
       ikPoser.poseWidgets.back().SetHighlight(true);
@@ -820,11 +750,10 @@ bool RobotPoseWidget::BeginDrag(int x,int y,Camera::Viewport& viewport,double& d
     return true;
   }
   else if(mode == ModeIKPoseFixed) {
-    Snapshot();
     bool res=WidgetSet::BeginDrag(x,y,viewport,distance);
     if(!res) return false;
     if(closestWidget == &linkPoser) {
-      printf("Adding new fixed transform constraint\n");
+      LOG4CXX_INFO(KrisLibrary::logger(),"Adding new fixed transform constraint\n");
       res=FixCurrent();
       ikPoser.poseWidgets.back().Hover(x,y,viewport,distance);
       ikPoser.poseWidgets.back().SetHighlight(true);
@@ -837,8 +766,11 @@ bool RobotPoseWidget::BeginDrag(int x,int y,Camera::Viewport& viewport,double& d
     }
     return true;
   }
+  else if(mode == ModeIKDelete) {
+    DeleteConstraint();
+    return true;
+  }
   else {
-    Snapshot();
     return WidgetSet::BeginDrag(x,y,viewport,distance);
   }
 }
@@ -846,7 +778,7 @@ bool RobotPoseWidget::BeginDrag(int x,int y,Camera::Viewport& viewport,double& d
 void RobotPoseWidget::Drag(int dx,int dy,Camera::Viewport& viewport)
 {
   if(mode == ModeIKAttach) {
-    //printf("Attach dragging, hover widget %d\n",ikPoser.ActiveWidget());
+    //LOG4CXX_INFO(KrisLibrary::logger(),"Attach dragging, hover widget "<<ikPoser.ActiveWidget());
     attachx += dx;
     attachy += dy; 
     viewport.getClickSource(attachx,attachy,attachRay.source);
@@ -880,7 +812,7 @@ void RobotPoseWidget::Drag(int dx,int dy,Camera::Viewport& viewport)
 void RobotPoseWidget::EndDrag()
 {
   if(mode == ModeIKAttach) {
-    cout<<"Attaching constraint to "<<linkPoser.hoverLink<<endl;
+    LOG4CXX_INFO(KrisLibrary::logger(),"Attaching constraint to "<<linkPoser.hoverLink<<"\n");
     Refresh();
     int link = linkPoser.hoverLink;
     int widget = ikPoser.ActiveWidget();
@@ -893,7 +825,7 @@ void RobotPoseWidget::EndDrag()
 bool RobotPoseWidget::SolveIK(int iters,Real tol)
 {
   if(Constraints().empty()) return true;
-  if(iters <= 0) iters=20;
+  if(iters <= 0) iters=100;
   if(tol <= 0) tol = 1e-3;
   //solve the IK problem    
   Robot* robot=linkPoser.robot;
@@ -915,11 +847,8 @@ bool RobotPoseWidget::SolveIK(int iters,Real tol)
   f.activeDofs.mapping = vector<int>(dofs.begin(),dofs.end());
 
   //define start config
-  if(undoConfigs.empty())
-    robot->UpdateConfig(linkPoser.poseConfig);
-  else
-    robot->UpdateConfig(undoConfigs.back());
-  bool res = (RobustSolveIK(*robot,f,iters,tol,2) == 0);
+  robot->q = linkPoser.poseConfig;
+  bool res = (RobustSolveIK(*robot,f,iters,tol,5) == 0);
 
   linkPoser.poseConfig = robot->q;
   if(useBase)
@@ -1003,8 +932,5 @@ void RobotPoseWidget::Keypress(char c)
 {
   if(c=='s') {
     SolveIK();
-  }
-  else if(c == 'z') {
-    Undo();
   }
 }

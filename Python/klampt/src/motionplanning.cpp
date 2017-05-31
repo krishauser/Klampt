@@ -1,3 +1,5 @@
+#include <log4cxx/logger.h>
+#include <KrisLibrary/Logger.h>
 #include "motionplanning.h"
 #include <KrisLibrary/planning/AnyMotionPlanner.h>
 #include <KrisLibrary/planning/CSpaceHelpers.h>
@@ -1010,7 +1012,7 @@ void setPlanType(const char* type)
 
 void setPlanSetting(const char* setting,double value)
 {
-  //printf("Setting factory setting %s to %g\n",setting,value);
+  //LOG4CXX_INFO(KrisLibrary::logger(),"Setting factory setting "<<setting<<" to "<<value);
   if(0==strcmp(setting,"knn")) 
     factory.knn = (int)value;
   else if(0==strcmp(setting,"connectionThreshold"))
@@ -1182,7 +1184,7 @@ void PlannerInterface::planMore(int iterations)
   if(plans[index]->IsPointToPoint() && plans[index]->NumMilestones() < 1) throw PyException("No start or goal set for point-to-point planner, cannot start");
   if(spaceIndex < (int)adaptiveSpaces.size() && adaptiveSpaces[spaceIndex]) adaptiveSpaces[spaceIndex]->OptimizeQueryOrder();
   plans[index]->PlanMore(iterations);
-  //printf("Plan now has %d milestones, %d components\n",plans[plan]->NumMilestones(),plans[plan]->NumComponents());
+  //LOG4CXX_INFO(KrisLibrary::logger(),"Plan now has "<<plans[plan]->NumMilestones()<<" milestones, "<<plans[plan]->NumComponents());
   //DumpPlan(plans[plan],"plan.tgf");
 }
 

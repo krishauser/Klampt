@@ -1,9 +1,12 @@
+#include <log4cxx/logger.h>
+#include <KrisLibrary/Logger.h>
 #include "SimTestGUI.h"
 #include <KrisLibrary/GLdraw/GLError.h>
 #include <KrisLibrary/utils/AnyValue.h>
 #include <KrisLibrary/utils/ioutils.h>
 #include <KrisLibrary/utils/apputils.h>
 #include <KrisLibrary/math/random.h>
+
 
 
 SimTestBackend::SimTestBackend(RobotWorld* world)
@@ -37,11 +40,15 @@ SimTestBackend::SimTestBackend(RobotWorld* world)
 void SimTestBackend::Start()
 {
   if(!settings.read("simtest.settings")) {
-    printf("Didn't read settings from [APPDATA]/simtest.settings\n");
-    if(!settings.write("simtest.settings")) 
-      printf("ERROR: couldn't write default settings to [APPDATA]/simtest.settings\n");
-    else
-      printf("Wrote default settings to [APPDATA]/simtest.settings\n");
+    
+    LOG4CXX_INFO(KrisLibrary::logger(), "Didn't read settings from [APPDATA]/simtest.settings\n");
+    //LOG4CXX_INFO(KrisLibrary::logger(),"Didn't read settings from [APPDATA]/simtest.settings\n");
+    if(!settings.write("simtest.settings")) {
+      LOG4CXX_ERROR(KrisLibrary::logger(),"ERROR: couldn't write default settings to [APPDATA]/simtest.settings\n");
+    }
+    else{
+      LOG4CXX_INFO(KrisLibrary::logger(),"Wrote default settings to [APPDATA]/simtest.settings\n");
+    }
   }
 
   cur_link=0;
@@ -113,18 +120,18 @@ void SimTestBackend::Start()
   sim.Advance(dt);
   sim.WriteState(temp);
   if(temp != trace[i]) {
-  printf("Warning, sim state nondeterministic @ step %d: ",i);
+  LOG4CXX_WARN(KrisLibrary::logger(),"Warning, sim state nondeterministic @ step "<<i);
   nondet = true;
   if(temp.length() != trace[i].length())
-  printf("different lengths %d vs %d\n",temp.length(),trace[i].length());
+  LOG4CXX_INFO(KrisLibrary::logger(),"different lengths "<<temp.length()<<" vs "<<trace[i].length());
   else {
   for(size_t j=0;j<temp.length();j++)
   if(temp[j] != trace[i][j]) {
-  printf("byte %d\n",j);
+  LOG4CXX_INFO(KrisLibrary::logger(),"byte "<<j);
   break;
   }
   }
-  getchar();
+  if(KrisLibrary::logger()->isEnabledFor(log4cxx::Level::ERROR_INT)) getchar();
   }
   }
   */
@@ -390,18 +397,18 @@ bool SimTestBackend::OnCommand(const string& cmd,const string& args)
 	sim.controlSimulators[i].GetCommandedConfig(qref);
       ss<<robotWidgets[i].Pose_Conditioned(qref);
       if(!rc->SendCommand("set_q",ss.str())) {
-	fprintf(stderr,"set_q command does not work with the robot's controller\n");
+		LOG4CXX_ERROR(KrisLibrary::logger(),"set_q command does not work with the robot's controller\n");
       }
     }
   }
   else if(cmd=="command_config") {
     if(sim.robotControllers.size() == 0) {
-	fprintf(stderr,"set_q command does not work when there is no robot\n");
+		LOG4CXX_ERROR(KrisLibrary::logger(),"set_q command does not work when there is no robot\n");
     }
     else {
       RobotController* rc=sim.robotControllers[0];
       if(!rc->SendCommand("set_q",args)) {
-	fprintf(stderr,"set_q command does not work with the robot's controller\n");
+		LOG4CXX_ERROR(KrisLibrary::logger(),"set_q command does not work with the robot's controller\n");
       }
     }
   }
@@ -645,7 +652,7 @@ void SimTestBackend::SimStep(Real dt)
       sim.odesim.robot(obj.index)->GetLinkTransform(obj.bodyIndex,T);
     }
     else {
-      fprintf(stderr,"Trying to drag terrain?\n");
+            LOG4CXX_ERROR(KrisLibrary::logger(),"Trying to drag terrain?\n");
       body = NULL;
     }
     if(body != NULL) {
@@ -667,7 +674,7 @@ void SimTestBackend::SimStep(Real dt)
     if(i->first < 0 || i->first >= (int)world->robots.size()) continue;
     ofstream out(i->second.c_str(),ios::app);
     if(!out) {
-      printf("Error writing robot command path to %s\n",i->second.c_str());
+      LOG4CXX_ERROR(KrisLibrary::logger(),"Error writing robot command path to "<<i->second.c_str());
       continue;
     }
     Config q;
@@ -680,7 +687,7 @@ void SimTestBackend::SimStep(Real dt)
     if(i->first < 0 || i->first >= (int)world->robots.size()) continue;
     ofstream out(i->second.c_str(),ios::app);
     if(!out) {
-      printf("Error writing robot sensed path to %s\n",i->second.c_str());
+      LOG4CXX_ERROR(KrisLibrary::logger(),"Error writing robot sensed path to "<<i->second.c_str());
       continue;
     }
     Config q;
@@ -693,7 +700,7 @@ void SimTestBackend::SimStep(Real dt)
     if(i->first < 0 || i->first >= (int)world->robots.size()) continue;
     ofstream out(i->second.c_str(),ios::app);
     if(!out) {
-      printf("Error writing robot torque path to %s\n",i->second.c_str());
+      LOG4CXX_ERROR(KrisLibrary::logger(),"Error writing robot torque path to "<<i->second.c_str());
       continue;
     }
     Config q;
@@ -764,7 +771,7 @@ bool SimTestBackend::OnIdle() {
 
     Real elapsedTime = timer.ElapsedTime();
     Real remainingTime = Max(0.0,dt-elapsedTime);
-    //printf("Simulated time %g took time %g, pausing for time %g\n",dt,elapsedTime,remainingTime);
+    //LOG4CXX_INFO(KrisLibrary::logger(),"Simulated time "<<dt<<" took time "<<elapsedTime<<", pausing for time "<<remainingTime);
     SendPauseIdle(remainingTime);
     return true;
   }
@@ -972,7 +979,7 @@ void GLUISimTestGUI::UpdateControllerSettingGUI()
   if(controllerSettingIndex >= 0 && controllerSettingIndex < (int)controllerSettings.size()) {
     string value;
     bool res=sim->robotControllers[0]->GetSetting(controllerSettings[controllerSettingIndex],value);
-    if(!res) printf("Failed to get setting %s\n",controllerSettings[controllerSettingIndex].c_str());
+    if(!res){ LOG4CXX_INFO(KrisLibrary::logger(),"Failed to get setting "<<controllerSettings[controllerSettingIndex].c_str());}
     else
       settingEdit->set_text(value.c_str());
   }
@@ -1034,7 +1041,7 @@ void GLUISimTestGUI::Handle_Control(int id)
   else if(controls[id]==commandEdit) {
     if(controllerCommandIndex >= 0 && controllerCommandIndex < (int)controllerCommands.size()) {
       bool res=sim->robotControllers[0]->SendCommand(controllerCommands[controllerCommandIndex],commandEdit->get_text());
-      if(!res) printf("Failed to send command %s(%s)\n",controllerCommands[controllerCommandIndex].c_str(),commandEdit->get_text());
+      if(!res) LOG4CXX_INFO(KrisLibrary::logger(),"Failed to send command "<<controllerCommands[controllerCommandIndex].c_str()<<"("<<commandEdit->get_text());
     }
     return;
   }
@@ -1044,7 +1051,7 @@ void GLUISimTestGUI::Handle_Control(int id)
   else if(controls[id]==settingEdit) {
     if(controllerSettingIndex >= 0 && controllerSettingIndex<(int)controllerSettings.size()) {
       bool res=sim->robotControllers[0]->SetSetting(controllerSettings[controllerSettingIndex],settingEdit->get_text());
-      if(!res) printf("Failed to set setting %s\n",controllerSettings[controllerSettingIndex].c_str());
+      if(!res) LOG4CXX_INFO(KrisLibrary::logger(),"Failed to set setting "<<controllerSettings[controllerSettingIndex].c_str());
     }
     return;
   }
@@ -1103,14 +1110,14 @@ void GLUISimTestGUI::Handle_Keypress(unsigned char c,int x,int y)
 {
   switch(c) {
   case 'h':
-    printf("Keyboard help:\n");
-    printf("[space]: sends the milestone to the controller\n");
-    printf("s: toggles simulation\n");
-    printf("a: advances the simulation one step\n");
-    printf("c: in IK mode, constrains link rotation and position\n");
-    printf("d: in IK mode, deletes an ik constraint\n");
-    printf("v: save current viewport\n");
-    printf("V: load viewport\n");
+    LOG4CXX_INFO(KrisLibrary::logger(),"Keyboard help:\n");
+    LOG4CXX_INFO(KrisLibrary::logger(),"[space]: sends the milestone to the controller\n");
+    LOG4CXX_INFO(KrisLibrary::logger(),"s: toggles simulation\n");
+    LOG4CXX_INFO(KrisLibrary::logger(),"a: advances the simulation one step\n");
+    LOG4CXX_INFO(KrisLibrary::logger(),"c: in IK mode, constrains link rotation and position\n");
+    LOG4CXX_INFO(KrisLibrary::logger(),"d: in IK mode, deletes an ik constraint\n");
+    LOG4CXX_INFO(KrisLibrary::logger(),"v: save current viewport\n");
+    LOG4CXX_INFO(KrisLibrary::logger(),"V: load viewport\n");
     break;
   default:
     BaseT::Handle_Keypress(c,x,y);

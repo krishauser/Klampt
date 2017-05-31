@@ -50,6 +50,8 @@ class ConfigEditor(VisualEditorBase):
             robot = world.robot(0)
         robot.setConfig(value)
         self.robot = robot
+        self.clicked = None
+        self.hovered = None
         if isinstance(robot,SubRobotModel):
             self.robotposer = RobotPoser(robot._robot)
             self.robotposer.setActiveDofs(robot._links)
@@ -61,9 +63,10 @@ class ConfigEditor(VisualEditorBase):
         return 'Right-click and drag on the robot links to pose the robot'
 
     def mousefunc(self,button,state,x,y):
-        if self.robotposer.hasFocus():
+        if VisualEditorBase.mousefunc(self,button,state,x,y):
             self.value = self.robotposer.get()
-        return VisualEditorBase.mousefunc(self,button,state,x,y)
+            return True
+        return False
 
     def display(self):
         #Override display handler since the widget draws the robot
@@ -89,6 +92,8 @@ class ConfigsEditor(VisualEditorBase):
             robot.setConfig(value[0])
         self.robot = robot
         self.editingIndex = len(value)-1
+        self.clicked = None
+        self.hovered = None
         self.robotposer = RobotPoser(robot)
         self.addWidget(self.robotposer)
     
@@ -143,10 +148,11 @@ class ConfigsEditor(VisualEditorBase):
         self.refresh()
 
     def mousefunc(self,button,state,x,y):
-        if self.editingIndex >= 0 and self.robotposer.hasFocus():
-            #mouse release
-            self.value[self.editingIndex] = self.robotposer.get()
-        return VisualEditorBase.mousefunc(self,button,state,x,y)
+        if VisualEditorBase.mousefunc(self,button,state,x,y):
+            if self.editingIndex >= 0:
+                self.value[self.editingIndex] = self.robotposer.get()
+            return True
+        return False
     
     def keyboardfunc(self,c,x,y):
         if c=='i':
@@ -226,6 +232,8 @@ class TrajectoryEditor(VisualEditorBase):
         self.animating = False
         self.animSelectorValue = 0
         self.lastAnimTrajectoryTime = None
+        self.clicked = None
+        self.hovered = None
         self.robotposer = RobotPoser(robot)
         self.addWidget(self.robotposer)
         self.updateAnimTrajectory()
@@ -392,9 +400,11 @@ class TrajectoryEditor(VisualEditorBase):
             self.animTrajectory = self.value
 
     def mousefunc(self,button,state,x,y):
-        if self.editingIndex >= 0 and self.robotposer.hasFocus():
-            self.value.milestones[self.editingIndex] = self.robotposer.get()
-        return VisualEditorBase.mousefunc(self,button,state,x,y)
+        if VisualEditorBase.mousefunc(self,button,state,x,y):
+            if self.editingIndex >= 0:
+                self.value.milestones[self.editingIndex] = self.robotposer.get()
+            return True
+        return False
     
     def keyboardfunc(self,c,x,y):
         if c=='i':
@@ -486,6 +496,8 @@ class SelectionEditor(VisualEditorBase):
         VisualEditorBase.__init__(self,name,value,description,world)
         self.robot = robot
         self.lastClicked = -1
+        self.clicked = None
+        self.hovered = None
         self.oldAppearances = {}
         self.newAppearances = {}
 
@@ -667,9 +679,10 @@ class PointEditor(VisualEditorBase):
         return 'Right-click and drag on the widget to pose the point'
 
     def mousefunc(self,button,state,x,y):
-        if self.pointposer.hasFocus():
+        if VisualEditorBase.mousefunc(self,button,state,x,y):
             self.value = se3.apply(se3.inv(self.frame),self.pointposer.get())
-        return VisualEditorBase.mousefunc(self,button,state,x,y)
+            return True
+        return False
 
 class RigidTransformEditor(VisualEditorBase):
     def __init__(self,name,value,description,world,frame=None):
@@ -716,11 +729,10 @@ class RigidTransformEditor(VisualEditorBase):
         return False
 
     def motionfunc(self,x,y,dx,dy):
-        if self.xformposer.hasFocus():
+        if VisualEditorBase.motionfunc(self,x,y,dx,dy):
             self.value = se3.mul(se3.inv(self.frame),self.xformposer.get())
             for o,p in zip(self.attachedObjects,self.attachedRelativePoses):
                 o.setTransform(*se3.mul(self.xformposer.get(),p))
-        return VisualEditorBase.motionfunc(self,x,y,dx,dy)
 
     def display(self):
         VisualEditorBase.display(self)
@@ -738,9 +750,11 @@ class ObjectTransformEditor(VisualEditorBase):
         return 'Right-click and drag on the widget to pose the object'
 
     def mousefunc(self,button,state,x,y):
-        if self.objposer.hasFocus():
+        if VisualEditorBase.mousefunc(self,button,state,x,y):
             self.value = self.objposer.get()
-        return VisualEditorBase.mousefunc(self,button,state,x,y)
+            return True
+        return False
+
 
 
 #Qt stuff
