@@ -29,6 +29,7 @@ class StanceCSpace(ClosedLoopRobotCSpace):
         sp = contact.supportPolygon(holds)
         #print "Support polygon",sp
         self.sp = sp
+        self.equilibriumMargin = 0.0
         self.addFeasibilityTest(self.testSupportPolygon,"suppPoly")
         if checkTorqueLimits:
             raise NotImplementedError("Torque limit testing")
@@ -37,7 +38,7 @@ class StanceCSpace(ClosedLoopRobotCSpace):
         self.robot.setConfig(q)
         x = self.robot.getCom()
         for plane in self.sp:
-            if vectorops.dot(plane[:2],(x[0],x[1])) > plane[2]:
+            if vectorops.dot(plane[:2],(x[0],x[1])) > plane[2] - self.equilibriumMargin:
                 #print "COM",x[:2],"out of support polygon size",len(sp)
                 #for plane in sp:
                 #   print "  ",vectorops.dot(plane[:2],(x[0],x[1])) - plane[2]
