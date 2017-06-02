@@ -812,7 +812,7 @@ def path_to_trajectory(path,velocities='auto',timing='limited',smoothing='spline
 	if startvel != 0.0 or endvel != 0.0:
 		print "path_to_trajectory():WARNING: respecting nonzero start/end velocity not implemented yet"
 
-	print "path_to_trajectory(): Total distance",totaldistance
+	#print "path_to_trajectory(): Total distance",totaldistance
 	if totaldistance == 0.0:
 		return normalizedPath
 	finalduration = totaldistance
