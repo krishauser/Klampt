@@ -1219,7 +1219,7 @@ void selfCollisionCallback(void *data, dGeomID o1, dGeomID o2)
   int link2 = GeomDataToRobotLinkIndex(dGeomGetData(o2));
   Assert(link1 >= 0 && link1 < (int)robot->robot.links.size());
   Assert(link2 >= 0 && link2 < (int)robot->robot.links.size());
-  if(robot->robot.selfCollisions(link1,link2)==NULL) {
+  if(robot->robot.selfCollisions(link1,link2)==NULL && robot->robot.selfCollisions(link2,link1)==NULL) {
     return;
   }
   
@@ -1229,7 +1229,7 @@ void selfCollisionCallback(void *data, dGeomID o1, dGeomID o2)
   int numOk = 0;
   for(int i=0;i<num;i++) {
     if(gContactTemp[i].g1 == o2 && gContactTemp[i].g2 == o1) {
-      printf("Swapping contact\n");
+      printf("Swapping contact... shouldn't be here?\n");
       std::swap(gContactTemp[i].g1,gContactTemp[i].g2);
       for(int k=0;k<3;k++) gContactTemp[i].normal[k]*=-1.0;
       std::swap(gContactTemp[i].side1,gContactTemp[i].side2);
@@ -1454,6 +1454,8 @@ void ODESimulator::SetupContactResponse(const ODEObjectID& a,const ODEObjectID& 
   }
 }
 
+void dCustomGeometryAABB(dGeomID o,dReal aabb[6]);
+
 void ODESimulator::DetectCollisions()
 {
 #if DO_TIMING
@@ -1489,12 +1491,12 @@ void ODESimulator::DetectCollisions()
 #endif //DO_TIMING
 
     //call the collision routine between the robot and the world
-	bool gContactsEmpty = gContacts.empty();
-	list<ODEContactResult>::iterator gContactStart;
-	if(!gContactsEmpty) gContactStart = --gContacts.end();
-	dSpaceCollide2((dxGeom *)robots[i]->space(),(dxGeom *)envSpaceID,(void*)this,collisionCallback);
-	if(!gContactsEmpty) ++gContactStart;
-	else gContactStart = gContacts.begin();
+    bool gContactsEmpty = gContacts.empty();
+    list<ODEContactResult>::iterator gContactStart;
+    if(!gContactsEmpty) gContactStart = --gContacts.end();
+    dSpaceCollide2((dxGeom *)robots[i]->space(),(dxGeom *)envSpaceID,(void*)this,collisionCallback);
+    if(!gContactsEmpty) ++gContactStart;
+    else gContactStart = gContacts.begin();
 
 #if DO_TIMING
     gContactDetectTime += timer.ElapsedTime();
@@ -1516,22 +1518,22 @@ void ODESimulator::DetectCollisions()
 #endif
 
       gContactsEmpty = gContacts.empty();
-	  if(!gContactsEmpty) gContactStart = --gContacts.end();
+      if(!gContactsEmpty) gContactStart = --gContacts.end();
       //call the self collision routine for the robot
       dSpaceCollide(robots[i]->space(),(void*)robots[i],selfCollisionCallback);
       if(!gContactsEmpty) ++gContactStart;
-	  else gContactStart = gContacts.begin();
+      else gContactStart = gContacts.begin();
 
 #if DO_TIMING
-    gContactDetectTime += timer.ElapsedTime();
-    timer.Reset();
+      gContactDetectTime += timer.ElapsedTime();
+      timer.Reset();
 #endif //DO_TIMING
       
       ProcessContacts(gContactStart,gContacts.end(),settings);
 
 #if DO_TIMING
-    gClusterTime += timer.ElapsedTime();
-    timer.Reset();
+      gClusterTime += timer.ElapsedTime();
+      timer.Reset();
 #endif //DO_TIMING
     }
 
