@@ -185,10 +185,8 @@ bool RobotController::GetSensedVelocity(Config& dq)
 void RobotControllerFactory::RegisterDefault(Robot& robot)
 {
   Register("JointTrackingController",new JointTrackingController(robot));
-  Register("MilestonePathController",new MilestonePathController(robot));
   Register("PolynomialPathController",new PolynomialPathController(robot));
   Register("FeedforwardJointTrackingController",new FeedforwardController(robot,new JointTrackingController(robot)));
-  Register("FeedforwardMilestonePathController",new FeedforwardController(robot,new MilestonePathController(robot)));
   Register("FeedforwardPolynomialPathController",new FeedforwardController(robot,new PolynomialPathController(robot)));
   Register("SerialController",new SerialController(robot));
 }
