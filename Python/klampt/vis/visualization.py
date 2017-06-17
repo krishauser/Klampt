@@ -1009,7 +1009,7 @@ class VisPlotItem:
                 assert t > prev[0]
                 slope_old = (prev[1]-pprev[1])/(prev[0]-pprev[0])
                 slope_new = (v-prev[1])/(t-prev[0])
-                if abs(slope_old-slope_new) > self.compressThreshold:
+                if (slope_old > 0 != slope_new > 0) or abs(slope_old-slope_new) > self.compressThreshold:
                     trace.append((t,v))
                 else:
                     #near-linear, just extend along straight line
