@@ -259,14 +259,13 @@ def solver(objectives,iters=None,tol=None):
             for key,(r,objs) in robs.iteritems():
                 if isinstance(r,SubRobotModel):
                     s = IKSolver(r._robot)
+                    s.setActiveDofs(r.links)
                 else:
                     s = IKSolver(r)
                 if iters != None: s.setMaxIters(iters)
                 if tol != None: s.setTolerance(tol)
                 for obj in objs:
                     s.add(obj)
-                if isinstance(r,SubRobotModel):
-                    s.setActiveDofs(r.links)
                 res.append(s)
             if len(res)==1:
                 return res[0]
@@ -275,7 +274,11 @@ def solver(objectives,iters=None,tol=None):
         if isinstance(objectives,IKObjective):
             if not hasattr(objectives,'robot'):
                 raise ValueError("IKObjective object must have 'robot' member for use in ik.solver. Either set this manually or use the ik.objective function")
-            s = IKSolver(objectives.robot)
+            if isinstance(objectives.robot,SubRobotModel):
+                s = IKSolver(objectives.robot._robot)
+                s.setActiveDofs(r.links)
+            else:
+                s = IKSolver(objectives.robot)
             if iters != None: s.setMaxIters(iters)
             if tol != None: s.setTolerance(tol)
             s.add(objectives)
@@ -303,7 +306,7 @@ def solve(objectives,iters=1000,tol=1e-3,activeDofs=None):
         - iters: a maximum number of iterations.
         - tol: a maximum error tolerance on satisfying the objectives
         - activeDofs: a list of link indices or names to use for IK solving.
-          Note: cannot use sub-robots and activeDofs at the moment.  Undefined
+          Note: cannot use sub-robots and activeDofs at the same time.  Undefined
           behavior will result.
 
     Returns True if a solution is successfully found to the given tolerance,
