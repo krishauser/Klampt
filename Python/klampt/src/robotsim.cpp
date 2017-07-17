@@ -3436,7 +3436,8 @@ void SimBody::setVelocity(const double w[3],const double v[3])
   if(!body) return;
   dBodySetLinearVel(body,v[0],v[1],v[2]);
   dBodySetAngularVel(body,w[1],w[1],w[2]);
-
+  ODEObjectID id = sim->sim->WorldToODEID(objectID);
+  sim->sim->odesim.DisableInstabilityCorrection(id);
 }
 
 void SimBody::getVelocity(double out[3],double out2[3])
