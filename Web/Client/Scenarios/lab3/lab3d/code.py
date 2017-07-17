@@ -1,6 +1,6 @@
 from klampt import *
 from klampt.math import vectorops,so2,so3
-from klampt.cspace import CSpace,MotionPlan
+from klampt.plan.cspace import CSpace,MotionPlan
 import math
 
 #turn this to False if redrawing becomes too slow

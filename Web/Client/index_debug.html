@@ -393,7 +393,7 @@
          {
             if (confirm("Are you sure you want to discard ALL changes?") == true) {
               var boilerid=$('#boilerselctor').val();
-              var file_to_load="Scenarios/code_"+boilerid+".py";
+              var file_to_load="Scenarios/"+boilerid+"/code.py";
               loadFileToEditor(file_to_load);
               
               stopAnimation();
@@ -403,7 +403,7 @@
          function boilerPlateChanged()
          {
             var boilerid=$('#boilerselctor').val();
-            var file_to_load="Scenarios/code_"+boilerid+".py";
+            var file_to_load="Scenarios/"+boilerid+"/code.py";
          
             if(localStorageAvailable) //lets see if we have worked on this previously
             {
@@ -420,7 +420,7 @@
             else
                loadFileToEditor(file_to_load);
             newBoilerplate = true;
-            var panel_to_load="Scenarios/panel_"+boilerid+".xml";
+            var panel_to_load="Scenarios/"+boilerid+"/panel.xml";
             loadFileToPanel(panel_to_load);
             stopAnimation();
          }   

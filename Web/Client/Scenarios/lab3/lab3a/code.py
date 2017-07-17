@@ -1,5 +1,5 @@
 from klampt import *
-from klampt import vectorops
+from klampt.math import vectorops
 
 #attractive force constant
 attractiveConstant = 100

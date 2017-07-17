@@ -2,7 +2,7 @@ import pkg_resources
 pkg_resources.require("klampt==0.6.2")
 from klampt import *
 from klampt.math import vectorops,so3,se3
-from klampt.cspace import MotionPlan
+from klampt.plan.cspace import MotionPlan
 import math
 import sys
 sys.path.append("Web/Server")
@@ -20,21 +20,8 @@ optimizing = False
 existing_path_lines = []
 existing_ghosts = []
 existing_roadmap_lines = set()
-path_height = 0.002
+path_height = 0.02
 accumulated_time = 0
-
-class Circle:
-    def __init__(self,x=0,y=0,radius=1):
-        self.center = (x,y)
-        self.radius = radius
-        
-    def contains(self,point):
-        return (vectorops.distance(point,self.center) <= self.radius)
-
-    def distance(self,point):
-        return (vectorops.distance(point,self.center) - self.radius)
-
-
     
 def boilerplate_start():
     global world,space,start,target,planner,optimizing,path,existing_path_lines,existing_ghosts,roadmap,existing_roadmap_lines
@@ -47,45 +34,30 @@ def boilerplate_start():
     start=stub.start()
     target=stub.target()
 
-    space = stub.CircleObstacleCSpace()
-    for o in stub.obstacles():
-        space.addObstacle(o)
+    world = WorldModel()
+    world.readFile("Web/Client/Scenarios/lab3/plan_world.xml")
+    space = stub.SE2ObstacleCSpace(world)
 
     #TODO: in Problem 4 you should switch the commented-out lines to
     #decide whether you want a feasible planner or an optimizing planner
     planner,optimizing = stub.makePlanner(space,start,target)
-    planner.setEndpoints(start,target)
+    try:
+        planner.setEndpoints(start,target)
+    except:
+        pass
     
     path = []
     roadmap = [],[]
-    world = WorldModel()
-    for o in space.obstacles:
-        obst = world.loadElement("Web/Client/Scenarios/lab3/cylinder.tri")
-        if obst < 0:
-            raise IOError("Unable to load cylinder, check the path")
-        obst = world.terrain(world.numTerrains()-1)
-        obst.geometry().transform([o.radius,0,0,0,o.radius,0,0,0,0.05],[o.center[0],o.center[1],0])
-        obst.appearance().setColor(0.3,0.3,0.3,1)
-    #make a box around everything
-    world.loadElement("Web/Client/Scenarios/lab3/cube.tri")
-    wall = world.terrain(world.numTerrains()-1)
-    wall.geometry().transform([0.01,0,0,0,1,0,0,0,0.05],[-0.01,0,0])
-    world.loadElement("Web/Client/Scenarios/lab3/cube.tri")
-    wall = world.terrain(world.numTerrains()-1)
-    wall.geometry().transform([0.01,0,0,0,1,0,0,0,0.05],[1,0,0])
-    world.loadElement("Web/Client/Scenarios/lab3/cube.tri")
-    wall = world.terrain(world.numTerrains()-1)
-    wall.geometry().transform([1,0,0,0,0.01,0,0,0,0.05],[0,-0.01,0])
-    world.loadElement("Web/Client/Scenarios/lab3/cube.tri")
-    wall = world.terrain(world.numTerrains()-1)
-    wall.geometry().transform([1,0,0,0,0.11,0,0,0,0.05],[0,1,0])
-    
-    radius = space.robot.radius
     kviz._init(world)
-    kviz.add_sphere("robot",start[0],start[1],0,radius)
-    kviz.add_sphere("target",target[0],target[1],0,radius)
-    kviz.set_color("robot",0,0,1)
-    kviz.set_color("target",1,0,0)
+    radius = 0.025
+    
+    print world.robot(0).numLinks()
+    start_ghost = kviz.add_ghost("start")
+    target_ghost = kviz.add_ghost("target")
+    kviz.set_ghost_config(start,"start")
+    kviz.set_ghost_config(target,"target")
+    kviz.set_color(start_ghost,0,1,0)
+    kviz.set_color(target_ghost,1,0,0)
     existing_roadmap_lines = set()
     existing_path_lines = []
     existing_ghosts = []
@@ -105,15 +77,15 @@ def refresh_viz():
             existing_path_lines.append(name)
             kviz.add_line(name,path[i][0],path[i][1],path_height,path[i+1][0],path[i+1][1],path_height)
             kviz.set_visible(name,True)
-            kviz.set_color(name,0,0,1)
-            existing_ghosts.append("ghost"+str(i))
-            kviz.add_sphere("ghost"+str(i),path[i][0],path[i][1],0,space.robot.radius)
-            kviz.set_color("ghost"+str(i),1,1,1,0.5)
+            kviz.set_color(name,0,0,1])
+            existing_ghosts.append(kviz.add_ghost("ghost"+str(i)))
+            kviz.set_ghost_config(path[i],"ghost"+str(i))
+            kviz.set_color(existing_ghosts[-1],1,1,1,0.5)
         else:
             name = existing_path_lines[i]
             kviz.set_visible(name,True)
             kviz.update_line(name,path[i][0],path[i][1],path_height,path[i+1][0],path[i+1][1],path_height)
-            kviz.update_sphere("ghost"+str(i),path[i][0],path[i][1],0,space.robot.radius)
+            kviz.set_ghost_config(path[i],"ghost"+str(i))
     if stub.draw_roadmap:
         V,E = roadmap
         for i,e in enumerate(E):

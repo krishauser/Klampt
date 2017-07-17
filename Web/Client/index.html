@@ -388,6 +388,46 @@
            });
          }
 
+         //the magic of AJAX
+         //http://stackoverflow.com/questions/3567369/reading-server-side-file-with-javascript
+         function loadScenarios(file_to_load,shown_only)
+         {
+            function onLoadScenariosJson(data) {
+              var parsed_data = JSON.parse(data);
+              function add_option(id,text) {
+                $('#boilerselctor').append($('<option>', {value:id}).text(text));
+              }
+              if(shown_only) {
+                for (var key in parsed_data['shown']) {
+                  add_option(key,parsed_data['scenarios'][key]);
+                }
+              }
+              else {
+                for (var key in parsed_data['scenarios']) {
+                  add_option(key,parsed_data['scenarios'][key]);
+                }
+              }
+              if(parsed_data['active']) {
+                $('#boilerselctor').val(parsed_data['scenarios'][parsed_data['active']]);
+              }
+              boilerPlateChanged();
+            }
+            console.log("Trying to load scenarios "+file_to_load);
+            $.ajax({
+               url: file_to_load,
+               async: true,   // asynchronous request? (synchronous requests are discouraged...)
+               cache: false,   // with this, you can force the browser to not make cache of the retrieved data
+               dataType: "text",  // jQuery will infer this, but you can set explicitly
+               success: function( data, textStatus, jqXHR ) {
+                  console.log("Received scenarios from server");
+                  onLoadScenariosJson(data);
+               },
+               error : function( jqXHR, textStatus, errorThrown ) {
+                  console.log("Error loading scenarios: "+textStatus);
+               }
+            });
+         }
+
          function serverChanged()
          {
             console.log("Server changed.");
@@ -399,7 +439,7 @@
          {
             if (confirm("Are you sure you want to discard ALL changes?") == true) {
               var boilerid=$('#boilerselctor').val();
-              var file_to_load="Scenarios/code_"+boilerid+".py";
+              var file_to_load="Scenarios/"+boilerid+"/code.py";
               loadFileToEditor(file_to_load);
               
               stopAnimation();
@@ -409,7 +449,7 @@
          function boilerPlateChanged()
          {
             var boilerid=$('#boilerselctor').val();
-            var file_to_load="Scenarios/code_"+boilerid+".py";
+            var file_to_load="Scenarios/"+boilerid+"/code.py";
          
             if(localStorageAvailable) //lets see if we have worked on this previously
             {
@@ -426,7 +466,7 @@
             else
                loadFileToEditor(file_to_load);
             newBoilerplate = true;
-            var panel_to_load="Scenarios/panel_"+boilerid+".xml";
+            var panel_to_load="Scenarios/"+boilerid+"/panel.xml";
             loadFileToPanel(panel_to_load);
             stopAnimation();
          }   
@@ -494,15 +534,7 @@
                random = ~~(Math.random() * $options.length);
             $options.eq(random).prop('selected', true);
 
-            function add_option(id,text) {
-               $('#boilerselctor').append($('<option>', {value:id}).text(text));
-            }
-            add_option("finalA","Final A");
-            add_option("finalB","Final B");
-            add_option("finalC","Final C");
-            add_option("test_sim","Test Simulation");
-            add_option("sandbox","Simulation Sandbox");
-            add_option("kinematic_sandbox","Kinematic Sandbox");
+            loadScenarios("Scenarios/scenarios.json",true);
             //if(localStorageAvailable) {
             //   var url=localStorage.getItem('serverURL');
             //   if(url!=null) {
@@ -523,7 +555,6 @@
             editor.setTheme("ace/theme/eclipse"); 
             editor.getSession().setMode("ace/mode/python");
             
-            boilerPlateChanged();
                        
             //var editor = CodeMirror( document.getElementById("editor"), { //use codemirror as text editor
             //value: "print 'hello world'\n",

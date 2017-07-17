@@ -1,6 +1,6 @@
 from klampt import *
 from klampt.math import vectorops
-from klampt.cspace import CSpace,MotionPlan
+from klampt.plan.cspace import CSpace,MotionPlan
 
 #turn this to False if redrawing becomes too slow
 draw_roadmap = True

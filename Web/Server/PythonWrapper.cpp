@@ -208,9 +208,9 @@ void initialize_python_interpreter()
 
 bool run_boiler_plate(const string& which)
 {
-   string boilerplate="boilerplate_"+which+".py";
+   string boilerplate=which+"/boilerplate"+".py";
 
-   printf("  running boilerplate code %s\n",which.c_str()); //TODO, allow client to specify boiler plate
+   printf("  running boilerplate code %s\n",which.c_str()); 
    std::string boiler_plate=load_file(boilerplate);
 
    if(boiler_plate.size()==0) //okay now lets try to find the file in a different place
