@@ -30,7 +30,7 @@ def boilerplate_advance():
 	t += 0.02
 
 def boilerplate_keypress(key):
-	print "boiler plate received key: " + str(key)
-	#TODO call student code here? via stub? -DJZ
+	stub.keypress(key)
+
 
 

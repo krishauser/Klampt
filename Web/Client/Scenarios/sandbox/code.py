@@ -1,5 +1,6 @@
 import random
-next_move_time = 5
+next_move_time = 2.0
+move_delay = 5.0
 robot = None
 
 def init(world):
@@ -15,5 +16,9 @@ def control_loop(t,controller):
         qmin,qmax = robot.getJointLimits()
         q = [random.uniform(a,b) for (a,b) in zip(qmin,qmax)]
         controller.setMilestone(q)
-        next_move_time += 5.0
+        next_move_time += move_delay
     pass
+
+def keypress(key):
+    #called on keyboard press
+    print "Keyboard event: ",key

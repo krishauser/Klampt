@@ -17,3 +17,7 @@ def advance(t,world):
         robot.setConfig(q)
         next_move_time += 1.0
     pass
+
+def keypress(key):
+    #called on keyboard press
+    print "Keyboard event: ",key

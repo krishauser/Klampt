@@ -10,7 +10,15 @@
 		"Lab 1d":"lab1/lab1d",
 		"Lab 2a":"lab2/lab2a",
 		"Lab 2b":"lab2/lab2b",
-		"Lab 2c":"lab2/lab2c"
+		"Lab 2c":"lab2/lab2c",
+		"Lab 3a":"lab3/lab3a",
+		"Lab 3b":"lab3/lab3b",
+		"Lab 3d":"lab3/lab3d",
+		"Lab 4":"lab4",
+		"Lab 5":"lab5",
+		"Final A":"finalA",
+		"Final B":"finalB",
+		"Final C":"finalC"
 	},
 	"shown":["Simulation Test","Dynamic Sandbox","Kinematic Sandbox"],
 	"active":"Dynamic Sandbox"

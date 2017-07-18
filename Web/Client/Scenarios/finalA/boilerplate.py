@@ -2,6 +2,7 @@ import sys
 sys.path.append("Web/Server")
 sys.path.append('Web/Client/Scenarios/final')
 from klampt import *
+from klampt.math import vectorops,so3,se3
 from common import *
 import time
 import random
@@ -244,8 +245,8 @@ class GLTest:
                     kviz.update_quad("blob"+str(i),a,d,c,b)
                     kviz.update_quad("blob_back"+str(i),a,b,c,d)
                     #kviz.update_quad("blob"+str(i),(0,0,2),b=(1,0,2),c=(1,1,2),d=(0,1,2))
-                    kviz.set_color("blob"+str(i),*blob.color
-                    kviz.set_color("blob_back"+str(i),*blob.color
+                    kviz.set_color("blob"+str(i),*blob.color)
+                    kviz.set_color("blob_back"+str(i),*blob.color)
                 for i in xrange(len(r.blobs),self.numBlobs):
                     print "Removing blob",i
                     kviz.remove("blob"+str(i))

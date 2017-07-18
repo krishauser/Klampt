@@ -4,7 +4,6 @@ import sys
 from klampt import *
 sys.path.append("Web/Server")
 #sys.path.append(".")
-from webrobotprogram import *
 import kviz
 #from kviz import *
 
@@ -15,26 +14,30 @@ import kviz
 #def control_loop(t,controller):
 #	pass
 
-viewer = None
+world = None
+sim = None
+dt = 0.02
 
 def boilerplate_start():
-	global viewer
-	viewer = WebSimulationProgram([])
-	kviz._init(viewer.world)
-	stub.init(viewer.world)
-	viewer.sim = Simulator(viewer.world)
+	global world,sim
+	world = WorldModel()
+	kviz._init(world)
+	stub.init(world)
+	sim = Simulator(world)
 
 def boilerplate_advance():
-	global viewer
-	if viewer.world.numRobots() > 0:
-		stub.control_loop(viewer.sim.getTime(),viewer.sim.controller(0))  #call student code
-	#print "Simulating...",viewer.dt
-	viewer.sim.simulate(viewer.dt)
-	viewer.sim.updateWorld()
+	global world,sim
+	if world.numRobots() > 0:
+		stub.control_loop(sim.getTime(),sim.controller(0))  #call student code
+	#print "Simulating...",dt
+	sim.simulate(dt)
+	sim.updateWorld()
 	#print "Done."
 
 def boilerplate_keypress(key):
-	print "boiler plate received key: " + str(key)
-	#TODO call student code here? via stub? -DJZ
+	stub.keypress(key)
 
-
+def boilerplate_setitem(name,value):
+	if name == "move_delay":
+		print "Setting move_delay to",value
+		stub.move_delay = float(value)

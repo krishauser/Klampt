@@ -1,4 +1,4 @@
-from klampt import vectorops,so3,se3
+from klampt.math import vectorops,so3,se3
 import math
 import random
 from common import CameraBlob,CameraColorDetectorOutput,OmniscientObjectOutput
