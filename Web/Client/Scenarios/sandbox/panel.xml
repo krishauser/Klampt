@@ -1,0 +1,1 @@
+<div style="font-size:small;">Move Delay (0.5 - 10)<input type="range" name="move_delay" min="0.5" max="10" step="0.1"/></div>
