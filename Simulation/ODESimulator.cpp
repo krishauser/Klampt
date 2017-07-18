@@ -1829,6 +1829,18 @@ bool ODESimulator::InstabilityCorrection()
   return corrected;
 }
 
+void ODESimulator::DisableInstabilityCorrection()
+{
+  energies.clear();
+}
+
+void ODESimulator::DisableInstabilityCorrection(const ODEObjectID& obj)
+{
+  map<ODEObjectID,Real>::iterator i = energies.find(obj);
+  if(i != energies.end()) 
+    energies.erase(i);
+}
+
 void ODESimulator::ClearContactFeedback()
 {
   for(map<CollisionPair,ODEContactList>::iterator i=contactList.begin();i!=contactList.end();i++) {
@@ -1873,7 +1885,7 @@ bool ODESimulator::ReadState(File& f)
   if(!ReadFile(f,status)) return false;
   if(!ReadState_Internal(f)) return false;
 
-  //TODO: maintain instability detection state and 
+  //TODO: maintain instability detection state, margins, and status
   energies.clear();
   lastMarginsRemaining.clear();
   statusHistory.clear();
