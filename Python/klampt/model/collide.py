@@ -14,6 +14,11 @@ def bb_intersect(a,b):
     bmin,bmax=b
     return not any(q < u or v < p for (p,q,u,v) in zip(amin,amax,bmin,bmax))
 
+def bb_union(*bbs):
+    """Returns a bounding box containing the given bboxes"""
+    return [min(*x) for x in zip(*[b[0] for b in bbs])],[max(*x) for x in zip(*[b[1] for b in bbs])]
+
+
 def self_collision_iter(geomlist,pairs='all'):
     """For a list of Geometry3D's, performs efficient self collision testing.
     Yields an iterator over pairs (i,j) where i and j are indices
@@ -24,11 +29,11 @@ def self_collision_iter(geomlist,pairs='all'):
     they should be tested.  Otherwise it can be a list of collision indices.
 
     Uses a quick bounding box reject test."""
-    bblist = [g.getBB() for g in geomlist]
+    #bblist = [g.getBB() for g in geomlist]
     if pairs=='all':
         for i,g in enumerate(geomlist):
             for j in range(i+1,len(geomlist)):
-                if not bb_intersect(bblist[i],bblist[j]): continue
+                #if not bb_intersect(bblist[i],bblist[j]): continue
                 g2 = geomlist[j]
                 if g.collides(g2):
                     yield (i,j)
@@ -36,13 +41,13 @@ def self_collision_iter(geomlist,pairs='all'):
         for i,g in enumerate(geomlist):
             for j in range(i+1,len(geomlist)):
                 if not pairs(i,j): continue
-                if not bb_intersect(bblist[i],bblist[j]): continue
+                #if not bb_intersect(bblist[i],bblist[j]): continue
                 g2 = geomlist[j]
                 if g.collides(g2):
                     yield (i,j)
     else:
         for (i,j) in pairs:
-            if not bb_intersect(bblist[i],bblist[j]): continue
+            #if not bb_intersect(bblist[i],bblist[j]): continue
             g  =geomlist[i]
             g2 = geomlist[j]
             if g.collides(g2):
@@ -61,22 +66,26 @@ def group_collision_iter(geomlist1,geomlist2,pairs='all'):
     if len(geomlist1) == 0 or len(geomlist2) == 0: return
     bblist1 = [g.getBB() for g in geomlist1]
     bblist2 = [g.getBB() for g in geomlist2]
+    bb1 = bb_union(*bblist1)
+    bb2 = bb_union(*bblist2)
+    geoms1 = [(i,g) for (i,g) in enumerate(geomlist1) if bb_intersect(bblist1[i],bb2)]
+    geoms2 = [(i,g) for (i,g) in enumerate(geomlist2) if bb_intersect(bblist2[i],bb1)]
     if pairs=='all':
-        for i,g in enumerate(geomlist1):
-            for j,g2 in enumerate(geomlist2):
-                if not bb_intersect(bblist1[i],bblist2[j]): continue
+        for i,g in geoms1:
+            for j,g2 in geoms2:
+                #if not bb_intersect(bblist1[i],bblist2[j]): continue
                 if g.collides(g2):
                     yield (i,j)
     elif callable(pairs):
-        for i,g in enumerate(geomlist1):
-            for j,g2 in enumerate(geomlist2):
+        for i,g in geoms1:
+            for j,g2 in geoms2:
                 if not pairs(i,j): continue
-                if not bb_intersect(bblist1[i],bblist2[j]): continue
+                #if not bb_intersect(bblist1[i],bblist2[j]): continue
                 if g.collides(g2):
                     yield (i,j)
     else:
         for (i,j) in pairs:
-            if not bb_intersect(bblist1[i],bblist2[j]): continue
+            #if not bb_intersect(bblist1[i],bblist2[j]): continue
             g  = geomlist1[i]
             g2 = geomlist2[j]
             if g.collides(g2):
@@ -101,26 +110,26 @@ def group_subset_collision_iter(geomlist,alist,blist,pairs='all'):
     for id in blist:
         if bblist[id] is not None:
             bblist[id] = geomlist[id].getBB()
+    bb1 = bb_union(*[bblist[i] for i in alist])
+    bb2 = bb_union(*[bblist[i] for i in blist])
+    geoms1 = [(i,geomlist[i]) for i in alist if bb_intersect(bblist[i],bb2)]
+    geoms2 = [(i,geomlist[i]) for i in blist if bb_intersect(bblist[i],bb1)]
     if pairs=='all':
-        for i in alist:
-            for j in blist:
-                if not bb_intersect(bblist[i],bblist[j]): continue
-                g = geomlist[i]
-                g2 = geomlist[j]
+        for i,g in geoms1:
+            for j,g2 in geoms2:
+                #if not bb_intersect(bblist[i],bblist[j]): continue
                 if g.collides(g2):
                     yield (i,j)
     elif callable(pairs):
-        for i in alist:
-            for j in blist:
+        for i,g in geoms1:
+            for j,g2 in geoms2:
                 if not pairs(i,j): continue
-                if not bb_intersect(bblist[i],bblist[j]): continue
-                g = geomlist[i]
-                g2 = geomlist[j]
+                #if not bb_intersect(bblist[i],bblist[j]): continue
                 if g.collides(g2):
                     yield (i,j)
     else:
         for (i,j) in pairs:
-            if not bb_intersect(bblist[i],bblist[j]): continue
+            #if not bb_intersect(bblist[i],bblist[j]): continue
             g  =geomlist[i]
             g2 = geomlist[j]
             if g.collides(g2):
@@ -156,7 +165,7 @@ class WorldCollider:
       - robots: contains the geomList indices of each robot in the world.
 
     Methods:
-      - getGeom(obj): finds the geometry corresponding to an object
+      - getGeomIndex(obj): finds the geomList index corresponding to an object
       - ignoreCollision(obj or obj pair): ignores collisions corresponding to
         an object or pair of objects
       - collisionTests(filter1,filter2): returns an iterator over potential
@@ -267,12 +276,15 @@ class WorldCollider:
                         self.mask[r[j]].add(r[i])
                         
         for i in ignore:
-            self.ignoreCollisions(i)
+            self.ignoreCollision(i)
                 
-    def getGeom(self,object):
-        for (o,g) in self.geomList:
-            if o==object:
-                return g
+    def getGeomIndex(self,object):
+        assert isinstance(object,(RobotModel,RobotModelLink,RigidObjectModel,TerrainModel))
+        for i,(o,g) in enumerate(self.geomList):
+            if o.world==object.world and o.getID()==object.getID():
+                assert o.getName()==object.getName()
+                assert type(o) == type(object)
+                return i
         return None
 
 
@@ -282,15 +294,15 @@ class WorldCollider:
         ign can be either a single body in the world or a pair of bodies."""
         if hasattr(ign,'__iter__'):
             (a,b) = ign
-            ageom = self.getGeom(a)
-            bgeom = self.getGeom(b)
+            ageom = self.getGeomIndex(a)
+            bgeom = self.getGeomIndex(b)
             if ageom is None or bgeom is None:
-                raise ValueError("Invalid ignore collision item, must be a body in the world")
+                raise ValueError("Invalid ignore collision item, must be a pair of bodies in the world")
             self.mask[ageom].discard(bgeom)
             self.mask[bgeom].discard(ageom)
         else:
             #ignore all collisions with the given geometry
-            geom = self.getGeom(ign)
+            geom = self.getGeomIndex(ign)
             if geom is None:
                 raise ValueError("Invalid ignore collision item, must be a body in the world")
             for i in self.mask[geom]:

@@ -446,34 +446,34 @@ class SE3Trajectory(GeodesicTrajectory):
 	def to_se3(self,milestone):
 		"""Converts a state parameter vector to a klampt.se3 element"""
 		return (milestone[:9],milestone[9:])
-	def from_se3(self,milestone):
+	def from_se3(self,T):
 		"""Converts a klampt.se3 element to a state parameter vector"""
-		return (milestone[:9],milestone[9:])
+		return list(T[0]) + list(T[1])
 	def eval_se3(self,t,endBehavior='halt'):
 		"""Returns an SE3 element"""
 		res = self.eval(t,endBehavior)
-		return (res[:9],res[9:])
+		return self.to_se3(res)
 	def deriv_se3(self,t,endBehavior='halt'):
 		"""Returns the derivative as the derivatives of an SE3
 		element"""
 		res = self.deriv(t,endBehavior)
-		return (res[:9],res[9:])
+		return self.to_se3(res)
 	def preTransform(self,T):
 		"""Premultiplies every transform in here by the se3 element
 		T. In other words, if T transforms a local frame F to frame F',
 		this method converts this SE3Trajectory from coordinates in F
 		to coordinates in F'"""
 		for i,m in enumerate(self.milestones):
-			Tm = (m[:9],m[9:])
-			self.milestones[i] = se3.mul(T,Tm)
+			Tm = self.to_se3(m)
+			self.milestones[i] = self.from_se3(se3.mul(T,Tm))
 	def postTransform(self,T):
 		"""Postmultiplies every transform in here by the se3 element
 		T. In other words, if T transforms a local frame F to frame F',
 		this method converts this SE3Trajectory from describing how F'
 		moves to how F moves."""
 		for i,m in enumerate(self.milestones):
-			Tm = (m[:9],m[9:])
-			self.milestones[i] = se3.mul(Tm,T)
+			Tm = self.to_se3(m)
+			self.milestones[i] = self.from_se3(se3.mul(Tm,T))
 	def getRotationTrajectory(self):
 		"""Returns an SO3Trajectory describing the rotation
 		trajectory."""
@@ -484,7 +484,7 @@ class SE3Trajectory(GeodesicTrajectory):
 		if localPt is None:
 			return Trajectory(times,[m[9:] for m in self.milestones])
 		else:
-			return Trajectory(times,[se3.apply((m[:9],m[9:]),localPt) for m in self.milestones])
+			return Trajectory(times,[se3.apply(self.to_se3(m),localPt) for m in self.milestones])
 	def constructor(self):
 		return SE3Trajectory
 
@@ -656,6 +656,7 @@ def path_to_trajectory(path,velocities='auto',timing='limited',smoothing='spline
 	    base timing.
 	  * 'L2': base timing is set proportional to L2 distance between milestones
 	  * 'Linf': base timing is set proportional to L-infinity distance between milestones
+	  * 'robot': base timing is set proportional to robot's distance function between milestones
 	  * a list or tuple: the base timing is given in this list
 	  * callable function f(a,b): sets the normalization to the function f(a,b).
 	- smoothing: if 'spline', the geometric path is first smoothed before assigning times.  Otherwise, the
@@ -698,6 +699,7 @@ def path_to_trajectory(path,velocities='auto',timing='limited',smoothing='spline
 	milestones = path
 	if isinstance(path,Trajectory):
 		milestones = path.milestones
+
 	_durations = None
 	if isinstance(timing,(list,tuple)):
 		_durations = timing
@@ -755,6 +757,8 @@ def path_to_trajectory(path,velocities='auto',timing='limited',smoothing='spline
 				durationfuncs = dict()
 				durationfuncs['L2'] = vectorops.distance
 				durationfuncs['Linf'] = lambda a,b:max(abs(u-v) for (u,v) in zip(a,b))
+				if hasattr(path,'robot'):
+					durationfuncs['robot'] = path.robot.distance
 				assert timing in durationfuncs,"Invalid duration function specified, valid values are: "+", ".join(durationfuncs.keys())
 				timing = durationfuncs[timing]
 				_durations = [timing(a,b) for a,b in zip(milestones[:-1],milestones[1:])]
@@ -772,7 +776,7 @@ def path_to_trajectory(path,velocities='auto',timing='limited',smoothing='spline
 				splits.append(i)
 		splits.append(len(milestones)-1)
 		if len(splits) > 2:
-			print "Splitting path into",len(splits)-1,"segments, starting and stopping between"
+			print "path_to_trajectory(): Splitting path into",len(splits)-1,"segments, starting and stopping between"
 			res = None
 			for i in xrange(len(splits)-1):
 				a,b = splits[i],splits[i+1]
@@ -806,8 +810,11 @@ def path_to_trajectory(path,velocities='auto',timing='limited',smoothing='spline
 		normalizedPath = hpath.configTrajectory()
 
 	if startvel != 0.0 or endvel != 0.0:
-		print "WARNING: respecting nonzero start/end velocity not implemented yet"
+		print "path_to_trajectory():WARNING: respecting nonzero start/end velocity not implemented yet"
 
+	#print "path_to_trajectory(): Total distance",totaldistance
+	if totaldistance == 0.0:
+		return normalizedPath
 	finalduration = totaldistance
 	evmax = 1
 	eamax = 0
@@ -864,9 +871,10 @@ def path_to_trajectory(path,velocities='auto',timing='limited',smoothing='spline
 		#T >= L sqrt(evmax^2 + vmax/amax eamax)
 		if finalduration < totaldistance*math.sqrt(evmax**2 + eamax):
 			finalduration = totaldistance*math.sqrt(evmax**2 + eamax)
-		print "Setting first guess of path duration to",finalduration
+		print "path_to_trajectory(): Setting first guess of path duration to",finalduration
 	res = normalizedPath.constructor()()
 	N = int(math.ceil(finalduration/dt))
+	assert N > 0
 	dt = finalduration / N
 	res.times=[0.0]*(N+1)
 	res.milestones = [None]*(N+1)
@@ -924,19 +932,19 @@ def path_to_trajectory(path,velocities='auto',timing='limited',smoothing='spline
 						#print "Previous velocity",path.difference(p,q,1.,dt)
 						scaling = math.sqrt(abs(x)/lim)
 						aLimitingTime = i
-		print "Velocity limit exceeded by factor of",vscaling,"at time",res.times[vLimitingTime]*max(scaling,vscaling)
-		print "Acceleration limit exceeded by factor of",scaling,"at time",res.times[aLimitingTime]*max(scaling,vscaling)
+		print "path_to_trajectory(): Velocity limit exceeded by factor of",vscaling,"at time",res.times[vLimitingTime]*max(scaling,vscaling)
+		print "path_to_trajectory(): Acceleration limit exceeded by factor of",scaling,"at time",res.times[aLimitingTime]*max(scaling,vscaling)
 		if velocities == 'trapezoidal':
 			#speed up until vscaling is hit
 			if vscaling < scaling:
-				print "Velocity maximum not hit"
+				print "path_to_trajectory(): Velocity maximum not hit"
 			else:
-				print "TODO: fiddle with velocity maximum."
+				print "path_to_trajectory(): TODO: fiddle with velocity maximum."
 				scaling = max(vscaling,scaling)
 				res.times = [t*scaling for t in res.times]
 		else:
 			scaling = max(vscaling,scaling)
-		print "Velocity / acceleration limiting yields a time expansion of",scaling
+		print "path_to_trajectory(): Velocity / acceleration limiting yields a time expansion of",scaling
 		res.times = vectorops.mul(res.times,scaling)
 	if speed != 1.0:
 		res.times = vectorops.mul(res.times,1.0/speed)

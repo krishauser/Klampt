@@ -3,6 +3,7 @@
 import sys
 from klampt import *
 from klampt.vis.glrobotprogram import *
+from klampt import vis
 
 #FOR DEFAULT JOINT-BY-JOINT KEYMAP: set keymap=None
 keymap = None
@@ -39,10 +40,10 @@ def build_default_keymap(world):
 
 
 
-class MyGLViewer(GLSimulationProgram):
+class MyGLViewer(GLSimulationPlugin):
     def __init__(self,world):
         global keymap
-        GLSimulationProgram.__init__(self,world,"My GL program")
+        GLSimulationPlugin.__init__(self,world)
         self.world = world
         if keymap == None:
             keymap = build_default_keymap(world)
@@ -77,10 +78,10 @@ class MyGLViewer(GLSimulationProgram):
             if state==0:
                 print [o.getName() for o in self.click_world(x,y)]
                 return
-        GLRealtimeProgram.mousefunc(self,button,state,x,y)
+        GLSimulationPlugin.mousefunc(self,button,state,x,y)
 
     def print_help(self):
-        GLSimulationProgram.print_help(self)
+        self.window.program.print_help()
         print 'Drive keys:',sorted(self.keymap.keys())
 
     def keyboardfunc(self,c,x,y):
@@ -88,8 +89,13 @@ class MyGLViewer(GLSimulationProgram):
         #the current example toggles simulation / movie mode
         if c in self.keymap:
             self.current_velocities[c]=self.keymap[c]
+            return True
+        elif c == '?':
+            self.print_help()
+            return True
         else:
-            GLSimulationProgram.keyboardfunc(self,c,x,y)
+            GLSimulationPlugin.keyboardfunc(self,c,x,y)
+            return True
         self.refresh()
 
     def keyboardupfunc(self,c,x,y):
@@ -108,5 +114,14 @@ if __name__ == "__main__":
         res = world.readFile(fn)
         if not res:
             raise RuntimeError("Unable to load model "+fn)
+
     viewer = MyGLViewer(world)
-    viewer.run()
+
+    print 
+    print "**********************"
+    print "       HELP"
+    print "Press 's' to start simulating."
+    print "Use 1,2,..,0 to increase the robot's joints and q,w,...,p to reduce them."
+    print "**********************"
+    print 
+    vis.run(viewer)

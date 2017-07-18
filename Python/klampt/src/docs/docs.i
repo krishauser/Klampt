@@ -501,7 +501,17 @@ are implemented in the Python API.
 
 C++ includes: robotik.h ";
 
-%feature("docstring")  IKObjective::IKObjective "";
+%feature("docstring")  IKObjective::IKObjective "
+
+Constructs a blank IKObjective. ";
+
+%feature("docstring")  IKObjective::IKObjective "
+
+Copy constructor. ";
+
+%feature("docstring")  IKObjective::copy "
+
+Copy constructor. ";
 
 %feature("docstring")  IKObjective::link "
 
@@ -645,9 +655,17 @@ can be sampled in case the prior configs lead to local minima.
 
 C++ includes: robotik.h ";
 
-%feature("docstring")  IKSolver::IKSolver "";
+%feature("docstring")  IKSolver::IKSolver "
 
-%feature("docstring")  IKSolver::IKSolver "";
+Creates an empty solver. ";
+
+%feature("docstring")  IKSolver::IKSolver "
+
+Copy constructor. ";
+
+%feature("docstring")  IKSolver::copy "
+
+Copy constructor. ";
 
 %feature("docstring")  IKSolver::add "
 
@@ -1216,6 +1234,16 @@ Returns a reference to the indexed driver. ";
 
 Returns a reference to the named driver. ";
 
+%feature("docstring")  RobotModel::getJointType "
+
+Returns the joint type of the joint connecting the indexed link to its
+parent. ";
+
+%feature("docstring")  RobotModel::getJointType "
+
+Returns the joint type of the joint connecting the named link to its
+parent. ";
+
 %feature("docstring")  RobotModel::getConfig "
 
 Retrieves the current configuration of the robot model. ";
@@ -1393,8 +1421,8 @@ robot's appearances is to set the link Appearance's directly. ";
 
 A reference to a driver of a RobotModel.
 
-A driver corresponds to one of the robot's actuators and its
-transmission.
+A driver corresponds to one of the robot's actuators and encodes how
+its forces are transmitted to joints.
 
 C++ includes: robotmodel.h ";
 
@@ -1611,6 +1639,10 @@ drawn. ";
 %feature("docstring")  RobotPoser::get "";
 
 %feature("docstring")  RobotPoser::getConditioned "";
+
+%feature("docstring")  RobotPoser::addIKConstraint "";
+
+%feature("docstring")  RobotPoser::clearIKConstraints "";
 
 
 // File: classSimBody.xml
@@ -2544,6 +2576,8 @@ Sets the random seed used by the motion planner. ";
 
 %feature("docstring")  std::destroyCSpace "";
 
+%feature("docstring")  std::getPreferredSpace "";
+
 %feature("docstring")  std::setPlanJSONString "
 
 Loads planner values from a JSON string. ";
@@ -2883,6 +2917,8 @@ empty. ";
 %feature("docstring")  DetachFromStream "";
 
 %feature("docstring")  ProcessStreams "";
+
+%feature("docstring")  WaitForStream "";
 
 %feature("docstring")  ThreeJSGetScene "
 

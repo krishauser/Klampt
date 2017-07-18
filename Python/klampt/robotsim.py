@@ -1513,6 +1513,14 @@ class RobotPoser(Widget):
         """getConditioned(RobotPoser self, doubleVector qref)"""
         return _robotsim.RobotPoser_getConditioned(self, *args)
 
+    def addIKConstraint(self, *args):
+        """addIKConstraint(RobotPoser self, IKObjective obj)"""
+        return _robotsim.RobotPoser_addIKConstraint(self, *args)
+
+    def clearIKConstraints(self):
+        """clearIKConstraints(RobotPoser self)"""
+        return _robotsim.RobotPoser_clearIKConstraints(self)
+
     __swig_destroy__ = _robotsim.delete_RobotPoser
     __del__ = lambda self : None;
 RobotPoser_swigregister = _robotsim.RobotPoser_swigregister
@@ -1926,8 +1934,8 @@ class RobotModelDriver(_object):
     """
     A reference to a driver of a RobotModel.
 
-    A driver corresponds to one of the robot's actuators and its
-    transmission.
+    A driver corresponds to one of the robot's actuators and encodes how
+    its forces are transmitted to joints.
 
     C++ includes: robotmodel.h 
     """
@@ -2135,6 +2143,16 @@ class RobotModel(_object):
         Returns a reference to the named driver. 
         """
         return _robotsim.RobotModel_driver(self, *args)
+
+    def getJointType(self, *args):
+        """
+        getJointType(RobotModel self, int index) -> char const
+        getJointType(RobotModel self, char const * name) -> char const *
+
+        Returns the joint type of the joint connecting the named link to its
+        parent. 
+        """
+        return _robotsim.RobotModel_getJointType(self, *args)
 
     def getConfig(self):
         """
@@ -2909,11 +2927,24 @@ class IKObjective(_object):
     __swig_getmethods__ = {}
     __getattr__ = lambda self, name: _swig_getattr(self, IKObjective, name)
     __repr__ = _swig_repr
-    def __init__(self): 
-        """__init__(IKObjective self) -> IKObjective"""
-        this = _robotsim.new_IKObjective()
+    def __init__(self, *args): 
+        """
+        __init__(IKObjective self) -> IKObjective
+        __init__(IKObjective self, IKObjective arg2) -> IKObjective
+
+        Copy constructor. 
+        """
+        this = _robotsim.new_IKObjective(*args)
         try: self.this.append(this)
         except: self.this = this
+    def copy(self):
+        """
+        copy(IKObjective self) -> IKObjective
+
+        Copy constructor. 
+        """
+        return _robotsim.IKObjective_copy(self)
+
     def link(self):
         """
         link(IKObjective self) -> int
@@ -3184,10 +3215,20 @@ class IKSolver(_object):
         """
         __init__(IKSolver self, RobotModel robot) -> IKSolver
         __init__(IKSolver self, IKSolver solver) -> IKSolver
+
+        Copy constructor. 
         """
         this = _robotsim.new_IKSolver(*args)
         try: self.this.append(this)
         except: self.this = this
+    def copy(self):
+        """
+        copy(IKSolver self) -> IKSolver
+
+        Copy constructor. 
+        """
+        return _robotsim.IKSolver_copy(self)
+
     def add(self, *args):
         """
         add(IKSolver self, IKObjective objective)

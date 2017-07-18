@@ -19,7 +19,13 @@ typedef _object PyObject;
 class IKObjective
 {
  public:
+  ///Constructs a blank IKObjective
   IKObjective();
+  ///Copy constructor
+  IKObjective(const IKObjective&);
+  ///Copy constructor
+  IKObjective copy() const;
+
   ///The index of the robot link that is constrained
   int link() const;
   ///The index of the destination link, or -1 if fixed to the world
@@ -113,8 +119,12 @@ class IKObjective
 class IKSolver
 {
  public:
+  ///Creates an empty solver
   IKSolver(const RobotModel& robot);
+  ///Copy constructor
   IKSolver(const IKSolver& solver);
+  ///Copy constructor
+  IKSolver copy() const;
 
   /// Adds a new simultaneous objective
   void add(const IKObjective& objective);

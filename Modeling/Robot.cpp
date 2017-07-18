@@ -2792,6 +2792,10 @@ bool Robot::LoadURDF(const char* fn)
 		this->velMin[link_index] = -Inf;
 		this->torqueMax[link_index] = Inf;
 		this->powerMax[link_index] = Inf;
+		if(link_index == 5 && floating) {
+			this->torqueMax[link_index] = 0;
+			this->powerMax[link_index] = 0;
+		}
 		//set joint
 		urdf::Joint* joint = linkNode->joint;
 		if (joint) {

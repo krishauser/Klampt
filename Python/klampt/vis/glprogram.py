@@ -307,6 +307,9 @@ class GLProgram:
         except ImportError:
             print "Cannot save screens to disk, the Python Imaging Library is not installed"
             return
+        if hasattr(self.window,'makeCurrent'):
+            self.window.makeCurrent()
+        glReadBuffer(GL_FRONT);
         screenshot = glReadPixels( self.view.x, self.view.y, self.view.w, self.view.h, GL_RGBA, GL_UNSIGNED_BYTE)
         im = Image.frombuffer("RGBA", (self.view.w, self.view.h), screenshot, "raw", "RGBA", 0, 0)
         print "Saving screen to",fn

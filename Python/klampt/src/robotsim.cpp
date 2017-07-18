@@ -29,6 +29,7 @@
 #include <ode/ode.h>
 #include "pyerr.h"
 #include "pyconvert.h"
+#include "robotik.h"
 #include <fstream>
 #ifndef WIN32
 #include <unistd.h>
@@ -2362,6 +2363,7 @@ RobotModel::RobotModel()
 
 const char* RobotModel::getName() const
 {
+  if(index < 0) throw PyException("Robot is empty");
   RobotWorld& world = *worlds[this->world]->world;
   return world.robots[index]->name.c_str();
 }
@@ -2378,12 +2380,14 @@ void RobotModel::setName(const char* name)
 
 int RobotModel::getID() const
 {
+  if(index < 0) return -1;
   RobotWorld& world = *worlds[this->world]->world;
   return world.RobotID(index);
 }
 
 int RobotModel::numLinks()
 {
+  if(index < 0) return -1;
   return robot->links.size();
 }
 
@@ -2442,6 +2446,33 @@ RobotModelDriver RobotModel::driver(const char* name)
   link.robotIndex = index;
   link.index = -1;
   return link;
+}
+
+const char* RobotModel::getJointType(int dofIndex)
+{
+  if(index < 0) throw PyException("Empty robot");
+  for(size_t i=0;i<robot->joints.size();i++) {
+    if(robot->DoesJointAffect((int)i,dofIndex)) {
+      switch(robot->joints[i].type) {
+      case RobotJoint::Weld: return "weld";
+      case RobotJoint::Normal: return "normal";
+      case RobotJoint::Spin: return "spin";
+      case RobotJoint::Floating: return "floating";
+      case RobotJoint::FloatingPlanar: return "floatingplanar";
+      case RobotJoint::BallAndSocket: return "ballandsocket";
+      default:
+        return "invalid joint type?";
+      }
+    }
+  }
+  throw PyException("DOF is not affected by any joint definition?");
+}
+
+const char* RobotModel::getJointType(const char* name)
+{
+  RobotModelLink l = link(name);
+  if(l.index < 0) throw PyException("Invalid DOF named");
+  return getJointType(l.index);
 }
 
 
@@ -4354,6 +4385,20 @@ void RobotPoser::getConditioned(const std::vector<double>& qref,std::vector<doub
   tw->Pose_Conditioned(Config(qref)).getCopy(&out[0]);
 }
 
+void RobotPoser::addIKConstraint(const IKObjective& obj)
+{
+  RobotPoseWidget* tw=dynamic_cast<RobotPoseWidget*>(&*widgets[index].widget);
+  tw->ikPoser.ClearLink(obj.goal.link);
+  tw->ikPoser.Add(obj.goal);
+  tw->ikPoser.Enable(&tw->ikPoser.poseWidgets.back(),false);
+}
+
+void RobotPoser::clearIKConstraints()
+{
+  RobotPoseWidget* tw=dynamic_cast<RobotPoseWidget*>(&*widgets[index].widget);
+  tw->ikPoser.poseGoals.clear();
+  tw->ikPoser.poseWidgets.clear();
+}
 
 
 

@@ -38,6 +38,7 @@ class GLSimulationPlugin(GLPluginInterface):
         self.collider = collide.WorldCollider(world)
         self.sim = SimpleSimulator(world)
         self.simulate = False
+        self.dt = 0.02
 
         #turn this on to draw contact points
         self.drawContacts = False
@@ -89,12 +90,21 @@ class GLSimulationPlugin(GLPluginInterface):
                 except ImportError:
                     pass
                 self.htmlSharePath.end()
+        def single_step():
+            print "Advancing by 0.01s"
+            self.simStep(0.01)
         self.add_action(toggle_simulate,'Toggle simulation','s')
+        self.add_action(single_step,'Step simulation',' ')
         self.add_action(toggle_movie_mode,'Toggle movie mode','m')
         self.add_action(self.sim.toggleLogging,'Toggle simulation logging','l')
         self.add_action(toggle_draw_contacts,'Toggle draw contacts','c')
         self.add_action(toggle_draw_sensors,'Toggle draw sensors','v')
         self.add_action(share_path,'Begin/finalize logging path to HTML','w')
+
+    def initialize(self):
+        #match window refresh rate
+        self.dt = self.window.program.dt
+        return GLPluginInterface.initialize(self)
 
     def display(self):
         #Put your display handler here
@@ -149,29 +159,35 @@ class GLSimulationPlugin(GLPluginInterface):
         """Overload this to perform custom control handling."""
         pass
 
+    def simStep(self,dt=None):
+        """Advance the simulation and update the GUI"""
+        if dt is None:
+            dt = self.dt
+        if self.sim.getTime() == 0:
+            self.sim.simulate(0)
+
+        #Handle screenshots
+        if self.saveScreenshots:
+            #The following line saves movies on simulation time
+            if self.sim.getTime() >= self.nextScreenshotTime:
+            #The following line saves movies on wall clock time
+            #if self.ttotal >= self.nextScreenshotTime:
+                self.save_screen("image%04d.ppm"%(self.screenshotCount,))
+            self.screenshotCount += 1
+            self.nextScreenshotTime += 1.0/30.0;
+
+        if self.htmlSharePath:
+            self.htmlSharePath.animate()
+
+        self.control_loop()
+        self.sim.simulate(dt)
+        self.refresh()
+
     def idle(self):
         #Put your idle loop handler here
         #the current example simulates with the current time step self.dt
         if self.simulate:
-            if self.sim.getTime() == 0:
-                self.sim.simulate(0)
-
-            #Handle screenshots
-            if self.saveScreenshots:
-                #The following line saves movies on simulation time
-                if self.sim.getTime() >= self.nextScreenshotTime:
-                #The following line saves movies on wall clock time
-                #if self.ttotal >= self.nextScreenshotTime:
-                    self.save_screen("image%04d.ppm"%(self.screenshotCount,))
-                self.screenshotCount += 1
-                self.nextScreenshotTime += 1.0/30.0;
-
-            if self.htmlSharePath:
-                self.htmlSharePath.animate()
-
-            self.control_loop()
-            self.sim.simulate(self.window.program.dt)
-            self.refresh()
+            self.simStep()
         return True
 
     def mousefunc(self,button,state,x,y):

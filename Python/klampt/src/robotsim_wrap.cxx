@@ -25497,6 +25497,84 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_RobotPoser_addIKConstraint(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  RobotPoser *arg1 = (RobotPoser *) 0 ;
+  IKObjective *arg2 = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:RobotPoser_addIKConstraint",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_RobotPoser, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "RobotPoser_addIKConstraint" "', argument " "1"" of type '" "RobotPoser *""'"); 
+  }
+  arg1 = reinterpret_cast< RobotPoser * >(argp1);
+  res2 = SWIG_ConvertPtr(obj1, &argp2, SWIGTYPE_p_IKObjective,  0  | 0);
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "RobotPoser_addIKConstraint" "', argument " "2"" of type '" "IKObjective const &""'"); 
+  }
+  if (!argp2) {
+    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "RobotPoser_addIKConstraint" "', argument " "2"" of type '" "IKObjective const &""'"); 
+  }
+  arg2 = reinterpret_cast< IKObjective * >(argp2);
+  {
+    try {
+      (arg1)->addIKConstraint((IKObjective const &)*arg2);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_RobotPoser_clearIKConstraints(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  RobotPoser *arg1 = (RobotPoser *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:RobotPoser_clearIKConstraints",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_RobotPoser, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "RobotPoser_clearIKConstraints" "', argument " "1"" of type '" "RobotPoser *""'"); 
+  }
+  arg1 = reinterpret_cast< RobotPoser * >(argp1);
+  {
+    try {
+      (arg1)->clearIKConstraints();
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_delete_RobotPoser(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   RobotPoser *arg1 = (RobotPoser *) 0 ;
@@ -29496,6 +29574,143 @@ fail:
     "  Possible C/C++ prototypes are:\n"
     "    RobotModel::driver(int)\n"
     "    RobotModel::driver(char const *)\n");
+  return 0;
+}
+
+
+SWIGINTERN PyObject *_wrap_RobotModel_getJointType__SWIG_0(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  RobotModel *arg1 = (RobotModel *) 0 ;
+  int arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  char *result = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:RobotModel_getJointType",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_RobotModel, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "RobotModel_getJointType" "', argument " "1"" of type '" "RobotModel *""'"); 
+  }
+  arg1 = reinterpret_cast< RobotModel * >(argp1);
+  ecode2 = SWIG_AsVal_int(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "RobotModel_getJointType" "', argument " "2"" of type '" "int""'");
+  } 
+  arg2 = static_cast< int >(val2);
+  {
+    try {
+      result = (char *)(arg1)->getJointType(arg2);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_FromCharPtr((const char *)result);
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_RobotModel_getJointType__SWIG_1(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  RobotModel *arg1 = (RobotModel *) 0 ;
+  char *arg2 = (char *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int res2 ;
+  char *buf2 = 0 ;
+  int alloc2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  char *result = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:RobotModel_getJointType",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_RobotModel, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "RobotModel_getJointType" "', argument " "1"" of type '" "RobotModel *""'"); 
+  }
+  arg1 = reinterpret_cast< RobotModel * >(argp1);
+  res2 = SWIG_AsCharPtrAndSize(obj1, &buf2, NULL, &alloc2);
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "RobotModel_getJointType" "', argument " "2"" of type '" "char const *""'");
+  }
+  arg2 = reinterpret_cast< char * >(buf2);
+  {
+    try {
+      result = (char *)(arg1)->getJointType((char const *)arg2);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_FromCharPtr((const char *)result);
+  if (alloc2 == SWIG_NEWOBJ) delete[] buf2;
+  return resultobj;
+fail:
+  if (alloc2 == SWIG_NEWOBJ) delete[] buf2;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_RobotModel_getJointType(PyObject *self, PyObject *args) {
+  int argc;
+  PyObject *argv[3];
+  int ii;
+  
+  if (!PyTuple_Check(args)) SWIG_fail;
+  argc = args ? (int)PyObject_Length(args) : 0;
+  for (ii = 0; (ii < 2) && (ii < argc); ii++) {
+    argv[ii] = PyTuple_GET_ITEM(args,ii);
+  }
+  if (argc == 2) {
+    int _v;
+    void *vptr = 0;
+    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_RobotModel, 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      {
+        int res = SWIG_AsVal_int(argv[1], NULL);
+        _v = SWIG_CheckState(res);
+      }
+      if (_v) {
+        return _wrap_RobotModel_getJointType__SWIG_0(self, args);
+      }
+    }
+  }
+  if (argc == 2) {
+    int _v;
+    void *vptr = 0;
+    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_RobotModel, 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      int res = SWIG_AsCharPtrAndSize(argv[1], 0, NULL, 0);
+      _v = SWIG_CheckState(res);
+      if (_v) {
+        return _wrap_RobotModel_getJointType__SWIG_1(self, args);
+      }
+    }
+  }
+  
+fail:
+  SWIG_SetErrorMsg(PyExc_NotImplementedError,"Wrong number or type of arguments for overloaded function 'RobotModel_getJointType'.\n"
+    "  Possible C/C++ prototypes are:\n"
+    "    RobotModel::getJointType(int)\n"
+    "    RobotModel::getJointType(char const *)\n");
   return 0;
 }
 
@@ -35645,7 +35860,7 @@ SWIGINTERN PyObject *WorldModel_swigregister(PyObject *SWIGUNUSEDPARM(self), PyO
   return SWIG_Py_Void();
 }
 
-SWIGINTERN PyObject *_wrap_new_IKObjective(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_new_IKObjective__SWIG_0(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   IKObjective *result = 0 ;
   
@@ -35664,6 +35879,108 @@ SWIGINTERN PyObject *_wrap_new_IKObjective(PyObject *SWIGUNUSEDPARM(self), PyObj
     }
   }
   resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_IKObjective, SWIG_POINTER_NEW |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_new_IKObjective__SWIG_1(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  IKObjective *arg1 = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  IKObjective *result = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:new_IKObjective",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1, SWIGTYPE_p_IKObjective,  0  | 0);
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "new_IKObjective" "', argument " "1"" of type '" "IKObjective const &""'"); 
+  }
+  if (!argp1) {
+    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "new_IKObjective" "', argument " "1"" of type '" "IKObjective const &""'"); 
+  }
+  arg1 = reinterpret_cast< IKObjective * >(argp1);
+  {
+    try {
+      result = (IKObjective *)new IKObjective((IKObjective const &)*arg1);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_IKObjective, SWIG_POINTER_NEW |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_new_IKObjective(PyObject *self, PyObject *args) {
+  int argc;
+  PyObject *argv[2];
+  int ii;
+  
+  if (!PyTuple_Check(args)) SWIG_fail;
+  argc = args ? (int)PyObject_Length(args) : 0;
+  for (ii = 0; (ii < 1) && (ii < argc); ii++) {
+    argv[ii] = PyTuple_GET_ITEM(args,ii);
+  }
+  if (argc == 0) {
+    return _wrap_new_IKObjective__SWIG_0(self, args);
+  }
+  if (argc == 1) {
+    int _v;
+    int res = SWIG_ConvertPtr(argv[0], 0, SWIGTYPE_p_IKObjective, 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      return _wrap_new_IKObjective__SWIG_1(self, args);
+    }
+  }
+  
+fail:
+  SWIG_SetErrorMsg(PyExc_NotImplementedError,"Wrong number or type of arguments for overloaded function 'new_IKObjective'.\n"
+    "  Possible C/C++ prototypes are:\n"
+    "    IKObjective::IKObjective()\n"
+    "    IKObjective::IKObjective(IKObjective const &)\n");
+  return 0;
+}
+
+
+SWIGINTERN PyObject *_wrap_IKObjective_copy(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  IKObjective *arg1 = (IKObjective *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  IKObjective result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:IKObjective_copy",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_IKObjective, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IKObjective_copy" "', argument " "1"" of type '" "IKObjective const *""'"); 
+  }
+  arg1 = reinterpret_cast< IKObjective * >(argp1);
+  {
+    try {
+      result = ((IKObjective const *)arg1)->copy();
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_NewPointerObj((new IKObjective(static_cast< const IKObjective& >(result))), SWIGTYPE_p_IKObjective, SWIG_POINTER_OWN |  0 );
   return resultobj;
 fail:
   return NULL;
@@ -37445,6 +37762,40 @@ fail:
     "    IKSolver::IKSolver(RobotModel const &)\n"
     "    IKSolver::IKSolver(IKSolver const &)\n");
   return 0;
+}
+
+
+SWIGINTERN PyObject *_wrap_IKSolver_copy(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  IKSolver *arg1 = (IKSolver *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  SwigValueWrapper< IKSolver > result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:IKSolver_copy",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_IKSolver, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IKSolver_copy" "', argument " "1"" of type '" "IKSolver const *""'"); 
+  }
+  arg1 = reinterpret_cast< IKSolver * >(argp1);
+  {
+    try {
+      result = ((IKSolver const *)arg1)->copy();
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_NewPointerObj((new IKSolver(static_cast< const IKSolver& >(result))), SWIGTYPE_p_IKSolver, SWIG_POINTER_OWN |  0 );
+  return resultobj;
+fail:
+  return NULL;
 }
 
 
@@ -49973,6 +50324,8 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"RobotPoser_set", _wrap_RobotPoser_set, METH_VARARGS, (char *)"RobotPoser_set(RobotPoser self, doubleVector q)"},
 	 { (char *)"RobotPoser_get", _wrap_RobotPoser_get, METH_VARARGS, (char *)"RobotPoser_get(RobotPoser self)"},
 	 { (char *)"RobotPoser_getConditioned", _wrap_RobotPoser_getConditioned, METH_VARARGS, (char *)"RobotPoser_getConditioned(RobotPoser self, doubleVector qref)"},
+	 { (char *)"RobotPoser_addIKConstraint", _wrap_RobotPoser_addIKConstraint, METH_VARARGS, (char *)"RobotPoser_addIKConstraint(RobotPoser self, IKObjective obj)"},
+	 { (char *)"RobotPoser_clearIKConstraints", _wrap_RobotPoser_clearIKConstraints, METH_VARARGS, (char *)"RobotPoser_clearIKConstraints(RobotPoser self)"},
 	 { (char *)"delete_RobotPoser", _wrap_delete_RobotPoser, METH_VARARGS, (char *)"delete_RobotPoser(RobotPoser self)"},
 	 { (char *)"RobotPoser_swigregister", RobotPoser_swigregister, METH_VARARGS, NULL},
 	 { (char *)"Mass_setMass", _wrap_Mass_setMass, METH_VARARGS, (char *)"Mass_setMass(Mass self, double _mass)"},
@@ -50283,6 +50636,13 @@ static PyMethodDef SwigMethods[] = {
 		"RobotModel_driver(RobotModel self, char const * name) -> RobotModelDriver\n"
 		"\n"
 		"Returns a reference to the named driver. \n"
+		""},
+	 { (char *)"RobotModel_getJointType", _wrap_RobotModel_getJointType, METH_VARARGS, (char *)"\n"
+		"getJointType(int index) -> char const\n"
+		"RobotModel_getJointType(RobotModel self, char const * name) -> char const *\n"
+		"\n"
+		"Returns the joint type of the joint connecting the named link to its\n"
+		"parent. \n"
 		""},
 	 { (char *)"RobotModel_getConfig", _wrap_RobotModel_getConfig, METH_VARARGS, (char *)"\n"
 		"RobotModel_getConfig(RobotModel self)\n"
@@ -50711,7 +51071,17 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"WorldModel_index_set", _wrap_WorldModel_index_set, METH_VARARGS, (char *)"WorldModel_index_set(WorldModel self, int index)"},
 	 { (char *)"WorldModel_index_get", _wrap_WorldModel_index_get, METH_VARARGS, (char *)"WorldModel_index_get(WorldModel self) -> int"},
 	 { (char *)"WorldModel_swigregister", WorldModel_swigregister, METH_VARARGS, NULL},
-	 { (char *)"new_IKObjective", _wrap_new_IKObjective, METH_VARARGS, (char *)"new_IKObjective() -> IKObjective"},
+	 { (char *)"new_IKObjective", _wrap_new_IKObjective, METH_VARARGS, (char *)"\n"
+		"IKObjective()\n"
+		"new_IKObjective(IKObjective arg1) -> IKObjective\n"
+		"\n"
+		"Copy constructor. \n"
+		""},
+	 { (char *)"IKObjective_copy", _wrap_IKObjective_copy, METH_VARARGS, (char *)"\n"
+		"IKObjective_copy(IKObjective self) -> IKObjective\n"
+		"\n"
+		"Copy constructor. \n"
+		""},
 	 { (char *)"IKObjective_link", _wrap_IKObjective_link, METH_VARARGS, (char *)"\n"
 		"IKObjective_link(IKObjective self) -> int\n"
 		"\n"
@@ -50872,6 +51242,13 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"new_IKSolver", _wrap_new_IKSolver, METH_VARARGS, (char *)"\n"
 		"IKSolver(RobotModel robot)\n"
 		"new_IKSolver(IKSolver solver) -> IKSolver\n"
+		"\n"
+		"Copy constructor. \n"
+		""},
+	 { (char *)"IKSolver_copy", _wrap_IKSolver_copy, METH_VARARGS, (char *)"\n"
+		"IKSolver_copy(IKSolver self) -> IKSolver\n"
+		"\n"
+		"Copy constructor. \n"
 		""},
 	 { (char *)"IKSolver_add", _wrap_IKSolver_add, METH_VARARGS, (char *)"\n"
 		"IKSolver_add(IKSolver self, IKObjective objective)\n"
