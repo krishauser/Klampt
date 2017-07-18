@@ -96,9 +96,9 @@ void ThreeJSExport(const RobotWorld& world,AnyCollection& out,ThreeJSCache& cach
       ThreeJSExportGeometry(world.robots[i]->geomManagers[j],geom,cache);
       ThreeJSExportAppearance(world.robots[i]->geomManagers[j],mat,cache);
       if(geom.ismap()) 
-	geometries[geometries.size()] = geom;
+  geometries[geometries.size()] = geom;
       if(mat.ismap()) 
-	materials[materials.size()] = mat;
+  materials[materials.size()] = mat;
     }
   }
   for(size_t i=0;i<world.rigidObjects.size();i++) {
@@ -300,8 +300,8 @@ void ThreeJSExport(const Robot& robot,AnyCollection& out,ThreeJSCache& cache)
       clist = &out["children"];
     else {
       if(!clists[robot.parents[i]])
-	//add children element
-	clists[robot.parents[i]] = &(*llists[robot.parents[i]])["children"];
+  //add children element
+  clists[robot.parents[i]] = &(*llists[robot.parents[i]])["children"];
       clist = clists[robot.parents[i]];
     }
     //this accessor automatically appends to the array

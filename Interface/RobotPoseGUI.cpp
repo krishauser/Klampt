@@ -450,6 +450,7 @@ bool RobotPoseBackend::OnCommand(const string& cmd,const string& args)
       r->fileName = oldr->fileName;
 
       resources->selected->resource = r;
+      resources->selected->SetChanged();
       if(resources->selected->IsExpanded()) {
         fprintf(stderr,"Warning, don't know how clearing children will be reflected in GUI\n");
         resources->selected->ClearExpansion();
@@ -462,14 +463,19 @@ bool RobotPoseBackend::OnCommand(const string& cmd,const string& args)
     if(rc) {
       Vector q = robotWidgets[0].Pose();
       q=rc->data;
-      robotWidgets[0].SetPose(q);
-      /*
-      robotWidgets[0].SetPose(rc->data);
-      robot->NormalizeAngles(robotWidgets[0].linkPoser.poseConfig);
-      if(robotWidgets[0].linkPoser.poseConfig != rc->data)
-	printf("Warning: config in library is not normalized\n");
-      */
-      UpdateConfig();
+      if(q.n == robot->q.n) {
+        robotWidgets[0].SetPose(q);
+        /*
+        robotWidgets[0].SetPose(rc->data);
+        robot->NormalizeAngles(robotWidgets[0].linkPoser.poseConfig);
+        if(robotWidgets[0].linkPoser.poseConfig != rc->data)
+    printf("Warning: config in library is not normalized\n");
+        */
+        UpdateConfig();
+      }
+      else {
+        fprintf(stderr,"Can't copy this Config to the poser, it is not the same size\n");
+      }
     }
     else {
       const IKGoalResource* rc = dynamic_cast<const IKGoalResource*>((const ResourceBase*)r);
@@ -821,6 +827,14 @@ bool RobotPoseBackend::OnCommand(const string& cmd,const string& args)
     robot->SetDriverValue(cur_driver,driver_value);
     robotWidgets[0].SetPose(robot->q);
   }
+  else if(cmd == "undo_pose") {
+    for(size_t i=0;i<world->robots.size();i++) 
+      if(lastActiveWidget == &robotWidgets[i]) {
+        printf("Undoing robot poser %d\n",i);
+        robotWidgets[i].Undo();
+        UpdateConfig();
+      }
+  }
   else {
     return ResourceGUIBackend::OnCommand(cmd,args);
   }
@@ -833,8 +847,10 @@ void RobotPoseBackend::BeginDrag(int x,int y,int button,int modifiers)
   Robot* robot = world->robots[0];
   if(button == GLUT_RIGHT_BUTTON) {
     double d;
-    if(allWidgets.BeginDrag(x,viewport.h-y,viewport,d))
+    if(allWidgets.BeginDrag(x,viewport.h-y,viewport,d)) {
       allWidgets.SetFocus(true);
+      lastActiveWidget = allWidgets.activeWidget;
+    }
     else
       allWidgets.SetFocus(false);
     if(allWidgets.requestRedraw) { SendRefresh(); allWidgets.requestRedraw=false; }

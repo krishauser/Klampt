@@ -139,8 +139,8 @@ class RobotModelLink
 
 /** @brief A reference to a driver of a RobotModel.
  * 
- * A driver corresponds to one of the robot's actuators and its
- * transmission.
+ * A driver corresponds to one of the robot's actuators and encodes how its
+ * forces are transmitted to joints.
  */
 class RobotModelDriver
 {
@@ -222,6 +222,10 @@ class RobotModel
   RobotModelDriver driver(int index);
   ///Returns a reference to the named driver.
   RobotModelDriver driver(const char* name);
+  ///Returns the joint type of the joint connecting the indexed link to its parent
+  const char* getJointType(int index);
+  ///Returns the joint type of the joint connecting the named link to its parent
+  const char* getJointType(const char* name);
 
   //kinematic and dynamic properties
   ///Retreives the current configuration of the robot model.

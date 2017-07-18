@@ -467,6 +467,7 @@ def spin(duration):
         if not shown(): break
         time.sleep(min(0.04,duration-t))
         t += 0.04
+    show(False)
     return
 
 def lock():
@@ -871,7 +872,7 @@ def savePlot(name,fn):
     global _vis
     if _vis==None:
         return
-    _vis.savePlot(fn)
+    _vis.savePlot(name,fn)
 
 def autoFitCamera(scale=1):
     global _vis
@@ -944,12 +945,19 @@ class VisPlotItem:
             self.itemnames = config.getConfigNames(linkitem.item)
 
     def customUpdate(self,item,t,v):
-        for i,trace in enumerate(self.itemnames):
+        for i,itemname in enumerate(self.itemnames):
             if item == itemname:
                 self.updateTrace(i,t,v)
                 self.traceRanges[i] = (min(self.traceRanges[i][0],v),max(self.traceRanges[i][1],v))
-                return    
-        raise ValueError("Invalid item specified: "+str(item))
+                return
+        else:
+            from collections import deque
+            self.itemnames.append(item)
+            self.traces.append(deque())
+            i = len(self.itemnames)-1
+            self.updateTrace(i,t,v)
+            self.traceRanges[i] = (min(self.traceRanges[i][0],v),max(self.traceRanges[i][1],v))
+        #raise ValueError("Invalid item specified: "+str(item))
 
     def update(self,t):
         if self.linkitem is None:
@@ -986,6 +994,9 @@ class VisPlotItem:
                 else:
                     self.luminosity.append(random.uniform(0,1))
         trace = self.traces[i]
+        if len(trace) > 0 and trace[-1][0] == t:
+            trace[-1] = (t,v)
+            return
         if self.compressThreshold is None:
             trace.append((t,v))
         else:
@@ -993,11 +1004,12 @@ class VisPlotItem:
                 trace.append((t,v))
             else:
                 pprev = trace[-2]
-                prev = trace[-1] 
+                prev = trace[-1]
+                assert prev > pprev,"Added two items with the same time?"
                 assert t > prev[0]
                 slope_old = (prev[1]-pprev[1])/(prev[0]-pprev[0])
                 slope_new = (v-prev[1])/(t-prev[0])
-                if abs(slope_old-slope_new) > self.compressThreshold:
+                if (slope_old > 0 != slope_new > 0) or abs(slope_old-slope_new) > self.compressThreshold:
                     trace.append((t,v))
                 else:
                     #near-linear, just extend along straight line
@@ -1155,11 +1167,17 @@ class VisPlot:
         self.outfile = open(fn,'w')
         if self.outformat == '.csv':
             #output a header
-            self.outfile.write("time,")
+            self.outfile.write("time")
             for i in self.items:
+                self.outfile.write(",")
                 fullitemnames = []
                 if len(i.name) != 0:
-                    fullitemnames = [i.name+'.'+itemname for itemname in i.itemnames]
+                    name = None
+                    if isinstance(i.name,(list,tuple)):
+                        name = '.'.join(v for v in i.name)
+                    else:
+                        name = i.name
+                    fullitemnames = [name+'.'+itemname for itemname in i.itemnames]
                 else:
                     fullitemnames = i.itemnames
                 self.outfile.write(",".join(fullitemnames))
@@ -1178,29 +1196,32 @@ class VisPlot:
         mint = float('inf')
         maxt = -float('inf')
         for i in self.items:
-            if len(i.trace) == 0:
+            if len(i.traces) == 0:
                 continue
-            for j,trace in enumerate(i.trace):
-                traj = Trajectory(*zip(*trace))
+            for j,trace in enumerate(i.traces):
+                times,vals = zip(*trace)
+                if isinstance(vals[0],(int,float)):
+                    vals = [[v] for v in vals]
+                traj = Trajectory(times,vals)
                 cols.append(traj)
                 mint = min(mint,traj.times[0])
                 maxt = max(maxt,traj.times[-1])
                 for k in xrange(len(traj.times)-1):
                     mindt = min(mindt,traj.times[k+1] - traj.times[k])
-        assert mindt > 0
+        assert mindt > 0, "For some reason, there is a duplicate time?"
         N = int((maxt - mint)/mindt)
         dt = (maxt - mint)/N
         times = [mint + i*(maxt-mint)/N for i in range(N+1)]
         for i in xrange(N+1):
-            vals = [col.evaluate(times[i]) for col in cols]
+            vals = [col.eval(times[i]) for col in cols]
             if self.outformat == '.csv':
                 self.outfile.write(str(times[i])+',')
-                self.outfile.write(','.join([str(v) for v in vals]))
+                self.outfile.write(','.join([str(v[0]) for v in vals]))
                 self.outfile.write('\n')
             else:
                 self.outfile.write(str(times[i])+'\t')
                 self.outfile.write(str(len(vals))+' ')
-                self.outfile.write(' '.join([str(v) for v in vals]))
+                self.outfile.write(' '.join([str(v[0]) for v in vals]))
                 self.outfile.write('\n')
 
     def dumpCurrent(self):
@@ -1363,6 +1384,7 @@ class VisAppearance:
         if self.hidden: return
         if self.customDrawFunc is not None:
           self.customDrawFunc(self.item)
+          return
        
         item = self.item
         name = self.name
@@ -2308,8 +2330,8 @@ class VisualizationPlugin(glcommon.GLWidgetPlugin):
         if customIndex < 0:
             customIndex = len(plot.items)
             plot.items.append(VisPlotItem('',None))
-        plot.items[customItem].compressThreshold = compress
-        plot.items[customItem].customUpdate(itemname,self.t - self.startTime,value)
+        plot.items[customIndex].compressThreshold = compress
+        plot.items[customIndex].customUpdate(itemname,self.t - self.startTime,value)
         _globalLock.release()
 
     def logPlotEvent(self,plotname,eventname,color):

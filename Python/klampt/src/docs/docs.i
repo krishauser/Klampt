@@ -417,24 +417,6 @@ supported. ";
 Saves to file. Standard mesh types, PCD files, and .geom files are
 supported. ";
 
-%feature("docstring")  Geometry3D::attachToStream "
-
-Attaches this geometry to a given stream.
-
-Currently only \"ros\" protocol is supported. For \"ros\" protocol,
-name is the ROS topic to attach to. type indicates the datatype that
-the stream source should have, and this will return false if that type
-is not obeyed. Currently only the \"PointCloud\" or default empty
-(\"\") types are supported.
-
-Note: you will need to call Appearance.refresh(True) to get the
-appearance to update. ";
-
-%feature("docstring")  Geometry3D::detachFromStream "
-
-Detaches this geometry from a given stream. This must be called before
-deleting a piece of geometry. ";
-
 %feature("docstring")  Geometry3D::setCurrentTransform "
 
 Sets the current transformation (not modifying the underlying data) ";
@@ -519,7 +501,17 @@ are implemented in the Python API.
 
 C++ includes: robotik.h ";
 
-%feature("docstring")  IKObjective::IKObjective "";
+%feature("docstring")  IKObjective::IKObjective "
+
+Constructs a blank IKObjective. ";
+
+%feature("docstring")  IKObjective::IKObjective "
+
+Copy constructor. ";
+
+%feature("docstring")  IKObjective::copy "
+
+Copy constructor. ";
 
 %feature("docstring")  IKObjective::link "
 
@@ -663,9 +655,17 @@ can be sampled in case the prior configs lead to local minima.
 
 C++ includes: robotik.h ";
 
-%feature("docstring")  IKSolver::IKSolver "";
+%feature("docstring")  IKSolver::IKSolver "
 
-%feature("docstring")  IKSolver::IKSolver "";
+Creates an empty solver. ";
+
+%feature("docstring")  IKSolver::IKSolver "
+
+Copy constructor. ";
+
+%feature("docstring")  IKSolver::copy "
+
+Copy constructor. ";
 
 %feature("docstring")  IKSolver::add "
 
@@ -1234,6 +1234,16 @@ Returns a reference to the indexed driver. ";
 
 Returns a reference to the named driver. ";
 
+%feature("docstring")  RobotModel::getJointType "
+
+Returns the joint type of the joint connecting the indexed link to its
+parent. ";
+
+%feature("docstring")  RobotModel::getJointType "
+
+Returns the joint type of the joint connecting the named link to its
+parent. ";
+
 %feature("docstring")  RobotModel::getConfig "
 
 Retreives the current configuration of the robot model. ";
@@ -1411,8 +1421,8 @@ robot's appearances is to set the link Appearance's directly. ";
 
 A reference to a driver of a RobotModel.
 
-A driver corresponds to one of the robot's actuators and its
-transmission.
+A driver corresponds to one of the robot's actuators and encodes how
+its forces are transmitted to joints.
 
 C++ includes: robotmodel.h ";
 
@@ -1629,6 +1639,10 @@ drawn. ";
 %feature("docstring")  RobotPoser::get "";
 
 %feature("docstring")  RobotPoser::getConditioned "";
+
+%feature("docstring")  RobotPoser::addIKConstraint "";
+
+%feature("docstring")  RobotPoser::clearIKConstraints "";
 
 
 // File: classSimBody.xml
@@ -2566,6 +2580,8 @@ Sets the random seed used by the motion planner. ";
 
 %feature("docstring")  std::destroyCSpace "";
 
+%feature("docstring")  std::getPreferredSpace "";
+
 %feature("docstring")  std::setPlanJSONString "
 
 Loads planner values from a JSON string. ";
@@ -2899,6 +2915,22 @@ empty. ";
 %feature("docstring")  equilibriumTorques "";
 
 %feature("docstring")  equilibriumTorques "";
+
+%feature("docstring")  SubscribeToStream "";
+
+%feature("docstring")  DetachFromStream "";
+
+%feature("docstring")  ProcessStreams "";
+
+%feature("docstring")  WaitForStream "";
+
+%feature("docstring")  ThreeJSGetScene "
+
+Exports the WorldModel to a JSON string ready for use in Three.js. ";
+
+%feature("docstring")  ThreeJSGetTransforms "
+
+Exports the WorldModel to a JSON string ready for use in Three.js. ";
 
 
 // File: robotsim_8h.xml

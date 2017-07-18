@@ -60,6 +60,10 @@ class SimLogger:
             elements.append(n+'_cmy')
             elements.append(n+'_cmz')
             for j in xrange(world.robot(i).numLinks()):
+                elements.append(n+'_qcmd['+world.robot(i).link(j).getName()+']')
+            for j in xrange(world.robot(i).numLinks()):
+                elements.append(n+'_dqcmd['+world.robot(i).link(j).getName()+']')
+            for j in xrange(world.robot(i).numLinks()):
                 elements.append(n+'_q['+world.robot(i).link(j).getName()+']')
             for j in xrange(world.robot(i).numLinks()):
                 elements.append(n+'_dq['+world.robot(i).link(j).getName()+']')
@@ -103,8 +107,15 @@ class SimLogger:
         for i in xrange(world.numRobots()):
             robot = world.robot(i)
             values += robot.getCom()
-            values += robot.getConfig()
-            values += robot.getVelocity()
+            controller = sim.controller(i)
+            try:
+                values += controller.getCommandedConfig()
+                values += controller.getCommandedVelocity()
+            except Exception:
+                values += [0.0]*robot.numLinks()
+                values += [0.0]*robot.numLinks()
+            values += sim.getActualConfig(i)
+            values += sim.getActualVelocity(i)
             assert len(sim.getActualTorques(i)) == world.robot(i).numDrivers()
             values += sim.getActualTorques(i)
             if self.saveSensors:

@@ -73,7 +73,8 @@ void ActuatorCommand::IntegratePID(Real q,Real dt)
     iterm += AngleDiff(qdes,q)*dt;
 
   //integrate qdes
-  qdes += dqdes*dt;
+  if(mode == LOCKED_VELOCITY)
+    qdes += dqdes*dt;
 }
 
 void RobotMotorCommand::SetTorque(const Vector& torques)

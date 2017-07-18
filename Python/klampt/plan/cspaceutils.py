@@ -139,7 +139,8 @@ class EmbeddedCSpace(CSpace):
         self.properties = self.ambientspace.properties
         if self.ambientspace.feasibilityTests is not None:
             self.feasibilityTests = [(lambda x:f(self.lift(x))) for f in self.ambientspace.feasibilityTests]
-            self.feasibilityTestNames = [(lambda x:f(self.lift(x))) for f in self.ambientspace.feasibilityTestNames]
+            self.feasibilityTestNames = self.ambientspace.feasibilityTestNames[:]
+            self.feasibilityTestDependencies = self.ambientspace.feasibilityTestDependencies[:]
 
     def project(self,xamb):
         """Ambient space -> embedded space"""

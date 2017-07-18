@@ -337,6 +337,14 @@ bool RobotTestBackend::OnCommand(const string& cmd,const string& args)
     robotSensors.sensors.resize(0);
     robot = world->robots[0];
   }
+  else if(cmd == "undo_pose") {
+    for(size_t i=0;i<world->robots.size();i++) 
+      if(lastActiveWidget == &robotWidgets[i]) {
+        printf("Undoing robot poser %d\n",i);
+        robotWidgets[i].Undo();
+        UpdateConfig();
+      }
+  }
   else {
     return WorldGUIBackend::OnCommand(cmd,args);
   }
@@ -359,8 +367,10 @@ void RobotTestBackend::BeginDrag(int x,int y,int button,int modifiers)
 {  
   if(button == GLUT_RIGHT_BUTTON) {
     double d;
-    if(allWidgets.BeginDrag(x,viewport.h-y,viewport,d))
+    if(allWidgets.BeginDrag(x,viewport.h-y,viewport,d)) {
       allWidgets.SetFocus(true);
+      lastActiveWidget = allWidgets.activeWidget;
+    }
     else
       allWidgets.SetFocus(false);
     if(allWidgets.requestRedraw) { SendRefresh(); allWidgets.requestRedraw=false; }
@@ -501,6 +511,7 @@ bool GLUIRobotTestGUI::Initialize()
 [{type:key_down,key:c}, {type:command,cmd:constrain_current_link,args:\"\"}],	\
 [{type:key_down,key:d}, {type:command,cmd:delete_current_constraint,args:\"\"}], \
 [{type:key_down,key:p}, {type:command,cmd:print_pose,args:\"\"}],	\
+[{type:key_down,key:z}, {type:command,cmd:undo_pose,args:\"\"}], \
 [{type:button_press,button:print_config}, {type:command,cmd:print_pose,args:\"\"}], \
 [{type:button_toggle,button:pose_ik,checked:1}, {type:command,cmd:constrain_point_mode,args:\"\"}], \
 [{type:button_toggle,button:pose_ik,checked:0}, {type:command,cmd:pose_mode,args:\"\"}], \

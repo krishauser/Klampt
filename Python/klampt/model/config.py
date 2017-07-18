@@ -201,7 +201,6 @@ def setConfig(item,vector):
             assert len(vector) == 6+start
             loc,wor = vector[start:start+3],vector[start+3:start+6]
             item.setAxialRotConstraint(loc,wor)
-        return x
     elif isCompound(item):
         subitems = components(item)
         lengths = []
@@ -216,7 +215,7 @@ def setConfig(item,vector):
         assert len(item) == len(vector)
         for i in xrange(len(item)):
             item[i] = vector[i]
-    return item
+    return
 
 _so3Names = ['R11','R21','R31','R12','R22','R32','R13','R23','R33']
 _pointNames = ['x','y','z']
