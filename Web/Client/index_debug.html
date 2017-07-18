@@ -382,6 +382,37 @@
            });
          }
 
+         //the magic of AJAX
+         //http://stackoverflow.com/questions/3567369/reading-server-side-file-with-javascript
+         function loadScenarios(file_to_load,shown_only)
+         {
+            console.log("Trying to load scenarios "+file_to_load);
+            $.getJSON( file_to_load)
+             .done(function (data) {
+                function add_option(id,text) {
+                  $('#boilerselctor').append($('<option>', {value:id}).text(text));
+                }
+                if(shown_only) {
+                  for (var key in data['shown']) {
+                    add_option(data['scenarios'][key],key);
+                  }
+                }
+                else {
+                  for (var key in data['scenarios']) {
+                    add_option(data['scenarios'][key],key);
+                  }
+                }
+                if(data['active']) {
+                  $('#boilerselctor').val(data['scenarios'][data['active']]);
+                }
+                boilerPlateChanged();
+              })
+             .fail(function( jqXHR, textStatus, errorThrown ) {
+                  console.log("Error loading scenarios: "+textStatus);
+             });
+         }
+
+
          function serverChanged()
          {
             console.log("Server changed.");
@@ -479,28 +510,7 @@
               }
             });            
 
-            function add_option(id,text) {
-               $('#boilerselctor').append($('<option>', {value:id}).text(text));
-            }
-            add_option("test_sim","Test Simulation")
-            add_option("sandbox","Simulation Sandbox")
-            add_option("kinematic_sandbox","Kinematic Sandbox")
-            add_option("lab1a","Lab 1a")
-            add_option("lab1b","Lab 1b")
-            add_option("lab1c","Lab 1c")
-            add_option("lab1d","Lab 1d")
-            add_option("lab2a","Lab 2a")
-            add_option("lab2b","Lab 2b")
-            add_option("lab2c","Lab 2c")
-            add_option("lab3a","Lab 3a")
-            add_option("lab3b","Lab 3b")
-            add_option("lab3d","Lab 3d")
-            add_option("dynamics","Dynamics test")
-            add_option("lab4","Lab 4")
-            add_option("lab5","Lab 5")
-            add_option("finalA","Final A")
-            add_option("finalB","Final B")
-            add_option("finalC","Final C")
+            loadScenarios("Scenarios/scenarios.json",false);
 
             if(localStorageAvailable) {
                var url=localStorage.getItem('serverURL');
@@ -508,8 +518,6 @@
                   $('#serverURL').val(url);
                }
             }
-            
-          
 
             ace.require("ace/ext/language_tools"); //setup the text editor
             editor = ace.edit("editor");
@@ -524,7 +532,6 @@
             editor.setTheme("ace/theme/eclipse"); 
             editor.getSession().setMode("ace/mode/python");
             
-            boilerPlateChanged();
                        
             //var editor = CodeMirror( document.getElementById("editor"), { //use codemirror as text editor
             //value: "print 'hello world'\n",
@@ -546,6 +553,16 @@
             var container = document.getElementById("canvas");
             var textArea = document.getElementById("myTextarea");
             KLAMPT.init(container,textArea);
+
+            //hack to allow canvas to accept keyboard events
+            $('#canvas').attr("tabindex", "0")
+              // Mouse down override to prevent default browser controls from appearing
+              .mousedown(function(){ $(this).focus(); return false; })
+              .keydown(function(event){
+                if(event.key == "'") { KLAMPT.event("keydown_\\"+event.key);  }
+                else { KLAMPT.event("keydown_"+event.key); }
+                return false;
+              });
             
             onWindowResize();
          });

@@ -275,10 +275,10 @@ void handleIncomingMessage(string message)
            precomputed_response = false;
            pause_io = false;
         }
-          std::string pycode;
-          pycode+="wrapper_event('"+message+"')\n";
-          int res = PyRun_SimpleString(pycode.c_str());
-          FlushStreams();
+        std::string pycode;
+        pycode+="wrapper_event('"+message+"')\n";
+        int res = PyRun_SimpleString(pycode.c_str());
+        FlushStreams();
       }
       else if(routing=='S') //set item event
       {
@@ -288,17 +288,17 @@ void handleIncomingMessage(string message)
            precomputed_response = false;
            pause_io = false;
         }
-          size_t i=message.find(',');
-          if(i == std::string::npos) {
-            printf("Error parsing set item message, no comma found\n");
-            return;
-          }
-          std::string item = message.substr(0,i);
-          std::string value = message.substr(i+1,message.length()-i-1);
-          std::string pycode;
-          pycode+="wrapper_setitem('" + item + "',"+value+")\n";
-          int res = PyRun_SimpleString(pycode.c_str());
-          FlushStreams();
+        size_t i=message.find(',');
+        if(i == std::string::npos) {
+          printf("Error parsing set item message, no comma found\n");
+          return;
+        }
+        std::string item = message.substr(0,i);
+        std::string value = message.substr(i+1,message.length()-i-1);
+        std::string pycode;
+        pycode+="wrapper_setitem('" + item + "',"+value+")\n";
+        int res = PyRun_SimpleString(pycode.c_str());
+        FlushStreams();
       }
       else if(routing=='A')
       {

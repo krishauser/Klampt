@@ -388,44 +388,34 @@
            });
          }
 
-         //the magic of AJAX
+                  //the magic of AJAX
          //http://stackoverflow.com/questions/3567369/reading-server-side-file-with-javascript
          function loadScenarios(file_to_load,shown_only)
          {
-            function onLoadScenariosJson(data) {
-              var parsed_data = JSON.parse(data);
-              function add_option(id,text) {
-                $('#boilerselctor').append($('<option>', {value:id}).text(text));
-              }
-              if(shown_only) {
-                for (var key in parsed_data['shown']) {
-                  add_option(key,parsed_data['scenarios'][key]);
-                }
-              }
-              else {
-                for (var key in parsed_data['scenarios']) {
-                  add_option(key,parsed_data['scenarios'][key]);
-                }
-              }
-              if(parsed_data['active']) {
-                $('#boilerselctor').val(parsed_data['scenarios'][parsed_data['active']]);
-              }
-              boilerPlateChanged();
-            }
             console.log("Trying to load scenarios "+file_to_load);
-            $.ajax({
-               url: file_to_load,
-               async: true,   // asynchronous request? (synchronous requests are discouraged...)
-               cache: false,   // with this, you can force the browser to not make cache of the retrieved data
-               dataType: "text",  // jQuery will infer this, but you can set explicitly
-               success: function( data, textStatus, jqXHR ) {
-                  console.log("Received scenarios from server");
-                  onLoadScenariosJson(data);
-               },
-               error : function( jqXHR, textStatus, errorThrown ) {
+            $.getJSON( file_to_load)
+             .done(function (data) {
+                function add_option(id,text) {
+                  $('#boilerselctor').append($('<option>', {value:id}).text(text));
+                }
+                if(shown_only) {
+                  for (var key in data['shown']) {
+                    add_option(data['scenarios'][key],key);
+                  }
+                }
+                else {
+                  for (var key in data['scenarios']) {
+                    add_option(data['scenarios'][key],key);
+                  }
+                }
+                if(data['active']) {
+                  $('#boilerselctor').val(data['scenarios'][data['active']]);
+                }
+                boilerPlateChanged();
+              })
+             .fail(function( jqXHR, textStatus, errorThrown ) {
                   console.log("Error loading scenarios: "+textStatus);
-               }
-            });
+             });
          }
 
          function serverChanged()
@@ -576,6 +566,17 @@
             var container = document.getElementById("canvas");
             var textArea = document.getElementById("myTextarea");
             KLAMPT.init(container,textArea);
+
+            //hack to allow canvas to accept keyboard events
+            $('#canvas').attr("tabindex", "0")
+              // Mouse down override to prevent default browser controls from appearing
+              .mousedown(function(){ $(this).focus(); return false; })
+              .keydown(function(event){
+                if(event.key == "'") { KLAMPT.event("keydown_\\"+event.key);  }
+                else { KLAMPT.event("keydown_"+event.key); }
+                return false;
+              });
+
             onWindowResize();
          });
          
