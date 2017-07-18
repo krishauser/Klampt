@@ -492,8 +492,6 @@ class WorldModel
   Appearance appearance(int id);
   ///Draws the entire world using OpenGL
   void drawGL();
-  std::string getSceneJSON(); //returns our scene in JSON format - DJZ
-  std::string getTransformsJSON();
 
   ///If geometry loading is set to false, then only the kinematics are loaded from
   ///disk, and no geometry / visualization / collision detection structures will be

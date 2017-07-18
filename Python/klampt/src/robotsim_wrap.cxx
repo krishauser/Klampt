@@ -35717,74 +35717,6 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_WorldModel_getSceneJSON(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  WorldModel *arg1 = (WorldModel *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject * obj0 = 0 ;
-  std::string result;
-  
-  if (!PyArg_ParseTuple(args,(char *)"O:WorldModel_getSceneJSON",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_WorldModel, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "WorldModel_getSceneJSON" "', argument " "1"" of type '" "WorldModel *""'"); 
-  }
-  arg1 = reinterpret_cast< WorldModel * >(argp1);
-  {
-    try {
-      result = (arg1)->getSceneJSON();
-    }
-    catch(PyException& e) {
-      e.setPyErr();
-      return NULL;
-    }
-    catch(std::exception& e) {
-      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
-      return NULL;
-    }
-  }
-  resultobj = SWIG_From_std_string(static_cast< std::string >(result));
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_WorldModel_getTransformsJSON(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  WorldModel *arg1 = (WorldModel *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject * obj0 = 0 ;
-  std::string result;
-  
-  if (!PyArg_ParseTuple(args,(char *)"O:WorldModel_getTransformsJSON",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_WorldModel, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "WorldModel_getTransformsJSON" "', argument " "1"" of type '" "WorldModel *""'"); 
-  }
-  arg1 = reinterpret_cast< WorldModel * >(argp1);
-  {
-    try {
-      result = (arg1)->getTransformsJSON();
-    }
-    catch(PyException& e) {
-      e.setPyErr();
-      return NULL;
-    }
-    catch(std::exception& e) {
-      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
-      return NULL;
-    }
-  }
-  resultobj = SWIG_From_std_string(static_cast< std::string >(result));
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
 SWIGINTERN PyObject *_wrap_WorldModel_enableGeometryLoading(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   WorldModel *arg1 = (WorldModel *) 0 ;
@@ -51117,8 +51049,6 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"Draws the entire world using OpenGL. \n"
 		""},
-	 { (char *)"WorldModel_getSceneJSON", _wrap_WorldModel_getSceneJSON, METH_VARARGS, (char *)"WorldModel_getSceneJSON(WorldModel self) -> std::string"},
-	 { (char *)"WorldModel_getTransformsJSON", _wrap_WorldModel_getTransformsJSON, METH_VARARGS, (char *)"WorldModel_getTransformsJSON(WorldModel self) -> std::string"},
 	 { (char *)"WorldModel_enableGeometryLoading", _wrap_WorldModel_enableGeometryLoading, METH_VARARGS, (char *)"\n"
 		"WorldModel_enableGeometryLoading(WorldModel self, bool enabled)\n"
 		"\n"

@@ -2539,10 +2539,6 @@ Retrieves an appearance for a given element ID. ";
 
 Draws the entire world using OpenGL. ";
 
-%feature("docstring")  WorldModel::getSceneJSON "";
-
-%feature("docstring")  WorldModel::getTransformsJSON "";
-
 %feature("docstring")  WorldModel::enableGeometryLoading "
 
 If geometry loading is set to false, then only the kinematics are
