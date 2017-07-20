@@ -184,11 +184,7 @@ class CSpace:
         return all(a<=xi<=b for (xi,(a,b)) in zip(x,self.bound))
 
     def feasible(self,x):
-<<<<<<< HEAD:Python/klampt/cspace.py
-        """Overload this to define your new feasibility test.   
-=======
         """Overload this to define your new feasibility test.
->>>>>>> master:Python/klampt/plan/cspace.py
         By default the implementation simply tests the bounds constraint, or if self.feasibilityTests
         is not empty, tests each function in self.feasibilityTests."""
         if self.feasibilityTests is None:
@@ -355,11 +351,6 @@ class MotionPlan:
         planner-dependent """
         return self.planner.getStats()
 
-<<<<<<< HEAD:Python/klampt/cspace.py
-
-
-=======
->>>>>>> master:Python/klampt/plan/cspace.py
 def _selfTest():
     c = CSpace()
     c.bound = [(-2,2),(-2,2)]
