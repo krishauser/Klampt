@@ -393,7 +393,8 @@
                   $('#boilerselctor').append($('<option>', {value:id}).text(text));
                 }
                 if(shown_only) {
-                  for (var key in data['shown']) {
+                  for (var i in data['shown']) {
+                    var key = data['shown'][i];
                     add_option(data['scenarios'][key],key);
                   }
                 }
