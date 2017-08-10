@@ -1,3 +1,5 @@
+#include <log4cxx/logger.h>
+#include <KrisLibrary/Logger.h>
 #include "Control/JointSensors.h"
 #include "Control/PathController.h"
 #include "Control/FeedforwardController.h"
@@ -122,13 +124,13 @@ void SimViewProgram::InitSim()
     }
 
     sim.WriteState(initialState);
-    printf("Simulation initial state: %d bytes\n",initialState.length());
+    LOG4CXX_INFO(KrisLibrary::logger(),"Simulation initial state: "<<initialState.length());
 }
 
 void SimViewProgram::ResetSim()
 {
   if(!sim.ReadState(initialState)) {
-    fprintf(stderr,"Warning, ReadState doesn't work\n");
+        LOG4CXX_ERROR(KrisLibrary::logger(),"Warning, ReadState doesn't work\n");
   }
 }
 
@@ -169,7 +171,7 @@ bool SimViewProgram::LoadAndInitSim(int argc,const char** argv)
 	i++;
       }
       else {
-	printf("Unknown option %s",argv[i]);
+	LOG4CXX_INFO(KrisLibrary::logger(),"Unknown option "<<argv[i]);
 	return false;
       }
     }
@@ -177,11 +179,11 @@ bool SimViewProgram::LoadAndInitSim(int argc,const char** argv)
       const char* ext=FileExtension(argv[i]);
       if(0==strcmp(ext,"xml")) {
 	if(!xmlWorld.Load(argv[i])) {
-	  printf("Error loading world file %s\n",argv[i]);
+	  LOG4CXX_ERROR(KrisLibrary::logger(),"Error loading world file "<<argv[i]);
 	  return false;
 	}
 	if(!xmlWorld.GetWorld(*world)) {
-	  printf("Error loading world from %s\n",argv[i]);
+	  LOG4CXX_ERROR(KrisLibrary::logger(),"Error loading world from "<<argv[i]);
 	  return false;
 	}
       }
@@ -194,17 +196,17 @@ bool SimViewProgram::LoadAndInitSim(int argc,const char** argv)
   }
 
   if(configs.size() > world->robots.size()) {
-    printf("Warning, too many configs specified\n");
+    LOG4CXX_WARN(KrisLibrary::logger(),"Warning, too many configs specified\n");
   }
   for(size_t i=0;i<configs.size();i++) {
     if(i >= world->robots.size()) break;
     ifstream in(configs[i].c_str(),ios::in);
-    if(!in) printf("Could not open config file %s\n",configs[i].c_str());
+    if(!in) LOG4CXX_INFO(KrisLibrary::logger(),"Could not open config file "<<configs[i].c_str());
     Vector temp;
     in >> temp;
-    if(!in) printf("Error reading config file %s\n",configs[i].c_str());
+    if(!in) LOG4CXX_ERROR(KrisLibrary::logger(),"Error reading config file "<<configs[i].c_str());
     if(temp.n != (int)world->robots[i]->links.size()) {
-      printf("Incorrect number of DOFs in config %d\n",i);
+      LOG4CXX_INFO(KrisLibrary::logger(),"Incorrect number of DOFs in config "<<i);
       continue;
     }
     world->robots[i]->UpdateConfig(temp);
@@ -217,10 +219,10 @@ bool SimViewProgram::LoadAndInitSim(int argc,const char** argv)
   if(xmlWorld.elem) {
     TiXmlElement* e=xmlWorld.GetElement("simulation");
     if(e) {
-      printf("Reading simulation settings...\n");
+      LOG4CXX_INFO(KrisLibrary::logger(),"Reading simulation settings...\n");
       XmlSimulationSettings s(e);
       if(!s.GetSettings(sim)) {
-	fprintf(stderr,"Warning, simulation settings not read correctly\n");
+		LOG4CXX_ERROR(KrisLibrary::logger(),"Warning, simulation settings not read correctly\n");
       }
     }
   }
@@ -229,13 +231,13 @@ bool SimViewProgram::LoadAndInitSim(int argc,const char** argv)
     const char* ext=FileExtension(paths[0].c_str());
     if(0 == strcmp(ext,"xml")) {
       if(!LoadMultiPath(paths[0].c_str())) {
-	fprintf(stderr,"Couldn't load MultiPath file %s\n",paths[0].c_str());
+		LOG4CXX_ERROR(KrisLibrary::logger(),"Couldn't load MultiPath file "<<paths[0].c_str());
 	return false;
       }
     }
     else {
       if(!LoadLinearPath(paths[0].c_str())) {
-	fprintf(stderr,"Couldn't load linear path file %s\n",paths[0].c_str());
+		LOG4CXX_ERROR(KrisLibrary::logger(),"Couldn't load linear path file "<<paths[0].c_str());
 	return false;
       }
     }
@@ -245,7 +247,7 @@ bool SimViewProgram::LoadAndInitSim(int argc,const char** argv)
 
   if(!milestones.empty()) {
     if(!LoadMilestones(milestones[0].c_str())) {
-      fprintf(stderr,"Couldn't load milestone file %s\n",milestones[0].c_str());
+            LOG4CXX_ERROR(KrisLibrary::logger(),"Couldn't load milestone file "<<milestones[0].c_str());
       return false;
     }
     //TODO: set initial sim state from start of path?
@@ -254,7 +256,7 @@ bool SimViewProgram::LoadAndInitSim(int argc,const char** argv)
 
   if(!states.empty()) {
     if(!LoadState(states[0].c_str())) {
-      fprintf(stderr,"Couldn't load file %s\n",states[0].c_str());
+            LOG4CXX_ERROR(KrisLibrary::logger(),"Couldn't load file "<<states[0].c_str());
       return false;
     }
   }
@@ -408,7 +410,7 @@ bool SimViewProgram::LoadMilestones(const char* fn)
   vector<Vector> dmilestones;
   ifstream in(fn,ios::in);
   if(!in) {
-    printf("Warning, couldn't open file %s\n",fn);
+    LOG4CXX_WARN(KrisLibrary::logger(),"Warning, couldn't open file "<<fn);
     return false;
   }
   Vector x,dx;
@@ -421,26 +423,26 @@ bool SimViewProgram::LoadMilestones(const char* fn)
     }
   }
   if(in.bad()) {
-    printf("Error during read of file %s\n",fn);
+    LOG4CXX_ERROR(KrisLibrary::logger(),"Error during read of file "<<fn);
     return false;
   }
   in.close();
     
   Assert(sim.robotControllers.size()>=1);
   if(sim.robotControllers.size()>1)
-    printf("Warning, sending path to robot 0 by default\n");
+    LOG4CXX_WARN(KrisLibrary::logger(),"Warning, sending path to robot 0 by default\n");
   for(size_t i=0;i<milestones.size();i++) {
     stringstream ss;
     ss<<milestones[i]<<"\t"<<dmilestones[i];
     if(i==0) {
       if(!sim.robotControllers[0]->SendCommand("set_qv",ss.str())) {
-	fprintf(stderr,"set_qv command does not work with the robot's controller\n");
+		LOG4CXX_ERROR(KrisLibrary::logger(),"set_qv command does not work with the robot's controller\n");
 	return false;
       }
     }
     else {
       if(!sim.robotControllers[0]->SendCommand("append_qv",ss.str())) {
-	fprintf(stderr,"append_qv command does not work with the robot's controller\n");
+		LOG4CXX_ERROR(KrisLibrary::logger(),"append_qv command does not work with the robot's controller\n");
 	return false;
       }
     }
@@ -461,18 +463,18 @@ bool SimViewProgram::LoadState(const char* fn)
   sim.WriteState(curState);
   File f;
   if(!f.Open((char *)fn,FILEREAD)) {
-    printf("Warning, couldn't open file %s\n",fn);
+    LOG4CXX_WARN(KrisLibrary::logger(),"Warning, couldn't open file "<<fn);
     return false;
   }
   else {
     if(!sim.ReadState(f)) {
-      printf("Warning, couldn't read state from %s\n",fn);
+      LOG4CXX_WARN(KrisLibrary::logger(),"Warning, couldn't read state from "<<fn);
       sim.ReadState(curState);
       f.Close();
       return false;
     }
     else
-      printf("Loaded simulation state from %s\n",fn);
+      LOG4CXX_INFO(KrisLibrary::logger(),"Loaded simulation state from "<<fn);
     f.Close();
   }
   return true;
@@ -483,16 +485,16 @@ bool SimViewProgram::LoadMultiPath(const char* fn,bool constrainedInterpolate,Re
   //load and convert MultiPath
   MultiPath path;
   if(!path.Load(fn)) {
-    fprintf(stderr,"Unable to load file %s\n",fn);
+        LOG4CXX_ERROR(KrisLibrary::logger(),"Unable to load file "<<fn);
     return false;
   }
   bool timed = path.HasTiming();
   bool timeOptimizePath = false;
   if(!timed && timeOptimizePath) {
     //this function both discretizes and optimizes at once
-    printf("Discretizing MultiPath by resolution %g and time-optimizing with res %g\n",interpolateTolerance,0.05);
+    LOG4CXX_INFO(KrisLibrary::logger(),"Discretizing MultiPath by resolution "<<interpolateTolerance<<" and time-optimizing with res "<<0.05);
     if(!GenerateAndTimeOptimizeMultiPath(*world->robots[0],path,interpolateTolerance,0.05)) {
-      printf("   failed!\n");
+      LOG4CXX_INFO(KrisLibrary::logger(),"   failed!\n");
       return false;
     }
     if(durationScale != 1.0) {
@@ -502,22 +504,22 @@ bool SimViewProgram::LoadMultiPath(const char* fn,bool constrainedInterpolate,Re
   else {
     if(constrainedInterpolate) {
       MultiPath dpath;
-      printf("Discretizing MultiPath by resolution %g\n",interpolateTolerance);
+      LOG4CXX_INFO(KrisLibrary::logger(),"Discretizing MultiPath by resolution "<<interpolateTolerance);
       if(!DiscretizeConstrainedMultiPath(*world->robots[0],path,dpath,interpolateTolerance)) {
-	printf("   failed!\n");
+	LOG4CXX_INFO(KrisLibrary::logger(),"   failed!\n");
 	return false;
       }
       dpath.SetDuration(dpath.Duration());
       path = dpath;
     }
     if(!timed) {
-      //printf("Assigning times to MultiPath via smooth timing, duration %g\n",path.sections.size()*durationScale);
+      //LOG4CXX_INFO(KrisLibrary::logger(),"Assigning times to MultiPath via smooth timing, duration "<<path.sections.size()*durationScale);
       //path.SetSmoothTiming(path.sections.size()*durationScale,false);
-      printf("Assigning times to MultiPath via linear timing, duration %g\n",path.Duration()*durationScale);
+      LOG4CXX_INFO(KrisLibrary::logger(),"Assigning times to MultiPath via linear timing, duration "<<path.Duration()*durationScale);
       path.SetDuration(path.Duration()*durationScale);
     }
     else 
-      printf("Using existing timing in MultiPath, duration %g\n",path.Duration());
+      LOG4CXX_INFO(KrisLibrary::logger(),"Using existing timing in MultiPath, duration "<<path.Duration());
   }
 
   vector<Real> times,stimes;
@@ -532,7 +534,7 @@ bool SimViewProgram::LoadMultiPath(const char* fn,bool constrainedInterpolate,Re
     times.insert(times.end(),stimes.begin()+ofs,stimes.end());
     milestones.insert(milestones.end(),smilestones.begin()+ofs,smilestones.end());
   }
-  printf("Path time range [%g,%g]\n",times.front(),times.back());
+  LOG4CXX_INFO(KrisLibrary::logger(),"Path time range ["<<times.front()<<","<<times.back());
   return SendLinearPath(times,milestones);
 }
 
@@ -543,7 +545,7 @@ bool SimViewProgram::LoadLinearPath(const char* fn)
   vector<Vector> milestones;
   ifstream in(fn,ios::in);
   if(!in) {
-    printf("Warning, couldn't open file %s\n",fn);
+    LOG4CXX_WARN(KrisLibrary::logger(),"Warning, couldn't open file "<<fn);
     return false;
   }
   Real t;
@@ -556,7 +558,7 @@ bool SimViewProgram::LoadLinearPath(const char* fn)
     }
   }
   if(in.bad()) {
-    printf("Error during read of file %s\n",fn);
+    LOG4CXX_ERROR(KrisLibrary::logger(),"Error during read of file "<<fn);
     return false;
   }
   in.close();
@@ -568,21 +570,21 @@ bool SimViewProgram::SendLinearPath(const vector<Real>& times,const vector<Confi
 {
   Assert(sim.robotControllers.size()>=1);
   if(sim.robotControllers.size()>1)
-    printf("Warning, sending path to robot 0 by default\n");
-  if(sim.time > 0) printf("SendLinearPath: simulation time offset %g\n",sim.time);
+    LOG4CXX_WARN(KrisLibrary::logger(),"Warning, sending path to robot 0 by default\n");
+  if(sim.time > 0) LOG4CXX_INFO(KrisLibrary::logger(),"SendLinearPath: simulation time offset "<<sim.time);
   for(size_t i=0;i<milestones.size();i++) {
     stringstream ss;
     //TODO: why do you need to add dt to the simulation time?
     ss<<sim.time+pathDelay+times[i]<<"\t"<<milestones[i];
     if(i==0) {
       if(!sim.robotControllers[0]->SendCommand("set_tq",ss.str())) {
-	fprintf(stderr,"set_tq command failed or does not work with the robot's controller\n");
+		LOG4CXX_ERROR(KrisLibrary::logger(),"set_tq command failed or does not work with the robot's controller\n");
 	return false;
       }
     }
     else {
       if(!sim.robotControllers[0]->SendCommand("append_tq",ss.str())) {
-	fprintf(stderr,"append_tq command failed or does not work with the robot's controller\n");
+		LOG4CXX_ERROR(KrisLibrary::logger(),"append_tq command failed or does not work with the robot's controller\n");
 	return false;
       }
     }
@@ -594,7 +596,7 @@ void SimViewProgram::DoLogging(const char* fn)
 {
   ofstream out(fn,ios::app);
   if(out.tellp()==std::streamoff(0)) {
-    cout<<"Saving simulation state to "<<fn<<endl;
+    LOG4CXX_INFO(KrisLibrary::logger(),"Saving simulation state to "<<fn<<"\n");
     out<<"time,";
     for(size_t i=0;i<world->robots.size();i++) {
       for(size_t j=0;j<world->robots[i]->links.size();j++)

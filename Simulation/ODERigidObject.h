@@ -9,10 +9,7 @@
 using namespace Math;
 
 /** @ingroup Simulation
- * @brief An ODE-simulated rigid object.
- *
- * Note: if you manually set the object's velocities, make sure to disable
- * instability correction in the simulator for that time step.
+ * @brief An ODE-simulated rigid object
  */
 class ODERigidObject
 {

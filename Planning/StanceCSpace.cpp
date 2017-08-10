@@ -1,3 +1,5 @@
+#include <log4cxx/logger.h>
+#include <KrisLibrary/Logger.h>
 #include "StanceCSpace.h"
 #include <boost/functional.hpp>
 
@@ -78,7 +80,7 @@ bool StanceCSpace::CheckRBStability(const Config& x)
   if(spCalculated) return sp.TestCOM(robot.GetCOM());
   else {
     if(spMargin != 0) {
-      fprintf(stderr,"Warning: spMargin is nonzero but the SP has not been calculated\n");
+            LOG4CXX_ERROR(KrisLibrary::logger(),"Warning: spMargin is nonzero but the SP has not been calculated\n");
     }
     vector<ContactPoint> cps;
     vector<Vector3> f;

@@ -1,3 +1,5 @@
+#include <log4cxx/logger.h>
+#include <KrisLibrary/Logger.h>
 #include "ContactTimeScaling.h"
 #include "ZMP.h"
 #include <KrisLibrary/robotics/NewtonEuler.h>
@@ -289,28 +291,28 @@ bool ContactTimeScaling::SetParams(const MultiPath& path,const vector<Real>& par
     proj.Solve(poly);
     if(poly.vertices.empty()) {
       //problem is infeasible?
-      printf("Problem is infeasible at segment %d\n",i);
-      cout<<"x = "<<xs[i]<<endl;
-      cout<<"dx = "<<dxs[i]<<endl;
-      cout<<"ddx = "<<ddxs[i]<<endl;
+      LOG4CXX_INFO(KrisLibrary::logger(),"Problem is infeasible at segment "<<i);
+      LOG4CXX_INFO(KrisLibrary::logger(),"x = "<<xs[i]<<"\n");
+      LOG4CXX_INFO(KrisLibrary::logger(),"dx = "<<dxs[i]<<"\n");
+      LOG4CXX_INFO(KrisLibrary::logger(),"ddx = "<<ddxs[i]<<"\n");
       lp.Print(cout);
-      getchar();
+      if(KrisLibrary::logger()->isEnabledFor(log4cxx::Level::ERROR_INT)) getchar();
       feasible=false;
     }
     /*
     if(i == 49) {
-      cout<<"x = "<<xs[i]<<endl;
-      cout<<"dx = "<<dxs[i]<<endl;
-      cout<<"ddx = "<<ddxs[i]<<endl;
+      LOG4CXX_INFO(KrisLibrary::logger(),"x = "<<xs[i]<<"\n");
+      LOG4CXX_INFO(KrisLibrary::logger(),"dx = "<<dxs[i]<<"\n");
+      LOG4CXX_INFO(KrisLibrary::logger(),"ddx = "<<ddxs[i]<<"\n");
       lp.Print(cout);
-      cout<<"Result: "<<endl;
+      LOG4CXX_INFO(KrisLibrary::logger(),"Result: "<<"\n");
       for(size_t j=0;j<poly.planes.size();j++) 
-	cout<<poly.planes[j].normal.x<<" ds^2 + "<<poly.planes[j].normal.y<<" dds <= "<<poly.planes[j].offset<<endl;
-      cout<<"Vertices: "<<endl;
+	LOG4CXX_INFO(KrisLibrary::logger(),poly.planes[j].normal.x<<" ds^2 + "<<poly.planes[j].normal.y<<" dds <= "<<poly.planes[j].offset<<"\n");
+      LOG4CXX_INFO(KrisLibrary::logger(),"Vertices: "<<"\n");
       for(size_t j=0;j<poly.vertices.size();j++) {
-	cout<<poly.vertices[j]<<endl;
+	LOG4CXX_INFO(KrisLibrary::logger(),poly.vertices[j]<<"\n");
       }
-      getchar();
+      if(KrisLibrary::logger()->isEnabledFor(log4cxx::Level::ERROR_INT)) getchar();
     }
     */
     ds2ddsConstraintNormals[i].resize(poly.planes.size());
@@ -345,15 +347,15 @@ bool ContactTimeScaling::Check(const MultiPath& path)
 
     for(int j=0;j<dx.n;j++)
       if(Abs(dx[j]) > robot.velMax[j]*(1+Epsilon)) {
-	printf("Vel at param %d (time %g/%g) is infeasible\n",i,t,traj.timeScaling.times.back());
-	printf("   |%g| > %g  at link %s\n",dx[j],robot.velMax[j],robot.LinkName(j).c_str());
+	LOG4CXX_INFO(KrisLibrary::logger(),"Vel at param "<<i<<" (time "<<t<<"/"<<traj.timeScaling.times.back());
+	LOG4CXX_INFO(KrisLibrary::logger(),"   |"<<dx[j]<<"| > "<<robot.velMax[j]<<"  at link "<<robot.LinkName(j).c_str());
 	feasible = false;
       }
 
     for(int j=0;j<ddx.n;j++)
       if(Abs(ddx[j]) > robot.accMax[j]*(1+Epsilon)) {
-	printf("Acc at param %d (time %g/%g) is infeasible\n",i,t,traj.timeScaling.times.back());
-	printf("   |%g| > %g  at link %s\n",ddx[j],robot.accMax[j],robot.LinkName(j).c_str());
+	LOG4CXX_INFO(KrisLibrary::logger(),"Acc at param "<<i<<" (time "<<t<<"/"<<traj.timeScaling.times.back());
+	LOG4CXX_INFO(KrisLibrary::logger(),"   |"<<ddx[j]<<"| > "<<robot.accMax[j]<<"  at link "<<robot.LinkName(j).c_str());
 	feasible = false;
       }
 
@@ -371,14 +373,14 @@ bool ContactTimeScaling::Check(const MultiPath& path)
     solver.SetDynamics(ddx);
     bool res=solver.Solve();
     if(!res) {
-      printf("TorqueSolver was not able to compute a solution at param %d (time %g/%g)\n",i,t,traj.timeScaling.times.back());
+      LOG4CXX_INFO(KrisLibrary::logger(),"TorqueSolver was not able to compute a solution at param "<<i<<" (time "<<t<<"/"<<traj.timeScaling.times.back());
       feasible = false;
       continue;
     }
     for(int j=0;j<solver.t.n;j++) {
       if(Abs(solver.t(j)) > robot.torqueMax(j)*(1+Epsilon)) {
-	printf("Torque at param %d (time %g/%g) is infeasible\n",i,t,traj.timeScaling.times.back());
-	printf("   |%g| > %g  at link %s\n",solver.t(j),robot.torqueMax(j),robot.LinkName(j).c_str());
+	LOG4CXX_INFO(KrisLibrary::logger(),"Torque at param "<<i<<" (time "<<t<<"/"<<traj.timeScaling.times.back());
+	LOG4CXX_INFO(KrisLibrary::logger(),"   |"<<solver.t(j)<<"| > "<<robot.torqueMax(j)<<"  at link "<<robot.LinkName(j).c_str());
 	feasible = false;
       }
     }

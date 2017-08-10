@@ -1,3 +1,5 @@
+#include <log4cxx/logger.h>
+#include <KrisLibrary/Logger.h>
 #include "Planning/ConstrainedInterpolator.h"
 #include <KrisLibrary/math3d/primitives.h>
 #include <KrisLibrary/math/random.h>
@@ -59,17 +61,17 @@ bool ContactOptimizeMultipath(Robot& robot,const MultiPath& path,
   MultiPath ipath;
   bool res=DiscretizeConstrainedMultiPath(robot,path,ipath,interpTol);
   if(!res) {
-    printf("Could not discretize path, failing\n");
+    LOG4CXX_INFO(KrisLibrary::logger(),"Could not discretize path, failing\n");
     return false;
   }
 
   int ns = 0;
   for(size_t i=0;i<ipath.sections.size();i++)
     ns += ipath.sections[i].milestones.size()-1;
-  printf("Interpolated at resolution %g to %d segments, time %g\n",interpTol,ns,timer.ElapsedTime());
+  LOG4CXX_INFO(KrisLibrary::logger(),"Interpolated at resolution "<<interpTol<<" to "<<ns<<" segments, time "<<timer.ElapsedTime());
   if(savePath)
   {
-    cout<<"Saving interpolated geometric path to temp.xml"<<endl;
+    LOG4CXX_INFO(KrisLibrary::logger(),"Saving interpolated geometric path to temp.xml"<<"\n");
     ipath.Save("temp.xml");
   }
 
@@ -94,9 +96,9 @@ bool ContactOptimizeMultipath(Robot& robot,const MultiPath& path,
   bool res=true;
   */
   if(!res) {
-    printf("Unable to set contact scaling, time %g\n",timer.ElapsedTime());
+    LOG4CXX_INFO(KrisLibrary::logger(),"Unable to set contact scaling, time "<<timer.ElapsedTime());
     if(saveConstraints) {
-      printf("Saving to scaling_constraints.csv\n");
+      LOG4CXX_INFO(KrisLibrary::logger(),"Saving to scaling_constraints.csv\n");
       ofstream outc("scaling_constraints.csv",ios::out);
       outc<<"collocation point,planeindex,normal x,normal y,offset"<<endl;
       for(size_t i=0;i<scaling.ds2ddsConstraintNormals.size();i++) 
@@ -105,9 +107,9 @@ bool ContactOptimizeMultipath(Robot& robot,const MultiPath& path,
     }
     return false;
   }
-  printf("Contact scaling init successful, time %g\n",timer.ElapsedTime());
+  LOG4CXX_INFO(KrisLibrary::logger(),"Contact scaling init successful, time "<<timer.ElapsedTime());
   if(saveConstraints) {
-    printf("Saving to scaling_constraints.csv\n");
+    LOG4CXX_INFO(KrisLibrary::logger(),"Saving to scaling_constraints.csv\n");
     ofstream outc("scaling_constraints.csv",ios::out);
     outc<<"collocation point,planeindex,normal x,normal y,offset"<<endl;
     for(size_t i=0;i<scaling.ds2ddsConstraintNormals.size();i++) 
@@ -117,10 +119,10 @@ bool ContactOptimizeMultipath(Robot& robot,const MultiPath& path,
 
   res=scaling.Optimize();
   if(!res) {
-    printf("Time scaling failed in time %g.  Path may be dynamically infeasible.\n",timer.ElapsedTime());
+    LOG4CXX_INFO(KrisLibrary::logger(),"Time scaling failed in time "<<timer.ElapsedTime());
     return false;
   }
-  printf("Time scaling solved in time %g, execution time %g\n",timer.ElapsedTime(),scaling.traj.timeScaling.times.back());
+  LOG4CXX_INFO(KrisLibrary::logger(),"Time scaling solved in time "<<timer.ElapsedTime()<<", execution time "<<scaling.traj.timeScaling.times.back());
   //scaling.Check(ipath);
 
   traj = scaling.traj;
@@ -158,7 +160,7 @@ void ContactOptimizeMultipath(const char* robfile,const char* pathfile,const cha
   ContactOptimizeSettings settings;
   if(settingsfile != NULL) {
     if(!settings.read(settingsfile)) {
-      printf("Unable to read settings file %s\n",settingsfile);
+      LOG4CXX_INFO(KrisLibrary::logger(),"Unable to read settings file "<<settingsfile);
       return;
     }
   }
@@ -174,13 +176,13 @@ void ContactOptimizeMultipath(const char* robfile,const char* pathfile,const cha
 
   Robot robot;
   if(!robot.Load(robfile)) {
-    printf("Unable to load robot file %s\n",robfile);
+    LOG4CXX_INFO(KrisLibrary::logger(),"Unable to load robot file "<<robfile);
     return;
   }
 
   MultiPath path;
   if(!path.Load(pathfile)) {
-    printf("Unable to load path file %s\n",pathfile);
+    LOG4CXX_INFO(KrisLibrary::logger(),"Unable to load path file "<<pathfile);
     return;
   }
 
@@ -195,19 +197,20 @@ void ContactOptimizeMultipath(const char* robfile,const char* pathfile,const cha
       numContacts += (int)h->second.contacts.size();
       for(size_t j=0;j<h->second.contacts.size();j++)
 	if(h->second.contacts[j].kFriction <= 0) {
-	  if(!changed)
-	    printf("Warning, contact %d of hold %d has invalid friction %g, setting to 0.5\n",j,k,h->second.contacts[j].kFriction);
-	  h->second.contacts[j].kFriction = 0.5;
+	  if(!changed){
+	    LOG4CXX_WARN(KrisLibrary::logger(),"Warning, contact "<< j<<" of hold "<< k<<" has invalid friction "<< h->second.contacts[j].kFriction<<", setting to 0.5\n");
+    }
+    h->second.contacts[j].kFriction = 0.5;
 	  changed = true;
 	}
     }
     path.SetStance(s,i);
     if(numContacts == 0 && !ignoreForces && robot.joints[0].type == RobotJoint::Floating) {
-      printf("Warning, no contacts given in stance %d for floating-base robot\n",i);
-      printf("Should set ignoreForces = true in trajopt.settings if you wish\n");
-      printf("to ignore contact force constraints.\n");
-      printf("Press enter to continue...\n");
-      getchar();
+      LOG4CXX_WARN(KrisLibrary::logger(),"Warning, no contacts given in stance "<<i);
+      LOG4CXX_INFO(KrisLibrary::logger(),"Should set ignoreForces = true in trajopt.settings if you wish\n");
+      LOG4CXX_INFO(KrisLibrary::logger(),"to ignore contact force constraints.\n");
+      LOG4CXX_INFO(KrisLibrary::logger(),"Press enter to continue...\n");
+      KrisLibrary::loggerWait();
     }
   }
 
@@ -215,11 +218,11 @@ void ContactOptimizeMultipath(const char* robfile,const char* pathfile,const cha
   if(ignoreForces) {
     bool res=GenerateAndTimeOptimizeMultiPath(robot,path,xtol,outputDt);
     if(!res) {
-      printf("Time optimization failed\n");
+      LOG4CXX_INFO(KrisLibrary::logger(),"Time optimization failed\n");
       return;
     }
     Assert(path.HasTiming());
-    cout<<"Saving dynamically optimized path to "<<outputPath<<endl;
+    LOG4CXX_INFO(KrisLibrary::logger(),"Saving dynamically optimized path to "<<outputPath<<"\n");
     ofstream out(outputPath.c_str(),ios::out);
     for(size_t i=0;i<path.sections.size();i++) {
       for(size_t j=0;j<path.sections[i].milestones.size();j++) 
@@ -235,7 +238,7 @@ void ContactOptimizeMultipath(const char* robfile,const char* pathfile,const cha
 				 frictionRobustness,
 				 forceRobustness);
     if(!res) {
-      printf("Time optimization failed\n");
+      LOG4CXX_INFO(KrisLibrary::logger(),"Time optimization failed\n");
       return;
     }
     RobotCSpace cspace(robot);
@@ -245,14 +248,14 @@ void ContactOptimizeMultipath(const char* robfile,const char* pathfile,const cha
     }
     vector<Config> milestones;
     opttraj.GetDiscretizedPath(outputDt,milestones);
-    cout<<"Saving dynamically optimized path to "<<outputPath<<endl;
+    LOG4CXX_INFO(KrisLibrary::logger(),"Saving dynamically optimized path to "<<outputPath<<"\n");
     ofstream out(outputPath.c_str(),ios::out);
     for(size_t i=0;i<milestones.size();i++) {
       out<<i*outputDt<<"\t"<<milestones[i]<<endl;
     }
     out.close();
 
-    printf("Plotting vel/acc constraints to trajopt_plot.csv...\n");
+    LOG4CXX_INFO(KrisLibrary::logger(),"Plotting vel/acc constraints to trajopt_plot.csv...\n");
     opttraj.Plot("trajopt_plot.csv",robot.velMin,robot.velMax,-1.0*robot.accMax,robot.accMax);
   }
 }
@@ -262,8 +265,8 @@ int main(int argc, char** argv)
 {
   Robot::disableGeometryLoading = true;
   if(argc < 3) {
-    printf("Usage: TrajOpt robot multipath [settings]\n");
-    printf("Saving settings template to trajopt_default.settings...\n");
+    LOG4CXX_INFO(KrisLibrary::logger(),"Usage: TrajOpt robot multipath [settings]\n");
+    LOG4CXX_INFO(KrisLibrary::logger(),"Saving settings template to trajopt_default.settings...\n");
     ContactOptimizeSettings settings;
     ofstream out("trajopt_default.settings",ios::out);
     out<<settings<<endl;

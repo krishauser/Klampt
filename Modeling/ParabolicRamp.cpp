@@ -28,6 +28,8 @@
  * 
  ***************************************************************************/
 
+#include <log4cxx/logger.h>
+#include <KrisLibrary/Logger.h>
 #include "ParabolicRamp.h"
 #include "Config.h"
 #include <stdio.h>
@@ -46,7 +48,7 @@ static bool gMinAccelQuiet = false;
 //a flag used to stop SolveMinTime2 from complaining during internal testing
 static bool gMinTime2Quiet = false;
 
-void DoGetchar() { fprintf(stderr,"Press enter to continue...\n"); getchar(); }
+void DoGetchar() { LOG4CXX_ERROR(KrisLibrary::logger(),"Press enter to continue...\n"); KrisLibrary::loggerWait(); }
 
 //solves the quadratic formula and returns the number of roots found
 int quadratic(Real a, Real b, Real c, Real& x1, Real& x2)
@@ -480,7 +482,7 @@ Real PPRamp::Accel(Real t) const
 bool PPRamp::SolveMinTime(Real amax)
 {
   Real tpn = CalcTotalTime(amax), tnp = CalcTotalTime(-amax);
-  //cout<<"Time for parabola +-: "<<tpn<<", parabola -+: "<<tnp<<endl;
+  //LOG4CXX_INFO(KrisLibrary::logger(),"Time for parabola +-: "<<tpn<<", parabola -+: "<<tnp<<"\n");
   if(tpn >= 0) {
     if(tnp >= 0 && tnp < tpn) {
       a = -amax;
@@ -616,7 +618,7 @@ bool PPRamp::SolveMinAccel(Real endTime)
   Real switch1,switch2;
   Real apn = CalcMinAccel(endTime,1.0,switch1);
   Real anp = CalcMinAccel(endTime,-1.0,switch2);
-  //cout<<"Accel for parabola +-: "<<apn<<", parabola -+: "<<anp<<endl;
+  //LOG4CXX_INFO(KrisLibrary::logger(),"Accel for parabola +-: "<<apn<<", parabola -+: "<<anp<<"\n");
   if(apn >= 0) {
     if(anp >= 0 && anp < apn)  a = -anp;
     else a = apn;
@@ -694,7 +696,7 @@ Real PPRamp::MaxVelocity() const
 Real PPRamp::CalcTotalTime(Real a) const
 {
   Real tswitch = CalcSwitchTime(a);
-  //printf("a = %g, switch time %g\n",a,tswitch);
+  //LOG4CXX_INFO(KrisLibrary::logger(),"a = "<<a<<", switch time "<<tswitch);
   if(tswitch < 0) return -1;
   if(tswitch < (dx1-dx0)/a) return -1;
   return tswitch*2.0 - (dx1-dx0)/a;
@@ -841,8 +843,8 @@ Real PPRamp::CalcMinAccel(Real endTime,Real sign,Real& switchTime) const
     if(!FuzzyEquals(x0 + switchTime1*dx0 + 0.5*Sqr(switchTime1)*accel1,x1 - (endTime-switchTime1)*dx1 - 0.5*Sqr(endTime-switchTime1)*accel1,EpsilonX) ||
        !FuzzyEquals(dx0+switchTime1*accel1,dx1+(endTime-switchTime1)*accel1,EpsilonV)) {
       firstInfeas = true;
-      //printf("First solution %g for time %g, %g for time %g\n",accel1,switchTime1,-accel1,endTime-switchTime1);
-      //printf("First solution infeasible, x diff %g, v %g %g\n",x0 + switchTime1*dx0 + 0.5*Sqr(switchTime1)*accel1 - (x1 - (endTime-switchTime1)*dx1 - 0.5*Sqr(endTime-switchTime1)*accel1),dx0+switchTime1*accel1,(dx1+(endTime-switchTime1)*accel1));
+      //LOG4CXX_INFO(KrisLibrary::logger(),"First solution "<<accel1<<" for time "<<switchTime1<<", "<<-accel1<<" for time "<<endTime-switchTime1);
+      //LOG4CXX_INFO(KrisLibrary::logger(),"First solution infeasible, x diff "<<x0 + switchTime1*dx0 + 0.5*Sqr(switchTime1)*accel1 - (x1 - (endTime-switchTime1)*dx1 - 0.5*Sqr(endTime-switchTime1)*accel1)<<", v "<<dx0+switchTime1*accel1<<" "<<(dx1+(endTime-switchTime1)*accel1));
     }
   }
   if(res > 1 && (FuzzyZero(accel2,EpsilonA) || FuzzyZero(endTime/rat2,EpsilonA))) {
@@ -851,8 +853,8 @@ Real PPRamp::CalcMinAccel(Real endTime,Real sign,Real& switchTime) const
     //}
     if(!FuzzyEquals(x0 + switchTime2*dx0 + 0.5*Sqr(switchTime2)*accel2,x1 - (endTime-switchTime2)*dx1 - 0.5*Sqr(endTime-switchTime2)*accel2,EpsilonX) ||
        !FuzzyEquals(dx0+switchTime2*accel2,dx1+(endTime-switchTime2)*accel2,EpsilonV)) {
-      //printf("Second solution %g for time %g, %g for time %g\n",accel2,switchTime2,-accel2,endTime-switchTime2);
-      //printf("Second solution infeasible, x %g %g, v %g %g\n",x0 + switchTime2*dx0 + 0.5*Sqr(switchTime2)*accel2,x1 - (endTime-switchTime2)*dx1 - 0.5*Sqr(endTime-switchTime2)*accel2,dx0+switchTime2*accel2,(dx1+(endTime-switchTime2)*accel2));
+      //LOG4CXX_INFO(KrisLibrary::logger(),"Second solution "<<accel2<<" for time "<<switchTime2<<", "<<-accel2<<" for time "<<endTime-switchTime2);
+      //LOG4CXX_INFO(KrisLibrary::logger(),"Second solution infeasible, x "<<x0 + switchTime2*dx0 + 0.5*Sqr(switchTime2)*accel2<<" "<<x1 - (endTime-switchTime2)*dx1 - 0.5*Sqr(endTime-switchTime2)*accel2<<", v "<<dx0+switchTime2*accel2<<" "<<(dx1+(endTime-switchTime2)*accel2));
       res--;
     }
   }
@@ -902,10 +904,10 @@ Real PPRamp::CalcMinAccel(Real endTime,Real sign,Real& switchTime) const
   if(FuzzyEquals(dx1,dx0,EpsilonV)) {
     //one of the solutions will be very close to zero, use alt solution
     Real a=-2.0*(dx0+dx1)/endTime + 4.0*(x1-x0)/Sqr(endTime);
-    printf("only two solutions: 0 and %g\n",a);
+    LOG4CXX_INFO(KrisLibrary::logger(),"only two solutions: 0 and "<<a);
     switchTime = 0.5*endTime;
     //try out the zero solution
-    printf("diff at 0 solution: %g\n",x0-x1 + switchTime*(dx0+dx1));
+    LOG4CXX_INFO(KrisLibrary::logger(),"diff at 0 solution: "<<x0-x1 + switchTime*(dx0+dx1));
     if(FuzzyEquals(x0 + switchTime*dx0,x1 - switchTime*dx1,EpsilonX)) 
       return 0;
     PARABOLIC_RAMP_ASSERT(FuzzyEquals(dx0 + switchTime*a,dx1 + switchTime*a,CheckEpsilonV));
@@ -937,11 +939,11 @@ Real PPRamp::CalcMinAccel(Real endTime,Real sign,Real& switchTime) const
   if(res==0) return -1;
   else if(res==1) {
     if(!IsFinite(accel1)) {
-      printf("Error computing accelerations!\n");
-      printf("Quadratic %g x^2 + %g x + %g = 0\n",a,b,c);
-      printf("x0 %g, dx0 %g, x1 %g, dx1 %g\n",x0,dx0,x1,dx1);
-      printf("EndTime %g, sign %g\n",endTime,sign);
-      printf("Results %g %g\n",accel1,accel2);
+      LOG4CXX_ERROR(KrisLibrary::logger(),"Error computing accelerations!\n");
+      LOG4CXX_INFO(KrisLibrary::logger(),"Quadratic "<<a<<" x^2 + "<<b<<" x + "<<c);
+      LOG4CXX_INFO(KrisLibrary::logger(),"x0 "<<x0<<", dx0 "<<dx0<<", x1 "<<x1<<", dx1 "<<dx1);
+      LOG4CXX_INFO(KrisLibrary::logger(),"EndTime "<<endTime<<", sign "<<sign);
+      LOG4CXX_INFO(KrisLibrary::logger(),"Results "<<accel1<<" "<<accel2);
       DoGetchar();
     }
     if(switchTime1 >= 0 && switchTime1 <= endTime) { switchTime=switchTime1; return accel1; }
@@ -949,11 +951,11 @@ Real PPRamp::CalcMinAccel(Real endTime,Real sign,Real& switchTime) const
   }
   else if(res==2) {
     if(!IsFinite(accel1) || !IsFinite(accel2)) {
-      printf("Error computing accelerations!\n");
-      printf("Quadratic %g x^2 + %g x + %g = 0\n",a,b,c);
-      printf("x0 %g, dx0 %g, x1 %g, dx1 %g\n",x0,dx0,x1,dx1);
-      printf("EndTime %g, sign %g\n",endTime,sign);
-      printf("Results %g %g\n",accel1,accel2);
+      LOG4CXX_ERROR(KrisLibrary::logger(),"Error computing accelerations!\n");
+      LOG4CXX_INFO(KrisLibrary::logger(),"Quadratic "<<a<<" x^2 + "<<b<<" x + "<<c);
+      LOG4CXX_INFO(KrisLibrary::logger(),"x0 "<<x0<<", dx0 "<<dx0<<", x1 "<<x1<<", dx1 "<<dx1);
+      LOG4CXX_INFO(KrisLibrary::logger(),"EndTime "<<endTime<<", sign "<<sign);
+      LOG4CXX_INFO(KrisLibrary::logger(),"Results "<<accel1<<" "<<accel2);
       DoGetchar();
     }
     if(FuzzyZero(switchTime1,EpsilonT) || FuzzyZero(switchTime2,EpsilonT)) {
@@ -1052,7 +1054,7 @@ Real PLPRamp::CalcMinAccel(Real endTime,Real v) const
   Real a;
   bool res = SafeEqSolve(den,num,EpsilonA,-Inf,Inf,a);
   if(!res) {
-    printf("Couldn't solve SafeEqSolve for CalcMinAccel?\n");
+    LOG4CXX_INFO(KrisLibrary::logger(),"Couldn't solve SafeEqSolve for CalcMinAccel?\n");
     a=0.0;
   }
   */
@@ -1061,8 +1063,8 @@ Real PLPRamp::CalcMinAccel(Real endTime,Real v) const
   Real a;
   bool res = SafeEqSolve(den,num,EpsilonA,-Inf,Inf,a);
   if(!res) {
-    printf("Couldn't solve SafeEqSolve for CalcMinAccel(%g,%g)?\n",endTime,v);
-    printf("Denominator %g, numerator %g\n",den,num);
+    LOG4CXX_INFO(KrisLibrary::logger(),"Couldn't solve SafeEqSolve for CalcMinAccel("<<endTime<<","<<v);
+    LOG4CXX_INFO(KrisLibrary::logger(),"Denominator "<<den<<", numerator "<<num);
   }
 
   /*
@@ -1073,8 +1075,8 @@ Real PLPRamp::CalcMinAccel(Real endTime,Real v) const
   //Real t2mt1 = 0.5*(Sqr(dx1) + Sqr(dx0))/(v*a) - v/a + (x1 - x0)/v;
   Real t2mt1 = (y2-y1)/v;
   Real vold = v;
-  //cout<<"EndTime "<<endTime<<", v "<<v<<endl;
-  //cout<<"a = "<<a<<", t1="<<t1<<", t2mt1="<<t2mt1<<", t2mT="<<t2mT<<endl;
+  //LOG4CXX_INFO(KrisLibrary::logger(),"EndTime "<<endTime<<", v "<<v<<"\n");
+  //LOG4CXX_INFO(KrisLibrary::logger(),"a = "<<a<<", t1="<<t1<<", t2mt1="<<t2mt1<<", t2mT="<<t2mT<<"\n");
   if(t1 < 0 || t2mT > 0 || t2mt1 < 0) return Inf;
   if(!IsFinite(t1) || !IsFinite(t2mT)) return Inf;
   */
@@ -1085,17 +1087,17 @@ Real PLPRamp::CalcMinAccel(Real endTime,Real v) const
   if(!(CalcTotalTime(a,v) >= 0)) {
     //this is very strange -- does it happen because of a compiler
     //optimization error?
-    fprintf(stderr,"PLPRamp::CalcMinAccel: some numerical error prevented computing total time\n");
-    fprintf(stderr,"  Ramp %g,%g -> %g,%g\n",x0,dx0,x1,dx1);
-    fprintf(stderr,"  endTime %g, accel %g, vel %g, switch times %g %g, total time %g\n",endTime,a,v,CalcSwitchTime1(a,v),CalcSwitchTime2(a,v),CalcTotalTime(a,v)); 
-    PARABOLIC_RAMP_ASSERT(v == vold);
-    printf("y1=%g, y2=%g, t2mt1 = %g\n",y1,y2,t2mt1);
+        LOG4CXX_ERROR(KrisLibrary::logger(),"PLPRamp::CalcMinAccel: some numerical error prevented computing total time\n");
+        LOG4CXX_ERROR(KrisLibrary::logger(),"  Ramp "<<x0<<","<<dx0<<" -> "<<x1<<","<<dx1);
+        LOG4CXX_ERROR(KrisLibrary::logger(),"  endTime "<<endTime<<", accel "<<a<<", vel "<<v<<", switch times "<<CalcSwitchTime1(a,v)<<" "<<CalcSwitchTime2(a,v)<<", total time "<<CalcTotalTime(a,v)<<"\n");   
+        PARABOLIC_RAMP_ASSERT(v == vold);
+    LOG4CXX_INFO(KrisLibrary::logger(),"y1="<<y1<<", y2="<<y2<<", t2mt1 = "<<t2mt1);
     Real y1_test = 0.5*(Sqr(v) - Sqr(dx0))/a + x0;
     Real y2_test = 0.5*(Sqr(dx1) - Sqr(v))/a + x1;
     Real t2mt1_test = (y2_test-y1_test)/v;
     //Real t2mt1_test = 0.5*(Sqr(dx1) + Sqr(dx0))/(v*a) - v/a + (x1 - x0)/v;
-    printf("y1=%g, y2=%g, t2mt1 = %g\n",y1_test,y2_test,t2mt1_test);
-    printf("dy1=%g, dy2=%g, dt2mt1 = %g\n",y1-y1_test,y2-y2_test,t2mt1-t2mt1_test);
+    LOG4CXX_INFO(KrisLibrary::logger(),"y1="<<y1_test<<", y2="<<y2_test<<", t2mt1 = "<<t2mt1_test);
+    LOG4CXX_INFO(KrisLibrary::logger(),"dy1="<<y1-y1_test<<", dy2="<<y2-y2_test<<", dt2mt1 = "<<t2mt1-t2mt1_test);
     DoGetchar();
     return Inf;
     PARABOLIC_RAMP_ASSERT(y1 == y1_test);
@@ -1120,7 +1122,7 @@ bool PLPRamp::SolveMinTime2(Real amax,Real vmax,Real timeLowerBound)
   Real t2 = CalcTotalTime(-amax,vmax);
   Real t3 = CalcTotalTime(amax,-vmax);
   Real t4 = CalcTotalTime(-amax,-vmax);
-  //cout<<"Time for PLP ++-: "<<t1<<", -++: "<<t2<<", +--: "<<t3<<", --+: "<<t4<<endl;
+  //LOG4CXX_INFO(KrisLibrary::logger(),"Time for PLP ++-: "<<t1<<", -++: "<<t2<<", +--: "<<t3<<", --+: "<<t4<<"\n");
   ttotal = Inf;
   if(t1 >= timeLowerBound && t1 < ttotal) {
     a = amax;
@@ -1146,8 +1148,8 @@ bool PLPRamp::SolveMinTime2(Real amax,Real vmax,Real timeLowerBound)
     a = v = 0;
     tswitch1 = tswitch2 = ttotal = -1;
 
-    //printf("Times... %g %g %g %g\n",t1,t2,t3,t4);
-    //printf("Trying alternate MinTime2 solution technique...\n");
+    //LOG4CXX_INFO(KrisLibrary::logger(),"Times... "<<t1<<" "<<t2<<" "<<t3<<" "<<t4);
+    //LOG4CXX_INFO(KrisLibrary::logger(),"Trying alternate MinTime2 solution technique...\n");
     Real v1 = CalcMinTime2(timeLowerBound,amax,vmax);
     Real v2 = CalcMinTime2(timeLowerBound,-amax,vmax);
     if(v1 > 0) {
@@ -1156,10 +1158,10 @@ bool PLPRamp::SolveMinTime2(Real amax,Real vmax,Real timeLowerBound)
       tswitch1 = (v1-dx0)/a;
       tswitch2 = timeLowerBound - (v1-dx1)/a;
       ttotal = timeLowerBound;
-      //printf("Candidate 1 timing %g %g %g\n",tswitch1,tswitch2,ttotal);
-      //printf("Test 1 x %g %g\n",x1-(ttotal-tswitch2)*v1+0.5*Sqr(ttotal-tswitch2)*a,x0+tswitch1*dx0+0.5*Sqr(tswitch1)*a+(tswitch1-tswitch2)*v1);
-      //printf("x1, v1 = %g, %g\n",x0+dx0*tswitch1+0.5*Sqr(tswitch1)*a,dx0+tswitch1*a);
-      //printf("x2, v2 = %g, %g\n",x1-dx1*(ttotal-tswitch2)+0.5*Sqr(ttotal-tswitch2)*a,dx1+(ttotal-tswitch2)*a);
+      //LOG4CXX_INFO(KrisLibrary::logger(),"Candidate 1 timing "<<tswitch1<<" "<<tswitch2<<" "<<ttotal);
+      //LOG4CXX_INFO(KrisLibrary::logger(),"Test 1 x "<<x1-(ttotal-tswitch2)*v1+0.5*Sqr(ttotal-tswitch2)*a<<" "<<x0+tswitch1*dx0+0.5*Sqr(tswitch1)*a+(tswitch1-tswitch2)*v1);
+      //LOG4CXX_INFO(KrisLibrary::logger(),"x1, v1 = "<<x0+dx0*tswitch1+0.5*Sqr(tswitch1)*a<<", "<<dx0+tswitch1*a);
+      //LOG4CXX_INFO(KrisLibrary::logger(),"x2, v2 = "<<x1-dx1*(ttotal-tswitch2)+0.5*Sqr(ttotal-tswitch2)*a<<", "<<dx1+(ttotal-tswitch2)*a);
       return true;
     }
     if(v2 > 0) {
@@ -1168,10 +1170,10 @@ bool PLPRamp::SolveMinTime2(Real amax,Real vmax,Real timeLowerBound)
       tswitch1 = (v2-dx0)/a;
       tswitch2 = timeLowerBound - (v2-dx1)/a;
       ttotal = timeLowerBound;
-      //printf("Candidate 2 timing %g %g %g\n",tswitch1,tswitch2,ttotal);
-      //printf("Test 2 x %g %g\n",x1-(ttotal-tswitch2)*v1+0.5*Sqr(ttotal-tswitch2)*a,x0+tswitch1*dx0+0.5*Sqr(tswitch1)*a+(tswitch1-tswitch2)*v1);
-      //printf("x1, v1 = %g, %g\n",x0+dx0*tswitch1+0.5*Sqr(tswitch1)*a,dx0+tswitch1*a);
-      //printf("x2, v2 = %g, %g\n",x1-dx1*(ttotal-tswitch1)+0.5*Sqr(ttotal-tswitch1)*a,dx1+(ttotal-tswitch2)*a);
+      //LOG4CXX_INFO(KrisLibrary::logger(),"Candidate 2 timing "<<tswitch1<<" "<<tswitch2<<" "<<ttotal);
+      //LOG4CXX_INFO(KrisLibrary::logger(),"Test 2 x "<<x1-(ttotal-tswitch2)*v1+0.5*Sqr(ttotal-tswitch2)*a<<" "<<x0+tswitch1*dx0+0.5*Sqr(tswitch1)*a+(tswitch1-tswitch2)*v1);
+      //LOG4CXX_INFO(KrisLibrary::logger(),"x1, v1 = "<<x0+dx0*tswitch1+0.5*Sqr(tswitch1)*a<<", "<<dx0+tswitch1*a);
+      //LOG4CXX_INFO(KrisLibrary::logger(),"x2, v2 = "<<x1-dx1*(ttotal-tswitch1)+0.5*Sqr(ttotal-tswitch1)*a<<", "<<dx1+(ttotal-tswitch2)*a);
       return true;
     }
     return false;
@@ -1302,19 +1304,19 @@ Real PLPRamp::CalcMinTime2(Real endTime,Real a,Real vmax) const
   Real b = -a*endTime - (dx1+dx0);
   Real c = a*(x1-x0) + (Sqr(dx0)+Sqr(dx1))*0.5;
   Real v1,v2;
-  //printf("Quadratic coeffs %g, %g, %g\n",1.0,b,c);
+  //LOG4CXX_INFO(KrisLibrary::logger(),"Quadratic coeffs "<<1.0<<", "<<b<<", "<<c);
   int res=quadratic(1.0,b,c,v1,v2);
-  //printf("Quadratic res %d, accel %g, velocities %g %g\n",res,a,v1,v2);
+  //LOG4CXX_INFO(KrisLibrary::logger(),"Quadratic res "<<res<<", accel "<<a<<", velocities "<<v1<<" "<<v2);
   if(res >= 1) {
     Real ts1 = (v1-dx0)/a;
     Real ts2 = endTime - (v1-dx1)/a;
-    //printf("Solution 1 times %g %g %g\n",ts1,ts2,endTime);
+    //LOG4CXX_INFO(KrisLibrary::logger(),"Solution 1 times "<<ts1<<" "<<ts2<<" "<<endTime);
     if(Abs(v1) <= vmax && ts1 >= 0 && ts2 >= ts1 && ts2 <= endTime) return v1;  //it's a valid solution!
   }
   if(res == 2) {
     Real ts1 = (v2-dx0)/a;
     Real ts2 = endTime - (v2-dx1)/a;
-    //printf("Solution 2 times %g %g %g\n",ts1,ts2,endTime);
+    //LOG4CXX_INFO(KrisLibrary::logger(),"Solution 2 times "<<ts1<<" "<<ts2<<" "<<endTime);
     if(Abs(v2) <= vmax && ts1 >= 0 && ts2 >= ts1 && ts2 <= endTime) return v2;  //it's a valid solution!
   }
   return -1;
@@ -1402,8 +1404,8 @@ bool ParabolicRamp1D::SolveMinAccel(Real endTime,Real vmax)
   bool plpres = false;
   if(!IsInf(vmax))
     plpres = plp.SolveMinAccel(endTime,vmax);
-  //cout<<"PP a: "<<pp.a<<", max vel "<<pp.MaxVelocity()<<endl;
-  //cout<<"PLP a: "<<plp.a<<", vel "<<plp.v<<endl;
+  //LOG4CXX_INFO(KrisLibrary::logger(),"PP a: "<<pp.a<<", max vel "<<pp.MaxVelocity()<<"\n");
+  //LOG4CXX_INFO(KrisLibrary::logger(),"PLP a: "<<plp.a<<", vel "<<plp.v<<"\n");
   a1 = Inf;
   if(pres && FuzzyEquals(endTime,p.ttotal,EpsilonT) && Abs(p.MaxVelocity()) <= vmax) {
     if(FuzzyEquals(p.Evaluate(endTime),x1,EpsilonX) && FuzzyEquals(p.Derivative(endTime),dx1,EpsilonV)) {
@@ -1533,9 +1535,9 @@ bool ParabolicRamp1D::SolveMinTime(Real amax,Real vmax)
   bool plpres = false;
   if(!IsInf(vmax))
     plpres = plp.SolveMinTime(amax,vmax);
-  //cout<<"P time: "<<p.ttotal<<", accel "<<p.a<<endl;
-  //cout<<"PP time: "<<pp.ttotal<<", max vel "<<pp.MaxVelocity()<<endl;
-  //cout<<"PLP time: "<<plp.ttotal<<", vel "<<plp.v<<endl;
+  //LOG4CXX_INFO(KrisLibrary::logger(),"P time: "<<p.ttotal<<", accel "<<p.a<<"\n");
+  //LOG4CXX_INFO(KrisLibrary::logger(),"PP time: "<<pp.ttotal<<", max vel "<<pp.MaxVelocity()<<"\n");
+  //LOG4CXX_INFO(KrisLibrary::logger(),"PLP time: "<<plp.ttotal<<", vel "<<plp.v<<"\n");
   ttotal = Inf;
   if(pres && Abs(p.a) <= amax+EpsilonA && p.ttotal < ttotal) {
     if(Abs(p.a) <= amax) {
@@ -1595,7 +1597,7 @@ bool ParabolicRamp1D::SolveMinTime(Real amax,Real vmax)
     return false;
   }
   a2 = -a1;
-  //cout<<"switch time 1: "<<tswitch1<<", 2: "<<tswitch2<<", total "<<ttotal<<endl;
+  //LOG4CXX_INFO(KrisLibrary::logger(),"switch time 1: "<<tswitch1<<", 2: "<<tswitch2<<", total "<<ttotal<<"\n");
   if(gValidityCheckLevel >= 2) {
     if(!IsValid()) {
       if(gVerbose >= 1) {
@@ -1625,9 +1627,9 @@ bool ParabolicRamp1D::SolveMinTime2(Real amax,Real vmax,Real tLowerBound)
   bool plpres = false;
   if(!IsInf(vmax))
     plpres = plp.SolveMinTime2(amax,vmax,tLowerBound);
-  //cout<<"P time: "<<p.ttotal<<", accel "<<p.a<<endl;
-  //cout<<"PP time: "<<pp.ttotal<<", max vel "<<pp.MaxVelocity()<<endl;
-  //cout<<"PLP time: "<<plp.ttotal<<", vel "<<plp.v<<endl;
+  //LOG4CXX_INFO(KrisLibrary::logger(),"P time: "<<p.ttotal<<", accel "<<p.a<<"\n");
+  //LOG4CXX_INFO(KrisLibrary::logger(),"PP time: "<<pp.ttotal<<", max vel "<<pp.MaxVelocity()<<"\n");
+  //LOG4CXX_INFO(KrisLibrary::logger(),"PLP time: "<<plp.ttotal<<", vel "<<plp.v<<"\n");
   ttotal = Inf;
   if(pres && Abs(p.a) <= amax+EpsilonA && p.ttotal < ttotal && p.ttotal >= tLowerBound) {
     if(Abs(p.a) <= amax) {
@@ -1692,7 +1694,7 @@ bool ParabolicRamp1D::SolveMinTime2(Real amax,Real vmax,Real tLowerBound)
     return false;
   }
   a2 = -a1;
-  //cout<<"switch time 1: "<<tswitch1<<", 2: "<<tswitch2<<", total "<<ttotal<<endl;
+  //LOG4CXX_INFO(KrisLibrary::logger(),"switch time 1: "<<tswitch1<<", 2: "<<tswitch2<<", total "<<ttotal<<"\n");
   if(gValidityCheckLevel >= 2) {
     if(!IsValid()) {
       if(gVerbose >= 1) {
@@ -1776,11 +1778,11 @@ void ParabolicRamp1D::Bounds(Real& xmin,Real& xmax) const
   /*
   if(x0 < xmin || x0 > xmax ||
      x1 < xmin || x1 > xmax) {
-    printf("Warning, ParabolicRamp1D::Bounds function doesn't seem to work!\n");
-    printf("%g,%g in [%g,%g]\n",x0,x1,xmin,xmax);
-    printf("Margins %g %g %g %g\n",x0-xmin,x1-xmin,xmax-x0,xmax-x1);
-    printf("ttotal %g, tswitch1 %g, tswitch2 %g\n",ttotal,tswitch1,tswitch2);
-    printf("a1 %g, v %g, a2 %g\n",a1,v,a2);
+    LOG4CXX_WARN(KrisLibrary::logger(),"Warning, ParabolicRamp1D::Bounds function doesn't seem to work!\n");
+    LOG4CXX_INFO(KrisLibrary::logger(),""<<x0<<","<<x1<<" in ["<<xmin<<","<<xmax);
+    LOG4CXX_INFO(KrisLibrary::logger(),"Margins "<<x0-xmin<<" "<<x1-xmin<<" "<<xmax-x0<<" "<<xmax-x1);
+    LOG4CXX_INFO(KrisLibrary::logger(),"ttotal "<<ttotal<<", tswitch1 "<<tswitch1<<", tswitch2 "<<tswitch2);
+    LOG4CXX_INFO(KrisLibrary::logger(),"a1 "<<a1<<", v "<<v<<", a2 "<<a2);
   }
   */
 }
@@ -2482,8 +2484,8 @@ inline Real BrakeTime(Real x,Real v,Real xbound)
   Real t;
   bool res=SafeEqSolve(v,2.0*(xbound-x),EpsilonX,0,Inf,t);
   if(!res) {
-    printf("Warning, couldn't solve brake time equation:\n");
-    printf("%g*a = %g = 0\n",v,2.0*(xbound-x));
+    LOG4CXX_WARN(KrisLibrary::logger(),"Warning, couldn't solve brake time equation:\n");
+    LOG4CXX_INFO(KrisLibrary::logger(),""<<v<<"*a = "<<2.0*(xbound-x));
     if(gErrorGetchar) DoGetchar();
     return 0;
   }
@@ -2497,8 +2499,8 @@ inline Real BrakeAccel(Real x,Real v,Real xbound)
   Real a;
   bool res=SafeEqSolve(2.0*(xbound-x),-v*v,EpsilonV,-Inf,Inf,a);
   if(!res) {
-    printf("Warning, couldn't solve braking acceleration equation:\n");
-    printf("%g*a + %g = 0\n",2.0*(xbound-x),v*v);
+    LOG4CXX_WARN(KrisLibrary::logger(),"Warning, couldn't solve braking acceleration equation:\n");
+    LOG4CXX_INFO(KrisLibrary::logger(),""<<2.0*(xbound-x)<<"*a + "<<v*v);
     if(gErrorGetchar) DoGetchar();
     return 0;
   }
@@ -2762,11 +2764,11 @@ Real SolveMinTimeBounded(const Vector& x0,const Vector& v0,const Vector& x1,cons
   PARABOLIC_RAMP_ASSERT(x0.size() == vmax.size());
   for(size_t i=0;i<x0.size();i++) {
     if(x0[i] < xmin[i] || x0[i] > xmax[i]) {
-      printf("Warning, start component %d=%g out of range [%g,%g]\n",i,x0[i],xmin[i],xmax[i]);
+      LOG4CXX_WARN(KrisLibrary::logger(),"Warning, start component "<<i<<"="<<x0[i]<<" out of range ["<<xmin[i]<<","<<xmax[i]);
       return -1;
     }
     if(x1[i] < xmin[i] || x1[i] > xmax[i]) {
-      printf("Warning, goal component %d=%g out of range [%g,%g]\n",i,x1[i],xmin[i],xmax[i]);
+      LOG4CXX_WARN(KrisLibrary::logger(),"Warning, goal component "<<i<<"="<<x1[i]<<" out of range ["<<xmin[i]<<","<<xmax[i]);
       return -1;
     }
     PARABOLIC_RAMP_ASSERT(x0[i] >= xmin[i] && x0[i] <= xmax[i]);
@@ -2847,9 +2849,9 @@ Real SolveMinTimeBounded(const Vector& x0,const Vector& v0,const Vector& x1,cons
       }
       if(x0[i] < bmin || x0[i] > bmax ||
 	 x1[i] < bmin || x1[i] > bmax) {
-	printf("Warning, ParabolicRamp1D::Bounds function doesnt seem to work!\n");
-	printf("%g,%g in [%g,%g]\n",x0[i],x1[i],bmin,bmax);
-	printf("Margins %g %g %g %g\n",x0[i]-bmin,x1[i]-bmin,bmax-x0[i],bmax-x1[i]);
+	LOG4CXX_WARN(KrisLibrary::logger(),"Warning, ParabolicRamp1D::Bounds function doesnt seem to work!\n");
+	LOG4CXX_INFO(KrisLibrary::logger(),""<<x0[i]<<","<<x1[i]<<" in ["<<bmin<<","<<bmax);
+	LOG4CXX_INFO(KrisLibrary::logger(),"Margins "<<x0[i]-bmin<<" "<<x1[i]-bmin<<" "<<bmax-x0[i]<<" "<<bmax-x1[i]);
       }
       bmin = Max(bmin-EpsilonX,xmin[i]);
       bmax = Min(bmax+EpsilonX,xmax[i]);
@@ -2881,7 +2883,7 @@ Real SolveMinTimeBounded(const Vector& x0,const Vector& v0,const Vector& x1,cons
 	Real bmin,bmax;
 	ramps[i][0].Bounds(bmin,bmax);
 	if(bmin < xmin[i] || bmax > xmax[i]) {
-	  //printf("Couldn't solve min-time with lower bound while staying in bounds\n");
+	  //LOG4CXX_INFO(KrisLibrary::logger(),"Couldn't solve min-time with lower bound while staying in bounds\n");
 	  if(gVerbose >= 1) PARABOLIC_RAMP_PERROR("Braking path %d exceeds bounds: [%g,%g] not in [%g,%g]\n",i,bmin,bmax,xmin[i],xmax[i]);  
 	  //DoGetchar();
 	  return -1;
@@ -2980,12 +2982,12 @@ void CombineRamps(const std::vector<std::vector<ParabolicRamp1D> >& ramps,std::v
     if(tnext == 0) {
       for(size_t i=0;i<ramps.size();i++) {
 	if(ramps[i].size()!=1) {
-	  printf("Warning, some entry has multiple zeroes?\n");
+	  LOG4CXX_WARN(KrisLibrary::logger(),"Warning, some entry has multiple zeroes?\n");
 	  for(size_t j=0;j<ramps.size();j++) {
-	    printf("Ramp %d: ",j);
+	    LOG4CXX_INFO(KrisLibrary::logger(),"Ramp "<<j);
 	    for(size_t k=0;k<ramps[j].size();k++) 
-	      printf("%g ",ramps[j][k].ttotal);
-	    printf("\n");
+	      LOG4CXX_INFO(KrisLibrary::logger(),""<<ramps[j][k].ttotal);
+	    LOG4CXX_INFO(KrisLibrary::logger(),"\n");
 	  }
 	}
 	PARABOLIC_RAMP_ASSERT(ramps[i].size()==1);

@@ -4,6 +4,8 @@
  *  Created on: Jun 07, 2013
  *      Author: jingru
  */
+#include <log4cxx/logger.h>
+#include <KrisLibrary/Logger.h>
 #include "Modeling/Robot.h"
 #include <string.h>
 #include <KrisLibrary/utils/stringutils.h>
@@ -51,13 +53,13 @@ int main_shell(int argc, char** argv)
   settings["outputGeometryPrefix"] = string("");
   settings["packageRootPath"] = string("");
   if(!settings.read("urdftorob.settings")) {
-    printf("Didn't read settings from [APPDATA]/urdftorob.settings\n");
-    printf("Writing default settings to [APPDATA]/urdftorob.settings\n");
+    LOG4CXX_INFO(KrisLibrary::logger(),"Didn't read settings from [APPDATA]/urdftorob.settings\n");
+    LOG4CXX_INFO(KrisLibrary::logger(),"Writing default settings to [APPDATA]/urdftorob.settings\n");
     settings.write("urdftorob.settings");
   }
 
   if (argc < 2 || argc > 3) {
-    printf(
+    LOG4CXX_INFO(KrisLibrary::logger(),
 	   "USAGE: URDFtoRob robot_file.urdf [optional filename for .rob]\n");
     return 0;
   }
@@ -75,12 +77,12 @@ int main_shell(int argc, char** argv)
   const char* ext = FileExtension(argv[1]);
   if (0 == strcmp(ext, "urdf")) {
     URDFtoRob(settings,infile,outfile);
-    cout<<"Converted "<<infile<<" to "<< outfile<<endl;
-    cout << "Done!" << endl;
+    LOG4CXX_INFO(KrisLibrary::logger(),"Converted "<<infile<<" to "<< outfile<<"\n");
+    LOG4CXX_INFO(KrisLibrary::logger(), "Done!" << "\n");
     return 1;
   }
   else {
-    printf("Unknown file extension %s on file %s!\nOnly converts URDF to Rob", ext, argv[1]);
+    LOG4CXX_INFO(KrisLibrary::logger(),"Unknown file extension "<< ext<<" on file "<< argv[1]);
     return 0;
   }
 }

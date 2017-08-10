@@ -1,3 +1,5 @@
+#include <log4cxx/logger.h>
+#include <KrisLibrary/Logger.h>
 #include "PlannerObjective.h"
 #include <KrisLibrary/utils/AnyCollection.h>
 #include <KrisLibrary/robotics/IKFunctions.h>
@@ -399,7 +401,7 @@ Real CartesianTrackingObjective::TerminalCost(Real tend,const Vector& qend,const
   assert(positions.size()==times.size());
   if(positions.empty()) return 0.0;
 
-  //printf("TerminalCost\n");
+  //LOG4CXX_INFO(KrisLibrary::logger(),"TerminalCost\n");
 
   //compute workspace position at terminal config
   robot->UpdateConfig(qend);
@@ -509,7 +511,7 @@ const static Real g5weights [5] = {128.0/225.0,(322.0+13*Sqrt(70.0))/900,(322.0+
 //    = (c-r).A(c-r) + 1/12 (b-a+p-q).A(b-a+p-q)
 Real CartesianTrackingObjective::IntegrateSegment(int index,Real a,Real b,Real tstart,const ParabolicRamp::ParabolicRampND& ramp)
 {
-  //printf("IntegrateSegment\n");
+  //LOG4CXX_INFO(KrisLibrary::logger(),"IntegrateSegment\n");
   assert(index >= 0 && index+1 < (int)times.size());
   assert(a <= b);
   assert(times[index] <= a && b <= times[index+1]);
@@ -534,7 +536,7 @@ Real CartesianTrackingObjective::PathCost(const ParabolicRamp::DynamicPath& path
 Real CartesianTrackingObjective::Delta(PlannerObjectiveBase* priorGoal)
 {
   if(priorGoal->TypeString() != TypeString()) return Inf;
-  //printf("Delta\n");
+  //LOG4CXX_INFO(KrisLibrary::logger(),"Delta\n");
   const CartesianTrackingObjective* cartObj = dynamic_cast<const CartesianTrackingObjective*>(priorGoal);
   if(link != cartObj->link) return Inf;
   if(localPosition != cartObj->localPosition) return Inf;
@@ -630,7 +632,7 @@ bool SavePlannerObjective(PlannerObjectiveBase* obj,AnyCollection& msg)
     msg["norm"] = cobj->norm;
     for(size_t i=0;i<cobj->components.size();i++) {
       if(!SavePlannerObjective(cobj->components[i],msg["components"][i])) {
-	fprintf(stderr,"SavePlannerObjective: error saving component %d of composite objective\n",(int)i);
+		LOG4CXX_ERROR(KrisLibrary::logger(),"SavePlannerObjective: error saving component "<<(int)i);
 	return false;
       }
     }
@@ -647,7 +649,7 @@ bool SavePlannerObjective(PlannerObjectiveBase* obj,AnyCollection& msg)
     Convert(cobj->ikGoal,msg["data"]);
   }
   else {
-    fprintf(stderr,"SavePlannerObjective: unknown objective type %s\n",type.c_str());
+        LOG4CXX_ERROR(KrisLibrary::logger(),"SavePlannerObjective: unknown objective type "<<type.c_str());
     return false;
   }
   return true;
@@ -659,7 +661,7 @@ PlannerObjectiveBase* LoadPlannerObjective(AnyCollection& msg,Robot* robot)
   string type;
   bool res = msg["type"].as<string>(type);
   if(!res) {
-    fprintf(stderr,"LoadPlannerObjective: message didn't contain 'type' member\n");
+        LOG4CXX_ERROR(KrisLibrary::logger(),"LoadPlannerObjective: message didn't contain 'type' member\n");
     return NULL;
   }
   if(type == "time") {
@@ -671,11 +673,11 @@ PlannerObjectiveBase* LoadPlannerObjective(AnyCollection& msg,Robot* robot)
   else if(type == "config") {
     vector<Real> q;
     if(!msg["data"].asvector(q)) {
-      fprintf(stderr,"LoadPlannerObjective: config message didn't contain 'data' member\n");
+            LOG4CXX_ERROR(KrisLibrary::logger(),"LoadPlannerObjective: config message didn't contain 'data' member\n");
       return NULL;
     }
     if(robot && q.size() != robot->links.size()) {
-      fprintf(stderr,"LoadPlannerObjective: config message contains desired configuration of incorrect length %d vs %d\n",(int)q.size(),(int)robot->links.size());
+            LOG4CXX_ERROR(KrisLibrary::logger(),"LoadPlannerObjective: config message contains desired configuration of incorrect length "<<(int)q.size()<<" vs "<<(int)robot->links.size());
       return NULL;
     }
     return new ConfigObjective(Vector(q));
@@ -683,11 +685,11 @@ PlannerObjectiveBase* LoadPlannerObjective(AnyCollection& msg,Robot* robot)
   else if(type == "velocity") {
     vector<Real> v;
     if(!msg["data"].asvector(v)) {
-      fprintf(stderr,"LoadPlannerObjective: velocity  message didn't contain 'data' member\n");
+            LOG4CXX_ERROR(KrisLibrary::logger(),"LoadPlannerObjective: velocity  message didn't contain 'data' member\n");
       return NULL;
     }
     if(robot && v.size() != robot->links.size()) {
-      fprintf(stderr,"LoadPlannerObjective: velocity message contains desired velocity of incorrect length %d vs %d\n",(int)v.size(),(int)robot->links.size());
+            LOG4CXX_ERROR(KrisLibrary::logger(),"LoadPlannerObjective: velocity message contains desired velocity of incorrect length "<<(int)v.size()<<" vs "<<(int)robot->links.size());
       return NULL;
     }
     return new VelocityObjective(Vector(v));
@@ -696,7 +698,7 @@ PlannerObjectiveBase* LoadPlannerObjective(AnyCollection& msg,Robot* robot)
     vector<SmartPointer<AnyCollection> > items;
     AnyCollection msgcomp = msg["components"];
     if(msgcomp.depth() == 0) {
-      fprintf(stderr,"LoadPlannerObjective: composite message didn't contain 'components' member\n");
+            LOG4CXX_ERROR(KrisLibrary::logger(),"LoadPlannerObjective: composite message didn't contain 'components' member\n");
       return NULL;
     }
     msgcomp.enumerate(items);
@@ -713,7 +715,7 @@ PlannerObjectiveBase* LoadPlannerObjective(AnyCollection& msg,Robot* robot)
     return obj;
   }
   else {
-    fprintf(stderr,"LoadPlannerObjective: message of unknown type %s\n",type.c_str());
+        LOG4CXX_ERROR(KrisLibrary::logger(),"LoadPlannerObjective: message of unknown type "<<type.c_str());
     return NULL;
   }
 }
@@ -724,7 +726,7 @@ PlannerObjectiveBase* LoadPlannerObjective(istream& in,Robot* robot)
   AnyCollection msg;
   in>>msg;
   if(!in) {
-    fprintf(stderr,"LoadPlannerObjective: Unable to parse message\n");
+        LOG4CXX_ERROR(KrisLibrary::logger(),"LoadPlannerObjective: Unable to parse message\n");
     return NULL;
   }
   return LoadPlannerObjective(msg,robot);
@@ -737,7 +739,7 @@ bool SavePlannerObjective(PlannerObjectiveBase* obj,ostream& out)
   if(!SavePlannerObjective(obj,msg)) return false;
   out<<msg;
   if(!out) {
-    fprintf(stderr,"LoadPlannerObjective: Unable to write message\n");
+        LOG4CXX_ERROR(KrisLibrary::logger(),"LoadPlannerObjective: Unable to write message\n");
     return false;
   }
   return true;

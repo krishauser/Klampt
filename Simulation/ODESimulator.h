@@ -141,17 +141,13 @@ class ODESimulator
   void ClearContactFeedback();
   bool InContact(const ODEObjectID& a) const;
   bool InContact(const ODEObjectID& a,const ODEObjectID& b) const;
-  ///Disables instability correction for the next time step.  This should be done if you manually set several objects' velocities, for example.
-  void DisableInstabilityCorrection();
-  ///Disables instability correction for the given object on the next time step. This should be done if you manually set an object's velocities, for example.
-  void DisableInstabilityCorrection(const ODEObjectID& obj);
+  void SetupContactResponse(const ODEObjectID& a,const ODEObjectID& b,int feedbackIndex,ODEContactResult& c);
 
   //used internally
   bool ReadState_Internal(File& f);
   bool WriteState_Internal(File& f) const;
   void DetectCollisions();
   void SetupContactResponse(); 
-  void SetupContactResponse(const ODEObjectID& a,const ODEObjectID& b,int feedbackIndex,ODEContactResult& c);
   void ClearCollisions();
   bool InstabilityCorrection();
     
