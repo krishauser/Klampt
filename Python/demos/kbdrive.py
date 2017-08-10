@@ -2,7 +2,8 @@
 
 import sys
 from klampt import *
-from klampt.glrobotprogram import *
+from klampt.vis.glrobotprogram import *
+from klampt import vis
 
 #FOR DEFAULT JOINT-BY-JOINT KEYMAP: set keymap=None
 keymap = None
@@ -10,7 +11,7 @@ keymap = None
 #FOR CUSTOM KEYMAPS: set up keymap to define how keys map to velocities.
 #keymap is a map from key name to (robot index,velocity vector) pairs.
 #Key names can either be single keys or names of special keys
-#'left','up','down','right', 'home', 'insert', 'end', and the function keys.
+#'left','up','down','right', 'home', 'insert', 'end', and the function keys 'f1',...,'f12'.
 #keymap = {'up':(0,[0,1]),'down':(0,[0,-1]),'left':(0,[-1,0]),'right':(0,[1,0])}
 
 def build_default_keymap(world):
@@ -37,35 +38,12 @@ def build_default_keymap(world):
         res[down[i]] = (0,vel)
     return res
 
-glutspecialmap = {
-    GLUT_KEY_F1:'f1',
-    GLUT_KEY_F2:'f2',
-    GLUT_KEY_F3:'f3',
-    GLUT_KEY_F4:'f4',
-    GLUT_KEY_F5:'f5',
-    GLUT_KEY_F6:'f6',
-    GLUT_KEY_F7:'f7',
-    GLUT_KEY_F8:'f8',
-    GLUT_KEY_F9:'f9',
-    GLUT_KEY_F10:'f10',
-    GLUT_KEY_F11:'f11',
-    GLUT_KEY_F12:'f12',
-    GLUT_KEY_LEFT:'left',
-    GLUT_KEY_UP:'up',
-    GLUT_KEY_RIGHT:'right',
-    GLUT_KEY_DOWN:'down',
-    GLUT_KEY_PAGE_UP:'pageup',
-    GLUT_KEY_PAGE_DOWN:'pagedown',
-    GLUT_KEY_HOME:'home',
-    GLUT_KEY_END:'end',
-    GLUT_KEY_INSERT:'insert'
-    }
 
 
-class MyGLViewer(GLSimulationProgram):
+class MyGLViewer(GLSimulationPlugin):
     def __init__(self,world):
         global keymap
-        GLSimulationProgram.__init__(self,world,"My GL program")
+        GLSimulationPlugin.__init__(self,world)
         self.world = world
         if keymap == None:
             keymap = build_default_keymap(world)
@@ -100,38 +78,25 @@ class MyGLViewer(GLSimulationProgram):
             if state==0:
                 print [o.getName() for o in self.click_world(x,y)]
                 return
-        GLRealtimeProgram.mousefunc(self,button,state,x,y)
+        GLSimulationPlugin.mousefunc(self,button,state,x,y)
 
-    def specialfunc(self,c,x,y):
-        #Put your keyboard special character handler here
-        if c in glutspecialmap:
-            name = glutspecialmap[c]
-            if name in self.keymap:
-                self.current_velocities[name]=self.keymap[name]
-        pass
-
-    def specialupfunc(self,c,x,y):
-        #Put your keyboard special character handler here
-        if c in glutspecialmap:
-            name = glutspecialmap[c]
-            if name in self.current_velocities:
-                del self.current_velocities[name]
-        pass
+    def print_help(self):
+        self.window.program.print_help()
+        print 'Drive keys:',sorted(self.keymap.keys())
 
     def keyboardfunc(self,c,x,y):
         #Put your keyboard handler here
         #the current example toggles simulation / movie mode
-        if c == 's':
-            self.simulate = not self.simulate
-            print "Simulating:",self.simulate
-        elif c == 'm':
-            self.saveScreenshots = not self.saveScreenshots
-            print "Movie mode:",self.saveScreenshots
-        elif c == 'h':
-            print 'Available keys:',sorted(self.keymap.keys())
-        elif c in self.keymap:
+        if c in self.keymap:
             self.current_velocities[c]=self.keymap[c]
-        glutPostRedisplay()
+            return True
+        elif c == '?':
+            self.print_help()
+            return True
+        else:
+            GLSimulationPlugin.keyboardfunc(self,c,x,y)
+            return True
+        self.refresh()
 
     def keyboardupfunc(self,c,x,y):
         if c in self.current_velocities:
@@ -149,5 +114,14 @@ if __name__ == "__main__":
         res = world.readFile(fn)
         if not res:
             raise RuntimeError("Unable to load model "+fn)
+
     viewer = MyGLViewer(world)
-    viewer.run()
+
+    print 
+    print "**********************"
+    print "       HELP"
+    print "Press 's' to start simulating."
+    print "Use 1,2,..,0 to increase the robot's joints and q,w,...,p to reduce them."
+    print "**********************"
+    print 
+    vis.run(viewer)

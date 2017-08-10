@@ -72,18 +72,12 @@ bool SimplePlan(RobotWorld& world,int robot,const Config& qstart,const Config& q
 
   if(!cspace.IsFeasible(qstart)) {
     cout<<"Start configuration is infeasible, violated constraints:"<<endl;
-    vector<bool> infeasible;
-    cspace.CheckObstacles(qstart,infeasible);
-    for(size_t i=0;i<infeasible.size();i++)
-      if(infeasible[i]) cout<<"  "<<cspace.ObstacleName(i)<<endl;
+    cspace.PrintInfeasibleNames(qstart);
     return false;
   }
   if(!cspace.IsFeasible(qgoal)) {
     cout<<"Goal configuration is infeasible, violated constraints:"<<endl;
-    vector<bool> infeasible;
-    cspace.CheckObstacles(qgoal,infeasible);
-    for(size_t i=0;i<infeasible.size();i++)
-      if(infeasible[i]) cout<<"  "<<cspace.ObstacleName(i)<<endl;
+    cspace.PrintInfeasibleNames(qgoal);
     return false;
   }
 

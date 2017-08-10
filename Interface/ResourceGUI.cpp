@@ -127,7 +127,12 @@ ResourceNodePtr ResourceGUIBackend::Add(ResourcePtr r)
       }
       r->name = ss.str();
   }
-  last_added = resources->Add(r,parent);
+  //need to get the reference counted version of parent;
+  ResourceNodePtr parentSafe;
+  if(parent != NULL) {
+    parentSafe = resources->SafePtr(parent);
+  }
+  last_added = resources->Add(r,parentSafe);
   //SendCommand("new_resource", r->Type()+string(" ")+r->name);
   SendCommand("new_resource", last_added->Identifier());
   return last_added;

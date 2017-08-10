@@ -19,8 +19,8 @@ swig:
 	swig -python -c++ src/motionplanning.i
 	swig -python -c++ src/rootfind.i
 	cp src/robotsim.py .
-	cp src/motionplanning.py .
-	cp src/rootfind.py .
+	cp src/motionplanning.py plan
+	cp src/rootfind.py math
 
 
 clean:

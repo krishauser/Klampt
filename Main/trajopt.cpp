@@ -239,10 +239,9 @@ void ContactOptimizeMultipath(const char* robfile,const char* pathfile,const cha
       return;
     }
     RobotCSpace cspace(robot);
-    RobotGeodesicManifold manifold(robot);
     for(size_t i=0;i<opttraj.path.segments.size();i++) {
       opttraj.path.segments[i].space = &cspace;
-      opttraj.path.segments[i].manifold = &manifold;
+      opttraj.path.segments[i].manifold = &cspace;
     }
     vector<Config> milestones;
     opttraj.GetDiscretizedPath(outputDt,milestones);

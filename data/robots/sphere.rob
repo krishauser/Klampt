@@ -9,7 +9,7 @@ velMax  5 5 5
 qMin -1 -1 -1 
 qMax 1 1 1 
 q 0 0 0 
-geometry   ""   ""   "../objects/sphere.tri"
+geometry   ""   ""   "../objects/sphere.off"
 geomscale 1 1 0.05
 mass       0 0 0.05
 automass

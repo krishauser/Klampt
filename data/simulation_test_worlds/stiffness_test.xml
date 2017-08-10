@@ -1,33 +1,33 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <world>
-  <terrain file="../terrains/block.tri" />
+  <terrain file="../terrains/block.off" />
 
 
-  <rigidObject name="ball_soft" file="../objects/sphere.obj"  position="-0.5 0 1">
+  <rigidObject name="ball_soft_1" file="../objects/sphere.obj"  position="-0.5 0 1">
   </rigidObject> 
 
-  <rigidObject name="ball_medium" file="../objects/sphere.obj"  position="0 0 1">
+  <rigidObject name="ball_medium_1" file="../objects/sphere.obj"  position="0 0 1">
   </rigidObject> 
 
-  <rigidObject name="ball_hard" file="../objects/sphere.obj"  position="0.5 0 1">
+  <rigidObject name="ball_hard_1" file="../objects/sphere.obj"  position="0.5 0 1">
   </rigidObject> 
 
-  <rigidObject name="ball_soft" file="../objects/sphere.obj"  position="-0.5 0.5 1">
+  <rigidObject name="ball_soft_2" file="../objects/sphere.obj"  position="-0.5 0.5 1">
   </rigidObject> 
 
-  <rigidObject name="ball_medium" file="../objects/sphere.obj"  position="0 0.5 1">
+  <rigidObject name="ball_medium_2" file="../objects/sphere.obj"  position="0 0.5 1">
   </rigidObject> 
 
-  <rigidObject name="ball_hard" file="../objects/sphere.obj"  position="0.5 0.5 1">
+  <rigidObject name="ball_hard_2" file="../objects/sphere.obj"  position="0.5 0.5 1">
   </rigidObject> 
 
-  <rigidObject name="ball_soft" file="../objects/sphere.obj"  position="-0.5 1 1">
+  <rigidObject name="ball_soft_3" file="../objects/sphere.obj"  position="-0.5 1 1">
   </rigidObject> 
 
-  <rigidObject name="ball_medium" file="../objects/sphere.obj"  position="0 1 1">
+  <rigidObject name="ball_medium_3" file="../objects/sphere.obj"  position="0 1 1">
   </rigidObject> 
 
-  <rigidObject name="ball_hard" file="../objects/sphere.obj"  position="0.5 1 1">
+  <rigidObject name="ball_hard_3" file="../objects/sphere.obj"  position="0.5 1 1">
   </rigidObject> 
 
   <rigidObject name="ball_rigid" file="../objects/sphere.obj"  position="1 0 1">
@@ -36,6 +36,9 @@
   <simulation>
     <globals /> 
     <!-- object parameters -->
+    <terrain index="0">
+      <geometry kFriction="0.5" kRestitution="0.7"/>
+    </terrain>
     <object index="0">
        <geometry kFriction="0.5" kRestitution="0.7" kStiffness="50" kDamping="4" padding="0.04" preshrink="1"/>
     </object>

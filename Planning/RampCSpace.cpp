@@ -8,6 +8,8 @@ RampCSpaceAdaptor::RampCSpaceAdaptor(CSpace* _cspace,const Vector& _velMax,const
   :cspace(_cspace),velMax(_velMax),accMax(_accMax),visibilityTolerance(1e-3)
 {}
 
+int RampCSpaceAdaptor::NumDimensions() const { return cspace->NumDimensions()*2; }
+
 bool RampCSpaceAdaptor::IsFeasible(const Config& q,const Config& dq)
 {
   for(int i=0;i<dq.n;i++) {
@@ -40,7 +42,7 @@ void RampCSpaceAdaptor::Sample(State& s)
 
 EdgePlanner* RampCSpaceAdaptor::LocalPlanner(const State& a,const State& b)
 {
-  return new RampEdgePlanner(this,a,b);
+  return new RampEdgeChecker(this,a,b);
 }
 
 Real RampCSpaceAdaptor::Distance(const State& x, const State& y)
@@ -134,7 +136,7 @@ void RampCSpaceAdaptor::Properties(PropertyMap& props) const
 
 
 
-RampEdgePlanner::RampEdgePlanner(RampCSpaceAdaptor* _space,const State& a,const State& b)
+RampEdgeChecker::RampEdgeChecker(RampCSpaceAdaptor* _space,const State& a,const State& b)
   :space(_space),start(a),goal(b),checked(0)
 {
   Assert(space->accMax.size()*2 == start.n);
@@ -153,7 +155,7 @@ RampEdgePlanner::RampEdgePlanner(RampCSpaceAdaptor* _space,const State& a,const 
     path.ramps.clear();
 }
 
-RampEdgePlanner::RampEdgePlanner(RampCSpaceAdaptor* _space,const ParabolicRamp::ParabolicRampND& _ramp)
+RampEdgeChecker::RampEdgeChecker(RampCSpaceAdaptor* _space,const ParabolicRamp::ParabolicRampND& _ramp)
   :space(_space),checked(0)
 {
   path.ramps.resize(1,_ramp);
@@ -165,7 +167,7 @@ RampEdgePlanner::RampEdgePlanner(RampCSpaceAdaptor* _space,const ParabolicRamp::
   goal.copySubVector(_ramp.x1.size(),Vector(_ramp.dx1));
 }
 
-RampEdgePlanner::RampEdgePlanner(RampCSpaceAdaptor* _space,const ParabolicRamp::DynamicPath& _path)
+RampEdgeChecker::RampEdgeChecker(RampCSpaceAdaptor* _space,const ParabolicRamp::DynamicPath& _path)
   :space(_space),path(_path),checked(0)
 {
   int n=(int)path.ramps.front().x0.size();
@@ -178,30 +180,35 @@ RampEdgePlanner::RampEdgePlanner(RampCSpaceAdaptor* _space,const ParabolicRamp::
 }
 
 
-Real RampEdgePlanner::Duration() const
+Real RampEdgeChecker::Duration() const
 {
   return path.GetTotalTime();
 }
 
-bool RampEdgePlanner::IsValid() const
+Real RampEdgeChecker::Length() const
+{
+  return Duration();
+}
+
+bool RampEdgeChecker::IsValid() const
 {
   for(size_t i=0;i<path.ramps.size();i++) if(!path.ramps[i].IsValid()) return false;
   return true;
 }
 
-EdgePlanner* RampEdgePlanner::Copy() const
+EdgePlanner* RampEdgeChecker::Copy() const
 {
-  RampEdgePlanner* copy = new RampEdgePlanner(space,path);
+  RampEdgeChecker* copy = new RampEdgeChecker(space,path);
   copy->checked = checked;
   return copy;
 }
 
-EdgePlanner* RampEdgePlanner::ReverseCopy() const
+EdgePlanner* RampEdgeChecker::ReverseCopy() const
 {
-  RampEdgePlanner* copy = new RampEdgePlanner(space,goal,start);
+  RampEdgeChecker* copy = new RampEdgeChecker(space,goal,start);
   //SolveMinTime is not guaranteed to work!
   if(copy->path.ramps.empty() && !path.ramps.empty()) {
-    fprintf(stderr,"RampEdgePlanner::ReverseCopy(): couldn't solve reverse path\n");
+    fprintf(stderr,"RampEdgeChecker::ReverseCopy(): couldn't solve reverse path\n");
     fprintf(stderr,"Press enter to continue...\n");
     getchar();
   }
@@ -210,7 +217,7 @@ EdgePlanner* RampEdgePlanner::ReverseCopy() const
   return copy;
 }
 
-bool RampEdgePlanner::IsVisible()
+bool RampEdgeChecker::IsVisible()
 {
   if(checked > 0) return true;
   else if(checked < 0) return false;
@@ -238,7 +245,7 @@ bool RampEdgePlanner::IsVisible()
   return true;
 }
 
-void RampEdgePlanner::Eval(Real u,State& x) const
+void RampEdgeChecker::Eval(Real u,State& x) const
 {
   x.resize(start.n);
   if(path.ramps.empty()) { 

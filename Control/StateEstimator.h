@@ -16,8 +16,8 @@ class ODERobot;
  * like calibrate the robot limb lengths, dynamic parameters, or even a
  * world model.
  *
- * The typical sensor loop is ReadSensors, UpdateModel, ReadCommand,
- * Advance.  A RobotController will call these manually.
+ * The typical state estimation loop is ReadSensors, UpdateModel, ReadCommand,
+ * Advance.  To use these in a RobotController, call this sequence manually.
  */
 struct RobotStateEstimator
 {

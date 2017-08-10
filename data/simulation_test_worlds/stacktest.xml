@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<world>
+  <terrain file="../terrains/block.off"  translation="0 0 0"/>
+  <rigidObject name="block1"  position="0 0 0.0520000">
+     <geometry mesh="../objects/cube.off" scale="0.100000 0.100000 0.100000" translation="-0.050000 -0.050000 -0.050000" />
+     <physics mass="1.000000" automass="1" kRestitution="0.0000000" kFriction="0.500000" kStiffness="inf" kDamping="inf" />
+  </rigidObject> 
+
+  <rigidObject name="block2"  position="0 0 0.154100">
+     <geometry mesh="../objects/cube.off" scale="0.100000 0.100000 0.100000" translation="-0.050000 -0.050000 -0.050000" />
+     <physics mass="1.000000" automass="1" kRestitution="0.0000000" kFriction="0.500000" kStiffness="inf" kDamping="inf" />
+  </rigidObject> 
+
+  <rigidObject name="block3"  position="0 0 0.256200">
+     <geometry mesh="../objects/cube.off" scale="0.100000 0.100000 0.100000" translation="-0.050000 -0.050000 -0.050000" />
+     <physics mass="1.000000" automass="1" kRestitution="0.0000000" kFriction="0.500000" kStiffness="inf" kDamping="inf" />
+  </rigidObject> 
+
+  <rigidObject name="block4"  position="0 0 0.358300">
+     <geometry mesh="../objects/cube.off" scale="0.100000 0.100000 0.100000" translation="-0.050000 -0.050000 -0.050000" />
+     <physics mass="1.000000" automass="1" kRestitution="0.0000000" kFriction="0.500000" kStiffness="inf" kDamping="inf" />
+  </rigidObject> 
+
+  <rigidObject name="block5"  position="0 0 0.460400">
+     <geometry mesh="../objects/cube.off" scale="0.100000 0.100000 0.100000" translation="-0.050000 -0.050000 -0.050000" />
+     <physics mass="1.000000" automass="1" kRestitution="0.0000000" kFriction="0.500000" kStiffness="inf" kDamping="inf" />
+  </rigidObject> 
+
+  <rigidObject name="block6"  position="0 0 0.562500">
+     <geometry mesh="../objects/cube.off" scale="0.100000 0.100000 0.100000" translation="-0.050000 -0.050000 -0.050000" />
+     <physics mass="1.000000" automass="1" kRestitution="0.0000000" kFriction="0.500000" kStiffness="inf" kDamping="inf" />
+  </rigidObject> 
+
+  <rigidObject name="block7"  position="0 0 0.664600">
+     <geometry mesh="../objects/cube.off" scale="0.100000 0.100000 0.100000" translation="-0.050000 -0.050000 -0.050000" />
+     <physics mass="1.000000" automass="1" kRestitution="0.0000000" kFriction="0.500000" kStiffness="inf" kDamping="inf" />
+  </rigidObject> 
+
+  <rigidObject name="block8"  position="0 0 0.766700">
+     <geometry mesh="../objects/cube.off" scale="0.100000 0.100000 0.100000" translation="-0.050000 -0.050000 -0.050000" />
+     <physics mass="1.000000" automass="1" kRestitution="0.0000000" kFriction="0.500000" kStiffness="inf" kDamping="inf" />
+  </rigidObject> 
+
+  <rigidObject name="block9"  position="0 0 0.868800">
+     <geometry mesh="../objects/cube.off" scale="0.100000 0.100000 0.100000" translation="-0.050000 -0.050000 -0.050000" />
+     <physics mass="1.000000" automass="1" kRestitution="0.0000000" kFriction="0.500000" kStiffness="inf" kDamping="inf" />
+  </rigidObject> 
+
+  <rigidObject name="block10"  position="0 0 0.970900">
+     <geometry mesh="../objects/cube.off" scale="0.100000 0.100000 0.100000" translation="-0.050000 -0.050000 -0.050000" />
+     <physics mass="1.000000" automass="1" kRestitution="0.0000000" kFriction="0.500000" kStiffness="inf" kDamping="inf" />
+  </rigidObject> 
+
+  <simulation>
+    <globals/> 
+    <object index="0">
+       <geometry kRestitution="0.000000" kFriction="0.500000" kStiffness="inf" kDamping="inf" padding="0.001" preshink="1"/>
+    </object>
+
+    <object index="1">
+       <geometry kRestitution="0.000000" kFriction="0.500000" kStiffness="inf" kDamping="inf" padding="0.001" preshink="1"/>
+    </object>
+
+    <object index="2">
+       <geometry kRestitution="0.000000" kFriction="0.500000" kStiffness="inf" kDamping="inf" padding="0.001" preshink="1"/>
+    </object>
+
+    <object index="3">
+       <geometry kRestitution="0.000000" kFriction="0.500000" kStiffness="inf" kDamping="inf" padding="0.001" preshink="1"/>
+    </object>
+
+    <object index="4">
+       <geometry kRestitution="0.000000" kFriction="0.500000" kStiffness="inf" kDamping="inf" padding="0.001" preshink="1"/>
+    </object>
+
+    <object index="5">
+       <geometry kRestitution="0.000000" kFriction="0.500000" kStiffness="inf" kDamping="inf" padding="0.001" preshink="1"/>
+    </object>
+
+    <object index="6">
+       <geometry kRestitution="0.000000" kFriction="0.500000" kStiffness="inf" kDamping="inf" padding="0.001" preshink="1"/>
+    </object>
+
+    <object index="7">
+       <geometry kRestitution="0.000000" kFriction="0.500000" kStiffness="inf" kDamping="inf" padding="0.001" preshink="1"/>
+    </object>
+
+    <object index="8">
+       <geometry kRestitution="0.000000" kFriction="0.500000" kStiffness="inf" kDamping="inf" padding="0.001" preshink="1"/>
+    </object>
+
+    <object index="9">
+       <geometry kRestitution="0.000000" kFriction="0.500000" kStiffness="inf" kDamping="inf" padding="0.001" preshink="1"/>
+    </object>
+
+    <terrain index="0">
+       <geometry kRestitution="0.000000" kFriction="0.500000" kStiffness="inf" kDamping="inf" padding="0.001" preshink="1"/>
+    </terrain>
+  </simulation>
+</world>

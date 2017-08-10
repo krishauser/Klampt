@@ -4,6 +4,7 @@
 #include "ResourceGUI.h"
 #include "View/RobotPoseWidget.h"
 #include "View/ObjectPoseWidget.h"
+#include "Control/Sensor.h"
 #include <KrisLibrary/utils/apputils.h>
 #include <fstream>
 
@@ -22,9 +23,11 @@ using namespace GLDraw;
  * - draw_com
  * - draw_frame
  * - draw_poser
+ * - draw_sensors
  * 
  * Accepts commands (in addition to ResourceGUIBackend and WorldGUIBackend):
  * - pose_mode: next clicks will pose the robot's joints
+ * - undo_pose: undoes the last robot pose
  * - constrain_link_mode: next clicks will add constraints to a link
  * - constrain_point_mode: next clicks will add point constraints
  * - delete_constraint_mode: next clicks will delete constraints
@@ -47,6 +50,8 @@ using namespace GLDraw;
  *   evenly spaced milestones.
  * - optimize_path: optimizes the current LinearPath, MultiPath, Configs
  *   resource.
+ * - split_path: splits the current LinearPath or MultiPath at the current
+ *   time into two paths.
  * - store_flat_contacts [xtol]: gets the stance for the robot standing on
  *   flat ground and adds it as a new resource
  * - get_flat_contacts [xtol]: gets the stance for the robot standing on
@@ -57,6 +62,7 @@ using namespace GLDraw;
  * - clean_contacts [xtol] [ntol]: cleans up the current Stance or Hold
  *   resource. Points and normals within xtol and ntol, respectively, will
  *   be merged.
+ * - resample res: resamples geomery with the given resolution.
  */
 class RobotPoseBackend : public ResourceGUIBackend
 {
@@ -70,7 +76,10 @@ class RobotPoseBackend : public ResourceGUIBackend
   vector<RobotPoseWidget> robotWidgets;
   vector<RigidObjectPoseWidget> objectWidgets;
   WidgetSet allWidgets;
-  int draw_geom,draw_poser,draw_bbs,draw_com,draw_frame;
+  GLDraw::Widget* lastActiveWidget;
+  int draw_geom,draw_poser,draw_bbs,draw_com,draw_frame,draw_sensors;
+  //temp: sensors storage
+  RobotSensors robotSensors;
 
   RobotPoseBackend(RobotWorld* world,ResourceManager* library);
   virtual void Start();

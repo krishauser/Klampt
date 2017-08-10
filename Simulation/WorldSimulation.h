@@ -128,6 +128,8 @@ public:
   vector<SmartPointer<WorldSimulationHook> > hooks;
   typedef map<pair<ODEObjectID,ODEObjectID>,ContactFeedbackInfo> ContactFeedbackMap;
   ContactFeedbackMap contactFeedback;
+  ///Worst simulation status over the last Advance() call.
+  ODESimulator::Status worstStatus;
 };
 
 /** @brief A hook that adds a constant force to a body

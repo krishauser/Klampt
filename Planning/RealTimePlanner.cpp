@@ -95,7 +95,7 @@ RealTimePlanner::~RealTimePlanner()
 void RealTimePlanner::SetSpace(SingleRobotCSpace* space)
 {
   if(planner) {
-    planner->Init(space,space->GetRobot(),space->settings);
+    planner->Init(space,&space->robot,space->settings);
   }
   else {
     fprintf(stderr,"RealTimePlanner::SetSpace: warning, underlying planner not set\n");
@@ -1254,7 +1254,7 @@ Real DynamicRRTPlanner::EvaluateNodePathCost(RRTPlanner::Node* n)
   dq.setRef(n->x,n->x.n/2,1,n->x.n/2);
   Real time=0;
   while(n->getParent() != NULL) {
-    time += ((RampEdgePlanner*)((EdgePlanner*)n->edgeFromParent()))->Duration();
+    time += ((RampEdgeChecker*)((EdgePlanner*)n->edgeFromParent()))->Duration();
     n = n->getParent();
   }
   return goal->TerminalCost(time,q,dq);
@@ -1273,9 +1273,9 @@ bool DynamicRRTPlanner::CheckPath(RRTPlanner::Node* n,vector<RRTPlanner::Node*>&
     //assume existing path is feasible, so check if temp is on the existing path
     for(size_t i=0;i<existingNodes.size();i++)
       if(temp == existingNodes[i]) {
-	Assert(((RampEdgePlanner*)((EdgePlanner*)temp->edgeFromParent()))->IsValid());
+	Assert(((RampEdgeChecker*)((EdgePlanner*)temp->edgeFromParent()))->IsValid());
 	while(temp->getParent() != NULL) {
-	  Assert(((RampEdgePlanner*)((EdgePlanner*)temp->edgeFromParent()))->IsValid());
+	  Assert(((RampEdgeChecker*)((EdgePlanner*)temp->edgeFromParent()))->IsValid());
 	  temp = temp->getParent();
 	}
 	return true;
@@ -1289,7 +1289,7 @@ bool DynamicRRTPlanner::CheckPath(RRTPlanner::Node* n,vector<RRTPlanner::Node*>&
       return false;
     }
     else {
-      Assert(((RampEdgePlanner*)((EdgePlanner*)temp->edgeFromParent()))->IsValid());
+      Assert(((RampEdgeChecker*)((EdgePlanner*)temp->edgeFromParent()))->IsValid());
     }
     temp = temp->getParent();
   }
@@ -1343,7 +1343,7 @@ int DynamicRRTPlanner::PlanFrom(ParabolicRamp::DynamicPath& path,Real cutoff)
     nik=TryIKExtend(n,false);
   if(nik && EvaluateNodePathCost(nik) < bestPathCost) {
     if(nik->edgeFromParent()->IsVisible()) {  //only need to check path to parent assuming an already feasible path
-      Assert(((RampEdgePlanner*)((EdgePlanner*)nik->edgeFromParent()))->IsValid());
+      Assert(((RampEdgeChecker*)((EdgePlanner*)nik->edgeFromParent()))->IsValid());
       bestNode = nik;
       bestPathCost = EvaluateNodePathCost(nik);
     }
@@ -1357,9 +1357,9 @@ int DynamicRRTPlanner::PlanFrom(ParabolicRamp::DynamicPath& path,Real cutoff)
   for(size_t i=0;i<path.ramps.size();i++) {
     n = ((TreeRoadmapPlanner*)rrt)->Extend(n,MakeState(path.ramps[i].x1,path.ramps[i].dx1));
     //sometimes there's an error with SolveMinTime...
-    ((RampEdgePlanner*)((EdgePlanner*)n->edgeFromParent()))->path.ramps.resize(1,path.ramps[i]);
+    ((RampEdgeChecker*)((EdgePlanner*)n->edgeFromParent()))->path.ramps.resize(1,path.ramps[i]);
     Assert(path.ramps[i].IsValid());
-    Assert(((RampEdgePlanner*)((EdgePlanner*)n->edgeFromParent()))->IsValid());
+    Assert(((RampEdgeChecker*)((EdgePlanner*)n->edgeFromParent()))->IsValid());
     /*
     if(!n->edgeFromParent()->IsVisible()) {
       fprintf(flog,"Prior path edge %d became infeasible\n",i);
@@ -1378,7 +1378,7 @@ int DynamicRRTPlanner::PlanFrom(ParabolicRamp::DynamicPath& path,Real cutoff)
       //if(nik) fprintf(flog,"IK node %d\n",i+1);
       if(nik && EvaluateNodePathCost(nik) < bestPathCost) {
 	if(nik->edgeFromParent()->IsVisible()) {
-	  Assert(((RampEdgePlanner*)((EdgePlanner*)nik->edgeFromParent()))->IsValid());
+	  Assert(((RampEdgeChecker*)((EdgePlanner*)nik->edgeFromParent()))->IsValid());
 	  bestNode = nik;
 	  bestPathCost = EvaluateNodePathCost(nik);
 	}
@@ -1393,16 +1393,16 @@ int DynamicRRTPlanner::PlanFrom(ParabolicRamp::DynamicPath& path,Real cutoff)
   //sanity check
   for(size_t i=0;i<existingNodes.size();i++) {
     if(existingNodes[i]->getParent()) {
-      Assert(((RampEdgePlanner*)((EdgePlanner*)existingNodes[i]->edgeFromParent()))->IsValid());
+      Assert(((RampEdgeChecker*)((EdgePlanner*)existingNodes[i]->edgeFromParent()))->IsValid());
       n = existingNodes[i];
-      assert(n->edgeFromParent()->Goal() == n->x);
+      assert(n->edgeFromParent()->End() == n->x);
       assert(n->edgeFromParent()->Start() == n->getParent()->x);
     }
   }
   for(size_t i=0;i<rrt->milestones.size();i++) {
     n = rrt->milestones[i];
     if(n->getParent() != NULL) {
-      assert(n->edgeFromParent()->Goal() == n->x);
+      assert(n->edgeFromParent()->End() == n->x);
       assert(n->edgeFromParent()->Start() == n->getParent()->x);
     }
     else assert(i == 0);
@@ -1465,7 +1465,7 @@ int DynamicRRTPlanner::PlanFrom(ParabolicRamp::DynamicPath& path,Real cutoff)
 	bestPathCost = EvaluateNodePathCost(nik);
 	
 	while(nik->getParent() != NULL) {
-	  Assert(((RampEdgePlanner*)((EdgePlanner*)nik->edgeFromParent()))->IsValid());
+	  Assert(((RampEdgeChecker*)((EdgePlanner*)nik->edgeFromParent()))->IsValid());
 	  nik = nik->getParent();
 	}
       }
@@ -1495,7 +1495,7 @@ int DynamicRRTPlanner::PlanFrom(ParabolicRamp::DynamicPath& path,Real cutoff)
 	bestPathCost = EvaluateNodePathCost(n);
 	
 	while(n->getParent() != NULL) {
-	  Assert(((RampEdgePlanner*)((EdgePlanner*)n->edgeFromParent()))->IsValid());
+	  Assert(((RampEdgeChecker*)((EdgePlanner*)n->edgeFromParent()))->IsValid());
 	  n = n->getParent();
 	}
       }
@@ -1508,7 +1508,7 @@ int DynamicRRTPlanner::PlanFrom(ParabolicRamp::DynamicPath& path,Real cutoff)
   for(size_t i=0;i<rrt->milestones.size();i++) {
     n = rrt->milestones[i];
     if(n->getParent() != NULL) {
-      assert(n->edgeFromParent()->Goal() == n->x);
+      assert(n->edgeFromParent()->End() == n->x);
       assert(n->edgeFromParent()->Start() == n->getParent()->x);
     }
     else assert(i == 0);
@@ -1521,7 +1521,7 @@ int DynamicRRTPlanner::PlanFrom(ParabolicRamp::DynamicPath& path,Real cutoff)
     n = bestNode;
     int parent = 0;
     while(n->getParent() != NULL) {
-      Assert(n->edgeFromParent()->Goal() == n->x);
+      Assert(n->edgeFromParent()->End() == n->x);
       if(n->edgeFromParent()->Start() != n->getParent()->x) {
 	fprintf(flog,"Parent %d node is incorrect\n",parent+1);
 	fprintf(flog,"%s\n",LexicalCast(n->edgeFromParent()->Start()).c_str());
@@ -1555,13 +1555,13 @@ int DynamicRRTPlanner::PlanFrom(ParabolicRamp::DynamicPath& path,Real cutoff)
 	  break;
 	}
       }
-      Assert(((RampEdgePlanner*)((EdgePlanner*)n->edgeFromParent()))->IsValid());
+      Assert(((RampEdgeChecker*)((EdgePlanner*)n->edgeFromParent()))->IsValid());
       n = n->getParent();
     }
     //sanity check
     for(size_t i=0;i<existingNodes.size();i++) {
       if(existingNodes[i]->getParent()) {
-	Assert(((RampEdgePlanner*)((EdgePlanner*)existingNodes[i]->edgeFromParent()))->IsValid());
+	Assert(((RampEdgeChecker*)((EdgePlanner*)existingNodes[i]->edgeFromParent()))->IsValid());
       }
     }
 
@@ -1569,7 +1569,7 @@ int DynamicRRTPlanner::PlanFrom(ParabolicRamp::DynamicPath& path,Real cutoff)
     path.ramps.resize(0);
     path.ramps.reserve(rampPath.edges.size());
     for(size_t i=0;i<rampPath.edges.size();i++) {
-      RampEdgePlanner* e=(RampEdgePlanner*)((EdgePlanner*)rampPath.edges[i]);
+      RampEdgeChecker* e=(RampEdgeChecker*)((EdgePlanner*)rampPath.edges[i]);
       path.Concat(e->path);
 
       //sanity checks
@@ -1644,24 +1644,24 @@ DynamicHybridTreePlanner::Node* DynamicHybridTreePlanner::AddChild(Node* node,co
   xq.setZero();
   xq.copySubVector(0,q);
   EdgePlanner* e=stateSpace->LocalPlanner(xn,xq);
-  SmartPointer<RampEdgePlanner> ptr((RampEdgePlanner*)e);
+  SmartPointer<RampEdgeChecker> ptr((RampEdgeChecker*)e);
   return AddChild(node,ptr);
 }
 
 DynamicHybridTreePlanner::Node* DynamicHybridTreePlanner::AddChild(Node* node,const ParabolicRamp::ParabolicRampND& ramp)
 {
-  SmartPointer<RampEdgePlanner> ptr(new RampEdgePlanner(stateSpace,ramp));
+  SmartPointer<RampEdgeChecker> ptr(new RampEdgeChecker(stateSpace,ramp));
   return AddChild(node,ptr);
 }
 
 
 DynamicHybridTreePlanner::Node* DynamicHybridTreePlanner::AddChild(Node* node,const ParabolicRamp::DynamicPath& path)
 {
-  SmartPointer<RampEdgePlanner> ptr(new RampEdgePlanner(stateSpace,path));
+  SmartPointer<RampEdgeChecker> ptr(new RampEdgeChecker(stateSpace,path));
   return AddChild(node,ptr);
 }
 
-DynamicHybridTreePlanner::Node* DynamicHybridTreePlanner::AddChild(Node* node,SmartPointer<RampEdgePlanner>& e)
+DynamicHybridTreePlanner::Node* DynamicHybridTreePlanner::AddChild(Node* node,SmartPointer<RampEdgeChecker>& e)
 {
   if(e->path.ramps.empty()) return NULL;
   Node* c = new Node;
@@ -2082,7 +2082,7 @@ DynamicHybridTreePlanner::Node* DynamicHybridTreePlanner::SplitEdge(DynamicHybri
     after.ramps.front().ramps[i].dx0 = after.ramps.front().dx0[i]; 
   }
   Assert(after.IsValid());
-  Config x = n->edgeFromParent().e->Goal();
+  Config x = n->edgeFromParent().e->End();
   n->edgeFromParent().e->path = after;
   n->edgeFromParent().cost = goal->IncrementalCost(s->t,n->edgeFromParent().e->path);
   return s;

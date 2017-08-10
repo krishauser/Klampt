@@ -87,8 +87,14 @@ public:
   ///Renders the simulation clock (when in screen mode)
   void DrawClock(int x,int y);
 
+  ///Draws sensor readings on the world visualization.
+  ///If robot < 0, draws all the robots/sensors.
+  ///If sensor < 0, draws all the sensors on the given robot.
+  void DrawSensor(int robot=-1,int sensor=-1);
+
   ///Draws contact points
   void DrawContacts(Real pointSize = 5.0, Real fscale = 0.01, Real nscale=0.05);
+  
   ///Draws wrenches
   void DrawWrenches(Real fscale=-1);
 

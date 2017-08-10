@@ -1,5 +1,5 @@
 from controller import BaseController
-from klampt import trajectory
+from klampt.model import trajectory
 
 class TrajectoryController(BaseController):
     """A controller that takes in a trajectory and outputs the position along

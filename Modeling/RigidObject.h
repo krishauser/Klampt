@@ -30,6 +30,7 @@ public:
   string geomFile;
   ManagedGeometry geometry;
   RigidTransform T;    //current transform
+  Vector3 w,v;         //current angular velocity and velocity
   Real mass;           //mass
   Vector3 com;         //center of mass in local frame
   Matrix3 inertia;     //inertia matrix about com

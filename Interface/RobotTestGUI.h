@@ -27,6 +27,7 @@ using namespace GLDraw;
  * - reload_file(file): reloads an element whose file may have changed (inherited from WorldGUIBackend)
  * - load_view(file): loads a previously saved view (inherited from GLNavigationProgram)
  * - save_view(file): saves a view to a file (inherited from GLNavigationProgram)
+ * - undo_pose(): undo's last pose action
  *
  * button_press
  * - print_pose
@@ -41,6 +42,7 @@ using namespace GLDraw;
  * - draw_expanded 
  * - draw_sensors
  * - draw_self_collision_tests
+ * - output_ros
  *
  * Signals sent back to GUI are defined as follows:
  * - command update_config: notifies that the configuration of the world has changed.
@@ -59,8 +61,10 @@ public:
   vector<RobotPoseWidget> robotWidgets;
   vector<RigidObjectPoseWidget> objectWidgets;
   WidgetSet allWidgets;
+  GLDraw::Widget* lastActiveWidget;
   int draw_geom,draw_bbs,draw_com,draw_frame,draw_expanded,draw_sensors;
   int draw_self_collision_tests;
+  int output_ros, ros_status;
 
   vector<GLDisplayList> originalDisplayLists,expandedDisplayLists;
 
@@ -68,6 +72,7 @@ public:
   virtual void Start();
   void UpdateConfig();
   virtual void RenderWorld();
+  virtual bool OnQuit();
   virtual bool OnButtonPress(const string& button);
   virtual bool OnButtonToggle(const string& button,int checked);
   virtual bool OnCommand(const string& cmd,const string& args);

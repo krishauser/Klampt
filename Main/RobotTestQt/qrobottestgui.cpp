@@ -1,10 +1,10 @@
 #include "qrobottestgui.h"
 
 #include <QSettings>
-#include <QtGui/QApplication>
+#include <QApplication>
 
-QRobotTestGUI::QRobotTestGUI(GenericBackendBase *_backend,QKlamptDisplay* _display) :
-  QtGUIBase(_backend),display(_display),
+QRobotTestGUI::QRobotTestGUI(QKlamptDisplay* _display,GenericBackendBase *_backend) :
+  QKlamptGUIBase(_display,_backend),
     col_out(new CollisionOutput)
 
 {
@@ -12,6 +12,7 @@ QRobotTestGUI::QRobotTestGUI(GenericBackendBase *_backend,QKlamptDisplay* _displ
 [{type:key_down,key:c}, {type:command,cmd:constrain_current_link,args:\"\"}],	\
 [{type:key_down,key:d}, {type:command,cmd:delete_current_constraint,args:\"\"}], \
 [{type:key_down,key:p}, {type:command,cmd:print_pose,args:\"\"}],	\
+[{type:key_down,key:z}, {type:command,cmd:undo_pose,args:\"\"}], \
 [{type:button_press,button:print_config}, {type:command,cmd:print_pose,args:_0}], \
 [{type:widget_value,widget:link,value:_0}, {type:command,cmd:set_link,args:_0}], \
 [{type:widget_value,widget:link_value,value:_0}, {type:command,cmd:set_link_value,args:_0}], \
@@ -40,24 +41,6 @@ void QRobotTestGUI::SetDriver(int index){
 void QRobotTestGUI::SetDriverValue(double val){
     SendCommand("set_driver",driver_index);
     SendCommand("set_driver_value",val);
-
-  connect(&idle_timer, SIGNAL(timeout()),this,SLOT(OnIdleTimer()));
-  idle_timer.start(0);
-}
-
-
-void QRobotTestGUI::OnIdleTimer()
-{
-  SendIdle();
-}
-
-bool QRobotTestGUI::OnPauseIdle(double secs) 
-{
-  if(secs > 10000000)
-    idle_timer.stop();
-  else
-    idle_timer.start(int(secs*1000));
-  return true;
 }
 
 
@@ -73,11 +56,6 @@ void QRobotTestGUI::SetLinkValue(double val){
     SendCommand("set_link_value",val);
 }
 
-bool QRobotTestGUI::OnRefresh()
-{
-  display->updateGL();
-  return true;
-}
 
 bool QRobotTestGUI::OnCommand(const string &cmd, const string &args){
   if(cmd=="update_config"){

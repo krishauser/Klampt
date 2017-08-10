@@ -1,8 +1,7 @@
 import math
 from klampt import *
-from klampt.glprogram import *
-from klampt import vectorops
-from klampt import so3
+from klampt.vis.glprogram import *
+from klampt.math import vectorops,so3
 #import numpy as np
 
 

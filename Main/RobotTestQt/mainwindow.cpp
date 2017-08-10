@@ -28,10 +28,9 @@ bool MainWindow::Initialize(int _argc,const char** _argv)
     }
     backend = new RobotTestBackend(&world);
     printf("BACKEND LOADED\n");
-    gui=new QRobotTestGUI(backend,ui->displaywidget);
+    gui=new QRobotTestGUI(ui->displaywidget,backend);
     gui->opened_file = argv[1];
     backend->Start();
-    ui->displaywidget->gui = gui;
 
     //Receive info from the GUI
     connect(gui,SIGNAL(UpdateDriverValue()),this,SLOT(UpdateDriverValue()));
@@ -90,6 +89,10 @@ void MainWindow::SetSensors(bool status){
   gui->SendButtonToggle("draw_sensors",status);
 }
 
+
+void MainWindow::SetROS(bool status) {
+  gui->SendButtonToggle("output_ros",status);
+}
 
 void MainWindow::SetIK(bool status){
   if(status) gui->SendCommand("constrain_point_mode");
@@ -223,12 +226,16 @@ void MainWindow::PrintCollisions(){
     gui->SendButtonPress("request_self_collisions");
 }
 
+void MainWindow::PrintConfig()
+{
+    gui->SendButtonPress("print_pose");
+}
+
 void MainWindow::LoadFile(){
     gui->LoadFile();
 }
 
 void MainWindow::ReloadFile(){
-  printf("MainWindow::ReloadFile\n");
     gui->ReloadFile();
 }
 

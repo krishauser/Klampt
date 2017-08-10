@@ -1,0 +1,74 @@
+#converted 2/10/15
+#did some tuning of masses and motor parameters to get stable simulation
+
+links	"jaco_link_base" "jaco_link_1" "jaco_link_2" "jaco_link_3" "jaco_link_4" "jaco_link_5" "jaco_link_hand" "jaco_link_finger_1" "jaco_link_finger_2" "jaco_link_finger_3" 
+
+parents	-1 0 1 2 3 4 5 6 6 6 
+
+axis	0 0 1	0 0 -1	0 0 1	0 0 -1	0 0 -1	0 0 -1	0 0 -1	0 0 1	0 0 1	0 0 1	
+
+jointtype	r r r r r r r r r r 
+
+Tparent	1 0 0	0 1 0	0 0 1	0 0 0 \
+-1 -2.06823e-13 4.27758e-26	-2.06823e-13 1 -2.06823e-13	1.31021e-42 -2.06823e-13 -1	0 0 0.1535 \
+-1 2.06823e-13 -1.01274e-24	4.38188e-30 4.89667e-12 1	2.06823e-13 1 -4.89663e-12	0 0 -0.1185 \
+4.89667e-12 1 -2.06823e-13	1 -4.89663e-12 1.01274e-24	-4.38188e-30 -2.06823e-13 -1	0.41 0 0 \
+4.89667e-12 -2.06823e-13 -1	-4.38188e-30 -1 2.06823e-13	-1 -1.01274e-24 -4.89663e-12	0.207 0 -0.01125 \
+0.573576 -0 -0.819152	0 1 -0	0.819152 0 0.573576	0.0343 0 -0.06588 \
+4.89659e-12 -0.573576 -0.819152	1 2.80855e-12 4.01108e-12	-7.48099e-18 -0.819152 0.573576	0.0343 0 -0.06588 \
+-0.438381 0.875628 0.202726	-3.22053e-06 0.225553 -0.974231	-0.898789 -0.427085 -0.0988751	-0.03978 0 -0.10071 \
+0.426214 -0.884711 0.188753	-0.102564 0.160049 0.981766	-0.898789 -0.437802 -0.0225245	0.03569 -0.0216 -0.10071 \
+0.400433 -0.896675 -0.188751	0.0978992 -0.162943 0.981766	-0.911081 -0.41161 0.022536	0.03569 0.0216 -0.10071
+
+#From wiki.ros.org/jaco:
+#All the joints have a range limit. Joints 1, 4, 5 and 6 have a range of -10,000 to +10,000 degrees. Joint 2 has a range of +42 to +318 degrees. Joint 3 has a range of +17 to +343 degrees. Sending a command past these limits will cause the arm to move to its hard-wired limit, then stop. 
+#it looks like joints 1 and 2 are bent by 90 degrees at the zero configuration...
+#also the reference frame looks backwards
+qmin	0 -inf -3.97935067 -4.41568301 -inf -inf -inf 0 0 0 
+
+qmax	0 inf 0.83775803 1.274090357 inf inf inf 0.698132 0.698132 0.698132 
+
+q	0 0 0 0 0 0 0 0 0 0 
+
+geometry	"jaco/jaco_link_base.off" "jaco/jaco_link_1.off" "jaco/jaco_link_2.off" "jaco/jaco_link_3.off" "jaco/jaco_link_4.off" "jaco/jaco_link_5.off" "jaco/jaco_link_hand.off" "jaco/jaco_link_finger_1.off" "jaco/jaco_link_finger_2.off" "jaco/jaco_link_finger_3.off" 
+
+mass	1.2 1 1 1 0.5 0.3 0.4 0.1 0.1 0.1 
+automass
+
+torquemax	inf 50 50 40 40 30 20 .7 .7 .7 
+
+#8rpm
+velmax	0 .419 .419 .419 .419 .419 .419 1 1 1 
+
+accmax	0 4 4 4 4 4 4 4 4 4 
+
+
+joint weld 0
+joint spin 1
+joint normal 2
+joint normal 3
+joint spin 4
+joint spin 5
+joint spin 6
+joint normal 7
+joint normal 8
+joint normal 9
+
+
+driver normal 1
+driver normal 2
+driver normal 3
+driver normal 4
+driver normal 5
+driver normal 6
+driver normal 7
+driver normal 8
+driver normal 9
+
+
+servoP	200 200 100 100 70 50 20 20 20 
+servoI	0 0 0 0 0 0 0 0 0 
+servoD	30 30 10 10 5 3 1 1 1
+
+dryFriction	0 0 0 0 0 0 0 0 0 
+viscousFriction	2 2 1.5 1.5 1.5 1 1 1 1 

@@ -100,6 +100,7 @@ class ResourceManager : public ResourceTree
   vector<ResourceNodePtr> ExpandSelected();
   bool SaveSelected();
   bool SaveSelected(const string& fn);
+  ResourceNodePtr SafePtr(ResourceNode* ptr);
 
   ResourceNode* selected;
 };

@@ -10,7 +10,7 @@ from scipy import sparse
 from scipy.sparse import linalg
 import math
 import time
-from klampt import vectorops,so3,se3
+from klampt.math import vectorops,so3,se3
 from OpenGL.GL import *
 from abc import ABCMeta, abstractmethod
 from collections import defaultdict

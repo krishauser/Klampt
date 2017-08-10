@@ -4,10 +4,10 @@
   <TiltSensor name="TorsoTilt" link="5" hasAxis="1 1 0" hasVelocity="1"/>
   <TiltSensor name="LF_Tilt" link="56" hasAxis="1 1 0" hasVelocity="1"/>
   <TiltSensor name="RF_Tilt" link="62" hasAxis="1 1 0" hasVelocity="1"/>
-  <ForceTorqueSensor name="LF_ForceSensor" link="56" localPos="0 0 0" hasForce="0 0 1" hasMoment="1 1 0"/>
-  <ForceTorqueSensor name="RF_ForceSensor" link="62" localPos="0 0 0" hasForce="0 0 1" hasMoment="1 1 0"/>
-  <ForceTorqueSensor name="LH_ForceSensor" link="13" localPos="0 0 0" hasForce="0 0 1" hasMoment="1 1 0"/>
-  <ForceTorqueSensor name="RH_ForceSensor" link="34" localPos="0 0 0" hasForce="0 0 1" hasMoment="1 1 0"/>
+  <ForceTorqueSensor name="LF_ForceSensor" link="56" localPos="0 0 0" hasForce="0 0 1" hasTorque="1 1 0"/>
+  <ForceTorqueSensor name="RF_ForceSensor" link="62" localPos="0 0 0" hasForce="0 0 1" hasTorque="1 1 0"/>
+  <ForceTorqueSensor name="LH_ForceSensor" link="13" localPos="0 0 0" hasForce="0 0 1" hasTorque="1 1 0"/>
+  <ForceTorqueSensor name="RH_ForceSensor" link="34" localPos="0 0 0" hasForce="0 0 1" hasTorque="1 1 0"/>
   <FilteredSensor name="LH_ForceSensor_Filtered" sensor="LH_ForceSensor" smoothing="0.8" />
   <FilteredSensor name="RH_ForceSensor_Filtered" sensor="RH_ForceSensor" smoothing="0.8" />
   <FilteredSensor name="LF_ForceSensor_Filtered" sensor="LF_ForceSensor" smoothing="0.8" />

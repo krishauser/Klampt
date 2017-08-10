@@ -1,6 +1,5 @@
 import math
-from klampt import vectorops
-from klampt import so3
+from klampt.math import vectorops,so3
 #import numpy as np
 
 def solve_2R_inverse_kinematics(x,y,L1=1,L2=1):

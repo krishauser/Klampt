@@ -17,7 +17,7 @@
    </sizepolicy>
   </property>
   <property name="windowTitle">
-   <string>Plot Options</string>
+   <string>Sensor Drawing Options</string>
   </property>
   <widget class="QWidget" name="CentralWidget" native="true">
    <property name="geometry">
@@ -75,6 +75,13 @@
          <widget class="QCheckBox" name="chk_plot">
           <property name="text">
            <string>Plot On</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QCheckBox" name="chk_render">
+          <property name="text">
+           <string>Render</string>
           </property>
          </widget>
         </item>
@@ -140,8 +147,8 @@
    <slot>ChangeSensor(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>91</x>
-     <y>60</y>
+     <x>87</x>
+     <y>59</y>
     </hint>
     <hint type="destinationlabel">
      <x>322</x>
@@ -245,6 +252,22 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>chk_render</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>LogOptions</receiver>
+   <slot>ToggleRender(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>293</x>
+     <y>47</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>241</x>
+     <y>-14</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>ChangeSensor(int)</slot>
@@ -255,5 +278,6 @@
   <slot>ShowAll()</slot>
   <slot>TogglePlot(bool)</slot>
   <slot>ToggleLogging(bool)</slot>
+  <slot>ToggleRender(bool)</slot>
  </slots>
 </ui>

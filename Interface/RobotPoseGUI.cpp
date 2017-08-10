@@ -1,6 +1,8 @@
 #include "RobotPoseGUI.h"
 #include <KrisLibrary/GLdraw/drawMesh.h>
 #include <KrisLibrary/GLdraw/drawgeometry.h>
+#include <KrisLibrary/geometry/Conversions.h>
+#include <KrisLibrary/meshing/VolumeGrid.h>
 #include "Modeling/MultiPath.h"
 #include <KrisLibrary/robotics/IKFunctions.h>
 #include "Contact/Utils.h"
@@ -75,8 +77,7 @@ void RobotPoseBackend::Start()
   draw_bbs = 0;
   draw_com = 0;
   draw_frame = 0;
-  self_colliding.resize(robot->links.size(),false);   
-
+  draw_sensors = 0;
 
   robotWidgets.resize(world->robots.size());
   for(size_t i=0;i<world->robots.size();i++) {
@@ -106,6 +107,7 @@ void RobotPoseBackend::Start()
   MapButtonToggle("draw_bbs",&draw_bbs);
   MapButtonToggle("draw_com",&draw_com);
   MapButtonToggle("draw_frame",&draw_frame);
+  MapButtonToggle("draw_sensors",&draw_sensors);
 }
 
 void RobotPoseBackend::UpdateConfig()
@@ -145,6 +147,16 @@ void RobotPoseBackend::RenderWorld()
     world->terrains[i]->DrawGL();
   for(size_t i=0;i<world->rigidObjects.size();i++)
     world->rigidObjects[i]->DrawGL();
+
+  if(draw_sensors) {
+    if(robotSensors.sensors.empty()) {
+      robotSensors.MakeDefault(robot);
+    }
+    for(size_t i=0;i<robotSensors.sensors.size();i++) {
+      vector<double> measurements;
+      robotSensors.sensors[i]->DrawGL(*robot,measurements);
+    }
+  }
 
   if(draw_geom) {
     //set the robot colors
@@ -316,12 +328,19 @@ ResourcePtr RobotPoseBackend::PoserToResource(const string& type)
   else if(type == "IKGoal") {
     int ind = robotWidgets[0].ikPoser.ActiveWidget();
     if(ind < 0) {
-      printf("Not hovering over any IK widget\n");
-      return NULL;
+      vector<IKGoal>& constraints = robotWidgets[0].Constraints();
+      if(constraints.size() == 0) {
+        printf("Not hovering over any IK widget\n");
+        return NULL;
+      }
+      else {
+        return MakeResource("",constraints[0]);
+      }
     }
     return MakeResource("",robotWidgets[0].ikPoser.poseGoals[ind]);
   }
   else if(type == "Stance") {
+    printf("Creating stance from IK goals and contacts from flat-ground assumption\n");
     Stance s = GetFlatStance();
     return MakeResource("",s);
   }
@@ -426,13 +445,16 @@ bool RobotPoseBackend::OnCommand(const string& cmd,const string& args)
       return true;
     }
     ResourcePtr r = PoserToResource(oldr->Type());
-    r->name = oldr->name;
-    r->fileName = oldr->fileName;
+    if(r) {
+      r->name = oldr->name;
+      r->fileName = oldr->fileName;
 
-    resources->selected->resource = r;
-    if(resources->selected->IsExpanded()) {
-      fprintf(stderr,"Warning, don't know how clearing children will be reflected in GUI\n");
-      resources->selected->ClearExpansion();
+      resources->selected->resource = r;
+      resources->selected->SetChanged();
+      if(resources->selected->IsExpanded()) {
+        fprintf(stderr,"Warning, don't know how clearing children will be reflected in GUI\n");
+        resources->selected->ClearExpansion();
+      }
     }
   }
   else if(cmd == "resource_to_poser") {
@@ -441,14 +463,19 @@ bool RobotPoseBackend::OnCommand(const string& cmd,const string& args)
     if(rc) {
       Vector q = robotWidgets[0].Pose();
       q=rc->data;
-      robotWidgets[0].SetPose(q);
-      /*
-      robotWidgets[0].SetPose(rc->data);
-      robot->NormalizeAngles(robotWidgets[0].linkPoser.poseConfig);
-      if(robotWidgets[0].linkPoser.poseConfig != rc->data)
-	printf("Warning: config in library is not normalized\n");
-      */
-      UpdateConfig();
+      if(q.n == robot->q.n) {
+        robotWidgets[0].SetPose(q);
+        /*
+        robotWidgets[0].SetPose(rc->data);
+        robot->NormalizeAngles(robotWidgets[0].linkPoser.poseConfig);
+        if(robotWidgets[0].linkPoser.poseConfig != rc->data)
+    printf("Warning: config in library is not normalized\n");
+        */
+        UpdateConfig();
+      }
+      else {
+        fprintf(stderr,"Can't copy this Config to the poser, it is not the same size\n");
+      }
     }
     else {
       const IKGoalResource* rc = dynamic_cast<const IKGoalResource*>((const ResourceBase*)r);
@@ -566,6 +593,25 @@ bool RobotPoseBackend::OnCommand(const string& cmd,const string& args)
     ResourceGUIBackend::Add("",path);
     ResourceGUIBackend::SetLastActive(); 
     ResourceGUIBackend::viewResource.pathTime = 0;
+  }
+  else if(cmd == "split_path") {
+    ResourcePtr r=ResourceGUIBackend::CurrentResource();
+    const LinearPathResource* lp = dynamic_cast<const LinearPathResource*>((const ResourceBase*)r);
+    double t = viewResource.pathTime;
+    fprintf(stderr,"TODO: split paths\n");
+    if(lp) {
+      
+      //ResourceGUIBackend::Add("",newtimes,newconfigs);
+      //ResourceGUIBackend::SetLastActive(); 
+      //ResourceGUIBackend::viewResource.pathTime = 0;
+    }
+    const MultiPathResource* mp = dynamic_cast<const MultiPathResource*>((const ResourceBase*)r);
+    if(mp) {
+      
+      //ResourceGUIBackend::Add("",path);
+      //ResourceGUIBackend::SetLastActive(); 
+      //ResourceGUIBackend::viewResource.pathTime = 0;
+    }
   }
   else if(cmd == "discretize_path") {
     int num;
@@ -729,6 +775,28 @@ bool RobotPoseBackend::OnCommand(const string& cmd,const string& args)
       }
     }
   }
+  else if(cmd == "resample") {
+    stringstream ss(args);
+    Real res;
+    ss >> res;
+    ResourcePtr r=ResourceGUIBackend::CurrentResource();
+    const TriMeshResource* tr = dynamic_cast<const TriMeshResource*>((const ResourceBase*)r);
+    if(tr) {
+      Meshing::VolumeGrid grid;
+      Geometry::CollisionMesh mesh(tr->data);
+      mesh.CalcTriNeighbors();
+      mesh.InitCollisions();
+      Geometry::MeshToImplicitSurface_SpaceCarving(mesh,grid,res);
+      //Geometry::MeshToImplicitSurface_FMM(mesh,grid,res);
+      Meshing::TriMesh newMesh;
+      Geometry::ImplicitSurfaceToMesh(grid,newMesh);
+      ResourcePtr r = MakeResource(tr->name+"_simplified",newMesh);
+      if(r) {
+        ResourceGUIBackend::Add(r);
+        ResourceGUIBackend::SetLastActive();
+      }
+    }
+  }
   else if(cmd=="constrain_link") {
       robotWidgets[0].FixCurrent();
   }
@@ -759,6 +827,14 @@ bool RobotPoseBackend::OnCommand(const string& cmd,const string& args)
     robot->SetDriverValue(cur_driver,driver_value);
     robotWidgets[0].SetPose(robot->q);
   }
+  else if(cmd == "undo_pose") {
+    for(size_t i=0;i<world->robots.size();i++) 
+      if(lastActiveWidget == &robotWidgets[i]) {
+        printf("Undoing robot poser %d\n",i);
+        robotWidgets[i].Undo();
+        UpdateConfig();
+      }
+  }
   else {
     return ResourceGUIBackend::OnCommand(cmd,args);
   }
@@ -771,8 +847,10 @@ void RobotPoseBackend::BeginDrag(int x,int y,int button,int modifiers)
   Robot* robot = world->robots[0];
   if(button == GLUT_RIGHT_BUTTON) {
     double d;
-    if(allWidgets.BeginDrag(x,viewport.h-y,viewport,d))
+    if(allWidgets.BeginDrag(x,viewport.h-y,viewport,d)) {
       allWidgets.SetFocus(true);
+      lastActiveWidget = allWidgets.activeWidget;
+    }
     else
       allWidgets.SetFocus(false);
     if(allWidgets.requestRedraw) { SendRefresh(); allWidgets.requestRedraw=false; }

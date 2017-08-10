@@ -30,10 +30,7 @@ class StanceCSpace : public ContactCSpace
   StanceCSpace(const SingleRobotCSpace& space);
   StanceCSpace(const StanceCSpace& space);
   virtual ~StanceCSpace() {}
-  virtual void Sample(Config& x);
-  virtual void SampleNeighborhood(const Config& c,Real r,Config& x);
-  virtual bool IsFeasible(const Config&);
-
+  
   ///Sets the current stance for this space
   void SetStance(const Stance& s);
   ///Adds the given hold to the space's stance
@@ -47,10 +44,12 @@ class StanceCSpace : public ContactCSpace
   void InitTorqueSolver();
 
   ///Check if the current robot COM satisfies rigid body equilibrium
-  bool CheckRBStability();
+  ///NOTE: x is ignored
+  bool CheckRBStability(const Config& x);
   ///Check if the current robot configuration satisfies articulated robot
   ///equilibrium with torque limits
-  bool CheckTorqueStability();
+  ///NOTE: x is ignored
+  bool CheckTorqueStability(const Config& x);
 
   Stance stance;
   Vector3 gravity;

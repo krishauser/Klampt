@@ -1,3 +1,5 @@
+"""Merges two CSV files based on a matching key."""
+
 import sys
 import os
 

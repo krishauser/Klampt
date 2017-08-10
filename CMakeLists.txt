@@ -3,18 +3,26 @@ PROJECT( Klampt )
 
 # version (e.g. for packaging)
 set(KLAMPT_MAJOR_VERSION 0)
-set(KLAMPT_MINOR_VERSION 6)
-set(KLAMPT_PATCH_VERSION 2)
+set(KLAMPT_MINOR_VERSION 7)
+set(KLAMPT_PATCH_VERSION 0)
 set(KLAMPT_VERSION ${KLAMPT_MAJOR_VERSION}.${KLAMPT_MINOR_VERSION}.${KLAMPT_PATCH_VERSION})
 if(COMMAND cmake_policy)
   cmake_policy(SET CMP0003 NEW)
 endif(COMMAND cmake_policy)
+
+option(KLAMPT_COMPILE_TESTS "Compile Klampt tests" FALSE)
 
 SET (CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/CMakeModules")
 
 IF(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   SET (GLUI_INCLUDE_DIR "/usr/local/include")
 ENDIF(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+IF(MSVC)
+  # needed for some MSVC installations to handle glut32.lib
+  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /SAFESEH:NO")
+  set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} /SAFESEH:NO")
+  set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} /SAFESEH:NO")
+ENDIF(MSVC)
 
 # COMPILER SETTINGS (default: Release) and flags
 INCLUDE(CompilerSettings)
@@ -71,15 +79,30 @@ ELSE(WIN32)
 ENDIF(WIN32)
 
 ####### Klamp't Applications #########
-IF(NOT USE_QT4_APPS)
+IF(NOT USE_QT5_APPS)
+  #USE_QT5_APPS not set
+  FIND_PACKAGE(Qt5 COMPONENTS Widgets OpenGL)
+  IF(Qt5_FOUND)
+    MESSAGE (STATUS "Qt5 detected, building Qt version of apps\n")
+    SET(USE_QT5_APPS TRUE)
+  ELSE(Qt5_FOUND)
+    MESSAGE (STATUS "Qt5 not detected\n")
+    SET(USE_QT5_APPS FALSE)
+  ENDIF(Qt5_FOUND)
+ENDIF(NOT USE_QT5_APPS)
+
+IF(NOT USE_QT5_APPS AND NOT USE_QT4_APPS)
   #USE_QT4_APPS not set
   FIND_PACKAGE(Qt4)
   IF(QT4_FOUND)
+    MESSAGE (STATUS "Qt4 detected, building Qt version of apps\n")
     SET(USE_QT4_APPS TRUE)
   ELSE(QT4_FOUND)
     SET(USE_QT4_APPS FALSE)
+    MESSAGE (STATUS "Qt not found, building GLUI version of apps\n")
   ENDIF(QT4_FOUND)
-ENDIF(NOT USE_QT4_APPS)
+ENDIF(NOT USE_QT5_APPS AND NOT USE_QT4_APPS)
+
 ADD_SUBDIRECTORY(Main)
 
 ####### Klamp't Examples #########
@@ -102,7 +125,7 @@ ADD_DEPENDENCIES(python Klampt)
 
 # uninstall target
 configure_file(
-    "${CMAKE_MODULE_PATH}/CMakeUninstall.cmake.in"
+    "CMakeModules/CMakeUninstall.cmake.in"
     "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake"
     IMMEDIATE @ONLY)
 
@@ -123,12 +146,15 @@ endforeach(s)
 install(DIRECTORY data
     DESTINATION .
     COMPONENT datafiles)
+install(DIRECTORY Documentation
+    DESTINATION .
+    COMPONENT documentation)
 
 #examples and apps already added
 
 IF(WIN32)
 	#need to install Assimp, GLPK, glut32 dlls
-	install(FILES Library/Assimp32.dll Library/glpk_4_52.dll Library/glut32.dll
+	install(FILES Library/Assimp32.dll Library/glpk_4_61.dll Library/glut32.dll Library/glew32.dll
 		DESTINATION bin
 		COMPONENT apps)
 ELSE(WIN32)
@@ -151,6 +177,10 @@ install(DIRECTORY Python/utils
     DESTINATION Python
     COMPONENT pythonexamples)
 
+if((NOT WIN32) AND KLAMPT_COMPILE_TESTS)
+  enable_testing()
+  add_subdirectory(tests)
+endif()
 
 IF(PYTHON)
   install(CODE "execute_process(COMMAND \"cd Python; ${PYTHON} setup.py install\")" COMPONENT python)

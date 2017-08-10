@@ -5,8 +5,8 @@
 
 #include <boost/foreach.hpp>
 
-ResourceNode::ResourceNode(const ResourcePtr& p,ResourceNode* _parent):
-  resource(p),parent(_parent)
+ResourceNode::ResourceNode(const ResourcePtr& p,ResourceNode* _parent)
+  :resource(p),parent(_parent)
 {
   childrenChanged= false;
   childrenEditable = true;
@@ -23,6 +23,7 @@ int ResourceNode::Depth() const
 
 ResourceNodePtr ResourceNode::AddChild(const ResourcePtr& p)
 {
+  printf("Adding new child of resource, existing %d\n",(int)children.size());
   ResourceNodePtr node = new ResourceNode(p,this);
   children.push_back(node);
   childrenChanged = true;
@@ -36,6 +37,7 @@ vector<ResourceNodePtr> ResourceNode::AddChildren(const vector<ResourcePtr>& ptr
   vector<ResourceNodePtr> ret;
   for(size_t i=0;i<ptrs.size();i++){
     ret.push_back(AddChild(ptrs[i]));
+    assert(ret.back()->resource == ptrs[i]);
   }
   return ret;
 }
@@ -251,7 +253,9 @@ ResourceNodePtr ResourceTree::Add(ResourcePtr r,ResourceNodePtr parent)
       r->name = origName + buf;
     }
   if(parent) {
-    return parent->AddChild(r);
+    ResourceNodePtr c = parent->AddChild(r);
+    parent->SetChanged();
+    return c;
   }
   else {
     topLevel.push_back(new ResourceNode(r));
@@ -424,7 +428,7 @@ ResourceNodePtr ResourceManager::Get(const vector<string>& path)
 
 ResourceNodePtr ResourceManager::AddChildOfSelected(ResourcePtr r,bool changeSelection)
 {
-  ResourceNodePtr n = Add(r,selected);
+  ResourceNodePtr n = Add(r,SafePtr(selected));
   if(changeSelection)
     selected = n;
   return n;
@@ -468,4 +472,27 @@ bool ResourceManager::SaveSelected(const string& fn)
     return Save(selected,fn);
   }
   return false;
+}
+
+ResourceNodePtr ResourceManager::SafePtr(ResourceNode* ptr)
+{
+  if(!ptr) return NULL;
+  if(ptr->parent == NULL) {
+    for(size_t i=0;i<topLevel.size();i++) 
+      if(&*topLevel[i] == ptr) return topLevel[i];
+    fprintf(stderr,"ResourceManager::SafePtr: could not find element named %s, ptr %p?\n",ptr->resource->name.c_str(),&*ptr->resource);
+    fprintf(stderr,"Candidates:");
+    for(size_t i=0;i<topLevel.size();i++) 
+      fprintf(stderr,"  %s %p\n",topLevel[i]->resource->name.c_str(),&*topLevel[i]->resource);
+  }
+  else {
+    for(size_t i=0;i<ptr->parent->children.size();i++) 
+      if(&*ptr->parent->children[i] == ptr) return ptr->parent->children[i];
+    fprintf(stderr,"ResourceManager::SafePtr: could not find element named %s, ptr %p?\n",ptr->resource->name.c_str(),&*ptr->resource);
+    fprintf(stderr,"Candidates:");
+    for(size_t i=0;i<ptr->parent->children.size();i++) 
+      fprintf(stderr,"  %s %p\n",ptr->parent->children[i]->resource->name.c_str(),&*ptr->parent->children[i]->resource);
+  }
+  AssertNotReached();
+  return NULL;
 }

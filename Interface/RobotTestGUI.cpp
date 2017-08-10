@@ -1,6 +1,7 @@
 #include "RobotTestGUI.h"
 #include <KrisLibrary/GLdraw/drawMesh.h>
 #include <KrisLibrary/GLdraw/drawgeometry.h>
+#include "IO/ROS.h"
 #include <sstream>
 
 #ifndef GLUT_LEFT_BUTTON
@@ -12,6 +13,14 @@
 RobotTestBackend::RobotTestBackend(RobotWorld* world)
   :WorldGUIBackend(world)
 {
+}
+
+
+bool RobotTestBackend::OnQuit()
+{
+  if(ros_status == 1)
+    ROSShutdown();
+  return true;
 }
 
 void RobotTestBackend::Start()
@@ -28,6 +37,8 @@ void RobotTestBackend::Start()
   draw_expanded = 0;
   draw_sensors = 0;
   draw_self_collision_tests = 0;
+  output_ros = 0;
+  ros_status = 0;
   pose_ik = 0;
   self_colliding.resize(robot->links.size(),false);   
 
@@ -50,6 +61,7 @@ void RobotTestBackend::Start()
   MapButtonToggle("draw_frame",&draw_frame);
   MapButtonToggle("draw_sensors",&draw_sensors);
   MapButtonToggle("draw_self_collision_tests",&draw_self_collision_tests);
+  MapButtonToggle("output_ros",&output_ros);
 }
   
 void RobotTestBackend::UpdateConfig()
@@ -75,7 +87,13 @@ void RobotTestBackend::UpdateConfig()
     }
   }
   */
+  //tell the front end that the configuration is updated
   SendCommand("update_config","");
+
+  //If ROS is enabled, broadcast the transforms of the updated world
+  if(output_ros && ros_status == 1) {
+    ROSPublishTransforms(*world);
+  }
 }
 
 void RobotTestBackend::RenderWorld()
@@ -94,12 +112,10 @@ void RobotTestBackend::RenderWorld()
     if(robotSensors.sensors.empty()) {
       robotSensors.MakeDefault(robot);
     }
-    /*
     for(size_t i=0;i<robotSensors.sensors.size();i++) {
       vector<double> measurements;
       robotSensors.sensors[i]->DrawGL(*robot,measurements);
     }
-    */
   }
    
   if(draw_geom) {
@@ -232,6 +248,23 @@ bool RobotTestBackend::OnButtonToggle(const string& button,int checked)
     SendRefresh();
     return true;
   }
+  else if(button=="output_ros") {
+    if(checked) {
+      //initialize ROS if not initialized
+      if(ros_status == 0) {
+        if(ROSInit()) {
+          ros_status = 1;
+          bool res = ROSPublishTransforms(*world);
+          if(!res) printf("Error publishing transforms?\n");
+        }
+        else ros_status = -1;
+      }
+    }
+    if(!GenericBackendBase::OnButtonToggle(button,checked)) {
+      cout<<"RobotTestBackend: Unknown button: "<<button<<endl;
+      return false;
+    }
+  }
   else if(!GenericBackendBase::OnButtonToggle(button,checked)) {
     cout<<"RobotTestBackend: Unknown button: "<<button<<endl;
     return false;
@@ -304,6 +337,14 @@ bool RobotTestBackend::OnCommand(const string& cmd,const string& args)
     robotSensors.sensors.resize(0);
     robot = world->robots[0];
   }
+  else if(cmd == "undo_pose") {
+    for(size_t i=0;i<world->robots.size();i++) 
+      if(lastActiveWidget == &robotWidgets[i]) {
+        printf("Undoing robot poser %d\n",i);
+        robotWidgets[i].Undo();
+        UpdateConfig();
+      }
+  }
   else {
     return WorldGUIBackend::OnCommand(cmd,args);
   }
@@ -326,8 +367,10 @@ void RobotTestBackend::BeginDrag(int x,int y,int button,int modifiers)
 {  
   if(button == GLUT_RIGHT_BUTTON) {
     double d;
-    if(allWidgets.BeginDrag(x,viewport.h-y,viewport,d))
+    if(allWidgets.BeginDrag(x,viewport.h-y,viewport,d)) {
       allWidgets.SetFocus(true);
+      lastActiveWidget = allWidgets.activeWidget;
+    }
     else
       allWidgets.SetFocus(false);
     if(allWidgets.requestRedraw) { SendRefresh(); allWidgets.requestRedraw=false; }
@@ -468,6 +511,7 @@ bool GLUIRobotTestGUI::Initialize()
 [{type:key_down,key:c}, {type:command,cmd:constrain_current_link,args:\"\"}],	\
 [{type:key_down,key:d}, {type:command,cmd:delete_current_constraint,args:\"\"}], \
 [{type:key_down,key:p}, {type:command,cmd:print_pose,args:\"\"}],	\
+[{type:key_down,key:z}, {type:command,cmd:undo_pose,args:\"\"}], \
 [{type:button_press,button:print_config}, {type:command,cmd:print_pose,args:\"\"}], \
 [{type:button_toggle,button:pose_ik,checked:1}, {type:command,cmd:constrain_point_mode,args:\"\"}], \
 [{type:button_toggle,button:pose_ik,checked:0}, {type:command,cmd:pose_mode,args:\"\"}], \

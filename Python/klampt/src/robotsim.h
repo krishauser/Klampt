@@ -26,38 +26,87 @@ class Simulator;
 /** @brief A sensor on a simulated robot.  Retreive this from the controller,
  * and use getMeasurements to get the currently simulated measurement vector.
  *
- * type() gives you a string defining the sensor type.
- * measurementNames() gives you a list of names for the measurements.
+ * Sensors are automatically updated through the sim.simulate call, and
+ * getMeasurements() retrieves the previously updated values.  As a result,
+ * you may get garbage measurements before the first sim.simulate call is made.
+ * 
+ * There is also a new mode for doing kinematic simulation, which is supported
+ * (i.e., makes sensible measurements) for some types of sensors when just 
+ * a robot / world model is given. This is similar to Simulation.fakeSimulate
+ * but the entire controller structure is bypassed.  You can randomly set the
+ * robot's position, call kinematicReset(), and then call kinematicSimulate().
+ * Subsequent calls assume the robot is being driven along a trajectory until the
+ * next kinematicReset() is called.
+ * LaserSensor, CameraSensor, TiltSensor, AccelerometerSensor, GyroSensor,
+ * JointPositionSensor, JointVelocitySensor support kinematic simulation mode.
+ * FilteredSensor and TimeDelayedSensor also work.  The force-related sensors 
+ * (ContactSensor and ForceTorqueSensor) return 0's in kinematic simulation.
+ *
+ * To use get/setSetting, you will need to know the sensor attribute names
+ * and types as described in Klampt/Control/*Sensor.h (same as in the world or
+ * sensor XML file).
  */
 class SimRobotSensor
 {
  public:
-  SimRobotSensor(SensorBase* sensor);
+  SimRobotSensor(Robot* robot,SensorBase* sensor);
+  ///Returns the name of the sensor
   std::string name();
+  ///Returns the type of the sensor
   std::string type();
+  ///Returns a list of names for the measurements (one per measurement).
   std::vector<std::string> measurementNames();
+  ///Returns a list of measurements from the previous simulation (or kinematicSimulate) timestep
   void getMeasurements(std::vector<double>& out);
+  ///Returns the value of the named setting (you will need to manually parse this)
+  std::string getSetting(const std::string& name);
+  ///Sets the value of the named setting (you will need to manually cast an int/float/etc to a str)
+  void setSetting(const std::string& name,const std::string& val);
+  ///Draws a sensor indicator using OpenGL
+  void drawGL();
+  ///Draws a sensor indicator and its measurements using OpenGL.
+  void drawGL(const std::vector<double>& measurements);
 
+  ///simulates / advances the kinematic simulation
+  void kinematicSimulate(WorldModel& world,double dt);
+  ///resets a kinematic simulation so that a new initial condition can be set
+  void kinematicReset();
+
+  Robot* robot;
   SensorBase* sensor;
 };
 
 /** @brief A controller for a simulated robot.
  *
- * The basic way of using this is in "standard" move-to mode which accepts
+ * By default a SimRobotController has three possible modes:
+ * - Motion queue + PID mode: the controller has an internal trajectory
+ *   queue that may be added to and modified.  This queue supports
+ *   piecewise linear interpolation, cubic interpolation, and time-optimal
+ *   move-to commands.
+ * - PID mode: the user controls the motor's PID setpoints directly
+ * - Torque control: the user controlls the motor torques directly.
+ *
+ * The "standard" way of using this is in move-to mode which accepts
  * a milestone (setMilestone) or list of milestones (repeated calls to
  * addMilestone) and interpolates dynamically from the current
- * configuration/velocity.  To handle disturbances, a PID loop is run.
- * The constants of this loop are initially set in the robot file, or you can
- * perform tuning via setPIDGains.
+ * configuration/velocity.  To handle disturbances, a PID loop is run
+ * automatically at the controller's specified rate.
  *
- * Move-to motions are handled using a motion queue.  To get finer-grained
- * control over the motion queue you may use the setLinear/setCubic/
- * addLinear/addCubic functions.
+ * To get finer-grained control over the motion queue's timing, you may
+ * use the setLinear/setCubic/addLinear/addCubic functions.  In these functions
+ * it is up to the user to respect velocity, acceleration, and torque limits.
+ *  
+ * Whether in motion queue or PID mode, the constants of the PID loop
+ * are initially set in the robot file.  You can programmatically 
+ * tune these via the setPIDGains function.
  *
  * Arbitrary trajectories can be tracked by using setVelocity over short time
  * steps.  Force controllers can be implemented using setTorque, again using
- * short time steps.  These set the controller into manual override mode.
- * To reset back to regular motion queue control,
+ * short time steps. 
+ * 
+ * If setVelocity, setTorque, or setPID command are called, the motion queue behavior
+ * will be completely overridden.  To reset back to motion queue control, the function
+ * setManualMode(False) must be called.
  */
 class SimRobotController
 {
@@ -68,6 +117,8 @@ class SimRobotController
   RobotModel model();
   /// Sets the current feedback control rate
   void setRate(double dt);
+  /// Gets the current feedback control rate
+  double getRate();
 
   /// Returns the current commanded configuration
   void getCommandedConfig(std::vector<double>& out);
@@ -83,28 +134,30 @@ class SimRobotController
   SimRobotSensor sensor(int index);
   /// Returns a sensor by name.  If unavailable, a null sensor is returned
   SimRobotSensor sensor(const char* name);
-  ///Old-style: will be deprecated
-  SimRobotSensor getSensor(int index);
-  ///Old-style: will be deprecated
-  SimRobotSensor getNamedSensor(const std::string& name);
-
+  
   /// gets a command list
   std::vector<std::string> commands();
   /// sends a command to the controller
   bool sendCommand(const std::string& name,const std::string& args);
 
-  /// gets/sets settings of the controller
+  /// gets a setting of the controller
   std::string getSetting(const std::string& name);
+  /// sets a setting of the controller
   bool setSetting(const std::string& name,const std::string& val);
 
   /// Uses a dynamic interpolant to get from the current state to the
   /// desired milestone (with optional ending velocity).  This interpolant
   /// is time-optimal with respect to the velocity and acceleration bounds.
   void setMilestone(const std::vector<double>& q);
+  /// Uses a dynamic interpolant to get from the current state to the
+  /// desired milestone (with optional ending velocity).  This interpolant
+  /// is time-optimal with respect to the velocity and acceleration bounds.
   void setMilestone(const std::vector<double>& q,const std::vector<double>& dq);
   /// Same as setMilestone, but appends an interpolant onto an internal
   /// motion queue starting at the current queued end state.
   void addMilestone(const std::vector<double>& q);
+  /// Same as setMilestone, but appends an interpolant onto an internal
+  /// motion queue starting at the current queued end state.
   void addMilestone(const std::vector<double>& q,const std::vector<double>& dq);
   /// Same as addMilestone, but enforces that the motion should move along
   /// a straight-line joint-space path
@@ -130,25 +183,26 @@ class SimRobotController
   void setTorque(const std::vector<double>& t);
   /// Sets a PID command controller
   void setPIDCommand(const std::vector<double>& qdes,const std::vector<double>& dqdes);
-  /// Sets a PID command controller with feedforward torques
+  /// Sets a PID command controller.  If tfeedforward is used, it is the feedforward torque vector
   void setPIDCommand(const std::vector<double>& qdes,const std::vector<double>& dqdes,const std::vector<double>& tfeedforward);
   /// Turns on/off manual mode, if either the setTorque or setPID command were
   /// previously set.
   void setManualMode(bool enabled);
 
-  /// Returns the control type for the active controller
-  /// valid values are:
-  /// - unknown
-  /// - off
-  /// - torque
-  /// - PID
-  /// - locked_velocity
+  /// Returns the control type for the active controller.
+  ///
+  /// Valid values are:
+  /// * unknown
+  /// * off
+  /// * torque
+  /// * PID
+  /// * locked_velocity
   std::string getControlType();
 
   /// Sets the PID gains
   void setPIDGains(const std::vector<double>& kP,const std::vector<double>& kI,const std::vector<double>& kD);
-
-  void getPIDGains(std::vector<double>& kP,std::vector<double>& kI,std::vector<double>& kD);
+  /// Gets the PID gains for the PID controller
+  void getPIDGains(std::vector<double>& kPout,std::vector<double>& kIout,std::vector<double>& kDout);
 
   int index;
   Simulator* sim;
@@ -164,10 +218,15 @@ class SimRobotController
  * provided to Simulation.simulate().  If you need fine-grained control,
  * make sure to call simulate() with time steps equal to the value provided
  * to Simulation.setSimStep() (this is 0.001s by default).
+ *
+ * Important: the transform of the object is centered at the *object's center of mass*
+ * rather than the reference frame given in the RobotModelLink or RigidObjectModel.
  */
 class SimBody
 {
  public:
+  /// Returns the object ID that this body associated with
+  int getID() const;
   /// Sets the simulation of this body on/off
   void enable(bool enabled=true);
   /// Returns true if this body is being simulated
@@ -185,14 +244,23 @@ class SimBody
   /// Applies a force at a given point (in world coordinates) over the
   /// duration of the next Simulator.simulate(t) call.
   void applyForceAtPoint(const double f[3],const double pworld[3]);
-  /// Applies a force at a given point (in local coordinates) over
-  /// the duration of the next Simulator.simulate(t) call.
+  /// Applies a force at a given point (in local center-of-mass-centered
+  /// coordinates) over the duration of the next Simulator.simulate(t) call.
   void applyForceAtLocalPoint(const double f[3],const double plocal[3]);
 
   /// Sets the body's transformation at the current
-  /// simulation time step.
+  /// simulation time step (in center-of-mass centered coordinates).
   void setTransform(const double R[9],const double t[3]);
+  /// Gets the body's transformation at the current
+  /// simulation time step (in center-of-mass centered coordinates).
   void getTransform(double out[9],double out2[3]);
+
+  /// Sets the body's transformation at the current
+  /// simulation time step (in object-native coordinates)
+  void setObjectTransform(const double R[9],const double t[3]);
+  /// Gets the body's transformation at the current
+  /// simulation time step (in object-native coordinates).
+  void getObjectTransform(double out[9],double out2[3]);
 
   /// Sets the angular velocity and translational velocity at the current
   /// simulation time step.
@@ -214,6 +282,7 @@ class SimBody
   void setSurface(const ContactParameters& params);
 
   Simulator* sim;
+  int objectID;
   ODEGeometry* geometry;
   dBodyID body;
 };
@@ -223,15 +292,25 @@ class SimBody
 class Simulator
 {
  public:
+  ///Status flags
+  enum { STATUS_NORMAL=0, STATUS_ADAPTIVE_TIME_STEPPING=1, STATUS_CONTACT_UNRELIABLE=2,
+    STATUS_UNSTABLE=3, STATUS_ERROR=4 };
+
   /// Constructs the simulator from a WorldModel.  If the WorldModel was
   /// loaded from an XML file, then the simulation setup is loaded from it.
-  Simulator(const WorldModel& model,const char* settings=NULL);
+  Simulator(const WorldModel& model);
   ~Simulator();
 
   /// Resets to the initial state (same as setState(initialState))
   void reset();
-  /// Old-style: will be deprecated
-  WorldModel getWorld() const;
+
+  /// Returns an indicator code for the simulator status.  The return result
+  /// is one of the STATUS_X flags.  (Technically, this returns the *worst* status
+  /// over the last simulate() call)
+  int getStatus();
+  /// Returns a string indicating the simulator's status.  If s is provided and >= 0,
+  /// this function maps the indicator code s to a string.
+  std::string getStatusString(int s=-1);
 
   /// Returns a Base64 string representing the binary data for the current
   /// simulation state, including controller parameters, etc.
@@ -316,16 +395,6 @@ class Simulator
   SimBody body(const RigidObjectModel& object);
   ///Returns the SimBody corresponding to the given terrain
   SimBody body(const TerrainModel& terrain);
-  ///Old-style: will be deprecated
-  SimRobotController getController(int robot);
-  ///Old-style: will be deprecated
-  SimRobotController getController(const RobotModel& robot);
-  ///Old-style: will be deprecated
-  SimBody getBody(const RobotModelLink& link);
-  ///Old-style: will be deprecated
-  SimBody getBody(const RigidObjectModel& object);
-  ///Old-style: will be deprecated
-  SimBody getBody(const TerrainModel& terrain);
 
   /// Returns the joint force and torque local to the link, as would be read
   /// by a force-torque sensor mounted at the given link's origin.  The 6
@@ -336,11 +405,31 @@ class Simulator
   void setGravity(const double g[3]);
   /// Sets the internal simulation substep.  Values < 0.01 are recommended.
   void setSimStep(double dt);
+  /// Retrieves some simulation setting.  Valid names are gravity,
+  /// simStep, boundaryLayerCollisions, rigidObjectCollisions, robotSelfCollisions,
+  /// robotRobotCollisions, adaptiveTimeStepping, minimumAdaptiveTimeStep, maxContacts,
+  /// clusterNormalScale, errorReductionParameter, dampedLeastSquaresParameter,
+  /// instabilityConstantEnergyThreshold, instabilityLinearEnergyThreshold,
+  /// instabilityMaxEnergyThreshold, and instabilityPostCorrectionEnergy.
+  /// See Klampt/Simulation/ODESimulator.h for detailed descriptions of these
+  /// parameters.
+  std::string getSetting(const std::string& name);
+  /// Sets some simulation setting. Raises an exception if the name is
+  /// unknown or the value is of improper format
+  void setSetting(const std::string& name,const std::string& value);
+
 
   int index;
   WorldModel world;
   WorldSimulation* sim;
   std::string initialState;
 };
+
+/// Sets the random seed used by the configuration sampler
+void setRandomSeed(int seed);
+
+///Cleans up all internal data structures.  Useful for multithreaded programs to make sure ODE errors
+///aren't thrown on exit.  This is called for you on exit when importing the Python klampt module.
+void destroy();
 
 #endif

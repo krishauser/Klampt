@@ -18,7 +18,7 @@ Authors: Giulia Franchi, Kris Hauser
 """
 
 import math
-from klampt.simulation import ActuatorEmulator
+from klampt.sim import ActuatorEmulator
 
 xmin = (0,0,-55,0,0)
 xmax = (70,90,43,255,255)
@@ -248,7 +248,7 @@ class FingerEmulator:
                 #print "stopping finger"
                 self.gstop = self.g
                 print "RobotiQ finger model g:",self.g,"gobs",self.gobs,"gstop",self.gstop,"exceeded threshold, stopped."
-                return
+            return
 
     def advance_sim(self,dt,q,qactual,in_contact):
         """Given a commanded configuration q, an actual configuration qactual,
@@ -269,7 +269,6 @@ class FingerEmulator:
         res = quasistatic_finger_model(self.gobs,self.g)
         #print "RobotiQ finger model g:",self.g,"gobs",self.gobs,"gstop",self.gstop,"res",res
         return res
->>>>>>> Stashed changes
 
 
 class Emulator(ActuatorEmulator):
