@@ -1,13 +1,14 @@
 #!/usr/bin/python
 import sys
 from klampt import *
-from klampt.vis.glrobotprogram import GLSimulationProgram
+from klampt import vis
+from klampt.vis.glrobotprogram import GLSimulationPlugin
 import robotiq 
 
 
-class MyGLViewer(GLSimulationProgram):
+class MyGLViewer(GLSimulationPlugin):
     def __init__(self,world):
-        GLSimulationProgram.__init__(self,world,"RobotiQ test program")
+        GLSimulationPlugin.__init__(self,world)
         #Put any controller modules or sensor / actuator emulators here
         self.robotiqEmulator = robotiq.Emulator(self.sim)
         self.sim.addEmulator(0,self.robotiqEmulator)
@@ -41,4 +42,5 @@ if __name__ == "__main__":
         exit(1)
 
     viewer = MyGLViewer(world)
-    viewer.run()
+    vis.setWindowTitle("Robotiq gripper test")
+    vis.run(viewer)

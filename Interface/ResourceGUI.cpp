@@ -1,3 +1,5 @@
+#include <log4cxx/logger.h>
+#include <KrisLibrary/Logger.h>
 #include "ResourceGUI.h"
 #include "IO/XmlWorld.h"
 #include <KrisLibrary/utils/stringutils.h>
@@ -14,11 +16,11 @@ inline bool LoadResources(const char* fn,ResourceTree& lib)
   size_t origsize = lib.topLevel.size();
   if(!lib.LoadFolder(fn)) {
     lib.TreeFromLibrary();
-    fprintf(stderr,"Warning, couldn't load library %s\n",fn);
+        LOG4CXX_ERROR(KrisLibrary::logger(),"Warning, couldn't load library "<<fn);
     return false;
   }
   else {
-    printf("Loaded %d items from %s\n",lib.topLevel.size()-origsize,fn);
+    LOG4CXX_INFO(KrisLibrary::logger(),"Loaded "<<lib.topLevel.size()-origsize<<" items from "<<fn);
     return true;
   }
   return false;
@@ -28,13 +30,13 @@ inline bool LoadResources(TiXmlElement* e,ResourceTree& lib)
 {
   size_t origsize = lib.topLevel.size();
   if(!lib.library.Load(e)) {
-    fprintf(stderr,"Warning, couldn't load library from XML\n");
+        LOG4CXX_ERROR(KrisLibrary::logger(),"Warning, couldn't load library from XML\n");
     lib.TreeFromLibrary();
     return false;
   }
   else {
     lib.TreeFromLibrary();
-    printf("Loaded %d items from XML\n",lib.topLevel.size()-origsize);
+    LOG4CXX_INFO(KrisLibrary::logger(),"Loaded "<<lib.topLevel.size()-origsize);
     return true;
   }
   return false;
@@ -44,11 +46,11 @@ inline bool LoadItem(const char* fn,ResourceTree& lib)
 {
   ResourceNodePtr r=lib.LoadFile(fn);
   if(r != NULL) {
-    printf("Loaded %s as type %s\n",fn,r->Type());
+    LOG4CXX_INFO(KrisLibrary::logger(),"Loaded "<<fn<<" as type "<<r->Type());
     return true;
   }
   else {
-    fprintf(stderr,"Couldn't load resource file %s\n",fn);
+        LOG4CXX_ERROR(KrisLibrary::logger(),"Couldn't load resource file "<<fn);
     return false;
   }
 }
@@ -63,7 +65,7 @@ bool ResourceGUIBackend::LoadCommandLine(int argc,const char** argv)
 	i++;
       }
       else {
-	printf("Unknown option %s",argv[i]);
+	LOG4CXX_INFO(KrisLibrary::logger(),"Unknown option "<<argv[i]);
 	return 0;
       }
     }
@@ -72,17 +74,17 @@ bool ResourceGUIBackend::LoadCommandLine(int argc,const char** argv)
       if(0==strcmp(ext,"xml")) {
 	TiXmlDocument doc;
 	if(!doc.LoadFile(argv[i])) {
-	  printf("Error loading XML file %s\n",argv[i]);
+	  LOG4CXX_ERROR(KrisLibrary::logger(),"Error loading XML file "<<argv[i]);
 	  return false;
 	}
 	if(0 == strcmp(doc.RootElement()->Value(),"world")) {
 	  XmlWorld xmlWorld;
 	  if(!xmlWorld.Load(doc.RootElement(),GetFilePath(argv[i]))) {
-	    printf("Error loading world file %s\n",argv[i]);
+	    LOG4CXX_ERROR(KrisLibrary::logger(),"Error loading world file "<<argv[i]);
 	    return 0;
 	  }
 	  if(!xmlWorld.GetWorld(*world)) {
-	    printf("Error loading world from %s\n",argv[i]);
+	    LOG4CXX_ERROR(KrisLibrary::logger(),"Error loading world from "<<argv[i]);
 	    return 0;
 	  }
 	}
@@ -127,7 +129,12 @@ ResourceNodePtr ResourceGUIBackend::Add(ResourcePtr r)
       }
       r->name = ss.str();
   }
-  last_added = resources->Add(r,parent);
+  //need to get the reference counted version of parent;
+  ResourceNodePtr parentSafe;
+  if(parent != NULL) {
+    parentSafe = resources->SafePtr(parent);
+  }
+  last_added = resources->Add(r,parentSafe);
   //SendCommand("new_resource", r->Type()+string(" ")+r->name);
   SendCommand("new_resource", last_added->Identifier());
   return last_added;
@@ -159,11 +166,11 @@ void ResourceGUIBackend::SaveAll(const string& path)
 bool ResourceGUIBackend::LoadAll(const string& path)
 {
   if(!resources->LoadFolder(path)) {
-    fprintf(stderr,"Error loading resources from %s\n",path.c_str());
+        LOG4CXX_ERROR(KrisLibrary::logger(),"Error loading resources from "<<path.c_str());
     return false;
     }
     else {
-    fprintf(stderr,"Loaded all resources from %s\n",path.c_str());
+        LOG4CXX_ERROR(KrisLibrary::logger(),"Loaded all resources from "<<path.c_str());
     return true;
   }
   return false;
@@ -204,7 +211,7 @@ bool ResourceGUIBackend::OnCommand(const string& cmd,const string& args)
   }
   else if(cmd == "set_resource_name") {
     if(resources->selected) resources->selected->resource->name = args;
-    printf("Updating name to %s\n",args.c_str());
+    LOG4CXX_INFO(KrisLibrary::logger(),"Updating name to "<<args.c_str());
   }
   else if(cmd == "delete_resource") {
     resources->DeleteSelected();
@@ -213,11 +220,11 @@ bool ResourceGUIBackend::OnCommand(const string& cmd,const string& args)
     string type,name;
     stringstream ss(args);
     if(!SafeInputString(ss,type)) {
-      cout<<"Error reading resource type from args \""<<args<<"\""<<endl;
+      LOG4CXX_ERROR(KrisLibrary::logger(),"Error reading resource type from args \""<<args<<"\""<<"\n");
       return true;
     }
     if(!SafeInputString(ss,name)) {
-      cout<<"Error reading resource name from args \""<<args<<"\""<<endl;
+      LOG4CXX_ERROR(KrisLibrary::logger(),"Error reading resource name from args \""<<args<<"\""<<"\n");
       return true;
     }
     last_added = Add(name,type);
@@ -242,7 +249,7 @@ bool ResourceGUIBackend::OnCommand(const string& cmd,const string& args)
     ResourcePtr r=CurrentResource();
     ResourcePtr res = CastResource(r,args.c_str());
     if(!res) {
-      fprintf(stderr,"Conversion failed\n");
+            LOG4CXX_ERROR(KrisLibrary::logger(),"Conversion failed\n");
       return true;
     }
     Add(res);     

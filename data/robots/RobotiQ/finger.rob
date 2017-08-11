@@ -26,7 +26,7 @@ accMaxDeg    180  180  180
 qDeg  0 0 0
 
 #geometry files 
-geometry       "link1.tri"    "link2.tri"  "link3.tri"
+geometry       "link1.off"    "link2.off"  "link3.off"
 
 mass       0.3  0.3   0.3   
 automass

@@ -18,7 +18,7 @@ from .. import robotsim
 from ..math import vectorops,se3,so3
 import os
 import time
-from ..robotsim import WorldModel,RobotModelLink,RigidObjectModel,IKObjective
+from ..robotsim import WorldModel,RobotModel,RobotModelLink,RigidObjectModel,IKObjective
 from ..model.contact import ContactPoint
 from ..model.contact import Hold
 from .. import vis
@@ -364,7 +364,7 @@ class _ThumbnailPlugin(vis.VisualizationPlugin):
     def idle(self):
         vis.VisualizationPlugin.idle(self)
         if self.rendered and not self.done:
-            from OpenGL.GL import *
+            from OpenGL.GL import glReadPixels,GL_RGBA,GL_UNSIGNED_BYTE
             view = self.window.program.view
             screenshot = glReadPixels( view.x, view.y, view.w, view.h, GL_RGBA, GL_UNSIGNED_BYTE)
             try:
@@ -499,10 +499,29 @@ def console_edit(name,value,type,description=None,world=None,frame=None):
         return False,None
 
 
-def edit(name,value,type='auto',description=None,editor='visual',world=None,robot=None,frame=None):
+def edit(name,value,type='auto',description=None,editor='visual',world=None,referenceObject=None,frame=None):
     """Launches an editor for the given value.  Returns a pair (save,result)
     where save indicates what the user wanted to do with the edited value
-    and result is the edited value."""
+    and result is the edited value.
+
+    Arguments:
+    - name: the displayed name of the edited value. Can be None, in which case 'Anonymous' is displayed
+    - value: the value to be edited.  Can be None, in which case 'type' must be specified and a default value
+      is created.
+    - type: the type string of the value to be edited.  Usually can be auto-detected from value.
+    - description: a descriptive string, displayed to the person editing.
+    - editor: either 'visual' or 'console'.  If 'visual', will display a GUI for visually editing the item.
+      If 'console', the user will have to type in the value.
+    - world: either a WorldModel instance or a string specifying a world file. This is necessary for visual
+      editing.
+    - referenceObject: a RobotModel or other object to which the value "refers to".  For configurations and
+      trajectories, this is the object that will be moved by the trajectory.  In the case of a
+      RigidTransform value, this can be an object or a list of objects that will be transformed by the
+      transform.  
+    - frame: for Vector3, Matrix3, Point, Rotation, and RigidTransform types, the returned value will be
+      given relative to this reference frame.  The reference frame can be either an element of se3, an
+      ObjectModel, a RobotModelLink, or a string indicating a named rigid element of the world.
+    """
     if name == None and type=='auto':
         raise RuntimeError("Cannot do an anonymous edit without the 'type' argument specified")
     if name == None:
@@ -524,8 +543,8 @@ def edit(name,value,type='auto',description=None,editor='visual',world=None,robo
             frame = oframe
         except RuntimeError:
             try:
-                if robot != None:
-                    oframe = robot.link(frame)
+                if isinstance(referenceObject,RobotModel):
+                    oframe = referenceObject.link(frame)
                     frame = oframe
                 else:
                     oframe = world.robot(0).link(frame)
@@ -536,45 +555,69 @@ def edit(name,value,type='auto',description=None,editor='visual',world=None,robo
                     frame = oframe
                 except RuntimeError:
                     raise RuntimeError('Named frame "'+frame+'" is not a valid frame')
-    if value==None:
-        if type == 'Config':
-            if world==None and robot==None:
-                raise RuntimeError("Cannot visually edit a Config resource without a world/robot")
-            if robot==None:
-                robot = world.robot(0)
-            value = robot.getConfig()
-        elif type == 'Configs':
-            if world==None and robot==None:
-                raise RuntimeError("Cannot visually edit a Configs resource without a world/robot")
-            if robot==None:
-                robot = world.robot(0)
-            value = [robot.getConfig()]
-        else:
-            value = types.make(type)
-            if value == None:
-                raise RuntimeError("Don't know how to edit objects of type "+type)
+    if type in ['Config','Configs','Trajectory']:
+        if world==None and referenceObject==None:
+            raise RuntimeError("Cannot visually edit a "+type+" resource without a world/referenceObject argument")
+        if referenceObject==None and world.numRobots() > 0:
+            referenceObject = world.robot(0)
+    
+    if value is None:
+        value = types.make(type,referenceObject)
+        if value == None:
+            raise RuntimeError("Don't know how to edit objects of type "+type)
 
     if editor == 'console':
         return console_edit(name,value,type,description,world,frame)
     elif editor == 'visual':
         if type == 'Config':
-            return vis.editors.run(vis.editors.ConfigEditor(name,value,description,world,robot))
+            assert isinstance(referenceObject,RobotModel),"Can currently only edit Config values with a RobotModel reference object"
+            return vis.editors.run(vis.editors.ConfigEditor(name,value,description,world,referenceObject))
         elif type == 'Configs':
-            return vis.editors.run(vis.editors.ConfigsEditor(name,value,description,world,robot))
+            assert isinstance(referenceObject,RobotModel),"Can currently only edit Configs values with a RobotModel reference object"
+            return vis.editors.run(vis.editors.ConfigsEditor(name,value,description,world,referenceObject))
+        elif type == 'Trajectory':
+            assert isinstance(referenceObject,RobotModel),"Can currently only edit Trajectory values with a RobotModel reference object"
+            return vis.editors.run(vis.editors.TrajectoryEditor(name,value,description,world,referenceObject))
         elif type == 'Vector3' or type == 'Point':
             if hasattr(frame,'getTransform'):
                 frame = frame.getTransform()
             return vis.editors.run(vis.editors.PointEditor(name,value,description,world,frame))
-        elif type == 'Rotation':
-            if hasattr(frame,'getTransform'):
-                frame = frame.getTransform()
-            return vis.editors.run(vis.editors.RotationEditor(name,value,description,world,frame))
-        elif type == 'RigidTransform':
-            if isinstance(frame,RigidObjectModel):
+        elif type == 'RigidTransform' or type == 'Rotation':
+            if type == 'RigidTransform' and isinstance(frame,RigidObjectModel):
                 return vis.editors.run(vis.editors.ObjectTransformEditor(name,value,description,world,frame))
+            if type == 'Rotation':
+                #convert from so3 to se3
+                value = [value,[0,0,0]]
+            Tref = frame
             if hasattr(frame,'getTransform'):
-                frame = frame.getTransform()
-            return vis.editors.run(vis.editors.RigidTransformEditor(name,value,description,world,frame))
+                Tref = frame.getTransform()
+            editor = vis.editors.RigidTransformEditor(name,value,description,world,Tref)
+            if type == 'Rotation':
+                editor.disableTranslation()
+            #attach visualization items to the transform
+            if isinstance(frame,RobotModelLink):
+                assert frame.index >= 0
+                r = frame.robot()
+                descendant = [False]*r.numLinks()
+                descendant[frame.index] = True
+                for i in xrange(r.numLinks()):
+                    p = r.link(i).getParent()
+                    if p >= 0 and descendant[p]: descendant[i]=True
+                for i in xrange(r.numLinks()):
+                    if descendant[i]:
+                        editor.attach(r.link(i))
+                editor.attach(frame)
+            if hasattr(referenceObject,'getTransform'):
+                editor.attach(referenceObject)
+            if hasattr(referenceObject,'__iter__'):
+                for i in referenceObject:
+                    editor.attach(referenceObject)
+            #Run!
+            if type == 'Rotation':
+                #convert from se3 to so3
+                return vis.editors.run(editor)[0]
+            else:
+                return vis.editors.run(editor)
         else:
             raise RuntimeError("Visual editing of objects of type "+type+" not supported yet")
     else:

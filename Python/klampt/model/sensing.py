@@ -295,4 +295,25 @@ def camera_to_points_world(camera,robot,points_format='numpy',color_format='chan
 		raise ValueError("Invalid format "+str(points_format))
 	return pts
 
-		
+def camera_to_viewport(camera,robot):
+	"""Returns a GLViewport instance corresponding to the camera's view.  See klampt.vis.glprogram
+	and klampt.vis.visualization for information about how to use the object with the visualization."""
+	assert isinstance(camera,SimRobotSensor),"Must provide a SimRobotSensor instance"
+	assert camera.type() == 'CameraSensor',"Must provide a camera sensor instance"
+	from ..vis.glprogram import GLViewport
+	xform = get_sensor_xform(camera,robot)
+	w = int(camera.getSetting('xres'))
+	h = int(camera.getSetting('yres'))
+	xfov = float(camera.getSetting('xfov'))
+	yfov = float(camera.getSetting('yfov'))
+	zmin = float(camera.getSetting('zmin'))
+	zmax = float(camera.getSetting('zmax'))
+	view = GLViewport()
+	view.w, view.h = w,h
+	view.fov = math.degrees(xfov)
+	view.camera.dist = 1.0
+	view.camera.tgt = se3.apply(xform,[0,0,view.camera.dist])
+	#axes corresponding to right, down, fwd in camera view
+	view.camera.set_orientation(xform[0],['x','y','z'])
+	view.clippingplanes = (zmin,zmax)
+	return view

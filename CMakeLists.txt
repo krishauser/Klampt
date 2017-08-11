@@ -1,6 +1,8 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.6.4)
 PROJECT( Klampt )
 
+
+
 # version (e.g. for packaging)
 set(KLAMPT_MAJOR_VERSION 0)
 set(KLAMPT_MINOR_VERSION 7)
@@ -17,6 +19,12 @@ SET (CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/CMakeModules")
 IF(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   SET (GLUI_INCLUDE_DIR "/usr/local/include")
 ENDIF(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+IF(MSVC)
+  # needed for some MSVC installations to handle glut32.lib
+  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /SAFESEH:NO")
+  set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} /SAFESEH:NO")
+  set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} /SAFESEH:NO")
+ENDIF(MSVC)
 
 # COMPILER SETTINGS (default: Release) and flags
 INCLUDE(CompilerSettings)
@@ -72,16 +80,35 @@ ELSE(WIN32)
   SET(KLAMPT_ABSOLUTE_LIBRARIES ${CMAKE_BINARY_DIR}/lib/libKlampt.lib ${KLAMPT_LIBRARIES})
 ENDIF(WIN32)
 
+MESSAGE("CMAKE compiler: " ${CMAKE_CXX_COMPILER})
+MESSAGE("CMAKE flags: " ${CMAKE_CXX_FLAGS})
+MESSAGE("CMAKE version: " ${CMAKE_VERSION})
+
 ####### Klamp't Applications #########
-IF(NOT USE_QT4_APPS)
+IF(NOT USE_QT5_APPS)
+  #USE_QT5_APPS not set
+  FIND_PACKAGE(Qt5 COMPONENTS Widgets OpenGL)
+  IF(Qt5_FOUND)
+    MESSAGE (STATUS "Qt5 detected, building Qt version of apps\n")
+    SET(USE_QT5_APPS TRUE)
+  ELSE(Qt5_FOUND)
+    MESSAGE (STATUS "Qt5 not detected\n")
+    SET(USE_QT5_APPS FALSE)
+  ENDIF(Qt5_FOUND)
+ENDIF(NOT USE_QT5_APPS)
+
+IF(NOT USE_QT5_APPS AND NOT USE_QT4_APPS)
   #USE_QT4_APPS not set
   FIND_PACKAGE(Qt4)
   IF(QT4_FOUND)
+    MESSAGE (STATUS "Qt4 detected, building Qt version of apps\n")
     SET(USE_QT4_APPS TRUE)
   ELSE(QT4_FOUND)
     SET(USE_QT4_APPS FALSE)
+    MESSAGE (STATUS "Qt not found, building GLUI version of apps\n")
   ENDIF(QT4_FOUND)
-ENDIF(NOT USE_QT4_APPS)
+ENDIF(NOT USE_QT5_APPS AND NOT USE_QT4_APPS)
+
 ADD_SUBDIRECTORY(Main)
 
 ####### Klamp't Examples #########
@@ -125,12 +152,15 @@ endforeach(s)
 install(DIRECTORY data
     DESTINATION .
     COMPONENT datafiles)
+install(DIRECTORY Documentation
+    DESTINATION .
+    COMPONENT documentation)
 
 #examples and apps already added
 
 IF(WIN32)
 	#need to install Assimp, GLPK, glut32 dlls
-	install(FILES Library/Assimp32.dll Library/glpk_4_52.dll Library/glut32.dll
+	install(FILES Library/Assimp32.dll Library/glpk_4_61.dll Library/glut32.dll Library/glew32.dll
 		DESTINATION bin
 		COMPONENT apps)
 ELSE(WIN32)

@@ -9,13 +9,15 @@ ODECONFIG += --enable-double-precision
 
 UNAME = $(shell uname)
 
+#NOTE: plan_devel is temporary, will be moved to master
 unpack-deps:
 	git clone https://github.com/krishauser/KrisLibrary
+	cd KrisLibrary; git checkout plan_devel
 	tar xvzf ode-0.14.tar.gz
 	tar xvzf glui-2.36.tgz
-	tar xvzf glew-1.13.0.tgz
+	tar xvzf glew-2.0.0.tgz
 
-deps: dep-tinyxml dep-glui dep-ode dep-KrisLibrary
+deps: dep-tinyxml dep-glew dep-glui dep-ode dep-KrisLibrary
 
 dep-KrisLibrary:
 	cd KrisLibrary; cmake .
@@ -25,7 +27,10 @@ dep-tinyxml:
 	cd tinyxml; make lib
 
 dep-glew:
-	cd glew-1.13.0; make
+	cd glew-2.0.0; make
+	cd glew-2.0.0; sudo make install
+	echo "/usr/lib64" | sudo tee /etc/ld.so.conf.d/GLEW.conf
+	sudo ldconfig
 
 ifeq ($(UNAME), Darwin)
 dep-glui:
@@ -39,3 +44,10 @@ endif
 dep-ode:
 	cd ode-0.14; X_EXTRA_LIBS=-lX11 CXXFLAGS=-fPIC ./configure $(ODECONFIG)
 	cd ode-0.14; make
+
+#NOTE: call "sudo make ldconfig-ode" if you have set --enable-shared in ODECONFIG
+ldconfig-ode:
+	echo "$(CURDIR)/ode-0.14/ode/src/.libs" > /etc/ld.so.conf.d/ode.conf
+	ldconfig
+
+	

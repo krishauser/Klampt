@@ -1,3 +1,5 @@
+#include <log4cxx/logger.h>
+#include <KrisLibrary/Logger.h>
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "QDebug"
@@ -23,15 +25,14 @@ bool MainWindow::Initialize(int _argc,const char** _argv)
     const string robname="placeholder";
     //world->AddRobot(robname,&robot);
     if(world.LoadRobot(argv[1]) < 0) {
-      printf("RobotTest: error loading robot file %s, quitting\n",argv[1]);
+      LOG4CXX_ERROR(KrisLibrary::logger(),"RobotTest: error loading robot file "<<argv[1] <<", quitting\n");
       return false;
     }
     backend = new RobotTestBackend(&world);
-    printf("BACKEND LOADED\n");
-    gui=new QRobotTestGUI(backend,ui->displaywidget);
+    LOG4CXX_INFO(KrisLibrary::logger(),"BACKEND LOADED\n");
+    gui=new QRobotTestGUI(ui->displaywidget,backend);
     gui->opened_file = argv[1];
     backend->Start();
-    ui->displaywidget->gui = gui;
 
     //Receive info from the GUI
     connect(gui,SIGNAL(UpdateDriverValue()),this,SLOT(UpdateDriverValue()));
@@ -94,7 +95,6 @@ void MainWindow::SetSensors(bool status){
 void MainWindow::SetROS(bool status) {
   gui->SendButtonToggle("output_ros",status);
 }
-
 
 void MainWindow::SetIK(bool status){
   if(status) gui->SendCommand("constrain_point_mode");

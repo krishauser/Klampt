@@ -25,9 +25,6 @@
 
   <simulation>
     <globals maxContacts="20" />
-    <robot index="0">
-       <controller type="PolynomialPathController" />
-    </robot>
     <robot index="0" body="56">  <!-- right foot -->
        <geometry kFriction="1.0" kRestitution="0.0" padding="0.01" stiffness="8000" damping="20000" />
     </robot>

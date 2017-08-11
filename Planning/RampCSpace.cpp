@@ -1,3 +1,5 @@
+#include <log4cxx/logger.h>
+#include <KrisLibrary/Logger.h>
 #include "RampCSpace.h"
 #include "Modeling/DynamicPath.h"
 #include <KrisLibrary/math/random.h>
@@ -14,7 +16,7 @@ bool RampCSpaceAdaptor::IsFeasible(const Config& q,const Config& dq)
 {
   for(int i=0;i<dq.n;i++) {
     if(Abs(dq(i)) > velMax[i]) {
-      //printf("Velocity exceeded bound %d\n",i);
+      //LOG4CXX_INFO(KrisLibrary::logger(),"Velocity exceeded bound "<<i);
       return false;
     }
   }
@@ -208,9 +210,9 @@ EdgePlanner* RampEdgeChecker::ReverseCopy() const
   RampEdgeChecker* copy = new RampEdgeChecker(space,goal,start);
   //SolveMinTime is not guaranteed to work!
   if(copy->path.ramps.empty() && !path.ramps.empty()) {
-    fprintf(stderr,"RampEdgeChecker::ReverseCopy(): couldn't solve reverse path\n");
-    fprintf(stderr,"Press enter to continue...\n");
-    getchar();
+        LOG4CXX_ERROR(KrisLibrary::logger(),"RampEdgeChecker::ReverseCopy(): couldn't solve reverse path\n");
+        LOG4CXX_ERROR(KrisLibrary::logger(),"Press enter to continue...\n");
+    if(KrisLibrary::logger()->isEnabledFor(log4cxx::Level::ERROR_INT)) getchar();
   }
   //FatalError("Can't do ReverseCopy");
   copy->checked = checked;
@@ -223,14 +225,14 @@ bool RampEdgeChecker::IsVisible()
   else if(checked < 0) return false;
 
   //unchecked, now do checking
-  if(path.ramps.empty()) { checked=-1; printf("Ramp empty\n"); return false; }
+  if(path.ramps.empty()) { checked=-1; LOG4CXX_INFO(KrisLibrary::logger(),"Ramp empty\n"); return false; }
   if(!space->qMin.empty()) {
     ParabolicRamp::Vector bmin,bmax;
     for(size_t r=0;r<path.ramps.size();r++) {
       path.ramps[r].Bounds(0,path.ramps[r].endTime,bmin,bmax);
       for(size_t i=0;i<bmin.size();i++) {
-	if(bmin[i] < space->qMin[i]) { printf("Ramp exited joint limit %d\n",i); checked=-1; return false; }
-	if(bmax[i] > space->qMax[i]) { printf("Ramp exited joint limit %d\n",i);checked=-1; return false; }
+	if(bmin[i] < space->qMin[i]) { LOG4CXX_INFO(KrisLibrary::logger(),"Ramp exited joint limit "<<i); checked=-1; return false; }
+	if(bmax[i] > space->qMax[i]) { LOG4CXX_INFO(KrisLibrary::logger(),"Ramp exited joint limit "<<i);checked=-1; return false; }
       }
     }
   }

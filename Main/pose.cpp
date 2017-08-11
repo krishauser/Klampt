@@ -1,3 +1,5 @@
+#include <log4cxx/logger.h>
+#include <KrisLibrary/Logger.h>
 #include "ResourceBrowserProgram.h"
 #include "Planning/RobotCSpace.h"
 #include "Planning/RobotConstrainedInterpolator.h"
@@ -112,19 +114,19 @@ public:
   virtual bool Initialize()
   {
     if(!settings.read("robotpose.settings")) {
-      printf("Didn't read settings from [APPDATA]/robotpose.settings\n");
+      LOG4CXX_INFO(KrisLibrary::logger(),"Didn't read settings from [APPDATA]/robotpose.settings\n");
       if(settings.write("robotpose.settings")) {
-	printf("Wrote default settings to [APPDATA]/robotpose.settings\n");
+	LOG4CXX_INFO(KrisLibrary::logger(),"Wrote default settings to [APPDATA]/robotpose.settings\n");
       }
       else {
-	printf("Error writing default settings to [APPDATA]/robotpose.settings\n");
+	LOG4CXX_ERROR(KrisLibrary::logger(),"Error writing default settings to [APPDATA]/robotpose.settings\n");
       }
     }
 
-    poseWidget.Set(world->robots[0].robot,&world->robots[0].view);
+    poseWidget.Set(world->robots[0],&world->robotViews[0]);
     objectWidgets.resize(world->rigidObjects.size());
     for(size_t i=0;i<world->rigidObjects.size();i++)
-      objectWidgets[i].Set(world->rigidObjects[i].object,&world->rigidObjects[i].view);
+      objectWidgets[i].Set(world->rigidObjects[i]);
     allWidgets.widgets.push_back(&poseWidget);
     for(size_t i=0;i<world->rigidObjects.size();i++)
       allWidgets.widgets.push_back(&objectWidgets[i]);
@@ -139,7 +141,7 @@ public:
     pose_ik = 0;
     attachMode = false;
     if(!ResourceBrowserProgram::Initialize()) return false;
-    Robot* robot = world->robots[0].robot;
+    Robot* robot = world->robots[0];
     viewResource.SetRobot(robot);
     self_colliding.resize(robot->links.size(),false);   
     env_colliding.resize(robot->links.size(),false);   
@@ -211,7 +213,7 @@ public:
   
   void UpdateConfig()
   {
-    Robot* robot = world->robots[0].robot;
+    Robot* robot = world->robots[0];
     robot->UpdateConfig(poseWidget.Pose());
 
     //update collisions
@@ -219,7 +221,7 @@ public:
       self_colliding[i]=env_colliding[i]=false;
     robot->UpdateGeometry();
     if(!world->terrains.empty()) {
-      robot->InitMeshCollision(world->terrains[0].terrain->geometry);
+      robot->InitMeshCollision(*world->terrains[0]->geometry);
       for(size_t i=0;i<robot->links.size();i++) {
 	if(robot->MeshCollision(i))
 	  env_colliding[i] = true;
@@ -254,7 +256,7 @@ public:
 
   void UpdateLinkValueGUI()
   {
-    Robot* robot = world->robots[0].robot;
+    Robot* robot = world->robots[0];
     Vector2 limits(robot->qMin(cur_link),robot->qMax(cur_link));
     link_value_spinner->set_float_limits(limits.x,limits.y);
     link_value = robot->q(cur_link);
@@ -278,7 +280,7 @@ public:
 
   void UpdateDriverValueGUI()
   {
-    Robot* robot = world->robots[0].robot;
+    Robot* robot = world->robots[0];
     Vector2 limits = robot->GetDriverLimits(cur_driver);
     driver_value_spinner->set_float_limits(limits.x,limits.y);
     driver_value = robot->GetDriverValue(cur_driver);
@@ -286,13 +288,13 @@ public:
 
   virtual void RenderWorld()
   {
-    Robot* robot = world->robots[0].robot;
-    ViewRobot& viewRobot = world->robots[0].view;
+    Robot* robot = world->robots[0];
+    ViewRobot& viewRobot = world->robotViews[0];
     //ResourceBrowserProgram::RenderWorld();
     for(size_t i=0;i<world->terrains.size();i++)
-      world->terrains[i].view.Draw();
+      world->terrains[i]->DrawGL();
     for(size_t i=0;i<world->rigidObjects.size();i++)
-      world->rigidObjects[i].view.Draw();
+      world->rigidObjects[i]->DrawGL();
 
     if(draw_geom) {
       //set the robot colors
@@ -378,10 +380,10 @@ public:
 
   Stance GetFlatStance()
   {
-    Robot* robot = world->robots[0].robot;
+    Robot* robot = world->robots[0];
     Stance s;
     if(poseWidget.ikPoser.poseGoals.empty()) {
-      printf("Storing flat ground stance\n");
+      LOG4CXX_INFO(KrisLibrary::logger(),"Storing flat ground stance\n");
       ContactFormation cf;
       GetFlatContacts(*robot,settings["flatContactTolerance"],cf);
       Real friction = settings["defaultStanceFriction"];
@@ -395,7 +397,7 @@ public:
       }
     }
     else {
-      printf("Storing flat contact stance\n");
+      LOG4CXX_INFO(KrisLibrary::logger(),"Storing flat contact stance\n");
       for(size_t i=0;i<poseWidget.ikPoser.poseGoals.size();i++) {
 	int link = poseWidget.ikPoser.poseGoals[i].link;
 	vector<ContactPoint> cps;
@@ -415,14 +417,14 @@ public:
 
   ResourcePtr PoserToResource()
   {
-    Robot* robot = world->robots[0].robot;
+    Robot* robot = world->robots[0];
     string type = resource_types[ResourceBrowserProgram::cur_resource_type];
     if(type == "Config") 
       return MakeResource("",robot->q);
     else if(type == "IKGoal") {
       int ind = poseWidget.ikPoser.ActiveWidget();
       if(ind < 0) {
-	printf("Not hovering over any IK widget\n");
+	LOG4CXX_INFO(KrisLibrary::logger(),"Not hovering over any IK widget\n");
 	return NULL;
       }
       return MakeResource("",poseWidget.ikPoser.poseGoals[ind]);
@@ -433,7 +435,7 @@ public:
     }
     else if(type == "Grasp") {
       int link = 0;
-      cout<<"Which robot link to use? > "; cout.flush();
+      LOG4CXX_INFO(KrisLibrary::logger(),"Which robot link to use? > ");
       cin >> link;
       cin.ignore(256,'\n');
       Grasp g;
@@ -451,7 +453,7 @@ public:
       ResourcePtr r=ResourceBrowserProgram::CurrentResource();
       const GeometricPrimitive3DResource* gr = dynamic_cast<const GeometricPrimitive3DResource*>((const ResourceBase*)r);
       if(gr) {
-	cout<<"Making grasp relative to "<<gr->name<<endl;
+	LOG4CXX_INFO(KrisLibrary::logger(),"Making grasp relative to "<<gr->name<<"\n");
 	//TODO: detect contacts
 	
 	RigidTransform T = gr->data.GetFrame();
@@ -462,7 +464,7 @@ public:
       else {
 	const RigidObjectResource* obj = dynamic_cast<const RigidObjectResource*>((const ResourceBase*)r);
 	if(obj) {
-	  cout<<"Making grasp relative to "<<obj->name<<endl;
+	  LOG4CXX_INFO(KrisLibrary::logger(),"Making grasp relative to "<<obj->name<<"\n");
 	  //TODO: detect contacts
 	  
 	  RigidTransform T = obj->object.T;
@@ -474,7 +476,7 @@ public:
       return MakeResource("",g);
     }
     else {
-      fprintf(stderr,"Poser does not contain items of the selected type\n");
+            LOG4CXX_ERROR(KrisLibrary::logger(),"Poser does not contain items of the selected type\n");
       return NULL;
     }
   }
@@ -488,7 +490,7 @@ public:
 
   virtual void Handle_Control(int id)
   {
-    Robot* robot = world->robots[0].robot;
+    Robot* robot = world->robots[0];
     switch(id) {
     case SAVE_MOVIE_BUTTON_ID:
       //resize for movie
@@ -516,7 +518,7 @@ public:
 	ResourcePtr r = PoserToResource();
 	ResourcePtr oldr = ResourceBrowserProgram::CurrentResource();
 	if(0!=strcmp(oldr->Type(),r->Type())) {
-	  printf("Unable to overwrite, selected item is not of the correct type\n");
+	  LOG4CXX_INFO(KrisLibrary::logger(),"Unable to overwrite, selected item is not of the correct type\n");
 	  break;
 	}
 	r->name = oldr->name;
@@ -538,7 +540,7 @@ public:
 	  poseWidget.SetPose(rc->data);
 	  robot->NormalizeAngles(poseWidget.linkPoser.poseConfig);
 	  if(poseWidget.linkPoser.poseConfig != rc->data)
-	    printf("Warning: config in library is not normalized\n");
+	    LOG4CXX_WARN(KrisLibrary::logger(),"Warning: config in library is not normalized\n");
 	  UpdateConfig();
 	  Refresh();
 	}
@@ -588,7 +590,7 @@ public:
 	  a = rc->data;
 	  b = robot->q;
 	  if(a.n != b.n) {
-	    fprintf(stderr,"Incorrect start and end config size\n");
+	    	    LOG4CXX_ERROR(KrisLibrary::logger(),"Incorrect start and end config size\n");
 	    return;
 	  }
 	  milestones.resize(2);
@@ -624,10 +626,10 @@ public:
 	  int numdivs = (configs.size()-1);
 	  vector<Real> newtimes;
 	  vector<Config> newconfigs;
-	  printf("Discretizing at resolution %g\n",1.0/Real(numdivs));
+	  LOG4CXX_INFO(KrisLibrary::logger(),"Discretizing at resolution "<<1.0/Real(numdivs));
 	  SmoothDiscretizePath(*robot,configs,numdivs,newtimes,newconfigs);
-	  cout<<"Smoothed to "<<newconfigs.size()<<" milestones"<<endl;
-	  cout<<"Total time "<<timer.ElapsedTime()<<endl;
+	  LOG4CXX_INFO(KrisLibrary::logger(),"Smoothed to "<<newconfigs.size()<<" milestones"<<"\n");
+	  LOG4CXX_INFO(KrisLibrary::logger(),"Total time "<<timer.ElapsedTime()<<"\n");
 	  swap(times,newtimes);
 	  swap(configs,newconfigs);
 	}
@@ -659,8 +661,7 @@ public:
 	const LinearPathResource* lp = dynamic_cast<const LinearPathResource*>((const ResourceBase*)r);
 	if(lp) {
 	  int num;
-	  cout<<"How many points? > "; cout.flush();
-	  cin >> num;
+	  LOG4CXX_INFO(KrisLibrary::logger(),"How many points? > "); 	  cin >> num;
 	  cin.ignore(256,'\n');
 	  for(int i=0;i<num;i++) {
 	    Real t = Real(lp->times.size()-1)*Real(i+1)/(num+1);
@@ -680,8 +681,7 @@ public:
 	const MultiPathResource* mp = dynamic_cast<const MultiPathResource*>((const ResourceBase*)r);
 	if(mp) {
 	  int num;
-	  cout<<"How many points? > "; cout.flush();
-	  cin >> num;
+	  LOG4CXX_INFO(KrisLibrary::logger(),"How many points? > "); 	  cin >> num;
 	  cin.ignore(256,'\n');
 	  Real minTime = 0, maxTime = 1;
 	  if(mp->path.HasTiming()) {
@@ -710,7 +710,7 @@ public:
 	  vector<double> newtimes;
 	  vector<Config> newconfigs;
 	  if(!TimeOptimizePath(*robot,lp->times,lp->milestones,0.01,newtimes,newconfigs)) {
-	    fprintf(stderr,"Error optimizing path\n");
+	    	    LOG4CXX_ERROR(KrisLibrary::logger(),"Error optimizing path\n");
 	    return;
 	  }
 	  ResourceBrowserProgram::Add("",newtimes,newconfigs);
@@ -723,7 +723,7 @@ public:
 	  Real dt = settings["pathOptimize"]["outputResolution"];
 	  MultiPath path = mp->path;
 	  if(!GenerateAndTimeOptimizeMultiPath(*robot,path,xtol,dt)) {
-	    fprintf(stderr,"Error optimizing path\n");
+	    	    LOG4CXX_ERROR(KrisLibrary::logger(),"Error optimizing path\n");
 	    return;
 	  }
 	  ResourceBrowserProgram::Add("",path);
@@ -739,7 +739,7 @@ public:
 	  Real xtol = settings["pathOptimize"]["contactTol"];
 	  Real dt = settings["pathOptimize"]["outputResolution"];
 	  if(!GenerateAndTimeOptimizeMultiPath(*robot,path,xtol,dt)) {
-	    fprintf(stderr,"Error optimizing path\n");
+	    	    LOG4CXX_ERROR(KrisLibrary::logger(),"Error optimizing path\n");
 	    return;
 	  }
 	  ResourceBrowserProgram::Add("",path);
@@ -833,18 +833,18 @@ public:
 
   virtual void Handle_Keypress(unsigned char key,int x,int y)
   {
-    Robot* robot = world->robots[0].robot;
+    Robot* robot = world->robots[0];
     switch(key) {
     case 'h':
-      printf("Help:\n");
-      printf("[space]: next link\n");
-      printf("z: previous link\n");
-      printf("d: in pose-by-IK mode, delete constraint\n");
-      printf("c: in pose-by-IK mode, constrain current rotations\n");
-      printf("a: attach hovered IK constraint to another link\n");
-      printf("p: print the current configuration\n");
-      printf("v: save current viewport\n");
-      printf("V: load viewport\n");
+      LOG4CXX_INFO(KrisLibrary::logger(),"Help:\n");
+      LOG4CXX_INFO(KrisLibrary::logger(),"[space]: next link\n");
+      LOG4CXX_INFO(KrisLibrary::logger(),"z: previous link\n");
+      LOG4CXX_INFO(KrisLibrary::logger(),"d: in pose-by-IK mode, delete constraint\n");
+      LOG4CXX_INFO(KrisLibrary::logger(),"c: in pose-by-IK mode, constrain current rotations\n");
+      LOG4CXX_INFO(KrisLibrary::logger(),"a: attach hovered IK constraint to another link\n");
+      LOG4CXX_INFO(KrisLibrary::logger(),"p: print the current configuration\n");
+      LOG4CXX_INFO(KrisLibrary::logger(),"v: save current viewport\n");
+      LOG4CXX_INFO(KrisLibrary::logger(),"V: load viewport\n");
       break;
     case ' ':
       cur_link++;
@@ -860,7 +860,7 @@ public:
       break;
     case 'c':
       if(!poseWidget.FixCurrent())
-	  printf("Before constraining a link you need to hover over it\n");
+	  LOG4CXX_INFO(KrisLibrary::logger(),"Before constraining a link you need to hover over it\n");
       break;
     case 'a':
       attachMode = !attachMode;
@@ -871,25 +871,25 @@ public:
       break;
     case 'p':
       {
-	cout<<"Robot pose:"<<endl;
-	cout<<robot->q<<endl;
+	LOG4CXX_INFO(KrisLibrary::logger(),"Robot pose:"<<"\n");
+	LOG4CXX_INFO(KrisLibrary::logger(),robot->q<<"\n");
 	for(size_t i=0;i<world->rigidObjects.size();i++) {
-	  cout<<endl;
-	  cout<<world->rigidObjects[i].name<<" pose:"<<endl; 
-	  cout<<world->rigidObjects[i].object->T<<endl;
-	  cout<<world->rigidObjects[i].name<<" translation:"<<endl; 
-	  cout<<world->rigidObjects[i].object->T.t<<endl;
-	  cout<<world->rigidObjects[i].name<<" RPY:"<<endl; 
+	  LOG4CXX_INFO(KrisLibrary::logger(),"\n");
+	  LOG4CXX_INFO(KrisLibrary::logger(),world->rigidObjects[i]->name<<" pose:"<<"\n"); 
+	  LOG4CXX_INFO(KrisLibrary::logger(),world->rigidObjects[i]->T<<"\n");
+	  LOG4CXX_INFO(KrisLibrary::logger(),world->rigidObjects[i]->name<<" translation:"<<"\n"); 
+	  LOG4CXX_INFO(KrisLibrary::logger(),world->rigidObjects[i]->T.t<<"\n");
+	  LOG4CXX_INFO(KrisLibrary::logger(),world->rigidObjects[i]->name<<" RPY:"<<"\n"); 
 	  EulerAngleRotation ea;
-	  ea.setMatrixZYX(world->rigidObjects[i].object->T.R);
-	  cout<<ea.z<<" "<<ea.y<<" "<<ea.x<<endl;
+	  ea.setMatrixZYX(world->rigidObjects[i]->T.R);
+	  LOG4CXX_INFO(KrisLibrary::logger(),ea.z<<" "<<ea.y<<" "<<ea.x<<"\n");
 	}
       }
       break;
     case 'v':
       {
 	string viewFile = AppUtils::GetApplicationDataPath("Klampt")+string("/robotpose_view.txt");
-	printf("Saving viewport to %s\n",viewFile.c_str());
+	LOG4CXX_INFO(KrisLibrary::logger(),"Saving viewport to "<<viewFile.c_str());
 	ofstream out(viewFile.c_str(),ios::out);
 	WriteDisplaySettings(out);
 	break;
@@ -897,10 +897,10 @@ public:
     case 'V':
       {
 	string viewFile = AppUtils::GetApplicationDataPath("Klampt")+string("/robotpose_view.txt");
-	printf("Loading viewport from %s...\n",viewFile.c_str());
+	LOG4CXX_INFO(KrisLibrary::logger(),"Loading viewport from "<<viewFile.c_str());
 	ifstream in(viewFile.c_str(),ios::in);
 	if(!in) {
-	  printf("Unable to open %s\n",viewFile.c_str());
+	  LOG4CXX_INFO(KrisLibrary::logger(),"Unable to open "<<viewFile.c_str());
 	}
 	else {
 	  ReadDisplaySettings(in);
@@ -926,7 +926,7 @@ public:
 
   virtual void BeginDrag(int x,int y,int button,int modifiers)
   {
-    Robot* robot = world->robots[0].robot;
+    Robot* robot = world->robots[0];
     if(button == GLUT_RIGHT_BUTTON) {
       double d;
       if(allWidgets.BeginDrag(x,viewport.h-y,viewport,d))
@@ -949,7 +949,7 @@ public:
 
   virtual void DoFreeDrag(int dx,int dy,int button)
   {
-    Robot* robot = world->robots[0].robot;
+    Robot* robot = world->robots[0];
     if(button == GLUT_LEFT_BUTTON)  DragRotate(dx,dy);
     else if(button == GLUT_RIGHT_BUTTON) {
       if(allWidgets.hasFocus) {
@@ -984,7 +984,7 @@ const char* OPTIONS_STRING = "Options:\n\
 \t-l [file]: loads the given resource file.\n\
 ";
 
-#include <utils/EquivalenceMap.h>
+#include <Krislibrary/utils/EquivalenceMap.h>
 
 struct EqualVertex
 {
@@ -1024,7 +1024,7 @@ void CollapseVerts(Meshing::TriMesh& mesh,Real tol=0.0)
       newverts[i] += mesh.verts[components[i][j]];
     newverts[i] /= components[i].size();
   }
-  printf("Deleted %d duplicate vertices\n",mesh.verts.size()-newverts.size());
+  LOG4CXX_INFO(KrisLibrary::logger(),"Deleted "<<mesh.verts.size()-newverts.size());
   mesh.verts = newverts;
 
   //construct triangles, discarding duplicate triangles
@@ -1073,15 +1073,15 @@ void CollapseVerts(Meshing::TriMesh& mesh,Real tol=0.0)
       incidentTris[tri.c].push_back(newtris.size()-1);
     }
   }
-  printf("Deleted %d triangles\n",mesh.tris.size()-newtris.size());
+  LOG4CXX_INFO(KrisLibrary::logger(),"Deleted "<<mesh.tris.size()-newtris.size());
   mesh.tris = newtris;
 }
 
 int main(int argc, char** argv)
 {
   if(argc < 2) {
-    printf(USAGE_STRING);
-    printf(OPTIONS_STRING);
+    LOG4CXX_INFO(KrisLibrary::logger(),USAGE_STRING);
+    LOG4CXX_INFO(KrisLibrary::logger(),OPTIONS_STRING);
     return 0;
   }
   RobotWorld world;
@@ -1102,7 +1102,7 @@ int main(int argc, char** argv)
   Robot* robot = world.robots[0].robot;
   AABB3D bb;
 
-  printf("Computing mesh shrunk by 1.5cm\n");
+  LOG4CXX_INFO(KrisLibrary::logger(),"Computing mesh shrunk by 1.5cm\n");
   vector<IntTriple> surfaceCells;
   Geometry::CollisionMesh* mesh = &robot->geometry[60];
   mesh->CalcIncidentTris();

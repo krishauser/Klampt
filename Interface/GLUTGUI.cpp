@@ -1,3 +1,5 @@
+#include <log4cxx/logger.h>
+#include <KrisLibrary/Logger.h>
 #include "GLUTGUI.h"
 #ifdef __APPLE__
 #include <GLUT/glut.h>
@@ -122,7 +124,7 @@ bool GLUTGUI::OnQuit()
 
 bool GLUTGUI::OnNotify(const string& text,const string& msglevel)
 {
-  cout<<"GLUTGUI::OnNotify:"<<text<<endl;
+  LOG4CXX_INFO(KrisLibrary::logger(),"GLUTGUI::OnNotify:"<<text<<"\n");
   return true;
 }
 

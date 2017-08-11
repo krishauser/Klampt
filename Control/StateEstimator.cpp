@@ -1,3 +1,5 @@
+#include <log4cxx/logger.h>
+#include <KrisLibrary/Logger.h>
 #include "StateEstimator.h"
 #include "JointSensors.h"
 #include "InertialSensors.h"
@@ -85,7 +87,7 @@ void IntegratedStateEstimator::ReadSensors(RobotSensors& sensors)
 	dq_predicted(indices[5]) = robot.dq(indices[5]);
       }
       else {
-	fprintf(stderr,"Warning: can't use gyro sensor on a non-floating link %d\n",glink);
+		LOG4CXX_ERROR(KrisLibrary::logger(),"Warning: can't use gyro sensor on a non-floating link "<<glink);
       }
     }
   }
@@ -107,7 +109,7 @@ void IntegratedStateEstimator::ReadSensors(RobotSensors& sensors)
 
   //advance accelerometers
   if(last_dt > 0.0 && !accelerometers.empty()) {
-    fprintf(stderr,"TODO: integrate accelerometers\n");
+        LOG4CXX_ERROR(KrisLibrary::logger(),"TODO: integrate accelerometers\n");
   }
 }
 

@@ -29,14 +29,10 @@ class GLWidgetPlugin(GLPluginInterface):
         self.klamptwidgetmaster.drawGL(self.viewport())
         return False
     def keyboardfunc(self,c,x,y):
-        self.klamptwidgetmaster.keypress(c)
+        if len(c)==1:
+            self.klamptwidgetmaster.keypress(c)
         return False
     def keyboardupfunc(self,c,x,y):
-        return False
-    def specialfunc(self,c,x,y):
-        self.klamptwidgetmaster.keypress(c)
-        return False
-    def specialupfunc(self,c,x,y):
         return False
     def mousefunc(self,button,state,x,y):
         if button == self.klamptwidgetbutton:
@@ -347,7 +343,7 @@ class CachedGLObject:
                 renderFunction(*args)
             except GLError:
                 import traceback
-                print "Error encountered during draw"
+                print "Error encountered during draw, display list",self.glDisplayList
                 traceback.print_exc()
             self.makingDisplayList = False
             glEndList()

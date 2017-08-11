@@ -5,7 +5,7 @@
  */
 
 QKlamptDisplay::QKlamptDisplay(QWidget *parent) :
-  QGLWidget(parent),GLScreenshotPlugin(),gui(NULL)
+  QGLWidget(parent),GLScreenshotPlugin(),gui(NULL),painted(true)
 {
     setMouseTracking(true);
 }
@@ -32,10 +32,11 @@ void QKlamptDisplay::initializeGL(){
 }
 
 void QKlamptDisplay::paintGL(){
-  if(gui != NULL)
+  if(gui != NULL) 
     gui->SendGLRender();
   else
     glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+  painted = true;
 }
 
 

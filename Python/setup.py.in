@@ -56,7 +56,7 @@ setup(name='Klampt',
       version='@KLAMPT_VERSION@',
       description="PyKlamp't",
       author='Kris Hauser',
-      author_email='hauserk@indiana.edu',
+      author_email='kris.hauser@duke.edu',
       url='https://github.com/krishauser/Klampt',
       ext_modules=[Extension('klampt._robotsim',
                              [os.path.join('klampt/src',f) for f in rssourcefiles],
@@ -85,5 +85,7 @@ setup(name='Klampt',
                    ],
       py_modules=['klampt.robotsim','klampt.plan.motionplanning','klampt.math.rootfind'],
       packages=['klampt','klampt.io', 'klampt.math', 'klampt.model', 'klampt.plan', 'klampt.sim', 'klampt.vis'],
+      package_dir={'klampt': 'klampt'},
+      package_data={'klampt': ['data/*.html']}
      )
 

@@ -4,7 +4,6 @@ import sys
 from klampt import *
 from klampt import vis
 from klampt.robotsim import setRandomSeed
-from klampt.vis.glprogram import GLPluginProgram
 from klampt.vis.glcommon import GLWidgetPlugin
 from klampt import RobotPoser
 from klampt.model import ik,coordinates
@@ -36,6 +35,7 @@ if __name__ == "__main__":
     vis.setViewport(vp)
 
     #do this if you want to test the robot configuration auto-fitting
+    #vis.add("text1","Using a random configuration")
     #setRandomSeed(int(time.time()))
     #world.robot(0).randomizeConfig()
     
@@ -57,11 +57,24 @@ if __name__ == "__main__":
     #vis.edit("some blinking transform")
     #vis.edit("coordinates:ATHLETE:ankle roll 3")
 
+    #test the on-screen text display
+    vis.addText("text2","Here's some red text")
+    vis.setColor("text2",1,0,0)
+    vis.addText("text3","Here's bigger text")
+    vis.setAttribute("text3","size",24)
+    vis.addText("text4","Transform status")
+    vis.addText("textbottom","Text anchored to bottom of screen",(20,-30))
+
+    vis.addPlot('plot')
+    vis.addPlotItem('plot','some point')
+    vis.setPlotDuration('plot',10.0)
+
     print "Visualization items:"
     vis.listItems(indent=2)
 
     vis.autoFitCamera()
 
+    print "Starting visualization window..."
     #run the visualizer, which runs in a separate thread
     vis.setWindowTitle("Basic visualization test")
     vis.show()
@@ -72,14 +85,21 @@ if __name__ == "__main__":
         pt[2] = 1 + math.sin(iteration*0.03)
         vis.unlock()
         #changes to the visualization must be done outside the lock
-        if (iteration / 100)%2 == 0:
-            vis.hide("some blinking transform")
-        else:
-            vis.hide("some blinking transform",False)
+        if (iteration % 100) == 0:
+            if (iteration / 100)%2 == 0:
+                vis.hide("some blinking transform")
+                vis.addText("text4","The transform was hidden")
+                vis.logPlotEvent('plot','hide')
+            else:
+                vis.hide("some blinking transform",False)
+                vis.addText("text4","The transform was shown")
+                vis.logPlotEvent('plot','show')
         #this is another way of changing the point's data
         #vis.add("some point",[2,5,1 + math.sin(iteration*0.03)],keepAppearance=True)
         time.sleep(0.01)
         iteration += 1
+    vis.clearText()
+    vis.remove("plot")
 
     """
     #Now testing ability to re-launch windows
@@ -95,6 +115,8 @@ if __name__ == "__main__":
     vis.dialog()
 
     print "Doing a split screen program..."
+    vp.w,vp.h = 640,480
+    vis.setViewport(vp)
     for i in range(3):
         widgets = GLWidgetPlugin()
         widgets.addWidget(RobotPoser(world.robot(0)))

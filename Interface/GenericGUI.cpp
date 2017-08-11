@@ -1,3 +1,5 @@
+#include <log4cxx/logger.h>
+#include <KrisLibrary/Logger.h>
 #include "GenericGUI.h"
 #include <KrisLibrary/utils/AnyMapper.h>
 #include <fstream>
@@ -54,10 +56,10 @@ bool GenericGUIBase::LoadRules(istream& in)
   if(!rules.read(in)) return false;
   for(size_t i=0;i<rules.size();i++) {
     if(rules[i].size() != 2) {
-      cerr<<"Format error: Rule "<<i<<" isn't a pair"<<endl;
+      LOG4CXX_ERROR(KrisLibrary::logger(),"Format error: Rule "<<i<<" isn't a pair"<<"\n");
       return false;
     }
-    //cout<<"Rule: "<<rules[i][0]<<" -> "<<rules[i][1]<<endl;
+    //LOG4CXX_INFO(KrisLibrary::logger(),"Rule: "<<rules[i][0]<<" -> "<<rules[i][1]<<"\n");
     AddRule(rules[i][0],rules[i][1]);
   }
   return true;
@@ -122,17 +124,17 @@ bool GenericGUIBase::SendMessage(const AnyCollection& msg)
     AnyCollection outmsg;
     if(MatchAndFill(msg,rules[i].first,rules[i].second,outmsg)) {
       if(DEBUG_GUI)
-	cout<<"GUI->Backend "<<msg<<" matched rule "<<i<<", processed to "<<outmsg<<endl;
+	LOG4CXX_INFO(KrisLibrary::logger(),"GUI->Backend "<<msg<<" matched rule "<<i<<", processed to "<<outmsg<<"\n");
       if(!backend->ProcessMessage(outmsg)) {
-	cout<<"Message "<<outmsg<<" not processed"<<endl;
+	LOG4CXX_INFO(KrisLibrary::logger(),"Message "<<outmsg<<" not processed"<<"\n");
 	return false;
       }
       return true;
     }
   }
-  //cout<<"GUI->Backend "<<msg<<endl;
+  //LOG4CXX_INFO(KrisLibrary::logger(),"GUI->Backend "<<msg<<"\n");
   if(!backend->ProcessMessage(msg)) {
-    cout<<"GUI->Backend Message "<<msg<<" not processed"<<endl;
+    LOG4CXX_INFO(KrisLibrary::logger(),"GUI->Backend Message "<<msg<<" not processed"<<"\n");
     return false;
   }
   return true;
@@ -352,7 +354,7 @@ bool CompositeBackend::ProcessMessage(const AnyCollection& msg)
   string type;
   res = msg["type"].as<string>(type);
   if(!res) {
-    cerr<<"Message doesn't contain type"<<endl;
+    LOG4CXX_ERROR(KrisLibrary::logger(),"Message doesn't contain type"<<"\n");
     return false;
   }
 

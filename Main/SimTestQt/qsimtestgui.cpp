@@ -1,8 +1,10 @@
+#include <log4cxx/logger.h>
+#include <KrisLibrary/Logger.h>
 #include "qsimtestgui.h"
 #include <KrisLibrary/utils/apputils.h>
 
 QSimTestGUI::QSimTestGUI(QKlamptDisplay* _display,SimTestBackend *_backend) :
-  QtGUIBase(_backend), display(_display)
+  QKlamptGUIBase(_display,_backend)
 {
   //BaseT::backend = _backend;
   //  BaseT::width = w;
@@ -12,7 +14,6 @@ QSimTestGUI::QSimTestGUI(QKlamptDisplay* _display,SimTestBackend *_backend) :
   assert(_backend != NULL);
   assert(sim != NULL);
   assert(sim->world != NULL);
-  _backend->gui = this;
 
   driver_tool=new DriverEdit(sim->world);
   connect(driver_tool,SIGNAL(SetDriverValue(int,float)),this,SLOT(SendDriverValue(int,float)));
@@ -57,24 +58,6 @@ QSimTestGUI::QSimTestGUI(QKlamptDisplay* _display,SimTestBackend *_backend) :
     Assert(res == true);
     AddCommandRule(c,rules[i*3+1],rules[i*3+2]);
   }
-
-  connect(&idle_timer, SIGNAL(timeout()),this,SLOT(OnIdleTimer()));
-  idle_timer.start(0);
-}
-
-void QSimTestGUI::OnIdleTimer()
-{
-  SendIdle();
-  idle_timer.start(0);
-}
-
-bool QSimTestGUI::OnPauseIdle(double secs) 
-{
-  if(secs > 10000000)
-    idle_timer.stop();
-  else
-    idle_timer.start(int(secs*1000));
-  return true;
 }
 
 bool QSimTestGUI::OnCommand(const string& cmd,const string& args)
@@ -92,12 +75,6 @@ bool QSimTestGUI::OnCommand(const string& cmd,const string& args)
   }
   else
     return QtGUIBase::OnCommand(cmd,args);
-}
-
-bool QSimTestGUI::OnRefresh()
-{
-  display->updateGL();
-  return true;
 }
 
 QSimTestGUI::~QSimTestGUI(){
@@ -175,12 +152,12 @@ void QSimTestGUI::SaveLastScenario(){
 
 void QSimTestGUI::SendControllerSetting(int robot,string setting, string value){
     bool res = sim->robotControllers[robot]->SetSetting(setting,value);
-    if(!res) printf("Failed to set setting %s\n",setting.c_str());
+    if(!res) LOG4CXX_INFO(KrisLibrary::logger(),"Failed to set setting "<<setting.c_str());
 }
 
 void QSimTestGUI::SendControllerCommand(int robot,string setting,string value){
     bool res = sim->robotControllers[robot]->SendCommand(setting,value);
-    if(!res) printf("Failed to send command %s\n",setting.c_str());
+    if(!res) LOG4CXX_INFO(KrisLibrary::logger(),"Failed to send command "<<setting.c_str());
 }
 
 void QSimTestGUI::SendConnection(int robot, QString host, int port, int rate)

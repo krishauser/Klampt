@@ -13,6 +13,7 @@
 #include "IO/XmlWorld.h"
 #include "IO/XmlODE.h"
 #include "IO/ROS.h"
+#include "IO/three.js.h" 
 #include <KrisLibrary/robotics/NewtonEuler.h>
 #include <KrisLibrary/robotics/Stability.h>
 #include <KrisLibrary/robotics/TorqueSolver.h>
@@ -28,6 +29,7 @@
 #include <ode/ode.h>
 #include "pyerr.h"
 #include "pyconvert.h"
+#include "robotik.h"
 #include <fstream>
 #ifndef WIN32
 #include <unistd.h>
@@ -220,6 +222,7 @@ void destroy()
   worldDeleteList.clear();
   sims.resize(0);
   worlds.resize(0);
+  ManagedGeometry::manager.Clear();
 }
 
 void setRandomSeed(int seed)
@@ -788,49 +791,6 @@ bool Geometry3D::loadFile(const char* fn)
     return false;
   }
 }
-
-bool Geometry3D::attachToStream(const char* protocol,const char* name,const char* type)
-{
-  SmartPointer<AnyCollisionGeometry3D>& geom = *reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(geomPtr);
-  if(0==strcmp(protocol,"ros")) {
-    if(0==strcmp(type,""))
-      type = "PointCloud";
-    if(0 == strcmp(type,"PointCloud")) {
-      if(!isStandalone()) {
-	RobotWorld& world=*worlds[this->world]->world;
-	GetManagedGeometry(world,id).RemoveFromCache();
-	return GetManagedGeometry(world,id).Load((string("ros:PointCloud2//")+string(name)).c_str());
-      }
-      printf("Warning, attaching to a ROS stream without a ManagedGeometry.\n");
-      printf("You will not be able to automatically get updates from ROS.\n");
-      if(!geom) 
-        geom = new AnyCollisionGeometry3D();
-      (*geom) = AnyCollisionGeometry3D(Meshing::PointCloud3D());
-      return ROSSubscribePointCloud(geom->AsPointCloud(),name);
-      //TODO: update ROS, update the appearance every time the point cloud changes
-    }
-    else {
-      throw PyException("Geometry3D::attachToStream: Unsupported type argument");
-      return false;
-    }
-  }
-  else {
-    throw PyException("Geometry3D::attachToStream: Unsupported protocol argument");
-    return false;
-  }
-}
-
-bool Geometry3D::detachFromStream(const char* protocol,const char* name)
-{
-  if(0==strcmp(protocol,"ros")) {
-    return ROSDetach(name);
-  }
-  else {
-    throw PyException("Geometry3D::detachFromStream: Unsupported protocol argument");
-    return false;
-  }
-}
-
 
 bool Geometry3D::saveFile(const char* fn)
 {
@@ -2403,6 +2363,7 @@ RobotModel::RobotModel()
 
 const char* RobotModel::getName() const
 {
+  if(index < 0) throw PyException("Robot is empty");
   RobotWorld& world = *worlds[this->world]->world;
   return world.robots[index]->name.c_str();
 }
@@ -2419,12 +2380,14 @@ void RobotModel::setName(const char* name)
 
 int RobotModel::getID() const
 {
+  if(index < 0) return -1;
   RobotWorld& world = *worlds[this->world]->world;
   return world.RobotID(index);
 }
 
 int RobotModel::numLinks()
 {
+  if(index < 0) return -1;
   return robot->links.size();
 }
 
@@ -2483,6 +2446,33 @@ RobotModelDriver RobotModel::driver(const char* name)
   link.robotIndex = index;
   link.index = -1;
   return link;
+}
+
+const char* RobotModel::getJointType(int dofIndex)
+{
+  if(index < 0) throw PyException("Empty robot");
+  for(size_t i=0;i<robot->joints.size();i++) {
+    if(robot->DoesJointAffect((int)i,dofIndex)) {
+      switch(robot->joints[i].type) {
+      case RobotJoint::Weld: return "weld";
+      case RobotJoint::Normal: return "normal";
+      case RobotJoint::Spin: return "spin";
+      case RobotJoint::Floating: return "floating";
+      case RobotJoint::FloatingPlanar: return "floatingplanar";
+      case RobotJoint::BallAndSocket: return "ballandsocket";
+      default:
+        return "invalid joint type?";
+      }
+    }
+  }
+  throw PyException("DOF is not affected by any joint definition?");
+}
+
+const char* RobotModel::getJointType(const char* name)
+{
+  RobotModelLink l = link(name);
+  if(l.index < 0) throw PyException("Invalid DOF named");
+  return getJointType(l.index);
 }
 
 
@@ -3446,7 +3436,8 @@ void SimBody::setVelocity(const double w[3],const double v[3])
   if(!body) return;
   dBodySetLinearVel(body,v[0],v[1],v[2]);
   dBodySetAngularVel(body,w[1],w[1],w[2]);
-
+  ODEObjectID id = sim->sim->WorldToODEID(objectID);
+  sim->sim->odesim.DisableInstabilityCorrection(id);
 }
 
 void SimBody::getVelocity(double out[3],double out2[3])
@@ -3628,6 +3619,11 @@ RobotModel SimRobotController::model()
 void SimRobotController::setRate(double dt)
 {
   controller->controlTimeStep = dt;
+}
+
+double SimRobotController::getRate()
+{
+  return controller->controlTimeStep;
 }
 
 void SimRobotController::getCommandedConfig(vector<double>& q)
@@ -4390,6 +4386,20 @@ void RobotPoser::getConditioned(const std::vector<double>& qref,std::vector<doub
   tw->Pose_Conditioned(Config(qref)).getCopy(&out[0]);
 }
 
+void RobotPoser::addIKConstraint(const IKObjective& obj)
+{
+  RobotPoseWidget* tw=dynamic_cast<RobotPoseWidget*>(&*widgets[index].widget);
+  tw->ikPoser.ClearLink(obj.goal.link);
+  tw->ikPoser.Add(obj.goal);
+  tw->ikPoser.Enable(&tw->ikPoser.poseWidgets.back(),false);
+}
+
+void RobotPoser::clearIKConstraints()
+{
+  RobotPoseWidget* tw=dynamic_cast<RobotPoseWidget*>(&*widgets[index].widget);
+  tw->ikPoser.poseGoals.clear();
+  tw->ikPoser.poseWidgets.clear();
+}
 
 
 
@@ -4733,3 +4743,99 @@ PyObject* equilibriumTorques(const RobotModel& robot,const std::vector<std::vect
   vector<double> internalTorques;
   return ::equilibriumTorques(robot,contacts,links,fext,internalTorques,norm);
 }
+
+
+
+
+/*************************** IO CODE ***************************************/
+
+bool SubscribeToStream(Geometry3D& g,const char* protocol,const char* name,const char* type)
+{
+  SmartPointer<AnyCollisionGeometry3D>& geom = *reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(g.geomPtr);
+  if(0==strcmp(protocol,"ros")) {
+    if(0==strcmp(type,""))
+      type = "PointCloud";
+    if(0 == strcmp(type,"PointCloud")) {
+      if(!g.isStandalone()) {
+  RobotWorld& world=*worlds[g.world]->world;
+  GetManagedGeometry(world,g.id).RemoveFromCache();
+  return GetManagedGeometry(world,g.id).Load((string("ros:PointCloud2//")+string(name)).c_str());
+      }
+      printf("Warning, attaching to a ROS stream without a ManagedGeometry.\n");
+      printf("You will not be able to automatically get updates from ROS.\n");
+      if(!geom) 
+        geom = new AnyCollisionGeometry3D();
+      (*geom) = AnyCollisionGeometry3D(Meshing::PointCloud3D());
+      return ROSSubscribePointCloud(geom->AsPointCloud(),name);
+      //TODO: update ROS, update the appearance every time the point cloud changes
+    }
+    else {
+      throw PyException("AttachToStream(Geometry3D): Unsupported type argument");
+      return false;
+    }
+  }
+  else {
+    throw PyException("AttachToStream(Geometry3D): Unsupported protocol argument");
+    return false;
+  }
+}
+
+bool DetachFromStream(const char* protocol,const char* name)
+{
+  if(0==strcmp(protocol,"ros")) {
+    return ROSDetach(name);
+  }
+  else {
+    throw PyException("DetachFromStream: Unsupported protocol argument");
+    return false;
+  }
+}
+
+bool ProcessStreams(const char* protocol)
+{
+  if((0==strcmp(protocol,"all")&&ROSInitialized()) || 0==strcmp(protocol,"ros"))
+    if(ROSSubscribeUpdate()) return true;
+  return false;
+}
+
+bool WaitForStream(const char* protocol,const char* name,double timeout)
+{
+  if(0==strcmp(protocol,"ros")) {
+    return ROSWaitForUpdate(name,timeout);
+  }
+  return false;
+}
+
+/*
+bool PublishToStream(const Vector& x,const char* protocol,const char* name,const char* type);
+bool PublishToStream(const RobotModel& robot,const char* protocol,const char* name,const char* type);
+bool PublishToStream(const WorldModel& world,const char* protocol,const char* name,const char* type);
+bool PublishToStream(const Geometry3D& g,const char* protocol,const char* name,const char* type);
+*/
+
+///Exports the WorldModel to a JSON string ready for use in Three.js
+std::string ThreeJSGetScene(const WorldModel& w)
+{
+  if(w.index < 0) return "{}";
+  RobotWorld& world = *worlds[w.index]->world;
+
+  AnyCollection obj;
+  ThreeJSExport(world,obj);
+  std::ostringstream stream;
+  stream<<obj;
+  return stream.str();
+}
+
+///Exports the WorldModel to a JSON string ready for use in Three.js
+std::string ThreeJSGetTransforms(const WorldModel& w)
+{
+  if(w.index < 0) return "{}";
+   RobotWorld& world = *worlds[w.index]->world;
+
+   AnyCollection obj;
+   ThreeJSExportTransforms(world,obj);
+   std::ostringstream stream;
+   stream<<obj;
+   return stream.str();
+}
+

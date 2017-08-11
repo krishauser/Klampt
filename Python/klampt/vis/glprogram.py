@@ -60,13 +60,13 @@ class GLViewport:
         aspect = float(self.w)/float(self.h)
         rfov = self.fov*math.pi/180.0
         vp.scale = 1.0/(2.0*math.tan(rfov*0.5/aspect)*aspect)
-        vp.setRigidTransform(*se3.inv(self.camera.matrix()))
+        vp.setRigidTransform(*self.camera.matrix())
         return vp
 
     def click_ray(self,x,y):
         """Returns a pair of 3-tuples indicating the ray source and direction
         in world coordinates for a screen-coordinate point (x,y)"""
-        R,t = se3.inv(self.camera.matrix())
+        R,t = self.camera.matrix()
         #from x and y compute ray direction
         u = float(x-(self.x + self.w/2))/self.w
         v = float((self.y + self.h/2) -y)/self.w
@@ -85,7 +85,7 @@ class GLViewport:
         Otherwise, if the point is exactly at the focal plane then the middle of the viewport
         is returned.
         """
-        ploc = se3.apply(self.camera.matrix(),pt)
+        ploc = se3.apply(se3.inv(self.camera.matrix()),pt)
         if clip:
             if -ploc[2] <= self.clippingplanes[0] or -ploc[2] >= self.clippingplanes[1]:
                 return None
@@ -118,7 +118,7 @@ class GLViewport:
         glLoadIdentity()
         
         # View transformation
-        mat = se3.homogeneous(self.camera.matrix())
+        mat = se3.homogeneous(se3.inv(self.camera.matrix()))
         cols = zip(*mat)
         pack = sum((list(c) for c in cols),[])
         glMultMatrixf(pack)
@@ -136,8 +136,6 @@ class GLProgram:
     """A basic OpenGL visualization, run as part of some _GLBackend.
     For the most part there is a one-to-one correspondence and the
     backend just relays the input / drawing messages
-
-    The run()
 
     Assumes that glinit.py has been imported to define _GLBackend.
 
@@ -218,6 +216,10 @@ class GLProgram:
         if c == '?':
             self.print_help()
             return True
+        if 'alt' in self.modifiers():
+            c = 'Alt+'+c
+        if 'ctrl' in self.modifiers():
+            c = 'Ctrl+'+c
         for a in self.actions:
             if c == a.key:
                 a.hook()
@@ -304,6 +306,9 @@ class GLProgram:
         except ImportError:
             print "Cannot save screens to disk, the Python Imaging Library is not installed"
             return
+        if hasattr(self.window,'makeCurrent'):
+            self.window.makeCurrent()
+        glReadBuffer(GL_FRONT);
         screenshot = glReadPixels( self.view.x, self.view.y, self.view.w, self.view.h, GL_RGBA, GL_UNSIGNED_BYTE)
         im = Image.frombuffer("RGBA", (self.view.w, self.view.h), screenshot, "raw", "RGBA", 0, 0)
         print "Saving screen to",fn
@@ -359,13 +364,13 @@ class GLNavigationProgram(GLProgram):
                 aspect = float(self.view.w)/self.view.h
                 rfov = self.view.fov*math.pi/180.0
                 scale = 2.0*math.tan(rfov*0.5/aspect)*aspect
-                delta = so3.apply(so3.inv(R),[-scale*float(dx)*self.view.camera.dist/self.view.w,scale*float(dy)*self.view.camera.dist/self.view.w,0])
+                delta = so3.apply(R,[-scale*float(dx)*self.view.camera.dist/self.view.w,scale*float(dy)*self.view.camera.dist/self.view.w,0])
                 self.view.camera.tgt = vectorops.add(self.view.camera.tgt,delta)
             elif 'shift' in self.modifiers():
                 self.view.camera.dist *= math.exp(dy*0.01)
             else:
-                self.view.camera.rot[2] += float(dx)*0.01
-                self.view.camera.rot[1] += float(dy)*0.01 
+                self.view.camera.rot[2] -= float(dx)*0.01
+                self.view.camera.rot[1] -= float(dy)*0.01 
             self.refresh()
             return True
         return False
@@ -402,8 +407,10 @@ class GLRealtimeProgram(GLNavigationProgram):
     def idlefunc (self):
         tcur = time.time()
         tsleep = self.dt - (tcur - self.lasttime)
-        if (tsleep > 0):
+        if tsleep > 0.001:
+            #print "Elapsed time",tcur-self.lasttime,"sleep",tsleep,"window",self.window.name
             self.idlesleep(tsleep)
+            return
         
         self.ttotal += self.dt
         self.counter += 1
@@ -411,7 +418,7 @@ class GLRealtimeProgram(GLNavigationProgram):
         #do something random
         self.idle()
         
-        self.lasttime = time.time()
+        self.lasttime = tcur
         self.refresh()
         return True
 
@@ -438,6 +445,8 @@ class GLPluginProgram(GLRealtimeProgram):
         self.plugins.append(plugin)
         plugin.window = self.window
         if self.window:
+            if self.window.initialized:
+                print "GLPluginProgram.pushPlugin called after window was initialized, some actions may not be available"
             plugin.view = self.view
             plugin.reshapefunc(self.view.w,self.view.h)
             self.refresh()
@@ -453,13 +462,19 @@ class GLPluginProgram(GLRealtimeProgram):
         if self.window:
             self.refresh()
         return res
+    def set_view(self,v):
+        GLRealtimeProgram.set_view(self,v)
+        for p in self.plugins:
+            p.view = self.view
     def initialize(self):
+        #print "GLPluginProgram initialize:",len(self.plugins),"plugins"
         for plugin in self.plugins:
             plugin.window = self.window
             if not plugin.initialize():
                 print "GLPluginProgram.initialize(): Plugin of type",plugin.__class__.__name__,"Did not initialize"
                 return False
             if hasattr(plugin,'actions'):
+                #print "Adding",len(plugin.actions),"actions for plugin",plugin.__class__.__name__
                 for a in plugin.actions:
                     self.add_action(*a)
         return GLRealtimeProgram.initialize(self)

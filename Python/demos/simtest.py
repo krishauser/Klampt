@@ -41,7 +41,7 @@ class MyGLViewer(GLSimulationPlugin):
     def display_screen(self):
         glDisable(GL_LIGHTING)
         h = 20
-        self.draw_text((20,h),str(self.sim.getTime()))
+        self.draw_text((20,h),str(self.sim.getTime()),color=[1,1,1])
         h += 20
         for (t,s) in self.statusLog:
             self.draw_text((20,h),"Sim status "+str(t)+": "+self.sim.getStatusString(s),color=[1,0,0])
@@ -117,11 +117,11 @@ class MyGLViewer(GLSimulationPlugin):
         wp = se3.apply(T,self.forceLocalPoint)
         f = vectorops.mul(vectorops.sub(self.forceAnchorPoint,wp),kP)
         body.applyForceAtLocalPoint(f,self.forceLocalPoint)
-        #get wrench about com
-        momentArmLocal = vectorops.sub(self.forceLocalPoint,self.forceObject.getMass().getCom())
-        momentArmWorld = so3.apply(T[0],momentArmLocal)
-        w = vectorops.cross(momentArmWorld,f)
-        print "Applying wrench",(f,w)
+        #alternate approach: get wrench about com, use applyWrench
+        #momentArmLocal = vectorops.sub(self.forceLocalPoint,self.forceObject.getMass().getCom())
+        #momentArmWorld = so3.apply(T[0],momentArmLocal)
+        #w = vectorops.cross(momentArmWorld,f)
+        #print "Applying wrench",(f,w)
         #body.applyWrench(f,w)
 
     def keyboardfunc(self,c,x,y):
@@ -136,6 +136,7 @@ if __name__ == "__main__":
         print "USAGE: simtest.py [world_file] [controller files (.py)]"
         exit()
     world = WorldModel()
+    #load up any world items, control modules, or paths
     control_modules = []
     for fn in sys.argv[1:]:
         path,base = os.path.split(fn)
@@ -165,7 +166,7 @@ if __name__ == "__main__":
                 print "Module",c.__name__,"must have a make() method"
                 raise
             controller = maker(world.robot(i))
-        viewer.sim.setController(i,controller)
+        viewer.sim.setController(world.robot(i),controller)
     
     if SPLIT_SCREEN_TEST:
         viewer2 = MyGLViewer(world)

@@ -35,6 +35,8 @@
 /* Author: John Hsu */
 
 
+#include <log4cxx/logger.h>
+#include <KrisLibrary/Logger.h>
 #include "urdf_model_state.h"
 #include <fstream>
 #include <sstream>
@@ -51,7 +53,7 @@ bool parseModelState(ModelState &ms, TiXmlElement* config)
   const char *name_char = config->Attribute("name");
   if (!name_char)
   {
-    printf("No name given for the model_state. \n");
+    LOG4CXX_INFO(KrisLibrary::logger(),"No name given for the model_state. \n");
     return false;
   }
   ms.name = std::string(name_char);
@@ -64,7 +66,7 @@ bool parseModelState(ModelState &ms, TiXmlElement* config)
       ms.time_stamp.set(sec);
     }
     catch (boost::bad_lexical_cast &e) {
-      printf("Parsing time stamp [%s] failed: %s \n", time_stamp_char, e.what());
+      LOG4CXX_INFO(KrisLibrary::logger(),"Parsing time stamp ["<< time_stamp_char<<"] failed: "<< e.what());
       return false;
     }
   }
@@ -80,7 +82,7 @@ bool parseModelState(ModelState &ms, TiXmlElement* config)
       joint_state->joint = std::string(joint_char);
     else
     {
-      printf("No joint name given for the model_state. \n");
+      LOG4CXX_INFO(KrisLibrary::logger(),"No joint name given for the model_state. \n");
       return false;
     }
     

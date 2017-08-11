@@ -1,3 +1,5 @@
+#include <log4cxx/logger.h>
+#include <KrisLibrary/Logger.h>
 #include "ODECustomGeometry.h"
 #include "ODECommon.h"
 #include <KrisLibrary/geometry/CollisionPointCloud.h>
@@ -90,7 +92,7 @@ int VertexIndex(const Vector3& b)
 Vector3 VertexNormal(CollisionMesh& m,int tri,int vnum)
 {
   if(m.incidentTris.empty()) {
-    fprintf(stderr,"VertexNormal: mesh is not properly initialized with incidentTris array?\n");
+        LOG4CXX_ERROR(KrisLibrary::logger(),"VertexNormal: mesh is not properly initialized with incidentTris array?\n");
     m.CalcIncidentTris();
     //return Vector3(0.0);
     //FatalError("VertexNormal: mesh is not properly initialized with incidentTris array?");
@@ -109,7 +111,7 @@ Vector3 VertexNormal(CollisionMesh& m,int tri,int vnum)
 Vector3 EdgeNormal(CollisionMesh& m,int tri,int e)
 {
   if(m.triNeighbors.empty()) {
-    fprintf(stderr,"EdgeNormal: Warning, mesh is not properly initialized with triNeighbors\n");
+        LOG4CXX_ERROR(KrisLibrary::logger(),"EdgeNormal: Warning, mesh is not properly initialized with triNeighbors\n");
     m.CalcTriNeighbors();
     //return Vector3(0.0);
   }
@@ -139,7 +141,7 @@ Vector3 ContactNormal(CollisionMesh& m1,CollisionMesh& m2,const Vector3& p1,cons
     case 1:  //pt
       //get the triangle normals
       {
-	//printf("ODECustomMesh: Point-point contact\n");
+	//LOG4CXX_INFO(KrisLibrary::logger(),"ODECustomMesh: Point-point contact\n");
 	Vector3 n1 = VertexNormal(m1,t1,VertexIndex(b1));
 	Vector3 n2 = VertexNormal(m2,t2,VertexIndex(b2));
 	n2 -= n1;
@@ -149,7 +151,7 @@ Vector3 ContactNormal(CollisionMesh& m1,CollisionMesh& m2,const Vector3& p1,cons
       break;
     case 2:  //edge
       {
-	//printf("ODECustomMesh: Point-edge contact\n");
+	//LOG4CXX_INFO(KrisLibrary::logger(),"ODECustomMesh: Point-edge contact\n");
 	Vector3 n1 = VertexNormal(m1,t1,VertexIndex(b1));
 	int e = EdgeIndex(b2);
 	Segment3D s = tri2.edge(e);
@@ -168,7 +170,7 @@ Vector3 ContactNormal(CollisionMesh& m1,CollisionMesh& m2,const Vector3& p1,cons
     switch(type2) {
     case 1:  //pt
       {
-	//printf("ODECustomMesh: Edge-point contact\n");
+	//LOG4CXX_INFO(KrisLibrary::logger(),"ODECustomMesh: Edge-point contact\n");
 	Vector3 n2 = VertexNormal(m2,t2,VertexIndex(b2));
 	int e = EdgeIndex(b1);
 	Segment3D s = tri1.edge(e);
@@ -181,7 +183,7 @@ Vector3 ContactNormal(CollisionMesh& m1,CollisionMesh& m2,const Vector3& p1,cons
       break;
     case 2:  //edge
       {
-	//printf("ODECustomMesh: Edge-edge contact\n");
+	//LOG4CXX_INFO(KrisLibrary::logger(),"ODECustomMesh: Edge-edge contact\n");
 	int e = EdgeIndex(b1);
 	Segment3D s1 = tri1.edge(e);
 	Vector3 ev1 = m1.currentTransform.R*(s1.b-s1.a);
@@ -203,17 +205,17 @@ Vector3 ContactNormal(CollisionMesh& m1,CollisionMesh& m2,const Vector3& p1,cons
 	/*
 	if(n.dot(m1.currentTransform.R*tri1.normal()) > 0.0) {
 	  if(n.dot(m2.currentTransform.R*tri2.normal()) > 0.0) {
-	    printf("ODECustomMesh: Warning, inconsistent normal direction? %g, %g\n",n.dot(m1.currentTransform.R*tri1.normal()),n.dot(m2.currentTransform.R*tri2.normal()));
+	    LOG4CXX_WARN(KrisLibrary::logger(),"ODECustomMesh: Warning, inconsistent normal direction? "<<n.dot(m1.currentTransform.R*tri1.normal())<<", "<<n.dot(m2.currentTransform.R*tri2.normal()));
 	  }
 	  n.inplaceNegative();
 	}
 	else {
 	  if(n.dot(m2.currentTransform.R*tri2.normal()) < 0.0) {
-	    printf("ODECustomMesh: Warning, inconsistent normal direction? %g, %g\n",n.dot(m1.currentTransform.R*tri1.normal()),n.dot(m2.currentTransform.R*tri2.normal()));
+	    LOG4CXX_WARN(KrisLibrary::logger(),"ODECustomMesh: Warning, inconsistent normal direction? "<<n.dot(m1.currentTransform.R*tri1.normal())<<", "<<n.dot(m2.currentTransform.R*tri2.normal()));
 	  }
 	}
 	*/
-	//cout<<"Edge vector 1 "<<ev1<<", vector 2" <<ev2<<", normal: "<<n<<endl;
+	//LOG4CXX_INFO(KrisLibrary::logger(),"Edge vector 1 "<<ev1<<", vector 2" <<ev2<<", normal: "<<n<<"\n");
 	return n;
       }
       break;
@@ -223,13 +225,13 @@ Vector3 ContactNormal(CollisionMesh& m1,CollisionMesh& m2,const Vector3& p1,cons
     break;
   case 3:  //face
     if(type2 == 3) {
-      //printf("ODECustomMesh: Warning, face-face contact?\n");
+      //LOG4CXX_WARN(KrisLibrary::logger(),"ODECustomMesh: Warning, face-face contact?\n");
     }
     return m1.currentTransform.R*(-tri1.normal());
   }
   static int warnedCount = 0;
   if(warnedCount % 10000 == 0) 
-    printf("ODECustomMesh: Warning, degenerate triangle, types %d %d\n",type1,type2);
+    LOG4CXX_WARN(KrisLibrary::logger(),"ODECustomMesh: Warning, degenerate triangle, types "<<type1<<" "<<type2);
   warnedCount++;
   //AssertNotReached();
   return Vector3(Zero);
@@ -265,7 +267,7 @@ Vector3 ContactNormal(CollisionMesh& m,const Vector3& p,int t,const Vector3& clo
   }
   static int warnedCount = 0;
   if(warnedCount % 10000 == 0) 
-    printf("ODECustomMesh: Warning, degenerate triangle, types %d\n",type);
+    LOG4CXX_WARN(KrisLibrary::logger(),"ODECustomMesh: Warning, degenerate triangle, types "<<type);
   warnedCount++;
   //AssertNotReached();
   return Vector3(Zero);
@@ -283,7 +285,7 @@ int MeshMeshCollide(CollisionMesh& m1,Real outerMargin1,CollisionMesh& m2,Real o
   vector<Vector3> cp1,cp2;
   q.TolerancePairs(t1,t2);
   q.TolerancePoints(cp1,cp2);
-  //printf("%d Collision pairs\n",t1.size());
+  //LOG4CXX_INFO(KrisLibrary::logger(),""<<t1.size());
   const RigidTransform& T1 = m1.currentTransform;
   const RigidTransform& T2 = m2.currentTransform;
   RigidTransform T21; T21.mulInverseA(T1,T2);
@@ -380,9 +382,9 @@ int MeshMeshCollide(CollisionMesh& m1,Real outerMargin1,CollisionMesh& m2,Real o
     }
     /*
     if(t1.size() != imax)
-      printf("ODECustomMesh: Triangle vert checking added %d points\n",t1.size()-imax);
+      LOG4CXX_INFO(KrisLibrary::logger(),"ODECustomMesh: Triangle vert checking added "<<t1.size()-imax);
     */
-    //getchar();
+    //KrisLibrary::loggerWait();
   }
 
   imax = t1.size();
@@ -401,17 +403,17 @@ int MeshMeshCollide(CollisionMesh& m1,Real outerMargin1,CollisionMesh& m2,Real o
     if(tri2loc.intersects(tri1,s)) { 
       gCustomGeometryMeshesIntersect = true;
       if(warnedCount % 1000 == 0) {
-	printf("ODECustomMesh: Triangles penetrate margin %g+%g: can't trust contact detector\n",outerMargin1,outerMargin2);
+	LOG4CXX_INFO(KrisLibrary::logger(),"ODECustomMesh: Triangles penetrate margin "<<outerMargin1<<"+"<<outerMargin2);
       }
       /*
-      cout<<"Triangle 1"<<endl;
-      cout<<"  "<<tri1.a<<endl;
-      cout<<"  "<<tri1.b<<endl;
-      cout<<"  "<<tri1.c<<endl;
-      cout<<"intersects triangle 2"<<endl;
-      cout<<"  "<<tri2loc.a<<endl;
-      cout<<"  "<<tri2loc.b<<endl;
-      cout<<"  "<<tri2loc.c<<endl;
+      LOG4CXX_INFO(KrisLibrary::logger(),"Triangle 1"<<"\n");
+      LOG4CXX_INFO(KrisLibrary::logger(),"  "<<tri1.a<<"\n");
+      LOG4CXX_INFO(KrisLibrary::logger(),"  "<<tri1.b<<"\n");
+      LOG4CXX_INFO(KrisLibrary::logger(),"  "<<tri1.c<<"\n");
+      LOG4CXX_INFO(KrisLibrary::logger(),"intersects triangle 2"<<"\n");
+      LOG4CXX_INFO(KrisLibrary::logger(),"  "<<tri2loc.a<<"\n");
+      LOG4CXX_INFO(KrisLibrary::logger(),"  "<<tri2loc.b<<"\n");
+      LOG4CXX_INFO(KrisLibrary::logger(),"  "<<tri2loc.c<<"\n");
       */
       warnedCount++;
       /*
@@ -426,7 +428,7 @@ int MeshMeshCollide(CollisionMesh& m1,Real outerMargin1,CollisionMesh& m2,Real o
     }
   }
   if(t1.size() != imax) {
-    printf("ODECustomMesh: %d candidate points were removed due to mesh collision\n",t1.size()-imax);
+    LOG4CXX_INFO(KrisLibrary::logger(),"ODECustomMesh: "<<t1.size()-imax);
     t1.resize(imax);
     t2.resize(imax);
     cp1.resize(imax);
@@ -443,30 +445,30 @@ int MeshMeshCollide(CollisionMesh& m1,Real outerMargin1,CollisionMesh& m2,Real o
       n = ContactNormal(m1,m2,cp1[i],cp2[i],t1[i],t2[i]);
     }
     else if(d > tol) {  //some penetration -- we can't trust the result of PQP
-      printf("Skipping contact due to irregular distance between points %g\n",d);
-      cout<<"  cp 1 "<<p1<<endl;
-      cout<<"  cp 2 "<<p2<<endl;
-      cout<<"  local cp 1 "<<cp1[i]<<endl;
-      cout<<"  local cp 2 "<<cp2[i]<<endl;
+      LOG4CXX_INFO(KrisLibrary::logger(),"Skipping contact due to irregular distance between points "<<d);
+      LOG4CXX_INFO(KrisLibrary::logger(),"  cp 1 "<<p1<<"\n");
+      LOG4CXX_INFO(KrisLibrary::logger(),"  cp 2 "<<p2<<"\n");
+      LOG4CXX_INFO(KrisLibrary::logger(),"  local cp 1 "<<cp1[i]<<"\n");
+      LOG4CXX_INFO(KrisLibrary::logger(),"  local cp 2 "<<cp2[i]<<"\n");
       continue;
     }
     else n /= d;
     //check for invalid normals
     Real len=n.length();
     if(len < gZeroNormalTolerance || !IsFinite(len)) {
-      printf("Skipping contact due to irregular normal length %g\n",len);
+      LOG4CXX_INFO(KrisLibrary::logger(),"Skipping contact due to irregular normal length "<<len);
       continue;
     }
-    //cout<<"Local Points "<<cp1[i]<<", "<<cp2[i]<<endl;
-    //cout<<"Points "<<p1<<", "<<p2<<endl;
+    //LOG4CXX_INFO(KrisLibrary::logger(),"Local Points "<<cp1[i]<<", "<<cp2[i]<<"\n");
+    //LOG4CXX_INFO(KrisLibrary::logger(),"Points "<<p1<<", "<<p2<<"\n");
     //Real utol = (tol)*0.5/d + 0.5;
     //CopyVector(contact[k].pos,p1+utol*(p2-p1));
     CopyVector(contact[k].pos,0.5*(p1+p2) + ((outerMargin2 - outerMargin1)*0.5)*n);
     CopyVector(contact[k].normal,n);
     contact[k].depth = tol - d;
     if(contact[k].depth < 0) contact[k].depth = 0;
-    //cout<<"Normal "<<n<<", depth "<<contact[i].depth<<endl;
-    //getchar();
+    //LOG4CXX_INFO(KrisLibrary::logger(),"Normal "<<n<<", depth "<<contact[i].depth<<"\n");
+    //KrisLibrary::loggerWait();
     k++;
     if(k == maxcontacts) break;
   }
@@ -626,7 +628,7 @@ int MeshPrimitiveCollide(CollisionMesh& m1,Real outerMargin1,GeometricPrimitive3
     return MeshSphereCollide(m1,outerMargin1,s,outerMargin2,contact,maxcontacts);
   }
   else {
-    fprintf(stderr,"Distance computations between Triangles and %s not supported\n",gworld.TypeName());
+        LOG4CXX_ERROR(KrisLibrary::logger(),"Distance computations between Triangles and "<<gworld.TypeName());
     return 0;
   }
 }
@@ -635,7 +637,7 @@ int PointCloudPrimitiveCollide(CollisionPointCloud& pc1,Real outerMargin1,Geomet
 {
   if(g2.type == GeometricPrimitive3D::Empty) return 0;
   if(!g2.SupportsDistance(GeometricPrimitive3D::Point)) {
-    printf("Cannot do contact checking on point cloud vs primitive %s yet\n",g2.TypeName());
+    LOG4CXX_INFO(KrisLibrary::logger(),"Cannot do contact checking on point cloud vs primitive "<<g2.TypeName());
     return 0;
   }
 
@@ -675,7 +677,7 @@ int PrimitivePrimitiveCollide(GeometricPrimitive3D& g1,const RigidTransform& T1,
 {
   if(maxcontacts==0) return 0;
   if(!g1.SupportsDistance(g2.type)) {
-    fprintf(stderr,"TODO: primitive collisions of type %s to %s\n",g1.TypeName(),g2.TypeName());
+        LOG4CXX_ERROR(KrisLibrary::logger(),"TODO: primitive collisions of type "<<g1.TypeName()<<" to "<<g2.TypeName());
     return 0;
   }
   if((g1.type != GeometricPrimitive3D::Point && g1.type != GeometricPrimitive3D::Point) && (g2.type == GeometricPrimitive3D::Point || g2.type == GeometricPrimitive3D::Point)) {
@@ -690,7 +692,7 @@ int PrimitivePrimitiveCollide(GeometricPrimitive3D& g1,const RigidTransform& T1,
   tg2.Transform(T2);
   if(g1.type != GeometricPrimitive3D::Point && g1.type != GeometricPrimitive3D::Sphere) {
     //TODO: try copying into ODE data structures?
-    fprintf(stderr,"Contact computations between primitives %s and %s not yet supported\n",g1.TypeName(),g2.TypeName());
+        LOG4CXX_ERROR(KrisLibrary::logger(),"Contact computations between primitives "<<g1.TypeName()<<" and "<<g2.TypeName());
     return 0;
   }
   else {
@@ -755,7 +757,7 @@ int PrimitiveGeometryCollide(GeometricPrimitive3D& g1,const RigidTransform& T, R
     return PrimitivePointCloudCollide(g1,T,outerMargin1,
 				      g2.PointCloudCollisionData(),g2.margin+outerMargin2,contact,m);
   case AnyGeometry3D::ImplicitSurface:
-    fprintf(stderr,"TODO: primitive-implicit surface collisions\n");
+        LOG4CXX_ERROR(KrisLibrary::logger(),"TODO: primitive-implicit surface collisions\n");
     break;
   case AnyGeometry3D::Group:
     {
@@ -789,7 +791,7 @@ int MeshGeometryCollide(CollisionMesh& m1,Real outerMargin1,Geometry::AnyCollisi
 				 contact,m);
     break;
   case AnyGeometry3D::ImplicitSurface:
-    fprintf(stderr,"TODO: triangle mesh-implicit surface collisions\n");
+        LOG4CXX_ERROR(KrisLibrary::logger(),"TODO: triangle mesh-implicit surface collisions\n");
     break;
   case AnyGeometry3D::Group:
     {
@@ -829,32 +831,32 @@ int GeometryGeometryCollide(Geometry::AnyCollisionGeometry3D& g1,Real outerMargi
 				   contact,m);
       break;
     case AnyGeometry3D::PointCloud:
-      fprintf(stderr,"TODO: point cloud-point cloud collisions\n");
+            LOG4CXX_ERROR(KrisLibrary::logger(),"TODO: point cloud-point cloud collisions\n");
       break;
     case AnyGeometry3D::ImplicitSurface:
-      fprintf(stderr,"TODO: point cloud-implicit surface collisions\n");
+            LOG4CXX_ERROR(KrisLibrary::logger(),"TODO: point cloud-implicit surface collisions\n");
       break;
     case AnyGeometry3D::Group:
-      fprintf(stderr,"TODO: point cloud-group collisions\n");
+            LOG4CXX_ERROR(KrisLibrary::logger(),"TODO: point cloud-group collisions\n");
       break;
     }
     break;
   case AnyGeometry3D::ImplicitSurface:
     switch(g2.type) {
     case AnyGeometry3D::Primitive:
-      fprintf(stderr,"TODO: implicit surface-primitive collisions\n");
+            LOG4CXX_ERROR(KrisLibrary::logger(),"TODO: implicit surface-primitive collisions\n");
       break;
     case AnyGeometry3D::TriangleMesh:
-      fprintf(stderr,"TODO: implicit surface-triangle mesh collisions\n");
+            LOG4CXX_ERROR(KrisLibrary::logger(),"TODO: implicit surface-triangle mesh collisions\n");
       break;
     case AnyGeometry3D::PointCloud:
-      fprintf(stderr,"TODO: implicit surface-point cloud collisions\n");
+            LOG4CXX_ERROR(KrisLibrary::logger(),"TODO: implicit surface-point cloud collisions\n");
       break;
     case AnyGeometry3D::ImplicitSurface:
-      fprintf(stderr,"TODO: implicit surface-implicit surface collisions\n");
+            LOG4CXX_ERROR(KrisLibrary::logger(),"TODO: implicit surface-implicit surface collisions\n");
       break;
     case AnyGeometry3D::Group:
-      fprintf(stderr,"TODO: implicit surface-group collisions\n");
+            LOG4CXX_ERROR(KrisLibrary::logger(),"TODO: implicit surface-group collisions\n");
       break;
     }
     break;
@@ -878,7 +880,7 @@ int dCustomGeometryCollide (dGeomID o1, dGeomID o2, int flags,
 {
   int m = (flags&0xffff);
   if(m == 0) m=1;
-  //printf("CustomGeometry collide\n");
+  //LOG4CXX_INFO(KrisLibrary::logger(),"CustomGeometry collide\n");
   CustomGeometryData* d1 = dGetCustomGeometryData(o1);
   CustomGeometryData* d2 = dGetCustomGeometryData(o2);
   RigidTransform T1;

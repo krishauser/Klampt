@@ -54,8 +54,8 @@ class map:
         geometry (Geometry3D)
         appearance (Appearance)
         mass (Mass)
-        parentTransform (se3 object (R,t))
-        transform (se3 object (R,t))
+        #parentTransform (se3 object (R,t))
+        #transform (se3 object (R,t))
         #axis (3-list of floats)
     RigidObjectModel:
         *name (string)
@@ -64,6 +64,8 @@ class map:
         appearance (Appearance)
         mass (Mass)
         contactParameters (ContactParameters)
+        # transform (se3 object (R,t))
+        # velocity (pair of 3D vectors w,v giving angular and translational velocity)
     TerrainModel:
         *name (string)
         *id (int)
@@ -80,20 +82,29 @@ class map:
         gravity (3-list of floats)
         [string]: accesses bodies by name
     SimRobot:
-        *actualConfig (list of floats)
+        *actualConfig (list of floats) 
         *actualVelocity (list of floats)
         *actualTorques (list of floats)
-        *links (list/dict of SimBodys)
+        *config (an alias of actualConfig)
+        *velocity (an alias of actualVelocity)
+        *torques (an alias of actualTorques)
+        *links (list/dict of SimLinks)
+    SimLink:
+        # transform (se3 object (R,t))
+        # velocity (pair of 3D vectors w,v giving angular and translational velocity)
     SimBody:
         enabled (bool)
-        transform (se3 object (R,t))
-        velocity (angular velocity / velocity pair (w,v))
         collisionPadding (float)
         surface (ContactParameters)
+        # transform (se3 object (R,t))
+        # objectTransform (se3 object (R,t))
+        # velocity (pair of 3D vectors w,v giving angular and translational velocity)
+        # objectVelocity (pair of 3D vectors w,v giving angular and translational velocity)
     SimRobotController:
         *commandedConfig (list of floats)
         *commandedVelocity (list of floats)
         *sensedConfig (list of floats)
+        *sensedVelocity (list of floats)
         *sensors (list/dict of SimRobotSensors)
     
     dicts, lists, tuples: behave like normal
@@ -110,8 +121,10 @@ class map:
             self.obj = obj
 
     def __getattr__(self,name):        
-        #handle non-standard getters
         if name in['obj','setter']: return self.__dict__[name]
+        #any internal Python operations return the operation on the actual object
+        if name.startswith('__'): return getattr(self.obj,name)
+        #handle non-standard getters
         if isinstance(self.obj,WorldModel):
             if name == 'robots':
                 return _index_name_map([self.obj.robot(i) for i in xrange(self.obj.numRobots())])
@@ -160,6 +173,10 @@ class map:
                 return self.obj.appearance()
             elif name == 'axis':
                 return map(self.obj.getAxis(),self.obj.setAxis)
+            elif name == 'transform':
+                return map(self.obj.getTransform(),lambda T:self.obj.setTransform(*T))
+            elif name == 'parentTransform':
+                return map(self.obj.getParentTransform(),lambda T:self.obj.setParentTransform(*T))
         elif isinstance(self.obj,RigidObjectModel):
             if name == 'id':
                 return self.obj.getID()
@@ -167,6 +184,10 @@ class map:
                 return self.obj.geometry()
             elif name == 'appearance':
                 return self.obj.appearance()
+            elif name == 'transform':
+                return map(self.obj.getTransform(),lambda T:self.obj.setTransform(*T))
+            elif name == 'velocity':
+                return map(self.obj.getVelocity(),lambda twist:self.obj.setVelocity(*twist))
         elif isinstance(self.obj,TerrainModel):
             if name == 'id':
                 return self.obj.getID()
@@ -188,10 +209,10 @@ class map:
                 return _index_name_map([_SimRobot(self.obj,i) for i in range(w.numRobots())],[w.robot(i).getName() for i in range(nr)])
             elif name == 'rigidObjects':
                 nr = w.numRigidObjects()
-                return _index_name_map([self.obj.getBody(w.rigidObject(i)) for i in range(w.numRigidObjects())],[w.rigidObject(i).getName() for i in range(nr)])
+                return _index_name_map([_SimObjectCentricBody(self.obj.body(w.rigidObject(i))) for i in range(w.numRigidObjects())],[w.rigidObject(i).getName() for i in range(nr)])
             elif name == 'terrains':
                 nr = w.numTerrains()
-                return _index_name_map([self.obj.getBody(w.terrain(i)) for i in range(w.numTerrains())],[w.terrain(i).getName() for i in range(nr)])
+                return _index_name_map([self.obj.body(w.terrain(i)) for i in range(w.numTerrains())],[w.terrain(i).getName() for i in range(nr)])
             elif name == 'gravity':
                 return map(self.obj.getGravity(),self.obj.setGravity)
             else:
@@ -199,17 +220,38 @@ class map:
                     obj = getattr(map(w),name)
                     if isinstance(obj.obj,RobotModel):
                         return map(_SimRobot(self.obj,obj.obj.index))
-                    return map(self.obj.getBody(obj.obj))
+                    return map(self.obj.body(obj.obj))
                 except Exception as e:
                     print "Exception raised on Simulator.",name,":",e
                     print "Simulator has no object",name
                     pass
         elif isinstance(self.obj,_SimRobot):
             if name=='links':
-                return _index_name_map(self.obj.getBodies(),self.obj.getBodyNames())
+                return _index_name_map(self.obj.getLinks(),self.obj.getBodyNames())
+            elif name=='config':
+                return self.obj.getActualConfig()
+            elif name=='velocity':
+                return self.obj.getActualVelocity()
+            elif name=='torques':
+                return self.obj.getActualTorques()
+            elif name == 'bodies':
+                raise AttributeError("Object of type "+self.obj.__class__.__name__+" does not have attribute "+name)
+        elif isinstance(self.obj,_SimObjectCentricBody):
+            if name == 'transform':
+                return map(self.obj.obj.getObjectTransform(),lambda T:self.obj.obj.setObjectTransform(*T))
+            elif name == 'velocity':
+                return map(self.obj.obj.getObjectVelocity(),lambda twist:self.obj.obj.setObjectVelocity(*twist))
         elif isinstance(self.obj,SimBody):
             if name=='enabled':
                 return self.obj.isEnabled()
+            elif name == 'transform':
+                return map(self.obj.getTransform(),lambda T:self.obj.setTransform(*T))
+            elif name == 'objectTransform':
+                return map(self.obj.getObjectTransform(),lambda T:self.obj.setObjectTransform(*T))
+            elif name == 'velocity':
+                return map(self.obj.getVelocity(),lambda twist:self.obj.setVelocity(*twist))
+            elif name == 'objectVelocity':
+                return map(self.obj.getObjectVelocity(),lambda twist:self.obj.setObjectVelocity(*twist))
         elif isinstance(self.obj,SimRobotController):
             if name=='sensors':
                 sensors = []
@@ -221,12 +263,13 @@ class map:
                     index += 1
                 return _index_name_map(sensors,[s.name() for s in sensors])
         elif isinstance(self.obj,(list,tuple,dict)):
+            print "Accessing",name,"from",self.obj
             return self.obj[name]
 
         #now do the default
         getname = 'get'+name[0].upper()+name[1:]
         if hasattr(self.obj,name):
-            return self.obj.name
+            return getattr(self.obj,name)
         elif hasattr(self.obj,getname):
             return getattr(self.obj,getname)()
         raise AttributeError("Object of type "+self.obj.__class__.__name__+" does not have attribute "+name)
@@ -277,13 +320,18 @@ class map:
             elif name == 'transform':
                 self.obj.setTransform(*value)
                 return
+            elif name == 'velocity':
+                self.obj.setVelocity(*value)
+                return
         elif isinstance(self.obj,TerrainModel):
             if name == 'name' or name == 'id':
                 raise ValueError("Element "+name+" is read only")
             elif name == 'geometry':
                 self.obj.geometry().set(value)
+                return
             elif name == 'appearance':
                 self.obj.appearance().set(value)
+                return
         setname ='set'+name[0].upper()+name[1:]
         if hasattr(self.obj,name):
             setattr(self.obj,name,value)
@@ -293,6 +341,16 @@ class map:
             return
         #duck-typing: add it to this item's dict
         self.__dict__[name]=value
+
+    def __getitem__(self,index):
+        #for nested lists / dicts with a setter
+        if self.setter != None:
+            #this is a sub-object of an object that needs custom setting
+            def subsetter(x):
+                self.obj[index] = x
+                self.setter(self.obj)
+            return map(self.obj[index],subsetter)
+        return self.obj[index]
 
     def __setitem__(self,index,value):
         #for lists / dicts with a setter
@@ -326,6 +384,11 @@ class _index_name_map:
     def __setitem__(self,index):
         raise AttributeError("Cannot set in a map()'ed named list")
 
+class _SimObjectCentricBody:
+    #helper for accessing robot links and so on from simulation, but returning object-centric transform and velocity
+    def __init__(self,obj):
+        self.obj = obj
+    
 class _SimRobot:
     #helper for accessing robot
     def __init__(self,sim,index):
@@ -340,12 +403,16 @@ class _SimRobot:
     def getBodies(self):
         w = self.sim.world
         r = w.robot(self.index)
-        return [self.sim.getBody(r.link(j) ) for j in range(r.numLinks())]
+        return [self.sim.body(r.link(j) ) for j in range(r.numLinks())]
     def getBodyNames(self):
         w = self.sim.world
         r = w.robot(self.index)
         return [r.link(j).getName() for j in range(r.numLinks())]
-
+    def getLinks(self):
+        w = self.sim.world
+        r = w.robot(self.index)
+        return [_SimObjectCentricBody(self.sim.body(r.link(j) )) for j in range(r.numLinks())]
+    
 
 def get_item(obj,name):
     """Given a attribute item like 'robots[2].links[4].name', evaluates

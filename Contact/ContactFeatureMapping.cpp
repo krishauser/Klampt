@@ -1,3 +1,5 @@
+#include <log4cxx/logger.h>
+#include <KrisLibrary/Logger.h>
 #include "ContactFeatureMapping.h"
 #include "KrisLibrary/robotics/Rotation.h"
 #include <KrisLibrary/math3d/Plane3D.h>
@@ -96,7 +98,7 @@ public:
     else if(item == "angle") { rhs >> fm.angle; return true; }
     else if(item == "fixedwheel") { fm.fixedWheel=true; return true; }
     else if(item == "wheelroll") { rhs >> fm.wheelRoll; return true; }
-    cout<<"Unknown item "<<item<<endl;
+    LOG4CXX_INFO(KrisLibrary::logger(),"Unknown item "<<item<<"\n");
     return false;
   }
   virtual bool End() 
@@ -107,7 +109,7 @@ public:
 	fm.feature = features[i];
     }
     if(fm.feature == NULL) {
-      cerr<<"Invalid feature named: "<<featureName<<endl;
+      LOG4CXX_ERROR(KrisLibrary::logger(),"Invalid feature named: "<<featureName<<"\n");
       return false;
     }
     return true;
@@ -154,14 +156,14 @@ bool MatchHoldToFeatureMapping(const Hold& h,const ContactFeature& f,ContactFeat
   const ContactFeatureBase* _f=f;
   if(h.link != f->link) return false;
   if(h.contacts.empty()) {
-    cerr<<"MatchHoldToFeatureMapping: hold has no contacts??"<<endl;
+    LOG4CXX_ERROR(KrisLibrary::logger(),"MatchHoldToFeatureMapping: hold has no contacts??"<<"\n");
     return false;
   }
   switch(f->GetType()) {
   case ContactFeatureBase::Point:
     if(h.ikConstraint.rotConstraint!=IKGoal::RotNone) return false;
     if(h.contacts.size() != 1) {
-      cerr<<"Hmm... point-constrained hold with more than one contact point?"<<endl;
+      LOG4CXX_ERROR(KrisLibrary::logger(),"Hmm... point-constrained hold with more than one contact point?"<<"\n");
       return false;
     }
     {
@@ -175,7 +177,7 @@ bool MatchHoldToFeatureMapping(const Hold& h,const ContactFeature& f,ContactFeat
   case ContactFeatureBase::Edge:
     if(h.ikConstraint.rotConstraint!=IKGoal::RotAxis) return false;
     if(h.contacts.size() != 2) {
-      cerr<<"Hmm... edge-constrained hold with more than two contact points?"<<endl;
+      LOG4CXX_ERROR(KrisLibrary::logger(),"Hmm... edge-constrained hold with more than two contact points?"<<"\n");
       return false;
     }
     {
@@ -237,11 +239,11 @@ bool MatchHoldToFeatureMapping(const Hold& h,const ContactFeature& f,ContactFeat
 	  hpoly.vertices[k] = h.contacts[k].x;
 	Plane3D hp;
 	hpoly.getPlaneFit(hp);
-	cout<<"Fitted plane normal: "<<hp.normal<<endl;
+	LOG4CXX_INFO(KrisLibrary::logger(),"Fitted plane normal: "<<hp.normal<<"\n");
 	for(size_t k=0;k<h.contacts.size();k++) {
 	  if(Abs(h.contacts[k].n.dot(hp.normal)) < 0.9) {
-	    cout<<"The normal at contact "<<k<<" deviates from the fit plane normal:"<<endl;
-	    cout<<h.contacts[k].n<<endl;
+	    LOG4CXX_INFO(KrisLibrary::logger(),"The normal at contact "<<k<<" deviates from the fit plane normal:"<<"\n");
+	    LOG4CXX_INFO(KrisLibrary::logger(),h.contacts[k].n<<"\n");
 	  }
 	}
 	*/
@@ -288,16 +290,16 @@ bool MatchHoldToFeatureMapping(const Hold& h,const ContactFeature& f,ContactFeat
       else {
 	/*
 	  if(!FuzzyEquals(Abs(aa.axis.dot(m.contact.n)),One,(Real)5e-2)) {
-	  cerr<<"contact feature "<<ff->name<<endl;
-	  cerr<<"Rotation axis does not match with normal!"<<endl;
-	  cerr<<"Feature normal "<<p.normal<<endl;
-	  cerr<<"Terrain normal "<<m.contact.n<<endl;
-	  cerr<<"end Rotation"<<endl<<T.R<<endl<<endl;
-	  cerr<<"base rotation"<<endl<<R0<<endl<<endl;
-	  cerr<<"axis rotation"<<endl<<Raxis<<endl<<endl;
-	  cerr<<"angle "<<aa.angle<<", axis "<<aa.axis<<endl;
-	  cerr<<"Probably shouldn't use this feature"<<endl;
-	  getchar();
+	  LOG4CXX_ERROR(KrisLibrary::logger(),"contact feature "<<ff->name<<"\n");
+	  LOG4CXX_ERROR(KrisLibrary::logger(),"Rotation axis does not match with normal!"<<"\n");
+	  LOG4CXX_ERROR(KrisLibrary::logger(),"Feature normal "<<p.normal<<"\n");
+	  LOG4CXX_ERROR(KrisLibrary::logger(),"Terrain normal "<<m.contact.n<<"\n");
+	  LOG4CXX_ERROR(KrisLibrary::logger(),"end Rotation"<<"\n"<<T.R<<"\n"<<"\n");
+	  LOG4CXX_ERROR(KrisLibrary::logger(),"base rotation"<<"\n"<<R0<<"\n"<<"\n");
+	  LOG4CXX_ERROR(KrisLibrary::logger(),"axis rotation"<<"\n"<<Raxis<<"\n"<<"\n");
+	  LOG4CXX_ERROR(KrisLibrary::logger(),"angle "<<aa.angle<<", axis "<<aa.axis<<"\n");
+	  LOG4CXX_ERROR(KrisLibrary::logger(),"Probably shouldn't use this feature"<<"\n");
+	  KrisLibrary::loggerWait();
 	  }
 	*/
 	if(aa.axis.dot(m.contact.n) < 0) //reverse
@@ -360,7 +362,7 @@ bool MatchHoldToFeatureMapping(const Hold& h,const ContactFeature& f,ContactFeat
 	ss<<"Transform of wheel center: "<<T*wheelCenter<<endl;
 	ss<<"wheel plane distance from center: "<<plocal.distance(wheelCenter)<<endl;
 	ss<<"AxisDiff "<<axisDiff<<", RimDist "<<rimDist;
-	cerr<<ss.str()<<endl;
+	LOG4CXX_ERROR(KrisLibrary::logger(),ss.str()<<"\n");
       }
       axisDiff=0;
       error=axisDiff+rimDist;
@@ -416,7 +418,7 @@ bool FeatureMappingFromHold(const Hold& h,const vector<ContactFeature>& features
 	    stringstream ss;
 	    ss<<"Choosing between two features: "<<m.feature->name<<" and "<<temp.feature->name<<endl;
 	    ss<<"Differences "<<closestDist<<" and "<<dist<<endl;
-	    cerr<<ss.str()<<endl;
+	    LOG4CXX_ERROR(KrisLibrary::logger(),ss.str()<<"\n");
 	  }
 	}
 	m = temp;
@@ -438,7 +440,7 @@ bool FeatureMappingFromHold(const Hold& h,const vector<ContactFeature>& features
 	ss<<"  Feature "<<features[i]->name<<" couldn't be matched"<<endl;
       }
     }
-    cerr<<ss.str()<<endl;
+    LOG4CXX_ERROR(KrisLibrary::logger(),ss.str()<<"\n");
     //TEMP: this is here for things that assert holds map to contact features?
     return true;
     return false;
@@ -472,7 +474,7 @@ Real BestFeatureMappingAngle(const ContactFeatureMapping& feature,const Matrix3&
     The following commented out code tests to make sure that this is the correct angle...
     AngleAxisRotation aa;    
     aa.setMatrix(Rrel);
-    cout<<"Theta=0 orientation error: "<<aa.angle<<endl;
+    LOG4CXX_ERROR(KrisLibrary::logger(),"Theta=0 orientation error: "<<aa.angle<<"\n");
 
     Matrix3 Rangle;
     aa.axis = nrel;
@@ -480,31 +482,31 @@ Real BestFeatureMappingAngle(const ContactFeatureMapping& feature,const Matrix3&
     aa.getMatrix(Rangle);
     Rrel = Rangle*Rrel;
     aa.setMatrix(Rrel);
-    cout<<"Theoretical theta="<<fm.angle<<" orientation error: "<<aa.angle<<endl;
+    LOG4CXX_ERROR(KrisLibrary::logger(),"Theoretical theta="<<fm.angle<<" orientation error: "<<aa.angle<<"\n");
 
     fm.GetHold(h);
     h.ikConstraint.GetFixedGoalTransform(T);
     Rrel.mulTransposeA(T.R,Rdes);
     aa.setMatrix(Rrel);
-    cout<<"Theta="<<fm.angle<<" orientation error: "<<aa.angle<<endl;
+    LOG4CXX_ERROR(KrisLibrary::logger(),"Theta="<<fm.angle<<" orientation error: "<<aa.angle<<"\n");
     fm.angle += 0.1;
     fm.GetHold(h);
     h.ikConstraint.GetFixedGoalTransform(T);
     Rrel.mulTransposeA(T.R,robot.links[feature->link].T_World.R);
     aa.setMatrix(Rrel);
-    cout<<"Theta="<<fm.angle<<" orientation error: "<<aa.angle<<endl;
+    LOG4CXX_ERROR(KrisLibrary::logger(),"Theta="<<fm.angle<<" orientation error: "<<aa.angle<<"\n");
     fm.angle -= 0.2;
     fm.GetHold(h);
     h.ikConstraint.GetFixedGoalTransform(T);
     Rrel.mulTransposeA(T.R,robot.links[feature->link].T_World.R);
     aa.setMatrix(Rrel);
-    cout<<"Theta="<<fm.angle<<" orientation error: "<<aa.angle<<endl;
+    LOG4CXX_ERROR(KrisLibrary::logger(),"Theta="<<fm.angle<<" orientation error: "<<aa.angle<<"\n");
     fm.angle += 0.1;
-    getchar();
+    KrisLibrary::loggerWait();
     */
   }
   else if(h.ikConstraint.rotConstraint == IKGoal::RotAxis) { 
-    cerr<<"TODO: BestFeatureMappingAngle for axis-type feature mappings"<<endl;
+    LOG4CXX_ERROR(KrisLibrary::logger(),"TODO: BestFeatureMappingAngle for axis-type feature mappings"<<"\n");
     //TODO: something smarter
     return Rand()*TwoPi;
   }
@@ -538,7 +540,7 @@ Real BestRotationAngle(const Vector3& axis,const Vector3& a,const Vector3& b)
   Real q1,q2;
   bool res=SolveCosSinEquation(triple,ar*br-ab,0,q1,q2);
   if(!res) {
-    cerr<<"Error solving best rotation angle"<<endl;
+    LOG4CXX_ERROR(KrisLibrary::logger(),"Error solving best rotation angle"<<"\n");
     return Rand()*TwoPi;
   }
   Real c=Cos(q1), s=Sin(q1);

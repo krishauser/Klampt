@@ -1,15 +1,14 @@
 #ifndef QROBOTTESTGUIBASE_H
 #define QROBOTTESTGUIBASE_H
 
-#include "KlamptQt/qtguibase.h"
-#include "KlamptQt/qklamptdisplay.h"
+#include "KlamptQt/qklamptguibase.h"
 
 #include "Interface/RobotPoseGUI.h"
 #include <collisionoutput.h>
 #include <resourceframe.h>
 #include <playresourceframe.h>
 
-class QRobotPoseGUI : public QtGUIBase
+class QRobotPoseGUI : public QKlamptGUIBase
 {
     Q_OBJECT
 public:
@@ -19,19 +18,14 @@ public:
     void LoadFile(QString filename=QString());
     void LoadFilePrompt(QString directory_key="", QString filter="*");
     void SaveFilePrompt(QString directory_key="");
-    virtual bool OnPauseIdle(double secs);
     virtual bool OnCommand(const string &cmd, const string &args);
-    virtual bool OnRefresh();
     void UpdateGUI();
 
-    QKlamptDisplay* display;
     ResourceFrame* resource_frame;
-    QTimer idle_timer;
 
     int driver_index;
     int link_index;
 public slots:
-    void OnIdleTimer();
     void SetDriverValue(double val);
     void SetLinkValue(double val);
     void SetRecord(bool status);

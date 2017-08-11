@@ -63,6 +63,9 @@ class CompositeCSpace(CSpace):
                     s.interpolate = defaultinterpolate
             self.interpolate = interpolate
 
+        #TODO: should add feasibility tests for subspaces -- this will allow the planning module to optimize
+        #constraint testing order.
+
     def subDims(self):
         return [len(s.sample()) for s in self.spaces]
 
@@ -136,7 +139,8 @@ class EmbeddedCSpace(CSpace):
         self.properties = self.ambientspace.properties
         if self.ambientspace.feasibilityTests is not None:
             self.feasibilityTests = [(lambda x:f(self.lift(x))) for f in self.ambientspace.feasibilityTests]
-            self.feasibilityTestNames = [(lambda x:f(self.lift(x))) for f in self.ambientspace.feasibilityTestNames]
+            self.feasibilityTestNames = self.ambientspace.feasibilityTestNames[:]
+            self.feasibilityTestDependencies = self.ambientspace.feasibilityTestDependencies[:]
 
     def project(self,xamb):
         """Ambient space -> embedded space"""
@@ -150,6 +154,10 @@ class EmbeddedCSpace(CSpace):
             xamb[j] = xemb[i]
         return xamb
 
+    def liftPath(self,path):
+        """Given a CSpace path path, lifts this to the full ambient space configuration"""
+        return [self.lift(q) for q in path]
+
     def feasible(self,x):
         return self.ambientspace.feasible(self.lift(x))
         
@@ -157,198 +165,3 @@ class EmbeddedCSpace(CSpace):
         return self.project(self.ambientspace.sample())
     
     
-
-class ZeroTest:
-    """A test that evaluates to 0 at the feasible set"""
-    def __init__(self):
-        self.name = '0'
-        self.type = 'constant'
-        self.dist = lambda(x): 1 if x != 0 else 0
-
-    def __call__(self,*args):
-        return self.dist(*args)
-
-    def setConstant(self,val):
-        self.name = str(val)
-        self.type = 'constant'
-        if isinstance(val,(int,float)):
-            self.dist = lambda(x): x-val
-        else:
-            self.dist = lambda(x): 1 if x != val else 0
-
-    def setCondition(self,f,name=None):
-        """Let this be 0 whenever f evaluates to True"""
-        if name: self.name = name
-        else: self.name = "f(x)"
-        self.f = f
-        self.dist = lambda(x): 0 if f(x) else 1
-            
-    def setComparison(self,f,cmp,rhs,name=None):
-        if name: self.name = name+cmp+str(rhs)
-        else: self.name = "f(x)"+cmp+str(rhs)
-        self.f = f
-        self.cmp = cmp
-        self.rhs = rhs
-        
-        def lessPenalty(x,y):
-            if isinstance(x,int) and isinstance(y,int):
-                return max(1+x-y,0)
-            else:
-                return max(x-y,0)
-        
-        def greaterPenalty(x,y):
-            if isinstance(x,int) and isinstance(y,int):
-                return max(1+y-x,0)
-            else:
-                return max(y-x,0)
-        
-        comparisons = {'==':lambda x,y:abs(x-y),
-                       '>=':lambda x,y:max(y-x,0),
-                       '<=':lambda x,y:max(x-y,0),
-                       '<':lessPenalty,
-                       '>':greaterPenalty}
-        self.dist = comparisons[cmp]
-
-class AdaptiveZeroTester:
-    """Tests a set of tests f1(x),...,fn(x) for equality to zero.
-    Maintains statistics about evaluation time, success rate,
-    max/average deviation from zero.  The stats are then used to determine
-    the optimal testing order.
-    """
-    def __init__(self):
-        self.tests = []
-        self.test_ids = []
-
-    def add_test(self,f,id=None):
-        """Adds an instance of the ZeroTest f to the AdaptiveZeroTester"""
-        if id is None:
-            id = len(self.tests)
-        self.tests.append(f)
-        self.test_ids.append(id)
-        self.reset_history(self.tests[-1])
-
-    def update_order(self):
-        """Given the empirical costs / failures of testing, returns the optimal
-        order to find the first failure."""
-        thelist = [(f._sum_cost/f._num_fail,id,f) for f,id in zip(self.tests,self.test_ids)]
-        thelist = sorted(thelist)
-        self.tests = [item[2] for item in thelist]
-        self.test_ids = [item[1] for item in thelist]
-
-    def testmax(self,*args):
-        """Tests all tests, returning the max absolute deviation from 0."""
-        vmax = 0.0
-        for f in self.tests:
-            t1 = time.time()
-            res = f(*args)
-            t2 = time.time()
-            self.update_stats(f,t2-t1,res)
-            vmax = max(vmax,abs(res))
-        self.update_order()
-        return vmax
-
-    def test(self,*args):
-        """Tests whether *args passes all tests.  Updates the stats and
-        internal order"""
-        for f in self.tests:
-            t1 = time.time()
-            res = f(*args)
-            t2 = time.time()
-            self.update_stats(f,t2-t1,res)
-            if res != 0:
-                self.update_order()
-                return False
-        self.update_order()
-        return True
-
-    def expectation(self):
-        """Returns (expected cost, expected success) of testing all tests
-        in the current order."""
-        c = 0.0
-        p = 1.0
-        for f in self.tests:
-            avgcost = f._sum_cost/(f._num_pass+f._num_fail)
-            failrate = float(f._num_fail)/(f._num_pass+f._num_fail)
-            c += p*avgcost
-            p *= failrate
-        return (c,p)
-
-    def reset_history(self,f,avg_cost=1.0,pr_pass=0.5,evidence=2.0):
-        f._sum_cost = avg_cost*evidence
-        f._num_pass = pr_pass*evidence
-        f._num_fail = (1.0-pr_pass)*evidence
-        f._max_dist = 0.
-        f._sum_dist = 0.
-
-    def update_stats(self,f,cost,res):
-        f._sum_cost += cost
-        if res==0: f._num_pass += 1
-        else:
-            f._num_fail += 1
-            f._max_dist = max(f._max_dist,abs(res))
-            f._sum_dist += abs(res)
-
-    def stats(self,f):
-        """Returns a dictionary describing the statistics of f"""
-        res = dict()
-        res['average cost']=f._sum_cost/(f._num_pass+f._num_fail)
-        res['pass rate']=float(f._num_pass)/(f._num_pass+f._num_fail)
-        res['evaluations']=f._num_pass+f._num_fail
-        res['max distance']=f._max_dist
-        res['average distance']=float(f._sum_dist)/(f._num_pass+f._num_fail)
-        return res
-
-    def init_stats(self,f,d):
-        """Given a dictionary returned by a stats() call, fills in the
-        appropriate statistics of f"""
-        f._sum_cost = d['average cost']*d['evaluations']
-        f._num_pass = d['evaluations']*d['pass rate']
-        f._num_fail = d['evaluations']*(1.0-d['pass rate'])
-        f._max_dist = d['max distance']
-        f._sum_dist = d['average distance']*d['evaluations']
-
-
-
-
-class AdaptiveCSpace(CSpace,AdaptiveZeroTester):
-    """A cspace with an adaptive feasibility checker.  Subclasses
-    fill out feasibility tests using addFeasibleTest (binary conditions)
-    or addFeasibleComp (inequalities).  The cspace will then learn the
-    characteristics of each test and find the (near) optimal testing
-    order."""
-    def __init__(self):
-        CSpace.__init__(self)
-        AdaptiveZeroTester.__init__(self)
-
-    def addFeasibleTest(self,f,name):
-        t = ZeroTest()
-        t.setCondition(f,name)
-        self.add_test(t,name)
-
-    def addFeasibleComp(self,f,cmp,val,name):
-        t = ZeroTest()
-        t.setComparison(f,cmp,val,name)
-        self.add_test(t)
-
-    def feasible(self,x):
-        return self.test(x)
-
-    def stats(self):
-        """Retreives the feasibility test stats."""
-        res = dict()
-        for t in self.tests:
-            res[t.name] = AdaptiveZeroTester.stats(self,t)
-        return res
-
-    def init_stats(self,d):
-        """Given a dictionary of (name,dict) pairs returned from stats(),
-        initializes the zero tester stats."""
-        for (k,v) in d.iteritems():
-            found = False
-            for t in self.tests:
-                if t.name == k:
-                    AdaptiveZeroTester.init_stats(self,t,v)
-                    found = True
-                    break
-            if not Found:
-                raise RuntimeError("init_stats: key '"+key+"' not found")

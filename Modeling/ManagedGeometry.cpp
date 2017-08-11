@@ -1,3 +1,5 @@
+#include <log4cxx/logger.h>
+#include <KrisLibrary/Logger.h>
 #include "ManagedGeometry.h"
 #include "IO/ROS.h"
 #include <KrisLibrary/meshing/PointCloud.h>
@@ -7,6 +9,32 @@
 using namespace Math3D;
 
 #define CACHE_DEBUG 0
+
+GeometryManager::GeometryManager()
+{
+
+}
+
+GeometryManager::~GeometryManager()
+{
+  if(!cache.empty())  {
+        LOG4CXX_ERROR(KrisLibrary::logger(),"~GeometryManager: Warning, destruction of global objects is out of order?\n");
+    for(std::map<std::string,GeometryList>::iterator i=cache.begin();i!=cache.end();i++) {
+            LOG4CXX_ERROR(KrisLibrary::logger(),"Destroying GeometryManager, have "<<(int)i->second.geoms.size()<<" items left on name "<<i->first.c_str());
+    }
+  }
+  Clear();
+}
+
+void GeometryManager::Clear()
+{
+  for(std::map<std::string,GeometryList>::iterator i=cache.begin();i!=cache.end();i++) {
+    for(size_t j=0;j<i->second.geoms.size();j++)
+      i->second.geoms[j]->cacheKey.clear();
+  }
+  cache.clear();
+}
+
 
 ManagedGeometry::ManagedGeometry()
 {
@@ -30,7 +58,7 @@ ManagedGeometry::~ManagedGeometry()
     assert(cacheKey.empty());
   }
   else {
-    printf("Destroying ManagedGeometry %s, appearance ref count %d\n",(cacheKey.empty() ? "uncached " : cacheKey.c_str()), appearance.getRefCount());
+    LOG4CXX_INFO(KrisLibrary::logger(),"Destroying ManagedGeometry "<<(cacheKey.empty() ? "uncached " : cacheKey.c_str())<<", appearance ref count "<< appearance.getRefCount());
   }
 #endif
   RemoveFromCache();
@@ -75,30 +103,30 @@ bool ManagedGeometry::Load(const std::string& filename)
   ManagedGeometry* prev = ManagedGeometry::IsCached(filename);
   if(prev) {
     cacheKey = filename;
-    //printf("ManagedGeometry: Copying data from previously loaded file %s\n",filename.c_str());
+    //LOG4CXX_INFO(KrisLibrary::logger(),"ManagedGeometry: Copying data from previously loaded file "<<filename.c_str());
     if(!prev->geometry->CollisionDataInitialized()) {
       Timer timer;
       prev->geometry->InitCollisionData();
       double t = timer.ElapsedTime();
       if(t > 0.2) 
-	printf("ManagedGeometry: Initialized %s collision data structures in time %gs\n",filename.c_str(),t);
+	LOG4CXX_INFO(KrisLibrary::logger(),"ManagedGeometry: Initialized "<<filename.c_str()<<" collision data structures in time "<<t);
     }
     geometry = new Geometry::AnyCollisionGeometry3D(*prev->geometry);
     appearance = prev->appearance;
     appearance->geom = geometry;
-    cachedGeoms[filename].geoms.push_back(this);
+    manager.cache[filename].geoms.push_back(this);
 #if CACHE_DEBUG
-    printf("ManagedGeometry: adding a duplicate of %s to cache.\n",filename.c_str());
+    LOG4CXX_INFO(KrisLibrary::logger(),"ManagedGeometry: adding a duplicate of "<<filename.c_str());
 #endif
     return true;
   }
 
   if(LoadNoCache(filename)) {  
 #if CACHE_DEBUG
-    printf("ManagedGeometry: adding %s to cache.\n",filename.c_str());
+    LOG4CXX_INFO(KrisLibrary::logger(),"ManagedGeometry: adding "<<filename.c_str());
 #endif
     cacheKey = filename;
-    cachedGeoms[filename].geoms.push_back(this);
+    manager.cache[filename].geoms.push_back(this);
     return true;
   }
   return false;
@@ -121,7 +149,7 @@ bool ManagedGeometry::LoadNoCache(const std::string& filename)
     geometry = new Geometry::AnyCollisionGeometry3D(Meshing::PointCloud3D());
     appearance->Set(*geometry);
     Meshing::PointCloud3D& pc = geometry->AsPointCloud();
-    printf("ManagedGeometry subscribing to point cloud on ROS topic %s\n",fn+16);
+    LOG4CXX_INFO(KrisLibrary::logger(),"ManagedGeometry subscribing to point cloud on ROS topic "<<fn+16);
     return ROSSubscribePointCloud(pc,fn+16);
   }
   else if(0==strncmp(fn,"ros://",6)) {
@@ -131,7 +159,7 @@ bool ManagedGeometry::LoadNoCache(const std::string& filename)
     *geometry = Geometry::AnyCollisionGeometry3D(Meshing::PointCloud3D());
     appearance->Set(*geometry);
     Meshing::PointCloud3D& pc = geometry->AsPointCloud();
-    printf("ManagedGeometry subscribing to point cloud on ROS topic %s\n",fn+5);
+    LOG4CXX_INFO(KrisLibrary::logger(),"ManagedGeometry subscribing to point cloud on ROS topic "<<fn+5);
     return ROSSubscribePointCloud(pc,fn+5);
   }
   
@@ -143,13 +171,13 @@ bool ManagedGeometry::LoadNoCache(const std::string& filename)
       Timer timer;
       geometry = new Geometry::AnyCollisionGeometry3D();
       if(!geometry->Load(fn)) {
-        fprintf(stderr,"ManagedGeometry: Error loading geometry file %s\n",fn);
+                LOG4CXX_ERROR(KrisLibrary::logger(),"ManagedGeometry: Error loading geometry file "<<fn);
 	geometry = NULL;
         return false;
       }
       double t = timer.ElapsedTime();
       if(t > 0.2) 
-	printf("ManagedGeometry: loaded %s in time %gs\n",filename.c_str(),t);
+	LOG4CXX_INFO(KrisLibrary::logger(),"ManagedGeometry: loaded "<<filename.c_str()<<" in time "<<t);
       if(geometry->type == Geometry::AnyGeometry3D::TriangleMesh) {
 	if(geometry->TriangleMeshAppearanceData() != NULL) {
 	  appearance = new GLDraw::GeometryAppearance(*geometry->TriangleMeshAppearanceData());
@@ -165,23 +193,23 @@ bool ManagedGeometry::LoadNoCache(const std::string& filename)
       return true;
     }
     else {
-      fprintf(stderr,"ManagedGeometry: Unknown file extension %s on file %s\n",ext,fn);
+            LOG4CXX_ERROR(KrisLibrary::logger(),"ManagedGeometry: Unknown file extension "<<ext<<" on file "<<fn);
       return false;
     }
   }
   else {
-    fprintf(stderr,"ManagedGeometry: No file extension on file %s\n",fn);
+        LOG4CXX_ERROR(KrisLibrary::logger(),"ManagedGeometry: No file extension on file "<<fn);
     return false;
   }
 }
 
 ManagedGeometry* ManagedGeometry::IsCached(const std::string& filename)
 {
-  std::map<std::string,ManagedGeometry::GeometryInfo>::const_iterator i=cachedGeoms.find(filename);
-  if(i==cachedGeoms.end()) return NULL;
+  std::map<std::string,GeometryManager::GeometryList>::const_iterator i=manager.cache.find(filename);
+  if(i==manager.cache.end()) return NULL;
   if(i->second.geoms.empty()) return NULL;
 #if CACHE_DEBUG
-  printf("ManagedGeometry: retreiving %s from cache.\n",filename.c_str());
+  LOG4CXX_INFO(KrisLibrary::logger(),"ManagedGeometry: retreiving "<<filename.c_str());
 #endif
   return i->second.geoms[0];
 }
@@ -200,27 +228,27 @@ void ManagedGeometry::AddToCache(const std::string& filename)
 {
   if(!cacheKey.empty()) {
     if(cacheKey != filename)
-      printf("ManagedGeometry::AddToCache(): warning, item was previously cached as %s, now being asked to be cached as %s?\n",cacheKey.c_str(),filename.c_str());
+      LOG4CXX_WARN(KrisLibrary::logger(),"ManagedGeometry::AddToCache(): warning, item was previously cached as "<<cacheKey.c_str()<<", now being asked to be cached as "<<filename.c_str());
     return;
   }
 #if CACHE_DEBUG
-  printf("ManagedGeometry: adding %s to cache.\n",filename.c_str());
+  LOG4CXX_INFO(KrisLibrary::logger(),"ManagedGeometry: adding "<<filename.c_str());
 #endif
   cacheKey = filename;
-  cachedGeoms[cacheKey].geoms.push_back(this);
+  manager.cache[cacheKey].geoms.push_back(this);
 }
 
 void ManagedGeometry::RemoveFromCache()
 {
   if(cacheKey.empty()) return;
-  std::map<std::string,ManagedGeometry::GeometryInfo>::iterator i=cachedGeoms.find(cacheKey);
-  if(i==cachedGeoms.end()) {
-    printf("ManagedGeometry::RemoveFromCache(): warning, item %s was not previously cached?\n",cacheKey.c_str());
+  std::map<std::string,GeometryManager::GeometryList>::iterator i=manager.cache.find(cacheKey);
+  if(i==manager.cache.end()) {
+    LOG4CXX_WARN(KrisLibrary::logger(),"ManagedGeometry::RemoveFromCache(): warning, item "<<cacheKey.c_str());
     cacheKey.clear();
     return;
   }
   if(i->second.geoms.empty()) {
-    printf("ManagedGeometry::RemoveFromCache(): warning, item %s was previously deleted?\n",cacheKey.c_str());
+    LOG4CXX_WARN(KrisLibrary::logger(),"ManagedGeometry::RemoveFromCache(): warning, item "<<cacheKey.c_str());
     cacheKey.clear();
     return;
   }
@@ -228,16 +256,16 @@ void ManagedGeometry::RemoveFromCache()
     if(i->second.geoms[j] == this) {
       i->second.geoms.erase(i->second.geoms.begin()+j);
       if(i->second.geoms.empty()) {
-        cachedGeoms.erase(i);
+        manager.cache.erase(i);
 #if CACHE_DEBUG
-        printf("ManagedGeometry: removing %s from cache.\n",cacheKey.c_str());
+        LOG4CXX_INFO(KrisLibrary::logger(),"ManagedGeometry: removing "<<cacheKey.c_str());
 #endif
       }
       cacheKey.clear();
       return;
     }
   }
-  printf("ManagedGeometry::RemoveFromCache(): warning, item %s pointer was not previously cached?\n",cacheKey.c_str());
+  LOG4CXX_WARN(KrisLibrary::logger(),"ManagedGeometry::RemoveFromCache(): warning, item "<<cacheKey.c_str());
   cacheKey.clear();
 }
 
@@ -266,8 +294,8 @@ ManagedGeometry::AppearancePtr ManagedGeometry::Appearance() const
 bool ManagedGeometry::IsAppearanceShared() const
 { 
   if(cacheKey.empty()) return false;
-  std::map<std::string,ManagedGeometry::GeometryInfo>::const_iterator i=cachedGeoms.find(cacheKey);
-  if(i==cachedGeoms.end()) 
+  std::map<std::string,GeometryManager::GeometryList>::const_iterator i=manager.cache.find(cacheKey);
+  if(i==manager.cache.end()) 
     return false;
   if(i->second.geoms.empty()) 
     return false;
@@ -293,7 +321,7 @@ const ManagedGeometry& ManagedGeometry::operator = (const ManagedGeometry& rhs)
   appearance->geom = geometry;
   cacheKey = rhs.cacheKey;
   if(!cacheKey.empty()) {
-    cachedGeoms[cacheKey].geoms.push_back(this);
+    manager.cache[cacheKey].geoms.push_back(this);
   }
 
   return *this;
@@ -325,4 +353,4 @@ bool ManagedGeometry::DynamicGeometryUpdate()
 }
 
 
-std::map<std::string,ManagedGeometry::GeometryInfo> ManagedGeometry::cachedGeoms;
+GeometryManager ManagedGeometry::manager;

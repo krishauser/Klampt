@@ -975,33 +975,6 @@ class Geometry3D(_object):
         """
         return _robotsim.Geometry3D_saveFile(self, *args)
 
-    def attachToStream(self, *args):
-        """
-        attachToStream(Geometry3D self, char const * protocol, char const * name, char const * type="") -> bool
-        attachToStream(Geometry3D self, char const * protocol, char const * name) -> bool
-
-        Attaches this geometry to a given stream.
-
-        Currently only "ros" protocol is supported. For "ros" protocol,
-        name is the ROS topic to attach to. type indicates the datatype that
-        the stream source should have, and this will return false if that type
-        is not obeyed. Currently only the "PointCloud" or default empty
-        ("") types are supported.
-
-        Note: you will need to call Appearance.refresh(True) to get the
-        appearance to update. 
-        """
-        return _robotsim.Geometry3D_attachToStream(self, *args)
-
-    def detachFromStream(self, *args):
-        """
-        detachFromStream(Geometry3D self, char const * protocol, char const * name) -> bool
-
-        Detaches this geometry from a given stream. This must be called before
-        deleting a piece of geometry. 
-        """
-        return _robotsim.Geometry3D_detachFromStream(self, *args)
-
     def setCurrentTransform(self, *args):
         """
         setCurrentTransform(Geometry3D self, double const [9] R, double const [3] t)
@@ -1540,6 +1513,14 @@ class RobotPoser(Widget):
         """getConditioned(RobotPoser self, doubleVector qref)"""
         return _robotsim.RobotPoser_getConditioned(self, *args)
 
+    def addIKConstraint(self, *args):
+        """addIKConstraint(RobotPoser self, IKObjective obj)"""
+        return _robotsim.RobotPoser_addIKConstraint(self, *args)
+
+    def clearIKConstraints(self):
+        """clearIKConstraints(RobotPoser self)"""
+        return _robotsim.RobotPoser_clearIKConstraints(self)
+
     __swig_destroy__ = _robotsim.delete_RobotPoser
     __del__ = lambda self : None;
 RobotPoser_swigregister = _robotsim.RobotPoser_swigregister
@@ -1953,8 +1934,8 @@ class RobotModelDriver(_object):
     """
     A reference to a driver of a RobotModel.
 
-    A driver corresponds to one of the robot's actuators and its
-    transmission.
+    A driver corresponds to one of the robot's actuators and encodes how
+    its forces are transmitted to joints.
 
     C++ includes: robotmodel.h 
     """
@@ -2162,6 +2143,16 @@ class RobotModel(_object):
         Returns a reference to the named driver. 
         """
         return _robotsim.RobotModel_driver(self, *args)
+
+    def getJointType(self, *args):
+        """
+        getJointType(RobotModel self, int index) -> char const
+        getJointType(RobotModel self, char const * name) -> char const *
+
+        Returns the joint type of the joint connecting the named link to its
+        parent. 
+        """
+        return _robotsim.RobotModel_getJointType(self, *args)
 
     def getConfig(self):
         """
@@ -2936,11 +2927,24 @@ class IKObjective(_object):
     __swig_getmethods__ = {}
     __getattr__ = lambda self, name: _swig_getattr(self, IKObjective, name)
     __repr__ = _swig_repr
-    def __init__(self): 
-        """__init__(IKObjective self) -> IKObjective"""
-        this = _robotsim.new_IKObjective()
+    def __init__(self, *args): 
+        """
+        __init__(IKObjective self) -> IKObjective
+        __init__(IKObjective self, IKObjective arg2) -> IKObjective
+
+        Copy constructor. 
+        """
+        this = _robotsim.new_IKObjective(*args)
         try: self.this.append(this)
         except: self.this = this
+    def copy(self):
+        """
+        copy(IKObjective self) -> IKObjective
+
+        Copy constructor. 
+        """
+        return _robotsim.IKObjective_copy(self)
+
     def link(self):
         """
         link(IKObjective self) -> int
@@ -3211,10 +3215,20 @@ class IKSolver(_object):
         """
         __init__(IKSolver self, RobotModel robot) -> IKSolver
         __init__(IKSolver self, IKSolver solver) -> IKSolver
+
+        Copy constructor. 
         """
         this = _robotsim.new_IKSolver(*args)
         try: self.this.append(this)
         except: self.this = this
+    def copy(self):
+        """
+        copy(IKSolver self) -> IKSolver
+
+        Copy constructor. 
+        """
+        return _robotsim.IKSolver_copy(self)
+
     def add(self, *args):
         """
         add(IKSolver self, IKObjective objective)
@@ -3783,6 +3797,14 @@ class SimRobotController(_object):
         Sets the current feedback control rate. 
         """
         return _robotsim.SimRobotController_setRate(self, *args)
+
+    def getRate(self):
+        """
+        getRate(SimRobotController self) -> double
+
+        Gets the current feedback control rate. 
+        """
+        return _robotsim.SimRobotController_getRate(self)
 
     def getCommandedConfig(self):
         """
@@ -4595,6 +4617,44 @@ def destroy():
     destroys internal data structures 
     """
   return _robotsim.destroy()
+
+def SubscribeToStream(*args):
+  """
+    SubscribeToStream(Geometry3D g, char const * protocol, char const * name, char const * type="") -> bool
+    SubscribeToStream(Geometry3D g, char const * protocol, char const * name) -> bool
+    """
+  return _robotsim.SubscribeToStream(*args)
+
+def DetachFromStream(*args):
+  """DetachFromStream(char const * protocol, char const * name) -> bool"""
+  return _robotsim.DetachFromStream(*args)
+
+def ProcessStreams(protocol="all"):
+  """
+    ProcessStreams(char const * protocol="all") -> bool
+    ProcessStreams() -> bool
+    """
+  return _robotsim.ProcessStreams(protocol)
+
+def WaitForStream(*args):
+  """WaitForStream(char const * protocol, char const * name, double timeout) -> bool"""
+  return _robotsim.WaitForStream(*args)
+
+def ThreeJSGetScene(*args):
+  """
+    ThreeJSGetScene(WorldModel arg1) -> std::string
+
+    Exports the WorldModel to a JSON string ready for use in Three.js. 
+    """
+  return _robotsim.ThreeJSGetScene(*args)
+
+def ThreeJSGetTransforms(*args):
+  """
+    ThreeJSGetTransforms(WorldModel arg1) -> std::string
+
+    Exports the WorldModel to a JSON string ready for use in Three.js. 
+    """
+  return _robotsim.ThreeJSGetTransforms(*args)
 
 def setFrictionConeApproximationEdges(*args):
   """setFrictionConeApproximationEdges(int numEdges)"""

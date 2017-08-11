@@ -1,3 +1,5 @@
+#include <log4cxx/logger.h>
+#include <KrisLibrary/Logger.h>
 #include "Controller.h"
 #include "FeedforwardController.h"
 #include "LoggingController.h"
@@ -45,7 +47,7 @@ void RobotController::SetPIDCommand(const Config& _qdes,const Config& dqdes)
     else {
       robot.q = qdes;
       robot.dq = dqdes;
-      //printf("Desired affine driver value %g, vel %g\n",robot.GetDriverValue(i),robot.GetDriverVelocity(i));
+      //LOG4CXX_INFO(KrisLibrary::logger(),"Desired affine driver value "<<robot.GetDriverValue(i)<<", vel "<<robot.GetDriverVelocity(i));
       command->actuators[i].SetPID(robot.GetDriverValue(i),robot.GetDriverVelocity(i),command->actuators[i].iterm);
     }
   }
@@ -95,7 +97,7 @@ bool RobotController::GetCommandedConfig(Config& q)
     if(command->actuators[i].mode == ActuatorCommand::PID)
       robot.SetDriverValue(i,command->actuators[i].qdes);
     else {
-      fprintf(stderr,"RobotController::GetCommandedConfig: driver %d is not in PID mode",i);
+            LOG4CXX_ERROR(KrisLibrary::logger(),"RobotController::GetCommandedConfig: driver "<<i);
       return false;
     }
   }
@@ -110,7 +112,7 @@ bool RobotController::GetCommandedVelocity(Config& dq)
     if(command->actuators[i].mode == ActuatorCommand::PID)
       robot.SetDriverVelocity(i,command->actuators[i].dqdes);
     else {
-      fprintf(stderr,"RobotController::GetCommandedVelocity: driver %d is not in PID mode",i);
+            LOG4CXX_ERROR(KrisLibrary::logger(),"RobotController::GetCommandedVelocity: driver "<<i);
       return false;
     }
   }
@@ -122,10 +124,10 @@ bool RobotController::GetSensedConfig(Config& q)
 {
   JointPositionSensor* s = sensors->GetTypedSensor<JointPositionSensor>();
   if(s==NULL) {
-    fprintf(stderr,"RobotController: Warning, robot has no joint position sensor\n");
-    fprintf(stderr,"Sensor list:\n");
+        LOG4CXX_ERROR(KrisLibrary::logger(),"RobotController: Warning, robot has no joint position sensor\n");
+        LOG4CXX_ERROR(KrisLibrary::logger(),"Sensor list:\n");
     for(size_t i=0;i<sensors->sensors.size();i++)
-      fprintf(stderr,"  %s: %s\n",sensors->sensors[i]->Type(),sensors->sensors[i]->name.c_str());
+            LOG4CXX_ERROR(KrisLibrary::logger(),"  "<<sensors->sensors[i]->Type()<<": "<<sensors->sensors[i]->name.c_str());
     return false;
   }
   if(s->indices.empty())
@@ -153,10 +155,10 @@ bool RobotController::GetSensedVelocity(Config& dq)
 {
   JointVelocitySensor* s=sensors->GetTypedSensor<JointVelocitySensor>();
   if(s==NULL) {
-    fprintf(stderr,"RobotController: Warning, robot has no joint velocity sensor\n");
-    fprintf(stderr,"Sensor list:\n");
+        LOG4CXX_ERROR(KrisLibrary::logger(),"RobotController: Warning, robot has no joint velocity sensor\n");
+        LOG4CXX_ERROR(KrisLibrary::logger(),"Sensor list:\n");
     for(size_t i=0;i<sensors->sensors.size();i++)
-      fprintf(stderr,"  %s: %s\n",sensors->sensors[i]->Type(),sensors->sensors[i]->name.c_str());
+            LOG4CXX_ERROR(KrisLibrary::logger(),"  "<<sensors->sensors[i]->Type()<<": "<<sensors->sensors[i]->name.c_str());
     return false;
   }
   if(s->indices.empty())
@@ -185,10 +187,8 @@ bool RobotController::GetSensedVelocity(Config& dq)
 void RobotControllerFactory::RegisterDefault(Robot& robot)
 {
   Register("JointTrackingController",new JointTrackingController(robot));
-  Register("MilestonePathController",new MilestonePathController(robot));
   Register("PolynomialPathController",new PolynomialPathController(robot));
   Register("FeedforwardJointTrackingController",new FeedforwardController(robot,new JointTrackingController(robot)));
-  Register("FeedforwardMilestonePathController",new FeedforwardController(robot,new MilestonePathController(robot)));
   Register("FeedforwardPolynomialPathController",new FeedforwardController(robot,new PolynomialPathController(robot)));
   Register("SerialController",new SerialController(robot));
 }
@@ -220,19 +220,19 @@ SmartPointer<RobotController> RobotControllerFactory::CreateByName(const char* n
 SmartPointer<RobotController> RobotControllerFactory::Load(TiXmlElement* in,Robot& robot)
 {
   if(0!=strcmp(in->Value(),"controller")) {
-    fprintf(stderr,"Controller does not have type \"controller\", got %s\n",in->Value());
+        LOG4CXX_ERROR(KrisLibrary::logger(),"Controller does not have type \"controller\", got "<<in->Value());
     return NULL;
   }
   if(in->Attribute("type")==NULL) {
-    fprintf(stderr,"Controller does not have \"type\" attribute\n");
+        LOG4CXX_ERROR(KrisLibrary::logger(),"Controller does not have \"type\" attribute\n");
     return NULL;
   }
   SmartPointer<RobotController> c = CreateByName(in->Attribute("type"),robot);
   if(!c) {
-    fprintf(stderr,"Unable to load controller of type %s\n",in->Attribute("type"));
-    fprintf(stderr,"Candidates: \n");
+        LOG4CXX_ERROR(KrisLibrary::logger(),"Unable to load controller of type "<<in->Attribute("type"));
+        LOG4CXX_ERROR(KrisLibrary::logger(),"Candidates: \n");
     for(map<std::string,SmartPointer<RobotController> >::iterator i=controllers.begin();i!=controllers.end();i++)
-      fprintf(stderr,"  %s\n",i->first.c_str());
+            LOG4CXX_ERROR(KrisLibrary::logger(),"  "<<i->first.c_str());
     return NULL;
   }
   TiXmlAttribute* attr = in->FirstAttribute();
@@ -243,7 +243,7 @@ SmartPointer<RobotController> RobotControllerFactory::Load(TiXmlElement* in,Robo
     else if(0==strcmp(attr->Name(),"rate")) {
       double temp=0;
       if(in->QueryValueAttribute("rate",&temp)!=TIXML_SUCCESS || (temp <= 0)){
-	fprintf(stderr,"Invalid rate %g\n",temp);
+		LOG4CXX_ERROR(KrisLibrary::logger(),"Invalid rate "<<temp);
 	return NULL;
       }
       else 
@@ -252,14 +252,14 @@ SmartPointer<RobotController> RobotControllerFactory::Load(TiXmlElement* in,Robo
     else if(0==strcmp(attr->Name(),"timeStep")) {
       double temp=0;
       if(in->QueryValueAttribute("timeStep",&temp)!=TIXML_SUCCESS || temp <= 0){
-	fprintf(stderr,"Invalid timestep %g\n",temp);
+		LOG4CXX_ERROR(KrisLibrary::logger(),"Invalid timestep "<<temp);
 	return NULL;
       }
       c->nominalTimeStep = temp;
     }
     else {
       if(!c->SetSetting(attr->Name(),attr->Value())) {
-	fprintf(stderr,"Load controller  %s from XML: Unable to set setting %s\n",in->Attribute("type"),attr->Name());
+		LOG4CXX_ERROR(KrisLibrary::logger(),"Load controller  "<<in->Attribute("type")<<" from XML: Unable to set setting "<<attr->Name());
 	return NULL;
       }
     }
@@ -308,10 +308,10 @@ SmartPointer<RobotController> MakeDefaultController(Robot* robot)
       if(res) return res;
     }
   
-    printf("MakeDefaultController: could not load controller from data %s\n",controllerXml.c_str());
-    printf("  Making the standard controller instead.\n");
-    printf("  Press enter to continue.\n");
-    getchar();
+    LOG4CXX_INFO(KrisLibrary::logger(),"MakeDefaultController: could not load controller from data "<<controllerXml.c_str());
+    LOG4CXX_INFO(KrisLibrary::logger(),"  Making the standard controller instead.\n");
+    LOG4CXX_INFO(KrisLibrary::logger(),"  Press enter to continue.\n");
+    KrisLibrary::loggerWait();
   }
   PolynomialPathController* c = new PolynomialPathController(*robot);
   FeedforwardController* fc = new FeedforwardController(*robot,c);

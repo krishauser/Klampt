@@ -1,3 +1,5 @@
+#include <log4cxx/logger.h>
+#include <KrisLibrary/Logger.h>
 #include "TimeScaling.h"
 #include "ContactTimeScaling.h"
 #include <KrisLibrary/math/misc.h>
@@ -73,11 +75,11 @@ int PolygonCrossings(const vector<Vector2>& poly,const Plane2D& p,int& ind1,int&
   }
   /*
   if(count > 2) {
-    cout<<"Strange number of polygon crossings??? "<<count<<endl;
-    cout<<"Plane "<<p.normal<<", "<<p.offset<<endl;
-    cout<<"Poly: "<<endl;
+    LOG4CXX_INFO(KrisLibrary::logger(),"Strange number of polygon crossings??? "<<count<<"\n");
+    LOG4CXX_INFO(KrisLibrary::logger(),"Plane "<<p.normal<<", "<<p.offset<<"\n");
+    LOG4CXX_INFO(KrisLibrary::logger(),"Poly: "<<"\n");
     for(size_t i=0;i<poly.size();i++) {
-      cout<<"  "<<poly[i]<<endl;
+      LOG4CXX_INFO(KrisLibrary::logger(),"  "<<poly[i]<<"\n");
     }
   }
   Assert(count <= 2);
@@ -122,8 +124,8 @@ bool GetActiveBounds(Vector2& l,Vector2& u,const Vector& ax,const Vector& ay,con
 	continue;
       }
       else {
-	printf("Warning, infeasible constraint %d: %g * x + %g * y <= %g\n",i,ax(i),ay(i),b(i));
-	printf("Distance to first point: %g\n",pi.distance(pts[0]));
+	LOG4CXX_WARN(KrisLibrary::logger(),"Warning, infeasible constraint "<<i<<": "<<ax(i)<<" * x + "<<ay(i)<<" * y <= "<<b(i));
+	LOG4CXX_INFO(KrisLibrary::logger(),"Distance to first point: "<<pi.distance(pts[0]));
 	if(print) {
 	  ofstream out("bounds.csv",ios::out | ios::app);
 	  out<<"infeasible"<<endl;
@@ -141,11 +143,11 @@ bool GetActiveBounds(Vector2& l,Vector2& u,const Vector& ax,const Vector& ay,con
     if(n > 2) {
       /*
       //DEBUG
-      cout<<"Strange number of polygon crossings??? "<<n<<endl;
-      cout<<"Plane "<<pi.normal<<", "<<pi.offset<<endl;
-      cout<<"Poly: "<<endl;
+      LOG4CXX_INFO(KrisLibrary::logger(),"Strange number of polygon crossings??? "<<n<<"\n");
+      LOG4CXX_INFO(KrisLibrary::logger(),"Plane "<<pi.normal<<", "<<pi.offset<<"\n");
+      LOG4CXX_INFO(KrisLibrary::logger(),"Poly: "<<"\n");
       for(size_t i=0;i<pts.size();i++) {
-	cout<<"  "<<pts[i]<<endl;
+	LOG4CXX_INFO(KrisLibrary::logger(),"  "<<pts[i]<<"\n");
       }
       */
       if(print) {
@@ -322,21 +324,21 @@ bool SolveSLP(const vector<Real>& paramDivs,
       slp.AddVel2Bound(i,ai[j],an[j],b[j]);
     */
     if(!slp.AddVel2Bounds(i,ai,an,b)) {
-      printf("SLP bounds were found to be infeasible on segment %d\n",i);
+      LOG4CXX_INFO(KrisLibrary::logger(),"SLP bounds were found to be infeasible on segment "<<i);
       return false;
     }
 
     /*
-    cout<<i<<" vmax "<<dsmaxs[i]<<endl;
-    cout<<ai<<endl;
-    cout<<an<<endl;
-    cout<<b<<endl;
-    cout<<"Total constraints: "<<slp.lp.A.m<<endl;
-    getchar();
+    LOG4CXX_INFO(KrisLibrary::logger(),i<<" vmax "<<dsmaxs[i]<<"\n");
+    LOG4CXX_INFO(KrisLibrary::logger(),ai<<"\n");
+    LOG4CXX_INFO(KrisLibrary::logger(),an<<"\n");
+    LOG4CXX_INFO(KrisLibrary::logger(),b<<"\n");
+    LOG4CXX_INFO(KrisLibrary::logger(),"Total constraints: "<<slp.lp.A.m<<"\n");
+    if(KrisLibrary::logger()->isEnabledFor(log4cxx::Level::ERROR_INT)) getchar();
     */
   }
-  printf("Reduced %d constraints to %d\n",numTotalConstraints,slp.lp.A.m);
-  //getchar();
+  LOG4CXX_INFO(KrisLibrary::logger(),"Reduced "<<numTotalConstraints<<" constraints to "<<slp.lp.A.m);
+  //if(KrisLibrary::logger()->isEnabledFor(log4cxx::Level::ERROR_INT)) getchar();
 
   int maxIters = SLP_SOLVE_ITERS;
   bool res = slp.Solve(maxIters);
@@ -447,15 +449,16 @@ void TimeScalingSLP::CheckSolution()
       }
   }
   for(int i=0;i<=n;i++)
-    if(!anyNonBasic[i]) printf("Hmm, variable %d not involved in the basis\n",i);
+    if(!anyNonBasic[i]) LOG4CXX_INFO(KrisLibrary::logger(),"Hmm, variable "<<i);
   for(int i=0;i<=n;i++) {
-    if(find(limitingConstraints[i].begin(),limitingConstraints[i].end(),-1)!=limitingConstraints[i].end())
-      printf("v,");
+    if(find(limitingConstraints[i].begin(),limitingConstraints[i].end(),-1)!=limitingConstraints[i].end()){
+      LOG4CXX_INFO(KrisLibrary::logger(),"v,");
+    }
     else {
-      printf("a,");
+      LOG4CXX_INFO(KrisLibrary::logger(),"a,");
     }
   }
-  printf("\n");
+  LOG4CXX_INFO(KrisLibrary::logger(),"\n");
 }
 
 void TimeScalingSLP::SetFixed(int i,Real vi)
@@ -474,7 +477,7 @@ bool TimeScalingSLP::AddVel2Bounds(int i,const Vector& Ai,const Vector& An,const
 {
   Assert(i < (int)segToConstraints.size());
   if(segToConstraints[i] != pair<int,int>(-1,-1)) {
-    fprintf(stderr,"TimeScalingSLP: Error, can't add multiple vel bounds yet\n");
+        LOG4CXX_ERROR(KrisLibrary::logger(),"TimeScalingSLP: Error, can't add multiple vel bounds yet\n");
   }
   Assert(segToConstraints[i].first==-1);
   Assert(segToConstraints[i].second==-1);
@@ -483,12 +486,12 @@ bool TimeScalingSLP::AddVel2Bounds(int i,const Vector& Ai,const Vector& An,const
   vector<bool> nonredundant(Ai.n,false);
   Vector2 l(0.0,0.0), u(lp.u(i),lp.u(i+1));
   if(IsInf(lp.u(i)) || IsInf(lp.u(i+1))) {
-    fprintf(stderr,"Warning: can't get nonredundant bounds with infinite velocity bound\n");
+        LOG4CXX_ERROR(KrisLibrary::logger(),"Warning: can't get nonredundant bounds with infinite velocity bound\n");
     fill(nonredundant.begin(),nonredundant.end(),true);
   }
   else {
     if(!GetActiveBounds(l,u,Ai,An,bi,nonredundant)) {
-      fprintf(stderr,"Infeasible set of linear constraints on segment %d\n",i);
+            LOG4CXX_ERROR(KrisLibrary::logger(),"Infeasible set of linear constraints on segment "<<i);
       return false;
     }
   }
@@ -531,7 +534,7 @@ bool TimeScalingSLP::AddVel2Bounds(int i,const Vector& Ai,const Vector& An,const
       lp.A(k,i) = Ai(num);
       lp.A(k,i+1) = An(num);
       lp.p(k) = bi(num);
-      //cout<<"constraint "<<k<<": "<<Ai(num)<<"*x("<<i<<") + "<<An(num)<<"*x("<<i+1<<") <= "<<bi(num)<<endl;;
+      //LOG4CXX_INFO(KrisLibrary::logger(),"constraint "<<k<<": "<<Ai(num)<<"*x("<<i<<") + "<<An(num)<<"*x("<<i+1<<") <= "<<bi(num)<<"\n");;
       k++;
     }
   }
@@ -542,7 +545,7 @@ bool TimeScalingSLP::AddVel2Bound(int i,Real Ai,Real An,Real bi)
 {
   Assert(i < (int)segToConstraints.size());
   if(segToConstraints[i] != pair<int,int>(-1,-1) && segToConstraints[i].second != lp.A.m) {
-    fprintf(stderr,"TimeScalingSLP: Error, can't add multiple vel bounds yet\n");
+        LOG4CXX_ERROR(KrisLibrary::logger(),"TimeScalingSLP: Error, can't add multiple vel bounds yet\n");
   }
 
   if(lp.A.m+1 > (int)lp.A.rows.size()) {
@@ -595,17 +598,17 @@ bool TimeScalingSLP::Solve(int& maxIters,Real xtol,Real ftol)
   bool feasible=lp.IsFeasible(x);
   if(!feasible) {
     feasible = true;
-    //if(!lp.SatisfiesBounds(x)) { printf("  Bound error\n"); feasible = false; }
-    //if(!lp.SatisfiesEqualities(x)) { printf("  Equality error\n"); feasible = false; }
+    //if(!lp.SatisfiesBounds(x)) { LOG4CXX_ERROR(KrisLibrary::logger(),"  Bound error\n"); feasible = false; }
+    //if(!lp.SatisfiesEqualities(x)) { LOG4CXX_ERROR(KrisLibrary::logger(),"  Equality error\n"); feasible = false; }
     if(!lp.SatisfiesInequalities(x)) {
       for(int i=0;i<lp.A.m;i++) {
 	Real d = lp.A.dotRow(i,x);
 	if(d > lp.p(i)+Epsilon || d < lp.q(i)) {
-	  //printf("Constraint %d violation: %g <= %g <= %g\n",i,lp.q(i),d,lp.p(i));
+	  //LOG4CXX_INFO(KrisLibrary::logger(),"Constraint "<<i<<" violation: "<<lp.q(i)<<" <= "<<d<<" <= "<<lp.p(i));
 	  feasible = false;
 	}
       }
-      //if(!feasible)      printf("  Inequality error\n");
+      //if(!feasible)      LOG4CXX_ERROR(KrisLibrary::logger(),"  Inequality error\n");
     }
   }
   ComputeObjective(x);
@@ -617,11 +620,11 @@ bool TimeScalingSLP::Solve(int& maxIters,Real xtol,Real ftol)
   while(numIters < maxIters) {
     //set up trust region
     if(feasible) {
-      //printf("Setting trust region size %g\n",trustRegionSize);
+      //LOG4CXX_INFO(KrisLibrary::logger(),"Setting trust region size "<<trustRegionSize);
       for(int i=0;i<x.n;i++) {
 	Real lo=Max(lp.l(i),x(i)-trustRegionSize);
 	Real hi=Min(lp.u(i),x(i)+trustRegionSize);
-	//printf("[%g,%g] %g %g, dir %g\n",lp.l(i),lp.u(i),x(i),trustRegionSize,-lp.c(i));
+	//LOG4CXX_INFO(KrisLibrary::logger(),"["<<lp.l(i)<<","<<lp.u(i)<<"] "<<x(i)<<" "<<trustRegionSize<<", dir "<<-lp.c(i));
 	//Assert(lo <= hi);
 	glpk.SetVariableBounds(i,lo,hi);
       }
@@ -635,17 +638,17 @@ bool TimeScalingSLP::Solve(int& maxIters,Real xtol,Real ftol)
     Vector xnext;
     LinearProgram::Result res=glpk.Solve(xnext);
     if(res == LinearProgram::Infeasible) {
-      fprintf(stderr,"Warning, got an infeasible linear program???\n");
+            LOG4CXX_ERROR(KrisLibrary::logger(),"Warning, got an infeasible linear program???\n");
       maxIters = numIters;
       return false;
     }
     else if(res == LinearProgram::Unbounded) {
-      fprintf(stderr,"Warning, got an unbounded linear program???\n");
+            LOG4CXX_ERROR(KrisLibrary::logger(),"Warning, got an unbounded linear program???\n");
       maxIters = numIters;
       return false;
     }
     else if(res == LinearProgram::Error) {
-      fprintf(stderr,"Warning, linear program solver failed\n");
+            LOG4CXX_ERROR(KrisLibrary::logger(),"Warning, linear program solver failed\n");
       maxIters = numIters;
       return false;
     }
@@ -653,7 +656,7 @@ bool TimeScalingSLP::Solve(int& maxIters,Real xtol,Real ftol)
       //numerical error cleanup?
       for(int i=0;i<=n;i++) {
 	if(xnext[i] < -1e-5) {
-	  printf("Warning, numerical error in LP solve, value %g\n",xnext[i]);
+	  LOG4CXX_WARN(KrisLibrary::logger(),"Warning, numerical error in LP solve, value "<<xnext[i]);
 	}
 	Assert(xnext[i] >= -1e-5);
 	if(xnext[i] < 0) xnext[i] = 0;
@@ -663,7 +666,7 @@ bool TimeScalingSLP::Solve(int& maxIters,Real xtol,Real ftol)
 	Assert(xnext[i+1] >= 0);
       }
       numIters++;
-      //cout<<"Solved solution: "<<x<<endl;
+      //LOG4CXX_INFO(KrisLibrary::logger(),"Solved solution: "<<x<<"\n");
       Real Told = T;
       ComputeObjective(xnext);
 
@@ -675,7 +678,7 @@ bool TimeScalingSLP::Solve(int& maxIters,Real xtol,Real ftol)
 	else 
 	  ComputeObjective(x);
 	maxIters = numIters;
-	printf("SLP step %d converged on x and f, dist %g, delta %g with time %g\n",numIters,xdist,Told-T,T);
+	LOG4CXX_INFO(KrisLibrary::logger(),"SLP step "<<numIters<<" converged on x and f, dist "<<xdist<<", delta "<<Told-T<<" with time "<<T);
 	return true;
       }
 
@@ -685,16 +688,15 @@ bool TimeScalingSLP::Solve(int& maxIters,Real xtol,Real ftol)
 	if(T <= Told) {
     if(T >= Told-ftol) {
       maxIters = numIters;
-      printf("SLP step %d converged on f, delta %g with time %g\n",numIters,Told-T,T);
+      LOG4CXX_INFO(KrisLibrary::logger(),"SLP step "<<numIters<<" converged on f, delta "<<Told-T<<" with time "<<T);
       return true;
     }
-	  printf("SLP step %d size %g changed time from %g to %g\n",numIters,trustRegionSize,Told,T);
-	  //printf("Distance %g\n",xdist);
+	  LOG4CXX_INFO(KrisLibrary::logger(),"SLP step "<<numIters<<" size "<<trustRegionSize<<" changed time from "<<Told<<" to "<<T);
+	  //LOG4CXX_INFO(KrisLibrary::logger(),"Distance "<<xdist);
 	  trustRegionSize *= 1.5;
 	}
 	else {
-	  printf("SLP step %d size %g increased time from %g to %g, reducing max step\n",numIters,trustRegionSize,Told,T);
-	  //reject step and continue
+	  LOG4CXX_INFO(KrisLibrary::logger(),"SLP step "<<numIters <<" size "<<trustRegionSize <<" increased from "<<Told <<" to "<<T <<", reducing max step\n");
 	  ComputeObjective(x);
 	  trustRegionSize *= 0.5;
 	  continue;
@@ -703,17 +705,18 @@ bool TimeScalingSLP::Solve(int& maxIters,Real xtol,Real ftol)
       }
       else {
 	changed = true;
-	printf("SLP step %d found feasible solution with time %g\n",numIters,T);
+	LOG4CXX_INFO(KrisLibrary::logger(),"SLP step "<<numIters<<" found feasible solution with time "<<T);
       }
 
       feasible = true;
       if(!changed || xdist<=xtol) {
 	x = xnext;
 	maxIters = numIters;
-	if(!changed)
-	  printf("SLP time change %g below tolerance %g, end time %g\n",Told-T,ftol,T);
+	if(!changed){
+	  LOG4CXX_INFO(KrisLibrary::logger(),"SLP time change "<<Told-T<<" below tolerance "<<ftol<<", end time "<<T);
+  }
 	else
-	  printf("SLP state change below tolerance %g, val %g, end time %g\n",xtol,xdist,T);
+	  LOG4CXX_INFO(KrisLibrary::logger(),"SLP state change below tolerance "<<xtol<<", val "<<xdist<<", end time "<<T);
 	return true;
       }
       x = xnext;
@@ -721,11 +724,11 @@ bool TimeScalingSLP::Solve(int& maxIters,Real xtol,Real ftol)
       //calc new gradient
       Vector oldDt = lp.c;
       ComputeGradient();
-      //cout<<"Change in gradient: "<<oldDt.distance(lp.c)<<endl;
+      //LOG4CXX_INFO(KrisLibrary::logger(),"Change in gradient: "<<oldDt.distance(lp.c)<<"\n");
       glpk.SetObjective(lp.c,true);
     }
   }
-  printf("SLP terminated after %d iterations with total time %g\n",numIters,T);
+  LOG4CXX_INFO(KrisLibrary::logger(),"SLP terminated after "<<numIters<<" iterations with total time "<<T);
   return true;
 }
 
@@ -746,17 +749,17 @@ bool TimeScalingSLP::SolveCustom(ScalarFieldFunction* f,int& maxIters,Real xtol,
   bool feasible=lp.IsFeasible(x);
   if(!feasible) {
     feasible = true;
-    //if(!lp.SatisfiesBounds(x)) { printf("  Bound error\n"); feasible = false; }
-    //if(!lp.SatisfiesEqualities(x)) { printf("  Equality error\n"); feasible = false; }
+    //if(!lp.SatisfiesBounds(x)) { LOG4CXX_ERROR(KrisLibrary::logger(),"  Bound error\n"); feasible = false; }
+    //if(!lp.SatisfiesEqualities(x)) { LOG4CXX_ERROR(KrisLibrary::logger(),"  Equality error\n"); feasible = false; }
     if(!lp.SatisfiesInequalities(x)) {
       for(int i=0;i<lp.A.m;i++) {
 	Real d = lp.A.dotRow(i,x);
 	if(d > lp.p(i)+Epsilon || d < lp.q(i)) {
-	  //printf("Constraint %d violation: %g <= %g <= %g\n",i,lp.q(i),d,lp.p(i));
+	  //LOG4CXX_INFO(KrisLibrary::logger(),"Constraint "<<i<<" violation: "<<lp.q(i)<<" <= "<<d<<" <= "<<lp.p(i));
 	  feasible = false;
 	}
       }
-      //if(!feasible)      printf("  Inequality error\n");
+      //if(!feasible)      LOG4CXX_ERROR(KrisLibrary::logger(),"  Inequality error\n");
     }
   }
   //compute objective and gradient
@@ -769,11 +772,11 @@ bool TimeScalingSLP::SolveCustom(ScalarFieldFunction* f,int& maxIters,Real xtol,
   while(numIters < maxIters) {
     //set up trust region
     if(feasible) {
-      //printf("Setting trust region size %g\n",trustRegionSize);
+      //LOG4CXX_INFO(KrisLibrary::logger(),"Setting trust region size "<<trustRegionSize);
       for(int i=0;i<x.n;i++) {
 	Real lo=Max(lp.l(i),x(i)-trustRegionSize);
 	Real hi=Min(lp.u(i),x(i)+trustRegionSize);
-	//printf("[%g,%g] %g %g, dir %g\n",lp.l(i),lp.u(i),x(i),trustRegionSize,-lp.c(i));
+	//LOG4CXX_INFO(KrisLibrary::logger(),"["<<lp.l(i)<<","<<lp.u(i)<<"] "<<x(i)<<" "<<trustRegionSize<<", dir "<<-lp.c(i));
 	//Assert(lo <= hi);
 	glpk.SetVariableBounds(i,lo,hi);
       }
@@ -787,17 +790,17 @@ bool TimeScalingSLP::SolveCustom(ScalarFieldFunction* f,int& maxIters,Real xtol,
     Vector xnext;
     LinearProgram::Result res=glpk.Solve(xnext);
     if(res == LinearProgram::Infeasible) {
-      fprintf(stderr,"Warning, got an infeasible linear program???\n");
+            LOG4CXX_ERROR(KrisLibrary::logger(),"Warning, got an infeasible linear program???\n");
       maxIters = numIters;
       return false;
     }
     else if(res == LinearProgram::Unbounded) {
-      fprintf(stderr,"Warning, got an unbounded linear program???\n");
+            LOG4CXX_ERROR(KrisLibrary::logger(),"Warning, got an unbounded linear program???\n");
       maxIters = numIters;
       return false;
     }
     else if(res == LinearProgram::Error) {
-      fprintf(stderr,"Warning, linear program solver failed\n");
+            LOG4CXX_ERROR(KrisLibrary::logger(),"Warning, linear program solver failed\n");
       maxIters = numIters;
       return false;
     }
@@ -805,7 +808,7 @@ bool TimeScalingSLP::SolveCustom(ScalarFieldFunction* f,int& maxIters,Real xtol,
       //numerical error cleanup?
       for(int i=0;i<=n;i++) {
 	if(xnext[i] < -1e-5) {
-	  printf("Warning, numerical error in LP solve, value %g\n",xnext[i]);
+	  LOG4CXX_WARN(KrisLibrary::logger(),"Warning, numerical error in LP solve, value "<<xnext[i]);
 	}
 	Assert(xnext[i] >= -1e-5);
 	if(xnext[i] < 0) xnext[i] = 0;
@@ -815,7 +818,7 @@ bool TimeScalingSLP::SolveCustom(ScalarFieldFunction* f,int& maxIters,Real xtol,
 	Assert(xnext[i+1] >= 0);
       }
       numIters++;
-      //cout<<"Solved solution: "<<x<<endl;
+      //LOG4CXX_INFO(KrisLibrary::logger(),"Solved solution: "<<x<<"\n");
       Real Told = T;
       //compute objective
       T = (*f)(xnext);
@@ -828,7 +831,7 @@ bool TimeScalingSLP::SolveCustom(ScalarFieldFunction* f,int& maxIters,Real xtol,
 	else 
 	  T = (*f)(x);
 	maxIters = numIters;
-	printf("SLP step %d converged on x, dist %g with time %g\n",numIters,xdist,T);
+	LOG4CXX_INFO(KrisLibrary::logger(),"SLP step "<<numIters<<" converged on x, dist "<<xdist<<" with time "<<T);
 	return true;
       }
 
@@ -838,16 +841,16 @@ bool TimeScalingSLP::SolveCustom(ScalarFieldFunction* f,int& maxIters,Real xtol,
 	if(T <= Told) {
     if(T >= Told-ftol) {
       maxIters = numIters;
-      printf("SLP step %d converged on f, delta %g with time %g\n",numIters,Told-T,T);
+      LOG4CXX_INFO(KrisLibrary::logger(),"SLP step "<<numIters<<" converged on f, delta "<<Told-T<<" with time "<<T);
       return true;
     }
-	  printf("SLP step %d size %g changed time from %g to %g\n",numIters,trustRegionSize,Told,T);
-	  //printf("Distance %g\n",xdist);
+	  LOG4CXX_INFO(KrisLibrary::logger(),"SLP step "<<numIters<<" size "<<trustRegionSize<<" changed time from "<<Told<<" to "<<T);
+	  //LOG4CXX_INFO(KrisLibrary::logger(),"Distance "<<xdist);
 	  trustRegionSize *= 1.5;
 	}
 	else {
-	  printf("SLP step %d size %g increased time from %g to %g, reducing max step\n",numIters,trustRegionSize,Told,T);
-	  //reject step and continue
+	  LOG4CXX_INFO(KrisLibrary::logger(),"SLP step "<< numIters <<" size "<< trustRegionSize<<" increased time from "<< Told<< " to "<<T <<", reducing max step\n");
+    //reject step and continue
 	  T = (*f)(x);
 	  trustRegionSize *= 0.5;
 	  continue;
@@ -856,17 +859,19 @@ bool TimeScalingSLP::SolveCustom(ScalarFieldFunction* f,int& maxIters,Real xtol,
       }
       else {
 	changed = true;
-	printf("SLP step %d found feasible solution with time %g\n",numIters,T);
+	LOG4CXX_INFO(KrisLibrary::logger(),"SLP step "<<numIters<<" found feasible solution with time "<<T);
       }
 
       feasible = true;
       if(!changed || xdist<=xtol) {
 	x = xnext;
 	maxIters = numIters;
-	if(!changed)
-	  printf("SLP time change %g below tolerance %g, end time %g\n",Told-T,ftol,T);
-	else
-	  printf("SLP state change below tolerance %g, val %g, end time %g\n",xtol,xdist,T);
+	if(!changed){
+	  LOG4CXX_INFO(KrisLibrary::logger(),"SLP time change "<<Told-T<<" below tolerance "<<ftol<<", end time "<<T);
+  }
+	else{
+	  LOG4CXX_INFO(KrisLibrary::logger(),"SLP state change below tolerance "<<xtol<<", val "<<xdist<<", end time "<<T);
+  }
 	return true;
       }
       x = xnext;
@@ -875,11 +880,11 @@ bool TimeScalingSLP::SolveCustom(ScalarFieldFunction* f,int& maxIters,Real xtol,
       Vector oldDt = lp.c;
       f->PreEval(x);
       f->Gradient(x,lp.c); lp.c.inplaceMul(1.0/lp.c.maxAbsElement());
-      //cout<<"Change in gradient: "<<oldDt.distance(lp.c)<<endl;
+      //LOG4CXX_INFO(KrisLibrary::logger(),"Change in gradient: "<<oldDt.distance(lp.c)<<"\n");
       glpk.SetObjective(lp.c,true);
     }
   }
-  printf("SLP terminated after %d iterations with total time %g\n",numIters,T);
+  LOG4CXX_INFO(KrisLibrary::logger(),"SLP terminated after "<<numIters<<" iterations with total time "<<T);
   return true;
 }
 
@@ -914,10 +919,10 @@ void TimeScalingSLP::ComputeObjective(const Vector& x)
   for(int i=0;i+1<n;i++) {
     if(x[i] + x[i+1] <=0) {
       /*
-      fprintf(stderr,"Warning: two subsequent x variables are forced to be nonpositive? %d and %d\n",i,i+1);
-      fprintf(stderr,"upper bounds %g and %g\n",lp.u(i),lp.u(i+1));
-      fprintf(stderr,"Values %g and %g\n",x[i],x[i+1]);
-      getchar();
+            LOG4CXX_ERROR(KrisLibrary::logger(),"Warning: two subsequent x variables are forced to be nonpositive? "<<i<<" and "<<i+1);
+            LOG4CXX_ERROR(KrisLibrary::logger(),"upper bounds "<<lp.u(i)<<" and "<<lp.u(i+1));
+            LOG4CXX_ERROR(KrisLibrary::logger(),"Values "<<x[i]<<" and "<<x[i+1]);
+      if(KrisLibrary::logger()->isEnabledFor(log4cxx::Level::ERROR_INT)) getchar();
       */
       T = Inf;
       return;
@@ -927,11 +932,11 @@ void TimeScalingSLP::ComputeObjective(const Vector& x)
       Assert(ds[i]+ds[i+1] > 0);
       T += 2*(paramdivs[i+1]-paramdivs[i])/(ds[i]+ds[i+1]);
       //if(IsInf(T))
-      //printf("%g %g %g %g\n",paramdivs[i+1],paramdivs[i],ds[i],ds[i+1]);
+      //LOG4CXX_INFO(KrisLibrary::logger(),""<<paramdivs[i+1]<<" "<<paramdivs[i]<<" "<<ds[i]<<" "<<ds[i+1]);
       //Assert(!IsInf(T));
     }
   }
-  //printf("Computed T(x): %g\n",T);
+  //LOG4CXX_INFO(KrisLibrary::logger(),"Computed T(x): "<<T);
 }
 
 
@@ -968,20 +973,19 @@ void TimeScalingSLP::InitializeInitPoint()
       }
     }
     if(x[i] == 0.0 && i != n) {
-      printf("x[%d] is set to zero, x[%d]=%g\n",i,i-1,x[i-1]);
+      LOG4CXX_INFO(KrisLibrary::logger(),"x["<<i<<"] is set to zero, x["<<i-1<<"]="<<x[i-1]);
       /*
       for(int c=cfirst;c<cend;c++) {
-	printf("' %g <= %g*%g + %g*%g <= %g\n",lp.q(c),lp.A(c,i-1),x[i-1],lp.A(c,i),xorig,lp.p(c));
-      }
+	LOG4CXX_INFO(KrisLibrary::logger(),"' "<<lp.q(c)<<" <= "<<lp.A(c<<"*"<<i-1)<<" + "<<x[i-1]<<"*"<<lp.A(c<<" <= "<<i)      }
       */
     }
     if(x[i] >= 0 && x[i] <= 1e-5 && i!=n) {
-      printf("Warning: x[%d] is set to small value %g\n",i,x[i]);
-      printf("Warning: x[%d]=%g \n",i-1,x[i-1]);
+      LOG4CXX_WARN(KrisLibrary::logger(),"Warning: x["<<i<<"] is set to small value "<<x[i]);
+      LOG4CXX_WARN(KrisLibrary::logger(),"Warning: x["<<i-1<<"]="<<x[i-1]);
     }
     if(x[i] < 0.0 ) {
       if(x[i-1] == 0.0 ) {
-	fprintf(stderr,"Warning: two subsequent x variables are forced to be negative? %d and %d\n",i-1,i);
+		LOG4CXX_ERROR(KrisLibrary::logger(),"Warning: two subsequent x variables are forced to be negative? "<<i-1<<" and "<<i);
 	x[i] = lp.u(i);
 	if(IsInf(lp.u(i)))
 	  x[i] = 1.0;
@@ -989,11 +993,10 @@ void TimeScalingSLP::InitializeInitPoint()
       else
 	x[i] = 0.0; 
       // if x[i] becomes 0, enforce it to be zero, and then propagate backwards
-      //printf("Variable x[%d] forced to zero, from x[%d]=%g\n",i,i-1,x[i-1]);
+      //LOG4CXX_INFO(KrisLibrary::logger(),"Variable x["<<i<<"] forced to zero, from x["<<i-1<<"]="<<x[i-1]);
       /*
       for(int c=cfirst;c<cend;c++) {
-	printf("' %g <= %g*%g + %g*%g <= %g\n",lp.q(c),lp.A(c,i-1),x[i-1],lp.A(c,i),xorig,lp.p(c));
-      }
+	LOG4CXX_INFO(KrisLibrary::logger(),"' "<<lp.q(c)<<" <= "<<lp.A(c<<"*"<<i-1)<<" + "<<x[i-1]<<"*"<<lp.A(c<<" <= "<<i)      }
       */
       if(BACKWARDS_PROPAGATION) {
 	int j=i;
@@ -1020,14 +1023,14 @@ void TimeScalingSLP::InitializeInitPoint()
 	    }
 	  }
 	  if(x[j-1] == oldxj) {
-	    //printf("Backwards propagation from %d stopped at %d with variable left unchanged at %g\n",i,j-1,oldxj); 
+	    //LOG4CXX_INFO(KrisLibrary::logger(),"Backwards propagation from "<<i<<" stopped at "<<j-1<<" with variable left unchanged at "<<oldxj); 
 	    break;
 	  }
 	  if(x[j-1] >= 0 && x[j-1] <= 1e-5) {
-	    printf("Warning: backprop from %d set %d to small value %g\n",i,j-1,x[j-1]);
+	    LOG4CXX_WARN(KrisLibrary::logger(),"Warning: backprop from "<<i<<" set "<<j-1<<" to small value "<<x[j-1]);
 	  }
 	  if(x[j-1] < 0.0) {
-	    printf("Backwards propagation from %d stopped at %d with negative\n",i,j-1); 
+	    LOG4CXX_INFO(KrisLibrary::logger(),"Backwards propagation from "<<i<<" stopped at "<<j-1); 
 	    x[j-1]=0;
 	    break; 
 	  } 
@@ -1063,14 +1066,14 @@ void TimeScalingSLP::InitializeInitPoint()
 	}
       }
       if(x[j-1] == oldxj) {
-	//printf("Backwards propagation from %d stopped at %d with variable left unchanged at %g\n",n,j-1,oldxj); 
+	//LOG4CXX_INFO(KrisLibrary::logger(),"Backwards propagation from "<<n<<" stopped at "<<j-1<<" with variable left unchanged at "<<oldxj); 
 	break;
       }
       if(x[j-1] >= 0 && x[j-1] <= 1e-5) {
-	printf("Warning: backprop from %d set %d to small value %g\n",n,j-1,x[j-1]);
+	LOG4CXX_WARN(KrisLibrary::logger(),"Warning: backprop from "<<n<<" set "<<j-1<<" to small value "<<x[j-1]);
       }
       if(x[j-1] < 0.0) {
-	printf("Backwards propagation from %d stopped at %d with negative\n",n,j-1); 
+	LOG4CXX_INFO(KrisLibrary::logger(),"Backwards propagation from "<<n<<" stopped at "<<j-1); 
 	x[j-1]=0;
 	break; 
       } 
@@ -1277,12 +1280,12 @@ Real TimeScaling::TimeToParam(int segment,Real t) const
   Real b=ds[segment];
   Real s=params[segment]+b*u+a*Sqr(u);
   if(s < params[segment] || s > params[segment+1]) {
-    printf("param %g (time %g) not in [%g,%g]\n",s,t,params[segment],params[segment+1]);
-    printf("Segment time range [%g,%g]\n",times[segment],times[segment+1]);
-    printf("segment ds = %g to %g\n",ds[segment],ds[segment+1]);
+    LOG4CXX_INFO(KrisLibrary::logger(),"param "<<s<<" (time "<<t<<") not in ["<<params[segment]<<","<<params[segment+1]);
+    LOG4CXX_INFO(KrisLibrary::logger(),"Segment time range ["<<times[segment]<<","<<times[segment+1]);
+    LOG4CXX_INFO(KrisLibrary::logger(),"segment ds = "<<ds[segment]<<" to "<<ds[segment+1]);
     Real dt=(times[segment+1]-times[segment]);
-    printf("Segment delta s = %g\n",b*dt+a*Sqr(dt));
-    printf("Segment delta t = %g\n",2.0*(params[segment+1]-params[segment])/(ds[segment]+ds[segment+1]));
+    LOG4CXX_INFO(KrisLibrary::logger(),"Segment delta s = "<<b*dt+a*Sqr(dt));
+    LOG4CXX_INFO(KrisLibrary::logger(),"Segment delta t = "<<2.0*(params[segment+1]-params[segment])/(ds[segment]+ds[segment+1]));
   }
   Assert(s >= params[segment]-Epsilon && s <= params[segment+1]+Epsilon);
   return Clamp(s,params[segment],params[segment+1]);
@@ -1336,9 +1339,9 @@ Real TimeScaling::ParamToTime(int segment,Real s) const
   Real u1,u2;
   int res=quadratic(a,b,c,u1,u2);
   if(res == 0 || res < 0) {
-    fprintf(stderr,"TimeScaling::ParamToTime: Unable to solve for time\n");
-    fprintf(stderr,"  s=%g in [%g,%g]\n",s,params[segment],params[segment+1]);
-    fprintf(stderr,"  quadratic %g u^2 + %g u + %g = 0\n",a,b,c);
+        LOG4CXX_ERROR(KrisLibrary::logger(),"TimeScaling::ParamToTime: Unable to solve for time\n");
+        LOG4CXX_ERROR(KrisLibrary::logger(),"  s="<<s<<" in ["<<params[segment]<<","<<params[segment+1]);
+        LOG4CXX_ERROR(KrisLibrary::logger(),"  quadratic "<<a<<" u^2 + "<<b<<" u + "<<c);
     Real u = (s-params[segment])/(params[segment+1]-params[segment]);
     return times[segment]+u*(times[segment+1]-times[segment]);
   }
@@ -1348,10 +1351,10 @@ Real TimeScaling::ParamToTime(int segment,Real s) const
     Assert(res==2);
     if(u1 < 0 || u1 + times[segment] > times[segment+1]) {
       if(u2 < 0 || u2 + times[segment] > times[segment+1]) {
-	fprintf(stderr,"TimeScaling::ParamToTime: Solution is invalid?\n");
-	fprintf(stderr,"  s=%g in [%g,%g]\n",s,params[segment],params[segment+1]);
-	fprintf(stderr,"  quadratic %g u^2 + %g u + %g = 0\n",a,b,c);
-	fprintf(stderr,"  solutions %g %g\n", u1,u2);
+		LOG4CXX_ERROR(KrisLibrary::logger(),"TimeScaling::ParamToTime: Solution is invalid?\n");
+		LOG4CXX_ERROR(KrisLibrary::logger(),"  s="<<s<<" in ["<<params[segment]<<","<<params[segment+1]);
+		LOG4CXX_ERROR(KrisLibrary::logger(),"  quadratic "<<a<<" u^2 + "<<b<<" u + "<<c);
+		LOG4CXX_ERROR(KrisLibrary::logger(),"  solutions "<< u1<<" "<<u2);
 	Real u = (s-params[segment])/(params[segment+1]-params[segment]);
 	return times[segment]+u*(times[segment+1]-times[segment]);
       }
@@ -1444,7 +1447,7 @@ void TimeScaling::ConditionMinTime(vector<Real>& paramdivs,vector<Vector>& dxs,
   for(size_t i=0;i<zeroRanges.size();i++) {
     int kstart=zeroRanges[i].first-numReduced;
     int kend=zeroRanges[i].second-numReduced;
-    printf("found zero range %d %d\n",zeroRanges[i].first,zeroRanges[i].second);
+    LOG4CXX_INFO(KrisLibrary::logger(),"found zero range "<<zeroRanges[i].first<<" "<<zeroRanges[i].second);
     bool merge=true,mergeEnds=true;
     if(kstart==kend) {
       if(kstart == 0 || kend == (int)dxMins.size()) mergeEnds=false;
@@ -1470,16 +1473,16 @@ void TimeScaling::ConditionMinTime(vector<Real>& paramdivs,vector<Vector>& dxs,
 	k++;
       }
       if(ContainsZeroInterior(newdxmin-dxmin,newdxmax-dxmax,0)) {
-	printf("Singularity from %d to %d does not appear to be an inflection\n",zeroRanges[i].first,zeroRanges[i].second);
-	cout<<"dx: "<<dxs[kstart]<<", dxmin "<<dxMins[kstart]<<", dxmax "<<dxMaxs[kstart]<<endl;
+	LOG4CXX_INFO(KrisLibrary::logger(),"Singularity from "<<zeroRanges[i].first<<" to "<<zeroRanges[i].second);
+	LOG4CXX_INFO(KrisLibrary::logger(),"dx: "<<dxs[kstart]<<", dxmin "<<dxMins[kstart]<<", dxmax "<<dxMaxs[kstart]<<"\n");
 	if(k > 0)
-	  cout<<"prev dxmin "<<dxMins[kstart]<<", dxmax "<<dxMaxs[kstart]<<endl;
-	cout<<"Range: "<<newdxmin<<" to "<<newdxmax<<endl;
+	  LOG4CXX_INFO(KrisLibrary::logger(),"prev dxmin "<<dxMins[kstart]<<", dxmax "<<dxMaxs[kstart]<<"\n");
+	LOG4CXX_INFO(KrisLibrary::logger(),"Range: "<<newdxmin<<" to "<<newdxmax<<"\n");
 	mergeEnds = false;
       }
     }
     if(mergeEnds) {
-      printf("Merging %d to %d, inclusive\n",kstart,kend);
+      LOG4CXX_INFO(KrisLibrary::logger(),"Merging "<<kstart<<" to "<<kend <<", inclusive\n");
       int k=kstart;
       if(k>0) k--;
       newdxmin = dxs[k]; newdxmax = dxs[k];
@@ -1499,7 +1502,7 @@ void TimeScaling::ConditionMinTime(vector<Real>& paramdivs,vector<Vector>& dxs,
       numReduced += kend-kstart+1;
     }
     else if(merge) {
-      printf("Merging %d to %d into one\n",kstart,kend);
+      LOG4CXX_INFO(KrisLibrary::logger(),"Merging "<<kstart<<" to "<<kend);
       int k=kstart;
       newdxmin = dxMins[k];
       newdxmax = dxMaxs[k];
@@ -1585,7 +1588,7 @@ bool TimeScaling::SolveMinTime(const Vector& vmin,const Vector& vmax,
   if(dsEnd >= 0)
     slp.SetFixed(n,dsEnd);
   if(dxMins.size()==1 && ds0 == 0 && dsEnd == 0) {
-    printf("SolveMinTime: failed, start and goal velocities are 0, only 1 grid cell\n");
+    LOG4CXX_INFO(KrisLibrary::logger(),"SolveMinTime: failed, start and goal velocities are 0, only 1 grid cell\n");
     return false;
   }
 
@@ -1597,8 +1600,8 @@ bool TimeScaling::SolveMinTime(const Vector& vmin,const Vector& vmax,
     Assert(paramdivs[i+1]>paramdivs[i]);
     Real scale = 0.5/(paramdivs[i+1]-paramdivs[i]);
     //Real invscale = 2.0*(paramdivs[i+1]-paramdivs[i]);
-    //cout<<"seg "<<i<<": "<<dxMins[i]<<", "<<dxMaxs[i]<<endl;
-    //cout<<"     "<<ddxMins[i]<<", "<<ddxMaxs[i]<<endl;
+    //LOG4CXX_INFO(KrisLibrary::logger(),"seg "<<i<<": "<<dxMins[i]<<", "<<dxMaxs[i]<<"\n");
+    //LOG4CXX_INFO(KrisLibrary::logger(),"     "<<ddxMins[i]<<", "<<ddxMaxs[i]<<"\n");
     int num=0;
     for(int j=0;j<d;j++) {
       Vector2 dbnd(dxMins[i][j],dxMaxs[i][j]);
@@ -1629,8 +1632,8 @@ bool TimeScaling::SolveMinTime(const Vector& vmin,const Vector& vmax,
       Assert(b1.x <= b1.y);
       Assert(a2.x <= a2.y);
       Assert(b2.x <= b2.y);
-      //printf("[%g,%g]*x[%d] + [%g,%g]*x[%d] in [%g,%g]\n",a1.x,a1.y,i,b1.x,b1.y,i+1,abnd.x,abnd.y);
-      //printf("[%g,%g]*x[%d] + [%g,%g]*x[%d] in [%g,%g]\n",a2.x,a2.y,i,b2.x,b2.y,i+1,abnd.x,abnd.y);
+      //LOG4CXX_INFO(KrisLibrary::logger(),"["<<a1.x<<","<<a1.y<<"]*x["<<i<<"] + ["<<b1.x<<","<<b1.y<<"]*x["<<i+1<<"] in ["<<abnd.x<<","<<abnd.y);
+      //LOG4CXX_INFO(KrisLibrary::logger(),"["<<a2.x<<","<<a2.y<<"]*x["<<i<<"] + ["<<b2.x<<","<<b2.y<<"]*x["<<i+1<<"] in ["<<abnd.x<<","<<abnd.y);
       //a1.x * x[i] + b1.x *x[i+1] >= abnd.x
       //a1.y * x[i] + b1.x *x[i+1] >= abnd.x
       //a1.x * x[i] + b1.y *x[i+1] <= abnd.y
@@ -1652,25 +1655,24 @@ bool TimeScaling::SolveMinTime(const Vector& vmin,const Vector& vmax,
       Ai[num] = a2.y; An[num] = b2.y; bi[num] = abnd.y; num++;
       /*
       if(dbnd.x == 0 || dbnd.y == 0) {
-	printf("Singularity: %d: x[i] <= %g, x[i+1] <= %g\n",i,slp.u(i),slp.u(i+1));
+	LOG4CXX_INFO(KrisLibrary::logger(),"Singularity: "<<i<<": x[i] <= "<<slp.u(i)<<", x[i+1] <= "<<slp.u(i+1));
 	for(int j=k-8;j<k;j++) {
-	  printf("%g <= %g * x[i] + %g * x[i+1] <= %g:\n",slp.q(j),slp.A(j,i),slp.A(j,i+1),slp.p(j));
-	}
+	  LOG4CXX_INFO(KrisLibrary::logger(),""<<slp.q(j)<<" <= "<<slp.A(j<<" * x[i] + "<<i)<<" * x[i+1] <= "<<slp.A(j	}
       }
       */
     }
     if(!slp.AddVel2Bounds(i,Ai,An,bi)) {
-      cout<<"Error setting bounds on segment "<<i<<endl;
-      cout<<slp.lp.l(i)<<"<= x[i] <= "<<slp.lp.u(i)<<endl;
-      cout<<slp.lp.l(i+1)<<"<= x[i+1] <= "<<slp.lp.u(i+1)<<endl;
+      LOG4CXX_ERROR(KrisLibrary::logger(),"Error setting bounds on segment "<<i<<"\n");
+      LOG4CXX_INFO(KrisLibrary::logger(),slp.lp.l(i)<<"<= x[i] <= "<<slp.lp.u(i)<<"\n");
+      LOG4CXX_INFO(KrisLibrary::logger(),slp.lp.l(i+1)<<"<= x[i+1] <= "<<slp.lp.u(i+1)<<"\n");
       for(int j=0;j<Ai.n;j++)
-	cout<<Ai[j]<<"*x[i] + "<<An[j]<<"*x[i+1] <= "<<bi[j]<<endl;
+	LOG4CXX_INFO(KrisLibrary::logger(),Ai[j]<<"*x[i] + "<<An[j]<<"*x[i+1] <= "<<bi[j]<<"\n");
       return false;
     }
   }
-  cout<<dxMins.size()<<" segments, "<<d<<" dimensions, "<<slp.lp.A.m<<" constraints"<<endl;
+  LOG4CXX_INFO(KrisLibrary::logger(),dxMins.size()<<" segments, "<<d<<" dimensions, "<<slp.lp.A.m<<" constraints"<<"\n");
 
-  printf("Reduced %d constraints to %d\n",(int)dxMins.size()*d*8,slp.lp.A.m);
+  LOG4CXX_INFO(KrisLibrary::logger(),"Reduced "<<(int)dxMins.size()*d*8<<" constraints to "<<slp.lp.A.m);
 
   int maxIters = SLP_SOLVE_ITERS;
   bool res = slp.Solve(maxIters);
@@ -1696,92 +1698,115 @@ bool TimeScaling::SolveMinTime(const Vector& vmin,const Vector& vmax,
       //compute min/max y' and y''
       Real minGap = Inf;
       if(ds[i] < 0 || ds[i+1] < 0)
-	printf("Negative speed %d?\n",i);
+	LOG4CXX_INFO(KrisLibrary::logger(),"Negative speed "<<i);
       for(int j=0;j<d;j++) {
 	Real dy = ds[i]*dxMins[i][j];
-	if(dy < vmin[j]-Epsilon)
-	  printf("Speed [%d,%d] = %g < vmin %g\n",i,j,dy,vmin[j]);
-	else if(dy > vmax[j]+Epsilon)
-	  printf("Speed [%d,%d] = %g > vmax %g\n",i,j,dy,vmax[j]);
+	if(dy < vmin[j]-Epsilon){
+	  LOG4CXX_INFO(KrisLibrary::logger(),"Speed ["<<i<<","<<j<<"] = "<<dy<<" < vmin "<<vmin[j]);
+  }
+	else if(dy > vmax[j]+Epsilon){
+	  LOG4CXX_INFO(KrisLibrary::logger(),"Speed ["<<i<<","<<j<<"] = "<<dy<<" > vmax "<<vmax[j]);
+  }
 	minGap = Min(minGap,dy-vmin[j]);
 	minGap = Min(minGap,vmax[j]-dy);
 	dy = ds[i]*dxMaxs[i][j];
-	if(dy < vmin[j]-Epsilon)
-	  printf("Speed [%d,%d] = %g < vmin %g\n",i,j,dy,vmin[j]);
-	else if(dy > vmax[j]+Epsilon)
-	  printf("Speed [%d,%d] = %g > vmax %g\n",i,j,dy,vmax[j]);
+	if(dy < vmin[j]-Epsilon){
+	  LOG4CXX_INFO(KrisLibrary::logger(),"Speed ["<<i<<","<<j<<"] = "<<dy<<" < vmin "<<vmin[j]);
+  }
+	else if(dy > vmax[j]+Epsilon){
+	  LOG4CXX_INFO(KrisLibrary::logger(),"Speed ["<<i<<","<<j<<"] = "<<dy<<" > vmax "<<vmax[j]);
+  }
 	minGap = Min(minGap,dy-vmin[j]);
 	minGap = Min(minGap,vmax[j]-dy);
 	dy = ds[i+1]*dxMins[i][j];
-	if(dy < vmin[j]-Epsilon)
-	  printf("End speed [%d,%d] = %g < vmin %g\n",i+1,j,dy,vmin[j]);
+	if(dy < vmin[j]-Epsilon){
+	  LOG4CXX_INFO(KrisLibrary::logger(),"End speed ["<<i+1<<","<<j<<"] = "<<dy<<" < vmin "<<vmin[j]);
+  }
 	else if(dy > vmax[j]+Epsilon)
-	  printf("End speed [%d,%d] = %g > vmax %g\n",i+1,j,dy,vmax[j]);
+	  LOG4CXX_INFO(KrisLibrary::logger(),"End speed ["<<i+1<<","<<j<<"] = "<<dy<<" > vmax "<<vmax[j]);
 	minGap = Min(minGap,dy-vmin[j]);
 	minGap = Min(minGap,vmax[j]-dy);
 	dy = ds[i+1]*dxMaxs[i][j];
-	if(dy < vmin[j]-Epsilon)
-	  printf("End speed [%d,%d] = %g < vmin %g\n",i+1,j,dy,vmin[j]);
-	else if(dy > vmax[j]+Epsilon)
-	  printf("End speed [%d,%d] = %g > vmax %g\n",i+1,j,dy,vmax[j]);
+	if(dy < vmin[j]-Epsilon){
+	  LOG4CXX_INFO(KrisLibrary::logger(),"End speed ["<<i+1<<","<<j<<"] = "<<dy<<" < vmin "<<vmin[j]);
+  }
+	else if(dy > vmax[j]+Epsilon){
+	  LOG4CXX_INFO(KrisLibrary::logger(),"End speed ["<<i+1<<","<<j<<"] = "<<dy<<" > vmax "<<vmax[j]);
+  }
 	minGap = Min(minGap,dy-vmin[j]);
 	minGap = Min(minGap,vmax[j]-dy);
 
 	Real ddy = Sqr(ds[i])*ddxMins[i][j] + (Sqr(ds[i+1])-Sqr(ds[i]))/(paramdivs[i+1]-paramdivs[i])*0.5*dxMins[i][j];
-	if(ddy < amin[j])
-	  printf("Accel [%d,%d] = %g < amin %g\n",i+1,j,ddy,amin[j]);
-	else if(ddy > amax[j])
-	  printf("Accel [%d,%d] = %g > amax %g\n",i+1,j,ddy,amax[j]);
+	if(ddy < amin[j]){
+	  LOG4CXX_INFO(KrisLibrary::logger(),"Accel ["<<i+1<<","<<j<<"] = "<<ddy<<" < amin "<<amin[j]);
+  }
+	else if(ddy > amax[j]){
+	  LOG4CXX_INFO(KrisLibrary::logger(),"Accel ["<<i+1<<","<<j<<"] = "<<ddy<<" > amax "<<amax[j]);
+  }
 	minGap = Min(minGap,ddy-amin[j]);
 	minGap = Min(minGap,amax[j]-ddy);
 	ddy = Sqr(ds[i])*ddxMaxs[i][j] + (Sqr(ds[i+1])-Sqr(ds[i]))/(paramdivs[i+1]-paramdivs[i])*0.5*dxMins[i][j];
-	if(ddy < amin[j])
-	  printf("Accel [%d,%d] = %g < amin %g\n",i+1,j,ddy,amin[j]);
-	else if(ddy > amax[j])
-	  printf("Accel [%d,%d] = %g > amax %g\n",i+1,j,ddy,amax[j]);
+	if(ddy < amin[j]){
+	  LOG4CXX_INFO(KrisLibrary::logger(),"Accel ["<<i+1<<","<<j<<"] = "<<ddy<<" < amin "<<amin[j]);
+  }
+	else if(ddy > amax[j]){
+	  LOG4CXX_INFO(KrisLibrary::logger(),"Accel ["<<i+1<<","<<j<<"] = "<<ddy<<" > amax "<<amax[j]);
+  }
 	minGap = Min(minGap,ddy-amin[j]);
 	minGap = Min(minGap,amax[j]-ddy);
 	ddy = Sqr(ds[i])*ddxMins[i][j] + (Sqr(ds[i+1])-Sqr(ds[i]))/(paramdivs[i+1]-paramdivs[i])*0.5*dxMaxs[i][j];
-	if(ddy < amin[j])
-	  printf("Accel [%d,%d] = %g < amin %g\n",i+1,j,ddy,amin[j]);
-	else if(ddy > amax[j])
-	  printf("Accel [%d,%d] = %g > amax %g\n",i+1,j,ddy,amax[j]);
+	if(ddy < amin[j]){
+	  LOG4CXX_INFO(KrisLibrary::logger(),"Accel ["<<i+1<<","<<j<<"] = "<<ddy<<" < amin "<<amin[j]);
+  }
+	else if(ddy > amax[j]){
+	  LOG4CXX_INFO(KrisLibrary::logger(),"Accel ["<<i+1<<","<<j<<"] = "<<ddy<<" > amax "<<amax[j]);
+  }
 	minGap = Min(minGap,ddy-amin[j]);
 	minGap = Min(minGap,amax[j]-ddy);
 	ddy = Sqr(ds[i])*ddxMaxs[i][j] + (Sqr(ds[i+1])-Sqr(ds[i]))/(paramdivs[i+1]-paramdivs[i])*0.5*dxMaxs[i][j];
-	if(ddy < amin[j])
-	  printf("Accel [%d,%d] = %g < amin %g\n",i+1,j,ddy,amin[j]);
-	else if(ddy > amax[j])
-	  printf("Accel [%d,%d] = %g > amax %g\n",i+1,j,ddy,amax[j]);
+	if(ddy < amin[j]){
+	  LOG4CXX_INFO(KrisLibrary::logger(),"Accel ["<<i+1<<","<<j<<"] = "<<ddy<<" < amin "<<amin[j]);
+  }
+	else if(ddy > amax[j]){
+	  LOG4CXX_INFO(KrisLibrary::logger(),"Accel ["<<i+1<<","<<j<<"] = "<<ddy<<" > amax "<<amax[j]);
+  }
 	minGap = Min(minGap,ddy-amin[j]);
 	minGap = Min(minGap,amax[j]-ddy);
 
 	ddy = Sqr(ds[i+1])*ddxMins[i][j] + (Sqr(ds[i+1])-Sqr(ds[i]))/(paramdivs[i+1]-paramdivs[i])*0.5*dxMins[i][j];
-	if(ddy < amin[j])
-	  printf("End accel [%d,%d] = %g < amin %g\n",i+1,j,ddy,amin[j]);
-	else if(ddy > amax[j])
-	  printf("End accel [%d,%d] = %g > amax %g\n",i+1,j,ddy,amax[j]);
+	if(ddy < amin[j]){
+	  LOG4CXX_INFO(KrisLibrary::logger(),"End accel ["<<i+1<<","<<j<<"] = "<<ddy<<" < amin "<<amin[j]);
+  }
+	else if(ddy > amax[j]){
+	  LOG4CXX_INFO(KrisLibrary::logger(),"End accel ["<<i+1<<","<<j<<"] = "<<ddy<<" > amax "<<amax[j]);
+  }
 	minGap = Min(minGap,ddy-amin[j]);
 	minGap = Min(minGap,amax[j]-ddy);
 	ddy = Sqr(ds[i+1])*ddxMaxs[i][j] + (Sqr(ds[i+1])-Sqr(ds[i]))/(paramdivs[i+1]-paramdivs[i])*0.5*dxMins[i][j];
-	if(ddy < amin[j])
-	  printf("End accel [%d,%d] = %g < amin %g\n",i+1,j,ddy,amin[j]);
-	else if(ddy > amax[j])
-	  printf("End accel [%d,%d] = %g > amax %g\n",i+1,j,ddy,amax[j]);
+	if(ddy < amin[j]){
+	  LOG4CXX_INFO(KrisLibrary::logger(),"End accel ["<<i+1<<","<<j<<"] = "<<ddy<<" < amin "<<amin[j]);
+  }
+	else if(ddy > amax[j]){
+	  LOG4CXX_INFO(KrisLibrary::logger(),"End accel ["<<i+1<<","<<j<<"] = "<<ddy<<" > amax "<<amax[j]);
+  }
 	minGap = Min(minGap,ddy-amin[j]);
 	minGap = Min(minGap,amax[j]-ddy);
 	ddy = Sqr(ds[i+1])*ddxMins[i][j] + (Sqr(ds[i+1])-Sqr(ds[i]))/(paramdivs[i+1]-paramdivs[i])*0.5*dxMaxs[i][j];
-	if(ddy < amin[j])
-	  printf("End accel [%d,%d] = %g < amin %g\n",i+1,j,ddy,amin[j]);
-	else if(ddy > amax[j])
-	  printf("End accel [%d,%d] = %g > amax %g\n",i+1,j,ddy,amax[j]);
+	if(ddy < amin[j]){
+	  LOG4CXX_INFO(KrisLibrary::logger(),"End accel ["<<i+1<<","<<j<<"] = "<<ddy<<" < amin "<<amin[j]);
+  }
+	else if(ddy > amax[j]){
+	  LOG4CXX_INFO(KrisLibrary::logger(),"End accel ["<<i+1<<","<<j<<"] = "<<ddy<<" > amax "<<amax[j]);
+  }
 	minGap = Min(minGap,ddy-amin[j]);
 	minGap = Min(minGap,amax[j]-ddy);
 	ddy = Sqr(ds[i+1])*ddxMaxs[i][j] + (Sqr(ds[i+1])-Sqr(ds[i]))/(paramdivs[i+1]-paramdivs[i])*0.5*dxMaxs[i][j];
-	if(ddy < amin[j])
-	  printf("End accel [%d,%d] = %g < amin %g\n",i+1,j,ddy,amin[j]);
-	else if(ddy > amax[j])
-	  printf("End accel [%d,%d] = %g > amax %g\n",i+1,j,ddy,amax[j]);
+	if(ddy < amin[j]){
+	  LOG4CXX_INFO(KrisLibrary::logger(),"End accel ["<<i+1<<","<<j<<"] = "<<ddy<<" < amin "<<amin[j]);
+  }
+	else if(ddy > amax[j]){
+	  LOG4CXX_INFO(KrisLibrary::logger(),"End accel ["<<i+1<<","<<j<<"] = "<<ddy<<" > amax "<<amax[j]);
+  }
 	minGap = Min(minGap,ddy-amin[j]);
 	minGap = Min(minGap,amax[j]-ddy);
 
@@ -1789,12 +1814,12 @@ bool TimeScaling::SolveMinTime(const Vector& vmin,const Vector& vmax,
       if(minGap > maxGap) maxGap = minGap;
       sumGap += minGap;
     }
-    printf("Maximum bound gap %g, average bound gap %g\n",maxGap,sumGap/n);
+    LOG4CXX_INFO(KrisLibrary::logger(),"Maximum bound gap "<<maxGap<<", average bound gap "<<sumGap/n);
   /*
   for(int i=0;i<=n;i++) {
-    printf("Variable %d\n",i);
+    LOG4CXX_INFO(KrisLibrary::logger(),"Variable "<<i);
     if(i<n) {
-      printf("Predicted ddx = ");
+      LOG4CXX_INFO(KrisLibrary::logger(),"Predicted ddx = ");
       for(int j=0;j<d;j++) {
 	Real maxdy=0;
 	Real dy=Sqr(ds[i])*ddxMins[i][j] + (Sqr(ds[i+1])-Sqr(ds[i]))/(paramdivs[i+1]-paramdivs[i])*0.5*dxMins[i][j];
@@ -1805,11 +1830,11 @@ bool TimeScaling::SolveMinTime(const Vector& vmin,const Vector& vmax,
 	if(Abs(dy) > Abs(maxdy)) maxdy=dy;
 	dy=Sqr(ds[i])*ddxMaxs[i][j] + (Sqr(ds[i+1])-Sqr(ds[i]))/(paramdivs[i+1]-paramdivs[i])*0.5*dxMaxs[i][j];
 	if(Abs(dy) > Abs(maxdy)) maxdy=dy;
-	printf("%g ",maxdy);
+	LOG4CXX_INFO(KrisLibrary::logger(),""<<maxdy);
       }
     }
     else {
-      printf("Predicted ddx = ");
+      LOG4CXX_INFO(KrisLibrary::logger(),"Predicted ddx = ");
       for(int j=0;j<d;j++) {
 	Real maxdy=0;
 	Real dy=Sqr(ds[i])*ddxMins[i-1][j] + (Sqr(ds[i])-Sqr(ds[i-1]))/(paramdivs[i]-paramdivs[i-1])*0.5*dxMins[i-1][j];
@@ -1820,18 +1845,17 @@ bool TimeScaling::SolveMinTime(const Vector& vmin,const Vector& vmax,
 	if(Abs(dy) > Abs(maxdy)) maxdy=dy;
 	dy=Sqr(ds[i])*ddxMaxs[i-1][j] + (Sqr(ds[i])-Sqr(ds[i-1]))/(paramdivs[i]-paramdivs[i-1])*0.5*dxMaxs[i-1][j];
 	if(Abs(dy) > Abs(maxdy)) maxdy=dy;
-	printf("%g ",maxdy);
+	LOG4CXX_INFO(KrisLibrary::logger(),""<<maxdy);
       }
     }
-    printf("\n");
+    LOG4CXX_INFO(KrisLibrary::logger(),"\n");
     for(size_t j=0;j<limitingConstraints[i].size();j++) {
       int c=limitingConstraints[i][j];
       if(c >= 0) {
 	Real ax = lp.A.dotRow(c,x);
-	printf("%g <= %g <= %g\n",lp.q(c),ax,lp.p(c));
+	LOG4CXX_INFO(KrisLibrary::logger(),""<<lp.q(c)<<" <= "<<ax<<" <= "<<lp.p(c));
 	for(SparseArray<Real>::iterator k=lp.A.rows[c].begin();k!=lp.A.rows[c].end();k++)
-	  printf("%d: %g, ",k->first,k->second);
-	printf("\n");
+	  LOG4CXX_INFO(KrisLibrary::logger(),""<< "<<": "<<k->first	LOG4CXX_INFO(KrisLibrary::logger(),"\n");
       }
     }
   }
@@ -1928,7 +1952,7 @@ bool TimeScaling::SolveMinTime(const Vector& vmin,const Vector& vmax,
   if(dsEnd >= 0)
     slp.SetFixed(n,dsEnd);
   if(n==1 && ds0 == 0 && dsEnd == 0) {
-    printf("SolveMinTime: failed, start and goal velocities are 0, only 1 grid cell\n");
+    LOG4CXX_INFO(KrisLibrary::logger(),"SolveMinTime: failed, start and goal velocities are 0, only 1 grid cell\n");
     return false;
   }
 
@@ -1963,11 +1987,11 @@ bool TimeScaling::SolveMinTime(const Vector& vmin,const Vector& vmax,
       Real a=va(j),b=vb(j),c=vc(j);
       Real thetai_offset = b - c*0.5;
       Real thetan_offset = c*0.5;
-      //printf("a=%g, b=%g, c=%g, deltas=%g, min %g, max %g\n",a,b,c,path.durations[i],amin[j],amax[j]);
+      //LOG4CXX_INFO(KrisLibrary::logger(),"a="<<a<<", b="<<b<<", c="<<c<<", deltas="<<path.durations[i]<<", min "<<amin[j]<<", max "<<amax[j]);
       for(int k=0;k<numcoeffs;k++) {
 	Real thetai_coeff = (coeffs[k][0]*a - coeffs[k][2]*b + thetai_offset)*Sqr(invDuration);
 	Real thetan_coeff = (coeffs[k][1]*a + coeffs[k][2]*b + thetan_offset)*Sqr(invDuration);
-	//printf("  coeff[i]=%g, coeff[i+1]=%g\n",thetai_coeff,thetan_coeff);
+	//LOG4CXX_INFO(KrisLibrary::logger(),"  coeff[i]="<<thetai_coeff<<", coeff[i+1]="<<thetan_coeff);
 	Ai.push_back(thetai_coeff);
 	An.push_back(thetan_coeff);
 	bi.push_back(amax[j]);
@@ -1976,30 +2000,30 @@ bool TimeScaling::SolveMinTime(const Vector& vmin,const Vector& vmax,
 	bi.push_back(-amin[j]);
       }
     }
-    //printf("Adding %d bounds...\n",Ai.size());
+    //LOG4CXX_INFO(KrisLibrary::logger(),"Adding "<<Ai.size());
     int cprev = slp.lp.A.m;
     bool res=slp.AddVel2Bounds(i,Ai,An,bi);
     if(!res) {
-      printf("LP was found to be infeasible on segment %d\n",(int)i);
-      //printf("Infeasible LP!\n");
-      //getchar();
+      LOG4CXX_INFO(KrisLibrary::logger(),"LP was found to be infeasible on segment "<<(int)i);
+      //LOG4CXX_INFO(KrisLibrary::logger(),"Infeasible LP!\n");
+      //if(KrisLibrary::logger()->isEnabledFor(log4cxx::Level::ERROR_INT)) getchar();
       return false;
     }
     /*
-    printf("New rows:\n");
+    LOG4CXX_INFO(KrisLibrary::logger(),"New rows:\n");
     for(int j=cprev;j<slp.lp.A.m;j++) {
-      printf("%g <= ",slp.lp.q(j));
+      LOG4CXX_INFO(KrisLibrary::logger(),""<<slp.lp.q(j));
       for(SparseMatrix::RowT::iterator k=slp.lp.A.rows[j].begin();k!=slp.lp.A.rows[j].end();k++)
-	printf(" %g * x[%d] + ",k->second,k->first);
-      printf("<= %g\n",slp.lp.p(j));
+	LOG4CXX_INFO(KrisLibrary::logger()," "<<k->second<<" * x["<<k->first);
+      LOG4CXX_INFO(KrisLibrary::logger(),"<= "<<slp.lp.p(j));
     }
-    getchar();
+    if(KrisLibrary::logger()->isEnabledFor(log4cxx::Level::ERROR_INT)) getchar();
     */
   }
-  cout<<n<<" segments, "<<d<<" dimensions, "<<slp.lp.A.m<<" constraints"<<endl;
+  LOG4CXX_INFO(KrisLibrary::logger(),n<<" segments, "<<d<<" dimensions, "<<slp.lp.A.m<<" constraints"<<"\n");
 
 
-  printf("Reduced %d constraints to %d\n",n*d*numcoeffs*2,slp.lp.A.m);
+  LOG4CXX_INFO(KrisLibrary::logger(),"Reduced "<<n*d*numcoeffs*2<<" constraints to "<<slp.lp.A.m);
 
   int maxIters = SLP_SOLVE_ITERS;
   bool res = slp.Solve(maxIters);
@@ -2077,7 +2101,7 @@ bool TimeScaling::SolveMinTimeArcLength(const Vector& vmin,const Vector& vmax,
   if(dsEnd >= 0)
     lp.u(n) = lp.l(n) = Sqr(dsEnd);
   if(dxMins.size()==1 && ds0 == 0 && dsEnd == 0) {
-    printf("SolveMinTimeArcLength: failed, start and goal velocities are 0, only 1 grid cell\n");
+    LOG4CXX_INFO(KrisLibrary::logger(),"SolveMinTimeArcLength: failed, start and goal velocities are 0, only 1 grid cell\n");
     return false;
   }
 
@@ -2135,8 +2159,8 @@ bool TimeScaling::SolveMinTimeArcLength(const Vector& vmin,const Vector& vmax,
 	}
       }
     }
-    //cout<<"Normalized velocity bounds "<<i<<": "<<dxnMin<<", "<<dxnMax<<endl;
-    //cout<<"Normalized acceleration bounds "<<i<<": "<<ddxnMin<<", "<<ddxnMax<<endl;
+    //LOG4CXX_INFO(KrisLibrary::logger(),"Normalized velocity bounds "<<i<<": "<<dxnMin<<", "<<dxnMax<<"\n");
+    //LOG4CXX_INFO(KrisLibrary::logger(),"Normalized acceleration bounds "<<i<<": "<<ddxnMin<<", "<<ddxnMax<<"\n");
     for(int j=0;j<d;j++) {
       Vector2 dbnd(dxnMin[j],dxnMin[j]);
       Vector2 ddbnd(ddxnMin[j],ddxnMax[j]);
@@ -2166,8 +2190,8 @@ bool TimeScaling::SolveMinTimeArcLength(const Vector& vmin,const Vector& vmax,
       //Vector2 a1(ddbnd.x*invscale-dbnd.y,ddbnd.y*invscale-dbnd.x), b1(dbnd);
       //Vector2 a2(-dbnd.y,-dbnd.x), b2(ddbnd*invscale+dbnd);
       //abnd *= invscale;
-      //printf("[%g,%g]*x[%d] + [%g,%g]*x[%d] in [%g,%g]\n",a1.x,a1.y,i,b1.x,b1.y,i+1,abnd.x,abnd.y);
-      //printf("[%g,%g]*x[%d] + [%g,%g]*x[%d] in [%g,%g]\n",a2.x,a2.y,i,b2.x,b2.y,i+1,abnd.x,abnd.y);
+      //LOG4CXX_INFO(KrisLibrary::logger(),"["<<a1.x<<","<<a1.y<<"]*x["<<i<<"] + ["<<b1.x<<","<<b1.y<<"]*x["<<i+1<<"] in ["<<abnd.x<<","<<abnd.y);
+      //LOG4CXX_INFO(KrisLibrary::logger(),"["<<a2.x<<","<<a2.y<<"]*x["<<i<<"] + ["<<b2.x<<","<<b2.y<<"]*x["<<i+1<<"] in ["<<abnd.x<<","<<abnd.y);
       //a1.x * x[i] + b1.x *x[i+1] >= abnd.x
       //a1.y * x[i] + b1.x *x[i+1] >= abnd.x
       //a1.x * x[i] + b1.y *x[i+1] <= abnd.y
@@ -2189,7 +2213,7 @@ bool TimeScaling::SolveMinTimeArcLength(const Vector& vmin,const Vector& vmax,
   }
   Assert(k == lp.A.m);
   //lp.Print(cout);
-  //getchar();
+  //if(KrisLibrary::logger()->isEnabledFor(log4cxx::Level::ERROR_INT)) getchar();
 
   //set up initial solution in a greedy fashion
   Vector x=lp.u;
@@ -2215,22 +2239,22 @@ bool TimeScaling::SolveMinTimeArcLength(const Vector& vmin,const Vector& vmax,
       }
     }
     if(x[i] == 0.0 && i != n) {
-      printf("x[%d] is set to zero, x[%d]=%g\n",i,i-1,x[i-1]);
+      LOG4CXX_INFO(KrisLibrary::logger(),"x["<<i<<"] is set to zero, x["<<i-1<<"]="<<x[i-1]);
       for(int c=cfirst;c<cend;c++) {
-	printf("' %g <= %g*%g + %g*%g <= %g\n",lp.q(c),lp.A(c,i-1),x[i-1],lp.A(c,i),xorig,lp.p(c));
+	LOG4CXX_INFO(KrisLibrary::logger(),"' "<<lp.q(c)<<" <= "<<lp.A(c,i-1)<<"*"<<x[i-1]<<" + "<<lp.A(c,i)<<"*"<<xorig<<" <= "<<lp.p(c)<<"\n");
       }
     }
     if(x[i] < 0.0 ) {
       if(x[i-1] == 0.0 ) {
-	fprintf(stderr,"Warning: two subsequent x variables are forced to be negative? %d and %d\n",i-1,i);
+		LOG4CXX_ERROR(KrisLibrary::logger(),"Warning: two subsequent x variables are forced to be negative? "<<i-1<<" and "<<i);
 	x[i] = lp.u(i);
       }
       else
 	x[i] = 0.0; 
       // if x[i] becomes 0, enforce it to be zero, and then propagate backwards
-      printf("Variable x[%d] forced to zero, from x[%d]=%g\n",i,i-1,x[i-1]);
+      LOG4CXX_INFO(KrisLibrary::logger(),"Variable x["<<i<<"] forced to zero, from x["<<i-1<<"]="<<x[i-1]);
       for(int c=cfirst;c<cend;c++) {
-	printf("' %g <= %g*%g + %g*%g <= %g\n",lp.q(c),lp.A(c,i-1),x[i-1],lp.A(c,i),xorig,lp.p(c));
+	LOG4CXX_INFO(KrisLibrary::logger(),"' "<<lp.q(c)<<" <= "<<lp.A(c,i-1)<<"*"<<x[i-1]<<" + "<<lp.A(c,i)<<"*"<<xorig<<" <= "<<lp.p(c)<<"\n");
       }
       if(BACKWARDS_PROPAGATION) {
 	int j=i;
@@ -2306,10 +2330,10 @@ bool TimeScaling::SolveMinTimeArcLength(const Vector& vmin,const Vector& vmax,
   Vector dT(n+1,0.0);
   for(int i=0;i<n;i++) {
     if(x[i] + x[i+1] <=0) {
-      fprintf(stderr,"Warning: two subsequent x variables are inititalized to be negative? %d and %d\n",i,i+1);
-      fprintf(stderr,"upper bounds %g and %g\n",lp.u(i),lp.u(i+1));
+            LOG4CXX_ERROR(KrisLibrary::logger(),"Warning: two subsequent x variables are inititalized to be negative? "<<i<<" and "<<i+1);
+            LOG4CXX_ERROR(KrisLibrary::logger(),"upper bounds "<<lp.u(i)<<" and "<<lp.u(i+1));
       lp.Print(cout);
-      getchar();
+      if(KrisLibrary::logger()->isEnabledFor(log4cxx::Level::ERROR_INT)) getchar();
       return false;
     }
     Assert(x[i]+x[i+1] > 0);
@@ -2320,9 +2344,9 @@ bool TimeScaling::SolveMinTimeArcLength(const Vector& vmin,const Vector& vmax,
       dT(i+1) -= (paramdivs[i+1]-paramdivs[i])/(ds[i+1]*Sqr(ds[i]+ds[i+1]));
   }
   lp.c = dT;
-  //cout<<"Initial solution: "<<x<<endl;
-  //cout<<"Gradient "<<dT<<endl;
-  //printf("Initial time %g\n",T);
+  //LOG4CXX_INFO(KrisLibrary::logger(),"Initial solution: "<<x<<"\n");
+  //LOG4CXX_INFO(KrisLibrary::logger(),"Gradient "<<dT<<"\n");
+  //LOG4CXX_INFO(KrisLibrary::logger(),"Initial time "<<T);
 
   Real xtol = 1e-5, ftol=1e-8;
   GLPKInterface glpk;
@@ -2360,15 +2384,15 @@ bool TimeScaling::SolveMinTimeArcLength(const Vector& vmin,const Vector& vmax,
     Vector xnext;
     LinearProgram::Result res=glpk.Solve(xnext);
     if(res == LinearProgram::Infeasible) {
-      fprintf(stderr,"Warning, got an infeasible linear program???\n");
+            LOG4CXX_ERROR(KrisLibrary::logger(),"Warning, got an infeasible linear program???\n");
       break;
     }
     else if(res == LinearProgram::Unbounded) {
-      fprintf(stderr,"Warning, got an unbounded linear program???\n");
+            LOG4CXX_ERROR(KrisLibrary::logger(),"Warning, got an unbounded linear program???\n");
       break;
     }
     else if(res == LinearProgram::Error) {
-      fprintf(stderr,"Warning, linear program solver failed\n");
+            LOG4CXX_ERROR(KrisLibrary::logger(),"Warning, linear program solver failed\n");
       break;
     }
     else {
@@ -2381,16 +2405,16 @@ bool TimeScaling::SolveMinTimeArcLength(const Vector& vmin,const Vector& vmax,
 	Assert(xnext[i] >= 0);
 	Assert(xnext[i+1] >= 0);
 	if(xnext[i]+xnext[i+1] == 0) {
-	  fprintf(stderr,"Warning: two subsequent x variables are forced to be zero? %d and %d\n",i,i+1);
-	  fprintf(stderr,"upper bounds %g and %g\n",lp.u(i),lp.u(i+1));	  
+	  	  LOG4CXX_ERROR(KrisLibrary::logger(),"Warning: two subsequent x variables are forced to be zero? "<<i<<" and "<<i+1);
+	  	  LOG4CXX_ERROR(KrisLibrary::logger(),"upper bounds "<<lp.u(i)<<" and "<<lp.u(i+1));	  
 	  lp.Print(cout);
-	  getchar();
+	  if(KrisLibrary::logger()->isEnabledFor(log4cxx::Level::ERROR_INT)) getchar();
 	  return false;
 	}
 	Assert(xnext[i]+xnext[i+1] > 0);
       }
       numIters++;
-      //cout<<"Solved solution: "<<x<<endl;
+      //LOG4CXX_INFO(KrisLibrary::logger(),"Solved solution: "<<x<<"\n");
       Real Told = T;
       for(int i=0;i<=n;i++) 
 	ds[i] = Sqrt(xnext[i]);
@@ -2424,14 +2448,14 @@ bool TimeScaling::SolveMinTimeArcLength(const Vector& vmin,const Vector& vmax,
 	      break;
 	    }
 	  }
-	  printf("SLP step %d size %g changed time from %g to %g\n",numIters,len,Told,T);
+	  LOG4CXX_INFO(KrisLibrary::logger(),"SLP step "<<numIters<<" size "<<len<<" changed time from "<<Told<<" to "<<T);
 	}
 	else 
-	  printf("SLP step %d changed time from %g to %g\n",numIters,Told,T);
+	  LOG4CXX_INFO(KrisLibrary::logger(),"SLP step "<<numIters<<" changed time from "<<Told<<" to "<<T);
       }
       else {
 	changed = true;
-	printf("SLP step %d found feasible solution at time %g\n",numIters,T);
+	LOG4CXX_INFO(KrisLibrary::logger(),"SLP step "<<numIters<<" found feasible solution at time "<<T);
       }
 
       feasible = true;
@@ -2451,14 +2475,16 @@ bool TimeScaling::SolveMinTimeArcLength(const Vector& vmin,const Vector& vmax,
 	if(x[i+1]!=0)
 	  dT(i+1) -= (paramdivs[i+1]-paramdivs[i])/(ds[i+1]*Sqr(ds[i]+ds[i+1]));
       }
-      //cout<<"Change in gradient: "<<oldDt.distance(dT)<<endl;
+      //LOG4CXX_INFO(KrisLibrary::logger(),"Change in gradient: "<<oldDt.distance(dT)<<"\n");
       glpk.SetObjective(dT,true);
     }
   }
-  if(changed)
-    printf("SLP terminated after %d iterations with total time %g\n",numIters,T);
-  else
-    printf("SLP converged after %d iterations with total time %g\n",numIters,T);
+  if(changed){
+    LOG4CXX_INFO(KrisLibrary::logger(),"SLP terminated after "<<numIters<<" iterations with total time "<<T);
+  }
+  else{
+    LOG4CXX_INFO(KrisLibrary::logger(),"SLP converged after "<<numIters<<" iterations with total time "<<T);
+  }
 
   if(CHECK_SLP_BOUNDS) {
     vector<bool> anyNonBasic(n+1,false);
@@ -2481,21 +2507,22 @@ bool TimeScaling::SolveMinTimeArcLength(const Vector& vmin,const Vector& vmax,
 	}
     }
     for(int i=0;i<=n;i++)
-      if(!anyNonBasic[i]) printf("Hmm, variable %d not involved in the basis\n",i);
+      if(!anyNonBasic[i]) LOG4CXX_INFO(KrisLibrary::logger(),"Hmm, variable "<<i);
     for(int i=0;i<=n;i++) {
-      if(find(limitingConstraints[i].begin(),limitingConstraints[i].end(),-1)!=limitingConstraints[i].end())
-	printf("v,");
+      if(find(limitingConstraints[i].begin(),limitingConstraints[i].end(),-1)!=limitingConstraints[i].end()){
+	LOG4CXX_INFO(KrisLibrary::logger(),"v,");
+      }
       else {
-	printf("a[");
+	LOG4CXX_INFO(KrisLibrary::logger(),"a[");
 	for(size_t j=0;j<limitingConstraints[i].size();j++) {
 	  int seg = limitingConstraints[i][j]/(d*8);
 	  int ind = limitingConstraints[i][j]%(d*8);
-	  printf("%d %d;",seg,ind);
+	  LOG4CXX_INFO(KrisLibrary::logger(),""<<seg<<" "<<ind);
 	}
-	printf("],");
+	LOG4CXX_INFO(KrisLibrary::logger(),"],");
       }
     }
-    printf("\n");
+    LOG4CXX_INFO(KrisLibrary::logger(),"\n");
   }
 
   params.resize(paramdivs.size());
@@ -2543,33 +2570,33 @@ bool OptimizeTimeScaling(const GeneralizedCubicBezierSpline& path,
     path.segments[i].Deriv(0.5,temp3);
     for(int j=0;j<temp1.n;j++) {
       if(temp1(j) < vmins[i](j)-Epsilon)
-	printf("OptimizeTimeScaling: Error, deriv bound %d %d incorrect @ start, %g < %g\n",i,j,temp1(j),vmins[i](j));
+	LOG4CXX_ERROR(KrisLibrary::logger(),"OptimizeTimeScaling: Error, deriv bound "<<i<<" "<<j<<" incorrect @ start, "<<temp1(j)<<" < "<<vmins[i](j));
       if(temp1(j) > vmaxs[i](j)+Epsilon)
-	printf("OptimizeTimeScaling: Error, deriv bound %d %d incorrect @ start, %g > %g\n",i,j,temp1(j),vmaxs[i](j));
+	LOG4CXX_ERROR(KrisLibrary::logger(),"OptimizeTimeScaling: Error, deriv bound "<<i<<" "<<j<<" incorrect @ start, "<<temp1(j)<<" > "<<vmaxs[i](j));
       if(temp2(j) < vmins[i](j)-Epsilon)
-	printf("OptimizeTimeScaling: Error, deriv bound %d %d incorrect @ end, %g < %g\n",i,j,temp2(j),vmins[i](j));
+	LOG4CXX_ERROR(KrisLibrary::logger(),"OptimizeTimeScaling: Error, deriv bound "<<i<<" "<<j<<" incorrect @ end, "<<temp2(j)<<" < "<<vmins[i](j));
       if(temp2(j) > vmaxs[i](j)+Epsilon)
-	printf("OptimizeTimeScaling: Error, deriv bound %d %d incorrect @ end, %g > %g\n",i,j,temp2(j),vmaxs[i](j));
+	LOG4CXX_ERROR(KrisLibrary::logger(),"OptimizeTimeScaling: Error, deriv bound "<<i<<" "<<j<<" incorrect @ end, "<<temp2(j)<<" > "<<vmaxs[i](j));
       if(temp3(j) < vmins[i](j)-Epsilon)
-	printf("OptimizeTimeScaling: Error, deriv bound %d %d incorrect @ mid, %g < %g\n",i,j,temp3(j),vmins[i](j));
+	LOG4CXX_ERROR(KrisLibrary::logger(),"OptimizeTimeScaling: Error, deriv bound "<<i<<" "<<j<<" incorrect @ mid, "<<temp3(j)<<" < "<<vmins[i](j));
       if(temp3(j) > vmaxs[i](j)+Epsilon)
-	printf("OptimizeTimeScaling: Error, deriv bound %d %d incorrect @ mid, %g > %g\n",i,j,temp3(j),vmaxs[i](j));
+	LOG4CXX_ERROR(KrisLibrary::logger(),"OptimizeTimeScaling: Error, deriv bound "<<i<<" "<<j<<" incorrect @ mid, "<<temp3(j)<<" > "<<vmaxs[i](j));
       if((Max(temp1(j),temp2(j),temp3(j))-Min(temp1(j),temp2(j),temp3(j)))*2.0 < (vmaxs[i](j) - vmins[i](j)))
-	printf("OptimizeTimeScaling: Warning, deriv bound %d %d is loose, [%g,%g] vs %g->%g->%g\n",i,j,vmins[i](j),vmaxs[i](j),temp1(j),temp3(j),temp2(j));
+	LOG4CXX_WARN(KrisLibrary::logger(),"OptimizeTimeScaling: Warning, deriv bound "<<i<<" "<<j<<" is loose, ["<<vmins[i](j)<<","<<vmaxs[i](j)<<"] vs "<<temp1(j)<<"->"<<temp3(j)<<"->"<<temp2(j));
     }
     path.segments[i].Accel(0,temp1);
     path.segments[i].Accel(1,temp2);
     for(int j=0;j<temp1.n;j++) {
       if(temp1(j) < amins[i](j)-Epsilon)
-	printf("OptimizeTimeScaling: Error, accel bound %d %d incorrect @ start, %g < %g\n",i,j,temp1(j),amins[i](j));
+	LOG4CXX_ERROR(KrisLibrary::logger(),"OptimizeTimeScaling: Error, accel bound "<<i<<" "<<j<<" incorrect @ start, "<<temp1(j)<<" < "<<amins[i](j));
       if(temp1(j) > amaxs[i](j)+Epsilon)
-	printf("OptimizeTimeScaling: Error, accel bound %d %d incorrect @ start, %g > %g\n",i,j,temp1(j),amaxs[i](j));
+	LOG4CXX_ERROR(KrisLibrary::logger(),"OptimizeTimeScaling: Error, accel bound "<<i<<" "<<j<<" incorrect @ start, "<<temp1(j)<<" > "<<amaxs[i](j));
       if(temp2(j) < amins[i](j)-Epsilon)
-	printf("OptimizeTimeScaling: Error, accel bound %d %d incorrect @ end, %g < %g\n",i,j,temp2(j),amins[i](j));
+	LOG4CXX_ERROR(KrisLibrary::logger(),"OptimizeTimeScaling: Error, accel bound "<<i<<" "<<j<<" incorrect @ end, "<<temp2(j)<<" < "<<amins[i](j));
       if(temp2(j) > amaxs[i](j)+Epsilon)
-	printf("OptimizeTimeScaling: Error, accel bound %d %d incorrect @ end, %g > %g\n",i,j,temp2(j),amaxs[i](j));
+	LOG4CXX_ERROR(KrisLibrary::logger(),"OptimizeTimeScaling: Error, accel bound "<<i<<" "<<j<<" incorrect @ end, "<<temp2(j)<<" > "<<amaxs[i](j));
       if(Abs(temp2(j) - temp1(j))*2.0 < (amaxs[i](j) - amins[i](j)))
-	printf("OptimizeTimeScaling: Warning, accel bound %d %d is loose, [%g,%g] vs [%g,%g]\n",i,j,amins[i](j),amaxs[i](j),temp1(j),temp2(j));
+	LOG4CXX_WARN(KrisLibrary::logger(),"OptimizeTimeScaling: Warning, accel bound "<<i<<" "<<j<<" is loose, ["<<amins[i](j)<<","<<amaxs[i](j)<<"] vs ["<<temp1(j)<<","<<temp2(j));
     }
   #endif // DEBUG_INTERVAL_DERIV_BOUNDS
 #else
@@ -2587,12 +2614,12 @@ bool OptimizeTimeScaling(const GeneralizedCubicBezierSpline& path,
 
     for(size_t j=0;j<vmins[i].n;j++)
       if(vmins[i][j] < -vWarningThreshold || vmaxs[i][j] > vWarningThreshold || amins[i][j] < -aWarningThreshold || amaxs[i][j] > aWarningThreshold ) {
-	printf("Spline segment %d deriv bounds seem odd on entry %d\n",i,j);
-	printf("x0 %g, x1 %g, x2 %g, x3 %g\n",path.segments[i].x0[j],path.segments[i].x1[j],path.segments[i].x2[j],path.segments[i].x3[j]);
-	printf("duration %g\n",path.durations[i]);
-	printf("Deriv bounds %g %g, accel bounds %g %g\n",vmins[i][j],vmaxs[i][j],amins[i][j],amaxs[i][j]);
-	printf("Press enter to continue\n");
-	getchar();
+	LOG4CXX_INFO(KrisLibrary::logger(),"Spline segment "<<i<<" deriv bounds seem odd on entry "<<j);
+	LOG4CXX_INFO(KrisLibrary::logger(),"x0 "<<path.segments[i].x0[j]<<", x1 "<<path.segments[i].x1[j]<<", x2 "<<path.segments[i].x2[j]<<", x3 "<<path.segments[i].x3[j]);
+	LOG4CXX_INFO(KrisLibrary::logger(),"duration "<<path.durations[i]);
+	LOG4CXX_INFO(KrisLibrary::logger(),"Deriv bounds "<<vmins[i][j]<<" "<<vmaxs[i][j]<<", accel bounds "<<amins[i][j]<<" "<<amaxs[i][j]);
+	LOG4CXX_INFO(KrisLibrary::logger(),"Press enter to continue\n");
+	if(KrisLibrary::logger()->isEnabledFor(log4cxx::Level::ERROR_INT)) getchar();
       }
   }
   bool res=scaling.SolveMinTime(vmin,vmax,amin,amax,divs,vmins,vmaxs,amins,amaxs,0.0,0.0);
@@ -2630,7 +2657,7 @@ void TimeScaledBezierCurve::GetDiscretizedPath(Real dt,std::vector<Config>& mile
 {
   Real T = EndTime();
   Real t=0;
-  //printf("Discretizing to %d milestones\n",(int)Ceil(T/dt));
+  //LOG4CXX_INFO(KrisLibrary::logger(),"Discretizing to "<<(int)Ceil(T/dt));
   milestones.reserve((int)Ceil(T/dt));
   milestones.resize(0);
   Config temp;
@@ -2740,7 +2767,7 @@ void TimeScaledBezierCurve::Plot(const char* fn,const Vector& vmin,const Vector&
 {
   ofstream out(fn,ios::out);
   if(!out) {
-    fprintf(stderr,"TimeScaledBezierCurve::Plot(): Error opening %s\n",fn);
+        LOG4CXX_ERROR(KrisLibrary::logger(),"TimeScaledBezierCurve::Plot(): Error opening "<<fn);
     return;
   }
   out<<"s,seg,t,ds,dds,dsmax,ddsmin(ds),ddsmax(ds),max d saturation,max dd saturation,active constraint"<<endl;
@@ -2822,7 +2849,7 @@ bool CustomTimeScaling::IsFeasible(const vector<Real>& ds) const
   Real minMargin = Inf;
   for(size_t i=0;i<paramDivs.size();i++) {
     if(ds[i] < 0 || ds[i] > dsmax[i]) {
-      printf("CustomTimeScaling::IsCurrentFeasible: velocity %d exceeds bound %g > %g\n",i,ds[i],dsmax[i]);
+      LOG4CXX_INFO(KrisLibrary::logger(),"CustomTimeScaling::IsCurrentFeasible: velocity "<<i<<" exceeds bound "<<ds[i]<<" > "<<dsmax[i]);
       //return false;
       res = false;
     }
@@ -2836,13 +2863,13 @@ bool CustomTimeScaling::IsFeasible(const vector<Real>& ds) const
       for(size_t j=0;j<ds2ddsConstraintNormals[i].size();j++) {
         if(ds2ddsConstraintNormals[i][j].dot(ds2dds) > ds2ddsConstraintOffsets[i][j] + Epsilon) {
           if(!ds2ddsConstraintNames.empty()) name = ds2ddsConstraintNames[i][j].c_str();
-          printf("CustomTimeScaling::IsCurrentFeasible: start acceleration on segment %d exceeds bound %d %s: %g*%g + %g*%g = %g <= %g\n",i,j,name,
-            ds2dds.x,ds2ddsConstraintNormals[i][j].x,
-            ds2dds.y,ds2ddsConstraintNormals[i][j].y,
-            ds2dds.dot(ds2ddsConstraintNormals[i][j]),
-            ds2ddsConstraintOffsets[i][j]);
+          LOG4CXX_INFO(KrisLibrary::logger(),"CustomTimeScaling::IsCurrentFeasible: start acceleration on segment "<<i<<" exceeds bound "<<j<<" "<<name<<": "<<
+            ds2dds.x<<"*"<<ds2ddsConstraintNormals[i][j].x <<" + "<<
+            ds2dds.y<<"*"<<ds2ddsConstraintNormals[i][j].y<<" = "<<
+            ds2dds.dot(ds2ddsConstraintNormals[i][j])<<" <= "<<
+            ds2ddsConstraintOffsets[i][j]<<"\n");
           //return false;
-          getchar();
+          if(KrisLibrary::logger()->isEnabledFor(log4cxx::Level::ERROR_INT)) getchar();
           res = false;
         }
         else {
@@ -2856,13 +2883,13 @@ bool CustomTimeScaling::IsFeasible(const vector<Real>& ds) const
       for(size_t j=0;j<ds2ddsConstraintNormals[i].size();j++) {
         if(ds2ddsConstraintNormals[i][j].dot(ds2dds) > ds2ddsConstraintOffsets[i][j] + Epsilon) {
           if(!ds2ddsConstraintNames.empty()) name = ds2ddsConstraintNames[i][j].c_str();
-          printf("CustomTimeScaling::IsCurrentFeasible: end acceleration on segment %d exceeds bound %d %s: %g*%g + %g*%g = %g <= %g\n",i,j,name,
-            ds2dds.x,ds2ddsConstraintNormals[i][j].x,
-            ds2dds.y,ds2ddsConstraintNormals[i][j].y,
-            ds2dds.dot(ds2ddsConstraintNormals[i][j]),
-            ds2ddsConstraintOffsets[i][j]);
+          LOG4CXX_INFO(KrisLibrary::logger(),"CustomTimeScaling::IsCurrentFeasible: start acceleration on segment "<<i<<" exceeds bound "<<j<<" "<<name<<": "<<
+            ds2dds.x<<"*"<<ds2ddsConstraintNormals[i][j].x <<" + "<<
+            ds2dds.y<<"*"<<ds2ddsConstraintNormals[i][j].y<<" = "<<
+            ds2dds.dot(ds2ddsConstraintNormals[i][j])<<" <= "<<
+            ds2ddsConstraintOffsets[i][j]<<"\n");
           //return false;
-          getchar();
+          if(KrisLibrary::logger()->isEnabledFor(log4cxx::Level::ERROR_INT)) getchar();
           res = false;
         }
         else {
@@ -2871,7 +2898,7 @@ bool CustomTimeScaling::IsFeasible(const vector<Real>& ds) const
       }
     }
   }
-  printf("CustomTimeScaling::IsFeasible: Minimum margin is %g\n",minMargin);
+  LOG4CXX_INFO(KrisLibrary::logger(),"CustomTimeScaling::IsFeasible: Minimum margin is "<<minMargin);
   return res;
   return true;
 }
@@ -2899,7 +2926,7 @@ void CustomTimeScaling::SetPath(const GeneralizedCubicBezierSpline& path,const v
   fill(dsmax.begin(),dsmax.end(),Inf);
 
   if(SAVE_COLLOCATION_POINTS) {
-    printf("Saving collocation points to xs.txt, dxs.txt, ddxs.txt\n");
+    LOG4CXX_INFO(KrisLibrary::logger(),"Saving collocation points to xs.txt, dxs.txt, ddxs.txt\n");
     {
       ofstream out("xs.txt",ios::out);
       for(size_t i=0;i<xs.size();i++)
@@ -2946,7 +2973,7 @@ void CustomTimeScaling::SetPath(const MultiPath& path,const vector<Real>& paramD
   }
 
   if(SAVE_CONTROL_POINTS) {
-    printf("Saving control points to cps.txt\n");
+    LOG4CXX_INFO(KrisLibrary::logger(),"Saving control points to cps.txt\n");
     ofstream out("cps.txt");
     for(size_t i=0;i<smoothPaths.size();i++) {
       for(size_t j=0;j<smoothPaths[i].segments.size();j++) {
@@ -2965,7 +2992,7 @@ void CustomTimeScaling::SetPath(const MultiPath& path,const vector<Real>& paramD
   for(size_t i=0;i<smoothPaths.size();i++) {
     if(smoothPaths[i].durations.empty()) {
       if(!traj.path.durations.empty())
-	fprintf(stderr,"Error, cannot mix timed and untimed sections in multipath\n");
+		LOG4CXX_ERROR(KrisLibrary::logger(),"Error, cannot mix timed and untimed sections in multipath\n");
       Assert(traj.path.durations.empty());
     }
     traj.path.Concat(smoothPaths[i]);
@@ -2994,7 +3021,7 @@ void CustomTimeScaling::SetPath(const MultiPath& path,const vector<Real>& paramD
   fill(dsmax.begin(),dsmax.end(),Inf);
 
   if(SAVE_COLLOCATION_POINTS) {
-    printf("Saving collocation points to xs.txt, dxs.txt, ddxs.txt\n");
+    LOG4CXX_INFO(KrisLibrary::logger(),"Saving collocation points to xs.txt, dxs.txt, ddxs.txt\n");
     {
       ofstream out("xs.txt",ios::out);
       for(size_t i=0;i<xs.size();i++)
@@ -3069,12 +3096,12 @@ bool CustomTimeScaling::Optimize()
 void CustomTimeScaling::PrintActiveConstraints(ostream& out)
 {
   if(!computeLagrangeMultipliers) {
-    printf("CustomTimeScaling: Warning, have to re-solve to get lagrange multipliers.\n");
+    LOG4CXX_WARN(KrisLibrary::logger(),"CustomTimeScaling: Warning, have to re-solve to get lagrange multipliers.\n");
     computeLagrangeMultipliers = true;
     Optimize();
   }
   if(traj.timeScaling.ds.empty()) {
-    printf("CustomTimeScaling: Warning, haven't solved yet, or no feasible prior solution.\n");
+    LOG4CXX_WARN(KrisLibrary::logger(),"CustomTimeScaling: Warning, haven't solved yet, or no feasible prior solution.\n");
     Optimize();
   }
   if(traj.timeScaling.ds.empty()) {

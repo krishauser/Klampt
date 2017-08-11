@@ -38,7 +38,7 @@ class GLSimulationPlugin(GLPluginInterface):
         self.collider = collide.WorldCollider(world)
         self.sim = SimpleSimulator(world)
         self.simulate = False
-        self.commanded_config_color = [0,1,0,0.5]
+        self.dt = 0.02
 
         #turn this on to draw contact points
         self.drawContacts = False
@@ -52,6 +52,8 @@ class GLSimulationPlugin(GLPluginInterface):
         self.screenshotCount = 0
         self.verbose = 0
 
+        self.htmlSharePath = None
+        
         def toggle_simulate():
             self.simulate = not self.simulate
             print "Simulating:",self.simulate
@@ -69,38 +71,46 @@ class GLSimulationPlugin(GLPluginInterface):
                 self.drawSensors = 'full'
             else:
                 self.drawSensors = False
+        def share_path():
+            from ..io import html
+            if self.htmlSharePath is None:
+                self.htmlSharePath = html.HTMLSharePath(filename="simulation_path.html",name="Klamp't Simulation Path")
+                #20FPS is sufficient...
+                self.htmlSharePath.dt = 0.05
+                self.htmlSharePath.start(self.sim)
+            else:
+                try:
+                    from PyQt4.QtGui import QFileDialog
+                    patterns = "HTML files (*.html)"
+                    fn = QFileDialog.getSaveFileName(None, "Save path HTML file to...", self.htmlSharePath.fn, patterns)
+                    if fn:
+                        self.htmlSharePath.fn = fn
+                    else:
+                        return
+                except ImportError:
+                    pass
+                self.htmlSharePath.end()
+        def single_step():
+            print "Advancing by 0.01s"
+            self.simStep(0.01)
         self.add_action(toggle_simulate,'Toggle simulation','s')
+        self.add_action(single_step,'Step simulation',' ')
         self.add_action(toggle_movie_mode,'Toggle movie mode','m')
         self.add_action(self.sim.toggleLogging,'Toggle simulation logging','l')
         self.add_action(toggle_draw_contacts,'Toggle draw contacts','c')
         self.add_action(toggle_draw_sensors,'Toggle draw sensors','v')
+        self.add_action(share_path,'Begin/finalize logging path to HTML','w')
+
+    def initialize(self):
+        #match window refresh rate
+        self.dt = self.window.program.dt
+        return GLPluginInterface.initialize(self)
 
     def display(self):
         #Put your display handler here
         #the current example draws the simulated world in grey and the
         #commanded configurations in transparent green
         self.sim.drawGL()
-
-        """
-        #draw commanded configurations
-        if self.commanded_config_color != None:
-            for i in xrange(self.world.numRobots()):
-                r = self.world.robot(i)
-                mode = self.sim.controller(i).getControlType()
-                if mode == "PID":
-                    q = self.sim.controller(i).getCommandedConfig()
-                    #save old appearance
-                    oldapps = [r.link(j).appearance().clone() for j in xrange(r.numLinks())]
-                    #set new appearance
-                    for j in xrange(r.numLinks()):
-                        r.link(j).appearance().setColor(*self.commanded_config_color)
-                    r.setConfig(q)
-                    r.drawGL()
-                    #restore old appearance
-                    for j in xrange(r.numLinks()):
-                        r.link(j).appearance().set(oldapps[j])
-            glDisable(GL_BLEND)
-        """
 
         #draw contacts, if enabled
         if self.drawContacts:
@@ -149,25 +159,35 @@ class GLSimulationPlugin(GLPluginInterface):
         """Overload this to perform custom control handling."""
         pass
 
+    def simStep(self,dt=None):
+        """Advance the simulation and update the GUI"""
+        if dt is None:
+            dt = self.dt
+        if self.sim.getTime() == 0:
+            self.sim.simulate(0)
+
+        #Handle screenshots
+        if self.saveScreenshots:
+            #The following line saves movies on simulation time
+            if self.sim.getTime() >= self.nextScreenshotTime:
+            #The following line saves movies on wall clock time
+            #if self.ttotal >= self.nextScreenshotTime:
+                self.save_screen("image%04d.ppm"%(self.screenshotCount,))
+            self.screenshotCount += 1
+            self.nextScreenshotTime += 1.0/30.0;
+
+        if self.htmlSharePath:
+            self.htmlSharePath.animate()
+
+        self.control_loop()
+        self.sim.simulate(dt)
+        self.refresh()
+
     def idle(self):
         #Put your idle loop handler here
         #the current example simulates with the current time step self.dt
         if self.simulate:
-            #Handle screenshots
-            if self.saveScreenshots:
-                #The following line saves movies on simulation time
-                if self.sim.getTime() >= self.nextScreenshotTime:
-                #The following line saves movies on wall clock time
-                #if self.ttotal >= self.nextScreenshotTime:
-                    self.save_screen("image%04d.ppm"%(self.screenshotCount,))
-                self.screenshotCount += 1
-                self.nextScreenshotTime += 1.0/30.0;
-
-            if self.sim.getTime() == 0:
-                self.sim.simulate(0)
-            self.control_loop()
-            self.sim.simulate(self.window.program.dt)
-            self.refresh()
+            self.simStep()
         return True
 
     def mousefunc(self,button,state,x,y):

@@ -1,4 +1,6 @@
 //these two include files are needed for SimplePlan
+#include <log4cxx/logger.h>
+#include <KrisLibrary/Logger.h>
 #include "Planning/RobotCSpace.h"
   //defines WorldPlannerSettings and SingleRobotCSpace
   //includes definitions for RobotWorld, Config
@@ -76,12 +78,12 @@ bool SimplePlan(RobotWorld& world,int robot,const Config& qstart,const Config& q
   //3. Some sanity checks -- make sure the start and goal configurations
   //are feasible.
   if(!cspace.IsFeasible(qstart)) {
-    cout<<"Start configuration is infeasible, violated constraints:"<<endl;
+    LOG4CXX_INFO(KrisLibrary::logger(),"Start configuration is infeasible, violated constraints:"<<"\n");
     cspace.PrintInfeasibleNames(qstart);
     return false;
   }
   if(!cspace.IsFeasible(qgoal)) {
-    cout<<"Goal configuration is infeasible, violated constraints:"<<endl;
+    LOG4CXX_INFO(KrisLibrary::logger(),"Goal configuration is infeasible, violated constraints:"<<"\n");
     cspace.PrintInfeasibleNames(qstart);
     return false;
   }
@@ -92,7 +94,7 @@ bool SimplePlan(RobotWorld& world,int robot,const Config& qstart,const Config& q
   if(!plannerSettings.empty()) {
     bool res = factory.LoadJSON(plannerSettings);
     if(!res) 
-      printf("Warning, incorrectly formatted planner settings file\n");
+      LOG4CXX_WARN(KrisLibrary::logger(),"Warning, incorrectly formatted planner settings file\n");
   }
   //You may also manually do more planner setup here if desired, e.g.,
   //change planner type, perturbation size, connection radius, etc.
@@ -103,19 +105,19 @@ bool SimplePlan(RobotWorld& world,int robot,const Config& qstart,const Config& q
   Timer timer;
   string res = planner->Plan(path,cond);
   //print some debugging information
-  cout<<"Planner terminated with condition "<<res<<" after "<<planner->NumIterations()<<" iters and time "<<timer.ElapsedTime()<<"s"<<endl;
+  LOG4CXX_INFO(KrisLibrary::logger(),"Planner terminated with condition "<<res<<" after "<<planner->NumIterations()<<" iters and time "<<timer.ElapsedTime()<<"s"<<"\n");
   if(!path.edges.empty())
-    cout<<"Solution path length: "<<path.Length()<<endl;
+    LOG4CXX_INFO(KrisLibrary::logger(),"Solution path length: "<<path.Length()<<"\n");
   PropertyMap stats;
   planner->GetStats(stats);
-  cout<<"Planner stats: ";
+  LOG4CXX_INFO(KrisLibrary::logger(),"Planner stats: ");
   stats.Print(cout);
-  cout<<endl;
+  LOG4CXX_INFO(KrisLibrary::logger(),"\n");
   PropertyMap sstats;
   cspace.GetStats(sstats);
-  cout<<"Space stats: ";
+  LOG4CXX_INFO(KrisLibrary::logger(),"Space stats: ");
   sstats.Print(cout);
-  cout<<endl;
+  LOG4CXX_INFO(KrisLibrary::logger(),"\n");
   delete planner;
   //return true if a solution was found
   return !path.edges.empty();
@@ -124,14 +126,14 @@ bool SimplePlan(RobotWorld& world,int robot,const Config& qstart,const Config& q
 int main(int argc,const char** argv)
 {
   if(argc <= 2) {
-    printf("USAGE: PlanDemo [options] world_file configs\n");
-    printf("OPTIONS:\n");
-    printf("-o filename: the output linear path or multipath (default plandemo.xml)\n");
-    printf("-p settings: set the planner configuration file\n");
-    printf("-opt: do optimal planning (do not terminate on the first found solution)\n");
-    printf("-n iters: set the default number of iterations (default 1000)\n");
-    printf("-t time: set the planning time limit (default infinity)\n");
-    printf("-r robotindex: set the robot index (default 0)\n");
+    LOG4CXX_INFO(KrisLibrary::logger(),"USAGE: PlanDemo [options] world_file configs\n");
+    LOG4CXX_INFO(KrisLibrary::logger(),"OPTIONS:\n");
+    LOG4CXX_INFO(KrisLibrary::logger(),"-o filename: the output linear path or multipath (default plandemo.xml)\n");
+    LOG4CXX_INFO(KrisLibrary::logger(),"-p settings: set the planner configuration file\n");
+    LOG4CXX_INFO(KrisLibrary::logger(),"-opt: do optimal planning (do not terminate on the first found solution)\n");
+    LOG4CXX_INFO(KrisLibrary::logger(),"-n iters: set the default number of iterations (default 1000)\n");
+    LOG4CXX_INFO(KrisLibrary::logger(),"-t time: set the planning time limit (default infinity)\n");
+    LOG4CXX_INFO(KrisLibrary::logger(),"-r robotindex: set the robot index (default 0)\n");
     return 0;
   }
   Srand(time(NULL));
@@ -156,7 +158,7 @@ int main(int argc,const char** argv)
       }
       else if(0==strcmp(argv[i],"-p")) {
 	if(!GetFileContents(argv[i+1],plannerSettings)) {
-	  printf("Unable to load planner settings file %s\n",argv[i+1]);
+	  LOG4CXX_INFO(KrisLibrary::logger(),"Unable to load planner settings file "<<argv[i+1]);
 	  return 1;
 	}
 	i++;
@@ -170,19 +172,19 @@ int main(int argc,const char** argv)
 	i++;
       }
       else {
-	printf("Invalid option %s\n",argv[i]);
+	LOG4CXX_INFO(KrisLibrary::logger(),"Invalid option "<<argv[i]);
 	return 1;
       }
     }
     else break;
   }
   if(i+2 < argc) {
-    printf("Too few arguments provided\n");
-    printf("USAGE: PlanDemo [options] world_file configs\n");
+    LOG4CXX_INFO(KrisLibrary::logger(),"Too few arguments provided\n");
+    LOG4CXX_INFO(KrisLibrary::logger(),"USAGE: PlanDemo [options] world_file configs\n");
     return 1;
   }
   if(i+2 > argc) {
-    printf("Warning: extra arguments provided\n");
+    LOG4CXX_WARN(KrisLibrary::logger(),"Warning: extra arguments provided\n");
   }
   const char* worldfile = argv[i];
   const char* configsfile = argv[i+1];
@@ -191,11 +193,11 @@ int main(int argc,const char** argv)
   XmlWorld xmlWorld;
   RobotWorld world;
   if(!xmlWorld.Load(worldfile)) {
-    printf("Error loading world XML file %s\n",worldfile);
+    LOG4CXX_ERROR(KrisLibrary::logger(),"Error loading world XML file "<<worldfile);
     return 1;
   }
   if(!xmlWorld.GetWorld(world)) {
-    printf("Error loading world file %s\n",worldfile);
+    LOG4CXX_ERROR(KrisLibrary::logger(),"Error loading world file "<<worldfile);
     return 1;
   }
 
@@ -203,7 +205,7 @@ int main(int argc,const char** argv)
   vector<Config> configs;
   ifstream in(configsfile);
   if(!in) {
-    printf("Error opening configs file %s\n",configsfile);
+    LOG4CXX_ERROR(KrisLibrary::logger(),"Error opening configs file "<<configsfile);
     return false;
   }
   while(in) {
@@ -212,7 +214,7 @@ int main(int argc,const char** argv)
     if(in) configs.push_back(temp);
   }
   if(configs.size() < 2) {
-    printf("Configs file does not contain 2 or more configs\n");
+    LOG4CXX_INFO(KrisLibrary::logger(),"Configs file does not contain 2 or more configs\n");
     return 1;
   }
 
@@ -231,7 +233,7 @@ int main(int argc,const char** argv)
   for(size_t i=0;i+1<configs.size();i++) {
     MilestonePath mpath;
     if(!SimplePlan(world,robot,configs[i],configs[i+1],mpath,termCond,plannerSettings)) {
-      printf("Planning from configuration %d to %d failed\n",i,i+1);
+      LOG4CXX_INFO(KrisLibrary::logger(),"Planning from configuration "<<i<<" to "<<i+1);
       path.sections.resize(path.sections.size()+1);
       path.sections.back().settings["infeasible"]=1;
       path.sections.back().milestones.resize(2);
@@ -246,13 +248,15 @@ int main(int argc,const char** argv)
 	path.sections.back().milestones[j] = mpath.GetMilestone(j);
     }
   }
-  if(feasible)
-    printf("Path planning success! Saving to %s\n",outputfile);
-  else
-    printf("Path planning failure. Saving placeholder path to %s\n",outputfile);
+  if(feasible){
+    LOG4CXX_INFO(KrisLibrary::logger(),"Path planning success! Saving to "<<outputfile);
+  }
+  else{
+    LOG4CXX_INFO(KrisLibrary::logger(),"Path planning failure. Saving placeholder path to "<<outputfile);
+  }
   const char* ext = FileExtension(outputfile);
   if(ext && 0==strcmp(ext,"path")) {
-    printf("Converted to linear path format\n");
+    LOG4CXX_INFO(KrisLibrary::logger(),"Converted to linear path format\n");
     LinearPath lpath;
     Convert(path,lpath);
     ofstream f(outputfile,ios::out);

@@ -33,6 +33,11 @@ add_dependencies(test_ODERigidObject GTest-ext Klampt python)
 add_test(NAME Klampt_Simulation_ODERigidObject
          WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
          COMMAND test_ODERigidObject)
+
+#weird workaround to force cmake to build the test executable before running Klampt_Simulation_ODERigidObject
+ADD_TEST(ctest_build_test_code "${CMAKE_COMMAND}" --build ${CMAKE_BINARY_DIR} --target test_ODERigidObject)
+SET_TESTS_PROPERTIES ( Klampt_Simulation_ODERigidObject PROPERTIES DEPENDS ctest_build_test_code)
+
 find_package(PythonInterp)
 
 if(PYTHONINTERP_FOUND)

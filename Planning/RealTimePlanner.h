@@ -1,6 +1,8 @@
 #ifndef REAL_TIME_PLANNER_H
 #define REAL_TIME_PLANNER_H
 
+#include <log4cxx/logger.h>
+#include <KrisLibrary/Logger.h>
 #include "RobotCSpace.h"
 #include "PlannerSettings.h"
 #include "PlannerObjective.h"
@@ -178,10 +180,10 @@ class SendPathCallbackBase
  *   //planner.sendPathCallback will be called if the planner succeeded
  * 
  *   if(changed) {
- *     printf("Path was successfully updated, split time %g, plan time %g\n",splitTime,planTime);
+ *     LOG4CXX_INFO(logger,"Path was successfully updated, split time "<<splitTime<<", plan time "<<planTime);
  *   }
  *   else {
- *     printf("Path update was unsuccessful, split time %g, plan time %g\n",splitTime,planTime);
+ *     LOG4CXX_INFO(logger,"Path update was unsuccessful, split time "<<splitTime<<", plan time "<<planTime);
  *   }
  * }
  * @endcode
@@ -276,7 +278,7 @@ public:
  *     //change the cspace or planner here if needed
  *   }
  *   if(thread.SendUpdate(queue)) {
- *     printf("Planner had an update\n")
+ *     LOG4CXX_INFO(logger,"Planner had an update\n")
  *   }
  *   ///advance the motion queue and do whatever else you need to do here...
  * }

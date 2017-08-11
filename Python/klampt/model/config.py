@@ -32,6 +32,29 @@ def components(item):
         return sum([components(v) for v in item],[])
     return [item]
 
+def componentNames(item):
+    """For compound items returns a list of names of all component sub-items.
+    For non-compound items, returns a singular name."""
+    if isinstance(item,WorldModel):
+        res = [item.robot(i).getName() for i in range(item.numRobots())]
+        res += [item.rigidObject(i).getName() for i in range(item.numRigidObjects())]
+        return res
+    elif isinstance(item,coordinates.Group):
+        res = item.frames.keys()
+        res += item.points.keys()
+        res += item.directions.keys()
+        res += [componentNames(g) for g in item.subgroups.iterkeys()]
+        return res
+    elif hasattr(item,'__iter__'):
+        if all(isinstance(v,(bool,int,float,str)) for v in item):
+            return ''
+        return sum(['['+str(i)+']'+componentNames(v) for i,v in enumerate(item)],[])
+    if hasattr(item,'getName'):
+        return [item.getName()]
+    if hasattr(item,'name'):
+        return [item.name]
+    return ['']
+
 def numConfigParams(item):
     """Returns the number of free parameters in the flattened version of the configuration
     of the given item. Nearly all Klamp't objects are recognized, including RobotModel's,
@@ -105,7 +128,7 @@ def getConfig(item):
             #planar constraint
             loc,wor = item.getPosition()
             axis = item.getPositionDirection()
-            x += loc + axis + vectorops.dot(axis,wor)
+            x += loc + axis + [vectorops.dot(axis,wor)]
         if item.numRotDims() == 3:
             x += item.getRotation()
         elif item.numRotDims() == 2:
@@ -178,7 +201,6 @@ def setConfig(item,vector):
             assert len(vector) == 6+start
             loc,wor = vector[start:start+3],vector[start+3:start+6]
             item.setAxialRotConstraint(loc,wor)
-        return x
     elif isCompound(item):
         subitems = components(item)
         lengths = []
@@ -193,7 +215,65 @@ def setConfig(item,vector):
         assert len(item) == len(vector)
         for i in xrange(len(item)):
             item[i] = vector[i]
-    return item
+    return
+
+_so3Names = ['R11','R21','R31','R12','R22','R32','R13','R23','R33']
+_pointNames = ['x','y','z']
+_se3Names = _so3Names + ['tx','ty','tz']
+
+def getConfigNames(item):
+    """Returns a list giving string names for each configuration dimension of given
+    item. Nearly all Klamp't objects are recognized, including RobotModel's,
+    RigidObjectModel's, WorldModel's, IKObjectives, and all variable types in the
+    coordinates module.
+
+    TODO: ContactPoint
+    """
+    if isinstance(item,RobotModel):
+        return [item.link(i).getName() for i in xrange(item.numLinks())]
+    elif isinstance(item,(RigidObjectModel,coordinates.Frame)):
+        return _se3Names
+    elif isinstance(item,(coordinates.Point,coordinates.Direction)):
+        return _pointNames
+    elif isinstance(item,IKObjective):
+        if item.numPosDims() == 3 and item.numRotDims() == 3:
+            #local position is irrelevant
+            return _se3Names
+        x = []
+        if item.numPosDims() == 3:
+            x += ['local_x','local_y','local_z','world_x','world_y','world_z']
+        elif item.numPosDims() == 2:
+            x += ['local_x','local_y','local_z','world_x','world_y','world_z','dir_x','dir_y','dir_z']
+        elif item.numPosDims() == 1:
+            #planar constraint
+            x += ['local_x','local_y','local_z','world_x','world_y','world_z','offset']
+        if item.numRotDims() == 3:
+            x += _so3Names
+        elif item.numRotDims() == 2:
+            x += ['local_axis_x','local_axis_y','local_axis_z','world_axis_x','world_axis_y','world_axis_z']
+        return x
+    elif isCompound(item):
+        res = []
+        cnames = componentNames(item)
+        comps = components(item)
+        for (cname,comp) in zip(cnames,comps):
+            for n in getConfigNames(c):
+                res.append(cname+'.'+n)
+        return res
+    elif hasattr(item,'__iter__'):
+        if len(item)==2:
+            if isinstance(item[0],(list,tuple)) and len(item[0])==9 and isinstance(item[1],(list,tuple)) and len(item[1])==3:
+                #assume it's an se3 element
+                return _se3Names
+        if len(item)==3 and all([isinstance(v,(float,int)) for v in item]):
+            return _pointNames
+        if isinstance(item[0],(bool,int,float,str)):
+            return ['['+str(i)+']' for i in range(len(item))]
+        else:
+            return sum(['['+str(i)+'].'+getConfigNames(v) for i,v in enumerate(item)],[])
+    else:
+        return []
+
 
 def distance(item,a,b):
     """Returns a distance metric for the given configurations a and b of the given item.

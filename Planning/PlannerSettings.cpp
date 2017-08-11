@@ -1,3 +1,5 @@
+#include <log4cxx/logger.h>
+#include <KrisLibrary/Logger.h>
 #include "PlannerSettings.h"
 using namespace Meshing;
 using namespace Geometry;
@@ -422,11 +424,11 @@ Real WorldPlannerSettings::DistanceLowerBound(RobotWorld& world,int id1,int id2,
       Robot* robot = world.robots[linkid.first];
       assert(linkid.second >= 0 && linkid.second < (int)robot->links.size());
       Real d=DistanceLowerBound(world,robot->geometry[linkid.second],id2,eps,minDist);
-      //printf("Link %d on robot %d to object %d has distance %g\n",linkid.second,linkid.first,id2,d);
-      //printf("Object %s\n",world.GetName(id2).c_str());
+      //LOG4CXX_INFO(KrisLibrary::logger(),"Link "<<linkid.second<<" on robot "<<linkid.first<<" to object "<<id2<<" has distance "<<d);
+      //LOG4CXX_INFO(KrisLibrary::logger(),"Object "<<world.GetName(id2).c_str());
       //if(d<=0) {
       //Assert(CheckCollision(world,robot->geometry[linkid.second],id2,0));
-	//printf("It collides!\n");
+	//LOG4CXX_INFO(KrisLibrary::logger(),"It collides!\n");
       //}
       return d;
     }

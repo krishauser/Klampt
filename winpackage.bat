@@ -3,13 +3,13 @@ REM script that builds and uploads everything on Windows Visual Studio 2015
 REM (assumes CMake is set up properly, Python is installed, etc)
 
 REM configuration variables
-SET buildfolder=msvc14
+SET buildfolder=msvc
 SET python=C:\Python27\python.exe
-SET klamptversion=0.6.2
+SET klamptversion=0.7.0
 
 REM update KrisLibrary, build both release and debug and copy into Library directory
 cd Library\KrisLibrary
-git pull
+REM git pull
 if %errorlevel% neq 0 exit /b %errorlevel%
 devenv %buildfolder%\KrisLibrary.sln /build Release
 if %errorlevel% neq 0 exit /b %errorlevel%
@@ -20,7 +20,7 @@ copy /Y lib\Debug\KrisLibrary.lib ..\KrisLibraryd.lib
 cd ..\..\
 
 REM update and build Klamp't
-git pull
+REM git pull
 if %errorlevel% neq 0 exit /b %errorlevel%
 devenv %buildfolder%\Klampt.sln /build Release
 REM (python doesnt build right here...) if %errorlevel% neq 0 exit /b %errorlevel%
@@ -40,7 +40,7 @@ REM zip dependency libraries
 REM   release
 mkdir Klampt-%klamptversion%.win32-deps-vs2015
 cd Library
-for %I in (assimp--3.0.1270-sdk\lib\assimp_release-dll_win32\* Assimp32.dll glpk_4_52.dll glpk_4_52.lib glui32.lib glut32.dll KrisLibrary.lib ode_double.lib tinyxml_STL.lib) do copy /Y %I ..\Klampt-%klamptversion%.win32-deps-vs2015
+for %I in (assimp--3.0.1270-sdk\lib\assimp_release-dll_win32\* Assimp32.dll glpk_4_61.dll glpk_4_61.lib glui32.lib glut32.dll glew32.dll glew32.lib KrisLibrary.lib ode_double.lib tinyxml_STL.lib) do copy /Y %I ..\Klampt-%klamptversion%.win32-deps-vs2015
 if %errorlevel% neq 0 exit /b %errorlevel%
 cd ..\Klampt-%klamptversion%.win32-deps-vs2015
 zip ..\Klampt-%klamptversion%.win32-deps-vs2015.zip *
@@ -50,7 +50,7 @@ if %errorlevel% neq 0 exit /b %errorlevel%
 REM   debug
 mkdir Klampt-%klamptversion%.win32-deps-vs2015d
 cd Library
-for %I in (assimp--3.0.1270-sdk\lib\assimp_debug-dll_win32\* Assimp32d.dll  glpk_4_52.dll glpk_4_52.lib glui32d.lib "glui-2.36\src\msvc\Debug\_glui library.pdb" glut32.dll KrisLibraryd.lib ode_doubled.lib ode-0.11.1\lib\DebugDoubleLib\ode.pdb tinyxmld_STL.lib) do copy /Y %I ..\Klampt-%klamptversion%.win32-deps-vs2015d
+for %I in (assimp--3.0.1270-sdk\lib\assimp_debug-dll_win32\* Assimp32d.dll  glpk_4_61.dll glpk_4_52.lib glui32d.lib "glui-2.36\src\msvc\Debug\_glui library.pdb" glut32.dll glew32.dll glew32.lib KrisLibraryd.lib ode_doubled.lib ode-0.14\lib\DebugDoubleLib\ode.pdb tinyxmld_STL.lib) do copy /Y %I ..\Klampt-%klamptversion%.win32-deps-vs2015d
 if %errorlevel% neq 0 exit /b %errorlevel%
 cd ..\Klampt-%klamptversion%.win32-deps-vs2015d
 zip ..\Klampt-%klamptversion%.win32-deps-vs2015d.zip *

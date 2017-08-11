@@ -1,15 +1,18 @@
+#include <log4cxx/logger.h>
+#include <KrisLibrary/Logger.h>
 #include "qrobotposegui.h"
 
 #include <QSettings>
 #include <QCoreApplication>
 
 QRobotPoseGUI::QRobotPoseGUI(QKlamptDisplay* _display,RobotPoseBackend *_backend) :
-  QtGUIBase(_backend), display(_display)
+  QKlamptGUIBase(_display,_backend)
 {
   const char* rules = "[ \
 [{type:key_down,key:c}, {type:command,cmd:constrain_current_link,args:\"\"}],	\
 [{type:key_down,key:d}, {type:command,cmd:delete_current_constraint,args:\"\"}], \
 [{type:key_down,key:p}, {type:command,cmd:print_config,args:\"\"}],	\
+[{type:key_down,key:z}, {type:command,cmd:undo_pose,args:\"\"}], \
 [{type:button_press,button:print_config}, {type:command,cmd:print_pose,args:_0}], \
 [{type:widget_value,widget:link,value:_0}, {type:command,cmd:set_link,args:_0}], \
 [{type:widget_value,widget:link_value,value:_0}, {type:command,cmd:set_link_value,args:_0}], \
@@ -22,27 +25,6 @@ QRobotPoseGUI::QRobotPoseGUI(QKlamptDisplay* _display,RobotPoseBackend *_backend
   assert(res==true);
   driver_index=0;
   link_index=0;
-
-  RobotPoseBackend* rbackend = dynamic_cast<RobotPoseBackend*>(_backend);
-  Assert(rbackend != NULL);
-
-  connect(&idle_timer, SIGNAL(timeout()),this,SLOT(OnIdleTimer()));
-  idle_timer.start(0);
-}
-
-void QRobotPoseGUI::OnIdleTimer()
-{
-  SendIdle();
-  idle_timer.start(0);
-}
-
-bool QRobotPoseGUI::OnPauseIdle(double secs) 
-{
-  if(secs > 10000000)
-    idle_timer.stop();
-  else
-    idle_timer.start(int(secs*1000));
-  return true;
 }
 
 
@@ -94,11 +76,6 @@ bool QRobotPoseGUI::OnCommand(const string &cmd, const string &args){
     return true;
 }
 
-bool QRobotPoseGUI::OnRefresh()
-{
-  display->updateGL();
-  return true;
-}
 
 
 void QRobotPoseGUI::UpdateGUI(){

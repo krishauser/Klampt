@@ -2,6 +2,7 @@
 
 import sys
 from klampt import *
+from klampt import vis
 from klampt.model import collide
 from klampt.vis.glrobotprogram import *
 from klampt.sim.simulation import ActuatorEmulator
@@ -135,11 +136,11 @@ class Emulator(ActuatorEmulator):
         return
 
 
-class MyGLViewer(GLSimulationProgram):
+class MyGLViewer(GLSimulationPlugin):
     def __init__(self,world):
         global keymap
         from functools import partial
-        GLSimulationProgram.__init__(self,world,"My GL program")
+        GLSimulationPlugin.__init__(self,world)
         self.keymap = keymap
         self.current_velocities = {}
         #Put your initialization code here
@@ -181,4 +182,4 @@ if __name__ == "__main__":
         if not res:
             raise RuntimeError("Unable to load model "+fn)
     viewer = MyGLViewer(world)
-    viewer.run()
+    vis.run(viewer)

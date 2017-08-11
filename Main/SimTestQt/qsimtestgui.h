@@ -1,8 +1,7 @@
 #ifndef QSIMTESTGUI_H
 #define QSIMTESTGUI_H
 
-#include "KlamptQt/qtguibase.h"
-#include "KlamptQt/qklamptdisplay.h"
+#include "KlamptQt/qklamptguibase.h"
 
 #include <Interface/GenericGUI.h>
 #include "Modeling/World.h"
@@ -10,7 +9,6 @@
 
 #include <QMouseEvent>
 #include <QObject>
-#include <QTimer>
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QSettings>
@@ -19,25 +17,21 @@
 #include <logoptions.h>
 #include <controllerdialog.h>
 
-class QSimTestGUI : public QtGUIBase
+class QSimTestGUI : public QKlamptGUIBase
 {
     Q_OBJECT
 
 public:
     QSimTestGUI(QKlamptDisplay* display,SimTestBackend* _backend);
     virtual ~QSimTestGUI();
-    QKlamptDisplay* display;
     WorldSimulation* sim;
     DriverEdit *driver_tool;
     LogOptions *log_options;
     ControllerDialog *controller_dialog;
     QString old_filename;
     QSettings* ini;
-    QTimer idle_timer;
 
     virtual bool OnCommand(const string& cmd,const string& args);
-    virtual bool OnRefresh();
-    virtual bool OnPauseIdle(double secs);
     void UpdateGUI();
     void UpdateMeasurements();
     void LoadFile(QString filename=QString());
@@ -47,7 +41,6 @@ public:
     void ShowHelp();
     void ShowAbout();
 public slots:
-    void OnIdleTimer();
     void SendDriverValue(int index, float value);
     void ShowSensor(int sensor,bool shown);
     void RenderSensor(int sensor,bool rendered);

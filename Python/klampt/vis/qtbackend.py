@@ -71,8 +71,14 @@ class QtGLWindow(QGLWidget):
         format.setDepth(True)
         format.setSampleBuffers(True)
         format.setSamples(4)
-        QGLWidget.__init__(self,format)
-
+        if not hasattr(QtGLWindow,"_firstWidget"):
+            QtGLWindow._firstWidget = self
+            QGLWidget.__init__(self,format,parent)
+        else:
+            shareWidget = QtGLWindow._firstWidget
+            QGLWidget.__init__(self,format,shareWidget=shareWidget)
+            #self.setContext(self.context(),shareContext=shareWidget.context())
+        
         self.name = name
         self.program = None
         self.width = 640
@@ -89,7 +95,10 @@ class QtGLWindow(QGLWidget):
         self.setFixedSize(self.width,self.height)
         self.setWindowTitle(self.name)
         self.idleTimer = QTimer()
+        self.nextIdleEvent = 0
         self.actions = []
+        self.actionMenu = None
+        self.inpaint = False
 
     def setProgram(self,program):
         from glprogram import GLProgram
@@ -104,7 +113,10 @@ class QtGLWindow(QGLWidget):
             program.initialize()
             program.reshapefunc(self.width,self.height)
             def f():
+                self.nextIdleEvent = 0
                 if self.program: self.program.idlefunc()
+                if self.nextIdleEvent == 0:
+                    self.idleTimer.start(0)
             self.idleTimer.timeout.connect(f)
         else:
             self.reshape(program.view.w,program.view.h)
@@ -120,16 +132,26 @@ class QtGLWindow(QGLWidget):
         self.setMouseTracking(True)
         self.setFocusPolicy(Qt.StrongFocus)
         def f():
+            self.nextIdleEvent = 0
             if self.program: self.program.idlefunc()
+            if self.nextIdleEvent == 0:
+                self.idleTimer.start(0)
         self.idleTimer.timeout.connect(f)
+        self.idleTimer.setSingleShot(True)
         self.idleTimer.start(0)
         #init function
         self.program.initialize()
+
+        if self.actionMenu is not None:
+            for a in self.actions:
+                self.actionMenu.addAction(a)
+        else:
+            print "QtGLWidget.initialize: no action menu?"
+
         self.initialized = True
 
     def add_action(self,hook,short_text,key,description=None):
         a = QtGui.QAction(short_text, self)
-        #a.setShortcut("Ctrl+"+key.upper())
         a.setShortcut(key)
         if description == None:
             description = short_text
@@ -142,8 +164,11 @@ class QtGLWindow(QGLWidget):
 
     #QtGLWidget bindings
     def initializeGL(self):
-        #print "######### QGLWidget Initialize GL ###############"
+        print "######### QGLWidget Initialize GL ###############"
+        if self.initialized:
+            print "QGLWidget.initializeGL: already initialized?"
         try:
+            self.makeCurrent()
             return self.initialize()
         except Exception,e:
             import traceback
@@ -154,6 +179,8 @@ class QtGLWindow(QGLWidget):
         if self.program == None:
             print "QGLWidget.resizeGL: called after close?"
             return
+        if not self.isVisible():
+            return
         (self.width,self.height) = (w,h)
         self.program.reshapefunc(w,h)
         return
@@ -161,14 +188,22 @@ class QtGLWindow(QGLWidget):
         if self.program == None:
             print "QGLWidget.paintGL: called after close?"
             return
+        if not self.isVisible():
+            print "QGLWidget.paintGL: called while invisible?"
+            return
+        if self.inpaint:
+            return
+        self.inpaint = True
         self.refreshed = False
         try:
+            glRenderMode(GL_RENDER)
             res = self.program.displayfunc()
         except Exception,e:
             import traceback
             print "QGLWidget.paintGL: hit an exception?"
             traceback.print_exc()
             exit(-1)
+        self.inpaint = False
         return
     #QWidget bindings
     def mouseMoveEvent(self,e):
@@ -227,12 +262,16 @@ class QtGLWindow(QGLWidget):
     def idlesleep(self,duration=float('inf')):
         """Sleeps the idle callback for t seconds.  If t is not provided,
         the idle callback is slept forever"""
-        if duration==0:
+        if duration<=0:
+            self.nextIdleEvent = 0
             self.idleTimer.start(0)
-        else:
+        elif duration == float('inf'):
+            #print "Stopping idle timer",self.name,"forever"
             self.idleTimer.stop()
-            if duration!=float('inf'):
-                QTimer.singleShot(duration*1000,lambda:self.idleTimer.start(0));
+        else:
+            #print "Stopping idle timer",self.name,duration
+            self.idleTimer.start(int(1000*duration))
+            self.nextIdleEvent = duration
 
     def close(self):
         """Call close() after this widget should be closed down, to stop
@@ -246,37 +285,53 @@ class QtGLWindow(QGLWidget):
     def refresh(self):
         if not self.refreshed:
             self.refreshed = True
+            if not self.isVisible():
+                return
             #TODO: resolve whether it's better to call updateGL here or to schedule
             # a timer event
+            #first method: may have issues with being called from a different thread?
+            #self.makeCurrent()
             #self.updateGL()
-            QTimer.singleShot(0,lambda:self.updateGL());
+            #second method: works even when called from a different thread.
+            def dorefresh():
+                self.makeCurrent()
+                #self.updateGL()
+                self.update()
+            QTimer.singleShot(0,dorefresh)
 
     def reshape(self,w,h):
         (self.width,self.height) = (w,h)
-        self.setFixedSize(self.width,self.height)
-        self.window().resize(self.sizeHint())
-        self.refresh()
+        def doreshape():
+            self.setFixedSize(self.width,self.height)
+            self.window().resize(self.sizeHint())
+            self.window().adjustSize()
+            if self.isVisible():
+                self.refresh()
+        if not self.initialized: doreshape()
+        else: QTimer.singleShot(0,doreshape)
 
     def draw_text(self,point,text,size=12,color=None):
         if color:
-            glColor3f(*color)
+            if len(color)==3:
+                glColor3f(*color)
+            else:
+                glColor4f(*color)
+
+        font = QtGui.QFont()
+        font.setPixelSize(size)
         if len(point) == 2:
-            self.renderText(point[0],point[1],0,text)
+            self.renderText(point[0],point[1],0,text,font)
         else:
-            self.renderText(point[0],point[1],point[2],text)
+            self.renderText(point[0],point[1],point[2],text,font)
 
 
 class QtBackend:
     """
-    To use as a standalone program: Set up your GLProgramInterface, then call run() to start the Qt main loop. 
-    
-    For more control over windowing, you can use the createWindow function to
-    construct new windows and setProgram to set the program used in that window.
+    Backend implementation of OpenGL visualization using Qt. Usually hidden from the user.
 
-    IMPORTANT NOTE: only one window may be created for a given world due to OpenGL display lists
-    not being shared between OpenGL contexts.  If you want to use multiple windows, then a new world
-    should be loaded for each world.  You can close down and start up a new window with the same world
-    as long as you refresh all appearances in the world.
+    To use as a standalone program: Set up your GLProgramInterface, call createWindow to
+    construct new windows and setProgram to set the GLProgram used in that window.
+    Then call run() to start the Qt main loop. 
     """
     def __init__(self):
         self.app = None
