@@ -587,15 +587,15 @@ void ContactSensor::SimulateKinematic(Robot& robot,RobotWorld& world)
 
 void ContactSensor::Simulate(ControlledRobotSimulator* robot,WorldSimulation* sim)
 {
-  RigidTransform Tlink;
-  robot->oderobot->GetLinkTransform(link,Tlink);
-  RigidTransform TsensorWorld  = Tlink*Tsensor;
   contact = false;
   force.setZero();
   dBodyID body = robot->oderobot->body(link);
   if(!body || !HasContact(body)) {
     return;
   }
+  RigidTransform Tlink;
+  robot->oderobot->GetLinkTransform(link,Tlink);
+  RigidTransform TsensorWorld  = Tlink*Tsensor;
   //look through contacts
   vector<ODEContactList> contacts;
   GetContacts(body,contacts);
@@ -607,7 +607,7 @@ void ContactSensor::Simulate(ControlledRobotSimulator* robot,WorldSimulation* si
 	 patchMin.y <= xlocal.y && xlocal.y <= patchMax.y &&
 	 Abs(xlocal.z) <= patchTolerance) {
 	//contact!
-	Tsensor.R.mulTranspose(contacts[i].forces[j],flocal);
+	TsensorWorld.R.mulTranspose(contacts[i].forces[j],flocal);
   if(falloffCoefficient > 0) {
     Vector2 patchCenter = 0.5*(patchMin+patchMax);
     Real weight = 1.0-Abs(4.0*(xlocal.x - patchCenter.x)*(xlocal.y - patchCenter.y))/((patchMax.x - patchMin.x)*(patchMax.y - patchMin.y));

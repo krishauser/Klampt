@@ -566,7 +566,8 @@ void ODESimulator::Step(Real dt)
         }
   		  if(rollback && !lastState.IsOpen()) {
           LOG4CXX_INFO(KrisLibrary::logger(),"ODESimulation: Rollback rejected because last state not saved\n");
-          KrisLibrary::loggerWait();;;
+          //KrisLibrary::loggerWait();;;
+          //getchar();
           rollback = false;
   		  }
   		  if(rollback && timestep < settings.minimumAdaptiveTimeStep) {
@@ -742,7 +743,7 @@ void ODESimulator::Step(Real dt)
           }
   			}
   			LOG4CXX_INFO(KrisLibrary::logger(),"Press enter to continue...\n");
-  			KrisLibrary::loggerWait();;;
+  			//KrisLibrary::loggerWait();;;
         status = StatusContactUnreliable;
   			//NO ROLLBACK ON FIRST
   			rollback = false;
@@ -1311,7 +1312,7 @@ void ProcessContacts(list<ODEContactResult>::iterator start,list<ODEContactResul
       if(settings.maxContacts > 50) {
 	if(!warnedContacts) {
 	  LOG4CXX_INFO(KrisLibrary::logger(),"Max contacts > 50, may crash.  Press enter to continue...\n");
-	  KrisLibrary::loggerWait();;;
+	  //KrisLibrary::loggerWait();;;
 	}
 	warnedContacts = true;
       }
@@ -1328,7 +1329,7 @@ void ProcessContacts(list<ODEContactResult>::iterator start,list<ODEContactResul
       if(settings.maxContacts > 50) {
 	if(!warnedContacts) {
 	  LOG4CXX_INFO(KrisLibrary::logger(),"Max contacts > 50, may crash.  Press enter to continue...\n");
-	  KrisLibrary::loggerWait();;;
+	  //KrisLibrary::loggerWait();;;
 	}
 	warnedContacts = true;
       }
@@ -1858,6 +1859,18 @@ bool ODESimulator::InstabilityCorrection()
   return corrected;
 }
 
+void ODESimulator::DisableInstabilityCorrection()
+{
+  energies.clear();
+}
+
+void ODESimulator::DisableInstabilityCorrection(const ODEObjectID& obj)
+{
+  map<ODEObjectID,Real>::iterator i = energies.find(obj);
+  if(i != energies.end()) 
+    energies.erase(i);
+}
+
 void ODESimulator::ClearContactFeedback()
 {
   for(map<CollisionPair,ODEContactList>::iterator i=contactList.begin();i!=contactList.end();i++) {
@@ -1902,7 +1915,7 @@ bool ODESimulator::ReadState(File& f)
   if(!ReadFile(f,status)) return false;
   if(!ReadState_Internal(f)) return false;
 
-  //TODO: maintain instability detection state and 
+  //TODO: maintain instability detection state, margins, and status
   energies.clear();
   lastMarginsRemaining.clear();
   statusHistory.clear();
