@@ -184,9 +184,9 @@
 
          function enablePlaybackButtons()
          {
-           $('#reset').click(onClickReset);
-           $('#step').click(onClickRequestAdvance);
-           $('#play_pause').click(onClickPlayPause);
+           $('#reset').off('click').click(onClickReset);
+           $('#step').off('click').click(onClickRequestAdvance);
+           $('#play_pause').off('click').click(onClickPlayPause);
             make_reset('reset');
             make_step('step');
             make_play('play_pause');
