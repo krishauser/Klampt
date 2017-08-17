@@ -399,7 +399,7 @@ void DynamicPath::Concat(const DynamicPath& suffix)
 	LOG4CXX_INFO(KrisLibrary::logger(),""<<ramps.back().dx1[i]<<" - "<<suffix.ramps.front().dx0[i]<<" = "<<ramps.back().dx1[i]-suffix.ramps.front().dx0[i]);
       if(gErrorGetchar) {
 	LOG4CXX_INFO(KrisLibrary::logger(),"Press enter to continue\n");
-	KrisLibrary::loggerWait();
+	//KrisLibrary::loggerWait();
       }
     }
     ramps.back().x1 = suffix.ramps.front().x0;

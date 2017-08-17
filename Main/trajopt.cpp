@@ -210,7 +210,7 @@ void ContactOptimizeMultipath(const char* robfile,const char* pathfile,const cha
       LOG4CXX_INFO(KrisLibrary::logger(),"Should set ignoreForces = true in trajopt.settings if you wish\n");
       LOG4CXX_INFO(KrisLibrary::logger(),"to ignore contact force constraints.\n");
       LOG4CXX_INFO(KrisLibrary::logger(),"Press enter to continue...\n");
-      KrisLibrary::loggerWait();
+      //KrisLibrary::loggerWait();
     }
   }
 

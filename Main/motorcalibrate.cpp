@@ -244,12 +244,12 @@ dts,torquemin,torquemax);
     for(size_t i=0;i<f.fs.size();i++) { 
       (*f.fs[i])(minProblem.x,res);
       LOG4CXX_INFO(KrisLibrary::logger(),""<<res[0]<<", "<<res[1]<<": x'' = "<<minvs[i]<<"*(PID("<<xDes[i]<<","<<dxDes[i]<<") - "<<ds[i]<<"*x' + "<<ks[i]<<"*x + "<<cs[i]);
-      if(gErrorGetchar && (i+1)%100 == 0) KrisLibrary::loggerWait();
+      //if(gErrorGetchar && (i+1)%100 == 0) KrisLibrary::loggerWait();
       if(!IsFinite(res[0]) || !IsFinite(res[1]) || Abs(res[1]) > 1e2) {
 	LOG4CXX_ERROR(KrisLibrary::logger(),"Large error on step "<< i<<" this may require tuning initial parameters\n");
   if(gErrorGetchar) {
 	  LOG4CXX_INFO(KrisLibrary::logger(),"Press enter to continue\n");
-	  KrisLibrary::loggerWait();
+	  //KrisLibrary::loggerWait();
 	  paused = true;
 	}
 	break;
@@ -262,7 +262,7 @@ dts,torquemin,torquemax);
   LOG4CXX_INFO(KrisLibrary::logger(),"SD result: "<<res<<" after "<<maxIters<<" iters, RMSE "<<fx<<"\n");
   if(paused) {
     LOG4CXX_INFO(KrisLibrary::logger(),"Press enter to continue\n");
-    KrisLibrary::loggerWait();
+    //KrisLibrary::loggerWait();
   }
   kP = minProblem.x(0);
   kI = minProblem.x(1);
@@ -397,7 +397,7 @@ void LinearizeRobot(Robot& robot,const vector<int>& fixedLinks,
     LOG4CXX_INFO(KrisLibrary::logger(),"Mass matrix inverse diag"<<minv<<"\n");
     if(gErrorGetchar) {
       LOG4CXX_INFO(KrisLibrary::logger(),"Press enter to continue\n");
-      KrisLibrary::loggerWait();
+      //KrisLibrary::loggerWait();
     }
   }
 }
@@ -579,7 +579,7 @@ void RunCalibrationInd(MotorCalibrationProblem& problem,int numIters)
     LOG4CXX_INFO(KrisLibrary::logger(),"\n");
     rmsds[k]=res;
     if(gStepGetchar) {
-      KrisLibrary::loggerWait();
+      //KrisLibrary::loggerWait();
     }
   }
 

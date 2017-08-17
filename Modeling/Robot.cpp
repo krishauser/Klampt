@@ -91,7 +91,7 @@ void GetAccMax(const Robot& robot, Vector& accMax) {
 		if (!IsFinite(accMax(i))) {
 			LOG4CXX_WARN(KrisLibrary::logger(),"Warning, infinite acceleration limit for joint "<< i);
 			LOG4CXX_INFO(KrisLibrary::logger(),"Press enter to continue\n");
-			KrisLibrary::loggerWait();
+			//KrisLibrary::loggerWait();
 		}
 	}
 }
@@ -1103,7 +1103,7 @@ bool Robot::LoadRob(const char* fn) {
 					if(!links[i].inertia.isZero(1e300)) {
 					  LOG4CXX_INFO(KrisLibrary::logger(),"Huge automass inertia for "<<linkNames[i]<<": "<<"\n"<<links[i].inertia<<"\n");
 					  LOG4CXX_INFO(KrisLibrary::logger(),"Press enter to continue..."<<"\n");
-					  KrisLibrary::loggerWait();
+					  //KrisLibrary::loggerWait();
 					}
 				} else {
 					links[i].inertia.setZero();
@@ -2415,7 +2415,7 @@ bool Robot::LoadURDF(const char* fn)
 	if(!loaded) {
 	  	  LOG4CXX_ERROR(KrisLibrary::logger(),"Strange, unable to re-open URDF robot file "<<fn);
 	  LOG4CXX_INFO(KrisLibrary::logger(),"Press Enter to continue\n");
-	  KrisLibrary::loggerWait();
+	  //KrisLibrary::loggerWait();
 	}
 	TiXmlElement *robot_xml = xml_doc.FirstChildElement("robot");
 	TiXmlElement *klampt_xml = NULL;
@@ -2747,7 +2747,7 @@ bool Robot::LoadURDF(const char* fn)
 		  this->links[link_index].w.set(linkNode->axis);
 		if(this->links[link_index].w.norm() < 0.1){
 		  LOG4CXX_ERROR(KrisLibrary::logger(),"Axis error: "<<linkNames[link_index]<<";"<<this->links[link_index].w<<"\n");
-		  KrisLibrary::loggerWait();
+		  //KrisLibrary::loggerWait();
 		}
 
 		//If have inertia specified, then, use the specified inertia

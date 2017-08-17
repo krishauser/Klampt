@@ -314,7 +314,7 @@ void ODERobot::Create(int robotIndex,dWorldID worldID,bool useBoundaryLayer)
       body.inertia.setIdentity(); body.inertia *= 0.01;
       CopyMatrix(mass.I,body.inertia);
             LOG4CXX_ERROR(KrisLibrary::logger(),"Setting inertia to 0.01*identity. Press enter to continue...\n");
-      KrisLibrary::loggerWait();
+      //KrisLibrary::loggerWait();
     }
     dBodySetMass(bodyID[primaryLink],&mass);
 
@@ -635,7 +635,7 @@ void ODERobot::SetVelocities(const Config& dq)
     LOG4CXX_ERROR(KrisLibrary::logger(),"Error: "<<temp.distance(dq)<<"\n");
     LOG4CXX_ERROR(KrisLibrary::logger(),"did you remember to set the robot's configuration?"<<"\n");
     LOG4CXX_INFO(KrisLibrary::logger(),"Press enter to continue..."<<"\n");
-    KrisLibrary::loggerWait();
+    //KrisLibrary::loggerWait();
   }
   //Assert(temp.isEqual(dq,1e-4));
 }
@@ -811,7 +811,7 @@ void ODERobot::AddLinkTorque(int i,Real t)
   }
   if(!IsFinite(t)) {
     LOG4CXX_ERROR(KrisLibrary::logger(),"ODERobot::AddLinkTorque: Error, commanding link "<<i);
-    KrisLibrary::loggerWait();
+    //KrisLibrary::loggerWait();
     return;
   }
   if(robot.links[i].type == RobotLink3D::Revolute)   

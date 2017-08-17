@@ -2844,7 +2844,7 @@ void RobotSensors::MakeDefault(Robot* robot)
     LOG4CXX_INFO(KrisLibrary::logger(),"RobotSensors::MakeDefault: invalid sensor data format "<<sensorXml.c_str());
     LOG4CXX_INFO(KrisLibrary::logger(),"  Making the standard sensors instead.\n");
     LOG4CXX_INFO(KrisLibrary::logger(),"  Press enter to continue.\n");
-    KrisLibrary::loggerWait();
+    //KrisLibrary::loggerWait();
     sensors.resize(0);
   }
   //LOG4CXX_INFO(KrisLibrary::logger(),"RobotSensors::MakeDefault: no \"sensors\" property in robot\n");

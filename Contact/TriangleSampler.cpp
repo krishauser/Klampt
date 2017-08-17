@@ -29,7 +29,7 @@ void Triangle2DSampler::SamplePoint(Vector2& x) const
   if(tris.empty()) {
     LOG4CXX_ERROR(KrisLibrary::logger(),"Triangle2DSampler: tris are empty!"<<"\n");
     LOG4CXX_ERROR(KrisLibrary::logger(),"Press any key to continue"<<"\n");
-    KrisLibrary::loggerWait();
+    //KrisLibrary::loggerWait();
     x.setZero();
     return;
   }
@@ -107,7 +107,7 @@ void Triangle3DSampler::SamplePoint(Vector3& x) const
   if(tris.empty()) {
     LOG4CXX_ERROR(KrisLibrary::logger(),"Triangle3DSampler: tris are empty!"<<"\n");
     LOG4CXX_ERROR(KrisLibrary::logger(),"Press any key to continue"<<"\n");
-    KrisLibrary::loggerWait();
+    //KrisLibrary::loggerWait();
     x.setZero();
     return;
   }
