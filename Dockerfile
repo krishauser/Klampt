@@ -1,14 +1,16 @@
-FROM ubuntu:15.04
+FROM ubuntu:16.04
 
 # This image contains Klamp't: Kris' Locomotion and Manipulation Planning Toolbox
-# This image utilizes X11 in order to allow users to interact with the GUI.
-# This image requires root access to run.
 
-MAINTAINER Steve Kuznetsov <skuznets@redhat.com>
+MAINTAINER Mark McCahill
 
 # Install dependencies
 RUN apt-get update && \
-	apt-get -y install g++ \
+	apt-get -y install \
+	 build-essential \
+	 wget \
+	 sudo \
+	 g++ \
 	 cmake \
 	 git \
 	 libboost-system-dev \
@@ -22,69 +24,87 @@ RUN apt-get update && \
 	 libxi-dev \
 	 libqt4-dev \
 	 libassimp-dev \
-	 ffmpeg && \
+	 ffmpeg \
+	 doxygen \
+	 qt5-default \
+	 libtf-dev && \
 	apt-get clean
 
-# Copy Klamp't Data
-RUN mkdir /etc/Klampt
-COPY CMakeLists.txt /etc/Klampt/CMakeLists.txt
-COPY CMakeModules /etc/Klampt/CMakeModules/
-COPY Contact /etc/Klampt/Contact/
-COPY Control /etc/Klampt/Control/
-COPY data /etc/Klampt/data/
-COPY Documentation /etc/Klampt/Documentation/
-COPY doxygen.conf /etc/Klampt/doxygen.conf
-COPY doxygen.conf.in /etc/Klampt/doxygen.conf.in
-COPY Examples /etc/Klampt/Examples/
-COPY Interface /etc/Klampt/Interface/
-COPY IO /etc/Klampt/IO/
-COPY Library /etc/Klampt/Library/
-COPY LICENSE /etc/Klampt/LICENSE
-COPY Main /etc/Klampt/Main/
-COPY Modeling /etc/Klampt/Modeling/
-COPY Planning /etc/Klampt/Planning/
-COPY Python /etc/Klampt/Python/
-COPY Simulation /etc/Klampt/Simulation/
-COPY View /etc/Klampt/View/
-COPY Web /etc/Klampt/Web/
+RUN echo "deb http://packages.ros.org/ros/ubuntu xenial main " >> /etc/apt/sources.list.d/ros-latest.list
+RUN DEBIAN_FRONTEND=noninteractive apt-key adv --keyserver hkp://ha.pool.sks-keyservers.net:80 --recv-key 421C365BD9FF1F717815A3895523BAEEB01FA116
+RUN apt-get update && \
+    apt-get -y install \
+      ros-kinetic-desktop-full \
+      python-rosinstall \
+      python-rosinstall-generator \
+      python-wstool \
+      python-rosdep && \
+    apt-get clean 
+	  
+RUN cd / ; \
+    git clone -b web_devel https://github.com/krishauser/Klampt.git
+
+RUN rosdep init
+
+# add a non-root user so we can run as that user; make sure that user is in the group "users"
+RUN adduser --disabled-password --gecos "" --ingroup users klamptuser
+
+RUN chown -R klamptuser /Klampt
+USER klamptuser
+RUN rosdep update
+RUN cd /Klampt ; \
+    git submodule init ; \
+    git submodule update
+
+USER root
 
 # Install Klamp't dependencies
-RUN cd /etc/Klampt/Library && \
+RUN cd /Klampt/Library && \
 	make unpack-deps && \
-	make deps && \
-	echo "/etc/Klampt/Library/ode-0.14/ode/src/.libs/" >> /etc/ld.so.conf && \
-	ldconfig
+	make deps 
+
+USER klamptuser
 
 # Install Klamp't
-RUN cd /etc/Klampt && \
+RUN cd /Klampt && \
 	cmake . && \
 	make Klampt && \
 	make apps && \ 
-	make python && \
+	make python 
+	
+USER root
+RUN cd /Klampt ; \
 	make python-install
 
+USER klamptuser
+
 # Build WebServer program 
-RUN cd /etc/Klampt/Web/Server && \
+RUN cd /Klampt/Web/Server && \
     make
 
-# Get web client JS libraries
-RUN cd /etc/Klampt/Web/Client && \ 
-    git submodule init && \
-    git submodule update
+# copy the web server program into place
+RUN cp /Klampt/Web/Server/WebServer /Klampt/
 
-# Link required client-side files on /var/www/html
-RUN mkdir /var/www/html
-RUN cd /var/www/html && \
-    ln -s /etc/Klampt/Web/Client/ace-builds && \
-    ln -s /etc/Klampt/Web/Client/images && \
-    ln -s /etc/Klampt/Web/Client/index_debug.html && \
-    ln -s /etc/Klampt/Web/Client/index.html && \
-    ln -s /etc/Klampt/Web/Client/KlamptClient.js && \
-    ln -s /etc/Klampt/Web/Client/kviz_docs.html && \
-    ln -s /etc/Klampt/Web/Client/Scenarios && \
-    ln -s /etc/Klampt/Web/Client/stats.js && \
-    ln -s /etc/Klampt/Web/Client/three.js && \
-    ln -s /etc/Klampt/Web/Client/w2ui 
 
-# Volume Mount User Data
-VOLUME /home/Klampt/data
+USER root
+
+# Supervisord
+RUN DEBIAN_FRONTEND=noninteractive apt-get install -y supervisor && \
+   mkdir -p /var/log/supervisor
+
+# Config files
+COPY   dockerconfigs/supervisord-klampt.conf /etc/supervisor/conf.d/supervisord-klampt.conf
+
+# add a script that supervisord could use to initialize a user and  password based on an optional
+# environmental variable ($USERPASS) passed in when the containers is instantiated
+COPY dockerconfigs/initialize.sh /
+
+RUN apt-get install  -y locales 
+RUN locale-gen en_US en_US.UTF-8
+RUN DEBIAN_FRONTEND=noninteractive dpkg-reconfigure locales
+
+# expose the websocket port that the Klampt server listens on
+EXPOSE 1234
+
+CMD ["/usr/bin/supervisord"]
+
