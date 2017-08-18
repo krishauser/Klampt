@@ -1,6 +1,8 @@
 #ifndef GENERIC_GUI_H
 #define GENERIC_GUI_H
 
+#include <log4cxx/logger.h>
+#include <KrisLibrary/Logger.h>
 #include <KrisLibrary/utils/AnyCollection.h>
 #include <KrisLibrary/math3d/primitives.h>
 #include <string>
@@ -167,13 +169,13 @@ class CompositeBackend : public GenericBackendBase
   string type; \
   res = msg["type"].as<string>(type); \
   if(!res) { \
-    cerr<<"Message doesn't contain type"<<endl; \
+    LOG4CXX_ERROR(KrisLibrary::logger(),"Message doesn't contain type"<<"\n"); \
     return false; \
   } \
 
 #define DISPATCHEND() \
   else { \
-    cerr<<"Unhandled message type "<<type<<endl; \
+    LOG4CXX_ERROR(KrisLibrary::logger(),"Unhandled message type "<<type<<"\n"); \
     return false; \
   }
 

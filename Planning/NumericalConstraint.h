@@ -1,6 +1,8 @@
 #ifndef NUMERICAL_CSPACE_CONSTRAINT_H
 #define NUMERICAL_CSPACE_CONSTRAINT_H
 
+#include <log4cxx/logger.h>
+#include <KrisLibrary/Logger.h>
 #include <KrisLibrary/math/InequalityConstraint.h>
 #include <KrisLibrary/robotics/Stability.h>
 #include <KrisLibrary/robotics/TorqueSolver.h>
@@ -63,8 +65,8 @@ struct CollisionConstraint : public InequalityConstraint
   virtual string Label(int i) const;
   virtual int NumDimensions() const {
 //	  return this->activeDofs.Size();
-//	  cout << "calling NumDimensions" << endl;
-//	  getchar();
+//	  LOG4CXX_INFO(KrisLibrary::logger(), "calling NumDimensions" << "\n");
+//	  if(KrisLibrary::logger()->isEnabledFor(log4cxx::Level::ERROR_INT)) getchar();
 	  return robot.links.size();
   }
   virtual void PreEval(const Vector& x);

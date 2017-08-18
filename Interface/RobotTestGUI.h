@@ -1,6 +1,8 @@
 #ifndef ROBOTTESTGUI
 #define ROBOTTESTGUI
 
+#include <log4cxx/logger.h>
+#include <KrisLibrary/Logger.h>
 #include "WorldGUI.h"
 #include "View/RobotPoseWidget.h"
 #include "View/ObjectPoseWidget.h"

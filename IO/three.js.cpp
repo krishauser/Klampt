@@ -1,3 +1,5 @@
+#include <log4cxx/logger.h>
+#include <KrisLibrary/Logger.h>
 #include "three.js.h"
 #include <KrisLibrary/meshing/MeshPrimitives.h>
 #include <boost/uuid/uuid.hpp>            // uuid class
@@ -461,11 +463,11 @@ void ThreeJSExport(const Meshing::TriMesh& mesh,AnyCollection& out)
 void ThreeJSExport(const Geometry::AnyCollisionGeometry3D& geom,AnyCollection& out,ThreeJSCache& cache)
 {
   if(geom.Empty()) {
-    fprintf(stderr,"Unable to save empty geometry to three.js!\n");
+        LOG4CXX_ERROR(KrisLibrary::logger(),"Unable to save empty geometry to three.js!\n");
     return;
   }
   if(cache.HasUUID(geom)) {
-    //fprintf(stderr,"Cached geometry.\n");
+        //LOG4CXX_ERROR(KrisLibrary::logger(),"Cached geometry.\n");
     out = cache.GetUUID(geom);
     return;
   }
@@ -496,14 +498,14 @@ void ThreeJSExport(const Geometry::AnyCollisionGeometry3D& geom,AnyCollection& o
     }
   }
   else if(geom.type == Geometry::AnyCollisionGeometry3D::TriangleMesh) {
-    //fprintf(stderr,"Triangle mesh geometry.\n");
+        //LOG4CXX_ERROR(KrisLibrary::logger(),"Triangle mesh geometry.\n");
     const Meshing::TriMesh& mesh = geom.AsTriangleMesh();
     out["uuid"] = cache.GetUUID(geom);
     ThreeJSExport(mesh,out);
   }
   else {
     //can't export files of that type
-    fprintf(stderr,"Unable to save geometries of that type to three.js!\n");
+        LOG4CXX_ERROR(KrisLibrary::logger(),"Unable to save geometries of that type to three.js!\n");
   }
 }
 void ThreeJSExport(const GLDraw::GeometryAppearance& app,AnyCollection& out,ThreeJSCache& cache)

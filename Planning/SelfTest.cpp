@@ -1,3 +1,5 @@
+#include <log4cxx/logger.h>
+#include <KrisLibrary/Logger.h>
 #include "SelfTest.h"
 #include "RampCSpace.h"
 #include <KrisLibrary/Timer.h>
@@ -38,11 +40,11 @@ void TestShortcutting(SingleRobotCSpace* cspace,MotionPlannerFactory& plannerFac
     mpath.CreateEdgesFromMilestones(cspace,milestones);
     mpath.edges.resize(mpath.edges.size()-1);
     bool res=mpath.IsFeasible();
-    if(!res) printf("Warning, path is not feasible\n");
-    printf("Time to check path feasibility: %g\n",timer.ElapsedTime());
+    if(!res) LOG4CXX_WARN(KrisLibrary::logger(),"Warning, path is not feasible\n");
+    LOG4CXX_INFO(KrisLibrary::logger(),"Time to check path feasibility: "<<timer.ElapsedTime());
     timer.Reset();
     
-    printf("Planned a path successfully!\n");
+    LOG4CXX_INFO(KrisLibrary::logger(),"Planned a path successfully!\n");
     
     //shortcuts
     ParabolicRamp::DynamicPath path;
@@ -71,36 +73,36 @@ void TestShortcutting(SingleRobotCSpace* cspace,MotionPlannerFactory& plannerFac
       durShortcut[i] = path.GetTotalTime();
     }
     Real tnew = path.GetTotalTime();
-    printf("Performed %d shortcuts, reduced time from %g to %g\n",ns,torig,tnew);
-    printf("**** Timing ****\n");
-    printf("Time to plan: %g\n",tPlanning);
-    printf("Sections of %d shortcuts each:\n",maxShortcutIters/10);
+    LOG4CXX_INFO(KrisLibrary::logger(),"Performed "<<ns<<" shortcuts, reduced time from "<<torig<<" to "<<tnew);
+    LOG4CXX_INFO(KrisLibrary::logger(),"**** Timing ****\n");
+    LOG4CXX_INFO(KrisLibrary::logger(),"Time to plan: "<<tPlanning);
+    LOG4CXX_INFO(KrisLibrary::logger(),"Sections of "<<maxShortcutIters/10);
     for(int i=0;i<10;i++) 
-      printf("Time to compute %g, path duration %g\n",tShortcut[i],durShortcut[i]);
+      LOG4CXX_INFO(KrisLibrary::logger(),"Time to compute "<<tShortcut[i]<<", path duration "<<durShortcut[i]);
 
     timer.Reset();
     for(size_t i=0;i<path.ramps.size();i++) {
       if(!checker.Check(path.ramps[i])) {
-	printf("Shortcutted path ramp %d was found to be infeasible!\n",i);
-	getchar();
+	LOG4CXX_INFO(KrisLibrary::logger(),"Shortcutted path ramp "<<i);
+	if(KrisLibrary::logger()->isEnabledFor(log4cxx::Level::ERROR_INT)) getchar();
       }
     }
     /*
-      printf("Regular shortcutting\n");
+      LOG4CXX_INFO(KrisLibrary::logger(),"Regular shortcutting\n");
       for(int trial = 0; trial < 5; trial++) {
       path = porig;
       timer.Reset();
       path.Shortcut(cspace,tol,Inf,maxShortcutIters);
-      printf("Time to compute %g, path duration %g\n",timer.ElapsedTime(),path.GetTotalTime());
+      LOG4CXX_INFO(KrisLibrary::logger(),"Time to compute "<<timer.ElapsedTime()<<", path duration "<<path.GetTotalTime());
       }
     */
 
-    printf("Dynamic shortcutting\n");
+    LOG4CXX_INFO(KrisLibrary::logger(),"Dynamic shortcutting\n");
     /* for(int trial = 0;trial < 5; trial++)*/ {
       path = porig;
       timer.Reset();
       ns = path.OnlineShortcut(0.0,0.01,checker);
-      printf("Window %g: %d shortcuts, %g seconds, path len %g\n",0.0,ns,timer.ElapsedTime(),path.GetTotalTime());
+      LOG4CXX_INFO(KrisLibrary::logger(),"Window "<<0.0<<": "<<ns<<" shortcuts, "<<timer.ElapsedTime()<<" seconds, path len "<<path.GetTotalTime());
     }
   }
 }
@@ -115,21 +117,21 @@ void TestDynamicShortcutting(SingleRobotCSpace& freeSpace,const ParabolicRamp::D
   int ns=0;
   timer.Reset();
   ns = path.OnlineShortcut(0.1,0.01,checker);
-  printf("Dynamic shortcutting with window %g made %d shortcuts, took %g seconds\n",0.1,ns,timer.ElapsedTime());
+  LOG4CXX_INFO(KrisLibrary::logger(),"Dynamic shortcutting with window "<<0.1<<" made "<<ns<<" shortcuts, took "<<timer.ElapsedTime());
 
   path = porig;
   timer.Reset();
   ns=path.OnlineShortcut(0.5,0.01,checker);
-  printf("Dynamic shortcutting with window %g made %d shortcuts, took %g seconds\n",0.5,ns,timer.ElapsedTime());
+  LOG4CXX_INFO(KrisLibrary::logger(),"Dynamic shortcutting with window "<<0.5<<" made "<<ns<<" shortcuts, took "<<timer.ElapsedTime());
 
   path = porig;
   timer.Reset();
   ns=path.OnlineShortcut(1.0,0.01,checker);
-  printf("Dynamic shortcutting with window %g made %d shortcuts, took %g seconds\n",1.0,ns,timer.ElapsedTime());
+  LOG4CXX_INFO(KrisLibrary::logger(),"Dynamic shortcutting with window "<<1.0<<" made "<<ns<<" shortcuts, took "<<timer.ElapsedTime());
 
   path = porig;
   timer.Reset();
   ns=path.OnlineShortcut(2.0,0.01,checker);
-  printf("Dynamic shortcutting with window %g made %d shortcuts, took %g seconds\n",2.0,ns,timer.ElapsedTime());
+  LOG4CXX_INFO(KrisLibrary::logger(),"Dynamic shortcutting with window "<<2.0<<" made "<<ns<<" shortcuts, took "<<timer.ElapsedTime());
 }
 
