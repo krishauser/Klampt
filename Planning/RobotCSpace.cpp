@@ -13,7 +13,7 @@
 #include <KrisLibrary/planning/CSetHelpers.h>
 #include <KrisLibrary/planning/CSpaceHelpers.h>
 #include <KrisLibrary/Timer.h>
-#include <boost/functional.hpp>
+#include <functional>
 #include <sstream>
 
 Real RandLaplacian()
@@ -656,7 +656,7 @@ void SingleRobotCSpace::Init()
     settings->collisionEnabled(ignoreCollisions[i].second,ignoreCollisions[i].first) = false;
   }
 
-  AddConstraint("update_geometry",boost::bind1st(std::mem_fun(&SingleRobotCSpace::UpdateGeometry),this));
+  AddConstraint("update_geometry",std::bind(std::mem_fun(&SingleRobotCSpace::UpdateGeometry),this,std::placeholders::_1));
 
   int id = world.RobotID(index);
   collisionPairs.resize(0);
@@ -935,7 +935,7 @@ void SingleRigidObjectCSpace::Init()
   constraints.resize(3);
   constraintNames.resize(3);
 
-  CSet::CPredicate f = boost::bind1st(std::mem_fun(&SingleRigidObjectCSpace::UpdateGeometry),this);
+  CSet::CPredicate f = std::bind(std::mem_fun(&SingleRigidObjectCSpace::UpdateGeometry),this,std::placeholders::_1);
   CSpace::AddConstraint("update_geometry",f);
 
   if(collisionPairs.empty()) {
