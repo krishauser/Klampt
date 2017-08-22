@@ -22,6 +22,7 @@
 #include <KrisLibrary/GLdraw/drawMesh.h>
 #include <KrisLibrary/GLdraw/Widget.h>
 #include <KrisLibrary/GLdraw/TransformWidget.h>
+#include <KrisLibrary/Logger.h>
 #include "View/ObjectPoseWidget.h"
 #include "View/RobotPoseWidget.h"
 #include <KrisLibrary/utils/AnyCollection.h>
@@ -36,6 +37,8 @@
 #endif //WIN32
 
 /***************************  GLOBALS: REFERENCING TO KLAMPT C++ CODE ***************************************/
+
+DEFINE_LOGGER(PyKlampt)
 
 /// Internally used.
 struct WorldData
@@ -236,7 +239,7 @@ void setRandomSeed(int seed)
 ManagedGeometry& GetManagedGeometry(RobotWorld& world,int id)
 {
   if(id < 0) {
-    fprintf(stderr,"GetManagedGeometry(): Invalid ID: %d\n",id);
+    LOG4CXX_ERROR(GET_LOGGER(PyKlampt),"GetManagedGeometry(): Invalid ID: "<<id);
     return world.robots[0]->geomManagers[0];
   }
   int terrain = world.IsTerrain(id);
@@ -249,7 +252,7 @@ ManagedGeometry& GetManagedGeometry(RobotWorld& world,int id)
   if(robotLink.first >= 0) {
     return world.robots[robotLink.first]->geomManagers[robotLink.second];
   }
-  fprintf(stderr,"GetManagedGeometry(): Invalid ID: %d\n",id);
+  LOG4CXX_ERROR(GET_LOGGER(PyKlampt),"GetManagedGeometry(): Invalid ID: "<<id);
   return world.robots[0]->geomManagers[0];
 }
 
@@ -435,7 +438,7 @@ bool GeometricPrimitive::loadString(const char* str)
   properties.resize(items.size()-1);
   for(size_t i=1;i<items.size();i++)
     if(!LexicalCast<double>(items[i],properties[i-1])) {
-      fprintf(stderr,"GeometricPrimitive::loadString: could not parse item %d: \"%s\"\n",(int)i,items[i].c_str());
+      LOG4CXX_ERROR(GET_LOGGER(PyKlampt),"GeometricPrimitive::loadString: could not parse item "<<i<<" \""<<items[i]<<"\"");
       return false;
     }
   return true;
@@ -1231,7 +1234,7 @@ void Appearance::drawWorldGL(Geometry3D& g)
   }
   if(app->geom) {
     if(app->geom != geom) {
-      fprintf(stderr,"Appearance::drawGL(): performance warning, setting to a different geometry\n");
+      LOG4CXX_ERROR(GET_LOGGER(PyKlampt),"Appearance::drawGL(): performance warning, setting to a different geometry");
       app->Set(*geom);
     }
   }
@@ -1255,7 +1258,7 @@ void Appearance::drawGL(Geometry3D& g)
   }
   if(app->geom) {
     if(app->geom != geom) {
-      fprintf(stderr,"Appearance::drawGL(): performance warning, setting to a different geometry\n");
+      LOG4CXX_ERROR(GET_LOGGER(PyKlampt),"Appearance::drawGL(): performance warning, setting to a different geometry");
       app->Set(*geom);
     }
   }
@@ -1598,7 +1601,7 @@ bool WorldModel::readFile(const char* fn)
   const char* ext=FileExtension(fn);
   if(0==strcmp(ext,"rob") || 0==strcmp(ext,"urdf")) {
     if(world.LoadRobot(fn)<0) {
-      printf("Error loading robot file %s\n",fn);
+      LOG4CXX_ERROR(GET_LOGGER(PyKlampt),"Error loading robot file "<<fn);
       return false;
     }
     if(gEnableCollisionInitialization) 
@@ -1607,14 +1610,14 @@ bool WorldModel::readFile(const char* fn)
   }
   else if(0==strcmp(ext,"env") || 0==strcmp(ext,"tri") || 0==strcmp(ext,"pcd")) {
     if(world.LoadTerrain(fn)<0) {
-      printf("Error loading terrain file %s\n",fn);
+      LOG4CXX_ERROR(GET_LOGGER(PyKlampt),"Error loading terrain file "<<fn);
       return false;
     }
     if(gEnableCollisionInitialization) world.terrains.back()->InitCollisions();
   }
   else if(0==strcmp(ext,"obj")) {
     if(world.LoadRigidObject(fn)<0) {
-      printf("Error loading rigid object file %s\n",fn);
+      LOG4CXX_ERROR(GET_LOGGER(PyKlampt),"Error loading rigid object file "<<fn);
       return false;
     }
     if(gEnableCollisionInitialization) 
@@ -1645,7 +1648,7 @@ bool WorldModel::readFile(const char* fn)
     delete [] path;
     */
     if(!result) {
-      printf("Error opening or parsing world file %s\n",fn);
+      LOG4CXX_ERROR(GET_LOGGER(PyKlampt),"Error opening or parsing world file "<<fn);
       return false;
     }
     if(gEnableCollisionInitialization) 
@@ -1654,7 +1657,7 @@ bool WorldModel::readFile(const char* fn)
     return true;
   }
   else {
-    printf("Unknown file extension %s on file %s\n",ext,fn);
+    LOG4CXX_ERROR(GET_LOGGER(PyKlampt),"Unknown file extension "<<ext<<" on file "<<fn);
     return false;
   }
   return true;
@@ -3050,7 +3053,7 @@ Simulator::Simulator(const WorldModel& model)
   sim = &sims[index]->sim;
 
   //initialize simulation
-  printf("Initializing simulation...\n");
+  LOG4CXX_INFO(GET_LOGGER(PyKlampt),"Initializing simulation...");
   RobotWorld& rworld=*worlds[model.index]->world;
   sim->Init(&rworld);
 
@@ -3062,18 +3065,18 @@ Simulator::Simulator(const WorldModel& model)
 
     sim->controlSimulators[i].sensors.MakeDefault(robot);
   }
-  printf("Done\n");
+  LOG4CXX_INFO(GET_LOGGER(PyKlampt),"Done");
 
 
   //setup ODE settings, if any
   TiXmlElement* e=worlds[world.index]->xmlWorld.GetElement("simulation");
   if(e) {
-    printf("Reading simulation settings...\n");
+    LOG4CXX_INFO(GET_LOGGER(PyKlampt),"Reading simulation settings...");
     XmlSimulationSettings s(e);
     if(!s.GetSettings(*sim)) {
-      fprintf(stderr,"Warning, simulation settings not read correctly\n");
+      LOG4CXX_WARN(GET_LOGGER(PyKlampt),"Warning, simulation settings not read correctly");
     }
-    printf("Done\n");
+    LOG4CXX_INFO(GET_LOGGER(PyKlampt),"Done");
   }
 
   //TEMP: play around with auto disable of rigid objects
@@ -3745,7 +3748,7 @@ SimRobotSensor SimRobotController::sensor(const char* name)
   RobotSensors& sensors = controller->sensors;
   SmartPointer<SensorBase> sensor = sensors.GetNamedSensor(name);
   if(sensor==NULL) {
-    fprintf(stderr,"Warning, sensor %s does not exist\n",name);
+    LOG4CXX_WARN(GET_LOGGER(PyKlampt),"SimRobotController::sensor(): Warning, sensor "<<name<<" does not exist");
   }
   return SimRobotSensor(controller->robot,sensor);
 }
@@ -3827,7 +3830,7 @@ void EnablePathControl(RobotController* c)
         pc->SetConstant(q);
       }
       else {
-        fprintf(stderr,"First simulation cycle: the path controller needs to read from the encoders before motion commands can be issued\n");
+        LOG4CXX_WARN(GET_LOGGER(PyKlampt),"First simulation cycle: the path controller needs to read from the encoders before motion commands can be issued");
       }
     }
   }
@@ -4761,8 +4764,8 @@ bool SubscribeToStream(Geometry3D& g,const char* protocol,const char* name,const
   GetManagedGeometry(world,g.id).RemoveFromCache();
   return GetManagedGeometry(world,g.id).Load((string("ros:PointCloud2//")+string(name)).c_str());
       }
-      printf("Warning, attaching to a ROS stream without a ManagedGeometry.\n");
-      printf("You will not be able to automatically get updates from ROS.\n");
+      LOG4CXX_WARN(GET_LOGGER(PyKlampt),"Warning, attaching to a ROS stream without a ManagedGeometry.");
+      LOG4CXX_WARN(GET_LOGGER(PyKlampt),"You will not be able to automatically get updates from ROS.");
       if(!geom) 
         geom = new AnyCollisionGeometry3D();
       (*geom) = AnyCollisionGeometry3D(Meshing::PointCloud3D());
