@@ -540,7 +540,7 @@ void ODESimulator::Step(Real dt)
         }
   		  if(rollback && !lastState.IsOpen()) {
           printf("ODESimulation: Rollback rejected because last state not saved\n");
-          getchar();
+          //getchar();
           rollback = false;
   		  }
   		  if(rollback && timestep < settings.minimumAdaptiveTimeStep) {
@@ -712,8 +712,8 @@ void ODESimulator::Step(Real dt)
             printf("  %s - %s\n",id1.c_str(),id2.c_str());
           }
   			}
-  			printf("Press enter to continue...\n");
-  			getchar();
+  			//printf("Press enter to continue...\n");
+  			//getchar();
         status = StatusContactUnreliable;
   			//NO ROLLBACK ON FIRST
   			rollback = false;
@@ -1282,7 +1282,7 @@ void ProcessContacts(list<ODEContactResult>::iterator start,list<ODEContactResul
       if(settings.maxContacts > 50) {
 	if(!warnedContacts) {
 	  printf("Max contacts > 50, may crash.  Press enter to continue...\n");
-	  getchar();
+	  //getchar();
 	}
 	warnedContacts = true;
       }
@@ -1299,7 +1299,7 @@ void ProcessContacts(list<ODEContactResult>::iterator start,list<ODEContactResul
       if(settings.maxContacts > 50) {
 	if(!warnedContacts) {
 	  printf("Max contacts > 50, may crash.  Press enter to continue...\n");
-	  getchar();
+	  //getchar();
 	}
 	warnedContacts = true;
       }
@@ -1829,6 +1829,18 @@ bool ODESimulator::InstabilityCorrection()
   return corrected;
 }
 
+void ODESimulator::DisableInstabilityCorrection()
+{
+  energies.clear();
+}
+
+void ODESimulator::DisableInstabilityCorrection(const ODEObjectID& obj)
+{
+  map<ODEObjectID,Real>::iterator i = energies.find(obj);
+  if(i != energies.end()) 
+    energies.erase(i);
+}
+
 void ODESimulator::ClearContactFeedback()
 {
   for(map<CollisionPair,ODEContactList>::iterator i=contactList.begin();i!=contactList.end();i++) {
@@ -1873,7 +1885,7 @@ bool ODESimulator::ReadState(File& f)
   if(!ReadFile(f,status)) return false;
   if(!ReadState_Internal(f)) return false;
 
-  //TODO: maintain instability detection state and 
+  //TODO: maintain instability detection state, margins, and status
   energies.clear();
   lastMarginsRemaining.clear();
   statusHistory.clear();
