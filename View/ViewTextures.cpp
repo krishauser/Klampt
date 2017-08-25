@@ -1,4 +1,3 @@
-#include <log4cxx/logger.h>
 #include <KrisLibrary/Logger.h>
 #include "ViewTextures.h"
 #include <KrisLibrary/GLdraw/GLTexture1D.h>

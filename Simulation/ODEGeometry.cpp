@@ -1,4 +1,3 @@
-#include <log4cxx/logger.h>
 #include <KrisLibrary/Logger.h>
 #include "ODEGeometry.h"
 #include "ODECommon.h"
@@ -11,6 +10,8 @@
 #include <KrisLibrary/GLdraw/GL.h>
 #include <KrisLibrary/errors.h>
 using namespace Meshing;
+
+DEFINE_LOGGER(ODEGeometry)
 
 #define USING_GIMPACT 0
 
@@ -36,7 +37,7 @@ ODEGeometry::~ODEGeometry()
 
 void ODEGeometry::Create(AnyCollisionGeometry3D* geom,dSpaceID space,Vector3 offset,bool useCustomMesh)
 {
-  //LOG4CXX_INFO(KrisLibrary::logger(),"ODEGeometry: Collision detection method: "<<(useCustomMesh?"custom":"GIMPACT"));
+  //LOG4CXX_INFO(GET_LOGGER(ODEGeometry),"ODEGeometry: Collision detection method: "<<(useCustomMesh?"custom":"GIMPACT"));
   Clear();
   if(!useCustomMesh) {
     Assert(geom->type == AnyGeometry3D::TriangleMesh);
@@ -96,14 +97,14 @@ void ODEGeometry::Create(AnyCollisionGeometry3D* geom,dSpaceID space,Vector3 off
     CopyVector(x0,tri.a);
     CopyVector(x1,tri.b);
     CopyVector(x2,tri.c);
-    LOG4CXX_INFO(KrisLibrary::logger(),"triangle "<<i);
-    LOG4CXX_INFO(KrisLibrary::logger(),"  ("<<x0[0]<<","<<x0[1]<<","<<x0[2]);
-    LOG4CXX_INFO(KrisLibrary::logger(),"  ("<<x1[0]<<","<<x1[1]<<","<<x1[2]);
-    LOG4CXX_INFO(KrisLibrary::logger(),"  ("<<x2[0]<<","<<x2[1]<<","<<x2[2]);
-    LOG4CXX_INFO(KrisLibrary::logger(),"ret:\n");
-    LOG4CXX_INFO(KrisLibrary::logger(),"  ("<<v0[0]<<","<<v0[1]<<","<<v0[2]);
-    LOG4CXX_INFO(KrisLibrary::logger(),"  ("<<v1[0]<<","<<v1[1]<<","<<v1[2]);
-    LOG4CXX_INFO(KrisLibrary::logger(),"  ("<<v2[0]<<","<<v2[1]<<","<<v2[2]);
+    LOG4CXX_INFO(GET_LOGGER(ODEGeometry),"triangle "<<i);
+    LOG4CXX_INFO(GET_LOGGER(ODEGeometry),"  ("<<x0[0]<<","<<x0[1]<<","<<x0[2]);
+    LOG4CXX_INFO(GET_LOGGER(ODEGeometry),"  ("<<x1[0]<<","<<x1[1]<<","<<x1[2]);
+    LOG4CXX_INFO(GET_LOGGER(ODEGeometry),"  ("<<x2[0]<<","<<x2[1]<<","<<x2[2]);
+    LOG4CXX_INFO(GET_LOGGER(ODEGeometry),"ret:\n");
+    LOG4CXX_INFO(GET_LOGGER(ODEGeometry),"  ("<<v0[0]<<","<<v0[1]<<","<<v0[2]);
+    LOG4CXX_INFO(GET_LOGGER(ODEGeometry),"  ("<<v1[0]<<","<<v1[1]<<","<<v1[2]);
+    LOG4CXX_INFO(GET_LOGGER(ODEGeometry),"  ("<<v2[0]<<","<<v2[1]<<","<<v2[2]);
     for(int k=0;k<3;k++) {
       Assert(FuzzyEquals(x0[k],v0[k]));
       Assert(FuzzyEquals(x2[k],v1[k]));
@@ -116,7 +117,7 @@ void ODEGeometry::Create(AnyCollisionGeometry3D* geom,dSpaceID space,Vector3 off
     Timer timer;
     geom->InitCollisionData();
     double t = timer.ElapsedTime();
-    if(t > 0.1) LOG4CXX_INFO(KrisLibrary::logger(),"ODEGeometry: initializing collision data took time "<<t);
+    if(t > 0.1) LOG4CXX_INFO(GET_LOGGER(ODEGeometry),"ODEGeometry: initializing collision data took time "<<t);
 
     //add offsets
     collisionGeometry = geom;
@@ -186,11 +187,11 @@ void ODEGeometry::DrawGL()
 void ODEGeometry::SetPadding(Real padding)
 {
   if(collisionGeometry) {
-    //LOG4CXX_INFO(KrisLibrary::logger(),"Setting padding "<<padding);
+    //LOG4CXX_INFO(GET_LOGGER(ODEGeometry),"Setting padding "<<padding);
     dGetCustomGeometryData(geom())->outerMargin = padding;
   }
   else {
-        //LOG4CXX_ERROR(KrisLibrary::logger(),"Not using boundary layer, setting padding "<<padding);
+        //LOG4CXX_ERROR(GET_LOGGER(ODEGeometry),"Not using boundary layer, setting padding "<<padding);
   }
 }
 
@@ -206,10 +207,10 @@ AnyCollisionGeometry3D* _Preshrink(AnyCollisionGeometry3D* geom,Real padding) {
   if(padding==0) return geom;
   switch(geom->type) {
   case AnyCollisionGeometry3D::Primitive:
-        LOG4CXX_ERROR(KrisLibrary::logger(),"SetPaddingWithPreshink: Cannot shrink geometric primitives\n");
+        LOG4CXX_ERROR(GET_LOGGER(ODEGeometry),"SetPaddingWithPreshink: Cannot shrink geometric primitives\n");
     return geom;
   case AnyCollisionGeometry3D::PointCloud:
-        LOG4CXX_ERROR(KrisLibrary::logger(),"SetPaddingWithPreshink: Cannot shrink point clouds\n");
+        LOG4CXX_ERROR(GET_LOGGER(ODEGeometry),"SetPaddingWithPreshink: Cannot shrink point clouds\n");
     return geom;
   case AnyCollisionGeometry3D::TriangleMesh:
     {
@@ -219,7 +220,7 @@ AnyCollisionGeometry3D* _Preshrink(AnyCollisionGeometry3D* geom,Real padding) {
       mnew.tris = morig.tris;
       int numflips = Meshing::ApproximateShrink(mnew,padding);
       if(numflips > 0) {
-		LOG4CXX_ERROR(KrisLibrary::logger(),"SetPaddingWithPreshink: Warning, mesh shrinkage by amount "<<padding<<" created "<<numflips);
+		LOG4CXX_ERROR(GET_LOGGER(ODEGeometry),"SetPaddingWithPreshink: Warning, mesh shrinkage by amount "<<padding<<" created "<<numflips);
       }
       AnyCollisionGeometry3D* res = new AnyCollisionGeometry3D(mnew);
       res->margin = geom->margin;
@@ -239,7 +240,7 @@ AnyCollisionGeometry3D* _Preshrink(AnyCollisionGeometry3D* geom,Real padding) {
     }
   case AnyCollisionGeometry3D::Group:
     {
-            LOG4CXX_ERROR(KrisLibrary::logger(),"TODO: Can't do preshrink for group geometries yet\n");
+            LOG4CXX_ERROR(GET_LOGGER(ODEGeometry),"TODO: Can't do preshrink for group geometries yet\n");
       return geom;
     }
     break;
@@ -253,10 +254,10 @@ AnyCollisionGeometry3D* _Preshrink(AnyCollisionGeometry3D* geom,Real padding) {
 AnyCollisionGeometry3D* ODEGeometry::SetPaddingWithPreshrink(Real padding,bool inplace)
 {
   if(collisionGeometry) {
-    LOG4CXX_INFO(KrisLibrary::logger(),"ODEGeometry::SetPaddingWithPreshrink: Working...");
+    LOG4CXX_INFO(GET_LOGGER(ODEGeometry),"ODEGeometry::SetPaddingWithPreshrink: Working...");
     fflush(stdout);
     AnyCollisionGeometry3D* newgeom = _Preshrink(collisionGeometry,padding);
-    LOG4CXX_INFO(KrisLibrary::logger()," Done.\n");
+    LOG4CXX_INFO(GET_LOGGER(ODEGeometry)," Done.\n");
     if(collisionGeometry != newgeom) {
       if(inplace) {
 	//modify original geometry
@@ -288,7 +289,7 @@ AnyCollisionGeometry3D* ODEGeometry::SetPaddingWithPreshrink(Real padding,bool i
     return collisionGeometry;
   }
   else {
-        LOG4CXX_ERROR(KrisLibrary::logger(),"ODEGeometry::SetPaddingWithPreshrink: Not using boundary layer, setting padding/preshrink "<<padding);
+        LOG4CXX_ERROR(GET_LOGGER(ODEGeometry),"ODEGeometry::SetPaddingWithPreshrink: Not using boundary layer, setting padding/preshrink "<<padding);
     return NULL;
   }
 }
