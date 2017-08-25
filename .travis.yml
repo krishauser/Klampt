@@ -12,7 +12,8 @@ matrix:
     - compiler: clang
 
 install:
-  - sudo apt-get install cmake g++ git libboost-system-dev libboost-thread-dev freeglut3 freeglut3-dev libglpk-dev python-dev python-opengl libxmu-dev libxi-dev libqt4-dev libqt4-opengl-dev libassimp-dev libgtest-dev
+  - sudo apt-get install cmake g++ git freeglut3 freeglut3-dev libglpk-dev python-dev python-opengl libxmu-dev libxi-dev libqt4-dev libqt4-opengl-dev libassimp-dev libgtest-dev
+  - sudo apt-get install liblog4cxx-dev
 
 before_script:
   - echo $LD_LIBRARY_PATH
@@ -22,6 +23,7 @@ before_script:
 
 script:
   - cd Library && make unpack-deps
+  - cd KrisLibrary && git checkout logging_devel && cd ..;
   - make deps && cd ..
   - cmake .
   - make Klampt
