@@ -1050,9 +1050,19 @@ class Geometry3D(_object):
         """
         getBB(Geometry3D self)
 
-        Returns the axis-aligned bounding box of the object. 
+        Returns the axis-aligned bounding box of the object. Note: O(1) time,
+        but may not be tight. 
         """
         return _robotsim.Geometry3D_getBB(self)
+
+    def getBBTight(self):
+        """
+        getBBTight(Geometry3D self)
+
+        Returns a tighter axis-aligned bounding box of the object than getBB.
+        Worst case O(n) time. 
+        """
+        return _robotsim.Geometry3D_getBBTight(self)
 
     def collides(self, *args):
         """
@@ -4183,8 +4193,10 @@ class SimBody(_object):
         """
         setCollisionPadding(SimBody self, double padding)
 
-        Sets the collision padding (useful for thin objects). Default is
-        0.0025. 
+        Sets the collision padding used for contact generation. At 0 padding
+        the simulation will be unstable for triangle mesh and point cloud
+        geometries. A larger value is useful to maintain simulation stability
+        for thin or soft objects. Default is 0.0025. 
         """
         return _robotsim.SimBody_setCollisionPadding(self, *args)
 
@@ -4199,7 +4211,8 @@ class SimBody(_object):
 
         If set, preshrinks the geometry so that the padded geometry better
         matches the original mesh. If shrinkVisualization=true, the underlying
-        mesh is also shrunk (helps debug) 
+        mesh is also shrunk (helps debug simulation artifacts due to
+        preshrink) 
         """
         return _robotsim.SimBody_setCollisionPreshrink(self, shrinkVisualization)
 
@@ -4315,6 +4328,15 @@ class Simulator(_object):
         and >= 0, this function maps the indicator code s to a string. 
         """
         return _robotsim.Simulator_getStatusString(self, *args)
+
+    def checkObjectOverlap(self):
+        """
+        checkObjectOverlap(Simulator self)
+
+        Checks if any objects are overlapping. Returns a pair of lists of
+        integers, giving the pairs of object ids that are overlapping. 
+        """
+        return _robotsim.Simulator_checkObjectOverlap(self)
 
     def getState(self):
         """

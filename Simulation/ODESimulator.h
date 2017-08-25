@@ -113,11 +113,14 @@ class ODESimulator
   void SetERP(double erp);   //global error reduction  -- see ODE docs
   void SetCFM(double erp);   //global constraint force mixing -- see ODE docs
   ODESimulatorSettings& GetSettings() { return settings; }
-  Status GetStatus() const;
+  Status GetStatus() const; 
   void GetStatusHistory(vector<Status>& statuses,vector<Real>& statusChangeTimes) const;
   void AddTerrain(Terrain& terr);
   void AddRobot(Robot& robot);
   void AddObject(RigidObject& object);
+  ///Returns true if the current  state is in "reliable" status. Otherwise returns false
+  ///and populates the list of overlapping object pairs. 
+  bool CheckObjectOverlap(vector<pair<ODEObjectID,ODEObjectID> >& overlaps);
   void Step(Real dt);
   void StepDynamics(Real dt);
   bool ReadState(File& f);
