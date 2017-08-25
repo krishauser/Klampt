@@ -561,6 +561,8 @@ const char* DefaultFileExtension(const Geometry::AnyCollisionGeometry3D& geom)
     return ".pcd";
   else if(geom.type == Geometry::AnyGeometry3D::ImplicitSurface)
     return ".vol";
+  else if(geom.type == Geometry::AnyGeometry3D::Group)
+    return ".group";
   else
     return ".unknown";
 }
