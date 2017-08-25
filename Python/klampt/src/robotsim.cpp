@@ -898,6 +898,19 @@ void Geometry3D::getBB(double out[3],double out2[3])
   bb.bmax.get(out2);
 }
 
+void Geometry3D::getBBTight(double out[3],double out2[3])
+{
+  SmartPointer<AnyCollisionGeometry3D>& geom = *reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(geomPtr);
+  if(!geom) {
+    out[0] = out[1] = out[2] = Inf;
+    out2[0] = out2[1] = out2[2] = -Inf;
+    return;
+  }
+  AABB3D bb = geom->GetAABBTight();
+  bb.bmin.get(out);
+  bb.bmax.get(out2);
+}
+
 bool Geometry3D::collides(const Geometry3D& other)
 {
   SmartPointer<AnyCollisionGeometry3D>& geom = *reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(geomPtr);
@@ -3077,8 +3090,8 @@ Simulator::Simulator(const WorldModel& model)
   }
 
   //TEMP: play around with auto disable of rigid objects
-  //for(size_t i=0;i<sim->odesim.numObjects();i++)
-  //    dBodySetAutoDisableFlag(sim->odesim.object(i)->body(),1);
+  for(size_t i=0;i<sim->odesim.numObjects();i++)
+      dBodySetAutoDisableFlag(sim->odesim.object(i)->body(),1);
 
   sim->WriteState(initialState);
 }
@@ -3120,6 +3133,18 @@ string Simulator::getState()
 void Simulator::setState(const string& str)
 {
   sim->ReadState(FromBase64(str));
+}
+
+void Simulator::checkObjectOverlap(std::vector<int>& out,std::vector<int>& out2)
+{
+  vector<pair<ODEObjectID,ODEObjectID> > overlaps;
+  sim->odesim.CheckObjectOverlap(overlaps);
+  out.resize(overlaps.size());
+  out2.resize(overlaps.size());
+  for(size_t i=0;i<overlaps.size();i++) {
+    out[i]=sim->ODEToWorldID(overlaps[i].first);
+    out2[i]=sim->ODEToWorldID(overlaps[i].second);
+  }
 }
 
 void Simulator::simulate(double t)

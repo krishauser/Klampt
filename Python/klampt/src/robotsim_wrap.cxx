@@ -20422,6 +20422,87 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_Geometry3D_getBBTight(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Geometry3D *arg1 = (Geometry3D *) 0 ;
+  double *arg2 ;
+  double *arg3 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double temp2[3] ;
+  double temp23[3] ;
+  PyObject * obj0 = 0 ;
+  
+  {
+    arg2 = &temp2[0];
+  }
+  {
+    arg3 = &temp23[0];
+  }
+  if (!PyArg_ParseTuple(args,(char *)"O:Geometry3D_getBBTight",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Geometry3D, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Geometry3D_getBBTight" "', argument " "1"" of type '" "Geometry3D *""'"); 
+  }
+  arg1 = reinterpret_cast< Geometry3D * >(argp1);
+  {
+    try {
+      (arg1)->getBBTight(arg2,arg3);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  {
+    PyObject *o, *o2, *o3;
+    o = convert_darray_obj(arg2,3);
+    if ((!resultobj) || (resultobj == Py_None)) {
+      resultobj = o;
+    } else {
+      if (!PyTuple_Check(resultobj)) {
+        PyObject *o2 = resultobj;
+        resultobj = PyTuple_New(1);
+        PyTuple_SetItem(resultobj,0,o2);
+      }
+      o3 = PyTuple_New(1);
+      PyTuple_SetItem(o3,0,o);
+      o2 = resultobj;
+      resultobj = PySequence_Concat(o2,o3);
+      Py_DECREF(o2);
+      Py_DECREF(o3);
+    }
+  }
+  {
+    PyObject *o, *o2, *o3;
+    o = convert_darray_obj(arg3,3);
+    if ((!resultobj) || (resultobj == Py_None)) {
+      resultobj = o;
+    } else {
+      if (!PyTuple_Check(resultobj)) {
+        PyObject *o2 = resultobj;
+        resultobj = PyTuple_New(1);
+        PyTuple_SetItem(resultobj,0,o2);
+      }
+      o3 = PyTuple_New(1);
+      PyTuple_SetItem(o3,0,o);
+      o2 = resultobj;
+      resultobj = PySequence_Concat(o2,o3);
+      Py_DECREF(o2);
+      Py_DECREF(o3);
+    }
+  }
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_Geometry3D_collides(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   Geometry3D *arg1 = (Geometry3D *) 0 ;
@@ -45686,6 +45767,87 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_Simulator_checkObjectOverlap(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Simulator *arg1 = (Simulator *) 0 ;
+  std::vector< int,std::allocator< int > > *arg2 = 0 ;
+  std::vector< int,std::allocator< int > > *arg3 = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  std::vector< int > temp2 ;
+  std::vector< int > temp23 ;
+  PyObject * obj0 = 0 ;
+  
+  {
+    arg2 = &temp2;
+  }
+  {
+    arg3 = &temp23;
+  }
+  if (!PyArg_ParseTuple(args,(char *)"O:Simulator_checkObjectOverlap",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Simulator, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Simulator_checkObjectOverlap" "', argument " "1"" of type '" "Simulator *""'"); 
+  }
+  arg1 = reinterpret_cast< Simulator * >(argp1);
+  {
+    try {
+      (arg1)->checkObjectOverlap(*arg2,*arg3);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  {
+    PyObject *o, *o2, *o3;
+    o = convert_iarray_obj(&(*arg2)[0],(int)arg2->size());
+    if ((!resultobj) || (resultobj == Py_None)) {
+      resultobj = o;
+    } else {
+      if (!PyTuple_Check(resultobj)) {
+        PyObject *o2 = resultobj;
+        resultobj = PyTuple_New(1);
+        PyTuple_SetItem(resultobj,0,o2);
+      }
+      o3 = PyTuple_New(1);
+      PyTuple_SetItem(o3,0,o);
+      o2 = resultobj;
+      resultobj = PySequence_Concat(o2,o3);
+      Py_DECREF(o2);
+      Py_DECREF(o3);
+    }
+  }
+  {
+    PyObject *o, *o2, *o3;
+    o = convert_iarray_obj(&(*arg3)[0],(int)arg3->size());
+    if ((!resultobj) || (resultobj == Py_None)) {
+      resultobj = o;
+    } else {
+      if (!PyTuple_Check(resultobj)) {
+        PyObject *o2 = resultobj;
+        resultobj = PyTuple_New(1);
+        PyTuple_SetItem(resultobj,0,o2);
+      }
+      o3 = PyTuple_New(1);
+      PyTuple_SetItem(o3,0,o);
+      o2 = resultobj;
+      resultobj = PySequence_Concat(o2,o3);
+      Py_DECREF(o2);
+      Py_DECREF(o3);
+    }
+  }
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_Simulator_getState(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   Simulator *arg1 = (Simulator *) 0 ;
@@ -50160,7 +50322,14 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"Geometry3D_getBB", _wrap_Geometry3D_getBB, METH_VARARGS, (char *)"\n"
 		"Geometry3D_getBB(Geometry3D self)\n"
 		"\n"
-		"Returns the axis-aligned bounding box of the object. \n"
+		"Returns the axis-aligned bounding box of the object. Note: O(1) time,\n"
+		"but may not be tight. \n"
+		""},
+	 { (char *)"Geometry3D_getBBTight", _wrap_Geometry3D_getBBTight, METH_VARARGS, (char *)"\n"
+		"Geometry3D_getBBTight(Geometry3D self)\n"
+		"\n"
+		"Returns a tighter axis-aligned bounding box of the object than getBB.\n"
+		"Worst case O(n) time. \n"
 		""},
 	 { (char *)"Geometry3D_collides", _wrap_Geometry3D_collides, METH_VARARGS, (char *)"\n"
 		"Geometry3D_collides(Geometry3D self, Geometry3D other) -> bool\n"
@@ -51769,8 +51938,10 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"SimBody_setCollisionPadding", _wrap_SimBody_setCollisionPadding, METH_VARARGS, (char *)"\n"
 		"SimBody_setCollisionPadding(SimBody self, double padding)\n"
 		"\n"
-		"Sets the collision padding (useful for thin objects). Default is\n"
-		"0.0025. \n"
+		"Sets the collision padding used for contact generation. At 0 padding\n"
+		"the simulation will be unstable for triangle mesh and point cloud\n"
+		"geometries. A larger value is useful to maintain simulation stability\n"
+		"for thin or soft objects. Default is 0.0025. \n"
 		""},
 	 { (char *)"SimBody_getCollisionPadding", _wrap_SimBody_getCollisionPadding, METH_VARARGS, (char *)"SimBody_getCollisionPadding(SimBody self) -> double"},
 	 { (char *)"SimBody_setCollisionPreshrink", _wrap_SimBody_setCollisionPreshrink, METH_VARARGS, (char *)"\n"
@@ -51779,7 +51950,8 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"If set, preshrinks the geometry so that the padded geometry better\n"
 		"matches the original mesh. If shrinkVisualization=true, the underlying\n"
-		"mesh is also shrunk (helps debug) \n"
+		"mesh is also shrunk (helps debug simulation artifacts due to\n"
+		"preshrink) \n"
 		""},
 	 { (char *)"SimBody_getSurface", _wrap_SimBody_getSurface, METH_VARARGS, (char *)"\n"
 		"SimBody_getSurface(SimBody self) -> ContactParameters\n"
@@ -51846,6 +52018,12 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"Returns a string indicating the simulator's status. If s is provided\n"
 		"and >= 0, this function maps the indicator code s to a string. \n"
+		""},
+	 { (char *)"Simulator_checkObjectOverlap", _wrap_Simulator_checkObjectOverlap, METH_VARARGS, (char *)"\n"
+		"Simulator_checkObjectOverlap(Simulator self)\n"
+		"\n"
+		"Checks if any objects are overlapping. Returns a pair of lists of\n"
+		"integers, giving the pairs of object ids that are overlapping. \n"
 		""},
 	 { (char *)"Simulator_getState", _wrap_Simulator_getState, METH_VARARGS, (char *)"\n"
 		"Simulator_getState(Simulator self) -> std::string\n"

@@ -462,7 +462,13 @@ Returns the padding around the base geometry. Default 0. ";
 
 %feature("docstring")  Geometry3D::getBB "
 
-Returns the axis-aligned bounding box of the object. ";
+Returns the axis-aligned bounding box of the object. Note: O(1) time,
+but may not be tight. ";
+
+%feature("docstring")  Geometry3D::getBBTight "
+
+Returns a tighter axis-aligned bounding box of the object than getBB.
+Worst case O(n) time. ";
 
 %feature("docstring")  Geometry3D::collides "
 
@@ -1731,8 +1737,10 @@ Returns the angular velocity and translational velocity. ";
 
 %feature("docstring")  SimBody::setCollisionPadding "
 
-Sets the collision padding (useful for thin objects). Default is
-0.0025. ";
+Sets the collision padding used for contact generation. At 0 padding
+the simulation will be unstable for triangle mesh and point cloud
+geometries. A larger value is useful to maintain simulation stability
+for thin or soft objects. Default is 0.0025. ";
 
 %feature("docstring")  SimBody::getCollisionPadding "";
 
@@ -1740,7 +1748,8 @@ Sets the collision padding (useful for thin objects). Default is
 
 If set, preshrinks the geometry so that the padded geometry better
 matches the original mesh. If shrinkVisualization=true, the underlying
-mesh is also shrunk (helps debug) ";
+mesh is also shrunk (helps debug simulation artifacts due to
+preshrink) ";
 
 %feature("docstring")  SimBody::getSurface "
 
@@ -2057,6 +2066,11 @@ status over the last simulate() call) ";
 
 Returns a string indicating the simulator's status. If s is provided
 and >= 0, this function maps the indicator code s to a string. ";
+
+%feature("docstring")  Simulator::checkObjectOverlap "
+
+Checks if any objects are overlapping. Returns a pair of lists of
+integers, giving the pairs of object ids that are overlapping. ";
 
 %feature("docstring")  Simulator::getState "
 
