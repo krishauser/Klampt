@@ -13,7 +13,7 @@ matrix:
 
 install:
   - sudo apt-get install cmake g++ git freeglut3 freeglut3-dev libglpk-dev python-dev python-opengl libxmu-dev libxi-dev libqt4-dev libqt4-opengl-dev libassimp-dev libgtest-dev
-  - sudo apt-get install liblog4cxx-dev
+  - sudo apt-get install liblog4cxx10-dev
 
 before_script:
   - echo $LD_LIBRARY_PATH
