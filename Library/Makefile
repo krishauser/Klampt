@@ -9,10 +9,8 @@ ODECONFIG += --enable-double-precision
 
 UNAME = $(shell uname)
 
-#NOTE: plan_devel is temporary, will be moved to master
 unpack-deps:
 	git clone https://github.com/krishauser/KrisLibrary
-	cd KrisLibrary; git checkout plan_devel
 	tar xvzf ode-0.14.tar.gz
 	tar xvzf glui-2.36.tgz
 	tar xvzf glew-2.0.0.tgz
