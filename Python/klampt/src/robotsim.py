@@ -2103,6 +2103,26 @@ class RobotModel(_object):
         this = _robotsim.new_RobotModel()
         try: self.this.append(this)
         except: self.this = this
+    def loadFile(self, *args):
+        """
+        loadFile(RobotModel self, char const * fn) -> bool
+
+        Loads the robot from a file. 
+        """
+        return _robotsim.RobotModel_loadFile(self, *args)
+
+    def saveFile(self, *args):
+        """
+        saveFile(RobotModel self, char const * fn, char const * geometryPrefix=None) -> bool
+        saveFile(RobotModel self, char const * fn) -> bool
+
+        Saves the robot. If geometryPrefix == NULL, the geometry is not saved
+        (default). Otherwise, the geometry of each link will be saved to files
+        named geometryPrefix+name, where name is either the name of the
+        geometry file that was loaded, or [link_name].off. 
+        """
+        return _robotsim.RobotModel_saveFile(self, *args)
+
     def getID(self):
         """
         getID(RobotModel self) -> int
@@ -2488,8 +2508,31 @@ class RigidObjectModel(_object):
         this = _robotsim.new_RigidObjectModel()
         try: self.this.append(this)
         except: self.this = this
+    def loadFile(self, *args):
+        """
+        loadFile(RigidObjectModel self, char const * fn) -> bool
+
+        Loads the object from a file. 
+        """
+        return _robotsim.RigidObjectModel_loadFile(self, *args)
+
+    def saveFile(self, *args):
+        """
+        saveFile(RigidObjectModel self, char const * fn, char const * geometryName=None) -> bool
+        saveFile(RigidObjectModel self, char const * fn) -> bool
+
+        Saves the object. If geometryName is given, the geometry is saved to
+        that file. 
+        """
+        return _robotsim.RigidObjectModel_saveFile(self, *args)
+
     def getID(self):
-        """getID(RigidObjectModel self) -> int"""
+        """
+        getID(RigidObjectModel self) -> int
+
+        Returns the ID of the rigid object in its world (Note: not the same as
+        the rigid object index) 
+        """
         return _robotsim.RigidObjectModel_getID(self)
 
     def getName(self):
@@ -2599,8 +2642,31 @@ class TerrainModel(_object):
         this = _robotsim.new_TerrainModel()
         try: self.this.append(this)
         except: self.this = this
+    def loadFile(self, *args):
+        """
+        loadFile(TerrainModel self, char const * fn) -> bool
+
+        Loads the terrain from a file. 
+        """
+        return _robotsim.TerrainModel_loadFile(self, *args)
+
+    def saveFile(self, *args):
+        """
+        saveFile(TerrainModel self, char const * fn, char const * geometryName=None) -> bool
+        saveFile(TerrainModel self, char const * fn) -> bool
+
+        Saves the terrain. If geometryName is given, the geometry is saved to
+        that file. 
+        """
+        return _robotsim.TerrainModel_saveFile(self, *args)
+
     def getID(self):
-        """getID(TerrainModel self) -> int"""
+        """
+        getID(TerrainModel self) -> int
+
+        Returns the ID of the terrain in its world (Note: not the same as the
+        terrain index) 
+        """
         return _robotsim.TerrainModel_getID(self)
 
     def getName(self):
