@@ -1123,7 +1123,19 @@ C++ includes: robotmodel.h ";
 
 %feature("docstring")  RigidObjectModel::RigidObjectModel "";
 
-%feature("docstring")  RigidObjectModel::getID "";
+%feature("docstring")  RigidObjectModel::loadFile "
+
+Loads the object from a file. ";
+
+%feature("docstring")  RigidObjectModel::saveFile "
+
+Saves the object. If geometryName is given, the geometry is saved to
+that file. ";
+
+%feature("docstring")  RigidObjectModel::getID "
+
+Returns the ID of the rigid object in its world (Note: not the same as
+the rigid object index) ";
 
 %feature("docstring")  RigidObjectModel::getName "";
 
@@ -1206,6 +1218,17 @@ simulator.
 C++ includes: robotmodel.h ";
 
 %feature("docstring")  RobotModel::RobotModel "";
+
+%feature("docstring")  RobotModel::loadFile "
+
+Loads the robot from a file. ";
+
+%feature("docstring")  RobotModel::saveFile "
+
+Saves the robot. If geometryPrefix == NULL, the geometry is not saved
+(default). Otherwise, the geometry of each link will be saved to files
+named geometryPrefix+name, where name is either the name of the
+geometry file that was loaded, or [link_name].off. ";
 
 %feature("docstring")  RobotModel::getID "
 
@@ -2251,7 +2274,19 @@ C++ includes: robotmodel.h ";
 
 %feature("docstring")  TerrainModel::TerrainModel "";
 
-%feature("docstring")  TerrainModel::getID "";
+%feature("docstring")  TerrainModel::loadFile "
+
+Loads the terrain from a file. ";
+
+%feature("docstring")  TerrainModel::saveFile "
+
+Saves the terrain. If geometryName is given, the geometry is saved to
+that file. ";
+
+%feature("docstring")  TerrainModel::getID "
+
+Returns the ID of the terrain in its world (Note: not the same as the
+terrain index) ";
 
 %feature("docstring")  TerrainModel::getName "";
 

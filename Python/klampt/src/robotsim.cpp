@@ -2377,6 +2377,31 @@ RobotModel::RobotModel()
   :world(-1),index(-1),robot(NULL)
 {}
 
+bool RobotModel::loadFile(const char* fn)
+{
+  if(index < 0) {
+    throw PyException("Cannot load an empty robot, this needs to be part of a world");
+  }
+  return robot->Load(fn);
+}
+
+bool RobotModel::saveFile(const char* fn,const char* geometryPrefix)
+{
+  if(index < 0) {
+    throw PyException("Cannot save an empty robot");
+  }
+  if(!robot->Save(fn)) return false;
+  if(geometryPrefix) {
+    for(size_t i=0;i<robot->links.size();i++) {
+      if(!robot->IsGeometryEmpty(i) && robot->geomFiles[i].empty()) {
+        robot->geomFiles[i] = robot->linkNames[i]+".off";
+      }
+    }
+    if(!robot->SaveGeometry(geometryPrefix)) return false;
+  }
+  return true;
+}
+
 const char* RobotModel::getName() const
 {
   if(index < 0) throw PyException("Robot is empty");
@@ -2834,6 +2859,22 @@ RigidObjectModel::RigidObjectModel()
   :world(-1),index(-1),object(NULL)
 {}
 
+bool RigidObjectModel::loadFile(const char* fn)
+{
+  if(index < 0) {
+    throw PyException("Cannot load an empty rigid object, this needs to be part of a world");
+  }
+  return object->Load(fn);
+}
+
+bool RigidObjectModel::saveFile(const char* fn,const char* geometryName)
+{
+  if(!object->Save(fn)) return false;
+  if(geometryName)
+    if(!object->geometry->Save(geometryName)) return false;
+  return true;
+}
+
 const char* RigidObjectModel::getName() const
 {
   RobotWorld& world = *worlds[this->world]->world;
@@ -2977,6 +3018,23 @@ void RigidObjectModel::drawGL(bool keepAppearance)
 TerrainModel::TerrainModel()
   :world(-1),index(-1),terrain(NULL)
 {
+}
+
+
+bool TerrainModel::loadFile(const char* fn)
+{
+  if(index < 0) {
+    throw PyException("Cannot load an empty terrain, this needs to be part of a world");
+  }
+  return terrain->Load(fn);
+}
+
+bool TerrainModel::saveFile(const char* fn,const char* geometryName)
+{
+  if(!terrain->Save(fn)) return false;
+  if(geometryName)
+    if(!terrain->geometry->Save(geometryName)) return false;
+  return true;
 }
 
 const char* TerrainModel::getName() const
