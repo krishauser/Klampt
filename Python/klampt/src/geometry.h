@@ -245,8 +245,10 @@ class Geometry3D
   void setCollisionMargin(double margin);
   ///Returns the padding around the base geometry.  Default 0
   double getCollisionMargin();
-  ///Returns the axis-aligned bounding box of the object
+  ///Returns the axis-aligned bounding box of the object. Note: O(1) time, but may not be tight
   void getBB(double out[3],double out2[3]);
+  ///Returns a tighter axis-aligned bounding box of the object than getBB. Worst case O(n) time.
+  void getBBTight(double out[3],double out2[3]);
   ///Returns true if this geometry collides with the other
   bool collides(const Geometry3D& other);
   ///Returns true if this geometry is within distance tol to other

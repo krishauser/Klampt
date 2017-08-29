@@ -210,8 +210,16 @@ static PyObject* convert_dmatrix_obj(const std::vector<std::vector<double> >& ma
    $1 = &temp;
 }
 
+%typemap(in, numinputs=0) std::vector<int>& out2 (std::vector<int> temp2) {
+   $1 = &temp2;
+}
+
 %typemap(in, numinputs=0) std::vector<float>& out (std::vector<float> temp) {
    $1 = &temp;
+}
+
+%typemap(in, numinputs=0) std::vector<float>& out2 (std::vector<float> temp2) {
+   $1 = &temp2;
 }
 
 %typemap(in, numinputs=0) std::vector<double>& out (std::vector<double> temp) {
@@ -306,7 +314,47 @@ static PyObject* convert_dmatrix_obj(const std::vector<std::vector<double> >& ma
     }
 }
 
+%typemap(argout) std::vector<int>& out2 {
+    PyObject *o, *o2, *o3;
+    o = convert_iarray_obj(&(*$1)[0],(int)$1->size());
+    if ((!$result) || ($result == Py_None)) {
+        $result = o;
+    } else {
+        if (!PyTuple_Check($result)) {
+            PyObject *o2 = $result;
+            $result = PyTuple_New(1);
+            PyTuple_SetItem($result,0,o2);
+        }
+        o3 = PyTuple_New(1);
+        PyTuple_SetItem(o3,0,o);
+        o2 = $result;
+        $result = PySequence_Concat(o2,o3);
+        Py_DECREF(o2);
+        Py_DECREF(o3);
+    }
+}
+
 %typemap(argout) std::vector<float>& out {
+    PyObject *o, *o2, *o3;
+    o = convert_farray_obj(&(*$1)[0],(int)$1->size());
+    if ((!$result) || ($result == Py_None)) {
+        $result = o;
+    } else {
+        if (!PyTuple_Check($result)) {
+            PyObject *o2 = $result;
+            $result = PyTuple_New(1);
+            PyTuple_SetItem($result,0,o2);
+        }
+        o3 = PyTuple_New(1);
+        PyTuple_SetItem(o3,0,o);
+        o2 = $result;
+        $result = PySequence_Concat(o2,o3);
+        Py_DECREF(o2);
+        Py_DECREF(o3);
+    }
+}
+
+%typemap(argout) std::vector<float>& out2 {
     PyObject *o, *o2, *o3;
     o = convert_farray_obj(&(*$1)[0],(int)$1->size());
     if ((!$result) || ($result == Py_None)) {

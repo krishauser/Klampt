@@ -1,6 +1,3 @@
-#include <log4cxx/logger.h>
-#include <log4cxx/level.h>
-#include <log4cxx/helpers/objectptr.h>
 #include <KrisLibrary/Logger.h>
 #include "ODERobot.h"
 #include "ODECommon.h"
