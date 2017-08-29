@@ -61,12 +61,12 @@ void URDFConverter::DFSLinkTree(URDFLinkNode& root, vector<URDFLinkNode>& linkNo
 	}
 }
 
-void URDFConverter::setJointforNodes(vector< boost::shared_ptr<urdf::Joint> >& joints, vector<URDFLinkNode>& linkNodes){
+void URDFConverter::setJointforNodes(vector< std::shared_ptr<urdf::Joint> >& joints, vector<URDFLinkNode>& linkNodes){
 	for(size_t i = 0; i < linkNodes.size(); i++){
 		string linkname = linkNodes[i].link->name;
 		linkNodes[i].joint = 0;
 		for (size_t j = 0; j < joints.size(); j++) {
-			boost::shared_ptr<urdf::Joint> joint = joints[j];
+			std::shared_ptr<urdf::Joint> joint = joints[j];
 			//find link index of the joint
 			string joint_name = joint->child_link_name;
 			if(0 == strcmp(joint_name.c_str(), linkname.c_str())){
@@ -95,7 +95,7 @@ void URDFConverter::QuatToRotationMat(const Vector4& aa, Matrix3& mat){
 	mat(2,2) = 1 - 2*x*x - 2*y*y;
 }
 
-URDFLinkNode::URDFLinkNode(boost::shared_ptr<urdf::Link>& link, int index, int index_parent) {
+URDFLinkNode::URDFLinkNode(std::shared_ptr<urdf::Link>& link, int index, int index_parent) {
 	this->link = link;
 	this->index = index;
 	this->index_parent = index_parent;
@@ -118,14 +118,14 @@ void URDFLinkNode::GetGeometryProperty(bool useVisGeom){
 	}
 	geomScale.setIdentity();
 	geomPrimitive = false;
-	boost::shared_ptr<urdf::Geometry> geom;
+	std::shared_ptr<urdf::Geometry> geom;
 	if(useVisGeom && this->link->visual) geom = this->link->visual->geometry;
 	else if(!useVisGeom && this->link->collision) geom = this->link->collision->geometry;
 	if(geom){
 	  if(geom->type == urdf::Geometry::BOX){
 		  geomPrimitive = true;
 		  geomName = URDFConverter::primitiveMeshPath + "box_ori_center.off";
-			boost::shared_ptr<urdf::Box> box = boost::static_pointer_cast<urdf::Box>(geom);
+			std::shared_ptr<urdf::Box> box = std::static_pointer_cast<urdf::Box>(geom);
 			geomScale(0,0) = box->dim.x;
 			geomScale(1,1) = box->dim.y;
 			geomScale(2,2) = box->dim.z;
@@ -133,20 +133,20 @@ void URDFLinkNode::GetGeometryProperty(bool useVisGeom){
 		}else if(geom->type == urdf::Geometry::CYLINDER){
 		  geomPrimitive = true;
 			geomName = URDFConverter::primitiveMeshPath + "cylinder_ori_center.off";
-			boost::shared_ptr<urdf::Cylinder> cylinder = boost::static_pointer_cast<urdf::Cylinder>(geom);
+			std::shared_ptr<urdf::Cylinder> cylinder = std::static_pointer_cast<urdf::Cylinder>(geom);
 			geomScale(0,0) = cylinder->radius;
 			geomScale(1,1) = cylinder->radius;
 			geomScale(2,2) = cylinder->length;
 		}else if(geom->type == urdf::Geometry::SPHERE){
 		  geomPrimitive = true;
 		  geomName = URDFConverter::primitiveMeshPath + "sphere_ori_center.off";
-			boost::shared_ptr<urdf::Sphere> sphere = boost::static_pointer_cast<urdf::Sphere>(geom);
+			std::shared_ptr<urdf::Sphere> sphere = std::static_pointer_cast<urdf::Sphere>(geom);
 			geomScale(0,0) = sphere->radius;
 			geomScale(1,1) = sphere->radius;
 			geomScale(2,2) = sphere->radius;
 		}
 	  else if(geom->type == urdf::Geometry::MESH){
-			boost::shared_ptr<urdf::Mesh> mesh = boost::static_pointer_cast<urdf::Mesh>(geom);
+			std::shared_ptr<urdf::Mesh> mesh = std::static_pointer_cast<urdf::Mesh>(geom);
 			geomName = mesh->filename.c_str();
 			if(geomName.compare(0,10,"package://")==0) {
 			  //take off the first 10 characters

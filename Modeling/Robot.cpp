@@ -18,7 +18,7 @@
 #include <sstream>
 #include <KrisLibrary/Timer.h>
 #include "IO/urdf_parser.h"
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include "IO/URDFConverter.h"
 //using namespace urdf;
 
@@ -2359,12 +2359,12 @@ bool Robot::LoadURDF(const char* fn)
 	string path = GetFilePath(s);
 
 	//Get content from the Willow Garage parser
-	boost::shared_ptr<urdf::ModelInterface> parser = urdf::parseURDF(s);
+	std::shared_ptr<urdf::ModelInterface> parser = urdf::parseURDF(s);
 	if(!parser) {
 	  	  LOG4CXX_ERROR(KrisLibrary::logger(),"Robot::LoadURDF: error parsing XML\n");
 	  return false;
 	}
-	boost::shared_ptr<urdf::Link> root_link = parser->root_link_;
+	std::shared_ptr<urdf::Link> root_link = parser->root_link_;
 	if (!root_link) {
 	  	  LOG4CXX_ERROR(KrisLibrary::logger(),"Robot::LoadURDF: Root link is NULL\n");
 	  return false;
@@ -2715,10 +2715,10 @@ bool Robot::LoadURDF(const char* fn)
 	vector<URDFLinkNode> linkNodes;
 	URDFConverter::DFSLinkTree(rootLinkNode, linkNodes);
 
-	vector<boost::shared_ptr<urdf::Joint> > urdfJoints;
-	for (std::map<std::string, boost::shared_ptr<urdf::Joint> >::iterator it =
+	vector<std::shared_ptr<urdf::Joint> > urdfJoints;
+	for (std::map<std::string, std::shared_ptr<urdf::Joint> >::iterator it =
 			parser->joints_.begin(); it != parser->joints_.end(); ++it) {
-		boost::shared_ptr<urdf::Joint> joint = it->second;
+		std::shared_ptr<urdf::Joint> joint = it->second;
 		urdfJoints.push_back(joint);
 	}
 	URDFConverter::setJointforNodes(urdfJoints, linkNodes);

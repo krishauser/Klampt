@@ -74,7 +74,7 @@ bool parseModelState(ModelState &ms, TiXmlElement* config)
   TiXmlElement *joint_state_elem = config->FirstChildElement("joint_state");
   if (joint_state_elem)
   {
-    boost::shared_ptr<JointState> joint_state;
+    std::shared_ptr<JointState> joint_state;
     joint_state.reset(new JointState());
 
     const char *joint_char = joint_state_elem->Attribute("joint");

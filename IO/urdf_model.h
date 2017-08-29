@@ -55,15 +55,15 @@ namespace urdf {
     /**
      * @function getRoot
      */
-    boost::shared_ptr<const Link> getRoot(void) const{
+    std::shared_ptr<const Link> getRoot(void) const{
       return this->root_link_;
     };
 
     /**
      * @function getLink
      */
-    boost::shared_ptr<const Link> getLink(const std::string& name) const {
-      boost::shared_ptr<const Link> ptr;
+    std::shared_ptr<const Link> getLink(const std::string& name) const {
+      std::shared_ptr<const Link> ptr;
       if (this->links_.find(name) == this->links_.end())
 	ptr.reset();
       else
@@ -74,8 +74,8 @@ namespace urdf {
     /**
      * @function getJoint
      */
-    boost::shared_ptr<const Joint> getJoint(const std::string& name) const {
-      boost::shared_ptr<const Joint> ptr;
+    std::shared_ptr<const Joint> getJoint(const std::string& name) const {
+      std::shared_ptr<const Joint> ptr;
       if (this->joints_.find(name) == this->joints_.end())
 	ptr.reset();
       else
@@ -93,8 +93,8 @@ namespace urdf {
     /**
      * @function getLinks()
      */
-    void getLinks(std::vector<boost::shared_ptr<Link> >& links) const {
-      for (std::map<std::string,boost::shared_ptr<Link> >::const_iterator link = this->links_.begin();
+    void getLinks(std::vector<std::shared_ptr<Link> >& links) const {
+      for (std::map<std::string,std::shared_ptr<Link> >::const_iterator link = this->links_.begin();
 	   link != this->links_.end(); link++)
 	{
 	  links.push_back(link->second);
@@ -116,8 +116,8 @@ namespace urdf {
      * @function getLink()
      * @brief non-const getLink()
      */
-    void getLink(const std::string& name,boost::shared_ptr<Link> &link) const {
-      boost::shared_ptr<Link> ptr;
+    void getLink(const std::string& name,std::shared_ptr<Link> &link) const {
+      std::shared_ptr<Link> ptr;
       if (this->links_.find(name) == this->links_.end())
 	ptr.reset();
       else
@@ -129,8 +129,8 @@ namespace urdf {
      * @function getMaterial
      * @brief non-const getMaterial()
      */
-    boost::shared_ptr<Material> getMaterial(const std::string& name) const {
-      boost::shared_ptr<Material> ptr;
+    std::shared_ptr<Material> getMaterial(const std::string& name) const {
+      std::shared_ptr<Material> ptr;
       if (this->materials_.find(name) == this->materials_.end())
 	ptr.reset();
       else
@@ -144,7 +144,7 @@ namespace urdf {
      */
     void initTree(std::map<std::string, std::string> &parent_link_tree) {
       
-      for (std::map<std::string,boost::shared_ptr<Joint> >::iterator joint = this->joints_.begin();
+      for (std::map<std::string,std::shared_ptr<Joint> >::iterator joint = this->joints_.begin();
 	   joint != this->joints_.end(); joint++) {
 	std::string parent_link_name = joint->second->parent_link_name;
 	std::string child_link_name = joint->second->child_link_name;
@@ -156,7 +156,7 @@ namespace urdf {
 	else
 	  {
 	    // find child and parent links
-	    boost::shared_ptr<Link> child_link, parent_link;
+	    std::shared_ptr<Link> child_link, parent_link;
 	    this->getLink(child_link_name, child_link);
 	    if (!child_link)
 	      {
@@ -193,7 +193,7 @@ namespace urdf {
       this->root_link_.reset();
       
       // find the links that have no parent in the tree
-      for (std::map<std::string, boost::shared_ptr<Link> >::const_iterator l=this->links_.begin(); l!=this->links_.end(); l++)  
+      for (std::map<std::string, std::shared_ptr<Link> >::const_iterator l=this->links_.begin(); l!=this->links_.end(); l++)  
 	{
 	  std::map<std::string, std::string >::const_iterator parent = parent_link_tree.find(l->first);
 	  if (parent == parent_link_tree.end())
@@ -218,11 +218,11 @@ namespace urdf {
     
     
     /// \brief complete list of Links
-    std::map<std::string, boost::shared_ptr<Link> > links_;
+    std::map<std::string, std::shared_ptr<Link> > links_;
     /// \brief complete list of Joints
-    std::map<std::string, boost::shared_ptr<Joint> > joints_;
+    std::map<std::string, std::shared_ptr<Joint> > joints_;
     /// \brief complete list of Materials
-    std::map<std::string, boost::shared_ptr<Material> > materials_;
+    std::map<std::string, std::shared_ptr<Material> > materials_;
     
     std::string name_;
 
@@ -230,7 +230,7 @@ namespace urdf {
     ///  typically, root link is the world(inertial).  Where world is a special link
     /// or is the root_link_ the link attached to the world by PLANAR/FLOATING joint?
     ///  hmm...
-    boost::shared_ptr<Link> root_link_;
+    std::shared_ptr<Link> root_link_;
     
   };
 

@@ -296,9 +296,9 @@ bool parseRay(Ray &ray, TiXmlElement* config)
   return true;
 }
 
-boost::shared_ptr<VisualSensor> parseVisualSensor(TiXmlElement *g)
+std::shared_ptr<VisualSensor> parseVisualSensor(TiXmlElement *g)
 {
-  boost::shared_ptr<VisualSensor> visual_sensor;
+  std::shared_ptr<VisualSensor> visual_sensor;
 
   // get sensor type
   TiXmlElement *sensor_xml;

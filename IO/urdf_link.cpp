@@ -220,9 +220,9 @@ bool parseMesh(Mesh &m, TiXmlElement *c)
   return true;
 }
 
-boost::shared_ptr<Geometry> parseGeometry(TiXmlElement *g)
+std::shared_ptr<Geometry> parseGeometry(TiXmlElement *g)
 {
-  boost::shared_ptr<Geometry> geom;
+  std::shared_ptr<Geometry> geom;
   if (!g) return geom;
 
   TiXmlElement *shape = g->FirstChildElement();
@@ -267,7 +267,7 @@ boost::shared_ptr<Geometry> parseGeometry(TiXmlElement *g)
     return geom;
   }
   
-  return boost::shared_ptr<Geometry>();
+  return std::shared_ptr<Geometry>();
 }
 
 bool parseInertial(Inertial &i, TiXmlElement *config)
@@ -448,15 +448,15 @@ bool parseLink(Link &link, TiXmlElement* config)
   for (TiXmlElement* vis_xml = config->FirstChildElement("visual"); vis_xml; vis_xml = vis_xml->NextSiblingElement("visual"))
   {
 
-    boost::shared_ptr<Visual> vis;
+    std::shared_ptr<Visual> vis;
     vis.reset(new Visual());
     if (parseVisual(*vis, vis_xml))
     {
-      boost::shared_ptr<std::vector<boost::shared_ptr<Visual > > > viss = link.getVisuals(vis->group_name);
+      std::shared_ptr<std::vector<std::shared_ptr<Visual > > > viss = link.getVisuals(vis->group_name);
       if (!viss)
       {
         // group does not exist, create one and add to map
-        viss.reset(new std::vector<boost::shared_ptr<Visual > >);
+        viss.reset(new std::vector<std::shared_ptr<Visual > >);
         // new group name, create vector, add vector to map and add Visual to the vector
         link.visual_groups.insert(make_pair(vis->group_name,viss));
         LOG4CXX_DEBUG(KrisLibrary::logger(),  "successfully added a new visual group name '"<<vis->group_name.c_str());
@@ -477,7 +477,7 @@ bool parseLink(Link &link, TiXmlElement* config)
   // Visual (optional)
   // Assign one single default visual pointer from the visual_groups map
   link.visual.reset();
-  boost::shared_ptr<std::vector<boost::shared_ptr<Visual > > > default_visual = link.getVisuals("default");
+  std::shared_ptr<std::vector<std::shared_ptr<Visual > > > default_visual = link.getVisuals("default");
   if (!default_visual)
   {
     //("No 'default' visual group for Link '%s'", this->name.c_str());
@@ -499,16 +499,16 @@ bool parseLink(Link &link, TiXmlElement* config)
   // Multiple Collisions (optional)
   for (TiXmlElement* col_xml = config->FirstChildElement("collision"); col_xml; col_xml = col_xml->NextSiblingElement("collision"))
   {
-    boost::shared_ptr<Collision> col;
+    std::shared_ptr<Collision> col;
     col.reset(new Collision());
     if (parseCollision(*col, col_xml))
     {      
-      boost::shared_ptr<std::vector<boost::shared_ptr<Collision > > > cols = link.getCollisions(col->group_name);  
+      std::shared_ptr<std::vector<std::shared_ptr<Collision > > > cols = link.getCollisions(col->group_name);  
       
       if (!cols)
       {
         // group does not exist, create one and add to map
-        cols.reset(new std::vector<boost::shared_ptr<Collision > >);
+        cols.reset(new std::vector<std::shared_ptr<Collision > >);
         // new group name, create vector, add vector to map and add Collision to the vector
         link.collision_groups.insert(make_pair(col->group_name,cols));
         LOG4CXX_DEBUG(KrisLibrary::logger(),  "successfully added a new collision group name '"<<col->group_name.c_str());
@@ -529,7 +529,7 @@ bool parseLink(Link &link, TiXmlElement* config)
   // Collision (optional)
   // Assign one single default collision pointer from the collision_groups map
   link.collision.reset();
-  boost::shared_ptr<std::vector<boost::shared_ptr<Collision > > > default_collision = link.getCollisions("default");
+  std::shared_ptr<std::vector<std::shared_ptr<Collision > > > default_collision = link.getCollisions("default");
 
   if (!default_collision)
   {
@@ -609,24 +609,24 @@ bool exportMesh(Mesh &m, TiXmlElement *xml)
   return true;
 }
 
-bool exportGeometry(boost::shared_ptr<Geometry> &geom, TiXmlElement *xml)
+bool exportGeometry(std::shared_ptr<Geometry> &geom, TiXmlElement *xml)
 {
   TiXmlElement *geometry_xml = new TiXmlElement("geometry");
-  if (boost::dynamic_pointer_cast<Sphere>(geom))
+  if (std::dynamic_pointer_cast<Sphere>(geom))
   {
-    exportSphere((*(boost::dynamic_pointer_cast<Sphere>(geom).get())), geometry_xml);
+    exportSphere((*(std::dynamic_pointer_cast<Sphere>(geom).get())), geometry_xml);
   }
-  else if (boost::dynamic_pointer_cast<Box>(geom))
+  else if (std::dynamic_pointer_cast<Box>(geom))
   {
-    exportBox((*(boost::dynamic_pointer_cast<Box>(geom).get())), geometry_xml);
+    exportBox((*(std::dynamic_pointer_cast<Box>(geom).get())), geometry_xml);
   }
-  else if (boost::dynamic_pointer_cast<Cylinder>(geom))
+  else if (std::dynamic_pointer_cast<Cylinder>(geom))
   {
-    exportCylinder((*(boost::dynamic_pointer_cast<Cylinder>(geom).get())), geometry_xml);
+    exportCylinder((*(std::dynamic_pointer_cast<Cylinder>(geom).get())), geometry_xml);
   }
-  else if (boost::dynamic_pointer_cast<Mesh>(geom))
+  else if (std::dynamic_pointer_cast<Mesh>(geom))
   {
-    exportMesh((*(boost::dynamic_pointer_cast<Mesh>(geom).get())), geometry_xml);
+    exportMesh((*(std::dynamic_pointer_cast<Mesh>(geom).get())), geometry_xml);
   }
   else
   {
@@ -634,7 +634,7 @@ bool exportGeometry(boost::shared_ptr<Geometry> &geom, TiXmlElement *xml)
     Sphere *s = new Sphere();
     s->radius = 0.03;
     geom.reset(s);
-    exportSphere((*(boost::dynamic_pointer_cast<Sphere>(geom).get())), geometry_xml);
+    exportSphere((*(std::dynamic_pointer_cast<Sphere>(geom).get())), geometry_xml);
   }
 
   xml->LinkEndChild(geometry_xml);

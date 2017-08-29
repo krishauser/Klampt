@@ -57,9 +57,9 @@ namespace urdf{
   /**
    * @function parseWorldURDF
    */
-  boost::shared_ptr<World> parseWorldURDF(const std::string &_xml_string, std::string _path ) {
+  std::shared_ptr<World> parseWorldURDF(const std::string &_xml_string, std::string _path ) {
     
-    boost::shared_ptr<World> world( new World );
+    std::shared_ptr<World> world( new World );
     world->clear();
     
     TiXmlDocument xml_doc;
@@ -132,7 +132,7 @@ namespace urdf{
 	  }
 	  xml_file.close();
 
-	  boost::shared_ptr<ModelInterface> model;
+	  std::shared_ptr<ModelInterface> model;
 	  model = parseURDF( xml_model_string );
 	  entity.model = model;  
 
