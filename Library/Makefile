@@ -40,7 +40,7 @@ dep-glui:
 endif
 
 dep-ode:
-	cd ode-0.14; X_EXTRA_LIBS=-lX11 CXXFLAGS=-fPIC ./configure $(ODECONFIG)
+	cd ode-0.14; X_EXTRA_LIBS=-lX11 CFLAGS=-fPIC CXXFLAGS=-fPIC ./configure $(ODECONFIG)
 	cd ode-0.14; make
 
 #NOTE: call "sudo make ldconfig-ode" if you have set --enable-shared in ODECONFIG
