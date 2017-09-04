@@ -295,6 +295,9 @@ void handleIncomingMessage(string message)
         }
         std::string item = message.substr(0,i);
         std::string value = message.substr(i+1,message.length()-i-1);
+        //convert JSON simple values to Python ones
+        if(value == "true") value="True";
+        else if(value == "false") value="False";
         std::string pycode;
         pycode+="wrapper_setitem('" + item + "',"+value+")\n";
         int res = PyRun_SimpleString(pycode.c_str());
