@@ -3,6 +3,8 @@ import sys
 sys.path.append("Web/Server")
 import time
 from klampt import *
+from klampt.math import *
+import math
 import kviz
 
 #stub code
@@ -30,15 +32,17 @@ def euler_angle_to_rotation(ea,convention='zyx'):
 #TODO: play around with these euler angles
 Ta,Tb = None,None
 ttotal = 0
+period = 3.0
+manual = False
 
 def make_frame_widget(name,size,opacity=1.0):
     world = kviz._world
     x = world.makeRigidObject(name+"_x")
     y = world.makeRigidObject(name+"_y")
     z = world.makeRigidObject(name+"_z")
-    x.geometry().loadFile("data/objects/cube.tri")
-    y.geometry().loadFile("data/objects/cube.tri")
-    z.geometry().loadFile("data/objects/cube.tri")
+    x.geometry().loadFile("data/objects/cube.off")
+    y.geometry().loadFile("data/objects/cube.off")
+    z.geometry().loadFile("data/objects/cube.off")
     w = size*0.1
     x.geometry().transform([size,0,0,0,w,0,0,0,w],[0,-w*0.5,-w*0.5])
     y.geometry().transform([w,0,0,0,size,0,0,0,w],[-w*0.5,0,-w*0.5])
@@ -74,10 +78,45 @@ def boilerplate_start():
 def boilerplate_advance():
     #interpolate with a period of 3 seconds
     global ttotal
-    ttotal += 0.02
-    period = 3.0
-    u = (ttotal%period)/period
-    T = update_interpolation(u)
-    set_frame_widget_xform("current_frame",T)
+    if not manual:
+        ttotal += 0.02
+        u = (ttotal%period)/period
+        T = update_interpolation(u)
+        set_frame_widget_xform("current_frame",T)
 
 
+def boilerplate_setitem(name,value):
+    global ttotal,manual
+    if name == 'manual':
+        manual = value
+    if manual:
+        #allow control
+        if name == 'u':
+            ttotal = float(value)/100*period
+        elif name == 'psi1' and manual:
+            stub.ea[0] = math.radians(float(value))
+            print "ea is now",stub.ea
+        elif name == 'theta1':
+            stub.ea[1] = math.radians(float(value))
+            print "ea is now",stub.ea
+        elif name == 'phi1':
+            stub.ea[2] = math.radians(float(value))
+            print "ea is now",stub.ea
+        elif name == 'psi2':
+            stub.eb[0] = math.radians(float(value))
+            print "eb is now",stub.eb
+        elif name == 'theta2':
+            stub.eb[1] = math.radians(float(value))
+            print "eb is now",stub.eb
+        elif name == 'phi2':
+            stub.eb[2] = math.radians(float(value))
+            print "eb is now",stub.eb
+        global Ta,Tb
+        Ta = (stub.euler_angle_to_rotation(stub.ea),(-1,0,0.5))
+        Tb = (stub.euler_angle_to_rotation(stub.eb),(1,0,0.5))
+        set_frame_widget_xform("start_frame",Ta)
+        set_frame_widget_xform("goal_frame",Tb)
+        ttotal += 0.02
+        u = (ttotal%period)/period
+        T = update_interpolation(u)
+        set_frame_widget_xform("current_frame",T)

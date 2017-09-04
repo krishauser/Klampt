@@ -1,4 +1,5 @@
 from klampt import *
+from klampt.math import *
 import math
 import sys
 sys.path.append("Web/Server")
@@ -17,9 +18,10 @@ vmax = 1
 steermax = 45
 steerinc = 2
 xform = [0,0,0]
+random_control = False
 
 def boilerplate_start():
-    global world,car_body,wheels,velocity,xform
+    global world,car_body,wheels,velocity,xform,random_control
     world = WorldModel()
     car_body = world.loadElement("Web/Client/Scenarios/lab1/body.obj")
     wheels['fl'] = world.loadElement("Web/Client/Scenarios/lab1/tire_fl.obj")
@@ -74,14 +76,19 @@ def update_xform(dt=0.02):
     xform = (xform[0]+v[0]*dt,xform[1]+v[1]*dt,xform[2]+dtheta*dt)
 
 def boilerplate_advance():
+    global random_control
     update_xform()
     update_car()
-    boilerplate_keypress(stub.control())
+    if random_control:
+        boilerplate_keypress(stub.control())
     #boilerplate_keypress(random.choice(['up','down','left','right']))
 
 def boilerplate_keypress(c):
-    global velocity,steer,xform
-    if c=='up':
+    global velocity,steer,xform,random_control
+    if c.startswith('Arrow'):
+        random_control = False
+        boilerplate_keypress(c[5:].lower())
+    elif c=='up':
         velocity += vinc
         if velocity > vmax:
             velocity = vmax
@@ -97,4 +104,6 @@ def boilerplate_keypress(c):
         steer += steerinc
         if steer > steermax:
             steer = steermax
+    elif c=='r':
+        random_control = True
     

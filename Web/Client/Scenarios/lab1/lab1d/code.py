@@ -1,5 +1,5 @@
 import math
-from klampt import so3,se3,vectorops
+from klampt.math import so3,se3,vectorops
 
 def interpolate_linear(a,b,u):
     """Interpolates linearly in cartesian space between a and b."""
