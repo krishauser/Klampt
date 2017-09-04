@@ -329,7 +329,12 @@
                         $(this).click(function() { KLAMPT.event($(this).attr('name')); })
                      });
                      $(ei).find("input, textarea").addBack("input, textarea").each( function(i) {
-                        $(this).change(function() { KLAMPT.setitem($(this).attr('name'),$(this).val()); });
+                        if($(this).attr('type') == 'checkbox') {
+                           $(this).change(function() { KLAMPT.setitem($(this).attr('name'),$(this).prop('checked')); });
+                        }
+                        else {
+                           $(this).change(function() { KLAMPT.setitem($(this).attr('name'),$(this).val()); });
+                        }
                      });
                      $(ei).find("select").addBack("select").each( function(i) {
                         $(this).on("input change",function() { KLAMPT.setitem($(this).attr('name'),$(this).val()); });
@@ -375,7 +380,12 @@
          function buttonPanelToServer()
          {
            $('#buttonpanel_content').find("input, textarea").addBack("input, textarea").each( function(i) {
-              KLAMPT.setitem($(this).attr('name'),$(this).val());
+              if($(this).attr('type') == 'checkbox') {
+                 KLAMPT.setitem($(this).attr('name'),$(this).prop('checked'));
+              }
+              else {
+                 KLAMPT.setitem($(this).attr('name'),$(this).val());
+              }
            });
            $('#buttonpanel_content').find("select").addBack("select").each( function(i) {
                   KLAMPT.setitem($(this).attr('name'),$(this).val()); 
@@ -480,7 +490,7 @@
                               <button onclick="doConnect()">Connect</button> \
                               <div style=" width:20px;display:inline-block;" /> \
                               <select id="boilerselctor" onchange="boilerPlateChanged()"></select> \
-                              <input type="checkbox" id="shadows" onclick="toggleShadow(this);">Shadows</input>';
+                              <input type="checkbox" id="shadows" checked onclick="toggleShadow(this);">Shadows</input>';
             var pstyle = 'background-color: #F5F6F7; border: 1px solid #dfdfdf; padding: 5px;';
             $('#myLayout').w2layout({
                name: 'layout',
