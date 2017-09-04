@@ -334,7 +334,7 @@
                      });
                      $(ei).find("input, textarea").addBack("input, textarea").each( function(i) {
                         if($(this).attr('type') == 'checkbox') {
-                           $(this).change(function() { KLAMPT.setitem($(this).attr('name'),$(this).prop('checked'); });
+                           $(this).change(function() { KLAMPT.setitem($(this).attr('name'),$(this).prop('checked')); });
                         }
                         else {
                            $(this).change(function() { KLAMPT.setitem($(this).attr('name'),$(this).val()); });
