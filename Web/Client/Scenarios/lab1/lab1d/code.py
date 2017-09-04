@@ -26,8 +26,8 @@ def euler_angle_to_rotation(ea,convention='zyx'):
     return so3.mul(R0,so3.mul(R1,R2))
 
 #TODO: play around with these euler angles -- they'll determine the start and end of the rotations
-ea = (math.pi/4,0,0)
-eb = (math.pi*7/4,0,0)
+ea = [math.pi/4,0,0]
+eb = [math.pi*7/4,0,0]
 
 
 
