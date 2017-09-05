@@ -88,6 +88,18 @@ def boilerplate_keypress(c):
     if c.startswith('Arrow'):
         random_control = False
         boilerplate_keypress(c[5:].lower())
+    elif c=='w':
+        random_control = False
+        boilerplate_keypress('up')
+    elif c=='a':
+        random_control = False
+        boilerplate_keypress('left')
+    elif c=='s':
+        random_control = False
+        boilerplate_keypress('down')
+    elif c=='d':
+        random_control = False
+        boilerplate_keypress('right')
     elif c=='up':
         velocity += vinc
         if velocity > vmax:
