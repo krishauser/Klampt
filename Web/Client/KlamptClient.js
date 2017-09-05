@@ -359,7 +359,7 @@ function kclient_init(dom_sceneArea,dom_textArea)
 	textArea = dom_textArea;
 	//renderer.setClearColor(0x88888888);
   renderer.setClearColor(0x888888FF);
-  renderer.shadowMapEnabled = false;
+  renderer.shadowMapEnabled = true;
   // to antialias the shadow
   renderer.shadowMapType = THREE.PCFSoftShadowMap;
   renderer.shadowMapSoft = true;
