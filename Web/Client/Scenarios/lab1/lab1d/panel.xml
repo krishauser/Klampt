@@ -1,10 +1,10 @@
 <document>
-    <div style="font-size:small;">Manual control<input type="checkbox" name="manual" /></div>
-    <div style="font-size:small;">Path<input type="range" name="u" min="0" max="100" step="1" value="0"/></div>
-    <div style="font-size:small;">ψ1<input type="range" name="psi1" min="0" max="360" step="1"/></div>
-    <div style="font-size:small;">θ1<input type="range" name="theta1" min="0" max="360" step="1"/></div>
-    <div style="font-size:small;">ϕ1<input type="range" name="phi1" min="0" max="360" step="1"/></div>
-    <div style="font-size:small;">ψ2<input type="range" name="psi2" min="0" max="360" step="1"/></div>
-    <div style="font-size:small;">θ2<input type="range" name="theta2" min="0" max="360" step="1"/></div>
-    <div style="font-size:small;">ϕ2<input type="range" name="phi2" min="0" max="360" step="1"/></div>
+    <div class="panel_control">Manual control<input type="checkbox" name="manual" /></div>
+    <div class="panel_control">Path<input type="range" name="u" min="0" max="100" step="1" value="0"/></div>
+    <div class="panel_control">ψ1<input type="range" name="psi1" min="0" max="360" step="1"/></div>
+    <div class="panel_control">θ1<input type="range" name="theta1" min="0" max="360" step="1"/></div>
+    <div class="panel_control">ϕ1<input type="range" name="phi1" min="0" max="360" step="1"/></div>
+    <div class="panel_control">ψ2<input type="range" name="psi2" min="0" max="360" step="1"/></div>
+    <div class="panel_control">θ2<input type="range" name="theta2" min="0" max="360" step="1"/></div>
+    <div class="panel_control">ϕ2<input type="range" name="phi2" min="0" max="360" step="1"/></div>
 </document>

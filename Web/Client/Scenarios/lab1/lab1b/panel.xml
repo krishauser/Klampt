@@ -1,4 +1,4 @@
 <document>
-    <div style="font-size:small;">Manual control<input type="checkbox" name="angle_manual" /></div>
-    <div style="font-size:small;">Angle (0 - 360)<input type="range" name="angle" min="0" max="360" step="1"/></div>
+    <div class="panel_control">Manual control<input type="checkbox" name="angle_manual" /></div>
+    <div class="panel_control">Angle (0 - 360)<input type="range" name="angle" min="0" max="360" step="1"/></div>
 </document>
