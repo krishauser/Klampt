@@ -50,6 +50,13 @@ if __name__ == "__main__":
             traj3.milestones.append(rrot+rpoint)
         
         vis.animate("xform",traj3)
+
+        #testing adding the trajectory to the visualization... only works with piecewise linear Trajectories at the moment
+        #vis.add("point_milestones",traj)
+        #vis.add("point_milestones_smooth",traj2)    #not implemented yet
+        vis.add("xform_milestones",traj3)
+        vis.setAttribute("xform_milestones","width",1.0)
+        vis.setColor("xform_milestones",1,1,0)
     else:
         #creates a world and loads all the items on the command line
         world = WorldModel()
