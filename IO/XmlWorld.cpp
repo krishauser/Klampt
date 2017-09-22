@@ -4,6 +4,9 @@
 #include <KrisLibrary/utils/fileutils.h>
 #include <fstream>
 
+///defined in XmlODE.cpp
+int SafeQueryFloat(TiXmlElement* e,const char* attr,double& out);
+
 ///reads a transformation matrix from attributes of an XML element
 bool ReadTransform(TiXmlElement* e,RigidTransform& xform)
 {
@@ -213,7 +216,6 @@ bool XmlRigidObject::GetRigidObject(RigidObject& obj)
     if(ReadTransform(geom,xform)) {
       obj.geometry.TransformGeometry(xform);
     }
-    xform.setIdentity();
     Real temp;
     if(geom->QueryValueAttribute("margin",&temp) == TIXML_SUCCESS) {
       obj.geometry->margin = temp;
@@ -250,14 +252,10 @@ bool XmlRigidObject::GetRigidObject(RigidObject& obj)
       obj.SetMassFromGeometry(obj.mass);
     }
     
-    if(phys->QueryValueAttribute("kRestitution",&val)==TIXML_SUCCESS)
-      obj.kRestitution=val;
-    if(phys->QueryValueAttribute("kFriction",&val)==TIXML_SUCCESS)
-      obj.kFriction = val;
-    if(phys->QueryValueAttribute("kStiffness",&val)==TIXML_SUCCESS)
-      obj.kStiffness = val;
-    if(phys->QueryValueAttribute("kDamping",&val)==TIXML_SUCCESS)
-      obj.kDamping = val;
+    SafeQueryFloat(phys,"kRestitution",obj.kRestitution);
+    SafeQueryFloat(phys,"kFriction",obj.kFriction);
+    SafeQueryFloat(phys,"kStiffness",obj.kStiffness);
+    SafeQueryFloat(phys,"kDamping",obj.kDamping);
   }
 
   obj.UpdateGeometry();
