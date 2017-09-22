@@ -275,12 +275,12 @@ void ManagedGeometry::SetUnique()
   SetUniqueAppearance();
   std::map<std::string,GeometryManager::GeometryList>::iterator i=manager.cache.find(cacheKey);
   if(i==manager.cache.end()) {
-    LOG4CXX_WARN(KrisLibrary::logger(),"ManagedGeometry::RemoveFromCache(): warning, item "<<cacheKey.c_str());
+    printf("ManagedGeometry::RemoveFromCache(): warning, item %s\n");
     cacheKey.clear();
     return;
   }
   if(i->second.geoms.empty()) {
-    LOG4CXX_WARN(KrisLibrary::logger(),"ManagedGeometry::RemoveFromCache(): warning, item "<<cacheKey.c_str());
+    printf("ManagedGeometry::RemoveFromCache(): warning, item %s\n");
     cacheKey.clear();
     return;
   }
