@@ -1,3 +1,5 @@
+#include <log4cxx/logger.h>
+#include <KrisLibrary/Logger.h>
 #include "PathController.h"
 #include "JointSensors.h"
 #include "Modeling/Conversions.h"
@@ -137,8 +139,8 @@ void PolynomialMotionQueue::AppendLinear(const Config& config,Real dt)
   if(path.elements.empty()) FatalError("PolynomialMotionQueue::AppendLinear: motion queue is uninitialized.  Wait until after the control loop or call SetMilestone() first\n");
   if(dt == 0 && config != Endpoint()) {
     //want a continuous jump?
-    printf("PolynomialMotionQueue::AppendLinear: Warning, discontinuous jump requested\n");
-    cout<<"Time "<<path.EndTime()<<" distance "<<config.distance(Endpoint())<<endl;
+    LOG4CXX_WARN(KrisLibrary::logger(),"PolynomialMotionQueue::AppendLinear: Warning, discontinuous jump requested\n");
+    LOG4CXX_INFO(KrisLibrary::logger(),"Time "<<path.EndTime()<<" distance "<<config.distance(Endpoint())<<"\n");
     path.Concat(Spline::Linear(config,config,0,0),true);    
   }
   else 
@@ -151,8 +153,8 @@ void PolynomialMotionQueue::AppendCubic(const Config& x,const Vector& v,Real dt)
   if(dt == 0) {
     if(x != Endpoint()) {
       //want a continuous jump?
-      printf("PolynomialMotionQueue::AppendCubic: Warning, discontinuous jump requested\n");
-      cout<<"Time "<<path.EndTime()<<" distance "<<x.distance(Endpoint())<<endl;
+      LOG4CXX_WARN(KrisLibrary::logger(),"PolynomialMotionQueue::AppendCubic: Warning, discontinuous jump requested\n");
+      LOG4CXX_INFO(KrisLibrary::logger(),"Time "<<path.EndTime()<<" distance "<<x.distance(Endpoint())<<"\n");
       path.Concat(Spline::Linear(x,x,0,0),true);    
     }
   }
@@ -199,19 +201,17 @@ void PolynomialMotionQueue::AppendRamp(const Config& x,const Vector& v)
   dmilestones[1] = v;
   for(int i=0;i<x.n;i++)
     if(milestones[0][i] != Clamp(milestones[0][i],qMin[i],qMax[i])) {
-  printf("  Warning, current config[%d] is out of joint limits: %g <= %g <= %g, clamping\n",i,qMin[i],milestones[0][i],qMax[i]);
-      milestones[0][i] = Clamp(milestones[0][i],qMin[i],qMax[i]);
+  LOG4CXX_WARN(KrisLibrary::logger(),"  Warning, current config["<< i<<"] is out of joint limits: |"<<qMin[i] <<"| <= "<< milestones[0][i]<<" <= "<<qMax[i] <<" , clamping\n");
     }
   for(int i=0;i<v.n;i++)
     if(dmilestones[0][i] != Clamp(dmilestones[0][i],-velMax[i],velMax[i])) {
-  printf("  Warning, current vel[%d] is out of velMax limits: |%g| <= %g, clamping\n",i,dmilestones[0][i],velMax[i]);
-      dmilestones[0][i] = Clamp(dmilestones[0][i],-velMax[i],velMax[i]);
-    }
+    LOG4CXX_WARN(KrisLibrary::logger(),"  Warning, current vel["<< i<<"] is out of velMax limits: |"<<dmilestones[0][i] <<"| <= "<< velMax[i]<<", clamping\n");
+  }
 
   if(!qMin.empty()) {
     for(int i=0;i<x.n;i++) {
       if(x[i] != Clamp(x[i],qMin[i],qMax[i])) {
-	printf("AppendRamp: Warning, clamping desired config %d to joint limits %g in [%g,%g]\n",i,x[i],qMin[i],qMax[i]);
+	LOG4CXX_WARN(KrisLibrary::logger(),"AppendRamp: Warning, clamping desired config "<<i<<" to joint limits "<<x[i]<<" in ["<<qMin[i]<<","<<qMax[i]);
 	Real shrink = gJointLimitEpsilon*(qMax[i]-qMin[i]);
 	milestones[1][i] = Clamp(x[i],qMin[i]+shrink,qMax[i]-shrink);
       }
@@ -219,7 +219,7 @@ void PolynomialMotionQueue::AppendRamp(const Config& x,const Vector& v)
   }
   for(int i=0;i<x.n;i++) {
     if(Abs(v[i]) > velMax[i]) {
-      printf("AppendRamp: Warning, clamping desired velocity %d to limits |%g|<=%g\n",i,v[i],velMax[i]);
+      LOG4CXX_WARN(KrisLibrary::logger(),"AppendRamp: Warning, clamping desired velocity "<<i<<" to limits |"<<v[i]<<"|<="<<velMax[i]);
       Real shrink = gVelocityLimitEpsilon*velMax[i]*2.0;
       dmilestones[1][i] = Clamp(v[i],-velMax[i]+shrink,velMax[i]-shrink);
     }
@@ -230,19 +230,19 @@ void PolynomialMotionQueue::AppendRamp(const Config& x,const Vector& v)
   if(!qMin.empty()) //optional joint limits
     dpath.SetJointLimits(qMin,qMax);
   if(!dpath.SetMilestones(milestones,dmilestones)) {
-    printf("AppendRamp: Warning, DynamicPath::SetMilestones failed!\n");
+    LOG4CXX_WARN(KrisLibrary::logger(),"AppendRamp: Warning, DynamicPath::SetMilestones failed!\n");
     for(int i=0;i<x.n;i++)
       if(milestones[0][i] != Clamp(milestones[0][i],qMin[i],qMax[i])) {
-	printf("  Reason: current config[%d] is out of joint limits: %g <= %g <= %g\n",i,qMin[i],milestones[0][i],qMax[i]);
+	LOG4CXX_INFO(KrisLibrary::logger(),"  Reason: current config["<<i<<"] is out of joint limits: "<<qMin[i]<<" <= "<<milestones[0][i]<<" <= "<<qMax[i]);
       }
     for(int i=0;i<v.n;i++)
       if(Abs(dmilestones[0][i]) > velMax[i]) {
-	printf("  Reason: current velocity[%d] is out of vel limits: |%g| <= %g\n",i,dmilestones[0][i],velMax[i]);
+	LOG4CXX_INFO(KrisLibrary::logger(),"  Reason: current velocity["<<i<<"] is out of vel limits: |"<<dmilestones[0][i]<<"| <= "<<velMax[i]);
       }
   }
   else {
     if(path.EndTime() < pathOffset) {
-      printf("AppendRamp: Warning, path end time is in the past, cutting...\n");
+      LOG4CXX_WARN(KrisLibrary::logger(),"AppendRamp: Warning, path end time is in the past, cutting...\n");
       Cut(0);
     }
     path.Concat(Cast(dpath),true);
@@ -266,7 +266,7 @@ void PolynomialMotionQueue::AppendLinearRamp(const Config& x)
   if(!qMin.empty()) {
     for(int i=0;i<x.n;i++) {
       if(x[i] != Clamp(x[i],qMin[i],qMax[i])) {
-	printf("AppendRamp: Warning, clamping desired config %d to joint limits %g in [%g,%g]\n",i,x[i],qMin[i],qMax[i]);
+	LOG4CXX_WARN(KrisLibrary::logger(),"AppendRamp: Warning, clamping desired config "<<i<<" to joint limits "<<x[i]<<" in ["<<qMin[i]<<","<<qMax[i]);
 	Real shrink = gJointLimitEpsilon*(qMax[i]-qMin[i]);
 	milestones[1][i] = Clamp(x[i],qMin[i]+shrink,qMax[i]-shrink);
       }
@@ -276,11 +276,11 @@ void PolynomialMotionQueue::AppendLinearRamp(const Config& x)
   ParabolicRamp::DynamicPath dpath;
   dpath.Init(velMax,accMax);
   if(!dpath.SetMilestones(milestones)) {
-    printf("AppendRamp: Warning, DynamicPath::SetMilestones failed!\n");
+    LOG4CXX_WARN(KrisLibrary::logger(),"AppendRamp: Warning, DynamicPath::SetMilestones failed!\n");
   }
   else {
     if(path.EndTime() < pathOffset) {
-      printf("AppendRamp: Warning, path end time is in the past, cutting...\n");
+      LOG4CXX_WARN(KrisLibrary::logger(),"AppendRamp: Warning, path end time is in the past, cutting...\n");
       Cut(0);
     }
     path.Concat(Cast(dpath),true);
@@ -442,7 +442,7 @@ bool PolynomialPathController::SendCommand(const string& name,const string& str)
 {
   if(name.substr(0,6) == "append") {
     if(path.elements.empty()) {
-      fprintf(stderr,"%s: warning, the controller has not been set up yet with the robot's current configuration... try to take some simulation steps first, call set_tq, or SetConstant(q)\n",name.c_str());    
+      LOG4CXX_ERROR(KrisLibrary::logger(),""<<name.c_str() <<": warning, the controller has not been set up yet with the robot's current configuration... try to take some simulation steps first, call set_tq, or SetConstant(q)\n");
       return false;
     }
   }
@@ -454,11 +454,11 @@ bool PolynomialPathController::SendCommand(const string& name,const string& str)
     ss>>t>>q;
     if(!ss) return false;
     if(t < pathOffset) {
-      fprintf(stderr,"set_tq: warning, cut time %g is less than path's endtime %g\n",t,pathOffset);
+            LOG4CXX_ERROR(KrisLibrary::logger(),"set_tq: warning, cut time "<<t<<" is less than path's endtime "<<pathOffset);
       return false;
     }
     if(path.elements.empty()) {
-      fprintf(stderr,"set_tq: warning, the controller has not been set up yet with the robot's current configuration... starting at the given configuration\n");    
+            LOG4CXX_ERROR(KrisLibrary::logger(),"set_tq: warning, the controller has not been set up yet with the robot's current configuration... starting at the given configuration\n");
       path = Spline::Constant(q,0,t);
       pathOffset = 0;
       return true;
@@ -472,11 +472,11 @@ bool PolynomialPathController::SendCommand(const string& name,const string& str)
     ss>>t>>q;
     if(!ss) return false;
     if(t < path.EndTime()) {
-      fprintf(stderr,"append_tq: warning, append time %g is less than path's endtime %g\n",t,path.EndTime());
+            LOG4CXX_ERROR(KrisLibrary::logger(),"append_tq: warning, append time "<<t<<" is less than path's endtime "<<path.EndTime());
       return false;
     }
     if(path.elements.empty()) {
-      fprintf(stderr,"append_tq: warning, the motion queue has not been set up yet.  Call any of the setX commands first or wait until the first control loop has passed.\n");    
+      LOG4CXX_ERROR(KrisLibrary::logger(),"append_tq: warning, the motion queue has not been set up yet.  Call any of the setX commands first or wait until the first control loop has passed.\n");
       return false;
     }
     AppendLinear(q,t-path.EndTime());
@@ -486,7 +486,7 @@ bool PolynomialPathController::SendCommand(const string& name,const string& str)
     ss>>q;
     if(!ss) return false;
     if(path.elements.empty()) {
-      fprintf(stderr,"set_q: warning, the controller has not been set up yet with the robot's current configuration... starting at the given configuration\n");    
+      LOG4CXX_ERROR(KrisLibrary::logger(),"set_q: warning, the controller has not been set up yet with the robot's current configuration... starting at the given configuration\n");
       SetConstant(q);
       return true;
     }
@@ -498,7 +498,7 @@ bool PolynomialPathController::SendCommand(const string& name,const string& str)
     ss>>q;
     if(!ss) return false;
     if(path.elements.empty()) {
-      fprintf(stderr,"append_q: warning, the motion queue has not been set up yet.  Call any of the setX commands first or wait until the first control loop has passed.\n");    
+      LOG4CXX_ERROR(KrisLibrary::logger(),"append_q: warning, the motion queue has not been set up yet.  Call any of the setX commands first or wait until the first control loop has passed.\n");
       return false;
     }
     AppendRamp(q);
@@ -508,7 +508,7 @@ bool PolynomialPathController::SendCommand(const string& name,const string& str)
     ss>>q;
     if(!ss) return false;
     if(path.elements.empty()) {
-      fprintf(stderr,"append_q_linear: warning, the motion queue has not been set up yet.  Call any of the setX commands first or wait until the first control loop has passed.\n");    
+      LOG4CXX_ERROR(KrisLibrary::logger(),"append_q_linear: warning, the motion queue has not been set up yet.  Call any of the setX commands first or wait until the first control loop has passed.\n");
       return false;
     }
     AppendLinearRamp(q);
@@ -518,7 +518,7 @@ bool PolynomialPathController::SendCommand(const string& name,const string& str)
     ss>>q>>v;
     if(!ss) return false;
     if(path.elements.empty()) {
-      fprintf(stderr,"set_qq: warning, the controller has not been set up yet with the robot's current configuration... starting at the given configuration\n");    
+      LOG4CXX_ERROR(KrisLibrary::logger(),"set_qq: warning, the controller has not been set up yet with the robot's current configuration... starting at the given configuration\n");
       SetConstant(q);
       return true;
     }
@@ -530,7 +530,7 @@ bool PolynomialPathController::SendCommand(const string& name,const string& str)
     ss>>q>>v;
     if(!ss) return false;
     if(path.elements.empty()) {
-      fprintf(stderr,"append_qv: warning, the motion queue has not been set up yet.  Call any of the setX commands first or wait until the first control loop has passed.\n");    
+      LOG4CXX_ERROR(KrisLibrary::logger(),"append_qv: warning, the motion queue has not been set up yet.  Call any of the setX commands first or wait until the first control loop has passed.\n");
       return false;
     }
     AppendRamp(q,v);
@@ -540,7 +540,7 @@ bool PolynomialPathController::SendCommand(const string& name,const string& str)
     ss>>t>>q>>v;
     if(!ss) return false;
     if(path.elements.empty()) {
-      fprintf(stderr,"set_tqv: warning, the controller has not been set up yet with the robot's current configuration... starting at the given configuration\n");    
+      LOG4CXX_ERROR(KrisLibrary::logger(),"set_tqv: warning, the controller has not been set up yet with the robot's current configuration... starting at the given configuration\n");
       path = Spline::Constant(q,0,t);
       pathOffset = 0;
       return true;
@@ -554,11 +554,11 @@ bool PolynomialPathController::SendCommand(const string& name,const string& str)
     ss>>t>>q>>v;
     if(!ss) return false;
     if(path.elements.empty()) {
-      fprintf(stderr,"append_tqv: warning, the motion queue has not been set up yet.  Call any of the setX commands first or wait until the first control loop has passed.\n");    
+      LOG4CXX_ERROR(KrisLibrary::logger(),"append_tqv: warning, the motion queue has not been set up yet.  Call any of the setX commands first or wait until the first control loop has passed.\n");
       return false;
     }
     if(t < path.EndTime()) {
-      fprintf(stderr,"append_tqv: requested time %g is not after end of existing path %g.\n",t,path.EndTime());    
+      LOG4CXX_ERROR(KrisLibrary::logger(),"append_tqv: requested time "<<t<<" is not after end of existing path "<<path.EndTime());
       return false;
     }
     AppendCubic(q,v,t-path.EndTime());
@@ -566,7 +566,7 @@ bool PolynomialPathController::SendCommand(const string& name,const string& str)
   }
   else if(name == "brake") {
     //Brake();
-    fprintf(stderr,"Brake is not done yet\n");
+        LOG4CXX_ERROR(KrisLibrary::logger(),"Brake is not done yet\n");
     return false;
     return true;
   }

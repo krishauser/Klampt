@@ -1,3 +1,5 @@
+#include <log4cxx/logger.h>
+#include <KrisLibrary/Logger.h>
 #include "RobotConstrainedInterpolator.h"
 
 RobotConstrainedInterpolator::RobotConstrainedInterpolator(Robot& robot,const vector<IKGoal>& goals)
@@ -96,7 +98,7 @@ bool RobotSmoothConstrainedInterpolator::ProjectVelocity(const Config& x,Vector&
   RobustSVD<Real> svd;
   bool res=svd.set(J);
   if(!res) {
-    fprintf(stderr,"SmoothConstrainedInterpolator: Numerical error projecting velocity?\n");
+        LOG4CXX_ERROR(KrisLibrary::logger(),"SmoothConstrainedInterpolator: Numerical error projecting velocity?\n");
     return false;
   }
   Vector vtemp2;

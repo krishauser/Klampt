@@ -1,3 +1,5 @@
+#include <log4cxx/logger.h>
+#include <KrisLibrary/Logger.h>
 #include "SerialController.h"
 #include <KrisLibrary/utils/threadutils.h>
 #include <KrisLibrary/utils/AnyCollection.h>
@@ -13,7 +15,7 @@ SerialController::SerialController(Robot& robot,const string& _servAddr,Real _wr
 
   if(!servAddr.empty()) {
     while(!OpenConnection(servAddr)) {
-      printf("\n...Trying to connect again in 5 seconds...\n");
+      LOG4CXX_INFO(KrisLibrary::logger(),"\n...Trying to connect again in 5 seconds...\n");
       ThreadSleep(5);
     }
   }
@@ -67,7 +69,7 @@ void SerialController::Update(Real dt)
   if(time >= lastWriteTime + 1.0/writeRate) {
     lastWriteTime += 1.0/writeRate;
     if(time >= lastWriteTime + 1.0/writeRate) {
-      printf("Warning, next write time %g is less than controller update time %g\n",lastWriteTime+1.0/writeRate,time);
+      LOG4CXX_WARN(KrisLibrary::logger(),"Warning, next write time "<<lastWriteTime+1.0/writeRate<<" is less than controller update time "<<time);
       lastWriteTime = time;
     }
     AnyCollection sensorData;
@@ -83,7 +85,7 @@ void SerialController::Update(Real dt)
     if(scmd.empty()) return;
     AnyCollection cmd;
     if(!cmd.read(scmd.c_str())) {
-      fprintf(stderr,"SerialController: Unable to parse incoming message \"%s\"\n",scmd.c_str());
+            LOG4CXX_ERROR(KrisLibrary::logger(),"SerialController: Unable to parse incoming message \""<<scmd.c_str());
       return;
     }
     if(cmd.size()==0) {
@@ -99,12 +101,12 @@ void SerialController::Update(Real dt)
       vcmd.clear();
       vector<Real> qcmd,dqcmd,torquecmd;
       if(!qcmdptr->asvector(qcmd)) {
-	fprintf(stderr,"SerialController: qcmd not of proper type\n");
+		LOG4CXX_ERROR(KrisLibrary::logger(),"SerialController: qcmd not of proper type\n");
 	return;
       }
       if(dqcmdptr) {
 	if(!dqcmdptr->asvector(dqcmd)) {
-	  fprintf(stderr,"SerialController: dqcmd not of proper type\n");
+	  	  LOG4CXX_ERROR(KrisLibrary::logger(),"SerialController: dqcmd not of proper type\n");
 	  return;
 	}
       }
@@ -112,20 +114,20 @@ void SerialController::Update(Real dt)
 	dqcmd.resize(qcmd.size(),0);
       if(torquecmdptr) {
 	if(!torquecmdptr->asvector(torquecmd)) {
-	  fprintf(stderr,"SerialController: torquecmd not of proper type\n");
+	  	  LOG4CXX_ERROR(KrisLibrary::logger(),"SerialController: torquecmd not of proper type\n");
 	  return;
 	}
       }
       if(qcmd.size() != robot.q.n) {
-	fprintf(stderr,"SerialController: position command of wrong size: %d vs %d \n",(int)qcmd.size(),robot.q.n);
+		LOG4CXX_ERROR(KrisLibrary::logger(),"SerialController: position command of wrong size: "<<(int)qcmd.size()<<" vs "<<robot.q.n);
 	return;
       }
       if(!dqcmd.empty() && (dqcmd.size() != robot.dq.n)) {
-	fprintf(stderr,"SerialController: velocity command of wrong size: %d vs %d \n",(int)dqcmd.size(),robot.q.n);
+		LOG4CXX_ERROR(KrisLibrary::logger(),"SerialController: velocity command of wrong size: "<<(int)dqcmd.size()<<" vs "<<robot.q.n);
 	return;
       }
       if(!torquecmd.empty() && (torquecmd.size() != robot.drivers.size())) {
-	fprintf(stderr,"SerialController: torque command of wrong size: %d vs %d \n",(int)torquecmd.size(),(int)robot.drivers.size());
+		LOG4CXX_ERROR(KrisLibrary::logger(),"SerialController: torque command of wrong size: "<<(int)torquecmd.size()<<" vs "<<(int)robot.drivers.size());
 	return;
       }
 
@@ -138,21 +140,21 @@ void SerialController::Update(Real dt)
     }
     else if(dqcmdptr) {
       if(tcmdptr == NULL) {
-	fprintf(stderr,"SerialController: dqcmd not given with tcmd\n");
+		LOG4CXX_ERROR(KrisLibrary::logger(),"SerialController: dqcmd not given with tcmd\n");
 	return;
       }
       vector<Real> dqcmd;
       if(!dqcmdptr->asvector(dqcmd)) {
-	fprintf(stderr,"SerialController: dqcmd not of proper type\n");
+		LOG4CXX_ERROR(KrisLibrary::logger(),"SerialController: dqcmd not of proper type\n");
 	return;
       }
       Real tcmd;
       if(!tcmdptr->as(tcmd)) {
-	fprintf(stderr,"SerialController: tcmd not of proper type\n");
+		LOG4CXX_ERROR(KrisLibrary::logger(),"SerialController: tcmd not of proper type\n");
 	return;
       }
       if(dqcmd.size() != robot.dq.n) {
-	fprintf(stderr,"SerialController: velocity command of wrong size: %d vs %d \n",(int)dqcmd.size(),robot.q.n);
+		LOG4CXX_ERROR(KrisLibrary::logger(),"SerialController: velocity command of wrong size: "<<(int)dqcmd.size()<<" vs "<<robot.q.n);
 	return;
       }
       endVCmdTime = time + tcmd;
@@ -163,19 +165,19 @@ void SerialController::Update(Real dt)
       vcmd.clear();
       vector<Real> torquecmd;
       if(!torquecmdptr->asvector(torquecmd)) {
-	fprintf(stderr,"SerialController: torquecmd not of proper type\n");
+		LOG4CXX_ERROR(KrisLibrary::logger(),"SerialController: torquecmd not of proper type\n");
 	return;
       }
       if(!torquecmd.empty() && (torquecmd.size() != robot.drivers.size())) {
-	fprintf(stderr,"SerialController: torque command of wrong size: %d vs %d \n",(int)torquecmd.size(),(int)robot.drivers.size());
+		LOG4CXX_ERROR(KrisLibrary::logger(),"SerialController: torque command of wrong size: "<<(int)torquecmd.size()<<" vs "<<(int)robot.drivers.size());
 	return;
       }
 
       SetTorqueCommand(torquecmd);
     }
     else {
-      fprintf(stderr,"SerialController: message doesn't contain proper command type (qcmd, dqcmd, or torquecmd)\n");
-      cout<<"   Message: "<<scmd<<endl;
+            LOG4CXX_ERROR(KrisLibrary::logger(),"SerialController: message doesn't contain proper command type (qcmd, dqcmd, or torquecmd)\n");
+      LOG4CXX_INFO(KrisLibrary::logger(),"   Message: "<<scmd<<"\n");
       return;
     }
   }
@@ -219,7 +221,7 @@ bool SerialController::SetSetting(const string& name,const string& str)
 {
   if(name == "servAddr") {
     while(!OpenConnection(str)) {
-      printf("\n...Trying to connect again in 5 seconds...\n");
+      LOG4CXX_INFO(KrisLibrary::logger(),"\n...Trying to connect again in 5 seconds...\n");
       ThreadSleep(5);
     }
     return true;
@@ -237,10 +239,10 @@ bool SerialController::OpenConnection(const string& addr)
   }
   controllerPipe = new SocketPipeWorker(addr.c_str(),true);
   if(!controllerPipe->Start()) {
-    cout<<"Controller could not be opened on address "<<addr<<endl;
+    LOG4CXX_INFO(KrisLibrary::logger(),"Controller could not be opened on address "<<addr<<"\n");
     return false;
   }
-  cout<<"Opened controller on address "<<addr<<endl;
+  LOG4CXX_INFO(KrisLibrary::logger(),"Opened controller on address "<<addr<<"\n");
   return true;
 }
 

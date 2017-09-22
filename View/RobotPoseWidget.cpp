@@ -1,3 +1,4 @@
+#include <KrisLibrary/Logger.h>
 #include "RobotPoseWidget.h"
 #include <KrisLibrary/math/angle.h>
 #include <KrisLibrary/math3d/basis.h>
@@ -390,7 +391,7 @@ void RobotIKPoseWidget::Add(const IKGoal& goal) {
 }
 void RobotIKPoseWidget::AttachWidget(int widget,int link) 
 {
-  printf("Attaching widget from link %d to %d\n",poseGoals[widget].destLink,link);
+  LOG4CXX_INFO(KrisLibrary::logger(),"Attaching widget from link "<<poseGoals[widget].destLink<<" to "<<link);
   Assert(widget >= 0 && widget < (int)poseGoals.size());
   int oldDest = poseGoals[widget].destLink;
   poseGoals[widget].destLink = link;
@@ -411,11 +412,11 @@ void RobotIKPoseWidget::AttachWidget(int widget,int link)
   if(link >= 0) {
     robot->links[link].T_World.mulInverse(oldp,poseGoals[widget].endPosition);
     if(poseGoals[widget].rotConstraint == IKGoal::RotFixed) {
-      //cout<<"Desired world rotation "<<oldR<<endl;
-      //cout<<"Reference link rotation "<<robot->links[link].T_World.R<<endl;
+      //LOG4CXX_INFO(KrisLibrary::logger(),"Desired world rotation "<<oldR<<"\n");
+      //LOG4CXX_INFO(KrisLibrary::logger(),"Reference link rotation "<<robot->links[link].T_World.R<<"\n");
       Matrix3 Rlocal;
       Rlocal.mulTransposeA(robot->links[link].T_World.R,oldR);
-      //cout<<"Desired local rotation "<<Rlocal<<endl;
+      //LOG4CXX_INFO(KrisLibrary::logger(),"Desired local rotation "<<Rlocal<<"\n");
       poseGoals[widget].SetFixedRotation(Rlocal);
     }
   }
@@ -464,7 +465,7 @@ bool RobotIKPoseWidget::ClearCurrent()
       break;
     }
   if(index != -1) {
-    printf("Deleting IK goal on link %s\n",robot->LinkName(poseGoals[index].link).c_str());
+    LOG4CXX_INFO(KrisLibrary::logger(),"Deleting IK goal on link "<<robot->LinkName(poseGoals[index].link).c_str());
     poseGoals.erase(poseGoals.begin()+index);
     poseWidgets.erase(poseWidgets.begin()+index);
     RefreshWidgets();
@@ -806,7 +807,7 @@ bool RobotPoseWidget::BeginDrag(int x,int y,Camera::Viewport& viewport,double& d
     bool res=WidgetSet::BeginDrag(x,y,viewport,distance);
     if(!res) return false;
     if(closestWidget == &linkPoser) {
-      printf("Adding new point constraint\n");
+      LOG4CXX_INFO(KrisLibrary::logger(),"Adding new point constraint\n");
       res=FixCurrentPoint();
       ikPoser.poseWidgets.back().Hover(x,y,viewport,distance);
       ikPoser.poseWidgets.back().SetHighlight(true);
@@ -824,7 +825,7 @@ bool RobotPoseWidget::BeginDrag(int x,int y,Camera::Viewport& viewport,double& d
     bool res=WidgetSet::BeginDrag(x,y,viewport,distance);
     if(!res) return false;
     if(closestWidget == &linkPoser) {
-      printf("Adding new fixed transform constraint\n");
+      LOG4CXX_INFO(KrisLibrary::logger(),"Adding new fixed transform constraint\n");
       res=FixCurrent();
       ikPoser.poseWidgets.back().Hover(x,y,viewport,distance);
       ikPoser.poseWidgets.back().SetHighlight(true);
@@ -846,7 +847,7 @@ bool RobotPoseWidget::BeginDrag(int x,int y,Camera::Viewport& viewport,double& d
 void RobotPoseWidget::Drag(int dx,int dy,Camera::Viewport& viewport)
 {
   if(mode == ModeIKAttach) {
-    //printf("Attach dragging, hover widget %d\n",ikPoser.ActiveWidget());
+    //LOG4CXX_INFO(KrisLibrary::logger(),"Attach dragging, hover widget "<<ikPoser.ActiveWidget());
     attachx += dx;
     attachy += dy; 
     viewport.getClickSource(attachx,attachy,attachRay.source);
@@ -880,7 +881,7 @@ void RobotPoseWidget::Drag(int dx,int dy,Camera::Viewport& viewport)
 void RobotPoseWidget::EndDrag()
 {
   if(mode == ModeIKAttach) {
-    cout<<"Attaching constraint to "<<linkPoser.hoverLink<<endl;
+    LOG4CXX_INFO(KrisLibrary::logger(),"Attaching constraint to "<<linkPoser.hoverLink<<"\n");
     Refresh();
     int link = linkPoser.hoverLink;
     int widget = ikPoser.ActiveWidget();

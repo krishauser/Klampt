@@ -1,3 +1,5 @@
+#include <log4cxx/logger.h>
+#include <KrisLibrary/Logger.h>
 #include "ContactCSpace.h"
 #include <KrisLibrary/robotics/IKFunctions.h>
 #include <KrisLibrary/robotics/JointStructure.h>
@@ -77,7 +79,7 @@ void ContactCSpace::Sample(Config& x)
 	vector<int> indices;
 	robot.GetJointIndices(i,indices);
 	if(js.bounds[robot.joints[i].linkIndex].IsEmpty()) {
-	  cout<<"Joint structure on joint "<<i<<" was empty"<<endl;
+	  LOG4CXX_INFO(KrisLibrary::logger(),"Joint structure on joint "<<i<<" was empty"<<"\n");
 	  x[indices[0]] = x[indices[1]] = x[indices[2]] = 0;
 	}
 	else {
@@ -128,7 +130,7 @@ void ContactCSpace::AddContact(const IKGoal& goal)
   //DEBUG
   for(size_t i=0;i<contactIK.size();i++) {
     if(contactIK[i].link == goal.link) {
-      fprintf(stderr,"ContactCSpace::AddContact: adding goal on existing link, link %d, constraint %d\n",goal.link,i);
+            LOG4CXX_ERROR(KrisLibrary::logger(),"ContactCSpace::AddContact: adding goal on existing link, link "<<goal.link<<", constraint "<<i);
     }
     Assert(contactIK[i].link != goal.link);
   }

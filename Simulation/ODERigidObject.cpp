@@ -1,3 +1,4 @@
+#include <KrisLibrary/Logger.h>
 #include "ODERigidObject.h"
 #include "ODECommon.h"
 #include "ODECustomGeometry.h"
@@ -32,8 +33,8 @@ void ODERigidObject::Create(dWorldID worldID,dSpaceID space,bool useBoundaryLaye
   CopyMatrix(mass.I,obj.inertia);
   int res=dMassCheck(&mass);
   if(res != 1) {
-    fprintf(stderr,"Uh... mass is not considered to be valid by ODE?\n");
-    std::cerr<<"Inertia: "<<obj.inertia<<std::endl;
+        LOG4CXX_ERROR(KrisLibrary::logger(),"Uh... mass is not considered to be valid by ODE?\n");
+    LOG4CXX_ERROR(KrisLibrary::logger(),"Inertia: "<<obj.inertia<<"\n");
   }
   dBodySetMass(bodyID,&mass);
   

@@ -1,3 +1,4 @@
+#include <KrisLibrary/Logger.h>
 #include "ViewPlot.h"
 #include <KrisLibrary/utils.h>
 #include <KrisLibrary/math/random.h>
@@ -97,7 +98,7 @@ void ViewPlot::AutoErase()
 	curves[i].pop_back();
       }
       //if(curves[i].size() != oldsize)
-	//printf("Auto-erased %d points\n",oldsize-curves[i].size());
+	//LOG4CXX_INFO(KrisLibrary::logger(),"Auto-erased "<<oldsize-curves[i].size());
     }
   }
   else {

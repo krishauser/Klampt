@@ -1,3 +1,4 @@
+#include <KrisLibrary/Logger.h>
 #include "ViewTextures.h"
 #include <KrisLibrary/GLdraw/GLTexture1D.h>
 #include <KrisLibrary/GLdraw/GLTexture2D.h>
@@ -30,7 +31,7 @@ SmartPointer<Image> ViewTextures::Load(const char* fn)
       return img;
     }
     else {
-      printf("  Failed.\n");
+      LOG4CXX_INFO(KrisLibrary::logger(),"  Failed.\n");
       return NULL;
     }
   }

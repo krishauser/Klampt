@@ -1,3 +1,4 @@
+#include <KrisLibrary/Logger.h>
 #include "ODESimulator.h"
 #include "ODECommon.h"
 #include "ODECustomGeometry.h"
@@ -11,6 +12,7 @@
 #include <KrisLibrary/utils/EquivalenceMap.h>
 #include <KrisLibrary/utils/permutation.h>
 #include <ode/ode.h>
+#include <KrisLibrary/Logger.h>
 #include <KrisLibrary/Timer.h>
 #include <KrisLibrary/myfile.h>
 #ifndef WIN32
@@ -19,6 +21,8 @@
 
 #define TEST_READ_WRITE_STATE 0
 #define DO_TIMING 0
+
+DEFINE_LOGGER(ODESimulator)
 
 const static size_t gMaxKMeansSize = 5000;
 const static size_t gMaxHClusterSize = 2000;
@@ -86,7 +90,7 @@ bool TestReadWriteState(T& obj,const char* name="")
   File fwrite,fwritenew;
   fwrite.OpenData();
   if(!obj.WriteState(fwrite)) {
-    fprintf(stderr,"WriteState %s failed\n",name);
+        LOG4CXX_ERROR(GET_LOGGER(ODESimulator),"WriteState "<<name);
     return false;
   }
   //HACK for File internal buffer length bug returning buffer capacity rather
@@ -95,12 +99,12 @@ bool TestReadWriteState(T& obj,const char* name="")
   int n1 = fwrite.Position();
   fwrite.Seek(0,FILESEEKSTART);
   if(!obj.ReadState(fwrite)) {
-    fprintf(stderr,"ReadState %s failed\n",name);
+        LOG4CXX_ERROR(GET_LOGGER(ODESimulator),"ReadState "<<name);
     return false;
   }
   fwritenew.OpenData();
   if(!obj.WriteState(fwritenew)) {
-    fprintf(stderr,"Second WriteState %s failed\n",name);
+        LOG4CXX_ERROR(GET_LOGGER(ODESimulator),"Second WriteState "<<name);
     return false;
   }
   //HACK for File internal buffer length bug returning buffer capacity rather
@@ -110,12 +114,12 @@ bool TestReadWriteState(T& obj,const char* name="")
   char* d1 = (char*)fwrite.GetDataBuffer();
   char* d2 = (char*)fwritenew.GetDataBuffer();
   if(n1 != n2) {
-    fprintf(stderr,"WriteState %s wrote different numbers of bytes: %d -> %d\n",name,n1,n2);
+        LOG4CXX_ERROR(GET_LOGGER(ODESimulator),"WriteState "<<name<<" wrote different numbers of bytes: "<<n1<<" -> "<<n2);
     return false;
   }
   for(int i=0;i<n1;i++) {
     if(d1[i] != d2[i]) {
-      fprintf(stderr,"WriteState %s wrote different byte at position %d/%d: 0x%x vs 0x%x\n",name,i,n1,(int)d1[i],(int)d2[i]);
+            LOG4CXX_ERROR(GET_LOGGER(ODESimulator),"WriteState "<<name<<" wrote different byte at position "<<i<<"/"<<n1<<": 0x"<<(int)d1[i]<<" vs 0x"<<(int)d2[i]);
       return false;
     }
   }
@@ -180,7 +184,7 @@ struct ODEObject
   ODEObject () : gODEInitialized(false) {}
   void Init() {
     if(!gODEInitialized) {
-      #ifdef dDOUBLE
+      #ifndef dSINGLE
       if(dCheckConfiguration("ODE_double_precision")!=1) {
 	FatalError("ODE is compiled with single precision but Klamp't is compiled with double, either reconfigure ODE with --enable-double-precision or recompile Klamp't with dDOUBLE");
       }
@@ -190,7 +194,14 @@ struct ODEObject
       }
       #endif
 
-      printf("Initializing ODE...\n");
+      LOG4CXX_INFO(GET_LOGGER(ODESimulator),"Initializing ODE...\n");
+      if(dCheckConfiguration("ODE_double_precision")!=1) {
+        LOG4CXX_INFO(GET_LOGGER(ODESimulator),"ODE is compiled in single precision...\n");
+      }
+      else {
+        LOG4CXX_INFO(GET_LOGGER(ODESimulator),"ODE is compiled in double precision...\n");
+      }
+      //KrisLibrary::loggerWait();;
       dInitODE();
       InitODECustomGeometry();
       gODEInitialized = true;
@@ -198,7 +209,7 @@ struct ODEObject
   }
   ~ODEObject() { 
     if(gODEInitialized) {
-      printf("Closing ODE...\n");
+      LOG4CXX_INFO(GET_LOGGER(ODESimulator),"Closing ODE...\n");
       dCloseODE(); 
     }
   }
@@ -285,7 +296,7 @@ void ODESimulator::AddTerrain(Terrain& terr)
     terrainGeoms.back()->surf().kFriction = terr.kFriction[0];
   //set the geom data pointer
   dGeomSetData(terrainGeoms.back()->geom(),TerrainIndexToGeomData((int)terrains.size()-1));
-  //printf("Terrain %d GeomData set to %p\n",terrains.size()-1,TerrainIndexToGeomData((int)terrains.size()-1));
+  //LOG4CXX_INFO(GET_LOGGER(ODESimulator),"Terrain "<<terrains.size()-1<<" GeomData set to "<<TerrainIndexToGeomData((int)terrains.size()-1));
   dGeomSetCategoryBits(terrainGeoms.back()->geom(),0x1);
   dGeomSetCollideBits(terrainGeoms.back()->geom(),0xffffffff ^ 0x1);
 }
@@ -314,7 +325,7 @@ void ODESimulator::AddObject(RigidObject& object)
   objects.push_back(new ODERigidObject(object));
   objects.back()->Create(worldID,envSpaceID,settings.boundaryLayerCollisions);
   dGeomSetData(objects.back()->geom(),ObjectIndexToGeomData(objects.size()-1));
-  //printf("Rigid object %d GeomData set to %p\n",objects.size()-1,ObjectIndexToGeomData((int)objects.size()-1));
+  //LOG4CXX_INFO(GET_LOGGER(ODESimulator),"Rigid object "<<objects.size()-1<<" GeomData set to "<<ObjectIndexToGeomData((int)objects.size()-1));
   dGeomSetCategoryBits(objects.back()->geom(),0x2);
   dGeomSetCollideBits(objects.back()->geom(),0xffffffff);
 }
@@ -376,7 +387,7 @@ void GetCurrentCollisionStatus(ODESimulator* sim,
       string id1=sim->ObjectName(collpair.first),id2=sim->ObjectName(collpair.second);
       for(size_t j=0;j<i->contacts.size();j++)
         depth = Max(depth,(double)i->contacts[j].depth);
-      //printf("ODESimulation: normal penetration depth between bodies %s and %s is %g/%g\n",id1.c_str(),id2.c_str(),depth,margin);
+      //LOG4CXX_INFO(GET_LOGGER(ODESimulator),"ODESimulation: normal penetration depth between bodies "<<id1.c_str()<<" and "<<id2.c_str()<<" is "<<depth<<"/"<<margin);
       double oldmargin = (sim->lastMarginsRemaining.count(collpair) == 0 ? margin : sim->lastMarginsRemaining[collpair]);
       if((margin - depth) < gRollbackPenetrationFraction*oldmargin) {
         //if there was some previous collision margin, we should do a rollback if the margins were reduced even further
@@ -389,7 +400,7 @@ void GetCurrentCollisionStatus(ODESimulator* sim,
 
 void PrintStatus(ODESimulator* sim,const CollisionPair& collpair,const char* predescription="Concerned objects",const char* postdescription="have")
 {
-  printf("  %s %s - %s %s position ",predescription,sim->ObjectName(collpair.first).c_str(),sim->ObjectName(collpair.second).c_str(),postdescription);
+  LOG4CXX_INFO(GET_LOGGER(ODESimulator),"  "<<predescription<<" "<<sim->ObjectName(collpair.first).c_str()<<" - "<<sim->ObjectName(collpair.second).c_str()<<" "<<postdescription);
 
   const dReal* p1 = sim->ObjectBody(collpair.first) ? dBodyGetPosition(sim->ObjectBody(collpair.first)) : NULL;
   const dReal* p2 = sim->ObjectBody(collpair.second) ? dBodyGetPosition(sim->ObjectBody(collpair.second)) : NULL;
@@ -397,32 +408,44 @@ void PrintStatus(ODESimulator* sim,const CollisionPair& collpair,const char* pre
   const dReal* v2 = sim->ObjectBody(collpair.second) ? dBodyGetLinearVel(sim->ObjectBody(collpair.second)) : NULL;
   const dReal* w1 = sim->ObjectBody(collpair.first) ? dBodyGetAngularVel(sim->ObjectBody(collpair.first)) : NULL;
   const dReal* w2 = sim->ObjectBody(collpair.second) ? dBodyGetAngularVel(sim->ObjectBody(collpair.second)) : NULL;
-  if(p1)
-    printf("%g %g %g and ",p1[0],p1[1],p1[2]);
-  else 
-    printf("NONE and ");
-  if(p2)
-    printf("%g %g %g\n",p2[0],p2[1],p2[2]);
-  else
-    printf("NONE\n");
-  printf("  velocity ");
-  if(p1)
-    printf("%g %g %g and ",v1[0],v1[1],v1[2]);
-  else 
-    printf("NONE and ");
-  if(p2)
-    printf("%g %g %g\n",v2[0],v2[1],v2[2]);
-  else
-    printf("NONE\n");
-  printf("  angular vel ");
-  if(p1)
-    printf("%g %g %g and ",w1[0],w1[1],w1[2]);
-  else 
-    printf("NONE and ");
-  if(p2)
-    printf("%g %g %g\n",w2[0],w2[1],w2[2]);
-  else
-    printf("NONE\n");
+  if(p1){
+    LOG4CXX_INFO(GET_LOGGER(ODESimulator),""<<p1[0]<<" "<<p1[1]<<" "<<p1[2]);
+  }
+  else {
+    LOG4CXX_INFO(GET_LOGGER(ODESimulator),"NONE and ");
+  }
+  if(p2){
+    LOG4CXX_INFO(GET_LOGGER(ODESimulator),""<<p2[0]<<" "<<p2[1]<<" "<<p2[2]);
+  }
+  else{
+    LOG4CXX_INFO(GET_LOGGER(ODESimulator),"NONE\n");
+  }
+  LOG4CXX_INFO(GET_LOGGER(ODESimulator),"  velocity ");
+  if(p1){
+    LOG4CXX_INFO(GET_LOGGER(ODESimulator),""<<v1[0]<<" "<<v1[1]<<" "<<v1[2]);
+  }
+  else {
+    LOG4CXX_INFO(GET_LOGGER(ODESimulator),"NONE and ");
+  }
+  if(p2){
+    LOG4CXX_INFO(GET_LOGGER(ODESimulator),""<<v2[0]<<" "<<v2[1]<<" "<<v2[2]);
+  }
+  else{
+    LOG4CXX_INFO(GET_LOGGER(ODESimulator),"NONE\n");
+  }
+  LOG4CXX_INFO(GET_LOGGER(ODESimulator),"  angular vel ");
+  if(p1){
+    LOG4CXX_INFO(GET_LOGGER(ODESimulator),""<<w1[0]<<" "<<w1[1]<<" "<<w1[2]);
+  }
+  else {
+    LOG4CXX_INFO(GET_LOGGER(ODESimulator),"NONE and ");
+  }
+  if(p2){
+    LOG4CXX_INFO(GET_LOGGER(ODESimulator),""<<w2[0]<<" "<<w2[1]<<" "<<w2[2]);
+  }
+  else{
+    LOG4CXX_INFO(GET_LOGGER(ODESimulator),"NONE\n");
+  }
 }
 
 void PrintStatus(ODESimulator* sim,const vector<CollisionPair >& concernedObjects,const char* predescription="Concerned objects",const char* postdescription="have")
@@ -536,44 +559,49 @@ void ODESimulator::Step(Real dt)
           if(marginsRemaining[collpair] == 0) {
             if(!didRollback) {
               string id1=ObjectName(collpair.first),id2=ObjectName(collpair.second);
-              printf("ODESimulation: rolling back due to new penetration between bodies %s and %s\n",id1.c_str(),id2.c_str());
-              if(lastMarginsRemaining.count(collpair) == 0)
-                printf("  no previous contact\n");
-              else
-                printf("  previously had depth %g\n",lastMarginsRemaining[collpair]);
+              LOG4CXX_INFO(GET_LOGGER(ODESimulator),"ODESimulation: rolling back due to new penetration between bodies "<<id1.c_str()<<" and "<<id2.c_str());
+              if(lastMarginsRemaining.count(collpair) == 0){
+                LOG4CXX_INFO(GET_LOGGER(ODESimulator),"  no previous contact\n");
+              }
+              else{
+                LOG4CXX_INFO(GET_LOGGER(ODESimulator),"  previously had depth "<<lastMarginsRemaining[collpair]);
+              }
             }
             //PrintStatus(this,collpair,"Colliding objects","found collision at");
           }
           else {
             if(true || !didRollback) {
               string id1=ObjectName(collpair.first),id2=ObjectName(collpair.second);
-              printf("ODESimulation: rolling back due to increasing penetration between bodies %s and %s\n",id1.c_str(),id2.c_str());
-              if(lastMarginsRemaining.count(collpair) == 0)
-                printf("  margin shrank from no-contact to %g\n",marginsRemaining[collpair]);
-              else
-                printf("  margin shrank from %g to %g\n",lastMarginsRemaining[collpair],marginsRemaining[collpair]);
+              LOG4CXX_INFO(GET_LOGGER(ODESimulator),"ODESimulation: rolling back due to increasing penetration between bodies "<<id1.c_str()<<" and "<<id2.c_str());
+              if(lastMarginsRemaining.count(collpair) == 0){
+                LOG4CXX_INFO(GET_LOGGER(ODESimulator),"  margin shrank from no-contact to "<<marginsRemaining[collpair]);
+              }
+              else{
+                LOG4CXX_INFO(GET_LOGGER(ODESimulator),"  margin shrank from "<<lastMarginsRemaining[collpair]<<" to "<<marginsRemaining[collpair]);
+              }
             }
           }
         }
   		  if(rollback && !lastState.IsOpen()) {
-          printf("ODESimulation: Rollback rejected because last state not saved\n");
+          LOG4CXX_INFO(GET_LOGGER(ODESimulator),"ODESimulation: Rollback rejected because last state not saved\n");
+          //KrisLibrary::loggerWait();;;
           //getchar();
           rollback = false;
   		  }
   		  if(rollback && timestep < settings.minimumAdaptiveTimeStep) {
-  		    printf("ODESimulation: Rollback rejected because timestep %g below minimum threshold %g\n",timestep,settings.minimumAdaptiveTimeStep);
-          //getchar();
+  		    LOG4CXX_INFO(GET_LOGGER(ODESimulator),"ODESimulation: Rollback rejected because timestep "<<timestep<<" below minimum threshold "<<settings.minimumAdaptiveTimeStep);
+          //KrisLibrary::loggerWait();;;
 
           //TODO: DEBUG THIS PRINTOUT STUFF -- it changes the state of the adaptive time stepper
           /*
           //TEMP: print out remaining configuration
-          printf("POST TINY STEP CONFIGURATION:\n");
+          LOG4CXX_INFO(GET_LOGGER(ODESimulator),"POST TINY STEP CONFIGURATION:\n");
           PrintStatus(this,concernedObjects,"Concerned objects after step","had");
           for(size_t i=0;i<concernedObjects.size();i++) {
             if(marginsRemaining.count(concernedObjects[i]) == 0)
-              printf("%s %s not even close\n",ObjectName(concernedObjects[i].first).c_str(),ObjectName(concernedObjects[i].second).c_str());
+              LOG4CXX_INFO(GET_LOGGER(ODESimulator),""<<ObjectName(concernedObjects[i].first).c_str()<<" "<<ObjectName(concernedObjects[i].second).c_str());
             else
-              printf("%s %s margin %g\n",ObjectName(concernedObjects[i].first).c_str(),ObjectName(concernedObjects[i].second).c_str(),marginsRemaining[concernedObjects[i]]);
+              LOG4CXX_INFO(GET_LOGGER(ODESimulator),""<<ObjectName(concernedObjects[i].first).c_str()<<" "<<ObjectName(concernedObjects[i].second).c_str()<<" margin "<<marginsRemaining[concernedObjects[i]]);
           }
 
           //TEMP: print out starting configuration (make sure to save current state to temp then load it back)
@@ -585,15 +613,15 @@ void ODESimulator::Step(Real dt)
           
           lastState.Seek(0,FILESEEKSTART);
           ReadState_Internal(lastState);
-          printf("STARTING CONFIGURATION:\n");
+          LOG4CXX_INFO(GET_LOGGER(ODESimulator),"STARTING CONFIGURATION:\n");
           PrintStatus(this,concernedObjects,"Concerned objects originally","had");
           DetectCollisions();
           GetCurrentCollisionStatus(this,marginsRemaining,newConcernedObjects);
           for(size_t i=0;i<concernedObjects.size();i++) {
             if(marginsRemaining.count(concernedObjects[i]) == 0)
-              printf("%s %s not even close\n",ObjectName(concernedObjects[i].first).c_str(),ObjectName(concernedObjects[i].second).c_str());
+              LOG4CXX_INFO(GET_LOGGER(ODESimulator),""<<ObjectName(concernedObjects[i].first).c_str()<<" "<<ObjectName(concernedObjects[i].second).c_str());
             else
-              printf("%s %s margin %g\n",ObjectName(concernedObjects[i].first).c_str(),ObjectName(concernedObjects[i].second).c_str(),marginsRemaining[concernedObjects[i]]);
+              LOG4CXX_INFO(GET_LOGGER(ODESimulator),""<<ObjectName(concernedObjects[i].first).c_str()<<" "<<ObjectName(concernedObjects[i].second).c_str()<<" margin "<<marginsRemaining[concernedObjects[i]]);
           }
 
           temp.Seek(0,FILESEEKSTART);
@@ -601,16 +629,16 @@ void ODESimulator::Step(Real dt)
           DetectCollisions();
           GetCurrentCollisionStatus(this,marginsRemaining,concernedObjects);
 
-          printf("DOUBLE CHECKING THATPOST TINY STEP CONFIGURATION RESTORED:\n");
+          LOG4CXX_INFO(GET_LOGGER(ODESimulator),"DOUBLE CHECKING THATPOST TINY STEP CONFIGURATION RESTORED:\n");
           PrintStatus(this,concernedObjects,"Concerned objects after step","had");
           for(size_t i=0;i<concernedObjects.size();i++) {
             if(marginsRemaining.count(concernedObjects[i]) == 0)
-              printf("%s %s not even close\n",ObjectName(concernedObjects[i].first).c_str(),ObjectName(concernedObjects[i].second).c_str());
+              LOG4CXX_INFO(GET_LOGGER(ODESimulator),""<<ObjectName(concernedObjects[i].first).c_str()<<" "<<ObjectName(concernedObjects[i].second).c_str());
             else
-              printf("%s %s margin %g\n",ObjectName(concernedObjects[i].first).c_str(),ObjectName(concernedObjects[i].second).c_str(),marginsRemaining[concernedObjects[i]]);
+              LOG4CXX_INFO(GET_LOGGER(ODESimulator),""<<ObjectName(concernedObjects[i].first).c_str()<<" "<<ObjectName(concernedObjects[i].second).c_str()<<" margin "<<marginsRemaining[concernedObjects[i]]);
           }
-          printf("Press enter to continue...\n");
-          getchar();
+          LOG4CXX_INFO(GET_LOGGER(ODESimulator),"Press enter to continue...\n");
+          KrisLibrary::loggerWait();;;
           */
 
           rollback = false;
@@ -618,7 +646,7 @@ void ODESimulator::Step(Real dt)
   		  }
   	
   		  if(rollback) {
-          printf("ODESimulation: Rolling back at time %g, time step halved to %g\n",simTime,timestep*0.5);
+          LOG4CXX_INFO(GET_LOGGER(ODESimulator),"ODESimulation: Rolling back at time "<<simTime<<", time step halved to "<<timestep*0.5);
           status = StatusAdaptiveTimeStepping;
           //PrintStatus(this,concernedObjects,"Backing up colliding objects","from");
           
@@ -637,9 +665,9 @@ void ODESimulator::Step(Real dt)
           GetCurrentCollisionStatus(this,marginsRemaining,newConcernedObjects);
           /*
           if(marginsRemaining != lastMarginsRemaining) {
-            printf("ODESimulation: Warning, difference between rolled-back re-detected margins and previous margins?\n");
-            printf("Press enter to continue\n");
-            getchar();
+            LOG4CXX_WARN(GET_LOGGER(ODESimulator),"ODESimulation: Warning, difference between rolled-back re-detected margins and previous margins?\n");
+            LOG4CXX_INFO(GET_LOGGER(ODESimulator),"Press enter to continue\n");
+            KrisLibrary::loggerWait();;;
           }
           */
   		  }
@@ -652,18 +680,20 @@ void ODESimulator::Step(Real dt)
           WriteState_Internal(lastState);
           for(size_t i=0;i<concernedObjects.size();i++) {
             if(marginsRemaining.count(concernedObjects[i]) == 0) {
-              printf("ODESimulation: collision %s - %s erased entirely\n",ObjectName(concernedObjects[i].first).c_str(),ObjectName(concernedObjects[i].second).c_str());
+              LOG4CXX_INFO(GET_LOGGER(ODESimulator),"ODESimulation: collision "<<ObjectName(concernedObjects[i].first).c_str()<<" - "<<ObjectName(concernedObjects[i].second).c_str());
             }
             else {
               double d=marginsRemaining[concernedObjects[i]];
-              if(lastMarginsRemaining.count(concernedObjects[i])) 
-                printf("ODESimulation: collision %s - %s changed from no contact to depth %g\n",ObjectName(concernedObjects[i].first).c_str(),ObjectName(concernedObjects[i].second).c_str(),d);
-              else
-                printf("ODESimulation: collision %s - %s changed from depth %g to depth %g\n",ObjectName(concernedObjects[i].first).c_str(),ObjectName(concernedObjects[i].second).c_str(),lastMarginsRemaining[concernedObjects[i]],d);
+              if(lastMarginsRemaining.count(concernedObjects[i])){ 
+                LOG4CXX_INFO(GET_LOGGER(ODESimulator),"ODESimulation: collision "<<ObjectName(concernedObjects[i].first).c_str()<<" - "<<ObjectName(concernedObjects[i].second).c_str()<<" changed from no contact to depth "<<d);
+              }else{
+                LOG4CXX_INFO(GET_LOGGER(ODESimulator),"ODESimulation: collision "<<ObjectName(concernedObjects[i].first).c_str()<<" - "<<ObjectName(concernedObjects[i].second).c_str()<<" changed from depth "<<lastMarginsRemaining[concernedObjects[i]]<<" to depth "<<d);
+              }
             }
           }
-          if(didRollback)
-            printf("ODESimulation: Adaptive sub-step of size %g is valid, arriving at time %g.\n",timestep,simTime);
+          if(didRollback){
+            LOG4CXX_INFO(GET_LOGGER(ODESimulator),"ODESimulation: Adaptive sub-step of size "<<timestep<<" is valid, arriving at time "<<simTime);
+          }
           //if(didRollback) {
           //  PrintStatus(this,concernedObjects,"Colliding objects","now at");
           //}
@@ -673,14 +703,15 @@ void ODESimulator::Step(Real dt)
           validTime += timestep;
           simTime += timestep;
           timestep = desiredTime-validTime;
-          if(didRollback) 
-            printf("   reset time step to %g.\n",timestep);
+          if(didRollback){ 
+            LOG4CXX_INFO(GET_LOGGER(ODESimulator),"   reset time step to "<<timestep);
+          }
           didRollback = false;
   		  }
   		  if(validTime >= desiredTime) break;
 
         //heres where we make the tentative step, to be checked for collisions at the start of the next loop
-        //if(didRollback) printf("Trying step of size %g\n",timestep);
+        //if(didRollback) LOG4CXX_INFO(GET_LOGGER(ODESimulator),"Trying step of size "<<timestep);
         //NOW set up the contact response for the previous timestep
         SetupContactResponse();
         //PrintStatus(this,concernedObjects,"Colliding objects","pre-step");
@@ -688,7 +719,7 @@ void ODESimulator::Step(Real dt)
         //PrintStatus(this,concernedObjects,"Colliding objects","post-step");
   		}
   		if(didAnyRollback) {
-  		  printf("ODESimulation: Adaptive time step done, arrived at time %g.\n",simTime);
+  		  LOG4CXX_INFO(GET_LOGGER(ODESimulator),"ODESimulation: Adaptive time step done, arrived at time "<<simTime);
   		}
   	}
   	else {
@@ -721,16 +752,16 @@ void ODESimulator::Step(Real dt)
         }
   		}
   		if(rollback) {
-  			printf("ODESimulation: Warning, initial state has underlying meshes overlapping\n");
+  			LOG4CXX_WARN(GET_LOGGER(ODESimulator),"ODESimulation: Warning, initial state has underlying meshes overlapping\n");
   			for(map<CollisionPair,double>::const_iterator i=marginsRemaining.begin();i!=marginsRemaining.end();i++) {
           if(i->second <= 0) {
     			  CollisionPair collpair = i->first;
             string id1=ObjectName(collpair.first),id2=ObjectName(collpair.second);
-            printf("  %s - %s\n",id1.c_str(),id2.c_str());
+            LOG4CXX_INFO(GET_LOGGER(ODESimulator),"  "<<id1.c_str()<<" - "<<id2.c_str());
           }
   			}
-  			//printf("Press enter to continue...\n");
-  			//getchar();
+  			LOG4CXX_INFO(GET_LOGGER(ODESimulator),"Press enter to continue...\n");
+  			//KrisLibrary::loggerWait();;;
         status = StatusContactUnreliable;
   			//NO ROLLBACK ON FIRST
   			rollback = false;
@@ -756,7 +787,7 @@ void ODESimulator::Step(Real dt)
     DetectCollisions();
     SetupContactResponse();
 
-  //printf("  %d contacts detected\n",gContacts.size());
+  //LOG4CXX_INFO(GET_LOGGER(ODESimulator),"  "<<gContacts.size());
 
 #if DO_TIMING
     collisionTime = timer.ElapsedTime();
@@ -798,8 +829,8 @@ void ODESimulator::Step(Real dt)
 	cl.forces.push_back(temp);
 	/*
 	if(!cl.points.back().isValidForce(-temp)) {
-	  printf("ODESimulator: Warning, solved contact force %d %d is invalid\n",k,i);
-	  cout<<"  Force: "<<-temp<<", normal "<<cl.points.back().n<<" kFriction "<<cl.points.back().kFriction<<endl;
+	  LOG4CXX_WARN(GET_LOGGER(ODESimulator),"ODESimulator: Warning, solved contact force "<<k<<" "<<i);
+	  LOG4CXX_INFO(GET_LOGGER(ODESimulator),"  Force: "<<-temp<<", normal "<<cl.points.back().n<<" kFriction "<<cl.points.back().kFriction<<"\n");
 	}
 	*/
       }
@@ -817,7 +848,7 @@ void ODESimulator::Step(Real dt)
 #if DO_TIMING
   ofstream out("odesimulator_timing.csv",ios::app);
   if(out.tellp()==0) {
-    cout<<"Saving to odesimulator_timing.csv"<<endl;
+    LOG4CXX_INFO(GET_LOGGER(ODESimulator),"Saving to odesimulator_timing.csv"<<"\n");
     out<<"total,#preclusterContacts,#contacts,collision detection,contact detect,clustering,dynamics step,misc update"<<endl;
   }
   size_t nc = 0;
@@ -973,11 +1004,11 @@ void ClusterContactsMerge(vector<dContactGeom>& contacts,int maxClusters,Real cl
   //Timer timer;
   Statistics::HierarchicalClustering clust;
   clust.Build(pts,maxClusters,Statistics::HierarchicalClustering::AverageLinkage);
-  //cout<<"Clustering time: "<<timer.ElapsedTime()<<endl;
+  //LOG4CXX_INFO(GET_LOGGER(ODESimulator),"Clustering time: "<<timer.ElapsedTime()<<"\n");
   /*
-  cout<<"Points"<<endl;
+  LOG4CXX_INFO(GET_LOGGER(ODESimulator),"Points"<<"\n");
   for(size_t i=0;i<pts.size();i++)
-    cout<<pts[i]<<endl;
+    LOG4CXX_INFO(GET_LOGGER(ODESimulator),pts[i]<<"\n");
   */
 
   //read out the clusters
@@ -985,10 +1016,10 @@ void ClusterContactsMerge(vector<dContactGeom>& contacts,int maxClusters,Real cl
   for(int i=0;i<maxClusters;i++) {
     const vector<int>& inds = clust.Cluster(i);
     /*
-    cout<<"Cluster "<<i<<": ";
+    LOG4CXX_INFO(GET_LOGGER(ODESimulator),"Cluster "<<i<<": ");
     for(size_t j=0;j<inds.size();j++)
-      cout<<inds[j]<<", ";
-    cout<<endl;
+      LOG4CXX_INFO(GET_LOGGER(ODESimulator),inds[j]<<", ");
+    LOG4CXX_INFO(GET_LOGGER(ODESimulator),"\n");
     */
     Vector mean(7,Zero);
     for(size_t j=0;j<inds.size();j++) 
@@ -1004,7 +1035,7 @@ void ClusterContactsMerge(vector<dContactGeom>& contacts,int maxClusters,Real cl
 
     Real len = Vector3(contacts[i].normal[0],contacts[i].normal[1],contacts[i].normal[2]).length();
     if(FuzzyZero(len) || !IsFinite(len)) {
-      printf("ODESimulator: Warning, clustered normal became zero/infinite\n");
+      LOG4CXX_WARN(GET_LOGGER(ODESimulator),"ODESimulator: Warning, clustered normal became zero/infinite\n");
       int found = inds[0];
       contacts[i].pos[0] = pts[found][0];
       contacts[i].pos[1] = pts[found][1];
@@ -1061,7 +1092,7 @@ void ClusterContactsKMeans(vector<dContactGeom>& contacts,int maxClusters,Real c
     contacts[i].depth = kmeans.centers[i][6];
     Real len = Vector3(contacts[i].normal[0],contacts[i].normal[1],contacts[i].normal[2]).length();
     if(FuzzyZero(len) || !IsFinite(len)) {
-      printf("ODESimulator: Warning, clustered normal became zero/infinite\n");
+      LOG4CXX_WARN(GET_LOGGER(ODESimulator),"ODESimulator: Warning, clustered normal became zero/infinite\n");
       //pick any in the cluster
       int found = -1;
       for(size_t k=0;k<kmeans.labels.size();k++) {
@@ -1091,8 +1122,8 @@ void ClusterContactsKMeans(vector<dContactGeom>& contacts,int maxClusters,Real c
     contacts[i].normal[0] /= len;
     contacts[i].normal[1] /= len;
     contacts[i].normal[2] /= len;
-    //cout<<"Clustered contact "<<contacts[i].pos[0]<<" "<<contacts[i].pos[1]<<" "<<contacts[i].pos[2]<<endl;
-    //cout<<"Clustered normal "<<contacts[i].normal[0]<<" "<<contacts[i].normal[1]<<" "<<contacts[i].normal[2]<<endl;
+    //LOG4CXX_INFO(GET_LOGGER(ODESimulator),"Clustered contact "<<contacts[i].pos[0]<<" "<<contacts[i].pos[1]<<" "<<contacts[i].pos[2]<<"\n");
+    //LOG4CXX_INFO(GET_LOGGER(ODESimulator),"Clustered normal "<<contacts[i].normal[0]<<" "<<contacts[i].normal[1]<<" "<<contacts[i].normal[2]<<"\n");
     contacts[i].depth = kmeans.centers[i][6];
   }
   reverse(degenerate.begin(),degenerate.end());
@@ -1115,7 +1146,7 @@ void ClusterContacts(vector<dContactGeom>& contacts,int maxClusters,Real cluster
   //for really big contact sets, do a subsampling
   if(contacts.size()*maxClusters > gMaxKMeansSize && contacts.size()*contacts.size() > gMaxHClusterSize) {
     int minsize = Max((int)gMaxKMeansSize/maxClusters,(int)Sqrt(Real(gMaxHClusterSize)));
-    printf("ClusterContacts: subsampling %d to %d contacts\n",(int)contacts.size(),minsize);
+    LOG4CXX_INFO(GET_LOGGER(ODESimulator),"ClusterContacts: subsampling "<<(int)contacts.size()<<" to "<<minsize);
     vector<dContactGeom> subcontacts(minsize);
     //random subsample
     /*
@@ -1160,7 +1191,7 @@ void MergeContacts(vector<dContactGeom>& contacts,double posTolerance,double ori
     for(size_t j=0;j<sets[i].size();j++)
       temp[j] = contacts[sets[i][j]];
     CHContactsPlane(temp);
-    //printf("CH Reduced from %d to %d\n",sets[i].size(),temp.size());
+    //LOG4CXX_INFO(GET_LOGGER(ODESimulator),"CH Reduced from "<<sets[i].size()<<" to "<<temp.size());
 
     //EqualPoint eq(posTolerance);
     //Clusterize(temp,eq);
@@ -1191,7 +1222,7 @@ void collisionCallback(void *data, dGeomID o1, dGeomID o2)
   int numOk = 0;
   for(int i=0;i<num;i++) {
     if(gContactTemp[i].g1 == o2 && gContactTemp[i].g2 == o1) {
-      printf("Swapping contact\n");
+      LOG4CXX_INFO(GET_LOGGER(ODESimulator),"Swapping contact\n");
       std::swap(gContactTemp[i].g1,gContactTemp[i].g2);
       for(int k=0;k<3;k++) gContactTemp[i].normal[k]*=-1.0;
       std::swap(gContactTemp[i].side1,gContactTemp[i].side2);
@@ -1202,7 +1233,7 @@ void collisionCallback(void *data, dGeomID o1, dGeomID o2)
     const dReal* n=vcontact[numOk].normal;
     if(Sqr(n[0])+Sqr(n[1])+Sqr(n[2]) < 0.9 || Sqr(n[0])+Sqr(n[1])+Sqr(n[2]) > 1.2) {
       //GIMPACT will report this
-      //printf("Warning, degenerate contact with normal %f %f %f\n",vcontact[numOk].normal[0],vcontact[numOk].normal[1],vcontact[numOk].normal[2]);
+      //LOG4CXX_WARN(GET_LOGGER(ODESimulator),"Warning, degenerate contact with normal "<<vcontact[numOk].normal[0]<<" "<<vcontact[numOk].normal[1]<<" "<<vcontact[numOk].normal[2]);
       continue;
     }
     numOk++;
@@ -1218,7 +1249,7 @@ void collisionCallback(void *data, dGeomID o1, dGeomID o2)
   }
   else {
     if(!GetCustomGeometryCollisionReliableFlag()) {
-      printf("collision callback: meshes overlapped, but no contacts were generated?\n");
+      LOG4CXX_INFO(GET_LOGGER(ODESimulator),"collision callback: meshes overlapped, but no contacts were generated?\n");
       gContacts.push_back(ODEContactResult());
       gContacts.back().o1 = o1;
       gContacts.back().o2 = o2;
@@ -1246,7 +1277,7 @@ void selfCollisionCallback(void *data, dGeomID o1, dGeomID o2)
   int numOk = 0;
   for(int i=0;i<num;i++) {
     if(gContactTemp[i].g1 == o2 && gContactTemp[i].g2 == o1) {
-      printf("Swapping contact... shouldn't be here?\n");
+      LOG4CXX_INFO(GET_LOGGER(ODESimulator),"Swapping contact... shouldn't be here?\n");
       std::swap(gContactTemp[i].g1,gContactTemp[i].g2);
       for(int k=0;k<3;k++) gContactTemp[i].normal[k]*=-1.0;
       std::swap(gContactTemp[i].side1,gContactTemp[i].side2);
@@ -1256,13 +1287,13 @@ void selfCollisionCallback(void *data, dGeomID o1, dGeomID o2)
     vcontact[numOk] = gContactTemp[i];
     const dReal* n=vcontact[numOk].normal;
     if(Sqr(n[0])+Sqr(n[1])+Sqr(n[2]) < 0.9 || Sqr(n[0])+Sqr(n[1])+Sqr(n[2]) > 1.2) {
-      printf("Warning, degenerate contact with normal %f %f %f\n",vcontact[numOk].normal[0],vcontact[numOk].normal[1],vcontact[numOk].normal[2]);
+      LOG4CXX_WARN(GET_LOGGER(ODESimulator),"Warning, degenerate contact with normal "<<vcontact[numOk].normal[0]<<" "<<vcontact[numOk].normal[1]<<" "<<vcontact[numOk].normal[2]);
       //continue;
     }
     numOk++;
   }
   //TEMP: printing self collisions
-  //if(numOk > 0) printf("%d self collision contacts between links %d and %d\n",numOk,(int)link1,(int)link2);
+  //if(numOk > 0) LOG4CXX_INFO(GET_LOGGER(ODESimulator),""<<numOk<<" self collision contacts between links "<<(int)link1<<" and "<<(int)link2);
   vcontact.resize(numOk);
   
   if(kMergeContacts && numOk > 0) {
@@ -1272,8 +1303,8 @@ void selfCollisionCallback(void *data, dGeomID o1, dGeomID o2)
   if(vcontact.size() > 0) {
     if(numOk != (int)vcontact.size())
     	//// The int type is not guaranteed to be big enough, use intptr_t
-		//cout<<numOk<<" contacts between env "<<(int)dGeomGetData(o2)<<" and body "<<(int)dGeomGetData(o1)<<"  (clustered to "<<vcontact.size()<<")"<<endl;
-      cout<<numOk<<" contacts between link "<<GeomDataToRobotLinkIndex(dGeomGetData(o2))<<" and link "<<GeomDataToRobotLinkIndex(dGeomGetData(o1))<<"  (clustered to "<<vcontact.size()<<")"<<endl;
+		//LOG4CXX_INFO(GET_LOGGER(ODESimulator),numOk<<" contacts between env "<<(int)dGeomGetData(o2)<<" and body "<<(int)dGeomGetData(o1)<<"  (clustered to "<<vcontact.size()<<")"<<"\n");
+      LOG4CXX_INFO(GET_LOGGER(ODESimulator),numOk<<" contacts between link "<<GeomDataToRobotLinkIndex(dGeomGetData(o2))<<" and link "<<GeomDataToRobotLinkIndex(dGeomGetData(o1))<<"  (clustered to "<<vcontact.size()<<")"<<"\n");
     gContacts.push_back(ODEContactResult());
     gContacts.back().o1 = o1;
     gContacts.back().o2 = o2;
@@ -1295,18 +1326,18 @@ void ProcessContacts(list<ODEContactResult>::iterator start,list<ODEContactResul
     for(list<ODEContactResult>::iterator j=start;j!=end;j++) 
       numContacts += (int)j->contacts.size();
     if(numContacts > settings.maxContacts) {
-      //printf("Warning: %d robot-env contacts > maximum %d, may crash\n",numContacts,settings.maxContacts);
+      //LOG4CXX_WARN(GET_LOGGER(ODESimulator),"Warning: "<< may crash\n"<<" robot-env contacts > maximum "<<numContacts      
       if(settings.maxContacts > 50) {
 	if(!warnedContacts) {
-	  printf("Max contacts > 50, may crash.  Press enter to continue...\n");
-	  //getchar();
+	  LOG4CXX_INFO(GET_LOGGER(ODESimulator),"Max contacts > 50, may crash.  Press enter to continue...\n");
+	  //KrisLibrary::loggerWait();;;
 	}
 	warnedContacts = true;
       }
       Real scale = Real(settings.maxContacts)/numContacts;
       for(list<ODEContactResult>::iterator j=start;j!=end;j++) {
 	int n=(int)Ceil(Real(j->contacts.size())*scale);
-	//printf("Clustering %d->%d\n",j->contacts.size(),n);
+	//LOG4CXX_INFO(GET_LOGGER(ODESimulator),"Clustering "<<j->contacts.size()<<"->"<<n);
 	ClusterContacts(j->contacts,n,settings.clusterNormalScale);
       }
     }
@@ -1315,8 +1346,8 @@ void ProcessContacts(list<ODEContactResult>::iterator start,list<ODEContactResul
     for(list<ODEContactResult>::iterator j=start;j!=end;j++) {
       if(settings.maxContacts > 50) {
 	if(!warnedContacts) {
-	  printf("Max contacts > 50, may crash.  Press enter to continue...\n");
-	  //getchar();
+	  LOG4CXX_INFO(GET_LOGGER(ODESimulator),"Max contacts > 50, may crash.  Press enter to continue...\n");
+	  //KrisLibrary::loggerWait();;;
 	}
 	warnedContacts = true;
       }
@@ -1343,7 +1374,7 @@ void ODESimulator::GetSurfaceParameters(const ODEObjectID& a,const ODEObjectID& 
   surface.bounce = 0;
   surface.bounce_vel = 0;
   
-  //printf("GetSurfaceParameters a = %d,%d, b = %d,%d\n",a.type,a.index,b.type,b.index);
+  //LOG4CXX_INFO(GET_LOGGER(ODESimulator),"GetSurfaceParameters a = "<<a.type<<","<<a.index<<", b = "<<b.type<<","<<b.index);
   ODEGeometry *ma,*mb;
   if(a.type == 0) {
     Assert(a.index < (int)terrains.size());
@@ -1371,8 +1402,8 @@ void ODESimulator::GetSurfaceParameters(const ODEObjectID& a,const ODEObjectID& 
     Real kDamping = 1.0/(1.0/propa.kDamping+1.0/propb.kDamping);
     surface.soft_erp = ERPFromSpring(timestep,kStiffness,kDamping);
     surface.soft_cfm = CFMFromSpring(timestep,kStiffness,kDamping);
-    //printf("Joint stiffness %g, damping %g, time step %g\n",kStiffness,kDamping,timestep);
-    //printf("ERP = %g, CFM = %g\n",surface.soft_erp,surface.soft_cfm);
+    //LOG4CXX_INFO(GET_LOGGER(ODESimulator),"Joint stiffness "<<kStiffness<<", damping "<<kDamping<<", time step "<<timestep);
+    //LOG4CXX_INFO(GET_LOGGER(ODESimulator),"ERP = "<<surface.soft_erp<<", CFM = "<<surface.soft_cfm);
   }
   surface.mu = 2.0/(1.0/propa.kFriction+1.0/propb.kFriction);
   //correction to account for pyramid shaped friction cone
@@ -1770,7 +1801,7 @@ bool ODESimulator::InstabilityCorrection()
     {
       double stepThreshold = energies[id]*settings.instabilityLinearEnergyThreshold + settings.instabilityConstantEnergyThreshold*objects[i]->obj.mass;
       if(!(ke < stepThreshold)) {
-        //printf("ODESimulator: Rigid object %s energy %g exceeds linear threshold %g*%g + %g\n",objects[i]->obj.name.c_str(),ke,energies[id],settings.instabilityLinearEnergyThreshold,settings.instabilityConstantEnergyThreshold);
+        //LOG4CXX_INFO(GET_LOGGER(ODESimulator),"ODESimulator: Rigid object "<<objects[i]->obj.name.c_str()<<" energy "<<ke<<" exceeds linear threshold "<<energies[id]<<"*"<<settings.instabilityLinearEnergyThreshold<<" + "<<settings.instabilityConstantEnergyThreshold);
         unstable = true;
         if(stepThreshold < threshold)
           threshold = stepThreshold;
@@ -1778,11 +1809,11 @@ bool ODESimulator::InstabilityCorrection()
     }
     if(unstable) {
       if(!IsFinite(ke)) {
-        printf("ODESimulator: Rigid object %s has non-finite energy, setting to 0\n",objects[i]->obj.name.c_str());
+        LOG4CXX_INFO(GET_LOGGER(ODESimulator),"ODESimulator: Rigid object "<<objects[i]->obj.name.c_str()<<" has non-finite energy, setting to 0\n");
         objects[i]->SetVelocity(Vector3(0.0),Vector3(0.0));
       }
       else {
-        printf("ODESimulator: Rigid object %s energy %g exceeds threshold %g\n",objects[i]->obj.name.c_str(),ke,threshold);
+        LOG4CXX_INFO(GET_LOGGER(ODESimulator),"ODESimulator: Rigid object "<<objects[i]->obj.name.c_str()<<" energy "<<ke<<" exceeds threshold "<<threshold);
         Assert(ke > 0);
         Real newValue = 0;
         if(settings.instabilityPostCorrectionEnergy < 0)
@@ -1815,12 +1846,12 @@ bool ODESimulator::InstabilityCorrection()
     }
     if(unstable) {
       if(!IsFinite(ke)) {
-        printf("ODESimulator: Robot %s has non-finite energy, setting to 0\n",robots[i]->robot.name.c_str());
+        LOG4CXX_INFO(GET_LOGGER(ODESimulator),"ODESimulator: Robot "<<robots[i]->robot.name.c_str()<<" has non-finite energy, setting to 0\n");
         Vector zero(robots[i]->robot.q.n,0.0);
         robots[i]->SetVelocities(zero);
       }
       else {
-        printf("ODESimulator: Robot %s energy %g exceeds threshold %g\n",robots[i]->robot.name.c_str(),ke,threshold);
+        LOG4CXX_INFO(GET_LOGGER(ODESimulator),"ODESimulator: Robot "<<robots[i]->robot.name.c_str()<<" energy "<<ke<<" exceeds threshold "<<threshold);
         Assert(ke > 0);
         Real newValue = 0;
         if(settings.instabilityPostCorrectionEnergy < 0)
@@ -1885,13 +1916,13 @@ bool ODESimulator::ReadState_Internal(File& f)
 
   for(size_t i=0;i<robots.size();i++) {
     if(!robots[i]->ReadState(f)) {
-      fprintf(stderr,"ODESimulator::ReadState(): failed to read robot %d\n",i);
+            LOG4CXX_ERROR(GET_LOGGER(ODESimulator),"ODESimulator::ReadState(): failed to read robot "<<i);
       return false;
     }
   }
   for(size_t i=0;i<objects.size();i++) {
     if(!objects[i]->ReadState(f)) {
-      fprintf(stderr,"ODESimulator::ReadState(): failed to read object %d\n",i);
+            LOG4CXX_ERROR(GET_LOGGER(ODESimulator),"ODESimulator::ReadState(): failed to read object "<<i);
       return false;
     }
   }

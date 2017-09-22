@@ -1,3 +1,4 @@
+#include <KrisLibrary/Logger.h>
 #include "Polygon2DSampler.h"
 #include <KrisLibrary/math/random.h>
 #include <KrisLibrary/errors.h>
@@ -52,7 +53,7 @@ void Polygon2DSampler::Set(const vector<PointRay2D>& poly, Real rayBound)
   Triangle2D t;
 
   if(poly.size()==0) {
-    cout<<"Polygon2DSampler:: Warning, empty polygon!"<<endl;
+    LOG4CXX_WARN(KrisLibrary::logger(),"Polygon2DSampler:: Warning, empty polygon!"<<"\n");
     t.a = t.b = t.c = Vector2(Zero);
     tris.push_back(t);
   }

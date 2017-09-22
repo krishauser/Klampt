@@ -1,3 +1,5 @@
+#include <log4cxx/logger.h>
+#include <KrisLibrary/Logger.h>
 #include "qsimtestgui.h"
 #include <KrisLibrary/utils/apputils.h>
 
@@ -150,12 +152,12 @@ void QSimTestGUI::SaveLastScenario(){
 
 void QSimTestGUI::SendControllerSetting(int robot,string setting, string value){
     bool res = sim->robotControllers[robot]->SetSetting(setting,value);
-    if(!res) printf("Failed to set setting %s\n",setting.c_str());
+    if(!res) LOG4CXX_INFO(KrisLibrary::logger(),"Failed to set setting "<<setting.c_str());
 }
 
 void QSimTestGUI::SendControllerCommand(int robot,string setting,string value){
     bool res = sim->robotControllers[robot]->SendCommand(setting,value);
-    if(!res) printf("Failed to send command %s\n",setting.c_str());
+    if(!res) LOG4CXX_INFO(KrisLibrary::logger(),"Failed to send command "<<setting.c_str());
 }
 
 void QSimTestGUI::SendConnection(int robot, QString host, int port, int rate)

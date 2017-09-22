@@ -1,3 +1,5 @@
+#include <log4cxx/logger.h>
+#include <KrisLibrary/Logger.h>
 #include "qresourcetreewidget.h"
 #include <QMessageBox>
 #include <QApplication>
@@ -109,7 +111,7 @@ void QResourceTreeWidget::addNotify(ResourceNode* node)
     for(size_t i=0;i+1<path.size();i++) {
       int row = manager->ChildIndex(path[i]);
       if(row < 0) {
-	fprintf(stderr,"Error finding %d'th path item %s\n",i,path[i]->Name());
+		LOG4CXX_ERROR(KrisLibrary::logger(),"Error finding "<<i<<"'th path item "<<path[i]->Name());
 	delete newitem;
 	return;
       }
@@ -213,7 +215,7 @@ QTreeWidgetItem* QResourceTreeWidget::nodeToItem(ResourceNode* n)
   for(size_t i=0;i<path.size();i++) {
     int row = manager->ChildIndex(path[i]);
     if(row < 0 || row >= item->childCount()) {
-      fprintf(stderr,"Error finding %d'th path item %s\n",i,path[i]->Name());
+            LOG4CXX_ERROR(KrisLibrary::logger(),"Error finding "<<i<<"'th path item "<<path[i]->Name());
       return NULL;
     }
     item = item->child(row);
@@ -246,7 +248,7 @@ void QResourceTreeWidget::dropEvent(QDropEvent *event)
     //MimeData: application/x-qabstractitemmodeldatalist"
  
     assert(dragNode != NULL);
-    cout<<"Dragged item: "<<dragNode->Identifier()<<endl;
+    LOG4CXX_INFO(KrisLibrary::logger(),"Dragged item: "<<dragNode->Identifier()<<"\n");
 
     QTreeWidgetItem* dragParent = NULL;
     if(dragNode->parent) dragParent = nodeToItem(dragNode->parent);
@@ -282,20 +284,20 @@ void QResourceTreeWidget::dropEvent(QDropEvent *event)
 	targetNodeParent = NULL;
       }
       else {
-	printf("Invalid dropIndicatorPosition? %d\n",(int)dropIndicatorPosition());
+	LOG4CXX_INFO(KrisLibrary::logger(),"Invalid dropIndicatorPosition? "<<(int)dropIndicatorPosition());
 	return;
       }
-      cout<<"Dragged parent: "<<(dragNode->parent ? dragNode->parent->Name() : "Root" )<<endl;
-      cout<<"Target parent: "<<(targetNodeParent ? targetNodeParent->Name() : "Root")<<endl;
-      cout<<"Insert position: "<<insertIndex<<endl;
+      LOG4CXX_INFO(KrisLibrary::logger(),"Dragged parent: "<<(dragNode->parent ? dragNode->parent->Name() : "Root" )<<"\n");
+      LOG4CXX_INFO(KrisLibrary::logger(),"Target parent: "<<(targetNodeParent ? targetNodeParent->Name() : "Root")<<"\n");
+      LOG4CXX_INFO(KrisLibrary::logger(),"Insert position: "<<insertIndex<<"\n");
 
       Assert(dragNode != targetNodeParent);
       if(event->dropAction() == Qt::MoveAction) {
-	printf("Deleting from drag parent\n");
+	LOG4CXX_INFO(KrisLibrary::logger(),"Deleting from drag parent\n");
 	//detatch dragNode from parent and put it before, after, or in targetNode
 	manager->Delete(dragNode);
 	if(dragParent) {
-	  printf("Updating drag parent decorator\n");
+	  LOG4CXX_INFO(KrisLibrary::logger(),"Updating drag parent decorator\n");
 	  updateDecorator(dragParent);
 	}
 	if(dragParent==targetParent) {
@@ -306,14 +308,14 @@ void QResourceTreeWidget::dropEvent(QDropEvent *event)
       }
       else {
 	//copying -- make a copy
-	printf("Copying resource\n");
+	LOG4CXX_INFO(KrisLibrary::logger(),"Copying resource\n");
 	ResourcePtr rcopy = dragNode->resource->Copy();
 	rcopy->name = dragNode->resource->name;
 	rcopy->fileName = dragNode->resource->fileName;
 	dragNode = new ResourceNode(rcopy);
       }
 
-      printf("Adding to target parent\n");
+      LOG4CXX_INFO(KrisLibrary::logger(),"Adding to target parent\n");
       if(targetNodeParent) {
 	if(!targetNodeParent->IsExpandable()) return;
 	if(!targetNodeParent->IsExpanded())
@@ -339,12 +341,12 @@ void QResourceTreeWidget::dropEvent(QDropEvent *event)
       }
     }
     else {
-      printf("Unable to copy yet\n");
+      LOG4CXX_INFO(KrisLibrary::logger(),"Unable to copy yet\n");
       return;
     }
-    cout<<"After drag: new resource tree: "<<endl;
+    LOG4CXX_INFO(KrisLibrary::logger(),"After drag: new resource tree: "<<"\n");
     manager->Print();
-    cout<<endl;
+    LOG4CXX_INFO(KrisLibrary::logger(),"\n");
 
     if(event->dropAction() == Qt::CopyAction) {
       //item can't load data pointer type, we need to set new pointer for the 
@@ -382,12 +384,12 @@ void QResourceTreeWidget::dropEvent(QDropEvent *event)
         stream >> row >> col >> roleDataMap;
  
 	if(col == NAMECOL) {
-	  cout<<"RoleDataMap:"<<endl;
+	  LOG4CXX_INFO(KrisLibrary::logger(),"RoleDataMap:"<<"\n");
 	  QMapIterator<int, QVariant> i(roleDataMap);
 	  while (i.hasNext()) {
 	    i.next();
 	    QString value = i.value().toString();
-	    cout << "  " << i.key() << ": " << value.toStdString() << endl;
+	    LOG4CXX_INFO(KrisLibrary::logger(), "  " << i.key() << ": " << value.toStdString() << "\n");
 	  }
 	  QString dropped = roleDataMap[0].toString();
 

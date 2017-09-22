@@ -1,3 +1,5 @@
+#include <log4cxx/logger.h>
+#include <KrisLibrary/Logger.h>
 #include "RobotCSpace.h"
 #include "Modeling/Interpolate.h"
 #include <KrisLibrary/math/angle.h>
@@ -11,7 +13,7 @@
 #include <KrisLibrary/planning/CSetHelpers.h>
 #include <KrisLibrary/planning/CSpaceHelpers.h>
 #include <KrisLibrary/Timer.h>
-#include <boost/functional.hpp>
+#include <functional>
 #include <sstream>
 
 Real RandLaplacian()
@@ -574,7 +576,7 @@ bool SingleRobotCSpace::CheckJointLimits(const Config& x)
     if(robot.joints[i].type == RobotJoint::Normal || robot.joints[i].type == RobotJoint::Weld) {
       int k=robot.joints[i].linkIndex;
       if(x(k) < robot.qMin(k) || x(k) > robot.qMax(k)) {
-	//printf("Joint %d value %g out of bounds [%g,%g]\n",i,x(i),robot.qMin(i),robot.qMax(i));
+	//LOG4CXX_INFO(KrisLibrary::logger(),"Joint "<<i<<" value "<<x(i)<<" out of bounds ["<<robot.qMin(i)<<","<<robot.qMax(i));
 	return false;
       }
     }
@@ -582,7 +584,7 @@ bool SingleRobotCSpace::CheckJointLimits(const Config& x)
   for(size_t i=0;i<robot.drivers.size();i++) {
     Real v=robot.GetDriverValue(i);
     if(v < robot.drivers[i].qmin || v > robot.drivers[i].qmax) {
-      //printf("Driver %d value %g out of bounds [%g,%g]\n",i,v,robot.drivers[i].qmin,robot.drivers[i].qmax);
+      //LOG4CXX_INFO(KrisLibrary::logger(),"Driver "<<i<<" value "<<v<<" out of bounds ["<<robot.drivers[i].qmin<<","<<robot.drivers[i].qmax);
       return false;
     }
   }
@@ -654,7 +656,7 @@ void SingleRobotCSpace::Init()
     settings->collisionEnabled(ignoreCollisions[i].second,ignoreCollisions[i].first) = false;
   }
 
-  AddConstraint("update_geometry",boost::bind1st(std::mem_fun(&SingleRobotCSpace::UpdateGeometry),this));
+  AddConstraint("update_geometry",std::bind(std::mem_fun(&SingleRobotCSpace::UpdateGeometry),this,std::placeholders::_1));
 
   int id = world.RobotID(index);
   collisionPairs.resize(0);
@@ -686,7 +688,7 @@ void SingleRobotCSpace::Init()
         swap(link,endLink);
     }
 
-    //printf("Getting lipschitz bounds for %d -> %d\n",link,endLink);
+    //LOG4CXX_INFO(KrisLibrary::logger(),"Getting lipschitz bounds for "<<link<<" -> "<<endLink);
 
     Real d=0;
     int j=link;
@@ -770,13 +772,13 @@ bool SingleRobotCSpace::CheckCollisionFree(const Config& x)
   //environment collision check
   pair<int,int> res = settings->CheckCollision(world,idrobot,idothers);
   if(res.first >= 0) {
-    //printf("Collision found: %s (%d) - %s (%d)\n",world.GetName(res.first).c_str(),res.first,world.GetName(res.second).c_str(),res.second);
+    //LOG4CXX_INFO(KrisLibrary::logger(),"Collision found: "<<world.GetName(res.first).c_str()<<" ("<<res.first<<") - "<<world.GetName(res.second).c_str()<<" ("<<res.second);
     return false;
   }
   //self collision check
   res = settings->CheckCollision(world,idrobot);
   if(res.first >= 0) {
-    //printf("Self-collision found: %s %s\n",world.GetName(res.first).c_str(),world.GetName(res.second).c_str());
+    //LOG4CXX_INFO(KrisLibrary::logger(),"Self-collision found: "<<world.GetName(res.first).c_str()<<" "<<world.GetName(res.second).c_str());
     return false;
   }
   return true;
@@ -833,8 +835,8 @@ void GetCollisionList(RobotWorld& world,int robot,WorldPlannerSettings* settings
       }
     }
     for(size_t i=0;i<linkCollisions.size();i++)
-      printf("Collide link %d %d has %d elements to collide\n",linkIndices[i].first,linkIndices[i].second,linkCollisions[i].size());
-    getchar();
+      LOG4CXX_INFO(KrisLibrary::logger(),"Collide link "<<linkIndices[i].first<<" "<<linkIndices[i].second<<" has "<<linkCollisions[i].size());
+    if(KrisLibrary::logger()->isEnabledFor(log4cxx::Level::ERROR_INT)) getchar();
   }
 }
 */
@@ -903,7 +905,7 @@ SingleRigidObjectCSpace::SingleRigidObjectCSpace(RobotWorld& _world,int _index,W
 {
   Assert(settings != NULL);
   if(settings->objectSettings[index].translationWeight != 1.0)
-    fprintf(stderr,"SingleRigidObjectCSpace: translation distance weight is not 1\n");
+        LOG4CXX_ERROR(KrisLibrary::logger(),"SingleRigidObjectCSpace: translation distance weight is not 1\n");
   SE3CSpace::SetAngleWeight(settings->objectSettings[index].rotationWeight);
 
   Init();
@@ -933,7 +935,7 @@ void SingleRigidObjectCSpace::Init()
   constraints.resize(3);
   constraintNames.resize(3);
 
-  CSet::CPredicate f = boost::bind1st(std::mem_fun(&SingleRigidObjectCSpace::UpdateGeometry),this);
+  CSet::CPredicate f = std::bind(std::mem_fun(&SingleRigidObjectCSpace::UpdateGeometry),this,std::placeholders::_1);
   CSpace::AddConstraint("update_geometry",f);
 
   if(collisionPairs.empty()) {
