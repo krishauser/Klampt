@@ -1349,7 +1349,8 @@ class VisAppearance:
         if self.drawConfig: 
             try:
                 newDrawConfig = config.getConfig(self.item)
-                self.item = config.setConfig(self.item,self.drawConfig)
+                #self.item = 
+                config.setConfig(self.item,self.drawConfig)
                 self.drawConfig = newDrawConfig
             except Exception as e:
                 print "Warning, exception thrown during animation update.  Probably have incorrect length of configuration"
@@ -1594,7 +1595,7 @@ class VisAppearance:
             try:
                 itypes = objectToVisType(item,world)
             except:
-                print "Unknown object type",item.__class__.__name__
+                print "visualization.py: Unsupported object type",item,"of type:",item.__class__.__name__
                 return
             if itypes == None:
                 print "Unable to convert item",item,"to drawable"
@@ -2741,6 +2742,9 @@ def _show():
     if len(_windows)==0:
         _windows.append(WindowInfo(_window_title,_frontend,_vis)) 
         _current_window = 0
+    _windows[_current_window].mode = 'shown'
+    _windows[_current_window].worlds = _current_worlds
+    _windows[_current_window].active_worlds = _current_worlds[:]
     if not _thread_running:
         signal.signal(signal.SIGINT, signal.SIG_DFL)
         if _PyQtAvailable and False:
@@ -2752,9 +2756,6 @@ def _show():
             thread.setDaemon(True)
             thread.start()
         time.sleep(0.1)
-    _windows[_current_window].mode = 'shown'
-    _windows[_current_window].worlds = _current_worlds
-    _windows[_current_window].active_worlds = _current_worlds[:]
 
 def _hide():
     global _windows,_current_window,_thread_running
