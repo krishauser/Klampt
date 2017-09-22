@@ -1,5 +1,3 @@
-#include <log4cxx/logger.h>
-#include <KrisLibrary/Logger.h>
 #include "RealTimePlanner.h"
 #include "RealTimeIKPlanner.h"
 #include "RealTimeRRTPlanner.h"
@@ -31,7 +29,7 @@ void Extract(PlannerObjectiveBase* obj,Robot* robot,vector<IKGoal>& ikproblem,ve
   else if(typeid(*obj) == typeid(ConfigObjective)) {
     ConfigObjective* cobj = dynamic_cast<ConfigObjective*>(obj);
     if(!joint_constraints.empty())
-            LOG4CXX_ERROR(KrisLibrary::logger(),"Cannot support multiple configuration constraints yet\n");
+      fprintf(stderr,"Cannot support multiple configuration constraints yet\n");
     assert(joint_constraints.empty());
     joint_constraints.resize(cobj->qgoal.n);
     for(int i=0;i<cobj->qgoal.n;i++) {
@@ -40,7 +38,7 @@ void Extract(PlannerObjectiveBase* obj,Robot* robot,vector<IKGoal>& ikproblem,ve
     }
   }
   else {
-        LOG4CXX_ERROR(KrisLibrary::logger(),"Cant support objective type "<<typeid(*obj).name());
+    fprintf(stderr,"Cant support objective type %s\n",typeid(*obj).name());
     ikproblem.clear();
   }
 }
@@ -52,10 +50,10 @@ bool Optimize(PlannerObjectiveBase* obj,Robot* robot,int iters,Real tol)
   Extract(obj,robot,ikproblem,joint_constraints);
   if(!joint_constraints.empty()) {
     if(!ikproblem.empty())
-            LOG4CXX_ERROR(KrisLibrary::logger(),"Cannot support IK and configuration objectives simultaneously yet\n");
+      fprintf(stderr,"Cannot support IK and configuration objectives simultaneously yet\n");
     assert(joint_constraints.size()==robot->links.size());
     if(joint_constraints.size()!=robot->links.size())
-            LOG4CXX_ERROR(KrisLibrary::logger(),"Cannot support partial joint constraints yet\n");
+      fprintf(stderr,"Cannot support partial joint constraints yet\n");
     assert(joint_constraints.size()==robot->links.size());
     for(size_t i=0;i<joint_constraints.size();i++) {
       int k=joint_constraints[i].first;
@@ -100,7 +98,7 @@ void RealTimePlanner::SetSpace(SingleRobotCSpace* space)
     planner->Init(space,&space->robot,space->settings);
   }
   else {
-        LOG4CXX_ERROR(KrisLibrary::logger(),"RealTimePlanner::SetSpace: warning, underlying planner not set\n");
+    fprintf(stderr,"RealTimePlanner::SetSpace: warning, underlying planner not set\n");
   }
 }
 
@@ -154,7 +152,7 @@ bool RealTimePlanner::PlanUpdate(Real tglobal,Real& splitTime,Real& planTime)
   ParabolicRamp::DynamicPath before;
   if(tglobal > pathStartTime) {
     ParabolicRamp::DynamicPath updatedPath;
-    LOG4CXX_INFO(KrisLibrary::logger(),"split at "<<tglobal-pathStartTime<<" for path of duration "<<currentPath.GetTotalTime());
+    printf("split at %g for path of duration %g\n",tglobal-pathStartTime,currentPath.GetTotalTime());
     currentPath.Split(tglobal-pathStartTime,before,updatedPath);
     currentPath = updatedPath;
     pathStartTime = tglobal;
@@ -171,7 +169,7 @@ bool RealTimePlanner::PlanUpdate(Real tglobal,Real& splitTime,Real& planTime)
   Assert(before.IsValid());
   Assert(after.IsValid());
   assert(FuzzyEquals(before.GetTotalTime(),splitTime));
-  //LOG4CXX_INFO(KrisLibrary::logger(),"Split took time "<<timer.ElapsedTime());
+  //printf("Split took time %g\n",timer.ElapsedTime());
   fprintf(planner->flog,"***** Planning for time %gs (split %g, padding %g, ext %g)*********\n",(currentSplitTime-currentPadding-currentExternalPadding)*cognitiveMultiplier,currentSplitTime,currentPadding,currentExternalPadding);
 
   timer.Reset();
@@ -181,7 +179,7 @@ bool RealTimePlanner::PlanUpdate(Real tglobal,Real& splitTime,Real& planTime)
   planTime = timer.ElapsedTime()/cognitiveMultiplier;
 
   fprintf(planner->flog,"***** Planning took time %gs *********\n",timer.ElapsedTime());
-  //LOG4CXX_INFO(KrisLibrary::logger(),"Planning took time "<<planTime);
+  //printf("Planning took time %g\n",planTime);
   //collect statistics
   if(res==DynamicMotionPlannerBase::Failure) planFailTimeStats.collect(planTime);
   else if(res==DynamicMotionPlannerBase::Success) planSuccessTimeStats.collect(planTime);
@@ -261,14 +259,14 @@ bool RealTimePlanner::PlanUpdate(Real tglobal,Real& splitTime,Real& planTime)
 
     //debugging path
     if(!Vector(after.ramps.front().x0).isEqual(Vector(before.ramps.back().x1),1e-5)) {
-      LOG4CXX_INFO(KrisLibrary::logger(),"Updated path start configuration mismatch"<<"\n");
-      LOG4CXX_INFO(KrisLibrary::logger(),Vector(before.ramps.back().x1)<<"\n");
-      LOG4CXX_INFO(KrisLibrary::logger(),Vector(after.ramps.front().x0)<<"\n");
+      cout<<"Updated path start configuration mismatch"<<endl;
+      cout<<Vector(before.ramps.back().x1)<<endl;
+      cout<<Vector(after.ramps.front().x0)<<endl;
     }
     if(!Vector(after.ramps.front().dx0).isEqual(Vector(before.ramps.back().dx1),1e-5)) {
-      LOG4CXX_INFO(KrisLibrary::logger(),"Updated path start velocity mismatch"<<"\n");
-      LOG4CXX_INFO(KrisLibrary::logger(),Vector(before.ramps.back().dx1)<<"\n");
-      LOG4CXX_INFO(KrisLibrary::logger(),Vector(after.ramps.front().dx0)<<"\n");
+      cout<<"Updated path start velocity mismatch"<<endl;
+      cout<<Vector(before.ramps.back().dx1)<<endl;
+      cout<<Vector(after.ramps.front().dx0)<<endl;
     }
     Assert(Vector(after.ramps.front().x0).isEqual(Vector(before.ramps.back().x1),1e-5));
     Assert(Vector(after.ramps.front().dx0).isEqual(Vector(before.ramps.back().dx1),1e-5));
@@ -329,7 +327,7 @@ void RealTimePlanner::SetConstantPath(const Config& q)
     currentPath.accMax = planner->accMax;
   }
   else {
-    LOG4CXX_WARN(KrisLibrary::logger(),"RealTimePlanner: Warning, dynamic limits are not set yet\n");
+    printf("RealTimePlanner: Warning, dynamic limits are not set yet\n");
   }
 }
 
@@ -400,7 +398,7 @@ bool RealTimePlannerDataSender::Send(Real tplanstart,Real tcut,const ParabolicRa
     }//unlocks mutex
     iters ++ ;
     if(iters % 1000 == 0) {
-            LOG4CXX_ERROR(KrisLibrary::logger(),"Data sender is waiting for a long time... Did you forget to call RealTimePlanningThread.SendUpdate()?\n");
+      fprintf(stderr,"Data sender is waiting for a long time... Did you forget to call RealTimePlanningThread.SendUpdate()?\n");
     }
   }
 }  
@@ -431,7 +429,7 @@ void* planner_thread_func(void * ptr)
 
       //parse the data
       if(!data->active) {
-	LOG4CXX_INFO(KrisLibrary::logger(),"Planner_thread_func: quitting\n");
+	printf("Planner_thread_func: quitting\n");
 	//quit
 	return NULL;  //unlocks the mutex
       }
@@ -442,7 +440,7 @@ void* planner_thread_func(void * ptr)
       }
       assert(data->pathRefresh == false);
       if(data->resetStartConfig == true) {
-	LOG4CXX_INFO(KrisLibrary::logger(),"Planning thread: resetting start configuration\n");
+	printf("Planning thread: resetting start configuration\n");
 	data->planner->SetConstantPath(data->startConfig);
 	data->resetStartConfig = false;
       }
@@ -454,7 +452,7 @@ void* planner_thread_func(void * ptr)
 	}
       }
       if(data->objective != data->planner->planner->goal) {
-	LOG4CXX_INFO(KrisLibrary::logger(),"Planning thread: changing objective\n");
+	printf("Planning thread: changing objective\n");
 	if(data->objective) {
 	  //planner takes ownership
 	  data->planner->Reset(data->objective);
@@ -471,11 +469,11 @@ void* planner_thread_func(void * ptr)
       Real splitTime, planTime;
       bool res = data->planner->PlanUpdate(startTime, splitTime, planTime);
       
-      LOG4CXX_INFO(KrisLibrary::logger(),"Planning thread: plan result "<<(int)res);    
+      printf("Planning thread: plan result %d\n",(int)res);    
       ThreadYield();
     }
     else {
-      //LOG4CXX_INFO(KrisLibrary::logger(),"Planning thread waiting for an objective...\n");
+      //printf("Planning thread waiting for an objective...\n");
       ThreadSleep(0.01);
     }
   }
@@ -515,7 +513,7 @@ void RealTimePlanningThread::SetStartConfig(const Config& qstart)
       ThreadSleep(0.01);
       iters++;
       if(iters % 100 == 0)
-	LOG4CXX_INFO(KrisLibrary::logger(),"SetStartConfig... Waiting for planner to stop...\n");
+	printf("SetStartConfig... Waiting for planner to stop...\n");
     }
   }
   ScopedLock lock(data->mutex);
@@ -545,7 +543,7 @@ void RealTimePlanningThread::SetCSpace(SingleRobotCSpace* space)
       ThreadSleep(0.01);
       iters++;
       if(iters % 100 == 0)
-	LOG4CXX_INFO(KrisLibrary::logger(),"SetCSpace... Waiting for planner to stop...\n");
+	printf("SetCSpace... Waiting for planner to stop...\n");
     }
   }
   ScopedLock lock(data->mutex);
@@ -591,7 +589,7 @@ void RealTimePlanningThread::SetPlanner(const SmartPointer<DynamicMotionPlannerB
       ThreadSleep(0.01);
       iters++;
       if(iters % 100 == 0)
-	LOG4CXX_INFO(KrisLibrary::logger(),"SetCSpace... Waiting for planner to stop...\n");
+	printf("SetCSpace... Waiting for planner to stop...\n");
     }
   }
   ScopedLock lock(data->mutex);
@@ -624,7 +622,7 @@ bool RealTimePlanningThread::Start()
   data->pause = false;
   data->globalTime = 0;
   data->pathRefresh = false;
-  LOG4CXX_INFO(KrisLibrary::logger(),"Creating planning thread\n");
+  printf("Creating planning thread\n");
   thread = ThreadStart(planner_thread_func,data);
   return true;
 }
@@ -670,7 +668,7 @@ void RealTimePlanningThread::Stop()
   RealTimePlannerData* data = reinterpret_cast<RealTimePlannerData*>(internal);
   if(!data->active) return;
 
-  LOG4CXX_INFO(KrisLibrary::logger(),"Stopping planning thread\n");
+  printf("Stopping planning thread\n");
   if(data->planner)
   {
     ScopedLock lock(data->mutex);
@@ -697,19 +695,19 @@ bool RealTimePlanningThread::SendUpdate(MotionQueueInterface* robotInterface)
 
   //if so, mark that it's refreshed and send the path
   ScopedLock lock(data->mutex);
-  LOG4CXX_INFO(KrisLibrary::logger(),"Exec thread: SendUpdate: Refreshing path...\n");
+  printf("Exec thread: SendUpdate: Refreshing path...\n");
   data->pathRefresh = false;
   MotionQueueInterface::MotionResult res = robotInterface->SendPathImmediate(data->startPlanTime+data->tcut,data->path);
   Real t=robotInterface->GetCurTime();
   if(res == MotionQueueInterface::Success) {
     data->pathRefreshSuccess = true;
-    LOG4CXX_INFO(KrisLibrary::logger(),"Exec thread: Plan+send successful, split "<<data->tcut<<", delay "<<t - data->startPlanTime);
+    printf("Exec thread: Plan+send successful, split %g, delay %g\n",data->tcut,t - data->startPlanTime);
     data->globalTime = robotInterface->GetCurTime();
     return true;
   }
   else {
     data->pathRefreshSuccess = false;
-    LOG4CXX_INFO(KrisLibrary::logger(),"Exec thread: Plan+send overrun, split "<<data->tcut<<", delay "<<t - data->startPlanTime);
+    printf("Exec thread: Plan+send overrun, split %g, delay %g\n",data->tcut,t - data->startPlanTime);
     data->globalTime = robotInterface->GetCurTime();
     return false;
   }
@@ -747,8 +745,8 @@ bool DynamicMotionPlannerBase::LogBegin(const char* fn)
     fclose(flog);
   flog = fopen(fn,"a");
   if(!flog) {
-    LOG4CXX_INFO(KrisLibrary::logger(),"DynamicMotionPlannerBase: Couldn't open log to file "<<fn<<"\n");
-    if(KrisLibrary::logger()->isEnabledFor(log4cxx::Level::ERROR_INT)) getchar();
+    cout<<"DynamicMotionPlannerBase: Couldn't open log to file "<<fn<<endl;
+    getchar();
     flog = stdout;
     return false;
   }
@@ -993,7 +991,7 @@ bool DynamicMotionPlannerBase::GetMilestoneRamp(const ParabolicRamp::DynamicPath
 bool DynamicMotionPlannerBase::CheckMilestoneRamp(const ParabolicRamp::DynamicPath& curPath,const Config& q,ParabolicRamp::DynamicPath& ramp) const
 {
   if(!GetMilestoneRamp(curPath,q,ramp)) {
-    LOG4CXX_INFO(KrisLibrary::logger(),"CheckMilestoneRamp: Failed to get milestone ramp\n");
+    printf("CheckMilestoneRamp: Failed to get milestone ramp\n");
     return false;
   }
   //check bounding box exactly
@@ -1002,11 +1000,11 @@ bool DynamicMotionPlannerBase::CheckMilestoneRamp(const ParabolicRamp::DynamicPa
     ramp.ramps[r].Bounds(bmin,bmax);
     for(size_t i=0;i<bmin.size();i++) {
       if(bmin[i] < robot->qMin(i)) {
-	LOG4CXX_INFO(KrisLibrary::logger(),"CheckMilestoneRamp: Bound on link "<<(int)i<<" failed check: "<<bmin[i]<<" < "<<robot->qMin(i));
+	printf("CheckMilestoneRamp: Bound on link %d failed check: %g < %g\n",(int)i,bmin[i],robot->qMin(i));
 	return false;
       }
       if(bmax[i] > robot->qMax(i)) {
-	LOG4CXX_INFO(KrisLibrary::logger(),"CheckMilestoneRamp: Bound on link "<<(int)i<<" failed check: "<<bmax[i]<<" > "<<robot->qMax(i));
+	printf("CheckMilestoneRamp: Bound on link %d failed check: %g > %g\n",(int)i,bmax[i],robot->qMax(i));
 	return false;
       }
     }
@@ -1016,7 +1014,7 @@ bool DynamicMotionPlannerBase::CheckMilestoneRamp(const ParabolicRamp::DynamicPa
   CSpaceFeasibilityChecker checker(cspace);
   for(size_t r=0;r<ramp.ramps.size();r++) {
     if(!CheckRamp(ramp.ramps[r],&checker,pathEpsilon)) {
-      LOG4CXX_INFO(KrisLibrary::logger(),"CheckMilestoneRamp: Collision check failed.\n");
+      printf("CheckMilestoneRamp: Collision check failed.\n");
       return false;
     }
   }
@@ -1068,7 +1066,7 @@ int DynamicIKPlanner::PlanFrom(ParabolicRamp::DynamicPath& path,Real cutoff)
     if(cost < Cstart) {
       ParabolicRamp::DynamicPath ramp;
       if(CheckMilestoneRamp(path,q,ramp)) {
-	LOG4CXX_INFO(KrisLibrary::logger(),"IK planner: success\n");
+	printf("IK planner: success\n");
 	path = ramp;
 	return Success;
       }
@@ -1329,7 +1327,7 @@ int DynamicRRTPlanner::PlanFrom(ParabolicRamp::DynamicPath& path,Real cutoff)
 
   existingNodes.resize(0);
 
-  //LOG4CXX_INFO(KrisLibrary::logger(),"Adding old path...\n");
+  //printf("Adding old path...\n");
   //initialize tree with existing path
   RRTPlanner::Node* n=rrt->AddMilestone(MakeState(path.ramps[0].x0,path.ramps[0].dx0));
   if(!stateSpace->IsFeasible(n->x)) {
@@ -1542,7 +1540,7 @@ int DynamicRRTPlanner::PlanFrom(ParabolicRamp::DynamicPath& path,Real cutoff)
     //test feasibility of last state
     if(!stateSpace->IsFeasible(bestNode->x)) {
       fprintf(flog,"Problem: last node is infeasible?\n");
-      if(KrisLibrary::logger()->isEnabledFor(log4cxx::Level::ERROR_INT)) getchar();
+      getchar();
     }
     */
 
@@ -1591,7 +1589,7 @@ int DynamicRRTPlanner::PlanFrom(ParabolicRamp::DynamicPath& path,Real cutoff)
       fprintf(flog,"%s\n",LexicalCast(Vector(path.ramps.back().dx1)).c_str());
       fprintf(flog,"Last milestone: %s\n",LexicalCast(bestNode->x).c_str());
       fprintf(flog,"About to Abort() after getchar...\n");
-      if(KrisLibrary::logger()->isEnabledFor(log4cxx::Level::ERROR_INT)) getchar();
+      getchar();
       Abort();
     }
     Assert(Vector(path.ramps.back().dx1).isZero());
@@ -1958,7 +1956,7 @@ bool DynamicHybridTreePlanner::CheckPath(Node* n,Timer& timer,Real cutoff,Node**
   while(temp != NULL) {
     if(!temp->reachable) {
       fprintf(flog,"Warning: inconsitency in reachability marking\n");
-      if(KrisLibrary::logger()->isEnabledFor(log4cxx::Level::ERROR_INT)) getchar();
+      getchar();
     }
     temp = temp->getParent();
   }
@@ -2386,7 +2384,7 @@ int DynamicHybridTreePlanner::PlanFrom(ParabolicRamp::DynamicPath& path,Real cut
     fprintf(flog,"%s\n",LexicalCast(Vector(path.ramps.back().dx1)).c_str());
     fprintf(flog,"Last milestone %s, %s\n",LexicalCast(bestNode->q).c_str(),LexicalCast(bestNode->dq).c_str());
     fprintf(flog,"About to Abort() after getchar...\n");
-    if(KrisLibrary::logger()->isEnabledFor(log4cxx::Level::ERROR_INT)) getchar();
+    getchar();
     Abort();
   }
   Assert(Vector(path.ramps.back().dx1).isZero());

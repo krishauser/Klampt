@@ -1,8 +1,6 @@
 #ifndef WORLD_VIEW_PROGRAM_H
 #define WORLD_VIEW_PROGRAM_H
 
-#include <log4cxx/logger.h>
-#include <KrisLibrary/Logger.h>
 #include <KrisLibrary/math3d/Ray3D.h>
 #include "Modeling/World.h"
 #include "IO/XmlWorld.h"
@@ -80,7 +78,7 @@ bool WorldViewProgram::LoadCommandLine(int argc,const char** argv)
 	i++;
       }
       else {
-	LOG4CXX_INFO(KrisLibrary::logger(),"Unknown option "<<argv[i]);
+	printf("Unknown option %s",argv[i]);
 	return false;
       }
     }
@@ -88,11 +86,11 @@ bool WorldViewProgram::LoadCommandLine(int argc,const char** argv)
       const char* ext=FileExtension(argv[i]);
       if(0==strcmp(ext,"xml")) {
 	if(!xmlWorld.Load(argv[i])) {
-	  LOG4CXX_ERROR(KrisLibrary::logger(),"Error loading world file "<<argv[i]);
+	  printf("Error loading world file %s\n",argv[i]);
 	  return false;
 	}
 	if(!xmlWorld.GetWorld(*world)) {
-	  LOG4CXX_ERROR(KrisLibrary::logger(),"Error loading world from "<<argv[i]);
+	  printf("Error loading world from %s\n",argv[i]);
 	  return false;
 	}
       }
@@ -105,17 +103,17 @@ bool WorldViewProgram::LoadCommandLine(int argc,const char** argv)
   }
 
   if(configs.size() > world->robots.size()) {
-    LOG4CXX_WARN(KrisLibrary::logger(),"Warning, too many configs specified\n");
+    printf("Warning, too many configs specified\n");
   }
   for(size_t i=0;i<configs.size();i++) {
     if(i >= world->robots.size()) break;
     ifstream in(configs[i].c_str(),ios::in);
-    if(!in) LOG4CXX_INFO(KrisLibrary::logger(),"Could not open config file "<<configs[i].c_str());
+    if(!in) printf("Could not open config file %s\n",configs[i].c_str());
     Vector temp;
     in >> temp;
-    if(!in) LOG4CXX_ERROR(KrisLibrary::logger(),"Error reading config file "<<configs[i].c_str());
+    if(!in) printf("Error reading config file %s\n",configs[i].c_str());
     if(temp.n != (int)world->robots[i]->links.size()) {
-      LOG4CXX_INFO(KrisLibrary::logger(),"Incorrect number of DOFs in config "<<i);
+      printf("Incorrect number of DOFs in config %d\n",i);
       continue;
     }
     world->robots[i]->UpdateConfig(temp);
@@ -204,7 +202,7 @@ void WorldViewProgram::ClickRay(int x,int y,Ray3D& r) const
 {
   viewport.getClickSource(x,viewport.y+viewport.h-y,r.source);
   viewport.getClickVector(x,viewport.y+viewport.h-y,r.direction);
-  //LOG4CXX_INFO(KrisLibrary::logger(),"Ray "<<r.source<<" -> "<<r.direction<<"\n");
+  //cout<<"Ray "<<r.source<<" -> "<<r.direction<<endl;
 }
 
 

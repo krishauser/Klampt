@@ -1,5 +1,3 @@
-#include <log4cxx/logger.h>
-#include <KrisLibrary/Logger.h>
 #include "Control/PathController.h"
 #include "Control/FeedforwardController.h"
 #include "Control/LoggingController.h"
@@ -38,10 +36,10 @@ typedef PolynomialPathController MyMilestoneController;
 	  sprintf(buf,"robot%d_commands.log",i);
 	  LoggingController<FeedforwardController>* c = dynamic_cast<LoggingController<FeedforwardController>* >(&*sim.robotControllers[i]);
 	  if(!c->SaveLog(buf)) {
-	    	    LOG4CXX_ERROR(KrisLibrary::logger(),"Error writing to "<<buf);
+	    fprintf(stderr,"Error writing to %s\n",buf);
 	  }
 	  else
-	    LOG4CXX_INFO(KrisLibrary::logger(),"Saved commands to "<<buf);
+	    printf("Saved commands to %s\n",buf);
 	}
 */
 
@@ -51,21 +49,21 @@ typedef PolynomialPathController MyMilestoneController;
 	  sprintf(buf,"robot%d_commands.log",i);
 	  LoggingController<FeedforwardController>* c = dynamic_cast<LoggingController<FeedforwardController>* >(&*sim.robotControllers[i]);
 	  if(!c->LoadLog(buf)) {
-	    	    LOG4CXX_ERROR(KrisLibrary::logger(),"Error reading commands from "<<buf);
+	    fprintf(stderr,"Error reading commands from %s\n",buf);
 	  }
 	  else {
-	    LOG4CXX_INFO(KrisLibrary::logger(),"Loaded commands from "<<buf);
+	    printf("Loaded commands from %s\n",buf);
 	    c->replay = true;
 	    c->replayIndex = 0;
 	    c->onlyJointCommands = true;
 	    //hack
-	    LOG4CXX_INFO(KrisLibrary::logger(),"HACK: removing delays from recorded commands\n");
+	    printf("HACK: removing delays from recorded commands\n");
 	    c->RemoveDelays(0.2);
-	    LOG4CXX_INFO(KrisLibrary::logger(),"Read "<<c->trajectory.size());
+	    printf("Read %d commands\n",c->trajectory.size());
 	    //check if it's for the right robot
 	    if(!c->trajectory.empty()) {
 	      if(c->trajectory[0].second.actuators.size() != c->command.actuators.size()) {
-				LOG4CXX_ERROR(KrisLibrary::logger(),"Command file "<<buf);
+		fprintf(stderr,"Command file %s doesn't have the right number of actuators\n",buf);
 		c->replay = false;
 	      }
 	    }
@@ -80,22 +78,22 @@ bool SetupCommands(WorldSimulation& sim,const string& fn)
     Assert(sim.robotControllers.size()==1);
     LoggingController* c = dynamic_cast<LoggingController*>(&*sim.robotControllers[0]);
     if(!c->LoadLog(fn.c_str())) {
-            LOG4CXX_ERROR(KrisLibrary::logger(),"Error reading commands from "<<fn.c_str());
+      fprintf(stderr,"Error reading commands from %s\n",fn.c_str());
       return false;
     }
     else {
-      LOG4CXX_INFO(KrisLibrary::logger(),"Loaded commands from "<<fn.c_str());
+      printf("Loaded commands from %s\n",fn.c_str());
       c->replay = true;
       c->replayIndex = 0;
       c->onlyJointCommands = true;
       //hack
-      LOG4CXX_INFO(KrisLibrary::logger(),"HACK: removing delays from recorded commands\n");
+      printf("HACK: removing delays from recorded commands\n");
       c->RemoveDelays(0.2);
-      LOG4CXX_INFO(KrisLibrary::logger(),"Read "<<c->trajectory.size());
+      printf("Read %d commands\n",c->trajectory.size());
       //check if it's for the right robot
       if(!c->trajectory.empty()) {
 	if(c->trajectory[0].second.actuators.size() != c->command->actuators.size()) {
-	  	  LOG4CXX_ERROR(KrisLibrary::logger(),"Command file "<<fn.c_str());
+	  fprintf(stderr,"Command file %s doesn't have the right number of actuators\n",fn.c_str());
 	  c->replay = false;
 	}
       }
@@ -110,7 +108,7 @@ bool SetupCommands(WorldSimulation& sim,const string& fn)
     while(in) {
       in >> x >> dx;
       if(in) {
-	LOG4CXX_INFO(KrisLibrary::logger(),x<<", "<<dx<<"\n");
+	cout<<x<<", "<<dx<<endl;
 	milestones.push_back(x);
 	dmilestones.push_back(dx);
       }
@@ -123,13 +121,13 @@ bool SetupCommands(WorldSimulation& sim,const string& fn)
       ss<<milestones[i]<<"\t"<<dmilestones[i];
       if(i==0) {
 	if(!sim.robotControllers[0]->SendCommand("set_qv",ss.str())) {
-	  	  LOG4CXX_ERROR(KrisLibrary::logger(),"set_qv command does not work with the robot's controller\n");
+	  fprintf(stderr,"set_qv command does not work with the robot's controller\n");
 	  return false;
 	}
       }
       else {
 	if(!sim.robotControllers[0]->SendCommand("append_qv",ss.str())) {
-	  	  LOG4CXX_ERROR(KrisLibrary::logger(),"append_qv command does not work with the robot's controller\n");
+	  fprintf(stderr,"append_qv command does not work with the robot's controller\n");
 	  return false;
 	}
       }
@@ -162,7 +160,7 @@ bool WriteSimState(WorldSimulation& sim,const char* fn,Format format)
     ThreeJSExport(sim,obj);
     ofstream out(fn,ios::out|ios::binary);
     if(!out) {
-            LOG4CXX_ERROR(KrisLibrary::logger(),"Unable to open file "<<fn);
+      fprintf(stderr,"Unable to open file %s for writing\n",fn);
       return false;
     }
     out<<obj<<endl;
@@ -174,7 +172,7 @@ bool WriteSimState(WorldSimulation& sim,const char* fn,Format format)
     sim.WriteState(finalState);
     ofstream out(fn,ios::out|ios::binary);
     if(!out) {
-            LOG4CXX_ERROR(KrisLibrary::logger(),"Unable to open file "<<fn);
+      fprintf(stderr,"Unable to open file %s for writing\n",fn);
       return false;
     }
     string data;
@@ -204,8 +202,8 @@ const char* OPTIONS_STRING = "Options:\n\
 int main(int argc, char** argv)
 { 
   if(argc < 2) {
-    LOG4CXX_INFO(KrisLibrary::logger(),"USAGE: SimUtil [options] [xml_files, robot_files, terrain_files, object_files]\n");
-    LOG4CXX_INFO(KrisLibrary::logger(),OPTIONS_STRING);
+    printf("USAGE: SimUtil [options] [xml_files, robot_files, terrain_files, object_files]\n");
+    printf(OPTIONS_STRING);
     return 0;
   }
   XmlWorld xmlWorld;
@@ -266,8 +264,8 @@ int main(int argc, char** argv)
 	i++;
       }
       else {
-		LOG4CXX_ERROR(KrisLibrary::logger(),"Unknown option "<<argv[i]);
-	LOG4CXX_INFO(KrisLibrary::logger(),OPTIONS_STRING);
+	fprintf(stderr,"Unknown option %s\n",argv[i]);
+	printf(OPTIONS_STRING);
 	return 1;
       }
     }
@@ -275,11 +273,11 @@ int main(int argc, char** argv)
       const char* ext=FileExtension(argv[i]);
       if(0==strcmp(ext,"xml")) {
 	if(!xmlWorld.Load(argv[i])) {
-	  LOG4CXX_ERROR(KrisLibrary::logger(),"Error loading world file "<<argv[i]);
+	  printf("Error loading world file %s\n",argv[i]);
 	  return 1;
 	}
 	if(!xmlWorld.GetWorld(world)) {
-	  LOG4CXX_ERROR(KrisLibrary::logger(),"Error loading world from "<<argv[i]);
+	  printf("Error loading world from %s\n",argv[i]);
 	  return 1;
 	}
       }
@@ -292,9 +290,9 @@ int main(int argc, char** argv)
   }
 
   //initialize simulation
-  LOG4CXX_INFO(KrisLibrary::logger(),"Initializing simulation...\n");
+  printf("Initializing simulation...\n");
   sim.Init(&world);
-  LOG4CXX_INFO(KrisLibrary::logger(),"Done\n");
+  printf("Done\n");
 
   //setup controllers
   sim.robotControllers.resize(world.robots.size());
@@ -307,12 +305,12 @@ int main(int argc, char** argv)
   //setup ODE settings, if any
   TiXmlElement* e=xmlWorld.GetElement("simulation");
   if(e) {
-    LOG4CXX_INFO(KrisLibrary::logger(),"Reading simulation settings...\n");
+    printf("Reading simulation settings...\n");
     XmlSimulationSettings s(e);
     if(!s.GetSettings(sim)) {
-            LOG4CXX_ERROR(KrisLibrary::logger(),"Warning, simulation settings not read correctly\n");
+      fprintf(stderr,"Warning, simulation settings not read correctly\n");
     }
-    LOG4CXX_INFO(KrisLibrary::logger(),"Done\n");
+    printf("Done\n");
   }
   
   //setup feedback
@@ -342,7 +340,7 @@ int main(int argc, char** argv)
     for(size_t i=0;i<initialStates.size();i++) {
       if(initialStates.size() > 1) {
 	if(!sim.ReadState(initialStates[i])) {
-	  	  LOG4CXX_ERROR(KrisLibrary::logger(),"Warning, ReadState didn't work\n");
+	  fprintf(stderr,"Warning, ReadState didn't work\n");
 	  abort();
 	}
       }
@@ -360,21 +358,21 @@ int main(int argc, char** argv)
     for(size_t trial=0;trial<commandFiles.size();trial++) {
       if(initialStates.size() > 1 || trial > 0) {
 	if(!sim.ReadState(initialStates[init])) {
-	  	  LOG4CXX_ERROR(KrisLibrary::logger(),"Warning, ReadState didn't work\n");
+	  fprintf(stderr,"Warning, ReadState didn't work\n");
 	  abort();
 	}
       }
       Real time0 = sim.time;
 
-      LOG4CXX_INFO(KrisLibrary::logger(),"Loading commands...\n");
+      printf("Loading commands...\n");
       bool res=SetupCommands(sim,commandFiles[trial]);
       if(!res) {
-		LOG4CXX_ERROR(KrisLibrary::logger(),"Unable to load commands from "<<commandFiles[trial].c_str());
+	fprintf(stderr,"Unable to load commands from %s\n",commandFiles[trial].c_str());
 	return 1;
       }
       
       while(sim.time < simEndTime && sim.time < simDuration + time0 ) {
-	LOG4CXX_INFO(KrisLibrary::logger(),"Time "<<sim.time);
+	printf("Time %g\n",sim.time);
 	sim.Advance(sim.simStep);
       }
       
@@ -389,7 +387,7 @@ int main(int argc, char** argv)
 	else sprintf(buf,"%s_%04d_%04d.%s",prefix.c_str(),init,trial,FormatExtension(format));
       }
 
-      LOG4CXX_INFO(KrisLibrary::logger(),"Writing state at time "<<sim.time<<" to file "<<buf);
+      printf("Writing state at time %g to file %s\n",sim.time,buf);
       if(!WriteSimState(sim,buf,format)) {
 	return 1;
       }

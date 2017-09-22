@@ -1,5 +1,3 @@
-#include <log4cxx/logger.h>
-#include <KrisLibrary/Logger.h>
 #include "DistanceQuery.h"
 #include <KrisLibrary/errors.h>
 using namespace std;
@@ -30,11 +28,11 @@ Real DistanceQuery::UpdateQuery()
   Real d;
   switch(s) {
   case Far:
-    //LOG4CXX_WARN(KrisLibrary::logger(),"Warning: we seem to have already evaluated distance\n");
+    //printf("Warning: we seem to have already evaluated distance\n");
     return distanceTolerance;
 
   case Close:
-    //LOG4CXX_WARN(KrisLibrary::logger(),"Warning: we seem to have already evaluated distance\n");
+    //printf("Warning: we seem to have already evaluated distance\n");
     //return query->Distance_Cached();
     return query->Distance(distanceAbsErr,distanceRelErr);
 
@@ -83,7 +81,7 @@ bool DistanceQuery::ClosestPoints(Vector3& cp1, Vector3& cp2, Vector3& dir)
   switch(s) {
   case Far: case Close: case Contact: break;
   default:
-    LOG4CXX_WARN(KrisLibrary::logger(),"Warning: querying closest points without an updated query\n");
+    printf("Warning: querying closest points without an updated query\n");
     UpdateQuery();
     break;
   }

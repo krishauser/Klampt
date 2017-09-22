@@ -1,5 +1,3 @@
-#include <log4cxx/logger.h>
-#include <KrisLibrary/Logger.h>
 #include "dialog.h"
 #include "ui_dialog.h"
 #include "Modeling/Robot.h"
@@ -107,9 +105,9 @@ int Dialog::DoCalibrate(){
   popup->rob=robotFilename;
   popup->show();
 
-  LOG4CXX_INFO(KrisLibrary::logger(),"\n");
-  LOG4CXX_INFO(KrisLibrary::logger(),"To re-run from command line, copy the following lines to \n\
+  cout<<endl;
+  cout<<"To re-run from command line, copy the following lines to \n\
 motorcalibrate.settings and run \n\
-  ./MotorCalibrate motorcalibrate.settings"<<"\n");
-  LOG4CXX_INFO(KrisLibrary::logger(),settings<<"\n");
+  ./MotorCalibrate motorcalibrate.settings"<<endl;
+  cout<<settings<<endl;
 }

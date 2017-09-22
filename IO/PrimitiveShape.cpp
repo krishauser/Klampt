@@ -4,8 +4,6 @@
  *  Created on: Aug 29, 2012
  *      Author: jingru
  */
-#include <log4cxx/logger.h>
-#include <KrisLibrary/Logger.h>
 #include <KrisLibrary/math3d/primitives.h>
 #include "PrimitiveShape.h"
 #include <fstream>
@@ -201,8 +199,8 @@ void Sphere::readInUnitSphere(){
 	ifstream file;
 	file.open("data/objects/sphere.tri");
 	if(!file.is_open()){
-		LOG4CXX_INFO(KrisLibrary::logger(),"Cannot read in data/objects/sphere.tri!\n");
-		//KrisLibrary::loggerWait();
+		cout<<"Cannot read in data/objects/sphere.tri!\n"<<flush;
+		getchar();
 	}
 	int nPoint;
 	file >> nPoint;
@@ -233,8 +231,8 @@ void loadWrl(string filename, vector<MyPoint3D>& points, vector<TriFaceIndex>& i
 	ifstream file;
 	file.open(filename.c_str());
 	if(!file.is_open()){
-		LOG4CXX_INFO(KrisLibrary::logger(),"Cannot read in wrl "<<filename<<" geometry!\n");
-		//KrisLibrary::loggerWait();
+		cout<<"Cannot read in wrl "<<filename<<" geometry!\n"<<flush;
+		getchar();
 	}
 
 	int colbaseIndex = points.size();
@@ -288,7 +286,7 @@ void loadWrl(string filename, vector<MyPoint3D>& points, vector<TriFaceIndex>& i
 								{
 									TriFaceIndex ti(p[0]+colbaseIndex,p[1]+colbaseIndex,p[2]+colbaseIndex);
 									indexes.push_back(ti);
-//									LOG4CXX_INFO(KrisLibrary::logger(),p[0]+colbaseIndex<<","<<p[1]+colbaseIndex<<","<<p[2]+colbaseIndex<<"\n");KrisLibrary::loggerWait();
+//									cout<<p[0]+colbaseIndex<<","<<p[1]+colbaseIndex<<","<<p[2]+colbaseIndex<<endl;getchar();
 								}
 							}
 							ind = 0;
@@ -302,7 +300,7 @@ void loadWrl(string filename, vector<MyPoint3D>& points, vector<TriFaceIndex>& i
 //						{
 //							TriFaceIndex ti(p[0]+colbaseIndex,p[1]+colbaseIndex,p[2]+colbaseIndex);
 //							indexes.push_back(ti);
-//							LOG4CXX_INFO(KrisLibrary::logger(),p[0]+colbaseIndex<<","<<p[1]+colbaseIndex<<","<<p[2]+colbaseIndex<<"\n");KrisLibrary::loggerWait();
+//							cout<<p[0]+colbaseIndex<<","<<p[1]+colbaseIndex<<","<<p[2]+colbaseIndex<<endl;getchar();
 //						}
 //					}
 				}
@@ -334,8 +332,8 @@ void loadTri(string filename, vector<MyPoint3D>& points, vector<TriFaceIndex>& i
 	ifstream file;
 	file.open(filename.c_str());
 	if(!file.is_open()){
-		LOG4CXX_INFO(KrisLibrary::logger(),"Cannot read in tri "<<filename<<" geometry!\n");
-		//KrisLibrary::loggerWait();
+		cout<<"Cannot read in tri "<<filename<<" geometry!\n"<<flush;
+		getchar();
 	}
 	int colbaseIndex = points.size();
 	int nPoint;

@@ -28,8 +28,6 @@
  * 
  ***************************************************************************/
 
-#include <log4cxx/logger.h>
-#include <KrisLibrary/Logger.h>
 #include "DynamicPath.h"
 #include <KrisLibrary/Timer.h>
 #include "Config.h"
@@ -60,7 +58,7 @@ inline bool InBounds(const Vector& x,const Vector& bmin,const Vector& bmax)
   PARABOLIC_RAMP_ASSERT(x.size()==bmax.size());
   for(size_t i=0;i<x.size();i++)
     if(x[i] < bmin[i] || x[i] > bmax[i]) {
-      LOG4CXX_INFO(KrisLibrary::logger(),"x["<<i<<"]="<<x[i]<<" not in bounds ["<<bmin[i]<<","<<bmax[i]);
+      printf("x[%d]=%g not in bounds [%g,%g]\n",i,x[i],bmin[i],bmax[i]);
       return false;
     }
   return true;
@@ -274,13 +272,13 @@ bool DynamicPath::SetMilestones(const vector<Vector>& x,const vector<Vector>& dx
       std::vector<std::vector<ParabolicRamp1D> > tempRamps;
       std::vector<ParabolicRampND> tempRamps2;
       if(!InBounds(x[0],xMin,xMax)) {
-		LOG4CXX_ERROR(KrisLibrary::logger(),"DynamicPath::SetMilestones: Initial milestone is not within joint limits\n");
+	fprintf(stderr,"DynamicPath::SetMilestones: Initial milestone is not within joint limits\n");
 	return false;
       }
       PARABOLIC_RAMP_ASSERT(InBounds(x[0],xMin,xMax));
       for(size_t i=0;i+1<x.size();i++) {
 	if(!InBounds(x[i+1],xMin,xMax)) {
-	  	  LOG4CXX_ERROR(KrisLibrary::logger(),"DynamicPath::SetMilestones: Milestone "<<i+1);
+	  fprintf(stderr,"DynamicPath::SetMilestones: Milestone %d is not within joint limits\n",i+1);
 	  return false;
 	}
 	PARABOLIC_RAMP_ASSERT(InBounds(x[i+1],xMin,xMax));
@@ -390,16 +388,16 @@ void DynamicPath::Concat(const DynamicPath& suffix)
       dxmax=Max(dxmax,Abs(ramps.back().dx1[i]-suffix.ramps.front().dx0[i]));
     }
     if(Abs(xmax) > EpsilonX || Abs(dxmax) > EpsilonV) {
-      LOG4CXX_ERROR(KrisLibrary::logger(),"Concat endpoint error\n");
-      LOG4CXX_INFO(KrisLibrary::logger(),"x:\n");
+      printf("Concat endpoint error\n");
+      printf("x:\n");
       for(size_t i=0;i<ramps.back().x1.size();i++)
-	LOG4CXX_INFO(KrisLibrary::logger(),""<<ramps.back().x1[i]<<" - "<<suffix.ramps.front().x0[i]<<" = "<<ramps.back().x1[i]-suffix.ramps.front().x0[i]);
-      LOG4CXX_INFO(KrisLibrary::logger(),"dx:\n");
+	printf("%g - %g = %g\n",ramps.back().x1[i],suffix.ramps.front().x0[i],ramps.back().x1[i]-suffix.ramps.front().x0[i]);
+      printf("dx:\n");
       for(size_t i=0;i<ramps.back().x1.size();i++)
-	LOG4CXX_INFO(KrisLibrary::logger(),""<<ramps.back().dx1[i]<<" - "<<suffix.ramps.front().dx0[i]<<" = "<<ramps.back().dx1[i]-suffix.ramps.front().dx0[i]);
+	printf("%g - %g = %g\n",ramps.back().dx1[i],suffix.ramps.front().dx0[i],ramps.back().dx1[i]-suffix.ramps.front().dx0[i]);
       if(gErrorGetchar) {
-	LOG4CXX_INFO(KrisLibrary::logger(),"Press enter to continue\n");
-	//KrisLibrary::loggerWait();
+	printf("Press enter to continue\n");
+	getchar();
       }
     }
     ramps.back().x1 = suffix.ramps.front().x0;
@@ -450,8 +448,8 @@ void DynamicPath::Split(Real t,DynamicPath& before,DynamicPath& after) const
 	temp=ramps[i];
 	temp.TrimFront(t);
 	if(!after.ramps.empty()) {
-	  LOG4CXX_INFO(KrisLibrary::logger(),"DynamicPath::Split: Uh... weird, after is not empty?\n");
-	  LOG4CXX_INFO(KrisLibrary::logger(),"t = "<<t<<", i = "<<i<<", endtime = "<<ramps[i].endTime);
+	  printf("DynamicPath::Split: Uh... weird, after is not empty?\n");
+	  printf("t = %g, i = %d, endtime = %g\n",t,i,ramps[i].endTime);
 	}
 	PARABOLIC_RAMP_ASSERT(after.ramps.size() == 0);
 	after.ramps.push_back(temp);
@@ -1009,51 +1007,51 @@ int DynamicPath::WrappedShortcut(const std::vector<Real>& modulus,int numIters,R
 bool DynamicPath::IsValid() const
 {
   if(ramps.empty()) {
-        LOG4CXX_ERROR(KrisLibrary::logger(),"DynamicPath::IsValid: empty path\n");
+    fprintf(stderr,"DynamicPath::IsValid: empty path\n");
     return false;
   }
   for(size_t i=0;i<ramps.size();i++) {
     if(!ramps[i].IsValid()) {
-            LOG4CXX_ERROR(KrisLibrary::logger(),"DynamicPath::IsValid: ramp "<<i);
+      fprintf(stderr,"DynamicPath::IsValid: ramp %d is invalid\n",i);
       return false;
     }
     if(ramps[i].ramps.size() != velMax.size()) {
-            LOG4CXX_ERROR(KrisLibrary::logger(),"DynamicPath::IsValid: invalid size of velocity bound or size of ramp "<<i<<": "<<velMax.size()<<" vs "<<ramps[i].ramps.size());
+      fprintf(stderr,"DynamicPath::IsValid: invalid size of velocity bound or size of ramp %d: %d vs %d\n",i,velMax.size(),ramps[i].ramps.size());
       return false;
     }
     if(ramps[i].ramps.size() != accMax.size()) {
-            LOG4CXX_ERROR(KrisLibrary::logger(),"DynamicPath::IsValid: invalid size of acceleration bound or size of ramp "<<i<<": "<<accMax.size()<<" vs "<<ramps[i].ramps.size());
+      fprintf(stderr,"DynamicPath::IsValid: invalid size of acceleration bound or size of ramp %d: %d vs %d\n",i,accMax.size(),ramps[i].ramps.size());
       return false;
     }
     for(size_t j=0;j<accMax.size();j++) {
       if(Abs(ramps[i].ramps[j].a1) > accMax[j]+EpsilonA ||
 	 Abs(ramps[i].ramps[j].v) > velMax[j] ||
 	 Abs(ramps[i].ramps[j].a2) > accMax[j]+EpsilonA) {
-		LOG4CXX_ERROR(KrisLibrary::logger(),"DynamicPath::IsValid: invalid acceleration or velocity on ramp "<<i);
-		LOG4CXX_ERROR(KrisLibrary::logger(),"\ta1 "<<ramps[i].ramps[j].a1<<", v "<<ramps[i].ramps[j].v<<", a2 "<<ramps[i].ramps[j].a2<<".  amax "<<accMax[j]<<", vmax "<<velMax[j]);
+	fprintf(stderr,"DynamicPath::IsValid: invalid acceleration or velocity on ramp %d\n",i);
+	fprintf(stderr,"\ta1 %g, v %g, a2 %g.  amax %g, vmax %g\n",ramps[i].ramps[j].a1,ramps[i].ramps[j].v,ramps[i].ramps[j].a2,accMax[j],velMax[j]);
 	return false;
       }
     }
   }
   for(size_t i=1;i<ramps.size();i++) {
     if(ramps[i].x0 != ramps[i-1].x1) {
-            LOG4CXX_ERROR(KrisLibrary::logger(),"DynamicPath::IsValid: discontinuity at ramp "<<i);
+      fprintf(stderr,"DynamicPath::IsValid: discontinuity at ramp %d\n",i);
       for(size_t j=0;j<ramps[i].x0.size();j++)
-		LOG4CXX_ERROR(KrisLibrary::logger(),""<<ramps[i].x0[j]);
-            LOG4CXX_ERROR(KrisLibrary::logger(),"\n");
+	fprintf(stderr,"%g ",ramps[i].x0[j]);
+      fprintf(stderr,"\n");
       for(size_t j=0;j<ramps[i-1].x1.size();j++)
-		LOG4CXX_ERROR(KrisLibrary::logger(),""<<ramps[i-1].x1[j]);
-            LOG4CXX_ERROR(KrisLibrary::logger(),"\n");
+	fprintf(stderr,"%g ",ramps[i-1].x1[j]);
+      fprintf(stderr,"\n");
       return false;
     }
     if(ramps[i].dx0 != ramps[i-1].dx1) {
-            LOG4CXX_ERROR(KrisLibrary::logger(),"DynamicPath::IsValid: derivative discontinuity at ramp "<<i);
+      fprintf(stderr,"DynamicPath::IsValid: derivative discontinuity at ramp %d\n",i);
       for(size_t j=0;j<ramps[i].dx0.size();j++)
-		LOG4CXX_ERROR(KrisLibrary::logger(),""<<ramps[i].dx0[j]);
-            LOG4CXX_ERROR(KrisLibrary::logger(),"\n");
+	fprintf(stderr,"%g ",ramps[i].dx0[j]);
+      fprintf(stderr,"\n");
       for(size_t j=0;j<ramps[i-1].dx1.size();j++)
-		LOG4CXX_ERROR(KrisLibrary::logger(),""<<ramps[i-1].dx1[j]);
-            LOG4CXX_ERROR(KrisLibrary::logger(),"\n");
+	fprintf(stderr,"%g ",ramps[i-1].dx1[j]);
+      fprintf(stderr,"\n");
 
       return false;
     }

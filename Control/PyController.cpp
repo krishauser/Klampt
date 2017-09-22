@@ -1,5 +1,3 @@
-#include <log4cxx/logger.h>
-#include <KrisLibrary/Logger.h>
 #include "PyController.h"
 #include <KrisLibrary/errors.h>
 
@@ -56,7 +54,7 @@ bool PyController::Load(const string& _moduleName)
   module = PyImport_Import(pName);
   Py_DECREF(pName);
   if(!module) {
-        LOG4CXX_ERROR(KrisLibrary::logger(),"PyController: Couldn't load module "<<moduleName.c_str());
+    fprintf(stderr,"PyController: Couldn't load module %s\n",moduleName.c_str());
     return false;
   }
   else {
@@ -67,27 +65,27 @@ bool PyController::Load(const string& _moduleName)
     getSettingsFunc = PyObject_GetAttrString(module,"getSettings");
     setSettingsFunc = PyObject_GetAttrString(module,"setSettings");
     if(resetFunc && !PyCallable_Check(resetFunc)) {
-            LOG4CXX_ERROR(KrisLibrary::logger(),"PyController: "<<moduleName.c_str());
+      fprintf(stderr,"PyController: %s.reset is not callable\n",moduleName.c_str());
       Py_DECREF(resetFunc);
     }
     if(updateFunc && !PyCallable_Check(updateFunc)) {
-            LOG4CXX_ERROR(KrisLibrary::logger(),"PyController: "<<moduleName.c_str());
+      fprintf(stderr,"PyController: %s.update is not callable\n",moduleName.c_str());
       Py_DECREF(updateFunc);
     }
     if(getStateFunc && !PyCallable_Check(getStateFunc)) {
-            LOG4CXX_ERROR(KrisLibrary::logger(),"PyController: "<<moduleName.c_str());
+      fprintf(stderr,"PyController: %s.getState is not callable\n",moduleName.c_str());
       Py_DECREF(getStateFunc);
     }
     if(setStateFunc && !PyCallable_Check(setStateFunc)) {
-            LOG4CXX_ERROR(KrisLibrary::logger(),"PyController: "<<moduleName.c_str());
+      fprintf(stderr,"PyController: %s.setState is not callable\n",moduleName.c_str());
       Py_DECREF(setStateFunc);
     }
     if(getSettingsFunc && !PyCallable_Check(getSettingsFunc)) {
-            LOG4CXX_ERROR(KrisLibrary::logger(),"PyController: "<<moduleName.c_str());
+      fprintf(stderr,"PyController: %s.getSettings is not callable\n",moduleName.c_str());
       Py_DECREF(getSettingsFunc);
     }
     if(setSettingsFunc && !PyCallable_Check(setSettingsFunc)) {
-            LOG4CXX_ERROR(KrisLibrary::logger(),"PyController: "<<moduleName.c_str());
+      fprintf(stderr,"PyController: %s.setSettings is not callable\n",moduleName.c_str());
       Py_DECREF(setSettingsFunc);
     }
 
@@ -96,7 +94,7 @@ bool PyController::Load(const string& _moduleName)
     if(commandsFunc && PyCallable_Check(commandsFunc)) {
       PyObject* res = PyObject_CallFunction(commandsFunc,NULL);
       if(!res) {
-		LOG4CXX_ERROR(KrisLibrary::logger(),"PyController: "<<moduleName.c_str());
+	fprintf(stderr,"PyController: %s.commands() failed\n",moduleName.c_str());
       }
       else {
 	if(PySequence_Check(res)) {
@@ -106,7 +104,7 @@ bool PyController::Load(const string& _moduleName)
 	  for(Py_ssize_t i=0;i<n;i++) {
 	    PyObject* elem = PySequence_GetItem(res,i);
 	    if(!elem || !PyString_Check(elem)) {
-	      	      LOG4CXX_ERROR(KrisLibrary::logger(),"PyController: element "<<(int)i<<" of "<<moduleName.c_str());
+	      fprintf(stderr,"PyController: element %d of %s.commands() not a string\n",(int)i,moduleName.c_str());
 	      commandFuncs[i] = NULL;
 	    }
 	    else {
@@ -115,10 +113,10 @@ bool PyController::Load(const string& _moduleName)
 	      commandFuncNames[i] = c;
 	      commandFuncs[i] = PyObject_GetAttr(module,elem);
 	      if(!commandFuncs[i]) {
-				LOG4CXX_ERROR(KrisLibrary::logger(),"PyController: command of "<<moduleName.c_str()<<"."<<c);
+		fprintf(stderr,"PyController: command of %s.%s not available",moduleName.c_str(),c);
 	      }
 	      else if(!PyCallable_Check(commandFuncs[i])) {
-				LOG4CXX_ERROR(KrisLibrary::logger(),"PyController: command "<<moduleName.c_str()<<"."<<c);
+		fprintf(stderr,"PyController: command %s.%s is not a callable object",moduleName.c_str(),c);
 		Py_DECREF(commandFuncs[i]);
 		commandFuncs[i] = NULL;
 	      }
@@ -126,7 +124,7 @@ bool PyController::Load(const string& _moduleName)
 	  }
 	}
 	else {
-	  	  LOG4CXX_ERROR(KrisLibrary::logger(),"PyController: "<<moduleName.c_str());
+	  fprintf(stderr,"PyController: %s.commands() did not return a sequence\n",moduleName.c_str());
 	}
       }
       Py_XDECREF(res);
@@ -224,13 +222,13 @@ void PyController::Update(Real dt)
       /*
 	if(tcmd) {
 	if(!PyNumber_Check(tcmd)) {
-	  	  LOG4CXX_ERROR(KrisLibrary::logger(),"Python module "<<moduleName);
+	  fprintf(stderr,"Python module %s.update didn't return 'tcmd' as a number\n",moduleName);
 	  dt = PyFloat_AsDouble(tcmd);
 	}
       }
       */
       if(!qcmd && !dqcmd && !torquecmd) {
-		LOG4CXX_ERROR(KrisLibrary::logger(),"Python module "<<moduleName.c_str());
+	fprintf(stderr,"Python module %s.update doesn't return valid command item\n",moduleName.c_str());
       }
       if(qcmd) {
 	robot.NormalizeAngles(vqcmd);
@@ -252,7 +250,7 @@ void PyController::Update(Real dt)
       }
     }
     else {
-            LOG4CXX_ERROR(KrisLibrary::logger(),"Python module "<<moduleName.c_str());
+      fprintf(stderr,"Python module %s.update doesn't return dictionary\n",moduleName.c_str());
     }
 
     Py_DECREF(res);
@@ -341,7 +339,7 @@ map<string,string> PyController::Settings() const
 	Py_DECREF(pMap);
       }
       else {
-		LOG4CXX_ERROR(KrisLibrary::logger(),"PyController: "<<moduleName.c_str());
+	fprintf(stderr,"PyController: %s.getSettings failed to return map type\n",moduleName.c_str());
       }
       Py_DECREF(pMap);
     }
@@ -410,7 +408,7 @@ bool PyController::SendCommand(const string& name,const string& str)
 PyController::PyController(Robot& robot)
   :RobotController(robot)
 {
-    LOG4CXX_ERROR(KrisLibrary::logger(),"Python not enabled, cannot instantiate PyControllers\n");
+  fprintf(stderr,"Python not enabled, cannot instantiate PyControllers\n");
 }
 
 bool PyController::Load(const string& _moduleName) { return false; }

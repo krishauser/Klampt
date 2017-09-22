@@ -1,5 +1,3 @@
-#include <log4cxx/logger.h>
-#include <KrisLibrary/Logger.h>
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "QDebug"
@@ -21,11 +19,11 @@ bool  MainWindow::Initialize(int argc,const char** argv)
 {
     backend = new SimTestBackend(&world);
     if(!backend->LoadAndInitSim(argc,argv)) {
-      LOG4CXX_ERROR(KrisLibrary::logger(),"ERROR LOADING FROM COMMAND LINE");
+      printf("ERROR LOADING FROM COMMAND LINE");
       return false;
     }
     else
-      LOG4CXX_INFO(KrisLibrary::logger(),"BACKEND LOADED\n");
+      printf("BACKEND LOADED\n");
 
     gui=new QSimTestGUI(ui->displaywidget,backend);
     gui->ini=ini;

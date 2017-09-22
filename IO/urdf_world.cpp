@@ -34,8 +34,6 @@
 
 /* Author: Wim Meeussen */
 
-#include <log4cxx/logger.h>
-#include <KrisLibrary/Logger.h>
 #include "urdf_parser.h"
 #include "urdf_model.h"
 #include "urdf_world.h"
@@ -68,7 +66,7 @@ namespace urdf{
     TiXmlElement *world_xml = xml_doc.FirstChildElement("world");
     
     if( !world_xml ) {
-      LOG4CXX_ERROR(KrisLibrary::logger(),  "[parseWorldURDF] ERROR: Could not find a world, exiting! \n" );
+      if(debug) printf ( "[parseWorldURDF] ERROR: Could not find a world, exiting! \n" );
       // world.reset();
       return world;
     }
@@ -76,12 +74,12 @@ namespace urdf{
     // Get world name
     const char *name = world_xml->Attribute("name");
     if(!name) {
-      LOG4CXX_DEBUG(KrisLibrary::logger(), "No name given for the world! \n");
+      if(debug) printf ("No name given for the world! \n");
       // world.reset();
       return world;
     }
     world->name = std::string(name);
-    LOG4CXX_DEBUG(KrisLibrary::logger(), "World name: "<< world->name << "\n");
+    if(debug) std::cout<< "World name: "<< world->name << std::endl;
     
     
     // Get all include filenames
@@ -96,9 +94,10 @@ namespace urdf{
       std::string string_filename( filename );
       std::string string_model_name( model_name );
       includedFiles[string_model_name] = string_filename;
-      LOG4CXX_DEBUG(KrisLibrary::logger(), "Include: "<< model_name<<" "<< filename);
+      if(debug) printf ("Include: %s %s \n", model_name, filename);
     }
-    LOG4CXX_DEBUG(KrisLibrary::logger(), "Found "<< count);    
+    if(debug) printf ("Found %d include filenames \n", count);
+    
     // Get all entities
     count = 0;
     for( TiXmlElement* entity_xml = world_xml->FirstChildElement("entity");
@@ -112,14 +111,14 @@ namespace urdf{
 	
 	// Find the model
 	if( includedFiles.find( string_entity_model ) == includedFiles.end() ) {
-	  LOG4CXX_DEBUG(KrisLibrary::logger(), "[ERROR] Include the model you want to use \n");
+	  if(debug) printf ("[ERROR] Include the model you want to use \n");
 	  return world;
 	} 
 	else {
 	  std::string modelName = includedFiles.find( string_entity_model )->second;
 	  std::string modelFullName = _path;
 	  modelFullName.append( modelName );
-	  LOG4CXX_DEBUG(KrisLibrary::logger(), "Model full name: "<< modelFullName << "\n");
+	  if(debug) std::cout<< "Model full name: "<< modelFullName << std::endl;
 	  
 	  // Parse model
 	  std::string xml_model_string;
@@ -140,7 +139,7 @@ namespace urdf{
 	  TiXmlElement *o = entity_xml->FirstChildElement("origin");
 	  if( o ) {
 	    if( !parsePose( entity.origin, o ) ) {
-	      LOG4CXX_DEBUG(KrisLibrary::logger(), "[ERROR] Write the pose for your entity! \n");
+	      if(debug) printf ("[ERROR] Write the pose for your entity! \n");
 	      return world; }
 	  }
 
@@ -165,14 +164,15 @@ namespace urdf{
 	
       }
       catch( ParseError &e ) {
-	LOG4CXX_DEBUG(KrisLibrary::logger(), "Entity xml not initialized correctly \n");
+	if(debug) printf ("Entity xml not initialized correctly \n");
 	//entity->reset();
 	//world->reset();
 	return world;
       }
       
     } // end for
-    LOG4CXX_DEBUG(KrisLibrary::logger(), "Found "<< count);  
+    if(debug) printf ("Found %d entities \n", count);
+    
     return world;
     
   }	

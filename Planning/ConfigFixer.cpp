@@ -1,5 +1,3 @@
-#include <log4cxx/logger.h>
-#include <KrisLibrary/Logger.h>
 #include "ConfigFixer.h"
 
 ConfigFixer::ConfigFixer()
@@ -36,22 +34,22 @@ bool ConfigFixer::Fix(CSpace* space,const Config& q0,Config& q)
 	dcuriter = iters;
 	r = rmax*0.5;
 	dr = (rmax-r)/(maxIters-iters);
-	LOG4CXX_INFO(KrisLibrary::logger(),"ConfigFixer: found a config with distance "<<dcur);
+	printf("ConfigFixer: found a config with distance %g\n",dcur);
       }
     }
     if(!shrink) {  //grow r towards rmax
       r += dr;
       if((dcur-r)/Real(iters-dcuriter) < dRate) {
-	LOG4CXX_INFO(KrisLibrary::logger(),"ConfigFixer: breaking by rate, current iter "<<iters<<", radius "<<r);
-	LOG4CXX_INFO(KrisLibrary::logger(),"ConfigFixer: last iter "<<dcuriter<<", radius "<<dcur);
+	printf("ConfigFixer: breaking by rate, current iter %d, radius %g\n",iters,r);
+	printf("ConfigFixer: last iter %d, radius %g\n",dcuriter,dcur);
 	break;
       }
     }
   }
   if(found) {
     q = closest;
-    LOG4CXX_INFO(KrisLibrary::logger(),"ConfigFixer: closest distance "<<dcur <<", press enter to continue\n");
-    if(KrisLibrary::logger()->isEnabledFor(log4cxx::Level::ERROR_INT)) getchar();
+    printf("ConfigFixer: closest distance %g, press enter to continue\n",dcur);
+    getchar();
     return true;
   }
   return false;

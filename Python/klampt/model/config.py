@@ -28,7 +28,7 @@ def components(item):
         return res
     elif hasattr(item,'__iter__'):
         if all(isinstance(v,(bool,int,float,str)) for v in item):
-            return [item]
+            return item
         return sum([components(v) for v in item],[])
     return [item]
 

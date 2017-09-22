@@ -1,5 +1,3 @@
-#include <log4cxx/logger.h>
-#include <KrisLibrary/Logger.h>
 #include "RobotPoseGUI.h"
 #include <KrisLibrary/GLdraw/drawMesh.h>
 #include <KrisLibrary/GLdraw/drawgeometry.h>
@@ -62,13 +60,11 @@ RobotPoseBackend::RobotPoseBackend(RobotWorld* world,ResourceManager* library)
 void RobotPoseBackend::Start()
 {
   if(!settings.read("robotpose.settings")) {
-    LOG4CXX_INFO(KrisLibrary::logger(),"Didn't read settings from [APPDATA]/robotpose.settings\n");
-    if(!settings.write("robotpose.settings")) {
-      LOG4CXX_ERROR(KrisLibrary::logger(),"ERROR: couldn't write default settings to [APPDATA]/robotpose.settings\n");
-    }
-    else{
-      LOG4CXX_INFO(KrisLibrary::logger(),"Wrote default settings to [APPDATA]/robotpose.settings\n");
-    }
+    printf("Didn't read settings from [APPDATA]/robotpose.settings\n");
+    if(!settings.write("robotpose.settings")) 
+      printf("ERROR: couldn't write default settings to [APPDATA]/robotpose.settings\n");
+    else
+      printf("Wrote default settings to [APPDATA]/robotpose.settings\n");
   }
 
   WorldGUIBackend::Start();
@@ -248,7 +244,7 @@ Stance RobotPoseBackend::GetFlatStance(Real tolerance)
   Robot* robot = world->robots[0];
   Stance s;
   if(robotWidgets[0].ikPoser.poseGoals.empty()) {
-    LOG4CXX_INFO(KrisLibrary::logger(),"Computing stance as though robot were standing on flat ground\n");
+    printf("Computing stance as though robot were standing on flat ground\n");
     ContactFormation cf;
     GetFlatContacts(*robot,tolerance,cf);
 
@@ -263,7 +259,7 @@ Stance RobotPoseBackend::GetFlatStance(Real tolerance)
     }
   }
   else {
-    LOG4CXX_INFO(KrisLibrary::logger(),"Computing flat-ground stance only for IK-posed links\n");
+    printf("Computing flat-ground stance only for IK-posed links\n");
     for(size_t i=0;i<robotWidgets[0].ikPoser.poseGoals.size();i++) {
       int link = robotWidgets[0].ikPoser.poseGoals[i].link;
       vector<ContactPoint> cps;
@@ -289,7 +285,7 @@ Stance RobotPoseBackend::GetNearbyStance(Real tolerance)
   Robot* robot = world->robots[0];
   Stance s;
   if(robotWidgets[0].ikPoser.poseGoals.empty()) {
-    LOG4CXX_INFO(KrisLibrary::logger(),"Calculating stance from all points on robot near environment / objects\n");
+    printf("Calculating stance from all points on robot near environment / objects\n");
     ContactFormation cf;
     GetNearbyContacts(*robot,*world,tolerance,cf);
 
@@ -304,7 +300,7 @@ Stance RobotPoseBackend::GetNearbyStance(Real tolerance)
     }
   }
   else {
-    LOG4CXX_INFO(KrisLibrary::logger(),"Calculating near-environment stance only for IK-posed links\n");
+    printf("Calculating near-environment stance only for IK-posed links\n");
     for(size_t i=0;i<robotWidgets[0].ikPoser.poseGoals.size();i++) {
       int link = robotWidgets[0].ikPoser.poseGoals[i].link;
       vector<ContactPoint> cps;
@@ -334,7 +330,7 @@ ResourcePtr RobotPoseBackend::PoserToResource(const string& type)
     if(ind < 0) {
       vector<IKGoal>& constraints = robotWidgets[0].Constraints();
       if(constraints.size() == 0) {
-        LOG4CXX_INFO(KrisLibrary::logger(),"Not hovering over any IK widget\n");
+        printf("Not hovering over any IK widget\n");
         return NULL;
       }
       else {
@@ -344,13 +340,13 @@ ResourcePtr RobotPoseBackend::PoserToResource(const string& type)
     return MakeResource("",robotWidgets[0].ikPoser.poseGoals[ind]);
   }
   else if(type == "Stance") {
-    LOG4CXX_INFO(KrisLibrary::logger(),"Creating stance from IK goals and contacts from flat-ground assumption\n");
+    printf("Creating stance from IK goals and contacts from flat-ground assumption\n");
     Stance s = GetFlatStance();
     return MakeResource("",s);
   }
   else if(type == "Grasp") {
     int link = 0;
-    LOG4CXX_INFO(KrisLibrary::logger(),"Which robot link to use? > ");
+    cout<<"Which robot link to use? > "; cout.flush();
     cin >> link;
     cin.ignore(256,'\n');
     Grasp g;
@@ -368,7 +364,7 @@ ResourcePtr RobotPoseBackend::PoserToResource(const string& type)
     ResourcePtr r=ResourceGUIBackend::CurrentResource();
     const GeometricPrimitive3DResource* gr = dynamic_cast<const GeometricPrimitive3DResource*>((const ResourceBase*)r);
     if(gr) {
-      LOG4CXX_INFO(KrisLibrary::logger(),"Making grasp relative to "<<gr->name<<"\n");
+      cout<<"Making grasp relative to "<<gr->name<<endl;
       //TODO: detect contacts
 	
       RigidTransform T = gr->data.GetFrame();
@@ -379,7 +375,7 @@ ResourcePtr RobotPoseBackend::PoserToResource(const string& type)
     else {
       const RigidObjectResource* obj = dynamic_cast<const RigidObjectResource*>((const ResourceBase*)r);
       if(obj) {
-	LOG4CXX_INFO(KrisLibrary::logger(),"Making grasp relative to "<<obj->name<<"\n");
+	cout<<"Making grasp relative to "<<obj->name<<endl;
 	//TODO: detect contacts
 	  
 	RigidTransform T = obj->object.T;
@@ -391,7 +387,7 @@ ResourcePtr RobotPoseBackend::PoserToResource(const string& type)
     return MakeResource("",g);
   }
   else {
-        LOG4CXX_ERROR(KrisLibrary::logger(),"Poser does not contain items of the selected type\n");
+    fprintf(stderr,"Poser does not contain items of the selected type\n");
     return NULL;
   }
 }
@@ -445,7 +441,7 @@ bool RobotPoseBackend::OnCommand(const string& cmd,const string& args)
   else if(cmd == "poser_to_resource_overwrite") { 
     ResourcePtr oldr = ResourceGUIBackend::CurrentResource();
     if(!oldr) {
-      LOG4CXX_INFO(KrisLibrary::logger(),"No resource selected\n");
+      printf("No resource selected\n");
       return true;
     }
     ResourcePtr r = PoserToResource(oldr->Type());
@@ -456,7 +452,7 @@ bool RobotPoseBackend::OnCommand(const string& cmd,const string& args)
       resources->selected->resource = r;
       resources->selected->SetChanged();
       if(resources->selected->IsExpanded()) {
-                LOG4CXX_ERROR(KrisLibrary::logger(),"Warning, don't know how clearing children will be reflected in GUI\n");
+        fprintf(stderr,"Warning, don't know how clearing children will be reflected in GUI\n");
         resources->selected->ClearExpansion();
       }
     }
@@ -473,12 +469,12 @@ bool RobotPoseBackend::OnCommand(const string& cmd,const string& args)
         robotWidgets[0].SetPose(rc->data);
         robot->NormalizeAngles(robotWidgets[0].linkPoser.poseConfig);
         if(robotWidgets[0].linkPoser.poseConfig != rc->data)
-    LOG4CXX_WARN(KrisLibrary::logger(),"Warning: config in library is not normalized\n");
+    printf("Warning: config in library is not normalized\n");
         */
         UpdateConfig();
       }
       else {
-                LOG4CXX_ERROR(KrisLibrary::logger(),"Can't copy this Config to the poser, it is not the same size\n");
+        fprintf(stderr,"Can't copy this Config to the poser, it is not the same size\n");
       }
     }
     else {
@@ -546,7 +542,7 @@ bool RobotPoseBackend::OnCommand(const string& cmd,const string& args)
       a = rc->data;
       b = robot->q;
       if(a.n != b.n) {
-		LOG4CXX_ERROR(KrisLibrary::logger(),"Incorrect start and end config size\n");
+	fprintf(stderr,"Incorrect start and end config size\n");
 	return true;
       }
       milestones.resize(2);
@@ -582,10 +578,10 @@ bool RobotPoseBackend::OnCommand(const string& cmd,const string& args)
       int numdivs = (configs.size()-1);
       vector<Real> newtimes;
       vector<Config> newconfigs;
-      LOG4CXX_INFO(KrisLibrary::logger(),"Discretizing at resolution "<<1.0/Real(numdivs));
+      printf("Discretizing at resolution %g\n",1.0/Real(numdivs));
       SmoothDiscretizePath(*robot,configs,numdivs,newtimes,newconfigs);
-      LOG4CXX_INFO(KrisLibrary::logger(),"Smoothed to "<<newconfigs.size()<<" milestones"<<"\n");
-      LOG4CXX_INFO(KrisLibrary::logger(),"Total time "<<timer.ElapsedTime()<<"\n");
+      cout<<"Smoothed to "<<newconfigs.size()<<" milestones"<<endl;
+      cout<<"Total time "<<timer.ElapsedTime()<<endl;
       swap(times,newtimes);
       swap(configs,newconfigs);
       }
@@ -602,7 +598,7 @@ bool RobotPoseBackend::OnCommand(const string& cmd,const string& args)
     ResourcePtr r=ResourceGUIBackend::CurrentResource();
     const LinearPathResource* lp = dynamic_cast<const LinearPathResource*>((const ResourceBase*)r);
     double t = viewResource.pathTime;
-        LOG4CXX_ERROR(KrisLibrary::logger(),"TODO: split paths\n");
+    fprintf(stderr,"TODO: split paths\n");
     if(lp) {
       
       //ResourceGUIBackend::Add("",newtimes,newconfigs);
@@ -672,7 +668,7 @@ bool RobotPoseBackend::OnCommand(const string& cmd,const string& args)
       vector<double> newtimes;
       vector<Config> newconfigs;
       if(!TimeOptimizePath(*robot,lp->times,lp->milestones,dt,newtimes,newconfigs)) {
-		LOG4CXX_ERROR(KrisLibrary::logger(),"Error optimizing path\n");
+	fprintf(stderr,"Error optimizing path\n");
 	return true;
       }
       ResourceGUIBackend::Add("",newtimes,newconfigs);
@@ -685,7 +681,7 @@ bool RobotPoseBackend::OnCommand(const string& cmd,const string& args)
       Real dt = settings["pathOptimize"]["outputResolution"];
       MultiPath path = mp->path;
       if(!GenerateAndTimeOptimizeMultiPath(*robot,path,xtol,dt)) {
-		LOG4CXX_ERROR(KrisLibrary::logger(),"Error optimizing path\n");
+	fprintf(stderr,"Error optimizing path\n");
 	return true;
       }
       ResourceGUIBackend::Add("",path);
@@ -701,7 +697,7 @@ bool RobotPoseBackend::OnCommand(const string& cmd,const string& args)
       Real xtol = settings["pathOptimize"]["contactTol"];
       Real dt = settings["pathOptimize"]["outputResolution"];
       if(!GenerateAndTimeOptimizeMultiPath(*robot,path,xtol,dt)) {
-		LOG4CXX_ERROR(KrisLibrary::logger(),"Error optimizing path\n");
+	fprintf(stderr,"Error optimizing path\n");
 	return true;
       }
       ResourceGUIBackend::Add("",path);
@@ -733,7 +729,7 @@ bool RobotPoseBackend::OnCommand(const string& cmd,const string& args)
       sp->stance = s;
     }
     else {
-      LOG4CXX_INFO(KrisLibrary::logger(),"Need to be selecting a Stance resource\n");
+      printf("Need to be selecting a Stance resource\n");
     }
   }
   else if(cmd == "get_nearby_contacts") {
@@ -748,7 +744,7 @@ bool RobotPoseBackend::OnCommand(const string& cmd,const string& args)
       sp->stance = s;
     }
     else {
-      LOG4CXX_INFO(KrisLibrary::logger(),"Need to be selecting a Stance resource\n");
+      printf("Need to be selecting a Stance resource\n");
     }
   }
   else if(cmd == "clean_contacts") {
@@ -834,7 +830,7 @@ bool RobotPoseBackend::OnCommand(const string& cmd,const string& args)
   else if(cmd == "undo_pose") {
     for(size_t i=0;i<world->robots.size();i++) 
       if(lastActiveWidget == &robotWidgets[i]) {
-        LOG4CXX_INFO(KrisLibrary::logger(),"Undoing robot poser "<<i);
+        printf("Undoing robot poser %d\n",i);
         robotWidgets[i].Undo();
         UpdateConfig();
       }
@@ -901,7 +897,7 @@ void RobotPoseBackend::DoPassiveMouseMove(int x, int y)
 bool RobotPoseBackend::OnButtonPress(const string& button)
 {
   if(!GenericBackendBase::OnButtonPress(button)) {
-    LOG4CXX_INFO(KrisLibrary::logger(),"RobotTestBackend: Unknown button: "<<button<<"\n");
+    cout<<"RobotTestBackend: Unknown button: "<<button<<endl;
     return false;
   }
   return true;
@@ -910,7 +906,7 @@ bool RobotPoseBackend::OnButtonPress(const string& button)
 bool RobotPoseBackend::OnButtonToggle(const string& button,int checked)
 {
   if(!GenericBackendBase::OnButtonToggle(button,checked)) {
-    LOG4CXX_INFO(KrisLibrary::logger(),"RobotTestBackend: Unknown button: "<<button<<"\n");
+    cout<<"RobotTestBackend: Unknown button: "<<button<<endl;
     return false;
   }
   return true;

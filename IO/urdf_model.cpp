@@ -34,8 +34,6 @@
 
 /* Author: Wim Meeussen */
 
-#include <log4cxx/logger.h>
-#include <KrisLibrary/Logger.h>
 #include <boost/algorithm/string.hpp>
 #include <vector>
 #include "urdf_parser.h"
@@ -94,23 +92,23 @@ boost::shared_ptr<ModelInterface>  parseURDF(const std::string &xml_string)
     // all the rest is the same as original
     robot_xml = xml_doc.FirstChildElement("object");
     if( !robot_xml ) {
-      LOG4CXX_DEBUG(KrisLibrary::logger(),  "Could find neither a robot nor an object element in the xml file \n" );
+      if(debug) printf ( "Could find neither a robot nor an object element in the xml file \n" );
       model.reset();
       return model;
     }
     else {
-      LOG4CXX_DEBUG(KrisLibrary::logger(), "Found an object file in the xml file!  \n");
+      if(debug) printf ("Found an object file in the xml file!  \n");
     }
   }
   else {
-    LOG4CXX_DEBUG(KrisLibrary::logger(), " Found a robot object in urdf file! \n");
+    if(debug) printf (" Found a robot object in urdf file! \n");
   }
 
   // Get robot name
   const char *name = robot_xml->Attribute("name");
   if (!name)
   {
-    LOG4CXX_DEBUG(KrisLibrary::logger(), "No name given for the robot. \n");
+    if(debug) printf ("No name given for the robot. \n");
     model.reset();
     return model;
   }
@@ -126,7 +124,7 @@ boost::shared_ptr<ModelInterface>  parseURDF(const std::string &xml_string)
       parseMaterial(*material, material_xml);
       if (model->getMaterial(material->name))
       {
-        LOG4CXX_DEBUG(KrisLibrary::logger(), "material '"<< material->name.c_str());
+        if(debug) printf ("material '%s' is not unique. \n", material->name.c_str());
         material.reset();
         model.reset();
         return model;
@@ -134,11 +132,11 @@ boost::shared_ptr<ModelInterface>  parseURDF(const std::string &xml_string)
       else
       {
         model->materials_.insert(make_pair(material->name,material));
-        LOG4CXX_DEBUG(KrisLibrary::logger(), "successfully added a new material '"<< material->name.c_str());
+        if(debug) printf ("successfully added a new material '%s' \n", material->name.c_str());
       }
     }
     catch (ParseError &e) {
-      LOG4CXX_DEBUG(KrisLibrary::logger(), "material xml is not initialized correctly \n");
+      if(debug) printf ("material xml is not initialized correctly \n");
       material.reset();
       model.reset();
       return model;
@@ -155,33 +153,33 @@ boost::shared_ptr<ModelInterface>  parseURDF(const std::string &xml_string)
       parseLink(*link, link_xml);
       if (model->getLink(link->name))
       {
-        LOG4CXX_DEBUG(KrisLibrary::logger(), "link '"<< link->name.c_str());
+        if(debug) printf ("link '%s' is not unique. \n", link->name.c_str());
         model.reset();
         return model;
       }
       else
       {
         // set link visual material
-        LOG4CXX_DEBUG(KrisLibrary::logger(), "setting link '"<< link->name.c_str());
+        if(debug) printf ("setting link '%s' material \n", link->name.c_str());
         if (link->visual)
         {
           if (!link->visual->material_name.empty())
           {
             if (model->getMaterial(link->visual->material_name))
             {
-              LOG4CXX_DEBUG(KrisLibrary::logger(), "setting link '"<< link->name.c_str()<<"' material to '"<<link->visual->material_name.c_str());
+              if(debug) printf ("setting link '%s' material to '%s' \n", link->name.c_str(),link->visual->material_name.c_str());
               link->visual->material = model->getMaterial( link->visual->material_name.c_str() );
             }
             else
             {
               if (link->visual->material)
               {
-                LOG4CXX_DEBUG(KrisLibrary::logger(), "link '"<< link->name.c_str()<<"' material '"<<link->visual->material_name.c_str());
+                if(debug) printf ("link '%s' material '%s' defined in Visual. \n", link->name.c_str(),link->visual->material_name.c_str());
                 model->materials_.insert(make_pair(link->visual->material->name,link->visual->material));
               }
               else
               {
-                LOG4CXX_DEBUG(KrisLibrary::logger(), "link '"<< link->name.c_str()<<"' material '"<<link->visual->material_name.c_str());
+                if(debug) printf ("link '%s' material '%s' undefined. \n", link->name.c_str(),link->visual->material_name.c_str());
                 model.reset();
                 return model;
               }
@@ -190,17 +188,17 @@ boost::shared_ptr<ModelInterface>  parseURDF(const std::string &xml_string)
         }
 
         model->links_.insert(make_pair(link->name,link));
-        LOG4CXX_DEBUG(KrisLibrary::logger(), "successfully added a new link '"<< link->name.c_str());
+        if(debug) printf ("successfully added a new link '%s' \n", link->name.c_str());
       }
     }
     catch (ParseError &e) {
-      LOG4CXX_DEBUG(KrisLibrary::logger(), "link xml is not initialized correctly \n");
+      if(debug) printf ("link xml is not initialized correctly \n");
       model.reset();
       return model;
     }
   }
   if (model->links_.empty()){
-    LOG4CXX_DEBUG(KrisLibrary::logger(), "No link elements found in urdf file \n");
+    if(debug) printf ("No link elements found in urdf file \n");
     model.reset();
     return model;
   }
@@ -215,19 +213,19 @@ boost::shared_ptr<ModelInterface>  parseURDF(const std::string &xml_string)
     {
       if (model->getJoint(joint->name))
       {
-        LOG4CXX_DEBUG(KrisLibrary::logger(), "joint '"<< joint->name.c_str());
+        if(debug) printf ("joint '%s' is not unique. \n", joint->name.c_str());
         model.reset();
         return model;
       }
       else
       {
         model->joints_.insert(make_pair(joint->name,joint));
-        LOG4CXX_DEBUG(KrisLibrary::logger(), "successfully added a new joint '"<< joint->name.c_str());
+        if(debug) printf ("successfully added a new joint '%s' \n", joint->name.c_str());
       }
     }
     else
     {
-      LOG4CXX_DEBUG(KrisLibrary::logger(), "joint xml is not initialized correctly \n");
+      if(debug) printf ("joint xml is not initialized correctly \n");
       model.reset();
       return model;
     }
@@ -246,7 +244,7 @@ boost::shared_ptr<ModelInterface>  parseURDF(const std::string &xml_string)
   }
   catch(ParseError &e)
   {
-    LOG4CXX_DEBUG(KrisLibrary::logger(), "Failed to build tree: "<< e.what());
+    if(debug) printf ("Failed to build tree: %s \n", e.what());
     model.reset();
     return model;
   }
@@ -258,7 +256,7 @@ boost::shared_ptr<ModelInterface>  parseURDF(const std::string &xml_string)
   }
   catch(ParseError &e)
   {
-    LOG4CXX_DEBUG(KrisLibrary::logger(), "Failed to find root link: "<< e.what());
+    if(debug) printf ("Failed to find root link: %s \n", e.what());
     model.reset();
     return model;
   }
@@ -282,7 +280,7 @@ TiXmlDocument*  exportURDF(boost::shared_ptr<ModelInterface> &model)
 
   for (std::map<std::string, boost::shared_ptr<Joint> >::const_iterator j=model->joints_.begin(); j!=model->joints_.end(); j++)  
   {
-    LOG4CXX_DEBUG(KrisLibrary::logger(), "exporting joint ["<<j->second->name.c_str());
+    if(debug) printf ("exporting joint [%s]\n",j->second->name.c_str());
     exportJoint(*(j->second), robot);
   }
 

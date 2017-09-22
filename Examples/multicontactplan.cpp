@@ -1,5 +1,3 @@
-#include <log4cxx/logger.h>
-#include <KrisLibrary/Logger.cpp>
 #include "Planning/StanceCSpace.h"
 #include <KrisLibrary/planning/AnyMotionPlanner.h>
 #include <KrisLibrary/utils/ioutils.h>
@@ -27,7 +25,7 @@ bool PlanToSpace(CSpace* space,const Config& qstart,CSpace* goalSpace,
   //perturbation size, connection radius, etc
   MotionPlannerInterface* planner = factory.Create(space,qstart,goalSpace);
   string res = planner->Plan(path,cond);
-  LOG4CXX_INFO(logger,"Planner terminated with condition "<<res<<"\n");
+  cout<<"Planner terminated with condition "<<res<<endl;
   delete planner;
   return !path.edges.empty();
 }
@@ -63,7 +61,7 @@ bool StancePlan(RobotWorld& world,int robot,const Config& qstart,const Stance& s
   GetDifference(sstart,sgoal,removedHolds);
   GetDifference(sgoal,sstart,addedHolds);
   if(!addedHolds.empty() && !removedHolds.empty()) {
-        LOG4CXX_ERROR(logger,"StancePlan: A stance change must either remove or add holds, not both\n");
+    fprintf(stderr,"StancePlan: A stance change must either remove or add holds, not both\n");
     return false;
   }
   if(addedHolds.empty()) {
@@ -138,15 +136,15 @@ bool ContactPlan(RobotWorld& world,int robot,const Config& qstart,const Stance& 
 int main(int argc,const char** argv)
 {
   if(argc <= 2) {
-    LOG4CXX_INFO(logger,"USAGE: MultiContactPlan [options] world_file stance0 stance1 ...\n");
-    LOG4CXX_INFO(logger,"OPTIONS:\n");
-    LOG4CXX_INFO(logger,"-o filename: the output linear path or multipath (default contactplan.xml)\n");
-    LOG4CXX_INFO(logger,"-p settings: set the planner configuration file\n");
-    LOG4CXX_INFO(logger,"-opt: do optimal planning (do not terminate on the first found solution)\n");
-    LOG4CXX_INFO(logger,"-n iters: set the default number of iterations per step (default 1000)\n");
-    LOG4CXX_INFO(logger,"-t time: set the planning time limit (default infinity)\n");
-    LOG4CXX_INFO(logger,"-m margin: set support polygon margin (default 0)\n");
-    LOG4CXX_INFO(logger,"-r robotindex: set the robot index (default 0)\n");
+    printf("USAGE: MultiContactPlan [options] world_file stance0 stance1 ...\n");
+    printf("OPTIONS:\n");
+    printf("-o filename: the output linear path or multipath (default contactplan.xml)\n");
+    printf("-p settings: set the planner configuration file\n");
+    printf("-opt: do optimal planning (do not terminate on the first found solution)\n");
+    printf("-n iters: set the default number of iterations per step (default 1000)\n");
+    printf("-t time: set the planning time limit (default infinity)\n");
+    printf("-m margin: set support polygon margin (default 0)\n");
+    printf("-r robotindex: set the robot index (default 0)\n");
     return 0;
   }
   Srand(time(NULL));
@@ -171,7 +169,7 @@ int main(int argc,const char** argv)
       }
       else if(0==strcmp(argv[i],"-p")) {
 	if(!GetFileContents(argv[i+1],plannerSettings)) {
-	  LOG4CXX_INFO(logger,"Unable to load planner settings file "<<argv[i+1]);
+	  printf("Unable to load planner settings file %s\n",argv[i+1]);
 	  return 1;
 	}
 	i++;
@@ -189,14 +187,14 @@ int main(int argc,const char** argv)
 	i++;
       }
       else {
-	LOG4CXX_INFO(logger,"Invalid option "<<argv[i]);
+	printf("Invalid option %s\n",argv[i]);
 	return 1;
       }
     }
     else break;
   }
   if(i+3 < argc) {
-    LOG4CXX_INFO(logger,"USAGE: ContactPlan [options] world_file stance0 stance1 ...\n");
+    printf("USAGE: ContactPlan [options] world_file stance0 stance1 ...\n");
     return 1;
   }
   const char* worldfile = argv[i];
@@ -205,11 +203,11 @@ int main(int argc,const char** argv)
   XmlWorld xmlWorld;
   RobotWorld world;
   if(!xmlWorld.Load(worldfile)) {
-    LOG4CXX_ERROR(logger,"Error loading world XML file "<<worldfile);
+    printf("Error loading world XML file %s\n",worldfile);
     return 1;
   }
   if(!xmlWorld.GetWorld(world)) {
-    LOG4CXX_ERROR(logger,"Error loading world file "<<worldfile);
+    printf("Error loading world file %s\n",worldfile);
     return 1;
   }
 
@@ -219,7 +217,7 @@ int main(int argc,const char** argv)
     ifstream in(argv[k],ios::in);
     in >> stances.back();
     if(!in) {
-      LOG4CXX_ERROR(logger,"Error loading stance file "<<argv[k]);
+      printf("Error loading stance file %s\n",argv[k]);
       return 1;
     }
   }
@@ -240,7 +238,7 @@ int main(int argc,const char** argv)
   for(size_t i=0;i+1<stances.size();i++) {
     MilestonePath mpath;
     if(!StancePlan(world,robot,qstart,stances[i],stances[i+1],mpath,termCond,plannerSettings)) {
-      LOG4CXX_INFO(logger,"Planning from stance "<<i<<" to "<<i+1);
+      printf("Planning from stance %d to %d failed\n",i,i+1);
       path.sections.resize(path.sections.size()+1);
       path.SetStance(stances[i],path.sections.size()-1);
       path.sections.back().milestones[0] = qstart;
@@ -257,12 +255,12 @@ int main(int argc,const char** argv)
     }
   }
   if(feasible)
-    LOG4CXX_INFO(logger,"Path planning success! Saving to "<<outputfile);
+    printf("Path planning success! Saving to %s\n",outputfile);
   else
-    LOG4CXX_INFO(logger,"Path planning failure. Saving placeholder path to "<<outputfile);
+    printf("Path planning failure. Saving placeholder path to %s\n",outputfile);
   const char* ext = FileExtension(outputfile);
   if(ext && 0==strcmp(ext,"path")) {
-    LOG4CXX_INFO(logger,"Converted to linear path format\n");
+    printf("Converted to linear path format\n");
     LinearPath lpath;
     Convert(path,lpath);
     ofstream f(outputfile,ios::out);

@@ -1,4 +1,3 @@
-#include <KrisLibrary/Logger.h>
 #include "ODEGeometry.h"
 #include "ODECommon.h"
 #include "ODECustomGeometry.h"
@@ -10,8 +9,6 @@
 #include <KrisLibrary/GLdraw/GL.h>
 #include <KrisLibrary/errors.h>
 using namespace Meshing;
-
-DEFINE_LOGGER(ODEGeometry)
 
 #define USING_GIMPACT 0
 
@@ -37,7 +34,7 @@ ODEGeometry::~ODEGeometry()
 
 void ODEGeometry::Create(AnyCollisionGeometry3D* geom,dSpaceID space,Vector3 offset,bool useCustomMesh)
 {
-  //LOG4CXX_INFO(GET_LOGGER(ODEGeometry),"ODEGeometry: Collision detection method: "<<(useCustomMesh?"custom":"GIMPACT"));
+  //printf("ODEGeometry: Collision detection method: %s\n",(useCustomMesh?"custom":"GIMPACT"));
   Clear();
   if(!useCustomMesh) {
     Assert(geom->type == AnyGeometry3D::TriangleMesh);
@@ -73,7 +70,7 @@ void ODEGeometry::Create(AnyCollisionGeometry3D* geom,dSpaceID space,Vector3 off
     
     triMeshDataID = dGeomTriMeshDataCreate();
     //for some reason, ODE behaves better when it calculates its own normals
-#if !defined(dDSINGLE)
+#if defined(dDOUBLE)
     if(USING_GIMPACT)
       FatalError("GIMPACT doesn't work with doubles, recompile with dSINGLE");
     //dGeomTriMeshDataBuildDouble1(triMeshDataID,verts,sizeof(dReal)*numVertComponents,numVerts,indices,numTris*3,sizeof(int)*3,normals);
@@ -97,14 +94,14 @@ void ODEGeometry::Create(AnyCollisionGeometry3D* geom,dSpaceID space,Vector3 off
     CopyVector(x0,tri.a);
     CopyVector(x1,tri.b);
     CopyVector(x2,tri.c);
-    LOG4CXX_INFO(GET_LOGGER(ODEGeometry),"triangle "<<i);
-    LOG4CXX_INFO(GET_LOGGER(ODEGeometry),"  ("<<x0[0]<<","<<x0[1]<<","<<x0[2]);
-    LOG4CXX_INFO(GET_LOGGER(ODEGeometry),"  ("<<x1[0]<<","<<x1[1]<<","<<x1[2]);
-    LOG4CXX_INFO(GET_LOGGER(ODEGeometry),"  ("<<x2[0]<<","<<x2[1]<<","<<x2[2]);
-    LOG4CXX_INFO(GET_LOGGER(ODEGeometry),"ret:\n");
-    LOG4CXX_INFO(GET_LOGGER(ODEGeometry),"  ("<<v0[0]<<","<<v0[1]<<","<<v0[2]);
-    LOG4CXX_INFO(GET_LOGGER(ODEGeometry),"  ("<<v1[0]<<","<<v1[1]<<","<<v1[2]);
-    LOG4CXX_INFO(GET_LOGGER(ODEGeometry),"  ("<<v2[0]<<","<<v2[1]<<","<<v2[2]);
+    printf("triangle %d:\n",i);
+    printf("  (%g,%g,%g):\n",x0[0],x0[1],x0[2]);
+    printf("  (%g,%g,%g):\n",x1[0],x1[1],x1[2]);
+    printf("  (%g,%g,%g):\n",x2[0],x2[1],x2[2]);
+    printf("ret:\n");
+    printf("  (%g,%g,%g):\n",v0[0],v0[1],v0[2]);
+    printf("  (%g,%g,%g):\n",v1[0],v1[1],v1[2]);
+    printf("  (%g,%g,%g):\n",v2[0],v2[1],v2[2]);
     for(int k=0;k<3;k++) {
       Assert(FuzzyEquals(x0[k],v0[k]));
       Assert(FuzzyEquals(x2[k],v1[k]));
@@ -117,7 +114,7 @@ void ODEGeometry::Create(AnyCollisionGeometry3D* geom,dSpaceID space,Vector3 off
     Timer timer;
     geom->InitCollisionData();
     double t = timer.ElapsedTime();
-    if(t > 0.1) LOG4CXX_INFO(GET_LOGGER(ODEGeometry),"ODEGeometry: initializing collision data took time "<<t);
+    if(t > 0.1) printf("ODEGeometry: initializing collision data took time %gs\n",t);
 
     //add offsets
     collisionGeometry = geom;
@@ -150,7 +147,7 @@ void ODEGeometry::DrawGL()
   glPointSize(3.0);
   glBegin(GL_POINTS);
   for(int i=0;i<numVerts;i++) {
-#if !defined(dSINGLE)
+#if defined(dDOUBLE)
     glVertex3dv(&verts[i*numVertComponents]);
 #else
     glVertex3fv(&verts[i*numVertComponents]);
@@ -169,7 +166,7 @@ void ODEGeometry::DrawGL()
     dReal centroid[3]={0,0,0};
     for(int k=0;k<3;k++)
       centroid[k] = (verts[a*numVertComponents+k]+verts[b*numVertComponents+k]+verts[c*numVertComponents+k])/3.0;
-#if !defined(dSINGLE)
+#if defined(dDOUBLE)
     glVertex3dv(centroid);
     glVertex3d(centroid[0]+len*normals[i*3],
 	       centroid[1]+len*normals[i*3+1],
@@ -179,7 +176,7 @@ void ODEGeometry::DrawGL()
     glVertex3f(centroid[0]+len*normals[i*3],
 	       centroid[1]+len*normals[i*3+1],
 	       centroid[2]+len*normals[i*3+2]);
-#endif //dSINGLE
+#endif //dDOUBLE
   }
   glEnd();
 }
@@ -187,11 +184,11 @@ void ODEGeometry::DrawGL()
 void ODEGeometry::SetPadding(Real padding)
 {
   if(collisionGeometry) {
-    //LOG4CXX_INFO(GET_LOGGER(ODEGeometry),"Setting padding "<<padding);
+    //printf("Setting padding %g\n",padding);
     dGetCustomGeometryData(geom())->outerMargin = padding;
   }
   else {
-        //LOG4CXX_ERROR(GET_LOGGER(ODEGeometry),"Not using boundary layer, setting padding "<<padding);
+    //fprintf(stderr,"Not using boundary layer, setting padding %g has no effect\n",padding);
   }
 }
 
@@ -207,10 +204,10 @@ AnyCollisionGeometry3D* _Preshrink(AnyCollisionGeometry3D* geom,Real padding) {
   if(padding==0) return geom;
   switch(geom->type) {
   case AnyCollisionGeometry3D::Primitive:
-        LOG4CXX_ERROR(GET_LOGGER(ODEGeometry),"SetPaddingWithPreshink: Cannot shrink geometric primitives\n");
+    fprintf(stderr,"SetPaddingWithPreshink: Cannot shrink geometric primitives\n");
     return geom;
   case AnyCollisionGeometry3D::PointCloud:
-        LOG4CXX_ERROR(GET_LOGGER(ODEGeometry),"SetPaddingWithPreshink: Cannot shrink point clouds\n");
+    fprintf(stderr,"SetPaddingWithPreshink: Cannot shrink point clouds\n");
     return geom;
   case AnyCollisionGeometry3D::TriangleMesh:
     {
@@ -220,7 +217,7 @@ AnyCollisionGeometry3D* _Preshrink(AnyCollisionGeometry3D* geom,Real padding) {
       mnew.tris = morig.tris;
       int numflips = Meshing::ApproximateShrink(mnew,padding);
       if(numflips > 0) {
-		LOG4CXX_ERROR(GET_LOGGER(ODEGeometry),"SetPaddingWithPreshink: Warning, mesh shrinkage by amount "<<padding<<" created "<<numflips);
+	fprintf(stderr,"SetPaddingWithPreshink: Warning, mesh shrinkage by amount %g created %d triangle flips\n",padding,numflips);
       }
       AnyCollisionGeometry3D* res = new AnyCollisionGeometry3D(mnew);
       res->margin = geom->margin;
@@ -240,7 +237,7 @@ AnyCollisionGeometry3D* _Preshrink(AnyCollisionGeometry3D* geom,Real padding) {
     }
   case AnyCollisionGeometry3D::Group:
     {
-            LOG4CXX_ERROR(GET_LOGGER(ODEGeometry),"TODO: Can't do preshrink for group geometries yet\n");
+      fprintf(stderr,"TODO: Can't do preshrink for group geometries yet\n");
       return geom;
     }
     break;
@@ -254,10 +251,10 @@ AnyCollisionGeometry3D* _Preshrink(AnyCollisionGeometry3D* geom,Real padding) {
 AnyCollisionGeometry3D* ODEGeometry::SetPaddingWithPreshrink(Real padding,bool inplace)
 {
   if(collisionGeometry) {
-    LOG4CXX_INFO(GET_LOGGER(ODEGeometry),"ODEGeometry::SetPaddingWithPreshrink: Working...");
+    printf("ODEGeometry::SetPaddingWithPreshrink: Working...");
     fflush(stdout);
     AnyCollisionGeometry3D* newgeom = _Preshrink(collisionGeometry,padding);
-    LOG4CXX_INFO(GET_LOGGER(ODEGeometry)," Done.\n");
+    printf(" Done.\n");
     if(collisionGeometry != newgeom) {
       if(inplace) {
 	//modify original geometry
@@ -289,7 +286,7 @@ AnyCollisionGeometry3D* ODEGeometry::SetPaddingWithPreshrink(Real padding,bool i
     return collisionGeometry;
   }
   else {
-        LOG4CXX_ERROR(GET_LOGGER(ODEGeometry),"ODEGeometry::SetPaddingWithPreshrink: Not using boundary layer, setting padding/preshrink "<<padding);
+    fprintf(stderr,"ODEGeometry::SetPaddingWithPreshrink: Not using boundary layer, setting padding/preshrink %g has no effect\n",padding);
     return NULL;
   }
 }

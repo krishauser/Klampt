@@ -1,5 +1,3 @@
-#include <log4cxx/logger.h>
-#include <KrisLibrary/Logger.h>
 #include "RigidObject.h"
 #include <KrisLibrary/Timer.h>
 #include "Mass.h"
@@ -73,7 +71,7 @@ bool RigidObject::Load(const char* fn)
 	geomT(2,2)=scale[2];
       }
       else {
-		LOG4CXX_ERROR(KrisLibrary::logger(),"Invalid number of geomscale components in "<<fn);
+	fprintf(stderr,"Invalid number of geomscale components in %s\n",fn);
 	return false;
       }
       f.erase("geomscale");
@@ -109,7 +107,7 @@ bool RigidObject::Load(const char* fn)
 	T.R.set(x,y,z); T.t=t;
       }
       else {
-		LOG4CXX_ERROR(KrisLibrary::logger(),"Invalid number of transformation components in "<<fn);
+	fprintf(stderr,"Invalid number of transformation components in %s\n",fn);
 	return false;
       }
       f.erase("T");
@@ -162,7 +160,7 @@ bool RigidObject::Load(const char* fn)
 	inertia(2,0)=items[6]; 	inertia(2,1)=items[7]; 	inertia(2,2)=items[8];
       }
       else {
-		LOG4CXX_ERROR(KrisLibrary::logger(),"Invalid number of inertia matrix components in "<<fn);
+	fprintf(stderr,"Invalid number of inertia matrix components in %s\n",fn);
 	return false;
       }
       f.erase("inertia");
@@ -204,13 +202,13 @@ bool RigidObject::Load(const char* fn)
     }
     if(!f.empty()) {
       for(map<string,vector<PrimitiveValue> >::const_iterator i=f.entries.begin();i!=f.entries.end();i++)
-		LOG4CXX_ERROR(KrisLibrary::logger(),"Unknown entry "<<i->first.c_str()<<" in object file "<<fn);
+	fprintf(stderr,"Unknown entry %s in object file %s\n",i->first.c_str(),fn);
     }
     return true;
   }
   else {
     if(!LoadGeometry(fn)) {
-      LOG4CXX_INFO(KrisLibrary::logger(),"LoadGeometry "<<fn);
+      printf("LoadGeometry %s failed\n",fn);
       return false;
     }
     T.setIdentity();
@@ -221,11 +219,10 @@ bool RigidObject::Load(const char* fn)
     kRestitution = 0.5;
     kStiffness=Inf;
     kDamping=Inf;
-    if(ext){
-            LOG4CXX_ERROR(KrisLibrary::logger(),"Warning, loading object from ."<<ext<<" file "<<fn);
-    }else{
-            LOG4CXX_ERROR(KrisLibrary::logger(),"Warning, loading object from file "<<fn);
-    }
+    if(ext)
+      fprintf(stderr,"Warning, loading object from .%s file %s.  Setting COM and inertia matrix from geometry.\n",ext,fn);
+    else
+      fprintf(stderr,"Warning, loading object from file %s.  Setting COM and inertia matrix from geometry.\n",fn);
     SetMassFromGeometry(1.0);
     return true;
   }
@@ -284,7 +281,7 @@ void RigidObject::InitCollisions()
   geometry->InitCollisionData();
   double t = timer.ElapsedTime();
   if(t > 0.2) 
-    LOG4CXX_INFO(KrisLibrary::logger(),"Initialized rigid object "<<geomFile.c_str()<<" collision data structures in time "<<t);
+    printf("Initialized rigid object %s collision data structures in time %gs\n",geomFile.c_str(),t);
 }
 
 void RigidObject::UpdateGeometry()

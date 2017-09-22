@@ -1,5 +1,3 @@
-#include <log4cxx/logger.h>
-#include <KrisLibrary/Logger.h>
 #include "resourceframe.h"
 #include "ui_resourceframe.h"
 #include "configsframe.h"
@@ -122,7 +120,7 @@ bool ResourceFrame::doBackup(QTreeWidgetItem* it)
     res = false;
   }
   else {
-    //LOG4CXX_INFO(KrisLibrary::logger(),"Backup successful\n");
+    //printf("Backup successful\n");
     res = true;
   }
   ui->treeWidget->updateAllDecorators();
@@ -178,12 +176,12 @@ void ResourceFrame::updateSelectedResourcePane(ResourcePtr resource)
 {
   if(!resource) return;
   if(resourceToStackWidgetIndex.count(resource->Type()) == 0) {
-    //LOG4CXX_INFO(KrisLibrary::logger(),"Setting selection index 0 for type "<<resource->Type());
+    //printf("Setting selection index 0 for type %s\n",resource->Type());
     ui->selectedResourceWidget->setCurrentIndex(0);
   }
   else {
     int index=resourceToStackWidgetIndex[resource->Type()];
-    //LOG4CXX_INFO(KrisLibrary::logger(),"Setting selection index "<<index<<" for type "<<resource->Type());
+    //printf("Setting selection index %d for type %s\n",index,resource->Type());
     QWidget* w = ui->selectedResourceWidget->widget(index);
     if(0==strcmp(resource->Type(),"Configs")) 
       dynamic_cast<ConfigsFrame*>(w)->set(resource);
@@ -200,7 +198,7 @@ void ResourceFrame::updateSelectedResourcePane(ResourcePtr resource)
     else if(0==strcmp(resource->Type(),"TriMesh"))
       dynamic_cast<TriMeshFrame*>(w)->set(resource);
     else
-            LOG4CXX_ERROR(KrisLibrary::logger(),"Uh... not handling edit widget for resource of type "<<resource->Type());
+      fprintf(stderr,"Uh... not handling edit widget for resource of type %s\n",resource->Type());
     ui->selectedResourceWidget->setCurrentIndex(index);
   }
 }
@@ -386,7 +384,7 @@ void ResourceFrame::updateNewResource(string id)
 {
   ResourceNodePtr node = manager->Get(id);
   if(node == NULL) {
-    LOG4CXX_INFO(KrisLibrary::logger(),"updateNewResource: "<<id<<" doesn't exist"<<"\n");
+    cout<<"updateNewResource: "<<id<<" doesn't exist"<<endl;
     manager->Print();
     return;
   }

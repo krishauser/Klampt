@@ -1,5 +1,3 @@
-#include <log4cxx/logger.h>
-#include <KrisLibrary/Logger.h>
 #include "RobotTestGUI.h"
 #include <KrisLibrary/GLdraw/drawMesh.h>
 #include <KrisLibrary/GLdraw/drawgeometry.h>
@@ -201,21 +199,21 @@ void RobotTestBackend::RenderWorld()
 bool RobotTestBackend::OnButtonPress(const string& button)
 {
   if(button=="print_pose") {
-    LOG4CXX_INFO(KrisLibrary::logger(),robot->q<<"\n");
+    cout<<robot->q<<endl;
     return true;
   }
   else if(button=="print_self_collisions") {
-    LOG4CXX_INFO(KrisLibrary::logger(),"Self-colliding:\n");
+    printf("Self-colliding:\n");
     for(size_t i=0;i<robot->links.size();i++) {
       if(self_colliding[i]) {
 	bool printed=false;
 	for(size_t j=i;j<robot->links.size();j++) {
 	  if(self_colliding[j] && robot->SelfCollision(i,j)) {
-	    LOG4CXX_INFO(KrisLibrary::logger(),""<<i<<" "<<j);
+	    printf("%d %d\t",i,j);
 	    printed = true;
 	  }
 	}
-	if(printed) LOG4CXX_INFO(KrisLibrary::logger(),"\n");
+	if(printed) printf("\n");
       }
     }
     return true;
@@ -237,7 +235,7 @@ bool RobotTestBackend::OnButtonPress(const string& button)
     SendCommand("return_self_collisions",ss.str());
   }
   else if(!GenericBackendBase::OnButtonPress(button)) {
-    LOG4CXX_INFO(KrisLibrary::logger(),"RobotTestBackend: Unknown button: "<<button<<"\n");
+    cout<<"RobotTestBackend: Unknown button: "<<button<<endl;
     return false;
   }
   return true;
@@ -257,18 +255,18 @@ bool RobotTestBackend::OnButtonToggle(const string& button,int checked)
         if(ROSInit()) {
           ros_status = 1;
           bool res = ROSPublishTransforms(*world);
-          if(!res) LOG4CXX_ERROR(KrisLibrary::logger(),"Error publishing transforms?\n");
+          if(!res) printf("Error publishing transforms?\n");
         }
         else ros_status = -1;
       }
     }
     if(!GenericBackendBase::OnButtonToggle(button,checked)) {
-      LOG4CXX_INFO(KrisLibrary::logger(),"RobotTestBackend: Unknown button: "<<button<<"\n");
+      cout<<"RobotTestBackend: Unknown button: "<<button<<endl;
       return false;
     }
   }
   else if(!GenericBackendBase::OnButtonToggle(button,checked)) {
-    LOG4CXX_INFO(KrisLibrary::logger(),"RobotTestBackend: Unknown button: "<<button<<"\n");
+    cout<<"RobotTestBackend: Unknown button: "<<button<<endl;
     return false;
   }
   return true;
@@ -276,7 +274,7 @@ bool RobotTestBackend::OnButtonToggle(const string& button,int checked)
 
 bool RobotTestBackend::OnCommand(const string& cmd,const string& args)
 {
-  //LOG4CXX_INFO(KrisLibrary::logger(),"Command: "<<cmd<<", args "<<args<<"\n");
+  //cout<<"Command: "<<cmd<<", args "<<args<<endl;
   stringstream ss(args);
   if(cmd=="set_link") {
     ss >> cur_link;
@@ -328,7 +326,7 @@ bool RobotTestBackend::OnCommand(const string& cmd,const string& args)
       robotWidgets[i].DeleteConstraint();
   }
   else if(cmd == "print_pose") {
-    LOG4CXX_INFO(KrisLibrary::logger(),robot->q<<"\n");
+    cout<<robot->q<<endl;
   }
   else if(cmd == "reload_file") {
     if(!WorldGUIBackend::ReloadFile(args.c_str())) return false;
@@ -342,7 +340,7 @@ bool RobotTestBackend::OnCommand(const string& cmd,const string& args)
   else if(cmd == "undo_pose") {
     for(size_t i=0;i<world->robots.size();i++) 
       if(lastActiveWidget == &robotWidgets[i]) {
-        LOG4CXX_INFO(KrisLibrary::logger(),"Undoing robot poser "<<i);
+        printf("Undoing robot poser %d\n",i);
         robotWidgets[i].Undo();
         UpdateConfig();
       }

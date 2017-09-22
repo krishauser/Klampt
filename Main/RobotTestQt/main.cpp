@@ -1,5 +1,3 @@
-#include <log4cxx/logger.h>
-#include <KrisLibrary/Logger.h>
 #include <QApplication>
 #include <QFileDialog>
 #include "mainwindow.h"
@@ -48,13 +46,13 @@ int main(int argc, char *argv[])
       const char* c = s.c_str();
       const char* args[3] = {"RobotTest",c,""};
       if(!w.Initialize(2,(const char**)args)) {
-	LOG4CXX_INFO(KrisLibrary::logger(),"Failed to initialize\n");
+	printf("Failed to initialize\n");
 	return 1;
       }
     }
     else{
       if(!w.Initialize(argc,(const char**)argv)) {
-	LOG4CXX_INFO(KrisLibrary::logger(),"Failed to initialize\n");
+	printf("Failed to initialize\n");
 	return 1;
       }
     }

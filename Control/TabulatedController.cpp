@@ -1,5 +1,3 @@
-#include <log4cxx/logger.h>
-#include <KrisLibrary/Logger.h>
 #include "TabulatedController.h"
 #include "JointSensors.h"
 #include <KrisLibrary/robotics/NewtonEuler.h>
@@ -46,11 +44,11 @@ void TabulatedController::Update(Real dt)
   commands.grid.PointToIndex(v,index);
   for(size_t i=0;i<index.size();i++) {
     if(index[i] < commands.imin[i]) {
-      LOG4CXX_INFO(KrisLibrary::logger(),"Index "<<i<<"="<<index[i]<<" out of lower bound: "<<v[i]);
+      printf("Index %d=%d out of lower bound: %g\n",i,index[i],v[i]);
       index[i] = commands.imin[i];
     }
     if(index[i] > commands.imax[i]) {
-      LOG4CXX_INFO(KrisLibrary::logger(),"Index "<<i<<"="<<index[i]<<" out of upper bound: "<<v[i]);
+      printf("Index %d=%d out of upper bound: %g\n",i,index[i],v[i]);
       index[i] = commands.imax[i];  
     }    
   }
@@ -231,7 +229,7 @@ void OptimizeMDP(TabulatedController& controller,
       a[i] = Rand(robot.drivers[i].tmin,robot.drivers[i].tmax);
     actions.push_back(a);
   }
-  LOG4CXX_INFO(KrisLibrary::logger(),"Constructing an MDP with "<<n<<" states and "<<actions.size());
+  printf("Constructing an MDP with %d states and %d actions\n",n,actions.size());
   
   vector<SparseMatrix> T(actions.size());
   vector<Vector> cost(actions.size());
@@ -304,7 +302,7 @@ void OptimizeMDP(TabulatedController& controller,
     }
   } while (IncrementIndex(index,commands.imin,commands.imax)==0);
   
-  LOG4CXX_INFO(KrisLibrary::logger(),"Solving MDP with value iteration...\n");
+  printf("Solving MDP with value iteration...\n");
   //solve for optimal actions via policy iteration
   Real tolerance = 1e-5;
   vector<int> policy(n,0);
@@ -325,7 +323,7 @@ void OptimizeMDP(TabulatedController& controller,
   int solveIters=0;
   bool changed=true;
   while(changed) {
-    LOG4CXX_INFO(KrisLibrary::logger(),"Iteration "<<solveIters);
+    printf("Iteration %d\n",solveIters);
     solveIters++;
     
     //sparse solve Ax=b with A=Tp, b=costp
@@ -338,7 +336,7 @@ void OptimizeMDP(TabulatedController& controller,
     Tp.mul(values,r);
     r -= costp;
     if(r.norm() > 1e-1) {
-      LOG4CXX_ERROR(KrisLibrary::logger(),"Quitting due to error in linear system solve?"<<"\n");
+      cout<<"Quitting due to error in linear system solve?"<<endl;
       break;
     }
 
@@ -372,9 +370,9 @@ void OptimizeMDP(TabulatedController& controller,
 	costp(i) = cost[policy[i]](i)/discount;
       }
     }
-    LOG4CXX_INFO(KrisLibrary::logger(),""<<numchanged<<" actions of policy changed, amount "<<improvement);
+    printf("%d actions of policy changed, amount %g\n",numchanged,improvement);
   }
-  LOG4CXX_INFO(KrisLibrary::logger(),"Done.  Saving values and actions to mdp.txt...\n");
+  printf("Done.  Saving values and actions to mdp.txt...\n");
 
   //read out the policy
   for(int i=0;i<n;i++)

@@ -1,5 +1,3 @@
-#include <log4cxx/logger.h>
-#include <KrisLibrary/Logger.h>
 #include "RandomizedSelfCollisions.h"
 #include <KrisLibrary/math/random.h>
 #include <KrisLibrary/utils/ProgressPrinter.h>
@@ -20,7 +18,7 @@ void SampleRobot(RobotWithGeometry& robot)
 //NOTE: tests only those in robot's collision pairs
 void TestCollisions(RobotWithGeometry& robot,Array2D<bool>& canCollide,int numSamples)
 {
-  LOG4CXX_INFO(KrisLibrary::logger(),"Randomly calculating new collisions..."<<"\n");
+  cout<<"Randomly calculating new collisions..."<<endl;
   ProgressPrinter progress(numSamples);
   for(int k=0;k<numSamples;k++) {
     progress.Update();
@@ -42,7 +40,7 @@ void TestIndependentCollisions(RobotWithGeometry& robot,Array2D<bool>& canCollid
 {
   Array2D<bool> knownIndependent = independent;
 
-  LOG4CXX_INFO(KrisLibrary::logger(),"Randomly calculating new independent collisions..."<<"\n");
+  cout<<"Randomly calculating new independent collisions..."<<endl;
   ProgressPrinter progress(numSamples);
   for(int k=0;k<numSamples;k++) {
     progress.Update();
@@ -76,7 +74,7 @@ void TestIndependentCollisions(RobotWithGeometry& robot,Array2D<bool>& canCollid
       }
     }
   }
-  LOG4CXX_INFO(KrisLibrary::logger(),numNewPairs<<" new independent pairs"<<"\n");
+  cout<<numNewPairs<<" new independent pairs"<<endl;
 }
 
 
@@ -105,7 +103,7 @@ void RandomizedSelfCollisionPairs(RobotWithGeometry& robot,Array2D<bool>& collis
 	numNewPairs++;
     }
   }
-  LOG4CXX_INFO(KrisLibrary::logger(),numNewPairs<<" new pairs, "<<numPairs<<" total"<<"\n");
+  cout<<numNewPairs<<" new pairs, "<<numPairs<<" total"<<endl;
 }
 
 void RandomizedIndependentSelfCollisionPairs(RobotWithGeometry& robot,Array2D<bool>& collision,int numSamples)
@@ -134,7 +132,7 @@ void RandomizedIndependentSelfCollisionPairs(RobotWithGeometry& robot,Array2D<bo
 	numNewPairs++;
     }
   }
-  LOG4CXX_INFO(KrisLibrary::logger(),numNewPairs<<" new pairs, "<<numPairs<<" total"<<"\n");
+  cout<<numNewPairs<<" new pairs, "<<numPairs<<" total"<<endl;
 }
 
 
@@ -157,7 +155,7 @@ void RandomizedSelfCollisionDistances(RobotWithGeometry& robot,Array2D<Real>& mi
   Real relErr = 0.01;
   for(int iters=0;iters<numSamples;iters++) {
     if(iters*100 % numSamples == 0) {
-      LOG4CXX_INFO(KrisLibrary::logger(),iters*100/numSamples<<"...");
+      cout<<iters*100/numSamples<<"..."; cout.flush();
     }
     SampleRobot(robot);
     for(int i=0;i<robot.q.n;i++) {

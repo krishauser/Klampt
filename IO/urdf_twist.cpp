@@ -35,8 +35,6 @@
 /* Author: John Hsu */
 
 
-#include <log4cxx/logger.h>
-#include <KrisLibrary/Logger.h>
 #include "urdf_twist.h"
 #include <fstream>
 #include <sstream>
@@ -59,7 +57,7 @@ bool parseTwist(Twist &twist, TiXmlElement* xml)
       }
       catch (ParseError &e) {
         twist.linear.clear();
-        LOG4CXX_INFO(KrisLibrary::logger(),"Malformed linear string ["<< linear_char<<"]: "<< e.what());
+        printf("Malformed linear string [%s]: %s \n", linear_char, e.what());
         return false;
       }
     }
@@ -72,7 +70,7 @@ bool parseTwist(Twist &twist, TiXmlElement* xml)
       }
       catch (ParseError &e) {
         twist.angular.clear();
-        LOG4CXX_INFO(KrisLibrary::logger(),"Malformed angular ["<< angular_char<<"]: "<< e.what());
+        printf("Malformed angular [%s]: %s \n", angular_char, e.what());
         return false;
       }
     }

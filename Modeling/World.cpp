@@ -1,5 +1,3 @@
-#include <log4cxx/logger.h>
-#include <KrisLibrary/Logger.h>
 #include "World.h"
 #include <KrisLibrary/utils/stringutils.h>
 #include <KrisLibrary/GLdraw/GL.h>
@@ -17,11 +15,11 @@ bool RobotWorld::LoadXML(const char* fn)
 {
   XmlWorld xmlWorld;
   if(!xmlWorld.Load(fn)) {
-    LOG4CXX_ERROR(KrisLibrary::logger(),"RobotWorld::LoadXML: Error loading world file "<<fn);
+    printf("RobotWorld::LoadXML: Error loading world file %s\n",fn);
     return false;
   }
   if(!xmlWorld.GetWorld(*this)) {
-    LOG4CXX_ERROR(KrisLibrary::logger(),"RobotWorld::LoadXML: Error extracting world data from "<<fn);
+    printf("RobotWorld::LoadXML: Error extracting world data from %s\n",fn);
     return false;
   }
   return true;
@@ -157,7 +155,7 @@ RobotWorld::GeometryPtr RobotWorld::GetGeometry(int id)
   if(robotLink.first >= 0) {
     return robots[robotLink.first]->geometry[robotLink.second];
   }
-    LOG4CXX_ERROR(KrisLibrary::logger(),"RobotWorld::GetGeometry: Invalid ID: "<<id);
+  fprintf(stderr,"RobotWorld::GetGeometry: Invalid ID: %d\n",id);
   return NULL;
 }
 
@@ -173,7 +171,7 @@ RobotWorld::AppearancePtr RobotWorld::GetAppearance(int id)
   if(robotLink.first >= 0) {
     return robots[robotLink.first]->geomManagers[robotLink.second].Appearance();
   }
-    LOG4CXX_ERROR(KrisLibrary::logger(),"RobotWorld::GetAppearance: Invalid ID: "<<id);
+  fprintf(stderr,"RobotWorld::GetAppearance: Invalid ID: %d\n",id);
   return NULL;
 }
 
@@ -192,7 +190,7 @@ RigidTransform RobotWorld::GetTransform(int id) const
   if(robotLink.first >= 0) {
     return robots[robotLink.first]->links[robotLink.second].T_World;
   }
-    LOG4CXX_ERROR(KrisLibrary::logger(),"GetTransform: Invalid ID: "<<id);
+  fprintf(stderr,"GetTransform: Invalid ID: %d\n",id);
   return RigidTransform();
 }
 
@@ -256,7 +254,7 @@ void RobotWorld::SetGLLights()
   DEBUG_GL_ERRORS()
     /*
   for(int i=(int)lights.size();i<GL_MAX_LIGHTS;i++) {
-    LOG4CXX_INFO(KrisLibrary::logger(),"disable "<<i);
+    printf("disable %d\n",i);
     glDisable(GL_LIGHT0+i);
     DEBUG_GL_ERRORS()
       }
@@ -276,7 +274,7 @@ void RobotWorld::DrawGL()
 int RobotWorld::LoadRobot(const string& fn)
 {
   Robot* robot = new Robot;
-  LOG4CXX_INFO(KrisLibrary::logger(),"RobotWorld::LoadRobot: "<<fn.c_str());
+  printf("RobotWorld::LoadRobot: %s\n",fn.c_str());
   if(!robot->Load(fn.c_str())) {
     delete robot;
     return -1;
@@ -339,7 +337,7 @@ int RobotWorld::LoadTerrain(const string& fn)
     return -1;
   }
   //AABB3D bb = t->geometry.GetAABB();
-  //LOG4CXX_INFO(KrisLibrary::logger(),"Terrain "<<fn.c_str()<<" bounding box ["<<bb.bmin.x<<","<<bb.bmax.x<<"]x["<<bb.bmin.y<<","<<bb.bmax.y<<"]x["<<bb.bmin.z<<","<<bb.bmax.z);
+  //printf("Terrain %s bounding box [%g,%g]x[%g,%g]x[%g,%g]\n",fn.c_str(),bb.bmin.x,bb.bmax.x,bb.bmin.y,bb.bmax.y,bb.bmin.z,bb.bmax.z);
   const char* justfn = GetFileName(fn.c_str());
   char* buf = new char[strlen(justfn)+1];
   strcpy(buf,justfn);
@@ -573,7 +571,7 @@ int RobotWorld::LoadElement(const string& sfn)
   if(0==strcmp(ext,"rob") || 0==strcmp(ext,"urdf")) {
     int res=LoadRobot(fn);
     if(res<0) {
-      LOG4CXX_ERROR(KrisLibrary::logger(),"Error loading robot file "<<fn);
+      printf("Error loading robot file %s\n",fn);
       return -1;
     }
     return RobotID(res);
@@ -585,7 +583,7 @@ int RobotWorld::LoadElement(const string& sfn)
 	res = LoadTerrain(fn);
 	if(res >= 0) return TerrainID(res);
       }
-      LOG4CXX_ERROR(KrisLibrary::logger(),"Error loading rigid object file "<<fn);
+      printf("Error loading rigid object file %s\n",fn);
       return -1;
     }
     return RigidObjectID(res);
@@ -593,13 +591,13 @@ int RobotWorld::LoadElement(const string& sfn)
   else if(0==strcmp(ext,"env") || Geometry::AnyGeometry3D::CanLoadExt(ext)) {
     int res=LoadTerrain(fn);
     if(res < 0) {
-      LOG4CXX_ERROR(KrisLibrary::logger(),"Error loading terrain file "<<fn);
+      printf("Error loading terrain file %s\n",fn);
       return -1;
     }
     return TerrainID(res);
   }
   else {
-    LOG4CXX_INFO(KrisLibrary::logger(),"RobotWorld::Load: Unknown file extension "<<ext<<" on file "<<fn);
+    printf("RobotWorld::Load: Unknown file extension %s on file %s\n",ext,fn);
     return -1;
   }
 }

@@ -1,5 +1,3 @@
-#include <log4cxx/logger.h>
-#include <KrisLibrary/Logger.h>
 #include "GLUIGUI.h"
 #include <limits.h>
 #include <sstream>
@@ -108,7 +106,7 @@ bool GLUIGUI::Initialize()
 void GLUIGUI::Handle_Control(int id)
 {
   if(id < 0 || id >= (int)controls.size())
-    LOG4CXX_ERROR(KrisLibrary::logger(),"GLUIGUI: invalid control"<<"\n");
+    cerr<<"GLUIGUI: invalid control"<<endl;
   if(controlNames[id]=="") return;
   if(dynamic_cast<GLUI_Button*>(controls[id]) != NULL) 
     SendButtonPress(controlNames[id]);
@@ -133,7 +131,7 @@ void GLUIGUI::Handle_Control(int id)
     SendWidgetValue(controlNames[id],ss.str());
   }
   else {
-    LOG4CXX_ERROR(KrisLibrary::logger(),"GLUIGUI: Unknown control type, name "<<controlNames[id]<<"\n");
+    cerr<<"GLUIGUI: Unknown control type, name "<<controlNames[id]<<endl;
     SendWidgetValue(controlNames[id],controls[id]->text);
   }
 }
@@ -158,7 +156,7 @@ bool GLUIGUI::OnQuit()
 
 bool GLUIGUI::OnNotify(const string& text,const string& msglevel)
 {
-  LOG4CXX_INFO(KrisLibrary::logger(),"GLUIGUI::OnNotify:"<<text<<"\n");
+  cout<<"GLUIGUI::OnNotify:"<<text<<endl;
   return true;
 }
 

@@ -1,8 +1,6 @@
 #ifndef ROBOT_VIEW_PROGRAM_H
 #define ROBOT_VIEW_PROGRAM_H
 
-#include <log4cxx/logger.h>
-#include <KrisLibrary/Logger.h>
 #include "Modeling/Robot.h"
 #include "Modeling/Environment.h"
 #include "View/ViewEnvironment.h"
@@ -109,7 +107,7 @@ void RobotViewProgram::ClickRay(int x,int y,Ray3D& r) const
 {
   viewport.getClickSource(x,viewport.y+viewport.h-y,r.source);
   viewport.getClickVector(x,viewport.y+viewport.h-y,r.direction);
-  //LOG4CXX_INFO(KrisLibrary::logger(),"Ray "<<r.source<<" -> "<<r.direction<<"\n");
+  //cout<<"Ray "<<r.source<<" -> "<<r.direction<<endl;
 }
 
 bool RobotViewProgram::ClickRobot(const Ray3D& r,int& body,Vector3& localpt) const

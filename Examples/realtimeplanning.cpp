@@ -1,5 +1,3 @@
-#include <log4cxx/logger.h>
-#include <KrisLibrary/Logger.h>
 #include "Interface/UserInterface.h"
 #include "Interface/SimulationGUI.h"
 #include "Interface/GLUIGUI.h"
@@ -153,10 +151,10 @@ public:
     //set up user interface
     robotInterface = new DefaultMotionQueueInterface(GetMotionQueue(sim.robotControllers[0]));
 #ifdef MULTITHREADED
-    LOG4CXX_INFO(KrisLibrary::logger(),"Constructing multi-threaded RRT user interface...\n");
+    printf("Constructing multi-threaded RRT user interface...\n");
     ui = new MTRRTCommandInterface;
 #else
-    LOG4CXX_INFO(KrisLibrary::logger(),"Constructing single-threaded RRT user interface...\n");
+    printf("Constructing single-threaded RRT user interface...\n");
     ui = new RRTCommandInterface;
 #endif //WIN32
     ui->world = world;
@@ -414,7 +412,7 @@ bool GLUIRealTimePlannerGUI::Initialize()
   Assert(res == true);
   AddCommandRule(c,"set_collision_margin","_1");
   
-  LOG4CXX_INFO(KrisLibrary::logger(),"Done initializing...\n");
+  printf("Done initializing...\n");
   return true;
 }
 
@@ -433,7 +431,7 @@ bool GLUIRealTimePlannerGUI::OnCommand(const string& cmd,const string& args)
 int main(int argc, const char** argv)
 {
   if(argc < 2) {
-    LOG4CXX_INFO(KrisLibrary::logger(),"USAGE: RealTimePlanning [world XML file or element files]\n");
+    printf("USAGE: RealTimePlanning [world XML file or element files]\n");
     return 0;
   }
 

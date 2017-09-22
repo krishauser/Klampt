@@ -5,8 +5,6 @@
  *      Author: jingru
  */
 
-#include <log4cxx/logger.h>
-#include <KrisLibrary/Logger.h>
 #include "PrimitiveShape.h"
 #include "orXmlTags.h"
 #include <sstream>
@@ -110,19 +108,19 @@ void quat2RotationMat(const Vector4& aa, Matrix3& mat){
 void rotationMat2RPY(const Matrix3& mat, Vector3& vec){
 	double alphayaw, betapitch, gamaroll;
 //	if((mat(0,0)>=0 && mat(0,0) <= 1e-6) || (mat(2,2)>=0 && mat(2,2) <= 1e-6) ){
-//		LOG4CXX_INFO(KrisLibrary::logger(),"mat(0,0)="<<mat(0,0)<<" or mat(2,2)="<<mat(2,2)<<" are zeros!\n");
-//		//Krislibrary::loggerWait();
+//		cout<<"mat(0,0)="<<mat(0,0)<<" or mat(2,2)="<<mat(2,2)<<" are zeros!\n"<<flush;
+//		getchar();
 //	}
 	alphayaw = atan2(mat(1,0), mat(0,0));
 	betapitch = atan2(-mat(2,0), sqrt(mat(2,1)*mat(2,1) + mat(2,2)*mat(2,2)));
 	gamaroll = atan2(mat(2,1), mat(2,2));
 	vec.set(gamaroll, betapitch, alphayaw);
-//	LOG4CXX_INFO(KrisLibrary::logger(),"rotationMat2RPY:\n");
+//	cout<<"rotationMat2RPY:\n";cout<<"mat:"<<mat<<"\nvec:"<<vec<<endl<<flush;getchar();
 }
 
 //TiXmlElement* getFirstChild(TiXmlElement* e, const char* value){
 //	if(!value)
-//		LOG4CXX_ERROR(KrisLibrary::logger(),"Error: value is empty in getChild!\n");
+//		cout<<"Error: value is empty in getChild!\n";
 //	TiXmlElement* c = e->FirstChildElement(value);
 //	if(!c){
 //		char firstc = value[0];
@@ -134,12 +132,12 @@ void rotationMat2RPY(const Matrix3& mat, Vector3& vec){
 //		strcpy(newvalue,value);
 //		newvalue[0] = firstc;
 //		c = e->FirstChildElement(newvalue);
-//		if(value[0] == 'T')LOG4CXX_INFO(KrisLibrary::logger(),"***"<<value<<":"<<newvalue<<":"<<strcmp(value,"Translation")<<"\n");
+//		if(value[0] == 'T')cout<<"***"<<value<<":"<<newvalue<<":"<<strcmp(value,"Translation")<<endl;
 //		if(!c && 0 == strcmp(value,"Translation")){
-//			LOG4CXX_INFO(KrisLibrary::logger(),"here "<<e->Value()<<"\n");
+//			cout<<"here "<<e->Value()<<endl;
 //			c = e->FirstChildElement("translation");
 //			if(!c)
-//				LOG4CXX_INFO(KrisLibrary::logger()," problem!"<<"\n");
+//				cout<<" problem!"<<endl;
 //		}
 //		if(!c && (0==strcmp(value, "KinBody") || 0 == strcmp(value, "kinBody"))){
 //			c = e->FirstChildElement("Kinbody");
@@ -162,7 +160,7 @@ void rotationMat2RPY(const Matrix3& mat, Vector3& vec){
 //
 //TiXmlElement* getNextSibling(TiXmlElement* e, char* value){
 //	if(!value)
-//		LOG4CXX_ERROR(KrisLibrary::logger(),"Error: value is empty in getChild!\n");
+//		cout<<"Error: value is empty in getChild!\n";
 //	TiXmlElement* c = e->NextSiblingElement(value);
 //	if(!c){
 //		char firstc = value[0];
@@ -207,7 +205,7 @@ int lcstrcmp(const char* a,const char* b)
 
 TiXmlElement* getFirstChild(TiXmlElement* e, const char* value){
 	if(!value)
-		LOG4CXX_ERROR(KrisLibrary::logger(),"Error: value is empty in getChild!\n");
+		cout<<"Error: value is empty in getChild!\n";
 
 	TiXmlElement* child = e->FirstChildElement();
 	while(child){
@@ -220,7 +218,7 @@ TiXmlElement* getFirstChild(TiXmlElement* e, const char* value){
 
 TiXmlElement* getNextSibling(TiXmlElement* e, const char* value){
 	if(!value)
-		LOG4CXX_ERROR(KrisLibrary::logger(),"Error: value is empty in getChild!\n");
+		cout<<"Error: value is empty in getChild!\n";
 
 	TiXmlElement* child = e->NextSiblingElement();
 	while(child){
@@ -290,8 +288,8 @@ OrXmlTransformation::~OrXmlTransformation(){
 //0: translation; 1: rotationmat; 2: rotationaxis; 3: quat
 int OrXmlTransformation::getTransformType(TiXmlElement* et){
 	if(!et){
-		LOG4CXX_INFO(KrisLibrary::logger(),"getTransformType: et is null!\n");
-		//Krislibrary::loggerWait();
+		cout<<"getTransformType: et is null!\n"<<flush;
+		getchar();
 		return -1;
 	}
 	if(0==lcstrcmp(et->Value(), "rotationmat"))
@@ -588,8 +586,8 @@ bool OrXmlJoint::GetCleanJointInfo(){
 	if(this->limitsrad.size() > 0)
 		nLimits++;
 	if(nLimits >= 2){
-		LOG4CXX_INFO(KrisLibrary::logger(),"More than one type of limits are specified!\n");
-		//Krislibrary::loggerWait();
+		cout<<"More than one type of limits are specified!\n"<<flush;
+		getchar();
 		return false;
 	}
 	if(limits.size() > 0){
@@ -609,8 +607,8 @@ bool OrXmlJoint::GetCleanJointInfo(){
 	if(this->maxacceldeg.size() > 0)
 		nLimits++;
 	if(nLimits > 1){
-		LOG4CXX_INFO(KrisLibrary::logger(),"More than one type of acc are specified!\n");
-		//Krislibrary::loggerWait();
+		cout<<"More than one type of acc are specified!\n"<<flush;
+		getchar();
 		return false;
 	}
 	if(maxaccel.size() > 0){
@@ -627,8 +625,8 @@ bool OrXmlJoint::GetCleanJointInfo(){
 	if(this->maxveldeg.size() > 0)
 		nLimits++;
 	if(nLimits > 1){
-		LOG4CXX_INFO(KrisLibrary::logger(),"More than one type of vel are specified!\n");
-		//Krislibrary::loggerWait();
+		cout<<"More than one type of vel are specified!\n"<<flush;
+		getchar();
 		return false;
 	}
 	if(maxvel.size() > 0){
@@ -727,7 +725,7 @@ OrXmlMass::~OrXmlMass(){
 void OrXmlMass::GetBoxMass(){
 	double tmass = defaultmass;
 	if(!extents){
-		LOG4CXX_INFO(KrisLibrary::logger(),"Box Mass has no extents!\n");//Krislibrary::loggerWait();
+		cout<<"Box Mass has no extents!\n"<<flush;getchar();
 	}
 	if(total){
 		tmass = *total;
@@ -755,7 +753,7 @@ void OrXmlMass::GetBoxMass(){
 void OrXmlMass::GetSphereMass(){
 	double tmass = defaultmass;
 	if(!radius){
-		LOG4CXX_INFO(KrisLibrary::logger(),"Sphere Mass has no radius!\n");//Krislibrary::loggerWait();
+		cout<<"Sphere Mass has no radius!\n"<<flush;getchar();
 	}
 	if(total){
 		tmass = *total;
@@ -778,7 +776,7 @@ void OrXmlMass::GetSphereMass(){
 	if(!com)
 		com = new Vector3;
 	com->setZero();
-//	LOG4CXX_INFO(KrisLibrary::logger(),tmass<<" sphere inertia:"<<(*inertia)<<"\n");
+//	cout<<tmass<<" sphere inertia:"<<(*inertia)<<endl;
 }
 
 void OrXmlMass::GetUnitSphereMass(){
@@ -802,7 +800,7 @@ void OrXmlMass::GetUnitSphereMass(){
 void OrXmlMass::GetCylinderMass(){
 	double tmass = defaultmass;
 	if(!radius || !height){
-		LOG4CXX_INFO(KrisLibrary::logger(),"Cylinder Mass has no radius or height!\n");//Krislibrary::loggerWait();
+		cout<<"Cylinder Mass has no radius or height!\n"<<flush;getchar();
 	}
 	if(total){
 		tmass = *total;
@@ -848,7 +846,7 @@ void OrXmlMass::AddMass(OrXmlMass* r){
 //	t = mnew.t;
 //	fTotalMass = mnew.fTotalMass;
 	if(!r->inertia || !r->total || !inertia || !total){
-		LOG4CXX_INFO(KrisLibrary::logger(),"total or inertia is empty!\n");//Krislibrary::loggerWait();
+		cout<<"total or inertia is empty!\n"<<flush;getchar();
 		return;
 	}
 	if(*total + *(r->total) == 0)
@@ -892,7 +890,7 @@ void OrXmlMass::ChangeCenterOfRotation(const Vector3& newcor)
 //    t.m[8] -= fTotalMass * v.z * v.x;   t.m[9] -= fTotalMass * v.z * v.y;   t.m[10] += fTotalMass * (x2+y2);
 //    return *this;
 	if(!total || !com || !inertia){
-		LOG4CXX_INFO(KrisLibrary::logger(),"total or com or inertia is empty!\n");//Krislibrary::loggerWait();
+		cout<<"total or com or inertia is empty!\n"<<flush;getchar();
 		return;
 	}
 	Vector3 v(newcor-(*com));
@@ -913,8 +911,8 @@ void OrXmlMass::ChangeCoordinateSystem(RigidTransform& trans)
 //    t = trot.rotate(t.rotate(trot.inverse())); // rotate inertia
 //    t.trans = trans*oldcom;
 	if(!com || !inertia){
-		LOG4CXX_INFO(KrisLibrary::logger(),"No com or inertia specified!");
-		//Krislibrary::loggerWait();
+		cout<<"No com or inertia specified!"<<flush;
+		getchar();
 	}
 	Vector3 oldcom(*com);
 	RigidTransform trot, inverseT, massT, tmpT, finalmassT;
@@ -936,8 +934,8 @@ void OrXmlMass::ChangeCoordinateSystem(RigidTransform& trans)
 
 bool OrXmlMass::GetContent(){
 	if(e->QueryValueAttribute("type",&type)!=TIXML_SUCCESS){
-		LOG4CXX_ERROR(KrisLibrary::logger(),"Error in GetContent! No type specified!\n");
-		//Krislibrary::loggerWait();
+		cout<<"Error in GetContent! No type specified!\n"<<flush;
+		getchar();
 		return false;
 	}
 	TiXmlElement* c = getFirstChild(e,"com");
@@ -1022,7 +1020,7 @@ bool OrXmlMass::GetContent(){
 			(*inertia)(2,2) = (*inertia)(0,0);
 		}
 	}else if(0 == strcmp(type.c_str(), "mimicgeom")){
-//		LOG4CXX_INFO(KrisLibrary::logger(), "mimicgeom!\n");
+//		cout << "mimicgeom!\n"<<flush;
 	}
 	return true;
 }
@@ -1054,16 +1052,16 @@ OrXmlGeom::~OrXmlGeom(){
 
 bool OrXmlGeom::Convert2Tri(){
 	if(this->type.empty()){
-		LOG4CXX_INFO(KrisLibrary::logger(),"Geom has no type!\n");
-		//Krislibrary::loggerWait();
+		cout<<"Geom has no type!\n"<<flush;
+		getchar();
 	}
 	if(strcmp(type.c_str(), "trimesh") != 0 && !render.empty()){
-		LOG4CXX_INFO(KrisLibrary::logger(),"Not support non trimesh type has render data!\n");
-		//Krislibrary::loggerWait();
+		cout<<"Not support non trimesh type has render data!\n"<<flush;
+		getchar();
 	}
 	if(!render.empty() && !dorender){
-		LOG4CXX_INFO(KrisLibrary::logger(),"Render=false while render file is not empty!\n");
-		//Krislibrary::loggerWait();
+		cout<<"Render=false while render file is not empty!\n"<<flush;
+		getchar();
 	}
 	if(strcmp(type.c_str(), "trimesh") == 0){
 		if(!render.empty()){
@@ -1076,22 +1074,22 @@ bool OrXmlGeom::Convert2Tri(){
 		}
 	}else if(strcmp(type.c_str(), "box") == 0){
 		if(!extents){
-			LOG4CXX_INFO(KrisLibrary::logger(),"No extent specified for Box!\n");
-			//Krislibrary::loggerWait();
+			cout<<"No extent specified for Box!\n"<<flush;
+			getchar();
 		}
 		Box box(extents->x,extents->y,extents->z);
 		copyPrimitiveMesh(box.points, box.indexes);
 	}else if(strcmp(type.c_str(), "sphere") == 0){
 		if(!radius){
-			LOG4CXX_INFO(KrisLibrary::logger(),"No radius specified for sphere!\n");
-			//Krislibrary::loggerWait();
+			cout<<"No radius specified for sphere!\n"<<flush;
+			getchar();
 		}
 		Sphere sphere(*radius);
 		copyPrimitiveMesh(sphere.points, sphere.indexes);
 	}else if(strcmp(type.c_str(), "cylinder") == 0){
 		if(!radius || !height){
-			LOG4CXX_INFO(KrisLibrary::logger(),"No radius or height specified for cylinder!\n");
-			//Krislibrary::loggerWait();
+			cout<<"No radius or height specified for cylinder!\n"<<flush;
+			getchar();
 		}
 		Cylinder cylinder(*radius, *height);
 		copyPrimitiveMesh(cylinder.points, cylinder.indexes);
@@ -1122,13 +1120,13 @@ bool OrXmlGeom::applyTransformation(){
 
 bool OrXmlGeom::applyScale(bool visible){
 	if(!renderscale && visible){
-		LOG4CXX_INFO(KrisLibrary::logger(),"Geom has no renderscale!\n");
-		//Krislibrary::loggerWait();
+		cout<<"Geom has no renderscale!\n"<<flush;
+		getchar();
 		return true;
 	}
 	if(!datascale && !visible){
-		LOG4CXX_INFO(KrisLibrary::logger(),"Geom has no datascale!\n");
-		//Krislibrary::loggerWait();
+		cout<<"Geom has no datascale!\n"<<flush;
+		getchar();
 		return true;
 	}
 	Matrix3 scaleM;
@@ -1202,12 +1200,12 @@ void OrXmlGeom::copyPrimitiveMesh(const vector<MyPoint3D>& pts, const vector<Tri
 
 void OrXmlGeom::loadGeom(bool visible){
 	if(visible && render.empty()){
-		LOG4CXX_INFO(KrisLibrary::logger(),"Render Geometry is empty!\n");
-		//Krislibrary::loggerWait();
+		cout<<"Render Geometry is empty!\n"<<flush;
+		getchar();
 	}
 	else if(!visible && data.empty()){
-		LOG4CXX_INFO(KrisLibrary::logger(),"Collision Geometry is empty!\n");
-		//Krislibrary::loggerWait();
+		cout<<"Collision Geometry is empty!\n"<<flush;
+		getchar();
 	}
 	const char* ext;
 	if(visible)
@@ -1230,8 +1228,8 @@ void OrXmlGeom::loadWrl(bool visible){
 	ifstream file;
 	file.open(filename);
 	if(!file.is_open()){
-		LOG4CXX_INFO(KrisLibrary::logger(),"Cannot read in wrl "<<filename<<" geometry!\n");
-		//Krislibrary::loggerWait();
+		cout<<"Cannot read in wrl "<<filename<<" geometry!\n"<<flush;
+		getchar();
 	}
 	int visbaseIndex = vispoints.size();
 	int colbaseIndex = colpoints.size();
@@ -1291,9 +1289,9 @@ void OrXmlGeom::loadWrl(bool visible){
 							TriFaceIndex ti(p[0]+visbaseIndex,p[1]+visbaseIndex,p[2]+visbaseIndex);
 							visindexes.push_back(ti);
 							if(ti.data[0] > vispoints.size() || ti.data[1] > vispoints.size() || ti.data[2] > vispoints.size()){
-								LOG4CXX_INFO(KrisLibrary::logger(), "render:"<<render<<"\n");
-								LOG4CXX_INFO(KrisLibrary::logger(),vispoints.size()<<";("<<ti.data[0]<<","<<ti.data[1]<<","<<ti.data[2]<<")\n");
-								//Krislibrary::loggerWait();
+								cout<< "render:"<<render<<endl;
+								cout<<vispoints.size()<<";("<<ti.data[0]<<","<<ti.data[1]<<","<<ti.data[2]<<")\n"<<flush;
+								getchar();
 							}
 						}else{
 							TriFaceIndex ti(p[0]+colbaseIndex,p[1]+colbaseIndex,p[2]+colbaseIndex);
@@ -1316,8 +1314,8 @@ void OrXmlGeom::loadTri(bool visible){
 		sprintf(filename,"%s%s%s%s",ROBOT_DIR.c_str(),KINBODY_DIR.c_str(),MODEL_DIR.c_str(),data.c_str());
 	file.open(filename);
 	if(!file.is_open()){
-		LOG4CXX_INFO(KrisLibrary::logger(),"Cannot read in tri "<<filename<<" geometry!\n");
-		//Krislibrary::loggerWait();
+		cout<<"Cannot read in tri "<<filename<<" geometry!\n"<<flush;
+		getchar();
 	}
 	int visbaseIndex = vispoints.size();
 	int colbaseIndex = colpoints.size();
@@ -1359,7 +1357,7 @@ void OrXmlGeom::loadTri(bool visible){
 
 bool OrXmlGeom::GetContent(){
 	if(e->QueryValueAttribute("type",&type)!=TIXML_SUCCESS){
-		LOG4CXX_ERROR(KrisLibrary::logger(),"Error in GetContent! No type specified!\n");
+		cout<<"Error in GetContent! No type specified!\n";
 		return false;
 	}
 	dorender = true;
@@ -1399,7 +1397,7 @@ bool OrXmlGeom::GetContent(){
 	if(strcmp(type.c_str(), "box") == 0){
 		TiXmlElement* c = getFirstChild(e,"extents");
 		if(!c){
-			LOG4CXX_ERROR(KrisLibrary::logger(),"Error in GetContent! No extents for box!\n");
+			cout<<"Error in GetContent! No extents for box!\n";
 			return false;
 		}
 		this->extents = new Vector3;
@@ -1410,7 +1408,7 @@ bool OrXmlGeom::GetContent(){
 	if(strcmp(type.c_str(), "sphere") == 0){
 		TiXmlElement* c = getFirstChild(e,"radius");
 		if(!c){
-			LOG4CXX_ERROR(KrisLibrary::logger(),"Error in GetContent! No radius for sphere!\n");
+			cout<<"Error in GetContent! No radius for sphere!\n";
 			return false;
 		}
 		this->radius = new double;
@@ -1421,7 +1419,7 @@ bool OrXmlGeom::GetContent(){
 	if(strcmp(type.c_str(), "cylinder") == 0){
 		TiXmlElement* c = getFirstChild(e,"radius");
 		if(!c){
-			LOG4CXX_ERROR(KrisLibrary::logger(),"Error in GetContent! No radius for cylinder!\n");
+			cout<<"Error in GetContent! No radius for cylinder!\n";
 			return false;
 		}
 		this->radius = new double;
@@ -1430,7 +1428,7 @@ bool OrXmlGeom::GetContent(){
 		ss >> *radius;
 		c = getFirstChild(e,"height");
 		if(!c){
-			LOG4CXX_ERROR(KrisLibrary::logger(),"Error in GetContent! No radius for cylinder!\n");
+			cout<<"Error in GetContent! No radius for cylinder!\n";
 			return false;
 		}
 		this->height = new double;

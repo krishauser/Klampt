@@ -1,5 +1,3 @@
-#include <log4cxx/logger.h>
-#include <KrisLibrary/Logger.h>
 #include "ConstrainedInterpolator.h"
 #include "Modeling/SplineInterpolate.h"
 #include <KrisLibrary/math3d/primitives.h>
@@ -56,13 +54,13 @@ int DebugCurve(const GeneralizedCubicBezierCurve& c,Real duration)
   amax /= Sqr(duration);
   for(size_t j=0;j<vmin.n;j++) {
     if(vmin[j] < -vWarningThreshold || vmax[j] > vWarningThreshold || amin[j] < -aWarningThreshold || amax[j] > aWarningThreshold ) {
-      LOG4CXX_INFO(KrisLibrary::logger(),"Projected deriv bounds seem odd on entry "<<j);
-      LOG4CXX_INFO(KrisLibrary::logger(),"x0 "<<c.x0[j]<<", x1 "<<c.x1[j]<<", x2 "<<c.x2[j]<<", x3 "<<c.x3[j]);
-      LOG4CXX_INFO(KrisLibrary::logger(),"duration "<<duration);
-      LOG4CXX_INFO(KrisLibrary::logger(),"Deriv bounds "<<vmin[j]<<" "<<vmax[j]<<", accel bounds "<<amin[j]<<" "<<amax[j]);
+      printf("Projected deriv bounds seem odd on entry %d\n",j);
+      printf("x0 %g, x1 %g, x2 %g, x3 %g\n",c.x0[j],c.x1[j],c.x2[j],c.x3[j]);
+      printf("duration %g\n",duration);
+      printf("Deriv bounds %g %g, accel bounds %g %g\n",vmin[j],vmax[j],amin[j],amax[j]);
 
-      LOG4CXX_INFO(KrisLibrary::logger(),"Press enter to continue\n");
-      if(KrisLibrary::logger()->isEnabledFor(log4cxx::Level::ERROR_INT)) getchar();
+      printf("Press enter to continue\n");
+      getchar();
       return j;
     }
   }
@@ -105,9 +103,9 @@ void ConditionTangents(GeneralizedCubicBezierCurve& curve)
   ta *= scale.x;
   tb *= scale.y;
   /*
-  LOG4CXX_INFO(KrisLibrary::logger(),"A: "<<A<<"\n");
-  LOG4CXX_INFO(KrisLibrary::logger(),"b: "<<b<<"\n");
-  LOG4CXX_INFO(KrisLibrary::logger(),"Tangent scales: "<<scale<<"\n");
+  cout<<"A: "<<A<<endl;
+  cout<<"b: "<<b<<endl;
+  cout<<"Tangent scales: "<<scale<<endl;
   */
   curve.SetNaturalTangents(ta,tb);
 }
@@ -199,9 +197,9 @@ void ConditionMiddleTangent(GeneralizedCubicBezierCurve& c1,GeneralizedCubicBezi
   Real newAccelMid2 = a.norm();
   c2.Accel(1,a); for(int i=0;i<6;i++) a(i)=0;
   Real newAccelEnd = a.norm();
-  LOG4CXX_INFO(KrisLibrary::logger(),"Tangent scaling "<<c);
-  LOG4CXX_INFO(KrisLibrary::logger(),"Accel change: "<<oldAccelStart<<" "<<oldAccelMid<<" "<<oldAccelMid2<<" "<<oldAccelEnd<<" -> "<<newAccelStart<<" "<<newAccelMid<<" "<<newAccelMid2<<" "<<newAccelEnd);
-  if(KrisLibrary::logger()->isEnabledFor(log4cxx::Level::ERROR_INT)) getchar();
+  printf("Tangent scaling %g\n",c);
+  printf("Accel change: %g %g %g %g -> %g %g %g %g\n",oldAccelStart,oldAccelMid,oldAccelMid2,oldAccelEnd,newAccelStart,newAccelMid,newAccelMid2,newAccelEnd);
+  getchar();
   */
 }
 
@@ -246,11 +244,11 @@ bool ConstrainedInterpolator::Make(const Config& qa,const Config& qb,vector<Conf
   Vector temp(constraint->NumDimensions());
   ConstraintValue(qa,temp);
   if(temp.maxAbsElement() > ftol) {
-        LOG4CXX_ERROR(KrisLibrary::logger(),"ConstrainedInterpolator: Warning, initial point a is not on manifold, error "<<temp.maxAbsElement());
+    fprintf(stderr,"ConstrainedInterpolator: Warning, initial point a is not on manifold, error %g\n",temp.maxAbsElement());
   }
   ConstraintValue(qb,temp);
   if(temp.maxAbsElement() > ftol) {
-        LOG4CXX_ERROR(KrisLibrary::logger(),"ConstrainedInterpolator: Warning, initial point b is not on manifold, error "<<temp.maxAbsElement());
+    fprintf(stderr,"ConstrainedInterpolator: Warning, initial point b is not on manifold, error %g\n",temp.maxAbsElement());
   }
 
   list<Config> lpath;
@@ -270,12 +268,12 @@ bool ConstrainedInterpolator::Make(const Config& qa,const Config& qb,vector<Conf
     list<Config>::iterator b=a; b++;
     space->Midpoint(*a,*b,x);
     if(!Project(x)) {
-      LOG4CXX_INFO(KrisLibrary::logger(),"Unable to project "<<x<<"\n");
-      LOG4CXX_INFO(KrisLibrary::logger(),"Midpoint "<<*a<<" -> "<<*b<<"\n");
+      cout<<"Unable to project "<<x<<endl;
+      cout<<"Midpoint "<<*a<<" -> "<<*b<<endl;
       return false;
     }
     if(checkConstraints && !space->IsFeasible(x)) {
-      LOG4CXX_INFO(KrisLibrary::logger(),"Infeasible configuration "<<x<<"\n");
+      cout<<"Infeasible configuration "<<x<<endl;
       return false;
     }
 
@@ -285,11 +283,11 @@ bool ConstrainedInterpolator::Make(const Config& qa,const Config& qb,vector<Conf
     Real l1=space->Distance(*a,x);
     Real l2=space->Distance(x,*b);
     if(l1 > 0.5*(1+maxGrowth)*s.length) {
-      LOG4CXX_INFO(KrisLibrary::logger(),"Excessive growth: "<<l1<<" > "<<0.5*(1+maxGrowth)*s.length<<"\n");
+      cout<<"Excessive growth: "<<l1<<" > "<<0.5*(1+maxGrowth)*s.length<<endl;
       return false;
     }
     if(l2 > 0.5*(1+maxGrowth)*s.length) {
-      LOG4CXX_INFO(KrisLibrary::logger(),"Excessive growth: "<<l2<<" > "<<0.5*(1+maxGrowth)*s.length<<"\n");
+      cout<<"Excessive growth: "<<l2<<" > "<<0.5*(1+maxGrowth)*s.length<<endl;
       return false;
     }
     s.prev = a;
@@ -348,23 +346,23 @@ bool SmoothConstrainedInterpolator::Make(const Config& qa,const Vector& da,const
   Vector temp(constraint->NumDimensions());
   ConstraintValue(qa,temp);
   if(temp.maxAbsElement() > ftol) {
-        LOG4CXX_ERROR(KrisLibrary::logger(),"ConstrainedInterpolator: Warning, initial point a is not on manifold, error "<<temp.maxAbsElement());
+    fprintf(stderr,"ConstrainedInterpolator: Warning, initial point a is not on manifold, error %g\n",temp.maxAbsElement());
   }
   ConstraintValue(qb,temp);
   if(temp.maxAbsElement() > ftol) {
-        LOG4CXX_ERROR(KrisLibrary::logger(),"ConstrainedInterpolator: Warning, initial point b is not on manifold, error "<<temp.maxAbsElement());
+    fprintf(stderr,"ConstrainedInterpolator: Warning, initial point b is not on manifold, error %g\n",temp.maxAbsElement());
   }
 
   Vector da2=da,db2=db;
   if(!da.empty()) {
     if(!ProjectVelocity(qa,da2)) {
-            LOG4CXX_ERROR(KrisLibrary::logger(),"ConstrainedInterpolator: Warning, initial velocity a could not be projected\n");
+      fprintf(stderr,"ConstrainedInterpolator: Warning, initial velocity a could not be projected\n");
       da2.setZero();
     }
   }
   if(!db.empty()) {
     if(!ProjectVelocity(qb,db2)) {
-            LOG4CXX_ERROR(KrisLibrary::logger(),"ConstrainedInterpolator: Warning, initial velocity b could not be projected\n");
+      fprintf(stderr,"ConstrainedInterpolator: Warning, initial velocity b could not be projected\n");
       db2.setZero();
     }
   }
@@ -380,14 +378,14 @@ bool SmoothConstrainedInterpolator::Make(const Config& qa,const Vector& da,const
   if(da2.empty()) {
     curve.Deriv(0,da2);
     if(!ProjectVelocity(qa,da2)) {
-            LOG4CXX_ERROR(KrisLibrary::logger(),"ConstrainedInterpolator: Warning, start velocity a could not be projected\n");
+      fprintf(stderr,"ConstrainedInterpolator: Warning, start velocity a could not be projected\n");
       da2.setZero();
     }
   }
   if(db2.empty()) {
     curve.Deriv(1,db2);
     if(!ProjectVelocity(qb,db2)) {
-            LOG4CXX_ERROR(KrisLibrary::logger(),"ConstrainedInterpolator: Warning, end velocity b could not be projected\n");
+      fprintf(stderr,"ConstrainedInterpolator: Warning, end velocity b could not be projected\n");
       db2.setZero();
     }
   }
@@ -436,38 +434,38 @@ bool SmoothConstrainedInterpolator::Make(const Config& qa,const Vector& da,const
 
     //c->first.Eval(0.5,x);
     c->first.Midpoint(x);
-    //LOG4CXX_INFO(KrisLibrary::logger(),"Depth: "<<c->second<<"\n");
-    //LOG4CXX_INFO(KrisLibrary::logger(),"Bspline midpoint: "<<x<<", "<<v<<"\n");
-    //LOG4CXX_INFO(KrisLibrary::logger(),"Original point :"<<x<<"\n");
+    //cout<<"Depth: "<<c->second<<endl;
+    //cout<<"Bspline midpoint: "<<x<<", "<<v<<endl;
+    //cout<<"Original point :"<<x<<endl;
     if(!Project(x)) {
       ConstraintValue(x,temp);
-      if(verbose) LOG4CXX_ERROR(KrisLibrary::logger(),"Projection of point "<<x<<" failed, "<<" error "<<temp.maxAbsElement()<<"\n");
+      if(verbose) cout<<"Projection of point "<<x<<" failed, "<<" error "<<temp.maxAbsElement()<<endl;
       return false;
     }
-    //LOG4CXX_INFO(KrisLibrary::logger(),"Projected midpoint: "<<x<<", "<<v<<"\n");
-    //if(KrisLibrary::logger()->isEnabledFor(log4cxx::Level::ERROR_INT)) getchar(); 
+    //cout<<"Projected midpoint: "<<x<<", "<<v<<endl;
+    //getchar(); 
 
 #if OPTIMIZE_TANGENTS
     //if(manifold) FatalError("Can't optimize tangents with a manifold");
     //scale the tangents of the curve so that the midpoint gets closer to x
     //xmid = (x0/8+3/8 x1 + 3/8 x2 + x3/8) + 3/8 (alpha (x1-x0) - beta (x3-x2))
     //Solve least squares
-    //LOG4CXX_INFO(KrisLibrary::logger(),"Projected point :"<<x<<"\n");
+    //cout<<"Projected point :"<<x<<endl;
     Vector t1=c->first.x1-c->first.x0,t2=c->first.x3-c->first.x2;
     Vector xmid = (c->first.x0+c->first.x3)*0.5 + 3.0/8.0*(t1-t2);
     Vector rhs = (x - xmid)*8.0*third;
     Real origDist = xmid.distance(x);
-    //LOG4CXX_INFO(KrisLibrary::logger(),"Xmid "<<xmid<<"\n");
+    //cout<<"Xmid "<<xmid<<endl;
     Vector2 Atb(dot(rhs,t1),-dot(rhs,t2));
     Matrix2 AtA;
     AtA(0,0) = dot(t1,t1) + 1e-1*s.length;
     AtA(0,1) = AtA(1,0) = -dot(t1,t2);
     AtA(1,1) = dot(t2,t2) + 1e-1*s.length;
-    //LOG4CXX_INFO(KrisLibrary::logger(),"AtA: "<<AtA<<"\n");
+    //cout<<"AtA: "<<AtA<<endl;
     bool res = AtA.inplaceInverse();
     if(res) {
       Vector2 alphabeta = AtA*Atb;
-      //LOG4CXX_INFO(KrisLibrary::logger(),"Scaling: "<<alphabeta<<"\n");
+      //cout<<"Scaling: "<<alphabeta<<endl;
       if(manifold) {
 	manifold->Integrate(c->first.x0,(1.0+alphabeta.x)*t1,c->first.x1);
 	manifold->Integrate(c->first.x3,-(1.0+alphabeta.y)*t2,c->first.x2);
@@ -481,8 +479,8 @@ bool SmoothConstrainedInterpolator::Make(const Config& qa,const Vector& da,const
       c->first.Eval(0.5,rhs);
       Real newDist = rhs.distance(x);
       //Assert(newDist <= origDist+Epsilon);
-      //LOG4CXX_INFO(KrisLibrary::logger(),"Result: "<<rhs<<"\n");
-      //if(KrisLibrary::logger()->isEnabledFor(log4cxx::Level::ERROR_INT)) getchar();
+      //cout<<"Result: "<<rhs<<endl;
+      //getchar();
     }
 #endif // OPTIMIZE_TANGENTS
 
@@ -526,27 +524,27 @@ bool SmoothConstrainedInterpolator::Make(const Config& qa,const Vector& da,const
     Vector temp;
     c1.Deriv(0,temp);
     if(!temp.isEqual((c->first.x1-c->first.x0)*3.0*0.5,1e-4)) {
-      LOG4CXX_INFO(KrisLibrary::logger(),"Invalid starting derivative of subdivision 1"<<"\n");
-      LOG4CXX_INFO(KrisLibrary::logger(),temp<<" vs "<<(c->first.x1-c->first.x0)*3.0*0.5<<"\n");
-      if(KrisLibrary::logger()->isEnabledFor(log4cxx::Level::ERROR_INT)) getchar();
+      cout<<"Invalid starting derivative of subdivision 1"<<endl;
+      cout<<temp<<" vs "<<(c->first.x1-c->first.x0)*3.0*0.5<<endl;
+      getchar();
     }
     c1.Deriv(1,temp);
     if(!temp.isEqual(v*0.5,1e-4)) {
-      LOG4CXX_INFO(KrisLibrary::logger(),"Invalid ending derivative of subdivision 1"<<"\n");
-      LOG4CXX_INFO(KrisLibrary::logger(),temp<<" vs "<<v*0.5<<"\n");
-      if(KrisLibrary::logger()->isEnabledFor(log4cxx::Level::ERROR_INT)) getchar();
+      cout<<"Invalid ending derivative of subdivision 1"<<endl;
+      cout<<temp<<" vs "<<v*0.5<<endl;
+      getchar();
     }
     c2.Deriv(0,temp);
     if(!temp.isEqual(v*0.5,1e-4)) {
-      LOG4CXX_INFO(KrisLibrary::logger(),"Invalid starting derivative of subdivision 2"<<"\n");
-      LOG4CXX_INFO(KrisLibrary::logger(),temp<<" vs "<<v*0.5<<"\n");
-      if(KrisLibrary::logger()->isEnabledFor(log4cxx::Level::ERROR_INT)) getchar();
+      cout<<"Invalid starting derivative of subdivision 2"<<endl;
+      cout<<temp<<" vs "<<v*0.5<<endl;
+      getchar();
     }
     c2.Deriv(1,temp);
     if(!temp.isEqual((c->first.x3-c->first.x2)*3.0*0.5,1e-4)) {
-      LOG4CXX_INFO(KrisLibrary::logger(),"Invalid ending derivative of subdivision 2"<<"\n");
-      LOG4CXX_INFO(KrisLibrary::logger(),temp<<" vs "<<(c->first.x3-c->first.x2)*3.0*0.5<<"\n");
-      if(KrisLibrary::logger()->isEnabledFor(log4cxx::Level::ERROR_INT)) getchar();
+      cout<<"Invalid ending derivative of subdivision 2"<<endl;
+      cout<<temp<<" vs "<<(c->first.x3-c->first.x2)*3.0*0.5<<endl;
+      getchar();
     }
     */
 
@@ -559,34 +557,34 @@ bool SmoothConstrainedInterpolator::Make(const Config& qa,const Vector& da,const
     Real l2=c2.OuterLength();
     if(l1 > 0.5*(1.0+maxGrowth)*s.length) {
       if(verbose) {
-	LOG4CXX_INFO(KrisLibrary::logger(),"Projection exceeded growth factor: ");
-	LOG4CXX_INFO(KrisLibrary::logger(),l1<<" > "<<0.5*(1.0+maxGrowth)*s.length<<"\n");
+	cout<<"Projection exceeded growth factor: ";
+	cout<<l1<<" > "<<0.5*(1.0+maxGrowth)*s.length<<endl;
       }
       /*
-      LOG4CXX_INFO(KrisLibrary::logger(),c->first.x0<<", "<<c->first.x1<<", "<<c->first.x2<<", "<<c->first.x3<<"\n");
+      cout<<c->first.x0<<", "<<c->first.x1<<", "<<c->first.x2<<", "<<c->first.x3<<endl;
       c->first.Midpoint(x);
       c->first.MidpointDeriv(v);
-      LOG4CXX_INFO(KrisLibrary::logger(),"Midpoint: "<<x<<", deriv "<<v<<"\n");
+      cout<<"Midpoint: "<<x<<", deriv "<<v<<endl;
       Project(x);
       ProjectVelocity(x,v);
-      LOG4CXX_INFO(KrisLibrary::logger(),"Projected midpoint: "<<x<<", deriv "<<v<<"\n");
+      cout<<"Projected midpoint: "<<x<<", deriv "<<v<<endl;
       */
-      //if(KrisLibrary::logger()->isEnabledFor(log4cxx::Level::ERROR_INT)) getchar();
+      //getchar();
       return false;
     }
     if(l2 > 0.5*(1.0+maxGrowth)*s.length) {
       if(verbose) {
-	LOG4CXX_INFO(KrisLibrary::logger(),"Projection exceeded growth factor: ");
-	LOG4CXX_INFO(KrisLibrary::logger(),l2<<" > "<<0.5*(1.0+maxGrowth)*s.length<<"\n");
+	cout<<"Projection exceeded growth factor: ";
+	cout<<l2<<" > "<<0.5*(1.0+maxGrowth)*s.length<<endl;
       }
       /*
-      LOG4CXX_INFO(KrisLibrary::logger(),c->first.x0<<", "<<c->first.x1<<", "<<c->first.x2<<", "<<c->first.x3<<"\n");      
+      cout<<c->first.x0<<", "<<c->first.x1<<", "<<c->first.x2<<", "<<c->first.x3<<endl;      
       c->first.Midpoint(x);
       c->first.MidpointDeriv(v);
-      LOG4CXX_INFO(KrisLibrary::logger(),"Midpoint: "<<x<<", deriv "<<v<<"\n");
+      cout<<"Midpoint: "<<x<<", deriv "<<v<<endl;
       Project(x);
       ProjectVelocity(x,v);
-      LOG4CXX_INFO(KrisLibrary::logger(),"Projected midpoint: "<<x<<", deriv "<<v<<"\n");
+      cout<<"Projected midpoint: "<<x<<", deriv "<<v<<endl;
       */
       return false;
     }
@@ -613,12 +611,12 @@ bool SmoothConstrainedInterpolator::Make(const Config& qa,const Vector& da,const
       m->first.Deriv(1,vp);
       vp /= m->second;
       if(!vn.isEqual(vp,1e-2)) {
-	LOG4CXX_INFO(KrisLibrary::logger(),"Next derivative inequality!\n");
-	LOG4CXX_INFO(KrisLibrary::logger(),"End: "<<vp<<"\n");
-	LOG4CXX_INFO(KrisLibrary::logger(),"Duration "<<m->second<<"\n");
-	LOG4CXX_INFO(KrisLibrary::logger(),"Start of next: "<<vn<<"\n");
-	LOG4CXX_INFO(KrisLibrary::logger(),"Duration "<<n->second<<"\n");
-	if(KrisLibrary::logger()->isEnabledFor(log4cxx::Level::ERROR_INT)) getchar();
+	printf("Next derivative inequality!\n");
+	cout<<"End: "<<vp<<endl;
+	cout<<"Duration "<<m->second<<endl;
+	cout<<"Start of next: "<<vn<<endl;
+	cout<<"Duration "<<n->second<<endl;
+	getchar();
       }
     }
     n = c;
@@ -630,12 +628,12 @@ bool SmoothConstrainedInterpolator::Make(const Config& qa,const Vector& da,const
       n->first.Deriv(1,vp);
       vp /= n->second;
       if(!vn.isEqual(vp,1e-2)) {
-	LOG4CXX_INFO(KrisLibrary::logger(),"Prev derivative inequality!\n");
-	LOG4CXX_INFO(KrisLibrary::logger(),"End: "<<vp<<"\n");
-	LOG4CXX_INFO(KrisLibrary::logger(),"Duration "<<n->second<<"\n");
-	LOG4CXX_INFO(KrisLibrary::logger(),"Start of next: "<<vn<<"\n");
-	LOG4CXX_INFO(KrisLibrary::logger(),"Duration "<<c->second<<"\n");
-	if(KrisLibrary::logger()->isEnabledFor(log4cxx::Level::ERROR_INT)) getchar();
+	printf("Prev derivative inequality!\n");
+	cout<<"End: "<<vp<<endl;
+	cout<<"Duration "<<n->second<<endl;
+	cout<<"Start of next: "<<vn<<endl;
+	cout<<"Duration "<<c->second<<endl;
+	getchar();
       }
     }
     */
@@ -671,16 +669,16 @@ bool SmoothConstrainedInterpolator::Make(const Config& qa,const Vector& da,const
     vn /= path.durations[i+1];
 
     if(!vn.isEqual(vp,1e-2)) {
-      LOG4CXX_INFO(KrisLibrary::logger(),"Derivative inequality!\n");
-      LOG4CXX_INFO(KrisLibrary::logger(),"End: "<<vp<<"\n");
-      LOG4CXX_INFO(KrisLibrary::logger(),"Duration "<<path.durations[i]<<"\n");
-      LOG4CXX_INFO(KrisLibrary::logger(),"Start of next: "<<vn<<"\n");
-      LOG4CXX_INFO(KrisLibrary::logger(),"Duration "<<path.durations[i+1]<<"\n");
-      if(KrisLibrary::logger()->isEnabledFor(log4cxx::Level::ERROR_INT)) getchar();
+      printf("Derivative inequality!\n");
+      cout<<"End: "<<vp<<endl;
+      cout<<"Duration "<<path.durations[i]<<endl;
+      cout<<"Start of next: "<<vn<<endl;
+      cout<<"Duration "<<path.durations[i+1]<<endl;
+      getchar();
     }
     else {
       if(path.durations[i] != path.durations[i+1])
-	LOG4CXX_INFO(KrisLibrary::logger(),"Different durations work!"<<"\n");
+	cout<<"Different durations work!"<<endl;
     }
   }
   */
@@ -710,7 +708,7 @@ bool SmoothConstrainedInterpolator::ProjectVelocity(const Config& x,Config& v)
   RobustSVD<Real> svd;
   bool res=svd.set(J);
   if(!res) {
-        LOG4CXX_ERROR(KrisLibrary::logger(),"SmoothConstrainedInterpolator: Numerical error projecting velocity?\n");
+    fprintf(stderr,"SmoothConstrainedInterpolator: Numerical error projecting velocity?\n");
     return false;
   }
   Vector temp;
@@ -781,10 +779,10 @@ bool MultiSmoothInterpolate(SmoothConstrainedInterpolator& interp,const vector<V
     //bool res=interp.Make(pts[i],di,pts[i+1],dn,cpath);
     bool res=interp.Make(pathSegs[i].x0,derivs[i],pathSegs[i].x3,derivs[i+1],cpath);
     if(!res) {
-      LOG4CXX_INFO(KrisLibrary::logger(),"Could not make path between point "<<i<<" and "<<i+1);
+      printf("Could not make path between point %d and %d\n",i,i+1);
       return false;
     }
-    //LOG4CXX_INFO(KrisLibrary::logger(),"Actual initial velocity: "<<3.0*(cpath.front().x1-cpath.front().x0)/cdurations.front()<<", terminal velocity: "<<3.0*(cpath.back().x3-cpath.back().x2)/cdurations.back()<<"\n");
+    //cout<<"Actual initial velocity: "<<3.0*(cpath.front().x1-cpath.front().x0)/cdurations.front()<<", terminal velocity: "<<3.0*(cpath.back().x3-cpath.back().x2)/cdurations.back()<<endl;
     path.Concat(cpath);
   }
   return true;
@@ -825,7 +823,7 @@ bool MultiSmoothInterpolate(SmoothConstrainedInterpolator& interp,const vector<V
     cpath.durations.resize(0);
     bool res=interp.Make(pathSegs[i].x0,derivs[i],pathSegs[i].x3,derivs[i+1],cpath);
     if(!res) {
-      LOG4CXX_INFO(KrisLibrary::logger(),"Could not make path between point "<<i<<" and "<<i+1);
+      printf("Could not make path between point %d and %d\n",i,i+1);
       return false;
     }
 #if DEBUG_ACCELS
@@ -843,10 +841,10 @@ bool MultiSmoothInterpolate(SmoothConstrainedInterpolator& interp,const vector<V
       avgAcc += anorm;
     }
     pathSegs[i].Accel(0.5,a);
-    LOG4CXX_INFO(KrisLibrary::logger(),"Accel interpolating from point "<<i<<" -> "<<i+1<<": max "<<maxAcc<<", avg "<<avgAcc/(2*cpath.segments.size())<<", orig "<<a.norm());
+    printf("Accel interpolating from point %d -> %d: max %g, avg %g, orig %g\n",i,i+1,maxAcc,avgAcc/(2*cpath.segments.size()),a.norm());
 #endif
-    //LOG4CXX_INFO(KrisLibrary::logger(),"Actual initial velocity: "<<3.0*(cpath.front().x1-cpath.front().x0)/cdurations.front()<<", terminal velocity: "<<3.0*(cpath.back().x3-cpath.back().x2)/cdurations.back()<<"\n");
-    //LOG4CXX_INFO(KrisLibrary::logger(),"Interp segment "<<i<<" duration "<<cpath.TotalTime()<<"\n");
+    //cout<<"Actual initial velocity: "<<3.0*(cpath.front().x1-cpath.front().x0)/cdurations.front()<<", terminal velocity: "<<3.0*(cpath.back().x3-cpath.back().x2)/cdurations.back()<<endl;
+    //cout<<"Interp segment "<<i<<" duration "<<cpath.TotalTime()<<endl;
     path.Concat(cpath);
   }
   return true;
@@ -871,7 +869,7 @@ bool AppendInterpolate(SmoothConstrainedInterpolator& interp,const Vector& pt,Re
     return false;
   }
   cpath.TimeScale(suffixDuration);
-  //LOG4CXX_INFO(KrisLibrary::logger(),"Actual initial velocity: "<<3.0*(cpath.front().x1-cpath.front().x0)/cdurations.front()<<", terminal velocity: "<<3.0*(cpath.back().x3-cpath.back().x2)/cdurations.back()<<"\n");
+  //cout<<"Actual initial velocity: "<<3.0*(cpath.front().x1-cpath.front().x0)/cdurations.front()<<", terminal velocity: "<<3.0*(cpath.back().x3-cpath.back().x2)/cdurations.back()<<endl;
   path.Concat(cpath);
   return true;
 }

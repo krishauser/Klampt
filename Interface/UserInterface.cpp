@@ -1,5 +1,3 @@
-#include <log4cxx/logger.h>
-#include <KrisLibrary/Logger.h>
 #include "UserInterface.h"
 #include "Planning/RealTimePlanner.h"
 #include "Planning/RealTimeRRTPlanner.h"
@@ -31,20 +29,20 @@ public:
     //impose hard real time constraint
     /*
     Real t= iface->GetCurTime();
-    LOG4CXX_INFO(KrisLibrary::logger(),"Plan time elapsed = "<<t-tplanstart<<", split time ... "<<tcut);
+    printf("Plan time elapsed = %g, split time ... %g\n",t-tplanstart,tcut);
     if(t >= tplanstart+tcut) {
       //too late
-      LOG4CXX_INFO(KrisLibrary::logger(),"MotionQueueInterfaceSender: Path send violates hard real-time constraint\n");
+      printf("MotionQueueInterfaceSender: Path send violates hard real-time constraint\n");
       return false;
     }
     */
     MotionQueueInterface::MotionResult res=iface->SendPathImmediate(tplanstart+tcut,path);
     if(res == MotionQueueInterface::TransmitError) {
-      LOG4CXX_ERROR(KrisLibrary::logger(),"MotionQueueInterfaceSender: Transmission error\n");
+      printf("MotionQueueInterfaceSender: Transmission error\n");
       return false;
     }
     else if(res != MotionQueueInterface::Success) {
-      LOG4CXX_INFO(KrisLibrary::logger(),"MotionQueueInterfaceSender: Hmmm.. failed path check.  Should debug!\n");
+      printf("MotionQueueInterfaceSender: Hmmm.. failed path check.  Should debug!\n");
       return false;
     }
       
@@ -363,13 +361,13 @@ string PlannerCommandInterface::UpdateEvent()
       robotInterface->GetEndConfig(q);
       v.resize(q.n,Zero);
       if(obj->TerminalCost(0,q,v) > startObjectiveThreshold) {
-	LOG4CXX_INFO(KrisLibrary::logger(),"Waiting until the objective gets below "<<startObjectiveThreshold<<", currently "<<obj->TerminalCost(0,q,v)<<"...\n");
-  return "";
+	printf("Waiting until the objective gets below %g, currently %g...\n",startObjectiveThreshold,obj->TerminalCost(0,q,v));
+	return "";
       }
       else started=true;
     } 
     else {
-      LOG4CXX_INFO(KrisLibrary::logger(),"Waiting for an objective...\n");
+      printf("Waiting for an objective...\n");
     }
   }
   if(!started) return "";
@@ -380,7 +378,7 @@ string PlannerCommandInterface::UpdateEvent()
   }
   if(robotInterface->HadExternalChange()) {
     if(robotInterface->GetCurTime()  < robotInterface->GetEndTime()) {
-            LOG4CXX_ERROR(KrisLibrary::logger(),"Cannot handle an externally changed robot that is still moving\n");
+      fprintf(stderr,"Cannot handle an externally changed robot that is still moving\n");
       return "";
     }
     Config q;
@@ -400,7 +398,7 @@ string PlannerCommandInterface::UpdateEvent()
     planner->Reset(plannerObjective);
   }
 
-  //LOG4CXX_INFO(KrisLibrary::logger(),"Path advance "<<startPlanTime-lastPlanTime<<"\n");
+  //cout<<"Path advance "<<startPlanTime-lastPlanTime<<endl;
   /*
   //TODO: debug with mirror config at time startPlanTime, not the queried
   //config from the server
@@ -408,10 +406,11 @@ string PlannerCommandInterface::UpdateEvent()
   robotInterface->GetCurConfig(qcur);
   //double check the assumptions of the planner
   if(MaxAbsError(planner->currentPath.ramps.front().x0,qcur)>1e-2) {
-    LOG4CXX_INFO(KrisLibrary::logger(),"Major discrepancy between predicted and actual path"<<"\n");
-    LOG4CXX_INFO(KrisLibrary::logger(),"\tCur predicted config "); PrintConfig( cout,planner->currentPath.ramps.front().x0); cout<<endl;
-    LOG4CXX_INFO(KrisLibrary::logger(),"\tCur actual config "); PrintConfig(cout,qcur); cout<<endl;
-    KrisLibrary::loggerWait();
+    cout<<"Major discrepancy between predicted and actual path"<<endl;
+    cout<<"\tCur predicted config "; PrintConfig(cout,planner->currentPath.ramps.front().x0); cout<<endl;
+    cout<<"\tCur actual config "; PrintConfig(cout,qcur); cout<<endl;
+    getchar();
+    
     robotInterface->GetCurConfig(qcur);
     if(robotInterface->GetEndTime() <= robotInterface->GetCurTime()) {
       planner->currentPath.ramps.resize(1);
@@ -421,14 +420,14 @@ string PlannerCommandInterface::UpdateEvent()
     }
   }
   */
-  //LOG4CXX_INFO(KrisLibrary::logger(),"End time "<<GetEndTime()<<", predicted end time "<<t+updatedCurrent.GetTotalTime()<<"\n");    
+  //cout<<"End time "<<GetEndTime()<<", predicted end time "<<t+updatedCurrent.GetTotalTime()<<endl;    
   
   Timer timer;
   Real splitTime=0,planTime=0;
   bool res=false;
   if(planner->Objective() != NULL) {
     res=planner->PlanUpdate(t,splitTime,planTime);
-    LOG4CXX_INFO(KrisLibrary::logger(),"Plan update: time "<<t<<", time elapsed "<<planTime<<", result "<<(int)res);
+    printf("Plan update: time %g, time elapsed %g, result %d\n",t,planTime,(int)res);
     
     ss<<"Plan "<<planTime<<", padding "<<planner->currentPadding<<", split "<<splitTime<<", res "<<res<<endl;
     assert(planner->currentPath.IsValid());
@@ -444,7 +443,7 @@ string PlannerCommandInterface::UpdateEvent()
 string IKPlannerCommandInterface::ActivateEvent(bool enabled)
 {
   if(!planner) {
-    LOG4CXX_INFO(KrisLibrary::logger(),"IK planner activated, 150ms loop\n");
+    printf("IK planner activated, 150ms loop\n");
     assert(settings != NULL);
     cspace = new SingleRobotCSpace(*planningWorld,0,settings);
     
@@ -558,20 +557,20 @@ string MTPlannerCommandInterface::UpdateEvent()
       robotInterface->GetEndConfig(q);
       v.resize(q.n,Zero);
       if(obj->TerminalCost(0,q,v) > startObjectiveThreshold) {
-	LOG4CXX_INFO(KrisLibrary::logger(),"Waiting until the objective gets below "<<startObjectiveThreshold<<", currently "<<obj->TerminalCost(0,q,v)<<"...\n");
-  return "";
+	printf("Waiting until the objective gets below %g, currently %g...\n",startObjectiveThreshold,obj->TerminalCost(0,q,v));
+	return "";
       }
       else started=true;
     } 
     else {
-      LOG4CXX_INFO(KrisLibrary::logger(),"Waiting for an objective...\n");
+      printf("Waiting for an objective...\n");
     }
   }
   if(!started) return "";
 
   if(robotInterface->HadExternalChange()) {
     if(robotInterface->GetCurTime()  < robotInterface->GetEndTime()) {
-            LOG4CXX_ERROR(KrisLibrary::logger(),"Cannot handle an externally changed robot that is still moving\n");
+      fprintf(stderr,"Cannot handle an externally changed robot that is still moving\n");
       return "";
     }
     Config q;
@@ -590,13 +589,12 @@ string MTPlannerCommandInterface::UpdateEvent()
     //evaluate the objective
     PlannerObjectiveBase* oldObj = planningThread.GetObjective();
     if((oldObj && !obj) || (oldObj && oldObj->Delta(obj) > gPlannerStopDeltaThreshold)) {
-      LOG4CXX_INFO(KrisLibrary::logger(),"\n");
-      if(obj){
-	       LOG4CXX_INFO(KrisLibrary::logger(),"********* Objective changed, STOP PLANNING **********\n");
-      }else{
-	       LOG4CXX_INFO(KrisLibrary::logger(),"********* Objective deleted, STOP PLANNING **********\n");
-      }
-      LOG4CXX_INFO(KrisLibrary::logger(),"\n");
+      printf("\n");
+      if(obj)
+	printf("********* Objective changed, STOP PLANNING **********\n");
+      else
+	printf("********* Objective deleted, STOP PLANNING **********\n");
+      printf("\n");
       planningThread.BreakPlanning();
     }
   }

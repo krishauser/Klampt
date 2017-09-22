@@ -5,8 +5,6 @@
  *      Author: yajia
  */
 
-#include <log4cxx/logger.h>
-#include <KrisLibrary/Logger.h>
 #include "URDFConverter.h"
 #include <fstream>
 #include <KrisLibrary/utils/stringutils.h>
@@ -113,7 +111,7 @@ URDFLinkNode::URDFLinkNode(boost::shared_ptr<urdf::Link>& link, int index, int i
 
 void URDFLinkNode::GetGeometryProperty(bool useVisGeom){
 	if(!this->link){
-		LOG4CXX_INFO(KrisLibrary::logger(),"link is NULL!"<<"\n");
+		cout<<"link is NULL!"<<endl;
 		return;
 	}
 	geomScale.setIdentity();
@@ -166,7 +164,7 @@ void URDFLinkNode::GetGeometryProperty(bool useVisGeom){
 			}
 		}
 	  else {
-	    LOG4CXX_INFO(KrisLibrary::logger(),"Unknown URDF geometry type "<<(int)geom->type<<"\n");
+	    cout<<"Unknown URDF geometry type "<<(int)geom->type<<endl;
 	  }
 	}else{
 		geomName = "";
@@ -176,7 +174,7 @@ void URDFLinkNode::GetGeometryProperty(bool useVisGeom){
 
 void URDFLinkNode::GetTransformations(){
 	if(!this->link){
-		LOG4CXX_INFO(KrisLibrary::logger(),"link is NULL!"<<"\n");
+		cout<<"link is NULL!"<<endl;
 		return;
 	}
 	urdf::Vector3 pos;

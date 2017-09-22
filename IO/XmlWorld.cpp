@@ -1,5 +1,3 @@
-#include <log4cxx/logger.h>
-#include <KrisLibrary/Logger.h>
 #include "XmlWorld.h"
 #include "View/Texturizer.h"
 #include <KrisLibrary/utils/stringutils.h>
@@ -108,25 +106,25 @@ bool XmlRobot::GetRobot(Robot& robot)
 {
   const char* fn = e->Attribute("file");
   if(!fn) {
-        LOG4CXX_ERROR(KrisLibrary::logger(),"XmlRobot: element does not contain file attribute\n");
+    fprintf(stderr,"XmlRobot: element does not contain file attribute\n");
     return false;
   }
   string sfn = path + string(fn);
   if(!robot.Load(sfn.c_str())) {
-    LOG4CXX_ERROR(KrisLibrary::logger(),"XmlRobot: error loading "<<sfn.c_str() <<", trying absolute path\n");
+    fprintf(stderr,"XmlRobot: error loading %s, trying absolute path\n",sfn.c_str());
     //try absolute path
     if(!robot.Load(fn)) {
-            LOG4CXX_ERROR(KrisLibrary::logger(),"XmlRobot: error loading "<<sfn.c_str());
+      fprintf(stderr,"XmlRobot: error loading %s\n",sfn.c_str());
       return false;
     }
     else
-            LOG4CXX_ERROR(KrisLibrary::logger(),"XmlRobot: absolute path succeeded\n");
+      fprintf(stderr,"XmlRobot: absolute path succeeded\n");
   }
   Vector q;
   if(e->QueryValueAttribute("config",&q)==TIXML_SUCCESS) {
     if(q.n != robot.q.n) {
-            LOG4CXX_ERROR(KrisLibrary::logger(),""<<q.n<<"!="<<robot.q.n);
-            LOG4CXX_ERROR(KrisLibrary::logger(),"XmlRobot: element's configuration doesnt match size with the robot\n");
+      fprintf(stderr,"%d!=%d\n",q.n,robot.q.n);
+      fprintf(stderr,"XmlRobot: element's configuration doesnt match size with the robot\n");
       return false;
     }
     robot.UpdateConfig(q);
@@ -134,14 +132,14 @@ bool XmlRobot::GetRobot(Robot& robot)
   if(e->Attribute("configfile")!= NULL) {
     ifstream in (e->Attribute("configfile"),ios::in);
     if(!in) {
-            LOG4CXX_ERROR(KrisLibrary::logger(),"XmlRobot: could not open robot config file "<<e->Attribute("configfile"));
+      fprintf(stderr,"XmlRobot: could not open robot config file %s\n",e->Attribute("configfile"));
       return false;
     }
     Vector q;
     in >> q;
     if(q.n != robot.q.n) {
-            LOG4CXX_ERROR(KrisLibrary::logger(),""<<q.n<<"!="<<robot.q.n);
-            LOG4CXX_ERROR(KrisLibrary::logger(),"XmlRobot: configuration file "<<e->Attribute("configfile"));
+      fprintf(stderr,"%d!=%d\n",q.n,robot.q.n);
+      fprintf(stderr,"XmlRobot: configuration file %s vector  doesnt match size with the robot\n",e->Attribute("configfile"));
       return false;
     }
     robot.UpdateConfig(q);
@@ -189,13 +187,13 @@ bool XmlRigidObject::GetRigidObject(RigidObject& obj)
   if(fn) {
     string sfn = path + string(fn);
     if(!obj.Load(sfn.c_str())) {
-        LOG4CXX_ERROR(KrisLibrary::logger(),"XmlRigidObject: error loading "<<sfn.c_str()<<", trying absolute path\n");
-        if(!obj.Load(fn)) {
-		LOG4CXX_ERROR(KrisLibrary::logger(),"XmlRigidObject: error loading obj file "<<sfn.c_str());
+      fprintf(stderr,"XmlRigidObject: error loading %s, trying absolute path\n",sfn.c_str());
+      if(!obj.Load(fn)) {
+	fprintf(stderr,"XmlRigidObject: error loading obj file %s\n",sfn.c_str());
 	return false;
       }
       else
-		LOG4CXX_ERROR(KrisLibrary::logger(),"XmlRigidObject: absolute path succeeded\n");
+	fprintf(stderr,"XmlRigidObject: absolute path succeeded\n");
     }
   }
   TiXmlElement* geom=e->FirstChildElement("geometry");
@@ -207,7 +205,7 @@ bool XmlRigidObject::GetRigidObject(RigidObject& obj)
       obj.geomFile = fn;
       string sfn = path + obj.geomFile;
       if(!obj.LoadGeometry(sfn.c_str())) {
-                LOG4CXX_ERROR(KrisLibrary::logger(),"XmlRigidObject: error loading geometry from "<<sfn.c_str());
+        fprintf(stderr,"XmlRigidObject: error loading geometry from %s\n",sfn.c_str());
         return false;
       }
     }
@@ -222,7 +220,7 @@ bool XmlRigidObject::GetRigidObject(RigidObject& obj)
     }
   }
   if(obj.geometry->Empty()) {
-        LOG4CXX_ERROR(KrisLibrary::logger(),"XmlRigidObject: element does not contain geometry attribute\n");
+    fprintf(stderr,"XmlRigidObject: element does not contain geometry attribute\n");
     return false;
   }
 
@@ -274,18 +272,18 @@ bool XmlTerrain::GetTerrain(Terrain& env)
 {
   const char* fn = e->Attribute("file");
   if(!fn) {
-        LOG4CXX_ERROR(KrisLibrary::logger(),"XmlTerrain: element does not contain file attribute\n");
+    fprintf(stderr,"XmlTerrain: element does not contain file attribute\n");
     return false;
   }
   string sfn = path + string(fn);
   if(!env.Load(sfn.c_str())) {
-        LOG4CXX_ERROR(KrisLibrary::logger(),"XmlTerrain: error loading "<< sfn.c_str()<<", trying absolute path\n");
+    fprintf(stderr,"XmlTerrain: error loading %s, trying absolute path\n",sfn.c_str());
     if(!env.Load(fn)) {
-      LOG4CXX_ERROR(KrisLibrary::logger(),"XmlTerrain: error loading "<<sfn.c_str());
+      fprintf(stderr,"XmlTerrain: error loading %s\n",sfn.c_str());
       return false;
     }
     else
-            LOG4CXX_ERROR(KrisLibrary::logger(),"XmlTerrain: absolute path succeeded\n");
+      fprintf(stderr,"XmlTerrain: absolute path succeeded\n");
   }
 
   Real kf;
@@ -357,7 +355,7 @@ class XmlAppearance
     tex.texCoords = Texturizer::ParameterizedTexCoord;
         }
         else {
-    LOG4CXX_INFO(KrisLibrary::logger(),"Unsupported value for texture_projection: "<<e->Attribute("texture_projection"));
+    printf("Unsupported value for texture_projection: %s\n",e->Attribute("texture_projection"));
     tex.texCoords = Texturizer::XYTexCoords;
         }
       }
@@ -446,7 +444,7 @@ bool XmlWorld::GetWorld(RobotWorld& world)
     if(name) sname=name;
     Robot* r = new Robot;
     if(!XmlRobot(e,path).GetRobot(*r)) {
-      LOG4CXX_INFO(KrisLibrary::logger(),"XmlWorld: Unable to load robot "<<sname.c_str());
+      printf("XmlWorld: Unable to load robot %s\n",sname.c_str());
       delete r;
       return false;
     }
@@ -461,7 +459,7 @@ bool XmlWorld::GetWorld(RobotWorld& world)
     if(name) sname=name;
     RigidObject* o = new RigidObject;
     if(!XmlRigidObject(e,path).GetRigidObject(*o)) {
-      LOG4CXX_INFO(KrisLibrary::logger(),"XmlWorld: Unable to load rigid object "<<sname.c_str());
+      printf("XmlWorld: Unable to load rigid object %s\n",sname.c_str());
       delete o;
       return false;
     }
@@ -470,7 +468,7 @@ bool XmlWorld::GetWorld(RobotWorld& world)
     if(!d) d = e->FirstChildElement(appearance);
     if(d) {
       if(!XmlAppearance(d,path).Get(world.rigidObjects[i]->geometry)) {
-	LOG4CXX_WARN(KrisLibrary::logger(),"XmlWorld: Warning, unable to load geometry appearance "<<sname.c_str());
+	printf("XmlWorld: Warning, unable to load geometry appearance %s\n",sname.c_str());
       }
     }
     e = e->NextSiblingElement(object);
@@ -482,7 +480,7 @@ bool XmlWorld::GetWorld(RobotWorld& world)
     string sname = "Terrain";
     Terrain* t = new Terrain;
     if(!XmlTerrain(e,path).GetTerrain(*t)) {
-      LOG4CXX_INFO(KrisLibrary::logger(),"XmlWorld: Unable to load terrain "<<sname.c_str());
+      printf("XmlWorld: Unable to load terrain %s\n",sname.c_str());
       delete t;
       return false;
     }
@@ -497,7 +495,7 @@ bool XmlWorld::GetWorld(RobotWorld& world)
     if(!d) d = e->FirstChildElement(appearance);
     if(d) {
       if(!XmlAppearance(d,path).Get(*world.terrains[i])) {
-	LOG4CXX_WARN(KrisLibrary::logger(),"XmlWorld: Warning, unable to load terrain appearance "<<sname.c_str());
+	printf("XmlWorld: Warning, unable to load terrain appearance %s\n",sname.c_str());
       }
     }
     e = e->NextSiblingElement(terrain);
@@ -561,8 +559,6 @@ const char* DefaultFileExtension(const Geometry::AnyCollisionGeometry3D& geom)
     return ".pcd";
   else if(geom.type == Geometry::AnyGeometry3D::ImplicitSurface)
     return ".vol";
-  else if(geom.type == Geometry::AnyGeometry3D::Group)
-    return ".group";
   else
     return ".unknown";
 }
@@ -579,10 +575,10 @@ bool XmlWorld::Save(RobotWorld& world,const string& fn,string itempath)
     StripExtension(relpath);
     relpath = relpath + "/";
   }
-  LOG4CXX_INFO(KrisLibrary::logger(),"World::Save(): Saving world item files to "<<itempath.c_str());
+  printf("World::Save(): Saving world item files to %s\n",itempath.c_str());
   if(!FileUtils::IsDirectory(itempath.c_str())) {
     if(!FileUtils::MakeDirectoryRecursive(itempath.c_str())) {
-      LOG4CXX_INFO(KrisLibrary::logger(),"World::Save(): could not make directory "<<itempath.c_str());
+      printf("World::Save(): could not make directory %s for world items\n",itempath.c_str());
       return false;
     }
   }
@@ -649,7 +645,7 @@ bool XmlWorld::Save(RobotWorld& world,const string& fn,string itempath)
         if(!FileUtils::IsDirectory(((relpath)+geomdir).c_str()))
           FileUtils::MakeDirectory((relpath+geomdir).c_str());
         world.robots[i]->geomFiles[j] = geomdir + "/" + FileUtils::SafeFileName(world.robots[i]->linkNames[j]) + DefaultFileExtension(*world.robots[i]->geomManagers[j]);
-        LOG4CXX_INFO(KrisLibrary::logger(),"  Saving modified geometry for link "<<world.robots[i]->linkNames[j].c_str()<<" to "<<(relpath + world.robots[i]->geomFiles[j]).c_str());
+        printf("  Saving modified geometry for link %s to %s\n",world.robots[i]->linkNames[j].c_str(),(relpath + world.robots[i]->geomFiles[j]).c_str());
         world.robots[i]->geomManagers[j]->Save((relpath + world.robots[i]->geomFiles[j]).c_str());
       }
     }
@@ -669,7 +665,7 @@ bool XmlWorld::Save(RobotWorld& world,const string& fn,string itempath)
       if(!FileUtils::IsDirectory((relpath+geomdir).c_str()))
         FileUtils::MakeDirectory((relpath+geomdir).c_str());
       world.rigidObjects[i]->geomFile = geomdir + "/" + FileUtils::SafeFileName(world.rigidObjects[i]->name) + DefaultFileExtension(*world.rigidObjects[i]->geometry);
-      LOG4CXX_INFO(KrisLibrary::logger(),"  Saving modified geometry for rigid object "<<world.rigidObjects[i]->name.c_str()<<" to "<<(relpath + world.rigidObjects[i]->geomFile).c_str());
+      printf("  Saving modified geometry for rigid object %s to %s\n",world.rigidObjects[i]->name.c_str(),(relpath + world.rigidObjects[i]->geomFile).c_str());
       world.rigidObjects[i]->geometry->Save((relpath + world.rigidObjects[i]->geomFile).c_str());
     }
   }
@@ -688,29 +684,29 @@ bool XmlWorld::Save(RobotWorld& world,const string& fn,string itempath)
       if(!FileUtils::IsDirectory((relpath+geomdir).c_str()))
         FileUtils::MakeDirectory((relpath+geomdir).c_str());
       world.terrains[i]->geomFile = geomdir + "/" + FileUtils::SafeFileName(world.terrains[i]->name) + DefaultFileExtension(*world.terrains[i]->geometry);
-      LOG4CXX_INFO(KrisLibrary::logger(),"  Saving modified geometry for terrain "<<world.terrains[i]->name.c_str()<<" to "<<(relpath + world.terrains[i]->geomFile).c_str());
+      printf("  Saving modified geometry for terrain %s to %s\n",world.terrains[i]->name.c_str(),(relpath + world.terrains[i]->geomFile).c_str());
       world.terrains[i]->geometry->Save((relpath + world.terrains[i]->geomFile).c_str());
     }
   }
 
   for(size_t i=0;i<world.robots.size();i++) {
-    LOG4CXX_INFO(KrisLibrary::logger(),"  Saving robot to "<<(itempath+robotFileNames[i]).c_str());
+    printf("  Saving robot to %s\n",(itempath+robotFileNames[i]).c_str());
     if(!world.robots[i]->Save((itempath + robotFileNames[i]).c_str())) {
-      LOG4CXX_INFO(KrisLibrary::logger(),"  Robot saving failed.\n");
+      printf("  Robot saving failed.\n");
       return false;
     }
   }
   for(size_t i=0;i<world.rigidObjects.size();i++) {
-    LOG4CXX_INFO(KrisLibrary::logger(),"  Saving rigid object to "<<(itempath+objectFileNames[i]).c_str());
+    printf("  Saving rigid object to %s\n",(itempath+objectFileNames[i]).c_str());
     if(!world.rigidObjects[i]->Save((itempath + objectFileNames[i]).c_str())) {
-      LOG4CXX_INFO(KrisLibrary::logger(),"  Rigid object saving failed.\n");
+      printf("  Rigid object saving failed.\n");
       return false;
     }
   }
   for(size_t i=0;i<world.terrains.size();i++) {
-    LOG4CXX_INFO(KrisLibrary::logger(),"  Saving terrain to "<<(itempath+terrainFileNames[i]).c_str());
+    printf("  Saving terrain to %s\n",(itempath+terrainFileNames[i]).c_str());
     if(!world.terrains[i]->Save((itempath + terrainFileNames[i]).c_str())) {
-      LOG4CXX_INFO(KrisLibrary::logger(),"  Terrain saving failed.\n");
+      printf("  Terrain saving failed.\n");
       return false;
     }
   }
@@ -740,6 +736,6 @@ bool XmlWorld::Save(RobotWorld& world,const string& fn,string itempath)
   fprintf(out,"</world>\n");
   fclose(out);
   if(geomErrors)
-    LOG4CXX_WARN(KrisLibrary::logger(),"World::Save(): warning: geometry files may not be saved properly\n");
+    printf("World::Save(): warning: geometry files may not be saved properly\n");
   return true; 
 }

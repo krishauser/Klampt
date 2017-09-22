@@ -1,5 +1,3 @@
-#include <log4cxx/logger.h>
-#include <KrisLibrary/Logger.h>
 #include "orXmlEnvironment.h"
 #include "Modeling/Mass.h"
 #include <sstream>
@@ -65,7 +63,7 @@ bool OrXmlKinbody::RemoveSameBody() {
 					== strcmp(xmlBodys[i]->name.c_str(),
 							newBodys[j]->name.c_str())) {
 				combineTwoBody(newBodys[j], xmlBodys[i]);
-//				LOG4CXX_INFO(KrisLibrary::logger(),newBodys[j]->name<<";"<<newBodys[j]->offsetfrom<<"\n");
+//				cout<<newBodys[j]->name<<";"<<newBodys[j]->offsetfrom<<endl;
 				repeat = true;
 				break;
 			}
@@ -83,8 +81,8 @@ bool OrXmlKinbody::RemoveSameBody() {
 //copy extra properties of b2 to b1
 void OrXmlKinbody::combineTwoBody(OrXmlBody* b1, OrXmlBody* b2) {
 	if (0 != strcmp(b1->name.c_str(), b2->name.c_str())) {
-		LOG4CXX_ERROR(KrisLibrary::logger(), "Error: Bodies' names are not the same!\n");
-		//Krislibrary::loggerWait();
+		cout << "Error: Bodies' names are not the same!\n" << flush;
+		getchar();
 	}
 	if ((b1->xmlGeoms.size() > 0 && b2->xmlGeoms.size() > 0)\
 
@@ -95,8 +93,8 @@ void OrXmlKinbody::combineTwoBody(OrXmlBody* b1, OrXmlBody* b2) {
 			|| (b1->vispoints.size() > 0 && b2->vispoints.size() > 0)\
 
 			|| (b1->colpoints.size() > 0 && b2->colpoints.size() > 0)) {
-		LOG4CXX_ERROR(KrisLibrary::logger(), "Error: both bodies have same properties!\n" );
-		//Krislibrary::loggerWait();
+		cout << "Error: both bodies have same properties!\n" << flush;
+		getchar();
 	}
 	if (!b2->offsetfrom.empty() && b1->offsetfrom.empty()) {
 		b1->offsetfrom = b2->offsetfrom;
@@ -146,25 +144,25 @@ bool OrXmlKinbody::appyTran2Tparent(OrXmlTransformation* tran) {
 		return true;
 	}
 	if (!isGetAllBodys) {
-		LOG4CXX_INFO(KrisLibrary::logger(), "Should call GetAllBodyJoints first!\n" );
-		//Krislibrary::loggerWait();
+		cout << "Should call GetAllBodyJoints first!\n" << flush;
+		getchar();
 		return false;
 	}
 	if (!hasSetPrefix) {
-		LOG4CXX_INFO(KrisLibrary::logger(), name << " hasSetPrefix == false!\n" );
-		//Krislibrary::loggerWait();
+		cout << name << " hasSetPrefix == false!\n" << flush;
+		getchar();
 		return false;
 	}
 	tran->ComputeTransform();
 	for (size_t i = 0; i < this->xmlBodys.size(); i++) {
 //		if(0==strcmp(xmlBodys[i]->name.c_str(),"rightIndexProximal")){
-//			LOG4CXX_INFO(KrisLibrary::logger(),"here1! "<<name<<":"<<xmlBodys[i]->name<<"\n");
+//			cout<<"here1! "<<name<<":"<<xmlBodys[i]->name<<endl;
 //			if(xmlBodys[i]->transformation){
 //				xmlBodys[i]->transformation->ComputeTransform();
-//				LOG4CXX_INFO(KrisLibrary::logger(),*xmlBodys[i]->transformation->T<<"\n");
+//				cout<<*xmlBodys[i]->transformation->T<<endl<<flush;
 //			}
-//			LOG4CXX_INFO(KrisLibrary::logger(),"tran:"<<*tran->T<<"\n");
-//			//Krislibrary::loggerWait();
+//			cout<<"tran:"<<*tran->T<<endl;
+//			getchar();
 //		}
 		if (xmlBodys[i]->offsetfrom.empty()){
 			xmlBodys[i]->applyTran2Tparent(tran);
@@ -181,19 +179,19 @@ bool OrXmlKinbody::appyTran2Tparent(OrXmlTransformation* tran) {
 			}
 			if (offsetfromhere == false) {
 				xmlBodys[i]->applyTran2Tparent(tran);
-//				LOG4CXX_INFO(KrisLibrary::logger(), "apply Kinbody tran:" << *tran->T << "\n")
+//				cout << "apply Kinbody tran:" << *tran->T << endl
 //						<< xmlBodys[i]->name << endl << xmlBodys[i]->offsetfrom
-//						;
-//				//Krislibrary::loggerWait();
+//						<< flush;
+//				getchar();
 			}
 		}
 //		if(0==strcmp(xmlBodys[i]->name.c_str(),"rightIndexProximal")){
-//			LOG4CXX_INFO(KrisLibrary::logger(),"here2! "<<name<<":"<<xmlBodys[i]->name<<"\n");
+//			cout<<"here2! "<<name<<":"<<xmlBodys[i]->name<<endl;
 //			if(xmlBodys[i]->transformation){
 ////				xmlBodys[i]->transformation->ComputeTransform();
-//				LOG4CXX_INFO(KrisLibrary::logger(),*xmlBodys[i]->transformation->T);
+//				cout<<*xmlBodys[i]->transformation->T<<flush;
 //			}
-//			//Krislibrary::loggerWait();
+//			getchar();
 //		}
 	}
 	return true;
@@ -201,15 +199,15 @@ bool OrXmlKinbody::appyTran2Tparent(OrXmlTransformation* tran) {
 
 void OrXmlKinbody::GetAllBodyGeom() {
 	if (!isGetAllBodys) {
-		LOG4CXX_INFO(KrisLibrary::logger(), "Should call GetAllBodyJoints first!\n" );
-		//Krislibrary::loggerWait();
+		cout << "Should call GetAllBodyJoints first!\n" << flush;
+		getchar();
 	}
 	for (size_t i = 0; i < this->xmlBodys.size(); i++) {
 		xmlBodys[i]->GetMimicGeomMass();
 		xmlBodys[i]->GetFinalGeom();
 		if (xmlBodys[i]->transformation)
 			xmlBodys[i]->transformation->ComputeTransform();
-		LOG4CXX_INFO(KrisLibrary::logger(),"kinbody:GetAllBodyGeom:"<<xmlBodys[i]->name<<"\n");
+		cout<<"kinbody:GetAllBodyGeom:"<<xmlBodys[i]->name<<endl;
 	}
 }
 
@@ -308,18 +306,18 @@ bool OrXmlKinbody::GetContent() {
 		sprintf(filename, "%s%s%s", ROBOT_DIR.c_str(), kin_dir_str.c_str(), name);
 
 
-//		LOG4CXX_INFO(KrisLibrary::logger(),"ROBOT_DIR:"<<ROBOT_DIR<<"\n");
-//		LOG4CXX_INFO(KrisLibrary::logger(),"KINBODY_DIR:"<<KINBODY_DIR<<"\n");
-//		LOG4CXX_INFO(KrisLibrary::logger(),"file:"<<file<<"\n");
-//		LOG4CXX_INFO(KrisLibrary::logger(),"path:"<<path<<"\n");
-//		LOG4CXX_INFO(KrisLibrary::logger(),"name:"<<name<<"\n");
-//		LOG4CXX_INFO(KrisLibrary::logger(),"filename:"<<filename<<"\n");
+//		cout<<"ROBOT_DIR:"<<ROBOT_DIR<<endl;
+//		cout<<"KINBODY_DIR:"<<KINBODY_DIR<<endl;
+//		cout<<"file:"<<file<<endl;
+//		cout<<"path:"<<path<<endl;
+//		cout<<"name:"<<name<<endl;
+//		cout<<"filename:"<<filename<<endl;
 		if (!doc->LoadFile(filename))
-			LOG4CXX_ERROR(KrisLibrary::logger(), "Error in loading file " << filename << "\n");
+			cout << "Error in loading file " << filename << endl;
 		TiXmlElement* originalE = e;
 		e = doc->RootElement();
 		if (!this->getRealContent()) {
-			LOG4CXX_ERROR(KrisLibrary::logger(), "Error in read file of Kinbody!\n");
+			cout << "Error in read file of Kinbody!\n";
 			return false;
 		}
 		e = originalE;
@@ -341,8 +339,8 @@ bool OrXmlKinbody::getRealContent() {
 
 	TiXmlElement* c = getFirstChild(e, "offsetfrom");
 	if (c) {
-		LOG4CXX_ERROR(KrisLibrary::logger(), "Error: no support for offsetfrom tag in Kinbody!\n" );
-		//Krislibrary::loggerWait();
+		cout << "Error: no support for offsetfrom tag in Kinbody!\n" << flush;
+		getchar();
 		return false;
 	}
 	TiXmlElement* c2 = getFirstChild(e, "KinBody");
@@ -414,10 +412,10 @@ bool OrXmlKinbody::getRealContent() {
 
 bool OrXmlKinbody::GetObjectOrTerrain(RobotWorld& world) {
 	if (!isGetAllCleanBody) {
-		LOG4CXX_INFO(KrisLibrary::logger(),
-			"Error: should first process all the contents by GetAllCleanBodyJoints!\n"
-			<< "\n");
-		//Krislibrary::loggerWait();
+		cout
+				<< "Error: should first process all the contents by GetAllCleanBodyJoints!\n"
+				<< endl;
+		getchar();
 		return false;
 	}
 	for (size_t i = 0; i < this->xmlBodys.size(); i++) {
@@ -484,21 +482,21 @@ bool OrXmlBody::GetContent() {
 		ss << c->GetText();
 		ss >> offsetfrom;
 	}
-	LOG4CXX_INFO(KrisLibrary::logger(),name<<"\n");
+	cout<<name<<endl;
 
 	if (hasTransformation(e)) {
-		LOG4CXX_INFO(KrisLibrary::logger(),"hasTransformation:"<<hasTransformation(e)<<"\n");
+		cout<<"hasTransformation:"<<hasTransformation(e)<<endl;
 		transformation = new OrXmlTransformation(e);
 		transformation->GetContent();
-		LOG4CXX_INFO(KrisLibrary::logger(),transformation->translation.size());
+		cout<<transformation->translation.size();
 	}
 	return true;
 }
 
 void OrXmlBody::output2Wrl() {
 	if (name.empty()) {
-		LOG4CXX_INFO(KrisLibrary::logger(), "No body name specified!Name it body_" << vispoints.size()
-				<< ".tri\n" );
+		cout << "No body name specified!Name it body_" << vispoints.size()
+				<< ".tri\n" << flush;
 	}
 	ofstream file;
 	if (vispoints.size() > 0) {
@@ -595,8 +593,8 @@ void OrXmlBody::output2Wrl() {
 
 void OrXmlBody::output2Tri() {
 	if (name.empty()) {
-		LOG4CXX_INFO(KrisLibrary::logger(), "No body name specified!Name it body_" << vispoints.size()
-				<< ".tri\n" );
+		cout << "No body name specified!Name it body_" << vispoints.size()
+				<< ".tri\n" << flush;
 	}
 	ofstream file;
 	if (vispoints.size() > 0) {
@@ -637,7 +635,7 @@ void OrXmlBody::output2Tri() {
 
 void OrXmlBody::GetMimicGeomMass() {
 	if (mass && 0 == strcmp(mass->type.c_str(), "mimicgeom")) {
-//		LOG4CXX_INFO(KrisLibrary::logger(),"body "<<name<<" size "<<xmlGeoms.size());//Krislibrary::loggerWait();
+//		cout<<"body "<<name<<" size "<<xmlGeoms.size()<<flush;getchar();
 		OrXmlMass* finalMass = new OrXmlMass();
 		finalMass->com = new Vector3;
 		finalMass->com->setZero();
@@ -725,8 +723,8 @@ bool OrXmlBody::GetFinalGeom() {
 	}
 
 //	if (count >= 2) {
-//		LOG4CXX_INFO(KrisLibrary::logger(), "Body:" << name << " :" << count << "\n" );
-//		//Krislibrary::loggerWait();
+//		cout << "Body:" << name << " :" << count << endl << flush;
+//		getchar();
 //	}
 	this->output2Tri();
 	return true;
@@ -885,10 +883,10 @@ bool OrXmlRobot::ReSetBodyJointOrder() {
 		} else if (parents[b2] == b1) {
 			xmlJoints[i]->linkI = b2 + 5;
 		} else {
-			LOG4CXX_INFO(KrisLibrary::logger(), "Invalid joint " << xmlJoints[i]->name << ";"
+			cout << "Invalid joint " << xmlJoints[i]->name << ";"
 					<< xmlJoints[i]->bodys[0] << ";" << xmlJoints[i]->bodys[1]
-					<< "\n");
-			//Krislibrary::loggerWait();
+					<< endl;
+			getchar();
 			return false;
 		}
 	}
@@ -929,9 +927,10 @@ bool OrXmlRobot::GetParentChildRelation() {
 	//infer parent children relationship from joints
 	for (size_t i = 0; i < this->xmlJoints.size(); i++) {
 		if (xmlJoints[i]->bodys.size() != 2) {
-			LOG4CXX_ERROR(KrisLibrary::logger(), "Error: joint " << xmlJoints[i]->name << " bodys size="
-					<< xmlJoints[i]->bodys.size() << "\n");
-			//Krislibrary::loggerWait();
+			cout << "Error: joint " << xmlJoints[i]->name << " bodys size="\
+
+					<< xmlJoints[i]->bodys.size() << endl << flush;
+			getchar();
 			return false;
 		}
 		string b1 = xmlJoints[i]->bodys[0];
@@ -947,9 +946,9 @@ bool OrXmlRobot::GetParentChildRelation() {
 				break;
 		}
 		if (index1 == -1 && index2 == -1) {
-			LOG4CXX_ERROR(KrisLibrary::logger(), "Error: Joint " << xmlJoints[i]->name << " invalid!\n");
-			LOG4CXX_INFO(KrisLibrary::logger(), "b1:" << b1 << ";b2:" << b2 );
-			//Krislibrary::loggerWait();
+			cout << "Error: Joint " << xmlJoints[i]->name << " invalid!\n";
+			cout << "b1:" << b1 << ";b2:" << b2 << flush;
+			getchar();
 			return false;
 		}
 		//if b1 has no parent and b1 is defined after b2
@@ -976,9 +975,10 @@ bool OrXmlRobot::applyTran2Tparent() {
 	if (!transformation)
 		return true;
 	if (!allclean) {
-		LOG4CXX_INFO(KrisLibrary::logger(),
-			"Error: robot transformation should be applied after everything else is processed!\n");
-		//Krislibrary::loggerWait();
+		cout
+				<< "Error: robot transformation should be applied after everything else is processed!\n"
+				<< flush;
+		getchar();
 		return false;
 	}
 	transformation->ComputeTransform();
@@ -998,11 +998,11 @@ bool OrXmlRobot::GetContent() {
 		const char* filename = filename_string.c_str();
 		doc = new TiXmlDocument();
 		if (!doc->LoadFile(filename))
-			LOG4CXX_ERROR(KrisLibrary::logger(), "Error in loading file " << filename << "\n");
+			cout << "Error in loading file " << filename << endl;
 		TiXmlElement* originalE = e;
 		e = doc->RootElement();
 		if (!this->getRealContent()) {
-			LOG4CXX_ERROR(KrisLibrary::logger(), "Error in read file of Kinbody!\n");
+			cout << "Error in read file of Kinbody!\n";
 			return false;
 		}
 		e = originalE;
@@ -1068,8 +1068,8 @@ void OrXmlRobot::setPrefixName() {
 //copy extra properties of b2 to b1
 void OrXmlRobot::combineTwoBody(OrXmlBody* b1, OrXmlBody* b2) {
 	if (0 != strcmp(b1->name.c_str(), b2->name.c_str())) {
-		LOG4CXX_ERROR(KrisLibrary::logger(), "Error: Bodies' names are not the same!\n" );
-		//Krislibrary::loggerWait();
+		cout << "Error: Bodies' names are not the same!\n" << flush;
+		getchar();
 	}
 	if ((b1->xmlGeoms.size() > 0 && b2->xmlGeoms.size() > 0)\
 
@@ -1080,8 +1080,8 @@ void OrXmlRobot::combineTwoBody(OrXmlBody* b1, OrXmlBody* b2) {
 			|| (b1->vispoints.size() > 0 && b2->vispoints.size() > 0)\
 
 			|| (b1->colpoints.size() > 0 && b2->colpoints.size() > 0)) {
-		LOG4CXX_ERROR(KrisLibrary::logger(), "Error: both bodies have same properties!\n" );
-		//Krislibrary::loggerWait();
+		cout << "Error: both bodies have same properties!\n" << flush;
+		getchar();
 	}
 	if (!b2->offsetfrom.empty() && b1->offsetfrom.empty()) {
 		b1->offsetfrom = b2->offsetfrom;
@@ -1135,7 +1135,7 @@ bool OrXmlRobot::RemoveSameBody() {
 					== strcmp(xmlBodys[i]->name.c_str(),
 							newBodys[j]->name.c_str())) {
 				combineTwoBody(newBodys[j], xmlBodys[i]);
-//				LOG4CXX_INFO(KrisLibrary::logger(),newBodys[j]->name<<";"<<newBodys[j]->offsetfrom<<"\n");
+//				cout<<newBodys[j]->name<<";"<<newBodys[j]->offsetfrom<<endl;
 				repeat = true;
 				break;
 			}
@@ -1268,7 +1268,7 @@ bool OrXmlEnvironment::getWorld() {
 	string file;
 	if (doc.RootElement()->QueryValueAttribute("file", &file)
 			== TIXML_SUCCESS) {
-		LOG4CXX_INFO(KrisLibrary::logger(), "Environment Tag from file is Not supported!\n");
+		cout << "Environment Tag from file is Not supported!\n";
 		return false;
 	}
 	string envstr = "environment";
@@ -1284,7 +1284,7 @@ bool OrXmlEnvironment::getWorld() {
 	if (0 == strcmp(rootvalue.c_str(), robstr.c_str())) {
 		OrXmlRobot* robxml = new OrXmlRobot(root);
 		if (!robxml->GetContent()) {
-			LOG4CXX_INFO(KrisLibrary::logger(), "Robot read failed!\n" );
+			cout << "Robot read failed!\n" << flush;
 			return false;
 		}
 		this->xmlRobots.push_back(robxml);
@@ -1292,7 +1292,7 @@ bool OrXmlEnvironment::getWorld() {
 	} else if (0 == strcmp(rootvalue.c_str(), kinstr.c_str())) {
 		OrXmlKinbody* kinxml = new OrXmlKinbody(root);
 		if (!kinxml->GetContent()) {
-			LOG4CXX_INFO(KrisLibrary::logger(), "Kinbody read failed!\n" );
+			cout << "Kinbody read failed!\n" << flush;
 			return false;
 		}
 		this->xmlKinbodys.push_back(kinxml);
@@ -1315,7 +1315,7 @@ bool OrXmlEnvironment::getWorld() {
 		return true;
 	}
 	if(this->xmlRobots.size() == 0){
-		LOG4CXX_INFO(KrisLibrary::logger(),"No robot found!\n");
+		cout<<"No robot found!\n"<<flush;
 		return false;
 	}
 	return true;
@@ -1324,15 +1324,15 @@ bool OrXmlEnvironment::getWorld() {
 bool OrXmlEnvironment::Convert2URDF() {
 	//parse xml first
 	if (!getWorld()) {
-		LOG4CXX_INFO(KrisLibrary::logger(), "getWorld failed!\n" );
+		cout << "getWorld failed!\n" << flush;
 		return false;
 	}
-	LOG4CXX_INFO(KrisLibrary::logger(), "*************Read in OR xml info!*************\n" );
+	cout << "*************Read in OR xml info!*************\n" << flush;
 	for (size_t i = 0; i < this->xmlRobots.size(); i++) {
 		if (TOURDF) {
-			LOG4CXX_INFO(KrisLibrary::logger(), "Write to URDF format!\n" << "\n");
+			cout << "Write to URDF format!\n" << endl;
 			if (!xmlRobots[i]->ConvertToURDF()) {
-				LOG4CXX_INFO(KrisLibrary::logger(), "ConvertToURDF failed!\n" );
+				cout << "ConvertToURDF failed!\n" << flush;
 				return false;
 			}
 		}
@@ -1344,14 +1344,14 @@ bool OrXmlEnvironment::Convert2URDF() {
 bool OrXmlEnvironment::GetWorld(RobotWorld& world) {
 	//parse xml first
 	if (!getWorld()) {
-		LOG4CXX_INFO(KrisLibrary::logger(), "getWorld failed!\n" );
+		cout << "getWorld failed!\n" << flush;
 		return false;
 	}
-	LOG4CXX_INFO(KrisLibrary::logger(), "*************Read in OR xml info!*************\n" );
+	cout << "*************Read in OR xml info!*************\n" << flush;
 	for (size_t i = 0; i < this->xmlRobots.size(); i++) {
 		Robot* r = new Robot;
 		if (!xmlRobots[i]->GetRobot(*r)) {
-			LOG4CXX_INFO(KrisLibrary::logger(), "Get robot failed!\n" );
+			cout << "Get robot failed!\n" << flush;
 			delete r;
 			return false;
 		}
@@ -1365,14 +1365,14 @@ bool OrXmlEnvironment::GetWorld(RobotWorld& world) {
 bool OrXmlEnvironment::Convert2Rob() {
 	//parse xml first
 	if (!getWorld()) {
-		LOG4CXX_INFO(KrisLibrary::logger(), "getWorld failed!\n" );
+		cout << "getWorld failed!\n" << flush;
 		return false;
 	}
 	//create the world
 	for (size_t i = 0; i < this->xmlRobots.size(); i++) {
 		Robot* r = new Robot;
 		if (!xmlRobots[i]->GetRobot(*r)) {
-			LOG4CXX_INFO(KrisLibrary::logger(), "Get robot failed!\n" );
+			cout << "Get robot failed!\n" << flush;
 			delete r;
 			return false;
 		}
@@ -1475,10 +1475,10 @@ bool OrXmlRobot::GetFixedBaseRobot(Robot& robot) {
 		} else if (parents[b2] == b1) {
 			linkI = b2;
 		} else {
-			LOG4CXX_INFO(KrisLibrary::logger(), "Invalid joint " << xmlJoints[i]->name << ";"
+			cout << "Invalid joint " << xmlJoints[i]->name << ";"
 					<< xmlJoints[i]->bodys[0] << ";" << xmlJoints[i]->bodys[1]
-					<< "\n");
-			//Krislibrary::loggerWait();
+					<< endl;
+			getchar();
 			return false;
 		}
 		robjoint.linkIndex = linkI;
@@ -1609,9 +1609,9 @@ void OrXmlRobot::GetTransformAnchorAxis() {
 	}
 	for (size_t i = 0; i < xmlBodys.size(); i++) {
 		if (!xmlBodys[i]->Tparent || !xmlBodys[i]->Tworld) {
-			LOG4CXX_ERROR(KrisLibrary::logger(), "Error: body " << xmlBodys[i]->name
-					<< " no Tparent or Tworld!\n" );
-			//Krislibrary::loggerWait();
+			cout << "Error: body " << xmlBodys[i]->name
+					<< " no Tparent or Tworld!\n" << flush;
+			getchar();
 		}
 	}
 
@@ -1623,8 +1623,8 @@ void OrXmlRobot::GetTransformAnchorAxis() {
 //			file<<children[i][j]<<",";
 //		file<<")"<<endl;
 //		if(0==strcmp(xmlBodys[i]->name.c_str(),"rightIndexProximal")){
-//			LOG4CXX_INFO(KrisLibrary::logger(),xmlBodys[i]->name<<"\n");
-//			if(xmlBodys[i]->Tparent)LOG4CXX_INFO(KrisLibrary::logger(),*xmlBodys[i]->Tparent);//Krislibrary::loggerWait();
+//			cout<<xmlBodys[i]->name<<endl;
+//			if(xmlBodys[i]->Tparent)cout<<*xmlBodys[i]->Tparent<<flush;getchar();
 //		}
 //	}
 //	file.close();
@@ -1635,9 +1635,9 @@ void OrXmlRobot::GetTransformAnchorAxis() {
 		int b2 = this->getLinkIndex(xmlJoints[i]->bodys[1]);
 		if (xmlJoints[i]->anchor) {
 			if (xmlJoints[i]->offsetfrom.empty()) {
-				LOG4CXX_INFO(KrisLibrary::logger(), xmlJoints[i]->name << " anchor without offsetfrom!\n")
-						;
-				//Krislibrary::loggerWait();
+				cout << xmlJoints[i]->name << " anchor without offsetfrom!\n"
+						<< flush;
+				getchar();
 			}
 			int linkindex = this->getLinkIndex(xmlJoints[i]->offsetfrom);
 			int tmpparent = b1;
@@ -1649,12 +1649,12 @@ void OrXmlRobot::GetTransformAnchorAxis() {
 				tmpparent = b1;
 				tmpchild = b2;
 			} else {
-				LOG4CXX_ERROR(KrisLibrary::logger(), "Error: b1 b2 invalid!\n" );
-				//Krislibrary::loggerWait();
+				cout << "Error: b1 b2 invalid!\n" << flush;
+				getchar();
 			}
 			//transform anchor to child's frame
 			if (linkindex == tmpparent) {
-//				LOG4CXX_INFO(KrisLibrary::logger(),"offset from parents"<<"\n");//Krislibrary::loggerWait();
+//				cout<<"offset from parents"<<endl;getchar();
 				Vector3 anchor2;
 				RigidTransform inverseT;
 				inverseT.setInverse(*(xmlBodys[tmpchild]->Tparent));
@@ -1671,7 +1671,7 @@ void OrXmlRobot::GetTransformAnchorAxis() {
 							v[2] / norm);
 				}
 			}else{
-//				LOG4CXX_INFO(KrisLibrary::logger(),"offset from child"<<"\n");//Krislibrary::loggerWait();
+//				cout<<"offset from child"<<endl;getchar();
 			}
 		}
 	}
@@ -1686,9 +1686,9 @@ void OrXmlRobot::ProcessJointAnchorInitial() {
 		int tmpchild = b2;
 		if (xmlJoints[i]->anchor) {
 			if (xmlJoints[i]->offsetfrom.empty()) {
-				LOG4CXX_INFO(KrisLibrary::logger(), xmlJoints[i]->name << " anchor without offsetfrom!\n")
-						;
-				//Krislibrary::loggerWait();
+				cout << xmlJoints[i]->name << " anchor without offsetfrom!\n"
+						<< flush;
+				getchar();
 			}
 			int linkindex = this->getLinkIndex(xmlJoints[i]->offsetfrom);
 			if (parents[b1] == b2) {
@@ -1698,8 +1698,8 @@ void OrXmlRobot::ProcessJointAnchorInitial() {
 				tmpparent = b1;
 				tmpchild = b2;
 			} else {
-				LOG4CXX_ERROR(KrisLibrary::logger(), "Error: b1 b2 invalid!\n" );
-				//Krislibrary::loggerWait();
+				cout << "Error: b1 b2 invalid!\n" << flush;
+				getchar();
 			}
 //			if (!xmlBodys[tmpchild]->vis_filename.empty()) {
 //
@@ -1724,20 +1724,20 @@ void OrXmlRobot::ProcessJointAnchorInitial() {
 			    else if(xmlJoints[i]->axis->z == One)
 			      T.R.setRotateZ(qi);
 			    else {
-			      //LOG4CXX_INFO(KrisLibrary::logger(),"Not a standard axis: "<<w<<"\n");
+			      //cout<<"Not a standard axis: "<<w<<endl;
 			      MomentRotation r(qi*(*xmlJoints[i]->axis));
 			      r.getMatrix(T.R);
 			    }
 			  }else{
-				  LOG4CXX_ERROR(KrisLibrary::logger(),"Invalid joint type "<<xmlJoints[i]->type<<"\n");
-			    //Krislibrary::loggerWait();
+				  cerr<<"Invalid joint type "<<xmlJoints[i]->type<<endl;
+			    getchar();
 			  }
 			  RigidTransform newTP;
 			  newTP.mul(*this->xmlBodys[tmpchild]->Tparent, T);
 			  this->xmlBodys[tmpchild]->Tparent->set(newTP);
 		}else if(xmlJoints[i]->initial.size() != 1 && xmlJoints[i]->initial.size() > 0){
-			LOG4CXX_INFO(KrisLibrary::logger(),"No code for handling this situation where initial tag contains multiple values!"<<"\n");
-			//Krislibrary::loggerWait();
+			cout<<"No code for handling this situation where initial tag contains multiple values!"<<endl;
+			getchar();
 		}
 	}
 }
@@ -2020,12 +2020,12 @@ bool OrXmlRobot::GetRobot(Robot& robot) {
 	GetAllCleanBodyJoints();
 
 	if (children[0].size() <= 1) {
-		LOG4CXX_INFO(KrisLibrary::logger(), "Fixed Base robot\n" );
+		cout << "Fixed Base robot\n" << flush;
 		if (!GetFixedBaseRobot(robot)) {
 			return false;
 		}
 	} else {
-		LOG4CXX_INFO(KrisLibrary::logger(), "Floating Base robot\n" );
+		cout << "Floating Base robot\n" << flush;
 		if (!GetFloatingBaseRobot(robot)) {
 			return false;
 		}
@@ -2059,7 +2059,7 @@ void OrXmlRobot::recomputeTworld() {
 			OrXmlBody* parentbody = xmlBodys[parents[bodyindex]];
 			body->Tworld->mul(*parentbody->Tworld, *body->Tparent);
 		}
-//		LOG4CXX_INFO(KrisLibrary::logger(),body->name<<":\n"<<"Tparent:"<<*body->Tparent<<"\nTworld:"<<*body->Tworld<<"\n");//Krislibrary::loggerWait();
+//		cout<<body->name<<":\n"<<"Tparent:"<<*body->Tparent<<"\nTworld:"<<*body->Tworld<<endl<<flush;getchar();
 
 		for (size_t i = 0; i < children[bodyindex].size(); i++) {
 			needprocess.push_back(children[bodyindex][i]);
@@ -2203,10 +2203,10 @@ void OrXmlRobot::writeToURDF() {
 			parentint = b1;
 			childint = b2;
 		} else {
-			LOG4CXX_INFO(KrisLibrary::logger(), "Invalid joint " << xmlJoints[i]->name << ";"
+			cout << "Invalid joint " << xmlJoints[i]->name << ";"
 					<< xmlJoints[i]->bodys[0] << ";" << xmlJoints[i]->bodys[1]
-					<< "\n");
-			//Krislibrary::loggerWait();
+					<< endl;
+			getchar();
 			return;
 		}
 		Vector3 xyz, rpy;
@@ -2261,12 +2261,12 @@ void OrXmlRobot::WriteHubo(Robot& robot, bool isjaemi) {
 	ofstream file;
 	file.open(filename.c_str());
 	if (!file.is_open()) {
-		LOG4CXX_INFO(KrisLibrary::logger(), filename << " cannot be opened!\n" );
-		//Krislibrary::loggerWait();
+		cout << filename << " cannot be opened!\n" << flush;
+		getchar();
 		file.close();
 		return;
 	}
-	LOG4CXX_INFO(KrisLibrary::logger(),"write "<<filename<<"\n");
+	cout<<"write "<<filename<<endl<<flush;
 	size_t nLinks = robot.links.size();
 	assert(linkgroups.back().back()+1 == nLinks);
 
@@ -2500,10 +2500,10 @@ void OrXmlRobot::Write2Rob(Robot& robot) {
 	else
 		filename = ROBOT_DIR + name + "_vis.rob";
 
-	LOG4CXX_INFO(KrisLibrary::logger(), "Writing .rob file to " << filename << "\n");
+	cout << "Writing .rob file to " << filename << endl;
 	vector<string> geomFiles(robot.links.size());
 	if(robot.joints[0].type == RobotJoint::Floating){
-		LOG4CXX_INFO(KrisLibrary::logger(),"write floating base robot"<<"\n");
+		cout<<"write floating base robot"<<endl;
 		for (size_t i = 0; i < robot.links.size(); i++) {
 			if (i < 5)
 				continue;
@@ -2517,7 +2517,7 @@ void OrXmlRobot::Write2Rob(Robot& robot) {
 			}
 		}
 	}else{
-		LOG4CXX_INFO(KrisLibrary::logger(),"write fixed base robot"<<"\n");
+		cout<<"write fixed base robot"<<endl;
 		for(size_t i = 0; i < robot.links.size(); i++){
 			if(false == LOADSimpleGEOM)
 				geomFiles[i] = xmlBodys[i]->vis_filename;
@@ -2640,7 +2640,7 @@ bool OrXmlRobot::GetFloatingBaseRobot(Robot& robot) {
 				robot.links[i + 5].inertia.set(*xmlBodys[i]->mass->inertia);
 			else{
 				robot.links[i + 5].inertia.setZero();
-//				LOG4CXX_INFO(KrisLibrary::logger(),robot.linkNames[i+5]<<";"<<robot.links[i+5].inertia<<"\n");
+//				cout<<robot.linkNames[i+5]<<";"<<robot.links[i+5].inertia<<endl;
 			}
 
 			if (xmlBodys[i]->mass && xmlBodys[i]->mass->total)
@@ -2779,7 +2779,7 @@ bool OrXmlRobot::GetFloatingBaseRobot(Robot& robot) {
 
 //	for(size_t i = 0; i < robot.links.size(); i++){
 //		if(0==strcmp(robot.linkNames[i].c_str(), "Body_LSY")||0==strcmp(robot.linkNames[i].c_str(), "Body_RSY")){
-//			LOG4CXX_INFO(KrisLibrary::logger(),robot.linkNames[i]<<":"<<robot.links[i].inertia<<"\n");
+//			cout<<robot.linkNames[i]<<":"<<robot.links[i].inertia<<endl;
 //		}
 //	}
 	return true;
@@ -2788,9 +2788,9 @@ bool OrXmlRobot::GetFloatingBaseRobot(Robot& robot) {
 void OrXmlRobot::setJaemihuboProperty(Robot& robot) {
 	if (robot.qMin.size() == 71 && robot.drivers.size() == 59) {
 		initJaemihuboGroups();
-//		LOG4CXX_INFO(KrisLibrary::logger(), "set qmin and qmax for fingers" );
+//		cout << "set qmin and qmax for fingers" << flush;
 		int rthumbGroup = 4;
-//		LOG4CXX_INFO(KrisLibrary::logger(), linkgroups[rthumbGroup].size() << "\n" );
+//		cout << linkgroups[rthumbGroup].size() << endl << flush;
 		assert(linkgroups[rthumbGroup].size() == 3);
 		robot.qMin[linkgroups[rthumbGroup][0]] = -2;
 		robot.qMin[linkgroups[rthumbGroup][1]] = -1;
@@ -2824,7 +2824,7 @@ void OrXmlRobot::setJaemihuboProperty(Robot& robot) {
 			robot.qMax[linkgroups[i][2]] = 1;
 		}
 
-//		LOG4CXX_INFO(KrisLibrary::logger(), "set torques, velmax, accmax" );
+//		cout << "set torques, velmax, accmax" << flush;
 		for (size_t i = 0; i < linkgroups.size(); i++) {
 			for (size_t j = 0; j < linkgroups[i].size(); j++) {
 				robot.torqueMax[linkgroups[i][j]] = defaultTorqueMax[i];
@@ -2845,7 +2845,7 @@ void OrXmlRobot::setJaemihuboProperty(Robot& robot) {
 		robot.accMax[linkgroups[11][2]] = 0;
 		robot.accMax[linkgroups[18][1]] = 0;
 
-//		LOG4CXX_INFO(KrisLibrary::logger(), " set servo PID dryFriction\n" );
+//		cout << " set servo PID dryFriction\n" << flush;
 		for (size_t i = 0; i < drivergroups.size(); i++) {
 			for (size_t j = 0; j < drivergroups[i].size(); j++) {
 				robot.drivers[drivergroups[i][j]].servoP = defaultSP[i];
@@ -2872,9 +2872,9 @@ void OrXmlRobot::setJaemihuboProperty(Robot& robot) {
 void OrXmlRobot::setHuboplusProperty(Robot& robot) {
 	if (robot.qMin.size() == 63 && robot.drivers.size() == 57) {
 		initHuboplusGroups();
-//		LOG4CXX_INFO(KrisLibrary::logger(), "set qmin and qmax for fingers" );
+//		cout << "set qmin and qmax for fingers" << flush;
 		int rthumbGroup = 3;
-//		LOG4CXX_INFO(KrisLibrary::logger(), linkgroups[rthumbGroup].size() << "\n" );
+//		cout << linkgroups[rthumbGroup].size() << endl << flush;
 		assert(linkgroups[rthumbGroup].size() == 3);
 		robot.qMin[linkgroups[rthumbGroup][0]] = -2;
 		robot.qMin[linkgroups[rthumbGroup][1]] = -1;
@@ -2908,7 +2908,7 @@ void OrXmlRobot::setHuboplusProperty(Robot& robot) {
 			robot.qMin[linkgroups[i][2]] = -1;
 		}
 
-//		LOG4CXX_INFO(KrisLibrary::logger(), "set torques, velmax, accmax" );
+//		cout << "set torques, velmax, accmax" << flush;
 		for (size_t i = 0; i < linkgroups.size(); i++) {
 			for (size_t j = 0; j < linkgroups[i].size(); j++) {
 				robot.torqueMax[linkgroups[i][j]] = defaultTorqueMax[i];
@@ -2925,7 +2925,7 @@ void OrXmlRobot::setHuboplusProperty(Robot& robot) {
 		robot.torqueMax[linkgroups[8][4]] = 10;
 		robot.torqueMax[linkgroups[8][5]] = 10;
 
-//		LOG4CXX_INFO(KrisLibrary::logger(), " set servo PID dryFriction\n" );
+//		cout << " set servo PID dryFriction\n" << flush;
 		for (size_t i = 0; i < drivergroups.size(); i++) {
 			for (size_t j = 0; j < drivergroups[i].size(); j++) {
 				robot.drivers[drivergroups[i][j]].servoP = defaultSP[i];

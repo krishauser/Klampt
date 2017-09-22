@@ -1,5 +1,3 @@
-#include <log4cxx/logger.h>
-#include <KrisLibrary/Logger.h>
 #include "Stance.h"
 #include "HoldReader.h"
 #include <KrisLibrary/statistics/OLS.h>
@@ -30,18 +28,18 @@ struct StanceReader : public SimpleParser
   StanceReader(istream& in) : SimpleParser(in),holdReader(in),mode(0) {}
   virtual Result InputToken(const string& word)
   {
-    //LOG4CXX_INFO(KrisLibrary::logger(),"InputToken("<<word<<"), mode="<<mode<<"\n");
+    //cout<<"InputToken("<<word<<"), mode="<<mode<<endl;
     switch(mode) {
     case 0:
       if(word != "begin") {
-	LOG4CXX_ERROR(KrisLibrary::logger(),"StanceReader: Error reading begin"<<"\n");
+	cerr<<"StanceReader: Error reading begin"<<endl;
 	return Error;
       }
       mode=1;
       break;
     case 1:
       if(word != "stance") {
-	LOG4CXX_ERROR(KrisLibrary::logger(),"StanceReader: Error reading begin stance"<<"\n");
+	cerr<<"StanceReader: Error reading begin stance"<<endl;
 	return Error;
       }
       mode=2;
@@ -56,7 +54,7 @@ struct StanceReader : public SimpleParser
 	return Stop;
       }
       else { //anything else?
-	LOG4CXX_ERROR(KrisLibrary::logger(),"StanceReader: Some weird word during stance: "<<word<<"\n");
+	cerr<<"StanceReader: Some weird word during stance: "<<word<<endl;
 	return Error;
       }
       break;
@@ -76,7 +74,7 @@ struct StanceReader : public SimpleParser
   }
   virtual Result InputPunct(const string& punct)
   {
-    //LOG4CXX_INFO(KrisLibrary::logger(),"InputPunct("<<punct<<"), mode="<<mode<<"\n");
+    //cout<<"InputPunct("<<punct<<"), mode="<<mode<<endl;
     if(mode==3) {
       holdReader.lineno = lineno;
       return holdReader.InputPunct(punct);
@@ -85,7 +83,7 @@ struct StanceReader : public SimpleParser
   }
   virtual Result InputEndLine()
   {
-    //LOG4CXX_INFO(KrisLibrary::logger(),"InputEndline(), mode="<<mode<<"\n");
+    //cout<<"InputEndline(), mode="<<mode<<endl;
     if(mode==3) {
       holdReader.lineno = lineno;
       return holdReader.InputEndLine();
@@ -268,7 +266,7 @@ void GetPlaneFit(const Stance& s,Plane3D& p)
   int np = NumContactPoints(s);
   Assert(np >= 0);
   if(np < 3) {
-    LOG4CXX_ERROR(KrisLibrary::logger(),"GetPlaneFit(): Grasp contains less than 3 contact points, returning +z plane"<<"\n");
+    cerr<<"GetPlaneFit(): Grasp contains less than 3 contact points, returning +z plane"<<endl;
     p.normal.setZero(); p.normal.z = 1;
     p.offset=0;
     return;
@@ -289,13 +287,13 @@ void GetPlaneFit(const Stance& s,Plane3D& p)
   coeffs.resize(3);
   bool res=Statistics::LeastSquaresPickDependent(v,d,coeffs);
   if(!res) {
-    LOG4CXX_ERROR(KrisLibrary::logger(),"GetPlaneFit(): Warning, least squares failed!"<<"\n");
+    cerr<<"GetPlaneFit(): Warning, least squares failed!"<<endl;
     p.normal.setZero(); p.normal.z=1;
     p.offset=Zero;
     return;
   }
   Assert(coeffs.n == 3);
-  //LOG4CXX_INFO(KrisLibrary::logger(),"Dependent variable: "<<d<<"\n");
+  //cout<<"Dependent variable: "<<d<<endl;
   //if d == 0, x = c0 + c1*y + c2*z
   //if d == 1, y = c0*x + c1 + c2*z
   //if d == 2, z = c0*x + c1*y + c2

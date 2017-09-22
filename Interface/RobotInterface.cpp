@@ -1,5 +1,3 @@
-#include <log4cxx/logger.h>
-#include <KrisLibrary/Logger.h>
 #include "RobotInterface.h"
 
 MotionQueueInterface::MotionQueueInterface()
@@ -70,7 +68,7 @@ MotionQueueInterface::MotionResult DefaultMotionQueueInterface::SendPathImmediat
     queue->Append(path);
   }
   else {
-        LOG4CXX_ERROR(KrisLibrary::logger(),"Warning, sending immediate path with time < current sim time\n");
+    fprintf(stderr,"Warning, sending immediate path with time < current sim time\n");
     return InvalidParams;
     queue->SetPath(path);
   }

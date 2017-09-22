@@ -1,5 +1,3 @@
-#include <log4cxx/logger.h>
-#include <KrisLibrary/Logger.h>
 #include "XmlODE.h"
 #include "Control/Controller.h"
 #include <KrisLibrary/utils/stringutils.h>
@@ -53,7 +51,7 @@ bool XmlODESettings::GetSettings(ODESimulator& sim)
   string globals="globals";
   TiXmlElement* c = e->FirstChildElement(globals);
   if(c) {
-    LOG4CXX_INFO(KrisLibrary::logger(),"Parsing globals...\n");
+    printf("Parsing globals...\n");
     //parse globals: gravity, etc
     Vector3 gravity;
     if(c->QueryValueAttribute("gravity",&gravity)==TIXML_SUCCESS)
@@ -68,7 +66,7 @@ bool XmlODESettings::GetSettings(ODESimulator& sim)
       sim.GetSettings().maxContacts = maxContacts;
     int boundaryLayer,adaptiveTimeStepping,rigidObjectCollisions,robotSelfCollisions,robotRobotCollisions;
     if(c->QueryValueAttribute("boundaryLayer",&boundaryLayer)==TIXML_SUCCESS) {
-      LOG4CXX_WARN(KrisLibrary::logger(),"XML simulator: warning, boundary layer settings don't have an effect after world is loaded\n");
+      printf("XML simulator: warning, boundary layer settings don't have an effect after world is loaded\n");
       sim.GetSettings().boundaryLayerCollisions = boundaryLayer;
     }
     if(c->QueryValueAttribute("adaptiveTimeStepping",&adaptiveTimeStepping)==TIXML_SUCCESS) {
@@ -85,7 +83,7 @@ bool XmlODESettings::GetSettings(ODESimulator& sim)
 
   while(c!=NULL) {
     const char* name=c->Value();
-    LOG4CXX_INFO(KrisLibrary::logger(),"Parsing element "<<name);
+    printf("Parsing element %s\n",name);
     if(0 == strcmp(name,"terrain")) {
       int index;
       if(c->QueryValueAttribute("index",&index)==TIXML_SUCCESS) {
@@ -94,13 +92,13 @@ bool XmlODESettings::GetSettings(ODESimulator& sim)
 	if(eg) {
 	  XmlODEGeometry g(eg);
 	  if(!g.Get(*sim.terrainGeom(index))) {
-	    	    LOG4CXX_ERROR(KrisLibrary::logger(),"Error reading terrain geometry from XML\n");
+	    fprintf(stderr,"Error reading terrain geometry from XML\n");
 	    return false;
 	  }
 	}
       }
       else {
-		LOG4CXX_ERROR(KrisLibrary::logger(),"Error reading terrain index from XML file\n");
+	fprintf(stderr,"Error reading terrain index from XML file\n");
 	return false;
       }
     }
@@ -112,7 +110,7 @@ bool XmlODESettings::GetSettings(ODESimulator& sim)
 	if(eg) {
 	  XmlODEGeometry g(eg);
 	  if(!g.Get(*sim.object(index)->triMesh())) {
-	    	    LOG4CXX_ERROR(KrisLibrary::logger(),"Error reading object geometry from XML\n");
+	    fprintf(stderr,"Error reading object geometry from XML\n");
 	    return false;
 	  }
 	}
@@ -123,12 +121,12 @@ bool XmlODESettings::GetSettings(ODESimulator& sim)
 	    v.setZero();
 	  if(ev->QueryValueAttribute("angular",&w) != TIXML_SUCCESS)
 	    w.setZero();
-	  LOG4CXX_INFO(KrisLibrary::logger(),"Setting velocity "<<w<<", "<<v<<"\n");
+	  cout<<"Setting velocity "<<w<<", "<<v<<endl;
 	  sim.object(index)->SetVelocity(w,v);
 	}
       }
       else {
-		LOG4CXX_ERROR(KrisLibrary::logger(),"Error reading object index from XML file\n");
+	fprintf(stderr,"Error reading object index from XML file\n");
 	return false;
       }
     }
@@ -158,7 +156,7 @@ bool XmlODESettings::GetSettings(ODESimulator& sim)
 	}
       }
       else {
-		LOG4CXX_ERROR(KrisLibrary::logger(),"Error reading robot index from XML file\n");
+	fprintf(stderr,"Error reading robot index from XML file\n");
 	return false;
       }
     }
@@ -178,25 +176,25 @@ bool XmlSimulationSettings::GetSettings(WorldSimulation& sim)
   string globals="globals";
   TiXmlElement* c = e->FirstChildElement(globals);
   if(c) {
-    LOG4CXX_INFO(KrisLibrary::logger(),"Parsing timestep...\n");
+    printf("Parsing timestep...\n");
     //parse timestep
     double timestep;
     if(c->QueryValueAttribute("timestep",&timestep)==TIXML_SUCCESS)
       sim.simStep = timestep;
   }
-  LOG4CXX_INFO(KrisLibrary::logger(),"Parsing ODE...\n");
+  printf("Parsing ODE...\n");
   XmlODESettings ode(e);
   if(!ode.GetSettings(sim.odesim)) {
     return false;
   }
 
 
-  LOG4CXX_INFO(KrisLibrary::logger(),"Parsing robot controllers / sensors\n");
+  printf("Parsing robot controllers / sensors\n");
   c = e->FirstChildElement("robot");
   while(c != NULL) {
     int index;
     if(c->QueryValueAttribute("index",&index)!=TIXML_SUCCESS) {
-            LOG4CXX_ERROR(KrisLibrary::logger(),"Unable to read index of robot element\n");
+      fprintf(stderr,"Unable to read index of robot element\n");
       continue;
     }
     Assert(index < (int)sim.robotControllers.size());
@@ -209,7 +207,7 @@ bool XmlSimulationSettings::GetSettings(WorldSimulation& sim)
       if(controller)
 	sim.SetController(index,controller); 
       else {
-		LOG4CXX_ERROR(KrisLibrary::logger(),"Unable to load controller from xml file\n");
+	fprintf(stderr,"Unable to load controller from xml file\n");
 	return false;
       }
       if(controller->nominalTimeStep > 0)
@@ -218,7 +216,7 @@ bool XmlSimulationSettings::GetSettings(WorldSimulation& sim)
     TiXmlElement*es=c->FirstChildElement("sensors");
     if(es) {
       if(!sim.controlSimulators[index].sensors.LoadSettings(es)) {
-		LOG4CXX_ERROR(KrisLibrary::logger(),"Unable to load sensors from xml file\n");
+	fprintf(stderr,"Unable to load sensors from xml file\n");
 	return false;
       }
     }
@@ -226,14 +224,14 @@ bool XmlSimulationSettings::GetSettings(WorldSimulation& sim)
     /*
     TiXmlElement* es=c->FirstChildElement("sensors");
     if(es) {
-      LOG4CXX_INFO(KrisLibrary::logger(),"Parsing sensors...\n");
+      printf("Parsing sensors...\n");
       TiXmlElement* pos=es->FirstChildElement("position");
       int ival;
       Real fval;
       if(pos) {
 	if(pos->QueryValueAttribute("enabled",&ival)==TIXML_SUCCESS) {
 	  if(bodyIndex >= 0) 
-	    	    LOG4CXX_ERROR(KrisLibrary::logger(),"Warning: cannot enable individual joint encoders yet\n");
+	    fprintf(stderr,"Warning: cannot enable individual joint encoders yet\n");
 	  robotSim.sensors.hasJointPosition=(ival!=0);
 	}
 	if(pos->QueryValueAttribute("variance",&fval)==TIXML_SUCCESS) {
@@ -257,7 +255,7 @@ bool XmlSimulationSettings::GetSettings(WorldSimulation& sim)
       if(vel) {
 	if(vel->QueryValueAttribute("enabled",&ival)==TIXML_SUCCESS) {
 	  if(bodyIndex >= 0) 
-	    	    LOG4CXX_ERROR(KrisLibrary::logger(),"Warning: cannot enable individual joint encoders yet\n");
+	    fprintf(stderr,"Warning: cannot enable individual joint encoders yet\n");
 	  robotSim.sensors.hasJointVelocity=(ival!=0);
 	}
 	if(vel->QueryValueAttribute("variance",&fval)==TIXML_SUCCESS) {
@@ -283,12 +281,13 @@ bool XmlSimulationSettings::GetSettings(WorldSimulation& sim)
     /*
     TiXmlElement* ec=c->FirstChildElement("controller");
     if(ec) {
-      LOG4CXX_INFO(KrisLibrary::logger(),"Parsing controller...\n");
+      printf("Parsing controller...\n");
       TiXmlAttribute* setting = ec->FirstAttribute();
       while(setting) {
 	bool res=robotSim.controller->SetSetting(setting->Name(),setting->Value());
 	if(!res) {
-	  LOG4CXX_INFO(KrisLibrary::logger(),"Setting "<< or failed parsing\n"	}
+	  printf("Setting %s not valid for current controller, or failed parsing\n",setting->Name());
+	}
 	setting = setting->Next();
       }
     }
@@ -296,17 +295,17 @@ bool XmlSimulationSettings::GetSettings(WorldSimulation& sim)
     c = c->NextSiblingElement("robot");
   }
 
-  LOG4CXX_INFO(KrisLibrary::logger(),"Parsing state\n");
+  printf("Parsing state\n");
   c = e->FirstChildElement("state");
   if(c) {
     const char* data=c->Attribute("data");
     if(!data) {
-            LOG4CXX_ERROR(KrisLibrary::logger(),"No 'data' attribute in state\n");
+      fprintf(stderr,"No 'data' attribute in state\n");
       return false;
     }
     string decoded=FromBase64(data);
     if(!sim.ReadState(decoded)) {
-            LOG4CXX_ERROR(KrisLibrary::logger(),"Unable to read state from data\n");
+      fprintf(stderr,"Unable to read state from data\n");
       return false;
     }
   }

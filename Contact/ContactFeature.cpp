@@ -1,5 +1,3 @@
-#include <log4cxx/logger.h>
-#include <KrisLibrary/Logger.h>
 #include "ContactFeature.h"
 #include "TriangleSampler.h"
 #include <KrisLibrary/robotics/Rotation.h>
@@ -41,7 +39,7 @@ void EdgeContactFeature::GetHold(const Vector3& x,const Vector3& axis,Hold& h) c
   h.ikConstraint.SetFixedPosition(x);
   Vector3 locAxis=p2-p1;
   if(locAxis.isZero()) {
-    LOG4CXX_ERROR(KrisLibrary::logger(),"Warning: edge contact feature is degenerate, setting a point hold"<<"\n");
+    cerr<<"Warning: edge contact feature is degenerate, setting a point hold"<<endl;
     h.ikConstraint.SetFreeRotation();
     h.contacts.resize(1);
     h.contacts[0].x = p1;
@@ -66,7 +64,7 @@ void EdgeContactFeature::GetHold(const Vector3& x,const Vector3& n,Real theta,Ho
   h.ikConstraint.SetFixedPosition(x);
   Vector3 locAxis = p2-p1;
   if(locAxis.isZero()) {
-    LOG4CXX_ERROR(KrisLibrary::logger(),"Warning: edge contact feature is degenerate, setting a point hold"<<"\n");
+    cerr<<"Warning: edge contact feature is degenerate, setting a point hold"<<endl;
     h.ikConstraint.SetFreeRotation();
     h.contacts.resize(1);
     h.contacts[0].x = p1;
@@ -348,20 +346,20 @@ public:
       return true; 
     }
     else if(item == "axis") { rhs >> center >> axis; return true; }
-    LOG4CXX_INFO(KrisLibrary::logger(),"Unknown item "<<item<<"\n");
+    cout<<"Unknown item "<<item<<endl;
     return false;
   }
   virtual bool End() 
   { 
     if(faces.empty()) {
-      LOG4CXX_ERROR(KrisLibrary::logger(),"Must have at least one set of points"<<"\n");
+      cerr<<"Must have at least one set of points"<<endl;
       return false;
     }
     //most types of features only have one set of points
     const vector<Vector3>& pts=faces[0];
     if(type != ContactFeatureBase::MultipleFaces) {
       if(faces.size() > 1) {
-	LOG4CXX_ERROR(KrisLibrary::logger(),"Warning: feature should only have one set of points, ignoring all but the first set"<<"\n");
+	cerr<<"Warning: feature should only have one set of points, ignoring all but the first set"<<endl;
       }
     }
 
@@ -371,11 +369,11 @@ public:
 	PointContactFeature* f=new PointContactFeature;
 	c=f;
 	if(pts.size() > 1) {
-	  LOG4CXX_ERROR(KrisLibrary::logger(),"Only one contact point can be specified for point features"<<"\n");
+	  cerr<<"Only one contact point can be specified for point features"<<endl;
 	  return false;
 	}
 	if(pts.size() == 0) {
-	  LOG4CXX_ERROR(KrisLibrary::logger(),"Must specify one contact point for a point feature"<<"\n");
+	  cerr<<"Must specify one contact point for a point feature"<<endl;
 	  return false;
 	}
 	f->p = pts[0];
@@ -386,11 +384,11 @@ public:
 	EdgeContactFeature* f=new EdgeContactFeature;
 	c=f;
 	if(pts.size() > 2) {
-	  LOG4CXX_ERROR(KrisLibrary::logger(),"Only two contact points can be specified for edge features"<<"\n");
+	  cerr<<"Only two contact points can be specified for edge features"<<endl;
 	  return false;
 	}
 	if(pts.size() < 2) {
-	  LOG4CXX_ERROR(KrisLibrary::logger(),"Must specify two contact points for a edge feature"<<"\n");
+	  cerr<<"Must specify two contact points for a edge feature"<<endl;
 	  return false;
 	}
 	f->p1 = pts[0];
@@ -402,7 +400,7 @@ public:
 	FaceContactFeature* f=new FaceContactFeature;
 	c=f;
 	if(pts.size() < 3) {
-	  LOG4CXX_ERROR(KrisLibrary::logger(),"At least contact points must be specified for face features"<<"\n");
+	  cerr<<"At least contact points must be specified for face features"<<endl;
 	  return false;
 	}
 	f->vertices = pts;
@@ -413,11 +411,11 @@ public:
 	WheelContactFeature* f=new WheelContactFeature;
 	c=f;
 	if(pts.size() > 2) {
-	  LOG4CXX_ERROR(KrisLibrary::logger(),"At most two contact points can be specified for wheel features"<<"\n");
+	  cerr<<"At most two contact points can be specified for wheel features"<<endl;
 	  return false;
 	}
 	else if(pts.size() == 0) {
-	  LOG4CXX_ERROR(KrisLibrary::logger(),"Must specify more than one contact point for a wheel feature"<<"\n");
+	  cerr<<"Must specify more than one contact point for a wheel feature"<<endl;
 	  return false;
 	}
 	else if(pts.size() == 1) {
@@ -429,19 +427,19 @@ public:
 	  f->width = pts[0].distance(pts[1]);
 	}
 	if(axis.isZero()) {
-	  LOG4CXX_ERROR(KrisLibrary::logger(),"Didn't specify axis for wheel hold"<<"\n");
+	  cerr<<"Didn't specify axis for wheel hold"<<endl;
 	  return false;
 	}
 	f->axis.source = center;
 	f->axis.direction = axis;
 	if(!FuzzyEquals(f->axis.direction.norm(),One)) {
-	  LOG4CXX_ERROR(KrisLibrary::logger(),"Warning, axis is not normalized"<<"\n");
+	  cerr<<"Warning, axis is not normalized"<<endl;
 	  f->axis.direction.inplaceNormalize();
 	}
       }
       break;
     case ContactFeatureBase::MultipleFaces:
-      LOG4CXX_ERROR(KrisLibrary::logger(),"Not done with multiple face contact"<<"\n");
+      cerr<<"Not done with multiple face contact"<<endl;
       return false;
     }
     Assert(c != NULL);

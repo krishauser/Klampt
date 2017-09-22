@@ -1,8 +1,6 @@
 #ifndef PARABOLIC_RAMP_CONFIG_H
 #define PARABOLIC_RAMP_CONFIG_H
 
-#include <log4cxx/logger.h>
-#include <KrisLibrary/Logger.h>
 #include <assert.h>
 
 ///assertion function

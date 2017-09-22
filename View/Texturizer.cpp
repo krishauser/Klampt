@@ -1,4 +1,3 @@
-#include <KrisLibrary/Logger.h>
 #include "Texturizer.h"
 #include "ViewTextures.h"
 #include <KrisLibrary/errors.h>
@@ -20,7 +19,7 @@ void SetupTextureCoordinates(TriMeshWithTopology& mesh,vector<Vector2>& texcoord
     texcoords = chart.coordinates;
   }
   else {
-    LOG4CXX_ERROR(KrisLibrary::logger(),"Error generating texcoords"<<"\n");
+    cerr<<"Error generating texcoords"<<endl;
   }
 }
 
@@ -49,7 +48,7 @@ bool Texturizer::Set(ManagedGeometry& geom)
 
     app->tex2D = ViewTextures::Load(texture.c_str());
     if(!app->tex2D) {
-            LOG4CXX_ERROR(KrisLibrary::logger(),"Texture image "<<texture.c_str());
+      fprintf(stderr,"Texture image %s couldn't be loaded\n",texture.c_str());
       return false;
     }
     if(app->tex2D->h == 1) {
@@ -60,9 +59,9 @@ bool Texturizer::Set(ManagedGeometry& geom)
 
   switch(texCoords) {
   case ParameterizedTexCoord:
-    if(geom->type != Geometry::AnyGeometry3D::TriangleMesh){
-            LOG4CXX_ERROR(KrisLibrary::logger(),"Can't wrap texture coordinates around non-triangle mesh geometry\n");
-    }else
+    if(geom->type != Geometry::AnyGeometry3D::TriangleMesh)
+      fprintf(stderr,"Can't wrap texture coordinates around non-triangle mesh geometry\n");
+    else
       SetupTextureCoordinates(geom->TriangleMeshCollisionData(),app->texcoords);
     break;
   case XYTexCoords:

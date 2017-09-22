@@ -1,5 +1,3 @@
-#include <log4cxx/logger.h>
-#include <KrisLibrary/Logger.h>
 #include "RobotTimeScaling.h"
 #include "RobotConstrainedInterpolator.h"
 #include "Modeling/SplineInterpolate.h"
@@ -73,11 +71,11 @@ bool CheckBounds(Robot& robot,const TimeScaledBezierCurve& traj,const vector<Rea
     }
     for(int j=0;j<v.n;j++) {
       if(Abs(v[j]) > robot.velMax[j]+1e-3) {
-	LOG4CXX_INFO(KrisLibrary::logger(),"Exceeded vel max "<<robot.LinkName(j).c_str()<<"="<<v(j)<<" at time "<<times[i]);
+	printf("Exceeded vel max %s=%g at time %g\n",robot.LinkName(j).c_str(),v(j),times[i]);
 	res = false;
       }
       if(Abs(a[j]) > robot.accMax[j]+1e-3) {
-	LOG4CXX_INFO(KrisLibrary::logger(),"Exceeded accel max "<<robot.LinkName(j).c_str()<<"="<<a(j)<<" at time "<<times[i]);
+	printf("Exceeded accel max %s=%g at time %g\n",robot.LinkName(j).c_str(),a(j),times[i]);
 	res = false; 
       }
     }
@@ -85,17 +83,17 @@ bool CheckBounds(Robot& robot,const TimeScaledBezierCurve& traj,const vector<Rea
       diffa = (v-oldv)/(times[i]-times[i-1]);
       for(int j=0;j<v.n;j++) {
 	if(Abs(diffa[j]) > robot.accMax[j]+1e-3) {
-	  LOG4CXX_INFO(KrisLibrary::logger(),"Diff accel max "<<robot.LinkName(j).c_str()<<"="<<diffa(j)<<" at time "<<times[i]);
+	  printf("Diff accel max %s=%g at time %g\n",robot.LinkName(j).c_str(),diffa(j),times[i]);
 	  res = false;
 	}
       }	    
     }
     oldv = v;
   }
-  LOG4CXX_INFO(KrisLibrary::logger(),"Max vel "<<maxv<<"\n");
-  LOG4CXX_INFO(KrisLibrary::logger(),"Max accel "<<maxa<<"\n");
-  LOG4CXX_INFO(KrisLibrary::logger(),"End vel "<<v<<"\n");
-  LOG4CXX_INFO(KrisLibrary::logger(),"End accel "<<a<<"\n");
+  cout<<"Max vel "<<maxv<<endl;
+  cout<<"Max accel "<<maxa<<endl;
+  cout<<"End vel "<<v<<endl;
+  cout<<"End accel "<<a<<endl;
   return res;
 }
 
@@ -115,7 +113,7 @@ void SaveLimits(Robot& robot,const TimeScaledBezierCurve& traj,Real dt,const cha
 {
   Real T=traj.EndTime();
   int numdivs = (int)Ceil(T/dt);
-  LOG4CXX_INFO(KrisLibrary::logger(),"Saving time-scaled values to "<<fn);
+  printf("Saving time-scaled values to %s\n",fn);
   ofstream out(fn,ios::out);
   out<<"t";
   for(size_t i=0;i<robot.links.size();i++)
@@ -204,7 +202,7 @@ bool TimeOptimizePath(Robot& robot,const vector<Real>& oldtimes,const vector<Con
   for(size_t i=0;i+1<oldconfigs.size();i++) {
     traj.path.durations[i] = oldtimes[i+1]-oldtimes[i];
     if(!(traj.path.durations[i] > 0)) {
-            LOG4CXX_ERROR(KrisLibrary::logger(),"TimeOptimizePath: input path does not have monotonically increasing time: segment "<<i<<" range ["<<oldtimes[i]<<","<<oldtimes[i+1]);
+      fprintf(stderr,"TimeOptimizePath: input path does not have monotonically increasing time: segment %d range [%g,%g]\n",i,oldtimes[i],oldtimes[i+1]);
       return false;
     }
     Assert(traj.path.durations[i] > 0);
@@ -235,16 +233,16 @@ bool TimeOptimizePath(Robot& robot,const vector<Real>& oldtimes,const vector<Con
   Timer timer;
   bool res=traj.OptimizeTimeScaling(robot.velMin,robot.velMax,-1.0*robot.accMax,robot.accMax);
   if(!res) {
-    LOG4CXX_INFO(KrisLibrary::logger(),"Failed to optimize time scaling\n");
+    printf("Failed to optimize time scaling\n");
     return false;
   }
   else {
-    LOG4CXX_INFO(KrisLibrary::logger(),"Optimized into a path with duration "<<traj.EndTime()<<", (took "<<timer.ElapsedTime());
+    printf("Optimized into a path with duration %g, (took %gs)\n",traj.EndTime(),timer.ElapsedTime());
   }
   double T = traj.EndTime();
   int numdivs = (int)Ceil(T/dt);
 
-  LOG4CXX_INFO(KrisLibrary::logger(),"Discretizing at time resolution "<<T/numdivs);
+  printf("Discretizing at time resolution %g\n",T/numdivs);
   numdivs++;
   newtimes.resize(numdivs);
   newconfigs.resize(numdivs);
@@ -340,11 +338,11 @@ bool InterpolateConstrainedMultiPath(Robot& robot,const MultiPath& path,vector<G
 {
   //sanity check -- make sure it's a continuous path
   if(!path.IsContinuous()) {
-        LOG4CXX_ERROR(KrisLibrary::logger(),"InterpolateConstrainedMultiPath: path is discontinuous\n");
+    fprintf(stderr,"InterpolateConstrainedMultiPath: path is discontinuous\n");
     return false;
   }
   if(path.sections.empty()) {
-        LOG4CXX_ERROR(KrisLibrary::logger(),"InterpolateConstrainedMultiPath: path is empty\n");
+    fprintf(stderr,"InterpolateConstrainedMultiPath: path is empty\n");
     return false;
   }
 
@@ -352,7 +350,7 @@ bool InterpolateConstrainedMultiPath(Robot& robot,const MultiPath& path,vector<G
     //see if the resolution is high enough to just interpolate directly
     Real res=path.settings.as<Real>("resolution");
     if(res <= xtol) {
-      LOG4CXX_INFO(KrisLibrary::logger(),"InterpolateConstrainedMultiPath: Direct interpolating trajectory with res "<<res);
+      printf("InterpolateConstrainedMultiPath: Direct interpolating trajectory with res %g\n",res);
       //just interpolate directly
       RobotCSpace space(robot);
       paths.resize(path.sections.size());
@@ -378,7 +376,7 @@ bool InterpolateConstrainedMultiPath(Robot& robot,const MultiPath& path,vector<G
       return true;
     }
   }
-  LOG4CXX_INFO(KrisLibrary::logger(),"InterpolateConstrainedMultiPath: Discretizing constrained trajectory at res "<<xtol);
+  printf("InterpolateConstrainedMultiPath: Discretizing constrained trajectory at res %g\n",xtol);
 
   RobotCSpace cspace(robot);
 
@@ -394,8 +392,8 @@ bool InterpolateConstrainedMultiPath(Robot& robot,const MultiPath& path,vector<G
     for(size_t j=0;j<stanceConstraints[i+1].size();j++) {
       bool res=AddGoalNonredundant(stanceConstraints[i+1][j],transitionConstraints[i]);
       if(!res) {
-		LOG4CXX_ERROR(KrisLibrary::logger(),"InterpolateConstrainedMultiPath: Conflict between goal "<<j<<" of stance "<<i+1<<" and stance "<<i);
-		LOG4CXX_ERROR(KrisLibrary::logger(),"  Link "<<stanceConstraints[i+1][j].link);
+	fprintf(stderr,"InterpolateConstrainedMultiPath: Conflict between goal %d of stance %d and stance %d\n",j,i+1,i);
+	fprintf(stderr,"  Link %d\n",stanceConstraints[i+1][j].link);
 	return false;
       }
     }
@@ -439,7 +437,7 @@ bool InterpolateConstrainedMultiPath(Robot& robot,const MultiPath& path,vector<G
     f.Jacobian(temp,J);
     RobustSVD<Real> svd;
     if(!svd.set(J)) {
-            LOG4CXX_ERROR(KrisLibrary::logger(),"Unable to set SVD of transition constraints "<<i);
+      fprintf(stderr,"Unable to set SVD of transition constraints %d\n",i);
       return false;
     }
     svd.nullspaceComponent(dtemp,dtemp2);
@@ -465,20 +463,20 @@ bool InterpolateConstrainedMultiPath(Robot& robot,const MultiPath& path,vector<G
       //Note: discretizeSpline will fill in the spline durations
     }
     else {
-      LOG4CXX_INFO(KrisLibrary::logger(),"Trying MultiSmoothInterpolate...\n");
+      printf("Trying MultiSmoothInterpolate...\n");
       RobotSmoothConstrainedInterpolator interp(robot,stanceConstraints[i]);
       interp.ftol = xtol*gConstraintToleranceScale;
       interp.xtol = xtol;
       if(!MultiSmoothInterpolate(interp,path.sections[i].milestones,dxprev,dxnext,paths[i])) {
 	/** TEMP - test no inter-section smoothing**/
 	//if(!MultiSmoothInterpolate(interp,path.sections[i].milestones,paths[i])) {
-		LOG4CXX_ERROR(KrisLibrary::logger(),"InterpolateConstrainedMultiPath: Unable to interpolate section "<<i);
+	fprintf(stderr,"InterpolateConstrainedMultiPath: Unable to interpolate section %d\n",i);
 	return false;
       }
     }
     //set the time scale if the input path is timed
     if(!path.sections[i].times.empty()) {
-      //LOG4CXX_INFO(KrisLibrary::logger(),"Time scaling section "<<i<<" to duration "<<path.sections[i].times.back()-path.sections[i].times.front());
+      //printf("Time scaling section %d to duration %g\n",i,path.sections[i].times.back()-path.sections[i].times.front());
       paths[i].TimeScale(path.sections[i].times.back()-path.sections[i].times.front());
     }
   }
@@ -543,7 +541,7 @@ Real OptimalTriangularTimeScaling(const GeneralizedCubicBezierSpline& path,const
       traj.timeScaling.times[i] = 1.0 - Sqrt(0.5 - 0.5*u*invpathlen);
       traj.timeScaling.ds[i] = 4.0*pathlen*(1.0 - traj.timeScaling.times[i]);
     }
-    //LOG4CXX_INFO(KrisLibrary::logger(),"u: "<<u<<" / "<<pathlen<<", t: "<<traj.timeScaling.times[i]);
+    //printf("u: %g / %g, t: %g / 1\n",u,pathlen,traj.timeScaling.times[i]);
     if(i < path.segments.size()) {
       Real du = path.durations[i];
       u += du;
@@ -595,7 +593,7 @@ Real OptimalTriangularTimeScaling(const GeneralizedCubicBezierSpline& path,const
   Real maxRate = Max(vmaxrel,amaxrel);
   //duration of ramp up is 2*pathlen/2 / rate, ramp down is the same
   Real T = 2.0*Sqrt(maxRate/4.0);
-  LOG4CXX_INFO(KrisLibrary::logger(),"Pathlen "<<pathlen<<", time "<<T<<", max relative velocity "<<vmaxrel<<", acceleration "<<amaxrel);
+  printf("Pathlen %g, time %g, max relative velocity %g, acceleration %g\n",pathlen,T,vmaxrel,amaxrel);
 
   for(size_t i=0;i<=path.durations.size();i++) 
     traj.timeScaling.ds[i] *= 1.0/Sqrt(maxRate);
@@ -604,7 +602,7 @@ Real OptimalTriangularTimeScaling(const GeneralizedCubicBezierSpline& path,const
     Real dt = 2*path.durations[i]/(traj.timeScaling.ds[i]+traj.timeScaling.ds[i+1]);    
     traj.timeScaling.times[i+1]=traj.timeScaling.times[i]+dt;
   }
-  LOG4CXX_INFO(KrisLibrary::logger(),"Recalculated time "<<traj.timeScaling.times.back());
+  printf("Recalculated time %g\n",traj.timeScaling.times.back());
   return T;
 }
 
@@ -614,7 +612,7 @@ bool GenerateAndTimeOptimizeMultiPath(Robot& robot,MultiPath& multipath,Real xto
   vector<GeneralizedCubicBezierSpline > paths;
   if(!InterpolateConstrainedMultiPath(robot,multipath,paths,xtol))
     return false;
-  LOG4CXX_INFO(KrisLibrary::logger(),"Generated interpolating path in time "<<timer.ElapsedTime());
+  printf("Generated interpolating path in time %gs\n",timer.ElapsedTime());
 
   RobotCSpace cspace(robot);
   for(size_t i=0;i<multipath.sections.size();i++) {
@@ -628,7 +626,7 @@ bool GenerateAndTimeOptimizeMultiPath(Robot& robot,MultiPath& multipath,Real xto
 
 #if SAVE_INTERPOLATING_CURVES
   int index=0;
-  LOG4CXX_INFO(KrisLibrary::logger(),"Saving sections, element "<<index);
+  printf("Saving sections, element %d to section_x_bezier.csv\n",index);
   for(size_t i=0;i<paths.size();i++) {
     {
       stringstream ss;
@@ -873,15 +871,15 @@ bool GenerateAndTimeOptimizeMultiPath(Robot& robot,MultiPath& multipath,Real xto
   timer.Reset();
   bool res=traj.OptimizeTimeScaling(robot.velMin,robot.velMax,-1.0*robot.accMax,robot.accMax);
   if(!res) {
-    LOG4CXX_INFO(KrisLibrary::logger(),"Failed to optimize time scaling\n");
+    printf("Failed to optimize time scaling\n");
     return false;
   }
   else {
-    LOG4CXX_INFO(KrisLibrary::logger(),"Optimized into a path with duration "<<traj.EndTime()<<", (took "<<timer.ElapsedTime());
+    printf("Optimized into a path with duration %g, (took %gs)\n",traj.EndTime(),timer.ElapsedTime());
   }
   double T = traj.EndTime();
   int numdivs = (int)Ceil(T/dt);
-  LOG4CXX_INFO(KrisLibrary::logger(),"Discretizing at time resolution "<<T/numdivs);
+  printf("Discretizing at time resolution %g\n",T/numdivs);
   numdivs++;
 
   Vector x,v;
@@ -893,8 +891,8 @@ bool GenerateAndTimeOptimizeMultiPath(Robot& robot,MultiPath& multipath,Real xto
     Assert(trajEdge < (int)edgeToSection.size());
     int s=edgeToSection[trajEdge];
     if(s < sCur) {
-            LOG4CXX_ERROR(KrisLibrary::logger(),"Strange: edge index is going backward? "<<sCur<<" -> "<<s);
-            LOG4CXX_ERROR(KrisLibrary::logger(),"  time "<<t<<", division "<<i<<", traj segment "<<trajEdge);
+      fprintf(stderr,"Strange: edge index is going backward? %d -> %d\n",sCur,s);
+      fprintf(stderr,"  time %g, division %d, traj segment %d\n",t,i,trajEdge);
     }
     Assert(s - sCur >=0);
     while(sCur < s) {
@@ -928,11 +926,11 @@ bool GenerateAndTimeOptimizeMultiPath(Robot& robot,MultiPath& multipath,Real xto
   timer.Reset();
   TimeScaledBezierCurve trajTri;
   Real Ttrap = 0;
-  LOG4CXX_INFO(KrisLibrary::logger(),""<<paths.size());
+  printf("%d paths?\n",paths.size());
   for(size_t i=0;i<paths.size();i++)
     Ttrap += OptimalTriangularTimeScaling(paths[i],robot.velMin,robot.velMax,-1.0*robot.accMax,robot.accMax,trajTri);
-  LOG4CXX_INFO(KrisLibrary::logger(),"Optimal trapezoidal time scaling duration "<<Ttrap<<", calculated in "<<timer.ElapsedTime());
-  LOG4CXX_INFO(KrisLibrary::logger(),"Saving plot to opt_tri_multipath.csv\n");
+  printf("Optimal trapezoidal time scaling duration %g, calculated in %gs\n",Ttrap,timer.ElapsedTime());
+  printf("Saving plot to opt_tri_multipath.csv\n");
   trajTri.Plot("opt_tri_multipath.csv",robot.velMin,robot.velMax,-1.0*robot.accMax,robot.accMax);
 #endif // DO_TEST_TRAPEZOIDAL
 
@@ -942,7 +940,7 @@ bool GenerateAndTimeOptimizeMultiPath(Robot& robot,MultiPath& multipath,Real xto
 #endif // DO_CHECK_BOUNDS
 
 #if DO_SAVE_PLOT
-  LOG4CXX_INFO(KrisLibrary::logger(),"Saving plot to opt_multipath.csv\n");
+  printf("Saving plot to opt_multipath.csv\n");
   traj.Plot("opt_multipath.csv",robot.velMin,robot.velMax,-1.0*robot.accMax,robot.accMax);
 #endif //DO_SAVE_PLOT
 
@@ -985,7 +983,7 @@ void EvaluateMultiPath(Robot& robot,const MultiPath& path,Real t,Config& q,Real 
 
       int iters=numIKIters;
       bool res=SolveIK(robot,ik,contactol,iters,0);
-      if(!res) LOG4CXX_WARN(KrisLibrary::logger(),"Warning, couldn't solve IK problem at sec "<<seg<<", time "<<t);
+      if(!res) printf("Warning, couldn't solve IK problem at sec %d, time %g\n",seg,t);
       swap(q,robot.q);
     }
   }
