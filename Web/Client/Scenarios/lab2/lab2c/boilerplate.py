@@ -3,6 +3,7 @@ import sys
 sys.path.append("Web/Server")
 import time
 from klampt import *
+from klampt.math import *
 import kviz
 import math
 import random
