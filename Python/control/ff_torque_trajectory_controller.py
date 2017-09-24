@@ -1,5 +1,5 @@
 from controller import ControllerAPI,BaseController
-from klampt import trajectory
+from klampt.model import trajectory
 import time
 
 class TrajectoryWithFeedforwardController(BaseController):

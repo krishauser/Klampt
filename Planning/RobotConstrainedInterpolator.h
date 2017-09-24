@@ -18,7 +18,6 @@ public:
   virtual bool Project(Config& x);
 
   RobotCSpace space;
-  RobotGeodesicManifold manifold;
   RobotIKFunction f;
 };
 
@@ -35,7 +34,6 @@ public:
   virtual bool ProjectVelocity(const Config& x,Vector& v);
 
   RobotCSpace space;
-  RobotGeodesicManifold manifold;
   RobotIKFunction f;
 };
 

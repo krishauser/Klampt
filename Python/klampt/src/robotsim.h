@@ -26,18 +26,53 @@ class Simulator;
 /** @brief A sensor on a simulated robot.  Retreive this from the controller,
  * and use getMeasurements to get the currently simulated measurement vector.
  *
- * type() gives you a string defining the sensor type.
- * measurementNames() gives you a list of names for the measurements.
+ * Sensors are automatically updated through the sim.simulate call, and
+ * getMeasurements() retrieves the previously updated values.  As a result,
+ * you may get garbage measurements before the first sim.simulate call is made.
+ * 
+ * There is also a new mode for doing kinematic simulation, which is supported
+ * (i.e., makes sensible measurements) for some types of sensors when just 
+ * a robot / world model is given. This is similar to Simulation.fakeSimulate
+ * but the entire controller structure is bypassed.  You can randomly set the
+ * robot's position, call kinematicReset(), and then call kinematicSimulate().
+ * Subsequent calls assume the robot is being driven along a trajectory until the
+ * next kinematicReset() is called.
+ * LaserSensor, CameraSensor, TiltSensor, AccelerometerSensor, GyroSensor,
+ * JointPositionSensor, JointVelocitySensor support kinematic simulation mode.
+ * FilteredSensor and TimeDelayedSensor also work.  The force-related sensors 
+ * (ContactSensor and ForceTorqueSensor) return 0's in kinematic simulation.
+ *
+ * To use get/setSetting, you will need to know the sensor attribute names
+ * and types as described in Klampt/Control/*Sensor.h (same as in the world or
+ * sensor XML file).
  */
 class SimRobotSensor
 {
  public:
-  SimRobotSensor(SensorBase* sensor);
+  SimRobotSensor(Robot* robot,SensorBase* sensor);
+  ///Returns the name of the sensor
   std::string name();
+  ///Returns the type of the sensor
   std::string type();
+  ///Returns a list of names for the measurements (one per measurement).
   std::vector<std::string> measurementNames();
+  ///Returns a list of measurements from the previous simulation (or kinematicSimulate) timestep
   void getMeasurements(std::vector<double>& out);
+  ///Returns the value of the named setting (you will need to manually parse this)
+  std::string getSetting(const std::string& name);
+  ///Sets the value of the named setting (you will need to manually cast an int/float/etc to a str)
+  void setSetting(const std::string& name,const std::string& val);
+  ///Draws a sensor indicator using OpenGL
+  void drawGL();
+  ///Draws a sensor indicator and its measurements using OpenGL.
+  void drawGL(const std::vector<double>& measurements);
 
+  ///simulates / advances the kinematic simulation
+  void kinematicSimulate(WorldModel& world,double dt);
+  ///resets a kinematic simulation so that a new initial condition can be set
+  void kinematicReset();
+
+  Robot* robot;
   SensorBase* sensor;
 };
 
@@ -82,6 +117,8 @@ class SimRobotController
   RobotModel model();
   /// Sets the current feedback control rate
   void setRate(double dt);
+  /// Gets the current feedback control rate
+  double getRate();
 
   /// Returns the current commanded configuration
   void getCommandedConfig(std::vector<double>& out);
@@ -97,11 +134,7 @@ class SimRobotController
   SimRobotSensor sensor(int index);
   /// Returns a sensor by name.  If unavailable, a null sensor is returned
   SimRobotSensor sensor(const char* name);
-  ///Old-style: will be deprecated
-  SimRobotSensor getSensor(int index);
-  ///Old-style: will be deprecated
-  SimRobotSensor getNamedSensor(const std::string& name);
-
+  
   /// gets a command list
   std::vector<std::string> commands();
   /// sends a command to the controller
@@ -137,8 +170,6 @@ class SimRobotController
   void setCubic(const std::vector<double>& q,const std::vector<double>& v,double dt);
   /// Same as setLinear but appends an interpolant onto the motion queue
   void addLinear(const std::vector<double>& q,double dt);
-  /// Same as addLinear (will be deprecated)
-  void appendLinear(const std::vector<double>& q,double dt);
   /// Same as setCubic but appends an interpolant onto the motion queue
   void addCubic(const std::vector<double>& q,const std::vector<double>& v,double dt);
 
@@ -170,6 +201,8 @@ class SimRobotController
 
   /// Sets the PID gains
   void setPIDGains(const std::vector<double>& kP,const std::vector<double>& kI,const std::vector<double>& kD);
+  /// Gets the PID gains for the PID controller
+  void getPIDGains(std::vector<double>& kPout,std::vector<double>& kIout,std::vector<double>& kDout);
 
   int index;
   Simulator* sim;
@@ -192,6 +225,8 @@ class SimRobotController
 class SimBody
 {
  public:
+  /// Returns the object ID that this body associated with
+  int getID() const;
   /// Sets the simulation of this body on/off
   void enable(bool enabled=true);
   /// Returns true if this body is being simulated
@@ -220,6 +255,13 @@ class SimBody
   /// simulation time step (in center-of-mass centered coordinates).
   void getTransform(double out[9],double out2[3]);
 
+  /// Sets the body's transformation at the current
+  /// simulation time step (in object-native coordinates)
+  void setObjectTransform(const double R[9],const double t[3]);
+  /// Gets the body's transformation at the current
+  /// simulation time step (in object-native coordinates).
+  void getObjectTransform(double out[9],double out2[3]);
+
   /// Sets the angular velocity and translational velocity at the current
   /// simulation time step.
   void setVelocity(const double w[3],const double v[3]);
@@ -229,6 +271,10 @@ class SimBody
   /// Sets the collision padding (useful for thin objects).  Default is 0.0025
   void setCollisionPadding(double padding);
   double getCollisionPadding();
+  /// If set, preshrinks the geometry so that the padded geometry better matches
+  /// the original mesh.  If shrinkVisualization=true, the underlying mesh is
+  /// also shrunk (helps debug)
+  void setCollisionPreshrink(bool shrinkVisualization=false);
 
   /// Gets (a copy of) the surface properties
   ContactParameters getSurface();
@@ -236,6 +282,7 @@ class SimBody
   void setSurface(const ContactParameters& params);
 
   Simulator* sim;
+  int objectID;
   ODEGeometry* geometry;
   dBodyID body;
 };
@@ -245,15 +292,25 @@ class SimBody
 class Simulator
 {
  public:
+  ///Status flags
+  enum { STATUS_NORMAL=0, STATUS_ADAPTIVE_TIME_STEPPING=1, STATUS_CONTACT_UNRELIABLE=2,
+    STATUS_UNSTABLE=3, STATUS_ERROR=4 };
+
   /// Constructs the simulator from a WorldModel.  If the WorldModel was
   /// loaded from an XML file, then the simulation setup is loaded from it.
-  Simulator(const WorldModel& model,const char* settings=NULL);
+  Simulator(const WorldModel& model);
   ~Simulator();
 
   /// Resets to the initial state (same as setState(initialState))
   void reset();
-  /// Old-style: will be deprecated
-  WorldModel getWorld() const;
+
+  /// Returns an indicator code for the simulator status.  The return result
+  /// is one of the STATUS_X flags.  (Technically, this returns the *worst* status
+  /// over the last simulate() call)
+  int getStatus();
+  /// Returns a string indicating the simulator's status.  If s is provided and >= 0,
+  /// this function maps the indicator code s to a string.
+  std::string getStatusString(int s=-1);
 
   /// Returns a Base64 string representing the binary data for the current
   /// simulation state, including controller parameters, etc.
@@ -338,16 +395,6 @@ class Simulator
   SimBody body(const RigidObjectModel& object);
   ///Returns the SimBody corresponding to the given terrain
   SimBody body(const TerrainModel& terrain);
-  ///Old-style: will be deprecated
-  SimRobotController getController(int robot);
-  ///Old-style: will be deprecated
-  SimRobotController getController(const RobotModel& robot);
-  ///Old-style: will be deprecated
-  SimBody getBody(const RobotModelLink& link);
-  ///Old-style: will be deprecated
-  SimBody getBody(const RigidObjectModel& object);
-  ///Old-style: will be deprecated
-  SimBody getBody(const TerrainModel& terrain);
 
   /// Returns the joint force and torque local to the link, as would be read
   /// by a force-torque sensor mounted at the given link's origin.  The 6
@@ -358,11 +405,31 @@ class Simulator
   void setGravity(const double g[3]);
   /// Sets the internal simulation substep.  Values < 0.01 are recommended.
   void setSimStep(double dt);
+  /// Retrieves some simulation setting.  Valid names are gravity,
+  /// simStep, boundaryLayerCollisions, rigidObjectCollisions, robotSelfCollisions,
+  /// robotRobotCollisions, adaptiveTimeStepping, minimumAdaptiveTimeStep, maxContacts,
+  /// clusterNormalScale, errorReductionParameter, dampedLeastSquaresParameter,
+  /// instabilityConstantEnergyThreshold, instabilityLinearEnergyThreshold,
+  /// instabilityMaxEnergyThreshold, and instabilityPostCorrectionEnergy.
+  /// See Klampt/Simulation/ODESimulator.h for detailed descriptions of these
+  /// parameters.
+  std::string getSetting(const std::string& name);
+  /// Sets some simulation setting. Raises an exception if the name is
+  /// unknown or the value is of improper format
+  void setSetting(const std::string& name,const std::string& value);
+
 
   int index;
   WorldModel world;
   WorldSimulation* sim;
   std::string initialState;
 };
+
+/// Sets the random seed used by the configuration sampler
+void setRandomSeed(int seed);
+
+///Cleans up all internal data structures.  Useful for multithreaded programs to make sure ODE errors
+///aren't thrown on exit.  This is called for you on exit when importing the Python klampt module.
+void destroy();
 
 #endif

@@ -39,6 +39,10 @@
        width:100%;
        height:100%;
       }
+      .panel_control {
+        font-size:small;
+        white-space:nowrap;
+      }
       .button { 
        display:block;
        float:left;
@@ -184,9 +188,9 @@
 
          function enablePlaybackButtons()
          {
-           $('#reset').click(onClickReset);
-           $('#step').click(onClickRequestAdvance);
-           $('#play_pause').click(onClickPlayPause);
+           $('#reset').off('click').click(onClickReset);
+           $('#step').off('click').click(onClickRequestAdvance);
+           $('#play_pause').off('click').click(onClickPlayPause);
             make_reset('reset');
             make_step('step');
             make_play('play_pause');
@@ -322,14 +326,19 @@
                dataType: "text",  // jQuery will infer this, but you can set explicitly
                success: function( data, textStatus, jqXHR ) {
                   $("#buttonpanel_content").empty();
-                  $("#myTextarea").width("94%");
+                  //$("#myTextarea").width("94%");
                   domitems = $.parseHTML(data);
                   domitems.forEach(function(ei) {
                      $(ei).find("button").addBack("button").each( function(i) {
                         $(this).click(function() { KLAMPT.event($(this).attr('name')); })
                      });
                      $(ei).find("input, textarea").addBack("input, textarea").each( function(i) {
-                        $(this).change(function() { KLAMPT.setitem($(this).attr('name'),$(this).val()); });
+                        if($(this).attr('type') == 'checkbox') {
+                           $(this).change(function() { KLAMPT.setitem($(this).attr('name'),$(this).prop('checked')); });
+                        }
+                        else {
+                           $(this).change(function() { KLAMPT.setitem($(this).attr('name'),$(this).val()); });
+                        }
                      });
                      $(ei).find("select").addBack("select").each( function(i) {
                         $(this).on("input change",function() { KLAMPT.setitem($(this).attr('name'),$(this).val()); });
@@ -352,21 +361,21 @@
                   setTimeout(function(){
                      var wtext = $("#myTextarea").outerWidth();
                      var wpanel = $("#buttonpanel_content").outerWidth();
-                     var ftext = Math.floor(wtext/(wtext + wpanel)*100);
-                     var fpanel = Math.ceil(wpanel/(wtext + wpanel)*100);
-                     //console.log(ftext);
-                     //console.log(fpanel);
-                     //why these magic offsets?
-                     $("#myTextarea").width((ftext-6-fpanel/3)+"%");
-                     //$("#buttonpanel").width(fpanel+"%");
+                     var htext = $("#myTextarea").outerHeight();
+                     var hpanel = $("#buttonpanel_content").outerHeight();
+                     $("#buttonpanel").width(wpanel+1);
+                     w2ui['layout'].set('preview',{minSize:hpanel + 13});
+                     if(htext < hpanel) {
+                        w2ui['layout'].set('preview',{size:hpanel + 13});
+                     }
+                     //$("#myTextarea").width((wtext-wpanel-11.0)+"px");
                   },0);
                },
                error : function( jqXHR, textStatus, errorThrown ) {
                   console.log("No button panel: "+textStatus);
                   $("#buttonpanel_content").empty();
-                  //$("#myTextarea").width("100%");
-                  //why 6% offset?
-                  $("#myTextarea").width("94%");
+                  w2ui['layout'].set('preview',{minSize:20})
+                  $("#buttonpanel").width(0);
                   editor.resize();
                }
             });
@@ -375,12 +384,49 @@
          function buttonPanelToServer()
          {
            $('#buttonpanel_content').find("input, textarea").addBack("input, textarea").each( function(i) {
-              KLAMPT.setitem($(this).attr('name'),$(this).val());
+              if($(this).attr('type') == 'checkbox') {
+                 KLAMPT.setitem($(this).attr('name'),$(this).prop('checked'));
+              }
+              else {
+                 KLAMPT.setitem($(this).attr('name'),$(this).val());
+              }
            });
            $('#buttonpanel_content').find("select").addBack("select").each( function(i) {
                   KLAMPT.setitem($(this).attr('name'),$(this).val()); 
            });
          }
+
+         //the magic of AJAX
+         //http://stackoverflow.com/questions/3567369/reading-server-side-file-with-javascript
+         function loadScenarios(file_to_load,shown_only)
+         {
+            console.log("Trying to load scenarios "+file_to_load);
+            $.getJSON( file_to_load)
+             .done(function (data) {
+                function add_option(id,text) {
+                  $('#boilerselctor').append($('<option>', {value:id}).text(text));
+                }
+                if(shown_only) {
+                  for (var i in data['shown']) {
+                    var key = data['shown'][i];
+                    add_option(data['scenarios'][key],key);
+                  }
+                }
+                else {
+                  for (var key in data['scenarios']) {
+                    add_option(data['scenarios'][key],key);
+                  }
+                }
+                if(data['active']) {
+                  $('#boilerselctor').val(data['scenarios'][data['active']]);
+                }
+                boilerPlateChanged();
+              })
+             .fail(function( jqXHR, textStatus, errorThrown ) {
+                  console.log("Error loading scenarios: "+textStatus);
+             });
+         }
+
 
          function serverChanged()
          {
@@ -393,7 +439,7 @@
          {
             if (confirm("Are you sure you want to discard ALL changes?") == true) {
               var boilerid=$('#boilerselctor').val();
-              var file_to_load="Scenarios/code_"+boilerid+".py";
+              var file_to_load="Scenarios/"+boilerid+"/code.py";
               loadFileToEditor(file_to_load);
               
               stopAnimation();
@@ -403,7 +449,7 @@
          function boilerPlateChanged()
          {
             var boilerid=$('#boilerselctor').val();
-            var file_to_load="Scenarios/code_"+boilerid+".py";
+            var file_to_load="Scenarios/"+boilerid+"/code.py";
          
             if(localStorageAvailable) //lets see if we have worked on this previously
             {
@@ -420,7 +466,7 @@
             else
                loadFileToEditor(file_to_load);
             newBoilerplate = true;
-            var panel_to_load="Scenarios/panel_"+boilerid+".xml";
+            var panel_to_load="Scenarios/"+boilerid+"/panel.xml";
             loadFileToPanel(panel_to_load);
             stopAnimation();
          }   
@@ -448,14 +494,14 @@
                               <button onclick="doConnect()">Connect</button> \
                               <div style=" width:20px;display:inline-block;" /> \
                               <select id="boilerselctor" onchange="boilerPlateChanged()"></select> \
-                              <input type="checkbox" id="shadows" onclick="toggleShadow(this);">Shadows</input>';
+                              <input type="checkbox" id="shadows" checked onclick="toggleShadow(this);">Shadows</input>';
             var pstyle = 'background-color: #F5F6F7; border: 1px solid #dfdfdf; padding: 5px;';
             $('#myLayout').w2layout({
                name: 'layout',
                panels: [
                   { type: 'top',  size: "7%", resizable: true, style: pstyle, content: toolbarHTML},
                   { type: 'main', style: pstyle, content: '<div id="canvas" style="width:100%; height:100%; margin:0; padding:0"></div>' },
-                  { type: 'preview', size: "15%", resizable: true, style: pstyle, content: '<textarea readonly id="myTextarea" style="background-color: black;color:white;width:100%;height:100%;float:left;">> </textarea><div id="buttonpanel" style="height:100%; margin:0; padding:0; float:left;"><div id="buttonpanel_content" style="margin:0;padding:0;"></div></div>' },
+                  { type: 'preview', size: "15%", resizable: true, style: pstyle, content: '<div style="display:table;width:100%;height:100%;"><div style="display:table-cell;width:auto;height:100%;"><textarea readonly id="myTextarea" style="background-color: black;color:white;width:100%;height:100%;resize:vertical;">></textarea></div><div id="buttonpanel" style="height:100%; margin:0; padding:0; display:table-cell;"><div id="buttonpanel_content" style="margin:0;padding:0;float:right;"></div></div></div>' },
                   { type: 'right', size: '50%', resizable: true, style: pstyle, content: 
                     '<div style="padding-left:40px"> \
                       <div id="myTabs"></div> \
@@ -479,28 +525,7 @@
               }
             });            
 
-            function add_option(id,text) {
-               $('#boilerselctor').append($('<option>', {value:id}).text(text));
-            }
-            add_option("test_sim","Test Simulation")
-            add_option("sandbox","Simulation Sandbox")
-            add_option("kinematic_sandbox","Kinematic Sandbox")
-            add_option("lab1a","Lab 1a")
-            add_option("lab1b","Lab 1b")
-            add_option("lab1c","Lab 1c")
-            add_option("lab1d","Lab 1d")
-            add_option("lab2a","Lab 2a")
-            add_option("lab2b","Lab 2b")
-            add_option("lab2c","Lab 2c")
-            add_option("lab3a","Lab 3a")
-            add_option("lab3b","Lab 3b")
-            add_option("lab3d","Lab 3d")
-            add_option("dynamics","Dynamics test")
-            add_option("lab4","Lab 4")
-            add_option("lab5","Lab 5")
-            add_option("finalA","Final A")
-            add_option("finalB","Final B")
-            add_option("finalC","Final C")
+            loadScenarios("Scenarios/scenarios.json",false);
 
             if(localStorageAvailable) {
                var url=localStorage.getItem('serverURL');
@@ -508,8 +533,6 @@
                   $('#serverURL').val(url);
                }
             }
-            
-          
 
             ace.require("ace/ext/language_tools"); //setup the text editor
             editor = ace.edit("editor");
@@ -524,7 +547,6 @@
             editor.setTheme("ace/theme/eclipse"); 
             editor.getSession().setMode("ace/mode/python");
             
-            boilerPlateChanged();
                        
             //var editor = CodeMirror( document.getElementById("editor"), { //use codemirror as text editor
             //value: "print 'hello world'\n",
@@ -536,7 +558,7 @@
 
             w2ui.layout.on('resize', function(event) { //make sure three.js canvas resizes when sub-window size changes
                event.onComplete = function () {
-                  console.log("resize completed"); 
+                  //console.log("KLAMPT OpenGL window resize completed"); 
                   onWindowResize(event);
                }
             });
@@ -546,6 +568,16 @@
             var container = document.getElementById("canvas");
             var textArea = document.getElementById("myTextarea");
             KLAMPT.init(container,textArea);
+
+            //hack to allow canvas to accept keyboard events
+            $('#canvas').attr("tabindex", "0")
+              // Mouse down override to prevent default browser controls from appearing
+              .mousedown(function(){ $(this).focus(); return false; })
+              .keydown(function(event){
+                if(event.key == "'") { KLAMPT.event("keydown_\\"+event.key);  }
+                else { KLAMPT.event("keydown_"+event.key); }
+                return false;
+              });
             
             onWindowResize();
          });
@@ -553,8 +585,6 @@
             
          function onWindowResize( event )
          {
-            console.log("onWindowResize");
-         
             //account for 5px padding on each side
             KLAMPT.windowResize(visPanel.width-11,visPanel.height-11);
          }       

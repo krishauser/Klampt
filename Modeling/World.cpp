@@ -27,8 +27,11 @@ bool RobotWorld::LoadXML(const char* fn)
 
 bool RobotWorld::SaveXML(const char* fn,const char* elementDir)
 {
-  fprintf(stderr,"RobotWorld::SaveXML: Saving worlds is not implemented yet\n");
-  return false;
+  XmlWorld xmlWorld;
+  if(elementDir)
+    return xmlWorld.Save(*this,fn,elementDir);
+  else
+    return xmlWorld.Save(*this,fn);
 }
 
 int RobotWorld::NumIDs() const
@@ -417,9 +420,60 @@ RigidObject* RobotWorld::GetRigidObject(const string& name)
 
 
 
+int RobotWorld::RayCast(const Ray3D& r,Vector3& worldpt)
+{
+  for(size_t j=0;j<robots.size();j++) 
+    robots[j]->InitCollisions();
+  for(size_t j=0;j<rigidObjects.size();j++) 
+    rigidObjects[j]->InitCollisions();
+  for(size_t j=0;j<terrains.size();j++) 
+    terrains[j]->InitCollisions();
+  int closestBody = -1;
+  Real closestDist = Inf;
+  Vector3 closestPoint;
+  for(size_t j=0;j<robots.size();j++) {
+    Robot* robot = robots[j];
+    robot->UpdateGeometry();
+    for(size_t i=0;i<robot->links.size();i++) {
+      if(robot->IsGeometryEmpty(i)) continue;
+      Real dist;
+      if(robot->geometry[i]->RayCast(r,&dist)) {
+        if(dist < closestDist) {
+          closestDist = dist;
+          closestPoint = r.source + dist*r.direction;
+          closestBody = RobotLinkID(j,i);
+        }
+      }
+    }
+  }
+  for(size_t j=0;j<rigidObjects.size();j++) {
+    RigidObject* obj = rigidObjects[j];
+    obj->geometry->SetTransform(obj->T);
+    Real dist;
+    if(obj->geometry->RayCast(r,&dist)) {
+      if(dist < closestDist) {
+        closestDist = dist;
+        closestPoint = r.source+dist*r.direction;
+        closestBody = RigidObjectID(j);
+      }
+    }
+  }
+  for(size_t j=0;j<terrains.size();j++) {
+    Terrain* ter = terrains[j];
+    Real dist;
+    if(ter->geometry->RayCast(r,&dist)) {
+      if(dist < closestDist) {
+        closestDist = dist;
+        closestPoint = r.source+dist*r.direction;
+        closestBody = TerrainID(j);
+      }
+    }
+  }
+  worldpt = closestPoint;
+  return closestBody;
+}
 
-
-Robot* RobotWorld::ClickRobot(const Ray3D& r,int& body,Vector3& localpt)
+Robot* RobotWorld::RayCastRobot(const Ray3D& r,int& body,Vector3& localpt)
 {
   //doing it this way rather than dynamic initialization gives better 
   //debug printing info
@@ -454,7 +508,7 @@ Robot* RobotWorld::ClickRobot(const Ray3D& r,int& body,Vector3& localpt)
   return closestRobot;
 }
 
-RigidObject* RobotWorld::ClickObject(const Ray3D& r,Vector3& localpt)
+RigidObject* RobotWorld::RayCastObject(const Ray3D& r,Vector3& localpt)
 {
   //doing it this way rather than dynamic initialization gives better 
   //debug printing info

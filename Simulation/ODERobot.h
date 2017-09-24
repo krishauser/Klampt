@@ -22,6 +22,9 @@ using namespace std;
  * If self-collisions should be tested, the EnableSelfCollisions function
  * must be called first. It appears that the space has to be a
  * dSimpleSpace which is somewhat less efficient than the default dHashSpace.
+ *
+ * Note: if you manually set the robot's velocities, make sure to disable
+ * instability correction in the simulator for that time step.
  */
 class ODERobot
 {
@@ -60,6 +63,8 @@ class ODERobot
   void GetLinkTransform(int link,RigidTransform& T) const;
   void SetLinkVelocity(int link,const Vector3& w,const Vector3& v);
   void GetLinkVelocity(int link,Vector3& w,Vector3& v) const;
+  Real GetKineticEnergy() const;
+  Real GetKineticEnergy(int link) const;
   bool ReadState(File& f);
   bool WriteState(File& f) const;
 

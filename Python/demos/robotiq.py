@@ -18,6 +18,7 @@ Authors: Giulia Franchi, Kris Hauser
 """
 
 import math
+from klampt.sim import ActuatorEmulator
 
 xmin = (0,0,-55,0,0)
 xmax = (70,90,43,255,255)
@@ -198,6 +199,7 @@ class FingerEmulator:
     """
     def __init__(self):
         self.g = 0
+        self.gdes = 0
         self.gobs = [None,None,None]
         self.gstop = None
         self.forceThreshold = 255
@@ -210,7 +212,6 @@ class FingerEmulator:
         #force threshold units
         self.kP = [1,1,1,200]
         #TODO: calibrate the speed
-        self.dt = 0.01
         self.speed = 255
 
     def set_speed(self,speed):
@@ -221,31 +222,22 @@ class FingerEmulator:
         #force is a value from 0-255
         self.forceThreshold = force
 
-    def next_q(self,q,qactual,gdes,in_contact):
-        """Given a commanded configuration q, an actual configuration qactual,
-        a desired gdes, and a list in_contact denoting whether each link is
-        colliding, returns a q for the next time step"""
-        dg = gdes - self.g
-        #clamp the speed
-        dg = max(-self.speed*self.dt,min(dg,self.speed*self.dt))
-        self.g += dg
-        for i in range(3):
-            if self.gobs[i] != None and gdes < self.gobs[i]:
-                self.gobs[i] = None
-        for i in range(3):
-            if self.gobs[i] == None and in_contact[i]:
-                self.gobs[i] = self.g
-        if self.gstop and self.g < self.gstop:
+    def advance_controller(self,dt,gdes,q,qactual):
+        """Outer controller time step.  Given a desired gdes,
+        outputs whether the and a list in_contact denoting whether each link is
+        colliding, moves the finger emulator forward.
+        """
+        self.gdes = gdes
+        if self.gstop is not None:
             #opening motion after full stop
-            self.gstop = None
-            res = quasistatic_finger_model(self.gobs,self.g)
-            print "RobotiQ finger model g:",self.g,"gobs",self.gobs,"gstop",self.gstop,"res",res
-            return res
-        else:
-            #closing motion
-            if self.gstop != None:
-                print "RobotiQ finger model g:",self.g,"gobs",self.gobs,"gstop",self.gstop,"stopped."
-                return q
+            if self.gdes < self.gstop:
+                self.gstop = None
+            else:
+                self.g = self.gstop
+                self.gdes = self.gstop
+        else: 
+            #emulate detector of current threshold
+
             #hack -- full stop if link 2 is hit
             #do_stop = in_contact[2]
             kP,errorDeadband,forceThreshold = self.kP,self.errorDeadband,self.forceThreshold
@@ -255,14 +247,31 @@ class FingerEmulator:
             if do_stop:
                 #print "stopping finger"
                 self.gstop = self.g
-                print "RobotiQ finger model g:",self.g,"gobs",self.gobs,"gstop",self.gstop,"stopped."
-                return q
-            res = quasistatic_finger_model(self.gobs,self.g)
-            print "RobotiQ finger model g:",self.g,"gobs",self.gobs,"gstop",self.gstop,"res",res
-            return res
+                print "RobotiQ finger model g:",self.g,"gobs",self.gobs,"gstop",self.gstop,"exceeded threshold, stopped."
+            return
+
+    def advance_sim(self,dt,q,qactual,in_contact):
+        """Given a commanded configuration q, an actual configuration qactual,
+        a desired gdes, and a list in_contact denoting whether each link is
+        colliding, returns a q that the simulation model should be driven toward"""
+        dg = self.gdes - self.g
+        #clamp the speed
+        dg = max(-self.speed*dt,min(dg,self.speed*dt))
+        self.g += dg
+        for i in range(3):
+            if self.gobs[i] != None and self.g < self.gobs[i]:
+                self.gobs[i] = None
+        for i in range(3):
+            if self.gobs[i] == None and in_contact[i]:
+                if abs(q[i]-qactual[i]) > 0.04:  #contact forces are enough to overcome spring torque
+                    print "Making contact with link",i,"at",self.g
+                    self.gobs[i] = self.g
+        res = quasistatic_finger_model(self.gobs,self.g)
+        #print "RobotiQ finger model g:",self.g,"gobs",self.gobs,"gstop",self.gstop,"res",res
+        return res
 
 
-class Emulator:
+class Emulator(ActuatorEmulator):
     """An emulator of the whole RobotiQ 3-finger hand in a Klamp't simulator.
 
     It is based on the assumption that when an object is touched, it stays
@@ -270,8 +279,8 @@ class Emulator:
     """
     def __init__(self,sim,robotIndex = 0, handLinkIndex = 0):
         self.sim = sim
-        # if you don't enable contact feedback, the contact feedback will not be
-        # generated
+        self.controller = self.sim.controller(robotIndex)
+        # if you don't enable contact feedback, the sim.hadContact call will fail
         sim.enableContactFeedbackAll()
         self.finger_sims = [FingerEmulator() for i in range(3)]
 
@@ -285,15 +294,14 @@ class Emulator:
         #get the IDs of the gripper links 
         self.fingerids = [[world.robotLink(robotIndex,i).getID() for i in self.fingerlinks[f]] for f in range(3)]
         self.robotIndex = robotIndex
-
-    def get_command(self,g,scissor=None):
+        self.lastCommand = None
+        
+    def update_finger_commands(self,dt,g,scissor=None):
         """Emulates the Robotiq given the command g (a 3-tuple of values from
         [0-255]) and the scissor value ([0-255], or None to keep it
         unchanged).
         """
-        finger_links_touching = [[self.sim.hadContact(linkj,-1) for linkj in self.fingerids[f]] for f in range(3)]
-
-        controller = self.sim.controller(self.robotIndex)
+        controller = self.controller
         desired_joint_angles = controller.getCommandedConfig()
         actual_joint_angles = self.sim.getActualConfig(self.robotIndex)
         #commanded finger configuration
@@ -302,23 +310,54 @@ class Emulator:
         fingerqa = [[actual_joint_angles[i]*180.0/math.pi for i in self.fingerlinks[f]] for f in range(3)]
         #simulate the fingers
         for f in range(3):
-            fingerq[f] = self.finger_sims[f].next_q(fingerq[f],fingerqa[f],g[f],finger_links_touching[f])
-        
-        #read this into the desired joint angles
-        for f in range(3):
-            for i,link in enumerate(self.fingerlinks[f]):
-                desired_joint_angles[link] = fingerq[f][i]/180.0*math.pi
-        if scissor != None:
-            u = float(scissor)/255.0
-            desired_joint_angles[self.scissorlinks[0]] = (-17 + u*34)*math.pi/180.0
-            desired_joint_angles[self.scissorlinks[1]] = (17.0 - u*34)*math.pi/180.0*u
-        return desired_joint_angles
+            self.finger_sims[f].advance_controller(dt,g[f],fingerq[f],fingerqa[f])
         
     def send_command(self,g,scissor=None):
         """Sends the command given by g and scissor to the robot controller"""
-        qdes = self.get_command(g,scissor)
-        controller = self.sim.controller(self.robotIndex)
-        controller.setPIDCommand(qdes,[0.0]*len(qdes))
+        self.lastCommand = (g,scissor)
+        
+    def process(self,commands,dt):
+        """The method that overrides ActuatorEmulator."""
+        if commands != None:
+            if 'g' in commands:
+                scissor = commands.get('scissor',None)
+                self.send_command(commands['g'],scissor)
+                del commands['g']
+                if 'scissor' in commands:
+                    del commands['scissor']
+            elif 'qcmd' in commands:
+                cmd = commands['qcmd']
+                assert len(cmd) >= 3,"Command to Robotiq must have 3 or 4 entries"
+                scissor = None if len(cmd) == 3 else cmd[3]
+                self.send_command(cmd,scissor)
+                del commands['cmd']
+
+        if self.lastCommand != None:
+            self.update_finger_commands(dt,*self.lastCommand)
+
+    def substep(self,dt):
+        controller = self.controller
+        desired_joint_angles = controller.getCommandedConfig()
+        actual_joint_angles = self.sim.getActualConfig(self.robotIndex)
+        #commanded finger configuration
+        fingerq = [[desired_joint_angles[i]*180.0/math.pi for i in self.fingerlinks[f]] for f in range(3)]
+        #actual finger configurations
+        fingerqa = [[actual_joint_angles[i]*180.0/math.pi for i in self.fingerlinks[f]] for f in range(3)]
+        finger_links_touching = [[self.sim.hadContact(linkj,-1) for linkj in self.fingerids[f]] for f in range(3)]
+        for f in range(3):
+            fingerq[f] = self.finger_sims[f].advance_sim(dt,fingerq[f],fingerqa[f],finger_links_touching[f])
+
+        #read these into the desired joint angles
+        for f in range(3):
+            for i,link in enumerate(self.fingerlinks[f]):
+                desired_joint_angles[link] = fingerq[f][i]/180.0*math.pi
+        if self.lastCommand != None:
+            scissor = self.lastCommand[1]
+            if scissor != None:
+                u = float(scissor)/255.0
+                desired_joint_angles[self.scissorlinks[0]] = (-17 + u*34)*math.pi/180.0
+                desired_joint_angles[self.scissorlinks[1]] = (17.0 - u*34)*math.pi/180.0*u
+        self.controller.setPIDCommand(desired_joint_angles,[0.0]*len(desired_joint_angles))
 
 def self_test(fn="robotiq.csv",gob1=None,gob2=None,gob3=None):
     x,m = finger_hybrid_initial_state()

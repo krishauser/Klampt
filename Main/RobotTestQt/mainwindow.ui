@@ -203,16 +203,6 @@
         </property>
        </widget>
       </item>
-      <item row="0" column="4">
-       <widget class="QCheckBox" name="chk_bboxes">
-        <property name="statusTip">
-         <string>Draw bounding boxes</string>
-        </property>
-        <property name="text">
-         <string>BBoxes</string>
-        </property>
-       </widget>
-      </item>
       <item row="0" column="0">
        <spacer name="horizontalSpacer_3">
         <property name="orientation">
@@ -226,6 +216,16 @@
         </property>
        </spacer>
       </item>
+      <item row="0" column="5">
+       <widget class="QCheckBox" name="chk_bboxes">
+        <property name="statusTip">
+         <string>Draw bounding boxes</string>
+        </property>
+        <property name="text">
+         <string>BBoxes</string>
+        </property>
+       </widget>
+      </item>
       <item row="0" column="2">
        <widget class="QCheckBox" name="chk_com">
         <property name="statusTip">
@@ -236,7 +236,7 @@
         </property>
        </widget>
       </item>
-      <item row="0" column="7">
+      <item row="0" column="9">
        <spacer name="horizontalSpacer_4">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
@@ -262,7 +262,7 @@
         </property>
        </widget>
       </item>
-      <item row="1" column="1" colspan="6">
+      <item row="1" column="1" colspan="8">
        <layout class="QHBoxLayout" name="horizontalLayout_4">
         <item>
          <widget class="QRadioButton" name="radioButton">
@@ -346,7 +346,7 @@
         </item>
        </layout>
       </item>
-      <item row="0" column="5">
+      <item row="0" column="7">
        <widget class="QCheckBox" name="chk_expanded">
         <property name="statusTip">
          <string>Draw expanded meshes</string>
@@ -359,13 +359,20 @@
         </property>
        </widget>
       </item>
-      <item row="0" column="6">
+      <item row="0" column="8">
        <widget class="QCheckBox" name="chk_collisions">
         <property name="statusTip">
          <string>Draw tested self-collisions</string>
         </property>
         <property name="text">
          <string>Collisions</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="4">
+       <widget class="QCheckBox" name="chk_sensors">
+        <property name="text">
+         <string>Sensors</string>
         </property>
        </widget>
       </item>
@@ -386,7 +393,7 @@
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>21</height>
+     <height>25</height>
     </rect>
    </property>
    <property name="nativeMenuBar">
@@ -397,8 +404,17 @@
      <string>File</string>
     </property>
     <addaction name="actionOpen_File"/>
+    <addaction name="actionReload_file"/>
+   </widget>
+   <widget class="QMenu" name="menuIO">
+    <property name="title">
+     <string>IO</string>
+    </property>
+    <addaction name="actionROS_Broadcast"/>
+    <addaction name="actionPrint_Configuration"/>
    </widget>
    <addaction name="menuFile"/>
+   <addaction name="menuIO"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <action name="actionOpen">
@@ -462,66 +478,6 @@
     <string>Default</string>
    </property>
   </action>
-  <action name="actionDrivers">
-   <property name="text">
-    <string>Drivers</string>
-   </property>
-   <property name="toolTip">
-    <string>ctrl-d</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+D</string>
-   </property>
-  </action>
-  <action name="actionSensor_Plot">
-   <property name="text">
-    <string>Sensor Plot</string>
-   </property>
-   <property name="toolTip">
-    <string>ctrl-p</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+P</string>
-   </property>
-  </action>
-  <action name="actionOptions">
-   <property name="text">
-    <string>Options</string>
-   </property>
-   <property name="toolTip">
-    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;ctrl-r&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+R</string>
-   </property>
-  </action>
-  <action name="actionSave_State_As">
-   <property name="text">
-    <string>Save State As</string>
-   </property>
-   <property name="toolTip">
-    <string>ctrl-shift-s</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+Shift+S</string>
-   </property>
-  </action>
-  <action name="actionRecordFile">
-   <property name="text">
-    <string>Change File</string>
-   </property>
-  </action>
-  <action name="actionMultiple_Parts">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Multiple Parts</string>
-   </property>
-   <property name="statusTip">
-    <string>Does not automatically encode when a recording ends.  Can record 2 parts consecutively into 1 video.</string>
-   </property>
-  </action>
   <action name="action640x480">
    <property name="text">
     <string>640x480</string>
@@ -581,6 +537,27 @@
     <string>Ctrl+O</string>
    </property>
   </action>
+  <action name="actionReload_file">
+   <property name="text">
+    <string>Reload File</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+R</string>
+   </property>
+  </action>
+  <action name="actionROS_Broadcast">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>ROS Broadcast</string>
+   </property>
+  </action>
+  <action name="actionPrint_Configuration">
+   <property name="text">
+    <string>Print Configuration</string>
+   </property>
+  </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>
@@ -634,8 +611,8 @@
    <slot>SetFrame(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>323</x>
-     <y>476</y>
+     <x>331</x>
+     <y>507</y>
     </hint>
     <hint type="destinationlabel">
      <x>340</x>
@@ -650,8 +627,8 @@
    <slot>SetBboxes(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>408</x>
-     <y>476</y>
+     <x>505</x>
+     <y>507</y>
     </hint>
     <hint type="destinationlabel">
      <x>407</x>
@@ -666,8 +643,8 @@
    <slot>SetLink(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>261</x>
-     <y>567</y>
+     <x>219</x>
+     <y>573</y>
     </hint>
     <hint type="destinationlabel">
      <x>293</x>
@@ -682,8 +659,8 @@
    <slot>SetIK(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>482</x>
-     <y>530</y>
+     <x>589</x>
+     <y>542</y>
     </hint>
     <hint type="destinationlabel">
      <x>28</x>
@@ -702,8 +679,8 @@
      <y>567</y>
     </hint>
     <hint type="destinationlabel">
-     <x>261</x>
-     <y>567</y>
+     <x>219</x>
+     <y>573</y>
     </hint>
    </hints>
   </connection>
@@ -730,8 +707,8 @@
    <slot>setValue(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>261</x>
-     <y>567</y>
+     <x>219</x>
+     <y>573</y>
     </hint>
     <hint type="destinationlabel">
      <x>122</x>
@@ -762,8 +739,8 @@
    <slot>DriverMode()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>186</x>
-     <y>517</y>
+     <x>222</x>
+     <y>539</y>
     </hint>
     <hint type="destinationlabel">
      <x>125</x>
@@ -778,8 +755,8 @@
    <slot>SetDriver(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>183</x>
-     <y>567</y>
+     <x>99</x>
+     <y>575</y>
     </hint>
     <hint type="destinationlabel">
      <x>25</x>
@@ -794,12 +771,12 @@
    <slot>setCurrentIndex(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>183</x>
-     <y>567</y>
+     <x>99</x>
+     <y>575</y>
     </hint>
     <hint type="destinationlabel">
-     <x>333</x>
-     <y>567</y>
+     <x>99</x>
+     <y>575</y>
     </hint>
    </hints>
   </connection>
@@ -810,12 +787,12 @@
    <slot>setValue(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>333</x>
-     <y>567</y>
+     <x>99</x>
+     <y>575</y>
     </hint>
     <hint type="destinationlabel">
-     <x>183</x>
-     <y>567</y>
+     <x>99</x>
+     <y>575</y>
     </hint>
    </hints>
   </connection>
@@ -826,8 +803,8 @@
    <slot>SetDriver(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>333</x>
-     <y>567</y>
+     <x>99</x>
+     <y>575</y>
     </hint>
     <hint type="destinationlabel">
      <x>541</x>
@@ -842,8 +819,8 @@
    <slot>SliderLinkAngle(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>235</x>
-     <y>524</y>
+     <x>388</x>
+     <y>543</y>
     </hint>
     <hint type="destinationlabel">
      <x>157</x>
@@ -858,8 +835,8 @@
    <slot>SliderDriverAngle(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>378</x>
-     <y>525</y>
+     <x>545</x>
+     <y>543</y>
     </hint>
     <hint type="destinationlabel">
      <x>420</x>
@@ -874,8 +851,8 @@
    <slot>UpdateLinkSlider(double)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>436</x>
-     <y>557</y>
+     <x>358</x>
+     <y>573</y>
     </hint>
     <hint type="destinationlabel">
      <x>457</x>
@@ -890,8 +867,8 @@
    <slot>UpdateDriverSlider(double)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>518</x>
-     <y>557</y>
+     <x>99</x>
+     <y>575</y>
     </hint>
     <hint type="destinationlabel">
      <x>511</x>
@@ -906,8 +883,8 @@
    <slot>PrintCollisions()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>580</x>
-     <y>523</y>
+     <x>713</x>
+     <y>542</y>
     </hint>
     <hint type="destinationlabel">
      <x>628</x>
@@ -938,8 +915,8 @@
    <slot>SetExpanded(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>510</x>
-     <y>476</y>
+     <x>614</x>
+     <y>507</y>
     </hint>
     <hint type="destinationlabel">
      <x>500</x>
@@ -954,12 +931,76 @@
    <slot>SetCollisions(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>607</x>
-     <y>476</y>
+     <x>714</x>
+     <y>507</y>
     </hint>
     <hint type="destinationlabel">
      <x>624</x>
      <y>552</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>chk_sensors</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>MainWindow</receiver>
+   <slot>SetSensors(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>371</x>
+     <y>493</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>439</x>
+     <y>-11</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionReload_file</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>ReloadFile()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>399</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionROS_Broadcast</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>MainWindow</receiver>
+   <slot>SetROS(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>399</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionPrint_Configuration</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>PrintConfig()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>399</x>
+     <y>299</y>
     </hint>
    </hints>
   </connection>
@@ -985,5 +1026,9 @@
   <slot>UpdateDriverSlider(double)</slot>
   <slot>PrintCollisions()</slot>
   <slot>LoadFile()</slot>
+  <slot>SetSensors(bool)</slot>
+  <slot>ReloadFile()</slot>
+  <slot>SetROS(bool)</slot>
+  <slot>PrintConfig()</slot>
  </slots>
 </ui>

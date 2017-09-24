@@ -62,7 +62,7 @@ def wrapper_start():
 	try:
 		boilerplate_start()
 	except Exception as e:
-		print "Exception in init code"
+		print "Exception in boilerplate_start code"
 		raise
 	wrapper_JSON_message_count = 0
 
@@ -77,11 +77,18 @@ def wrapper_advance():
 
 def wrapper_event(*args):
 	#print "got event: " + args
-	try:
-		boilerplate_event(*args)
-	except Exception as e:
-		print "Exception in event code"
-		raise
+	if args[0].startswith('keydown_'):
+		try:
+			boilerplate_keypress(args[0][8:])
+		except Exception as e:
+			print "Exception in boilerplate_keypress code"
+			raise
+	else:
+		try:
+			boilerplate_event(*args)
+		except Exception as e:
+			print "Exception in boilerplate_event code"
+			raise
 	wrapper_compute_JSON()
 	wrapper_send_JSON()
 
@@ -90,7 +97,7 @@ def wrapper_setitem(item,value):
 	try:
 		boilerplate_setitem(item,value)
 	except Exception as e:
-		print "Exception in setitem code"
+		print "Exception in boilerplate_setitem code"
 		raise
 	wrapper_compute_JSON()		
 	wrapper_send_JSON()

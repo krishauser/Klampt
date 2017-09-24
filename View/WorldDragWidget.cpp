@@ -43,7 +43,7 @@ bool WorldDragWidget::Hover(int x,int y,Camera::Viewport& viewport,double& dista
   if(robotsActive) {
     int body;
     Vector3 localpt;
-    Robot* rob = world->ClickRobot(r,body,localpt);
+    Robot* rob = world->RayCastRobot(r,body,localpt);
     if(rob) {
       hoverPt = localpt;
       int index = -1;
@@ -58,7 +58,7 @@ bool WorldDragWidget::Hover(int x,int y,Camera::Viewport& viewport,double& dista
   }
   if(objectsActive) {
     Vector3 localpt;
-    RigidObject* obj = world->ClickObject(r,localpt);
+    RigidObject* obj = world->RayCastObject(r,localpt);
     if(obj) {
       Vector3 worldpt = obj->T*localpt;
       Real d=worldpt.distance(r.source);

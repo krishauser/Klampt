@@ -24,7 +24,6 @@ DOC "Directory where Klamp't header files are stored" )
 #do the find_package call...
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(KLAMPT "Could not find Klampt " KLAMPT_INCLUDE_DIR KLAMPT_LIBRARY)
-# show the BERKELEY_DB_INCLUDE_DIR and BERKELEY_DB_LIBRARIES variables only in the advanced view
 
 #add to dependencies
 SET(KLAMPT_LIBRARIES ${KLAMPT_LIBRARY} ${KLAMPT_LIBRARIES})

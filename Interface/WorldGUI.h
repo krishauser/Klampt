@@ -14,6 +14,9 @@ using namespace Math3D;
  * 
  * Accepts commands:
  * - load_file fn: loads a file into the world.
+ * - reload_file fn: reloads a file into the world, and its settings replace the previously
+     loaded item's settings.
+ * - save_world fn: saves the world to the given file
  */
 class WorldGUIBackend : public GLNavigationBackend
 {
@@ -23,6 +26,8 @@ public:
 
   bool LoadCommandLine(int argc,const char** argv);
   bool LoadFile(const char* fn);
+  bool ReloadFile(const char* fn);
+  bool SaveWorld(const char* fn,const char* elementPath=NULL);
   //backend overloads
   virtual void Start();
   virtual bool OnIdle();

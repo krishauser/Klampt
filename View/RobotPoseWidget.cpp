@@ -3,9 +3,103 @@
 #include <KrisLibrary/math3d/basis.h>
 #include <KrisLibrary/GLdraw/drawextra.h>
 #include <KrisLibrary/robotics/IKFunctions.h>
+#include "Planning/RobotCSpace.h"
+#include <KrisLibrary/Timer.h>
 #include <map>
 using namespace GLDraw;
 
+Real RobustSolveIK(Robot& robot,RobotIKFunction& f,int iters,Real tol,int numRestarts)
+{
+  RobotIKSolver solver(f);
+  solver.UseBiasConfiguration(robot.q);
+  solver.UseJointLimits(TwoPi);
+  bool res = solver.Solve(tol,iters);
+  if(!res && numRestarts) {
+    //attempt to do random restarts
+    Timer timer;
+    Config qbest = robot.q;
+    Vector residual(f.NumDimensions());
+    f(solver.solver.x,residual);
+    Real residNorm = residual.normSquared();
+    for(int restart=0;restart<numRestarts;restart++) {
+      //random restarts
+      Config qorig = robot.q;
+      RobotCSpace space(robot);
+      space.Sample(robot.q);
+      swap(robot.q,qorig);
+      for(size_t j=0;j<f.activeDofs.mapping.size();j++)
+        robot.q(f.activeDofs.mapping[j]) = qorig(f.activeDofs.mapping[j]);
+      if(solver.Solve(tol,iters)) {
+        qbest = robot.q;
+        return 0;
+      }
+      f(solver.solver.x,residual);
+      Real newResidNorm = residual.normSquared();
+      if(newResidNorm < residNorm) {
+        residNorm = newResidNorm;
+        qbest = robot.q;
+      }
+    }
+    robot.UpdateConfig(qbest);
+    return residNorm;
+  }
+  return 0;
+}
+
+bool IsFloatingBase(Robot& robot) 
+{
+  if(robot.joints[0].type == RobotJoint::Floating) return true;
+  else if(robot.joints[0].type == RobotJoint::FloatingPlanar) return true;
+  //detect poorly set up floating base
+  if(robot.links.size() < 6) return false;
+  if(robot.links[0].type == RobotLink3D::Prismatic && 
+    robot.links[1].type == RobotLink3D::Prismatic &&
+    robot.links[2].type == RobotLink3D::Prismatic &&
+    robot.links[3].type == RobotLink3D::Revolute && 
+    robot.links[4].type == RobotLink3D::Revolute &&
+    robot.links[5].type == RobotLink3D::Revolute) {
+    Vector3 x,y,z,rz,ry,rx;
+    x = robot.links[0].w;
+    y = robot.links[1].w;
+    z = robot.links[2].w;
+    rz = robot.links[3].w;
+    ry = robot.links[4].w;
+    rx = robot.links[5].w;
+    if(dot(x,y) == 0 && dot(x,z) == 0 && dot(y,z) == 0 && 
+      dot(rx,ry) == 0 && dot(rx,rz) == 0 && dot(ry,rz) == 0) {
+      //TODO: other conventions besides roll-pitch-yaw?
+      if(x.x == 1 && y.y == 1 && z.z == 1 && rz.z == 1 && ry.y == 1 && rx.x == 1)
+        return true;
+    }
+  }
+  return false;
+}
+
+void SetFloatingBase(Robot& robot,const RigidTransform& T)
+{
+  T.t.get(robot.q(0),robot.q(1),robot.q(2));
+  EulerAngleRotation e;
+  e.setMatrixZYX(T.R);
+  e.get(robot.q(3),robot.q(4),robot.q(5));
+}
+
+RigidTransform GetFloatingBase(const Robot& robot)
+{
+  if(robot.joints[0].type == RobotJoint::Floating || robot.joints[0].type == RobotJoint::FloatingPlanar) {
+    return robot.links[robot.joints[0].linkIndex].T_World;
+  }
+  else {
+    return robot.links[5].T_World;
+    /*
+    EulerAngleRotation e;
+    e.set(robot.q(3),robot.q(4),robot.q(5));
+    RigidTransform T;
+    e.getMatrixZYX(T.R);
+    T.t.set(robot.q(0),robot.q(1),robot.q(2));
+    return T;
+    */
+  }
+}
 
 RobotLinkPoseWidget::RobotLinkPoseWidget()
   :robot(NULL),viewRobot(NULL),highlightColor(1,1,0,1),hoverLink(-1),draw(true)
@@ -15,6 +109,10 @@ RobotLinkPoseWidget::RobotLinkPoseWidget(Robot* _robot,ViewRobot* _viewRobot)
   :robot(_robot),viewRobot(_viewRobot),poseConfig(_robot->q),highlightColor(1,1,0,1),hoverLink(-1),affectedLink(-1),affectedDriver(-1),draw(true)
 {}
 
+void RobotLinkPoseWidget::SetActiveDofs(const vector<int>& _activeDofs)
+{
+  activeDofs = _activeDofs;
+}
 
 void RobotLinkPoseWidget::Set(Robot* _robot,ViewRobot* _viewRobot)
 {
@@ -36,7 +134,13 @@ bool RobotLinkPoseWidget::Hover(int x,int y,Camera::Viewport& viewport,double& d
   Config oldConfig = robot->q;
   robot->UpdateConfig(poseConfig);
   robot->UpdateGeometry();
-  for(size_t i=0;i<robot->links.size();i++) {
+  vector<int> dofs;
+  if(activeDofs.empty()) 
+    for(size_t i=0;i<robot->links.size();i++) dofs.push_back((int)i);
+  else
+    dofs = activeDofs;
+  for(size_t j=0;j<dofs.size();j++) {
+    int i=dofs[j];
     if(robot->IsGeometryEmpty(i)) continue;
     Real dist;
     if(robot->geometry[i]->RayCast(r,&dist)) {
@@ -119,6 +223,15 @@ void RobotLinkPoseWidget::DrawGL(Camera::Viewport& viewport)
     if(hasHighlight || hasFocus) {
       for(size_t i=0;i<highlightedLinks.size();i++)
 	viewRobot->Appearance(highlightedLinks[i]).ModulateColor(highlightColor,0.5);
+    }
+    if(!activeDofs.empty()) {
+      GLColor black(0,0,0,0);
+      vector<bool> active(robot->links.size(),false);
+      for(size_t i=0;i<activeDofs.size();i++)
+        active[activeDofs[i]] = true;
+      for(size_t i=0;i<robot->links.size();i++)
+        if(!active[i])
+          viewRobot->Appearance(i).ModulateColor(black,0.5);
     }
     viewRobot->Draw();
     //copy display lists, if not already initialized
@@ -419,6 +532,18 @@ void RobotIKPoseWidget::DrawGL(Camera::Viewport& viewport)
   glDisable(GL_POLYGON_OFFSET_FILL);
 }
 
+void RobotIKPoseWidget::SetPoseAndWidgetTransform(int widget,const RigidTransform& T)
+{
+  poseWidgets[widget].T = T;
+  if(poseGoals[widget].rotConstraint == IKGoal::RotFixed) {
+      poseGoals[widget].SetFixedRotation(T.R);
+      poseGoals[widget].SetFixedPosition(T.t);
+    }
+    else {
+      poseGoals[widget].SetFixedPosition(T.t);
+    }
+}
+
 void RobotIKPoseWidget::Drag(int dx,int dy,Camera::Viewport& viewport)
 {
   if(activeWidget) {
@@ -447,17 +572,30 @@ RobotPoseWidget::RobotPoseWidget(Robot* robot,ViewRobot* viewRobot)
 {
   if(robot->joints[0].type == RobotJoint::Floating) {
     useBase=true;
-    basePoser.T = robot->links[robot->joints[0].linkIndex].T_World;
+    basePoser.T = GetFloatingBase(*robot);
   }
   else if(robot->joints[0].type == RobotJoint::FloatingPlanar) {  //only allow movement in x,y, and yaw axes
     useBase=true;
-    basePoser.T = robot->links[robot->joints[0].linkIndex].T_World;
+    basePoser.T = GetFloatingBase(*robot);
     basePoser.enableTranslationAxes[2] = 0;
     basePoser.enableRotationAxes[0] = 0;
     basePoser.enableRotationAxes[1] = 0;
     basePoser.enableOriginTranslation = 0;
     basePoser.enableOuterRingRotation = 0;
   }
+  else if (IsFloatingBase(*robot)) {
+    useBase = true;
+    basePoser.T = GetFloatingBase(*robot);
+  }
+  vector<bool> active(robot->links.size(),true);
+  for(size_t i=0;i<robot->joints.size();i++)
+    if(robot->joints[i].type == RobotJoint::Weld)
+      active[robot->joints[i].linkIndex] = false;
+  if(useBase)
+    for(size_t i=0;i<6;i++)
+      active[i] = false;
+  for(size_t i=0;i<active.size();i++)
+    if(active[i]) linkPoser.activeDofs.push_back((int)i);
   if(useBase) {
     widgets.resize(3);
     widgets[0]=&basePoser;
@@ -477,17 +615,30 @@ void RobotPoseWidget::Set(Robot* robot,ViewRobot* viewRobot)
   ikPoser.robot = robot;
   if(robot->joints[0].type == RobotJoint::Floating) {
     useBase=true;
-    basePoser.T = robot->links[robot->joints[0].linkIndex].T_World;
+    basePoser.T = GetFloatingBase(*robot);
   }
   else if(robot->joints[0].type == RobotJoint::FloatingPlanar) {  //only allow movement in x,y, and yaw axes
     useBase=true;
-    basePoser.T = robot->links[robot->joints[0].linkIndex].T_World;
+    basePoser.T = GetFloatingBase(*robot);
     basePoser.enableTranslationAxes[2] = 0;
     basePoser.enableRotationAxes[0] = 0;
     basePoser.enableRotationAxes[1] = 0;
     basePoser.enableOriginTranslation = 0;
     basePoser.enableOuterRingRotation = 0;
   }
+  else if (IsFloatingBase(*robot)) {
+    useBase = true;
+    basePoser.T = GetFloatingBase(*robot);
+  }
+  vector<bool> active(robot->links.size(),true);
+  for(size_t i=0;i<robot->joints.size();i++)
+    if(robot->joints[i].type == RobotJoint::Weld)
+      active[robot->joints[i].linkIndex] = false;
+  if(useBase)
+    for(size_t i=0;i<6;i++)
+      active[i] = false;
+  for(size_t i=0;i<active.size();i++)
+    if(active[i]) linkPoser.activeDofs.push_back((int)i);
   if(useBase) {
     widgets.resize(3);
     widgets[0]=&basePoser;
@@ -578,8 +729,9 @@ void RobotPoseWidget::SetPose(const Config& q)
   linkPoser.poseConfig = q;
   if(q != robot->q)
     robot->UpdateConfig(q);
-  if(useBase)
-    basePoser.T = robot->links[robot->joints[0].linkIndex].T_World;
+  if(useBase) {
+    basePoser.T = GetFloatingBase(*robot);
+  }
 }
 
 void RobotPoseWidget::DrawGL(Camera::Viewport& viewport)
@@ -601,6 +753,38 @@ void RobotPoseWidget::DrawGL(Camera::Viewport& viewport)
   }
 }
 
+void RobotPoseWidget::Snapshot()
+{
+  assert(undoTransforms.size() == undoConfigs.size());
+  undoConfigs.push_back(linkPoser.poseConfig);
+  undoTransforms.resize(undoTransforms.size()+1);
+  for(size_t i=0;i<ikPoser.poseWidgets.size();i++)
+    undoTransforms.back().push_back(pair<int,RigidTransform>(ikPoser.poseGoals[i].link,ikPoser.poseWidgets[i].T));
+  if(undoConfigs.size() > 20) {
+    undoConfigs.erase(undoConfigs.begin(),undoConfigs.begin() + undoConfigs.size() - 20);
+    undoTransforms.erase(undoTransforms.begin(),undoTransforms.begin() + undoTransforms.size() - 20);
+  }
+  assert(undoTransforms.size() == undoConfigs.size());
+}
+
+void RobotPoseWidget::Undo()
+{
+  assert(undoTransforms.size() == undoConfigs.size());
+  if(!undoConfigs.empty()) {
+    SetPose(undoConfigs.back());
+    for(size_t i=0;i<undoTransforms.back().size();i++) {
+      int link = undoTransforms.back()[i].first;
+      RigidTransform T = undoTransforms.back()[i].second;
+      for(size_t j=0;j<ikPoser.poseWidgets.size();j++)
+        if(ikPoser.poseGoals[j].link == link)
+          ikPoser.SetPoseAndWidgetTransform(j,T);
+    }
+    undoConfigs.resize(undoConfigs.size()-1);
+    undoTransforms.resize(undoTransforms.size()-1);
+    Refresh();
+  }
+}
+
 bool RobotPoseWidget::BeginDrag(int x,int y,Camera::Viewport& viewport,double& distance)
 {
   if(mode == ModeIKAttach) {
@@ -613,7 +797,12 @@ bool RobotPoseWidget::BeginDrag(int x,int y,Camera::Viewport& viewport,double& d
     Refresh();
     return true;
   }
+  else if(mode == ModeIKDelete) {
+    DeleteConstraint();
+    return true;
+  }
   else if(mode == ModeIKPose) {
+    Snapshot();
     bool res=WidgetSet::BeginDrag(x,y,viewport,distance);
     if(!res) return false;
     if(closestWidget == &linkPoser) {
@@ -631,6 +820,7 @@ bool RobotPoseWidget::BeginDrag(int x,int y,Camera::Viewport& viewport,double& d
     return true;
   }
   else if(mode == ModeIKPoseFixed) {
+    Snapshot();
     bool res=WidgetSet::BeginDrag(x,y,viewport,distance);
     if(!res) return false;
     if(closestWidget == &linkPoser) {
@@ -647,11 +837,8 @@ bool RobotPoseWidget::BeginDrag(int x,int y,Camera::Viewport& viewport,double& d
     }
     return true;
   }
-  else if(mode == ModeIKDelete) {
-    DeleteConstraint();
-    return true;
-  }
   else {
+    Snapshot();
     return WidgetSet::BeginDrag(x,y,viewport,distance);
   }
 }
@@ -675,7 +862,7 @@ void RobotPoseWidget::Drag(int dx,int dy,Camera::Viewport& viewport)
   WidgetSet::Drag(dx,dy,viewport);
   if(activeWidget == &basePoser) {
     Robot* robot=linkPoser.robot;
-    robot->SetJointByTransform(0,robot->joints[0].linkIndex,basePoser.T);
+    SetFloatingBase(*robot,basePoser.T);
     robot->UpdateFrames();
     linkPoser.poseConfig = robot->q;
   }
@@ -706,15 +893,37 @@ void RobotPoseWidget::EndDrag()
 bool RobotPoseWidget::SolveIK(int iters,Real tol)
 {
   if(Constraints().empty()) return true;
-  if(iters <= 0) iters=100;
+  if(iters <= 0) iters=20;
   if(tol <= 0) tol = 1e-3;
   //solve the IK problem    
   Robot* robot=linkPoser.robot;
   robot->UpdateConfig(linkPoser.poseConfig);
-  bool res=::SolveIK(*robot,ikPoser.poseGoals,tol,iters,0);
+  
+  RobotIKFunction f(*robot);
+  f.UseIK(Constraints());
+  GetDefaultIKDofs(*robot,Constraints(),f.activeDofs);
+  //take out the fixed DOF
+  set<int> dofs(f.activeDofs.mapping.begin(),f.activeDofs.mapping.end());
+  if(!linkPoser.activeDofs.empty()) {
+    //take out non-active dofs
+    set<int> intersect;
+    for(size_t i=0;i<linkPoser.activeDofs.size();i++)
+      if(dofs.count(linkPoser.activeDofs[i]) != 0)
+        intersect.insert(linkPoser.activeDofs[i]);
+    dofs = intersect;
+  }
+  f.activeDofs.mapping = vector<int>(dofs.begin(),dofs.end());
+
+  //define start config
+  if(undoConfigs.empty())
+    robot->UpdateConfig(linkPoser.poseConfig);
+  else
+    robot->UpdateConfig(undoConfigs.back());
+  bool res = (RobustSolveIK(*robot,f,iters,tol,2) == 0);
+
   linkPoser.poseConfig = robot->q;
   if(useBase)
-    basePoser.T = robot->links[robot->joints[0].linkIndex].T_World;
+    basePoser.T = GetFloatingBase(*robot);
   Refresh();
   return res;
 }
@@ -735,15 +944,22 @@ bool RobotPoseWidget::SolveIKFixedBase(int iters,Real tol)
   set<int> dofs(f.activeDofs.mapping.begin(),f.activeDofs.mapping.end());
   for(int i=0;i<6;i++)
     dofs.erase(i);
+  if(!linkPoser.activeDofs.empty()) {
+    //take out non-active dofs
+    set<int> intersect;
+    for(size_t i=0;i<linkPoser.activeDofs.size();i++)
+      if(dofs.count(linkPoser.activeDofs[i]) != 0)
+        intersect.insert(linkPoser.activeDofs[i]);
+    dofs = intersect;
+  }
   f.activeDofs.mapping = vector<int>(dofs.begin(),dofs.end());
 
-  RobotIKSolver solver(f);
-  solver.UseJointLimits(TwoPi);
-  bool res = solver.Solve(tol,iters);
+  robot->q = linkPoser.poseConfig;
+  bool res = (RobustSolveIK(*robot,f,iters,tol,5) == 0);
 
   linkPoser.poseConfig = robot->q;
   if(useBase)
-    basePoser.T = robot->links[robot->joints[0].linkIndex].T_World;
+    basePoser.T = GetFloatingBase(*robot);
   Refresh();
   return res;
 }
@@ -763,15 +979,22 @@ bool RobotPoseWidget::SolveIKFixedJoint(int fixedJoint,int iters,Real tol)
   //take out the fixed DOF
   set<int> dofs(f.activeDofs.mapping.begin(),f.activeDofs.mapping.end());
   dofs.erase(fixedJoint);
+  if(!linkPoser.activeDofs.empty()) {
+    //take out non-active dofs
+    set<int> intersect;
+    for(size_t i=0;i<linkPoser.activeDofs.size();i++)
+      if(dofs.count(linkPoser.activeDofs[i]) != 0)
+        intersect.insert(linkPoser.activeDofs[i]);
+    dofs = intersect;
+  }
   f.activeDofs.mapping = vector<int>(dofs.begin(),dofs.end());
 
-  RobotIKSolver solver(f);
-  solver.UseJointLimits(TwoPi);
-  bool res = solver.Solve(tol,iters);
+  robot->q = linkPoser.poseConfig;
+  bool res = (RobustSolveIK(*robot,f,iters,tol,5) == 0);
 
   linkPoser.poseConfig = robot->q;
   if(useBase)
-    basePoser.T = robot->links[robot->joints[0].linkIndex].T_World;
+    basePoser.T = basePoser.T = GetFloatingBase(*robot);
   Refresh();
   return res;
 }
@@ -780,5 +1003,8 @@ void RobotPoseWidget::Keypress(char c)
 {
   if(c=='s') {
     SolveIK();
+  }
+  else if(c == 'z') {
+    Undo();
   }
 }

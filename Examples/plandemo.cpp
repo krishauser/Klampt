@@ -3,6 +3,9 @@
   //defines WorldPlannerSettings and SingleRobotCSpace
   //includes definitions for RobotWorld, Config
 #include <KrisLibrary/planning/AnyMotionPlanner.h>
+  //defines AdaptiveCSpace, which helps debugging and
+  //can reorder constraints for faster performance
+#include <KrisLibrary/planning/CSpaceHelpers.h>
   //defines MotionPlannerFactory
   //includes MilestonePath, HaltingCondition
 
@@ -62,26 +65,24 @@ bool SimplePlan(RobotWorld& world,int robot,const Config& qstart,const Config& q
   //use the SingleRobotCSpace2 class.  See its documentation in
   //Planning/RobotCSpace.h
   //
-  //If you wish to add custom kinematic constraints, you can subclass
-  //SingleRobotCSpace and override the IsFeasible method.
-  SingleRobotCSpace cspace(world,robot,&settings); 
+  //If you wish to add custom kinematic constraints, you can use the
+  //CSpace.AddConstraint method.  See its documentation in KrisLibrary/planning/CSpace.h
+  SingleRobotCSpace sspace(world,robot,&settings); 
+  //The AdaptiveCSpace class profiles the CSpace's constraints and will help get
+  //better stats for debugging.
+  AdaptiveCSpace cspace(&sspace);
+  cspace.SetupAdaptiveInfo();
 
   //3. Some sanity checks -- make sure the start and goal configurations
   //are feasible.
   if(!cspace.IsFeasible(qstart)) {
     cout<<"Start configuration is infeasible, violated constraints:"<<endl;
-    vector<bool> infeasible;
-    cspace.CheckObstacles(qstart,infeasible);
-    for(size_t i=0;i<infeasible.size();i++)
-      if(infeasible[i]) cout<<"  "<<cspace.ObstacleName(i)<<endl;
+    cspace.PrintInfeasibleNames(qstart);
     return false;
   }
   if(!cspace.IsFeasible(qgoal)) {
     cout<<"Goal configuration is infeasible, violated constraints:"<<endl;
-    vector<bool> infeasible;
-    cspace.CheckObstacles(qgoal,infeasible);
-    for(size_t i=0;i<infeasible.size();i++)
-      if(infeasible[i]) cout<<"  "<<cspace.ObstacleName(i)<<endl;
+    cspace.PrintInfeasibleNames(qstart);
     return false;
   }
 
@@ -109,6 +110,11 @@ bool SimplePlan(RobotWorld& world,int robot,const Config& qstart,const Config& q
   planner->GetStats(stats);
   cout<<"Planner stats: ";
   stats.Print(cout);
+  cout<<endl;
+  PropertyMap sstats;
+  cspace.GetStats(sstats);
+  cout<<"Space stats: ";
+  sstats.Print(cout);
   cout<<endl;
   delete planner;
   //return true if a solution was found

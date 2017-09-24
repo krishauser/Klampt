@@ -254,8 +254,27 @@ void ViewResource::DrawGL(const ResourcePtr& r)
   }
   else if(typeid(*r)==typeid(PointCloudResource)) {
     const PointCloudResource* rc=dynamic_cast<const PointCloudResource*>((const ResourceBase*)r);
-    fprintf(stderr,"TODO: View PointCloud resources\n");
-    //pointCloudViewer(rc->pointCloud);
+    if(items.size() != 1 || items[0] != rc) {
+      items.resize(1);
+      items[0] = rc;
+      geometries.resize(1);
+      geometries.back() = new Geometry::AnyGeometry3D(rc->pointCloud);
+      appearances.resize(1);
+      appearances.back().Set(*geometries.back());
+    }
+    appearances.back().DrawGL();
+  }
+  else if(typeid(*r)==typeid(TriMeshResource)) {
+    const TriMeshResource* rc=dynamic_cast<const TriMeshResource*>((const ResourceBase*)r);
+    if(items.size() != 1 || items[0] != rc) {
+      items.resize(1);
+      items[0] = rc;
+      geometries.resize(1);
+      geometries.back() = new Geometry::AnyGeometry3D(rc->data);
+      appearances.resize(1);
+      appearances.back().Set(*geometries.back());
+    }
+    appearances.back().DrawGL();
   }
   else if(typeid(*r)==typeid(GeometricPrimitive3DResource)) {
     const GeometricPrimitive3DResource* rc=dynamic_cast<const GeometricPrimitive3DResource*>((const ResourceBase*)r);

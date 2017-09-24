@@ -350,6 +350,8 @@ var freeRun=false;
 var refreshCallback; 
 //a function to run once after the server responds
 var serverResponseCallback;
+//so that multiple redraw requests don't make multiple subsequent refresh calls
+var numRefreshCalls=0;
 
 function kclient_init(dom_sceneArea,dom_textArea)
 {
@@ -357,7 +359,7 @@ function kclient_init(dom_sceneArea,dom_textArea)
 	textArea = dom_textArea;
 	//renderer.setClearColor(0x88888888);
   renderer.setClearColor(0x888888FF);
-  renderer.shadowMapEnabled = false;
+  renderer.shadowMapEnabled = true;
   // to antialias the shadow
   renderer.shadowMapType = THREE.PCFSoftShadowMap;
   renderer.shadowMapSoft = true;
@@ -458,7 +460,7 @@ function kclient_setConnectionHooks(onconnect,ondisconnect)
 function kclient_advance(callback)
 {
 	refreshCallback = callback;
-	if(net_isConnected()) {
+  if(net_isConnected()) {
 		net_sendMessage("A");
 	}
 	freeRun = false;
@@ -481,6 +483,7 @@ function kclient_animate(animate)
 		console.log("stopping freeRun...");
 		freeRun=false;
     refreshCallback = null;
+    waitingForRefresh = false;
 	}
 	else {
       if(!net_isConnected()) {
@@ -493,6 +496,7 @@ function kclient_animate(animate)
         refreshCallback = _freeRunCallback;
         freeRun=true;
         net_sendMessage("R");
+        numRefreshCalls += 1;
      }
 	}
 }
@@ -500,12 +504,14 @@ function kclient_animate(animate)
 function kclient_event(event)
 {
   net_sendMessage("E"+event);
+  numRefreshCalls += 1;
 }
 
 
 function kclient_setitem(item,value)
 {
   net_sendMessage("S"+item+","+JSON.stringify(value));
+  numRefreshCalls += 1
 }
 
 function kclient_getitem(item,onvalue)
@@ -1212,7 +1218,13 @@ function newSceneArrivedCallback(data)
 	rpc=null;
   
   //console.log("finished processing message");
-  if(refreshCallback) refreshCallback();
+  numRefreshCalls = Math.max(numRefreshCalls - 1,0)
+  if(refreshCallback) {
+    if(numRefreshCalls <= 0) {
+      refreshCallback();
+      numRefreshCalls += 1;
+    }
+  }
   if(serverResponseCallback) { serverResponseCallback(); serverResponseCallback=null; }
 }
 

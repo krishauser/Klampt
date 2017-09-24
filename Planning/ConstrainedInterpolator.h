@@ -84,7 +84,7 @@ class SmoothConstrainedInterpolator
   virtual bool ProjectVelocity(const Config& x,Config& v);
 
   CSpace* space;
-  GeodesicManifold* manifold;
+  GeodesicSpace* manifold;
   VectorFieldFunction* constraint;
   Config xmin,xmax; ///< if set, uses bounds in the newton solver
   VectorFieldFunction* inequalities;  ///< if set, uses a nonlinear constraint in the newton solver

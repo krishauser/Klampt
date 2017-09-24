@@ -127,11 +127,12 @@ ResourceNodePtr ResourceGUIBackend::Add(ResourcePtr r)
       }
       r->name = ss.str();
   }
-  //last_added = resources->AddChildOfSelected(r);
-  if(parent == NULL)
-    last_added = resources->Add(r);
-  else
-    last_added = parent->AddChild(r);
+  //need to get the reference counted version of parent;
+  ResourceNodePtr parentSafe;
+  if(parent != NULL) {
+    parentSafe = resources->SafePtr(parent);
+  }
+  last_added = resources->Add(r,parentSafe);
   //SendCommand("new_resource", r->Type()+string(" ")+r->name);
   SendCommand("new_resource", last_added->Identifier());
   return last_added;
@@ -249,7 +250,6 @@ bool ResourceGUIBackend::OnCommand(const string& cmd,const string& args)
       fprintf(stderr,"Conversion failed\n");
       return true;
     }
-    res->name = r->name;
     Add(res);     
     SetLastActive();
   }

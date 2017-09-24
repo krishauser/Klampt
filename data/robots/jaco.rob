@@ -30,7 +30,7 @@ qmax	0 inf 0.83775803 1.274090357 inf inf inf 0.698132 0.698132 0.698132
 
 q	0 0 0 0 0 0 0 0 0 0 
 
-geometry	"jaco/jaco_link_base.dae" "jaco/jaco_link_1.dae" "jaco/jaco_link_2.dae" "jaco/jaco_link_3.dae" "jaco/jaco_link_4.dae" "jaco/jaco_link_5.dae" "jaco/jaco_link_hand.dae" "jaco/jaco_link_finger_1.dae" "jaco/jaco_link_finger_2.dae" "jaco/jaco_link_finger_3.dae" 
+geometry	"jaco/jaco_link_base.off" "jaco/jaco_link_1.off" "jaco/jaco_link_2.off" "jaco/jaco_link_3.off" "jaco/jaco_link_4.off" "jaco/jaco_link_5.off" "jaco/jaco_link_hand.off" "jaco/jaco_link_finger_1.off" "jaco/jaco_link_finger_2.off" "jaco/jaco_link_finger_3.off" 
 
 mass	1.2 1 1 1 0.5 0.3 0.4 0.1 0.1 0.1 
 automass

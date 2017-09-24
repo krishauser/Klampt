@@ -30,7 +30,6 @@ public:
     RobotWorld world;
     SmartPointer<RobotTestBackend> backend;
     SmartPointer<QRobotTestGUI> gui;
-    Robot* rob;
     int mode;
     int argc;
     const char** argv;
@@ -45,7 +44,9 @@ public slots:
     void SetFrame(bool status);
     void SetExpanded(bool status);
     void SetCollisions(bool status);
+    void SetSensors(bool status);
     void SetIK(bool status);
+    void SetROS(bool status);
 
     void SetDriver(int index);
     void UpdateDriverValue();
@@ -62,9 +63,10 @@ public slots:
     void UpdateLinkSlider(double value);
     void UpdateDriverSlider(double value);
     void PrintCollisions();
+    void PrintConfig();
 
     void LoadFile();
-
+    void ReloadFile();
 
 };
 

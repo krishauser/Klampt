@@ -19,7 +19,13 @@ typedef _object PyObject;
 class IKObjective
 {
  public:
+  ///Constructs a blank IKObjective
   IKObjective();
+  ///Copy constructor
+  IKObjective(const IKObjective&);
+  ///Copy constructor
+  IKObjective copy() const;
+
   ///The index of the robot link that is constrained
   int link() const;
   ///The index of the destination link, or -1 if fixed to the world
@@ -67,8 +73,18 @@ class IKObjective
   void getRotation(double out[9]) const;
   ///For axis rotation constraints, returns the local and global axes
   void getRotationAxis(double out[3],double out2[3]) const;
-  ///For fixed-transform constraints, returns the transform (R,T)
+  ///For fixed-transform constraints, returns the transform (R,t)
   void getTransform(double out[9],double out2[3]) const;
+  ///Tranforms the target position/rotation of this IK constraint by transform (R,t)
+  void transform(const double R[9],const double t[3]);
+  ///Tranforms the local position/rotation of this IK constraint by transform (R,t)
+  void transformLocal(const double R[9],const double t[3]);
+
+  ///Sets the destination coordinates of this constraint to fit the given target 
+  ///transform.  In other words, if (R,t) is the current link transform, this sets the 
+  ///destination position / orientation so that this objective has zero error.  The
+  ///current position/rotation constraint types are kept.
+  void matchDestination(const double R[9],const double t[3]);
 
   ///Loads the objective from a Klamp't-native formatted string. For a
   ///more readable but verbose format, try the JSON IO routines
@@ -89,11 +105,13 @@ class IKObjective
  * s = IKSolver(robot)
  * s.add(objective1)
  * s.add(objective2)
- * (res,iters) = s.solve(100,1e-4)
+ * s.setMaxIters(100)
+ * s.setTolerance(1e-4)
+ * res = s.solve()
  * if res:
- *    print "IK solution:",robot.getConfig(),"found in",iters,"iterations, residual",s.getResidual()
+ *    print "IK solution:",robot.getConfig(),"found in",s.lastSolveIters(),"iterations, residual",s.getResidual()
  * else:
- *    print "IK failed:",robot.getConfig(),"found in",iters,"iterations, residual",s.getResidual()
+ *    print "IK failed:",robot.getConfig(),"found in",s.lastSolveIters(),"iterations, residual",s.getResidual()
  *
  * sampleInitial() is a convenience routine.  More initial configurations can
  * be sampled in case the prior configs lead to local minima.
@@ -101,11 +119,27 @@ class IKObjective
 class IKSolver
 {
  public:
+  ///Creates an empty solver
   IKSolver(const RobotModel& robot);
+  ///Copy constructor
   IKSolver(const IKSolver& solver);
+  ///Copy constructor
+  IKSolver copy() const;
 
   /// Adds a new simultaneous objective
   void add(const IKObjective& objective);
+  /// Assigns an existing objective added by add
+  void set(int i,const IKObjective& objective);
+  /// Clears objectives
+  void clear();
+  /// Sets the max # of iterations (default 100)
+  void setMaxIters(int iters);
+  /// Gets the max # of iterations
+  int getMaxIters();
+  /// Sets the constraint solve tolerance (default 1e-3)
+  void setTolerance(double res);
+  /// Gets the constraint solve tolerance
+  double getTolerance();
   /// Sets the active degrees of freedom
   void setActiveDofs(const std::vector<int>& active);
   /// Gets the active degrees of freedom
@@ -114,8 +148,14 @@ class IKSolver
   void setJointLimits(const std::vector<double>& qmin,const std::vector<double>& qmax);
   /// Gets the limits on the robot's configuration (by default this is the robot's joint limits
   void getJointLimits(std::vector<double>& out,std::vector<double>& out2);
+  /// Biases the solver to approach a given configuration.  Setting an empty vector clears the bias term.
+  void setBiasConfig(const std::vector<double>& biasConfig);
+  /// Gets the solvers' bias configuration
+  void getBiasConfig(std::vector<double>& out);
 
-  /// Returns a vector describing the error of the objective
+  /// Returns true if the current configuration residual is less than tol
+  bool isSolved();
+  /// Returns a vector describing the error of the objective at the current configuration
   void getResidual(std::vector<double>& out);
   /// Returns a matrix describing the instantaneous derivative of the objective
   /// with respect to the active Dofs
@@ -123,18 +163,31 @@ class IKSolver
 
   /** Tries to find a configuration that satifies all simultaneous objectives
    * up to the desired tolerance.
-   * Returns (res,iters) where res indicates whether x converged.
+   * Returns true if x converged.
    */
-  PyObject* solve(int iters,double tol=1e-3);
+  bool solve();
+  /** Old-style: will be deprecated.  Specify # of iterations and tolerance.
+   * Tries to find a configuration that satifies all simultaneous objectives
+   * up to the desired tolerance. Returns (res,iterations) where res is true
+   * if x converged.
+   */
+  PyObject* solve(int iters,double tol);
+  /// Returns the number of Newton-Raphson iterations used in the last solve() call.
+  int lastSolveIters();
 
   /// Samples an initial random configuration
   void sampleInitial();
 
   RobotModel robot;
   std::vector<IKObjective> objectives;
+  double tol;
+  int maxIters;
   std::vector<int> activeDofs;
   bool useJointLimits;
   std::vector<double> qmin,qmax;
+  std::vector<double> biasConfig;
+  //temp: stores # of iterations used in last solve call
+  int lastIters;
 };
 
 
@@ -174,6 +227,7 @@ class GeneralizedIKObjective
 
 /**
  * @brief An inverse kinematics solver between multiple robots and/or objects.
+ * NOT IMPLEMENTED YET
  */
 class GeneralizedIKSolver
 {
@@ -182,6 +236,11 @@ class GeneralizedIKSolver
 
   /// Adds a new simultaneous objective
   void add(const GeneralizedIKObjective& objective);
+
+  /// Sets the max # of iterations (default 100)
+  void setMaxIters(int iters);
+  /// Sets the constraint solve tolerance (default 1e-3)
+  void setTolerance(double res);
 
   /// Returns a vector describing the error of the objective
   void getResidual(std::vector<double>& out);
@@ -193,13 +252,15 @@ class GeneralizedIKSolver
    * up to the desired tolerance.  
    * Returns (res,iters) where res indicates whether x converged.
    */
-  PyObject* solve(int iters,double tol=1e-3);
+  PyObject* solve();
 
   /// Samples an initial random configuration
   void sampleInitial();
 
   WorldModel world;
   std::vector<GeneralizedIKObjective> objectives;
+  double tol;
+  int maxIters;
   bool useJointLimits;
 };
 

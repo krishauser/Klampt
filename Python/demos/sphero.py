@@ -2,38 +2,16 @@
 
 import sys
 from klampt import *
-from klampt.glprogram import *
-from OpenGL.GLUT import *
+from klampt import vis
+from klampt.model import collide
+from klampt.vis.glrobotprogram import *
+from klampt.sim.simulation import ActuatorEmulator
 import math
 
 #Sphero local axes: [0,0,1] is "turn", [1,0,0] is "drive"
-#can be 'left','up','down','right', 'home', 'insert', 'end', and the function keys.
+#can be 'left','up','down','right', 'home', 'insert', 'end', and the function keys 'f1',...,'f12'.
 keymap = {'up':(0,[-1,0,0]),'down':(0,[1,0,0]),'left':(0,[0,0,-1]),'right':(0,[0,0,1])}
 
-
-glutspecialmap = {
-    GLUT_KEY_F1:'f1',
-    GLUT_KEY_F2:'f2',
-    GLUT_KEY_F3:'f3',
-    GLUT_KEY_F4:'f4',
-    GLUT_KEY_F5:'f5',
-    GLUT_KEY_F6:'f6',
-    GLUT_KEY_F7:'f7',
-    GLUT_KEY_F8:'f8',
-    GLUT_KEY_F9:'f9',
-    GLUT_KEY_F10:'f10',
-    GLUT_KEY_F11:'f11',
-    GLUT_KEY_F12:'f12',
-    GLUT_KEY_LEFT:'left',
-    GLUT_KEY_UP:'up',
-    GLUT_KEY_RIGHT:'right',
-    GLUT_KEY_DOWN:'down',
-    GLUT_KEY_PAGE_UP:'pageup',
-    GLUT_KEY_PAGE_DOWN:'pagedown',
-    GLUT_KEY_HOME:'home',
-    GLUT_KEY_END:'end',
-    GLUT_KEY_INSERT:'insert'
-    }
 
 
 def euler_zyx_moments(theta):
@@ -82,12 +60,12 @@ def euler_zyx_moments_inv(theta):
             [c0/c1,s0/c1,0]]
 
 
-class Emulator:
+class Emulator(ActuatorEmulator):
     def __init__(self,sim,robotIndex = 0):
         self.sim = sim
         self.robotIndex = robotIndex
         self.controller = sim.controller(robotIndex)
-        self.robot = sim.getWorld().robot(robotIndex)
+        self.robot = sim.world.robot(robotIndex)
         #indices: turn and drive, respectively
         self.velocityLimits = [180*math.pi/180,1080*math.pi/180]
         self.accelLimits = [360*math.pi/180,2080*math.pi/180]
@@ -98,9 +76,18 @@ class Emulator:
         self.rollingFrictionCoeff = 0.01
         #timestep
         self.dt = 0.01
+        self.twist = [0,0,0]
     
-    def send_command(self,twist):
-        assert twist[1] == 0
+    def process(self,commands,dt):
+        if commands == None:
+            return
+        if 'twist' in commands:
+            twist = commands['twist']
+            assert twist[1] == 0
+            self.twist = twist
+
+    def substep(self,dt):
+        twist = self.twist
         #compute the angular velocity of the shell in the motor frame
         motorBody = self.sim.body(self.robot.link(5))
         shellBody = self.sim.body(self.robot.link(8))
@@ -149,33 +136,23 @@ class Emulator:
         return
 
 
-class MyGLViewer(GLRealtimeProgram):
+class MyGLViewer(GLSimulationPlugin):
     def __init__(self,world):
         global keymap
-        GLRealtimeProgram.__init__(self,"My GL program")
-        self.world = world
+        from functools import partial
+        GLSimulationPlugin.__init__(self,world)
         self.keymap = keymap
         self.current_velocities = {}
         #Put your initialization code here
-        #the current example creates a collision class, simulator, 
-        #simulation flag, and screenshot flags
-        self.collider = robotcollide.WorldCollider(world)
-        self.sim = Simulator(world)
-        self.simulate = False
         #initialize emulators
         self.spheros = [Emulator(self.sim,r) for r in range(world.numRobots())]
+        for (i,s) in enumerate(self.spheros):
+            self.sim.addEmulator(i,s)
 
-        self.saveScreenshots = False
-        self.nextScreenshotTime = 0
-        self.screenshotCount = 0
-
-    def display(self):
-        #Put your display handler here
-        #the current example draws the simulated world in grey and the
-        #commanded configurations in transparent green
-        self.sim.updateWorld()
-        self.world.drawGL()
-        return
+        for c in self.keymap:
+            def setvel(d):
+                self.current_velocities[d]=self.keymap[d]
+            self.add_action(partial(setvel,c),"Move "+c,c)
 
     def control_loop(self):
         #Calculate the desired velocity for each robot by adding up all
@@ -185,86 +162,13 @@ class MyGLViewer(GLRealtimeProgram):
             rvels[r] = vectorops.add(rvels[r],v)
         #send to the robot(s)
         for r in range(self.world.numRobots()):           
-            self.spheros[r].send_command(rvels[r])
+            self.spheros[r].process({'twist':rvels[r]},self.dt)
         return
-
-    def idle(self):
-        #Put your idle loop handler here
-        #the current example simulates with the current time step self.dt
-        if self.simulate and self.saveScreenshots:
-            if self.ttotal >= self.nextScreenshotTime:
-                self.save_screen("image%04d.ppm"%(self.screenshotCount,))
-            self.screenshotCount += 1
-            self.nextScreenshotTime += 1.0/30.0;
-
-        if self.simulate:
-            self.control_loop()
-            self.sim.simulate(self.dt)
-            glutPostRedisplay()
-
-    def mousefunc(self,button,state,x,y):
-        #Put your mouse handler here
-        #the current example prints out the list of objects clicked whenever
-        #you right click
-        if button==2:
-            if state==0:
-                print [o.getName() for o in self.click_world(x,y)]
-                return
-        GLRealtimeProgram.mousefunc(self,button,state,x,y)
-
-    def specialfunc(self,c,x,y):
-        #Put your keyboard special character handler here
-        if c in glutspecialmap:
-            name = glutspecialmap[c]
-            print name,"pressed"
-            if name in self.keymap:
-                self.current_velocities[name]=self.keymap[name]
-        pass
-
-    def specialupfunc(self,c,x,y):
-        #Put your keyboard special character handler here
-        if c in glutspecialmap:
-            name = glutspecialmap[c]
-            #print name,"unpressed"
-            if name in self.current_velocities:
-                del self.current_velocities[name]
-        pass
-
-    def keyboardfunc(self,c,x,y):
-        #Put your keyboard handler here
-        #the current example toggles simulation / movie mode
-        if c == 's':
-            self.simulate = not self.simulate
-            print "Simulating:",self.simulate
-        elif c == 'm':
-            self.saveScreenshots = not self.saveScreenshots
-            print "Movie mode:",self.saveScreenshots
-        elif c == 'h':
-            print 'Available keys:',sorted(self.keymap.keys())
-        elif c in self.keymap:
-            self.current_velocities[c]=self.keymap[c]
-        glutPostRedisplay()
 
     def keyboardupfunc(self,c,x,y):
         if c in self.current_velocities:
             del self.current_velocities[c]
         return
-
-    def click_world(self,x,y):
-        """Helper: returns a list of world objects sorted in order of
-        increasing distance."""
-        #get the viewport ray
-        (s,d) = self.click_ray(x,y)
-        
-        #run the collision tests
-        self.collider.updateFrames()
-        collided = []
-        for g in self.collider.geomList:
-            (hit,pt) = collide.rayCast(g[1],s,d)
-            if hit:
-                dist = vectorops.dot(vectorops.sub(pt,s),d)
-                collided.append((dist,g[0]))
-        return [g[1] for g in sorted(collided)]
 
 
 if __name__ == "__main__":
@@ -278,4 +182,4 @@ if __name__ == "__main__":
         if not res:
             raise RuntimeError("Unable to load model "+fn)
     viewer = MyGLViewer(world)
-    viewer.run()
+    vis.run(viewer)

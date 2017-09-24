@@ -12,7 +12,7 @@ jointtype p p p r r r r
 qMin -1 -1 -1  -inf -inf -inf -10 
 qMax 1 1 1  inf inf inf 10 
 q 0 0 0.053 0 0 0 -1.57
-geometry   ""   ""   ""   ""    ""    "../objects/centeredcube.tri"  "../objects/thincube.tri" 
+geometry   ""   ""   ""   ""    ""    "../objects/centeredcube.off"  "../objects/thincube.off" 
 geomscale 1 1 1 1 1 0.1 1
 mass       0 0 0 0 0 0.1 0.1 
 automass

@@ -1,4 +1,4 @@
-#Klamp't
+#Klamp't [![Build Status](https://travis-ci.org/krishauser/Klampt.svg?branch=master)](https://travis-ci.org/arocchi/Klampt)
 
 A robot simulation, planning, and control package from Indiana University /
 Duke University.
@@ -10,6 +10,11 @@ More information can be found on the website:
 The manual is also available in the Documentation folder.
 
 ## Installation
+
+More information on installing from source on Linux or Mac OSX and binaries on Windows can be found here:
+
+   http://motion.pratt.duke.edu/klampt/tutorial_install.html
+
 ### Using Docker
 
 Using [Docker](https://www.docker.com) to run this application is the easiest way to install and use Klamp't on your machine. In order to use this method, you must download and set up Docker. Tutorials are available for [OSX](http://docs.docker.com/mac/started/), [Linux](http://docs.docker.com/linux/started) and [Windows](http://docs.docker.com/windows/started). 
@@ -83,11 +88,7 @@ docker run -it -v /tmp/.X11-unix:/tmp/.X11-unix -e DISPLAY=unix$DISPLAY --name k
 
 Then, use the internal tools inside of the container (i.e. `SimTest`, `RobotTest`, etc.) on your files. They will be found in `/home/Klampt/data`. 
 
-### Local Installation 
 
-A local installation tutorial for Linux and Windows can be found here:
-
-   http://motion.pratt.duke.edu/klampt/tutorial_install.html
 
 
 ## Contact

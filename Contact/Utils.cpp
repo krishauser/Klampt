@@ -7,6 +7,17 @@
 using namespace Geometry;
 using namespace Meshing;
 
+#include <ode/common.h>
+#include <ode/collision.h>
+#include "Modeling/World.h"
+
+//defined in ODECustomGeometry.cpp
+//TODO: make this native!
+int GeometryGeometryCollide(Geometry::AnyCollisionGeometry3D& g1,Real outerMargin1,
+        Geometry::AnyCollisionGeometry3D& g2,Real outerMargin2,
+        dContactGeom* contact,int m);
+
+
 //Produces a list of contacts as though the robot were standing on a plane.
 //tol is the tolerance with which minimum-distance points are generated.
 //All contacts are given zero friction and in the local frame of the robot.
@@ -16,7 +27,7 @@ void GetFlatContacts(RobotWithGeometry& robot,Real tol,ContactFormation& contact
   vector<pair<Real,int> > order;
   robot.UpdateGeometry();
   for(size_t i=0;i<robot.geometry.size();i++)
-    if(!robot.IsGeometryEmpty(i)) {
+    if(robot.parents[i] >= 0 && !robot.IsGeometryEmpty(i)) {
       AABB3D aabb = robot.geometry[i]->GetAABB();
       bbs[i] = aabb;
       order.push_back(pair<Real,int>(aabb.bmin.z,(int)i));
@@ -183,7 +194,69 @@ void GetFlatStance(RobotWithGeometry& robot,Real tol,Stance& s,Real kFriction)
   LocalContactsToStance(formation,robot,s);
   for(Stance::iterator i=s.begin();i!=s.end();i++)
     for(size_t j=0;j<i->second.contacts.size();j++)
-      i->second.contacts[j].kFriction = 0.25;
+      i->second.contacts[j].kFriction = kFriction;
+}
+
+
+void GetNearbyContacts(RobotWithGeometry& robot,RobotWorld& world,Real tol,ContactFormation& contacts)
+{
+  contacts.links.resize(0);
+  contacts.contacts.resize(0);
+  for(int i=0;i<(int)robot.links.size();i++) {
+    if(robot.parents[i] < 0) continue; //fixed link
+    vector<ContactPoint> cps;
+    GetNearbyContacts(robot,i,world,tol,cps);
+    if(!cps.empty()) {
+      contacts.links.push_back(i);
+      contacts.contacts.push_back(cps);
+    }
+  }
+}
+
+
+void GetNearbyContacts(RobotWithGeometry& robot,int link,RobotWorld& world,Real tol,vector<ContactPoint>& contacts)
+{
+  contacts.resize(0);
+  if(robot.IsGeometryEmpty(link)) {
+    return;
+  }
+  Geometry::AnyCollisionGeometry3D& g1 = *robot.geometry[link];
+  Real m1 = 0;
+  Real m2 = tol;
+  dContactGeom temp[1000];
+  int maxContacts = 1000;
+  vector<Geometry::AnyCollisionGeometry3D*> geomsToCheck;
+  for(size_t i=0;i<world.terrains.size();i++) {
+    if(world.terrains[i]->geometry.Empty()) continue;
+    geomsToCheck.push_back(&*world.terrains[i]->geometry);
+  }
+  for(size_t i=0;i<world.rigidObjects.size();i++) {
+    if(world.rigidObjects[i]->geometry.Empty()) {
+      continue;
+    }
+    geomsToCheck.push_back(&*world.rigidObjects[i]->geometry);
+    world.rigidObjects[i]->UpdateGeometry();
+  }
+  //now do the tolerance checks and add to the contacts list
+  for(size_t i=0;i<geomsToCheck.size();i++) {
+    int nc = GeometryGeometryCollide(g1,m1,*geomsToCheck[i],m2,temp,maxContacts);
+    if(nc > 0) {
+      size_t start = contacts.size();
+      contacts.resize(start+nc);
+      for(int j=0;j<nc;j++) {
+        contacts[j].x.set(temp[j].pos);
+        contacts[j].n.set(temp[j].normal);
+        contacts[j].kFriction = 0;
+
+        //convert to local coordinates
+        Vector3 localPos,localNormal;
+        robot.links[link].T_World.mulInverse(contacts[j].x,localPos);
+        robot.links[link].T_World.R.mulTranspose(contacts[j].n,localNormal);
+        contacts[j].x = localPos;
+        contacts[j].n = localNormal;
+      }
+    }
+  }
 }
 
 void LocalContactsToHold(const vector<ContactPoint>& contacts,int link,const RobotKinematics3D& robot,Hold& hold)

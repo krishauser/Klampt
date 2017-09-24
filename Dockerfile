@@ -46,12 +46,13 @@ COPY Planning /etc/Klampt/Planning/
 COPY Python /etc/Klampt/Python/
 COPY Simulation /etc/Klampt/Simulation/
 COPY View /etc/Klampt/View/
+COPY Web /etc/Klampt/Web/
 
 # Install Klamp't dependencies
 RUN cd /etc/Klampt/Library && \
 	make unpack-deps && \
 	make deps && \
-	echo "/etc/Klampt/Library/ode-0.11.1/ode/src/.libs/" >> /etc/ld.so.conf && \
+	echo "/etc/Klampt/Library/ode-0.14/ode/src/.libs/" >> /etc/ld.so.conf && \
 	ldconfig
 
 # Install Klamp't
@@ -61,6 +62,29 @@ RUN cd /etc/Klampt && \
 	make apps && \ 
 	make python && \
 	make python-install
+
+# Build WebServer program 
+RUN cd /etc/Klampt/Web/Server && \
+    make
+
+# Get web client JS libraries
+RUN cd /etc/Klampt/Web/Client && \ 
+    git submodule init && \
+    git submodule update
+
+# Link required client-side files on /var/www/html
+RUN mkdir /var/www/html
+RUN cd /var/www/html && \
+    ln -s /etc/Klampt/Web/Client/ace-builds && \
+    ln -s /etc/Klampt/Web/Client/images && \
+    ln -s /etc/Klampt/Web/Client/index_debug.html && \
+    ln -s /etc/Klampt/Web/Client/index.html && \
+    ln -s /etc/Klampt/Web/Client/KlamptClient.js && \
+    ln -s /etc/Klampt/Web/Client/kviz_docs.html && \
+    ln -s /etc/Klampt/Web/Client/Scenarios && \
+    ln -s /etc/Klampt/Web/Client/stats.js && \
+    ln -s /etc/Klampt/Web/Client/three.js && \
+    ln -s /etc/Klampt/Web/Client/w2ui 
 
 # Volume Mount User Data
 VOLUME /home/Klampt/data

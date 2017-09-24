@@ -68,6 +68,7 @@ struct SensorPlot
  * - draw_wrenches
  * - draw_expanded 
  * - draw_time
+ * - output_ros
  *
  * Signals sent back to GUI are defined as follows:
  * - command update_config: notifies that the configuration of the world has changed.
@@ -80,6 +81,7 @@ public:
 
   int cur_link,cur_driver;
   int pose_objects;
+  int output_ros;
   enum {ModeNormal, ModeForceApplication};
   int click_mode;
   vector<RobotPoseWidget> robotWidgets;
@@ -96,6 +98,7 @@ public:
   map<int,string> robotCommandLogFiles, robotSensedLogFiles, robotTorqueLogFiles;
 
   vector<SensorPlot> sensorPlots;
+  vector<vector<bool> > drawSensors;
   vector<GeometryAppearance> originalAppearance,expandedAppearance;
 
   SimTestBackend(RobotWorld* world);

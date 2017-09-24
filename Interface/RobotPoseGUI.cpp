@@ -1,6 +1,8 @@
 #include "RobotPoseGUI.h"
 #include <KrisLibrary/GLdraw/drawMesh.h>
 #include <KrisLibrary/GLdraw/drawgeometry.h>
+#include <KrisLibrary/geometry/Conversions.h>
+#include <KrisLibrary/meshing/VolumeGrid.h>
 #include "Modeling/MultiPath.h"
 #include <KrisLibrary/robotics/IKFunctions.h>
 #include "Contact/Utils.h"
@@ -21,6 +23,7 @@ RobotPoseBackend::RobotPoseBackend(RobotWorld* world,ResourceManager* library)
   settings["contact"]["normalLength"]= 0.05; 
   settings["linkCOMRadius"] = 0.01;
   settings["flatContactTolerance"] = 0.001;
+  settings["nearbyContactTolerance"] = 0.005;
   settings["selfCollideColor"][0] = 1;
   settings["selfCollideColor"][1] = 0;
   settings["selfCollideColor"][2] = 0;
@@ -74,8 +77,7 @@ void RobotPoseBackend::Start()
   draw_bbs = 0;
   draw_com = 0;
   draw_frame = 0;
-  self_colliding.resize(robot->links.size(),false);   
-
+  draw_sensors = 0;
 
   robotWidgets.resize(world->robots.size());
   for(size_t i=0;i<world->robots.size();i++) {
@@ -105,6 +107,7 @@ void RobotPoseBackend::Start()
   MapButtonToggle("draw_bbs",&draw_bbs);
   MapButtonToggle("draw_com",&draw_com);
   MapButtonToggle("draw_frame",&draw_frame);
+  MapButtonToggle("draw_sensors",&draw_sensors);
 }
 
 void RobotPoseBackend::UpdateConfig()
@@ -144,6 +147,16 @@ void RobotPoseBackend::RenderWorld()
     world->terrains[i]->DrawGL();
   for(size_t i=0;i<world->rigidObjects.size();i++)
     world->rigidObjects[i]->DrawGL();
+
+  if(draw_sensors) {
+    if(robotSensors.sensors.empty()) {
+      robotSensors.MakeDefault(robot);
+    }
+    for(size_t i=0;i<robotSensors.sensors.size();i++) {
+      vector<double> measurements;
+      robotSensors.sensors[i]->DrawGL(*robot,measurements);
+    }
+  }
 
   if(draw_geom) {
     //set the robot colors
@@ -231,7 +244,7 @@ Stance RobotPoseBackend::GetFlatStance(Real tolerance)
   Robot* robot = world->robots[0];
   Stance s;
   if(robotWidgets[0].ikPoser.poseGoals.empty()) {
-    printf("Storing flat ground stance\n");
+    printf("Computing stance as though robot were standing on flat ground\n");
     ContactFormation cf;
     GetFlatContacts(*robot,tolerance,cf);
 
@@ -246,11 +259,12 @@ Stance RobotPoseBackend::GetFlatStance(Real tolerance)
     }
   }
   else {
-    printf("Storing flat contact stance\n");
+    printf("Computing flat-ground stance only for IK-posed links\n");
     for(size_t i=0;i<robotWidgets[0].ikPoser.poseGoals.size();i++) {
       int link = robotWidgets[0].ikPoser.poseGoals[i].link;
       vector<ContactPoint> cps;
       GetFlatContacts(*robot,link,tolerance,cps);
+      if(cps.empty()) continue;
       Real friction = settings["defaultStanceFriction"];
       //assign default friction
       for(size_t j=0;j<cps.size();j++)
@@ -264,6 +278,48 @@ Stance RobotPoseBackend::GetFlatStance(Real tolerance)
   return s;
 }
 
+Stance RobotPoseBackend::GetNearbyStance(Real tolerance)
+{
+  if(tolerance==0)
+    tolerance = settings["nearbyContactTolerance"];
+  Robot* robot = world->robots[0];
+  Stance s;
+  if(robotWidgets[0].ikPoser.poseGoals.empty()) {
+    printf("Calculating stance from all points on robot near environment / objects\n");
+    ContactFormation cf;
+    GetNearbyContacts(*robot,*world,tolerance,cf);
+
+    Real friction = settings["defaultStanceFriction"];
+    for(size_t i=0;i<cf.links.size();i++) {
+      //assign default friction
+      for(size_t j=0;j<cf.contacts[i].size();j++)
+  cf.contacts[i][j].kFriction = friction;
+      Hold h;
+      LocalContactsToHold(cf.contacts[i],cf.links[i],*robot,h);
+      s.insert(h);
+    }
+  }
+  else {
+    printf("Calculating near-environment stance only for IK-posed links\n");
+    for(size_t i=0;i<robotWidgets[0].ikPoser.poseGoals.size();i++) {
+      int link = robotWidgets[0].ikPoser.poseGoals[i].link;
+      vector<ContactPoint> cps;
+      GetNearbyContacts(*robot,link,*world,tolerance,cps);
+      if(cps.empty()) continue;
+      Real friction = settings["defaultStanceFriction"];
+      //assign default friction
+      for(size_t j=0;j<cps.size();j++)
+  cps[j].kFriction = friction;
+      Hold h;
+      LocalContactsToHold(cps,link,*robot,h);
+      h.ikConstraint = robotWidgets[0].ikPoser.poseGoals[i];
+      s.insert(h);
+    }
+  }
+  return s;
+}
+
+
 ResourcePtr RobotPoseBackend::PoserToResource(const string& type)
 {
   Robot* robot = world->robots[0];
@@ -272,12 +328,19 @@ ResourcePtr RobotPoseBackend::PoserToResource(const string& type)
   else if(type == "IKGoal") {
     int ind = robotWidgets[0].ikPoser.ActiveWidget();
     if(ind < 0) {
-      printf("Not hovering over any IK widget\n");
-      return NULL;
+      vector<IKGoal>& constraints = robotWidgets[0].Constraints();
+      if(constraints.size() == 0) {
+        printf("Not hovering over any IK widget\n");
+        return NULL;
+      }
+      else {
+        return MakeResource("",constraints[0]);
+      }
     }
     return MakeResource("",robotWidgets[0].ikPoser.poseGoals[ind]);
   }
   else if(type == "Stance") {
+    printf("Creating stance from IK goals and contacts from flat-ground assumption\n");
     Stance s = GetFlatStance();
     return MakeResource("",s);
   }
@@ -382,13 +445,16 @@ bool RobotPoseBackend::OnCommand(const string& cmd,const string& args)
       return true;
     }
     ResourcePtr r = PoserToResource(oldr->Type());
-    r->name = oldr->name;
-    r->fileName = oldr->fileName;
+    if(r) {
+      r->name = oldr->name;
+      r->fileName = oldr->fileName;
 
-    resources->selected->resource = r;
-    if(resources->selected->IsExpanded()) {
-      fprintf(stderr,"Warning, don't know how clearing children will be reflected in GUI\n");
-      resources->selected->ClearExpansion();
+      resources->selected->resource = r;
+      resources->selected->SetChanged();
+      if(resources->selected->IsExpanded()) {
+        fprintf(stderr,"Warning, don't know how clearing children will be reflected in GUI\n");
+        resources->selected->ClearExpansion();
+      }
     }
   }
   else if(cmd == "resource_to_poser") {
@@ -397,14 +463,19 @@ bool RobotPoseBackend::OnCommand(const string& cmd,const string& args)
     if(rc) {
       Vector q = robotWidgets[0].Pose();
       q=rc->data;
-      robotWidgets[0].SetPose(q);
-      /*
-      robotWidgets[0].SetPose(rc->data);
-      robot->NormalizeAngles(robotWidgets[0].linkPoser.poseConfig);
-      if(robotWidgets[0].linkPoser.poseConfig != rc->data)
-	printf("Warning: config in library is not normalized\n");
-      */
-      UpdateConfig();
+      if(q.n == robot->q.n) {
+        robotWidgets[0].SetPose(q);
+        /*
+        robotWidgets[0].SetPose(rc->data);
+        robot->NormalizeAngles(robotWidgets[0].linkPoser.poseConfig);
+        if(robotWidgets[0].linkPoser.poseConfig != rc->data)
+    printf("Warning: config in library is not normalized\n");
+        */
+        UpdateConfig();
+      }
+      else {
+        fprintf(stderr,"Can't copy this Config to the poser, it is not the same size\n");
+      }
     }
     else {
       const IKGoalResource* rc = dynamic_cast<const IKGoalResource*>((const ResourceBase*)r);
@@ -522,6 +593,25 @@ bool RobotPoseBackend::OnCommand(const string& cmd,const string& args)
     ResourceGUIBackend::Add("",path);
     ResourceGUIBackend::SetLastActive(); 
     ResourceGUIBackend::viewResource.pathTime = 0;
+  }
+  else if(cmd == "split_path") {
+    ResourcePtr r=ResourceGUIBackend::CurrentResource();
+    const LinearPathResource* lp = dynamic_cast<const LinearPathResource*>((const ResourceBase*)r);
+    double t = viewResource.pathTime;
+    fprintf(stderr,"TODO: split paths\n");
+    if(lp) {
+      
+      //ResourceGUIBackend::Add("",newtimes,newconfigs);
+      //ResourceGUIBackend::SetLastActive(); 
+      //ResourceGUIBackend::viewResource.pathTime = 0;
+    }
+    const MultiPathResource* mp = dynamic_cast<const MultiPathResource*>((const ResourceBase*)r);
+    if(mp) {
+      
+      //ResourceGUIBackend::Add("",path);
+      //ResourceGUIBackend::SetLastActive(); 
+      //ResourceGUIBackend::viewResource.pathTime = 0;
+    }
   }
   else if(cmd == "discretize_path") {
     int num;
@@ -642,6 +732,21 @@ bool RobotPoseBackend::OnCommand(const string& cmd,const string& args)
       printf("Need to be selecting a Stance resource\n");
     }
   }
+  else if(cmd == "get_nearby_contacts") {
+    ResourcePtr r=ResourceGUIBackend::CurrentResource();
+    StanceResource* sp = dynamic_cast<StanceResource*>((ResourceBase*)r);
+    if(sp) {
+      Real tolerance = 0;
+      if(!args.empty()) {
+  stringstream ss(args); ss>>tolerance; 
+      }
+      Stance s = GetNearbyStance(tolerance);
+      sp->stance = s;
+    }
+    else {
+      printf("Need to be selecting a Stance resource\n");
+    }
+  }
   else if(cmd == "clean_contacts") {
     Real xtol,ntol;
     stringstream ss(args);
@@ -667,6 +772,28 @@ bool RobotPoseBackend::OnCommand(const string& cmd,const string& args)
       if(r) {
 	ResourceGUIBackend::Add(r);
 	ResourceGUIBackend::SetLastActive();
+      }
+    }
+  }
+  else if(cmd == "resample") {
+    stringstream ss(args);
+    Real res;
+    ss >> res;
+    ResourcePtr r=ResourceGUIBackend::CurrentResource();
+    const TriMeshResource* tr = dynamic_cast<const TriMeshResource*>((const ResourceBase*)r);
+    if(tr) {
+      Meshing::VolumeGrid grid;
+      Geometry::CollisionMesh mesh(tr->data);
+      mesh.CalcTriNeighbors();
+      mesh.InitCollisions();
+      Geometry::MeshToImplicitSurface_SpaceCarving(mesh,grid,res);
+      //Geometry::MeshToImplicitSurface_FMM(mesh,grid,res);
+      Meshing::TriMesh newMesh;
+      Geometry::ImplicitSurfaceToMesh(grid,newMesh);
+      ResourcePtr r = MakeResource(tr->name+"_simplified",newMesh);
+      if(r) {
+        ResourceGUIBackend::Add(r);
+        ResourceGUIBackend::SetLastActive();
       }
     }
   }
@@ -700,6 +827,14 @@ bool RobotPoseBackend::OnCommand(const string& cmd,const string& args)
     robot->SetDriverValue(cur_driver,driver_value);
     robotWidgets[0].SetPose(robot->q);
   }
+  else if(cmd == "undo_pose") {
+    for(size_t i=0;i<world->robots.size();i++) 
+      if(lastActiveWidget == &robotWidgets[i]) {
+        printf("Undoing robot poser %d\n",i);
+        robotWidgets[i].Undo();
+        UpdateConfig();
+      }
+  }
   else {
     return ResourceGUIBackend::OnCommand(cmd,args);
   }
@@ -712,8 +847,10 @@ void RobotPoseBackend::BeginDrag(int x,int y,int button,int modifiers)
   Robot* robot = world->robots[0];
   if(button == GLUT_RIGHT_BUTTON) {
     double d;
-    if(allWidgets.BeginDrag(x,viewport.h-y,viewport,d))
+    if(allWidgets.BeginDrag(x,viewport.h-y,viewport,d)) {
       allWidgets.SetFocus(true);
+      lastActiveWidget = allWidgets.activeWidget;
+    }
     else
       allWidgets.SetFocus(false);
     if(allWidgets.requestRedraw) { SendRefresh(); allWidgets.requestRedraw=false; }

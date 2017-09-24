@@ -9,7 +9,10 @@
 using namespace Math;
 
 /** @ingroup Simulation
- * @brief An ODE-simulated rigid object
+ * @brief An ODE-simulated rigid object.
+ *
+ * Note: if you manually set the object's velocities, make sure to disable
+ * instability correction in the simulator for that time step.
  */
 class ODERigidObject
 {
@@ -25,6 +28,7 @@ class ODERigidObject
   void GetTransform(RigidTransform& T) const;
   void SetVelocity(const Vector3& w,const Vector3& v);
   void GetVelocity(Vector3& w,Vector3& v) const;
+  Real GetKineticEnergy() const;
   bool ReadState(File& f);
   bool WriteState(File& f) const;
   

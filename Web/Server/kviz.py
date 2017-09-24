@@ -1,5 +1,7 @@
 import json
 from klampt import *
+from klampt import robotsim
+from klampt.math import vectorops,so3,se3
 global _world,_sceneCurrent,_sceneChanges,_namedItems
 _world = None
 _sceneCurrent = {}
@@ -283,7 +285,7 @@ def json_fixed_precision_dump(obj,digits):
 
 def _getInitialJSON():
 	global _world,_sceneCurrent,_RPC
-	msg = json.loads(_world.getSceneJSON())
+	msg = json.loads(robotsim.ThreeJSGetScene(_world))
 	msg['RPC'] = _RPC
 	_RPC = []
 	return json_fixed_precision_dump(msg,3)
@@ -291,7 +293,7 @@ def _getInitialJSON():
 
 def _getUpdateJSON():
 	global _world,_sceneCurrent,_RPC
-	msg = json.loads(_world.getTransformsJSON())
+	msg = json.loads(robotsim.ThreeJSGetTransforms(_world))
 	msg['RPC'] = _RPC
 	_RPC = []
 	return json_fixed_precision_dump(msg,3)

@@ -26,7 +26,10 @@ public:
   RobotLinkPoseWidget();
   RobotLinkPoseWidget(Robot* robot,ViewRobot* viewRobot);
   virtual ~RobotLinkPoseWidget() {}
+  ///Initializer
   void Set(Robot* robot,ViewRobot* viewRobot);
+  ///Sets the active dofs
+  void SetActiveDofs(const vector<int>& activeDofs);
   virtual bool Hover(int x,int y,Camera::Viewport& viewport,double& distance);
   virtual bool BeginDrag(int x,int y,Camera::Viewport& viewport,double& distance);
   virtual void Drag(int dx,int dy,Camera::Viewport& viewport);
@@ -37,6 +40,7 @@ public:
   Config poseConfig;
   GLDraw::GLColor highlightColor;
   int hoverLink,affectedLink,affectedDriver;
+  vector<int> activeDofs;
   vector<int> highlightedLinks;
   Vector3 hoverPt;
   bool draw;
@@ -59,6 +63,8 @@ public:
   void Add(const IKGoal& goal);
   ///Sets the destination link of the given widget
   void AttachWidget(int widget,int link);
+  ///Sets the transform of the pose goal and its widget 
+  void SetPoseAndWidgetTransform(int widget,const RigidTransform& T);
   ///Call this after changing the poseGoals and poseWidgets structure.
   void RefreshWidgets();
   ///Returns the index of the hovered widget
@@ -95,6 +101,8 @@ public:
   ///if there are multiple solutions for the current pose, picks the one that
   ///most closely matches qref (useful for spin joints)
   Config Pose_Conditioned(const Config& qref) const;
+  ///Enables / disables editing certain joints
+  void SetActiveDofs(const vector<int>& activeDofs) { linkPoser.SetActiveDofs(activeDofs); }
   ///Adds a pos/rot constraint on the currently hovered link
   bool FixCurrent();
   ///Adds a point constraint on the currently hovered link
@@ -123,6 +131,9 @@ public:
   virtual void EndDrag();
   virtual void Keypress(char c);
 
+  void Snapshot();
+  void Undo();
+
   bool useBase;
   GLDraw::TransformWidget basePoser;
   RobotLinkPoseWidget linkPoser;
@@ -131,6 +142,8 @@ public:
   int mode;
   int attachx,attachy;
   Ray3D attachRay;
+  vector<Config> undoConfigs;
+  vector<vector<pair<int,RigidTransform> > > undoTransforms;
 };
 
 /** @} */

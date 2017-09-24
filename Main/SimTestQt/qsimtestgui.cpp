@@ -2,7 +2,7 @@
 #include <KrisLibrary/utils/apputils.h>
 
 QSimTestGUI::QSimTestGUI(QKlamptDisplay* _display,SimTestBackend *_backend) :
-  QtGUIBase(_backend), display(_display)
+  QKlamptGUIBase(_display,_backend)
 {
   //BaseT::backend = _backend;
   //  BaseT::width = w;
@@ -12,15 +12,14 @@ QSimTestGUI::QSimTestGUI(QKlamptDisplay* _display,SimTestBackend *_backend) :
   assert(_backend != NULL);
   assert(sim != NULL);
   assert(sim->world != NULL);
-  _backend->gui = this;
 
   driver_tool=new DriverEdit(sim->world);
   connect(driver_tool,SIGNAL(SetDriverValue(int,float)),this,SLOT(SendDriverValue(int,float)));
   //driver_tool->show();
 
   log_options=new LogOptions();
-  connect(log_options,SIGNAL(ShowSensor(int)),this,SLOT(ShowSensor(int)));
-  connect(log_options,SIGNAL(HideSensor(int)),this,SLOT(HideSensor(int)));
+  connect(log_options,SIGNAL(ShowSensor(int,bool)),this,SLOT(ShowSensor(int,bool)));
+  connect(log_options,SIGNAL(RenderSensor(int,bool)),this,SLOT(RenderSensor(int,bool)));
   connect(log_options,SIGNAL(toggle_measurement(int,int,bool)),this,SLOT(SendMeasurement(int,int,bool)));
   connect(log_options,SIGNAL(toggle_measurement(int,int,bool)),this,SLOT(SendMeasurement(int,int,bool)));
   if(sim->controlSimulators.size() > 0) {
@@ -57,24 +56,6 @@ QSimTestGUI::QSimTestGUI(QKlamptDisplay* _display,SimTestBackend *_backend) :
     Assert(res == true);
     AddCommandRule(c,rules[i*3+1],rules[i*3+2]);
   }
-
-  connect(&idle_timer, SIGNAL(timeout()),this,SLOT(OnIdleTimer()));
-  idle_timer.start(0);
-}
-
-void QSimTestGUI::OnIdleTimer()
-{
-  SendIdle();
-  idle_timer.start(0);
-}
-
-bool QSimTestGUI::OnPauseIdle(double secs) 
-{
-  if(secs > 10000000)
-    idle_timer.stop();
-  else
-    idle_timer.start(int(secs*1000));
-  return true;
 }
 
 bool QSimTestGUI::OnCommand(const string& cmd,const string& args)
@@ -92,12 +73,6 @@ bool QSimTestGUI::OnCommand(const string& cmd,const string& args)
   }
   else
     return QtGUIBase::OnCommand(cmd,args);
-}
-
-bool QSimTestGUI::OnRefresh()
-{
-  display->updateGL();
-  return true;
 }
 
 QSimTestGUI::~QSimTestGUI(){
@@ -118,14 +93,15 @@ void QSimTestGUI::SendDriverValue(int dr, float value){
     SendCommand("set_driver_value",value);
 }
 
-void QSimTestGUI::ShowSensor(int sensor){
+void QSimTestGUI::ShowSensor(int sensor,bool shown){
+  if(shown)
     SendCommand("show_sensor",sensor);
-    log_options->sensorDrawn[sensor]=true;
+  else
+    SendCommand("hide_sensor",sensor);
 }
 
-void QSimTestGUI::HideSensor(int sensor){
-    SendCommand("hide_sensor",sensor);
-    log_options->sensorDrawn[sensor]=false;
+void QSimTestGUI::RenderSensor(int sensor,bool rendered){
+    SendCommand("draw_sensor",sensor,rendered);
 }
 
 void QSimTestGUI::SendMeasurement(int sensor,int measurement,bool status){

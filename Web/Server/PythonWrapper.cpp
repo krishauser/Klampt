@@ -208,9 +208,9 @@ void initialize_python_interpreter()
 
 bool run_boiler_plate(const string& which)
 {
-   string boilerplate="boilerplate_"+which+".py";
+   string boilerplate=which+"/boilerplate"+".py";
 
-   printf("  running boilerplate code %s\n",which.c_str()); //TODO, allow client to specify boiler plate
+   printf("  running boilerplate code %s\n",which.c_str()); 
    std::string boiler_plate=load_file(boilerplate);
 
    if(boiler_plate.size()==0) //okay now lets try to find the file in a different place
@@ -275,10 +275,10 @@ void handleIncomingMessage(string message)
            precomputed_response = false;
            pause_io = false;
         }
-          std::string pycode;
-          pycode+="wrapper_event('"+message+"')\n";
-          int res = PyRun_SimpleString(pycode.c_str());
-          FlushStreams();
+        std::string pycode;
+        pycode+="wrapper_event('"+message+"')\n";
+        int res = PyRun_SimpleString(pycode.c_str());
+        FlushStreams();
       }
       else if(routing=='S') //set item event
       {
@@ -288,17 +288,20 @@ void handleIncomingMessage(string message)
            precomputed_response = false;
            pause_io = false;
         }
-          size_t i=message.find(',');
-          if(i == std::string::npos) {
-            printf("Error parsing set item message, no comma found\n");
-            return;
-          }
-          std::string item = message.substr(0,i);
-          std::string value = message.substr(i+1,message.length()-i-1);
-          std::string pycode;
-          pycode+="wrapper_setitem('" + item + "',"+value+")\n";
-          int res = PyRun_SimpleString(pycode.c_str());
-          FlushStreams();
+        size_t i=message.find(',');
+        if(i == std::string::npos) {
+          printf("Error parsing set item message, no comma found\n");
+          return;
+        }
+        std::string item = message.substr(0,i);
+        std::string value = message.substr(i+1,message.length()-i-1);
+        //convert JSON simple values to Python ones
+        if(value == "true") value="True";
+        else if(value == "false") value="False";
+        std::string pycode;
+        pycode+="wrapper_setitem('" + item + "',"+value+")\n";
+        int res = PyRun_SimpleString(pycode.c_str());
+        FlushStreams();
       }
       else if(routing=='A')
       {

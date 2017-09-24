@@ -1,5 +1,6 @@
 #include "configsframe.h"
 #include "ui_configsframe.h"
+#include "qrobotposegui.h"
 #include <iostream>
 using namespace std;
 

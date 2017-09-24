@@ -1,0 +1,13 @@
+<document>
+<select name="mode">
+    <option value="automatic">Automatic mode</option>
+    <option value="user">User mode</option>
+</select> <br>
+<div class="panel_control">q1 <input type="range" name="q1" min="-179" max="179" step="0.1"/></div>
+<div class="panel_control">q2 <input type="range" name="q2" min="-147.5" max="130" step="0.1"/></div>
+<div class="panel_control">q3 <input type="range" name="q3" min="-145" max="145" step="0.1"/></div>
+<div class="panel_control">q4 <input type="range" name="q4" min="-179" max="179" step="0.1"/></div>
+<div class="panel_control">q5 <input type="range" name="q5" min="-140" max="115" step="0.1"/></div>
+<div class="panel_control">q6 <input type="range" name="q6" min="-179" max="179" step="0.1"/></div>
+<button name="print">Print config</button>
+</document>

@@ -37,10 +37,10 @@ rotation        (base rotation, 9 values column major)
  com          (3 values for each link)
  inertiaDiag  (3 values for each link)
  inertia      (9 values for each link)
- automass     (sets the com and inertia matrices from geometry)
+ automass     (sets the com and inertia m.offces from geometry)
 
 # [Geometry parameters]
- geometry     (tri mesh files, empty string "" for no geometry)
+ geometry     .off mesh files, empty .offng "" for no geometry)
  geomscale    (a single value, or a list)
 
 # [Convenience tweaks]

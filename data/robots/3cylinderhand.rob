@@ -15,7 +15,7 @@ velMax  5 5 5 5 5 5 5 5 5
 qMin -1 -1 -1    -1 -1 -1     -1 -1 -1
 qMax 1 1 1    1 1 1     1 1 1
 q -0.5 0 0    0 0 0     0.5 0 0
-geometry   ""   ""   "../objects/cylinder_y.tri"   ""   ""   "../objects/cylinder_y.tri"   ""   ""   "../objects/cylinder_y.tri"
+geometry   ""   ""   "../objects/cylinder_y.off"   ""   ""   "../objects/cylinder_y.off"   ""   ""   "../objects/cylinder_y.off"
 geomscale 1 1 0.05   1 1 0.05    1 1 0.05 
 mass       0 0 0.05    0 0 0.05     0 0 0.05
 com    0 0 0   0 0 0   0 0 0     0 0 0   0 0 0   0 0 0    0 0 0   0 0 0   0 0 0

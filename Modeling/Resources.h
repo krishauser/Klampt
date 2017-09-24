@@ -17,7 +17,6 @@ typedef BasicResource<Matrix3> Matrix3Resource;
 typedef BasicResource<Matrix> MatrixResource;
 typedef BasicResource<RigidTransform> RigidTransformResource;
 typedef BasicResource<GeometricPrimitive3D> GeometricPrimitive3DResource;
-typedef BasicResource<Meshing::TriMesh> TriMeshResource;
 typedef BasicResource<Camera::Viewport> ViewportResource;
 
 /** @brief Resource for multiple Config's.
@@ -42,6 +41,19 @@ class ConfigsResource : public CompoundResourceBase
   virtual bool Unpack(vector<ResourcePtr>& subobjects,bool* incomplete=NULL);
 
   vector<Vector> configs;
+};
+
+/** @brief Resource for a TriMesh.  Needs to be overloaded to load
+ * from alternate mesh formats (meshing/IO.h).
+ */
+class TriMeshResource : public BasicResource<Meshing::TriMesh>
+{
+public:
+  virtual bool Load(const std::string& fn);
+  virtual bool Save(const std::string& fn);
+  virtual const char* Type() const { return "TriMesh"; }
+  virtual ResourceBase* Make() { return new TriMeshResource; }
+  virtual ResourceBase* Copy();
 };
 
 /** @brief Resource for a PointCloud3D.

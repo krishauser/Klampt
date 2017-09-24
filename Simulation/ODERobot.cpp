@@ -407,7 +407,7 @@ void ODERobot::Create(int robotIndex,dWorldID worldID,bool useBoundaryLayer)
     case RobotJoint::Floating:
       break;
     default:
-      FatalError("TODO: setup affine and other custom joints\n");
+      FatalError("TODO: setup FloatingPlanar, BallAndSocket, and Custom joints\n");
       break;
     }
   }
@@ -623,11 +623,15 @@ void ODERobot::SetVelocities(const Config& dq)
   Vector temp=dq;
   GetVelocities(temp);
   if(!temp.isEqual(dq,1e-4)) {
-    cout<<"ODERobot::SetVelocities: Error, Get/SetVelocities don't match"<<endl;
-    cout<<"dq = "<<dq<<endl;
-    cout<<"from GetVelocities = "<<temp<<endl;
+    cerr<<"ODERobot::SetVelocities: Error, Get/SetVelocities don't match"<<endl;
+    cerr<<"dq = "<<dq<<endl;
+    cerr<<"from GetVelocities = "<<temp<<endl;
+    cerr<<"Error: "<<temp.distance(dq)<<endl;
+    cerr<<"did you remember to set the robot's configuration?"<<endl;
+    cout<<"Press enter to continue..."<<endl;
+    getchar();
   }
-  Assert(temp.isEqual(dq,1e-4));
+  //Assert(temp.isEqual(dq,1e-4));
 }
 
 void ODERobot::GetVelocities(Config& dq) const
@@ -681,6 +685,36 @@ Real ODERobot::GetLinkVelocity(int i) const
     return dJointGetHingeAngleRate(jointID[i]);
   else
     return dJointGetSliderPositionRate(jointID[i]);
+}
+
+Real ODERobot::GetKineticEnergy() const
+{
+  Real ke = 0;
+  for(size_t i=0;i<robot.links.size();i++)
+    ke += GetKineticEnergy(i);
+  return ke;
+}
+
+Real ODERobot::GetKineticEnergy(int link) const
+{
+  dBodyID bodyid = body(link);
+  if(!bodyid) {
+    bodyid = baseBody(link);
+    if(!bodyid) {
+      //when does this happen?
+      //fprintf(stderr,"ODERobot: baseBody returned NULL\n");
+      return 0;
+    }
+  }
+  Vector3 v,w;
+  CopyVector(v,dBodyGetLinearVel(bodyid));
+  CopyVector(w,dBodyGetAngularVel(bodyid));
+  const dReal* rot = dBodyGetRotation(bodyid);
+  Matrix3 Rbody;
+  CopyMatrix(Rbody,rot);
+  Vector3 wlocal;
+  Rbody.mulTranspose(w,wlocal);
+  return robot.links[link].mass*v.normSquared() + wlocal.dot(robot.links[link].inertia*wlocal);
 }
 
 void ODERobot::AddTorques(const Config& t)
@@ -798,8 +832,16 @@ Real ODERobot::GetDriverValue(int driver) const
     {
       RigidTransform T;
       GetLinkTransform(d.linkIndices[1],T);
-      FatalError("What to do with rotation?");
-      return 0;
+      Vector3 axis = robot.links[d.linkIndices[0]].w;
+      EulerAngleRotation ea;
+      ea.setMatrixZYX(T.R);
+      if(axis.x == 1) return ea.z;
+      else if(axis.y == 1) return ea.y;
+      else if(axis.z == 1) return ea.x;
+      else {
+        fprintf(stderr,"ODERobot: Invalid axis for rotation driver, simulation will likely be unstable!\n");
+        return MatrixAngleAboutAxis(T.R,axis);
+      }
     }
     break;
   case RobotJointDriver::Affine: 
