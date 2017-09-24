@@ -3,6 +3,7 @@ import sys
 sys.path.append("Web/Server")
 import time
 from klampt import *
+from klampt.math import *
 import kviz
 import math
 
@@ -32,7 +33,7 @@ def boilerplate_start():
     ghosts.append(kviz.add_ghost("solution3"))
     ghosts.append(kviz.add_ghost("solution4"))
     kviz.add_sphere("target_point",0,0,0,0.15)
-    kviz.set_color("target_point",1,0,0])
+    kviz.set_color("target_point",1,0,0)
     t = 0
 
 def boilerplate_advance():
@@ -52,13 +53,13 @@ def boilerplate_advance():
             kviz.set_color(robot.link(i),1,0,0,0.25)
         #hide ghosts
         for ghost in ghosts:
-            kviz.set_color(ghost,[0,0,0,0])
+            kviz.set_color(ghost,0,0,0,0)
     else:
         #show/hide ghosts
         for i,ghost in enumerate(ghosts):
             if i+1 >= solutions[0]:
                 print "Hiding ghost",i
-                kviz.set_color(ghost,[0,0,0,0])
+                kviz.set_color(ghost,0,0,0,0)
             else:
                 print "Setting ghost",i,"solution",solutions[1][i+1]
                 kviz.set_color(ghost,1,1.0/(i+2),1)

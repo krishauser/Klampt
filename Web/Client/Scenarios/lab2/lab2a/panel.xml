@@ -1,0 +1,6 @@
+<document>
+    <div class="panel_control">Manual control<input type="checkbox" name="target_manual" /></div>
+    <div class="panel_control">X (-2 -> 2)<input type="range" name="targetX" min="-2" max="2" step=".01"/></div>
+    <div class="panel_control">Y (-2 -> 2)<input type="range" name="targetY" min="-2" max="2" step=".01"/></div>
+    <div class="panel_control">Z (-2 -> 2)<input type="range" name="targetZ" min="-2" max="2" step=".01"/></div>
+</document>

@@ -14,7 +14,8 @@ ghosts = None
 ee_link = 7
 ee_localpos = (0.17,0,0)
 t = 0
-
+auto = True
+target_position = [0,0,0]
 #stub provided
 #def lab2a(robot,q,ee_link,ee_localpos,target):
 #   pass
@@ -55,7 +56,10 @@ def boilerplate_start():
 
 def boilerplate_advance():
     global robot,target,configurations,ghosts,t,ee_link,ee_localpos
+    global target_position, auto
     target = stub.target_motion(t)
+    if not auto:
+        target = target_position
     kviz.update_sphere("target",*target)
 
     #draw the configurations with opacity proportional to end-effector
@@ -81,4 +85,24 @@ def boilerplate_advance():
 
     kviz.update_text("HUD1","Closest: "+str(closest)+" at distance "+str(distances[closest]))
     t += 0.02
+
+def boilerplate_setitem(name,value):
+    global auto,target_position
+    if name == "target_manual":
+        print "Setting target manual control to",value
+        auto = not value
+    elif name == "targetX":
+        if not auto:
+            print "Setting x to",value
+            target_position[0] = float(value)
+    elif name == "targetY":
+        if not auto:
+            print "Setting y to",value
+            target_position[1] = float(value)
+    elif name == "targetZ":
+        if not auto:
+            print "Setting z to",value
+            target_position[2] = float(value)
+
+
 
