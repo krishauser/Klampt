@@ -40,8 +40,7 @@
 #include <string>
 #include <vector>
 #include <map>
-#include <boost/shared_ptr.hpp>
-#include <boost/weak_ptr.hpp>
+#include <memory>
 
 #include "urdf_joint.h"
 #include "urdf_color.h"
@@ -183,10 +182,10 @@ namespace urdf{
   public:
     Visual() { this->clear(); };
     Pose origin;
-    boost::shared_ptr<Geometry> geometry;
+    std::shared_ptr<Geometry> geometry;
     
     std::string material_name;
-    boost::shared_ptr<Material> material;
+    std::shared_ptr<Material> material;
     
     void clear()
     {
@@ -210,7 +209,7 @@ namespace urdf{
   public:
     Collision() { this->clear(); };
     Pose origin;
-    boost::shared_ptr<Geometry> geometry;
+    std::shared_ptr<Geometry> geometry;
     
     void clear()
     {
@@ -236,32 +235,32 @@ namespace urdf{
     std::string name;
     
     /// inertial element
-    boost::shared_ptr<Inertial> inertial;
+    std::shared_ptr<Inertial> inertial;
     
     /// visual element
-    boost::shared_ptr<Visual> visual;
+    std::shared_ptr<Visual> visual;
     
     /// collision element
-    boost::shared_ptr<Collision> collision;
+    std::shared_ptr<Collision> collision;
     
     /// a collection of visual elements, keyed by a string tag called "group"
-    std::map<std::string, boost::shared_ptr<std::vector<boost::shared_ptr<Visual> > > > visual_groups;
+    std::map<std::string, std::shared_ptr<std::vector<std::shared_ptr<Visual> > > > visual_groups;
     
     /// a collection of collision elements, keyed by a string tag called "group"
-    std::map<std::string, boost::shared_ptr<std::vector<boost::shared_ptr<Collision> > > > collision_groups;
+    std::map<std::string, std::shared_ptr<std::vector<std::shared_ptr<Collision> > > > collision_groups;
     
     /// Parent Joint element
     ///   explicitly stating "parent" because we want directional-ness for tree structure
     ///   every link can have one parent
-    boost::shared_ptr<Joint> parent_joint;
+    std::shared_ptr<Joint> parent_joint;
     
-    std::vector<boost::shared_ptr<Joint> > child_joints;
-    std::vector<boost::shared_ptr<Link> > child_links;
+    std::vector<std::shared_ptr<Joint> > child_joints;
+    std::vector<std::shared_ptr<Link> > child_links;
     
-    boost::shared_ptr<Link> getParent() const
+    std::shared_ptr<Link> getParent() const
       {return parent_link_.lock();};
     
-    void setParent(const boost::shared_ptr<Link> &parent)
+    void setParent(const std::shared_ptr<Link> &parent)
     { parent_link_ = parent; }
     
     void clear()
@@ -276,29 +275,29 @@ namespace urdf{
       this->collision_groups.clear();
     };
     
-    boost::shared_ptr<std::vector<boost::shared_ptr<Visual > > > getVisuals(const std::string& group_name) const
+    std::shared_ptr<std::vector<std::shared_ptr<Visual > > > getVisuals(const std::string& group_name) const
       {
 	if (this->visual_groups.find(group_name) != this->visual_groups.end())
 	  return this->visual_groups.at(group_name);
-	return boost::shared_ptr<std::vector<boost::shared_ptr<Visual > > >();
+	return std::shared_ptr<std::vector<std::shared_ptr<Visual > > >();
       }
 
-    boost::shared_ptr<std::vector<boost::shared_ptr<Collision > > > getCollisions(const std::string& group_name) const
+    std::shared_ptr<std::vector<std::shared_ptr<Collision > > > getCollisions(const std::string& group_name) const
       {
 	if (this->collision_groups.find(group_name) != this->collision_groups.end())
 	  return this->collision_groups.at(group_name);
-	return boost::shared_ptr<std::vector<boost::shared_ptr<Collision > > >();
+	return std::shared_ptr<std::vector<std::shared_ptr<Collision > > >();
       }
     
     /*
-      void setParentJoint(boost::shared_ptr<Joint> child);
-      void addChild(boost::shared_ptr<Link> child);
-      void addChildJoint(boost::shared_ptr<Joint> child);
+      void setParentJoint(std::shared_ptr<Joint> child);
+      void addChild(std::shared_ptr<Link> child);
+      void addChildJoint(std::shared_ptr<Joint> child);
       
       
     */
   private:
-    boost::weak_ptr<Link> parent_link_;
+    std::weak_ptr<Link> parent_link_;
     
   };
   

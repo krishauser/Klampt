@@ -40,8 +40,7 @@
 #include <string>
 #include <vector>
 #include <map>
-#include <boost/shared_ptr.hpp>
-#include <boost/weak_ptr.hpp>
+#include <memory>
 
 #include "urdf_pose.h"
 #include "urdf_twist.h"
@@ -140,7 +139,7 @@ public:
     this->joint_states.clear();
   };
 
-  std::vector<boost::shared_ptr<JointState> > joint_states;
+  std::vector<std::shared_ptr<JointState> > joint_states;
 
 };
 

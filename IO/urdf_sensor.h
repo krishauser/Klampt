@@ -64,8 +64,7 @@
 #include <string>
 #include <vector>
 #include <map>
-#include <boost/shared_ptr.hpp>
-#include <boost/weak_ptr.hpp>
+#include <memory>
 #include "urdf_pose.h"
 #include "urdf_joint.h"
 #include "urdf_link.h"
@@ -148,16 +147,16 @@ public:
   Pose origin;
 
   /// sensor
-  boost::shared_ptr<VisualSensor> sensor;
+  std::shared_ptr<VisualSensor> sensor;
 
 
   /// Parent link element name.  A pointer is stored in parent_link_.
   std::string parent_link_name;
 
-  boost::shared_ptr<Link> getParent() const
+  std::shared_ptr<Link> getParent() const
   {return parent_link_.lock();};
 
-  void setParent(boost::shared_ptr<Link> parent)
+  void setParent(std::shared_ptr<Link> parent)
   {  this->parent_link_ = parent; }
   
   void clear()
@@ -169,7 +168,7 @@ public:
   };
 
 private:
-  boost::weak_ptr<Link> parent_link_;
+  std::weak_ptr<Link> parent_link_;
 
 };
 }

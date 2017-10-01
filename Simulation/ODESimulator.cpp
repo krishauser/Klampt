@@ -184,24 +184,17 @@ struct ODEObject
   ODEObject () : gODEInitialized(false) {}
   void Init() {
     if(!gODEInitialized) {
-      #ifndef dSINGLE
+      #ifdef dDOUBLE
       if(dCheckConfiguration("ODE_double_precision")!=1) {
-	FatalError("ODE is compiled with single precision but Klamp't is compiled with double, either reconfigure ODE with --enable-double-precision or recompile Klamp't with dDOUBLE");
+  FatalError("ODE is compiled with single precision but Klamp't is compiled with double, either reconfigure ODE with --enable-double-precision or recompile Klamp't with dDOUBLE");
       }
       #else
       if(dCheckConfiguration("ODE_single_precision")!=1) {
-	FatalError("ODE is compiled with double precision but Klamp't is compiled with single, either reconfigure ODE without --enable-double-precision or recompile Klamp't with dSINGLE");
+  FatalError("ODE is compiled with double precision but Klamp't is compiled with single, either reconfigure ODE without --enable-double-precision or recompile Klamp't with dSINGLE");
       }
       #endif
 
-      LOG4CXX_INFO(GET_LOGGER(ODESimulator),"Initializing ODE...\n");
-      if(dCheckConfiguration("ODE_double_precision")!=1) {
-        LOG4CXX_INFO(GET_LOGGER(ODESimulator),"ODE is compiled in single precision...\n");
-      }
-      else {
-        LOG4CXX_INFO(GET_LOGGER(ODESimulator),"ODE is compiled in double precision...\n");
-      }
-      //KrisLibrary::loggerWait();;
+      printf("Initializing ODE...\n");
       dInitODE();
       InitODECustomGeometry();
       gODEInitialized = true;
