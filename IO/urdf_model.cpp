@@ -36,7 +36,6 @@
 
 #include <log4cxx/logger.h>
 #include <KrisLibrary/Logger.h>
-#include <boost/algorithm/string.hpp>
 #include <vector>
 #include "urdf_parser.h"
 

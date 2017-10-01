@@ -41,7 +41,7 @@
 #include "urdf_link.h"
 #include <fstream>
 #include <sstream>
-#include <boost/lexical_cast.hpp>
+#include <KrisLibrary/utils/AnyValue.h>
 #include <algorithm>
 #include <tinyxml.h>
 
@@ -60,7 +60,7 @@ bool parseMaterial(Material &material, TiXmlElement *config)
 
   if (!config->Attribute("name"))
   {
-    LOG4CXX_DEBUG(KrisLibrary::logger(),  "Material must contain a name attribute \n");
+    LOG4CXX_DEBUG(KrisLibrary::logger(),  "Material must contain a name attribute");
     return false;
   }
   
@@ -89,14 +89,14 @@ bool parseMaterial(Material &material, TiXmlElement *config)
       }
       catch (ParseError &e) {
         material.color.clear();
-	LOG4CXX_INFO(KrisLibrary::logger(),"Material [" << material.name <<"] has malformed color rgba values: "<<e.what() << "\n");
+	LOG4CXX_INFO(KrisLibrary::logger(),"Material [" << material.name <<"] has malformed color rgba values: "<<e.what() );
       }
     }
   }
 
   if (!has_rgb && !has_filename) {
-    if (!has_rgb) LOG4CXX_INFO(KrisLibrary::logger(), "Material ["<<material.name<<"] color has no rgba"<< "\n");
-    if (!has_filename) LOG4CXX_INFO(KrisLibrary::logger(),"Material ["<<material.name<<"] not defined in file"<< "\n");
+    if (!has_rgb) LOG4CXX_INFO(KrisLibrary::logger(), "Material ["<<material.name<<"] color has no rgba");
+    if (!has_filename) LOG4CXX_INFO(KrisLibrary::logger(),"Material ["<<material.name<<"] not defined in file");
     return false;
   }
   return true;
@@ -110,19 +110,13 @@ bool parseSphere(Sphere &s, TiXmlElement *c)
   s.type = Geometry::SPHERE;
   if (!c->Attribute("radius"))
   {
-    LOG4CXX_DEBUG(KrisLibrary::logger(),  "Sphere shape must have a radius attribute \n");
+    LOG4CXX_DEBUG(KrisLibrary::logger(),  "Sphere shape must have a radius attribute");
     return false;
   }
 
-  try
+  if(!LexicalCast(c->Attribute("radius"),s.radius))
   {
-    s.radius = boost::lexical_cast<double>(c->Attribute("radius"));
-  }
-  catch (boost::bad_lexical_cast &e)
-  {
-    std::stringstream stm;
-    stm << "radius [" << c->Attribute("radius") << "] is not a valid float: " << e.what();
-    LOG4CXX_INFO(KrisLibrary::logger(), stm.str().c_str() << "\n");
+    LOG4CXX_INFO(KrisLibrary::logger(), "radius [" << c->Attribute("radius") << "] is not a valid float");
     return false;
   }
   
@@ -136,7 +130,7 @@ bool parseBox(Box &b, TiXmlElement *c)
   b.type = Geometry::BOX;
   if (!c->Attribute("size"))
   {
-    LOG4CXX_DEBUG(KrisLibrary::logger(),  "Box shape has no size attribute \n");
+    LOG4CXX_DEBUG(KrisLibrary::logger(),  "Box shape has no size attribute");
     return false;
   }
   try
@@ -146,7 +140,7 @@ bool parseBox(Box &b, TiXmlElement *c)
   catch (ParseError &e)
   {
     b.dim.clear();
-    LOG4CXX_INFO(KrisLibrary::logger(), e.what() << "\n");
+    LOG4CXX_INFO(KrisLibrary::logger(), e.what() );
     return false;
   }
   return true;
@@ -160,31 +154,19 @@ bool parseCylinder(Cylinder &y, TiXmlElement *c)
   if (!c->Attribute("length") ||
       !c->Attribute("radius"))
   {
-    LOG4CXX_DEBUG(KrisLibrary::logger(),  "Cylinder shape must have both length and radius attributes \n");
+    LOG4CXX_DEBUG(KrisLibrary::logger(),  "Cylinder shape must have both length and radius attributes");
     return false;
   }
 
-  try
+  if(!LexicalCast(c->Attribute("length"),y.length))
   {
-    y.length = boost::lexical_cast<double>(c->Attribute("length"));
-  }
-  catch (boost::bad_lexical_cast &e)
-  {
-    std::stringstream stm;
-    stm << "length [" << c->Attribute("length") << "] is not a valid float";
-    LOG4CXX_DEBUG(KrisLibrary::logger(),  ""<< stm.str().c_str());
+    LOG4CXX_DEBUG(KrisLibrary::logger(),  "length [" << c->Attribute("length") << "] is not a valid float");
     return false;
   }
 
-  try
+  if(!LexicalCast(c->Attribute("radius"),y.radius))
   {
-    y.radius = boost::lexical_cast<double>(c->Attribute("radius"));
-  }
-  catch (boost::bad_lexical_cast &e)
-  {
-    std::stringstream stm;
-    stm << "radius [" << c->Attribute("radius") << "] is not a valid float";
-    LOG4CXX_DEBUG(KrisLibrary::logger(),  ""<< stm.str().c_str());
+    LOG4CXX_DEBUG(KrisLibrary::logger(),  "radius [" << c->Attribute("radius") << "] is not a valid float");
     return false;
   }
   return true;
@@ -197,7 +179,7 @@ bool parseMesh(Mesh &m, TiXmlElement *c)
 
   m.type = Geometry::MESH;
   if (!c->Attribute("filename")) {
-    LOG4CXX_DEBUG(KrisLibrary::logger(),  "Mesh must contain a filename attribute \n");
+    LOG4CXX_DEBUG(KrisLibrary::logger(),  "Mesh must contain a filename attribute");
     return false;
   }
 
@@ -228,7 +210,7 @@ std::shared_ptr<Geometry> parseGeometry(TiXmlElement *g)
   TiXmlElement *shape = g->FirstChildElement();
   if (!shape)
   {
-    LOG4CXX_DEBUG(KrisLibrary::logger(),  "Geometry tag contains no child element. \n");
+    LOG4CXX_DEBUG(KrisLibrary::logger(),  "Geometry tag contains no child element.");
     return geom;
   }
 
@@ -285,51 +267,40 @@ bool parseInertial(Inertial &i, TiXmlElement *config)
   TiXmlElement *mass_xml = config->FirstChildElement("mass");
   if (!mass_xml)
   {
-    LOG4CXX_DEBUG(KrisLibrary::logger(),  "Inertial element must have a mass element \n");
+    LOG4CXX_DEBUG(KrisLibrary::logger(),  "Inertial element must have a mass element");
     return false;
   }
   if (!mass_xml->Attribute("value"))
   {
-    LOG4CXX_DEBUG(KrisLibrary::logger(),  "Inertial: mass element must have value attribute \n");
+    LOG4CXX_DEBUG(KrisLibrary::logger(),  "Inertial: mass element must have value attribute");
     return false;
   }
 
-  try
+  if(!LexicalCast(mass_xml->Attribute("value"),i.mass))
   {
-    i.mass = boost::lexical_cast<double>(mass_xml->Attribute("value"));
-  }
-  catch (boost::bad_lexical_cast &e)
-  {
-    std::stringstream stm;
-    stm << "Inertial: mass [" << mass_xml->Attribute("value")
-        << "] is not a float";
-    LOG4CXX_DEBUG(KrisLibrary::logger(),  ""<< stm.str().c_str());
+    LOG4CXX_DEBUG(KrisLibrary::logger(),  "Inertial: mass [" << mass_xml->Attribute("value") << "] is not a float");
     return false;
   }
 
   TiXmlElement *inertia_xml = config->FirstChildElement("inertia");
   if (!inertia_xml)
   {
-    LOG4CXX_DEBUG(KrisLibrary::logger(),  "Inertial element must have inertia element \n");
+    LOG4CXX_DEBUG(KrisLibrary::logger(),  "Inertial element must have inertia element");
     return false;
   }
   if (!(inertia_xml->Attribute("ixx") && inertia_xml->Attribute("ixy") && inertia_xml->Attribute("ixz") &&
         inertia_xml->Attribute("iyy") && inertia_xml->Attribute("iyz") &&
         inertia_xml->Attribute("izz")))
   {
-    LOG4CXX_DEBUG(KrisLibrary::logger(),  "Inertial: inertia element must have ixx,ixy,ixz,iyy,iyz,izz attributes \n");
+    LOG4CXX_DEBUG(KrisLibrary::logger(),  "Inertial: inertia element must have ixx,ixy,ixz,iyy,iyz,izz attributes");
     return false;
   }
-  try
-  {
-    i.ixx  = boost::lexical_cast<double>(inertia_xml->Attribute("ixx"));
-    i.ixy  = boost::lexical_cast<double>(inertia_xml->Attribute("ixy"));
-    i.ixz  = boost::lexical_cast<double>(inertia_xml->Attribute("ixz"));
-    i.iyy  = boost::lexical_cast<double>(inertia_xml->Attribute("iyy"));
-    i.iyz  = boost::lexical_cast<double>(inertia_xml->Attribute("iyz"));
-    i.izz  = boost::lexical_cast<double>(inertia_xml->Attribute("izz"));
-  }
-  catch (boost::bad_lexical_cast &e)
+  if(!LexicalCast(inertia_xml->Attribute("ixx"),i.ixx) ||
+    !LexicalCast(inertia_xml->Attribute("ixy"),i.ixy) ||
+    !LexicalCast(inertia_xml->Attribute("ixz"),i.ixz) ||
+    !LexicalCast(inertia_xml->Attribute("iyy"),i.iyy) ||
+    !LexicalCast(inertia_xml->Attribute("iyz"),i.iyz) ||
+    !LexicalCast(inertia_xml->Attribute("izz"),i.izz))
   {
     std::stringstream stm;
     stm << "Inertial: one of the inertia elements is not a valid double:"
@@ -339,7 +310,7 @@ bool parseInertial(Inertial &i, TiXmlElement *config)
         << " iyy [" << inertia_xml->Attribute("iyy") << "]"
         << " iyz [" << inertia_xml->Attribute("iyz") << "]"
         << " izz [" << inertia_xml->Attribute("izz") << "]";
-    LOG4CXX_DEBUG(KrisLibrary::logger(),  ""<< stm.str().c_str());
+    LOG4CXX_DEBUG(KrisLibrary::logger(),  ""<< stm.str());
     return false;
   }
   return true;
@@ -367,7 +338,7 @@ bool parseVisual(Visual &vis, TiXmlElement *config)
   if (mat) {
     // get material name
     if (!mat->Attribute("name")) {
-      LOG4CXX_DEBUG(KrisLibrary::logger(),  "Visual material must contain a name attribute \n");
+      LOG4CXX_DEBUG(KrisLibrary::logger(),  "Visual material must contain a name attribute");
       return false;
     }
     vis.material_name = mat->Attribute("name");
@@ -378,7 +349,7 @@ bool parseVisual(Visual &vis, TiXmlElement *config)
     {
       //vis.material.reset();
       //return false;
-      LOG4CXX_DEBUG(KrisLibrary::logger(),  "material has only name, actual material definition may be in the model \n");
+      LOG4CXX_DEBUG(KrisLibrary::logger(),  "material has only name, actual material definition may be in the model");
     }
   }
   
@@ -427,7 +398,7 @@ bool parseLink(Link &link, TiXmlElement* config)
   const char *name_char = config->Attribute("name");
   if (!name_char)
   {
-    LOG4CXX_DEBUG(KrisLibrary::logger(),  "No name given for the link. \n");
+    LOG4CXX_DEBUG(KrisLibrary::logger(),  "No name given for the link.");
     return false;
   }
   link.name = std::string(name_char);
@@ -543,7 +514,7 @@ bool parseLink(Link &link, TiXmlElement* config)
   {
     if (default_collision->size() > 1)
     {
-      LOG4CXX_DEBUG(KrisLibrary::logger(), "'default' collision group has "<< (int)default_collision->size()<< "collisions for Link '"<< link.name.c_str()<<"', taking the first one as default \n");
+      LOG4CXX_DEBUG(KrisLibrary::logger(), "'default' collision group has "<< (int)default_collision->size()<< "collisions for Link '"<< link.name.c_str()<<"', taking the first one as default");
     }
     link.collision = (*default_collision->begin());
   }
@@ -630,7 +601,7 @@ bool exportGeometry(std::shared_ptr<Geometry> &geom, TiXmlElement *xml)
   }
   else
   {
-    LOG4CXX_DEBUG(KrisLibrary::logger(),  "geometry not specified, I'll make one up for you! \n");
+    LOG4CXX_DEBUG(KrisLibrary::logger(),  "geometry not specified, I'll make one up for you!");
     Sphere *s = new Sphere();
     s->radius = 0.03;
     geom.reset(s);

@@ -40,8 +40,6 @@
 #include <string>
 #include <map>
 #include <tinyxml.h>
-#include <boost/function.hpp>
-//#include <urdf_model/model.h>
 #include "urdf_model.h"
 #include "urdf_world.h"
 #include "urdf_color.h"

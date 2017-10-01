@@ -39,7 +39,6 @@
 
 #include <string>
 #include <map>
-#include <boost/function.hpp>
 #include "urdf_link.h"
 #include "urdf_exception.h"
 
