@@ -182,6 +182,24 @@ class TriMesh:
         return triangleNormal(a,b,c)
 
     def load(self,fn):
+        if fn.lower().endswith('tri'):
+            return self.load_tri(fn)
+        elif fn.lower().endswith('off'):
+            return self.load_off(fn)
+        else:
+            print "Unknown file extension on mesh file",fn,"trying .tri loader"
+            return self.load_tri(fn)
+
+    def save(self,fn):
+        if fn.lower().endswith('tri'):
+            return self.save_tri(fn)
+        elif fn.lower().endswith('off'):
+            return self.save_off(fn)
+        else:
+            print "Unknown file extension on mesh file",fn,"trying .tri saver"
+            return self.save_tri(fn)
+
+    def load_tri(self,fn):
         f = open(fn,'r')
         try:
             items = (' '.join(f.readlines())).split();
@@ -199,8 +217,30 @@ class TriMesh:
             raise IOError('Error loading tri mesh from '+fn)
         finally:
             f.close()
-            
-    def save(self,fn):
+
+    def load_off(self,fn):
+        f = open(fn,'r')
+        try:
+            items = (' '.join(f.readlines())).split();
+            if items[0] != 'OFF':
+                raise RuntimeError()
+            nv = int(items[1])
+            nt = int(items[2])
+            ne = int(items[3])
+            vtext = zip(items[4:4+nv*3:3],items[5:5+nv*3:3],items[6:6+nv*3:3])
+            self.points = [(float(i[0]),float(i[1]),float(i[2])) for i in vtext]
+            items = items[4+nv*3:]
+            ttext = zip(items[1:1+nt*4:4],items[2:2+nt*4:4],items[3:3+nt*4:4])
+            self.triangles = [(int(i[0]),int(i[1]),int(i[2])) for i in ttext]
+            items = items[nt*4:]
+            if len(items) != 0:
+                print('Warning,',len(items),'words at end of file')
+        except:
+            raise IOError('Error loading OFF mesh from '+fn)
+        finally:
+            f.close()
+
+    def save_tri(self,fn):
         f = open(fn,'w')
         f.write(str(len(self.points))+'\n')
         for a,b,c in self.points:
@@ -208,4 +248,13 @@ class TriMesh:
         f.write(str(len(self.triangles))+'\n')
         for a,b,c in self.triangles:
             f.write(str(a)+' '+str(b)+' '+str(c)+'\n')
+        f.close()
+
+    def save_off(self,fn):
+        f = open(fn,'w')
+        f.write("OFF\n%d %d 0\n"%(len(self.points),len(self.triangles)))
+        for a,b,c in self.points:
+            f.write('%g %g %g\n'%(a,b,c))
+        for a,b,c in self.triangles:
+            f.write("3 %d %d %d\n"%(a,b,c))
         f.close()
