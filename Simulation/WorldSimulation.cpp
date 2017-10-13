@@ -231,7 +231,7 @@ WorldSimulation::WorldSimulation()
 
 void WorldSimulation::Init(RobotWorld* _world)
 {
-  LOG4CXX_INFO(GET_LOGGER(WorldSimulator),"Creating WorldSimulation\n");
+  LOG4CXX_INFO(GET_LOGGER(WorldSimulator),"Creating WorldSimulation");
   time = 0;
   world = _world;
   odesim.SetGravity(Vector3(0,0,-9.8));
@@ -270,7 +270,7 @@ void WorldSimulation::Init(RobotWorld* _world)
 	  //ODE has problems with joint angles > 2pi
 	  if(robot->qMax(k)-robot->qMin(k) >= TwoPi) {
 	    command.actuators[j].measureAngleAbsolute=false;
-	    LOG4CXX_INFO(GET_LOGGER(WorldSimulator),"WorldSimulation: Link "<<k<<" ("<< robot->LinkName(k).c_str()<<") can make complete turn, using relative encoding\n");
+	    LOG4CXX_INFO(GET_LOGGER(WorldSimulator),"WorldSimulation: Link "<<k<<" ("<< robot->LinkName(k).c_str()<<") can make complete turn, using relative encoding");
     }
 	}
       }
@@ -281,7 +281,7 @@ void WorldSimulation::Init(RobotWorld* _world)
       command.actuators[j].qdes = robot->GetDriverValue(j);
     }
   }
-  LOG4CXX_INFO(GET_LOGGER(WorldSimulator),"Done.\n");
+  LOG4CXX_INFO(GET_LOGGER(WorldSimulator),"Done.");
 }
 
 void WorldSimulation::OnAddModel()
@@ -318,7 +318,7 @@ void WorldSimulation::OnAddModel()
 	  //ODE has problems with joint angles > 2pi
 	  if(robot->qMax(k)-robot->qMin(k) >= TwoPi) {
 	    command.actuators[j].measureAngleAbsolute=false;
-	    LOG4CXX_INFO(GET_LOGGER(WorldSimulator),"WorldSimulation: Link "<<k<<" ("<<robot->LinkName(k).c_str()<<") can make complete turn, using relative encoding\n");
+	    LOG4CXX_INFO(GET_LOGGER(WorldSimulator),"WorldSimulation: Link "<<k<<" ("<<robot->LinkName(k).c_str()<<") can make complete turn, using relative encoding");
     }
 	}
       }
@@ -562,7 +562,7 @@ bool WorldSimulation::ReadState(File& f)
 
   READ_FILE_DEBUG(f,time,"WorldSimulation::ReadState");
   if(!odesim.ReadState(f)) {
-        LOG4CXX_ERROR(GET_LOGGER(WorldSimulator),"WorldSimulation::ReadState: ODE sim failed to read\n");
+        LOG4CXX_ERROR(GET_LOGGER(WorldSimulator),"WorldSimulation::ReadState: ODE sim failed to read");
     return false;
   }
   //controlSimulators will read the robotControllers' states
@@ -894,7 +894,7 @@ int WorldSimulation::ODEToWorldID(const ODEObjectID& odeid) const
   case 2:  //object
     return world->RigidObjectID(odeid.index);
   default: 
-    FatalError("ODE object ID %d, %d not valid\n",odeid.type,odeid.index);
+    FatalError("ODE object ID %d, %d not valid",odeid.type,odeid.index);
     return -1;
   }
 }
@@ -909,7 +909,7 @@ ODEObjectID WorldSimulation::WorldToODEID(int id) const
   if(i>=0) return ODEObjectID(1,i);
   pair<int,int> res=world->IsRobotLink(id);
   if(res.first>=0) return ODEObjectID(1,res.first,res.second);
-  FatalError("World ID %d not valid\n",id);
+  FatalError("World ID %d not valid",id);
   return ODEObjectID();
 }
 
@@ -1002,7 +1002,7 @@ void SpringHook::Step(Real dt)
   CopyMatrix(R,dBodyGetRotation(body));
   wp = R*localpt+t;
   f = k*(target-wp);
-  //LOG4CXX_INFO(GET_LOGGER(WorldSimulator),"Target "<<target<<", world point "<<wp<<", force "<<f<<"\n");
+  //LOG4CXX_INFO(GET_LOGGER(WorldSimulator),"Target "<<target<<", world point "<<wp<<", force "<<f<<"");
   dBodyAddForceAtPos(body,f.x,f.y,f.z,wp.x,wp.y,wp.z);
 }
 
