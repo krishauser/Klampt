@@ -172,8 +172,8 @@ void ThreeJSExport(const RobotWorld& world,AnyCollection& out,ThreeJSCache& cach
   AnyCollection zero;
   zero.resize(3);
   zero[0] = 0;
-  zero[0] = 0;
-  zero[0] = 0;
+  zero[1] = 0;
+  zero[2] = 0;
   light["position"] = above;
   light["target"]["position"] = zero;
   clist[clist.size()]=light;
