@@ -32,6 +32,10 @@ public:
 		else
 			counts[v] += numVotes;
 	}
+	void erase(const Val& v) {
+		if(counts.count(v) != 0)
+			counts.erase(counts.find(v));
+	}
 	size_t numVotes() const {
 		size_t cnt = 0;
 		for(typename map<Val,size_t>::const_iterator i=counts.begin();i!=counts.end();i++)
@@ -40,7 +44,7 @@ public:
 	}
 	///returns the winning value. This will return an empty Val if there are 0 votes.  If there are ties, this
 	///returns the one that has least value.
-	Val value() const {
+	Val winner() const {
 		size_t imax = 0;
 		Val vmax;
 		for(typename map<Val,size_t>::const_iterator i=counts.begin();i!=counts.end();i++) {
@@ -696,7 +700,8 @@ bool Robot::LoadRob(const char* fn) {
 	nvote.add(vMaxVec.size());
 	nvote.add(tMaxVec.size());
 	nvote.add(pMaxVec.size());
-	n = nvote.value();
+	nvote.erase(0);
+	n = nvote.winner();
 	//jointNames.resize(0);
 	//joints.resize(0);
 	bool sizeErr = false;
@@ -805,8 +810,12 @@ bool Robot::LoadRob(const char* fn) {
 		sizeErr = true;
 	}
 
-	if (sizeErr)
+	if (sizeErr) {
+		printf("Votes:\n");
+		for(auto i=nvote.counts.begin();i!=nvote.counts.end();i++)
+			printf("%d: %d\n",i->first,i->second);
 		return false;
+	}
 
 	printf("   Parsing robot file, %d links read...\n", n);
 	if (parents.empty()) {
