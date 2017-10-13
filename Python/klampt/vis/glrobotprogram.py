@@ -71,35 +71,15 @@ class GLSimulationPlugin(GLPluginInterface):
                 self.drawSensors = 'full'
             else:
                 self.drawSensors = False
-        def share_path():
-            from ..io import html
-            if self.htmlSharePath is None:
-                self.htmlSharePath = html.HTMLSharePath(filename="simulation_path.html",name="Klamp't Simulation Path")
-                #20FPS is sufficient...
-                self.htmlSharePath.dt = 0.05
-                self.htmlSharePath.start(self.sim)
-            else:
-                try:
-                    from PyQt4.QtGui import QFileDialog
-                    patterns = "HTML files (*.html)"
-                    fn = QFileDialog.getSaveFileName(None, "Save path HTML file to...", self.htmlSharePath.fn, patterns)
-                    if fn:
-                        self.htmlSharePath.fn = fn
-                    else:
-                        return
-                except ImportError:
-                    pass
-                self.htmlSharePath.end()
         def single_step():
             print "Advancing by 0.01s"
             self.simStep(0.01)
         self.add_action(toggle_simulate,'Toggle simulation','s')
         self.add_action(single_step,'Step simulation',' ')
-        self.add_action(toggle_movie_mode,'Toggle movie mode','m')
+        #self.add_action(toggle_movie_mode,'Toggle movie mode','m')
         self.add_action(self.sim.toggleLogging,'Toggle simulation logging','l')
         self.add_action(toggle_draw_contacts,'Toggle draw contacts','c')
         self.add_action(toggle_draw_sensors,'Toggle draw sensors','v')
-        self.add_action(share_path,'Begin/finalize logging path to HTML','w')
 
     def initialize(self):
         #match window refresh rate
