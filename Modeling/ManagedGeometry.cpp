@@ -110,8 +110,9 @@ bool ManagedGeometry::Load(const std::string& filename)
 	printf("ManagedGeometry: Initialized %s collision data structures in time %gs\n",filename.c_str(),t);
     }
     geometry = new Geometry::AnyCollisionGeometry3D(*prev->geometry);
+    //geometry = prev->geometry;
     appearance = prev->appearance;
-    appearance->geom = geometry;
+    //appearance->geom = geometry;
     manager.cache[filename].geoms.push_back(this);
 #if CACHE_DEBUG
     printf("ManagedGeometry: adding a duplicate of %s to cache.\n",filename.c_str());
@@ -269,35 +270,14 @@ void ManagedGeometry::RemoveFromCache()
   cacheKey.clear();
 }
 
-void ManagedGeometry::SetUnique()
-{
-  if(cacheKey.empty()) return;
-  SetUniqueAppearance();
-  std::map<std::string,GeometryManager::GeometryList>::iterator i=manager.cache.find(cacheKey);
-  if(i==manager.cache.end()) {
-    printf("ManagedGeometry::RemoveFromCache(): warning, item %s\n");
-    cacheKey.clear();
-    return;
-  }
-  if(i->second.geoms.empty()) {
-    printf("ManagedGeometry::RemoveFromCache(): warning, item %s\n");
-    cacheKey.clear();
-    return;
-  }
-  if(i->second.geoms.size() > 1) {
-    //has duplicates, actually have to copy the geometry and remove this
-    geometry = new Geometry::AnyCollisionGeometry3D(*geometry);
-    OnGeometryChange();
-    RemoveFromCache();
-  }
-}
 
 void ManagedGeometry::TransformGeometry(const Math3D::Matrix4& xform)
 {
   if(geometry) {
-    SetUnique();
     geometry->Transform(xform);
     geometry->ClearCollisionData();
+    SetUniqueAppearance();
+    RemoveFromCache();
     OnGeometryChange();
   }
 }
@@ -332,6 +312,13 @@ void ManagedGeometry::SetUniqueAppearance()
 {
   if(appearance && appearance.getRefCount() > 1) {
     appearance = new GLDraw::GeometryAppearance(*appearance);
+    //detach references to this' geometry
+    std::map<std::string,GeometryManager::GeometryList>::iterator i=manager.cache.find(cacheKey);
+    Assert(i != manager.cache.end());
+    for(size_t j=0;j<i->second.geoms.size();j++) {
+      if(i->second.geoms[j]->appearance->geom == geometry)
+        i->second.geoms[j]->appearance->Set(*i->second.geoms[j]->geometry);
+    }
   }
 }
 

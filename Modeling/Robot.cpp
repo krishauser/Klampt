@@ -18,7 +18,41 @@
 #include "IO/urdf_parser.h"
 #include <boost/shared_ptr.hpp>
 #include "IO/URDFConverter.h"
+#include <map>
 //using namespace urdf;
+
+template <class Val>
+class Voting
+{
+public:
+	Voting() {}
+	void add(const Val& v,int numVotes=1) {
+		if(counts.count(v) == 0)
+			counts[v] = numVotes;
+		else
+			counts[v] += numVotes;
+	}
+	size_t numVotes() const {
+		size_t cnt = 0;
+		for(typename map<Val,size_t>::const_iterator i=counts.begin();i!=counts.end();i++)
+			cnt += i->second;
+		return cnt;
+	}
+	///returns the winning value. This will return an empty Val if there are 0 votes.  If there are ties, this
+	///returns the one that has least value.
+	Val value() const {
+		size_t imax = 0;
+		Val vmax;
+		for(typename map<Val,size_t>::const_iterator i=counts.begin();i!=counts.end();i++) {
+			if(i->second > imax) {
+				imax = i->second;
+				vmax = i->first;
+			}
+		}
+		return vmax;
+	}
+	map<Val,size_t> counts;
+};
 
 Real Radius(const Geometry::AnyGeometry3D& geom)
 {
@@ -642,25 +676,27 @@ bool Robot::LoadRob(const char* fn) {
 	nd = std::max(driverNames.size(), nd);
 	nd = std::max(drivers.size(), nd);
 	nj = std::max(joints.size(), nj);
-	n = std::max(parents.size(), n);
-	n = std::max(jointType.size(), n);
-	n = std::max(linkNames.size(), n);
-	n = std::max(massVec.size(), n);
-	n = std::max(comVec.size(), n);
-	n = std::max(inertiaVec.size(), n);
-	n = std::max(a.size(), n);
-	n = std::max(d.size(), n);
-	n = std::max(alpha.size(), n);
-	n = std::max(theta.size(), n);
-	n = std::max(TParent.size(), n);
-	n = std::max(axes.size(), n);
-	n = std::max(qVec.size(), n);
-	n = std::max(qMinVec.size(), n);
-	n = std::max(qMaxVec.size(), n);
-	n = std::max(vMinVec.size(), n);
-	n = std::max(vMaxVec.size(), n);
-	n = std::max(tMaxVec.size(), n);
-	n = std::max(pMaxVec.size(), n);
+	Voting<size_t> nvote;
+	nvote.add(parents.size());
+	nvote.add(jointType.size());
+	nvote.add(linkNames.size());
+	nvote.add(massVec.size());
+	nvote.add(comVec.size());
+	nvote.add(inertiaVec.size());
+	nvote.add(a.size());
+	nvote.add(d.size());
+	nvote.add(alpha.size());
+	nvote.add(theta.size());
+	nvote.add(TParent.size());
+	nvote.add(axes.size());
+	nvote.add(qVec.size());
+	nvote.add(qMinVec.size());
+	nvote.add(qMaxVec.size());
+	nvote.add(vMinVec.size());
+	nvote.add(vMaxVec.size());
+	nvote.add(tMaxVec.size());
+	nvote.add(pMaxVec.size());
+	n = nvote.value();
 	//jointNames.resize(0);
 	//joints.resize(0);
 	bool sizeErr = false;
@@ -943,6 +979,7 @@ bool Robot::LoadRob(const char* fn) {
 	    continue;
 	  }
 	  geomManagers[geomIndex].TransformGeometry(geomTransform[i]);
+	  geometry[geomIndex] = geomManagers[geomIndex];
 	}
 
 	if (collision.empty()) {
@@ -2018,7 +2055,7 @@ void Robot::SetJointByTransform(int j, int link, const RigidTransform& Tl) {
 
 	switch (joints[j].type) {
 	case RobotJoint::Weld:
-		FatalError("Can't set a weld joint\n");
+		FatalError("Can't set a weld joint");
 		break;
 	case RobotJoint::Normal:
 	case RobotJoint::Spin:
@@ -2100,7 +2137,7 @@ void Robot::SetJointByOrientation(int j, int link, const Matrix3& Rl) {
 
 	switch (joints[j].type) {
 	case RobotJoint::Weld:
-		FatalError("Can't set a weld joint\n");
+		FatalError("Can't set a weld joint");
 		break;
 	case RobotJoint::Normal:
 	case RobotJoint::Spin:
@@ -2251,7 +2288,7 @@ void Robot::SetJointVelocityByMoment(int j, int link, const Vector3& w,
 		const Vector3& v) {
 	switch (joints[j].type) {
 	case RobotJoint::Weld:
-		FatalError("Can't set a weld joint\n");
+		FatalError("Can't set a weld joint");
 		break;
 	case RobotJoint::Normal:
 	case RobotJoint::Spin:
@@ -2920,6 +2957,7 @@ bool Robot::LoadURDF(const char* fn)
 		    Matrix4 ident; ident.setIdentity();
 		    if(!linkNode->geomScale.isEqual(ident)) {
 		      this->geomManagers[link_index].TransformGeometry(linkNode->geomScale);
+		      this->geometry[link_index] = this->geomManagers[link_index];
 		    }
 		  }
 		}
