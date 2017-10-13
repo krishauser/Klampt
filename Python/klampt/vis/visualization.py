@@ -2616,7 +2616,7 @@ if _PyQtAvailable:
             w = self.getWorld()
             if w is None:
                 print "Program does not appear to have a world"
-            fn = QFileDialog.getOpenFileName(caption="World element",filter="Robot file (*.rob,*.urdf);;Object file (*.obj);;Terrain file (*.env,*.off,*.obj,*.stl);;All files (*.*)")
+            fn = QFileDialog.getOpenFileName(caption="World element",filter="Robot file (*.rob *.urdf);;Object file (*.obj);;Terrain file (*.env *.off *.obj *.stl *.wrl);;All files (*.*)")
             if fn != None:
                 w.loadElement(str(fn))
                 for p in self.glwidget.program.plugins:
@@ -2631,7 +2631,14 @@ if _PyQtAvailable:
                     self.movie_time_last = sim.getTime()
             else:
                 self.movie_timer.stop()
-                (cmd,ok) = QtGui.QInputDialog.getText(self,"Process with ffmpeg?","Command", text='ffmpeg -y -f image2 -i image%04d.png klampt_record.mp4')
+                dlg =  QtGui.QInputDialog(self)                 
+                dlg.setInputMode( QtGui.QInputDialog.TextInput) 
+                dlg.setLabelText("Command")
+                dlg.setTextValue('ffmpeg -y -f image2 -i image%04d.png klampt_record.mp4')
+                dlg.resize(500,100)                             
+                ok = dlg.exec_()                                
+                cmd = dlg.textValue()
+                #(cmd,ok) = QtGui.QInputDialog.getText(self,"Process with ffmpeg?","Command", text='ffmpeg -y -f image2 -i image%04d.png klampt_record.mp4')
                 if ok:
                     import os,glob
                     os.system(str(cmd))
