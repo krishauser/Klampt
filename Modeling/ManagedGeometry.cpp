@@ -318,12 +318,14 @@ void ManagedGeometry::SetUniqueAppearance()
 {
   if(appearance && appearance.getRefCount() > 1) {
     appearance = new GLDraw::GeometryAppearance(*appearance);
-    //detach references to this' geometry
-    std::map<std::string,GeometryManager::GeometryList>::iterator i=manager.cache.find(cacheKey);
-    Assert(i != manager.cache.end());
-    for(size_t j=0;j<i->second.geoms.size();j++) {
-      if(i->second.geoms[j]->appearance->geom == geometry)
-        i->second.geoms[j]->appearance->Set(*i->second.geoms[j]->geometry);
+    if(!cacheKey.empty()) {
+      //detach references to this' geometry
+      std::map<std::string,GeometryManager::GeometryList>::iterator i=manager.cache.find(cacheKey);
+      Assert(i != manager.cache.end());
+      for(size_t j=0;j<i->second.geoms.size();j++) {
+        if(i->second.geoms[j]->appearance->geom == geometry)
+          i->second.geoms[j]->appearance->Set(*i->second.geoms[j]->geometry);
+      }
     }
   }
 }
