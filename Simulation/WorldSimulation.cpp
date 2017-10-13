@@ -891,7 +891,7 @@ int WorldSimulation::ODEToWorldID(const ODEObjectID& odeid) const
   case 2:  //object
     return world->RigidObjectID(odeid.index);
   default: 
-    FatalError("ODE object ID %d, %d not valid\n",odeid.type,odeid.index);
+    FatalError("ODE object ID %d, %d not valid",odeid.type,odeid.index);
     return -1;
   }
 }
@@ -906,7 +906,7 @@ ODEObjectID WorldSimulation::WorldToODEID(int id) const
   if(i>=0) return ODEObjectID(1,i);
   pair<int,int> res=world->IsRobotLink(id);
   if(res.first>=0) return ODEObjectID(1,res.first,res.second);
-  FatalError("World ID %d not valid\n",id);
+  FatalError("World ID %d not valid",id);
   return ODEObjectID();
 }
 
