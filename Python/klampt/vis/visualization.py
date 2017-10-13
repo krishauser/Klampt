@@ -2640,6 +2640,7 @@ if _PyQtAvailable:
                 self.html_start_time = time.time()
                 self.html_saver = html.HTMLSharePath(fn)
                 self.html_saver.dt = 0.033;
+                self.html_saver.
                 self.html_saver.start(world)
                 self.html_timer.start(33)
             else:
@@ -2649,7 +2650,7 @@ if _PyQtAvailable:
             t = None
             if self.html_saver.sim == None:
                 #t = time.time()-self.html_start_time
-                t = self.html_saver.last_t + 0.033
+                t = self.html_saver.last_t + 0.034
             self.html_saver.animate(t)
         def closeEvent(self,event):
             global _globalLock
@@ -2658,9 +2659,10 @@ if _PyQtAvailable:
             self.windowinfo.mode = 'hidden'
             self.windowinfo.glwindow.idlesleep()
             self.windowinfo.glwindow.setParent(None)
-            self.saving_movie = False
-            self.saving_html = False
-            self.movie_timer.stop()
+            if self.saving_movie:
+                self.toggle_movie_mode()
+            if self.saving_html:
+                self.toggle_html_mode()
             print "#########################################"
             print "klampt.vis: Window close"
             print "#########################################"
