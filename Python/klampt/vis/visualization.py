@@ -1657,7 +1657,10 @@ class VisAppearance:
                     self.drawText(name,item)
             elif itypes == 'RigidTransform':
                 def drawRaw():
-                    gldraw.xform_widget(se3.identity(),self.attributes.get("length",0.1),self.attributes.get("width",0.01))
+                    fancy = self.attributes.get("fancy",False)
+                    if fancy: glEnable(GL_LIGHTING)
+                    else: glDisable(GL_LIGHTING)
+                    gldraw.xform_widget(se3.identity(),self.attributes.get("length",0.1),self.attributes.get("width",0.01),fancy=fancy)
                 self.displayCache[0].draw(drawRaw,transform=item)
                 if name != None:
                     self.drawText(name,item[1])
@@ -1945,7 +1948,23 @@ class VisAppearance:
                 self.item.setConfig(self.item.fromfull(self.editor.get()))
             elif isinstance(self.item,RigidObjectModel):
                 self.item.setTransform(*self.editor.get())
-            elif isinstance(self.item,(list,tuple)):
+            elif isinstance(self.item,(tuple,list)):
+                def setList(a,b):
+                    if isinstance(a,(list,tuple)) and isinstance(b,(list,tuple)):
+                        if len(a) == len(b):
+                            for i in xrange(len(a)):
+                                if not setList(a[i],b[i]):
+                                    if isinstance(a,list):
+                                        a[i] = b[i]
+                                    else:
+                                        return False
+                            return True
+                    return False
+                v = self.editor.get()
+                if not setList(self.item,v):
+                    self.item = v
+            elif isinstance(self.item,tuple):
+                print "Edited a tuple... maybe a point or an xform? can't actually edit"
                 self.item = self.editor.get()
             else:
                 raise RuntimeError("Uh... unsupported type with an editor?")
