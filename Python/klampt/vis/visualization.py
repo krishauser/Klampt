@@ -2535,6 +2535,14 @@ if _PyQtAvailable:
             fileMenu = mainMenu.addMenu('&Actions')
             self.glwidget.actionMenu = fileMenu
             visMenu = mainMenu.addMenu('&Visualization')
+            a = QtGui.QAction('Save world...', self)
+            a.setStatusTip('Saves world to xml file')
+            a.triggered.connect(self.save_world)
+            visMenu.addAction(a)
+            a = QtGui.QAction('Add to world...', self)
+            a.setStatusTip('Adds an item to the world')
+            a.triggered.connect(self.add_to_world)
+            visMenu.addAction(a)
             a = QtGui.QAction('Save camera...', self)
             a.setStatusTip('Saves camera settings')
             a.triggered.connect(self.save_camera)
@@ -2578,7 +2586,7 @@ if _PyQtAvailable:
             fn = QFileDialog.getSaveFileName(caption="Viewport file (*.txt)",filter="Viewport file (*.txt);;All files (*.*)")
             if fn is None:
                 return
-            f = open(fn,'w')
+            f = open(str(fn),'w')
             f.write("VIEWPORT\n")
             f.write("FRAME %d %d %d %d\n"%(v.x,v.y,v.w,v.h))
             f.write("PERSPECTIVE 1\n")
@@ -2596,6 +2604,24 @@ if _PyQtAvailable:
             f.close()
         def load_camera(self):
             print "TODO"
+        def save_world(self):
+            w = self.getWorld()
+            if w is None:
+                print "Program does not appear to have a world"
+            fn = QFileDialog.getSaveFileName(caption="World file (elements will be saved to folder)",filter="World file (*.xml);;All files (*.*)")
+            if fn != None:
+                w.saveFile(str(fn))
+                print "Saved to",fn,"and elements were saved to a directory of the same name."
+        def add_to_world(self):
+            w = self.getWorld()
+            if w is None:
+                print "Program does not appear to have a world"
+            fn = QFileDialog.getOpenFileName(caption="World element",filter="Robot file (*.rob,*.urdf);;Object file (*.obj);;Terrain file (*.env,*.off,*.obj,*.stl);;All files (*.*)")
+            if fn != None:
+                w.loadElement(str(fn))
+                for p in self.glwidget.program.plugins:
+                    if isinstance(p,VisualizationPlugin):
+                        p.getItem('world').setItem(w)
         def toggle_movie_mode(self):
             self.saving_movie = not self.saving_movie
             if self.saving_movie:
@@ -2640,7 +2666,6 @@ if _PyQtAvailable:
                 self.html_start_time = time.time()
                 self.html_saver = html.HTMLSharePath(fn)
                 self.html_saver.dt = 0.033;
-                self.html_saver.
                 self.html_saver.start(world)
                 self.html_timer.start(33)
             else:
