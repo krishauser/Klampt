@@ -522,9 +522,9 @@ class SelectionEditor(VisualEditorBase):
     def selectAll(self):
         if self.robot == None:
             #select all ids in the world
-            pass
+            self.value = range(self.world.numIDs())
         else:
-            self.value = [l for l in range(self.robot.numLinks())]
+            self.value = range(self.robot.numLinks())
         self.selectionListChangeFlag = True
         for i in self.value:
             self.selectionList.setCurrentItem(self.selectionList.item(i),QItemSelectionModel.Select)
