@@ -83,7 +83,7 @@ class orbit:
     target point, distance, and orientation.
 
     Attributes:        
-        - tgt: target point
+        - tgt: target point (in world coordinates)
         - rot: euler angle rotation (roll-pitch-yaw entries relative to default view with fwd = +y, right = +x, up = +z)
         - dist: target distance
         - ori: orientation matrix type (see :func:`orientation_matrix`)
@@ -116,7 +116,7 @@ class orbit:
         If ori is provided, it is an orientation list (e.g., ['x','y','z'])
         that tells the function how to interpret the columns of R in terms of
         the right, down, and fwd axes of the camera.  Its default value is 
-        ['x','y','z'].
+        None.
         """
         import math
         #Rdes*oR*[right,down,fwd] = R_euler(rot)*o*[right,down,fwd]
@@ -127,7 +127,7 @@ class orbit:
         #Ry = so3.rotation([0,1,0],self.rot[0])
         #Rx = so3.rotation([1,0,0],self.rot[1])
         #Rz = so3.rotation([0,0,1],self.rot[2])
-        #set self.rot to fulfill constraint R = Ry*Rx*Rz
+        #set self.rot to fulfill constraint R = Rz*Rx*Ry
         #     [cz -sz 0][1  0   0][cy  0 sy]   [cz -szcx  szsx][cy  0 sy]
         # R = [sz  cz 0][0 cx -sx][0   1  0] = [sz  czcx -czsx][0   1 0 ]
         #     [0   0  1][0 sx  cx][-sy 0 cy]   [0    sx     cx][-sy 0 cy]
@@ -135,7 +135,8 @@ class orbit:
         #  = [szcy+czsxsy    czcx  szsy-czsxcy ]
         #    [-cxsy           sx   cxcy        ]
         m = so3.matrix(R)
-        cx = m[0][1]**2 + m[1][1]**2
+        cx = math.sqrt(m[0][1]**2 + m[1][1]**2)
+        #assume cx is positive (pitch in range [-pi/2,pi/2])
         sx = m[2][1]
         self.rot[1] = math.atan2(sx,cx)
         if abs(cx) > 1e-5:
@@ -155,7 +156,13 @@ class orbit:
     def set_matrix(self,T):
         """Restores from a matrix retrieved using matrix()"""
         R,t = T
-        self.set_orientation(so3.inv(R),['x','y','z'])
+        #self.rot fulfills constraint R = Rz*Rx*Ry*ori
+        o = orientation_matrix(*self.ori)
+        R2 = so3.mul(R,so3.inv(o))
+        #      [czcy-szsxsy   -szcx  czsy+szsxcy ]
+        #R2  = [szcy+czsxsy    czcx  szsy-czsxcy ]
+        #      [-cxsy           sx   cxcy        ]
+        self.set_orientation(R2,None)
         #tgt + R*[0,0,dist] = t
         self.tgt = vectorops.sub(t,so3.apply(R,[0,0,self.dist]))
         

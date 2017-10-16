@@ -2590,7 +2590,7 @@ if _PyQtAvailable:
                 print "Program does not appear to have a camera"
                 return
             v = self.glwidget.program.get_view()
-            fn = QFileDialog.getSaveFileName(caption="Viewport file (*.txt)",filter="Viewport file (*.txt);;All files (*.*)")
+            fn = QFileDialog.getSaveFileName(caption="Viewport file (*.txt)",filter="Viewport file (*.txt);;All files (*.*)",options=QFileDialog.DontUseNativeDialog)
             if fn is None:
                 return
             f = open(str(fn),'w')
@@ -2611,7 +2611,7 @@ if _PyQtAvailable:
             f.close()
         def load_camera(self):
             v = self.glwidget.program.get_view()
-            fn = QFileDialog.getOpenFileName(caption="Viewport file (*.txt)",filter="Viewport file (*.txt);;All files (*.*)")
+            fn = QFileDialog.getOpenFileName(caption="Viewport file (*.txt)",filter="Viewport file (*.txt);;All files (*.*)",options=QFileDialog.DontUseNativeDialog)
             if fn is None:
                 return
             f = open(str(fn),'r')
