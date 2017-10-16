@@ -49,6 +49,9 @@ class free:
         R = so3.mul(R,o);
         raise (R,self.pos)
 
+    def set_matrix(self,T):
+        raise NotImplementedError("Can't set free camera matrix yet")
+
 class target:
     """A look-at camera that is controlled using a translation,
     target point, and up vector
@@ -71,6 +74,9 @@ class target:
         """Returns the camera transform.  Applying this transform converts points in OpenGL camera
         coordinates (x right, y up, -z forward), to points in world coordinates."""
         raise NotImplementedError()
+
+    def set_matrix(self,T):
+        raise NotImplementedError("Can't set target camera matrix yet")
 
 class orbit:
     """An orbit camera that is controlled using a rotation, 
@@ -146,5 +152,10 @@ class orbit:
             sz = m[1][0]
             self.rot[2] = math.atan2(sz,cz)
 
-
+    def set_matrix(self,T):
+        """Restores from a matrix retrieved using matrix()"""
+        R,t = T
+        self.set_orientation(so3.inv(R),['x','y','z'])
+        #tgt + R*[0,0,dist] = t
+        self.tgt = vectorops.sub(t,so3.apply(R,[0,0,self.dist]))
         

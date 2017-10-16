@@ -23,14 +23,14 @@ Due to weird OpenGL and Qt behavior in multi-threaded programs, you should
 only run visualizations using the methods in this module.
 
 There are two primary ways of setting up a visualization:
-- The first is by adding items to the visualization world and customizing them
-  using the vis.X routines that mirror the methods in VisualizationPlugin (like
-  add, setColor, animate, etc).  See Python/demos/vistemplate.py for more information.
-- The second is by creating a subclass of GLPluginInterface and doing
-  all the necessary drawing / interaction yourself inside its hooks.  In the
-  latter case, you will call vis.setPlugin(plugin) to override the default
-  visualization behavior before creating your window. See Python/demos/visplugin.py
-  for more information.
+  - The first is by adding items to the visualization world and customizing them
+    using the vis.X routines that mirror the methods in VisualizationPlugin (like
+    add, setColor, animate, etc).  See Python/demos/vistemplate.py for more information.
+  - The second is by creating a subclass of GLPluginInterface and doing
+    all the necessary drawing / interaction yourself inside its hooks.  In the
+    latter case, you will call vis.setPlugin(plugin) to override the default
+    visualization behavior before creating your window. See Python/demos/visplugin.py
+    for more information.
 
 A third way of setting up a visualization is a hybrid of the two, where you can
 add functionality on top of default the visualization world. You can either use
@@ -40,82 +40,82 @@ override the default functionality.
 
 Instructions:
 
-- To add things to the default visualization:
-  Call the VisualizationPlugin aliases (add, animate, setColor, etc)
+  - To add things to the default visualization:
+    Call the VisualizationPlugin aliases (add, animate, setColor, etc)
 
-- To show the visualization and quit when the user closes the window:
-  vis.run()
+  - To show the visualization and quit when the user closes the window:
+    vis.run()
 
-- To show the visualization and return when the user closes the window:
-  vis.dialog()
-  ... do stuff afterwards ... 
-  vis.kill()
+  - To show the visualization and return when the user closes the window:
+    vis.dialog()
+    ... do stuff afterwards ... 
+    vis.kill()
 
-- To show the visualization and be able to run a script alongside it
-  until the user closes the window:
-  vis.show()
-  while vis.shown():
-      vis.lock()
-      ... do stuff ...
-      [to exit the loop call show(False)]
-      vis.unlock()
-      time.sleep(dt)
-  ... do stuff afterwards ...
-  vis.kill()
+  - To show the visualization and be able to run a script alongside it
+    until the user closes the window:
+    vis.show()
+    while vis.shown():
+        vis.lock()
+        ... do stuff ...
+        [to exit the loop call show(False)]
+        vis.unlock()
+        time.sleep(dt)
+    ... do stuff afterwards ...
+    vis.kill()
 
-- To run a window with a custom plugin (GLPluginInterface) and terminate on
-  closure: 
-  vis.run(plugin)
+  - To run a window with a custom plugin (GLPluginInterface) and terminate on
+    closure: 
+    vis.run(plugin)
+  
+  - To show a dialog or parallel window
+    vis.setPlugin(plugin)
+    ... then call  
+    vis.dialog()
+    ... or
+    vis.show()
+    ... do stuff afterwards ... 
+    vis.kill()
 
-- To show a dialog or parallel window
-  vis.setPlugin(plugin)
-  ... then call  
-  vis.dialog()
-  ... or
-  vis.show()
-  ... do stuff afterwards ... 
-  vis.kill()
+  - To add a GLPluginInterface that just customizes a few things on top of
+    the default visualization:
+    vis.pushPlugin(plugin)
+    vis.dialog()
+    vis.popPlugin()
 
-- To add a GLPluginInterface that just customizes a few things on top of
-  the default visualization:
-  vis.pushPlugin(plugin)
-  vis.dialog()
-  vis.popPlugin()
+  - To run plugins side-by-side in the same window:
+    vis.setPlugin(plugin1)
+    vis.addPlugin(plugin2)  #this creates a new split-screen
+    vis.dialog()
+    ... or
+    vis.show()
+    ... do stuff afterwards ... 
+    vis.kill()
 
-- To run plugins side-by-side in the same window:
-  vis.setPlugin(plugin1)
-  vis.addPlugin(plugin2)  #this creates a new split-screen
-  vis.dialog()
-  ... or
-  vis.show()
-  ... do stuff afterwards ... 
-  vis.kill()
+  - To run a custom dialog in a QtWindow
+    vis.setPlugin([desired plugin or None for visualization])
+    vis.setParent(qt_window)
+    vis.dialog()
+    ... or 
+    vis.show()
+    ... do stuff afterwards ... 
+    vis.kill()
 
-- To run a custom dialog in a QtWindow
-  vis.setPlugin([desired plugin or None for visualization])
-  vis.setParent(qt_window)
-  vis.dialog()
-  ... or 
-  vis.show()
-  ... do stuff afterwards ... 
-  vis.kill()
+  - To launch a second window after the first is closed: just call whatever you
+    want again. Note: if show was previously called with a plugin and you wish to
+    revert to the default visualization, you should call setPlugin(None) first to 
+    restore the default.
 
-- To launch a second window after the first is closed: just call whatever you
-  want again. Note: if show was previously called with a plugin and you wish to
-  revert to the default visualization, you should call setPlugin(None) first to 
-  restore the default.
-
-- To create a separate window with a given plugin:
-  w1 = vis.createWindow()  #w1=0
-  show()
-  w2 = vis.createWindow()  #w2=1
-  vis.setPlugin(plugin)
-  vis.dialog()
-  #to restore commands to the original window
-  vis.setWindow(w1)
-  while vis.shown():
-      ...
-  vis.kill()
+  - To create a separate window with a given plugin:
+    w1 = vis.createWindow()  #w1=0
+    show()
+    w2 = vis.createWindow()  #w2=1
+    vis.setPlugin(plugin)
+    vis.dialog()
+    #to restore commands to the original window
+    vis.setWindow(w1)
+    while vis.shown():
+        ...
+    vis.kill()
 
 Note: when changing the data shown by the window (e.g., modifying the
 configurations of robots in a WorldModel) you must call vis.lock() before
@@ -182,8 +182,15 @@ def hideLabel(name,hidden=True): hides/unhides an item's text label.
 def setAppearance(name,appearance): changes the Appearance of an item.
 def revertAppearance(name): restores the Appearance of an item
 def setAttribute(name,attribute,value): sets an attribute of the appearance
-    of an item.  Typical attributes are 'color', 'size', 'length', 'width'...
-    TODO: document all accepted attributes.
+    of an item.  Accepted attributes are:
+    - 'color': the item's color (r,g,b) or (r,g,b,a)
+    - 'size': a plot or text's size
+    - 'length': the length of axes in RigidTransform
+    - 'width': the width of axes and trajectory curves
+    - 'duration': the duration of a plot
+    - 'endeffectors': for a robot Trajectory, the list of end effectors to plot (default the last link).
+    - 'maxConfigs': for a Configs resource, the maximum number of drawn configurations (default 10)
+    - 'fancy': for RigidTransform objects, whether the axes are drawn with boxes or lines (default False)
 def setColor(name,r,g,b,a=1.0): changes the color of an item.
 def setDrawFunc(name,func): sets a custom OpenGL drawing function for an item.
     func is a one-argument function that takes the item data as input.  Set
@@ -2595,7 +2602,7 @@ if _PyQtAvailable:
             scale = 1.0/(2.0*math.tan(rfov*0.5/aspect)*aspect)
             f.write("SCALE %f\n"%(scale,))
             f.write("NEARPLANE %f\n"%(v.clippingplanes[0],))
-            f.write("FARPLANE %f\n"%(v.clippingplanes[0],))
+            f.write("FARPLANE %f\n"%(v.clippingplanes[1],))
             f.write("CAMTRANSFORM ")
             mat = se3.homogeneous(v.camera.matrix())
             f.write(' '.join(str(v) for v in sum(mat,[])))
@@ -2603,7 +2610,57 @@ if _PyQtAvailable:
             f.write("ORBITDIST %f\n"%(v.camera.dist,))
             f.close()
         def load_camera(self):
-            print "TODO"
+            v = self.glwidget.program.get_view()
+            fn = QFileDialog.getOpenFileName(caption="Viewport file (*.txt)",filter="Viewport file (*.txt);;All files (*.*)")
+            if fn is None:
+                return
+            f = open(str(fn),'r')
+            read_viewport = False
+            mat = None
+            for line in f:
+                entries = line.split()
+                if len(entries) == 0:
+                    continue
+                kw = entries[0]
+                args = entries[1:]
+                if kw == 'VIEWPORT':
+                    read_viewport = True
+                    continue
+                else:
+                    if not read_viewport:
+                        print "File does not appear to be a valid viewport file, must start with VIEWPORT"
+                        break
+                if kw == 'FRAME':
+                    v.x,v.y,v.w,v.h = [int(x) for x in args]
+                elif kw == 'PERSPECTIVE':
+                    if args[0] != '1':
+                        print "WARNING: CANNOT CHANGE TO ORTHO MODE IN PYTHON VISUALIZATION"
+                elif kw == 'SCALE':
+                    scale = float(args[0])
+                    aspect = float(v.w)/float(v.h)
+                    #2.0*math.tan(rfov*0.5/aspect)*aspect = 1.0/scale
+                    #math.tan(rfov*0.5/aspect) = 0.5/(scale*aspect)
+                    #rfov*0.5/aspect = math.atan(0.5/(scale*aspect))
+                    #rfov = 2*aspect*math.atan(0.5/(scale*aspect))
+                    rfov = math.atan(0.5/(scale*aspect))*2*aspect
+                    v.fov = math.degrees(rfov)
+                elif kw == 'NEARPLANE':
+                    v.clippingplanes = (float(args[0]),v.clippingplanes[1])
+                elif kw == 'FARPLANE':
+                    v.clippingplanes = (v.clippingplanes[0],float(args[0]))
+                elif kw == 'CAMTRANSFORM':
+                    mat = [args[0:4],args[4:8],args[8:12],args[12:16]]
+                    for i,row in enumerate(mat):
+                        mat[i] = [float(x) for x in row]
+                elif kw == 'ORBITDIST':
+                    v.camera.dist = float(args[0])
+                else:
+                    raise RuntimeError("Invalid viewport keyword "+kw)
+            if mat != None:
+                v.camera.set_matrix(se3.from_homogeneous(mat))
+            self.glwidget.program.set_view(v)
+            f.close()
+
         def save_world(self):
             w = self.getWorld()
             if w is None:
