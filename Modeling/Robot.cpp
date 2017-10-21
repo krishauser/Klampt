@@ -812,7 +812,7 @@ bool Robot::LoadRob(const char* fn) {
 
 	if (sizeErr) {
 		printf("Votes:\n");
-		for(auto i=nvote.counts.begin();i!=nvote.counts.end();i++)
+		for(map<size_t,size_t>::const_iterator i=nvote.counts.begin();i!=nvote.counts.end();i++)
 			printf("%d: %d\n",i->first,i->second);
 		return false;
 	}
