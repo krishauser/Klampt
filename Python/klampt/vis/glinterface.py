@@ -70,4 +70,6 @@ class GLPluginInterface:
         return self.view.click_ray(x,y)
     def viewport(self):
         """Returns the Viewport instance associated with the current GL view."""
-        return self.view.toViewport()
+        if not self.view:
+            self.view = self.window.view()
+        return self.view
