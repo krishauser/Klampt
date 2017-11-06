@@ -2,6 +2,7 @@
 import time
 import sys
 from klampt import *
+from klampt.math import *
 sys.path.append("Web/Server")
 import kviz
 
