@@ -1,5 +1,3 @@
-import pkg_resources
-pkg_resources.require("klampt==0.6.2")
 from klampt import *
 from klampt.math import vectorops,so3,se3
 from klampt.plan.cspace import MotionPlan
@@ -77,7 +75,7 @@ def refresh_viz():
             existing_path_lines.append(name)
             kviz.add_line(name,path[i][0],path[i][1],path_height,path[i+1][0],path[i+1][1],path_height)
             kviz.set_visible(name,True)
-            kviz.set_color(name,0,0,1])
+            kviz.set_color(name,0,0,1)
             existing_ghosts.append(kviz.add_ghost("ghost"+str(i)))
             kviz.set_ghost_config(path[i],"ghost"+str(i))
             kviz.set_color(existing_ghosts[-1],1,1,1,0.5)

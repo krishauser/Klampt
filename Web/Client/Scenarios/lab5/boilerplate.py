@@ -7,6 +7,7 @@ sys.path.append("Web/Server")
 import kviz
 from klampt import *
 from klampt.math import vectorops,so2,so3,se3
+import math
 import random
 
 #from kviz import *
