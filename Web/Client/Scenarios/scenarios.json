@@ -1,4 +1,4 @@
-{
+
 	"scenarios":{
 		"Dynamics Test":"dynamics",
 		"Simulation Test":"test_sim",
@@ -20,6 +20,6 @@
 		"Final B":"finalB",
 		"Final C":"finalC"
 	},
-	"shown":["Simulation Test","Dynamic Sandbox","Kinematic Sandbox"],
-	"active":"Dynamic Sandbox"
+	"shown":["Simulation Test","Dynamic Sandbox","Kinematic Sandbox","Lab 1a","Lab 1b","Lab 1c","Lab 1d","Lab 2a","Lab 2b","Lab 2c","Lab 3a","Lab 3b","Lab 3d","Lab 4"],
+	"active":"Lab 4"
 }
