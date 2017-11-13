@@ -2,9 +2,9 @@
 #include <KrisLibrary/Logger.h>
 #include "three.js.h"
 #include <KrisLibrary/meshing/MeshPrimitives.h>
-#include <boost/uuid/uuid.hpp>            // uuid class
-#include <boost/uuid/uuid_generators.hpp> // generators
-#include <boost/uuid/uuid_io.hpp>         // streaming operators etc.
+//#include <boost/uuid/uuid.hpp>            // uuid class
+//#include <boost/uuid/uuid_generators.hpp> // generators
+//#include <boost/uuid/uuid_io.hpp>         // streaming operators etc.
 #include <random>
 #include <sstream>
 using namespace std;
