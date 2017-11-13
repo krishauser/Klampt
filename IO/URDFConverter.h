@@ -18,11 +18,11 @@ using namespace Math3D;
 
 class URDFLinkNode {
 public:
-	URDFLinkNode(boost::shared_ptr<urdf::Link>& link, int index, int index_parent);
+	URDFLinkNode(std::shared_ptr<urdf::Link>& link, int index, int index_parent);
 	void GetTransformations();
 	void GetGeometryProperty(bool useVisGeom=false);
 	void GetJoint();
-	boost::shared_ptr<urdf::Link> link;
+	std::shared_ptr<urdf::Link> link;
 	int index;
 	int index_parent;
 	RigidTransform T_link_to_inertia;
@@ -42,7 +42,7 @@ public:
 	static int GetLinkIndexfromName(string name, const vector<string> linknames);
 	static RobotJoint::Type jointType_URDF2ROB(int );
 	static void DFSLinkTree( URDFLinkNode& root, vector<URDFLinkNode>& linkNodes);
-	static void setJointforNodes(vector< boost::shared_ptr<urdf::Joint> >& joints, vector<URDFLinkNode>& linkNodes);
+	static void setJointforNodes(vector< std::shared_ptr<urdf::Joint> >& joints, vector<URDFLinkNode>& linkNodes);
 	static Math3D::Matrix3 convertInertial( urdf::Inertial& I);
 	static void QuatToRotationMat(const Vector4& aa, Matrix3& mat);
 	static void processTParentTransformations(vector<URDFLinkNode>& linkNodes);

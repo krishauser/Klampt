@@ -19,7 +19,7 @@
      <x>12</x>
      <y>13</y>
      <width>321</width>
-     <height>271</height>
+     <height>284</height>
     </rect>
    </property>
    <layout class="QGridLayout" name="gridLayout">
@@ -106,7 +106,7 @@
     <item row="7" column="1">
      <widget class="QLineEdit" name="line_ext">
       <property name="text">
-       <string>tri</string>
+       <string>off</string>
       </property>
      </widget>
     </item>

@@ -48,7 +48,7 @@ static bool gMinAccelQuiet = false;
 //a flag used to stop SolveMinTime2 from complaining during internal testing
 static bool gMinTime2Quiet = false;
 
-void DoGetchar() { LOG4CXX_ERROR(KrisLibrary::logger(),"Press enter to continue...\n"); KrisLibrary::loggerWait(); }
+void DoGetchar() { LOG4CXX_ERROR(KrisLibrary::logger(),"Press enter to continue...\n"); }//KrisLibrary::loggerWait(); }
 
 //solves the quadratic formula and returns the number of roots found
 int quadratic(Real a, Real b, Real c, Real& x1, Real& x2)

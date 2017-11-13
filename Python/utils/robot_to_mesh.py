@@ -1,5 +1,5 @@
 import klampt
-from klampt.math import vectorops as vops
+from klampt.math import vectorops
 from klampt.math import se3
 from klampt.io import loader
 
@@ -7,10 +7,9 @@ if __name__=="__main__":
     import sys
     if len(sys.argv) != 4:
         print "robot_to_mesh.py: converts an articulated robot to a simple mesh"
-        print "file.  Outputs in .tri format, which can be converted to OFF using"
-        print "tri2off.py"
+        print "file.  Output mesh is in Object File Format (OFF)"
         print
-        print "Usage: python robot_to_mesh.py robot config mesh"
+        print "Usage: python robot_to_mesh.py ROBOT.urdf CONFIG.config MESH.off"
         exit(0)
     robotfn = sys.argv[1]
     configfn = sys.argv[2]
@@ -48,12 +47,13 @@ if __name__=="__main__":
             unionPoints += points
             #offset triangle indices by number of existing points
             unionTris += [(a+offset,b+offset,c+offset) for (a,b,c) in tris]
+        else:
+            print "Warning, link",i,"doesn't have geometry in mesh format"
     print "Writing to",meshfn,"..."
     f = open(meshfn,'w')
-    f.write(str(len(unionPoints))+'\n')
+    f.write("OFF\n %d %d 0\n"%(len(unionPoints),len(unionTris)))
     for pt in unionPoints:
         f.write('%g %g %g\n'%tuple(pt))
-    f.write(str(len(unionTris))+'\n')
     for tri in unionTris:
-        f.write('%d %d %d\n'%tuple(tri))
+        f.write('3 %d %d %d\n'%tuple(tri))
     f.close()

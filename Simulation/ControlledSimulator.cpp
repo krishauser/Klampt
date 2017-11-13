@@ -1,7 +1,9 @@
-#include <log4cxx/logger.h>
 #include <KrisLibrary/Logger.h>
 #include "ControlledSimulator.h"
 #include "Control/JointSensors.h"
+
+
+DEFINE_LOGGER(ControlledRobotSimulator)
 
 //Set these values to 0 to get all warnings
 
@@ -45,7 +47,7 @@ void ControlledRobotSimulator::GetCommandedConfig(Config& q)
       robot->SetDriverValue(i,command.actuators[i].qdes);
     else {
       if(!warned){
-        LOG4CXX_ERROR(KrisLibrary::logger(),"ControlledRobotSimulator::GetCommandedConfig: Can't get commanded config for non-PID drivers\n");
+        LOG4CXX_ERROR(GET_LOGGER(ControlledRobotSimulator),"ControlledRobotSimulator::GetCommandedConfig: Can't get commanded config for non-PID drivers\n");
       }
       warned = true;
       robot->SetDriverValue(i,0.0);
@@ -64,7 +66,7 @@ void ControlledRobotSimulator::GetCommandedVelocity(Config& dq)
       robot->SetDriverVelocity(i,command.actuators[i].dqdes);
     else {
       if(!warned){
-        LOG4CXX_ERROR(KrisLibrary::logger(),"ControlledRobotSimulator::GetCommandedVelocity: Can't get commanded velocity for non-PID drivers\n");
+        LOG4CXX_ERROR(GET_LOGGER(ControlledRobotSimulator),"ControlledRobotSimulator::GetCommandedVelocity: Can't get commanded velocity for non-PID drivers\n");
       }warned = true;
       robot->SetDriverVelocity(i,0.0);
     }
@@ -76,7 +78,7 @@ void ControlledRobotSimulator::GetSensedConfig(Config& q)
 {
   JointPositionSensor* s = sensors.GetTypedSensor<JointPositionSensor>();
   if(s==NULL){
-        LOG4CXX_ERROR(KrisLibrary::logger(),"ControlledRobotSimulator::GetSensedConfig: Warning, robot has no joint position sensor\n");
+        LOG4CXX_ERROR(GET_LOGGER(ControlledRobotSimulator),"ControlledRobotSimulator::GetSensedConfig: Warning, robot has no joint position sensor\n");
   }else
     q = s->q;
 }
@@ -85,7 +87,7 @@ void ControlledRobotSimulator::GetSensedVelocity(Config& dq)
 {
   JointVelocitySensor* s=sensors.GetTypedSensor<JointVelocitySensor>();
   if(s==NULL){
-    LOG4CXX_ERROR(KrisLibrary::logger(),"ControlledRobotSimulator::GetSensedVelocity: Warning, robot has no joint velocity sensor\n");
+    LOG4CXX_ERROR(GET_LOGGER(ControlledRobotSimulator),"ControlledRobotSimulator::GetSensedVelocity: Warning, robot has no joint velocity sensor\n");
   }else
     dq = s->dq;
 }
@@ -125,9 +127,9 @@ void ControlledRobotSimulator::GetActuatorTorques(Vector& t) const
 {
   if(t.empty()) t.resize(robot->drivers.size());
   if(t.n != (int)robot->drivers.size()) {
-    LOG4CXX_ERROR(KrisLibrary::logger(),"ControlledRobotSimulator::GetActuatorTorques: Warning, vector isn't sized to the number of drivers "<<robot->drivers.size()<<" (got "<<t.n<<")\n");
+    LOG4CXX_ERROR(GET_LOGGER(ControlledRobotSimulator),"ControlledRobotSimulator::GetActuatorTorques: Warning, vector isn't sized to the number of drivers "<<robot->drivers.size()<<" (got "<<t.n<<")\n");
     if(t.n == (int)robot->links.size()){
-      LOG4CXX_ERROR(KrisLibrary::logger(),"  (Did you mean GetLinkTorques()?\n");
+      LOG4CXX_ERROR(GET_LOGGER(ControlledRobotSimulator),"  (Did you mean GetLinkTorques()?\n");
     }
   }
   Assert(command.actuators.size() == robot->drivers.size());
@@ -146,23 +148,23 @@ void ControlledRobotSimulator::GetActuatorTorques(Vector& t) const
     q -= TwoPi;
     }
     if(q < robot->qMin(link)-gJointLimitWarningThreshold || q > robot->qMax(link)+gJointLimitWarningThreshold) {
-      LOG4CXX_WARN(KrisLibrary::logger(),"Warning: joint angle "<<robot->linkNames[link].c_str());
-      LOG4CXX_INFO(KrisLibrary::logger(),"q="<<RtoD(q)<<", qmin="<<RtoD(robot->qMin(link))<<", qmax="<<RtoD(robot->qMax(link)));
+      LOG4CXX_WARN(GET_LOGGER(ControlledRobotSimulator),"Warning: joint angle "<<robot->linkNames[link].c_str());
+      LOG4CXX_INFO(GET_LOGGER(ControlledRobotSimulator),"q="<<RtoD(q)<<", qmin="<<RtoD(robot->qMin(link))<<", qmax="<<RtoD(robot->qMax(link)));
       //KrisLibrary::loggerWait();
     }
     const ActuatorCommand& cmd=command.actuators[i];
     switch(cmd.mode) {
     case ActuatorCommand::OFF:
-      LOG4CXX_WARN(KrisLibrary::logger(),"Warning: actuator off?\n");
+      LOG4CXX_WARN(GET_LOGGER(ControlledRobotSimulator),"Warning: actuator off?\n");
       t(i) = 0;
       break;
     case ActuatorCommand::TORQUE:
 
-      //LOG4CXX_WARN(KrisLibrary::logger(),"Warning: direct torque?\n");
+      //LOG4CXX_WARN(GET_LOGGER(ControlledRobotSimulator),"Warning: direct torque?\n");
       if(cmd.torque < d.tmin-gTorqueLimitWarningThreshold){
-    LOG4CXX_INFO(KrisLibrary::logger(),"Actuator "<<robot->LinkName(robot->drivers[i].linkIndices[0]).c_str()<<" limit exceeded: "<<cmd.torque<<" < "<<d.tmin);
+    LOG4CXX_INFO(GET_LOGGER(ControlledRobotSimulator),"Actuator "<<robot->LinkName(robot->drivers[i].linkIndices[0]).c_str()<<" limit exceeded: "<<cmd.torque<<" < "<<d.tmin);
       }else if(cmd.torque > d.tmax+gTorqueLimitWarningThreshold){
-    LOG4CXX_INFO(KrisLibrary::logger(),"Actuator "<<robot->LinkName(robot->drivers[i].linkIndices[0]).c_str()<<" limit exceeded: "<<cmd.torque<<" > "<<d.tmax);
+    LOG4CXX_INFO(GET_LOGGER(ControlledRobotSimulator),"Actuator "<<robot->LinkName(robot->drivers[i].linkIndices[0]).c_str()<<" limit exceeded: "<<cmd.torque<<" > "<<d.tmax);
       }
       t(i) = Clamp(cmd.torque,d.tmin,d.tmax);
       break;
@@ -171,13 +173,13 @@ void ControlledRobotSimulator::GetActuatorTorques(Vector& t) const
     //TODO: simulate low level errors in the PID loop
     Real cmdtorque = cmd.GetPIDTorque(q,dq);
     if(cmdtorque < d.tmin-gTorqueLimitWarningThreshold){
-      LOG4CXX_INFO(KrisLibrary::logger(),"Actuator "<<robot->LinkName(robot->drivers[i].linkIndices[0]).c_str()<<" limit exceeded: "<<cmdtorque<<" < "<<d.tmin);
+      LOG4CXX_INFO(GET_LOGGER(ControlledRobotSimulator),"Actuator "<<robot->LinkName(robot->drivers[i].linkIndices[0]).c_str()<<" limit exceeded: "<<cmdtorque<<" < "<<d.tmin);
     }
     else if(cmdtorque > d.tmax+gTorqueLimitWarningThreshold){
-      LOG4CXX_INFO(KrisLibrary::logger(),"Actuator "<<robot->LinkName(robot->drivers[i].linkIndices[0]).c_str()<<" limit exceeded: "<<cmdtorque<<" > "<<d.tmax);
+      LOG4CXX_INFO(GET_LOGGER(ControlledRobotSimulator),"Actuator "<<robot->LinkName(robot->drivers[i].linkIndices[0]).c_str()<<" limit exceeded: "<<cmdtorque<<" > "<<d.tmax);
     }
     Real td=Clamp(cmdtorque,d.tmin,d.tmax);
-    //LOG4CXX_INFO(KrisLibrary::logger(),""<<i<<": Current "<<q<<","<<dq<<", desired "<<cmd.qdes<<","<<cmd.dqdes<<", torque desired "<<cmd.GetPIDTorque(q<<", clamped "<<dq)    
+    //LOG4CXX_INFO(GET_LOGGER(ControlledRobotSimulator),""<<i<<": Current "<<q<<","<<dq<<", desired "<<cmd.qdes<<","<<cmd.dqdes<<", torque desired "<<cmd.GetPIDTorque(q<<", clamped "<<dq)    
     t(i) = td;
     break;
       }
@@ -205,8 +207,8 @@ void ControlledRobotSimulator::Step(Real dt,WorldSimulation* sim)
     else
       delay = 1.0/sensors.sensors[i]->rate;
     if(delay < dt) {
-      LOG4CXX_INFO(KrisLibrary::logger(),"Sensor "<<sensors.sensors[i]->name.c_str());
-      LOG4CXX_INFO(KrisLibrary::logger(),"  ... Limiting sensor rate to "<<1.0/dt);
+      LOG4CXX_INFO(GET_LOGGER(ControlledRobotSimulator),"Sensor "<<sensors.sensors[i]->name.c_str());
+      LOG4CXX_INFO(GET_LOGGER(ControlledRobotSimulator),"  ... Limiting sensor rate to "<<1.0/dt);
       sensors.sensors[i]->rate = 1.0/dt;
       //todo: handle numerical errors in inversion...
       delay = dt;
@@ -267,9 +269,9 @@ void ControlledRobotSimulator::Step(Real dt,WorldSimulation* sim)
 	  tjoints.madd(driverBasis,-tjoints.dot(driverBasis)/driverBasis.normSquared());
 	  if(tjoints.norm() > mechMaxTorque)
 	    tjoints *= mechMaxTorque/tjoints.norm();
-	  //LOG4CXX_INFO(KrisLibrary::logger(),"Stabilizing torques: "<<tjoints<<"\n");
+	  //LOG4CXX_INFO(GET_LOGGER(ControlledRobotSimulator),"Stabilizing torques: "<<tjoints<<"\n");
 	  tjoints.madd(driverBasis,t[i]);
-	  //LOG4CXX_INFO(KrisLibrary::logger(),"Torques: "<<tjoints<<"\n");
+	  //LOG4CXX_INFO(GET_LOGGER(ControlledRobotSimulator),"Torques: "<<tjoints<<"\n");
 	  for(size_t j=0;j<d.linkIndices.size();j++) 
 	    oderobot->AddLinkTorque(d.linkIndices[j],tjoints[j]);
 	}

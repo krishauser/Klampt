@@ -3,7 +3,20 @@
 #include "XmlODE.h"
 #include "Control/Controller.h"
 #include <KrisLibrary/utils/stringutils.h>
+#include <KrisLibrary/utils/ioutils.h>
+#include <sstream>
 
+int SafeQueryFloat(TiXmlElement* e,const char* attr,double& out)
+{
+  if(e->Attribute(attr)) {
+    std::stringstream ss(e->Attribute(attr));
+    if(SafeInputFloat(ss,out)) 
+      return TIXML_SUCCESS;
+    LOG4CXX_ERROR(KrisLibrary::logger(),"Error reading <"<<e->Value()<<">  attribute"<<attr);
+    return TIXML_WRONG_TYPE;
+  }
+  return TIXML_NO_ATTRIBUTE;
+}
 
 XmlODEGeometry::XmlODEGeometry(TiXmlElement* _element)
   :e(_element)
@@ -25,18 +38,10 @@ bool XmlODEGeometry::Get(ODEGeometry& mesh)
       mesh.SetPadding(padding);
     }
   }
-  if(e->QueryValueAttribute("kFriction",&temp)==TIXML_SUCCESS) {
-    mesh.surf().kFriction=temp;
-  }
-  if(e->QueryValueAttribute("kRestitution",&temp)==TIXML_SUCCESS) {
-    mesh.surf().kRestitution=temp;
-  }
-  if(e->QueryValueAttribute("kStiffness",&temp)==TIXML_SUCCESS) {
-    mesh.surf().kStiffness=temp;
-  }
-  if(e->QueryValueAttribute("kDamping",&temp)==TIXML_SUCCESS) {
-    mesh.surf().kDamping=temp;
-  }
+  SafeQueryFloat(e,"kFriction",mesh.surf().kFriction);
+  SafeQueryFloat(e,"kRestitution",mesh.surf().kRestitution);
+  SafeQueryFloat(e,"kStiffness",mesh.surf().kStiffness);
+  SafeQueryFloat(e,"kDamping",mesh.surf().kDamping);
   return true;
 }
 
@@ -104,7 +109,7 @@ bool XmlODESettings::GetSettings(ODESimulator& sim)
 	return false;
       }
     }
-    else if(0 == strcmp(name,"object")) {
+    else if(0 == strcmp(name,"object") || 0 == strcmp(name,"rigidObject")) {
       int index;
       if(c->QueryValueAttribute("index",&index)==TIXML_SUCCESS) {
 	Assert(index < (int)sim.numObjects());
@@ -178,25 +183,22 @@ bool XmlSimulationSettings::GetSettings(WorldSimulation& sim)
   string globals="globals";
   TiXmlElement* c = e->FirstChildElement(globals);
   if(c) {
-    LOG4CXX_INFO(KrisLibrary::logger(),"Parsing timestep...\n");
     //parse timestep
-    double timestep;
-    if(c->QueryValueAttribute("timestep",&timestep)==TIXML_SUCCESS)
-      sim.simStep = timestep;
+    SafeQueryFloat(c,"timestep",sim.simStep);
   }
-  LOG4CXX_INFO(KrisLibrary::logger(),"Parsing ODE...\n");
+  LOG4CXX_INFO(KrisLibrary::logger(),"Parsing ODE...");
   XmlODESettings ode(e);
   if(!ode.GetSettings(sim.odesim)) {
     return false;
   }
 
 
-  LOG4CXX_INFO(KrisLibrary::logger(),"Parsing robot controllers / sensors\n");
+  LOG4CXX_INFO(KrisLibrary::logger(),"Parsing robot controllers / sensors");
   c = e->FirstChildElement("robot");
   while(c != NULL) {
     int index;
     if(c->QueryValueAttribute("index",&index)!=TIXML_SUCCESS) {
-            LOG4CXX_ERROR(KrisLibrary::logger(),"Unable to read index of robot element\n");
+            LOG4CXX_ERROR(KrisLibrary::logger(),"Unable to read index of robot element");
       continue;
     }
     Assert(index < (int)sim.robotControllers.size());
@@ -209,7 +211,7 @@ bool XmlSimulationSettings::GetSettings(WorldSimulation& sim)
       if(controller)
 	sim.SetController(index,controller); 
       else {
-		LOG4CXX_ERROR(KrisLibrary::logger(),"Unable to load controller from xml file\n");
+		LOG4CXX_ERROR(KrisLibrary::logger(),"Unable to load controller from xml file");
 	return false;
       }
       if(controller->nominalTimeStep > 0)

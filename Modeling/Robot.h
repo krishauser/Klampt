@@ -85,7 +85,7 @@ public:
   bool LoadURDF(const char* fn);
   bool Save(const char* fn);
   bool LoadGeometry(int i,const char* file);
-  void SetGeomFiles(const char* geomPrefix="",const char* geomExt="tri");  ///< Sets the geometry file names to geomPrefix+[linkName].[geomExt]
+  void SetGeomFiles(const char* geomPrefix="",const char* geomExt="off");  ///< Sets the geometry file names to geomPrefix+[linkName].[geomExt]
   void SetGeomFiles(const vector<string>& geomFiles);
   bool SaveGeometry(const char* prefix="");  
   void InitStandardJoints();

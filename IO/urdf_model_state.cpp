@@ -40,7 +40,6 @@
 #include "urdf_model_state.h"
 #include <fstream>
 #include <sstream>
-#include <boost/lexical_cast.hpp>
 #include <algorithm>
 #include <tinyxml.h>
 
@@ -53,7 +52,7 @@ bool parseModelState(ModelState &ms, TiXmlElement* config)
   const char *name_char = config->Attribute("name");
   if (!name_char)
   {
-    LOG4CXX_INFO(KrisLibrary::logger(),"No name given for the model_state. \n");
+    LOG4CXX_INFO(KrisLibrary::logger(),"No name given for the model_state. ");
     return false;
   }
   ms.name = std::string(name_char);
@@ -61,12 +60,12 @@ bool parseModelState(ModelState &ms, TiXmlElement* config)
   const char *time_stamp_char = config->Attribute("time_stamp");
   if (time_stamp_char)
   {
-    try {
-      double sec = boost::lexical_cast<double>(time_stamp_char);
+    double sec;
+    if(LexicalCast(time_stamp_char,sec)) {
       ms.time_stamp.set(sec);
     }
-    catch (boost::bad_lexical_cast &e) {
-      LOG4CXX_INFO(KrisLibrary::logger(),"Parsing time stamp ["<< time_stamp_char<<"] failed: "<< e.what());
+    else {
+      LOG4CXX_INFO(KrisLibrary::logger(),"Parsing time stamp ["<< time_stamp_char<<"] failed");
       return false;
     }
   }
@@ -74,7 +73,7 @@ bool parseModelState(ModelState &ms, TiXmlElement* config)
   TiXmlElement *joint_state_elem = config->FirstChildElement("joint_state");
   if (joint_state_elem)
   {
-    boost::shared_ptr<JointState> joint_state;
+    std::shared_ptr<JointState> joint_state;
     joint_state.reset(new JointState());
 
     const char *joint_char = joint_state_elem->Attribute("joint");
@@ -82,7 +81,7 @@ bool parseModelState(ModelState &ms, TiXmlElement* config)
       joint_state->joint = std::string(joint_char);
     else
     {
-      LOG4CXX_INFO(KrisLibrary::logger(),"No joint name given for the model_state. \n");
+      LOG4CXX_INFO(KrisLibrary::logger(),"No joint name given for the model_state. ");
       return false;
     }
     
@@ -92,13 +91,16 @@ bool parseModelState(ModelState &ms, TiXmlElement* config)
     {
 
       std::vector<std::string> pieces;
-      boost::split( pieces, position_char, boost::is_any_of(" "));
+      pieces = Split( position_char, " ");
       for (unsigned int i = 0; i < pieces.size(); ++i){
         if (pieces[i] != ""){
-          try {
-            joint_state->position.push_back(boost::lexical_cast<double>(pieces[i].c_str()));
+          double val;
+          if(LexicalCast(pieces[i],val))
+          {
+            joint_state->position.push_back(val);
           }
-          catch (boost::bad_lexical_cast &e) {
+          else 
+          {
             throw ParseError("position element ("+ pieces[i] +") is not a valid float");
           }
         }
@@ -111,13 +113,16 @@ bool parseModelState(ModelState &ms, TiXmlElement* config)
     {
 
       std::vector<std::string> pieces;
-      boost::split( pieces, velocity_char, boost::is_any_of(" "));
+      pieces = Split( position_char, " ");
       for (unsigned int i = 0; i < pieces.size(); ++i){
         if (pieces[i] != ""){
-          try {
-            joint_state->velocity.push_back(boost::lexical_cast<double>(pieces[i].c_str()));
+          double val;
+          if(LexicalCast(pieces[i],val))
+          {
+            joint_state->velocity.push_back(val);
           }
-          catch (boost::bad_lexical_cast &e) {
+          else 
+          {
             throw ParseError("velocity element ("+ pieces[i] +") is not a valid float");
           }
         }
@@ -130,13 +135,16 @@ bool parseModelState(ModelState &ms, TiXmlElement* config)
     {
 
       std::vector<std::string> pieces;
-      boost::split( pieces, effort_char, boost::is_any_of(" "));
+      pieces = Split( position_char, " ");
       for (unsigned int i = 0; i < pieces.size(); ++i){
         if (pieces[i] != ""){
-          try {
-            joint_state->effort.push_back(boost::lexical_cast<double>(pieces[i].c_str()));
+          double val;
+          if(LexicalCast(pieces[i],val))
+          {
+            joint_state->effort.push_back(val);
           }
-          catch (boost::bad_lexical_cast &e) {
+          else 
+          {
             throw ParseError("effort element ("+ pieces[i] +") is not a valid float");
           }
         }

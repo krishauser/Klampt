@@ -113,11 +113,14 @@ class ODESimulator
   void SetERP(double erp);   //global error reduction  -- see ODE docs
   void SetCFM(double erp);   //global constraint force mixing -- see ODE docs
   ODESimulatorSettings& GetSettings() { return settings; }
-  Status GetStatus() const;
+  Status GetStatus() const; 
   void GetStatusHistory(vector<Status>& statuses,vector<Real>& statusChangeTimes) const;
   void AddTerrain(Terrain& terr);
   void AddRobot(Robot& robot);
   void AddObject(RigidObject& object);
+  ///Returns true if the current  state is in "reliable" status. Otherwise returns false
+  ///and populates the list of overlapping object pairs. 
+  bool CheckObjectOverlap(vector<pair<ODEObjectID,ODEObjectID> >& overlaps);
   void Step(Real dt);
   void StepDynamics(Real dt);
   bool ReadState(File& f);
@@ -141,13 +144,17 @@ class ODESimulator
   void ClearContactFeedback();
   bool InContact(const ODEObjectID& a) const;
   bool InContact(const ODEObjectID& a,const ODEObjectID& b) const;
-  void SetupContactResponse(const ODEObjectID& a,const ODEObjectID& b,int feedbackIndex,ODEContactResult& c);
+  ///Disables instability correction for the next time step.  This should be done if you manually set several objects' velocities, for example.
+  void DisableInstabilityCorrection();
+  ///Disables instability correction for the given object on the next time step. This should be done if you manually set an object's velocities, for example.
+  void DisableInstabilityCorrection(const ODEObjectID& obj);
 
   //used internally
   bool ReadState_Internal(File& f);
   bool WriteState_Internal(File& f) const;
   void DetectCollisions();
   void SetupContactResponse(); 
+  void SetupContactResponse(const ODEObjectID& a,const ODEObjectID& b,int feedbackIndex,ODEContactResult& c);
   void ClearCollisions();
   bool InstabilityCorrection();
     

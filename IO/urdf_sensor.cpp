@@ -40,7 +40,7 @@
 #include "urdf_sensor.h"
 #include <fstream>
 #include <sstream>
-#include <boost/lexical_cast.hpp>
+#include <KrisLibrary/utils/AnyValue.h>
 #include <algorithm>
 #include <tinyxml.h>
 
@@ -59,38 +59,30 @@ bool parseCamera(Camera &camera, TiXmlElement* config)
     const char* width_char = image->Attribute("width");
     if (width_char)
     {
-      try
+      if(!LexicalCast(width_char,camera.width)) 
       {
-        camera.width = boost::lexical_cast<unsigned int>(width_char);
-      }
-      catch (boost::bad_lexical_cast &e)
-      {
-        LOG4CXX_INFO(KrisLibrary::logger(),"Camera image width ["<< width_char<<"] is not a valid int: "<< e.what());
+        LOG4CXX_INFO(KrisLibrary::logger(),"Camera image width ["<< width_char<<"] is not a valid int");
         return false;
       }
     }
     else
     {
-      LOG4CXX_INFO(KrisLibrary::logger(),"Camera sensor needs an image width attribute \n");
+      LOG4CXX_INFO(KrisLibrary::logger(),"Camera sensor needs an image width attribute ");
       return false;
     }
 
     const char* height_char = image->Attribute("height");
     if (height_char)
     {
-      try
+      if(!LexicalCast(height_char,camera.height)) 
       {
-        camera.height = boost::lexical_cast<unsigned int>(height_char);
-      }
-      catch (boost::bad_lexical_cast &e)
-      {
-	LOG4CXX_INFO(KrisLibrary::logger(),"Camera image height ["<< height_char<<"] is not a valid int: "<< e.what());
+	       LOG4CXX_INFO(KrisLibrary::logger(),"Camera image height ["<< height_char<<"] is not a valid int");
         return false;
       }
     }
     else
     {
-      LOG4CXX_INFO(KrisLibrary::logger(),"Camera sensor needs an image height attribute \n");
+      LOG4CXX_INFO(KrisLibrary::logger(),"Camera sensor needs an image height attribute ");
       return false;
     }
 
@@ -99,71 +91,59 @@ bool parseCamera(Camera &camera, TiXmlElement* config)
       camera.format = std::string(format_char);
     else
     {
-      LOG4CXX_INFO(KrisLibrary::logger(),"Camera sensor needs an image format attribute \n");
+      LOG4CXX_INFO(KrisLibrary::logger(),"Camera sensor needs an image format attribute ");
       return false;
     }    
 
     const char* hfov_char = image->Attribute("hfov");
     if (hfov_char)
     {
-      try
+      if(!LexicalCast(hfov_char,camera.hfov)) 
       {
-        camera.hfov = boost::lexical_cast<double>(hfov_char);
-      }
-      catch (boost::bad_lexical_cast &e)
-      {
-        LOG4CXX_INFO(KrisLibrary::logger(),"Camera image hfov ["<< hfov_char<<"] is not a valid float: "<< e.what());
+        LOG4CXX_INFO(KrisLibrary::logger(),"Camera image hfov ["<< hfov_char<<"] is not a valid float");
         return false;
       }
     }
     else
     {
-      LOG4CXX_INFO(KrisLibrary::logger(),"Camera sensor needs an image hfov attribute \n");
+      LOG4CXX_INFO(KrisLibrary::logger(),"Camera sensor needs an image hfov attribute ");
       return false;
     }
 
     const char* near_char = image->Attribute("near");
     if (near_char)
     {
-      try
+      if(!LexicalCast(near_char,camera.near)) 
       {
-        camera.near = boost::lexical_cast<double>(near_char);
-      }
-      catch (boost::bad_lexical_cast &e)
-      {
-        LOG4CXX_INFO(KrisLibrary::logger(),"Camera image near ["<< near_char<<"] is not a valid float: "<< e.what());
+        LOG4CXX_INFO(KrisLibrary::logger(),"Camera image near ["<< near_char<<"] is not a valid float: ");
         return false;
       }
     }
     else
     {
-      LOG4CXX_INFO(KrisLibrary::logger(),"Camera sensor needs an image near attribute \n");
+      LOG4CXX_INFO(KrisLibrary::logger(),"Camera sensor needs an image near attribute ");
       return false;
     }
 
     const char* far_char = image->Attribute("far");
     if (far_char)
     {
-      try
+      if(!LexicalCast(far_char,camera.far)) 
       {
-        camera.far = boost::lexical_cast<double>(far_char);
-      }
-      catch (boost::bad_lexical_cast &e)
-      {
-        LOG4CXX_INFO(KrisLibrary::logger(),"Camera image far ["<< far_char<<"] is not a valid float: "<< e.what());
+        LOG4CXX_INFO(KrisLibrary::logger(),"Camera image far ["<< far_char<<"] is not a valid float");
         return false;
       }
     }
     else
     {
-      LOG4CXX_INFO(KrisLibrary::logger(),"Camera sensor needs an image far attribute \n");
+      LOG4CXX_INFO(KrisLibrary::logger(),"Camera sensor needs an image far attribute ");
       return false;
     }
     
   }
   else
   {
-    LOG4CXX_INFO(KrisLibrary::logger(),"Camera sensor has no <image> element \n");
+    LOG4CXX_INFO(KrisLibrary::logger(),"Camera sensor has no <image> element ");
     return false;
   }
   return true;
@@ -180,13 +160,9 @@ bool parseRay(Ray &ray, TiXmlElement* config)
     const char* samples_char = horizontal->Attribute("samples");
     if (samples_char)
     {
-      try
+      if(!LexicalCast(samples_char,ray.horizontal_samples)) 
       {
-        ray.horizontal_samples = boost::lexical_cast<unsigned int>(samples_char);
-      }
-      catch (boost::bad_lexical_cast &e)
-      {
-        LOG4CXX_INFO(KrisLibrary::logger(),"Ray horizontal samples ["<< samples_char<<"] is not a valid float: "<< e.what());
+        LOG4CXX_INFO(KrisLibrary::logger(),"Ray horizontal samples ["<< samples_char<<"] is not a valid float");
         return false;
       }
     }
@@ -194,13 +170,9 @@ bool parseRay(Ray &ray, TiXmlElement* config)
     const char* resolution_char = horizontal->Attribute("resolution");
     if (resolution_char)
     {
-      try
+      if(!LexicalCast(resolution_char,ray.horizontal_resolution)) 
       {
-        ray.horizontal_resolution = boost::lexical_cast<double>(resolution_char);
-      }
-      catch (boost::bad_lexical_cast &e)
-      {
-        LOG4CXX_INFO(KrisLibrary::logger(),"Ray horizontal resolution ["<< resolution_char<<"] is not a valid float: "<< e.what());
+        LOG4CXX_INFO(KrisLibrary::logger(),"Ray horizontal resolution ["<< resolution_char<<"] is not a valid float");
         return false;
       }
     }   
@@ -208,13 +180,9 @@ bool parseRay(Ray &ray, TiXmlElement* config)
     const char* min_angle_char = horizontal->Attribute("min_angle");
     if (min_angle_char)
     {
-      try
+      if(!LexicalCast(min_angle_char,ray.horizontal_min_angle)) 
       {
-        ray.horizontal_min_angle = boost::lexical_cast<double>(min_angle_char);
-      }
-      catch (boost::bad_lexical_cast &e)
-      {
-        LOG4CXX_INFO(KrisLibrary::logger(),"Ray horizontal min_angle ["<< min_angle_char<<"] is not a valid float: "<< e.what());
+        LOG4CXX_INFO(KrisLibrary::logger(),"Ray horizontal min_angle ["<< min_angle_char<<"] is not a valid float");
         return false;
       }
     }
@@ -222,13 +190,9 @@ bool parseRay(Ray &ray, TiXmlElement* config)
     const char* max_angle_char = horizontal->Attribute("max_angle");
     if (max_angle_char)
     {
-      try
+      if(!LexicalCast(max_angle_char,ray.horizontal_max_angle)) 
       {
-        ray.horizontal_max_angle = boost::lexical_cast<double>(max_angle_char);
-      }
-      catch (boost::bad_lexical_cast &e)
-      {
-        LOG4CXX_INFO(KrisLibrary::logger(),"Ray horizontal max_angle ["<< max_angle_char<<"] is not a valid float: "<< e.what());
+        LOG4CXX_INFO(KrisLibrary::logger(),"Ray horizontal max_angle ["<< max_angle_char<<"] is not a valid float");
         return false;
       }
     }
@@ -240,13 +204,9 @@ bool parseRay(Ray &ray, TiXmlElement* config)
     const char* samples_char = vertical->Attribute("samples");
     if (samples_char)
     {
-      try
+      if(!LexicalCast(samples_char,ray.vertical_samples)) 
       {
-        ray.vertical_samples = boost::lexical_cast<unsigned int>(samples_char);
-      }
-      catch (boost::bad_lexical_cast &e)
-      {
-        LOG4CXX_INFO(KrisLibrary::logger(),"Ray vertical samples ["<< samples_char<<"] is not a valid float: "<< e.what());
+        LOG4CXX_INFO(KrisLibrary::logger(),"Ray vertical samples ["<< samples_char<<"] is not a valid float");
         return false;
       }
     }
@@ -254,13 +214,9 @@ bool parseRay(Ray &ray, TiXmlElement* config)
     const char* resolution_char = vertical->Attribute("resolution");
     if (resolution_char)
     {
-      try
+      if(!LexicalCast(resolution_char,ray.vertical_resolution)) 
       {
-        ray.vertical_resolution = boost::lexical_cast<double>(resolution_char);
-      }
-      catch (boost::bad_lexical_cast &e)
-      {
-        LOG4CXX_INFO(KrisLibrary::logger(),"Ray vertical resolution ["<< resolution_char<<"] is not a valid float: "<< e.what());
+        LOG4CXX_INFO(KrisLibrary::logger(),"Ray vertical resolution ["<< resolution_char<<"] is not a valid float");
         return false;
       }
     }   
@@ -268,13 +224,9 @@ bool parseRay(Ray &ray, TiXmlElement* config)
     const char* min_angle_char = vertical->Attribute("min_angle");
     if (min_angle_char)
     {
-      try
+      if(!LexicalCast(min_angle_char,ray.vertical_min_angle)) 
       {
-        ray.vertical_min_angle = boost::lexical_cast<double>(min_angle_char);
-      }
-      catch (boost::bad_lexical_cast &e)
-      {
-        LOG4CXX_INFO(KrisLibrary::logger(),"Ray vertical min_angle ["<< min_angle_char<<"] is not a valid float: "<< e.what());
+        LOG4CXX_INFO(KrisLibrary::logger(),"Ray vertical min_angle ["<< min_angle_char<<"] is not a valid float");
         return false;
       }
     }
@@ -282,13 +234,9 @@ bool parseRay(Ray &ray, TiXmlElement* config)
     const char* max_angle_char = vertical->Attribute("max_angle");
     if (max_angle_char)
     {
-      try
+      if(!LexicalCast(max_angle_char,ray.vertical_max_angle)) 
       {
-        ray.vertical_max_angle = boost::lexical_cast<double>(max_angle_char);
-      }
-      catch (boost::bad_lexical_cast &e)
-      {
-        LOG4CXX_INFO(KrisLibrary::logger(),"Ray vertical max_angle ["<< max_angle_char<<"] is not a valid float: "<< e.what());
+        LOG4CXX_INFO(KrisLibrary::logger(),"Ray vertical max_angle ["<< max_angle_char<<"] is not a valid float");
         return false;
       }
     }
@@ -296,9 +244,9 @@ bool parseRay(Ray &ray, TiXmlElement* config)
   return true;
 }
 
-boost::shared_ptr<VisualSensor> parseVisualSensor(TiXmlElement *g)
+std::shared_ptr<VisualSensor> parseVisualSensor(TiXmlElement *g)
 {
-  boost::shared_ptr<VisualSensor> visual_sensor;
+  std::shared_ptr<VisualSensor> visual_sensor;
 
   // get sensor type
   TiXmlElement *sensor_xml;
@@ -320,7 +268,7 @@ boost::shared_ptr<VisualSensor> parseVisualSensor(TiXmlElement *g)
   }
   else
   {
-    LOG4CXX_INFO(KrisLibrary::logger(),"No know sensor types [camera|ray] defined in <sensor> block \n");
+    LOG4CXX_INFO(KrisLibrary::logger(),"No known sensor types [camera|ray] defined in <sensor> block ");
   }
   return visual_sensor;
 }
@@ -333,7 +281,7 @@ bool parseSensor(Sensor &sensor, TiXmlElement* config)
   const char *name_char = config->Attribute("name");
   if (!name_char)
   {
-    LOG4CXX_INFO(KrisLibrary::logger(),"No name given for the sensor. \n");
+    LOG4CXX_INFO(KrisLibrary::logger(),"No name given for the sensor. ");
     return false;
   }
   sensor.name = std::string(name_char);
@@ -342,7 +290,7 @@ bool parseSensor(Sensor &sensor, TiXmlElement* config)
   const char *parent_link_name_char = config->Attribute("parent_link_name");
   if (!parent_link_name_char)
   {
-    LOG4CXX_INFO(KrisLibrary::logger(),"No parent_link_name given for the sensor. \n");
+    LOG4CXX_INFO(KrisLibrary::logger(),"No parent_link_name given for the sensor. ");
     return false;
   }
   sensor.parent_link_name = std::string(parent_link_name_char);

@@ -410,6 +410,7 @@ def solve_nearby(objectives,maxDeviation,iters=1000,tol=1e-3,activeDofs=None,num
       each configuration element is allowed to change.
     - numRestarts: same as in solve_global, but is by default set to zero.
     """
+    if feasibilityCheck is None: feasibilityCheck=lambda : True
     s = solver(objectives,iters,tol)
     if not isinstance(s,IKSolver):
         raise NotImplementedError("solve_nearby: currently only supports single-robot objectives")

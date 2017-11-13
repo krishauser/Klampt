@@ -596,7 +596,7 @@ void OperationalSpaceController::TasksToTorques(Vector& t)
     break;
   default:
     LOG4CXX_ERROR(KrisLibrary::logger(),"Error computing torques! result "<<res<<"\n");
-    KrisLibrary::loggerWait();
+    //KrisLibrary::loggerWait();
     t.setZero();
     f.resize(numContactForces,0);
     break;

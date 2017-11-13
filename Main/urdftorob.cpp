@@ -49,7 +49,7 @@ int main_shell(int argc, char** argv)
   AppUtils::ProgramSettings settings("Klampt");
   settings["useVisGeom"] = false;
   settings["flipYZ"] = false;
-  settings["outputGeometryExtension"] = string("tri");
+  settings["outputGeometryExtension"] = string("off");
   settings["outputGeometryPrefix"] = string("");
   settings["packageRootPath"] = string("");
   if(!settings.read("urdftorob.settings")) {

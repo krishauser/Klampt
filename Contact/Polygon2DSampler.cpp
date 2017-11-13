@@ -1,4 +1,3 @@
-#include <log4cxx/logger.h>
 #include <KrisLibrary/Logger.h>
 #include "Polygon2DSampler.h"
 #include <KrisLibrary/math/random.h>

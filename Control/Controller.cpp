@@ -311,7 +311,7 @@ SmartPointer<RobotController> MakeDefaultController(Robot* robot)
     LOG4CXX_INFO(KrisLibrary::logger(),"MakeDefaultController: could not load controller from data "<<controllerXml.c_str());
     LOG4CXX_INFO(KrisLibrary::logger(),"  Making the standard controller instead.\n");
     LOG4CXX_INFO(KrisLibrary::logger(),"  Press enter to continue.\n");
-    KrisLibrary::loggerWait();
+    //KrisLibrary::loggerWait();
   }
   PolynomialPathController* c = new PolynomialPathController(*robot);
   FeedforwardController* fc = new FeedforwardController(*robot,c);

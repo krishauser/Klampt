@@ -40,7 +40,6 @@
 #include "urdf_twist.h"
 #include <fstream>
 #include <sstream>
-#include <boost/lexical_cast.hpp>
 #include <algorithm>
 #include <tinyxml.h>
 

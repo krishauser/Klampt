@@ -36,9 +36,9 @@
 
 #include <log4cxx/logger.h>
 #include <KrisLibrary/Logger.h>
+#include <KrisLibrary/utils/AnyValue.h>
 #include <sstream>
 #include "urdf_joint.h"
-#include <boost/lexical_cast.hpp>
 #include <tinyxml.h>
 #include "urdf_parser.h"
 #include <stdio.h>
@@ -55,18 +55,14 @@ bool parseJointDynamics(JointDynamics &jd, TiXmlElement* config)
   // Get joint damping
   const char* damping_str = config->Attribute("damping");
   if (damping_str == NULL){
-    LOG4CXX_INFO(KrisLibrary::logger(),"joint dynamics: no damping, defaults to 0"<<"\n");
+    LOG4CXX_INFO(KrisLibrary::logger(),"joint dynamics: no damping, defaults to 0");
     jd.damping = 0;
   }
   else
   {
-    try
+    if(!LexicalCast(damping_str,jd.damping))
     {
-      jd.damping = boost::lexical_cast<double>(damping_str);
-    }
-    catch (boost::bad_lexical_cast &e)
-    {
-      LOG4CXX_INFO(KrisLibrary::logger(),"damping value ("<< damping_str<<") is not a float: "<<  e.what()<< "\n");
+      LOG4CXX_INFO(KrisLibrary::logger(),"damping value ("<< damping_str<<") is not a float");
       return false;
     }
   }
@@ -74,18 +70,14 @@ bool parseJointDynamics(JointDynamics &jd, TiXmlElement* config)
   // Get joint friction
   const char* friction_str = config->Attribute("friction");
   if (friction_str == NULL){
-    LOG4CXX_INFO(KrisLibrary::logger(),"joint dynamics: no friction, defaults to 0"<<"\n");
+    LOG4CXX_INFO(KrisLibrary::logger(),"joint dynamics: no friction, defaults to 0");
     jd.friction = 0;
   }
   else
   {
-    try
+    if(!LexicalCast(friction_str,jd.friction))
     {
-      jd.friction = boost::lexical_cast<double>(friction_str);
-    }
-    catch (boost::bad_lexical_cast &e)
-    {
-      LOG4CXX_INFO(KrisLibrary::logger(),"friction value ("<< friction_str<< ") is not a float: "<< e.what() << "\n");
+      LOG4CXX_INFO(KrisLibrary::logger(),"friction value ("<< friction_str<< ") is not a float");
       return false;
     }
   }
@@ -113,13 +105,9 @@ bool parseJointLimits(JointLimits &jl, TiXmlElement* config)
   }
   else
   {
-    try
+    if(!LexicalCast(lower_str,jl.lower))
     {
-      jl.lower = boost::lexical_cast<double>(lower_str);
-    }
-    catch (boost::bad_lexical_cast &e)
-    {
-      LOG4CXX_INFO(KrisLibrary::logger(),"lower value ("<< lower_str<<") is not a float: "<< e.what());
+      LOG4CXX_INFO(KrisLibrary::logger(),"lower value ("<< lower_str<<") is not a float: ");
       return false;
     }
   }
@@ -132,13 +120,9 @@ bool parseJointLimits(JointLimits &jl, TiXmlElement* config)
   }
   else
   {
-    try
+    if(!LexicalCast(upper_str,jl.upper))
     {
-      jl.upper = boost::lexical_cast<double>(upper_str);
-    }
-    catch (boost::bad_lexical_cast &e)
-    {
-      LOG4CXX_INFO(KrisLibrary::logger(),"upper value ("<<upper_str<<") is not a float: "<< e.what());
+      LOG4CXX_INFO(KrisLibrary::logger(),"upper value ("<<upper_str<<") is not a float: ");
       return false;
     }
   }
@@ -151,13 +135,9 @@ bool parseJointLimits(JointLimits &jl, TiXmlElement* config)
   }
   else
   {
-    try
+    if(!LexicalCast(effort_str,jl.effort))
     {
-      jl.effort = boost::lexical_cast<double>(effort_str);
-    }
-    catch (boost::bad_lexical_cast &e)
-    {
-      LOG4CXX_INFO(KrisLibrary::logger(),"effort value ("<<effort_str<<") is not a float: "<< e.what());
+      LOG4CXX_INFO(KrisLibrary::logger(),"effort value ("<<effort_str<<") is not a float: ");
       return false;
     }
   }
@@ -170,13 +150,9 @@ bool parseJointLimits(JointLimits &jl, TiXmlElement* config)
   }
   else
   {
-    try
+    if(!LexicalCast(velocity_str,jl.velocity))
     {
-      jl.velocity = boost::lexical_cast<double>(velocity_str);
-    }
-    catch (boost::bad_lexical_cast &e)
-    {
-      LOG4CXX_INFO(KrisLibrary::logger(),"velocity value ("<<velocity_str<<") is not a float: "<< e.what());
+      LOG4CXX_INFO(KrisLibrary::logger(),"velocity value ("<<velocity_str<<") is not a float: ");
       return false;
     }
   }
@@ -197,13 +173,9 @@ bool parseJointSafety(JointSafety &js, TiXmlElement* config)
   }
   else
   {
-    try
+    if(!LexicalCast(soft_lower_limit_str,js.soft_lower_limit))
     {
-      js.soft_lower_limit = boost::lexical_cast<double>(soft_lower_limit_str);
-    }
-    catch (boost::bad_lexical_cast &e)
-    {
-      LOG4CXX_INFO(KrisLibrary::logger(),"soft_lower_limit value ("<<soft_lower_limit_str<<") is not a float: "<< e.what());
+      LOG4CXX_INFO(KrisLibrary::logger(),"soft_lower_limit value ("<<soft_lower_limit_str<<") is not a float: ");
       return false;
     }
   }
@@ -217,13 +189,9 @@ bool parseJointSafety(JointSafety &js, TiXmlElement* config)
   }
   else
   {
-    try
+    if(!LexicalCast(soft_upper_limit_str,js.soft_upper_limit))
     {
-      js.soft_upper_limit = boost::lexical_cast<double>(soft_upper_limit_str);
-    }
-    catch (boost::bad_lexical_cast &e)
-    {
-      LOG4CXX_INFO(KrisLibrary::logger(),"soft_upper_limit value ("<<soft_upper_limit_str<<") is not a float: "<< e.what());
+      LOG4CXX_INFO(KrisLibrary::logger(),"soft_upper_limit value ("<<soft_upper_limit_str<<") is not a float: ");
       return false;
     }
   }
@@ -237,13 +205,9 @@ bool parseJointSafety(JointSafety &js, TiXmlElement* config)
   }
   else
   {
-    try
+    if(!LexicalCast(k_position_str,js.k_position))
     {
-      js.k_position = boost::lexical_cast<double>(k_position_str);
-    }
-    catch (boost::bad_lexical_cast &e)
-    {
-      LOG4CXX_INFO(KrisLibrary::logger(),"k_position value ("<<k_position_str<<") is not a float: "<< e.what());
+      LOG4CXX_INFO(KrisLibrary::logger(),"k_position value ("<<k_position_str<<") is not a float: ");
       return false;
     }
   }
@@ -256,13 +220,9 @@ bool parseJointSafety(JointSafety &js, TiXmlElement* config)
   }
   else
   {
-    try
+    if(!LexicalCast(k_velocity_str,js.k_velocity))
     {
-      js.k_velocity = boost::lexical_cast<double>(k_velocity_str);
-    }
-    catch (boost::bad_lexical_cast &e)
-    {
-      LOG4CXX_INFO(KrisLibrary::logger(),"k_velocity value ("<<k_velocity_str<<") is not a float: "<< e.what());
+      LOG4CXX_INFO(KrisLibrary::logger(),"k_velocity value ("<<k_velocity_str<<") is not a float: ");
       return false;
     }
   }
@@ -283,13 +243,14 @@ bool parseJointCalibration(JointCalibration &jc, TiXmlElement* config)
   }
   else
   {
-    try
+    double val;
+    if(LexicalCast(rising_position_str,val))
     {
-      jc.rising.reset(new double(boost::lexical_cast<double>(rising_position_str)));
+      jc.rising.reset(new double(val));
     }
-    catch (boost::bad_lexical_cast &e)
+    else
     {
-      LOG4CXX_INFO(KrisLibrary::logger(),"risingvalue ("<<rising_position_str<<") is not a float: "<< e.what());
+      LOG4CXX_INFO(KrisLibrary::logger(),"risingvalue ("<<rising_position_str<<") is not a float: ");
       return false;
     }
   }
@@ -303,13 +264,14 @@ bool parseJointCalibration(JointCalibration &jc, TiXmlElement* config)
   }
   else
   {
-    try
+    double val;
+    if(LexicalCast(falling_position_str,val))
     {
-      jc.falling.reset(new double(boost::lexical_cast<double>(falling_position_str)));
+      jc.falling.reset(new double(val));
     }
-    catch (boost::bad_lexical_cast &e)
+    else
     {
-      LOG4CXX_INFO(KrisLibrary::logger(),"fallingvalue ("<<falling_position_str<<") is not a float: "<< e.what());
+      LOG4CXX_INFO(KrisLibrary::logger(),"fallingvalue ("<<falling_position_str<<") is not a float: ");
       return false;
     }
   }
@@ -342,13 +304,9 @@ bool parseJointMimic(JointMimic &jm, TiXmlElement* config)
   }
   else
   {
-    try
+    if(!LexicalCast(multiplier_str,jm.multiplier))
     {
-      jm.multiplier = boost::lexical_cast<double>(multiplier_str);
-    }
-    catch (boost::bad_lexical_cast &e)
-    {
-      LOG4CXX_INFO(KrisLibrary::logger(),"multiplier value ("<<multiplier_str<<") is not a float: "<< e.what());
+      LOG4CXX_INFO(KrisLibrary::logger(),"multiplier value ("<<multiplier_str<<") is not a float: ");
       return false;
     }
   }
@@ -363,13 +321,9 @@ bool parseJointMimic(JointMimic &jm, TiXmlElement* config)
   }
   else
   {
-    try
+    if(!LexicalCast(offset_str,jm.offset))
     {
-      jm.offset = boost::lexical_cast<double>(offset_str);
-    }
-    catch (boost::bad_lexical_cast &e)
-    {
-      LOG4CXX_INFO(KrisLibrary::logger(),"offset value ("<<offset_str<<") is not a float: "<< e.what());
+      LOG4CXX_INFO(KrisLibrary::logger(),"offset value ("<<offset_str<<") is not a float: ");
       return false;
     }
   }
@@ -480,7 +434,7 @@ bool parseJoint(Joint &joint, TiXmlElement* config)
         }
         catch (ParseError &e) {
           joint.axis.clear();
-          LOG4CXX_INFO(KrisLibrary::logger(),"Malformed axis element for joint ["<< joint.name.c_str()<<"]: "<< e.what());
+          LOG4CXX_INFO(KrisLibrary::logger(),"Malformed axis element for joint ["<< joint.name.c_str()<<"]: ");
           return false;
         }
       }

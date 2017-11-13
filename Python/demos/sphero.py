@@ -2,6 +2,7 @@
 
 import sys
 from klampt import *
+from klampt.math import vectorops,so3,se3
 from klampt import vis
 from klampt.model import collide
 from klampt.vis.glrobotprogram import *

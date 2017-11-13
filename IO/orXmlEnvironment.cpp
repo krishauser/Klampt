@@ -84,7 +84,7 @@ bool OrXmlKinbody::RemoveSameBody() {
 void OrXmlKinbody::combineTwoBody(OrXmlBody* b1, OrXmlBody* b2) {
 	if (0 != strcmp(b1->name.c_str(), b2->name.c_str())) {
 		LOG4CXX_ERROR(KrisLibrary::logger(), "Error: Bodies' names are not the same!\n");
-		KrisLibrary::loggerWait();
+		//Krislibrary::loggerWait();
 	}
 	if ((b1->xmlGeoms.size() > 0 && b2->xmlGeoms.size() > 0)\
 
@@ -96,7 +96,7 @@ void OrXmlKinbody::combineTwoBody(OrXmlBody* b1, OrXmlBody* b2) {
 
 			|| (b1->colpoints.size() > 0 && b2->colpoints.size() > 0)) {
 		LOG4CXX_ERROR(KrisLibrary::logger(), "Error: both bodies have same properties!\n" );
-		KrisLibrary::loggerWait();
+		//Krislibrary::loggerWait();
 	}
 	if (!b2->offsetfrom.empty() && b1->offsetfrom.empty()) {
 		b1->offsetfrom = b2->offsetfrom;
@@ -147,12 +147,12 @@ bool OrXmlKinbody::appyTran2Tparent(OrXmlTransformation* tran) {
 	}
 	if (!isGetAllBodys) {
 		LOG4CXX_INFO(KrisLibrary::logger(), "Should call GetAllBodyJoints first!\n" );
-		KrisLibrary::loggerWait();
+		//Krislibrary::loggerWait();
 		return false;
 	}
 	if (!hasSetPrefix) {
 		LOG4CXX_INFO(KrisLibrary::logger(), name << " hasSetPrefix == false!\n" );
-		KrisLibrary::loggerWait();
+		//Krislibrary::loggerWait();
 		return false;
 	}
 	tran->ComputeTransform();
@@ -164,7 +164,7 @@ bool OrXmlKinbody::appyTran2Tparent(OrXmlTransformation* tran) {
 //				LOG4CXX_INFO(KrisLibrary::logger(),*xmlBodys[i]->transformation->T<<"\n");
 //			}
 //			LOG4CXX_INFO(KrisLibrary::logger(),"tran:"<<*tran->T<<"\n");
-//			KrisLibrary::loggerWait();
+//			//Krislibrary::loggerWait();
 //		}
 		if (xmlBodys[i]->offsetfrom.empty()){
 			xmlBodys[i]->applyTran2Tparent(tran);
@@ -184,7 +184,7 @@ bool OrXmlKinbody::appyTran2Tparent(OrXmlTransformation* tran) {
 //				LOG4CXX_INFO(KrisLibrary::logger(), "apply Kinbody tran:" << *tran->T << "\n")
 //						<< xmlBodys[i]->name << endl << xmlBodys[i]->offsetfrom
 //						;
-//				KrisLibrary::loggerWait();
+//				//Krislibrary::loggerWait();
 			}
 		}
 //		if(0==strcmp(xmlBodys[i]->name.c_str(),"rightIndexProximal")){
@@ -193,7 +193,7 @@ bool OrXmlKinbody::appyTran2Tparent(OrXmlTransformation* tran) {
 ////				xmlBodys[i]->transformation->ComputeTransform();
 //				LOG4CXX_INFO(KrisLibrary::logger(),*xmlBodys[i]->transformation->T);
 //			}
-//			KrisLibrary::loggerWait();
+//			//Krislibrary::loggerWait();
 //		}
 	}
 	return true;
@@ -202,7 +202,7 @@ bool OrXmlKinbody::appyTran2Tparent(OrXmlTransformation* tran) {
 void OrXmlKinbody::GetAllBodyGeom() {
 	if (!isGetAllBodys) {
 		LOG4CXX_INFO(KrisLibrary::logger(), "Should call GetAllBodyJoints first!\n" );
-		KrisLibrary::loggerWait();
+		//Krislibrary::loggerWait();
 	}
 	for (size_t i = 0; i < this->xmlBodys.size(); i++) {
 		xmlBodys[i]->GetMimicGeomMass();
@@ -342,7 +342,7 @@ bool OrXmlKinbody::getRealContent() {
 	TiXmlElement* c = getFirstChild(e, "offsetfrom");
 	if (c) {
 		LOG4CXX_ERROR(KrisLibrary::logger(), "Error: no support for offsetfrom tag in Kinbody!\n" );
-		KrisLibrary::loggerWait();
+		//Krislibrary::loggerWait();
 		return false;
 	}
 	TiXmlElement* c2 = getFirstChild(e, "KinBody");
@@ -417,7 +417,7 @@ bool OrXmlKinbody::GetObjectOrTerrain(RobotWorld& world) {
 		LOG4CXX_INFO(KrisLibrary::logger(),
 			"Error: should first process all the contents by GetAllCleanBodyJoints!\n"
 			<< "\n");
-		KrisLibrary::loggerWait();
+		//Krislibrary::loggerWait();
 		return false;
 	}
 	for (size_t i = 0; i < this->xmlBodys.size(); i++) {
@@ -637,7 +637,7 @@ void OrXmlBody::output2Tri() {
 
 void OrXmlBody::GetMimicGeomMass() {
 	if (mass && 0 == strcmp(mass->type.c_str(), "mimicgeom")) {
-//		LOG4CXX_INFO(KrisLibrary::logger(),"body "<<name<<" size "<<xmlGeoms.size());KrisLibrary::loggerWait();
+//		LOG4CXX_INFO(KrisLibrary::logger(),"body "<<name<<" size "<<xmlGeoms.size());//Krislibrary::loggerWait();
 		OrXmlMass* finalMass = new OrXmlMass();
 		finalMass->com = new Vector3;
 		finalMass->com->setZero();
@@ -726,7 +726,7 @@ bool OrXmlBody::GetFinalGeom() {
 
 //	if (count >= 2) {
 //		LOG4CXX_INFO(KrisLibrary::logger(), "Body:" << name << " :" << count << "\n" );
-//		KrisLibrary::loggerWait();
+//		//Krislibrary::loggerWait();
 //	}
 	this->output2Tri();
 	return true;
@@ -888,7 +888,7 @@ bool OrXmlRobot::ReSetBodyJointOrder() {
 			LOG4CXX_INFO(KrisLibrary::logger(), "Invalid joint " << xmlJoints[i]->name << ";"
 					<< xmlJoints[i]->bodys[0] << ";" << xmlJoints[i]->bodys[1]
 					<< "\n");
-			KrisLibrary::loggerWait();
+			//Krislibrary::loggerWait();
 			return false;
 		}
 	}
@@ -931,7 +931,7 @@ bool OrXmlRobot::GetParentChildRelation() {
 		if (xmlJoints[i]->bodys.size() != 2) {
 			LOG4CXX_ERROR(KrisLibrary::logger(), "Error: joint " << xmlJoints[i]->name << " bodys size="
 					<< xmlJoints[i]->bodys.size() << "\n");
-			KrisLibrary::loggerWait();
+			//Krislibrary::loggerWait();
 			return false;
 		}
 		string b1 = xmlJoints[i]->bodys[0];
@@ -949,7 +949,7 @@ bool OrXmlRobot::GetParentChildRelation() {
 		if (index1 == -1 && index2 == -1) {
 			LOG4CXX_ERROR(KrisLibrary::logger(), "Error: Joint " << xmlJoints[i]->name << " invalid!\n");
 			LOG4CXX_INFO(KrisLibrary::logger(), "b1:" << b1 << ";b2:" << b2 );
-			KrisLibrary::loggerWait();
+			//Krislibrary::loggerWait();
 			return false;
 		}
 		//if b1 has no parent and b1 is defined after b2
@@ -978,7 +978,7 @@ bool OrXmlRobot::applyTran2Tparent() {
 	if (!allclean) {
 		LOG4CXX_INFO(KrisLibrary::logger(),
 			"Error: robot transformation should be applied after everything else is processed!\n");
-		KrisLibrary::loggerWait();
+		//Krislibrary::loggerWait();
 		return false;
 	}
 	transformation->ComputeTransform();
@@ -1069,7 +1069,7 @@ void OrXmlRobot::setPrefixName() {
 void OrXmlRobot::combineTwoBody(OrXmlBody* b1, OrXmlBody* b2) {
 	if (0 != strcmp(b1->name.c_str(), b2->name.c_str())) {
 		LOG4CXX_ERROR(KrisLibrary::logger(), "Error: Bodies' names are not the same!\n" );
-		KrisLibrary::loggerWait();
+		//Krislibrary::loggerWait();
 	}
 	if ((b1->xmlGeoms.size() > 0 && b2->xmlGeoms.size() > 0)\
 
@@ -1081,7 +1081,7 @@ void OrXmlRobot::combineTwoBody(OrXmlBody* b1, OrXmlBody* b2) {
 
 			|| (b1->colpoints.size() > 0 && b2->colpoints.size() > 0)) {
 		LOG4CXX_ERROR(KrisLibrary::logger(), "Error: both bodies have same properties!\n" );
-		KrisLibrary::loggerWait();
+		//Krislibrary::loggerWait();
 	}
 	if (!b2->offsetfrom.empty() && b1->offsetfrom.empty()) {
 		b1->offsetfrom = b2->offsetfrom;
@@ -1478,7 +1478,7 @@ bool OrXmlRobot::GetFixedBaseRobot(Robot& robot) {
 			LOG4CXX_INFO(KrisLibrary::logger(), "Invalid joint " << xmlJoints[i]->name << ";"
 					<< xmlJoints[i]->bodys[0] << ";" << xmlJoints[i]->bodys[1]
 					<< "\n");
-			KrisLibrary::loggerWait();
+			//Krislibrary::loggerWait();
 			return false;
 		}
 		robjoint.linkIndex = linkI;
@@ -1611,7 +1611,7 @@ void OrXmlRobot::GetTransformAnchorAxis() {
 		if (!xmlBodys[i]->Tparent || !xmlBodys[i]->Tworld) {
 			LOG4CXX_ERROR(KrisLibrary::logger(), "Error: body " << xmlBodys[i]->name
 					<< " no Tparent or Tworld!\n" );
-			KrisLibrary::loggerWait();
+			//Krislibrary::loggerWait();
 		}
 	}
 
@@ -1624,7 +1624,7 @@ void OrXmlRobot::GetTransformAnchorAxis() {
 //		file<<")"<<endl;
 //		if(0==strcmp(xmlBodys[i]->name.c_str(),"rightIndexProximal")){
 //			LOG4CXX_INFO(KrisLibrary::logger(),xmlBodys[i]->name<<"\n");
-//			if(xmlBodys[i]->Tparent)LOG4CXX_INFO(KrisLibrary::logger(),*xmlBodys[i]->Tparent);KrisLibrary::loggerWait();
+//			if(xmlBodys[i]->Tparent)LOG4CXX_INFO(KrisLibrary::logger(),*xmlBodys[i]->Tparent);//Krislibrary::loggerWait();
 //		}
 //	}
 //	file.close();
@@ -1637,7 +1637,7 @@ void OrXmlRobot::GetTransformAnchorAxis() {
 			if (xmlJoints[i]->offsetfrom.empty()) {
 				LOG4CXX_INFO(KrisLibrary::logger(), xmlJoints[i]->name << " anchor without offsetfrom!\n")
 						;
-				KrisLibrary::loggerWait();
+				//Krislibrary::loggerWait();
 			}
 			int linkindex = this->getLinkIndex(xmlJoints[i]->offsetfrom);
 			int tmpparent = b1;
@@ -1650,11 +1650,11 @@ void OrXmlRobot::GetTransformAnchorAxis() {
 				tmpchild = b2;
 			} else {
 				LOG4CXX_ERROR(KrisLibrary::logger(), "Error: b1 b2 invalid!\n" );
-				KrisLibrary::loggerWait();
+				//Krislibrary::loggerWait();
 			}
 			//transform anchor to child's frame
 			if (linkindex == tmpparent) {
-//				LOG4CXX_INFO(KrisLibrary::logger(),"offset from parents"<<"\n");KrisLibrary::loggerWait();
+//				LOG4CXX_INFO(KrisLibrary::logger(),"offset from parents"<<"\n");//Krislibrary::loggerWait();
 				Vector3 anchor2;
 				RigidTransform inverseT;
 				inverseT.setInverse(*(xmlBodys[tmpchild]->Tparent));
@@ -1671,7 +1671,7 @@ void OrXmlRobot::GetTransformAnchorAxis() {
 							v[2] / norm);
 				}
 			}else{
-//				LOG4CXX_INFO(KrisLibrary::logger(),"offset from child"<<"\n");KrisLibrary::loggerWait();
+//				LOG4CXX_INFO(KrisLibrary::logger(),"offset from child"<<"\n");//Krislibrary::loggerWait();
 			}
 		}
 	}
@@ -1688,7 +1688,7 @@ void OrXmlRobot::ProcessJointAnchorInitial() {
 			if (xmlJoints[i]->offsetfrom.empty()) {
 				LOG4CXX_INFO(KrisLibrary::logger(), xmlJoints[i]->name << " anchor without offsetfrom!\n")
 						;
-				KrisLibrary::loggerWait();
+				//Krislibrary::loggerWait();
 			}
 			int linkindex = this->getLinkIndex(xmlJoints[i]->offsetfrom);
 			if (parents[b1] == b2) {
@@ -1699,7 +1699,7 @@ void OrXmlRobot::ProcessJointAnchorInitial() {
 				tmpchild = b2;
 			} else {
 				LOG4CXX_ERROR(KrisLibrary::logger(), "Error: b1 b2 invalid!\n" );
-				KrisLibrary::loggerWait();
+				//Krislibrary::loggerWait();
 			}
 //			if (!xmlBodys[tmpchild]->vis_filename.empty()) {
 //
@@ -1730,14 +1730,14 @@ void OrXmlRobot::ProcessJointAnchorInitial() {
 			    }
 			  }else{
 				  LOG4CXX_ERROR(KrisLibrary::logger(),"Invalid joint type "<<xmlJoints[i]->type<<"\n");
-			    KrisLibrary::loggerWait();
+			    //Krislibrary::loggerWait();
 			  }
 			  RigidTransform newTP;
 			  newTP.mul(*this->xmlBodys[tmpchild]->Tparent, T);
 			  this->xmlBodys[tmpchild]->Tparent->set(newTP);
 		}else if(xmlJoints[i]->initial.size() != 1 && xmlJoints[i]->initial.size() > 0){
 			LOG4CXX_INFO(KrisLibrary::logger(),"No code for handling this situation where initial tag contains multiple values!"<<"\n");
-			KrisLibrary::loggerWait();
+			//Krislibrary::loggerWait();
 		}
 	}
 }
@@ -2059,7 +2059,7 @@ void OrXmlRobot::recomputeTworld() {
 			OrXmlBody* parentbody = xmlBodys[parents[bodyindex]];
 			body->Tworld->mul(*parentbody->Tworld, *body->Tparent);
 		}
-//		LOG4CXX_INFO(KrisLibrary::logger(),body->name<<":\n"<<"Tparent:"<<*body->Tparent<<"\nTworld:"<<*body->Tworld<<"\n");KrisLibrary::loggerWait();
+//		LOG4CXX_INFO(KrisLibrary::logger(),body->name<<":\n"<<"Tparent:"<<*body->Tparent<<"\nTworld:"<<*body->Tworld<<"\n");//Krislibrary::loggerWait();
 
 		for (size_t i = 0; i < children[bodyindex].size(); i++) {
 			needprocess.push_back(children[bodyindex][i]);
@@ -2206,7 +2206,7 @@ void OrXmlRobot::writeToURDF() {
 			LOG4CXX_INFO(KrisLibrary::logger(), "Invalid joint " << xmlJoints[i]->name << ";"
 					<< xmlJoints[i]->bodys[0] << ";" << xmlJoints[i]->bodys[1]
 					<< "\n");
-			KrisLibrary::loggerWait();
+			//Krislibrary::loggerWait();
 			return;
 		}
 		Vector3 xyz, rpy;
@@ -2262,7 +2262,7 @@ void OrXmlRobot::WriteHubo(Robot& robot, bool isjaemi) {
 	file.open(filename.c_str());
 	if (!file.is_open()) {
 		LOG4CXX_INFO(KrisLibrary::logger(), filename << " cannot be opened!\n" );
-		KrisLibrary::loggerWait();
+		//Krislibrary::loggerWait();
 		file.close();
 		return;
 	}

@@ -111,7 +111,7 @@ void rotationMat2RPY(const Matrix3& mat, Vector3& vec){
 	double alphayaw, betapitch, gamaroll;
 //	if((mat(0,0)>=0 && mat(0,0) <= 1e-6) || (mat(2,2)>=0 && mat(2,2) <= 1e-6) ){
 //		LOG4CXX_INFO(KrisLibrary::logger(),"mat(0,0)="<<mat(0,0)<<" or mat(2,2)="<<mat(2,2)<<" are zeros!\n");
-//		KrisLibrary::loggerWait();
+//		//Krislibrary::loggerWait();
 //	}
 	alphayaw = atan2(mat(1,0), mat(0,0));
 	betapitch = atan2(-mat(2,0), sqrt(mat(2,1)*mat(2,1) + mat(2,2)*mat(2,2)));
@@ -291,7 +291,7 @@ OrXmlTransformation::~OrXmlTransformation(){
 int OrXmlTransformation::getTransformType(TiXmlElement* et){
 	if(!et){
 		LOG4CXX_INFO(KrisLibrary::logger(),"getTransformType: et is null!\n");
-		KrisLibrary::loggerWait();
+		//Krislibrary::loggerWait();
 		return -1;
 	}
 	if(0==lcstrcmp(et->Value(), "rotationmat"))
@@ -589,7 +589,7 @@ bool OrXmlJoint::GetCleanJointInfo(){
 		nLimits++;
 	if(nLimits >= 2){
 		LOG4CXX_INFO(KrisLibrary::logger(),"More than one type of limits are specified!\n");
-		KrisLibrary::loggerWait();
+		//Krislibrary::loggerWait();
 		return false;
 	}
 	if(limits.size() > 0){
@@ -610,7 +610,7 @@ bool OrXmlJoint::GetCleanJointInfo(){
 		nLimits++;
 	if(nLimits > 1){
 		LOG4CXX_INFO(KrisLibrary::logger(),"More than one type of acc are specified!\n");
-		KrisLibrary::loggerWait();
+		//Krislibrary::loggerWait();
 		return false;
 	}
 	if(maxaccel.size() > 0){
@@ -628,7 +628,7 @@ bool OrXmlJoint::GetCleanJointInfo(){
 		nLimits++;
 	if(nLimits > 1){
 		LOG4CXX_INFO(KrisLibrary::logger(),"More than one type of vel are specified!\n");
-		KrisLibrary::loggerWait();
+		//Krislibrary::loggerWait();
 		return false;
 	}
 	if(maxvel.size() > 0){
@@ -727,7 +727,7 @@ OrXmlMass::~OrXmlMass(){
 void OrXmlMass::GetBoxMass(){
 	double tmass = defaultmass;
 	if(!extents){
-		LOG4CXX_INFO(KrisLibrary::logger(),"Box Mass has no extents!\n");KrisLibrary::loggerWait();
+		LOG4CXX_INFO(KrisLibrary::logger(),"Box Mass has no extents!\n");//Krislibrary::loggerWait();
 	}
 	if(total){
 		tmass = *total;
@@ -755,7 +755,7 @@ void OrXmlMass::GetBoxMass(){
 void OrXmlMass::GetSphereMass(){
 	double tmass = defaultmass;
 	if(!radius){
-		LOG4CXX_INFO(KrisLibrary::logger(),"Sphere Mass has no radius!\n");KrisLibrary::loggerWait();
+		LOG4CXX_INFO(KrisLibrary::logger(),"Sphere Mass has no radius!\n");//Krislibrary::loggerWait();
 	}
 	if(total){
 		tmass = *total;
@@ -802,7 +802,7 @@ void OrXmlMass::GetUnitSphereMass(){
 void OrXmlMass::GetCylinderMass(){
 	double tmass = defaultmass;
 	if(!radius || !height){
-		LOG4CXX_INFO(KrisLibrary::logger(),"Cylinder Mass has no radius or height!\n");KrisLibrary::loggerWait();
+		LOG4CXX_INFO(KrisLibrary::logger(),"Cylinder Mass has no radius or height!\n");//Krislibrary::loggerWait();
 	}
 	if(total){
 		tmass = *total;
@@ -848,7 +848,7 @@ void OrXmlMass::AddMass(OrXmlMass* r){
 //	t = mnew.t;
 //	fTotalMass = mnew.fTotalMass;
 	if(!r->inertia || !r->total || !inertia || !total){
-		LOG4CXX_INFO(KrisLibrary::logger(),"total or inertia is empty!\n");KrisLibrary::loggerWait();
+		LOG4CXX_INFO(KrisLibrary::logger(),"total or inertia is empty!\n");//Krislibrary::loggerWait();
 		return;
 	}
 	if(*total + *(r->total) == 0)
@@ -892,7 +892,7 @@ void OrXmlMass::ChangeCenterOfRotation(const Vector3& newcor)
 //    t.m[8] -= fTotalMass * v.z * v.x;   t.m[9] -= fTotalMass * v.z * v.y;   t.m[10] += fTotalMass * (x2+y2);
 //    return *this;
 	if(!total || !com || !inertia){
-		LOG4CXX_INFO(KrisLibrary::logger(),"total or com or inertia is empty!\n");KrisLibrary::loggerWait();
+		LOG4CXX_INFO(KrisLibrary::logger(),"total or com or inertia is empty!\n");//Krislibrary::loggerWait();
 		return;
 	}
 	Vector3 v(newcor-(*com));
@@ -914,7 +914,7 @@ void OrXmlMass::ChangeCoordinateSystem(RigidTransform& trans)
 //    t.trans = trans*oldcom;
 	if(!com || !inertia){
 		LOG4CXX_INFO(KrisLibrary::logger(),"No com or inertia specified!");
-		KrisLibrary::loggerWait();
+		//Krislibrary::loggerWait();
 	}
 	Vector3 oldcom(*com);
 	RigidTransform trot, inverseT, massT, tmpT, finalmassT;
@@ -937,7 +937,7 @@ void OrXmlMass::ChangeCoordinateSystem(RigidTransform& trans)
 bool OrXmlMass::GetContent(){
 	if(e->QueryValueAttribute("type",&type)!=TIXML_SUCCESS){
 		LOG4CXX_ERROR(KrisLibrary::logger(),"Error in GetContent! No type specified!\n");
-		KrisLibrary::loggerWait();
+		//Krislibrary::loggerWait();
 		return false;
 	}
 	TiXmlElement* c = getFirstChild(e,"com");
@@ -1055,15 +1055,15 @@ OrXmlGeom::~OrXmlGeom(){
 bool OrXmlGeom::Convert2Tri(){
 	if(this->type.empty()){
 		LOG4CXX_INFO(KrisLibrary::logger(),"Geom has no type!\n");
-		KrisLibrary::loggerWait();
+		//Krislibrary::loggerWait();
 	}
 	if(strcmp(type.c_str(), "trimesh") != 0 && !render.empty()){
 		LOG4CXX_INFO(KrisLibrary::logger(),"Not support non trimesh type has render data!\n");
-		KrisLibrary::loggerWait();
+		//Krislibrary::loggerWait();
 	}
 	if(!render.empty() && !dorender){
 		LOG4CXX_INFO(KrisLibrary::logger(),"Render=false while render file is not empty!\n");
-		KrisLibrary::loggerWait();
+		//Krislibrary::loggerWait();
 	}
 	if(strcmp(type.c_str(), "trimesh") == 0){
 		if(!render.empty()){
@@ -1077,21 +1077,21 @@ bool OrXmlGeom::Convert2Tri(){
 	}else if(strcmp(type.c_str(), "box") == 0){
 		if(!extents){
 			LOG4CXX_INFO(KrisLibrary::logger(),"No extent specified for Box!\n");
-			KrisLibrary::loggerWait();
+			//Krislibrary::loggerWait();
 		}
 		Box box(extents->x,extents->y,extents->z);
 		copyPrimitiveMesh(box.points, box.indexes);
 	}else if(strcmp(type.c_str(), "sphere") == 0){
 		if(!radius){
 			LOG4CXX_INFO(KrisLibrary::logger(),"No radius specified for sphere!\n");
-			KrisLibrary::loggerWait();
+			//Krislibrary::loggerWait();
 		}
 		Sphere sphere(*radius);
 		copyPrimitiveMesh(sphere.points, sphere.indexes);
 	}else if(strcmp(type.c_str(), "cylinder") == 0){
 		if(!radius || !height){
 			LOG4CXX_INFO(KrisLibrary::logger(),"No radius or height specified for cylinder!\n");
-			KrisLibrary::loggerWait();
+			//Krislibrary::loggerWait();
 		}
 		Cylinder cylinder(*radius, *height);
 		copyPrimitiveMesh(cylinder.points, cylinder.indexes);
@@ -1123,12 +1123,12 @@ bool OrXmlGeom::applyTransformation(){
 bool OrXmlGeom::applyScale(bool visible){
 	if(!renderscale && visible){
 		LOG4CXX_INFO(KrisLibrary::logger(),"Geom has no renderscale!\n");
-		KrisLibrary::loggerWait();
+		//Krislibrary::loggerWait();
 		return true;
 	}
 	if(!datascale && !visible){
 		LOG4CXX_INFO(KrisLibrary::logger(),"Geom has no datascale!\n");
-		KrisLibrary::loggerWait();
+		//Krislibrary::loggerWait();
 		return true;
 	}
 	Matrix3 scaleM;
@@ -1203,11 +1203,11 @@ void OrXmlGeom::copyPrimitiveMesh(const vector<MyPoint3D>& pts, const vector<Tri
 void OrXmlGeom::loadGeom(bool visible){
 	if(visible && render.empty()){
 		LOG4CXX_INFO(KrisLibrary::logger(),"Render Geometry is empty!\n");
-		KrisLibrary::loggerWait();
+		//Krislibrary::loggerWait();
 	}
 	else if(!visible && data.empty()){
 		LOG4CXX_INFO(KrisLibrary::logger(),"Collision Geometry is empty!\n");
-		KrisLibrary::loggerWait();
+		//Krislibrary::loggerWait();
 	}
 	const char* ext;
 	if(visible)
@@ -1231,7 +1231,7 @@ void OrXmlGeom::loadWrl(bool visible){
 	file.open(filename);
 	if(!file.is_open()){
 		LOG4CXX_INFO(KrisLibrary::logger(),"Cannot read in wrl "<<filename<<" geometry!\n");
-		KrisLibrary::loggerWait();
+		//Krislibrary::loggerWait();
 	}
 	int visbaseIndex = vispoints.size();
 	int colbaseIndex = colpoints.size();
@@ -1293,7 +1293,7 @@ void OrXmlGeom::loadWrl(bool visible){
 							if(ti.data[0] > vispoints.size() || ti.data[1] > vispoints.size() || ti.data[2] > vispoints.size()){
 								LOG4CXX_INFO(KrisLibrary::logger(), "render:"<<render<<"\n");
 								LOG4CXX_INFO(KrisLibrary::logger(),vispoints.size()<<";("<<ti.data[0]<<","<<ti.data[1]<<","<<ti.data[2]<<")\n");
-								KrisLibrary::loggerWait();
+								//Krislibrary::loggerWait();
 							}
 						}else{
 							TriFaceIndex ti(p[0]+colbaseIndex,p[1]+colbaseIndex,p[2]+colbaseIndex);
@@ -1317,7 +1317,7 @@ void OrXmlGeom::loadTri(bool visible){
 	file.open(filename);
 	if(!file.is_open()){
 		LOG4CXX_INFO(KrisLibrary::logger(),"Cannot read in tri "<<filename<<" geometry!\n");
-		KrisLibrary::loggerWait();
+		//Krislibrary::loggerWait();
 	}
 	int visbaseIndex = vispoints.size();
 	int colbaseIndex = colpoints.size();

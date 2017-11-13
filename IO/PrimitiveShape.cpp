@@ -202,7 +202,7 @@ void Sphere::readInUnitSphere(){
 	file.open("data/objects/sphere.tri");
 	if(!file.is_open()){
 		LOG4CXX_INFO(KrisLibrary::logger(),"Cannot read in data/objects/sphere.tri!\n");
-		KrisLibrary::loggerWait();
+		//KrisLibrary::loggerWait();
 	}
 	int nPoint;
 	file >> nPoint;
@@ -234,7 +234,7 @@ void loadWrl(string filename, vector<MyPoint3D>& points, vector<TriFaceIndex>& i
 	file.open(filename.c_str());
 	if(!file.is_open()){
 		LOG4CXX_INFO(KrisLibrary::logger(),"Cannot read in wrl "<<filename<<" geometry!\n");
-		KrisLibrary::loggerWait();
+		//KrisLibrary::loggerWait();
 	}
 
 	int colbaseIndex = points.size();
@@ -335,7 +335,7 @@ void loadTri(string filename, vector<MyPoint3D>& points, vector<TriFaceIndex>& i
 	file.open(filename.c_str());
 	if(!file.is_open()){
 		LOG4CXX_INFO(KrisLibrary::logger(),"Cannot read in tri "<<filename<<" geometry!\n");
-		KrisLibrary::loggerWait();
+		//KrisLibrary::loggerWait();
 	}
 	int colbaseIndex = points.size();
 	int nPoint;
