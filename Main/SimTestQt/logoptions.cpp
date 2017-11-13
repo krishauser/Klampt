@@ -1,5 +1,5 @@
 #include "stdio.h"
-#include <boost/foreach.hpp>
+//#include <boost/foreach.hpp>
 
 #include "logoptions.h"
 #include "ui_logoptions.h"
@@ -55,9 +55,9 @@ void LogOptions::AddMeasurement(QString name){
 }
 
 void LogOptions::AddMeasurements(vector<string> names){
-       BOOST_FOREACH(string measurement,names){
-//    for(vector<string>::iterator it=names.begin();it != names.end();it++){
-        AddMeasurement(QString::fromStdString(measurement));
+       //BOOST_FOREACH(string measurement,names){
+    for(vector<string>::iterator it=names.begin();it != names.end();it++){
+        AddMeasurement(QString::fromStdString(*it));
     }
 }
 
