@@ -1,0 +1,7 @@
+<document>
+<select name="sensor">
+	<option value="omniscient">Omniscient</option>
+	<option value="position">Position</option>
+	<option value="blobdetector">Blob detector</option>
+</select>
+</document>

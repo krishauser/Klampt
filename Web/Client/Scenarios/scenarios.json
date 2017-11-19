@@ -1,25 +1,25 @@
-
+{
 	"scenarios":{
 		"Dynamics Test":"dynamics",
 		"Simulation Test":"test_sim",
 		"Dynamic Sandbox":"sandbox",
 		"Kinematic Sandbox":"kinematic_sandbox",
-		"Lab 1a":"lab1/lab1a",
-		"Lab 1b":"lab1/lab1b",
-		"Lab 1c":"lab1/lab1c",
-		"Lab 1d":"lab1/lab1d",
-		"Lab 2a":"lab2/lab2a",
-		"Lab 2b":"lab2/lab2b",
-		"Lab 2c":"lab2/lab2c",
-		"Lab 3a":"lab3/lab3a",
-		"Lab 3b":"lab3/lab3b",
-		"Lab 3d":"lab3/lab3d",
-		"Lab 4":"lab4",
-		"Lab 5":"lab5",
+		"Lab 1a":"lab_coordinates/lab1a",
+		"Lab 1b":"lab_coordinates/lab1b",
+		"Lab 1c":"lab_coordinates/lab1c",
+		"Lab 1d":"lab_coordinates/lab1d",
+		"Lab 2a":"lab_kinematics/lab2a",
+		"Lab 2b":"lab_kinematics/lab2b",
+		"Lab 2c":"lab_kinematics/lab2c",
+		"Lab 3a":"lab_planning/lab3a",
+		"Lab 3b":"lab_planning/lab3b",
+		"Lab 3d":"lab_planning/lab3d",
+		"Lab 4":"lab_robot_control",
+		"Lab 5":"lab_state_estimation",
 		"Final A":"finalA",
 		"Final B":"finalB",
 		"Final C":"finalC"
 	},
 	"shown":["Simulation Test","Dynamic Sandbox","Kinematic Sandbox","Lab 1a","Lab 1b","Lab 1c","Lab 1d","Lab 2a","Lab 2b","Lab 2c","Lab 3a","Lab 3b","Lab 3d","Lab 4"],
-	"active":"Lab 4"
+	"active":"Lab 5"
 }

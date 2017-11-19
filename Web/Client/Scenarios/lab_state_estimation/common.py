@@ -15,6 +15,17 @@ class OmniscientObjectOutput:
         self.positions = positions[:]
         self.velocities = velocities[:]
 
+class ObjectPositionOutput:
+    """Stores the output of an ObjectPositionSensor
+    Attributes:
+    names: a list of object names (actually, these will be the colors
+      of the objects)
+    positions: a list of object positions
+    """
+    def __init__(self,names,positions):
+        self.names = names[:]
+        self.positions = positions[:]
+
 class CameraBlob:
     """A blob on the camera screen, in image coordinates.
     Attributes:
@@ -74,20 +85,6 @@ class MultiObjectStateEstimate:
                 return o
         return None
 
-class OmniscientStateEstimator:
-    """A hack state estimator that gives perfect state information from
-    OmniscientObjectOutput readings."""
-    def __init__(self):
-        self.reset()
-        return
-    def reset(self):
-        pass
-    def update(self,o):
-        """Produces an updated MultiObjectStateEstimate given an OmniscientObjectOutput
-        sensor reading."""
-        assert isinstance(o,OmniscientObjectOutput),"OmniscientStateEstimator only works with an omniscient sensor"
-        estimates = [ObjectStateEstimate(n,p+v) for n,p,v in zip(o.names,o.positions,o.velocities)]
-        return MultiObjectStateEstimate(estimates)
 
 #Kalman filtering code
 
