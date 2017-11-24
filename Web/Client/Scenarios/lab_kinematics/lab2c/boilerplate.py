@@ -32,9 +32,9 @@ t = 0
 
 def boilerplate_start():
     global robot,target,target_axis,configurations,ghosts,t
-    fn = "Web/Client/Scenarios/lab2/tx90pr2.rob"
-    plane = "data/terrains/plane.env"
-    cylinder = "data/objects/cylinder.obj"
+    fn = __DIR__+"../tx90pr2.rob"
+    plane = __KLAMPT_DIR__+"data/terrains/plane.env"
+    cylinder = __KLAMPT_DIR__+"data/objects/cylinder.obj"
     kviz._world.loadElement(plane)
     kviz._world.loadElement(cylinder)
     res = kviz._world.loadElement(fn)

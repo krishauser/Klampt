@@ -136,8 +136,7 @@ program = None
 def boilerplate_start():
     global program
     world = WorldModel()
-    fn = "Web/Client/Scenarios/lab_state_estimation/world.xml"
-    #fn = "Web/Client/Scenarios/final/finalA.xml"
+    fn = __DIR__+"world.xml"
     res = world.readFile(fn)
     if not res:
         raise RuntimeError("Unable to load world "+fn)

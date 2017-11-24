@@ -55,7 +55,7 @@ def boilerplate_start():
 	global world,sim,t,desired,in_trace,trace
 	t = 0
 	world = WorldModel()
-	world.loadElement("Web/Client/Scenarios/lab4/scara.rob")
+	world.loadElement(__DIR__+"scara.rob")
 	sim = Simulator(world)
 	kviz._init(world)
 	stub.init(world)

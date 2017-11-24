@@ -194,9 +194,9 @@ def boilerplate_start():
 	global world,robot,t
 	t = 0
 	world = WorldModel()
-	fn = "Web/Client/Scenarios/lab5/lab6world.xml"
+	fn = __DIR__+"lab6world.xml"
 	if stub.environment == 'fancy':
-		fn = "Web/Client/Scenarios/lab5/luxuryhouseworld.xml"
+		fn = __DIR__+"luxuryhouseworld.xml"
 	if not world.readFile(fn):
 		raise IOError("Unable to load world XML file")
 	robot = Robot(world)

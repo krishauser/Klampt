@@ -30,7 +30,8 @@ def robot_dynamics(robot,q,dq,g,torques):
 def init(world):
     global robot,t
     global q,dq
-    world.loadElement("Web/Client/Scenarios/dynamics/planarRP.rob")
+    # Note: The values of __DIR__ and __KLAMPT_DIR__ are predefined.
+    world.loadElement(__DIR__+"planarRP.rob")
     robot = world.robot(0)
     q,dq = robot.getConfig(),robot.getVelocity()
     t = 0

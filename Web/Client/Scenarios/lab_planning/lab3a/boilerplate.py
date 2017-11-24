@@ -56,7 +56,7 @@ def boilerplate_start():
     path = [start]
     existing_path_lines = []
     for o in field.obstacles:
-        obst = world.loadElement("Web/Client/Scenarios/lab3/cylinder.tri")
+        obst = world.loadElement(__DIR__+"../cylinder.tri")
         if obst < 0:
             raise IOError("Unable to load cylinder, check the path")
         obst = world.terrain(world.numTerrains()-1)

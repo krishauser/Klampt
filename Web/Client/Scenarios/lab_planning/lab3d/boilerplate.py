@@ -33,7 +33,7 @@ def boilerplate_start():
     target=stub.target()
 
     world = WorldModel()
-    world.readFile("Web/Client/Scenarios/lab3/plan_world.xml")
+    world.readFile(__DIR__+"../plan_world.xml")
     space = stub.SE2ObstacleCSpace(world)
 
     #TODO: in Problem 4 you should switch the commented-out lines to

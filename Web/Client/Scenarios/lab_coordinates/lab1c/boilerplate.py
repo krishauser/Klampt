@@ -23,11 +23,11 @@ random_control = False
 def boilerplate_start():
     global world,car_body,wheels,velocity,xform,random_control
     world = WorldModel()
-    car_body = world.loadElement("Web/Client/Scenarios/lab1/body.obj")
-    wheels['fl'] = world.loadElement("Web/Client/Scenarios/lab1/tire_fl.obj")
-    wheels['fr'] = world.loadElement("Web/Client/Scenarios/lab1/tire_fr.obj")
-    wheels['bl'] = world.loadElement("Web/Client/Scenarios/lab1/tire_bl.obj")
-    wheels['br'] = world.loadElement("Web/Client/Scenarios/lab1/tire_br.obj")
+    car_body = world.loadElement(__DIR__+"../body.obj")
+    wheels['fl'] = world.loadElement(__DIR__+"../tire_fl.obj")
+    wheels['fr'] = world.loadElement(__DIR__+"../tire_fr.obj")
+    wheels['bl'] = world.loadElement(__DIR__+"../tire_bl.obj")
+    wheels['br'] = world.loadElement(__DIR__+"../tire_br.obj")
     car_body = world.rigidObject(car_body)
     car_body.appearance().setColor(1,0,0,1)
     for (k,v) in wheels.iteritems():

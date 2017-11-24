@@ -28,8 +28,8 @@ def arg_min(items):
 
 def boilerplate_start():
     global robot,target,configurations,ghosts,t
-    fn = "Web/Client/Scenarios/lab2/tx90pr2.rob"
-    plane = "data/terrains/plane.env"
+    fn = __DIR__+"../tx90pr2.rob"
+    plane = __KLAMPT_DIR__+"data/terrains/plane.env"
     kviz._world.loadElement(plane)
     res = kviz._world.loadElement(fn)
     robot = kviz._world.robot(0)

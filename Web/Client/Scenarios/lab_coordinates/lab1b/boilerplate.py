@@ -23,7 +23,7 @@ def boilerplate_start():
     pos3local = (1.6,1.4)
     angle = 0
     auto = True
-    kviz._world.loadElement("data/terrains/plane.env")
+    kviz._world.loadElement(__KLAMPT_DIR__+"data/terrains/plane.env")
     kviz.add_sphere("center",0,0,0.1,0.1)
     kviz.add_sphere("point1",0,0,0.1,0.05)
     kviz.add_sphere("point2",0,0,0.1,0.05)

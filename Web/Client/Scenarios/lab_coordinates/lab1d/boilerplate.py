@@ -40,9 +40,9 @@ def make_frame_widget(name,size,opacity=1.0):
     x = world.makeRigidObject(name+"_x")
     y = world.makeRigidObject(name+"_y")
     z = world.makeRigidObject(name+"_z")
-    x.geometry().loadFile("data/objects/cube.off")
-    y.geometry().loadFile("data/objects/cube.off")
-    z.geometry().loadFile("data/objects/cube.off")
+    x.geometry().loadFile(__KLAMPT_DIR__+"data/objects/cube.off")
+    y.geometry().loadFile(__KLAMPT_DIR__+"data/objects/cube.off")
+    z.geometry().loadFile(__KLAMPT_DIR__+"data/objects/cube.off")
     w = size*0.1
     x.geometry().transform([size,0,0,0,w,0,0,0,w],[0,-w*0.5,-w*0.5])
     y.geometry().transform([w,0,0,0,size,0,0,0,w],[-w*0.5,0,-w*0.5])

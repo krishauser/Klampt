@@ -58,23 +58,23 @@ def boilerplate_start():
     roadmap = [],[]
     world = WorldModel()
     for o in space.obstacles:
-        obst = world.loadElement("Web/Client/Scenarios/lab3/cylinder.tri")
+        obst = world.loadElement(__DIR__+"../cylinder.tri")
         if obst < 0:
             raise IOError("Unable to load cylinder, check the path")
         obst = world.terrain(world.numTerrains()-1)
         obst.geometry().transform([o.radius,0,0,0,o.radius,0,0,0,0.05],[o.center[0],o.center[1],0])
         obst.appearance().setColor(0.3,0.3,0.3,1)
     #make a box around everything
-    world.loadElement("Web/Client/Scenarios/lab3/cube.tri")
+    world.loadElement(__DIR__+"../cube.tri")
     wall = world.terrain(world.numTerrains()-1)
     wall.geometry().transform([0.01,0,0,0,1,0,0,0,0.05],[-0.01,0,0])
-    world.loadElement("Web/Client/Scenarios/lab3/cube.tri")
+    world.loadElement(__DIR__+"../cube.tri")
     wall = world.terrain(world.numTerrains()-1)
     wall.geometry().transform([0.01,0,0,0,1,0,0,0,0.05],[1,0,0])
-    world.loadElement("Web/Client/Scenarios/lab3/cube.tri")
+    world.loadElement(__DIR__+"../cube.tri")
     wall = world.terrain(world.numTerrains()-1)
     wall.geometry().transform([1,0,0,0,0.01,0,0,0,0.05],[0,-0.01,0])
-    world.loadElement("Web/Client/Scenarios/lab3/cube.tri")
+    world.loadElement(__DIR__+"../cube.tri")
     wall = world.terrain(world.numTerrains()-1)
     wall.geometry().transform([1,0,0,0,0.11,0,0,0,0.05],[0,1,0])
     

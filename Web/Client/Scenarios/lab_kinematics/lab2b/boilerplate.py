@@ -22,7 +22,7 @@ def boilerplate_start():
     global robot,ghosts,solutions,t
     solutions = (1,[(0,0,0)])
     world = kviz._world
-    fn = "Web/Client/Scenarios/lab2/3R_zyy.rob"
+    fn = __DIR__+"../3R_zyy.rob"
     res = world.loadElement(fn)
     assert res >= 0
     kviz._init(world)

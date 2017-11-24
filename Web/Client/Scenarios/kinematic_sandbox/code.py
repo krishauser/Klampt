@@ -4,7 +4,8 @@ robot = None
 
 def init(world):
     global robot
-    world.readFile("data/tx90scenario0.xml")
+    # Note: The values of __DIR__ and __KLAMPT_DIR__ are predefined.
+    world.readFile(__KLAMPT_DIR__+"data/tx90scenario0.xml")
     robot = world.robot(0)
     kviz.add_text("HUD1",1,1)
     

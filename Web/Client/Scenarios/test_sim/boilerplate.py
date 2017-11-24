@@ -20,7 +20,7 @@ dt = 0.02
 def boilerplate_start():
 	global world,sim
 	world = WorldModel()
-	world.readFile("./data/athlete_fractal_1.xml")
+	world.readFile(__KLAMPT_DIR__+"data/athlete_fractal_1.xml")
 	kviz._init(world)
 	sim = Simulator(world)
 	stub.init(world.robot(0))
