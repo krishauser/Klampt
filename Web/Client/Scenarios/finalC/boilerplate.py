@@ -11,9 +11,15 @@ import sensor
 import kviz
 import math
 
+def velocity_limited_move(x,xdes,dxmax):
+    dx = xdes - x
+    dx = min(max(dx,-dxmax),dxmax)
+    return x + dx
+
 class EventC:
     """This class does the event logic"""
     def __init__(self,sim):
+        sim.setSetting("adaptiveTimeStepping","0")
         self.difficulty = stub.difficulty
         self.score = 0
         self.forfeit = False
@@ -29,6 +35,8 @@ class EventC:
             self.endtime = 50
         elif self.difficulty == 'hard':
             self.endtime = 40
+        self.rubber_bands = [0 for i in range(sim.world.numRigidObjects())]
+        self.t_last = 0
 
         self.initialStates = None
         self.phase_shifts = [random.uniform(0,math.pi*2) for i in range(sim.world.numRigidObjects())]
@@ -111,46 +119,61 @@ class EventC:
     
     def doGameLogic(self,sim):
         t = sim.getTime()
+        dt = t - self.t_last
+        self.t_last = t
 
         #determine if ball touched; reset after 3 seconds
         robot = sim.world.robot(0)
-        for i in range(robot.numLinks()):
-            if sim.hadContact(robot.link(i).getID(),sim.world.rigidObject(0).getID()):
-                self.lasttouchtime = t
-
-        goalcenter = (3.5,0,0.5)
-        goaldims = (0.5,2,1)
-        goalmin = vectorops.madd(goalcenter,goaldims,-0.5)
-        goalmax = vectorops.madd(goalcenter,goaldims,0.5)
         obj = sim.world.rigidObject(0)
         ballbody = sim.body(obj)
-        ballbody.enable(True)
-        respawn = False
-        if self.ball < self.maxTries:
-            Tb = ballbody.getTransform()
-            Rb,tb = Tb
-            if all(tb[i] > goalmin[i] and tb[i] < goalmax[i] for i in range(3)):
-                print "Event supervisor: Ball",i,"scored, adding 10 points"
-                self.score += 10
+        tb = ballbody.getTransform()[1]
+        bx,by,bz = ballbody.getTransform()[1]
+        bvx,bvy,bvz = ballbody.getVelocity()[1]
+        if not ballbody.isEnabled():
+            #respawned
+            ballbody.enable(True)
+        else:
+            for i in range(robot.numLinks()):
+                if sim.hadContact(robot.link(i).getID(),sim.world.rigidObject(0).getID()):
+                    self.lasttouchtime = t
+
+            goalcenter = (3.5,0,0.5)
+            goaldims = (0.5,2,1)
+            goalmin = vectorops.madd(goalcenter,goaldims,-0.5)
+            goalmax = vectorops.madd(goalcenter,goaldims,0.5)
+            respawn = False
+            if self.ball < self.maxTries:
+                if all(tb[i] > goalmin[i] and tb[i] < goalmax[i] for i in range(3)):
+                    print "Event supervisor: Ball",self.ball,"scored, adding 10 points"
+                    self.score += 10
+                    respawn = True
+            
+            if self.lasttouchtime != None and t > self.lasttouchtime + 3.0:
+                print "Event supervisor: Ball",self.ball,"passed 3 seconds, respawning"
                 respawn = True
-        
-        if self.lasttouchtime != None and t > self.lasttouchtime + 3.0:
-            print "Event supervisor: Ball",i,"passed 3 seconds, respawning"
-            respawn = True
 
-        if ballbody.getTransform()[1][2] < 0:
-            #fallen off the edge
-            print "Event supervisor: Ball",i,"fell off the playing field, respawning"
-            respawn = True
+            if bz < 0:
+                #fallen off the edge
+                print "Event supervisor: Ball",self.ball,"fell off the playing field, height",bz,"respawning"
+                respawn = True
 
-        if respawn:
-            ballbody.setTransform(self.initialStates[0][0],self.initialStates[0][1])
-            ballbody.setVelocity([0]*3,[0]*3)
-            self.lasttouchtime = None
-            self.ball += 1
+            if respawn:
+                ballbody.setTransform(self.initialStates[0][0],self.initialStates[0][1])
+                ballbody.setVelocity([0]*3,[0]*3)
+                self.lasttouchtime = None
+                self.ball += 1
+                ballbody.enable(False)
 
         #drive obstacles    
+        rubber_band_threshold = 1.5
+        rubber_band_max_speed = 0.3
+        if self.difficulty == "medium":
+            rubber_band_max_speed = 0.4
+        if self.difficulty == "hard":
+            rubber_band_max_speed = 0.5
         for i in range(1,sim.world.numRigidObjects()):
+            blocker = sim.world.rigidObject(i)
+            told = blocker.getTransform()[1]
             Tx = self.initialStates[i]
             period = 5+i*2
             amplitude = 1.2
@@ -164,8 +187,20 @@ class EventC:
             delta = amplitude*math.sin((t+phase)/period*math.pi*2)
             vdelta = amplitude*math.cos((t+phase)/period*math.pi*2)*math.pi*2/period
             Tnew = (Tx[0],vectorops.add(Tx[1],[0,delta,0]))
-            sim.body(sim.world.rigidObject(i)).setTransform(*Tnew)
-            sim.body(sim.world.rigidObject(i)).setVelocity([0,0,0],[0,vdelta,0])
+            #rubber banding
+            if Tx[1][0]-bx > 0 and Tx[1][0]-bx < rubber_band_threshold:
+                #determine intercept
+                dx = Tx[1][0] - bx
+                tdiff = dx/max(bvx,0.1)
+                ytgt = by + bvy*tdiff
+                ycur = Tnew[1][1] + self.rubber_bands[i]
+                self.rubber_bands[i] = velocity_limited_move(ycur,ytgt,rubber_band_max_speed*dt) - Tnew[1][1]
+            else:
+                self.rubber_bands[i] = velocity_limited_move(self.rubber_bands[i],0,rubber_band_max_speed*dt)
+            Tnew = (Tnew[0],vectorops.add(Tnew[1],(0,self.rubber_bands[i],0)))
+            sim.body(blocker).setTransform(*Tnew)
+            #sim.body(blocker).setVelocity([0,0,0],[0,vdelta,0])
+            sim.body(blocker).setVelocity([0,0,0],vectorops.div(vectorops.sub(Tnew[1],told),dt))
     
     def inContact(self,sim):
         """Returns true if the robot touches the environment"""
@@ -308,7 +343,7 @@ def boilerplate_start():
     random.seed(stub.random_seed)
     world = WorldModel()
     world2 = WorldModel()
-    fn = "Web/Client/Scenarios/final/finalC.xml"
+    fn = __DIR__+"../final/finalC.xml"
     res = world.readFile(fn)
     if not res:
         raise RuntimeError("Unable to load world "+fn)

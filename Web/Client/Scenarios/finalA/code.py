@@ -1,6 +1,7 @@
 from klampt import *
 from klampt.math import vectorops,so3,se3
 from common import *
+import math
 import random
 #this may be useful...
 #import numpy as np
@@ -30,18 +31,21 @@ class MyObjectStateEstimator:
         #TODO: fill this in with your own camera model, if you wish
         self.Tsensor = None
         cameraRot = [0,-1,0,0,0,-1,1,0,0]
+        self.w,self.h = 320,240
+        self.fov = 90
+        self.dmax = 5
         if event == 'A':
             #at goal post, pointing a bit up and to the left
             self.Tsensor = (so3.mul(so3.rotation([0,0,1],0.20),so3.mul(so3.rotation([0,-1,0],0.25),cameraRot)),[-2.55,-1.1,0.25])
         elif event == 'B':
             #on ground near robot, pointing up and slightly to the left
             self.Tsensor = (so3.mul(so3.rotation([1,0,0],-0.10),so3.mul(so3.rotation([0,-1,0],math.radians(90)),cameraRot)),[-1.5,-0.5,0.25])
+            self.w = 640
+            self.h = 480
+            self.dmax = 10
         else:
             #on ground near robot, pointing to the right
             self.Tsensor = (cameraRot,[-1.5,-0.5,0.25])
-        self.fov = 90
-        self.w,self.h = 320,240
-        self.dmax = 5
         self.dt = 0.02
         return
     def reset(self):
@@ -51,6 +55,7 @@ class MyObjectStateEstimator:
         sensor reading."""
         #TODO
         return MultiObjectStateEstimate([])
+
 
 ################### CONTROLLER ########################
 

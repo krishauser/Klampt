@@ -290,7 +290,7 @@ def boilerplate_start():
     global program
     world = WorldModel()
     world2 = WorldModel()
-    fn = "Web/Client/Scenarios/final/finalA.xml"
+    fn = __DIR__+"../final/finalA.xml"
     res = world.readFile(fn)
     if not res:
         raise RuntimeError("Unable to load world "+fn)

@@ -1,4 +1,3 @@
-import math
 import sys
 sys.path.append("Web/Server")
 sys.path.append('Web/Client/Scenarios/final')
@@ -10,6 +9,8 @@ import random
 import traceback
 import sensor
 import kviz
+import math
+
 
 class EventB:
     """This class does the event logic"""
@@ -102,8 +103,15 @@ class EventB:
         t = sim.getTime()
         goalcenter = (-1,0,0.5)
         goaldims = (1.5,1.5,0)
-        goalmin = vectorops.madd(goalcenter,goaldims,-0.5)
-        goalmax = vectorops.madd(goalcenter,goaldims,0.5)
+        goalsize = 1.0
+        if self.difficulty == "easy":
+            goalsize = 0.5
+        elif self.difficulty == "medium":
+            goalsize = 0.75
+        elif self.difficulty == "hard":
+            goalsize = 1.0
+        goalmin = vectorops.madd(goalcenter,goaldims,-goalsize*0.5)
+        goalmax = vectorops.madd(goalcenter,goaldims,goalsize*0.5)
         if self.ball < len(self.balltimes) and t > self.balltimes[self.ball]:
             obj = sim.world.rigidObject(self.ball)
             ballbody = sim.body(obj)
@@ -117,11 +125,11 @@ class EventB:
             vel = vectorops.sub(target,Tb[1])
             h = 1
             if self.difficulty == "easy":
-                h=random.uniform(4,5)
+                h=random.uniform(6,7)
             elif self.difficulty == "medium":
-                h=random.uniform(3,6)
+                h=random.uniform(4,8)
             elif self.difficulty == "hard":
-                h=random.uniform(2,7)
+                h=random.uniform(3,9)
             #h = g*t^2 - 1/2*t*2*g
             g = 9.8
             t = math.sqrt(2*h/g)
@@ -180,18 +188,15 @@ class GLTest:
         self.sensors = dict()
         cameraRot = [0,-1,0,0,0,-1,1,0,0]
         #on ground near robot, pointing up and slightly to the left
-        Tsensor = (so3.mul(so3.rotation([1,0,0],-0.10),so3.mul(so3.rotation([0,-1,0],math.radians(90)),cameraRot)),[-1.5,-0.5,0.25])
+        Tsensor = (so3.mul(so3.rotation([1,0,0],-0.10),so3.mul(so3.rotation([0,-1,0],math.radians(90)),cameraRot)),[-1.0,-0.5,0.25])
         if stub.omniscient_sensor:
             self.sensors['omniscient'] = sensor.OmniscientObjectSensor()
         else:
             self.sensors['blobdetector'] = sensor.CameraColorDetectorSensor()
             self.sensors['blobdetector'].Tsensor = Tsensor        
-
-        #set up camera to get a better vantage point
-        #self.camera.dist = 12
-        #self.camera.tgt[2] = -1
-        #self.clippingplanes = (0.2,50)
-        
+            self.sensors['blobdetector'].w = 640
+            self.sensors['blobdetector'].h = 480
+            self.sensors['blobdetector'].dmax = 10
 
         self.mode = 'automatic'
         self.quser = simWorld.robot(0).getConfig()
@@ -302,7 +307,7 @@ def boilerplate_start():
     global program,world,world2
     world = WorldModel()
     world2 = WorldModel()
-    fn = "Web/Client/Scenarios/final/finalB.xml"
+    fn = __DIR__+"../final/finalB.xml"
     res = world.readFile(fn)
     if not res:
         raise RuntimeError("Unable to load world "+fn)
