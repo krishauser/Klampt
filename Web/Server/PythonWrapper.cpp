@@ -457,6 +457,7 @@ void handleIncomingMessage(string message)
       }
       else {
        printf("  Error occurred while running boilerplate_start()\n");
+       PyErr_Print();
        PyErr_Clear();
       }
     }
