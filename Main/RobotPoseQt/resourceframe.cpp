@@ -16,7 +16,6 @@
 #include <QInputDialog>
 #include <QMessageBox>
 
-#include <boost/foreach.hpp>
 
 static const int numtoposertypes = 5;
 static const char* toposertypes [] = {"Config","IKGoal","Stance","LinearPath","MultiPath"};
