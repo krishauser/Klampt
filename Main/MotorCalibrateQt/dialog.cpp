@@ -7,7 +7,6 @@
 #include <Main/motorcalibrate.h>
 #include "showtext.h"
 
-#include <boost/foreach.hpp>
 
 Dialog::Dialog(QWidget *parent) :
     QDialog(parent),
