@@ -4,7 +4,7 @@ include(ExternalProject)
 set(PROJECTNAME tests)
 project(${PROJECTNAME})
 
-# compite GTest
+# compile GTest
 find_package(GTest)
 if (NOT GTEST_FOUND)
     set(gTestSource "/usr/src/gtest")
@@ -43,5 +43,5 @@ find_package(PythonInterp)
 if(PYTHONINTERP_FOUND)
 add_test(NAME run_python_tests
          WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-         COMMAND python -m unittest discover ${CMAKE_CURRENT_SOURCE_DIR})
+         COMMAND python -m unittest discover ${CMAKE_SOURCE_DIR})
 ENDIF(PYTHONINTERP_FOUND)

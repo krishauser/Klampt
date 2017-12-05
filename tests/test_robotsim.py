@@ -9,6 +9,7 @@ class robotsimTest(unittest.TestCase):
         self.sim = SimpleSimulator(self.world)
 
     def test_getPIDGains(self):
+        self.assertTrue(self.world.numRobots()==1)
         c = self.sim.controller(0)
         pid_gains = c.getPIDGains()
         self.assertIsNotNone(pid_gains)

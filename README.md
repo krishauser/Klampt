@@ -1,4 +1,4 @@
-#Klamp't [![Build Status](https://travis-ci.org/krishauser/Klampt.svg?branch=master)](https://travis-ci.org/arocchi/Klampt)
+#Klamp't [![Build Status](https://travis-ci.org/krishauser/Klampt.svg?branch=master)](https://travis-ci.org/krishauser/Klampt)
 
 A robot simulation, planning, and control package from Indiana University /
 Duke University.
@@ -17,7 +17,7 @@ More information on installing from source on Linux or Mac OSX and binaries on W
 
 ### Using Docker
 
-Using [Docker](https://www.docker.com) to run this application is the easiest way to install and use Klamp't on your machine. In order to use this method, you must download and set up Docker. Tutorials are available for [OSX](http://docs.docker.com/mac/started/), [Linux](http://docs.docker.com/linux/started) and [Windows](http://docs.docker.com/windows/started). 
+Using [Docker](https://www.docker.com) to run this application is an easy way to install and use Klamp't on your machine. In order to use this method, you must download and set up Docker. Tutorials are available for [OSX](http://docs.docker.com/mac/started/), [Linux](http://docs.docker.com/linux/started) and [Windows](http://docs.docker.com/windows/started). 
 
 #### Running the Image
 

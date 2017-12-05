@@ -9,6 +9,7 @@ class robotsimTest(unittest.TestCase):
 
     def test_getStatus_unstable(self):
         self.world.loadRobot('data/robots/swingup.rob')
+        self.assertEqual(self.world.numRobots(),1)
 
         sim = SimpleSimulator(self.world)
         robot = self.world.robot(0)
@@ -30,6 +31,9 @@ class robotsimTest(unittest.TestCase):
         self.world.loadTerrain('data/terrains/plane.off')
         self.world.loadRobot('data/robots/pr2gripper.rob')
         self.world.loadRigidObject('data/objects/sphere_5cm.obj')
+        self.assertEqual(self.world.numRobots(),1)
+        self.assertEqual(self.world.numTerrains(),1)
+        self.assertEqual(self.world.numRigidObjects(),1)
         robot = self.world.robot(0)
         sphere = self.world.rigidObject(0)
 
@@ -54,6 +58,8 @@ class robotsimTest(unittest.TestCase):
     def test_getStatus_adaptive_time_stepping(self):
         self.world.loadTerrain('data/terrains/plane.off')
         self.world.loadRigidObject('data/objects/sphere_5cm.obj')
+        self.assertEqual(self.world.numRobots(),1)
+        self.assertEqual(self.world.numRigidObjects(),1)
         sphere = self.world.rigidObject(0)
         mass = sphere.getMass()
         mass.setMass(100)
@@ -80,6 +86,8 @@ class robotsimTest(unittest.TestCase):
     def test_getStatus_unreliable(self):
         self.world.loadTerrain('data/terrains/plane.off')
         self.world.loadRigidObject('data/objects/sphere_5cm.obj')
+        self.assertEqual(self.world.numTerrains(),1)
+        self.assertEqual(self.world.numRigidObjects(),1)
         sphere = self.world.rigidObject(0)
         mass = sphere.getMass()
         mass.setMass(1000)
