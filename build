@@ -1,0 +1,4 @@
+sudo docker rmi docker-klampt-old --force
+sudo docker tag docker-klampt docker-klampt-old
+sudo docker build -t docker-klampt .
+

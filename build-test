@@ -1,0 +1,4 @@
+sudo docker rmi docker-klampt-test-old --force
+sudo docker tag docker-klampt-test docker-klampt-test-old
+sudo docker build -t docker-klampt-test .
+
