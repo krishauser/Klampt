@@ -1,7 +1,20 @@
 #include "XmlODE.h"
 #include "Control/Controller.h"
 #include <KrisLibrary/utils/stringutils.h>
+#include <KrisLibrary/utils/ioutils.h>
+#include <sstream>
 
+int SafeQueryFloat(TiXmlElement* e,const char* attr,double& out)
+{
+  if(e->Attribute(attr)) {
+    std::stringstream ss(e->Attribute(attr));
+    if(SafeInputFloat(ss,out)) 
+      return TIXML_SUCCESS;
+    fprintf(stderr,"XML parser: Error reading <%s> attribute %s\n",e->Value(),attr);
+    return TIXML_WRONG_TYPE;
+  }
+  return TIXML_NO_ATTRIBUTE;
+}
 
 XmlODEGeometry::XmlODEGeometry(TiXmlElement* _element)
   :e(_element)
@@ -23,18 +36,10 @@ bool XmlODEGeometry::Get(ODEGeometry& mesh)
       mesh.SetPadding(padding);
     }
   }
-  if(e->QueryValueAttribute("kFriction",&temp)==TIXML_SUCCESS) {
-    mesh.surf().kFriction=temp;
-  }
-  if(e->QueryValueAttribute("kRestitution",&temp)==TIXML_SUCCESS) {
-    mesh.surf().kRestitution=temp;
-  }
-  if(e->QueryValueAttribute("kStiffness",&temp)==TIXML_SUCCESS) {
-    mesh.surf().kStiffness=temp;
-  }
-  if(e->QueryValueAttribute("kDamping",&temp)==TIXML_SUCCESS) {
-    mesh.surf().kDamping=temp;
-  }
+  SafeQueryFloat(e,"kFriction",mesh.surf().kFriction);
+  SafeQueryFloat(e,"kRestitution",mesh.surf().kRestitution);
+  SafeQueryFloat(e,"kStiffness",mesh.surf().kStiffness);
+  SafeQueryFloat(e,"kDamping",mesh.surf().kDamping);
   return true;
 }
 
@@ -102,7 +107,7 @@ bool XmlODESettings::GetSettings(ODESimulator& sim)
 	return false;
       }
     }
-    else if(0 == strcmp(name,"object")) {
+    else if(0 == strcmp(name,"object") || 0 == strcmp(name,"rigidObject")) {
       int index;
       if(c->QueryValueAttribute("index",&index)==TIXML_SUCCESS) {
 	Assert(index < (int)sim.numObjects());
@@ -176,11 +181,8 @@ bool XmlSimulationSettings::GetSettings(WorldSimulation& sim)
   string globals="globals";
   TiXmlElement* c = e->FirstChildElement(globals);
   if(c) {
-    printf("Parsing timestep...\n");
     //parse timestep
-    double timestep;
-    if(c->QueryValueAttribute("timestep",&timestep)==TIXML_SUCCESS)
-      sim.simStep = timestep;
+    SafeQueryFloat(c,"timestep",sim.simStep);
   }
   printf("Parsing ODE...\n");
   XmlODESettings ode(e);

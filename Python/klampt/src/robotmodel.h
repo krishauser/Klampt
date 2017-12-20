@@ -206,6 +206,12 @@ class RobotModel
 {
  public:
   RobotModel();
+  ///Loads the robot from a file 
+  bool loadFile(const char* fn);
+  ///Saves the robot.  If geometryPrefix == NULL, the geometry is not saved (default).  Otherwise, the geometry of each link
+  ///will be saved to files named geometryPrefix+name, where name is either the name of the geometry file that was loaded,
+  ///or [link_name].off
+  bool saveFile(const char* fn,const char* geometryPrefix=NULL);
   ///Returns the ID of the robot in its world (Note: not the same as the robot index)
   int getID() const;
   const char* getName() const;
@@ -338,6 +344,11 @@ class RigidObjectModel
 {
  public:
   RigidObjectModel();
+  ///Loads the object from a file 
+  bool loadFile(const char* fn);
+  ///Saves the object.  If geometryName is given, the geometry is saved to that file.
+  bool saveFile(const char* fn,const char* geometryName=NULL);
+  ///Returns the ID of the rigid object in its world (Note: not the same as the rigid object index)
   int getID() const;
   const char* getName() const;
   void setName(const char* name);
@@ -372,6 +383,11 @@ class TerrainModel
 {
  public:
   TerrainModel();
+  ///Loads the terrain from a file 
+  bool loadFile(const char* fn);
+  ///Saves the terrain.  If geometryName is given, the geometry is saved to that file.
+  bool saveFile(const char* fn,const char* geometryName=NULL);
+  ///Returns the ID of the terrain in its world (Note: not the same as the terrain index)
   int getID() const;
   const char* getName() const;
   void setName(const char* name);

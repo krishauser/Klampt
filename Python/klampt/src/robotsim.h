@@ -268,12 +268,14 @@ class SimBody
   /// Returns the angular velocity and translational velocity
   void getVelocity(double out[3],double out2[3]);
 
-  /// Sets the collision padding (useful for thin objects).  Default is 0.0025
+  /// Sets the collision padding used for contact generation.  At 0 padding the simulation will be unstable
+  /// for triangle mesh and point cloud geometries.  A larger value is useful to maintain simulation stability
+  /// for thin or soft objects.  Default is 0.0025.
   void setCollisionPadding(double padding);
   double getCollisionPadding();
   /// If set, preshrinks the geometry so that the padded geometry better matches
   /// the original mesh.  If shrinkVisualization=true, the underlying mesh is
-  /// also shrunk (helps debug)
+  /// also shrunk (helps debug simulation artifacts due to preshrink)
   void setCollisionPreshrink(bool shrinkVisualization=false);
 
   /// Gets (a copy of) the surface properties
@@ -311,6 +313,9 @@ class Simulator
   /// Returns a string indicating the simulator's status.  If s is provided and >= 0,
   /// this function maps the indicator code s to a string.
   std::string getStatusString(int s=-1);
+  /// Checks if any objects are overlapping. Returns a pair of lists of
+  /// integers, giving the pairs of object ids that are overlapping.
+  void checkObjectOverlap(std::vector<int>& out,std::vector<int>& out2);
 
   /// Returns a Base64 string representing the binary data for the current
   /// simulation state, including controller parameters, etc.
@@ -417,7 +422,6 @@ class Simulator
   /// Sets some simulation setting. Raises an exception if the name is
   /// unknown or the value is of improper format
   void setSetting(const std::string& name,const std::string& value);
-
 
   int index;
   WorldModel world;

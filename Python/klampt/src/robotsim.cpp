@@ -898,6 +898,19 @@ void Geometry3D::getBB(double out[3],double out2[3])
   bb.bmax.get(out2);
 }
 
+void Geometry3D::getBBTight(double out[3],double out2[3])
+{
+  SmartPointer<AnyCollisionGeometry3D>& geom = *reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(geomPtr);
+  if(!geom) {
+    out[0] = out[1] = out[2] = Inf;
+    out2[0] = out2[1] = out2[2] = -Inf;
+    return;
+  }
+  AABB3D bb = geom->GetAABBTight();
+  bb.bmin.get(out);
+  bb.bmax.get(out2);
+}
+
 bool Geometry3D::collides(const Geometry3D& other)
 {
   SmartPointer<AnyCollisionGeometry3D>& geom = *reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(geomPtr);
@@ -2361,6 +2374,31 @@ RobotModel::RobotModel()
   :world(-1),index(-1),robot(NULL)
 {}
 
+bool RobotModel::loadFile(const char* fn)
+{
+  if(index < 0) {
+    throw PyException("Cannot load an empty robot, this needs to be part of a world");
+  }
+  return robot->Load(fn);
+}
+
+bool RobotModel::saveFile(const char* fn,const char* geometryPrefix)
+{
+  if(index < 0) {
+    throw PyException("Cannot save an empty robot");
+  }
+  if(!robot->Save(fn)) return false;
+  if(geometryPrefix) {
+    for(size_t i=0;i<robot->links.size();i++) {
+      if(!robot->IsGeometryEmpty(i) && robot->geomFiles[i].empty()) {
+        robot->geomFiles[i] = robot->linkNames[i]+".off";
+      }
+    }
+    if(!robot->SaveGeometry(geometryPrefix)) return false;
+  }
+  return true;
+}
+
 const char* RobotModel::getName() const
 {
   if(index < 0) throw PyException("Robot is empty");
@@ -2818,6 +2856,22 @@ RigidObjectModel::RigidObjectModel()
   :world(-1),index(-1),object(NULL)
 {}
 
+bool RigidObjectModel::loadFile(const char* fn)
+{
+  if(index < 0) {
+    throw PyException("Cannot load an empty rigid object, this needs to be part of a world");
+  }
+  return object->Load(fn);
+}
+
+bool RigidObjectModel::saveFile(const char* fn,const char* geometryName)
+{
+  if(!object->Save(fn)) return false;
+  if(geometryName)
+    if(!object->geometry->Save(geometryName)) return false;
+  return true;
+}
+
 const char* RigidObjectModel::getName() const
 {
   RobotWorld& world = *worlds[this->world]->world;
@@ -2963,6 +3017,23 @@ TerrainModel::TerrainModel()
 {
 }
 
+
+bool TerrainModel::loadFile(const char* fn)
+{
+  if(index < 0) {
+    throw PyException("Cannot load an empty terrain, this needs to be part of a world");
+  }
+  return terrain->Load(fn);
+}
+
+bool TerrainModel::saveFile(const char* fn,const char* geometryName)
+{
+  if(!terrain->Save(fn)) return false;
+  if(geometryName)
+    if(!terrain->geometry->Save(geometryName)) return false;
+  return true;
+}
+
 const char* TerrainModel::getName() const
 {
   RobotWorld& world = *worlds[this->world]->world;
@@ -3077,8 +3148,8 @@ Simulator::Simulator(const WorldModel& model)
   }
 
   //TEMP: play around with auto disable of rigid objects
-  //for(size_t i=0;i<sim->odesim.numObjects();i++)
-  //    dBodySetAutoDisableFlag(sim->odesim.object(i)->body(),1);
+  for(size_t i=0;i<sim->odesim.numObjects();i++)
+      dBodySetAutoDisableFlag(sim->odesim.object(i)->body(),1);
 
   sim->WriteState(initialState);
 }
@@ -3120,6 +3191,18 @@ string Simulator::getState()
 void Simulator::setState(const string& str)
 {
   sim->ReadState(FromBase64(str));
+}
+
+void Simulator::checkObjectOverlap(std::vector<int>& out,std::vector<int>& out2)
+{
+  vector<pair<ODEObjectID,ODEObjectID> > overlaps;
+  sim->odesim.CheckObjectOverlap(overlaps);
+  out.resize(overlaps.size());
+  out2.resize(overlaps.size());
+  for(size_t i=0;i<overlaps.size();i++) {
+    out[i]=sim->ODEToWorldID(overlaps[i].first);
+    out2[i]=sim->ODEToWorldID(overlaps[i].second);
+  }
 }
 
 void Simulator::simulate(double t)

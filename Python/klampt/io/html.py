@@ -60,6 +60,7 @@ class HTMLSharePath:
 		if isinstance(world,Simulator):
 			self.sim = world
 			self.world = world.world
+			self.last_t = world.getTime()
 		else:
 			self.sim = None
 			self.world = world

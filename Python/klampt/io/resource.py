@@ -118,7 +118,7 @@ def filenameToType(name):
         raise RuntimeError("Cannot determine type of resource from name "+name)
 
 
-def get(name,type='auto',directory=None,default=None,doedit='auto',description=None,editor='visual',world=None,frame=None):
+def get(name,type='auto',directory=None,default=None,doedit='auto',description=None,editor='visual',world=None,referenceObject=None,frame=None):
     """Retrieve a resource of the given name from the current resources
     directory.  Resources may be of type Config, Configs, IKGoal, Hold,
     Stance, MultiPath, Trajectory/LinearPath, etc. (see Klampt/Modeling/Resources.h for
@@ -151,15 +151,19 @@ def get(name,type='auto',directory=None,default=None,doedit='auto',description=N
           the item to edit.  If this is a string it points to a file
           that will be loaded for the world (e.g., a world XML file, or a
           robot file).
+        - referenceObject: to give visual reference points, one or more RobotModels,
+          ObjectModels, Geometry3D's, or RobotModelLink's may be designated to follow
+          the edited object.  Currently works with Config's / Configs' / Trajectories /
+          rigid transforms / rotations / points.
         - frame: for rigid transforms / rotations / points, the reference
-          frame for the visual editor.  This is an element of se3, or an
-          ObjectModel, or a RobotModelLink, or a string indicating a named
-          rigid element of the world.
+          frame in which the quantity is represented.  This is an element of
+          se3, or an ObjectModel, or a RobotModelLink, or a string indicating a
+          named rigid element of the world.
           """
     if name==None:
         if doedit==False:
             raise RuntimeError("Can't get() an anonymous resource without launching editor")
-        success,newvalue = edit(name,value=default,type=type,description=description,editor=editor,world=world,frame=frame)
+        success,newvalue = edit(name,value=default,type=type,description=description,editor=editor,world=world,referenceObject=referenceObject,frame=frame)
         if not success:
             print "Cancel pressed, returning None"
             return None
@@ -194,7 +198,7 @@ def get(name,type='auto',directory=None,default=None,doedit='auto',description=N
         if value==None:
             raise IOError("Unable to load from file "+fn)
         if doedit==True:
-            success,newvalue = edit(name,value=value,type=type,description=description,editor=editor,world=world,frame=frame)
+            success,newvalue = edit(name,value=value,type=type,description=description,editor=editor,world=world,referenceObject=referenceObject,frame=frame)
             if success:
                 print "Ok pressed, saving resource to",name
                 value = newvalue
@@ -206,7 +210,7 @@ def get(name,type='auto',directory=None,default=None,doedit='auto',description=N
     except IOError as e:
         if doedit!=False:
             print "Resource",fn,"does not exist, launching editor..."
-            success,newvalue = edit(name,value=default,type=type,description=description,editor=editor,world=world,frame=frame)
+            success,newvalue = edit(name,value=default,type=type,description=description,editor=editor,world=world,referenceObject=referenceObject,frame=frame)
             if success:
                 print "Ok pressed, saving resource to",name
                 value = newvalue
@@ -595,7 +599,7 @@ def edit(name,value,type='auto',description=None,editor='visual',world=None,refe
             if type == 'Rotation':
                 editor.disableTranslation()
             #attach visualization items to the transform
-            if isinstance(frame,RobotModelLink):
+            if isinstance(referenceObject,RobotModelLink):
                 assert frame.index >= 0
                 r = frame.robot()
                 descendant = [False]*r.numLinks()
@@ -607,9 +611,9 @@ def edit(name,value,type='auto',description=None,editor='visual',world=None,refe
                     if descendant[i]:
                         editor.attach(r.link(i))
                 editor.attach(frame)
-            if hasattr(referenceObject,'getTransform'):
+            elif hasattr(referenceObject,'getTransform'):
                 editor.attach(referenceObject)
-            if hasattr(referenceObject,'__iter__'):
+            elif hasattr(referenceObject,'__iter__'):
                 for i in referenceObject:
                     editor.attach(referenceObject)
             #Run!

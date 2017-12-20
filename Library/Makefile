@@ -9,10 +9,8 @@ ODECONFIG += --enable-double-precision
 
 UNAME = $(shell uname)
 
-#NOTE: plan_devel is temporary, will be moved to master
 unpack-deps:
 	git clone https://github.com/krishauser/KrisLibrary
-	cd KrisLibrary; git checkout plan_devel
 	tar xvzf ode-0.14.tar.gz
 	tar xvzf glui-2.36.tgz
 	tar xvzf glew-2.0.0.tgz
@@ -42,7 +40,7 @@ dep-glui:
 endif
 
 dep-ode:
-	cd ode-0.14; X_EXTRA_LIBS=-lX11 CXXFLAGS=-fPIC ./configure $(ODECONFIG)
+	cd ode-0.14; X_EXTRA_LIBS=-lX11 CFLAGS=-fPIC CXXFLAGS=-fPIC ./configure $(ODECONFIG)
 	cd ode-0.14; make
 
 #NOTE: call "sudo make ldconfig-ode" if you have set --enable-shared in ODECONFIG

@@ -432,6 +432,23 @@ void PrintStatus(ODESimulator* sim,const vector<CollisionPair >& concernedObject
   }
 }
 
+bool ODESimulator::CheckObjectOverlap(vector<pair<ODEObjectID,ODEObjectID> >& overlaps)
+{
+  DetectCollisions();
+  overlaps.resize(0);
+  for(list<ODEContactResult>::iterator i=gContacts.begin();i!=gContacts.end();i++) {
+    CollisionPair collpair(GeomDataToObjectID(dGeomGetData(i->o1)),GeomDataToObjectID(dGeomGetData(i->o2)));
+    if(collpair.second < collpair.first) 
+      swap(collpair.first,collpair.second);
+
+    //if two bodies had overlap on the prior timestep, don't
+    //keep rolling back
+    if(i->meshOverlap) 
+      overlaps.push_back(collpair);
+  }
+  return overlaps.empty();
+}
+
 void ODESimulator::Step(Real dt)
 {
   if(GetStatus() == StatusError)  {
@@ -1737,8 +1754,13 @@ bool ODESimulator::InstabilityCorrection()
   double scale = 1.0;
   ODEObjectID id;
   for(size_t i=0;i<objects.size();i++) {
-    Real ke = objects[i]->GetKineticEnergy();
     id.SetRigidObject(i);
+    //ignore non-dynamically simulated bodies for instability correction
+    if(!dBodyIsEnabled(objects[i]->body()) || dBodyIsKinematic(objects[i]->body())) {
+      DisableInstabilityCorrection(id);
+      continue;
+    }
+    Real ke = objects[i]->GetKineticEnergy();
     bool unstable = false;
     double threshold = settings.instabilityMaxEnergyThreshold;
     if(!(ke < settings.instabilityMaxEnergyThreshold)) {

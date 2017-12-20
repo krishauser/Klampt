@@ -1050,9 +1050,19 @@ class Geometry3D(_object):
         """
         getBB(Geometry3D self)
 
-        Returns the axis-aligned bounding box of the object. 
+        Returns the axis-aligned bounding box of the object. Note: O(1) time,
+        but may not be tight. 
         """
         return _robotsim.Geometry3D_getBB(self)
+
+    def getBBTight(self):
+        """
+        getBBTight(Geometry3D self)
+
+        Returns a tighter axis-aligned bounding box of the object than getBB.
+        Worst case O(n) time. 
+        """
+        return _robotsim.Geometry3D_getBBTight(self)
 
     def collides(self, *args):
         """
@@ -2093,6 +2103,26 @@ class RobotModel(_object):
         this = _robotsim.new_RobotModel()
         try: self.this.append(this)
         except: self.this = this
+    def loadFile(self, *args):
+        """
+        loadFile(RobotModel self, char const * fn) -> bool
+
+        Loads the robot from a file. 
+        """
+        return _robotsim.RobotModel_loadFile(self, *args)
+
+    def saveFile(self, *args):
+        """
+        saveFile(RobotModel self, char const * fn, char const * geometryPrefix=None) -> bool
+        saveFile(RobotModel self, char const * fn) -> bool
+
+        Saves the robot. If geometryPrefix == NULL, the geometry is not saved
+        (default). Otherwise, the geometry of each link will be saved to files
+        named geometryPrefix+name, where name is either the name of the
+        geometry file that was loaded, or [link_name].off. 
+        """
+        return _robotsim.RobotModel_saveFile(self, *args)
+
     def getID(self):
         """
         getID(RobotModel self) -> int
@@ -2478,8 +2508,31 @@ class RigidObjectModel(_object):
         this = _robotsim.new_RigidObjectModel()
         try: self.this.append(this)
         except: self.this = this
+    def loadFile(self, *args):
+        """
+        loadFile(RigidObjectModel self, char const * fn) -> bool
+
+        Loads the object from a file. 
+        """
+        return _robotsim.RigidObjectModel_loadFile(self, *args)
+
+    def saveFile(self, *args):
+        """
+        saveFile(RigidObjectModel self, char const * fn, char const * geometryName=None) -> bool
+        saveFile(RigidObjectModel self, char const * fn) -> bool
+
+        Saves the object. If geometryName is given, the geometry is saved to
+        that file. 
+        """
+        return _robotsim.RigidObjectModel_saveFile(self, *args)
+
     def getID(self):
-        """getID(RigidObjectModel self) -> int"""
+        """
+        getID(RigidObjectModel self) -> int
+
+        Returns the ID of the rigid object in its world (Note: not the same as
+        the rigid object index) 
+        """
         return _robotsim.RigidObjectModel_getID(self)
 
     def getName(self):
@@ -2589,8 +2642,31 @@ class TerrainModel(_object):
         this = _robotsim.new_TerrainModel()
         try: self.this.append(this)
         except: self.this = this
+    def loadFile(self, *args):
+        """
+        loadFile(TerrainModel self, char const * fn) -> bool
+
+        Loads the terrain from a file. 
+        """
+        return _robotsim.TerrainModel_loadFile(self, *args)
+
+    def saveFile(self, *args):
+        """
+        saveFile(TerrainModel self, char const * fn, char const * geometryName=None) -> bool
+        saveFile(TerrainModel self, char const * fn) -> bool
+
+        Saves the terrain. If geometryName is given, the geometry is saved to
+        that file. 
+        """
+        return _robotsim.TerrainModel_saveFile(self, *args)
+
     def getID(self):
-        """getID(TerrainModel self) -> int"""
+        """
+        getID(TerrainModel self) -> int
+
+        Returns the ID of the terrain in its world (Note: not the same as the
+        terrain index) 
+        """
         return _robotsim.TerrainModel_getID(self)
 
     def getName(self):
@@ -4183,8 +4259,10 @@ class SimBody(_object):
         """
         setCollisionPadding(SimBody self, double padding)
 
-        Sets the collision padding (useful for thin objects). Default is
-        0.0025. 
+        Sets the collision padding used for contact generation. At 0 padding
+        the simulation will be unstable for triangle mesh and point cloud
+        geometries. A larger value is useful to maintain simulation stability
+        for thin or soft objects. Default is 0.0025. 
         """
         return _robotsim.SimBody_setCollisionPadding(self, *args)
 
@@ -4199,7 +4277,8 @@ class SimBody(_object):
 
         If set, preshrinks the geometry so that the padded geometry better
         matches the original mesh. If shrinkVisualization=true, the underlying
-        mesh is also shrunk (helps debug) 
+        mesh is also shrunk (helps debug simulation artifacts due to
+        preshrink) 
         """
         return _robotsim.SimBody_setCollisionPreshrink(self, shrinkVisualization)
 
@@ -4315,6 +4394,15 @@ class Simulator(_object):
         and >= 0, this function maps the indicator code s to a string. 
         """
         return _robotsim.Simulator_getStatusString(self, *args)
+
+    def checkObjectOverlap(self):
+        """
+        checkObjectOverlap(Simulator self)
+
+        Checks if any objects are overlapping. Returns a pair of lists of
+        integers, giving the pairs of object ids that are overlapping. 
+        """
+        return _robotsim.Simulator_checkObjectOverlap(self)
 
     def getState(self):
         """
