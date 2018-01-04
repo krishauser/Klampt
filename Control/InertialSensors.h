@@ -7,6 +7,12 @@ using namespace Math3D;
 
 /** @ingroup Control
  * @brief Simulates an accelerometer.
+ *
+ * Configurable settings:
+ * - link: int
+ * - Tsensor: RigidTransform (default identity)
+ * - hasAxis: bool [3]
+ * - accelVariance: Vector3
  */
 class Accelerometer : public SensorBase
 {
@@ -40,6 +46,15 @@ class Accelerometer : public SensorBase
 /** @ingroup Control
  * @brief Simulates a tilt sensor that measures the angle of
  * a reference direction about certain axes.
+ *
+ * Configurable settings:
+ * - link: int
+ * - referenceDir: Vector3 (default 0,0,1)
+ * - Rsensor: Matrix3 (default identity)
+ * - hasAxis: bool [3]
+ * - resolution: Vector3
+ * - variance: Vector3
+ * - hasVelocity: bool (default false)
  */
 class TiltSensor : public SensorBase
 {
@@ -59,7 +74,7 @@ class TiltSensor : public SensorBase
 
   int link;
   Vector3 referenceDir;
-  Matrix3 Rsensor;  ///< Position of unit on link
+  Matrix3 Rsensor;  ///< Orientation of unit on link
   bool hasAxis[3];  ///< true if tilt is measured on the x, y, z axes
   Vector3 resolution,variance;
   bool hasVelocity;
@@ -70,6 +85,15 @@ class TiltSensor : public SensorBase
 
 /** @ingroup Control
  * @brief Simulates a gyroscope.
+ *
+ * Configurable settings:
+ * - link: int
+ * - hasAngAccel: bool (default 0)
+ * - hasAngVel: bool (default 0)
+ * - hasRotation: bool (default 0)
+ * - angAccelVariance: Matrix3
+ * - angVelVariance: Matrix3
+ * - rotationVariance: Matrix3
  */
 class GyroSensor : public SensorBase
 {
@@ -108,6 +132,9 @@ class GyroSensor : public SensorBase
 /** @ingroup Control
  * @brief An inertial measurement unit.  May provide all or some of a 
  * rigid body's state.
+ *
+ * Configurable settings:
+ * see Accelerometer and GyroSensor
  */
 class IMUSensor : public SensorBase
 {

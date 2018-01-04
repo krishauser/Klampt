@@ -22,11 +22,25 @@ using namespace Math3D;
  * (x,y) attenuates according to the weight
  * (1-4*|x||y|/(xpatchSize*ypatchSize))^falloffCoefficient so that forces near
  * the edge of the patch are reduced in their influence on the measurement.
+ * 
+ * Configurable settings:
+ * - link (int)
+ * - Tsensor (RigidTransform)
+ * - patchMin (Vector2)
+ * - patchMax (Vector2)
+ * - patchTolerance (float)
+ * - hasForce (bool [3])
+ * - fResolution (Vector3)
+ * - fVariance (Vector3)
+ * - fSensitivity (float)
+ * - fSaturation (Vector3)
+ * - falloffCoefficient (float)
  */
 class ContactSensor : public SensorBase
 {
  public:
   ContactSensor();
+  virtual ~ContactSensor() {}
   virtual const char* Type() const { return "ContactSensor"; }
   virtual void Simulate(ControlledRobotSimulator* robot,WorldSimulation* sim);
   virtual void SimulateKinematic(Robot& robot,RobotWorld& world);
@@ -40,7 +54,7 @@ class ContactSensor : public SensorBase
   virtual void DrawGL(const Robot& robot,const vector<double>& measurements);
 
   int link;                ///< The link on which the sensor is located
-  RigidTransform Tsensor;  ///< Local frame of the sensor (by convention, origin is at contact patch center, z is normal to surface, out of robot)
+  RigidTransform Tsensor;  ///< Local frame of the sensor relative to the link (by convention, origin is at contact patch center, z is normal to surface, out of robot)
   Vector2 patchMin,patchMax;///< The 2D contact patch in the local frame of the sensor 
   Real patchTolerance;     ///< The deformation tolerance of the contact patch (default 0.001)
   bool hasForce[3];        ///< If an element is true, that component of force is measured (default false)
@@ -57,11 +71,26 @@ class ContactSensor : public SensorBase
 /** @ingroup Control
  * @brief Simulates a force-torque sensor mounted between a link and its
  * parent. Can be configured to be up to 6DOF.
+ *
+ * To set up an accurate model of a force-torque sensor, you need to 
+ * set up a link centered at the sensor frame welded to its parent link.
+ * The parent link must contain all the mass of the mount on the mounting side,
+ * and the sensor link must contain all the mass on the other (end effector) side.
+ * Any descendant links of the end effector (like fingers of a hand) should be
+ * attached to the *sensor* link.  NOTE: This conflicts with the way that Klampt's
+ * ODE implementation handles welded links! TODO: fix that.
+ *
+ * Configurable settings:
+ * - link (int)
+ * - hasForce (bool [3])
+ * - hasTorque (bool [3])
+ * - fVariance, tVariance (Vector3)
  */
 class ForceTorqueSensor : public SensorBase
 {
  public:
   ForceTorqueSensor();
+  virtual ~ForceTorqueSensor() {}
   virtual const char* Type() const { return "ForceTorqueSensor"; }
   virtual void Simulate(ControlledRobotSimulator* robot,WorldSimulation* sim);
   virtual void SimulateKinematic(Robot& robot,RobotWorld& world);
@@ -75,7 +104,6 @@ class ForceTorqueSensor : public SensorBase
   virtual void DrawGL(const Robot& robot,const vector<double>& measurements);
 
   int link;                ///< The link on which the sensor is located (between link and parent)
-  Vector3 localPos;        ///< The position of the sensor, in the local frame
   bool hasForce[3];        ///< true if force is measured along the given axis (default false)
   bool hasTorque[3];       ///< true if torque is measured along the given axis (default false)
   Vector3 fVariance, tVariance; ///< Estimated variance of the sensor (default 0)

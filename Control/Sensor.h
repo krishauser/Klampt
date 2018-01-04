@@ -189,6 +189,35 @@ T* RobotSensors::GetTypedSensor(int index)
     return bool(ss);              \
   }
 
-
+#define FILL_VECTOR_SENSOR_SETTING(res,membername) \
+  { \
+    stringstream ss;                      \
+    for(size_t _i=0;_i<membername.size();_i++)             \
+      ss<<membername[_i]<<" ";             \
+    settings[#membername] = ss.str();     \
+  }
+#define GET_VECTOR_SENSOR_SETTING(membername)  \
+  if(name == #membername) { \
+    stringstream ss;   \
+    for(size_t _i=0;_i<membername.size();_i++)            \
+      ss << membername[_i]<<" ";      \
+    str = ss.str();    \
+    return true;       \
+  }
+#define SET_VECTOR_SENSOR_SETTING(membername)  \
+  if(name == #membername) { \
+    stringstream ss(str);   \
+    membername.resize(0); \
+    while(ss) {     \
+      membername.resize(membername.size()+1); \
+      ss >> membername.back();   \
+      if(ss.fail()) { \
+        membername.resize(membername.size()-1); \
+        return true; \
+      } \
+      if(ss.bad()) return false; \
+    } \
+    return true;              \
+  }
 
 #endif

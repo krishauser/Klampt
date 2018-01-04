@@ -6,11 +6,17 @@ using namespace Math;
 
 /** @ingroup Control
  * @brief Simulates a joint encoder.
+ *
+ * Configurable settings:
+ * - indices: integer array
+ * - qvariance: Vector
+ * - qresolution: Vector
  */
 class JointPositionSensor : public SensorBase
 {
  public:
   JointPositionSensor();
+  virtual ~JointPositionSensor() {}
   virtual const char* Type() const { return "JointPositionSensor"; }
   virtual void Simulate(ControlledRobotSimulator* robot,WorldSimulation* sim);
   virtual void SimulateKinematic(Robot& robot,RobotWorld& world);
@@ -29,12 +35,18 @@ class JointPositionSensor : public SensorBase
 };
 
 /** @ingroup Control
- * @brief Simulates a "true" velocity sensor
+ * @brief Simulates a velocity sensor.  (Does not perform differencing)
+ *
+ * Configurable settings:
+ * - indices: integer array
+ * - dqvariance: Vector
+ * - dqresolution: Vector
  */
 class JointVelocitySensor : public SensorBase
 {
  public:
   JointVelocitySensor();
+  virtual ~JointVelocitySensor() {}
   virtual const char* Type() const { return "JointVelocitySensor"; }
   virtual void Simulate(ControlledRobotSimulator* robot,WorldSimulation* sim);
   virtual void SimulateKinematic(Robot& robot,RobotWorld& world);
@@ -57,11 +69,17 @@ class JointVelocitySensor : public SensorBase
  * 
  * Motors typically provide current/voltage information, and this assumes
  * that it is transformed into torque units.
+ *
+ * Configurable settings:
+ * - indices: integer array
+ * - tvariance: Vector
+ * - tresolution: Vector
  */
 class DriverTorqueSensor : public SensorBase
 {
  public:
   DriverTorqueSensor();
+  virtual ~DriverTorqueSensor() {}
   virtual const char* Type() const { return "DriverTorqueSensor"; }
   virtual void Simulate(ControlledRobotSimulator* robot,WorldSimulation* sim);
   virtual void SimulateKinematic(Robot& robot,RobotWorld& world);

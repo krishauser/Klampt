@@ -20,11 +20,24 @@ class Robot;
  * past the robot's geometry.
  *
  * Currently intensity information is not provided.
+ *
+ * Configurable settings:
+ * - link
+ * - Tsensor
+ * - measurementCount
+ * - depthResolution
+ * - depthMinimum,depthMaximum
+ * - depthVarianceLinear,depthVarianceConstant
+ * - xSweepMagnitude, xSweepPeriod, xSweepPhase
+ * - xSweepType
+ * - ySweepMagnitude, ySweepPeriod, ySweepPhase
+ * - ySweepType
  */
 class LaserRangeSensor : public SensorBase
 {
  public:
   LaserRangeSensor();
+  virtual ~LaserRangeSensor() {}
   virtual const char* Type() const { return "LaserRangeSensor"; }
   virtual void Simulate(ControlledRobotSimulator* robot,WorldSimulation* sim);
   virtual void SimulateKinematic(Robot& robot,RobotWorld& world);
@@ -82,7 +95,18 @@ class LaserRangeSensor : public SensorBase
  * The list of measurements proceeds in scan-line order from the upper-left pixel.
  *
  * For optimal performance using the graphics card, you must install the GLEW package
- * on your system.
+ * on your system.  You must also initialize OpenGL before running the simulator, 
+ * which typically requires popping up a visualization window.
+ *
+ * Configurable settings:
+ * - link: int
+ * - Tsensor: RigidTransform
+ * - rgb,depth: bool
+ * - xres,yres: int
+ * - xfov,yfov: float
+ * - zmin,zmax: float
+ * - zresolution: int
+ * - zvarianceLinear,zvarianceConstant: float
  */
 class CameraSensor : public SensorBase
 {
