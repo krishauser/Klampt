@@ -655,8 +655,14 @@ bool Robot::LoadRob(const char* fn) {
 			    	return false;
 			    }
 			}
-			else 
+			else {
 				properties[stemp] = value;
+				stringstream ss(value);
+				TiXmlElement e(stemp.c_str());
+				ss >> e;
+				if(!ss) 
+					LOG4CXX_ERROR(KrisLibrary::logger(),"     Property "<<stemp.c_str()<<" is not valid XML");
+			}
 		  }
 		  else 
 		    properties[stemp] = value; 
@@ -2538,7 +2544,7 @@ bool Robot::LoadURDF(const char* fn)
 			    }
 			}
 			else {
-								LOG4CXX_ERROR(KrisLibrary::logger(),"<klampt> XML tag \""<<prop);
+								LOG4CXX_ERROR(KrisLibrary::logger(),"<klampt> XML tag \""<<prop<<"\" needs to be an external XML file");
 				properties[prop] = value;
 			}
 		}
