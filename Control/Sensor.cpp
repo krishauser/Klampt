@@ -323,9 +323,9 @@ void JointVelocitySensor::SimulateKinematic(Robot& robot,RobotWorld& world)
   }
   if(!indices.empty()) {
     //only read a subset
-    Vector dqread(dq.n,Zero);
+    Vector dqread(indices.size(),Zero);
     for(size_t i=0;i<indices.size();i++)
-      dqread(indices[i]) = dq(indices[i]);
+      dqread(i) = dq(indices[i]);
     swap(dqread,dq);
   }
 }
@@ -348,9 +348,9 @@ void JointVelocitySensor::Simulate(ControlledRobotSimulator* robot,WorldSimulati
   }
   if(!indices.empty()) {
     //only read a subset
-    Vector dqread(dq.n,Zero);
+    Vector dqread(indices.size(),Zero);
     for(size_t i=0;i<indices.size();i++)
-      dqread(indices[i]) = dq(indices[i]);
+      dqread(i) = dq(indices[i]);
     swap(dqread,dq);
   }
 }
