@@ -116,6 +116,10 @@ void RobotTestBackend::RenderWorld()
     }
     for(size_t i=0;i<robotSensors.sensors.size();i++) {
       vector<double> measurements;
+      if(0 == strcmp(robotSensors.sensors[i]->Type(),"CameraSensor")) {
+        robotSensors.sensors[i]->SimulateKinematic(*robot,*world);
+        robotSensors.sensors[i]->GetMeasurements(measurements);
+      }
       robotSensors.sensors[i]->DrawGL(*robot,measurements);
     }
   }
