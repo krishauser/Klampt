@@ -2,10 +2,10 @@
 #include <KrisLibrary/Logger.h>
 #include "three.js.h"
 #include <KrisLibrary/meshing/MeshPrimitives.h>
+#include <KrisLibrary/math/random.h>
 //#include <boost/uuid/uuid.hpp>            // uuid class
 //#include <boost/uuid/uuid_generators.hpp> // generators
 //#include <boost/uuid/uuid_io.hpp>         // streaming operators etc.
-#include <random>
 #include <sstream>
 using namespace std;
 
@@ -26,13 +26,11 @@ string MakeRandomUUID()
   char str[33];
   str[32]=0;
   char alphaNumeric[] = {'a','b','c','d','e','f','g','0','1','2','3','4','5','6','7','8','9'};
-  //make a 36 char long string
-  std::default_random_engine generator;
-  std::uniform_int_distribution<int> distribution(0,15);
-
+  //make a 32 char long string
+  
   //boost::uuids::uuid uuid = boost::uuids::random_generator()();
   for(int i = 0; i<32; i++){
-    str[i] = alphaNumeric[distribution(generator)];
+    str[i] = alphaNumeric[Math::RandInt(16)];
   }
   //ss << uuid;
   return string(str);
