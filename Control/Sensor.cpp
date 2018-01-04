@@ -11,6 +11,7 @@
 #include "Simulation/WorldSimulation.h"
 #include <KrisLibrary/utils/PropertyMap.h>
 #include <KrisLibrary/math/random.h>
+#include <KrisLibrary/robotics/NewtonEuler.h>
 #if HAVE_GLEW
 #include <GL/glew.h>
 #endif //HAVE_GLEW
@@ -771,7 +772,7 @@ void ContactSensor::DrawGL(const Robot& robot,const vector<double>& measurements
 }
 
 ForceTorqueSensor::ForceTorqueSensor()
-  :link(0),localPos(Zero),fVariance(Zero),tVariance(Zero),f(Zero),t(Zero)
+  :link(0),fVariance(Zero),tVariance(Zero),f(Zero),t(Zero)
 {
   hasForce[0] = hasForce[1] = hasForce[2] = false;
   hasTorque[0] = hasTorque[1] = hasTorque[2] = false;
@@ -781,21 +782,35 @@ void ForceTorqueSensor::SimulateKinematic(Robot& robot,RobotWorld& world)
 {
   f.setZero();
   t.setZero();
+
+  NewtonEulerSolver ne(robot);
+  ne.SetGravityWrenches(Vector3(0,0,-9.806));
+  Vector torques;
+  ne.CalcTorques(Vector(robot.q.n,0.0),torques);
+  Vector3 fw = ne.jointWrenches[link].f;
+  Vector3 mw = ne.jointWrenches[link].m;
+
+  RigidTransform T = robot.links[link].T_World;
+  T.R.mulTranspose(fw,f);
+  T.R.mulTranspose(mw,t);
+
+  f = Discretize(f,Vector3(0.0),fVariance);
+  t = Discretize(t,Vector3(0.0),tVariance);
+  for(int i=0;i<3;i++)
+    if(!hasForce[i]) f[i] = 0;
+  for(int i=0;i<3;i++)
+    if(!hasTorque[i]) t[i] = 0;
 }
 
 void ForceTorqueSensor::Simulate(ControlledRobotSimulator* robot,WorldSimulation* sim) 
 {
   dJointFeedback fb = robot->oderobot->feedback(link);
+  Vector3 w,v;
+  robot->oderobot->GetLinkVelocity(link,w,v);
   Vector3 fw(fb.f1[0],fb.f1[1],fb.f1[2]);
   RigidTransform T;
   robot->oderobot->GetLinkTransform(link,T);
   Vector3 mcomw = Vector3(fb.t1[0],fb.t1[1],fb.t1[2]);
-  //convert moment about link's com to moment about localpos
-  //mp_w = (p-com) x f_w + mcom_w 
-  //Vector3 comw = T*robot->robot->links[link].com;
-  //Vector3 pw = T*localPos;
-  //TEMP: is the moment measured about the joint axis?
-  //Vector3 mw = cross(comw-pw,fw) + mcomw;
   Vector3 mw = mcomw;
   //convert to local frame
   T.R.mulTranspose(fw,f);
@@ -848,7 +863,6 @@ map<string,string> ForceTorqueSensor::Settings() const
 {
   map<string,string> settings = SensorBase::Settings();
   FILL_SENSOR_SETTING(settings,link);
-  FILL_SENSOR_SETTING(settings,localPos);
   FILL_ARRAY_SENSOR_SETTING(settings,hasForce,3);
   FILL_ARRAY_SENSOR_SETTING(settings,hasTorque,3);
   FILL_SENSOR_SETTING(settings,fVariance);
@@ -860,7 +874,6 @@ bool ForceTorqueSensor::GetSetting(const string& name,string& str) const
 {
   if(SensorBase::GetSetting(name,str)) return true;
   GET_SENSOR_SETTING(link);
-  GET_SENSOR_SETTING(localPos);
   GET_ARRAY_SENSOR_SETTING(hasForce,3);
   GET_ARRAY_SENSOR_SETTING(hasTorque,3);
   GET_SENSOR_SETTING(fVariance);
@@ -872,7 +885,6 @@ bool ForceTorqueSensor::SetSetting(const string& name,const string& str)
 {
   if(SensorBase::SetSetting(name,str)) return true;
   SET_SENSOR_SETTING(link);
-  SET_SENSOR_SETTING(localPos);
   SET_ARRAY_SENSOR_SETTING(hasForce,3);
   SET_ARRAY_SENSOR_SETTING(hasTorque,3);
   SET_SENSOR_SETTING(fVariance);
@@ -898,7 +910,7 @@ void ForceTorqueSensor::DrawGL(const Robot& robot,const vector<double>& measurem
     ViewWrench view;
     view.fscale = 1.0/9.8;
     view.mscale = 1.0/9.8;
-    view.DrawGL(localPos,f,m);
+    view.DrawGL(Vector3(0.0),f,m);
   }
   glPopMatrix();
 }
@@ -1578,10 +1590,289 @@ bool IMUSensor::GetSetting(const string& name,string& str) const
 bool IMUSensor::SetSetting(const string& name,const string& str)
 {
   if(SensorBase::SetSetting(name,str)) return true;
+  if(name == "link") {
+    accelerometer.SetSetting(name,str); 
+    gyro.SetSetting(name,str); 
+    return true;
+  }
   if(accelerometer.SetSetting(name,str)) return true;
   if(gyro.SetSetting(name,str)) return true;
   return false;
 }
+
+TransformedSensor::TransformedSensor()
+{}
+
+void TransformedSensor::SimulateKinematic(Robot& robot,RobotWorld& world)
+{
+  if(!sensor) return;
+  sensor->SimulateKinematic(robot,world);
+  sensor->GetMeasurements(measurements);
+  DoTransform();
+}
+
+void TransformedSensor::DoTransform()
+{
+  if(!scale.empty()) {
+    if(scale.size() == 1) {
+      for(size_t i=0;i<measurements.size();i++)
+        measurements[i] *= scale[0];
+    }
+    else {
+      if(measurements.size() != scale.size()) fprintf(stderr,"Transformed sensor (%s) has incorrect scale size (%d != %d)\n",sensor->name.c_str(),(int)measurements.size(),(int)scale.size());
+      else {
+        for(size_t i=0;i<measurements.size();i++)
+          measurements[i] *= scale[i];
+      }
+    }
+  }
+  if(!bias.empty()) {
+    if(bias.size() == 1) {
+      for(size_t i=0;i<measurements.size();i++)
+        measurements[i] += bias[0];
+    }
+    else {
+      if(measurements.size() != bias.size()) fprintf(stderr,"Transformed sensor (%s) has incorrect bias size (%d != %d)\n",sensor->name.c_str(),(int)measurements.size(),(int)bias.size());
+      else {
+        for(size_t i=0;i<measurements.size();i++)
+          measurements[i] += bias[i];
+      }
+    }
+  }
+  if(!minimum.empty()) {
+    if(minimum.size() == 1) {
+      for(size_t i=0;i<measurements.size();i++)
+        measurements[i] = Max(minimum[0],measurements[i]);
+    }
+    else {
+      if(measurements.size() != minimum.size()) fprintf(stderr,"Transformed sensor (%s) has incorrect minimum size (%d != %d)\n",sensor->name.c_str(),(int)measurements.size(),(int)minimum.size());
+      else {
+        for(size_t i=0;i<measurements.size();i++)
+          measurements[i] = Max(minimum[i],measurements[i]);
+      }
+    }
+  }
+  if(!maximum.empty()) {
+    if(maximum.size() == 1) {
+      for(size_t i=0;i<measurements.size();i++)
+        measurements[i] = Max(maximum[0],measurements[i]);
+    }
+    else {
+      if(measurements.size() != maximum.size()) fprintf(stderr,"Transformed sensor (%s) has incorrect maximum size (%d != %d)\n",sensor->name.c_str(),(int)measurements.size(),(int)maximum.size());
+      else {
+        for(size_t i=0;i<measurements.size();i++)
+          measurements[i] = Max(maximum[i],measurements[i]);
+      }
+    }
+  }
+}
+
+void TransformedSensor::Simulate(ControlledRobotSimulator* robot,WorldSimulation* sim)
+{
+  if(!sensor) return;
+  sensor->Simulate(robot,sim);
+  sensor->GetMeasurements(measurements);
+  DoTransform();
+}
+
+void TransformedSensor::Advance(Real dt)
+{
+  if(!sensor) return;
+  sensor->Advance(dt);
+}
+
+void TransformedSensor::Reset()
+{
+  fill(measurements.begin(),measurements.end(),0.0);
+  if(sensor) sensor->Reset();
+}
+
+void TransformedSensor::MeasurementNames(vector<string>& names) const
+{
+  if(sensor)
+    sensor->MeasurementNames(names);
+}
+
+void TransformedSensor::GetMeasurements(vector<double>& values) const
+{
+  values = measurements;
+}
+
+void TransformedSensor::SetMeasurements(const vector<double>& values)
+{
+  measurements = values;
+}
+
+void TransformedSensor::GetInternalState(vector<double>& values) const
+{
+  if(sensor) {
+    sensor->GetInternalState(values);
+  }
+}
+void TransformedSensor::SetInternalState(const vector<double>& state)
+{
+  if(sensor) sensor->SetInternalState(state);
+}
+
+map<string,string> TransformedSensor::Settings() const
+{
+  map<string,string> settings = SensorBase::Settings();
+  FILL_VECTOR_SENSOR_SETTING(settings,scale);
+  FILL_VECTOR_SENSOR_SETTING(settings,bias);
+  FILL_VECTOR_SENSOR_SETTING(settings,minimum);
+  FILL_VECTOR_SENSOR_SETTING(settings,maximum);
+  return settings;
+}
+
+bool TransformedSensor::GetSetting(const string& name,string& str) const
+{
+  if(SensorBase::GetSetting(name,str)) return true;
+  GET_VECTOR_SENSOR_SETTING(scale);
+  GET_VECTOR_SENSOR_SETTING(bias);
+  GET_VECTOR_SENSOR_SETTING(minimum);
+  GET_VECTOR_SENSOR_SETTING(maximum);
+  return false;
+}
+
+bool TransformedSensor::SetSetting(const string& name,const string& str)
+{
+  if(SensorBase::SetSetting(name,str)) return true;
+  SET_VECTOR_SENSOR_SETTING(scale);
+  SET_VECTOR_SENSOR_SETTING(bias);
+  SET_VECTOR_SENSOR_SETTING(minimum);
+  SET_VECTOR_SENSOR_SETTING(maximum);
+  return false;
+}
+
+void TransformedSensor::DrawGL(const Robot& robot,const vector<double>& measurements)
+{
+  if(sensor) sensor->DrawGL(robot,measurements);
+}
+
+
+
+CorruptedSensor::CorruptedSensor()
+{}
+
+void CorruptedSensor::SimulateKinematic(Robot& robot,RobotWorld& world)
+{
+  if(!sensor) return;
+  sensor->SimulateKinematic(robot,world);
+  sensor->GetMeasurements(measurements);
+  DoCorrupt();
+}
+
+void CorruptedSensor::DoCorrupt()
+{
+  if(!variance.empty()) {
+    if(variance.size() == 1) {
+      for(size_t i=0;i<measurements.size();i++)
+        if(measurements[i]!=0.0)
+          measurements[i] += RandGaussian()*Sqrt(variance[0]);
+    }
+    else {
+      if(measurements.size() != variance.size()) fprintf(stderr,"Corrupted sensor (%s) has incorrect variance size (%d != %d)\n",sensor->name.c_str(),(int)measurements.size(),(int)variance.size());
+      else {
+        for(size_t i=0;i<measurements.size();i++)
+          if(measurements[i]!=0.0)
+            measurements[i] += RandGaussian()*Sqrt(variance[i]);
+      }
+    }
+  }
+  if(!resolution.empty()) {
+    if(resolution.size() == 1) {
+      for(size_t i=0;i<measurements.size();i++)
+        measurements[i] = round(measurements[i]/resolution[0])*resolution[0];
+    }
+    else {
+      if(measurements.size() != resolution.size()) fprintf(stderr,"Corrupted sensor (%s) has incorrect resolution size (%d != %d)\n",sensor->name.c_str(),(int)measurements.size(),(int)resolution.size());
+      else {
+        for(size_t i=0;i<measurements.size();i++)
+          measurements[i] = round(measurements[i]/resolution[i])*resolution[i];
+      }
+    }
+  }
+}
+
+void CorruptedSensor::Simulate(ControlledRobotSimulator* robot,WorldSimulation* sim)
+{
+  if(!sensor) return;
+  sensor->Simulate(robot,sim);
+  sensor->GetMeasurements(measurements);
+  DoCorrupt();
+}
+
+void CorruptedSensor::Advance(Real dt)
+{
+  if(!sensor) return;
+  sensor->Advance(dt);
+}
+
+void CorruptedSensor::Reset()
+{
+  fill(measurements.begin(),measurements.end(),0.0);
+  if(sensor) sensor->Reset();
+}
+
+void CorruptedSensor::MeasurementNames(vector<string>& names) const
+{
+  if(sensor)
+    sensor->MeasurementNames(names);
+}
+
+void CorruptedSensor::GetMeasurements(vector<double>& values) const
+{
+  values = measurements;
+}
+
+void CorruptedSensor::SetMeasurements(const vector<double>& values)
+{
+  measurements = values;
+}
+
+void CorruptedSensor::GetInternalState(vector<double>& values) const
+{
+  if(sensor) {
+    sensor->GetInternalState(values);
+  }
+}
+void CorruptedSensor::SetInternalState(const vector<double>& state)
+{
+  if(sensor) sensor->SetInternalState(state);
+}
+
+map<string,string> CorruptedSensor::Settings() const
+{
+  map<string,string> settings = SensorBase::Settings();
+  FILL_VECTOR_SENSOR_SETTING(settings,variance);
+  FILL_VECTOR_SENSOR_SETTING(settings,resolution);
+  return settings;
+}
+
+bool CorruptedSensor::GetSetting(const string& name,string& str) const
+{
+  if(SensorBase::GetSetting(name,str)) return true;
+  GET_VECTOR_SENSOR_SETTING(resolution);
+  GET_VECTOR_SENSOR_SETTING(variance);
+  return false;
+}
+
+bool CorruptedSensor::SetSetting(const string& name,const string& str)
+{
+  if(SensorBase::SetSetting(name,str)) return true;
+  SET_VECTOR_SENSOR_SETTING(resolution);
+  SET_VECTOR_SENSOR_SETTING(variance);
+  return false;
+}
+
+void CorruptedSensor::DrawGL(const Robot& robot,const vector<double>& measurements)
+{
+  if(sensor) sensor->DrawGL(robot,measurements);
+}
+
+
+
+
 
 FilteredSensor::FilteredSensor()
   :smoothing(0)
@@ -2065,8 +2356,7 @@ void LaserRangeSensor::DrawGL(const Robot& robot,const vector<double>& measureme
 
 
 CameraSensor::CameraSensor()
-:link(-1),xres(640),yres(480),
- rgb(true),depth(true),
+:link(-1),rgb(true),depth(true),xres(640),yres(480),
  xfov(DtoR(56.0)),yfov(DtoR(43.0)),
  zmin(0.4),zmax(4.0),zresolution(0),
  zvarianceLinear(0),zvarianceConstant(0),
@@ -2495,7 +2785,7 @@ void CameraSensor::DrawGL(const Robot& robot,const vector<double>& measurements)
     glMaterialfv(GL_FRONT,GL_AMBIENT_AND_DIFFUSE,white);
     Real vscale = 0.5/Tan(xfov*0.5);
     Real xscale = (0.5/vscale)/(xres/2);
-    Real aspectRatio = Real(xres)/Real(yres);
+    //Real aspectRatio = Real(xres)/Real(yres);
     Real yscale = xscale;
     vector<Vector3> pts(xres*yres);
     int k=0;
@@ -2665,6 +2955,36 @@ bool RobotSensors::LoadSettings(TiXmlElement* node)
       sensor = new CameraSensor;
       sensors.push_back(sensor);
     }
+    else if(0==strcmp(e->Value(),"TransformedSensor")) {
+      TransformedSensor* fs = new TransformedSensor;
+      if(!e->Attribute("sensor")) {
+    LOG4CXX_ERROR(KrisLibrary::logger(),"Transformed sensor doesn't have a \"sensor\" attribute\n");
+  return false;
+      }
+      fs->sensor = GetNamedSensor(e->Attribute("sensor"));
+      if(fs->sensor == NULL) {
+    LOG4CXX_ERROR(KrisLibrary::logger(),"Transformed sensor has unknown sensor named \""<<e->Attribute("sensor"));
+  return false;
+      }
+      sensor = fs;
+      sensors.push_back(sensor);
+      processedAttributes.insert("sensor");
+    }
+    else if(0==strcmp(e->Value(),"CorruptedSensor")) {
+      CorruptedSensor* fs = new CorruptedSensor;
+      if(!e->Attribute("sensor")) {
+    LOG4CXX_ERROR(KrisLibrary::logger(),"Corrupted sensor doesn't have a \"sensor\" attribute\n");
+  return false;
+      }
+      fs->sensor = GetNamedSensor(e->Attribute("sensor"));
+      if(fs->sensor == NULL) {
+    LOG4CXX_ERROR(KrisLibrary::logger(),"Corrupted sensor has unknown sensor named \""<<e->Attribute("sensor"));
+  return false;
+      }
+      sensor = fs;
+      sensors.push_back(sensor);
+      processedAttributes.insert("sensor");
+    }
     else if(0==strcmp(e->Value(),"FilteredSensor")) {
       FilteredSensor* fs = new FilteredSensor;
       if(!e->Attribute("sensor")) {
@@ -2719,7 +3039,7 @@ bool RobotSensors::LoadSettings(TiXmlElement* node)
     }
     e = e->NextSiblingElement();
   }
-  LOG4CXX_INFO(KrisLibrary::logger(),"RobotSensors::LoadSettings: loaded "<<sensors.size());
+  LOG4CXX_INFO(KrisLibrary::logger(),"RobotSensors::LoadSettings: loaded "<<sensors.size()<<" sensors from XML");
   return true;
 }
 
