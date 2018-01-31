@@ -74,8 +74,17 @@ void ControlledRobotSimulator::GetSensedConfig(Config& q)
   JointPositionSensor* s = sensors.GetTypedSensor<JointPositionSensor>();
   if(s==NULL)
     fprintf(stderr,"ControlledRobotSimulator::GetSensedConfig: Warning, robot has no joint position sensor\n");
-  else
-    q = s->q;
+  else {
+    //resize to the correct size
+    if(s->indices.empty() || s->q.empty())
+      q = s->q;
+    else {
+      q.resize(robot->q.n);
+      q.set(0.0);
+      for(size_t i=0;i<s->indices.size();i++)
+        q[s->indices[i]] = s->q[i];
+    }
+  }
 }
 
 void ControlledRobotSimulator::GetSensedVelocity(Config& dq)
@@ -83,8 +92,17 @@ void ControlledRobotSimulator::GetSensedVelocity(Config& dq)
   JointVelocitySensor* s=sensors.GetTypedSensor<JointVelocitySensor>();
   if(s==NULL)
     fprintf(stderr,"ControlledRobotSimulator::GetSensedVelocity: Warning, robot has no joint velocity sensor\n");
-  else
-    dq = s->dq;
+  else {
+    //resize to the correct size
+    if(s->indices.empty() || s->dq.empty())
+      dq = s->dq;
+    else {
+      dq.resize(robot->dq.n);
+      dq.set(0.0);
+      for(size_t i=0;i<s->indices.size();i++)
+        dq[s->indices[i]] = s->dq[i];
+    }
+  }
 }
 
 void ControlledRobotSimulator::GetSimulatedConfig(Config& q)
