@@ -13,7 +13,7 @@ if (NOT GTEST_FOUND)
                                   INSTALL_COMMAND "")
     set(GTEST_LIB_DIRS "${CMAKE_CURRENT_BINARY_DIR}/external/src/GTest-ext-build/")
     set(GTEST_INCLUDE_DIRS ${gTestSource})
-    set(GTEST_BOTH_LIBRARIES gtest gtest_main)
+    set(GTEST_BOTH_LIBRARIES gtest gtest_main -pthread)
 endif()
 
 include_directories(${GTEST_INCLUDE_DIRS})
