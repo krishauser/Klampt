@@ -1,6 +1,8 @@
 #ifndef WORLD_VIEW_PROGRAM_H
 #define WORLD_VIEW_PROGRAM_H
 
+#if HAVE_GLUI
+
 #include <log4cxx/logger.h>
 #include <KrisLibrary/Logger.h>
 #include <KrisLibrary/math3d/Ray3D.h>
@@ -217,5 +219,7 @@ RigidObject* WorldViewProgram::ClickObject(const Ray3D& r,Vector3& localpt) cons
 {
   return world->RayCastObject(r,localpt);
 }
+
+#endif // HAVE_GLUI
 
 #endif
