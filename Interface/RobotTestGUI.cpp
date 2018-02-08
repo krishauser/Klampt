@@ -443,7 +443,7 @@ void RobotTestBackend::SetDrawExpanded(int value)
 
 
 
-#ifdef HAVE_GLUI
+#if HAVE_GLUI
 
 GLUIRobotTestGUI::GLUIRobotTestGUI(GenericBackendBase* backend,RobotWorld* _world,int w,int h)
   :GLUIGUI(backend,w,h),world(_world)

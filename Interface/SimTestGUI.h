@@ -139,7 +139,7 @@ public:
 
 
 
-#ifdef HAVE_GLUI
+#if HAVE_GLUI
 
 #include <KrisLibrary/GLdraw/GLScreenshotProgram.h>
 #include "GLUIGUI.h"
