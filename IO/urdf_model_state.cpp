@@ -153,7 +153,9 @@ bool parseModelState(ModelState &ms, TiXmlElement* config)
 
     // add to vector
     ms.joint_states.push_back(joint_state);
+	return true;
   }
+  return false;
 };
 
 
