@@ -331,8 +331,10 @@ bool ROSToKlampt(const sensor_msgs::PointCloud2& pc,Meshing::PointCloud3D& kpc)
   int rgbfloat_field=-1;
   int rgbproperty=-1;
   vector<int> fieldmap(pc.fields.size(),-1);
+  bool structured = false;
   if(pc.height > 1) {
-    kpc.settings.set("width",pc.height);
+    structured = true;
+    kpc.settings.set("width",pc.width);
     kpc.settings.set("height",pc.height);
   }
   kpc.points.resize(0);
@@ -371,7 +373,7 @@ bool ROSToKlampt(const sensor_msgs::PointCloud2& pc,Meshing::PointCloud3D& kpc)
       if(xfield >=0) UNPACK<Real>(pc.fields[xfield],&pc.data[vofs],&pt.x,swap_bigendian);
       if(yfield >=0) UNPACK<Real>(pc.fields[yfield],&pc.data[vofs],&pt.y,swap_bigendian);
       if(zfield >=0) UNPACK<Real>(pc.fields[zfield],&pc.data[vofs],&pt.z,swap_bigendian);
-      if(IsFinite(pt.x) && IsFinite(pt.y) && IsFinite(pt.z)) {
+      if(structured || (IsFinite(pt.x) && IsFinite(pt.y) && IsFinite(pt.z))) {
         kpc.points.push_back(pt);
         if(rgbfloat_field >= 0) {
           //hack
@@ -1112,7 +1114,13 @@ bool ROSWaitForUpdate(const char* topic,double timeout)
 
 bool ROSHadUpdate(const char* topic)
 {
-  if(gSubscribers.count(topic) == 0) return false;
+  if(gSubscribers.count(topic) == 0) {
+    printf("No subscribers on topic %s\n",topic);
+    printf("Valid topics:\n");
+    for(SubscriberList::const_iterator i = gSubscribers.begin();i!=gSubscribers.end();i++)
+      printf("  %s\n",i->first.c_str());
+    return false;
+  }
   ROSSubscriberBase* s = gSubscribers[topic];
   return s->numMessages > 0;
 }

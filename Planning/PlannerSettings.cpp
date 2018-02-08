@@ -498,16 +498,18 @@ Real MaxDistance2(const AABB3D& a,const Vector3& pt)
 Real MaxDistance(const AABB3D& a,const AABB3D& b)
 {
   Vector3 fa,fb;
-  if(a.bmax.x < b.bmin.x) { fa.x = a.bmax.x; fb.x=b.bmin.x; }  //a to left of b
-  else if(b.bmax.x < b.bmin.x) { fa.x = a.bmin.x; fb.x=b.bmax.x; } //b to left of a
+  if(a.bmax.x < b.bmin.x) { fa.x = a.bmin.x; fb.x=b.bmax.x; }  //a to left of b
+  else if(b.bmax.x < a.bmin.x) { fa.x = a.bmax.x; fb.x=b.bmin.x; } //b to left of a
   else if(Abs(b.bmax.x-a.bmin.x) > Abs(b.bmin.x-a.bmax.x)) { fa.x = a.bmin.x; fb.x=b.bmax.x; }  //ranges intersect
   else { fa.x = a.bmax.x; fb.x=b.bmin.x; } //ranges intersect
-  if(a.bmax.y < b.bmin.y) { fa.y = a.bmax.y; fb.y=b.bmin.y; }  //a to left of b
-  else if(b.bmax.y < b.bmin.y) { fa.y = a.bmin.y; fb.y=b.bmax.y; } //b to left of a
+
+  if(a.bmax.y < b.bmin.y) { fa.y = a.bmin.y; fb.y=b.bmax.y; }  //a to left of b
+  else if(b.bmax.y < a.bmin.y) { fa.y = a.bmax.y; fb.y=b.bmin.y; } //b to left of a
   else if(Abs(b.bmax.y-a.bmin.y) > Abs(b.bmin.y-a.bmax.y)) { fa.y = a.bmin.y; fb.y=b.bmax.y; }  //ranges intersect
   else { fa.y = a.bmax.y; fb.y=b.bmin.y; } //ranges intersect
-  if(a.bmax.z < b.bmin.z) { fa.z = a.bmax.z; fb.z=b.bmin.z; }  //a to left of b
-  else if(b.bmax.z < b.bmin.z) { fa.z = a.bmin.z; fb.z=b.bmax.z; } //b to left of a
+
+  if(a.bmax.z < b.bmin.z) { fa.z = a.bmin.z; fb.z=b.bmax.z; }  //a to left of b
+  else if(b.bmax.z < a.bmin.z) { fa.z = a.bmax.z; fb.z=b.bmin.z; } //b to left of a
   else if(Abs(b.bmax.z-a.bmin.z) > Abs(b.bmin.z-a.bmax.z)) { fa.z = a.bmin.z; fb.z=b.bmax.z; }  //ranges intersect
   else { fa.z = a.bmax.z; fb.z=b.bmin.z; } //ranges intersect
   return fa.distance(fb);
@@ -580,7 +582,7 @@ Real WorldPlannerSettings::DistanceLowerBound(RobotWorld& world,const vector<int
   for(size_t i=0;i<activeids1.size();i++) {
     for(size_t j=0;j<activeids2.size();j++) {
       if(!collisionEnabled(activeids1[i],activeids2[j])) continue;
-      Real maxd=MaxDistance(bbs1[i],bbs1[j]);
+      Real maxd=MaxDistance(bbs1[i],bbs2[j]);
       if(maxd < bound) bound=maxd;
     }
   }

@@ -1559,6 +1559,14 @@ bool Robot::Save(const char* fn) {
 		file << drivers[i].viscousFriction << " ";
 	}
 	file << endl;
+	file << endl;
+
+	for(map<string,string>::const_iterator i=properties.begin();i!=properties.end();i++) {
+		file << "property "<<i->first<<" ";
+		SafeOutputString(file,i->second);
+		file << endl;
+	}
+
 	file.close();
 	return true;
 }
