@@ -378,9 +378,10 @@ readers = {'Config':readVector,
            'Vector3':readVectorRaw,
            'Matrix':readMatrix,
            'Matrix3':readMatrix3,
-           'RotationMatrix':readSo3,
+           'Rotation':readSo3,
            'RigidTransform':readSe3,
            'IKObjective':readIKObjective,
+           'IKGoal':readIKObjective,
            'Hold':readHold,
            'GeometricPrimitive':readGeometricPrimitive,
            'IntArray':readIntArray,
@@ -393,9 +394,10 @@ writers = {'Config':writeVector,
            'Vector3':writeVectorRaw,
            'Matrix':writeMatrix,
            'Matrix3':writeMatrix3,
-           'RotationMatrix':writeSo3,
+           'Rotation':writeSo3,
            'RigidTransform':writeSe3,
            'IKObjective':writeIKObjective,
+           'IKGoal':writeIKObjective,
            'Hold':writeHold,
            'GeometricPrimitive':writeGeometricPrimitive,
            'IntArray':writeVector,
@@ -505,7 +507,7 @@ def toJson(obj,type='auto'):
         else:
             raise RuntimeError("Unknown object of type "+obj.__class__.__name)
 
-    if type in ['Config','Configs','Vector','Matrix','Matrix3','RotationMatrix','Value','IntArray','StringArray']:
+    if type in ['Config','Configs','Vector','Matrix','Matrix3','Rotation','Value','IntArray','StringArray']:
         return obj
     elif type == 'RigidTransform':
         return obj
@@ -513,7 +515,7 @@ def toJson(obj,type='auto'):
         return {'x':obj.x,'n':obj.n,'kFriction':kFriction}
     elif type == 'Trajectory' or type == 'LinearPath':
         return {'times':obj.times,'milestones':obj.milestones}
-    elif type == 'IKObjective':
+    elif type == 'IKObjective' or type == 'IKGoal':
         res = {'type':type,'link':obj.link()}
         if obj.destLink() >= 0:
             res['destLink'] = obj.destLink()
@@ -570,7 +572,7 @@ def fromJson(jsonobj,type='auto'):
         else:
             raise RuntimeError("Unknown JSON object of type "+jsonobj.__class__.__name)
 
-    if type in ['Config','Configs','Vector','Matrix','Matrix3','RotationMatrix','Value','IntArray','StringArray']:
+    if type in ['Config','Configs','Vector','Matrix','Matrix3','Rotation','Value','IntArray','StringArray']:
         return jsonobj
     elif type == 'RigidTransform':
         return jsonobj
@@ -578,7 +580,7 @@ def fromJson(jsonobj,type='auto'):
         return ContactPoint(jsonobj['x'],jsonobj['n'],jsonobj['kFriction'])
     elif type == 'Trajectory' or type == 'LinearPath':
         return Trajectory(jsonobj['times'],jsonobj['milestones'])
-    elif type == 'IKObjective':
+    elif type == 'IKObjective' or type == 'IKGoal':
         link = jsonobj['link']
         destlink = jsonobj['destLink'] if 'destLink' in jsonobj else -1
         posConstraint = 'free'
