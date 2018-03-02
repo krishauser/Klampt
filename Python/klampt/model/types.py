@@ -2,13 +2,24 @@ from ..model.contact import ContactPoint,Hold
 from ..model.trajectory import Trajectory,RobotTrajectory,SO3Trajectory,SE3Trajectory
 from ..model.multipath import MultiPath
 from ..math import vectorops,so3,se3
-from ..robotsim import WorldModel,RobotModel,RobotModelLink,RigidObjectModel,IKObjective
+from ..robotsim import WorldModel,RobotModel,RobotModelLink,RigidObjectModel,IKObjective,Geometry3D,TriangleMesh,PointCloud,GeometricPrimitive
+
+_knownTypes = ['Value','Vector2','Vector3','Matrix3','Point','Rotation','RigidTransform','Vector','Config',
+                'IntArray','StringArray',
+                'Configs','Trajectory','LinearPath','MultiPath',
+                'IKGoal','ContactPoint','Hold',
+                'TriangleMesh','PointCloud','VolumeGrid','GeometricPrimitive']
+
+def knownTypes():
+    return _knownTypes[:]
 
 def objectToTypes(object,world=None):
     """Returns a string defining the type of the given Python Klamp't object.
     If multiple types could be associated with it, then it returns a list of all
     possible valid types."""
     if hasattr(object,'type'):
+        if callable(object.type):
+            return object.type()
         return object.type
     if isinstance(object,ContactPoint):
         return 'ContactPoint'
@@ -63,10 +74,10 @@ def make(type,object=None):
 
     Arguments:
     - str: the name of the desired type type 
-    - object: If type is 'Config', 'Configs', or 'Trajectory', can provide the object for
+    - object: If type is 'Config', 'Configs', 'Vector', or 'Trajectory', can provide the object for
       which the new instance will be compatible.
       """
-    if type == 'Config':
+    if type == 'Config' or type == 'Vector':
         if isinstance(object,RobotModel):
             return object.getConfig()
         else:
@@ -101,5 +112,17 @@ def make(type,object=None):
         return Trajectory()
     elif type == 'MultiPath':
         return MultiPath()
+    elif type == 'Value':
+        return 0
+    elif type == 'TriangleMesh':
+        return Geometry3D(TriangleMesh())
+    elif type == 'PointCloud':
+        return Geometry3D(PointCloud())
+    elif type == 'GeometricPrimitive':
+        p = GeometricPrimitive()
+        p.setPoint((0,0,0))
+        return Geometry3D(p)
+    elif type == 'VolumeGrid':
+        raise NotImplementedError("Can't create empty volume grid yet")
     else:
         return None
