@@ -1,5 +1,3 @@
-#include <log4cxx/logger.h>
-#include <KrisLibrary/Logger.h>
 #include "FeedforwardController.h"
 #include "JointSensors.h"
 //#include "Modeling/ParabolicRamp.h"
@@ -23,7 +21,7 @@ void FeedforwardController::Update(Real dt)
   base->command = command;
   base->Update(dt);
   if(!enableGravityCompensation && !enableFeedforwardAcceleration) {
-    //LOG4CXX_INFO(KrisLibrary::logger(),"FF disabled"<<"\n");
+    //cout<<"FF disabled"<<endl;
     return;
   }
 
@@ -33,13 +31,13 @@ void FeedforwardController::Update(Real dt)
   }
   else {
     if(!sensors->GetTypedSensor<JointPositionSensor>()) {
-      LOG4CXX_INFO(KrisLibrary::logger(),"FeedforwardController: No joint positions, FF disabled\n");
+      printf("FeedforwardController: No joint positions, FF disabled\n");
       enableGravityCompensation = enableFeedforwardAcceleration = false;
       return;
     }
     Config& q = sensors->GetTypedSensor<JointPositionSensor>()->q;
     if(q.n != robot.q.n) {
-      LOG4CXX_INFO(KrisLibrary::logger(),"FeedforwardController: joint encoders don't provide full state information, FF disabled\n");
+      printf("FeedforwardController: joint encoders don't provide full state information, FF disabled\n");
       enableGravityCompensation = enableFeedforwardAcceleration = false;
       return;
     }    
@@ -57,8 +55,8 @@ void FeedforwardController::Update(Real dt)
 
   Vector torques;
   SolveTorques(torques,dt);
-  //LOG4CXX_INFO(KrisLibrary::logger(),"Estimated config "<<robot.q<<"\n");
-  //LOG4CXX_INFO(KrisLibrary::logger(),"FF Torques: "<<torques<<"\n");
+  //cout<<"Estimated config "<<robot.q<<endl;
+  //cout<<"FF Torques: "<<torques<<endl;
   for(size_t i=0;i<command->actuators.size();i++) {
     if(robot.drivers[i].type == RobotJointDriver::Normal) {
       command->actuators[i].torque = torques(robot.drivers[i].linkIndices[0]);
@@ -180,7 +178,7 @@ void FeedforwardController::SolveTorques(Vector& torques,Real dt)
   for(size_t i=0;i<wrenches.size();i++) {
     ne.externalWrenches[i].f += wrenches[i].f;
     ne.externalWrenches[i].m += wrenches[i].m;
-    //LOG4CXX_INFO(KrisLibrary::logger(),"Total wrench "<<i<<": "<<ne.externalWrenches[i].m<<", "<<ne.externalWrenches[i].f<<"\n");
+    //cout<<"Total wrench "<<i<<": "<<ne.externalWrenches[i].m<<", "<<ne.externalWrenches[i].f<<endl;
   }
   if(enableFeedforwardAcceleration) {
     Assert(dt > 0);
@@ -210,8 +208,8 @@ void FeedforwardController::SolveTorques(Vector& torques,Real dt)
       }
     }
     ne.CalcTorques(ddq,torques);
-    //LOG4CXX_INFO(KrisLibrary::logger(),"Desired accel: "<<ddq<<"\n");
-    //LOG4CXX_INFO(KrisLibrary::logger(),"FF torques: "<<torques<<"\n");
+    //cout<<"Desired accel: "<<ddq<<endl;
+    //cout<<"FF torques: "<<torques<<endl;
   }
   else 
     ne.CalcResidualTorques(torques);

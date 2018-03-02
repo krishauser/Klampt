@@ -1,8 +1,6 @@
 #ifndef GL_SCREENSHOT_PLUGIN_H
 #define GL_SCREENSHOT_PLUGIN_H
 
-#include <log4cxx/logger.h>
-#include <KrisLibrary/Logger.h>
 #include <KrisLibrary/utils/stringutils.h>
 #include <KrisLibrary/Timer.h>
 #include <string>
@@ -55,8 +53,8 @@ public:
   {
     const char* screenshotFilec=screenshotFile.c_str();
     bool res=GLSaveScreenshotPPM(screenshotFilec);
-    if(!res) LOG4CXX_ERROR(KrisLibrary::logger(),"Error saving screenshot to "<<screenshotFile.c_str());
-    if(verbose) LOG4CXX_INFO(KrisLibrary::logger(),"Screenshot saved to "<<screenshotFile.c_str());
+    if(!res) printf("Error saving screenshot to %s\n",screenshotFile.c_str());
+    if(verbose) printf("Screenshot saved to %s\n",screenshotFile.c_str());
   }
 
   void StartMovie()
@@ -106,7 +104,7 @@ public:
   {
     if(saveMovie) {
       if(t >= lastScreenshotTime + frameTime) {
-	LOG4CXX_INFO(KrisLibrary::logger(),"Time "<<t<<" last "<<lastScreenshotTime<<", Saving "<<(int)Math::Floor((t-lastScreenshotTime)/frameTime));
+	printf("Time %g last %g, Saving %d screenshots\n",t,lastScreenshotTime,(int)Math::Floor((t-lastScreenshotTime)/frameTime));
 	while(lastScreenshotTime+frameTime < t) {
 	  SaveScreenshot();
 	  IncrementStringDigits(screenshotFile);

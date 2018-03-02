@@ -1,5 +1,3 @@
-#include <log4cxx/logger.h>
-#include <KrisLibrary/Logger.h>
 #include "WorldGUI.h"
 #include "IO/ROS.h"
 #include <string.h>
@@ -74,7 +72,7 @@ bool WorldGUIBackend::LoadFile(const char* fn)
     const char* ext=FileExtension(fn);
     if(0==strcmp(ext,"xml")) {
       if(!world->LoadXML(fn)) {
-	LOG4CXX_ERROR(KrisLibrary::logger(),"Error loading world file "<<fn);
+	printf("Error loading world file %s\n",fn);
 	return false;
       }
     }
@@ -88,18 +86,18 @@ bool WorldGUIBackend::LoadFile(const char* fn)
 
 bool WorldGUIBackend::ReloadFile(const char* fn)
 {
-  LOG4CXX_INFO(KrisLibrary::logger(),"Reloading "<<fn);
+  printf("Reloading %s\n",fn);
   const char* ext=FileExtension(fn);
     if(0==strcmp(ext,"xml")) {
       if(!world->LoadXML(fn)) {
-  LOG4CXX_ERROR(KrisLibrary::logger(),"WorldGUIBackend::ReloadFile: Error loading world file "<<fn);
+  printf("WorldGUIBackend::ReloadFile: Error loading world file %s\n",fn);
   return false;
       }
     }
     else {
       int id = world->LoadElement(fn);
       if(id < 0) {
-        LOG4CXX_ERROR(KrisLibrary::logger(),"WorldGUIBackend::ReloadFile: Error loading file "<<fn);
+        printf("WorldGUIBackend::ReloadFile: Error loading file %s\n",fn);
         return false;
       }
       string name = world->GetName(id);
@@ -159,7 +157,7 @@ bool WorldGUIBackend::ReloadFile(const char* fn)
         }
       }
       if(!found) {
-        LOG4CXX_INFO(KrisLibrary::logger(),"WorldGUIBackend::ReloadFile: unable to find a previous item named "<<name.c_str());
+        printf("WorldGUIBackend::ReloadFile: unable to find a previous item named %s\n",name.c_str());
         return false;
       }
     }
@@ -182,7 +180,7 @@ bool WorldGUIBackend::LoadCommandLine(int argc,const char** argv)
 	i++;
       }
       else {
-	LOG4CXX_INFO(KrisLibrary::logger(),"Unknown option "<<argv[i]);
+	printf("Unknown option %s",argv[i]);
 	return false;
       }
     }
@@ -190,7 +188,7 @@ bool WorldGUIBackend::LoadCommandLine(int argc,const char** argv)
       const char* ext=FileExtension(argv[i]);
       if(0==strcmp(ext,"xml")) {
 	if(!world->LoadXML(argv[i])) {
-	  LOG4CXX_ERROR(KrisLibrary::logger(),"Error loading world from "<<argv[i]);
+	  printf("Error loading world from %s\n",argv[i]);
 	  return false;
 	}
       }
@@ -203,17 +201,17 @@ bool WorldGUIBackend::LoadCommandLine(int argc,const char** argv)
   }
 
   if(configs.size() > world->robots.size()) {
-    LOG4CXX_WARN(KrisLibrary::logger(),"Warning, too many configs specified\n");
+    printf("Warning, too many configs specified\n");
   }
   for(size_t i=0;i<configs.size();i++) {
     if(i >= world->robots.size()) break;
     ifstream in(configs[i].c_str(),ios::in);
-    if(!in) LOG4CXX_INFO(KrisLibrary::logger(),"Could not open config file "<<configs[i].c_str());
+    if(!in) printf("Could not open config file %s\n",configs[i].c_str());
     Vector temp;
     in >> temp;
-    if(!in) LOG4CXX_ERROR(KrisLibrary::logger(),"Error reading config file "<<configs[i].c_str());
+    if(!in) printf("Error reading config file %s\n",configs[i].c_str());
     if(temp.n != (int)world->robots[i]->links.size()) {
-      LOG4CXX_INFO(KrisLibrary::logger(),"Incorrect number of DOFs in config "<<i);
+      printf("Incorrect number of DOFs in config %d\n",i);
       continue;
     }
     world->robots[i]->UpdateConfig(temp);
@@ -224,7 +222,7 @@ bool WorldGUIBackend::LoadCommandLine(int argc,const char** argv)
 bool WorldGUIBackend::SaveWorld(const char* fn,const char* elementPath)
 {
   if(!world->SaveXML(fn,elementPath)) {
-LOG4CXX_ERROR(KrisLibrary::logger(),"Error saving world file "<<fn);
+printf("Error saving world file %s\n",fn);
 return false;
   }
   return true;

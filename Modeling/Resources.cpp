@@ -1,5 +1,3 @@
-#include <log4cxx/logger.h>
-#include <KrisLibrary/Logger.h>
 #include "Resources.h"
 #include <KrisLibrary/utils/stringutils.h>
 #include <KrisLibrary/utils/fileutils.h>
@@ -199,7 +197,7 @@ bool TriMeshResource::Load(const std::string& fn)
 {
   bool res=Meshing::Import(fn.c_str(),data);
   if(!res) {
-    LOG4CXX_INFO(KrisLibrary::logger(),"TriMeshResource::Load:  Unable to load mesh from file "<<fn.c_str());
+    printf("TriMeshResource::Load:  Unable to load mesh from file %s\n",fn.c_str());
   }
   return res;
 }
@@ -296,7 +294,7 @@ bool WorldResource::Load(const string& fn)
 
 bool WorldResource::Save(const string& fn)
 {
-    LOG4CXX_ERROR(KrisLibrary::logger(),"TODO: saving worlds\n");
+  fprintf(stderr,"TODO: saving worlds\n");
   return false;
 }
 
@@ -885,7 +883,7 @@ bool HoldResource::Pack(vector<ResourcePtr>& lib,string* errorMessage)
   vector<IKGoalResource*> ikgoals = ResourcesByType<IKGoalResource>(lib);
   vector<FloatArrayResource*> contacts = ResourcesByType<FloatArrayResource>(lib);
   if(ikgoals.size() != 1) {
-        LOG4CXX_ERROR(KrisLibrary::logger(),"Trying to pack more than 1 ik goal into a hold\n");
+    fprintf(stderr,"Trying to pack more than 1 ik goal into a hold\n");
     return false;
   }
   this->hold.link = ikgoals[0]->goal.link;
@@ -893,7 +891,7 @@ bool HoldResource::Pack(vector<ResourcePtr>& lib,string* errorMessage)
   this->hold.contacts.resize(contacts.size());
   for(size_t i=0;i<contacts.size();i++) {
     if(contacts[i]->data.size() != 7) {
-            LOG4CXX_ERROR(KrisLibrary::logger(),"Contact point doesn't have 7 entries x y z nx ny nz kf\n");
+      fprintf(stderr,"Contact point doesn't have 7 entries x y z nx ny nz kf\n");
       return false;
     }
     this->hold.contacts[i].x.set(&contacts[i]->data[0]);
@@ -1300,7 +1298,7 @@ ResourcePtr CastResource(ResourcePtr& item,const char* type)
       return new ConfigResource(ar->data);
     }
   }
-    LOG4CXX_ERROR(KrisLibrary::logger(),"CastResource: No conversion from "<<item->Type()<<" to "<<type);
+  fprintf(stderr,"CastResource: No conversion from %s to %s\n",item->Type(),type);
   return NULL;
 }
 
@@ -1318,11 +1316,11 @@ vector<ResourcePtr> ExtractResources(ResourcePtr& item,const char* type)
   CompoundResourceBase* cr = dynamic_cast<CompoundResourceBase*>((ResourceBase*)item);
   if(cr) {
     if(!cr->Extract(type,res)) {
-            LOG4CXX_ERROR(KrisLibrary::logger(),"ExtractResource: No elements of type "<<type<<" in "<<item->Type());
+      fprintf(stderr,"ExtractResource: No elements of type %s in %s\n",type,item->Type());
     }
     return res;
   }
-    LOG4CXX_ERROR(KrisLibrary::logger(),"ExtractResource: item "<<item->Type());
+  fprintf(stderr,"ExtractResource: item %s is not compound\n",item->Type());
   return res;
 }
 
@@ -1381,7 +1379,7 @@ vector<ResourcePtr> UnpackResource(ResourcePtr r,bool* successful,bool* incomple
     return res;
   }
   else {
-    LOG4CXX_WARN(KrisLibrary::logger(),"ResourceNode::Expand: Warning, no expansion known for type "<<type);
+    printf("ResourceNode::Expand: Warning, no expansion known for type %s\n",type);
     if(successful) *successful = false;
     return res;
   }
@@ -1555,7 +1553,7 @@ bool Convert(const AnyCollection& c,IKGoal& g)
     else if(s=="linear") 
       g.posConstraint = IKGoal::PosLinear;
     else {
-            LOG4CXX_ERROR(KrisLibrary::logger(),"AnyCollection to IKGoal: Invalid posConstraint type "<<s.c_str());
+      fprintf(stderr,"AnyCollection to IKGoal: Invalid posConstraint type %s\n",s.c_str());
       return false;
     }
     if(s == "fixed" || s == "planar" || s=="linear") {
@@ -1576,7 +1574,7 @@ bool Convert(const AnyCollection& c,IKGoal& g)
     else if(s=="twoaxis") 
       g.rotConstraint = IKGoal::RotTwoAxis;
     else {
-            LOG4CXX_ERROR(KrisLibrary::logger(),"AnyCollection to IKGoal: Invalid rotConstraint type "<<s.c_str());
+      fprintf(stderr,"AnyCollection to IKGoal: Invalid rotConstraint type %s\n",s.c_str());
       return false;
     }
     if(s == "fixed" || s == "axis" || s=="twoaxis") {
@@ -1632,7 +1630,7 @@ bool Convert(const AnyCollection& c,Stance& s)
   for(size_t i=0;i<holds.size();i++) {
     HoldResource h;
     if(!h.Load(*holds[i])) {
-            LOG4CXX_ERROR(KrisLibrary::logger(),"Convert(AnyCollection,Stance): Error reading hold "<<(int)i);
+      fprintf(stderr,"Convert(AnyCollection,Stance): Error reading hold %d\n",(int)i);
       return false;
     }
     s.insert(h.hold);

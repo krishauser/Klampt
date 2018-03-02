@@ -1,5 +1,3 @@
-#include <log4cxx/logger.h>
-#include <KrisLibrary/Logger.h>
 #include "ROS.h"
 
 #if HAVE_ROS 
@@ -108,7 +106,7 @@ bool ROSToKlampt(const sensor_msgs::JointState& js,Robot& krobot)
     indices[krobot.linkNames[i]] = (int)i;
   for(size_t i=0;i<js.name.size();i++) {
     if(indices.count(js.name[i])==0) {
-            LOG4CXX_ERROR(KrisLibrary::logger(),"ROS JointState message has incorrect name "<<js.name[i].c_str());
+      fprintf(stderr,"ROS JointState message has incorrect name %s\n",js.name[i].c_str());
       return false;
     }
     if(!js.position.empty()) krobot.q[indices[js.name[i]]] = js.position[i];
@@ -222,7 +220,7 @@ bool KlamptToROS(const Robot& robot,const LinearPath& kpath,trajectory_msgs::Joi
     return true;
   }
   if((int)robot.linkNames.size() != kpath.milestones[0].size()) {
-        LOG4CXX_ERROR(KrisLibrary::logger(),"KlamptToROS (LinearPath): path doesn't have same number of milestones as the robot\n");
+    fprintf(stderr,"KlamptToROS (LinearPath): path doesn't have same number of milestones as the robot\n");
     return false;
   }
   traj.joint_names = robot.linkNames;
@@ -242,13 +240,13 @@ bool KlamptToROS(const Robot& robot,const vector<int>& indices,const LinearPath&
     return true;
   }
   if((int)indices.size() != kpath.milestones[0].size()) {
-        LOG4CXX_ERROR(KrisLibrary::logger(),"KlamptToROS (LinearPath): path doesn't have same number of milestones as the indices\n");
+    fprintf(stderr,"KlamptToROS (LinearPath): path doesn't have same number of milestones as the indices\n");
     return false;
   }
   traj.joint_names.resize(indices.size());
   for(size_t i=0;i<indices.size();i++) {
     if(indices[i] < 0 || indices[i] > robot.q.n)  {
-            LOG4CXX_ERROR(KrisLibrary::logger(),"KlamptToROS (LinearPath): invalid index\n");
+      fprintf(stderr,"KlamptToROS (LinearPath): invalid index\n");
       return false;
     }
     traj.joint_names[i] = robot.linkNames[indices[i]];
@@ -394,7 +392,7 @@ bool ROSToKlampt(const sensor_msgs::PointCloud2& pc,Meshing::PointCloud3D& kpc)
     }
     ofs += pc.row_step;
   }
-  //LOG4CXX_INFO(KrisLibrary::logger(),"Read "<<kpc.points.size());
+  //printf("Read %d points from ROS\n",kpc.points.size());
   return true;
 }
 
@@ -625,7 +623,7 @@ public:
     tf::Transform transform;
     bool valid = KlamptToROS(T,transform);
     if(!valid) {
-      LOG4CXX_INFO(KrisLibrary::logger(),"RosPublishTransforms: transform of "<<name.c_str());
+      printf("RosPublishTransforms: transform of %s is not valid?\n",name.c_str());
       return;
     }
     broadcaster.sendTransform(tf::StampedTransform(transform, ros::Time::now(), parent, name));
@@ -670,13 +668,13 @@ bool RosSubscribe(Type& obj,const string& topic)
   if(!ROSInit()) return false;
   SubscriberList::iterator i=gSubscribers.find(topic); 
   if(i!=gSubscribers.end()) { 
-    LOG4CXX_INFO(KrisLibrary::logger(),"ROSSubscribe: Unsubscribing old subscriber to topic "<<topic.c_str());
+    printf("ROSSubscribe: Unsubscribing old subscriber to topic %s\n",topic.c_str());
     i->second->unsubscribe();
     i->second = NULL;
   }
   ROSSubscriber<Type,Msg>* sub = new ROSSubscriber<Type,Msg>(obj,topic); 
   if(!sub->sub) {
-    LOG4CXX_ERROR(KrisLibrary::logger(),"ROSSubscribe: Unable to subscribe to topic "<<topic.c_str() <<", maybe wrong type\n");    
+    fprintf(stderr,"ROSSubscribe: Unable to subscribe to topic %s, maybe wrong type\n",topic.c_str());
     return false;
   }
   gSubscribers[topic] = sub; 
@@ -1029,7 +1027,7 @@ bool ROSSubscribeJointState(Robot& robot,const char* topic)
 }
 bool ROSSubscribePointCloud(Meshing::PointCloud3D& pc,const char* topic)
 {
-  //LOG4CXX_INFO(KrisLibrary::logger(),"ROSSubscribePointCloud "<<topic);
+  //printf("ROSSubscribePointCloud %s\n",topic);
   return RosSubscribe<Meshing::PointCloud3D,sensor_msgs::PointCloud2>(pc,topic);
 }
 
@@ -1054,13 +1052,13 @@ bool ROSSubscribeUpdate()
   bool updated = false;
   for(SubscriberList::iterator i=gSubscribers.begin();i!=gSubscribers.end();i++)
     if(i->second->numMessages > 0) {
-      //LOG4CXX_INFO(KrisLibrary::logger(),""<<i->second->numMessages<<" updates to "<<i->second->topic.c_str());
+      //printf("%d updates to %s\n",i->second->numMessages,i->second->topic.c_str());
       updated = true;
       i->second->endUpdate();
     }
-  //LOG4CXX_INFO(KrisLibrary::logger(),"ROS Update in time "<<timer.ElapsedTime());
+  //printf("ROS Update in time %gs\n",timer.ElapsedTime());
   if(gRosSubscribeError) {
-        LOG4CXX_ERROR(KrisLibrary::logger(),"ROS: Error converting topic "<<gRosSubscribeErrorWhere.c_str());
+    fprintf(stderr,"ROS: Error converting topic %s to Klampt format\n",gRosSubscribeErrorWhere.c_str());
     return false;
   }
   return updated;
@@ -1073,7 +1071,7 @@ bool ROSDetach(const char* topic)
     gSubscribers.erase(gSubscribers.find(topic));
     return true;
   }
-    LOG4CXX_ERROR(KrisLibrary::logger(),"ROSDetach: topic "<<topic);
+  fprintf(stderr,"ROSDetach: topic %s not published/subscribed\n",topic);
   return false;
 }
 
@@ -1122,7 +1120,7 @@ bool ROSHadUpdate(const char* topic)
 #else
 
 #include "Modeling/World.h"
-bool ROSInit(const char* nodename) { LOG4CXX_ERROR(KrisLibrary::logger(),"ROSInit(): Klamp't was not built with ROS support\n"); return false; }
+bool ROSInit(const char* nodename) { fprintf(stderr,"ROSInit(): Klamp't was not built with ROS support\n"); return false; }
 bool ROSShutdown() { return false; }
 bool ROSInitialized() { return false; }
 bool ROSSetQueueSize(int size) { return false; }

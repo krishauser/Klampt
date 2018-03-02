@@ -1,20 +1,19 @@
-#include <KrisLibrary/Logger.h>
 #include "WorldSimulation.h"
 #include <KrisLibrary/Timer.h>
 #include <ode/ode.h>
 #include "ODECommon.h"
-
 DEFINE_LOGGER(WorldSimulator)
+
 
 #define READ_FILE_DEBUG(file,object,prefix)		\
   if(!ReadFile(file,object)) { \
-        LOG4CXX_ERROR(GET_LOGGER(WorldSimulator),""<<prefix<<": ReadFile failed to read item "<<#object); \
+    LOG4CXX_ERROR(GET_LOGGER(WorldSimulator),prefix<<": ReadFile failed to read item "<<#object); \
     return false; \
   }
 
 #define READ_ARRAY_FILE_DEBUG(file,object,count,prefix)	\
   if(!ReadArrayFile(file,object,count)) {					\
-        LOG4CXX_ERROR(GET_LOGGER(WorldSimulator),""<<prefix<<": ReadArrayFile failed to read item "<<#object<<", size "<<count); \
+    LOG4CXX_ERROR(GET_LOGGER(WorldSimulator),prefix<<": ReadArrayFile failed to read item "<<#object<<", size "<<count); \
     return false; \
   }
 
@@ -26,7 +25,7 @@ bool TestReadWriteState(T& obj,const char* name="")
   File fwrite,fwritenew;
   fwrite.OpenData();
   if(!obj.WriteState(fwrite)) {
-        LOG4CXX_ERROR(GET_LOGGER(WorldSimulator),"WriteState "<<name);
+    fprintf(stderr,"WriteState %s failed\n",name);
     return false;
   }
   //HACK for File internal buffer length bug returning buffer capacity rather
@@ -34,12 +33,12 @@ bool TestReadWriteState(T& obj,const char* name="")
   int n1 = fwrite.Position();
   fwrite.Seek(0,FILESEEKSTART);
   if(!obj.ReadState(fwrite)) {
-        LOG4CXX_ERROR(GET_LOGGER(WorldSimulator),"ReadState "<<name);
+    fprintf(stderr,"ReadState %s failed\n",name);
     return false;
   }
   fwritenew.OpenData();
   if(!obj.WriteState(fwritenew)) {
-        LOG4CXX_ERROR(GET_LOGGER(WorldSimulator),"Second WriteState "<<name);
+    fprintf(stderr,"Second WriteState %s failed\n",name);
     return false;
   }
   //HACK for File internal buffer length bug returning buffer capacity rather
@@ -49,12 +48,12 @@ bool TestReadWriteState(T& obj,const char* name="")
   char* d1 = (char*)fwrite.GetDataBuffer();
   char* d2 = (char*)fwritenew.GetDataBuffer();
   if(n1 != n2) {
-        LOG4CXX_ERROR(GET_LOGGER(WorldSimulator),"WriteState "<<name<<" wrote different numbers of bytes: "<<n1<<" -> "<<n2);
+    fprintf(stderr,"WriteState %s wrote different numbers of bytes: %d -> %d\n",name,n1,n2);
     return false;
   }
   for(int i=0;i<n1;i++) {
     if(d1[i] != d2[i]) {
-            LOG4CXX_ERROR(GET_LOGGER(WorldSimulator),"WriteState "<<name<<" wrote different byte at position "<<i<<"/"<<n1<<": 0x"<<(int)d1[i]<<" vs 0x"<<(int)d2[i]);
+      fprintf(stderr,"WriteState %s wrote different byte at position %d/%d: 0x%x vs 0x%x\n",name,i,n1,(int)d1[i],(int)d2[i]);
       return false;
     }
   }
@@ -68,29 +67,29 @@ bool TestReadWrite(T& obj,const char* name="")
   File fwrite,fwritenew;
   fwrite.OpenData();
   if(!obj.WriteFile(fwrite)) {
-        LOG4CXX_ERROR(GET_LOGGER(WorldSimulator),"WriteFile "<<name);
+    fprintf(stderr,"WriteFile %s failed\n",name);
     return false;
   }
   fwrite.Seek(0);
   if(!obj.ReadFile(fwrite)) {
-        LOG4CXX_ERROR(GET_LOGGER(WorldSimulator),"ReadFile "<<name);
+    fprintf(stderr,"ReadFile %s failed\n",name);
     return false;
   }
   fwritenew.OpenData();
   if(!obj.WriteFile(fwritenew)) {
-        LOG4CXX_ERROR(GET_LOGGER(WorldSimulator),"Second WriteFile "<<name);
+    fprintf(stderr,"Second WriteFile %s failed\n",name);
     return false;
   }
   int n1 = fwrite.Length(), n2 = fwritenew.Length();
   char* d1 = (char*)fwrite.GetDataBuffer();
   char* d2 = (char*)fwritenew.GetDataBuffer();
   if(n1 != n2) {
-        LOG4CXX_ERROR(GET_LOGGER(WorldSimulator),"WriteFile "<<name<<" wrote different numbers of bytes: "<<n1<<" -> "<<n2);
+    fprintf(stderr,"WriteFile %s wrote different numbers of bytes: %d -> %d\n",name,n1,n2);
     return false;
   }
   for(int i=0;i<n1;i++) {
     if(d1[i] != d2[i]) {
-            LOG4CXX_ERROR(GET_LOGGER(WorldSimulator),"WriteFile "<<name<<" wrote different byte at position "<<i<<": "<<d1[i]<<" vs "<<d2[i]);
+      fprintf(stderr,"WriteFile %s wrote different byte at position %d: %c vs %c\n",name,i,d1[i],d2[i]);
       return false;
     }
   }
@@ -128,7 +127,7 @@ bool ReadFile(File& f,vector<T>& v)
   int n;
   READ_FILE_DEBUG(f,n,"ReadFile(vector<T>)");
   if(n < 0) {
-        LOG4CXX_ERROR(GET_LOGGER(WorldSimulator),"ReadFile(vector<T>): invalid size "<<n);
+    fprintf(stderr,"ReadFile(vector<T>): invalid size %d\n",n);
     return false;
   }
   v.resize(n);
@@ -260,7 +259,7 @@ void WorldSimulation::Init(RobotWorld* _world)
 	}
       }
 
-      //LOG4CXX_INFO(GET_LOGGER(WorldSimulator),"Setting up servo for joint "<<j);
+      //printf("Setting up servo for joint %d\n",j);
       //setup actuator parameters
       if(robot->drivers[j].type == RobotJointDriver::Normal) {
 	int k=robot->drivers[j].linkIndices[0];
@@ -310,7 +309,7 @@ void WorldSimulation::OnAddModel()
 	}
       }
 
-      //LOG4CXX_INFO(GET_LOGGER(WorldSimulator),"Setting up servo for joint "<<j);
+      //printf("Setting up servo for joint %d\n",j);
       //setup actuator parameters
       if(robot->drivers[j].type == RobotJointDriver::Normal) {
 	int k=robot->drivers[j].linkIndices[0];
@@ -369,7 +368,7 @@ void WorldSimulation::Advance(Real dt)
   Real timeLeft=dt;
   Real accumTime=0;
   int numSteps = 0;
-  //LOG4CXX_INFO(GET_LOGGER(WorldSimulator),"Advance "<<time<<" -> "<<time+dt<<", simulation time step "<<simStep);
+  //printf("Advance %g -> %g, simulation time step %g\n",time,time+dt,simStep);
   while(timeLeft > 0.0) {
     Real step = Min(timeLeft,simStep);
     for(size_t i=0;i<controlSimulators.size();i++) 
@@ -475,7 +474,7 @@ void WorldSimulation::Advance(Real dt)
     }
   }
   */
-  //LOG4CXX_INFO(GET_LOGGER(WorldSimulator),"WorldSimulation: Sim step "<<dt<<"s, real step "<<timer.ElapsedTime());
+  //printf("WorldSimulation: Sim step %gs, real step %gs\n",dt,timer.ElapsedTime());
 }
 
 void WorldSimulation::AdvanceFake(Real dt)
@@ -562,26 +561,26 @@ bool WorldSimulation::ReadState(File& f)
 
   READ_FILE_DEBUG(f,time,"WorldSimulation::ReadState");
   if(!odesim.ReadState(f)) {
-        LOG4CXX_ERROR(GET_LOGGER(WorldSimulator),"WorldSimulation::ReadState: ODE sim failed to read");
+    LOG4CXX_ERROR(GET_LOGGER(WorldSimulator),"WorldSimulation::ReadState: ODE sim failed to read");
     return false;
   }
   //controlSimulators will read the robotControllers' states
   for(size_t i=0;i<controlSimulators.size();i++) {
     if(!controlSimulators[i].ReadState(f)) {
-            LOG4CXX_ERROR(GET_LOGGER(WorldSimulator),"WorldSimulation::ReadState: Control simulator "<<i);
+      LOG4CXX_ERROR(GET_LOGGER(WorldSimulator),"WorldSimulation::ReadState: Control simulator "<<i<<" failed to read");
       return false;
     }
   }
   for(size_t i=0;i<hooks.size();i++) {
     if(!hooks[i]->ReadState(f)) {
-            LOG4CXX_ERROR(GET_LOGGER(WorldSimulator),"WorldSimulation::ReadState: Hook "<<i);
+      LOG4CXX_ERROR(GET_LOGGER(WorldSimulator),"WorldSimulation::ReadState: Hook "<<i<<" failed to read");
       return false;
     }
   }
   int n;
   READ_FILE_DEBUG(f,n,"WorldSimulation::ReadState: reading number of contactFeadback items");
   if(n < 0) {
-        LOG4CXX_ERROR(GET_LOGGER(WorldSimulator),"Invalid number "<<n);
+    fprintf(stderr,"Invalid number %d of contactFeedback items\n",n);
     return false;
   }
   contactFeedback.clear();
@@ -589,15 +588,15 @@ bool WorldSimulation::ReadState(File& f)
     pair<ODEObjectID,ODEObjectID> key;
     ContactFeedbackInfo info;
     if(!ReadFile(f,key.first)) {
-            LOG4CXX_ERROR(GET_LOGGER(WorldSimulator),"Unable to read contact feedback "<<i);
+      fprintf(stderr,"Unable to read contact feedback %d object 1\n",i);
       return false;
     }
     if(!ReadFile(f,key.second)) {
-            LOG4CXX_ERROR(GET_LOGGER(WorldSimulator),"Unable to read contact feedback "<<i);
+      fprintf(stderr,"Unable to read contact feedback %d object 2\n",i);
       return false;
     }
     if(!ReadFile(f,info)) {
-            LOG4CXX_ERROR(GET_LOGGER(WorldSimulator),"Unable to read contact feedback "<<i);
+      fprintf(stderr,"Unable to read contact feedback %d info\n",i);
       return false;
     }
     contactFeedback[key] = info;
@@ -616,7 +615,7 @@ bool WorldSimulation::WriteState(File& f) const
   }
   for(size_t i=0;i<hooks.size();i++) {
     if(!hooks[i]->WriteState(f)) {
-            LOG4CXX_ERROR(GET_LOGGER(WorldSimulator),"WorldSimulation::ReadState: Hook "<<i);
+      fprintf(stderr,"WorldSimulation::ReadState: Hook %d failed to write\n",i);
       return false;
     }
   }

@@ -1,5 +1,3 @@
-#include <log4cxx/logger.h>
-#include <KrisLibrary/Logger.h>
 #include "Sensor.h"
 #include "JointSensors.h"
 #include "ForceSensors.h"
@@ -31,6 +29,8 @@
 #endif //GL_BGRA_EXT
 #define GL_BGRA GL_BGRA_EXT
 #endif //GL_BGRA
+
+DECLARE_LOGGER(XmlParser);
 
 using namespace GLDraw;
 
@@ -175,12 +175,12 @@ void JointPositionSensor::SimulateKinematic(Robot& robot,RobotWorld& world)
 {
   q = robot.q;
   if(!qvariance.empty()) {
-    //LOG4CXX_INFO(KrisLibrary::logger(),"q: "<<qvariance<<"\n");
+    //cout<<"q: "<<qvariance<<endl;
     for(int i=0;i<q.n;i++)
       q(i) += RandGaussian()*Sqrt(qvariance(i));
   }
   if(!qresolution.empty()) {
-    //LOG4CXX_INFO(KrisLibrary::logger(),"q: "<<qresolution<<"\n");
+    //cout<<"q: "<<qresolution<<endl;
     for(int i=0;i<q.n;i++) {
       if(qresolution(i) > 0) {
   q(i) = round(q(i)/qresolution(i))*qresolution(i);
@@ -200,12 +200,12 @@ void JointPositionSensor::Simulate(ControlledRobotSimulator* robot,WorldSimulati
 {
   robot->oderobot->GetConfig(q);
   if(!qvariance.empty()) {
-    //LOG4CXX_INFO(KrisLibrary::logger(),"q: "<<qvariance<<"\n");
+    //cout<<"q: "<<qvariance<<endl;
     for(int i=0;i<q.n;i++)
       q(i) += RandGaussian()*Sqrt(qvariance(i));
   }
   if(!qresolution.empty()) {
-    //LOG4CXX_INFO(KrisLibrary::logger(),"q: "<<qresolution<<"\n");
+    //cout<<"q: "<<qresolution<<endl;
     for(int i=0;i<q.n;i++) {
       if(qresolution(i) > 0) {
 	q(i) = round(q(i)/qresolution(i))*qresolution(i);
@@ -309,12 +309,12 @@ void JointVelocitySensor::SimulateKinematic(Robot& robot,RobotWorld& world)
 {
   dq = robot.dq;
   if(!dqvariance.empty()) {
-    //LOG4CXX_INFO(KrisLibrary::logger(),"dq: "<<qvariance<<"\n");
+    //cout<<"dq: "<<qvariance<<endl;
     for(int i=0;i<dq.n;i++)
       dq(i) += RandGaussian()*Sqrt(dqvariance(i));
   }
   if(!dqresolution.empty()) {
-    //LOG4CXX_INFO(KrisLibrary::logger(),"dq: "<<dqresolution<<"\n");
+    //cout<<"dq: "<<dqresolution<<endl;
     for(int i=0;i<dq.n;i++) {
       if(dqresolution(i) > 0) {
   dq(i) = int(dq(i)/dqresolution(i)+0.5)*dqresolution(i);
@@ -334,12 +334,12 @@ void JointVelocitySensor::Simulate(ControlledRobotSimulator* robot,WorldSimulati
 {
   robot->oderobot->GetVelocities(dq);
   if(!dqvariance.empty()) {
-    //LOG4CXX_INFO(KrisLibrary::logger(),"dq: "<<qvariance<<"\n");
+    //cout<<"dq: "<<qvariance<<endl;
     for(int i=0;i<dq.n;i++)
       dq(i) += RandGaussian()*Sqrt(dqvariance(i));
   }
   if(!dqresolution.empty()) {
-    //LOG4CXX_INFO(KrisLibrary::logger(),"dq: "<<dqresolution<<"\n");
+    //cout<<"dq: "<<dqresolution<<endl;
     for(int i=0;i<dq.n;i++) {
       if(dqresolution(i) > 0) {
 	dq(i) = int(dq(i)/dqresolution(i)+0.5)*dqresolution(i);
@@ -2394,16 +2394,16 @@ void CameraSensor::SimulateKinematic(Robot& robot,RobotWorld& world)
         if (GLEW_OK != err)
         {
           /* Problem: glewInit failed, something is seriously wrong. */
-          LOG4CXX_ERROR(KrisLibrary::logger(),"CameraSensor: Couldn't initialize GLEW, falling back to slow mode\n");
-          LOG4CXX_ERROR(KrisLibrary::logger(),"  glewInit() error: "<< glewGetErrorString(err));
-          LOG4CXX_ERROR(KrisLibrary::logger(),"  This usually happens when an OpenGL context has not been initialized.");
-          LOG4CXX_ERROR(KrisLibrary::logger(),"  GL version is: "<<glGetString(GL_VERSION));
+          fprintf(stderr,"CameraSensor: Couldn't initialize GLEW, falling back to slow mode\n");
+          fprintf(stderr,"  glewInit() error: %s\n", glewGetErrorString(err));
+          fprintf(stderr,"  This usually happens when an OpenGL context has not been initialized.");
+          fprintf(stderr,"  GL version is: %s\n",glGetString(GL_VERSION));
           useGLFramebuffers = false;
         }
         
       }
       if(!GLEW_EXT_framebuffer_object) {
-        LOG4CXX_ERROR(KrisLibrary::logger(),"CameraSensor: GL framebuffers not supported, falling back to slow mode\n");
+        fprintf(stderr,"CameraSensor: GL framebuffers not supported, falling back to slow mode\n");
         useGLFramebuffers = false;
       }
     }
@@ -2445,7 +2445,7 @@ void CameraSensor::SimulateKinematic(Robot& robot,RobotWorld& world)
     case GL_FRAMEBUFFER_COMPLETE_EXT:
       break;
     default:
-            LOG4CXX_ERROR(KrisLibrary::logger(),"CameraSensor: Couldn't initialize GL framebuffers, falling back to slow mode\n");
+      fprintf(stderr,"CameraSensor: Couldn't initialize GL framebuffers, falling back to slow mode\n");
       useGLFramebuffers = false;
       //Delete resources
       glDeleteTextures(1, &color_tex);
@@ -2590,7 +2590,7 @@ void CameraSensor::SimulateKinematic(Robot& robot,RobotWorld& world)
     }
     static bool warned = false;
     if(!warned) {
-      LOG4CXX_INFO(KrisLibrary::logger(),"DepthCameraSensor: doing fallback from GLEW... "<<k<<" rays cast, may be slow\n");
+      printf("DepthCameraSensor: doing fallback from GLEW... %d rays cast, may be slow\n",k);
       warned = true;
     }
 
@@ -2903,7 +2903,7 @@ bool RobotSensors::SaveSettings(const char* fn)
 bool RobotSensors::LoadSettings(TiXmlElement* node)
 {
   if(0!=strcmp(node->Value(),"sensors")){
-        LOG4CXX_ERROR(KrisLibrary::logger(),"RobotSensors::LoadSettings: unable to load from xml file, no <sensors> tag\n");
+    fprintf(stderr,"RobotSensors::LoadSettings: unable to load from xml file, no <sensors> tag\n");
     return false;
   }
   TiXmlElement* e=node->FirstChildElement();
@@ -2958,12 +2958,12 @@ bool RobotSensors::LoadSettings(TiXmlElement* node)
     else if(0==strcmp(e->Value(),"TransformedSensor")) {
       TransformedSensor* fs = new TransformedSensor;
       if(!e->Attribute("sensor")) {
-    LOG4CXX_ERROR(KrisLibrary::logger(),"Transformed sensor doesn't have a \"sensor\" attribute\n");
+    LOG4CXX_ERROR(GET_LOGGER(XmlParser),"Transformed sensor doesn't have a \"sensor\" attribute\n");
   return false;
       }
       fs->sensor = GetNamedSensor(e->Attribute("sensor"));
       if(fs->sensor == NULL) {
-    LOG4CXX_ERROR(KrisLibrary::logger(),"Transformed sensor has unknown sensor named \""<<e->Attribute("sensor"));
+    LOG4CXX_ERROR(GET_LOGGER(XmlParser),"Transformed sensor has unknown sensor named \""<<e->Attribute("sensor"));
   return false;
       }
       sensor = fs;
@@ -2973,12 +2973,12 @@ bool RobotSensors::LoadSettings(TiXmlElement* node)
     else if(0==strcmp(e->Value(),"CorruptedSensor")) {
       CorruptedSensor* fs = new CorruptedSensor;
       if(!e->Attribute("sensor")) {
-    LOG4CXX_ERROR(KrisLibrary::logger(),"Corrupted sensor doesn't have a \"sensor\" attribute\n");
+    LOG4CXX_ERROR(GET_LOGGER(XmlParser),"Corrupted sensor doesn't have a \"sensor\" attribute\n");
   return false;
       }
       fs->sensor = GetNamedSensor(e->Attribute("sensor"));
       if(fs->sensor == NULL) {
-    LOG4CXX_ERROR(KrisLibrary::logger(),"Corrupted sensor has unknown sensor named \""<<e->Attribute("sensor"));
+    LOG4CXX_ERROR(GET_LOGGER(XmlParser),"Corrupted sensor has unknown sensor named \""<<e->Attribute("sensor"));
   return false;
       }
       sensor = fs;
@@ -2988,12 +2988,12 @@ bool RobotSensors::LoadSettings(TiXmlElement* node)
     else if(0==strcmp(e->Value(),"FilteredSensor")) {
       FilteredSensor* fs = new FilteredSensor;
       if(!e->Attribute("sensor")) {
-		LOG4CXX_ERROR(KrisLibrary::logger(),"Filtered sensor doesn't have a \"sensor\" attribute\n");
+	LOG4CXX_ERROR(GET_LOGGER(XmlParser),"Filtered sensor doesn't have a \"sensor\" attribute");
 	return false;
       }
       fs->sensor = GetNamedSensor(e->Attribute("sensor"));
       if(fs->sensor == NULL) {
-		LOG4CXX_ERROR(KrisLibrary::logger(),"Filtered sensor has unknown sensor named \""<<e->Attribute("sensor"));
+	LOG4CXX_ERROR(GET_LOGGER(XmlParser),"Filtered sensor has unknown sensor named \""<<e->Attribute("sensor")<<"\"");
 	return false;
       }
       sensor = fs;
@@ -3003,12 +3003,12 @@ bool RobotSensors::LoadSettings(TiXmlElement* node)
     else if(0==strcmp(e->Value(),"TimeDelayedSensor")) {
       TimeDelayedSensor* fs = new TimeDelayedSensor;
       if(!e->Attribute("sensor")) {
-		LOG4CXX_ERROR(KrisLibrary::logger(),"Time-delayed sensor doesn't have a \"sensor\" attribute\n");
+	LOG4CXX_ERROR(GET_LOGGER(XmlParser),"Time-delayed sensor doesn't have a \"sensor\" attribute\n");
 	return false;
       }
       fs->sensor = GetNamedSensor(e->Attribute("sensor"));
       if(fs->sensor == NULL) {
-		LOG4CXX_ERROR(KrisLibrary::logger(),"Time-delayed sensor has unknown sensor named \""<<e->Attribute("sensor"));
+	LOG4CXX_ERROR(GET_LOGGER(XmlParser),"Time-delayed sensor has unknown sensor named \""<<e->Attribute("sensor")<<"\"");
 	return false;
       }
       sensor = fs;
@@ -3016,7 +3016,7 @@ bool RobotSensors::LoadSettings(TiXmlElement* node)
       processedAttributes.insert("sensor");
     }
     else {
-      LOG4CXX_INFO(KrisLibrary::logger(),"RobotSensors::LoadSettings: Unknown sensor type "<<e->Value());
+      LOG4CXX_ERROR(GET_LOGGER(XmlParser),"RobotSensors::LoadSettings: Unknown sensor type "<<e->Value());
       return false;
     }
     TiXmlAttribute* attr = e->FirstAttribute();
@@ -3028,18 +3028,18 @@ bool RobotSensors::LoadSettings(TiXmlElement* node)
 	sensor->name = attr->Value();
       }
       else if(!sensor->SetSetting(attr->Name(),attr->Value())) {
-		LOG4CXX_ERROR(KrisLibrary::logger(),"Error setting sensor "<<e->Value()<<" attribute "<<attr->Name() <<", doesn't exist?\n");
-    map<string,string> s = sensor->Settings();
-		LOG4CXX_ERROR(KrisLibrary::logger(),"Candidates:\n");
+	LOG4CXX_ERROR(GET_LOGGER(XmlParser),"Error setting sensor "<<e->Value()<<" attribute "<<attr->Name()<<", doesn't exist?");
+	map<string,string> s = sensor->Settings();
+	LOG4CXX_INFO(GET_LOGGER(XmlParser),"Candidates:");
 	for(map<string,string>::const_iterator i=s.begin();i!=s.end();i++)
-	  	  LOG4CXX_ERROR(KrisLibrary::logger(),"  "<<i->first.c_str()<<" : "<<i->second.c_str());
+	  LOG4CXX_INFO(GET_LOGGER(XmlParser),"  "<<i->first<<" : "<<i->second<<" by default");
 	return false;
       }
       attr = attr->Next();
     }
     e = e->NextSiblingElement();
   }
-  LOG4CXX_INFO(KrisLibrary::logger(),"RobotSensors::LoadSettings: loaded "<<sensors.size()<<" sensors from XML");
+  LOG4CXX_INFO(GET_LOGGER(XmlParser),"RobotSensors::LoadSettings: loaded "<<sensors.size()<<" sensors from XML");
   return true;
 }
 
@@ -3062,7 +3062,7 @@ bool RobotSensors::LoadMeasurements(TiXmlElement* node)
   while(e != NULL) {
     SensorBase* s = GetNamedSensor(e->Value());
     if(!s) {
-            LOG4CXX_ERROR(KrisLibrary::logger(),"No sensor named "<<e->Value());
+      fprintf(stderr,"No sensor named %s\n",e->Value());
       return false;
     }
     vector<string> measurementNames;
@@ -3072,7 +3072,7 @@ bool RobotSensors::LoadMeasurements(TiXmlElement* node)
     attrs.Load(e);
     for(size_t i=0;i<measurementNames.size();i++) {
       if(attrs.count(measurementNames[i]) == 0) {
-		LOG4CXX_ERROR(KrisLibrary::logger(),"No measurement of "<<e->Value()<<" of name "<<measurementNames[i].c_str());
+	fprintf(stderr,"No measurement of %s of name %s\n",e->Value(),measurementNames[i].c_str());
 	return false;
       }
       stringstream ss(attrs[measurementNames[i]]);
@@ -3161,13 +3161,13 @@ void RobotSensors::MakeDefault(Robot* robot)
         return;
       }
     }
-    LOG4CXX_INFO(KrisLibrary::logger(),"RobotSensors::MakeDefault: invalid sensor data format "<<sensorXml.c_str());
-    LOG4CXX_INFO(KrisLibrary::logger(),"  Making the standard sensors instead.\n");
-    LOG4CXX_INFO(KrisLibrary::logger(),"  Press enter to continue.\n");
-    //KrisLibrary::loggerWait();
+    printf("RobotSensors::MakeDefault: invalid sensor data format %s\n",sensorXml.c_str());
+    printf("  Making the standard sensors instead.\n");
+    printf("  Press enter to continue.\n");
+    getchar();
     sensors.resize(0);
   }
-  //LOG4CXX_INFO(KrisLibrary::logger(),"RobotSensors::MakeDefault: no \"sensors\" property in robot\n");
+  //printf("RobotSensors::MakeDefault: no \"sensors\" property in robot\n");
   JointPositionSensor* jp = new JointPositionSensor;
   JointVelocitySensor* jv = new JointVelocitySensor;
   jp->name = "q";

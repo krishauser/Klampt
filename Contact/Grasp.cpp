@@ -1,5 +1,3 @@
-#include <log4cxx/logger.h>
-#include <KrisLibrary/Logger.h>
 #include "Grasp.h"
 #include <tinyxml.h>
 
@@ -129,14 +127,14 @@ bool Grasp::Load(TiXmlElement* in)
   while(c != NULL) {
     if(0==strcmp(c->Value(),"IKGoal")) {
       if(!c->Attribute("data")) {
-		LOG4CXX_ERROR(KrisLibrary::logger(),"IKGoal does not have data attribute\n");
+	fprintf(stderr,"IKGoal does not have data attribute\n");
 	return false;
       }
       stringstream ss(c->Attribute("data"));
       IKGoal g;
       ss >> g;
       if(ss.bad()) {
-		LOG4CXX_ERROR(KrisLibrary::logger(),"Error loading IKGoal from data attribute\n");
+	fprintf(stderr,"Error loading IKGoal from data attribute\n");
 	return false;
       }
       constraints.push_back(g);
@@ -147,19 +145,19 @@ bool Grasp::Load(TiXmlElement* in)
       bool hasForce = false;
       Vector3 force;
       if(c->QueryIntAttribute("link",&link)!=TIXML_SUCCESS) {
-		LOG4CXX_ERROR(KrisLibrary::logger(),"Grasp contact does not have link attribute\n");
+	fprintf(stderr,"Grasp contact does not have link attribute\n");
 	return false;
       }
       if(c->QueryValueAttribute("x",&pt.x)!=TIXML_SUCCESS) {
-		LOG4CXX_ERROR(KrisLibrary::logger(),"Grasp contact does not have x attribute\n");
+	fprintf(stderr,"Grasp contact does not have x attribute\n");
 	return false;
       }
       if(c->QueryValueAttribute("n",&pt.n)!=TIXML_SUCCESS) {
-		LOG4CXX_ERROR(KrisLibrary::logger(),"Grasp contact does not have n attribute\n");
+	fprintf(stderr,"Grasp contact does not have n attribute\n");
 	return false;
       }
       if(c->QueryValueAttribute("kFriction",&pt.kFriction)!=TIXML_SUCCESS) {
-		LOG4CXX_ERROR(KrisLibrary::logger(),"Grasp contact does not have kFriction attribute\n");
+	fprintf(stderr,"Grasp contact does not have kFriction attribute\n");
 	return false;
       }
       if(c->QueryValueAttribute("force",&force)!=TIXML_SUCCESS) {

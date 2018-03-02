@@ -1,4 +1,3 @@
-#include <KrisLibrary/Logger.h>
 #include "ViewResource.h"
 #include "Planning/RobotCSpace.h"
 #include "Planning/RobotTimeScaling.h"
@@ -163,7 +162,7 @@ using namespace GLDraw;
       }
       break;
     default:
-            LOG4CXX_ERROR(KrisLibrary::logger(),"draw: Unsupported geometry type\n");
+      fprintf(stderr,"draw: Unsupported geometry type\n");
       return;
     }
   }
@@ -204,7 +203,7 @@ void ViewResource::DrawGL(const ResourcePtr& r)
     const ConfigResource* rc=dynamic_cast<const ConfigResource*>((const ResourceBase*)r);
     Config oldq = configViewer.robot->q;
     if(rc->data.n != configViewer.robot->q.n) {
-            //LOG4CXX_ERROR(KrisLibrary::logger(),"Incorrect robot configuration size: "<<rc->data.n<<" vs "<<configViewer.robot->q.n);
+      //fprintf(stderr,"Incorrect robot configuration size: %d vs %d\n",rc->data.n,configViewer.robot->q.n);
     }
     else {
       configViewer.robot->UpdateConfig(rc->data);
@@ -221,7 +220,7 @@ void ViewResource::DrawGL(const ResourcePtr& r)
       skip = rc->configs.size()/50;
     for(size_t i=0;i<rc->configs.size();i+=skip) {
       if(rc->configs[i].n != configViewer.robot->q.n) {
-		//LOG4CXX_ERROR(KrisLibrary::logger(),"Incorrect robot configuration size: "<<rc->configs[i].n<<" vs "<<configViewer.robot->q.n);
+	//fprintf(stderr,"Incorrect robot configuration size: %d vs %d\n",rc->configs[i].n,configViewer.robot->q.n);
       }
       else {
 	configsViewer.robot->UpdateConfig(rc->configs[i]);
@@ -372,7 +371,7 @@ void ViewResource::GetMultiPathConfig(const MultiPathResource* rc,Real pathTime,
 void ViewResource::RenderLinearPath(const LinearPathResource* rc,Real pathTime)
 {
   if(pathViewer.robot==NULL) {
-    LOG4CXX_INFO(KrisLibrary::logger(),"ViewResource: Robot is NULL\n");
+    printf("ViewResource: Robot is NULL\n");
     return;
   }
   Config oldq = pathViewer.robot->q;
@@ -388,7 +387,7 @@ void ViewResource::RenderLinearPath(const LinearPathResource* rc,Real pathTime)
 void ViewResource::RenderMultiPath(const MultiPathResource* rc,Real pathTime)
 {
   if(pathViewer.robot==NULL) {
-    LOG4CXX_INFO(KrisLibrary::logger(),"ViewResource: Robot is NULL\n");
+    printf("ViewResource: Robot is NULL\n");
     return;
   }
   Config oldq = pathViewer.robot->q;

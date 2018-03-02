@@ -1,5 +1,3 @@
-#include <log4cxx/logger.h>
-#include <KrisLibrary/Logger.h>
 #include "LineReader.h"
 #include <KrisLibrary/utils/ioutils.h>
 #include <KrisLibrary/errors.h>
@@ -22,7 +20,7 @@ bool ReadCToken(istream& in,string& str)
 	mode = 1;
       }
       else {  //non-token character
-	LOG4CXX_ERROR(KrisLibrary::logger(),"Started reading at a non-token character "<<c<<"\n");
+	cerr<<"Started reading at a non-token character "<<c<<endl;
 	return false;
       }
       break;
@@ -31,7 +29,7 @@ bool ReadCToken(istream& in,string& str)
 	str += c;
       }
       else {
-	LOG4CXX_INFO(KrisLibrary::logger(),"Finished reading at "<<c<<" string is "<<str<<"\n");
+	cout<<"Finished reading at "<<c<<" string is "<<str<<endl;
 	return true;
       }
       break;
@@ -40,11 +38,11 @@ bool ReadCToken(istream& in,string& str)
     c=in.get();
   }
   if(in.eof()) {
-    LOG4CXX_ERROR(KrisLibrary::logger(),"Encountered eof"<<"\n");
+    cerr<<"Encountered eof"<<endl;
     if(mode == 1) return true;
     else return false;
   }
-  LOG4CXX_ERROR(KrisLibrary::logger(),"Failed read"<<"\n");
+  cerr<<"Failed read"<<endl;
   return false;
 }
 
@@ -56,8 +54,8 @@ bool ReadTokenLine(istream& in,string& str,string& line)
   stringbuf buf;
   in.get(buf,'\n');
   if(!in) {
-    LOG4CXX_ERROR(KrisLibrary::logger(),"ReadTokenLine(): failed to get args"<<"\n");
-    LOG4CXX_ERROR(KrisLibrary::logger(),"str="<<str<<"\n");
+    cerr<<"ReadTokenLine(): failed to get args"<<endl;
+    cerr<<"str="<<str<<endl;
     return false;
   }
   line = buf.str();
@@ -65,7 +63,7 @@ bool ReadTokenLine(istream& in,string& str,string& line)
   in.get(c);
   if(in.eof()) return true;
   else if(!in) {
-    LOG4CXX_ERROR(KrisLibrary::logger(),"ReadTokenLine(): Failed reading trailing endline?"<<"\n");
+    cerr<<"ReadTokenLine(): Failed reading trailing endline?"<<endl;
     return false;
   }
   return true;
@@ -79,7 +77,7 @@ bool LineReader::Read()
   bool res=SimpleParser::Read();
   if(!res) return false;
   if(mode != 0) {
-    LOG4CXX_INFO(KrisLibrary::logger(),"LineReader: did not end properly\n");
+    printf("LineReader: did not end properly\n");
     return false;
   }
   return true;
@@ -91,7 +89,7 @@ SimpleParser::Result LineReader::InputToken(const string& word)
   switch(mode) {
   case 0:
     if(word != "begin") {
-      LOG4CXX_ERROR(KrisLibrary::logger(),"Couldn't read begin on line "<<lineno<<"\n");
+      cerr<<"Couldn't read begin on line "<<lineno<<endl;
       return Error;
     }
     else {
@@ -101,17 +99,17 @@ SimpleParser::Result LineReader::InputToken(const string& word)
     break;
   case 1:  //begin name
     if(!ReadLine(line)) { 
-      LOG4CXX_ERROR(KrisLibrary::logger(),"Couldn't read line after begin"<<"\n"); 
+      cerr<<"Couldn't read line after begin"<<endl; 
       return Error;
     }
     else {
       stringstream ss; ss.str(line);
       if(!Begin(word,ss)) {
-	LOG4CXX_ERROR(KrisLibrary::logger(),"Couldn't do begin with args "<<line<<"\n");
+	cerr<<"Couldn't do begin with args "<<line<<endl;
 	return Error;
       }
       else if(ss.fail()) {
-	LOG4CXX_ERROR(KrisLibrary::logger(),"Begin() failed to read arguments correctly"<<"\n");
+	cerr<<"Begin() failed to read arguments correctly"<<endl;
 	return Error;
       }
       mode = 2;
@@ -125,7 +123,7 @@ SimpleParser::Result LineReader::InputToken(const string& word)
 	return Stop;
       }
       else {
-	LOG4CXX_ERROR(KrisLibrary::logger(),"Failed End()"<<"\n");
+	cerr<<"Failed End()"<<endl;
 	return Error;
       }
     }
@@ -136,10 +134,10 @@ SimpleParser::Result LineReader::InputToken(const string& word)
     }
     break;
   case 3:
-    LOG4CXX_ERROR(KrisLibrary::logger(),"Expecting an = sign, instead got "<<word<<" on line "<<lineno<<"\n");
+    cerr<<"Expecting an = sign, instead got "<<word<<" on line "<<lineno<<endl;
     return Error;
   default:
-    LOG4CXX_ERROR(KrisLibrary::logger(),"Unknown mode: "<<mode<<"\n");
+    cerr<<"Unknown mode: "<<mode<<endl;
     return Error;
   }
   AssertNotReached();
@@ -154,19 +152,19 @@ SimpleParser::Result LineReader::InputPunct(const string& punct)
       ReadLine(line);
       stringstream ss; ss.str(line);
       if(!Assign(curitem,ss)) {
-	LOG4CXX_ERROR(KrisLibrary::logger(),"Assign() failed for item "<<curitem<<", arguments "<<ss.str()<<" on line "<<lineno<<"\n");
+	cerr<<"Assign() failed for item "<<curitem<<", arguments "<<ss.str()<<" on line "<<lineno<<endl;
 	return Error;
       }
       if(!ss.eof() && ss.fail()) {
-	LOG4CXX_ERROR(KrisLibrary::logger(),"Assign() failed to read rhs "<<curitem<<" correctly"<<"\n");
-	LOG4CXX_INFO(KrisLibrary::logger(),"Stringbuf "<<ss.str()<<"\n");
-	LOG4CXX_INFO(KrisLibrary::logger(),"Position "<<ss.tellg()<<"\n");
+	cerr<<"Assign() failed to read rhs "<<curitem<<" correctly"<<endl;
+	cout<<"Stringbuf "<<ss.str()<<endl;
+	cout<<"Position "<<ss.tellg()<<endl;
 	return Error;
       }
       mode = 2;
       return Continue;
     }
   }
-  LOG4CXX_ERROR(KrisLibrary::logger(),"Error, reading punctuation characters: "<<punct<<" on line "<<lineno<<"\n");
+  cerr<<"Error, reading punctuation characters: "<<punct<<" on line "<<lineno<<endl;
   return Error;
 }

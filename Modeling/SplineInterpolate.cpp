@@ -1,5 +1,3 @@
-#include <log4cxx/logger.h>
-#include <KrisLibrary/Logger.h>
 #include "SplineInterpolate.h"
 
 void SplineInterpolate(const vector<Vector>& pts,
@@ -129,7 +127,7 @@ void MonotonicInterpolate(const vector<Vector>& pts,vector<GeneralizedCubicBezie
   }
   int n=pts[0].n;
   for(size_t i=0;i<pts.size();i++) {
-    if(tangents[i].n != n) LOG4CXX_INFO(KrisLibrary::logger(),""<<i<<" / "<<tangents.size());
+    if(tangents[i].n != n) printf("%d / %d\n",i,tangents.size());
     Assert(tangents[i].n == n);
   }
   for(size_t i=0;i+1<pts.size();i++) {
@@ -265,7 +263,7 @@ void MonotonicInterpolate(const vector<Vector>& pts,const vector<Real>& times,ve
   }
   int n=pts[0].n;
   for(size_t i=0;i<pts.size();i++) {
-    if(tangents[i].n != n) LOG4CXX_INFO(KrisLibrary::logger(),""<<i<<" / "<<tangents.size());
+    if(tangents[i].n != n) printf("%d / %d\n",i,tangents.size());
     Assert(tangents[i].n == n);
   }
   for(size_t i=0;i+1<pts.size();i++) {
@@ -358,15 +356,15 @@ void MonotonicAccelInterpolate(const vector<Vector>& pts,vector<GeneralizedCubic
   }
   int n=pts[0].n;
   for(size_t i=0;i<pts.size();i++) {
-    if(tangents[i].n != n) LOG4CXX_INFO(KrisLibrary::logger(),""<<i<<" / "<<tangents.size());
+    if(tangents[i].n != n) printf("%d / %d\n",i,tangents.size());
     Assert(tangents[i].n == n);
   }
   for(size_t i=0;i+1<pts.size();i++) {
     if(i == 1)
-      LOG4CXX_INFO(KrisLibrary::logger(),"Orig tangent 2: "<<tangents[i+1]<<"\n");
+      cout<<"Orig tangent 2: "<<tangents[i+1]<<endl;
     for(int j=0;j<n;j++) {
       if(j==0) {
-	LOG4CXX_INFO(KrisLibrary::logger(),"Segment "<<i<<": accel in "<<3.0*inslopes[i][j] - tangents[i+1][j]-2*tangents[i][j]<<", out "<<2*tangents[i+1][j]+tangents[i][j] - 3.0*outslopes[i][j]);
+	printf("Segment %d: accel in %g, out %g\n",i,3.0*inslopes[i][j] - tangents[i+1][j]-2*tangents[i][j],2*tangents[i+1][j]+tangents[i][j] - 3.0*outslopes[i][j]);
       }
       if(Sign(3.0*inslopes[i][j] - tangents[i+1][j] - 2*tangents[i][j]) != Sign(2*tangents[i+1][j]+tangents[i][j] - 3.0*outslopes[i][j])) {
 	//(3.0*mi - x - 2*t0)*(2*x+t0 - 3.0*mo) = 0
@@ -381,7 +379,7 @@ void MonotonicAccelInterpolate(const vector<Vector>& pts,vector<GeneralizedCubic
 	int res=quadratic(a,b,c,t1,t2);
 	if(res == 0) {
 	  if(j==0) 
-	    LOG4CXX_INFO(KrisLibrary::logger(),"No solution to quadratic "<<a<<" "<<b<<" "<<c);
+	    printf("No solution to quadratic %g %g %g\n",a,b,c);
 	}
 	else {
 	  assert(res > 0);
@@ -392,20 +390,20 @@ void MonotonicAccelInterpolate(const vector<Vector>& pts,vector<GeneralizedCubic
 	  }
 	  tangents[i+1][j] = t1;
 	  if(j==0) {
-	    LOG4CXX_INFO(KrisLibrary::logger(),"New accel in "<<3.0*inslopes[i][j] - tangents[i+1][j]-2*tangents[i][j]<<", out "<<2*tangents[i+1][j]+tangents[i][j] - 3.0*outslopes[i][j]);
+	    printf("New accel in %g, out %g\n",3.0*inslopes[i][j] - tangents[i+1][j]-2*tangents[i][j],2*tangents[i+1][j]+tangents[i][j] - 3.0*outslopes[i][j]);
 	  }
 	}
       }
     }
     if(i == 1)
-      LOG4CXX_INFO(KrisLibrary::logger(),"New tangent 2: "<<tangents[i+1]<<"\n");
+      cout<<"New tangent 2: "<<tangents[i+1]<<endl;
   }
   for(size_t i=0;i+1<pts.size();i++) {
     paths[i].SetNaturalTangents(tangents[i],tangents[i+1]);
     Vector temp,temp2;
     paths[i].Accel(0,temp);
     paths[i].Accel(1,temp2);
-    LOG4CXX_INFO(KrisLibrary::logger(),"in "<<temp[0]<<" out "<<temp2[0]<<"\n");
+    cout<<"in "<<temp[0]<<" out "<<temp2[0]<<endl;
   }
 }
 

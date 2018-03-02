@@ -35,8 +35,6 @@
 /* Author: Wim Meeussen */
 
 
-#include <log4cxx/logger.h>
-#include <KrisLibrary/Logger.h>
 #include "urdf_parser.h"
 #include "urdf_link.h"
 #include <fstream>
@@ -44,6 +42,9 @@
 #include <KrisLibrary/utils/AnyValue.h>
 #include <algorithm>
 #include <tinyxml.h>
+
+DECLARE_LOGGER(URDFParser)
+
 
 namespace urdf{
 
@@ -60,7 +61,7 @@ bool parseMaterial(Material &material, TiXmlElement *config)
 
   if (!config->Attribute("name"))
   {
-    LOG4CXX_DEBUG(KrisLibrary::logger(),  "Material must contain a name attribute");
+    LOG4CXX_DEBUG(GET_LOGGER(URDFParser),  "Material must contain a name attribute");
     return false;
   }
   
@@ -89,14 +90,14 @@ bool parseMaterial(Material &material, TiXmlElement *config)
       }
       catch (ParseError &e) {
         material.color.clear();
-	LOG4CXX_INFO(KrisLibrary::logger(),"Material [" << material.name <<"] has malformed color rgba values: "<<e.what() );
+	LOG4CXX_INFO(GET_LOGGER(URDFParser),"Material [" << material.name <<"] has malformed color rgba values: "<<e.what() );
       }
     }
   }
 
   if (!has_rgb && !has_filename) {
-    if (!has_rgb) LOG4CXX_INFO(KrisLibrary::logger(), "Material ["<<material.name<<"] color has no rgba");
-    if (!has_filename) LOG4CXX_INFO(KrisLibrary::logger(),"Material ["<<material.name<<"] not defined in file");
+    if (!has_rgb) LOG4CXX_INFO(GET_LOGGER(URDFParser), "Material ["<<material.name<<"] color has no rgba");
+    if (!has_filename) LOG4CXX_INFO(GET_LOGGER(URDFParser),"Material ["<<material.name<<"] not defined in file");
     return false;
   }
   return true;
@@ -110,13 +111,13 @@ bool parseSphere(Sphere &s, TiXmlElement *c)
   s.type = Geometry::SPHERE;
   if (!c->Attribute("radius"))
   {
-    LOG4CXX_DEBUG(KrisLibrary::logger(),  "Sphere shape must have a radius attribute");
+    LOG4CXX_DEBUG(GET_LOGGER(URDFParser),  "Sphere shape must have a radius attribute");
     return false;
   }
 
   if(!LexicalCast(c->Attribute("radius"),s.radius))
   {
-    LOG4CXX_INFO(KrisLibrary::logger(), "radius [" << c->Attribute("radius") << "] is not a valid float");
+    LOG4CXX_INFO(GET_LOGGER(URDFParser), "radius [" << c->Attribute("radius") << "] is not a valid float");
     return false;
   }
   
@@ -130,7 +131,7 @@ bool parseBox(Box &b, TiXmlElement *c)
   b.type = Geometry::BOX;
   if (!c->Attribute("size"))
   {
-    LOG4CXX_DEBUG(KrisLibrary::logger(),  "Box shape has no size attribute");
+    LOG4CXX_DEBUG(GET_LOGGER(URDFParser),  "Box shape has no size attribute");
     return false;
   }
   try
@@ -140,7 +141,7 @@ bool parseBox(Box &b, TiXmlElement *c)
   catch (ParseError &e)
   {
     b.dim.clear();
-    LOG4CXX_INFO(KrisLibrary::logger(), e.what() );
+    LOG4CXX_INFO(GET_LOGGER(URDFParser), e.what() );
     return false;
   }
   return true;
@@ -154,19 +155,19 @@ bool parseCylinder(Cylinder &y, TiXmlElement *c)
   if (!c->Attribute("length") ||
       !c->Attribute("radius"))
   {
-    LOG4CXX_DEBUG(KrisLibrary::logger(),  "Cylinder shape must have both length and radius attributes");
+    LOG4CXX_DEBUG(GET_LOGGER(URDFParser),  "Cylinder shape must have both length and radius attributes");
     return false;
   }
 
   if(!LexicalCast(c->Attribute("length"),y.length))
   {
-    LOG4CXX_DEBUG(KrisLibrary::logger(),  "length [" << c->Attribute("length") << "] is not a valid float");
+    LOG4CXX_DEBUG(GET_LOGGER(URDFParser),  "length [" << c->Attribute("length") << "] is not a valid float");
     return false;
   }
 
   if(!LexicalCast(c->Attribute("radius"),y.radius))
   {
-    LOG4CXX_DEBUG(KrisLibrary::logger(),  "radius [" << c->Attribute("radius") << "] is not a valid float");
+    LOG4CXX_DEBUG(GET_LOGGER(URDFParser),  "radius [" << c->Attribute("radius") << "] is not a valid float");
     return false;
   }
   return true;
@@ -179,7 +180,7 @@ bool parseMesh(Mesh &m, TiXmlElement *c)
 
   m.type = Geometry::MESH;
   if (!c->Attribute("filename")) {
-    LOG4CXX_DEBUG(KrisLibrary::logger(),  "Mesh must contain a filename attribute");
+    LOG4CXX_DEBUG(GET_LOGGER(URDFParser),  "Mesh must contain a filename attribute");
     return false;
   }
 
@@ -191,7 +192,7 @@ bool parseMesh(Mesh &m, TiXmlElement *c)
     }
     catch (ParseError &e) {
       m.scale.clear();
-      LOG4CXX_DEBUG(KrisLibrary::logger(),  "Mesh scale was specified, but could not be parsed: "<< e.what());
+      if(debug) printf ("Mesh scale was specified, but could not be parsed: %s", e.what());
       return false;
     }
   }
@@ -210,7 +211,7 @@ std::shared_ptr<Geometry> parseGeometry(TiXmlElement *g)
   TiXmlElement *shape = g->FirstChildElement();
   if (!shape)
   {
-    LOG4CXX_DEBUG(KrisLibrary::logger(),  "Geometry tag contains no child element.");
+    LOG4CXX_DEBUG(GET_LOGGER(URDFParser),  "Geometry tag contains no child element.");
     return geom;
   }
 
@@ -245,7 +246,7 @@ std::shared_ptr<Geometry> parseGeometry(TiXmlElement *g)
   }
   else
   {
-    LOG4CXX_DEBUG(KrisLibrary::logger(),  "Unknown geometry type '"<< type_name.c_str());
+    if(debug) printf ("Unknown geometry type '%s' \n", type_name.c_str());
     return geom;
   }
   
@@ -267,32 +268,32 @@ bool parseInertial(Inertial &i, TiXmlElement *config)
   TiXmlElement *mass_xml = config->FirstChildElement("mass");
   if (!mass_xml)
   {
-    LOG4CXX_DEBUG(KrisLibrary::logger(),  "Inertial element must have a mass element");
+    LOG4CXX_DEBUG(GET_LOGGER(URDFParser),  "Inertial element must have a mass element");
     return false;
   }
   if (!mass_xml->Attribute("value"))
   {
-    LOG4CXX_DEBUG(KrisLibrary::logger(),  "Inertial: mass element must have value attribute");
+    LOG4CXX_DEBUG(GET_LOGGER(URDFParser),  "Inertial: mass element must have value attribute");
     return false;
   }
 
   if(!LexicalCast(mass_xml->Attribute("value"),i.mass))
   {
-    LOG4CXX_DEBUG(KrisLibrary::logger(),  "Inertial: mass [" << mass_xml->Attribute("value") << "] is not a float");
+    LOG4CXX_DEBUG(GET_LOGGER(URDFParser),  "Inertial: mass [" << mass_xml->Attribute("value") << "] is not a float");
     return false;
   }
 
   TiXmlElement *inertia_xml = config->FirstChildElement("inertia");
   if (!inertia_xml)
   {
-    LOG4CXX_DEBUG(KrisLibrary::logger(),  "Inertial element must have inertia element");
+    LOG4CXX_DEBUG(GET_LOGGER(URDFParser),  "Inertial element must have inertia element");
     return false;
   }
   if (!(inertia_xml->Attribute("ixx") && inertia_xml->Attribute("ixy") && inertia_xml->Attribute("ixz") &&
         inertia_xml->Attribute("iyy") && inertia_xml->Attribute("iyz") &&
         inertia_xml->Attribute("izz")))
   {
-    LOG4CXX_DEBUG(KrisLibrary::logger(),  "Inertial: inertia element must have ixx,ixy,ixz,iyy,iyz,izz attributes");
+    LOG4CXX_DEBUG(GET_LOGGER(URDFParser),  "Inertial: inertia element must have ixx,ixy,ixz,iyy,iyz,izz attributes");
     return false;
   }
   if(!LexicalCast(inertia_xml->Attribute("ixx"),i.ixx) ||
@@ -310,7 +311,7 @@ bool parseInertial(Inertial &i, TiXmlElement *config)
         << " iyy [" << inertia_xml->Attribute("iyy") << "]"
         << " iyz [" << inertia_xml->Attribute("iyz") << "]"
         << " izz [" << inertia_xml->Attribute("izz") << "]";
-    LOG4CXX_DEBUG(KrisLibrary::logger(),  ""<< stm.str());
+    LOG4CXX_DEBUG(GET_LOGGER(URDFParser),  ""<< stm.str());
     return false;
   }
   return true;
@@ -338,7 +339,7 @@ bool parseVisual(Visual &vis, TiXmlElement *config)
   if (mat) {
     // get material name
     if (!mat->Attribute("name")) {
-      LOG4CXX_DEBUG(KrisLibrary::logger(),  "Visual material must contain a name attribute");
+      LOG4CXX_DEBUG(GET_LOGGER(URDFParser),  "Visual material must contain a name attribute");
       return false;
     }
     vis.material_name = mat->Attribute("name");
@@ -349,7 +350,7 @@ bool parseVisual(Visual &vis, TiXmlElement *config)
     {
       //vis.material.reset();
       //return false;
-      LOG4CXX_DEBUG(KrisLibrary::logger(),  "material has only name, actual material definition may be in the model");
+      LOG4CXX_DEBUG(GET_LOGGER(URDFParser),  "material has only name, actual material definition may be in the model");
     }
   }
   
@@ -398,7 +399,7 @@ bool parseLink(Link &link, TiXmlElement* config)
   const char *name_char = config->Attribute("name");
   if (!name_char)
   {
-    LOG4CXX_DEBUG(KrisLibrary::logger(),  "No name given for the link.");
+    LOG4CXX_DEBUG(GET_LOGGER(URDFParser),  "No name given for the link.");
     return false;
   }
   link.name = std::string(name_char);
@@ -410,7 +411,7 @@ bool parseLink(Link &link, TiXmlElement* config)
     link.inertial.reset(new Inertial());
     if (!parseInertial(*link.inertial, i))
     {
-      LOG4CXX_DEBUG(KrisLibrary::logger(),  "Could not parse inertial element for Link ["<< link.name.c_str());
+      if(debug) printf ("Could not parse inertial element for Link [%s] \n", link.name.c_str());
       return false;
     }
   }
@@ -430,17 +431,17 @@ bool parseLink(Link &link, TiXmlElement* config)
         viss.reset(new std::vector<std::shared_ptr<Visual > >);
         // new group name, create vector, add vector to map and add Visual to the vector
         link.visual_groups.insert(make_pair(vis->group_name,viss));
-        LOG4CXX_DEBUG(KrisLibrary::logger(),  "successfully added a new visual group name '"<<vis->group_name.c_str());
+        if(debug) printf ("successfully added a new visual group name '%s' \n",vis->group_name.c_str());
       }
       
       // group exists, add Visual to the vector in the map
       viss->push_back(vis);
-      LOG4CXX_DEBUG(KrisLibrary::logger(),  "successfully added a new visual under group name '"<<vis->group_name.c_str());
+      if(debug) printf ("successfully added a new visual under group name '%s' \n",vis->group_name.c_str());
     }
     else
     {
       vis.reset();
-      LOG4CXX_DEBUG(KrisLibrary::logger(),  "Could not parse visual element for Link ["<< link.name.c_str());
+      if(debug) printf ("Could not parse visual element for Link [%s] \n", link.name.c_str());
       return false;
     }
   }
@@ -482,17 +483,17 @@ bool parseLink(Link &link, TiXmlElement* config)
         cols.reset(new std::vector<std::shared_ptr<Collision > >);
         // new group name, create vector, add vector to map and add Collision to the vector
         link.collision_groups.insert(make_pair(col->group_name,cols));
-        LOG4CXX_DEBUG(KrisLibrary::logger(),  "successfully added a new collision group name '"<<col->group_name.c_str());
+        if(debug) printf ("successfully added a new collision group name '%s' \n",col->group_name.c_str());
       }
 
       // group exists, add Collision to the vector in the map
       cols->push_back(col);
-      LOG4CXX_DEBUG(KrisLibrary::logger(),  "successfully added a new collision under group name '"<<col->group_name.c_str());
+      if(debug) printf ("successfully added a new collision under group name '%s' \n",col->group_name.c_str());
     }
     else
     {
       col.reset();
-      LOG4CXX_DEBUG(KrisLibrary::logger(),  "Could not parse collision element for Link ["<<  link.name.c_str());
+      if(debug) printf ("Could not parse collision element for Link [%s] \n",  link.name.c_str());
       return false;
     }
   }
@@ -504,17 +505,17 @@ bool parseLink(Link &link, TiXmlElement* config)
 
   if (!default_collision)
   {
-    LOG4CXX_DEBUG(KrisLibrary::logger(),  "No 'default' collision group for Link '"<< link.name.c_str());
+    if(debug) printf ("No 'default' collision group for Link '%s' \n", link.name.c_str());
   }
   else if (default_collision->empty())
   {
-    LOG4CXX_DEBUG(KrisLibrary::logger(),  "'default' collision group is empty for Link '"<< link.name.c_str());
+    if(debug) printf ("'default' collision group is empty for Link '%s' \n", link.name.c_str());
   }
   else
   {
     if (default_collision->size() > 1)
     {
-      LOG4CXX_DEBUG(KrisLibrary::logger(), "'default' collision group has "<< (int)default_collision->size()<< "collisions for Link '"<< link.name.c_str()<<"', taking the first one as default");
+      LOG4CXX_DEBUG(GET_LOGGER(URDFParser), "'default' collision group has "<< default_collision->size()<< "collisions for Link '"<< link.name.c_str()<<"', taking the first one as default");
     }
     link.collision = (*default_collision->begin());
   }
@@ -601,7 +602,7 @@ bool exportGeometry(std::shared_ptr<Geometry> &geom, TiXmlElement *xml)
   }
   else
   {
-    LOG4CXX_DEBUG(KrisLibrary::logger(),  "geometry not specified, I'll make one up for you!");
+    LOG4CXX_DEBUG(GET_LOGGER(URDFParser),  "geometry not specified, I'll make one up for you!");
     Sphere *s = new Sphere();
     s->radius = 0.03;
     geom.reset(s);

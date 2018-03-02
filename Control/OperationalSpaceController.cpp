@@ -1,5 +1,3 @@
-#include <log4cxx/logger.h>
-#include <KrisLibrary/Logger.h>
 #include "OperationalSpaceController.h"
 #include <KrisLibrary/robotics/NewtonEuler.h>
 #include <KrisLibrary/robotics/IKFunctions.h>
@@ -145,35 +143,35 @@ bool OperationalSpaceController::IsValid() const
 {
   for(size_t i=0;i<jointTasks.size();i++) {
     if(jointTasks[i].ddqdes.n != (int)jointTasks[i].indices.size()) {
-            LOG4CXX_ERROR(KrisLibrary::logger(),"OperationalSpaceController::IsValid(): invalid ddqdes["<<i);
+      fprintf(stderr,"OperationalSpaceController::IsValid(): invalid ddqdes[%d]\n",i);
       return false;
     }
     for(size_t j=0;j<jointTasks[i].indices.size();j++) {
       if(jointTasks[i].indices[j] < 0 || jointTasks[i].indices[j] > (int)robot.links.size()) {
-		LOG4CXX_ERROR(KrisLibrary::logger(),"OperationalSpaceController::IsValid(): invalid joint index["<<i<<"]["<<j<<"]="<<jointTasks[i].indices[j]);
+	fprintf(stderr,"OperationalSpaceController::IsValid(): invalid joint index[%d][%d]=%d\n",i,j,jointTasks[i].indices[j]);
 	return false;
       }
     }
   }
   for(size_t i=0;i<workspaceTasks.size();i++) {
     if(workspaceTasks[i].workspace.link < 0 || workspaceTasks[i].workspace.link > (int)robot.links.size()) {
-		LOG4CXX_ERROR(KrisLibrary::logger(),"OperationalSpaceController::IsValid(): invalid workspace index["<<i<<"]="<<workspaceTasks[i].workspace.link);
+	fprintf(stderr,"OperationalSpaceController::IsValid(): invalid workspace index[%d]=%d\n",i,workspaceTasks[i].workspace.link);
 	return false;
     }
   }
   for(size_t i=0;i<comTasks.size();i++) {
     if(comTasks[i].numAxes < 0 || comTasks[i].numAxes > 3) {
-            LOG4CXX_ERROR(KrisLibrary::logger(),"OperationalSpaceController::IsValid(): invalid com axes["<<i<<"] = "<<comTasks[i].numAxes);
+      fprintf(stderr,"OperationalSpaceController::IsValid(): invalid com axes[%d] = %d\n",i,comTasks[i].numAxes);
       return false;
     }
     if(comTasks[i].numAxes != comTasks[i].ddxdes.n) {
-            LOG4CXX_ERROR(KrisLibrary::logger(),"OperationalSpaceController::IsValid(): invalid com axes["<<i<<"] = "<<comTasks[i].numAxes);
+      fprintf(stderr,"OperationalSpaceController::IsValid(): invalid com axes[%d] = %d\n",i,comTasks[i].numAxes);
       return false;
     }
   }
   for(size_t i=0;i<torqueTasks.size();i++) { 
     if(torqueTasks[i].Tdes.n != (int)torqueTasks[i].indices.size()) {
-            LOG4CXX_ERROR(KrisLibrary::logger(),"OperationalSpaceController::IsValid(): invalid Tdes["<<i);
+      fprintf(stderr,"OperationalSpaceController::IsValid(): invalid Tdes[%d]\n",i);
       return false;
     }
 #if OPTIMIZE_DRIVER_TORQUES
@@ -183,19 +181,19 @@ bool OperationalSpaceController::IsValid() const
 #endif //OPTIMIZE_DRIVER_TORQUES
     for(size_t j=0;j<torqueTasks[i].indices.size();j++) {
       if(torqueTasks[i].indices[j] < 0 || torqueTasks[i].indices[j] > maxtorqueind) {
-		LOG4CXX_ERROR(KrisLibrary::logger(),"OperationalSpaceController::IsValid(): invalid torque index["<<i<<"]["<<j<<"]="<<torqueTasks[i].indices[j]);
+	fprintf(stderr,"OperationalSpaceController::IsValid(): invalid torque index[%d][%d]=%d\n",i,j,torqueTasks[i].indices[j]);
 	return false;
       }
     }
   }
   for(size_t i=0;i<contactForceTasks.size();i++) {
     if(contactForceTasks[i].links.size() != contactForceTasks[i].contacts.size()) {
-            LOG4CXX_ERROR(KrisLibrary::logger(),"OperationalSpaceController::IsValid(): invalid contact links["<<i);
+      fprintf(stderr,"OperationalSpaceController::IsValid(): invalid contact links[%d]\n",i);
       return false;
     }
     for(size_t j=0;j<contactForceTasks[i].links.size();j++) {
       if(contactForceTasks[i].links[j] < 0 || contactForceTasks[i].links[j] > (int)robot.links.size()) {
-		LOG4CXX_ERROR(KrisLibrary::logger(),"OperationalSpaceController::IsValid(): invalid contact link["<<i<<"]["<<j<<"]="<<contactForceTasks[i].links[j]);
+	fprintf(stderr,"OperationalSpaceController::IsValid(): invalid contact link[%d][%d]=%d\n",i,j,contactForceTasks[i].links[j]);
 	return false;
       }
     }
@@ -215,18 +213,18 @@ void OperationalSpaceController::Update(Real dt)
     stateEstimator->ReadSensors(*sensors);
     stateEstimator->UpdateModel();
     /*
-    LOG4CXX_INFO(KrisLibrary::logger(),"Estimated state: "<<"\n");
-    LOG4CXX_INFO(KrisLibrary::logger(),"   "<<stateEstimator->q_predicted<<"\n");
-    LOG4CXX_INFO(KrisLibrary::logger(),"   "<<stateEstimator->dq_predicted<<"\n");
-    LOG4CXX_INFO(KrisLibrary::logger(),"Forward predicted state"<<"\n");
-    LOG4CXX_INFO(KrisLibrary::logger(),"   "<<q_predicted<<"\n");
-    LOG4CXX_INFO(KrisLibrary::logger(),"   "<<dq_predicted<<"\n");
-    LOG4CXX_ERROR(KrisLibrary::logger(),"   DDQ error "<<(dq_predicted-stateEstimator->dq_predicted)/dt<<"\n");
+    cout<<"Estimated state: "<<endl;
+    cout<<"   "<<stateEstimator->q_predicted<<endl;
+    cout<<"   "<<stateEstimator->dq_predicted<<endl;
+    cout<<"Forward predicted state"<<endl;
+    cout<<"   "<<q_predicted<<endl;
+    cout<<"   "<<dq_predicted<<endl;
+    cout<<"   DDQ error "<<(dq_predicted-stateEstimator->dq_predicted)/dt<<endl;
     */
   }
   Vector torques;
   TasksToTorques(torques);
-  //LOG4CXX_INFO(KrisLibrary::logger(),torques<<"\n");
+  //cout<<torques<<endl;
 #if OPTIMIZE_DRIVER_TORQUES
   command->SetTorque(torques);
 #else
@@ -280,8 +278,8 @@ void OperationalSpaceController::TasksToTorques(Vector& t)
   Matrix BinvJdT;
 #if OPTIMIZE_DRIVER_TORQUES
   PostMulDriverJacobianT(robot,Binv,BinvJdT);
-  //LOG4CXX_INFO(KrisLibrary::logger(),"B^{-1}Jd^T: "<<"\n");
-  //LOG4CXX_INFO(KrisLibrary::logger(),BinvJdT<<"\n");
+  //cout<<"B^{-1}Jd^T: "<<endl;
+  //cout<<BinvJdT<<endl;
 
   //look for fixed links -- todo: add this as a constraint to the LP solver
   for(size_t i=0;i<robot.joints.size();i++)
@@ -376,8 +374,8 @@ void OperationalSpaceController::TasksToTorques(Vector& t)
   for(size_t i=0;i<contactForceTasks.size();i++)
     numTasks += contactForceTasks[i].A.m;
   numTasks += numContactPoints;
-  LOG4CXX_INFO(KrisLibrary::logger(),"OperationalSpaceController: "<<numTasks<<" tasks, "<<numContactPoints<<" contacts"<<"\n");
-  //LOG4CXX_INFO(KrisLibrary::logger(),"ddq0: "<<ddq0<<"\n");
+  cout<<"OperationalSpaceController: "<<numTasks<<" tasks, "<<numContactPoints<<" contacts"<<endl;
+  //cout<<"ddq0: "<<ddq0<<endl;
   lp.C.resize(numTasks,numTorques+numContactForces);
   lp.d.resize(numTasks);
   lp.l.resize(numTorques+numContactForces,Zero);
@@ -408,8 +406,8 @@ void OperationalSpaceController::TasksToTorques(Vector& t)
     GetRows(BinvJdT,jointTasks[i].indices,atemp);
     atemp *= jointTasks[i].weight;
     btemp *= jointTasks[i].weight;
-    //LOG4CXX_INFO(KrisLibrary::logger(),"ddqdes - ddq0: "<<"\n");
-    //LOG4CXX_INFO(KrisLibrary::logger(),btemp<<"\n");
+    //cout<<"ddqdes - ddq0: "<<endl;
+    //cout<<btemp<<endl;
     if(numContactForces > 0) {
       atemp2.setRef(lp.C,numTasks,numTorques,1,1,jointTasks[i].indices.size(),numContactForces);
       atemp2.mulTransposeB(atemp,Jf);
@@ -537,9 +535,9 @@ void OperationalSpaceController::TasksToTorques(Vector& t)
   assert(numTasks == lp.C.m);
   assert(numTasks == lp.d.n);
   /*
-  LOG4CXX_INFO(KrisLibrary::logger(),"C:"<<"\n");
-  LOG4CXX_INFO(KrisLibrary::logger(),lp.C<<"\n");
-  LOG4CXX_INFO(KrisLibrary::logger(),"d: "<<lp.d<<"\n");
+  cout<<"C:"<<endl;
+  cout<<lp.C<<endl;
+  cout<<"d: "<<lp.d<<endl;
   */
 
   Assert(lp.IsValid());
@@ -551,52 +549,52 @@ void OperationalSpaceController::TasksToTorques(Vector& t)
   case LinearProgram::Error:
     x.getSubVectorCopy(0,t);
     f.setRef(x,t.n,1,numContactForces);
-    //LOG4CXX_INFO(KrisLibrary::logger(),"Commanded torques: "<<VectorPrinter(t,VectorPrinter::AsciiShade)<<"\n");
-    LOG4CXX_ERROR(KrisLibrary::logger(),"L"<<lp.norm<<" error: "<<lp.Norm(x)<<"\n");
-    LOG4CXX_INFO(KrisLibrary::logger(),"solved t: "<<VectorPrinter(t)<<"\n");
-    LOG4CXX_INFO(KrisLibrary::logger(),"solved f: "<<VectorPrinter(f)<<"\n");
+    //cout<<"Commanded torques: "<<VectorPrinter(t,VectorPrinter::AsciiShade)<<endl;
+    cout<<"L"<<lp.norm<<" error: "<<lp.Norm(x)<<endl;
+    cout<<"solved t: "<<VectorPrinter(t)<<endl;
+    cout<<"solved f: "<<VectorPrinter(f)<<endl;
     if(lp.Norm(x) > 10 ) {
       Vector temp;
       lp.C.mul(x,temp);
       temp -= lp.d;
-      LOG4CXX_ERROR(KrisLibrary::logger(),"Errors:"<<"\n");
+      cout<<"Errors:"<<endl;
       int numTasks = 0;
       for(size_t i=0;i<jointTasks.size();i++) {
 	Vector vtemp;
 	vtemp.setRef(temp,numTasks,1,jointTasks[i].indices.size());
-	LOG4CXX_INFO(KrisLibrary::logger(),"  Joint task "<<i<<": "<<vtemp<<"\n");
+	cout<<"  Joint task "<<i<<": "<<vtemp<<endl;
 	numTasks += (int)jointTasks[i].indices.size();
       }
       for(size_t i=0;i<workspaceTasks.size();i++) {
 	Vector vtemp;
 	vtemp.setRef(temp,numTasks,1,workspaceTasks[i].ddxdes.size());
-	LOG4CXX_INFO(KrisLibrary::logger(),"  Workspace task "<<i<<": "<<vtemp<<"\n");
+	cout<<"  Workspace task "<<i<<": "<<vtemp<<endl;
 	numTasks += (int)workspaceTasks[i].ddxdes.size();
       }
       for(size_t i=0;i<torqueTasks.size();i++) {
 	Vector vtemp;
 	vtemp.setRef(temp,numTasks,1,torqueTasks[i].indices.size());
-	LOG4CXX_INFO(KrisLibrary::logger(),"  Torque task "<<i<<": "<<vtemp<<"\n");
+	cout<<"  Torque task "<<i<<": "<<vtemp<<endl;
 	numTasks += (int)torqueTasks[i].indices.size();
       }
       for(size_t i=0;i<contactForceTasks.size();i++) {
 	Vector vtemp;
 	vtemp.setRef(temp,numTasks,1,contactForceTasks[i].A.m);
-	LOG4CXX_INFO(KrisLibrary::logger(),"  Force task "<<i<<": "<<vtemp<<"\n");
+	cout<<"  Force task "<<i<<": "<<vtemp<<endl;
 	numTasks += (int)contactForceTasks[i].A.m;
       }
       if(!Jfx.isEmpty()) {
 	Vector vtemp;
 	vtemp.setRef(temp,numTasks,1,Jfx.m);
-	LOG4CXX_INFO(KrisLibrary::logger(),"  Contact pt task "<<": "<<vtemp<<"\n");
+	cout<<"  Contact pt task "<<": "<<vtemp<<endl;
       }
-      //LOG4CXX_INFO(KrisLibrary::logger(),Jfx<<"\n");
-      //KrisLibrary::loggerWait();
+      //cout<<Jfx<<endl;
+      //getchar();
     }
     break;
   default:
-    LOG4CXX_ERROR(KrisLibrary::logger(),"Error computing torques! result "<<res<<"\n");
-    //KrisLibrary::loggerWait();
+    cout<<"Error computing torques! result "<<res<<endl;
+    getchar();
     t.setZero();
     f.resize(numContactForces,0);
     break;
@@ -614,7 +612,7 @@ void OperationalSpaceController::TasksToTorques(Vector& t)
       tl += Tf;
     }
     nr.CalcAccel(tl,ddq_predicted);
-    LOG4CXX_INFO(KrisLibrary::logger(),"Predicted q'': "<<ddq_predicted<<"\n");
+    cout<<"Predicted q'': "<<ddq_predicted<<endl;
     stateEstimator->SetDDQ(ddq_predicted);
   }
 }

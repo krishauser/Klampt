@@ -1,5 +1,3 @@
-#include <log4cxx/logger.h>
-#include <KrisLibrary/Logger.h>
 #include "Planning/RobotCSpace.h"
 #include <KrisLibrary/planning/AnyMotionPlanner.h>
 #include "IO/XmlWorld.h"
@@ -38,7 +36,7 @@ void DynamicShortcut(RobotWorld& world,int robot,const MilestonePath& path,int m
   for(size_t i=0;i<milestones.size();i++)
     milestones[i] = path.GetMilestone(i);
   dynamicPath.SetMilestones(milestones);
-  LOG4CXX_INFO(KrisLibrary::logger(),"Initial path duration: "<<dynamicPath.GetTotalTime());
+  printf("Initial path duration: %g seconds\n",dynamicPath.GetTotalTime());
 
   //2. Set up the collision checker
   WorldPlannerSettings settings;
@@ -50,8 +48,8 @@ void DynamicShortcut(RobotWorld& world,int robot,const MilestonePath& path,int m
 
   //3. Perform shortcutting
   int numShortcuts = dynamicPath.Shortcut(maxIters,checker);
-  LOG4CXX_INFO(KrisLibrary::logger(),""<<numShortcuts);
-  LOG4CXX_INFO(KrisLibrary::logger(),"Optimized path duration: "<<dynamicPath.GetTotalTime());
+  printf("%d dynamic shortcuts performed\n",numShortcuts);
+  printf("Optimized path duration: %g seconds\n",dynamicPath.GetTotalTime());
 }
 
 /** @brief Performs basic path planning in collision-free space for the
@@ -73,12 +71,12 @@ bool SimplePlan(RobotWorld& world,int robot,const Config& qstart,const Config& q
   SingleRobotCSpace cspace(world,robot,&settings); 
 
   if(!cspace.IsFeasible(qstart)) {
-    LOG4CXX_INFO(KrisLibrary::logger(),"Start configuration is infeasible, violated constraints:"<<"\n");
+    cout<<"Start configuration is infeasible, violated constraints:"<<endl;
     cspace.PrintInfeasibleNames(qstart);
     return false;
   }
   if(!cspace.IsFeasible(qgoal)) {
-    LOG4CXX_INFO(KrisLibrary::logger(),"Goal configuration is infeasible, violated constraints:"<<"\n");
+    cout<<"Goal configuration is infeasible, violated constraints:"<<endl;
     cspace.PrintInfeasibleNames(qgoal);
     return false;
   }
@@ -87,12 +85,12 @@ bool SimplePlan(RobotWorld& world,int robot,const Config& qstart,const Config& q
   if(!plannerSettings.empty()) {
     bool res = factory.LoadJSON(plannerSettings);
     if(!res) 
-      LOG4CXX_WARN(KrisLibrary::logger(),"Warning, incorrectly formatted planner settings file\n");
+      printf("Warning, incorrectly formatted planner settings file\n");
   }
 
   MotionPlannerInterface* planner = factory.Create(&cspace,qstart,qgoal);
   string res = planner->Plan(path,cond);
-  LOG4CXX_INFO(KrisLibrary::logger(),"Planner terminated with condition "<<res<<"\n");
+  cout<<"Planner terminated with condition "<<res<<endl;
   delete planner;
   return !path.edges.empty();
 }
@@ -100,16 +98,16 @@ bool SimplePlan(RobotWorld& world,int robot,const Config& qstart,const Config& q
 int main(int argc,const char** argv)
 {
   if(argc <= 2) {
-    LOG4CXX_INFO(KrisLibrary::logger(),"USAGE: DynamicPlanDemo [options] world_file configs\n");
-    LOG4CXX_INFO(KrisLibrary::logger(),"OPTIONS:\n");
-    LOG4CXX_INFO(KrisLibrary::logger(),"-o filename: the output linear path or multipath (default dynamicplandemo.xml)\n");
-    LOG4CXX_INFO(KrisLibrary::logger(),"-h timestep: resolution for linear path output (default 0.01)\n");
-    LOG4CXX_INFO(KrisLibrary::logger(),"-p settings: set the planner configuration file\n");
-    LOG4CXX_INFO(KrisLibrary::logger(),"-opt: do optimal planning (do not terminate on the first found solution)\n");
-    LOG4CXX_INFO(KrisLibrary::logger(),"-n iters: set the default number of iterations (default 1000)\n");
-    LOG4CXX_INFO(KrisLibrary::logger(),"-t time: set the planning time limit (default infinity)\n");
-    LOG4CXX_INFO(KrisLibrary::logger(),"-s iters: set the number of shortcuts (default 100)\n");
-    LOG4CXX_INFO(KrisLibrary::logger(),"-r robotindex: set the robot index (default 0)\n");
+    printf("USAGE: DynamicPlanDemo [options] world_file configs\n");
+    printf("OPTIONS:\n");
+    printf("-o filename: the output linear path or multipath (default dynamicplandemo.xml)\n");
+    printf("-h timestep: resolution for linear path output (default 0.01)\n");
+    printf("-p settings: set the planner configuration file\n");
+    printf("-opt: do optimal planning (do not terminate on the first found solution)\n");
+    printf("-n iters: set the default number of iterations (default 1000)\n");
+    printf("-t time: set the planning time limit (default infinity)\n");
+    printf("-s iters: set the number of shortcuts (default 100)\n");
+    printf("-r robotindex: set the robot index (default 0)\n");
     return 0;
   }
   Srand(time(NULL));
@@ -136,7 +134,7 @@ int main(int argc,const char** argv)
       }
       else if(0==strcmp(argv[i],"-p")) {
 	if(!GetFileContents(argv[i+1],plannerSettings)) {
-	  LOG4CXX_INFO(KrisLibrary::logger(),"Unable to load planner settings file "<<argv[i+1]);
+	  printf("Unable to load planner settings file %s\n",argv[i+1]);
 	  return 1;
 	}
 	i++;
@@ -158,19 +156,19 @@ int main(int argc,const char** argv)
 	i++;
       }
       else {
-	LOG4CXX_INFO(KrisLibrary::logger(),"Invalid option "<<argv[i]);
+	printf("Invalid option %s\n",argv[i]);
 	return 1;
       }
     }
     else break;
   }
   if(i+2 < argc) {
-    LOG4CXX_INFO(KrisLibrary::logger(),"Too few arguments provided\n");
-    LOG4CXX_INFO(KrisLibrary::logger(),"USAGE: DynamicPlanDemo [options] world_file configs\n");
+    printf("Too few arguments provided\n");
+    printf("USAGE: DynamicPlanDemo [options] world_file configs\n");
     return 1;
   }
   if(i+2 > argc) {
-    LOG4CXX_WARN(KrisLibrary::logger(),"Warning: extra arguments provided\n");
+    printf("Warning: extra arguments provided\n");
   }
   const char* worldfile = argv[i];
   const char* configsfile = argv[i+1];
@@ -179,11 +177,11 @@ int main(int argc,const char** argv)
   XmlWorld xmlWorld;
   RobotWorld world;
   if(!xmlWorld.Load(worldfile)) {
-    LOG4CXX_ERROR(KrisLibrary::logger(),"Error loading world XML file "<<worldfile);
+    printf("Error loading world XML file %s\n",worldfile);
     return 1;
   }
   if(!xmlWorld.GetWorld(world)) {
-    LOG4CXX_ERROR(KrisLibrary::logger(),"Error loading world file "<<worldfile);
+    printf("Error loading world file %s\n",worldfile);
     return 1;
   }
 
@@ -191,7 +189,7 @@ int main(int argc,const char** argv)
   vector<Config> configs;
   ifstream in(configsfile);
   if(!in) {
-    LOG4CXX_ERROR(KrisLibrary::logger(),"Error opening configs file "<<configsfile);
+    printf("Error opening configs file %s\n",configsfile);
     return false;
   }
   while(in) {
@@ -200,7 +198,7 @@ int main(int argc,const char** argv)
     if(in) configs.push_back(temp);
   }
   if(configs.size() < 2) {
-    LOG4CXX_INFO(KrisLibrary::logger(),"Configs file does not contain 2 or more configs\n");
+    printf("Configs file does not contain 2 or more configs\n");
     return 1;
   }
 
@@ -219,7 +217,7 @@ int main(int argc,const char** argv)
   for(size_t i=0;i+1<configs.size();i++) {
     MilestonePath mpath;
     if(!SimplePlan(world,robot,configs[i],configs[i+1],mpath,termCond,plannerSettings)) {
-      LOG4CXX_INFO(KrisLibrary::logger(),"Planning from configuration "<<i<<" to "<<i+1);
+      printf("Planning from configuration %d to %d failed\n",i,i+1);
       path.sections.resize(path.sections.size()+1);
       path.sections.back().settings["infeasible"]=1;
       path.sections.back().milestones.resize(2);
@@ -235,15 +233,13 @@ int main(int argc,const char** argv)
       path.Concat(dpathSection);
     }
   }
-  if(feasible){
-    LOG4CXX_INFO(KrisLibrary::logger(),"Path planning success! Saving to "<<outputfile);
-  }
-  else{
-    LOG4CXX_INFO(KrisLibrary::logger(),"Path planning failure. Saving placeholder path to "<<outputfile);
-  }
+  if(feasible)
+    printf("Path planning success! Saving to %s\n",outputfile);
+  else
+    printf("Path planning failure. Saving placeholder path to %s\n",outputfile);
   const char* ext = FileExtension(outputfile);
   if(ext && 0==strcmp(ext,"path")) {
-    LOG4CXX_INFO(KrisLibrary::logger(),"Converted to linear path format at resolution "<<discretizeTimeStep);
+    printf("Converted to linear path format at resolution %g\n",discretizeTimeStep);
     LinearPath lpath;
     Discretize(path,discretizeTimeStep,lpath.times,lpath.milestones);
     ofstream f(outputfile,ios::out);

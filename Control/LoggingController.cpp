@@ -1,5 +1,3 @@
-#include <log4cxx/logger.h>
-#include <KrisLibrary/Logger.h>
 #include "LoggingController.h"
 #include <sstream>
 
@@ -58,7 +56,7 @@ void LoggingController::Update(Real dt)
 	    base->time >= trajectory[replayIndex+1].first) {
 	replayIndex++;
       }
-      //LOG4CXX_INFO(KrisLibrary::logger(),"Replay time "<<RobotController::time<<", index "<<replayIndex);
+      //printf("Replay time %g, index %d\n",RobotController::time,replayIndex);
       //read it out
       const RobotMotorCommand& logCmd = trajectory[replayIndex].second;
       RobotMotorCommand* actualCmd = RobotController::command;
@@ -132,13 +130,13 @@ bool LoggingController::SendCommand(const string& name,const string& str)
       replayIndex = 0;
       onlyJointCommands = true;
       //hack
-      LOG4CXX_INFO(KrisLibrary::logger(),"HACK: removing delays from recorded commands\n");
+      printf("HACK: removing delays from recorded commands\n");
       RemoveDelays(0.2);
-      LOG4CXX_INFO(KrisLibrary::logger(),"Read "<<trajectory.size());
+      printf("Read %d commands\n",trajectory.size());
       //check if it's for the right robot
       if(!trajectory.empty()) {
 	if(trajectory[0].second.actuators.size() != command->actuators.size()) {
-	  	  LOG4CXX_ERROR(KrisLibrary::logger(),"Command file "<<str.c_str());
+	  fprintf(stderr,"Command file %s doesn't have the right number of actuators\n",str.c_str());
 	  replay = false;
 	}
       }
@@ -197,7 +195,7 @@ void LoggingController::RemoveDelays(Real maxDelayTime)
     }
     else {
       if(lastEraseIndex >= 0) {
-	//LOG4CXX_INFO(KrisLibrary::logger(),"Erasing trajectory commands "<<lastEraseIndex<<"-"<<i-1);
+	//printf("Erasing trajectory commands %d-%d\n",lastEraseIndex,i-1);
 	trajectory.erase(trajectory.begin()+lastEraseIndex,trajectory.begin()+i);
 	i = lastEraseIndex-1;
 	lastEraseIndex = -1;
@@ -209,12 +207,12 @@ void LoggingController::RemoveDelays(Real maxDelayTime)
     trajectory[i].first -= shift;
     if(i > 0) {
       if(trajectory[i].first-trajectory[i-1].first > maxDelayTime) {
-	//LOG4CXX_INFO(KrisLibrary::logger(),"Found delay of "<<trajectory[i].first-trajectory[i-1].first<<" at "<<i);
+	//printf("Found delay of %g at %d\n",trajectory[i].first-trajectory[i-1].first,i);
 	shift += trajectory[i].first-trajectory[i-1].first-maxDelayTime;
-	//LOG4CXX_INFO(KrisLibrary::logger(),"New shift "<<shift);
+	//printf("New shift %g\n",shift);
 	trajectory[i].first = trajectory[i-1].first+maxDelayTime;
       }
     }
   }
-  //LOG4CXX_INFO(KrisLibrary::logger(),"Trimmed "<<shift);
+  //printf("Trimmed %g seconds from trajectory\n",shift);
 }

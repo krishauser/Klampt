@@ -1,5 +1,3 @@
-#include <log4cxx/logger.h>
-#include <KrisLibrary/Logger.h>
 #include <resourcemanager.h>
 #include <Modeling/Resources.h>
 #include <string.h>
@@ -25,7 +23,7 @@ int ResourceNode::Depth() const
 
 ResourceNodePtr ResourceNode::AddChild(const ResourcePtr& p)
 {
-  LOG4CXX_INFO(KrisLibrary::logger(),"Adding new child of resource, existing "<<(int)children.size());
+  printf("Adding new child of resource, existing %d\n",(int)children.size());
   ResourceNodePtr node = new ResourceNode(p,this);
   children.push_back(node);
   childrenChanged = true;
@@ -98,7 +96,7 @@ bool ResourceNode::Backup(string* errorMessage,ResourceNode** where)
     if(!children[i]->Backup(errorMessage,where)) return false;
   if(!childrenChanged) return true;
 
-  LOG4CXX_INFO(KrisLibrary::logger(),"Packing resources of type "<<Type()<<" into "<<Identifier().c_str());
+  printf("Packing resources of type %s into %s\n",Type(),Identifier().c_str());
   //try doing the packing
   vector<ResourcePtr> temp;
   for(size_t i=0;i<children.size();i++)
@@ -116,7 +114,7 @@ bool ResourceNode::Backup(string* errorMessage,ResourceNode** where)
     return false;
   }
 
-  LOG4CXX_INFO(KrisLibrary::logger(),"Successful\n");
+  printf("Successful\n");
   valid = true;
   childrenChanged = false;
   return true;
@@ -209,11 +207,11 @@ bool ResourceTree::Save(ResourceNode* node,string file)
   else
     r->fileName = file;
   if(!r->Save()){
-        LOG4CXX_ERROR(KrisLibrary::logger(),"Unable to save "<<r->name.c_str()<<" to "<<r->fileName.c_str());
+    fprintf(stderr,"Unable to save %s to %s\n",r->name.c_str(),r->fileName.c_str());
     return false;
   }
   else {
-    LOG4CXX_INFO(KrisLibrary::logger(),"Saved "<<r->name.c_str()<<" to "<<r->fileName.c_str());
+    printf("Saved %s to %s\n",r->name.c_str(),r->fileName.c_str());
     node->SetSaved();
     return true;
   }
@@ -229,13 +227,13 @@ bool ResourceTree::SaveFolder(const string& path)
   }
   library.ChangeBaseDirectory(path);
   if(!library.SaveAll()) {
-        LOG4CXX_ERROR(KrisLibrary::logger(),"Unable to save all resources to "<<path.c_str());
+    fprintf(stderr,"Unable to save all resources to %s\n",path.c_str());
     return false;
   }
   else {
     for(size_t i=0;i<topLevel.size();i++)
       topLevel[i]->SetSaved();
-        LOG4CXX_ERROR(KrisLibrary::logger(),"Saved all resources to "<<path.c_str());
+    fprintf(stderr,"Saved all resources to %s\n",path.c_str());
     return true;
   }
 }
@@ -277,7 +275,7 @@ void ResourceTree::Delete(ResourceNode* r){
     library.Erase(r->resource);
     int index = ChildIndex(r);
     if(index < 0)
-            LOG4CXX_ERROR(KrisLibrary::logger(),"ResourceTree::Delete: inconsistency found, resource "<<r->Identifier().c_str());
+      fprintf(stderr,"ResourceTree::Delete: inconsistency found, resource %s has no parent but is not in topLevel list\n",r->Identifier().c_str());
     assert(index >= 0);
     assert(index < (int)topLevel.size());
     topLevel.erase(topLevel.begin()+index);
@@ -285,7 +283,7 @@ void ResourceTree::Delete(ResourceNode* r){
   else {
     int index = ChildIndex(r);
     if(index < 0)
-            LOG4CXX_ERROR(KrisLibrary::logger(),"ResourceTree::Delete: inconsistency found, resource "<<r->Identifier().c_str()<<" has parent but is not in child list of "<<r->parent->Identifier().c_str());
+      fprintf(stderr,"ResourceTree::Delete: inconsistency found, resource %s has parent but is not in child list of %s\n",r->Identifier().c_str(),r->parent->Identifier().c_str());
     assert(index >= 0);
     assert(index < (int)r->parent->children.size());
     r->parent->children.erase(r->parent->children.begin()+index);
@@ -411,7 +409,7 @@ ResourceNodePtr ResourceManager::Get(const string& name)
     //discard /
     int c = ss.get();
     if(c != EOF && c != '/')
-      LOG4CXX_WARN(KrisLibrary::logger(),"Warning, strange character "<<(char)c);
+      printf("Warning, strange character %c in identifier\n",(char)c);
     path.push_back(temp);
   }
   return Get(path);
@@ -490,18 +488,18 @@ ResourceNodePtr ResourceManager::SafePtr(ResourceNode* ptr)
   if(ptr->parent == NULL) {
     for(size_t i=0;i<topLevel.size();i++) 
       if(&*topLevel[i] == ptr) return topLevel[i];
-        LOG4CXX_ERROR(KrisLibrary::logger(),"ResourceManager::SafePtr: could not find element named "<<ptr->resource->name.c_str()<<", ptr "<<&*ptr->resource);
-        LOG4CXX_ERROR(KrisLibrary::logger(),"Candidates:");
+    fprintf(stderr,"ResourceManager::SafePtr: could not find element named %s, ptr %p?\n",ptr->resource->name.c_str(),&*ptr->resource);
+    fprintf(stderr,"Candidates:");
     for(size_t i=0;i<topLevel.size();i++) 
-            LOG4CXX_ERROR(KrisLibrary::logger(),"  "<<topLevel[i]->resource->name.c_str()<<" "<<&*topLevel[i]->resource);
+      fprintf(stderr,"  %s %p\n",topLevel[i]->resource->name.c_str(),&*topLevel[i]->resource);
   }
   else {
     for(size_t i=0;i<ptr->parent->children.size();i++) 
       if(&*ptr->parent->children[i] == ptr) return ptr->parent->children[i];
-        LOG4CXX_ERROR(KrisLibrary::logger(),"ResourceManager::SafePtr: could not find element named "<<ptr->resource->name.c_str()<<", ptr "<<&*ptr->resource);
-        LOG4CXX_ERROR(KrisLibrary::logger(),"Candidates:");
+    fprintf(stderr,"ResourceManager::SafePtr: could not find element named %s, ptr %p?\n",ptr->resource->name.c_str(),&*ptr->resource);
+    fprintf(stderr,"Candidates:");
     for(size_t i=0;i<ptr->parent->children.size();i++) 
-            LOG4CXX_ERROR(KrisLibrary::logger(),"  "<<ptr->parent->children[i]->resource->name.c_str()<<" "<<&*ptr->parent->children[i]->resource);
+      fprintf(stderr,"  %s %p\n",ptr->parent->children[i]->resource->name.c_str(),&*ptr->parent->children[i]->resource);
   }
   AssertNotReached();
   return NULL;

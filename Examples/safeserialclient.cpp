@@ -1,8 +1,6 @@
 //This program will read objective functions from a socket via the
 //objective function serialization interface and run real-time planning
 //to avoid obstacles.  The robot will be simulated.
-#include <log4cxx/logger.h>
-#include <KrisLibrary/Logger.h>
 #include "Interface/UserInterface.h"
 #include "Interface/RobotInterface.h"
 #include "Main/SimViewProgram.h"
@@ -62,16 +60,16 @@ public:
       if(in) 
 	readsettings = true;
       else
-	LOG4CXX_ERROR(KrisLibrary::logger(),"Error reading settings from safeserialclient.settings"<<"\n");
+	cerr<<"Error reading settings from safeserialclient.settings"<<endl;
     }
     if(!readsettings) {
-            LOG4CXX_ERROR(KrisLibrary::logger(),"Need safeserialclient.settings file, copy and paste the following lines into the file.\n");
+      fprintf(stderr,"Need safeserialclient.settings file, copy and paste the following lines into the file.\n");
       settings = AnyCollection();
       settings["objective_address"]=string("tcp://localhost:3456");
       settings["objective_filter"]=string("objective");
       settings["time_publish_address"]=string("tcp://*:3457");
       settings["collision_margin"] = 0.0;
-      LOG4CXX_ERROR(KrisLibrary::logger(),settings<<"\n");
+      cerr<<settings<<endl;
       exit(-1);
     }
     string objsubaddr = settings["objective_address"];
@@ -136,7 +134,7 @@ public:
     glui->add_checkbox("Draw path",&drawPath);
     glui->add_checkbox("Draw contacts",&drawContacts);
 
-    LOG4CXX_INFO(KrisLibrary::logger(),"Done initializing...\n");
+    printf("Done initializing...\n");
     return true;
   }
 
@@ -331,7 +329,7 @@ public:
 int main(int argc, const char** argv)
 {
   if(argc < 2) {
-    LOG4CXX_INFO(KrisLibrary::logger(),"USAGE: SafeSerialClient XML_file\n");
+    printf("USAGE: SafeSerialClient XML_file\n");
     return 0;
   }
   RobotWorld world;

@@ -35,8 +35,6 @@
 /* Author: John Hsu */
 
 
-#include <log4cxx/logger.h>
-#include <KrisLibrary/Logger.h>
 #include "urdf_sensor.h"
 #include <fstream>
 #include <sstream>

@@ -1,5 +1,3 @@
-#include <log4cxx/logger.h>
-#include <KrisLibrary/Logger.h>
 #include "ControlledRobot.h"
 #include "JointSensors.h"
 
@@ -56,9 +54,8 @@ void ControlledRobot::GetCommandedVelocity(Config& dq)
 void ControlledRobot::GetSensedConfig(Config& q)
 {
   JointPositionSensor* s = sensors.GetTypedSensor<JointPositionSensor>();
-  if(s==NULL){ 
-        LOG4CXX_ERROR(KrisLibrary::logger(),"Warning, robot has no joint position sensor\n");
-  }
+  if(s==NULL) 
+    fprintf(stderr,"Warning, robot has no joint position sensor\n");
   else
     q = s->q;
 }
@@ -66,9 +63,8 @@ void ControlledRobot::GetSensedConfig(Config& q)
 void ControlledRobot::GetSensedVelocity(Config& dq)
 {
   JointVelocitySensor* s=sensors.GetTypedSensor<JointVelocitySensor>();
-  if(s==NULL){
-        LOG4CXX_ERROR(KrisLibrary::logger(),"Warning, robot has no joint velocity sensor\n");
-  }
+  if(s==NULL)
+    fprintf(stderr,"Warning, robot has no joint velocity sensor\n");
   else
     dq = s->dq;
 }

@@ -1,5 +1,3 @@
-#include <log4cxx/logger.h>
-#include <KrisLibrary/Logger.h>
 #include "Planning/StanceCSpace.h"
 #include <KrisLibrary/planning/AnyMotionPlanner.h>
 #include <KrisLibrary/utils/ioutils.h>
@@ -42,34 +40,34 @@ bool StancePlan(RobotWorld& world,int robot,Config& qstart,Config& qgoal,const S
     cspace.SetSPMargin(gSupportPolygonMargin);
   //sanity checking
   if(!cspace.CheckContact(qstart)) {
-    LOG4CXX_ERROR(KrisLibrary::logger(),"Start configuration does not meet contact constraint, error "<<cspace.ContactDistance(qstart));
+    printf("Start configuration does not meet contact constraint, error %g\n",cspace.ContactDistance(qstart));
     if(!cspace.SolveContact()) {
-      LOG4CXX_INFO(KrisLibrary::logger(),"  Solving for contact failed.\n");
+      printf("  Solving for contact failed.\n");
       return false;
     }
     else {
-      LOG4CXX_INFO(KrisLibrary::logger(),"  IK problem was solved, using new start configuration\n");
+      printf("  IK problem was solved, using new start configuration\n");
       qstart = cspace.robot.q;
     }
   }
   if(!cspace.CheckContact(qgoal)) {
-    LOG4CXX_ERROR(KrisLibrary::logger(),"Goal configuration does not meet contact constraint, error "<<cspace.ContactDistance(qgoal));
+    printf("Goal configuration does not meet contact constraint, error %g\n",cspace.ContactDistance(qgoal));
     if(!cspace.SolveContact()) {
-      LOG4CXX_INFO(KrisLibrary::logger(),"  Solving for contact failed.\n");
+      printf("  Solving for contact failed.\n");
       return false;
     }
     else {
-      LOG4CXX_INFO(KrisLibrary::logger(),"  IK problem was solved, using new goal configuration\n");
+      printf("  IK problem was solved, using new goal configuration\n");
       qgoal = cspace.robot.q;
     }
   }
   if(!cspace.IsFeasible(qstart)) {
-    LOG4CXX_INFO(KrisLibrary::logger(),"Start configuration is infeasible, violated constraints:"<<"\n");
+    cout<<"Start configuration is infeasible, violated constraints:"<<endl;
     cspace.PrintInfeasibleNames(qstart);
     return false;
   }
   if(!cspace.IsFeasible(qgoal)) {
-    LOG4CXX_INFO(KrisLibrary::logger(),"Goal configuration is infeasible, violated constraints:"<<"\n");
+    cout<<"Goal configuration is infeasible, violated constraints:"<<endl;
     cspace.PrintInfeasibleNames(qgoal);
     return false;
   }
@@ -83,8 +81,8 @@ bool StancePlan(RobotWorld& world,int robot,Config& qstart,Config& qgoal,const S
   //make the planner and do the planning
   MotionPlannerInterface* planner = factory.Create(&cspace,qstart,qgoal);
   string res = planner->Plan(path,cond);
-  LOG4CXX_INFO(KrisLibrary::logger(),"Planner terminated with condition "<<res<<"\n");
-  LOG4CXX_INFO(KrisLibrary::logger(),"  Stats: SolveContact "<<cspace.numSolveContact<<", "<<cspace.solveContactTime);
+  cout<<"Planner terminated with condition "<<res<<endl;
+  printf("  Stats: SolveContact %d, %gs.\n",cspace.numSolveContact,cspace.solveContactTime);
   delete planner;
   return !path.edges.empty();
 }
@@ -114,34 +112,34 @@ bool ContactPlan(RobotWorld& world,int robot,Config& qstart,Config& qgoal,const 
     cspace.AddContact(i->second.ikConstraint);
   //sanity checking
   if(!cspace.CheckContact(qstart)) {
-    LOG4CXX_ERROR(KrisLibrary::logger(),"Start configuration does not meet contact constraint, error "<<cspace.ContactDistance(qstart));
+    printf("Start configuration does not meet contact constraint, error %g\n",cspace.ContactDistance(qstart));
     if(!cspace.SolveContact()) {
-      LOG4CXX_INFO(KrisLibrary::logger(),"  Solving for contact failed.\n");
+      printf("  Solving for contact failed.\n");
       return false;
     }
     else {
-      LOG4CXX_INFO(KrisLibrary::logger(),"  IK problem was solved, using new start configuration\n");
+      printf("  IK problem was solved, using new start configuration\n");
       qstart = cspace.robot.q;
     }
   }
   if(!cspace.CheckContact(qgoal)) {
-    LOG4CXX_ERROR(KrisLibrary::logger(),"Goal configuration does not meet contact constraint, error "<<cspace.ContactDistance(qgoal));
+    printf("Goal configuration does not meet contact constraint, error %g\n",cspace.ContactDistance(qgoal));
     if(!cspace.SolveContact()) {
-      LOG4CXX_INFO(KrisLibrary::logger(),"  Solving for contact failed.\n");
+      printf("  Solving for contact failed.\n");
       return false;
     }
     else {
-      LOG4CXX_INFO(KrisLibrary::logger(),"  IK problem was solved, using new goal configuration\n");
+      printf("  IK problem was solved, using new goal configuration\n");
       qgoal = cspace.robot.q;
     }
   }
   if(!cspace.IsFeasible(qstart)) {
-    LOG4CXX_INFO(KrisLibrary::logger(),"Start configuration is infeasible, violated constraints:"<<"\n");
+    cout<<"Start configuration is infeasible, violated constraints:"<<endl;
     cspace.PrintInfeasibleNames(qstart);
     return false;
   }
   if(!cspace.IsFeasible(qgoal)) {
-    LOG4CXX_INFO(KrisLibrary::logger(),"Goal configuration is infeasible, violated constraints:"<<"\n");
+    cout<<"Goal configuration is infeasible, violated constraints:"<<endl;
     cspace.PrintInfeasibleNames(qgoal);
     return false;
   }
@@ -155,10 +153,10 @@ bool ContactPlan(RobotWorld& world,int robot,Config& qstart,Config& qgoal,const 
   //make the planner and do the planning
   Timer timer;
   MotionPlannerInterface* planner = factory.Create(&cspace,qstart,qgoal);
-  LOG4CXX_INFO(KrisLibrary::logger(),"  Create time: "<<timer.ElapsedTime()<<"\n");
+  cout<<"  Create time: "<<timer.ElapsedTime()<<endl;
   string res = planner->Plan(path,cond);
-  LOG4CXX_INFO(KrisLibrary::logger(),"Planner terminated with condition "<<res<<"\n");
-  LOG4CXX_INFO(KrisLibrary::logger(),"  Stats: SolveContact "<<cspace.numSolveContact<<", "<<cspace.solveContactTime);
+  cout<<"Planner terminated with condition "<<res<<endl;
+  printf("  Stats: SolveContact %d, %gs\n",cspace.numSolveContact,cspace.solveContactTime);
   delete planner;
   return !path.edges.empty();
 }
@@ -167,15 +165,15 @@ bool ContactPlan(RobotWorld& world,int robot,Config& qstart,Config& qgoal,const 
 int main(int argc,const char** argv)
 {
   if(argc <= 3) {
-    LOG4CXX_INFO(KrisLibrary::logger(),"USAGE: ContactPlan [options] world_file configs stance\n");
-    LOG4CXX_INFO(KrisLibrary::logger(),"OPTIONS:\n");
-    LOG4CXX_INFO(KrisLibrary::logger(),"-o filename: the output linear path or multipath (default contactplan.xml)\n");
-    LOG4CXX_INFO(KrisLibrary::logger(),"-p settings: set the planner configuration file\n");
-    LOG4CXX_INFO(KrisLibrary::logger(),"-opt: do optimal planning (do not terminate on the first found solution)\n");
-    LOG4CXX_INFO(KrisLibrary::logger(),"-n iters: set the default number of iterations per step (default 1000)\n");
-    LOG4CXX_INFO(KrisLibrary::logger(),"-t time: set the planning time limit (default infinity)\n");
-    LOG4CXX_INFO(KrisLibrary::logger(),"-m margin: set support polygon margin (default 0)\n");
-    LOG4CXX_INFO(KrisLibrary::logger(),"-r robotindex: set the robot index (default 0)\n");
+    printf("USAGE: ContactPlan [options] world_file configs stance\n");
+    printf("OPTIONS:\n");
+    printf("-o filename: the output linear path or multipath (default contactplan.xml)\n");
+    printf("-p settings: set the planner configuration file\n");
+    printf("-opt: do optimal planning (do not terminate on the first found solution)\n");
+    printf("-n iters: set the default number of iterations per step (default 1000)\n");
+    printf("-t time: set the planning time limit (default infinity)\n");
+    printf("-m margin: set support polygon margin (default 0)\n");
+    printf("-r robotindex: set the robot index (default 0)\n");
     return 0;
   }
   Srand(time(NULL));
@@ -200,7 +198,7 @@ int main(int argc,const char** argv)
       }
       else if(0==strcmp(argv[i],"-p")) {
 	if(!GetFileContents(argv[i+1],plannerSettings)) {
-	  LOG4CXX_INFO(KrisLibrary::logger(),"Unable to load planner settings file "<<argv[i+1]);
+	  printf("Unable to load planner settings file %s\n",argv[i+1]);
 	  return 1;
 	}
 	i++;
@@ -218,18 +216,18 @@ int main(int argc,const char** argv)
 	i++;
       }
       else {
-	LOG4CXX_INFO(KrisLibrary::logger(),"Invalid option "<<argv[i]);
+	printf("Invalid option %s\n",argv[i]);
 	return 1;
       }
     }
     else break;
   }
   if(i+3 < argc) {
-    LOG4CXX_INFO(KrisLibrary::logger(),"USAGE: ContactPlan [options] world_file configs stance\n");
+    printf("USAGE: ContactPlan [options] world_file configs stance\n");
     return 1;
   }
   if(i+3 > argc) {
-    LOG4CXX_WARN(KrisLibrary::logger(),"Warning: extra arguments provided\n");
+    printf("Warning: extra arguments provided\n");
   }
   const char* worldfile = argv[i];
   const char* configsfile = argv[i+1];
@@ -239,11 +237,11 @@ int main(int argc,const char** argv)
   XmlWorld xmlWorld;
   RobotWorld world;
   if(!xmlWorld.Load(worldfile)) {
-    LOG4CXX_ERROR(KrisLibrary::logger(),"Error loading world XML file "<<worldfile);
+    printf("Error loading world XML file %s\n",worldfile);
     return 1;
   }
   if(!xmlWorld.GetWorld(world)) {
-    LOG4CXX_ERROR(KrisLibrary::logger(),"Error loading world file "<<worldfile);
+    printf("Error loading world file %s\n",worldfile);
     return 1;
   }
 
@@ -252,7 +250,7 @@ int main(int argc,const char** argv)
     //Read in the configurations specified in configsfile
     ifstream in(configsfile);
     if(!in) {
-      LOG4CXX_ERROR(KrisLibrary::logger(),"Error opening configs file "<<configsfile);
+      printf("Error opening configs file %s\n",configsfile);
       return false;
     }
     while(in) {
@@ -261,7 +259,7 @@ int main(int argc,const char** argv)
       if(in) configs.push_back(temp);
     }
     if(configs.size() < 2) {
-      LOG4CXX_INFO(KrisLibrary::logger(),"Configs file does not contain 2 or more configs\n");
+      printf("Configs file does not contain 2 or more configs\n");
       return 1;
     }
     in.close();
@@ -273,7 +271,7 @@ int main(int argc,const char** argv)
     ifstream in(stancefile,ios::in);
     in >> stance;
     if(!in) {
-      LOG4CXX_ERROR(KrisLibrary::logger(),"Error loading stance file "<<stancefile);
+      printf("Error loading stance file %s\n",stancefile);
       return 1;
     }
     in.close();
@@ -282,7 +280,7 @@ int main(int argc,const char** argv)
   //If the stance has no contacts, use ContactPlan.  Otherwise, use StancePlan
   bool ignoreContactForces = false;
   if(NumContactPoints(stance)==0) {
-    LOG4CXX_INFO(KrisLibrary::logger(),"No contact points in stance, planning without stability constraints\n");
+    printf("No contact points in stance, planning without stability constraints\n");
     ignoreContactForces = true;
   }
 
@@ -307,7 +305,7 @@ int main(int argc,const char** argv)
     else
       res = StancePlan(world,robot,configs[i],configs[i+1],stance,mpath,termCond,plannerSettings);
     if(!res) {
-      LOG4CXX_INFO(KrisLibrary::logger(),"Planning from stance "<<i<<" to "<<i+1);
+      printf("Planning from stance %d to %d failed\n",i,i+1);
       path.sections.resize(path.sections.size()+1);
       path.SetStance(stance,path.sections.size()-1);
       path.sections.back().milestones[0] = configs[i];
@@ -323,15 +321,13 @@ int main(int argc,const char** argv)
       qstart = path.sections.back().milestones.back();
     }
   }
-  if(feasible){
-    LOG4CXX_INFO(KrisLibrary::logger(),"Path planning success! Saving to "<<outputfile);
-  }
-  else{
-    LOG4CXX_INFO(KrisLibrary::logger(),"Path planning failure. Saving placeholder path to "<<outputfile);
-  }
+  if(feasible)
+    printf("Path planning success! Saving to %s\n",outputfile);
+  else
+    printf("Path planning failure. Saving placeholder path to %s\n",outputfile);
   const char* ext = FileExtension(outputfile);
   if(ext && 0==strcmp(ext,"path")) {
-    LOG4CXX_INFO(KrisLibrary::logger(),"Converted to linear path format\n");
+    printf("Converted to linear path format\n");
     LinearPath lpath;
     Convert(path,lpath);
     ofstream f(outputfile,ios::out);

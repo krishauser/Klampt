@@ -44,6 +44,8 @@
 #include <stdio.h>
 #include <iostream>
 
+DECLARE_LOGGER(URDFParser)
+
 namespace urdf{
 
 bool parsePose(Pose &pose, TiXmlElement* xml);
@@ -55,14 +57,14 @@ bool parseJointDynamics(JointDynamics &jd, TiXmlElement* config)
   // Get joint damping
   const char* damping_str = config->Attribute("damping");
   if (damping_str == NULL){
-    LOG4CXX_INFO(KrisLibrary::logger(),"joint dynamics: no damping, defaults to 0");
+    LOG4CXX_INFO(GET_LOGGER(URDFParser),"joint dynamics: no damping, defaults to 0");
     jd.damping = 0;
   }
   else
   {
     if(!LexicalCast(damping_str,jd.damping))
     {
-      LOG4CXX_INFO(KrisLibrary::logger(),"damping value ("<< damping_str<<") is not a float");
+      LOG4CXX_INFO(GET_LOGGER(URDFParser),"damping value ("<< damping_str<<") is not a float");
       return false;
     }
   }
@@ -70,25 +72,25 @@ bool parseJointDynamics(JointDynamics &jd, TiXmlElement* config)
   // Get joint friction
   const char* friction_str = config->Attribute("friction");
   if (friction_str == NULL){
-    LOG4CXX_INFO(KrisLibrary::logger(),"joint dynamics: no friction, defaults to 0");
+    LOG4CXX_INFO(GET_LOGGER(URDFParser),"joint dynamics: no friction, defaults to 0");
     jd.friction = 0;
   }
   else
   {
     if(!LexicalCast(friction_str,jd.friction))
     {
-      LOG4CXX_INFO(KrisLibrary::logger(),"friction value ("<< friction_str<< ") is not a float");
+      LOG4CXX_INFO(GET_LOGGER(URDFParser),"friction value ("<< friction_str<< ") is not a float");
       return false;
     }
   }
 
   if (damping_str == NULL && friction_str == NULL)
   {
-    LOG4CXX_INFO(KrisLibrary::logger(),"joint dynamics element specified with no damping and no friction \n");
+    printf("joint dynamics element specified with no damping and no friction \n");
     return false;
   }
   else{
-    //LOG4CXX_INFO(KrisLibrary::logger(),"joint dynamics: damping "<< jd.damping<<" and friction "<< jd.friction);
+    //printf("joint dynamics: damping %f and friction %f\n", jd.damping, jd.friction);
     return true;
   }
 }
@@ -100,14 +102,14 @@ bool parseJointLimits(JointLimits &jl, TiXmlElement* config)
   // Get lower joint limit
   const char* lower_str = config->Attribute("lower");
   if (lower_str == NULL){
-    LOG4CXX_INFO(KrisLibrary::logger(),"joint limit: no lower, defaults to 0");
+    printf("joint limit: no lower, defaults to 0");
     jl.lower = 0;
   }
   else
   {
     if(!LexicalCast(lower_str,jl.lower))
     {
-      LOG4CXX_INFO(KrisLibrary::logger(),"lower value ("<< lower_str<<") is not a float: ");
+      LOG4CXX_INFO(GET_LOGGER(URDFParser),"lower value ("<< lower_str<<") is not a float: ");
       return false;
     }
   }
@@ -115,14 +117,14 @@ bool parseJointLimits(JointLimits &jl, TiXmlElement* config)
   // Get upper joint limit
   const char* upper_str = config->Attribute("upper");
   if (upper_str == NULL){
-    LOG4CXX_INFO(KrisLibrary::logger(),"joint limit: no upper, , defaults to 0");
+    printf("joint limit: no upper, , defaults to 0");
     jl.upper = 0;
   }
   else
   {
     if(!LexicalCast(upper_str,jl.upper))
     {
-      LOG4CXX_INFO(KrisLibrary::logger(),"upper value ("<<upper_str<<") is not a float: ");
+      LOG4CXX_INFO(GET_LOGGER(URDFParser),"upper value ("<<upper_str<<") is not a float: ");
       return false;
     }
   }
@@ -130,14 +132,14 @@ bool parseJointLimits(JointLimits &jl, TiXmlElement* config)
   // Get joint effort limit
   const char* effort_str = config->Attribute("effort");
   if (effort_str == NULL){
-    LOG4CXX_INFO(KrisLibrary::logger(),"joint limit: no effort");
+    printf("joint limit: no effort");
     return false;
   }
   else
   {
     if(!LexicalCast(effort_str,jl.effort))
     {
-      LOG4CXX_INFO(KrisLibrary::logger(),"effort value ("<<effort_str<<") is not a float: ");
+      LOG4CXX_INFO(GET_LOGGER(URDFParser),"effort value ("<<effort_str<<") is not a float: ");
       return false;
     }
   }
@@ -145,14 +147,14 @@ bool parseJointLimits(JointLimits &jl, TiXmlElement* config)
   // Get joint velocity limit
   const char* velocity_str = config->Attribute("velocity");
   if (velocity_str == NULL){
-    LOG4CXX_INFO(KrisLibrary::logger(),"joint limit: no velocity \n");
+    printf("joint limit: no velocity \n");
     return false;
   }
   else
   {
     if(!LexicalCast(velocity_str,jl.velocity))
     {
-      LOG4CXX_INFO(KrisLibrary::logger(),"velocity value ("<<velocity_str<<") is not a float: ");
+      LOG4CXX_INFO(GET_LOGGER(URDFParser),"velocity value ("<<velocity_str<<") is not a float: ");
       return false;
     }
   }
@@ -168,14 +170,14 @@ bool parseJointSafety(JointSafety &js, TiXmlElement* config)
   const char* soft_lower_limit_str = config->Attribute("soft_lower_limit");
   if (soft_lower_limit_str == NULL)
   {
-    LOG4CXX_INFO(KrisLibrary::logger(),"joint safety: no soft_lower_limit, using default value \n");
+    printf("joint safety: no soft_lower_limit, using default value \n");
     js.soft_lower_limit = 0;
   }
   else
   {
     if(!LexicalCast(soft_lower_limit_str,js.soft_lower_limit))
     {
-      LOG4CXX_INFO(KrisLibrary::logger(),"soft_lower_limit value ("<<soft_lower_limit_str<<") is not a float: ");
+      LOG4CXX_INFO(GET_LOGGER(URDFParser),"soft_lower_limit value ("<<soft_lower_limit_str<<") is not a float: ");
       return false;
     }
   }
@@ -184,14 +186,14 @@ bool parseJointSafety(JointSafety &js, TiXmlElement* config)
   const char* soft_upper_limit_str = config->Attribute("soft_upper_limit");
   if (soft_upper_limit_str == NULL)
   {
-    LOG4CXX_INFO(KrisLibrary::logger(),"joint safety: no soft_upper_limit, using default value \n");
+    printf("joint safety: no soft_upper_limit, using default value \n");
     js.soft_upper_limit = 0;
   }
   else
   {
     if(!LexicalCast(soft_upper_limit_str,js.soft_upper_limit))
     {
-      LOG4CXX_INFO(KrisLibrary::logger(),"soft_upper_limit value ("<<soft_upper_limit_str<<") is not a float: ");
+      LOG4CXX_INFO(GET_LOGGER(URDFParser),"soft_upper_limit value ("<<soft_upper_limit_str<<") is not a float: ");
       return false;
     }
   }
@@ -200,14 +202,14 @@ bool parseJointSafety(JointSafety &js, TiXmlElement* config)
   const char* k_position_str = config->Attribute("k_position");
   if (k_position_str == NULL)
   {
-    LOG4CXX_INFO(KrisLibrary::logger(),"joint safety: no k_position, using default value \n");
+    printf("joint safety: no k_position, using default value \n");
     js.k_position = 0;
   }
   else
   {
     if(!LexicalCast(k_position_str,js.k_position))
     {
-      LOG4CXX_INFO(KrisLibrary::logger(),"k_position value ("<<k_position_str<<") is not a float: ");
+      LOG4CXX_INFO(GET_LOGGER(URDFParser),"k_position value ("<<k_position_str<<") is not a float: ");
       return false;
     }
   }
@@ -215,14 +217,14 @@ bool parseJointSafety(JointSafety &js, TiXmlElement* config)
   const char* k_velocity_str = config->Attribute("k_velocity");
   if (k_velocity_str == NULL)
   {
-    LOG4CXX_INFO(KrisLibrary::logger(),"joint safety: no k_velocity \n");
+    printf("joint safety: no k_velocity \n");
     return false;
   }
   else
   {
     if(!LexicalCast(k_velocity_str,js.k_velocity))
     {
-      LOG4CXX_INFO(KrisLibrary::logger(),"k_velocity value ("<<k_velocity_str<<") is not a float: ");
+      LOG4CXX_INFO(GET_LOGGER(URDFParser),"k_velocity value ("<<k_velocity_str<<") is not a float: ");
       return false;
     }
   }
@@ -238,7 +240,7 @@ bool parseJointCalibration(JointCalibration &jc, TiXmlElement* config)
   const char* rising_position_str = config->Attribute("rising");
   if (rising_position_str == NULL)
   {
-    LOG4CXX_INFO(KrisLibrary::logger(),"joint calibration: no rising, using default value \n");
+    printf("joint calibration: no rising, using default value \n");
     jc.rising.reset();
   }
   else
@@ -250,7 +252,7 @@ bool parseJointCalibration(JointCalibration &jc, TiXmlElement* config)
     }
     else
     {
-      LOG4CXX_INFO(KrisLibrary::logger(),"risingvalue ("<<rising_position_str<<") is not a float: ");
+      LOG4CXX_INFO(GET_LOGGER(URDFParser),"risingvalue ("<<rising_position_str<<") is not a float: ");
       return false;
     }
   }
@@ -259,7 +261,7 @@ bool parseJointCalibration(JointCalibration &jc, TiXmlElement* config)
   const char* falling_position_str = config->Attribute("falling");
   if (falling_position_str == NULL)
   {
-    LOG4CXX_INFO(KrisLibrary::logger(),"joint calibration: no falling, using default value \n");
+    printf("joint calibration: no falling, using default value \n");
     jc.falling.reset();
   }
   else
@@ -271,7 +273,7 @@ bool parseJointCalibration(JointCalibration &jc, TiXmlElement* config)
     }
     else
     {
-      LOG4CXX_INFO(KrisLibrary::logger(),"fallingvalue ("<<falling_position_str<<") is not a float: ");
+      LOG4CXX_INFO(GET_LOGGER(URDFParser),"fallingvalue ("<<falling_position_str<<") is not a float: ");
       return false;
     }
   }
@@ -288,7 +290,7 @@ bool parseJointMimic(JointMimic &jm, TiXmlElement* config)
 
   if (joint_name_str == NULL)
   {
-    LOG4CXX_INFO(KrisLibrary::logger(),"joint mimic: no mimic joint specified \n");
+    printf("joint mimic: no mimic joint specified \n");
     return false;
   }
   else
@@ -299,14 +301,14 @@ bool parseJointMimic(JointMimic &jm, TiXmlElement* config)
 
   if (multiplier_str == NULL)
   {
-    LOG4CXX_INFO(KrisLibrary::logger(),"joint mimic: no multiplier, using default value of 1 \n");
+    printf("joint mimic: no multiplier, using default value of 1 \n");
     jm.multiplier = 1;    
   }
   else
   {
     if(!LexicalCast(multiplier_str,jm.multiplier))
     {
-      LOG4CXX_INFO(KrisLibrary::logger(),"multiplier value ("<<multiplier_str<<") is not a float: ");
+      LOG4CXX_INFO(GET_LOGGER(URDFParser),"multiplier value ("<<multiplier_str<<") is not a float: ");
       return false;
     }
   }
@@ -316,14 +318,14 @@ bool parseJointMimic(JointMimic &jm, TiXmlElement* config)
   const char* offset_str = config->Attribute("offset");
   if (offset_str == NULL)
   {
-    LOG4CXX_INFO(KrisLibrary::logger(),"joint mimic: no offset, using default value of 0 \n");
+    printf("joint mimic: no offset, using default value of 0 \n");
     jm.offset = 0;
   }
   else
   {
     if(!LexicalCast(offset_str,jm.offset))
     {
-      LOG4CXX_INFO(KrisLibrary::logger(),"offset value ("<<offset_str<<") is not a float: ");
+      LOG4CXX_INFO(GET_LOGGER(URDFParser),"offset value ("<<offset_str<<") is not a float: ");
       return false;
     }
   }
@@ -339,7 +341,7 @@ bool parseJoint(Joint &joint, TiXmlElement* config)
   const char *name = config->Attribute("name");
   if (!name)
   {
-    LOG4CXX_INFO(KrisLibrary::logger(),"unnamed joint found \n");
+    printf("unnamed joint found \n");
     return false;
   }
   joint.name = name;
@@ -348,7 +350,7 @@ bool parseJoint(Joint &joint, TiXmlElement* config)
   TiXmlElement *origin_xml = config->FirstChildElement("origin");
   if (!origin_xml)
   {
-    LOG4CXX_INFO(KrisLibrary::logger(),"Joint ["<< joint.name.c_str() <<"] missing origin tag under parent describing transform from Parent Link to Joint frame, (using Identity transform). \n");
+    printf("Joint [%s] missing origin tag under parent describing transform from Parent Link to Joint Frame, (using Identity transform). \n", joint.name.c_str());
     joint.parent_to_joint_origin_transform.clear();
   }
   else
@@ -356,7 +358,7 @@ bool parseJoint(Joint &joint, TiXmlElement* config)
     if (!parsePose(joint.parent_to_joint_origin_transform, origin_xml))
     {
       joint.parent_to_joint_origin_transform.clear();
-      LOG4CXX_INFO(KrisLibrary::logger(),"Malformed parent origin element for joint ["<< joint.name.c_str());
+      printf("Malformed parent origin element for joint [%s] \n", joint.name.c_str());
       return false;
     }
   }
@@ -368,7 +370,7 @@ bool parseJoint(Joint &joint, TiXmlElement* config)
     const char *pname = parent_xml->Attribute("link");
     if (!pname)
     {
-      LOG4CXX_INFO(KrisLibrary::logger(),"no parent link name specified for Joint link ["<< joint.name.c_str());
+      printf("no parent link name specified for Joint link [%s]. this might be the root? \n", joint.name.c_str());
     }
     else
     {
@@ -383,7 +385,7 @@ bool parseJoint(Joint &joint, TiXmlElement* config)
     const char *pname = child_xml->Attribute("link");
     if (!pname)
     {
-      LOG4CXX_INFO(KrisLibrary::logger(),"no child link name specified for Joint link ["<< joint.name.c_str());
+      printf("no child link name specified for Joint link [%s]. \n", joint.name.c_str());
     }
     else
     {
@@ -395,7 +397,7 @@ bool parseJoint(Joint &joint, TiXmlElement* config)
   const char* type_char = config->Attribute("type");
   if (!type_char)
   {
-    LOG4CXX_INFO(KrisLibrary::logger(),"joint ["<<joint.name.c_str() <<"] has no type, check to see if it's a reference. \n");
+    printf("joint [%s] has no type, check to see if it's a reference. \n", joint.name.c_str());
     return false;
   }
   
@@ -414,7 +416,7 @@ bool parseJoint(Joint &joint, TiXmlElement* config)
     joint.type = Joint::FIXED;
   else
   {
-    LOG4CXX_INFO(KrisLibrary::logger(),"Joint ["<< joint.name.c_str()<<"] has no known type ["<< type_str.c_str());
+    printf("Joint [%s] has no known type [%s] \n", joint.name.c_str(), type_str.c_str());
     return false;
   }
 
@@ -424,7 +426,7 @@ bool parseJoint(Joint &joint, TiXmlElement* config)
     // axis
     TiXmlElement *axis_xml = config->FirstChildElement("axis");
     if (!axis_xml){
-      LOG4CXX_INFO(KrisLibrary::logger(),"no axis elemement for Joint link ["<<joint.name.c_str()<<"], defaulting to (1,0,0) axis\n");
+      printf("no axis elemement for Joint link [%s], defaulting to (1,0,0) axis \n", joint.name.c_str());
       joint.axis = Vector3(1.0, 0.0, 0.0);
     }
     else{
@@ -434,7 +436,7 @@ bool parseJoint(Joint &joint, TiXmlElement* config)
         }
         catch (ParseError &e) {
           joint.axis.clear();
-          LOG4CXX_INFO(KrisLibrary::logger(),"Malformed axis element for joint ["<< joint.name.c_str()<<"]: ");
+          LOG4CXX_INFO(GET_LOGGER(URDFParser),"Malformed axis element for joint ["<< joint.name.c_str()<<"]: ");
           return false;
         }
       }
@@ -448,19 +450,19 @@ bool parseJoint(Joint &joint, TiXmlElement* config)
     joint.limits.reset(new JointLimits());
     if (!parseJointLimits(*joint.limits, limit_xml))
     {
-      LOG4CXX_INFO(KrisLibrary::logger(),"Could not parse limit element for joint ["<< joint.name.c_str());
+      printf("Could not parse limit element for joint [%s] \n", joint.name.c_str());
       joint.limits.reset();
       return false;
     }
   }
   else if (joint.type == Joint::REVOLUTE)
   {
-    LOG4CXX_INFO(KrisLibrary::logger(),"Joint ["<< joint.name.c_str());
+    printf("Joint [%s] is of type REVOLUTE but it does not specify limits \n", joint.name.c_str());
     return false;
   }
   else if (joint.type == Joint::PRISMATIC)
   {
-    LOG4CXX_INFO(KrisLibrary::logger(),"Joint ["<< joint.name.c_str()); 
+    printf("Joint [%s] is of type PRISMATIC without limits \n", joint.name.c_str()); 
     return false;
   }
 
@@ -471,7 +473,7 @@ bool parseJoint(Joint &joint, TiXmlElement* config)
     joint.safety.reset(new JointSafety());
     if (!parseJointSafety(*joint.safety, safety_xml))
     {
-      LOG4CXX_INFO(KrisLibrary::logger(),"Could not parse safety element for joint ["<< joint.name.c_str());
+      printf("Could not parse safety element for joint [%s] \n", joint.name.c_str());
       joint.safety.reset();
       return false;
     }
@@ -484,7 +486,7 @@ bool parseJoint(Joint &joint, TiXmlElement* config)
     joint.calibration.reset(new JointCalibration());
     if (!parseJointCalibration(*joint.calibration, calibration_xml))
     {
-      LOG4CXX_INFO(KrisLibrary::logger(),"Could not parse calibration element for joint  ["<< joint.name.c_str());
+      printf("Could not parse calibration element for joint  [%s] \n", joint.name.c_str());
       joint.calibration.reset();
       return false;
     }
@@ -497,7 +499,7 @@ bool parseJoint(Joint &joint, TiXmlElement* config)
     joint.mimic.reset(new JointMimic());
     if (!parseJointMimic(*joint.mimic, mimic_xml))
     {
-      LOG4CXX_INFO(KrisLibrary::logger(),"Could not parse mimic element for joint  ["<< joint.name.c_str());
+      printf("Could not parse mimic element for joint  [%s] \n", joint.name.c_str());
       joint.mimic.reset();
       return false;
     }
@@ -510,7 +512,7 @@ bool parseJoint(Joint &joint, TiXmlElement* config)
     joint.dynamics.reset(new JointDynamics());
     if (!parseJointDynamics(*joint.dynamics, prop_xml))
     {
-      LOG4CXX_INFO(KrisLibrary::logger(),"Could not parse joint_dynamics element for joint ["<< joint.name.c_str());
+      printf("Could not parse joint_dynamics element for joint [%s] \n", joint.name.c_str());
       joint.dynamics.reset();
       return false;
     }
@@ -599,7 +601,7 @@ bool exportJoint(Joint &joint, TiXmlElement* xml)
   else if (joint.type == urdf::Joint::FIXED)
     joint_xml->SetAttribute("type", "fixed");
   else
-    LOG4CXX_ERROR(KrisLibrary::logger(),"ERROR:  Joint ["<<joint.name.c_str()<<"] type ["<< joint.type);
+    printf("ERROR:  Joint [%s] type [%d] is not a defined type.\n",joint.name.c_str(), joint.type);
 
   // origin
   exportPose(joint.parent_to_joint_origin_transform, joint_xml);

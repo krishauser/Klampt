@@ -1,5 +1,3 @@
-#include <log4cxx/logger.h>
-#include <KrisLibrary/Logger.h>
 #include "Interface/SimulationGUI.h"
 #include "Control/TabulatedController.h"
 #include "Control/SerialControlledRobot.h"
@@ -72,11 +70,11 @@ inline RobotController* MakeController(Robot* robot,const char* file)
   TabulatedController* c = new TabulatedController(*robot);
   ifstream in(file,ios::in);
   if(!in) {
-        LOG4CXX_ERROR(KrisLibrary::logger(),"Unable to open policy file "<<file);
+    fprintf(stderr,"Unable to open policy file %s\n",file);
     exit(-1);
   }
   if(!c->Load(in)) {
-        LOG4CXX_ERROR(KrisLibrary::logger(),"Error loading policy from file "<<file);
+    fprintf(stderr,"Error loading policy from file %s\n",file);
     exit(-1);
   }
   return c;
@@ -96,12 +94,12 @@ inline void MakeDefaultSensors(Robot* robot,RobotSensors& sensors)
 int main(int argc, const char** argv)
 {  
   if(argc < 2) {
-    LOG4CXX_INFO(KrisLibrary::logger(),"USAGE: CartPole [options] [robot or world files]\n");
-    LOG4CXX_INFO(KrisLibrary::logger(),"OPTIONS: \n");
-    LOG4CXX_INFO(KrisLibrary::logger()," -cartpole: use swingup task (default on)\n");
-    LOG4CXX_INFO(KrisLibrary::logger()," -swingup: use swingup task (default off)\n");
-    LOG4CXX_INFO(KrisLibrary::logger()," -optimize: optimize policy for the robot (default on)\n");
-    LOG4CXX_INFO(KrisLibrary::logger()," -control: run a SerialControlledRobot using optimized policy (default off)\n");
+    printf("USAGE: CartPole [options] [robot or world files]\n");
+    printf("OPTIONS: \n");
+    printf(" -cartpole: use swingup task (default on)\n");
+    printf(" -swingup: use swingup task (default off)\n");
+    printf(" -optimize: optimize policy for the robot (default on)\n");
+    printf(" -control: run a SerialControlledRobot using optimized policy (default off)\n");
     return 0;
   }
   bool cartpole=true,swingup=false,optimize=true,control=false;
@@ -126,7 +124,7 @@ int main(int argc, const char** argv)
 	optimize=false;
       }
       else {
-	LOG4CXX_INFO(KrisLibrary::logger(),"Unknown option "<<argv[i]);
+	printf("Unknown option %s",argv[i]);
 	return 1;
       }
     }
@@ -141,21 +139,21 @@ int main(int argc, const char** argv)
 
   Robot* robot = world.robots[0];
   if(optimize) {
-    LOG4CXX_INFO(KrisLibrary::logger(),"Optimizing policy around setpoint "<<robot->q<<"..."<<"\n");
+    cout<<"Optimizing policy around setpoint "<<robot->q<<"..."<<endl;
     if(swingup)
       OptimizeSwingUp(*robot);
     else if(cartpole)
       OptimizeCartPole(*robot);
   }
   else if(control) {
-    LOG4CXX_INFO(KrisLibrary::logger(),"Starting serial controlled robot server on localhost:3456...\n");
+    printf("Starting serial controlled robot server on localhost:3456...\n");
     //start up a controller server
     SerialControlledRobot server("tcp://localhost:3456");
     server.klamptRobotModel = robot;
     server.klamptController = MakeController(robot,"swingup.policy"); 
     server.command.actuators.resize(robot->drivers.size());
     server.sensors = backend.sim.controlSimulators[0].sensors;
-    LOG4CXX_INFO(KrisLibrary::logger(),"Running forever (press Ctrl+C to quit)...\n");
+    printf("Running forever (press Ctrl+C to quit)...\n");
     server.Run();
   }
   return 0;

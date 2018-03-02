@@ -1,8 +1,6 @@
 #ifndef RESOURCE_BROWSER_PROGRAM_H
 #define RESOURCE_BROWSER_PROGRAM_H
 
-#include <log4cxx/logger.h>
-#include <KrisLibrary/Logger.h>
 #include "WorldViewProgram.h"
 #include "Modeling/Resources.h"
 #include "View/ViewResource.h"
@@ -111,11 +109,11 @@ inline bool LoadResources(const char* fn,ResourceLibrary& lib)
 {
   size_t origsize = lib.itemsByName.size();
   if(!lib.LoadAll(fn)) {
-        LOG4CXX_ERROR(KrisLibrary::logger(),"Warning, couldn't load library "<<fn);
+    fprintf(stderr,"Warning, couldn't load library %s\n",fn);
     return false;
   }
   else {
-    LOG4CXX_INFO(KrisLibrary::logger(),"Loaded "<<lib.itemsByName.size()-origsize<<" items from "<<fn);
+    printf("Loaded %d items from %s\n",lib.itemsByName.size()-origsize,fn);
     return true;
   }
 }
@@ -124,11 +122,11 @@ inline bool LoadResources(TiXmlElement* e,ResourceLibrary& lib)
 {
   size_t origsize = lib.itemsByName.size();
   if(!lib.Load(e)) {
-        LOG4CXX_ERROR(KrisLibrary::logger(),"Warning, couldn't load library from XML\n");
+    fprintf(stderr,"Warning, couldn't load library from XML\n");
     return false;
   }
   else {
-    LOG4CXX_INFO(KrisLibrary::logger(),"Loaded "<<lib.itemsByName.size()-origsize);
+    printf("Loaded %d items from XML\n",lib.itemsByName.size()-origsize);
     return true;
   }
 }
@@ -137,12 +135,12 @@ inline bool LoadItem(const char* fn,ResourceLibrary& lib)
 {
   ResourcePtr r=lib.LoadItem(fn);
   if(r) {
-    LOG4CXX_INFO(KrisLibrary::logger(),"Loaded "<<fn<<" as type "<<r->Type());
+    printf("Loaded %s as type %s\n",fn,r->Type());
     lib.Add(r);
     return true;
   }
   else {
-        LOG4CXX_ERROR(KrisLibrary::logger(),"Couldn't load resource file "<<fn);
+    fprintf(stderr,"Couldn't load resource file %s\n",fn);
     return false;
   }
 }
@@ -157,7 +155,7 @@ bool ResourceBrowserProgram::LoadCommandLine(int argc,char** argv)
 	i++;
       }
       else {
-	LOG4CXX_INFO(KrisLibrary::logger(),"Unknown option "<<argv[i]);
+	printf("Unknown option %s",argv[i]);
 	return 0;
       }
     }
@@ -166,17 +164,17 @@ bool ResourceBrowserProgram::LoadCommandLine(int argc,char** argv)
       if(0==strcmp(ext,"xml")) {
 	TiXmlDocument doc;
 	if(!doc.LoadFile(argv[i])) {
-	  LOG4CXX_ERROR(KrisLibrary::logger(),"Error loading XML file "<<argv[i]);
+	  printf("Error loading XML file %s\n",argv[i]);
 	  return false;
 	}
 	if(0 == strcmp(doc.RootElement()->Value(),"world")) {
 	  XmlWorld xmlWorld;
 	  if(!xmlWorld.Load(doc.RootElement(),GetFilePath(argv[i]))) {
-	    LOG4CXX_ERROR(KrisLibrary::logger(),"Error loading world file "<<argv[i]);
+	    printf("Error loading world file %s\n",argv[i]);
 	    return 0;
 	  }
 	  if(!xmlWorld.GetWorld(*world)) {
-	    LOG4CXX_ERROR(KrisLibrary::logger(),"Error loading world from "<<argv[i]);
+	    printf("Error loading world from %s\n",argv[i]);
 	    return 0;
 	  }
 	}
@@ -321,9 +319,9 @@ void ResourceBrowserProgram::SaveCur(const string& file)
     r->fileName = file;
 
   if(!r->Save()) 
-        LOG4CXX_ERROR(KrisLibrary::logger(),"Unable to save "<<r->name.c_str()<<" to "<<r->fileName.c_str());
+    fprintf(stderr,"Unable to save %s to %s\n",r->name.c_str(),r->fileName.c_str());
   else {
-    LOG4CXX_INFO(KrisLibrary::logger(),"Saved "<<r->name.c_str()<<" to "<<r->fileName.c_str());
+    printf("Saved %s to %s\n",r->name.c_str(),r->fileName.c_str());
   }
 }
 
@@ -332,11 +330,11 @@ void ResourceBrowserProgram::LoadNew(const string& file)
   size_t oldcount = resources.itemsByType.size();
   ResourcePtr r=resources.LoadItem(file);
   if(!r) {
-        LOG4CXX_ERROR(KrisLibrary::logger(),"Unable to load resource from  "<<file.c_str());
+    fprintf(stderr,"Unable to load resource from  %s\n",file.c_str());
     return;
   }
   else {
-    LOG4CXX_INFO(KrisLibrary::logger(),"Loaded "<<r->name.c_str()<<" from "<<file.c_str());
+    printf("Loaded %s from %s\n",r->name.c_str(),file.c_str());
   }
 
   if(resources.itemsByType.size() != oldcount) {
@@ -359,17 +357,17 @@ void ResourceBrowserProgram::SaveAll(const string& path)
   }
   resources.ChangeBaseDirectory(path);
   if(!resources.SaveAll()) 
-        LOG4CXX_ERROR(KrisLibrary::logger(),"Unable to save all resources to "<<path.c_str());
+    fprintf(stderr,"Unable to save all resources to %s\n",path.c_str());
   else
-        LOG4CXX_ERROR(KrisLibrary::logger(),"Saved all resources to "<<path.c_str());
+    fprintf(stderr,"Saved all resources to %s\n",path.c_str());
 }
 
 void ResourceBrowserProgram::LoadAll(const string& path)
 {
   if(!resources.LoadAll(path))
-        LOG4CXX_ERROR(KrisLibrary::logger(),"Error loading resources from "<<path.c_str());
+    fprintf(stderr,"Error loading resources from %s\n",path.c_str());
   else
-        LOG4CXX_ERROR(KrisLibrary::logger(),"Loaded all resources from "<<path.c_str());
+    fprintf(stderr,"Loaded all resources from %s\n",path.c_str());
   RefreshTypes();
   RefreshNames();
 }
@@ -468,7 +466,7 @@ void ResourceBrowserProgram::Handle_Control(int id)
   case RESOURCE_NAME_EDITBOX_ID:
     {
       CurrentResource()->name = resource_name;
-      LOG4CXX_INFO(KrisLibrary::logger(),"Updating name to "<<resource_name.c_str());
+      printf("Updating name to %s\n",resource_name.c_str());
       //TODO: update listbox
     }
     break;
@@ -489,12 +487,12 @@ void ResourceBrowserProgram::Handle_Control(int id)
       if(!r) return;
       ResourcePtr res;
       string type;
-      LOG4CXX_INFO(KrisLibrary::logger(),"To what type? > ");
+      cout<<"To what type? > ";
       cin >> type;
       cin.ignore(1024,'\n');
       res = CastResource(r,type.c_str());
       if(!res) {
-		LOG4CXX_ERROR(KrisLibrary::logger(),"Conversion failed\n");
+	fprintf(stderr,"Conversion failed\n");
 	return;
       }
       res->name = r->name;
@@ -508,7 +506,7 @@ void ResourceBrowserProgram::Handle_Control(int id)
       if(!r) return;
       vector<ResourcePtr> res;
       string type;
-      LOG4CXX_INFO(KrisLibrary::logger(),"To what type? > ");
+      cout<<"To what type? > ";
       cin >> type;
       cin.ignore(1024,'\n');
       //string type = resource_types[cur_resource_type];

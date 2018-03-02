@@ -1,5 +1,3 @@
-#include <log4cxx/logger.h>
-#include <KrisLibrary/Logger.h>
 #include "SimulationGUI.h"
 #include "Control/JointSensors.h"
 #include "Control/PathController.h"
@@ -62,17 +60,17 @@ bool SimGUIBackend::OnCommand(const string& cmd,const string& args)
   else if(cmd=="save_state") {
     File f;
     if(!f.Open((char *)args.c_str(),FILEWRITE)) {
-      LOG4CXX_WARN(KrisLibrary::logger(),"Warning, couldn't open file "<<args.c_str());
+      printf("Warning, couldn't open file %s\n",args.c_str());
     }
     else {
-      LOG4CXX_INFO(KrisLibrary::logger(),"Writing simulation state to "<<args.c_str());
+      printf("Writing simulation state to %s\n",args.c_str());
       sim.WriteState(f);
       f.Close();
     }
   }
   else if(cmd=="load_state") {
     if(!LoadState(args.c_str())) {
-            LOG4CXX_ERROR(KrisLibrary::logger(),"Couldn't load file "<<args.c_str());
+      fprintf(stderr,"Couldn't load file %s\n",args.c_str());
     }
   }
   else if(cmd=="connect_serial_controller") {
@@ -81,19 +79,19 @@ bool SimGUIBackend::OnCommand(const string& cmd,const string& args)
     Real rate;
     ss>>robot>>port>>rate;
     if(!ss) {
-            LOG4CXX_ERROR(KrisLibrary::logger(),"Couldn't parse arguments to connect_serial_controller\n");
+      fprintf(stderr,"Couldn't parse arguments to connect_serial_controller\n");
       return false;
     }
     if(robot < 0 || robot >= (int)world->robots.size()) {
-            LOG4CXX_ERROR(KrisLibrary::logger(),"Invalid robot argument to connect_serial_controller\n");
+      fprintf(stderr,"Invalid robot argument to connect_serial_controller\n");
       return false;
     }
     if(port < 0 || port > 0xffff) {
-            LOG4CXX_ERROR(KrisLibrary::logger(),"Invalid port argument to connect_serial_controller\n");
+      fprintf(stderr,"Invalid port argument to connect_serial_controller\n");
       return false;
     }
     if(rate <= 0 || rate > 1000) {
-            LOG4CXX_ERROR(KrisLibrary::logger(),"Invalid rate argument to connect_serial_controller\n");
+      fprintf(stderr,"Invalid rate argument to connect_serial_controller\n");
       return false;
     }
     ConnectSerialController(robot,port,rate);
@@ -104,10 +102,10 @@ bool SimGUIBackend::OnCommand(const string& cmd,const string& args)
     string prefix;
     ss >> prefix;
     if(ss) {
-            if(!OutputROS(prefix.c_str())) { LOG4CXX_ERROR(KrisLibrary::logger(),"Error starting ROS output\n"); }
+      if(!OutputROS(prefix.c_str())) { fprintf(stderr,"Error starting ROS output\n"); }
     }
     else {
-            if(!OutputROS()) { LOG4CXX_ERROR(KrisLibrary::logger(),"Error starting ROS output\n"); }
+      if(!OutputROS()) { fprintf(stderr,"Error starting ROS output\n"); }
     }
     return true;
   }
@@ -177,7 +175,7 @@ void SimGUIBackend::InitSim()
 void SimGUIBackend::ResetSim()
 {
   if(!sim.ReadState(initialState)) {
-        LOG4CXX_ERROR(KrisLibrary::logger(),"Warning, ReadState doesn't work\n");
+    fprintf(stderr,"Warning, ReadState doesn't work\n");
   }
   inContact.clear();
 }
@@ -219,7 +217,7 @@ bool SimGUIBackend::LoadAndInitSim(int argc,const char** argv)
 	i++;
       }
       else {
-	LOG4CXX_INFO(KrisLibrary::logger(),"Unknown option "<<argv[i]);
+	printf("Unknown option %s",argv[i]);
 	return false;
       }
     }
@@ -227,11 +225,11 @@ bool SimGUIBackend::LoadAndInitSim(int argc,const char** argv)
       const char* ext=FileExtension(argv[i]);
       if(0==strcmp(ext,"xml")) {
 	if(!xmlWorld.Load(argv[i])) {
-	  LOG4CXX_ERROR(KrisLibrary::logger(),"Error loading world file "<<argv[i]);
+	  printf("Error loading world file %s\n",argv[i]);
 	  return false;
 	}
 	if(!xmlWorld.GetWorld(*world)) {
-	  LOG4CXX_ERROR(KrisLibrary::logger(),"Error loading world from "<<argv[i]);
+	  printf("Error loading world from %s\n",argv[i]);
 	  return false;
 	}
       }
@@ -244,17 +242,17 @@ bool SimGUIBackend::LoadAndInitSim(int argc,const char** argv)
   }
 
   if(configs.size() > world->robots.size()) {
-    LOG4CXX_WARN(KrisLibrary::logger(),"Warning, too many configs specified\n");
+    printf("Warning, too many configs specified\n");
   }
   for(size_t i=0;i<configs.size();i++) {
     if(i >= world->robots.size()) break;
     ifstream in(configs[i].c_str(),ios::in);
-    if(!in) LOG4CXX_INFO(KrisLibrary::logger(),"Could not open config file "<<configs[i].c_str());
+    if(!in) printf("Could not open config file %s\n",configs[i].c_str());
     Vector temp;
     in >> temp;
-    if(!in) LOG4CXX_ERROR(KrisLibrary::logger(),"Error reading config file "<<configs[i].c_str());
+    if(!in) printf("Error reading config file %s\n",configs[i].c_str());
     if(temp.n != (int)world->robots[i]->links.size()) {
-      LOG4CXX_INFO(KrisLibrary::logger(),"Incorrect number of DOFs in config "<<i);
+      printf("Incorrect number of DOFs in config %d\n",i);
       continue;
     }
     world->robots[i]->UpdateConfig(temp);
@@ -267,10 +265,10 @@ bool SimGUIBackend::LoadAndInitSim(int argc,const char** argv)
   if(xmlWorld.elem) {
     TiXmlElement* e=xmlWorld.GetElement("simulation");
     if(e) {
-      LOG4CXX_INFO(KrisLibrary::logger(),"Reading simulation settings...\n");
+      printf("Reading simulation settings...\n");
       XmlSimulationSettings s(e);
       if(!s.GetSettings(sim)) {
-		LOG4CXX_ERROR(KrisLibrary::logger(),"Warning, simulation settings not read correctly\n");
+	fprintf(stderr,"Warning, simulation settings not read correctly\n");
       }
     }
   }
@@ -279,13 +277,13 @@ bool SimGUIBackend::LoadAndInitSim(int argc,const char** argv)
     const char* ext=FileExtension(paths[0].c_str());
     if(0 == strcmp(ext,"xml")) {
       if(!LoadMultiPath(paths[0].c_str())) {
-		LOG4CXX_ERROR(KrisLibrary::logger(),"Couldn't load MultiPath file "<<paths[0].c_str());
+	fprintf(stderr,"Couldn't load MultiPath file %s\n",paths[0].c_str());
 	return false;
       }
     }
     else {
       if(!LoadLinearPath(paths[0].c_str())) {
-		LOG4CXX_ERROR(KrisLibrary::logger(),"Couldn't load linear path file "<<paths[0].c_str());
+	fprintf(stderr,"Couldn't load linear path file %s\n",paths[0].c_str());
 	return false;
       }
     }
@@ -295,7 +293,7 @@ bool SimGUIBackend::LoadAndInitSim(int argc,const char** argv)
 
   if(!milestones.empty()) {
     if(!LoadMilestones(milestones[0].c_str())) {
-            LOG4CXX_ERROR(KrisLibrary::logger(),"Couldn't load milestone file "<<milestones[0].c_str());
+      fprintf(stderr,"Couldn't load milestone file %s\n",milestones[0].c_str());
       return false;
     }
     //TODO: set initial sim state from start of path?
@@ -304,13 +302,13 @@ bool SimGUIBackend::LoadAndInitSim(int argc,const char** argv)
 
   if(!states.empty()) {
     if(!LoadState(states[0].c_str())) {
-            LOG4CXX_ERROR(KrisLibrary::logger(),"Couldn't load file "<<states[0].c_str());
+      fprintf(stderr,"Couldn't load file %s\n",states[0].c_str());
       return false;
     }
   }
 
   sim.WriteState(initialState);
-  LOG4CXX_INFO(KrisLibrary::logger(),"Simulation initial state: "<<initialState.length());
+  printf("Simulation initial state: %d bytes\n",initialState.length());
   return true;
 }
 
@@ -509,7 +507,7 @@ bool SimGUIBackend::LoadFile(const char* fn)
 	  Geometry::AnyGeometry3D::CanLoadExt(ext)) {
     int res = world->LoadElement(fn);
     if(res<0) {
-      LOG4CXX_ERROR(KrisLibrary::logger(),"SimGUIBackend::LoadFile: Error loading entity "<<fn);
+      printf("SimGUIBackend::LoadFile: Error loading entity %s\n",fn);
       return false;
     }
     sim.OnAddModel();
@@ -518,7 +516,7 @@ bool SimGUIBackend::LoadFile(const char* fn)
     return true;
   }
   else {
-    LOG4CXX_INFO(KrisLibrary::logger(),"SimGUIBackend::LoadFile: Unknown file extension on "<<fn);
+    printf("SimGUIBackend::LoadFile: Unknown file extension on %s\n",fn);
     return false;
   }
 }
@@ -533,7 +531,7 @@ bool SimGUIBackend::LoadPath(const char* fn)
   else if(0==strcmp(ext,"xml"))
     return LoadMultiPath(fn);
   else {
-    LOG4CXX_INFO(KrisLibrary::logger(),"SimGUIBackend::LoadPath: Unknown file extension on "<<fn);
+    printf("SimGUIBackend::LoadPath: Unknown file extension on %s\n",fn);
     return false;
   }
 }
@@ -544,7 +542,7 @@ bool SimGUIBackend::LoadMilestones(const char* fn)
   vector<Vector> dmilestones;
   ifstream in(fn,ios::in);
   if(!in) {
-    LOG4CXX_WARN(KrisLibrary::logger(),"Warning, couldn't open file "<<fn);
+    printf("Warning, couldn't open file %s\n",fn);
     return false;
   }
   Vector x,dx;
@@ -557,26 +555,26 @@ bool SimGUIBackend::LoadMilestones(const char* fn)
     }
   }
   if(in.bad()) {
-    LOG4CXX_ERROR(KrisLibrary::logger(),"Error during read of file "<<fn);
+    printf("Error during read of file %s\n",fn);
     return false;
   }
   in.close();
     
   Assert(sim.robotControllers.size()>=1);
   if(sim.robotControllers.size()>1)
-    LOG4CXX_WARN(KrisLibrary::logger(),"Warning, sending path to robot 0 by default\n");
+    printf("Warning, sending path to robot 0 by default\n");
   for(size_t i=0;i<milestones.size();i++) {
     stringstream ss;
     ss<<milestones[i]<<"\t"<<dmilestones[i];
     if(i==0) {
       if(!sim.robotControllers[0]->SendCommand("set_qv",ss.str())) {
-		LOG4CXX_ERROR(KrisLibrary::logger(),"set_qv command does not work with the robot's controller\n");
+	fprintf(stderr,"set_qv command does not work with the robot's controller\n");
 	return false;
       }
     }
     else {
       if(!sim.robotControllers[0]->SendCommand("append_qv",ss.str())) {
-		LOG4CXX_ERROR(KrisLibrary::logger(),"append_qv command does not work with the robot's controller\n");
+	fprintf(stderr,"append_qv command does not work with the robot's controller\n");
 	return false;
       }
     }
@@ -597,18 +595,18 @@ bool SimGUIBackend::LoadState(const char* fn)
   sim.WriteState(curState);
   File f;
   if(!f.Open((char *)fn,FILEREAD)) {
-    LOG4CXX_WARN(KrisLibrary::logger(),"Warning, couldn't open file "<<fn);
+    printf("Warning, couldn't open file %s\n",fn);
     return false;
   }
   else {
     if(!sim.ReadState(f)) {
-      LOG4CXX_WARN(KrisLibrary::logger(),"Warning, couldn't read state from "<<fn);
+      printf("Warning, couldn't read state from %s\n",fn);
       sim.ReadState(curState);
       f.Close();
       return false;
     }
     else
-      LOG4CXX_INFO(KrisLibrary::logger(),"Loaded simulation state from "<<fn);
+      printf("Loaded simulation state from %s\n",fn);
     f.Close();
   }
   return true;
@@ -617,13 +615,13 @@ bool SimGUIBackend::LoadState(const char* fn)
 bool SimGUIBackend::LoadMultiPath(const char* fn,bool constrainedInterpolate,Real interpolateTolerance,Real durationScale)
 {
   if(world->robots.size()==0) {
-        LOG4CXX_ERROR(KrisLibrary::logger(),"Cannot match path to a robot, no robots in world\n");
+    fprintf(stderr,"Cannot match path to a robot, no robots in world\n");
     return false;
   }
   //load and convert MultiPath
   MultiPath path;
   if(!path.Load(fn)) {
-        LOG4CXX_ERROR(KrisLibrary::logger(),"Unable to load file "<<fn);
+    fprintf(stderr,"Unable to load file %s\n",fn);
     return false;
   }
   bool timed = path.HasTiming();
@@ -631,9 +629,9 @@ bool SimGUIBackend::LoadMultiPath(const char* fn,bool constrainedInterpolate,Rea
   if(!path.HasConstraints()) constrainedInterpolate = false;
   if(!timed && timeOptimizePath) {
     //this function both discretizes and optimizes at once
-    LOG4CXX_INFO(KrisLibrary::logger(),"Discretizing MultiPath by resolution "<<interpolateTolerance<<" and time-optimizing with res "<<0.05);
+    printf("Discretizing MultiPath by resolution %g and time-optimizing with res %g\n",interpolateTolerance,0.05);
     if(!GenerateAndTimeOptimizeMultiPath(*world->robots[0],path,interpolateTolerance,0.05)) {
-      LOG4CXX_INFO(KrisLibrary::logger(),"   failed!\n");
+      printf("   failed!\n");
       return false;
     }
     if(durationScale != 1.0) {
@@ -643,28 +641,28 @@ bool SimGUIBackend::LoadMultiPath(const char* fn,bool constrainedInterpolate,Rea
   else {
     if(constrainedInterpolate) {
       MultiPath dpath;
-      LOG4CXX_INFO(KrisLibrary::logger(),"Discretizing MultiPath by resolution "<<interpolateTolerance);
+      printf("Discretizing MultiPath by resolution %g\n",interpolateTolerance);
       if(!DiscretizeConstrainedMultiPath(*world->robots[0],path,dpath,interpolateTolerance)) {
-	LOG4CXX_INFO(KrisLibrary::logger(),"   failed!\n");
+	printf("   failed!\n");
 	return false;
       }
       dpath.SetDuration(dpath.Duration());
       path = dpath;
     }
     if(!timed) {
-      //LOG4CXX_INFO(KrisLibrary::logger(),"Assigning times to MultiPath via smooth timing, duration "<<path.sections.size()*durationScale);
+      //printf("Assigning times to MultiPath via smooth timing, duration %g\n",path.sections.size()*durationScale);
       //path.SetSmoothTiming(path.sections.size()*durationScale,false);
-      LOG4CXX_INFO(KrisLibrary::logger(),"Assigning times to MultiPath via linear timing, duration "<<path.Duration()*durationScale);
+      printf("Assigning times to MultiPath via linear timing, duration %g\n",path.Duration()*durationScale);
       path.SetDuration(path.Duration()*durationScale);
     }
     else 
-      LOG4CXX_INFO(KrisLibrary::logger(),"Using existing timing in MultiPath, duration "<<path.Duration());
+      printf("Using existing timing in MultiPath, duration %g\n",path.Duration());
   }
 
   if(path.HasVelocity()) {
-    LOG4CXX_INFO(KrisLibrary::logger(),"Path has velocity, doing smooth interpolation\n");
+    printf("Path has velocity, doing smooth interpolation\n");
     //hermite interpolators
-    LOG4CXX_INFO(KrisLibrary::logger(),"Path time range ["<<path.StartTime()<<","<<path.EndTime());
+    printf("Path time range [%g,%g]\n",path.StartTime(),path.EndTime());
     bool first=true;
     for(size_t i=0;i<path.sections.size();i++) {
       if(path.HasTiming(i)) {
@@ -673,14 +671,14 @@ bool SimGUIBackend::LoadMultiPath(const char* fn,bool constrainedInterpolate,Rea
 	  ss<<path.sections[i].times[j]<<"\t"<<path.sections[i].milestones[j]<<"\t"<<path.sections[i].velocities[j];
 	  if(first) {
 	    if(!sim.robotControllers[0]->SendCommand("set_tqv",ss.str())) { 
-	      	      LOG4CXX_ERROR(KrisLibrary::logger(),"set_tqv command failed or does not work with the robot's controller\n");
+	      fprintf(stderr,"set_tqv command failed or does not work with the robot's controller\n");
 	      return false;
 	    }
 	    first = false;
 	  }
 	  else {
 	    if(!sim.robotControllers[0]->SendCommand("append_tqv",ss.str())) { 
-	      	      LOG4CXX_ERROR(KrisLibrary::logger(),"append_tqv command failed or does not work with the robot's controller\n");
+	      fprintf(stderr,"append_tqv command failed or does not work with the robot's controller\n");
 	      return false;
 	    }
 	  }
@@ -692,14 +690,14 @@ bool SimGUIBackend::LoadMultiPath(const char* fn,bool constrainedInterpolate,Rea
 	  ss<<path.sections[i].milestones[j]<<"\t"<<path.sections[i].velocities[j];
 	  if(first) {
 	    if(!sim.robotControllers[0]->SendCommand("set_qv",ss.str())) { 
-	      	      LOG4CXX_ERROR(KrisLibrary::logger(),"set_qv command failed or does not work with the robot's controller\n");
+	      fprintf(stderr,"set_qv command failed or does not work with the robot's controller\n");
 	      return false;
 	    }
 	    first = false;
 	  }
 	  else {
 	    if(!sim.robotControllers[0]->SendCommand("append_qv",ss.str())) { 
-	      	      LOG4CXX_ERROR(KrisLibrary::logger(),"append_qv command failed or does not work with the robot's controller\n");
+	      fprintf(stderr,"append_qv command failed or does not work with the robot's controller\n");
 	      return false;
 	    }
 	  }
@@ -709,7 +707,7 @@ bool SimGUIBackend::LoadMultiPath(const char* fn,bool constrainedInterpolate,Rea
     return true;
   }
   else {
-    LOG4CXX_INFO(KrisLibrary::logger(),"No velocity in path, using piecewise linear evaluation\n");
+    printf("No velocity in path, using piecewise linear evaluation\n");
     vector<Real> times,stimes;
     vector<Vector> milestones,smilestones;  
     for(size_t i=0;i<path.sections.size();i++) {
@@ -722,7 +720,7 @@ bool SimGUIBackend::LoadMultiPath(const char* fn,bool constrainedInterpolate,Rea
       times.insert(times.end(),stimes.begin()+ofs,stimes.end());
       milestones.insert(milestones.end(),smilestones.begin()+ofs,smilestones.end());
     }
-    LOG4CXX_INFO(KrisLibrary::logger(),"Path time range ["<<times.front()<<","<<times.back());
+    printf("Path time range [%g,%g]\n",times.front(),times.back());
     return SendLinearPath(times,milestones);
   }
 }
@@ -734,7 +732,7 @@ bool SimGUIBackend::LoadLinearPath(const char* fn)
   vector<Vector> milestones;
   ifstream in(fn,ios::in);
   if(!in) {
-    LOG4CXX_WARN(KrisLibrary::logger(),"Warning, couldn't open file "<<fn);
+    printf("Warning, couldn't open file %s\n",fn);
     return false;
   }
   Real t;
@@ -747,7 +745,7 @@ bool SimGUIBackend::LoadLinearPath(const char* fn)
     }
   }
   if(in.bad()) {
-    LOG4CXX_ERROR(KrisLibrary::logger(),"Error during read of file "<<fn);
+    printf("Error during read of file %s\n",fn);
     return false;
   }
   in.close();
@@ -759,8 +757,8 @@ bool SimGUIBackend::SendLinearPath(const vector<Real>& times,const vector<Config
 {
   Assert(sim.robotControllers.size()>=1);
   if(sim.robotControllers.size()>1)
-    LOG4CXX_WARN(KrisLibrary::logger(),"Warning, sending path to robot 0 by default\n");
-  //if(sim.time > 0) LOG4CXX_INFO(KrisLibrary::logger(),"SendLinearPath: simulation time offset "<<sim.time);
+    printf("Warning, sending path to robot 0 by default\n");
+  //if(sim.time > 0) printf("SendLinearPath: simulation time offset %g\n",sim.time);
   for(size_t i=0;i<milestones.size();i++) {
     stringstream ss;
     ss<<fixed<<setprecision(5);
@@ -768,13 +766,13 @@ bool SimGUIBackend::SendLinearPath(const vector<Real>& times,const vector<Config
     ss<<sim.time+pathDelay+times[i]<<"\t"<<milestones[i];
     if(i==0) {
       if(!sim.robotControllers[0]->SendCommand("set_tq",ss.str())) {
-		LOG4CXX_ERROR(KrisLibrary::logger(),"set_tq command failed or does not work with the robot's controller\n");
+	fprintf(stderr,"set_tq command failed or does not work with the robot's controller\n");
 	return false;
       }
     }
     else {
       if(!sim.robotControllers[0]->SendCommand("append_tq",ss.str())) {
-		LOG4CXX_ERROR(KrisLibrary::logger(),"append_tq command failed or does not work with the robot's controller\n");
+	fprintf(stderr,"append_tq command failed or does not work with the robot's controller\n");
 	return false;
       }
     }
@@ -791,7 +789,7 @@ bool SimGUIBackend::OutputROS(const char* prefix)
     for(size_t j=0;j<sim.controlSimulators[i].sensors.sensors.size();j++) {
       SensorBase* s = sim.controlSimulators[i].sensors.sensors[j];
       if(!ROSPublishSensorMeasurement(s,*world->robots[i],(string(prefix)+"/"+world->robots[i]->name+"/"+s->name).c_str())) {
-        LOG4CXX_INFO(KrisLibrary::logger(),"OutputROS: Couldn't publish sensor "<<s->name.c_str());
+        printf("OutputROS: Couldn't publish sensor %s\n",s->name.c_str());
         return false;
       }
     }
@@ -804,7 +802,7 @@ void SimGUIBackend::DoLogging(const char* fn)
 {
   ofstream out(fn,ios::app);
   if(out.tellp()==std::streamoff(0)) {
-    LOG4CXX_INFO(KrisLibrary::logger(),"Saving simulation state to "<<fn<<"\n");
+    cout<<"Saving simulation state to "<<fn<<endl;
     out<<"time,";
     for(size_t i=0;i<world->robots.size();i++) {
       out<<world->robots[i]->name<<"_cmx,";
@@ -912,7 +910,7 @@ void SimGUIBackend::DoContactStateLogging(const char* fn)
 {
   ofstream out(fn,ios::app);
   if(out.tellp()==std::streamoff(0)) {
-    LOG4CXX_INFO(KrisLibrary::logger(),"Saving simulation contact state to "<<fn<<"\n");
+    cout<<"Saving simulation contact state to "<<fn<<endl;
     out<<"time,body1,body2,contact"<<endl;
   }
   for(WorldSimulation::ContactFeedbackMap::iterator i=sim.contactFeedback.begin();i!=sim.contactFeedback.end();i++) {
@@ -951,7 +949,7 @@ void SimGUIBackend::DoContactWrenchLogging(const char* fn)
 {
   ofstream out(fn,ios::app);
   if(out.tellp()==std::streamoff(0)) {
-    LOG4CXX_INFO(KrisLibrary::logger(),"Saving simulation contact wrenches to "<<fn<<"\n");
+    cout<<"Saving simulation contact wrenches to "<<fn<<endl;
     out<<"time,body1,body2,cop x,cop y,cop z,fx,fy,fz,tx,ty,tz"<<endl;
   }
   for(WorldSimulation::ContactFeedbackMap::iterator i=sim.contactFeedback.begin();i!=sim.contactFeedback.end();i++) {

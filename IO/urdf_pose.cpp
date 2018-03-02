@@ -35,8 +35,6 @@
 /* Author: Wim Meeussen, John Hsu */
 
 
-#include <log4cxx/logger.h>
-#include <KrisLibrary/Logger.h>
 #include "urdf_pose.h"
 #include <fstream>
 #include <sstream>
@@ -100,7 +98,7 @@ bool parsePose(Pose &pose, TiXmlElement* xml)
         pose.position.init(xyz_str);
       }
       catch (ParseError &e) {
-	LOG4CXX_INFO(KrisLibrary::logger(),e.what() << "\n");
+	std::cout <<e.what() << std::endl;
         return false;
       }
     }
@@ -112,7 +110,7 @@ bool parsePose(Pose &pose, TiXmlElement* xml)
         pose.rotation.init(rpy_str);
       }
       catch (ParseError &e) {
-	LOG4CXX_INFO(KrisLibrary::logger(),e.what()<<"\n");
+	std::cout<<e.what()<<std::endl;
         return false;
       }
     }
