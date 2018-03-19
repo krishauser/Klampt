@@ -151,7 +151,7 @@ bool ODERigidObject::WriteState(File& f) const
   const dReal* pos=dBodyGetPosition(bodyID);
   const dReal* q=dBodyGetQuaternion(bodyID);
   GetVelocity(w,v);
-  //do we need this?
+  //do we need this? (yes)
   const dReal* frc=dBodyGetForce(bodyID);
   const dReal* trq=dBodyGetTorque(bodyID);
     
