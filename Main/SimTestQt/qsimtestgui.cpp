@@ -13,7 +13,7 @@ QSimTestGUI::QSimTestGUI(QKlamptDisplay* _display,SimTestBackend *_backend) :
   assert(sim != NULL);
   assert(sim->world != NULL);
 
-  driver_tool=new DriverEdit(sim->world);
+  driver_tool=new DriverEdit(sim->world,sim);
   connect(driver_tool,SIGNAL(SetDriverValue(int,float)),this,SLOT(SendDriverValue(int,float)));
   //driver_tool->show();
 
