@@ -519,6 +519,28 @@ void ODESimulator::Step(Real dt)
   		Real validTime = -lastStateTimestep, desiredTime = 0;
       bool didAnyRollback = false;
   		bool didRollback = false;
+      vector<Vector3> initialforces;
+      vector<Vector3> initialtorques;
+      ///cache applied forces
+      for(size_t i=0;i<robots.size();i++)
+        for(size_t j=0;j<robots[i]->robot.links.size();j++) {
+          dBodyID obj = robots[i]->body(j);
+          if(obj) {
+            const dReal* frc=dBodyGetForce(obj);
+            const dReal* trq=dBodyGetTorque(obj);
+            initialforces.push_back(Vector3(frc));
+            initialtorques.push_back(Vector3(trq));
+          }
+        }
+      for(size_t i=0;i<objects.size();i++) {
+        dBodyID obj = objects[i]->body();
+        if(obj) {
+          const dReal* frc=dBodyGetForce(obj);
+          const dReal* trq=dBodyGetTorque(obj);
+          initialforces.push_back(Vector3(frc));
+          initialtorques.push_back(Vector3(trq));
+        }
+      }
   		while(true) {
   		  DetectCollisions();
   	#if DO_TIMING
@@ -662,8 +684,33 @@ void ODESimulator::Step(Real dt)
                 printf("ODESimulation: collision %s - %s changed from depth %g to depth %g\n",ObjectName(concernedObjects[i].first).c_str(),ObjectName(concernedObjects[i].second).c_str(),lastMarginsRemaining[concernedObjects[i]],d);
             }
           }
-          if(didRollback)
+          if(didRollback) {
             printf("ODESimulation: Adaptive sub-step of size %g is valid, arriving at time %g.\n",timestep,simTime);
+            //now restore prior forces applied to all objects
+            int k=0;
+            for(size_t i=0;i<robots.size();i++) {
+              for(size_t j=0;j<robots[i]->robot.links.size();j++) {
+                dBodyID obj = robots[i]->body(j);
+                if(obj) {
+                  const Vector3& f=initialforces[k];
+                  const Vector3& t=initialtorques[k];
+                  dBodySetForce(obj,f.x,f.y,f.z);
+                  dBodySetTorque(obj,t.x,t.y,t.z);
+                  k++;
+                }
+              }
+            }
+            for(size_t i=0;i<objects.size();i++) {
+              dBodyID obj = objects[i]->body();
+              if(obj) {
+                const Vector3& f=initialforces[k];
+                const Vector3& t=initialtorques[k];
+                dBodySetForce(obj,f.x,f.y,f.z);
+                dBodySetTorque(obj,t.x,t.y,t.z);
+                k++;
+              }
+            }
+          }
           //if(didRollback) {
           //  PrintStatus(this,concernedObjects,"Colliding objects","now at");
           //}
@@ -1885,13 +1932,13 @@ bool ODESimulator::ReadState_Internal(File& f)
 
   for(size_t i=0;i<robots.size();i++) {
     if(!robots[i]->ReadState(f)) {
-      fprintf(stderr,"ODESimulator::ReadState(): failed to read robot %d\n",i);
+      fprintf(stderr,"ODESimulator::ReadState(): failed to read robot %d\n",(int)i);
       return false;
     }
   }
   for(size_t i=0;i<objects.size();i++) {
     if(!objects[i]->ReadState(f)) {
-      fprintf(stderr,"ODESimulator::ReadState(): failed to read object %d\n",i);
+      fprintf(stderr,"ODESimulator::ReadState(): failed to read object %d\n",(int)i);
       return false;
     }
   }
