@@ -480,7 +480,7 @@ class WorldCollider:
         if object2 is None:
             #test all terrains
             for o in xrange(len(self.rigidObjects)):
-                for c in self.objectObjectCollisions(objectot):
+                for c in self.objectObjectCollisions(object):
                     yield c
             return
         oindex = self.rigidObjects[object]
