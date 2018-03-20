@@ -2578,6 +2578,9 @@ if _PyQtAvailable:
             for p in self.glwidget.program.plugins:
                 if hasattr(p,'sim'):
                     return p.sim
+                elif isinstance(p,VisualizationPlugin):
+                    sim = p.items.get('sim',None)
+                    if sim != None: return sim.item
             return None
         def save_camera(self):
             if not hasattr(self.glwidget.program,'get_view'):
