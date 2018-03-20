@@ -476,11 +476,11 @@ class WorldCollider:
         if isinstance(object,RigidObjectModel):
             object = object.index
         if isinstance(object2,RigidObjectModel):
-            object2 = object.index
+            object2 = object2.index
         if object2 is None:
             #test all terrains
             for o in xrange(len(self.rigidObjects)):
-                for c in self.objectObjectCollisions(objectot):
+                for c in self.objectObjectCollisions(object):
                     yield c
             return
         oindex = self.rigidObjects[object]
