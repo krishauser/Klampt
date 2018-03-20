@@ -36,6 +36,7 @@ void ControlledRobotSimulator::Init(Robot* _robot,ODERobot* _oderobot,RobotContr
 void ControlledRobotSimulator::GetCommandedConfig(Config& q)
 {
   Assert(command.actuators.size() == robot->drivers.size());
+  robot->q.set(0.0);
   bool warned=false;
   for(size_t i=0;i<command.actuators.size();i++) {
     RobotJointDriver& d=robot->drivers[i];
@@ -45,7 +46,7 @@ void ControlledRobotSimulator::GetCommandedConfig(Config& q)
       if(!warned)
         fprintf(stderr,"ControlledRobotSimulator::GetCommandedConfig: Can't get commanded config for non-PID drivers\n");
       warned = true;
-      robot->SetDriverValue(i,0.0);
+      //robot->SetDriverValue(i,0.0);
     }
   }
   q = robot->q;
@@ -54,6 +55,7 @@ void ControlledRobotSimulator::GetCommandedConfig(Config& q)
 void ControlledRobotSimulator::GetCommandedVelocity(Config& dq)
 {
   Assert(command.actuators.size() == robot->drivers.size());
+  robot->dq.set(0.0);
   bool warned=false;
   for(size_t i=0;i<command.actuators.size();i++) {
     RobotJointDriver& d=robot->drivers[i];
@@ -63,7 +65,7 @@ void ControlledRobotSimulator::GetCommandedVelocity(Config& dq)
       if(!warned)
         fprintf(stderr,"ControlledRobotSimulator::GetCommandedVelocity: Can't get commanded velocity for non-PID drivers\n");
       warned = true;
-      robot->SetDriverVelocity(i,0.0);
+      //robot->SetDriverVelocity(i,0.0);
     }
   }
   dq = robot->dq;
