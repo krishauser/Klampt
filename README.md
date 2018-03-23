@@ -1,6 +1,6 @@
 # Klamp't [![Build Status](https://travis-ci.org/krishauser/Klampt.svg?branch=master)](https://travis-ci.org/arocchi/Klampt)
 
-![Klamp't image][Documentation/images/klampt-image.jpg]
+![Klamp't image](Documentation/images/klampt-image.jpg)
 
 A robot simulation, planning, and control package maintained at Duke University.
 
