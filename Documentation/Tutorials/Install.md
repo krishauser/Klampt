@@ -1,4 +1,4 @@
-#Klamp't Tutorial: Installation
+# Klamp't Tutorial: Installation
 
 In this tutorial we learn how to install Klamp't, step by step.
 
@@ -7,7 +7,7 @@ Difficulty: easy
 Time: 10-30 minutes
 
 
-##Linux, from binaries
+## Linux, from binaries
 
 Compiled binary packages are available for the following systems:
 
@@ -18,7 +18,7 @@ To compile your own programs, you will need the same dependencies as compiling f
 Linux x86, 64-bit Debian package for KrisLibrary dependency
 
 
-##Linux, from source
+## Linux, from source
 
 The following commands will install Klamp't onto your system from source.
 
@@ -80,7 +80,7 @@ Or run a simulation from the Python API:
     python kbdrive.py ../../data/tx90roll.xml
 ```
 
-#Windows, from binaries
+# Windows, from binaries
 
 To run apps and obtain the C++ include/static library files:
 
@@ -101,7 +101,7 @@ Note: if you see errors that read "glut32.dll not found", you should copy the gl
 
 Note: when using the Python API, if you see an error that reads "NoneType not callable", then your version of PyOpenGL was built with freeglut, but its DLL was not shipped with the PyOpenGL distributable. To install the DLL, grab the binaries from the freeglut downloads page and install the 32-bit version into the Windows\SysWOW64 folder, and the 64-bit version into your Windows\System folder.
 
-#Windows, from source
+# Windows, from source
 
 1. Install CMake.
 2. Visit https://github.com/krishauser/Klampt and click "Clone on Desktop". Follow the on-screen instructions to download Git, if necesary, and clone the Klamp't Git repository.
@@ -112,7 +112,7 @@ Note: when using the Python API, if you see an error that reads "NoneType not ca
 6. Build the "Klampt", "apps", and "examples" projects in Visual Studio.
 7. To build the Python bindings, you must copy the Windows Python setup.py into your Klampt/Python folder and edit it to reflect the paths in your distribution. Then run the Visual Studio Command prompt as an administrator and navigate to Klampt/Python. If you are using VS 2012, you must first enter "set VS90COMNTOOLS=%VS110COMNTOOLS%" and with VS 2015 you must first enter "set VS90COMNTOOLS=%VS140COMNTOOLS%". Then, run "python setup.py install".
 
-#Mac OSX, from source
+# Mac OSX, from source
 
 1. You will need to install the Xcode Command Line Tools. To see if they are installed, run
 ```
