@@ -6,11 +6,11 @@ Difficulty: easy
 
 Time: 10-30 minutes
 
-[Linux, from binaries](#linux-from-binaries)
-[Linux, from source](#linux-from-source)
-[Windows, from binaries](#windows-from-binaries)
-[Windows, from source](#windows-from-source)
-[Mac OSX, from source](#mac-osx-from-source)
+- [Linux, from binaries](#linux-from-binaries)
+- [Linux, from source](#linux-from-source)
+- [Windows, from binaries](#windows-from-binaries)
+- [Windows, from source](#windows-from-source)
+- [Mac OSX, from source](#mac-osx-from-source)
 
 
 ## Linux, from binaries
