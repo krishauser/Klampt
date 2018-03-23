@@ -1,5 +1,7 @@
 # Klamp't [![Build Status](https://travis-ci.org/krishauser/Klampt.svg?branch=master)](https://travis-ci.org/arocchi/Klampt)
 
+![Klamp't image][Documentation/images/klampt-image.jpg]
+
 A robot simulation, planning, and control package maintained at Duke University.
 
 More information can be found on the website:
@@ -16,7 +18,7 @@ You can also use Docker [as described here](Documentation/Install-Docker.md)
 
 ## Tutorials 
 
-Tutorials are available on the [Klamp't website](http://klampt.org).  We are in the process of updating these to Markdown so they can be browsed on Github.
+Some tutorials are available in the [Tutorials folder](Documentation/Tutorials) and on the [Klamp't website](http://klampt.org).  (Stay tuned... we are in the process of updating the HTML tutorials to Markdown so they can be browsed more easily on Github.)
 
 ## Contact
 
