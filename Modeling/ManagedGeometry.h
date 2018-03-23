@@ -59,10 +59,6 @@ class ManagedGeometry
   const std::string& CachedFilename() const;
   ///Remove self from cache, if in it
   void RemoveFromCache();
-  ///Makes this item have its own geometry data separate from all other
-  ///instances of this object, and if there are other instances removes
-  ///this item from the cache.
-  void SetUnique();
   ///Transforms the geometry (requires removing from cache, and
   ///re-initializing collision data). 
   void TransformGeometry(const Math3D::Matrix4& xform);

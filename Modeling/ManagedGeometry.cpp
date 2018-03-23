@@ -383,7 +383,8 @@ bool ManagedGeometry::IsDynamicGeometry() const
 bool ManagedGeometry::DynamicGeometryUpdate()
 {
   if(0==strncmp(dynamicGeometrySource.c_str(),"ros://",6)) {
-    if(ROSHadUpdate(dynamicGeometrySource.c_str())) {
+    //strip out the ros:/ part
+    if(ROSHadUpdate(dynamicGeometrySource.substr(5,dynamicGeometrySource.length()-5).c_str())) {
       OnGeometryChange();
       return true;
     }

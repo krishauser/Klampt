@@ -65,7 +65,8 @@ void ControlledRobotSimulator::GetCommandedVelocity(Config& dq)
     else {
       if(!warned){
         LOG4CXX_ERROR(GET_LOGGER(ControlledRobotSimulator),"ControlledRobotSimulator::GetCommandedVelocity: Can't get commanded velocity for non-PID drivers");
-      }warned = true;
+      }
+      warned = true;
       //robot->SetDriverVelocity(i,0.0);
     }
   }

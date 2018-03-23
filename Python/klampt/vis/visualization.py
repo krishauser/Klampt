@@ -1398,6 +1398,7 @@ class VisAppearance:
         name = self.name
         #set appearance
         if not self.useDefaultAppearance and hasattr(item,'appearance'):
+            print "Has custom appearance"
             if not hasattr(self,'oldAppearance'):
                 self.oldAppearance = item.appearance().clone()
             if self.customAppearance != None:
@@ -2160,7 +2161,7 @@ class VisualizationPlugin(glcommon.GLWidgetPlugin):
         global _globalLock
         _globalLock.acquire()
         if item_name == 'all':
-            if (name,itemvis) in self.items.iteritems():
+            for (name,itemvis) in self.items.iteritems():
                 itemvis.markChanged()
         else:
             self.getItem(item_name).markChanged()
@@ -2584,6 +2585,9 @@ if _PyQtAvailable:
             for p in self.glwidget.program.plugins:
                 if hasattr(p,'sim'):
                     return p.sim
+                elif isinstance(p,VisualizationPlugin):
+                    sim = p.items.get('sim',None)
+                    if sim != None: return sim.item
             return None
         def save_camera(self):
             if not hasattr(self.glwidget.program,'get_view'):
