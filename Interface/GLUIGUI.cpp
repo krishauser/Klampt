@@ -1,3 +1,6 @@
+#if HAVE_GLUI
+
+#include <KrisLibrary/Logger.h>
 #include "GLUIGUI.h"
 #include <limits.h>
 #include <sstream>
@@ -170,3 +173,4 @@ bool GLUIGUI::OnPauseIdle(double secs)
 }
 
 
+#endif //HAVE_GLUI

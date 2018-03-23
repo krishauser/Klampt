@@ -83,7 +83,7 @@ public:
   void SetDrawExpanded(int value);
 };
 
-#ifdef HAVE_GLUI
+#if HAVE_GLUI
 
 #include <GL/glui.h>
 

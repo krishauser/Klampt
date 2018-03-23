@@ -773,7 +773,7 @@ bool SimTestBackend::OnIdle() {
 
 
 
-#ifdef HAVE_GLUI
+#if HAVE_GLUI
 
 void delete_all(GLUI_Listbox* listbox)
 {
