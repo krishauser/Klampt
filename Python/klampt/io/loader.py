@@ -507,7 +507,7 @@ def toJson(obj,type='auto'):
         else:
             raise RuntimeError("Unknown object of type "+obj.__class__.__name)
 
-    if type in ['Config','Configs','Vector','Matrix','Matrix3','Rotation','Value','IntArray','StringArray']:
+    if type in ['Config','Configs','Vector','Matrix','Vector2','Vector3','Matrix3','Point','Rotation','Value','IntArray','StringArray']:
         return obj
     elif type == 'RigidTransform':
         return obj
