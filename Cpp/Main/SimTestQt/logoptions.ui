@@ -1,0 +1,283 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>LogOptions</class>
+ <widget class="QDialog" name="LogOptions">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>360</width>
+    <height>240</height>
+   </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
+  <property name="windowTitle">
+   <string>Sensor Drawing Options</string>
+  </property>
+  <widget class="QWidget" name="CentralWidget" native="true">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>369</width>
+     <height>244</height>
+    </rect>
+   </property>
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
+   <layout class="QVBoxLayout" name="verticalLayout_3">
+    <item>
+     <layout class="QGridLayout" name="gridLayout">
+      <item row="3" column="3">
+       <layout class="QVBoxLayout" name="verticalLayout">
+        <item>
+         <widget class="QPushButton" name="pushButton_4">
+          <property name="text">
+           <string>Show</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="pushButton_3">
+          <property name="text">
+           <string>Hide</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="pushButton_2">
+          <property name="text">
+           <string>Isolate</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="pushButton">
+          <property name="text">
+           <string>Show All</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item row="0" column="3" rowspan="3">
+       <layout class="QVBoxLayout" name="verticalLayout_2">
+        <item>
+         <widget class="QCheckBox" name="chk_plot">
+          <property name="text">
+           <string>Plot On</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QCheckBox" name="chk_render">
+          <property name="text">
+           <string>Render</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="verticalSpacer">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>40</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
+      </item>
+      <item row="1" column="1">
+       <widget class="QComboBox" name="comboBox"/>
+      </item>
+      <item row="1" column="2">
+       <spacer name="horizontalSpacer">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item row="2" column="1" colspan="2">
+       <widget class="QLabel" name="label">
+        <property name="text">
+         <string>Measurements</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1" colspan="2">
+       <widget class="QLabel" name="label_3">
+        <property name="text">
+         <string>Sensor</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="1" colspan="2">
+       <widget class="QListWidget" name="list_show"/>
+      </item>
+     </layout>
+    </item>
+   </layout>
+  </widget>
+ </widget>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>comboBox</sender>
+   <signal>currentIndexChanged(int)</signal>
+   <receiver>LogOptions</receiver>
+   <slot>ChangeSensor(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>87</x>
+     <y>59</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>322</x>
+     <y>38</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>list_show</sender>
+   <signal>currentRowChanged(int)</signal>
+   <receiver>LogOptions</receiver>
+   <slot>ChangeSelectedIndex(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>207</x>
+     <y>129</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>326</x>
+     <y>10</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>pushButton</sender>
+   <signal>clicked()</signal>
+   <receiver>LogOptions</receiver>
+   <slot>ShowAll()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>323</x>
+     <y>203</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>360</x>
+     <y>205</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>chk_plot</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>LogOptions</receiver>
+   <slot>TogglePlot(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>293</x>
+     <y>22</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>357</x>
+     <y>24</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>pushButton_2</sender>
+   <signal>clicked()</signal>
+   <receiver>LogOptions</receiver>
+   <slot>Isolate()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>292</x>
+     <y>180</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>265</x>
+     <y>178</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>pushButton_3</sender>
+   <signal>clicked()</signal>
+   <receiver>LogOptions</receiver>
+   <slot>HideItem()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>306</x>
+     <y>144</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>357</x>
+     <y>135</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>pushButton_4</sender>
+   <signal>clicked()</signal>
+   <receiver>LogOptions</receiver>
+   <slot>ShowItem()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>309</x>
+     <y>115</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>358</x>
+     <y>92</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>chk_render</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>LogOptions</receiver>
+   <slot>ToggleRender(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>293</x>
+     <y>47</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>241</x>
+     <y>-14</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>ChangeSensor(int)</slot>
+  <slot>ChangeSelectedIndex(int)</slot>
+  <slot>ShowItem()</slot>
+  <slot>HideItem()</slot>
+  <slot>Isolate()</slot>
+  <slot>ShowAll()</slot>
+  <slot>TogglePlot(bool)</slot>
+  <slot>ToggleLogging(bool)</slot>
+  <slot>ToggleRender(bool)</slot>
+ </slots>
+</ui>

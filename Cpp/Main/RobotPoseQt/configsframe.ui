@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>ConfigsFrame</class>
+ <widget class="QGroupBox" name="ConfigsFrame">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>268</width>
+    <height>56</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Configs</string>
+  </property>
+  <property name="title">
+   <string>Configs</string>
+  </property>
+  <layout class="QHBoxLayout" name="horizontalLayout">
+   <item>
+    <widget class="QPushButton" name="btn_optimize">
+     <property name="statusTip">
+      <string>Optimize a path interpolating the configs</string>
+     </property>
+     <property name="text">
+      <string>Optimize path</string>
+     </property>
+    </widget>
+   </item>
+   <item alignment="Qt::AlignRight">
+    <widget class="QLabel" name="label">
+     <property name="text">
+      <string>Divisions</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QSpinBox" name="spin_numDivs">
+     <property name="minimum">
+      <number>2</number>
+     </property>
+     <property name="maximum">
+      <number>10000</number>
+     </property>
+     <property name="value">
+      <number>1000</number>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>btn_optimize</sender>
+   <signal>clicked()</signal>
+   <receiver>ConfigsFrame</receiver>
+   <slot>Optimize()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>61</x>
+     <y>37</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>109</x>
+     <y>26</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>Optimize()</slot>
+ </slots>
+</ui>

@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>StanceFrame</class>
+ <widget class="QGroupBox" name="StanceFrame">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>291</width>
+    <height>129</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>GroupBox</string>
+  </property>
+  <property name="title">
+   <string>Stance</string>
+  </property>
+  <layout class="QGridLayout" name="gridLayout">
+   <item row="0" column="0">
+    <widget class="QPushButton" name="btn_createFlat">
+     <property name="statusTip">
+      <string>Generate a stance from the robot's pose as if standing on flat ground</string>
+     </property>
+     <property name="text">
+      <string>Create flat</string>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="0">
+    <widget class="QLabel" name="label">
+     <property name="text">
+      <string>Contact tolerance (m)</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="1">
+    <widget class="QDoubleSpinBox" name="contactToleranceSpin">
+     <property name="maximum">
+      <double>1.000000000000000</double>
+     </property>
+     <property name="singleStep">
+      <double>0.001000000000000</double>
+     </property>
+     <property name="value">
+      <double>0.000000000000000</double>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="1">
+    <widget class="QPushButton" name="btn_createNearby">
+     <property name="statusTip">
+      <string>NOT IMPLEMENTED YET</string>
+     </property>
+     <property name="text">
+      <string>Create nearby</string>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="0">
+    <widget class="QPushButton" name="btn_clean">
+     <property name="text">
+      <string>Clean</string>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>btn_createFlat</sender>
+   <signal>clicked()</signal>
+   <receiver>StanceFrame</receiver>
+   <slot>CreateFlat()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>106</x>
+     <y>30</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>128</x>
+     <y>15</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>btn_createNearby</sender>
+   <signal>clicked()</signal>
+   <receiver>StanceFrame</receiver>
+   <slot>CreateNearby()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>235</x>
+     <y>37</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>263</x>
+     <y>13</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>btn_clean</sender>
+   <signal>clicked()</signal>
+   <receiver>StanceFrame</receiver>
+   <slot>Clean()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>89</x>
+     <y>71</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>145</x>
+     <y>64</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>CreateFlat()</slot>
+  <slot>CreateNearby()</slot>
+  <slot>Clean()</slot>
+ </slots>
+</ui>
