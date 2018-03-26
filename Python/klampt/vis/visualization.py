@@ -899,6 +899,7 @@ def objectToVisType(item,world):
                 validtypes.append(t)
         if len(validtypes) > 1:
             print "Unable to draw item of ambiguous types",validtypes
+            print "  (Try vis.setAttribute(item,'type',desired_type_str) to disambiguate)"
             return
         if len(validtypes) == 0:
             print "Unable to draw any of types",itypes
@@ -1594,10 +1595,13 @@ class VisAppearance:
             pass
         else:
             try:
-                itypes = objectToVisType(item,world)
-            except:
-                print "visualization.py: Unsupported object type",item,"of type:",item.__class__.__name__
-                return
+                itypes = self.attributes['type']
+            except KeyError:
+                try:
+                    itypes = objectToVisType(item,world)
+                except:
+                    print "visualization.py: Unsupported object type",item,"of type:",item.__class__.__name__
+                    return
             if itypes == None:
                 print "Unable to convert item",item,"to drawable"
                 return
@@ -1620,7 +1624,7 @@ class VisAppearance:
                         for (i,app) in enumerate(oldAppearance):
                             robot.link(i).appearance().set(app)
                 else:
-                    print "Unable to draw Config tiems without a world"
+                    print "Unable to draw Config items without a world"
             elif itypes == 'Configs':
                 if world:
                     maxConfigs = self.attributes.get("maxConfigs",min(10,len(item)))
