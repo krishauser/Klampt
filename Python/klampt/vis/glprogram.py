@@ -304,8 +304,11 @@ class GLProgram:
         try:
             import Image
         except ImportError:
-            print "Cannot save screens to disk, the Python Imaging Library is not installed"
-            return
+            try:
+                from PIL import Image
+            except ImportError:
+                print "Cannot save screens to disk, the Python Imaging Library is not installed"
+                return
         if hasattr(self.window,'makeCurrent'):
             self.window.makeCurrent()
         glReadBuffer(GL_FRONT);

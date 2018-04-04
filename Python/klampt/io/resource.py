@@ -360,19 +360,19 @@ class _ThumbnailPlugin(vis.VisualizationPlugin):
         vis.VisualizationPlugin.__init__(self)
         self.world = world
         self.done = False
-        self.rendered = False
+        self.rendered = 0
         self.image = None
     def display(self):
-        self.rendered = True
+        self.rendered += 1
         vis.VisualizationPlugin.display(self)
     def idle(self):
         vis.VisualizationPlugin.idle(self)
-        if self.rendered and not self.done:
+        if self.rendered >= 2 and not self.done:
             from OpenGL.GL import glReadPixels,GL_RGBA,GL_UNSIGNED_BYTE
             view = self.window.program.view
             screenshot = glReadPixels( view.x, view.y, view.w, view.h, GL_RGBA, GL_UNSIGNED_BYTE)
             try:
-                import Image
+                from PIL import Image
                 self.image = Image.frombuffer("RGBA", (view.w, view.h), screenshot, "raw", "RGBA", 0, 0)
             except ImportError:
                 self.image = screenshot
@@ -428,14 +428,14 @@ def thumbnail(value,size,type='auto',world=None,frame=None):
     plugin.autoFitCamera()
     vis.setPlugin(plugin)
     vis.show()
-    plugin.rendered = False
+    plugin.rendered = 0
     while not plugin.done:
         time.sleep(0.1)
     vis.setPlugin(None)
     vis.show(False)
     vis.setWindow(old_window)
     if (vp.w,vp.h) != size and plugin.image.__class__.__name__=='Image':
-        import Image
+        from PIL import Image
         plugin.image.thumbnail(size,Image.ANTIALIAS)
     return plugin.image
 
@@ -626,5 +626,4 @@ def edit(name,value,type='auto',description=None,editor='visual',world=None,refe
             raise RuntimeError("Visual editing of objects of type "+type+" not supported yet")
     else:
         raise ValueError("Invalid value for argument 'editor', must be either 'visual' or 'console'")
-
 
