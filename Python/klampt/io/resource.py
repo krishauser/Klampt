@@ -375,7 +375,11 @@ class _ThumbnailPlugin(vis.VisualizationPlugin):
                 from PIL import Image
                 self.image = Image.frombuffer("RGBA", (view.w, view.h), screenshot, "raw", "RGBA", 0, 0)
             except ImportError:
-                self.image = screenshot
+                try:
+                    import Image
+                    self.image = Image.frombuffer("RGBA", (view.w, view.h), screenshot, "raw", "RGBA", 0, 0)
+                except ImportError:
+                    self.image = screenshot
             self.done = True
         return True
 
@@ -435,8 +439,17 @@ def thumbnail(value,size,type='auto',world=None,frame=None):
     vis.show(False)
     vis.setWindow(old_window)
     if (vp.w,vp.h) != size and plugin.image.__class__.__name__=='Image':
-        from PIL import Image
-        plugin.image.thumbnail(size,Image.ANTIALIAS)
+        try:
+            from PIL import Image
+            plugin.image.thumbnail(size,Image.ANTIALIAS)
+        except ImportError:
+            try:
+                import Image
+                plugin.image.thumbnail(size,Image.ANTIALIAS)
+            except ImportError:
+                # if this happens then
+                # plugin.image is just a raw RGBA memory buffer
+                pass
     return plugin.image
 
 def console_edit(name,value,type,description=None,world=None,frame=None):
