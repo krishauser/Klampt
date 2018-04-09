@@ -390,7 +390,7 @@ class RobotTrajectory(Trajectory):
 		Rmilestones = []
 		for m in self.milestones:
 			self.robot.setConfig(m)
-			rmilestones.append(link.getTransform())
+			Rmilestones.append(link.getTransform())
 		return SE3Trajectory(self.times[:],Rmilestones)
 
 class GeodesicTrajectory(Trajectory):
