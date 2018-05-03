@@ -398,7 +398,16 @@ int MeshMeshCollide(CollisionMesh& m1,Real outerMargin1,CollisionMesh& m2,Real o
     tri2loc.b = T21*tri2.b;
     tri2loc.c = T21*tri2.c;
     Segment3D s;
-    if(tri2loc.intersects(tri1,s)) { 
+    //this is here to avoid degenerate triangles
+    bool collides;
+    Vector3 n1,n2;
+    n1.setCross(tri1.b-tri1.a,tri1.c-tri1.a);
+    n2.setCross(tri2.b-tri2.a,tri2.c-tri2.a);
+    if(n2.normSquared() > n1.normSquared())
+      collides = tri2loc.intersects(tri1,s);
+    else
+      collides = tri1.intersects(tri2loc,s);
+    if(collides) { 
       gCustomGeometryMeshesIntersect = true;
       if(warnedCount % 1000 == 0) {
 	printf("ODECustomMesh: Triangles penetrate margin %g+%g: can't trust contact detector\n",outerMargin1,outerMargin2);
