@@ -21,8 +21,8 @@ before_script:
   #- cd Klampt
 
 script:
-  - cd Library && make unpack-deps
-  - make deps && cd ..
+  - cd Cpp/Dependencies && make unpack-deps
+  - make deps && cd ../..
   - cmake .
   - make Klampt
   - cmake . -DKLAMPT_COMPILE_TESTS:BOOL=True
