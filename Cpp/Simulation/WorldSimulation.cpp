@@ -25,20 +25,21 @@ bool TestReadWriteState(T& obj,const char* name="")
   File fwrite,fwritenew;
   fwrite.OpenData();
   if(!obj.WriteState(fwrite)) {
-    fprintf(stderr,"WriteState %s failed\n",name);
+    LOG4CXX_ERROR(GET_LOGGER(WorldSimulator),"WriteState "<<name<<" failed");
     return false;
   }
   //HACK for File internal buffer length bug returning buffer capacity rather
   //than size
+  //int n = fwrite.Length();
   int n1 = fwrite.Position();
   fwrite.Seek(0,FILESEEKSTART);
   if(!obj.ReadState(fwrite)) {
-    fprintf(stderr,"ReadState %s failed\n",name);
+    LOG4CXX_ERROR(GET_LOGGER(WorldSimulator),"ReadState "<<name<<" failed");
     return false;
   }
   fwritenew.OpenData();
   if(!obj.WriteState(fwritenew)) {
-    fprintf(stderr,"Second WriteState %s failed\n",name);
+    LOG4CXX_ERROR(GET_LOGGER(WorldSimulator),"Second WriteState "<<name<<" failed");
     return false;
   }
   //HACK for File internal buffer length bug returning buffer capacity rather
@@ -48,12 +49,13 @@ bool TestReadWriteState(T& obj,const char* name="")
   char* d1 = (char*)fwrite.GetDataBuffer();
   char* d2 = (char*)fwritenew.GetDataBuffer();
   if(n1 != n2) {
-    fprintf(stderr,"WriteState %s wrote different numbers of bytes: %d -> %d\n",name,n1,n2);
+    LOG4CXX_ERROR(GET_LOGGER(WorldSimulator),"WriteState "<<name<<" wrote different numbers of bytes: "<<n1<<" -> "<<n2);
     return false;
   }
   for(int i=0;i<n1;i++) {
     if(d1[i] != d2[i]) {
-      fprintf(stderr,"WriteState %s wrote different byte at position %d/%d: 0x%x vs 0x%x\n",name,i,n1,(int)d1[i],(int)d2[i]);
+      LOG4CXX_ERROR(GET_LOGGER(WorldSimulator),"WriteState "<<name<<" wrote different byte at position "<<i<<"/"<<n1);
+      //fprintf(stderr,"WriteState %s wrote different byte at position %d/%d: 0x%x vs 0x%x\n",name,i,n1,(int)d1[i],(int)d2[i]);
       return false;
     }
   }
@@ -67,29 +69,30 @@ bool TestReadWrite(T& obj,const char* name="")
   File fwrite,fwritenew;
   fwrite.OpenData();
   if(!obj.WriteFile(fwrite)) {
-    fprintf(stderr,"WriteFile %s failed\n",name);
+    LOG4CXX_ERROR(GET_LOGGER(WorldSimulator),"WriteFile "<<name<<" failed");
     return false;
   }
   fwrite.Seek(0);
   if(!obj.ReadFile(fwrite)) {
-    fprintf(stderr,"ReadFile %s failed\n",name);
+    LOG4CXX_ERROR(GET_LOGGER(WorldSimulator),"ReadFile "<<name<<" failed");
     return false;
   }
   fwritenew.OpenData();
   if(!obj.WriteFile(fwritenew)) {
-    fprintf(stderr,"Second WriteFile %s failed\n",name);
+    LOG4CXX_ERROR(GET_LOGGER(WorldSimulator),"Second WriteFile "<<name<<" failed");
     return false;
   }
   int n1 = fwrite.Length(), n2 = fwritenew.Length();
   char* d1 = (char*)fwrite.GetDataBuffer();
   char* d2 = (char*)fwritenew.GetDataBuffer();
   if(n1 != n2) {
-    fprintf(stderr,"WriteFile %s wrote different numbers of bytes: %d -> %d\n",name,n1,n2);
+    LOG4CXX_ERROR(GET_LOGGER(WorldSimulator),"WriteFile "<<name<<" wrote different numbers of bytes: "<<n1<<" -> "<<n2);
     return false;
   }
   for(int i=0;i<n1;i++) {
     if(d1[i] != d2[i]) {
-      fprintf(stderr,"WriteFile %s wrote different byte at position %d: %c vs %c\n",name,i,d1[i],d2[i]);
+      LOG4CXX_ERROR(GET_LOGGER(WorldSimulator),"WriteFile "<<name<<" wrote different byte at position "<<i<<"/"<<n1);
+      //fprintf(stderr,"WriteFile %s wrote different byte at position %d: %c vs %c\n",name,i,d1[i],d2[i]);
       return false;
     }
   }
@@ -127,7 +130,7 @@ bool ReadFile(File& f,vector<T>& v)
   int n;
   READ_FILE_DEBUG(f,n,"ReadFile(vector<T>)");
   if(n < 0) {
-    fprintf(stderr,"ReadFile(vector<T>): invalid size %d\n",n);
+    LOG4CXX_ERROR(GET_LOGGER(WorldSimulator),"ReadFile(vector<T>): invalid size "<<n);
     return false;
   }
   v.resize(n);
@@ -580,7 +583,7 @@ bool WorldSimulation::ReadState(File& f)
   int n;
   READ_FILE_DEBUG(f,n,"WorldSimulation::ReadState: reading number of contactFeadback items");
   if(n < 0) {
-    fprintf(stderr,"Invalid number %d of contactFeedback items\n",n);
+    LOG4CXX_ERROR(GET_LOGGER(WorldSimulator),"Invalid number "<<n<<" of contactFeedback items");
     return false;
   }
   contactFeedback.clear();
@@ -588,15 +591,15 @@ bool WorldSimulation::ReadState(File& f)
     pair<ODEObjectID,ODEObjectID> key;
     ContactFeedbackInfo info;
     if(!ReadFile(f,key.first)) {
-      fprintf(stderr,"Unable to read contact feedback %d object 1\n",i);
+      LOG4CXX_ERROR(GET_LOGGER(WorldSimulator),"Unable to read contact feedback "<<i<<" object 1");
       return false;
     }
     if(!ReadFile(f,key.second)) {
-      fprintf(stderr,"Unable to read contact feedback %d object 2\n",i);
+      LOG4CXX_ERROR(GET_LOGGER(WorldSimulator),"Unable to read contact feedback "<<i<<" object 2");
       return false;
     }
     if(!ReadFile(f,info)) {
-      fprintf(stderr,"Unable to read contact feedback %d info\n",i);
+      LOG4CXX_ERROR(GET_LOGGER(WorldSimulator),"Unable to read contact feedback "<<i<<" info");
       return false;
     }
     contactFeedback[key] = info;
@@ -615,7 +618,7 @@ bool WorldSimulation::WriteState(File& f) const
   }
   for(size_t i=0;i<hooks.size();i++) {
     if(!hooks[i]->WriteState(f)) {
-      fprintf(stderr,"WorldSimulation::ReadState: Hook %d failed to write\n",i);
+      LOG4CXX_ERROR(GET_LOGGER(WorldSimulator),"WorldSimulation::ReadState: Hook "<<i<<" failed to write");
       return false;
     }
   }
