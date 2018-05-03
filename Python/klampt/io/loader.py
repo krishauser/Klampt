@@ -505,7 +505,7 @@ def toJson(obj,type='auto'):
         elif isinstance(obj,Trajectory):
             type = 'Trajectory'
         else:
-            raise RuntimeError("Unknown object of type "+obj.__class__.__name)
+            raise RuntimeError("Unknown object of type "+obj.__class__.__name__)
 
     if type in ['Config','Configs','Vector','Matrix','Vector2','Vector3','Matrix3','Point','Rotation','Value','IntArray','StringArray']:
         return obj
