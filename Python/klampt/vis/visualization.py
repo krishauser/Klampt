@@ -1399,7 +1399,7 @@ class VisAppearance:
         name = self.name
         #set appearance
         if not self.useDefaultAppearance and hasattr(item,'appearance'):
-            print "Has custom appearance"
+            #print "Has custom appearance"
             if not hasattr(self,'oldAppearance'):
                 self.oldAppearance = item.appearance().clone()
             if self.customAppearance != None:
@@ -1809,8 +1809,39 @@ class VisAppearance:
                             pass
                         if name != None:
                             self.drawText(name,wp)
+            elif itypes == 'GeometricPrimitive':
+                if not hasattr(self,'appearance'):
+                    self.appearance = Appearance()
+                c = self.attributes.get("color",[0.5,0.5,0.5,1])
+                self.appearance.setColor(*c)
+                s = self.attributes.get("size",None)
+                if s:
+                    self.appearance.setPointSize(s)
+                wp = None
+                if isinstance(self.item,GeometricPrimitive):
+                    if not hasattr(self,'geometry'):
+                        self.geometry = Geometry3D(self.item)
+                    if self.item.type in ['Sphere','AABB']:
+                        glEnable(GL_LIGHTING)
+                    else:
+                        glDisable(GL_LIGHTING)
+                    self.appearance.drawGL(self.geometry)
+                    if name != None:
+                        bmin,bmax = self.geometry.getBB()
+                        wp = vectorops.mul(vectorops.add(bmin,bmax),0.5)
+                else:
+                    if self.item.getGeometricPrimitive().type in ['Sphere','AABB']:
+                        glEnable(GL_LIGHTING)
+                    else:
+                        glDisable(GL_LIGHTING)
+                    self.appearance.drawWorldGL(self.item)
+                    if name != None:
+                        bmin,bmax = self.item.getBB()
+                        wp = vectorops.mul(vectorops.add(bmin,bmax),0.5)
+                if name != None:
+                    self.drawText(name,wp)
             else:
-                print "Unable to draw item of type",itypes
+                print "Unable to draw item of type \"%s\""%(str(itypes),)
 
         #revert appearance
         if not self.useDefaultAppearance and hasattr(item,'appearance'):
@@ -2905,7 +2936,7 @@ elif _GLUTAvailable:
                 gldraw.glutBitmapString(GLUT_BITMAP_HELVETICA_18,"In Window mode. Press 'Esc' to hide window")
             _globalLock.release()
         def keyboardfunc(self,c,x,y):
-            if ord(c)==27:
+            if len(c)==1 and ord(c)==27:
                 if self.inDialog:
                     print "Esc pressed, hiding dialog"
                     self.inDialog = False
@@ -3072,7 +3103,7 @@ def _refreshDisplayLists(item):
 def _checkWindowCurrent(item):
     global _windows,_current_window,_world_to_window,_current_worlds
     if isinstance(item,int):
-        if not all(w.index != item for w in _current_worlds):
+        if not all(w().index != item for w in _current_worlds):
             print "klampt.vis: item appears to be in a new world, but doesn't have a full WorldModel instance"
     if isinstance(item,WorldModel):
         #print "Worlds active in current window",_current_window,":",[w().index for w in _current_worlds]
