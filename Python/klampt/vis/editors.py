@@ -742,6 +742,49 @@ class ObjectTransformEditor(VisualEditorBase):
             self.value = self.objposer.get()
         return VisualEditorBase.mousefunc(self,button,state,x,y)
 
+class WorldEditor(VisualEditorBase):
+    def __init__(self,name,value,description):
+        VisualEditorBase.__init__(self,name,value,description,value)
+        world = value
+        self.world = value
+        self.robotPosers = [RobotPoser(world.robot(i)) for i in range(world.numRobots())]
+        self.objectPosers = [ObjectPoser(world.rigidObject(i)) for i in range(world.numRigidObjects())]
+        self.terrainPosers = [TransformPoser() for i in range(world.numTerrains())]
+        self.terrainGeometryCenters = []
+        for i in range(world.numTerrains()):
+            bmin,bmax=world.terrain(i).geometry().getBB()
+            gc = vectorops.interpolate(bmin,bmax,0.5)
+            T0 = world.terrain(i).geometry().getCurrentTransform()
+            self.terrainGeometryCenters.append(se3.apply(se3.inv(T0),gc))
+            #Tw.R = Tg.R
+            #Tw.t = gc = Tg.R*gcloc + Tg.t
+            self.terrainPosers[i].set(T0[0],gc)
+        for r in self.robotPosers:
+            self.addWidget(r)
+        for r in self.objectPosers:
+            self.addWidget(r)
+        for r in self.terrainPosers:
+            self.addWidget(r)
+
+    def finalize(self):
+        """Applies the transforms to all the terrain geometries."""
+        for i in xrange(self.world.numTerrains()):
+            T0 = self.world.terrain(i).geometry().getCurrentTransform()
+            self.world.terrain(i).geometry().getCurrentTransform(*se3.identity())
+            self.world.terrain(i).geometry().transform(*T0)
+    
+    def instructions(self):
+        return 'Right-click and drag on the widgets to pose the world objects'
+
+    def motionfunc(self,button,state,x,y):
+        for i,r in enumerate(self.terrainPosers):
+            if r.hasFocus():
+                Tw = r.get()
+                gcloc = self.terrainGeometryCenters[i]
+                #Tw.t = Tw.R*gc + Tg.t
+                self.world.terrain(i).geometry().setCurrentTransform(Tw[0],vectorops.sub(Tw[1],so3.apply(Tw[0],gcloc)))
+        return VisualEditorBase.motionfunc(self,button,state,x,y)
+
 
 #Qt stuff
 if glinit._PyQtAvailable:
@@ -756,7 +799,7 @@ if glinit._PyQtAvailable:
         def __init__(self,glwidget):
             QDialog.__init__(self)
             self.glwidget = glwidget
-            glwidget.setMinimumSize(glwidget.width,glwidget.height)
+            #glwidget.setMinimumSize(glwidget.width,glwidget.height)
             glwidget.setMaximumSize(4000,4000)
             glwidget.setSizePolicy(QSizePolicy(QSizePolicy.Maximum,QSizePolicy.Maximum))
             self.instructions = QLabel()
@@ -769,15 +812,27 @@ if glinit._PyQtAvailable:
             self.extraDialog = QFrame()
             self.extraDialog.setSizePolicy(QSizePolicy(QSizePolicy.Minimum,QSizePolicy.Minimum))
             self.topBoxLayout.addWidget(self.extraDialog)
-            self.layout = QVBoxLayout(self)
-            self.layout.addWidget(self.topBox)
+            self.layout = QVBoxLayout()
+            #self.layout.addWidget(self.topBox)
             self.layout.addWidget(glwidget)
             self.layout.addWidget(self.description2)
             self.layout.setStretchFactor(glwidget,10)
+            #self.layout.setStretchFactor(self.topBox,0)
             self.buttons = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel,Qt.Horizontal, self)
             self.buttons.accepted.connect(self.accept)
             self.buttons.rejected.connect(self.reject)
             self.layout.addWidget(self.buttons)
+            self.splitter = QSplitter(Qt.Vertical)
+            top = QWidget(self)
+            bottom = QWidget(self)
+            top.setLayout(self.topBoxLayout)
+            bottom.setLayout(self.layout)
+            self.splitter.addWidget(top)
+            self.splitter.addWidget(bottom)
+            hbox = QHBoxLayout(self)
+            hbox.addWidget(self.splitter)
+            self.splitter.setSizes([self.topBoxLayout.sizeHint().height(),self.layout.sizeHint().height()])
+
 
         def setEditor(self,editorObject):
             self.editorObject = editorObject
