@@ -410,6 +410,7 @@ void GeometricPrimitive::setSphere(const double c[3],double r)
   type = "Sphere";
   properties.resize(4);
   copy(c,c+3,properties.begin());
+  properties[3] = r;
 }
 
 void GeometricPrimitive::setSegment(const double a[3],const double b[3])
@@ -568,7 +569,9 @@ string Geometry3D::type()
   SmartPointer<AnyCollisionGeometry3D>& geom = *reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(geomPtr);
   if(!geom) return "";
   if(geom->Empty()) return "";
-  return geom->TypeName();
+  string res = geom->TypeName();
+  if(res == "Primitive") return "GeometricPrimitive";
+  return res;
 }
 
 bool Geometry3D::empty()
