@@ -17,10 +17,6 @@ def objectToTypes(object,world=None):
     """Returns a string defining the type of the given Python Klamp't object.
     If multiple types could be associated with it, then it returns a list of all
     possible valid types."""
-    if hasattr(object,'type'):
-        if callable(object.type):
-            return object.type()
-        return object.type
     if isinstance(object,ContactPoint):
         return 'ContactPoint'
     elif isinstance(object,Hold):
@@ -31,6 +27,12 @@ def objectToTypes(object,world=None):
         return 'Trajectory'
     elif isinstance(object,MultiPath):
         return 'MultiPath'
+    elif isinstance(object,GeometricPrimitive):
+        return 'GeometricPrimitive'
+    elif hasattr(object,'type'):
+        if callable(object.type):
+            return object.type()
+        return object.type
     elif hasattr(object,'__iter__'):
         if hasattr(object[0],'__iter__'):
             #list of lists or tuples
