@@ -12,7 +12,7 @@ matrix:
     - compiler: clang
 
 install:
-  - sudo apt-get install cmake g++ git libboost-system-dev libboost-thread-dev freeglut3 freeglut3-dev libglpk-dev python-dev python-opengl libxmu-dev libxi-dev libqt4-dev libqt4-opengl-dev libassimp-dev libgtest-dev
+  - sudo apt-get install cmake g++ git liblog4cxx10-dev freeglut3 freeglut3-dev libglpk-dev python-dev python-opengl libxmu-dev libxi-dev libqt4-dev libqt4-opengl-dev libassimp-dev libgtest-dev
 
 before_script:
   - echo $LD_LIBRARY_PATH
