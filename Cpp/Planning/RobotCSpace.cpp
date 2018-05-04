@@ -11,7 +11,6 @@
 #include <KrisLibrary/planning/CSetHelpers.h>
 #include <KrisLibrary/planning/CSpaceHelpers.h>
 #include <KrisLibrary/Timer.h>
-#include <boost/functional.hpp>
 #include <sstream>
 
 Real RandLaplacian()
@@ -251,7 +250,7 @@ void RobotCSpace::InterpolateDerivA(const Config& a,const Config& b,Real u,const
 { 
   dx.mul(da,1-u);
   for(size_t i=0;i<robot.joints.size();i++) {
-    int k=robot.joints[i].linkIndex;
+    //int k=robot.joints[i].linkIndex;
     if(robot.joints[i].type == RobotJoint::Floating) {
       vector<int> indices;
       robot.GetJointIndices(i,indices);
@@ -273,6 +272,7 @@ void RobotCSpace::InterpolateDerivA(const Config& a,const Config& b,Real u,const
       AngularVelocityEulerAngle(oldrot,drot,2,1,0,dw);
       Vector3 dtheta;
       bool res=EulerAngleDerivative(eu,dw,2,1,0,dtheta);
+      Assert(res);
       dtheta *= (1-u);
       dtheta.get(dx(indices[3]),dx(indices[4]),dx(indices[5]));
     }
@@ -297,6 +297,7 @@ void RobotCSpace::InterpolateDerivA(const Config& a,const Config& b,Real u,const
       AngularVelocityEulerAngle(oldrot,drot,2,1,0,dw);
       Vector3 dtheta;
       bool res=EulerAngleDerivative(eu,dw,2,1,0,dtheta);
+      Assert(res);
       dtheta *= (1-u);
       dtheta.get(dx(indices[0]),dx(indices[1]),dx(indices[2]));
     }
@@ -328,6 +329,7 @@ void RobotCSpace::InterpolateDerivB(const Config& a,const Config& b,Real u,const
       AngularVelocityEulerAngle(newrot,drot,2,1,0,dw);
       Vector3 dtheta;
       bool res=EulerAngleDerivative(eu,dw,2,1,0,dtheta);
+      Assert(res);
       dtheta *= u;
       dtheta.get(dx(indices[3]),dx(indices[4]),dx(indices[5]));
     }
@@ -352,6 +354,7 @@ void RobotCSpace::InterpolateDerivB(const Config& a,const Config& b,Real u,const
       AngularVelocityEulerAngle(newrot,drot,2,1,0,dw);
       Vector3 dtheta;
       bool res=EulerAngleDerivative(eu,dw,2,1,0,dtheta);
+      Assert(res);
       dtheta *= u;
       dtheta.get(dx(indices[0]),dx(indices[1]),dx(indices[2]));
     }
@@ -654,7 +657,7 @@ void SingleRobotCSpace::Init()
     settings->collisionEnabled(ignoreCollisions[i].second,ignoreCollisions[i].first) = false;
   }
 
-  AddConstraint("update_geometry",boost::bind1st(std::mem_fun(&SingleRobotCSpace::UpdateGeometry),this));
+  AddConstraint("update_geometry",std::bind(std::mem_fun(&SingleRobotCSpace::UpdateGeometry),this,std::placeholders::_1));
 
   int id = world.RobotID(index);
   collisionPairs.resize(0);
@@ -933,7 +936,7 @@ void SingleRigidObjectCSpace::Init()
   constraints.resize(3);
   constraintNames.resize(3);
 
-  CSet::CPredicate f = boost::bind1st(std::mem_fun(&SingleRigidObjectCSpace::UpdateGeometry),this);
+  CSet::CPredicate f = std::bind(std::mem_fun(&SingleRigidObjectCSpace::UpdateGeometry),this,std::placeholders::_1);
   CSpace::AddConstraint("update_geometry",f);
 
   if(collisionPairs.empty()) {
