@@ -403,12 +403,17 @@ class MultiPath:
 
         if robot is not None and eps is not None:
             from ..plan.robotcspace import ClosedLoopRobotCSpace
+            hastiming = self.hasTiming()
             for i,s in enumerate(self.sections):
                 space = ClosedLoopRobotCSpace(robot,self.getIKProblem(i))
                 for j in xrange(len(s.configs)-1):
                     ikpath = space.interpolationPath(s.configs[j],s.configs[j+1],eps)
-                    t0 = len(res.milestones)
-                    t1 = t0 + 1
+                    if hastiming:
+                        t0 = s.times[j]
+                        t1 = s.times[j+1]
+                    else:
+                        t0 = len(res.milestones)
+                        t1 = t0 + 1
                     iktimes = [t0 + float(k)/float(len(ikpath)-1)*(t1-t0) for k in xrange(len(ikpath))]
                     res.milestones += ikpath[:-1]
                     res.times += iktimes[:-1]
