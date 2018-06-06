@@ -102,9 +102,18 @@ extensionToType = {'.config':'Config',
 
 typeToExtension = dict((v,k) for (k,v) in extensionToType.items())
 
+def knownExtensions():
+    """Returns all known file extensions"""
+    return extensionToType.keys()
+
 def knownTypes():
     """Returns all known types"""
-    return extensionToType.keys()
+    return typeToExtension.keys()
+
+def visualEditTypes():
+    """Returns types that can be visually edited"""
+    return ['Config','Configs','Trajectory','Vector3','Point','RigidTransform','Rotation','WorldModel']
+
 
 def filenameToType(name):
     fileName, fileExtension = os.path.splitext(name)
@@ -179,7 +188,13 @@ def get(name,type='auto',directory=None,default=None,doedit='auto',description=N
         fn = os.path.join(directory,name)
         try:
             if type == 'xml':
-                raise NotImplementedError("TODO: load xml files from Python API")
+                value = WorldModel()
+                res = value.readFile(fn)
+                if not res:
+                    try:
+                        value = loader.load('MultiPath',fn)
+                    except Exception as e:
+                        raise
             elif type == 'json':
                 f = open(fn,'r')
                 text = ''.join(f.readlines())
@@ -235,7 +250,9 @@ def set(name,value,type='auto',directory=None):
     fn = os.path.join(directory,name)
     _ensure_dir(fn)
     if type == 'xml':
-        raise NotImplementedError("TODO: save xml files from Python API")
+        if hasattr(value,'saveFile'):
+            return value.saveFile(fn)
+        raise NotImplementedError("TODO: save other xml files from Python API")
     elif type == 'json':
         f = open(fn,'w')
         f.write(loader.toJson(value,type=type))
@@ -276,7 +293,7 @@ class FileGetter:
                 pattern = desc + " ("
                 pattern = pattern + ' '.join("*"+ext for ext in exts) + ")"
                 patternlist.append(pattern)
-            #print patternlist
+            #print "Pattern list:",patternlist
             patterns = ";;".join(patternlist)
         self.result = QFileDialog.getSaveFileName(None, self.title, self.directory, patterns)
 
@@ -333,6 +350,7 @@ def save(value,type='auto',directory=None):
             if v == type:
                 extensions.append(k)
         extensions.append('.json')
+        print "Available extensions for objects of type",type,":",extensions
         fg.filetypes.append((type,extensions))
 
     def make_getfilename(glbackend):
@@ -622,6 +640,8 @@ def edit(name,value,type='auto',description=None,editor='visual',world=None,refe
                 return vis.editors.run(editor)[0]
             else:
                 return vis.editors.run(editor)
+        elif type == 'WorldModel':
+            return vis.editors.run(vis.editors.WorldEditor(name,value,description))
         else:
             raise RuntimeError("Visual editing of objects of type "+type+" not supported yet")
     else:

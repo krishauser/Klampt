@@ -15,7 +15,6 @@ from ..math import so3,vectorops
 from ..model.contact import ContactPoint, Hold
 from ..model.trajectory import Trajectory
 
-
 def writeVector(q):
     """Writes a vector to a string in the length-prepended format 'n v1 ... vn'"""
     return str(len(q))+'\t'+' '.join(str(v) for v in q)
@@ -221,11 +220,11 @@ def readIKObjective(text):
     if posLocal: posLocal = [float(v) for v in posLocal]
     if posWorld: posWorld = [float(v) for v in posWorld]
     if posDirection: posDirection = [float(v) for v in posDirection]
-    if rotLocal: rotLocal = [float(v) for v in rotLocal]
+    if rotAxis: rotAxis = [float(v) for v in rotAxis]
     if rotWorld: rotWorld = [float(v) for v in rotWorld]
     
     obj = IKObjective()
-    obj.setLinks(link,destLink);
+    obj.setLinks(link,destlink);
     if posType=='N':
         obj.setFreePosConstraint()
     elif posType=='F':
@@ -241,7 +240,7 @@ def readIKObjective(text):
         R = so3.from_moment(rotWorld)
         obj.setFixedRotConstraint(R)
     elif rotType == 'A':
-        obj.setAxialRotConstraint(rotLocal,rotWorld)
+        obj.setAxialRotConstraint(rotAxis,rotWorld)
     else:
         raise NotImplementedError("Two-axis rotational constraints not supported")
     return obj
@@ -417,6 +416,12 @@ def read(type,text):
         raise RuntimeError("Reading of objects of type "+type+" not supported")
     return readers[type](text)
 
+def loadWorldModel(fn):
+    w = WorldModel()
+    if not w.loadFile(fn):
+        raise RuntimeError("Error reading WorldModel from "+fn)
+    return w
+
 def loadGeometry3D(fn):
     g = Geometry3D()
     if not g.loadFile(fn):
@@ -424,11 +429,12 @@ def loadGeometry3D(fn):
     return g
 
 def loadTrajectory(fn):
-    value = trajectory.Trajectory()
+    value = Trajectory()
     value.load(fn)
     return value
 
 def loadMultiPath(fn):
+    from ..model import multipath
     value = multipath.MultiPath()
     value.load(fn)
     return value
@@ -437,12 +443,12 @@ loaders = {'Trajectory':loadTrajectory,
            'LinearPath':loadTrajectory,
            'MultiPath':loadMultiPath,
            'Geometry3D':loadGeometry3D,
+           'WorldModel':loadWorldModel,
            }
 
 savers = {'Trajectory':lambda x,fn:x.save(fn),
           'LinearPath':lambda x,fn:x.save(fn),
           'MultiPath':lambda x,fn:x.save(fn),
-          'Geometry3D':lambda x,fn:x.saveFile(fn),
           }
 
 def save(obj,type,fn):
@@ -454,13 +460,14 @@ def save(obj,type,fn):
         f.write(writers[type](obj)+'\n')
         f.close()
         return True
+    elif hasattr(obj,'saveFile'):
+        return obj.saveFile(fn)
     else:
         raise RuntimeError("Saving of type "+type+" is not supported")
 
 
 def load(type,fn):
     """General-purpose load"""
-    
     if type in loaders:
         return loaders[type](fn)
     elif type in readers:
@@ -498,12 +505,10 @@ def toJson(obj,type='auto'):
                         raise RuntimeError("Could not parse object "+str(obj))
         elif isinstance(obj,(bool,int,float,str,unicode)):
             type = 'Value'
-        elif isinstance(obj,ContactPoint):
-            type = 'ContactPoint'
-        elif isinstance(obj,IKObjective):
-            type = 'IKObjective'
-        elif isinstance(obj,Trajectory):
-            type = 'Trajectory'
+        elif obj.__class__.__name__ in ['ContactPoint','IKObjective','Trajectory','MultiPath']:
+            return obj.__class__.__name__
+        elif isinstance(obj,Trajectory):   #some subclasses of Trajectory may be used here too
+            return "Trajectory"
         else:
             raise RuntimeError("Unknown object of type "+obj.__class__.__name__)
 
