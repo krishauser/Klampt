@@ -150,7 +150,9 @@ if __name__ == "__main__":
         else:
             res = world.readFile(fn)
             if not res:
-                raise RuntimeError("Unable to load model "+fn)
+                print "Unable to load model "+fn
+                print "Quitting..."
+                sys.exit(1)
     viewer = MyGLViewer(world)
 
     for i,c in enumerate(control_modules):
@@ -164,7 +166,8 @@ if __name__ == "__main__":
                 maker = c.make
             except AttributeError:
                 print "Module",c.__name__,"must have a make() method"
-                raise
+                print "Quitting..."
+                sys.exit(1)
             controller = maker(world.robot(i))
         viewer.sim.setController(world.robot(i),controller)
     
