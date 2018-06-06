@@ -2,13 +2,14 @@ from ..model.contact import ContactPoint,Hold
 from ..model.trajectory import Trajectory,RobotTrajectory,SO3Trajectory,SE3Trajectory
 from ..model.multipath import MultiPath
 from ..math import vectorops,so3,se3
-from ..robotsim import WorldModel,RobotModel,RobotModelLink,RigidObjectModel,IKObjective,Geometry3D,TriangleMesh,PointCloud,GeometricPrimitive
+from ..robotsim import WorldModel,RobotModel,RobotModelLink,RigidObjectModel,TerrainModel,IKObjective,Geometry3D,TriangleMesh,PointCloud,GeometricPrimitive
 
 _knownTypes = ['Value','Vector2','Vector3','Matrix3','Point','Rotation','RigidTransform','Vector','Config',
                 'IntArray','StringArray',
                 'Configs','Trajectory','LinearPath','MultiPath',
                 'IKGoal','ContactPoint','Hold',
-                'TriangleMesh','PointCloud','VolumeGrid','GeometricPrimitive']
+                'TriangleMesh','PointCloud','VolumeGrid','GeometricPrimitive',
+                'WorldModel','RobotModel','RigidObjectModel','TerrainModel']
 
 def knownTypes():
     return _knownTypes[:]
@@ -29,6 +30,14 @@ def objectToTypes(object,world=None):
         return 'MultiPath'
     elif isinstance(object,GeometricPrimitive):
         return 'GeometricPrimitive'
+    elif isinstance(object,WorldModel):
+        return 'WorldModel'
+    elif isinstance(object,RobotModel):
+        return 'RobotModel'
+    elif isinstance(object,RigidObjectModel):
+        return 'RigidObjectModel'
+    elif isinstance(object,TerrainModel):
+        return 'TerrainModel'
     elif hasattr(object,'type'):
         if callable(object.type):
             return object.type()
@@ -69,10 +78,10 @@ def objectToTypes(object,world=None):
                 return vtypes[0]
             return vtypes
     else:
-        raise ValueError("Unknown object passed to objectToTypes")
+        raise ValueError("Unknown object of type %s passed to objectToTypes"%(object.__class__.__name__,))
 
 def make(type,object=None):
-    """Makes a default instance of the given type..
+    """Makes a default instance of the given type.
 
     Arguments:
     - str: the name of the desired type type 
@@ -126,5 +135,10 @@ def make(type,object=None):
         return Geometry3D(p)
     elif type == 'VolumeGrid':
         raise NotImplementedError("Can't create empty volume grid yet")
+    elif isinstance(object,WorldModel):
+        return WorldModel()
+    elif isinstance(object,(RobotModel,RigidObjectModel,TerrainModel)):
+        raise ValueError("Can't make an independent robot, rigid object, or terrain")
     else:
-        return None
+        raise ValueError("Can't make a Klamp't object of type %s"%(type,))
+    return None
