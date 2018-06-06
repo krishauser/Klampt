@@ -1,5 +1,6 @@
 import math
 import time
+from ..math import vectorops
 from cspace import CSpace
 
 def default_sampleneighborhood(c,r):
@@ -9,10 +10,10 @@ def default_visible(a,b):
     raise RuntimeError("Can't check visibility")
 
 def default_distance(a,b):
-    return math.sqrt(math.pow(ai-bi,2) for (ai,bi) in zip(a,b))
+    return vectorops.distance(a,b)
 
 def default_interpolate(a,b,u):
-    return [ai+u*(bi-ai) for (ai,bi) in zip(a,b)]
+    return vectorops.interpolate(a,b,u)
 
 def makedefault(space):
     """Helper: makes a space's callbacks perform the default Cartesian space
