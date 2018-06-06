@@ -2,6 +2,7 @@ from glinterface import GLPluginInterface
 from glprogram import GLProgram,GLPluginProgram
 import math
 from OpenGL.GL import *
+import weakref
 
 class GLWidgetPlugin(GLPluginInterface):
     """A GL plugin that sends user events to one or more Klamp't widgets.
@@ -93,7 +94,7 @@ class GLMultiViewportProgram(GLProgram):
         assert isinstance(view,GLProgram)
         self.views.append(view)
         #spoofs reshape, motion functions
-        view.window = self
+        view.window = weakref.proxy(self)
         self.defaultSizes.append((view.view.w,view.view.h))
         self.fit()
         #print "Added a view, total",len(self.views),"size now",self.view.w,self.view.h
@@ -107,6 +108,12 @@ class GLMultiViewportProgram(GLProgram):
                 self.fit()
                 self.activeView = None
                 return
+    def clearViews(self):
+        for p in self.views:
+            p.window = None
+        self.views = []
+        self.defaultSizes = []
+        self.activeView = None
     def updateActive(self,x,y):
         if not self.view.contains(x,y):
             return
@@ -118,6 +125,7 @@ class GLMultiViewportProgram(GLProgram):
                 return
         return
     def fit(self):
+        if len(self.views) == 0: return
         rowlen = int(math.ceil(math.sqrt(len(self.views))))
         assert rowlen > 0
         rowheights = [0]*int(math.ceil(float(len(self.views))/rowlen))
@@ -140,11 +148,14 @@ class GLMultiViewportProgram(GLProgram):
                 col = i % rowlen
                 row = int(i / rowlen)
                 p.view.x,p.view.y = (cumcolwidths[col],cumrowheights[row])
+            self.width = self.view.w
             self.height = self.view.h
             if self.window != None:
                 self.window.reshape(self.view.w,self.view.h)
         else:
             #squeeze
+            self.width = self.view.w
+            self.height = self.view.h
             for i,p in enumerate(self.views):
                 col = i % rowlen
                 row = int(i / rowlen)
@@ -170,6 +181,10 @@ class GLMultiViewportProgram(GLProgram):
         return True
     def displayfunc(self):
         anyTrue = False
+        glClearColor(0,0,0,0)
+        glScissor(0,0,self.view.w,self.view.h)
+        glEnable(GL_SCISSOR_TEST);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         for p in self.views:
             try:
                 if p.displayfunc():
@@ -244,7 +259,9 @@ class GLMultiViewportProgram(GLProgram):
         for p in self.views:
             p.idlefunc()
         return True
-
+    def refresh(self):
+        """Spoofs the window's refresh function"""
+        self.window.refresh()
     def reshape(self,w,h):
         """Spoofs the window's reshape function"""
         raise NotImplementedError("Can't have a viewport reshaping a multi-viewport yet")

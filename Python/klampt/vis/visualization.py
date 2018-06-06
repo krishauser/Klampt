@@ -152,7 +152,8 @@ def unlock(): unlocks the visualization world.  Must only be called once
 def customUI(make_func): launches a user-defined UI window by calling make_func(gl_backend)
     in the visualization thread.  This can be used to build custom editors and windows that
     are compatible with other visualization functionality.  Here gl_backend is an instance of
-    _GLBackend instantiated for the current plugin.
+    _GLBackend instantiated for the current plugin, and make_func returns a QDialog for dialog()
+    constructed windows, or QMainWindow (or similar Qt object) for show() constructed windows.
 def getViewport(): Returns the currently active viewport.
 
 The following VisualizationPlugin methods are also added to the klampt.vis namespace
@@ -269,6 +270,7 @@ from ..model import config
 from ..model import coordinates
 from ..model.subrobot import SubRobotModel
 from ..model.trajectory import *
+from ..model.multipath import MultiPath
 from ..model.contact import ContactPoint,Hold
 
 class WindowInfo:
@@ -367,7 +369,7 @@ def setPlugin(plugin):
                 _frontend.window = _windows[_current_window].glwindow
     if plugin == None:
         global _vis
-        if _vis==None:
+        if _vis is None:
             raise RuntimeError("Visualization disabled")
         _frontend.setPlugin(_vis)
     else:
@@ -384,7 +386,7 @@ def pushPlugin(plugin):
     assert isinstance(_frontend,GLPluginProgram),"Can't push a plugin after addPlugin"
     if len(_frontend.plugins) == 0:
         global _vis
-        if _vis==None:
+        if _vis is None:
             raise RuntimeError("Visualization disabled")
         _frontend.setPlugin(_vis)
     _frontend.pushPlugin(plugin)
@@ -452,7 +454,7 @@ def kill():
     """This should be called at the end of the calling program to cleanly terminate the
     visualization thread"""
     global _vis,_globalLock
-    if _vis==None:
+    if _vis is None:
         print "vis.kill() Visualization disabled"
         return
     _kill()
@@ -521,7 +523,7 @@ def setViewport(viewport):
 def clear():
     """Clears the visualization world."""
     global _vis
-    if _vis==None:
+    if _vis is None:
         return
     _vis.clear()
 
@@ -530,7 +532,7 @@ def add(name,item,keepAppearance=False):
     the same name already exists, it will no longer be shown.  If keepAppearance=True, then
     the prior item's appearance will be kept, if a prior item exists."""
     global _vis
-    if _vis==None:
+    if _vis is None:
         print "Visualization disabled"
         return
     _globalLock.acquire()
@@ -540,7 +542,7 @@ def add(name,item,keepAppearance=False):
 
 def listItems(name=None,indent=0):
     global _vis
-    if _vis==None:
+    if _vis is None:
         print "Visualization disabled"
         return
     _vis.listItems(name,indent)
@@ -550,7 +552,7 @@ def dirty(item_name='all'):
     to call this if you modify an item's geometry, for example.  If things start disappearing
     from your world when you create a new window, you may need to call this too."""
     global _vis
-    if _vis==None:
+    if _vis is None:
         print "Visualization disabled"
         return
     _vis.dirty(item_name)
@@ -567,21 +569,21 @@ def animate(name,animation,speed=1.0,endBehavior='loop'):
     - endBehavior: either 'loop' (animation repeats forever) or 'halt' (plays once).
     """
     global _vis
-    if _vis==None:
+    if _vis is None:
         print "Visualization disabled"
         return
     _vis.animate(name,animation,speed,endBehavior)
 
 def pauseAnimation(paused=True):
     global _vis
-    if _vis==None:
+    if _vis is None:
         print "Visualization disabled"
         return
     _vis.pauseAnimation(paused)
 
 def stepAnimation(amount):
     global _vis
-    if _vis==None:
+    if _vis is None:
         print "Visualization disabled"
         return
     _vis.stepAnimation(amount)
@@ -592,38 +594,38 @@ def animationTime(newtime=None):
     If newtime != None, this sets a new animation time.
     """
     global _vis
-    if _vis==None:
+    if _vis is None:
         print "Visualization disabled"
         return 0
     return _vis.animationTime(newtime)
 
 def remove(name):
     global _vis
-    if _vis==None:
+    if _vis is None:
         return
     return _vis.remove(name)
 
 def getItemConfig(name):
     global _vis
-    if _vis==None:
+    if _vis is None:
         return None
     return _vis.getItemConfig(name)
 
 def setItemConfig(name,value):
     global _vis
-    if _vis==None:
+    if _vis is None:
         return
     return _vis.setItemConfig(name,value)
 
 def hideLabel(name,hidden=True):
     global _vis
-    if _vis==None:
+    if _vis is None:
         return
     return _vis.hideLabel(name,hidden)
 
 def hide(name,hidden=True):
     global _vis
-    if _vis==None:
+    if _vis is None:
         return
     _vis.hide(name,hidden)
 
@@ -632,37 +634,37 @@ def edit(name,doedit=True):
     coordinate.Point's, coordinate.Transform's, coordinate.Frame's, robots,
     and objects are currently accepted."""
     global _vis
-    if _vis==None:
+    if _vis is None:
         return
     _vis.edit(name,doedit)
 
 def setAppearance(name,appearance):
     global _vis
-    if _vis==None:
+    if _vis is None:
         return
     _vis.setAppearance(name,appearance)
 
 def setAttribute(name,attr,value):
     global _vis
-    if _vis==None:
+    if _vis is None:
         return
     _vis.setAttribute(name,attr,value)
 
 def revertAppearance(name):
     global _vis
-    if _vis==None:
+    if _vis is None:
         return
     _vis.revertAppearance(name)
 
 def setColor(name,r,g,b,a=1.0):
     global _vis
-    if _vis==None:
+    if _vis is None:
         return
     _vis.setColor(name,r,g,b,a)
 
 def setDrawFunc(name,func):
     global _vis
-    if _vis==None:
+    if _vis is None:
         return
     _vis.setDrawFunc(name,func)
 
@@ -703,16 +705,21 @@ def _getBounds(object):
     if isinstance(object,WorldModel):
         res = []
         for i in range(object.numRobots()):
-            res += _getBounds(object.robots(i))
+            res += _getBounds(object.robot(i))
         for i in range(object.numRigidObjects()):
             res += _getBounds(object.rigidObject(i))
         return res
     elif isinstance(object,RobotModel):
-        return sum([object.link(i).geometry().getBB() for i in range(object.numLinks())],[])
+        res = []
+        for i in range(object.numLinks()):
+            bb = object.link(i).geometry().getBB()
+            if bb != None and not aabb_empty(bb):
+                res += list(bb)
+        return res
     elif isinstance(object,RigidObjectModel):
-        return object.geometry().getAABB()
+        return list(object.geometry().getBB())
     elif isinstance(object,Geometry3D):
-        return object.getAABB()
+        return list(object.getBB())
     elif isinstance(object,VisAppearance):
         if len(object.subAppearances) == 0:
             if isinstance(object.item,TerrainModel):
@@ -823,14 +830,14 @@ def addText(name,text,pos=None):
     attribute of the text using the identifier given in 'name'.
     """
     global _vis
-    _vis.add(name,text,True)
-    if pos is not None:
-        _vis.setAttribute(name,'position',pos)
+    if _vis is None:
+        return
+    _vis.addText(name,text,pos)
 
 def clearText():
     """Clears all text in the visualization."""
     global _vis
-    if _vis==None:
+    if _vis is None:
         return
     _vis.clearText()
 
@@ -839,27 +846,27 @@ def addPlot(name):
 
 def addPlotItem(name,itemname):
     global _vis
-    if _vis==None:
+    if _vis is None:
         return
     _vis.addPlotItem(name,itemname)
 
 def logPlot(name,itemname,value):
     """Logs a custom visualization item to a plot"""
     global _vis
-    if _vis==None:
+    if _vis is None:
         return
     _vis.logPlot(name,itemname,value)
 
 def logPlotEvent(name,eventname,color=None):
     """Logs an event on the plot."""
     global _vis
-    if _vis==None:
+    if _vis is None:
         return
     _vis.logPlotEvent(name,eventname,color)
 
 def hidePlotItem(name,itemname,hidden=True):
     global _vis
-    if _vis==None:
+    if _vis is None:
         return
     _vis.hidePlotItem(name,itemname,hidden)
 
@@ -877,13 +884,13 @@ def setPlotSize(name,w,h):
 
 def savePlot(name,fn):
     global _vis
-    if _vis==None:
+    if _vis is None:
         return
     _vis.savePlot(name,fn)
 
 def autoFitCamera(scale=1):
     global _vis
-    if _vis==None:
+    if _vis is None:
         return
     print "klampt.vis: auto-fitting camera to scene."
     _vis.autoFitCamera(scale)
@@ -1253,6 +1260,55 @@ class VisPlot:
             self.outfile.write(' '.join([str(v) for v in vals]))
             self.outfile.write('\n')
 
+def drawTrajectory(traj,width,color):
+    """Draws a trajectory of points or transforms"""
+    if isinstance(traj,list):
+        #R3 trajectory
+        glDisable(GL_LIGHTING)
+        glColor4f(*color)
+        if len(traj) == 1:
+            glPointSize(width)
+            glBegin(GL_POINTS)
+            glVertex3f(*traj[0])
+            glEnd()
+        if len(traj) >= 2:
+            glLineWidth(width)
+            glBegin(GL_LINE_STRIP)
+            for p in traj:
+                glVertex3f(*p)
+            glEnd()
+            glLineWidth(1.0)
+    elif isinstance(traj,SE3Trajectory):
+        pointTraj = []
+        for m in traj.milestones:
+            pointTraj.append(m[9:])
+        drawTrajectory(pointTraj,width,color)
+    else:
+        if len(traj.milestones[0]) == 3:
+            drawTrajectory(traj.milestones,width,color)
+        elif len(traj.milestones[0]) == 2:
+            #R2 trajectory
+            drawTrajectory([v + [0.0] for v in traj.milestones],width,color)
+
+
+def drawRobotTrajectory(traj,robot,ees,width=2,color=[1,0.5,0,1]):
+    """Draws trajectories for the robot's end effectors.  Note: no additional discretization is performed,
+    only the end effector points at the trajectory's milestones are shown.  If you want more accurate trajectories,
+    first call traj.discretize(eps)."""
+    for i,ee in enumerate(ees):
+        if ee < 0: ees[i] = robot.numLinks()-1
+    pointTrajectories = []
+    for ee in ees:
+        pointTrajectories.append([])
+    if isinstance(traj,Trajectory):
+        traj = traj.milestones
+    for m in traj:
+        robot.setConfig(m)
+        for ee,eetraj in zip(ees,pointTrajectories):
+            eetraj.append(robot.link(ee).getTransform()[1])
+    for ptraj in pointTrajectories:
+        drawTrajectory(ptraj,width,color)
+
 class VisAppearance:
     def __init__(self,item,name = None):
         self.name = name
@@ -1427,11 +1483,12 @@ class VisAppearance:
         elif isinstance(item,Trajectory):
             doDraw = False
             centroid = None
-            if isinstance(item,RobotTrajectory):
+            robot = (world.robot(0) if world.numRobots() > 0 else None)
+            treatAsRobotTrajectory = (item.__class__ == Trajectory and len(item.milestones) > 0 and robot and len(item.milestones[0]) == robot.numLinks())
+            if isinstance(item,RobotTrajectory) or treatAsRobotTrajectory:
                 ees = self.attributes.get("endeffectors",[-1])
                 if world:
                     doDraw = (len(ees) > 0)
-                    robot = world.robot(0)
                     for i,ee in enumerate(ees):
                         if ee < 0: ees[i] = robot.numLinks()-1
                     if doDraw:
@@ -1449,49 +1506,43 @@ class VisAppearance:
                     #R2 trajectory
                     doDraw = True
                     centroid = item.milestones[0]+[0.0]
+                else:
+                    #don't know how to interpret this trajectory
+                    pass
             if doDraw:
                 def drawRaw():
                     pointTrajectories = []
-                    if isinstance(item,RobotTrajectory):
-                        robot = world.robot(0)
+                    width = self.attributes.get("width",3)
+                    color = self.attributes.get("color",[1,0.5,0,1])
+                    if isinstance(item,RobotTrajectory) or treatAsRobotTrajectory:
                         ees = self.attributes.get("endeffectors",[-1])
-                        for i,ee in enumerate(ees):
-                            if ee < 0: ees[i] = robot.numLinks()-1
-                        if world:
-                            for ee in ees:
-                                pointTrajectories.append([])
-                            for m in item.milestones:
-                                robot.setConfig(m)
-                                for ee,eetraj in zip(ees,pointTrajectories):
-                                    eetraj.append(robot.link(ee).getTransform()[1])
-                    elif isinstance(item,SE3Trajectory):
-                        pointTrajectories.append([])
-                        for m in item.milestones:
-                            pointTrajectories[-1].append(m[9:])
+                        drawRobotTrajectory(item,robot,ees,width,color)                        
                     else:
-                        if len(item.milestones[0]) == 3:
-                            #R3 trajectory
-                            pointTrajectories.append(item.milestones)
-                        elif len(item.milestones[0]) == 2:
-                            #R2 trajectory
-                            pointTrajectories.append([v + [0.0] for v in item.milestones])
-                    glDisable(GL_LIGHTING)
-                    glLineWidth(self.attributes.get("width",3))
-                    glColor4f(*self.attributes.get("color",[1,0.5,0,1]))
-                    for traj in pointTrajectories:
-                        if len(traj) == 1:
-                            glBegin(GL_POINTS)
-                            glVertex3f(*traj[0])
-                            glEnd()
-                        if len(traj) >= 2:
-                            glBegin(GL_LINE_STRIP)
-                            for p in traj:
-                                glVertex3f(*p)
-                            glEnd()
-                    glLineWidth(1.0)
+                        drawTrajectory(item,width,color)
                 self.displayCache[0].draw(drawRaw,se3.identity())
                 if name != None:
                     self.drawText(name,centroid)
+        elif isinstance(item,MultiPath):
+            robot = (world.robot(0) if world.numRobots() > 0 else None)
+            if robot is not None and item.numSections() > 0:
+                if len(item.sections[0].configs[0]) == robot.numLinks():
+                    ees = self.attributes.get("endeffectors",[-1])
+                    if len(ees) > 0:
+                        for i,ee in enumerate(ees):
+                            if ee < 0: ees[i] = robot.numLinks()-1
+                        robot.setConfig(item.sections[0].configs[0])
+                        centroid = vectorops.div(vectorops.add(*[robot.link(ee).getTransform()[1] for ee in ees]),len(ees))
+                    width = self.attributes.get("width",3)
+                    color = self.attributes.get("color",[1,0.5,0,1])
+                    color2 = [1-c for c in color]
+                    color2[3] = color[3]
+                    def drawRaw():
+                        for i,s in enumerate(item.sections):
+                            drawRobotTrajectory(s.configs,robot,ees,width,(color if i%2 == 0 else color2))
+                    #draw it!
+                    self.displayCache[0].draw(drawRaw,se3.identity())
+                    if name != None:
+                        self.drawText(name,centroid)
         elif isinstance(item,coordinates.Point):
             def drawRaw():
                 glDisable(GL_LIGHTING)
@@ -1600,6 +1651,183 @@ class VisAppearance:
             self.displayCache[0].draw(drawRaw,[so3.canonical(item.n),item.x])
         elif isinstance(item,Hold):
             pass
+        elif isinstance(item,IKObjective):
+            if hasattr(item,'robot'):
+                #need this to be built with a robot element.
+                #Otherwise, can't determine the correct transforms
+                robot = item.robot
+            elif world:
+                if world.numRobots() >= 1:
+                    robot = world.robot(0)
+                else:
+                    robot = None
+            else:
+                robot = None
+            if robot != None:
+                link = robot.link(item.link())
+                dest = robot.link(item.destLink()) if item.destLink()>=0 else None
+                while len(self.displayCache) < 3:
+                    self.displayCache.append(glcommon.CachedGLObject())
+                self.displayCache[1].name = self.name+" target position"
+                self.displayCache[2].name = self.name+" curve"
+                if item.numPosDims() != 0:
+                    lp,wp = item.getPosition()
+                    #set up parameters of connector
+                    p1 = se3.apply(link.getTransform(),lp)
+                    if dest != None:
+                        p2 = se3.apply(dest.getTransform(),wp)
+                    else:
+                        p2 = wp
+                    d = vectorops.distance(p1,p2)
+                    v1 = [0.0]*3
+                    v2 = [0.0]*3
+                    if item.numRotDims()==3: #full constraint
+                        R = item.getRotation()
+                        def drawRaw():
+                            gldraw.xform_widget(se3.identity(),self.attributes.get("length",0.1),self.attributes.get("width",0.01))
+                        t1 = se3.mul(link.getTransform(),(so3.identity(),lp))
+                        t2 = (R,wp) if dest==None else se3.mul(dest.getTransform(),(R,wp))
+                        self.displayCache[0].draw(drawRaw,transform=t1)
+                        self.displayCache[1].draw(drawRaw,transform=t2)
+                        vlen = d*0.1
+                        v1 = so3.apply(t1[0],[-vlen]*3)
+                        v2 = so3.apply(t2[0],[vlen]*3)
+                    elif item.numRotDims()==0: #point constraint
+                        def drawRaw():
+                            glDisable(GL_LIGHTING)
+                            glEnable(GL_POINT_SMOOTH)
+                            glPointSize(self.attributes.get("size",5.0))
+                            glColor4f(*self.attributes.get("color",[0,0,0,1]))
+                            glBegin(GL_POINTS)
+                            glVertex3f(0,0,0)
+                            glEnd()
+                        self.displayCache[0].draw(drawRaw,transform=(so3.identity(),p1))
+                        self.displayCache[1].draw(drawRaw,transform=(so3.identity(),p2))
+                        #set up the connecting curve
+                        vlen = d*0.5
+                        d = vectorops.sub(p2,p1)
+                        v1 = vectorops.mul(d,0.5)
+                        #curve in the destination
+                        v2 = vectorops.cross((0,0,0.5),d)
+                    else: #hinge constraint
+                        p = [0,0,0]
+                        d = [0,0,0]
+                        def drawRawLine():
+                            glDisable(GL_LIGHTING)
+                            glEnable(GL_POINT_SMOOTH)
+                            glPointSize(self.attributes.get("size",5.0))
+                            glColor4f(*self.attributes.get("color",[0,0,0,1]))
+                            glBegin(GL_POINTS)
+                            glVertex3f(*p)
+                            glEnd()
+                            glColor4f(*self.attributes.get("color",[0.5,0,0.5,1]))
+                            glLineWidth(self.attributes.get("width",3.0))
+                            glBegin(GL_LINES)
+                            glVertex3f(*p)
+                            glVertex3f(*vectorops.madd(p,d,self.attributes.get("length",0.1)))
+                            glEnd()
+                            glLineWidth(1.0)
+                        ld,wd = item.getRotationAxis()
+                        p = lp
+                        d = ld
+                        self.displayCache[0].draw(drawRawLine,transform=link.getTransform(),parameters=(p,d))
+                        p = wp
+                        d = wd
+                        self.displayCache[1].draw(drawRawLine,transform=dest.getTransform() if dest else se3.identity(),parameters=(p,d))
+                        #set up the connecting curve
+                        d = vectorops.sub(p2,p1)
+                        v1 = vectorops.mul(d,0.5)
+                        #curve in the destination
+                        v2 = vectorops.cross((0,0,0.5),d)
+                    def drawConnection():
+                        glDisable(GL_LIGHTING)
+                        glDisable(GL_DEPTH_TEST)
+                        glColor3f(1,0.5,0)
+                        gldraw.hermite_curve(p1,v1,p2,v2,0.03*max(0.1,vectorops.distance(p1,p2)))
+                        #glBegin(GL_LINES)
+                        #glVertex3f(*p1)
+                        #glVertex3f(*p2)
+                        #glEnd()
+                        glEnable(GL_DEPTH_TEST)
+                    #TEMP for some reason the cached version sometimes gives a GL error
+                    self.displayCache[2].draw(drawConnection,transform=None,parameters = (p1,v1,p2,v2))
+                    #drawConnection()
+                    if name != None:
+                        self.drawText(name,wp)
+                else:
+                    wp = link.getTransform()[1]
+                    if item.numRotDims()==3: #full constraint
+                        R = item.getRotation()
+                        def drawRaw():
+                            gldraw.xform_widget(se3.identity(),self.attributes.get("length",0.1),self.attributes.get("width",0.01))
+                        self.displayCache[0].draw(drawRaw,transform=link.getTransform())
+                        self.displayCache[1].draw(drawRaw,transform=se3.mul(link.getTransform(),(R,[0,0,0])))
+                    elif item.numRotDims() > 0:
+                        #axis constraint
+                        d = [0,0,0]
+                        def drawRawLine():
+                            glDisable(GL_LIGHTING)
+                            glColor4f(*self.attributes.get("color",[0.5,0,0.5,1]))
+                            glLineWidth(self.attributes.get("width",3.0))
+                            glBegin(GL_LINES)
+                            glVertex3f(0,0,0)
+                            glVertex3f(*vectorops.mul(d,self.attributes.get("length",0.1)))
+                            glEnd()
+                            glLineWidth(1.0)
+                        ld,wd = item.getRotationAxis()
+                        d = ld
+                        self.displayCache[0].draw(drawRawLine,transform=link.getTransform(),parameters=d)
+                        d = wd
+                        self.displayCache[1].draw(drawRawLine,transform=(dest.getTransform()[0] if dest else so3.identity(),wp),parameters=d)
+                    else:
+                        #no drawing
+                        pass
+                    if name != None:
+                        self.drawText(name,wp)
+        elif isinstance(item,(GeometricPrimitive,TriangleMesh,PointCloud,Geometry3D)):
+            if not hasattr(self,'appearance'):
+                self.appearance = Appearance()
+            c = self.attributes.get("color",[0.5,0.5,0.5,1])
+            self.appearance.setColor(*c)
+            s = self.attributes.get("size",None)
+            if s:
+                self.appearance.setPointSize(s)
+            wp = None
+            geometry = None
+            lighting = True
+            if isinstance(self.item,GeometricPrimitive):
+                if not hasattr(self,'geometry'):
+                    self.geometry = Geometry3D(self.item)
+                geometry = self.geometry
+                if self.item.type not in ['Sphere','AABB']:
+                    lighting = False
+            elif isinstance(self.item,PointCloud):
+                if not hasattr(self,'geometry'):
+                    self.geometry = Geometry3D(self.item)
+                lighting = False
+                geometry = self.geometry
+            elif isinstance(self.item,TriangleMesh):
+                if not hasattr(self,'geometry'):
+                    self.geometry = Geometry3D(self.item)
+                geometry = self.geometry
+            else:
+                assert isinstance(self.item,Geometry3D)
+                if self.item.type() == 'GeometricPrimitive':
+                    prim = self.item.getGeometricPrimitive()
+                    if prim.type not in ['Sphere','AABB']:
+                        lighting = False
+                elif self.item.type() == 'PointCloud':
+                    lighting = False
+                geometry = self.item
+            if lighting:
+                glEnable(GL_LIGHTING)
+            else:
+                glDisable(GL_LIGHTING)
+            self.appearance.drawWorldGL(geometry)
+            if name != None:
+                bmin,bmax = geometry.getBB()
+                wp = vectorops.mul(vectorops.add(bmin,bmax),0.5)
+                self.drawText(name,wp)
         else:
             try:
                 itypes = self.attributes['type']
@@ -1676,170 +1904,6 @@ class VisAppearance:
                 self.displayCache[0].draw(drawRaw,transform=item)
                 if name != None:
                     self.drawText(name,item[1])
-            elif itypes == 'IKGoal':
-                if hasattr(item,'robot'):
-                    #need this to be built with a robot element.
-                    #Otherwise, can't determine the correct transforms
-                    robot = item.robot
-                elif world:
-                    if world.numRobots() >= 1:
-                        robot = world.robot(0)
-                    else:
-                        robot = None
-                else:
-                    robot = None
-                if robot != None:
-                    link = robot.link(item.link())
-                    dest = robot.link(item.destLink()) if item.destLink()>=0 else None
-                    while len(self.displayCache) < 3:
-                        self.displayCache.append(glcommon.CachedGLObject())
-                    self.displayCache[1].name = self.name+" target position"
-                    self.displayCache[2].name = self.name+" curve"
-                    if item.numPosDims() != 0:
-                        lp,wp = item.getPosition()
-                        #set up parameters of connector
-                        p1 = se3.apply(link.getTransform(),lp)
-                        if dest != None:
-                            p2 = se3.apply(dest.getTransform(),wp)
-                        else:
-                            p2 = wp
-                        d = vectorops.distance(p1,p2)
-                        v1 = [0.0]*3
-                        v2 = [0.0]*3
-                        if item.numRotDims()==3: #full constraint
-                            R = item.getRotation()
-                            def drawRaw():
-                                gldraw.xform_widget(se3.identity(),self.attributes.get("length",0.1),self.attributes.get("width",0.01))
-                            t1 = se3.mul(link.getTransform(),(so3.identity(),lp))
-                            t2 = (R,wp) if dest==None else se3.mul(dest.getTransform(),(R,wp))
-                            self.displayCache[0].draw(drawRaw,transform=t1)
-                            self.displayCache[1].draw(drawRaw,transform=t2)
-                            vlen = d*0.1
-                            v1 = so3.apply(t1[0],[-vlen]*3)
-                            v2 = so3.apply(t2[0],[vlen]*3)
-                        elif item.numRotDims()==0: #point constraint
-                            def drawRaw():
-                                glDisable(GL_LIGHTING)
-                                glEnable(GL_POINT_SMOOTH)
-                                glPointSize(self.attributes.get("size",5.0))
-                                glColor4f(*self.attributes.get("color",[0,0,0,1]))
-                                glBegin(GL_POINTS)
-                                glVertex3f(0,0,0)
-                                glEnd()
-                            self.displayCache[0].draw(drawRaw,transform=(so3.identity(),p1))
-                            self.displayCache[1].draw(drawRaw,transform=(so3.identity(),p2))
-                            #set up the connecting curve
-                            vlen = d*0.5
-                            d = vectorops.sub(p2,p1)
-                            v1 = vectorops.mul(d,0.5)
-                            #curve in the destination
-                            v2 = vectorops.cross((0,0,0.5),d)
-                        else: #hinge constraint
-                            p = [0,0,0]
-                            d = [0,0,0]
-                            def drawRawLine():
-                                glDisable(GL_LIGHTING)
-                                glEnable(GL_POINT_SMOOTH)
-                                glPointSize(self.attributes.get("size",5.0))
-                                glColor4f(*self.attributes.get("color",[0,0,0,1]))
-                                glBegin(GL_POINTS)
-                                glVertex3f(*p)
-                                glEnd()
-                                glColor4f(*self.attributes.get("color",[0.5,0,0.5,1]))
-                                glLineWidth(self.attributes.get("width",3.0))
-                                glBegin(GL_LINES)
-                                glVertex3f(*p)
-                                glVertex3f(*vectorops.madd(p,d,self.attributes.get("length",0.1)))
-                                glEnd()
-                                glLineWidth(1.0)
-                            ld,wd = item.getRotationAxis()
-                            p = lp
-                            d = ld
-                            self.displayCache[0].draw(drawRawLine,transform=link.getTransform(),parameters=(p,d))
-                            p = wp
-                            d = wd
-                            self.displayCache[1].draw(drawRawLine,transform=dest.getTransform() if dest else se3.identity(),parameters=(p,d))
-                            #set up the connecting curve
-                            d = vectorops.sub(p2,p1)
-                            v1 = vectorops.mul(d,0.5)
-                            #curve in the destination
-                            v2 = vectorops.cross((0,0,0.5),d)
-                        def drawConnection():
-                            glDisable(GL_LIGHTING)
-                            glDisable(GL_DEPTH_TEST)
-                            glColor3f(1,0.5,0)
-                            gldraw.hermite_curve(p1,v1,p2,v2,0.03*max(0.1,vectorops.distance(p1,p2)))
-                            #glBegin(GL_LINES)
-                            #glVertex3f(*p1)
-                            #glVertex3f(*p2)
-                            #glEnd()
-                            glEnable(GL_DEPTH_TEST)
-                        #TEMP for some reason the cached version sometimes gives a GL error
-                        self.displayCache[2].draw(drawConnection,transform=None,parameters = (p1,v1,p2,v2))
-                        #drawConnection()
-                        if name != None:
-                            self.drawText(name,wp)
-                    else:
-                        wp = link.getTransform()[1]
-                        if item.numRotDims()==3: #full constraint
-                            R = item.getRotation()
-                            def drawRaw():
-                                gldraw.xform_widget(se3.identity(),self.attributes.get("length",0.1),self.attributes.get("width",0.01))
-                            self.displayCache[0].draw(drawRaw,transform=link.getTransform())
-                            self.displayCache[1].draw(drawRaw,transform=se3.mul(link.getTransform(),(R,[0,0,0])))
-                        elif item.numRotDims() > 0:
-                            #axis constraint
-                            d = [0,0,0]
-                            def drawRawLine():
-                                glDisable(GL_LIGHTING)
-                                glColor4f(*self.attributes.get("color",[0.5,0,0.5,1]))
-                                glLineWidth(self.attributes.get("width",3.0))
-                                glBegin(GL_LINES)
-                                glVertex3f(0,0,0)
-                                glVertex3f(*vectorops.mul(d,self.attributes.get("length",0.1)))
-                                glEnd()
-                                glLineWidth(1.0)
-                            ld,wd = item.getRotationAxis()
-                            d = ld
-                            self.displayCache[0].draw(drawRawLine,transform=link.getTransform(),parameters=d)
-                            d = wd
-                            self.displayCache[1].draw(drawRawLine,transform=(dest.getTransform()[0] if dest else so3.identity(),wp),parameters=d)
-                        else:
-                            #no drawing
-                            pass
-                        if name != None:
-                            self.drawText(name,wp)
-            elif itypes == 'GeometricPrimitive':
-                if not hasattr(self,'appearance'):
-                    self.appearance = Appearance()
-                c = self.attributes.get("color",[0.5,0.5,0.5,1])
-                self.appearance.setColor(*c)
-                s = self.attributes.get("size",None)
-                if s:
-                    self.appearance.setPointSize(s)
-                wp = None
-                if isinstance(self.item,GeometricPrimitive):
-                    if not hasattr(self,'geometry'):
-                        self.geometry = Geometry3D(self.item)
-                    if self.item.type in ['Sphere','AABB']:
-                        glEnable(GL_LIGHTING)
-                    else:
-                        glDisable(GL_LIGHTING)
-                    self.appearance.drawGL(self.geometry)
-                    if name != None:
-                        bmin,bmax = self.geometry.getBB()
-                        wp = vectorops.mul(vectorops.add(bmin,bmax),0.5)
-                else:
-                    if self.item.getGeometricPrimitive().type in ['Sphere','AABB']:
-                        glEnable(GL_LIGHTING)
-                    else:
-                        glDisable(GL_LIGHTING)
-                    self.appearance.drawWorldGL(self.item)
-                    if name != None:
-                        bmin,bmax = self.item.getBB()
-                        wp = vectorops.mul(vectorops.add(bmin,bmax),0.5)
-                if name != None:
-                    self.drawText(name,wp)
             else:
                 print "Unable to draw item of type \"%s\""%(str(itypes),)
 
@@ -2256,6 +2320,12 @@ class VisualizationPlugin(glcommon.GLWidgetPlugin):
         _globalLock.release()
         #self.refresh()
 
+    def addText(self,name,text,pos=None):
+        self.add(name,text,True)
+        if pos is not None:
+            self.setAttribute(name,'position',pos)
+
+
     def animate(self,name,animation,speed=1.0,endBehavior='loop'):
         global _globalLock
         _globalLock.acquire()
@@ -2265,6 +2335,19 @@ class VisualizationPlugin(glcommon.GLWidgetPlugin):
             animation = Trajectory(range(len(animation)),animation)
         if isinstance(animation,HermiteTrajectory):
             animation = animation.configTrajectory()
+        if isinstance(animation,MultiPath):
+            world = self.items.get('world',None)
+            if world != None:
+                world=world.item
+                if world.numRobots() > 0:
+                    #discretize multipath
+                    robot = world.robot(0)
+                    animation = animation.getTrajectory(robot,0.1)
+                else:
+                    animation = animation.getTrajectory()
+            else:
+                animation = animation.getTrajectory()
+        assert isinstance(animation,Trajectory) or animation is None,"Must animate() with a Trajectory object or list of milestones"
         item = self.getItem(name)
         item.animation = animation
         item.animationStartTime = self.currentAnimationTime
@@ -2509,6 +2592,7 @@ _frontend.setPlugin(_vis)
 #signals to visualization thread
 _quit = False
 _thread_running = False
+_in_app_thread = False
 
 if _PyQtAvailable:
     from PyQt4 import QtGui
@@ -2561,6 +2645,7 @@ if _PyQtAvailable:
             self.glwidget.setMaximumSize(4000,4000)
             self.glwidget.setSizePolicy(QSizePolicy(QSizePolicy.Maximum,QSizePolicy.Maximum))
             self.setCentralWidget(self.glwidget)
+            self.glwidget.setParent(self)
             self.setWindowTitle(windowinfo.name)
             self.glwidget.name = windowinfo.name
             self.saving_movie = False
@@ -2797,7 +2882,7 @@ if _PyQtAvailable:
             _globalLock.release()
 
     def _run_app_thread():
-        global _thread_running,_vis,_widget,_window,_quit,_showdialog,_showwindow,_globalLock
+        global _thread_running,_in_app_thread,_vis,_widget,_window,_quit,_showdialog,_showwindow,_globalLock
         _thread_running = True
 
         _GLBackend.initialize("Klamp't visualization")
@@ -2838,7 +2923,6 @@ if _PyQtAvailable:
                         w.glwindow.show()
                         w.glwindow.idlesleep(0)
                         w.glwindow.refresh()
-                        w.glwindow.refresh()
                         _globalLock.release()
                         res = dlg.exec_()
                         _globalLock.acquire()
@@ -2864,7 +2948,6 @@ if _PyQtAvailable:
                     print "klampt.vis: Showing window",i
                     print "#########################################"
                     w.glwindow.show()
-                    w.glwindow.setParent(w.guidata)
                     w.glwindow.idlesleep(0)
                     w.guidata.show()
                 if w.mode == 'hidden' and w.guidata != None:
@@ -2880,7 +2963,9 @@ if _PyQtAvailable:
                     w.glwindow.setParent(None)
                     w.guidata = None
             _globalLock.release()
+            _in_app_thread = True
             _GLBackend.app.processEvents()
+            _in_app_thread = False
             time.sleep(0.001)
         print "Visualization thread closing..."
         for w in _windows:
@@ -3060,8 +3145,42 @@ def _dialog():
     _windows[_current_window].worlds = _current_worlds
     _windows[_current_window].active_worlds = _current_worlds[:]
     _globalLock.release()
-    while _windows[_current_window].mode == 'dialog':
-        time.sleep(0.1)
+    if not _in_app_thread:
+        print "vis.dialog(): Waiting for dialog to complete...."
+        while _windows[_current_window].mode == 'dialog':
+            time.sleep(0.1)
+        print "vis.dialog(): ... dialog done."
+    else:
+        _globalLock.acquire()
+        w = _windows[_current_window]
+        if w.glwindow == None:
+            print "vis: creating GL window"
+            w.glwindow = _GLBackend.createWindow(w.name)
+            w.glwindow.setProgram(w.frontend)
+            w.glwindow.setParent(None)
+            w.glwindow.refresh()
+        if w.custom_ui == None:
+            dlg = _MyDialog(w)
+        else:
+            dlg = w.custom_ui(w.glwindow)
+        print "#########################################"
+        print "klampt.vis: Dialog starting on window",_current_window
+        print "#########################################"
+        if dlg != None:
+            w.glwindow.show()
+            w.glwindow.idlesleep(0)
+            w.glwindow.refresh()
+            _globalLock.release()
+            res = dlg.exec_()
+            _globalLock.acquire()
+        print "#########################################"
+        print "klampt.vis: Dialog done on window",_current_window
+        print "#########################################"
+        w.glwindow.hide()
+        w.glwindow.setParent(None)
+        w.glwindow.idlesleep()
+        w.mode = 'hidden'
+        _globalLock.release()
     return
 
 def _set_custom_ui(func):

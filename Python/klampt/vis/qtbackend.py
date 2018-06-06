@@ -3,6 +3,7 @@ from PyQt4 import QtGui
 from PyQt4.QtCore import *
 from PyQt4.QtOpenGL import *
 import math
+import weakref
 
 GLUT_UP = 1
 GLUT_DOWN = 0
@@ -108,7 +109,7 @@ class QtGLWindow(QGLWidget):
             if self.initialized:
                 self.setWindowTitle(program.name)
         self.program = program
-        program.window = self
+        program.window = weakref.proxy(self)
         if self.initialized:
             program.initialize()
             program.reshapefunc(self.width,self.height)
@@ -298,6 +299,16 @@ class QtGLWindow(QGLWidget):
                 #self.updateGL()
                 self.update()
             QTimer.singleShot(0,dorefresh)
+
+    def resizeEvent(self,event):
+        QGLWidget.resizeEvent(self,event)
+
+        (self.width,self.height) = (event.size().width(),event.size().height())
+        #self.window().resize(event.size())
+        #self.window().adjustSize()
+        if self.program:
+            self.program.reshapefunc(self.width,self.height)
+        self.refresh()
 
     def reshape(self,w,h):
         (self.width,self.height) = (w,h)

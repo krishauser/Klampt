@@ -879,7 +879,7 @@ if glinit._PyQtAvailable:
         """Returns a pair (res,value) where res is True / False if OK / Cancel was pressed, respectively, 
         and value is the return value of the editor object
         """
-        assert isinstance(editorObject,VisualEditorBase),"Must provide a VisualEditorBase instance to run()"
+        assert isinstance(editorObject,VisualEditorBase),"Must provide a VisualEditorBase instance to vis.editors.run()"
         global _vis_id, _my_dialog_res, _my_dialog_retval
 
         old_vis_window = visualization.getWindow()
@@ -889,6 +889,7 @@ if glinit._PyQtAvailable:
             visualization.setWindow(_vis_id)
         visualization.setPlugin(editorObject)
         def makefunc(gl_backend):
+            assert gl_backend is not None
             res = _EditDialog(gl_backend)
             res.setEditor(editorObject)
             visualization._checkWindowCurrent(editorObject.world)
@@ -902,11 +903,11 @@ if glinit._PyQtAvailable:
             print "Exiting program."
             exit(0)
 
-        visualization.setWindow(old_vis_window)
         visualization.setPlugin(None)
         visualization.customUI(None)
+        visualization.setWindow(old_vis_window)
 
-        print "Result",res,"return value",retVal
+        print "vis.editors.run(): Result",res,"return value",retVal
         return res,retVal
 else:
     def run(editorObject):

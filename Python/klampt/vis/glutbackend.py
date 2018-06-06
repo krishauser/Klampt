@@ -106,7 +106,7 @@ class GLUTWindow:
             if self.initialized:
                 glutSetWindowTitle(program.name)
         self.program = program
-        program.window = self
+        program.window = weakref.proxy(self)
         if self.initialized:
             program.initialize()
             program.reshapefunc(self.width,self.height)
