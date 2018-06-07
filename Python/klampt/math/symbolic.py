@@ -1107,7 +1107,7 @@ class Context:
         assert newname not in self.variableDict,"Renamed variable name "+newname+" already exists"
 
         del self.variableDict[item.name]
-        self.value.variableDict[newname] = item
+        self.variableDict[newname] = item
         item.name = newname
     def renameUserData(self,itemname,newname):
         """Renames a userData"""
@@ -2610,6 +2610,8 @@ class OperatorExpression(Expression):
                             rows = [self.functionInfo.deriv[index](*(self.args+[reshape.optimized(da[i],arg_shape) if needs_reshaping else da[i]])) for i in range(stackcount)]
                             inc = array(*rows)
                         else:
+                            #Need an apply_ and concat function
+                            #inc = array(*map_(apply_(self.functionInfo.deriv[index],concat(self.args,[reshaper(da['i'])])),'i',range_(stackcount))
                             raise NotImplementedError("Dynamically sized dispatch to stacked derivatives of function %s?"%(self.functionInfo.name,))
                 else:
                     #da is not stacked
