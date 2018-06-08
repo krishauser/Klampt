@@ -742,6 +742,7 @@ class ObjectTransformEditor(VisualEditorBase):
             self.value = self.objposer.get()
         return VisualEditorBase.mousefunc(self,button,state,x,y)
 
+
 class WorldEditor(VisualEditorBase):
     def __init__(self,name,value,description):
         VisualEditorBase.__init__(self,name,value,description,value)
@@ -766,11 +767,19 @@ class WorldEditor(VisualEditorBase):
         for r in self.terrainPosers:
             self.addWidget(r)
 
+    def display(self):
+        #Override display handler since the widget draws the rigid objects and transforms
+        for i in xrange(self.world.numTerrains()):
+            #self.world.terrain(i).geometry().getCurrentTransform()
+            self.world.terrain(i).appearance().drawWorldGL(self.world.terrain(i).geometry())
+        self.klamptwidgetmaster.drawGL(self.viewport())
+        return False
+
     def finalize(self):
         """Applies the transforms to all the terrain geometries."""
         for i in xrange(self.world.numTerrains()):
             T0 = self.world.terrain(i).geometry().getCurrentTransform()
-            self.world.terrain(i).geometry().getCurrentTransform(*se3.identity())
+            self.world.terrain(i).geometry().setCurrentTransform(*se3.identity())
             self.world.terrain(i).geometry().transform(*T0)
     
     def instructions(self):
