@@ -299,7 +299,7 @@ class FileGetter:
 
 def load(type=None,directory=None):
     """Asks the user to open a resource file of a given type.  If type is not given, all resource file types
-    are given as options.  Returns a (filename,value) pair"""
+    are given as options.  Returns a (filename,value) pair, or None if the operation was canceled"""
     
     fg = FileGetter('Open resource')
     fg.directory = directory
@@ -329,9 +329,8 @@ def load(type=None,directory=None):
     vis.setWindow(old_window)
     if len(fg.result) == 0:
         return None
-    if type == None:
-        return get(str(fg.result),'auto',directory,doedit=False)
-    return str(fg.result),get(str(fg.result),type,'',doedit=False)
+    fn = str(fg.result)
+    return fn,get(fn,('auto' if type is None else type),'',doedit=False)
 
 def save(value,type='auto',directory=None):
     """Asks the user to save the given resource to a file of the correct type.  If type='auto', the type
