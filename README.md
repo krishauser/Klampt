@@ -92,21 +92,23 @@ Other documentation includes:
 
 ## Tutorials 
 
-Tutorials are available in the [Tutorials folder](Documentation/Tutorials), with a more complete list on the [Klamp't website](http://klampt.org#tutorials).  (Stay tuned... we are in the process of updating the HTML tutorials to Markdown so they can be browsed more easily on Github.)
+Tutorials are available in the [Tutorials folder](Documentation/Tutorials), with a more complete list on the [Klamp't website](http://klampt.org#tutorials). 
 
 - Install Klampt ([Linux](Documentation/Tutorials/Install-Linux.md), [Windows](Documentation/Tutorials/Install-Windows.md), [Mac](Documentation/Tutorials/Install-Mac.md))
-- Edit a world file
-- Dynamically create a world using code (Python)
-- Generate a path/trajectory from keyframes (Apps, Python)
-- Animate a video of a path/trajectory (Apps, Python)
-- Simulate the execution of a keyframe path (Apps, Python)
-- Implement a custom controller for a simulated robot (C++, Python)
-- Implement a custom controller for a real robot (C++, Python)
-- Process clicks on the robot or world (C++, Python)
-- Run a motion planner (C++, Python)
-- Add a custom feasibility test to a motion planner (C++, Python)
-- Set up a simulated camera sensor and save frames to disk (Apps, Python)
-- Display ROS point cloud messages (Python)
+- Build and edit a world file([Python](Documentation/Tutorials/Build-and-edit-world.md))
+- Dynamically create a world using code ([Python](Documentation/Tutorials/Create-a-world-using-code.md))
+- Generate a path/trajectory from keyframes ([Apps](Documentation/Tutorials/Path-generation-using-Apps.md), [Python](Documentation/Tutorials/Path-generation-using-Python.md))
+- Animate a video of a path/trajectory ([Apps](Documentation/Tutorials/Animation-generation-using-Apps.md), [Python](Documentation/Tutorials/Animation-generation-using-Python.md))
+- Simulate the execution of a keyframe path ([Apps](Documentation/Tutorials/Run-a-simulation-Apps.md), [C++](Documentation/Tutorials/Run-a-simulation-Cpp.md),[Python](Documentation/Tutorials/Run-a-simulation-Python.md))
+- Implement a custom controller for a simulated robot ([C++](Documentation/Tutorials/Custom-controller-simulated-cpp.md), [Python](Documentation/Tutorials/Custom-controller-simulated-Python.md))
+- Process clicks on the robot or world ([C++](Documentation/Tutorials/Click-on-robot-cpp.md), [Python](Documentation/Tutorials/Click-on-robot-Python.md))
+- Run a motion planner and add a custom feasibility test to a motion planner([Python](Documentation/Tutorials/Motion-planning-Python.md))
+- Set up a simulated camera sensor and save frames to disk ([Apps](Documentation/Tutorials/Simulated-sensor-Apps.md), [Python](Documentation/Tutorials/Simulated-sensor-Python.md))
+- Display ROS point cloud messages ([Python](Documentation/Tutorials/Ros-point-cloud.md))
+- Import and calibrate a URDF robot ([Apps](Documentation/Tutorials/Import-and-calibrate-urdf.md))
+- Solve an inverse kinematics problem ([C++](Documentation/Tutorials/Inverse-kinematics-cpp.md), [Python](Documentation/Tutorials/Inverse-kinematics-Python.md))
+- Grasp and Object ([C++](Documentation/Tutorials/Grasp-object-cpp.md))
+- Run a batch simulation ([Python](Documentation/Tutorials/Batch-simulation-Python.md))
 
 
 ## Version history
