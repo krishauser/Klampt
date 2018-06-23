@@ -1483,7 +1483,7 @@ class VisAppearance:
         elif isinstance(item,Trajectory):
             doDraw = False
             centroid = None
-            robot = (world.robot(0) if world.numRobots() > 0 else None)
+            robot = (world.robot(0) if world is not None and world.numRobots() > 0 else None)
             treatAsRobotTrajectory = (item.__class__ == Trajectory and len(item.milestones) > 0 and robot and len(item.milestones[0]) == robot.numLinks())
             if isinstance(item,RobotTrajectory) or treatAsRobotTrajectory:
                 ees = self.attributes.get("endeffectors",[-1])
@@ -1523,7 +1523,7 @@ class VisAppearance:
                 if name != None:
                     self.drawText(name,centroid)
         elif isinstance(item,MultiPath):
-            robot = (world.robot(0) if world.numRobots() > 0 else None)
+            robot = (world.robot(0) if world is not None and world.numRobots() > 0 else None)
             if robot is not None and item.numSections() > 0:
                 if len(item.sections[0].configs[0]) == robot.numLinks():
                     ees = self.attributes.get("endeffectors",[-1])
@@ -1657,7 +1657,7 @@ class VisAppearance:
                 #Otherwise, can't determine the correct transforms
                 robot = item.robot
             elif world:
-                if world.numRobots() >= 1:
+                if world is not None and world.numRobots() >= 1:
                     robot = world.robot(0)
                 else:
                     robot = None
