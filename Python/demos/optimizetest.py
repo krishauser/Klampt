@@ -360,6 +360,16 @@ def test_robotoptimize():
     world = WorldModel()
     world.readFile("../../data/tx90scenario0.xml")
     opt = robotoptimize.RobotOptimizationProblem(world=world)
+    rot = opt.addKlamptVar("rot","Rotation")
+    opt.addCost(rot.expr[2])
+    #opt.addEquality(opt.q[3])
+    opt.q.bind(world.robot(0).getConfig())
+    print "Initial cost",opt.cost()
+    opt.q.unbind()
+    opt.pprint()
+    print "Solve result:",opt.solve(optimize.OptimizerParams(localMethod='auto'))
+    raw_input()
+
     ikgoal = ik.objective(world.robot(0).link(6),local=[0,0,0],world=[1,0,1])
     opt.addIKObjective(ikgoal)
     opt.objectives[-1].name = "IK constraint"
@@ -415,14 +425,15 @@ def test_error():
 
 from klampt import *
 from klampt.plan import robotoptimize
-from klampt.math import symbolic,optimize,vectorops
+from klampt.math import symbolic,optimize,vectorops,so3,se3
 
 from klampt.vis import editors
 from klampt.model import types
-from klampt.io import loader
+from klampt.io import loader,resource
 from klampt import RobotPoser,PointPoser,TransformPoser
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
+from PyQt4.QtGui import QFileDialog
 import json
 import unicodedata
 from OpenGL.GL import *
@@ -431,7 +442,8 @@ class SmallListWidget(QListWidget):
     def sizeHint(self):
         s = QSize()
         s.setHeight(80)
-        s.setWidth(QListWidget.sizeHint(self).width())
+        #s.setWidth(QListWidget.sizeHint(self).width())
+        s.setWidth(150)
         return s
 
 class SmallTextEdit(QTextEdit):
@@ -454,15 +466,26 @@ class ShowTextDialog(QDialog):
 class OptimizationProblemEditor(editors.WorldEditor):
     def __init__(self,name,value,description,world):
         editors.WorldEditor.__init__(self,name,world,description)
+        self.typelist = ['N','V','M','A',
+                         'Vector3','Config','Rotation','RigidTransform',
+                         'U']
+        self.typenamelist = ["Numeric","Vector","Matrix","N-D array",
+                             "3D point","Robot configuration","3D rotation","3D transform",
+                             "User data"]
+        self.typedefaultvalues = [0.0,[0.0,0.0],[[1.0,0.0],[0.0,1.0]],[[1.0,0.0],[0.0,1.0]],
+            None,None,None,None,
+            None]
+        self.visuallyEditableTypes = ['Config','Vector','Vector3','Point','Matrix3','Rotation','RigidTransform']
         self.value = value
         self.allFunctions = sorted(value.context.listFunctions(doprint=False))
         self.argumentWidget = None
         self.worldeditmaster = self.klamptwidgetmaster
+        self.variableWidgets = dict()
     def instructions(self):
-        return "Use the controls to change the optimization problem.\nRight-click on items in the world to change the solver starting configuration."
+        return "Edit the optimization problem below.\nRight-click on items in the world to change starting values."
     def addDialogItems(self,parent,ui='qt'):
         self.parent = parent
-        playout = QHBoxLayout(parent)
+        playout = QVBoxLayout(parent)
         self.tabWidget = QTabWidget()
         playout.addWidget(self.tabWidget)
         firstTab = QWidget()
@@ -470,20 +493,17 @@ class OptimizationProblemEditor(editors.WorldEditor):
         thirdTab = QWidget()
         self.tabWidget.addTab(firstTab,"Objectives")
         self.tabWidget.addTab(secondTab,"Variables")
-        self.tabWidget.addTab(thirdTab,"Problem")
+        self.tabWidget.addTab(thirdTab,"I/O")
         self.tabWidget.setSizePolicy(QSizePolicy(QSizePolicy.Expanding,QSizePolicy.Expanding))
 
         #constraint editing
-        hlayout = QHBoxLayout(firstTab)
-        left = QGridLayout()
-        right = QGridLayout()
-        hlayout.addLayout(left)
-        hlayout.addLayout(right)
+        vlayout = QVBoxLayout(firstTab)
         #left.setSizePolicy(QSizePolicy(QSizePolicy.Expanding,QSizePolicy.Fixed))
         #left.resize(350,200)
         #right.setSizePolicy(QSizePolicy(QSizePolicy.Expanding,QSizePolicy.Fixed))
         #right.resize(350,200)
         self.typeCombo = QComboBox()
+        self.typeCombo.setToolTip("Filter by constraint type")
         self.typeCombo.addItem("Cost")
         self.typeCombo.addItem("IK objective")
         self.typeCombo.addItem("Equality")
@@ -491,41 +511,63 @@ class OptimizationProblemEditor(editors.WorldEditor):
         self.typeCombo.addItem("Feasibility test")
         self.typeMap = ['cost','ik','eq','ineq','feas']
         self.constraintList = SmallListWidget()
-        left.addWidget(self.typeCombo,0,0,1,3)
-        left.addWidget(self.constraintList,1,0,1,3)
+        self.constraintList.setToolTip("Costs and constraints")
+        vlayout.addWidget(self.typeCombo)
+        vlayout.addWidget(self.constraintList)
         self.addButton = QPushButton("Add")
+        self.addButton.setToolTip("Add a new cost/constraint")
         self.deleteButton = QPushButton("Delete")
+        self.deleteButton.setToolTip("Delete selected cost/constraint")
         self.weightLabel = QLabel("Weight")
         self.weightSpin = QDoubleSpinBox()
+        self.weightSpin.setToolTip("The weight of the selected cost/constraint")
         self.valueLabel = QLabel("Value: ")
         self.solveButton = QPushButton("Solve")
+        self.solveButton.setToolTip("Solve the current optimization problem")
         self.objectiveNameEdit = QLineEdit("Name")
+        self.objectiveNameEdit.setToolTip("An optional name of the cost/constraint")
         
-        left.addWidget(self.addButton,2,0,1,2)
-        left.addWidget(self.deleteButton,2,2)
+        hlayout = QHBoxLayout()
+        hlayout.addWidget(self.addButton)
+        hlayout.addWidget(self.deleteButton)
+        vlayout.addLayout(hlayout)
         
-        left.addWidget(self.valueLabel,3,0)
-        left.addWidget(self.weightLabel,3,1)
-        left.addWidget(self.weightSpin,3,2)
-        left.addWidget(self.objectiveNameEdit,4,0,1,3)
-        left.addWidget(self.solveButton,5,0,1,3)
+        hlayout = QHBoxLayout()
+        hlayout.addWidget(self.valueLabel)
+        hlayout.addWidget(self.weightLabel)
+        hlayout.addWidget(self.weightSpin)
+        vlayout.addLayout(hlayout)
+        hlayout = QHBoxLayout()
+        hlayout.addWidget(QLabel("Name:"))
+        hlayout.addWidget(self.objectiveNameEdit)
+        vlayout.addLayout(hlayout)
+        playout.addWidget(self.solveButton)
 
         self.functionCombo = QComboBox()
         for f in self.allFunctions:
             self.functionCombo.addItem(f)
         self.insertFunctionButton = QPushButton("Insert Func")
+        self.insertFunctionButton.setToolTip("Adds the selected function to the code box")
         self.codeEdit = SmallTextEdit()
+        self.codeEdit.setToolTip("The code box. Edit the constraint expression here")
         self.simplifyButton = QPushButton("Simplify")
+        self.simplifyButton.setToolTip("Simplify the constraint expression")
         self.derivativeButton = QPushButton("Derivative")
+        self.derivativeButton.setToolTip("Calculate the derivative of the constraint")
         self.editVisualButton = QPushButton("Visual Edit")
         self.editVisualButton.setCheckable(True)
+        self.editVisualButton.setToolTip("Show the selected expression in the world")
 
-        right.addWidget(self.functionCombo,0,0,1,2)
-        right.addWidget(self.insertFunctionButton,1,0,1,2)
-        right.addWidget(self.codeEdit,2,0,1,2)
-        right.addWidget(self.simplifyButton,3,0,1,1)
-        right.addWidget(self.derivativeButton,3,1,1,1)
-        right.addWidget(self.editVisualButton,4,0,1,2)
+        hlayout = QHBoxLayout()
+        hlayout.addWidget(self.functionCombo)
+        hlayout.addWidget(self.insertFunctionButton)
+        vlayout.addLayout(hlayout)
+        vlayout.addWidget(self.codeEdit)
+        hlayout = QHBoxLayout()
+        hlayout.addWidget(self.simplifyButton)
+        hlayout.addWidget(self.derivativeButton)
+        vlayout.addLayout(hlayout)
+        vlayout.addWidget(self.editVisualButton)
         self.solveButton.clicked.connect(self.solve)
         self.addButton.clicked.connect(self.insert)
         self.deleteButton.clicked.connect(self.delete)
@@ -549,77 +591,91 @@ class OptimizationProblemEditor(editors.WorldEditor):
         """
 
         #variable editing
-        hlayout = QHBoxLayout(secondTab)
+        vlayout = QVBoxLayout(secondTab)
         self.variableList = SmallListWidget()
+        self.variableList.setToolTip("List of all variables and user data")
         self.addVarButton = QPushButton("Add")
+        self.addVarButton.setToolTip("Add a new variable")
         self.deleteVarButton = QPushButton("Delete")
-        vlayout = QVBoxLayout()
-        vlayout.addWidget(self.variableList)
-        vlayout.addWidget(self.addVarButton)
-        vlayout.addWidget(self.deleteVarButton)
-        hlayout.addLayout(vlayout)
-        vlayout = QVBoxLayout()
-        self.varNameEdit = QLineEdit("Name")
+        self.deleteVarButton.setToolTip("Delete the selected variable")
         self.varTypeCombo = QComboBox()
-        self.varTypeCombo.addItem("Numeric")
-        self.varTypeCombo.addItem("Vector")
-        self.varTypeCombo.addItem("Matrix")
-        self.varTypeCombo.addItem("User data")
+        self.varTypeCombo.setToolTip("The type of the new variable")
+        for t in self.typenamelist:
+            self.varTypeCombo.addItem(t)
+        hlayout2 = QHBoxLayout()
+        hlayout2.addWidget(self.addVarButton)
+        hlayout2.addWidget(self.varTypeCombo)
+        vlayout.addLayout(hlayout2)
+        vlayout.addWidget(self.deleteVarButton)
+        hlayout = QHBoxLayout()
+        hlayout.addWidget(self.variableList)
+        vlayout2 = QVBoxLayout()
+        hlayout.addLayout(vlayout2)
+        self.varNameEdit = QLineEdit("Name")
+        self.varNameEdit.setToolTip("Edit the variable name")
+        self.varTypeLabel = QLabel("Type:")
         self.varOptimizeCheck = QCheckBox("Optimize")
+        self.varOptimizeCheck.setToolTip("Should this variable be optimized?")
         self.varSizeEdit = QLineEdit("Size")
+        self.varSizeEdit.setToolTip("The size of the array")
         self.varValueCombo = QComboBox()
         for name in ['Value','Minimum','Maximum']:
             self.varValueCombo.addItem(name)
-        self.varValueEdit = QLineEdit("Value")
+        self.varValueCombo.setToolTip("Which value to edit?")
+        self.varValueEdit = SmallTextEdit()
+        self.varValueEdit.setToolTip("Edit the value of the variable here")
         self.varLoad = QPushButton("Load...")
+        self.varLoad.setToolTip("Load a variable value from file")
         self.varShowVisual = QCheckBox("Show in visualization")
         for k,v in self.value.context.variableDict.iteritems():
-            self.variableList.addItem("$"+k)
-        for k,v in self.value.context.userData.iteritems():
             self.variableList.addItem(k)
-        vlayout.addWidget(self.varNameEdit)
-        vlayout.addWidget(self.varOptimizeCheck)
+        for k,v in self.value.context.userData.iteritems():
+            self.variableList.addItem(symbolic_io.USER_DATA_PREFIX+k)
+        vlayout2.addWidget(self.varNameEdit)
+        vlayout2.addWidget(self.varOptimizeCheck)
+        vlayout2.addWidget(self.varTypeLabel)
         sizelayout = QHBoxLayout()
-        sizelayout.addWidget(self.varTypeCombo)
         sizelayout.addWidget(QLabel("Size:"))
         sizelayout.addWidget(self.varSizeEdit)
-        vlayout.addLayout(sizelayout)
+        vlayout2.addLayout(sizelayout)
+        vlayout.addLayout(hlayout)
         valueLayout = QHBoxLayout()
+        valueLayout.addWidget(QLabel("Value"))
         valueLayout.addWidget(self.varValueCombo)
-        valueLayout.addWidget(self.varValueEdit)
         vlayout.addLayout(valueLayout)
+        vlayout.addWidget(self.varValueEdit)
         vlayout.addWidget(self.varLoad)
         vlayout.addWidget(self.varShowVisual)
-        hlayout.addLayout(vlayout)
+        self.addVarButton.clicked.connect(self.onVarAdd)
+        self.deleteVarButton.clicked.connect(self.onVarDelete)
         self.varNameEdit.editingFinished.connect(self.onVarNameChange)
         self.variableList.itemSelectionChanged.connect(self.onVarSelectionChange)
-        self.varTypeCombo.activated.connect(self.onVarTypeChange)
+        self.varValueCombo.activated.connect(self.onVarValueComboChange)
         self.varSizeEdit.textChanged.connect(self.onVarSizeChange)
         self.varOptimizeCheck.clicked.connect(self.onVarOptimizeChange)
         self.varLoad.clicked.connect(self.onVarLoad)
         self.varShowVisual.clicked.connect(self.onVarShowVisualChange)
 
         #problem 
-        hlayout = QHBoxLayout(thirdTab)
-        column1 = QVBoxLayout()
-        column2 = QVBoxLayout()
-        hlayout.addLayout(column1)
-        hlayout.addLayout(column2)
+        vlayout = QVBoxLayout(thirdTab)
         self.loadProblemButton = QPushButton("Load problem...")
         self.saveProblemButton = QPushButton("Save problem...")
         self.printProblemButton = QPushButton("Print problem")
+        self.printCodeButton = QPushButton("Print code")
         self.prettyPrintCheck = QCheckBox("Pretty-print expressions")
         self.saveContextFunctionsCheck = QCheckBox("Save context functions")
         self.prettyPrintCheck.setChecked(True)
         self.saveContextFunctionsCheck.setChecked(False)
-        column1.addWidget(self.loadProblemButton)
-        column1.addWidget(self.saveProblemButton)
-        column1.addWidget(self.printProblemButton)
-        column2.addWidget(self.prettyPrintCheck)
-        column2.addWidget(self.saveContextFunctionsCheck)
+        vlayout.addWidget(self.loadProblemButton)
+        vlayout.addWidget(self.saveProblemButton)
+        vlayout.addWidget(self.printProblemButton)
+        vlayout.addWidget(self.printCodeButton)
+        vlayout.addWidget(self.prettyPrintCheck)
+        vlayout.addWidget(self.saveContextFunctionsCheck)
         self.loadProblemButton.clicked.connect(self.loadProblem)
         self.saveProblemButton.clicked.connect(self.saveProblem)
         self.printProblemButton.clicked.connect(self.printProblem)
+        self.printCodeButton.clicked.connect(self.printCode)
 
         self.oldSelection = 0,0
         self.suppressSelectionChange = False
@@ -905,7 +961,7 @@ class OptimizationProblemEditor(editors.WorldEditor):
         expr = symbolic_io.exprFromStr(self.value.context,val)
 
         res = []
-        for var in self.value.context.variables:
+        for var in self.value.optimizationVariables:
             dexpr = symbolic.deriv(expr,var)
             dstr = symbolic_io.exprToStr(dexpr,parseCompatible=True)
             res.append(var.name+":")
@@ -914,7 +970,7 @@ class OptimizationProblemEditor(editors.WorldEditor):
         dialog.exec_()
 
     def makeEditingWidget(self,type,params):
-        if type not in ['Config','Vector','Vector3','Point','Matrix3','Rotation','RigidTransform']:
+        if type not in self.visuallyEditableTypes:
             return None
         if type in ['Config','Vector']:
             res = RobotPoser(self.world.robot(0))
@@ -923,8 +979,14 @@ class OptimizationProblemEditor(editors.WorldEditor):
         elif type in ['Matrix3','Rotation']:
             res = TransformPoser()
             res.enableTranslation(False)
+            if params is not None:
+                res.set(params,[0.0]*3)
+            return res
         else:
-            res = RigidTransform()
+            res = TransformPoser()
+            if params is not None:
+                res.set(*params)
+            return res
         if params is not None:
             res.set(params)
         return res
@@ -989,25 +1051,32 @@ class OptimizationProblemEditor(editors.WorldEditor):
         self.constraintList.addItem(self.shortName(self.value.objectives[-1]))
     def insertFunction(self):
         fnname = str(self.functionCombo.currentText())
-        print "insert",fnname
+        print "insert function",fnname
         fn = self.value.context.function(fnname)
         if fn is None:
             print "Unable to get function",fnname,"?"
             return
         argnames = fn.argNames[:]
+        print self.value.context.userData.keys()
         if fn.argTypes is not None:
             for i,t in enumerate(fn.argTypes):
-                if len(t) > 1:
-                    res = types.make(t,self.value.robot)
-                    if res is not None:
-                        argnames[i] = json.dumps(loader.toJson(res), sort_keys=True, indent=4, separators=(',', ': '))
-                    else:
-                        print "Could not make default item of type",t,"for argument",argnames[i]
+                if argnames[i] in self.value.context.userData:
+                    argnames[i] = symbolic_io.USER_DATA_PREFIX + argnames[i]
+                elif t.char == 'U':
+                    try:
+                        res = types.make(t.subtype,self.value.robot)
+                        if res is not None:
+                            argnames[i] = json.dumps(loader.toJson(res), sort_keys=True, indent=4, separators=(',', ': '))
+                        else:
+                            #print "Could not make default item of type",t.subtype,"for argument",argnames[i]
+                            pass
+                    except Exception:
+                        pass
 
         self.insertCode(fnname+'('+','.join(argnames)+')')
         self.onCodeChange()
     def delete(self):
-        print "delete"
+        print "delete constraint"
         index = self.constraintList.currentRow()
         if index < 0:
             return
@@ -1047,17 +1116,41 @@ class OptimizationProblemEditor(editors.WorldEditor):
         self.updateValueLabel()
         self.refresh()
 
-    def onVarNameChange(self):
+    def currentVar(self):
         index = self.variableList.currentRow()
         if index < 0 or index >= self.variableList.count():
-            return
+            return None,None
         newname = str(self.varNameEdit.text())
         itemname = str(self.variableList.item(index).text())
-        if itemname[0] == '$':
+        if itemname[0] in [symbolic_io.USER_DATA_PREFIX,symbolic_io.NAMED_EXPRESSION_PREFIX]:
             itemname = itemname[1:]
-            item = self.value.context.get(itemname)
+            item = self.value.get(itemname)
         else:
-            item = self.value.context.get(itemname)
+            item = self.value.get(itemname)
+        return itemname,item
+
+    def onVarAdd(self):
+        import copy
+        type = self.typelist[self.varTypeCombo.currentIndex()]
+        if len(type) > 1:
+            var = self.value.addKlamptVar("unnamed",type)
+            print "REFER TO THIS VARIABLE AS",symbolic_io.NAMED_EXPRESSION_PREFIX+"unnamed"
+            print "IT SHOULD BE REPLACED WITH",symbolic_io.toStr(var.expr,parseCompatible=False)
+            self.variableList.addItem(symbolic_io.NAMED_EXPRESSION_PREFIX+"unnamed")
+        else:
+            var = self.value.context.addVar("unnamed",type)
+            var.value = copy.copy(self.typedefaultvalues[self.varTypeCombo.currentIndex()])
+            self.variableList.addItem("unnamed")
+        self.variableList.setCurrentRow(self.variableList.count()-1)
+
+    def onVarDelete(self):
+        print "TODO: delete variable"
+
+    def onVarNameChange(self):
+        index = self.variableList.currentRow()
+        itemname,item = self.currentVar()
+        if itemname == None: return
+        newname = str(self.varNameEdit.text())
 
         #validation
         if len(newname) == 0:
@@ -1071,7 +1164,7 @@ class OptimizationProblemEditor(editors.WorldEditor):
         if newname == itemname:
             return
 
-        if self.value.context.get(newname,None):
+        if self.value.get(newname,None):
             QMessageBox.information( 
                 self.parent, 
                 "Application Name", 
@@ -1080,79 +1173,292 @@ class OptimizationProblemEditor(editors.WorldEditor):
             return
 
         print "Variable name changed from",itemname,"to",newname
-        if isinstance(item,symbolic.Variable):
-            self.variableList.item(index).setText('$'+newname)
-            self.value.context.renameVar(item,newname)
+        if isinstance(item,(symbolic.Variable,robotoptimize.KlamptVariable)):
+            if isinstance(item,robotoptimize.KlamptVariable):
+                self.variableList.item(index).setText(symbolic_io.NAMED_EXPRESSION_PREFIX+newname)
+            else:
+                self.variableList.item(index).setText(newname)
+            self.value.rename(itemname,newname)
             #all constraints will be automatically renamed
         else:
-            self.variableList.item(index).setText(newname)
-            self.value.context.renameUserData(itemname,newname)
+            self.variableList.item(index).setText(symbolic_io.USER_DATA_PREFIX+newname)
+            self.value.rename(itemname,newname)
             #constraints will NOT be automatically renamed
             for obj in self.value.objectives:
                 obj.expr = obj.expr.replace(symbolic.UserDataExpression(itemname),symbolic.UserDataExpression(newname))
 
     def onVarSelectionChange(self):
-        index = self.variableList.currentRow()
-        if index < 0 or index >= self.variableList.count():
+        itemname,item = self.currentVar()
+        if itemname is None:
             self.varNameEdit.setEnabled(False)
-            self.varTypeCombo.setEnabled(False)
             self.varSizeEdit.setEnabled(False)
             self.varOptimizeCheck.setEnabled(False)
+            self.varValueEdit.setEnabled(False)
             return
         else:
             self.varNameEdit.setEnabled(True)
-            self.varTypeCombo.setEnabled(True)
             self.varSizeEdit.setEnabled(True)
             self.varOptimizeCheck.setEnabled(True)
-        itemname = str(self.variableList.item(index).text())
-        if itemname[0] == '$':
-            itemname = itemname[1:]
-            item = self.value.context.get(itemname)
-        else:
-            item = self.value.context.get(itemname)
-            self.varSizeEdit.setEnabled(False)
-            self.varOptimizeCheck.setEnabled(False)
-        tmap = {'N':0,'V':1,'M':2,'U':3}
+            self.varValueEdit.setEnabled(True)
         if isinstance(item,symbolic.Variable):
             self.varNameEdit.setText(item.name)
-            self.varTypeCombo.setCurrentIndex(tmap[item.type])
-            if item.type == 'N':
+            stemp = item.type.size
+            item.type.size = None
+            self.varTypeLabel.setText("Type: "+str(item.type))
+            item.type.size = stemp
+            if item.type.char == 'N':
                 self.varSizeEdit.setEnabled(False)
             else:
-                self.varSizeEdit.setText(str(item.size))
-            self.varOptimizeCheck.setChecked((item in self.value.optimizationVariables))
+                self.varSizeEdit.setText(str(item.type.size))
+            self.varOptimizeCheck.setChecked(any(v is item for v  in self.value.optimizationVariables))
+            self.onVarValueComboChange()
+        elif isinstance(item,robotoptimize.KlamptVariable):
+            self.varNameEdit.setText(item.name)
+            self.varTypeLabel.setText("Type: "+item.type)
+            self.varSizeEdit.setEnabled(False)
+            contextvariable = item.variables[0]
+            self.varOptimizeCheck.setChecked(any(v is contextvariable for v in self.value.optimizationVariables))
+            self.onVarValueComboChange()
         else:
+            self.varOptimizeCheck.setEnabled(False)
             self.varNameEdit.setText(itemname)
-            self.varTypeCombo.setCurrentIndex(tmap['U'])
+            self.varTypeLabel.setText("User data")
+            self.varSizeEdit.setEnabled(False)
+            self.varValueCombo.setCurrentIndex(0)
+            self.varValueCombo.setEnabled(False)
+            try:
+                jsonobj = loader.toJson(item)
+                self.varValueEdit.setText(json.dumps(jsonobj))
+            except Exception as e:
+                print "Can't dump item",item,"exception",e
+                self.varValueEdit.setText('')
+        self.varShowVisual.setChecked(itemname in self.variableWidgets)
 
-    def onVarTypeChange(self):
-        print "Changed variable type to",self.varTypeCombo.currentText()
-        print "TODO"
     def onVarSizeChange(self):
-        print "Changed variable size to",self.varSizeEdit.text()
-        print "TODO"
+        itemname,item = self.currentVar()
+        if itemname is None: return
+        sizetext = str(self.varSizeEdit.text())
+        if sizetext == 'None' or sizetext == '':
+            item.type.size = None
+        else:
+            try:
+                obj = json.loads(sizetext)
+                if isinstance(obj,int) or (isinstance(obj,(tuple,list)) and all(isinstance(v) for v in obj)):
+                    item.type.size = obj
+                else:
+                    print "Unable to resize, invalid size specified (must be integer or tuple, got %s)"%(sizetext,)
+            except Exception as e:
+                print "Unable to resize, invalid size %s specified"%(sizetext,)
+                print e
+                return
+        print "Changed variable size to",sizetext
+        if item.value is not None:
+            print "TODO: modify the value to reflect the new size"
+
     def onVarOptimizeChange(self):
-        print "Changed optimize to",self.varOptimizeCheck.isChecked()
-        print "TODO"
+        itemname,item = self.currentVar()
+        if itemname is None: return
+        if isinstance(item,symbolic.Variable):
+            if self.varOptimizeCheck.isChecked():
+                self.value.optimizationVariables.append(item)
+            else:
+                for i,v in enumerate(self.value.optimizationVariables):
+                    if v is item:
+                        self.value.optimizationVariables.pop(i)
+                        break
+            print "Changed optimize to",self.varOptimizeCheck.isChecked()
+        elif isinstance(item,robotoptimize.KlamptVariable):
+            for v in item.variables:
+                if self.varOptimizeCheck.isChecked():
+                    self.value.optimizationVariables.append(v)
+                else:
+                    for i,v2 in enumerate(self.value.optimizationVariables):
+                        if v2 is v:
+                            self.value.optimizationVariables.pop(i)
+                            break
+
+    def onVarValueComboChange(self):
+        itemname,item = self.currentVar()
+        if itemname is None: return
+        if isinstance(item,symbolic.Variable):
+            self.varValueEdit.setEnabled(True)
+            if self.varValueCombo.currentIndex() == 0:  #value
+                if item.value is None:
+                    if itemname == 'q':
+                        self.varValueEdit.setText('Current robot config')
+                        self.varValueEdit.setEnabled(False)
+                    else:
+                        self.varValueEdit.setText('')
+                else:
+                    self.varValueEdit.setText(str(item.value))
+            else:
+                ind = self.varValueCombo.currentIndex()-1
+                if itemname in self.value.variableBounds:
+                    limit = self.value.variableBounds[itemname][ind]
+                    self.varValueEdit.setText(str(limit))
+                else:
+                    self.varValueEdit.setText('')
+        elif isinstance(item,robotoptimize.KlamptVariable):
+            self.varValueEdit.setEnabled(True)
+            values = []
+            if self.varValueCombo.currentIndex() == 0:  #value
+                for var in item.variables:
+                    if var.value is None:
+                        values.append(None)
+                    else:
+                        values.append(var.value)
+            else:
+                ind = self.varValueCombo.currentIndex()-1
+                for var in item.variables:
+                    if var.name in self.value.variableBounds:
+                        limit = self.value.variableBounds[var.name][ind]
+                        values.append(limit)
+                    else:
+                        values.append(None)
+            if any(v is None for v in values):
+                #unbounded
+                self.varValueEdit.setText('')
+            else:
+                if len(values) == 1:
+                    value = item.decode(values[0])
+                else:
+                    value = item.decode(values)
+                self.varValueEdit.setText(str(value))
+
     def onVarLoad(self):
         print "Clicked variable Load"
-        print "TODO"
+        itemname,item = self.currentVar()
+        allowedTypes = None
+        if isinstance(item,robotoptimize.KlamptVariable):
+            allowedTypes = item.type
+        res = resource.load(type=allowedTypes)
+        if res == None: return  #cancel clicked
+
+        fn,value = res
+        types = type.objectToTypes(value,world=self.world)
+        if isinstance(types,list):
+            types = types[0]
+        if itemname is None:
+            defaultname = os.path.basename(fn)
+            if types in ['Config','RigidTransform','Rotation','Matrix3','Vector3','Point']:
+                self.value.addKlamptVar(defaultname,types,initialValue = value)
+                self.variableList.addItem(defaultname)
+            else:
+                self.value.context.userData[defaultname] = value
+                self.variableList.addItem(symbolic_io.USER_DATA_PREFIX+defaultname)
+        elif isinstance(item,symbolic.Variable):
+            #verify that the value is compatible?
+            if not item.type.match(value):
+                print "Loaded value is not compatible with variable of type",item.type
+            else:
+                item.bind(value)
+        elif isinstance(item,robotoptimize.KlamptVariable):
+            #TODO: verify that the value is compatible?
+            item.bind(value)
+        else:
+            self.value.context.userData[itemname] = value
+
+        
     def onVarShowVisualChange(self):
-        print "Changed variable show visual"
-        print "TODO"
+        itemname,item = self.currentVar()
+        if item is None: return
+        if itemname in ['q','robot','world']:
+            return  #can't toggle q, robot, or the world
+        if self.varShowVisual.isChecked():
+            if isinstance(item,symbolic.Variable):  #can't show a vector or number
+                return
+            elif isinstance(item,robotoptimize.KlamptVariable): 
+                if item.type not in self.visuallyEditableTypes:
+                    return
+                self.variableWidgets[itemname] = self.makeEditingWidget(item.type,item.getValue())
+                self.klamptwidgetmaster.add(self.variableWidgets[itemname])
+        else:
+            #hide
+            self.klamptwidgetmaster.remove(self.variableWidgets[itemname])
+            del self.variableWidgets[itemname]
+
     def loadProblem(self):
-        print "TODO"
+        fn = QFileDialog.getOpenFileName(self, "Load optimization problem from...", "problem.json", "JSON file (*.json)")
+        if fn is not None:
+            with open(fn,'r') as f:
+                jsonobj = json.load(f)
+                self.value.fromJson(jsonobj)
+                self.refresh()
     def saveProblem(self):
-        print "TODO"
+        fn = QFileDialog.getSaveFileName(self, "Save optimization problem to...", "problem.json", "JSON file (*.json)")
+        if fn is not None:
+            saveContextFunctions = self.saveContextFunctionsCheck.isChecked()
+            prettyPrint = self.prettyPrintCheck.isChecked()
+            with open(fn,'w') as f:
+                jsonobj = self.value.toJson(saveContextFunctions=saveContextFunctions,prettyPrintExprs=prettyPrint)
+                json.dump(jsonobj,f,sort_keys=True, indent=4, separators=(',', ': '))
+                f.write('\n')
     def printProblem(self):
         saveContextFunctions = self.saveContextFunctionsCheck.isChecked()
         prettyPrint = self.prettyPrintCheck.isChecked()
-        print "Save context functions",saveContextFunctions
-        print "Pretty print",prettyPrint
         string = json.dumps(self.value.toJson(saveContextFunctions=saveContextFunctions,prettyPrintExprs=prettyPrint),sort_keys=True, indent=4, separators=(',', ': '))
         dialog = ShowTextDialog("Optimization problem",string)
         dialog.exec_()
         #QInputDialog.getMultiLineText(self.parent,"Optimization problem","JSON",string)
+    def printCode(self):
+        saveContextFunctions = self.saveContextFunctionsCheck.isChecked()
+        prettyPrint = self.prettyPrintCheck.isChecked()
+        problem_string = json.dumps(self.value.toJson(saveContextFunctions=saveContextFunctions,prettyPrintExprs=prettyPrint),sort_keys=True, indent=4, separators=(',', ': '))
+        userdata_nondefault = [k for k in self.value.context.userData.keys() if k not in ['robot','world']]
+        variables_nondefault = [v.name for v in self.value.context.variables if v.name != 'q']
+        if len(userdata_nondefault) > 0:
+            userdata_args = ','+','.join(userdata_nondefault)
+        else:
+            userdata_args = ''
+        if len(variables_nondefault) > 0:
+            variable_args = ','+','.join([k+'=None' for k in variables_nondefault])
+        else:
+            variable_args = ''
+        setup_userdata = '    \n'.join(["res.context.userData['%s'] = %s"%(k,k) for k in userdata_nondefault])
+        setup_variables = '    \n'.join(["res.bind('%s',%s)"%(k,k) for k in variables_nondefault])
+        extract_variables = '    \n'.join(["res['%s'] = problem.context.variableDict['%s'].value"%(k,k) for k in variables_nondefault])
+        boilerplate = """from klampt.plan.robotoptimize import *
+from klampt.math.optimize import OptimizerParams
+import json
+
+#automatically generated from OptimizationProblemEditor
+problemstring = \"\"\"{problem_string}\"\"\"
+
+def optimization_setup(world{userdata_args}):
+    \"\"\"Creates a RobotOptimizationProblem from the given user data items.  Calling sequence is:
+        from klampt import *
+        world = WorldModel()
+        world.readFile([the world file])
+        opt_problem = optimization_setup(world,...[userdata]...)
+        qopt = optimization_solve(opt_problem,...[variables]...)
+        if qopt is not None:
+            #qopt is the optimal configuration
+            print optimization_results(opt_problem)
+            ...
+    \"\"\"
+    #create optimization problem
+    res = RobotOptimizationProblem(world=world)
+    res.fromJson(json.loads(problemstring))
+    #set userdata variables to arguments provided
+    {setup_userdata}
+    return res
+
+def optimization_solve(problem,params=OptimizerParams(),q=None{variable_args}):
+    if q is not None:
+        problem.bind('q',q)
+    {setup_variables}
+    return problem.solve(params)
+
+def optimization_results(problem):
+    \"\"\"Returns a dictionary mapping variable names to optimized values\"\"\"
+    res = dict()
+    res['q'] = problem.q.value
+    {extract_variables}
+    return res
+"""
+        formatted = boilerplate.format(userdata_args=userdata_args,setup_userdata=setup_userdata,variable_args=variable_args,setup_variables=setup_variables,extract_variables=extract_variables,problem_string=problem_string)
+        dialog = ShowTextDialog("Optimization Python code",formatted)
+        dialog.exec_()
     def display(self):
         glEnable(GL_BLEND)
         glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA)
@@ -1163,29 +1469,116 @@ class OptimizationProblemEditor(editors.WorldEditor):
         if self.klamptwidgetmaster is self.argumentWidget:
             print "New value",self.argumentWidget.get()
             self.setCurrentValue(self.argumentWidget.get(),updateText=True)
+        for k,widget in self.variableWidgets.iteritems():
+            if widget.hasFocus():
+                newval = widget.get()
+                var = self.value.get(k)
+                assert isinstance(var,robotoptimize.KlamptVariable)
+                var.bind(newval)
+                self.onVarSelectionChange()
         self.updateValueLabel()
         return editors.WorldEditor.mousefunc(self,button,state,x,y)
 
+class _EditWindow(QMainWindow):
+    def __init__(self,glwidget):
+        QMainWindow.__init__(self)
+        self.glwidget = glwidget
+        #glwidget.setMinimumSize(glwidget.width,glwidget.height)
+        glwidget.setMaximumSize(4000,4000)
+        #glwidget.setSizePolicy(QSizePolicy(QSizePolicy.Maximum,QSizePolicy.Maximum))
+        self.instructions = QLabel()
+        self.description = QLabel()
+        self.topBoxLayout = QVBoxLayout()
+        self.topBoxLayout.addWidget(self.description)
+        self.topBoxLayout.addWidget(self.instructions)
+        self.extraDialog = QFrame()
+        self.extraDialog.setSizePolicy(QSizePolicy(QSizePolicy.Minimum,QSizePolicy.Minimum))
+        self.topBoxLayout.addWidget(self.extraDialog)
+        self.topBoxLayout.setStretchFactor(self.description,1)
+        self.topBoxLayout.setStretchFactor(self.instructions,1)
+        self.topBoxLayout.setStretchFactor(self.extraDialog,10)
+        self.layout = QVBoxLayout()
+        #self.layout.addWidget(self.topBox)
+        self.layout.addWidget(glwidget)
+        #self.layout.setStretchFactor(glwidget,10)
+        #self.layout.setStretchFactor(self.topBox,0)
+        self.splitter = QSplitter(Qt.Horizontal)
+        left = QFrame()
+        right = QFrame()
+        left.setLayout(self.topBoxLayout)
+        right.setLayout(self.layout)
+        self.splitter.setHandleWidth(7)
+        self.splitter.addWidget(left)
+        self.splitter.addWidget(right)
+        self.setCentralWidget(self.splitter)
+        #self.splitter.setSizes([self.topBoxLayout.sizeHint().height(),self.layout.sizeHint().height()])
+
+    def setEditor(self,editorObject):
+        self.editorObject = editorObject
+        self.setWindowTitle("Editing "+editorObject.name)
+        if editorObject.description==None:
+            self.description.setText("")
+        else:
+            self.description.setText(editorObject.description)
+        self.instructions.setText(editorObject.instructions())
+        editorObject.addDialogItems(self.extraDialog,ui='qt')
+
+    def closeEvent(self,event):
+        from klampt import vis
+        reply = QMessageBox.question(self, 'Message',
+             "Are you sure to quit the program?", QMessageBox.Yes | 
+             QMessageBox.No, QMessageBox.No)
+
+        if reply == QMessageBox.Yes:
+            res = QMainWindow.closeEvent(self,event)
+            vis.show(False)
+            return
+        return
+
 def test_editor():
     """Tests the visual optimization editor"""
+    from klampt import vis
     world = WorldModel()
     world.readFile("../../data/tx90scenario0.xml")
     robot = world.robot(0)
 
-    print "Methods available:",optimize.LocalOptimizer.methodsAvailable()
+    print "Optimization methods available:",optimize.LocalOptimizer.methodsAvailable()
 
     opt = robotoptimize.RobotOptimizationProblem(world=world)
 
     editorObject = OptimizationProblemEditor('opt',opt,'Optimization problem',world) 
-    editors.run(editorObject)
+    #editors.run(editorObject)
+    old_vis_window = vis.getWindow()
+    editor_window = vis.createWindow("Optimization Problem Editor")
+    vis.setPlugin(editorObject)
+    def makefunc(gl_backend):
+        assert gl_backend is not None
+        res = _EditWindow(gl_backend)
+        res.setEditor(editorObject)
+        return res
+    vis.customUI(makefunc)
+    vis.show()
+    while vis.shown():
+        time.sleep(0.2)
 
+    opt = editorObject.value
+    vis.setPlugin(None)
+    vis.customUI(None)
+    vis.setWindow(old_vis_window)
+
+    print "Testing random restart 10..."
     params = optimize.OptimizerParams()
     params.localMethod = 'auto'
     params.globalMethod = 'random-restart'
+    params.numRestarts = 10
     res = opt.solve(params)
-    print "Cost:",opt.cost(res)
-    print "Feasible?",opt.isFeasible(res)
-    print "Result:",res
+    print "Optimization result:",res
+    if res:
+        robot.setConfig(opt.q.value)
+        opt.q.bind(robot.getConfig())
+        print "  Cost:",opt.cost()
+        print "  Feasible?",opt.isFeasible()
+    
 
     #test saving and loading
     """
