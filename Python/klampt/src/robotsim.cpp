@@ -18,6 +18,7 @@
 #include <KrisLibrary/robotics/Stability.h>
 #include <KrisLibrary/robotics/TorqueSolver.h>
 #include <KrisLibrary/meshing/PointCloud.h>
+#include <KrisLibrary/meshing/VolumeGrid.h>
 #include <KrisLibrary/GLdraw/drawextra.h>
 #include <KrisLibrary/GLdraw/drawMesh.h>
 #include <KrisLibrary/GLdraw/Widget.h>
@@ -371,9 +372,11 @@ void GetPointCloud(const Geometry::AnyCollisionGeometry3D& geom,PointCloud& pc)
   pc.vertices.resize(gpc.points.size()*3);
   pc.propertyNames = gpc.propertyNames;
   pc.properties.resize(gpc.points.size()*gpc.propertyNames.size());
-  for(size_t i=0;i<gpc.points.size();i++) {
+  for(size_t i=0;i<gpc.points.size();i++) 
     gpc.points[i].get(pc.vertices[i*3],pc.vertices[i*3+1],pc.vertices[i*3+2]);
-    gpc.properties[i].getCopy(&pc.properties[i*gpc.propertyNames.size()]);
+  if(!gpc.propertyNames.empty()) {
+    for(size_t i=0;i<gpc.points.size();i++)
+      gpc.properties[i].getCopy(&pc.properties[i*gpc.propertyNames.size()]);
   }
   pc.settings = gpc.settings;
 }
@@ -395,6 +398,23 @@ void GetPointCloud(const PointCloud& pc,Geometry::AnyCollisionGeometry3D& geom)
   gpc.settings = pc.settings;
   //printf("Copying PointCloud to geometry, %d points\n",(int)gpc.points.size());
   geom = gpc;
+  geom.ClearCollisionData();
+}
+
+void GetVolumeGrid(const VolumeGrid& grid,Geometry::AnyCollisionGeometry3D& geom)
+{
+  Meshing::VolumeGrid gvg;
+  Assert(grid.dims.size()==3);
+  Assert(grid.bbox.size()==6);
+  gvg.Resize(grid.dims[0],grid.dims[1],grid.dims[2]);
+  gvg.bb.bmin.set(grid.bbox[0],grid.bbox[1],grid.bbox[2]);
+  gvg.bb.bmax.set(grid.bbox[3],grid.bbox[4],grid.bbox[5]);
+  Assert(grid.values.size() == grid.dims[0]*grid.dims[1]*grid.dims[2]);
+  int k=0;
+  for(Array3D<Real>::iterator i=gvg.value.begin();i!=gvg.value.end();++i,k++) {
+    *i = grid.values[k];
+  }
+  geom = gvg;
   geom.ClearCollisionData();
 }
 
@@ -487,6 +507,13 @@ Geometry3D::Geometry3D(const PointCloud& rhs)
 {
   geomPtr = new SmartPointer<AnyCollisionGeometry3D>();
   setPointCloud(rhs);
+}
+
+Geometry3D::Geometry3D(const VolumeGrid& rhs)
+:world(-1),id(-1),geomPtr(NULL)
+{
+  geomPtr = new SmartPointer<AnyCollisionGeometry3D>();
+  setVolumeGrid(rhs);
 }
 
 Geometry3D::~Geometry3D()
@@ -653,15 +680,38 @@ Geometry3D Geometry3D::getElement(int element)
   SmartPointer<AnyCollisionGeometry3D>& geom = *reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(geomPtr);
   if(!geom) 
     throw PyException("Geometry is empty");
-  if(geom->type != AnyCollisionGeometry3D::Group)
-    throw PyException("Not a group geometry");
-  vector<AnyCollisionGeometry3D>& data = geom->GroupCollisionData();
-  if(element < 0 || element >= (int)data.size())
-    throw PyException("Invalid element specified");
-  Geometry3D res;
-  SmartPointer<AnyCollisionGeometry3D>& rgeom = *reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(res.geomPtr);
-  *rgeom = data[element];
-  return res;
+  if(geom->type == AnyCollisionGeometry3D::Group) {
+    vector<AnyCollisionGeometry3D>& data = geom->GroupCollisionData();
+    if(element < 0 || element >= (int)data.size())
+      throw PyException("Invalid element specified");
+    Geometry3D res;
+    SmartPointer<AnyCollisionGeometry3D>& rgeom = *reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(res.geomPtr);
+    *rgeom = data[element];
+    return res;
+  }
+  else if(geom->type == AnyCollisionGeometry3D::TriangleMesh) {
+    CollisionMesh& data = geom->TriangleMeshCollisionData();
+    if(element < 0 || element >= (int)data.tris.size())
+      throw PyException("Invalid element specified");
+    Math3D::Triangle3D tri;
+    data.GetTriangle(element,tri);
+    Geometry3D res;
+    SmartPointer<AnyCollisionGeometry3D>& rgeom = *reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(res.geomPtr);
+    rgeom = new AnyCollisionGeometry3D(Math3D::GeometricPrimitive3D(tri));
+    return res;
+  }
+  else if(geom->type == AnyCollisionGeometry3D::TriangleMesh) {
+    Meshing::PointCloud3D& data = geom->AsPointCloud();
+    if(element < 0 || element >= (int)data.points.size())
+      throw PyException("Invalid element specified");
+    Geometry3D res;
+    SmartPointer<AnyCollisionGeometry3D>& rgeom = *reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(res.geomPtr);
+    rgeom = new AnyCollisionGeometry3D(Math3D::GeometricPrimitive3D(data.points[element]));
+    return res;
+  }
+  else {
+    throw PyException("Geometry type does not have sub-elements");
+  }
 }
 
 void Geometry3D::setElement(int element,const Geometry3D& rhs)
@@ -697,10 +747,16 @@ int Geometry3D::numElements()
   SmartPointer<AnyCollisionGeometry3D>& geom = *reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(geomPtr);
   if(!geom) 
     throw PyException("Geometry is empty");
-  if(geom->type != AnyCollisionGeometry3D::Group)
-    throw PyException("Not a group geometry");
-  vector<AnyGeometry3D>& data = geom->AsGroup();
-  return (int)data.size();
+  switch(geom->type) {
+  case AnyCollisionGeometry3D::Group:
+    return (int)geom->AsGroup().size();
+  case AnyCollisionGeometry3D::PointCloud:
+    return (int)geom->AsPointCloud().points.size();
+  case AnyCollisionGeometry3D::TriangleMesh:
+    return (int)geom->AsTriangleMesh().tris.size();
+  default:
+    return 0;
+  }
 }
 
 
@@ -730,6 +786,31 @@ void Geometry3D::setPointCloud(const PointCloud& pc)
       geom = new AnyCollisionGeometry3D();
   }
   GetPointCloud(pc,*geom);
+  //this is already called
+  //geom->ClearCollisionData();
+  if(mgeom) {
+    //update the display list / cache
+    mgeom->OnGeometryChange();
+    mgeom->RemoveFromCache();
+  }
+}
+
+void Geometry3D::setVolumeGrid(const VolumeGrid& vg)
+{
+  SmartPointer<AnyCollisionGeometry3D>& geom = *reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(geomPtr);
+  ManagedGeometry* mgeom = NULL;
+  if(!isStandalone()) {
+    RobotWorld& world = *worlds[this->world]->world;
+    mgeom = &GetManagedGeometry(world,id);
+  }
+  if(geom == NULL) {
+    if(mgeom) {
+      geom = mgeom->CreateEmpty();
+    }
+    else
+      geom = new AnyCollisionGeometry3D();
+  }
+  GetVolumeGrid(vg,*geom);
   //this is already called
   //geom->ClearCollisionData();
   if(mgeom) {
@@ -914,6 +995,43 @@ void Geometry3D::getBBTight(double out[3],double out2[3])
   bb.bmax.get(out2);
 }
 
+Geometry3D Geometry3D::convert(const char* destype,double param)
+{
+  SmartPointer<AnyCollisionGeometry3D>& geom = *reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(geomPtr);
+  if(!geom) throw PyException("Geometry3D is empty, cannot convert");
+  AnyGeometry3D::Type srctype = geom->type;
+  AnyGeometry3D::Type destype2;
+  if(0==strcmp(destype,"TriangleMesh")) 
+    destype2 = AnyGeometry3D::TriangleMesh;
+  else if(0==strcmp(destype,"PointCloud")) 
+    destype2 = AnyGeometry3D::PointCloud;
+  else if(0==strcmp(destype,"VolumeGrid")) 
+    destype2 = AnyGeometry3D::ImplicitSurface;
+  else if(0==strcmp(destype,"GeometricPrimitive")) 
+    destype2 = AnyGeometry3D::Primitive;
+  else
+    throw PyException("Invalid desired type specified, must be TriangleMesh, PointCloud, or VolumeGrid");
+
+  if(srctype == destype2)
+    return *this;
+  if(param < 0) throw PyException("Invalid conversion parameter, must be nonnegative");
+
+  //do the conversion
+  geom->InitCollisionData();
+  if(geom->type == AnyGeometry3D::TriangleMesh) {
+    geom->TriangleMeshCollisionData().CalcTriNeighbors();
+  }
+  Geometry3D res;
+  SmartPointer<AnyCollisionGeometry3D>& resgeom = *reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(res.geomPtr);
+  resgeom = new AnyCollisionGeometry3D;
+  if(!geom->Convert(destype2,*resgeom,param)) {
+    stringstream ss;
+    ss<<"Cannot perform the geometry conversion "<<geom->TypeName()<<" -> "<<destype;
+    throw PyException(ss.str().c_str());
+  }
+  return res;
+}
+
 bool Geometry3D::collides(const Geometry3D& other)
 {
   SmartPointer<AnyCollisionGeometry3D>& geom = *reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(geomPtr);
@@ -947,6 +1065,67 @@ bool Geometry3D::closestPoint(const double pt[3],double out[3])
   Real d = geom->Distance(Vector3(pt),vout);
   if(IsInf(d)) return false;
   vout.get(out);
+  return true;
+}
+
+bool Geometry3D::closestPointWithBound(const double pt[3],double upperBound,double out[3])
+{
+  SmartPointer<AnyCollisionGeometry3D>& geom = *reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(geomPtr);
+  if(!geom) return false;
+  if(geom->type == AnyGeometry3D::ImplicitSurface || geom->type == AnyGeometry3D::Primitive)
+    return closestPoint(pt,out); //O(1)
+  int elem1,elem2;
+  Math3D::GeometricPrimitive3D g = Math3D::GeometricPrimitive3D(Vector3(pt));
+  AnyCollisionGeometry3D geom2(g);
+  Real d = geom->Distance(geom2,elem1,elem2,upperBound);
+  if(d>=upperBound) return false;
+  Vector3 ptlocal;
+  geom->GetTransform().mulInverse(Vector3(pt),ptlocal);
+  if(geom->type == AnyGeometry3D::TriangleMesh) {
+    const Geometry::CollisionMesh& mesh = geom->TriangleMeshCollisionData();
+    Math3D::Triangle3D tri;
+    mesh.GetTriangle(elem1,tri);
+    Vector3 cp;
+    cp = tri.closestPoint(ptlocal);
+    (geom->GetTransform()*cp).get(out);
+  }
+  else if(geom->type == AnyGeometry3D::PointCloud) {
+    const Meshing::PointCloud3D& pc = geom->AsPointCloud();
+    (geom->GetTransform()*pc.points[elem1]).get(out);
+  }
+  else {
+    throw PyException("Hmm... not sure how to handle that type of geometry yet");
+  }
+  return true;
+}
+
+bool Geometry3D::closestPoints(const Geometry3D& other,double out[3],double out2[3])
+{
+  double upperBound = Inf;
+  return closestPointsWithBound(other,upperBound,out,out2);
+}
+
+bool Geometry3D::closestPointsWithBound(const Geometry3D& other,double upperBound,double out[3],double out2[3])
+{
+  SmartPointer<AnyCollisionGeometry3D>& geom = *reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(geomPtr);
+  SmartPointer<AnyCollisionGeometry3D>& geom2 = *reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(other.geomPtr);
+  if(!geom) return false;
+  if(!geom2) return false;
+  int elem1,elem2;
+  Real d = geom->Distance(*geom2,elem1,elem2,upperBound);
+  if(d>=upperBound) return false;
+  Math3D::GeometricPrimitive3D prim1 = geom->GetElement(elem1),prim2 = geom2->GetElement(elem2);
+  RigidTransform Tself,Tselfother;
+  Tself = geom->GetTransform();
+  Tselfother.mulInverseA(Tself,geom2->GetTransform());
+  prim2.Transform(Tselfother);
+  Vector3 cp1,cp2;
+  d = prim1.ClosestPoints(prim2,cp1,cp2);
+  if(IsInf(d)) return false;
+  cp1 = Tself*cp1;
+  cp2 = Tself*cp2;
+  cp1.get(out);
+  cp2.get(out2);
   return true;
 }
 
@@ -1515,6 +1694,57 @@ void PointCloud::transform(const double R[9],const double t[3])
 }
 
 
+void VolumeGrid::setBounds(const double bmin[3],const double bmax[3])
+{
+  bbox.resize(6);
+  bbox[0] = bmin[0];
+  bbox[1] = bmin[1];
+  bbox[2] = bmin[2];
+  bbox[3] = bmax[0];
+  bbox[4] = bmax[1];
+  bbox[5] = bmax[2];
+}
+
+void VolumeGrid::resize(int sx,int sy,int sz)
+{
+  Assert(sx >= 0 && sy >= 0 && sz >= 0);
+  dims.resize(3);
+  dims[0] = sx;
+  dims[1] = sy;
+  dims[2] = sz;
+  values.resize(sx*sy*sz);
+}
+
+void VolumeGrid::set(double value)
+{
+  std::fill(values.begin(),values.end(),value);
+}
+
+void VolumeGrid::set(int i,int j,int k,double value)
+{
+  if(dims.empty()) throw PyException("VolumeGrid was not initialized yet");
+  if(i < 0 || i >= (int)dims[0]) throw PyException("First index out of range");
+  if(j < 0 || j >= (int)dims[1]) throw PyException("Second index out of range");
+  if(k < 0 || k >= (int)dims[2]) throw PyException("Third index out of range");
+  int ind = i*dims[1]*dims[2] + j*dims[2] + k;
+  values[ind] = value;
+}
+
+double VolumeGrid::get(int i,int j,int k)
+{
+  if(dims.empty()) throw PyException("VolumeGrid was not initialized yet");
+  if(i < 0 || i >= (int)dims[0]) throw PyException("First index out of range");
+  if(j < 0 || j >= (int)dims[1]) throw PyException("Second index out of range");
+  if(k < 0 || k >= (int)dims[2]) throw PyException("Third index out of range");
+  int ind = i*dims[1]*dims[2] + j*dims[2] + k;
+  return values[ind];
+}
+
+void VolumeGrid::shift(double dv)
+{
+  for(vector<double>::iterator i=values.begin();i!=values.end();i++)
+    *i += dv;
+}
 
 
 
