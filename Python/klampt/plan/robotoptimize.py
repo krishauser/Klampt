@@ -4,7 +4,7 @@ from ..robotsim import IKSolver,IKObjective
 from ..io import loader
 import time
 import random
-from ..math import optimize,symbolic,symbolic_klampt
+from ..math import optimize,symbolic,symbolic_klampt,so3,se3
 import numpy as np
 
 class KlamptVariable:
@@ -13,8 +13,8 @@ class KlamptVariable:
     - name: the Klamp't item's name
     - type: the Klamp't item's type
     - encoding: the way in which the item is encoded in the optimization
-    - variables: the list of Variables corresponding to this Klamp't item 
-    - expr: the Expression that should be used to refer to the symbolic version of the Klamp't object.
+    - variables: the list of Variables encoding this Klamp't item 
+    - expr: the Expression that will be used to replace the symbolic mainVariable via appropriate variables
     - constraints, encoder, decoder: internally used
     """
     def __init__(self,name,type):
@@ -29,32 +29,32 @@ class KlamptVariable:
     def bind(self,obj):
         """Binds all Variables associated with this to the value of Klamp't object obj"""
         if self.type in ['Config','Vector','Vector3','Point']:
-            self.variables.bind(obj)
+            self.variables[0].bind(obj)
         elif self.type == 'Configs':
             assert len(obj) == len(self.variables),"Invalid number of configs in Configs object"
             for i,v in enumerate(obj):
                 self.variables[i].bind(v)
-        elif type == 'Rotation':
+        elif self.type == 'Rotation':
             if self.encoder is None:
-                self.variables.bind(obj)
+                self.variables[0].bind(obj)
             else:
-                self.variables.bind(self.encoder(obj).evalf())
-        elif type == 'RigidTransform':
+                self.variables[0].bind(self.encoder(obj))
+        elif self.type == 'RigidTransform':
             if self.encoder is None:
                 self.variables[0].bind(obj[0])
                 self.variables[1].bind(obj[1])
             else:
-                T = self.encoder(obj).evalf()
+                T = self.encoder(obj)
                 self.variables[0].bind(T[0])
                 self.variables[1].bind(T[1])
         else:
-            raise ValueError("Unsupported object type "+type)
+            raise ValueError("Unsupported object type "+self.type)
     def getParams(self):
         """Returns the list of current parameters bound to the symbolic Variables."""
-        if hasattr(self.variables,'__iter__'):
+        if len(self.variables) > 1:
             return [v.value for v in self.variables]
         else:
-            return self.variables.value
+            return self.variables[0].value
     def getValue(self):
         """Returns the Klamp't value corresponding to the current bound parameters."""
         return self.decode(self.getParams())
@@ -77,7 +77,7 @@ class KlamptVariable:
 
 class RobotOptimizationProblem(optimize.OptimizationProblemBuilder):
     """Defines a generalized optimization problem for a robot, which is a subclass of
-    SaveableOptimizationProblem. This may easily incorporate IK constraints, and may
+    OptimizationProblemBuilder. This may easily incorporate IK constraints, and may
     have additional specifications of active DOF.
 
     Members:
@@ -90,6 +90,11 @@ class RobotOptimizationProblem(optimize.OptimizationProblemBuilder):
     - autoLoad: a dictionary of (userDataName:fileName) pairs that are stored so that user data
       is automatically loaded from files. I.e., upon self.loadJson(), for each pair in autoLoad
       the command self.context.userData[userDataName] = loader.load(fileName) is executed.
+    - managedVariables: a dictionary of KlamptVariables like rotations and rigid transforms.
+      Managed variables should be referred to in parsed expressions with the prefix @name, 
+      and are encoded into optimization form and decoded from optimization form
+      using KlamptVariable.bind / KlamptVariable.unbind.  You can also retrieve the Klampt value
+      by KlamptVariable.getValue().
     
     If you would like to find the configuration *closest* to solving the
     IK constraints, either add the IK constraints one by one with weight=1 (or some other
@@ -126,7 +131,7 @@ class RobotOptimizationProblem(optimize.OptimizationProblemBuilder):
         """Returns True if the indexed constraint is an IKObjective"""
         if self.objectives[index].type != "eq":
             return False
-        return self.objectives[index].expr.functionInfo.name == 'ik.residual'
+        return symbolic.is_op(self.objectives[index].expr,'ik.residual')
     def getIKObjective(self,index):
         """Returns the IKObjective the indexed constraint is an IKObjective"""
         res = self.objectives[index].expr.args[0]
@@ -188,7 +193,7 @@ class RobotOptimizationProblem(optimize.OptimizationProblemBuilder):
         - optimize: If True, adds the variables to the list of optimization variables.
 
         Returns a KlamptVariable containing information about the encoding of the object. 
-        Note that the symbolic Variable names may be decorated with extensions in the form of "_ext" if
+        Note that extra symbolic Variable names may be decorated with extensions in the form of "_ext" if
         the encoding is not direct.
         """
         if type is None:
@@ -204,8 +209,6 @@ class RobotOptimizationProblem(optimize.OptimizationProblemBuilder):
         def default(name,value):
             v = self.context.addVar(name,"V",len(value))
             v.value = value[:]
-            if optimize:
-                self.optimizationVariables.append(v)
             return v
 
         if name in self.managedVariables:
@@ -234,24 +237,26 @@ class RobotOptimizationProblem(optimize.OptimizationProblemBuilder):
                     self.setBounds(vals[-1].name,*self.robot.getJointLimits())
                     kv.constraints.append(self.robot.getJointLimits())
             kv.variables = vals
-            kv.expr = list_(*vals)
+            kv.expr = symbolic.list_(*vals)
         elif type == 'Rotation':
             if encoding == 'auto': encoding='rotation_vector'
             if encoding == 'rotation_vector':
                 if initialValue is not None:
-                    initialValue = so3.rotation_vector(initialValue)
+                    initialValue2 = so3.rotation_vector(initialValue)
                 else:
-                    initialValue = [0.0]*3
-                v = default(name+"_rv",initialValue)
+                    initialValue = so3.identity()
+                    initialValue2 = [0.0]*3
+                v = default(name+"_rv",initialValue2)
                 kv.expr = self.context.so3.from_rotation_vector(v)
                 kv.decoder = so3.from_rotation_vector
                 kv.encoder = so3.rotation_vector
             elif encoding == 'quaternion':
                 if initialValue is not None:
-                    initialValue = so3.quaternion(initialValue)
+                    initialValue2 = so3.quaternion(initialValue)
                 else:
-                    initialValue = [1,0,0,0]
-                v = default(name+"_q",initialValue)
+                    initialValue = so3.identity()
+                    initialValue2 = [1,0,0,0]
+                v = default(name+"_q",initialValue2)
                 kv.expr = self.context.so3.from_quaternion(v)
                 kv.decoder = so3.from_quaternion
                 kv.encoder = so3.quaternion
@@ -261,10 +266,11 @@ class RobotOptimizationProblem(optimize.OptimizationProblemBuilder):
                     kv.constraints = [f]
             elif encoding == 'rpy':
                 if initialValue is not None:
-                    initialValue = so3.rpy(initialValue)
+                    initialValue2 = so3.rpy(initialValue)
                 else:
-                    initialValue = [0.0]*3
-                v = default(name+"_rpy",initialValue)
+                    initialValue = so3.identity()
+                    initialValue2 = [0.0]*3
+                v = default(name+"_rpy",initialValue2)
                 kv.expr = self.context.so3.from_rpy(v)
                 kv.decoder = so3.from_rpy
                 kv.encoder = so3.rpy
@@ -284,25 +290,64 @@ class RobotOptimizationProblem(optimize.OptimizationProblemBuilder):
                 Ri,ti = None,[0.0]*3
             else:
                 Ri,ti = initialValue
-            kR = self.addVar(name+'_R','Rotation',Ri,constraints=constraints,encoding=encoding)
+            kR = self.addKlamptVar(name+'_R','Rotation',Ri,constraints=constraints,encoding=encoding)
             t = default(name+'_t',ti)
             kv.variables = kR.variables+[t]
             kv.constraints = kR.constraints
-            kv.expr = list_(kR.expr,t)
+            kv.expr = symbolic.list_(kR.expr,t)
             kv.encoding = encoding
             if kR.encoder is not None:
-                kv.encoder = lambda T:(kr.encoder(T[0]),t[1])
-                kv.decoder = lambda T:(kr.decoder(T[0]),t[1])
+                kv.encoder = lambda T:(kR.encoder(T[0]),T[1])
+                kv.decoder = lambda T:(kR.decoder(T[0]),T[1])
             del self.managedVariables[kR.name]
         else:
             raise ValueError("Unsupported object type "+type)
 
         if kv.variables is None:
-            kv.variables = v
+            kv.variables = [v]
         if kv.expr is None:
-            kv.expr = VariableExpression(v)
+            kv.expr = symbolic.VariableExpression(v)
+        self.context.addExpr(name,kv.expr)
+        if optimize:
+            for v in kv.variables:
+                self.optimizationVariables.append(v)
         self.managedVariables[name] = kv
         return kv
+
+    def get(self,name,defaultValue=None):
+        """Returns a Variable or UserData in the context, or a managed KlamptVariable.  If the item
+        does not exist, defaultValue is returned.
+        """
+        if name in self.managedVariables:
+            return self.managedVariables[name]
+        else:
+            return self.context.get(name,defaultValue)
+
+    def rename(self,itemname,newname):
+        """Renames a Variable, UserData, or managed KlamptVariable."""
+        if itemname in self.managedVariables:
+            item = self.managedVariables[itemname]
+            del self.managedVariables[itemname]
+            item.name = newname
+            print "Renaming KlamptVariable",itemname
+            self.context.expressions[newname] = self.context.expressions[itemname]
+            del self.context.expressions[itemname]
+            for var in item.variables:
+                varnewname = newname + var.name[len(itemname):]
+                print "  Renaming internal variable",var.name,"to",varnewname
+                if var.name in self.variableBounds:
+                    self.variableBounds[varnewname] = self.variableBounds[var.name]
+                    del self.variableBounds[var.name]
+                self.context.renameVar(var,varnewname)
+            self.managedVariables[newname] = item
+        elif itemname in self.context.userData:
+            self.context.renameUserData(itemname,newname)
+        else:
+            var = self.context.variableDict[itemname]
+            if var.name in self.variableBounds:
+                self.variableBounds[newname] = self.variableBounds[var.name]
+                del self.variableBounds[var.name]
+            self.context.renameVar(var,newname)
     
     def setActiveDofs(self,links):
         """Sets the list of active DOFs.  These may be indices, RobotModelLinks, or strings."""
@@ -330,6 +375,7 @@ class RobotOptimizationProblem(optimize.OptimizationProblemBuilder):
         else:
             if link not in self.activeDofs:
                 self.activeDofs.append(link)
+
     def disableJointLimits(self):
         """Disables joint limits.  By default, the robot's joint limits are
         used."""
@@ -369,9 +415,20 @@ class RobotOptimizationProblem(optimize.OptimizationProblemBuilder):
         res = optimize.OptimizationProblemBuilder.toJson(self,saveContextFunctions,prettyPrintExprs)
         if self.activeDofs is not None:
             res['activeDofs'] = self.activeDofs
+        if len(self.managedVariables) > 0:
+            varobjs = []
+            for (k,v) in self.managedVariables.iteritems():
+                varobj = dict()
+                assert k == v.name
+                varobj['name'] = v.name
+                varobj['type'] = v.type
+                varobj['encoding'] = v.encoding
+                varobjs.append(varobj)
+            res['managedVariables'] = varobjs
         if len(self.autoLoad) > 0:
             res['autoLoad'] = self.autoLoad
         return res
+
     def fromJson(self,obj,doAutoLoad=True):
         """Loads from a JSON-compatible object.
 
@@ -384,7 +441,17 @@ class RobotOptimizationProblem(optimize.OptimizationProblemBuilder):
             self.activeDofs = obj['activeDofs']
         else:
             self.activeDofs = None
-        if not ignoreAutoLoad:
+        assert 'q'in self.context.variableDict,'Strange, the loaded JSON file does not have a configuration q variable?'
+        self.q = self.context.variableDict['q']
+        if 'managedVariables' in obj:
+            self.managedVariables = dict()
+            for v in obj['managedVariables']:
+                name = v['name']
+                type = v['type']
+                encoding = v['encoding']
+                raise NotImplementedError("TODO: load managed variables from disk properly")
+                self.managedVariables[name] = self.addKlamptVar(name,type,encoding)
+        if doAutoLoad:
             self.autoLoad = obj.get('autoLoad',dict())
             for (name,fn) in self.autoLoad.iteritems():
                 try:
@@ -435,6 +502,17 @@ class RobotOptimizationProblem(optimize.OptimizationProblemBuilder):
             activeDofs = ikActiveDofs
             activeNonIKDofs = []
             ikToActive = range(len(ikActiveDofs))
+        anyIKProblems = False
+        anyCosts = False
+        softIK = False
+        for obj in self.objectives:
+            if obj.type == 'ik':
+                anyIKProblems = True
+                if obj.soft:
+                    softIK = True
+            elif obj.type == 'cost' or obj.soft:
+                anyCosts = True
+
         #sample random start point
         if params.startRandom:
             self.randomVarBinding()
@@ -444,7 +522,7 @@ class RobotOptimizationProblem(optimize.OptimizationProblemBuilder):
                 for i in activeNonIKDofs:
                     q[i] = random.uniform(qmin[i],qmax[i])
                 robot.setConfig(q)
-        if params.localMethod is not None or params.globalMethod is not None:
+        if params.localMethod is not None or params.globalMethod is not None or (anyCosts or not anyIKProblems):
             #set up optProblem, an instance of optimize.Problem
             assert self.optimizationVariables[0] is self.q
             if len(activeDofs) < self.robot.numLinks():
@@ -458,6 +536,7 @@ class RobotOptimizationProblem(optimize.OptimizationProblemBuilder):
                 self.setBounds("q",qmin,qmax)
 
                 reducedProblem,reducedToFullMapping,fullToReducedMapping = self.preprocess()
+
                 optq = reducedProblem.context.variableDict['q']
 
                 print "Preprocessed problem:"
@@ -510,16 +589,6 @@ class RobotOptimizationProblem(optimize.OptimizationProblemBuilder):
             q = self.q.value
             return q
 
-        anyIKProblems = False
-        anyCosts = False
-        softIK = False
-        for obj in self.objectives:
-            if obj.type == 'ik':
-                anyIKProblems = True
-                if obj.soft:
-                    softIK = True
-            elif obj.type == 'cost' or obj.soft:
-                anyCosts = True
         if anyIKProblems:
             print "Performing random-restart newton raphson"
             #random-restart newton-raphson
