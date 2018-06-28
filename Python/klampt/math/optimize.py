@@ -1,5 +1,5 @@
 import numpy as np
-import math
+import math,random
 import symbolic,symbolic_io,symbolic_linalg
 from ..io import loader
 
@@ -332,6 +332,8 @@ class LocalOptimizer:
                 print "LocalOptimizer.solve(): warning, can't use method",scipyMethod,"with constraints"
                 raw_input("Press enter to continue > ")
             #print "Scipy constraints",constraintDicts
+            #print "Scipy bounds",bounds
+            #print "Objective jacobian",jac
             res = optimize.minimize(problem.objective,x0=self.seed,method=scipyMethod,
                                     jac=jac,bounds=bounds,
                                     constraints=constraintDicts,tol=tol,options={'maxiter':numIters,'disp':True})
@@ -398,12 +400,40 @@ class LocalOptimizer:
             if len(items)>1:
                 pyOptMethod = items[1]
 
+            #for some reason PyOpt doesn't do well with infinite bounds
+            for i,v in enumerate(problem.bounds[0]):
+                if math.isinf(v): problem.bounds[0][i] = -1e20
+            for i,v in enumerate(problem.bounds[1]):
+                if math.isinf(v): problem.bounds[1][i] = 1e20
+            ubIndices = [i for i,v in enumerate(problem.bounds[1]) if not math.isinf(v)]
+            lbIndices = [i for i,v in enumerate(problem.bounds[0]) if not math.isinf(v)]
             def objfunc(x):
+                #print "EVALUATING OBJECTIVE AT",x
                 fx = problem.objective(x)
-                gx = sum([f(x) for f in problem.equalities]+[f(x) for f in problem.inequalities],[])
-                gx = gx + (x-problem.bounds[1]).tolist() + (problem.bounds[0]-x).tolist()
-                #flag = True if problem.feasibilityTest is None else problem.feasibilityTest(x)
+                eqs = [f(x) for f in problem.equalities]+[f(x) for f in problem.inequalities]
+                if len(eqs) == 0:
+                    gx = []
+                else:
+                    gx = np.hstack(eqs)
+                    assert len(gx.shape)==1
+                    gx = gx.tolist()
+                ub = (x-problem.bounds[1])[ubIndices]
+                lb = (problem.bounds[0]-x)[lbIndices]
+                if len(gx) == 0:
+                    gx = ub.tolist() + lb.tolist()
+                else:
+                    gx = gx + ub.tolist() + lb.tolist()
+                #for f in problem.equalities:
+                #    print "EQUALITY VALUE",f(x)
+                #for f in problem.inequalities:
+                #    print "INEQUALITY VALUE",f(x)
+                flag = not any(not f(x) for f in problem.feasibilityTests)
+                #print "CONSTRAINTS",gx
+                #print "FUNCTION VALUE IS",fx
+                assert len(gx) == hlen+glen+len(ubIndices)+len(lbIndices)
                 flag = True
+                if any(math.isnan(v) for v in x):
+                    return 0,[0]*len(gx),flag
                 return fx,gx,flag
             opt_prob = pyOpt.Optimization('',objfunc)
             opt_prob.addObj('f')
@@ -414,31 +444,32 @@ class LocalOptimizer:
             opt_prob.addConGroup('eq',hlen,'e')
             opt_prob.addConGroup('ineq',glen,'i')
             #expressing bounds as inequalities
-            opt_prob.addConGroup('bnd',len(self.seed)*2,'i')
+            opt_prob.addConGroup('bnd',len(ubIndices)+len(lbIndices),'i')
 
             opt = getattr(pyOpt,pyOptMethod)()
-            opt.setOption('IPRINT', -1)
+            #opt.setOption('IPRINT', -1)
+            opt.setOption('IPRINT', -2)
             opt.setOption('MAXIT',numIters)
             opt.setOption('ACC',tol)
             sens_type = 'FD'
             if problem.objectiveGrad is not None:
                 #user provided gradients
                 if all(f is not None for f in problem.equalityGrads) and all(f is not None for f in problem.inequalityGrads):
+                    #print "RETURNING GRADIENTS"
                     def objfuncgrad(x):
                         fx = problem.objectiveGrad(x)
-                        gx = sum([f(x) for f in problem.equalityGrads]+[f(x) for f in problem.equalityGrads],[])
-                        for i in range(len(x)):
+                        gx = sum([f(x) for f in problem.equalityGrads]+[f(x) for f in problem.inequalityGrads],[])
+                        for i in ubIndices:
                             zero = [0]*len(x)
                             zero[i] = 1
                             gx.append(zero)
-                        for i in range(len(x)):
+                        for i in lbIndices:
                             zero = [0]*len(x)
                             zero[i] = -1
                             gx.append(zero)
                         flag = True
                         return fx,gx,flag
-                    #TEMP: test no analytic gradients
-                    #sens_type = objfuncgrad
+                    sens_type = objfuncgrad
                 else:
                     print "LocalOptimizer.solve(): Warning, currently need all or no gradients provided. Assuming no gradients."
             [fstr, xstr, inform] = opt(opt_prob,sens_type=sens_type)
@@ -666,7 +697,7 @@ class OptimizerParams:
         numIters = self.numIters
         if self.globalMethod == 'random-restart' or (self.globalMethod is None and (self.numRestarts > 1 or self.startRandom == False)):
             #use the GlobalOptimize version of random restarts
-            assert self.localMethod is not None,"Need a localMethod for random-restart to work"
+            assert self.localMethod is not None,"Need a localMethod for random-restart to work ('auto' is OK)"
             if self.globalMethod is None:
                 method = 'random-restart' + '.' + self.localMethod
             else:
@@ -848,6 +879,7 @@ class OptimizationProblemBuilder:
         csum = 0.0
         for obj in self.objectives:
             if obj.type == 'cost':
+                #print obj.weight,obj.expr.evalf(self.context)
                 csum += obj.weight*obj.expr.evalf(self.context)
             elif obj.soft:
                 if obj.type == 'eq':
@@ -923,7 +955,7 @@ class OptimizationProblemBuilder:
             var = self.context.variableDict[k]
             assert var.value is not None,"All optimization variables must be bound"
             xmin,xmax = bnds
-            if not symbolic_linalg.bound_contains(xmin,xmax,var.value):
+            if not symbolic_linalg.bound_contains(xmin,xmax,var.value).evalf():
                 return False
         return True
 
@@ -942,7 +974,7 @@ class OptimizationProblemBuilder:
         return True
 
     def costSymbolic(self):
-        """Returns a symbolic.Expression, over $q and other user data variables, that
+        """Returns a symbolic.Expression, over variables in self.context, that
         evaluates to the cost"""
         components = []
         weights = []
@@ -961,7 +993,11 @@ class OptimizationProblemBuilder:
                     raise NotImplementedError("Soft inequalities")
         if len(components)==0:
             return None
-        return symbolic.simplify(symbolic.weightedsum(*(components + weights)),self.context)
+        oldvals = self.getVarValues()
+        self.unbindVars()
+        res = symbolic.simplify(symbolic.weightedsum(*(components + weights)),self.context)
+        self.setVarValues(oldvals)
+        return res
         #return symbolic.weightedsum(*(components + weights))
 
     def equalityResidualSymbolic(self,soft=False):
@@ -970,9 +1006,13 @@ class OptimizationProblemBuilder:
         components = []
         for obj in self.objectives:
             if obj.type == 'eq' and (not obj.soft or soft):
-                components.append(symbolic.simplify(obj.expr*obj.weight,self.context))
+                components.append(obj.expr*obj.weight)
         if len(components) == 0: return None
-        return symbolic.simplify(symbolic.flatten(*components),self.context)
+        oldvals = self.getVarValues()
+        self.unbindVars()
+        res = symbolic.simplify(symbolic.flatten(*components),self.context)
+        self.setVarValues(oldvals)
+        return res
 
     def inequalityResidualSymbolic(self,soft=False):
         """Returns a symbolic.Expression,  over variables in self.context, that
@@ -980,9 +1020,13 @@ class OptimizationProblemBuilder:
         components = []
         for obj in self.objectives:
             if obj.type == 'ineq' and (not obj.soft or soft):
-                components.append(symbolic.simplify(obj.expr*obj.weight,self.context))
+                components.append(obj.expr*obj.weight)
         if len(components) == 0: return None
-        return symbolic.simplify(symbolic.flatten(*components),self.context)
+        oldvals = self.getVarValues()
+        self.unbindVars()
+        res = symbolic.simplify(symbolic.flatten(*components),self.context)
+        self.setVarValues(oldvals)
+        return res
 
     def equalitySatisfiedSymbolic(self,tol=1e-3,soft=False):
         """Returns a symbolic.Expression, over variables in self.context, that
@@ -1006,7 +1050,11 @@ class OptimizationProblemBuilder:
             if obj == 'feas' and (not obj.soft or soft):
                 components.append(obj.expr)
         if len(components) == 0: return None
-        return symbolic.simplify(symbolic.all_(*components),self.context)
+        oldvals = self.getVarValues()
+        self.unbindVars()
+        res = symbolic.simplify(symbolic.all_(*components),self.context)
+        self.setVarValues(oldvals)
+        return res
 
     def inBoundsSymbolic(self):
         """Returns a symbolic.Expression, over variables in self.context, that
@@ -1112,7 +1160,7 @@ class OptimizationProblemBuilder:
 
         self.objectives = []
         for ojson in object['objectives']:
-            if isinstance(ojson['expr'],str):
+            if isinstance(ojson['expr'],(str,unicode)):
                 expr = symbolic_io.exprFromStr(self.context,ojson['expr'])
             else:
                 expr = symbolic_io.exprFromJson(self.context,ojson['expr'])
@@ -1136,7 +1184,7 @@ class OptimizationProblemBuilder:
         - delete any optimization variables not appearing in expressions
         - fixed-bound (x in [a,b], with a=b) variables are replaced with fixed values.
         - simplify objectives
-        - TODO: replace equalities with individual variables?
+        - TODO: replace equalities of the form var = expr by matching var to expr?
 
         If optToSelf is not None, then it is a list of Expressions that, when eval'ed, produce the values of the corresponding
         optimizationVariables in the original optimization problem.  selfToOpt performs the converse mapping.
@@ -1210,7 +1258,7 @@ class OptimizationProblemBuilder:
         sourceObjectives = self.objectives
         if any(obj.weight==0 for obj in self.objectives):
             modified = True
-            sourceObjectives = [obj for obj in result.objectives if obj.weight != 0]
+            sourceObjectives = [obj for obj in self.objectives if obj.weight != 0]
 
         if not modified:
             return self,None,None
@@ -1218,12 +1266,16 @@ class OptimizationProblemBuilder:
         #convert names to Variables
         result.optimizationVariables = [result.context.variableDict[vname] for vname in result.optimizationVariables]
         #simplify and remap expressions
-        oldVals = result.getVarValues()
-        result.unbindVars()
+        oldVals = self.getVarValues()
+        for var in self.optimizationVariables:
+            var.unbind()
         for i,obj in enumerate(sourceObjectives):
             expr = symbolic.simplify(obj.expr,result.context)
             for var,vexpr in zip(result.optimizationVariables,optToSelf):
-                expr = expr.replace(var,vexpr)
+                try:
+                    expr = expr.replace(var,vexpr)
+                except ValueError:
+                    pass
             #print "Replacement for",obj.type,"objective",obj.expr,"is",expr
             expr = symbolic.simplify(expr)
             #print "  simplified to",expr
@@ -1231,7 +1283,7 @@ class OptimizationProblemBuilder:
             result.objectives.append(OptimizationObjective(expr,obj.type,obj.weight))
             result.objectives[-1].soft = obj.soft
             result.objectives[-1].name = obj.name
-        result.setVarValues(oldVals)
+        self.setVarValues(oldVals)
         return (result,optToSelf,selfToOpt)
 
     def getBounds(self):
@@ -1274,14 +1326,28 @@ class OptimizationProblemBuilder:
         self.setVarValues(oldValues)
         return optProblem
 
-    def solve(self,params=OptimizerParams(),preprocess=True):
-        """Solves the optimization problem.  The result is stored in the bound optimizationVariables."""
+    def solve(self,params=OptimizerParams(),preprocess=True,cache=False):
+        """Solves the optimization problem.  The result is stored in the bound optimizationVariables.
+
+        If you will be solving the problem several times without modification (except for user data and
+        initial values of optimizationVariables), you may set cache=True to eliminate some overhead. 
+        Note that caching does not work properly if you change constraints or non-optimization variables.
+        """
         print "OptimizationProblemBuilder.solve(): My optimization variables",[v.name for v in self.optimizationVariables]
-        if preprocess:
-            p,pToSelf,selfToP = self.preprocess()
+        #first check for cached values
+        if cache and hasattr(self,'_cached_problem'):
+            p,pToSelf,selfToP,optp = self._cached_problem
         else:
-            p = self
-        optp = p.getProblem()
+            #if not, do the preprocessing
+            if preprocess:
+                p,pToSelf,selfToP = self.preprocess()
+            else:
+                p = self
+                pToSelf,selfToP = None,None
+            optp = p.getProblem()
+            if cache:
+                self._cached_problem = p,pToSelf,selfToP,optp
+
         seed = None
         if params.globalMethod is None or params.globalMethod == 'random-restart':
             #ensure that you have a seed
