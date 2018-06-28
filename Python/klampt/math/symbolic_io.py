@@ -22,6 +22,18 @@ _operator_precedence = {'pow':1,
 class _Object(object):
     pass
 
+def byteify(input):
+    """Helpful for converting unicode values in JSON loaded objects to strings"""
+    if isinstance(input, dict):
+        return {byteify(key): byteify(value)
+                for key, value in input.iteritems()}
+    elif isinstance(input, list):
+        return [byteify(element) for element in input]
+    elif isinstance(input, unicode):
+        return input.encode('utf-8')
+    else:
+        return input
+
 class _TaggedExpression(Expression):
     def __init__(self,name):
         self.name = name
@@ -304,10 +316,12 @@ def exprFromStr(context,string,fmt=None,add=False):
         TAGLIST_NAME = '__tagexprlist__'
         taglist = context.expressions.copy()
         def __settag__(self,tagname,taglist):
-            taglist[str(tagname)] = self
+            assert isinstance(tagname,ConstantExpression) and isinstance(tagname.value,str)
+            taglist[tagname.value] = self
             return self
         def __gettag__(tagname,taglist):
-            return taglist[str(tagname)]
+            assert isinstance(tagname,ConstantExpression) and isinstance(tagname.value,str)
+            return taglist[tagname.value]
         Expression.__settag__ = __settag__
 
         x = re.sub(r"\$(\w+)", r"___\1",string)
@@ -420,6 +434,7 @@ def exprToJson(expr):
 
 def exprFromJson(context,jsonObj,taggedExpressions=None):
     """Creates an Expression from a JSON object previously saved by expr.toJson()"""
+    print "exprFromJson:",jsonObj
     name = str(jsonObj['type'])
     args = jsonObj['args']
     parsedArgs = []
@@ -433,10 +448,14 @@ def exprFromJson(context,jsonObj,taggedExpressions=None):
                 parsedArgs.append(context.userData[a[plen:]])
             elif a.startswith(NAMED_EXPRESSION_PREFIX):
                 plen = len(NAMED_EXPRESSION_PREFIX)
-                if a[plen:] not in taggedExpressions:
-                    print "exprFromJson(): Valid tags:",taggedExpressions
-                    raise RuntimeError("Invalid expression tag "+a)
-                parsedArgs.append(taggedExpressions[a[plen:]])
+                a = a[plen:]
+                if a in taggedExpressions:
+                    parsedArgs.append(taggedExpressions[a])
+                elif a in context.expressions:
+                    parsedArgs.append(context.expressions[a])
+                else:
+                    print "exprFromJson(): Valid tags:",taggedExpressions.keys(),"(tags)",context.expressions.keys(),"(expressions)"
+                    raise RuntimeError("Invalid expression tag "+NAMED_EXPRESSION_PREFIX+a)
             else:
                 #variable reference
                 if a not in context.variableDict:
@@ -462,6 +481,34 @@ def exprFromJson(context,jsonObj,taggedExpressions=None):
         return context.customFunctions[name](*parsedArgs)
     raise RuntimeError("Invalid expression type "+name)
 
+def typeToJson(type):
+    res = { 'char':type.char }
+    if type.size is not None:
+        res['size'] = type.size
+    if type.subtype is not None:
+        if isinstance(type.subtype,str):
+            res['subtype'] = type.subtype
+        elif isinstance(type.subtype,list):
+            res['subtype'] = [typeToJson(st) for st in type.subtype]
+        else:
+            res[subtype] = typeToJson(type.subtype)
+    return res
+
+def typeFromJson(jsonObj):
+    assert 'char' in jsonObj
+    st = None
+    if 'subtype' in jsonObj:
+        subtypeobj = jsonObj['subtype']
+        if isinstance(subtypeobj,list):
+            st = [typeFromJson(stobj) for stobj in subtypeobj]
+        elif isinstance(subtypeobj,(str,unicode)):
+            st = subtypeobj
+        elif isinstance(subtypeobj,dict):
+            st = typeFromJson(subtypeobj)
+        else:
+            raise ValueError("Invalid JSON object specifying Type subtype")
+    return Type(byteify(jsonObj['char']),jsonObj.get('size',None),st)
+
 def contextToJson(ctx,saveFunctions=False):
     """Produces a JSON object from a context.  Only the names for userData and customFunctions are saved.
     If saveFunctions=False, customFunctions are not saved"""
@@ -469,7 +516,7 @@ def contextToJson(ctx,saveFunctions=False):
     if len(ctx.variables) > 0:
         varjson = []
         for v in ctx.variables:
-            varjson.append({'name':v.name,'type':v.type.type,'size':v.type.size})
+            varjson.append({'name':v.name,'type':typeToJson(v.type)})
         res['variables'] = varjson
     if len(ctx.expressions) > 0:
         exprjson = {}
@@ -500,7 +547,7 @@ def contextFromJson(context,jsonObj):
     context.expressions = dict()
     if 'variables' in jsonObj:
         for v in jsonObj['variables']:
-            context.addVar(v['name'],v['type'],v['size'])
+            context.addVar(v['name'],typeFromJson(v['type']))
     if 'expressions' in jsonObj:
         for n,v in jsonObj['expressions'].iteritems():
             context.expressions[n] = exprFromJson(context,v)

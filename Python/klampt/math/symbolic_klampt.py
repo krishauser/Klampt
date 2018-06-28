@@ -86,7 +86,7 @@ class SO3Context(Context):
         self.error = self.declare(so3.error,"error")
         self.distance = self.declare(so3.distance,"distance")
         self.from_rpy = self.declare(so3.from_rpy,"from_rpy")
-        self.to_rpy = self.declare(so3.rpy,"rpy")
+        self.rpy = self.declare(so3.rpy,"rpy")
         self.from_quaternion = self.declare(expr(so3.from_quaternion([q[0],q[1],q[2],q[3]])),"from_quaternion",["q"])
         self.quaternion = self.declare(so3.quaternion,"quaternion")
         self.from_rotation_vector = self.declare(so3.from_rotation_vector,"from_rotation_vector")
@@ -95,8 +95,6 @@ class SO3Context(Context):
         self.eq_constraint = self.declare(dot(Rm.T,Rm),'eq_constraint',['R'])
         self.quaternion_constraint = self.declare(norm2(q)-1,'quaternion_constraint',['q'])
         self.identity.returnType = self.type
-        self.matrix.returnType = Type('M',(3,3))
-        self.matrix.argTypes = [self.type]
         self.inv.returnType = self.type
         self.inv.argTypes = [self.type]
         self.mul.returnType = self.type
@@ -109,6 +107,23 @@ class SO3Context(Context):
         self.error.argTypes = [self.type,self.type]
         self.distance.returnType = Type('N')
         self.distance.argTypes = [self.type,self.type]
+        self.from_matrix.returnType = self.type
+        self.from_matrix.argTypes = [M.type]
+        self.from_rpy.returnType = self.type
+        self.from_rpy.argTypes = [Type('V',3)]
+        self.from_quaternion.returnType = self.type
+        self.from_quaternion.argTypes = [Type('V',4)]
+        self.from_rotation_vector.returnType = self.type
+        self.from_rotation_vector.argTypes = [Type('V',3)]
+        self.matrix.returnType = self.from_matrix.argTypes[0]
+        self.matrix.argTypes = [self.from_matrix.returnType]
+        self.rpy.returnType = self.from_rpy.argTypes[0]
+        self.rpy.argTypes = [self.from_rpy.returnType]
+        self.quaternion.returnType = self.from_quaternion.argTypes[0]
+        self.quaternion.argTypes = [self.from_quaternion.returnType]
+        self.rotation_vector.returnType = self.from_rotation_vector.argTypes[0]
+        self.rotation_vector.argTypes = [self.from_rotation_vector.returnType]
+
 
 class SE3Context(Context):
     """Defines some functions in the se3 module under the se3 namespace
@@ -444,15 +459,15 @@ class KlamptContext(Context):
             return link.getTransform()[0]
         def com(robot):
             return robot.getCom()
-        def comDeriv(robot,dq):
+        def comJacobian(robot):
             sumMass = 0.0
-            sumDeriv = np.array([0,0,0])
+            sumJacobian = np.zeros((3,robot.numLinks()))
             for i in range(robot.numLinks()):
                 mass = robot.link(i).getMass()
                 sumMass += mass.getMass()
                 if mass.getMass() > 0:
-                    sumDeriv += np.dot(robot.link(i).getPositionJacobian(mass.getCom()),dq)*mass.getMass()
-            return sumDeriv*(1.0/sumMass)
+                    sumJacobian += np.array(robot.link(i).getPositionJacobian(mass.getCom()))*mass.getMass()
+            return sumJacobian*(1.0/sumMass)
         def gravityTorque(gravity,robot):
             return robot.getGravityForces(gravity)
         #def inJointLimits(q,robot):
@@ -545,7 +560,7 @@ class KlamptContext(Context):
         self.com = self.declare(com)
         self.com.returnType = self.pointType
         self.com.argTypes = [self.robotType]
-        self.com.setDeriv('robot',comDeriv,stackable=True)
+        self.com.setJacobian('robot',comJacobian)
         self.gravityTorque = self.declare(gravityTorque)
         self.gravityTorque.argTypes = [self.pointType,self.robotType]
         jl = getattr_(UserDataExpression("robot"),const("getJointLimits"))
