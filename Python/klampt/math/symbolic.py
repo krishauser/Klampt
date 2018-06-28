@@ -869,6 +869,7 @@ class Context:
             raise RuntimeError("Expression "+name+" already exists")
         if name in self.customFunctions or name in _builtin_functions:
             raise RuntimeError("Expression "+name+" conflicts with a function")
+        assert isinstance(name,str)
         assert isinstance(expr,Expression)
         self.expressions[name] = expr
         return expr
@@ -974,18 +975,13 @@ class Context:
         res.userData = self.userData.copy()
         #deep-copy expressions so they refer to expressions and variables in the new context
         def rebind(expr,res):
-            newargs = []
-            for a in expr.args:
-                if isinstance(a,Variable):
-                    if a.isUserData():
-                        newargs.append(a)
-                    else:
-                        newargs.append(res.variableDict[a.name])
-                elif isinstance(a,Expression):
-                    newargs.append(rebind(a,res))
-                else:
-                    newargs.append(a)
-            return Expression(expr.type,newargs,expr.op)
+            if isinstance(expr,OperatorExpression):
+                newargs = [rebind(a,res) for a in expr.args]
+                return OperatorExpression(expr.functionInfo,newargs,expr.op)
+            elif isinstance(expr,VariableExpression):
+                return VariableExpression(res.variableDict[expr.var.name])
+            else:
+                return expr
         for n,e in self.expressions.iteritems():
             res.expressions[n] = rebind(e,res)
         if copyFunctions:
@@ -1197,10 +1193,12 @@ class Context:
             return f(*arglist)
         return fv,varorder
     def makeFlatFunctionDeriv(self,expr,varorder=None,defaultsize=1):
-        """Given an expression expr, return (df,varorder),
+        """Given a differentiable expression expr, return (df,varorder),
         where df is an 1-argument Python function that that takes a list of numbers or numpy array and
         outputs the derivative (Jacobian matrix) of expression expr.
         The order of variables that should be provided to df in this tuple is returned in varorder.
+
+        If expr is not differentiable, then df=None is returned
 
         If vector variables are not given size hints, then they are assumed to have defaultsize.
         """
@@ -1209,6 +1207,9 @@ class Context:
         dvs = []
         for v in varorder:
             dv = expr.deriv(v)
+            if dv is None:
+                print "makeFlatFunctionDeriv: Derivative with respect to",v.name,"is undefined, returning None"
+                return None,varorder
             if not isinstance(dv,Expression):
                 if dv is 0 and not v.type.is_scalar():
                     #get the jacobian dimensions right
@@ -2435,7 +2436,6 @@ class OperatorExpression(Expression):
                     return (False,True,None)
                 if node.functionInfo.deriv is 0:
                     return (False,True,None)
-                res = node.functionInfo.deriv(*([context]+node.args+[varderivs]))
                 assert callable(node.functionInfo.deriv),"custom_eval functions needs to define a callable deriv function"
                 res = node.functionInfo.deriv(*([context]+node.args+[varderivs]))
                 if res is 0:
@@ -2444,6 +2444,8 @@ class OperatorExpression(Expression):
                     except Exception:
                         #there's a problem getting the shape... let's hope that it's ok to return 0
                         pass
+                elif res is None:
+                    pass
                 else:
                     res = transpose.optimized(res)
                 return (False,True,res)
@@ -2540,15 +2542,18 @@ class OperatorExpression(Expression):
             reshapers1 = [(lambda a,da:reshape.optimized(da,flatten.optimized(stackcount,shape.optimized(a)))) if do_reshape else (lambda a,da:da) for do_reshape in needs_reshaping]
             reshapers2 = [(lambda a,da:reshape.optimized(da,shape.optimized(a))) if do_reshape else (lambda a,da:da) for do_reshape in needs_reshaping]
             if callable(self.functionInfo.rowstackderiv):
+                if any(v is None for v in dargs): return None
                 daresized = [reshaper(a,da) for (reshaper,a,da) in zip(reshapers1,self.args,dargs)]
                 return self.functionInfo.rowstackderiv(self.args,daresized)
             elif callable(self.functionInfo.colstackderiv):
+                if any(v is None for v in dargs): return None
                 daresized = [reshaper(a,da) for (reshaper,a,da) in zip(reshapers1,self.args,dargs)]
                 res = self.functionInfo.colstackderiv(self.args,[transpose.optimized(da) if (da is not None) else None for da in daresized])
                 if res is not None:
                     return res.T
                 return None
             elif callable(self.functionInfo.deriv):
+                if any(v is None for v in dargs): return None
                 assert is_const(stackcount),"Can't do functional derivatives yet with variable stack size"
                 di = []
                 #print [str(da) for da in dargs]
@@ -2563,6 +2568,7 @@ class OperatorExpression(Expression):
                 return array(*di)
         else:
             if callable(self.functionInfo.deriv):
+                if any(v is None for v in dargs): return None
                 return self.functionInfo.deriv(self.args,dargs)
         res = 0
         assert len(self.functionInfo.deriv) == len(self.args)
@@ -2573,6 +2579,7 @@ class OperatorExpression(Expression):
             if self.functionInfo.deriv[index] is None:
                 if self.functionInfo.jacobian is not None and self.functionInfo.jacobian[index] is not None:
                     J = self.functionInfo.jacobian[index](*self.args)
+                    assert J is not None
                     Jconst = to_const(J)
                     if Jconst is not None:
                         da_cols = shape.optimized(da)[-1]
@@ -2599,6 +2606,7 @@ class OperatorExpression(Expression):
                     elif self.functionInfo.colstackderiv is not None and self.functionInfo.colstackderiv[index] is not None:
                         #assume it can handle the derivatives
                         daresized = reshape.optimized(da,flatten.optimized(stackcount,arg_shape)) if needs_reshaping else da
+                        assert daresized is not None
                         da_stack = transpose.optimized(daresized)
                         inc = self.functionInfo.colstackderiv[index](*(self.args+[da_stack]))
                         if inc is not None:
@@ -5022,6 +5030,7 @@ def _setitem_simplifier(x,indices,rhs):
 
 def _subs_deriv(context,expr,var,value,derivs):
     #chain rule
+    if any(dv is None for dv in derivs): return None
     if hasattr(var,'__iter__'):
         assert hasattr(value,'__iter__')
         assert len(var) == len(value)
