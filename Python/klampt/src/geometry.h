@@ -154,6 +154,39 @@ public:
   std::vector<double> values;  //triple index (i,j,k) is flattened to i*dims[1]*dims[2] + j*dims[2] + k
 };
 
+class DistanceQuerySettings
+{
+public:
+  DistanceQuerySettings();
+  ///Allows a relative error in the distance calculation to speed up calculation.
+  ///The calculated result is Dcalc <= D(1+relErr) + absErr
+  double relErr;
+  ///Allows an absolute error in the distance calculation to speed up calculation.
+  ///The calculated result is Dcalc <= D(1+relErr) + absErr
+  double absErr;
+  ///If given, if the lowest distance is >= than this upper bound, the calculation may
+  ///branch.
+  double upperBound;
+};
+
+class DistanceQueryResult
+{
+public:
+  ///The calculated distance, with negative values indicating penetration.  Can also
+  ///be upperBound if the branch was hit.
+  double d;
+  ///If true, the closest point information is given in cp0 and cp1
+  bool hasClosestPoints;
+  ///If true, distance gradient information is given in grad0 and grad1
+  bool hasGradients;
+  ///closest points on self vs other, in world coordinates
+  std::vector<double> cp1,cp2;
+  ///the gradients of the objects' distance fields, in world coordinates. 
+  ///I.e., to move object1 to touch object2, move it in direction grad1 by distance -d. 
+  ///Note that grad2 is always -grad1.
+  std::vector<double> grad1,grad2;
+};
+
 /** @brief A three-D geometry.  Can either be a reference to a
  * world item's geometry, in which case modifiers change the 
  * world item's geometry, or it can be a standalone geometry.
@@ -290,41 +323,30 @@ class Geometry3D
   bool collides(const Geometry3D& other);
   ///Returns true if this geometry is within distance tol to other
   bool withinDistance(const Geometry3D& other,double tol);
-  ///Returns the distance from this geometry to the other
+  ///Returns the distance from this geometry to the other.  If either geometry contains volume information,
+  ///this value may be negative to indicate penetration.
   double distance(const Geometry3D& other,double relErr=0,double absErr=0);
-  ///Returns (success,cp) giving the closest point to the input point.
-  ///success is false if that operation is not supported with the given
-  ///geometry type
+  ///Returns the the distance and closest point to the input point, given in world coordinates.
+  ///An exception is raised if this operation is not supported with the given
+  ///geometry type.
   ///
-  ///pt and cp are given in world coordinates.  A non-default value of upperBound 
-  ///lets the calculation break early if it can be shown that the closest points are
-  ///greater than upperBound distance from one another.  In this case, success=false is
-  ///returned.
+  ///The return value contains the distance, closest points, and gradients if available.
   ///
-  ///If pt is contained within the interior of a GeometricPrimitive or VolumeGrid, a negative
-  ///value is returned
-  bool closestPoint(const double pt[3],double out[3]);
-  ///Same as the normal closestPoint, but a value of upperBound can be provided to
-  ///let the calculation break early if it can be shown that the closest points are
-  ///at least upperBound distance from one another.  In this case, success=False is
-  ///returned.
-  bool closestPointWithBound(const double pt[3],double upperBound,double out[3]);
-  ///Returns (success,cp1,cp2) where cp1 is the closest point on self to other, and cp2 is the
-  ///closest point on other to self. success is false if that operation is not supported with the
-  ///given geometry types.
-  ///
-  ///cp1 and cp2 are returned in world coordinates.
+  ///The settings for the calculator can be customized with relErr, absErr, and upperBound, e.g., to
+  ///break if the closest points are at least upperBound distance from one another.  
+  DistanceQueryResult distance2_point_ext(const double pt[3],const DistanceQuerySettings& settings);
+  DistanceQueryResult distance2_point(const double pt[3]);
+  ///Returns the the distance and closest points between the given geometries.
   ///
   ///If the objects are penetrating, some combinations of geometry types allow calculating penetration
   ///depths (GeometricPrimitive-GeometricPrimitive, GeometricPrimitive-TriangleMesh (surface only),
   ///GeometricPrimitive-PointCloud, GeometricPrimitive-VolumeGrid, TriangleMesh (surface only)-
   ///GeometricPrimitive, PointCloud-VolumeGrid).  In this case, a negative value is returned and cp1,cp2
   ///are the deepest penetrating points.
-  bool closestPoints(const Geometry3D& other,double out[3],double out2[3]);
-  ///Same as closestPoints, but a value of upperBound can be provided to let the calculation
-  ///break early if it can be shown that the closest points are at least upperBound distance
-  ///away from one another.  In this case, success=False is returned.
-  bool closestPointsWithBound(const Geometry3D& other,double upperBound,double out[3],double out2[3]);
+  ///
+  ///Same comments as the other distance2 function
+  DistanceQueryResult distance2(const Geometry3D& other,const DistanceQuerySettings& settings);
+  DistanceQueryResult distance2(const Geometry3D& other);
   ///Returns (hit,pt) where hit is true if the ray starting at s and pointing
   ///in direction d hits the geometry (given in world coordinates); pt is
   ///the hit point, in world coordinates.
