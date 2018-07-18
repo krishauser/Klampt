@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 """A program to quickly browse Klamp't objects.  Run it with
 
    python resourcebrowser.py
