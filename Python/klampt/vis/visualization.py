@@ -1009,8 +1009,13 @@ class VisPlotItem:
                 else:
                     self.luminosity.append(random.uniform(0,1))
         trace = self.traces[i]
-        if len(trace) > 0 and trace[-1][0] == t:
-            trace[-1] = (t,v)
+        #trange = self.traceRanges[i][1] - self.traceRanges[i][0]
+        if len(trace) > 0 and trace[-1][0] >= t:
+            tsafe = trace[-1][0]+1e-8
+            if v != trace[-1][1]:
+                trace.append((tsafe,v))
+                return
+            trace[-1] = (tsafe,v)
             return
         if self.compressThreshold is None:
             trace.append((t,v))
@@ -1963,7 +1968,7 @@ class VisAppearance:
                     raise ValueError("Invalid sub-path specified "+str(path)+" at "+str(e))
         raise ValueError("Invalid sub-item specified "+path[0])
 
-    def make_editor(self):
+    def make_editor(self,world=None):
         if self.editor != None:
             return 
         item = self.item
@@ -2003,6 +2008,17 @@ class VisAppearance:
                 res.enableRotation(True)
                 res.enableTranslation(True)
                 res.set(*self.item)
+            elif itype == 'Config':
+                if world is not None and world.numRobots() > 0 and world.robot(0).numLinks() == len(item):
+                    #it's a valid configuration
+                    oldconfig = world.robot(0).getConfig()
+                    world.robot(0).setConfig(self.item)
+                    res = RobotPoser(world.robot(0))
+                    world.robot(0).setConfig(oldconfig)
+                    self.hidden = True
+                else:
+                    print "VisAppearance.make_editor(): Warning, editor for object of type",itype,"cannot be associated with a robot"
+                    return
             else:
                 print "VisAppearance.make_editor(): Warning, editor for object of type",itype,"not defined"
                 return
@@ -2036,6 +2052,8 @@ class VisAppearance:
                     self.editor.set(self.item)
                 elif itype == 'RigidTransform':
                     self.editor.set(*self.item)
+                elif itype == 'Config':
+                    self.editor.set(self.item)
             else:
                 raise RuntimeError("Uh... unsupported type with an editor?")
         else:
@@ -2427,7 +2445,10 @@ class VisualizationPlugin(glcommon.GLWidgetPlugin):
             _globalLock.release()
             raise ValueError("Object "+name+" does not exist in visualization")
         if doedit:
-            obj.make_editor()
+            world = self.items.get('world',None)
+            if world != None:
+                world=world.item
+            obj.make_editor(world)
             if obj.editor:
                 self.klamptwidgetmaster.add(obj.editor)
         else:
