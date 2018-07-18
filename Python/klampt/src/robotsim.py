@@ -1348,6 +1348,88 @@ class VolumeGrid(_object):
 VolumeGrid_swigregister = _robotsim.VolumeGrid_swigregister
 VolumeGrid_swigregister(VolumeGrid)
 
+class DistanceQuerySettings(_object):
+    """Proxy of C++ DistanceQuerySettings class."""
+
+    __swig_setmethods__ = {}
+    __setattr__ = lambda self, name, value: _swig_setattr(self, DistanceQuerySettings, name, value)
+    __swig_getmethods__ = {}
+    __getattr__ = lambda self, name: _swig_getattr(self, DistanceQuerySettings, name)
+    __repr__ = _swig_repr
+
+    def __init__(self):
+        """__init__(DistanceQuerySettings self) -> DistanceQuerySettings"""
+        this = _robotsim.new_DistanceQuerySettings()
+        try:
+            self.this.append(this)
+        except Exception:
+            self.this = this
+    __swig_setmethods__["relErr"] = _robotsim.DistanceQuerySettings_relErr_set
+    __swig_getmethods__["relErr"] = _robotsim.DistanceQuerySettings_relErr_get
+    if _newclass:
+        relErr = _swig_property(_robotsim.DistanceQuerySettings_relErr_get, _robotsim.DistanceQuerySettings_relErr_set)
+    __swig_setmethods__["absErr"] = _robotsim.DistanceQuerySettings_absErr_set
+    __swig_getmethods__["absErr"] = _robotsim.DistanceQuerySettings_absErr_get
+    if _newclass:
+        absErr = _swig_property(_robotsim.DistanceQuerySettings_absErr_get, _robotsim.DistanceQuerySettings_absErr_set)
+    __swig_setmethods__["upperBound"] = _robotsim.DistanceQuerySettings_upperBound_set
+    __swig_getmethods__["upperBound"] = _robotsim.DistanceQuerySettings_upperBound_get
+    if _newclass:
+        upperBound = _swig_property(_robotsim.DistanceQuerySettings_upperBound_get, _robotsim.DistanceQuerySettings_upperBound_set)
+    __swig_destroy__ = _robotsim.delete_DistanceQuerySettings
+    __del__ = lambda self: None
+DistanceQuerySettings_swigregister = _robotsim.DistanceQuerySettings_swigregister
+DistanceQuerySettings_swigregister(DistanceQuerySettings)
+
+class DistanceQueryResult(_object):
+    """Proxy of C++ DistanceQueryResult class."""
+
+    __swig_setmethods__ = {}
+    __setattr__ = lambda self, name, value: _swig_setattr(self, DistanceQueryResult, name, value)
+    __swig_getmethods__ = {}
+    __getattr__ = lambda self, name: _swig_getattr(self, DistanceQueryResult, name)
+    __repr__ = _swig_repr
+    __swig_setmethods__["d"] = _robotsim.DistanceQueryResult_d_set
+    __swig_getmethods__["d"] = _robotsim.DistanceQueryResult_d_get
+    if _newclass:
+        d = _swig_property(_robotsim.DistanceQueryResult_d_get, _robotsim.DistanceQueryResult_d_set)
+    __swig_setmethods__["hasClosestPoints"] = _robotsim.DistanceQueryResult_hasClosestPoints_set
+    __swig_getmethods__["hasClosestPoints"] = _robotsim.DistanceQueryResult_hasClosestPoints_get
+    if _newclass:
+        hasClosestPoints = _swig_property(_robotsim.DistanceQueryResult_hasClosestPoints_get, _robotsim.DistanceQueryResult_hasClosestPoints_set)
+    __swig_setmethods__["hasGradients"] = _robotsim.DistanceQueryResult_hasGradients_set
+    __swig_getmethods__["hasGradients"] = _robotsim.DistanceQueryResult_hasGradients_get
+    if _newclass:
+        hasGradients = _swig_property(_robotsim.DistanceQueryResult_hasGradients_get, _robotsim.DistanceQueryResult_hasGradients_set)
+    __swig_setmethods__["cp1"] = _robotsim.DistanceQueryResult_cp1_set
+    __swig_getmethods__["cp1"] = _robotsim.DistanceQueryResult_cp1_get
+    if _newclass:
+        cp1 = _swig_property(_robotsim.DistanceQueryResult_cp1_get, _robotsim.DistanceQueryResult_cp1_set)
+    __swig_setmethods__["cp2"] = _robotsim.DistanceQueryResult_cp2_set
+    __swig_getmethods__["cp2"] = _robotsim.DistanceQueryResult_cp2_get
+    if _newclass:
+        cp2 = _swig_property(_robotsim.DistanceQueryResult_cp2_get, _robotsim.DistanceQueryResult_cp2_set)
+    __swig_setmethods__["grad1"] = _robotsim.DistanceQueryResult_grad1_set
+    __swig_getmethods__["grad1"] = _robotsim.DistanceQueryResult_grad1_get
+    if _newclass:
+        grad1 = _swig_property(_robotsim.DistanceQueryResult_grad1_get, _robotsim.DistanceQueryResult_grad1_set)
+    __swig_setmethods__["grad2"] = _robotsim.DistanceQueryResult_grad2_set
+    __swig_getmethods__["grad2"] = _robotsim.DistanceQueryResult_grad2_get
+    if _newclass:
+        grad2 = _swig_property(_robotsim.DistanceQueryResult_grad2_get, _robotsim.DistanceQueryResult_grad2_set)
+
+    def __init__(self):
+        """__init__(DistanceQueryResult self) -> DistanceQueryResult"""
+        this = _robotsim.new_DistanceQueryResult()
+        try:
+            self.this.append(this)
+        except Exception:
+            self.this = this
+    __swig_destroy__ = _robotsim.delete_DistanceQueryResult
+    __del__ = lambda self: None
+DistanceQueryResult_swigregister = _robotsim.DistanceQueryResult_swigregister
+DistanceQueryResult_swigregister(DistanceQueryResult)
+
 class Geometry3D(_object):
     """
 
@@ -1800,65 +1882,61 @@ class Geometry3D(_object):
         return _robotsim.Geometry3D_withinDistance(self, other, tol)
 
 
-    def distance(self, other, relErr=0, absErr=0):
+    def distance_simple(self, other, relErr=0, absErr=0):
         """
-        distance(Geometry3D self, Geometry3D other, double relErr=0, double absErr=0) -> double
-        distance(Geometry3D self, Geometry3D other, double relErr=0) -> double
-        distance(Geometry3D self, Geometry3D other) -> double
+        distance_simple(Geometry3D self, Geometry3D other, double relErr=0, double absErr=0) -> double
+        distance_simple(Geometry3D self, Geometry3D other, double relErr=0) -> double
+        distance_simple(Geometry3D self, Geometry3D other) -> double
 
 
 
-        Returns the distance from this geometry to the other. 
+        Version 0.8: this is the same as the old distance() function.
+
+        Returns the distance from this geometry to the other. If either
+        geometry contains volume information, this value may be negative to
+        indicate penetration. 
         """
-        return _robotsim.Geometry3D_distance(self, other, relErr, absErr)
+        return _robotsim.Geometry3D_distance_simple(self, other, relErr, absErr)
 
 
-    def closestPoint(self, pt):
+    def distance_point(self, pt):
         """
-        closestPoint(Geometry3D self, double const [3] pt) -> bool
+        distance_point(Geometry3D self, double const [3] pt) -> DistanceQueryResult
 
 
 
-        Returns (success,cp) giving the closest point to the input point.
-        success is false if that operation is not supported with the given
-        geometry type.
+        Returns the the distance and closest point to the input point, given
+        in world coordinates. An exception is raised if this operation is not
+        supported with the given geometry type.
 
-        pt and cp are given in world coordinates. A non-default value of
-        upperBound lets the calculation break early if it can be shown that
-        the closest points are greater than upperBound distance from one
-        another. In this case, success=false is returned.
-
-        If pt is contained within the interior of a GeometricPrimitive or
-        VolumeGrid, a negative value is returned 
+        The return value contains the distance, closest points, and gradients
+        if available. 
         """
-        return _robotsim.Geometry3D_closestPoint(self, pt)
+        return _robotsim.Geometry3D_distance_point(self, pt)
 
 
-    def closestPointWithBound(self, pt, upperBound):
+    def distance_point_ext(self, pt, settings):
         """
-        closestPointWithBound(Geometry3D self, double const [3] pt, double upperBound) -> bool
+        distance_point_ext(Geometry3D self, double const [3] pt, DistanceQuerySettings settings) -> DistanceQueryResult
 
 
 
-        Same as the normal closestPoint, but a value of upperBound can be
-        provided to let the calculation break early if it can be shown that
-        the closest points are at least upperBound distance from one another.
-        In this case, success=False is returned. 
+        A customizable version of distance_point. The settings for the
+        calculation can be customized with relErr, absErr, and upperBound,
+        e.g., to break if the closest points are at least upperBound distance
+        from one another. 
         """
-        return _robotsim.Geometry3D_closestPointWithBound(self, pt, upperBound)
+        return _robotsim.Geometry3D_distance_point_ext(self, pt, settings)
 
 
-    def closestPoints(self, other):
+    def distance(self, other):
         """
-        closestPoints(Geometry3D self, Geometry3D other) -> bool
+        distance(Geometry3D self, Geometry3D other) -> DistanceQueryResult
 
 
 
-        Returns (success,cp1,cp2) where cp1 is the closest point on self to
-        other, and cp2 is the closest point on other to self. success is false
-        if that operation is not supported with the given geometry types.
-
-        cp1 and cp2 are returned in world coordinates.
+        Returns the the distance and closest points between the given
+        geometries.
 
         If the objects are penetrating, some combinations of geometry types
         allow calculating penetration depths (GeometricPrimitive-
@@ -1866,23 +1944,25 @@ class Geometry3D(_object):
         GeometricPrimitive-PointCloud, GeometricPrimitive-VolumeGrid,
         TriangleMesh (surface only)- GeometricPrimitive, PointCloud-
         VolumeGrid). In this case, a negative value is returned and cp1,cp2
-        are the deepest penetrating points. 
+        are the deepest penetrating points.
+
+        Same comments as the distance_point function 
         """
-        return _robotsim.Geometry3D_closestPoints(self, other)
+        return _robotsim.Geometry3D_distance(self, other)
 
 
-    def closestPointsWithBound(self, other, upperBound):
+    def distance_ext(self, other, settings):
         """
-        closestPointsWithBound(Geometry3D self, Geometry3D other, double upperBound) -> bool
+        distance_ext(Geometry3D self, Geometry3D other, DistanceQuerySettings settings) -> DistanceQueryResult
 
 
 
-        Same as closestPoints, but a value of upperBound can be provided to
-        let the calculation break early if it can be shown that the closest
-        points are at least upperBound distance away from one another. In this
-        case, success=False is returned. 
+        A customizable version of distance. The settings for the calculation
+        can be customized with relErr, absErr, and upperBound, e.g., to break
+        if the closest points are at least upperBound distance from one
+        another. 
         """
-        return _robotsim.Geometry3D_closestPointsWithBound(self, other, upperBound)
+        return _robotsim.Geometry3D_distance_ext(self, other, settings)
 
 
     def rayCast(self, s, d):

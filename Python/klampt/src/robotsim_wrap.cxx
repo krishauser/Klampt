@@ -3012,73 +3012,75 @@ SWIG_Python_NonDynamicSetAttr(PyObject *obj, PyObject *name, PyObject *value) {
 #define SWIGTYPE_p_Appearance swig_types[0]
 #define SWIGTYPE_p_ContactParameters swig_types[1]
 #define SWIGTYPE_p_ControlledRobotSimulator swig_types[2]
-#define SWIGTYPE_p_GeneralizedIKObjective swig_types[3]
-#define SWIGTYPE_p_GeneralizedIKSolver swig_types[4]
-#define SWIGTYPE_p_GeometricPrimitive swig_types[5]
-#define SWIGTYPE_p_Geometry3D swig_types[6]
-#define SWIGTYPE_p_IKGoal swig_types[7]
-#define SWIGTYPE_p_IKObjective swig_types[8]
-#define SWIGTYPE_p_IKSolver swig_types[9]
-#define SWIGTYPE_p_Mass swig_types[10]
-#define SWIGTYPE_p_ODEGeometry swig_types[11]
-#define SWIGTYPE_p_ObjectPoser swig_types[12]
-#define SWIGTYPE_p_PointCloud swig_types[13]
-#define SWIGTYPE_p_PointPoser swig_types[14]
-#define SWIGTYPE_p_RigidObject swig_types[15]
-#define SWIGTYPE_p_RigidObjectModel swig_types[16]
-#define SWIGTYPE_p_Robot swig_types[17]
-#define SWIGTYPE_p_RobotModel swig_types[18]
-#define SWIGTYPE_p_RobotModelDriver swig_types[19]
-#define SWIGTYPE_p_RobotModelLink swig_types[20]
-#define SWIGTYPE_p_RobotPoser swig_types[21]
-#define SWIGTYPE_p_SensorBase swig_types[22]
-#define SWIGTYPE_p_SimBody swig_types[23]
-#define SWIGTYPE_p_SimRobotController swig_types[24]
-#define SWIGTYPE_p_SimRobotSensor swig_types[25]
-#define SWIGTYPE_p_Simulator swig_types[26]
-#define SWIGTYPE_p_Terrain swig_types[27]
-#define SWIGTYPE_p_TerrainModel swig_types[28]
-#define SWIGTYPE_p_TransformPoser swig_types[29]
-#define SWIGTYPE_p_TriangleMesh swig_types[30]
-#define SWIGTYPE_p_Viewport swig_types[31]
-#define SWIGTYPE_p_VolumeGrid swig_types[32]
-#define SWIGTYPE_p_Widget swig_types[33]
-#define SWIGTYPE_p_WidgetSet swig_types[34]
-#define SWIGTYPE_p_WorldModel swig_types[35]
-#define SWIGTYPE_p_WorldSimulation swig_types[36]
-#define SWIGTYPE_p__object swig_types[37]
-#define SWIGTYPE_p_allocator_type swig_types[38]
-#define SWIGTYPE_p_char swig_types[39]
-#define SWIGTYPE_p_difference_type swig_types[40]
-#define SWIGTYPE_p_double swig_types[41]
-#define SWIGTYPE_p_doubleArray swig_types[42]
-#define SWIGTYPE_p_dxBody swig_types[43]
-#define SWIGTYPE_p_float swig_types[44]
-#define SWIGTYPE_p_floatArray swig_types[45]
-#define SWIGTYPE_p_int swig_types[46]
-#define SWIGTYPE_p_intArray swig_types[47]
-#define SWIGTYPE_p_p__object swig_types[48]
-#define SWIGTYPE_p_size_type swig_types[49]
-#define SWIGTYPE_p_std__allocatorT_double_t swig_types[50]
-#define SWIGTYPE_p_std__allocatorT_float_t swig_types[51]
-#define SWIGTYPE_p_std__allocatorT_int_t swig_types[52]
-#define SWIGTYPE_p_std__allocatorT_std__string_t swig_types[53]
-#define SWIGTYPE_p_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t swig_types[54]
-#define SWIGTYPE_p_std__invalid_argument swig_types[55]
-#define SWIGTYPE_p_std__mapT_std__string_std__string_t swig_types[56]
-#define SWIGTYPE_p_std__vectorT_GeneralizedIKObjective_std__allocatorT_GeneralizedIKObjective_t_t swig_types[57]
-#define SWIGTYPE_p_std__vectorT_IKObjective_std__allocatorT_IKObjective_t_t swig_types[58]
-#define SWIGTYPE_p_std__vectorT_double_std__allocatorT_double_t_t swig_types[59]
-#define SWIGTYPE_p_std__vectorT_float_std__allocatorT_float_t_t swig_types[60]
-#define SWIGTYPE_p_std__vectorT_int_std__allocatorT_int_t_t swig_types[61]
-#define SWIGTYPE_p_std__vectorT_std__string_std__allocatorT_std__string_t_t swig_types[62]
-#define SWIGTYPE_p_std__vectorT_std__vectorT_double_std__allocatorT_double_t_t_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t_t swig_types[63]
-#define SWIGTYPE_p_std__vectorT_unsigned_char_std__allocatorT_unsigned_char_t_t swig_types[64]
-#define SWIGTYPE_p_swig__SwigPyIterator swig_types[65]
-#define SWIGTYPE_p_value_type swig_types[66]
-#define SWIGTYPE_p_void swig_types[67]
-static swig_type_info *swig_types[69];
-static swig_module_info swig_module = {swig_types, 68, 0, 0, 0, 0};
+#define SWIGTYPE_p_DistanceQueryResult swig_types[3]
+#define SWIGTYPE_p_DistanceQuerySettings swig_types[4]
+#define SWIGTYPE_p_GeneralizedIKObjective swig_types[5]
+#define SWIGTYPE_p_GeneralizedIKSolver swig_types[6]
+#define SWIGTYPE_p_GeometricPrimitive swig_types[7]
+#define SWIGTYPE_p_Geometry3D swig_types[8]
+#define SWIGTYPE_p_IKGoal swig_types[9]
+#define SWIGTYPE_p_IKObjective swig_types[10]
+#define SWIGTYPE_p_IKSolver swig_types[11]
+#define SWIGTYPE_p_Mass swig_types[12]
+#define SWIGTYPE_p_ODEGeometry swig_types[13]
+#define SWIGTYPE_p_ObjectPoser swig_types[14]
+#define SWIGTYPE_p_PointCloud swig_types[15]
+#define SWIGTYPE_p_PointPoser swig_types[16]
+#define SWIGTYPE_p_RigidObject swig_types[17]
+#define SWIGTYPE_p_RigidObjectModel swig_types[18]
+#define SWIGTYPE_p_Robot swig_types[19]
+#define SWIGTYPE_p_RobotModel swig_types[20]
+#define SWIGTYPE_p_RobotModelDriver swig_types[21]
+#define SWIGTYPE_p_RobotModelLink swig_types[22]
+#define SWIGTYPE_p_RobotPoser swig_types[23]
+#define SWIGTYPE_p_SensorBase swig_types[24]
+#define SWIGTYPE_p_SimBody swig_types[25]
+#define SWIGTYPE_p_SimRobotController swig_types[26]
+#define SWIGTYPE_p_SimRobotSensor swig_types[27]
+#define SWIGTYPE_p_Simulator swig_types[28]
+#define SWIGTYPE_p_Terrain swig_types[29]
+#define SWIGTYPE_p_TerrainModel swig_types[30]
+#define SWIGTYPE_p_TransformPoser swig_types[31]
+#define SWIGTYPE_p_TriangleMesh swig_types[32]
+#define SWIGTYPE_p_Viewport swig_types[33]
+#define SWIGTYPE_p_VolumeGrid swig_types[34]
+#define SWIGTYPE_p_Widget swig_types[35]
+#define SWIGTYPE_p_WidgetSet swig_types[36]
+#define SWIGTYPE_p_WorldModel swig_types[37]
+#define SWIGTYPE_p_WorldSimulation swig_types[38]
+#define SWIGTYPE_p__object swig_types[39]
+#define SWIGTYPE_p_allocator_type swig_types[40]
+#define SWIGTYPE_p_char swig_types[41]
+#define SWIGTYPE_p_difference_type swig_types[42]
+#define SWIGTYPE_p_double swig_types[43]
+#define SWIGTYPE_p_doubleArray swig_types[44]
+#define SWIGTYPE_p_dxBody swig_types[45]
+#define SWIGTYPE_p_float swig_types[46]
+#define SWIGTYPE_p_floatArray swig_types[47]
+#define SWIGTYPE_p_int swig_types[48]
+#define SWIGTYPE_p_intArray swig_types[49]
+#define SWIGTYPE_p_p__object swig_types[50]
+#define SWIGTYPE_p_size_type swig_types[51]
+#define SWIGTYPE_p_std__allocatorT_double_t swig_types[52]
+#define SWIGTYPE_p_std__allocatorT_float_t swig_types[53]
+#define SWIGTYPE_p_std__allocatorT_int_t swig_types[54]
+#define SWIGTYPE_p_std__allocatorT_std__string_t swig_types[55]
+#define SWIGTYPE_p_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t swig_types[56]
+#define SWIGTYPE_p_std__invalid_argument swig_types[57]
+#define SWIGTYPE_p_std__mapT_std__string_std__string_t swig_types[58]
+#define SWIGTYPE_p_std__vectorT_GeneralizedIKObjective_std__allocatorT_GeneralizedIKObjective_t_t swig_types[59]
+#define SWIGTYPE_p_std__vectorT_IKObjective_std__allocatorT_IKObjective_t_t swig_types[60]
+#define SWIGTYPE_p_std__vectorT_double_std__allocatorT_double_t_t swig_types[61]
+#define SWIGTYPE_p_std__vectorT_float_std__allocatorT_float_t_t swig_types[62]
+#define SWIGTYPE_p_std__vectorT_int_std__allocatorT_int_t_t swig_types[63]
+#define SWIGTYPE_p_std__vectorT_std__string_std__allocatorT_std__string_t_t swig_types[64]
+#define SWIGTYPE_p_std__vectorT_std__vectorT_double_std__allocatorT_double_t_t_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t_t swig_types[65]
+#define SWIGTYPE_p_std__vectorT_unsigned_char_std__allocatorT_unsigned_char_t_t swig_types[66]
+#define SWIGTYPE_p_swig__SwigPyIterator swig_types[67]
+#define SWIGTYPE_p_value_type swig_types[68]
+#define SWIGTYPE_p_void swig_types[69]
+static swig_type_info *swig_types[71];
+static swig_module_info swig_module = {swig_types, 70, 0, 0, 0, 0};
 #define SWIG_TypeQuery(name) SWIG_TypeQueryModule(&swig_module, &swig_module, name)
 #define SWIG_MangledTypeQuery(name) SWIG_MangledTypeQueryModule(&swig_module, &swig_module, name)
 
@@ -19707,6 +19709,656 @@ SWIGINTERN PyObject *VolumeGrid_swigregister(PyObject *SWIGUNUSEDPARM(self), PyO
   return SWIG_Py_Void();
 }
 
+SWIGINTERN PyObject *_wrap_new_DistanceQuerySettings(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  DistanceQuerySettings *result = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)":new_DistanceQuerySettings")) SWIG_fail;
+  {
+    try {
+      result = (DistanceQuerySettings *)new DistanceQuerySettings();
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_DistanceQuerySettings, SWIG_POINTER_NEW |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_DistanceQuerySettings_relErr_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  DistanceQuerySettings *arg1 = (DistanceQuerySettings *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:DistanceQuerySettings_relErr_set",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_DistanceQuerySettings, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "DistanceQuerySettings_relErr_set" "', argument " "1"" of type '" "DistanceQuerySettings *""'"); 
+  }
+  arg1 = reinterpret_cast< DistanceQuerySettings * >(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "DistanceQuerySettings_relErr_set" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = static_cast< double >(val2);
+  if (arg1) (arg1)->relErr = arg2;
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_DistanceQuerySettings_relErr_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  DistanceQuerySettings *arg1 = (DistanceQuerySettings *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  double result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:DistanceQuerySettings_relErr_get",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_DistanceQuerySettings, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "DistanceQuerySettings_relErr_get" "', argument " "1"" of type '" "DistanceQuerySettings *""'"); 
+  }
+  arg1 = reinterpret_cast< DistanceQuerySettings * >(argp1);
+  result = (double) ((arg1)->relErr);
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_DistanceQuerySettings_absErr_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  DistanceQuerySettings *arg1 = (DistanceQuerySettings *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:DistanceQuerySettings_absErr_set",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_DistanceQuerySettings, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "DistanceQuerySettings_absErr_set" "', argument " "1"" of type '" "DistanceQuerySettings *""'"); 
+  }
+  arg1 = reinterpret_cast< DistanceQuerySettings * >(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "DistanceQuerySettings_absErr_set" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = static_cast< double >(val2);
+  if (arg1) (arg1)->absErr = arg2;
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_DistanceQuerySettings_absErr_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  DistanceQuerySettings *arg1 = (DistanceQuerySettings *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  double result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:DistanceQuerySettings_absErr_get",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_DistanceQuerySettings, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "DistanceQuerySettings_absErr_get" "', argument " "1"" of type '" "DistanceQuerySettings *""'"); 
+  }
+  arg1 = reinterpret_cast< DistanceQuerySettings * >(argp1);
+  result = (double) ((arg1)->absErr);
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_DistanceQuerySettings_upperBound_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  DistanceQuerySettings *arg1 = (DistanceQuerySettings *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:DistanceQuerySettings_upperBound_set",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_DistanceQuerySettings, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "DistanceQuerySettings_upperBound_set" "', argument " "1"" of type '" "DistanceQuerySettings *""'"); 
+  }
+  arg1 = reinterpret_cast< DistanceQuerySettings * >(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "DistanceQuerySettings_upperBound_set" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = static_cast< double >(val2);
+  if (arg1) (arg1)->upperBound = arg2;
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_DistanceQuerySettings_upperBound_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  DistanceQuerySettings *arg1 = (DistanceQuerySettings *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  double result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:DistanceQuerySettings_upperBound_get",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_DistanceQuerySettings, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "DistanceQuerySettings_upperBound_get" "', argument " "1"" of type '" "DistanceQuerySettings *""'"); 
+  }
+  arg1 = reinterpret_cast< DistanceQuerySettings * >(argp1);
+  result = (double) ((arg1)->upperBound);
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_delete_DistanceQuerySettings(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  DistanceQuerySettings *arg1 = (DistanceQuerySettings *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:delete_DistanceQuerySettings",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_DistanceQuerySettings, SWIG_POINTER_DISOWN |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "delete_DistanceQuerySettings" "', argument " "1"" of type '" "DistanceQuerySettings *""'"); 
+  }
+  arg1 = reinterpret_cast< DistanceQuerySettings * >(argp1);
+  {
+    try {
+      delete arg1;
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *DistanceQuerySettings_swigregister(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *obj;
+  if (!PyArg_ParseTuple(args,(char*)"O:swigregister", &obj)) return NULL;
+  SWIG_TypeNewClientData(SWIGTYPE_p_DistanceQuerySettings, SWIG_NewClientData(obj));
+  return SWIG_Py_Void();
+}
+
+SWIGINTERN PyObject *_wrap_DistanceQueryResult_d_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  DistanceQueryResult *arg1 = (DistanceQueryResult *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:DistanceQueryResult_d_set",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_DistanceQueryResult, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "DistanceQueryResult_d_set" "', argument " "1"" of type '" "DistanceQueryResult *""'"); 
+  }
+  arg1 = reinterpret_cast< DistanceQueryResult * >(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "DistanceQueryResult_d_set" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = static_cast< double >(val2);
+  if (arg1) (arg1)->d = arg2;
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_DistanceQueryResult_d_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  DistanceQueryResult *arg1 = (DistanceQueryResult *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  double result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:DistanceQueryResult_d_get",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_DistanceQueryResult, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "DistanceQueryResult_d_get" "', argument " "1"" of type '" "DistanceQueryResult *""'"); 
+  }
+  arg1 = reinterpret_cast< DistanceQueryResult * >(argp1);
+  result = (double) ((arg1)->d);
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_DistanceQueryResult_hasClosestPoints_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  DistanceQueryResult *arg1 = (DistanceQueryResult *) 0 ;
+  bool arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  bool val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:DistanceQueryResult_hasClosestPoints_set",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_DistanceQueryResult, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "DistanceQueryResult_hasClosestPoints_set" "', argument " "1"" of type '" "DistanceQueryResult *""'"); 
+  }
+  arg1 = reinterpret_cast< DistanceQueryResult * >(argp1);
+  ecode2 = SWIG_AsVal_bool(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "DistanceQueryResult_hasClosestPoints_set" "', argument " "2"" of type '" "bool""'");
+  } 
+  arg2 = static_cast< bool >(val2);
+  if (arg1) (arg1)->hasClosestPoints = arg2;
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_DistanceQueryResult_hasClosestPoints_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  DistanceQueryResult *arg1 = (DistanceQueryResult *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  bool result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:DistanceQueryResult_hasClosestPoints_get",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_DistanceQueryResult, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "DistanceQueryResult_hasClosestPoints_get" "', argument " "1"" of type '" "DistanceQueryResult *""'"); 
+  }
+  arg1 = reinterpret_cast< DistanceQueryResult * >(argp1);
+  result = (bool) ((arg1)->hasClosestPoints);
+  resultobj = SWIG_From_bool(static_cast< bool >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_DistanceQueryResult_hasGradients_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  DistanceQueryResult *arg1 = (DistanceQueryResult *) 0 ;
+  bool arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  bool val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:DistanceQueryResult_hasGradients_set",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_DistanceQueryResult, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "DistanceQueryResult_hasGradients_set" "', argument " "1"" of type '" "DistanceQueryResult *""'"); 
+  }
+  arg1 = reinterpret_cast< DistanceQueryResult * >(argp1);
+  ecode2 = SWIG_AsVal_bool(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "DistanceQueryResult_hasGradients_set" "', argument " "2"" of type '" "bool""'");
+  } 
+  arg2 = static_cast< bool >(val2);
+  if (arg1) (arg1)->hasGradients = arg2;
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_DistanceQueryResult_hasGradients_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  DistanceQueryResult *arg1 = (DistanceQueryResult *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  bool result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:DistanceQueryResult_hasGradients_get",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_DistanceQueryResult, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "DistanceQueryResult_hasGradients_get" "', argument " "1"" of type '" "DistanceQueryResult *""'"); 
+  }
+  arg1 = reinterpret_cast< DistanceQueryResult * >(argp1);
+  result = (bool) ((arg1)->hasGradients);
+  resultobj = SWIG_From_bool(static_cast< bool >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_DistanceQueryResult_cp1_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  DistanceQueryResult *arg1 = (DistanceQueryResult *) 0 ;
+  std::vector< double,std::allocator< double > > *arg2 = (std::vector< double,std::allocator< double > > *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:DistanceQueryResult_cp1_set",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_DistanceQueryResult, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "DistanceQueryResult_cp1_set" "', argument " "1"" of type '" "DistanceQueryResult *""'"); 
+  }
+  arg1 = reinterpret_cast< DistanceQueryResult * >(argp1);
+  res2 = SWIG_ConvertPtr(obj1, &argp2,SWIGTYPE_p_std__vectorT_double_std__allocatorT_double_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "DistanceQueryResult_cp1_set" "', argument " "2"" of type '" "std::vector< double,std::allocator< double > > *""'"); 
+  }
+  arg2 = reinterpret_cast< std::vector< double,std::allocator< double > > * >(argp2);
+  if (arg1) (arg1)->cp1 = *arg2;
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_DistanceQueryResult_cp1_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  DistanceQueryResult *arg1 = (DistanceQueryResult *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  std::vector< double,std::allocator< double > > *result = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:DistanceQueryResult_cp1_get",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_DistanceQueryResult, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "DistanceQueryResult_cp1_get" "', argument " "1"" of type '" "DistanceQueryResult *""'"); 
+  }
+  arg1 = reinterpret_cast< DistanceQueryResult * >(argp1);
+  result = (std::vector< double,std::allocator< double > > *)& ((arg1)->cp1);
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_std__vectorT_double_std__allocatorT_double_t_t, 0 |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_DistanceQueryResult_cp2_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  DistanceQueryResult *arg1 = (DistanceQueryResult *) 0 ;
+  std::vector< double,std::allocator< double > > *arg2 = (std::vector< double,std::allocator< double > > *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:DistanceQueryResult_cp2_set",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_DistanceQueryResult, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "DistanceQueryResult_cp2_set" "', argument " "1"" of type '" "DistanceQueryResult *""'"); 
+  }
+  arg1 = reinterpret_cast< DistanceQueryResult * >(argp1);
+  res2 = SWIG_ConvertPtr(obj1, &argp2,SWIGTYPE_p_std__vectorT_double_std__allocatorT_double_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "DistanceQueryResult_cp2_set" "', argument " "2"" of type '" "std::vector< double,std::allocator< double > > *""'"); 
+  }
+  arg2 = reinterpret_cast< std::vector< double,std::allocator< double > > * >(argp2);
+  if (arg1) (arg1)->cp2 = *arg2;
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_DistanceQueryResult_cp2_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  DistanceQueryResult *arg1 = (DistanceQueryResult *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  std::vector< double,std::allocator< double > > *result = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:DistanceQueryResult_cp2_get",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_DistanceQueryResult, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "DistanceQueryResult_cp2_get" "', argument " "1"" of type '" "DistanceQueryResult *""'"); 
+  }
+  arg1 = reinterpret_cast< DistanceQueryResult * >(argp1);
+  result = (std::vector< double,std::allocator< double > > *)& ((arg1)->cp2);
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_std__vectorT_double_std__allocatorT_double_t_t, 0 |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_DistanceQueryResult_grad1_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  DistanceQueryResult *arg1 = (DistanceQueryResult *) 0 ;
+  std::vector< double,std::allocator< double > > *arg2 = (std::vector< double,std::allocator< double > > *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:DistanceQueryResult_grad1_set",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_DistanceQueryResult, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "DistanceQueryResult_grad1_set" "', argument " "1"" of type '" "DistanceQueryResult *""'"); 
+  }
+  arg1 = reinterpret_cast< DistanceQueryResult * >(argp1);
+  res2 = SWIG_ConvertPtr(obj1, &argp2,SWIGTYPE_p_std__vectorT_double_std__allocatorT_double_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "DistanceQueryResult_grad1_set" "', argument " "2"" of type '" "std::vector< double,std::allocator< double > > *""'"); 
+  }
+  arg2 = reinterpret_cast< std::vector< double,std::allocator< double > > * >(argp2);
+  if (arg1) (arg1)->grad1 = *arg2;
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_DistanceQueryResult_grad1_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  DistanceQueryResult *arg1 = (DistanceQueryResult *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  std::vector< double,std::allocator< double > > *result = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:DistanceQueryResult_grad1_get",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_DistanceQueryResult, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "DistanceQueryResult_grad1_get" "', argument " "1"" of type '" "DistanceQueryResult *""'"); 
+  }
+  arg1 = reinterpret_cast< DistanceQueryResult * >(argp1);
+  result = (std::vector< double,std::allocator< double > > *)& ((arg1)->grad1);
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_std__vectorT_double_std__allocatorT_double_t_t, 0 |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_DistanceQueryResult_grad2_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  DistanceQueryResult *arg1 = (DistanceQueryResult *) 0 ;
+  std::vector< double,std::allocator< double > > *arg2 = (std::vector< double,std::allocator< double > > *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:DistanceQueryResult_grad2_set",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_DistanceQueryResult, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "DistanceQueryResult_grad2_set" "', argument " "1"" of type '" "DistanceQueryResult *""'"); 
+  }
+  arg1 = reinterpret_cast< DistanceQueryResult * >(argp1);
+  res2 = SWIG_ConvertPtr(obj1, &argp2,SWIGTYPE_p_std__vectorT_double_std__allocatorT_double_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "DistanceQueryResult_grad2_set" "', argument " "2"" of type '" "std::vector< double,std::allocator< double > > *""'"); 
+  }
+  arg2 = reinterpret_cast< std::vector< double,std::allocator< double > > * >(argp2);
+  if (arg1) (arg1)->grad2 = *arg2;
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_DistanceQueryResult_grad2_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  DistanceQueryResult *arg1 = (DistanceQueryResult *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  std::vector< double,std::allocator< double > > *result = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:DistanceQueryResult_grad2_get",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_DistanceQueryResult, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "DistanceQueryResult_grad2_get" "', argument " "1"" of type '" "DistanceQueryResult *""'"); 
+  }
+  arg1 = reinterpret_cast< DistanceQueryResult * >(argp1);
+  result = (std::vector< double,std::allocator< double > > *)& ((arg1)->grad2);
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_std__vectorT_double_std__allocatorT_double_t_t, 0 |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_new_DistanceQueryResult(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  DistanceQueryResult *result = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)":new_DistanceQueryResult")) SWIG_fail;
+  {
+    try {
+      result = (DistanceQueryResult *)new DistanceQueryResult();
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_DistanceQueryResult, SWIG_POINTER_NEW |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_delete_DistanceQueryResult(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  DistanceQueryResult *arg1 = (DistanceQueryResult *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:delete_DistanceQueryResult",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_DistanceQueryResult, SWIG_POINTER_DISOWN |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "delete_DistanceQueryResult" "', argument " "1"" of type '" "DistanceQueryResult *""'"); 
+  }
+  arg1 = reinterpret_cast< DistanceQueryResult * >(argp1);
+  {
+    try {
+      delete arg1;
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *DistanceQueryResult_swigregister(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *obj;
+  if (!PyArg_ParseTuple(args,(char*)"O:swigregister", &obj)) return NULL;
+  SWIG_TypeNewClientData(SWIGTYPE_p_DistanceQueryResult, SWIG_NewClientData(obj));
+  return SWIG_Py_Void();
+}
+
 SWIGINTERN PyObject *_wrap_new_Geometry3D__SWIG_0(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   Geometry3D *result = 0 ;
@@ -21698,7 +22350,7 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_Geometry3D_distance__SWIG_0(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_Geometry3D_distance_simple__SWIG_0(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   Geometry3D *arg1 = (Geometry3D *) 0 ;
   Geometry3D *arg2 = 0 ;
@@ -21718,33 +22370,33 @@ SWIGINTERN PyObject *_wrap_Geometry3D_distance__SWIG_0(PyObject *SWIGUNUSEDPARM(
   PyObject * obj3 = 0 ;
   double result;
   
-  if (!PyArg_ParseTuple(args,(char *)"OOOO:Geometry3D_distance",&obj0,&obj1,&obj2,&obj3)) SWIG_fail;
+  if (!PyArg_ParseTuple(args,(char *)"OOOO:Geometry3D_distance_simple",&obj0,&obj1,&obj2,&obj3)) SWIG_fail;
   res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Geometry3D, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Geometry3D_distance" "', argument " "1"" of type '" "Geometry3D *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Geometry3D_distance_simple" "', argument " "1"" of type '" "Geometry3D *""'"); 
   }
   arg1 = reinterpret_cast< Geometry3D * >(argp1);
   res2 = SWIG_ConvertPtr(obj1, &argp2, SWIGTYPE_p_Geometry3D,  0  | 0);
   if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "Geometry3D_distance" "', argument " "2"" of type '" "Geometry3D const &""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "Geometry3D_distance_simple" "', argument " "2"" of type '" "Geometry3D const &""'"); 
   }
   if (!argp2) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "Geometry3D_distance" "', argument " "2"" of type '" "Geometry3D const &""'"); 
+    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "Geometry3D_distance_simple" "', argument " "2"" of type '" "Geometry3D const &""'"); 
   }
   arg2 = reinterpret_cast< Geometry3D * >(argp2);
   ecode3 = SWIG_AsVal_double(obj2, &val3);
   if (!SWIG_IsOK(ecode3)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "Geometry3D_distance" "', argument " "3"" of type '" "double""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "Geometry3D_distance_simple" "', argument " "3"" of type '" "double""'");
   } 
   arg3 = static_cast< double >(val3);
   ecode4 = SWIG_AsVal_double(obj3, &val4);
   if (!SWIG_IsOK(ecode4)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode4), "in method '" "Geometry3D_distance" "', argument " "4"" of type '" "double""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode4), "in method '" "Geometry3D_distance_simple" "', argument " "4"" of type '" "double""'");
   } 
   arg4 = static_cast< double >(val4);
   {
     try {
-      result = (double)(arg1)->distance((Geometry3D const &)*arg2,arg3,arg4);
+      result = (double)(arg1)->distance_simple((Geometry3D const &)*arg2,arg3,arg4);
     }
     catch(PyException& e) {
       e.setPyErr();
@@ -21762,7 +22414,7 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_Geometry3D_distance__SWIG_1(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_Geometry3D_distance_simple__SWIG_1(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   Geometry3D *arg1 = (Geometry3D *) 0 ;
   Geometry3D *arg2 = 0 ;
@@ -21778,28 +22430,28 @@ SWIGINTERN PyObject *_wrap_Geometry3D_distance__SWIG_1(PyObject *SWIGUNUSEDPARM(
   PyObject * obj2 = 0 ;
   double result;
   
-  if (!PyArg_ParseTuple(args,(char *)"OOO:Geometry3D_distance",&obj0,&obj1,&obj2)) SWIG_fail;
+  if (!PyArg_ParseTuple(args,(char *)"OOO:Geometry3D_distance_simple",&obj0,&obj1,&obj2)) SWIG_fail;
   res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Geometry3D, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Geometry3D_distance" "', argument " "1"" of type '" "Geometry3D *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Geometry3D_distance_simple" "', argument " "1"" of type '" "Geometry3D *""'"); 
   }
   arg1 = reinterpret_cast< Geometry3D * >(argp1);
   res2 = SWIG_ConvertPtr(obj1, &argp2, SWIGTYPE_p_Geometry3D,  0  | 0);
   if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "Geometry3D_distance" "', argument " "2"" of type '" "Geometry3D const &""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "Geometry3D_distance_simple" "', argument " "2"" of type '" "Geometry3D const &""'"); 
   }
   if (!argp2) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "Geometry3D_distance" "', argument " "2"" of type '" "Geometry3D const &""'"); 
+    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "Geometry3D_distance_simple" "', argument " "2"" of type '" "Geometry3D const &""'"); 
   }
   arg2 = reinterpret_cast< Geometry3D * >(argp2);
   ecode3 = SWIG_AsVal_double(obj2, &val3);
   if (!SWIG_IsOK(ecode3)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "Geometry3D_distance" "', argument " "3"" of type '" "double""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "Geometry3D_distance_simple" "', argument " "3"" of type '" "double""'");
   } 
   arg3 = static_cast< double >(val3);
   {
     try {
-      result = (double)(arg1)->distance((Geometry3D const &)*arg2,arg3);
+      result = (double)(arg1)->distance_simple((Geometry3D const &)*arg2,arg3);
     }
     catch(PyException& e) {
       e.setPyErr();
@@ -21817,7 +22469,7 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_Geometry3D_distance__SWIG_2(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_Geometry3D_distance_simple__SWIG_2(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   Geometry3D *arg1 = (Geometry3D *) 0 ;
   Geometry3D *arg2 = 0 ;
@@ -21829,23 +22481,23 @@ SWIGINTERN PyObject *_wrap_Geometry3D_distance__SWIG_2(PyObject *SWIGUNUSEDPARM(
   PyObject * obj1 = 0 ;
   double result;
   
-  if (!PyArg_ParseTuple(args,(char *)"OO:Geometry3D_distance",&obj0,&obj1)) SWIG_fail;
+  if (!PyArg_ParseTuple(args,(char *)"OO:Geometry3D_distance_simple",&obj0,&obj1)) SWIG_fail;
   res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Geometry3D, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Geometry3D_distance" "', argument " "1"" of type '" "Geometry3D *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Geometry3D_distance_simple" "', argument " "1"" of type '" "Geometry3D *""'"); 
   }
   arg1 = reinterpret_cast< Geometry3D * >(argp1);
   res2 = SWIG_ConvertPtr(obj1, &argp2, SWIGTYPE_p_Geometry3D,  0  | 0);
   if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "Geometry3D_distance" "', argument " "2"" of type '" "Geometry3D const &""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "Geometry3D_distance_simple" "', argument " "2"" of type '" "Geometry3D const &""'"); 
   }
   if (!argp2) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "Geometry3D_distance" "', argument " "2"" of type '" "Geometry3D const &""'"); 
+    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "Geometry3D_distance_simple" "', argument " "2"" of type '" "Geometry3D const &""'"); 
   }
   arg2 = reinterpret_cast< Geometry3D * >(argp2);
   {
     try {
-      result = (double)(arg1)->distance((Geometry3D const &)*arg2);
+      result = (double)(arg1)->distance_simple((Geometry3D const &)*arg2);
     }
     catch(PyException& e) {
       e.setPyErr();
@@ -21863,7 +22515,7 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_Geometry3D_distance(PyObject *self, PyObject *args) {
+SWIGINTERN PyObject *_wrap_Geometry3D_distance_simple(PyObject *self, PyObject *args) {
   Py_ssize_t argc;
   PyObject *argv[5] = {
     0
@@ -21884,7 +22536,7 @@ SWIGINTERN PyObject *_wrap_Geometry3D_distance(PyObject *self, PyObject *args) {
       int res = SWIG_ConvertPtr(argv[1], 0, SWIGTYPE_p_Geometry3D, 0);
       _v = SWIG_CheckState(res);
       if (_v) {
-        return _wrap_Geometry3D_distance__SWIG_2(self, args);
+        return _wrap_Geometry3D_distance_simple__SWIG_2(self, args);
       }
     }
   }
@@ -21902,7 +22554,7 @@ SWIGINTERN PyObject *_wrap_Geometry3D_distance(PyObject *self, PyObject *args) {
           _v = SWIG_CheckState(res);
         }
         if (_v) {
-          return _wrap_Geometry3D_distance__SWIG_1(self, args);
+          return _wrap_Geometry3D_distance_simple__SWIG_1(self, args);
         }
       }
     }
@@ -21926,7 +22578,7 @@ SWIGINTERN PyObject *_wrap_Geometry3D_distance(PyObject *self, PyObject *args) {
             _v = SWIG_CheckState(res);
           }
           if (_v) {
-            return _wrap_Geometry3D_distance__SWIG_0(self, args);
+            return _wrap_Geometry3D_distance_simple__SWIG_0(self, args);
           }
         }
       }
@@ -21934,35 +22586,30 @@ SWIGINTERN PyObject *_wrap_Geometry3D_distance(PyObject *self, PyObject *args) {
   }
   
 fail:
-  SWIG_SetErrorMsg(PyExc_NotImplementedError,"Wrong number or type of arguments for overloaded function 'Geometry3D_distance'.\n"
+  SWIG_SetErrorMsg(PyExc_NotImplementedError,"Wrong number or type of arguments for overloaded function 'Geometry3D_distance_simple'.\n"
     "  Possible C/C++ prototypes are:\n"
-    "    Geometry3D::distance(Geometry3D const &,double,double)\n"
-    "    Geometry3D::distance(Geometry3D const &,double)\n"
-    "    Geometry3D::distance(Geometry3D const &)\n");
+    "    Geometry3D::distance_simple(Geometry3D const &,double,double)\n"
+    "    Geometry3D::distance_simple(Geometry3D const &,double)\n"
+    "    Geometry3D::distance_simple(Geometry3D const &)\n");
   return 0;
 }
 
 
-SWIGINTERN PyObject *_wrap_Geometry3D_closestPoint(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_Geometry3D_distance_point(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   Geometry3D *arg1 = (Geometry3D *) 0 ;
   double *arg2 ;
-  double *arg3 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
   double temp2[3] ;
-  double temp3[3] ;
   PyObject * obj0 = 0 ;
   PyObject * obj1 = 0 ;
-  bool result;
+  DistanceQueryResult result;
   
-  {
-    arg3 = &temp3[0];
-  }
-  if (!PyArg_ParseTuple(args,(char *)"OO:Geometry3D_closestPoint",&obj0,&obj1)) SWIG_fail;
+  if (!PyArg_ParseTuple(args,(char *)"OO:Geometry3D_distance_point",&obj0,&obj1)) SWIG_fail;
   res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Geometry3D, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Geometry3D_closestPoint" "', argument " "1"" of type '" "Geometry3D *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Geometry3D_distance_point" "', argument " "1"" of type '" "Geometry3D *""'"); 
   }
   arg1 = reinterpret_cast< Geometry3D * >(argp1);
   {
@@ -21973,7 +22620,7 @@ SWIGINTERN PyObject *_wrap_Geometry3D_closestPoint(PyObject *SWIGUNUSEDPARM(self
   }
   {
     try {
-      result = (bool)(arg1)->closestPoint((double const (*))arg2,arg3);
+      result = (arg1)->distance_point((double const (*))arg2);
     }
     catch(PyException& e) {
       e.setPyErr();
@@ -21984,56 +22631,32 @@ SWIGINTERN PyObject *_wrap_Geometry3D_closestPoint(PyObject *SWIGUNUSEDPARM(self
       return NULL;
     }
   }
-  resultobj = SWIG_From_bool(static_cast< bool >(result));
-  {
-    PyObject *o, *o2, *o3;
-    o = convert_darray_obj(arg3,3);
-    if ((!resultobj) || (resultobj == Py_None)) {
-      resultobj = o;
-    } else {
-      if (!PyTuple_Check(resultobj)) {
-        PyObject *o2 = resultobj;
-        resultobj = PyTuple_New(1);
-        PyTuple_SetItem(resultobj,0,o2);
-      }
-      o3 = PyTuple_New(1);
-      PyTuple_SetItem(o3,0,o);
-      o2 = resultobj;
-      resultobj = PySequence_Concat(o2,o3);
-      Py_DECREF(o2);
-      Py_DECREF(o3);
-    }
-  }
+  resultobj = SWIG_NewPointerObj((new DistanceQueryResult(static_cast< const DistanceQueryResult& >(result))), SWIGTYPE_p_DistanceQueryResult, SWIG_POINTER_OWN |  0 );
   return resultobj;
 fail:
   return NULL;
 }
 
 
-SWIGINTERN PyObject *_wrap_Geometry3D_closestPointWithBound(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_Geometry3D_distance_point_ext(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   Geometry3D *arg1 = (Geometry3D *) 0 ;
   double *arg2 ;
-  double arg3 ;
-  double *arg4 ;
+  DistanceQuerySettings *arg3 = 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
   double temp2[3] ;
-  double val3 ;
-  int ecode3 = 0 ;
-  double temp4[3] ;
+  void *argp3 = 0 ;
+  int res3 = 0 ;
   PyObject * obj0 = 0 ;
   PyObject * obj1 = 0 ;
   PyObject * obj2 = 0 ;
-  bool result;
+  DistanceQueryResult result;
   
-  {
-    arg4 = &temp4[0];
-  }
-  if (!PyArg_ParseTuple(args,(char *)"OOO:Geometry3D_closestPointWithBound",&obj0,&obj1,&obj2)) SWIG_fail;
+  if (!PyArg_ParseTuple(args,(char *)"OOO:Geometry3D_distance_point_ext",&obj0,&obj1,&obj2)) SWIG_fail;
   res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Geometry3D, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Geometry3D_closestPointWithBound" "', argument " "1"" of type '" "Geometry3D *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Geometry3D_distance_point_ext" "', argument " "1"" of type '" "Geometry3D *""'"); 
   }
   arg1 = reinterpret_cast< Geometry3D * >(argp1);
   {
@@ -22042,14 +22665,17 @@ SWIGINTERN PyObject *_wrap_Geometry3D_closestPointWithBound(PyObject *SWIGUNUSED
     }
     arg2 = &temp2[0];
   }
-  ecode3 = SWIG_AsVal_double(obj2, &val3);
-  if (!SWIG_IsOK(ecode3)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "Geometry3D_closestPointWithBound" "', argument " "3"" of type '" "double""'");
-  } 
-  arg3 = static_cast< double >(val3);
+  res3 = SWIG_ConvertPtr(obj2, &argp3, SWIGTYPE_p_DistanceQuerySettings,  0  | 0);
+  if (!SWIG_IsOK(res3)) {
+    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "Geometry3D_distance_point_ext" "', argument " "3"" of type '" "DistanceQuerySettings const &""'"); 
+  }
+  if (!argp3) {
+    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "Geometry3D_distance_point_ext" "', argument " "3"" of type '" "DistanceQuerySettings const &""'"); 
+  }
+  arg3 = reinterpret_cast< DistanceQuerySettings * >(argp3);
   {
     try {
-      result = (bool)(arg1)->closestPointWithBound((double const (*))arg2,arg3,arg4);
+      result = (arg1)->distance_point_ext((double const (*))arg2,(DistanceQuerySettings const &)*arg3);
     }
     catch(PyException& e) {
       e.setPyErr();
@@ -22060,71 +22686,42 @@ SWIGINTERN PyObject *_wrap_Geometry3D_closestPointWithBound(PyObject *SWIGUNUSED
       return NULL;
     }
   }
-  resultobj = SWIG_From_bool(static_cast< bool >(result));
-  {
-    PyObject *o, *o2, *o3;
-    o = convert_darray_obj(arg4,3);
-    if ((!resultobj) || (resultobj == Py_None)) {
-      resultobj = o;
-    } else {
-      if (!PyTuple_Check(resultobj)) {
-        PyObject *o2 = resultobj;
-        resultobj = PyTuple_New(1);
-        PyTuple_SetItem(resultobj,0,o2);
-      }
-      o3 = PyTuple_New(1);
-      PyTuple_SetItem(o3,0,o);
-      o2 = resultobj;
-      resultobj = PySequence_Concat(o2,o3);
-      Py_DECREF(o2);
-      Py_DECREF(o3);
-    }
-  }
+  resultobj = SWIG_NewPointerObj((new DistanceQueryResult(static_cast< const DistanceQueryResult& >(result))), SWIGTYPE_p_DistanceQueryResult, SWIG_POINTER_OWN |  0 );
   return resultobj;
 fail:
   return NULL;
 }
 
 
-SWIGINTERN PyObject *_wrap_Geometry3D_closestPoints(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_Geometry3D_distance(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   Geometry3D *arg1 = (Geometry3D *) 0 ;
   Geometry3D *arg2 = 0 ;
-  double *arg3 ;
-  double *arg4 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
   void *argp2 = 0 ;
   int res2 = 0 ;
-  double temp3[3] ;
-  double temp24[3] ;
   PyObject * obj0 = 0 ;
   PyObject * obj1 = 0 ;
-  bool result;
+  DistanceQueryResult result;
   
-  {
-    arg3 = &temp3[0];
-  }
-  {
-    arg4 = &temp24[0];
-  }
-  if (!PyArg_ParseTuple(args,(char *)"OO:Geometry3D_closestPoints",&obj0,&obj1)) SWIG_fail;
+  if (!PyArg_ParseTuple(args,(char *)"OO:Geometry3D_distance",&obj0,&obj1)) SWIG_fail;
   res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Geometry3D, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Geometry3D_closestPoints" "', argument " "1"" of type '" "Geometry3D *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Geometry3D_distance" "', argument " "1"" of type '" "Geometry3D *""'"); 
   }
   arg1 = reinterpret_cast< Geometry3D * >(argp1);
   res2 = SWIG_ConvertPtr(obj1, &argp2, SWIGTYPE_p_Geometry3D,  0  | 0);
   if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "Geometry3D_closestPoints" "', argument " "2"" of type '" "Geometry3D const &""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "Geometry3D_distance" "', argument " "2"" of type '" "Geometry3D const &""'"); 
   }
   if (!argp2) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "Geometry3D_closestPoints" "', argument " "2"" of type '" "Geometry3D const &""'"); 
+    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "Geometry3D_distance" "', argument " "2"" of type '" "Geometry3D const &""'"); 
   }
   arg2 = reinterpret_cast< Geometry3D * >(argp2);
   {
     try {
-      result = (bool)(arg1)->closestPoints((Geometry3D const &)*arg2,arg3,arg4);
+      result = (arg1)->distance((Geometry3D const &)*arg2);
     }
     catch(PyException& e) {
       e.setPyErr();
@@ -22135,99 +22732,54 @@ SWIGINTERN PyObject *_wrap_Geometry3D_closestPoints(PyObject *SWIGUNUSEDPARM(sel
       return NULL;
     }
   }
-  resultobj = SWIG_From_bool(static_cast< bool >(result));
-  {
-    PyObject *o, *o2, *o3;
-    o = convert_darray_obj(arg3,3);
-    if ((!resultobj) || (resultobj == Py_None)) {
-      resultobj = o;
-    } else {
-      if (!PyTuple_Check(resultobj)) {
-        PyObject *o2 = resultobj;
-        resultobj = PyTuple_New(1);
-        PyTuple_SetItem(resultobj,0,o2);
-      }
-      o3 = PyTuple_New(1);
-      PyTuple_SetItem(o3,0,o);
-      o2 = resultobj;
-      resultobj = PySequence_Concat(o2,o3);
-      Py_DECREF(o2);
-      Py_DECREF(o3);
-    }
-  }
-  {
-    PyObject *o, *o2, *o3;
-    o = convert_darray_obj(arg4,3);
-    if ((!resultobj) || (resultobj == Py_None)) {
-      resultobj = o;
-    } else {
-      if (!PyTuple_Check(resultobj)) {
-        PyObject *o2 = resultobj;
-        resultobj = PyTuple_New(1);
-        PyTuple_SetItem(resultobj,0,o2);
-      }
-      o3 = PyTuple_New(1);
-      PyTuple_SetItem(o3,0,o);
-      o2 = resultobj;
-      resultobj = PySequence_Concat(o2,o3);
-      Py_DECREF(o2);
-      Py_DECREF(o3);
-    }
-  }
+  resultobj = SWIG_NewPointerObj((new DistanceQueryResult(static_cast< const DistanceQueryResult& >(result))), SWIGTYPE_p_DistanceQueryResult, SWIG_POINTER_OWN |  0 );
   return resultobj;
 fail:
   return NULL;
 }
 
 
-SWIGINTERN PyObject *_wrap_Geometry3D_closestPointsWithBound(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_Geometry3D_distance_ext(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   Geometry3D *arg1 = (Geometry3D *) 0 ;
   Geometry3D *arg2 = 0 ;
-  double arg3 ;
-  double *arg4 ;
-  double *arg5 ;
+  DistanceQuerySettings *arg3 = 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
   void *argp2 = 0 ;
   int res2 = 0 ;
-  double val3 ;
-  int ecode3 = 0 ;
-  double temp4[3] ;
-  double temp25[3] ;
+  void *argp3 = 0 ;
+  int res3 = 0 ;
   PyObject * obj0 = 0 ;
   PyObject * obj1 = 0 ;
   PyObject * obj2 = 0 ;
-  bool result;
+  DistanceQueryResult result;
   
-  {
-    arg4 = &temp4[0];
-  }
-  {
-    arg5 = &temp25[0];
-  }
-  if (!PyArg_ParseTuple(args,(char *)"OOO:Geometry3D_closestPointsWithBound",&obj0,&obj1,&obj2)) SWIG_fail;
+  if (!PyArg_ParseTuple(args,(char *)"OOO:Geometry3D_distance_ext",&obj0,&obj1,&obj2)) SWIG_fail;
   res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Geometry3D, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Geometry3D_closestPointsWithBound" "', argument " "1"" of type '" "Geometry3D *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Geometry3D_distance_ext" "', argument " "1"" of type '" "Geometry3D *""'"); 
   }
   arg1 = reinterpret_cast< Geometry3D * >(argp1);
   res2 = SWIG_ConvertPtr(obj1, &argp2, SWIGTYPE_p_Geometry3D,  0  | 0);
   if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "Geometry3D_closestPointsWithBound" "', argument " "2"" of type '" "Geometry3D const &""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "Geometry3D_distance_ext" "', argument " "2"" of type '" "Geometry3D const &""'"); 
   }
   if (!argp2) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "Geometry3D_closestPointsWithBound" "', argument " "2"" of type '" "Geometry3D const &""'"); 
+    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "Geometry3D_distance_ext" "', argument " "2"" of type '" "Geometry3D const &""'"); 
   }
   arg2 = reinterpret_cast< Geometry3D * >(argp2);
-  ecode3 = SWIG_AsVal_double(obj2, &val3);
-  if (!SWIG_IsOK(ecode3)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "Geometry3D_closestPointsWithBound" "', argument " "3"" of type '" "double""'");
-  } 
-  arg3 = static_cast< double >(val3);
+  res3 = SWIG_ConvertPtr(obj2, &argp3, SWIGTYPE_p_DistanceQuerySettings,  0  | 0);
+  if (!SWIG_IsOK(res3)) {
+    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "Geometry3D_distance_ext" "', argument " "3"" of type '" "DistanceQuerySettings const &""'"); 
+  }
+  if (!argp3) {
+    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "Geometry3D_distance_ext" "', argument " "3"" of type '" "DistanceQuerySettings const &""'"); 
+  }
+  arg3 = reinterpret_cast< DistanceQuerySettings * >(argp3);
   {
     try {
-      result = (bool)(arg1)->closestPointsWithBound((Geometry3D const &)*arg2,arg3,arg4,arg5);
+      result = (arg1)->distance_ext((Geometry3D const &)*arg2,(DistanceQuerySettings const &)*arg3);
     }
     catch(PyException& e) {
       e.setPyErr();
@@ -22238,45 +22790,7 @@ SWIGINTERN PyObject *_wrap_Geometry3D_closestPointsWithBound(PyObject *SWIGUNUSE
       return NULL;
     }
   }
-  resultobj = SWIG_From_bool(static_cast< bool >(result));
-  {
-    PyObject *o, *o2, *o3;
-    o = convert_darray_obj(arg4,3);
-    if ((!resultobj) || (resultobj == Py_None)) {
-      resultobj = o;
-    } else {
-      if (!PyTuple_Check(resultobj)) {
-        PyObject *o2 = resultobj;
-        resultobj = PyTuple_New(1);
-        PyTuple_SetItem(resultobj,0,o2);
-      }
-      o3 = PyTuple_New(1);
-      PyTuple_SetItem(o3,0,o);
-      o2 = resultobj;
-      resultobj = PySequence_Concat(o2,o3);
-      Py_DECREF(o2);
-      Py_DECREF(o3);
-    }
-  }
-  {
-    PyObject *o, *o2, *o3;
-    o = convert_darray_obj(arg5,3);
-    if ((!resultobj) || (resultobj == Py_None)) {
-      resultobj = o;
-    } else {
-      if (!PyTuple_Check(resultobj)) {
-        PyObject *o2 = resultobj;
-        resultobj = PyTuple_New(1);
-        PyTuple_SetItem(resultobj,0,o2);
-      }
-      o3 = PyTuple_New(1);
-      PyTuple_SetItem(o3,0,o);
-      o2 = resultobj;
-      resultobj = PySequence_Concat(o2,o3);
-      Py_DECREF(o2);
-      Py_DECREF(o3);
-    }
-  }
+  resultobj = SWIG_NewPointerObj((new DistanceQueryResult(static_cast< const DistanceQueryResult& >(result))), SWIGTYPE_p_DistanceQueryResult, SWIG_POINTER_OWN |  0 );
   return resultobj;
 fail:
   return NULL;
@@ -52316,6 +52830,32 @@ static PyMethodDef SwigMethods[] = {
 		""},
 	 { (char *)"delete_VolumeGrid", _wrap_delete_VolumeGrid, METH_VARARGS, (char *)"delete_VolumeGrid(VolumeGrid self)"},
 	 { (char *)"VolumeGrid_swigregister", VolumeGrid_swigregister, METH_VARARGS, NULL},
+	 { (char *)"new_DistanceQuerySettings", _wrap_new_DistanceQuerySettings, METH_VARARGS, (char *)"new_DistanceQuerySettings() -> DistanceQuerySettings"},
+	 { (char *)"DistanceQuerySettings_relErr_set", _wrap_DistanceQuerySettings_relErr_set, METH_VARARGS, (char *)"DistanceQuerySettings_relErr_set(DistanceQuerySettings self, double relErr)"},
+	 { (char *)"DistanceQuerySettings_relErr_get", _wrap_DistanceQuerySettings_relErr_get, METH_VARARGS, (char *)"DistanceQuerySettings_relErr_get(DistanceQuerySettings self) -> double"},
+	 { (char *)"DistanceQuerySettings_absErr_set", _wrap_DistanceQuerySettings_absErr_set, METH_VARARGS, (char *)"DistanceQuerySettings_absErr_set(DistanceQuerySettings self, double absErr)"},
+	 { (char *)"DistanceQuerySettings_absErr_get", _wrap_DistanceQuerySettings_absErr_get, METH_VARARGS, (char *)"DistanceQuerySettings_absErr_get(DistanceQuerySettings self) -> double"},
+	 { (char *)"DistanceQuerySettings_upperBound_set", _wrap_DistanceQuerySettings_upperBound_set, METH_VARARGS, (char *)"DistanceQuerySettings_upperBound_set(DistanceQuerySettings self, double upperBound)"},
+	 { (char *)"DistanceQuerySettings_upperBound_get", _wrap_DistanceQuerySettings_upperBound_get, METH_VARARGS, (char *)"DistanceQuerySettings_upperBound_get(DistanceQuerySettings self) -> double"},
+	 { (char *)"delete_DistanceQuerySettings", _wrap_delete_DistanceQuerySettings, METH_VARARGS, (char *)"delete_DistanceQuerySettings(DistanceQuerySettings self)"},
+	 { (char *)"DistanceQuerySettings_swigregister", DistanceQuerySettings_swigregister, METH_VARARGS, NULL},
+	 { (char *)"DistanceQueryResult_d_set", _wrap_DistanceQueryResult_d_set, METH_VARARGS, (char *)"DistanceQueryResult_d_set(DistanceQueryResult self, double d)"},
+	 { (char *)"DistanceQueryResult_d_get", _wrap_DistanceQueryResult_d_get, METH_VARARGS, (char *)"DistanceQueryResult_d_get(DistanceQueryResult self) -> double"},
+	 { (char *)"DistanceQueryResult_hasClosestPoints_set", _wrap_DistanceQueryResult_hasClosestPoints_set, METH_VARARGS, (char *)"DistanceQueryResult_hasClosestPoints_set(DistanceQueryResult self, bool hasClosestPoints)"},
+	 { (char *)"DistanceQueryResult_hasClosestPoints_get", _wrap_DistanceQueryResult_hasClosestPoints_get, METH_VARARGS, (char *)"DistanceQueryResult_hasClosestPoints_get(DistanceQueryResult self) -> bool"},
+	 { (char *)"DistanceQueryResult_hasGradients_set", _wrap_DistanceQueryResult_hasGradients_set, METH_VARARGS, (char *)"DistanceQueryResult_hasGradients_set(DistanceQueryResult self, bool hasGradients)"},
+	 { (char *)"DistanceQueryResult_hasGradients_get", _wrap_DistanceQueryResult_hasGradients_get, METH_VARARGS, (char *)"DistanceQueryResult_hasGradients_get(DistanceQueryResult self) -> bool"},
+	 { (char *)"DistanceQueryResult_cp1_set", _wrap_DistanceQueryResult_cp1_set, METH_VARARGS, (char *)"DistanceQueryResult_cp1_set(DistanceQueryResult self, doubleVector cp1)"},
+	 { (char *)"DistanceQueryResult_cp1_get", _wrap_DistanceQueryResult_cp1_get, METH_VARARGS, (char *)"DistanceQueryResult_cp1_get(DistanceQueryResult self) -> doubleVector"},
+	 { (char *)"DistanceQueryResult_cp2_set", _wrap_DistanceQueryResult_cp2_set, METH_VARARGS, (char *)"DistanceQueryResult_cp2_set(DistanceQueryResult self, doubleVector cp2)"},
+	 { (char *)"DistanceQueryResult_cp2_get", _wrap_DistanceQueryResult_cp2_get, METH_VARARGS, (char *)"DistanceQueryResult_cp2_get(DistanceQueryResult self) -> doubleVector"},
+	 { (char *)"DistanceQueryResult_grad1_set", _wrap_DistanceQueryResult_grad1_set, METH_VARARGS, (char *)"DistanceQueryResult_grad1_set(DistanceQueryResult self, doubleVector grad1)"},
+	 { (char *)"DistanceQueryResult_grad1_get", _wrap_DistanceQueryResult_grad1_get, METH_VARARGS, (char *)"DistanceQueryResult_grad1_get(DistanceQueryResult self) -> doubleVector"},
+	 { (char *)"DistanceQueryResult_grad2_set", _wrap_DistanceQueryResult_grad2_set, METH_VARARGS, (char *)"DistanceQueryResult_grad2_set(DistanceQueryResult self, doubleVector grad2)"},
+	 { (char *)"DistanceQueryResult_grad2_get", _wrap_DistanceQueryResult_grad2_get, METH_VARARGS, (char *)"DistanceQueryResult_grad2_get(DistanceQueryResult self) -> doubleVector"},
+	 { (char *)"new_DistanceQueryResult", _wrap_new_DistanceQueryResult, METH_VARARGS, (char *)"new_DistanceQueryResult() -> DistanceQueryResult"},
+	 { (char *)"delete_DistanceQueryResult", _wrap_delete_DistanceQueryResult, METH_VARARGS, (char *)"delete_DistanceQueryResult(DistanceQueryResult self)"},
+	 { (char *)"DistanceQueryResult_swigregister", DistanceQueryResult_swigregister, METH_VARARGS, NULL},
 	 { (char *)"new_Geometry3D", _wrap_new_Geometry3D, METH_VARARGS, (char *)"\n"
 		"Geometry3D()\n"
 		"Geometry3D(Geometry3D arg2)\n"
@@ -52582,52 +53122,48 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"Returns true if this geometry is within distance tol to other. \n"
 		""},
+	 { (char *)"Geometry3D_distance_simple", _wrap_Geometry3D_distance_simple, METH_VARARGS, (char *)"\n"
+		"distance_simple(Geometry3D other, double relErr=0, double absErr=0) -> double\n"
+		"distance_simple(Geometry3D other, double relErr=0) -> double\n"
+		"Geometry3D_distance_simple(Geometry3D self, Geometry3D other) -> double\n"
+		"\n"
+		"\n"
+		"\n"
+		"Version 0.8: this is the same as the old distance() function.\n"
+		"\n"
+		"Returns the distance from this geometry to the other. If either\n"
+		"geometry contains volume information, this value may be negative to\n"
+		"indicate penetration. \n"
+		""},
+	 { (char *)"Geometry3D_distance_point", _wrap_Geometry3D_distance_point, METH_VARARGS, (char *)"\n"
+		"Geometry3D_distance_point(Geometry3D self, double const [3] pt) -> DistanceQueryResult\n"
+		"\n"
+		"\n"
+		"\n"
+		"Returns the the distance and closest point to the input point, given\n"
+		"in world coordinates. An exception is raised if this operation is not\n"
+		"supported with the given geometry type.\n"
+		"\n"
+		"The return value contains the distance, closest points, and gradients\n"
+		"if available. \n"
+		""},
+	 { (char *)"Geometry3D_distance_point_ext", _wrap_Geometry3D_distance_point_ext, METH_VARARGS, (char *)"\n"
+		"Geometry3D_distance_point_ext(Geometry3D self, double const [3] pt, DistanceQuerySettings settings) -> DistanceQueryResult\n"
+		"\n"
+		"\n"
+		"\n"
+		"A customizable version of distance_point. The settings for the\n"
+		"calculation can be customized with relErr, absErr, and upperBound,\n"
+		"e.g., to break if the closest points are at least upperBound distance\n"
+		"from one another. \n"
+		""},
 	 { (char *)"Geometry3D_distance", _wrap_Geometry3D_distance, METH_VARARGS, (char *)"\n"
-		"distance(Geometry3D other, double relErr=0, double absErr=0) -> double\n"
-		"distance(Geometry3D other, double relErr=0) -> double\n"
-		"Geometry3D_distance(Geometry3D self, Geometry3D other) -> double\n"
+		"Geometry3D_distance(Geometry3D self, Geometry3D other) -> DistanceQueryResult\n"
 		"\n"
 		"\n"
 		"\n"
-		"Returns the distance from this geometry to the other. \n"
-		""},
-	 { (char *)"Geometry3D_closestPoint", _wrap_Geometry3D_closestPoint, METH_VARARGS, (char *)"\n"
-		"Geometry3D_closestPoint(Geometry3D self, double const [3] pt) -> bool\n"
-		"\n"
-		"\n"
-		"\n"
-		"Returns (success,cp) giving the closest point to the input point.\n"
-		"success is false if that operation is not supported with the given\n"
-		"geometry type.\n"
-		"\n"
-		"pt and cp are given in world coordinates. A non-default value of\n"
-		"upperBound lets the calculation break early if it can be shown that\n"
-		"the closest points are greater than upperBound distance from one\n"
-		"another. In this case, success=false is returned.\n"
-		"\n"
-		"If pt is contained within the interior of a GeometricPrimitive or\n"
-		"VolumeGrid, a negative value is returned \n"
-		""},
-	 { (char *)"Geometry3D_closestPointWithBound", _wrap_Geometry3D_closestPointWithBound, METH_VARARGS, (char *)"\n"
-		"Geometry3D_closestPointWithBound(Geometry3D self, double const [3] pt, double upperBound) -> bool\n"
-		"\n"
-		"\n"
-		"\n"
-		"Same as the normal closestPoint, but a value of upperBound can be\n"
-		"provided to let the calculation break early if it can be shown that\n"
-		"the closest points are at least upperBound distance from one another.\n"
-		"In this case, success=False is returned. \n"
-		""},
-	 { (char *)"Geometry3D_closestPoints", _wrap_Geometry3D_closestPoints, METH_VARARGS, (char *)"\n"
-		"Geometry3D_closestPoints(Geometry3D self, Geometry3D other) -> bool\n"
-		"\n"
-		"\n"
-		"\n"
-		"Returns (success,cp1,cp2) where cp1 is the closest point on self to\n"
-		"other, and cp2 is the closest point on other to self. success is false\n"
-		"if that operation is not supported with the given geometry types.\n"
-		"\n"
-		"cp1 and cp2 are returned in world coordinates.\n"
+		"Returns the the distance and closest points between the given\n"
+		"geometries.\n"
 		"\n"
 		"If the objects are penetrating, some combinations of geometry types\n"
 		"allow calculating penetration depths (GeometricPrimitive-\n"
@@ -52635,17 +53171,19 @@ static PyMethodDef SwigMethods[] = {
 		"GeometricPrimitive-PointCloud, GeometricPrimitive-VolumeGrid,\n"
 		"TriangleMesh (surface only)- GeometricPrimitive, PointCloud-\n"
 		"VolumeGrid). In this case, a negative value is returned and cp1,cp2\n"
-		"are the deepest penetrating points. \n"
+		"are the deepest penetrating points.\n"
+		"\n"
+		"Same comments as the distance_point function \n"
 		""},
-	 { (char *)"Geometry3D_closestPointsWithBound", _wrap_Geometry3D_closestPointsWithBound, METH_VARARGS, (char *)"\n"
-		"Geometry3D_closestPointsWithBound(Geometry3D self, Geometry3D other, double upperBound) -> bool\n"
+	 { (char *)"Geometry3D_distance_ext", _wrap_Geometry3D_distance_ext, METH_VARARGS, (char *)"\n"
+		"Geometry3D_distance_ext(Geometry3D self, Geometry3D other, DistanceQuerySettings settings) -> DistanceQueryResult\n"
 		"\n"
 		"\n"
 		"\n"
-		"Same as closestPoints, but a value of upperBound can be provided to\n"
-		"let the calculation break early if it can be shown that the closest\n"
-		"points are at least upperBound distance away from one another. In this\n"
-		"case, success=False is returned. \n"
+		"A customizable version of distance. The settings for the calculation\n"
+		"can be customized with relErr, absErr, and upperBound, e.g., to break\n"
+		"if the closest points are at least upperBound distance from one\n"
+		"another. \n"
 		""},
 	 { (char *)"Geometry3D_rayCast", _wrap_Geometry3D_rayCast, METH_VARARGS, (char *)"\n"
 		"Geometry3D_rayCast(Geometry3D self, double const [3] s, double const [3] d) -> bool\n"
@@ -55192,6 +55730,8 @@ static void *_p_intArrayTo_p_int(void *x, int *SWIGUNUSEDPARM(newmemory)) {
 static swig_type_info _swigt__p_Appearance = {"_p_Appearance", "Appearance *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_ContactParameters = {"_p_ContactParameters", "ContactParameters *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_ControlledRobotSimulator = {"_p_ControlledRobotSimulator", "ControlledRobotSimulator *", 0, 0, (void*)0, 0};
+static swig_type_info _swigt__p_DistanceQueryResult = {"_p_DistanceQueryResult", "DistanceQueryResult *", 0, 0, (void*)0, 0};
+static swig_type_info _swigt__p_DistanceQuerySettings = {"_p_DistanceQuerySettings", "DistanceQuerySettings *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_GeneralizedIKObjective = {"_p_GeneralizedIKObjective", "GeneralizedIKObjective *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_GeneralizedIKSolver = {"_p_GeneralizedIKSolver", "GeneralizedIKSolver *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_GeometricPrimitive = {"_p_GeometricPrimitive", "GeometricPrimitive *", 0, 0, (void*)0, 0};
@@ -55262,6 +55802,8 @@ static swig_type_info *swig_type_initial[] = {
   &_swigt__p_Appearance,
   &_swigt__p_ContactParameters,
   &_swigt__p_ControlledRobotSimulator,
+  &_swigt__p_DistanceQueryResult,
+  &_swigt__p_DistanceQuerySettings,
   &_swigt__p_GeneralizedIKObjective,
   &_swigt__p_GeneralizedIKSolver,
   &_swigt__p_GeometricPrimitive,
@@ -55332,6 +55874,8 @@ static swig_type_info *swig_type_initial[] = {
 static swig_cast_info _swigc__p_Appearance[] = {  {&_swigt__p_Appearance, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_ContactParameters[] = {  {&_swigt__p_ContactParameters, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_ControlledRobotSimulator[] = {  {&_swigt__p_ControlledRobotSimulator, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_DistanceQueryResult[] = {  {&_swigt__p_DistanceQueryResult, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_DistanceQuerySettings[] = {  {&_swigt__p_DistanceQuerySettings, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_GeneralizedIKObjective[] = {  {&_swigt__p_GeneralizedIKObjective, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_GeneralizedIKSolver[] = {  {&_swigt__p_GeneralizedIKSolver, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_GeometricPrimitive[] = {  {&_swigt__p_GeometricPrimitive, 0, 0, 0},{0, 0, 0, 0}};
@@ -55402,6 +55946,8 @@ static swig_cast_info *swig_cast_initial[] = {
   _swigc__p_Appearance,
   _swigc__p_ContactParameters,
   _swigc__p_ControlledRobotSimulator,
+  _swigc__p_DistanceQueryResult,
+  _swigc__p_DistanceQuerySettings,
   _swigc__p_GeneralizedIKObjective,
   _swigc__p_GeneralizedIKSolver,
   _swigc__p_GeometricPrimitive,
