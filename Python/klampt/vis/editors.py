@@ -1,6 +1,7 @@
 import glcommon
 import glinit
 import visualization
+import time
 from ..math import vectorops,so3,se3
 from ..robotsim import WidgetSet,RobotPoser,ObjectPoser,TransformPoser,PointPoser,WorldModel,RobotModelLink,RigidObjectModel,IKObjective
 from ..model.subrobot import SubRobotModel
@@ -432,6 +433,17 @@ class TrajectoryEditor(VisualEditorBase):
                     self.world.robot(i).drawGL()
         glEnable(GL_BLEND)
         glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA)
+
+        #draw animation, if available
+        if self.animTrajectoryTime is not None:
+            for j in xrange(self.robot.numLinks()):
+                self.robot.link(j).appearance().setColor(1.0,1.0,0,0.5)
+            q = self.animTrajectory.eval(self.animTrajectoryTime,'loop')
+            self.robot.setConfig(q)
+            self.robot.drawGL()
+            for j in xrange(self.robot.numLinks()):
+                self.robot.link(j).appearance().setColor(0.5,0.5,0.5,1)
+        
         #draw most opaque first
         order = []
         if self.editingIndex < 0:
@@ -455,16 +467,6 @@ class TrajectoryEditor(VisualEditorBase):
                 self.robot.drawGL()
         for j in xrange(self.robot.numLinks()):
             self.robot.link(j).appearance().setColor(0.5,0.5,0.5,1)
-
-        #draw animation, if available
-        if self.animTrajectoryTime is not None:
-            for j in xrange(self.robot.numLinks()):
-                self.robot.link(j).appearance().setColor(1.0,1.0,0,0.5)
-            q = self.animTrajectory.eval(self.animTrajectoryTime,'loop')
-            self.robot.setConfig(q)
-            self.robot.drawGL()
-            for j in xrange(self.robot.numLinks()):
-                self.robot.link(j).appearance().setColor(0.5,0.5,0.5,1)
         glDisable(GL_BLEND)
 
     def idle(self):
