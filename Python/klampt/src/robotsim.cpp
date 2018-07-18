@@ -1048,7 +1048,7 @@ bool Geometry3D::withinDistance(const Geometry3D& other,double tol)
   return geom->WithinDistance(*geom2,tol);
 }
 
-double Geometry3D::distance(const Geometry3D& other,double relErr,double absErr)
+double Geometry3D::distance_simple(const Geometry3D& other,double relErr,double absErr)
 {
   SmartPointer<AnyCollisionGeometry3D>& geom = *reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(geomPtr);
   SmartPointer<AnyCollisionGeometry3D>& geom2 = *reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(other.geomPtr);
@@ -1057,76 +1057,82 @@ double Geometry3D::distance(const Geometry3D& other,double relErr,double absErr)
   return q.Distance(relErr,absErr);
 }
 
-bool Geometry3D::closestPoint(const double pt[3],double out[3])
+DistanceQuerySettings::DistanceQuerySettings()
+:relErr(0),absErr(0),upperBound(Inf)
+{}
+
+DistanceQueryResult Geometry3D::distance_point(const double pt[3])
+{
+  return distance_point_ext(pt,DistanceQuerySettings());
+}
+
+DistanceQueryResult Geometry3D::distance_point_ext(const double pt[3],const DistanceQuerySettings& settings)
 {
   SmartPointer<AnyCollisionGeometry3D>& geom = *reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(geomPtr);
-  if(!geom) return false;
-  Vector3 vout;
-  Real d = geom->Distance(Vector3(pt),vout);
-  if(IsInf(d)) return false;
-  vout.get(out);
-  return true;
+  if(!geom) throw PyException("Geometry3D.distance_point: Geometry is empty");
+  AnyDistanceQuerySettings gsettings;
+  gsettings.relErr = settings.relErr;
+  gsettings.absErr = settings.absErr;
+  gsettings.upperBound = settings.upperBound;
+  AnyDistanceQueryResult gres = geom->Distance(Vector3(pt),gsettings);
+  if(IsInf(gres.d)) {
+    throw PyException("Distance queries not implemented yet for that type of geometry");
+  }
+  DistanceQueryResult result;
+  result.d = gres.d;
+  result.hasClosestPoints = gres.hasClosestPoints;
+  if(result.hasClosestPoints) {
+    result.cp1.resize(3);
+    result.cp2.resize(3);
+    gres.cp1.get(&result.cp1[0]);
+    gres.cp2.get(&result.cp2[0]);
+  }
+  result.hasGradients = gres.hasDirections;
+  if(result.hasGradients) {
+    result.grad1.resize(3);
+    result.grad2.resize(3);
+    gres.dir1.get(&result.grad2[0]);
+    gres.dir2.get(&result.grad1[0]);
+  }
+  return result;
 }
 
-bool Geometry3D::closestPointWithBound(const double pt[3],double upperBound,double out[3])
+DistanceQueryResult Geometry3D::distance(const Geometry3D& other)
 {
-  SmartPointer<AnyCollisionGeometry3D>& geom = *reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(geomPtr);
-  if(!geom) return false;
-  if(geom->type == AnyGeometry3D::ImplicitSurface || geom->type == AnyGeometry3D::Primitive)
-    return closestPoint(pt,out); //O(1)
-  int elem1,elem2;
-  Math3D::GeometricPrimitive3D g = Math3D::GeometricPrimitive3D(Vector3(pt));
-  AnyCollisionGeometry3D geom2(g);
-  Real d = geom->Distance(geom2,elem1,elem2,upperBound);
-  if(d>=upperBound) return false;
-  Vector3 ptlocal;
-  geom->GetTransform().mulInverse(Vector3(pt),ptlocal);
-  if(geom->type == AnyGeometry3D::TriangleMesh) {
-    const Geometry::CollisionMesh& mesh = geom->TriangleMeshCollisionData();
-    Math3D::Triangle3D tri;
-    mesh.GetTriangle(elem1,tri);
-    Vector3 cp;
-    cp = tri.closestPoint(ptlocal);
-    (geom->GetTransform()*cp).get(out);
-  }
-  else if(geom->type == AnyGeometry3D::PointCloud) {
-    const Meshing::PointCloud3D& pc = geom->AsPointCloud();
-    (geom->GetTransform()*pc.points[elem1]).get(out);
-  }
-  else {
-    throw PyException("Hmm... not sure how to handle that type of geometry yet");
-  }
-  return true;
+  return distance_ext(other,DistanceQuerySettings());
 }
 
-bool Geometry3D::closestPoints(const Geometry3D& other,double out[3],double out2[3])
-{
-  double upperBound = Inf;
-  return closestPointsWithBound(other,upperBound,out,out2);
-}
-
-bool Geometry3D::closestPointsWithBound(const Geometry3D& other,double upperBound,double out[3],double out2[3])
+DistanceQueryResult Geometry3D::distance_ext(const Geometry3D& other,const DistanceQuerySettings& settings)
 {
   SmartPointer<AnyCollisionGeometry3D>& geom = *reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(geomPtr);
   SmartPointer<AnyCollisionGeometry3D>& geom2 = *reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(other.geomPtr);
-  if(!geom) return false;
-  if(!geom2) return false;
-  int elem1,elem2;
-  Real d = geom->Distance(*geom2,elem1,elem2,upperBound);
-  if(d>=upperBound) return false;
-  Math3D::GeometricPrimitive3D prim1 = geom->GetElement(elem1),prim2 = geom2->GetElement(elem2);
-  RigidTransform Tself,Tselfother;
-  Tself = geom->GetTransform();
-  Tselfother.mulInverseA(Tself,geom2->GetTransform());
-  prim2.Transform(Tselfother);
-  Vector3 cp1,cp2;
-  d = prim1.ClosestPoints(prim2,cp1,cp2);
-  if(IsInf(d)) return false;
-  cp1 = Tself*cp1;
-  cp2 = Tself*cp2;
-  cp1.get(out);
-  cp2.get(out2);
-  return true;
+  if(!geom) throw PyException("Geometry3D.distance: Geometry is empty");
+  if(!geom2) throw PyException("Geometry3D.distance: Other geometry is empty");
+  AnyDistanceQuerySettings gsettings;
+  gsettings.relErr = settings.relErr;
+  gsettings.absErr = settings.absErr;
+  gsettings.upperBound = settings.upperBound;
+  AnyDistanceQueryResult gres = geom->Distance(*geom2,gsettings);
+  if(IsInf(gres.d)) {
+    throw PyException("Distance queries not implemented yet for those types of geometry");
+  }
+  DistanceQueryResult result;
+  result.d = gres.d;
+  result.hasClosestPoints = gres.hasClosestPoints;
+  if(result.hasClosestPoints) {
+    result.cp1.resize(3);
+    result.cp2.resize(3);
+    gres.cp1.get(&result.cp1[0]);
+    gres.cp2.get(&result.cp2[0]);
+  }
+  result.hasGradients = gres.hasDirections;
+  if(result.hasGradients) {
+    result.grad1.resize(3);
+    result.grad2.resize(3);
+    gres.dir1.get(&result.grad2[0]);
+    gres.dir2.get(&result.grad1[0]);
+  }
+  return result;
 }
 
 bool Geometry3D::rayCast(const double s[3],const double d[3],double out[3])
@@ -2919,7 +2925,7 @@ double RobotModel::distance(const std::vector<double>& a,const std::vector<doubl
   if(robot->links.size() != b.size()) 
     throw PyException("Invalid size of configuration");
   Vector va(a),vb(b);
-  return Distance(*robot,va,vb,Inf);
+  return Distance(*robot,va,vb,2);
 }
 
 void RobotModel::interpolateDeriv(const std::vector<double>& a,const std::vector<double>& b,std::vector<double>& dout)

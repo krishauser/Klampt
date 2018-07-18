@@ -323,19 +323,21 @@ class Geometry3D
   bool collides(const Geometry3D& other);
   ///Returns true if this geometry is within distance tol to other
   bool withinDistance(const Geometry3D& other,double tol);
+  ///Version 0.8: this is the same as the old distance() function.
+  ///
   ///Returns the distance from this geometry to the other.  If either geometry contains volume information,
   ///this value may be negative to indicate penetration.
-  double distance(const Geometry3D& other,double relErr=0,double absErr=0);
+  double distance_simple(const Geometry3D& other,double relErr=0,double absErr=0);
   ///Returns the the distance and closest point to the input point, given in world coordinates.
   ///An exception is raised if this operation is not supported with the given
   ///geometry type.
   ///
   ///The return value contains the distance, closest points, and gradients if available.
-  ///
-  ///The settings for the calculator can be customized with relErr, absErr, and upperBound, e.g., to
+  DistanceQueryResult distance_point(const double pt[3]);
+  ///A customizable version of distance_point.
+  ///The settings for the calculation can be customized with relErr, absErr, and upperBound, e.g., to
   ///break if the closest points are at least upperBound distance from one another.  
-  DistanceQueryResult distance2_point_ext(const double pt[3],const DistanceQuerySettings& settings);
-  DistanceQueryResult distance2_point(const double pt[3]);
+  DistanceQueryResult distance_point_ext(const double pt[3],const DistanceQuerySettings& settings);
   ///Returns the the distance and closest points between the given geometries.
   ///
   ///If the objects are penetrating, some combinations of geometry types allow calculating penetration
@@ -344,9 +346,12 @@ class Geometry3D
   ///GeometricPrimitive, PointCloud-VolumeGrid).  In this case, a negative value is returned and cp1,cp2
   ///are the deepest penetrating points.
   ///
-  ///Same comments as the other distance2 function
-  DistanceQueryResult distance2(const Geometry3D& other,const DistanceQuerySettings& settings);
-  DistanceQueryResult distance2(const Geometry3D& other);
+  ///Same comments as the distance_point function
+  DistanceQueryResult distance(const Geometry3D& other);
+  ///A customizable version of distance.
+  ///The settings for the calculation can be customized with relErr, absErr, and upperBound, e.g., to
+  ///break if the closest points are at least upperBound distance from one another.  
+  DistanceQueryResult distance_ext(const Geometry3D& other,const DistanceQuerySettings& settings);
   ///Returns (hit,pt) where hit is true if the ray starting at s and pointing
   ///in direction d hits the geometry (given in world coordinates); pt is
   ///the hit point, in world coordinates.
