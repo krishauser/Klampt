@@ -242,6 +242,7 @@ class TrajectoryEditor(VisualEditorBase):
         self.durationSpinBox = QDoubleSpinBox()
         self.durationSpinBox.setRange(0,10.0)
         self.durationSpinBox.setSingleStep(0.01)
+        self.durationSpinBox.setDecimals(4)
         self.insertButton = QPushButton("Insert")
         self.deleteButton = QPushButton("Delete")
         self.indexSpinBox.valueChanged.connect(self.indexChanged)
