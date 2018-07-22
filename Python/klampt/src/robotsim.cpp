@@ -401,6 +401,28 @@ void GetPointCloud(const PointCloud& pc,Geometry::AnyCollisionGeometry3D& geom)
   geom.ClearCollisionData();
 }
 
+void GetVolumeGrid(const Geometry::AnyCollisionGeometry3D& geom,VolumeGrid& grid)
+{
+  Assert(geom.type == Geometry::AnyGeometry3D::ImplicitSurface);
+  const Meshing::VolumeGrid& gvg = geom.AsImplicitSurface();
+  grid.dims.resize(3);
+  grid.dims[0] = gvg.value.m;
+  grid.dims[1] = gvg.value.n;
+  grid.dims[2] = gvg.value.p;
+  grid.bbox.resize(6);
+  grid.bbox[0] = gvg.bb.bmin.x;
+  grid.bbox[1] = gvg.bb.bmin.y;
+  grid.bbox[2] = gvg.bb.bmin.z;
+  grid.bbox[3] = gvg.bb.bmax.x;
+  grid.bbox[4] = gvg.bb.bmax.y;
+  grid.bbox[5] = gvg.bb.bmax.z;
+  grid.values.resize(gvg.value.m*gvg.value.n*gvg.value.p);
+  int k=0;
+  for(Array3D<Real>::iterator i=gvg.value.begin();i!=gvg.value.end();++i,k++) {
+    grid.values[k] = *i;
+  }
+}
+
 void GetVolumeGrid(const VolumeGrid& grid,Geometry::AnyCollisionGeometry3D& geom)
 {
   Meshing::VolumeGrid gvg;
@@ -417,6 +439,7 @@ void GetVolumeGrid(const VolumeGrid& grid,Geometry::AnyCollisionGeometry3D& geom
   geom = gvg;
   geom.ClearCollisionData();
 }
+
 
 void GeometricPrimitive::setPoint(const double pt[3])
 {
@@ -768,6 +791,16 @@ PointCloud Geometry3D::getPointCloud()
     GetPointCloud(*geom,pc);
   }
   return pc;
+}
+
+VolumeGrid Geometry3D::getVolumeGrid()
+{
+  SmartPointer<AnyCollisionGeometry3D>& geom = *reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(geomPtr);
+  VolumeGrid grid;
+  if(geom) {
+    GetVolumeGrid(*geom,grid);
+  }
+  return grid;
 }
 
 void Geometry3D::setPointCloud(const PointCloud& pc)
@@ -1274,7 +1307,7 @@ void Appearance::setDraw(bool draw)
     app->drawEdges = false;
   }
 }
-void Appearance::setDraw(int primitive,bool draw)
+void Appearance::setDraw(int feature,bool draw)
 {
   SmartPointer<GLDraw::GeometryAppearance>& app = *reinterpret_cast<SmartPointer<GLDraw::GeometryAppearance>*>(appearancePtr);
   if(!app) return;
@@ -1283,7 +1316,7 @@ void Appearance::setDraw(int primitive,bool draw)
     GetManagedGeometry(world,id).SetUniqueAppearance();
     app = GetManagedGeometry(world,id).Appearance();
   }
-  switch(primitive) {
+  switch(feature) {
   case ALL: app->drawFaces = app->drawVertices = app->drawEdges = draw; break;
   case VERTICES: app->drawVertices = draw; break;
   case EDGES: app->drawEdges = draw; break;
@@ -1298,11 +1331,11 @@ bool Appearance::getDraw()
   return app->drawFaces || app->drawVertices || app->drawEdges;
 }
 
-bool Appearance::getDraw(int primitive)
+bool Appearance::getDraw(int feature)
 {
   SmartPointer<GLDraw::GeometryAppearance>& app = *reinterpret_cast<SmartPointer<GLDraw::GeometryAppearance>*>(appearancePtr);
   if(!app) return false;
-  switch(primitive) {
+  switch(feature) {
   case ALL: return app->drawFaces || app->drawVertices || app->drawEdges;
   case VERTICES: return app->drawVertices;
   case EDGES: return app->drawEdges;
@@ -1323,7 +1356,7 @@ void Appearance::setColor(float r,float g,float b,float a)
   app->SetColor(r,g,b,a);
 }
 
-void Appearance::setColor(int primitive,float r,float g,float b,float a)
+void Appearance::setColor(int feature,float r,float g,float b,float a)
 {
   SmartPointer<GLDraw::GeometryAppearance>& app = *reinterpret_cast<SmartPointer<GLDraw::GeometryAppearance>*>(appearancePtr);
   if(!app) return;
@@ -1332,7 +1365,7 @@ void Appearance::setColor(int primitive,float r,float g,float b,float a)
     GetManagedGeometry(world,id).SetUniqueAppearance();
     app = GetManagedGeometry(world,id).Appearance();
   }
-  switch(primitive) {
+  switch(feature) {
   case ALL:
     app->SetColor(r,g,b,a);
     break;
@@ -1362,12 +1395,12 @@ void Appearance::getColor(float out[4])
   if(!app) throw PyException("Invalid appearance");
   for(int i=0;i<4;i++) out[i] = app->faceColor.rgba[i];
 }
-void Appearance::getColor(int primitive,float out[4])
+void Appearance::getColor(int feature,float out[4])
 {
   SmartPointer<GLDraw::GeometryAppearance>& app = *reinterpret_cast<SmartPointer<GLDraw::GeometryAppearance>*>(appearancePtr);
   if(!app) throw PyException("Invalid appearance");
   GLDraw::GLColor c;
-  switch(primitive) {
+  switch(feature) {
   case ALL:
   case FACES:
     c = app->faceColor;
@@ -1379,27 +1412,128 @@ void Appearance::getColor(int primitive,float out[4])
     c = app->edgeColor;
     break;
   default:
-    throw PyException("Invalid primitive");
+    throw PyException("Invalid feature");
   }
   for(int i=0;i<4;i++) out[i] = c.rgba[i];
 }
-void Appearance::setColors(int primitive,const std::vector<float>& colors,bool alpha)
+void Appearance::setColors(int feature,const std::vector<float>& colors,bool alpha)
 {
-  FatalError("Not implemented yet");
+  SmartPointer<GLDraw::GeometryAppearance>& app = *reinterpret_cast<SmartPointer<GLDraw::GeometryAppearance>*>(appearancePtr);
+  if(!app) throw PyException("Invalid appearance");
+  size_t nchannels = 3;
+  if(alpha) nchannels = 4;
+  if(colors.size()%nchannels != 0) 
+    throw PyException("An invalid number of color channels is specified, must be a multiple of 3 or 4 (depending on value of alpha)");
+  size_t n = colors.size()/nchannels;
+  switch(feature) {
+  case VERTICES:
+    {
+      printf("SetColors VERTICES %d %d\n",(int)n,(int)nchannels);
+      app->vertexColors.resize(n,app->vertexColor);
+      for(size_t i=0;i<n;i++) {
+        for(size_t k=0;k<nchannels;k++)
+          app->vertexColors[i].rgba[k] = colors[i*nchannels+k];
+      }
+      printf("%f %f %f\n",app->vertexColors[100].rgba[0],app->vertexColors[100].rgba[1],app->vertexColors[100].rgba[2]);
+    }
+    break;
+  case FACES:
+    {
+      app->faceColors.resize(n,app->faceColor);
+      for(size_t i=0;i<n;i++) {
+        for(size_t k=0;k<nchannels;k++)
+          app->faceColors[i].rgba[k] = colors[i*nchannels+k];
+      }
+    }
+    break;
+  default:
+    throw PyException("Invalid feature, can only do per-element colors for VERTICES or FACES");
+  }
+}
+void Appearance::setElementColor(int feature,int element,float r,float g,float b,float a)
+{
+  SmartPointer<GLDraw::GeometryAppearance>& app = *reinterpret_cast<SmartPointer<GLDraw::GeometryAppearance>*>(appearancePtr);
+  if(!app) throw PyException("Invalid appearance");
+  switch(feature) {
+  case VERTICES:
+    {
+      if(element >= app->vertexColors.size()) {
+        if(app->geom == NULL) {
+          app->vertexColors.resize(element+1,app->vertexColor);
+        }
+        else if(app->vertexColors.empty()) {
+          throw PyException("TODO: resize vertex colors to geometry size");
+        }
+        else {
+          throw PyException("Invalid element specified"); 
+        }
+      }
+      app->vertexColors[element].set(r,g,b,a);
+    }
+    break;
+  case FACES:
+    {
+      if(element >= app->faceColors.size()) {
+        if(app->geom == NULL) {
+          app->faceColors.resize(element+1,app->faceColor);
+        }
+        else if(app->faceColors.empty()) {
+          throw PyException("TODO: resize face colors to geometry size");
+        }
+        else {
+          throw PyException("Invalid element specified"); 
+        }
+      }
+      app->faceColors[element].set(r,g,b,a);
+    }
+    break;
+  default:
+    throw PyException("Invalid feature, can only do per-element colors for VERTICES or FACES");
+  }
+}
+
+void Appearance::getElementColor(int feature,int element,float out[4])
+{
+  SmartPointer<GLDraw::GeometryAppearance>& app = *reinterpret_cast<SmartPointer<GLDraw::GeometryAppearance>*>(appearancePtr);
+  if(!app) throw PyException("Invalid appearance");
+  switch(feature) {
+  case VERTICES:
+    {
+      if(app->vertexColors.empty())
+        for(int i=0;i<4;i++) out[i] = app->vertexColor.rgba[i];
+      else {
+        if(element < 0 || element >= (int)app->vertexColors.size()) throw PyException("Invalid element specified");
+        for(int i=0;i<4;i++) out[i] = app->vertexColors[element].rgba[i];
+      }
+    }
+    break;
+  case FACES:
+    {
+      if(app->faceColors.empty())
+        for(int i=0;i<4;i++) out[i] = app->faceColor.rgba[i];
+      else {
+        if(element < 0 || element >= (int)app->faceColors.size()) throw PyException("Invalid element specified");
+        for(int i=0;i<4;i++) out[i] = app->faceColors[element].rgba[i];
+      }
+    }
+    break;
+  default:
+    throw PyException("Invalid feature, can only do per-element colors for VERTICES or FACES");
+  }
 }
 void Appearance::setTexture1D(int w,const char* format,const std::vector<unsigned char>& bytes)
 {
-  FatalError("Not implemented yet");
+  throw PyException("Python API for textures not implemented yet");
 }
 
 void Appearance::setTexture2D(int w,int h,const char* format,const std::vector<unsigned char>& bytes)
 {
-  FatalError("Not implemented yet");
+ throw PyException("Python API for textures not implemented yet");
 }
 
 void Appearance::setTexcoords(const std::vector<double>& uvs)
 {
-  FatalError("Not implemented yet");
+  throw PyException("Python API for textures not implemented yet");
 }
 
 void Appearance::setPointSize(float size)
