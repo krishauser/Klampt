@@ -239,7 +239,7 @@ class Geometry3D
   bool isStandalone();
   ///Frees the data associated with this geometry, if standalone 
   void free();
-  ///Returns the type of geometry: TriangleMesh, PointCloud, or
+  ///Returns the type of geometry: TriangleMesh, PointCloud, VolumeGrid, or
   ///GeometricPrimitive
   std::string type();
   ///Returns true if this has no contents (not the same as numElements()==0)
@@ -250,6 +250,8 @@ class Geometry3D
   PointCloud getPointCloud();
   ///Returns a GeometricPrimitive if this geometry is of type GeometricPrimitive
   GeometricPrimitive getGeometricPrimitive();
+  ///Returns a VoumeGrid if this geometry is of type VolumeGrid
+  VolumeGrid getVolumeGrid();
   ///Sets this Geometry3D to a TriangleMesh
   void setTriangleMesh(const TriangleMesh&);
   ///Sets this Geometry3D to a PointCloud
