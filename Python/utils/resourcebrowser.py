@@ -111,8 +111,10 @@ class ResourceBrowser(QtGui.QMainWindow):
         self.model.setRootPath(QtCore.QDir.rootPath())
         # Add filters
         filters = QtCore.QStringList();
+        print "ALLOWABLE FILE EXTENSIONS"
         for k,v in resource.extensionToType.iteritems():
             filters.append("*"+k)
+            print " ",k
         filters.append("*.xml")
         filters.append("*.json")
         filters.append("*.txt")
@@ -281,20 +283,20 @@ class ResourceBrowser(QtGui.QMainWindow):
         self.view.setRootIndex(currentRoot.parent())
 
     def selection_changed(self,newSelection,deselected):
-        print "Selection changed!"
+        #print "Selection changed!"
         for i in newSelection.indexes():
             if i.column() == 0:
                 fn = str(i.model().filePath(i))
                 self.selected.add(fn)
                 self.add(fn)
-                print "  value:",fn
-        print "Deselected:"
+                #print "  value:",fn
+        #print "Deselected:"
         for i in deselected.indexes():
             if i.column() == 0:
                 fn = str(i.model().filePath(i))
                 self.selected.remove(fn)
                 self.remove(fn)
-                print "  value:",fn
+                #print "  value:",fn
         self.refresh()
 
     def onAutoFitCamera(self):
