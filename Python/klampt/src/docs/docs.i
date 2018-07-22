@@ -369,7 +369,7 @@ Frees the data associated with this geometry, if standalone. ";
 
 %feature("docstring")  Geometry3D::type "
 
-Returns the type of geometry: TriangleMesh, PointCloud, or
+Returns the type of geometry: TriangleMesh, PointCloud, VolumeGrid, or
 GeometricPrimitive. ";
 
 %feature("docstring")  Geometry3D::empty "
@@ -389,6 +389,10 @@ Returns a PointCloud if this geometry is of type PointCloud. ";
 
 Returns a GeometricPrimitive if this geometry is of type
 GeometricPrimitive. ";
+
+%feature("docstring")  Geometry3D::getVolumeGrid "
+
+Returns a VoumeGrid if this geometry is of type VolumeGrid. ";
 
 %feature("docstring")  Geometry3D::setTriangleMesh "
 
@@ -2980,6 +2984,8 @@ Sets the random seed used by the motion planner. ";
 %feature("docstring")  GetPointCloud "";
 
 %feature("docstring")  GetPointCloud "";
+
+%feature("docstring")  GetVolumeGrid "";
 
 %feature("docstring")  GetVolumeGrid "";
 

@@ -1547,7 +1547,7 @@ class Geometry3D(_object):
 
 
 
-        Returns the type of geometry: TriangleMesh, PointCloud, or
+        Returns the type of geometry: TriangleMesh, PointCloud, VolumeGrid, or
         GeometricPrimitive. 
         """
         return _robotsim.Geometry3D_type(self)
@@ -1597,6 +1597,17 @@ class Geometry3D(_object):
         GeometricPrimitive. 
         """
         return _robotsim.Geometry3D_getGeometricPrimitive(self)
+
+
+    def getVolumeGrid(self):
+        """
+        getVolumeGrid(Geometry3D self) -> VolumeGrid
+
+
+
+        Returns a VoumeGrid if this geometry is of type VolumeGrid. 
+        """
+        return _robotsim.Geometry3D_getVolumeGrid(self)
 
 
     def setTriangleMesh(self, arg2):
@@ -2049,7 +2060,7 @@ class Appearance(_object):
     def setDraw(self, *args):
         """
         setDraw(Appearance self, bool draw)
-        setDraw(Appearance self, int primitive, bool draw)
+        setDraw(Appearance self, int feature, bool draw)
         """
         return _robotsim.Appearance_setDraw(self, *args)
 
@@ -2057,7 +2068,7 @@ class Appearance(_object):
     def getDraw(self, *args):
         """
         getDraw(Appearance self) -> bool
-        getDraw(Appearance self, int primitive) -> bool
+        getDraw(Appearance self, int feature) -> bool
         """
         return _robotsim.Appearance_getDraw(self, *args)
 
@@ -2066,7 +2077,7 @@ class Appearance(_object):
         """
         setColor(Appearance self, float r, float g, float b, float a=1)
         setColor(Appearance self, float r, float g, float b)
-        setColor(Appearance self, int primitive, float r, float g, float b, float a)
+        setColor(Appearance self, int feature, float r, float g, float b, float a)
         """
         return _robotsim.Appearance_setColor(self, *args)
 
@@ -2074,17 +2085,30 @@ class Appearance(_object):
     def getColor(self, *args):
         """
         getColor(Appearance self)
-        getColor(Appearance self, int primitive)
+        getColor(Appearance self, int feature)
         """
         return _robotsim.Appearance_getColor(self, *args)
 
 
-    def setColors(self, primitive, colors, alpha=False):
+    def setColors(self, feature, colors, alpha=False):
         """
-        setColors(Appearance self, int primitive, floatVector colors, bool alpha=False)
-        setColors(Appearance self, int primitive, floatVector colors)
+        setColors(Appearance self, int feature, floatVector colors, bool alpha=False)
+        setColors(Appearance self, int feature, floatVector colors)
         """
-        return _robotsim.Appearance_setColors(self, primitive, colors, alpha)
+        return _robotsim.Appearance_setColors(self, feature, colors, alpha)
+
+
+    def setElementColor(self, feature, element, r, g, b, a=1):
+        """
+        setElementColor(Appearance self, int feature, int element, float r, float g, float b, float a=1)
+        setElementColor(Appearance self, int feature, int element, float r, float g, float b)
+        """
+        return _robotsim.Appearance_setElementColor(self, feature, element, r, g, b, a)
+
+
+    def getElementColor(self, feature, element):
+        """getElementColor(Appearance self, int feature, int element)"""
+        return _robotsim.Appearance_getElementColor(self, feature, element)
 
 
     def setTexture1D(self, w, format, bytes):

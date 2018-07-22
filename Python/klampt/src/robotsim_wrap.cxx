@@ -20987,6 +20987,40 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_Geometry3D_getVolumeGrid(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Geometry3D *arg1 = (Geometry3D *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  VolumeGrid result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:Geometry3D_getVolumeGrid",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Geometry3D, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Geometry3D_getVolumeGrid" "', argument " "1"" of type '" "Geometry3D *""'"); 
+  }
+  arg1 = reinterpret_cast< Geometry3D * >(argp1);
+  {
+    try {
+      result = (arg1)->getVolumeGrid();
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_NewPointerObj((new VolumeGrid(static_cast< const VolumeGrid& >(result))), SWIGTYPE_p_VolumeGrid, SWIG_POINTER_OWN |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_Geometry3D_setTriangleMesh(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   Geometry3D *arg1 = (Geometry3D *) 0 ;
@@ -24389,6 +24423,352 @@ fail:
     "    Appearance::setColors(int,std::vector< float,std::allocator< float > > const &,bool)\n"
     "    Appearance::setColors(int,std::vector< float,std::allocator< float > > const &)\n");
   return 0;
+}
+
+
+SWIGINTERN PyObject *_wrap_Appearance_setElementColor__SWIG_0(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Appearance *arg1 = (Appearance *) 0 ;
+  int arg2 ;
+  int arg3 ;
+  float arg4 ;
+  float arg5 ;
+  float arg6 ;
+  float arg7 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  int val3 ;
+  int ecode3 = 0 ;
+  float val4 ;
+  int ecode4 = 0 ;
+  float val5 ;
+  int ecode5 = 0 ;
+  float val6 ;
+  int ecode6 = 0 ;
+  float val7 ;
+  int ecode7 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  PyObject * obj2 = 0 ;
+  PyObject * obj3 = 0 ;
+  PyObject * obj4 = 0 ;
+  PyObject * obj5 = 0 ;
+  PyObject * obj6 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OOOOOOO:Appearance_setElementColor",&obj0,&obj1,&obj2,&obj3,&obj4,&obj5,&obj6)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Appearance, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Appearance_setElementColor" "', argument " "1"" of type '" "Appearance *""'"); 
+  }
+  arg1 = reinterpret_cast< Appearance * >(argp1);
+  ecode2 = SWIG_AsVal_int(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Appearance_setElementColor" "', argument " "2"" of type '" "int""'");
+  } 
+  arg2 = static_cast< int >(val2);
+  ecode3 = SWIG_AsVal_int(obj2, &val3);
+  if (!SWIG_IsOK(ecode3)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "Appearance_setElementColor" "', argument " "3"" of type '" "int""'");
+  } 
+  arg3 = static_cast< int >(val3);
+  ecode4 = SWIG_AsVal_float(obj3, &val4);
+  if (!SWIG_IsOK(ecode4)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode4), "in method '" "Appearance_setElementColor" "', argument " "4"" of type '" "float""'");
+  } 
+  arg4 = static_cast< float >(val4);
+  ecode5 = SWIG_AsVal_float(obj4, &val5);
+  if (!SWIG_IsOK(ecode5)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode5), "in method '" "Appearance_setElementColor" "', argument " "5"" of type '" "float""'");
+  } 
+  arg5 = static_cast< float >(val5);
+  ecode6 = SWIG_AsVal_float(obj5, &val6);
+  if (!SWIG_IsOK(ecode6)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode6), "in method '" "Appearance_setElementColor" "', argument " "6"" of type '" "float""'");
+  } 
+  arg6 = static_cast< float >(val6);
+  ecode7 = SWIG_AsVal_float(obj6, &val7);
+  if (!SWIG_IsOK(ecode7)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode7), "in method '" "Appearance_setElementColor" "', argument " "7"" of type '" "float""'");
+  } 
+  arg7 = static_cast< float >(val7);
+  {
+    try {
+      (arg1)->setElementColor(arg2,arg3,arg4,arg5,arg6,arg7);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Appearance_setElementColor__SWIG_1(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Appearance *arg1 = (Appearance *) 0 ;
+  int arg2 ;
+  int arg3 ;
+  float arg4 ;
+  float arg5 ;
+  float arg6 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  int val3 ;
+  int ecode3 = 0 ;
+  float val4 ;
+  int ecode4 = 0 ;
+  float val5 ;
+  int ecode5 = 0 ;
+  float val6 ;
+  int ecode6 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  PyObject * obj2 = 0 ;
+  PyObject * obj3 = 0 ;
+  PyObject * obj4 = 0 ;
+  PyObject * obj5 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OOOOOO:Appearance_setElementColor",&obj0,&obj1,&obj2,&obj3,&obj4,&obj5)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Appearance, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Appearance_setElementColor" "', argument " "1"" of type '" "Appearance *""'"); 
+  }
+  arg1 = reinterpret_cast< Appearance * >(argp1);
+  ecode2 = SWIG_AsVal_int(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Appearance_setElementColor" "', argument " "2"" of type '" "int""'");
+  } 
+  arg2 = static_cast< int >(val2);
+  ecode3 = SWIG_AsVal_int(obj2, &val3);
+  if (!SWIG_IsOK(ecode3)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "Appearance_setElementColor" "', argument " "3"" of type '" "int""'");
+  } 
+  arg3 = static_cast< int >(val3);
+  ecode4 = SWIG_AsVal_float(obj3, &val4);
+  if (!SWIG_IsOK(ecode4)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode4), "in method '" "Appearance_setElementColor" "', argument " "4"" of type '" "float""'");
+  } 
+  arg4 = static_cast< float >(val4);
+  ecode5 = SWIG_AsVal_float(obj4, &val5);
+  if (!SWIG_IsOK(ecode5)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode5), "in method '" "Appearance_setElementColor" "', argument " "5"" of type '" "float""'");
+  } 
+  arg5 = static_cast< float >(val5);
+  ecode6 = SWIG_AsVal_float(obj5, &val6);
+  if (!SWIG_IsOK(ecode6)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode6), "in method '" "Appearance_setElementColor" "', argument " "6"" of type '" "float""'");
+  } 
+  arg6 = static_cast< float >(val6);
+  {
+    try {
+      (arg1)->setElementColor(arg2,arg3,arg4,arg5,arg6);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Appearance_setElementColor(PyObject *self, PyObject *args) {
+  Py_ssize_t argc;
+  PyObject *argv[8] = {
+    0
+  };
+  Py_ssize_t ii;
+  
+  if (!PyTuple_Check(args)) SWIG_fail;
+  argc = args ? PyObject_Length(args) : 0;
+  for (ii = 0; (ii < 7) && (ii < argc); ii++) {
+    argv[ii] = PyTuple_GET_ITEM(args,ii);
+  }
+  if (argc == 6) {
+    int _v;
+    void *vptr = 0;
+    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_Appearance, 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      {
+        int res = SWIG_AsVal_int(argv[1], NULL);
+        _v = SWIG_CheckState(res);
+      }
+      if (_v) {
+        {
+          int res = SWIG_AsVal_int(argv[2], NULL);
+          _v = SWIG_CheckState(res);
+        }
+        if (_v) {
+          {
+            int res = SWIG_AsVal_float(argv[3], NULL);
+            _v = SWIG_CheckState(res);
+          }
+          if (_v) {
+            {
+              int res = SWIG_AsVal_float(argv[4], NULL);
+              _v = SWIG_CheckState(res);
+            }
+            if (_v) {
+              {
+                int res = SWIG_AsVal_float(argv[5], NULL);
+                _v = SWIG_CheckState(res);
+              }
+              if (_v) {
+                return _wrap_Appearance_setElementColor__SWIG_1(self, args);
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  if (argc == 7) {
+    int _v;
+    void *vptr = 0;
+    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_Appearance, 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      {
+        int res = SWIG_AsVal_int(argv[1], NULL);
+        _v = SWIG_CheckState(res);
+      }
+      if (_v) {
+        {
+          int res = SWIG_AsVal_int(argv[2], NULL);
+          _v = SWIG_CheckState(res);
+        }
+        if (_v) {
+          {
+            int res = SWIG_AsVal_float(argv[3], NULL);
+            _v = SWIG_CheckState(res);
+          }
+          if (_v) {
+            {
+              int res = SWIG_AsVal_float(argv[4], NULL);
+              _v = SWIG_CheckState(res);
+            }
+            if (_v) {
+              {
+                int res = SWIG_AsVal_float(argv[5], NULL);
+                _v = SWIG_CheckState(res);
+              }
+              if (_v) {
+                {
+                  int res = SWIG_AsVal_float(argv[6], NULL);
+                  _v = SWIG_CheckState(res);
+                }
+                if (_v) {
+                  return _wrap_Appearance_setElementColor__SWIG_0(self, args);
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  
+fail:
+  SWIG_SetErrorMsg(PyExc_NotImplementedError,"Wrong number or type of arguments for overloaded function 'Appearance_setElementColor'.\n"
+    "  Possible C/C++ prototypes are:\n"
+    "    Appearance::setElementColor(int,int,float,float,float,float)\n"
+    "    Appearance::setElementColor(int,int,float,float,float)\n");
+  return 0;
+}
+
+
+SWIGINTERN PyObject *_wrap_Appearance_getElementColor(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Appearance *arg1 = (Appearance *) 0 ;
+  int arg2 ;
+  int arg3 ;
+  float *arg4 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  int val3 ;
+  int ecode3 = 0 ;
+  float temp4[4] ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  PyObject * obj2 = 0 ;
+  
+  {
+    arg4 = &temp4[0];
+  }
+  if (!PyArg_ParseTuple(args,(char *)"OOO:Appearance_getElementColor",&obj0,&obj1,&obj2)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Appearance, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Appearance_getElementColor" "', argument " "1"" of type '" "Appearance *""'"); 
+  }
+  arg1 = reinterpret_cast< Appearance * >(argp1);
+  ecode2 = SWIG_AsVal_int(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Appearance_getElementColor" "', argument " "2"" of type '" "int""'");
+  } 
+  arg2 = static_cast< int >(val2);
+  ecode3 = SWIG_AsVal_int(obj2, &val3);
+  if (!SWIG_IsOK(ecode3)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "Appearance_getElementColor" "', argument " "3"" of type '" "int""'");
+  } 
+  arg3 = static_cast< int >(val3);
+  {
+    try {
+      (arg1)->getElementColor(arg2,arg3,arg4);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  {
+    PyObject *o, *o2, *o3;
+    o = convert_farray_obj(arg4,4);
+    if ((!resultobj) || (resultobj == Py_None)) {
+      resultobj = o;
+    } else {
+      if (!PyTuple_Check(resultobj)) {
+        PyObject *o2 = resultobj;
+        resultobj = PyTuple_New(1);
+        PyTuple_SetItem(resultobj,0,o2);
+      }
+      o3 = PyTuple_New(1);
+      PyTuple_SetItem(o3,0,o);
+      o2 = resultobj;
+      resultobj = PySequence_Concat(o2,o3);
+      Py_DECREF(o2);
+      Py_DECREF(o3);
+    }
+  }
+  return resultobj;
+fail:
+  return NULL;
 }
 
 
@@ -52898,7 +53278,7 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"\n"
 		"\n"
-		"Returns the type of geometry: TriangleMesh, PointCloud, or\n"
+		"Returns the type of geometry: TriangleMesh, PointCloud, VolumeGrid, or\n"
 		"GeometricPrimitive. \n"
 		""},
 	 { (char *)"Geometry3D_empty", _wrap_Geometry3D_empty, METH_VARARGS, (char *)"\n"
@@ -52930,6 +53310,13 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"Returns a GeometricPrimitive if this geometry is of type\n"
 		"GeometricPrimitive. \n"
+		""},
+	 { (char *)"Geometry3D_getVolumeGrid", _wrap_Geometry3D_getVolumeGrid, METH_VARARGS, (char *)"\n"
+		"Geometry3D_getVolumeGrid(Geometry3D self) -> VolumeGrid\n"
+		"\n"
+		"\n"
+		"\n"
+		"Returns a VoumeGrid if this geometry is of type VolumeGrid. \n"
 		""},
 	 { (char *)"Geometry3D_setTriangleMesh", _wrap_Geometry3D_setTriangleMesh, METH_VARARGS, (char *)"\n"
 		"Geometry3D_setTriangleMesh(Geometry3D self, TriangleMesh arg3)\n"
@@ -53216,25 +53603,30 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"Appearance_free", _wrap_Appearance_free, METH_VARARGS, (char *)"Appearance_free(Appearance self)"},
 	 { (char *)"Appearance_setDraw", _wrap_Appearance_setDraw, METH_VARARGS, (char *)"\n"
 		"setDraw(bool draw)\n"
-		"Appearance_setDraw(Appearance self, int primitive, bool draw)\n"
+		"Appearance_setDraw(Appearance self, int feature, bool draw)\n"
 		""},
 	 { (char *)"Appearance_getDraw", _wrap_Appearance_getDraw, METH_VARARGS, (char *)"\n"
 		"getDraw() -> bool\n"
-		"Appearance_getDraw(Appearance self, int primitive) -> bool\n"
+		"Appearance_getDraw(Appearance self, int feature) -> bool\n"
 		""},
 	 { (char *)"Appearance_setColor", _wrap_Appearance_setColor, METH_VARARGS, (char *)"\n"
 		"setColor(float r, float g, float b, float a=1)\n"
 		"setColor(float r, float g, float b)\n"
-		"Appearance_setColor(Appearance self, int primitive, float r, float g, float b, float a)\n"
+		"Appearance_setColor(Appearance self, int feature, float r, float g, float b, float a)\n"
 		""},
 	 { (char *)"Appearance_getColor", _wrap_Appearance_getColor, METH_VARARGS, (char *)"\n"
 		"getColor()\n"
-		"Appearance_getColor(Appearance self, int primitive)\n"
+		"Appearance_getColor(Appearance self, int feature)\n"
 		""},
 	 { (char *)"Appearance_setColors", _wrap_Appearance_setColors, METH_VARARGS, (char *)"\n"
-		"setColors(int primitive, floatVector colors, bool alpha=False)\n"
-		"Appearance_setColors(Appearance self, int primitive, floatVector colors)\n"
+		"setColors(int feature, floatVector colors, bool alpha=False)\n"
+		"Appearance_setColors(Appearance self, int feature, floatVector colors)\n"
 		""},
+	 { (char *)"Appearance_setElementColor", _wrap_Appearance_setElementColor, METH_VARARGS, (char *)"\n"
+		"setElementColor(int feature, int element, float r, float g, float b, float a=1)\n"
+		"Appearance_setElementColor(Appearance self, int feature, int element, float r, float g, float b)\n"
+		""},
+	 { (char *)"Appearance_getElementColor", _wrap_Appearance_getElementColor, METH_VARARGS, (char *)"Appearance_getElementColor(Appearance self, int feature, int element)"},
 	 { (char *)"Appearance_setTexture1D", _wrap_Appearance_setTexture1D, METH_VARARGS, (char *)"Appearance_setTexture1D(Appearance self, int w, char const * format, std::vector< unsigned char,std::allocator< unsigned char > > const & bytes)"},
 	 { (char *)"Appearance_setTexture2D", _wrap_Appearance_setTexture2D, METH_VARARGS, (char *)"Appearance_setTexture2D(Appearance self, int w, int h, char const * format, std::vector< unsigned char,std::allocator< unsigned char > > const & bytes)"},
 	 { (char *)"Appearance_setTexcoords", _wrap_Appearance_setTexcoords, METH_VARARGS, (char *)"Appearance_setTexcoords(Appearance self, doubleVector uvs)"},
