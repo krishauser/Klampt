@@ -17,7 +17,7 @@ FIND_LIBRARY( KLAMPT_LIBRARY Klampt
 
 FIND_PATH(KLAMPT_INCLUDE_DIR
 	Simulation/ODESimulator.h
-PATHS /usr/include/ /usr/include/Klampt /usr/local/include/Klampt ${KLAMPT_ROOT}
+PATHS /usr/include/ /usr/include/Klampt /usr/local/include/Klampt ${KLAMPT_ROOT}/Cpp
 DOC "Directory where Klamp't header files are stored" )
 
 
