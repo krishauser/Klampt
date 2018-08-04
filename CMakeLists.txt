@@ -147,7 +147,7 @@ install(TARGETS Klampt
   DESTINATION lib
   COMPONENT libraries)
 foreach(s ${SUBDIRS})
-  file(GLOB SUBDIRFILES  ${PROJECT_SOURCE_DIR}/${s}/*.h )
+  file(GLOB SUBDIRFILES  ${PROJECT_SOURCE_DIR}/Cpp/${s}/*.h )
   install(FILES ${SUBDIRFILES}
     DESTINATION include/Klampt/${s}
     COMPONENT headers)
