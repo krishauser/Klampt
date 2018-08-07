@@ -696,16 +696,16 @@ def _getBounds(object):
     if isinstance(object,WorldModel):
         res = []
         for i in range(object.numRobots()):
-            res += _getBounds(object.robots(i))
+            res += _getBounds(object.robot(i))
         for i in range(object.numRigidObjects()):
             res += _getBounds(object.rigidObject(i))
         return res
     elif isinstance(object,RobotModel):
-        return sum([object.link(i).geometry().getBB() for i in range(object.numLinks())],[])
+        return sum([list(object.link(i).geometry().getBB()) for i in range(object.numLinks())],[])
     elif isinstance(object,RigidObjectModel):
-        return object.geometry().getAABB()
+        return list(object.geometry().getBB())
     elif isinstance(object,Geometry3D):
-        return object.getAABB()
+        return list(object.getBB())
     elif isinstance(object,VisAppearance):
         if len(object.subAppearances) == 0:
             if isinstance(object.item,TerrainModel):
@@ -2848,7 +2848,7 @@ elif _GLUTAvailable:
                 gldraw.glutBitmapString(GLUT_BITMAP_HELVETICA_18,"In Window mode. Press 'Esc' to hide window")
             _globalLock.release()
         def keyboardfunc(self,c,x,y):
-            if ord(c)==27:
+            if len(c)==1 and ord(c)==27:
                 if self.inDialog:
                     print "Esc pressed, hiding dialog"
                     self.inDialog = False
