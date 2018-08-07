@@ -410,6 +410,7 @@ void GeometricPrimitive::setSphere(const double c[3],double r)
   type = "Sphere";
   properties.resize(4);
   copy(c,c+3,properties.begin());
+  properties[3] = r;
 }
 
 void GeometricPrimitive::setSegment(const double a[3],const double b[3])
@@ -568,7 +569,9 @@ string Geometry3D::type()
   SmartPointer<AnyCollisionGeometry3D>& geom = *reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(geomPtr);
   if(!geom) return "";
   if(geom->Empty()) return "";
-  return geom->TypeName();
+  string res = geom->TypeName();
+  if(res == "Primitive") return "GeometricPrimitive";
+  return res;
 }
 
 bool Geometry3D::empty()
@@ -1902,7 +1905,7 @@ RobotModel WorldModel::add(const char* name,const RobotModel& robot)
   if(robot.robot == NULL)
     throw PyException("add(RobotModel): robot refers to NULL object");
   RobotWorld& world = *worlds[index]->world;
-  world.robots.push_back(new Robot);
+  world.AddRobot(name,new Robot());
   *world.robots.back() = *robot.robot;
   return this->robot((int)world.robots.size()-1);
 }
@@ -1912,7 +1915,7 @@ RigidObjectModel WorldModel::add(const char* name,const RigidObjectModel& obj)
   if(obj.object == NULL)
     throw PyException("add(RigidObjectModel): obj refers to NULL object");
   RobotWorld& world = *worlds[index]->world;
-  world.rigidObjects.push_back(new RigidObject);
+  world.AddRigidObject(name,new RigidObject());
   *world.rigidObjects.back() = *obj.object;
   return this->rigidObject((int)world.rigidObjects.size()-1);
 }
@@ -1922,7 +1925,7 @@ TerrainModel WorldModel::add(const char* name,const TerrainModel& terrain)
   if(terrain.terrain == NULL)
     throw PyException("add(TerrianModel): terrain refers to NULL object");
   RobotWorld& world = *worlds[index]->world;
-  world.terrains.push_back(new Terrain);
+  world.AddTerrain(name,new Terrain());
   *world.terrains.back() = *terrain.terrain;
   return this->terrain((int)world.terrains.size()-1);
 }
