@@ -133,9 +133,10 @@ The following sensors are natively supported:
 - `IMUSensor`: An inertial measurement unit that uses an accelerometer and/or gyroscope to provide estimates of a link's transformation and its derivatives. It will fill in the gaps that are not provided by the accelerometer / gyro using either integration or differencing.
 - `FilteredSensor`: A &quot;virtual sensor&quot; that simply filters the measurements provided by another sensor.
 
-A robot's sensors are dynamically configured via an XML tag of the form `<sensors> <TheSensorType name="some_name" attr1="value" ... " > </sensors>`. Each of the attribute/value pairs is fed to the sensor's SetSetting method, and details on sensor-specific settings are found in the documentation in [Control/Sensor.h](../Control/Sensor.h).
+Each sensor derives from a standard base class, which is SensorBase in the C++ API [Control/Sensor.h](../Control/Sensor.h).  This base class provides functionality for configuring the sensor's settings and retrieving its measurements.  A sensor's settings are configured via attribute/value pairs, which are fed to the sensor's SetSetting method.  More details on sensor-specific settings are listed below. 
 
-These XML strings can be inserted into .rob files under a line property sensors [file], URDF files under the `<klampt>` element, or world XML files under the `<simulation>` and `<robot>` elements
+Sensor settings may also be dynamically configured via an XML tag of the form `<sensors> <TheSensorType name="some_name" attr1="value" ... " > </sensors>`. These XML strings can be inserted into .rob files under a line `property sensors [SENSORS_XML_FILE]`, URDF files under the `<klampt>` element, or world XML files under the `<simulation>` and `<robot>` elements.  See [the Hubo-II+ model](../data/robots/huboplus/huboplus_col.rob) for an example of configuring sensors in a .rob file, and [the simulation sensor test environment](../data/simulation_test_worlds/sensortest.xml) for an example of configuring sensor in an XML file.
+
 
 ### Python API 
 
@@ -146,11 +147,89 @@ The main interface to sensors is [SimRobotSensor](http://motion.pratt.duke.edu/k
 - `sensor.type()`: gets the sensor’s type string
 - `sensor.measurementNames()`: returns a list of strings naming the sensor’s measurements
 - `sensor.getMeasurements()`: returns a list of floats giving the sensor’s measurements at the current time step
+- `sensor.setSetting(name,value)`: sets a setting for the sensor.  value must be a string
+- `sensor.getSetting(name)`: retrieves a setting for the sensor, returned as a string
 
 It is often useful to retrieve hypothetical sensor data without actually running a simulation, in particular for visual sensors.
 - `sensor.kinematicSimulate(world,dt)`: kinematically simulates the sensor for its corresponding robot in the given world.
 
 The [model/sensing.py](http://motion.pratt.duke.edu/klampt/pyklampt_docs/namespaceklampt_1_1model_1_1sensing.html) module contains utility functions for reading sensor transforms and converting camera measurements to images (Numpy arrays) and point clouds.
+
+### Sensor measurements and attributes
+
+Formal documentation is not yet complete for most sensors.  For the most part, the attributes of a sensor match the members corresponding C++ class.  Please see the C++ class attributes and comments for the most complete information.
+
+####`JointPositionSensor`
+
+Settings are:
+
+- `indices` (int list): a list of link indices actually read.  May also be empty to indicate all DOFs on the robot are read.
+- `qresolution` (float list): resolution of each reading, in radians. E.g. "0.01 ... 0.01" indicates that each reading will be rounded to the nearest 0.01 radian
+- `qvariance` (float list): variance of each reading, in radians
+
+[C++ API documentation](http://motion.pratt.duke.edu/klampt/klampt_docs/classJointPositionSensor.html).
+
+#### `JointVelocitySensor`
+
+Settings are:
+
+- `indices` (int list): a list of link indices actually read.  May also be empty to indicate all DOFs on the robot are read.
+- `qresolution` (float list): resolution of each reading, in rad/s. E.g. "0.1 ... 0.1" indicates that each reading will be rounded to the nearest 0.1 rad/s
+- `qvariance` (float list): variance of each reading, in rad/s.
+
+[C++ API documentation](http://motion.pratt.duke.edu/klampt/klampt_docs/classJointVelocitySensor.html).
+
+#### `CameraSensor`
+
+Simulates a camera or RGB-D sensor.  Measurements give the pixel measurements of the RGB sensor (if present) followed by the pixel measurements of the depth sensor (if present). RGB measurements are three floating point measurements in the range [0,1] giving the RGB channels of each pixel, in scan-line order.  Depth measurements are in meters.
+
+Settings are:
+
+- `link` (int): the link on which this sensor lies.
+- `rgb` (bool): if true, the camera provides RGB output.
+- `depth` (bool): if true, the camera provides depth output.
+- `xres`, `yres` (int): the x and y resolution of the sensor.
+- `xfov`, `yfov` (float): the x and y field of view, in radians.
+- `zmin`, `zmax` (float): minimum and maximum range of the depth sensor.
+
+[C++ API documentation](http://motion.pratt.duke.edu/klampt/klampt_docs/classCameraSensor.html).
+
+#### `LaserRangeSensor`
+
+Details can be found in [Control/VisualSensors.h](../Control/VisualSensors.h).
+
+#### `DriverTorqueSensor`
+
+Details can be found in [Control/ForceSensors.h](../Control/JointSensors.h). 
+
+#### `ContactSensor`
+
+Details can be found in [Control/ForceSensors.h](../Control/ForceSensors.h).
+
+#### `ForceTorqueSensor`
+
+Details can be found in [Control/ForceSensors.h](../Control/ForceSensors.h).
+
+#### `Accelerometer`
+
+Details can be found in [Control/InertialSensors.h](../Control/InertialSensors.h).
+
+#### `TiltSensor`
+
+Details can be found in [Control/InertialSensors.h](../Control/InertialSensors.h).
+
+#### `GyroSensor`
+
+Details can be found in [Control/InertialSensors.h](../Control/InertialSensors.h).
+
+#### `IMUSensor`
+
+Details can be found in [Control/InertialSensors.h](../Control/InertialSensors.h).
+
+#### `FilteredSensor`
+
+Details can be found in [Control/OtherSensors.h](../Control/OtherSensors.h).
+
 
 ## State estimation
 
