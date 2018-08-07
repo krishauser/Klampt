@@ -221,11 +221,11 @@ def readIKObjective(text):
     if posLocal: posLocal = [float(v) for v in posLocal]
     if posWorld: posWorld = [float(v) for v in posWorld]
     if posDirection: posDirection = [float(v) for v in posDirection]
-    if rotLocal: rotLocal = [float(v) for v in rotLocal]
+    if rotAxis: rotAxis = [float(v) for v in rotAxis]
     if rotWorld: rotWorld = [float(v) for v in rotWorld]
     
     obj = IKObjective()
-    obj.setLinks(link,destLink);
+    obj.setLinks(link,destlink);
     if posType=='N':
         obj.setFreePosConstraint()
     elif posType=='F':
@@ -241,7 +241,7 @@ def readIKObjective(text):
         R = so3.from_moment(rotWorld)
         obj.setFixedRotConstraint(R)
     elif rotType == 'A':
-        obj.setAxialRotConstraint(rotLocal,rotWorld)
+        obj.setAxialRotConstraint(rotAxis,rotWorld)
     else:
         raise NotImplementedError("Two-axis rotational constraints not supported")
     return obj
