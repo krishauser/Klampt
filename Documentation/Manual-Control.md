@@ -133,7 +133,7 @@ The following sensors are natively supported:
 - `IMUSensor`: An inertial measurement unit that uses an accelerometer and/or gyroscope to provide estimates of a link's transformation and its derivatives. It will fill in the gaps that are not provided by the accelerometer / gyro using either integration or differencing.
 - `FilteredSensor`: A &quot;virtual sensor&quot; that simply filters the measurements provided by another sensor.
 
-A robot's sensors are dynamically configured via an XML tag of the form `<sensors> <TheSensorType name="some_name" attr1="value" ... " > </sensors>`. Each of the attribute/value pairs is fed to the sensor's SetSetting method, and details on sensor-specific settings are found in the documentation in [Control/Sensor.h.
+A robot's sensors are dynamically configured via an XML tag of the form `<sensors> <TheSensorType name="some_name" attr1="value" ... " > </sensors>`. Each of the attribute/value pairs is fed to the sensor's SetSetting method, and details on sensor-specific settings are found in the documentation in [Control/Sensor.h](../Control/Sensor.h).
 
 These XML strings can be inserted into .rob files under a line property sensors [file], URDF files under the `<klampt>` element, or world XML files under the `<simulation>` and `<robot>` elements
 
@@ -150,6 +150,7 @@ The main interface to sensors is [SimRobotSensor](http://motion.pratt.duke.edu/k
 It is often useful to retrieve hypothetical sensor data without actually running a simulation, in particular for visual sensors.
 - `sensor.kinematicSimulate(world,dt)`: kinematically simulates the sensor for its corresponding robot in the given world.
 
+The [model/sensing.py](http://motion.pratt.duke.edu/klampt/pyklampt_docs/namespaceklampt_1_1model_1_1sensing.html) module contains utility functions for reading sensor transforms and converting camera measurements to images (Numpy arrays) and point clouds.
 
 ## State estimation
 
