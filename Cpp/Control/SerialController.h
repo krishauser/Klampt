@@ -51,7 +51,7 @@ public:
   string servAddr;
   Real writeRate;
   Real lastWriteTime;
-  SmartPointer<SocketPipeWorker> controllerPipe;
+  shared_ptr<SocketPipeWorker> controllerPipe;
 
   //for fixed-velocity commands, these are an accumulator that processes
   //the linearly increasing configuration

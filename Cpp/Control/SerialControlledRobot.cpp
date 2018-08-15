@@ -1,11 +1,11 @@
 #include "SerialControlledRobot.h"
-#include "JointSensors.h"
+#include "Sensing/JointSensors.h"
 #include <KrisLibrary/utils/AnyCollection.h>
 
 SerialControlledRobot::SerialControlledRobot(const char* _host,double timeout)
   :host(_host),robotTime(0),timeStep(0),numOverruns(0),stopFlag(false),controllerMutex(NULL)
 {
-  controllerPipe = new SocketPipeWorker(_host,false,timeout);
+  controllerPipe = make_shared<SocketPipeWorker>(_host,false,timeout);
 }
 
 SerialControlledRobot::~SerialControlledRobot()
@@ -43,21 +43,21 @@ bool SerialControlledRobot::Process(double timeout)
       //read next sensor data again to get timing info
       if(controllerMutex) controllerMutex->unlock();
       if(iteration % 100 == 0)
-	printf("SerialControlledRobot(): Error getting timestep? Waiting.\n");
+        printf("SerialControlledRobot(): Error getting timestep? Waiting.\n");
       ThreadSleep(0.01);
     }
     else {
       if(klamptController) {
-	klamptController->sensors = &sensors;
-	klamptController->command = &command;
-	klamptController->Update(timeStep);
+        klamptController->sensors = &sensors;
+        klamptController->command = &command;
+        klamptController->Update(timeStep);
       }
       if(controllerMutex) controllerMutex->unlock();
       WriteCommandData(command);
 
       Real time = timer.ElapsedTime();
       if(time > lastReadTime + timeStep) {
-	numOverruns ++;
+        numOverruns ++;
       }
       return true;
     }
@@ -87,28 +87,28 @@ bool SerialControlledRobot::Run()
     }
     else {
       if(klamptController) {
-	klamptController->sensors = &sensors;
-	klamptController->command = &command;
-	Real dt = robotTime-klamptController->time;
-	if(klamptController->time == 0) //first update
-	  dt = timeStep;
-	klamptController->Update(robotTime-klamptController->time);
+        klamptController->sensors = &sensors;
+        klamptController->command = &command;
+        Real dt = robotTime-klamptController->time;
+        if(klamptController->time == 0) //first update
+          dt = timeStep;
+        klamptController->Update(robotTime-klamptController->time);
       }
       if(controllerMutex) controllerMutex->unlock();
 
       if(!controllerPipe->initialized) {
-	fprintf(stderr,"SerialControlledRobot::Run(): killed by socket disconnect?\n");
-	return false;
+        fprintf(stderr,"SerialControlledRobot::Run(): killed by socket disconnect?\n");
+        return false;
       }
       WriteCommandData(command);
 
       Real time = timer.ElapsedTime();
       if(time > lastReadTime + timeStep) {
-	printf("Klamp't controller overrun, took time %g which exceeds time step %g\n",time-lastReadTime,timeStep);
-	numOverruns ++;
+        printf("Klamp't controller overrun, took time %g which exceeds time step %g\n",time-lastReadTime,timeStep);
+        numOverruns ++;
       }
       else {
-	ThreadSleep(Max(lastReadTime + timeStep - time,0.0));
+        ThreadSleep(Max(lastReadTime + timeStep - time,0.0));
       }
     }
   }
@@ -144,22 +144,22 @@ void SerialControlledRobot::ReadSensorData(RobotSensors& sensors)
       //no sensors defined by the user -- initialize default sensors based on
       //what's in the sensor message
       if(c.find("q") != NULL) {
-	JointPositionSensor* jp = new JointPositionSensor;
-	jp->name = "q";
-	jp->q.resize(klamptRobotModel->q.n,Zero);
-	sensors.sensors.push_back(jp);
+        JointPositionSensor* jp = new JointPositionSensor;
+        jp->name = "q";
+        jp->q.resize(klamptRobotModel->q.n,Zero);
+        sensors.sensors.push_back(shared_ptr<SensorBase>(jp));
       }
       if(c.find("dq") != NULL) {
-	JointVelocitySensor* jv = new JointVelocitySensor;
-	jv->name = "dq";
-	jv->dq.resize(klamptRobotModel->q.n,Zero);
-	sensors.sensors.push_back(jv);
+        JointVelocitySensor* jv = new JointVelocitySensor;
+        jv->name = "dq";
+        jv->dq.resize(klamptRobotModel->q.n,Zero);
+        sensors.sensors.push_back(shared_ptr<SensorBase>(jv));
       }
       if(c.find("torque") != NULL) {
-	DriverTorqueSensor* ts = new DriverTorqueSensor;
-	ts->name = "torque";
-	ts->t.resize(klamptRobotModel->drivers.size());
-	sensors.sensors.push_back(ts);
+        DriverTorqueSensor* ts = new DriverTorqueSensor;
+        ts->name = "torque";
+        ts->t.resize(klamptRobotModel->drivers.size());
+        sensors.sensors.push_back(shared_ptr<SensorBase>(ts));
       }
     }
 
@@ -169,29 +169,29 @@ void SerialControlledRobot::ReadSensorData(RobotSensors& sensors)
     for(size_t i=0;i<keys.size();i++) {
       string key;
       if(LexicalCast(keys[i].value,key)) {
-	if(key == "dt") 
-	  timeStep = c["dt"];
-	else if(key == "t") 
-	  robotTime = c["t"];
-	else if(key == "qcmd" || key=="dqcmd" || key=="torquecmd")  //echo
-	  continue;
-	else {
-	  SmartPointer<SensorBase> s = sensors.GetNamedSensor(key);
-	  if(!s) {
-	    fprintf(stderr,"SerialControlledRobot::ReadSensorData: warning, sensor %s not given in model\n",key.c_str());
-	  }
-	  else {
-	    vector<double> values;
-	    bool converted = c[keys[i]].asvector<double>(values);
-	    if(!converted) 
-	      fprintf(stderr,"SerialControlledRobot::ReadSensorData: key %s does not yield a vector\n",key.c_str());
-	    else 
-	      s->SetMeasurements(values);
-	  }
-	}
+        if(key == "dt") 
+          timeStep = c["dt"];
+        else if(key == "t") 
+          robotTime = c["t"];
+        else if(key == "qcmd" || key=="dqcmd" || key=="torquecmd")  //echo
+          continue;
+        else {
+          shared_ptr<SensorBase> s = sensors.GetNamedSensor(key);
+          if(!s) {
+            fprintf(stderr,"SerialControlledRobot::ReadSensorData: warning, sensor %s not given in model\n",key.c_str());
+          }
+          else {
+            vector<double> values;
+            bool converted = c[keys[i]].asvector<double>(values);
+            if(!converted) 
+              fprintf(stderr,"SerialControlledRobot::ReadSensorData: key %s does not yield a vector\n",key.c_str());
+            else 
+              s->SetMeasurements(values);
+          }
+        }
       }
       else {
-	FatalError("SerialControlledRobot::ReadSensorData: Invalid key, element %d...\n",i);
+        FatalError("SerialControlledRobot::ReadSensorData: Invalid key, element %d...\n",i);
       }
     }
   }
@@ -209,12 +209,12 @@ void SerialControlledRobot::WriteCommandData(const RobotMotorCommand& command)
     int mode = ActuatorCommand::OFF;
     for(size_t i=0;i<command.actuators.size();i++) {
       if(mode == ActuatorCommand::OFF)
-	mode = command.actuators[i].mode;
+        mode = command.actuators[i].mode;
       else {
-	if(mode != command.actuators[i].mode) {
-	  fprintf(stderr,"SerialControlledRobot: do not support mixed torque / velocity / PID mode\n");
-	  Abort();
-	}
+        if(mode != command.actuators[i].mode) {
+          fprintf(stderr,"SerialControlledRobot: do not support mixed torque / velocity / PID mode\n");
+          Abort();
+        }
       }
       klamptRobotModel->SetDriverValue(i,command.actuators[i].qdes);
       klamptRobotModel->SetDriverVelocity(i,command.actuators[i].dqdes);
@@ -222,15 +222,15 @@ void SerialControlledRobot::WriteCommandData(const RobotMotorCommand& command)
       if(command.actuators[i].dqdes!=0) anyNonzeroV=true;
       if(command.actuators[i].torque!=0) anyNonzeroTorque=true;
       if(mode == ActuatorCommand::LOCKED_VELOCITY) 
-	klamptRobotModel->SetDriverVelocity(i,command.actuators[i].desiredVelocity);
+        klamptRobotModel->SetDriverVelocity(i,command.actuators[i].desiredVelocity);
     }
     if(mode == ActuatorCommand::PID) {
       for(size_t i=0;i<klamptRobotModel->links.size();i++)
-	qcmd[(int)i] = klamptRobotModel->q[i];
+        qcmd[(int)i] = klamptRobotModel->q[i];
     }
     if(anyNonzeroV || mode == ActuatorCommand::LOCKED_VELOCITY) {
       for(size_t i=0;i<klamptRobotModel->links.size();i++)
-	dqcmd[(int)i] = klamptRobotModel->dq[i];
+        dqcmd[(int)i] = klamptRobotModel->dq[i];
     }
 
     if(mode == ActuatorCommand::OFF) {

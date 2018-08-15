@@ -31,7 +31,7 @@ class SerialControlledRobot : public ControlledRobot
   virtual void WriteCommandData(const RobotMotorCommand& command);
  
   string host;
-  SmartPointer<SocketPipeWorker> controllerPipe;
+  shared_ptr<SocketPipeWorker> controllerPipe;
   Real robotTime;
   Real timeStep;
   int numOverruns;

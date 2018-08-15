@@ -2,9 +2,9 @@
 #define CONTROL_SENSORS_H
 
 #include <KrisLibrary/math/vector.h>
-#include <KrisLibrary/utils/SmartPointer.h>
 #include <map>
 #include <vector>
+#include <memory>
 #include <string>
 #include <typeinfo>
 using namespace std;
@@ -111,13 +111,13 @@ class RobotSensors
   void SaveMeasurements(TiXmlElement* out);
   bool ReadState(File& f);
   bool WriteState(File& f) const;
-  SmartPointer<SensorBase> GetNamedSensor(const string& name);
+  shared_ptr<SensorBase> GetNamedSensor(const string& name);
   template <class T>
   void GetTypedSensors(vector<T*>& sensors);
   template <class T>
   T* GetTypedSensor(int index=0);
 
-  vector<SmartPointer<SensorBase> > sensors;
+  vector<shared_ptr<SensorBase> > sensors;
 };
 
 
@@ -127,7 +127,7 @@ void RobotSensors::GetTypedSensors(vector<T*>& _sensors)
 {
   _sensors.resize(0);
   for(size_t i=0;i<sensors.size();i++)
-    if(typeid(T) == typeid(*sensors[i])) _sensors.push_back(dynamic_cast<T*>((SensorBase*)sensors[i]));
+    if(typeid(T) == typeid(*sensors[i])) _sensors.push_back(dynamic_cast<T*>(sensors[i].get()));
 }
 
 
@@ -136,7 +136,7 @@ T* RobotSensors::GetTypedSensor(int index)
 {
   for(size_t i=0;i<sensors.size();i++) {
     if(typeid(T) == typeid(*sensors[i])) {
-      if(index==0) return dynamic_cast<T*>((SensorBase*)sensors[i]);
+      if(index==0) return dynamic_cast<T*>(sensors[i].get());
       index--;
     }
   }

@@ -4,7 +4,7 @@
 #include "PathController.h"
 #include "JointTrackingController.h"
 #include "SerialController.h"
-#include "JointSensors.h"
+#include "Sensing/JointSensors.h"
 #include <KrisLibrary/utils/PropertyMap.h>
 #include <tinyxml.h>
 
@@ -186,8 +186,8 @@ void RobotControllerFactory::RegisterDefault(Robot& robot)
 {
   Register("JointTrackingController",new JointTrackingController(robot));
   Register("PolynomialPathController",new PolynomialPathController(robot));
-  Register("FeedforwardJointTrackingController",new FeedforwardController(robot,new JointTrackingController(robot)));
-  Register("FeedforwardPolynomialPathController",new FeedforwardController(robot,new PolynomialPathController(robot)));
+  Register("FeedforwardJointTrackingController",new FeedforwardController(robot,make_shared<JointTrackingController>(robot)));
+  Register("FeedforwardPolynomialPathController",new FeedforwardController(robot,make_shared<PolynomialPathController>(robot)));
   Register("SerialController",new SerialController(robot));
 }
 
@@ -198,24 +198,24 @@ void RobotControllerFactory::Register(RobotController* controller)
 
 void RobotControllerFactory::Register(const char* name,RobotController* controller)
 {
-  controllers[name] = controller;
+  controllers[name].reset(controller);
 }
 
-SmartPointer<RobotController> RobotControllerFactory::CreateByName(const char* name)
+shared_ptr<RobotController> RobotControllerFactory::CreateByName(const char* name)
 {
-  for(map<std::string,SmartPointer<RobotController> >::iterator i=controllers.begin();i!=controllers.end();i++)
+  for(map<std::string,shared_ptr<RobotController> >::iterator i=controllers.begin();i!=controllers.end();i++)
     if(i->first == name) return i->second;
   return NULL;
 }
 
-SmartPointer<RobotController> RobotControllerFactory::CreateByName(const char* name,Robot& robot)
+shared_ptr<RobotController> RobotControllerFactory::CreateByName(const char* name,Robot& robot)
 {
-  for(map<std::string,SmartPointer<RobotController> >::iterator i=controllers.begin();i!=controllers.end();i++)
+  for(map<std::string,shared_ptr<RobotController> >::iterator i=controllers.begin();i!=controllers.end();i++)
     if(i->first == name && &i->second->robot==&robot) return i->second;
   return NULL;
 }
 
-SmartPointer<RobotController> RobotControllerFactory::Load(TiXmlElement* in,Robot& robot)
+shared_ptr<RobotController> RobotControllerFactory::Load(TiXmlElement* in,Robot& robot)
 {
   if(0!=strcmp(in->Value(),"controller")) {
     fprintf(stderr,"Controller does not have type \"controller\", got %s\n",in->Value());
@@ -225,11 +225,11 @@ SmartPointer<RobotController> RobotControllerFactory::Load(TiXmlElement* in,Robo
     fprintf(stderr,"Controller does not have \"type\" attribute\n");
     return NULL;
   }
-  SmartPointer<RobotController> c = CreateByName(in->Attribute("type"),robot);
+  shared_ptr<RobotController> c = CreateByName(in->Attribute("type"),robot);
   if(!c) {
     fprintf(stderr,"Unable to load controller of type %s\n",in->Attribute("type"));
     fprintf(stderr,"Candidates: \n");
-    for(map<std::string,SmartPointer<RobotController> >::iterator i=controllers.begin();i!=controllers.end();i++)
+    for(map<std::string,shared_ptr<RobotController> >::iterator i=controllers.begin();i!=controllers.end();i++)
       fprintf(stderr,"  %s\n",i->first.c_str());
     return NULL;
   }
@@ -276,7 +276,7 @@ bool RobotControllerFactory::Save(RobotController* controller,TiXmlElement* out)
   return true;
 }
 
-SmartPointer<RobotController> RobotControllerFactory::Load(const char* fn,Robot& robot)
+shared_ptr<RobotController> RobotControllerFactory::Load(const char* fn,Robot& robot)
 {
   TiXmlDocument doc;
   if(!doc.LoadFile(fn)) return NULL;
@@ -290,11 +290,11 @@ bool RobotControllerFactory::Save(RobotController* controller,const char* fn)
   return doc.SaveFile(fn);
 }
 
-map<std::string,SmartPointer<RobotController> > RobotControllerFactory::controllers;
+map<std::string,shared_ptr<RobotController> > RobotControllerFactory::controllers;
 
 
 
-SmartPointer<RobotController> MakeDefaultController(Robot* robot)
+shared_ptr<RobotController> MakeDefaultController(Robot* robot)
 {
   string controllerXml;
   if(robot->properties.get("controller",controllerXml)) {
@@ -302,7 +302,7 @@ SmartPointer<RobotController> MakeDefaultController(Robot* robot)
     stringstream ss(controllerXml);
     ss >> n;
     if(ss) {
-      SmartPointer<RobotController> res = RobotControllerFactory::Load(&n,*robot);
+      shared_ptr<RobotController> res = RobotControllerFactory::Load(&n,*robot);
       if(res) return res;
     }
   
@@ -311,9 +311,9 @@ SmartPointer<RobotController> MakeDefaultController(Robot* robot)
     printf("  Press enter to continue.\n");
     getchar();
   }
-  PolynomialPathController* c = new PolynomialPathController(*robot);
-  FeedforwardController* fc = new FeedforwardController(*robot,c);
-  LoggingController* lc=new LoggingController(*robot,fc);
+  auto c = make_shared<PolynomialPathController>(*robot);
+  auto fc = make_shared<FeedforwardController>(*robot,c);
+  auto lc= make_shared<LoggingController>(*robot,fc);
   //defaults -- gravity compensation is better off with free-floating robots
   if(robot->joints[0].type == RobotJoint::Floating)
     fc->enableGravityCompensation=false;  //feedforward capability

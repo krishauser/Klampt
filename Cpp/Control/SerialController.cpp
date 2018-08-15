@@ -90,10 +90,10 @@ void SerialController::Update(Real dt)
       return;
     }
     //parse and do error checking
-    SmartPointer<AnyCollection> qcmdptr = cmd.find("qcmd");
-    SmartPointer<AnyCollection> dqcmdptr = cmd.find("dqcmd");
-    SmartPointer<AnyCollection> torquecmdptr = cmd.find("torquecmd");
-    SmartPointer<AnyCollection> tcmdptr = cmd.find("tcmd");
+    shared_ptr<AnyCollection> qcmdptr = cmd.find("qcmd");
+    shared_ptr<AnyCollection> dqcmdptr = cmd.find("dqcmd");
+    shared_ptr<AnyCollection> torquecmdptr = cmd.find("torquecmd");
+    shared_ptr<AnyCollection> tcmdptr = cmd.find("tcmd");
     if(qcmdptr) {
       endVCmdTime = -1;
       vcmd.clear();
@@ -235,7 +235,7 @@ bool SerialController::OpenConnection(const string& addr)
     CloseConnection();
     return true;
   }
-  controllerPipe = new SocketPipeWorker(addr.c_str(),true);
+  controllerPipe.reset(new SocketPipeWorker(addr.c_str(),true));
   if(!controllerPipe->Start()) {
     cout<<"Controller could not be opened on address "<<addr<<endl;
     return false;

@@ -2,7 +2,7 @@
 #define OPERATIONAL_SPACE_CONTROLLER_H
 
 #include "Controller.h"
-#include "StateEstimator.h"
+#include "Sensing/StateEstimator.h"
 #include <KrisLibrary/robotics/IK.h>
 #include <KrisLibrary/robotics/Contact.h>
 #include <KrisLibrary/utils/SmartPointer.h>

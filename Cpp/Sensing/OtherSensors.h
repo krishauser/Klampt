@@ -20,7 +20,7 @@ class TransformedSensor : public SensorBase
   virtual const char* Type() const { return "TransformedSensor"; }
   virtual void Simulate(ControlledRobotSimulator* robot,WorldSimulation* sim);
   virtual void SimulateKinematic(Robot& robot,RobotWorld& world);
-  virtual void Advance(Real dt);
+  virtual void Advance(double dt);
   virtual void Reset();
   virtual void MeasurementNames(vector<string>& names) const;
   virtual void GetMeasurements(vector<double>& values) const;
@@ -33,7 +33,7 @@ class TransformedSensor : public SensorBase
   virtual void DrawGL(const Robot& robot,const vector<double>& measurements);
   void DoTransform();
 
-  SmartPointer<SensorBase> sensor;
+  shared_ptr<SensorBase> sensor;
   vector<double> scale;
   vector<double> bias;
   vector<double> minimum,maximum;
@@ -56,7 +56,7 @@ class CorruptedSensor : public SensorBase
   virtual const char* Type() const { return "CorruptedSensor"; }
   virtual void Simulate(ControlledRobotSimulator* robot,WorldSimulation* sim);
   virtual void SimulateKinematic(Robot& robot,RobotWorld& world);
-  virtual void Advance(Real dt);
+  virtual void Advance(double dt);
   virtual void Reset();
   virtual void MeasurementNames(vector<string>& names) const;
   virtual void GetMeasurements(vector<double>& values) const;
@@ -69,7 +69,7 @@ class CorruptedSensor : public SensorBase
   virtual void DrawGL(const Robot& robot,const vector<double>& measurements);
   void DoCorrupt();
 
-  SmartPointer<SensorBase> sensor;
+  shared_ptr<SensorBase> sensor;
   vector<double> resolution;
   vector<double> variance;
 
@@ -90,7 +90,7 @@ class FilteredSensor : public SensorBase
   virtual const char* Type() const { return "FilteredSensor"; }
   virtual void Simulate(ControlledRobotSimulator* robot,WorldSimulation* sim);
   virtual void SimulateKinematic(Robot& robot,RobotWorld& world);
-  virtual void Advance(Real dt);
+  virtual void Advance(double dt);
   virtual void Reset();
   virtual void MeasurementNames(vector<string>& names) const;
   virtual void GetMeasurements(vector<double>& values) const;
@@ -102,9 +102,9 @@ class FilteredSensor : public SensorBase
   virtual bool SetSetting(const string& name,const string& str);
   virtual void DrawGL(const Robot& robot,const vector<double>& measurements);
 
-  SmartPointer<SensorBase> sensor;
+  shared_ptr<SensorBase> sensor;
   vector<double> measurements;
-  Real smoothing;
+  double smoothing;
 };
 
 /** @ingroup Control
@@ -122,7 +122,7 @@ class TimeDelayedSensor : public SensorBase
   virtual const char* Type() const { return "TimeDelayedSensor"; }
   virtual void Simulate(ControlledRobotSimulator* robot,WorldSimulation* sim);
   virtual void SimulateKinematic(Robot& robot,RobotWorld& world);
-  virtual void Advance(Real dt);
+  virtual void Advance(double dt);
   virtual void Reset();
   virtual void MeasurementNames(vector<string>& names) const;
   virtual void GetMeasurements(vector<double>& values) const;
@@ -134,7 +134,7 @@ class TimeDelayedSensor : public SensorBase
   virtual bool SetSetting(const string& name,const string& str);
   virtual void DrawGL(const Robot& robot,const vector<double>& measurements);
 
-  SmartPointer<SensorBase> sensor;
+  shared_ptr<SensorBase> sensor;
   deque<vector<double> > measurementsInTransit;
   deque<double> deliveryTimes;
   vector<double> arrivedMeasurement;

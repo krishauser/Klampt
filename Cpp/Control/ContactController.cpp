@@ -1,5 +1,5 @@
 #include "ContactController.h"
-#include "ForceSensors.h"
+#include "Sensing/ForceSensors.h"
 #include "Modeling/Interpolate.h"
 #include "Contact/Utils.h"
 #include <KrisLibrary/math/angle.h>
