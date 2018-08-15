@@ -7,6 +7,9 @@ ODECONFIG = --with-trimesh=none --disable-demos
 #(not recommended on Linux, may give reasonable performance on Windows)
 ODECONFIG += --enable-double-precision
 
+#this disables ODE threading support, which causes a linking error with pthread if Klamp't is built with Boost
+ODECONFIG += --disable-threading-intf
+
 UNAME = $(shell uname)
 
 unpack-deps:
@@ -25,11 +28,16 @@ dep-KrisLibrary:
 dep-tinyxml:
 	cd tinyxml; make lib
 
+ifeq ($(UNAME), Darwin)
+dep-glew:
+	echo "skipping glew for Mac build"
+else
 dep-glew:
 	cd glew-2.0.0; make
 	cd glew-2.0.0; sudo make install
 	echo "/usr/lib64" | sudo tee /etc/ld.so.conf.d/GLEW.conf
 	sudo ldconfig
+endif
 
 ifeq ($(UNAME), Darwin)
 dep-glui:

@@ -18,7 +18,7 @@ void WorldPlannerSettings::InitializeDefault(RobotWorld& world)
     int k=world.RobotID(i);
     collisionEnabled(k,k) = true; //can self collide
     int baseid=world.RobotLinkID(i,0);
-    Robot* robot = world.robots[i];
+    Robot* robot = world.robots[i].get();
     for(size_t j=0;j<robot->links.size();j++) {  //turn off link-to-robot collision
       collisionEnabled(baseid+j,k) = false;
       collisionEnabled(k,baseid+j) = false;
@@ -123,7 +123,7 @@ bool WorldPlannerSettings::CheckCollision(RobotWorld& world,int id1,int id2,Real
       int index1;
       index1 = world.IsRobot(id1);
       if(index1 >= 0) {
-        Robot* robot = world.robots[index1];
+        Robot* robot = world.robots[index1].get();
         vector<int> r1links(robot->links.size());
         for(size_t j=0;j<robot->links.size();j++)
           r1links[j] = world.RobotLinkID(index1,j);
@@ -154,9 +154,9 @@ bool WorldPlannerSettings::CheckCollision(RobotWorld& world,int id1,int id2,Real
     index2 = world.IsRobot(id2);
     //check for robot collision
     if(index1 >= 0) {
-      Robot* robot = world.robots[index1];
+      Robot* robot = world.robots[index1].get();
       if(index2 >= 0) {
-        Robot* robot2 = world.robots[index2];
+        Robot* robot2 = world.robots[index2].get();
         vector<int> r1links(robot->links.size());
         for(size_t j=0;j<robot->links.size();j++)
           r1links[j] = world.RobotLinkID(index1,j);
@@ -174,16 +174,16 @@ bool WorldPlannerSettings::CheckCollision(RobotWorld& world,int id1,int id2,Real
       else {
 	for(size_t j=0;j<robot->links.size();j++)
 	  if(collisionEnabled(world.RobotLinkID(index1,j),id2)) {
-	    if(CheckCollision(world,robot->geometry[j],id2,tol)) return true;
+	    if(CheckCollision(world,robot->geometry[j].get(),id2,tol)) return true;
 	  }
       }
       return false;
     }
     else if(index2 >= 0) {
-      Robot* robot2 = world.robots[index2];
+      Robot* robot2 = world.robots[index2].get();
       for(size_t j=0;j<robot2->links.size();j++)
 	if(collisionEnabled(id1,world.RobotLinkID(index2,j)))
-	  if(CheckCollision(world,robot2->geometry[j],id1,tol)) return true;
+	  if(CheckCollision(world,robot2->geometry[j].get(),id1,tol)) return true;
     }
     //non-robots
     index1 = world.IsTerrain(id1);
@@ -192,15 +192,15 @@ bool WorldPlannerSettings::CheckCollision(RobotWorld& world,int id1,int id2,Real
     }
     index1 = world.IsRigidObject(id1);
     if(index1 >= 0) {
-      RigidObject* obj = world.rigidObjects[index1];
+      RigidObject* obj = world.rigidObjects[index1].get();
       if(obj->geometry.Empty()) return false;
       obj->geometry->SetTransform(obj->T);
       return CheckCollision(world,obj->geometry,id2,tol);
     }
     pair<int,int> linkid = world.IsRobotLink(id1);
     if(linkid.first >= 0) {
-      Robot* robot = world.robots[linkid.first];
-      return CheckCollision(world,robot->geometry[linkid.second],id2,tol);
+      Robot* robot = world.robots[linkid.first].get();
+      return CheckCollision(world,robot->geometry[linkid.second].get(),id2,tol);
     }
     return false;
   }
@@ -214,9 +214,9 @@ void GetGeometries(RobotWorld& world,const vector<int>& ids,vector<Geometry::Any
     int robotindex = world.IsRobot(ids[i]);;
     if(robotindex >=0) {
       //crud, have to expand
-      Robot* robot = world.robots[robotindex];
+      Robot* robot = world.robots[robotindex].get();
       for(size_t j=0;j<robot->links.size();j++) {
-	Geometry::AnyCollisionGeometry3D* g=robot->geometry[j];
+	Geometry::AnyCollisionGeometry3D* g=robot->geometry[j].get();
 	if(g && !g->Empty()) {
 	  geoms.push_back(g);
 	  activeids.push_back(world.RobotLinkID(robotindex,j));
@@ -224,7 +224,7 @@ void GetGeometries(RobotWorld& world,const vector<int>& ids,vector<Geometry::Any
       }
     }
     else {
-      Geometry::AnyCollisionGeometry3D* g=world.GetGeometry(ids[i]);
+      Geometry::AnyCollisionGeometry3D* g=world.GetGeometry(ids[i]).get();
       if(g && !g->Empty()) {
 	geoms.push_back(g);
 	activeids.push_back(ids[i]);
@@ -342,23 +342,23 @@ bool WorldPlannerSettings::CheckCollision(RobotWorld& world,AnyCollisionGeometry
     }
     index = world.IsRigidObject(id);
     if(index >= 0) {
-      RigidObject* obj = world.rigidObjects[index];
+      RigidObject* obj = world.rigidObjects[index].get();
       if(obj->geometry.Empty()) return false;
       obj->geometry->SetTransform(obj->T);
       return ::CheckCollision(geom,&*obj->geometry,tol);
     }
     index = world.IsRobot(id);
     if(index >= 0) {
-      Robot* robot = world.robots[index];
+      Robot* robot = world.robots[index].get();
       for(size_t j=0;j<robot->links.size();j++) {
-	if(::CheckCollision(geom,&*robot->geometry[j],tol)) return true;
+	if(::CheckCollision(geom,&*robot->geometry[j].get(),tol)) return true;
       }
       return false;
     }
     pair<int,int> linkid = world.IsRobotLink(id);
     if(linkid.first >= 0) {
-      Robot* robot = world.robots[linkid.first];
-      return ::CheckCollision(geom,&*robot->geometry[linkid.second],tol);
+      Robot* robot = world.robots[linkid.first].get();
+      return ::CheckCollision(geom,&*robot->geometry[linkid.second].get(),tol);
     }
     return false;
   }
@@ -380,28 +380,28 @@ Real WorldPlannerSettings::DistanceLowerBound(RobotWorld& world,int id1,int id2,
     index2 = world.IsRobot(id2);
     //check for robot collision
     if(index1 >= 0) {
-      Robot* robot = world.robots[index1];
+      Robot* robot = world.robots[index1].get();
       if(index2 >= 0) {
-	Robot* robot2 = world.robots[index2];
+	Robot* robot2 = world.robots[index2].get();
 	for(size_t j=0;j<robot->links.size();j++)
 	  for(size_t k=0;k<robot2->links.size();k++)
 	    if(collisionEnabled(world.RobotLinkID(index1,j),world.RobotLinkID(index2,k))) {
-	      minDist = Min(minDist,::DistanceLowerBound(robot->geometry[j],robot2->geometry[k],eps,minDist));
+	      minDist = Min(minDist,::DistanceLowerBound(robot->geometry[j].get(),robot2->geometry[k].get(),eps,minDist));
 	    }
       }
       else {
 	for(size_t j=0;j<robot->links.size();j++)
 	  if(collisionEnabled(world.RobotLinkID(index1,j),id2)) {
-	    minDist = Min(minDist,DistanceLowerBound(world,robot->geometry[j],id2,eps,minDist));
+	    minDist = Min(minDist,DistanceLowerBound(world,robot->geometry[j].get(),id2,eps,minDist));
 	  }
       }
       return minDist;
     }
     else if(index2 >= 0) {
-      Robot* robot2 = world.robots[index2];
+      Robot* robot2 = world.robots[index2].get();
       for(size_t j=0;j<robot2->links.size();j++)
 	if(collisionEnabled(id1,world.RobotLinkID(index2,j))) {
-	  minDist = Min(minDist,DistanceLowerBound(world,robot2->geometry[j],id1,eps,minDist));
+	  minDist = Min(minDist,DistanceLowerBound(world,robot2->geometry[j].get(),id1,eps,minDist));
 	}
     }
     //non-robots
@@ -411,7 +411,7 @@ Real WorldPlannerSettings::DistanceLowerBound(RobotWorld& world,int id1,int id2,
     }
     index1 = world.IsRigidObject(id1);
     if(index1 >= 0) {
-      RigidObject* obj = world.rigidObjects[index1];
+      RigidObject* obj = world.rigidObjects[index1].get();
       if(obj->geometry.Empty()) return false;
       obj->geometry->SetTransform(obj->T);
       return DistanceLowerBound(world,obj->geometry,id2,eps,minDist);
@@ -419,9 +419,9 @@ Real WorldPlannerSettings::DistanceLowerBound(RobotWorld& world,int id1,int id2,
     pair<int,int> linkid = world.IsRobotLink(id1);
     if(linkid.first >= 0) {
       assert(linkid.first < (int)world.robots.size());
-      Robot* robot = world.robots[linkid.first];
+      Robot* robot = world.robots[linkid.first].get();
       assert(linkid.second >= 0 && linkid.second < (int)robot->links.size());
-      Real d=DistanceLowerBound(world,robot->geometry[linkid.second],id2,eps,minDist);
+      Real d=DistanceLowerBound(world,robot->geometry[linkid.second].get(),id2,eps,minDist);
       //printf("Link %d on robot %d to object %d has distance %g\n",linkid.second,linkid.first,id2,d);
       //printf("Object %s\n",world.GetName(id2).c_str());
       //if(d<=0) {
@@ -452,14 +452,14 @@ Real WorldPlannerSettings::DistanceLowerBound(RobotWorld& world,AnyCollisionGeom
     }
     index = world.IsRigidObject(id);
     if(index >= 0) {
-      RigidObject* obj = world.rigidObjects[index];
+      RigidObject* obj = world.rigidObjects[index].get();
       if(obj->geometry.Empty()) return Inf;
       obj->geometry->SetTransform(obj->T);
       return ::DistanceLowerBound(mesh,&*obj->geometry,eps);
     }
     index = world.IsRobot(id);
     if(index >= 0) {
-      Robot* robot = world.robots[index];
+      Robot* robot = world.robots[index].get();
       for(size_t j=0;j<robot->links.size();j++) {
 	minDist = Min(minDist,::DistanceLowerBound(mesh,&*robot->geometry[j],eps,minDist));
       }
@@ -468,10 +468,10 @@ Real WorldPlannerSettings::DistanceLowerBound(RobotWorld& world,AnyCollisionGeom
     pair<int,int> linkid = world.IsRobotLink(id);
     if(linkid.first >= 0) {
       assert(linkid.first < (int)world.robots.size());
-      Robot* robot = world.robots[linkid.first];
+      Robot* robot = world.robots[linkid.first].get();
       assert(linkid.second >= 0 && linkid.second < (int)robot->links.size());
 
-      return ::DistanceLowerBound(mesh,&*robot->geometry[linkid.second],eps,minDist);
+      return ::DistanceLowerBound(mesh,robot->geometry[linkid.second].get(),eps,minDist);
     }
     return minDist;
   }
@@ -643,9 +643,9 @@ void WorldPlannerSettings::EnumerateCollisionQueries(RobotWorld& world,int id1,i
     index2 = world.IsRobot(id2);
     //check for robot collision
     if(index1 >= 0) {
-      Robot* robot = world.robots[index1];
+      Robot* robot = world.robots[index1].get();
       if(index2 >= 0) {
-	Robot* robot2 = world.robots[index2];
+	Robot* robot2 = world.robots[index2].get();
 	for(size_t j=0;j<robot->links.size();j++)
 	  for(size_t k=0;k<robot2->links.size();k++)
 	    if(collisionEnabled(world.RobotLinkID(index1,j),world.RobotLinkID(index2,k))) {
@@ -658,18 +658,18 @@ void WorldPlannerSettings::EnumerateCollisionQueries(RobotWorld& world,int id1,i
 	  if(collisionEnabled(world.RobotLinkID(index1,j),id2)) {
 	    vector<int> ids;
 	    size_t qsize=queries.size();
-	    EnumerateCollisionQueries(world,robot->geometry[j],id2,ids,queries);
+	    EnumerateCollisionQueries(world,robot->geometry[j].get(),id2,ids,queries);
 	    indices.push_back(pair<int,int>(world.RobotLinkID(index1,j),id2));
 	  }
       }
       return;
     }
     else if(index2 >= 0) {
-      Robot* robot2 = world.robots[index2];
+      Robot* robot2 = world.robots[index2].get();
       for(size_t j=0;j<robot2->links.size();j++)
 	if(collisionEnabled(id1,world.RobotLinkID(index2,j))) {
 	  vector<int> ids;
-	  EnumerateCollisionQueries(world,robot2->geometry[j],id1,ids,queries);
+	  EnumerateCollisionQueries(world,robot2->geometry[j].get(),id1,ids,queries);
 	  indices.push_back(pair<int,int>(world.RobotLinkID(index2,j),id1));
 	}
       return;
@@ -685,7 +685,7 @@ void WorldPlannerSettings::EnumerateCollisionQueries(RobotWorld& world,int id1,i
     }
     index1 = world.IsRigidObject(id1);
     if(index1 >= 0) {
-      RigidObject* obj = world.rigidObjects[index1];
+      RigidObject* obj = world.rigidObjects[index1].get();
       if(obj->geometry.Empty()) return;
       obj->geometry->SetTransform(obj->T);
       EnumerateCollisionQueries(world,&*obj->geometry,id2,ids,queries);
@@ -695,8 +695,8 @@ void WorldPlannerSettings::EnumerateCollisionQueries(RobotWorld& world,int id1,i
     }
     pair<int,int> linkid = world.IsRobotLink(id1);
     if(linkid.first >= 0) {
-      Robot* robot = world.robots[linkid.first];
-      EnumerateCollisionQueries(world,&*robot->geometry[linkid.second],id2,ids,queries);
+      Robot* robot = world.robots[linkid.first].get();
+      EnumerateCollisionQueries(world,robot->geometry[linkid.second].get(),id2,ids,queries);
       for(size_t i=0;i<ids.size();i++)
 	indices.push_back(pair<int,int>(id1,ids[i]));
     }
@@ -724,7 +724,7 @@ void WorldPlannerSettings::EnumerateCollisionQueries(RobotWorld& world,AnyCollis
     }
     index = world.IsRigidObject(id);
     if(index >= 0) {
-      RigidObject* obj = world.rigidObjects[index];
+      RigidObject* obj = world.rigidObjects[index].get();
       if(obj->geometry.Empty()) return;
       obj->geometry->SetTransform(obj->T);
       queries.push_back(AnyCollisionQuery(*mesh,*obj->geometry));
@@ -733,7 +733,7 @@ void WorldPlannerSettings::EnumerateCollisionQueries(RobotWorld& world,AnyCollis
     }
     index = world.IsRobot(id);
     if(index >= 0) {
-      Robot* robot = world.robots[index];
+      Robot* robot = world.robots[index].get();
       for(size_t j=0;j<robot->links.size();j++) {
 	if(robot->IsGeometryEmpty(j)) continue;
 	queries.push_back(AnyCollisionQuery(*mesh,*robot->geometry[j]));
@@ -743,7 +743,7 @@ void WorldPlannerSettings::EnumerateCollisionQueries(RobotWorld& world,AnyCollis
     }
     pair<int,int> linkid = world.IsRobotLink(id);
     if(linkid.first >= 0) {
-      Robot* robot = world.robots[linkid.first];
+      Robot* robot = world.robots[linkid.first].get();
       if(robot->IsGeometryEmpty(linkid.second)) return;
       queries.push_back(AnyCollisionQuery(*mesh,*robot->geometry[linkid.second]));
       collisionIds.push_back(id);

@@ -200,7 +200,7 @@ void ViewResource::DrawGL(const ResourcePtr& r)
 {
   if(typeid(*r)==typeid(ConfigResource)) {
     if(configViewer.robot==NULL) return;
-    const ConfigResource* rc=dynamic_cast<const ConfigResource*>((const ResourceBase*)r);
+    const ConfigResource* rc=dynamic_cast<const ConfigResource*>(r.get());
     Config oldq = configViewer.robot->q;
     if(rc->data.n != configViewer.robot->q.n) {
       //fprintf(stderr,"Incorrect robot configuration size: %d vs %d\n",rc->data.n,configViewer.robot->q.n);
@@ -213,7 +213,7 @@ void ViewResource::DrawGL(const ResourcePtr& r)
   }
   else if(typeid(*r)==typeid(ConfigsResource)) {
     if(configsViewer.robot==NULL) return;
-    const ConfigsResource* rc=dynamic_cast<const ConfigsResource*>((const ResourceBase*)r);
+    const ConfigsResource* rc=dynamic_cast<const ConfigsResource*>(r.get());
     Config oldq = configsViewer.robot->q;
     int skip = 1;
     if(rc->configs.size() > 50)
@@ -230,54 +230,54 @@ void ViewResource::DrawGL(const ResourcePtr& r)
     configsViewer.robot->UpdateConfig(oldq);
   }
   else if(typeid(*r)==typeid(LinearPathResource)) {
-    const LinearPathResource* rc=dynamic_cast<const LinearPathResource*>((const ResourceBase*)r);
+    const LinearPathResource* rc=dynamic_cast<const LinearPathResource*>(r.get());
     if(!rc) return;
     RenderLinearPath(rc,pathTime);
   }
   else if(typeid(*r)==typeid(MultiPathResource)) {
-    const MultiPathResource* rc=dynamic_cast<const MultiPathResource*>((const ResourceBase*)r);
+    const MultiPathResource* rc=dynamic_cast<const MultiPathResource*>(r.get());
     if(!rc) return;
     RenderMultiPath(rc,pathTime);
   }
   else if(typeid(*r)==typeid(StanceResource)) {
-    const StanceResource* rc=dynamic_cast<const StanceResource*>((const ResourceBase*)r);
+    const StanceResource* rc=dynamic_cast<const StanceResource*>(r.get());
     stanceViewer.DrawHolds(rc->stance);
   }
   else if(typeid(*r)==typeid(GraspResource)) {
-    const GraspResource* rc=dynamic_cast<const GraspResource*>((const ResourceBase*)r);
+    const GraspResource* rc=dynamic_cast<const GraspResource*>(r.get());
     graspViewer.viewRobot = &configViewer;
     graspViewer.Draw(rc->grasp);
   }
   else if(typeid(*r)==typeid(HoldResource)) {
-    const HoldResource* rc=dynamic_cast<const HoldResource*>((const ResourceBase*)r);
+    const HoldResource* rc=dynamic_cast<const HoldResource*>(r.get());
     holdViewer.Draw(rc->hold);
   }
   else if(typeid(*r)==typeid(PointCloudResource)) {
-    const PointCloudResource* rc=dynamic_cast<const PointCloudResource*>((const ResourceBase*)r);
+    const PointCloudResource* rc=dynamic_cast<const PointCloudResource*>(r.get());
     if(items.size() != 1 || items[0] != rc) {
       items.resize(1);
       items[0] = rc;
       geometries.resize(1);
-      geometries.back() = new Geometry::AnyGeometry3D(rc->pointCloud);
+      geometries.back().reset(new Geometry::AnyGeometry3D(rc->pointCloud));
       appearances.resize(1);
       appearances.back().Set(*geometries.back());
     }
     appearances.back().DrawGL();
   }
   else if(typeid(*r)==typeid(TriMeshResource)) {
-    const TriMeshResource* rc=dynamic_cast<const TriMeshResource*>((const ResourceBase*)r);
+    const TriMeshResource* rc=dynamic_cast<const TriMeshResource*>(r.get());
     if(items.size() != 1 || items[0] != rc) {
       items.resize(1);
       items[0] = rc;
       geometries.resize(1);
-      geometries.back() = new Geometry::AnyGeometry3D(rc->data);
+      geometries.back().reset(new Geometry::AnyGeometry3D(rc->data));
       appearances.resize(1);
       appearances.back().Set(*geometries.back());
     }
     appearances.back().DrawGL();
   }
   else if(typeid(*r)==typeid(GeometricPrimitive3DResource)) {
-    const GeometricPrimitive3DResource* rc=dynamic_cast<const GeometricPrimitive3DResource*>((const ResourceBase*)r);
+    const GeometricPrimitive3DResource* rc=dynamic_cast<const GeometricPrimitive3DResource*>(r.get());
     draw(rc->data);
   }
 }
@@ -285,11 +285,11 @@ void ViewResource::DrawGL(const ResourcePtr& r)
 void ViewResource::GetAnimConfig(const ResourcePtr& r,Config& q)
 {
   if(typeid(*r)==typeid(LinearPathResource)) {
-    const LinearPathResource* rc=dynamic_cast<const LinearPathResource*>((const ResourceBase*)r);
+    const LinearPathResource* rc=dynamic_cast<const LinearPathResource*>(r.get());
     GetLinearPathConfig(rc,pathTime,q);
   }
   else if(typeid(*r)==typeid(MultiPathResource)) {
-    const MultiPathResource* rc=dynamic_cast<const MultiPathResource*>((const ResourceBase*)r);
+    const MultiPathResource* rc=dynamic_cast<const MultiPathResource*>(r.get());
     GetMultiPathConfig(rc,pathTime,q);
   }
   else

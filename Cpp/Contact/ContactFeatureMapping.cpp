@@ -40,7 +40,7 @@ void ContactFeatureMapping::GetLocalFrame(RigidTransform& T) const
 void ContactFeatureMapping::GetHold(Hold& h) const
 {
   ContactFeatureBase::Type type=feature->GetType();
-  const ContactFeatureBase* fp = feature;
+  const ContactFeatureBase* fp = feature.get();
   switch(type) {
   case ContactFeatureBase::Point:
     dynamic_cast<const PointContactFeature*>(fp)->GetHold(contact.x,h);
@@ -151,7 +151,7 @@ void SaveContactFeatureMapping(ostream& out,ContactFeatureMapping& m)
 
 bool MatchHoldToFeatureMapping(const Hold& h,const ContactFeature& f,ContactFeatureMapping& m,Real& error)
 {
-  const ContactFeatureBase* _f=f;
+  const ContactFeatureBase* _f=f.get();
   if(h.link != f->link) return false;
   if(h.contacts.empty()) {
     cerr<<"MatchHoldToFeatureMapping: hold has no contacts??"<<endl;
@@ -553,7 +553,7 @@ void SetFeatureMappingOrientation(ContactFeatureMapping& feature,const Matrix3& 
     return;
   }
 
-  const WheelContactFeature* wf=dynamic_cast<const WheelContactFeature*>((const ContactFeatureBase*)feature.feature);
+  const WheelContactFeature* wf=dynamic_cast<const WheelContactFeature*>(feature.feature.get());
   //orient axis by setting the normal rotation angle
   Matrix3 R_axis_to_n;
   GetMinimalRotationToPlane(wf->axis.direction,feature.contact.n,R_axis_to_n);

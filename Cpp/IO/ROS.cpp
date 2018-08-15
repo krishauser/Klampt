@@ -7,9 +7,9 @@
 #include "Simulation/WorldSimulation.h"
 #include <KrisLibrary/meshing/PointCloud.h>
 #include "Simulation/ControlledSimulator.h"
-#include "Control/Sensor.h"
-#include "Control/VisualSensors.h"
-#include "Control/ForceSensors.h"
+#include "Sensing/Sensor.h"
+#include "Sensing/VisualSensors.h"
+#include "Sensing/ForceSensors.h"
 #include <KrisLibrary/Timer.h>
 #include <ros/ros.h>
 #include <ros/time.h>
@@ -462,7 +462,7 @@ bool KlamptToROS(const RigidTransform& kT,tf::Transform& T)
 
 
 
-SmartPointer<ros::NodeHandle> gRosNh;
+unique_ptr<ros::NodeHandle> gRosNh;
 int gRosQueueSize = 1;
 bool gRosSubscribeError = false;
 string gRosSubscribeErrorWhere;
@@ -494,8 +494,8 @@ public:
   string topic;
 };
 
-typedef map<string,SmartPointer<ROSSubscriberBase> > SubscriberList;
-typedef map<string,SmartPointer<ROSPublisherBase> > PublisherList;
+typedef map<string,shared_ptr<ROSSubscriberBase> > SubscriberList;
+typedef map<string,shared_ptr<ROSPublisherBase> > PublisherList;
 SubscriberList gSubscribers;
 PublisherList gPublishers;
 
@@ -639,7 +639,7 @@ bool ROSInit(const char* nodeName)
   int argc = 1;
   char* argv [1]={(char*)"klampt"}; 
   ros::init(argc, &argv[0], nodeName);
-  gRosNh = new ros::NodeHandle;
+  gRosNh.reset(new ros::NodeHandle);
   return true;
 }
 
@@ -674,12 +674,12 @@ bool RosSubscribe(Type& obj,const string& topic)
     i->second->unsubscribe();
     i->second = NULL;
   }
-  ROSSubscriber<Type,Msg>* sub = new ROSSubscriber<Type,Msg>(obj,topic); 
+  auto sub = make_shared<ROSSubscriber<Type,Msg> >(obj,topic); 
   if(!sub->sub) {
     fprintf(stderr,"ROSSubscribe: Unable to subscribe to topic %s, maybe wrong type\n",topic.c_str());
     return false;
   }
-  gSubscribers[topic] = sub; 
+  gSubscribers[topic] = sub;
   return true; 
 }
 
@@ -691,10 +691,10 @@ bool RosPublish2(const Type& obj,const string& topic)
   PubType* pub;
   if(i==gPublishers.end()) { 
     pub = new PubType(topic); 
-    gPublishers[topic] = pub; 
+    gPublishers[topic].reset(pub); 
   } 
   else { 
-    pub = dynamic_cast<PubType*>((ROSPublisherBase*)i->second);
+    pub = dynamic_cast<PubType*>(i->second.get());
     if(!pub) return false;
   }
   pub->publish(obj); 
@@ -711,10 +711,10 @@ ROSPublisher<Msg>* GetPublisher(const char* topic)
   ROSPublisher<Msg>* pub;
   if(i==gPublishers.end()) { 
     pub = new ROSPublisher<Msg>(topic); 
-    gPublishers[topic] = pub; 
+    gPublishers[topic].reset(pub); 
   } 
   else { 
-    pub = dynamic_cast<ROSPublisher<Msg>*>((ROSPublisherBase*)i->second);
+    pub = dynamic_cast<ROSPublisher<Msg>*>(i->second.get());
     if(!pub) return NULL;
   }
   return pub;
@@ -733,10 +733,10 @@ bool ROSPublishTransforms(const RobotWorld& world,const char* frameprefix)
   ROSTfPublisher* tf;
   if(gPublishers.count("tf")==0) {
     tf = new ROSTfPublisher();
-    gPublishers["tf"] = tf;
+    gPublishers["tf"].reset(tf);
   }
   else {
-    tf = dynamic_cast<ROSTfPublisher*>((ROSPublisherBase*)gPublishers["tf"]);
+    tf = dynamic_cast<ROSTfPublisher*>(gPublishers["tf"].get());
     if(tf==NULL) return false;
   }
   for(size_t i=0;i<world.rigidObjects.size();i++)
@@ -765,10 +765,10 @@ bool ROSPublishTransforms(const WorldSimulation& sim,const char* frameprefix)
   ROSTfPublisher* tf;
   if(gPublishers.count("tf")==0) {
     tf = new ROSTfPublisher();
-    gPublishers["tf"] = tf;
+    gPublishers["tf"].reset(tf);
   }
   else {
-    tf = dynamic_cast<ROSTfPublisher*>((ROSPublisherBase*)gPublishers["tf"]);
+    tf = dynamic_cast<ROSTfPublisher*>(gPublishers["tf"].get());
     if(tf==NULL) return false;
   }
   RigidTransform T,Tp;
@@ -801,10 +801,10 @@ bool ROSPublishTransforms(const Robot& robot,const char* frameprefix)
   ROSTfPublisher* tf;
   if(gPublishers.count("tf")==0) {
     tf = new ROSTfPublisher();
-    gPublishers["tf"] = tf;
+    gPublishers["tf"].reset(tf);
   }
   else {
-    tf = dynamic_cast<ROSTfPublisher*>((ROSPublisherBase*)gPublishers["tf"]);
+    tf = dynamic_cast<ROSTfPublisher*>(gPublishers["tf"].get());
     if(tf==NULL) return false;
   }
   for(size_t j=0;j<robot.links.size();j++)  {
@@ -826,10 +826,10 @@ bool ROSPublishTransform(const RigidTransform& T,const char* frame)
   ROSTfPublisher* tf;
   if(gPublishers.count("tf")==0) {
     tf = new ROSTfPublisher();
-    gPublishers["tf"] = tf;
+    gPublishers["tf"].reset(tf);
   }
   else {
-    tf = dynamic_cast<ROSTfPublisher*>((ROSPublisherBase*)gPublishers["tf"]);
+    tf = dynamic_cast<ROSTfPublisher*>(gPublishers["tf"].get());
     if(tf==NULL) return false;
   }
   tf->send(frame,T);
@@ -1048,7 +1048,7 @@ bool ROSSubscribeUpdate()
   ros::spinOnce();
   //TODO: tf listener is running in background, do we want a delay?
   if(gSubscribers.count("tf") != 0) {
-    ROSTfSubscriber* tf=dynamic_cast<ROSTfSubscriber*>((ROSSubscriberBase*)gSubscribers["tf"]);
+    ROSTfSubscriber* tf=dynamic_cast<ROSTfSubscriber*>(gSubscribers["tf"].get());
     if(tf != NULL) tf->update();
   }
   bool updated = false;
@@ -1101,7 +1101,7 @@ std::string ROSFrame(const char* topic)
 bool ROSWaitForUpdate(const char* topic,double timeout)
 {
   if(gSubscribers.count(topic) == 0) return false;
-  ROSSubscriberBase* s = gSubscribers[topic];
+  auto s = gSubscribers[topic];
   int oldNumMessages = s->numMessages;
   Timer timer;
   while(timer.ElapsedTime() < timeout) {
@@ -1117,11 +1117,11 @@ bool ROSHadUpdate(const char* topic)
   if(gSubscribers.count(topic) == 0) {
     printf("No subscribers on topic %s\n",topic);
     printf("Valid topics:\n");
-    for(SubscriberList::const_iterator i = gSubscribers.begin();i!=gSubscribers.end();i++)
+    for(auto i = gSubscribers.begin();i!=gSubscribers.end();i++)
       printf("  %s\n",i->first.c_str());
     return false;
   }
-  ROSSubscriberBase* s = gSubscribers[topic];
+  auto s = gSubscribers[topic];
   return s->numMessages > 0;
 }
 

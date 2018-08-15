@@ -134,7 +134,7 @@ class OptimizeDofFunction : public ScalarFieldFunction
 {
 public:
   const vector<Real> &minvs,&ds,&ks,&cs,&x0s,&dx0s,&x1s,&dx1s,&xDes,&dxDes,&dts;
-  vector<SmartPointer<Simulate1DOFFunc> > fs;
+  vector<shared_ptr<Simulate1DOFFunc> > fs;
 
   OptimizeDofFunction(const vector<Real>& _minvs,const vector<Real>& _ds,const vector<Real>& _ks,const vector<Real>& _cs,
 		      const vector<Real>& _x0s,const vector<Real>& _dx0s,
@@ -145,7 +145,7 @@ public:
   {
     fs.resize(minvs.size());
     for(size_t i=0;i<minvs.size();i++) {
-      fs[i] = new Simulate1DOFFunc(minvs[i],ds[i],ks[i],cs[i],
+      fs[i] = make_shared<Simulate1DOFFunc>(minvs[i],ds[i],ks[i],cs[i],
 				   0,x0s[i],dx0s[i],
 				   xDes[i],dxDes[i],
 				   dts[i],torquemin,torquemax);

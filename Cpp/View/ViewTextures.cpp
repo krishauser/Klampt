@@ -5,6 +5,7 @@
 #include <KrisLibrary/math/random.h>
 #include <KrisLibrary/image/import.h>
 #include <KrisLibrary/math/infnan.h>
+#include <KrisLibrary/errors.h>
 using namespace Math;
 using namespace GLDraw;
 
@@ -15,16 +16,16 @@ bool gl_texture_set_up=false;
 #define FLOAT_TO_UCHAR(x) (unsigned char)(x*255.0)
 
 
-map<string,SmartPointer<Image> > ViewTextures::images;
+map<string,shared_ptr<Image> > ViewTextures::images;
 map<string,GLTextureObject> ViewTextures::textureObjects;
 
-SmartPointer<Image> ViewTextures::Load(const char* fn)
+shared_ptr<Image> ViewTextures::Load(const char* fn)
 {
   if(images.count(fn) > 0) {
     return images[fn];
   }
   else {
-    SmartPointer<Image> img = new Image;
+    shared_ptr<Image> img(new Image);
     if(ImportImage(fn,*img)) {
       images[fn] = img;
       return img;
@@ -51,11 +52,11 @@ void ViewTextures::Initialize(bool force)
   const static int gradientSize=256;
   startValidColors = 3.0 / float(gradientSize);
 
-  Image* noise = new Image;
-  Image* checker = new Image;
-  Image* grayscaleGradient = new Image;
-  Image* rainbowGradient = new Image;
-  Image* rainbowGradientWithHashmarks = new Image;
+  auto noise = make_shared<Image>();
+  auto checker = make_shared<Image>();
+  auto grayscaleGradient = make_shared<Image>();
+  auto rainbowGradient = make_shared<Image>();
+  auto rainbowGradientWithHashmarks = make_shared<Image>();
 
   noise->initialize(64,64,Image::A8);
   //noise

@@ -11,7 +11,7 @@ class DynamicRRTPlanner : public DynamicMotionPlannerBase
 public:
   DynamicRRTPlanner();
   virtual ~DynamicRRTPlanner() {  }
-  virtual void SetGoal(SmartPointer<PlannerObjectiveBase> newgoal);
+  virtual void SetGoal(shared_ptr<PlannerObjectiveBase> newgoal);
   Vector& MakeState(const Config& q,const Config& dq);
   Vector& MakeState(const Config& q);
   RRTPlanner::Node* TryIKExtend(RRTPlanner::Node* node,bool search=true);
@@ -25,14 +25,14 @@ public:
   Real EvaluateNodePathCost(RRTPlanner::Node* n);
 
   //settings
-  SmartPointer<RampCSpaceAdaptor> stateSpace;
+  shared_ptr<RampCSpaceAdaptor> stateSpace;
   Real delta;
   Real smoothTime;
   Real ikSolveProbability;
 
   //temporary state
   int iteration;
-  SmartPointer<RRTPlanner> rrt;
+  shared_ptr<RRTPlanner> rrt;
   vector<RRTPlanner::Node*> existingNodes;
   Vector tempV;
 };
@@ -56,17 +56,17 @@ public:
   struct EdgeData
   {
     Real cost;
-    SmartPointer<RampEdgeChecker> e;
+    shared_ptr<RampEdgeChecker> e;
   };
   typedef Graph::TreeNode<NodeData,EdgeData> Node;
 
   DynamicHybridTreePlanner();
   virtual ~DynamicHybridTreePlanner() {  }
-  virtual void SetGoal(SmartPointer<PlannerObjectiveBase> newgoal);
+  virtual void SetGoal(shared_ptr<PlannerObjectiveBase> newgoal);
   Node* AddChild(Node* node,const Config& q);
   Node* AddChild(Node* node,const ParabolicRamp::ParabolicRampND& ramp);
   Node* AddChild(Node* node,const ParabolicRamp::DynamicPath& path);
-  Node* AddChild(Node* node,SmartPointer<RampEdgeChecker>& e);
+  Node* AddChild(Node* node,shared_ptr<RampEdgeChecker>& e);
   //uses a local optimization to extend the tree from the given node.
   //if search is true, finds a parent node that gives a good fit, otherwise
   //adds the ik extension as a child of node.
@@ -85,14 +85,14 @@ public:
   virtual int PlanFrom(ParabolicRamp::DynamicPath& path,Real cutoff);
 
   //settings
-  SmartPointer<RampCSpaceAdaptor> stateSpace;
+  unique_ptr<RampCSpaceAdaptor> stateSpace;
   Real delta;
   Real smoothTime;
   Real ikSolveProbability;
 
   //temporary state
   int iteration;
-  SmartPointer<Node> root;
+  unique_ptr<Node> root;
   vector<Node*> nodes;
 };
 

@@ -4,7 +4,7 @@
 #include <QDialog>
 #include <QFormLayout>
 
-#include <Control/Sensor.h>
+#include <Sensing/Sensor.h>
 
 using namespace std;
 namespace Ui {

@@ -21,7 +21,7 @@ class DynamicPerturbationPlanner : public DynamicMotionPlannerBase
 {
 public:
   DynamicPerturbationPlanner();
-  virtual void SetGoal(SmartPointer<PlannerObjectiveBase> newgoal);
+  virtual void SetGoal(shared_ptr<PlannerObjectiveBase> newgoal);
   virtual int PlanFrom(ParabolicRamp::DynamicPath& path,Real cutoff);
 
   //setting
@@ -40,7 +40,7 @@ class DynamicPerturbationIKPlanner : public DynamicMotionPlannerBase
 {
 public:
   DynamicPerturbationIKPlanner();
-  virtual void SetGoal(SmartPointer<PlannerObjectiveBase> newgoal);
+  virtual void SetGoal(shared_ptr<PlannerObjectiveBase> newgoal);
   virtual int PlanFrom(ParabolicRamp::DynamicPath& path,Real cutoff);
 
   //setting

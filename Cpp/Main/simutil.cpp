@@ -1,7 +1,7 @@
 #include "Control/PathController.h"
 #include "Control/FeedforwardController.h"
 #include "Control/LoggingController.h"
-#include "Control/JointSensors.h"
+#include "Sensing/JointSensors.h"
 #include "Simulation/WorldSimulation.h"
 #include "IO/XmlWorld.h"
 #include "IO/XmlODE.h"
@@ -297,7 +297,7 @@ int main(int argc, char** argv)
   //setup controllers
   sim.robotControllers.resize(world.robots.size());
   for(size_t i=0;i<sim.robotControllers.size();i++) {    
-    Robot* robot=world.robots[i];
+    Robot* robot=world.robots[i].get();
     sim.SetController(i,MakeDefaultController(robot)); 
     sim.controlSimulators[i].sensors.MakeDefault(robot);
   }

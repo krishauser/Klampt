@@ -28,9 +28,9 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
     RobotWorld world;
-    SmartPointer<QRobotPoseGUI> gui;
-    SmartPointer<RobotPoseBackend> backend;
-    SmartPointer<ResourceManager> manager;
+    shared_ptr<QRobotPoseGUI> gui;
+    shared_ptr<RobotPoseBackend> backend;
+    shared_ptr<ResourceManager> manager;
     int mode;
     void Initialize(int _argc, const char **_argv);
     void StatusConnect();

@@ -65,7 +65,7 @@ public:
   ///Updates the simulation with new items added to the world model.
   void OnAddModel();
   ///Sets the robot's controller 
-  void SetController(int robot,SmartPointer<RobotController> c);
+  void SetController(int robot,shared_ptr<RobotController> c);
   ///Advance simulation time by dt (may take multiple sub-steps)
   void Advance(Real dt);
   ///Advance simulation time without actually performing ODE simulation
@@ -124,8 +124,8 @@ public:
   Real simStep;
   bool fakeSimulation;
   vector<ControlledRobotSimulator> controlSimulators;
-  vector<SmartPointer<RobotController> > robotControllers;
-  vector<SmartPointer<WorldSimulationHook> > hooks;
+  vector<shared_ptr<RobotController> > robotControllers;
+  vector<shared_ptr<WorldSimulationHook> > hooks;
   typedef map<pair<ODEObjectID,ODEObjectID>,ContactFeedbackInfo> ContactFeedbackMap;
   ContactFeedbackMap contactFeedback;
   ///Worst simulation status over the last Advance() call.

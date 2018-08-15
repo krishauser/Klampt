@@ -2,6 +2,7 @@
 #include "Interface/RobotInterface.h"
 #include "Main/SimViewProgram.h"
 #include <KrisLibrary/utils/StatCollector.h>
+#include <KrisLibrary/utils/SmartPointer.h>
 #include <GL/glui.h>
 #include <fstream>
 using namespace Math3D;
@@ -100,7 +101,7 @@ public:
     drawUI = 1;
     drawContacts = 1;
 
-    robotInterface = new DefaultMotionQueueInterface(GetMotionQueue(sim.robotControllers[0]));
+    robotInterface = new DefaultMotionQueueInterface(GetMotionQueue(sim.robotControllers[0].get()));
     CopyWorld(*world,planningWorld);
     planningWorld.InitCollisions();
 
@@ -153,8 +154,8 @@ public:
 
   virtual void RenderWorld()
   {
-    Robot* robot=world->robots[0];
-    RobotController* rc=sim.robotControllers[0];
+    Robot* robot=world->robots[0].get();
+    RobotController* rc=sim.robotControllers[0].get();
 
     SimViewProgram::RenderWorld();
 
@@ -172,38 +173,38 @@ public:
       Config curBest;
       robotInterface->GetEndConfig(curBest);
       if(!curBest.empty()) {
-	robot->UpdateConfig(curBest); 
-	world->robotViews[0].PushAppearance();
-	world->robotViews[0].SetColors(GLColor(1,1,0,0.5));
-	world->robotViews[0].Draw();
-	world->robotViews[0].PopAppearance();
+        robot->UpdateConfig(curBest); 
+        world->robotViews[0].PushAppearance();
+        world->robotViews[0].SetColors(GLColor(1,1,0,0.5));
+        world->robotViews[0].Draw();
+        world->robotViews[0].PopAppearance();
       }
       /*
       if(curGoal) {
-	glPointSize(5.0);
-	glDisable(GL_LIGHTING);
-	glColor3f(1,1,0);
-	glBegin(GL_POINTS);
-	glVertex3v(curGoal->ikGoal.endPosition);
-	glEnd();
+        glPointSize(5.0);
+        glDisable(GL_LIGHTING);
+        glColor3f(1,1,0);
+        glBegin(GL_POINTS);
+        glVertex3v(curGoal->ikGoal.endPosition);
+        glEnd();
 
-	//draw end effector path
-	glColor3f(1,0.5,0);
-	glBegin(GL_LINE_STRIP);
-	for(Real t=c->pathParameter;t<c->ramp.endTime;t+=0.05) {
-	  c->ramp.Evaluate(t,robot->q);
-	  robot->UpdateFrames();
-	  glVertex3v(robot->links[curGoal->ikGoal.link].T_World*curGoal->ikGoal.localPosition);
-	}
-	for(size_t i=0;i<c->path.ramps.size();i++) {
-	  for(Real t=0;t<c->path.ramps[i].endTime;t+=0.05) {
-	    c->path.ramps[i].Evaluate(t,robot->q);
-	    robot->UpdateFrames();
-	    glVertex3v(robot->links[curGoal->ikGoal.link].T_World*curGoal->ikGoal.localPosition);
-	  }
-	}
-	glEnd();
-	glEnable(GL_LIGHTING);
+        //draw end effector path
+        glColor3f(1,0.5,0);
+        glBegin(GL_LINE_STRIP);
+        for(Real t=c->pathParameter;t<c->ramp.endTime;t+=0.05) {
+          c->ramp.Evaluate(t,robot->q);
+          robot->UpdateFrames();
+          glVertex3v(robot->links[curGoal->ikGoal.link].T_World*curGoal->ikGoal.localPosition);
+        }
+        for(size_t i=0;i<c->path.ramps.size();i++) {
+          for(Real t=0;t<c->path.ramps[i].endTime;t+=0.05) {
+            c->path.ramps[i].Evaluate(t,robot->q);
+            robot->UpdateFrames();
+            glVertex3v(robot->links[curGoal->ikGoal.link].T_World*curGoal->ikGoal.localPosition);
+          }
+        }
+        glEnd();
+        glEnable(GL_LIGHTING);
       }
       */
     }
@@ -224,14 +225,14 @@ public:
       int istart=(int)Ceil(tstart/dt);
       int iend=(int)Ceil(tend/dt);
       for(int i=istart;i<iend;i++) {
-	Real t1=i*dt;
-	Real t2=t1+0.5*dt;
-	robotInterface->GetConfig(t1,robot->q);
-	robot->UpdateFrames();
-	glVertex3v(robot->links.back().T_World.t);
-	robotInterface->GetConfig(t2,robot->q);
-	robot->UpdateFrames();
-	glVertex3v(robot->links.back().T_World.t);
+        Real t1=i*dt;
+        Real t2=t1+0.5*dt;
+        robotInterface->GetConfig(t1,robot->q);
+        robot->UpdateFrames();
+        glVertex3v(robot->links.back().T_World.t);
+        robotInterface->GetConfig(t2,robot->q);
+        robot->UpdateFrames();
+        glVertex3v(robot->links.back().T_World.t);
       }
       glEnd();
     }
@@ -279,12 +280,12 @@ public:
     switch(id) {
     case SIMULATE_BUTTON_ID:
       if(simulate) {
-	simulate=0;
-	SleepIdleCallback();
+        simulate=0;
+        SleepIdleCallback();
       }
       else {
-	simulate=1;
-	SleepIdleCallback(0);
+        simulate=1;
+        SleepIdleCallback(0);
       }
       break;
     case RESET_BUTTON_ID:
@@ -293,11 +294,11 @@ public:
       break;
     case UI_LISTBOX_ID:
       {
-	string res=uis[oldUI]->ActivateEvent(false);
-	LogDeactivate(res);
-	res=uis[currentUI]->ActivateEvent(true);
-	LogActivate(res);
-	oldUI=currentUI;
+        string res=uis[oldUI]->ActivateEvent(false);
+        LogDeactivate(res);
+        res=uis[currentUI]->ActivateEvent(true);
+        LogActivate(res);
+        oldUI=currentUI;
       }
       break;
     }
@@ -392,30 +393,30 @@ int main(int argc, char** argv)
     const char* ext=FileExtension(argv[i]);
     if(0==strcmp(ext,"rob")) {
       if(world.LoadRobot(argv[i])<0) {
-	printf("Error loading robot file %s\n",argv[i]);
-	return 1;
+        printf("Error loading robot file %s\n",argv[i]);
+        return 1;
       }
     }
     else if(0==strcmp(ext,"env") || 0==strcmp(ext,"tri")) {
       if(world.LoadTerrain(argv[i])<0) {
-	printf("Error loading terrain file %s\n",argv[i]);
-	return 1;
+        printf("Error loading terrain file %s\n",argv[i]);
+        return 1;
       }
     }
     else if(0==strcmp(ext,"obj")) {
       if(world.LoadRigidObject(argv[i])<0) {
-	printf("Error loading rigid object file %s\n",argv[i]);
-	return 1;
+        printf("Error loading rigid object file %s\n",argv[i]);
+        return 1;
       }
     }
     else if(0==strcmp(ext,"xml")) {
       if(!xmlWorld.Load(argv[i])) {
-	printf("Error loading world file %s\n",argv[i]);
-	return 1;
+        printf("Error loading world file %s\n",argv[i]);
+        return 1;
       }
       if(!xmlWorld.GetWorld(world)) {
-	printf("Error loading world from %s\n",argv[i]);
-	return 1;
+        printf("Error loading world from %s\n",argv[i]);
+        return 1;
       }
     }
     else if(0==strcmp(ext,"log")) {

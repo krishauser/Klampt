@@ -30,7 +30,7 @@ class ViewResource
   ViewGrasp graspViewer;
   //custom draw
   vector<const void*> items;
-  vector<SmartPointer<Geometry::AnyGeometry3D> > geometries;
+  vector<shared_ptr<Geometry::AnyGeometry3D> > geometries;
   vector<GLDraw::GeometryAppearance> appearances;
 };
 

@@ -248,7 +248,7 @@ CompositeObjective::~CompositeObjective()
 {
 }
 
-void CompositeObjective::Add(const SmartPointer<PlannerObjectiveBase>& obj,Real weight)
+void CompositeObjective::Add(const shared_ptr<PlannerObjectiveBase>& obj,Real weight)
 {
   components.push_back(obj);
   if(!weights.empty())
@@ -336,7 +336,7 @@ Real CompositeObjective::Delta(PlannerObjectiveBase* priorGoal)
   for(size_t i=0;i<pcomposite->components.size();i++) {
     Real w1 = (weights.empty()?1.0:weights[i]);
     Real w2 = (pcomposite->weights.empty()?1.0:pcomposite->weights[i]);
-    Real d=components[i]->Delta(pcomposite->components[i]);
+    Real d=components[i]->Delta(pcomposite->components[i].get());
     if(IsInf(d)) return Inf;
     accum.Add(d,w1);
     accum.Add(w1-w2);
@@ -629,7 +629,7 @@ bool SavePlannerObjective(PlannerObjectiveBase* obj,AnyCollection& msg)
     CompositeObjective* cobj = dynamic_cast<CompositeObjective*>(obj);
     msg["norm"] = cobj->norm;
     for(size_t i=0;i<cobj->components.size();i++) {
-      if(!SavePlannerObjective(cobj->components[i],msg["components"][i])) {
+      if(!SavePlannerObjective(cobj->components[i].get(),msg["components"][i])) {
 	fprintf(stderr,"SavePlannerObjective: error saving component %d of composite objective\n",(int)i);
 	return false;
       }
@@ -693,16 +693,16 @@ PlannerObjectiveBase* LoadPlannerObjective(AnyCollection& msg,Robot* robot)
     return new VelocityObjective(Vector(v));
   }
   else if(type == "composite") {
-    vector<SmartPointer<AnyCollection> > items;
+    vector<shared_ptr<AnyCollection> > items;
     AnyCollection msgcomp = msg["components"];
     if(msgcomp.depth() == 0) {
       fprintf(stderr,"LoadPlannerObjective: composite message didn't contain 'components' member\n");
       return NULL;
     }
     msgcomp.enumerate(items);
-    vector<SmartPointer<PlannerObjectiveBase> > components;
+    vector<shared_ptr<PlannerObjectiveBase> > components;
     for(size_t i=0;i<items.size();i++) {
-      components.push_back(LoadPlannerObjective(*items[i],robot));
+      components.push_back(shared_ptr<PlannerObjectiveBase>(LoadPlannerObjective(*items[i],robot)));
       if(components.back()==NULL) return NULL;
     }
     CompositeObjective* obj = new CompositeObjective;

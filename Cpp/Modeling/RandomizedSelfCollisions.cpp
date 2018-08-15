@@ -1,7 +1,6 @@
 #include "RandomizedSelfCollisions.h"
 #include <KrisLibrary/math/random.h>
 #include <KrisLibrary/utils/ProgressPrinter.h>
-#include <KrisLibrary/utils/SmartPointer.h>
 #include "Planning/DistanceQuery.h"
 
 void SampleRobot(RobotWithGeometry& robot)
@@ -25,10 +24,10 @@ void TestCollisions(RobotWithGeometry& robot,Array2D<bool>& canCollide,int numSa
     SampleRobot(robot);
     for(int i=0;i<robot.q.n;i++)
       for(int j=0;j<robot.q.n;j++) {
-	if(!canCollide(i,j)) {
-	  if(robot.SelfCollision(i,j))
-	    canCollide(i,j) = true;
-	}
+        if(!canCollide(i,j)) {
+          if(robot.SelfCollision(i,j))
+            canCollide(i,j) = true;
+        }
       }
   }
   progress.Done();
@@ -49,14 +48,14 @@ void TestIndependentCollisions(RobotWithGeometry& robot,Array2D<bool>& canCollid
     int iCollide=-1,jCollide=-1;
     for(int i=0;i<robot.q.n && numCollisions<=1;i++)
       for(int j=0;j<robot.q.n && numCollisions<=1;j++) {
-	if(canCollide(i,j)) {
-	  if(robot.SelfCollision(i,j)) {
-	    numCollisions++;
-	    iCollide=i;
-	    jCollide=j;
-	    if(independent(i,j)) numCollisions = 5;  //can quit now
-	  }
-	}
+        if(canCollide(i,j)) {
+          if(robot.SelfCollision(i,j)) {
+            numCollisions++;
+            iCollide=i;
+            jCollide=j;
+            if(independent(i,j)) numCollisions = 5;  //can quit now
+          }
+        }
       }
     if(numCollisions == 1) {
       assert(iCollide >= 0&& jCollide >= 0);
@@ -69,8 +68,8 @@ void TestIndependentCollisions(RobotWithGeometry& robot,Array2D<bool>& canCollid
   for(size_t i=0;i<robot.links.size();i++) {
     for(size_t j=0;j<robot.links.size();j++) {
       if(robot.selfCollisions(i,j) && independent(i,j)) {
-	if(!knownIndependent(i,j)) 
-	  numNewPairs++;
+        if(!knownIndependent(i,j)) 
+          numNewPairs++;
       }
     }
   }
@@ -100,7 +99,7 @@ void RandomizedSelfCollisionPairs(RobotWithGeometry& robot,Array2D<bool>& collis
     for(int j=0;j<robot.q.n;j++) {
       if(collision(i,j)) numPairs++;
       if(collision(i,j) && !oldCollisions(i,j)) 
-	numNewPairs++;
+        numNewPairs++;
     }
   }
   cout<<numNewPairs<<" new pairs, "<<numPairs<<" total"<<endl;
@@ -129,7 +128,7 @@ void RandomizedIndependentSelfCollisionPairs(RobotWithGeometry& robot,Array2D<bo
     for(int j=0;j<robot.q.n;j++) {
       if(collision(i,j)) numPairs++;
       if(collision(i,j) && !oldCollisions(i,j)) 
-	numNewPairs++;
+        numNewPairs++;
     }
   }
   cout<<numNewPairs<<" new pairs, "<<numPairs<<" total"<<endl;
@@ -141,12 +140,12 @@ void RandomizedSelfCollisionDistances(RobotWithGeometry& robot,Array2D<Real>& mi
 {
   minDistance.resize(robot.q.n,robot.q.n,Inf);
   maxDistance.resize(robot.q.n,robot.q.n,-Inf);
-  Array2D<SmartPointer<RobotWithGeometry::CollisionQuery> > queries(robot.q.n,robot.q.n);
+  Array2D<shared_ptr<RobotWithGeometry::CollisionQuery> > queries(robot.q.n,robot.q.n);
   for(int i=0;i<robot.q.n;i++) {
     if(robot.IsGeometryEmpty(i)) continue;
     for(int j=i+1;j<robot.q.n;j++) {
       if(!robot.IsGeometryEmpty(j))
-	queries(i,j) = new RobotWithGeometry::CollisionQuery(*robot.geometry[i],*robot.geometry[j]);
+        queries(i,j).reset(new RobotWithGeometry::CollisionQuery(*robot.geometry[i],*robot.geometry[j]));
     }
   }
 
@@ -160,10 +159,10 @@ void RandomizedSelfCollisionDistances(RobotWithGeometry& robot,Array2D<Real>& mi
     SampleRobot(robot);
     for(int i=0;i<robot.q.n;i++) {
       for(int j=i+1;j<robot.q.n;j++) {
-	if(!queries(i,j)) continue;
-	Real d=queries(i,j)->Distance(absErr,relErr);
-	minDistance(i,j) = Min(minDistance(i,j),d);
-	maxDistance(i,j) = Max(maxDistance(i,j),d);
+        if(!queries(i,j)) continue;
+        Real d=queries(i,j)->Distance(absErr,relErr);
+        minDistance(i,j) = Min(minDistance(i,j),d);
+        maxDistance(i,j) = Max(maxDistance(i,j),d);
       }
     }
   }  

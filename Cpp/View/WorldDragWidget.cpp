@@ -48,9 +48,9 @@ bool WorldDragWidget::Hover(int x,int y,Camera::Viewport& viewport,double& dista
       hoverPt = localpt;
       int index = -1;
       for(size_t i=0;i<world->robots.size();i++)
-	if(rob == (Robot*)world->robots[i]) { index=(int)i; break; }
+        if(rob == world->robots[i].get()) { index=(int)i; break; }
       hoverID = world->RobotLinkID(index,body);
-      const Geometry::AnyCollisionGeometry3D* geom = world->GetGeometry(hoverID);
+      auto geom = world->GetGeometry(hoverID);
       Vector3 worldpt = geom->GetTransform()*localpt;
       distance = worldpt.distance(r.source);
       dragPt = worldpt;
@@ -63,13 +63,13 @@ bool WorldDragWidget::Hover(int x,int y,Camera::Viewport& viewport,double& dista
       Vector3 worldpt = obj->T*localpt;
       Real d=worldpt.distance(r.source);
       if(d < distance) {
-	distance = d;
-	hoverPt = localpt;
-	int index = -1;
-	for(size_t i=0;i<world->rigidObjects.size();i++)
-	  if(obj == (RigidObject*)world->rigidObjects[i]) { index=(int)i; break; }
-	hoverID = world->RigidObjectID(index);
-	dragPt = worldpt;
+        distance = d;
+        hoverPt = localpt;
+        int index = -1;
+        for(size_t i=0;i<world->rigidObjects.size();i++)
+          if(obj == world->rigidObjects[i].get()) { index=(int)i; break; }
+        hoverID = world->RigidObjectID(index);
+        dragPt = worldpt;
       }
     }
   }
@@ -103,7 +103,7 @@ void WorldDragWidget::DrawGL(Camera::Viewport& viewport)
 {
   if(hoverID < 0) return;
   if(hasFocus) {
-    Geometry::AnyCollisionGeometry3D* geom = world->GetGeometry(hoverID);
+    auto geom = world->GetGeometry(hoverID);
     glDisable(GL_LIGHTING);
     lineColor.setCurrentGL();
     glLineWidth(lineWidth);

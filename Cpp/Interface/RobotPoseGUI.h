@@ -4,7 +4,7 @@
 #include "ResourceGUI.h"
 #include "View/RobotPoseWidget.h"
 #include "View/ObjectPoseWidget.h"
-#include "Control/Sensor.h"
+#include "Sensing/Sensor.h"
 #include <KrisLibrary/utils/apputils.h>
 #include <fstream>
 

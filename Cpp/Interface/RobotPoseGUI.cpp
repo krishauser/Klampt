@@ -69,7 +69,7 @@ void RobotPoseBackend::Start()
 
   WorldGUIBackend::Start();
   world->InitCollisions();
-  robot = world->robots[0];
+  robot = world->robots[0].get();
   cur_link=0;
   cur_driver=0;
   draw_geom = 1;
@@ -81,14 +81,14 @@ void RobotPoseBackend::Start()
 
   robotWidgets.resize(world->robots.size());
   for(size_t i=0;i<world->robots.size();i++) {
-    robotWidgets[i].Set(world->robots[i],&world->robotViews[i]);
+    robotWidgets[i].Set(world->robots[i].get(),&world->robotViews[i]);
     robotWidgets[i].linkPoser.highlightColor.set(0.75,0.75,0);
   }
   objectWidgets.resize(world->rigidObjects.size());
 
 
   for(size_t i=0;i<world->rigidObjects.size();i++)
-    objectWidgets[i].Set(world->rigidObjects[i]);
+    objectWidgets[i].Set(world->rigidObjects[i].get());
   for(size_t i=0;i<world->robots.size();i++)
     allWidgets.widgets.push_back(&robotWidgets[i]);
   for(size_t i=0;i<world->rigidObjects.size();i++)
@@ -139,7 +139,7 @@ void RobotPoseBackend::UpdateConfig()
 
 void RobotPoseBackend::RenderWorld()
 {
-  Robot* robot = world->robots[0];
+  Robot* robot = world->robots[0].get();
   ViewRobot& viewRobot = world->robotViews[0];
   //want conditional drawing of the robot geometry
   //ResourceBrowserProgram::RenderWorld();
@@ -241,7 +241,7 @@ Stance RobotPoseBackend::GetFlatStance(Real tolerance)
 {
   if(tolerance==0)
     tolerance = settings["flatContactTolerance"];
-  Robot* robot = world->robots[0];
+  Robot* robot = world->robots[0].get();
   Stance s;
   if(robotWidgets[0].ikPoser.poseGoals.empty()) {
     printf("Computing stance as though robot were standing on flat ground\n");
@@ -282,7 +282,7 @@ Stance RobotPoseBackend::GetNearbyStance(Real tolerance)
 {
   if(tolerance==0)
     tolerance = settings["nearbyContactTolerance"];
-  Robot* robot = world->robots[0];
+  Robot* robot = world->robots[0].get();
   Stance s;
   if(robotWidgets[0].ikPoser.poseGoals.empty()) {
     printf("Calculating stance from all points on robot near environment / objects\n");
@@ -322,7 +322,7 @@ Stance RobotPoseBackend::GetNearbyStance(Real tolerance)
 
 ResourcePtr RobotPoseBackend::PoserToResource(const string& type)
 {
-  Robot* robot = world->robots[0];
+  Robot* robot = world->robots[0].get();
   if(type == "Config") 
     return MakeResource("",robot->q);
   else if(type == "IKGoal") {
@@ -362,7 +362,7 @@ ResourcePtr RobotPoseBackend::PoserToResource(const string& type)
       }
       
     ResourcePtr r=ResourceGUIBackend::CurrentResource();
-    const GeometricPrimitive3DResource* gr = dynamic_cast<const GeometricPrimitive3DResource*>((const ResourceBase*)r);
+    const GeometricPrimitive3DResource* gr = dynamic_cast<const GeometricPrimitive3DResource*>(r.get());
     if(gr) {
       cout<<"Making grasp relative to "<<gr->name<<endl;
       //TODO: detect contacts
@@ -373,7 +373,7 @@ ResourcePtr RobotPoseBackend::PoserToResource(const string& type)
       g.Transform(Tinv);
     }
     else {
-      const RigidObjectResource* obj = dynamic_cast<const RigidObjectResource*>((const ResourceBase*)r);
+      const RigidObjectResource* obj = dynamic_cast<const RigidObjectResource*>(r.get());
       if(obj) {
 	cout<<"Making grasp relative to "<<obj->name<<endl;
 	//TODO: detect contacts
@@ -405,7 +405,7 @@ void RobotPoseBackend::CleanContacts(Hold& h,Real xtol,Real ntol)
 
 bool RobotPoseBackend::OnCommand(const string& cmd,const string& args)
 {
-  Robot* robot = world->robots[0];
+  Robot* robot = world->robots[0].get();
   stringstream ss(args);
   if(cmd=="pose_mode") {
     for(size_t i=0;i<robotWidgets.size();i++)
@@ -459,7 +459,7 @@ bool RobotPoseBackend::OnCommand(const string& cmd,const string& args)
   }
   else if(cmd == "resource_to_poser") {
     ResourcePtr r=ResourceGUIBackend::CurrentResource();
-    const ConfigResource* rc = dynamic_cast<const ConfigResource*>((const ResourceBase*)r);
+    const ConfigResource* rc = dynamic_cast<const ConfigResource*>(r.get());
     if(rc) {
       Vector q = robotWidgets[0].Pose();
       q=rc->data;
@@ -478,13 +478,13 @@ bool RobotPoseBackend::OnCommand(const string& cmd,const string& args)
       }
     }
     else {
-      const IKGoalResource* rc = dynamic_cast<const IKGoalResource*>((const ResourceBase*)r);
+      const IKGoalResource* rc = dynamic_cast<const IKGoalResource*>(r.get());
       if(rc) {
 	robotWidgets[0].ikPoser.ClearLink(rc->goal.link);
 	robotWidgets[0].ikPoser.Add(rc->goal);
       }
       else {
-	const StanceResource* rc = dynamic_cast<const StanceResource*>((const ResourceBase*)r);
+	const StanceResource* rc = dynamic_cast<const StanceResource*>(r.get());
 	if(rc) {
 	  robotWidgets[0].ikPoser.poseGoals.clear();
 	  robotWidgets[0].ikPoser.poseWidgets.clear();
@@ -494,13 +494,13 @@ bool RobotPoseBackend::OnCommand(const string& cmd,const string& args)
 	  }
 	}
 	else {
-	  const HoldResource* rc = dynamic_cast<const HoldResource*>((const ResourceBase*)r);
+	  const HoldResource* rc = dynamic_cast<const HoldResource*>(r.get());
 	  if(rc) {
 	    robotWidgets[0].ikPoser.ClearLink(rc->hold.link);
 	    robotWidgets[0].ikPoser.Add(rc->hold.ikConstraint);
 	  }
 	  else {
-	    const GraspResource* rc = dynamic_cast<const GraspResource*>((const ResourceBase*)r);
+	    const GraspResource* rc = dynamic_cast<const GraspResource*>(r.get());
 	    if(rc) {
 	      robotWidgets[0].ikPoser.poseGoals.clear();
 	      robotWidgets[0].ikPoser.poseWidgets.clear();
@@ -510,14 +510,14 @@ bool RobotPoseBackend::OnCommand(const string& cmd,const string& args)
 		robotWidgets[0].ikPoser.Add(i->second.ikConstraint);
 	    }
 	    else {
-	      const LinearPathResource* rc = dynamic_cast<const LinearPathResource*>((const ResourceBase*)r);
+	      const LinearPathResource* rc = dynamic_cast<const LinearPathResource*>(r.get());
 	      if(rc) {
 		Config q;
 		ResourceGUIBackend::viewResource.GetAnimConfig(r,q);
 		robotWidgets[0].SetPose(q);
 	      }
 	      else {
-		const MultiPathResource* rc = dynamic_cast<const MultiPathResource*>((const ResourceBase*)r);
+		const MultiPathResource* rc = dynamic_cast<const MultiPathResource*>(r.get());
 		if(rc) {
 		  Config q;
 		  ResourceGUIBackend::viewResource.GetAnimConfig(r,q);
@@ -536,7 +536,7 @@ bool RobotPoseBackend::OnCommand(const string& cmd,const string& args)
     vector<Config> configs,milestones;
     
     ResourcePtr r=ResourceGUIBackend::CurrentResource();
-    const ConfigResource* rc = dynamic_cast<const ConfigResource*>((const ResourceBase*)r);
+    const ConfigResource* rc = dynamic_cast<const ConfigResource*>(r.get());
     if(rc) {
       Config a,b;
       a = rc->data;
@@ -553,7 +553,7 @@ bool RobotPoseBackend::OnCommand(const string& cmd,const string& args)
       times[1] = 1;
     }
     else {
-      const ConfigsResource* rc = dynamic_cast<const ConfigsResource*>((const ResourceBase*)r);
+      const ConfigsResource* rc = dynamic_cast<const ConfigsResource*>(r.get());
       if(rc) {
 	milestones = rc->configs;
 	times.resize(rc->configs.size());
@@ -570,7 +570,7 @@ bool RobotPoseBackend::OnCommand(const string& cmd,const string& args)
       configs = milestones;
       }
       else {
-      Robot* robot=world->robots[0];
+      Robot* robot=world->robots[0].get();
       Timer timer;
       if(!InterpolateConstrainedPath(*robot,milestones,robotWidgets[0].Constraints(),configs,1e-2)) return;
       
@@ -596,7 +596,7 @@ bool RobotPoseBackend::OnCommand(const string& cmd,const string& args)
   }
   else if(cmd == "split_path") {
     ResourcePtr r=ResourceGUIBackend::CurrentResource();
-    const LinearPathResource* lp = dynamic_cast<const LinearPathResource*>((const ResourceBase*)r);
+    const LinearPathResource* lp = dynamic_cast<const LinearPathResource*>(r.get());
     double t = viewResource.pathTime;
     fprintf(stderr,"TODO: split paths\n");
     if(lp) {
@@ -605,7 +605,7 @@ bool RobotPoseBackend::OnCommand(const string& cmd,const string& args)
       //ResourceGUIBackend::SetLastActive(); 
       //ResourceGUIBackend::viewResource.pathTime = 0;
     }
-    const MultiPathResource* mp = dynamic_cast<const MultiPathResource*>((const ResourceBase*)r);
+    const MultiPathResource* mp = dynamic_cast<const MultiPathResource*>(r.get());
     if(mp) {
       
       //ResourceGUIBackend::Add("",path);
@@ -618,7 +618,7 @@ bool RobotPoseBackend::OnCommand(const string& cmd,const string& args)
     stringstream ss(args);
     ss>>num;
     ResourcePtr r=ResourceGUIBackend::CurrentResource();
-    const ConfigsResource* cp = dynamic_cast<const ConfigsResource*>((const ResourceBase*)r);
+    const ConfigsResource* cp = dynamic_cast<const ConfigsResource*>(r.get());
     if(cp) {
       for(size_t i=0;i<cp->configs.size();i++) {
 	stringstream ss;
@@ -627,7 +627,7 @@ bool RobotPoseBackend::OnCommand(const string& cmd,const string& args)
       }
       ResourceGUIBackend::SetLastActive(); 
     }
-    const LinearPathResource* lp = dynamic_cast<const LinearPathResource*>((const ResourceBase*)r);
+    const LinearPathResource* lp = dynamic_cast<const LinearPathResource*>(r.get());
     if(lp) {
       for(int i=0;i<num;i++) {
 	Real t = Real(lp->times.size()-1)*Real(i+1)/(num+1);
@@ -642,7 +642,7 @@ bool RobotPoseBackend::OnCommand(const string& cmd,const string& args)
       }
       ResourceGUIBackend::SetLastActive(); 
     }
-    const MultiPathResource* mp = dynamic_cast<const MultiPathResource*>((const ResourceBase*)r);
+    const MultiPathResource* mp = dynamic_cast<const MultiPathResource*>(r.get());
     if(mp) {
       Real minTime = 0, maxTime = 1;
       if(mp->path.HasTiming()) {
@@ -662,7 +662,7 @@ bool RobotPoseBackend::OnCommand(const string& cmd,const string& args)
   }
   else if(cmd == "optimize_path") {
     ResourcePtr r=ResourceGUIBackend::CurrentResource();
-    const LinearPathResource* lp = dynamic_cast<const LinearPathResource*>((const ResourceBase*)r);
+    const LinearPathResource* lp = dynamic_cast<const LinearPathResource*>(r.get());
     if(lp) {
       Real dt = settings["pathOptimize"]["outputResolution"];
       vector<double> newtimes;
@@ -675,7 +675,7 @@ bool RobotPoseBackend::OnCommand(const string& cmd,const string& args)
       ResourceGUIBackend::SetLastActive(); 
       ResourceGUIBackend::viewResource.pathTime = 0;
     }
-    const MultiPathResource* mp = dynamic_cast<const MultiPathResource*>((const ResourceBase*)r);
+    const MultiPathResource* mp = dynamic_cast<const MultiPathResource*>(r.get());
     if(mp) {
       Real xtol = settings["pathOptimize"]["contactTol"];
       Real dt = settings["pathOptimize"]["outputResolution"];
@@ -688,7 +688,7 @@ bool RobotPoseBackend::OnCommand(const string& cmd,const string& args)
       ResourceGUIBackend::SetLastActive(); 
       ResourceGUIBackend::viewResource.pathTime = 0;
     }
-    const ConfigsResource* rc = dynamic_cast<const ConfigsResource*>((const ResourceBase*)r);
+    const ConfigsResource* rc = dynamic_cast<const ConfigsResource*>(r.get());
     if(rc) {
       MultiPath path;
       path.sections.resize(1);
@@ -719,7 +719,7 @@ bool RobotPoseBackend::OnCommand(const string& cmd,const string& args)
   }
   else if(cmd == "get_flat_contacts") {
     ResourcePtr r=ResourceGUIBackend::CurrentResource();
-    StanceResource* sp = dynamic_cast<StanceResource*>((ResourceBase*)r);
+    StanceResource* sp = dynamic_cast<StanceResource*>(r.get());
     if(sp) {
       Real tolerance = 0;
       if(!args.empty()) {
@@ -734,7 +734,7 @@ bool RobotPoseBackend::OnCommand(const string& cmd,const string& args)
   }
   else if(cmd == "get_nearby_contacts") {
     ResourcePtr r=ResourceGUIBackend::CurrentResource();
-    StanceResource* sp = dynamic_cast<StanceResource*>((ResourceBase*)r);
+    StanceResource* sp = dynamic_cast<StanceResource*>(r.get());
     if(sp) {
       Real tolerance = 0;
       if(!args.empty()) {
@@ -753,7 +753,7 @@ bool RobotPoseBackend::OnCommand(const string& cmd,const string& args)
     ss >> xtol >> ntol;
     if(ss.bad()) xtol = ntol = 0;
     ResourcePtr r=ResourceGUIBackend::CurrentResource();
-    const StanceResource* sp = dynamic_cast<const StanceResource*>((const ResourceBase*)r);
+    const StanceResource* sp = dynamic_cast<const StanceResource*>(r.get());
     if(sp) {
       Stance s=sp->stance;
       for(Stance::iterator i=s.begin();i!=s.end();i++) 
@@ -764,7 +764,7 @@ bool RobotPoseBackend::OnCommand(const string& cmd,const string& args)
 	ResourceGUIBackend::SetLastActive();
       }
     }
-    const HoldResource* hp = dynamic_cast<const HoldResource*>((const ResourceBase*)r);
+    const HoldResource* hp = dynamic_cast<const HoldResource*>(r.get());
     if(hp) {
       Hold h = hp->hold;
       CleanContacts(h,xtol,ntol);
@@ -780,7 +780,7 @@ bool RobotPoseBackend::OnCommand(const string& cmd,const string& args)
     Real res;
     ss >> res;
     ResourcePtr r=ResourceGUIBackend::CurrentResource();
-    const TriMeshResource* tr = dynamic_cast<const TriMeshResource*>((const ResourceBase*)r);
+    const TriMeshResource* tr = dynamic_cast<const TriMeshResource*>(r.get());
     if(tr) {
       Meshing::VolumeGrid grid;
       Geometry::CollisionMesh mesh(tr->data);
@@ -822,7 +822,7 @@ bool RobotPoseBackend::OnCommand(const string& cmd,const string& args)
   else if(cmd=="set_driver_value") {
     double driver_value;
     ss>>driver_value;
-    Robot* robot = world->robots[0];
+    Robot* robot = world->robots[0].get();
     robot->UpdateConfig(robotWidgets[0].Pose());
     robot->SetDriverValue(cur_driver,driver_value);
     robotWidgets[0].SetPose(robot->q);
@@ -844,7 +844,7 @@ bool RobotPoseBackend::OnCommand(const string& cmd,const string& args)
 
 void RobotPoseBackend::BeginDrag(int x,int y,int button,int modifiers)
 { 
-  Robot* robot = world->robots[0];
+  Robot* robot = world->robots[0].get();
   if(button == GLUT_RIGHT_BUTTON) {
     double d;
     if(allWidgets.BeginDrag(x,viewport.h-y,viewport,d)) {

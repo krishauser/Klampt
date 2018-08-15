@@ -50,7 +50,7 @@ void SimTestBackend::Start()
   dragWidget.Set(world);
   robotWidgets.resize(world->robots.size());
   for(size_t i=0;i<world->robots.size();i++) {
-    robotWidgets[i].Set(world->robots[i],&world->robotViews[i]);
+    robotWidgets[i].Set(world->robots[i].get(),&world->robotViews[i]);
     robotWidgets[i].linkPoser.poserAppearance.resize(world->robots[i]->links.size());
     AnyCollection poserColorSetting = settings["poser"]["color"];
     GLColor poserColor(poserColorSetting[0],poserColorSetting[1],poserColorSetting[2],poserColorSetting[3]);
@@ -60,7 +60,7 @@ void SimTestBackend::Start()
   //draw desired milestone
   objectWidgets.resize(world->rigidObjects.size());
   for(size_t i=0;i<world->rigidObjects.size();i++) 
-    objectWidgets[i].Set(world->rigidObjects[i]);
+    objectWidgets[i].Set(world->rigidObjects[i].get());
   allWidgets.widgets.push_back(&dragWidget);
   for(size_t i=0;i<world->robots.size();i++)
     allRobotWidgets.widgets.push_back(&robotWidgets[i]);
@@ -152,7 +152,7 @@ void SimTestBackend::ToggleSensorPlot(int sensorIndex,int enabled) {
       sensorPlot.view.y += sensorPlots.back().view.height+spacing;
     
     SensorBase* sensor = NULL;
-    sensor = sensors.sensors[sensorIndex];
+    sensor = sensors.sensors[sensorIndex].get();
     vector<string> names;
     sensor->MeasurementNames(names);
     sensorPlot.drawMeasurement.resize(names.size());
@@ -173,12 +173,12 @@ void SimTestBackend::ToggleSensorPlot(int sensorIndex,int enabled) {
     int spacing = int(settings["sensorPlot"]["spacing"]);
     for(size_t i=0;i<sensorPlots.size();i++) {
       if(sensorPlots[i].sensorIndex == sensorIndex) {
-	int h = sensorPlots[i].view.height+spacing;
-	sensorPlots.erase(sensorPlots.begin()+i);
-	//shift everything else up one
-	for(size_t j=i;j<sensorPlots.size();j++)
-	  sensorPlots[j].view.y -= h; 
-	break;
+        int h = sensorPlots[i].view.height+spacing;
+        sensorPlots.erase(sensorPlots.begin()+i);
+        //shift everything else up one
+        for(size_t j=i;j<sensorPlots.size();j++)
+          sensorPlots[j].view.y -= h; 
+        break;
       }
     }
   }
@@ -218,7 +218,7 @@ void SimTestBackend::RenderWorld()
   //draw commanded setpoint
   if(drawDesired) {
     for(size_t r=0;r<world->robots.size();r++) {
-      Robot* robot=world->robots[r];
+      Robot* robot=world->robots[r].get();
       
       robot->UpdateConfig(robotWidgets[r].Pose());
       sim.controlSimulators[r].GetCommandedConfig(robot->q);
@@ -260,12 +260,12 @@ void SimTestBackend::RenderWorld()
     sim.UpdateModel();
     for(size_t i=0;i<world->robots.size();i++) {
       for(size_t j=0;j<world->robots[i]->geometry.size();j++) {
-	if(world->robots[i]->IsGeometryEmpty(j)) continue;
-	Box3D bbox = world->robots[i]->geometry[j]->GetBB();
-	Matrix4 basis;
-	bbox.getBasis(basis);
-	glColor3f(1,0,0);
-	drawOrientedWireBox(bbox.dims.x,bbox.dims.y,bbox.dims.z,basis);
+        if(world->robots[i]->IsGeometryEmpty(j)) continue;
+        Box3D bbox = world->robots[i]->geometry[j]->GetBB();
+        Matrix4 basis;
+        bbox.getBasis(basis);
+        glColor3f(1,0,0);
+        drawOrientedWireBox(bbox.dims.x,bbox.dims.y,bbox.dims.z,basis);
       }
     }
     for(size_t i=0;i<world->rigidObjects.size();i++) {
@@ -321,32 +321,32 @@ void SimTestBackend::ToggleDrawExpandedCheckbox(int checked)
     }
     for(size_t i=0;i<world->robots.size();i++) {
       for(size_t j=0;j<world->robots[i]->links.size();j++) {
-	int id=world->RobotLinkID(i,j);
-	if(sim.odesim.robot(i)->triMesh(j)) 
-	  paddings[id] += sim.odesim.robot(i)->triMesh(j)->GetPadding();
+        int id=world->RobotLinkID(i,j);
+        if(sim.odesim.robot(i)->triMesh(j)) 
+          paddings[id] += sim.odesim.robot(i)->triMesh(j)->GetPadding();
       }
     }
     for(size_t i=0;i<world->terrains.size();i++) {
       int id=world->TerrainID(i);
       if(sim.odesim.terrainGeom(i)) 
-	paddings[id] += sim.odesim.terrainGeom(i)->GetPadding();
+        paddings[id] += sim.odesim.terrainGeom(i)->GetPadding();
     }
     for(size_t i=0;i<world->rigidObjects.size();i++) {
       int id = world->RigidObjectID(i);
       if(sim.odesim.object(i)->triMesh()) 
-	paddings[id] += sim.odesim.object(i)->triMesh()->GetPadding();
+        paddings[id] += sim.odesim.object(i)->triMesh()->GetPadding();
     }
     for(size_t i=0;i<originalAppearance.size();i++) {
       //robots don't get a geometry
       if(world->IsRobot(i) >= 0) continue;
       if(paddings[i] > 0) {
-	//draw the expanded mesh
-	expandedAppearance[i].faceDisplayList.beginCompile();
-	GLDraw::drawExpanded(*world->GetGeometry(i),paddings[i]);
-	expandedAppearance[i].faceDisplayList.endCompile();
+        //draw the expanded mesh
+        expandedAppearance[i].faceDisplayList.beginCompile();
+        GLDraw::drawExpanded(*world->GetGeometry(i),paddings[i]);
+        expandedAppearance[i].faceDisplayList.endCompile();
       }
       else
-	expandedAppearance[i] = originalAppearance[i];
+        expandedAppearance[i] = originalAppearance[i];
     }
   }
   drawExpanded = checked;
@@ -383,25 +383,25 @@ bool SimTestBackend::OnCommand(const string& cmd,const string& args)
   }
   else if(cmd=="command_pose") {
     for(size_t i=0;i<sim.robotControllers.size();i++) {
-      RobotController* rc=sim.robotControllers[i];
+      RobotController* rc=sim.robotControllers[i].get();
       stringstream ss;
       Config qref;
       if(!rc->GetCommandedConfig(qref)) 
-	sim.controlSimulators[i].GetCommandedConfig(qref);
+        sim.controlSimulators[i].GetCommandedConfig(qref);
       ss<<robotWidgets[i].Pose_Conditioned(qref);
       if(!rc->SendCommand("set_q",ss.str())) {
-	fprintf(stderr,"set_q command does not work with the robot's controller\n");
+        fprintf(stderr,"set_q command does not work with the robot's controller\n");
       }
     }
   }
   else if(cmd=="command_config") {
     if(sim.robotControllers.size() == 0) {
-	fprintf(stderr,"set_q command does not work when there is no robot\n");
+        fprintf(stderr,"set_q command does not work when there is no robot\n");
     }
     else {
-      RobotController* rc=sim.robotControllers[0];
+      RobotController* rc=sim.robotControllers[0].get();
       if(!rc->SendCommand("set_q",args)) {
-	fprintf(stderr,"set_q command does not work with the robot's controller\n");
+        fprintf(stderr,"set_q command does not work with the robot's controller\n");
       }
     }
   }
@@ -485,7 +485,7 @@ bool SimTestBackend::OnCommand(const string& cmd,const string& args)
     double driver_value;
     ss>>driver_value;
     if(world->robots.size()>0) {
-      Robot* robot = world->robots[0];
+      Robot* robot = world->robots[0].get();
       robot->UpdateConfig(robotWidgets[0].Pose());
       robot->SetDriverValue(cur_driver,driver_value);
       robotWidgets[0].SetPose(robot->q);
@@ -530,12 +530,12 @@ bool SimTestBackend::LoadFile(const char* fn)
     size_t no = objectWidgets.size();
     robotWidgets.resize(world->robots.size());
     for(size_t i=nr;i<world->robots.size();i++) {
-      robotWidgets[i].Set(world->robots[i],&world->robotViews[i]);
+      robotWidgets[i].Set(world->robots[i].get(),&world->robotViews[i]);
       allRobotWidgets.widgets.push_back(&robotWidgets[i]);
     }
     objectWidgets.resize(world->rigidObjects.size());
     for(size_t i=no;i<world->rigidObjects.size();i++) {
-      objectWidgets[i].Set(world->rigidObjects[i]);
+      objectWidgets[i].Set(world->rigidObjects[i].get());
       allObjectWidgets.widgets.push_back(&objectWidgets[i]);
     }
     return true;
@@ -590,9 +590,9 @@ void SimTestBackend::EndDrag(int x,int y,int button,int modifiers)
       
       double d;
       if(allWidgets.Hover(x,viewport.h-y,viewport,d))
-	allWidgets.SetHighlight(true);
+        allWidgets.SetHighlight(true);
       else
-	allWidgets.SetHighlight(false);
+        allWidgets.SetHighlight(false);
       if(allWidgets.requestRedraw) { SendRefresh(); allWidgets.requestRedraw=false; }
     }
   }
@@ -611,17 +611,17 @@ void SimTestBackend::DoFreeDrag(int dx,int dy,int button)
     if(allWidgets.hasFocus) {
       allWidgets.Drag(dx,-dy,viewport);
       if(allWidgets.requestRedraw) {
-	allWidgets.requestRedraw = false;
-	SendRefresh();
-	SendCommand("update_config","");
+        allWidgets.requestRedraw = false;
+        SendRefresh();
+        SendCommand("update_config","");
       }
       //instead of updating object pose in model, update it in simulation
       if(allObjectWidgets.hasFocus) {
-	for(size_t i=0;i<objectWidgets.size();i++)
-	  if(objectWidgets[i].hasFocus) {
-	    sim.odesim.object(i)->SetTransform(world->rigidObjects[i]->T);
-	    sim.odesim.object(i)->SetVelocity(Vector3(0.0),Vector3(0.0));
-	  }
+        for(size_t i=0;i<objectWidgets.size();i++)
+          if(objectWidgets[i].hasFocus) {
+            sim.odesim.object(i)->SetTransform(world->rigidObjects[i]->T);
+            sim.odesim.object(i)->SetVelocity(Vector3(0.0),Vector3(0.0));
+          }
       }
     }
   }
@@ -650,7 +650,7 @@ void SimTestBackend::SimStep(Real dt)
     }
     if(body != NULL) {
       Vector3 wp = T*dragWidget.hoverPt;
-      sim.hooks.push_back(new SpringHook(body,wp,dragWidget.dragPt,dragForce));
+      sim.hooks.push_back(make_shared<SpringHook>(body,wp,dragWidget.dragPt,dragForce));
     }
   }
   else
@@ -714,7 +714,7 @@ void SimTestBackend::SimStep(Real dt)
     
   //update root of poseConfig from simulation
   for(size_t r=0;r<world->robots.size();r++) {
-    Robot* robot=world->robots[r];
+    Robot* robot=world->robots[r].get();
     robot->UpdateConfig(robotWidgets[r].Pose());
     Vector driverVals(robot->drivers.size());
     for(size_t i=0;i<robot->drivers.size();i++)
@@ -739,7 +739,7 @@ void SimTestBackend::SensorPlotUpdate()
   SensorBase* sensor = NULL;
   for(size_t i=0;i<sensorPlots.size();i++) {
     SensorPlot& sensorPlot = sensorPlots[i];
-    sensor = sensors.sensors[sensorPlot.sensorIndex];
+    sensor = sensors.sensors[sensorPlot.sensorIndex].get();
       
     sensorPlot.view.xmin = sim.time - Real(settings["sensorPlot"]["duration"]);
     sensorPlot.view.xmax = sim.time;
@@ -902,7 +902,7 @@ bool GLUISimTestGUI::Initialize()
   AddControl(glui->add_checkbox_to_panel(panel,"Pose objects"),"pose_objects");
   AddControl(glui->add_checkbox_to_panel(panel,"Pose by IK"),"pose_ik");
   driver_listbox = glui->add_listbox_to_panel(panel,"Driver",&cur_driver);
-  Robot* robot = world->robots[0];
+  Robot* robot = world->robots[0].get();
   for(size_t i=0;i<robot->drivers.size();i++) {
     char buf[256];
     strcpy(buf,robot->driverNames[i].c_str());
@@ -920,29 +920,29 @@ bool GLUISimTestGUI::Initialize()
   string viewFile = appdataPath + string("/simtest_view.txt");
   const static int NR = 24;
   const static char* rules [NR*3]= {"{type:key_down,key:c}","constrain_link","",
-				    "{type:key_down,key:d}","delete_constraint","",
-				    "{type:key_down,key:p}","print_config","",
-				    "{type:key_down,key:a}","advance","",
-				    "{type:key_down,key:\" \"}","command_pose","",
-				    "{type:key_down,key:v}","save_view",viewFile.c_str(),
-				    "{type:key_down,key:V}","load_view",viewFile.c_str(),
-				    "{type:button_press,button:simulate}","toggle_simulate","",
-				    "{type:button_press,button:reset}","reset","",
-				    "{type:button_press,button:set_milestone}","command_pose","",
-				    "{type:button_toggle,button:pose_ik_mode,checked:1}","constrain_point_mode","",
-				    "{type:button_toggle,button:pose_ik,checked:0}","pose_mode","",
-				    "{type:button_toggle,button:force_application_mode,checked:1}","force_application_mode","",
-				    "{type:button_toggle,button:force_application_mode,checked:0}","pose_mode","",
-				    "{type:button_toggle,button:do_logging,checked:1}","log_sim","simtest_log.csv",
-				    "{type:button_toggle,button:do_logging,checked:0}","log_sim","",
-				    "{type:button_toggle,button:do_contact_state_logging,checked:1}","log_contact_state","simtest_contact_log.csv",
-				    "{type:button_toggle,button:do_contact_state_logging,checked:0}","log_contact_state","",
-				    "{type:button_toggle,button:do_contact_wrench_logging,checked:1}","log_contact_wrenches","simtest_wrench_log.csv",
-				    "{type:button_toggle,button:do_contact_wrench_logging,checked:0}","log_contact_wrenches","",
-				    "{type:widget_value,widget:link,value:_0}","set_link","_0",
-				    "{type:widget_value,widget:link_value,value:_0}","set_link_value","_0",
-				    "{type:widget_value,widget:driver,value:_0}","set_driver","_0",
-				    "{type:widget_value,widget:driver_value,value:_0}","set_driver_value","_0",
+                                    "{type:key_down,key:d}","delete_constraint","",
+                                    "{type:key_down,key:p}","print_config","",
+                                    "{type:key_down,key:a}","advance","",
+                                    "{type:key_down,key:\" \"}","command_pose","",
+                                    "{type:key_down,key:v}","save_view",viewFile.c_str(),
+                                    "{type:key_down,key:V}","load_view",viewFile.c_str(),
+                                    "{type:button_press,button:simulate}","toggle_simulate","",
+                                    "{type:button_press,button:reset}","reset","",
+                                    "{type:button_press,button:set_milestone}","command_pose","",
+                                    "{type:button_toggle,button:pose_ik_mode,checked:1}","constrain_point_mode","",
+                                    "{type:button_toggle,button:pose_ik,checked:0}","pose_mode","",
+                                    "{type:button_toggle,button:force_application_mode,checked:1}","force_application_mode","",
+                                    "{type:button_toggle,button:force_application_mode,checked:0}","pose_mode","",
+                                    "{type:button_toggle,button:do_logging,checked:1}","log_sim","simtest_log.csv",
+                                    "{type:button_toggle,button:do_logging,checked:0}","log_sim","",
+                                    "{type:button_toggle,button:do_contact_state_logging,checked:1}","log_contact_state","simtest_contact_log.csv",
+                                    "{type:button_toggle,button:do_contact_state_logging,checked:0}","log_contact_state","",
+                                    "{type:button_toggle,button:do_contact_wrench_logging,checked:1}","log_contact_wrenches","simtest_wrench_log.csv",
+                                    "{type:button_toggle,button:do_contact_wrench_logging,checked:0}","log_contact_wrenches","",
+                                    "{type:widget_value,widget:link,value:_0}","set_link","_0",
+                                    "{type:widget_value,widget:link_value,value:_0}","set_link_value","_0",
+                                    "{type:widget_value,widget:driver,value:_0}","set_driver","_0",
+                                    "{type:widget_value,widget:driver_value,value:_0}","set_driver_value","_0",
   };
   for(int i=0;i<NR;i++) {
     AnyCollection c;
@@ -955,7 +955,7 @@ bool GLUISimTestGUI::Initialize()
 
 void GLUISimTestGUI::UpdateGUI()
 {
-  Robot* robot = world->robots[0];
+  Robot* robot = world->robots[0].get();
   if(cur_driver >= 0 && cur_driver < (int)robot->drivers.size()) {
     driver_listbox->set_int_val(cur_driver);
     Vector2 limits = robot->GetDriverLimits(cur_driver);
@@ -1054,12 +1054,12 @@ void GLUISimTestGUI::Handle_Control(int id)
   else if(controls[id]==toggleSensorDrawCheckbox) {
     if(sensorSelectIndex >= 0 && sensorSelectIndex < (int)sensorDrawn.size()) {
       if(toggleSensorDrawCheckbox->get_int_val()!=0) {
-	sensorDrawn[sensorSelectIndex]=1;
-	SendCommand("show_sensor",sensorSelectIndex);
+        sensorDrawn[sensorSelectIndex]=1;
+        SendCommand("show_sensor",sensorSelectIndex);
       }
       else {
-	sensorDrawn[sensorSelectIndex]=0;
-	SendCommand("hide_sensor",sensorSelectIndex);
+        sensorDrawn[sensorSelectIndex]=0;
+        SendCommand("hide_sensor",sensorSelectIndex);
       }
     }
   }
@@ -1070,26 +1070,26 @@ void GLUISimTestGUI::Handle_Control(int id)
   else if(controls[id]==toggleMeasurementDrawCheckbox) {
     if(sensorSelectIndex >= 0 && sensorSelectIndex < (int)sensorDrawn.size() && sensorMeasurementSelectIndex >= 0 && sensorMeasurementSelectIndex < (int)sensorMeasurementDrawn[sensorSelectIndex].size()) {
       if(toggleMeasurementDrawCheckbox->get_int_val()!=0) {
-	sensorMeasurementDrawn[sensorSelectIndex][sensorMeasurementSelectIndex]=1;
-	SendCommand("show_sensor_measurement",sensorSelectIndex,sensorMeasurementSelectIndex);
+        sensorMeasurementDrawn[sensorSelectIndex][sensorMeasurementSelectIndex]=1;
+        SendCommand("show_sensor_measurement",sensorSelectIndex,sensorMeasurementSelectIndex);
       }
       else {
-	sensorMeasurementDrawn[sensorSelectIndex][sensorMeasurementSelectIndex]=0;
-	SendCommand("hide_sensor_measurement",sensorSelectIndex,sensorMeasurementSelectIndex);
+        sensorMeasurementDrawn[sensorSelectIndex][sensorMeasurementSelectIndex]=0;
+        SendCommand("hide_sensor_measurement",sensorSelectIndex,sensorMeasurementSelectIndex);
       }
     }
   }
   else if(controls[id]==isolateMeasurementButton) {
     if(sensorSelectIndex >= 0 && sensorSelectIndex < (int)sensorDrawn.size() && sensorMeasurementSelectIndex >= 0 && sensorMeasurementSelectIndex < (int)sensorMeasurementDrawn[sensorSelectIndex].size()) {
       for(size_t i=0;i<sensorMeasurementDrawn[sensorSelectIndex].size();i++) {
-	if((int)i != sensorMeasurementSelectIndex) {
-	  sensorMeasurementDrawn[sensorSelectIndex][i] = 0;
-	  SendCommand("hide_sensor_measurement",sensorSelectIndex,i);
-	}
-	else {
-	  sensorMeasurementDrawn[sensorSelectIndex][i] = 1;
-	  SendCommand("show_sensor_measurement",sensorSelectIndex,i);
-	}
+        if((int)i != sensorMeasurementSelectIndex) {
+          sensorMeasurementDrawn[sensorSelectIndex][i] = 0;
+          SendCommand("hide_sensor_measurement",sensorSelectIndex,i);
+        }
+        else {
+          sensorMeasurementDrawn[sensorSelectIndex][i] = 1;
+          SendCommand("show_sensor_measurement",sensorSelectIndex,i);
+        }
       }
     }
   }

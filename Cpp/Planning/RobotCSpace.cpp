@@ -786,20 +786,20 @@ bool SingleRobotCSpace::CheckCollisionFree(const Config& x)
 }
 
 
-EdgePlanner* SingleRobotCSpace::PathChecker(const Config& a,const Config& b,int obstacle)
+EdgePlannerPtr SingleRobotCSpace::PathChecker(const Config& a,const Config& b,int obstacle)
 {
   if(constraints[obstacle]->IsConvex()) {
-    return new TrueEdgeChecker(this,a,b);
+    return make_shared<TrueEdgeChecker>(this,a,b);
   }
-  SubsetConstraintCSpace* ospace = new SubsetConstraintCSpace(this,obstacle);
-  return new EdgePlannerWithCSpaceContainer(ospace,new EpsilonEdgeChecker(ospace,a,b,settings->robotSettings[index].collisionEpsilon));
+  auto ospace = make_shared<SubsetConstraintCSpace>(this,obstacle);
+  return make_shared<EdgePlannerWithCSpaceContainer>(ospace,make_shared<EpsilonEdgeChecker>(ospace.get(),a,b,settings->robotSettings[index].collisionEpsilon));
 }
 
-EdgePlanner* SingleRobotCSpace::PathChecker(const Config& a,const Config& b)
+EdgePlannerPtr SingleRobotCSpace::PathChecker(const Config& a,const Config& b)
 {
-  return new EpsilonEdgeChecker(this,a,b,settings->robotSettings[index].collisionEpsilon);
+  return make_shared<EpsilonEdgeChecker>(this,a,b,settings->robotSettings[index].collisionEpsilon);
   //uncomment this if you need an explicit edge planner
-  //return new ExplicitEdgePlanner(this,a,b);
+  //return make_shared<ExplicitEdgePlanner>(this,a,b);
 }
 
 
@@ -914,7 +914,7 @@ SingleRigidObjectCSpace::SingleRigidObjectCSpace(RobotWorld& _world,int _index,W
 
 RigidObject* SingleRigidObjectCSpace::GetObject() const
 {
-  return world.rigidObjects[index];
+  return world.rigidObjects[index].get();
 }
 
 void SingleRigidObjectCSpace::IgnoreCollisions(int id)
@@ -962,9 +962,9 @@ bool SingleRigidObjectCSpace::UpdateGeometry(const Config& q)
 }
 
 
-EdgePlanner* SingleRigidObjectCSpace::PathChecker(const Config& a,const Config& b)
+EdgePlannerPtr SingleRigidObjectCSpace::PathChecker(const Config& a,const Config& b)
 {
-  return new EpsilonEdgeChecker(this,a,b,settings->objectSettings[index].collisionEpsilon);
+  return make_shared<EpsilonEdgeChecker>(this,a,b,settings->objectSettings[index].collisionEpsilon);
 }
 
 

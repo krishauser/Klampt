@@ -12,7 +12,7 @@ InputProcessorBase::InputProcessorBase()
 
 Robot* InputProcessorBase::GetRobot() const
 {
-  return world->robots[0];
+  return world->robots[0].get();
 }
 
 void InputProcessorBase::GetClickRay(int mx, int my, Ray3D& ray) const

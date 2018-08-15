@@ -55,9 +55,9 @@ GeneralizedRobot::GeneralizedRobot()
 GeneralizedRobot::GeneralizedRobot(RobotWorld& world)
 {
   for(size_t i=0;i<world.robots.size();i++)
-    Add(world.robots[i],world.robots[i]->name.c_str());
+    Add(world.robots[i].get(),world.robots[i]->name.c_str());
   for(size_t i=0;i<world.rigidObjects.size();i++)
-    Add(world.rigidObjects[i],world.rigidObjects[i]->name.c_str());
+    Add(world.rigidObjects[i].get(),world.rigidObjects[i]->name.c_str());
 }
 
 int GeneralizedRobot::NumDof() const

@@ -1,7 +1,7 @@
 #include "Interface/SimulationGUI.h"
 #include "Control/TabulatedController.h"
 #include "Control/SerialControlledRobot.h"
-#include "Control/JointSensors.h"
+#include "Sensing/JointSensors.h"
 #include <KrisLibrary/utils/indexing.h>
 #include <KrisLibrary/utils/stringutils.h>
 #include <fstream>
@@ -81,8 +81,8 @@ inline RobotController* MakeController(Robot* robot,const char* file)
 }
 inline void MakeDefaultSensors(Robot* robot,RobotSensors& sensors)
 {
-  JointPositionSensor* jp = new JointPositionSensor;
-  JointVelocitySensor* jv = new JointVelocitySensor;
+  auto jp = make_shared<JointPositionSensor>();
+  auto jv = make_shared<JointVelocitySensor>();
   jp->name = "q";
   jv->name = "dq";
   jp->q.resize(robot->q.n,Zero);
@@ -137,7 +137,7 @@ int main(int argc, const char** argv)
   if(!backend.LoadAndInitSim(argc-i+1,&argv[i-1]))
     return 1;
 
-  Robot* robot = world.robots[0];
+  Robot* robot = world.robots[0].get();
   if(optimize) {
     cout<<"Optimizing policy around setpoint "<<robot->q<<"..."<<endl;
     if(swingup)

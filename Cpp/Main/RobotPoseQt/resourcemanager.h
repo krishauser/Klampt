@@ -19,8 +19,8 @@ class ResourceNode
   void Print(int level=0);
   string Identifier() const;
   vector<string> PathTo() const;
-  SmartPointer<ResourceNode> AddChild(const ResourcePtr& res);
-  vector<SmartPointer<ResourceNode> > AddChildren(const vector<ResourcePtr>& children);
+  shared_ptr<ResourceNode> AddChild(const ResourcePtr& res);
+  vector<shared_ptr<ResourceNode> > AddChildren(const vector<ResourcePtr>& children);
   bool Editable() const;
   void SetSaved() { saved = true; }
   bool IsSaved() const { return saved; }
@@ -49,7 +49,7 @@ class ResourceNode
   const char* Decorator() const;
 
   ResourcePtr resource;
-  vector<SmartPointer<ResourceNode> > children;
+  vector<shared_ptr<ResourceNode> > children;
   ResourceNode* parent;
  private:
   bool saved;
@@ -59,7 +59,7 @@ class ResourceNode
   bool valid;
 };
 
-typedef SmartPointer<ResourceNode> ResourceNodePtr;
+typedef shared_ptr<ResourceNode> ResourceNodePtr;
 
 class ResourceTree
 {  

@@ -39,7 +39,7 @@ INCLUDE_DIRECTORIES(${INCLUDE_DIRS})
 LINK_DIRECTORIES(${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
 
 # define the Klamp't library subdirectories in the SUBDIRS variable
-SET(SUBDIRS Contact Control IO Interface Modeling Planning Simulation View)
+SET(SUBDIRS Contact Control IO Interface Modeling Planning Sensing Simulation View)
 
 # Get all compilation files in subdirectories
 foreach(s ${SUBDIRS})

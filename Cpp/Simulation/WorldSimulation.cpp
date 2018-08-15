@@ -247,9 +247,9 @@ void WorldSimulation::Init(RobotWorld* _world)
 
   //setup control simulators
   for(size_t i=0;i<controlSimulators.size();i++) {
-    Robot* robot=world->robots[i];
+    Robot* robot=world->robots[i].get();
     RobotMotorCommand& command=controlSimulators[i].command;
-    controlSimulators[i].Init(robot,odesim.robot(i),(i < robotControllers.size() ? robotControllers[i] : NULL));
+    controlSimulators[i].Init(robot,odesim.robot(i),(i < robotControllers.size() ? robotControllers[i].get() : NULL));
 
     //RobotController* c=controlSimulators[i].controller;
 
@@ -297,9 +297,9 @@ void WorldSimulation::OnAddModel()
 
     //set up control simulator
     controlSimulators.resize(i+1);
-    Robot* robot=world->robots[i];
+    Robot* robot=world->robots[i].get();
     RobotMotorCommand& command=controlSimulators[i].command;
-    controlSimulators[i].Init(robot,odesim.robot(i),(i < robotControllers.size() ? robotControllers[i] : NULL));
+    controlSimulators[i].Init(robot,odesim.robot(i),(i < robotControllers.size() ? robotControllers[i].get() : NULL));
 
     //RobotController* c=controlSimulators[i].controller;
 
@@ -333,13 +333,13 @@ void WorldSimulation::OnAddModel()
   }
 }
 
-void WorldSimulation::SetController(int index,SmartPointer<RobotController> c)
+void WorldSimulation::SetController(int index,shared_ptr<RobotController> c)
 {
   if(robotControllers.empty()) {
     robotControllers.resize(world->robots.size());
   }
   robotControllers[index] = c;
-  controlSimulators[index].controller = c;
+  controlSimulators[index].controller = c.get();
   if(c) {
     c->sensors = &controlSimulators[index].sensors;
     c->command = &controlSimulators[index].command;
@@ -381,7 +381,7 @@ void WorldSimulation::Advance(Real dt)
 
     //update viscous friction approximation as dry friction from current velocity
     for(size_t i=0;i<controlSimulators.size();i++) {
-      Robot* robot=world->robots[i];
+      Robot* robot=world->robots[i].get();
       for(size_t j=0;j<robot->drivers.size();j++) {
 	//setup viscous friction
 	if(robot->drivers[j].viscousFriction != 0) {
@@ -455,7 +455,7 @@ void WorldSimulation::Advance(Real dt)
 
   //kill any autokill hooks at end of timestep
   bool anyKilled = false;
-  vector<SmartPointer<WorldSimulationHook> > newhooks;
+  vector<shared_ptr<WorldSimulationHook> > newhooks;
   for(size_t i=0;i<hooks.size();i++) {
     if(hooks[i]->autokill) {
       if(!anyKilled) 
@@ -494,7 +494,7 @@ void WorldSimulation::AdvanceFake(Real dt)
 
   //kill any autokill hooks at end of timestep
   bool anyKilled = false;
-  vector<SmartPointer<WorldSimulationHook> > newhooks;
+  vector<shared_ptr<WorldSimulationHook> > newhooks;
   for(size_t i=0;i<hooks.size();i++) {
     if(hooks[i]->autokill) {
       if(!anyKilled) 

@@ -107,8 +107,8 @@ bool WorldGUIBackend::ReloadFile(const char* fn)
         //check for previous robots of the same filename
         for(size_t i=0;i<world->robots.size();i++) {
           if(name == world->robots[i]->name) {
-            SmartPointer<Robot> r = world->robots[index];
-            SmartPointer<Robot> s = world->robots[i];
+            shared_ptr<Robot> r = world->robots[index];
+            shared_ptr<Robot> s = world->robots[i];
             //copy configuration, if possible
             map<string,int> jqmap;
             for(size_t j=0;j<r->links.size();j++)
@@ -124,7 +124,7 @@ bool WorldGUIBackend::ReloadFile(const char* fn)
             r->UpdateGeometry();
             world->robots[i] = r;
             world->robots.erase(world->robots.begin()+index);
-            world->robotViews[i] = ViewRobot(r);
+            world->robotViews[i] = ViewRobot(r.get());
             found = true;
             break;
           }

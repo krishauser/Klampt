@@ -148,12 +148,12 @@ class GenericBackendBase
 class CompositeBackend : public GenericBackendBase
 {
  public:
-  void Add(SmartPointer<GenericBackendBase>& backend);
+  void Add(std::shared_ptr<GenericBackendBase>& backend);
   void SetDefaultBroadcasts();
   void SetBroadcast(const string& msgtype) { targets[msgtype]="all"; }
   virtual bool ProcessMessage(const AnyCollection& msg);
 
-  vector<SmartPointer<GenericBackendBase> > children;
+  vector<std::shared_ptr<GenericBackendBase> > children;
   map<string,string> targets;
 };
 

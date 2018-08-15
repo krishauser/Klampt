@@ -3,7 +3,7 @@
 
 #include <KrisLibrary/geometry/AnyGeometry.h>
 #include <KrisLibrary/GLdraw/GeometryAppearance.h>
-#include <KrisLibrary/utils/SmartPointer.h>
+#include <memory>
 #include <map>
 #include <string>
 
@@ -31,8 +31,8 @@ class GeometryManager;
 class ManagedGeometry
 {
  public:
-  typedef SmartPointer<Geometry::AnyCollisionGeometry3D> GeometryPtr;
-  typedef SmartPointer<GLDraw::GeometryAppearance> AppearancePtr;
+  typedef std::shared_ptr<Geometry::AnyCollisionGeometry3D> GeometryPtr;
+  typedef std::shared_ptr<GLDraw::GeometryAppearance> AppearancePtr;
 
   ManagedGeometry();
   ///Copy constructor is a shallow copy
