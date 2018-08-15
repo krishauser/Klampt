@@ -1,8 +1,18 @@
+#!/usr/bin/env python
 import sys
 from klampt import *
 from klampt import robotsim
 from klampt import vis
 import time
+
+print """ros_point_cloud_show.py: Shows how to receive point clouds from ROS into Klamp't.
+
+Usage: python ros_point_cloud_show.py topic [save]
+- topic: the ROS topic to subscribe to.
+- save: If "save" is specified, then point clouds are saved to disk in PCD format.
+
+Simply close the window to quit.
+"""
 
 topic = sys.argv[1]
 
@@ -26,7 +36,9 @@ while vis.shown():
 	#in klampt / robotio.h -- this needs to be done to update ROS
 	processed = robotsim.ProcessStreams()
 	if processed:
-		#don't strictly need an if statement here, this is just a slight optimization
+		#don't strictly need the prior if statement, this is just a slight optimization
+		#if the sender is slower than the visualization
+
 		if g.empty():
 			print "empty"
 		else:
@@ -40,10 +52,11 @@ while vis.shown():
 		#this needs to be done to refresh the appearance
 		a = world.rigidObject(0).appearance()
 		a.refresh()
-		#vis.dirty(("world","point_cloud"))
 
 	vis.unlock()
 	#TODO: do anything?
-	time.sleep(0.3)
+
+	#runs at most 10Hz
+	time.sleep(0.1)
 
 vis.kill()

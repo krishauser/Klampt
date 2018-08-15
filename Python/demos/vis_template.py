@@ -448,10 +448,14 @@ def simulation_template(world):
     vis.kill()
 
 if __name__ == "__main__":
-    print "vistemplate.py: Demonstrates examples about how to run the visualization framework"
+    print """================================================================================
+    vis)template.py: Demonstrates examples about how to run the visualization framework.
+    """
     if len(sys.argv)<=1:
-        print "USAGE: vistemplate.py [world_file]"
-        print "   (Try python vistemplate.py ../../data/athlete_plane.xml)"
+        print "USAGE: vis_template.py [world_file]"
+        print "   (Try python vis_template.py ../../data/athlete_plane.xml)"
+    print """================================================================================"""
+    if len(sys.argv)<=1:
         exit()
 
     #creates a world and loads all the items on the command line

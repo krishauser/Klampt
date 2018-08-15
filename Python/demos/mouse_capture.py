@@ -2,14 +2,14 @@ from klampt import *
 from klampt import vis
 from klampt.vis.glinterface import *
 
-class GLTest(GLPluginInterface):
+class MouseCapture(GLPluginInterface):
     def __init__(self,world):
         GLPluginInterface.__init__(self)
         self.world = world
         self.q = world.robot(0).getConfig()
         
-    def display(self):
-        self.world.drawGL()
+    def mousefunc(self,button,state,x,y):
+        print "Mouse button",button,"state",state,"at point",x,y
 
     def motionfunc(self,x,y,dx,dy):
         if 'shift' in self.modifiers():
@@ -19,18 +19,23 @@ class GLTest(GLPluginInterface):
             return True
         return False
         
-    def idle(self):
-        return True
-
 if __name__ == "__main__":
-    print """mousetest.py: A simple program where the mouse motion, when
-    shift-clicking, gets translated into joint values for an animated robot."""
+    print """================================================================
+    mouse_capture.py: A simple program where the mouse motion, when
+    shift-clicking, gets translated into joint values for an animated robot.
+    ========================================================================
+    """
 
     world = WorldModel()
     res = world.readFile("../../data/tx90blocks.xml")
     if not res:
         raise RuntimeError("Unable to load world")
-    #set a custom initial configuration of the world
-    vis.setWindowTitle("mousetest.py")
-    vis.run(GLTest(world))
+    
+    plugin = MouseCapture(world)
+    vis.add("world",world)
+    vis.pushPlugin(plugin)
+    vis.setWindowTitle("mouse_capture.py")
+    vis.spin(float('inf'))   #shows the window
+    vis.kill()
+
 

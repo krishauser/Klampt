@@ -19,7 +19,12 @@ class GLTest(GLRealtimeProgram):
         return
 
 if __name__ == "__main__":
-    print "gltest.py: This example demonstrates how to simulate a world and read a force sensor"
+    print "================================================================"
+    print "gl_vis.py: This example demonstrates how to use the GL visualization interface"
+    print "   to tie directly into the GUI."
+    print
+    print "   The demo simulates a world and reads a force sensor"
+    print "================================================================"
     world = WorldModel()
     res = world.readFile("../../data/hubo_plane.xml")
     if not res:
