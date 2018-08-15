@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 import os
 import sys
 from klampt import *
@@ -131,10 +131,14 @@ class MyGLViewer(GLSimulationPlugin):
 
 
 if __name__ == "__main__":
+    print "============================================================"
     print "simtest.py: Simulates a robot file and Python controller"
     if len(sys.argv)<=1:
         print "USAGE: simtest.py [world_file] [controller files (.py)]"
+    print "============================================================"
+    if len(sys.argv)<=1:
         exit()
+
     world = WorldModel()
     #load up any world items, control modules, or paths
     control_modules = []

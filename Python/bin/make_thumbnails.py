@@ -1,7 +1,10 @@
+#!/usr/bin/env python
+
 from klampt import *
 from klampt import vis
 from klampt.io import resource
 import os,glob
+import sys
 
 def mkdir_p(path):
     import os, errno
@@ -40,7 +43,13 @@ def make_thumbnails(folder,outputfolder):
 	        	print "Could not save thumbnail."
 	        	exit(0)
 
-make_thumbnails("../../data","thumbnails")
-#make_thumbnails("../../data/robots","thumbnails/robots")
-#make_thumbnails("../../data/objects","thumbnails/objects")
-#make_thumbnails("../../data/terrains","thumbnails/terrains")
+if __name__ == '__main__':
+    if len(sys.argv) <= 1:
+        print "Usage: python make_thumbnails.py INPUT_FOLDER [OUTPUT_FOLDER]"
+        exit(0)
+    output_folder = 'thumbnails'
+    if len(sys.argv) > 2:
+        output_folder = sys.argv[2]
+    print "Outputting thumbnails to",output_folder
+    make_thumbnails(sys.argv[1],output_folder)
+    

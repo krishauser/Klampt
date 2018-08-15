@@ -1,18 +1,4 @@
 #!/usr/bin/env python
-"""A program to quickly browse Klamp't objects.  Run it with
-
-   python resourcebrowser.py
-
-If you know what items to use in the reference world, call
-
-   python resourcebrowser.py world.xml
-
-or 
-
-   python resourcebrowser.py item1 item2 ...
-
-where the items are world, robot, terrain, object, or geometry files.
-"""
 
 from klampt import *
 from klampt.io import loader,resource
@@ -644,12 +630,28 @@ class ResourceBrowser(QtGui.QMainWindow):
         self.glviewportManager.refresh()
 
 if __name__ == '__main__':
-    print """===============================================================================
-USAGE: python resourcebrowser.py [item1 item2 ...]
-where the given items are world, robot, terrain, object, or geometry files.
+    print """
+===============================================================================
+A program to quickly browse Klamp't objects. 
 
-If no items are given, an empty world is used.  You may add items to the
-reference world using the Add to World button.
+USAGE: python resource_browser.py [item1 item2 ...]
+
+where the given items are world, robot, terrain, object, or geometry files. Run
+it with
+
+   python resource_browser.py
+
+for an empty reference world. You may add items to the reference world using
+the `Add to World` button.  If you know what items to use in the reference
+world, run it with
+
+   python resource_browser.py world.xml
+
+or 
+
+   python resource_browser.py item1 item2 ...
+
+where the items are world, robot, terrain, object, or geometry files.
 ===============================================================================
 """
     def makefunc(gl_backend):
