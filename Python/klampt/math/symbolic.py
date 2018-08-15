@@ -228,9 +228,6 @@ Defining your own Functions
 
 If you want to use your own Python functions, you can use Context.declare.  By default this will use the same
 function signature that you used to define the function, or you can provide a new signature (name, arguments).
-Functions can also have argument types and return types, which are used for type checking at Expression creation time.
-This is quite helpful for debugging.
-
 The convention used in the built-in symbolic libraries is to prepend an underscore to the underlying Python
 function, and then declare the function to the undecorated name.
 
@@ -258,6 +255,16 @@ list so that unbound variables in the Expression are bound to the arguments.
     f = ctx.declare(const(2)*expr("x")*expr("y"),"f",["x","y"])
 
 This form will automatically obtain derivatives for you.
+
+Functions can also specify argument types and return types, which are used for type checking at Expression creation
+time. This is quite helpful for debugging, since you do not have to evaluate the Expression to find mismatched
+types, like indexing a vector with a list. To declare types for custom functions, use the setArgType and setReturnType
+methods:
+
+    #numeric input and output
+    f.setArgType(0,'N')
+    f.setArgType(1,'N')
+    f.setReturnType('N')
 
 
 =====================================================================================
@@ -406,7 +413,6 @@ Wish list
 
 - Sparse matrix support when obtaining jacobians -- especially in block matrix form.
 - Compiled code generation on vectors/matrices -- maybe integration with TensorFlow / PyTorch?
-
 
 
 """
@@ -661,6 +667,7 @@ class Type:
         else:
             return None
     def __str__(self):
+        """Returns a string representation of this type, suitable for brief printouts"""
         if self.char is None:
             return 'None'
         if self.size is None and self.subtype is None:
@@ -677,6 +684,32 @@ class Type:
                 return self.char+' size '+str(self.size)+' (subtypes '+','.join(str(s) for s in self.subtype)+')'
             else:
                 return self.char+' size '+str(self.size)+' (subtype '+str(self.subtype)+')'
+
+    _TYPE_DESCRIPTIONS = {'N':'numeric','I':'int','B':'bool','X':'index (int or slice)',
+        'V':'vector','M':'matrix','A':'array','L':'list','U':'user data'}
+        
+    def info(self):
+        """Returns a verbose, human readable string representation of this type"""
+        if self.char is None:
+            return 'unknown'
+        typedesc = _TYPE_DESCRIPTIONS[self.char]
+        if self.size is not None:
+            if isinstance(self.size,(list,tuple)):
+                sizedesc = 'x'.join(str(v) for v in self.size)
+                typedesc = sizedesc + ' ' + typedesc
+            else:
+                sizedesc = str(self.size)
+                typedesc = sizedesc + '-' + typedesc
+        if self.subtype is None:
+            return typedesc
+        else:
+            if self.char == 'U':
+                return '%s of type %s'%(typedesc,self.subtype)
+            if isinstance(self.subtype,list):
+                return '%s of subtypes [%s]'%(typedesc,','.join(str(s) for s in self.subtype))
+            else:
+                return '%s of subtype (%s)'%(typedesc,self.subtype.info())
+
 
 Numeric = Type('N')
 Integer = Type('I')
@@ -1302,10 +1335,12 @@ class Function:
         the autoSetJacobians function.
 
         Attributes:
-        - name: name of function
-        - func: Expression or python function
-        - argNames (optional): names of arguments
-        - argTypes (optional): list of argument Types. 
+        - name: name of function used in printing and IO.
+        - description (optional): text description of function.
+        - func: Expression or python function.
+        - argNames (optional): names of arguments.
+        - argTypes (optional): list of argument Types.
+        - returnType (optional): return Type.
         - deriv (optional): list of Jacobian-vector products with respect to each argument, or a function
           df(args,dargs).
         - colstackderiv (optional): same as deriv, except that stacked argument derivatives are accepted.
@@ -1320,6 +1355,7 @@ class Function:
             "parse": for parseCompatible=True exprToStr
         """
         self.name = name
+        self.description = None
         self.func = func
         self.argNames = argNames
         self.argTypes = None
@@ -1540,16 +1576,51 @@ class Function:
                 darg = expr(darg)
             self.setJacobian(arg,darg,asExpr=True)
     def setReturnType(self,type):
-        self.returnType = type
+        """Sets a return type specifier.
+        - type is a Type object or character type specifier.
+        """
+        self.returnType = Type(type)
     def setArgType(self,arg,type):
+        """Sets an argument type specifier.
+        - arg is an index or string naming an argument.
+        - type is a Type object or character type specifier.
+        """
         if self.argTypes is None:
             self.argTypes = [None]*len(self.argNames)
+        if isinstance(arg,str):
+            arg = self.argNames.index(arg)
+        if arg < 0 or arg >= len(self.argNames):
+            raise ValueError("Invalid argument specified")
         self.argTypes[arg] = Type(type)
     def getArgType(self,arg):
+        """Retrieves an argument type.  arg  is an index or string naming an argument."""
         if self.argTypes is None: return None
         if isinstance(arg,str):
             arg = self.argNames.index(arg)
         return self.argTypes[arg]
+    def info(self):
+        """Returns an text string describing the Function, similar to a docstring"""
+        signature = '%s(%s)'%(self.name,','.join(self.argNames))
+        argHelp = None
+        if self.argTypes is not None:
+            argHelp = []
+            for name,type in zip(self.argNames,self.argTypes):
+                if type is None:
+                    argHelp.append('%s: unknown' %(name,))
+                else:
+                    argHelp.append('%s: %s'%(name,type.info()))
+        returnHelp = None
+        if self.returnType is not None:
+            returnHelp = self.returnType.info()
+        items = [signature]
+        if self.description != None:
+            items += ['',self.description,'']
+        if self.argTypes is not None:
+            items += ['','Parameters','---------']+argHelp
+        if returnHelp is not None:
+            items += ['','Returns','-------',returnHelp]
+        return '\n'.join(items)
+
 
 class Variable:
     def __init__(self,name,type,ctx=None):
@@ -3950,6 +4021,103 @@ map_.custom_eval = _map
 forall.custom_eval = _forall
 forsome.custom_eval = _forsome
 summation.custom_eval = _summation
+range_.description = """Equivalent to Python's range(n) function."""
+dims.description = """Returns the dimensionality of the input.  Equivalent to len(shape(x))."""
+len_.description = """Equivalent to Python's len(x) function, except if x is a scalar then it evaluates to 0. 
+
+If x is a multi-dimensional array, this is the length of its first dimension.  Undefined for other
+forms of user data."""
+count.description = """Evaluates the number of numeric parameters in x. Works with scalars, arrays, and lists.
+
+If x is a scalar then it evaluates to 1.  Lists are evaluated recursively.  Undefined for other forms of
+user data."""
+shape.description = """Evaluates to x.shape if x is a Numpy array, (len_(x),) if x is a vector, and () if x is
+a scalar.  (shortcut: "x.shape")"""
+reshape.description = """Evaluates to x reshaped to the shape s.  If x is a scalar, this evaluates to a constant
+matrix."""
+transpose.description = """Evaluates to np.transpose(x).  (shortcut: "x.T")"""
+basis.description = """Evaluates to the i'th elementary basis vector in dimension n."""
+eye.description = """Evaluates to np.eye(n) if n > 0, otherwise returns 1."""
+zero.description = """Evaluates to np.zeros(s) if s is a matrix shape or scalar > 0, otherwise evaluates to 0."""
+diag.description = """Evaluates to np.diag(x)."""
+flatten.description = """Evaluates to a vector where all arguments are stacked (concatenated) into a single
+vector. Arrays are reduced to vectors by Numpy's flatten(), and complex objects are reduced via
+recursive flattening."""
+row_stack.description = """Evaluates to a matrix where all arguments are stacked vertically.  1D arrays are
+treated as row vectors.  If only a single list element is provided, then all arguments are stacked."""
+column_stack.description = """Evaluates to a matrix where all arguments are stacked horizontally.  1D arrays are
+treated as column vectors. If only a single list element is provided, then all arguments are stacked."""
+
+eq.description = """Evaluates to lhs = rhs (shortcut: "lhs = rhs")."""
+ne.description = """Evaluates to lhs != rhs (shortcut: "lhs != rhs")."""
+le.description = """Evaluates to lhs <= rhs (shortcut: "lhs <= rhs")."""
+ge.description = """Evaluates to lhs >= rhs (shortcut: "lhs >= rhs")."""
+not_.description = """Evaluates to not x (shortcut: "not x")."""
+or_.description = """Evaluates to x or y (shortcut: "x or y")."""
+and_.description = """Evaluates to x and y (shortcut: "x and y")."""
+any_.description = """Evaluates to any(*args)"""
+all_.description = """Evaluates to all(*args)"""
+neg.description = """Evaluates to -x (shorcut "-x")."""
+abs_.description = """Evaluates to abs(x) (shortcut: "abs(x)"). Works with arrays too (elementwise)"""
+sign.description = """Evaluates the sign of x.  Works with arrays too (elementwise)."""
+add.description = """Evaluates to x + y (shortcut: "x + y").  Works with arrays too."""
+sub.description = """Evaluates to x y (shortcut: "x - y").  Works with arrays too, and vector - scalar."""
+mul.description = """Evaluates to x * y (shortcut: "x * y").  Works with arrays too (elementwise multiplication)."""
+div.description = """Evaluates to x / y (shortcut: "x / y").  Works with arrays too (elementwise division), and
+vector / scalar."""
+pow_.description = """Evaluates to pow(x,y) (shortcut "x**y")."""
+dot.description = """Evaluates to np.dot(x,y)."""
+max_.description = """Evaluates to the maximum of the arguments."""
+min_.description = """Evaluates to the minimum of the arguments."""
+argmax.description = """Evaluates to the index of the maximum of the argments."""
+argmin.description = """Evaluates to the index of the minimum of the argments."""
+cos.description = """Evaluates to math.cos(x)."""
+sin.description = """Evaluates to math.sin(x)."""
+tan.description = """Evaluates to math.tan(x)."""
+sqrt.description = """Evaluates to math.sqrt(x)."""
+exp.description = """Evaluates to math.exp(x)."""
+log.description = """Evaluates to math.log(x) (base 10)."""
+ln.description = """Evaluates to math.ln(x) (natural log)."""
+sum_.description = """Evaluates to sum(args).  If arguments are vectors or matrices, then the result is also a vector
+or matrix. This is somewhat different behavior from sum(x) if x is a list."""
+weightedsum.description = """Evaluates to w1*v1+...+wn*vn. """
+getitem.description = """Evaluates to vec[index].  This also supports slices and tuples, as well as lists (Numpy fancy
+indexing). (shortcut: "vec[index]")"""
+setitem.description = """Evaluates to vec except with vec[index] set to val.  Equivalent to Python code "temp = vec[:];
+vec[index]=val; return temp" """
+getattr_.description = """returns the value of a given attribute under the given object. For example,
+getattr_(traj,const("milestones")) gets the milestone list of a user-data Trajectory named traj.
+
+If the result is a function (e.g., a getter method), it will be called with no arguments.  For example,
+getattr_(robot,const("getJointLimits")) will return the robot's joint limits.  (shortcut:
+"object.attr", where object is a UserDataExpression)"""
+setattr_.description = """returns a modified version of the given class object, where value is assigned to the
+attribute attr. For example, setattr_(traj,const("times"),[0,0.5,0.1]) sets the times attribute of a
+Trajectory to [0,0.5,1].  Note: this operation modifies the object itself and returns it. 
+
+If the attribute is a function (e.g., a setter method), it will be called with the argument val."""
+if_.description = """If cond evaluates to True, this expression evaluates to trueval. Otherwise, it evaluates to
+falseval."""
+switch.description = """An if-elif-elif-...-else switch statement."""
+array.description = """Creates a list or numpy array of the given arguments. This can accept arbitrary arguments,
+such as variable size vectors.  A Numpy array is produced only if the items have compatible types
+and dimensions."""
+list_.description = """Creates a list of the given arguments. This can accept arbitrary arguments, such as variable
+size vectors.  No attempt is made to convert to a numpy array."""
+tuple_.description = """Creates a tuple of the given arguments. This can accept arbitrary arguments, such as variable
+size vectors."""
+zip_.description = """Equivalent to the Python zip function, returning a list of tuples."""
+subs.description = """evaluates expr with var substituted with value.  For example, subs(const(2)*"i","i",3.5)
+yields 2*3.5"""
+map_.description = """like the Python map function, evaluates to a list where each entry evaluates expr with var
+substituted with a value from the list values.  For example, if x is a Variable, map_(x**"i","i",range(3))
+yields the list [x**0, x**1, x**2]"""
+forall.description = """True if, for every value in the list values, expr evaluates to nonzero when var is substituted
+with that value. Equivalent to all_(*[subs(expr,var,value) for value in values])"""
+forsome.description = """True if, for some value in the list values, expr evaluates to nonzero when var is substituted
+with that value. Equivalent to any_(*[subs(expr,var,value) for value in values])"""
+summation.description = """The sum of expr over var when var is substitued with each value in the list values.
+Equivalent to sum_(*[subs(expr,var,value) for value in values])"""
 
 _builtin_functions = {'dims':dims,'len':len_,'count':count,'shape':shape,'reshape':reshape,'transpose':transpose,'range':range_,
                     'eye':eye,'basis':basis,'zero':zero,'diag':diag,

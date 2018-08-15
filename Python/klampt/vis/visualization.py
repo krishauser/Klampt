@@ -192,6 +192,9 @@ def setAttribute(name,attribute,value): sets an attribute of the appearance
     - 'endeffectors': for a robot Trajectory, the list of end effectors to plot (default the last link).
     - 'maxConfigs': for a Configs resource, the maximum number of drawn configurations (default 10)
     - 'fancy': for RigidTransform objects, whether the axes are drawn with boxes or lines (default False)
+    - 'type': for ambiguous items, like a 3-item list when the robot has 3 links, specifies the type to be
+       used.  For example, 'Config' draws the item as a robot configuration, while 'Vector3' or 'Point'
+       draws it as a point.
 def setColor(name,r,g,b,a=1.0): changes the color of an item.
 def setDrawFunc(name,func): sets a custom OpenGL drawing function for an item.
     func is a one-argument function that takes the item data as input.  Set
