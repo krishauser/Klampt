@@ -182,7 +182,7 @@ def rotation_vector(R):
 
 def axis_angle(R):
     """Returns the (axis,angle) pair representing R"""
-    m = moment(R)
+    m = rotation_vector(R)
     return (vectorops.unit(m),vectorops.norm(m))
 
 def from_axis_angle(aa):
