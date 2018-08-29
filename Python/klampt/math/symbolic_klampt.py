@@ -17,6 +17,7 @@ from symbolic_linalg import *
 from .. import *
 import so3,se3
 from ..model import ik
+import weakref
 
 def _so3_rotation(axis,angle):
     """Symbolic version of so3.rotation"""
@@ -47,13 +48,11 @@ class SO3Context(Context):
     | Function       | Derivative   | Simplification |
     |----------------|--------------|----------------|
     | identity       | N/A          | N/A            |
-    | matrix         | Y            |                |
-    | inv            | Y            |                |
+    | matrix         | Y            | Y              |
+    | inv            | Y            | Y              |
     | mul            |              |                |
     | apply          | Y,Y          |                |
-    | rotation       |              |                |
-    | error          |              |                |
-    | distance       |              |                |
+    | rotation       | N,Y          |                |
     | from_matrix    | Y            |                |
     | from_rpy       |              |                |
     | rpy            |              |                |
@@ -61,6 +60,10 @@ class SO3Context(Context):
     | quaternion     |              |                |
     | from_rotation_v|              |                |
     | rotation_vector|              |                |
+    | axis           |              |                |
+    | angle          | Y            |                |
+    | error          |              |                |
+    | distance       |              |                |
     | eq_constraint  | Y            |                |
     | quaternion_cons| Y            |                |
     """
@@ -69,28 +72,49 @@ class SO3Context(Context):
         self.type = Type('V',9)
         Rvar = Variable("R",self.type)
         Rsymb = VariableExpression(Rvar)
+        R1 = Variable("R1",self.type)
+        R2 = Variable("R2",self.type)
+        V3type = Type('V',3)
         q = Variable('q',Type('V',4))
-        pointvar = Variable("point",Type("V",3))
+        pointvar = Variable("point",V3type)
         pointsymb = VariableExpression(pointvar)
         self.identity = self.declare(expr(so3.identity()),"identity",[])
+        self.identity.description = "The identity rotation"
         self.matrix = self.declare(expr(so3.matrix(Rsymb)),"matrix",["R"])
+        self.matrix.addSimplifier(['so3.identity'],(lambda R:eye(3)),pre=True)
+        self.matrix.description = "Converts to a 3x3 matrix"
         M = Variable("M",Type('M',(3,3)))
         self.from_matrix = self.declare(flatten(transpose(M)),"from_matrix",['M'])
+        self.from_matrix.description = "Converts from a 3x3 matrix"
         self.from_matrix.autoSetJacobians()
         self.inv = self.declare(expr(so3.inv(Rsymb)),"inv",["R"])
+        self.inv.description = "Inverts a rotation"
         self.inv.autoSetJacobians()
+        self.inv.properties['inverse'] = weakref.proxy(self.inv)
+        self.inv.addSimplifier(['so3.identity'],lambda R:R)
         self.mul = self.declare(so3.mul,"mul")
+        self.mul.description = "Inverts a rotation"
+        self.mul.setDeriv(0,lambda R1,R2,dR1:self.mul(dR1,R2),asExpr=True)
+        self.mul.setDeriv(1,lambda R1,R2,dR2:self.mul(R1,dR2),asExpr=True)
+        self.mul.addSimplifier(['so3.identity',None],(lambda R1,R2:R2),pre=True)
+        self.mul.addSimplifier([None,'so3.identity'],(lambda R1,R2:R1),pre=True)
+        self.mul.properties['associative'] = True
         self.apply = self.declare(expr(so3.apply(Rsymb,pointsymb)),"apply",["R","point"])
+        self.apply.addSimplifier(['so3.identity',None],(lambda R,point:point),pre=True)
+        self.apply.addSimplifier([None,'zero'],(lambda R,point:point),pre=True)
         self.apply.autoSetJacobians()
         self.rotation = self.declare(so3.rotation,"rotation")
-        self.error = self.declare(so3.error,"error")
-        self.distance = self.declare(so3.distance,"distance")
         self.from_rpy = self.declare(so3.from_rpy,"from_rpy")
         self.rpy = self.declare(so3.rpy,"rpy")
         self.from_quaternion = self.declare(expr(so3.from_quaternion([q[0],q[1],q[2],q[3]])),"from_quaternion",["q"])
         self.quaternion = self.declare(so3.quaternion,"quaternion")
         self.from_rotation_vector = self.declare(so3.from_rotation_vector,"from_rotation_vector")
         self.rotation_vector = self.declare(so3.rotation_vector,"rotation_vector")
+        self.axis = self.declare(unit(self.rotation_vector(Rvar)),"rotation",["R"])
+        self.angle = self.declare(so3.angle,"angle")
+        self.error = self.declare(so3.error,"error")
+        self.distance = self.declare(self.angle(self.mul(self.inv(R1),R2)),"distance",['R1','R2'])
+        self.distance.properties['nonnegative'] = True
         Rm = self.matrix(Rsymb)
         self.eq_constraint = self.declare(dot(Rm.T,Rm),'eq_constraint',['R'])
         self.quaternion_constraint = self.declare(norm2(q)-1,'quaternion_constraint',['q'])
@@ -99,22 +123,35 @@ class SO3Context(Context):
         self.inv.argTypes = [self.type]
         self.mul.returnType = self.type
         self.mul.argTypes = [self.type,self.type]
-        self.apply.returnType = Type('V',3)
-        self.apply.argTypes = [self.type,Type('V',3)]
+        self.apply.returnType = V3type
+        self.apply.argTypes = [self.type,V3type]
         self.rotation.returnType = self.type
-        self.rotation.argTypes = [Type('V',3),'N']
-        self.error.returnType = Type('V',3)
+        self.rotation.argTypes = [V3type,Numeric]
+        self.rotation.setDeriv(1,lambda axis,angle:so3.cross_product(axis))
+        self.axis.returnType = V3type
+        self.axis.argTypes = [self.type]
+        self.angle.returnType = V3type
+        self.angle.argTypes = [self.type]
+        def angle_deriv(R,dR):
+            cosangle = (R[0]+R[4]+R[8]-1)*0.5
+            angle = arccos(cosangle)
+            #dangle / dR[0] = -1.0/sqrt(1-cosangle**2) * dcosangle/dR[0]
+            dacos = -1.0/sqrt(1-cosangle**2)
+            return expr([0.5*dacos*dR[0],0,0,0,0.5*dacos*dR[4],0,0,0,0.5*dacos*dR[8]])
+        self.angle.setDeriv(0,angle_deriv,asExpr=True)
+        self.error.returnType = V3type
         self.error.argTypes = [self.type,self.type]
-        self.distance.returnType = Type('N')
+        self.distance.returnType = Numeric
         self.distance.argTypes = [self.type,self.type]
+        self.distance.autoSetJacobians()
         self.from_matrix.returnType = self.type
         self.from_matrix.argTypes = [M.type]
         self.from_rpy.returnType = self.type
-        self.from_rpy.argTypes = [Type('V',3)]
+        self.from_rpy.argTypes = [V3type]
         self.from_quaternion.returnType = self.type
         self.from_quaternion.argTypes = [Type('V',4)]
         self.from_rotation_vector.returnType = self.type
-        self.from_rotation_vector.argTypes = [Type('V',3)]
+        self.from_rotation_vector.argTypes = [V3type]
         self.matrix.returnType = self.from_matrix.argTypes[0]
         self.matrix.argTypes = [self.from_matrix.returnType]
         self.rpy.returnType = self.from_rpy.argTypes[0]
@@ -159,14 +196,24 @@ class SE3Context(Context):
         self.make = self.declare(array(R,t),"make",['R','t'])
         self.identity = self.declare(se3.identity,"identity")
         self.homogeneous = self.declare(se3.homogeneous,"homogeneous")
+        self.homogeneous.addSimplifier(['se3.identity'],lambda T:eye(4))
         Rinv = so3.inv(T[0])
         self.inv = self.declare(array(Rinv,neg(so3.apply(Rinv,T[1]))),"inv",['T'])
         self.inv.autoSetJacobians()
+        self.inv.properties['inverse'] = weakref.proxy(self.inv)
+        self.inv.addSimplifier(['se3.identity'],lambda T:T)
         self.mul = self.declare(se3.mul,"mul")
+        self.mul.setDeriv(0,lambda T1,T2,dT1:self.mul(dT1,T2),asExpr=True)
+        self.mul.setDeriv(1,lambda T1,T2,dT2:self.mul(T1,dT2),asExpr=True)
+        self.mul.addSimplifier(['se3.identity',None],(lambda T1,T2:T2),pre=True)
+        self.mul.addSimplifier([None,'se3.identity'],(lambda T1,T2:T1),pre=True)
+        self.mul.properties['associative'] = True
         pt = Variable('pt',self.ttype)
         self.apply = self.declare(so3.apply(T[0],pt)+T[1],"apply",['T','pt'])
         #self.apply.setDeriv(0,lambda T,pt,dT:array(so3.apply(dT[0],pt),dT[1]))
         #self.apply.setDeriv(1,lambda T,pt,dx:so3.apply(T[0],dx))
+        self.apply.addSimplifier([None,'zero'],lambda T,pt:T[1])
+        self.apply.addSimplifier(['se3.identity',None],lambda T,pt:pt)
         self.apply.autoSetJacobians()
         self.rotation = self.declare(T[0],"rotation",['T'])
         self.translation = self.declare(T[1],"translation",['T'])
@@ -196,7 +243,9 @@ class SE3Context(Context):
         self.translation.returnType = self.ttype
 
 class IKContext(Context):
-    """Defines the functions
+    """Performs operations on IKObjective user data objects.
+
+    Defines the functions
     - link(ikobj): returns the link index of an IKObjective
     - robot(ikobj): returns the RobotModel of an IKObjective
     - targetPos(ikobj): returns the target position of an IKObjective
@@ -254,6 +303,7 @@ class IKContext(Context):
         def _worldRotJacobian(ikobj,robot):
             assert hasattr(ikobj,"robot"),"IKObjective must be initialized with a RobotModel instance"
             assert ikobj.robot.index == robot.index
+            #TODO: convert this to 9 - element form
             return robot.link(ikobj.link()).getOrientationJacobian()
         def _residual(ikobj,robot):
             assert hasattr(ikobj,"robot"),"IKObjective must be initialized with a RobotModel instance"
@@ -312,6 +362,46 @@ class IKContext(Context):
         self.residual.argTypes = [self.type,Type('RobotModel')]
         self.residual.setJacobian("robot",_residualJacobian)
 
+class GeometryContext(Context):
+    """Performs operations on Geometry3D user data objects.  Derivatives of geom arguments are taken with
+    respect to the geometry transforms.
+
+    Defines the functions:
+    - geometry(object): calls the function object.geometry() (e.g., object can be a RobotModelLink)
+    - setTransform(geom,T): sets the current transform of the geometry and returns it.
+    - setCollisionMargin(geom,margin): sets the current collision of the geometry and returns it.
+    - bbox(geom): returns the bounding box of the geometry at its current transform.
+    - collision(geom1,geom2): returns True if the geometries are colliding.
+    - distance(geom1,geom2): returns the distance between the geometries, and if penetrating and 
+      the two geometries support signed distance, returns the negative penetation distance.
+    - closestPoints(geom1,geom2): returns the pair of closest points between geom1 and geom2.
+    - distancePoint(geom,pt): returns the closest point from geom to pt.
+    - closestPoint(geom,pt): returns the closest point to pt on geom.
+    - rayCast(geom,src,dir): returns the distance t>=0 along the ray src + t*dir that intersects geom, or
+      inf if there is no intersection.
+
+    Completeness table
+    __________________________________________________
+    | Function       | Derivative   | Simplification |
+    |----------------|--------------|----------------|
+    | setTransform   | N/A          | N/A            |
+    | setCollisionMar| N/A          | N/A            |
+    | bbox           |              | N/A            |
+    | collision      | Y            | N/A            |
+    | distance       |              | N/A            |
+    | closestPoints  |              | N/A            |
+    | distancePoint  |              | N/A            |
+    | closestPoint   |              | N/A            |
+    | rayCast        |              | N/A            |
+    """
+    def __init__(self):
+        Context.__init__(self)
+        Rtype = Type('V',9)
+        ttype = Type('V',3)
+        self.Ttype = Type('L',2,[Rtype,ttype])
+        self.type = Type('Geometry3D')
+
+
 class CollideContext(Context):
     """Defines the functions --
     - robotSelfCollision(q,robot): returns True if the robot has a collision at q
@@ -369,7 +459,19 @@ class CollideContext(Context):
         assert isinstance(self.robotSelfCollisionFree.func,Expression)
         
 class KlamptContext(Context):
-    """Defines the functions:
+    """Includes all Klampt-related functions.
+
+    Namespaces:
+    -so3: SO3Context
+    -se3: SE3Context
+    -ik: IKContext
+    -collide: CollideContext
+    -[main]: functions to perform kinematics operations on WorldModel, RobotModel, and RobotModelLink user data objects.
+
+    The main namespace defines the functions:
+    - robot(world,index): returns the index'th robot in the world
+    - rigidObject(world,index): returns the index'th robot in the world
+    - terrain(world,index): returns the index'th terrain in the world
     - config(robot): returns the current configuration of the robot or object
     - setConfig(robot,q): sets the current configuration of the robot and returns the robot
     - link(robot,index): returns the index'th link of the robot.  (If you want to use a named string as the index, use const(name))
@@ -394,6 +496,9 @@ class KlamptContext(Context):
     __________________________________________________
     | Function       | Derivative   | Simplification |
     |----------------|--------------|----------------|
+    | robot          | N/A          | N/A            |
+    | rigidObject    | N/A          | N/A            |
+    | terrain        | N/A          | N/A            |
     | config         | Y            | N/A            |
     | setConfig      | Y            | N/A            |
     | link           | N/A          | N/A            |
@@ -422,6 +527,12 @@ class KlamptContext(Context):
         self.include(SE3Context(),"se3",modify=True)
         self.include(IKContext(),"ik",modify=True)
         self.include(CollideContext(),"collide",modify=True)
+        def robot(world,index):
+            return world.robot(index)
+        def rigidObject(world,index):
+            return world.rigidObject(index)
+        def terrain(world,index):
+            return world.terrain(index)
         def config(robot):
             return robot.getConfig()
         def setConfig(robot,q):
@@ -449,6 +560,11 @@ class KlamptContext(Context):
                 link = robot.link(link)
                 assert link.index >= 0
             return link.getPositionJacobian(localPos)
+        def worldPosJacobian_localPos(robot,link,localPos):
+            if not isinstance(link,RobotModelLink):
+                link = robot.link(link)
+                assert link.index >= 0
+            return so3.matrix(link.getTransform()[0])
         def localPos(robot,link,worldPos):
             if not isinstance(link,RobotModelLink):
                 link = robot.link(link)
@@ -457,6 +573,11 @@ class KlamptContext(Context):
             if not isinstance(link,RobotModelLink):
                 link = robot.link(link)
             return link.getTransform()[0]
+        def worldRotJacobian(robot,link):
+            if not isinstance(link,RobotModelLink):
+                link = robot.link(link)
+            #TODO: convert this to 9 - element form
+            return link.getOrientationJacobian()
         def com(robot):
             return robot.getCom()
         def comJacobian(robot):
@@ -521,10 +642,22 @@ class KlamptContext(Context):
                 root[path[-1]] = val
             return loader.fromJson(jsonobj)
 
+        self.worldType = Type('WorldModel')
         self.robotType = Type('RobotModel')
+        self.rigidObjectType = Type('RigidObjectModel')
+        self.terrainType = Type('TerrainModel')
         self.linkType = Type('RobotModelLink')
         self.configType = Type('V')
         self.pointType = Type('V',3)
+        self.robot = self.declare(robot)
+        self.robot.returnType = self.robotType
+        self.robot.argTypes = [self.worldType,Integer]
+        self.rigidObject = self.declare(rigidObject)
+        self.rigidObject.returnType = self.rigidObjectType
+        self.rigidObject.argTypes = [self.worldType,Integer]
+        self.terrain = self.declare(terrain)
+        self.terrain.returnType = self.terrainType
+        self.terrain.argTypes = [self.worldType,Integer]
         self.config = self.declare(config)
         self.config.returnType = self.configType
         self.config.argTypes = [self.robotType]
@@ -532,14 +665,19 @@ class KlamptContext(Context):
         self.setConfig = self.declare(setConfig)
         self.setConfig.returnType = self.robotType
         self.setConfig.argTypes = [self.robotType,self.configType]
+        self.setConfig.setDeriv('robot',0)
         self.setConfig.setDeriv('q',(lambda robot,q,dq:dq),asExpr=True,stackable=True)
         self.link = self.declare(link)
         self.link.returnType = self.linkType
         self.link.argTypes = [self.robotType,Type('I')]
         self.transform = self.declare(transform)
         self.transform.returnType = self.se3.type
+        self.transform.setDeriv('object',(lambda object,dobject:dobject),asExpr=True)
         self.setTransform = self.declare(setTransform)
+        self.setTransform.argTypes = [Type('U'),self.se3.type]
         self.setTransform.returnType = Type('U')
+        self.setTransform.setDeriv('object',0)
+        self.setTransform.setDeriv('T',(lambda object,T,dT:dT),asExpr=True)
         self.velocity = self.declare(velocity)
         self.velocity.returnType = self.configType
         self.velocity.argTypes = [self.robotType]
@@ -550,6 +688,7 @@ class KlamptContext(Context):
         self.worldPos.returnType = self.pointType
         self.worldPos.argTypes = [self.robotType,Type('I'),self.pointType]
         self.worldPos.setJacobian('robot',worldPosJacobian_robot)
+        self.worldPos.setJacobian('localPos',worldPosJacobian_localPos)
         self.localPos = self.declare(localPos)
         self.localPos.returnType = self.pointType
         self.localPos.argTypes = [self.robotType,Type('I'),self.pointType]
