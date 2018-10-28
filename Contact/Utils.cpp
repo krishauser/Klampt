@@ -244,8 +244,10 @@ void GetNearbyContacts(RobotWithGeometry& robot,int link,RobotWorld& world,Real 
       size_t start = contacts.size();
       contacts.resize(start+nc);
       for(int j=0;j<nc;j++) {
-        contacts[j].x.set(temp[j].pos);
-        contacts[j].n.set(temp[j].normal);
+        //contacts[j].x.set(temp[j].pos);
+        contacts[j].x.set(temp[j].pos[0], temp[j].pos[1], temp[j].pos[2]);
+        contacts[j].n.set(temp[j].normal[0], temp[j].normal[1], temp[j].normal[2]);
+        //contacts[j].n.set(temp[j].normal);
         contacts[j].kFriction = 0;
 
         //convert to local coordinates
