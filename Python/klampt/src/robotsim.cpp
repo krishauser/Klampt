@@ -373,7 +373,9 @@ void GetPointCloud(const Geometry::AnyCollisionGeometry3D& geom,PointCloud& pc)
   pc.properties.resize(gpc.points.size()*gpc.propertyNames.size());
   for(size_t i=0;i<gpc.points.size();i++) {
     gpc.points[i].get(pc.vertices[i*3],pc.vertices[i*3+1],pc.vertices[i*3+2]);
-    gpc.properties[i].getCopy(&pc.properties[i*gpc.propertyNames.size()]);
+    if(!gpc.properties[i].empty()){
+      gpc.properties[i].getCopy(&pc.properties[i*gpc.propertyNames.size()]);
+    }
   }
   pc.settings = gpc.settings;
 }
