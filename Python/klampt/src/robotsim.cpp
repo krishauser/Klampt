@@ -1514,6 +1514,48 @@ void PointCloud::transform(const double R[9],const double t[3])
     v = T*v;
     v.get(vertices[i],vertices[i+1],vertices[i+2]);
   }
+
+  //transform viewpoint, if available
+  if(settings.count("viewpoint") > 0) {
+    stringstream ss(settings["viewpoint"]);
+    RigidTransform vpOld;
+    QuaternionRotation q;
+    ss>>vpOld.t>>q;
+    q.getMatrix(vpOld.R);
+
+    RigidTransform vpNew = T*vpOld;
+
+    q.setMatrix(vpNew.R);
+    stringstream ss2;
+    ss2 << vpNew.t <<" "<<q;
+    settings["viewpoint"] = ss2.str();
+  }
+
+  //transform normals
+  int nx = -1, ny = -1, nz = -1;
+  for(size_t i=0;i<propertyNames.size();i++)
+    if(propertyNames[i] == "normal_x") {
+      nx = (int)i;
+      break;
+    }
+  if(nx < 0) return;
+  for(size_t i=0;i<propertyNames.size();i++)
+    if(propertyNames[i] == "normal_y") {
+      ny = (int)i;
+      break;
+    }
+  if(ny < 0) return;
+  for(size_t i=0;i<propertyNames.size();i++)
+    if(propertyNames[i] == "normal_z") {
+      nz = (int)i;
+      break;
+    }
+  if(nz < 0) return;
+  for(size_t i=0,base=0;i<vertices.size();i++,base+=propertyNames.size()) {
+    Vector3 n(properties[base+nx],properties[base+ny],properties[base+nz]);
+    n = T.R*n;
+    n.get(properties[base+nx],properties[base+ny],properties[base+nz]);
+  }
 }
 
 
