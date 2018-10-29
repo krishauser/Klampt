@@ -7,6 +7,9 @@ ODECONFIG = --with-trimesh=none --disable-demos
 #(not recommended on Linux, may give reasonable performance on Windows)
 ODECONFIG += --enable-double-precision
 
+#this disables ODE threading support, which causes a linking error with pthread if Klamp't is built with Boost
+ODECONFIG += --disable-threading-intf
+
 UNAME = $(shell uname)
 
 unpack-deps:

@@ -279,6 +279,10 @@ class GLMultiViewportProgram(GLProgram):
         else:
             return self.views[self.activeView].get_view(vp)
 
+_CACHED_DISPLAY_LISTS = set()
+_CACHED_WARN_THRESHOLD = 1000
+_CACHED_DELETED_LISTS = list()
+
 class CachedGLObject:
     """An object whose drawing is accelerated by means of a display list.
     The draw function may draw the object in the local frame, and the
@@ -303,7 +307,14 @@ class CachedGLObject:
     def destroy(self):
         """Must be called to free up resources used by this object"""
         if self.glDisplayList != None:
-            glDeleteLists(self.glDisplayList,1)
+            global _CACHED_DELETED_LISTS,_CACHED_DISPLAY_LISTS
+            if len(_CACHED_DELETED_LISTS) > 100:
+                for dl in _CACHED_DELETED_LISTS:
+                    glDeleteLists(dl,1)
+                _CACHED_DELETED_LISTS = list()
+            else:
+                _CACHED_DELETED_LISTS.append(self.glDisplayList)
+            _CACHED_DISPLAY_LISTS.remove(self.glDisplayList)
             self.glDisplayList = None
 
     def markChanged(self):
@@ -331,7 +342,16 @@ class CachedGLObject:
             self.changed = False
             if self.glDisplayList == None:
                 #print "Generating new display list",self.name
-                self.glDisplayList = glGenLists(1)
+                global _CACHED_WARN_THRESHOLD,_CACHED_DISPLAY_LISTS,_CACHED_DELETED_LISTS
+                if len(_CACHED_DELETED_LISTS) > 0:
+                    self.glDisplayList = _CACHED_DELETED_LISTS[-1]
+                    _CACHED_DELETED_LISTS.pop(-1)
+                else:
+                    self.glDisplayList = glGenLists(1)
+                _CACHED_DISPLAY_LISTS.add(self.glDisplayList)
+                if len(_CACHED_DISPLAY_LISTS) > _CACHED_WARN_THRESHOLD:
+                    print "GLCachedObject: Creating",len(_CACHED_DISPLAY_LISTS),"GL objects",self.glDisplayList,"watch me for memory usage..."
+                    _CACHED_WARN_THRESHOLD += 1000
             #print "Compiling display list",self.name
             if transform:
                 glPushMatrix()

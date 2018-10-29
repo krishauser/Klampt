@@ -373,7 +373,9 @@ void GetPointCloud(const Geometry::AnyCollisionGeometry3D& geom,PointCloud& pc)
   pc.properties.resize(gpc.points.size()*gpc.propertyNames.size());
   for(size_t i=0;i<gpc.points.size();i++) {
     gpc.points[i].get(pc.vertices[i*3],pc.vertices[i*3+1],pc.vertices[i*3+2]);
-    gpc.properties[i].getCopy(&pc.properties[i*gpc.propertyNames.size()]);
+    if(!gpc.properties[i].empty()){
+      gpc.properties[i].getCopy(&pc.properties[i*gpc.propertyNames.size()]);
+    }
   }
   pc.settings = gpc.settings;
 }
@@ -410,6 +412,7 @@ void GeometricPrimitive::setSphere(const double c[3],double r)
   type = "Sphere";
   properties.resize(4);
   copy(c,c+3,properties.begin());
+  properties[3] = r;
 }
 
 void GeometricPrimitive::setSegment(const double a[3],const double b[3])
@@ -568,7 +571,9 @@ string Geometry3D::type()
   SmartPointer<AnyCollisionGeometry3D>& geom = *reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(geomPtr);
   if(!geom) return "";
   if(geom->Empty()) return "";
-  return geom->TypeName();
+  string res = geom->TypeName();
+  if(res == "Primitive") return "GeometricPrimitive";
+  return res;
 }
 
 bool Geometry3D::empty()
@@ -1509,6 +1514,48 @@ void PointCloud::transform(const double R[9],const double t[3])
     v = T*v;
     v.get(vertices[i],vertices[i+1],vertices[i+2]);
   }
+
+  //transform viewpoint, if available
+  if(settings.count("viewpoint") > 0) {
+    stringstream ss(settings["viewpoint"]);
+    RigidTransform vpOld;
+    QuaternionRotation q;
+    ss>>vpOld.t>>q;
+    q.getMatrix(vpOld.R);
+
+    RigidTransform vpNew = T*vpOld;
+
+    q.setMatrix(vpNew.R);
+    stringstream ss2;
+    ss2 << vpNew.t <<" "<<q;
+    settings["viewpoint"] = ss2.str();
+  }
+
+  //transform normals
+  int nx = -1, ny = -1, nz = -1;
+  for(size_t i=0;i<propertyNames.size();i++)
+    if(propertyNames[i] == "normal_x") {
+      nx = (int)i;
+      break;
+    }
+  if(nx < 0) return;
+  for(size_t i=0;i<propertyNames.size();i++)
+    if(propertyNames[i] == "normal_y") {
+      ny = (int)i;
+      break;
+    }
+  if(ny < 0) return;
+  for(size_t i=0;i<propertyNames.size();i++)
+    if(propertyNames[i] == "normal_z") {
+      nz = (int)i;
+      break;
+    }
+  if(nz < 0) return;
+  for(size_t i=0,base=0;i<vertices.size();i++,base+=propertyNames.size()) {
+    Vector3 n(properties[base+nx],properties[base+ny],properties[base+nz]);
+    n = T.R*n;
+    n.get(properties[base+nx],properties[base+ny],properties[base+nz]);
+  }
 }
 
 
@@ -1902,7 +1949,7 @@ RobotModel WorldModel::add(const char* name,const RobotModel& robot)
   if(robot.robot == NULL)
     throw PyException("add(RobotModel): robot refers to NULL object");
   RobotWorld& world = *worlds[index]->world;
-  world.robots.push_back(new Robot);
+  world.AddRobot(name,new Robot());
   *world.robots.back() = *robot.robot;
   return this->robot((int)world.robots.size()-1);
 }
@@ -1912,7 +1959,7 @@ RigidObjectModel WorldModel::add(const char* name,const RigidObjectModel& obj)
   if(obj.object == NULL)
     throw PyException("add(RigidObjectModel): obj refers to NULL object");
   RobotWorld& world = *worlds[index]->world;
-  world.rigidObjects.push_back(new RigidObject);
+  world.AddRigidObject(name,new RigidObject());
   *world.rigidObjects.back() = *obj.object;
   return this->rigidObject((int)world.rigidObjects.size()-1);
 }
@@ -1922,7 +1969,7 @@ TerrainModel WorldModel::add(const char* name,const TerrainModel& terrain)
   if(terrain.terrain == NULL)
     throw PyException("add(TerrianModel): terrain refers to NULL object");
   RobotWorld& world = *worlds[index]->world;
-  world.terrains.push_back(new Terrain);
+  world.AddTerrain(name,new Terrain());
   *world.terrains.back() = *terrain.terrain;
   return this->terrain((int)world.terrains.size()-1);
 }

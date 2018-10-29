@@ -87,10 +87,12 @@ CartPole
 ContactPlan
 DynamicPlanDemo
 Library/KrisLibrary/
-Library/glui-2.36/
-Library/ode-0.11.1/
+Library/glui*
+Library/glew*
+Library/ode*
 Merge
 MotorCalibrate
+Pack
 PlanDemo
 RealTimePlanning
 RobotPose

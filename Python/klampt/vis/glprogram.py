@@ -299,20 +299,31 @@ class GLProgram:
         """Called by the window when it is closed"""
         return True
 
-    def save_screen(self,fn):
+    def save_screen(self,fn,multithreaded=True):
         """Saves a screenshot"""
         try:
-            import Image
+            from PIL import Image
         except ImportError:
-            print "Cannot save screens to disk, the Python Imaging Library is not installed"
-            return
+            try:
+                import Image
+            except ImportError:
+                print "Cannot save screens to disk, the Python Imaging Library is not installed"
+                return
         if hasattr(self.window,'makeCurrent'):
             self.window.makeCurrent()
         glReadBuffer(GL_FRONT);
         screenshot = glReadPixels( self.view.x, self.view.y, self.view.w, self.view.h, GL_RGBA, GL_UNSIGNED_BYTE)
         im = Image.frombuffer("RGBA", (self.view.w, self.view.h), screenshot, "raw", "RGBA", 0, 0)
         print "Saving screen to",fn
-        im.save(fn)
+        if not multithreaded:
+            im.save(fn)
+        else:
+            import threading
+            def func(im,fn):
+                im.save(fn)
+            th = threading.Thread(target=func,args=(im,fn))
+            th.start()
+
 
     def draw_text(self,point,text,size=12,color=None):
         self.window.draw_text(point,text,size,color)

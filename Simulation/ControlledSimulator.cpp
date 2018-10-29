@@ -36,6 +36,7 @@ void ControlledRobotSimulator::Init(Robot* _robot,ODERobot* _oderobot,RobotContr
 void ControlledRobotSimulator::GetCommandedConfig(Config& q)
 {
   Assert(command.actuators.size() == robot->drivers.size());
+  robot->q.set(0.0);
   bool warned=false;
   for(size_t i=0;i<command.actuators.size();i++) {
     RobotJointDriver& d=robot->drivers[i];
@@ -45,7 +46,7 @@ void ControlledRobotSimulator::GetCommandedConfig(Config& q)
       if(!warned)
         fprintf(stderr,"ControlledRobotSimulator::GetCommandedConfig: Can't get commanded config for non-PID drivers\n");
       warned = true;
-      robot->SetDriverValue(i,0.0);
+      //robot->SetDriverValue(i,0.0);
     }
   }
   q = robot->q;
@@ -54,6 +55,7 @@ void ControlledRobotSimulator::GetCommandedConfig(Config& q)
 void ControlledRobotSimulator::GetCommandedVelocity(Config& dq)
 {
   Assert(command.actuators.size() == robot->drivers.size());
+  robot->dq.set(0.0);
   bool warned=false;
   for(size_t i=0;i<command.actuators.size();i++) {
     RobotJointDriver& d=robot->drivers[i];
@@ -63,7 +65,7 @@ void ControlledRobotSimulator::GetCommandedVelocity(Config& dq)
       if(!warned)
         fprintf(stderr,"ControlledRobotSimulator::GetCommandedVelocity: Can't get commanded velocity for non-PID drivers\n");
       warned = true;
-      robot->SetDriverVelocity(i,0.0);
+      //robot->SetDriverVelocity(i,0.0);
     }
   }
   dq = robot->dq;
@@ -74,8 +76,17 @@ void ControlledRobotSimulator::GetSensedConfig(Config& q)
   JointPositionSensor* s = sensors.GetTypedSensor<JointPositionSensor>();
   if(s==NULL)
     fprintf(stderr,"ControlledRobotSimulator::GetSensedConfig: Warning, robot has no joint position sensor\n");
-  else
-    q = s->q;
+  else {
+    //resize to the correct size
+    if(s->indices.empty() || s->q.empty())
+      q = s->q;
+    else {
+      q.resize(robot->q.n);
+      q.set(0.0);
+      for(size_t i=0;i<s->indices.size();i++)
+        q[s->indices[i]] = s->q[i];
+    }
+  }
 }
 
 void ControlledRobotSimulator::GetSensedVelocity(Config& dq)
@@ -83,8 +94,17 @@ void ControlledRobotSimulator::GetSensedVelocity(Config& dq)
   JointVelocitySensor* s=sensors.GetTypedSensor<JointVelocitySensor>();
   if(s==NULL)
     fprintf(stderr,"ControlledRobotSimulator::GetSensedVelocity: Warning, robot has no joint velocity sensor\n");
-  else
-    dq = s->dq;
+  else {
+    //resize to the correct size
+    if(s->indices.empty() || s->dq.empty())
+      dq = s->dq;
+    else {
+      dq.resize(robot->dq.n);
+      dq.set(0.0);
+      for(size_t i=0;i<s->indices.size();i++)
+        dq[s->indices[i]] = s->dq[i];
+    }
+  }
 }
 
 void ControlledRobotSimulator::GetSimulatedConfig(Config& q)

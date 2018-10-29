@@ -696,16 +696,16 @@ def _getBounds(object):
     if isinstance(object,WorldModel):
         res = []
         for i in range(object.numRobots()):
-            res += _getBounds(object.robots(i))
+            res += _getBounds(object.robot(i))
         for i in range(object.numRigidObjects()):
             res += _getBounds(object.rigidObject(i))
         return res
     elif isinstance(object,RobotModel):
-        return sum([object.link(i).geometry().getBB() for i in range(object.numLinks())],[])
+        return sum([list(object.link(i).geometry().getBB()) for i in range(object.numLinks())],[])
     elif isinstance(object,RigidObjectModel):
-        return object.geometry().getAABB()
+        return list(object.geometry().getBB())
     elif isinstance(object,Geometry3D):
-        return object.getAABB()
+        return list(object.getBB())
     elif isinstance(object,VisAppearance):
         if len(object.subAppearances) == 0:
             if isinstance(object.item,TerrainModel):
@@ -899,6 +899,7 @@ def objectToVisType(item,world):
                 validtypes.append(t)
         if len(validtypes) > 1:
             print "Unable to draw item of ambiguous types",validtypes
+            print "  (Try vis.setAttribute(item,'type',desired_type_str) to disambiguate)"
             return
         if len(validtypes) == 0:
             print "Unable to draw any of types",itypes
@@ -1226,14 +1227,14 @@ class VisPlot:
 
     def dumpCurrent(self):
         if len(self.items) == 0: return
-        assert len(self.items[0].trace) > 0, "Item has no channels?"
-        assert len(self.items[0].trace[0]) > 0, "Item has no readings yet?"
-        t = self.items[0].trace[0][-1]
+        assert len(self.items[0].traces) > 0, "Item has no channels?"
+        assert len(self.items[0].traces[0]) > 0, "Item has no readings yet?"
+        t = self.items[0].traces[0][-1]
         vals = []
         for i in self.items:
-            if len(i.trace) == 0:
+            if len(i.traces) == 0:
                 continue
-            for j,trace in enumerate(i.trace):
+            for j,trace in enumerate(i.traces):
                 vals.append(trace[-1][1])
         if self.outformat == '.csv':
             self.outfile.write(str(t)+',')
@@ -1391,6 +1392,7 @@ class VisAppearance:
         name = self.name
         #set appearance
         if not self.useDefaultAppearance and hasattr(item,'appearance'):
+            print "Has custom appearance"
             if not hasattr(self,'oldAppearance'):
                 self.oldAppearance = item.appearance().clone()
             if self.customAppearance != None:
@@ -1593,10 +1595,13 @@ class VisAppearance:
             pass
         else:
             try:
-                itypes = objectToVisType(item,world)
-            except:
-                print "visualization.py: Unsupported object type",item,"of type:",item.__class__.__name__
-                return
+                itypes = self.attributes['type']
+            except KeyError:
+                try:
+                    itypes = objectToVisType(item,world)
+                except:
+                    print "visualization.py: Unsupported object type",item,"of type:",item.__class__.__name__
+                    return
             if itypes == None:
                 print "Unable to convert item",item,"to drawable"
                 return
@@ -1619,7 +1624,7 @@ class VisAppearance:
                         for (i,app) in enumerate(oldAppearance):
                             robot.link(i).appearance().set(app)
                 else:
-                    print "Unable to draw Config tiems without a world"
+                    print "Unable to draw Config items without a world"
             elif itypes == 'Configs':
                 if world:
                     maxConfigs = self.attributes.get("maxConfigs",min(10,len(item)))
@@ -2153,7 +2158,7 @@ class VisualizationPlugin(glcommon.GLWidgetPlugin):
         global _globalLock
         _globalLock.acquire()
         if item_name == 'all':
-            if (name,itemvis) in self.items.iteritems():
+            for (name,itemvis) in self.items.iteritems():
                 itemvis.markChanged()
         else:
             self.getItem(item_name).markChanged()
@@ -2468,6 +2473,7 @@ _quit = False
 _thread_running = False
 
 if _PyQtAvailable:
+    from PyQt4 import QtGui
     #Qt specific startup
     #need to set up a QDialog and an QApplication
     class _MyDialog(QDialog):
@@ -2519,10 +2525,173 @@ if _PyQtAvailable:
             self.setCentralWidget(self.glwidget)
             self.setWindowTitle(windowinfo.name)
             self.glwidget.name = windowinfo.name
+            self.saving_movie = False
+            self.movie_timer = QTimer(self)
+            self.movie_timer.timeout.connect(self.movie_update)
+            self.movie_frame = 0
+            self.movie_time_last = 0
+            self.saving_html = False
+            self.html_saver = None
+            self.html_start_time = 0
+            self.html_timer = QTimer(self)
+            self.html_timer.timeout.connect(self.html_update)
             #TODO: for action-free programs, don't add this... but this has to be detected after initializeGL()?
             mainMenu = self.menuBar()
             fileMenu = mainMenu.addMenu('&Actions')
             self.glwidget.actionMenu = fileMenu
+            visMenu = mainMenu.addMenu('&Visualization')
+            a = QtGui.QAction('Save world...', self)
+            a.setStatusTip('Saves world to xml file')
+            a.triggered.connect(self.save_world)
+            visMenu.addAction(a)
+            a = QtGui.QAction('Add to world...', self)
+            a.setStatusTip('Adds an item to the world')
+            a.triggered.connect(self.add_to_world)
+            visMenu.addAction(a)
+            a = QtGui.QAction('Save camera...', self)
+            a.setStatusTip('Saves camera settings')
+            a.triggered.connect(self.save_camera)
+            visMenu.addAction(a)
+            a = QtGui.QAction('Load camera...', self)
+            a.setStatusTip('Loads camera settings')
+            a.triggered.connect(self.load_camera)
+            visMenu.addAction(a)
+            a = QtGui.QAction('Start/stop movie output', self)
+            a.setShortcut('Ctrl+M')
+            a.setStatusTip('Starts / stops saving movie frames')
+            a.triggered.connect(self.toggle_movie_mode)
+            visMenu.addAction(a)
+            a = QtGui.QAction('Start/stop html output', self)
+            a.setShortcut('Ctrl+H')
+            a.setStatusTip('Starts / stops saving animation to HTML file')
+            a.triggered.connect(self.toggle_html_mode)
+            visMenu.addAction(a)
+        def getWorld(self):
+            if not hasattr(self.glwidget.program,'plugins'):
+                return None
+            for p in self.glwidget.program.plugins:
+                if hasattr(p,'world'):
+                    return p.world
+                elif isinstance(p,VisualizationPlugin):
+                    world = p.items.get('world',None)
+                    if world != None: return world.item
+            return None
+        def getSimulator(self):
+            if not hasattr(self.glwidget.program,'plugins'):
+                return None
+            for p in self.glwidget.program.plugins:
+                if hasattr(p,'sim'):
+                    return p.sim
+                elif isinstance(p,VisualizationPlugin):
+                    sim = p.items.get('sim',None)
+                    if sim != None: return sim.item
+            return None
+        def save_camera(self):
+            if not hasattr(self.glwidget.program,'get_view'):
+                print "Program does not appear to have a camera"
+                return
+            v = self.glwidget.program.get_view()
+            fn = QFileDialog.getSaveFileName(caption="Viewport file (*.txt)",filter="Viewport file (*.txt);;All files (*.*)")
+            if fn is None:
+                return
+            f = open(str(fn),'w')
+            f.write("VIEWPORT\n")
+            f.write("FRAME %d %d %d %d\n"%(v.x,v.y,v.w,v.h))
+            f.write("PERSPECTIVE 1\n")
+            aspect = float(v.w)/float(v.h)
+            rfov = v.fov*math.pi/180.0
+            scale = 1.0/(2.0*math.tan(rfov*0.5/aspect)*aspect)
+            f.write("SCALE %f\n"%(scale,))
+            f.write("NEARPLANE %f\n"%(v.clippingplanes[0],))
+            f.write("FARPLANE %f\n"%(v.clippingplanes[0],))
+            f.write("CAMTRANSFORM ")
+            mat = se3.homogeneous(v.camera.matrix())
+            f.write(' '.join(str(v) for v in sum(mat,[])))
+            f.write('\n')
+            f.write("ORBITDIST %f\n"%(v.camera.dist,))
+            f.close()
+        def load_camera(self):
+            print "TODO"
+        def save_world(self):
+            w = self.getWorld()
+            if w is None:
+                print "Program does not appear to have a world"
+            fn = QFileDialog.getSaveFileName(caption="World file (elements will be saved to folder)",filter="World file (*.xml);;All files (*.*)")
+            if fn != None:
+                w.saveFile(str(fn))
+                print "Saved to",fn,"and elements were saved to a directory of the same name."
+        def add_to_world(self):
+            w = self.getWorld()
+            if w is None:
+                print "Program does not appear to have a world"
+            fn = QFileDialog.getOpenFileName(caption="World element",filter="Robot file (*.rob *.urdf);;Object file (*.obj);;Terrain file (*.env *.off *.obj *.stl *.wrl);;All files (*.*)")
+            if fn != None:
+                w.loadElement(str(fn))
+                for p in self.glwidget.program.plugins:
+                    if isinstance(p,VisualizationPlugin):
+                        p.getItem('world').setItem(w)
+        def toggle_movie_mode(self):
+            self.saving_movie = not self.saving_movie
+            if self.saving_movie:
+                self.movie_timer.start(33)
+                sim = self.getSimulator()
+                if sim != None:
+                    self.movie_time_last = sim.getTime()
+            else:
+                self.movie_timer.stop()
+                dlg =  QtGui.QInputDialog(self)                 
+                dlg.setInputMode( QtGui.QInputDialog.TextInput) 
+                dlg.setLabelText("Command")
+                dlg.setTextValue('ffmpeg -y -f image2 -i image%04d.png klampt_record.mp4')
+                dlg.resize(500,100)                             
+                ok = dlg.exec_()                                
+                cmd = dlg.textValue()
+                #(cmd,ok) = QtGui.QInputDialog.getText(self,"Process with ffmpeg?","Command", text='ffmpeg -y -f image2 -i image%04d.png klampt_record.mp4')
+                if ok:
+                    import os,glob
+                    os.system(str(cmd))
+                    print "Removing temporary files"
+                    for fn in glob.glob('image*.png'):
+                        os.remove(fn)
+        def movie_update(self):
+            sim = self.getSimulator()
+            if sim != None:
+                while sim.getTime() >= self.movie_time_last + 1.0/30.0:
+                    self.glwidget.program.save_screen('image%04d.png'%(self.movie_frame))
+                    self.movie_frame += 1
+                    self.movie_time_last += 1.0/30.0
+            else:
+                self.glwidget.program.save_screen('image%04d.png'%(self.movie_frame))
+                self.movie_frame += 1
+        def toggle_html_mode(self):
+            self.saving_html = not self.saving_html
+            if self.saving_html:
+                world = self.getSimulator()
+                if world is None:
+                    world = self.getWorld()
+                if world is None:
+                    print "There is no world in the current plugin, can't save"
+                    self.saving_html = False
+                    return
+                fn = QFileDialog.getSaveFileName(caption="Save path HTML file to...",filter="HTML file (*.html);;All files (*.*)")
+                if fn is None:
+                    self.saving_html = False
+                    return
+                from ..io import html
+                self.html_start_time = time.time()
+                self.html_saver = html.HTMLSharePath(fn)
+                self.html_saver.dt = 0.033;
+                self.html_saver.start(world)
+                self.html_timer.start(33)
+            else:
+                self.html_saver.end()
+                self.html_timer.stop()
+        def html_update(self):
+            t = None
+            if self.html_saver.sim == None:
+                #t = time.time()-self.html_start_time
+                t = self.html_saver.last_t + 0.034
+            self.html_saver.animate(t)
         def closeEvent(self,event):
             global _globalLock
             _globalLock.acquire()
@@ -2530,6 +2699,10 @@ if _PyQtAvailable:
             self.windowinfo.mode = 'hidden'
             self.windowinfo.glwindow.idlesleep()
             self.windowinfo.glwindow.setParent(None)
+            if self.saving_movie:
+                self.toggle_movie_mode()
+            if self.saving_html:
+                self.toggle_html_mode()
             print "#########################################"
             print "klampt.vis: Window close"
             print "#########################################"
@@ -2675,7 +2848,7 @@ elif _GLUTAvailable:
                 gldraw.glutBitmapString(GLUT_BITMAP_HELVETICA_18,"In Window mode. Press 'Esc' to hide window")
             _globalLock.release()
         def keyboardfunc(self,c,x,y):
-            if ord(c)==27:
+            if len(c)==1 and ord(c)==27:
                 if self.inDialog:
                     print "Esc pressed, hiding dialog"
                     self.inDialog = False

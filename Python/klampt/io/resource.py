@@ -118,7 +118,7 @@ def filenameToType(name):
         raise RuntimeError("Cannot determine type of resource from name "+name)
 
 
-def get(name,type='auto',directory=None,default=None,doedit='auto',description=None,editor='visual',world=None,frame=None):
+def get(name,type='auto',directory=None,default=None,doedit='auto',description=None,editor='visual',world=None,referenceObject=None,frame=None):
     """Retrieve a resource of the given name from the current resources
     directory.  Resources may be of type Config, Configs, IKGoal, Hold,
     Stance, MultiPath, Trajectory/LinearPath, etc. (see Klampt/Modeling/Resources.h for
@@ -151,15 +151,19 @@ def get(name,type='auto',directory=None,default=None,doedit='auto',description=N
           the item to edit.  If this is a string it points to a file
           that will be loaded for the world (e.g., a world XML file, or a
           robot file).
+        - referenceObject: to give visual reference points, one or more RobotModels,
+          ObjectModels, Geometry3D's, or RobotModelLink's may be designated to follow
+          the edited object.  Currently works with Config's / Configs' / Trajectories /
+          rigid transforms / rotations / points.
         - frame: for rigid transforms / rotations / points, the reference
-          frame for the visual editor.  This is an element of se3, or an
-          ObjectModel, or a RobotModelLink, or a string indicating a named
-          rigid element of the world.
+          frame in which the quantity is represented.  This is an element of
+          se3, or an ObjectModel, or a RobotModelLink, or a string indicating a
+          named rigid element of the world.
           """
     if name==None:
         if doedit==False:
             raise RuntimeError("Can't get() an anonymous resource without launching editor")
-        success,newvalue = edit(name,value=default,type=type,description=description,editor=editor,world=world,frame=frame)
+        success,newvalue = edit(name,value=default,type=type,description=description,editor=editor,world=world,referenceObject=referenceObject,frame=frame)
         if not success:
             print "Cancel pressed, returning None"
             return None
@@ -194,7 +198,7 @@ def get(name,type='auto',directory=None,default=None,doedit='auto',description=N
         if value==None:
             raise IOError("Unable to load from file "+fn)
         if doedit==True:
-            success,newvalue = edit(name,value=value,type=type,description=description,editor=editor,world=world,frame=frame)
+            success,newvalue = edit(name,value=value,type=type,description=description,editor=editor,world=world,referenceObject=referenceObject,frame=frame)
             if success:
                 print "Ok pressed, saving resource to",name
                 value = newvalue
@@ -206,7 +210,7 @@ def get(name,type='auto',directory=None,default=None,doedit='auto',description=N
     except IOError as e:
         if doedit!=False:
             print "Resource",fn,"does not exist, launching editor..."
-            success,newvalue = edit(name,value=default,type=type,description=description,editor=editor,world=world,frame=frame)
+            success,newvalue = edit(name,value=default,type=type,description=description,editor=editor,world=world,referenceObject=referenceObject,frame=frame)
             if success:
                 print "Ok pressed, saving resource to",name
                 value = newvalue
@@ -356,22 +360,26 @@ class _ThumbnailPlugin(vis.VisualizationPlugin):
         vis.VisualizationPlugin.__init__(self)
         self.world = world
         self.done = False
-        self.rendered = False
+        self.rendered = 0
         self.image = None
     def display(self):
-        self.rendered = True
+        self.rendered += 1
         vis.VisualizationPlugin.display(self)
     def idle(self):
         vis.VisualizationPlugin.idle(self)
-        if self.rendered and not self.done:
+        if self.rendered >= 2 and not self.done:
             from OpenGL.GL import glReadPixels,GL_RGBA,GL_UNSIGNED_BYTE
             view = self.window.program.view
             screenshot = glReadPixels( view.x, view.y, view.w, view.h, GL_RGBA, GL_UNSIGNED_BYTE)
             try:
-                import Image
+                from PIL import Image
                 self.image = Image.frombuffer("RGBA", (view.w, view.h), screenshot, "raw", "RGBA", 0, 0)
             except ImportError:
-                self.image = screenshot
+                try:
+                    import Image
+                    self.image = Image.frombuffer("RGBA", (view.w, view.h), screenshot, "raw", "RGBA", 0, 0)
+                except ImportError:
+                    self.image = screenshot
             self.done = True
         return True
 
@@ -424,15 +432,24 @@ def thumbnail(value,size,type='auto',world=None,frame=None):
     plugin.autoFitCamera()
     vis.setPlugin(plugin)
     vis.show()
-    plugin.rendered = False
+    plugin.rendered = 0
     while not plugin.done:
         time.sleep(0.1)
     vis.setPlugin(None)
     vis.show(False)
     vis.setWindow(old_window)
     if (vp.w,vp.h) != size and plugin.image.__class__.__name__=='Image':
-        import Image
-        plugin.image.thumbnail(size,Image.ANTIALIAS)
+        try:
+            from PIL import Image
+            plugin.image.thumbnail(size,Image.ANTIALIAS)
+        except ImportError:
+            try:
+                import Image
+                plugin.image.thumbnail(size,Image.ANTIALIAS)
+            except ImportError:
+                # if this happens then
+                # plugin.image is just a raw RGBA memory buffer
+                pass
     return plugin.image
 
 def console_edit(name,value,type,description=None,world=None,frame=None):
@@ -595,7 +612,7 @@ def edit(name,value,type='auto',description=None,editor='visual',world=None,refe
             if type == 'Rotation':
                 editor.disableTranslation()
             #attach visualization items to the transform
-            if isinstance(frame,RobotModelLink):
+            if isinstance(referenceObject,RobotModelLink):
                 assert frame.index >= 0
                 r = frame.robot()
                 descendant = [False]*r.numLinks()
@@ -607,9 +624,9 @@ def edit(name,value,type='auto',description=None,editor='visual',world=None,refe
                     if descendant[i]:
                         editor.attach(r.link(i))
                 editor.attach(frame)
-            if hasattr(referenceObject,'getTransform'):
+            elif hasattr(referenceObject,'getTransform'):
                 editor.attach(referenceObject)
-            if hasattr(referenceObject,'__iter__'):
+            elif hasattr(referenceObject,'__iter__'):
                 for i in referenceObject:
                     editor.attach(referenceObject)
             #Run!
@@ -622,5 +639,4 @@ def edit(name,value,type='auto',description=None,editor='visual',world=None,refe
             raise RuntimeError("Visual editing of objects of type "+type+" not supported yet")
     else:
         raise ValueError("Invalid value for argument 'editor', must be either 'visual' or 'console'")
-
 
