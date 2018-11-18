@@ -5,9 +5,9 @@
 #include <KrisLibrary/math/random.h>
 #include <KrisLibrary/math3d/random.h>
 #include <Python.h>
-#include "Planning/RobotCSpace.h"
-#include "Modeling/World.h"
-#include "Planning/RobotCSpace.h"
+#include <Klampt/Planning/RobotCSpace.h>
+#include <Klampt/Modeling/World.h>
+#include <Klampt/Planning/RobotCSpace.h>
 #include "pyerr.h"
 
 //defined in robotsim.cpp
