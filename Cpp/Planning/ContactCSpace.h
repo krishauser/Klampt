@@ -2,8 +2,8 @@
 #define ROBOT_CONTACT_CSPACE_H
 
 #include "RobotCSpace.h"
-#include "Modeling/GeneralizedRobot.h"
-#include "Contact/Stance.h"
+#include <Klampt/Modeling/GeneralizedRobot.h>
+#include <Klampt/Contact/Stance.h>
 #include <KrisLibrary/robotics/IK.h>
 
 /** @brief A SingleRobotCSpace for a robot maintaining contact.

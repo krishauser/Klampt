@@ -3,8 +3,8 @@
 
 #include <KrisLibrary/robotics/Contact.h>
 #include <KrisLibrary/robotics/IK.h>
-#include "Contact/Hold.h"
-#include "Contact/Stance.h"
+#include "Hold.h"
+#include "Stance.h"
 #include <vector>
 class TiXmlElement;
 

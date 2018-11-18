@@ -1,7 +1,7 @@
 #ifndef ODE_INTERFACE_ROBOT_H
 #define ODE_INTERFACE_ROBOT_H
 
-#include "Modeling/Robot.h"
+#include <Klampt/Modeling/Robot.h>
 #include "ODEGeometry.h"
 #include "ODESurface.h"
 #include <ode/common.h>

@@ -2,7 +2,7 @@
 #define XML_WORLD_H
 
 #include <tinyxml.h>
-#include "Modeling/World.h"
+#include <Klampt/Modeling/World.h>
 
 class XmlRobot
 {

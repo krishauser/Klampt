@@ -2,7 +2,7 @@
 #define FEEDFORWARD_CONTROLLER_H
 
 #include "Controller.h"
-#include "Sensing/StateEstimator.h"
+#include <Klampt/Sensing/StateEstimator.h>
 #include <KrisLibrary/robotics/Wrench.h>
 
 /** @ingroup Control

@@ -1,7 +1,7 @@
 #ifndef WORLD_SIMULATION_H
 #define WORLD_SIMULATION_H
 
-#include "Modeling/World.h"
+#include <Klampt/Modeling/World.h>
 #include "ODESimulator.h"
 #include "ControlledSimulator.h"
 #include <map>

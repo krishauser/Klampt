@@ -1,9 +1,9 @@
 #ifndef PLANNER_OBJECTIVES_H
 #define PLANNER_OBJECTIVES_H
 
-#include "Modeling/Robot.h"
-#include "Modeling/ParabolicRamp.h"
-#include "Modeling/DynamicPath.h"
+#include <Klampt/Modeling/Robot.h>
+#include <Klampt/Modeling/ParabolicRamp.h>
+#include <Klampt/Modeling/DynamicPath.h>
 #include <KrisLibrary/robotics/IK.h>
 
 /** @ingroup Planning

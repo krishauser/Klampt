@@ -1,7 +1,7 @@
 #ifndef PLANNER_SETTINGS_H
 #define PLANNER_SETTINGS_H
 
-#include "Modeling/World.h"
+#include <Klampt/Modeling/World.h>
 #include <KrisLibrary/structs/array2d.h>
 #include <KrisLibrary/geometry/CollisionMesh.h>
 #include <KrisLibrary/utils/PropertyMap.h>

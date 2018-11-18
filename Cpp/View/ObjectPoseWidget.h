@@ -4,7 +4,7 @@
 #include <KrisLibrary/GLdraw/Widget.h>
 #include <KrisLibrary/GLdraw/TransformWidget.h>
 #include <KrisLibrary/robotics/IK.h>
-#include "Modeling/RigidObject.h"
+#include <Klampt/Modeling/RigidObject.h>
 
 /** @addtogroup View */
 /** @{ */

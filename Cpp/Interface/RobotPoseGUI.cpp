@@ -69,7 +69,10 @@ void RobotPoseBackend::Start()
 
   WorldGUIBackend::Start();
   world->InitCollisions();
-  robot = world->robots[0].get();
+  if(!world->robots.empty())
+    robot = world->robots[0].get();
+  else
+    robot = NULL;
   cur_link=0;
   cur_driver=0;
   draw_geom = 1;
@@ -96,11 +99,12 @@ void RobotPoseBackend::Start()
   
   objectWidgets.resize(world->rigidObjects.size());
   
+  if(robot) {
+    self_colliding.resize(robot->links.size(),false);
+    env_colliding.resize(robot->links.size(),false);
 
-  self_colliding.resize(robot->links.size(),false);
-  env_colliding.resize(robot->links.size(),false);
-
-  UpdateConfig();
+    UpdateConfig();
+  }
 
   MapButtonToggle("draw_geom",&draw_geom);
   MapButtonToggle("draw_poser",&draw_poser);
@@ -115,38 +119,39 @@ void RobotPoseBackend::UpdateConfig()
   for(size_t i=0;i<robotWidgets.size();i++)
     world->robots[i]->UpdateConfig(robotWidgets[i].Pose());
 
-  //update collisions
-  for(size_t i=0;i<robot->links.size();i++)
-    self_colliding[i]=false;
-  robot->UpdateGeometry();
-  for(size_t i=0;i<robot->links.size();i++) {
-    for(size_t j=i+1;j<robot->links.size();j++) {
-      if(robot->SelfCollision(i,j)) {
-	self_colliding[i]=self_colliding[j]=true;
+  if(robot) {
+    //update collisions
+    for(size_t i=0;i<robot->links.size();i++)
+      self_colliding[i]=false;
+    robot->UpdateGeometry();
+    for(size_t i=0;i<robot->links.size();i++) {
+      for(size_t j=i+1;j<robot->links.size();j++) {
+        if(robot->SelfCollision(i,j)) {
+  	self_colliding[i]=self_colliding[j]=true;
+        }
       }
     }
-  }
-  for(size_t i=0;i<robot->links.size();i++) {
-    for(size_t j=i+1;j<robot->links.size();j++) {
-      if(robot->SelfCollision(i,j)) {
-	self_colliding[i]=self_colliding[j]=true;
+    for(size_t i=0;i<robot->links.size();i++) {
+      for(size_t j=i+1;j<robot->links.size();j++) {
+        if(robot->SelfCollision(i,j)) {
+  	self_colliding[i]=self_colliding[j]=true;
+        }
       }
     }
+    SendCommand("update_config","");
   }
-  SendCommand("update_config","");
 }
 
 
 void RobotPoseBackend::RenderWorld()
-{
-  Robot* robot = world->robots[0].get();
-  ViewRobot& viewRobot = world->robotViews[0];
+{ 
   //want conditional drawing of the robot geometry
   //ResourceBrowserProgram::RenderWorld();
   for(size_t i=0;i<world->terrains.size();i++)
     world->terrains[i]->DrawGL();
   for(size_t i=0;i<world->rigidObjects.size();i++)
     world->rigidObjects[i]->DrawGL();
+  if(!robot) return;
 
   if(draw_sensors) {
     if(robotSensors.sensors.empty()) {
@@ -158,7 +163,9 @@ void RobotPoseBackend::RenderWorld()
     }
   }
 
+  ViewRobot& viewRobot = world->robotViews[0];
   if(draw_geom) {
+    
     //set the robot colors
     GLColor robotColor(settings["robotColor"][0],settings["robotColor"][1],settings["robotColor"][2],settings["robotColor"][3]);
     GLColor highlight(settings["hoverColor"][0],settings["hoverColor"][1],settings["hoverColor"][2],settings["hoverColor"][3]);
@@ -239,9 +246,9 @@ void RobotPoseBackend::RenderWorld()
 
 Stance RobotPoseBackend::GetFlatStance(Real tolerance)
 {
+  if(!robot) return Stance();
   if(tolerance==0)
     tolerance = settings["flatContactTolerance"];
-  Robot* robot = world->robots[0].get();
   Stance s;
   if(robotWidgets[0].ikPoser.poseGoals.empty()) {
     printf("Computing stance as though robot were standing on flat ground\n");
@@ -280,9 +287,9 @@ Stance RobotPoseBackend::GetFlatStance(Real tolerance)
 
 Stance RobotPoseBackend::GetNearbyStance(Real tolerance)
 {
+  if(!robot) return Stance();
   if(tolerance==0)
     tolerance = settings["nearbyContactTolerance"];
-  Robot* robot = world->robots[0].get();
   Stance s;
   if(robotWidgets[0].ikPoser.poseGoals.empty()) {
     printf("Calculating stance from all points on robot near environment / objects\n");
@@ -322,7 +329,7 @@ Stance RobotPoseBackend::GetNearbyStance(Real tolerance)
 
 ResourcePtr RobotPoseBackend::PoserToResource(const string& type)
 {
-  Robot* robot = world->robots[0].get();
+  if(!robot) return NULL;
   if(type == "Config") 
     return MakeResource("",robot->q);
   else if(type == "IKGoal") {
@@ -405,7 +412,6 @@ void RobotPoseBackend::CleanContacts(Hold& h,Real xtol,Real ntol)
 
 bool RobotPoseBackend::OnCommand(const string& cmd,const string& args)
 {
-  Robot* robot = world->robots[0].get();
   stringstream ss(args);
   if(cmd=="pose_mode") {
     for(size_t i=0;i<robotWidgets.size();i++)
@@ -844,7 +850,6 @@ bool RobotPoseBackend::OnCommand(const string& cmd,const string& args)
 
 void RobotPoseBackend::BeginDrag(int x,int y,int button,int modifiers)
 { 
-  Robot* robot = world->robots[0].get();
   if(button == GLUT_RIGHT_BUTTON) {
     double d;
     if(allWidgets.BeginDrag(x,viewport.h-y,viewport,d)) {

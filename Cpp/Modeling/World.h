@@ -4,7 +4,7 @@
 #include "Robot.h"
 #include "Terrain.h"
 #include "RigidObject.h"
-#include "View/ViewRobot.h"
+#include <Klampt/View/ViewRobot.h>
 #include <KrisLibrary/camera/camera.h>
 #include <KrisLibrary/camera/viewport.h>
 #include <KrisLibrary/GLdraw/GLLight.h>

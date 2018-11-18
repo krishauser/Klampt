@@ -4,7 +4,7 @@
 #include <KrisLibrary/GLdraw/GLColor.h>
 #include <KrisLibrary/GLdraw/GLDisplayList.h>
 #include <KrisLibrary/GLdraw/GeometryAppearance.h>
-#include "Modeling/Robot.h"
+#include <Klampt/Modeling/Robot.h>
 
 /** @ingroup View
  * @brief Draws the robot (potentially color-coded)

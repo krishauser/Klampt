@@ -265,21 +265,13 @@ CameraSensor::CameraSensor()
  xfov(DtoR(56.0)),yfov(DtoR(43.0)),
  zmin(0.4),zmax(4.0),zresolution(0),
  zvarianceLinear(0),zvarianceConstant(0),
- useGLFramebuffers(true),color_tex(0),fb(0),depth_rb(0)
+ useGLFramebuffers(true)
 {
   Tsensor.setIdentity();
 }
 
 CameraSensor::~CameraSensor()
 {
-  if(color_tex) glDeleteTextures(1, &color_tex);
-#if HAVE_GLEW
-  if(depth_rb) glDeleteRenderbuffersEXT(1, &depth_rb);
-  if(fb) glDeleteFramebuffersEXT(1, &fb);
-#endif //HAVE_GLEW
-  color_tex = 0;
-  depth_rb = 0;
-  fb = 0;
 }
 
 void CameraSensor::SimulateKinematic(Robot& robot,RobotWorld& world)
@@ -288,97 +280,19 @@ void CameraSensor::SimulateKinematic(Robot& robot,RobotWorld& world)
   if(link >= 0) Tlink = robot.links[link].T_World;
   else Tlink.setIdentity();
 
-#if HAVE_GLEW
   if(useGLFramebuffers) {
-    if(!GLEW_EXT_framebuffer_object) {
-      GLenum err = glewInit();
-      if (err != GLEW_OK)
-      {
-        glewExperimental=GL_TRUE;
-        err = glewInit(); 
-        if (GLEW_OK != err)
-        {
-          /* Problem: glewInit failed, something is seriously wrong. */
-          LOG4CXX_WARN(GET_LOGGER(Sensing),"CameraSensor: Couldn't initialize GLEW, falling back to slow mode");
-          LOG4CXX_WARN(GET_LOGGER(Sensing),"  glewInit() error: "<<glewGetErrorString(err));
-          LOG4CXX_WARN(GET_LOGGER(Sensing),"  This usually happens when an OpenGL context has not been initialized.");
-          LOG4CXX_WARN(GET_LOGGER(Sensing),"  GL version is: "<<glGetString(GL_VERSION));
-          useGLFramebuffers = false;
-        }
-        
-      }
-      if(!GLEW_EXT_framebuffer_object) {
-        LOG4CXX_WARN(GET_LOGGER(Sensing),"CameraSensor: GL framebuffers not supported, falling back to slow mode");
-        useGLFramebuffers = false;
-      }
+    if(!renderer.Setup(xres,yres)) {
+      LOG4CXX_WARN(GET_LOGGER(Sensing),"CameraSensor: Couldn't initialize GLEW, falling back to slow mode");
+      LOG4CXX_WARN(GET_LOGGER(Sensing),"  GL version is: "<<glGetString(GL_VERSION));
+      useGLFramebuffers = false;
     }
   }
   if(useGLFramebuffers) {
-    if(color_tex == 0) { 
-      //RGBA8 2D texture, 24 bit depth texture, 256x256
-      glGenTextures(1, &color_tex);
-      glBindTexture(GL_TEXTURE_2D, color_tex);
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-      //NULL means reserve texture memory, but texels are undefined
-      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, xres, yres, 0, GL_BGRA, GL_UNSIGNED_BYTE, NULL);
-    }
-    if(fb == 0) {
-      //-------------------------
-      glGenFramebuffersEXT(1, &fb);
-      glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fb);
-      //Attach 2D texture to this FBO
-      glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, color_tex, 0);
-    }
-    if(depth_rb == 0) {
-      //-------------------------
-      glGenRenderbuffersEXT(1, &depth_rb);
-      glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, depth_rb);
-      glRenderbufferStorageEXT(GL_RENDERBUFFER_EXT, GL_DEPTH_COMPONENT24, xres, yres);
-      //-------------------------
-      //Attach depth buffer to FBO
-      glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_RENDERBUFFER_EXT, depth_rb);
-    }
-    //-------------------------
-    //Does the GPU support current FBO configuration?
-    GLenum status;
-    status = glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);
-    switch(status)
-    {
-    case GL_FRAMEBUFFER_COMPLETE_EXT:
-      break;
-    default:
-      LOG4CXX_WARN(GET_LOGGER(Sensing),"CameraSensor: Couldn't initialize GL framebuffers, falling back to slow mode");
-      useGLFramebuffers = false;
-      //Delete resources
-      glDeleteTextures(1, &color_tex);
-      glDeleteRenderbuffersEXT(1, &depth_rb);
-      //Bind 0, which means render to back buffer, as a result, fb is unbound
-      glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0); 
-      glDeleteFramebuffersEXT(1, &fb);
-      color_tex = 0;
-      depth_rb = 0;
-      fb = 0;
-      return;
-    }
-    //-------------------------
-    //and now you can render to GL_TEXTURE_2D
-    glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fb);
-    //float oldcolor[4];
-    //glGetFloatv(GL_COLOR_CLEAR_VALUE,oldcolor);
-    //glClearColor(0.0, 0.0, 0.0, 0.0);
-    //glClearDepth(1.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    //-------------------------
     //set up the POV of the camera
     Camera::Viewport vp;
     GetViewport(vp);
     vp.xform = Tlink*vp.xform;
-    GLDraw::GLView view;
-    view.setViewport(vp);
-    view.setCurrentGL();
+    renderer.Begin(vp);
     //-------------------------
     glDisable(GL_TEXTURE_2D);
     glDisable(GL_BLEND);
@@ -388,61 +302,39 @@ void CameraSensor::SimulateKinematic(Robot& robot,RobotWorld& world)
     world.DrawGL();
     //DONE: now captured on graphics card in framebuffer
     //----------------
-    //Bind 0, which means render to back buffer
-    glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
-    //restore previous stuff
-    //glClearColor(oldcolor[0],oldcolor[1],oldcolor[2],oldcolor[3]);
-    CheckGLErrors("GL errors during camera sensor simulation: ");
+    renderer.End();
 
     //extract measurements
     measurements.resize(0);
     if(rgb) {
-      pixels.resize(4*xres*yres);
-      glBindTexture(GL_TEXTURE_2D, color_tex);
-      glGetTexImage(GL_TEXTURE_2D,0,GL_RGBA,GL_UNSIGNED_INT_8_8_8_8,&pixels[0]);
       measurements.resize(xres*yres);
+      renderer.GetRGBA(pixels);
       int k=0;
-      //don't forget to flip vertically
       for(int j=0;j<yres;j++) {
         for(int i=0;i<xres;i++,k+=4) {
           unsigned int pix = (pixels[k] << 24 ) | (pixels[k+1] << 16 ) | (pixels[k+2] << 8 ) | (pixels[k+3]);
-          measurements[(yres-j-1)*xres + i] = double(pix);
+          measurements[j*xres + i] = double(pix);
         }
       }
     }
     if(depth) {
-      glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fb); 
-      floats.resize(xres*yres);
-      glReadPixels(0, 0, xres, yres, GL_DEPTH_COMPONENT, GL_FLOAT, &floats[0]);
-      glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0); 
-
       size_t vstart = measurements.size();
       measurements.resize(measurements.size() + xres*yres); 
-      //don't forget to flip vertically
+
+      renderer.GetDepth(vp,floats);
+      
       int k=0;
       for(int j=0;j<yres;j++) {
         for(int i=0;i<xres;i++,k++) {
-          //nonlinear depth normalization
-          //normal linear interpolation would give u = (z - zmin)/(zmax-zmin)
-          //instead we gt u = (1/zmin-1/z)/(1/zmin-1/zmax)
-          //so 1/z = 1/zmin - u(1/zmin-1/zmax)
-          if(floats[k] == 1.0) { //nothing seen
-            floats[k] = zmax;
-          }
-          else {
-            floats[k] = 1.0/(1.0/zmin - floats[k]*(1.0/zmin-1.0/zmax));
+          if(floats[k] <= zmax) {
             floats[k] = Discretize(floats[k],zresolution,zvarianceLinear*floats[k] + zvarianceConstant);
           }
-          measurements[vstart+(yres-j-1)*xres + i] = floats[k];
+          measurements[vstart+j*xres + i] = floats[k];
         }
       }
     }
   }
-#else
-  useGLFramebuffers = false;
-#endif //HAVE_GLEW
-
-  if(!useGLFramebuffers) {
+  else {
     //fallback will use ray casting: (slow!)
     //set up the POV of the camera
     Camera::Viewport vp;
@@ -501,18 +393,19 @@ void CameraSensor::SimulateKinematic(Robot& robot,RobotWorld& world)
     }
 
     //need to upload the texture for sensor visualization
-    if(color_tex == 0) { 
+    if(renderer.color_tex == 0) { 
       //RGBA8 2D texture, 24 bit depth texture, 256x256
-      glGenTextures(1, &color_tex);
-      if(color_tex != 0) {
-        glBindTexture(GL_TEXTURE_2D, color_tex);
+      glGenTextures(1, &renderer.color_tex);
+      if(renderer.color_tex != 0) {
+        glBindTexture(GL_TEXTURE_2D, renderer.color_tex);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
       }
     }
-    if(color_tex != 0) {
+    if(renderer.color_tex != 0) {
+      glBindTexture(GL_TEXTURE_2D, renderer.color_tex);
       //copy measurements into buffer -- don't forget y flip
       vector<unsigned int> image(xres*yres);
       int k=0;
@@ -641,7 +534,7 @@ void CameraSensor::DrawGL(const Robot& robot,const vector<double>& measurements)
   if(link >= 0) 
     v.xform = robot.links[link].T_World*v.xform;
 
-  if(rgb && color_tex != 0) {
+  if(rgb && renderer.color_tex != 0) {
     //debugging: draw image in frustum
     glPushMatrix();
     glMultMatrix((Matrix4)v.xform);
@@ -657,7 +550,7 @@ void CameraSensor::DrawGL(const Robot& robot,const vector<double>& measurements)
     xmax *= xscale;
     ymin *= yscale;
     ymax *= yscale;
-    glBindTexture(GL_TEXTURE_2D,color_tex);
+    glBindTexture(GL_TEXTURE_2D,renderer.color_tex);
     glDisable(GL_DEPTH_TEST);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
@@ -764,7 +657,7 @@ void CameraSensor::GetViewport(Camera::Viewport& vp) const
   vp.h = yres;
   vp.n = zmin;
   vp.f = zmax;
-  vp.setLensAngle(xfov);
+  vp.setFOV(xfov);
   vp.xform = Tsensor;
   Matrix3 flipYZ;
   flipYZ.setZero();

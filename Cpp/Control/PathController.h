@@ -2,7 +2,7 @@
 #define PATH_CONTROLLER_H
 
 #include "JointTrackingController.h"
-#include "Modeling/DynamicPath.h"
+#include <Klampt/Modeling/DynamicPath.h>
 #include <KrisLibrary/spline/PiecewisePolynomial.h>
 #include <list>
 

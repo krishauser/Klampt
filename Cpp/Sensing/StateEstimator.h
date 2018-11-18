@@ -2,8 +2,8 @@
 #define STATE_ESTIMATOR_H
 
 #include "Sensor.h"
-#include "Control/Command.h"
-#include "Modeling/Robot.h"
+#include <Klampt/Control/Command.h>
+#include <Klampt/Modeling/Robot.h>
 #include <KrisLibrary/robotics/Wrench.h>
 
 class ODERobot;

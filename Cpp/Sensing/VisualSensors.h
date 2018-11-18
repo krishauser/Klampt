@@ -4,6 +4,7 @@
 #include "Sensor.h"
 #include <KrisLibrary/camera/viewport.h>
 #include <KrisLibrary/math3d/primitives.h>
+#include <KrisLibrary/GLdraw/GLRenderToImage.h>
 using namespace Math3D;
 
 class RobotWorld;
@@ -139,7 +140,7 @@ class CameraSensor : public SensorBase
 
   //internal: used for OpenGL rendering / buffers
   bool useGLFramebuffers; 
-  unsigned int color_tex,fb,depth_rb;
+  GLDraw::GLRenderToImage renderer;
   vector<unsigned char> pixels;
   vector<float> floats;
   vector<double> measurements;

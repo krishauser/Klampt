@@ -1,8 +1,8 @@
 #ifndef RAMP_CSPACE_H
 #define RAMP_CSPACE_H
 
-#include "Modeling/ParabolicRamp.h"
-#include "Modeling/DynamicPath.h"
+#include <Klampt/Modeling/ParabolicRamp.h>
+#include <Klampt/Modeling/DynamicPath.h>
 #include <KrisLibrary/planning/CSpace.h>
 #include <KrisLibrary/planning/EdgePlanner.h>
 #include <KrisLibrary/planning/KinodynamicSpace.h>

@@ -1,8 +1,8 @@
 #ifndef ROBOT_CSPACE_H
 #define ROBOT_CSPACE_H
 
-#include "Modeling/World.h"
-#include "Modeling/GeneralizedRobot.h"
+#include <Klampt/Modeling/World.h>
+#include <Klampt/Modeling/GeneralizedRobot.h>
 #include "PlannerSettings.h"
 #include <KrisLibrary/planning/CSpaceHelpers.h>
 #include <KrisLibrary/planning/RigidBodyCSpace.h>

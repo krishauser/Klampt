@@ -1,10 +1,10 @@
 #ifndef VIEW_RESOURCE_H
 #define VIEW_RESOURCE_H
 
-#include "Modeling/Resources.h"
-#include "View/ViewRobot.h"
-#include "View/ViewStance.h"
-#include "View/ViewGrasp.h"
+#include <Klampt/Modeling/Resources.h>
+#include "ViewRobot.h"
+#include "ViewStance.h"
+#include "ViewGrasp.h"
 
 class ViewResource
 {

@@ -1,7 +1,7 @@
 #ifndef ODE_RIGID_OBJECT_H
 #define ODE_RIGID_OBJECT_H
 
-#include "Modeling/RigidObject.h"
+#include <Klampt/Modeling/RigidObject.h>
 #include "ODEGeometry.h"
 #include <KrisLibrary/math/vector.h>
 #include <ode/common.h>

@@ -1,7 +1,7 @@
 #ifndef VIEW_GRASP_H
 #define VIEW_GRASP_H
 
-#include "Contact/Grasp.h"
+#include <Klampt/Contact/Grasp.h>
 #include <KrisLibrary/robotics/Stability.h>
 #include <KrisLibrary/GLdraw/GLColor.h>
 #include "ViewHold.h"

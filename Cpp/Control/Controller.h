@@ -1,8 +1,8 @@
 #ifndef CONTROL_CONTROLLER_BASE_H
 #define CONTROL_CONTROLLER_BASE_H
 
-#include "Modeling/Robot.h"
-#include "Sensing/Sensor.h"
+#include <Klampt/Modeling/Robot.h>
+#include <Klampt/Sensing/Sensor.h>
 #include "Command.h"
 #include <KrisLibrary/myfile.h>
 #include <map>

@@ -2,8 +2,8 @@
 #define ROBOT_TIME_SCALING_H
 
 #include <KrisLibrary/planning/GeneralizedBezierCurve.h>
-#include "Modeling/Robot.h"
-#include "Modeling/MultiPath.h"
+#include <Klampt/Modeling/Robot.h>
+#include <Klampt/Modeling/MultiPath.h>
 
 /** @ingroup Planning
  * @brief Optimizes a piecewise-linear path by first smoothing it, then

@@ -1,7 +1,7 @@
 #ifndef VIEW_TEXTURIZER_H
 #define VIEW_TEXTURIZER_H
 
-#include "Modeling/ManagedGeometry.h"
+#include <Klampt/Modeling/ManagedGeometry.h>
 #include <KrisLibrary/GLdraw/GeometryAppearance.h>
 #include <string>
 
