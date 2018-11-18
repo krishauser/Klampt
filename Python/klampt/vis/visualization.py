@@ -1249,14 +1249,14 @@ class VisPlot:
 
     def dumpCurrent(self):
         if len(self.items) == 0: return
-        assert len(self.items[0].trace) > 0, "Item has no channels?"
-        assert len(self.items[0].trace[0]) > 0, "Item has no readings yet?"
-        t = self.items[0].trace[0][-1]
+        assert len(self.items[0].traces) > 0, "Item has no channels?"
+        assert len(self.items[0].traces[0]) > 0, "Item has no readings yet?"
+        t = self.items[0].traces[0][-1]
         vals = []
         for i in self.items:
-            if len(i.trace) == 0:
+            if len(i.traces) == 0:
                 continue
-            for j,trace in enumerate(i.trace):
+            for j,trace in enumerate(i.traces):
                 vals.append(trace[-1][1])
         if self.outformat == '.csv':
             self.outfile.write(str(t)+',')
