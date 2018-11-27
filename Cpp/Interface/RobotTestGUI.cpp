@@ -2,6 +2,7 @@
 #include <KrisLibrary/GLdraw/drawMesh.h>
 #include <KrisLibrary/GLdraw/drawgeometry.h>
 #include "IO/ROS.h"
+#include <string.h>
 #include <sstream>
 
 #ifndef GLUT_LEFT_BUTTON

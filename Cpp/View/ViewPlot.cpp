@@ -202,6 +202,7 @@ void ViewPlot::DrawGL()
   }
 
   //draw labels
+#if HAVE_GLUT
   char buf[64];
   void* font=GLUT_BITMAP_HELVETICA_10;
   double h = 10;
@@ -247,6 +248,6 @@ void ViewPlot::DrawGL()
       glutBitmapString(font,buf);
     }
   }
-
+#endif //HAVE_GLUT
   glEnable(GL_DEPTH_TEST);
 }

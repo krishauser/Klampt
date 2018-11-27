@@ -315,6 +315,7 @@ bool SimGUIBackend::LoadAndInitSim(int argc,const char** argv)
 
 void SimGUIBackend::DrawClock(int x,int y)
 {
+#if HAVE_GLUT
     void* fontface = GLUT_BITMAP_HELVETICA_18;
     //const int fontheight = 18;
     //const int lineSpacing = 36;
@@ -329,6 +330,7 @@ void SimGUIBackend::DrawClock(int x,int y)
     glutBitmapFloat(fontface,sim.time);
 
     glEnable(GL_DEPTH_TEST);
+#endif //HAVE_GLUT
 }
 
 void SimGUIBackend::DrawSensor(int robot,int sensor)
