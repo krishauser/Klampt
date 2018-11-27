@@ -15,6 +15,10 @@
 #include <map>
 using namespace std;
 
+#if PY_MAJOR_VERSION >= 3
+#define PyInt_Check PyLong_Check
+#endif //PY_MAJOR_VERSION >= 3
+
 void setRandomSeed(int seed)
 {
   Math::Srand(seed);

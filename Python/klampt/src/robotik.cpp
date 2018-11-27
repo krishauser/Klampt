@@ -4,11 +4,11 @@
 #include <KrisLibrary/robotics/IKFunctions.h>
 #include <KrisLibrary/math/random.h>
 #include <KrisLibrary/math3d/random.h>
-#include <Python.h>
 #include <Klampt/Planning/RobotCSpace.h>
 #include <Klampt/Modeling/World.h>
 #include <Klampt/Planning/RobotCSpace.h>
 #include "pyerr.h"
+#include "pyconvert.h"
 
 //defined in robotsim.cpp
 void copy(const Matrix& mat,vector<vector<double> >& v);

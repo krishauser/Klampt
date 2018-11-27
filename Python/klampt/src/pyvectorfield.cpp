@@ -67,6 +67,9 @@ using std::endl;
 #if PY_VERSION_HEX < 0x02050000
 typedef int Py_ssize_t;
 #endif
+#if PY_MAJOR_VERSION >= 3
+#define PyInt_Check PyLong_Check
+#endif //PY_MAJOR_VERSION >= 3
 
 namespace PyPlanner {
 
