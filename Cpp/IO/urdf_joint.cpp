@@ -34,7 +34,6 @@
 
 /* Author: John Hsu */
 
-#include <log4cxx/logger.h>
 #include <KrisLibrary/Logger.h>
 #include <KrisLibrary/utils/AnyValue.h>
 #include <sstream>
