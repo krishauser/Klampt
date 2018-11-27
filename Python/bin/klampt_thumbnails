@@ -45,7 +45,7 @@ def make_thumbnails(folder,outputfolder):
 
 if __name__ == '__main__':
     if len(sys.argv) <= 1:
-        print "Usage: python make_thumbnails.py INPUT_FOLDER [OUTPUT_FOLDER]"
+        print "Usage: klampt_thumbnails INPUT_FOLDER [OUTPUT_FOLDER]"
         exit(0)
     output_folder = 'thumbnails'
     if len(sys.argv) > 2:

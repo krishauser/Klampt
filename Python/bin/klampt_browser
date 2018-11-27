@@ -672,10 +672,12 @@ where the items are world, robot, terrain, object, or geometry files.
         return browser
     vis.customUI(makefunc)
     vis.show()
+    vis.setWindowTitle("Klamp't Resource Browser")
     vis.spin(float('inf'))
     vis.kill()
     exit(0)
 
+    #this code below is incorrect...
     app = QtGui.QApplication(sys.argv)
     browser = ResourceBrowser()
     for fn in sys.argv[1:]:

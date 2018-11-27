@@ -2965,6 +2965,7 @@ if _PyQtAvailable:
                         w.guidata = _MyWindow(w)
                     else:
                         w.guidata = w.custom_ui(w.glwindow)
+                    w.guidata.setWindowTitle(w.name)
                     w.glwindow.show()
                     w.glwindow.idlesleep(0)
                 if w.mode == 'shown' and not w.guidata.isVisible():

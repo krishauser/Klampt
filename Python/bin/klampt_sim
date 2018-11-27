@@ -175,6 +175,7 @@ if __name__ == "__main__":
             controller = maker(world.robot(i))
         viewer.sim.setController(world.robot(i),controller)
     
+    vis.setWindowTitle("Klamp't Simulation Tester")
     if SPLIT_SCREEN_TEST:
         viewer2 = MyGLViewer(world)
         vis.setPlugin(viewer)

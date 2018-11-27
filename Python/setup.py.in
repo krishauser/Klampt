@@ -87,8 +87,19 @@ setup(name='Klampt',
                              language='c++'),
                    ],
       py_modules=['klampt.robotsim','klampt.plan.motionplanning','klampt.math.rootfind'],
-      packages=['klampt','klampt.io', 'klampt.math', 'klampt.model', 'klampt.model.create', 'klampt.plan', 'klampt.sim', 'klampt.vis'],
+      packages=['klampt','klampt.io', 'klampt.math', 'klampt.model', 'klampt.model.create', 'klampt.plan', 'klampt.sim', 'klampt.vis', 'klampt.vis.ipython'],
       package_dir={'klampt': 'klampt'},
-      package_data={'klampt': ['data/*.html']}
+      package_data={'klampt': ['data/*.html']},
+      scripts=['bin/klampt_sim','bin/klampt_browser','bin/klampt_thumbnails'],
+      classifiers=[
+        "Programming Language :: Python :: 2.7",
+        "Development Status :: 4 - Beta",
+        "License :: OSI Approved :: BSD License",
+        "Natural Language :: English",
+        "Operating System :: Microsoft :: Windows",
+        "Operating System :: MacOS",
+        "Operating System :: POSIX :: Linux",
+        "Topic :: Scientific/Engineering"
+      ],
      )
 
