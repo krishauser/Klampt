@@ -1,3 +1,5 @@
+#if HAVE_GLUT
+
 #include "GLUTGUI.h"
 #ifdef __APPLE__
 #include <GLUT/glut.h>
@@ -136,3 +138,4 @@ bool GLUTGUI::OnPauseIdle(double secs)
 }
 
 
+#endif //HAVE_GLUT
