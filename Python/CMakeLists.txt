@@ -37,6 +37,25 @@ IF(PYTHON)
   )
   add_custom_target(python ALL DEPENDS ${OUTPUT}/python_timestamp)
   add_custom_target(python-docs DEPENDS ${OUTPUT}/python_docs_timestamp)
-  add_custom_target(python-install DEPENDS ${OUTPUT}/python_install_timestamp)
-  add_dependencies(python-install python)
+  add_custom_target(python-install DEPENDS ${OUTPUT}/python_install_timestamp python)
+
+  add_custom_command(
+    OUTPUT python3_version
+    COMMAND 2to3 --output-dir=python3_version/klampt -W -n klampt
+  )
+  add_custom_command(
+    OUTPUT ${OUTPUT}/python3_timestamp
+    COMMAND rm -rf build/
+    COMMAND python3 setup.py build_ext
+    COMMAND ${CMAKE_COMMAND} -E touch ${TEMPOUTPUT}/python3_timestamp
+    DEPENDS ${DEPS} python3_version
+  )
+  add_custom_command(
+    OUTPUT ${OUTPUT}/python3_install_timestamp
+    COMMAND python3 setup.py install
+    COMMAND ${CMAKE_COMMAND} -E touch ${TEMPOUTPUT}/python3_install_timestamp
+    DEPENDS ${DEPS}
+  )
+  add_custom_target(python3 ALL DEPENDS ${OUTPUT}/python3_timestamp)
+  add_custom_target(python3-install ALL DEPENDS ${OUTPUT}/python3_install_timestamp python3)
 ENDIF(PYTHON)

@@ -298,9 +298,9 @@ def skew(x):
     """Returns the skew-symmetric cross-product matrix corresponding to the
     matrix x"""
     try:
-	import numpy
+        import numpy
     except ImportError:
-	raise "skew(x) needs numpy"
+        raise RuntimeError("skew(x) needs numpy")
     assert(len(x) == 3)
     xhat = numpy.zeros((3,3))
     xhat[0,1] = -x[2]
@@ -317,9 +317,9 @@ def invMassMatrix(obj):
       [0 mI]
     about the origin."""
     try:
-	import numpy
+        import numpy
     except ImportError:
-	raise "invMassMatrix(obj) needs numpy"
+        raise RuntimeError("invMassMatrix(obj) needs numpy")
     Hinv = numpy.zeros((6,6))
     if obj == None or isinstance(obj,TerrainModel):
         #infinite inertia
@@ -352,9 +352,9 @@ def wrenchMatrices(contactMap):
     W2 is similar, but is the jacobian regarding the force on o1.
     """
     try:
-	import numpy
+        import numpy
     except ImportError:
-	raise "wrenchMatrices(contactMap) needs numpy"
+        raise RuntimeError("wrenchMatrices(contactMap) needs numpy")
     res = dict()
     for ((o1,o2),clist) in contactMap:
         w1 = numpy.zeros((6,3*len(clist)))
