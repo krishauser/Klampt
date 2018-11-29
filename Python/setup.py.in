@@ -6,9 +6,12 @@ import os
 import glob
 import sys
 
+scripts_folder = 'bin'
 root_py_folder = 'klampt'
 if sys.version_info[0] == 3:
     root_py_folder = 'python3_version/klampt'
+    scripts_folder = 'python3_version/bin'
+script_files = [os.path.join(scripts_folder,f) for f in ['klampt_sim','klampt_browser','klampt_thumbnails']]
 
 #Parse settings from CMake
 includeDirs = """${KLAMPT_INCLUDE_DIRS}""".split(';')
@@ -95,7 +98,7 @@ setup(name='Klampt',
       packages=['klampt','klampt.io', 'klampt.math', 'klampt.model', 'klampt.model.create', 'klampt.plan', 'klampt.sim', 'klampt.vis', 'klampt.vis.ipython'],
       package_dir={'klampt': root_py_folder},
       package_data={'klampt': ['data/*.html']},
-      scripts=['bin/klampt_sim','bin/klampt_browser','bin/klampt_thumbnails'],
+      scripts=script_files,
       classifiers=[
         "Programming Language :: Python :: 2.7",
         "Development Status :: 4 - Beta",
