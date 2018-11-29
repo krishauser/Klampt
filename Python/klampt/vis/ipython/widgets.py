@@ -252,13 +252,13 @@ class KlamptWidget(widgets.DOMWidget):
                     self.world.robot(target).index
                     recursive = True
                 except Exception:
-					found = False
-					for r in range(self.world.numRobots()):
-						if self.world.robot(r).link(target) >= 0:
-							found = True
-							break
-					if not found:
-						raise ValueError("ERROR: set_color requires target of either robot, link, index, or string name of object!")
+                    found = False
+                    for r in range(self.world.numRobots()):
+                        if self.world.robot(r).link(target) >= 0:
+                            found = True
+                            break
+                    if not found:
+                        raise ValueError("ERROR: set_color requires target of either robot, link, index, or string name of object!")
         else:
             raise ValueError("ERROR: set_color requires target of either robot, link, index, or string name of object!")
 
