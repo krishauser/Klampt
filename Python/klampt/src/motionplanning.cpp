@@ -15,6 +15,10 @@
 #include <map>
 using namespace std;
 
+#if PY_MAJOR_VERSION >= 3
+#define PyInt_Check PyLong_Check
+#endif //PY_MAJOR_VERSION >= 3
+
 void setRandomSeed(int seed)
 {
   Math::Srand(seed);
@@ -165,22 +169,16 @@ public:
   }
 
   virtual bool IsVisible(const Config& a,const Config& b) {
-    EdgePlanner* e = PathChecker(a,b);
-    bool res = e->IsVisible();
-    delete e;
-    return res;
+    return PathChecker(a,b)->IsVisible();
   }
 
   virtual bool IsVisible(const Config& a,const Config& b,int obstacle) {
-    EdgePlanner* e = PathChecker(a,b,obstacle);
-    bool res = e->IsVisible();
-    delete e;
-    return res;
+    return PathChecker(a,b,obstacle)->IsVisible();
   }
 
-  virtual EdgePlanner* PathChecker(const Config& a,const Config& b,int obstacle);
+  virtual EdgePlannerPtr PathChecker(const Config& a,const Config& b,int obstacle);
 
-  virtual EdgePlanner* PathChecker(const Config& a,const Config& b);
+  virtual EdgePlannerPtr PathChecker(const Config& a,const Config& b);
 
   virtual double Distance(const Config& x, const Config& y)
   {
@@ -266,7 +264,7 @@ class PyUpdateEdgePlanner : public PiggybackEdgePlanner
 {
 public:
   PyCSpace* space;
-  PyUpdateEdgePlanner(PyCSpace* _space,SmartPointer<EdgePlanner> e)
+  PyUpdateEdgePlanner(PyCSpace* _space,shared_ptr<EdgePlanner> e)
   :PiggybackEdgePlanner(e),space(_space)
   {}
   void UpdateCSpace(double time,bool visible) {
@@ -385,32 +383,32 @@ public:
   virtual const Config& Start() const { return a; }
   virtual const Config& End() const { return b; }
   virtual CSpace* Space() const { return space; }
-  virtual EdgePlanner* Copy() const {
-    return new PyEdgePlanner(space,a,b,obstacle); 
+  virtual EdgePlannerPtr Copy() const {
+    return make_shared<PyEdgePlanner>(space,a,b,obstacle); 
   }
-  virtual EdgePlanner* ReverseCopy() const {
-    return new PyEdgePlanner(space,b,a,obstacle);
+  virtual EdgePlannerPtr ReverseCopy() const {
+    return make_shared<PyEdgePlanner>(space,b,a,obstacle);
   }
 };
 
 
-EdgePlanner* PyCSpace::PathChecker(const Config& a,const Config& b)
+EdgePlannerPtr PyCSpace::PathChecker(const Config& a,const Config& b)
 {
   if(visibleTests.empty()) {
-    return new PyUpdateEdgePlanner(this,new BisectionEpsilonEdgePlanner(this,a,b,edgeResolution)); 
+    return make_shared<PyUpdateEdgePlanner>(this,make_shared<BisectionEpsilonEdgePlanner>(this,a,b,edgeResolution)); 
   }
   else {
-    return new PyUpdateEdgePlanner(this,new PyEdgePlanner(this,a,b));
+    return make_shared<PyUpdateEdgePlanner>(this,make_shared<PyEdgePlanner>(this,a,b));
   }
 }
 
-EdgePlanner* PyCSpace::PathChecker(const Config& a,const Config& b,int obstacle)
+EdgePlannerPtr PyCSpace::PathChecker(const Config& a,const Config& b,int obstacle)
 {
   if(visibleTests.empty()) {
-    return new PyUpdateEdgePlanner(this,MakeSingleConstraintBisectionPlanner(this,a,b,obstacle,edgeResolution)); 
+    return make_shared<PyUpdateEdgePlanner>(this,MakeSingleConstraintBisectionPlanner(this,a,b,obstacle,edgeResolution)); 
   }
   else {
-    return new PyUpdateEdgePlanner(this,new PyEdgePlanner(this,a,b,obstacle));
+    return make_shared<PyUpdateEdgePlanner>(this,make_shared<PyEdgePlanner>(this,a,b,obstacle));
   }
 }
 
@@ -529,10 +527,10 @@ public:
 
 
 
-static vector<SmartPointer<PyCSpace> > spaces;
-static vector<SmartPointer<AdaptiveCSpace> > adaptiveSpaces;
-static vector<SmartPointer<MotionPlannerInterface> > plans;
-static vector<SmartPointer<PyGoalSet> > goalSets;
+static vector<shared_ptr<PyCSpace> > spaces;
+static vector<shared_ptr<AdaptiveCSpace> > adaptiveSpaces;
+static vector<shared_ptr<MotionPlannerInterface> > plans;
+static vector<shared_ptr<PyGoalSet> > goalSets;
 static MotionPlannerFactory factory;
 static list<int> spacesDeleteList;
 static list<int> plansDeleteList;
@@ -540,13 +538,13 @@ static list<int> plansDeleteList;
 int makeNewCSpace()
 {
   if(spacesDeleteList.empty()) {
-    spaces.push_back(new PyCSpace);
+    spaces.push_back(make_shared<PyCSpace>());
     return (int)(spaces.size()-1);
   }
   else {
     int index = spacesDeleteList.front();
     spacesDeleteList.erase(spacesDeleteList.begin());
-    spaces[index] = new PyCSpace;
+    spaces[index].reset(new PyCSpace);
     return index;
   }
 }
@@ -566,8 +564,8 @@ CSpace* getPreferredSpace(int index)
   if(index < 0 || index >= (int)spaces.size() || spaces[index]==NULL) 
     throw PyException("Invalid cspace index");
   if(index < (int)adaptiveSpaces.size() && adaptiveSpaces[index] != NULL)
-    return adaptiveSpaces[index];
-  return spaces[index];
+    return adaptiveSpaces[index].get();
+  return spaces[index].get();
 }
 
 CSpaceInterface::CSpaceInterface()
@@ -601,7 +599,7 @@ void CSpaceInterface::setFeasibility(PyObject* pyFeas)
   spaces[index]->constraintNames.resize(1);
   spaces[index]->constraintNames[0] = "feasible";
   spaces[index]->constraints.resize(1);
-  spaces[index]->constraints[0] = new PyConstraintSet(pyFeas);
+  spaces[index]->constraints[0] = make_shared<PyConstraintSet>(pyFeas);
 }
 
 
@@ -613,10 +611,10 @@ void CSpaceInterface::addFeasibilityTest(const char* name,PyObject* pyFeas)
   spaces[index]->constraints.resize(spaces[index]->constraintNames.size(),NULL);
   if(cindex < 0) {
     spaces[index]->constraintNames.push_back(name);
-    spaces[index]->constraints.push_back(new PyConstraintSet(pyFeas));
+    spaces[index]->constraints.push_back(make_shared<PyConstraintSet>(pyFeas));
   }
   else {
-    spaces[index]->constraints[cindex] = new PyConstraintSet(pyFeas);
+    spaces[index]->constraints[cindex] = make_shared<PyConstraintSet>(pyFeas);
   }
 }
 
@@ -736,10 +734,7 @@ bool CSpaceInterface::isVisible(PyObject* a,PyObject* b)
     throw PyException("Invalid configuration b (must be list)");
   }
   CSpace* s = getPreferredSpace(index);
-  EdgePlanner* e = s->PathChecker(va,vb);
-  bool res = e->IsVisible();
-  delete e;
-  return res;
+  return s->PathChecker(va,vb)->IsVisible();
 }
 
 bool CSpaceInterface::testFeasibility(const char* name,PyObject* q)
@@ -768,10 +763,7 @@ bool CSpaceInterface::testVisibility(const char* name,PyObject* a,PyObject* b)
   int cindex = spaces[index]->ConstraintIndex(name);
   if(cindex < 0)
      throw PyException("Invalid constraint name");
-  EdgePlanner* e = s->PathChecker(va,vb,cindex);
-  bool res = e->IsVisible();
-  delete e;
-  return res;
+  return s->PathChecker(va,vb,cindex)->IsVisible();
 }
 
 PyObject* CSpaceInterface::feasibilityFailures(PyObject* q)
@@ -850,7 +842,7 @@ void CSpaceInterface::enableAdaptiveQueries(bool enabled)
     throw PyException("Invalid cspace index");
   if(index >= (int)adaptiveSpaces.size()) adaptiveSpaces.resize(spaces.size());
   if(adaptiveSpaces[index] == NULL)
-    adaptiveSpaces[index] = new AdaptiveCSpace(spaces[index]);
+    adaptiveSpaces[index].reset(new AdaptiveCSpace(spaces[index].get()));
 }
 
 void CSpaceInterface::optimizeQueryOrder()
@@ -1056,13 +1048,13 @@ int makeNewPlan(int cspace)
     throw PyException("Invalid cspace index");
   CSpace* klSpace = getPreferredSpace(cspace);
   if(plansDeleteList.empty()) {
-    plans.push_back(factory.Create(klSpace));
+    plans.push_back(shared_ptr<MotionPlannerInterface>(factory.Create(klSpace)));
     return (int)plans.size()-1;
   }
   else {
     int index = plansDeleteList.front();
     plansDeleteList.erase(plansDeleteList.begin());
-    plans[index] = factory.Create(klSpace);
+    plans[index].reset(factory.Create(klSpace));
     return index;
   }
 }
@@ -1145,8 +1137,8 @@ bool PlannerInterface::setEndpointSet(PyObject* start,PyObject* goal,PyObject* g
     throw PyException("Goal test is not callable");
   }
   goalSets.resize(plans.size());
-  goalSets[index] = new PyGoalSet(goal,goalSample);
-  plans[index]=factory.Create(s,qstart,goalSets[index]);
+  goalSets[index].reset(new PyGoalSet(goal,goalSample));
+  plans[index].reset(factory.Create(s,qstart,goalSets[index].get()));
   return true;
 }
 
@@ -1277,7 +1269,7 @@ void PlannerInterface::dump(const char* fn)
 {
   if(index < 0 || index >= (int)plans.size() || plans[index]==NULL) 
     throw PyException("Invalid plan index");
-  DumpPlan(plans[index],fn);
+  DumpPlan(plans[index].get(),fn);
 }
 
 void destroy()

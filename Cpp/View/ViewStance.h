@@ -1,7 +1,7 @@
 #ifndef VIEW_STANCE_H
 #define VIEW_STANCE_H
 
-#include "Contact/Stance.h"
+#include <Klampt/Contact/Stance.h>
 #include <KrisLibrary/robotics/Stability.h>
 #include <KrisLibrary/GLdraw/GLColor.h>
 #include "ViewHold.h"

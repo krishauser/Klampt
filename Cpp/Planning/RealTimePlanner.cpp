@@ -16,7 +16,7 @@ void Extract(PlannerObjectiveBase* obj,Robot* robot,vector<IKGoal>& ikproblem,ve
   if(typeid(*obj) == typeid(CompositeObjective)) {
     CompositeObjective* cobj = dynamic_cast<CompositeObjective*>(obj);
     for(size_t i=0;i<cobj->components.size();i++)
-      Extract(cobj->components[i],robot,ikproblem,joint_constraints);
+      Extract(cobj->components[i].get(),robot,ikproblem,joint_constraints);
   }
   else if(typeid(*obj) == typeid(CartesianObjective)) {
     CartesianObjective* cobj = dynamic_cast<CartesianObjective*>(obj);
@@ -43,11 +43,11 @@ void Extract(PlannerObjectiveBase* obj,Robot* robot,vector<IKGoal>& ikproblem,ve
   }
 }
 
-bool Optimize(PlannerObjectiveBase* obj,Robot* robot,int iters,Real tol)
+bool Optimize(shared_ptr<PlannerObjectiveBase> obj,Robot* robot,int iters,Real tol)
 {
   vector<IKGoal> ikproblem;
   vector<pair<int,Real> > joint_constraints;
-  Extract(obj,robot,ikproblem,joint_constraints);
+  Extract(obj.get(),robot,ikproblem,joint_constraints);
   if(!joint_constraints.empty()) {
     if(!ikproblem.empty())
       fprintf(stderr,"Cannot support IK and configuration objectives simultaneously yet\n");
@@ -70,7 +70,7 @@ bool Optimize(PlannerObjectiveBase* obj,Robot* robot,int iters,Real tol)
 //-1: cutoff hit
 //0: not visible
 //1: visible
-int IsVisible(EdgePlanner* e,Timer& timer,Real cutoff,int numStepsPerCheck=5)
+int IsVisible(const EdgePlannerPtr& e,Timer& timer,Real cutoff,int numStepsPerCheck=5)
 {
   return (e->IsVisible()?1:0);
 }
@@ -102,19 +102,19 @@ void RealTimePlanner::SetSpace(SingleRobotCSpace* space)
   }
 }
 
-SmartPointer<PlannerObjectiveBase> RealTimePlanner::Objective() const
+shared_ptr<PlannerObjectiveBase> RealTimePlanner::Objective() const
 {
   if(!planner) return NULL;
   return planner->goal; 
 }
 
-void RealTimePlanner::Reset(SmartPointer<PlannerObjectiveBase> newgoal)
+void RealTimePlanner::Reset(shared_ptr<PlannerObjectiveBase> newgoal)
 {
   if(!planner) return;
 
   if(protocol == ExponentialBackoff) {
     if(planner->goal && newgoal) {  //reduce timestep depending on the delta from the prior goal
-      Real d=planner->goal->Delta(newgoal);
+      Real d=planner->goal->Delta(newgoal.get());
       assert(d >= 0);
       //TODO: figure the correlation between task changes and likelihood of
       //success with a shorter planning period
@@ -350,7 +350,7 @@ struct RealTimePlannerData
   RealTimePlanner* planner;
   bool resetStartConfig;      //(in) true if the start configuration should be reset
   Config startConfig;         //(in) the start config
-  SmartPointer<PlannerObjectiveBase> objective;   //(in) the planning objective, can be NULL
+  shared_ptr<PlannerObjectiveBase> objective;   //(in) the planning objective, can be NULL
   bool active;             //(in) set this to false to quit
   bool pause;              //(in) set this to true to pause the planner
   Real globalTime;         //(in) time measured in calling thread
@@ -504,7 +504,7 @@ void RealTimePlanningThread::SetStartConfig(const Config& qstart)
 {
   RealTimePlannerData* data = reinterpret_cast<RealTimePlannerData*>(internal);
   if(!this->planner)
-    SetPlanner(new RealTimePlanner);
+    SetPlanner(make_shared<RealTimePlanner>());
   else {
     StopPlanning();
     //poll to wait for planning to stop
@@ -535,7 +535,7 @@ void RealTimePlanningThread::SetCSpace(SingleRobotCSpace* space)
 {
   RealTimePlannerData* data = reinterpret_cast<RealTimePlannerData*>(internal);
   if(!this->planner)
-    SetPlanner(new RealTimePlanner);
+    SetPlanner(make_shared<RealTimePlanner>());
   else {
     StopPlanning();
     int iters=0;
@@ -564,7 +564,7 @@ void RealTimePlanningThread::ResetCurrentPath(Real tglobal,const ParabolicRamp::
   FatalError("ResetCurrentPath not implemented yet");
 }
 
-void RealTimePlanningThread::SetObjective(SmartPointer<PlannerObjectiveBase> newgoal)
+void RealTimePlanningThread::SetObjective(shared_ptr<PlannerObjectiveBase> newgoal)
 {
   RealTimePlannerData* data = reinterpret_cast<RealTimePlannerData*>(internal);
   //set the objective function
@@ -575,13 +575,13 @@ void RealTimePlanningThread::SetObjective(SmartPointer<PlannerObjectiveBase> new
 PlannerObjectiveBase* RealTimePlanningThread::GetObjective() const
 {
   RealTimePlannerData* data = reinterpret_cast<RealTimePlannerData*>(internal);
-  return data->objective;
+  return data->objective.get();
 }
 
-void RealTimePlanningThread::SetPlanner(const SmartPointer<DynamicMotionPlannerBase>& planner)
+void RealTimePlanningThread::SetPlanner(const shared_ptr<DynamicMotionPlannerBase>& planner)
 {
   RealTimePlannerData* data = reinterpret_cast<RealTimePlannerData*>(internal);
-  if(!this->planner) SetPlanner(new RealTimePlanner);
+  if(!this->planner) SetPlanner(make_shared<RealTimePlanner>());
   else {
     StopPlanning();
     int iters=0;
@@ -604,14 +604,14 @@ void RealTimePlanningThread::SetPlanner(const SmartPointer<DynamicMotionPlannerB
 
   ResumePlanning();
 }
-void RealTimePlanningThread::SetPlanner(const SmartPointer<RealTimePlanner>& planner)
+void RealTimePlanningThread::SetPlanner(const shared_ptr<RealTimePlanner>& planner)
 {
   RealTimePlannerData* data = reinterpret_cast<RealTimePlannerData*>(internal);
   this->planner = planner;
   if(planner)
-    this->planner->sendPathCallback = new RealTimePlannerDataSender(data);
+    this->planner->sendPathCallback.reset(new RealTimePlannerDataSender(data));
   ScopedLock lock(data->mutex);
-  data->planner = this->planner;
+  data->planner = this->planner.get();
 }
 
 bool RealTimePlanningThread::Start()
@@ -773,7 +773,7 @@ void DynamicMotionPlannerBase::Init(CSpace* _space,Robot* _robot,WorldPlannerSet
   SetDefaultLimits();
 }
 
-void DynamicMotionPlannerBase::SetGoal(SmartPointer<PlannerObjectiveBase> newgoal)
+void DynamicMotionPlannerBase::SetGoal(shared_ptr<PlannerObjectiveBase> newgoal)
 {
   goal = newgoal;
 }
@@ -1089,7 +1089,7 @@ DynamicPerturbationPlanner::DynamicPerturbationPlanner()
   : perturbationStep(0.01),perturbLimit(100)
 {}
 
-void DynamicPerturbationPlanner::SetGoal(SmartPointer<PlannerObjectiveBase> newgoal)
+void DynamicPerturbationPlanner::SetGoal(shared_ptr<PlannerObjectiveBase> newgoal)
 {
   iteration = 0;
   DynamicMotionPlannerBase::SetGoal(newgoal);
@@ -1131,7 +1131,7 @@ DynamicPerturbationIKPlanner::DynamicPerturbationIKPlanner()
   : perturbationStep(0.01),perturbLimit(100)
 {}
 
-void DynamicPerturbationIKPlanner::SetGoal(SmartPointer<PlannerObjectiveBase> newgoal)
+void DynamicPerturbationIKPlanner::SetGoal(shared_ptr<PlannerObjectiveBase> newgoal)
 {
   iteration = 0;
   DynamicMotionPlannerBase::SetGoal(newgoal);
@@ -1182,7 +1182,7 @@ DynamicRRTPlanner::DynamicRRTPlanner()
   : delta(0.3),smoothTime(0.5),ikSolveProbability(0.5)
 {}
 
-void DynamicRRTPlanner::SetGoal(SmartPointer<PlannerObjectiveBase> newgoal)
+void DynamicRRTPlanner::SetGoal(shared_ptr<PlannerObjectiveBase> newgoal)
 {
   //reset
   iteration = 0;
@@ -1241,10 +1241,10 @@ RRTPlanner::Node* DynamicRRTPlanner::TryIKExtend(RRTPlanner::Node* node,bool sea
   State x=MakeState(qik);
   if(search) {
     RRTPlanner::Node* closest = rrt->ClosestMilestone(x);
-    return ((TreeRoadmapPlanner*)((RRTPlanner*)rrt))->Extend(closest,x);
+    return ((TreeRoadmapPlanner*)(rrt.get()))->Extend(closest,x);
   }
   else
-    return ((TreeRoadmapPlanner*)((RRTPlanner*)rrt))->Extend(node,x);
+    return ((TreeRoadmapPlanner*)(rrt.get()))->Extend(node,x);
 }
 
 Real DynamicRRTPlanner::EvaluateNodePathCost(RRTPlanner::Node* n) 
@@ -1254,7 +1254,7 @@ Real DynamicRRTPlanner::EvaluateNodePathCost(RRTPlanner::Node* n)
   dq.setRef(n->x,n->x.n/2,1,n->x.n/2);
   Real time=0;
   while(n->getParent() != NULL) {
-    time += ((RampEdgeChecker*)((EdgePlanner*)n->edgeFromParent()))->Duration();
+    time += ((RampEdgeChecker*)(n->edgeFromParent().get()))->Duration();
     n = n->getParent();
   }
   return goal->TerminalCost(time,q,dq);
@@ -1273,9 +1273,9 @@ bool DynamicRRTPlanner::CheckPath(RRTPlanner::Node* n,vector<RRTPlanner::Node*>&
     //assume existing path is feasible, so check if temp is on the existing path
     for(size_t i=0;i<existingNodes.size();i++)
       if(temp == existingNodes[i]) {
-	Assert(((RampEdgeChecker*)((EdgePlanner*)temp->edgeFromParent()))->IsValid());
+	Assert(((RampEdgeChecker*)(temp->edgeFromParent().get()))->IsValid());
 	while(temp->getParent() != NULL) {
-	  Assert(((RampEdgeChecker*)((EdgePlanner*)temp->edgeFromParent()))->IsValid());
+	  Assert(((RampEdgeChecker*)(temp->edgeFromParent().get()))->IsValid());
 	  temp = temp->getParent();
 	}
 	return true;
@@ -1289,7 +1289,7 @@ bool DynamicRRTPlanner::CheckPath(RRTPlanner::Node* n,vector<RRTPlanner::Node*>&
       return false;
     }
     else {
-      Assert(((RampEdgeChecker*)((EdgePlanner*)temp->edgeFromParent()))->IsValid());
+      Assert(((RampEdgeChecker*)(temp->edgeFromParent().get()))->IsValid());
     }
     temp = temp->getParent();
   }
@@ -1301,7 +1301,7 @@ int DynamicRRTPlanner::PlanFrom(ParabolicRamp::DynamicPath& path,Real cutoff)
   if (!goal) return Failure;
 
   if(stateSpace==NULL) {
-    stateSpace = new RampCSpaceAdaptor(cspace,velMax,accMax);
+    stateSpace.reset(new RampCSpaceAdaptor(cspace,velMax,accMax));
     stateSpace->qMin=qMin;
     stateSpace->qMax=qMax;
     stateSpace->visibilityTolerance = settings->robotSettings[0].collisionEpsilon;
@@ -1323,7 +1323,7 @@ int DynamicRRTPlanner::PlanFrom(ParabolicRamp::DynamicPath& path,Real cutoff)
 
   rrt = NULL;
   //create new RRT tree
-  rrt = new RRTPlanner(stateSpace);
+  rrt.reset(new RRTPlanner(stateSpace.get()));
 
   existingNodes.resize(0);
 
@@ -1343,7 +1343,7 @@ int DynamicRRTPlanner::PlanFrom(ParabolicRamp::DynamicPath& path,Real cutoff)
     nik=TryIKExtend(n,false);
   if(nik && EvaluateNodePathCost(nik) < bestPathCost) {
     if(nik->edgeFromParent()->IsVisible()) {  //only need to check path to parent assuming an already feasible path
-      Assert(((RampEdgeChecker*)((EdgePlanner*)nik->edgeFromParent()))->IsValid());
+      Assert(((RampEdgeChecker*)(nik->edgeFromParent().get()))->IsValid());
       bestNode = nik;
       bestPathCost = EvaluateNodePathCost(nik);
     }
@@ -1355,11 +1355,11 @@ int DynamicRRTPlanner::PlanFrom(ParabolicRamp::DynamicPath& path,Real cutoff)
   }
   //extending path destinations
   for(size_t i=0;i<path.ramps.size();i++) {
-    n = ((TreeRoadmapPlanner*)rrt)->Extend(n,MakeState(path.ramps[i].x1,path.ramps[i].dx1));
+    n = ((TreeRoadmapPlanner*)rrt.get())->Extend(n,MakeState(path.ramps[i].x1,path.ramps[i].dx1));
     //sometimes there's an error with SolveMinTime...
-    ((RampEdgeChecker*)((EdgePlanner*)n->edgeFromParent()))->path.ramps.resize(1,path.ramps[i]);
+    ((RampEdgeChecker*)(n->edgeFromParent().get()))->path.ramps.resize(1,path.ramps[i]);
     Assert(path.ramps[i].IsValid());
-    Assert(((RampEdgeChecker*)((EdgePlanner*)n->edgeFromParent()))->IsValid());
+    Assert(((RampEdgeChecker*)(n->edgeFromParent().get()))->IsValid());
     /*
     if(!n->edgeFromParent()->IsVisible()) {
       fprintf(flog,"Prior path edge %d became infeasible\n",i);
@@ -1378,7 +1378,7 @@ int DynamicRRTPlanner::PlanFrom(ParabolicRamp::DynamicPath& path,Real cutoff)
       //if(nik) fprintf(flog,"IK node %d\n",i+1);
       if(nik && EvaluateNodePathCost(nik) < bestPathCost) {
 	if(nik->edgeFromParent()->IsVisible()) {
-	  Assert(((RampEdgeChecker*)((EdgePlanner*)nik->edgeFromParent()))->IsValid());
+	  Assert(((RampEdgeChecker*)(nik->edgeFromParent().get()))->IsValid());
 	  bestNode = nik;
 	  bestPathCost = EvaluateNodePathCost(nik);
 	}
@@ -1393,7 +1393,7 @@ int DynamicRRTPlanner::PlanFrom(ParabolicRamp::DynamicPath& path,Real cutoff)
   //sanity check
   for(size_t i=0;i<existingNodes.size();i++) {
     if(existingNodes[i]->getParent()) {
-      Assert(((RampEdgeChecker*)((EdgePlanner*)existingNodes[i]->edgeFromParent()))->IsValid());
+      Assert(((RampEdgeChecker*)(existingNodes[i]->edgeFromParent().get()))->IsValid());
       n = existingNodes[i];
       assert(n->edgeFromParent()->End() == n->x);
       assert(n->edgeFromParent()->Start() == n->getParent()->x);
@@ -1444,7 +1444,7 @@ int DynamicRRTPlanner::PlanFrom(ParabolicRamp::DynamicPath& path,Real cutoff)
     q.setRef(x,0,1,dest.n);
     if(!cspace->IsFeasible(q)) continue;
 
-    RRTPlanner::Node* n=((TreeRoadmapPlanner*)((RRTPlanner*)rrt))->Extend(closest,x);
+    RRTPlanner::Node* n=((TreeRoadmapPlanner*)(rrt.get()))->Extend(closest,x);
 
     //add a dynamic point in the middle
     RRTPlanner::Node* n2 = rrt->SplitEdge(n->getParent(),n,0.5); 
@@ -1465,7 +1465,7 @@ int DynamicRRTPlanner::PlanFrom(ParabolicRamp::DynamicPath& path,Real cutoff)
 	bestPathCost = EvaluateNodePathCost(nik);
 	
 	while(nik->getParent() != NULL) {
-	  Assert(((RampEdgeChecker*)((EdgePlanner*)nik->edgeFromParent()))->IsValid());
+	  Assert(((RampEdgeChecker*)(nik->edgeFromParent().get()))->IsValid());
 	  nik = nik->getParent();
 	}
       }
@@ -1495,7 +1495,7 @@ int DynamicRRTPlanner::PlanFrom(ParabolicRamp::DynamicPath& path,Real cutoff)
 	bestPathCost = EvaluateNodePathCost(n);
 	
 	while(n->getParent() != NULL) {
-	  Assert(((RampEdgeChecker*)((EdgePlanner*)n->edgeFromParent()))->IsValid());
+	  Assert(((RampEdgeChecker*)(n->edgeFromParent().get()))->IsValid());
 	  n = n->getParent();
 	}
       }
@@ -1555,13 +1555,13 @@ int DynamicRRTPlanner::PlanFrom(ParabolicRamp::DynamicPath& path,Real cutoff)
 	  break;
 	}
       }
-      Assert(((RampEdgeChecker*)((EdgePlanner*)n->edgeFromParent()))->IsValid());
+      Assert(((RampEdgeChecker*)(n->edgeFromParent().get()))->IsValid());
       n = n->getParent();
     }
     //sanity check
     for(size_t i=0;i<existingNodes.size();i++) {
       if(existingNodes[i]->getParent()) {
-	Assert(((RampEdgeChecker*)((EdgePlanner*)existingNodes[i]->edgeFromParent()))->IsValid());
+	Assert(((RampEdgeChecker*)(existingNodes[i]->edgeFromParent().get()))->IsValid());
       }
     }
 
@@ -1569,7 +1569,7 @@ int DynamicRRTPlanner::PlanFrom(ParabolicRamp::DynamicPath& path,Real cutoff)
     path.ramps.resize(0);
     path.ramps.reserve(rampPath.edges.size());
     for(size_t i=0;i<rampPath.edges.size();i++) {
-      RampEdgeChecker* e=(RampEdgeChecker*)((EdgePlanner*)rampPath.edges[i]);
+      RampEdgeChecker* e=(RampEdgeChecker*)(rampPath.edges[i].get());
       path.Concat(e->path);
 
       //sanity checks
@@ -1628,7 +1628,7 @@ DynamicHybridTreePlanner::DynamicHybridTreePlanner()
   : delta(0.3),smoothTime(0.5),ikSolveProbability(0.5)
 {}
 
-void DynamicHybridTreePlanner::SetGoal(SmartPointer<PlannerObjectiveBase> newgoal)
+void DynamicHybridTreePlanner::SetGoal(shared_ptr<PlannerObjectiveBase> newgoal)
 {
   //reset
   iteration = 0;
@@ -1643,25 +1643,25 @@ DynamicHybridTreePlanner::Node* DynamicHybridTreePlanner::AddChild(Node* node,co
   xn.copySubVector(node->q.n,node->dq);
   xq.setZero();
   xq.copySubVector(0,q);
-  EdgePlanner* e=stateSpace->LocalPlanner(xn,xq);
-  SmartPointer<RampEdgeChecker> ptr((RampEdgeChecker*)e);
+  EdgePlannerPtr e=stateSpace->LocalPlanner(xn,xq);
+  shared_ptr<RampEdgeChecker> ptr((RampEdgeChecker*)e.get());
   return AddChild(node,ptr);
 }
 
 DynamicHybridTreePlanner::Node* DynamicHybridTreePlanner::AddChild(Node* node,const ParabolicRamp::ParabolicRampND& ramp)
 {
-  SmartPointer<RampEdgeChecker> ptr(new RampEdgeChecker(stateSpace,ramp));
+  shared_ptr<RampEdgeChecker> ptr(new RampEdgeChecker(stateSpace.get(),ramp));
   return AddChild(node,ptr);
 }
 
 
 DynamicHybridTreePlanner::Node* DynamicHybridTreePlanner::AddChild(Node* node,const ParabolicRamp::DynamicPath& path)
 {
-  SmartPointer<RampEdgeChecker> ptr(new RampEdgeChecker(stateSpace,path));
+  shared_ptr<RampEdgeChecker> ptr(new RampEdgeChecker(stateSpace.get(),path));
   return AddChild(node,ptr);
 }
 
-DynamicHybridTreePlanner::Node* DynamicHybridTreePlanner::AddChild(Node* node,SmartPointer<RampEdgeChecker>& e)
+DynamicHybridTreePlanner::Node* DynamicHybridTreePlanner::AddChild(Node* node,shared_ptr<RampEdgeChecker>& e)
 {
   if(e->path.ramps.empty()) return NULL;
   Node* c = new Node;
@@ -2034,7 +2034,7 @@ struct ClosestCallback : public Graph::CallbackBase<DynamicHybridTreePlanner::No
 
 DynamicHybridTreePlanner::Node* DynamicHybridTreePlanner::Closest(const Config& q,Real costBranch)
 {
-  ClosestCallback callback(stateSpace,q);
+  ClosestCallback callback(stateSpace.get(),q);
   callback.costBranch = costBranch;
   root->DFS(callback);
   return callback.closest;
@@ -2093,7 +2093,7 @@ int DynamicHybridTreePlanner::PlanFrom(ParabolicRamp::DynamicPath& path,Real cut
   if (!goal) return Failure;
 
   if(stateSpace==NULL) {
-    stateSpace = new RampCSpaceAdaptor(cspace,velMax,accMax);
+    stateSpace.reset(new RampCSpaceAdaptor(cspace,velMax,accMax));
     stateSpace->qMin = qMin;
     stateSpace->qMax = qMax;
     assert((int)path.velMax.size() == (int)robot->q.size());
@@ -2124,7 +2124,7 @@ int DynamicHybridTreePlanner::PlanFrom(ParabolicRamp::DynamicPath& path,Real cut
   if(!stateSpace->IsFeasible(path.ramps[0].x0,path.ramps[0].dx0)) {
     fprintf(flog,"Warning, start state is infeasible!\n");
   }
-  root=new Node;
+  root.reset(new Node());
   root->t = tstart;
   root->q = path.ramps[0].x0;
   root->dq = path.ramps[0].dx0;
@@ -2137,7 +2137,7 @@ int DynamicHybridTreePlanner::PlanFrom(ParabolicRamp::DynamicPath& path,Real cut
   vector<Node*> iknodes;
   //check the ik extension
   Node* nik=NULL;
-  if(ikSolveProbability > 0) TryIKExtend(root,false);
+  if(ikSolveProbability > 0) TryIKExtend(root.get(),false);
   if(nik) numIKExisting++;
   if(nik && nik->totalCost < bestTotalCost) {
     numIKExistingImprove++;
@@ -2165,7 +2165,7 @@ int DynamicHybridTreePlanner::PlanFrom(ParabolicRamp::DynamicPath& path,Real cut
   else
     fprintf(flog,"Optimization of current state failed\n");
   //extending path destinations
-  Node* n = root;
+  Node* n = root.get();
   for(size_t i=0;i<path.ramps.size();i++) {
     if(stopPlanning) return Timeout;
 

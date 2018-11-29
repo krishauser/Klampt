@@ -23,8 +23,8 @@ public:
     ~MainWindow();
     QSettings* ini;
     RobotWorld world;
-    SmartPointer<SimTestBackend> backend;
-    SmartPointer<QSimTestGUI> gui;
+    shared_ptr<SimTestBackend> backend;
+    shared_ptr<QSimTestGUI> gui;
     bool Initialize(int _argc, const char **_argv);
     void StatusConnect();
 private:

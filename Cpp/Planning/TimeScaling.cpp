@@ -1577,7 +1577,7 @@ bool TimeScaling::SolveMinTime(const Vector& vmin,const Vector& vmax,
   for(size_t i=0;i+1<dxMins.size();i++) {
     slp.SetVelBound(i+1,Min(dsmax[i],dsmax[i+1]));
   }
-  slp.SetVelBound(n,dsmax[n]);
+  slp.SetVelBound(n,dsmax[n-1]);
   
   //fixed endpoints
   if(ds0 >= 0)
@@ -1920,7 +1920,7 @@ bool TimeScaling::SolveMinTime(const Vector& vmin,const Vector& vmax,
   for(size_t i=0;i+1<n;i++) {
     slp.SetVelBound(i+1,Min(dsmax[i],dsmax[i+1]));
   }
-  slp.SetVelBound(n,dsmax[n]);
+  slp.SetVelBound(n,dsmax[n-1]);
 
   //fixed endpoints
   if(ds0 >= 0)

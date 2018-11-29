@@ -292,11 +292,11 @@ int RobotWorld::LoadRobot(const string& fn)
 int RobotWorld::AddRobot(const string& name,Robot* robot)
 {
   robots.resize(robots.size()+1);
-  robots.back() = robot;
+  robots.back().reset(robot);
   robotViews.resize(robots.size());
   if(robot) {
     robot->name = name;
-    robotViews.back() = robot;
+    robotViews.back() = ViewRobot(robot);
   }
   return (int)robots.size()-1;
 }
@@ -315,7 +315,7 @@ void RobotWorld::DeleteRobot(const string& name)
 Robot* RobotWorld::GetRobot(const string& name)
 {
   for(size_t i=0;i<robots.size();i++) 
-    if(robots[i]->name == name) return robots[i];
+    if(robots[i]->name == name) return robots[i].get();
   return NULL;
 }
 
@@ -351,7 +351,7 @@ int RobotWorld::LoadTerrain(const string& fn)
 int RobotWorld::AddTerrain(const string& name,Terrain* t)
 {
   terrains.resize(terrains.size()+1);
-  terrains.back() = t;
+  terrains.back().reset(t);
   if(t) t->name = name;
   return (int)terrains.size()-1;
 }
@@ -369,7 +369,7 @@ void RobotWorld::DeleteTerrain(const string& name)
 Terrain* RobotWorld::GetTerrain(const string& name)
 {
   for(size_t i=0;i<terrains.size();i++) 
-    if(terrains[i]->name == name) return terrains[i];
+    if(terrains[i]->name == name) return terrains[i].get();
   return NULL;
 }
 
@@ -397,7 +397,7 @@ int RobotWorld::AddRigidObject(const string& name,RigidObject* t)
 {
   if(t) t->name = name;
   rigidObjects.resize(rigidObjects.size()+1);
-  rigidObjects.back() = t;
+  rigidObjects.back().reset(t);
   return (int)rigidObjects.size()-1;
 }
 
@@ -414,7 +414,7 @@ void RobotWorld::DeleteRigidObject(const string& name)
 RigidObject* RobotWorld::GetRigidObject(const string& name)
 {
   for(size_t i=0;i<rigidObjects.size();i++) 
-    if(rigidObjects[i]->name == name) return rigidObjects[i];
+    if(rigidObjects[i]->name == name) return rigidObjects[i].get();
   return NULL;
 }
 
@@ -432,7 +432,7 @@ int RobotWorld::RayCast(const Ray3D& r,Vector3& worldpt)
   Real closestDist = Inf;
   Vector3 closestPoint;
   for(size_t j=0;j<robots.size();j++) {
-    Robot* robot = robots[j];
+    Robot* robot = robots[j].get();
     robot->UpdateGeometry();
     for(size_t i=0;i<robot->links.size();i++) {
       if(robot->IsGeometryEmpty(i)) continue;
@@ -447,7 +447,7 @@ int RobotWorld::RayCast(const Ray3D& r,Vector3& worldpt)
     }
   }
   for(size_t j=0;j<rigidObjects.size();j++) {
-    RigidObject* obj = rigidObjects[j];
+    RigidObject* obj = rigidObjects[j].get();
     obj->geometry->SetTransform(obj->T);
     Real dist;
     if(obj->geometry->RayCast(r,&dist)) {
@@ -459,7 +459,7 @@ int RobotWorld::RayCast(const Ray3D& r,Vector3& worldpt)
     }
   }
   for(size_t j=0;j<terrains.size();j++) {
-    Terrain* ter = terrains[j];
+    Terrain* ter = terrains[j].get();
     Real dist;
     if(ter->geometry->RayCast(r,&dist)) {
       if(dist < closestDist) {
@@ -487,7 +487,7 @@ Robot* RobotWorld::RayCastRobot(const Ray3D& r,int& body,Vector3& localpt)
   int closestBody = -1;
   Vector3 worldpt;
   for(size_t j=0;j<robots.size();j++) {
-    Robot* robot = robots[j];
+    Robot* robot = robots[j].get();
     robot->UpdateGeometry();
     for(size_t i=0;i<robot->links.size();i++) {
       if(robot->IsGeometryEmpty(i)) continue;
@@ -497,7 +497,7 @@ Robot* RobotWorld::RayCastRobot(const Ray3D& r,int& body,Vector3& localpt)
 	  closestDist = dist;
 	  closestPoint = r.source + dist*r.direction;
 	  closestBody = i;
-	  closestRobot = robots[j];
+	  closestRobot = robots[j].get();
 	}
       }
     }
@@ -521,14 +521,14 @@ RigidObject* RobotWorld::RayCastObject(const Ray3D& r,Vector3& localpt)
   Vector3 closestPoint;
   Vector3 worldpt;
   for(size_t j=0;j<rigidObjects.size();j++) {
-    RigidObject* obj = rigidObjects[j];
+    RigidObject* obj = rigidObjects[j].get();
     obj->geometry->SetTransform(obj->T);
     Real dist;
     if(obj->geometry->RayCast(r,&dist)) {
       if(dist < closestDist) {
 	closestDist = dist;
 	closestPoint = r.source+dist*r.direction;
-	closest = rigidObjects[j];
+	closest = rigidObjects[j].get();
       }
     }
   }
@@ -548,17 +548,17 @@ void CopyWorld(const RobotWorld& a,RobotWorld& b)
   b.terrains.resize(a.terrains.size());
   b.rigidObjects.resize(a.rigidObjects.size());
   for(size_t i=0;i<b.robots.size();i++) {
-    b.robots[i] = new Robot;
+    b.robots[i] = make_shared<Robot>();
     *b.robots[i] = *a.robots[i];
     b.robotViews[i] = a.robotViews[i];
-    b.robotViews[i].robot = b.robots[i];
+    b.robotViews[i].robot = b.robots[i].get();
   }
   for(size_t i=0;i<b.terrains.size();i++) {
-    b.terrains[i] = new Terrain;
+    b.terrains[i] = make_shared<Terrain>();
     *b.terrains[i] = *a.terrains[i];
   }
   for(size_t i=0;i<b.rigidObjects.size();i++) {
-    b.rigidObjects[i] = new RigidObject;
+    b.rigidObjects[i] = make_shared<RigidObject>();
     *b.rigidObjects[i] = *a.rigidObjects[i];
   }
 

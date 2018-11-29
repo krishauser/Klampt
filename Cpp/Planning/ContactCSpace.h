@@ -2,8 +2,8 @@
 #define ROBOT_CONTACT_CSPACE_H
 
 #include "RobotCSpace.h"
-#include "Modeling/GeneralizedRobot.h"
-#include "Contact/Stance.h"
+#include <Klampt/Modeling/GeneralizedRobot.h>
+#include <Klampt/Contact/Stance.h>
 #include <KrisLibrary/robotics/IK.h>
 
 /** @brief A SingleRobotCSpace for a robot maintaining contact.
@@ -25,7 +25,7 @@ class ContactCSpace : public SingleRobotCSpace
   virtual void Sample(Config& q);
   virtual void SampleNeighborhood(const Config& c,Real r,Config& q);
   virtual void Interpolate(const Config& x,const Config& y,Real u,Config& out);
-  virtual EdgePlanner* PathChecker(const Config& a,const Config& b);
+  virtual EdgePlannerPtr PathChecker(const Config& a,const Config& b);
   virtual void Properties(PropertyMap&);
 
   void AddContact(const IKGoal& goal);

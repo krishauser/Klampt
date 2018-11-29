@@ -1,11 +1,11 @@
 #include "FeedforwardController.h"
-#include "JointSensors.h"
+#include "Sensing/JointSensors.h"
 //#include "Modeling/ParabolicRamp.h"
 #include <KrisLibrary/robotics/NewtonEuler.h>
 #include <string>
 #include <sstream>
 
-FeedforwardController::FeedforwardController(Robot& _robot,SmartPointer<RobotController> _base)
+FeedforwardController::FeedforwardController(Robot& _robot,shared_ptr<RobotController> _base)
   :RobotController(_robot),base(_base),stateEstimator(NULL),enableGravityCompensation(true),
    enableFeedforwardAcceleration(true),gravity(0,0,-9.8)
 {

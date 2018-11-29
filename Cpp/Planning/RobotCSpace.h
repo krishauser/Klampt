@@ -1,13 +1,12 @@
 #ifndef ROBOT_CSPACE_H
 #define ROBOT_CSPACE_H
 
-#include "Modeling/World.h"
-#include "Modeling/GeneralizedRobot.h"
+#include <Klampt/Modeling/World.h>
+#include <Klampt/Modeling/GeneralizedRobot.h>
 #include "PlannerSettings.h"
 #include <KrisLibrary/planning/CSpaceHelpers.h>
 #include <KrisLibrary/planning/RigidBodyCSpace.h>
 #include <KrisLibrary/utils/ArrayMapping.h>
-#include <KrisLibrary/utils/SmartPointer.h>
 
 /** @defgroup Planning */
 
@@ -115,8 +114,8 @@ class SingleRobotCSpace : public RobotCSpace
   virtual void Sample(Config& x);
   virtual void SampleNeighborhood(const Config& c,Real r,Config& x);
   virtual bool IsFeasible(const Config& x);
-  virtual EdgePlanner* PathChecker(const Config& a,const Config& b,int obstacle);
-  virtual EdgePlanner* PathChecker(const Config& a,const Config& b);
+  virtual EdgePlannerPtr PathChecker(const Config& a,const Config& b,int obstacle);
+  virtual EdgePlannerPtr PathChecker(const Config& a,const Config& b);
   virtual void Properties(PropertyMap& map);
 
   virtual void GetJointLimits(Vector& bmin,Vector& bmax);
@@ -148,7 +147,7 @@ class SingleRigidObjectCSpace: public SE3CSpace
  public:
   SingleRigidObjectCSpace(RobotWorld& world,int index,WorldPlannerSettings* settings);
   RigidObject* GetObject() const;  
-  virtual EdgePlanner* PathChecker(const Config& a,const Config& b);
+  virtual EdgePlannerPtr PathChecker(const Config& a,const Config& b);
 
   ///Ignores collisino between this object and world ID id
   void IgnoreCollisions(int id);

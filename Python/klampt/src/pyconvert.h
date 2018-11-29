@@ -2,6 +2,12 @@
 #define PYTHON_KLAMPT_CONVERSIONS_H
 
 #include <Python.h>
+#if PY_MAJOR_VERSION >= 3
+#define IS_PY3K
+#define PyInt_FromLong PyLong_FromLong
+#define PyInt_AsLong PyLong_AsLong 
+#define PyString_FromString PyUnicode_FromString
+#endif //PY_MAJOR_VERSION >= 3
 #include <string>
 #include <vector>
 #include <KrisLibrary/math/vector.h>

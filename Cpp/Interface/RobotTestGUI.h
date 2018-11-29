@@ -4,7 +4,7 @@
 #include "WorldGUI.h"
 #include "View/RobotPoseWidget.h"
 #include "View/ObjectPoseWidget.h"
-#include "Control/Sensor.h"
+#include "Sensing/Sensor.h"
 #include "GLUIGUI.h"
 #include <fstream>
 using namespace Math3D;

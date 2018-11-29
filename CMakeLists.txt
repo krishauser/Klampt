@@ -3,7 +3,7 @@ PROJECT( Klampt )
 
 # version (e.g. for packaging)
 set(KLAMPT_MAJOR_VERSION 0)
-set(KLAMPT_MINOR_VERSION 7)
+set(KLAMPT_MINOR_VERSION 8)
 set(KLAMPT_PATCH_VERSION 0)
 set(KLAMPT_VERSION ${KLAMPT_MAJOR_VERSION}.${KLAMPT_MINOR_VERSION}.${KLAMPT_PATCH_VERSION})
 if(COMMAND cmake_policy)
@@ -39,7 +39,7 @@ INCLUDE_DIRECTORIES(${INCLUDE_DIRS})
 LINK_DIRECTORIES(${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
 
 # define the Klamp't library subdirectories in the SUBDIRS variable
-SET(SUBDIRS Contact Control IO Interface Modeling Planning Simulation View)
+SET(SUBDIRS Contact Control IO Interface Modeling Planning Sensing Simulation View)
 
 # Get all compilation files in subdirectories
 foreach(s ${SUBDIRS})
@@ -60,6 +60,7 @@ SET(KLAMPT_ROOT ${PROJECT_SOURCE_DIR})
 INCLUDE(KlamptDependencies)
 #defines KLAMPT_INCLUDE_DIRS, KLAMPT_DEFINITIONS, KLAMPT_LIBRARIES
 ADD_DEFINITIONS(${KLAMPT_DEFINITIONS})
+SET(KLAMPT_INCLUDE_DIRS ${KLAMPT_INCLUDE_DIRS} ${KLAMPT_ROOT}/include)
 INCLUDE_DIRECTORIES(${KLAMPT_INCLUDE_DIRS})
 
 #show in CMake cache
@@ -67,9 +68,8 @@ SET(KLAMPT_INCLUDE_DIRS ${KLAMPT_INCLUDE_DIRS} CACHE STRING "Klamp't include dir
 SET(KLAMPT_DEFINITIONS ${KLAMPT_DEFINITIONS} CACHE STRING "Klamp't compiler definitions" FORCE)
 SET(KLAMPT_LIBRARIES ${KLAMPT_LIBRARIES} CACHE STRING "Klamp't link libraries" FORCE)
 
-#add Klamp't onto KLAMPT_LIBRARIES, add Klampt/Cpp onto KLAMPT_INCLUDE_DIRS
+#add Klamp't onto KLAMPT_LIBRARIES, add Klampt/include onto KLAMPT_INCLUDE_DIRS
 SET(KLAMPT_LIBRARIES Klampt ${KLAMPT_LIBRARIES})
-SET(KLAMPT_INCLUDE_DIRS ${KLAMPT_INCLUDE_DIRS} ${KLAMPT_ROOT}/Cpp)
 
 #needed for python build
 IF(WIN32)
@@ -147,7 +147,7 @@ install(TARGETS Klampt
   DESTINATION lib
   COMPONENT libraries)
 foreach(s ${SUBDIRS})
-  file(GLOB SUBDIRFILES  ${PROJECT_SOURCE_DIR}/${s}/*.h )
+  file(GLOB SUBDIRFILES  ${PROJECT_SOURCE_DIR}/Cpp/${s}/*.h )
   install(FILES ${SUBDIRFILES}
     DESTINATION include/Klampt/${s}
     COMPONENT headers)

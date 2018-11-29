@@ -26,24 +26,24 @@ bool MainWindow::Initialize(int _argc,const char** _argv)
       printf("RobotTest: error loading robot file %s, quitting\n",argv[1]);
       return false;
     }
-    backend = new RobotTestBackend(&world);
+    backend.reset(new RobotTestBackend(&world));
     printf("BACKEND LOADED\n");
-    gui=new QRobotTestGUI(ui->displaywidget,backend);
+    gui.reset(new QRobotTestGUI(ui->displaywidget,backend.get()));
     gui->opened_file = argv[1];
     backend->Start();
 
     //Receive info from the GUI
-    connect(gui,SIGNAL(UpdateDriverValue()),this,SLOT(UpdateDriverValue()));
-    connect(gui,SIGNAL(UpdateDriverParameters()),this,SLOT(UpdateDriverParameters()));
+    connect(gui.get(),SIGNAL(UpdateDriverValue()),this,SLOT(UpdateDriverValue()));
+    connect(gui.get(),SIGNAL(UpdateDriverParameters()),this,SLOT(UpdateDriverParameters()));
 
-    connect(gui,SIGNAL(UpdateLinkValue()),this,SLOT(UpdateLinkValue()));
-    connect(gui,SIGNAL(UpdateLinkParameters()),this,SLOT(UpdateLinkParameters()));
+    connect(gui.get(),SIGNAL(UpdateLinkValue()),this,SLOT(UpdateLinkValue()));
+    connect(gui.get(),SIGNAL(UpdateLinkParameters()),this,SLOT(UpdateLinkParameters()));
 
     //Send GUI events
-    connect(ui->spn_driver,SIGNAL(valueChanged(double)),gui,SLOT(SetDriverValue(double)));
-    connect(ui->spn_link,SIGNAL(valueChanged(double)),gui,SLOT(SetLinkValue(double)));
+    connect(ui->spn_driver,SIGNAL(valueChanged(double)),gui.get(),SLOT(SetDriverValue(double)));
+    connect(ui->spn_link,SIGNAL(valueChanged(double)),gui.get(),SLOT(SetLinkValue(double)));
 
-    Robot* rob=world.robots[0];
+    Robot* rob=world.robots[0].get();
 
     //fill GUI info
     for(int i=0;i<rob->linkNames.size();i++)
@@ -106,7 +106,7 @@ void MainWindow::SetDriver(int index){
 void MainWindow::UpdateDriverParameters(){
     bool oldState = ui->spn_driver->blockSignals(true);
 #define NUM(x) QString::number(x)
-  Robot* rob = world.robots[0];
+  Robot* rob = world.robots[0].get();
   RobotJointDriver dr=rob->drivers[gui->driver_index];
   QString driver_info=QString("V [%1 %2], T [%3,%4], PID %5,%6,%7").arg( \
         NUM(dr.vmin),NUM(dr.vmax),NUM(dr.tmin),NUM(dr.tmax),NUM(dr.servoP),NUM(dr.servoI),NUM(dr.servoD));
@@ -126,7 +126,7 @@ void MainWindow::SetLink(int index){
 }
 
 void MainWindow::UpdateLinkValue(){
-    Robot* rob = world.robots[0];
+    Robot* rob = world.robots[0].get();
     bool oldState = ui->spn_link->blockSignals(true);
     ui->spn_link->setValue(rob->q[gui->link_index]);
     UpdateLinkSlider(rob->q[gui->link_index]);
@@ -134,7 +134,7 @@ void MainWindow::UpdateLinkValue(){
 }
 
 void MainWindow::UpdateDriverValue(){
-    Robot* rob = world.robots[0];
+    Robot* rob = world.robots[0].get();
     bool oldState = ui->spn_driver->blockSignals(true);
     ui->spn_driver->setValue(rob->GetDriverValue(gui->driver_index));
     UpdateDriverSlider(rob->GetDriverValue(gui->driver_index));
@@ -159,7 +159,7 @@ void MainWindow::UpdateDriverSlider(double value){
 
 void MainWindow::UpdateLinkParameters(){
 #define NUM(x) QString::number(x)
-  Robot* rob = world.robots[0];
+  Robot* rob = world.robots[0].get();
   QString link_info=QString("V [%1 %2], A [%3,%4], T [%5,%6]").arg(
 	NUM(rob->velMin(gui->link_index)),NUM(rob->velMax(gui->link_index)),
 	NUM(-rob->accMax(gui->link_index)),NUM(rob->accMax(gui->link_index)),

@@ -1,5 +1,5 @@
 #include "ControlledSimulator.h"
-#include "Control/JointSensors.h"
+#include "Sensing/JointSensors.h"
 DEFINE_LOGGER(ControlledRobotSimulator)
 
 //Set these values to 0 to get all warnings

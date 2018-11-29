@@ -1,9 +1,9 @@
 #ifndef CONSTRAINT_CHECKER_H
 #define CONSTRAINT_CHECKER_H
 
-#include "Modeling/Robot.h"
-#include "Modeling/Terrain.h"
-#include "Contact/Stance.h"
+#include <Klampt/Modeling/Robot.h>
+#include <Klampt/Modeling/Terrain.h>
+#include <Klampt/Contact/Stance.h>
 
 /** @ingroup Planning
  * @brief Checks for static constraints for a robot at a given stance.

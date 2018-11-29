@@ -2,9 +2,8 @@
 #define FEEDFORWARD_CONTROLLER_H
 
 #include "Controller.h"
-#include "StateEstimator.h"
+#include <Klampt/Sensing/StateEstimator.h>
 #include <KrisLibrary/robotics/Wrench.h>
-#include <KrisLibrary/utils/SmartPointer.h>
 
 /** @ingroup Control
  * @brief A class that adds a feedforward torque to the basic
@@ -23,7 +22,7 @@
 class FeedforwardController : public RobotController
 {
  public:
-  FeedforwardController(Robot& robot,SmartPointer<RobotController> base=NULL);
+  FeedforwardController(Robot& robot,shared_ptr<RobotController> base=NULL);
   virtual ~FeedforwardController() {}
   virtual const char* Type() const { return "FeedforwardController"; }
   virtual void Update(Real dt);
@@ -45,8 +44,8 @@ class FeedforwardController : public RobotController
   //helpers
   void SolveTorques(Vector& torques,Real dt);
 
-  SmartPointer<RobotController> base;
-  SmartPointer<RobotStateEstimator> stateEstimator;
+  shared_ptr<RobotController> base;
+  shared_ptr<RobotStateEstimator> stateEstimator;
   bool enableGravityCompensation,enableFeedforwardAcceleration;
   Vector3 gravity;
   //external forces and moments about the link origin

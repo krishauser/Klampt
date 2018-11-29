@@ -4,6 +4,7 @@
 #include <ode/collision.h>
 #include <KrisLibrary/Timer.h>
 #include <KrisLibrary/errors.h>
+#include <KrisLibrary/meshing/IO.h>
 #include <iostream>
 using namespace std;
 
@@ -283,13 +284,31 @@ int MeshMeshCollide(CollisionMesh& m1,Real outerMargin1,CollisionMesh& m2,Real o
   vector<Vector3> cp1,cp2;
   q.TolerancePairs(t1,t2);
   q.TolerancePoints(cp1,cp2);
-  //printf("%d Collision pairs\n",t1.size());
+
   const RigidTransform& T1 = m1.currentTransform;
   const RigidTransform& T2 = m2.currentTransform;
   RigidTransform T21; T21.mulInverseA(T1,T2);
   RigidTransform T12; T12.mulInverseA(T2,T1);
   Real tol = outerMargin1+outerMargin2;
   Real tol2 = Sqr(tol);
+
+  printf("%d Collision pairs between mesh of size %d and %d\n",t1.size(),m1.tris.size(),m2.tris.size());
+  if (m2.tris.size()==970) {
+    cout<<"Point "<<cp1[0]<<" vs "<<endl;
+    cout<<"Point "<<cp2[0]<<" on triangle "<<t2[0]<<endl;
+    Triangle3D tri2;
+    m2.GetTriangle(t2[0],tri2);
+    cout<<"Triangle "<<tri2.a<<", "<<tri2.b<<", "<<tri2.c<<endl;
+    cout<<"World point 1 "<<T1*cp1[0]<<endl;
+    cout<<"World point 2 "<<T2*cp2[0]<<endl;
+    cout<<"Transform 2 "<<T2<<endl;
+    Meshing::TriMesh mtest1 = m1;
+    mtest1.Transform(T1);
+    Export("test_mesh1.off",mtest1);
+    Meshing::TriMesh mtest2 = m2;
+    mtest2.Transform(T2);
+    Export("test_mesh2.off",mtest2);
+  }
 
   size_t imax=t1.size();
   Triangle3D tri1,tri2,tri1loc,tri2loc;

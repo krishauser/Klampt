@@ -141,7 +141,7 @@ ResourceNodePtr ResourceGUIBackend::Add(ResourcePtr r)
 ResourceNodePtr ResourceGUIBackend::Add(const string& name,const string& type)
 {
   if(resources->library.knownTypes.count(type)==0) return NULL;
-  ResourcePtr r=resources->library.knownTypes[type][0]->Make();
+  ResourcePtr r(resources->library.knownTypes[type][0]->Make());
   r->name = name;
   return Add(r);
 }
@@ -181,7 +181,7 @@ void ResourceGUIBackend::SetLastActive()
     resources->selected = NULL;
   }
   else {
-    resources->selected = last_added;
+    resources->selected = last_added.get();
   }
 }
 
@@ -292,7 +292,7 @@ void ResourceGUIBackend::RenderCurResource()
     viewResource.DrawGL(current);
   */
   //separate open?
-  viewResource.SetRobot(world->robots[0]);
+  viewResource.SetRobot(world->robots[0].get());
   if(resources && resources->selected)
     viewResource.DrawGL(resources->selected->resource);
 }

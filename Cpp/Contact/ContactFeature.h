@@ -2,9 +2,9 @@
 #define CONTACT_FEATURE_H
 
 #include "Hold.h"
-#include <KrisLibrary/utils/SmartPointer.h>
 #include <KrisLibrary/math3d/Polygon3D.h>
 #include <KrisLibrary/math3d/geometry3d.h>
+#include <memory>
 
 struct Triangle3DSampler;
 
@@ -154,7 +154,7 @@ struct FacesContactFeature : public ContactFeatureBase
 
 /// A smart pointer to a ContactFeatureBase -- use GetType() to cast
 /// to the right subtype.
-typedef SmartPointer<ContactFeatureBase> ContactFeature;
+typedef std::shared_ptr<ContactFeatureBase> ContactFeature;
 
 bool LoadContactFeatures(const char* fn,vector<ContactFeature>& ccs);
 bool SaveContactFeatures(const char* fn,const vector<ContactFeature>& ccs);

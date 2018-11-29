@@ -2,7 +2,6 @@
 #define LOGGING_CONTROLLER_H
 
 #include "Controller.h"
-#include <KrisLibrary/utils/SmartPointer.h>
 
 /** @brief A controllre that saves/replays low-level commands from disk.
  *
@@ -18,7 +17,7 @@
 class LoggingController : public RobotController
 {
  public:
-  LoggingController(Robot& robot,const SmartPointer<RobotController>& base);
+  LoggingController(Robot& robot,const shared_ptr<RobotController>& base);
   virtual const char* Type() const { return "LoggingController"; }
   virtual void Update(Real dt);
   bool SaveLog(const char* fn) const;
@@ -37,7 +36,7 @@ class LoggingController : public RobotController
   bool EqualCommand(const RobotMotorCommand& a,const RobotMotorCommand& b) const;
   void RemoveDelays(Real maxDelayTime);
 
-  SmartPointer<RobotController> base;
+  shared_ptr<RobotController> base;
   bool save,replay;
   bool onlyJointCommands; 
   vector<pair<Real,RobotMotorCommand> > trajectory;

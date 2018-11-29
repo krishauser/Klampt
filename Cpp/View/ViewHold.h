@@ -2,7 +2,7 @@
 #define VIEW_HOLD_H
 
 #include <KrisLibrary/GLdraw/GLColor.h>
-#include "Contact/Hold.h"
+#include <Klampt/Contact/Hold.h>
 #include "ViewRobot.h"
 
 /** \ingroup View 

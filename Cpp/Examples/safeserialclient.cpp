@@ -5,6 +5,7 @@
 #include "Interface/RobotInterface.h"
 #include "Main/SimViewProgram.h"
 #include <KrisLibrary/utils/AnyCollection.h>
+#include <KrisLibrary/utils/SmartPointer.h>
 #include <GL/glui.h>
 #include <fstream>
 using namespace Math3D;
@@ -38,7 +39,7 @@ public:
 
   SmartPointer<DefaultMotionQueueInterface> robotInterface;
   vector<SmartPointer<RobotUserInterface> > uis;
-  SmartPointer<InputProcessorBase> serialInputProcessor;
+  shared_ptr<InputProcessorBase> serialInputProcessor;
   int currentUI,oldUI;
 
   //GUI state
@@ -75,8 +76,7 @@ public:
     string objsubaddr = settings["objective_address"];
     string objfilter = settings["objective_filter"];
     string timepubaddr = settings["time_publish_address"];
-    SocketObjectiveProcessor* processor = new SocketObjectiveProcessor(objsubaddr.c_str());
-    serialInputProcessor = processor;
+    serialInputProcessor = make_shared<SocketObjectiveProcessor>(objsubaddr.c_str());
     collisionMargin = settings["collision_margin"];
   }
 
@@ -88,9 +88,9 @@ public:
     drawUI = 1;
     drawContacts = 1;
 
-    robotInterface = new DefaultMotionQueueInterface(GetMotionQueue(sim.robotControllers[0]));
+    robotInterface = new DefaultMotionQueueInterface(GetMotionQueue(sim.robotControllers[0].get()));
     CopyWorld(*world,planningWorld);
-    Robot* robot = planningWorld.robots[0];
+    Robot* robot = planningWorld.robots[0].get();
     for(size_t i=0;i<robot->geometry.size();i++)
       robot->geometry[i]->margin += collisionMargin;
     plannerSettings.InitializeDefault(planningWorld);
@@ -140,8 +140,8 @@ public:
 
   virtual void RenderWorld()
   {
-    Robot* robot=world->robots[0];
-    RobotController* rc=sim.robotControllers[0];
+    Robot* robot=world->robots[0].get();
+    RobotController* rc=sim.robotControllers[0].get();
 
     SimViewProgram::RenderWorld();
 

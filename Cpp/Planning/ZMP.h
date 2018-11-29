@@ -1,8 +1,8 @@
 #ifndef KLAMPT_PLANNING_ZMP_H
 #define KLAMPT_PLANNING_ZMP_H
 
-#include "Modeling/Robot.h"
-#include "Modeling/Paths.h"
+#include <Klampt/Modeling/Robot.h>
+#include <Klampt/Modeling/Paths.h>
 #include <KrisLibrary/planning/GeneralizedBezierCurve.h>
 class NewtonEulerSolver;
 

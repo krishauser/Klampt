@@ -211,6 +211,7 @@ class QtGLWindow(QGLWidget):
         if self.program == None:
             print "QGLWidget.mouseMoveEvent: called after close?"
             return
+        self.modifierList = toModifierList(e.modifiers())
         x,y = e.pos().x(),e.pos().y()
         if self.lastx == None: dx,dy = 0,0
         else: dx, dy = x - self.lastx, y - self.lasty

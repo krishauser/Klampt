@@ -2,6 +2,7 @@
 #include <KrisLibrary/GLdraw/drawMesh.h>
 #include <KrisLibrary/GLdraw/drawgeometry.h>
 #include "IO/ROS.h"
+#include <string.h>
 #include <sstream>
 
 #ifndef GLUT_LEFT_BUTTON
@@ -27,7 +28,7 @@ void RobotTestBackend::Start()
 {
   WorldGUIBackend::Start();
   world->InitCollisions();
-  robot = world->robots[0];
+  robot = world->robots[0].get();
   cur_link=0;
   cur_driver=0;
   draw_geom = 1;
@@ -44,12 +45,12 @@ void RobotTestBackend::Start()
 
   robotWidgets.resize(world->robots.size());
   for(size_t i=0;i<world->robots.size();i++) {
-    robotWidgets[i].Set(world->robots[i],&world->robotViews[i]);
+    robotWidgets[i].Set(world->robots[i].get(),&world->robotViews[i]);
     robotWidgets[i].linkPoser.highlightColor.set(0.75,0.75,0);
   }
   objectWidgets.resize(world->rigidObjects.size());
   for(size_t i=0;i<world->rigidObjects.size();i++)
-    objectWidgets[i].Set(world->rigidObjects[i]);
+    objectWidgets[i].Set(world->rigidObjects[i].get());
   for(size_t i=0;i<world->robots.size();i++)
     allWidgets.widgets.push_back(&robotWidgets[i]);
   for(size_t i=0;i<world->rigidObjects.size();i++)
@@ -337,9 +338,9 @@ bool RobotTestBackend::OnCommand(const string& cmd,const string& args)
     //now update the widgets
     robotWidgets.resize(world->robots.size());
     for(size_t i=0;i<world->robots.size();i++) 
-      robotWidgets[i].Set(world->robots[i],&world->robotViews[i]);
+      robotWidgets[i].Set(world->robots[i].get(),&world->robotViews[i]);
     robotSensors.sensors.resize(0);
-    robot = world->robots[0];
+    robot = world->robots[0].get();
   }
   else if(cmd == "undo_pose") {
     for(size_t i=0;i<world->robots.size();i++) 
@@ -450,7 +451,7 @@ GLUIRobotTestGUI::GLUIRobotTestGUI(GenericBackendBase* backend,RobotWorld* _worl
 bool GLUIRobotTestGUI::Initialize()
 {
   if(!GLUIGUI::Initialize()) return false;
-  robot = world->robots[0];
+  robot = world->robots[0].get();
   cur_link = 0;
   cur_driver = 0;
 

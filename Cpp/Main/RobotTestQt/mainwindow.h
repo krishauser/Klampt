@@ -28,8 +28,8 @@ public:
     QDir directory;
     QString filename;
     RobotWorld world;
-    SmartPointer<RobotTestBackend> backend;
-    SmartPointer<QRobotTestGUI> gui;
+    shared_ptr<RobotTestBackend> backend;
+    shared_ptr<QRobotTestGUI> gui;
     int mode;
     int argc;
     const char** argv;

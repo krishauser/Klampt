@@ -6,6 +6,10 @@ import os
 import glob
 import sys
 
+root_py_folder = 'klampt'
+if sys.version_info[0] == 3:
+    root_py_folder = 'python3_version/klampt'
+
 #Parse settings from CMake
 includeDirs = """${KLAMPT_INCLUDE_DIRS}""".split(';')
 libs = """${KLAMPT_ABSOLUTE_LIBRARIES}""".split(';')
@@ -54,7 +58,7 @@ if sys.platform == 'darwin':
 
 setup(name='Klampt',
       version='@KLAMPT_VERSION@',
-      description="PyKlamp't",
+      description="Python API to Klamp't, a package for robot modeling, simulating, planning, optimization, and visualization",
       author='Kris Hauser',
       author_email='kris.hauser@duke.edu',
       url='https://github.com/krishauser/Klampt',
@@ -65,6 +69,7 @@ setup(name='Klampt',
                              library_dirs=libdirs,
                              libraries=libs,
                              extra_link_args=extra_link_args,
+                             extra_compile_args=['-std=c++11'],
                              language='c++'),
                    Extension('klampt.plan._motionplanning',
                              [os.path.join('klampt/src',f) for f in mpsourcefiles],
@@ -73,19 +78,33 @@ setup(name='Klampt',
                              library_dirs=libdirs,
                              libraries=libs,
                              extra_link_args=extra_link_args,
+                             extra_compile_args=['-std=c++11'],
                              language='c++'),
-                   Extension('klampt.math._rootfind',
-                             [os.path.join('klampt/src',f) for f in rfsourcefiles],
-                             include_dirs=includeDirs,
-                             define_macros=commondefines,
-                             library_dirs=libdirs,
-                             libraries=libs,
-                             extra_link_args=extra_link_args,
-                             language='c++'),
+                   #Extension('klampt.math._rootfind',
+                   #          [os.path.join('klampt/src',f) for f in rfsourcefiles],
+                   #          include_dirs=includeDirs,
+                   #          define_macros=commondefines,
+                   #          library_dirs=libdirs,
+                   #          libraries=libs,
+                   #          extra_link_args=extra_link_args,
+                   #          extra_compile_args=['-std=c++11'],
+                   #          language='c++'),
                    ],
-      py_modules=['klampt.robotsim','klampt.plan.motionplanning','klampt.math.rootfind'],
-      packages=['klampt','klampt.io', 'klampt.math', 'klampt.model', 'klampt.model.create', 'klampt.plan', 'klampt.sim', 'klampt.vis'],
-      package_dir={'klampt': 'klampt'},
-      package_data={'klampt': ['data/*.html']}
+      #py_modules=['klampt.robotsim','klampt.plan.motionplanning','klampt.math.rootfind'],
+      py_modules=['klampt.robotsim','klampt.plan.motionplanning'],
+      packages=['klampt','klampt.io', 'klampt.math', 'klampt.model', 'klampt.model.create', 'klampt.plan', 'klampt.sim', 'klampt.vis', 'klampt.vis.ipython'],
+      package_dir={'klampt': root_py_folder},
+      package_data={'klampt': ['data/*.html']},
+      scripts=['bin/klampt_sim','bin/klampt_browser','bin/klampt_thumbnails'],
+      classifiers=[
+        "Programming Language :: Python :: 2.7",
+        "Development Status :: 4 - Beta",
+        "License :: OSI Approved :: BSD License",
+        "Natural Language :: English",
+        "Operating System :: Microsoft :: Windows",
+        "Operating System :: MacOS",
+        "Operating System :: POSIX :: Linux",
+        "Topic :: Scientific/Engineering"
+      ],
      )
 

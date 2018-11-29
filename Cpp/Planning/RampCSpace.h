@@ -1,8 +1,8 @@
 #ifndef RAMP_CSPACE_H
 #define RAMP_CSPACE_H
 
-#include "Modeling/ParabolicRamp.h"
-#include "Modeling/DynamicPath.h"
+#include <Klampt/Modeling/ParabolicRamp.h>
+#include <Klampt/Modeling/DynamicPath.h>
 #include <KrisLibrary/planning/CSpace.h>
 #include <KrisLibrary/planning/EdgePlanner.h>
 #include <KrisLibrary/planning/KinodynamicSpace.h>
@@ -20,7 +20,7 @@ public:
   virtual int NumDimensions() const;
   virtual bool IsFeasible(const State& s);
   virtual void Sample(State& s);
-  virtual EdgePlanner* LocalPlanner(const State& a,const State& b);
+  virtual EdgePlannerPtr LocalPlanner(const State& a,const State& b);
   virtual Real Distance(const State& x, const State& y);
   virtual void Interpolate(const State& x,const State& y,Real u,State& out);
   virtual void Properties(PropertyMap& props) const;
@@ -72,8 +72,8 @@ public:
   virtual const Config& Start() const { return start; }
   virtual const Config& End() const { return goal; }
   virtual CSpace* Space() const { return space; }
-  virtual EdgePlanner* Copy() const;
-  virtual EdgePlanner* ReverseCopy() const;
+  virtual EdgePlannerPtr Copy() const;
+  virtual EdgePlannerPtr ReverseCopy() const;
   Real Duration() const;
   bool IsValid() const;
 
@@ -90,8 +90,8 @@ public:
   CSpaceFeasibilityChecker(CSpace* _space) : space(_space) {}
     virtual bool ConfigFeasible(const ParabolicRamp::Vector& x) { return space->IsFeasible(x); }
   virtual bool SegmentFeasible(const ParabolicRamp::Vector& a,const ParabolicRamp::Vector& b) {
-    EdgePlanner* e=IsVisible(space,a,b);
-    if(e) { delete e; return true; }
+    EdgePlannerPtr e=IsVisible(space,a,b);
+    if(e) return true; 
     else return false;
   }
   CSpace* space;

@@ -108,9 +108,9 @@ void ContactCSpace::SampleNeighborhood(const Config& c,Real r,Config& x)
   x = robot.q;
 }
 
-EdgePlanner* ContactCSpace::PathChecker(const Config& a,const Config& b)
+EdgePlannerPtr ContactCSpace::PathChecker(const Config& a,const Config& b)
 {
-  return new BisectionEpsilonEdgePlanner(this,a,b,settings->robotSettings[index].collisionEpsilon);
+  return make_shared<BisectionEpsilonEdgePlanner>(this,a,b,settings->robotSettings[index].collisionEpsilon);
 }
 
 void ContactCSpace::Interpolate(const Config& x,const Config& y,Real u,Config& out)

@@ -45,8 +45,9 @@ vis.add("world",world)
 
 sim = Simulator(world)
 sensor = sim.controller(0).sensor("rgbd_camera")
-print sensor.getSetting("link")
-print sensor.getSetting("Tsensor")
+print "sensor.getSetting('link'):",sensor.getSetting("link")
+print "sensor.getSetting('Tsensor'):",sensor.getSetting("Tsensor")
+raw_input("Press enter to continue...")
 #T = (so3.sample(),[0,0,1.0])
 T = (so3.mul(so3.rotation([1,0,0],math.radians(-10)),[1,0,0, 0,0,-1,  0,1,0]),[0,-2.0,0.5])
 sensing.set_sensor_xform(sensor,T,link=-1)
@@ -103,8 +104,8 @@ class SensorTestWorld (GLPluginInterface):
 				self.view = v
 			else:
 				self.window.program.set_view(self.original_view)
-				self.original_view = None
 				self.view = self.original_view
+				self.original_view = None
 		def print_view():
 			print "Tgt",self.view.camera.tgt
 			print "Rot",self.view.camera.rot
@@ -180,7 +181,8 @@ while vis.shown():
 vis.kill()
 
 """
-#Note: GLEW doesn't work in this thread.  This code falls back to the non-accelerated sensor simulation
+#Note: GLEW doesn't work in the main thread, hence the use of the GLPluginInterface. 
+#The below code falls back to the non-accelerated sensor simulation
 
 vis.show()
 time.sleep(0.5)

@@ -16,7 +16,7 @@ struct DrawEECallback : public Graph::CallbackBase<SBLTree::Node*>
   }
   virtual bool ForwardEdge(SBLTree::Node* i,SBLTree::Node* j)
   {
-    //const SmartPointer<EdgePlanner>& e=j->edgeFromParent();
+    //const EdgePlannerPtr& e=j->edgeFromParent();
     edgeColor.setCurrentGL();
     glBegin(GL_LINES);
     GLDraw::glVertex3v(EEPosition(*i));
@@ -54,7 +54,7 @@ struct DrawEECallback2 : public Graph::CallbackBase<int>
   void DrawEdge(int i,int j)
   {
     if(i <= 1 || j <= 1) return;
-    //const SmartPointer<EdgePlanner>& e=j->edgeFromParent();
+    //const EdgePlannerPtr& e=j->edgeFromParent();
     edgeColor.setCurrentGL();
     glBegin(GL_LINES);
     GLDraw::glVertex3v(EEPosition(prm->roadmap.nodes[i]));
@@ -95,7 +95,7 @@ struct DrawEECallback3 : public Graph::CallbackBase<RRTPlanner::Node*>
   }
   virtual bool ForwardEdge(RRTPlanner::Node* i,RRTPlanner::Node* j)
   {
-    //const SmartPointer<EdgePlanner>& e=j->edgeFromParent();
+    //const EdgePlannerPtr& e=j->edgeFromParent();
     edgeColor.setCurrentGL();
     glBegin(GL_LINES);
     GLDraw::glVertex3v(EEPosition(i->x));

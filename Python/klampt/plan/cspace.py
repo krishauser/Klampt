@@ -119,17 +119,13 @@ class CSpace:
             if hasattr(self,'feasible'):
                 self.cspace.setFeasibility(getattr(self,'feasible'))
             else:
-                raise 'Need feasible method or addFeasibilityTests'
+                raise RuntimeError('CSpace needs feasible(q) method to be defined, or addFeasibilityTests to be called')
         if hasattr(self,'visible'):
             self.cspace.setVisibility(getattr(self,'visible'))
         else:
             self.cspace.setVisibilityEpsilon(self.eps)
-        if hasattr(self,'sample'):
-            self.cspace.setSampler(getattr(self,'sample'))
-        else:
-            raise 'Need sample method'
-        if hasattr(self,'sampleneighborhood'):
-            self.cspace.setNeighborhoodSampler(getattr(self,'sampleneighborhood'))
+        self.cspace.setSampler(self.sample)
+        self.cspace.setNeighborhoodSampler(self.sampleneighborhood)
         if hasattr(self,'distance'):
             self.cspace.setDistance(getattr(self,'distance'))
         if hasattr(self,'interpolate'):

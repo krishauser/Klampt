@@ -23,7 +23,7 @@ class RobotUserInterface
  public:
   RobotUserInterface();
   virtual ~RobotUserInterface() { }
-  Robot* GetRobot() const { return world->robots[0]; }
+  Robot* GetRobot() const { return world->robots[0].get(); }
   void GetClickRay(int mx,int my,Ray3D& ray) const;
 
   //Subclasses overload these functions
@@ -83,9 +83,9 @@ class InputProcessingInterface : public RobotUserInterface
  public:
   InputProcessingInterface();
   virtual ~InputProcessingInterface();
-  void SetProcessor(SmartPointer<InputProcessorBase>& newProcessor);
+  void SetProcessor(shared_ptr<InputProcessorBase>& newProcessor);
   bool ObjectiveChanged();
-  SmartPointer<PlannerObjectiveBase> GetObjective();
+  shared_ptr<PlannerObjectiveBase> GetObjective();
   CartesianObjective* GetCartesianObjective();
 
   virtual string Instructions() const { if(inputProcessor) return inputProcessor->Instructions(); else return ""; }
@@ -95,8 +95,8 @@ class InputProcessingInterface : public RobotUserInterface
   virtual string SpaceballEvent(const RigidTransform& T);
   virtual string UpdateEvent();
 
-  SmartPointer<InputProcessorBase> inputProcessor;
-  SmartPointer<PlannerObjectiveBase> currentObjective;
+  shared_ptr<InputProcessorBase> inputProcessor;
+  shared_ptr<PlannerObjectiveBase> currentObjective;
 };
 
 /** @brief An interface that uses numerical IK to solve for a Cartesian
@@ -127,8 +127,8 @@ class PlannerCommandInterface : public InputProcessingInterface
   virtual string UpdateEvent();
   virtual string Instructions() const;
 
-  SmartPointer<RealTimePlanner> planner;
-  SmartPointer<PlannerObjectiveBase> plannerObjective;
+  shared_ptr<RealTimePlanner> planner;
+  shared_ptr<PlannerObjectiveBase> plannerObjective;
   double lastPlanTime;
   double nextPlanTime;
 
@@ -149,7 +149,7 @@ class IKPlannerCommandInterface : public PlannerCommandInterface
   virtual string Description() const { return "Smart point poser"; }
   virtual string ActivateEvent(bool enabled);
 
-  SmartPointer<SingleRobotCSpace> cspace;
+  shared_ptr<SingleRobotCSpace> cspace;
 };
 
 /** @brief An interface that uses the real-time RRT motion planner to
@@ -165,7 +165,7 @@ class RRTCommandInterface : public PlannerCommandInterface
   //TODO: draw the plan feedback?
   //GLuint planDisplayList;
 
-  SmartPointer<SingleRobotCSpace> cspace;
+  shared_ptr<SingleRobotCSpace> cspace;
 };
 
 
@@ -179,7 +179,7 @@ class MTPlannerCommandInterface: public InputProcessingInterface
 {
 public:
   RealTimePlanningThread planningThread;
-  SmartPointer<PlannerObjectiveBase> plannerObjective; ///< this is needed to maintain object pointed to by planner's objective
+  shared_ptr<PlannerObjectiveBase> plannerObjective; ///< this is needed to maintain object pointed to by planner's objective
 
   ///The planner will not be called until the objective function is set below
   ///this threshold.  Infinity by default (i.e., the planner will start
@@ -204,7 +204,7 @@ class MTIKPlannerCommandInterface: public MTPlannerCommandInterface
   virtual string Description() const { 	return "Safety Filter"; }
   virtual string ActivateEvent(bool enabled);
 
-  SmartPointer<SingleRobotCSpace> cspace;
+  shared_ptr<SingleRobotCSpace> cspace;
 
 };
 
@@ -216,7 +216,7 @@ class MTRRTCommandInterface: public MTPlannerCommandInterface
   //sets up the planner
   virtual string ActivateEvent(bool enabled);
 
-  SmartPointer<SingleRobotCSpace> cspace;
+  shared_ptr<SingleRobotCSpace> cspace;
 };
 
 #endif

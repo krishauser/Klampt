@@ -80,8 +80,8 @@ void ResourceFrame::OpenFile(QString filename){
     //gui->SendCommand("load_resource",filename.toStdString());
     //todo send message to GUI
     ResourceNodePtr r = manager->LoadFile(filename.toStdString());
-    ui->treeWidget->addNotify(r);
-    manager->selected = r;
+    ui->treeWidget->addNotify(r.get());
+    manager->selected = r.get();
   }
 }
 
@@ -183,19 +183,19 @@ void ResourceFrame::updateSelectedResourcePane(ResourcePtr resource)
     //printf("Setting selection index %d for type %s\n",index,resource->Type());
     QWidget* w = ui->selectedResourceWidget->widget(index);
     if(0==strcmp(resource->Type(),"Configs")) 
-      dynamic_cast<ConfigsFrame*>(w)->set(resource);
+      dynamic_cast<ConfigsFrame*>(w)->set(resource.get());
     else if(0==strcmp(resource->Type(),"Hold"))
-      dynamic_cast<HoldFrame*>(w)->set(resource);
+      dynamic_cast<HoldFrame*>(w)->set(resource.get());
     else if(0==strcmp(resource->Type(),"Stance"))
-      dynamic_cast<StanceFrame*>(w)->set(resource);
+      dynamic_cast<StanceFrame*>(w)->set(resource.get());
     else if(0==strcmp(resource->Type(),"vector<double>"))
-      dynamic_cast<FloatArrayFrame*>(w)->set(resource);
+      dynamic_cast<FloatArrayFrame*>(w)->set(resource.get());
     else if(0==strcmp(resource->Type(),"LinearPath"))
-      dynamic_cast<PathFrame*>(w)->set(resource);
+      dynamic_cast<PathFrame*>(w)->set(resource.get());
     else if(0==strcmp(resource->Type(),"MultiPath"))
-      dynamic_cast<PathFrame*>(w)->set(resource);
+      dynamic_cast<PathFrame*>(w)->set(resource.get());
     else if(0==strcmp(resource->Type(),"TriMesh"))
-      dynamic_cast<TriMeshFrame*>(w)->set(resource);
+      dynamic_cast<TriMeshFrame*>(w)->set(resource.get());
     else
       fprintf(stderr,"Uh... not handling edit widget for resource of type %s\n",resource->Type());
     ui->selectedResourceWidget->setCurrentIndex(index);
@@ -388,7 +388,7 @@ void ResourceFrame::updateNewResource(string id)
     return;
   }
   assert(node != NULL);
-  ui->treeWidget->addNotify(node);
+  ui->treeWidget->addNotify(node.get());
 }
 
 void ResourceFrame::refreshResources()

@@ -5,7 +5,7 @@
 #include <KrisLibrary/robotics/Stability.h>
 #include <KrisLibrary/robotics/TorqueSolver.h>
 #include "DistanceQuery.h"
-#include "Modeling/Robot.h"
+#include <Klampt/Modeling/Robot.h>
 #include <KrisLibrary/utils/ArrayMapping.h>
 
 /** @ingroup Continuous

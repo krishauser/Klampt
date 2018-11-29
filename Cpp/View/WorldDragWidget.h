@@ -2,7 +2,7 @@
 #define WORLD_DRAG_WIDGET
 
 #include <KrisLibrary/GLdraw/Widget.h>
-#include "Modeling/World.h"
+#include <Klampt/Modeling/World.h>
 
 class WorldDragWidget : public GLDraw::Widget
 {

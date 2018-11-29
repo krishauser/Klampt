@@ -5,7 +5,7 @@
 //#include <tinyxml.h>
 //#include <vector>
 //#include <math3d/primitives.h>
-#include "Modeling/World.h"
+#include <Klampt/Modeling/World.h>
 #include "orXmlTags.h"
 using namespace std;
 using namespace Math3D;

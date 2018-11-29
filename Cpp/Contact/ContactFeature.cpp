@@ -271,7 +271,7 @@ void SampleHold(const Vector3& x,const Vector3& n,const vector<ContactFeature>& 
   for(size_t i=0;i<contacts.size();i++) {
     t -= contacts[i]->weight;
     if(t<=Zero) {
-      SampleHold(x,n,contacts[i],h);
+      SampleHold(x,n,contacts[i].get(),h);
       return;
     }
   }
@@ -297,7 +297,7 @@ void SampleHold(Triangle3DSampler& smp,const vector<ContactFeature>& contacts,Ho
   for(size_t i=0;i<contacts.size();i++) {
     t -= contacts[i]->weight;
     if(t<=Zero) {
-      SampleHold(smp,contacts[i],h);
+      SampleHold(smp,contacts[i].get(),h);
       return;
     }
   }
@@ -339,8 +339,8 @@ public:
       Vector3 v;
       rhs >> v;
       while(rhs) {
-	pts.push_back(v);
-	rhs >> v;
+        pts.push_back(v);
+        rhs >> v;
       }
       faces.push_back(pts);
       return true; 
@@ -359,83 +359,83 @@ public:
     const vector<Vector3>& pts=faces[0];
     if(type != ContactFeatureBase::MultipleFaces) {
       if(faces.size() > 1) {
-	cerr<<"Warning: feature should only have one set of points, ignoring all but the first set"<<endl;
+        cerr<<"Warning: feature should only have one set of points, ignoring all but the first set"<<endl;
       }
     }
 
     switch(type) {
     case ContactFeatureBase::Point:
       {
-	PointContactFeature* f=new PointContactFeature;
-	c=f;
-	if(pts.size() > 1) {
-	  cerr<<"Only one contact point can be specified for point features"<<endl;
-	  return false;
-	}
-	if(pts.size() == 0) {
-	  cerr<<"Must specify one contact point for a point feature"<<endl;
-	  return false;
-	}
-	f->p = pts[0];
+        PointContactFeature* f=new PointContactFeature;
+        c.reset(f);
+        if(pts.size() > 1) {
+          cerr<<"Only one contact point can be specified for point features"<<endl;
+          return false;
+        }
+        if(pts.size() == 0) {
+          cerr<<"Must specify one contact point for a point feature"<<endl;
+          return false;
+        }
+        f->p = pts[0];
       }
       break;
     case ContactFeatureBase::Edge:
       {
-	EdgeContactFeature* f=new EdgeContactFeature;
-	c=f;
-	if(pts.size() > 2) {
-	  cerr<<"Only two contact points can be specified for edge features"<<endl;
-	  return false;
-	}
-	if(pts.size() < 2) {
-	  cerr<<"Must specify two contact points for a edge feature"<<endl;
-	  return false;
-	}
-	f->p1 = pts[0];
-	f->p2 = pts[1];
+        EdgeContactFeature* f=new EdgeContactFeature;
+        c.reset(f);
+        if(pts.size() > 2) {
+          cerr<<"Only two contact points can be specified for edge features"<<endl;
+          return false;
+        }
+        if(pts.size() < 2) {
+          cerr<<"Must specify two contact points for a edge feature"<<endl;
+          return false;
+        }
+        f->p1 = pts[0];
+        f->p2 = pts[1];
       }
       break;
     case ContactFeatureBase::Face:
       {
-	FaceContactFeature* f=new FaceContactFeature;
-	c=f;
-	if(pts.size() < 3) {
-	  cerr<<"At least contact points must be specified for face features"<<endl;
-	  return false;
-	}
-	f->vertices = pts;
+        FaceContactFeature* f=new FaceContactFeature;
+        c.reset(f);
+        if(pts.size() < 3) {
+          cerr<<"At least contact points must be specified for face features"<<endl;
+          return false;
+        }
+        f->vertices = pts;
       }
       break;
     case ContactFeatureBase::Wheel:
       {
-	WheelContactFeature* f=new WheelContactFeature;
-	c=f;
-	if(pts.size() > 2) {
-	  cerr<<"At most two contact points can be specified for wheel features"<<endl;
-	  return false;
-	}
-	else if(pts.size() == 0) {
-	  cerr<<"Must specify more than one contact point for a wheel feature"<<endl;
-	  return false;
-	}
-	else if(pts.size() == 1) {
-	  f->p = pts[0];
-	  f->width = 0;
-	}
-	else {
-	  f->p = Half*(pts[0]+pts[1]);
-	  f->width = pts[0].distance(pts[1]);
-	}
-	if(axis.isZero()) {
-	  cerr<<"Didn't specify axis for wheel hold"<<endl;
-	  return false;
-	}
-	f->axis.source = center;
-	f->axis.direction = axis;
-	if(!FuzzyEquals(f->axis.direction.norm(),One)) {
-	  cerr<<"Warning, axis is not normalized"<<endl;
-	  f->axis.direction.inplaceNormalize();
-	}
+        WheelContactFeature* f=new WheelContactFeature;
+        c.reset(f);
+        if(pts.size() > 2) {
+          cerr<<"At most two contact points can be specified for wheel features"<<endl;
+          return false;
+        }
+        else if(pts.size() == 0) {
+          cerr<<"Must specify more than one contact point for a wheel feature"<<endl;
+          return false;
+        }
+        else if(pts.size() == 1) {
+          f->p = pts[0];
+          f->width = 0;
+        }
+        else {
+          f->p = Half*(pts[0]+pts[1]);
+          f->width = pts[0].distance(pts[1]);
+        }
+        if(axis.isZero()) {
+          cerr<<"Didn't specify axis for wheel hold"<<endl;
+          return false;
+        }
+        f->axis.source = center;
+        f->axis.direction = axis;
+        if(!FuzzyEquals(f->axis.direction.norm(),One)) {
+          cerr<<"Warning, axis is not normalized"<<endl;
+          f->axis.direction.inplaceNormalize();
+        }
       }
       break;
     case ContactFeatureBase::MultipleFaces:
@@ -471,7 +471,7 @@ istream& operator >> (istream& in,ContactFeature& c)
 
 ostream& operator << (ostream& out,const ContactFeature& _c)
 {
-  const ContactFeatureBase* c = _c;
+  const ContactFeatureBase* c = _c.get();
   out<<"begin ";
   switch(c->GetType()) {
   case ContactFeatureBase::Point: out<<"point"; break;
@@ -494,10 +494,10 @@ ostream& operator << (ostream& out,const ContactFeature& _c)
     { const FaceContactFeature* f = dynamic_cast<const FaceContactFeature*>(c);
       out<<"pts = ";
       for(size_t i=0;i<f->vertices.size();i++) {
-	if(i > 0) out<<"      ";
-	out<<f->vertices[i];
-	if(i+1 < f->vertices.size()) out<<" \\";
-	out<<endl;
+        if(i > 0) out<<"      ";
+        out<<f->vertices[i];
+        if(i+1 < f->vertices.size()) out<<" \\";
+        out<<endl;
       }
     }
     break;
@@ -589,7 +589,7 @@ bool FeatureRayIntersection(const ContactFeatureBase* f,const Ray3D& ray,Real to
       c.height = wf->width;
       Real tmin,tmax;
       if(c.intersects(ray,&tmin,&tmax))
-	return tmin > 0 || tmax > 0;
+        return tmin > 0 || tmax > 0;
       return false;
     }
   default:
@@ -718,9 +718,9 @@ void HoldFromTransform(const ContactFeatureBase* f,const RigidTransform& T,Hold&
       Plane3D p;
       ff->GetPlane(p);
       for(size_t i=0;i<h.contacts.size();i++) {
-	h.contacts[i].x = T*ff->vertices[i];
-	h.contacts[i].n = T.R*p.normal;
-	h.contacts[i].kFriction = 0;
+        h.contacts[i].x = T*ff->vertices[i];
+        h.contacts[i].n = T.R*p.normal;
+        h.contacts[i].kFriction = 0;
       }
     }
     break;

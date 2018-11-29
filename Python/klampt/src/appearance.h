@@ -22,7 +22,7 @@
 class Appearance
 {
  public:
-  ///Primitive types
+  ///Geometry feature types
   enum { ALL=0,VERTICES=1,EDGES=2,FACES=3};
 
   Appearance();
@@ -43,22 +43,28 @@ class Appearance
   void free();
   ///Turns on/off visibility of the object
   void setDraw(bool draw);
-  ///Turns on/off visibility of the given primitive
-  void setDraw(int primitive,bool draw);
+  ///Turns on/off visibility of the given feature
+  void setDraw(int feature,bool draw);
   ///Returns whether this object is visible
   bool getDraw();
-  ///Returns whether this primitive is visible
-  bool getDraw(int primitive);
+  ///Returns whether this feature is visible
+  bool getDraw(int feature);
   ///Sets color of the object
   void setColor(float r,float g, float b,float a=1);
-  ///Sets color of the given primitive
-  void setColor(int primitive,float r,float g, float b,float a);
+  ///Sets color of the given feature
+  void setColor(int feature,float r,float g, float b,float a);
   void getColor(float out[4]);
-  void getColor(int primitive,float out[4]);
-  ///Sets per-element color for elements of the given primitive type.
-  ///If alpha=True, colors are assumed to be rgba values
-  ///Otherwise they are assumed to be rgb values
-  void setColors(int primitive,const std::vector<float>& colors,bool alpha=false);
+  void getColor(int feature,float out[4]);
+  ///Sets per-element color for elements of the given feature type.
+  ///If alpha=True, colors are assumed to be 4*N rgba values, where N is the
+  ///number of features of that type.
+  ///Otherwise they are assumed to be 3*N rgb values.  Only supports feature=VERTICES
+  ///and feature=FACES
+  void setColors(int feature,const std::vector<float>& colors,bool alpha=false);
+  ///Sets the per-element color for the given feature
+  void setElementColor(int feature,int element,float r,float g,float b,float a=1);
+  ///Gets the per-element color for the given feature
+  void getElementColor(int feature,int element,float out[4]);
   ///Sets a 1D texture of the given width.  Valid format strings are
   /// - "": turn off texture mapping
   /// - rgb8: unsigned byte RGB colors with red in the most significant byte

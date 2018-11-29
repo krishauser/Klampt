@@ -17,7 +17,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
 bool  MainWindow::Initialize(int argc,const char** argv)
 {
-    backend = new SimTestBackend(&world);
+    backend = make_shared<SimTestBackend>(&world);
     if(!backend->LoadAndInitSim(argc,argv)) {
       printf("ERROR LOADING FROM COMMAND LINE");
       return false;
@@ -25,9 +25,9 @@ bool  MainWindow::Initialize(int argc,const char** argv)
     else
       printf("BACKEND LOADED\n");
 
-    gui=new QSimTestGUI(ui->displaywidget,backend);
+    gui=make_shared<QSimTestGUI>(ui->displaywidget,backend.get());
     gui->ini=ini;
-    ui->displaywidget->gui = gui;
+    ui->displaywidget->gui = gui.get();
 
     //set the system calls for encoding video
     ui->displaywidget->moviefile = toStdString(ini->value("video_record_file","klampt_record.mp4").toString());

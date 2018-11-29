@@ -89,6 +89,9 @@ extensionToType = {'.config':'Config',
                    '.tri':'Geometry3D',
                    '.off':'Geometry3D',
                    '.stl':'Geometry3D',
+                   '.ply':'Geometry3D',
+                   '.wrl':'Geometry3D',
+                   '.dae':'Geometry3D',
                    '.poly':'Geometry3D',
                    '.geom':'Geometry3D',
                    '.pcd':'Geometry3D',
@@ -377,22 +380,26 @@ class _ThumbnailPlugin(vis.VisualizationPlugin):
         vis.VisualizationPlugin.__init__(self)
         self.world = world
         self.done = False
-        self.rendered = False
+        self.rendered = 0
         self.image = None
     def display(self):
-        self.rendered = True
+        self.rendered += 1
         vis.VisualizationPlugin.display(self)
     def idle(self):
         vis.VisualizationPlugin.idle(self)
-        if self.rendered and not self.done:
+        if self.rendered >= 2 and not self.done:
             from OpenGL.GL import glReadPixels,GL_RGBA,GL_UNSIGNED_BYTE
             view = self.window.program.view
             screenshot = glReadPixels( view.x, view.y, view.w, view.h, GL_RGBA, GL_UNSIGNED_BYTE)
             try:
-                import Image
+                from PIL import Image
                 self.image = Image.frombuffer("RGBA", (view.w, view.h), screenshot, "raw", "RGBA", 0, 0)
             except ImportError:
-                self.image = screenshot
+                try:
+                    import Image
+                    self.image = Image.frombuffer("RGBA", (view.w, view.h), screenshot, "raw", "RGBA", 0, 0)
+                except ImportError:
+                    self.image = screenshot
             self.done = True
         return True
 
@@ -445,15 +452,24 @@ def thumbnail(value,size,type='auto',world=None,frame=None):
     plugin.autoFitCamera()
     vis.setPlugin(plugin)
     vis.show()
-    plugin.rendered = False
+    plugin.rendered = 0
     while not plugin.done:
         time.sleep(0.1)
     vis.setPlugin(None)
     vis.show(False)
     vis.setWindow(old_window)
     if (vp.w,vp.h) != size and plugin.image.__class__.__name__=='Image':
-        import Image
-        plugin.image.thumbnail(size,Image.ANTIALIAS)
+        try:
+            from PIL import Image
+            plugin.image.thumbnail(size,Image.ANTIALIAS)
+        except ImportError:
+            try:
+                import Image
+                plugin.image.thumbnail(size,Image.ANTIALIAS)
+            except ImportError:
+                # if this happens then
+                # plugin.image is just a raw RGBA memory buffer
+                pass
     return plugin.image
 
 def console_edit(name,value,type,description=None,world=None,frame=None):
@@ -617,22 +633,22 @@ def edit(name,value,type='auto',description=None,editor='visual',world=None,refe
                 editor.disableTranslation()
             #attach visualization items to the transform
             if isinstance(referenceObject,RobotModelLink):
-                assert frame.index >= 0
-                r = frame.robot()
+                assert referenceObject.index >= 0
+                r = referenceObject.robot()
                 descendant = [False]*r.numLinks()
-                descendant[frame.index] = True
+                descendant[referenceObject.index] = True
                 for i in xrange(r.numLinks()):
                     p = r.link(i).getParent()
                     if p >= 0 and descendant[p]: descendant[i]=True
                 for i in xrange(r.numLinks()):
                     if descendant[i]:
                         editor.attach(r.link(i))
-                editor.attach(frame)
+                editor.attach(referenceObject)
             elif hasattr(referenceObject,'getTransform'):
                 editor.attach(referenceObject)
             elif hasattr(referenceObject,'__iter__'):
                 for i in referenceObject:
-                    editor.attach(referenceObject)
+                    editor.attach(i)
             #Run!
             if type == 'Rotation':
                 #convert from se3 to so3
@@ -645,5 +661,4 @@ def edit(name,value,type='auto',description=None,editor='visual',world=None,refe
             raise RuntimeError("Visual editing of objects of type "+type+" not supported yet")
     else:
         raise ValueError("Invalid value for argument 'editor', must be either 'visual' or 'console'")
-
 

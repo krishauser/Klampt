@@ -5,6 +5,12 @@ print "USAGE: python make_planar_rob.py N"
 
 n = int(sys.argv[1])
 
+print
+print "Copy and paste the below code into your desired .rob file."
+print "You should also make sure that the path to Klampt/data/objects/thincube.off"
+print "are set correctly."
+print
+
 #scale = 1.0/n
 scale = 1.0;
 
@@ -16,7 +22,7 @@ jointtype = "r"
 qMin = "0"
 qMax = "6.28319"
 q ="0"
-geometry = ' "objects/thincube.tri"'
+geometry = ' "objects/thincube.off"'
 geomscale = "%g"%(max(scale,0.05))
 mass =  "1"
 torqueMax = "1"

@@ -477,14 +477,14 @@ class SE3Trajectory(GeodesicTrajectory):
 	def getRotationTrajectory(self):
 		"""Returns an SO3Trajectory describing the rotation
 		trajectory."""
-		return SO3Trajectory(times,[m[:9] for m in self.milestones])
+		return SO3Trajectory(self.times,[m[:9] for m in self.milestones])
 	def getPositionTrajectory(self,localPt=None):
 		"""Returns a Trajectory describing the movement of the given
 		local point localPt (or the origin, if none is provided)."""
 		if localPt is None:
-			return Trajectory(times,[m[9:] for m in self.milestones])
+			return Trajectory(self.times,[m[9:] for m in self.milestones])
 		else:
-			return Trajectory(times,[se3.apply(self.to_se3(m),localPt) for m in self.milestones])
+			return Trajectory(self.times,[se3.apply(self.to_se3(m),localPt) for m in self.milestones])
 	def constructor(self):
 		return SE3Trajectory
 

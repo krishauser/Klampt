@@ -33,7 +33,7 @@ Texturizer::Texturizer()
   
 bool Texturizer::Set(ManagedGeometry& geom)
 {
-  GLDraw::GeometryAppearance* app = geom.Appearance();
+  GLDraw::GeometryAppearance* app = geom.Appearance().get();
   Assert(app != NULL);
   if(!app->geom) 
     app->Set(*geom);

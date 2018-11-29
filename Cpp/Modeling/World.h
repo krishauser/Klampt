@@ -4,11 +4,10 @@
 #include "Robot.h"
 #include "Terrain.h"
 #include "RigidObject.h"
-#include "View/ViewRobot.h"
+#include <Klampt/View/ViewRobot.h>
 #include <KrisLibrary/camera/camera.h>
 #include <KrisLibrary/camera/viewport.h>
 #include <KrisLibrary/GLdraw/GLLight.h>
-#include <KrisLibrary/utils/SmartPointer.h>
 
 /** @ingroup Modeling
  * @brief The main world class containing multiple robots, objects, and
@@ -18,8 +17,8 @@
 class RobotWorld
 {
  public:
-  typedef SmartPointer<Geometry::AnyCollisionGeometry3D> GeometryPtr;
-  typedef SmartPointer<GLDraw::GeometryAppearance> AppearancePtr;
+  typedef shared_ptr<Geometry::AnyCollisionGeometry3D> GeometryPtr;
+  typedef shared_ptr<GLDraw::GeometryAppearance> AppearancePtr;
 
   RobotWorld();
   bool LoadXML(const char* fn);
@@ -84,9 +83,9 @@ class RobotWorld
   GLDraw::GLColor background;
 
   //world occupants
-  vector<SmartPointer<Robot> > robots;
-  vector<SmartPointer<Terrain> > terrains;
-  vector<SmartPointer<RigidObject> > rigidObjects;
+  vector<shared_ptr<Robot> > robots;
+  vector<shared_ptr<Terrain> > terrains;
+  vector<shared_ptr<RigidObject> > rigidObjects;
 
   vector<ViewRobot> robotViews;
 };

@@ -1,5 +1,5 @@
 from symbolic import *
-from symbolic import _stack,_row_stack,_builtin_functions
+from symbolic import _column_stack,_row_stack,_builtin_functions
 import sympy
 from sympy.matrices import Matrix
 from sympy.core.sympify import sympify
@@ -31,10 +31,6 @@ def _sympy_transpose(args,sargs):
 def _sympy_list(args,sargs):
     return np.array(sargs,dtype=np.object)
 
-def _sympy_stack(args,sargs):
-    sargs = [sa.tolist() if isinstance(sa,Matrix) else sa for sa in sargs]
-    return sympy.Matrix(_stack(*sargs))
-
 def _sympy_column_stack(args,sargs):
     sargs = [sa.tolist() if isinstance(sa,Matrix) else sa for sa in sargs]
     return sympy.Matrix(_column_stack(*sargs))
@@ -49,7 +45,7 @@ def _sympy_summation(args,sargs):
     sexpr,svar,srange = sargs
     if is_op(vrange,'range'):
         start = 0
-        stop = vrange.args[0]
+        stop = exprToSympy(vrange.args[0])
     elif is_const(vrange):
         vcrange = to_const(vrange)
         assert hasattr(vcrange,'__iter__')
@@ -83,7 +79,6 @@ _sympySpecialConstructors = {
     'diag': _sympy_diag,
     'dot': _sympy_dot,
     'transpose': _sympy_transpose,
-    'stack': _sympy_stack,
     'row_stack': _sympy_row_stack,
     'column_stack': _sympy_column_stack,
     'list': _sympy_list,

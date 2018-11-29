@@ -400,13 +400,19 @@ class LocalOptimizer:
             if len(items)>1:
                 pyOptMethod = items[1]
 
-            #for some reason PyOpt doesn't do well with infinite bounds
-            for i,v in enumerate(problem.bounds[0]):
-                if math.isinf(v): problem.bounds[0][i] = -1e20
-            for i,v in enumerate(problem.bounds[1]):
-                if math.isinf(v): problem.bounds[1][i] = 1e20
-            ubIndices = [i for i,v in enumerate(problem.bounds[1]) if not math.isinf(v)]
-            lbIndices = [i for i,v in enumerate(problem.bounds[0]) if not math.isinf(v)]
+            if problem.bounds is not None:
+                bmin = np.array(problem.bounds[0][:])
+                bmax = np.array(problem.bounds[1][:])
+                #for some reason PyOpt doesn't do well with infinite bounds
+                for i,v in enumerate(problem.bounds[0]):
+                    if math.isinf(v): bmin[i] = -1e20
+                for i,v in enumerate(problem.bounds[1]):
+                    if math.isinf(v): bmax[i] = 1e20
+                ubIndices = [i for i,v in enumerate(bmax) if not math.isinf(v)]
+                lbIndices = [i for i,v in enumerate(bmin) if not math.isinf(v)]
+            else:
+                ubIndices = []
+                lbIndices = []
             def objfunc(x):
                 #print "EVALUATING OBJECTIVE AT",x
                 fx = problem.objective(x)
@@ -417,12 +423,13 @@ class LocalOptimizer:
                     gx = np.hstack(eqs)
                     assert len(gx.shape)==1
                     gx = gx.tolist()
-                ub = (x-problem.bounds[1])[ubIndices]
-                lb = (problem.bounds[0]-x)[lbIndices]
-                if len(gx) == 0:
-                    gx = ub.tolist() + lb.tolist()
-                else:
-                    gx = gx + ub.tolist() + lb.tolist()
+                if problem.bounds is not None:
+                    ub = (x-bmax)[ubIndices]
+                    lb = (bmin-x)[lbIndices]
+                    if len(gx) == 0:
+                        gx = ub.tolist() + lb.tolist()
+                    else:
+                        gx = gx + ub.tolist() + lb.tolist()
                 #for f in problem.equalities:
                 #    print "EQUALITY VALUE",f(x)
                 #for f in problem.inequalities:
@@ -438,7 +445,10 @@ class LocalOptimizer:
             opt_prob = pyOpt.Optimization('',objfunc)
             opt_prob.addObj('f')
             for i in range(len(self.seed)):
-                opt_prob.addVar('x'+str(i),'c',lower=problem.bounds[0][i],upper=problem.bounds[1][i],value=self.seed[i])
+                if problem.bounds is not None:
+                    opt_prob.addVar('x'+str(i),'c',lower=bmin[i],upper=bmax[i],value=self.seed[i])
+                else:
+                    opt_prob.addVar('x'+str(i),'c',value=self.seed[i])
             hlen = sum(len(f(self.seed)) for f in problem.equalities)
             glen = sum(len(f(self.seed)) for f in problem.inequalities)
             opt_prob.addConGroup('eq',hlen,'e')
@@ -485,7 +495,7 @@ class LocalOptimizer:
                 if not boundfeasible:
                     #try clamping
                     for i in xrange(len(xstr)):
-                        xstr[i] = min(max(xstr[i],problem.bounds[0][i]),problem.bounds[1][i])
+                        xstr[i] = min(max(xstr[i],bmin[i]),bmax[i])
                     f,g,flag = objfunc(xstr)
                     boundfeasible = True
                     eqfeasible = all(abs(v)<tol for v in g[:hlen])
@@ -502,7 +512,7 @@ class LocalOptimizer:
                         print "  Inequality has residual",max(v for v in h),"> 0"
                         print "  Residual vector",g
                     if not boundfeasible:
-                        for i,(v,a,b) in enumerate(zip(x,problem.bounds[0],problem.bounds[1])):
+                        for i,(v,a,b) in enumerate(zip(x,bmin,bmax)):
                             if v < a or v > b:
                                 print "  Bound %d: %f <= %f <= %f violated"%(i,a,v,b)
                     raw_input("Press enter to continue >")

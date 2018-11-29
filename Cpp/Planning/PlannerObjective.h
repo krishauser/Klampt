@@ -1,11 +1,10 @@
 #ifndef PLANNER_OBJECTIVES_H
 #define PLANNER_OBJECTIVES_H
 
-#include "Modeling/Robot.h"
-#include "Modeling/ParabolicRamp.h"
-#include "Modeling/DynamicPath.h"
+#include <Klampt/Modeling/Robot.h>
+#include <Klampt/Modeling/ParabolicRamp.h>
+#include <Klampt/Modeling/DynamicPath.h>
 #include <KrisLibrary/robotics/IK.h>
-#include <KrisLibrary/utils/SmartPointer.h>
 
 /** @ingroup Planning
  * @brief A base class for objective functionals in time/config/velocity
@@ -148,7 +147,7 @@ class CompositeObjective : public PlannerObjectiveBase
   ~CompositeObjective();
 
   ///Adds a new component.  Note: this takes ownership of the pointer.
-  void Add(const SmartPointer<PlannerObjectiveBase>& obj,Real weight=1.0);
+  void Add(const shared_ptr<PlannerObjectiveBase>& obj,Real weight=1.0);
 
   virtual const char* TypeString() { return "composite"; }
   virtual string Description();
@@ -163,7 +162,7 @@ class CompositeObjective : public PlannerObjectiveBase
   virtual bool PathInvariant() const;
 
   Real norm;
-  vector<SmartPointer<PlannerObjectiveBase> > components;
+  vector<shared_ptr<PlannerObjectiveBase> > components;
   vector<Real> weights;
 };
 

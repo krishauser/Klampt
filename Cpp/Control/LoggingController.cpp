@@ -1,7 +1,7 @@
 #include "LoggingController.h"
 #include <sstream>
 
-LoggingController::LoggingController(Robot& robot,const SmartPointer<RobotController>& _base)
+LoggingController::LoggingController(Robot& robot,const shared_ptr<RobotController>& _base)
   : RobotController(robot),base(_base),save(false),replay(false),onlyJointCommands(false),replayIndex(0)
 {}
 

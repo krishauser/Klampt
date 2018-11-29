@@ -42,7 +42,7 @@ void QResourceTreeWidget::refresh()
   while(topLevelItemCount() > 0)
     delete topLevelItem(0);
   for(size_t i=0;i<manager->topLevel.size();i++) {
-    QTreeWidgetItem* res=makeItem(manager->topLevel[i]);
+    QTreeWidgetItem* res=makeItem(manager->topLevel[i].get());
     addTopLevelItem(res);
   }
 }
@@ -61,7 +61,7 @@ QTreeWidgetItem* QResourceTreeWidget::makeItem(ResourceNode* rt)
     updateDecorator(item);
 
     for(size_t i=0;i<rt->children.size();i++) {
-      QTreeWidgetItem* c = makeItem(rt->children[i]);
+      QTreeWidgetItem* c = makeItem(rt->children[i].get());
       item->addChild(c);
     }
     return item;
@@ -109,9 +109,9 @@ void QResourceTreeWidget::addNotify(ResourceNode* node)
     for(size_t i=0;i+1<path.size();i++) {
       int row = manager->ChildIndex(path[i]);
       if(row < 0) {
-	fprintf(stderr,"Error finding %d'th path item %s\n",i,path[i]->Name());
-	delete newitem;
-	return;
+        fprintf(stderr,"Error finding %d'th path item %s\n",i,path[i]->Name());
+        delete newitem;
+        return;
       }
       item = item->child(row);
     }
@@ -122,7 +122,7 @@ void QResourceTreeWidget::addNotify(ResourceNode* node)
 void QResourceTreeWidget::onAdd(ResourcePtr r)
 {
   ResourceNodePtr n=manager->Add(r);
-  addNotify(n);
+  addNotify(n.get());
 }
 
 void QResourceTreeWidget::onDeletePressed()
@@ -154,7 +154,7 @@ void QResourceTreeWidget::onExpand(QTreeWidgetItem* n)
   if(!r->IsExpanded()) {
     r->Expand();
     for(size_t i=0;i<r->children.size();i++)
-      n->addChild(makeItem(r->children[i]));
+      n->addChild(makeItem(r->children[i].get()));
   }
 }
 
@@ -172,15 +172,15 @@ void QResourceTreeWidget::mouseMoveEvent(QMouseEvent *event)
     if (event->buttons() & Qt::LeftButton) {
         int distance = (event->pos() - startPos).manhattanLength();
         if (distance >= QApplication::startDragDistance()) {
-	  QTreeWidgetItem *item = currentItem();
-	  //need to convert raw pointer to a smart pointer
-	  ResourceNode * nodePtr = itemToNode(item);
-	  int index = manager->ChildIndex(nodePtr);
-	  if(nodePtr->parent)
-	    dragNode = nodePtr->parent->children[index];
-	  else
-	    dragNode = manager->topLevel[index];
-	}
+          QTreeWidgetItem *item = currentItem();
+          //need to convert raw pointer to a smart pointer
+          ResourceNode * nodePtr = itemToNode(item);
+          int index = manager->ChildIndex(nodePtr);
+          if(nodePtr->parent)
+            dragNode = nodePtr->parent->children[index];
+          else
+            dragNode = manager->topLevel[index];
+        }
     }
  
     QTreeWidget::mouseMoveEvent(event);
@@ -259,83 +259,83 @@ void QResourceTreeWidget::dropEvent(QDropEvent *event)
     if(event->dropAction() == Qt::MoveAction || event->dropAction() == Qt::CopyAction) {
       QTreeWidgetItem* targetParent = target;
       ResourceNode* targetNodeParent = targetNode;
-      int dragIndex = manager->ChildIndex(dragNode);
+      int dragIndex = manager->ChildIndex(dragNode.get());
       int insertIndex = -1;  //default: insert at end
       if(dropIndicatorPosition() == OnItem) {
-	if(!target) {
-	  targetParent = invisibleRootItem();
-	  targetNodeParent = NULL;
-	}
+        if(!target) {
+          targetParent = invisibleRootItem();
+          targetNodeParent = NULL;
+        }
       }
       else if(dropIndicatorPosition() == AboveItem) {
-	targetParent = target->parent();
-	targetNodeParent = targetNode->parent;
-	insertIndex = manager->ChildIndex(targetNode);
+        targetParent = target->parent();
+        targetNodeParent = targetNode->parent;
+        insertIndex = manager->ChildIndex(targetNode);
       }
       else if(dropIndicatorPosition() == BelowItem) {
-	targetParent = target->parent();
-	targetNodeParent = targetNode->parent;
-	insertIndex = manager->ChildIndex(targetNode)+1;
+        targetParent = target->parent();
+        targetNodeParent = targetNode->parent;
+        insertIndex = manager->ChildIndex(targetNode)+1;
       }
       else if(dropIndicatorPosition() == OnViewport) {
-	targetParent = invisibleRootItem();
-	targetNodeParent = NULL;
+        targetParent = invisibleRootItem();
+        targetNodeParent = NULL;
       }
       else {
-	printf("Invalid dropIndicatorPosition? %d\n",(int)dropIndicatorPosition());
-	return;
+        printf("Invalid dropIndicatorPosition? %d\n",(int)dropIndicatorPosition());
+        return;
       }
       cout<<"Dragged parent: "<<(dragNode->parent ? dragNode->parent->Name() : "Root" )<<endl;
       cout<<"Target parent: "<<(targetNodeParent ? targetNodeParent->Name() : "Root")<<endl;
       cout<<"Insert position: "<<insertIndex<<endl;
 
-      Assert(dragNode != targetNodeParent);
+      Assert(dragNode.get() != targetNodeParent);
       if(event->dropAction() == Qt::MoveAction) {
-	printf("Deleting from drag parent\n");
-	//detatch dragNode from parent and put it before, after, or in targetNode
-	manager->Delete(dragNode);
-	if(dragParent) {
-	  printf("Updating drag parent decorator\n");
-	  updateDecorator(dragParent);
-	}
-	if(dragParent==targetParent) {
-	  //need to adjust insertion index
-	  if(dragIndex < insertIndex)
-	    insertIndex--;
-	}
+        printf("Deleting from drag parent\n");
+        //detatch dragNode from parent and put it before, after, or in targetNode
+        manager->Delete(dragNode.get());
+        if(dragParent) {
+          printf("Updating drag parent decorator\n");
+          updateDecorator(dragParent);
+        }
+        if(dragParent==targetParent) {
+          //need to adjust insertion index
+          if(dragIndex < insertIndex)
+            insertIndex--;
+        }
       }
       else {
-	//copying -- make a copy
-	printf("Copying resource\n");
-	ResourcePtr rcopy = dragNode->resource->Copy();
-	rcopy->name = dragNode->resource->name;
-	rcopy->fileName = dragNode->resource->fileName;
-	dragNode = new ResourceNode(rcopy);
+        //copying -- make a copy
+        printf("Copying resource\n");
+        ResourcePtr rcopy(dragNode->resource->Copy());
+        rcopy->name = dragNode->resource->name;
+        rcopy->fileName = dragNode->resource->fileName;
+        dragNode = make_shared<ResourceNode>(rcopy);
       }
 
       printf("Adding to target parent\n");
       if(targetNodeParent) {
-	if(!targetNodeParent->IsExpandable()) return;
-	if(!targetNodeParent->IsExpanded())
-	  targetNodeParent->Expand();
-	dragNode->parent = targetNodeParent;
-	if(insertIndex < 0)
-	  targetNodeParent->children.push_back(dragNode);
-	else
-	  targetNodeParent->children.insert(targetNodeParent->children.begin()+insertIndex,dragNode);
-	targetNodeParent->SetChildrenChanged();
-	updateDecorator(targetParent);
+        if(!targetNodeParent->IsExpandable()) return;
+        if(!targetNodeParent->IsExpanded())
+          targetNodeParent->Expand();
+        dragNode->parent = targetNodeParent;
+        if(insertIndex < 0)
+          targetNodeParent->children.push_back(dragNode);
+        else
+          targetNodeParent->children.insert(targetNodeParent->children.begin()+insertIndex,dragNode);
+        targetNodeParent->SetChildrenChanged();
+        updateDecorator(targetParent);
       }
       else {
-	dragNode->parent = NULL;
-	if(insertIndex < 0) {
-	  manager->topLevel.push_back(dragNode);
-	  manager->library.Add(dragNode->resource);
-	}
-	else {
-	  manager->topLevel.insert(manager->topLevel.begin()+insertIndex,dragNode);
-	  manager->library.Add(dragNode->resource);
-	}
+        dragNode->parent = NULL;
+        if(insertIndex < 0) {
+          manager->topLevel.push_back(dragNode);
+          manager->library.Add(dragNode->resource);
+        }
+        else {
+          manager->topLevel.insert(manager->topLevel.begin()+insertIndex,dragNode);
+          manager->library.Add(dragNode->resource);
+        }
       }
     }
     else {
@@ -349,7 +349,7 @@ void QResourceTreeWidget::dropEvent(QDropEvent *event)
     if(event->dropAction() == Qt::CopyAction) {
       //item can't load data pointer type, we need to set new pointer for the 
       //item
-      addNotify(dragNode);
+      addNotify(dragNode.get());
     }
     else 
       QTreeWidget::dropEvent(event);
@@ -381,21 +381,21 @@ void QResourceTreeWidget::dropEvent(QDropEvent *event)
  
         stream >> row >> col >> roleDataMap;
  
-	if(col == NAMECOL) {
-	  cout<<"RoleDataMap:"<<endl;
-	  QMapIterator<int, QVariant> i(roleDataMap);
-	  while (i.hasNext()) {
-	    i.next();
-	    QString value = i.value().toString();
-	    cout << "  " << i.key() << ": " << value.toStdString() << endl;
-	  }
-	  QString dropped = roleDataMap[0].toString();
+        if(col == NAMECOL) {
+          cout<<"RoleDataMap:"<<endl;
+          QMapIterator<int, QVariant> i(roleDataMap);
+          while (i.hasNext()) {
+            i.next();
+            QString value = i.value().toString();
+            cout << "  " << i.key() << ": " << value.toStdString() << endl;
+          }
+          QString dropped = roleDataMap[0].toString();
 
-	  QString into = (target ? target->text(NAMECOL) : "root");
-	  
-	  QMessageBox::information(this, "", "DROPPING:" + dropped + "\nINTO:" +
-				   into);
-	}
+          QString into = (target ? target->text(NAMECOL) : "root");
+          
+          QMessageBox::information(this, "", "DROPPING:" + dropped + "\nINTO:" +
+                                   into);
+        }
     }
     */
 }

@@ -1,7 +1,7 @@
 #ifndef ODE_CONTROLLED_SIMULATOR_H
 #define ODE_CONTROLLED_SIMULATOR_H
 
-#include "Control/Controller.h"
+#include <Klampt/Control/Controller.h>
 #include "ODERobot.h"
 
 class WorldSimulation;

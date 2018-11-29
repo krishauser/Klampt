@@ -4,8 +4,8 @@
 #include "ODERobot.h"
 #include "ODERigidObject.h"
 #include "ODESurface.h"
-#include "Modeling/Terrain.h"
-#include "Modeling/RigidObject.h"
+#include <Klampt/Modeling/Terrain.h>
+#include <Klampt/Modeling/RigidObject.h>
 #include <KrisLibrary/robotics/Contact.h>
 #include <ode/contact.h>
 #include <map>

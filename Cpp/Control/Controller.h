@@ -1,8 +1,8 @@
 #ifndef CONTROL_CONTROLLER_BASE_H
 #define CONTROL_CONTROLLER_BASE_H
 
-#include "Modeling/Robot.h"
-#include "Sensor.h"
+#include <Klampt/Modeling/Robot.h>
+#include <Klampt/Sensing/Sensor.h>
 #include "Command.h"
 #include <KrisLibrary/myfile.h>
 #include <map>
@@ -65,7 +65,7 @@ public:
 ///Makes a default controller used in all the Klamp't simulation apps.
 ///First, reads from the file given by robot->properties["controller"].
 ///If this fails, makes a Logging, Feedforward, PolynomialPath controller.
-SmartPointer<RobotController> MakeDefaultController(Robot* robot);
+shared_ptr<RobotController> MakeDefaultController(Robot* robot);
 
 /** @ingroup Control
  * @brief A class to simplify the loading of different controllers at run time.
@@ -81,14 +81,14 @@ class RobotControllerFactory
   static void RegisterDefault(Robot& robot);
   static void Register(RobotController* controller);
   static void Register(const char* name,RobotController* controller);
-  static SmartPointer<RobotController> CreateByName(const char* name);
-  static SmartPointer<RobotController> CreateByName(const char* name,Robot& robot);
-  static SmartPointer<RobotController> Load(const char* fn,Robot& robot);
+  static shared_ptr<RobotController> CreateByName(const char* name);
+  static shared_ptr<RobotController> CreateByName(const char* name,Robot& robot);
+  static shared_ptr<RobotController> Load(const char* fn,Robot& robot);
   static bool Save(RobotController* controller,const char* fn);
-  static SmartPointer<RobotController> Load(TiXmlElement* in,Robot& robot);
+  static shared_ptr<RobotController> Load(TiXmlElement* in,Robot& robot);
   static bool Save(RobotController* controller,TiXmlElement* out);
 
-  static std::map<std::string,SmartPointer<RobotController> > controllers;
+  static std::map<std::string,shared_ptr<RobotController> > controllers;
 };
 
 //these macros will help you read in / write out settings

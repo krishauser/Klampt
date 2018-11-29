@@ -18,7 +18,7 @@ class MotionQueueInterface;
  *
  * Important note: the objects pointed to by CSpace* space, Robot *robot,
  * and WorldPlannerSettings *settings must be owned by an outside source.
- * Make sure to pass a SmartPointer to SetGoal if you are going to use the
+ * Make sure to pass a shared_ptr to SetGoal if you are going to use the
  * objective elsewhere.
  */
 class DynamicMotionPlannerBase
@@ -29,7 +29,7 @@ class DynamicMotionPlannerBase
   DynamicMotionPlannerBase();
   virtual ~DynamicMotionPlannerBase();
   virtual void Init(CSpace* space,Robot* robot,WorldPlannerSettings* settings);
-  virtual void SetGoal(SmartPointer<PlannerObjectiveBase> newgoal);
+  virtual void SetGoal(shared_ptr<PlannerObjectiveBase> newgoal);
   virtual void SetTime(Real tstart);
   virtual void SetDefaultLimits();
   virtual void SetLimits(Real qScale=1.0,Real vScale=1.0,Real aScale=1.0);
@@ -96,7 +96,7 @@ class DynamicMotionPlannerBase
   WorldPlannerSettings* settings;
   CSpace* cspace;
   //objective function
-  SmartPointer<PlannerObjectiveBase> goal;
+  shared_ptr<PlannerObjectiveBase> goal;
   //configuration, velocity, and acceleration limits
   ParabolicRamp::Vector qMin,qMax,velMax,accMax;
 
@@ -202,10 +202,10 @@ public:
   void SetCurrentPath(Real tglobal,const ParabolicRamp::DynamicPath& path);
 
   /// Set the objective function.
-  virtual void Reset(SmartPointer<PlannerObjectiveBase> newgoal);
+  virtual void Reset(shared_ptr<PlannerObjectiveBase> newgoal);
 
   /// Gets the objective function
-  SmartPointer<PlannerObjectiveBase> Objective() const;
+  shared_ptr<PlannerObjectiveBase> Objective() const;
 
   /** Calls the planner, returns the splitting time and planning time.
    * tglobal is a global clock synchronized between the planning and
@@ -228,14 +228,14 @@ public:
   /// Users must set these members before planning
 
   /// The underlying planing algorithm
-  SmartPointer<DynamicMotionPlannerBase> planner;
+  shared_ptr<DynamicMotionPlannerBase> planner;
 
   /// Set the current path before planning, using SetConstantPath or SetCurrentPath
   Real pathStartTime; 
   ParabolicRamp::DynamicPath currentPath;
 
   /// Users should set this up to capture the outputted path
-  SmartPointer<SendPathCallbackBase> sendPathCallback;
+  shared_ptr<SendPathCallbackBase> sendPathCallback;
 
   /// Use only in simulation: multiplies the effective computational power
   /// of this machine (i.e., simulate a machine that's x times faster)
@@ -293,12 +293,12 @@ class RealTimePlanningThread
   /// Initializes the planning thread with a CSpace
   void SetCSpace(SingleRobotCSpace* space);
   /// Sets the planner
-  void SetPlanner(const SmartPointer<DynamicMotionPlannerBase>& planner);
-  void SetPlanner(const SmartPointer<RealTimePlanner>& planner);
+  void SetPlanner(const shared_ptr<DynamicMotionPlannerBase>& planner);
+  void SetPlanner(const shared_ptr<RealTimePlanner>& planner);
   /// Set the objective function.
-  void SetObjective(SmartPointer<PlannerObjectiveBase> newgoal);
+  void SetObjective(shared_ptr<PlannerObjectiveBase> newgoal);
   /// Gets the objective function.  (You must not delete the pointer or assign
-  /// it to a SmartPointer)
+  /// it to a shared_ptr)
   PlannerObjectiveBase* GetObjective() const;
   ///If the robot's path has changed for a reason outside of the planner's
   ///control, call this
@@ -327,7 +327,7 @@ class RealTimePlanningThread
   Real ObjectiveValue();
 
   void* internal;
-  SmartPointer<RealTimePlanner> planner;
+  shared_ptr<RealTimePlanner> planner;
   Thread thread;
 };
 

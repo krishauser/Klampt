@@ -139,7 +139,7 @@ void ViewRobot::Draw()
     glPushMatrix();
     glMultMatrix(mat);
     GLDraw::GeometryAppearance& a = Appearance(i);
-    if(a.geom != robot->geometry[i])
+    if(a.geom != robot->geometry[i].get())
       a.Set(*robot->geometry[i]);
     a.DrawGL();
     glPopMatrix();
@@ -151,7 +151,7 @@ void ViewRobot::DrawLink_Local(int i,bool keepAppearance)
   if(!robot || robot->IsGeometryEmpty(i)) return;
   if(keepAppearance) {
     GLDraw::GeometryAppearance& a = Appearance(i);
-    if(a.geom != robot->geometry[i])
+    if(a.geom != robot->geometry[i].get())
       a.Set(*robot->geometry[i]);
     a.DrawGL();
   }

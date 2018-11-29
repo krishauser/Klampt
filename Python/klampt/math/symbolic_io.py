@@ -382,9 +382,15 @@ def exprFromStr(context,string,fmt=None,add=False):
             def visit_Str(self, node):
                 return ast.copy_location(ast.Call(func=ast.copy_location(ast.Name(id="_const",ctx=ast.Load()),node),args=[node],keywords=[]),node)
             def visit_List(self, node):
-                return ast.copy_location(ast.Call(func=ast.copy_location(ast.Name(id="_convert_list",ctx=ast.Load()),node),args=[node],keywords=[]),node)
+                args = []
+                for idx, item in enumerate(node.elts):
+                    args.append(self.visit(item))
+                return ast.copy_location(ast.Call(func=ast.copy_location(ast.Name(id="_convert_list",ctx=ast.Load()),node),args=args,keywords=[]),node)
             def visit_Tuple(self, node):
-                return ast.copy_location(ast.Call(func=ast.copy_location(ast.Name(id="_convert_list",ctx=ast.Load()),node),args=[node],keywords=[]),node)
+                args = []
+                for idx, item in enumerate(node.elts):
+                    args.append(self.visit(item))
+                return ast.copy_location(ast.Call(func=ast.copy_location(ast.Name(id="_convert_list",ctx=ast.Load()),node),args=args,keywords=[]),node)
 
         #print "old tree:",ast.dump(tree)
         newtree = RewriteVarNames().visit(tree)
@@ -393,8 +399,8 @@ def exprFromStr(context,string,fmt=None,add=False):
             raise ValueError("Undefined functions "+','.join(missing_functions))
         if len(missing_names) > 0:
             raise ValueError("Undefined variable "+','.join(missing_names))
-        allFunctions['_const'] = const            
-        allFunctions['_convert_list'] = lambda arg:array(*arg)
+        allFunctions['_const'] = const
+        allFunctions['_convert_list'] = lambda *args:array(*args)
         ctree = compile(newtree, filename="<ast>", mode="eval")
         res = eval(ctree,allFunctions,userdata)
         delattr(Expression,'__settag__')
@@ -434,7 +440,7 @@ def exprToJson(expr):
 
 def exprFromJson(context,jsonObj,taggedExpressions=None):
     """Creates an Expression from a JSON object previously saved by expr.toJson()"""
-    print "exprFromJson:",jsonObj
+    #print "exprFromJson:",jsonObj
     name = str(jsonObj['type'])
     args = jsonObj['args']
     parsedArgs = []
@@ -533,7 +539,10 @@ def contextFromJson(context,jsonObj):
     """Creates a context from a JSON object previously saved by context.toJson().  
     userData is not restored and customFunctions are not restored, but rather,
     userData and customFunctions are assumed to have been set up with exactly the same keys
-    as when toJson was called."""
+    as when toJson was called.
+
+    Modifies context in-place.
+    """
     if 'userData' in jsonObj:
         for d in jsonObj['userData']:
             if d not in context.userData:
@@ -551,6 +560,7 @@ def contextFromJson(context,jsonObj):
     if 'expressions' in jsonObj:
         for n,v in jsonObj['expressions'].iteritems():
             context.expressions[n] = exprFromJson(context,v)
+    return context
 
 def toStr(obj,parseCompatible=True):
     if not isinstance(obj,Expression):
@@ -571,7 +581,8 @@ def latex(expr):
     try:
         import sympy
         import symbolic_sympy
-    except ImportError:
+    except ImportError as e:
+        raise e
         raise RuntimeError("Sympy is required for conversion to latex")
     return sympy.latex(symbolic_sympy.exprToSympy(expr))
 
@@ -614,11 +625,13 @@ def codegen(name_expr,language=None,**options):
                 raise ValueError("Can't do code generation for plain Python function %s"%(ne.name,))
             sexpr = symbolic_sympy.exprToSympy(ne.expr)
             return (ne.name,sexpr)
+        if not isinstance(ne,(list,tuple)) or len(ne)!=2 or not isinstance(ne[0],str):
+            raise ValueError("Input must be a (str,Expression) pair.")
         name,expr_or_exprs = ne
-        assert isinstance(name,str),"Must be a (str,Expression) pair."
         sexpr = None
         if not isinstance(expr_or_exprs,Expression):
-            assert isinstance(expr_or_exprs,(list,tuple)),"Must be a (str,Expression) pair."
+            if not isinstance(expr_or_exprs,(list,tuple)):
+                raise ValueError("Input must consist of one or more (str,Expression) pairs.")
             sexpr = []
             for expr in expr_or_exprs:
                 sexpr.append(symbolic_sympy.exprToSympy(expr))

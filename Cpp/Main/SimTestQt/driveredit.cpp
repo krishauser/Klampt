@@ -11,7 +11,7 @@ DriverEdit::DriverEdit(RobotWorld* _world,WorldSimulation* _sim,QWidget *parent)
 {
     ui->setupUi(this);
     if(world->robots.size() > 0) {
-      robot=world->robots[0];
+      robot=world->robots[0].get();
       addDrivers(robot->driverNames);
     }
     RequestDriverParameters();

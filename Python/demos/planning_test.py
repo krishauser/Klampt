@@ -11,7 +11,7 @@ from klampt import *
 import time
 import sys
 
-#settings
+#settings: feel free to edit these to see how the results change
 DO_SIMPLIFY = 1
 DEBUG_SIMPLIFY = 0
 MANUAL_SPACE_CREATION = 0
@@ -29,6 +29,9 @@ if not res:
     print "Unable to read file",fn
     exit(0)
 
+robot = world.robot(0)
+resource.setDirectory("resources/"+robot.getName())
+
 def simplify(robot):
     """Utility function: replaces a robot's geometry with simplified bounding
     boxes."""
@@ -42,7 +45,6 @@ def simplify(robot):
         BBgeom.setAABB(BB[0],BB[1])
         geom.setGeometricPrimitive(BBgeom)
 
-robot = world.robot(0)
 #this line replaces the robot's normal geometry with bounding boxes.
 #it makes planning faster but sacrifices accuracy.  Uncomment the line
 #vis.dialog() below to examine whether the simplified robot looks

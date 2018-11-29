@@ -1,8 +1,8 @@
 #ifndef IO_THREE_JS_H
 #define IO_THREE_JS_H
 
-#include "Modeling/World.h"
-#include "Simulation/WorldSimulation.h"
+#include <Klampt/Modeling/World.h>
+#include <Klampt/Simulation/WorldSimulation.h>
 #include <KrisLibrary/utils/AnyCollection.h>
 
 ///Exports a world to a JSON object that can be used in the three.js editor.

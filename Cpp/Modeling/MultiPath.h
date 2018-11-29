@@ -1,9 +1,9 @@
 #ifndef MULTI_PATH_H
 #define MULTI_PATH_H
 
-#include "Contact/Hold.h"
-#include "Contact/Stance.h"
-#include "Modeling/DynamicPath.h"
+#include "DynamicPath.h"
+#include <Klampt/Contact/Hold.h>
+#include <Klampt/Contact/Stance.h>
 #include <KrisLibrary/planning/GeneralizedBezierCurve.h>
 #include <KrisLibrary/utils/PropertyMap.h>
 #include <KrisLibrary/math/vector.h>

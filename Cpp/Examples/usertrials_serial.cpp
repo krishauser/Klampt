@@ -73,9 +73,9 @@ public:
   CommunicationThreadData communicationData;
   Thread communicationThread;
 
-  SmartPointer<PolynomialPathController> controller;
-  SmartPointer<DefaultMotionQueueInterface> robotInterface;
-  vector<SmartPointer<RobotUserInterface> > uis;
+  shared_ptr<PolynomialPathController> controller;
+  shared_ptr<DefaultMotionQueueInterface> robotInterface;
+  vector<shared_ptr<RobotUserInterface> > uis;
   int currentUI,oldUI;
 
   //GUI state
@@ -99,29 +99,29 @@ public:
     drawPath = 0;
     drawUI = 1;
 
-    controller = new PolynomialPathController(*world->robots[0]);
-    robotInterface = new DefaultMotionQueueInterface(controller);
+    controller = make_shared<PolynomialPathController>(*world->robots[0]);
+    robotInterface = make_shared<DefaultMotionQueueInterface>(controller.get());
     connected = false;
     CopyWorld(*world,planningWorld);
     planningWorld.InitCollisions();
-    Robot* robot = planningWorld.robots[0];
+    Robot* robot = planningWorld.robots[0].get();
     for(size_t i=0;i<robot->geometry.size();i++) {
       robot->geometry[i]->margin += collisionMargin;
     }
 
     uis.resize(0);
-    uis.push_back(new JointCommandInterface);
-    uis.push_back(new IKCommandInterface);
+    uis.push_back(make_shared<JointCommandInterface>());
+    uis.push_back(make_shared<IKCommandInterface>());
 
-    //uis.push_back(new IKPlannerCommandInterface);
-    //uis.push_back(new RRTCommandInterface);
+    //uis.push_back(make_shared<IKPlannerCommandInterface>());
+    //uis.push_back(make_shared<RRTCommandInterface>());
 
-    uis.push_back(new MTIKPlannerCommandInterface);
-    uis.push_back(new MTRRTCommandInterface);
+    uis.push_back(make_shared<MTIKPlannerCommandInterface>());
+    uis.push_back(make_shared<MTRRTCommandInterface>());
 
     for(size_t i=0;i<uis.size();i++) {
       uis[i]->world = world;
-      uis[i]->robotInterface = robotInterface;
+      uis[i]->robotInterface = robotInterface.get();
       uis[i]->planningWorld = &planningWorld;
       uis[i]->viewport = &viewport;
       uis[i]->settings = &settings;
@@ -156,14 +156,14 @@ public:
 
   virtual void RenderWorld()
   {
-    Robot* robot=world->robots[0];
+    Robot* robot=world->robots[0].get();
 
     //update actual configuration from sensors
     if(connected && controller->sensors != NULL) {
       communicationData.mutex.lock();
       Config q;
       if(controller->GetSensedConfig(q))
-	robot->UpdateConfig(q);
+        robot->UpdateConfig(q);
       communicationData.mutex.unlock();
       world->robotViews[0].RestoreAppearance();
     }
@@ -177,12 +177,12 @@ public:
       Config q;
       communicationData.mutex.lock();
       if(controller->GetCommandedConfig(q)) {
-	communicationData.mutex.unlock();
-	robot->UpdateConfig(q);
-	world->robotViews[0].Draw();
+        communicationData.mutex.unlock();
+        robot->UpdateConfig(q);
+        world->robotViews[0].Draw();
       }
       else
-	communicationData.mutex.unlock();
+        communicationData.mutex.unlock();
       world->robotViews[0].PopAppearance();
     }
 
@@ -198,30 +198,30 @@ public:
       communicationData.mutex.unlock();
       /*
       if(curGoal) {
-	glPointSize(5.0);
-	glDisable(GL_LIGHTING);
-	glColor3f(1,1,0);
-	glBegin(GL_POINTS);
-	glVertex3v(curGoal->ikGoal.endPosition);
-	glEnd();
+        glPointSize(5.0);
+        glDisable(GL_LIGHTING);
+        glColor3f(1,1,0);
+        glBegin(GL_POINTS);
+        glVertex3v(curGoal->ikGoal.endPosition);
+        glEnd();
 
-	//draw end effector path
-	glColor3f(1,0.5,0);
-	glBegin(GL_LINE_STRIP);
-	for(Real t=c->pathParameter;t<c->ramp.endTime;t+=0.05) {
-	  c->ramp.Evaluate(t,robot->q);
-	  robot->UpdateFrames();
-	  glVertex3v(robot->links[curGoal->ikGoal.link].T_World*curGoal->ikGoal.localPosition);
-	}
-	for(size_t i=0;i<c->path.ramps.size();i++) {
-	  for(Real t=0;t<c->path.ramps[i].endTime;t+=0.05) {
-	    c->path.ramps[i].Evaluate(t,robot->q);
-	    robot->UpdateFrames();
-	    glVertex3v(robot->links[curGoal->ikGoal.link].T_World*curGoal->ikGoal.localPosition);
-	  }
-	}
-	glEnd();
-	glEnable(GL_LIGHTING);
+        //draw end effector path
+        glColor3f(1,0.5,0);
+        glBegin(GL_LINE_STRIP);
+        for(Real t=c->pathParameter;t<c->ramp.endTime;t+=0.05) {
+          c->ramp.Evaluate(t,robot->q);
+          robot->UpdateFrames();
+          glVertex3v(robot->links[curGoal->ikGoal.link].T_World*curGoal->ikGoal.localPosition);
+        }
+        for(size_t i=0;i<c->path.ramps.size();i++) {
+          for(Real t=0;t<c->path.ramps[i].endTime;t+=0.05) {
+            c->path.ramps[i].Evaluate(t,robot->q);
+            robot->UpdateFrames();
+            glVertex3v(robot->links[curGoal->ikGoal.link].T_World*curGoal->ikGoal.localPosition);
+          }
+        }
+        glEnd();
+        glEnable(GL_LIGHTING);
       }
       */
     }
@@ -245,14 +245,14 @@ public:
       int istart=(int)Ceil(tstart/dt);
       int iend=(int)Ceil(tend/dt);
       for(int i=istart;i<iend;i++) {
-	Real t1=i*dt;
-	Real t2=t1+0.5*dt;
-	robotInterface->GetConfig(t1,robot->q);
-	robot->UpdateFrames();
-	glVertex3v(robot->links.back().T_World.t);
-	robotInterface->GetConfig(t2,robot->q);
-	robot->UpdateFrames();
-	glVertex3v(robot->links.back().T_World.t);
+        Real t1=i*dt;
+        Real t2=t1+0.5*dt;
+        robotInterface->GetConfig(t1,robot->q);
+        robot->UpdateFrames();
+        glVertex3v(robot->links.back().T_World.t);
+        robotInterface->GetConfig(t2,robot->q);
+        robot->UpdateFrames();
+        glVertex3v(robot->links.back().T_World.t);
       }
       glEnd();
       communicationData.mutex.unlock();
@@ -292,50 +292,50 @@ public:
     switch(id) {
     case CONNECT_BUTTON_ID:
       if(!connected) {
-	communicationData.ready = false;
-	communicationData.controller = controller;
-	communicationThread = ThreadStart(communicationThreadFunc,&communicationData);
-	while(!communicationData.ready) {
-	  ThreadSleep(0.1);
-	}
-	connected = true;
+        communicationData.ready = false;
+        communicationData.controller = controller.get();
+        communicationThread = ThreadStart(communicationThreadFunc,&communicationData);
+        while(!communicationData.ready) {
+          ThreadSleep(0.1);
+        }
+        connected = true;
 
-	//activate current UI
-	string res=uis[currentUI]->ActivateEvent(true);
+        //activate current UI
+        string res=uis[currentUI]->ActivateEvent(true);
 
-	SleepIdleCallback(0);
+        SleepIdleCallback(0);
       }
       break;
     case DISCONNECT_BUTTON_ID:
       if(connected) {
-	//activate current UI
-	string res=uis[currentUI]->ActivateEvent(false);
+        //activate current UI
+        string res=uis[currentUI]->ActivateEvent(false);
 
-	communicationData.comms->Stop();
-	while(communicationData.ready) {
-	  ThreadSleep(0.1);
-	}
-	connected = false;
-	SleepIdleCallback();
+        communicationData.comms->Stop();
+        while(communicationData.ready) {
+          ThreadSleep(0.1);
+        }
+        connected = false;
+        SleepIdleCallback();
       }
       break;
     case UI_LISTBOX_ID:
       {
-	if(connected) {
-	  string res=uis[oldUI]->ActivateEvent(false);
-	  res=uis[currentUI]->ActivateEvent(true);
-	  oldUI=currentUI;
-	}
+        if(connected) {
+          string res=uis[oldUI]->ActivateEvent(false);
+          res=uis[currentUI]->ActivateEvent(true);
+          oldUI=currentUI;
+        }
       }
       break;
     case COLLISION_MARGIN_SPINNER_ID:
       {
-	Robot* robot = planningWorld.robots[0];
-	for(size_t i=0;i<robot->geometry.size();i++)
-	  robot->geometry[i]->margin -= oldCollisionMargin;
-	for(size_t i=0;i<robot->geometry.size();i++)
-	  robot->geometry[i]->margin += collisionMargin;
-	oldCollisionMargin = collisionMargin;
+        Robot* robot = planningWorld.robots[0].get();
+        for(size_t i=0;i<robot->geometry.size();i++)
+          robot->geometry[i]->margin -= oldCollisionMargin;
+        for(size_t i=0;i<robot->geometry.size();i++)
+          robot->geometry[i]->margin += collisionMargin;
+        oldCollisionMargin = collisionMargin;
       }
       break;
     }
@@ -354,8 +354,8 @@ public:
   {
     if(button == GLUT_RIGHT_BUTTON) {
       if(connected) {
-	ScopedLock lock(communicationData.mutex);
-	string res=uis[currentUI]->MouseInputEvent(0,0,true);
+        ScopedLock lock(communicationData.mutex);
+        string res=uis[currentUI]->MouseInputEvent(0,0,true);
       }
     }
   }
@@ -365,8 +365,8 @@ public:
     if(button == GLUT_LEFT_BUTTON)  DragRotate(dx,dy);
     else if(button == GLUT_RIGHT_BUTTON) {
       if(connected) {
-	ScopedLock lock(communicationData.mutex);
-	string res=uis[currentUI]->MouseInputEvent(dx,dy,true);
+        ScopedLock lock(communicationData.mutex);
+        string res=uis[currentUI]->MouseInputEvent(dx,dy,true);
       }
     }
   }
@@ -438,30 +438,30 @@ int main(int argc, char** argv)
     const char* ext=FileExtension(argv[i]);
     if(0==strcmp(ext,"rob")) {
       if(world.LoadRobot(argv[i])<0) {
-	printf("Error loading robot file %s\n",argv[i]);
-	return 1;
+        printf("Error loading robot file %s\n",argv[i]);
+        return 1;
       }
     }
     else if(0==strcmp(ext,"env") || 0==strcmp(ext,"tri")) {
       if(world.LoadTerrain(argv[i])<0) {
-	printf("Error loading terrain file %s\n",argv[i]);
-	return 1;
+        printf("Error loading terrain file %s\n",argv[i]);
+        return 1;
       }
     }
     else if(0==strcmp(ext,"obj")) {
       if(world.LoadRigidObject(argv[i])<0) {
-	printf("Error loading rigid object file %s\n",argv[i]);
-	return 1;
+        printf("Error loading rigid object file %s\n",argv[i]);
+        return 1;
       }
     }
     else if(0==strcmp(ext,"xml")) {
       if(!xmlWorld.Load(argv[i])) {
-	printf("Error loading world file %s\n",argv[i]);
-	return 1;
+        printf("Error loading world file %s\n",argv[i]);
+        return 1;
       }
       if(!xmlWorld.GetWorld(world)) {
-	printf("Error loading world from %s\n",argv[i]);
-	return 1;
+        printf("Error loading world from %s\n",argv[i]);
+        return 1;
       }
     }
     else {

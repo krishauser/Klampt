@@ -428,17 +428,18 @@ class TerrainModel
 class WorldModel
 {
  public:
-  ///Creates a WorldModel.  With no arguments, creates a new world.  With
-  ///another WorldModel instance, creates a reference to an
-  ///existing world.  (To create a copy, use the copy() method.)
-  ///
-  ///If passed a pointer to a C++ RobotWorld structure, a reference to that
-  ///structure is returned. (This is used pretty much only when
-  ///interfacing C++ and Python code)
+  ///Creates a WorldModel. 
+  ///- Given no arguments, creates a new world. 
+  ///- Given another WorldModel instance, creates a reference to an
+  ///  existing world.  (To create a copy, use the copy() method.)
+  ///- Given a string, loads from a file. A PyException is raised on failure.
+  ///- Given a pointer to a C++ RobotWorld structure, a reference to that
+  ///  structure is returned. (This is advanced usage, seen only when
+  ///  interfacing C++ and Python code)
   WorldModel();
   WorldModel(void* ptrRobotWorld);
-  //WorldModel(int index);  /// < this constructor was problematic
   WorldModel(const WorldModel& w);
+  WorldModel(const char* fn); 
   ~WorldModel();
   ///Sets this WorldModel to a reference to w
   const WorldModel& operator = (const WorldModel& w);

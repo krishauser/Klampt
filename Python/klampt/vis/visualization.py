@@ -192,6 +192,9 @@ def setAttribute(name,attribute,value): sets an attribute of the appearance
     - 'endeffectors': for a robot Trajectory, the list of end effectors to plot (default the last link).
     - 'maxConfigs': for a Configs resource, the maximum number of drawn configurations (default 10)
     - 'fancy': for RigidTransform objects, whether the axes are drawn with boxes or lines (default False)
+    - 'type': for ambiguous items, like a 3-item list when the robot has 3 links, specifies the type to be
+       used.  For example, 'Config' draws the item as a robot configuration, while 'Vector3' or 'Point'
+       draws it as a point.
 def setColor(name,r,g,b,a=1.0): changes the color of an item.
 def setDrawFunc(name,func): sets a custom OpenGL drawing function for an item.
     func is a one-argument function that takes the item data as input.  Set
@@ -1009,8 +1012,13 @@ class VisPlotItem:
                 else:
                     self.luminosity.append(random.uniform(0,1))
         trace = self.traces[i]
-        if len(trace) > 0 and trace[-1][0] == t:
-            trace[-1] = (t,v)
+        #trange = self.traceRanges[i][1] - self.traceRanges[i][0]
+        if len(trace) > 0 and trace[-1][0] >= t:
+            tsafe = trace[-1][0]+1e-8
+            if v != trace[-1][1]:
+                trace.append((tsafe,v))
+                return
+            trace[-1] = (tsafe,v)
             return
         if self.compressThreshold is None:
             trace.append((t,v))
@@ -1241,14 +1249,14 @@ class VisPlot:
 
     def dumpCurrent(self):
         if len(self.items) == 0: return
-        assert len(self.items[0].trace) > 0, "Item has no channels?"
-        assert len(self.items[0].trace[0]) > 0, "Item has no readings yet?"
-        t = self.items[0].trace[0][-1]
+        assert len(self.items[0].traces) > 0, "Item has no channels?"
+        assert len(self.items[0].traces[0]) > 0, "Item has no readings yet?"
+        t = self.items[0].traces[0][-1]
         vals = []
         for i in self.items:
-            if len(i.trace) == 0:
+            if len(i.traces) == 0:
                 continue
-            for j,trace in enumerate(i.trace):
+            for j,trace in enumerate(i.traces):
                 vals.append(trace[-1][1])
         if self.outformat == '.csv':
             self.outfile.write(str(t)+',')
@@ -1963,7 +1971,7 @@ class VisAppearance:
                     raise ValueError("Invalid sub-path specified "+str(path)+" at "+str(e))
         raise ValueError("Invalid sub-item specified "+path[0])
 
-    def make_editor(self):
+    def make_editor(self,world=None):
         if self.editor != None:
             return 
         item = self.item
@@ -2003,6 +2011,17 @@ class VisAppearance:
                 res.enableRotation(True)
                 res.enableTranslation(True)
                 res.set(*self.item)
+            elif itype == 'Config':
+                if world is not None and world.numRobots() > 0 and world.robot(0).numLinks() == len(item):
+                    #it's a valid configuration
+                    oldconfig = world.robot(0).getConfig()
+                    world.robot(0).setConfig(self.item)
+                    res = RobotPoser(world.robot(0))
+                    world.robot(0).setConfig(oldconfig)
+                    self.hidden = True
+                else:
+                    print "VisAppearance.make_editor(): Warning, editor for object of type",itype,"cannot be associated with a robot"
+                    return
             else:
                 print "VisAppearance.make_editor(): Warning, editor for object of type",itype,"not defined"
                 return
@@ -2036,6 +2055,8 @@ class VisAppearance:
                     self.editor.set(self.item)
                 elif itype == 'RigidTransform':
                     self.editor.set(*self.item)
+                elif itype == 'Config':
+                    self.editor.set(self.item)
             else:
                 raise RuntimeError("Uh... unsupported type with an editor?")
         else:
@@ -2427,7 +2448,10 @@ class VisualizationPlugin(glcommon.GLWidgetPlugin):
             _globalLock.release()
             raise ValueError("Object "+name+" does not exist in visualization")
         if doedit:
-            obj.make_editor()
+            world = self.items.get('world',None)
+            if world != None:
+                world=world.item
+            obj.make_editor(world)
             if obj.editor:
                 self.klamptwidgetmaster.add(obj.editor)
         else:
@@ -2941,6 +2965,7 @@ if _PyQtAvailable:
                         w.guidata = _MyWindow(w)
                     else:
                         w.guidata = w.custom_ui(w.glwindow)
+                    w.guidata.setWindowTitle(w.name)
                     w.glwindow.show()
                     w.glwindow.idlesleep(0)
                 if w.mode == 'shown' and not w.guidata.isVisible():

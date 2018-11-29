@@ -2,8 +2,8 @@
 #define XML_ODE_H
 
 #include <tinyxml.h>
-#include "Simulation/ODESimulator.h"
-#include "Simulation/WorldSimulation.h"
+#include <Klampt/Simulation/ODESimulator.h>
+#include <Klampt/Simulation/WorldSimulation.h>
 
 class XmlODEGeometry
 {

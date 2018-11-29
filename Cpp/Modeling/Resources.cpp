@@ -126,13 +126,13 @@ ResourcePtr ConfigsResource::Cast(const char* type)
     p->times.resize(p->milestones.size());
     for(size_t i=0;i<p->times.size();i++)
       p->times[i] = i;
-    return p;
+    return ResourcePtr(p);
   }
   else if(0==strcmp(type,"MultiPath")) {
     MultiPathResource* mp = new MultiPathResource;
     mp->name = name;
     mp->path.SetMilestones(configs);
-    return mp;
+    return ResourcePtr(mp);
   }
   return NULL;
 }
@@ -146,14 +146,14 @@ bool ConfigsResource::Extract(const char* subtype,vector<ResourcePtr>& res)
     for(size_t i=0;i<p->times.size();i++)
       p->times[i] = i;
     p->name = this->name;
-    res.push_back(p);
+    res.push_back(ResourcePtr(p));
     return true;
   }
   else if(0==strcmp(subtype,"MultiPath")) {
     MultiPathResource* mp = new MultiPathResource;
     mp->path.SetMilestones(this->configs);
     mp->name = this->name;
-    res.push_back(mp);
+    res.push_back(ResourcePtr(mp));
     return true;
   }
   else if(0==strcmp(subtype,"Config")) {
@@ -167,7 +167,7 @@ bool ConfigsResource::Pack(vector<ResourcePtr>& lib,string* errorMessage)
 {
   configs.resize(0);
   for(size_t i=0;i<lib.size();i++) {
-    ConfigResource* config = dynamic_cast<ConfigResource*>((ResourceBase*)lib[i]);
+    ConfigResource* config = dynamic_cast<ConfigResource*>(lib[i].get());
     if(!config) {
       if(errorMessage) {
 	stringstream ss;
@@ -322,7 +322,7 @@ bool WorldResource::Extract(const char* subtype,vector<ResourcePtr>& subobjects)
       RobotResource* rr = new RobotResource;
       rr->name = world.robots[i]->name;
       rr->robot = *world.robots[i];
-      subobjects.push_back(rr);
+      subobjects.push_back(ResourcePtr(rr));
     }
     return true;
   }
@@ -331,7 +331,7 @@ bool WorldResource::Extract(const char* subtype,vector<ResourcePtr>& subobjects)
       RigidObjectResource* rr = new RigidObjectResource;
       rr->name = world.rigidObjects[i]->name;
       rr->object = *world.rigidObjects[i];
-      subobjects.push_back(rr);
+      subobjects.push_back(ResourcePtr(rr));
     }
     return true;
   }
@@ -341,7 +341,7 @@ bool WorldResource::Extract(const char* subtype,vector<ResourcePtr>& subobjects)
       r->name = world.terrains[i]->name;
       r->library.Add(MakeResource("geometry",*world.terrains[i]->geometry));
       r->library.Add(MakeResource("kFriction",world.terrains[i]->kFriction));
-      subobjects.push_back(r);
+      subobjects.push_back(ResourcePtr(r));
     }
     return true;
   }
@@ -360,20 +360,20 @@ bool WorldResource::Unpack(vector<ResourcePtr>& subobjects,bool* incomplete)
     RobotResource* rr = new RobotResource;
     rr->name = world.robots[i]->name;
     rr->robot = *world.robots[i];
-    subobjects.push_back(rr);
+    subobjects.push_back(ResourcePtr(rr));
   }
   for(size_t i=0;i<world.rigidObjects.size();i++) {
     RigidObjectResource* rr = new RigidObjectResource;
     rr->name = world.rigidObjects[i]->name;
     rr->object = *world.rigidObjects[i];
-    subobjects.push_back(rr);
+    subobjects.push_back(ResourcePtr(rr));
   }
   for(size_t i=0;i<world.terrains.size();i++) {
     ResourceLibraryResource* r = new ResourceLibraryResource;
     r->name = world.terrains[i]->name;
     r->library.Add(MakeResource("geometry",*world.terrains[i]->geometry));
     r->library.Add(MakeResource("kFriction",world.terrains[i]->kFriction));
-    subobjects.push_back(r);
+    subobjects.push_back(ResourcePtr(r));
   }
   if(incomplete) *incomplete = true;
   return true;
@@ -466,7 +466,7 @@ ResourcePtr LinearPathResource::Cast(const char* subtype)
     MultiPathResource* mp = new MultiPathResource;
     mp->name = name;
     mp->path.SetTimedMilestones(times,milestones);
-    return mp;
+    return ResourcePtr(mp);
   }
   return NULL;
 }
@@ -611,14 +611,14 @@ ResourcePtr MultiPathResource::Cast(const char* subtype)
       for(size_t i=0;i<p->times.size();i++)
 	p->times[i] = i;
     }
-    return p;
+    return ResourcePtr(p);
   }
   else if(0==strcmp(subtype,"Configs")) {
     ConfigsResource* c = new ConfigsResource;
     c->name = this->name;
     for(size_t i=0;i<this->path.sections.size();i++) 
       c->configs.insert(c->configs.end(),this->path.sections[i].milestones.begin(),this->path.sections[i].milestones.end());
-    return c;
+    return ResourcePtr(c);
   }
   return NULL;
 }
@@ -639,7 +639,7 @@ bool MultiPathResource::Extract(const char* subtype,vector<ResourcePtr>& res)
       stringstream ss;
       ss<<"section["<<i<<"]";
       p->name = ss.str();
-      res.push_back(p);
+      res.push_back(ResourcePtr(p));
     }
     return true;
   }
@@ -650,7 +650,7 @@ bool MultiPathResource::Extract(const char* subtype,vector<ResourcePtr>& res)
       stringstream ss;
       ss<<"configs["<<i<<"]";
       c->name = ss.str();
-      res.push_back(c);
+      res.push_back(ResourcePtr(c));
     }
     return true;
   }
@@ -752,7 +752,7 @@ bool MultiPathResource::Unpack(vector<ResourcePtr>& res,bool* incomplete)
     stringstream ss;
     ss<<"section["<<i<<"]";
     p->name = ss.str();
-    res.push_back(p);
+    res.push_back(ResourcePtr(p));
   }
   for(size_t i=0;i<this->path.sections.size();i++) {
     Stance s;
@@ -795,14 +795,14 @@ ResourcePtr IKGoalResource::Cast(const char* subtype) const
     Hold h;
     h.link = this->goal.link;
     h.ikConstraint = this->goal;
-    return new HoldResource(h);
+    return ResourcePtr(new HoldResource(h));
   }
   else if(0==strcmp(subtype,"Grasp")) {
     Grasp g;
     g.objectIndex = -1;
     g.robotIndex = -1;
     g.constraints.push_back(this->goal);
-    return new GraspResource(g);
+    return ResourcePtr(new GraspResource(g));
   }
   else if(0==strcmp(subtype,"Stance")) {
     Hold h;
@@ -810,7 +810,7 @@ ResourcePtr IKGoalResource::Cast(const char* subtype) const
     h.ikConstraint = this->goal;
     Stance s;
     s.insert(h);
-    return new StanceResource(s);
+    return ResourcePtr(new StanceResource(s));
   }
   return NULL;
 }
@@ -1119,16 +1119,16 @@ ResourcePtr GraspResource::Cast(const char* type)
     if(this->grasp.constraints.size()!=1) return NULL;
     Hold h;
     this->grasp.GetHold(h);
-    return new HoldResource(h);
+    return ResourcePtr(new HoldResource(h));
   }
   else if(0==strcmp(type,"Stance")) {
     Stance s;
     this->grasp.GetStance(s);
-    return new StanceResource(s);
+    return ResourcePtr(new StanceResource(s));
   }
   else if(0==strcmp(type,"IKGoal")) {
     if(this->grasp.constraints.size()!=1) return NULL;
-    return new IKGoalResource(this->grasp.constraints.front());
+    return ResourcePtr(new IKGoalResource(this->grasp.constraints.front()));
   }
   return NULL;
 }
@@ -1179,17 +1179,17 @@ bool GraspResource::Unpack(vector<ResourcePtr>& res,bool* incomplete)
 
 ResourcePtr MakeResource(const string& name,const vector<int>& vals)
 {
-  return new IntArrayResource(vals,name);
+  return ResourcePtr(new IntArrayResource(vals,name));
 }
 
 ResourcePtr MakeResource(const string& name,const vector<double>& vals)
 {
-  return new FloatArrayResource(vals,name);
+  return ResourcePtr(new FloatArrayResource(vals,name));
 }
 
 ResourcePtr MakeResource(const string& name,const Config& q)
 {
-  return (new ConfigResource(q,name));
+  return ResourcePtr(new ConfigResource(q,name));
 }
 
 ResourcePtr MakeResource(const string& name,const vector<Config>& qs)
@@ -1197,7 +1197,7 @@ ResourcePtr MakeResource(const string& name,const vector<Config>& qs)
   ConfigsResource* r=new ConfigsResource;
   r->configs = qs;
   r->name = name;
-  return (r);
+  return ResourcePtr(r);
 }
 
 ResourcePtr MakeResource(const string& name,const vector<Real>& ts,const vector<Config>& qs)
@@ -1206,7 +1206,7 @@ ResourcePtr MakeResource(const string& name,const vector<Real>& ts,const vector<
   r->name = name;
   r->times = ts;
   r->milestones = qs;
-  return (r);
+  return ResourcePtr(r);
 }
 
 ResourcePtr MakeResource(const string& name,const MultiPath& path)
@@ -1214,32 +1214,32 @@ ResourcePtr MakeResource(const string& name,const MultiPath& path)
   MultiPathResource* r=new MultiPathResource;
   r->name = name;
   r->path = path;
-  return (r);
+  return ResourcePtr(r);
 }
 
 ResourcePtr MakeResource(const string& name,const Vector3& T)
 {
-  return (new Vector3Resource(T,name));
+  return ResourcePtr(new Vector3Resource(T,name));
 }
 
 ResourcePtr MakeResource(const string& name,const Matrix3& T)
 {
-  return (new Matrix3Resource(T,name));
+  return ResourcePtr(new Matrix3Resource(T,name));
 }
 
 ResourcePtr MakeResource(const string& name,const RigidTransform& T)
 {
-  return (new RigidTransformResource(T,name));
+  return ResourcePtr(new RigidTransformResource(T,name));
 }
 
 ResourcePtr MakeResource(const string& name,const GeometricPrimitive3D& geom)
 {
-  return (new GeometricPrimitive3DResource(geom,name));
+  return ResourcePtr(new GeometricPrimitive3DResource(geom,name));
 }
 
 ResourcePtr MakeResource(const string& name,const IKGoal& goal)
 {
-  return (new IKGoalResource(goal,name));
+  return ResourcePtr(new IKGoalResource(goal,name));
 }
 
 
@@ -1248,7 +1248,7 @@ ResourcePtr MakeResource(const string& name,const Meshing::TriMesh& mesh)
   TriMeshResource* res=new TriMeshResource;
   res->data = mesh;
   res->name = name;
-  return res;
+  return ResourcePtr(res);
 }
 
 ResourcePtr MakeResource(const string& name,const Geometry::AnyGeometry3D& geom)
@@ -1263,39 +1263,39 @@ ResourcePtr MakeResource(const string& name,const Geometry::AnyGeometry3D& geom)
 
 ResourcePtr MakeResource(const string& name,const Hold& hold)
 {
-  return (new HoldResource(hold,name));
+  return ResourcePtr(new HoldResource(hold,name));
 }
 
 ResourcePtr MakeResource(const string& name,const Stance& stance)
 {
   StanceResource* res=new StanceResource(stance);
   res->name = name;
-  return (res);
+  return ResourcePtr(res);
 }
 
 ResourcePtr MakeResource(const string& name,const Grasp& grasp)
 {
   GraspResource* res=new GraspResource(grasp);
   res->name = name;
-  return (res);
+  return ResourcePtr(res);
 }
 
 ResourcePtr CastResource(ResourcePtr& item,const char* type)
 {
   if(0==strcmp(item->Type(),type)) return item;
-  CompoundResourceBase* cr = dynamic_cast<CompoundResourceBase*>((ResourceBase*)item);
+  CompoundResourceBase* cr = dynamic_cast<CompoundResourceBase*>(item.get());
   if(cr) return cr->Cast(type);
 
   if(0==strcmp("Config",item->Type())) {
-    ConfigResource* cr = dynamic_cast<ConfigResource*>((ResourceBase*)item);
+    ConfigResource* cr = dynamic_cast<ConfigResource*>(item.get());
     if(0==strcmp(type,"vector<double>")) {
-      return new FloatArrayResource(cr->data);
+      return ResourcePtr(new FloatArrayResource(cr->data));
     }
   }
   else if(0==strcmp("vector<double>",item->Type())) {
-    FloatArrayResource* ar = dynamic_cast<FloatArrayResource*>((ResourceBase*)item);
+    FloatArrayResource* ar = dynamic_cast<FloatArrayResource*>(item.get());
     if(0==strcmp(type,"Config")) {
-      return new ConfigResource(ar->data);
+      return ResourcePtr(new ConfigResource(ar->data));
     }
   }
   fprintf(stderr,"CastResource: No conversion from %s to %s\n",item->Type(),type);
@@ -1304,7 +1304,7 @@ ResourcePtr CastResource(ResourcePtr& item,const char* type)
 
 vector<string> ExtractResourceTypes(const ResourcePtr& item)
 {
-  const CompoundResourceBase* cr = dynamic_cast<const CompoundResourceBase*>((const ResourceBase*)item);
+  const CompoundResourceBase* cr = dynamic_cast<const CompoundResourceBase*>(item.get());
   if(cr) 
     return cr->ExtractTypes();
   return vector<string>();
@@ -1313,7 +1313,7 @@ vector<string> ExtractResourceTypes(const ResourcePtr& item)
 vector<ResourcePtr> ExtractResources(ResourcePtr& item,const char* type)
 {
   vector<ResourcePtr> res;
-  CompoundResourceBase* cr = dynamic_cast<CompoundResourceBase*>((ResourceBase*)item);
+  CompoundResourceBase* cr = dynamic_cast<CompoundResourceBase*>(item.get());
   if(cr) {
     if(!cr->Extract(type,res)) {
       fprintf(stderr,"ExtractResource: No elements of type %s in %s\n",type,item->Type());
@@ -1337,7 +1337,7 @@ bool CanCastResource(const ResourcePtr& item,const char* type)
   else if(0==strcmp("vector<double>",item->Type())) {
     if(0==strcmp(type,"Config")) return true;
   }
-  const CompoundResourceBase* cr = dynamic_cast<const CompoundResourceBase*>((const ResourceBase*)item);
+  const CompoundResourceBase* cr = dynamic_cast<const CompoundResourceBase*>(item.get());
   vector<string> types = cr->CastTypes();  
   for(size_t i=0;i<types.size();i++)
     if(types[i] == type) return true;
@@ -1347,7 +1347,7 @@ bool CanCastResource(const ResourcePtr& item,const char* type)
 ///Returns the list of types which the item is castable to
 vector<string> CastResourceTypes(const ResourcePtr& item)
 {
-  const CompoundResourceBase* cr = dynamic_cast<const CompoundResourceBase*>((const ResourceBase*)item);
+  const CompoundResourceBase* cr = dynamic_cast<const CompoundResourceBase*>(item.get());
   if(cr) return cr->CastTypes();
   vector<string> res;
   if(0==strcmp("Config",item->Type())) {
@@ -1361,7 +1361,7 @@ vector<string> CastResourceTypes(const ResourcePtr& item)
 
 bool IsCompoundResource(const ResourcePtr& r)
 {
-  const CompoundResourceBase* cr = dynamic_cast<const CompoundResourceBase*>((const ResourceBase*)r);
+  const CompoundResourceBase* cr = dynamic_cast<const CompoundResourceBase*>(r.get());
   if(cr) return true;
   return false;
 }
@@ -1371,7 +1371,7 @@ vector<ResourcePtr> UnpackResource(ResourcePtr r,bool* successful,bool* incomple
   vector<string> types;
   const char* type = r->Type();
   vector<ResourcePtr> res;
-  CompoundResourceBase* cr = dynamic_cast<CompoundResourceBase*>((ResourceBase*)r);
+  CompoundResourceBase* cr = dynamic_cast<CompoundResourceBase*>(r.get());
   if(cr) {
     vector<ResourcePtr> res;
     bool success = cr->Unpack(res,incomplete);
@@ -1398,7 +1398,7 @@ ResourcePtr PackResources(ResourceLibrary& lib,const string& type,string* errorM
 
 ResourcePtr PackResources(vector<ResourcePtr>& lib,ResourcePtr rtemplate,string* errorMessage)
 {
-  CompoundResourceBase* crtemplate = dynamic_cast<CompoundResourceBase*>((ResourceBase*)rtemplate);
+  CompoundResourceBase* crtemplate = dynamic_cast<CompoundResourceBase*>(rtemplate.get());
   if(!crtemplate) {
     if(errorMessage) {
       stringstream ss;
@@ -1406,8 +1406,8 @@ ResourcePtr PackResources(vector<ResourcePtr>& lib,ResourcePtr rtemplate,string*
       *errorMessage = ss.str();
     }
   }
-  ResourcePtr r = crtemplate->Make();
-  CompoundResourceBase* cr = dynamic_cast<CompoundResourceBase*>((ResourceBase*)r);
+  ResourcePtr r(crtemplate->Make());
+  CompoundResourceBase* cr = dynamic_cast<CompoundResourceBase*>(r.get());
   if(cr->Pack(lib,errorMessage)) return r;
   return NULL;  
 }
@@ -1624,7 +1624,7 @@ bool Convert(const AnyCollection& c,Grasp& g)
 
 bool Convert(const AnyCollection& c,Stance& s)
 {
-  vector<SmartPointer<AnyCollection> > holds;
+  vector<shared_ptr<AnyCollection> > holds;
   s.clear();
   c["holds"].enumerate(holds);
   for(size_t i=0;i<holds.size();i++) {

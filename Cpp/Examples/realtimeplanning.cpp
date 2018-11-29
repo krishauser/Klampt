@@ -8,6 +8,7 @@
 #include <KrisLibrary/GLdraw/GLScreenshotProgram.h>
 #include <KrisLibrary/utils/StatCollector.h>
 #include <KrisLibrary/GLdraw/drawextra.h>
+#include <KrisLibrary/utils/SmartPointer.h>
 #include <GL/glui.h>
 #include <fstream>
 using namespace Math3D;
@@ -20,11 +21,11 @@ inline PolynomialMotionQueue* GetMotionQueue(RobotController* rc)
   if(!lc) {
     FatalError("Robot controller isn't a LoggingController");
   }
-  FeedforwardController* fc = dynamic_cast<FeedforwardController*>(&*lc->base);
+  FeedforwardController* fc = dynamic_cast<FeedforwardController*>(lc->base.get());
   if(!fc) {
     FatalError("LoggingController base is not a feedforward controller");
   }
-  PolynomialPathController* c = dynamic_cast<PolynomialPathController*>(&*fc->base);
+  PolynomialPathController* c = dynamic_cast<PolynomialPathController*>(fc->base.get());
   if(!c) {
     FatalError("Feedforward base is not a PolynomialPathController");
   }
@@ -105,7 +106,7 @@ public:
 
   SmartPointer<DefaultMotionQueueInterface> robotInterface;
   SmartPointer<InputProcessingInterface> ui;
-  SmartPointer<InputProcessorBase> inputProcessor;
+  shared_ptr<InputProcessorBase> inputProcessor;
   //store existing collision geometries before modifying them for planner
   vector<AnyCollisionGeometry3D> geomStorage;
 
@@ -127,7 +128,7 @@ public:
     //choose and set the collision avoidance margin
     collisionMargin = 0.0;
     CopyWorld(*world,planningWorld);
-    Robot* robot = planningWorld.robots[0];
+    Robot* robot = planningWorld.robots[0].get();
     for(size_t i=0;i<robot->geometry.size();i++) {
       if(robot->geometry[i]) robot->geometry[i]->margin += collisionMargin;
     }
@@ -149,7 +150,7 @@ public:
     sim.robotControllers[0]->Update(0); 
 
     //set up user interface
-    robotInterface = new DefaultMotionQueueInterface(GetMotionQueue(sim.robotControllers[0]));
+    robotInterface = new DefaultMotionQueueInterface(GetMotionQueue(sim.robotControllers[0].get()));
 #ifdef MULTITHREADED
     printf("Constructing multi-threaded RRT user interface...\n");
     ui = new MTRRTCommandInterface;
@@ -162,7 +163,7 @@ public:
     ui->planningWorld = &planningWorld;
     ui->robotInterface = robotInterface;
     ui->viewport = &viewport;
-    inputProcessor = new MyInputProcessor;
+    inputProcessor = make_shared<MyInputProcessor>();
     ui->SetProcessor(inputProcessor);
 
     //activate current UI
@@ -176,8 +177,8 @@ public:
 
   virtual void RenderWorld()
   {
-    Robot* robot=world->robots[0];
-    RobotController* rc=sim.robotControllers[0];
+    Robot* robot=world->robots[0].get();
+    RobotController* rc=sim.robotControllers[0].get();
 
     SimGUIBackend::SetForceColors();
     SimGUIBackend::RenderWorld();
@@ -271,13 +272,13 @@ public:
   virtual bool OnCommand(const string& cmd,const string& args)
   {
     if(cmd=="new_target") {
-      dynamic_cast<MyInputProcessor*>(&*inputProcessor)->Randomize(world->robots[0]);
+      dynamic_cast<MyInputProcessor*>(inputProcessor.get())->Randomize(world->robots[0].get());
     }
     else if(cmd=="set_collision_margin") {
       double newmargin;
       bool res = LexicalCast<double>(args,newmargin);
       Assert(res != false);
-      Robot* robot = planningWorld.robots[0];
+      Robot* robot = planningWorld.robots[0].get();
       for(size_t i=0;i<robot->geometry.size();i++)
 	robot->geometry[i]->margin -= collisionMargin;
       collisionMargin = newmargin;

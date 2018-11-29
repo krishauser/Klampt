@@ -175,6 +175,16 @@ Returns constraint testing statistics. If adaptive queries are
 enabled, this returns the stats on each constraint. ";
 
 
+// File: classDistanceQueryResult.xml
+%feature("docstring") DistanceQueryResult "";
+
+
+// File: classDistanceQuerySettings.xml
+%feature("docstring") DistanceQuerySettings "";
+
+%feature("docstring")  DistanceQuerySettings::DistanceQuerySettings "";
+
+
 // File: classGeneralizedIKObjective.xml
 %feature("docstring") GeneralizedIKObjective "
 
@@ -359,7 +369,7 @@ Frees the data associated with this geometry, if standalone. ";
 
 %feature("docstring")  Geometry3D::type "
 
-Returns the type of geometry: TriangleMesh, PointCloud, or
+Returns the type of geometry: TriangleMesh, PointCloud, VolumeGrid, or
 GeometricPrimitive. ";
 
 %feature("docstring")  Geometry3D::empty "
@@ -379,6 +389,10 @@ Returns a PointCloud if this geometry is of type PointCloud. ";
 
 Returns a GeometricPrimitive if this geometry is of type
 GeometricPrimitive. ";
+
+%feature("docstring")  Geometry3D::getVolumeGrid "
+
+Returns a VoumeGrid if this geometry is of type VolumeGrid. ";
 
 %feature("docstring")  Geometry3D::setTriangleMesh "
 
@@ -505,38 +519,34 @@ Returns true if this geometry collides with the other. ";
 
 Returns true if this geometry is within distance tol to other. ";
 
+%feature("docstring")  Geometry3D::distance_simple "
+
+Version 0.8: this is the same as the old distance() function.
+
+Returns the distance from this geometry to the other. If either
+geometry contains volume information, this value may be negative to
+indicate penetration. ";
+
+%feature("docstring")  Geometry3D::distance_point "
+
+Returns the the distance and closest point to the input point, given
+in world coordinates. An exception is raised if this operation is not
+supported with the given geometry type.
+
+The return value contains the distance, closest points, and gradients
+if available. ";
+
+%feature("docstring")  Geometry3D::distance_point_ext "
+
+A customizable version of distance_point. The settings for the
+calculation can be customized with relErr, absErr, and upperBound,
+e.g., to break if the closest points are at least upperBound distance
+from one another. ";
+
 %feature("docstring")  Geometry3D::distance "
 
-Returns the distance from this geometry to the other. ";
-
-%feature("docstring")  Geometry3D::closestPoint "
-
-Returns (success,cp) giving the closest point to the input point.
-success is false if that operation is not supported with the given
-geometry type.
-
-pt and cp are given in world coordinates. A non-default value of
-upperBound lets the calculation break early if it can be shown that
-the closest points are greater than upperBound distance from one
-another. In this case, success=false is returned.
-
-If pt is contained within the interior of a GeometricPrimitive or
-VolumeGrid, a negative value is returned ";
-
-%feature("docstring")  Geometry3D::closestPointWithBound "
-
-Same as the normal closestPoint, but a value of upperBound can be
-provided to let the calculation break early if it can be shown that
-the closest points are at least upperBound distance from one another.
-In this case, success=False is returned. ";
-
-%feature("docstring")  Geometry3D::closestPoints "
-
-Returns (success,cp1,cp2) where cp1 is the closest point on self to
-other, and cp2 is the closest point on other to self. success is false
-if that operation is not supported with the given geometry types.
-
-cp1 and cp2 are returned in world coordinates.
+Returns the the distance and closest points between the given
+geometries.
 
 If the objects are penetrating, some combinations of geometry types
 allow calculating penetration depths (GeometricPrimitive-
@@ -544,14 +554,16 @@ GeometricPrimitive, GeometricPrimitive-TriangleMesh (surface only),
 GeometricPrimitive-PointCloud, GeometricPrimitive-VolumeGrid,
 TriangleMesh (surface only)- GeometricPrimitive, PointCloud-
 VolumeGrid). In this case, a negative value is returned and cp1,cp2
-are the deepest penetrating points. ";
+are the deepest penetrating points.
 
-%feature("docstring")  Geometry3D::closestPointsWithBound "
+Same comments as the distance_point function ";
 
-Same as closestPoints, but a value of upperBound can be provided to
-let the calculation break early if it can be shown that the closest
-points are at least upperBound distance away from one another. In this
-case, success=False is returned. ";
+%feature("docstring")  Geometry3D::distance_ext "
+
+A customizable version of distance. The settings for the calculation
+can be customized with relErr, absErr, and upperBound, e.g., to break
+if the closest points are at least upperBound distance from one
+another. ";
 
 %feature("docstring")  Geometry3D::rayCast "
 
@@ -2972,6 +2984,8 @@ Sets the random seed used by the motion planner. ";
 %feature("docstring")  GetPointCloud "";
 
 %feature("docstring")  GetPointCloud "";
+
+%feature("docstring")  GetVolumeGrid "";
 
 %feature("docstring")  GetVolumeGrid "";
 

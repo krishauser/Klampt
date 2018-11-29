@@ -19,42 +19,44 @@ MainWindow::MainWindow(QWidget *parent) :
 
 void MainWindow::Initialize(int argc,const char** argv)
 {
-  manager = new ResourceManager();
-  backend = new RobotPoseBackend(&world,manager);
+  manager = make_shared<ResourceManager>();
+  backend = make_shared<RobotPoseBackend>(&world,manager.get());
   if(!backend->LoadCommandLine(argc,argv)){
     exit(1);
   }
 
-  gui=new QRobotPoseGUI(ui->displaywidget,backend);
+  gui=make_shared<QRobotPoseGUI>(ui->displaywidget,backend.get());
     backend->Start();
 
     gui->resource_frame=ui->frame_resources;
 
-    ui->frame_resources->gui = gui;
-    ui->frame_resources->SetManager(manager);
+    ui->frame_resources->gui = gui.get();
+    ui->frame_resources->SetManager(manager.get());
 
     //Receive info from the GUI
-    connect(gui,SIGNAL(UpdateDriverValue()),this,SLOT(UpdateDriverValue()));
-    connect(gui,SIGNAL(UpdateDriverParameters()),this,SLOT(UpdateDriverParameters()));
+    connect(gui.get(),SIGNAL(UpdateDriverValue()),this,SLOT(UpdateDriverValue()));
+    connect(gui.get(),SIGNAL(UpdateDriverParameters()),this,SLOT(UpdateDriverParameters()));
 
-    connect(gui,SIGNAL(UpdateLinkValue()),this,SLOT(UpdateLinkValue()));
-    connect(gui,SIGNAL(UpdateLinkParameters()),this,SLOT(UpdateLinkParameters()));
+    connect(gui.get(),SIGNAL(UpdateLinkValue()),this,SLOT(UpdateLinkValue()));
+    connect(gui.get(),SIGNAL(UpdateLinkParameters()),this,SLOT(UpdateLinkParameters()));
 
     //Send GUI events
-    connect(ui->spn_driver,SIGNAL(valueChanged(double)),gui,SLOT(SetDriverValue(double)));
-    connect(ui->spn_link,SIGNAL(valueChanged(double)),gui,SLOT(SetLinkValue(double)));
+    connect(ui->spn_driver,SIGNAL(valueChanged(double)),gui.get(),SLOT(SetDriverValue(double)));
+    connect(ui->spn_link,SIGNAL(valueChanged(double)),gui.get(),SLOT(SetLinkValue(double)));
 
-    Robot* rob=world.robots[0];
+    if(!world.robots.empty()) {
+      Robot* rob=world.robots[0].get();
 
-    //fill GUI info
-    for(int i=0;i<rob->linkNames.size();i++)
-        ui->cb_link->addItem(QString::fromStdString(rob->linkNames[i]))
-                ;
-    for(int i=0;i<rob->drivers.size();i++)
-        ui->cb_driver->addItem(QString::fromStdString(rob->driverNames[i]));
+      //fill GUI info
+      for(int i=0;i<rob->linkNames.size();i++)
+          ui->cb_link->addItem(QString::fromStdString(rob->linkNames[i]))
+                  ;
+      for(int i=0;i<rob->drivers.size();i++)
+          ui->cb_driver->addItem(QString::fromStdString(rob->driverNames[i]));
 
-    ui->spn_driver_index->setMaximum(rob->drivers.size() - 1);
-    ui->spn_link_index->setMaximum(rob->links.size() - 1);
+      ui->spn_driver_index->setMaximum(rob->drivers.size() - 1);
+      ui->spn_link_index->setMaximum(rob->links.size() - 1);
+    }
 
     ui->displaywidget->installEventFilter(this);
     ui->displaywidget->setFocusPolicy(Qt::WheelFocus);    
@@ -151,7 +153,8 @@ void MainWindow::SetDriver(int index){
 
 //this information is shared via pointer, not message passing
 void MainWindow::UpdateDriverParameters(){
-    Robot* rob=world.robots[0];
+    if(world.robots.empty()) return;
+    Robot* rob=world.robots[0].get();
     bool oldState = ui->spn_driver->blockSignals(true);
 #define NUM(x) QString::number(x)
   RobotJointDriver dr=rob->drivers[gui->driver_index];
@@ -173,7 +176,8 @@ void MainWindow::SetLink(int index){
 }
 
 void MainWindow::UpdateLinkValue(){
-    Robot* rob=world.robots[0];
+    if(world.robots.empty()) return;
+    Robot* rob=world.robots[0].get();
     bool oldState = ui->spn_link->blockSignals(true);
     ui->spn_link->setValue(rob->q[gui->link_index]);
     UpdateLinkSlider(rob->q[gui->link_index]);
@@ -181,7 +185,8 @@ void MainWindow::UpdateLinkValue(){
 }
 
 void MainWindow::UpdateDriverValue(){
-    Robot* rob=world.robots[0];
+    if(world.robots.empty()) return;
+    Robot* rob=world.robots[0].get();
     bool oldState = ui->spn_driver->blockSignals(true);
     ui->spn_driver->setValue(rob->GetDriverValue(gui->driver_index));
     UpdateDriverSlider(rob->GetDriverValue(gui->driver_index));
@@ -206,7 +211,8 @@ void MainWindow::UpdateDriverSlider(double value){
 
 //this information is shared via pointer, not message passing
 void MainWindow::UpdateLinkParameters(){
-    Robot* rob=world.robots[0];
+    if(world.robots.empty()) return;
+    Robot* rob=world.robots[0].get();
 #define NUM(x) QString::number(x)
   QString link_info=QString("[%1 %2], T [%3,%4]").arg(NUM(rob->velMin(gui->link_index)),NUM(rob->velMax(gui->link_index)),NUM(-rob->torqueMax(gui->link_index)),NUM(rob->torqueMax(gui->link_index)));
   ui->lbl_link_info->setText(link_info);

@@ -1,5 +1,5 @@
 #include "SimulationGUI.h"
-#include "Control/JointSensors.h"
+#include "Sensing/JointSensors.h"
 #include "Control/PathController.h"
 #include "Control/FeedforwardController.h"
 #include "Control/LoggingController.h"
@@ -119,7 +119,7 @@ bool SimGUIBackend::OnCommand(const string& cmd,const string& args)
 
 void SimGUIBackend::InitController(int i)
 {
-  Robot* robot=world->robots[i];
+  Robot* robot=world->robots[i].get();
   sim.SetController(i,MakeDefaultController(robot)); 
   sim.controlSimulators[i].sensors.MakeDefault(robot);
 }
@@ -133,7 +133,7 @@ void SimGUIBackend::InitContactFeedbackAll()
   for(size_t i=0;i<world->rigidObjects.size();i++) {
     for(size_t r=0;r<world->robots.size();r++) {
       for(size_t j=0;j<world->robots[r]->links.size();j++) {
-	sim.EnableContactFeedback(world->RigidObjectID(i),world->RobotLinkID(r,j));
+        sim.EnableContactFeedback(world->RigidObjectID(i),world->RobotLinkID(r,j));
       }
     }
   }
@@ -145,7 +145,7 @@ void SimGUIBackend::InitContactFeedbackAll()
   for(size_t i=0;i<world->terrains.size();i++) {
     for(size_t r=0;r<world->robots.size();r++) {
       for(size_t j=0;j<world->robots[r]->links.size();j++) {
-	sim.EnableContactFeedback(world->TerrainID(i),world->RobotLinkID(r,j));
+        sim.EnableContactFeedback(world->TerrainID(i),world->RobotLinkID(r,j));
       }
     }
   }
@@ -153,10 +153,10 @@ void SimGUIBackend::InitContactFeedbackAll()
 
 void SimGUIBackend::ConnectSerialController(int i,int port,Real writeRate)
 {
-  Robot* robot=world->robots[i];
+  Robot* robot=world->robots[i].get();
   stringstream ss;
   ss<<"tcp://localhost:"<<port;
-  sim.SetController(i,new SerialController(*robot,ss.str(),writeRate));
+  sim.SetController(i,make_shared<SerialController>(*robot,ss.str(),writeRate));
 }
 
 void SimGUIBackend::InitSim()
@@ -201,42 +201,42 @@ bool SimGUIBackend::LoadAndInitSim(int argc,const char** argv)
   for(int i=1;i<argc;i++) {
     if(argv[i][0] == '-') {
       if(0==strcmp(argv[i],"-path")) {
-	paths.push_back(argv[i+1]);
-	i++;
+        paths.push_back(argv[i+1]);
+        i++;
       }
       else if(0==strcmp(argv[i],"-state")) {
-	states.push_back(argv[i+1]);
-	i++;
+        states.push_back(argv[i+1]);
+        i++;
       }
       else if(0==strcmp(argv[i],"-milestones")) {
-	milestones.push_back(argv[i+1]);
-	i++;
+        milestones.push_back(argv[i+1]);
+        i++;
       }
       else if(0==strcmp(argv[i],"-config")) {
-	configs.push_back(argv[i+1]);
-	i++;
+        configs.push_back(argv[i+1]);
+        i++;
       }
       else {
-	printf("Unknown option %s",argv[i]);
-	return false;
+        printf("Unknown option %s",argv[i]);
+        return false;
       }
     }
     else {
       const char* ext=FileExtension(argv[i]);
       if(0==strcmp(ext,"xml")) {
-	if(!xmlWorld.Load(argv[i])) {
-	  printf("Error loading world file %s\n",argv[i]);
-	  return false;
-	}
-	if(!xmlWorld.GetWorld(*world)) {
-	  printf("Error loading world from %s\n",argv[i]);
-	  return false;
-	}
+        if(!xmlWorld.Load(argv[i])) {
+          printf("Error loading world file %s\n",argv[i]);
+          return false;
+        }
+        if(!xmlWorld.GetWorld(*world)) {
+          printf("Error loading world from %s\n",argv[i]);
+          return false;
+        }
       }
       else {
-	if(world->LoadElement(argv[i]) < 0) {
-	  return false;
-	}
+        if(world->LoadElement(argv[i]) < 0) {
+          return false;
+        }
       }
     }
   }
@@ -268,7 +268,7 @@ bool SimGUIBackend::LoadAndInitSim(int argc,const char** argv)
       printf("Reading simulation settings...\n");
       XmlSimulationSettings s(e);
       if(!s.GetSettings(sim)) {
-	fprintf(stderr,"Warning, simulation settings not read correctly\n");
+        fprintf(stderr,"Warning, simulation settings not read correctly\n");
       }
     }
   }
@@ -277,14 +277,14 @@ bool SimGUIBackend::LoadAndInitSim(int argc,const char** argv)
     const char* ext=FileExtension(paths[0].c_str());
     if(0 == strcmp(ext,"xml")) {
       if(!LoadMultiPath(paths[0].c_str())) {
-	fprintf(stderr,"Couldn't load MultiPath file %s\n",paths[0].c_str());
-	return false;
+        fprintf(stderr,"Couldn't load MultiPath file %s\n",paths[0].c_str());
+        return false;
       }
     }
     else {
       if(!LoadLinearPath(paths[0].c_str())) {
-	fprintf(stderr,"Couldn't load linear path file %s\n",paths[0].c_str());
-	return false;
+        fprintf(stderr,"Couldn't load linear path file %s\n",paths[0].c_str());
+        return false;
       }
     }
     //TODO: set initial sim state from start of path?
@@ -315,6 +315,7 @@ bool SimGUIBackend::LoadAndInitSim(int argc,const char** argv)
 
 void SimGUIBackend::DrawClock(int x,int y)
 {
+#if HAVE_GLUT
     void* fontface = GLUT_BITMAP_HELVETICA_18;
     //const int fontheight = 18;
     //const int lineSpacing = 36;
@@ -329,6 +330,7 @@ void SimGUIBackend::DrawClock(int x,int y)
     glutBitmapFloat(fontface,sim.time);
 
     glEnable(GL_DEPTH_TEST);
+#endif //HAVE_GLUT
 }
 
 void SimGUIBackend::DrawSensor(int robot,int sensor)
@@ -365,32 +367,32 @@ void SimGUIBackend::SetForceColors()
     for(size_t j=0;j<world->robots[i]->links.size();j++) {
       float color[4] = {0.5,0.5,0.5,1.0};
       if(i==0) {
-	Real kg=sim.ContactForce(world->RobotLinkID(i,j)).norm()/9.8;
-	Assert(!(kg < 0.0));
-	kg /= world->robots[i]->GetTotalMass();
-	Real green = 0.1, yellow = 1.0, red = 1.5; 
-	if(kg < green) { //grey->green
-	  color[0]=0.5-0.5*kg/green;
-	  color[1]=0.5+0.5*kg/green;
-	  color[2]=0.5-0.5*kg/green;
-	}
-	else if(kg < yellow) { //green->yellow
-	  Real u=(kg-green)/(yellow-green);
-	  color[0]=u;
-	  color[1]=1.0;
-	  color[2]=0;
-	}
-	else if(kg < red) { //yellow->red
-	  Real u=(kg-yellow)/(red-yellow);
-	  color[0]=u;
-	  color[1]=1.0-u;
-	  color[2]=0;
-	}
-	else {
-	  color[0]=1.0;
-	  color[1]=0;
-	  color[2]=0;
-	}
+        Real kg=sim.ContactForce(world->RobotLinkID(i,j)).norm()/9.8;
+        Assert(!(kg < 0.0));
+        kg /= world->robots[i]->GetTotalMass();
+        Real green = 0.1, yellow = 1.0, red = 1.5; 
+        if(kg < green) { //grey->green
+          color[0]=0.5-0.5*kg/green;
+          color[1]=0.5+0.5*kg/green;
+          color[2]=0.5-0.5*kg/green;
+        }
+        else if(kg < yellow) { //green->yellow
+          Real u=(kg-green)/(yellow-green);
+          color[0]=u;
+          color[1]=1.0;
+          color[2]=0;
+        }
+        else if(kg < red) { //yellow->red
+          Real u=(kg-yellow)/(red-yellow);
+          color[0]=u;
+          color[1]=1.0-u;
+          color[2]=0;
+        }
+        else {
+          color[0]=1.0;
+          color[1]=0;
+          color[2]=0;
+        }
       }
       world->robotViews[i].SetColor(j,GLColor(color));
     }
@@ -436,7 +438,7 @@ void SimGUIBackend::DrawContacts(Real pointSize, Real fscale, Real nscale)
   glPointSize(pointSize);
   for (WorldSimulation::ContactFeedbackMap::iterator i = sim.contactFeedback.begin(); i != sim.contactFeedback.end(); i++) {
     ODEContactList* c = sim.odesim.GetContactFeedback(i->first.first,
-						      i->first.second);
+                                                      i->first.second);
     Assert(c != NULL);
     glColor3f(1,1,0);
     glBegin(GL_POINTS);
@@ -469,7 +471,7 @@ void SimGUIBackend::DrawWrenches(Real fscale)
     if(!i->second.inContact) continue;
     /*
     ODEContactList* c = sim.odesim.GetContactFeedback(i->first.first,
-						      i->first.second);
+                                                      i->first.second);
     Assert(c != NULL);
     Vector3 f(Zero),m(Zero);
     Vector3 center(Zero);
@@ -503,8 +505,8 @@ bool SimGUIBackend::LoadFile(const char* fn)
   else if(0==strcmp(ext,"xml"))
     return LoadMultiPath(fn);
   else if(0==strcmp(ext,"rob") || 0==strcmp(ext,"urdf") || 
-	  0==strcmp(ext,"obj") || 0==strcmp(ext,"ext") ||
-	  Geometry::AnyGeometry3D::CanLoadExt(ext)) {
+          0==strcmp(ext,"obj") || 0==strcmp(ext,"ext") ||
+          Geometry::AnyGeometry3D::CanLoadExt(ext)) {
     int res = world->LoadElement(fn);
     if(res<0) {
       printf("SimGUIBackend::LoadFile: Error loading entity %s\n",fn);
@@ -568,14 +570,14 @@ bool SimGUIBackend::LoadMilestones(const char* fn)
     ss<<milestones[i]<<"\t"<<dmilestones[i];
     if(i==0) {
       if(!sim.robotControllers[0]->SendCommand("set_qv",ss.str())) {
-	fprintf(stderr,"set_qv command does not work with the robot's controller\n");
-	return false;
+        fprintf(stderr,"set_qv command does not work with the robot's controller\n");
+        return false;
       }
     }
     else {
       if(!sim.robotControllers[0]->SendCommand("append_qv",ss.str())) {
-	fprintf(stderr,"append_qv command does not work with the robot's controller\n");
-	return false;
+        fprintf(stderr,"append_qv command does not work with the robot's controller\n");
+        return false;
       }
     }
   }
@@ -643,8 +645,8 @@ bool SimGUIBackend::LoadMultiPath(const char* fn,bool constrainedInterpolate,Rea
       MultiPath dpath;
       printf("Discretizing MultiPath by resolution %g\n",interpolateTolerance);
       if(!DiscretizeConstrainedMultiPath(*world->robots[0],path,dpath,interpolateTolerance)) {
-	printf("   failed!\n");
-	return false;
+        printf("   failed!\n");
+        return false;
       }
       dpath.SetDuration(dpath.Duration());
       path = dpath;
@@ -666,42 +668,42 @@ bool SimGUIBackend::LoadMultiPath(const char* fn,bool constrainedInterpolate,Rea
     bool first=true;
     for(size_t i=0;i<path.sections.size();i++) {
       if(path.HasTiming(i)) {
-	for(size_t j=0;j<path.sections[i].milestones.size();j++) {
-	  stringstream ss;
-	  ss<<path.sections[i].times[j]<<"\t"<<path.sections[i].milestones[j]<<"\t"<<path.sections[i].velocities[j];
-	  if(first) {
-	    if(!sim.robotControllers[0]->SendCommand("set_tqv",ss.str())) { 
-	      fprintf(stderr,"set_tqv command failed or does not work with the robot's controller\n");
-	      return false;
-	    }
-	    first = false;
-	  }
-	  else {
-	    if(!sim.robotControllers[0]->SendCommand("append_tqv",ss.str())) { 
-	      fprintf(stderr,"append_tqv command failed or does not work with the robot's controller\n");
-	      return false;
-	    }
-	  }
-	}
+        for(size_t j=0;j<path.sections[i].milestones.size();j++) {
+          stringstream ss;
+          ss<<path.sections[i].times[j]<<"\t"<<path.sections[i].milestones[j]<<"\t"<<path.sections[i].velocities[j];
+          if(first) {
+            if(!sim.robotControllers[0]->SendCommand("set_tqv",ss.str())) { 
+              fprintf(stderr,"set_tqv command failed or does not work with the robot's controller\n");
+              return false;
+            }
+            first = false;
+          }
+          else {
+            if(!sim.robotControllers[0]->SendCommand("append_tqv",ss.str())) { 
+              fprintf(stderr,"append_tqv command failed or does not work with the robot's controller\n");
+              return false;
+            }
+          }
+        }
       }
       else {
-	for(size_t j=0;j<path.sections[i].milestones.size();j++) {
-	  stringstream ss;
-	  ss<<path.sections[i].milestones[j]<<"\t"<<path.sections[i].velocities[j];
-	  if(first) {
-	    if(!sim.robotControllers[0]->SendCommand("set_qv",ss.str())) { 
-	      fprintf(stderr,"set_qv command failed or does not work with the robot's controller\n");
-	      return false;
-	    }
-	    first = false;
-	  }
-	  else {
-	    if(!sim.robotControllers[0]->SendCommand("append_qv",ss.str())) { 
-	      fprintf(stderr,"append_qv command failed or does not work with the robot's controller\n");
-	      return false;
-	    }
-	  }
-	}
+        for(size_t j=0;j<path.sections[i].milestones.size();j++) {
+          stringstream ss;
+          ss<<path.sections[i].milestones[j]<<"\t"<<path.sections[i].velocities[j];
+          if(first) {
+            if(!sim.robotControllers[0]->SendCommand("set_qv",ss.str())) { 
+              fprintf(stderr,"set_qv command failed or does not work with the robot's controller\n");
+              return false;
+            }
+            first = false;
+          }
+          else {
+            if(!sim.robotControllers[0]->SendCommand("append_qv",ss.str())) { 
+              fprintf(stderr,"append_qv command failed or does not work with the robot's controller\n");
+              return false;
+            }
+          }
+        }
       }
     }
     return true;
@@ -715,7 +717,7 @@ bool SimGUIBackend::LoadMultiPath(const char* fn,bool constrainedInterpolate,Rea
       //skip a milestones at each section
       int ofs = (i==0 ? 0 : 1);
       if(i > 0) {
-	if(stimes.front() != times.back()) ofs = 0; //some fixed delay
+        if(stimes.front() != times.back()) ofs = 0; //some fixed delay
       }
       times.insert(times.end(),stimes.begin()+ofs,stimes.end());
       milestones.insert(milestones.end(),smilestones.begin()+ofs,smilestones.end());
@@ -766,14 +768,14 @@ bool SimGUIBackend::SendLinearPath(const vector<Real>& times,const vector<Config
     ss<<sim.time+pathDelay+times[i]<<"\t"<<milestones[i];
     if(i==0) {
       if(!sim.robotControllers[0]->SendCommand("set_tq",ss.str())) {
-	fprintf(stderr,"set_tq command failed or does not work with the robot's controller\n");
-	return false;
+        fprintf(stderr,"set_tq command failed or does not work with the robot's controller\n");
+        return false;
       }
     }
     else {
       if(!sim.robotControllers[0]->SendCommand("append_tq",ss.str())) {
-	fprintf(stderr,"append_tq command failed or does not work with the robot's controller\n");
-	return false;
+        fprintf(stderr,"append_tq command failed or does not work with the robot's controller\n");
+        return false;
       }
     }
   }
@@ -787,7 +789,7 @@ bool SimGUIBackend::OutputROS(const char* prefix)
     if(!ROSPublishCommandedJointState(sim.controlSimulators[i],(string(prefix)+"/"+world->robots[i]->name+"/commanded_joint_state").c_str())) return false;
     if(!ROSPublishSensedJointState(sim.controlSimulators[i],(string(prefix)+"/"+world->robots[i]->name+"/sensed_joint_state").c_str())) return false;
     for(size_t j=0;j<sim.controlSimulators[i].sensors.sensors.size();j++) {
-      SensorBase* s = sim.controlSimulators[i].sensors.sensors[j];
+      SensorBase* s = sim.controlSimulators[i].sensors.sensors[j].get();
       if(!ROSPublishSensorMeasurement(s,*world->robots[i],(string(prefix)+"/"+world->robots[i]->name+"/"+s->name).c_str())) {
         printf("OutputROS: Couldn't publish sensor %s\n",s->name.c_str());
         return false;
@@ -809,21 +811,21 @@ void SimGUIBackend::DoLogging(const char* fn)
       out<<world->robots[i]->name<<"_cmy,";
       out<<world->robots[i]->name<<"_cmz,";
       for(size_t j=0;j<world->robots[i]->links.size();j++)
-	out<<world->robots[i]->name<<"_q["<<world->robots[i]->linkNames[j]<<"],";
+        out<<world->robots[i]->name<<"_q["<<world->robots[i]->linkNames[j]<<"],";
       out<<",";
       for(size_t j=0;j<world->robots[i]->links.size();j++)
-	out<<world->robots[i]->name<<"_dq["<<world->robots[i]->linkNames[j]<<"],";
+        out<<world->robots[i]->name<<"_dq["<<world->robots[i]->linkNames[j]<<"],";
       out<<",";
       for(size_t j=0;j<world->robots[i]->drivers.size();j++)
-	out<<world->robots[i]->name<<"_t["<<world->robots[i]->linkNames[world->robots[i]->drivers[j].linkIndices[0]]<<"],";
+        out<<world->robots[i]->name<<"_t["<<world->robots[i]->linkNames[world->robots[i]->drivers[j].linkIndices[0]]<<"],";
       out<<",";
       for(size_t j=0;j<sim.controlSimulators[i].sensors.sensors.size();j++) {
-	SensorBase* s=sim.controlSimulators[i].sensors.sensors[j];
-	vector<string> mnames;
-	s->MeasurementNames(mnames);
-	for(size_t k=0;k<mnames.size();k++)
-	  out<<world->robots[i]->name<<"_"<<s->name<<"["<<mnames[k]<<"],";
-	out<<",";
+        SensorBase* s=sim.controlSimulators[i].sensors.sensors[j].get();
+        vector<string> mnames;
+        s->MeasurementNames(mnames);
+        for(size_t k=0;k<mnames.size();k++)
+          out<<world->robots[i]->name<<"_"<<s->name<<"["<<mnames[k]<<"],";
+        out<<",";
       }
     }
     for(size_t i=0;i<world->rigidObjects.size();i++) {
@@ -851,11 +853,11 @@ void SimGUIBackend::DoLogging(const char* fn)
       out<<t[j]<<",";
     out<<",";
     for(size_t j=0;j<sim.controlSimulators[i].sensors.sensors.size();j++) {
-      SensorBase* s=sim.controlSimulators[i].sensors.sensors[j];
+      SensorBase* s=sim.controlSimulators[i].sensors.sensors[j].get();
       vector<double> ms;
       s->GetMeasurements(ms);
       for(size_t k=0;k<ms.size();k++)
-	out<<ms[k]<<",";
+        out<<ms[k]<<",";
       out<<",";
     }
   }
@@ -922,14 +924,14 @@ void SimGUIBackend::DoContactStateLogging(const char* fn)
     bool wasInContact = (inContact.count(pair<int,int>(aid,bid)) != 0);
     if(wasInContact && nowInContact) {
       if(hadSeparation) { //must have separated and contacted within the last time step
-	out<<sim.time<<","<<world->GetName(aid)<<","<<world->GetName(bid)<<","<<0<<endl;
-	out<<sim.time<<","<<world->GetName(aid)<<","<<world->GetName(bid)<<","<<1<<endl;
+        out<<sim.time<<","<<world->GetName(aid)<<","<<world->GetName(bid)<<","<<0<<endl;
+        out<<sim.time<<","<<world->GetName(aid)<<","<<world->GetName(bid)<<","<<1<<endl;
       }
     }
     else if(!wasInContact && !nowInContact) {
       if(hadContact) { //must have contacted and separated witihn the last time step
-	out<<sim.time<<","<<world->GetName(aid)<<","<<world->GetName(bid)<<","<<1<<endl;
-	out<<sim.time<<","<<world->GetName(aid)<<","<<world->GetName(bid)<<","<<0<<endl;
+        out<<sim.time<<","<<world->GetName(aid)<<","<<world->GetName(bid)<<","<<1<<endl;
+        out<<sim.time<<","<<world->GetName(aid)<<","<<world->GetName(bid)<<","<<0<<endl;
       }
     }
     else if(wasInContact && !nowInContact) {

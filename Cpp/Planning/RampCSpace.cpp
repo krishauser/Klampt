@@ -40,9 +40,9 @@ void RampCSpaceAdaptor::Sample(State& s)
     dq(i) =Rand(-velMax[i],velMax[i]);
 }
 
-EdgePlanner* RampCSpaceAdaptor::LocalPlanner(const State& a,const State& b)
+EdgePlannerPtr RampCSpaceAdaptor::LocalPlanner(const State& a,const State& b)
 {
-  return new RampEdgeChecker(this,a,b);
+  return make_shared<RampEdgeChecker>(this,a,b);
 }
 
 Real RampCSpaceAdaptor::Distance(const State& x, const State& y)
@@ -196,16 +196,16 @@ bool RampEdgeChecker::IsValid() const
   return true;
 }
 
-EdgePlanner* RampEdgeChecker::Copy() const
+EdgePlannerPtr RampEdgeChecker::Copy() const
 {
-  RampEdgeChecker* copy = new RampEdgeChecker(space,path);
+  auto copy = make_shared<RampEdgeChecker>(space,path);
   copy->checked = checked;
   return copy;
 }
 
-EdgePlanner* RampEdgeChecker::ReverseCopy() const
+EdgePlannerPtr RampEdgeChecker::ReverseCopy() const
 {
-  RampEdgeChecker* copy = new RampEdgeChecker(space,goal,start);
+  auto copy = make_shared<RampEdgeChecker>(space,goal,start);
   //SolveMinTime is not guaranteed to work!
   if(copy->path.ramps.empty() && !path.ramps.empty()) {
     fprintf(stderr,"RampEdgeChecker::ReverseCopy(): couldn't solve reverse path\n");

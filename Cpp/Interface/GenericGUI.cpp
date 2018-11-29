@@ -16,7 +16,7 @@ size_t ReplaceValues(AnyCollection& coll,const T& val,const AnyValue& replacemen
     }
     return 0;
   }
-  vector<SmartPointer<AnyCollection> > subelements;
+  vector<shared_ptr<AnyCollection> > subelements;
   coll.enumerate(subelements);
   size_t n=0;
   for(size_t i=0;i<subelements.size();i++) {
@@ -335,7 +335,7 @@ bool GenericBackendBase::OnKeyUp(const string& key)
 }
 
 
-void CompositeBackend::Add(SmartPointer<GenericBackendBase>& backend)
+void CompositeBackend::Add(std::shared_ptr<GenericBackendBase>& backend)
 {
   children.push_back(backend);
   children.back()->gui = gui;

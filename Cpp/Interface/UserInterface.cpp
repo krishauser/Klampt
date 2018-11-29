@@ -154,7 +154,7 @@ InputProcessingInterface::~InputProcessingInterface()
 {
 }
 
-void InputProcessingInterface::SetProcessor(SmartPointer<InputProcessorBase>& processor)
+void InputProcessingInterface::SetProcessor(shared_ptr<InputProcessorBase>& processor)
 {
   inputProcessor = processor;
   inputProcessor->world = world;
@@ -165,7 +165,7 @@ string InputProcessingInterface::ActivateEvent(bool enabled)
 {
   if(!inputProcessor) {
     if(enabled) {
-      inputProcessor = new StandardInputProcessor;
+      inputProcessor.reset(new StandardInputProcessor);
       inputProcessor->world = world;
       inputProcessor->viewport = viewport;
       inputProcessor->Activate(enabled);
@@ -181,13 +181,13 @@ bool InputProcessingInterface::ObjectiveChanged()
   return inputProcessor->HasUpdate();
 }
 
-SmartPointer<PlannerObjectiveBase> InputProcessingInterface::GetObjective()
+shared_ptr<PlannerObjectiveBase> InputProcessingInterface::GetObjective()
 {
   currentObjective = NULL;
   
   if(inputProcessor) {
     PlannerObjectiveBase* obj = inputProcessor->MakeObjective(GetRobot());
-    currentObjective = obj;
+    currentObjective.reset(obj);
   }
   return currentObjective;
 }
@@ -317,7 +317,7 @@ string PlannerCommandInterface::ActivateEvent(bool enabled)
   if(planner) {
     planner->currentPath.ramps.resize(0);
     lastPlanTime = nextPlanTime = robotInterface->GetCurTime();
-    planner->sendPathCallback = new MotionQueueInterfaceSender(robotInterface);
+    planner->sendPathCallback.reset(new MotionQueueInterfaceSender(robotInterface));
   }
   return "";
 }
@@ -355,7 +355,7 @@ string PlannerCommandInterface::UpdateEvent()
       started=true;
     }
     else if(ObjectiveChanged()) {
-      SmartPointer<PlannerObjectiveBase> obj = GetObjective();
+      shared_ptr<PlannerObjectiveBase> obj = GetObjective();
       Assert(currentObjective != NULL);
       Config q,v;
       robotInterface->GetEndConfig(q);
@@ -445,16 +445,16 @@ string IKPlannerCommandInterface::ActivateEvent(bool enabled)
   if(!planner) {
     printf("IK planner activated, 150ms loop\n");
     assert(settings != NULL);
-    cspace = new SingleRobotCSpace(*planningWorld,0,settings);
+    cspace.reset(new SingleRobotCSpace(*planningWorld,0,settings));
     
-    planner = new RealTimePlanner;
-    planner->planner = new DynamicIKPlanner;
+    planner = make_shared<RealTimePlanner>();
+    planner->planner.reset(new DynamicIKPlanner);
     //planner = new RealTimePerturbationIKPlanner;
     //planner->LogBegin();
     //planner->protocol = RealTimePlanner::Constant;
     planner->currentSplitTime=0.10;
     planner->currentPadding=0.05;
-    planner->SetSpace(cspace);
+    planner->SetSpace(cspace.get());
     assert(planner->planner->settings != NULL);
   }
   PlannerCommandInterface::ActivateEvent(enabled);
@@ -465,12 +465,12 @@ string RRTCommandInterface::ActivateEvent(bool enabled)
 {
   if(!planner) {
     planningWorld->InitCollisions();
-    cspace = new SingleRobotCSpace(*planningWorld,0,settings);
+    cspace.reset(new SingleRobotCSpace(*planningWorld,0,settings));
     
-    planner = new RealTimePlanner;
+    planner = make_shared<RealTimePlanner>();
     DynamicRRTPlanner* p = new DynamicRRTPlanner;
     p->delta = 0.5;
-    planner->planner = p;
+    planner->planner.reset(p);
     planner->planner->LogBegin();
     //planner->protocol = RealTimePlanner::Constant;
     planner->protocol = RealTimePlanner::ExponentialBackoff;
@@ -478,7 +478,7 @@ string RRTCommandInterface::ActivateEvent(bool enabled)
     planner->currentPadding=0.05;
     //test insufficient padding
     //planner->currentPadding=0.01;
-    planner->SetSpace(cspace);
+    planner->SetSpace(cspace.get());
   }
   PlannerCommandInterface::ActivateEvent(enabled);
   return "";
@@ -551,7 +551,7 @@ string MTPlannerCommandInterface::UpdateEvent()
       started=true;
     }
     else if(ObjectiveChanged()) {
-      SmartPointer<PlannerObjectiveBase> obj = GetObjective();
+      shared_ptr<PlannerObjectiveBase> obj = GetObjective();
       Assert(currentObjective != NULL);
       Config q,v;
       robotInterface->GetEndConfig(q);
@@ -579,16 +579,17 @@ string MTPlannerCommandInterface::UpdateEvent()
   }
 
   //tell the planner to stop if there's a new objective
-  SmartPointer<PlannerObjectiveBase> obj;
+  shared_ptr<PlannerObjectiveBase> obj;
   bool changedObjective = false;
   if(ObjectiveChanged()) {
+    Robot* robot = planningWorld->robots[0].get();
     changedObjective = true;
-    obj = inputProcessor->MakeObjective(planningWorld->robots[0]);
+    obj.reset(inputProcessor->MakeObjective(robot));
     //this is the visualization objective -- must be a different pointer
-    currentObjective = inputProcessor->MakeObjective(planningWorld->robots[0]);
+    currentObjective.reset(inputProcessor->MakeObjective(robot));
     //evaluate the objective
     PlannerObjectiveBase* oldObj = planningThread.GetObjective();
-    if((oldObj && !obj) || (oldObj && oldObj->Delta(obj) > gPlannerStopDeltaThreshold)) {
+    if((oldObj && !obj) || (oldObj && oldObj->Delta(obj.get()) > gPlannerStopDeltaThreshold)) {
       printf("\n");
       if(obj)
 	printf("********* Objective changed, STOP PLANNING **********\n");
@@ -614,15 +615,15 @@ string MTIKPlannerCommandInterface::ActivateEvent(bool enabled)
   if (!cspace) {
     Assert(planningWorld != NULL);
     planningWorld->InitCollisions();
-    cspace = new SingleRobotCSpace(*planningWorld, 0, settings);
+    cspace.reset(new SingleRobotCSpace(*planningWorld, 0, settings));
     
-    RealTimePlanner* planner = new RealTimePlanner;
-    planner->planner = new DynamicIKPlanner;
+    auto planner = make_shared<RealTimePlanner>();
+    planner->planner.reset(new DynamicIKPlanner);
     //planner->protocol = RealTimePlanner::Constant;
     planner->currentSplitTime = 0.05;
     planner->currentPadding = 0.025;
     planner->currentExternalPadding = 0.02;
-    planner->SetSpace(cspace);
+    planner->SetSpace(cspace.get());
     planningThread.SetPlanner(planner);
   }
   return MTPlannerCommandInterface::ActivateEvent(enabled);
@@ -633,14 +634,14 @@ string MTRRTCommandInterface::ActivateEvent(bool enabled)
   if (!cspace) {
     Assert(planningWorld != NULL);
     planningWorld->InitCollisions();
-    cspace = new SingleRobotCSpace(*planningWorld, 0, settings);
+    cspace.reset(new SingleRobotCSpace(*planningWorld, 0, settings));
     
     //DynamicRRTPlanner* p = new DynamicRRTPlanner;
     DynamicHybridTreePlanner* p = new DynamicHybridTreePlanner;
     p->delta = 0.5;
-    RealTimePlanner* planner = new RealTimePlanner;
-    planner->planner = p;
-    planner->SetSpace(cspace);
+    auto planner = make_shared<RealTimePlanner>();
+    planner->planner.reset(p);
+    planner->SetSpace(cspace.get());
     planningThread.SetPlanner(planner);
   }
   return MTPlannerCommandInterface::ActivateEvent(enabled);

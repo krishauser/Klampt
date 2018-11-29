@@ -1,10 +1,10 @@
 #ifndef VIEW_RESOURCE_H
 #define VIEW_RESOURCE_H
 
-#include "Modeling/Resources.h"
-#include "View/ViewRobot.h"
-#include "View/ViewStance.h"
-#include "View/ViewGrasp.h"
+#include <Klampt/Modeling/Resources.h>
+#include "ViewRobot.h"
+#include "ViewStance.h"
+#include "ViewGrasp.h"
 
 class ViewResource
 {
@@ -30,7 +30,7 @@ class ViewResource
   ViewGrasp graspViewer;
   //custom draw
   vector<const void*> items;
-  vector<SmartPointer<Geometry::AnyGeometry3D> > geometries;
+  vector<shared_ptr<Geometry::AnyGeometry3D> > geometries;
   vector<GLDraw::GeometryAppearance> appearances;
 };
 

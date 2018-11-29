@@ -17,6 +17,19 @@ if not res:
     exit(0)
 
 robot = world.robot(0)
+resource.setDirectory("resources/"+robot.getName())
+
+#Generate some waypoint configurations using the resource editor
+configs = resource.get("pathtest.configs","Configs",description="Set multiple configurations to interpolate",default=[robot.getConfig()],world=world,doedit=True)
+if len(configs) < 2:
+    print "Didn't add 2 or more milestones, quitting"
+    exit(-1)
+for q in configs:
+    if len(q) != robot.numLinks():
+        print "Some configuration isn't of the right size for the robot: %d != %d."%(len(q),robot.numLinks())
+        print "   Is pathtest.configs configured for the correct robot? (%s)"%(robot.getName(),)
+        exit(-1)
+resource.set("pathtest.configs",configs)
 
 #add the world elements individually to the vis
 vis.add("robot",robot)
@@ -26,16 +39,6 @@ for i in range(world.numRigidObjects()):
     vis.add("rigidObject"+str(i),world.rigidObject(i))
 for i in range(world.numTerrains()):
     vis.add("terrain"+str(i),world.terrain(i))
-
-#Generate some waypoint configurations using the resource editor
-configs = resource.get("pathtest.configs","Configs",default=[],world=world,doedit=False)
-if len(configs) < 2:
-    print "Invalid # of milestones, need 2 or more"
-    configs = resource.get("pathtest.configs","Configs",default=[],world=world,doedit=True)
-    if len(configs) < 2:
-        print "Didn't add 2 or more milestones, quitting"
-        exit(-1)
-resource.set("pathtest.configs",configs)
 
 traj0 = trajectory.RobotTrajectory(robot,times=range(len(configs)),milestones=configs)
 
