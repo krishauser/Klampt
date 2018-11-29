@@ -26,7 +26,7 @@ def triangleNormal(a,b,c):
 
 def triangleArea(a,b,c):
     if len(a)!=len(b) or len(a)!=len(c):
-        raise 'point dimensions not equal'
+        raise ValueError('point dimensions not equal')
     if len(a)==3:
         ba=(b[0]-a[0],b[1]-a[1],b[2]-a[2])
         ca=(c[0]-a[0],c[1]-a[1],c[2]-a[2])
@@ -37,7 +37,7 @@ def triangleArea(a,b,c):
         ca=(c[0]-a[0],c[1]-a[1],c[2]-a[2])
         return cross(ba,ca)*0.5
     else:
-        raise 'Triangle must be in 2 or 3D'
+        raise ValueError('Triangle must be in 2 or 3D')
 
 def triangleWeight(a,b,c):
     dA=distanceSquared(b,c)
@@ -53,12 +53,12 @@ def outputTriangles(ind,i,k):
     if j<0:
         return []
     if j<=i or j>=k:
-        raise 'invalid indices %d %d %d' % (i,j,k)
+        raise ValueError('invalid indices %d %d %d' % (i,j,k))
     return [(i,j,k)]+outputTriangles(ind,i,j)+outputTriangles(ind,j,k)
 
 def triangulateConvexOptimal(verts):
     if len(verts)<3:
-        raise 'Face must have 3 or more points'
+        raise ValueError('Face must have 3 or more points')
     cost=[]
     ind=[]
     for i in range(len(verts)):
@@ -78,7 +78,7 @@ def triangulateConvexOptimal(verts):
 
 def triangulateConvex(verts):
     if len(verts)<3:
-        raise 'Face must have 3 or more points'
+        raise ValueError('Face must have 3 or more points')
     n=len(verts)
     corner = 0
     largestArea = 0
@@ -129,7 +129,7 @@ class TriMesh:
         return tris
 
     def addTriangle(self,pts):
-        if len(pts) != 3: raise 'must give a list of 3 points'
+        if len(pts) != 3: raise ValueError('must give a list of 3 points')
         offset = len(self.points)
         self.points = self.points + (pts)
         self.triangles.append((offset,offset+1,offset+2))
