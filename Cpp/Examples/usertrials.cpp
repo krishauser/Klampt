@@ -2,7 +2,11 @@
 #include "Interface/RobotInterface.h"
 #include "Main/SimViewProgram.h"
 #include <KrisLibrary/utils/StatCollector.h>
+#if defined (__APPLE__) || defined (MACOSX)
+#include <glui.h>
+#else
 #include <GL/glui.h>
+#endif //__APPLE__ || MACOSX
 #include <fstream>
 using namespace Math3D;
 using namespace GLDraw;

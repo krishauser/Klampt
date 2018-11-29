@@ -12,7 +12,11 @@
 #include <KrisLibrary/GLdraw/GL.h>
 #include <KrisLibrary/GLdraw/drawextra.h>
 #include <KrisLibrary/GLdraw/Widget.h>
+#if defined (__APPLE__) || defined (MACOSX)
+#include <glui.h>
+#else
 #include <GL/glui.h>
+#endif //__APPLE__ || MACOSX
 #include <fstream>
 using namespace Math3D;
 using namespace GLDraw;

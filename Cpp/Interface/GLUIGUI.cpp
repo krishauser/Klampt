@@ -8,7 +8,11 @@
 #include <stdio.h>
 #include <iostream>
 
+#if defined (__APPLE__) || defined (MACOSX)
+#include <glui.h>
+#else
 #include <GL/glui.h>
+#endif //__APPLE__ || MACOSX
 
 //defined in GLUTGUI.cpp
 const char* special_map(int k);

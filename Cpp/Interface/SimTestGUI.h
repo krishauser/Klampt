@@ -143,8 +143,11 @@ public:
 
 #include <KrisLibrary/GLdraw/GLScreenshotProgram.h>
 #include "GLUIGUI.h"
+#if defined (__APPLE__) || defined (MACOSX)
+#include <glui.h>
+#else
 #include <GL/glui.h>
-
+#endif //__APPLE__ || MACOSX
 
 class GLUISimTestGUI : public GLScreenshotProgram<GLUIGUI>
 {

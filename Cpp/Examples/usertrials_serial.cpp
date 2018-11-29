@@ -5,7 +5,11 @@
 #include "Interface/RobotInterface.h"
 #include "Control/SerialControlledRobot.h"
 #include "Main/WorldViewProgram.h"
+#if defined (__APPLE__) || defined (MACOSX)
+#include <glui.h>
+#else
 #include <GL/glui.h>
+#endif //__APPLE__ || MACOSX
 #include <KrisLibrary/GLdraw/GLUTString.h>
 #include <fstream>
 using namespace Math3D;
