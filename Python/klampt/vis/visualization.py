@@ -137,8 +137,8 @@ def setPlugin(plugin=None): sets the current plugin (a GLPluginInterface instanc
 def addPlugin(plugin): adds a second OpenGL viewport governed by the given plugin (a
     GLPluginInterface instance).    
 def run([plugin]): pops up a dialog and then kills the program afterwards.
-def kill(): kills all previously launched visualizations.  Afterwards, you may not
-    be able to start new windows. Call this to cleanly quit.
+def kill(): kills all previously launched visualizations and terminates the visualization thread.
+    Afterwards, you may not be able to start new windows. Call this to cleanly quit.
 def dialog(): pops up a dialog box (does not return to calling
     thread until closed).
 def show(hidden=False): shows/hides a visualization window run in parallel with the calling script.
@@ -498,9 +498,9 @@ def unlock():
 
 def shown():
     """Returns true if a visualization window is currently shown."""
-    global _globalLock,_thread_running,_current_window
+    global _globalLock,_vis_thread_running,_current_window
     _globalLock.acquire()
-    res = (_thread_running and _current_window != None and _windows[_current_window].mode in ['shown','dialog'] or _windows[_current_window].guidata is not None)
+    res = (_vis_thread_running and _current_window != None and _windows[_current_window].mode in ['shown','dialog'] or _windows[_current_window].guidata is not None)
     _globalLock.release()
     return res
 
@@ -2615,11 +2615,13 @@ _frontend.setPlugin(_vis)
 
 #signals to visualization thread
 _quit = False
-_thread_running = False
+_vis_thread_running = False
+_vis_thread = None
 _in_app_thread = False
 
 if _PyQtAvailable:
-    from PyQt4 import QtGui
+    from PyQt5 import QtGui
+    from PyQt5.QtWidgets import QDialog,QDialogButtonBox,QMainWindow,QApplication,QAction
     #Qt specific startup
     #need to set up a QDialog and an QApplication
     class _MyDialog(QDialog):
@@ -2687,28 +2689,28 @@ if _PyQtAvailable:
             fileMenu = mainMenu.addMenu('&Actions')
             self.glwidget.actionMenu = fileMenu
             visMenu = mainMenu.addMenu('&Visualization')
-            a = QtGui.QAction('Save world...', self)
+            a = QAction('Save world...', self)
             a.setStatusTip('Saves world to xml file')
             a.triggered.connect(self.save_world)
             visMenu.addAction(a)
-            a = QtGui.QAction('Add to world...', self)
+            a = QAction('Add to world...', self)
             a.setStatusTip('Adds an item to the world')
             a.triggered.connect(self.add_to_world)
             visMenu.addAction(a)
-            a = QtGui.QAction('Save camera...', self)
+            a = QAction('Save camera...', self)
             a.setStatusTip('Saves camera settings')
             a.triggered.connect(self.save_camera)
             visMenu.addAction(a)
-            a = QtGui.QAction('Load camera...', self)
+            a = QAction('Load camera...', self)
             a.setStatusTip('Loads camera settings')
             a.triggered.connect(self.load_camera)
             visMenu.addAction(a)
-            a = QtGui.QAction('Start/stop movie output', self)
+            a = QAction('Start/stop movie output', self)
             a.setShortcut('Ctrl+M')
             a.setStatusTip('Starts / stops saving movie frames')
             a.triggered.connect(self.toggle_movie_mode)
             visMenu.addAction(a)
-            a = QtGui.QAction('Start/stop html output', self)
+            a = QAction('Start/stop html output', self)
             a.setShortcut('Ctrl+H')
             a.setStatusTip('Starts / stops saving animation to HTML file')
             a.triggered.connect(self.toggle_html_mode)
@@ -2900,14 +2902,16 @@ if _PyQtAvailable:
                 self.toggle_movie_mode()
             if self.saving_html:
                 self.toggle_html_mode()
+            self.html_timer.deleteLater()
+            self.movie_timer.deleteLater()
             print "#########################################"
             print "klampt.vis: Window close"
             print "#########################################"
             _globalLock.release()
 
     def _run_app_thread():
-        global _thread_running,_in_app_thread,_vis,_widget,_window,_quit,_showdialog,_showwindow,_globalLock
-        _thread_running = True
+        global _vis_thread_running,_in_app_thread,_vis,_widget,_window,_quit,_showdialog,_showwindow,_globalLock
+        _vis_thread_running = True
 
         _GLBackend.initialize("Klamp't visualization")
         
@@ -2945,8 +2949,6 @@ if _PyQtAvailable:
                     #here's the crash -- above line deleted the old dialog, which for some reason kills the widget
                     if dlg != None:
                         w.glwindow.show()
-                        w.glwindow.idlesleep(0)
-                        w.glwindow.refresh()
                         _globalLock.release()
                         res = dlg.exec_()
                         _globalLock.acquire()
@@ -2955,7 +2957,6 @@ if _PyQtAvailable:
                     print "#########################################"
                     w.glwindow.hide()
                     w.glwindow.setParent(None)
-                    w.glwindow.idlesleep()
                     w.mode = 'hidden'
                 if w.mode == 'shown' and w.guidata == None:
                     print "#########################################"
@@ -2967,13 +2968,14 @@ if _PyQtAvailable:
                         w.guidata = w.custom_ui(w.glwindow)
                     w.guidata.setWindowTitle(w.name)
                     w.glwindow.show()
-                    w.glwindow.idlesleep(0)
+                    if w.glwindow.initialized:
+                        #boot it back up again
+                        w.glwindow.idlesleep(0)
                 if w.mode == 'shown' and not w.guidata.isVisible():
                     print "#########################################"
                     print "klampt.vis: Showing window",i
                     print "#########################################"
                     w.glwindow.show()
-                    w.glwindow.idlesleep(0)
                     w.guidata.show()
                 if w.mode == 'hidden' and w.guidata != None:
                     if w.guidata.isVisible():
@@ -2981,7 +2983,6 @@ if _PyQtAvailable:
                         print "klampt.vis: Hiding window",i
                         print "#########################################"
                         w.glwindow.setParent(None)
-                        w.glwindow.idlesleep()
                         w.glwindow.hide()
                         w.guidata.hide()
                     #prevent deleting the GL window
@@ -2997,7 +2998,13 @@ if _PyQtAvailable:
             w.vis.clear()
             if w.glwindow:
                 w.glwindow.close()
-        _thread_running = False
+                #must be explicitly deleted for some reason in PyQt5...
+                del w.glwindow
+        _GLBackend.app.processEvents()
+        _vis_thread_running = False
+        #must be explicitly deleted for some reason in PyQt5...
+        del _GLBackend.app
+        _GLBackend.app = None
         return res
 
 
@@ -3095,9 +3102,9 @@ elif _GLUTAvailable:
             return self.frontend.idlefunc()
 
     def _run_app_thread():
-        global _thread_running,_vis,_old_glut_window,_quit,_windows
+        global _vis_thread_running,_vis,_old_glut_window,_quit,_windows
         import weakref
-        _thread_running = True
+        _vis_thread_running = True
         _GLBackend.initialize("Klamp't visualization")
         w = _GLBackend.createWindow("Klamp't visualization")
         hijacker = GLUTHijacker(_windows[0])
@@ -3107,18 +3114,19 @@ elif _GLUTAvailable:
         print "Visualization thread closing..."
         for w in _windows:
             w.vis.clear()
-        _thread_running = False
+        _vis_thread_running = False
         return
     
 def _kill():
-    global _quit
+    global _quit,_vis_thread_running,_vis_thread
     _quit = True
-    while _thread_running:
-        time.sleep(0.01)
+    if _vis_thread_running:
+        _vis_thread.join()
+        assert _vis_thread_running == False
     _quit = False
 
 if _PyQtAvailable:
-    from PyQt4 import QtCore
+    from PyQt5 import QtCore
     class MyQThread(QtCore.QThread):
         def __init__(self,func,*args):
             self.func = func
@@ -3128,41 +3136,41 @@ if _PyQtAvailable:
             self.func(*self.args)
 
 def _show():
-    global _windows,_current_window,_thread_running
+    global _windows,_current_window,_vis_thread_running,_vis_thread
     if len(_windows)==0:
         _windows.append(WindowInfo(_window_title,_frontend,_vis)) 
         _current_window = 0
     _windows[_current_window].mode = 'shown'
     _windows[_current_window].worlds = _current_worlds
     _windows[_current_window].active_worlds = _current_worlds[:]
-    if not _thread_running:
+    if not _vis_thread_running:
         signal.signal(signal.SIGINT, signal.SIG_DFL)
         if _PyQtAvailable and False:
             #for some reason, QThread doesn't allow for mouse events to be posted?
-            thread = MyQThread(_run_app_thread)
-            thread.start()
+            _vis_thread = MyQThread(_run_app_thread)
+            _vis_thread.start()
         else:
-            thread = Thread(target=_run_app_thread)
-            thread.setDaemon(True)
-            thread.start()
+            _vis_thread = Thread(target=_run_app_thread)
+            _vis_thread.setDaemon(True)
+            _vis_thread.start()
         time.sleep(0.1)
 
 def _hide():
-    global _windows,_current_window,_thread_running
+    global _windows,_current_window,_vis_thread_running
     if _current_window == None:
         return
     _windows[_current_window].mode = 'hidden'
 
 def _dialog():
-    global __windows,_current_window,_thread_running
+    global __windows,_current_window,_vis_thread_running,_vis_thread
     if len(_windows)==0:
         _windows.append(WindowInfo(_window_title,_frontend,_vis,None))
         _current_window = 0
-    if not _thread_running:
+    if not _vis_thread_running:
         signal.signal(signal.SIGINT, signal.SIG_DFL)
-        thread = Thread(target=_run_app_thread)
-        thread.setDaemon(True)
-        thread.start()
+        _vis_thread = Thread(target=_run_app_thread)
+        _vis_thread.setDaemon(True)
+        _vis_thread.start()
         #time.sleep(0.1)
     _globalLock.acquire()
     assert _windows[_current_window].mode == 'hidden',"dialog() called inside dialog?"
@@ -3193,8 +3201,6 @@ def _dialog():
         print "#########################################"
         if dlg != None:
             w.glwindow.show()
-            w.glwindow.idlesleep(0)
-            w.glwindow.refresh()
             _globalLock.release()
             res = dlg.exec_()
             _globalLock.acquire()
@@ -3203,13 +3209,12 @@ def _dialog():
         print "#########################################"
         w.glwindow.hide()
         w.glwindow.setParent(None)
-        w.glwindow.idlesleep()
         w.mode = 'hidden'
         _globalLock.release()
     return
 
 def _set_custom_ui(func):
-    global _windows,_current_window,_thread_running
+    global _windows,_current_window,_vis_thread_running
     if len(_windows)==0:
         _windows.append(WindowInfo(_window_title,_frontend,_vis,None))
         _current_window = 0
@@ -3217,7 +3222,7 @@ def _set_custom_ui(func):
     return
 
 def _onFrontendChange():
-    global _windows,_frontend,_window_title,_current_window,_thread_running
+    global _windows,_frontend,_window_title,_current_window,_vis_thread_running
     if _current_window == None:
         return
     w = _windows[_current_window]

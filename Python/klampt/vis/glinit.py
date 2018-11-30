@@ -5,8 +5,9 @@ _GLBackend = None
 
 if not _PyQtAvailable and not _GLUTAvailable:
     try:
-        from PyQt4.QtCore import *
-        from PyQt4.QtGui import *
+        from PyQt5.QtCore import *
+        from PyQt5.QtGui import *
+        from PyQt5.QtWidgets import *
         from qtbackend import QtBackend
         _PyQtAvailable = True
         _GLBackend = QtBackend()

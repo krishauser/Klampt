@@ -1,7 +1,8 @@
 from OpenGL.GL import *
-from PyQt4 import QtGui
-from PyQt4.QtCore import *
-from PyQt4.QtOpenGL import *
+from PyQt5 import QtGui
+from PyQt5.QtCore import *
+from PyQt5.QtWidgets import *
+from PyQt5.QtOpenGL import *
 import math
 import weakref
 
@@ -65,6 +66,10 @@ class QtGLWindow(QGLWidget):
           the window.
         - clearColor: the RGBA floating point values of the background color.
     """
+    idlesleep_signal = pyqtSignal(float)
+    refresh_signal = pyqtSignal()
+    reshape_signal = pyqtSignal(int,int)
+
     def __init__(self,name="OpenGL window",parent=None):
         format = QGLFormat()
         format.setRgba(True)
@@ -95,15 +100,21 @@ class QtGLWindow(QGLWidget):
 
         self.setFixedSize(self.width,self.height)
         self.setWindowTitle(self.name)
-        self.idleTimer = QTimer()
+        self.idleTimer = None
         self.nextIdleEvent = 0
         self.actions = []
         self.actionMenu = None
         self.inpaint = False
 
+        self.idlesleep_signal.connect(self.do_idlesleep)
+        self.refresh_signal.connect(self.do_refresh)
+        self.reshape_signal.connect(self.do_reshape)
+
     def setProgram(self,program):
+        """User will call this to set up the program variable"""
         from glprogram import GLProgram
         assert isinstance(program,GLProgram)
+        print "######### QGLWidget setProgram ###############"
         if hasattr(program,'name'):
             self.name = program.name
             if self.initialized:
@@ -127,7 +138,7 @@ class QtGLWindow(QGLWidget):
         
 
     def initialize(self):
-        """ Open a window and initialize """
+        """ Opens a window and initializes.  Called internally, and must be in the visualization thread."""
         assert self.program != None, "QGLWidget initialized without a GLProgram"
         glEnable(GL_MULTISAMPLE)
         self.setMouseTracking(True)
@@ -137,6 +148,7 @@ class QtGLWindow(QGLWidget):
             if self.program: self.program.idlefunc()
             if self.nextIdleEvent == 0:
                 self.idleTimer.start(0)
+        self.idleTimer = QTimer(self)
         self.idleTimer.timeout.connect(f)
         self.idleTimer.setSingleShot(True)
         self.idleTimer.start(0)
@@ -151,8 +163,43 @@ class QtGLWindow(QGLWidget):
 
         self.initialized = True
 
+    def hide(self):
+        """Hides the window, if already shown"""
+        QGLWidget.hide(self)
+        if self.initialized:
+            self.idlesleep()           
+
+    def show(self):
+        """Restores from a previous hide call"""
+        QGLWidget.show(self)
+        if self.initialized:
+            #boot it back up again
+            self.idlesleep(0)
+        self.refresh()
+
+    def close(self):
+        """Qt thread should call close() after this widget should be closed down to stop
+        any existing Qt callbacks."""
+        print "######### QGLWidget close ###############"
+        self.idleTimer.stop()
+        self.idleTimer.deleteLater()
+        self.idleTimer = None
+        if self.program:
+            self.program.window = None
+        self.program = None
+        self.initialized = False
+
     def add_action(self,hook,short_text,key,description=None):
-        a = QtGui.QAction(short_text, self)
+        """This is called by the user to add actions to the menu bar.
+
+        Parameters:
+        - hook: a python callback function, taking no arguments.
+        - short_text: the text shown in the menu bar
+        - key: a shortcut keyboard command (can be 'k' or 'Ctrl+k')
+        - description: if provided, this is a tooltip that shows up when the user
+          hovers their mouse over the menu item.
+        """
+        a = QAction(short_text, self)
         a.setShortcut(key)
         if description == None:
             description = short_text
@@ -261,9 +308,12 @@ class QtGLWindow(QGLWidget):
         """Call this to retrieve modifiers. Called by frontend."""
         return self.modifierList
 
-    def idlesleep(self,duration=float('inf')):
-        """Sleeps the idle callback for t seconds.  If t is not provided,
-        the idle callback is slept forever"""
+    @pyqtSlot(float)
+    def do_idlesleep(self,duration):
+        if self.idleTimer is None:
+            import traceback
+            traceback.print_stack()
+            raise ValueError("Idlesleep %f was called before initialize"%(duration,))
         if duration<=0:
             self.nextIdleEvent = 0
             self.idleTimer.start(0)
@@ -275,33 +325,27 @@ class QtGLWindow(QGLWidget):
             self.idleTimer.start(int(1000*duration))
             self.nextIdleEvent = duration
 
-    def close(self):
-        """Call close() after this widget should be closed down, to stop
-        any existing Qt callbacks."""
-        #print "######### QGLWidget close ###############"
-        self.idleTimer.stop()
-        if self.program:
-            self.program.window = None
-        self.program = None
+    def idlesleep(self,duration=float('inf')):
+        """Externally callable. Sleeps the idle callback for t seconds.  If t is not provided,
+        the idle callback is slept forever"""
+        self.idlesleep_signal.emit(duration)
+
+    @pyqtSlot()
+    def do_refresh(self):
+        self.makeCurrent()
+        #self.updateGL()
+        self.update()
 
     def refresh(self):
+        """Externally callable. Requests a refresh of the window"""
         if not self.refreshed:
             self.refreshed = True
             if not self.isVisible():
                 return
-            #TODO: resolve whether it's better to call updateGL here or to schedule
-            # a timer event
-            #first method: may have issues with being called from a different thread?
-            #self.makeCurrent()
-            #self.updateGL()
-            #second method: works even when called from a different thread.
-            def dorefresh():
-                self.makeCurrent()
-                #self.updateGL()
-                self.update()
-            QTimer.singleShot(0,dorefresh)
+            self.refresh_signal.emit()
 
     def resizeEvent(self,event):
+        """Called internally by Qt when Qt resizes the window"""
         QGLWidget.resizeEvent(self,event)
 
         (self.width,self.height) = (event.size().width(),event.size().height())
@@ -311,16 +355,18 @@ class QtGLWindow(QGLWidget):
             self.program.reshapefunc(self.width,self.height)
         self.refresh()
 
-    def reshape(self,w,h):
+    @pyqtSlot(int,int)
+    def do_reshape(self,w,h):
         (self.width,self.height) = (w,h)
-        def doreshape():
-            self.setFixedSize(self.width,self.height)
-            self.window().resize(self.sizeHint())
-            self.window().adjustSize()
-            if self.isVisible():
-                self.refresh()
-        if not self.initialized: doreshape()
-        else: QTimer.singleShot(0,doreshape)
+        self.setFixedSize(self.width,self.height)
+        self.window().resize(self.sizeHint())
+        self.window().adjustSize()
+        if self.isVisible():
+            self.do_refresh()
+
+    def reshape(self,w,h):
+        """Externally callable. Reshapes the window"""
+        self.reshape_signal.emit(w,h)
 
     def draw_text(self,point,text,size=12,color=None):
         if color:
@@ -353,7 +399,7 @@ class QtBackend:
         if self.app == None:
             #this is needed for some X11 multithreading bug 
             QCoreApplication.setAttribute(Qt.AA_X11InitThreads)
-            self.app = QtGui.QApplication([program_name])
+            self.app = QApplication([program_name])
 
     def createWindow(self,name,parent=None):
         self.initialize(name)
@@ -365,4 +411,10 @@ class QtBackend:
         self.window.show()
         self.app.exec_()
 
-
+    def kill(self):
+        if self.window:
+            self.window.close()
+            del self.window
+        del self.app
+        self.app = None
+        self.window = None

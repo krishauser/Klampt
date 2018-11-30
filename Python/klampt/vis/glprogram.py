@@ -251,7 +251,8 @@ class GLProgram:
         return True
         
     def idlefunc(self):
-        """Called on idle.  May be overridden."""
+        """Called on idle.  Default value stops all additional idle calls.  Must be
+        overridden if you want to do something in the idle loop."""
         #print "Sleeping idle from",self.__class__.__name__
         self.idlesleep()
 

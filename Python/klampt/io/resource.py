@@ -272,7 +272,7 @@ class FileGetter:
         self.filetypes = []
         self.result = None
     def getOpen(self):
-        from PyQt4.QtGui import QFileDialog
+        from PyQt5.QtGui import QFileDialog
         patterns = ""
         if len(self.filetypes) == 0:
             patterns = "All files (*.*)"
@@ -286,7 +286,7 @@ class FileGetter:
             patterns = ";;".join(patternlist)
         self.result = QFileDialog.getOpenFileName(None, self.title, self.directory, patterns)
     def getSave(self):
-        from PyQt4.QtGui import QFileDialog
+        from PyQt5.QtGui import QFileDialog
         patterns = ""
         if len(self.filetypes) == 0:
             patterns = "All files (*.*)"

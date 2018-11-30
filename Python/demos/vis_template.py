@@ -368,7 +368,7 @@ def plugin_template(world):
     vis.kill()
 
 
-class MyGLViewer(GLSimulationPlugin):
+class MyGLSimulationViewer(GLSimulationPlugin):
     """A custom simulation plugin that allows moving to random configurations"""
     def __init__(self,world):
         #initialize the simulation
@@ -443,9 +443,72 @@ class MyGLViewer(GLSimulationPlugin):
 
 def simulation_template(world):
     """Runs a custom simulation plugin"""
-    viewer = MyGLViewer(world)
+    viewer = MyGLSimulationViewer(world)
     vis.run(viewer)
     vis.kill()
+
+#Code for the QT template
+from klampt.vis import glinit
+if glinit._PyQtAvailable:
+    from PyQt5.QtWidgets import *
+    class MyQtMainWindow(QMainWindow):
+        def __init__(self,klamptGLWindow):
+            """When called, this be given a QtGLWidget object(found in klampt.vis.qtbackend).
+
+            You will need to place this widget into your Qt window's layout.
+            """
+            QMainWindow.__init__(self)
+             # Splitter to show 2 views in same widget easily.
+            self.splitter = QSplitter()
+            self.left = QFrame()
+            self.leftLayout = QVBoxLayout()
+            self.left.setLayout(self.leftLayout)
+            self.right = QFrame()
+            self.rightLayout = QVBoxLayout()
+            self.right.setLayout(self.rightLayout)
+            
+            self.glwidget = klamptGLWindow
+            self.glwidget.setParent(self.right)
+            self.rightLayout.addWidget(self.glwidget)
+        
+            self.helloButton = QPushButton("Hello world!")
+            self.leftLayout.addWidget(self.helloButton)
+
+            self.splitter.addWidget(self.left)
+            self.splitter.addWidget(self.right)
+            self.splitter.setHandleWidth(7)
+            self.setCentralWidget(self.splitter)
+
+        def closeEvent(self,event):
+            reply = QMessageBox.question(self, "Confirm quit", "Do you really want to quit?",
+                                    QMessageBox.Yes|QMessageBox.No);
+            if reply == QMessageBox.Yes:
+                vis.show(False)
+
+def qt_template(world):
+    """Runs a custom Qt frame around a visualization window"""
+    if not glinit._PyQtAvailable:
+        print "PyQt5 is not available on your system, try sudo apt-get install python-qt5"
+        return
+    
+    #Qt objects must be explicitly deleted for some reason in PyQt5...
+    g_mainwindow = None
+    #All Qt functions must be called in the vis thread.
+    #To hook into that thread, you will need to pass a window creation function into vis.customUI.
+    def makefunc(gl_backend):
+        global g_mainwindow
+        g_mainwindow = MyQtMainWindow(gl_backend)
+        return g_mainwindow
+    vis.customUI(makefunc)
+    vis.show()
+    #you can d
+    vis.add("world",world)
+    vis.setWindowTitle("Klamp't Qt test")
+    vis.spin(float('inf'))
+    vis.kill()
+    #Safe cleanup of all Qt objects created in makefunc.
+    #If you don't have this, PyQt5 complains about object destructors being called from the wrong thread
+    del g_mainwindow
 
 if __name__ == "__main__":
     print """================================================================================
@@ -467,7 +530,7 @@ if __name__ == "__main__":
 
     templates = {'1':basic_template,'2':edit_template,'3':animation_template,
                 '4':coordinates_template,'5':multiwindow_template,'6':modification_template,
-                '7':plugin_template,'8':simulation_template}
+                '7':plugin_template,'8':simulation_template,'9':qt_template}
     print "Available templates"
     import inspect
     for k in sorted(templates.keys()):
