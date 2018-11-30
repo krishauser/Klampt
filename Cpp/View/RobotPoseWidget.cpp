@@ -145,10 +145,10 @@ bool RobotLinkPoseWidget::Hover(int x,int y,Camera::Viewport& viewport,double& d
     Real dist;
     if(robot->geometry[i]->RayCast(r,&dist)) {
       if(dist < distance) {
-	distance = dist;
-	Vector3 worldpt = r.source + dist*r.direction;
-	robot->links[i].T_World.mulInverse(worldpt,hoverPt);
-	hoverLink = i;
+        distance = dist;
+        Vector3 worldpt = r.source + dist*r.direction;
+        robot->links[i].T_World.mulInverse(worldpt,hoverPt);
+        hoverLink = i;
       }
     }
   }
@@ -161,7 +161,7 @@ bool RobotLinkPoseWidget::Hover(int x,int y,Camera::Viewport& viewport,double& d
       vector<int> inds;
       robot->GetJointIndices(i,inds);
       for(size_t j=0;j<inds.size();j++)
-	linkToJoint[inds[j]]=(int)i;
+        linkToJoint[inds[j]]=(int)i;
     }
     int link = hoverLink;
     while(robot->joints[linkToJoint[link]].type == RobotJoint::Weld) {
@@ -174,8 +174,8 @@ bool RobotLinkPoseWidget::Hover(int x,int y,Camera::Viewport& viewport,double& d
     affectedLink = link;
     for(size_t i=0;i<robot->drivers.size();i++)
       if(robot->DoesDriverAffect(i,affectedLink)) {
-	affectedDriver = (int)i;
-	break;
+        affectedDriver = (int)i;
+        break;
       }
   }
   if(hoverLink != oldHoverLink) Refresh();
@@ -222,7 +222,7 @@ void RobotLinkPoseWidget::DrawGL(Camera::Viewport& viewport)
       viewRobot->Appearance(i) = poserAppearance[i];
     if(hasHighlight || hasFocus) {
       for(size_t i=0;i<highlightedLinks.size();i++)
-	viewRobot->Appearance(highlightedLinks[i]).ModulateColor(highlightColor,0.5);
+        viewRobot->Appearance(highlightedLinks[i]).ModulateColor(highlightColor,0.5);
     }
     if(!activeDofs.empty()) {
       GLColor black(0,0,0,0);
@@ -237,7 +237,7 @@ void RobotLinkPoseWidget::DrawGL(Camera::Viewport& viewport)
     //copy display lists, if not already initialized
     for(size_t i=0;i<poserAppearance.size();i++) {
       if(!poserAppearance[i].vertexDisplayList)
-	poserAppearance[i] = viewRobot->Appearance(i);
+        poserAppearance[i] = viewRobot->Appearance(i);
     }
     viewRobot->PopAppearance();
 
@@ -250,83 +250,83 @@ void RobotLinkPoseWidget::DrawGL(Camera::Viewport& viewport)
       glDisable(GL_CULL_FACE);
       int i = affectedDriver;
       if(i >= 0) {
-	if(robot->drivers[i].type == RobotJointDriver::Normal) {
-	  Vector3 center;
-	  if(robot->parents[affectedLink] < 0) center=robot->links[affectedLink].T0_Parent.t;
-	  else center=robot->links[robot->parents[affectedLink]].T_World*robot->links[affectedLink].T0_Parent.t;
-	  Vector3 worldAxis = robot->links[affectedLink].T_World.R*robot->links[affectedLink].w;
-	  Vector3 x,y;
-	  GetCanonicalBasis(worldAxis,x,y);
-	  Real q1 = robot->qMin(affectedLink);
-	  Real q2 = robot->qMax(affectedLink);
-	  if(!IsInf(q1) && !IsInf(q2) && q1 != q2) {
-	    if(robot->links[affectedLink].type == RobotLink3D::Revolute) {
-	      //rotational joint, draw a strip arc
-	      Real r1 = 0.1;
-	      Real r2 = 0.12;
-	      Real zscale = 0.0;
-	      if (q2 > q1+Pi*3/2)
-		zscale = 0.01;
-	      Real dq = 0.1;
-	      Real q = q1;
-	      glBegin(GL_TRIANGLE_STRIP);
-	      while(q < q2) {
-		GLColor col(1,1-0.5*(q-q1)/(q2-q1),0);
-		glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,col);
-		Real c = Cos(q);
-		Real s = Sin(q);
-		Vector3 p1 = center+worldAxis*zscale*q + c*r1*x + s*r1*y;
-		Vector3 p2 = center+worldAxis*zscale*q + c*r2*x + s*r2*y;
-		glNormal3v(worldAxis);
-		glVertex3v(p1);
-		glVertex3v(p2);
-		q += dq;
-	      }
-	      q = q2;
-	      GLColor col(1,0.5,0);
-	      Real c = Cos(q);
-	      Real s = Sin(q);
-	      glNormal3v(worldAxis);
-	      Vector3 p1 = center+worldAxis*zscale*q + c*r1*x + s*r1*y;
-	      Vector3 p2 = center+worldAxis*zscale*q + c*r2*x + s*r2*y;
-	      glVertex3v(p1);
-	      glVertex3v(p2);
-	      glEnd();
-	      Real rmid = (r1+r2)*0.5;
-	      q = robot->q(affectedLink);
-	      c = Cos(q);
-	      s = Sin(q);
-	      glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,col);
-	      Vector3 pt = center+worldAxis*zscale*q + c*rmid*x + s*rmid*y;
-	      glPushMatrix();
-	      glTranslate(pt);
-	      drawSphere(0.02,16,8);
-	      glPopMatrix();
-	    }
-	    else {
-	      //translational joint, draw a strip
-	      glBegin(GL_TRIANGLE_STRIP);
-	      Vector3 p1 = center+worldAxis*q1 - x*0.01;
-	      Vector3 p2 = center+worldAxis*q1 + x*0.01;
-	      GLColor col(1,1,0);
-	      glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,col);
-	      glVertex3v(p1);
-	      glVertex3v(p2);
-	      p1 = center+worldAxis*q2 - x*0.01;
-	      p2 = center+worldAxis*q2 + x*0.01;
-	      col.rgba[1] = 0.5;
-	      glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,col);
-	      glVertex3v(p1);
-	      glVertex3v(p2);
-	      glEnd();
-	      p1 = center+worldAxis*robot->q(affectedLink);
-	      glPushMatrix();
-	      glTranslate(p1);
-	      drawSphere(0.02,16,8);
-	      glPopMatrix();
-	    }
-	  }
-	}
+        if(robot->drivers[i].type == RobotJointDriver::Normal) {
+          Vector3 center;
+          if(robot->parents[affectedLink] < 0) center=robot->links[affectedLink].T0_Parent.t;
+          else center=robot->links[robot->parents[affectedLink]].T_World*robot->links[affectedLink].T0_Parent.t;
+          Vector3 worldAxis = robot->links[affectedLink].T_World.R*robot->links[affectedLink].w;
+          Vector3 x,y;
+          GetCanonicalBasis(worldAxis,x,y);
+          Real q1 = robot->qMin(affectedLink);
+          Real q2 = robot->qMax(affectedLink);
+          if(!IsInf(q1) && !IsInf(q2) && q1 != q2) {
+            if(robot->links[affectedLink].type == RobotLink3D::Revolute) {
+              //rotational joint, draw a strip arc
+              Real r1 = 0.1;
+              Real r2 = 0.12;
+              Real zscale = 0.0;
+              if (q2 > q1+Pi*3/2)
+                zscale = 0.01;
+              Real dq = 0.1;
+              Real q = q1;
+              glBegin(GL_TRIANGLE_STRIP);
+              while(q < q2) {
+                GLColor col(1,1-0.5*(q-q1)/(q2-q1),0);
+                glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,col);
+                Real c = Cos(q);
+                Real s = Sin(q);
+                Vector3 p1 = center+worldAxis*zscale*q + c*r1*x + s*r1*y;
+                Vector3 p2 = center+worldAxis*zscale*q + c*r2*x + s*r2*y;
+                glNormal3v(worldAxis);
+                glVertex3v(p1);
+                glVertex3v(p2);
+                q += dq;
+              }
+              q = q2;
+              GLColor col(1,0.5,0);
+              Real c = Cos(q);
+              Real s = Sin(q);
+              glNormal3v(worldAxis);
+              Vector3 p1 = center+worldAxis*zscale*q + c*r1*x + s*r1*y;
+              Vector3 p2 = center+worldAxis*zscale*q + c*r2*x + s*r2*y;
+              glVertex3v(p1);
+              glVertex3v(p2);
+              glEnd();
+              Real rmid = (r1+r2)*0.5;
+              q = robot->q(affectedLink);
+              c = Cos(q);
+              s = Sin(q);
+              glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,col);
+              Vector3 pt = center+worldAxis*zscale*q + c*rmid*x + s*rmid*y;
+              glPushMatrix();
+              glTranslate(pt);
+              drawSphere(0.02,16,8);
+              glPopMatrix();
+            }
+            else {
+              //translational joint, draw a strip
+              glBegin(GL_TRIANGLE_STRIP);
+              Vector3 p1 = center+worldAxis*q1 - x*0.01;
+              Vector3 p2 = center+worldAxis*q1 + x*0.01;
+              GLColor col(1,1,0);
+              glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,col);
+              glVertex3v(p1);
+              glVertex3v(p2);
+              p1 = center+worldAxis*q2 - x*0.01;
+              p2 = center+worldAxis*q2 + x*0.01;
+              col.rgba[1] = 0.5;
+              glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,col);
+              glVertex3v(p1);
+              glVertex3v(p2);
+              glEnd();
+              p1 = center+worldAxis*robot->q(affectedLink);
+              glPushMatrix();
+              glTranslate(p1);
+              drawSphere(0.02,16,8);
+              glPopMatrix();
+            }
+          }
+        }
       }
       glDepthRange (0.0, 1.0);
       glPopAttrib();
@@ -519,7 +519,7 @@ void RobotIKPoseWidget::DrawGL(Camera::Viewport& viewport)
       RigidTransform T;
       poseGoals[i].GetFixedGoalTransform(T);
       if(poseGoals[i].destLink >= 0)
-	T = robot->links[poseGoals[i].destLink].T_World*T;
+        T = robot->links[poseGoals[i].destLink].T_World*T;
       glMultMatrix(Matrix4(T));
       drawBox(0.04,0.04,0.04);
     }
@@ -589,7 +589,7 @@ RobotPoseWidget::RobotPoseWidget(Robot* robot,ViewRobot* viewRobot)
   }
   vector<bool> active(robot->links.size(),true);
   for(size_t i=0;i<robot->joints.size();i++)
-    if(robot->joints[i].type == RobotJoint::Weld)
+    if(robot->joints[i].type == RobotJoint::Weld && robot->parents[i]==-1)
       active[robot->joints[i].linkIndex] = false;
   if(useBase)
     for(size_t i=0;i<6;i++)
@@ -632,7 +632,7 @@ void RobotPoseWidget::Set(Robot* robot,ViewRobot* viewRobot)
   }
   vector<bool> active(robot->links.size(),true);
   for(size_t i=0;i<robot->joints.size();i++)
-    if(robot->joints[i].type == RobotJoint::Weld)
+    if(robot->joints[i].type == RobotJoint::Weld && robot->parents[i]==-1)
       active[robot->joints[i].linkIndex] = false;
   if(useBase)
     for(size_t i=0;i<6;i++)
@@ -660,7 +660,7 @@ Config RobotPoseWidget::Pose_Conditioned(const Config& qref) const
   for(int i=0;i<robot->q.n;i++) {
     if(robot->links[i].type == RobotLink3D::Revolute && robot->qMin(i)+TwoPi < robot->qMax(i)) {
       if(Abs(res[i]-qref[i]) > Pi) {
-	res[i] = AngleDiff(AngleNormalize(res[i]),AngleNormalize(qref[i])) + qref[i];
+        res[i] = AngleDiff(AngleNormalize(res[i]),AngleNormalize(qref[i])) + qref[i];
       }
     }
   }
@@ -812,9 +812,9 @@ bool RobotPoseWidget::BeginDrag(int x,int y,Camera::Viewport& viewport,double& d
       ikPoser.poseWidgets.back().SetHighlight(true);
       //following lines let it be dragged immediately -- comment out if you want it fixed
       if(ikPoser.poseWidgets.back().BeginDrag(x,y,viewport,distance)) {
-	closestWidget = &ikPoser;
-	ikPoser.closestWidget = &ikPoser.poseWidgets.back();
-	return true;
+        closestWidget = &ikPoser;
+        ikPoser.closestWidget = &ikPoser.poseWidgets.back();
+        return true;
       }
     }
     return true;
@@ -830,9 +830,9 @@ bool RobotPoseWidget::BeginDrag(int x,int y,Camera::Viewport& viewport,double& d
       ikPoser.poseWidgets.back().SetHighlight(true);
       //following lines let it be dragged immediately -- comment out if you want it fixed
       if(ikPoser.poseWidgets.back().BeginDrag(x,y,viewport,distance)) {
-	closestWidget = &ikPoser;
-	ikPoser.closestWidget = &ikPoser.poseWidgets.back();
-	return true;
+        closestWidget = &ikPoser;
+        ikPoser.closestWidget = &ikPoser.poseWidgets.back();
+        return true;
       }
     }
     return true;
