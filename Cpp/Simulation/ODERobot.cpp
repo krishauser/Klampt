@@ -6,7 +6,10 @@
 #include <KrisLibrary/math/angle.h>
 #include <KrisLibrary/math3d/interpolate.h>
 #include <KrisLibrary/robotics/Rotation.h>
+#include <KrisLibrary/Logger.h>
 #include "Settings.h"
+
+DECLARE_LOGGER(ODESimulator)
 
 double ODERobot::defaultPadding = gDefaultRobotPadding;
 //k restitution of 0.1, friction of 1, infinite stiffness
@@ -229,10 +232,10 @@ void ODERobot::Create(int robotIndex,dWorldID worldID,bool useBoundaryLayer)
       }
       bodyObjects[i].com /= bodyObjects[i].mass;
       bodyObjects[i].inertia /= bodyObjects[i].mass;
+
+      //the COM is the origin of the body
       bodyObjects[i].T.R = robot.links[baseLink].T_World.R; 
-      //set the COM to be the origin of the body
       bodyObjects[i].T.t = robot.links[baseLink].T_World * bodyObjects[i].com; 
-      bodyObjects[i].com.setZero();
       
       tempGeometries.resize(tempGeometries.size()+1);
       tempGeometries.back().reset(new RobotWithGeometry::CollisionGeometry);
@@ -243,18 +246,18 @@ void ODERobot::Create(int robotIndex,dWorldID worldID,bool useBoundaryLayer)
       }
     }
     if(bodyObjects[i].mass == 0.0) {
-      fprintf(stderr,"ODERobot: warning, body %d has mass zero\n",i);
-      fprintf(stderr,"  Consists of links: ");
+      LOG4CXX_WARN(GET_LOGGER(ODESimulator),"ODERobot: warning, body "<<i<<" has mass zero");
+      stringstream ss;
       for(size_t j=0;j<bodyLinks[i].size();j++)
-        fprintf(stderr,"%s, ",robot.LinkName(bodyLinks[i][j]).c_str());
-      fprintf(stderr,"\n");
+        ss<<robot.LinkName(bodyLinks[i][j])<<", ";
+      LOG4CXX_WARN(GET_LOGGER(ODESimulator),"  Consists of links: "<<ss.str());
     }
     if(bodyObjects[i].inertia.isZero()) {
-      fprintf(stderr,"ODERobot: warning, body %d has zero inertia\n",i);
-      fprintf(stderr,"  Consists of links: ");
+      LOG4CXX_WARN(GET_LOGGER(ODESimulator),"ODERobot: warning, body "<<i<<" has zero inertia");
+      stringstream ss;
       for(size_t j=0;j<bodyLinks[i].size();j++)
-        fprintf(stderr,"%s, ",robot.LinkName(bodyLinks[i][j]).c_str());
-      fprintf(stderr,"\n");
+        ss<<robot.LinkName(bodyLinks[i][j])<<", ";
+      LOG4CXX_WARN(GET_LOGGER(ODESimulator),"  Consists of links: "<<ss.str());
     }
   }
 
@@ -279,10 +282,10 @@ void ODERobot::Create(int robotIndex,dWorldID worldID,bool useBoundaryLayer)
     int primaryLink = robot.joints[bodyJoints[i][0]].linkIndex;
     Matrix3 ident; ident.setIdentity();
     if(!T_bodyToLink[primaryLink].R.isEqual(ident,1e-4)) {
-      cout<<"Mismatch betwen body and primary link orientations?"<<endl;
-      cout<<"Body: "<<bodyObjects[i].T.R<<endl;
-      cout<<"Link: "<<robot.links[primaryLink].T_World.R<<endl;
-      cout<<"T_bodyToLink: "<<T_bodyToLink[primaryLink].R<<endl;
+      LOG4CXX_FATAL(GET_LOGGER(ODESimulator),"Mismatch betwen body and primary link orientations?");
+      LOG4CXX_FATAL(GET_LOGGER(ODESimulator),"Body: "<<bodyObjects[i].T.R);
+      LOG4CXX_FATAL(GET_LOGGER(ODESimulator),"Link: "<<robot.links[primaryLink].T_World.R);
+      LOG4CXX_FATAL(GET_LOGGER(ODESimulator),"T_bodyToLink: "<<T_bodyToLink[primaryLink].R);
     }
     Assert(T_bodyToLink[primaryLink].R.isEqual(ident,1e-4));
     T_bodyToLink[primaryLink].R = ident;
@@ -303,12 +306,12 @@ void ODERobot::Create(int robotIndex,dWorldID worldID,bool useBoundaryLayer)
     CopyMatrix(mass.I,body.inertia);
     int res=dMassCheck(&mass);
     if(res != 1) {
-      fprintf(stderr,"Uh... mass of body %d is not considered to be valid by ODE?\n",i);
-      std::cerr<<"Inertia: "<<body.inertia<<std::endl;
+      LOG4CXX_WARN(GET_LOGGER(ODESimulator),"Uh... mass of body "<<i<<" is not considered to be valid by ODE?");
+      LOG4CXX_WARN(GET_LOGGER(ODESimulator),"  Inertia: "<<body.inertia);
       body.inertia.setIdentity(); body.inertia *= 0.01;
       CopyMatrix(mass.I,body.inertia);
-      fprintf(stderr,"Setting inertia to 0.01*identity. Press enter to continue...\n");
-      getchar();
+      LOG4CXX_WARN(GET_LOGGER(ODESimulator),"  Setting inertia to 0.01*identity.");
+      KrisLibrary::loggerWait();
     }
     dBodySetMass(bodyID[primaryLink],&mass);
 
@@ -369,19 +372,20 @@ void ODERobot::Create(int robotIndex,dWorldID worldID,bool useBoundaryLayer)
           dJointSetHingeAxis(jointID[link],axis.x,axis.y,axis.z);
           if(robot.joints[i].type != RobotJoint::Spin) {
             if(USE_JOINT_STOPS) {
-        //printf("Joint %d (link %s) ODE joint stops %g %g\n",i,robot.LinkName(link).c_str(),robot.qMin(link),robot.qMax(link));
+              //printf("Joint %d (link %s) ODE joint stops %g %g\n",i,robot.LinkName(link).c_str(),robot.qMin(link),robot.qMax(link));
               //stops are not working correctly if they are out of the range (-pi,pi) -- ODE flips out
-              if(robot.qMin(link) <= -Pi || robot.qMax(link) >= Pi) 
-                printf("ODERobot: Warning, turning off joint stops on joint %d (link %s) because of ODE range mismatch\n",i,robot.LinkName(link).c_str());
+              if(robot.qMin(link) <= -Pi || robot.qMax(link) >= Pi) {
+                LOG4CXX_WARN(GET_LOGGER(ODESimulator),"ODERobot: Warning, turning off joint stops on joint "<<i<<" (link "<<robot.LinkName(link)<<") because of ODE range mismatch");
+              }
               else {
-          if(robot.qMin(link) <= -Pi+0.1 || robot.qMax(link) >= Pi-0.1) {
-            printf("ODERobot: Warning, robot joint limits on joint %d (link %s) are close to [-pi,pi].\n",i,robot.LinkName(link).c_str());
-            printf("   Due to ODE joint stop handling quirks this may cause the robot to flip out\n");
-            printf("   Turn off USE_JOINT_STOPS in Klampt/Simulation/Settings.h if this becomes an issue\n");
-          }
-          dJointSetHingeParam(jointID[link],dParamLoStop,robot.qMin(link));
-          dJointSetHingeParam(jointID[link],dParamHiStop,robot.qMax(link));
-        }
+                if(robot.qMin(link) <= -Pi+0.1 || robot.qMax(link) >= Pi-0.1) {
+                  LOG4CXX_WARN(GET_LOGGER(ODESimulator),"ODERobot: Warning, robot joint limits on joint "<<i<<" (link "<<robot.LinkName(link)<<") are close to [-pi,pi].");
+                  LOG4CXX_WARN(GET_LOGGER(ODESimulator),"   Due to ODE joint stop handling quirks this may cause the robot to flip out");
+                  LOG4CXX_WARN(GET_LOGGER(ODESimulator),"   Turn off USE_JOINT_STOPS in Klampt/Simulation/Settings.h if this becomes an issue");
+                }
+                dJointSetHingeParam(jointID[link],dParamLoStop,robot.qMin(link));
+                dJointSetHingeParam(jointID[link],dParamHiStop,robot.qMax(link));
+              }
             }
             dJointSetHingeParam(jointID[link],dParamBounce,0);
           }
@@ -456,7 +460,9 @@ void ODERobot::SetLinkFixedVelocity(int k,Real vel,Real tmax)
 void ODERobot::SetConfig(const Config& q)
 {
   if(q != robot.q) {
-    cerr<<"ODERobot::SetConfig() TODO: We're asserting that the q is the"<<endl<<"active configuration in order to avoid unexpected changes in the temporary"<<endl<<"robot configuration"<<endl;
+    LOG4CXX_FATAL(GET_LOGGER(ODESimulator),"ODERobot::SetConfig() TODO: We're asserting that the q is the");
+    LOG4CXX_FATAL(GET_LOGGER(ODESimulator),"active configuration in order to avoid unexpected changes in the temporary");
+    LOG4CXX_FATAL(GET_LOGGER(ODESimulator),"robot configuration");
   }
   Assert(q == robot.q);
   for(size_t i=0;i<robot.links.size();i++) {
@@ -623,13 +629,12 @@ void ODERobot::SetVelocities(const Config& dq)
   Vector temp=dq;
   GetVelocities(temp);
   if(!temp.isEqual(dq,1e-4)) {
-    cerr<<"ODERobot::SetVelocities: Error, Get/SetVelocities don't match"<<endl;
-    cerr<<"dq = "<<dq<<endl;
-    cerr<<"from GetVelocities = "<<temp<<endl;
-    cerr<<"Error: "<<temp.distance(dq)<<endl;
-    cerr<<"did you remember to set the robot's configuration?"<<endl;
-    cout<<"Press enter to continue..."<<endl;
-    getchar();
+    LOG4CXX_WARN(GET_LOGGER(ODESimulator),"ODERobot::SetVelocities: Error, Get/SetVelocities don't match");
+    LOG4CXX_WARN(GET_LOGGER(ODESimulator),"dq = "<<dq);
+    LOG4CXX_WARN(GET_LOGGER(ODESimulator),"from GetVelocities = "<<temp);
+    LOG4CXX_WARN(GET_LOGGER(ODESimulator),"Error: "<<temp.distance(dq));
+    LOG4CXX_WARN(GET_LOGGER(ODESimulator),"did you remember to set the robot's configuration?");
+    KrisLibrary::loggerWait();
   }
   //Assert(temp.isEqual(dq,1e-4));
 }
@@ -722,8 +727,8 @@ void ODERobot::AddTorques(const Config& t)
   Assert(t.n == (int)robot.links.size());
   for(int i=0;i<t.n;i++)
     if(!IsFinite(t(i))) {
-      printf("Error, commanding link %d to a non-finite torque!\n",i);
-      getchar();
+      LOG4CXX_ERROR(GET_LOGGER(ODESimulator),"ODERobot::AddTorques: Error, commanding link "<<i<<" to a non-finite torque!");
+      KrisLibrary::loggerWait();
       return;
     }
 
@@ -801,12 +806,12 @@ void ODERobot::AddJointTorque(int joint,Real t)
 void ODERobot::AddLinkTorque(int i,Real t)
 {
   if(!jointID[i]) { 
-    printf("ODERobot::AddLinkTorque: Warning, no link %d\n",i);
+    LOG4CXX_WARN(GET_LOGGER(ODESimulator),"ODERobot::AddLinkTorque: Warning, no link "<<i);
     return;
   }
   if(!IsFinite(t)) {
-    printf("ODERobot::AddLinkTorque: Error, commanding link %d to a non-finite torque!\n",i);
-    getchar();
+    LOG4CXX_ERROR(GET_LOGGER(ODESimulator),"ODERobot::AddLinkTorque: Error, commanding link "<<i<<" to a non-finite torque!");
+    KrisLibrary::loggerWait();
     return;
   }
   if(robot.links[i].type == RobotLink3D::Revolute)   
@@ -839,7 +844,7 @@ Real ODERobot::GetDriverValue(int driver) const
       else if(axis.y == 1) return ea.y;
       else if(axis.z == 1) return ea.x;
       else {
-        fprintf(stderr,"ODERobot: Invalid axis for rotation driver, simulation will likely be unstable!\n");
+        LOG4CXX_ERROR(GET_LOGGER(ODESimulator),"ODERobot: Invalid axis for rotation driver, simulation will likely be unstable!");
         return MatrixAngleAboutAxis(T.R,axis);
       }
     }

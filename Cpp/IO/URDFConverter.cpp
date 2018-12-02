@@ -8,12 +8,14 @@
 #include "URDFConverter.h"
 #include <fstream>
 #include <KrisLibrary/utils/stringutils.h>
+#include <KrisLibrary/geometry/AnyGeometry.h>
+#include <KrisLibrary/math3d/geometry3d.h>
 #include <string.h>
 using namespace std;
-using namespace PrimitiveShape;
+using namespace Geometry;
+using namespace Math3D;
 
 string URDFConverter::packageRootPath("");
-string URDFConverter::primitiveMeshPath("data/objects/urdf_primitives/");
 bool URDFConverter::useVisGeom = false;
 bool URDFConverter::flipYZ = false;
 
@@ -121,27 +123,41 @@ void URDFLinkNode::GetGeometryProperty(bool useVisGeom){
 	else if(!useVisGeom && this->link->collision) geom = this->link->collision->geometry;
 	if(geom){
 	  if(geom->type == urdf::Geometry::BOX){
+		  std::shared_ptr<urdf::Box> box = std::static_pointer_cast<urdf::Box>(geom);
 		  geomPrimitive = true;
-		  geomName = URDFConverter::primitiveMeshPath + "box_ori_center.off";
-			std::shared_ptr<urdf::Box> box = std::static_pointer_cast<urdf::Box>(geom);
-			geomScale(0,0) = box->dim.x;
-			geomScale(1,1) = box->dim.y;
-			geomScale(2,2) = box->dim.z;
+		  AABB3D b;
+		  b.bmin.set(-box->dim.x*0.5,-box->dim.y*0.5,-box->dim.z*0.5);
+		  b.bmax = -b.bmin;
+		  GeometricPrimitive3D prim(b);
+		  AnyGeometry3D geom(prim);
+		  stringstream ss;
+		  geom.Save(ss);
+		  geomData = ss.str();
 
 		}else if(geom->type == urdf::Geometry::CYLINDER){
-		  geomPrimitive = true;
-			geomName = URDFConverter::primitiveMeshPath + "cylinder_ori_center.off";
-			std::shared_ptr<urdf::Cylinder> cylinder = std::static_pointer_cast<urdf::Cylinder>(geom);
-			geomScale(0,0) = cylinder->radius;
-			geomScale(1,1) = cylinder->radius;
-			geomScale(2,2) = cylinder->length;
+		  	std::shared_ptr<urdf::Cylinder> cylinder = std::static_pointer_cast<urdf::Cylinder>(geom);
+		  	geomPrimitive = true;
+			Cylinder3D c;
+			c.center.setZero();
+			c.axis.set(0,0,1);
+			c.radius = cylinder->radius;
+			c.height = cylinder->length;
+			GeometricPrimitive3D prim(c);
+			AnyGeometry3D geom(prim);
+		  	stringstream ss;
+		  	geom.Save(ss);
+		  	geomData = ss.str();
 		}else if(geom->type == urdf::Geometry::SPHERE){
-		  geomPrimitive = true;
-		  geomName = URDFConverter::primitiveMeshPath + "sphere_ori_center.off";
 			std::shared_ptr<urdf::Sphere> sphere = std::static_pointer_cast<urdf::Sphere>(geom);
-			geomScale(0,0) = sphere->radius;
-			geomScale(1,1) = sphere->radius;
-			geomScale(2,2) = sphere->radius;
+			geomPrimitive = true;
+			Sphere3D s;
+			s.center.setZero();
+			s.radius = sphere->radius;
+			GeometricPrimitive3D prim(s);
+			AnyGeometry3D geom(prim);
+		  	stringstream ss;
+		  	geom.Save(ss);
+		  	geomData = ss.str();
 		}
 	  else if(geom->type == urdf::Geometry::MESH){
 			std::shared_ptr<urdf::Mesh> mesh = std::static_pointer_cast<urdf::Mesh>(geom);
@@ -215,16 +231,6 @@ Math3D::Matrix3 URDFConverter::convertInertial(urdf::Inertial& I) {
 	m(1, 2) = m(2, 1) = I.iyz;
 	m(2, 2) = I.izz;
 	return m;
-}
-
-void URDFConverter::ConvertWrltoTri(string filename){
-	string wrlfile = filename + ".wrl";
-	string trifile = filename + ".tri";
-
-	vector<MyPoint3D> points;
-	vector<TriFaceIndex> indexes;
-	loadWrl(wrlfile, points, indexes);
-	write2Tri(trifile, points, indexes);
 }
 
 //void URDFConverter::ScalePrimitiveGeom(string infilename, string outfilename, const Vector3& geomScale){

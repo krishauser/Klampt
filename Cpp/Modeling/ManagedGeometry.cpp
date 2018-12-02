@@ -17,9 +17,9 @@ GeometryManager::GeometryManager()
 GeometryManager::~GeometryManager()
 {
   if(!cache.empty())  {
-    fprintf(stderr,"~GeometryManager: Warning, destruction of global objects is out of order?\n");
+    LOG4CXX_WARN(KrisLibrary::logger(),"~GeometryManager: Warning, destruction of global objects is out of order?");
     for(map<string,GeometryList>::iterator i=cache.begin();i!=cache.end();i++) {
-      fprintf(stderr,"Destroying GeometryManager, have %d items left on name %s\n",(int)i->second.geoms.size(),i->first.c_str());
+      LOG4CXX_WARN(KrisLibrary::logger(),"Destroying GeometryManager, have "<<i->second.geoms.size()<<" items left on name "<<i->first);
     }
   }
   Clear();
@@ -57,7 +57,9 @@ ManagedGeometry::~ManagedGeometry()
     assert(cacheKey.empty());
   }
   else {
-    printf("Destroying ManagedGeometry %s, appearance ref count %d\n",(cacheKey.empty() ? "uncached " : cacheKey.c_str()), appearance.use_count());
+    printf("Destroying ManagedGeometry %s, geometry ref count %d, appearance ref count %d\n",(cacheKey.empty() ? "uncached" : cacheKey.c_str()),
+      (cacheKey.empty() ? 1 : (int)manager.cache[cacheKey].geoms.size()),
+      appearance.use_count());
   }
 #endif
   RemoveFromCache();
@@ -108,15 +110,15 @@ bool ManagedGeometry::Load(const string& filename)
       prev->geometry->InitCollisionData();
       double t = timer.ElapsedTime();
       if(t > 0.2) 
-        printf("ManagedGeometry: Initialized %s collision data structures in time %gs\n",filename.c_str(),t);
+        LOG4CXX_INFO(KrisLibrary::logger(),"ManagedGeometry: Initialized "<<filename<<" collision data structures in time "<<t<<"s");
     }
     geometry = make_shared<Geometry::AnyCollisionGeometry3D>(*prev->geometry);
     //geometry = prev->geometry;
     appearance = prev->appearance;
-    //appearance->geom = geometry.get();
+    appearance->geom = geometry.get();
     manager.cache[filename].geoms.push_back(this);
 #if CACHE_DEBUG
-    printf("ManagedGeometry: adding a duplicate of %s to cache.\n",filename.c_str());
+    LOG4CXX_WARN(KrisLibrary::logger(),"ManagedGeometry: adding a duplicate of "<<filename<<" to cache");
 #endif
     return true;
   }
@@ -149,7 +151,7 @@ bool ManagedGeometry::LoadNoCache(const string& filename)
     geometry = make_shared<Geometry::AnyCollisionGeometry3D>(Meshing::PointCloud3D());
     appearance->Set(*geometry);
     Meshing::PointCloud3D& pc = geometry->AsPointCloud();
-    printf("ManagedGeometry subscribing to point cloud on ROS topic %s\n",fn+16);
+    LOG4CXX_INFO(KrisLibrary::logger(),"ManagedGeometry subscribing to point cloud on ROS topic "<<(fn+16));
     return ROSSubscribePointCloud(pc,fn+16);
   }
   else if(0==strncmp(fn,"ros://",6)) {
@@ -159,7 +161,7 @@ bool ManagedGeometry::LoadNoCache(const string& filename)
     *geometry = Geometry::AnyCollisionGeometry3D(Meshing::PointCloud3D());
     appearance->Set(*geometry);
     Meshing::PointCloud3D& pc = geometry->AsPointCloud();
-    printf("ManagedGeometry subscribing to point cloud on ROS topic %s\n",fn+5);
+    LOG4CXX_INFO(KrisLibrary::logger(),"ManagedGeometry subscribing to point cloud on ROS topic "<<(fn+5));
     return ROSSubscribePointCloud(pc,fn+5);
   }
   
@@ -171,13 +173,13 @@ bool ManagedGeometry::LoadNoCache(const string& filename)
       Timer timer;
       geometry = make_shared<Geometry::AnyCollisionGeometry3D>();
       if(!geometry->Load(fn)) {
-        fprintf(stderr,"ManagedGeometry: Error loading geometry file %s\n",fn);
+        LOG4CXX_WARN(KrisLibrary::logger(),"ManagedGeometry: Error loading geometry file "<<fn);
         geometry = NULL;
         return false;
       }
       double t = timer.ElapsedTime();
       if(t > 0.2) 
-        printf("ManagedGeometry: loaded %s in time %gs\n",filename.c_str(),t);
+        LOG4CXX_INFO(KrisLibrary::logger(),"ManagedGeometry: loaded "<<filename<<" in time "<<t<<"s");
       if(geometry->type == Geometry::AnyGeometry3D::TriangleMesh) {
         if(geometry->TriangleMeshAppearanceData() != NULL) {
           appearance = make_shared<GLDraw::GeometryAppearance>(*geometry->TriangleMeshAppearanceData());
@@ -193,12 +195,12 @@ bool ManagedGeometry::LoadNoCache(const string& filename)
       return true;
     }
     else {
-      fprintf(stderr,"ManagedGeometry: Unknown file extension %s on file %s\n",ext,fn);
+      LOG4CXX_WARN(KrisLibrary::logger(),"ManagedGeometry: Unknown file extension "<<ext<<" on file "<<fn);
       return false;
     }
   }
   else {
-    fprintf(stderr,"ManagedGeometry: No file extension on file %s\n",fn);
+    LOG4CXX_WARN(KrisLibrary::logger(),"ManagedGeometry: No file extension on file "<<fn);
     return false;
   }
 }
@@ -228,7 +230,7 @@ void ManagedGeometry::AddToCache(const string& filename)
 {
   if(!cacheKey.empty()) {
     if(cacheKey != filename)
-      printf("ManagedGeometry::AddToCache(): warning, item was previously cached as %s, now being asked to be cached as %s?\n",cacheKey.c_str(),filename.c_str());
+      LOG4CXX_WARN(KrisLibrary::logger(),"ManagedGeometry::AddToCache(): warning, item was previously cached as "<<cacheKey<<", now being asked to be cached as "<<filename<<"?");
     return;
   }
 #if CACHE_DEBUG
@@ -245,12 +247,12 @@ void ManagedGeometry::RemoveFromCache()
   }
   map<string,GeometryManager::GeometryList>::iterator i=manager.cache.find(cacheKey);
   if(i==manager.cache.end()) {
-    printf("ManagedGeometry::RemoveFromCache(): warning, item %s was not previously cached?\n",cacheKey.c_str());
+    LOG4CXX_WARN(KrisLibrary::logger(),"ManagedGeometry::RemoveFromCache(): warning, item "<<cacheKey<<" was not previously cached?");
     cacheKey.clear();
     return;
   }
   if(i->second.geoms.empty()) {
-    printf("ManagedGeometry::RemoveFromCache(): warning, item %s was previously deleted?\n",cacheKey.c_str());
+    LOG4CXX_WARN(KrisLibrary::logger(),"ManagedGeometry::RemoveFromCache(): warning, item "<<cacheKey<<" was previously deleted?");
     cacheKey.clear();
     return;
   }
@@ -260,14 +262,14 @@ void ManagedGeometry::RemoveFromCache()
       if(i->second.geoms.empty()) {
         manager.cache.erase(i);
 #if CACHE_DEBUG
-        printf("ManagedGeometry: removing %s from cache.\n",cacheKey.c_str());
+        LOG4CXX_INFO(KrisLibrary::logger(),"ManagedGeometry: removing "<<cacheKey<<" from cache.");
 #endif
       }
       cacheKey.clear();
       return;
     }
   }
-  LOG4CXX_INFO(KrisLibrary::logger(),"ManagedGeometry::RemoveFromCache(): warning, item "<<cacheKey.c_str()<<" pointer was not previously cached?");
+  LOG4CXX_INFO(KrisLibrary::logger(),"ManagedGeometry::RemoveFromCache(): warning, item "<<cacheKey<<" pointer was not previously cached?");
   cacheKey.clear();
 }
 
@@ -277,12 +279,12 @@ void ManagedGeometry::SetUnique()
   SetUniqueAppearance();
   map<string,GeometryManager::GeometryList>::iterator i=manager.cache.find(cacheKey);
   if(i==manager.cache.end()) {
-    LOG4CXX_INFO(KrisLibrary::logger(),"ManagedGeometry::RemoveFromCache(): warning, item "<<cacheKey.c_str());
+    LOG4CXX_INFO(KrisLibrary::logger(),"ManagedGeometry::RemoveFromCache(): warning, item "<<cacheKey);
     cacheKey.clear();
     return;
   }
   if(i->second.geoms.empty()) {
-    LOG4CXX_INFO(KrisLibrary::logger(),"ManagedGeometry::RemoveFromCache(): warning, item "<<cacheKey.c_str());
+    LOG4CXX_INFO(KrisLibrary::logger(),"ManagedGeometry::RemoveFromCache(): warning, item "<<cacheKey);
     cacheKey.clear();
     return;
   }
@@ -297,15 +299,45 @@ void ManagedGeometry::SetUnique()
 void ManagedGeometry::TransformGeometry(const Math3D::Matrix4& xform)
 {
   if(geometry) {
+    string newCacheKey;
 #if CACHE_DEBUG
-    if(!cacheKey.empty())
-      LOG4CXX_INFO(KrisLibrary::logger(),"ManagedGeometry: transforming geometry "<<cacheKey.c_str());
+    if(!cacheKey.empty()) {
+      LOG4CXX_INFO(KrisLibrary::logger(),"ManagedGeometry: transforming geometry "<<cacheKey);
+    }
 #endif
+    if(!cacheKey.empty()) {
+      stringstream ss;
+      ss<<cacheKey<<"[ transform "<<xform<<"]";
+      newCacheKey = ss.str();
+      ManagedGeometry* prev = ManagedGeometry::IsCached(newCacheKey);
+      if(prev) {
+        RemoveFromCache();
+        geometry = make_shared<Geometry::AnyCollisionGeometry3D>(*prev->geometry);
+        //geometry = prev->geometry;
+        appearance->geom = geometry.get();
+        cacheKey = newCacheKey;
+#if CACHE_DEBUG
+        LOG4CXX_INFO(KrisLibrary::logger(),"ManagedGeometry: transformed version of "<<cacheKey<<" was in cache.");
+#endif
+        manager.cache[newCacheKey].geoms.push_back(this);
+        OnGeometryChange();
+        return;
+      }
+      else {
+#if CACHE_DEBUG
+        LOG4CXX_INFO(KrisLibrary::logger(),"ManagedGeometry: couldn't find transformed version of "<<cacheKey);
+#endif        
+      }
+    }
     SetUnique();
+    RemoveFromCache();
     geometry->Transform(xform);
     geometry->ClearCollisionData();
     SetUniqueAppearance();
-    RemoveFromCache();
+    if(!newCacheKey.empty()) {
+      cacheKey = newCacheKey;
+      manager.cache[newCacheKey].geoms.push_back(this);
+    }
     OnGeometryChange();
   }
 }
@@ -371,6 +403,7 @@ void ManagedGeometry::DrawGL()
 {
   if(!geometry) return;
   Assert(appearance->geom != NULL);
+  Assert(appearance->geom == geometry.get());
   if(appearance->geom == NULL)
     appearance->Set(*geometry);
   appearance->DrawGL();

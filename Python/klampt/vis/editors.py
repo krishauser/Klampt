@@ -800,8 +800,9 @@ class WorldEditor(VisualEditorBase):
 
 #Qt stuff
 if glinit._PyQtAvailable:
-    from PyQt4.QtCore import *
-    from PyQt4.QtGui import *
+    from PyQt5.QtCore import *
+    from PyQt5.QtGui import *
+    from PyQt5.QtWidgets import *
     _vis_id = None
     _my_dialog_res = None
     _my_dialog_retval = None
@@ -870,8 +871,6 @@ if glinit._PyQtAvailable:
         def accept(self):
             global _my_dialog_res
             _my_dialog_res = True
-            print "Calling GLWidget.close"
-            self.glwidget.close()
             print "#########################################"
             print "klampt.vis: Dialog accept"
             print "#########################################"
@@ -879,8 +878,6 @@ if glinit._PyQtAvailable:
         def reject(self):
             global _my_dialog_res
             _my_dialog_res = False
-            print "Calling GLWidget.close"
-            self.glwidget.close()
             print "#########################################"
             print "klampt.vis: Dialog reject"
             print "#########################################"

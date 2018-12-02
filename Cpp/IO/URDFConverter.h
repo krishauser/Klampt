@@ -11,7 +11,6 @@
 #include <vector>
 #include <KrisLibrary/math3d/primitives.h>
 #include "Modeling/Robot.h"
-#include "PrimitiveShape.h"
 #include "urdf_link.h"
 using namespace std;
 using namespace Math3D;
@@ -33,6 +32,7 @@ public:
 	Vector3 axis;
 	bool geomPrimitive;
 	string geomName;
+	string geomData;   //Stores the primitive data if it's a primitive
 	Matrix4 geomScale;
 	urdf::Joint* joint;
 };
@@ -46,12 +46,9 @@ public:
 	static Math3D::Matrix3 convertInertial( urdf::Inertial& I);
 	static void QuatToRotationMat(const Vector4& aa, Matrix3& mat);
 	static void processTParentTransformations(vector<URDFLinkNode>& linkNodes);
-	static void ConvertWrltoTri(string filename);
 
 	//The location for package:// directives
 	static string packageRootPath;
-	//The location of primitive_mesh must be provided.
-	static string primitiveMeshPath;
 	//Set this to true if visualization geometry should be used
 	static bool useVisGeom;
 	//Set this to true if the geometry Y-Z plane should be flipped

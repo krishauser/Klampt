@@ -8,6 +8,8 @@
 #include <iostream>
 using namespace std;
 
+DECLARE_LOGGER(ODESimulator)
+
 //if a normal has this length then it is ignored
 const static Real gZeroNormalTolerance = 1e-4;
 
@@ -91,7 +93,7 @@ int VertexIndex(const Vector3& b)
 Vector3 VertexNormal(CollisionMesh& m,int tri,int vnum)
 {
   if(m.incidentTris.empty()) {
-    fprintf(stderr,"VertexNormal: mesh is not properly initialized with incidentTris array?\n");
+    LOG4CXX_WARN(GET_LOGGER(ODESimulator),"VertexNormal: mesh is not properly initialized with incidentTris array?");
     m.CalcIncidentTris();
     //return Vector3(0.0);
     //FatalError("VertexNormal: mesh is not properly initialized with incidentTris array?");
@@ -110,7 +112,7 @@ Vector3 VertexNormal(CollisionMesh& m,int tri,int vnum)
 Vector3 EdgeNormal(CollisionMesh& m,int tri,int e)
 {
   if(m.triNeighbors.empty()) {
-    fprintf(stderr,"EdgeNormal: Warning, mesh is not properly initialized with triNeighbors\n");
+    LOG4CXX_WARN(GET_LOGGER(ODESimulator),"EdgeNormal: Warning, mesh is not properly initialized with triNeighbors");
     m.CalcTriNeighbors();
     //return Vector3(0.0);
   }
@@ -140,25 +142,25 @@ Vector3 ContactNormal(CollisionMesh& m1,CollisionMesh& m2,const Vector3& p1,cons
     case 1:  //pt
       //get the triangle normals
       {
-	//printf("ODECustomMesh: Point-point contact\n");
-	Vector3 n1 = VertexNormal(m1,t1,VertexIndex(b1));
-	Vector3 n2 = VertexNormal(m2,t2,VertexIndex(b2));
-	n2 -= n1;
-	n2.inplaceNormalize();
-	return n2;
+        //printf("ODECustomMesh: Point-point contact\n");
+        Vector3 n1 = VertexNormal(m1,t1,VertexIndex(b1));
+        Vector3 n2 = VertexNormal(m2,t2,VertexIndex(b2));
+        n2 -= n1;
+        n2.inplaceNormalize();
+        return n2;
       }
       break;
     case 2:  //edge
       {
-	//printf("ODECustomMesh: Point-edge contact\n");
-	Vector3 n1 = VertexNormal(m1,t1,VertexIndex(b1));
-	int e = EdgeIndex(b2);
-	Segment3D s = tri2.edge(e);
-	Vector3 ev = m2.currentTransform.R*(s.b-s.a);
-	Vector3 n2 = EdgeNormal(m2,t2,e);
-	n2-=(n1-ev*ev.dot(n1)/ev.dot(ev)); //project onto normal
-	n2.inplaceNormalize();
-	return n2;
+        //printf("ODECustomMesh: Point-edge contact\n");
+        Vector3 n1 = VertexNormal(m1,t1,VertexIndex(b1));
+        int e = EdgeIndex(b2);
+        Segment3D s = tri2.edge(e);
+        Vector3 ev = m2.currentTransform.R*(s.b-s.a);
+        Vector3 n2 = EdgeNormal(m2,t2,e);
+        n2-=(n1-ev*ev.dot(n1)/ev.dot(ev)); //project onto normal
+        n2.inplaceNormalize();
+        return n2;
       }
       break;
     case 3:  //face
@@ -169,53 +171,53 @@ Vector3 ContactNormal(CollisionMesh& m1,CollisionMesh& m2,const Vector3& p1,cons
     switch(type2) {
     case 1:  //pt
       {
-	//printf("ODECustomMesh: Edge-point contact\n");
-	Vector3 n2 = VertexNormal(m2,t2,VertexIndex(b2));
-	int e = EdgeIndex(b1);
-	Segment3D s = tri1.edge(e);
-	Vector3 ev = m1.currentTransform.R*(s.b-s.a);
-	Vector3 n1 = EdgeNormal(m1,t1,e);
-	n2 = (n2-ev*ev.dot(n2)/ev.dot(ev))-n1; //project onto normal
-	n2.inplaceNormalize();
-	return n2;
+        //printf("ODECustomMesh: Edge-point contact\n");
+        Vector3 n2 = VertexNormal(m2,t2,VertexIndex(b2));
+        int e = EdgeIndex(b1);
+        Segment3D s = tri1.edge(e);
+        Vector3 ev = m1.currentTransform.R*(s.b-s.a);
+        Vector3 n1 = EdgeNormal(m1,t1,e);
+        n2 = (n2-ev*ev.dot(n2)/ev.dot(ev))-n1; //project onto normal
+        n2.inplaceNormalize();
+        return n2;
       }
       break;
     case 2:  //edge
       {
-	//printf("ODECustomMesh: Edge-edge contact\n");
-	int e = EdgeIndex(b1);
-	Segment3D s1 = tri1.edge(e);
-	Vector3 ev1 = m1.currentTransform.R*(s1.b-s1.a);
-	ev1.inplaceNormalize();
-	e = EdgeIndex(b2);
-	Segment3D s2 = tri2.edge(e);
-	Vector3 ev2 = m2.currentTransform.R*(s2.b-s2.a);
-	ev2.inplaceNormalize();
-	Vector3 n; 
-	n.setCross(ev1,ev2);
-	Real len = n.length();
-	if(len < gZeroNormalTolerance) {
-	  //hmm... edges are parallel?
-	}
-	n /= len;
-	//make sure the normal direction points into m1 and out of m2
-	if(n.dot(m1.currentTransform*s1.a) < n.dot(m2.currentTransform*s2.a))
-	  n.inplaceNegative();
-	/*
-	if(n.dot(m1.currentTransform.R*tri1.normal()) > 0.0) {
-	  if(n.dot(m2.currentTransform.R*tri2.normal()) > 0.0) {
-	    printf("ODECustomMesh: Warning, inconsistent normal direction? %g, %g\n",n.dot(m1.currentTransform.R*tri1.normal()),n.dot(m2.currentTransform.R*tri2.normal()));
-	  }
-	  n.inplaceNegative();
-	}
-	else {
-	  if(n.dot(m2.currentTransform.R*tri2.normal()) < 0.0) {
-	    printf("ODECustomMesh: Warning, inconsistent normal direction? %g, %g\n",n.dot(m1.currentTransform.R*tri1.normal()),n.dot(m2.currentTransform.R*tri2.normal()));
-	  }
-	}
-	*/
-	//cout<<"Edge vector 1 "<<ev1<<", vector 2" <<ev2<<", normal: "<<n<<endl;
-	return n;
+        //printf("ODECustomMesh: Edge-edge contact\n");
+        int e = EdgeIndex(b1);
+        Segment3D s1 = tri1.edge(e);
+        Vector3 ev1 = m1.currentTransform.R*(s1.b-s1.a);
+        ev1.inplaceNormalize();
+        e = EdgeIndex(b2);
+        Segment3D s2 = tri2.edge(e);
+        Vector3 ev2 = m2.currentTransform.R*(s2.b-s2.a);
+        ev2.inplaceNormalize();
+        Vector3 n; 
+        n.setCross(ev1,ev2);
+        Real len = n.length();
+        if(len < gZeroNormalTolerance) {
+          //hmm... edges are parallel?
+        }
+        n /= len;
+        //make sure the normal direction points into m1 and out of m2
+        if(n.dot(m1.currentTransform*s1.a) < n.dot(m2.currentTransform*s2.a))
+          n.inplaceNegative();
+        /*
+        if(n.dot(m1.currentTransform.R*tri1.normal()) > 0.0) {
+          if(n.dot(m2.currentTransform.R*tri2.normal()) > 0.0) {
+            printf("ODECustomMesh: Warning, inconsistent normal direction? %g, %g\n",n.dot(m1.currentTransform.R*tri1.normal()),n.dot(m2.currentTransform.R*tri2.normal()));
+          }
+          n.inplaceNegative();
+        }
+        else {
+          if(n.dot(m2.currentTransform.R*tri2.normal()) < 0.0) {
+            printf("ODECustomMesh: Warning, inconsistent normal direction? %g, %g\n",n.dot(m1.currentTransform.R*tri1.normal()),n.dot(m2.currentTransform.R*tri2.normal()));
+          }
+        }
+        */
+        //cout<<"Edge vector 1 "<<ev1<<", vector 2" <<ev2<<", normal: "<<n<<endl;
+        return n;
       }
       break;
     case 3:  //face
@@ -230,7 +232,7 @@ Vector3 ContactNormal(CollisionMesh& m1,CollisionMesh& m2,const Vector3& p1,cons
   }
   static int warnedCount = 0;
   if(warnedCount % 10000 == 0) 
-    printf("ODECustomMesh: Warning, degenerate triangle, types %d %d\n",type1,type2);
+    LOG4CXX_WARN(GET_LOGGER(ODESimulator),"ODECustomMesh: Warning, degenerate triangle, types "<<type1<<" "<<type2);
   warnedCount++;
   //AssertNotReached();
   return Vector3(Zero);
@@ -266,7 +268,7 @@ Vector3 ContactNormal(CollisionMesh& m,const Vector3& p,int t,const Vector3& clo
   }
   static int warnedCount = 0;
   if(warnedCount % 10000 == 0) 
-    printf("ODECustomMesh: Warning, degenerate triangle, types %d\n",type);
+    LOG4CXX_WARN(GET_LOGGER(ODESimulator),"ODECustomMesh: Warning, degenerate triangle, types "<<type);
   warnedCount++;
   //AssertNotReached();
   return Vector3(Zero);
@@ -291,24 +293,6 @@ int MeshMeshCollide(CollisionMesh& m1,Real outerMargin1,CollisionMesh& m2,Real o
   RigidTransform T12; T12.mulInverseA(T2,T1);
   Real tol = outerMargin1+outerMargin2;
   Real tol2 = Sqr(tol);
-
-  printf("%d Collision pairs between mesh of size %d and %d\n",t1.size(),m1.tris.size(),m2.tris.size());
-  if (m2.tris.size()==970) {
-    cout<<"Point "<<cp1[0]<<" vs "<<endl;
-    cout<<"Point "<<cp2[0]<<" on triangle "<<t2[0]<<endl;
-    Triangle3D tri2;
-    m2.GetTriangle(t2[0],tri2);
-    cout<<"Triangle "<<tri2.a<<", "<<tri2.b<<", "<<tri2.c<<endl;
-    cout<<"World point 1 "<<T1*cp1[0]<<endl;
-    cout<<"World point 2 "<<T2*cp2[0]<<endl;
-    cout<<"Transform 2 "<<T2<<endl;
-    Meshing::TriMesh mtest1 = m1;
-    mtest1.Transform(T1);
-    Export("test_mesh1.off",mtest1);
-    Meshing::TriMesh mtest2 = m2;
-    mtest2.Transform(T2);
-    Export("test_mesh2.off",mtest2);
-  }
 
   size_t imax=t1.size();
   Triangle3D tri1,tri2,tri1loc,tri2loc;
@@ -346,55 +330,55 @@ int MeshMeshCollide(CollisionMesh& m1,Real outerMargin1,CollisionMesh& m2,Real o
       if(usecpc2 && cpc2.isEqual(cp2[i],cptol)) usecpc2=false;
       
       if(usecpa) {
-	if(usecpb && cpb.isEqual(cpa,cptol)) usecpb=false;
-	if(usecpc && cpc.isEqual(cpa,cptol)) usecpc=false;
+        if(usecpb && cpb.isEqual(cpa,cptol)) usecpb=false;
+        if(usecpc && cpc.isEqual(cpa,cptol)) usecpc=false;
       }
       if(usecpb) {
-	if(usecpc && cpc.isEqual(cpb,cptol)) usecpc=false;
+        if(usecpc && cpc.isEqual(cpb,cptol)) usecpc=false;
       }
       if(usecpa2) {
-	if(usecpb2 && cpb2.isEqual(cpa2,cptol)) usecpb2=false;
-	if(usecpc2 && cpc2.isEqual(cpa2,cptol)) usecpc2=false;
+        if(usecpb2 && cpb2.isEqual(cpa2,cptol)) usecpb2=false;
+        if(usecpc2 && cpc2.isEqual(cpa2,cptol)) usecpc2=false;
       }
       if(usecpb) {
-	if(usecpc2 && cpc.isEqual(cpb2,cptol)) usecpc2=false;
+        if(usecpc2 && cpc.isEqual(cpb2,cptol)) usecpc2=false;
       }
       
       if(usecpa) {
-	t1.push_back(t1[i]);
-	t2.push_back(t2[i]);
-	cp1.push_back(cpa);
-	cp2.push_back(tri2.a);
+        t1.push_back(t1[i]);
+        t2.push_back(t2[i]);
+        cp1.push_back(cpa);
+        cp2.push_back(tri2.a);
       }
       if(usecpb) {
-	t1.push_back(t1[i]);
-	t2.push_back(t2[i]);
-	cp1.push_back(cpb);
-	cp2.push_back(tri2.b);
+        t1.push_back(t1[i]);
+        t2.push_back(t2[i]);
+        cp1.push_back(cpb);
+        cp2.push_back(tri2.b);
       }
       if(usecpc) {
-	t1.push_back(t1[i]);
-	t2.push_back(t2[i]);
-	cp1.push_back(cpc);
-	cp2.push_back(tri2.c);
+        t1.push_back(t1[i]);
+        t2.push_back(t2[i]);
+        cp1.push_back(cpc);
+        cp2.push_back(tri2.c);
       }
       if(usecpa2) {
-	t1.push_back(t1[i]);
-	t2.push_back(t2[i]);
-	cp1.push_back(tri1.a);
-	cp2.push_back(cpa2);
+        t1.push_back(t1[i]);
+        t2.push_back(t2[i]);
+        cp1.push_back(tri1.a);
+        cp2.push_back(cpa2);
       }
       if(usecpb2) {
-	t1.push_back(t1[i]);
-	t2.push_back(t2[i]);
-	cp1.push_back(tri1.b);
-	cp2.push_back(cpb2);
+        t1.push_back(t1[i]);
+        t2.push_back(t2[i]);
+        cp1.push_back(tri1.b);
+        cp2.push_back(cpb2);
       }
       if(usecpc2) {
-	t1.push_back(t1[i]);
-	t2.push_back(t2[i]);
-	cp1.push_back(tri1.c);
-	cp2.push_back(cpc2);
+        t1.push_back(t1[i]);
+        t2.push_back(t2[i]);
+        cp1.push_back(tri1.c);
+        cp2.push_back(cpc2);
       }
     }
     /*
@@ -429,7 +413,7 @@ int MeshMeshCollide(CollisionMesh& m1,Real outerMargin1,CollisionMesh& m2,Real o
     if(collides) { 
       gCustomGeometryMeshesIntersect = true;
       if(warnedCount % 1000 == 0) {
-	printf("ODECustomMesh: Triangles penetrate margin %g+%g: can't trust contact detector\n",outerMargin1,outerMargin2);
+        LOG4CXX_WARN(GET_LOGGER(ODESimulator),"ODECustomMesh: Triangles penetrate margin "<<outerMargin1<<"+"<<outerMargin2<<": can't trust contact detector");
       }
       /*
       cout<<"Triangle 1"<<endl;
@@ -454,7 +438,7 @@ int MeshMeshCollide(CollisionMesh& m1,Real outerMargin1,CollisionMesh& m2,Real o
     }
   }
   if(t1.size() != imax) {
-    printf("ODECustomMesh: %d candidate points were removed due to mesh collision\n",t1.size()-imax);
+    LOG4CXX_WARN(GET_LOGGER(ODESimulator),"ODECustomMesh: "<<t1.size()-imax<<" candidate points were removed due to mesh collision");
     t1.resize(imax);
     t2.resize(imax);
     cp1.resize(imax);
@@ -503,7 +487,7 @@ int MeshMeshCollide(CollisionMesh& m1,Real outerMargin1,CollisionMesh& m2,Real o
 
 //defined in KrisLibrary/geometry/AnyGeometry.cpp
 bool Collides(const CollisionPointCloud& a,Real margin,const CollisionMesh& b,
-	      vector<int>& elements1,vector<int>& elements2,size_t maxContacts);
+              vector<int>& elements1,vector<int>& elements2,size_t maxContacts);
 
 
 int MeshPointCloudCollide(CollisionMesh& m1,Real outerMargin1,CollisionPointCloud& pc2,Real outerMargin2,dContactGeom* contact,int maxcontacts)
@@ -570,12 +554,12 @@ int MeshPointCloudCollide(CollisionMesh& m1,Real outerMargin1,CollisionPointClou
       Vector3 n = cp - pw;
       Real d = n.length();
       if(d < gNormalFromGeometryTolerance) {  //compute normal from the geometry
-	Vector3 plocal;
-	m1.currentTransform.mulInverse(cp,plocal);
-	n = ContactNormal(m1,plocal,tris[j],pw);
+        Vector3 plocal;
+        m1.currentTransform.mulInverse(cp,plocal);
+        n = ContactNormal(m1,plocal,tris[j],pw);
       }
       else if(d > tol) {  //some penetration -- we can't trust the result of PQP
-	continue;
+        continue;
       }
       else n /= d;
       //migrate the contact point to the center of the overlap region
@@ -654,7 +638,7 @@ int MeshPrimitiveCollide(CollisionMesh& m1,Real outerMargin1,GeometricPrimitive3
     return MeshSphereCollide(m1,outerMargin1,s,outerMargin2,contact,maxcontacts);
   }
   else {
-    fprintf(stderr,"Distance computations between Triangles and %s not supported\n",gworld.TypeName());
+    LOG4CXX_WARN(GET_LOGGER(ODESimulator),"Distance computations between Triangles and "<<gworld.TypeName()<<" not supported");
     return 0;
   }
 }
@@ -663,7 +647,7 @@ int PointCloudPrimitiveCollide(CollisionPointCloud& pc1,Real outerMargin1,Geomet
 {
   if(g2.type == GeometricPrimitive3D::Empty) return 0;
   if(!g2.SupportsDistance(GeometricPrimitive3D::Point)) {
-    printf("Cannot do contact checking on point cloud vs primitive %s yet\n",g2.TypeName());
+    LOG4CXX_WARN(GET_LOGGER(ODESimulator),"Cannot do contact checking on point cloud vs primitive "<<g2.TypeName()<<" yet");
     return 0;
   }
 
@@ -682,10 +666,10 @@ int PointCloudPrimitiveCollide(CollisionPointCloud& pc1,Real outerMargin1,Geomet
       Vector3 n = pw - cp;
       Real d = n.length();
       if(d < gNormalFromGeometryTolerance) {  //too close?
-	continue;
+        continue;
       }
       else if(d > tol) {  //some penetration -- we can't trust the result of PQP
-	continue;
+        continue;
       }
       else n /= d;
       //migrate the contact point to the center of the overlap region
@@ -703,7 +687,7 @@ int PrimitivePrimitiveCollide(GeometricPrimitive3D& g1,const RigidTransform& T1,
 {
   if(maxcontacts==0) return 0;
   if(!g1.SupportsDistance(g2.type)) {
-    fprintf(stderr,"TODO: primitive collisions of type %s to %s\n",g1.TypeName(),g2.TypeName());
+    LOG4CXX_WARN(GET_LOGGER(ODESimulator),"TODO: primitive collisions of type "<<g1.TypeName()<<" to "<<g2.TypeName());
     return 0;
   }
   if((g1.type != GeometricPrimitive3D::Point && g1.type != GeometricPrimitive3D::Point) && (g2.type == GeometricPrimitive3D::Point || g2.type == GeometricPrimitive3D::Point)) {
@@ -718,7 +702,7 @@ int PrimitivePrimitiveCollide(GeometricPrimitive3D& g1,const RigidTransform& T1,
   tg2.Transform(T2);
   if(g1.type != GeometricPrimitive3D::Point && g1.type != GeometricPrimitive3D::Sphere) {
     //TODO: try copying into ODE data structures?
-    fprintf(stderr,"Contact computations between primitives %s and %s not yet supported\n",g1.TypeName(),g2.TypeName());
+    LOG4CXX_WARN(GET_LOGGER(ODESimulator),"Contact computations between primitives "<<g1.TypeName()<<" and "<<g2.TypeName()<<" not yet supported");
     return 0;
   }
   else {
@@ -778,20 +762,20 @@ int PrimitiveGeometryCollide(GeometricPrimitive3D& g1,const RigidTransform& T, R
     break;
   case AnyGeometry3D::TriangleMesh:
     return PrimitiveMeshCollide(g1,T,outerMargin1,
-				g2.TriangleMeshCollisionData(),g2.margin+outerMargin2,contact,m);
+                                g2.TriangleMeshCollisionData(),g2.margin+outerMargin2,contact,m);
   case AnyGeometry3D::PointCloud:
     return PrimitivePointCloudCollide(g1,T,outerMargin1,
-				      g2.PointCloudCollisionData(),g2.margin+outerMargin2,contact,m);
+                                      g2.PointCloudCollisionData(),g2.margin+outerMargin2,contact,m);
   case AnyGeometry3D::ImplicitSurface:
-    fprintf(stderr,"TODO: primitive-implicit surface collisions\n");
+    LOG4CXX_WARN(GET_LOGGER(ODESimulator),"TODO: primitive-implicit surface collisions");
     break;
   case AnyGeometry3D::Group:
     {
       vector<Geometry::AnyCollisionGeometry3D>& items = g2.GroupCollisionData();
       int n=0;
       for(size_t i=0;i<items.size();i++) {
-	n += PrimitiveGeometryCollide(g1,T,outerMargin1,items[i],g2.margin+outerMargin2,contact+n,m-n);
-	if(n >= m) return n;
+        n += PrimitiveGeometryCollide(g1,T,outerMargin1,items[i],g2.margin+outerMargin2,contact+n,m-n);
+        if(n >= m) return n;
       }
       return n;
     }
@@ -805,16 +789,16 @@ int MeshGeometryCollide(CollisionMesh& m1,Real outerMargin1,Geometry::AnyCollisi
   switch(g2.type) {
   case AnyGeometry3D::Primitive:
     return MeshPrimitiveCollide(m1,outerMargin1,
-				g2.AsPrimitive(),g2.PrimitiveCollisionData(),g2.margin+outerMargin2,
-				contact,m);
+                                g2.AsPrimitive(),g2.PrimitiveCollisionData(),g2.margin+outerMargin2,
+                                contact,m);
   case AnyGeometry3D::TriangleMesh:
     return MeshMeshCollide(m1,outerMargin1,
-			   g2.TriangleMeshCollisionData(),g2.margin+outerMargin2,
-			   contact,m);
+                           g2.TriangleMeshCollisionData(),g2.margin+outerMargin2,
+                           contact,m);
   case AnyGeometry3D::PointCloud:
     return MeshPointCloudCollide(m1,outerMargin1,
-				 g2.PointCloudCollisionData(),g2.margin+outerMargin2,
-				 contact,m);
+                                 g2.PointCloudCollisionData(),g2.margin+outerMargin2,
+                                 contact,m);
     break;
   case AnyGeometry3D::ImplicitSurface:
     fprintf(stderr,"TODO: triangle mesh-implicit surface collisions\n");
@@ -824,8 +808,8 @@ int MeshGeometryCollide(CollisionMesh& m1,Real outerMargin1,Geometry::AnyCollisi
       vector<Geometry::AnyCollisionGeometry3D>& items = g2.GroupCollisionData();
       int n=0;
       for(size_t i=0;i<items.size();i++) {
-	n += MeshGeometryCollide(m1,outerMargin1,items[i],g2.margin+outerMargin2,contact+n,m-n);
-	if(n >= m) return n;
+        n += MeshGeometryCollide(m1,outerMargin1,items[i],g2.margin+outerMargin2,contact+n,m-n);
+        if(n >= m) return n;
       }
       return n;
     }
@@ -836,8 +820,8 @@ int MeshGeometryCollide(CollisionMesh& m1,Real outerMargin1,Geometry::AnyCollisi
 
 //m is max number of contacts
 int GeometryGeometryCollide(Geometry::AnyCollisionGeometry3D& g1,Real outerMargin1,
-			    Geometry::AnyCollisionGeometry3D& g2,Real outerMargin2,
-			    dContactGeom* contact,int m)
+                            Geometry::AnyCollisionGeometry3D& g2,Real outerMargin2,
+                            dContactGeom* contact,int m)
 {
   g1.InitCollisionData();
   g2.InitCollisionData();
@@ -853,8 +837,8 @@ int GeometryGeometryCollide(Geometry::AnyCollisionGeometry3D& g1,Real outerMargi
       break;
     case AnyGeometry3D::TriangleMesh:
       return PointCloudMeshCollide(*AnyCast<CollisionPointCloud>(&g1.collisionData),g1.margin+outerMargin1,
-				   *AnyCast<CollisionMesh>(&g2.collisionData),g2.margin+outerMargin2,
-				   contact,m);
+                                   *AnyCast<CollisionMesh>(&g2.collisionData),g2.margin+outerMargin2,
+                                   contact,m);
       break;
     case AnyGeometry3D::PointCloud:
       fprintf(stderr,"TODO: point cloud-point cloud collisions\n");
@@ -891,8 +875,8 @@ int GeometryGeometryCollide(Geometry::AnyCollisionGeometry3D& g1,Real outerMargi
       vector<Geometry::AnyCollisionGeometry3D>& items = g1.GroupCollisionData();
       int n=0;
       for(size_t i=0;i<items.size();i++) {
-	n += GeometryGeometryCollide(items[i],g1.margin+outerMargin1,g2,outerMargin2,contact+n,m-n);
-	if(n >= m) return n;
+        n += GeometryGeometryCollide(items[i],g1.margin+outerMargin1,g2,outerMargin2,contact+n,m-n);
+        if(n >= m) return n;
       }
       return n;
     }
@@ -902,7 +886,7 @@ int GeometryGeometryCollide(Geometry::AnyCollisionGeometry3D& g1,Real outerMargi
 }
 
 int dCustomGeometryCollide (dGeomID o1, dGeomID o2, int flags,
-			   dContactGeom *contact, int skip)
+                           dContactGeom *contact, int skip)
 {
   int m = (flags&0xffff);
   if(m == 0) m=1;
