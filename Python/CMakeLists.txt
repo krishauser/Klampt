@@ -42,6 +42,8 @@ IF(PYTHON)
   add_custom_command(
     OUTPUT python3_version
     COMMAND 2to3 --output-dir=python3_version/klampt -W -n klampt
+    COMMAND 2to3 --output-dir=python3_version/utils -W -n utils
+    COMMAND 2to3 --output-dir=python3_version/demos -W -n demos
   )
   add_custom_command(
     OUTPUT ${OUTPUT}/python3_timestamp
