@@ -43,8 +43,8 @@ bool  MainWindow::Initialize(int argc,const char** argv)
 
 MainWindow::~MainWindow()
 {
-  backend->Stop();
-  delete ui;
+  if(backend) backend->Stop();
+  if(ui) delete ui;
 }
 
 //gui stuff
