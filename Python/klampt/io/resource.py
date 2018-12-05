@@ -272,7 +272,7 @@ class FileGetter:
         self.filetypes = []
         self.result = None
     def getOpen(self):
-        from PyQt5.QtGui import QFileDialog
+        from PyQt5.QtWidgets import QFileDialog
         patterns = ""
         if len(self.filetypes) == 0:
             patterns = "All files (*.*)"
@@ -285,8 +285,11 @@ class FileGetter:
             #print patternlist
             patterns = ";;".join(patternlist)
         self.result = QFileDialog.getOpenFileName(None, self.title, self.directory, patterns)
+        print "Result from open dialog",self.result
+        if isinstance(self.result,tuple):
+            self.result = self.result[0]
     def getSave(self):
-        from PyQt5.QtGui import QFileDialog
+        from PyQt5.QtWidgets import QFileDialog
         patterns = ""
         if len(self.filetypes) == 0:
             patterns = "All files (*.*)"
@@ -299,6 +302,9 @@ class FileGetter:
             #print "Pattern list:",patternlist
             patterns = ";;".join(patternlist)
         self.result = QFileDialog.getSaveFileName(None, self.title, self.directory, patterns)
+        print "Result from save dialog",self.result
+        if isinstance(self.result,tuple):
+            self.result = self.result[0]
 
 def load(type=None,directory=None):
     """Asks the user to open a resource file of a given type.  If type is not given, all resource file types

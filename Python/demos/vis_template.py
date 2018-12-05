@@ -12,6 +12,14 @@ from klampt.vis import GLSimulationPlugin
 import time
 import math
 
+#set this to True to test multi-threaded visualization
+MULTITHREADED = False
+#set this to True to demonstrate the code for manually animating a path
+MANUAL_ANIMATION = False
+#set this to True to demonstrate the code for manually setting up editing widgets in a GLPluginInterface
+MANUAL_EDITING = False
+
+
 def basic_template(world):
     """Shows how to pop up a visualization window with a world"""
     #add the world to the visualizer
@@ -39,15 +47,23 @@ def basic_template(world):
     vis.setColor("box",0,0,1,0.5)
 
     vis.setWindowTitle("Basic visualization test")
-    vis.show()
-    while vis.shown():
-        vis.lock()
-        #TODO: you may modify the world here.  Do not modify the internal state of any
-        #visualization items outside of the lock
-        vis.unlock()
-        #outside of the lock you can use any vis.X functions, including vis.setItemConfig()
-        #to modify the state of objects
-        time.sleep(0.01)
+    if not MULTITHREADED:
+        #single-threaded code
+        def callback():
+            #TODO: you may modify the world here.      
+            pass
+        vis.loop(setup=vis.show, callback=callback)   
+    else:
+        #multithreaded code
+        vis.show()
+        while vis.shown():
+            vis.lock()
+            #TODO: you may modify the world here.  Do not modify the internal state of any
+            #visualization items outside of the lock
+            vis.unlock()
+            #outside of the lock you can use any vis.X functions, including vis.setItemConfig()
+            #to modify the state of objects
+            time.sleep(0.01)
     #quit the visualization thread nicely
     vis.kill()
 
@@ -66,12 +82,15 @@ def edit_template(world):
     vis.listItems(indent=2)
 
     vis.setWindowTitle("Visualization editing test")
-    vis.show()
-    while vis.shown():
-        vis.lock()
-        #TODO: you may modify the world here.
-        vis.unlock()
-        time.sleep(0.01)
+    if not MULTITHREADED:
+        vis.loop(setup=vis.show)
+    else:
+        vis.show()
+        while vis.shown():
+            vis.lock()
+            #TODO: you may modify the world here.
+            vis.unlock()
+            time.sleep(0.01)
     print "Resulting configuration",vis.getItemConfig(robotPath)
     print "Resulting transform (config)",vis.getItemConfig("transform")  # this is a vector describing the item parameters
     xform = list(xform)  #convert se3 element from tuple to list
@@ -101,21 +120,31 @@ def animation_template(world):
     vis.add("robot trajectory",traj)
     vis.setAttribute("robot trajectory","endeffectors",[13,20])
 
-    manual_animation = False
-    if not manual_animation:
+    vis.setWindowTitle("Animation test")
+    MANUAL_ANIMATION = False
+    if not MANUAL_ANIMATION:
         #automatic animation, just call vis.animate
         vis.animate(robotPath,traj)
-    vis.setWindowTitle("Animation test")
-    vis.show()
-    while vis.shown():
-        vis.lock()
-        if manual_animation:
-            #with manual animation, you just set the robot's configuration based on the current time.
-            t = vis.animationTime()
-            q = traj.eval(t,endBehavior='loop')
-            robot.setConfig(q)
-        vis.unlock()
-        time.sleep(0.01)
+    if not MULTITHREADED:
+        def callback():
+            if MANUAL_ANIMATION:
+                #with manual animation, you just set the robot's configuration based on the current time.
+                t = vis.animationTime()
+                q = traj.eval(t,endBehavior='loop')
+                robot.setConfig(q)
+            pass    
+        vis.loop(callback=callback,setup=vis.show)
+    else:
+        vis.show()
+        while vis.shown():
+            vis.lock()
+            if MANUAL_ANIMATION:
+                #with manual animation, you just set the robot's configuration based on the current time.
+                t = vis.animationTime()
+                q = traj.eval(t,endBehavior='loop')
+                robot.setConfig(q)
+            vis.unlock()
+            time.sleep(0.01)
     #quit the visualization thread nicely
     vis.kill()
 
@@ -127,26 +156,35 @@ def coordinates_template(world):
     #add the coordinate Manager to the visualizer
     vis.add("coordinates",coordinates.manager())
 
-    manual_editing = False
-    if manual_editing:
+    vis.setWindowTitle("Coordinates visualiation test")
+    if MANUAL_EDITING:
         #manually adds a poser, and adds a callback whenever the widget changes
         widgets = GLWidgetPlugin()
         widgets.addWidget(RobotPoser(world.robot(0)))
         #update the coordinates every time the widget changes
         widgets.widgetchangefunc = (lambda self:coordinates.updateFromWorld())
         vis.pushPlugin(widgets)
+        if not MULTITHREADED:
+            vis.loop(callback=None,setup=vis.show)
+        else:
+            vis.show()
+            while vis.shown():
+                time.sleep(0.01)
     else:
         vis.edit(("world",world.robot(0).getName()))
+        if not MULTITHREADED:
+            def callback():
+                coordinates.updateFromWorld()
+            vis.loop(callback=callback,setup=vis.show)
+        else:
+            vis.show()
+            while vis.shown():
+                vis.lock()
+                #reads the coordinates from the world
+                coordinates.updateFromWorld()
+                vis.unlock()
+                time.sleep(0.01)
 
-    vis.setWindowTitle("Coordinates visualiation test")
-    vis.show()
-    while vis.shown():
-        vis.lock()
-        if not manual_editing:
-            #reads the coordinates from the world
-            coordinates.updateFromWorld()
-        vis.unlock()
-        time.sleep(0.01)
     #quit the visualization thread nicely
     vis.kill()
 
@@ -161,6 +199,8 @@ def viewport_template(world):
     #this auto-sizes the camera
     vis.autoFitCamera()
     vis.setWindowTitle("Viewport modification test")
+    vis.spin(float('inf'))
+    vis.kill()
 
 def multiwindow_template(world):
     """Tests multiple windows and views."""
@@ -174,9 +214,7 @@ def multiwindow_template(world):
 
     #Now testing ability to re-launch windows
     vis.setWindowTitle("Shown again.  Close me to proceed.")
-    vis.show()
-    while vis.shown():
-        time.sleep(0.01)
+    vis.spin(float('inf'))
 
     vis.setWindowTitle("Dialog test. Close me to proceed.")
     vp = vis.getViewport()
@@ -191,9 +229,7 @@ def multiwindow_template(world):
         widgets.addWidget(RobotPoser(world.robot(0)))
         vis.addPlugin(widgets)
     vis.setWindowTitle("Split screen test")
-    vis.show()
-    while vis.shown():
-        time.sleep(0.1)
+    vis.spin(float('inf'))
     
     vis.setPlugin(None)
     vis.setWindowTitle("Back to normal. Close me to quit.")
@@ -248,9 +284,8 @@ def modification_template(world):
 
     #run the visualizer, which runs in a separate thread
     vis.setWindowTitle("Manual animation visualization test")
-    vis.show()
     iteration = 0
-    while vis.shown():
+    def change_callback():
         vis.lock()
         #TODO: you may modify the world here.  This line tests a sin wave.
         pt[2] = 1 + math.sin(iteration*0.03)
@@ -265,7 +300,7 @@ def modification_template(world):
                 vis.hide("some blinking transform",False)
                 vis.addText("text4","The transform was shown")
                 vis.logPlotEvent('plot','show')
-        #this is another way of changing the point's data
+        #this is another way of changing the point's data without needing a lock/unlock
         #vis.add("some point",[2,5,1 + math.sin(iteration*0.03)],keepAppearance=True)
         #or
         #vis.setItemConfig("some point",[2,5,1 + math.sin(iteration*0.03)])
@@ -278,9 +313,15 @@ def modification_template(world):
         if iteration == 500:
             vis.addText("text2","Text added back again")
             vis.setColor("text2",1,0,0)
-
-        time.sleep(0.01)
         iteration += 1
+
+    if not MULTITHREADED:
+        vis.loop(callback=change_callback,setup=vis.show)
+    else:
+        vis.show()
+        while vis.shown():
+            change_callback()
+            time.sleep(0.01)
     
     #use this to remove a plot
     vis.remove("plot")
@@ -350,18 +391,23 @@ def plugin_template(world):
     vis.add("world",world)
     vis.setWindowTitle("GLPluginInterface template")
     #run the visualizer 
-    vis.show()
-    #if plugin.quit is True
-    while vis.shown() and not plugin.quit:
-        vis.lock()
-        #TODO: you may modify the world here
-        vis.unlock()
-        #changes to the visualization must be done outside the lock
-        time.sleep(0.01)
-    if plugin.quit:
-        #if you want to do other stuff after the window quits, the window needs to be hidden 
-        vis.show(False)
-        pass
+    if not MULTITHREADED:
+        def callback():
+            if plugin.quit:
+                vis.show(False)
+        vis.loop(callback=callback,setup=vis.show)
+    else:
+        #if plugin.quit is True
+        vis.show()
+        while vis.shown() and not plugin.quit:
+            vis.lock()
+            #TODO: you may modify the world here
+            vis.unlock()
+            #changes to the visualization must be done outside the lock
+            time.sleep(0.01)
+        if plugin.quit:
+            #if you want to do other stuff after the window quits, the window needs to be hidden 
+            vis.show(False)
     print "Waiting for 2 s..."
     time.sleep(2.0)
     #quit the visualization thread nicely
@@ -500,8 +546,6 @@ def qt_template(world):
         g_mainwindow = MyQtMainWindow(gl_backend)
         return g_mainwindow
     vis.customUI(makefunc)
-    vis.show()
-    #you can d
     vis.add("world",world)
     vis.setWindowTitle("Klamp't Qt test")
     vis.spin(float('inf'))
@@ -512,7 +556,7 @@ def qt_template(world):
 
 if __name__ == "__main__":
     print """================================================================================
-    vis)template.py: Demonstrates examples about how to run the visualization framework.
+    vis_template.py: Demonstrates examples about how to run the visualization framework.
     """
     if len(sys.argv)<=1:
         print "USAGE: vis_template.py [world_file]"

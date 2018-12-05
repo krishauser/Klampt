@@ -4,6 +4,8 @@ from klampt.model.trajectory import *
 from klampt import *
 import sys
 
+MULTITHREADED = False
+
 def config_edit_template(world):
     """Shows how to edit Config, Configs, and Trajectory resources"""
     config1 = resource.get("resourcetest1.config",description="First config, always edited",doedit=True,editor='visual',world=world)
@@ -26,9 +28,11 @@ def config_edit_template(world):
     if config3 != None: configs.append(config3)
     print "Configs resource:",configs
     configs = resource.get("resourcetest.configs",default=configs,description="Editing config sequence",doedit=True,editor='visual',world=world)
-
-    traj = RobotTrajectory(world.robot(0),range(len(configs)),configs)
-    traj = resource.edit(name="Timed trajectory",value=traj,description="Editing trajectory",world=world)
+    if configs is None:
+        print "To edit the trajectory, press OK next time"
+    else:
+        traj = RobotTrajectory(world.robot(0),range(len(configs)),configs)
+        traj = resource.edit(name="Timed trajectory",value=traj,description="Editing trajectory",world=world)
 
 def xform_edit_template(world):
     """Testing the transform editor."""
@@ -71,27 +75,31 @@ def vis_interaction_test(world):
     config = resource.get("resourcetest1.config",description="Should show up without a hitch...",doedit=True,editor='visual',world=world)
 
     import time
-    print "Showing threaded visualization"
-    visualization.show()
-    for i in range(3):
-        visualization.lock()
-        q = world.robot(0).getConfig()
-        q[9] = 3.0
-        world.robot(0).setConfig(q)
-        visualization.unlock()
-        time.sleep(1.0)
-        if not visualization.shown():
-            break
-        visualization.lock()
-        q = world.robot(0).getConfig()
-        q[9] = -1.0
-        world.robot(0).setConfig(q)
-        visualization.unlock()
-        time.sleep(1.0)
-        if not visualization.shown():
-            break
-    print "Hiding visualization window"
-    visualization.show(False)
+    if MULTITHREADED:
+        print "Showing threaded visualization (this will fail on GLUT or Mac OS)"
+        visualization.show()
+        for i in range(3):
+            visualization.lock()
+            q = world.robot(0).getConfig()
+            q[9] = 3.0
+            world.robot(0).setConfig(q)
+            visualization.unlock()
+            time.sleep(1.0)
+            if not visualization.shown():
+                break
+            visualization.lock()
+            q = world.robot(0).getConfig()
+            q[9] = -1.0
+            world.robot(0).setConfig(q)
+            visualization.unlock()
+            time.sleep(1.0)
+            if not visualization.shown():
+                break
+        print "Hiding visualization window"
+        visualization.show(False)
+    else:
+        print "Showing single-threaded visualization for 5s"
+        visualization.spin(5.0)
 
     config = resource.get("resourcetest1.config",description="Should show up without a hitch...",doedit=True,editor='visual',world=world)
     

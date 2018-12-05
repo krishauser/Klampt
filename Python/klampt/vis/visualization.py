@@ -19,24 +19,41 @@ Main features include:
 The resource editing functionality in the klampt.io.resource module (based on 
 klampt.vis.editors) use this module as well.
 
-Due to weird OpenGL and Qt behavior in multi-threaded programs, you should
-only run visualizations using the methods in this module.
+There are two primary modes of running the visualization: multi-threaded and single-threaded.
+- Multi-threaded mode pops up a window using show(), and the caller can then continue to interact
+  with the vis module.
+  IMPORTANT: multi-threaded mode is only supported on some systems (Linux, Windows using Qt).
+  Due to weird OpenGL and Qt behavior in multi-threaded programs, if you are using multithreaded mode,
+  you should only interact with OpenGL and the visualization using the methods in this module.
+- Single-threaded mode blocks the calling thread using loop().  To interact with the scene, the caller
+  will provide callbacks that can modify the visualization world, pop up windows etc.
+  Single-threaded mode is the most compatible, and is the only mode that works with GLUT and Mac OS.
+There are also some convenience functions that will work in both modes, such as run(), spin(), and
+dialog().
 
-There are two primary ways of setting up a visualization:
-  - The first is by adding items to the visualization world and customizing them
-    using the vis.X routines that mirror the methods in VisualizationPlugin (like
-    add, setColor, animate, etc).  See Python/demos/vistemplate.py for more information.
-  - The second is by creating a subclass of GLPluginInterface and doing
-    all the necessary drawing / interaction yourself inside its hooks.  In the
-    latter case, you will call vis.setPlugin(plugin) to override the default
-    visualization behavior before creating your window. See Python/demos/visplugin.py
-    for more information.
+The biggest drawback of single-threaded operation is that you can only start blocking dialogs at the outer-
+most level, not inside loop().  So if you have a GUI that's running in real-time, in a multi-threaded
+visualization your code can pop up a dialog (like an editor) and the continue running with the returned
+value.  There are some workarounds in single-thread mode (providing a callback to the dialog function)
+but these are not nearly as convenient. 
 
-A third way of setting up a visualization is a hybrid of the two, where you can
-add functionality on top of default the visualization world. You can either use
-vis.pushPlugin(plugin) in which case your plugin adds additional functionality,
-or you can subclass the vis.VisualizationPlugin class, and selectively augment /
-override the default functionality.
+It is possible to start in single-threaded mode and convert to multi-threaded, but the converse is not
+possible.
+
+To set up and modify the visualization scene, there are three primary ways to do so:
+  - Default scene manager.  You can use the scene manager to add items to the visualization world and
+    then customize them using the vis.X routines in this module (like
+    add, setColor, animate, etc).  See Python/demos/vistemplate.py for more information.  
+    These just mirror the methods in VisualizationPlugin, which is how the default scene manager is
+    implemented.
+  - Custom GLPluginInterface.  The user creates a subclass of GLPluginInterface and performs
+    all the necessary OpenGL drawing / interaction inside its hooks.  In this case, you will call
+    vis.setPlugin(plugin) to override the default visualization behavior before creating your
+    window. See Python/demos/visplugin.py for more information.
+  - Hybrid visualization.  A GLPluginInterface subclass is created to add functionality on top of
+    default the visualization world.  To augment the default scene manager, call vis.pushPlugin(plugin).
+    Another option for hybrid visualization is to  subclass the vis.VisualizationPlugin class, and
+    selectively augment / override the default functionality.
 
 Instructions:
 
@@ -51,16 +68,24 @@ Instructions:
     ... do stuff afterwards ... 
     vis.kill()
 
-  - To show the visualization and be able to run a script alongside it
-    until the user closes the window:
+  - To show the visualization and run a script alongside it until the user
+    closes the window (multithreaded mode):
     vis.show()
     while vis.shown():
         vis.lock()
         ... do stuff ...
-        [to exit the loop call show(False)]
+        [to exit the loop call vis.show(False)]
         vis.unlock()
         time.sleep(dt)
     ... do stuff afterwards ...
+    vis.kill()
+
+  - To show the visualization and run python commands until the user closes
+    the window (single-threaded mode)
+    def callback():
+        ... do stuff ...
+        [to exit the loop manually call vis.show(False)]
+    vis.loop(setup=vis.show,callback=callback)
     vis.kill()
 
   - To run a window with a custom plugin (GLPluginInterface) and terminate on
@@ -91,9 +116,11 @@ Instructions:
     ... do stuff afterwards ... 
     vis.kill()
 
-  - To run a custom dialog in a QtWindow
+  - To run a custom Qt window or dialog containing a visualization window
     vis.setPlugin([desired plugin or None for visualization])
-    vis.setParent(qt_window)
+    def makeMyUI(qtglwidget):
+        return MyQtMainWindow(qtglwidget)
+    vis.setCustomUI(makeMyUI)
     vis.dialog()
     ... or 
     vis.show()
@@ -117,8 +144,8 @@ Instructions:
         ...
     vis.kill()
 
-Note: when changing the data shown by the window (e.g., modifying the
-configurations of robots in a WorldModel) you must call vis.lock() before
+Note: in multithreaded mode, when changing the data shown by the window (e.g., modifying
+the configurations of robots in a WorldModel) you must call vis.lock() before
 accessing the data and then call vis.unlock() afterwards.
 
 The main interface is as follows:
@@ -139,9 +166,21 @@ def addPlugin(plugin): adds a second OpenGL viewport governed by the given plugi
 def run([plugin]): pops up a dialog and then kills the program afterwards.
 def kill(): kills all previously launched visualizations and terminates the visualization thread.
     Afterwards, you may not be able to start new windows. Call this to cleanly quit.
-def dialog(): pops up a dialog box (does not return to calling
-    thread until closed).
-def show(hidden=False): shows/hides a visualization window run in parallel with the calling script.
+def loop(setup=None,callback=None,cleanup=None): Runs the visualization thread inline with the main thread.
+    The setup() function is called at the start, the callback() function is run every time the event thread
+    is idle, and the cleanup() function is called on termination.
+
+    NOTE FOR MAC USERS: having the GUI in a separate thread is not supported on Mac, so the loop
+    function must be used rather than show/spin.
+
+    NOTE FOR GLUT USERS: this may only be run once.
+def dialog(): pops up a dialog box (does not return to calling thread until closed).
+def dialogInLoop(callback): for use inside loop(). Pops up a dialog box window, and returns
+    immediately to calling thread.
+    The callback function has signature callback(okPressed), where okPressed is True if the user
+    pressed the OK button, and False if Cancel or the close box was clicked.
+def show(hidden=False): shows/hides a visualization window.  If not called from the visualization loop,
+    a new visualization thread is run in parallel with the calling script. 
 def spin(duration): shows the visualization window for the desired amount
     of time before returning, or until the user closes the window.
 def shown(): returns true if the window is shown.
@@ -430,12 +469,22 @@ def addPlugin(plugin):
 
 def run(plugin=None):
     """A blocking call to start a single window and then kill the visualization
-    when closed.  If plugin == None, the default visualization is used. 
-    Otherwise, plugin is a glinterface.GLPluginInterface object, and it is used."""
+    once the user closes the window.  If plugin == None, the default visualization is used. 
+    Otherwise, plugin is a glinterface.GLPluginInterface object, and it is used
+    to handle all rendering and user input.
+
+    Works in both multi-threaded and single-threaded mode.
+    """
+    global _vis_thread_running
     setPlugin(plugin)
-    show()
-    while shown():
-        time.sleep(0.1)
+    if _vis_thread_running:
+        #already multithreaded, can't go back to single thread
+        show()
+        while shown():
+            time.sleep(0.1)
+    else:
+        #run in a single thread
+        loop(setup=show)
     setPlugin(None)
     kill()
 
@@ -462,8 +511,24 @@ def kill():
         return
     _kill()
 
+def loop(setup=None,callback=None,cleanup=None):
+    """Runs the visualization thread inline with the main thread.
+    The setup() function is called at the start, the callback() function is run every time the event thread
+    is idle, and the cleanup() function is called on termination.
+
+    NOTE FOR MAC USERS: a multithreaded GUI is not supported on Mac, so the loop()
+    function must be used rather than "show and wait".
+
+    NOTE FOR GLUT USERS: this may only be run once.
+    """
+    _loop(setup,callback,cleanup)
+
+
 def show(display=True):
-    """Shows or hides the current window"""
+    """Shows or hides the current window.
+
+    NOTE FOR MAC USERS: due to a lack of support of multithreading on Mac, this will not work outside
+    of the setup / callback / cleanup functions given in a call to loop()."""
     _globalLock.acquire()
     if display:
         _show()
@@ -473,13 +538,26 @@ def show(display=True):
 
 def spin(duration):
     """Spin-shows a window for a certain duration or until the window is closed."""
-    show()
-    t = 0
-    while t < duration:
-        if not shown(): break
-        time.sleep(min(0.04,duration-t))
-        t += 0.04
-    show(False)
+    global _vis_thread_running,_in_vis_loop
+    if _in_vis_loop:
+        raise RuntimeError("spin() cannot be used inside loop()")
+    if _vis_thread_running:
+        #use existing thread
+        show()
+        t = 0
+        while t < duration:
+            if not shown(): break
+            time.sleep(min(0.04,duration-t))
+            t += 0.04
+        show(False)
+    else:
+        #use single thread
+        t0 = time.time()
+        def timed_break():
+            t1 = time.time()
+            if t1 - t0 >= duration:
+                show(False)
+        loop(callback=timed_break,setup=lambda:show())
     return
 
 def lock():
@@ -2615,6 +2693,7 @@ _frontend.setPlugin(_vis)
 
 #signals to visualization thread
 _quit = False
+_in_vis_loop = False
 _vis_thread_running = False
 _vis_thread = None
 _in_app_thread = False
@@ -2902,14 +2981,21 @@ if _PyQtAvailable:
                 self.toggle_movie_mode()
             if self.saving_html:
                 self.toggle_html_mode()
-            self.html_timer.deleteLater()
-            self.movie_timer.deleteLater()
+            #self.html_timer.deleteLater()
+            #self.movie_timer.deleteLater()
             print "#########################################"
             print "klampt.vis: Window close"
             print "#########################################"
             _globalLock.release()
+        def detachGLWindow(self):
+            """Used for closing and restoring windows, while saving the OpenGL context"""
+            self.glwidget.setParent(None)
+        def attachGLWindow(self):
+            """Used for closing and restoring windows, while saving the OpenGL context"""
+            self.glwidget.setParent(self)
+            self.setCentralWidget(self.glwidget)
 
-    def _run_app_thread():
+    def _run_app_thread(callback=None):
         global _vis_thread_running,_in_app_thread,_vis,_widget,_window,_quit,_showdialog,_showwindow,_globalLock
         _vis_thread_running = True
 
@@ -2968,6 +3054,7 @@ if _PyQtAvailable:
                         w.guidata = w.custom_ui(w.glwindow)
                     w.guidata.setWindowTitle(w.name)
                     w.glwindow.show()
+                    w.guidata.show()
                     if w.glwindow.initialized:
                         #boot it back up again
                         w.glwindow.idlesleep(0)
@@ -2975,6 +3062,10 @@ if _PyQtAvailable:
                     print "#########################################"
                     print "klampt.vis: Showing window",i
                     print "#########################################"
+                    if hasattr(w.guidata,'attachGLWindow'):
+                        w.guidata.attachGLWindow()
+                    else:
+                        w.glwindow.setParent(w.guidata)
                     w.glwindow.show()
                     w.guidata.show()
                 if w.mode == 'hidden' and w.guidata != None:
@@ -2982,31 +3073,47 @@ if _PyQtAvailable:
                         print "#########################################"
                         print "klampt.vis: Hiding window",i
                         print "#########################################"
-                        w.glwindow.setParent(None)
+                        if hasattr(w.guidata,'detachGLWindow'):
+                            w.guidata.detachGLWindow()
+                        else:
+                            w.guidata.setParent(None)
                         w.glwindow.hide()
                         w.guidata.hide()
                     #prevent deleting the GL window
-                    w.glwindow.setParent(None)
+                    w.guidata.detachGLWindow()
                     w.guidata = None
             _globalLock.release()
             _in_app_thread = True
             _GLBackend.app.processEvents()
             _in_app_thread = False
-            time.sleep(0.001)
-        print "Visualization thread closing..."
+            if callback:
+                callback()
+            else:
+                if not _in_vis_loop:
+                    #give other threads time to work
+                    time.sleep(0.001)
+            if _in_vis_loop and (len(_windows)==0 or all(w.mode == 'hidden' for w in _windows)):
+                print "klampt.vis: No windows shown, breaking out of vis loop"
+                _vis_thread_running = False
+                return
+        print "Visualization thread closing and cleaning up Qt..."
+        _cleanup()
+        _vis_thread_running = False
+        return res
+
+    def _cleanup():
         for w in _windows:
             w.vis.clear()
             if w.glwindow:
+                w.glwindow.setParent(None)
                 w.glwindow.close()
                 #must be explicitly deleted for some reason in PyQt5...
                 del w.glwindow
         _GLBackend.app.processEvents()
-        _vis_thread_running = False
+
         #must be explicitly deleted for some reason in PyQt5...
         del _GLBackend.app
         _GLBackend.app = None
-        return res
-
 
 elif _GLUTAvailable:
     print "klampt.visualization: QT is not available, falling back to poorer"
@@ -3112,17 +3219,28 @@ elif _GLUTAvailable:
         w.setProgram(hijacker)
         _GLBackend.run()
         print "Visualization thread closing..."
-        for w in _windows:
-            w.vis.clear()
+        _cleanup()
         _vis_thread_running = False
         return
+
+    def _cleanup():
+        for w in _windows:
+            w.vis.clear()
     
 def _kill():
-    global _quit,_vis_thread_running,_vis_thread
+    global _quit,_in_vis_loop,_vis_thread_running,_vis_thread,_cleanup
     _quit = True
+    if _in_vis_loop:
+        #if the thread is running, _quit=True just signals to the vis loop to quit.
+        #otherwise, the program needs to be killed and cleaned up
+        if not _vis_thread_running:
+            #need to clean up Qt resources
+            _cleanup()
+        return
     if _vis_thread_running:
         _vis_thread.join()
         assert _vis_thread_running == False
+
     _quit = False
 
 if _PyQtAvailable:
@@ -3135,14 +3253,33 @@ if _PyQtAvailable:
         def run(self):
             self.func(*self.args)
 
+def _loop(setup,callback,cleanup):
+    global _in_vis_loop,_vis_thread_running,_quit
+    if _vis_thread_running or _in_vis_loop:
+        raise RuntimeError("Cannot call loop() after show(), inside dialog(), or inside loop() callbacks")
+    _in_vis_loop = True
+    try:
+        if setup is not None:
+            setup()
+        _quit = False
+        _run_app_thread(callback)
+        if cleanup is not None:
+            cleanup()
+    finally:
+        _in_vis_loop = False
+
+
 def _show():
-    global _windows,_current_window,_vis_thread_running,_vis_thread
+    global _windows,_current_window,_in_vis_loop,_vis_thread_running,_vis_thread
     if len(_windows)==0:
         _windows.append(WindowInfo(_window_title,_frontend,_vis)) 
         _current_window = 0
     _windows[_current_window].mode = 'shown'
     _windows[_current_window].worlds = _current_worlds
     _windows[_current_window].active_worlds = _current_worlds[:]
+    if _in_vis_loop:
+        #this will be handled in the loop, no need to start it
+        return
     if not _vis_thread_running:
         signal.signal(signal.SIGINT, signal.SIG_DFL)
         if _PyQtAvailable and False:
@@ -3162,56 +3299,66 @@ def _hide():
     _windows[_current_window].mode = 'hidden'
 
 def _dialog():
-    global __windows,_current_window,_vis_thread_running,_vis_thread
+    global __windows,_current_window,_in_vis_loop,_vis_thread_running,_vis_thread
     if len(_windows)==0:
         _windows.append(WindowInfo(_window_title,_frontend,_vis,None))
         _current_window = 0
-    if not _vis_thread_running:
-        signal.signal(signal.SIGINT, signal.SIG_DFL)
-        _vis_thread = Thread(target=_run_app_thread)
-        _vis_thread.setDaemon(True)
-        _vis_thread.start()
-        #time.sleep(0.1)
-    _globalLock.acquire()
-    assert _windows[_current_window].mode == 'hidden',"dialog() called inside dialog?"
-    _windows[_current_window].mode = 'dialog'
-    _windows[_current_window].worlds = _current_worlds
-    _windows[_current_window].active_worlds = _current_worlds[:]
-    _globalLock.release()
-    if not _in_app_thread:
-        print "vis.dialog(): Waiting for dialog to complete...."
-        while _windows[_current_window].mode == 'dialog':
-            time.sleep(0.1)
-        print "vis.dialog(): ... dialog done."
-    else:
-        _globalLock.acquire()
-        w = _windows[_current_window]
-        if w.glwindow == None:
-            print "vis: creating GL window"
-            w.glwindow = _GLBackend.createWindow(w.name)
-            w.glwindow.setProgram(w.frontend)
-            w.glwindow.setParent(None)
-            w.glwindow.refresh()
-        if w.custom_ui == None:
-            dlg = _MyDialog(w)
-        else:
-            dlg = w.custom_ui(w.glwindow)
-        print "#########################################"
-        print "klampt.vis: Dialog starting on window",_current_window
-        print "#########################################"
-        if dlg != None:
-            w.glwindow.show()
-            _globalLock.release()
-            res = dlg.exec_()
+    if _vis_thread_running:
+        if _in_vis_loop:
+            #single threaded
+            raise RuntimeError("Can't call dialog() inside loop().  Try dialogInLoop() instead.")
+        #just show the dialog and let the thread take over
+        assert _windows[_current_window].mode == 'hidden',"dialog() called inside dialog?"
+        if _in_app_thread:
             _globalLock.acquire()
-        print "#########################################"
-        print "klampt.vis: Dialog done on window",_current_window
-        print "#########################################"
-        w.glwindow.hide()
-        w.glwindow.setParent(None)
-        w.mode = 'hidden'
-        _globalLock.release()
-    return
+            _windows[_current_window].mode = 'dialog'
+            _windows[_current_window].worlds = _current_worlds
+            _windows[_current_window].active_worlds = _current_worlds[:]
+            _globalLock.release()
+        if not _in_app_thread:
+            print "vis.dialog(): Waiting for dialog to complete...."
+            while _windows[_current_window].mode == 'dialog':
+                time.sleep(0.1)
+            print "vis.dialog(): ... dialog done."
+        else:
+            #this is called from another dialog or window!
+            print "vis: Creating a dialog from within another dialog or window"
+            _globalLock.acquire()
+            w = _windows[_current_window]
+            if w.glwindow == None:
+                print "vis: creating GL window"
+                w.glwindow = _GLBackend.createWindow(w.name)
+                w.glwindow.setProgram(w.frontend)
+                w.glwindow.setParent(None)
+                w.glwindow.refresh()
+            if w.custom_ui == None:
+                dlg = _MyDialog(w)
+            else:
+                dlg = w.custom_ui(w.glwindow)
+            print "#########################################"
+            print "klampt.vis: Dialog starting on window",_current_window
+            print "#########################################"
+            if dlg != None:
+                w.glwindow.show()
+                _globalLock.release()
+                res = dlg.exec_()
+                _globalLock.acquire()
+            print "#########################################"
+            print "klampt.vis: Dialog done on window",_current_window
+            print "#########################################"
+            w.glwindow.hide()
+            w.glwindow.setParent(None)
+            w.mode = 'hidden'
+            _globalLock.release()
+    else:
+        print "vis: running single-threaded dialog"
+        _windows[_current_window].mode = 'dialog'
+        _windows[_current_window].worlds = _current_worlds
+        _windows[_current_window].active_worlds = _current_worlds[:]
+        _in_vis_loop = True
+        res = _run_app_thread()
+        _in_vis_loop = False
+    return res
 
 def _set_custom_ui(func):
     global _windows,_current_window,_vis_thread_running
