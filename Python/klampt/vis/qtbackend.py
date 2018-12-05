@@ -61,9 +61,11 @@ class QtGLWindow(QGLWidget):
     Attributes:
         - name: title of the window (only has an effect before calling
           run())
-        - width, height: width/height of the window (only has an effect
-          before calling run(), and these are updated when the user resizes
-          the window.
+        - width, height: width/height of the window in screen units.  These are initialized from
+          the GLProgram viewport on run(), but thereafter Qt manages them.  After, the user must
+          call resize(w,h) to change the dimensions.
+        - devwidth, devheight: width/height of the window in OpenGL device pixel units
+          (Note that these may be different from the screen dimensions due to Retina displays)
         - clearColor: the RGBA floating point values of the background color.
     """
     idlesleep_signal = pyqtSignal(float)
@@ -89,6 +91,8 @@ class QtGLWindow(QGLWidget):
         self.program = None
         self.width = 640
         self.height = 480
+        self.devheight = self.devicePixelRatio()*self.height
+        self.devwidth = self.devicePixelRatio()*self.width
         self.sizePolicy = "resize"
         self.clearColor = [1.0,1.0,1.0,0.0]
         #keyboard state information
@@ -121,6 +125,7 @@ class QtGLWindow(QGLWidget):
                 self.setWindowTitle(program.name)
         self.program = program
         program.window = weakref.proxy(self)
+        program.view.screenDeviceScale = self.devicePixelRatio()
         if self.initialized:
             program.initialize()
             program.reshapefunc(self.width,self.height)
@@ -229,8 +234,7 @@ class QtGLWindow(QGLWidget):
             return
         if not self.isVisible():
             return
-        (self.width,self.height) = (w,h)
-        self.program.reshapefunc(w,h)
+        (self.devwidth,self.devheight) = (w,h)
         return
     def paintGL(self):
         if self.program == None:
@@ -348,7 +352,9 @@ class QtGLWindow(QGLWidget):
         """Called internally by Qt when Qt resizes the window"""
         QGLWidget.resizeEvent(self,event)
 
-        (self.width,self.height) = (event.size().width(),event.size().height())
+        self.width,self.height = (event.size().width(),event.size().height())
+        scale = self.devicePixelRatio() 
+        (self.devwidth,self.devheight) = (self.width*scale,self.height*scale)
         #self.window().resize(event.size())
         #self.window().adjustSize()
         if self.program:

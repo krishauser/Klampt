@@ -17,8 +17,10 @@ import time
 class GLViewport:
     """
     A class describing an OpenGL camera view.
-        - x,y: upper left hand corner of the view in the OpenGL canvas, in pixels
-        - w,h: width and height of the view, in pixels
+        - x,y: upper left hand corner of the view in the OpenGL canvas, in screen pixels
+        - w,h: width and height of the view, in screen pixels
+        - screenDeviceScale: if not 1, multiply screen pixel coordinates by this to get
+          openGL pixel coordinates (usually Mac Retina displays)
         - orthogonal: if true, does an orthogonal projection. (Not supported)
         - camera: an orbit camera (see :class:`orbit`)
         - fov: the camera field of view in x direction
@@ -28,6 +30,7 @@ class GLViewport:
         self.orthogonal = False
         self.x,self.y = 0,0
         self.w,self.h = 640,480
+        self.screenDeviceScale = 1
         self.camera = camera.orbit()
         self.camera.dist = 6.0
         #x field of view in degrees
@@ -267,11 +270,11 @@ class GLProgram:
         # Viewport
         view = self.view
         ydevice = (self.window.height - view.y - view.h)
-        glViewport(view.x,ydevice,view.w,view.h)
+        glViewport(view.x*view.screenDeviceScale,ydevice*view.screenDeviceScale,view.w*view.screenDeviceScale,view.h*view.screenDeviceScale)
         
         # Initialize
         glClearColor(*self.clearColor)
-        glScissor(view.x,ydevice,view.w,view.h)
+        glScissor(view.x*view.screenDeviceScale,ydevice*view.screenDeviceScale,view.w*view.screenDeviceScale,view.h*view.screenDeviceScale)
         glEnable(GL_SCISSOR_TEST);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glEnable(GL_DEPTH_TEST)
@@ -284,7 +287,7 @@ class GLProgram:
         """
         glMatrixMode(GL_PROJECTION)
         glLoadIdentity()
-        glOrtho(0,self.view.w,self.view.h,0,-1,1);
+        glOrtho(0,self.view.w*self.view.screenDeviceScale,self.view.h*self.view.screenDeviceScale,0,-1,1);
         glMatrixMode(GL_MODELVIEW)
         glLoadIdentity()
        
@@ -313,8 +316,9 @@ class GLProgram:
         if hasattr(self.window,'makeCurrent'):
             self.window.makeCurrent()
         glReadBuffer(GL_FRONT);
-        screenshot = glReadPixels( self.view.x, self.view.y, self.view.w, self.view.h, GL_RGBA, GL_UNSIGNED_BYTE)
-        im = Image.frombuffer("RGBA", (self.view.w, self.view.h), screenshot, "raw", "RGBA", 0, 0)
+        x,y,w,h = self.view.x*self.view.screenDeviceScale,self.view.y*self.view.screenDeviceScale,self.view.w*self.view.screenDeviceScale,self.view.h*self.view.screenDeviceScale
+        screenshot = glReadPixels( x, y, w, h, GL_RGBA, GL_UNSIGNED_BYTE)
+        im = Image.frombuffer("RGBA", (w, h), screenshot, "raw", "RGBA", 0, 0)
         print "Saving screen to",fn
         if not multithreaded:
             im.save(fn)
