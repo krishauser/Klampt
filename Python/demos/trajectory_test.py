@@ -11,6 +11,9 @@ import random
 import time
 import math
 
+#set to True to use vis in multithreaded mode
+MULTITHREADED = False
+
 def random_rotation():
     """Returns a uniformly distributed rotation matrix."""
     q = [random.gauss(0,1),random.gauss(0,1),random.gauss(0,1),random.gauss(0,1)]
@@ -89,35 +92,40 @@ if __name__ == "__main__":
     
     vis.show()
     
-    iteration = 0
-    while vis.shown():
-        #vis.lock()
-        #can modify the vis here
-        #vis.unlock()
-        #time.sleep(0.01)
-        #animationTime = vis.animationTime()
-        iteration += 1
+    #pop up the window to show the trajectory
+    vis.spin(float('inf'))
 
     if len(sys.argv)>1:
         vis.animate("robot",None)
         sim = Simulator(world)
         sim.simulate(0)
         trajectory.execute_path(traj.milestones,sim.controller(0))
-        #for some tricky Qt reason, need to sleep before showing a window again
-        #Perhaps the event loop must complete some extra cycles?
-        time.sleep(0.01)
-        vis.show()
-        t0 = time.time()
-        while vis.shown():
-            #print "Time",sim.getTime()
-            sim.simulate(0.01)
-            if sim.controller(0).remainingTime() <= 0:
-                print "Executing timed trajectory"
-                trajectory.execute_trajectory(traj,sim.controller(0),smoothing='pause')
-            vis.setItemConfig("config",sim.controller(0).getCommandedConfig())
-            t1 = time.time()
-            time.sleep(max(0.01-(t1-t0),0.0))
-            t0 = t1
-    
+        if MULTITHREADED:
+            #for some tricky Qt reason, need to sleep before showing a window again
+            #Perhaps the event loop must complete some extra cycles?
+            time.sleep(0.01)
+            vis.show()
+            t0 = time.time()
+            while vis.shown():
+                #print "Time",sim.getTime()
+                sim.simulate(0.01)
+                if sim.controller(0).remainingTime() <= 0:
+                    print "Executing timed trajectory"
+                    trajectory.execute_trajectory(traj,sim.controller(0),smoothing='pause')
+                vis.setItemConfig("config",sim.controller(0).getCommandedConfig())
+                t1 = time.time()
+                time.sleep(max(0.01-(t1-t0),0.0))
+                t0 = t1
+        else:
+            data = {'next_sim_time':time.time()}
+            def callback():
+                if time.time() >= data['next_sim_time']:
+                    sim.simulate(0.01)
+                    if sim.controller(0).remainingTime() <= 0:
+                        print "Executing timed trajectory"
+                        trajectory.execute_trajectory(traj,sim.controller(0),smoothing='pause')
+                    vis.setItemConfig("config",sim.controller(0).getCommandedConfig())
+                    data['next_sim_time'] += 0.01
+            vis.loop(callback=callback,setup=vis.show)
     print "Ending vis."
     vis.kill()

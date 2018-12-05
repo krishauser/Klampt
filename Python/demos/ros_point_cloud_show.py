@@ -5,6 +5,8 @@ from klampt import robotsim
 from klampt import vis
 import time
 
+MULTITHREADED = True
+
 print """ros_point_cloud_show.py: Shows how to receive point clouds from ROS into Klamp't.
 
 Usage: python ros_point_cloud_show.py topic [save]
@@ -30,9 +32,8 @@ else:
 point_cloud_count = 0
 vis.add("world",world)
 vis.edit(("world","point_cloud"))
-vis.show()
-while vis.shown():
-	vis.lock()
+
+def updatePointCloud():
 	#in klampt / robotio.h -- this needs to be done to update ROS
 	processed = robotsim.ProcessStreams()
 	if processed:
@@ -53,10 +54,23 @@ while vis.shown():
 		a = world.rigidObject(0).appearance()
 		a.refresh()
 
-	vis.unlock()
-	#TODO: do anything?
+if MULTITHREADED:
+	vis.show()
+	while vis.shown():
+		vis.lock()
+		updatePointCloud()
+		vis.unlock()
+		#TODO: do anything else?
 
-	#runs at most 10Hz
-	time.sleep(0.1)
+		#runs at most 10Hz
+		time.sleep(0.1)
+else:
+	data = {'next_update_time':time.time()}
+	def callback():
+		if time.time() >= data['next_update_time']:
+			#run at approximately 10Hz
+			data['next_update_time'] += 0.1
+			updatePointCloud()
+	vis.loop(setup=vis.show,callback=callback)
 
 vis.kill()

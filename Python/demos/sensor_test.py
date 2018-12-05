@@ -175,13 +175,11 @@ class SensorTestWorld (GLPluginInterface):
 		return True
 
 vis.pushPlugin(SensorTestWorld())
-vis.show()
-while vis.shown():
-	time.sleep(0.1)
+vis.spin(float('inf'))
 vis.kill()
 
 """
-#Note: GLEW doesn't work in the main thread, hence the use of the GLPluginInterface. 
+#Note: GLEW doesn't work outside of the main thread, hence the use of the GLPluginInterface. 
 #The below code falls back to the non-accelerated sensor simulation
 
 vis.show()
