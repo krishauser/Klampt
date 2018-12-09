@@ -2699,7 +2699,7 @@ _vis_thread = None
 _in_app_thread = False
 
 if _PyQtAvailable:
-    from PyQt5 import QtGui
+    from PyQt5 import QtWidgets
     from PyQt5.QtWidgets import QDialog,QDialogButtonBox,QMainWindow,QApplication,QAction
     #Qt specific startup
     #need to set up a QDialog and an QApplication
@@ -2917,14 +2917,14 @@ if _PyQtAvailable:
                     self.movie_time_last = sim.getTime()
             else:
                 self.movie_timer.stop()
-                dlg =  QtGui.QInputDialog(self)                 
-                dlg.setInputMode( QtGui.QInputDialog.TextInput) 
+                dlg =  QtWidgets.QInputDialog(self)                 
+                dlg.setInputMode( QtWidgets.QInputDialog.TextInput) 
                 dlg.setLabelText("Command")
                 dlg.setTextValue('ffmpeg -y -f image2 -i image%04d.png klampt_record.mp4')
                 dlg.resize(500,100)                             
                 ok = dlg.exec_()                                
                 cmd = dlg.textValue()
-                #(cmd,ok) = QtGui.QInputDialog.getText(self,"Process with ffmpeg?","Command", text='ffmpeg -y -f image2 -i image%04d.png klampt_record.mp4')
+                #(cmd,ok) = QtWidgets.QInputDialog.getText(self,"Process with ffmpeg?","Command", text='ffmpeg -y -f image2 -i image%04d.png klampt_record.mp4')
                 if ok:
                     import os,glob
                     os.system(str(cmd))
