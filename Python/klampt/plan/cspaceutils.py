@@ -125,7 +125,7 @@ class EmbeddedCSpace(CSpace):
         def distance(a,b):
             return self.ambientspace.distance(self.lift(a),self.lift(b))
         def interpolate(a,b,u):
-            return self.project(self.ambientspace.interpolate(self.lift(a)),self.lift(b))
+            return self.project(self.ambientspace.interpolate(self.lift(a),self.lift(b),u))
 
         if hasattr(ambientspace,'sampleneighborhood'):
             self.sampleneighborhood = sampleneighborhood
@@ -145,7 +145,6 @@ class EmbeddedCSpace(CSpace):
 
     def project(self,xamb):
         """Ambient space -> embedded space"""
-        print "EmbeddedCSpace.project"
         return [xamb[i] for i in self.mapping]
 
     def lift(self,xemb):
