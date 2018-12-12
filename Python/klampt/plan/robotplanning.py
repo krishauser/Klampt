@@ -17,6 +17,8 @@ def preferredPlanOptions(robot,movingSubset=None,optimizing=False):
         return { 'type':"sbl", 'perturbationRadius':0.5, 'randomizeFrequency':1000, shortcut:1 }
 
 class SubsetMotionPlan (MotionPlan):
+    """An adaptor that "lifts" a motion planner in an EmbeddedCSpace to a higher dimensional ambient
+    space.  Used for planning in subsets of robot DOFs."""
     def __init__(self,space,subset,q0,type=None,**options):
         MotionPlan.__init__(self,space,type,**options)
         self.subset = subset
@@ -105,8 +107,17 @@ def makeSpace(world,robot,
                 inactive.append(i)
         #disable self-collisions for inactive objects
         for i in inactive:
-            rindex = space.collider.robots[robot.index][i]
-            space.collider.mask[rindex] = set()
+            rindices = space.collider.robots[robot.index]
+            rindex = rindices[i]
+            if rindex < 0:
+                continue
+            newmask = set()
+            for j in range(robot.numLinks()):
+                if rindices[j] in space.collider.mask[rindex] and active[j]:
+                    newmask.add(rindices[j])
+                else:
+                    print "Ignoring collisions between links",i,"and",j
+            space.collider.mask[rindex] = newmask
         space = sspace
     
     space.setup()
@@ -143,7 +154,8 @@ def planToConfig(world,robot,target,
       be allowed to move.  Otherwise, if this is None or 'all', all joints
       will be allowed to move.  If this is a list, then only these joint
       indices will be allowed to move.
-    - planOptions: keyword options that will be sent to the planner.
+    - planOptions: keyword options that will be sent to the planner.  See
+      the documentation for MotionPlan.setOptions for more details.
     Output: a cspace.MotionPlan instance that can be called to get a
       kinematically-feasible plan. (see cspace.MotionPlan.planMore(iterations))
     """

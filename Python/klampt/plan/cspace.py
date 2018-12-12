@@ -294,13 +294,19 @@ class MotionPlan:
         is listed in motionplanning.h)
         """
         for (a,b) in opts.items():
-            if a=='type':
-                motionplanning.setPlanType(str(b))
-            elif isinstance(b,str):
-                motionplanning.setPlanSetting(a,b)
-            else:
-                motionplanning.setPlanSetting(a,float(b))
-
+            try:
+                if a=='type':
+                    motionplanning.setPlanType(str(b))
+                elif isinstance(b,str):
+                    motionplanning.setPlanSetting(a,b)
+                else:
+                    motionplanning.setPlanSetting(a,float(b))
+            except Exception:
+                    print "Invalid MotionPlan setting",a,"=",b
+                    print "Valid keys are:"
+                    print "  type, knn, connectionThreshold, perturbationRadius, grid, gridResolution"
+                    print "  suboptimalityFactor, randomizeFrequency, shortcut, restart, pointLocation"
+                    print "  restartTermCond"
     def setEndpoints(self,start,goal):
         """Sets the start and goal configuration.  goal can also be a
         *goal test*, which is a function taking one argument f(q) that
