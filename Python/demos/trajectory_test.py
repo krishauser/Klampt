@@ -11,9 +11,6 @@ import random
 import time
 import math
 
-#set to True to use vis in multithreaded mode
-MULTITHREADED = False
-
 def random_rotation():
     """Returns a uniformly distributed rotation matrix."""
     q = [random.gauss(0,1),random.gauss(0,1),random.gauss(0,1),random.gauss(0,1)]
@@ -90,8 +87,6 @@ if __name__ == "__main__":
         save,traj.milestones = resource.edit("trajectory",traj.milestones,world=world)
         vis.animate("robot",traj)
     
-    vis.show()
-    
     #pop up the window to show the trajectory
     vis.spin(float('inf'))
 
@@ -100,7 +95,8 @@ if __name__ == "__main__":
         sim = Simulator(world)
         sim.simulate(0)
         trajectory.execute_path(traj.milestones,sim.controller(0))
-        if MULTITHREADED:
+        vis.setWindowTitle("Simulating path using trajectory.execute_trajectory")
+        if vis.multithreaded():
             #for some tricky Qt reason, need to sleep before showing a window again
             #Perhaps the event loop must complete some extra cycles?
             time.sleep(0.01)
@@ -112,7 +108,7 @@ if __name__ == "__main__":
                 if sim.controller(0).remainingTime() <= 0:
                     print "Executing timed trajectory"
                     trajectory.execute_trajectory(traj,sim.controller(0),smoothing='pause')
-                vis.setItemConfig("config",sim.controller(0).getCommandedConfig())
+                vis.setItemConfig("robot",sim.controller(0).getCommandedConfig())
                 t1 = time.time()
                 time.sleep(max(0.01-(t1-t0),0.0))
                 t0 = t1
@@ -124,7 +120,7 @@ if __name__ == "__main__":
                     if sim.controller(0).remainingTime() <= 0:
                         print "Executing timed trajectory"
                         trajectory.execute_trajectory(traj,sim.controller(0),smoothing='pause')
-                    vis.setItemConfig("config",sim.controller(0).getCommandedConfig())
+                    vis.setItemConfig("robot",sim.controller(0).getCommandedConfig())
                     data['next_sim_time'] += 0.01
             vis.loop(callback=callback,setup=vis.show)
     print "Ending vis."
