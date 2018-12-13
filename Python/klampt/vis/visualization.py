@@ -133,9 +133,9 @@ Instructions:
     restore the default.
 
   - To create a separate window with a given plugin:
-    w1 = vis.createWindow()  #w1=0
+    w1 = vis.createWindow("Window 1")  #w1=0
     show()
-    w2 = vis.createWindow()  #w2=1
+    w2 = vis.createWindow("Window 2")  #w2=1
     vis.setPlugin(plugin)
     vis.dialog()
     #to restore commands to the original window
@@ -150,7 +150,7 @@ accessing the data and then call vis.unlock() afterwards.
 
 The main interface is as follows:
 
-def createWindow(title=None): creates a new visualization window and returns an
+def createWindow(title): creates a new visualization window and returns an
     integer identifier.
 def setWindow(id): sets the active window for all subsequent calls.  ID 0 is
     the default visualization window.
@@ -166,6 +166,7 @@ def addPlugin(plugin): adds a second OpenGL viewport governed by the given plugi
 def run([plugin]): pops up a dialog and then kills the program afterwards.
 def kill(): kills all previously launched visualizations and terminates the visualization thread.
     Afterwards, you may not be able to start new windows. Call this to cleanly quit.
+def multithreaded(): returns true if multithreading is available.
 def loop(setup=None,callback=None,cleanup=None): Runs the visualization thread inline with the main thread.
     The setup() function is called at the start, the callback() function is run every time the event thread
     is idle, and the cleanup() function is called on termination.
@@ -307,6 +308,7 @@ import glcommon
 import time
 import signal
 import weakref
+import sys
 from ..model import types
 from ..model import config
 from ..model import coordinates
@@ -346,7 +348,7 @@ _windows = []
 #the index of the current window
 _current_window = None
 
-def createWindow(name):
+def createWindow(title):
     """Creates a new window (and sets it active)."""
     global _globalLock,_frontend,_vis,_window_title,_current_worlds,_windows,_current_window
     _globalLock.acquire()
@@ -356,7 +358,7 @@ def createWindow(name):
         _windows[-1].worlds = _current_worlds
         _windows[-1].active_worlds = _current_worlds[:]
     #make a new window
-    _window_title = name
+    _window_title = title
     _frontend = GLPluginProgram()
     _vis = VisualizationPlugin()
     _frontend.setPlugin(_vis)
@@ -488,6 +490,10 @@ def run(plugin=None):
     setPlugin(None)
     kill()
 
+def multithreaded():
+    global _use_multithreaded
+    return _use_multithreaded
+
 def dialog():
     """A blocking call to start a single dialog window with the current plugin.  It is
     closed by pressing OK or closing the window."""
@@ -538,10 +544,10 @@ def show(display=True):
 
 def spin(duration):
     """Spin-shows a window for a certain duration or until the window is closed."""
-    global _vis_thread_running,_in_vis_loop
+    global _use_multithreaded,_in_vis_loop
     if _in_vis_loop:
         raise RuntimeError("spin() cannot be used inside loop()")
-    if _vis_thread_running:
+    if _use_multithreaded:
         #use existing thread
         show()
         t = 0
@@ -2697,6 +2703,7 @@ _in_vis_loop = False
 _vis_thread_running = False
 _vis_thread = None
 _in_app_thread = False
+_use_multithreaded = (True if sys.platform != 'macosx' else False)
 
 if _PyQtAvailable:
     from PyQt5 import QtWidgets
@@ -2987,6 +2994,14 @@ if _PyQtAvailable:
             print "klampt.vis: Window close"
             print "#########################################"
             _globalLock.release()
+        def close(self):
+            """Called to clean up resources"""
+            self.html_timer.stop()
+            self.movie_timer.stop()
+            self.html_timer.deleteLater()
+            self.movie_timer.deleteLater()
+            self.movie_timer = None
+            self.html_timer = None
         def detachGLWindow(self):
             """Used for closing and restoring windows, while saving the OpenGL context"""
             self.glwidget.setParent(None)
@@ -3020,7 +3035,7 @@ if _PyQtAvailable:
                     if w.guidata:
                         w.guidata.setWindowTitle(w.name)
                         w.guidata.glwidget = w.glwindow
-                        w.guidata.setCentralWidget(w.glwindow)
+                        w.guidata.attachGLWindow()
                     w.doReload = False
                 if w.mode == 'dialog':
                     print "#########################################"
@@ -3081,6 +3096,7 @@ if _PyQtAvailable:
                         w.guidata.hide()
                     #prevent deleting the GL window
                     w.guidata.detachGLWindow()
+                    w.guidata.close()
                     w.guidata = None
             _globalLock.release()
             _in_app_thread = True
@@ -3254,7 +3270,7 @@ if _PyQtAvailable:
             self.func(*self.args)
 
 def _loop(setup,callback,cleanup):
-    global _in_vis_loop,_vis_thread_running,_quit
+    global _in_vis_loop,_vis_thread_running,_use_multithreaded,_quit
     if _vis_thread_running or _in_vis_loop:
         raise RuntimeError("Cannot call loop() after show(), inside dialog(), or inside loop() callbacks")
     _in_vis_loop = True
@@ -3267,6 +3283,19 @@ def _loop(setup,callback,cleanup):
             cleanup()
     finally:
         _in_vis_loop = False
+
+def _start_app_thread():
+    global _vis_thread
+    signal.signal(signal.SIGINT, signal.SIG_DFL)
+    if _PyQtAvailable and False:
+        #for some reason, QThread doesn't allow for mouse events to be posted?
+        _vis_thread = MyQThread(_run_app_thread)
+        _vis_thread.start()
+    else:
+        _vis_thread = Thread(target=_run_app_thread)
+        _vis_thread.setDaemon(True)
+        _vis_thread.start()
+    time.sleep(0.1)
 
 
 def _show():
@@ -3281,16 +3310,7 @@ def _show():
         #this will be handled in the loop, no need to start it
         return
     if not _vis_thread_running:
-        signal.signal(signal.SIGINT, signal.SIG_DFL)
-        if _PyQtAvailable and False:
-            #for some reason, QThread doesn't allow for mouse events to be posted?
-            _vis_thread = MyQThread(_run_app_thread)
-            _vis_thread.start()
-        else:
-            _vis_thread = Thread(target=_run_app_thread)
-            _vis_thread.setDaemon(True)
-            _vis_thread.start()
-        time.sleep(0.1)
+        _start_app_thread()
 
 def _hide():
     global _windows,_current_window,_vis_thread_running
@@ -3315,6 +3335,7 @@ def _dialog():
             _windows[_current_window].worlds = _current_worlds
             _windows[_current_window].active_worlds = _current_worlds[:]
             _globalLock.release()
+        #TODO: not so sure how this will work out
         if not _in_app_thread:
             print "vis.dialog(): Waiting for dialog to complete...."
             while _windows[_current_window].mode == 'dialog':
@@ -3350,15 +3371,29 @@ def _dialog():
             w.glwindow.setParent(None)
             w.mode = 'hidden'
             _globalLock.release()
+        return None
     else:
-        print "vis: running single-threaded dialog"
         _windows[_current_window].mode = 'dialog'
         _windows[_current_window].worlds = _current_worlds
         _windows[_current_window].active_worlds = _current_worlds[:]
-        _in_vis_loop = True
-        res = _run_app_thread()
-        _in_vis_loop = False
-    return res
+        if _use_multithreaded:
+            print "#########################################"
+            print "klampt.vis: Running multi-threaded dialog, waiting to complete..."
+            _start_app_thread()
+            while _windows[_current_window].mode == 'dialog':
+                time.sleep(0.1)
+            print "klampt.vis: ... dialog done."
+            print "#########################################"
+            return None
+        else:
+            print "#########################################"
+            print "klampt.vis: Running single-threaded dialog"
+            _in_vis_loop = True
+            res = _run_app_thread()
+            _in_vis_loop = False
+            print "klampt.vis: ... dialog done."
+            print "#########################################"
+            return res
 
 def _set_custom_ui(func):
     global _windows,_current_window,_vis_thread_running
