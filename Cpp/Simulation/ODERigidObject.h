@@ -5,7 +5,7 @@
 #include "ODEGeometry.h"
 #include <KrisLibrary/math/vector.h>
 #include <ode/common.h>
-#include <KrisLibrary/myfile.h>
+#include <KrisLibrary/File.h>
 using namespace Math;
 
 /** @ingroup Simulation

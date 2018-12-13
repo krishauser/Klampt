@@ -1,7 +1,7 @@
 #ifndef KLAMPT_SENSING_COMMON_H
 #define KLAMPT_SENSING_COMMON_H
 
-#include <KrisLibrary/myfile.h>
+#include <KrisLibrary/File.h>
 #include <KrisLibrary/math/random.h>
 #include <KrisLibrary/math/math.h>
 #include <KrisLibrary/math3d/primitives.h>

@@ -13,7 +13,7 @@
 #include <KrisLibrary/Logger.h>
 #include <ode/ode.h>
 #include <KrisLibrary/Timer.h>
-#include <KrisLibrary/myfile.h>
+#include <KrisLibrary/File.h>
 #ifndef WIN32
 #include <unistd.h>
 #endif //WIN32

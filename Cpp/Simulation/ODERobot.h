@@ -5,7 +5,7 @@
 #include "ODEGeometry.h"
 #include "ODESurface.h"
 #include <ode/common.h>
-#include <KrisLibrary/myfile.h>
+#include <KrisLibrary/File.h>
 using namespace Math;
 using namespace std;
 

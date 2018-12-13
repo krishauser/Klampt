@@ -4,7 +4,7 @@
 #include <Klampt/Modeling/Robot.h>
 #include <Klampt/Sensing/Sensor.h>
 #include "Command.h"
-#include <KrisLibrary/myfile.h>
+#include <KrisLibrary/File.h>
 #include <map>
 
 /** @ingroup Control
