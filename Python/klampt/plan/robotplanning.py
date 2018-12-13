@@ -115,8 +115,6 @@ def makeSpace(world,robot,
             for j in range(robot.numLinks()):
                 if rindices[j] in space.collider.mask[rindex] and active[j]:
                     newmask.add(rindices[j])
-                else:
-                    print "Ignoring collisions between links",i,"and",j
             space.collider.mask[rindex] = newmask
         space = sspace
     
