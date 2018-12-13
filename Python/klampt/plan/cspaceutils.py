@@ -139,16 +139,20 @@ class EmbeddedCSpace(CSpace):
         self.bound = [self.ambientspace.bound[i] for i in self.mapping]
         self.properties = self.ambientspace.properties
         if self.ambientspace.feasibilityTests is not None:
-            self.feasibilityTests = [(lambda x:f(self.lift(x))) for f in self.ambientspace.feasibilityTests]
+            self.feasibilityTests = [(lambda x,f=f:f(self.lift(x))) for f in self.ambientspace.feasibilityTests]
             self.feasibilityTestNames = self.ambientspace.feasibilityTestNames[:]
             self.feasibilityTestDependencies = self.ambientspace.feasibilityTestDependencies[:]
 
     def project(self,xamb):
         """Ambient space -> embedded space"""
+        if len(xamb) != len(self.xinit):
+            raise ValueError("Invalid length of ambient space vector: %d should be %d"%(len(xamb),len(self.xinit)))
         return [xamb[i] for i in self.mapping]
 
     def lift(self,xemb):
         """Embedded space -> ambient space"""
+        if len(xemb) != len(self.mapping):
+            raise ValueError("Invalid length of embedded space vector: %d should be %d"%(len(xemb),len(self.mapping)))
         xamb = self.xinit[:]
         for (i,j) in enumerate(self.mapping):
             xamb[j] = xemb[i]
