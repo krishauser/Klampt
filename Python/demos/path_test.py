@@ -109,7 +109,5 @@ class MyVisPlugin(GLPluginInterface):
 
 
 vis.pushPlugin(MyVisPlugin())
-vis.show()
-while vis.shown():
-    time.sleep(0.1)
+vis.spin(float('inf'))
 vis.kill()
