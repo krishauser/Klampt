@@ -2703,7 +2703,7 @@ _in_vis_loop = False
 _vis_thread_running = False
 _vis_thread = None
 _in_app_thread = False
-_use_multithreaded = (True if sys.platform != 'macosx' else False)
+_use_multithreaded = (True if sys.platform != 'darwin' else False)
 
 if _PyQtAvailable:
     from PyQt5 import QtWidgets
