@@ -152,8 +152,15 @@ class RobotSubsetCSpace(EmbeddedCSpace):
             #disable self-collisions for non moving objects
             for i,mv in enumerate(moving):
                 if not mv:
-                    rindex = self.collider.robots[robot.index][i]
-                    self.collider.mask[rindex] = set()
+                    rindices = self.collider.robots[robot.index]
+                    rindex = rindices[i]
+                    if rindex < 0:
+                        continue
+                    newmask = set()
+                    for j in range(robot.numLinks()):
+                        if rindices[j] in self.collider.mask[rindex] and moving[j]:
+                            newmask.add(rindices[j])
+                    self.collider.mask[rindex] = newmask
 
     def sendPathToController(self,path,controller):
         """Given a planned CSpace path 'path' and a SimRobotController 'controller',
