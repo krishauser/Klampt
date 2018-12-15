@@ -5,7 +5,7 @@ REM (assumes CMake is set up properly, Python is installed, etc)
 REM configuration variables
 SET buildfolder=msvc
 SET python=C:\Python27\python.exe
-SET klamptversion=0.7.0
+SET klamptversion=0.8.0
 
 REM update KrisLibrary, build both release and debug and copy into Library directory
 cd Library\KrisLibrary
