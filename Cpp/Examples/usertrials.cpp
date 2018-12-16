@@ -31,8 +31,8 @@ public:
   string initialState;
 
   string logFile;
-  SmartPointer<DefaultMotionQueueInterface> robotInterface;
-  vector<SmartPointer<RobotUserInterface> > uis;
+  shared_ptr<DefaultMotionQueueInterface> robotInterface;
+  vector<shared_ptr<RobotUserInterface> > uis;
   int currentUI,oldUI;
 
   //GUI state
@@ -104,7 +104,7 @@ public:
     drawUI = 1;
     drawContacts = 1;
 
-    robotInterface = new DefaultMotionQueueInterface(GetMotionQueue(sim.robotControllers[0].get()));
+    robotInterface.reset(new DefaultMotionQueueInterface(GetMotionQueue(sim.robotControllers[0].get())));
     CopyWorld(*world,planningWorld);
     planningWorld.InitCollisions();
 
@@ -112,17 +112,17 @@ public:
     sim.robotControllers[0]->Update(0); 
 
     uis.resize(0);
-    uis.push_back(new JointCommandInterface);
-    uis.push_back(new IKCommandInterface);
-    uis.push_back(new IKPlannerCommandInterface);
-    uis.push_back(new RRTCommandInterface);
+    uis.push_back(make_shared<JointCommandInterface>());
+    uis.push_back(make_shared<IKCommandInterface>());
+    uis.push_back(make_shared<IKPlannerCommandInterface>());
+    uis.push_back(make_shared<RRTCommandInterface>());
 #ifndef WIN32
-    uis.push_back(new MTIKPlannerCommandInterface);
-    uis.push_back(new MTRRTCommandInterface);
+    uis.push_back(make_shared<MTIKPlannerCommandInterface>());
+    uis.push_back(make_shared<MTRRTCommandInterface>());
 #endif //WIN32
     for(size_t i=0;i<uis.size();i++) {
       uis[i]->world = world;
-      uis[i]->robotInterface = robotInterface;
+      uis[i]->robotInterface = &*robotInterface;
       uis[i]->planningWorld = &planningWorld;
       uis[i]->viewport = &viewport;
       uis[i]->settings = &settings;
