@@ -2355,7 +2355,7 @@ class VisualizationPlugin(glcommon.GLWidgetPlugin):
             if len(components)==1: 
                 return self.getItem(components[0])
             if components[0] not in self.items:
-                raise ValueError("Invalid top-level item specified: "+item_name)
+                raise ValueError("Invalid top-level item specified: "+str(item_name))
             return self.items[components[0]].getSubItem(components[1:])
         if item_name in self.items:
             return self.items[item_name]
@@ -3148,6 +3148,7 @@ elif _GLUTAvailable:
             self.frontend = windowinfo.frontend
             self.inDialog = False
             self.hidden = False
+            self.callback = None
         def initialize(self):
             self.frontend.window = self.window
             if not self.frontend.initialize(): return False
@@ -3202,7 +3203,7 @@ elif _GLUTAvailable:
             global _quit,_showdialog
             global _globalLock
             _globalLock.acquire()
-            if _quit:
+            if _quit or (_in_vis_loop and self.hidden):
                 if bool(glutLeaveMainLoop):
                     glutLeaveMainLoop()
                 else:
@@ -3222,15 +3223,18 @@ elif _GLUTAvailable:
                     glutShowWindow()
                     self.hidden = False
             _globalLock.release()
+            if self.callback:
+                self.callback()
             return self.frontend.idlefunc()
 
-    def _run_app_thread():
+    def _run_app_thread(callback=None):
         global _vis_thread_running,_vis,_old_glut_window,_quit,_windows
         import weakref
         _vis_thread_running = True
         _GLBackend.initialize("Klamp't visualization")
         w = _GLBackend.createWindow("Klamp't visualization")
         hijacker = GLUTHijacker(_windows[0])
+        hijacker.callback = callback
         _windows[0].guidata = weakref.proxy(hijacker)
         w.setProgram(hijacker)
         _GLBackend.run()
