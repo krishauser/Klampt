@@ -186,7 +186,7 @@ bool XmlSimulationSettings::GetSettings(WorldSimulation& sim)
     //parse timestep
     SafeQueryFloat(c,"timestep",sim.simStep);
   }
-  LOG4CXX_INFO(GET_LOGGER(XmlParser),"Parsing ODE...");
+  LOG4CXX_INFO(GET_LOGGER(XmlParser),"Parsing simulation settings...");
   XmlODESettings ode(e);
   if(!ode.GetSettings(sim.odesim)) {
     return false;
