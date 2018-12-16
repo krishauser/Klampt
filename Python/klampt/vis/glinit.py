@@ -1,3 +1,4 @@
+import sys
 global _PyQtAvailable,_GLUTAvailable,_GLBackend
 _PyQtAvailable = False
 _GLUTAvailable = False
@@ -13,7 +14,10 @@ if not _PyQtAvailable and not _GLUTAvailable:
         _GLBackend = QtBackend()
         print "***  klampt.vis: using Qt as the visualization backend  ***"
     except ImportError:
-        print "QT is not available... try sudo apt-get install python-qt4 python-qt4-gl"
+        if sys.version_info[0] < 3:
+            print 'PyQt5 is not available... try running "pip install PyQt5" (Linux/Mac) or "pip install python-qt5" (Windows, 64-bit)'
+        else:
+            print 'PyQt5 is not available... try running "pip3 install PyQt5"'
         try:
             from OpenGL.GLUT import *
             from glutbackend import GLUTBackend
