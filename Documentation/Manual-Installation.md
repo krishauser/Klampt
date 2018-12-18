@@ -6,22 +6,23 @@ If you only need the Python API, you can install using pip.  Simply open up a co
 
 > pip install klampt
 
-or for Python 3.X, 
-
-> pip3 install klampt
-
 As of writing, pip packages are available for Linux (Python 2.7, 3.5, 3.6, 3.7), Windows (Python 2.7 and 3.7, 32- and 64-bit), and Mac OSX (Python 2.7 and 3.7).
 
 You should also obtain:
-- PyOpenGL for visualization ( [https://pypi.python.org/pypi/PyOpenGL/3.0.2](https://pypi.python.org/pypi/PyOpenGL/3.0.2)).
-- PyQt5 is highly recommended for resource editing and improved visualization.  PyQt4 is also supported for now, but at some point the package will be deprecated.
+- PyOpenGL for visualization.  Try `pip install PyOpenGL` ( [https://pypi.python.org/pypi/PyOpenGL/3.0.2](https://pypi.python.org/pypi/PyOpenGL/3.0.2)).
+- PyQt5 is highly recommended for resource editing and improved visualization.  Try `pip install PyQt5`. PyQt4 is also supported for now, but at some point the package will be deprecated.
 - Python Imaging Library (PIL) is required for saving screenshots to disk.
 
-You will also want to get the Klampt-examples repository 
+Python 2.7 Windows users will want to install the [correct binaries from here](https://www.lfd.uci.edu/~gohlke/pythonlibs/#pyqt4)
+
+You will also want to get the Klampt-examples repository to test your install, e.g.,:
 
 ```sh
 git clone https://github.com/krishauser/Klampt-examples
+cd Klampt-examples/Python/demos
+python kbdrive.py ../../data/tx90roll.xml
 ```
+
 
 ## Building from scratch, and C++ builds
 
@@ -75,10 +76,10 @@ sudo apt-get freeglut3 freeglut3-dev glpk python-opengl
 
 ```sh
 cd Klampt
-cd Library
+cd Cpp/Dependencies
 make unpack-deps
 make deps
-cd ..
+cd ../../
 cmake .
 make all
 sudo make python-install
@@ -88,7 +89,7 @@ sudo make python-install
 
 ## Windows
 
-Prebuilt binary executables and static libraries for VS2015 are available on the Klamp't website. Klamp't can also be built from source with Visual Studio 2012 (or Visual Studio 2010 SP1) and above.
+Prebuilt binary executables and static libraries for VS2015 are available on the Klamp't website. 
 
 **Step by step instructions to install the C++ applications from binaries**
 
@@ -97,8 +98,6 @@ From [http://klampt.org](http://klampt.org/), download and run the Win32 Klamp't
 **Step by step instructions to install the Python API from binaries**
 
 Follow the instructions at the top of this file.
-
-You may need to install the glut32.dll file from [http://user.xmission.com/~nate/glut.html](http://user.xmission.com/~nate/glut.html) into your SysWOW64 directory (if your machine is 64-bit, most newer machines) or System32 directory (for older 32-bit machines).
 
 
 **To build your own C++ applications that link to Klamp't**
@@ -142,18 +141,16 @@ python setup.py install
 
 **Building dependencies from source.**
 
-If you wish to build dependencies from scratch, Visual Studio project files are available. Make sure to place all compiled library (.lib) files in the Klampt/Library folder.  All libraries should be built in Win32 mode, with C++ code generation set to Multithreaded DLL / Multithreaded Debug DLL.
+If you wish to build dependencies from scratch, Visual Studio project files are available. Make sure to place all compiled library (.lib) files in the Klampt/Cpp/Dependencies folder.  All libraries should be built in Win32 mode, with C++ code generation set to Multithreaded DLL / Multithreaded Debug DLL.
 
 The general procedure is as follows:
 
-1. Acquire GLUT and optionally (but recommended) WinGLPK 4.61 and/or Assimp 3.0.1270. Place the glut32.lib, glew32.lib, glpk\_4\_61.lib files in Klampt/Library or in your Visual Studio path. Place the Assimp folder in Klampt/Library.
+1. Acquire GLEW and optionally (but recommended) WinGLPK 4.61 and/or Assimp 3.0.1270. Place the glew32.lib, glpk\_4\_61.lib files in Klampt/Cpp/Dependencies or in your Visual Studio path. Place the Assimp folder in Klampt/Library.
 2. Configure and edit dependencies as follows:
-    1. GLUI:  Visual Studio will complain about template instantiations inside class definitions in h; simply put these in the global namespace.  Also, if you are using GLUI rather than Qt4, due to Visual Studio's string range checking, GLUI will throw an assertion in Debug mode when an EditText is created.  To fix this, you will have to add several checks similar to this: `if(text.empty()) return 0;` in glui_edittext.cpp.
-    2. ODE: Set up build files with premake4 vs2010.
-3. Compile all dependencies except for KrisLibrary. Place all generated .lib files into the Klampt/Library directory.
+    1. ODE: Set up build files with premake4 vs2010.
+3. Compile all dependencies except for KrisLibrary. Place all generated .lib files into the Klampt/Cpp/Dependencies directory.
     1. ODE: compile in double precision, Static.
-    2. GLUI: compile as usual.
-    3. TinyXML: compile with STL support.
-4. Compile KrisLibrary last. CMake files are available for compiling KrisLibrary with/without Assimp support and with/without GLPK support. You may need to do some editing of the BOOST directories using CMake-GUI depending on how you built Boost.
+    2. TinyXML: compile with STL support.
+4. Compile KrisLibrary last. CMake files are available for compiling KrisLibrary with/without Assimp support and with/without GLPK support. 
 5. After compiling, all of the .dll files associated with dependency libraries should be placed in the appropriate Klamp't binary folders.
 

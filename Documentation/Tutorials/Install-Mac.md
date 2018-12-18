@@ -7,6 +7,27 @@ Difficulty: easy
 Time: 10-30 minutes
 
 
+- [Prebuilt Python libraries](#prebuilt-python-libraries)
+- [Mac OSX, from source](#mac-osx-from-source)
+- [Building the Python bindings](#building-the-python-bindings)
+
+
+# Prebuilt Python libraries
+
+For Python 2.7 and 3.7, you should be able to simply run
+
+- `pip install klampt`
+
+The current Klampt version is 0.8.0.
+
+To run a visualization, you will need PyOpenGL and PyQt5:
+- `pip install PyOpenGL`
+- `pip install PyQt5`
+- `git clone http://github.com/krishauser/Klampt-examples` (this is needed to run example programs)
+- `cd Klampt-examples/Python/demos`
+- `python gl_vis.py`
+
+
 # Mac OSX, from source
 
 1. You will need to install the Xcode Command Line Tools. To see if they are installed, run
@@ -32,7 +53,7 @@ Time: 10-30 minutes
 4. In the terminal, run
 
     ```
-    brew install assimp boost cmake ffmpeg freeglut glui homebrew/science/glpk python qt5 ode --with-double-precision
+    brew install assimp cmake ffmpeg freeglut glui homebrew/science/glpk python qt5 ode --with-double-precision
     ```
 
 5. Clone the Klamp't git repo:
@@ -44,13 +65,13 @@ Time: 10-30 minutes
 6. Make the Klamp't dependencies:
 
     ```
-    cd Klampt/Library; make unpack-deps; make deps
+    cd Klampt/Cpp/Dependencies; make unpack-deps; make deps
     ```
 
 7. Configure Klamp't via CMake
 
     ```
-    cd .. cmake .
+    cd ..\..\; cmake .
     ```
 
     or
@@ -60,6 +81,7 @@ Time: 10-30 minutes
     ```
 
     if you wish to have debugging information.
+	
 8. Compile the Klamp't static library:
 
     ```
@@ -72,13 +94,14 @@ Time: 10-30 minutes
     make apps
     ```
 
-    and test that they work:
+10. Obtain the Klampt-examples package and test whether the build works:
 
     ```
-    ./SimTest data/athlete_fractal_1.xml
+    git clone http://github.com/krishauser/Klampt-examples
+    bin/SimTest Klampt-examples/data/athlete_fractal_1.xml
     ```
 
-To install the Klamp't Python bindings:
+# Building the Python bindings
 1. Modify ~/.bash_profile as follows to use the homebrew version of Python:
 
     ```

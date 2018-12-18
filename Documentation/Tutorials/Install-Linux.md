@@ -6,28 +6,38 @@ Difficulty: easy
 
 Time: 10-30 minutes
 
+- [Prebuilt Python libraries](#prebuilt-python-libraries)
 - [Linux, from binaries](#linux-from-binaries)
 - [Linux, from source](#linux-from-source)
 
+## Prebuilt Python libraries
+
+For Python 2.7, 3.4, 3.5, 3.6, and 3.7, you should be able to simply run
+
+- `pip install klampt`
+
+The current Klampt version is 0.8.0.
+
+To run a visualization, you will need PyOpenGL and PyQt5:
+- `pip install PyOpenGL`
+- `pip install PyQt5`
+- `git clone http://github.com/krishauser/Klampt-examples` (this is needed to run example programs)
+- `cd Klampt-examples/Python/demos`
+- `python gl_vis.py`
+
 ## Linux, from binaries
 
-Compiled binary packages are available for the following systems:
-
-- [Linux x86, 64-bit Debian package](http://motion.pratt.duke.edu/software/Klampt-0.7.0-Linux.deb)
-- Linux x86, 64-bit Klamp't Python bindings, [for Python version 2.7](http://motion.pratt.duke.edu/software/Klampt-0.7.0-python2.7.x86_64.rpm)
-
-To compile your own programs, you will need the same dependencies as compiling from scratch. To save time compiling KrisLibrary, you can make use of the following compiled binary:
-Linux x86, 64-bit Debian package for KrisLibrary dependency
+Compiled binary packages are not yet available for Klampt 0.8.0.
 
 
 ## Linux, from source (recommended)
 
-The following commands will install Klamp't onto your system from source.
+The following commands will install Klamp't onto your system from source.  This will ensure that you have the latest updates.
 
-1. Make sure you have CMake, GLUT, GLPK, Boost C++ libraries, and Qt4 (or Qt5) on your system. On systems with apt-get, the following command will do the trick:
+1. Make sure you have CMake, GLPK, and Qt5 (or Qt4) on your system. On systems with apt-get, the following command will do the trick:
 
     ```
-    sudo apt-get install g++ cmake git libboost-system-dev libboost-thread-dev freeglut3 freeglut3-dev libglpk-dev python-dev python-opengl libxmu-dev libxi-dev libqt4-dev
+    sudo apt-get install g++ cmake git libglpk-dev python-dev python-opengl libxmu-dev libxi-dev libqt5-dev
     ```
 
 2. (recommended) Download and install Assimp using the following command line:
@@ -46,7 +56,7 @@ The following commands will install Klamp't onto your system from source.
 4. Make the Klamp't dependencies (KrisLibrary, TinyXML, ODE, GLEW, GLUI):
 
     ```
-    cd Klampt/Library; make unpack-deps; make deps
+    cd Klampt/Cpp/Dependencies; make unpack-deps; make deps
     ```
 
     If this step fails, some system-dependent configuration may need to be performed. Please consult the Installation section of the [Klamp't manual](../Manual-Installation.md) for help on resolving these issues.
@@ -55,7 +65,7 @@ The following commands will install Klamp't onto your system from source.
 5. Configure Klamp't via CMake:
 
     ```
-    cd ..
+    cd ../../
     cmake .
     ```
 
@@ -88,16 +98,18 @@ The following commands will install Klamp't onto your system from source.
     sudo apt-get install ffmpeg
     ```
 
-You're done! Try running the SimTest app:
+You're done! 
 
+Now download the examples and try running the SimTest app
 ```
-./SimTest data/athlete_fractal_1.xml
+git clone http://github.com/krishauser/Klampt-examples
+bin/SimTest Klampt-examples/data/athlete_fractal_1.xml
 ```
 
 Or run a simulation from the Python API:
 
 ```
-cd Python/demos
+cd Klampt-examples/Python/demos
 python kbdrive.py ../../data/tx90roll.xml
 ```
 
