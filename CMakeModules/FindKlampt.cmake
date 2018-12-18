@@ -12,6 +12,12 @@
 
 INCLUDE(KlamptDependencies)
 
+FIND_PATH(KLAMPT_INCLUDE_DIR
+	Klampt/Simulation/ODESimulator.h
+PATHS /usr/include/ /usr/local/include ${KLAMPT_ROOT}/include
+DOC "Directory where Klamp't header files are stored" )
+
+
 if(WIN32)
   IF(CMAKE_SIZEOF_VOID_P EQUAL 8)
     SET(KLAMPT_BUILD_DIR msvc64)
@@ -36,12 +42,6 @@ else()
   FIND_LIBRARY( KLAMPT_LIBRARY Klampt
 	      PATHS /usr/local/lib "${KLAMPT_ROOT}/lib")
 endif()
-
-FIND_PATH(KLAMPT_INCLUDE_DIR
-	Klampt/Simulation/ODESimulator.h
-PATHS /usr/include/ /usr/local/include ${KLAMPT_ROOT}/include
-DOC "Directory where Klamp't header files are stored" )
-
 
 #do the find_package call...
 include(FindPackageHandleStandardArgs)
