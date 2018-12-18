@@ -126,7 +126,7 @@ setup(name='Klampt',
       py_modules=['klampt.robotsim','klampt.plan.motionplanning'],
       packages=['klampt','klampt.io', 'klampt.math', 'klampt.model', 'klampt.model.create', 'klampt.plan', 'klampt.sim', 'klampt.vis', 'klampt.vis.ipython'],
       package_dir={'klampt': root_py_folder},
-      package_data={'klampt': ['data/*.html']},
+      package_data={'klampt': extra_shared_libraries + ['data/*.html']},
       scripts=script_files,
       classifiers=[
         "Programming Language :: Python :: 2.7",
