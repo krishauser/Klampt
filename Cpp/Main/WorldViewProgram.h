@@ -192,7 +192,7 @@ public:
 
 bool WorldViewProgram::LoadCommandLine(int argc,const char** argv)
 {
-  return LoadWorldCommandLine(*world, argc, argv));
+  return LoadWorldCommandLine(*world, argc, argv);
 }
 
 
