@@ -7,7 +7,8 @@ import glob
 import sys
 
 scripts_folder = 'bin'
-root_py_folder = 'klampt'
+src_folder = """${CMAKE_SOURCE_DIR}/Python/klampt/src"""
+root_py_folder = """${CMAKE_SOURCE_DIR}/Python/klampt"""
 if sys.version_info[0] == 3:
     root_py_folder = 'python3_version/klampt'
     scripts_folder = 'python3_version/bin'
@@ -18,7 +19,33 @@ includeDirs = """${KLAMPT_INCLUDE_DIRS}""".split(';')
 libs = """${KLAMPT_ABSOLUTE_LIBRARIES}""".split(';')
 defs = """${KLAMPT_DEFINITIONS}""".split(';')
 
+extra_shared_libraries = []
+extra_compile_args = []
+if sys.platform == 'win32':
+	import shutil
+	extra_shared_libraries = """${KLAMPT_EXTRA_DLLS}""".split(';')
+	for fn in extra_shared_libraries:
+		shutil.copy(os.path.join("""${KLAMPT_DEPENDENCY_LIB_DIR}""",fn),os.path.join(root_py_folder,fn))
+else:
+	extra_compile_args = ['-std=c++11']
+			
 #Parse libraries
+if sys.platform == 'win32':
+	optlibs = []
+	skipone = False
+	for i,l in enumerate(libs):
+		if skipone: 
+			skipone = False
+			continue
+		skipone = False
+		if l == 'optimized':
+			optlibs.append(libs[i+1])
+			skipone = True
+		elif l == 'debug':
+			skipone = True
+		else:
+			optlibs.append(l)
+	libs = optlibs
 libdirs = []
 libnames = []
 for l in libs:
@@ -31,6 +58,8 @@ for l in libs:
 	elif fn.endswith('lib'):
 		name = fn.split('.')[0]
 		libnames.append(name)
+	else:
+		libnames.append(fn)
 libs = libnames
 
 #Parse definitions
@@ -66,31 +95,31 @@ setup(name='Klampt',
       author_email='kris.hauser@duke.edu',
       url='https://github.com/krishauser/Klampt',
       ext_modules=[Extension('klampt._robotsim',
-                             [os.path.join('klampt/src',f) for f in rssourcefiles],
+                             [os.path.join(src_folder,f) for f in rssourcefiles],
                              include_dirs=includeDirs,
                              define_macros=commondefines,
                              library_dirs=libdirs,
                              libraries=libs,
                              extra_link_args=extra_link_args,
-                             extra_compile_args=['-std=c++11'],
+                             extra_compile_args=extra_compile_args,
                              language='c++'),
                    Extension('klampt.plan._motionplanning',
-                             [os.path.join('klampt/src',f) for f in mpsourcefiles],
+                             [os.path.join(src_folder,f) for f in mpsourcefiles],
                              include_dirs=includeDirs,
                              define_macros=commondefines,
                              library_dirs=libdirs,
                              libraries=libs,
                              extra_link_args=extra_link_args,
-                             extra_compile_args=['-std=c++11'],
+                             extra_compile_args=extra_compile_args,
                              language='c++'),
                    #Extension('klampt.math._rootfind',
-                   #          [os.path.join('klampt/src',f) for f in rfsourcefiles],
+                   #          [os.path.join(src_folder,f) for f in rfsourcefiles],
                    #          include_dirs=includeDirs,
                    #          define_macros=commondefines,
                    #          library_dirs=libdirs,
                    #          libraries=libs,
                    #          extra_link_args=extra_link_args,
-                   #          extra_compile_args=['-std=c++11'],
+                   #          extra_compile_args=extra_compile_args,
                    #          language='c++'),
                    ],
       #py_modules=['klampt.robotsim','klampt.plan.motionplanning','klampt.math.rootfind'],

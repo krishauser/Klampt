@@ -69,13 +69,39 @@ SET(KLAMPT_DEFINITIONS ${KLAMPT_DEFINITIONS} CACHE STRING "Klamp't compiler defi
 SET(KLAMPT_LIBRARIES ${KLAMPT_LIBRARIES} CACHE STRING "Klamp't link libraries" FORCE)
 
 #add Klamp't onto KLAMPT_LIBRARIES, add Klampt/include onto KLAMPT_INCLUDE_DIRS
-SET(KLAMPT_LIBRARIES Klampt ${KLAMPT_LIBRARIES})
+SET(KLAMPT_LIBRARIES ${KLAMPT_LIBRARY} ${KLAMPT_LIBRARIES})
 
 #needed for python build
+if(WIN32)
+  SET(KLAMPT_ABSOLUTE_LIBRARIES ${CMAKE_BINARY_DIR}/lib/Release/Klampt.lib ${KLAMPT_LIBRARIES})
+else(WIN32)
+  SET(KLAMPT_ABSOLUTE_LIBRARIES "Klampt.a" ${KLAMPT_LIBRARIES})
+endif(WIN32)
+
+
+#helper function
+FUNCTION(PREPEND var prefix items)
+   SET(listVar "")
+   FOREACH(f items)
+      LIST(APPEND listVar "${prefix}/${f}")
+   ENDFOREACH(f)
+   SET(${var} "${listVar}" PARENT_SCOPE)
+   UNSET(listVar)
+ENDFUNCTION(PREPEND)
+
 IF(WIN32)
-  SET(KLAMPT_ABSOLUTE_LIBRARIES ${CMAKE_BINARY_DIR}/lib/libKlampt.a ${KLAMPT_LIBRARIES})
+	#need to install Assimp, GLPK, glew dlls
+  IF(CMAKE_SIZEOF_VOID_P EQUAL 8)
+    SET(KLAMPT_EXTRA_DLLS Assimp64.dll glpk_4_61.dll glew32.dll)
+  ELSE()
+    SET(KLAMPT_EXTRA_DLLS Assimp32.dll glpk_4_61.dll glew32.dll)
+  ENDIF()
+  PREPEND(KLAMPT_EXTRA_DLLS_ABS ${KLAMPT_DEPENDENCY_LIB_DIR} ${KLAMPT_EXTRA_DLLS})
+  SET(KLAMPT_EXTRA_DLLS_ABS ${KLAMPT_EXTRA_DLLS_ABS} CACHE STRING "Extra DLLs for windows build")
+  install(FILES ${KLAMPT_EXTRA_DLLS_ABS} DESTINATION bin COMPONENT apps)
 ELSE(WIN32)
-  SET(KLAMPT_ABSOLUTE_LIBRARIES ${CMAKE_BINARY_DIR}/lib/libKlampt.lib ${KLAMPT_LIBRARIES})
+	#install to /opt/klampt-X.Y.Z
+    SET(CMAKE_INSTALL_PREFIX "/opt/klampt-${KLAMPT_MAJOR_VERSION}.${KLAMPT_MINOR_VERSION}.${KLAMPT_PATCH_VERSION}" CACHE INTERNAL "Prefix prepended to install directories" FORCE)
 ENDIF(WIN32)
 
 ####### Copy headers from Cpp/* to include/Klampt/* #######
@@ -114,9 +140,6 @@ ENDIF(NOT USE_QT5_APPS AND NOT USE_QT4_APPS)
 
 ADD_SUBDIRECTORY(Cpp/Main)
 
-####### Klamp't Examples #########
-ADD_SUBDIRECTORY(Cpp/Examples)
-
 ####### Klamp't Documentation #########
 FIND_PACKAGE(Doxygen)
 IF(DOXYGEN_FOUND)
@@ -152,39 +175,11 @@ foreach(s ${SUBDIRS})
     DESTINATION include/Klampt/${s}
     COMPONENT headers)
 endforeach(s)
-install(DIRECTORY data
-    DESTINATION .
-    COMPONENT datafiles)
 install(DIRECTORY Documentation
     DESTINATION .
     COMPONENT documentation)
 
 #examples and apps already added
-
-IF(WIN32)
-	#need to install Assimp, GLPK, glut32 dlls
-	install(FILES Library/Assimp32.dll Library/glpk_4_61.dll Library/glut32.dll Library/glew32.dll
-		DESTINATION bin
-		COMPONENT apps)
-ELSE(WIN32)
-	#install to /opt/klampt-X.Y
-    SET(CMAKE_INSTALL_PREFIX "/opt/klampt-${KLAMPT_MAJOR_VERSION}.${KLAMPT_MINOR_VERSION}.${KLAMPT_PATCH_VERSION}" CACHE INTERNAL "Prefix prepended to install directories" FORCE)
-
-ENDIF(WIN32)
-
-#python demos
-install(DIRECTORY Python/demos
-    DESTINATION Python
-    COMPONENT pythonexamples)
-install(DIRECTORY Python/exercises
-    DESTINATION Python
-    COMPONENT pythonexamples)
-install(DIRECTORY Python/control
-    DESTINATION Python
-    COMPONENT pythonexamples)
-install(DIRECTORY Python/utils
-    DESTINATION Python
-    COMPONENT pythonexamples)
 
 if((NOT WIN32) AND KLAMPT_COMPILE_TESTS)
   enable_testing()
@@ -205,12 +200,7 @@ MESSAGE (STATUS "Compile everything using: make\n")
 MESSAGE (STATUS "Compile Klampt lib using: make Klampt\n")
 MESSAGE (STATUS "Compile apps using: make apps OR make [appname]")
 MESSAGE (STATUS "  Possible values for [appname]:")
-MESSAGE (STATUS "    RobotTest, SimTest, RobotPose, MotorCalibrate,")
-MESSAGE (STATUS "    URDFtoRob, SimUtil, TrajOpt, Merge, or Pack\n")
-MESSAGE (STATUS "Compile examples using: make examples OR make [examplename]")
-MESSAGE (STATUS "  Possible values for [examplename]:")
-MESSAGE (STATUS "    IKDemo, PlanDemo, DynamicPlanDemo, ContactPlan,")
-MESSAGE (STATUS "    UserTrials, or RealTimePlanning\n")
+MESSAGE (STATUS "    " ${APPS})
 MESSAGE (STATUS "Compile Python API using: make python")
 MESSAGE (STATUS "Compile API-documentation using: make docs\n")
 MESSAGE (STATUS "Compile Python API-documentation using: make python-docs\n")
