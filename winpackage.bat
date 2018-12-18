@@ -1,6 +1,8 @@
 :: 
 :: script that builds and uploads everything on Windows Visual Studio 2015
 :: (assumes CMake is set up properly, Python is installed, etc)
+:: (assumes this is run on an administrator developer command prompt)
+:: (assumes zip and pscp command line tools are available.  See the GnuWin32 zip tool and PuTTy)
 
 :: configuration variables
 SET klamptversion=0.8.0
@@ -102,7 +104,7 @@ for %%P in (%PYTHON27_64%, %PYTHON37_64%) do (
 set depfolder=Klampt-%klamptversion%.win32-deps-vs2015
 mkdir %depfolder%
 cd Cpp\Dependencies
-for %I in (assimp--3.0.1270-sdk\lib\assimp_release-dll_win32\* Assimp32.dll glpk_4_61.dll glpk_4_61.lib glew32.dll glew32.lib KrisLibrary.lib ode_double.lib tinyxml_STL.lib) do copy /Y %I ..\..\%depfolder%
+for %%I in (assimp--3.0.1270-sdk\lib\assimp_release-dll_win32\* Assimp32.dll glpk_4_61.dll glpk_4_61.lib glew32.dll glew32.lib KrisLibrary.lib ode_double.lib tinyxml_STL.lib) do copy /Y %%I ..\..\%depfolder%
 if %errorlevel% neq 0 exit /b %errorlevel%
 cd ..\..
 cd %depfolder%
@@ -114,7 +116,7 @@ if %errorlevel% neq 0 exit /b %errorlevel%
 set depfolder=Klampt-%klamptversion%.win32-deps-vs2015d
 mkdir %depfolder%
 cd Cpp\Dependencies
-for %I in (assimp--3.0.1270-sdk\lib\assimp_debug-dll_win32\* Assimp32d.dll  glpk_4_61.dll glpk_4_61.lib glew32.dll glew32.lib KrisLibraryd.lib ode_doubled.lib ode-0.14\lib\DebugDoubleLib\ode.pdb tinyxmld_STL.lib) do copy /Y %I ..\..\%depfolder%
+for %%I in (assimp--3.0.1270-sdk\lib\assimp_debug-dll_win32\* Assimp32d.dll  glpk_4_61.dll glpk_4_61.lib glew32.dll glew32.lib KrisLibraryd.lib ode_doubled.lib ode-0.14\lib\DebugDoubleLib\ode.pdb tinyxmld_STL.lib) do copy /Y %%I ..\..\%depfolder%
 if %errorlevel% neq 0 exit /b %errorlevel%
 cd ..\..
 cd %depfolder%
@@ -126,7 +128,7 @@ if %errorlevel% neq 0 exit /b %errorlevel%
 set depfolder=Klampt-%klamptversion%.win64-deps-vs2015
 mkdir %depfolder%
 cd Cpp\Dependencies
-for %I in (assimp--3.0.1270-sdk\lib\assimp_release-dll_x64\* x64\Assimp64.dll glpk_4_61.dll glpk_4_61.lib glew32.dll glew32.lib x64\KrisLibrary.lib x64\ode_double.lib x64\tinyxml_STL.lib) do copy /Y %I ..\..\%depfolder%
+for %%I in (assimp--3.0.1270-sdk\lib\assimp_release-dll_x64\* x64\Assimp64.dll glpk_4_61.dll glpk_4_61.lib glew32.dll glew32.lib x64\KrisLibrary.lib x64\ode_double.lib x64\tinyxml_STL.lib) do copy /Y %%I ..\..\%depfolder%
 if %errorlevel% neq 0 exit /b %errorlevel%
 cd ..\..
 cd %depfolder%
@@ -138,7 +140,7 @@ if %errorlevel% neq 0 exit /b %errorlevel%
 set depfolder=Klampt-%klamptversion%.win64-deps-vs2015d
 mkdir %depfolder%
 cd Cpp\Dependencies
-for %I in (assimp--3.0.1270-sdk\lib\assimp_release-dll_x64\* x64\Assimp64d.dll glpk_4_61.dll glpk_4_61.lib glew32.dll glew32.lib x64\KrisLibraryd.lib x64\ode_doubled.lib x64\tinyxmld_STL.lib) do copy /Y %I ..\..\%depfolder%
+for %%I in (assimp--3.0.1270-sdk\lib\assimp_release-dll_x64\* x64\Assimp64d.dll glpk_4_61.dll glpk_4_61.lib glew32.dll glew32.lib x64\KrisLibraryd.lib x64\ode_doubled.lib x64\tinyxmld_STL.lib) do copy /Y %%I ..\..\%depfolder%
 if %errorlevel% neq 0 exit /b %errorlevel%
 cd ..\..
 cd %depfolder%
@@ -150,18 +152,18 @@ if %errorlevel% neq 0 exit /b %errorlevel%
 
 :: upload files to motion website
 cd %buildfolder%
-scp Klampt-%klamptversion%-win32.msi hauser@motion.pratt.duke.edu:software/
+pscp Klampt-%klamptversion%-win32.msi hauser@motion.pratt.duke.edu:software/
 :: Qt5 doesn't have a 64-bit version
-:: scp Klampt-%klamptversion%-win64.msi hauser@motion.pratt.duke.edu:software/
+:: pscp Klampt-%klamptversion%-win64.msi hauser@motion.pratt.duke.edu:software/
 if %errorlevel% neq 0 exit /b %errorlevel%
 cd ..
-scp Klampt-%klamptversion%.win32-deps-vs2015.zip hauser@motion.pratt.duke.edu:software/
-scp Klampt-%klamptversion%.win32-deps-vs2015d.zip hauser@motion.pratt.duke.edu:software/
-scp Klampt-%klamptversion%.win64-deps-vs2015.zip hauser@motion.pratt.duke.edu:software/
-scp Klampt-%klamptversion%.win64-deps-vs2015d.zip hauser@motion.pratt.duke.edu:software/
+pscp Klampt-%klamptversion%.win32-deps-vs2015.zip hauser@motion.pratt.duke.edu:software/
+pscp Klampt-%klamptversion%.win32-deps-vs2015d.zip hauser@motion.pratt.duke.edu:software/
+pscp Klampt-%klamptversion%.win64-deps-vs2015.zip hauser@motion.pratt.duke.edu:software/
+pscp Klampt-%klamptversion%.win64-deps-vs2015d.zip hauser@motion.pratt.duke.edu:software/
 if %errorlevel% neq 0 exit /b %errorlevel%
 cd Python\dist
-scp Klampt-%klamptversion%*.whl hauser@motion.pratt.duke.edu:software/
+pscp Klampt-%klamptversion%*.whl hauser@motion.pratt.duke.edu:software/
 cd ..\..\
 
 

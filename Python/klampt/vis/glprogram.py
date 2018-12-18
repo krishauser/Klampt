@@ -170,6 +170,7 @@ class GLProgram:
         Note: might not return, in the case of GLUT.
         """
         import visualization
+        visualization.setWindowTitle(self.name)
         visualization.run(self)
 
     def initialize(self):
