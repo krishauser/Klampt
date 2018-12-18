@@ -50,12 +50,22 @@ More information can be found on the Klamp't website (http://klampt.org)
 
 ## Installation
 
-An installation tutorial is available for
+Quick start (Python API only):
+- `pip install klampt`
+
+To run a visualization:
+- `pip install PyOpenGL`
+- `pip install PyQt5`
+- `git clone http://github.com/krishauser/Klampt-examples` (this is needed to run example programs)
+- `cd Klampt-examples/Python/demos`
+- `python gl_vis.py`
+
+Installation tutorials are also available for
 - [Linux](Documentation/Tutorials/Install-Linux.md)
 - [Windows](Documentation/Tutorials/Install-Windows.md)
 - [Mac OSX](Documentation/Tutorials/Install-Mac.md).
-
-You can also use Docker [as described here](Documentation/Install-Docker.md).
+- [Jupyter notebook](Jupyter/README.md)
+- [Docker](Documentation/Install-Docker.md).
 
 
 ## Documentation
@@ -114,7 +124,22 @@ Tutorials are available in the [Tutorials folder](Documentation/Tutorials), with
 
 ## Version history
 
-**0.7 Latest version** (3/24/2017)
+**0.8 Latest version** (12/17/2018)
+-	Cleaner file structure, with C++ files in the Cpp directory.
+-	Improved build system for Python, allowing easy installation via pip install python.
+-	Integration with Jupyter Notebook 
+-	Added Python utility programs (klampt_browse, klampt_sim, klampt_thumbnail).
+-	Improvements support Python visualization on Mac.
+-	Upgraded to PyQt5.  PyQt4 is still supported for now.
+-	Geometry conversions exposed in Python via the convert function.
+-	Improved usage of some graphics card resources for streaming point clouds.
+-	Support for LOG4CXX logging.
+-	Removed dependencies on Boost and upgraded to C++11.
+-	Removed dependencies on GLUT and GLUI.  (Some examples still need to be upgraded to Qt.)
+-	Cleaned up some cruft in KrisLibrary.
+
+
+**0.7** (3/24/2017)
 
 - Improved simulation stability, including adaptive time stepping and instability detection/recovery.
 - The proprietary `.tri` geometry file format has been replaced with the Object File Format (OFF) for better compatibility with 3D modeling packages.
