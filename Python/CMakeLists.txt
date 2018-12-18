@@ -43,12 +43,12 @@ IF(PYTHON)
 
   add_custom_command(
     OUTPUT python3_version
+    COMMAND mkdir python3_version
     COMMAND cp -r klampt/data python3_version/klampt/
     COMMAND 2to3 --output-dir=python3_version/klampt -W -n klampt
   )
   add_custom_command(
     OUTPUT ${OUTPUT}/python3_timestamp
-    COMMAND ${CMAKE_COMMAND} -E remove build/
     COMMAND ${PYTHON3} setup.py build_ext
     COMMAND ${CMAKE_COMMAND} -E touch ${TEMPOUTPUT}/python3_timestamp
     DEPENDS ${DEPS} python3_version
