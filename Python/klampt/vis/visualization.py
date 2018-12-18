@@ -3086,18 +3086,17 @@ if _PyQtAvailable:
                     w.glwindow.show()
                     w.guidata.show()
                 if w.mode == 'hidden' and w.guidata != None:
+                    #prevent deleting the GL window
+                    if hasattr(w.guidata,'detachGLWindow'):
+                        w.guidata.detachGLWindow()
+                    else:
+                        w.guidata.setParent(None)
                     if w.guidata.isVisible():
                         print "#########################################"
                         print "klampt.vis: Hiding window",i
                         print "#########################################"
-                        if hasattr(w.guidata,'detachGLWindow'):
-                            w.guidata.detachGLWindow()
-                        else:
-                            w.guidata.setParent(None)
                         w.glwindow.hide()
                         w.guidata.hide()
-                    #prevent deleting the GL window
-                    w.guidata.detachGLWindow()
                     w.guidata.close()
                     w.guidata = None
             _globalLock.release()
@@ -3338,20 +3337,22 @@ def _dialog():
             raise RuntimeError("Can't call dialog() inside loop().  Try dialogInLoop() instead.")
         #just show the dialog and let the thread take over
         assert _windows[_current_window].mode == 'hidden',"dialog() called inside dialog?"
-        if _in_app_thread:
-            _globalLock.acquire()
-            _windows[_current_window].mode = 'dialog'
-            _windows[_current_window].worlds = _current_worlds
-            _windows[_current_window].active_worlds = _current_worlds[:]
-            _globalLock.release()
-        #TODO: not so sure how this will work out
-        if not _in_app_thread:
-            print "vis.dialog(): Waiting for dialog to complete...."
+        print "#########################################"
+        print "klampt.vis: Creating dialog on window",_current_window
+        print "#########################################"
+        _globalLock.acquire()
+        _windows[_current_window].mode = 'dialog'
+        _windows[_current_window].worlds = _current_worlds
+        _windows[_current_window].active_worlds = _current_worlds[:]
+        _globalLock.release()
+
+        if not _in_app_thread or threading.current_thread().__class__.__name__ == '_MainThread':
+            print "vis.dialog(): Waiting for dialog on window",_current_window,"to complete...."
             while _windows[_current_window].mode == 'dialog':
                 time.sleep(0.1)
-            print "vis.dialog(): ... dialog done."
+            print "vis.dialog(): ... dialog done, status is now",_windows[_current_window].mode
         else:
-            #this is called from another dialog or window!
+            #called from another dialog or window!
             print "vis: Creating a dialog from within another dialog or window"
             _globalLock.acquire()
             w = _windows[_current_window]
@@ -3407,9 +3408,11 @@ def _dialog():
 def _set_custom_ui(func):
     global _windows,_current_window,_vis_thread_running
     if len(_windows)==0:
+        print "Making first window for custom ui"
         _windows.append(WindowInfo(_window_title,_frontend,_vis,None))
         _current_window = 0
     _windows[_current_window].custom_ui = func
+    print "setting custom ui on window",_current_window
     return
 
 def _onFrontendChange():

@@ -807,9 +807,9 @@ if glinit._PyQtAvailable:
     else:
         from PyQt4.QtCore import *
         from PyQt4.QtGui import *
+    global _vis_id,_my_dialog_res,_doexit
     _vis_id = None
     _my_dialog_res = None
-    _my_dialog_retval = None
     _doexit = False
 
     class _EditDialog(QDialog):
@@ -876,14 +876,14 @@ if glinit._PyQtAvailable:
             global _my_dialog_res
             _my_dialog_res = True
             print "#########################################"
-            print "klampt.vis: Dialog accept"
+            print "klampt.vis: EditDialog accept"
             print "#########################################"
             return QDialog.accept(self)
         def reject(self):
             global _my_dialog_res
             _my_dialog_res = False
             print "#########################################"
-            print "klampt.vis: Dialog reject"
+            print "klampt.vis: EditDialog reject"
             print "#########################################"
             return QDialog.reject(self)
 
@@ -893,7 +893,7 @@ if glinit._PyQtAvailable:
         and value is the return value of the editor object
         """
         assert isinstance(editorObject,VisualEditorBase),"Must provide a VisualEditorBase instance to vis.editors.run()"
-        global _vis_id, _my_dialog_res, _my_dialog_retval
+        global _vis_id, _my_dialog_res
 
         old_vis_window = visualization.getWindow()
         if _vis_id == None:
@@ -910,6 +910,7 @@ if glinit._PyQtAvailable:
         visualization.customUI(makefunc)
         visualization.dialog()
         res,retVal = _my_dialog_res,editorObject.value
+        assert res is not None,"vis.editors.run(): There may be something wrong with the vis module not catching the customUI, or terminating from a prior dialog?"
 
         if _doexit:
             visualization.kill()
