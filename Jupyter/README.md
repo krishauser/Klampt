@@ -1,35 +1,41 @@
 # Klampt-jupyter-extension
 
-A [Jupyter notebook](http://jupyter.org) extension for [Klamp't](https://github.com/krishauser/Klampt).
+This folder contains the [Jupyter notebook](http://jupyter.org) extension for [Klamp't](https://github.com/krishauser/Klampt).
 
 ## Installation
 
 To make any use of this extension, you will need to install:
 
 - [Jupyter notebook](http://jupyter.org) 
-- Klamp't: follow the [installation instructions here](https://github.com/krishauser/Klampt).
+- Klamp't Python API (try `pip install klampt`)
 
 To install the extension, you can simply enter
 
-`sudo make all`
+`sudo make install`
 
 in this directory.
 
 For more control, you can use the following Makefile targets:
 
-- `wurlitzer`: The wurlitzer library for capturing C++ output in Python.  This is not strictly needed
-- `python`: Installs the ipyklampt python extension.
-- `jupyter`: Installs the Jupyter notebook extension.
+- `install-user`: Installs this in the Jupyter user prefix
+- `install-wurlitzer`: The wurlitzer library for capturing C++ output in Python.  This is not strictly needed, but is nice to have
 
 ## Usage
 
-Once installed, the Javascript frontend widget can be created by a `KlamptWidget`, which is defined in the `ipyklampt` module. 
-Try typing `help(ipyklampt.KlamptWidget)` for more help.  The ipyklampt module also contains useful helper widgets for editing robot configurations and points.
+The best way to learn how to use this extension is to study the example notebooks in the Jupyter subdirectory of the [Klamp't examples](https://github.com/krishauser/Klampt-examples) package.
+Run:
 
-The best way to learn how to use this extension is to study the example notebooks, which are found in the [examples](examples/) subdirectory.
+> git clone https://github.com/krishauser/Klampt-examples
 
-Auto-generated [documentation for the ipyklampt module can be found here](https://htmlpreview.github.io/?https://github.com/krishauser/Klampt-jupyter-extension/blob/master/widgets.html).
+And then launch Jupyter:
 
+> cd Klampt-examples/Jupyter
+> jupyter notebook
+
+The Jupyter frontend widget can be created by a `KlamptWidget`, which is defined in the `klampt.vis.ipython` module. 
+Try typing `help(klampt.vis.ipython.KlamptWidget)` for more help.  The `klampt.vis.ipython` module also contains useful helper widgets for editing robot configurations and points.
+
+Auto-generated [documentation for the klampt.vis.ipython module can be found here](http://motion.pratt.duke.edu/klampt/pyklampt_docs/ipython_8py.html).
 
 ## Version history
 
