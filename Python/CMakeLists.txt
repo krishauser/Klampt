@@ -7,6 +7,7 @@ if(NOT KLAMPT_ROOT)
 endif( )
 
 find_program(PYTHON "python")
+find_program(PYTHON3 "python3")
 
 SET(TEMPOUTPUT CMakeFiles)
 #make these dependent on all klampt module source files, Klampt, and Klampt's dependency libraries
@@ -41,20 +42,22 @@ IF(PYTHON)
 
   add_custom_command(
     OUTPUT python3_version
+    COMMAND cp klampt/src/*.h python3_version/klampt/src
+    COMMAND cp klampt/src/*.cpp python3_version/klampt/src
+    COMMAND cp klampt/src/*.cxx python3_version/klampt/src
     COMMAND 2to3 --output-dir=python3_version/klampt -W -n klampt
     COMMAND 2to3 --output-dir=python3_version/utils -W -n utils
-    COMMAND 2to3 --output-dir=python3_version/demos -W -n demos
   )
   add_custom_command(
     OUTPUT ${OUTPUT}/python3_timestamp
-    COMMAND rm -rf build/
-    COMMAND python3 setup.py build_ext
+    COMMAND ${CMAKE_COMMAND} -E remove build/
+    COMMAND ${PYTHON3} setup.py build_ext
     COMMAND ${CMAKE_COMMAND} -E touch ${TEMPOUTPUT}/python3_timestamp
     DEPENDS ${DEPS} python3_version
   )
   add_custom_command(
     OUTPUT ${OUTPUT}/python3_install_timestamp
-    COMMAND python3 setup.py install
+    COMMAND ${PYTHON3} setup.py install
     COMMAND ${CMAKE_COMMAND} -E touch ${TEMPOUTPUT}/python3_install_timestamp
     DEPENDS ${DEPS}
   )
