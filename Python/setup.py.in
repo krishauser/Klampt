@@ -6,12 +6,12 @@ import os
 import glob
 import sys
 
-scripts_folder = 'bin'
-src_folder = """${CMAKE_SOURCE_DIR}/Python/klampt/src"""
-root_py_folder = """${CMAKE_SOURCE_DIR}/Python/klampt"""
+scripts_folder = "bin"
+src_folder = "klampt/src"
+root_py_folder = "klampt"
 if sys.version_info[0] == 3:
-    root_py_folder = 'python3_version/klampt'
-    scripts_folder = 'python3_version/bin'
+    root_py_folder = "python3_version/klampt"
+    scripts_folder = "python3_version/bin"
 script_files = [os.path.join(scripts_folder,f) for f in ['klampt_sim','klampt_browser','klampt_thumbnails']]
 
 #Parse settings from CMake
