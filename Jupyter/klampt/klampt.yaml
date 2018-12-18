@@ -1,0 +1,6 @@
+Type: IPython Notebook Extension
+Name: klampt
+Link: README.md
+Description: Klamp't Widget for use with klampt.vis.jupyter
+Main: main.js
+Compatibility: 4.x, 5.x
