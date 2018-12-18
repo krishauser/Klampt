@@ -1,6 +1,7 @@
 #if HAVE_GLUI
 
 #include <KrisLibrary/Logger.h>
+#include <KrisLibrary/GLdraw/GLUTString.h>
 #include "GLUIGUI.h"
 #include <limits.h>
 #include <sstream>
@@ -9,7 +10,7 @@
 #include <iostream>
 
 #if defined (__APPLE__) || defined (MACOSX)
-#include <glui.h>
+#include <GL/glui.h>
 #else
 #include <GL/glui.h>
 #endif //__APPLE__ || MACOSX

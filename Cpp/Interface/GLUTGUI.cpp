@@ -6,6 +6,7 @@
 #else
 #include <GL/glut.h>
 #endif
+#include <KrisLibrary/GLdraw/GLUTString.h>
 #include <limits.h>
 #include <assert.h>
 #include <iostream>

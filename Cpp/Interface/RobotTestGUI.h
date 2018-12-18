@@ -86,7 +86,7 @@ public:
 #if HAVE_GLUI
 
 #if defined (__APPLE__) || defined (MACOSX)
-#include <glui.h>
+#include <GL/glui.h>
 #else
 #include <GL/glui.h>
 #endif //__APPLE__ || MACOSX
