@@ -2,11 +2,6 @@
 
 #include <QFileDialog>
 #include "mainwindow.h"
-#ifdef __APPLE__
-#include <GLUT/glut.h>
-#else
-#include <GL/glut.h>
-#endif
 #include "QDebug"
 #include <QSettings>
 
@@ -19,15 +14,13 @@ string toStdString(const QString& s)
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
-    //needed for GLUTBitmapCharacter
-    glutInit(&argc,argv);
     QString filename;
     //inithome directory
     //load settings from qsetings ini
     QCoreApplication::setOrganizationName("Klampt");
     QCoreApplication::setOrganizationDomain("klampt.org");
     QCoreApplication::setApplicationName("SimTest");
-    QCoreApplication::setApplicationVersion("0.7");
+    QCoreApplication::setApplicationVersion("0.8.0");
     QSettings ini(QSettings::IniFormat, QSettings::UserScope,
 		  QCoreApplication::organizationName(),
 		  QCoreApplication::applicationName());

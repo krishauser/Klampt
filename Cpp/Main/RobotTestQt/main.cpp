@@ -3,25 +3,16 @@
 #include "mainwindow.h"
 #include "QDebug"
 #include <QSettings>
-/*
-#ifdef __APPLE__
-#include <GLUT/glut.h>
-#else
-#include <GL/glut.h>
-#endif
-*/
 
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
-    //needed for GLUTBitmapCharacter
-    //glutInit(&argc,argv);
     QString filename;
     //load settings from qsetings ini
     QCoreApplication::setOrganizationName("Klampt");
     QCoreApplication::setOrganizationDomain("klampt.org");
     QCoreApplication::setApplicationName("RobotTest");
-    QCoreApplication::setApplicationVersion("0.7");
+    QCoreApplication::setApplicationVersion("0.8");
     QSettings ini(QSettings::IniFormat, QSettings::UserScope,
 		  QCoreApplication::organizationName(),
 		  QCoreApplication::applicationName());
