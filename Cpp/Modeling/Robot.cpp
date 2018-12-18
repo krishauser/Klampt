@@ -1693,7 +1693,7 @@ bool Robot::CheckValid() const {
         || drivers[i].type == RobotJointDriver::Affine) {
       for (size_t j = 0; j < drivers[i].linkIndices.size(); j++) {
         if (drivenLink[drivers[i].linkIndices[j]] >= 0) {
-          LOG4CXX_ERROR(GET_LOGGER(Robot), "Driver " << i << "affects an already driven link, "<< drivers[i].linkIndices[j] <<" driven by", drivenLink[drivers[i].linkIndices[j]]);
+          LOG4CXX_ERROR(GET_LOGGER(Robot), "Driver " << i << "affects an already driven link, "<< drivers[i].linkIndices[j] <<" driven by" << drivenLink[drivers[i].linkIndices[j]]);
           return false;
         }
         drivenLink[drivers[i].linkIndices[j]] = (int)i;
@@ -1702,7 +1702,7 @@ bool Robot::CheckValid() const {
         || drivers[i].type == RobotJointDriver::Rotation) {
       //only the first linkindex is actually driven
       if (drivenLink[drivers[i].linkIndices[0]] >= 0) {
-        LOG4CXX_ERROR(GET_LOGGER(Robot), "Driver " << i << "affects an already driven link, " << drivers[i].linkIndices[0] << " driven by", drivenLink[drivers[i].linkIndices[0]]);
+        LOG4CXX_ERROR(GET_LOGGER(Robot), "Driver " << i << "affects an already driven link, " << drivers[i].linkIndices[0] << " driven by" << drivenLink[drivers[i].linkIndices[0]]);
         return false;
       }
       drivenLink[drivers[i].linkIndices[0]] = (int)i;
