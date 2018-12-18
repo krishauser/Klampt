@@ -75,7 +75,7 @@ void RobotController::SetTorqueCommand(const Vector& torques)
     }
   }
   else {
-    FatalError("RobotController::SetTorqueCommand: invalid vector size: %d\n",torques.size());
+    FatalError("RobotController::SetTorqueCommand: invalid vector size: %d\n",(int)torques.size());
   }
 }
 
@@ -95,7 +95,7 @@ bool RobotController::GetCommandedConfig(Config& q)
     if(command->actuators[i].mode == ActuatorCommand::PID)
       robot.SetDriverValue(i,command->actuators[i].qdes);
     else {
-      fprintf(stderr,"RobotController::GetCommandedConfig: driver %d is not in PID mode",i);
+      LOG4CXX_WARN(KrisLibrary::logger(), "RobotController::GetCommandedConfig: driver " << i << " is not in PID mode");
       return false;
     }
   }
@@ -110,7 +110,7 @@ bool RobotController::GetCommandedVelocity(Config& dq)
     if(command->actuators[i].mode == ActuatorCommand::PID)
       robot.SetDriverVelocity(i,command->actuators[i].dqdes);
     else {
-      fprintf(stderr,"RobotController::GetCommandedVelocity: driver %d is not in PID mode",i);
+      LOG4CXX_WARN(KrisLibrary::logger(),"RobotController::GetCommandedVelocity: driver "<<i<<" is not in PID mode");
       return false;
     }
   }
@@ -122,10 +122,10 @@ bool RobotController::GetSensedConfig(Config& q)
 {
   JointPositionSensor* s = sensors->GetTypedSensor<JointPositionSensor>();
   if(s==NULL) {
-    fprintf(stderr,"RobotController: Warning, robot has no joint position sensor\n");
-    fprintf(stderr,"Sensor list:\n");
+    LOG4CXX_WARN(KrisLibrary::logger(), "RobotController::GetSensedConfig: Warning, robot has no joint position sensor");
+    LOG4CXX_WARN(KrisLibrary::logger(), "  Sensor list:");
     for(size_t i=0;i<sensors->sensors.size();i++)
-      fprintf(stderr,"  %s: %s\n",sensors->sensors[i]->Type(),sensors->sensors[i]->name.c_str());
+      LOG4CXX_WARN(KrisLibrary::logger(), "    "<<sensors->sensors[i]->Type()<< ": "<<sensors->sensors[i]->name);
     return false;
   }
   if(s->indices.empty())
@@ -153,10 +153,10 @@ bool RobotController::GetSensedVelocity(Config& dq)
 {
   JointVelocitySensor* s=sensors->GetTypedSensor<JointVelocitySensor>();
   if(s==NULL) {
-    fprintf(stderr,"RobotController: Warning, robot has no joint velocity sensor\n");
-    fprintf(stderr,"Sensor list:\n");
-    for(size_t i=0;i<sensors->sensors.size();i++)
-      fprintf(stderr,"  %s: %s\n",sensors->sensors[i]->Type(),sensors->sensors[i]->name.c_str());
+      LOG4CXX_WARN(KrisLibrary::logger(), "RobotController::GetSensedVelocity: Warning, robot has no joint velocity sensor");
+      LOG4CXX_WARN(KrisLibrary::logger(), "  Sensor list:");
+      for (size_t i = 0; i<sensors->sensors.size(); i++)
+        LOG4CXX_WARN(KrisLibrary::logger(), "    " << sensors->sensors[i]->Type() << ": " << sensors->sensors[i]->name);
     return false;
   }
   if(s->indices.empty())
@@ -218,19 +218,19 @@ shared_ptr<RobotController> RobotControllerFactory::CreateByName(const char* nam
 shared_ptr<RobotController> RobotControllerFactory::Load(TiXmlElement* in,Robot& robot)
 {
   if(0!=strcmp(in->Value(),"controller")) {
-    fprintf(stderr,"Controller does not have type \"controller\", got %s\n",in->Value());
+    LOG4CXX_WARN(KrisLibrary::logger(),"Controller does not have type \"controller\", got "<<in->Value());
     return NULL;
   }
   if(in->Attribute("type")==NULL) {
-    fprintf(stderr,"Controller does not have \"type\" attribute\n");
+    LOG4CXX_WARN(KrisLibrary::logger(),"Controller does not have \"type\" attribute");
     return NULL;
   }
   shared_ptr<RobotController> c = CreateByName(in->Attribute("type"),robot);
   if(!c) {
-    fprintf(stderr,"Unable to load controller of type %s\n",in->Attribute("type"));
-    fprintf(stderr,"Candidates: \n");
+    LOG4CXX_WARN(KrisLibrary::logger(),"Unable to load controller of type "<<in->Attribute("type"));
+    LOG4CXX_WARN(KrisLibrary::logger(),"Candidates: ");
     for(map<std::string,shared_ptr<RobotController> >::iterator i=controllers.begin();i!=controllers.end();i++)
-      fprintf(stderr,"  %s\n",i->first.c_str());
+      LOG4CXX_WARN(KrisLibrary::logger(),"  "<<i->first);
     return NULL;
   }
   TiXmlAttribute* attr = in->FirstAttribute();
@@ -241,23 +241,23 @@ shared_ptr<RobotController> RobotControllerFactory::Load(TiXmlElement* in,Robot&
     else if(0==strcmp(attr->Name(),"rate")) {
       double temp=0;
       if(in->QueryValueAttribute("rate",&temp)!=TIXML_SUCCESS || (temp <= 0)){
-	fprintf(stderr,"Invalid rate %g\n",temp);
-	return NULL;
+        LOG4CXX_ERROR(KrisLibrary::logger(),"Invalid rate "<<temp);
+        return NULL;
       }
       else 
-	c->nominalTimeStep = 1.0/temp;
+        c->nominalTimeStep = 1.0/temp;
     }
     else if(0==strcmp(attr->Name(),"timeStep")) {
       double temp=0;
       if(in->QueryValueAttribute("timeStep",&temp)!=TIXML_SUCCESS || temp <= 0){
-	fprintf(stderr,"Invalid timestep %g\n",temp);
+	LOG4CXX_ERROR(KrisLibrary::logger(),"Invalid timestep "<<temp);
 	return NULL;
       }
       c->nominalTimeStep = temp;
     }
     else {
       if(!c->SetSetting(attr->Name(),attr->Value())) {
-	fprintf(stderr,"Load controller  %s from XML: Unable to set setting %s\n",in->Attribute("type"),attr->Name());
+		  LOG4CXX_ERROR(KrisLibrary::logger(),"Load controller "<<in->Attribute("type")<<" from XML: Unable to set setting "<<attr->Name());
 	return NULL;
       }
     }
@@ -306,10 +306,9 @@ shared_ptr<RobotController> MakeDefaultController(Robot* robot)
       if(res) return res;
     }
   
-    printf("MakeDefaultController: could not load controller from data %s\n",controllerXml.c_str());
-    printf("  Making the standard controller instead.\n");
-    printf("  Press enter to continue.\n");
-    getchar();
+    LOG4CXX_ERROR(KrisLibrary::logger(), "MakeDefaultController: could not load controller from data "<<controllerXml);
+	LOG4CXX_ERROR(KrisLibrary::logger(), "  Making the standard controller instead.");
+	KrisLibrary::loggerWait();
   }
   auto c = make_shared<PolynomialPathController>(*robot);
   auto fc = make_shared<FeedforwardController>(*robot,c);
