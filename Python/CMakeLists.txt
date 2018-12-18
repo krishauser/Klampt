@@ -15,6 +15,7 @@ FILE(GLOB DEPS klampt/src/*.h klampt/src/*.cpp klampt/*.py)
 SET(DEPS ${DEPS} ${KLAMPT_LIBRARIES} Klampt)
 
 IF(PYTHON)
+  MESSAGE(STATUS "Configuring {BUILD}/Python/setup.py from Python/setup.py.in")
   configure_file(setup.py.in setup.py)
   SET(OUTPUT CMakeFiles)
   add_custom_command(
@@ -42,9 +43,6 @@ IF(PYTHON)
 
   add_custom_command(
     OUTPUT python3_version
-    COMMAND cp klampt/src/*.h python3_version/klampt/src
-    COMMAND cp klampt/src/*.cpp python3_version/klampt/src
-    COMMAND cp klampt/src/*.cxx python3_version/klampt/src
     COMMAND 2to3 --output-dir=python3_version/klampt -W -n klampt
     COMMAND 2to3 --output-dir=python3_version/utils -W -n utils
   )
