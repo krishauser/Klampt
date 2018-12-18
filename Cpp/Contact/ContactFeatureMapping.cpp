@@ -259,14 +259,14 @@ bool MatchHoldToFeatureMapping(const Hold& h,const ContactFeature& f,ContactFeat
       Vector3 centroid(Zero);
       for(size_t i=0;i<ff->vertices.size();i++)
 	centroid += ff->vertices[i];
-      centroid /= ff->vertices.size();
+      centroid /= (Real)ff->vertices.size();
       m.contact.x = T * centroid;
       m.contact.n = avgNormal;
       //average friction
       m.contact.kFriction = 0;
       for(size_t k=0;k<h.contacts.size();k++)
 	m.contact.kFriction += h.contacts[k].kFriction;
-      m.contact.kFriction /= h.contacts.size();
+      m.contact.kFriction /= (Real)h.contacts.size();
       
       //get rotation angle
       //1. get the base matrix that rotates to the world frame

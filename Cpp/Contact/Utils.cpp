@@ -414,7 +414,7 @@ void GetPlane(const vector<ContactPoint>& cp,Vector3& n,Vector3& origin)
     n += cp[i].n;
     origin += cp[i].x;
   }
-  origin /= cp.size();
+  origin /= (Real)cp.size();
   n.inplaceNormalize();
 }
 
@@ -504,9 +504,9 @@ void CleanupContacts(vector<ContactPoint>& cp,Real tol)
       cpNew[i].n += cp[avgPoints[j]].n;
       cpNew[i].kFriction += cp[avgPoints[j]].kFriction;
     }
-    cpNew[i].x /= avgPoints.size();
-    cpNew[i].n /= avgPoints.size();
-    cpNew[i].kFriction /= avgPoints.size();
+    cpNew[i].x /= (Real)avgPoints.size();
+    cpNew[i].n /= (Real)avgPoints.size();
+    cpNew[i].kFriction /= (Real)avgPoints.size();
     cpNew[i].n.inplaceNormalize();
   }
   swap(cp,cpNew);

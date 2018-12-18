@@ -33,7 +33,7 @@ struct Hold
     c.setZero();
     for(size_t i=0;i<contacts.size();i++)
       c += contacts[i].x;
-    c/=contacts.size();
+    c/=(Real)contacts.size();
   }
 
   //Returns the average normal of the contacts
