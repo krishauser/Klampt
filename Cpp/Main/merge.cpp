@@ -4,12 +4,11 @@
 int main(int argc,const char** argv)
 {
   RobotWorld world;
-  WorldViewProgram program(&world);
-  if(!program.LoadCommandLine(argc,argv)) {
+  if(!LoadWorldCommandLine(world,argc,argv)) {
     printf("Error loading arguments\n");
     return 1;
   }
-  GeneralizedRobot grobot(*program.world);
+  GeneralizedRobot grobot(world);
   Robot out;
   grobot.GetMegaRobot(out);
   printf("Saving to merged.rob, geometry to merged/...\n");
