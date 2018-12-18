@@ -180,6 +180,7 @@ bool WriteSimState(WorldSimulation& sim,const char* fn,Format format)
     else data = ToBase64(finalState);
     out.write(data.c_str(),data.length());
     out.close();
+    return true;
   }
 }
 
