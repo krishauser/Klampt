@@ -20,7 +20,6 @@ list(APPEND CMAKE_MODULE_PATH ${KLAMPT_CPP_ROOT}/Dependencies/KrisLibrary/CMakeM
 
 IF(WIN32)
   SET(KRISLIBRARY_ROOT ${KLAMPT_DEPENDENCIES} CACHE PATH "KrisLibrary parent directory" FORCE)
-  SET(OPENGL_LIBRARY_DIR ${KLAMPT_DEPENDENCIES})  #this is needed for glut32.lib / glui32.lib to be found in Cpp/Dependencies
   #some weird windows setting regarding QT
   if(POLICY CMP0020)
 	cmake_policy(SET CMP0020 OLD)
@@ -31,6 +30,10 @@ IF(WIN32)
   ELSE()
     SET(KLAMPT_DEPENDENCY_LIB_DIR ${KLAMPT_DEPENDENCIES} CACHE PATH "Klamp't dependency folder for Windows libs")
   ENDIF()
+  
+  SET(OPENGL_LIBRARY_DIR ${KLAMPT_DEPENDENCY_LIB_DIR})  #this is needed for glut32.lib / glui32.lib to be found in Cpp/Dependencies
+  SET(GLEW_INCLUDE_DIR "${KLAMPT_DEPENDENCIES}/glew-2.0.0")
+  SET(GLEW_LIBRARY "${KLAMPT_DEPENDENCY_LIB_DIR}/glew32.lib")
   
   FIND_PACKAGE(KrisLibrary REQUIRED)
   

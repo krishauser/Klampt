@@ -68,9 +68,6 @@ SET(KLAMPT_INCLUDE_DIRS ${KLAMPT_INCLUDE_DIRS} CACHE STRING "Klamp't include dir
 SET(KLAMPT_DEFINITIONS ${KLAMPT_DEFINITIONS} CACHE STRING "Klamp't compiler definitions" FORCE)
 SET(KLAMPT_LIBRARIES ${KLAMPT_LIBRARIES} CACHE STRING "Klamp't link libraries" FORCE)
 
-#add Klamp't onto KLAMPT_LIBRARIES, add Klampt/include onto KLAMPT_INCLUDE_DIRS
-SET(KLAMPT_LIBRARIES ${KLAMPT_LIBRARY} ${KLAMPT_LIBRARIES})
-
 #needed for python build
 if(WIN32)
   SET(KLAMPT_ABSOLUTE_LIBRARIES ${CMAKE_BINARY_DIR}/lib/Release/Klampt.lib ${KLAMPT_LIBRARIES})
@@ -78,11 +75,13 @@ else(WIN32)
   SET(KLAMPT_ABSOLUTE_LIBRARIES "Klampt.a" ${KLAMPT_LIBRARIES})
 endif(WIN32)
 
+#add Klamp't onto KLAMPT_LIBRARIES, add Klampt/include onto KLAMPT_INCLUDE_DIRS
+SET(KLAMPT_LIBRARIES Klampt ${KLAMPT_LIBRARIES})
 
 #helper function
-FUNCTION(PREPEND var prefix items)
+FUNCTION(PREPEND var prefix)
    SET(listVar "")
-   FOREACH(f items)
+   FOREACH(f ${ARGN})
       LIST(APPEND listVar "${prefix}/${f}")
    ENDFOREACH(f)
    SET(${var} "${listVar}" PARENT_SCOPE)
@@ -143,10 +142,10 @@ ADD_SUBDIRECTORY(Cpp/Main)
 ####### Klamp't Documentation #########
 FIND_PACKAGE(Doxygen)
 IF(DOXYGEN_FOUND)
-  configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Documentation/doxygen.conf.in ${CMAKE_CURRENT_BINARY_DIR}/Documentation/doxygen.conf @ONLY)
-  ADD_CUSTOM_TARGET(docs ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/Documentation/doxygen.conf
-    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-    COMMENT "Generating documentation (Doxygen) at location ${PROJECT_SOURCE_DIR}/doc/html/")
+  configure_file(${CMAKE_SOURCE_DIR}/Documentation/doxygen.conf.in ${CMAKE_SOURCE_DIR}/Documentation/doxygen.conf @ONLY)
+  ADD_CUSTOM_TARGET(docs ${DOXYGEN_EXECUTABLE} ${CMAKE_SOURCE_DIR}/Documentation/doxygen.conf
+    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+    COMMENT "Generating documentation (Doxygen) at location ${CMAKE_CURRENT_BINARY_DIR}/doc/html/")
 ENDIF(DOXYGEN_FOUND)
 
 # Python API directory
@@ -200,7 +199,9 @@ MESSAGE (STATUS "Compile everything using: make\n")
 MESSAGE (STATUS "Compile Klampt lib using: make Klampt\n")
 MESSAGE (STATUS "Compile apps using: make apps OR make [appname]")
 MESSAGE (STATUS "  Possible values for [appname]:")
-MESSAGE (STATUS "    " ${APPS})
+FOREACH(app ${APPS})
+	MESSAGE (STATUS "    " ${app})
+ENDFOREACH()
 MESSAGE (STATUS "Compile Python API using: make python")
 MESSAGE (STATUS "Compile API-documentation using: make docs\n")
 MESSAGE (STATUS "Compile Python API-documentation using: make python-docs\n")
