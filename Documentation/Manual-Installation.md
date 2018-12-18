@@ -1,5 +1,30 @@
 # Klamp't Manual: Downloading and building Klamp't
 
+## Python-only install
+
+If you only need the Python API, you can install using pip.  Simply open up a command line window and call
+
+> pip install klampt
+
+or for Python 3.X, 
+
+> pip3 install klampt
+
+As of writing, pip packages are available for Linux (Python 2.7, 3.5, 3.6, 3.7), Windows (Python 2.7 and 3.7, 32- and 64-bit), and Mac OSX (Python 2.7 and 3.7).
+
+You should also obtain:
+- PyOpenGL for visualization ( [https://pypi.python.org/pypi/PyOpenGL/3.0.2](https://pypi.python.org/pypi/PyOpenGL/3.0.2)).
+- PyQt5 is highly recommended for resource editing and improved visualization.  PyQt4 is also supported for now, but at some point the package will be deprecated.
+- Python Imaging Library (PIL) is required for saving screenshots to disk.
+
+You will also want to get the Klampt-examples repository 
+
+```sh
+git clone https://github.com/krishauser/Klampt-examples
+```
+
+## Building from scratch, and C++ builds
+
 Klamp't is publicly available via the git repository at [https://github.com/krishauser/Klampt/](https://github.com/krishauser/Klampt/). The command
 ```sh
 git clone https://github.com/krishauser/Klampt
@@ -11,11 +36,9 @@ You will also need to obtain the following dependencies, which may already be in
 - CMake (version &gt;= 2.6)
 - GLUT
 - GLPK, the GNU Linear Programming Kit
-- Python, if you wish to use the Python bindings (tested only on Python 2.6 &amp; 2.7).
-- Boost C++ Libraries
+- Python, if you wish to use the Python bindings (compatible with Python 2.6, 2.7 and 3.x).
 - (recommended) Assimp, if you wish to load STL, DAE and other geometry file formats.  (Only OBJ and OFF are natively supported in Klampt.)
-- (recommended) Qt4, if you wish to use nicer GUIs for the core applications.
-- (recommended) PyOpenGL is required for visualization ( [https://pypi.python.org/pypi/PyOpenGL/3.0.2](https://pypi.python.org/pypi/PyOpenGL/3.0.2)). Qt4 and PyQt are optional for scripted resource editing. Python Imaging Library (PIL) is required for saving screenshots to disk.
+- (recommended) Qt5, if you wish to use nicer GUIs for the core applications.
 
 ## Linux-like Environments
 
@@ -73,20 +96,17 @@ From [http://klampt.org](http://klampt.org/), download and run the Win32 Klamp't
 
 **Step by step instructions to install the Python API from binaries**
 
-1. Visit [https://github.com/krishauser/Klampt](https://github.com/krishauser/Klampt) and click &quot;Clone on Desktop&quot;. Follow the on-screen instructions to clone the Klamp't Git repository.
-2. Install Python 2.7.x from [http://www.python.org/getit/](http://www.python.org/getit/). _Make sure to get the Win32 version even if you have a 64-bit machine._
-3. Add C:\Python27 to your PATH environment variable. (Right click My Computer -&gt; Properties -&gt; Advanced System Settings -&gt; Environment Variables and append ';C:\Python27' to the PATH variable.)
-4. Install PyOpenGL from [https://pypi.python.org/pypi/PyOpenGL/3.0.2](https://pypi.python.org/pypi/PyOpenGL/3.0.2) using the Win32 installer.
-5. Install the glut32.dll file from [http://user.xmission.com/~nate/glut.html](http://user.xmission.com/~nate/glut.html) into your SysWOW64 directory (if your machine is 64-bit, most newer machines) or System32 directory (for older 32-bit machines).
-6. From [http://klampt.org](http://klampt.org/), download and install the [Win32 Klamp't Python 2.7 bindings](http://www.iu.edu/~motion/software/Klampt-0.5.win32-py2.7.exe).
-7. Done. As a test, run 'cmd' from the start menu, change directories to Klampt/Python/demos, and run python gltemplate.py ../../data/athlete\_fractal\_1.xml.
+Follow the instructions at the top of this file.
+
+You may need to install the glut32.dll file from [http://user.xmission.com/~nate/glut.html](http://user.xmission.com/~nate/glut.html) into your SysWOW64 directory (if your machine is 64-bit, most newer machines) or System32 directory (for older 32-bit machines).
+
 
 **To build your own C++ applications that link to Klamp't**
 
 1. Follow the instructions to install the C++ applications from binaries.
 2. Clone the KrisLibrary Git repository from [https://github.com/krishauser/KrisLibrary](https://github.com/krishauser/KrisLibrary) to the Klampt/Library folder as the target location.
 3. From [http://klampt.org](http://klampt.org/), download the appropriate Win32 Klamp't dependencies for your Visual Studio version (both Release and Debug are recommended). Unpack into Klampt/Library.
-4. In your own CMake project, set `KLAMPT_ROOT` and `BOOST_ROOT` to the appropriate paths and put the following lines into your CMakeLists.txt (along with whatever other lines are needed to build your project)
+4. In your own CMake project, set `KLAMPT_ROOT` to the appropriate path and put the following lines into your CMakeLists.txt (along with whatever other lines are needed to build your project)
 ```cmake
 SET (CMAKE_MODULE_PATH "${KLAMPT_ROOT}/CMakeModules")
 FIND_PACKAGE(Klampt REQUIRED)
@@ -95,7 +115,6 @@ INCLUDE_DIRECTORIES(${KLAMPT_INCLUDE_DIRS})
 TARGET_LINK_LIBRARIES(MyApp ${KLAMPT_LIBRARIES})
 ```
 5. Build your project in standard CMake fashion.
-6. [Note: you may need to set the cmake variable `BOOST_ROOT` to reflect your Boost installation path using the command line option `-DBOOST_ROOT=/path/to/boost` or via adding `BOOST_ROOT` in cmake-gui.]
 
 **Building Klamp't from source.** After following the instructions under the heading &quot;To build your own C++ applications that link to Klamp't&quot;, the standard CMake procedure should generate appropriate Visual Studio project files.
 
@@ -121,13 +140,13 @@ set VS90COMNTOOLS=%VS140COMNTOOLS%
 python setup.py install
 ```
 
-**Building dependencies from source.** If you wish to build dependencies from scratch, Visual Studio project files are available. Make sure to place all compiled library (.lib) files in the Klampt/Library folder.  All libraries should be built in Win32 mode, with C++ code generation set to Multithreaded DLL / Multithreaded Debug DLL.
+**Building dependencies from source.**
 
-Note: when building KrisLibrary you may need to set the cmake variable BOOST\_ROOT to reflect your Boost installation path using the command line option `-DBOOST\_ROOT=/path/to/boost` or via adding BOOST\_ROOT in cmake-gui.
+If you wish to build dependencies from scratch, Visual Studio project files are available. Make sure to place all compiled library (.lib) files in the Klampt/Library folder.  All libraries should be built in Win32 mode, with C++ code generation set to Multithreaded DLL / Multithreaded Debug DLL.
 
 The general procedure is as follows:
 
-1. Acquire Boost, GLUT and optionally (but recommended) WinGLPK 4.61 and/or Assimp 3.0.1270. Place the glut32.lib, glew32.lib, glpk\_4\_61.lib files in Klampt/Library or in your Visual Studio path. Place the Assimp folder in Klampt/Library.
+1. Acquire GLUT and optionally (but recommended) WinGLPK 4.61 and/or Assimp 3.0.1270. Place the glut32.lib, glew32.lib, glpk\_4\_61.lib files in Klampt/Library or in your Visual Studio path. Place the Assimp folder in Klampt/Library.
 2. Configure and edit dependencies as follows:
     1. GLUI:  Visual Studio will complain about template instantiations inside class definitions in h; simply put these in the global namespace.  Also, if you are using GLUI rather than Qt4, due to Visual Studio's string range checking, GLUI will throw an assertion in Debug mode when an EditText is created.  To fix this, you will have to add several checks similar to this: `if(text.empty()) return 0;` in glui_edittext.cpp.
     2. ODE: Set up build files with premake4 vs2010.
