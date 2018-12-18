@@ -301,7 +301,7 @@ from ..robotsim import *
 from ..math import vectorops,so3,se3
 import gldraw
 from glinit import *
-from glinit import _GLBackend,_PyQtAvailable,_GLUTAvailable
+from glinit import _GLBackend,_PyQtAvailable,_PyQt5Available,_PyQt4Available,_GLUTAvailable
 from glinterface import GLPluginInterface
 from glprogram import GLPluginProgram
 import glcommon
@@ -2706,8 +2706,10 @@ _in_app_thread = False
 _use_multithreaded = (True if sys.platform != 'darwin' else False)
 
 if _PyQtAvailable:
-    from PyQt5 import QtWidgets
-    from PyQt5.QtWidgets import QDialog,QDialogButtonBox,QMainWindow,QApplication,QAction
+    if _PyQt5Available:
+        from PyQt5.QtWidgets import QDialog,QInputDialog,QDialogButtonBox,QMainWindow,QApplication,QAction
+    else:
+        from PyQt4.QtGui import QDialog,QInputDialog,QDialogButtonBox,QMainWindow,QApplication,QAction
     #Qt specific startup
     #need to set up a QDialog and an QApplication
     class _MyDialog(QDialog):
@@ -2924,14 +2926,14 @@ if _PyQtAvailable:
                     self.movie_time_last = sim.getTime()
             else:
                 self.movie_timer.stop()
-                dlg =  QtWidgets.QInputDialog(self)                 
-                dlg.setInputMode( QtWidgets.QInputDialog.TextInput) 
+                dlg =  QInputDialog(self)                 
+                dlg.setInputMode( QInputDialog.TextInput) 
                 dlg.setLabelText("Command")
                 dlg.setTextValue('ffmpeg -y -f image2 -i image%04d.png klampt_record.mp4')
                 dlg.resize(500,100)                             
                 ok = dlg.exec_()                                
                 cmd = dlg.textValue()
-                #(cmd,ok) = QtWidgets.QInputDialog.getText(self,"Process with ffmpeg?","Command", text='ffmpeg -y -f image2 -i image%04d.png klampt_record.mp4')
+                #(cmd,ok) = QInputDialog.getText(self,"Process with ffmpeg?","Command", text='ffmpeg -y -f image2 -i image%04d.png klampt_record.mp4')
                 if ok:
                     import os,glob
                     os.system(str(cmd))
@@ -3264,7 +3266,10 @@ def _kill():
     _quit = False
 
 if _PyQtAvailable:
-    from PyQt5 import QtCore
+    if _PyQt5Available:
+        from PyQt5 import QtCore
+    else:
+        from PyQt4 import QtCore
     class MyQThread(QtCore.QThread):
         def __init__(self,func,*args):
             self.func = func

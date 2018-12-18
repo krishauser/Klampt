@@ -1,8 +1,15 @@
 from OpenGL.GL import *
-from PyQt5 import QtGui
-from PyQt5.QtCore import *
-from PyQt5.QtWidgets import *
-from PyQt5.QtOpenGL import *
+try:
+    from PyQt5 import QtGui
+    from PyQt5.QtCore import *
+    from PyQt5.QtWidgets import *
+    from PyQt5.QtOpenGL import *
+except ImportError:
+    from PyQt4 import QtGui
+    from PyQt4.QtCore import *
+    from PyQt4.QtGui import *
+    from PyQt4.QtOpenGL import *
+import sys
 import math
 import weakref
 
@@ -91,8 +98,12 @@ class QtGLWindow(QGLWidget):
         self.program = None
         self.width = 640
         self.height = 480
-        self.devheight = self.devicePixelRatio()*self.height
-        self.devwidth = self.devicePixelRatio()*self.width
+        if hasattr(self,'devicePixelRatio'):
+            self.devheight = self.devicePixelRatio()*self.height
+            self.devwidth = self.devicePixelRatio()*self.width
+        else:
+            self.devheight = self.height
+            self.devwidth = self.width
         self.sizePolicy = "resize"
         self.clearColor = [1.0,1.0,1.0,0.0]
         #keyboard state information
@@ -125,7 +136,10 @@ class QtGLWindow(QGLWidget):
                 self.setWindowTitle(program.name)
         self.program = program
         program.window = weakref.proxy(self)
-        program.view.screenDeviceScale = self.devicePixelRatio()
+        if hasattr(self,'devicePixelRatio'):
+            program.view.screenDeviceScale = self.devicePixelRatio()
+        else:
+            program.view.screenDeviceScale = 1
         if self.initialized:
             program.initialize()
             program.reshapefunc(self.width,self.height)
@@ -145,7 +159,11 @@ class QtGLWindow(QGLWidget):
     def initialize(self):
         """ Opens a window and initializes.  Called internally, and must be in the visualization thread."""
         assert self.program != None, "QGLWidget initialized without a GLProgram"
-        glEnable(GL_MULTISAMPLE)
+        try:
+            glEnable(GL_MULTISAMPLE)
+        except Exception:
+            print "QGLWidget.initialize(): perhaps Qt didn't initialize properly?"
+            pass
         self.setMouseTracking(True)
         self.setFocusPolicy(Qt.StrongFocus)
         def f():
@@ -353,7 +371,10 @@ class QtGLWindow(QGLWidget):
         QGLWidget.resizeEvent(self,event)
 
         self.width,self.height = (event.size().width(),event.size().height())
-        scale = self.devicePixelRatio() 
+        if hasattr(self,'devicePixelRatio'):
+            scale = self.devicePixelRatio() 
+        else:
+            scale = 1
         (self.devwidth,self.devheight) = (self.width*scale,self.height*scale)
         #self.window().resize(event.size())
         #self.window().adjustSize()
@@ -402,6 +423,7 @@ class QtBackend:
         self.window = None
 
     def initialize(self,program_name):
+        print "INITIALIZING Qt BACKEND"
         if self.app == None:
             #this is needed for some X11 multithreading bug 
             QCoreApplication.setAttribute(Qt.AA_X11InitThreads)

@@ -800,9 +800,13 @@ class WorldEditor(VisualEditorBase):
 
 #Qt stuff
 if glinit._PyQtAvailable:
-    from PyQt5.QtCore import *
-    from PyQt5.QtGui import *
-    from PyQt5.QtWidgets import *
+    if glinit._PyQt5Available:
+        from PyQt5.QtCore import *
+        from PyQt5.QtGui import *
+        from PyQt5.QtWidgets import *
+    else:
+        from PyQt4.QtCore import *
+        from PyQt4.QtGui import *
     _vis_id = None
     _my_dialog_res = None
     _my_dialog_retval = None
