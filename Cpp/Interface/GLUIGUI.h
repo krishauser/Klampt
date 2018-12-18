@@ -57,6 +57,8 @@ class GLUIGUI : public GenericGUIBase, public GLUIProgramBase
   virtual bool OnPauseIdle(double secs);
   virtual bool OnRefresh();
   virtual bool OnResize(int w,int h);
+  virtual bool OnDrawText(double x, double y, double z, const std::string &text, int height);
+  virtual bool OnDrawText(int x, int y, const std::string &text, int height);
 
   string window_title;
   unsigned int displayMode;

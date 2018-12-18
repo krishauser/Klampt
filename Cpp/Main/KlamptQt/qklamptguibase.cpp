@@ -41,6 +41,22 @@ bool QKlamptGUIBase::OnRefresh()
   return true;
 }
 
+bool QKlamptGUIBase::OnDrawText(double x, double y, double z, const std::string &text, int height)
+{
+  QFont font;
+  font.setPointSize(height);
+  display->renderText(x, y, z, QString(text.c_str()), font);
+  return true;
+}
+
+bool QKlamptGUIBase::OnDrawText(int x, int y, const std::string &text, int height)
+{
+  QFont font;
+  font.setPointSize(height);
+  display->renderText(x, y, QString(text.c_str()), font);
+  return true;
+}
+
 QKlamptGUIBase::~QKlamptGUIBase(){
 }
 

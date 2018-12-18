@@ -51,6 +51,8 @@ class GenericGUIBase
   virtual bool OnPauseIdle(double secs) { return false; }
   virtual bool OnRefresh() { return false; }
   virtual bool OnResize(int w,int h) { return false; }
+  virtual bool OnDrawText(double x, double y, double z, const std::string &text, int height) { return false; }
+  virtual bool OnDrawText(int x,int y, const std::string &text, int height) { return false; }
 
   bool SendIdle();
   bool SendGLRender();
@@ -123,6 +125,8 @@ class GenericBackendBase
   bool SendPauseIdle(double secs=1e300);
   bool SendRefresh();
   bool SendResize(int w,int h);
+  bool SendDrawText(double x, double y, double z, const std::string &text, int height = 10);
+  bool SendDrawText(int x, int y, const std::string &text, int height = 10);
 
   GenericGUIBase* gui;
   map<string,int*> liveButtonPresses;
@@ -199,6 +203,10 @@ class CompositeBackend : public GenericBackendBase
   else if(type == msgtype) \
     return func(msg[#arg1],msg[#arg2],msg[#arg3],msg[#arg4]);  
 
+#define DISPATCH5(msgtype,arg1,arg2,arg3,arg4,arg5,func)	\
+  else if(type == msgtype) \
+    return func(msg[#arg1],msg[#arg2],msg[#arg3],msg[#arg4],msg[#arg5]);  
+
 
 /** @brief The SEND macros let you easily package messages to be sent to the
  * frontend/backend.
@@ -239,6 +247,15 @@ class CompositeBackend : public GenericBackendBase
   msg[#arg4] = arg4; \
   return SendMessage(msg);
 
+#define SEND5(msgtype,arg1,arg2,arg3,arg4,arg5)		\
+  AnyCollection msg; \
+  msg["type"] = string(msgtype); \
+  msg[#arg1] = arg1; \
+  msg[#arg2] = arg2; \
+  msg[#arg3] = arg3; \
+  msg[#arg4] = arg4; \
+  msg[#arg5] = arg5; \
+  return SendMessage(msg);
 
 
 template <class T>

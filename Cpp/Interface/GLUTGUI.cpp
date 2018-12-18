@@ -137,5 +137,41 @@ bool GLUTGUI::OnPauseIdle(double secs)
   return true;
 }
 
+bool GLUTGUI::OnDrawText(double x, double y, double z, const std::string &text, int height)
+{
+  void* fontface;
+  if (height <= 10)
+    fontface = GLUT_BITMAP_HELVETICA_10;
+  else if (height <= 12)
+    fontface = GLUT_BITMAP_HELVETICA_12;
+  else
+    fontface = GLUT_BITMAP_HELVETICA_18;
+
+  glDisable(GL_LIGHTING);
+  glDisable(GL_DEPTH_TEST);
+
+  glRasterPos3d(x, y, z);
+  glutBitmapString(fontface, text.c_str());
+
+  glEnable(GL_DEPTH_TEST);
+}
+bool GLUTGUI::OnDrawText(int x, int y, const std::string &text, int height)
+{
+  void* fontface;
+  if(height <= 10)
+    fontface = GLUT_BITMAP_HELVETICA_10;
+  else if(height <= 12)
+    fontface = GLUT_BITMAP_HELVETICA_12;
+  else 
+    fontface = GLUT_BITMAP_HELVETICA_18;
+
+  glDisable(GL_LIGHTING);
+  glDisable(GL_DEPTH_TEST);
+
+  glRasterPos2i(x, y);
+  glutBitmapString(fontface, text.c_str());
+
+  glEnable(GL_DEPTH_TEST);
+}
 
 #endif //HAVE_GLUT

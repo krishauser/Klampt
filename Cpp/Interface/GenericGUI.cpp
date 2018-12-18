@@ -113,6 +113,8 @@ bool GenericGUIBase::ProcessMessage(const AnyCollection& msg)
   DISPATCH1("pause_idle",secs,OnPauseIdle)
   DISPATCH0("refresh",OnRefresh)
   DISPATCH2("resize",w,h,OnResize)
+  DISPATCH5("drawtext3", x, y, z, text, height, OnDrawText)
+  DISPATCH4("drawtext2", x, y, text, height, OnDrawText)
   DISPATCHEND()
 }
 
@@ -272,6 +274,16 @@ bool GenericBackendBase::SendRefresh()
 bool GenericBackendBase::SendResize(int w,int h)
 {
   SEND2("resize",w,h)
+}
+
+bool GenericBackendBase::SendDrawText(double x, double y, double z, const std::string &text, int height)
+{
+  SEND5("drawtext3", x, y, z, text, height);
+}
+
+bool GenericBackendBase::SendDrawText(int x, int y, const std::string &text, int height)
+{
+  SEND4("drawtext2", x, y, text, height);
 }
 
 void GenericBackendBase::MapButtonPress(const string& button,int* var)

@@ -315,22 +315,10 @@ bool SimGUIBackend::LoadAndInitSim(int argc,const char** argv)
 
 void SimGUIBackend::DrawClock(int x,int y)
 {
-#if HAVE_GLUT
-    void* fontface = GLUT_BITMAP_HELVETICA_18;
-    //const int fontheight = 18;
-    //const int lineSpacing = 36;
-    //const int margin = 5;    
-
-    glColor3f(0,0,0);
-    glDisable(GL_LIGHTING);
-    glDisable(GL_DEPTH_TEST);
-
-    glRasterPos2i(x,y);
-    glutBitmapString(fontface,"Time: ");
-    glutBitmapFloat(fontface,sim.time);
-
-    glEnable(GL_DEPTH_TEST);
-#endif //HAVE_GLUT
+  stringstream ss;
+  ss << "Time: " << sim.time;
+  glColor3f(0, 0, 0);
+  SendDrawText(x, y, ss.str(), 18);
 }
 
 void SimGUIBackend::DrawSensor(int robot,int sensor)

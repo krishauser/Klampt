@@ -32,6 +32,8 @@ class GLUTGUI : public GenericGUIBase, public GLUTProgramBase
   virtual bool OnNotify(const string& text,const string& msglevel);
   virtual bool OnPauseIdle(double secs);
   virtual bool OnRefresh();
+  virtual bool OnDrawText(double x, double y, double z, const std::string &text, int height);
+  virtual bool OnDrawText(int x, int y, const std::string &text, int height);
 
   string window_title;
   unsigned int displayMode;
