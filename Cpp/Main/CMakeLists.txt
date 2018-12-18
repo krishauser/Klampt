@@ -63,7 +63,7 @@ ELSEIF(USE_QT4_APPS)
 			      DESTINATION bin/imageformats
 			      COMPONENT apps)
 	ENDIF(WIN32)
-ELSE(USE_QT5_APPS)
+ELSEIF(GLUI_FOUND)
 	#GLUI GUIs
 	MESSAGE(STATUS "Using GLUI/console versions of main apps")
 	ADD_EXECUTABLE(RobotTest test.cpp)
@@ -71,38 +71,30 @@ ELSE(USE_QT5_APPS)
 	ADD_EXECUTABLE(RobotPose pose.cpp)
 	ADD_EXECUTABLE(MotorCalibrate motorcalibrate.cpp)
 	ADD_EXECUTABLE(URDFtoRob urdftorob.cpp)
-	TARGET_LINK_LIBRARIES(RobotTest ${KLAMPT_LIBRARIES})
-	TARGET_LINK_LIBRARIES(SimTest ${KLAMPT_LIBRARIES})
-	TARGET_LINK_LIBRARIES(RobotPose ${KLAMPT_LIBRARIES})
-	TARGET_LINK_LIBRARIES(MotorCalibrate ${KLAMPT_LIBRARIES})
-	TARGET_LINK_LIBRARIES(URDFtoRob ${KLAMPT_LIBRARIES})
-	install(TARGETS RobotTest RobotPose SimTest MotorCalibrate URDFtoRob
-	  DESTINATION bin
-	  COMPONENT apps)
+	SET(APPS ${APPS} RobotTest SimTest RobotPose MotorCalibrate URDFtoRob)
+ELSE(USE_QT5_APPS)
+	MESSAGE(STATUS "No visualization framework (Qt/GLUI) available, using console versions of main apps")
+	ADD_EXECUTABLE(MotorCalibrate motorcalibrate.cpp)
+	ADD_EXECUTABLE(URDFtoRob urdftorob.cpp)
+	SET(APPS ${APPS} MotorCalibrate URDFtoRob)
 ENDIF(USE_QT5_APPS)
-ADD_DEPENDENCIES(RobotTest Klampt)
-ADD_DEPENDENCIES(SimTest Klampt)
-ADD_DEPENDENCIES(RobotPose Klampt)
-ADD_DEPENDENCIES(MotorCalibrate Klampt)
-ADD_DEPENDENCIES(URDFtoRob Klampt)
 
 #command line utilities, no need for GUI
 ADD_EXECUTABLE(Pack pack.cpp)
 ADD_EXECUTABLE(Merge merge.cpp)
 ADD_EXECUTABLE(TrajOpt trajopt.cpp)
 ADD_EXECUTABLE(SimUtil simutil.cpp)
-TARGET_LINK_LIBRARIES(Pack ${KLAMPT_LIBRARIES})
-TARGET_LINK_LIBRARIES(Merge ${KLAMPT_LIBRARIES})
-TARGET_LINK_LIBRARIES(TrajOpt ${KLAMPT_LIBRARIES})
-TARGET_LINK_LIBRARIES(SimUtil ${KLAMPT_LIBRARIES})
-ADD_DEPENDENCIES(Pack Klampt)
-ADD_DEPENDENCIES(Merge Klampt)
-ADD_DEPENDENCIES(TrajOpt Klampt)
-ADD_DEPENDENCIES(SimUtil Klampt)
-install(TARGETS Pack Merge TrajOpt SimUtil
+SET(APPS ${APPS} Pack Merge TrajOpt SimUtil)
+
+foreach(app ${APPS})
+  ADD_DEPENDENCIES(${app} Klampt)
+  TARGET_LINK_LIBRARIES(${app} ${KLAMPT_LIBRARIES})
+endforeach()
+
+install(TARGETS ${APPS}
 	DESTINATION bin
 	COMPONENT apps)
 
 ADD_CUSTOM_TARGET(apps ALL
-		DEPENDS RobotTest SimTest RobotPose MotorCalibrate URDFtoRob Pack Merge TrajOpt SimUtil)
+		DEPENDS ${APPS})
 
