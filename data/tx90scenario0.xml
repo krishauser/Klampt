@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<world>
-  <robot name="TX90L" file="robots/tx90ball.rob" />
-  <terrain file="terrains/block.off" />
-  <goal position="0.25 0.15 0.25" />
-</world>

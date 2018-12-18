@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<world>
-  <robot name="TX90L" file="robots/tx90ball.rob" config="7 0 0 -0.9 -1.9 0 0 0"/>
-  <terrain file="terrains/block.off" />
-  <terrain file="terrains/cube.off" scale="0.3 0.3 0.3" translation="0.4 -0.15 0.95">
-     <display color="0.3 0.1 0.05"/>
-  </terrain>
-  <goal position="0.6 0 0.85" />
-</world>

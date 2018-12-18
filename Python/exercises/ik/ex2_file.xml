@@ -1,5 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<world>
-  <robot name="TX90L" file="../../../data/robots/tx90pr2.rob" />
-  <terrain file="../../../data/terrains/block.off" />
-</world>

@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<world>
-  <robot name="tx90pr2" file="robots/tx90ball.rob" />
-  <terrain file="terrains/block.off" />
-  <terrain file="terrains/cube.off" scale="0.1 0.1 0.1" position="0.5 0 0.8"/>
-</world>

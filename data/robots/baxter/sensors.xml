@@ -1,4 +1,0 @@
-<sensors>
-  <JointPositionSensor name="encoders"/>
-  <DriverTorqueSensor name="effort_sensors"/>
-</sensors>
