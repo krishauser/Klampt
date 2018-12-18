@@ -99,11 +99,10 @@ SET(APPS ${APPS} Pack Merge TrajOpt SimUtil)
 foreach(app ${APPS})
   ADD_DEPENDENCIES(${app} Klampt)
   TARGET_LINK_LIBRARIES(${app} ${KLAMPT_LIBRARIES})
-endforeach()
-
-install(TARGETS ${APPS}
+  install(TARGETS ${app}
 	DESTINATION bin
 	COMPONENT apps)
+endforeach()
 
 ADD_CUSTOM_TARGET(apps ALL
 		DEPENDS ${APPS})
