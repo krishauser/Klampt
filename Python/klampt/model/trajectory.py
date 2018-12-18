@@ -503,7 +503,7 @@ class _HermiteConfigAdaptor(Trajectory):
 		hermite = self.__dict__['hermite']
 		hitem = getattr(hermite,item)
 		if item == 'milestones':
-			return [q[:len(q)/2] for q in hitem]
+			return [q[:len(q)//2] for q in hitem]
 		def methodadaptor(*args,**kwargs):
 			res = hitem(*args,**kwargs)
 			if isinstance(res,HermiteTrajectory):
@@ -593,30 +593,30 @@ class HermiteTrajectory(Trajectory):
 	def eval_config(self,t,endBehavior='halt'):
 		"""Returns just the configuration component of the result"""
 		res = Trajectory.eval(self,t,endBehavior)
-		return res[:len(res)/2]
+		return res[:len(res)//2]
 	
 	def eval_velocity(self,t,endBehavior='halt'):
 		"""Returns just the velocity component of the result"""
 		res = Trajectory.eval(self,t,endBehavior)
-		return res[len(res)/2:]
+		return res[len(res)//2:]
 
 	def eval_accel(self,t,endBehavior='halt'):
 		"""Returns just the acceleration component of the derivative"""
 		res = Trajectory.deriv(self,t,endBehavior)
-		return res[len(res)/2:]
+		return res[len(res)//2:]
 
 	def interpolate(self,a,b,u,dt):
 		assert len(a)==len(b)
-		x1,v1 = a[:len(a)/2],vectorops.mul(a[len(a)/2:],dt)
-		x2,v2 = b[:len(b)/2],vectorops.mul(b[len(b)/2:],dt)
+		x1,v1 = a[:len(a)//2],vectorops.mul(a[len(a)//2:],dt)
+		x2,v2 = b[:len(b)//2],vectorops.mul(b[len(b)//2:],dt)
 		x = spline.hermite_eval(x1,v1,x2,v2,u)
 		dx = vectorops.mul(spline.hermite_deriv(x1,v1,x2,v2,u),1.0/dt)
 		return x+dx
 	
 	def difference(self,a,b,u,dt):
 		assert len(a)==len(b)
-		x1,v1 = a[:len(a)/2],vectorops.mul(a[len(a)/2:],dt)
-		x2,v2 = b[:len(b)/2],vectorops.mul(b[len(b)/2:],dt)
+		x1,v1 = a[:len(a)//2],vectorops.mul(a[len(a)//2:],dt)
+		x2,v2 = b[:len(b)//2],vectorops.mul(b[len(b)//2:],dt)
 		dx = vectorops.mul(spline.hermite_deriv(x1,v1,x2,v2,u,order=1),1.0/dt)
 		ddx = vectorops.mul(spline.hermite_deriv(x1,v1,x2,v2,u,order=2),1.0/pow(dt,2))
 		return dx+ddx
@@ -1047,7 +1047,7 @@ def execute_trajectory(trajectory,controller,speed=1.0,smoothing=None,activeDofs
 		assert smoothing == None,"Smoothing cannot be applied to hermite trajectories"
 		ts = trajectory.startTime()
 		controller.setMilestone(trajectory.eval(ts),trajectory.deriv(ts))
-		n = len(trajectory.milestones[0])/2
+		n = len(trajectory.milestones[0])//2
 		for i in range(1,len(trajectory.times)):
 			q,v = trajectory.milestones[i][:n],trajectory.milestones[i][n:]
 			controller.addCubic(q,v,(trajectory.times[i]-trajectory.times[i-1])/speed)
