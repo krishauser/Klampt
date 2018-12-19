@@ -1,11 +1,6 @@
 #if defined (__APPLE__) || defined (MACOSX)
-  #include <Availability.h>
-  #if __MAC_OS_X_VERSION_MIN_REQUIRED < 1070
-    // earlier than 10.6, C++11 items are in the tr1 namespace
-    #include <tr1/memory>
-    #define shared_ptr tr1::shared_ptr
-  #endif 
-#endif //Mac Python 10.6 
+  #include "mac_fixes.h"
+#endif //Mac fixes 
 
 #include <string>
 #include <vector>
