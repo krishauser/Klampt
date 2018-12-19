@@ -1,3 +1,13 @@
+#if defined (__APPLE__) || defined (MACOSX)
+  #if #available(macOS 10.7, *) 
+    // macOS 10.7 supports C++11
+  #else
+    // earlier than 10.6, C++11 items are in the tr1 namespace
+    #include <tr1/memory>
+    #define shared_ptr tr1::shared_ptr
+  #endif 
+#endif //Mac Python 10.6 
+
 #include <string>
 #include <vector>
 #include "robotik.h"
