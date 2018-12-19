@@ -23,14 +23,13 @@ before_script:
 script:
   - cd Cpp/Dependencies && make unpack-deps
   - make deps && cd ../..
-  - cmake .
+  - cmake . -DKLAMPT_COMPILE_TESTS:BOOL=True
   - make Klampt
   - make apps
   - make python
   - sudo make python-install
   - make python3
   - sudo make python3-install
-  - cmake . -DKLAMPT_COMPILE_TESTS:BOOL=True
   - env CTEST_OUTPUT_ON_FAILURE=1 make test
 
 
