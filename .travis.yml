@@ -25,9 +25,12 @@ script:
   - make deps && cd ../..
   - cmake .
   - make Klampt
-  - cmake . -DKLAMPT_COMPILE_TESTS:BOOL=True
-  - make
+  - make apps
+  - make python
   - sudo make python-install
+  - make python3
+  - sudo make python3-install
+  - cmake . -DKLAMPT_COMPILE_TESTS:BOOL=True
   - env CTEST_OUTPUT_ON_FAILURE=1 make test
 
 
