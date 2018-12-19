@@ -613,22 +613,22 @@ def edit(name,value,type='auto',description=None,editor='visual',world=None,refe
                 editor.disableTranslation()
             #attach visualization items to the transform
             if isinstance(referenceObject,RobotModelLink):
-                assert frame.index >= 0
-                r = frame.robot()
+                assert referenceObject.index >= 0
+                r = referenceObject.robot()
                 descendant = [False]*r.numLinks()
-                descendant[frame.index] = True
+                descendant[referenceObject.index] = True
                 for i in xrange(r.numLinks()):
                     p = r.link(i).getParent()
                     if p >= 0 and descendant[p]: descendant[i]=True
                 for i in xrange(r.numLinks()):
                     if descendant[i]:
                         editor.attach(r.link(i))
-                editor.attach(frame)
+                editor.attach(referenceObject)
             elif hasattr(referenceObject,'getTransform'):
                 editor.attach(referenceObject)
             elif hasattr(referenceObject,'__iter__'):
                 for i in referenceObject:
-                    editor.attach(referenceObject)
+                    editor.attach(i)
             #Run!
             if type == 'Rotation':
                 #convert from se3 to so3
