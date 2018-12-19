@@ -101,7 +101,10 @@ class Trajectory:
 			return (-1,0)
 		if t > self.times[-1]:
 			if endBehavior == 'loop':
-				t = t % self.times[-1]
+				try:
+					t = t % self.times[-1]
+				except ZeroDivisionError:
+					t = 0
 			else:
 				return (len(self.milestones)-1,0)
 		if t >= self.times[-1]:
@@ -551,13 +554,15 @@ class HermiteTrajectory(Trajectory):
 		if len(t.milestones)==1:
 			velocities.append([0]*d)
 		elif len(t.milestones)==2:
-			v = vectorops.mul(vectorops.sub(t.milestones[1],t.milestones[0]),1.0/(t.times[1]-t.times[0]))
+			s = (1.0/(t.times[1]-t.times[0]) if (t.times[1]-t.times[0]) != 0 else 0)
+			v = vectorops.mul(vectorops.sub(t.milestones[1],t.milestones[0]),s) 
 			velocities.append(v)
 			velocities.append(v)
 		else:
 			third = 1.0/3.0
 			for i in range(1,len(waypointTrajectory.milestones)-1):
-				v = vectorops.mul(vectorops.sub(t.milestones[i+1],t.milestones[i-1]),1.0/(t.times[i+1]-t.times[i-1]))
+				s = (1.0/(t.times[i+1]-t.times[i-1]) if (t.times[i+1]-t.times[i-1]) != 0 else 0)
+				v = vectorops.mul(vectorops.sub(t.milestones[i+1],t.milestones[i-1]),s)
 				if preventOvershoot:
 					dtp = t.times[i]-t.times[i-1]
 					dtn = t.times[i]-t.times[i-1]
@@ -693,6 +698,8 @@ def path_to_trajectory(path,velocities='auto',timing='limited',smoothing='spline
 		else:
 			amax = 4.0
 	if speed != 1.0:
+		if not (speed > 0):
+			raise ValueError("Invalid value for speed, must be positive")
 		dt *= speed
 		startvel /= speed
 		endvel /= speed
@@ -712,6 +719,19 @@ def path_to_trajectory(path,velocities='auto',timing='limited',smoothing='spline
 				_durations = [(b-a) for a,b in zip(path.times[:-1],path.times[1:])]
 		if _durations is None:
 			if timing == 'limited':
+				if hasattr(vmax,'__iter__'):
+					if not all(v >= 0 for v in vmax):
+						raise ValueError("Invalid value for vmax, must be positive")
+				else:
+					if not vmax >= 0:
+						raise ValueError("Invalid value for vmax, must be positive")
+
+				if hasattr(amax,'__iter__'):
+					if not all(v >= 0 for v in amax):
+						raise ValueError("Invalid value for amax, must be positive")
+				else:
+					if not amax >= 0:
+						raise ValueError("Invalid value for amax, must be positive")
 				_durations = [0.0]*(len(milestones)-1)
 				for i in range(len(milestones)-1):
 					q,n = milestones[i],milestones[i+1]
@@ -874,6 +894,11 @@ def path_to_trajectory(path,velocities='auto',timing='limited',smoothing='spline
 			finalduration = totaldistance*math.sqrt(evmax**2 + eamax)
 		print("path_to_trajectory(): Setting first guess of path duration to",finalduration)
 	res = normalizedPath.constructor()()
+	if finalduration == 0:
+		print("path_to_trajectory(): there is no movement in the path, returning a 0-duration path")
+		res.times = [0.0,0.0]
+		res.milestones = [normalizedPath.milestones[0],normalizedPath.milestones[0]]
+		return res
 	N = int(math.ceil(finalduration/dt))
 	assert N > 0
 	dt = finalduration / N
