@@ -1611,7 +1611,7 @@ class VisAppearance:
                         drawRobotTrajectory(item,robot,ees,width,color)                        
                     else:
                         drawTrajectory(item,width,color)
-                self.displayCache[0].draw(drawRaw,se3.identity())
+                self.displayCache[0].draw(drawRaw)
                 if name != None:
                     self.drawText(name,centroid)
         elif isinstance(item,MultiPath):
@@ -1632,7 +1632,7 @@ class VisAppearance:
                         for i,s in enumerate(item.sections):
                             drawRobotTrajectory(s.configs,robot,ees,width,(color if i%2 == 0 else color2))
                     #draw it!
-                    self.displayCache[0].draw(drawRaw,se3.identity())
+                    self.displayCache[0].draw(drawRaw)
                     if name != None:
                         self.drawText(name,centroid)
         elif isinstance(item,coordinates.Point):
