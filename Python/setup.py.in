@@ -26,9 +26,11 @@ if sys.platform == 'win32':
     extra_shared_libraries = """${KLAMPT_EXTRA_DLLS}""".split(';')
     for fn in extra_shared_libraries:
         shutil.copy(os.path.join("""${KLAMPT_DEPENDENCY_LIB_DIR}""",fn),os.path.join(root_py_folder,fn))
+elif sys.platform == 'darwin':
+    extra_compile_args = ['-std=c++11','-stdlib=libc++']
 else:
     extra_compile_args = ['-std=c++11']
-            
+    
 #Parse libraries
 if sys.platform == 'win32':
     optlibs = []
