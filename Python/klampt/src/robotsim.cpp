@@ -158,7 +158,7 @@ void derefWorld(int index)
     //printf("Deleting world %d\n",index);
     if(!worlds[index]->worldExternal)
       delete worlds[index]->world;
-    worlds[index] = NULL;
+    worlds[index].reset();
     worldDeleteList.push_back(index);
   }
 }
@@ -198,7 +198,7 @@ void destroySim(int index)
   if(!sims[index])
     throw PyException("Invalid sim index");
 
-  sims[index] = NULL;
+  sims[index].reset();
   simDeleteList.push_back(index);
 }
 
@@ -213,7 +213,7 @@ int createWidget()
   else {
     int index = widgetDeleteList.front();
     widgetDeleteList.erase(widgetDeleteList.begin());
-    widgets[index].widget = NULL;
+    widgets[index].widget.reset();
     widgets[index].refCount = 1;
     //printf("Creating widget %d, ref count %d\n",index,1);
     return index;
@@ -231,7 +231,7 @@ void derefWidget(int index)
   //printf("Deref widget %d: count %d\n",index,widgets[index].refCount);
   if(widgets[index].refCount == 0) {
     //printf("Deleting widget %d\n",index);
-    widgets[index].widget = NULL;
+    widgets[index].widget.reset();
     widgetDeleteList.push_back(index);
   }
 }
@@ -248,9 +248,9 @@ void refWidget(int index)
 void destroy()
 {
   for(size_t i=0;i<sims.size();i++)
-    sims[i] = NULL;
+    sims[i].reset();
   for(size_t i=0;i<worlds.size();i++)
-    worlds[i] = NULL;
+    worlds[i].reset();
   simDeleteList.clear();
   worldDeleteList.clear();
   sims.resize(0);
