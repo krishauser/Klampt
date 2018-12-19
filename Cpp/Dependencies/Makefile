@@ -14,7 +14,7 @@ UNAME = $(shell uname)
 
 unpack-deps:
 	git clone https://github.com/krishauser/KrisLibrary
-	cd KrisLibrary; git checkout logging_devel
+	cd KrisLibrary; git checkout c++11
 	tar xvzf ode-0.14.tar.gz
 	tar xvzf glui-2.36.tgz
 	tar xvzf glew-2.0.0.tgz
