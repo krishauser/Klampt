@@ -158,7 +158,7 @@ void derefWorld(int index)
     //printf("Deleting world %d\n",index);
     if(!worlds[index]->worldExternal)
       delete worlds[index]->world;
-    worlds[index] = NULL;
+    worlds[index].clear();
     worldDeleteList.push_back(index);
   }
 }
