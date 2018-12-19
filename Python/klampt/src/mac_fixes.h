@@ -42,7 +42,12 @@
       {
         return shared_ptr<T>(new T(arg1,arg2,arg3,arg4));
       }
+
+
+      template <class C>
+      class function;
       
-    }
+    } //namespace std
+
   #endif 
 #endif
