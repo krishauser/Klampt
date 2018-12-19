@@ -138,7 +138,7 @@ class EmbeddedCSpace(CSpace):
         self.bound = [self.ambientspace.bound[i] for i in self.mapping]
         self.properties = self.ambientspace.properties
         if self.ambientspace.feasibilityTests is not None:
-            self.feasibilityTests = [(lambda x:f(self.lift(x))) for f in self.ambientspace.feasibilityTests]
+            self.feasibilityTests = [(lambda x,f=f:f(self.lift(x))) for f in self.ambientspace.feasibilityTests]
             self.feasibilityTestNames = self.ambientspace.feasibilityTestNames[:]
             self.feasibilityTestDependencies = self.ambientspace.feasibilityTestDependencies[:]
 
