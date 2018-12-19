@@ -522,9 +522,9 @@ class SelectionEditor(VisualEditorBase):
     def selectAll(self):
         if self.robot == None:
             #select all ids in the world
-            pass
+            self.value = range(self.world.numIDs())
         else:
-            self.value = [l for l in range(self.robot.numLinks())]
+            self.value = range(self.robot.numLinks())
         self.selectionListChangeFlag = True
         for i in self.value:
             self.selectionList.setCurrentItem(self.selectionList.item(i),QItemSelectionModel.Select)
@@ -741,6 +741,56 @@ class ObjectTransformEditor(VisualEditorBase):
         if self.objposer.hasFocus():
             self.value = self.objposer.get()
         return VisualEditorBase.mousefunc(self,button,state,x,y)
+
+class WorldEditor(VisualEditorBase):
+    """Note: need to call finalize in order to get terrain geometries updated"""
+    def __init__(self,name,value,description):
+        VisualEditorBase.__init__(self,name,value,description,None)
+        world = value.copy()
+        for i in range(value.numTerrains()):
+            tobj = world.makeRigidObject(value.terrain(i).getName())
+            tobj.geometry().set(value.terrain(i).geometry())
+            bmin,bmax = value.terrain(i).geometry().getBB()
+            shift = vectorops.interpolate(bmin,bmax,0.5)
+            tobj.geometry().transform(so3.identity(),vectorops.mul(shift,-1.0))
+            tobj.appearance().set(value.terrain(i).appearance())
+            tobj.setTransform(so3.identity(),shift)
+        for i in xrange(value.numTerrains()):
+            world.remove(world.terrain(0))
+        self._world = world
+        #self.world = world
+        self.robotPosers = [RobotPoser(world.robot(i)) for i in range(world.numRobots())]
+        self.objectPosers = [ObjectPoser(world.rigidObject(i)) for i in range(world.numRigidObjects())]
+        for r in self.robotPosers:
+            self.addWidget(r)
+        for r in self.objectPosers:
+            self.addWidget(r)
+        self.drawn = False
+
+    def display(self):
+        for i in xrange(self._world.numTerrains()):
+            self._world.terrain(i).drawGL()
+        for i in xrange(self._world.numRigidObjects()):
+            self._world.rigidObject(i).drawGL()
+        self.klamptwidgetmaster.drawGL(self.viewport())
+        return True
+
+    def finalize(self):
+        """Copies to the provided world."""
+        world = self._world
+        for i in xrange(self.value.numRobots()):
+            self.value.robot(i).setConfig(world.robot(i).getConfig())
+        for i in xrange(self.value.numRigidObjects()):
+            self.value.rigidObject(i).setTransform(*world.rigidObject(i).getTransform())
+        ofs = self.value.numRigidObjects()
+        for i in xrange(self.value.numTerrains()):
+            bmin,bmax = self.value.terrain(i).geometry().getBB()
+            shift = vectorops.interpolate(bmin,bmax,0.5)
+            Tc = world.rigidObject(i+ofs).getTransform()
+            self.value.terrain(i).geometry().transform(Tc[0],vectorops.sub(Tc[1],shift))
+    
+    def instructions(self):
+        return 'Right-click and drag on the widgets to pose the world objects'
 
 
 #Qt stuff
