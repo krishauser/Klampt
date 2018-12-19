@@ -6,7 +6,7 @@ If you only need the Python API, you can install using pip.  Simply open up a co
 
 > pip install klampt
 
-As of writing, pip packages are available for Linux (Python 2.7, 3.5, 3.6, 3.7), Windows (Python 2.7 and 3.7, 32- and 64-bit), and Mac OSX (Python 2.7 and 3.7).
+As of writing, pip packages are available for Linux (Python 2.7, 3.5, 3.6, 3.7), Windows (Python 2.7 and 3.7, 32- and 64-bit), and Mac OSX (Python 2.7 and 3.7).  These are built with Assimp (mesh loading) and GLEW (OpenGL supported rendering of camera images).  They **do not** have ROS or OMPL support, and if you want those you will need to build from scratch.
 
 You should also obtain:
 - PyOpenGL for visualization.  Try `pip install PyOpenGL` ( [https://pypi.python.org/pypi/PyOpenGL/3.0.2](https://pypi.python.org/pypi/PyOpenGL/3.0.2)).
@@ -35,22 +35,24 @@ will download the required files.
 You will also need to obtain the following dependencies, which may already be installed on your machine:
 
 - CMake (version &gt;= 2.6)
-- GLUT
 - GLPK, the GNU Linear Programming Kit
 - Python, if you wish to use the Python bindings (compatible with Python 2.6, 2.7 and 3.x).
 - (recommended) Assimp, if you wish to load STL, DAE and other geometry file formats.  (Only OBJ and OFF are natively supported in Klampt.)
 - (recommended) Qt5, if you wish to use nicer GUIs for the core applications.
+- (optional) ROS, if you wish to write to/read from ROS topics.
+- (optional) OMPL, if you wish to use the OMPL motion planning bindings.
+- (optional) GLUT, if you wish to use the legacy GLUI programs.
 
 ## Linux-like Environments
 
-**Building dependencies.** First, the dependencies must be downloaded and built. GLUT and GLPK must first be installed in your library paths. Change into the Klampt/Library folder and unpack KrisLibrary, TinyXML, GLUI, and ODE using the command 'make unpack-deps'. After configuring the dependencies as described below, they can be built using the command 'make deps'.
+**Building dependencies.** First, the dependencies must be downloaded and built. GLPK must first be installed in your library path. Change into the Klampt/Cpp/Dependencies folder and unpack KrisLibrary, TinyXML, and ODE using the command 'make unpack-deps'. After configuring the dependencies as described below, they can be built using the command 'make deps'.
 
 To configure the dependencies, consider the following notes:
 
 - KrisLibrary may need to be configured for your particular system. Try running cmake-gui and changing the Advanced variables.
 - By default, we compile ODE in double floating-point precision.  The reason for this is that on some Linux systems, ODE becomes unstable in single floating-point precision and may crash with assertion failures. This may be changed on other systems, if you wish, by toggling ODEDOUBLE=0 or 1 in Klampt/Library/Makefile. _Note: if you have already built ODE and then later change its precision, you must do a clean build of ODE as well as the CMake cache._
 
-**Enabling Assimp support (optional).** To load a larger variety of 3D meshes, Klamp't can be configured to use the Asset Importer ( [Assimp](http://assimp.sourceforge.net/)) library. Once Assimp 3.0.1270 is installed on your system (if Klampt/Library/assimp--3.0.1270-sdk or /usr/lib/libassimp.so exists), KrisLibrary and Klampt should automatically detect it when built.
+**Enabling Assimp support (optional).** To load a larger variety of 3D meshes, Klamp't can be configured to use the Asset Importer ( [Assimp](http://assimp.sourceforge.net/)) library. Once Assimp 3.0.1270 is installed on your system (if Klampt/Cpp/Depdencies/assimp--3.0.1270-sdk or /usr/lib/libassimp.so exists), KrisLibrary and Klampt should automatically detect it when built.
 
 **Run CMake to build Klamp't Makefiles.** Run &quot;cmake .&quot; to build the Klamp't makefiles.
 
@@ -145,7 +147,7 @@ If you wish to build dependencies from scratch, Visual Studio project files are 
 
 The general procedure is as follows:
 
-1. Acquire GLEW and optionally (but recommended) WinGLPK 4.61 and/or Assimp 3.0.1270. Place the glew32.lib, glpk\_4\_61.lib files in Klampt/Cpp/Dependencies or in your Visual Studio path. Place the Assimp folder in Klampt/Library.
+1. Acquire GLEW and optionally (but recommended) WinGLPK 4.61 and/or Assimp 3.0.1270. Place the glew32.lib, glpk\_4\_61.lib files in Klampt/Cpp/Dependencies or in your Visual Studio path. Place the Assimp folder in Klampt/Cpp/Dependencies.
 2. Configure and edit dependencies as follows:
     1. ODE: Set up build files with premake4 vs2010.
 3. Compile all dependencies except for KrisLibrary. Place all generated .lib files into the Klampt/Cpp/Dependencies directory.
