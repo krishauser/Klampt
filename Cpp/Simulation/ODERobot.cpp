@@ -788,6 +788,7 @@ void ODERobot::AddTorques(const Config& t)
           dBodyAddTorque(bodyID[k],m.x,m.y,m.z);
         }
         else {
+          tx = indices[0]; ty=indices[1]; tz=indices[2];
           dBodyAddForce(bodyID[k],t(tx),t(ty),t(tz));
         }
       }

@@ -1,3 +1,7 @@
+#if defined (__APPLE__) || defined (MACOSX)
+  #include "mac_fixes.h"
+#endif //Mac fixes 
+
 #include "motionplanning.h"
 #include <KrisLibrary/planning/AnyMotionPlanner.h>
 #include <KrisLibrary/planning/CSpaceHelpers.h>
@@ -111,10 +115,10 @@ public:
     PyObject* result = PyObject_CallFunctionObjArgs(sample,NULL);
     if(!result) {
       if(!PyErr_Occurred()) {
-	throw PyException("Python sample method failed");
+        throw PyException("Python sample method failed");
       }
       else {
-	throw PyPyErrorException();
+        throw PyPyErrorException();
       }
     }
     bool res=PyListToConfig(result,x);
@@ -135,19 +139,19 @@ public:
       PyObject* pyr=PyFloat_FromDouble(r);
       PyObject* result = PyObject_CallFunctionObjArgs(sampleNeighborhood,pyc,pyr,NULL);
       if(!result) {
-	Py_DECREF(pyr);
-	if(!PyErr_Occurred()) {
-	  throw PyException("Python sampleneighborhood method failed");
-	}
-	else {
-	  throw PyPyErrorException();
-	}
+        Py_DECREF(pyr);
+        if(!PyErr_Occurred()) {
+          throw PyException("Python sampleneighborhood method failed");
+        }
+        else {
+          throw PyPyErrorException();
+        }
       }
       bool res=PyListToConfig(result,x);
       if(!res) {
-	Py_DECREF(pyr);
-	Py_DECREF(result);
-	throw PyException("Python sampleNeighborhood method did not return a list");
+        Py_DECREF(pyr);
+        Py_DECREF(result);
+        throw PyException("Python sampleNeighborhood method did not return a list");
       }
       Py_DECREF(pyr);
       Py_DECREF(result);
@@ -190,16 +194,16 @@ public:
       PyObject* pyy = UpdateTempConfig2(y);
       PyObject* result = PyObject_CallFunctionObjArgs(distance,pyx,pyy,NULL);
       if(!result) {
-	if(!PyErr_Occurred()) {
-	  throw PyException("Python distance method failed");
-	}
-	else {
-	  throw PyPyErrorException();
-	}
+        if(!PyErr_Occurred()) {
+          throw PyException("Python distance method failed");
+        }
+        else {
+          throw PyPyErrorException();
+        }
       }
       if(!PyFloat_Check(result)) {
-	Py_DECREF(result);
-	throw PyException("Python distance didn't return float");
+        Py_DECREF(result);
+        throw PyException("Python distance didn't return float");
       }
       double res=PyFloat_AsDouble(result);
       Py_DECREF(result);
@@ -218,30 +222,30 @@ public:
       PyObject* result = PyObject_CallFunctionObjArgs(interpolate,pyx,pyy,pyu,NULL);
       Py_DECREF(pyu);
       if(!result) {
-	if(!PyErr_Occurred()) {
-	  throw PyException("Python interpolate method failed");
-	}
-	else {
-	  throw PyPyErrorException();
-	}
+        if(!PyErr_Occurred()) {
+          throw PyException("Python interpolate method failed");
+        }
+        else {
+          throw PyPyErrorException();
+        }
       }
       bool res=PyListToConfig(result,out);
       if(!res) {
-	Py_DECREF(result);
-	throw PyException("Python interpolate method did not return a list");
+        Py_DECREF(result);
+        throw PyException("Python interpolate method did not return a list");
       }
       Py_DECREF(result);
     }
   }
 
-  virtual void Properties(PropertyMap& props) const
+  virtual void Properties(PropertyMap& props)
   {
     props = properties;
     if(!distance) {
       props.set("euclidean",1);
       props.set("metric","euclidean");
       if(!interpolate)
-	props.set("geodesic",1);
+        props.set("geodesic",1);
     }
   }
 
@@ -490,12 +494,12 @@ public:
       //sample using python
       PyObject* result = PyObject_CallFunctionObjArgs(sampler,NULL);
       if(result == NULL) {
-	if(!PyErr_Occurred()) {
-	  throw PyException("Error calling goal sampler provided to setEndpoints, must accept 0 arguments");
-	}
-	else {
-	  throw PyPyErrorException();
-	}
+        if(!PyErr_Occurred()) {
+          throw PyException("Error calling goal sampler provided to setEndpoints, must accept 0 arguments");
+        }
+        else {
+          throw PyPyErrorException();
+        }
       }
       PyListToConfig(result,x);
       Py_DECREF(result);
@@ -508,10 +512,10 @@ public:
     Py_DECREF(pyq);
     if(result == NULL) {
       if(!PyErr_Occurred()) {
-	throw PyException("Error calling goal sampler provided to setEndpoints, must accept 1 argument");
+        throw PyException("Error calling goal sampler provided to setEndpoints, must accept 1 argument");
       }
       else {
-	throw PyPyErrorException();
+        throw PyPyErrorException();
       }
     }
     if(!PyBool_Check(result) && !PyInt_Check(result)) {
@@ -553,10 +557,10 @@ void destroyCSpace(int cspace)
 {
   if(cspace < 0 || cspace >= (int)spaces.size()) 
     throw PyException("Invalid cspace index");
-  spaces[cspace] = NULL;
+  spaces[cspace].reset();
   spacesDeleteList.push_back(cspace);
   if(cspace < (int)adaptiveSpaces.size())
-    adaptiveSpaces[cspace] = NULL;
+    adaptiveSpaces[cspace].reset();
 }
 
 CSpace* getPreferredSpace(int index)
@@ -608,7 +612,7 @@ void CSpaceInterface::addFeasibilityTest(const char* name,PyObject* pyFeas)
   if(index < 0 || index >= (int)spaces.size() || spaces[index]==NULL) 
     throw PyException("Invalid cspace index");
   int cindex = spaces[index]->ConstraintIndex(name);
-  spaces[index]->constraints.resize(spaces[index]->constraintNames.size(),NULL);
+  spaces[index]->constraints.resize(spaces[index]->constraintNames.size(),shared_ptr<PyConstraintSet>());
   if(cindex < 0) {
     spaces[index]->constraintNames.push_back(name);
     spaces[index]->constraints.push_back(make_shared<PyConstraintSet>(pyFeas));
@@ -640,7 +644,7 @@ void CSpaceInterface::addVisibilityTest(const char* name,PyObject* pyVis)
     Py_XINCREF(pyVis);
     spaces[index]->visibleTests.push_back(pyVis);
     spaces[index]->constraintNames.push_back(name);
-    spaces[index]->constraints.push_back(NULL);
+    spaces[index]->constraints.push_back(std::shared_ptr<CSet>());
   }
   else {
     Py_DECREF(spaces[index]->visibleTests[cindex]);
@@ -1063,9 +1067,9 @@ void destroyPlan(int plan)
 {
   if(plan < 0 || plan >= (int)plans.size() || plans[plan]==NULL) 
     throw PyException("Invalid plan index");
-  plans[plan] = NULL;
+  plans[plan].reset();
   if(plan < (int)goalSets.size())
-    goalSets[plan] = NULL;
+    goalSets[plan].reset();
   plansDeleteList.push_back(plan);
 }
 

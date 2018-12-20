@@ -22,7 +22,7 @@
 class FeedforwardController : public RobotController
 {
  public:
-  FeedforwardController(Robot& robot,shared_ptr<RobotController> base=NULL);
+  FeedforwardController(Robot& robot,shared_ptr<RobotController> base);
   virtual ~FeedforwardController() {}
   virtual const char* Type() const { return "FeedforwardController"; }
   virtual void Update(Real dt);

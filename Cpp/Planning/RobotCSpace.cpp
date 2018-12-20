@@ -180,7 +180,7 @@ Real RobotCSpace::Distance(const Config& a,const Config& b)
     return ::Distance(robot,a,b,norm,jointWeights,floatingRotationWeight);
 }
 
-void RobotCSpace::Properties(PropertyMap& map) const
+void RobotCSpace::Properties(PropertyMap& map)
 {
   int euclidean = 1;
   Real v = 1;

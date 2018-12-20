@@ -1,3 +1,7 @@
+#if defined (__APPLE__) || defined (MACOSX)
+  #include "mac_fixes.h"
+#endif //Mac fixes 
+
 #include <vector>
 #include <string>
 #include "robotsim.h"
@@ -126,7 +130,7 @@ void derefWorld(int index)
     //printf("Deleting world %d\n",index);
     if(!worlds[index]->worldExternal)
       delete worlds[index]->world;
-    worlds[index] = NULL;
+    worlds[index].reset();
     worldDeleteList.push_back(index);
   }
 }
@@ -166,7 +170,7 @@ void destroySim(int index)
   if(!sims[index])
     throw PyException("Invalid sim index");
 
-  sims[index] = NULL;
+  sims[index].reset();
   simDeleteList.push_back(index);
 }
 
@@ -181,7 +185,7 @@ int createWidget()
   else {
     int index = widgetDeleteList.front();
     widgetDeleteList.erase(widgetDeleteList.begin());
-    widgets[index].widget = NULL;
+    widgets[index].widget.reset();
     widgets[index].refCount = 1;
     //printf("Creating widget %d, ref count %d\n",index,1);
     return index;
@@ -199,7 +203,7 @@ void derefWidget(int index)
   //printf("Deref widget %d: count %d\n",index,widgets[index].refCount);
   if(widgets[index].refCount == 0) {
     //printf("Deleting widget %d\n",index);
-    widgets[index].widget = NULL;
+    widgets[index].widget.reset();
     widgetDeleteList.push_back(index);
   }
 }
@@ -216,9 +220,9 @@ void refWidget(int index)
 void destroy()
 {
   for(size_t i=0;i<sims.size();i++)
-    sims[i] = NULL;
+    sims[i].reset();
   for(size_t i=0;i<worlds.size();i++)
-    worlds[i] = NULL;
+    worlds[i].reset();
   simDeleteList.clear();
   worldDeleteList.clear();
   sims.resize(0);
@@ -605,7 +609,7 @@ void Geometry3D::free()
   shared_ptr<AnyCollisionGeometry3D>* geom = reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geomPtr);  
   if(isStandalone() && *geom) {
     //printf("Geometry3D(): Freeing standalone geometry\n");
-    *geom = NULL;
+    geom->reset();
   }
   world = -1;
   id = -1;
@@ -1276,7 +1280,7 @@ void Appearance::free()
 
   if(isStandalone() && *app) {
     //printf("Appearance(): Freeing standalone appearance for %p\n",this);
-    *app = NULL;
+    app->reset();
   }
   else if(*app)
     //printf("Appearance(): Releasing reference to world appearance %d %d for %p\n",world,id,this);
@@ -1284,7 +1288,7 @@ void Appearance::free()
     
   world = -1;
   id = -1;
-  *app = NULL;
+  app->reset();
 }
 
 void Appearance::setDraw(bool draw)

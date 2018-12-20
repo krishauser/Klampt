@@ -1,3 +1,7 @@
+#if defined (__APPLE__) || defined (MACOSX)
+  #include "mac_fixes.h"
+#endif //Mac fixes 
+
 #include <string>
 #include <vector>
 #include "robotik.h"

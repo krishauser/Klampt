@@ -21,6 +21,7 @@ defs = """${KLAMPT_DEFINITIONS}""".split(';')
 
 extra_shared_libraries = []
 extra_compile_args = []
+extra_link_args = []
 if sys.platform == 'win32':
     import shutil
     extra_shared_libraries = """${KLAMPT_EXTRA_DLLS}""".split(';')
@@ -28,7 +29,7 @@ if sys.platform == 'win32':
         shutil.copy(os.path.join("""${KLAMPT_DEPENDENCY_LIB_DIR}""",fn),os.path.join(root_py_folder,fn))
 else:
     extra_compile_args = ['-std=c++11']
-            
+    
 #Parse libraries
 if sys.platform == 'win32':
     optlibs = []
@@ -58,6 +59,9 @@ for l in libs:
     elif fn.endswith('lib'):
         name = fn.split('.')[0]
         libnames.append(name)
+    elif fn.endswith('framework'):
+        extra_link_args.append('-framework')
+        extra_link_args.append(fn.split('.')[0])
     else:
         libnames.append(fn)
 libs = libnames
@@ -84,9 +88,6 @@ rssourcefiles = commonfiles + ['robotsim.cpp','robotik.cpp','robotsim_wrap.cxx']
 mpsourcefiles = commonfiles + ['motionplanning.cpp','motionplanning_wrap.cxx']
 rfsourcefiles = commonfiles + ['rootfind.cpp','pyvectorfield.cpp','rootfind_wrap.cxx']
 
-extra_link_args = []
-if sys.platform == 'darwin':
-  extra_link_args = ['-framework', 'OpenGL']
 
 setup(name='Klampt',
       version='@KLAMPT_VERSION@',
