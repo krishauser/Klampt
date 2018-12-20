@@ -475,7 +475,7 @@ void MultiContactCSpace::Midpoint(const Config& x,const Config& y,Config& out)
   SolveContact(out);
 }
 
-void MultiContactCSpace::Properties(PropertyMap& map) const
+void MultiContactCSpace::Properties(PropertyMap& map)
 {
   MultiRobotCSpace::Properties(map);
   if(!closedChainConstraints.empty()) {

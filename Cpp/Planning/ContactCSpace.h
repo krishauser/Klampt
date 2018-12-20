@@ -78,7 +78,7 @@ class MultiContactCSpace : public MultiRobotCSpace
   virtual bool IsFeasible(const Config&);
   virtual void Interpolate(const Config& x,const Config& y,Real u,Config& out);
   virtual void Midpoint(const Config& x,const Config& y,Config& out);
-  virtual void Properties(PropertyMap&) const;
+  virtual void Properties(PropertyMap&);
 
   bool SolveContact(Config& x,int numIters=0,Real tol=0);
   Real ContactDistance();

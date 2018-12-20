@@ -38,7 +38,7 @@ public:
   virtual void SampleNeighborhood(const Config& c,Real r,Config& out);
   virtual void Interpolate(const Config& x,const Config& y,Real u,Config& out);
   virtual Real Distance(const Config& x,const Config& y);
-  virtual void Properties(PropertyMap&) const;
+  virtual void Properties(PropertyMap&);
 
   virtual void InterpolateDeriv(const Config& a,const Config& b,Real u,Vector& dx);
   virtual void InterpolateDerivA(const Config& a,const Config& b,Real u,const Vector& da,Vector& dx);
