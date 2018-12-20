@@ -17,28 +17,28 @@
 
       // one argument version
       template <typename T, typename Arg1>
-      inline shared_ptr<T> make_shared(Arg1& arg1)
+      inline shared_ptr<T> make_shared(const Arg1& arg1)
       {
         return shared_ptr<T>(new T(arg1));
       }
 
       // two arguments version
       template <typename T, typename Arg1, typename Arg2>
-      inline shared_ptr<T> make_shared(Arg1& arg1, Arg2& arg2)
+      inline shared_ptr<T> make_shared(const Arg1& arg1, const Arg2& arg2)
       {
         return shared_ptr<T>(new T(arg1,arg2));
       }
 
       // three arguments version
       template <typename T, typename Arg1, typename Arg2, typename Arg3>
-      inline shared_ptr<T> make_shared(Arg1& arg1, Arg2& arg2, Arg3& arg3)
+      inline shared_ptr<T> make_shared(const Arg1& arg1, const Arg2& arg2, const Arg3& arg3)
       {
         return shared_ptr<T>(new T(arg1,arg2,arg3));
       }
 
       // four arguments version
       template <typename T, typename Arg1, typename Arg2, typename Arg3, typename Arg4>
-      inline shared_ptr<T> make_shared(Arg1& arg1, Arg2& arg2, Arg3& arg3, Arg4& arg4)
+      inline shared_ptr<T> make_shared(const Arg1& arg1, const Arg2& arg2, const Arg3& arg3, const Arg4& arg4)
       {
         return shared_ptr<T>(new T(arg1,arg2,arg3,arg4));
       }
