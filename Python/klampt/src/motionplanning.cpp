@@ -612,7 +612,7 @@ void CSpaceInterface::addFeasibilityTest(const char* name,PyObject* pyFeas)
   if(index < 0 || index >= (int)spaces.size() || spaces[index]==NULL) 
     throw PyException("Invalid cspace index");
   int cindex = spaces[index]->ConstraintIndex(name);
-  spaces[index]->constraints.resize(spaces[index]->constraintNames.size(),NULL);
+  spaces[index]->constraints.resize(spaces[index]->constraintNames.size(),shared_ptr<PyConstraintSet>());
   if(cindex < 0) {
     spaces[index]->constraintNames.push_back(name);
     spaces[index]->constraints.push_back(make_shared<PyConstraintSet>(pyFeas));
@@ -1067,9 +1067,9 @@ void destroyPlan(int plan)
 {
   if(plan < 0 || plan >= (int)plans.size() || plans[plan]==NULL) 
     throw PyException("Invalid plan index");
-  plans[plan] = NULL;
+  plans[plan].reset();
   if(plan < (int)goalSets.size())
-    goalSets[plan] = NULL;
+    goalSets[plan].reset();
   plansDeleteList.push_back(plan);
 }
 
