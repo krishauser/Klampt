@@ -532,8 +532,8 @@ void ODESimulator::Step(Real dt)
           if(obj) {
             const dReal* frc=dBodyGetForce(obj);
             const dReal* trq=dBodyGetTorque(obj);
-            initialforces.push_back(Vector3(frc));
-            initialtorques.push_back(Vector3(trq));
+            initialforces.push_back(Vector3(frc[0],frc[1],frc[2]));
+            initialtorques.push_back(Vector3(trq[0],trq[1],trq[2]));
           }
         }
       for(size_t i=0;i<objects.size();i++) {
@@ -541,8 +541,8 @@ void ODESimulator::Step(Real dt)
         if(obj) {
           const dReal* frc=dBodyGetForce(obj);
           const dReal* trq=dBodyGetTorque(obj);
-          initialforces.push_back(Vector3(frc));
-          initialtorques.push_back(Vector3(trq));
+          initialforces.push_back(Vector3(frc[0],frc[1],frc[2]));
+          initialtorques.push_back(Vector3(trq[0],trq[1],trq[2]));
         }
       }
   		while(true) {
