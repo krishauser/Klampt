@@ -609,7 +609,7 @@ void Geometry3D::free()
   shared_ptr<AnyCollisionGeometry3D>* geom = reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geomPtr);  
   if(isStandalone() && *geom) {
     //printf("Geometry3D(): Freeing standalone geometry\n");
-    *geom = NULL;
+    geom->reset();
   }
   world = -1;
   id = -1;
@@ -1280,7 +1280,7 @@ void Appearance::free()
 
   if(isStandalone() && *app) {
     //printf("Appearance(): Freeing standalone appearance for %p\n",this);
-    *app = NULL;
+    app->reset();
   }
   else if(*app)
     //printf("Appearance(): Releasing reference to world appearance %d %d for %p\n",world,id,this);
@@ -1288,7 +1288,7 @@ void Appearance::free()
     
   world = -1;
   id = -1;
-  *app = NULL;
+  app->reset();
 }
 
 void Appearance::setDraw(bool draw)

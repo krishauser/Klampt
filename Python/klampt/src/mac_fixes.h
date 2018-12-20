@@ -47,9 +47,9 @@
       template <class C>
       class function {
       public:
-        function() {}
-        function(const C& v):value(v) {}
-        C value;
+        function():value(NULL) {}
+        function(C* v):value(v) {}
+        C* value;
       };
 
     } //namespace std
