@@ -5,7 +5,7 @@
 #include <KrisLibrary/math3d/primitives.h>
 using namespace Math3D;
 
-/** @ingroup Control
+/** @ingroup Sensing
  * @brief Simulates an accelerometer.
  *
  * Configurable settings:
@@ -43,7 +43,7 @@ class Accelerometer : public SensorBase
   Vector3 last_v;          ///< Temporary: needed to derive accel from ODE
 };
 
-/** @ingroup Control
+/** @ingroup Sensing
  * @brief Simulates a tilt sensor that measures the angle of
  * a reference direction about certain axes.
  *
@@ -83,7 +83,7 @@ class TiltSensor : public SensorBase
 };
 
 
-/** @ingroup Control
+/** @ingroup Sensing
  * @brief Simulates a gyroscope.
  *
  * Configurable settings:
@@ -129,7 +129,7 @@ class GyroSensor : public SensorBase
   Vector3 last_w;          ///< Temporary: needed to derive accel from ODE
 };
 
-/** @ingroup Control
+/** @ingroup Sensing
  * @brief An inertial measurement unit.  May provide all or some of a 
  * rigid body's state.
  *

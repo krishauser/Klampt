@@ -8,6 +8,10 @@
 
 struct Triangle3DSampler;
 
+/** @defgroup Contact
+ * Contact points, holds, stances, and grasps
+ */
+
 /** @file ContactFeature.h
  * @ingroup Contact
  * @brief Defines the ContactFeature structures and some

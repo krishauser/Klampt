@@ -3,6 +3,9 @@
 
 #include "Robot.h"
 
+/** @addtogroup Modeling */
+/*@{*/
+
 /** @brief Interpolates between the two configurations in geodesic fashion 
  * on the robot's underlying configuration space.
  */
@@ -40,5 +43,7 @@ Real Distance(const Robot& robot,const Config& a,const Config& b,Real norm,Real 
  * floatingRotationWeight
  */
 Real Distance(const Robot& robot,const Config& a,const Config& b,Real norm,const vector<Real>& weights,Real floatingRotationWeight=1.0);
+
+/*@}*/
 
 #endif

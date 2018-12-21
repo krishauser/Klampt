@@ -9,7 +9,8 @@
 
 class GeometryManager;
 
-/** @brief A "smart" geometry loading class that caches previous geometries,
+/** @ingroup Modeling
+ * @brief A "smart" geometry loading class that caches previous geometries,
  * and does not re-load or re-initialize existing collision detection data
  * structures if the item has already been loaded.
  *

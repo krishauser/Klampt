@@ -5,7 +5,7 @@
 #include <KrisLibrary/math3d/primitives.h>
 using namespace Math3D;
 
-/** @ingroup Control
+/** @ingroup Sensing
  * @brief Simulates a contact sensor / tactile sensor.
  * 
  * The sensor comprises a block of space which needs to be placed on the
@@ -68,7 +68,7 @@ class ContactSensor : public SensorBase
   Vector3 force;           ///< Measurement: the force magnitude
 };
 
-/** @ingroup Control
+/** @ingroup Sensing
  * @brief Simulates a force-torque sensor mounted between a link and its
  * parent. Can be configured to be up to 6DOF.
  *

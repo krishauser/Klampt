@@ -12,6 +12,8 @@ class WorldSimulation;
 class LinearPath;
 class SensorBase;
 
+/** @addtogroup IO */
+/*@{*/
 
 ///Must call this before all other ROS[X] calls. An optional node name can
 ///be provided, otherwise it is just "klampt".  This can safely be called many
@@ -118,5 +120,6 @@ bool ROSSubscribeTransforms(Robot& robot,const char* frameprefix="klampt");
 ///If you want to detach it from  future updates, call RosDetach("tf");
 bool ROSSubscribeTransform(Math3D::RigidTransform& T,const char* frameprefix="klampt_transform");
 
+/*@}*/
 
 #endif

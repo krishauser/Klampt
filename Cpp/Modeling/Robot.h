@@ -12,17 +12,18 @@ using namespace std;
  */
 struct RobotJoint
 {
-  /* Types:
-     Weld: completely fixed to the parent
-     Normal: regular fixed axis joint with finite range
-     Spin: infinitely spinnable rotational joint
-     Floating: free-floating base
-     FloatingPlanar: a free-floating 2D base
-     BallAndSocket: ball and socket joint
-     Closed: a closed chain loop
+  /** Types:
+    - Weld: completely fixed to the parent
+    - Normal: regular fixed axis joint with finite range
+    - Spin: infinitely spinnable rotational joint
+    - Floating: free-floating base
+    - FloatingPlanar: a free-floating 2D base
+    - BallAndSocket: ball and socket joint
+    - Closed: a closed chain loop
   */
   enum Type { Weld, Normal, Spin, Floating, FloatingPlanar, BallAndSocket, Closed };
-//  UNKNOWN, REVOLUTE, CONTINUOUS, PRISMATIC, FLOATING, PLANAR, FIXED
+
+  ///The type of this joint
   Type type;
   ///The affected link.  For Floating/BallAndSocket joints, the last
   ///link in the chain.  For Closed joints, the `free' link
@@ -39,15 +40,15 @@ struct RobotJoint
  */
 struct RobotJointDriver
 {
-  /* Types
-  Normal: normal 
-  Affine: scaling/offset of a single control to multiple outputs
+  /** Types
+  - Normal: normal 
+  - Affine: scaling/offset of a single control to multiple outputs
      linkIndices stores the mapping
-  Translation: controls are a direct force applied to the body.  (not implemented yet)
+  - Translation: controls are a direct force applied to the body.  (not implemented yet)
      linkIndices[0] is the "driver" link, linkIndices[1] is the affected link
-  Rotation: controls are a direct moment applied to the body.  (not implemented yet)
+  - Rotation: controls are a direct moment applied to the body.  (not implemented yet)
      linkIndices[0] is the "driver" link, linkIndices[1] is the affected link
-  Custom: in the future will hold more sophisticated mappings
+  - Custom: in the future will hold more sophisticated mappings
   */
   enum Type { Normal, Affine, Translation, Rotation, Custom };
 

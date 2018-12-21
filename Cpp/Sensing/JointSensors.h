@@ -4,7 +4,7 @@
 #include "Sensor.h"
 using namespace Math;
 
-/** @ingroup Control
+/** @ingroup Sensing
  * @brief Simulates a joint encoder.
  *
  * Configurable settings:
@@ -34,7 +34,7 @@ class JointPositionSensor : public SensorBase
   Vector q;              ///< Measurement: joint angles
 };
 
-/** @ingroup Control
+/** @ingroup Sensing
  * @brief Simulates a velocity sensor.  (Does not perform differencing)
  *
  * Configurable settings:
@@ -64,7 +64,7 @@ class JointVelocitySensor : public SensorBase
   Vector dq;             ///< Measurement: joint velocities
 };
 
-/** @ingroup Control
+/** @ingroup Sensing
  * @brief Simulates a torque sensor.
  * 
  * Motors typically provide current/voltage information, and this assumes

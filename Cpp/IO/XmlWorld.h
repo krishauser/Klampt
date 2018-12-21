@@ -4,6 +4,11 @@
 #include <tinyxml.h>
 #include <Klampt/Modeling/World.h>
 
+/** @defgroup IO
+ * I/O routines.  Most of these will be transparent to the user, and you should just use the Robot.Load and World.ReadFile routines.
+ * ROS.h and three.js.h might be useful.
+ */
+
 class XmlRobot
 {
  public:

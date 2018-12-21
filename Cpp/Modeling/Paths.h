@@ -6,6 +6,9 @@ class MultiPath;
 namespace ParabolicRamp { class DynamicPath; }
 namespace Spline { class PiecewisePolynomialND; }
 
+/** @addtogroup Modeling */
+/*@{*/
+
 /** @brief A piecewise linear path */
 class LinearPath
 {
@@ -185,5 +188,6 @@ void Approximate(const T1& in,Real res,LinearPath& out)
   Interpolate(times,milestones,out);
 }
 
+/*@}*/
 
 #endif 

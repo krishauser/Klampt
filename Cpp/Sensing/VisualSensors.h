@@ -10,7 +10,7 @@ using namespace Math3D;
 class RobotWorld;
 class Robot;
 
-/** @ingroup Control
+/** @ingroup Sensing
  * @brief Simulates a laser range sensor, either sweeping or stationary.  Can
  * both simulate both 1D sweeping and 2D sweeping.
  *
@@ -78,7 +78,7 @@ class LaserRangeSensor : public SensorBase
 };
 
 
-/** @ingroup Control
+/** @ingroup Sensing
  * @brief Simulates an RGB, D, or RGB+D camera sensor.  Provides a 2D grid of
  * color and/or depth values, capped and quantized.
  *

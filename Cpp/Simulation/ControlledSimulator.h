@@ -6,7 +6,8 @@
 
 class WorldSimulation;
 
-/** @brief A class containing information about an ODE-simulated and
+/** @ingroup Simulation
+ * @brief A class containing information about an ODE-simulated and
  * controlled robot.
  *
  * Performs the controller update and sensor simulation for each robot in

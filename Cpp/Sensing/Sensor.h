@@ -9,13 +9,17 @@
 #include <typeinfo>
 using namespace std;
 
+/** @defgroup Sensing
+ * Sensor configuration and simulation.
+ */
+
 class Robot;
 class RobotWorld;
 class ControlledRobotSimulator;
 class WorldSimulation;
 class TiXmlElement;
 
-/** @ingroup Control
+/** @ingroup Sensing
  * @brief A sensor base class.  A SensorBase should allow a Controller to 
  * both connect to a simulation as well as a real sensor. 
  *
@@ -90,7 +94,7 @@ class SensorBase
 
 
 
-/** @ingroup Control
+/** @ingroup Sensing
  * @brief A set of sensors for the robot.
  *
  * Accepts saving/loading to XML format.

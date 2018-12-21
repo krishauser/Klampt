@@ -5,6 +5,9 @@
 #include <Klampt/Simulation/WorldSimulation.h>
 #include <KrisLibrary/utils/AnyCollection.h>
 
+/** @addtogroup IO */
+/*@{*/
+
 ///Exports a world to a JSON object that can be used in the three.js editor.
 ///Contains metadata, geometries, materials, and object items.
 ///
@@ -44,5 +47,7 @@ void ThreeJSExportAppearance(const ManagedGeometry& geom,AnyCollection& out);
 void ThreeJSExport(const Geometry::AnyCollisionGeometry3D& geom,AnyCollection& out);
 ///Exports to a three.js scene Material instance
 void ThreeJSExport(const GLDraw::GeometryAppearance& app,AnyCollection& out);
+
+/*@}*/
 
 #endif

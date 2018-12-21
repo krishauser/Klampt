@@ -19,7 +19,8 @@ typedef BasicResource<RigidTransform> RigidTransformResource;
 typedef BasicResource<GeometricPrimitive3D> GeometricPrimitive3DResource;
 typedef BasicResource<Camera::Viewport> ViewportResource;
 
-/** @brief Resource for multiple Config's.
+/** @ingroup Modeling
+ * @brief Resource for multiple Config's.
  */
 class ConfigsResource : public CompoundResourceBase
 {
@@ -43,7 +44,8 @@ class ConfigsResource : public CompoundResourceBase
   vector<Vector> configs;
 };
 
-/** @brief Resource for a TriMesh.  Needs to be overloaded to load
+/** @ingroup Modeling
+ * @brief Resource for a TriMesh.  Needs to be overloaded to load
  * from alternate mesh formats (meshing/IO.h).
  */
 class TriMeshResource : public BasicResource<Meshing::TriMesh>
@@ -56,7 +58,8 @@ public:
   virtual ResourceBase* Copy();
 };
 
-/** @brief Resource for a PointCloud3D.
+/** @ingroup Modeling
+ * @brief Resource for a PointCloud3D.
  */
 class PointCloudResource : public ResourceBase
 {
@@ -72,7 +75,8 @@ class PointCloudResource : public ResourceBase
   Meshing::PointCloud3D pointCloud;
 };
 
-/** @brief Resource for a Robot.
+/** @ingroup Modeling
+ * @brief Resource for a Robot.
  */
 class RobotResource : public ResourceBase
 {
@@ -88,7 +92,8 @@ class RobotResource : public ResourceBase
   Robot robot;
 };
 
-/** @brief Resource for a RigidObject.
+/** @ingroup Modeling
+ * @brief Resource for a RigidObject.
  */
 class RigidObjectResource : public ResourceBase
 {
@@ -104,7 +109,8 @@ class RigidObjectResource : public ResourceBase
   RigidObject object;
 };
 
-/** @brief Resource for a RobotWorld.
+/** @ingroup Modeling
+ * @brief Resource for a RobotWorld.
  *
  * Implementation status: Incomplete. (Saving is not done yet, visualization
  * info are not implemented in hierarchy)
@@ -127,7 +133,9 @@ class WorldResource : public CompoundResourceBase
   RobotWorld world;
 };
 
-/** @brief Resource for a LinearPath. */
+/** @ingroup Modeling
+ * @brief Resource for a LinearPath.
+ */
 class LinearPathResource : public CompoundResourceBase
 {
  public:
@@ -152,7 +160,8 @@ class LinearPathResource : public CompoundResourceBase
   vector<Vector> milestones;
 };
 
-/** @brief Resource for a MultiPath.
+/** @ingroup Modeling
+ * @brief Resource for a MultiPath.
  * 
  * Implementation status: mostly complete. Hierarchy for properties and
  * global holds are not complete.
@@ -180,7 +189,8 @@ class MultiPathResource : public CompoundResourceBase
   MultiPath path;
 };
 
-/** @brief Resource for an IKGoal.
+/** @ingroup Modeling
+ * @brief Resource for an IKGoal.
  * 
  * Implementation status: hierarchy is incomplete.
  */
@@ -212,7 +222,8 @@ class IKGoalResource : public CompoundResourceBase
   IKGoal goal;
 };
 
-/** @brief Resource for a Hold.
+/** @ingroup Modeling
+ * @brief Resource for a Hold.
  */
 class HoldResource : public CompoundResourceBase
 {
@@ -245,7 +256,8 @@ class HoldResource : public CompoundResourceBase
   Hold hold;
 };
 
-/** @brief Resource for a Stance.
+/** @ingroup Modeling
+ * @brief Resource for a Stance.
  */
 class StanceResource : public CompoundResourceBase
 {
@@ -274,7 +286,8 @@ class StanceResource : public CompoundResourceBase
   Stance stance;
 };
 
-/** @brief Resource for a Grasp.
+/** @ingroup Modeling
+ * @brief Resource for a Grasp.
  * 
  * Implementation status: incomplete.  Hierarchy items for fixed DOFs
  * are incomplete.
@@ -304,8 +317,10 @@ class GraspResource : public CompoundResourceBase
   Grasp grasp;
 };
 
-/** @ingroup Modeling
- * @brief Initializes a ResourceLibrary so that it accepts standard RobotSim
+/** @addtogroup Modeling */
+/*@{*/
+
+/**  @brief Initializes a ResourceLibrary so that it accepts standard RobotSim
  * file types.
  */
 void MakeRobotResourceLibrary(ResourceLibrary& library);
@@ -351,5 +366,7 @@ ResourcePtr PackResources(ResourceLibrary& resources,const string& type,string* 
 ///Here "incomplete" means that calling Pack on the return array will
 ///NOT produce a copy of r.
 vector<ResourcePtr> UnpackResource(ResourcePtr r,bool* successful=NULL,bool* incomplete=NULL);
+
+/*@}*/
 
 #endif

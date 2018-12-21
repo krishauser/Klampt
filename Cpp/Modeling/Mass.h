@@ -4,6 +4,9 @@
 #include <KrisLibrary/geometry/AnyGeometry.h>
 using namespace Math3D;
 
+/** @addtogroup Modeling */
+/*@{*/
+
 ///Computes the first moment integrated over the mesh (assuming the mesh
 ///is a hollow shell)
 Vector3 CenterOfMass(const Meshing::TriMesh& mesh);
@@ -52,5 +55,7 @@ inline Matrix3 Inertia_Solid(const Meshing::TriMesh& mesh,Real gridRes,Real mass
 {
   return Inertia_Solid(mesh,gridRes,CenterOfMass_Solid(mesh,gridRes),mass);
 }
+
+/*@}*/
 
 #endif

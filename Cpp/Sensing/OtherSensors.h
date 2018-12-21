@@ -4,7 +4,7 @@
 #include "Sensor.h"
 #include <deque>
 
-/** @ingroup Control
+/** @ingroup Sensing
  * @brief A transformed "piggyback" sensor with a scale, bias, and minimum / maximum
  *
  * Configurable settings:
@@ -41,7 +41,7 @@ class TransformedSensor : public SensorBase
   vector<double> measurements;
 };
 
-/** @ingroup Control
+/** @ingroup Sensing
  * @brief A "piggyback" sensor that corrupts readings with quantization error and gaussian noise
  *
  * Configurable settings:
@@ -76,7 +76,7 @@ class CorruptedSensor : public SensorBase
   vector<double> measurements;
 };
 
-/** @ingroup Control
+/** @ingroup Sensing
  * @brief An exponentially smoothed filter that acts as a "piggyback" sensor.
  *
  * Configurable settings:
@@ -107,7 +107,7 @@ class FilteredSensor : public SensorBase
   double smoothing;
 };
 
-/** @ingroup Control
+/** @ingroup Sensing
  * @brief An time delayed "piggyback" sensor.
  *
  * Configurable settings:

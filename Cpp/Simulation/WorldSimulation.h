@@ -6,7 +6,12 @@
 #include "ControlledSimulator.h"
 #include <map>
 
-/** @brief Container for information about contacts regarding a certain
+/** @defgroup Simulation
+ * Klampt's rigid body physics simulation engine.
+ */
+
+/** @ingroup Simulation
+ * @brief Container for information about contacts regarding a certain
  * object.  Can be set to accumulate a summary over sub-steps or detailed
  * data per-step.
  *
@@ -32,7 +37,8 @@ struct ContactFeedbackInfo
   vector<ODEContactList> contactLists;
 };
 
-/** @brief Any function that should be run per sub-step of the simulation
+/** @ingroup Simulation
+ * @brief Any function that should be run per sub-step of the simulation
  * needs to be a WorldSimulationHook subclass and added to the
  * WorldSimulation.hooks member.
  *
@@ -55,7 +61,8 @@ class WorldSimulationHook
   bool autokill;
 };
 
-/** @brief A physical simulator for a RobotWorld.
+/** @ingroup Simulation
+ * @brief A physical simulator for a RobotWorld.
  */
 class WorldSimulation
 {
@@ -132,7 +139,8 @@ public:
   ODESimulator::Status worstStatus;
 };
 
-/** @brief A hook that adds a constant force to a body
+/** @ingroup Simulation
+ * @brief A hook that adds a constant force to a body
  */
 class ForceHook : public WorldSimulationHook
 {
@@ -146,7 +154,8 @@ class ForceHook : public WorldSimulationHook
   Vector3 worldpt,f;
 };
 
-/** @brief A hook that adds a constant force in world coordinates to a point
+/** @ingroup Simulation
+ * @brief A hook that adds a constant force in world coordinates to a point
  * on a body given in local coordinates
  */
 class LocalForceHook : public WorldSimulationHook
@@ -162,7 +171,8 @@ class LocalForceHook : public WorldSimulationHook
 };
 
 
-/** @brief A hook that adds a constant wrench (force f and moment m) to
+/** @ingroup Simulation
+ * @brief A hook that adds a constant wrench (force f and moment m) to
  * the body
  */
 class WrenchHook : public WorldSimulationHook
@@ -177,7 +187,8 @@ class WrenchHook : public WorldSimulationHook
   Vector3 f,m;
 };
 
-/** @brief A hook that acts as a Hookean spring to a given fixed target point.
+/** @ingroup Simulation
+ * @brief A hook that acts as a Hookean spring to a given fixed target point.
  */
 class SpringHook : public WorldSimulationHook
 {

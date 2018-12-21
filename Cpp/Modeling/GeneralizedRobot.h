@@ -6,7 +6,8 @@
 #include "World.h"
 #include <map>
 
-/** @brief A collection of robots and objects that can be treated like one "big robot".
+/** @ingroup Modeling
+ * @brief A collection of robots and objects that can be treated like one "big robot".
  *
  * Allows treating configuration in a single vector. Configurations of objects are
  * specified as 6 DOF (x,y,z,rz,ry,rx).
