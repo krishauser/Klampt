@@ -32,7 +32,6 @@ std::string getPlanJSONString();
 void setPlanType(const char* type);
 
 void setPlanSetting(const char* setting,double value);
-
 /** @brief Sets a numeric or string-valued setting for the planner.
  *
  * Valid numeric values are:
@@ -160,8 +159,8 @@ class CSpaceInterface
   int index;
 };
 
-/** @brief An interface for a motion planner.  The MotionPlanner interface
- * in cspace.py is somewhat easier to use.
+/** @brief An interface for a motion planner.  The :class:`MotionPlan`
+ * interface in cspace.py is somewhat easier to use.
  *
  * On construction, uses the planner type specified by setPlanType
  * and the settings currently specified by calls to setPlanSetting.
