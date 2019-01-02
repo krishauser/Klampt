@@ -3,6 +3,7 @@
 from klampt import *
 from klampt import vis
 from klampt.io import resource
+import optparse
 import os,glob
 import sys
 
@@ -44,12 +45,24 @@ def make_thumbnails(folder,outputfolder):
 	        	exit(0)
 
 if __name__ == '__main__':
-    if len(sys.argv) <= 1:
-        print "Usage: klampt_thumbnails INPUT_FOLDER [OUTPUT_FOLDER]"
+    usage = "Usage: %prog [options] INPUT_FOLDER [OUTPUT_FOLDER]\nCreates thumbnails from a set of Klamp't objects."
+    parser = optparse.OptionParser(usage=usage)
+    parser.add_option("-w", "--world", dest="world",metavar="WORLD", help="Use WORLD as a reference world")
+    (options,args) = parser.parse_args()
+
+    if len(args) == 0 or len(args) > 2:
+        parser.error("Must provide 1 or 2 arguments")
         exit(0)
+
+    world = None
+    if parser.world:
+        world = WorldModel()
+        if not world.readFile(parser.world):
+            parser.error("Error reading the specified world file")
+
     output_folder = 'thumbnails'
-    if len(sys.argv) > 2:
-        output_folder = sys.argv[2]
+    if len(args) == 2:
+        output_folder = args[1]
     print "Outputting thumbnails to",output_folder
-    make_thumbnails(sys.argv[1],output_folder)
+    make_thumbnails(args[0],output_folder,world=world)
     
