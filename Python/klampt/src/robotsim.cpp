@@ -1263,8 +1263,11 @@ void Appearance::set(const Appearance& g)
   if(!isStandalone()) {
     //need to detach from other geometries that might be sharing this appearance
     RobotWorld& world=*worlds[this->world]->world;
-    GetManagedGeometry(world,id).SetUniqueAppearance();
-    app = GetManagedGeometry(world,id).Appearance();
+    ManagedGeometry& geom = GetManagedGeometry(world,id);
+    if(geom.IsAppearanceShared()) {
+      geom.SetUniqueAppearance();
+      app = geom.Appearance();
+    }
   }
   if(app == NULL) {
     app = make_shared<GLDraw::GeometryAppearance>(*gapp);
@@ -1297,8 +1300,11 @@ void Appearance::setDraw(bool draw)
   if(!app) return;
   if(!isStandalone()) {
     RobotWorld& world=*worlds[this->world]->world;
-    GetManagedGeometry(world,id).SetUniqueAppearance();
-    app = GetManagedGeometry(world,id).Appearance();
+    ManagedGeometry& geom = GetManagedGeometry(world,id);
+    if(geom.IsAppearanceShared()) {
+      geom.SetUniqueAppearance();
+      app = geom.Appearance();
+    }
   }
   if(draw) {
     app->drawFaces = true;
@@ -1317,8 +1323,11 @@ void Appearance::setDraw(int feature,bool draw)
   if(!app) return;
   if(!isStandalone()) {
     RobotWorld& world=*worlds[this->world]->world;
-    GetManagedGeometry(world,id).SetUniqueAppearance();
-    app = GetManagedGeometry(world,id).Appearance();
+    ManagedGeometry& geom = GetManagedGeometry(world,id);
+    if(geom.IsAppearanceShared()) {
+      geom.SetUniqueAppearance();
+      app = geom.Appearance();
+    }
   }
   switch(feature) {
   case ALL: app->drawFaces = app->drawVertices = app->drawEdges = draw; break;
@@ -1354,8 +1363,12 @@ void Appearance::setColor(float r,float g,float b,float a)
   if(!app) return;
   if(!isStandalone()) {
     RobotWorld& world=*worlds[this->world]->world;
-    GetManagedGeometry(world,id).SetUniqueAppearance();
-    app = GetManagedGeometry(world,id).Appearance();
+    ManagedGeometry& geom = GetManagedGeometry(world,id);
+    if(geom.IsAppearanceShared()) {
+      geom.SetUniqueAppearance();
+      app = geom.Appearance();
+    }
+
   }
   app->SetColor(r,g,b,a);
 }
@@ -1366,8 +1379,11 @@ void Appearance::setColor(int feature,float r,float g,float b,float a)
   if(!app) return;
   if(!isStandalone()) {
     RobotWorld& world=*worlds[this->world]->world;
-    GetManagedGeometry(world,id).SetUniqueAppearance();
-    app = GetManagedGeometry(world,id).Appearance();
+    ManagedGeometry& geom = GetManagedGeometry(world,id);
+    if(geom.IsAppearanceShared()) {
+      geom.SetUniqueAppearance();
+      app = geom.Appearance();
+    }
   }
   switch(feature) {
   case ALL:
@@ -1546,8 +1562,11 @@ void Appearance::setPointSize(float size)
   if(!app) return;
   if(!isStandalone()) {
     RobotWorld& world=*worlds[this->world]->world;
-    GetManagedGeometry(world,id).SetUniqueAppearance();
-    app = GetManagedGeometry(world,id).Appearance();
+    ManagedGeometry& geom = GetManagedGeometry(world,id);
+    if(geom.IsAppearanceShared()) {
+      geom.SetUniqueAppearance();
+      app = geom.Appearance();
+    }
   }
   app->vertexSize = size;
 }
@@ -5284,12 +5303,12 @@ bool SubscribeToStream(Geometry3D& g,const char* protocol,const char* name,const
       //TODO: update ROS, update the appearance every time the point cloud changes
     }
     else {
-      throw PyException("AttachToStream(Geometry3D): Unsupported type argument");
+      throw PyException("SubscribeToStream(Geometry3D): Unsupported type argument");
       return false;
     }
   }
   else {
-    throw PyException("AttachToStream(Geometry3D): Unsupported protocol argument");
+    throw PyException("SubscribeToStream(Geometry3D): Unsupported protocol argument");
     return false;
   }
 }
