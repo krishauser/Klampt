@@ -1030,7 +1030,13 @@ void setPlanSetting(const char* setting,double value)
   else if(0==strcmp(setting,"restart"))
     factory.restart = (value != 0);
   else {
-    throw PyException("Invalid setting");
+    stringstream ss;
+    ss<<"Invalid numeric setting \""<<setting<<"\""<<endl;
+    ss<<"Valid keys are:"<<endl;
+    ss<<"  knn, connectionThreshold, perturbationRadius, bidirectional,"<<endl;
+    ss<<"  grid, gridResolution, suboptimalityFactor, randomizeFrequency,"<<endl;
+    ss<<"  shortcut, restart"<<endl;
+    throw PyException(ss.str());
   }
 }
 
@@ -1041,7 +1047,11 @@ void setPlanSetting(const char* setting,const char* value)
   else if(0==strcmp(setting,"restartTermCond"))
     factory.restartTermCond = value;
   else {
-    throw PyException("Invalid setting");
+    stringstream ss;
+    ss<<"Invalid string-valued setting \""<<setting<<"\""<<endl;
+    ss<<"Valid keys are:"<<endl;
+    ss<<"  pointLocation, restartTermCond"<<endl;
+    throw PyException(ss.str());
   }
 }
 
