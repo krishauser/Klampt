@@ -633,22 +633,22 @@ if __name__ == '__main__':
 ===============================================================================
 A program to quickly browse Klamp't objects. 
 
-USAGE: python resource_browser.py [item1 item2 ...]
+USAGE: klampt_browser [item1 item2 ...]
 
 where the given items are world, robot, terrain, object, or geometry files. Run
-it with
+it without arguments
 
-   python resource_browser.py
+   klampt_browser
 
 for an empty reference world. You may add items to the reference world using
 the `Add to World` button.  If you know what items to use in the reference
 world, run it with
 
-   python resource_browser.py world.xml
+   klampt_browser world.xml
 
 or 
 
-   python resource_browser.py item1 item2 ...
+   klampt_browser item1 item2 ...
 
 where the items are world, robot, terrain, object, or geometry files.
 ===============================================================================
