@@ -10,6 +10,7 @@ class BaseController(object):
 
         A top-level controller that communicates with SerialController and
         simtest.py will get the following values as input:
+
         - t = time: simulation time
         - dt = timestep: controller time step
         - sensor1 = sensor1_values: measurements for sensor 1
@@ -19,6 +20,7 @@ class BaseController(object):
         A top-level controller that communicates with SerialController and
         simtest.py should produce a dictionary containing one or more of
         the following keys:
+
         - qcmd
         - dqcmd 
         - tcmd
@@ -34,18 +36,22 @@ class BaseController(object):
 
         Otherwise, torquecmd must be set, and it's a torque command.
 
-        For convenience, you may use the ControllerAPI class. Usage is as
-        follows:
-        api = ControllerAPI(inputs)
-        print "Current time is",api.time()
-        #set a position command
-        api.setJointPositionCommand(5,0.5)
-        return api.makeCommand()
+        For convenience, your BaseController subclass may use the ControllerAPI
+        class for object-oriented access to the input / output data.
+        Example usage is as follows:
+
+            api = ControllerAPI(inputs)
+            print "Current time is",api.time()
+            #set a position command
+            api.setJointPositionCommand(5,0.5)
+            return api.makeCommand()
+
         """
         return None
     def signal(self,type,**inputs):
-        """Sends some asynchronous signal to the controller. Application
-        defined, but typical signals include:
+        """Sends some asynchronous signal to the controller. The inputs
+        are application-defined, but typical signals include:
+
         - 'reset'
         - 'enter'
         - 'exit'
@@ -210,9 +216,16 @@ class MultiController(BaseController):
     
     def map_input(self,c,regitem,citem=None):
         """Sends register regitem to the input of controller c.
-        If citem is specified, the data is is mapped to name citem.
+
+        Args:
+            c (int): the index of a sub-controller
+            regitem (str): the name of an input item.
+            citem (str, optional): if specified, the input item name is 
+                mapped to c's input name citem.
+        
         If this is not called for a given controller, then all items
-        in the register are automatically sent to the controller."""
+        in the register are automatically sent to the controller.
+        """
         if self.inmap[c]==None:
             self.inmap[c] = {}
         if citem == None:
@@ -223,9 +236,16 @@ class MultiController(BaseController):
 
     def map_output(self,c,citem,regitem=None):
         """Sends output citem of controller c to the register.
-        If regitem is specified, the data is mapped to name regitem.
+
+        Args:
+            c (int): the index of a sub-controller
+            citem (str): the name of an output item of c.
+            regitem (str, optional): if specified, c's output item cname is 
+                mapped to name regitem.
+        
         If this is not called for a given controller, then all items in
-        the controller's output are automatically sent to the register"""
+        the controller's output are automatically sent to the register
+        """
         if self.outmap[c]==None:
             self.outmap[c] = {}
         if regitem == None:
@@ -236,9 +256,14 @@ class MultiController(BaseController):
 
     def map_my_output(self,regitem,outitem=None):
         """Sends register item regitem to the output of the controller.
-        If outitem is specified, maps the data to the name outitem.
+
+        Args:
+            regitem (str): the name of an item in the register
+            outitem (str, optional): if specified, maps the data to the output
+                name outitem.
+        
         If this is not called, then the entire register is sent to the
-        output
+        output.
         """
         if self.myoutmap == None:
             self.myoutmap = {}
