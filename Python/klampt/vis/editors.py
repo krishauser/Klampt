@@ -1,3 +1,15 @@
+"""Functions for visual editing.  Used by the klampt.io.resource module
+in ``resource.get(...)`` and ``resource.edit(...)``.
+
+A couple editors, SelectionEditor and WorldEditor, cannot be launched from
+the resource module.  To use these, call::
+
+    from klampt.vis import editors
+    ed = editors.SelectionEditor("Some links",[],"Select the links that you want to modify",world))
+    indices = editors.run(ed)
+
+"""
+
 import glcommon
 import glinit
 import visualization
@@ -746,57 +758,10 @@ class ObjectTransformEditor(VisualEditorBase):
         return VisualEditorBase.mousefunc(self,button,state,x,y)
 
 class WorldEditor(VisualEditorBase):
-    """Note: need to call finalize in order to get terrain geometries updated"""
-    def __init__(self,name,value,description):
-        VisualEditorBase.__init__(self,name,value,description,None)
-        world = value.copy()
-        for i in range(value.numTerrains()):
-            tobj = world.makeRigidObject(value.terrain(i).getName())
-            tobj.geometry().set(value.terrain(i).geometry())
-            bmin,bmax = value.terrain(i).geometry().getBB()
-            shift = vectorops.interpolate(bmin,bmax,0.5)
-            tobj.geometry().transform(so3.identity(),vectorops.mul(shift,-1.0))
-            tobj.appearance().set(value.terrain(i).appearance())
-            tobj.setTransform(so3.identity(),shift)
-        for i in xrange(value.numTerrains()):
-            world.remove(world.terrain(0))
-        self._world = world
-        #self.world = world
-        self.robotPosers = [RobotPoser(world.robot(i)) for i in range(world.numRobots())]
-        self.objectPosers = [ObjectPoser(world.rigidObject(i)) for i in range(world.numRigidObjects())]
-        for r in self.robotPosers:
-            self.addWidget(r)
-        for r in self.objectPosers:
-            self.addWidget(r)
-        self.drawn = False
+    """Edits poses of robots, rigid objects, and terrains in a world.
 
-    def display(self):
-        for i in xrange(self._world.numTerrains()):
-            self._world.terrain(i).drawGL()
-        for i in xrange(self._world.numRigidObjects()):
-            self._world.rigidObject(i).drawGL()
-        self.klamptwidgetmaster.drawGL(self.viewport())
-        return True
-
-    def finalize(self):
-        """Copies to the provided world."""
-        world = self._world
-        for i in xrange(self.value.numRobots()):
-            self.value.robot(i).setConfig(world.robot(i).getConfig())
-        for i in xrange(self.value.numRigidObjects()):
-            self.value.rigidObject(i).setTransform(*world.rigidObject(i).getTransform())
-        ofs = self.value.numRigidObjects()
-        for i in xrange(self.value.numTerrains()):
-            bmin,bmax = self.value.terrain(i).geometry().getBB()
-            shift = vectorops.interpolate(bmin,bmax,0.5)
-            Tc = world.rigidObject(i+ofs).getTransform()
-            self.value.terrain(i).geometry().transform(Tc[0],vectorops.sub(Tc[1],shift))
-    
-    def instructions(self):
-        return 'Right-click and drag on the widgets to pose the world objects'
-
-
-class WorldEditor(VisualEditorBase):
+    Note: need to call ``finalize()`` in order to get terrain geometries updated.
+    """
     def __init__(self,name,value,description):
         VisualEditorBase.__init__(self,name,value,description,value)
         world = value
@@ -928,6 +893,8 @@ if glinit._PyQtAvailable:
             print "#########################################"
             print "klampt.vis: EditDialog accept"
             print "#########################################"
+            if hasattr(self,'finalize'):
+                self.finalize()
             return QDialog.accept(self)
         def reject(self):
             global _my_dialog_res
@@ -939,8 +906,16 @@ if glinit._PyQtAvailable:
 
 
     def run(editorObject):
-        """Returns a pair (res,value) where res is True / False if OK / Cancel was pressed, respectively, 
-        and value is the return value of the editor object
+        """
+        Args:
+            editorObject (VisualEditorBase): some subclass of VisualEditorBase
+
+        Returns:
+            (tuple): A pair (res,value) containing: 
+
+                * res (bool):True / False if OK / Cancel was pressed, respectively, 
+                * value: the return value of the editor object
+
         """
         assert isinstance(editorObject,VisualEditorBase),"Must provide a VisualEditorBase instance to vis.editors.run()"
         global _vis_id, _my_dialog_res
@@ -975,4 +950,14 @@ if glinit._PyQtAvailable:
         return res,retVal
 else:
     def run(editorObject):
+        """
+        Args:
+            editorObject (VisualEditorBase): some subclass of VisualEditorBase
+
+        Returns:
+            res,value (bool, value pair): 
+
+                * res is True / False if OK / Cancel was pressed, respectively, 
+                * value is the return value of the editor object
+        """
         raise ValueError("Unable to perform visual editing without PyQt")

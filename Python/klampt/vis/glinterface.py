@@ -1,3 +1,6 @@
+"""Defines the GLPluginInterface class, which is a unified base class for 
+plugins to the klampt.vis module.
+"""
 
 class GLPluginInterface:
     """Users can add their own hooks into the visualizer by overloading this

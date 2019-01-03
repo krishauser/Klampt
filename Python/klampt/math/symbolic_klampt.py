@@ -1,12 +1,14 @@
 """ Defines many functions of Klampt as symbolic Functions.
 
 Currently implemented:
+
 - so3, se3
 - ik
 - some collide functions
 - RobotModel kinematics
 
 TODO:
+
 - RobotModel dynamics
 - Trajectories
 - Geometries
@@ -38,34 +40,38 @@ def _so3_rotation(axis,angle):
 
 class SO3Context(Context):
     """Defines some functions in the so3 module:
+
     - identity, matrix, inv, mul, apply, rotation, error, distance
     - from_matrix, from_rpy, rpy, from_quaternion, quaternion, from_rotation_vector, rotation_vector
     - eq_constraint: equality constraint necessary for SO3 variables
     - quaternion_constraint: equality constraint necessary for quaternion variables
 
     Completeness table
-    __________________________________________________
-    | Function       | Derivative   | Simplification |
-    |----------------|--------------|----------------|
-    | identity       | N/A          | N/A            |
-    | matrix         | Y            | Y              |
-    | inv            | Y            | Y              |
-    | mul            |              |                |
-    | apply          | Y,Y          |                |
-    | rotation       | N,Y          |                |
-    | from_matrix    | Y            |                |
-    | from_rpy       |              |                |
-    | rpy            |              |                |
-    | from_quaternion| Y            |                |
-    | quaternion     |              |                |
-    | from_rotation_v|              |                |
-    | rotation_vector|              |                |
-    | axis           |              |                |
-    | angle          | Y            |                |
-    | error          |              |                |
-    | distance       |              |                |
-    | eq_constraint  | Y            |                |
-    | quaternion_cons| Y            |                |
+
+    =================  =============  ==============
+    Function           Derivative     Simplification 
+    =================  =============  ==============
+      identity         N/A            N/A             
+      matrix           Y              Y               
+      inv              Y              Y               
+      mul                                             
+      apply            Y,Y                            
+      rotation         N,Y                            
+      from_matrix      Y                              
+      from_rpy                                        
+      rpy                                             
+      from_quaternion  Y                              
+      quaternion                                      
+      from_rotation_v                                 
+      rotation_vector                                 
+      axis                                            
+      angle            Y                              
+      error                                           
+      distance                                        
+      eq_constraint    Y                              
+      quaternion_cons  Y                              
+    =================  =============  ==============
+
     """
     def __init__(self):
         Context.__init__(self)
@@ -164,6 +170,7 @@ class SO3Context(Context):
 
 class SE3Context(Context):
     """Defines some functions in the se3 module under the se3 namespace
+
     - make(R,t): makes an SE3 element from a rotation and a translation (equivalent to list(R,t))
     - identity, homogeneous, matrix (alias for homogeneous), inv, mul, apply
     - from_homogeneous: converts from a 4x4 matrix
@@ -171,19 +178,22 @@ class SE3Context(Context):
     - translation(T): retrieves the translation corresponding to T
 
     Completeness table
-    __________________________________________________
-    | Function       | Derivative   | Simplification |
-    |----------------|--------------|----------------|
-    | make           | Y            | N/A            |
-    | identity       | Y            |                |
-    | homogeneous    | Y            |                |
-    | matrix         | Y            |                |
-    | from_homogeneou| Y            |                |
-    | inv            | Y            |                |
-    | mul            |              |                |
-    | apply          | N,Y          |                |
-    | rotation       | Y            | Y              |
-    | translation    | Y            | Y              |
+
+    =================  =============  ==============
+      Function         Derivative     Simplification  
+    =================  =============  ==============
+      make             Y              N/A             
+      identity         Y                              
+      homogeneous      Y                              
+      matrix           Y                              
+      from_homogeneou  Y                              
+      inv              Y                              
+      mul                                             
+      apply            N,Y                            
+      rotation         Y              Y               
+      translation      Y              Y               
+    =================  =============  ==============
+
     """
     def __init__(self):
         Context.__init__(self)
@@ -246,6 +256,7 @@ class IKContext(Context):
     """Performs operations on IKObjective user data objects.
 
     Defines the functions
+
     - link(ikobj): returns the link index of an IKObjective
     - robot(ikobj): returns the RobotModel of an IKObjective
     - targetPos(ikobj): returns the target position of an IKObjective
@@ -257,18 +268,21 @@ class IKContext(Context):
     - residual(ikgoal,robot): returns the combined position and orientation residual of an IKObjective at the robot's current configuration
 
     Completeness table
-    __________________________________________________
-    | Function       | Derivative   | Simplification |
-    |----------------|--------------|----------------|
-    | link           | N/A          | N/A            |
-    | robot          | N/A          | N/A            |
-    | targetPos      | N/A          | N/A            |
-    | targetRot      | N/A          | N/A            |
-    | targetXform    | N/A          | N/A            |
-    | localPos       | N/A          | N/A            |
-    | worldPos       | N/A,Y(1)     | N/A            |
-    | worldRot       | N/A,Y(1)     | N/A            |
-    | residual       | N/A,Y(1)     | N/A            |
+    
+    =================  =============  ==============
+      Function         Derivative     Simplification  
+    =================  =============  ==============
+      link             N/A            N/A             
+      robot            N/A            N/A             
+      targetPos        N/A            N/A             
+      targetRot        N/A            N/A             
+      targetXform      N/A            N/A             
+      localPos         N/A            N/A             
+      worldPos         N/A,Y(1)       N/A             
+      worldRot         N/A,Y(1)       N/A             
+      residual         N/A,Y(1)       N/A             
+    =================  =============  ==============
+
     Y(1): yes, for the first derivative
     """
     def __init__(self):
@@ -367,6 +381,7 @@ class GeometryContext(Context):
     respect to the geometry transforms.
 
     Defines the functions:
+
     - geometry(object): calls the function object.geometry() (e.g., object can be a RobotModelLink)
     - setTransform(geom,T): sets the current transform of the geometry and returns it.
     - setCollisionMargin(geom,margin): sets the current collision of the geometry and returns it.
@@ -381,18 +396,21 @@ class GeometryContext(Context):
       inf if there is no intersection.
 
     Completeness table
-    __________________________________________________
-    | Function       | Derivative   | Simplification |
-    |----------------|--------------|----------------|
-    | setTransform   | N/A          | N/A            |
-    | setCollisionMar| N/A          | N/A            |
-    | bbox           |              | N/A            |
-    | collision      | Y            | N/A            |
-    | distance       |              | N/A            |
-    | closestPoints  |              | N/A            |
-    | distancePoint  |              | N/A            |
-    | closestPoint   |              | N/A            |
-    | rayCast        |              | N/A            |
+    
+    =================  =============  ==============
+    Function           Derivative     Simplification  
+    =================  =============  ==============
+      setTransform     N/A            N/A             
+      setCollisionMar  N/A            N/A             
+      bbox                            N/A             
+      collision        Y              N/A             
+      distance                        N/A             
+      closestPoints                   N/A             
+      distancePoint                   N/A             
+      closestPoint                    N/A             
+      rayCast                         N/A             
+    =================  =============  ==============
+
     """
     def __init__(self):
         Context.__init__(self)
@@ -404,10 +422,12 @@ class GeometryContext(Context):
 
 class CollideContext(Context):
     """Defines the functions --
+
     - robotSelfCollision(q,robot): returns True if the robot has a collision at q
     - robotCollision(q,context): returns True if the robot has a collision in the world. Saves a collider into the context
     - robotSelfCollisionFree(q,robot): the opposite of robotSelfCollision
     - robotCollisionFree(q,context): the opposite of robotCollision
+
     """
     def __init__(self):
         Context.__init__(self)
@@ -462,13 +482,15 @@ class KlamptContext(Context):
     """Includes all Klampt-related functions.
 
     Namespaces:
-    -so3: SO3Context
-    -se3: SE3Context
-    -ik: IKContext
-    -collide: CollideContext
-    -[main]: functions to perform kinematics operations on WorldModel, RobotModel, and RobotModelLink user data objects.
+
+    - so3: SO3Context
+    - se3: SE3Context
+    - ik: IKContext
+    - collide: CollideContext
+    - [main]: functions to perform kinematics operations on WorldModel, RobotModel, and RobotModelLink user data objects.
 
     The main namespace defines the functions:
+
     - robot(world,index): returns the index'th robot in the world
     - rigidObject(world,index): returns the index'th robot in the world
     - terrain(world,index): returns the index'th terrain in the world
@@ -493,27 +515,29 @@ class KlamptContext(Context):
 
     Also includes modules linalg, so3, se3, ik, and collide
 
-    __________________________________________________
-    | Function       | Derivative   | Simplification |
-    |----------------|--------------|----------------|
-    | robot          | N/A          | N/A            |
-    | rigidObject    | N/A          | N/A            |
-    | terrain        | N/A          | N/A            |
-    | config         | Y            | N/A            |
-    | setConfig      | Y            | N/A            |
-    | link           | N/A          | N/A            |
-    | transform      |              | N/A            |
-    | setTransform   |              | N/A            |
-    | velocity       |              | N/A            |
-    | setVelocity    |              | N/A            |
-    | worldPos       | Y(1)         | N/A            |
-    | localPos       |              | N/A            |
-    | worldRot       |              | N/A            |
-    | com            | Y(1)         | N/A            |
-    | gravityTorque  |              | N/A            |
-    | inJointLimits  | N/A          | N/A            |
-    | getJson        | N/A          | N/A            |
-    | setJson        | N/A          | N/A            |
+    ================   =============  ==============
+    Function           Derivative     Simplification 
+    ================   =============  ==============
+      robot            N/A            N/A           
+      rigidObject      N/A            N/A           
+      terrain          N/A            N/A           
+      config           Y              N/A           
+      setConfig        Y              N/A           
+      link             N/A            N/A           
+      transform                       N/A           
+      setTransform                    N/A           
+      velocity                        N/A           
+      setVelocity                     N/A           
+      worldPos         Y(1)           N/A           
+      localPos                        N/A           
+      worldRot                        N/A           
+      com              Y(1)           N/A           
+      gravityTorque                   N/A           
+      inJointLimits    N/A            N/A           
+      getJson          N/A            N/A           
+      setJson          N/A            N/A          
+    ================   =============  ==============
+
     Y(1): yes, for the first derivative
     """
     def __init__(self,world=None):

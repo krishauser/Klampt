@@ -66,14 +66,13 @@ class QtGLWindow(QGLWidget):
     the functions in QtBackend instead.
 
     Attributes:
-        - name: title of the window (only has an effect before calling
-          run())
-        - width, height: width/height of the window in screen units.  These are initialized from
-          the GLProgram viewport on run(), but thereafter Qt manages them.  After, the user must
-          call resize(w,h) to change the dimensions.
-        - devwidth, devheight: width/height of the window in OpenGL device pixel units
+        name (str): title of the window (only has an effect before calling run())
+        width, height (int): width/height of the window in screen units.  These are initialized
+            from the GLProgram viewport on run(), but thereafter Qt manages them.  After, the
+            user must call resize(w,h) to change the dimensions.
+        devwidth, devheight (int): width/height of the window in OpenGL device pixel units
           (Note that these may be different from the screen dimensions due to Retina displays)
-        - clearColor: the RGBA floating point values of the background color.
+        clearColor (list of 4 floats): the RGBA floating point values of the background color.
     """
     idlesleep_signal = pyqtSignal(float)
     refresh_signal = pyqtSignal()
@@ -215,12 +214,12 @@ class QtGLWindow(QGLWidget):
     def add_action(self,hook,short_text,key,description=None):
         """This is called by the user to add actions to the menu bar.
 
-        Parameters:
-        - hook: a python callback function, taking no arguments.
-        - short_text: the text shown in the menu bar
-        - key: a shortcut keyboard command (can be 'k' or 'Ctrl+k')
-        - description: if provided, this is a tooltip that shows up when the user
-          hovers their mouse over the menu item.
+        Args:
+            hook (function): a python callback function, taking no arguments.
+            short_text (str): the text shown in the menu bar
+            key (str): a shortcut keyboard command (can be 'k' or 'Ctrl+k')
+            description (str, optional): if provided, this is a tooltip that shows up
+                when the user hovers their mouse over the menu item.
         """
         a = QAction(short_text, self)
         a.setShortcut(key)
@@ -396,6 +395,16 @@ class QtGLWindow(QGLWidget):
         self.reshape_signal.emit(w,h)
 
     def draw_text(self,point,text,size=12,color=None):
+        """Renders text at the given point (may be 2d or 3d).  Frontend should call this to draw text
+        in either the display or display_screen method.
+
+        Args:
+            point (list of floats): either a 2d or 3d point at which to draw the text
+            text (str): the text to draw
+            size (int, optional): if given, it renders a font in the given size. 
+            color (list of 3 floats or list of 4 floats) if given, then an RGB or RGBA color value.
+
+        """
         if color:
             if len(color)==3:
                 glColor3f(*color)

@@ -17,8 +17,9 @@ def preferredPlanOptions(robot,movingSubset=None,optimizing=False):
         return { 'type':"sbl", 'perturbationRadius':0.5, 'randomizeFrequency':1000, shortcut:1 }
 
 class SubsetMotionPlan (MotionPlan):
-    """An adaptor that "lifts" a motion planner in an EmbeddedCSpace to a higher dimensional ambient
-    space.  Used for planning in subsets of robot DOFs."""
+    """An adaptor that "lifts" a motion planner in an EmbeddedCSpace to a
+    higher dimensional ambient space.  Used for planning in subsets of robot DOFs.
+    """
     def __init__(self,space,subset,q0,type=None,**options):
         MotionPlan.__init__(self,space,type,**options)
         self.subset = subset
@@ -43,26 +44,40 @@ def makeSpace(world,robot,
               equalityTolerance=1e-3,
               ignoreCollisions=[],
               movingSubset=None):
-    """Arguments:
-    - world: a WorldModel instance
-    - robot: a RobotModel in the world
-    - edgeCheckResolution: the resolution at which edges in the path are
-      checked for feasibility
-    - extraConstraints: a list of possible extra constraint functions, each
-      of which needs to return True if satisfied.  Note: don't put cartesian
-      constraints here! Instead place your function in equalityConstraints.
-    - equalityConstraints: a list of IKObjectives or equality
-      constraints f(x)=0 that must be satisfied during the motion. Equality
-      constraints may return a float or a list of floats, in which case all
-      entries of the vector must be 0.
-    - equalityTolerance: a tolerance to which all the equality constraints
-      must be satisfied.
-    - ignoreCollisions: a list of ignored collisions. Each element may be
-      a body in the world, or a pair (a,b) where a, b are bodies in the world.
-    - movingSubset: if None, 'all', or 'auto' (default), all joints
-      will be allowed to move.  If this is a list, then only these joint
-      indices will be allowed to move.
-    Output: a CSpace instance 
+    """Creates a standard CSpace instance for the robot moving in the given world.
+
+    Args:
+        world (WorldModel): the world in which the robot lives, including
+            obstacles.
+        robot (RobotModel): the moving robot
+        edgeCheckResolution (float, optional): the resolution at which edges in
+            the path are checked for feasibility
+        extraConstraints (list, optional): possible extra constraint functions,
+            each of which needs to return True if satisfied. 
+
+            .. note::
+
+                Don't put cartesian constraints here! Instead place your
+                function in equalityConstraints.
+
+        equalityConstraints (list, optional): a list of IKObjectives or
+            equality constraints f(x)=0 that must be satisfied during the
+            motion.  Equality constraints may return a float or a list of
+            floats.  In the latter case, this is interpreted as a vector
+            function, in which all entries of the vector must be 0.
+        equalityTolerance (float, optional): a tolerance to which all the
+            equality constraints must be satisfied.
+        ignoreCollisions (list): a list of ignored collisions. Each element
+            may be a body in the world, or a pair (a,b) where a, b are bodies
+            in the world.
+        movingSubset (optional): if None, 'all', or 'auto' (default), all
+            joints will be allowed to move.  If this is a list, then only
+            these joint indices will be allowed to move.
+
+    Returns:
+        (CSpace): a C-space instance that describes the robot's feasible space.
+            This can be used for planning by creating a :class:`cspace.MotionPlan`
+            object.
     """
     subset = []
     if movingSubset == 'auto' or movingSubset == 'all' or movingSubset == None:
@@ -130,32 +145,46 @@ def planToConfig(world,robot,target,
                  movingSubset='auto',
                  verbose=True,
                  **planOptions):
-    """Arguments:
-    - world: a WorldModel instance
-    - robot: a RobotModel in the world
-    - target: the desired final configuration of the robot
-    - edgeCheckResolution: the resolution at which edges in the path are
-      checked for feasibility
-    - extraConstraints: a list of possible extra constraint functions, each
-      of which needs to return True if satisfied.  Note: don't put cartesian
-      constraints here! Instead place your function in equalityConstraints.
-    - equalityConstraints: a list of IKObjectives or equality
-      constraints f(x)=0 that must be satisfied during the motion. Equality
-      constraints may return a float or a list of floats, in which case all
-      entries of the vector must be 0.
-    - equalityTolerance: a tolerance to which all the equality constraints
-      must be satisfied.
-    - ignoreCollisions: a list of ignored collisions. Each element may be
-      a body in the world, or a pair (a,b) where a, b are bodies in the world.
-    - movingSubset: if 'auto' (default), only the links that are
-      different between the robot's current config and target config will
-      be allowed to move.  Otherwise, if this is None or 'all', all joints
-      will be allowed to move.  If this is a list, then only these joint
-      indices will be allowed to move.
-    - planOptions: keyword options that will be sent to the planner.  See
-      the documentation for MotionPlan.setOptions for more details.
-    Output: a cspace.MotionPlan instance that can be called to get a
-      kinematically-feasible plan. (see cspace.MotionPlan.planMore(iterations))
+    """Creates a MotionPlan object that can be called to solve a standard motion
+    planning problem for a robot in a world.  The plan starts from the robot's
+    current configuration and ends in a target configuration.
+
+    Args:
+        world (WorldModel): the world in which the robot lives, including
+            obstacles
+        robot (RobotModel): the moving robot.  The plan start configuration
+            is the robot's current configuration `robot.getConfig()`.
+        target (list of float): the desired final configuration of the robot.
+        edgeCheckResolution (float, optional): the resolution at which edges
+            in the path are checked for feasibility
+        extraConstraints (list, optional): possible extra constraint functions,
+            each of which needs to return True if satisfied.  
+
+            .. note::
+
+                Don't put cartesian constraints here! Instead place your
+                function in equalityConstraints.
+
+        equalityConstraints (list, optional): a list of IKObjectives or
+            equality constraints f(x)=0 that must be satisfied during the
+            motion. Equality constraints may return a float or a list of
+            floats.  In the latter case, this is interpreted as a vector
+            function, in which all entries of the vector must be 0.
+        equalityTolerance (float, optional): a tolerance to which all the
+            equality constraints must be satisfied.
+        ignoreCollisions (list): a list of ignored collisions. Each element may be
+            a body in the world, or a pair (a,b) where a, b are bodies in the world.
+        movingSubset (optional): if 'auto' (default), only the links that are
+            different between the robot's current config and target config will
+            be allowed to move.  Otherwise, if this is None or 'all', all joints
+            will be allowed to move.  If this is a list, then only these joint
+            indices will be allowed to move.
+        planOptions (keywords): keyword options that will be sent to the planner.  See
+            the documentation for MotionPlan.setOptions for more details.
+    
+    Returns: 
+        (MotionPlan): a planner instance that can be called to get a
+            kinematically-feasible plan. (see :meth:`MotionPlan.planMore` )
     """
     q0 = robot.getConfig()
     assert(len(q0)==len(target)),"target configuration must be of correct size for robot"
@@ -205,30 +234,45 @@ def planToSet(world,robot,target,
               ignoreCollisions=[],
               movingSubset=None,
               **planOptions):
-    """Arguments:
-    - world: a WorldModel instance
-    - robot: a RobotModel in the world
-    - target: a function testing whether the given RobotModel configuration is
-      a goal, OR an instance of a CSpace subclass where sample() generates a
-      sample in the target set and feasible(x) tests whether a sample is in the
-      target set. (The CSpace should be of the same dimensionality as the robot,
-      not the moving subset.)
-    - extraConstraints: a list of possible extra constraint functions, each
-      of which needs to return True if satisfied.
-    - equalityConstraints: a list of IKObjectives or equality
-      constraints f(x)=0 that must be satisfied during the motion. Equality
-      constraints may return a float or a list of floats, in which case all
-      entries of the vector must be 0.
-    - equalityTolerance: a tolerance to which all the equality constraints
-      must be satisfied.
-    - ignoreCollisions: a list of collision pairs (a,b) where a, b are
-      bodies in the world.
-    - movingSubset: if 'auto', 'all', or None (default), all joints
-      will be allowed to move.  If this is a list, then only these joint
-      indices will be allowed to move.
-    - planOptions: keywords to be sent to the planner.
-    Output: a cspace.MotionPlan instance that can be called to get a
-      kinematically-feasible plan. (see cspace.MotionPlan.planMore(iterations))
+    """
+    reates a MotionPlan object that can be called to solve a standard motion planning
+    problem for a robot in a world.  The plan starts from the robot's current configuration
+    and ends in a target configuration.
+
+    Args:
+        world (WorldModel): the world in which the robot lives, including obstacles
+        robot (RobotModel): the moving robot.  The plan starts from robot.getConfig()
+        target (function or CSpace): a function f(q) returning a bool which is True if the
+            given RobotModel configuration q is a goal, OR an instance of a CSpace subclass
+            where sample() generates a sample in the target set and feasible(x) tests whether a
+            sample is in the target set. (The CSpace should be of the same dimensionality as the robot,
+            not the moving subset.)
+        edgeCheckResolution (float, optional): the resolution at which edges in the path are
+            checked for feasibility
+        extraConstraints (list, optional): possible extra constraint functions, each
+            of which needs to return True if satisfied. 
+
+            .. note::
+
+                Don't put cartesian constraints here! Instead place your function in equalityConstraints.
+                
+        equalityConstraints (list, optional): a list of IKObjectives or equality
+            constraints f(x)=0 that must be satisfied during the motion. Equality
+            constraints may return a float or a list of floats.  In the latter case, this
+            is interpreted as a vector function, in which all entries of the vector must be 0.
+        equalityTolerance (float, optional): a tolerance to which all the equality constraints
+            must be satisfied.
+        ignoreCollisions (list): a list of ignored collisions. Each element may be
+            a body in the world, or a pair (a,b) where a, b are bodies in the world.
+        movingSubset (optional): if 'auto', 'all', or None (default), all joints
+            will be allowed to move.  If this is a list, then only these joint
+            indices will be allowed to move.
+        planOptions (keywords): keyword options that will be sent to the planner.  See
+            the documentation for MotionPlan.setOptions for more details.
+    
+    Returns: 
+        (MotionPlan): a planner instance that can be called to get a
+            kinematically-feasible plan. (see :meth:`MotionPlan.planMore` )
     """
     q0 = robot.getConfig()
     subset = []
@@ -278,11 +322,17 @@ def planToCartesianObjective(world,robot,iktargets,iktolerance=1e-3,
                              ignoreCollisions=[],
                              movingSubset=None,
                              **planOptions):
-    """Arguments: all the same as planToConfig, except
-    - iktargets: a list of IKObjective instances (see the ik module)
-    - iktolerance: a tolerance to which the ik objectives must be satisfied
-    Output: a cspace.MotionPlan instance that can be called to get a
-      kinematically-feasible plan. (see cspace.MotionPlan.planMore(iterations))
+    """
+    Args:
+        world (WorldModel): same as planToConfig
+        iktargets (list of :class:`IKObjective`): a list of IKObjective
+            instances (see the ik module)
+        iktolerance (float): a tolerance to which the ik objectives must be
+            satisfied
+
+    Returns: 
+        (MotionPlan): a planner instance that can be called to get a
+            kinematically-feasible plan. (see :meth:`MotionPlan.planMore` )
     """
     #TODO: only subselect those links that are affected by the IK target
     goalset = robotcspace.ClosedLoopRobotCSpace(robot,iktargets,None)

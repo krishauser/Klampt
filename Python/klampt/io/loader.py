@@ -137,36 +137,42 @@ def writeContactPoint(cp):
 def readIKObjective(text):
     """Reads an IKObjective from a string in the Klamp't native format
     
-    'link destLink posConstraintType [pos constraint items] ...
-    rotConstraintType [rot constraint items]'
+    ``link destLink posConstraintType [pos constraint items] ...
+    rotConstraintType [rot constraint items]``
     
     where link and destLink are integers, posConstraintType is one of
-    - N: no constraint
-    - P: position constrained to a plane
-    - L: position constrained to a line
-    - F: position constrained to a point
+
+    * N: no constraint
+    * P: position constrained to a plane
+    * L: position constrained to a line
+    * F: position constrained to a point
+
     and rotConstraintType is one of
-    - N: no constraint
-    - T: two-axis constraint (not supported)
-    - A: rotation constrained about axis 
-    - F: fixed rotation
+
+    * N: no constraint
+    * T: two-axis constraint (not supported)
+    * A: rotation constrained about axis 
+    * F: fixed rotation
 
     The [pos constraint items] contain a variable number of whitespace-
     separated items, dependending on posConstraintType:
-    - N: 0 items
-    - P: the local position xl yl zl, world position x y z on the plane, and
+
+    * N: 0 items
+    * P: the local position xl yl zl, world position x y z on the plane, and
       plane normal nx,ny,nz
-    - L: the local position xl yl zl, world position x y z on the line, and
+    * L: the local position xl yl zl, world position x y z on the line, and
       line axis direction nx,ny,nz
-    - F: the local position xl yl zl and world position x y z
+    * F: the local position xl yl zl and world position x y z
 
     The [rot constraint items] contain a variable number of whitespace-
     separated items, dependending on rotConstraintType:
-    - N: 0 items
-    - T: not supported
-    - A: the local axis xl yl zl and the world axis x y z
-    - F: the world rotation matrix, in moment (aka exponential map) form
-      mx my mz (see so3.from_moment()
+
+    * N: 0 items
+    * T: not supported
+    * A: the local axis xl yl zl and the world axis x y z
+    * F: the world rotation matrix, in moment (aka exponential map) form
+      mx my mz (see so3.from_moment())
+
     """
     items = text.split()
     if len(items) < 4:

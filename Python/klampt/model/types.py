@@ -12,6 +12,7 @@ _knownTypes = ['Value','Vector2','Vector3','Matrix3','Point','Rotation','RigidTr
                 'WorldModel','RobotModel','RigidObjectModel','TerrainModel']
 
 def knownTypes():
+    """Returns all known Klampt types"""
     return _knownTypes[:]
 
 def objectToTypes(object,world=None):
@@ -83,11 +84,12 @@ def objectToTypes(object,world=None):
 def make(type,object=None):
     """Makes a default instance of the given type.
 
-    Arguments:
-    - str: the name of the desired type type 
-    - object: If type is 'Config', 'Configs', 'Vector', or 'Trajectory', can provide the object for
-      which the new instance will be compatible.
-      """
+    Args:
+        type (str): the name of the desired type 
+        object (optional): If ``type`` is 'Config', 'Configs', 'Vector', or
+            'Trajectory', can provide the object for which the new instance
+            will be compatible.
+    """
     if type == 'Config' or type == 'Vector':
         if isinstance(object,RobotModel):
             return object.getConfig()

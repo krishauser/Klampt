@@ -1,3 +1,6 @@
+"""Defines the GLPluginInterface class, which is a unified base class for 
+plugins to the klampt.vis module.
+"""
 import collections
 
 class GLPluginInterface:

@@ -1,3 +1,8 @@
+"""Defines GLWidgetPlugin, GLMultiViewportProgram, and CachedGLObject, which 
+are used by the core visualization module.  They may be useful for writing
+your own GLPluginInterface classes, too.
+"""
+
 from .glinterface import GLPluginInterface
 from .glprogram import GLProgram,GLPluginProgram
 import math

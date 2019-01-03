@@ -17,14 +17,16 @@ import time
 class GLViewport:
     """
     A class describing an OpenGL camera view.
-        - x,y: upper left hand corner of the view in the OpenGL canvas, in screen pixels
-        - w,h: width and height of the view, in screen pixels
-        - screenDeviceScale: if not 1, multiply screen pixel coordinates by this to get
-          openGL pixel coordinates (usually Mac Retina displays)
-        - orthogonal: if true, does an orthogonal projection. (Not supported)
-        - camera: an orbit camera (see :class:`orbit`)
-        - fov: the camera field of view in x direction
-        - clippingplanes: a pair containing the near and far clipping planes
+
+    Attributes:
+        x,y (int): upper left hand corner of the view in the OpenGL canvas, in screen pixels
+        w,h (int): width and height of the view, in screen pixels
+        screenDeviceScale (float): if not 1, multiply screen pixel coordinates by this to get
+            openGL pixel coordinates (usually Mac Retina displays)
+        orthogonal (bool): if true, does an orthogonal projection. (Not supported)
+        camera: an orbit camera (see :class:`orbit`)
+        fov (float): the camera field of view in x direction, in degrees
+        clippingplanes (pair of floats): a pair containing the near and far clipping planes
     """
     def __init__(self):
         self.orthogonal = False
@@ -143,14 +145,15 @@ class GLProgram:
     Assumes that glinit.py has been imported to define _GLBackend.
 
     Attributes:
-        - name: title of the window (only has an effect before calling
-          run())
-        - window: the QtBackend or GLUTBackend instance
-        - view: GLViewport instance.  If this is provided to an empty _GLBackend
-          window, the w,h gives a hint to the size of the window.  It is then updated
-          by the user and setting the viewport size has no effect on the window.
-        - clearColor: the RGBA floating point values of the background color.
-        - glutInitialized: true if GLUT has been initialized
+        name (str): title of the window (only has an effect before calling
+            run())
+        window: the QtBackend or GLUTBackend instance
+        view (GLViewport): describes the OpenGL viewport.  If this is provided to an
+            empty _GLBackend window, the w,h gives a hint to the size of the window. 
+            It is then updated by the user and setting the viewport size has no effect on the window.
+        clearColor (list of 4 floats): the RGBA floating point values of the background color.
+        actions (list of GLProgramAction): the list of actions.  Must be populated using
+            add_action before init().
     """
     def __init__(self,name="OpenGL Program"):
         global _GLBackend
@@ -406,17 +409,17 @@ class GLRealtimeProgram(GLNavigationProgram):
     """A GLNavigationProgram that refreshes the screen at a given frame rate.
 
     Attributes:
-        - ttotal: total elapsed time assuming a constant frame rate
-        - fps: the frame rate in Hz
-        - dt: 1.0/fps
-        - counter: a frame counter
+        ttotal (float): total elapsed time assuming a constant frame rate
+        fps (float): the frame rate in Hz
+        dt (float): 1.0/fps
+        counter (int): a frame counter
+        lasttime (float): time.time() value on the last frame.
     """
     def __init__(self,name):        
         GLNavigationProgram.__init__(self,name)
         self.ttotal = 0.0
         self.fps = 50
         self.dt = 1.0/self.fps
-        self.running = True
         self.counter = 0
         self.lasttime = time.time()
 
@@ -444,7 +447,7 @@ class GLRealtimeProgram(GLNavigationProgram):
 
 class GLPluginProgram(GLRealtimeProgram):
     """This base class should be used with a GLPluginBase object to handle the
-    GUI functionality (see glcommon.py.  Call setPlugin() on this object to set
+    GUI functionality (see glcommon.py).  Call setPlugin() on this object to set
     the currently used plugin.  pushPlugin()/popPlugin() can also be used to
     set a hierarchy of plugins."""
     def __init__(self,name="GLWidget"):

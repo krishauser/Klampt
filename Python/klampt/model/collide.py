@@ -1,6 +1,14 @@
 """Functions and classes for managing collision tests between multiple objects.
-In particular, the WorldCollider class makes it easy to ignore various collision pairs
-in a WorldModel.
+
+This module defines the :class:`WorldCollider` class, which makes it easy to
+ignore various collision pairs in a WorldModel.
+
+For groups of objects, the :meth:`self_collision_iter` and
+:meth:`group_collision_iter` functions perform broad-phase collision detection
+to speed up collision testing.
+
+The :meth:`ray_cast` function is a convenient way to return the first point of
+intersection for a ray and a group of objects.
 """
 
 from __future__ import generators
@@ -156,16 +164,16 @@ def ray_cast(geomlist,s,d):
 class WorldCollider:
     """
     Attributes:
-      - geomList: a list of (object,geom) pairs for all objects in the world
-      - mask: a list of sets, indicating which items are activated for
-        collision detection for each object in the world.
-      - terrains: contains the geomList indices of each terrain in the world.
-      - rigidObjects: contains the geomList indices of each object in
-        the world
-      - robots: contains the geomList indices of each robot in the world.
+        geomList (list): a list of (object,geom) pairs for all objects in the world
+        mask (list of sets): indicating which items are activated for collision detection, 
+            one for each object in the world.
+        terrains (list of ints): contains the geomList indices of each terrain in the world.
+        rigidObjects (list of ints): contains the geomList indices of each object in
+            the world
+        robots (list of list of lnts): contains the geomList indices of each robot in the world.
 
     Methods:
-      - getGeomIndex(obj): finds the geomList index corresponding to an object
+
       - ignoreCollision(obj or obj pair): ignores collisions corresponding to
         an object or pair of objects
       - collisionTests(filter1,filter2): returns an iterator over potential
@@ -183,6 +191,7 @@ class WorldCollider:
         object intersected by a ray
       - rayCastRobot(robot_index,ray_source_ray_direction): finds the
         first robot link intersected by a ray
+    
     """
     
     def __init__(self,world,ignore=[]):
@@ -279,6 +288,11 @@ class WorldCollider:
             self.ignoreCollision(i)
                 
     def getGeomIndex(self,object):
+        """Finds the geomList index corresponding to an object
+
+        Returns:
+            int: the index into self.geomList describing the object
+        """
         assert isinstance(object,(RobotModel,RobotModelLink,RigidObjectModel,TerrainModel))
         for i,(o,g) in enumerate(self.geomList):
             if o.world==object.world and o.getID()==object.getID():
@@ -289,9 +303,10 @@ class WorldCollider:
 
 
     def ignoreCollision(self,ign):
-        """Permanently removes an object or a pair of objects from
-        consideration.
-        ign can be either a single body in the world or a pair of bodies."""
+        """Permanently removes an object or a pair of objects from consideration.
+
+        ign can be either a single body in the world or a pair of bodies.
+        """
         if hasattr(ign,'__iter__'):
             (a,b) = ign
             ageom = self.getGeomIndex(a)

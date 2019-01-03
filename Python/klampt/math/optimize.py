@@ -1,3 +1,13 @@
+"""Classes to help set up and solve nonlinear, constrained optimization
+problems.
+
+
+Supports local and global optimization.  Wraps around scipy, pyOpt, or
+DIRECT (for now).
+
+Works well with the klampt.math.symbolic module.
+"""
+
 import numpy as np
 import math,random
 import symbolic,symbolic_io,symbolic_linalg
@@ -10,19 +20,23 @@ class OptimizationProblem:
     The objective function must return a float. All equality and inequality
     functions are required to return a list of floats.
     
-    - objective: an objective function f(x)
-    - objectiveGrad: a function df/dx(x) giving the gradient of f.
-    - bounds: a pair (l,u) giving lower and upper bounds on the search space.
-    - equalities: a list of functions g(x)=0 required of a feasible solution.
-      In practice, |g(x)| <= tol is required.
-    - equalityGrads: a list of gradient/Jacobian functions dg/dx(x) of the 
-      equality functions.
-    - inequalities: a list of functions h(x)<=0 required of a feasible
-      solution.
-    - inequalityGrads: a list of gradient/Jacobian functions dh/dx(x) of the 
-      inequality functions.
-    - feasibilityTests: a list of boolean black-box predicates that must be true 
-      of the solution
+    Attributes:
+
+        objective (function): an objective function f(x)
+        objectiveGrad (function): a function df/dx(x) giving the gradient of f.
+        bounds (tuple): a pair (l,u) giving lower and upper bounds on the search space.
+        equalities (list of functions): functions :math:`g(x)=0` required of a
+            feasible solution.  In practice, :math:`|g(x)| \leq tol` is required,
+            where tol is a tolerance parameter for the solver.
+        equalityGrads (list of functions): gradient/Jacobian functions 
+            :math:`\\frac{\partial g}{\partial x}(x)` of the 
+            equality functions.
+        inequalities (list of functions): inequality functions requiring math:`h(x) \leq 0`
+            for a feasible solution.
+        inequalityGrads (list of functions): a list of gradient/Jacobian functions
+            :math:`\\frac{partial h}{\partial x}(x)` of each inequality function.
+        feasibilityTests (list of functions): boolean black-box predicates that must
+            be true  of the solution
 
     Suitable for use with the symbolic module.  Once a Context is created, and
     appropriate Variables, Functions, Expressions are declared, the
@@ -223,12 +237,14 @@ class LocalOptimizer:
     minimization is supported, and only scipy and pyOpt are supported.
     
     The method is specified using the method string, which can be:
+
     - auto: picks between scipy and pyOpt, whatever is available.
     - scipy: uses scipy.optimize.minimize with default settings.
     - scipy.[METHOD]: uses scipy.optimize.minimize with the argument
       method=[METHOD].
     - pyOpt: uses pyOpt with SLSQP.
     - pyOpt.[METHOD]: uses pyOpt with the given method.
+
     """
     def __init__(self,method='auto'):
         if method == 'auto':
@@ -522,12 +538,15 @@ class LocalOptimizer:
 
 def sample_range(a,b):
     """Samples x in the range [a,b].
-    If the range is bounded, the uniform distribution x~U(a,b) is used.
-    If the range is unbounded, then this uses the log transform to sample a distribution.
-    Specifically, if a=-inf and b is finite, then x ~ b + log(y) where y~U(0,1).  A similar
-    formula holds for a finite and b=inf.
-    If a=-inf and b=inf, then x ~ s*log(y), where y~U(0,1) and the sign s takes on {-1,1} each
-    with probability 0.5.
+    
+    * If the range is bounded, the uniform distribution x~U(a,b) is used.
+    * If the range is unbounded, then this uses the log transform to sample a distribution.
+
+    Specifically, if a=-inf and b is finite, then :math:`x \sim b + \log(y)` where
+    :math:`y \sim U(0,1)`.  A similar formula holds for a finite and b=inf.
+
+    If a=-inf and b=inf, then :math:`x \sim s*\log(y)`, where `y \sim U(0,1)` and the sign
+    s takes on either of {-1,1} each with probability 0.5.
     """
     x = random.uniform(a,b)
     if math.isinf(x) or math.isnan(x):
@@ -554,6 +573,7 @@ class GlobalOptimizer:
     minimization is supported, and only DIRECT, scipy, and pyOpt are supported.
     
     The optimization technique is specified using the method string, which can be:
+
     - 'auto': picks between DIRECT and random-restart
     - 'random-restart.METHOD': random restarts using the local optimizer METHOD.
     - 'DIRECT': the DIRECT global optimizer
@@ -568,6 +588,7 @@ class GlobalOptimizer:
     solver.
 
     Examples:
+
     - 'DIRECT': Run the DIRECT method
     - 'scipy.differential_evolution': Runs the scipy differential evolution technique
     - 'random-restart.scipy': Runs random restarts using scipy's default local optimizer
@@ -732,17 +753,21 @@ class OptimizationObjective:
     """
     Describes an optimization cost function or constraint.
 
-    Members
-    - expr: a symbolic.Expression object f(x)
-    - type: string describing what the objective does:
-      - 'cost': added to the cost.  Must be scalar.
-      - 'eq': an equality f(x)=0 that must be met exactly (up to a given equality tolerance)
-      - 'ineq': an inequality constraint f(x)<=0
-      - 'feas': a black-box boolean feasibility test f(x) = True
-    - soft: if true, this is penalized as part of the cost function.  Specifically ||f(x)||^2 
-      is the penalty for eq types, and I[f(x)!=True] for feas types.
-    - weight: a weight weight
-    - name: an optional name
+    Attributes:
+
+        expr (symbolic.Expression):  object f(x)
+        type (str): string describing what the objective does:
+
+            - 'cost': added to the cost.  Must be scalar.
+            - 'eq': an equality f(x)=0 that must be met exactly (up to a given equality tolerance)
+            - 'ineq': an inequality constraint f(x)<=0
+            - 'feas': a black-box boolean feasibility test f(x) = True
+
+        soft (bool): if true, this is penalized as part of the cost function.  Specifically
+            :math:`w \|f(x)\|^2` is the penalty for eq types, and w I[f(x)!=True] for feas types.
+        weight (float, optional): a weight, used only for cost or soft objectives
+        name (str, optional): a name for this objective.
+
     """
     def __init__(self,expr,type,weight=None):
         self.expr = expr
@@ -758,14 +783,15 @@ class OptimizationObjective:
 
 class OptimizationProblemBuilder:
     """Defines a generalized optimization problem that can be saved/loaded from
-    a JSON string.  Allows custom lists of objectives, feasibility tests, andcost functions.
+    a JSON string.  Allows custom lists of objectives, feasibility tests, and cost functions.
     Multiple variables can be optimized at once.
 
-    - context: a symbolic.Context that stores the optimization variables and any user data.
-    - objectives: a list of OptimizationObjectives used in the optimization
-    - optimizationVariables: A list of Variables used for optimization.  If not set, this will
-      try to find the variable 'x'.  If not found, this will use all unbound variables in the
-      objectives.
+    Attributes:
+        context (symbolic.Context): a context that stores the optimization variables and any user data.
+        objectives (list of OptimizationObjective): all objectives or cosntraints used in the optimization.
+        optimizationVariables (list of Variable): A list of Variables used for optimization.  If not set,
+            this will try to find the variable 'x'.  If not found, this will use all unbound variables in
+            the objectives.
 
     Note that objectives must be symbolic.Function
     objects, so that they are savable/loadable.  See the documentation of the symbolic
@@ -1134,13 +1160,13 @@ class OptimizationProblemBuilder:
     def toJson(self,saveContextFunctions=False,prettyPrintExprs=False):
         """Returns a JSON object representing this optimization problem.
 
-        Arguments:
-        - saveContextFunctions: if True, saves all custom functions in self.context.
-          If they are saved, then the current context is required to be the same context
-          in which the problem is loaded.
-        - prettyPrintExprs: if True, prints expressions more nicely as more human-readable
-          strings rather than JSON objects. These strings are parsed on load, which is a
-          little slower than pure JSON. 
+        Args:
+            saveContextFunctions (bool, optional): if True, saves all custom functions in
+                self.context.  If they are saved, then the current context is required to be
+                the same context in which the problem is loaded.
+            prettyPrintExprs (bool, optional): if True, prints expressions more nicely as more
+                human-readable strings rather than JSON objects. These strings are parsed on load,
+                which is a little slower than pure JSON. 
         """
         res = dict()
         res['type'] = 'OptimizationProblemBuilder'
@@ -1184,23 +1210,30 @@ class OptimizationProblemBuilder:
         return
 
     def preprocess(self,steps='all'):
-        """Returns a triple (opt,optToSelf,selfToOpt) where
-        - opt: a simplified version of this optimization problem. If no simplfication can be performed, opt = self
-        - optToSelf: a map of opt's variables to self's variables. If no simplification can be performed, optToSelf = None
-        - selfToOpt: a map of self's variables to opts's variables. If no simplification can be performed, selfToOpt = None
+        """Preprocesses the problem to make solving more efficient
+
+        Returns:
+            tuple: (opt,optToSelf,selfToOpt)
+
+                - opt: a simplified version of this optimization problem. If no simplfication can be performed, opt = self
+                - optToSelf: a map of opt's variables to self's variables. If no simplification can be performed, optToSelf = None
+                - selfToOpt: a map of self's variables to opts's variables. If no simplification can be performed, selfToOpt = None
 
         Specific steps include:
-        - delete any objectives with 0 weight
-        - delete any optimization variables not appearing in expressions
-        - fixed-bound (x in [a,b], with a=b) variables are replaced with fixed values.
-        - simplify objectives
-        - TODO: replace equalities of the form var = expr by matching var to expr?
+
+        # delete any objectives with 0 weight
+        # delete any optimization variables not appearing in expressions
+        # fixed-bound (x in [a,b], with a=b) variables are replaced with fixed values.
+        # simplify objectives
+        # TODO: replace equalities of the form var = expr by matching var to expr?
 
         If optToSelf is not None, then it is a list of Expressions that, when eval'ed, produce the values of the corresponding
         optimizationVariables in the original optimization problem.  selfToOpt performs the converse mapping.
-        In other words, if opt has bound values to all of its optimizationVariables, the code
-        for var,expr in zip(self.optimizationVariables,optToSelf):
-            var.bind(expr.eval(opt.context))
+        In other words, if opt has bound values to all of its optimizationVariables, the code::
+
+            for var,expr in zip(self.optimizationVariables,optToSelf):
+                var.bind(expr.eval(opt.context))
+        
         binds all optimization variables in self appropriately.
         """
         modified = False

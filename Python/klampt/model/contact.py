@@ -1,5 +1,6 @@
-"""Definitions of frictional point contacts, contact maps, and basic wrench
-subroutines."""
+"""Definitions of frictional point contacts, contact maps, basic wrench space
+calculation subroutines, and performing equilibrium testing.
+"""
 
 import ik
 from ..math import so3,se3
@@ -29,10 +30,10 @@ class ContactPoint:
     """A point contact between two rigid bodies, object1 and object2.
 
     Attributes:
-        - x is the contact point in world coordinates.
-        - n is the normal pointing from object1 into object 2.
-        - kFriction is the friction coefficient.
-        - object1 and object2 are the objects in contact (optional).
+        x (list of 3 floats): the contact point in world coordinates.
+        n (list of 3 floats): the normal pointing from object1 into object 2.
+        kFriction (float): the friction coefficient.
+        object1, object2 (optional): the objects in contact.
     """
     def __init__(self,x=None,n=None,kFriction=0.):
         if x is None:
@@ -77,10 +78,10 @@ class Hold:
     Similar to the Hold class in the C++ RobotSim library.
 
     Attributes:
-        - link: the link index
-        - ikConstraint: an IKObjective object
-          (see klampt.robotsim.IKObjective or klampt.ik.objective)
-        - contacts: a list of ContactPoint objects
+        link (int): the link index
+        ikConstraint (IKObjective): the constraint
+            (see klampt.robotsim.IKObjective or klampt.ik.objective)
+        contacts (list of ContactPoint): the contacts used in the hold.
           (see klampt.contact.ContactPoint)
     """
     def __init__(self):
@@ -92,9 +93,9 @@ class Hold:
         """Creates this hold such that it fixes a robot link to match a list of contacts
         (in world space) at its current transform.
 
-        Arguments:
-        - link: a robot link or rigid object, currently contacting the environment / object at contacts
-        - contacts: a list of ContactPoint objects, given in world coordinates.
+        Args:
+            link: a robot link or rigid object, currently contacting the environment / object at contacts
+            contacts (list of ContactPoint): the fixed contact points, given in world coordinates.
         """
         assert isinstance(link,(RobotModelLink,RigidObjectModel)),"Argument must be a robot link or rigid object"
         self.link = link.index
@@ -151,17 +152,20 @@ def supportPolygon(contactOrHoldList):
 def equilibriumTorques(robot,holdList,fext=(0,0,-9.8),internalTorques=None,norm=0):
     """ Solves for the torques / forces that keep the robot balanced against gravity.
  
-    Arguments
-    - robot: the robot model, posed in its current configuration
-    - holdList: a list of Holds.
-    - fext: the external force (e.g., gravity)
-    - internalTorques: if given, a list of length robot.numDofs giving internal torques.
-      For example, can incorporate dynamics into the solver.
-    - norm: the torque norm to minimize.  If 0, minimizes the l-infinity norm (default)
-         If 1, minimizes the l-1 norm.  If 2, minimizes the l-2 norm (experimental,
-         may not get good results)
-    Return value is a pair (t,f) giving the joint torques and a list of frictional
-    contact forces, if a solution exists. The return value is None if no solution exists.
+    Args:
+        robot (RobotModel): the robot, posed in its current configuration
+        holdList (list of Hold): a list of Holds.
+        fext (list of 3 floats, optional): the external force (e.g., gravity)
+        internalTorques (list, optional): if given, a list of length robot.numDofs giving internal
+            torques. For example, using this can incorporate dynamics into the solver.
+        norm (float, optional): the torque norm to minimize.  If 0, minimizes the l-infinity norm
+            (default).  If 1, minimizes the l-1 norm.  If 2, minimizes the l-2 norm (experimental,
+            may not get good results)
+
+    Returns:
+        (tuple): A pair (t,f) giving the joint torques and a list of frictional
+            contact forces, if a solution exists. Or, the return value may be None
+            if no solution exists.
     """
     links = sum([[h.link]*len(h.contacts) for h in holdList],[])
     if internalTorques is None:
@@ -179,7 +183,8 @@ def contactMap(contacts,fixed=None):
     increasing getID(), so that (obj1,obj2) is not duplicated as (obj2,obj1).
     
     If fixed is provided, all objects for which fixed(x) returns true will be
-    set to None.  The most common example, which fixes terrains, is
+    set to None.  The most common example, which fixes terrains, is::
+    
        lambda x: x is None or isinstance(x,TerrainModel)
     """
     worlds = set()
@@ -313,8 +318,10 @@ def skew(x):
 
 def invMassMatrix(obj):
     """Returns the inverse of obj's generalized mass matrix
+
       [H 0 ]-1
       [0 mI]
+
     about the origin."""
     try:
         import numpy

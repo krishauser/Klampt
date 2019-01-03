@@ -9,13 +9,14 @@ import numpy as np
 
 class KlamptVariable:
     """
-    Members:
-    - name: the Klamp't item's name
-    - type: the Klamp't item's type
-    - encoding: the way in which the item is encoded in the optimization
-    - variables: the list of Variables encoding this Klamp't item 
-    - expr: the Expression that will be used to replace the symbolic mainVariable via appropriate variables
-    - constraints, encoder, decoder: internally used
+    Attributes:
+        name (str): the Klamp't item's name
+        type (str): the Klamp't item's type
+        encoding (str): the way in which the item is encoded in the optimization
+        variables (list of Variable): the list of Variables encoding this Klamp't item 
+        expr (Expression): the Expression that will be used to replace the symbolic mainVariable via
+            appropriate variables
+        constraints, encoder, decoder: internally used
     """
     def __init__(self,name,type):
         self.name = name
@@ -80,21 +81,24 @@ class RobotOptimizationProblem(optimize.OptimizationProblemBuilder):
     OptimizationProblemBuilder. This may easily incorporate IK constraints, and may
     have additional specifications of active DOF.
 
-    Members:
-    - robot, world: the RobotModel and WorldModel for this optimization
-    - context (inherited): a symbolic.KlamptContext that stores the variable $q denoting
-      the robot configuration as well as any user data.  User data "robot" and "world" are
-      available by default.
-    - q: the symbolic.Variable that is the primary optimization variable.
-    - activeDofs: the list of active robot DOFs.
-    - autoLoad: a dictionary of (userDataName:fileName) pairs that are stored so that user data
-      is automatically loaded from files. I.e., upon self.loadJson(), for each pair in autoLoad
-      the command self.context.userData[userDataName] = loader.load(fileName) is executed.
-    - managedVariables: a dictionary of KlamptVariables like rotations and rigid transforms.
-      Managed variables should be referred to in parsed expressions with the prefix @name, 
-      and are encoded into optimization form and decoded from optimization form
-      using KlamptVariable.bind / KlamptVariable.unbind.  You can also retrieve the Klampt value
-      by KlamptVariable.getValue().
+    Attributes:
+        robot (RobotModel) the robot whose configuration is being optimized
+        world (WorldModel, optional): the world containing possible obstacles
+        context (KlamptContext, inherited): a symbolic.KlamptContext that stores the variable q
+            denoting the robot configuration, as well as any user data.  User data "robot" and "world"
+            are available by default.
+        q (Variable): the primary optimization variable.
+        activeDofs (list): the list of active robot DOFs.
+        autoLoad (dict): a dictionary of (userDataName:fileName) pairs that are stored so that user data
+            is automatically loaded from files. I.e., upon self.loadJson(), for each pair in autoLoad
+            the command self.context.userData[userDataName] = loader.load(fileName) is executed.
+        managedVariables (dict of KlamptVariable): a dictionary of KlamptVariables like rotations and
+            rigid transforms.
+
+            Managed variables should be referred to in parsed expressions with the prefix @name, 
+            and are encoded into optimization form and decoded from optimization form
+            using KlamptVariable.bind / KlamptVariable.unbind.  You can also retrieve the Klampt value
+            by KlamptVariable.getValue().
     
     If you would like to find the configuration *closest* to solving the
     IK constraints, either add the IK constraints one by one with weight=1 (or some other
@@ -173,28 +177,31 @@ class RobotOptimizationProblem(optimize.OptimizationProblemBuilder):
 
         At least one of type / initialValue must be provided.
 
-        Arguments:
-        - name: a name for the variable.
-        - type: a supported variable type (default None determines the type by initialValue).  Supported
-          types include "Config", "Configs", Rotation", "RigidTransform", "Vector3".  Future work may support
-          Trajectory and other types.
-        - initialValue: the configuration of the variable.  If it's a float, the type will be set to 
-          numeric, if it's a list it will be set to a vector, or if its a supported object, the type will be set
-          appropriately and config.getConfig(initialValue) will be used for its parameter setting.
-        - encoding: only supported for Rotation and RigidTransform types, and defines how the variable will be
-          parameterized.  Can be:
-            - 'rotation_vector' (default) for rotation vector,  3 parameters
-            - 'quaternion' for quaternion encoding, 4 parameters + 1 constraint
-            - 'rpy' for roll-pitch-yaw euler angles, 3 parameters
-            - None for full rotation matrix (9 parameters, 6 constraints)
-            - 'auto' (equivalent to to 'rotation_vector')
-        - constraints: True if all default constraints are to be added.  For Config / Configs types,
-          bound constraints at the robot's joint limits are added.
-        - optimize: If True, adds the variables to the list of optimization variables.
+        Args:
+            name (str): a name for the variable.
+            type (str, optional): a supported variable type (default None determines the type by initialValue). 
+                Supported types include "Config", "Configs", Rotation", "RigidTransform", "Vector3".  Future
+                work may support Trajectory and other types.
+            initialValue (optional): the configuration of the variable.  If it's a float, the type will be set to 
+                numeric, if it's a list it will be set to a vector, or if its a supported object, the type will
+                be set appropriately and config.getConfig(initialValue) will be used for its parameter setting.
+            encoding (str, optional): only supported for Rotation and RigidTransform types, and defines how the
+                variable will be parameterized in optimization.  Can be:
 
-        Returns a KlamptVariable containing information about the encoding of the object. 
-        Note that extra symbolic Variable names may be decorated with extensions in the form of "_ext" if
-        the encoding is not direct.
+                - 'rotation_vector' (default) for rotation vector,  3 parameters
+                - 'quaternion' for quaternion encoding, 4 parameters + 1 constraint
+                - 'rpy' for roll-pitch-yaw euler angles, 3 parameters
+                - None for full rotation matrix (9 parameters, 6 constraints)
+                - 'auto' (equivalent to to 'rotation_vector')
+            constraints (bool, optional): True if all default constraints are to be added.  For Config / Configs
+                types, bound constraints at the robot's joint limits are added.
+            optimize (bool, optional): If True, adds the parameterized variables to the list of optimization
+                variables.
+
+        Returns:
+            KlamptVariable: an object containing information about the encoding of the variable.
+                Note that extra symbolic Variable names may be decorated with extensions in the form of "_ext" if
+                the encoding is not direct.
         """
         if type is None:
             assert initialValue is not None,"Either type or initialValue must be provided"
@@ -432,9 +439,10 @@ class RobotOptimizationProblem(optimize.OptimizationProblemBuilder):
     def fromJson(self,obj,doAutoLoad=True):
         """Loads from a JSON-compatible object.
 
-        - obj: the JSON-compatible object
-        - doAutoLoad: if True, performs the auto-loading step. An IOError is raised if any item can't
-          be loaded.
+        Args:
+            obj: the JSON-compatible object
+            doAutoLoad (bool, optional): if True, performs the auto-loading step. An IOError is raised if any
+                item can't be loaded.
         """
         optimize.OptimizationProblemBuilder.fromJson(self,obj)
         if 'activeDofs' in obj:
@@ -465,8 +473,8 @@ class RobotOptimizationProblem(optimize.OptimizationProblemBuilder):
         as a seed if params.startRandom=False).  Returns the solution configuration or
         None if failed.
 
-        Arguments:
-        - params: an OptimizerParams object.
+        Args:
+            params (OptimizerParams, optional): configures the optimizer.
         """
         if len(self.objectives) == 0:
             print("Warning, calling solve without setting any constraints?")

@@ -1,3 +1,10 @@
+"""Defines the ``SubRobotModel`` class, which is ``RobotModel``-like but
+only modifies selected degrees of freedom of the robot (e.g., an arm, a leg).
+
+Many, but not all, ``klampt`` module functions accept SubRobotModel in
+the place of RobotModel.
+"""
+
 from ..robotsim import *
 from collide import self_collision_iter
 from trajectory import Trajectory,HermiteTrajectory
@@ -13,7 +20,8 @@ class SubRobotModel:
 
     You provide the list of moving link indices or names in the constructor.
 
-    The methods tofull and fromfull convert objects to and from the full robot.
+    The methods ``tofull`` and ``fromfull`` convert objects to and from the
+    full robot.
     """
     def __init__(self,robot,links):
         assert isinstance(robot,(RobotModel,SubRobotModel)),"SubRobotModel constructor must be given a RobotModel or SubRobotModel as first argument"
@@ -32,13 +40,15 @@ class SubRobotModel:
         """Converts the given index, link, configuration, velocity, or trajectory of a sub robot
         to the corresponding object of the full robot.  Returns the object for the full robot.
 
-        Arguments:
-        - object: an integer index, configuration, velocity, matrix, list of configurations,
-          or Trajectory.
-        - type: if not None, the type of the object.  Used in the case of velocity objects
-          where type = 'Vector' or 'velocity' will treat the item like a velocity, or in
-          matrices, where type = 'jacobian' will treat the object like a jacobian matrix
-          (otherwise it will be treated as a list of configurations).
+        Args:
+        
+            object: an integer index, configuration, velocity, matrix, list of configurations,
+                or Trajectory.
+            type (str, optional): describes how to interpret object:
+
+                * 'vector' or 'Velocity': object is treated like a velocity.
+                * 'jacobian': object is treated like a jacobian matrix. 
+                * anything else: object is treated as a list of configurations.
         """
         if isinstance(object,int):
             return self._links[object]
@@ -86,12 +96,13 @@ class SubRobotModel:
         """Converts the given index, configuration, velocity, or trajectory of a full robot
         to the corresponding object of the sub-robot.  Returns the object for the sub-robot.
 
-        Arguments:
-        - object: an integer index, configuration, velocity, matrix, list of configurations,
-          or Trajectory.
+        Args:
+            object: an integer index, configuration, velocity, matrix, list of configurations,
+                or Trajectory.
 
-        Note: for indices, this is an O(n) operation where n is the size of the sub-robot.
-        If the index doesn't belong to the sub-robot then None is returned.
+        Note:
+            For indices, this is an O(n) operation where n is the size of the sub-robot.
+            If the index doesn't belong to the sub-robot then None is returned.
         """
         if isinstance(object,int):
             for i,l in enumerate(self._links):

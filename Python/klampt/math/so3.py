@@ -2,14 +2,17 @@
 represented by a 9-list specifying the entries of the rotation matrix
 in column major form.
 
-In other words, given a 3x3 matrix
-   [a11,a12,a13]
-   [a21,a22,a23]
-   [a31,a32,a33],
+In other words, given a 3x3 matrix::
+
+    [a11,a12,a13]
+    [a21,a22,a23]
+    [a31,a32,a33],
+
 Klamp't represents the matrix as a list [a11,a21,a31,a12,a22,a32,a13,a23,a33].
 
 The reasons for this representation are 1) simplicity, and 2) a more
 convenient interface with C code.
+
 """
 
 import math

@@ -1,4 +1,5 @@
 """Defines the symbolic functions:
+
 - norm(x): returns the L-2 norm of a vector
 - norm2(x): returns the squared L-2 norm of a vector
 - norm_L1(x): returns the L-1 norm of a vector
@@ -23,29 +24,32 @@
 Also defines a context LinAlgContext that can be included into a Context under "linalg" 
 
 Completeness table
-__________________________________________________
-| Function       | Derivative   | Simplification |
-|----------------|--------------|----------------|
-| norm           | Y            |                |
-| norm2          | Y            |                |
-| norm_L1        | Y            |                |
-| norm_Linf      | Y            |                |
-| norm_fro       | Y            |                |
-| distance       | Y            |                |
-| distance2      | Y            |                |
-| distance_L1    | Y            |                |
-| distance_Linf  | Y            |                |
-| mahalanobis_dis| Y,Y,N        |                |
-| mahalanobis...2| Y,Y,N        |                |
-| unit           | Y            |                |
-| inv            | Y            |                |
-| pinv           | Y            |                |
-| linear         | Y            |                |
-| quadratic      | Y,Y,N        |                |
-| bilinear       | Y,Y,N        |                |
-| bound_contains | N/A          |                |
-| bound_margin   |              |                |
-| bound_overlabs | N/A          |                |
+
+=================  =============  ==============
+Function           Derivative     Simplification
+=================  =============  ==============
+  norm             Y                              
+  norm2            Y                              
+  norm_L1          Y                              
+  norm_Linf        Y                              
+  norm_fro         Y                              
+  distance         Y                              
+  distance2        Y                              
+  distance_L1      Y                              
+  distance_Linf    Y                              
+  mahalanobis_dis  Y,Y,N                          
+  mahalanobis...2  Y,Y,N                          
+  unit             Y                              
+  inv              Y                              
+  pinv             Y                              
+  linear           Y                              
+  quadratic        Y,Y,N                          
+  bilinear         Y,Y,N                          
+  bound_contains   N/A                            
+  bound_margin                                    
+  bound_overlabs   N/A                            
+=================  =============  ==============
+
 """
 
 from symbolic import *

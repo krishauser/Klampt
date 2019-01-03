@@ -19,9 +19,11 @@ typedef _object PyObject;
 class IKObjective
 {
  public:
-  ///Constructs a blank IKObjective
+  ///With no arguments, constructs a blank IKObjective.  Given an IKObjective, 
+  ///acts as a copy constructor
   IKObjective();
-  ///Copy constructor
+  ///With no arguments, constructs a blank IKObjective.  Given an IKObjective, 
+  ///acts as a copy constructor
   IKObjective(const IKObjective&);
   ///Copy constructor
   IKObjective copy() const;
@@ -101,27 +103,30 @@ class IKObjective
 /**
  * @brief An inverse kinematics solver based on the Newton-Raphson technique.
  *
- * Typical calling pattern is
- * s = IKSolver(robot)
- * s.add(objective1)
- * s.add(objective2)
- * s.setMaxIters(100)
- * s.setTolerance(1e-4)
- * res = s.solve()
- * if res:
- *    print "IK solution:",robot.getConfig(),"found in",s.lastSolveIters(),"iterations, residual",s.getResidual()
- * else:
- *    print "IK failed:",robot.getConfig(),"found in",s.lastSolveIters(),"iterations, residual",s.getResidual()
+ * Typical calling pattern is::
  *
- * sampleInitial() is a convenience routine.  More initial configurations can
- * be sampled in case the prior configs lead to local minima.
+ *     s = IKSolver(robot)
+ *     s.add(objective1)
+ *     s.add(objective2)
+ *     s.setMaxIters(100)
+ *     s.setTolerance(1e-4)
+ *     res = s.solve()
+ *     if res:
+ *         print ("IK solution:",robot.getConfig(),"found in",
+ *             s.lastSolveIters(),"iterations, residual",s.getResidual()
+ *     else:
+ *         print "IK failed:",robot.getConfig(),"found in",
+ *             s.lastSolveIters(),"iterations, residual",s.getResidual()
+ *
  */
 class IKSolver
 {
  public:
-  ///Creates an empty solver
+  ///Initializes an IK solver.  Given a RobotModel, an empty solver is created.
+  ///Given an IK solver, acts as a copy constructor.
   IKSolver(const RobotModel& robot);
-  ///Copy constructor
+  ///Initializes an IK solver.  Given a RobotModel, an empty solver is created.
+  ///Given an IK solver, acts as a copy constructor.
   IKSolver(const IKSolver& solver);
   ///Copy constructor
   IKSolver copy() const;
@@ -175,7 +180,8 @@ class IKSolver
   /// Returns the number of Newton-Raphson iterations used in the last solve() call.
   int lastSolveIters();
 
-  /// Samples an initial random configuration
+  /// Samples an initial random configuration.  More initial configurations can
+  /// be sampled in case the prior configs lead to local minima.
   void sampleInitial();
 
   RobotModel robot;
@@ -250,7 +256,10 @@ class GeneralizedIKSolver
 
   /** Tries to find a configuration that satifies all simultaneous objectives
    * up to the desired tolerance.  
-   * Returns (res,iters) where res indicates whether x converged.
+   * 
+   * Returns:
+   *     res,iters (pair of bool, int): res indicates whether x converged, and
+   *     iters is the number of iterations used.
    */
   PyObject* solve();
 
@@ -264,9 +273,11 @@ class GeneralizedIKSolver
   bool useJointLimits;
 };
 
-///Returns a transformation (R,t) from link to link2 sampled at random from
-///the space of transforms that satisfies the objective.
+///Returns a transformation (R,t) from link relative to link2, sampled at random from
+///the space of transforms that satisfies the objective obj.
 void SampleTransform(const IKObjective& obj,double out[9],double out2[3]);
+///Returns a transformation (R,t) from link relative to link2, sampled at random from
+///the space of transforms that satisfies the objective obj.
 void SampleTransform(const GeneralizedIKObjective& obj,double out[9],double out2[3]);
 
 #endif

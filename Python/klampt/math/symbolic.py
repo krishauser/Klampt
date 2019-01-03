@@ -2,39 +2,51 @@
 Kris Hauser
 5/12/2018
 
-=====================================================================================
-A framework for declaring and manipulating symbolic expressions.  Suitable for automatic differentiation
-and developing computation graph models of functions for use in optimization.
+===============================================================================
+Overview
+===============================================================================
 
-Inspired by Sympy, SCIP models, Gurobi models, as well as TensorFlow / PyTorch, this framework has the
-following features:
-- Saving and loading of expressions is fully supported.  Strings and JSON formats are supported.
+A framework for declaring and manipulating symbolic expressions.  Suitable for
+automatic differentiation and developing computation graph models of functions
+for use in optimization.
+
+Inspired by Sympy, SCIP models, Gurobi models, as well as TensorFlow / PyTorch,
+this framework has the following features:
+
+- Saving and loading of expressions is fully supported.  Strings and JSON
+  formats are supported.
 - Supports black-box functions inside expressions.
 - Allows references to arbitrary non-serializable user data.
 - Allows new functions to be user-defined in a straightforward way.
 - Symbolic auto-differentiation.
 - Conversion to and from Sympy.
-- Numeric, vector, and matrix variables are allowed.  Many native numpy operations are supported.
+- Numeric, vector, and matrix variables are allowed.  Many native numpy
+  operations are supported.
 
-Could it be used for learning?  Yes, but it is not as fast as GPU-based learning libraries like
-TensorFlow / PyTorch.
+Could it be used for learning?  Yes, but it is not as fast as GPU-based
+learning libraries like TensorFlow / PyTorch.
 
-How does it compare to Sympy?  This module does a better job of handling large matrix expressions and
-variable indexing.  For example, the multiplication of 5 symbolic 2x2 matrices takes ~200 microseconds,
-which is a bit slower than direct numpy evaluation of ~50 microseconds.  On the other hand, the Sympy
-expression takes over 4s to construct, and each entry of the matrix contains hundreds of terms! 
+How does it compare to Sympy?  This module does a better job of handling large
+matrix expressions and variable indexing.  For example, the multiplication of 5
+symbolic 2x2 matrices takes ~200 microseconds, which is a bit slower than
+direct numpy evaluation of ~50 microseconds.  On the other hand, the Sympy
+expression takes over 4s to construct, and each entry of the matrix contains
+hundreds of terms! 
 
-This module can also take derivatives with respect to vectors using matrix calculus.  It can even
-auto-differentiate with nested lists/arrays!  However, function simplification is not as complete
-as Sympy, and derivatives for some functions are not available.  There are conversions to and from
-Sympy in the symbolic_sympy module, and these are complete for most "tame" expressions.
+This module can also take derivatives with respect to vectors using matrix
+calculus.  It can even auto-differentiate with nested lists/arrays!  However,
+function simplification is not as complete as Sympy, and derivatives for some
+functions are not available.  There are conversions to and from Sympy in the
+symbolic_sympy module, and these are complete for most "tame" expressions.
 
 
-=====================================================================================
+===============================================================================
 Basic usage
+===============================================================================
 
-In standard usage, first create a Context() and declare any extra functions to be used in your library.
-Then, and add variables and declare expressions as necessary.
+In standard usage, first create a ``Context`` and declare any extra functions
+to be used in your library. Then, and add variables and declare expressions as
+necessary.::
 
     ctx = Context()
     x = ctx.addVar("x",'N')
@@ -51,33 +63,43 @@ Then, and add variables and declare expressions as necessary.
     x.unbind() #x is now a variable
     y.unbind() #y is now a variable
 
-An Expression can take on a form x OP y or OP(x,y,z), where x,y, and z are either Variables, Expressions,
-or constant values and OP is either a builtin function or a declared Function type.  Expressions can be
-evaluated to other Expressions via Expression.eval(context=None), or to constants using
-Expression.evalf(context=None).
+An Expression can take on a form x OP y or OP(x,y,z), where x,y, and z are
+either Variables, Expressions, or constant values and OP is either a builtin
+function or a declared Function type.  Expressions can be evaluated to other
+Expressions via ``Expression.eval(context=None)``, or to constants using
+``Expression.evalf(context=None)``.
 
 There are two kinds of Variables. 
-- Standard Variable: This type is managed by Context and contains information in the Variable class.  Such a
-  variable can either be numeric, vector, or matrix type.  It will contain size information and will be
-  saved to and loaded from disk with the Context. 
-- User-data Variable. This type is an unmanaged variable.  These have unlimited type, and can be complex
-  Python objects, but the user must set these up in the context manually.  Hence, if you wish to reuse
-  Expressions loaded from disk, you will need to first set up the Context appropriately with a similar
-  user-data object.
-By default, expressions constructed in Python refer to user-data objects with strings, e.g., setConfig("robot",q)
-runs the setConfig Function on the "robot" user data and the q Variable.
-For use in the optimize.py module, all optimization parameters must be standard Variables.
 
-The expr() function is run on each argument to a Function.  This will automatically preserve Variables and
-Expressions, while most Python constants will be converted to ConstantExpressions.  However, Python strings
-will be converted to references to user-data variables. 
+- *Standard Variable*: This type is managed by ``Context`` and contains
+  information in the ``Variable`` class.  Such a variable can either be
+  numeric, vector, or matrix type.  It will contain size information and will
+  be saved to and  loaded from disk with the ``Context``. 
+- *User-data Variable*. This type is an unmanaged variable.  These have
+  unlimited type, and can be complex Python objects, but the user must set
+  these up in the context manually.  Hence, if you wish to reuse
+  Expressions of user-data variables loaded from disk, you will need to
+  first set up the ``Context`` appropriately with a similar   user-data object.
 
-Constant values can be floats, integers, booleans, strings, lists, and numpy arrays (Dictionaries are
-not supported as constant values.)  Constants are converted to expressions using const(x), or expr(x). 
+By default, expressions constructed in Python refer to user-data objects with
+strings, e.g., ``setConfig("robot",q)`` runs the setConfig Function on the
+"robot" user data and the q Variable. For use in the optimize.py module, all
+optimization parameters must be standard Variables.
 
-Type specifiers are used for type checking and to determine the type of expressions, particularly
-for Jacobians.  The Type class is used for this.  The type member specifies the general type of object, and is
-given by a character:
+The ``expr``() function is run on each argument to a ``Function``.  This will
+automatically preserve Variables and Expressions, while most Python
+constants will be converted to ConstantExpressions.  However, Python strings
+will be converted to references to user-data variables.
+
+Constant values can be floats, integers, booleans, strings, lists, and numpy
+arrays (Dictionaries are not supported as constant values.)  Constants are
+converted to expressions using ``const(x)``, or ``expr(x)``.
+
+Type specifiers are used for type checking and to determine the type of
+expressions, particularly for Jacobians.  The ``Type`` class is used for this.
+The type member specifies the general type of object, and is given by a
+character:
+
 - N: generic numeric
 - I: integer
 - B: boolean
@@ -88,148 +110,236 @@ given by a character:
 - L: list
 - U: user data
 - None: indicates an unknown type
-as well as an optional size and sub-type.  For L and V types, size is the length of the array.  For M and A types, 
-size is the Numpy shape of the array.  For the U type, the subtype member indicates __class__.__name__ if known.
+
+as well as an optional size and sub-type.  For L and V types, size is the length
+of the array.  For M and A types,  size is the Numpy shape of the array.  For
+the U type, the subtype member indicates ``__class__.__name__`` if known.
 
 
-=====================================================================================
+===============================================================================
 Standard functions
+===============================================================================
 
 Standard operations on expressions include:
-- expr(x): returns an Expression corresponding to x, whether x is a constant, Variable, or Expression
-- deriv(expr,var): take the derivative of expr with respect to var.  If no derivative information is available
-    for some of the expressions in expr, returns None.
-- simplify(expr,context=None): simplifies the expression in the optimal given context.  Note: this is not terribly 
-    powerful in terms of rearranging expressions (like x - x is not converted to 0).
-- is_const(x): returns True if x evaluates to a constant.
-- to_const(x): returns the constant to which x evaluates, if is_const(x).
-- is_expr(x): returns True if x is an Expression.
-- is_var(x): returns True if x is a Variable or a VariableExpression (i.e., monomial).
-- to_var(x): returns the Variable corresponding to the Variable or monomial x.
-- is_op(x,func=None): returns True if x is an operator.  If func is given, checks whether this is the the name of the function.
-- is_zero(x): returns True if x is the zero(...) operator or a scalar equal to 0.
-- is_scalar(x,val=None): returns True if x is known to evaluate to a scalar.  If val is provided, it checks whether x is equal to val.
-- type_of(x): returns the Type corresponding to x.
-(Note: these are Python functions, not symbolic Functions)
+
+- ``expr(x)``: returns an ``Expression`` corresponding to x, whether x is a
+  constant, ``Variable``, or ``Expression``
+- ``deriv(expr,var)``: take the derivative of expr with respect to var.  If no
+  derivative information is available for some of the expressions in expr,
+  returns None.
+- ``simplify(expr,context=None)``: simplifies the expression in the optimal given
+  context.  Note: this is not terribly  powerful in terms of rearranging
+  expressions (like x - x is not converted to 0).
+- ``is_const(x)``: returns True if x evaluates to a constant.
+- ``to_const(x)``: returns the constant to which x evaluates, if ``is_const(x)``.
+- ``is_expr(x)``: returns True if x is an ``Expression``.
+- ``is_var(x)``: returns True if x is a ``Variable`` or a ``VariableExpression``
+  (i.e., monomial).
+- ``to_var(x)``: returns the ``Variable`` corresponding to the ``Variable`` or
+  monomial x.
+- ``is_op(x,func=None)``: returns True if x is an operator.  If func is given,
+  checks whether this is the the name of the function.
+- ``is_zero(x)``: returns True if x is the zero(...) operator or a scalar equal to
+  0.
+- ``is_scalar(x,val=None)``: returns True if x is known to evaluate to a scalar. 
+  If val is provided, it checks whether x is equal to val.
+- ``type_of(x)``: returns the Type corresponding to x.
+
+.. note::
+    These are Python functions, not symbolic Functions.
 
 
-=====================================================================================
+===============================================================================
 Symbolic Functions
+===============================================================================
 
-You can build Expressions out of built-in symbolic Functions.  Calling a Function does not immediately evaluate
-the function on its arguments, but instead builds an Expression that is the root of a symbolic Expression Graph.
+You can build an ``Expression`` out of built-in symbolic Functions.  Calling
+a ``Function`` does not immediately evaluate the function on its arguments,
+but instead builds an ``Expression`` that is the root of a symbolic Expression
+Graph.
 
 Built-in symbolic Functions include:
 
-Shape functions:
-- range_(n): Evaluates to range(n).  The result can be treated like a vector or a list.
-- dims(x): Returns the dimensionality of the input.  Equivalent to len(shape(x)).
-- len_(x): Evaluates to len(x), except if x is a scalar then it evaluates to 0.  If x is a multi-dimensional array, this is the
-  length of its first dimension.  Undefined for other forms of user data.
-- count(x): Evaluates the number of numeric parameters in x. Works with scalars, arrays, and lists. If x is a scalar then it
-  evaluates to 1.  Lists are evaluated recursively.  Undefined for other forms of user data.
-- shape(x): Evaluates to x.shape if x is a Numpy array, (len_(x),) if x is a vector, and () if x is a scalar.  If x is a list,
-  this is (len_(x),)+shape(item) if all of the items have the same shape, otherwise it is a hyper-shape. (shortcut: "x.shape")
-- reshape(x,s): Evaluates to x reshaped to the shape s.  If x is a scalar, this evaluates to a constant matrix.
-- transpose(x): Evaluates to np.transpose(x).  (shortcut: "x.T")
-- basis(i,n): Evaluates to the i'th elementary basis vector in dimension n.
-- eye(n): Evaluates to np.eye(n) if n > 0, otherwise returns 1.
-- zero(s): Evaluates to np.zeros(s) if s is a matrix shape or scalar > 0, otherwise evaluates to 0.
-- diag(x): Evaluates to np.diag(x).
-- flatten(*args): Evaluates to a vector where all arguments are stacked (concatenated) into a single vector.  Arrays
-  are reduced to vectors by Numpy's flatten(), and complex objects are reduced via recursive flattening.
-- row_stack(*args): Evaluates to a matrix where all arguments are stacked vertically.  1D arrays are treated as row vectors.
-    If only a single list element is provided, then all arguments are stacked.
-- column_stack(*args): Evaluates to a matrix where all arguments are stacked horizontally.  1D arrays are treated as column vectors.
-    If only a single list element is provided, then all arguments are stacked.
+Shape functions
+---------------
 
-Comparisons and logical functions:
-- eq(lhs,rhs): Evaluates to lhs = rhs (shortcut: "lhs = rhs").
-- ne(lhs,rhs): Evaluates to lhs != rhs (shortcut: "lhs != rhs").
-- le(lhs,rhs): Evaluates to lhs <= rhs (shortcut: "lhs <= rhs").
-- ge(lhs,rhs): Evaluates to lhs >= rhs (shortcut: "lhs >= rhs").
-- not_(x): Evaluates to not x (shortcut: "not x").
-- or_(x,y): Evaluates to x or y (shortcut: "x or y").
-- and_(x,y): Evaluates to x and y (shortcut: "x and y").
-- any_(*args): Evaluates to any(*args)
-- all_(*args): Evaluates to all(*args)
+- ``range_(n)``: Evaluates to range(n).  The result can be treated like a
+  vector or a list.
+- ``dims(x)``: Returns the dimensionality of the input.  Equivalent to
+  ``len(shape(x))``.
+- ``len_(x)``: Evaluates to len(x), except if x is a scalar then it evaluates
+  to 0. If x is a multi-dimensional array, this is the length of its first
+  dimension.  Undefined for other forms of user data.
+- ``count(x)``: Evaluates the number of numeric parameters in x. Works with
+  scalars, arrays, and lists. If x is a scalar then it evaluates to 1.
+  Lists are evaluated recursively.  Undefined for other forms of user data.
+- ``shape(x)``: Evaluates to ``x.shape`` if x is a Numpy array, ``(len_(x),)``
+  if x is a vector, and () if x is a scalar.  If x is a list, this is
+  ``(len_(x),)+shape(item)`` if all of the items have the same shape,
+  and otherwise it is a hyper-shape. (shortcut: "x.shape")
+- ``reshape(x,s)``: Evaluates to x reshaped to the shape s.  If x is a scalar,
+  this evaluates to a constant matrix.
+- ``transpose(x)``: Evaluates to np.transpose(x).  (shortcut: "x.T")
+- ``basis(i,n)``: Evaluates to the i'th elementary basis vector in dimension n.
+- ``eye(n)``: Evaluates to np.eye(n) if n > 0, otherwise returns 1.
+- ``zero(s)``: Evaluates to np.zeros(s) if s is a matrix shape or scalar > 0,
+  otherwise evaluates to 0.
+- ``diag(x)``: Evaluates to np.diag(x).
+- ``flatten(*args)``: Evaluates to a vector where all arguments are stacked
+  (concatenated) into a single vector.  Arrays are reduced to vectors by
+  Numpy's flatten(), and complex objects are reduced via recursive flattening.
+- ``row_stack(*args)``: Evaluates to a matrix where all arguments are stacked
+  vertically.  1D arrays are treated as row vectors. If only a single list
+  element is provided, then all arguments are stacked.
+- ``column_stack(*args)``: Evaluates to a matrix where all arguments are stacked
+  horizontally.  1D arrays are treated as column vectors. If only a single
+  list element is provided, then all arguments are stacked.
+
+Comparisons and logical functions
+----------------------------------
+
+- ``eq(lhs,rhs)``: Evaluates to lhs = rhs (shortcut: "lhs = rhs").
+- ``ne(lhs,rhs)``: Evaluates to lhs != rhs (shortcut: "lhs != rhs").
+- ``le(lhs,rhs)``: Evaluates to lhs <= rhs (shortcut: "lhs <= rhs").
+- ``ge(lhs,rhs)``: Evaluates to lhs >= rhs (shortcut: "lhs >= rhs").
+- ``not_(x)``: Evaluates to not x (shortcut: "not x").
+- ``or_(x,y)``: Evaluates to x or y (shortcut: "x or y").
+- ``and_(x,y)``: Evaluates to x and y (shortcut: "x and y").
+- ``any_(*args)``: Evaluates to ``any(*args)``
+- ``all_(*args)``: Evaluates to ``all(*args)``
 
 Arithmetic functions
-- neg(x): Evaluates to -x (shorcut "-x").
-- abs_(x): Evaluates to abs(x) (shortcut: "abs(x)"). Works with arrays too (elementwise)
-- sign(x): Evaluates the sign of x.  Works with arrays too (elementwise).
-- add(x,y): Evaluates to x + y (shortcut: "x + y").  Works with arrays too.
-- sub(x,y): Evaluates to x - y (shortcut: "x - y").  Works with arrays too, and vector - scalar.
-- mul(x,y): Evaluates to x * y (shortcut: "x * y").  Works with arrays too (elementwise multiplication).
-- div(x,y): Evaluates to x / y (shortcut: "x / y").  Works with arrays too (elementwise division), and vector / scalar.
-- pow_(x,y): Evaluates to pow(x,y) (shortcut "x**y").
-- dot(x,y): Evaluates to np.dot(x,y).
-- max_(*args): Evaluates to the maximum of the arguments.
-- min_(*args): Evaluates to the minimum of the arguments.
-- argmax(*args): Evaluates to the index of the maximum of the argments.
-- argmin(*args): Evaluates to the index of the minimum of the argments.
-- cos(x): Evaluates to math.cos(x).
-- sin(x): Evaluates to math.sin(x).
-- tan(x): Evaluates to math.tan(x).
-- sqrt(x): Evaluates to math.sqrt(x).
-- exp(x): Evaluates to math.exp(x).
-- log(x): Evaluates to math.log(x) (base 10).
-- ln(x): Evaluates to math.ln(x) (natural log).
-- sum_(*args): Evaluates to sum(args).  If arguments are vectors or matrices, then the result is also a vector or matrix.
-    This is somewhat different behavior from sum(x) if x is a list.
-- weightedsum(v1,...,vn,w1,...,wn): Evaluates to w1*v1+...+wn*vn. 
+---------------------
+
+- ``neg(x)``: Evaluates to -x (shorcut "-x").
+- ``abs_(x)``: Evaluates to abs(x) (shortcut: "abs(x)"). Works with arrays too
+  (elementwise)
+- ``sign(x)``: Evaluates the sign of x.  Works with arrays too (elementwise).
+- ``add(x,y)``: Evaluates to x + y (shortcut: "x + y").  Works with arrays too.
+- ``sub(x,y)``: Evaluates to x - y (shortcut: "x - y").  Works with arrays too,
+  and vector - scalar.
+- ``mul(x,y)``: Evaluates to x * y (shortcut: "x * y").  Works with arrays too
+  (elementwise multiplication).
+- ``div(x,y)``: Evaluates to x / y (shortcut: "x / y").  Works with arrays too
+  (elementwise division), and vector / scalar.
+- ``pow_(x,y)``: Evaluates to ``pow(x,y)`` (shortcut "x**y").
+- ``dot(x,y)``: Evaluates to ``np.dot(x,y)``.
+- ``max_(*args)``: Evaluates to the maximum of the arguments.
+- ``min_(*args)``: Evaluates to the minimum of the arguments.
+- ``argmax(*args)``: Evaluates to the index of the maximum of the argments.
+- ``argmin(*args)``: Evaluates to the index of the minimum of the argments.
+- ``cos(x)``: Evaluates to math.cos(x).
+- ``sin(x)``: Evaluates to math.sin(x).
+- ``tan(x)``: Evaluates to math.tan(x).
+- ``sqrt(x)``: Evaluates to math.sqrt(x).
+- ``exp(x)``: Evaluates to math.exp(x).
+- ``log(x)``: Evaluates to math.log(x) (base 10).
+- ``ln(x)``: Evaluates to math.ln(x) (natural log).
+- ``sum_(*args)``: Evaluates to sum(args).  If arguments are vectors or matrices,
+  then the result is also a vector or matrix. This is somewhat different
+  behavior from sum(x) if x is a list.
+- ``weightedsum(v1,...,vn,w1,...,wn)``: Evaluates to w1*v1+...+wn*vn. 
 
 Accessors
-- getitem(vec,index): Evaluates to vec[index].  This also supports slices and tuples, as well as lists (Numpy fancy indexing).
-  (shortcut: "vec[index]")
-- setitem(vec,index,val): Evaluates to vec except with vec[index] set to val.  Equivalent to Python code "temp = vec[:];
-  vec[index]=val; return temp"
-- getattr_(object,attr): returns the value of a given attribute under the given object. For example,
-    getattr_(traj,const("milestones")) gets the milestone list of a user-data Trajectory named traj.
-    If the result is a function, it will be called with no arguments.  For example, getattr_(robot,const("getJointLimits")) will return
-    the robot's joint limits.  (shortcut: "object.attr", where object is a UserDataExpression)
-- setattr_(object,attr,val): returns a modified version of the given class object, where value is assigned to the attribute attr.
-    For example, setattr_(traj,const("times"),[0,0.5,0.1]) sets the times attribute of a Trajectory to [0,0.5,1].
-    Note: this operation modifies the object itself.  If the attribute is a function, it will be called with the argument val.
-    This allows setting operations to be called.
+---------
 
-Conditional:
-- if_(cond,trueval,falseval): If cond evaluates to True, this expression evaluates to trueval. Otherwise, it evaluates to falseval.
+- ``getitem(vec,index)``: Evaluates to ``vec[index]``.  This also supports slices
+  and tuples, as well as lists (Numpy fancy indexing). (shortcut:
+  "vec[index]")
 
-Arrays:  Arrays are mostly interchangable with vectors (numpy 1-D arrays), except they can contain objects of varying
-type/size. Arrays of varying type/size should only be used as arguments in the flatten or the special looping functions (forall,
-summation, etc). In many cases the Python construction [e1,e2,...,en] where en is an Expression, will be interpreted correctly
-as an array Expression. To handle nested lists of Expressions, and to ensure that your lists can be saved and loaded, you may
-need to use these functions.
-- array(*args): Creates a list or numpy array of the given arguments. This can accept arbitrary arguments,
-    such as variable size vectors.  A Numpy array is produced only if the items have compatible types and dimensions.
-- list_(*args): Creates a list of the given arguments. This can accept arbitrary arguments, such as variable size vectors.  No
-    attempt is made to convert to a numpy array.
-- tuple_(*args): Creates a tuple of the given arguments. This can accept arbitrary arguments, such as variable size vectors.
-- zip_(collection1,collection1,...): Does the same thing as the Python zip function, returning a list of tuples.
+- ``setitem(vec,index,val)``: Evaluates to vec except with vec[index] set to val.
+  Equivalent to Python code::
 
-Special functions are available for temporary variable substitution and emulation of for loops.  In each of the following,
-var can be a variable or userData referenced in the Expression expr:
-- subs(expr,var,value): evaluates expr with var substituted with value.  For example, subs(const(2)*"i","i",3.5) yields 2*3.5
-- map_(expr,var,values): like the Python map function, evaluates to a list where each entry evaluates expr with var
-    substituted with a value from the list values.  For example, if x is a Variable, map_(x**"i","i",range(3)) yields the
-    list [x**0, x**1, x**2]
-- forall(expr,var,values): True if, for every value in the list values, expr evaluates to nonzero when var is substituted
-    with that value. Equivalent to all_(*[subs(expr,var,value) for value in values])
-- forsome(expr,var,values): True if, for some value in the list values, expr evaluates to nonzero when var is substituted
-    with that value. Equivalent to any_(*[subs(expr,var,value) for value in values])
-- summation(expr,var,values): The sum of expr over var when var is substitued with each value in the list values.
-    Equivalent to sum_(*[subs(expr,var,value) for value in values])
-Nested iteration can be performed, such as summation(summation(expr("x")**"y","x",[1,2]),"y",[0,1])
+      temp = vec[:]
+      vec[index]=val
+      return temp
+
+- ``getattr_(object,attr)``: returns the value of a given attribute under the
+  given object. For example, ``getattr_(traj,const("milestones"))`` gets the
+  milestone list of a user-data ``Trajectory`` named ``traj``.
+
+  If the result is a function, it will be called with no arguments.  For
+  example, ``getattr_(robot,const("getJointLimits"))`` will return the robot's
+  joint limits.
+
+  (shortcut: "object.attr", where object is a UserDataExpression)
+
+- ``setattr_(object,attr,val)``: returns a modified version of the given class
+  object, where ``value`` is assigned to the attribute ``attr``. For example,
+  ``setattr_(traj,const("times"),[0,0.5,0.1])`` sets the ``times`` attribute
+  of a ``Trajectory`` to [0,0.5,1].
+
+  Note: this operation modifies the object itself. 
+
+  If the attribute ``attr`` is a function, it will be called with the argument
+  ``val``. This allows setting operations to be called.
+
+Conditionals
+------------
+
+- ``if_(cond,trueval,falseval)``: If cond evaluates to True, this expression
+  evaluates to trueval. Otherwise, it evaluates to falseval.
+
+Arrays
+-------
+
+Arrays are mostly interchangable with vectors (numpy 1-D arrays), except they
+can contain objects of varying type/size. Arrays of varying type/size should
+only be used as arguments in the flatten or the special looping functions
+(``forall``, ``summation``, etc). In many cases the Python construction
+``[e1,e2,...,en]`` where en is an ``Expression``, will be interpreted correctly
+as an ``array`` Expression. To handle nested lists of Expressions, and
+to ensure that your lists can be saved and loaded, you may need to use these
+functions.
+
+- ``array(*args)``: Creates a list or numpy array of the given arguments. This can
+  accept arbitrary arguments, such as variable size vectors.  A Numpy array is
+  produced only if the items have compatible types and dimensions.
+- ``list_(*args)``: Creates a list of the given arguments. This can accept
+  arbitrary arguments, such as variable size vectors.  No attempt is made to
+  convert to a numpy array.
+- ``tuple_(*args)``: Creates a tuple of the given arguments. This can accept
+  arbitrary arguments, such as variable size vectors.
+- ``zip_(collection1,collection1,...)``: Does the same thing as the Python zip
+  function, returning a list of tuples.
+
+Looping
+--------
+
+Special functions are available for temporary variable substitution and
+emulation of ``for`` loops.  In each of the following, var can be a variable
+or userData referenced in the ``Expression`` ``expr``:
+
+- ``subs(expr,var,value)``: evaluates expr with var substituted with value.  For
+  example, ``subs(const(2)*"i","i",3.5)`` yields 2*3.5
+- ``map_(expr,var,values)``: like the Python ``map`` function, evaluates to a
+  list where each entry evaluates ``expr`` with ``var`` substituted with
+  a value from the list ``values``.  For example, if x is a ``Variable``, then
+  ``map_(x**"i","i",range(3))`` yields the list ``[x**0, x**1, x**2]``
+- ``forall(expr,var,values)``: True if, for every value in the list ``values``,
+  ``expr`` evaluates to nonzero when ``var`` is substituted with that value.
+  Equivalent to ``all_(*[subs(expr,var,value) for value in values])``
+- ``forsome(expr,var,values)``: True if, for some value in the list ``values``,
+  ``expr`` evaluates to nonzero when ``var`` is substituted with that value.
+  Equivalent to ``any_(*[subs(expr,var,value) for value in values])``
+- ``summation(expr,var,values)``: The sum of ``expr`` over ``var`` when ``var``
+  is substituted with each value in the list ``values``. Equivalent to
+  ``sum_(*[subs(expr,var,value) for value in values])``
+
+Nested iteration can be performed, such as
+``summation(summation(expr("x")**"y","x",[1,2]),"y",[0,1])``
 
 
-=====================================================================================
+===============================================================================
 Defining your own Functions
+===============================================================================
 
-If you want to use your own Python functions, you can use Context.declare.  By default this will use the same
-function signature that you used to define the function, or you can provide a new signature (name, arguments).
-The convention used in the built-in symbolic libraries is to prepend an underscore to the underlying Python
-function, and then declare the function to the undecorated name.
+If you want to use your own Python functions, you can use ``Context.declare``.
+By default this will use the same function signature that you used to define
+the function, or you can provide a new signature (name, arguments).
+The convention used in the built-in symbolic libraries is to prepend an
+underscore to the underlying Python function, and then declare the function
+to the undecorated name.::
 
     def _f(x,y):
         return 2*x*y
@@ -238,28 +348,31 @@ function, and then declare the function to the undecorated name.
     print f(3,4)   #prints f(3,4)
     print f(3,4).evalf()  #prints 24, since 2*3*4=12.
 
-At this point, the module does not know how to take derivatives, so any deriv(f(...),arg) call will return None.
-To set derivatives, you can use the setDeriv or setJacobian functions
+At this point, the module does not know how to take derivatives, so any
+``deriv(f(...),arg)`` call will return None. To set derivatives, you can
+use the ``setDeriv`` or ``setJacobian`` functions::
 
     f.setDeriv("x",(lambda x,y,dx:2*dx*y))
     f.setDeriv("y",(lambda x,y,dy:2*x*dy))
 
-OR
+OR::
 
     f.setJacobian("x",(lambda x,y:2*y))
     f.setJacobian("y",(lambda x,y:2*x))
 
-Alternatively, you can declare Expressions as functions.  Here you need to define the function name and argument
-list so that unbound variables in the Expression are bound to the arguments.
+Alternatively, you can declare an ``Expression`` as a ``Function``.  Here you
+need to define the function name and argument list so that unbound variables in
+the ``Expression`` are bound to the arguments.::
 
     f = ctx.declare(const(2)*expr("x")*expr("y"),"f",["x","y"])
 
 This form will automatically obtain derivatives for you.
 
-Functions can also specify argument types and return types, which are used for type checking at Expression creation
-time. This is quite helpful for debugging, since you do not have to evaluate the Expression to find mismatched
-types, like indexing a vector with a list. To declare types for custom functions, use the setArgType and setReturnType
-methods:
+Functions can also specify argument types and return types, which are used
+for type checking at Expression creation time. This is quite helpful for
+debugging, since you do not have to evaluate the ``Expression`` to find
+mismatched types, like indexing a vector with a list. To declare types for
+custom functions, use the ``setArgType`` and ``setReturnType`` methods::
 
     #numeric input and output
     f.setArgType(0,'N')
@@ -267,155 +380,193 @@ methods:
     f.setReturnType('N')
 
 
-=====================================================================================
+===============================================================================
 Gotchas
+===============================================================================
 
-Most conversions of arguments to Expressions are done for you during the course of calling operators or
-calls to symbolic functions, but if you call operators on Python constants, you will invoke the standard Python
-operation.  For example, 5 + 7 produces 12 because 5 and 7 are Python constants, but if you want to build
-the symbolic Expression that represents "5 + 7", you will need to use const(5)+const(7) or expr(5)+expr(7).
+Most conversions of arguments to Expressions are done for you during the
+course of calling operators or calls to symbolic functions, but if you call
+operators on Python constants, you will invoke the standard Python operation.
+For example, 5 + 7 produces 12 because 5 and 7 are Python constants, but if you
+want to build the symbolic ``Expression`` that represents "5 + 7", you will need
+to use ``const(5)+const(7)`` or ``expr(5)+expr(7)``.
 
-Since raw strings are interpreted as references to user-data variables, to create string constants, you will
-need to wrap the string using the const() function, e.g., const("text").  This is mostly relevant for the
-get/setattr_ functions.  Suppose Point is a class with members Point.x and Point.y, the expression that
-accesses the x member of the user data Point p is built with getattr_("p",const("x")).  Using __getattr__
-operator overloading you can also use expr("p").x
+Since raw strings are interpreted as references to user-data variables, to
+create string constants, you will need to wrap the string using the ``const()``
+function, e.g., ``const("text")``.  This is mostly relevant for the
+``get/setattr_`` functions.  Suppose Point is a class with members Point.x and
+Point.y, the expression that accesses the x member of the user data ``Point p``
+is built with ``getattr_("p",const("x"))``.  Using ``__getattr__`` operator
+overloading you can also use ``expr("p").x``
 
-Python Lists as arguments are handled in somewhat of a tricky way.  If the list is compatible with a Numpy array 
-(i.e., each element is numeric or equal-sized arrays), it will be converted to a Numpy array.  Otherwise,
-(e.g., a non-constant Expression is inside or the elements do not have the same size) it will be converted
-to an array(e1,...,en) Expression.  Tuples are NOT converted in the same way, so that Numpy matrix indices can
-be preserved.  Tuples of expressions are not supported implicitly, instead you will have to use tuple_(e1,...,en).
+Python Lists as arguments are handled in somewhat of a tricky way.  If the list
+is compatible with a Numpy array  (i.e., each element is numeric or equal-sized
+arrays), it will be converted to a Numpy array.  Otherwise, (e.g., a non-
+constant Expression is inside or the elements do not have the same size) it will
+be converted to an ``array(e1,...,en)`` ``Expression``.  Tuples are NOT
+converted in the same way, so that Numpy matrix indices can be preserved.
+Tuples of expressions are not supported implicitly, instead you will have to use
+``tuple_(e1,...,en)``.
 
-Comparison testing on Expressions, such as e != 0 or e1 == e2, do not return True or False. Instead, they return 
-Expressions themselves!  As a result, standard Python if statements cannot be used on Expressions.  Instead, you 
-will need to run eval() or evalf() on the result if you want to get its truth value.  (eval() does return an 
-Expression, but if the result of eval() is a ConstantExpression then it may be directly tested for its truth value.)
-To help you remember this, an exception will be raised if you try to use an expression as a condition in a Python
-if statement.
+Comparison testing on Expressions, such as ``e != 0`` or ``e1 == e2``, do
+not return True or False. Instead, they return  Expressions themselves!  As
+a result, standard Python if statements cannot be used on Expressions.  Instead,
+you  will need to run ``eval()`` or ``evalf()`` on the result if you want to get
+its truth value.  (``eval()`` does return an  Expression, but if the result of
+``eval()`` is a ConstantExpression then it may be directly tested for its truth
+value.) To help you remember this, an exception will be raised if you try to use
+an expression as a condition in a Python ``if`` statement.
 
-Note also that e1 == e2 does NOT test for whether the two expressions are logically equivalent.  As an example,
-the expression 'x1+x2 == x2+x1' does not test equivalence as you might expect, nor would even eval() to true
-unless x1 and x2 were given.  In order to test whether two expressions are *syntactically* equivalent, you can
-use e1.match(e2).  It is computationally intractable in general to determine whether two expressions are logically 
+Note also that ``e1 == e2`` does NOT test for whether the two expressions are
+logically equivalent.  As an example, the expression ``x1+x2 == x2+x1`` does not
+test equivalence as you might expect, nor would even ``eval()`` to true unless
+x1 and x2 were given.  In order to test whether two expressions are
+*syntactically* equivalent, you can use ``e1.match(e2)``.  It is computationally
+intractable in general to determine whether two expressions are logically
 equivalent, so we don't even try.
 
-Derivatives are handled as usual for scalar/vector quantities, giving Jacobian matrices in the form
-[df1/dx1 ... df1/dxn ]
-[...                 ]
-[dfm/dx1 ... dfm/dxn ].
-However, if the function or variable has an "exotic" type, like a matrix, tensor, or nested list, then
-the Jacobian is taken with respect to the flattened version of the function and the variable.  The way this
-is handled can be seen in some complex derivative expressions, which will have various reshape operations.
+Derivatives are handled as usual for scalar/vector quantities, giving Jacobian
+matrices in the form::
 
-Many standard Python operators -- +,-,*,/,**, and, or, not, comparison tests, the [] indexing operator, and list
-construction via [a,b] -- are supported directly on Variables and Expressions.  Compound slices (matrix[:,:])
-have not yet been thoroughly tested.  Other standard functions -- len, min, max, sum, abs, any, and all --
-have direct analogues in this package, with a trailing underscore added. If statements and list comprehensions
-can be emulated via the if_(cond,trueval,falseval) statement and the map_(expr,var,range) statement.  There is no
-support for the in statement, bitwise operators, or procedural code (e.g., statements with side-effects). 
+    [df1/dx1 ... df1/dxn ]
+    [...                 ]
+    [dfm/dx1 ... dfm/dxn ].
 
-If-elif-...-else blocks can be emulated using a multiplexer array(expr1,expr2,...,exprn)[switch] where switch takes
-on the values 0,...,n-1.  This expression is lazy-evaluated so that only the selected expression is expanded. 
-Standard if_ statements are also lazy-evaluated.
+However, if the function or variable has an "exotic" type, like a matrix,
+tensor, or nested list, then the Jacobian is taken with respect to the flattened
+version of the function and the variable.  The way this is handled can be seen
+in some complex derivative expressions, which will have various reshape
+operations.
 
-Thread-safety: Expression evaluation, derivatives, and simplification are NOT thread safe.  Common Expressions
-used between threads should be deep-copied before use.
+Many standard Python operators -- +,-,*,/,**, and, or, not, comparison tests,
+the [] indexing operator, and list construction via [a,b] -- are supported
+directly on Variables and Expressions.  Compound slices (``matrix[:,:]``) have
+not yet been thoroughly tested.  Other standard functions -- len, min, max, sum,
+abs, any, and all -- have direct analogues in this package, with a trailing
+underscore added. If statements and list comprehensions can be emulated via the
+``if_(cond,trueval,falseval)`` statement and the ``map_(expr,var,range)
+statement``.  There is no support for the in statement, bitwise operators, or
+procedural code (e.g., statements with side-effects).
+
+If-elif-...-else blocks can be emulated using a multiplexer
+``array(expr1,expr2,...,exprn)[switch]`` where ``switch`` takes on the values
+0,...,n-1.  This expression is lazy-evaluated so that only the selected
+expression is expanded.  Standard ``if_`` statements are also lazy-evaluated.
+
+Thread-safety: Expression evaluation, derivatives, and simplification are NOT
+thread safe.  Common Expressions used between threads should be deep-copied
+before use.
 
 
-=====================================================================================
+===============================================================================
 Performance and Expression DAGs
+===============================================================================
 
-If your expression repeatedly performs computationally expensive operations, it is helpful to gather
-sub-expressions into the same Python objects.  As an example, consider a Variable a, and the expression
-d given by the following construction:
+If your expression repeatedly performs computationally expensive operations, it
+is helpful to gather sub-expressions into the same Python objects.  As an
+example, consider a Variable a, and the expression d given by the following
+construction::
 
     b = (a+a)  
     c = (b+b)
     d = (c+c)
 
-Expanded, d = (c+c) = ((b+b)+(b+b)) = (((a+a)+(a+a))+((a+a)+(a+a)). However, when d.eval({'a':1}) is called,
-this module is smart enough to evaluate a, b, and c only once.  This becomes really helpful in
-derivative evaluation as well, since the derivative expression will also try to reuse common
-sub-expressions.
+Expanded, d = (c+c) = ((b+b)+(b+b)) = (((a+a)+(a+a))+((a+a)+(a+a)). However,
+when ``d.eval({'a':1})`` is called, this module is smart enough to evaluate a,
+b, and c only once.  This becomes really helpful in derivative evaluation as
+well, since the derivative expression will also try to reuse common sub-
+expressions.
 
-Now what if we want to evaluate several expressions at once?  This naive code will evaluate a, b, c, and d
-1000 times:
+Now what if we want to evaluate several expressions at once?  This naive code
+will evaluate a, b, c, and d 1000 times::
 
     ds = [(d+i).eval({'a':1}) for i in range(1000)]
 
-In order to take advantage of the sub-expression d, we can put everything into a single array() expression:
+In order to take advantage of the sub-expression d, we can put everything into a
+single ``array()`` expression::
 
     ds = array(*[(d+i) for i in range(1000)]).eval({'a':1})
 
 which will only evaluate a,b,c, and d once.
 
 
-=====================================================================================
+===============================================================================
 IO
+===============================================================================
 
 There are three forms of Expression IO in symbolic_io:
+
 1. Standard Python printing: str(expr) (output only)
-2. Human-readable strings: symbolic_io.toStr(expr) (output) / symbolic_io.fromStr(str) (input)
-3. JSON-like objects: symbolic_io.toJson(expr) (output) / symbolic_io.fromJson(jsonobj) (input)
+2. Human-readable strings: symbolic_io.toStr(expr) (output) /
+   symbolic_io.fromStr(str) (input)
+3. JSON-like objects: symbolic_io.toJson(expr) (output) /
+   symbolic_io.fromJson(jsonobj) (input)
 
 Method 1 is the most readable when printed to the console, but can't be read.
 
-Method 2 is somewhat readable, and is compatible with the optimization problem editor. 
-Note that there may be some subtle problems with IO for lists vs numpy arrays, since lists are
-automatically converted to numpy arrays when possible.  It hasn't been tested extremely
-thoroughly yet.
+Method 2 is somewhat readable, and is compatible with the optimization problem
+editor.  Note that there may be some subtle problems with IO for lists vs numpy
+arrays, since lists are automatically converted to numpy arrays when possible.
+It hasn't been tested extremely thoroughly yet.
 
-Method 3 is the least ambiguous but it uses a nested JSON structure to represent the expression
-graph.  Hence it is rather verbose.
+Method 3 is the least ambiguous but it uses a nested JSON structure to represent
+the expression graph.  Hence it is rather verbose.
 
-In Methods 2 and 3, if the expression graph is a DAG rather than a tree, a special notation is
-used to represent repeated references to nodes.  In particular, any common ConstantExpression and
-OperatorExpression objects are "tagged" with a unique id string.
+In Methods 2 and 3, if the expression graph is a DAG rather than a tree, a
+special notation is used to represent repeated references to nodes.  In
+particular, any common ConstantExpression and OperatorExpression objects are
+"tagged" with a unique id string.
 
-In Method 2, the first time a sub-expression appears it's tagged with a suffix #id.  Then,
-subsequent references are retrieved with the expression @id.  As an example, the string
-"(x+y)#1*@1" evaluates to (x+y)*(x+y), since '#1' assigns (x+y) to the id '1' and
-'@1' retrieves it.
+In Method 2, the first time a sub-expression appears it's tagged with a suffix
+#id.  Then, subsequent references are retrieved with the expression @id.  As an
+example, the string "(x+y)#1*@1" evaluates to (x+y)*(x+y), since '#1' assigns
+(x+y) to the id '1' and '@1' retrieves it.
 
 
-=====================================================================================
+===============================================================================
 Code generation
+===============================================================================
 
-- context.makePyFunction(expr,varorder=None): creates a Python function that evaluates
-    expr given arguments whose values are to be assigned to the Variables in varorder.
-- context.makeFlatFunction(expr,varorder=None): creates a Python function that evaluates
-    expr given a flattened list or vector of parameters, which can be unraveled to values
-    to be assigned to the Variables in varorder.
-- symbolic_io.latex(expr): produces a LaTex string representing the expression (requires
-    Sympy)
-- symbolic_io.codegen(exprs,language): produces C / Matlab code to evaluate the Function
-    or named expressions (requires Sympy).
+- context.makePyFunction(expr,varorder=None): creates a Python function that
+  evaluates ``expr`` given arguments whose values are to be assigned to the
+  ``Variable``s in ``varorder``.
+- context.makeFlatFunction(expr,varorder=None): creates a Python function that
+  evaluates ``expr`` given a flattened list or vector of parameters, which can
+  be unraveled to values to be assigned to the Variables in ``varorder``.
+- symbolic_io.latex(expr): produces a LaTex string representing the expression
+  (requires Sympy)
+- symbolic_io.codegen(exprs,language): produces C / Matlab code to evaluate the
+  ``Function`` or named expressions (requires Sympy).
 
 
-=====================================================================================
+===============================================================================
 Sympy integration
+===============================================================================
 
-Sympy integration is quite automatic.  See exprToSympy and exprFromSympy in symbolic_simpy.py.
-Built-in functions are converted mostly bidirectionally and hence support all aspects of both
-libraries.
+Sympy integration is quite automatic.  See exprToSympy and exprFromSympy in
+symbolic_simpy.py. Built-in functions are converted mostly bidirectionally and
+hence support all aspects of both libraries.
 
-Array operations are converted to Sympy Matrix operations, which expand all entries into scalar
-expressions, so array operations like dot() cannot be converted to Sympy and then back into
-the equvalent symbolic operation.
+Array operations are converted to Sympy Matrix operations, which expand all
+entries into scalar expressions, so array operations like dot() cannot be
+converted to Sympy and then back into the equvalent symbolic operation.
 
-Custom symbolic functions are converted to sympy Function(f) objects, and it should be noted that
-these do not support code generation.
+Custom symbolic functions are converted to sympy Function(f) objects, and it
+should be noted that these do not support code generation.
 
-Special Sympy functions are automatically converted for use in the symbolic module, including
-differentiation.  (Note that they cannot be saved to / loaded from disk, though.)
+Special Sympy functions are automatically converted for use in the symbolic
+module, including differentiation.  (Note that they cannot be saved to / loaded
+from disk, though.)
 
 
-=====================================================================================
+===============================================================================
 Wish list
+===============================================================================
 
-- Sparse matrix support when obtaining jacobians -- especially in block matrix form.
-- Compiled code generation on vectors/matrices -- maybe integration with TensorFlow / PyTorch?
+- Sparse matrix support when obtaining jacobians -- especially in block matrix
+  form.
+- Compiled code generation on vectors/matrices -- maybe integration with
+  TensorFlow / PyTorch?
 
 
 """
@@ -427,6 +578,7 @@ import numpy as np
 import math
 import copy
 import itertools
+from builtins import object
 
 _DEBUG_CACHE = False
 _DEBUG_DERIVATIVES = False
@@ -444,12 +596,16 @@ class Type:
     """A specification of a variable/expression type.
 
     Attributes:
-    - char: a character defining the type. Valid values are N, I, B, X, A, V, M, L, U, and None.
-    - size: None (no size specified), the length of the array (L and V types), or the Numpy shape (A, M types)
-    - subtype:
-      - U type: the name of the class, if known.
-      - L type: either a single Type defining the list's element types, or a list of Types defining
-        individual element types (of the same length as size).
+        char (str): a character defining the type. Valid values are
+            N, I, B, X, A, V, M, L, U, and None.
+        size: None (no size specified), the length of the array (L
+            and V types), or the Numpy shape (A, M types)
+        subtype (str, Type, or list of Types, optional):
+
+          * U type: the name of the class, if known.
+          * L type: either a single Type defining the list's element
+            types, or a list of Types defining individual element
+            types (of the same length as size).
     """
     def __init__(self,type,size=None,subtype=None):
         if isinstance(type,Type):
@@ -1326,6 +1482,36 @@ class Context:
 class Function:
     """A symbolic function.  Contains optional specifications of argument and return types, as well as
     derivatives.
+
+    Attributes:
+        name (str): name of function used in printing and IO.
+        description (str, optional): text description of function.
+        func: Expression or python function.
+        argNames (list of strs, optional): names of arguments.
+        argTypes (list of Type, optional): list of argument Types.
+        argDescriptions (list of strs, optional): strings describing each argument
+        returnType (Type, optional): return Type
+        returnTypeFunc (function, optional): a function that takes argument types
+            and produces a more specific return type than returnType
+        returnTypeDescription (str, optional): description of the return type
+        deriv (optional): list of Jacobian-vector products with respect to each argument, or a function
+            df(args,dargs).
+        colstackderiv (optional): same as deriv, except that stacked argument derivatives are accepted.
+        rowstackderiv (optional): same as deriv, except that row-wise stacked argument derivatives are accepted.
+        jacobian (list of functions, optional): list of Jacobian functions with respect to each argument.
+        presimplifier (function, optional)
+        simplifier (function, optional)
+        presimplifierDict (dict, optional): a nested dict, mapping argument signatures to simplification
+            functions.  See :meth:`addSimplifier` for more details.
+        simplifierDict (dict, optional): a nested dict, mapping argument signatures to simplification functions. 
+            See :meth:`addSimplifier` for more details.
+        properties (dict): possible properties of this function, such as associativity, etc (not really used yet)
+        printers (dict of functions): a dict containing code generation methods.  Each entry, if present, is a
+            function printer(expr,argstrs) that returns a string. Common key values are:
+
+            * "str": for printing to console 
+            * "parse": for parseCompatible=True exprToStr
+
     """
     def __init__(self,name,func,argNames=None,returnType=None):
         """Initializes the function with a name, Python function or Expression, and optional argument list and
@@ -1335,52 +1521,27 @@ class Function:
         Otherwise, it must be an expression, and argNames needs to be provided.  The expression must be closed,
         meaning that all unspecified variables in the expression must be named in argNames.
 
-        Example:
-        #standard function method
-        def f(x,y):
-            ...
-        symfunc = Function("f",f)
-        a = context.addVar("a")
-        b = context.addVar("b")
-        c = context.addVar("c")
-        print symfunc(a,b)   # prints f($a,$b)
+        Examples:
+            Basic instantiation::
 
-        #Creating a Function from an Expression (sort of like a lambda function)
-        expr = a + 2*b
-        symfunc2 = Function("f2", expr, ["a","b"])  #when symfunc2 is called, its first argument will be bound to a, and its second will be bound to b
-        print symfunc2(c,4)   #prints f2(c,4)
-        print symfunc2(c,4).eval({'c':5})  #prints 13, because c + 2*4 = 5 + 2*4 = 13
+                #standard function method
+                def f(x,y):
+                    ...
+                symfunc = Function("f",f)
+                a = context.addVar("a")
+                b = context.addVar("b")
+                c = context.addVar("c")
+                print symfunc(a,b)   # prints f($a,$b)
+
+            Creating a Function from an Expression (sort of like a lambda function)::
+
+                expr = a + 2*b
+                symfunc2 = Function("f2", expr, ["a","b"])  #when symfunc2 is called, its first argument will be bound to a, and its second will be bound to b
+                print symfunc2(c,4)   #prints f2(c,4)
+                print symfunc2(c,4).eval({'c':5})  #prints 13, because c + 2*4 = 5 + 2*4 = 13
 
         The Expression method can automatically set derivatives if all the sub-expressions have derivatives. To do so, use
         the autoSetJacobians function.
-
-        Attributes:
-        - name: name of function used in printing and IO.
-        - description (optional): text description of function.
-        - func: Expression or python function.
-        - argNames (optional): names of arguments.
-        - argTypes (optional): list of argument Types.
-        - argDescriptions (optional): list of text strings describing each argument
-        - returnType (optional): return Type
-        - returnTypeFunc (optional): a function that takes argument types and produces a more specific return
-            type than returnType
-        - returnTypeDescription (optional): text describing the return type
-        - deriv (optional): list of Jacobian-vector products with respect to each argument, or a function
-          df(args,dargs).
-        - colstackderiv (optional): same as deriv, except that stacked argument derivatives are accepted.
-        - rowstackderiv (optional): same as deriv, except that row-wise stacked argument derivatives are accepted.
-        - jacobian (optional): list of Jacobian functions with respect to each argument.
-        - presimplifier (optional)
-        - simplifier (optional)
-        - presimplifierDict (optional): a nested dict, mapping argument signatures to simplification functions.  See
-          addSimplifier for more details.
-        - simplifierDict (optional): a nested dict, mapping argument signatures to simplification functions.  See
-          addSimplifier for more details.
-        - properties: a dict containing possible properties (not really used yet)
-        - printers: a dict containing code generation methods.  Each entry, if present, is a function
-            printer(expr,argstrs) that returns a string. Common key values are:
-            "str": for printing to console 
-            "parse": for parseCompatible=True exprToStr
         """
         self.name = name
         self.description = None
@@ -1461,9 +1622,10 @@ class Function:
             assert len(self.exprArgRefs) == len(args)
             return OperatorExpression(self,args,lambda *argvals:subs(self.func,self.exprArgRefs,argvals).eval())
     def optimized(self,*args):
-        """Similar to self(*args).simplify(depth=1), but optimized to reduce complexity earlier. In particular,
-        this directly applies the operation if all arguments are constants, and it will try to apply the simplifier
-        immediately."""
+        """Similar to ``self(*args).simplify(depth=1)``, but optimized to
+        reduce complexity earlier. In particular, this directly applies the
+        operation if all arguments are constants, and it will try to apply
+        the simplifier immediately."""
         if self.presimplifier != None:
             res = self.presimplifier(*args)
             if res is not None:
@@ -1608,8 +1770,12 @@ class Function:
             self.setJacobian(arg,darg,asExpr=True)
     def setReturnType(self,type):
         """Sets a return type specifier.
-        - type is a Type object, character type specifier, or a function that takes in argument Types 
-          and returns a Type.
+
+        Args:
+           type (Type, str, or function): if a Type object, the return type is set
+               directly.  If a character type specifier, it is cast to Type.
+               If it is a function, it is assumed to be a function that that takes
+               in argument ``Type``s and returns a ``Type``.
         """
         if callable(type):
             self.returnTypeFunc = type
@@ -1617,31 +1783,49 @@ class Function:
             self.returnType = Type(type)
     def setArgType(self,arg,type):
         """Sets an argument type specifier.
-        - arg is an index or string naming an argument.
-        - type is a Type object or character type specifier.
+
+        Args:
+            arg (int or str): an index or string naming an argument.
+            type (Type or str): a Type object or character type specifier for 
+                the specified argument.
         """
         if self.argTypes is None:
             self.argTypes = [None]*len(self.argNames)
         index,name = self.checkArg(arg)
         self.argTypes[index] = Type(type)
     def getArgType(self,arg):
-        """Retrieves an argument type.  arg is an index or string naming an argument."""
+        """Retrieves an argument type.
+
+        Args:
+            arg (int or str): the index or string naming an argument.
+        """
         if self.argTypes is None: return None
         index,name = self.checkArg(arg)
         return self.argTypes[index]
     def addSimplifier(self,signatures,func,pre=False):
         """For a signature tuple, sets the simplifier to func.
-        - signatures: a list of argument signatures. A signature can be:
-          - the operation name for an OperatorExpression, passing the arg directly to func(...)
-          - '_scalar': matches to a constant scalar, and passes that constant to func(...)
-          - '_const': matches to constant, and passes that constant to func(...)
-          - '_returnType': passes the argument's returnType() to func(...)
-          - None: match all.  The arg is passed directly to func(...)
-        - func: a callable that takes a list of arguments, possibly transformed by _const or _returnType.
-          This returns a simplified Expression or None.
-        - pre: if True, the simplifier is called before arguments are simplified.
 
-        If multiple matches are present then they are tested in order 1) operation name, 2) _const, 3) _returnType, 4) None, 
+        Args:
+            signatures (list): a list of argument signatures. A signature can be:
+
+                - the operation name for an OperatorExpression, passing the arg directly to func(...)
+                - '_scalar': matches to a constant scalar, and passes that constant to func(...)
+                - '_const': matches to constant, and passes that constant to func(...)
+                - '_returnType': passes the argument's returnType() to func(...)
+                - None: match all.  The arg is passed directly to func(...)
+
+            func (callable): a callable that takes a list of arguments, possibly transformed by _const or _returnType.
+                This returns a simplified Expression or None.
+
+            pre (bool, optional): if True, the simplifier is called before arguments are simplified.
+
+        If multiple matches are present then they are tested in order
+
+        1. operation name
+        2. _const
+        3. _returnType
+        4. None
+
         """
         if self.argNames is not None:
             if len(signatures) != len(self.argNames):
@@ -1928,7 +2112,7 @@ class _TraverseException(Exception):
             n._parent = p
         self.path[-1]._print_call_stack(indent)
 
-class Expression:
+class Expression(object):
     def __init__(self):
         self._parent = None
         self._id = None
@@ -1953,23 +2137,30 @@ class Expression:
         else:
             return self._traverse(post=_depth,cache=True,clearcache=False,cacheas='depth')
     def isConstant(self):
-        """Returns true if this expression is identically a constant.  If so, then the expression
-        can be safely replaced with its evalf() value without any possible change in meaning."""
+        """Returns true if this expression is identically a constant.  If so,
+        then the expression can be safely replaced with its evalf() value
+        without any possible change in meaning.
+        """
         raise NotImplementedError()
     def returnConstant(self,context=None):
         """Returns true if the evaluation of the expression in the given context results in a constant.
         If so, then evalf() can safely be applied without error."""
         raise NotImplementedError()
     def eval(self,context=None):
-        """Evaluates the expression while substituting all constant values.  The result can be a constant
-        or an Expression if the result is not constant.
+        """Evaluates the expression while substituting all constant values. 
+        The result can be a constant or an Expression if the result is not
+        constant.
 
-        context is a Context or a dictionary mapping names to values.
+        Args:
+            context (Context or dict, optional): a map of variable names to
+                constant values.
         """
         return self._eval(context)
     def evalf(self,context=None):
-        """Evaluates the expression while substituting all constant values, enforcing that the result
-        is a constant.  If the result is not constant, a ValueError is returned"""
+        """Evaluates the expression while substituting all constant values,
+        enforcing that the result is a constant.  If the result is not
+        constant, a ValueError is returned.
+        """
         r = self.eval(context)
         if not is_const(r):
             import symbolic_io
@@ -1991,9 +2182,14 @@ class Expression:
         are reduced to constant values. If all arguments are constant, returns a
         constant.
 
-        - var: either a Variable, a string naming a Variable, or a dictionary mapping variable
-          names to derivatives. For example, in the latter case, if this is an expression f(x,y),
-          and var is a dictionary {"x":dx,"y":dy}, then the result is df/dx(x,y)dx + df/dy(x,y)dxy
+        Args:
+            var: either a Variable, a string naming a Variable, or a dictionary
+                mapping variable names to derivatives. For example, in the
+                latter case, if this is an expression f(x,y),and var is a
+                dictionary {"x":dx,"y":dy}, then the result is
+                ``df/dx(x,y)dx + df/dy(x,y)dy``
+            context (Context or dict, optional): a map of variable names to
+                constant values.
         """
         return self._deriv(var,context)
     def _deriv(self,var,context):
@@ -2009,8 +2205,10 @@ class Expression:
         import symbolic_io
         return symbolic_io.exprToStr(self,parseCompatible=True)
     def vars(self,context=None,bound=False):
-        """Returns a list of all free Variables under this expression.  If bound is True, any Variables
-        currently bound to values are returned, otherwise they are not."""
+        """Returns a list of all free Variables under this expression. 
+
+        If bound is True, any Variables currently bound to values are
+        returned, otherwise they are not."""
         return []
     def match(self,val):
         """Returns true if self is equivalent to the given expression. Note: no
@@ -2046,29 +2244,35 @@ class Expression:
     def _traverse(self,pre=None,post=None,cache=True,clearcache=True,cacheas=None):
         """Generic traversal function.
 
-        Arguments:
-        - pre: a function f(expr) of an Expression that is called before traversing
-          children. It returns a triple (descend,cont,value) which controls the recursion:
-          - If descend is True, then this proceeds to traverse children and call post. value is ignored.
-          - If descend is False, value is the return value of the traversal.
-          - If cont is True, then the parent of expr continues traversing children.
-          - If cont is False, then the parent of expr continues traversing children.
-          For example, a find function would return (False,False,*) if an item is found, and
-          (True,True,*) otherwise.
-        - post: a two-argument function f(expr,childvals) called after traversing children.
-          childvals are the return values of traversing children.
-          It returns a pair (cont,value), where value is the return value of the traversal
-          under expr, and cont which controls the recursion:
-          - If cont is True, the parent of expr continues traversing children.
-          - If cont is False, the parent of expr stops traversing children and value is used the
-            return value of the parent.
-          If post is evaluated, the cont value here overrides the cont value of pre.
-        - cache: if True, uses the caching functionality.
-        - clearcache: if True, deletes the cache after traversal.  Default uses cache and clears it.
-        - cacheas: if not None, caches the return value as an attribute. For this to work,
-          cache must be True.
+        Args:
+            pre (function, optional): a function f(expr) of an Expression that is called before traversing
+                children. It returns a triple (descend,cont,value) which controls the recursion:
 
-        Output: the value returned by pre or post.
+                - If descend is True, then this proceeds to traverse children and call post. value is ignored.
+                - If descend is False, value is the return value of the traversal.
+                - If cont is True, then the parent of expr continues traversing children.
+                - If cont is False, then the parent of expr continues traversing children.
+
+                For example, a find function would return (False,False,*) if an item is found, and
+                (True,True,*) otherwise.
+
+            post (function, optional): a two-argument function f(expr,childvals) called after traversing children.
+                childvals are the return values of traversing children.
+                It returns a pair (cont,value), where value is the return value of the traversal
+                under expr, and cont which controls the recursion:
+
+                - If cont is True, the parent of expr continues traversing children.
+                - If cont is False, the parent of expr stops traversing children and value is used the
+                  return value of the parent.
+
+                If post is evaluated, the cont value here overrides the cont value of pre.
+            cache (bool, optional): if True, uses the caching functionality.
+            clearcache (bool, optional): if True, deletes the cache after traversal.  Default uses cache and clears it.
+            cacheas (str, optional): if not None, caches the return value as an attribute. For this to work,
+                cache must be True.
+
+        Returns:
+            result: The value returned by pre or post.
         """
         if cacheas is None:
             cacheas = 0
@@ -2225,8 +2429,8 @@ class Expression:
     def _signature(self):
         """Returns a tuple that can be used for comparisons and hashing"""
         return ()
-    def __nonzero__(self):
-        print "__nonzero__ was called on",self
+    def __bool__(self):
+        print "__bool__ was called on",self
         raise ValueError("Can't test the truth value of an Expression.... did you mean to use if_(...)?")
     def __not__(self):
         return not_(self)
@@ -2325,8 +2529,8 @@ class ConstantExpression(Expression):
             return tuple(self.value.flatten())
         else:
             return (id(self.value),)
-    def __nonzero__(self):
-        return self.value.__nonzero__()
+    def __bool__(self):
+        return bool(self.value)
     def __not__(self):
         return ConstantExpression(not self.value)
     def _do_binary_op(self,rhs,func):
@@ -2596,6 +2800,7 @@ class OperatorExpression(Expression):
         variables in context are reduced to constant values.  
 
         The derivative/Jacobian size is determined as follows:
+
         - If both var and self are scalar, the result is a scalar.
         - If self is scalar and var is non-scalar, the result has the same shape as var.
         - If self is non-scalar and var is scalar, the result the same shape as self.
@@ -3288,12 +3493,14 @@ class OperatorExpression(Expression):
         """Returns a new expression, or None if this cannot be simplified.
 
         Simplification has three phases:
+
         - pre-simplification (top-down): each expression examines its immediate children for
           possible symbolic simplification.  Then, it pre-simplifies its descendents.
         - post-simplification (bottom-up): each expression post-simplifies its descendants, then
           examines its new children for possible symbolic simplification.
         - constant expansion (bottom-up): any descendants are replaced with constants, and if any
           immediate children are changed, symbolic simplification is tried again.
+
         """
         if _DEBUG_SIMPLIFY:
             print "Simplifying expression",self,"to depth",depth
@@ -3522,10 +3729,10 @@ def to_var(v):
 def is_sparse(v,threshold='auto'):
     """Returns true if v is a sparse array, with #nonzeros(v) < threshold(shape(v)).  
 
-    Arguments: 
-    - v: the array
-    - threshold: either 'auto', a constant, or a function of a shape.  If threshold=auto,
-      the threshold is sqrt(product(shape))
+    Args: 
+        v (Expression): the array
+        threshold (optional): either 'auto', a constant, or a function of a
+            shape.  If threshold=auto, the threshold is sqrt(product(shape))
     """
     if isinstance(v,ConstantExpression):
         v = v.value
@@ -3540,14 +3747,17 @@ def is_sparse(v,threshold='auto'):
     return (nnz < threshold)
 
 def expr(x):
-    """Converts x to an appropriate Expression:
+    """Converts x to an appropriate Expression as follows:
+
     - If x is a Variable, returns a VariableExpression.
     - If x is a non-str constant, returns a ConstantExpression.
     - If x is a str, then a UserDataExpression is returned. 
     - If x is already an Expression, x is returned.
-    - If x is a list containing expressions, then array(*x) is returned.  This adds some ambiguity to
-      lists containing strings, like expr(['x','y']).  In this case, strings are recursively converted
-      to UserDataExpressions.
+    - If x is a list containing expressions, then ``array(*x)`` is returned. 
+        This adds some ambiguity to lists containing strings, like
+        ``expr(['x','y'])``.  In this case, strings are recursively converted
+        to UserDataExpressions.
+
     """
     if isinstance(x,Variable):
         return VariableExpression(x)

@@ -1,4 +1,4 @@
-%module(docstring="Klamp't Core Python bindings") robotsim
+%module(docstring="Klamp't Core Python bindings \n------------------------------") robotsim
 %{
 	#include <exception>
 	#include <vector>

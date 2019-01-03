@@ -195,15 +195,19 @@ def _json_depth(jsonval):
 def exprToStr(expr,parseCompatible=True,expandSubexprs='auto'):
     """Converts an Expression to a printable or parseable string.
 
-    Arguments
-    - expr: the Expression to convert
-    - parseCompatible: if True, the result is readable via exprFromStr()
-    - expandSubexprs: whether to expand subexpressions. Can be:
-      'auto': if parseCompatible, equivalent to False. 
-              if parseCompatible=False, equivalent to True.
-      True: expands all common subexpressions
-      False: does not expand common subexpressions.
-      'show': Internally used.
+    Args:
+        expr (Expression): the Expression to convert
+        parseCompatible (bool, optional): if True, the result is readable via exprFromStr()
+        expandSubexprs (str or bool, optional): whether to expand subexpressions. Can be:
+
+            * 'auto': if parseCompatible, equivalent to False. 
+                if parseCompatible=False, equivalent to True.
+            * True: expands all common subexpressions
+            * False: does not expand common subexpressions.
+            * 'show': Internally used.
+
+    Returns:
+        (str): a printable or parsable string representing expr.
     """
     if isinstance(expr,ConstantExpression):
         if isinstance(expr.value,slice):
@@ -295,12 +299,19 @@ def exprFromStr(context,string,fmt=None,add=False):
     compatible format, standard variables in the form "x", user data in the form of strings prepended with $
     (e.g., "$x"), and named expression references in the form of strings prepended with @.
 
-    - string: the string to parse.
-    - fmt: specifies a format for the string.  Can be None (auto), 'auto', or 'json'
-    - add: if true, adds all variables referenced in the string to the context.  Otherwise, undefined
-      variables are referred to as user data.
+    Args:
+        context (Context): the context containing possible functions in string
+        string (str): the string to parse.
+        fmt (str, optional): specifies a format for the string.  Can be None (auto), 'auto', or 'json'
+        add (bool, optional): if true, adds all variables referenced in the string to the context. 
+            Otherwise, undefined variables are referred to as user data.
+
+    An exception is raised on parsing failure.
 
     (Parsing is a little slow, so try not to use it in tight inner loops)
+
+    Returns:
+        (Expression): the expression represented by str.
     """
     if len(string) == 0:
         raise ValueError("Empty string provided")
@@ -604,14 +615,20 @@ def codegen(name_expr,language=None,**options):
     """Similar to sympy.codegen. Generates one or more expressions in the target language.
     Requires Sympy.
 
-    - name_expr: a single (name, Expression) tuple or a list of (name, Expression) tuples.
-      It is also acceptable to put in Function objects, provided that they are defined via
-      Expressions rather than Python functions.  To get multiple return values, you can provide
-      a list of (Variable == Expression) expressions.
-    - language: any language accepted by Sympy.
-    - options: other options for sympy.codegen.
+    Args:
+        name_expr: multiple interpretations:
 
-    See http://docs.sympy.org/latest/modules/utilities/codegen.html
+            * A single (name, Expression) tuple: generates code for one function
+            * A list of (name, Expression) tuples: generates code for multiple functions
+            * one or more Function objects: generates code for one or more functions, as long
+                as the Function is defined via symbolic  Expressions rather than Python functions.
+            * A list of (Variable == Expression) expressions.  Generates a function with multiple return values
+
+        language (str, optional): any language accepted by Sympy.
+        options: other options for sympy.codegen.
+
+    See the `Sympy codegen documentation <http://docs.sympy.org/latest/modules/utilities/codegen.html>`_
+    for more information.
     """
     try:
         import sympy

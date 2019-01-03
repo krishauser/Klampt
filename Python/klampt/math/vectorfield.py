@@ -1,6 +1,9 @@
+"""Helpers to make the rootfind module more convenient and Pythonic.
+"""
+
 class VectorFieldFunction:
     """A callback class used with the rootfind module to define a vector
-    field f(x)=0 to be solved for during Newton-Raphson root finding.
+    field :math:`f(x)=0` to be solved for during Newton-Raphson root finding.
     The output is dimension m and the input is dimension n.
 
     At the minimum, your subclass should fill out the m, n attributes, and
@@ -46,11 +49,13 @@ class VectorFieldFunction:
         
 class CompositeVectorFieldFunction(VectorFieldFunction):
     """A helper VectorFieldFunction that aggregates multiple
-    VectorFieldFunctions into a stacked constraint
-      0 = f1(x)
-      0 = f2(x)
-      ...
-      0 = fn(x)
+    VectorFieldFunctions into a stacked constraint::
+    
+        0 = f1(x)
+        0 = f2(x)
+        ...
+        0 = fn(x)
+    
     """
     def __init__(self, fns):
         if not fns:

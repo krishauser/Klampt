@@ -1,27 +1,36 @@
 """A Jupyter Notebook interface to Klampt.
 
-Usage:
-world = WorldModel()
-... #set up the world...
-kvis = KlamptWidget(world,width=800,height=640)
-display(kvis)   # This pops up a window in Jupyter
+Examples:
+    Basic usage::
 
-# Immedate changes can be made using the methods in KlamptWidget
-kvis.addText(name="text_id",text="hello",position=(10,10))
-kvis.addSphere(x=0,y=1.5,z=0,r=0.4)
+        from klampt import *
+        from klampt.vis.ipython import KlamptWidget
+        from IPython.display import display
 
-# Change the configuration of things in the world, and then call update() to see the changes
-robot = world.robot(0)
-q = robot.getConfig()
-q[2] += 1.0
-robot.setConfig(q)
-kvis.update()   # The previous changes are not made until this is called
+        world = WorldModel()
+        ... #set up the world...
+        kvis = KlamptWidget(world,width=800,height=640)
+        display(kvis)   # This pops up a window in Jupyter
 
-# If you completely change the number of objects in the world, or their underlying geometries,
-# you will need to call w.setWorld(world) again.  This is relatively expensive, so try not to
-# do it too often.
-world.readElement(...)
-kvis.setWorld(world)
+    Immedate changes can be made using the methods in KlamptWidget::
+
+        kvis.addText(name="text_id",text="hello",position=(10,10))
+        kvis.addSphere(x=0,y=1.5,z=0,r=0.4)
+
+    Change the configuration of things in the world, and then call update() to see the changes::
+
+        robot = world.robot(0)
+        q = robot.getConfig()
+        q[2] += 1.0
+        robot.setConfig(q)
+        kvis.update()   # The previous changes are not made until this is called
+
+    If you completely change the number of objects in the world, or their underlying geometries,
+    you will need to call w.setWorld(world) again.  This is relatively expensive, so try not to
+    do it too often::
+
+        world.readElement(...)
+        kvis.setWorld(world)
 
 """
 
@@ -49,24 +58,21 @@ class KlamptWidget(widgets.DOMWidget):
     The API is similar to the vis module, but has a reduced and slightly modified
     set of hooks.
 
-    Public DOMWidget attributes:
-    - width: the width of the view in pixels
-    - height: the height of the view in pixels
+    Attributes:
+        width (Int): the width of the view in pixels (public property)
+        height (Int): the height of the view in pixels (public property)
+        scene (Dict): the scene JSON message (private)
+        transforms (Dict): the transforms JSON message (private)
+        rpc (Dict): the rpc JSON message (private)
+        _camera (Dict): the incoming camera JSON message from the frontend (private)
+        camera (Dict): the outgoing camera JSON message (private)
+        drawn (Int): the incoming drawn message from the frontend (private)
+        events (Dict): incoming events from the frontend (private)
+        world (WorldModel): the WorldModel isinstance
+        _extras (dict): a dict mapping extra item names to (type,threejs_items) pairs
+        _rpc_calls (list): a list of pending RPC calls between beginRpc() and endRpc()
+        _aggregating_rpc (int): non-zero if between beginRpc and endRpc
 
-    Private DOMWidget attributes:
-    - scene: the scene JSON message
-    - transforms: the transforms JSON message
-    - rpc: the rpc JSON message
-    - _camera: the incoming camera JSON message from the frontend
-    - camera: the outgoing camera JSON message
-    - drawn: the incoming drawn message from the frontend
-    - events: incoming events from the frontend
-
-    Private members:
-    - - world: the WorldModel isinstance
-    - _extras: a dict mapping extra item names to (type,threejs_items) pairs
-    - _rpc_calls: a list of pending RPC calls between beginRpc() and endRpc()
-    - _aggregating_rpc: non-zero if between beginRpc and endRpc
     """
     _model_name = Unicode('KlamptModel').tag(sync=True)
     _view_name = Unicode('KlamptView').tag(sync=True)
@@ -126,18 +132,29 @@ class KlamptWidget(widgets.DOMWidget):
 
     def add(self,name,item,type='auto'):
         """Adds the item to the world, and returns a list of identifiers associated with it.
+
+        Args:
+            name (str): the name of the item, which will be used to refer to it from now on
+            item: the item data
+            type (str, optional): either 'auto' (default) or a string describing the type of
+                :obj:`item`, which can help disambiguate some types like 'Config' vs 'Vector3'
+                (see below)
         
-        Supports:
-        - Config, as a ghost (list, same size as robot)
-        - Configs, as a set of ghosts (list of lists, same size as robot)
-        - Vector3, drawn as a sphere (3-list)
-        - RigidTransform, drawn as an xform (pair of 9-list and 3-list)
-        - Configs, drawn as a polyline (list of 3-lists)
-        - Trajectory, drawn either as:
-           - a polyline (3D Trajectory objects),
-           - set of milestones (Trajectory or RobotTrajectory objects)
-           - a polyline + set of rigid transform milestones (SE3Trajectory objects)
-        - WorldModel, but only one world at once is supported (same as setWorld).
+        Supports items of type:
+
+        * Config, as a ghost (list, same size as robot)
+        * Configs, as a set of ghosts (list of lists, same size as robot)
+        * Vector3, drawn as a sphere (3-list)
+        * RigidTransform, drawn as an xform (pair of 9-list and 3-list)
+        * Configs, drawn as a polyline (list of 3-lists)
+        * Trajectory, drawn either as:
+
+           * a polyline (3D Trajectory objects),
+           * set of milestones (Trajectory or RobotTrajectory objects)
+           * a polyline + set of rigid transform milestones (SE3Trajectory objects)
+
+        * WorldModel, but only one world at once is supported (same as setWorld).
+
         """
         if type == 'auto':
             try:
@@ -416,26 +433,37 @@ class KlamptWidget(widgets.DOMWidget):
 
         By default the billboard is centered at (0,0,0) and faces up.  To modify it, call set_transform.
 
-        - image: a 2D array of single-channel values, (r,g,b) tuples, or (r,g,b,a) tuples.  Rows are listed
-          top to bottom, rows from left to right.  Or, can also be a URL.
-        - format:
-          - 'auto': autodetect the type from the image. If the image contains values, the format is 'value'.
-          - 'value': the values are mapped through either 'opacity', 'rainbow', or gradient
-            color mapping.
-          - 'rgb': if the image contains values, they are interpreted as RGB values packed in 24 bit
-            integers. Otherwise, the first 3 channels of the tuple are used.
-          - 'rgba': if the image contains values, they are interpreted as RGB values packed in 32 bit
-            integers. Otherwise, they are assumed to be (r,g,b,a) tuples
-        - crange: the range of the given values / channels. By default [0,1], but if you are using uint8
-          encoding this should be set to [0,255].
-        - colormap: how the color of the billboard should be set based on the image.  Valid values are:
-          - 'auto': if the image contains values, the gradient ((0,0,0),(1,1,1)) is used.  Otherwise
-            'replace' is used.
-          - (color1,color2): interpolates between the two given (r,g,b) or (r,g,b,a) tuples.
-          - 'opacity': sets the alpha channel only.
-          - 'modulate': the value / rgb / rgba texture modulates the billboard color as set by setColor
-        - filter: how values between pixels are interpolated.  Either 'nearest' or 'linear'.
-        - size: the (width,height) pair of the billboard, in world units.
+        Args:
+            name (str): the name used to refer to this item
+            
+            image (list of lists or str): a 2D array of single-channel values, (r,g,b) tuples, or (r,g,b,a)
+                tuples. Rows are listed top to bottom, rows from left to right.  Or, can also be a URL.
+            
+            format (str, optional): The image format.  Can be:
+
+                * 'auto': autodetect the type from the image. If the image contains values, the format is 'value'.
+                * 'value': the values are mapped through either 'opacity', 'rainbow', or gradient
+                    color mapping.
+                * 'rgb': if the image contains values, they are interpreted as RGB values packed in 24 bit
+                    integers. Otherwise, the first 3 channels of the tuple are used.
+                * 'rgba': if the image contains values, they are interpreted as RGB values packed in 32 bit
+                    integers. Otherwise, they are assumed to be (r,g,b,a) tuples
+
+            crange (pair of numbers, optional): the range of the given values / channels. By default [0,1], but if you are using uint8
+                encoding this should be set to [0,255].
+            
+            colormap (optional): how the color of the billboard should be set based on the image.  Valid values are:
+
+                * 'auto': if the image contains values, the gradient ((0,0,0),(1,1,1)) is used.  Otherwise
+                    'replace' is used.
+                * (color1,color2): interpolates between the two given (r,g,b) or (r,g,b,a) tuples.
+                * 'opacity': sets the alpha channel only.
+                * 'modulate': the value / rgb / rgba texture modulates the billboard color as set by setColor
+
+            filter (str, optional): how values between pixels are interpolated.  Either 'nearest' or 'linear'.
+            
+            size (pair of numbers, optional): the (width,height) pair of the billboard, in world units.
+
         """
         if not isinstance(image,str):
             import struct
@@ -502,12 +530,12 @@ class KlamptWidget(widgets.DOMWidget):
         """Begins collecting a set of RPC calls to be sent at once, which is a bit faster than doing multiple
         addX or setX calls. 
 
-        Usage:
-          widget.beginRpc()
-          widget.addX()
-          ...
-          widget.setX()
-          widget.endRpc()  #this sends all the messages at once
+        Usage::
+            widget.beginRpc()
+            widget.addX()
+            ...
+            widget.setX()
+            widget.endRpc()  #this sends all the messages at once
         """
         if self._aggregating_rpc == 0:
             assert len(self._rpc_calls)==0
@@ -561,20 +589,28 @@ class KlamptWidget(widgets.DOMWidget):
 def EditConfig(robot,klampt_widget=None,ghost=None,link_selector='slider',link_subset=None,callback=None):
     """Creates a Jupyter widget for interactive editing of the robot's configuration.
 
-    Arguments:
-    - robot: the robot to edit
-    - klampt_widget: the KlamptWidget visualization to update, or None if you don't want to visualize the
-      editing.
-    - ghost: if not None, this is the name of the ghost that should be updated. Widget updates are shown on
-      the given ghost rather than the actual robot.  To get the ghost configuration, you'll need to update the callback
-    - link_selector: how to select links.  Either:
-      - 'slider': uses an IntSlider widget
-      - 'dropdown': uses a Dropdown widget
-      - 'all': shows sliders for all links
-    - link_subset: if given, only a subset of links are shown.  Otherwise, only non-fixed links are shown.
-    - callback: a function callback(index,q) called when a DOF's value has changed.
+    Args:
+        robot (RobotModel): the robot to edit
 
-    Returns: a widget to be displayed as you like
+        klampt_widget (KlamptWidget, optional): the KlamptWidget visualization to update, or None if you
+            don't want to visualize the editing.
+
+        ghost (str, optional): if not None, this is the name of the ghost that should be updated. Widget
+            updates are shown on the given ghost rather than the actual robot.  To get the ghost
+            configuration, you'll need to update the callback.
+
+        link_selector (str): how to select links.  Either:
+
+            * 'slider': uses an IntSlider widget
+            * 'dropdown': uses a Dropdown widget
+            * 'all': shows sliders for all links
+
+        link_subset (list, optional): if given, only a subset of links are shown.  Otherwise, only non-fixed links are shown.
+
+        callback (function, optional): a function callback(index,q) called when a DOF's value has changed.
+
+    Returns:
+        VBox: a widget to be displayed as you like
     """
 
     qmin,qmax = robot.getJointLimits()
@@ -667,16 +703,19 @@ def EditPoint(value=None,min=None,max=None,labels=None,
     callback=None):
     """Creates a Jupyter widget for interactive editing of an xyz point
 
-    Arguments:
-    - value: the initial value of the point. If given, this must be a list and will hold the edited values.
-    - min/max: the minimum and maximum of the point
-    - labels: if given, the labels of each channel
-    - klampt_widget: the KlamptWidget visualization to update, or None if you don't want to visualize the point.
-    - point_name: the name of the point in the visualization world to edit.
-    - point_radius: the radius of the visualized point.
-    - callback: a function callback(xyz) called when a DOF's value has changed.
+    Args:
+        value (list of 3 floats, optional): the initial value of the point. If given, this must
+            be a list and will hold the edited values.
+        min/max (list of 3 floats, optional): the minimum and maximum of the point
+        labels (list of strs, optional): if given, the labels of each channel
+        klampt_widget (KlamptWidget, optional): the KlamptWidget visualization to update,
+            or None if you don't want to visualize the point.
+        point_name (str, optional): the name of the point in the visualization world to edit.
+        point_radius (float, optional): the radius of the visualized point.
+        callback (function ,optional): a function callback(xyz) called when a DOF's value has changed.
 
-    Returns: a VBox widget that can be displayed as you like
+    Returns: 
+        VBox: a widget that can be displayed as you like
     """
     if value is None:
         value = [0,0,0]
@@ -718,16 +757,19 @@ def EditTransform(value=None,xmin=None,xmax=None,labels=None,
     callback=None):
     """Creates a Jupyter widget for interactive editing of a rigid transform point
 
-    Arguments:
-    - value: the initial value of the transform (klampt.se3 element). If given as (R,t), the R and t members must be lists and will hold the edited values.
-    - xmin/xmax: the minimum and maximum of the translation
-    - labels: if given, the labels of roll,pitch,yaw and x,y,z
-    - klampt_widget: the KlamptWidget visualization to update, or None if you don't want to visualize the point.
-    - xform_name: the name of the xform in the visualization world to edit.
-    - axis_length,axis_width: the radius of the visualized point.
-    - callback: a function callback((R,t)) called when a DOF's value has changed.
+    Args:
+        value (klampt.se3 element), optional: the initial value of the transform (klampt.se3 element).
+            If given as (R,t), the R and t members must be lists and will hold the edited values.
+        xmin/xmax (list of 3 floats, optional): the minimum and maximum of the translation
+        labels (list of strs, optional): if given, the labels of roll,pitch,yaw and x,y,z
+        klampt_widget (KlamptWidget, optional): the KlamptWidget visualization to update, or None if
+            you don't want to visualize the point.
+        xform_name (str, optional): the name of the xform in the visualization world to edit.
+        axis_length,axis_width (float, optional): the length and width of the visualized widget
+        callback (function, optional): a function callback((R,t)) called when a DOF's value has changed.
 
-    Returns: a VBox widget that can be displayed as you like
+    Returns: 
+        VBox: a widget that can be displayed as you like
     """
     if value is None:
         value = se3.identity()
@@ -783,16 +825,16 @@ def EditTransform(value=None,xmin=None,xmax=None,labels=None,
 class Playback(widgets.VBox):
     """A play/pause/reset widget associated with a KlamptWidget.
 
-    Members:
-    - klampt_widget: the widget that should be updated after each advance call
-    - advance: a function to be called for each new frame.
-    - pause: a function to be called when pause is clicked.
-    - reset: a function to be called when reset is clicked.
-    - maxframes: the maximum number of frames.  If None, this is unlimited.
-    - framerate: number of frames per second desired.  If None, frames are run as
-      quickly as possible
-    - quiet: if True, suppresses output during play
-    - playbutton, stepbutton, pausebutton, resetbutton: the Button widgets
+    Attributes:
+        klampt_widget (KlamptWidget, optional): the widget that should be updated after each advance call
+        advance (function, optional): a function to be called for each new frame.
+        pause (function, optional): a function to be called when pause is clicked.
+        reset (function, optional): a function to be called when reset is clicked.
+        maxframes (int, optional): the maximum number of frames.  If None, this is unlimited.
+        framerate (int, optional): number of frames per second desired.  If None, frames are run as
+            quickly as possible
+        quiet (bool): if True, suppresses output during play
+        playbutton, stepbutton, pausebutton, resetbutton (Button): the Button widgets
     """
     def __init__(self,klampt_widget=None,advance=None,reset=None,pause=None,maxframes=None,framerate=None,quiet=False):
         """Arguments are the same as the members"""

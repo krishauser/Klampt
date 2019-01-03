@@ -231,14 +231,17 @@ class SympyFunction(Function):
 class SympyFunctionAdaptor(Function):
     """Defines a Function from a Sympy function.
 
-    Example:
-    heaviside = SympyFunctionAdaptor("heaviside",sympy.Heaviside,["x"])
+    Example::
+
+        heaviside = SympyFunctionAdaptor("heaviside",sympy.Heaviside,["x"])
     """
     def __init__(self,name,func,argnames=None):
         """
-        - name: the symbolic module name of the function.
-        - func: the Sympy function
-        - argnames: provided if you don't want to use 'x','y', 'z' for the argument names.
+        Args:
+            name (str): the symbolic module name of the function.
+            func (sympy.Function): the Sympy function
+            argnames (list of strs, optional): provided if you don't
+                want to use 'x','y', 'z' for the argument names.
         """
         assert isinstance(func,sympy.FunctionClass)
         if hasattr(func,'nargs'):
@@ -277,10 +280,15 @@ class SympyFunctionAdaptor(Function):
 
 def exprFromSympy(context,sexpr,addFuncs=True):
     """Converts a Sympy expression to a symbolic.py expression.
-    - context: a Context object that captures variable references and custom functions. This may be None.
-    - sexpr: the Sympy expression.
-    - addFuncs: if True, any Sympy functions without a direct match to symbolic functions are added to
-      sexpr's customFunctions list.
+
+    Args:
+        context (Context): a Context object that captures variable
+            references and custom functions. This may be None.
+        sexpr (sympy.Expr): the Sympy expression.
+        addFuncs (bool, optional): if True, any Sympy functions
+            without a direct match to symbolic functions are added to
+            sexpr's customFunctions list.
+    
     """
     if isinstance(sexpr,sympy.Symbol):
         if context is not None and sexpr.name in context.variableDict:

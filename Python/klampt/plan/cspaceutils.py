@@ -101,10 +101,11 @@ class EmbeddedCSpace(CSpace):
     of DOF indices of that ambient space.
     
     Attributes:
-    - ambientspace: the ambient configuration space
-    - mapping: the list of active indices into the ambient configuration
-      space
-    - xinit: the initial configuration in the ambient space (by default, 0)
+        ambientspace (CSpace): the ambient configuration space
+        mapping (list): the list of active indices into the ambient configuration
+            space
+        xinit (list, optional): the initial configuration in the ambient space
+            (by default, 0 vector)
     """
     def __init__(self,ambientspace,subset,xinit=None):
         CSpace.__init__(self)

@@ -15,7 +15,7 @@ classes = {'RobotModel','WorldModel','RobotModelLink','Terrain','RigidObjectMode
     'CSpace','MotionPlan'
     }
 #default prefix for class cross-references
-default_class_prefix = 'klampt.robotsim'
+default_class_prefix = 'klampt'
 #other prefixes for class cross-references
 class_prefix = {
     'ContactPoint':'klampt.model.contact',
@@ -40,6 +40,7 @@ to_python_types = { 'char const *':'str',
     'doubleMatrix': "2D matrix, list of list of floats",
     'floatVector': "list of floats",
     'floatArray': "list of floats",
+    'intVector': "list of int",
     'intArray': "list of int",
     'stringArray': "list of str",
     'double const [3]': "list of 3 floats",

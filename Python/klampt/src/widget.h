@@ -3,6 +3,10 @@
 
 #include <string>
 
+/** @file widget.h 
+ * API to interact with with C++ Widgets
+ */
+
 class RigidObjectModel;
 class RobotModel;
 class IKObjective;

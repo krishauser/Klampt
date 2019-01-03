@@ -1,3 +1,27 @@
+"""A uniform interface for determining configurations of arbitrary objects.
+These objects can be a world entity, a mathematical object, or an IK goal.
+
+A configuration is a flattened list of floats describing the physical layout of
+the object.
+
+Most notably, used in the :meth:`klampt.vis.visualization.setItemConfig`, 
+:meth:`klampt.vis.visualization.getItemConfig`, and
+:meth:`klampt.vis.visualization.animate` methods.
+
+Supported objects include
+
+- WorldModel
+- RobotModel
+- RigidObjectModel
+- point
+- rotation
+- rigid transform
+- coordinates module objects
+- IKObjective 
+- lists containing multiple objects (including nested lists)
+
+"""
+
 from ..robotsim import WorldModel,RobotModel,RobotModelLink,RigidObjectModel,IKObjective
 from ..math import vectorops,so3,se3
 import coordinates

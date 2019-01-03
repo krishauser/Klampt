@@ -37,39 +37,41 @@ def doSim(world,duration,initialCondition,
           simDt=0.01,simInit=None,simStep=None,simTerm=None):
     """Runs a simulation for a given initial condition of a world.
 
-    Arguments:
-    - world: the world
-    - duration: the maximum duration of simulation, in seconds
-    - initialCondition: a dictionary mapping named items to values.
-      Each named item is specified by a path as used by the map module, e.g.
-      'robot[0].config[4]'.  See the documentation for map.get_item()/
-      map.set_item() for details.
+    Args:
+        world (WorldModel): the world
+        duration (float): the maximum duration of simulation, in seconds
+        initialCondition (dict): a dictionary mapping named items to values.
+            Each named item is specified by a path as used by the map module, e.g.
+            'robot[0].config[4]'.  See the documentation for map.get_item()/
+            map.set_item() for details.
 
-      Special items include 'args' which is a tuple provided to each simInit,
-      simStep, and simTerm call.
-    - returnItems (optional): a list of named items to return in the final
-      state of the simulation.  By default returns everything that is
-      variable in the simulator (simulation time, robot and rigid object
-      configuration / velocity, robot commands, robot sensors).
-    - trace (optional, default False): if True, returns the entire trace of
-      the items specified in returnItems rather than just the final state.
-    - simDt (optional, default 0.01): the outer simulation loop (usually
-      corresponds to the control rate).
-    - simInit (optional): a function f(sim) called on the simulator after its
-      initial conditions are set but before simulating. You may configure the
-      simulator with this function.
-    - simStep (optional): a function f(sim) that is called on every outer
-      simulation loop (usually a controller function).
-    - simTerm (optional): a function f(sim) that returns True if the simulation
-      should terminate early.  Called on every outer simulation loop.
+            Special items include 'args' which is a tuple provided to each simInit,
+            simStep, and simTerm call.
+        returnItems (list of strs, optional): a list of named items to return in the final
+            state of the simulation.  By default returns everything that is
+            variable in the simulator (simulation time, robot and rigid object
+            configuration / velocity, robot commands, robot sensors).
+        trace (bool, optional): if True, returns the entire trace of
+            the items specified in returnItems rather than just the final state.
+        simDt (float, optional, default 0.01): the outer simulation loop (usually
+            corresponds to the control rate).
+        simInit (function, optional): a function f(sim) called on the simulator after its
+            initial conditions are set but before simulating. You may configure the
+            simulator with this function.
+        simStep (function, optional): a function f(sim) that is called on every outer
+            simulation loop (usually a controller function).
+        simTerm (function, optional): a function f(sim) that returns True if
+            the simulation should terminate early.  Called on every outer
+            simulation loop.
 
-    Return value is the final state of each returned item upon termination. 
-    This takes the form of a dictionary mapping named items (specified by
-    the returnItems argument) to their values. 
-    Additional returned items are:
-    - 'status', which gives the status string of the simulation
-    - 'time', which gives the time of the simulation, in s
-    - 'wall_clock_time', which gives the time elapsed while computing the simulation, in s
+    Returns:
+        (dict): the final state of each returned item upon termination.  The dictionary
+            maps named items (specified by the returnItems argument) to their values. 
+            Additional returned items are:
+        
+            * 'status', which gives the status string of the simulation
+            * 'time', which gives the time of the simulation, in s
+            * 'wall_clock_time', which gives the time elapsed while computing the simulation, in s
     """
     if returnItems == None:
         #set up default return items
@@ -148,14 +150,15 @@ def batchSim(world,duration,initialConditions,returnItems,
     """Given a world, a simulation duration, and a list of initial conditions,
     runs simulations for all initial conditions.
 
-    Arguments:
-        - everything but initialConditions is the same as in doSim()
-        - initialConditions: either a dict mapping named items to lists
-          of initial values, or a list of initial state dictionaries.
-          In the former case, all entries must be of the same length.
+    Args:
+        world,duration,returnItems,simDt,simInit,simStep,simTerm: the same as in doSim()
+        initialConditions (dict or list): either a dict mapping named items to lists
+            of initial values, or a list of initial state dictionaries.
+            In the former case, all entries must be of the same length.
     
-    Return a list of return values from doSim().  See the doSim()
-    documentation for more information on the arguments.
+    Returns:
+        (list): all return values from doSim().  See the :func:`doSim`
+            documentation for more information on the arguments.
     """
     res = []
     if isinstance(initialConditions,dict):
@@ -190,16 +193,17 @@ def monteCarloSim(world,duration,initialConditionSamplers,N,returnItems,
     """Given a world, a simulation duration, and dict of sampling functions
     for world items, runs N monte-carlo simulations.
 
-    Arguments:
-        - world, duration, returnItems, simDt, simInit, simStep, simTerm:
+    Args:
+        world, duration, returnItems, simDt, simInit, simStep, simTerm:
             same as for doSim()
-        - initialConditionSamplers: a dict mapping named world items to
-          sampling functions that take no arguments (i.e., sample()).
-        - N: the number of Monte Carlo samples
+        initialConditionSamplers (dict of functions): a dict mapping named
+            world items to sampling functions that take no arguments (i.e.,
+            sample()).
+        N (int): the number of Monte Carlo samples.
     
-    The return value is a list of N pairs (initCond,returnVal)
-    where initCond is the sampled initial condition and returnVal is the
-    return value from doSim().
+    Returns:
+        list: contains N pairs (initCond,returnVal) where initCond is the sampled
+            initial condition and returnVal is the return value from doSim().
     """
     print("klampt.batch.monteCarloSim(): Running",N,"simulations...")
     res = []

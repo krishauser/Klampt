@@ -12,11 +12,13 @@ class RobotCSpace(CSpace):
     floating base or continuously rotating (spin) joints, you will need to
     overload the sample() method."""
     def __init__(self,robot,collider=None):
-        """Arguments:
-        - robot: the robot which should move.
-        - collider (optional): a collide.WorldCollider instance containing
-          the world in which the robot lives.  Any ignored collisions will be
-          respected in the collision checker.
+        """
+        Args:
+            robot (RobotModel): the robot which should move.
+            collider (:class:`WorldCollider`, optional): a collide.WorldCollider
+                instance instantiated with the world in which the robot lives. 
+                Any ignored collisions in the collider will be respected in the
+                feasibility tests of this CSpace.
         """
         CSpace.__init__(self)
         self.robot = robot
@@ -129,15 +131,15 @@ class RobotSubsetCSpace(EmbeddedCSpace):
     in the collider.
 
     Note: to convert from start/goal robot configurations to the CSpace, call
-    the project(qrobot) method for the start and goal. (see EmbeddedCSpace.project())
+    the project(qrobot) method for the start and goal. (see :meth:`EmbeddedCSpace.project` ())
 
     Note: to convert from a planned path back to the robot's full configuration space,
     you will need to call the lift(q) method for all configurations q in the planned
-    path. (see EmbeddedCSpace.lift()) 
+    path. (see :meth:`EmbeddedCSpace.lift` ()) 
 
     Warning: if your robot has non-standard joints, like a free-
     floating base or continuously rotating (spin) joints, you will need to
-    overload the sample() method."""
+    overload the :meth:`sample` () method."""
     def __init__(self,robot,subset,collider=None):
         EmbeddedCSpace.__init__(self,RobotCSpace(robot,collider),subset,xinit=robot.getConfig())
         self.collider = collider
@@ -176,9 +178,9 @@ class ClosedLoopRobotCSpace(RobotCSpace):
     maintained during the robot's motion.
 
     Attributes:
-    - solver: the IKSolver that is used.
-    - maxIters: the maximum number of iterations for numerical IK solver
-    - tol: how closely the IK constraint must be met, in meters/radians
+        solver (IKSolver): the solver containing all IK constraints
+        maxIters (int): the maximum number of iterations for numerical IK solver
+        tol (float): how closely the IK constraint must be met, in meters and/or radians
 
     To satisfy the IK constraint, the motion planner ensures that configuration
     samples are projected to the manifold of closed-loop IK solutions.  To create
@@ -291,7 +293,7 @@ class ImplicitManifoldRobotCSpace(RobotCSpace):
     equal to 0 up to the given tolerance.  Essentially this is a
     ClosedLoopRobotCSpace except with a user-provided function.
 
-    See ClosedLoopRobotCSpace.
+    See :class:`ClosedLoopRobotCSpace`.
     """
     def __init__(self,robot,implicitConstraint,collider=None):
         RobotCSpace.__init__self(robot,collider)

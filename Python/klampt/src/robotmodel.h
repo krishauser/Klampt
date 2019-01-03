@@ -50,11 +50,15 @@ struct ContactParameters
 /** @brief A reference to a link of a RobotModel.
  *
  * The link stores many mostly-constant items (id, name, parent, geometry, appearance, mass, joint
- * axes).  The exception is the link's current transform, which is affected by the RobotModel's
- * current configuration, i.e., the last RobotModel.setConfig(q) call. The various Jacobians of
- * points on the link, accessed by getJacobianX, are configuration dependent.
+ * axes).  There are two exceptions:
+
+ * * the link's current transform, which is affected by the RobotModel's
+ *     current configuration, i.e., the last :meth:`RobotModel.setConfig` (q) call.
+ * * The various Jacobians of points on the link, accessed by :meth:`RobotModelLink.getJacobian` ,
+ *     :meth:`RobotModelLink.getPositionJacobian` , and :meth:`RobotModelLink.getOrientationJacobian` ,
+ *     which are configuration dependent.
  *
- * These are not created by hand, but instead accessed using RobotModel.link([index or name])
+ * A RobotModelLink is not created by hand, but instead accessed using :meth:`RobotModel.link` (index or name)
  */
 class RobotModelLink
 {
@@ -141,6 +145,8 @@ class RobotModelLink
  * 
  * A driver corresponds to one of the robot's actuators and encodes how its
  * forces are transmitted to joints.
+ *
+ * A RobotModelDriver is not created by hand, but instead accessed using :meth:`RobotModel.driver` (index or name)
  */
 class RobotModelDriver
 {
@@ -192,10 +198,11 @@ class RobotModelDriver
  * The state of the robot is retrieved using getConfig/getVelocity calls, and
  * is set using setConfig/setVelocity.  Because many routines change the robot's
  * configuration, like IK and motion planning, a common design pattern is to
- * save/restore the configuration as follows:
- * - q = robot.getConfig()
- * - do some stuff that may touch the robot's configuration...
- * - robot.setConfig(q)
+ * save/restore the configuration as follows::
+ * 
+ *     q = robot.getConfig()
+ *     do some stuff that may touch the robot's configuration...
+ *     robot.setConfig(q)
  *
  * The model maintains configuration/velocity/acceleration/torque bounds.
  * However, these are not enforced by the model, so you can happily set
@@ -218,19 +225,22 @@ class RobotModel
   void setName(const char* name);
   ///Returns the number of links = number of DOF's.
   int numLinks();
-  ///Returns a reference to the indexed link
+  ///Returns a reference to the link by index or name
   RobotModelLink link(int index);
-  ///Returns a reference to the named link
+  //note: only the last overload docstring is added to the documentation
+  ///Returns a reference to the link by index or name
   RobotModelLink link(const char* name);
   ///Returns the number of drivers.
   int numDrivers();
-  ///Returns a reference to the indexed driver.
+  ///Returns a reference to the driver by index or name
   RobotModelDriver driver(int index);
-  ///Returns a reference to the named driver.
+  //note: only the last overload docstring is added to the documentation
+  ///Returns a reference to the driver by index or name
   RobotModelDriver driver(const char* name);
-  ///Returns the joint type of the joint connecting the indexed link to its parent
+  ///Returns the joint type of the joint connecting the link to its parent, where the link is identified by index or by name
   const char* getJointType(int index);
-  ///Returns the joint type of the joint connecting the named link to its parent
+  //note: only the last overload docstring is added to the documentation
+  ///Returns the joint type of the joint connecting the link to its parent, where the link is identified by index or by name
   const char* getJointType(const char* name);
 
   //kinematic and dynamic properties
@@ -239,9 +249,10 @@ class RobotModel
   ///Retreives the current velocity of the robot model.
   void getVelocity(std::vector<double>& out);
   ///Sets the current configuration of the robot.  Input q is a vector of length numLinks().  This also updates forward kinematics of all links.
+  ///
   ///Again, it is important to realize that the RobotModel is not the same as a simulated robot, and this will not change the simulation world.
   ///Many functions such as IK and motion planning use the RobotModel configuration as a temporary variable, so if you need to keep the
-  ///configuration through a robot-modifying function call, you should call q = robot.getConfig() before the call, and then robot.setConfig(q)
+  ///configuration through a robot-modifying function call, you should call ``q = robot.getConfig()`` before the call, and then ``robot.setConfig(q)``
   ///after it.
   void setConfig(const std::vector<double>& q);
   ///Sets the current velocity of the robot model.  Like the configuration, this is also essentially a temporary variable. 
@@ -250,25 +261,27 @@ class RobotModel
   void getJointLimits(std::vector<double>& out,std::vector<double>& out2);
   ///Sets the min/max joint limit vectors (must have length numLinks())
   void setJointLimits(const std::vector<double>& qmin,const std::vector<double>& qmax);
-  ///Retrieve the velocity limit vector vmax, the constraint is |dq[i]| <= vmax[i]
+  ///Retrieve the velocity limit vector vmax, the constraint is :math:`|dq[i]| \leq vmax[i]`
   void getVelocityLimits(std::vector<double>& out);
-  ///Sets the velocity limit vector vmax, the constraint is |dq[i]| <= vmax[i]
+  ///Sets the velocity limit vector vmax, the constraint is :math:`|dq[i]| \leq vmax[i]`
   void setVelocityLimits(const std::vector<double>& vmax);
-  ///Retrieve the acceleration limit vector amax, the constraint is |ddq[i]| <= amax[i]
+  ///Retrieve the acceleration limit vector amax, the constraint is :math:`|ddq[i]| \leq amax[i]`
   void getAccelerationLimits(std::vector<double>& out);
-  ///Sets the acceleration limit vector amax, the constraint is |ddq[i]| <= amax[i]
+  ///Sets the acceleration limit vector amax, the constraint is :math:`|ddq[i]| \leq amax[i]`
   void setAccelerationLimits(const std::vector<double>& amax);
-  ///Retrieve the torque limit vector tmax, the constraint is |torque[i]| <= tmax[i]
+  ///Retrieve the torque limit vector tmax, the constraint is :math:`|torque[i]| \leq tmax[i]`
   void getTorqueLimits(std::vector<double>& out);
-  ///Sets the torque limit vector tmax, the constraint is |torque[i]| <= tmax[i]
+  ///Sets the torque limit vector tmax, the constraint is :math:`|torque[i]| <\leqtmax[i]`
   void setTorqueLimits(const std::vector<double>& tmax);
-  ///Sets a single DOF's position.  Note: if you are setting several joints 
-  ///at once, use setConfig because this function computes forward kinematics
-  ///every time.
+  ///Sets a single DOF's position (by index or by name).
+  ///
+  ///Note: if you are setting several joints at once, use setConfig because this
+  ///function computes forward kinematics each time it is called.
   void setDOFPosition(int i,double qi);
-  ///Sets a single DOF's position (by name).  Note: if you are setting several joints 
-  ///at once, use setConfig because this function computes forward kinematics
-  ///every time.
+  ///Sets a single DOF's position (by index or by name).
+  ///
+  ///Note: if you are setting several joints at once, use setConfig because this
+  ///function computes forward kinematics each time it is called.
   void setDOFPosition(const char* name,double qi);
   ///Returns a single DOF's position
   double getDOFPosition(int i);
@@ -323,9 +336,11 @@ class RobotModel
   ///Returns true if the robot is in self collision (faster than manual testing)
   bool selfCollides();
   ///Draws the robot geometry. If keepAppearance=true, the current appearance is honored.
-  ///Otherwise, only the raw geometry is drawn.  PERFORMANCE WARNING: if keepAppearance is
-  ///false, then this does not properly reuse OpenGL display lists.  A better approach
-  ///to changing the robot's appearances is to set the link Appearance's directly.
+  ///Otherwise, only the raw geometry is drawn.
+  ///
+  ///PERFORMANCE WARNING: if keepAppearance is false, then this does not properly
+  ///reuse OpenGL display lists.  A better approach to changing the robot's
+  ///appearances is to set the link Appearance's directly.
   void drawGL(bool keepAppearance=true);
 
   int world;
@@ -352,10 +367,19 @@ class RigidObjectModel
   int getID() const;
   const char* getName() const;
   void setName(const char* name);
+  ///Returns a reference to the geometry associated with this object
   Geometry3D geometry();
+  ///Returns a reference to the appearance associated with this object
   Appearance appearance();
+  ///Returns a copy of the Mass of this rigid object.  Note: to change the mass properties,
+  ///you should call m=object.getMass(), change the desired properties in m, and then object.setMass(m)
   Mass getMass();
   void setMass(const Mass& mass);
+  ///Returns a copy of the ContactParameters of this rigid object.
+  ///
+  ///Note: to change the contact parameters, you should call ``p=object.getContactParameters()``,
+  ///change the desired properties in p, and then
+  ///``object.setContactParameters(p)``
   ContactParameters getContactParameters();
   void setContactParameters(const ContactParameters& params);
   ///Retrieves the rotation / translation of the rigid object (R,t)
@@ -367,9 +391,11 @@ class RigidObjectModel
   ///Sets the (angular velocity, velocity) of the rigid object.
   void setVelocity(const double angularVelocity[3],const double velocity[3]);
   ///Draws the object's geometry. If keepAppearance=true, the current appearance is honored.
-  ///Otherwise, only the raw geometry is drawn.  PERFORMANCE WARNING: if keepAppearance is
-  ///false, then this does not properly reuse OpenGL display lists.  A better approach
-  ///to changing object's Appearance directly.
+  ///Otherwise, only the raw geometry is drawn.
+  ///
+  ///PERFORMANCE WARNING: if keepAppearance is false, then this does not properly reuse
+  ///OpenGL display lists.  A better approach is to change the object's Appearance
+  ///directly.
   void drawGL(bool keepAppearance=true);
 
   int world;
@@ -391,13 +417,18 @@ class TerrainModel
   int getID() const;
   const char* getName() const;
   void setName(const char* name);
+  ///Returns a reference to the geometry associated with this object
   Geometry3D geometry();
+  ///Returns a reference to the appearance associated with this object
   Appearance appearance();
+  ///Changes the friction coefficient for this terrain
   void setFriction(double friction);
   ///Draws the object's geometry. If keepAppearance=true, the current appearance is honored.
-  ///Otherwise, only the raw geometry is drawn.  PERFORMANCE WARNING: if keepAppearance is
-  ///false, then this does not properly reuse OpenGL display lists.  A better approach
-  ///to changing object's Appearance directly.
+  ///Otherwise, only the raw geometry is drawn. 
+  ///
+  ///PERFORMANCE WARNING: if keepAppearance is false, then this does not properly
+  ///reuse OpenGL display lists.  A better approach is to change the object's Appearance
+  ///directly.
   void drawGL(bool keepAppearance=true);
 
   int world;
@@ -428,7 +459,11 @@ class TerrainModel
 class WorldModel
 {
  public:
+  WorldModel();
+  WorldModel(void* ptrRobotWorld);
+  WorldModel(const WorldModel& w);
   ///Creates a WorldModel. 
+  ///
   ///- Given no arguments, creates a new world. 
   ///- Given another WorldModel instance, creates a reference to an
   ///  existing world.  (To create a copy, use the copy() method.)
@@ -436,9 +471,7 @@ class WorldModel
   ///- Given a pointer to a C++ RobotWorld structure, a reference to that
   ///  structure is returned. (This is advanced usage, seen only when
   ///  interfacing C++ and Python code)
-  WorldModel();
-  WorldModel(void* ptrRobotWorld);
-  WorldModel(const WorldModel& w);
+  ///
   WorldModel(const char* fn); 
   ~WorldModel();
   ///Sets this WorldModel to a reference to w
@@ -459,13 +492,24 @@ class WorldModel
   int numRigidObjects();
   int numTerrains();
   int numIDs();
+  ///Returns a RobotModel in the world by index or name.
   RobotModel robot(int index);
+  //note: only the last overload docstring is added to the documentation
+  ///Returns a RobotModel in the world by index or name.
   RobotModel robot(const char* name);
+  ///Returns a RobotModelLink of some RobotModel in the world by index or name.
   RobotModelLink robotLink(int robot,int index);
+  ///Returns a RobotModelLink of some RobotModel in the world by index or name.
   RobotModelLink robotLink(const char* robot,const char* name);
+  ///Returns a RigidObjectModel in the world by index or name.
   RigidObjectModel rigidObject(int index);
+  //note: only the last overload docstring is added to the documentation
+  ///Returns a RigidObjectModel in the world by index or name.
   RigidObjectModel rigidObject(const char* name);
+  ///Returns a TerrainModel in the world by index or name.
   TerrainModel terrain(int index);
+  //note: only the last overload docstring is added to the documentation
+  ///Returns a TerrainModel in the world by index or name.
   TerrainModel terrain(const char* name);
   ///Creates a new empty robot. (Not terribly useful now since you can't resize the number of links yet)
   RobotModel makeRobot(const char* name);
@@ -482,26 +526,33 @@ class WorldModel
   ///Loads some element from a file, automatically detecting its type.  Meshes are interpreted
   ///as terrains.  The ID is returned, or -1 if loading failed.
   int loadElement(const char* fn);
-  ///Adds a copy of the given robot to this world, either from this WorldModel
-  ///or another.
+  ///Adds a copy of the given robot, rigid object, or terrain to this world, either from
+  ///this WorldModel or another.
   RobotModel add(const char* name,const RobotModel& robot);
-  ///Adds a copy of the given rigid object to this world, either from this
-  ///WorldModel or another.
+  ///Adds a copy of the given robot, rigid object, or terrain to this world, either from
+  ///this WorldModel or another.
   RigidObjectModel add(const char* name,const RigidObjectModel& obj);
-  ///Adds a copy of the given terrain to this world, either from this
-  ///WorldModel or another.
+  //note: only the last overload docstring is added to the documentation
+  ///Adds a copy of the given robot, rigid object, or terrain to this world, either from
+  ///this WorldModel or another.
   TerrainModel add(const char* name,const TerrainModel& terrain);
-  ///Removes a robot.  It must be in this world or an exception is raised.
-  ///IMPORTANT: all other references to robots will be invalidated.
+  ///Removes a robot, rigid object, or terrain from the world.  It must be in this world or an exception
+  ///is raised.
+  ///
+  ///IMPORTANT: all other RobotModel, RigidObjectModel, and TerrainModel references will be invalidated.
   void remove(const RobotModel& robot);
-  ///Removes a rigid object.  It must be in this world or an exception is
-  ///raised.
-  ///IMPORTANT: all other references to rigid objects will be invalidated.
+  ///Removes a robot, rigid object, or terrain from the world.  It must be in this world or an exception
+  ///is raised.
+  ///
+  ///IMPORTANT: all other RobotModel, RigidObjectModel, and TerrainModel references will be invalidated.
   void remove(const RigidObjectModel& object);
-  ///Removes a terrain.  It must be in this world or an exception is raised.
-  ///IMPORTANT: all other references to terrains will be invalidated.
+  //note: only the last overload docstring is added to the documentation
+  ///Removes a robot, rigid object, or terrain from the world.  It must be in this world or an exception
+  ///is raised.
+  ///
+  ///IMPORTANT: all other RobotModel, RigidObjectModel, and TerrainModel references will be invalidated.
   void remove(const TerrainModel& terrain);
-  ///Retrieves a name for a given element ID
+  ///Retrieves the name for a given element ID
   std::string getName(int id);
   ///Retrieves a geometry for a given element ID
   Geometry3D geometry(int id);
@@ -516,10 +567,11 @@ class WorldModel
   ///If collision detection is set to true, then collision acceleration data
   ///structures will be automatically initialized, with debugging information.
   ///Useful for scripts that do planning and for which collision
-  ///initialization may take a long time.  Note that even when this flag
-  ///is off, the collision acceleration data structures will indeed be
-  ///initialized whenever geometry collision, distance, or ray-casting
-  ///routines are called.
+  ///initialization may take a long time.
+  ///
+  ///Note that even when this flag is off, the collision acceleration data
+  ///structures will indeed be initialized the first time that geometry collision,
+  ///distance, or ray-casting routines are called.
   void enableInitCollisions(bool enabled);
 
   //WARNING: do not modify this member directly

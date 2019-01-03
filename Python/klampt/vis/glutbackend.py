@@ -30,14 +30,15 @@ class GLUTWindow:
     """A GLUT window. Should not be used directly.
 
         Attributes:
-        - name: title of the window (only has an effect before calling
-          run())
-        - index: the GLUT index
-        - width, height: width/height of the window (only has an effect
-          before calling run(), and these are updated when the user resizes
-          the window.
-        - clearColor: the RGBA floating point values of the background color.
-        - glutInitialized: true if GLUT has been initialized
+            name (str): title of the window (only has an effect before calling
+                run())
+            index (int): the GLUT index
+            width, height (int): width/height of the window (only has an effect
+                before calling run(), and these are updated when the user resizes
+                the window.
+            clearColor (list of 4 floats): the RGBA floating point values of the
+                background color.
+            glutInitialized (bool): true if GLUT has been initialized
     """
     def __init__(self,name):
         """Note: must be called after GLUT is initialized."""
@@ -140,10 +141,16 @@ class GLUTWindow:
             glutReshapeWindow(self.width,self.height)
 
     def draw_text(self,point,text,size=12,color=None):
-        """If called in the display_screen method, renders text at the given point (may be 2d
-        or 3d).
-        If size is given, it renders a font in the given size. If color is given, then it
-        is an RGB or RGBA color value.  Called by frontend."""
+        """Renders text at the given point (may be 2d or 3d).  Frontend should call this to draw text
+        in either the display or display_screen method.
+
+        Args:
+            point (list of floats): either a 2d or 3d point at which to draw the text
+            text (str): the text to draw
+            size (int, optional): if given, it renders a font in the given size. 
+            color (list of 3 or 4 floats) if given, then an RGB or RGBA color value.
+
+        """
         import ctypes
         if size <= 10:
             font = GLUT_BITMAP_HELVETICA_10

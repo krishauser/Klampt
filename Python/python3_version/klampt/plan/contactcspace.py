@@ -12,11 +12,11 @@ class StanceCSpace(ClosedLoopRobotCSpace):
     Collisions are not checked between the world and fixed robot links, or 
     contacting links that are initially already colliding with the world.
 
-    Members:
-    - (inherited from ClosedLoopRobotCSpace) robot, collider, solver, tol, maxIters: 
-    - gravity: the gravity vector (default 0,0,-9.8 -- currently cannot accept anything else)
-    - holds: a list of Holds associated with the contacts.
-    - supportPolygon: the support polygon planes resulting from contact.supportPolygon(holds)
+    Attributes:
+        robot, collider, solver, tol, maxIters: inherited from ClosedLoopRobotCSpace
+        gravity: the gravity vector (default [0,0,-9.8] -- currently cannot accept anything else)
+        holds (list of Holds): a list of Holds associated with the contacts.
+        supportPolygon (list): the support polygon planes resulting from contact.supportPolygon(holds)
     """
     def __init__(self,robot,holds,collider=None,world=None,checkTorqueLimits=False):
         if collider is None and world is not None:
@@ -63,30 +63,30 @@ class MultiContactCSpace(CompositeCSpace):
     Collisions are not checked between the world and fixed robot links, or 
     contacting links that are initially already colliding with the world.
 
-    Members:
-    - gravity: the gravity vector (default 0,0,-9.8)
-    - contactMap: a dictionary mapping (obj1,obj2) pairs to lists of contacts. Same structures
-      that results from contactMap.
-    - holds: a list of Holds associated with the contacts.
-    - robotCSpace: a ClosedLoopRobotCSpace for the robot
-    - objectCSpaces: a list of RigidObjectCSpace's for each moving object
-    - movingObjects: a list of moving robots and rigid objects.
-    - stabilityTestObjects: a list of moving robots and rigid objects that will be stability tested
-    - supportPolygon: a list of supportPolygon planes (result from contact.supportPolygon).
-    - supportPolygonVerts: a list of support polygon vertices.
+    Attributes:
+        gravity: the gravity vector (default [0,0,-9.8])
+        contactMap (dict): a dictionary mapping (obj1,obj2) pairs to lists of contacts. Same structures
+            that results from contactMap.
+        holds (list of Hold): a list of Holds associated with the contacts.
+        robotCSpace (ClosedLoopRobotCSpace): a ClosedLoopRobotCSpace for the robot
+        objectCSpaces (list of RigidObjectCSpace): a list of RigidObjectCSpace's for each moving object
+        movingObjects (list): a list of moving robots and rigid objects.
+        stabilityTestObjects (list): a list of moving robots and rigid objects that will be stability tested
+        supportPolygon (list): a list of supportPolygon planes (result from contact.supportPolygon).
+        supportPolygonVerts (list): a list of support polygon vertices.
     """
     
     def __init__(self,robot,contacts,stabilityTestObjects=None,collider=None):
         """Initializes the ContactCSpace.  The members contactMap,
         and objectives are constructed from the contacts argument. 
 
-        Arguments:
-        - robot: the moving robot
-        - contacts: a list of Holds, or ContactPoint objects with the object1 and/or object2 elements
-          filled out.
-        - stabilityTestObjects argument, if provided, specifies which objects are
-          stability tested (either type RobotModel or RigidObjectModel).  Otherwise,
-          all objects and free-floating robots in contact are stability tested.
+        Args:
+            robot (RobotModel): the moving robot
+            contacts: a list of Holds, or ContactPoint objects with the object1 and/or object2 elements
+                filled out.
+            stabilityTestObjects (list, optional): if provided, specifies which objects are
+                stability tested (either type RobotModel or RigidObjectModel).  Otherwise,
+                all objects and free-floating robots in contact are stability tested.
         """
         self.gravity = (0,0,-9.8)
         

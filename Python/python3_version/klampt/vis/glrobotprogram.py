@@ -1,3 +1,7 @@
+"""Defines GLWorldPlugin and GLSimulationPlugin, which may be useful as base
+classes for your own plugins.
+"""
+
 from OpenGL.GL import *
 from ..robotsim import WidgetSet,RobotPoser
 from .glinterface import GLPluginInterface
@@ -6,29 +10,19 @@ from ..math import vectorops
 from ..sim.simulation import SimpleSimulator
 import sys
 
-class GLSimulationPlugin(GLPluginInterface):
-    """A program that runs a simulation given a world.
-    Attributes:
-    - world: the RobotWorld instance provided on startup.  All elements
-      are assumed to be instantiated already.
-    - sim: a Simulator for the given world.
-    - simulate: set this to True to start simulating.
-    - saveScreenshots: set this to True if frames should be saved to disk.
-    - commanded_config_color: an RGBA tuple defining the color of the
-      commanded configuration, or None if it should not be drawn.
-    - verbose: set to 1 if you wish to get printouts of the event loop
-    - logging, logger: set to True and the logger if you wish to save a
-      CSV log file to disk. Easier to use beginLogging(), pauseLogging(),
-      and endLogging().
+class GLWorldPlugin(GLPluginInterface):
+    """A program that draws a WorldModel.  This is a pretty bare plugin class,
+    and users will want to override the GLPluginInterface methods to provide
+    any reasonable functionality.
 
-    Subclasses should overload self.control_loop() and put whatever control
-    loop you desire inside.  Note: in this loop you should interact with
-    self.sim.controller(0), not self.world.robot(0).  self.world is simply
-    a model and does not have a direct relation to the simulation.
+    Attributes:
+        world (WorldModel): a world instance provided on construction.  All elements
+            in the world must be instantiated already.
+        collider (WorldCollider): used for the click_world helper.
     """
     def __init__(self,world):
-        """Arguments:
-        - world: a RobotWorld instance.
+        """Args:
+            world (WorldModel): the world to draw
         """
         GLPluginInterface.__init__(self)
         self.world = world
@@ -36,6 +30,63 @@ class GLSimulationPlugin(GLPluginInterface):
         #the current example creates a collision class, simulator, 
         #simulation flag, and screenshot flags
         self.collider = collide.WorldCollider(world)
+
+    def display(self):
+        self.world.drawGL()
+
+    def click_world(self,x,y,want_points=False):
+        """Helper: returns a list of objects sorted in order of
+        increasing distance.  This will be useful for handling mouse_click events.
+
+        Args:
+            x,y (int): the screen coordinates of a point being clicked
+            want_points (bool, optional): if true, the return list contains the
+                point of contact.
+
+        Returns:
+            (list): If want_points=False, a list of world objects.
+                If want_points=True, a list of (world object, point) pairs
+        """
+        #get the viewport ray
+        (s,d) = self.view.click_ray(x,y)
+
+        #run the collision tests
+        collided = []
+        for g in self.collider.geomList:
+            (hit,pt) = g[1].rayCast(s,d)
+            if hit:
+                dist = vectorops.dot(vectorops.sub(pt,s),d)
+                collided.append((dist,g[0],pt))
+        if want_points:
+            return [(g[1],g[2]) for g in sorted(collided)]
+        else:
+            return [g[1] for g in sorted(collided)]
+
+
+class GLSimulationPlugin(GLWorldPlugin):
+    """A program that runs a simulation given a world.
+
+    Attributes:
+        sim (SimpleSimulator): the simulator that this plugin will be using
+        simulate (bool): set this to True to start simulating.
+        dt (float): the timestep for each idle call.
+        drawContacts (bool): set this to True to draw contact points
+        drawSensors (bool): set this to True to draw sensors
+        saveScreenshots (bool): set this to True if frames should be saved to
+            disk.
+        verbose (int, optional): set to 1 if you wish to get printouts of the
+            event loop
+
+    Subclasses should overload self.control_loop() and put whatever control
+    loop you desire inside.  Note: in this loop you should interact with
+    self.sim.controller(0), not self.world.robot(0).  self.world is simply
+    a model and does not have a direct relation to the simulation.
+    """
+    def __init__(self,world):
+        """Args:
+            world (WorldModel): the world to simulate
+        """
+        GLWorldPlugin.__init__(self,world)
         self.sim = SimpleSimulator(world)
         self.simulate = False
         self.dt = 0.02
@@ -75,7 +126,7 @@ class GLSimulationPlugin(GLPluginInterface):
             print("Advancing by 0.01s")
             self.simStep(0.01)
         self.add_action(toggle_simulate,'Toggle simulation','s')
-        self.add_action(single_step,'Step simulation',' ')
+        self.add_action(single_step,'Step simulation',' ',)
         #self.add_action(toggle_movie_mode,'Toggle movie mode','m')
         self.add_action(self.sim.toggleLogging,'Toggle simulation logging','l')
         self.add_action(toggle_draw_contacts,'Toggle draw contacts','c')
@@ -84,11 +135,11 @@ class GLSimulationPlugin(GLPluginInterface):
     def initialize(self):
         #match window refresh rate
         self.dt = self.window.program.dt
-        return GLPluginInterface.initialize(self)
+        return GLWorldPlugin.initialize(self)
 
     def display(self):
-        #Put your display handler here
-        #the current example draws the simulated world in grey and the
+        """Override this to do custom drawing"""
+        #This draws the simulated world in grey and the
         #commanded configurations in transparent green
         self.sim.drawGL()
 
@@ -180,22 +231,5 @@ class GLSimulationPlugin(GLPluginInterface):
     def motionfunc(self,x,y,dx,dy):
         return GLPluginInterface.motionfunc(self,x,y,dx,dy)
 
-    def click_world(self,x,y,want_points=False):
-        """Helper: returns a list of (world object, point) pairs sorted in order of
-        increasing distance."""
-        #get the viewport ray
-        (s,d) = self.view.click_ray(x,y)
-
-        #run the collision tests
-        collided = []
-        for g in self.collider.geomList:
-            (hit,pt) = g[1].rayCast(s,d)
-            if hit:
-                dist = vectorops.dot(vectorops.sub(pt,s),d)
-                collided.append((dist,g[0],pt))
-        if want_points:
-            return [(g[1],g[2]) for g in sorted(collided)]
-        else:
-            return [g[1] for g in sorted(collided)]
 
 

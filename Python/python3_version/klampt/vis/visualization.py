@@ -1,11 +1,16 @@
-"""Klamp't visualization routines.  See Python/demos/vistemplate.py for an
-example of how to run this module.
+"""Klamp't visualization routines.  See
+`vistemplate.py in Klampt-examples <https://github.com/krishauser/Klampt-examples/Python/demos/vistemplate.py>`_
+for an example of how to run this module.
+
+OVERVIEW
+--------
 
 The visualization module lets you draw most Klamp't objects in a 3D world 
 using a simple interface.  It also lets you customize the GUI using Qt 
 widgets, OpenGL drawing, and keyboard/mouse intercept routines.  
 
 Main features include:
+
 - Simple interface to modify the visualization
 - Simple interface to animate and render trajectories
 - Simple interface to edit certain Klamp't objects (configurations, points,
@@ -20,6 +25,7 @@ The resource editing functionality in the klampt.io.resource module (based on
 klampt.vis.editors) use this module as well.
 
 There are two primary modes of running the visualization: multi-threaded and single-threaded.
+
 - Multi-threaded mode pops up a window using show(), and the caller can then continue to interact
   with the vis module.
   IMPORTANT: multi-threaded mode is only supported on some systems (Linux, Windows using Qt).
@@ -28,6 +34,7 @@ There are two primary modes of running the visualization: multi-threaded and sin
 - Single-threaded mode blocks the calling thread using loop().  To interact with the scene, the caller
   will provide callbacks that can modify the visualization world, pop up windows etc.
   Single-threaded mode is the most compatible, and is the only mode that works with GLUT and Mac OS.
+
 There are also some convenience functions that will work in both modes, such as run(), spin(), and
 dialog().
 
@@ -41,6 +48,7 @@ It is possible to start in single-threaded mode and convert to multi-threaded, b
 possible.
 
 To set up and modify the visualization scene, there are three primary ways to do so:
+
   - Default scene manager.  You can use the scene manager to add items to the visualization world and
     then customize them using the vis.X routines in this module (like
     add, setColor, animate, etc).  See Python/demos/vistemplate.py for more information.  
@@ -55,233 +63,219 @@ To set up and modify the visualization scene, there are three primary ways to do
     Another option for hybrid visualization is to  subclass the vis.VisualizationPlugin class, and
     selectively augment / override the default functionality.
 
-Instructions:
+INSTRUCTIONS
+------------
 
   - To add things to the default visualization:
     Call the VisualizationPlugin aliases (add, animate, setColor, etc)
 
-  - To show the visualization and quit when the user closes the window:
-    vis.run()
+  - To show the visualization and quit when the user closes the window::
+  
+        vis.run()
 
-  - To show the visualization and return when the user closes the window:
-    vis.dialog()
-    ... do stuff afterwards ... 
-    vis.kill()
+  - To show the visualization and return when the user closes the window::
+
+        vis.dialog()
+        ... do stuff afterwards ... 
+        vis.kill()
 
   - To show the visualization and run a script alongside it until the user
-    closes the window (multithreaded mode):
-    vis.show()
-    while vis.shown():
-        vis.lock()
-        ... do stuff ...
-        [to exit the loop call vis.show(False)]
-        vis.unlock()
-        time.sleep(dt)
-    ... do stuff afterwards ...
-    vis.kill()
+    closes the window (multithreaded mode)::
+ 
+        vis.show()
+        while vis.shown():
+            vis.lock()
+            ... do stuff ...
+            [to exit the loop call vis.show(False)]
+            vis.unlock()
+            time.sleep(dt)
+        ... do stuff afterwards ...
+        vis.kill()
 
   - To show the visualization and run python commands until the user closes
-    the window (single-threaded mode)
-    def callback():
-        ... do stuff ...
-        [to exit the loop manually call vis.show(False)]
-    vis.loop(setup=vis.show,callback=callback)
-    vis.kill()
+    the window (single-threaded mode)::
+ 
+        def callback():
+            ... do stuff ...
+            [to exit the loop manually call vis.show(False)]
+        vis.loop(setup=vis.show,callback=callback)
+        vis.kill()
 
   - To run a window with a custom plugin (GLPluginInterface) and terminate on
-    closure: 
-    vis.run(plugin)
+    closure::
+ 
+        vis.run(plugin)
   
-  - To show a dialog or parallel window
-    vis.setPlugin(plugin)
-    ... then call  
-    vis.dialog()
-    ... or
-    vis.show()
-    ... do stuff afterwards ... 
-    vis.kill()
+  - To show a dialog or parallel window::
+
+        vis.setPlugin(plugin)
+        ... then call  
+        vis.dialog()
+        ... or
+        vis.show()
+        ... do stuff afterwards ... 
+        vis.kill()
 
   - To add a GLPluginInterface that just customizes a few things on top of
-    the default visualization:
-    vis.pushPlugin(plugin)
-    vis.dialog()
-    vis.popPlugin()
+    the default visualization::
 
-  - To run plugins side-by-side in the same window:
-    vis.setPlugin(plugin1)
-    vis.addPlugin(plugin2)  #this creates a new split-screen
-    vis.dialog()
-    ... or
-    vis.show()
-    ... do stuff afterwards ... 
-    vis.kill()
+        vis.pushPlugin(plugin)
+        vis.dialog()
+        vis.popPlugin()
 
-  - To run a custom Qt window or dialog containing a visualization window
-    vis.setPlugin([desired plugin or None for visualization])
-    def makeMyUI(qtglwidget):
-        return MyQtMainWindow(qtglwidget)
-    vis.setCustomUI(makeMyUI)
-    vis.dialog()
-    ... or 
-    vis.show()
-    ... do stuff afterwards ... 
-    vis.kill()
+  - To run plugins side-by-side in the same window::
+
+        vis.setPlugin(plugin1)
+        vis.addPlugin(plugin2)  #this creates a new split-screen
+        vis.dialog()
+        ... or
+        vis.show()
+        ... do stuff afterwards ... 
+        vis.kill()
+
+  - To run a custom Qt window or dialog containing a visualization window::
+
+        vis.setPlugin([desired plugin or None for visualization])
+        def makeMyUI(qtglwidget):
+            return MyQtMainWindow(qtglwidget)
+        vis.setCustomUI(makeMyUI)
+        vis.dialog()
+        ... or 
+        vis.show()
+        ... do stuff afterwards ... 
+        vis.kill()
 
   - To launch a second window after the first is closed: just call whatever you
     want again. Note: if show was previously called with a plugin and you wish to
     revert to the default visualization, you should call setPlugin(None) first to 
     restore the default.
 
-  - To create a separate window with a given plugin:
-    w1 = vis.createWindow("Window 1")  #w1=0
-    show()
-    w2 = vis.createWindow("Window 2")  #w2=1
-    vis.setPlugin(plugin)
-    vis.dialog()
-    #to restore commands to the original window
-    vis.setWindow(w1)
-    while vis.shown():
-        ...
-    vis.kill()
+  - To create a separate window with a given plugin::
+
+        w1 = vis.createWindow("Window 1")  #w1=0
+        show()
+        w2 = vis.createWindow("Window 2")  #w2=1
+        vis.setPlugin(plugin)
+        vis.dialog()
+        #to restore commands to the original window
+        vis.setWindow(w1)
+        while vis.shown():
+            ...
+        vis.kill()
 
 Note: in multithreaded mode, when changing the data shown by the window (e.g., modifying
 the configurations of robots in a WorldModel) you must call vis.lock() before
 accessing the data and then call vis.unlock() afterwards.
 
-The main interface is as follows:
+MAIN INTERFACE
+--------------
 
-def createWindow(title): creates a new visualization window and returns an
-    integer identifier.
-def setWindow(id): sets the active window for all subsequent calls.  ID 0 is
-    the default visualization window.
-def getWindow(): gets the active window ID.
-def setWindowTitle(title): sets the title of the visualization window.
-def getWindowTitle(): returns the title of the visualization window
-def setPlugin(plugin=None): sets the current plugin (a GLPluginInterface instance). 
-    This plugin will now capture input from the visualization and can override
-    any of the default behavior of the visualizer. Set plugin=None if you want to return
-    to the default visualization.
-def addPlugin(plugin): adds a second OpenGL viewport governed by the given plugin (a
-    GLPluginInterface instance).    
-def run([plugin]): pops up a dialog and then kills the program afterwards.
-def kill(): kills all previously launched visualizations and terminates the visualization thread.
-    Afterwards, you may not be able to start new windows. Call this to cleanly quit.
-def multithreaded(): returns true if multithreading is available.
-def loop(setup=None,callback=None,cleanup=None): Runs the visualization thread inline with the main thread.
-    The setup() function is called at the start, the callback() function is run every time the event thread
-    is idle, and the cleanup() function is called on termination.
+- def createWindow(title): creates a new visualization window and returns an
+  integer identifier.
+- def setWindow(id): sets the active window for all subsequent calls.  ID 0 is
+  the default visualization window.
+- def getWindow(): gets the active window ID.
+- def setWindowTitle(title): sets the title of the visualization window.
+- def getWindowTitle(): returns the title of the visualization window
+- def setPlugin(plugin=None): sets the current plugin (a GLPluginInterface instance). 
+  This plugin will now capture input from the visualization and can override
+  any of the default behavior of the visualizer. Set plugin=None if you want to return
+  to the default visualization.
+- def addPlugin(plugin): adds a second OpenGL viewport governed by the given plugin (a
+  GLPluginInterface instance).  
+- def run([plugin]): pops up a dialog and then kills the program afterwards.
+- def kill(): kills all previously launched visualizations and terminates the visualization thread.
+  Afterwards, you may not be able to start new windows. Call this to cleanly quit.
+- def multithreaded(): returns true if multithreading is available.
+- def loop(setup=None,callback=None,cleanup=None): Runs the visualization thread inline with the main thread.
+  The setup() function is called at the start, the callback() function is run every time the event thread
+  is idle, and the cleanup() function is called on termination.
 
-    NOTE FOR MAC USERS: having the GUI in a separate thread is not supported on Mac, so the loop
-    function must be used rather than show/spin.
+  NOTE FOR MAC USERS: having the GUI in a separate thread is not supported on Mac, so the loop
+  function must be used rather than show/spin.
 
-    NOTE FOR GLUT USERS: this may only be run once.
-def dialog(): pops up a dialog box (does not return to calling thread until closed).
-def dialogInLoop(callback): for use inside loop(). Pops up a dialog box window, and returns
-    immediately to calling thread.
-    The callback function has signature callback(okPressed), where okPressed is True if the user
-    pressed the OK button, and False if Cancel or the close box was clicked.
-def show(hidden=False): shows/hides a visualization window.  If not called from the visualization loop,
-    a new visualization thread is run in parallel with the calling script. 
-def spin(duration): shows the visualization window for the desired amount
-    of time before returning, or until the user closes the window.
-def shown(): returns true if the window is shown.
-def lock(): locks the visualization world for editing.  The visualization will
-    be paused until unlock() is called.
-def unlock(): unlocks the visualization world.  Must only be called once
-    after every lock().
-def customUI(make_func): launches a user-defined UI window by calling make_func(gl_backend)
-    in the visualization thread.  This can be used to build custom editors and windows that
-    are compatible with other visualization functionality.  Here gl_backend is an instance of
-    _GLBackend instantiated for the current plugin, and make_func returns a QDialog for dialog()
-    constructed windows, or QMainWindow (or similar Qt object) for show() constructed windows.
-def getViewport(): Returns the currently active viewport.
+  NOTE FOR GLUT USERS: this may only be run once.
+- def dialog(): pops up a dialog box (does not return to calling thread until closed).
+- def dialogInLoop(callback): for use inside loop(). Pops up a dialog box window, and returns
+  immediately to calling thread.
+  The callback function has signature callback(okPressed), where okPressed is True if the user
+  pressed the OK button, and False if Cancel or the close box was clicked.
+- def show(hidden=False): shows/hides a visualization window.  If not called from the visualization loop,
+  a new visualization thread is run in parallel with the calling script. 
+- def spin(duration): shows the visualization window for the desired amount
+  of time before returning, or until the user closes the window.
+- def shown(): returns true if the window is shown.
+- def lock(): locks the visualization world for editing.  The visualization will
+  be paused until unlock() is called.
+- def unlock(): unlocks the visualization world.  Must only be called once
+  after every lock().
+- def customUI(make_func): launches a user-defined UI window by calling make_func(gl_backend)
+  in the visualization thread.  This can be used to build custom editors and windows that
+  are compatible with other visualization functionality.  Here gl_backend is an instance of
+  _GLBackend instantiated for the current plugin, and make_func returns a QDialog for dialog()
+  constructed windows, or QMainWindow (or similar Qt object) for show() constructed windows.
+- def getViewport(): Returns the currently active viewport.
 
 The following VisualizationPlugin methods are also added to the klampt.vis namespace
 and operate on the default plugin.  If you are calling these methods from an external
 loop (as opposed to inside a plugin) be sure to lock/unlock the visualization before/after
 calling these methods.
 
-def add(name,item,keepAppearance=False): adds an item to the visualization.
-    name is a unique identifier.  If an item with the same name already exists,
-    it will no longer be shown.  If keepAppearance=True, then the prior item's
-    appearance will be kept, if a prior item exists.
-def clear(): clears the visualization world.
-def listItems(): prints out all names of visualization objects
-def listItems(name): prints out all names of visualization objects under the given name
-def dirty(item_name='all'): marks the given item as dirty and recreates the
-    OpenGL display lists.  You may need to call this if you modify an item's geometry,
-    for example.
-def remove(name): removes an item from the visualization.
-def setItemConfig(name,vector): sets the configuration of a named item.
-def getItemConfig(name): returns the configuration of a named item.
-def hide(name,hidden=True): hides/unhides an item.  The item is not removed,
-    it just becomes invisible.
-def edit(name,doedit=True): turns on/off visual editing of some item.  Only points,
-    transforms, coordinate.Point's, coordinate.Transform's, coordinate.Frame's,
-    robots, and objects are currently accepted.
-def hideLabel(name,hidden=True): hides/unhides an item's text label.
-def setAppearance(name,appearance): changes the Appearance of an item.
-def revertAppearance(name): restores the Appearance of an item
-def setAttribute(name,attribute,value): sets an attribute of the appearance
-    of an item.  Accepted attributes are:
-    - 'color': the item's color (r,g,b) or (r,g,b,a)
-    - 'size': a plot or text's size
-    - 'length': the length of axes in RigidTransform
-    - 'width': the width of axes and trajectory curves
-    - 'duration': the duration of a plot
-    - 'endeffectors': for a robot Trajectory, the list of end effectors to plot (default the last link).
-    - 'maxConfigs': for a Configs resource, the maximum number of drawn configurations (default 10)
-    - 'fancy': for RigidTransform objects, whether the axes are drawn with boxes or lines (default False)
-    - 'type': for ambiguous items, like a 3-item list when the robot has 3 links, specifies the type to be
-       used.  For example, 'Config' draws the item as a robot configuration, while 'Vector3' or 'Point'
-       draws it as a point.
-def setColor(name,r,g,b,a=1.0): changes the color of an item.
-def setDrawFunc(name,func): sets a custom OpenGL drawing function for an item.
-    func is a one-argument function that takes the item data as input.  Set
-    func to None to revert to default drawing.
-def animate(name,animation,speed=1.0,endBehavior='loop'): Sends an animation to the
-    object. May be a Trajectory or a list of configurations.  Works with points,
-    so3 elements, se3 elements, rigid objects, or robots. 
-    - speed: a modulator on the animation speed.  If the animation is a list of
-      milestones, it is by default run at 1 milestone per second.
-    - endBehavior: either 'loop' (animation repeats forever) or 'halt' (plays once).
-def pauseAnimation(paused=True): Turns on/off animation.
-def stepAnimation(amount): Moves forward the animation time by the given amount
-    in seconds
-def animationTime(newtime=None): Gets/sets the current animation time
-    If newtime == None (default), this gets the animation time.
-    If newtime != None, this sets a new animation time.
-def addText(name,text,position=None): adds text.  You need to give an
-    identifier to all pieces of text, which will be used to access the text as any other
-    vis object.  If position is None, this is added as an on-screen display.  If position
-    is of length 2, it is the (x,y) position of the upper left corner of the text on the
-    screen.  Negative units anchor the text to the right or bottom of the window. 
-    If position is of length 3, the text is drawn in the world coordinates.  You can
-    then set the color, 'size' attribute, and 'position' attribute of the text using the
-    identifier given in 'name'.
-def clearText(): clears all previously added text.
-def addPlot(name): creates a new empty plot.
-def addPlotItem(name,itemname): adds a visualization item to a plot.
-def logPlot(name,itemname,value): logs a custom visualization item to a plot
-def logPlotEvent(name,eventname,color=None): logs an event on the plot.
-def hidePlotItem(name,itemname,hidden=True): hides an item in the plot.  To hide a
-    particular channel of a given item pass a pair (itemname,channelindex).  For example,
-    to hide configurations 0-5 of 'robot', call hidePlotItem('plot',('robot',0)), ...,
-    hidePlotItem('plot',('robot',5)).
-def setPlotDuration(name,time): sets the plot duration.
-def setPlotRange(name,vmin,vmax): sets the y range of a plot.
-def setPlotPosition(name,x,y): sets the upper left position of the plot on the screen.
-def setPlotSize(name,w,h): sets the width and height of the plot.
-def savePlot(name,fn): saves a plot to a CSV (extension .csv) or Trajectory (extension
-    .traj) file.
-def autoFitCamera(scale=1.0): Automatically fits the camera to all objects in the
-    visualization.  A scale > 1 magnifies the camera zoom.
+- def add(name,item,keepAppearance=False): adds an item to the visualization.
+  name is a unique identifier.  If an item with the same name already exists,
+  it will no longer be shown.  If keepAppearance=True, then the prior item's
+  appearance will be kept, if a prior item exists.
+- def clear(): clears the visualization world.
+- def listItems(): prints out all names of visualization objects
+- def listItems(name): prints out all names of visualization objects under the given name
+- def dirty(item_name='all'): marks the given item as dirty and recreates the
+  OpenGL display lists.  You may need to call this if you modify an item's geometry,
+  for example.
+- def remove(name): removes an item from the visualization.
+- def setItemConfig(name,vector): sets the configuration of a named item.
+- def getItemConfig(name): returns the configuration of a named item.
+- def hide(name,hidden=True): hides/unhides an item.  The item is not removed,
+  it just becomes invisible.
+- def edit(name,doedit=True): turns on/off visual editing of some item.  Only points,
+  transforms, coordinate.Point's, coordinate.Transform's, coordinate.Frame's,
+  robots, and objects are currently accepted.
+- def hideLabel(name,hidden=True): hides/unhides an item's text label.
+- def setAppearance(name,appearance): changes the Appearance of an item.
+- def revertAppearance(name): restores the Appearance of an item
+- def setAttribute(name,attribute,value): sets an attribute of the appearance
+  of an item.
+- def setColor(name,r,g,b,a=1.0): changes the color of an item.
+- def setDrawFunc(name,func): sets a custom OpenGL drawing function for an item.
+- def animate(name,animation,speed=1.0,endBehavior='loop'): Sends an animation to the
+  object. May be a Trajectory or a list of configurations.  Works with points,
+  so3 elements, se3 elements, rigid objects, or robots. 
+- def pauseAnimation(paused=True): Turns on/off animation.
+- def stepAnimation(amount): Moves forward the animation time by the given amount
+  in seconds
+- def animationTime(newtime=None): Gets/sets the current animation time
+- def addText(name,text,position=None): adds text to the visualizer.
+- def clearText(): clears all previously added text.
+- def addPlot(name): creates a new empty plot.
+- def addPlotItem(name,itemname): adds a visualization item to a plot.
+- def logPlot(name,itemname,value): logs a custom visualization item to a plot
+- def logPlotEvent(name,eventname,color=None): logs an event on the plot.
+- def hidePlotItem(name,itemname,hidden=True): hides an item in the plot. 
+- def setPlotDuration(name,time): sets the plot duration.
+- def setPlotRange(name,vmin,vmax): sets the y range of a plot.
+- def setPlotPosition(name,x,y): sets the upper left position of the plot on the screen.
+- def setPlotSize(name,w,h): sets the width and height of the plot.
+- def savePlot(name,fn): saves a plot to a CSV (extension .csv) or Trajectory (extension
+  .traj) file.
+- def autoFitCamera(scale=1.0): Automatically fits the camera to all objects in the
+  visualization.  A scale > 1 magnifies the camera zoom.
 
 Utility function:
-def autoFitViewport(viewport,objects): Automatically fits the viewport's camera to 
-    see all the given objects.
 
-NAMING CONVENTION:
+- def autoFitViewport(viewport,objects): Automatically fits the viewport's camera to 
+  see all the given objects.
+
+NAMING CONVENTION
+-----------------
 
 The world, if one exists, should be given the name 'world'.  Configurations and paths are drawn
 with reference to the first robot in the world.
@@ -296,7 +290,7 @@ link blue.
 
 
 from OpenGL.GL import *
-from threading import Thread,RLock
+import threading
 from ..robotsim import *
 from ..math import vectorops,so3,se3
 from . import gldraw
@@ -332,7 +326,7 @@ class WindowInfo:
         self.worlds = []
         self.active_worlds = []
 
-_globalLock = RLock()
+_globalLock = threading.RLock()
 #the VisualizationPlugin instance of the currently active window
 _vis = None
 #the GLPluginProgram of the currently active window.  Accepts _vis as plugin or other user-defined plugins as well
@@ -349,7 +343,11 @@ _windows = []
 _current_window = None
 
 def createWindow(title):
-    """Creates a new window (and sets it active)."""
+    """Creates a new window (and sets it active).
+
+    Returns:
+        int: an identifier of the window (for use with :func:`setWindow`).
+    """
     global _globalLock,_frontend,_vis,_window_title,_current_worlds,_windows,_current_window
     _globalLock.acquire()
     if len(_windows) == 0:
@@ -370,7 +368,11 @@ def createWindow(title):
     return id
 
 def setWindow(id):
-    """Sets currently active window."""
+    """Sets currently active window. 
+
+    Note:
+        ID 0 is the default visualization window.
+    """
     global _globalLock,_frontend,_vis,_window_title,_windows,_current_window,_current_worlds
     if id == _current_window:
         return
@@ -403,7 +405,13 @@ def getWindow():
 
 def setPlugin(plugin):
     """Lets the user capture input via a glinterface.GLPluginInterface class.
-    Set plugin to None to disable plugins and return to the standard visualization"""
+    Set plugin to None to disable plugins and return to the standard visualization
+
+    Args:
+        plugin (GLPluginInterface): a plugin that will hereafter capture input
+            from the visualization and can override any of the default behavior of the
+            visualizer. Can be set to None if you want to return to the default visualization.
+    """
     global _globalLock,_frontend,_windows,_current_window
     _globalLock.acquire()
     if not isinstance(_frontend,GLPluginProgram):
@@ -424,7 +432,13 @@ def setPlugin(plugin):
     _globalLock.release()
 
 def pushPlugin(plugin):
-    """Adds a new glinterface.GLPluginInterface plugin on top of the old one."""
+    """Adds a new plugin on top of the old one.
+
+    Args:
+        plugin (GLPluginInterface): a plugin that will optionally intercept GUI callbacks.
+            Unhandled callbacks will be forwarded to the next plugin on the stack.
+
+    """
     global _globalLock,_frontend
     _globalLock.acquire()
     assert isinstance(_frontend,GLPluginProgram),"Can't push a plugin after addPlugin"
@@ -446,8 +460,12 @@ def popPlugin():
     _globalLock.release()
 
 def addPlugin(plugin):
-    """Adds a second OpenGL viewport in the same window, governed by the given plugin (a
-    glinterface.GLPluginInterface instance)."""
+    """Adds a second OpenGL viewport in the same window, governed by the given plugin
+
+    Args:
+        plugin (GLPluginInterface): the plugin used for the second viewport.
+
+    """
     global _frontend
     _globalLock.acquire()
     #create a multi-view widget
@@ -471,11 +489,15 @@ def addPlugin(plugin):
 
 def run(plugin=None):
     """A blocking call to start a single window and then kill the visualization
-    once the user closes the window.  If plugin == None, the default visualization is used. 
-    Otherwise, plugin is a glinterface.GLPluginInterface object, and it is used
-    to handle all rendering and user input.
+    once the user closes the window. 
 
-    Works in both multi-threaded and single-threaded mode.
+    Args:
+        plugin (GLPluginInterface, optional): If given, the plugin used to handle all
+            rendering and user input.  If plugin == None, the default visualization is
+            used. 
+
+    Note:
+        Works in both multi-threaded and single-threaded mode.
     """
     global _vis_thread_running
     setPlugin(plugin)
@@ -491,6 +513,9 @@ def run(plugin=None):
     kill()
 
 def multithreaded():
+    """Returns true if the current GUI system allows multithreading.  Useful for apps
+    that will work cross-platform with Macs and systems with only GLUT.
+    """
     global _use_multithreaded
     return _use_multithreaded
 
@@ -649,11 +674,13 @@ def animate(name,animation,speed=1.0,endBehavior='loop'):
     Works with points, so3 elements, se3 elements, rigid objects, or robots, and may work
     with other objects as well.
 
-    Parameters:
-    - animation: may be a Trajectory or a list of configurations.
-    - speed: a modulator on the animation speed.  If the animation is a list of
-      milestones, it is by default run at 1 milestone per second.
-    - endBehavior: either 'loop' (animation repeats forever) or 'halt' (plays once).
+    Args:
+        animation: may be a Trajectory or a list of configurations.
+        speed (float, optional): a modulator on the animation speed.  If the animation
+            is a list of milestones, it is by default run at 1 milestone per second.
+        endBehavior (str, optional): either 'loop' (animation repeats forever) or 'halt'
+            (plays once).
+
     """
     global _vis
     if _vis is None:
@@ -677,7 +704,9 @@ def stepAnimation(amount):
 
 def animationTime(newtime=None):
     """Gets/sets the current animation time
+
     If newtime == None (default), this gets the animation time.
+
     If newtime != None, this sets a new animation time.
     """
     global _vis
@@ -687,51 +716,99 @@ def animationTime(newtime=None):
     return _vis.animationTime(newtime)
 
 def remove(name):
+    """Removes an item from the visualization"""
     global _vis
     if _vis is None:
         return
     return _vis.remove(name)
 
 def getItemConfig(name):
+    """Returns a configuration of an item from the visualization.  Useful for 
+    interacting with edited objects.
+
+    Returns:
+        list: a list of floats describing the item's current configuration.  Returns
+            None if name doesnt refer to an object."""
     global _vis
     if _vis is None:
         return None
     return _vis.getItemConfig(name)
 
 def setItemConfig(name,value):
+    """Sets a configuration of an item from the visualization.
+
+    Args:
+        name (str): the item to set the configuration of.
+        value (list of floats): the item's configuration.  The number of items
+            depends on the object's type.  See the config module for more information.
+
+    """
     global _vis
     if _vis is None:
         return
     return _vis.setItemConfig(name,value)
 
 def hideLabel(name,hidden=True):
+    """Hides or shows the label of an item in the visualization"""
     global _vis
     if _vis is None:
         return
     return _vis.hideLabel(name,hidden)
 
 def hide(name,hidden=True):
+    """Hides an item in the visualization.  
+
+    Note: the opposite of hide() is not show(), it's hide(False).
+    """
     global _vis
     if _vis is None:
         return
     _vis.hide(name,hidden)
 
 def edit(name,doedit=True):
-    """Turns on/off visual editing of some item.  Only points, transforms,
-    coordinate.Point's, coordinate.Transform's, coordinate.Frame's, robots,
-    and objects are currently accepted."""
+    """Turns on/off visual editing of some item. 
+
+    Only items of type point, transform, coordinate.Point, coordinate.Transform, coordinate.Frame, config,
+    robot, and rigid object are currently accepted.
+    """
     global _vis
     if _vis is None:
         return
     _vis.edit(name,doedit)
 
 def setAppearance(name,appearance):
+    """Changes the Appearance of an item, for an item that uses the Appearance
+    item to draw (config, geometry, robots, rigid bodies).
+    """
     global _vis
     if _vis is None:
         return
     _vis.setAppearance(name,appearance)
 
 def setAttribute(name,attr,value):
+    """Sets an attribute of the appearance
+    of an item. 
+
+    Args:
+        name (str): the name of the item
+        attr (str): the name of the attribute (see below)
+        value: the value (see below)
+
+    Accepted attributes are:
+
+    - 'color': the item's color (r,g,b) or (r,g,b,a)
+    - 'size': the size of the plot or text
+    - 'length': the length of axes in RigidTransform
+    - 'width': the width of axes and trajectory curves
+    - 'duration': the duration of a plot
+    - 'endeffectors': for a robot Trajectory, the list of end effectors to plot (default the last link).
+    - 'maxConfigs': for a Configs resource, the maximum number of drawn configurations (default 10)
+    - 'fancy': for RigidTransform objects, whether the axes are drawn with boxes or lines (default False)
+    - 'type': for ambiguous items, like a 3-item list when the robot has 3 links, specifies the type to be
+       used.  For example, 'Config' draws the item as a robot configuration, while 'Vector3' or 'Point'
+       draws it as a point.
+
+    """
     global _vis
     if _vis is None:
         return
@@ -750,6 +827,13 @@ def setColor(name,r,g,b,a=1.0):
     _vis.setColor(name,r,g,b,a)
 
 def setDrawFunc(name,func):
+    """Sets a custom OpenGL drawing function for an item.
+
+    Args:
+        name (str): the name of the item
+        func (function or None): a one-argument function draw(data) that takes the item data
+            as input.  Set func to None to revert to default drawing.
+    """
     global _vis
     if _vis is None:
         return
@@ -905,13 +989,13 @@ def addText(name,text,pos=None):
     """Adds text to the visualizer.  You must give an identifier to all pieces of
     text, which will be used to access the text as any other vis object. 
 
-    Parameters:
-    - name: the text's unique identifier.
-    - text: the string to be drawn
-    - pos: the position of the string. If pos=None, this is added to the on-screen "console" display. 
-      If pos has length 2, it is the (x,y) position of the upper left corner of the text on the
-      screen.  Negative units anchor the text to the right or bottom of the window. 
-      If pos has length 3, the text is drawn in the world coordinates. 
+    Args:
+        name (str): the text's unique identifier.
+        text (str): the string to be drawn
+        pos (list, optional): the position of the string. If pos=None, this is added to the on-screen
+            "console" display.  If pos has length 2, it is the (x,y) position of the upper left corner
+            of the text on the screen.  Negative units anchor the text to the right or bottom of the
+            window.  If pos has length 3, the text is drawn in the world coordinates. 
 
     To customize the text appearance, you can set the color, 'size' attribute, and 'position'
     attribute of the text using the identifier given in 'name'.
@@ -929,6 +1013,7 @@ def clearText():
     _vis.clearText()
 
 def addPlot(name):
+    """Creates a new empty plot.."""
     add(name,VisPlot())
 
 def addPlotItem(name,itemname):
@@ -952,30 +1037,50 @@ def logPlotEvent(name,eventname,color=None):
     _vis.logPlotEvent(name,eventname,color)
 
 def hidePlotItem(name,itemname,hidden=True):
+    """Hides an item in the plot.  To hide a particular channel of a given item
+    pass a pair (itemname,channelindex). 
+
+    Examples:
+        To hide configurations 0-5 of 'robot', call::
+            hidePlotItem('plot',('robot',0))
+            ...
+            hidePlotItem('plot',('robot',5))
+
+    """
     global _vis
     if _vis is None:
         return
     _vis.hidePlotItem(name,itemname,hidden)
 
 def setPlotDuration(name,time):
+    """Sets the plot duration."""
     setAttribute(name,'duration',time)
 
 def setPlotRange(name,vmin,vmax): 
+    """Sets the y range of a plot to [vmin,vmax]."""
     setAttribute(name,'range',(vmin,vmax))
 
 def setPlotPosition(name,x,y):
+    """Sets the upper left position of the plot on the screen."""
     setAttribute(name,'position',(x,y))
 
 def setPlotSize(name,w,h):
+    """sets the width and height of the plot, in pixels."""
     setAttribute(name,'size',(w,h))
 
 def savePlot(name,fn):
+    """Saves a plot to a CSV (extension .csv) or Trajectory (extension .traj) file."""
     global _vis
     if _vis is None:
         return
     _vis.savePlot(name,fn)
 
 def autoFitCamera(scale=1):
+    """Automatically fits the camera to all items in the visualization. 
+
+    Args:
+        scale (float, optional): a scale > 1 magnifies the camera zoom.
+    """
     global _vis
     if _vis is None:
         return
@@ -986,6 +1091,7 @@ def autoFitCamera(scale=1):
 
 
 def objectToVisType(item,world):
+    """Returns the default type for the given item in the current world"""
     itypes = types.objectToTypes(item,world)
     if isinstance(itypes,(list,tuple)):
         #ambiguous, still need to figure out what to draw
@@ -1611,7 +1717,7 @@ class VisAppearance:
                         drawRobotTrajectory(item,robot,ees,width,color)                        
                     else:
                         drawTrajectory(item,width,color)
-                self.displayCache[0].draw(drawRaw,se3.identity())
+                self.displayCache[0].draw(drawRaw)
                 if name != None:
                     self.drawText(name,centroid)
         elif isinstance(item,MultiPath):
@@ -1632,7 +1738,7 @@ class VisAppearance:
                         for i,s in enumerate(item.sections):
                             drawRobotTrajectory(s.configs,robot,ees,width,(color if i%2 == 0 else color2))
                     #draw it!
-                    self.displayCache[0].draw(drawRaw,se3.identity())
+                    self.displayCache[0].draw(drawRaw)
                     if name != None:
                         self.drawText(name,centroid)
         elif isinstance(item,coordinates.Point):
@@ -3300,7 +3406,7 @@ def _start_app_thread():
         _vis_thread = MyQThread(_run_app_thread)
         _vis_thread.start()
     else:
-        _vis_thread = Thread(target=_run_app_thread)
+        _vis_thread = threading.Thread(target=_run_app_thread)
         _vis_thread.setDaemon(True)
         _vis_thread.start()
     time.sleep(0.1)

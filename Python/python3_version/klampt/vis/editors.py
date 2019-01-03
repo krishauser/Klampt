@@ -1,3 +1,15 @@
+"""Functions for visual editing.  Used by the klampt.io.resource module
+in ``resource.get(...)`` and ``resource.edit(...)``.
+
+A couple editors, SelectionEditor and WorldEditor, cannot be launched from
+the resource module.  To use these, call::
+
+    from klampt.vis import editors
+    ed = editors.SelectionEditor("Some links",[],"Select the links that you want to modify",world))
+    indices = editors.run(ed)
+
+"""
+
 from . import glcommon
 from . import glinit
 from . import visualization
@@ -745,8 +757,11 @@ class ObjectTransformEditor(VisualEditorBase):
             self.value = self.objposer.get()
         return VisualEditorBase.mousefunc(self,button,state,x,y)
 
-
 class WorldEditor(VisualEditorBase):
+    """Edits poses of robots, rigid objects, and terrains in a world.
+
+    Note: need to call ``finalize()`` in order to get terrain geometries updated.
+    """
     def __init__(self,name,value,description):
         VisualEditorBase.__init__(self,name,value,description,value)
         world = value
@@ -878,6 +893,8 @@ if glinit._PyQtAvailable:
             print("#########################################")
             print("klampt.vis: EditDialog accept")
             print("#########################################")
+            if hasattr(self,'finalize'):
+                self.finalize()
             return QDialog.accept(self)
         def reject(self):
             global _my_dialog_res
@@ -889,8 +906,16 @@ if glinit._PyQtAvailable:
 
 
     def run(editorObject):
-        """Returns a pair (res,value) where res is True / False if OK / Cancel was pressed, respectively, 
-        and value is the return value of the editor object
+        """
+        Args:
+            editorObject (VisualEditorBase): some subclass of VisualEditorBase
+
+        Returns:
+            (tuple): A pair (res,value) containing: 
+
+                * res (bool):True / False if OK / Cancel was pressed, respectively, 
+                * value: the return value of the editor object
+
         """
         assert isinstance(editorObject,VisualEditorBase),"Must provide a VisualEditorBase instance to vis.editors.run()"
         global _vis_id, _my_dialog_res
@@ -925,4 +950,14 @@ if glinit._PyQtAvailable:
         return res,retVal
 else:
     def run(editorObject):
+        """
+        Args:
+            editorObject (VisualEditorBase): some subclass of VisualEditorBase
+
+        Returns:
+            res,value (bool, value pair): 
+
+                * res is True / False if OK / Cancel was pressed, respectively, 
+                * value is the return value of the editor object
+        """
         raise ValueError("Unable to perform visual editing without PyQt")

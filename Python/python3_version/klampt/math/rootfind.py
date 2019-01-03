@@ -7,7 +7,7 @@
 
 
 
-"""Python interface to KrisLibrary nonlinear, multidimensional root finding routines"""
+"""Python interface to C++ nonlinear, multidimensional root finding routines"""
 
 
 from sys import version_info
@@ -95,77 +95,81 @@ except AttributeError:
 
 def setFTolerance(tolf):
     """
-    setFTolerance(double tolf)
+    Sets the termination threshold for the change in f.  
 
-
-
-    Sets the termination threshold for the change in f. 
+    Args:
+        tolf (float)
     """
     return _rootfind.setFTolerance(tolf)
 
 def setXTolerance(tolx):
     """
-    setXTolerance(double tolx)
+    Sets the termination threshold for the change in x.  
 
-
-
-    Sets the termination threshold for the change in x. 
+    Args:
+        tolx (float)
     """
     return _rootfind.setXTolerance(tolx)
 
 def setVectorField(pVFObj):
     """
-    setVectorField(PyObject * pVFObj) -> int
+    Sets the vector field object.  
 
+    Args:
+        pVFObj (:obj:`object`)
 
+    Returns:  
 
-    Sets the vector field object, returns 0 if pVFObj = NULL, 1 otherwise.
-    See vectorfield.py for an abstract base class that can be overridden
-    to produce one of these objects. 
+        status (int): 0 if pVFObj = NULL, 1 otherwise.  
+
+    See vectorfield.py for an abstract base class that can be overridden to produce
+    one of these objects.  
+
     """
     return _rootfind.setVectorField(pVFObj)
 
 def findRoots(startVals, iter):
     """
-    findRoots(PyObject * startVals, int iter) -> PyObject *
+    Performs unconstrained root finding for up to iter iterations  
 
+    Args:
+        startVals (:obj:`object`)
+        iter (int)
 
+    Returns:  
 
-    Performs unconstrained root finding for up to iter iterations Return
-    values is a tuple indicating: (0,x,n) : convergence reached in x
+        status,x,n (tuple of int, list of floats, int): where status indicates
+            the return code, as follows:
 
-    (1,x,n) : convergence reached in f
+                - 0: convergence reached in x
+                - 1: convergence reached in f
+                - 2: divergence
+                - 3: degeneration of gradient (local extremum or saddle point)
+                - 4: maximum iterations reached
+                - 5: numerical error occurred
 
-    (2,x,n) : divergence
+            and x is the final point and n is the number of iterations used  
 
-    (3,x,n) : degeneration of gradient (local extremum or saddle point)
-
-    (4,x,n) : maximum iterations reached
-
-    (5,x,n) : numerical error occurred where x is the final point and n is
-    the number of iterations used 
     """
     return _rootfind.findRoots(startVals, iter)
 
 def findRootsBounded(startVals, boundVals, iter):
     """
-    findRootsBounded(PyObject * startVals, PyObject * boundVals, int iter) -> PyObject *
+    Same as findRoots, but with given bounds (xmin,xmax)  
 
-
-
-    Same as findRoots, but with given bounds (xmin,xmax) 
+    Args:
+        startVals (:obj:`object`)
+        boundVals (:obj:`object`)
+        iter (int)
+    Returns:
+        (:obj:`object`):
     """
     return _rootfind.findRootsBounded(startVals, boundVals, iter)
 
 def destroy():
     """
-    destroy()
+    destroys internal data structures  
 
-
-
-    destroys internal data structures
-
-    destroys internal data structures 
     """
     return _rootfind.destroy()
 # This file is compatible with both classic and new-style classes.

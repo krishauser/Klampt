@@ -8,7 +8,7 @@ and takes a number of iterations to seek the objective.  The solution
 is placed in the robot model's configuration.  If successful, the
 solution is also guaranteed to satisfy the robot's joint limits.
 
-For basic IK, the calling sequence is
+For basic IK, the calling sequence is::
 
     link = robot.link("name")
     goal = ik.objective(link,local=[p1,p2,p3],world=[r1,r2,r3])
@@ -22,7 +22,7 @@ For basic IK, the calling sequence is
 
 Here, the points p1,...,p3 on the link (specified in local coordinates)
 will be matched to the points r1,...,r3 in the world.  You can also
-directly constrain the translation/rotation of the link via the form:
+directly constrain the translation/rotation of the link via the form::
     
     ik.objective(link,R=link.getTransform()[0],t=[x,y,z])
     
@@ -32,11 +32,11 @@ position.
 A convenience function is ik.fixed_objective(link) which fixes the position
 of the link in its current position/orientation in world coordinates.
 Individual points on the link can be constrained to their coordinates using
-the local argument, as follows:
+the local argument, as follows::
 
     ik.fixed_objective(link,local=[p1,p2,p3])
 
-or if you prefer to give world coordinates, like so:
+or if you prefer to give world coordinates, like so::
 
     ik.fixed_objective(link,world=[q1,q2,q3])
 
@@ -74,6 +74,9 @@ def objective(body,ref=None,local=None,world=None,R=None,t=None):
 
     If R and t are provided, then the objective is set to a relative
     transformation between body and ref.
+
+    Returns:
+        (IKObjective or GeneralizedIKObjective)
     """
     generalized = False
     if not hasattr(body,'robot'):
@@ -138,11 +141,21 @@ def objective(body,ref=None,local=None,world=None,R=None,t=None):
 
 def fixed_objective(link,ref=None,local=None,world=None):
     """Convenience function for fixing the given link at the current position
-    in space.  If local and world are not provided, the entire link is
-    constrained.  If only local is provided, these points are fixed
-    to their current positions in space.  If only world is provided,
+    in space. 
+
+    If local and world are not provided, the entire link is
+    constrained. 
+
+    If only local is provided, these points are fixed
+    to their current positions in space.  
+
+    If only world is provided,
     the points on the link with the given world position are constrained in
-    place."""
+    place.
+
+    Returns:
+        (IKObjective or GeneralizedIKObjective)
+    """
     refcoords = ref.getTransform() if ref is not None else se3.identity()
     Tw = link.getTransform()
     Trel = se3.mul(se3.inv(refcoords),Tw)
@@ -169,10 +182,20 @@ def fixed_objective(link,ref=None,local=None,world=None):
 
 def fixed_rotation_objective(link,ref=None,local_axis=None,world_axis=None):
     """Convenience function for fixing the given link at its current orientation
-    in space.  If local_axis and world_axis are not provided, the entire link's orientation
-    is constrained.  If only local_axis is provided, the link is constrained
-    to rotate about this local axis.  If only world_axis is provided,
-    the link is constrained to rotate about this world-space axis."""
+    in space. 
+
+    If local_axis and world_axis are not provided, the entire link's orientation
+    is constrained.
+
+    If only local_axis is provided, the link is constrained
+    to rotate about this local axis. 
+
+    If only world_axis is provided,
+    the link is constrained to rotate about this world-space axis.
+
+    Returns:
+        (IKObjective or GeneralizedIKObjective)
+    """
     refcoords = ref.getTransform()[0] if ref is not None else so3.identity()
     Rw = link.getTransform()
     Rrel = so3.mul(so3.inv(refcoords),Rw[0])
@@ -205,24 +228,32 @@ def objects(objectives):
     pass
 
 def solver(objectives,iters=None,tol=None):
-    """Returns a solver for the given objective(s). Either a single objective
-    or a list of objectives can be provided. 
+    """Returns a solver for the given objective(s). 
 
-    If iters != None / tol != None, the max # of iterations / constraint solving tolerance
-    for the solver is set.  Otherwise, the default values are used
-    
-    The result is either an IKSolver or a GeneralizedIKSolver corresponding
-    to the given objective(s).  (see klampt.robotsim.IKSolver and
-    klampt.robotsim.GeneralizedIKSolver).
+    Args:
+        objectives (IKObjective or list of IKObjectives): the objective(s) that
+            should be solved.
 
-    In rare cases, it may return a list of IKSolver's if you give
-    it objectives on different robots.  They should be solved
-    independently for efficiency.
-    
-    (The objectives should be a result from the :func:`objective` function.
-    Beware that if you are making your own goals by calling the IKObjective
-    constructors from the robotsim module, the .robot member of these goals
-    must be set).
+            Note that these should be result(s) from the :func:`objective`
+            function.  OR, if you are making your own goals by calling the
+            ``IKObjective`` constructors from the ``robotsim`` module, you must
+            set the ``.robot`` member of each objective to the
+            :class:`RobotModel` being solved.
+
+        iters (int, optional): if given, the max # of iterations for the solver
+            is set to this value.  Otherwise, the default value (100) is used
+
+        tol (float, optional): if given, the constraint solving tolerance for
+            the solver is set to this value.  Otherwise, the default value
+            (1e-3) is used.
+
+    Returns:
+        (:class:`IKSolver` or :class:`GeneralizedIKSolver`)
+
+    Note:
+        In rare cases, this may return a list of IKSolver's if you give
+        it objectives on different robots.  They should be solved
+        independently for efficiency.
     """
     if hasattr(objectives,'__iter__'):
         generalized = []
@@ -301,18 +332,22 @@ def solve(objectives,iters=1000,tol=1e-3,activeDofs=None):
     """Attempts to solve the given objective(s). Either a single objective
     or a list of simultaneous objectives can be provided.
 
-    Arguments:
-        - objectives: either a single IKObjective or a list of IKObjectives.
-        - iters: a maximum number of iterations.
-        - tol: a maximum error tolerance on satisfying the objectives
-        - activeDofs: a list of link indices or names to use for IK solving.
-          Note: cannot use sub-robots and activeDofs at the same time.  Undefined
-          behavior will result.
+    Args:
+        objectives: either a single IKObjective or a list of IKObjectives.
+        iters (int, optional): a maximum number of iterations.
+        tol (float, optional): a maximum error tolerance on satisfying the objectives
+        activeDofs (list, optional): a list of link indices or names to use for IK
+            solving.  By default, will determine these automatically.
 
-    Returns True if a solution is successfully found to the given tolerance,
-    within the provided number of iterations.  The robot(s) are then set
-    to the solution configuration.  If a solution is not found, False is
-    returned and the robot(s) are set to the best found configuration.
+    Note:
+        You cannot use sub-robots and activeDofs at the same time.  Undefined
+        behavior will result.
+
+    Returns:
+        bool: True if a solution is successfully found to the given tolerance,
+            within the provided number of iterations.  The robot(s) are then set
+            to the solution configuration.  If a solution is not found, False is
+            returned and the robot(s) are set to the best found configuration.
 
     This function will be smart about multiple objects / robots.  If the
     objectives are on disjoint robots then disjoint IK problems will be
@@ -350,18 +385,20 @@ def solve_global(objectives,iters=1000,tol=1e-3,activeDofs=None,numRestarts=100,
     """Attempts to solve the given objective(s) but avoids local minima
     to some extent using a random-restart technique.  
         
-    Arguments: same as :func:`solve` except for...
-    - numRestarts: the number of random restarts.  The larger this is, the more
-      likely a solution will be found, but if no solution exists, the routine
-      will take more time.
-    - feasibilityCheck: if provided, it will be a function that takes no
-      arguments and returns True if the robot/world in the current
-      configuration is feasible, and False otherwise.
-    - startRandom: True if you wish to forgo the robot's current configuration
-      and start from random initial configurations
+    Args:
+        objectives, iters, tol, activeDofs: same as :func:`solve`
+        numRestarts (int, optional): the number of random restarts.  The larger this is,
+            the more likely a solution will be found, but if no solution exists, the
+            routine will take more time.
+        feasibilityCheck (function, optional): if provided, it will be a function feasible() 
+            that returns True if the robot/world in the current configuration is feasible,
+            and False otherwise.
+        startRandom (bool, optional): True if you wish to forgo the robot's current configuration
+            and start from random initial configurations
 
-    Returns true if a feasible solution is successfully found to the given
-    tolerance, within the provided number of iterations.
+    Returns:
+        bool: True if a feasible solution is successfully found to the given
+            tolerance, within the provided number of iterations.
     """
     if feasibilityCheck is None: feasibilityCheck=lambda : True
     s = solver(objectives,iters,tol)
@@ -403,12 +440,14 @@ def solve_nearby(objectives,maxDeviation,iters=1000,tol=1e-3,activeDofs=None,num
     """Solves for an IK solution that does not deviate too far from the
     initial configuration.
 
-    Note: currently only supports single-robot objectives!
+    Note:
+        Currently only supports single-robot objectives!
     
-    Arguments: same as :func:`solve_global` except for...
-    - maxDeviation: the maximum absolute amount in configuration space that
-      each configuration element is allowed to change.
-    - numRestarts: same as in solve_global, but is by default set to zero.
+    Args: 
+        objectives, iters, tol, activeDofs, feasibilityCheck: same as :func:`solve_global` except for...
+        maxDeviation (float): the maximum absolute amount in configuration space that
+            each configuration element is allowed to change.
+        numRestarts (int): same as in :func:`solve_global` , but is by default set to zero.
     """
     if feasibilityCheck is None: feasibilityCheck=lambda : True
     s = solver(objectives,iters,tol)

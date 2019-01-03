@@ -3,19 +3,27 @@ from klampt import *
 def box(width,depth,height,center=None,R=None,t=None,world=None,name=None,mass=float('inf'),type='TriangleMesh'):
     """Makes a box with dimensions width x depth x height. 
 
-    Parameters:
-    - width,depth,height: x,y,z dimensions of the box
-    - center: if None (typical), the *geometry* of the box is centered at 0. Otherwise, the *geometry* of
-      the box is shifted relative to the box's local coordinate system.
-    - R,t: if given, the box's world coordinates will be rotated and shifted by this transform.
-    - world: If given, then a RigidObjectModel or TerrainModel will be created in this world
-    - name: If world is given, this is the name of the object.  Default 'box'.
-    - mass: If world is given and this is inf, then a TerrainModel will be created. Otherwise, a RigidObjectModel
-      will be created with automatically determined inertia.
-    - type: the geometry type.  Defaults to 'TriangleMesh', but also 'GeometricPrimitive' and 'VolumeGrid' are reasonable.
+    Args:
+        width,depth,height (float): x,y,z dimensions of the box
+        center (list of 3 floats, optional): if None (typical),
+            the *geometry* of the box is centered at 0. Otherwise,
+            the *geometry* of the box is shifted relative to the
+            box's local coordinate system.
+        R,t (se3 transform, optional): if given, the box's world coordinates
+            will be rotated and shifted by this transform.
+        world (WorldModel, optional): If given, then the box will be a
+            RigidObjectModel or TerrainModel will be created in this world
+        name (str, optional): If world is given, this is the name of the object. 
+            Default is 'box'.
+        mass (float, optional): If world is given and this is inf, then a
+            TerrainModel will be created. Otherwise, a RigidObjectModel
+            will be created with automatically determined inertia.
+        type (str, optional): the geometry type.  Defaults to 'TriangleMesh',
+            but also 'GeometricPrimitive' and 'VolumeGrid' are accepted.
 
-    Returns either a Geometry3D, RigidObjectModel, or TerrainModel.  In the latter two cases, the box is
-    added to the world.
+    Returns:
+        box: either a Geometry3D, RigidObjectModel, or TerrainModel.  In the latter
+            two cases, the box is added to the world.
     """
     if center is None:
         center = [0,0,0]
@@ -53,19 +61,26 @@ def box(width,depth,height,center=None,R=None,t=None,world=None,name=None,mass=f
 def sphere(radius,center=None,R=None,t=None,world=None,name=None,mass=float('inf'),type='TriangleMesh'):
     """Makes a sphere with the given radius
 
-    Parameters:
-    - radius: radius of the sphere
-    - center: if None (typical), the *geometry* of the sphere is centered at 0. Otherwise, the *geometry* of
-      the sphere is shifted relative to the sphere's local coordinate system.
-    - R,t: if given, the spheres's world coordinates will be rotated and shifted by this transform.
-    - world: If given, then a RigidObjectModel or TerrainModel will be created in this world
-    - name: If world is given, this is the name of the object.  Default 'sphere'.
-    - mass: If world is given and this is inf, then a TerrainModel will be created. Otherwise, a RigidObjectModel
-      will be created with automatically determined inertia.
-    - type: the geometry type.  Defaults to 'TriangleMesh', but also 'GeometricPrimitive' and 'VolumeGrid' are reasonable.
+    Args:
+        radius (float): radius of the sphere
+        center (list of 3 floats, optional): if None (typical), the *geometry*
+            of the sphere is centered at 0. Otherwise, the *geometry* of
+            the sphere is shifted relative to the sphere's local coordinate system.
+        R,t (se3 transform, optional): if given, the sphere's world coordinates
+            will be rotated and shifted by this transform.
+        world (WorldModel, optional): If given, then the sphere will be a
+            RigidObjectModel or TerrainModel will be created in this world
+        name (str, optional): If world is given, this is the name of the object. 
+            Default is 'sphere'.
+        mass (float, optional): If world is given and this is inf, then a
+            TerrainModel will be created. Otherwise, a RigidObjectModel
+            will be created with automatically determined inertia.
+        type (str, optional): the geometry type.  Defaults to 'TriangleMesh',
+            but also 'GeometricPrimitive' and 'VolumeGrid' are accepted.
 
-    Returns either a Geometry3D, RigidObjectModel, or TerrainModel.  In the latter two cases, the sphere is
-    added to the world.
+    Returns:
+        sphere: either a Geometry3D, RigidObjectModel, or TerrainModel.  In the latter
+            two cases, the sphere is added to the world.
     """
     if center is None:
         center = [0,0,0]

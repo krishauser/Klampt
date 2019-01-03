@@ -1,17 +1,25 @@
 """Helpers for accessing world/simulation variables using a class-style
 interface.
 
-For example, map(world).robots[0].config retrieves the name of robot 0.
-This saves a little writing compared to world.robot(0).getConfig().
+For example,::
 
-You can also write map(world).robots[0].config = [q1,...,qn] to set the
-configuration of robot 0, rather than world.robot(0).setConfig([q1,...,qn]).
+    map(world).robots[0].config
 
-Conveniently, you can write expressions like:
+retrieves the name of robot 0. This saves a little writing compared to world.robot(0).getConfig().
+
+You can also write::
+
+    map(world).robots[0].config = [q1,...,qn]
+
+to set the configuration of robot 0, rather than world.robot(0).setConfig([q1,...,qn]).
+
+Conveniently, you can write expressions like::
+
     print len(map(world).robots)
     map(world).robots[0].config[4] = 3.5
 
-Which is a shortcut to:
+Which is a shortcut to::
+
     print world.numRobots()
     q = world.robot(0).getConfig()
     q[4] = 3.5
@@ -26,86 +34,104 @@ class map:
     WorldModel or Simulator.
 
     The following class hierarchy is supported:
-        * indicates read-only
-        # indicates sub-item set access is supported (otherwise, to set
+
+        - \* indicates read-only
+        - \# indicates sub-item set access is supported (otherwise, to set
           you have to set the entire object)
+
     WorldModel:
-        *robots (list/dict of RobotModels)
-        *rigidObjects (list/dict of RigidObjectModels)
-        *terrains (list/dict of TerrainModels)
-        *elements (list/dict of all elements by id)
-        *[string]: accesses objects by name
+
+        - \*robots (list/dict of RobotModels)
+        - \*rigidObjects (list/dict of RigidObjectModels)
+        - \*terrains (list/dict of TerrainModels)
+        - \*elements (list/dict of all elements by id)
+        - \*[string]: accesses objects by name
+
     RobotModel:
-        *name (string)
-        *id (int)
-        *links (list/dict of RobotModelLinks)
-        #config (list of floats)
-        #velocity (list of floats)
-        #jointLimits (pair of lists of floats)
-        velocityLimits (list of floats)
-        accelerationLimits (list of floats)
-        torqueLimits (list of floats)
-        *[string]: accesses links by name
+
+        - \*name (string)
+        - \*id (int)
+        - \*links (list/dict of RobotModelLinks)
+        - \#config (list of floats)
+        - \#velocity (list of floats)
+        - \#jointLimits (pair of lists of floats)
+        - velocityLimits (list of floats)
+        - accelerationLimits (list of floats)
+        - torqueLimits (list of floats)
+        - \*[string]: accesses links by name
+
     RobotModelLink:
-        *name (string)
-        *id (int)
-        *robot (RobotModel)
-        parent (int)
-        geometry (Geometry3D)
-        appearance (Appearance)
-        mass (Mass)
-        #parentTransform (se3 object (R,t))
-        #transform (se3 object (R,t))
-        #axis (3-list of floats)
+
+        - \*name (string)
+        - \*id (int)
+        - \*robot (RobotModel)
+        - parent (int)
+        - geometry (Geometry3D)
+        - appearance (Appearance)
+        - mass (Mass)
+        - \#parentTransform (se3 object (R,t))
+        - \#transform (se3 object (R,t))
+        - \#axis (3-list of floats)
+
     RigidObjectModel:
-        *name (string)
-        *id (int)
-        geometry (Geometry3D)
-        appearance (Appearance)
-        mass (Mass)
-        contactParameters (ContactParameters)
-        # transform (se3 object (R,t))
-        # velocity (pair of 3D vectors w,v giving angular and translational velocity)
+        - \*name (string)
+        - \*id (int)
+        - geometry (Geometry3D)
+        - appearance (Appearance)
+        - mass (Mass)
+        - contactParameters (ContactParameters)
+        - \# transform (se3 object (R,t))
+        - \# velocity (pair of 3D vectors w,v giving angular and translational velocity)
+
     TerrainModel:
-        *name (string)
-        *id (int)
-        geometry (Geometry3D)
-        appearance (Appearance)
+        - \*name (string)
+        - \*id (int)
+        - geometry (Geometry3D)
+        - appearance (Appearance)
+
     Simulator:
-        *world (WorldModel)
-        *bodies (list of SimBodys)
-        *controllers (list/dict of SimRobotControllers)
-        *time (float)
-        *robots (list/dict of SimRobots)
-        *rigidObjects (list/dict of SimBodys)
-        *terrains (list of SimBodys)
-        gravity (3-list of floats)
-        [string]: accesses bodies by name
+
+        - \*world (WorldModel)
+        - \*bodies (list of SimBodys)
+        - \*controllers (list/dict of SimRobotControllers)
+        - \*time (float)
+        - \*robots (list/dict of SimRobots)
+        - \*rigidObjects (list/dict of SimBodys)
+        - \*terrains (list of SimBodys)
+        - gravity (3-list of floats)
+        - [string]: accesses bodies by name
+
     SimRobot:
-        *actualConfig (list of floats) 
-        *actualVelocity (list of floats)
-        *actualTorques (list of floats)
-        *config (an alias of actualConfig)
-        *velocity (an alias of actualVelocity)
-        *torques (an alias of actualTorques)
-        *links (list/dict of SimLinks)
+        - \*actualConfig (list of floats) 
+        - \*actualVelocity (list of floats)
+        - \*actualTorques (list of floats)
+        - \*config (an alias of actualConfig)
+        - \*velocity (an alias of actualVelocity)
+        - \*torques (an alias of actualTorques)
+        - \*links (list/dict of SimLinks)
+
     SimLink:
-        # transform (se3 object (R,t))
-        # velocity (pair of 3D vectors w,v giving angular and translational velocity)
+
+        - \# transform (se3 object (R,t))
+        - \# velocity (pair of 3D vectors w,v giving angular and translational velocity)
+
     SimBody:
-        enabled (bool)
-        collisionPadding (float)
-        surface (ContactParameters)
-        # transform (se3 object (R,t))
-        # objectTransform (se3 object (R,t))
-        # velocity (pair of 3D vectors w,v giving angular and translational velocity)
-        # objectVelocity (pair of 3D vectors w,v giving angular and translational velocity)
+
+        - enabled (bool)
+        - collisionPadding (float)
+        - surface (ContactParameters)
+        - \# transform (se3 object (R,t))
+        - \# objectTransform (se3 object (R,t))
+        - \# velocity (pair of 3D vectors w,v giving angular and translational velocity)
+        - \# objectVelocity (pair of 3D vectors w,v giving angular and translational velocity)
+
     SimRobotController:
-        *commandedConfig (list of floats)
-        *commandedVelocity (list of floats)
-        *sensedConfig (list of floats)
-        *sensedVelocity (list of floats)
-        *sensors (list/dict of SimRobotSensors)
+    
+        - \*commandedConfig (list of floats)
+        - \*commandedVelocity (list of floats)
+        - \*sensedConfig (list of floats)
+        - \*sensedVelocity (list of floats)
+        - \*sensors (list/dict of SimRobotSensors)
     
     dicts, lists, tuples: behave like normal
     

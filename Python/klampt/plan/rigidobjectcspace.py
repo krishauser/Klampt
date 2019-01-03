@@ -13,25 +13,33 @@ class RigidObjectCSpace(CSpace):
     and [mx,my,mz] are the exponential map parameters of the rotation.
 
     Attributes:
-    - rigidObject
-    - rotationDomain
-    - collider
-    - rotationWeight: the relative weight used for measuring rotation vs translation distance
+        rigidObject (RigidObjectModel):
+        rotationDomain (see __init__, optional):
+        collider (WorldCollider):
+        rotationWeight (float): the relative weight used for measuring rotation vs translation distance
     """
     def __init__(self,rigidObject,collider=None,translationDomain=None,rotationDomain=None):
-        """Arguments:
-        - rigidObject: the RigidObjectModel that should move.
-        - collider (optional): a collide.WorldCollider instance containing
-          the world in which the robot lives.  Any ignored collisions will be
-          respected in the collision checker.
-        - translationDomain: None, or a bounding box in which the translation should be sampled. 
-          If None (default), the Jeffrey's prior is used to sample translations.
-        - rotationDomain: None, or a (rotation0,rdomain) pair specifying a range in which the
-          rotation should be sampled. If rdomain is a number, the rotation is sampled with absolute
-          angular error from rotation0 in the range [0,rdomain].  If rdomain is a triple, then the
-          rotation is sampled with euler angles with roll in the range [-rdomain[0],rdomain[0]], pitch
-          in the range [-rdomain[1],rdomain[1]], and yaw in the range [-rdomain[2],rdomain[2]].  The 
-          sampled rotation is then multiplied by rotation0.
+        """
+        Args:
+            rigidObject (RigidObjectModel): the object that should move.
+            collider (:class:`WorldCollider`, optional): a collider instance
+                containing the world in which the object lives.  Any ignored
+                collisions will be respected in the feasibility test.
+            translationDomain (list of pairs, optional): a bounding box in
+                which the translation should be sampled.  If None (default),
+                the improper Jeffrey's prior is used to sample translations.
+            rotationDomain (pair, optional): If provided, must be a
+                (rotation0,rdomain) pair specifying a range in which the
+                rotation should be sampled. rotation0 must be an SO3 element.
+                rdomain may be:
+
+                * A number: rotation is sampled with absolute angular error
+                  from rotation0 in the range [0,rdomain].  
+                * A triple: rotation is sampled with euler angles with roll
+                  in the range [-rdomain[0],rdomain[0]], pitch in the range
+                  [-rdomain[1],rdomain[1]], and yaw in the range
+                  [-rdomain[2],rdomain[2]].  The sampled rotation is then
+                  multiplied by rotation0.
         """
         CSpace.__init__(self)
         self.rigidObject = rigidObject

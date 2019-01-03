@@ -7,7 +7,7 @@
 
 
 
-"""Python interface to KrisLibrary motion planing routines"""
+"""Python interface to C++ motion planing routines"""
 
 
 from sys import version_info
@@ -95,151 +95,130 @@ except AttributeError:
 
 def setRandomSeed(seed):
     """
-    setRandomSeed(int seed)
+    Sets the random seed used by the configuration sampler.  
 
-
-
-    Sets the random seed used by the configuration sampler. 
+    Args:
+        seed (int)
     """
     return _motionplanning.setRandomSeed(seed)
 
 def setPlanJSONString(string):
     """
-    setPlanJSONString(char const * string)
+    Loads planner values from a JSON string.  
 
-
-
-    Loads planner values from a JSON string. 
+    Args:
+        string (str)
     """
     return _motionplanning.setPlanJSONString(string)
 
 def getPlanJSONString():
     """
-    getPlanJSONString() -> std::string
+    Saves planner values to a JSON string.  
 
-
-
-    Saves planner values to a JSON string. 
+    Returns:
+        (str):
     """
     return _motionplanning.getPlanJSONString()
 
 def setPlanType(type):
     """
-    setPlanType(char const * type)
+    Sets the planner type.  
 
+    Args:
+        type (str)
 
+    Valid values are  
 
-    Sets the planner type.
+    *   prm: the Probabilistic Roadmap algorithm  
+    *   rrt: the Rapidly Exploring Random Trees algorithm  
+    *   sbl: the Single-Query Bidirectional Lazy planner  
+    *   sblprt: the probabilistic roadmap of trees (PRT) algorithm with SBL as the
+        inter-root planner.  
+    *   rrt*: the RRT* algorithm for optimal motion planning  
+    *   prm*: the PRM* algorithm for optimal motion planning  
+    *   lazyprm*: the Lazy-PRM* algorithm for optimal motion planning  
+    *   lazyrrg*: the Lazy-RRG* algorithm for optimal motion planning  
+    *   fmm: the fast marching method algorithm for resolution-complete optimal
+        motion planning  
+    *   fmm*: an anytime fast marching method algorithm for optimal motion planning  
 
-    Valid values are prm: the Probabilistic Roadmap algorithm
-
-    rrt: the Rapidly Exploring Random Trees algorithm
-
-    sbl: the Single-Query Bidirectional Lazy planner
-
-    sblprt: the probabilistic roadmap of trees (PRT) algorithm with SBL as
-    the inter-root planner.
-
-    rrt*: the RRT* algorithm for optimal motion planning
-
-    prm*: the PRM* algorithm for optimal motion planning
-
-    lazyprm*: the Lazy-PRM* algorithm for optimal motion planning
-
-    lazyrrg*: the Lazy-RRG* algorithm for optimal motion planning
-
-    fmm: the fast marching method algorithm for resolution-complete
-    optimal motion planning
-
-    fmm*: an anytime fast marching method algorithm for optimal motion
-    planning 
     """
     return _motionplanning.setPlanType(type)
 
 def setPlanSetting(*args):
     """
-    setPlanSetting(char const * setting, double value)
-    setPlanSetting(char const * setting, char const * value)
+    Sets a numeric or string-valued setting for the planner.  
+
+    setPlanSetting (setting,value)
 
 
+    Args:
+        setting (str): 
+        value (float or str): 
 
-    Sets a numeric or string-valued setting for the planner.
+    Valid numeric values are:  
 
-    Valid numeric values are: "knn": k value for the k-nearest neighbor
-    connection strategy (only for PRM)
+    *   "knn": k value for the k-nearest neighbor connection strategy (only for
+        PRM)  
+    *   "connectionThreshold": a milestone connection threshold  
+    *   "perturbationRadius": (for RRT and SBL)  
+    *   "bidirectional": 1 if bidirectional planning is requested (for RRT)  
+    *   "grid": 1 if a point selection grid should be used (for SBL)  
+    *   "gridResolution": resolution for the grid, if the grid should be used (for
+        SBL with grid, FMM, FMM*)  
+    *   "suboptimalityFactor": allowable suboptimality (for RRT*, lazy PRM*, lazy
+        RRG*)  
+    *   "randomizeFrequency": a grid randomization frequency (for SBL)  
+    *   "shortcut": nonzero if you wish to perform shortcutting after a first plan
+        is found.  
+    *   "restart": nonzero if you wish to restart the planner to get better paths
+        with the remaining time.  
 
-    "connectionThreshold": a milestone connection threshold
+    Valid string values are:  
 
-    "perturbationRadius": (for RRT and SBL)
+    *   "pointLocation": a string designating a point location data structure.
+        "kdtree" is supported, optionally followed by a weight vector (for PRM,
+        RRT*, PRM*, LazyPRM*, LazyRRG*)  
+    *   "restartTermCond": used if the "restart" setting is true. This is a JSON
+        string defining the termination condition (default value:
+        "{foundSolution:1;maxIters:1000}")  
 
-    "bidirectional": 1 if bidirectional planning is requested (for RRT)
-
-    "grid": 1 if a point selection grid should be used (for SBL)
-
-    "gridResolution": resolution for the grid, if the grid should be
-    used (for SBL with grid, FMM, FMM*)
-
-    "suboptimalityFactor": allowable suboptimality (for RRT*, lazy PRM*,
-    lazy RRG*)
-
-    "randomizeFrequency": a grid randomization frequency (for SBL)
-
-    "shortcut": nonzero if you wish to perform shortcutting after a
-    first plan is found.
-
-    "restart": nonzero if you wish to restart the planner to get better
-    paths with the remaining time.
-
-    Valid string values are: "pointLocation": a string designating a
-    point location data structure. "kdtree" is supported, optionally
-    followed by a weight vector (for PRM, RRT*, PRM*, LazyPRM*, LazyRRG*)
-
-    "restartTermCond": used if the "restart" setting is true. This is
-    a JSON string defining the termination condition (default value:
-    "{foundSolution:1;maxIters:1000}") 
     """
     return _motionplanning.setPlanSetting(*args)
 
 def destroy():
     """
-    destroy()
+    destroys internal data structures  
 
-
-
-    destroys internal data structures
-
-    destroys internal data structures 
     """
     return _motionplanning.destroy()
 class CSpaceInterface(_object):
     """
 
 
-    A raw interface for a configuration space. Note: the native Python
-    CSpace interface class in cspace.py is easier to use.
+    A raw interface for a configuration space. Note: the native Python CSpace
+    interface class in cspace.py is easier to use.  
 
-    You can either set a single feasibility test function using
-    setFeasibility() or add several feasibility tests, all of which need
-    to be satisfied, using addFeasibilityTest(). In the latter case,
-    planners may be able to provide debugging statistics, solve Minimum
-    Constraint Removal problems, run faster by eliminating constraint
-    tests, etc.
+    You can either set a single feasibility test function using setFeasibility() or
+    add several feasibility tests, all of which need to be satisfied, using
+    addFeasibilityTest(). In the latter case, planners may be able to provide
+    debugging statistics, solve Minimum Constraint Removal problems, run faster by
+    eliminating constraint tests, etc.  
 
-    Either setVisibility() or setVisibilityEpsilon() must be called to
-    define a visibility checker between two (feasible) configurations. In
-    the latter case, the path will be discretized at the resolution sent
-    to setVisibilityEpsilon. If you have special single-constraint
-    visibility tests, you can call that using addVisibilityTest (for
-    example, for convex constraints you can set it to the lambda function
-    that returns true regardless of its arguments).
+    Either setVisibility() or setVisibilityEpsilon() must be called to define a
+    visibility checker between two (feasible) configurations. In the latter case,
+    the path will be discretized at the resolution sent to setVisibilityEpsilon. If
+    you have special single-constraint visibility tests, you can call that using
+    addVisibilityTest (for example, for convex constraints you can set it to the
+    lambda function that returns true regardless of its arguments).  
 
-    Supported properties include "euclidean" (boolean), "metric"
-    (string), "geodesic" (boolean), "minimum" (vector), and
-    "maximum" (vector). These may be used by planners to make planning
-    faster or more accurate. For a complete list see
-    KrisLibrary/planning/CSpace.h.
+    Supported properties include "euclidean" (boolean), "metric" (string),
+    "geodesic" (boolean), "minimum" (vector), and "maximum" (vector). These
+    may be used by planners to make planning faster or more accurate. For a complete
+    list see KrisLibrary/planning/CSpace.h.  
 
-    C++ includes: motionplanning.h 
+    C++ includes: motionplanning.h
+
     """
 
     __swig_setmethods__ = {}
@@ -250,8 +229,13 @@ class CSpaceInterface(_object):
 
     def __init__(self, *args):
         """
-        __init__(CSpaceInterface self) -> CSpaceInterface
-        __init__(CSpaceInterface self, CSpaceInterface arg2) -> CSpaceInterface
+        __init__ (): :class:`~klampt.CSpaceInterface`
+
+        __init__ (arg2): :class:`~klampt.CSpaceInterface`
+
+
+        Args:
+            arg2 (:class:`~klampt.CSpaceInterface`, optional): 
         """
         this = _motionplanning.new_CSpaceInterface(*args)
         try:
@@ -262,334 +246,397 @@ class CSpaceInterface(_object):
     __del__ = lambda self: None
 
     def destroy(self):
-        """destroy(CSpaceInterface self)"""
+        """
+        """
         return _motionplanning.CSpaceInterface_destroy(self)
 
 
     def setFeasibility(self, pyFeas):
-        """setFeasibility(CSpaceInterface self, PyObject * pyFeas)"""
+        """
+        Args:
+            pyFeas (:obj:`object`)
+        """
         return _motionplanning.CSpaceInterface_setFeasibility(self, pyFeas)
 
 
     def addFeasibilityTest(self, name, pyFeas):
-        """addFeasibilityTest(CSpaceInterface self, char const * name, PyObject * pyFeas)"""
+        """
+        Args:
+            name (str)
+            pyFeas (:obj:`object`)
+        """
         return _motionplanning.CSpaceInterface_addFeasibilityTest(self, name, pyFeas)
 
 
     def setVisibility(self, pyVisible):
-        """setVisibility(CSpaceInterface self, PyObject * pyVisible)"""
+        """
+        Args:
+            pyVisible (:obj:`object`)
+        """
         return _motionplanning.CSpaceInterface_setVisibility(self, pyVisible)
 
 
     def addVisibilityTest(self, name, pyVisible):
-        """addVisibilityTest(CSpaceInterface self, char const * name, PyObject * pyVisible)"""
+        """
+        Args:
+            name (str)
+            pyVisible (:obj:`object`)
+        """
         return _motionplanning.CSpaceInterface_addVisibilityTest(self, name, pyVisible)
 
 
     def setVisibilityEpsilon(self, eps):
-        """setVisibilityEpsilon(CSpaceInterface self, double eps)"""
+        """
+        Args:
+            eps (float)
+        """
         return _motionplanning.CSpaceInterface_setVisibilityEpsilon(self, eps)
 
 
     def setSampler(self, pySamp):
-        """setSampler(CSpaceInterface self, PyObject * pySamp)"""
+        """
+        Args:
+            pySamp (:obj:`object`)
+        """
         return _motionplanning.CSpaceInterface_setSampler(self, pySamp)
 
 
     def setNeighborhoodSampler(self, pySamp):
-        """setNeighborhoodSampler(CSpaceInterface self, PyObject * pySamp)"""
+        """
+        Args:
+            pySamp (:obj:`object`)
+        """
         return _motionplanning.CSpaceInterface_setNeighborhoodSampler(self, pySamp)
 
 
     def setDistance(self, pyDist):
-        """setDistance(CSpaceInterface self, PyObject * pyDist)"""
+        """
+        Args:
+            pyDist (:obj:`object`)
+        """
         return _motionplanning.CSpaceInterface_setDistance(self, pyDist)
 
 
     def setInterpolate(self, pyInterp):
-        """setInterpolate(CSpaceInterface self, PyObject * pyInterp)"""
+        """
+        Args:
+            pyInterp (:obj:`object`)
+        """
         return _motionplanning.CSpaceInterface_setInterpolate(self, pyInterp)
 
 
     def setProperty(self, key, value):
-        """setProperty(CSpaceInterface self, char const * key, char const * value)"""
+        """
+        Args:
+            key (str)
+            value (str)
+        """
         return _motionplanning.CSpaceInterface_setProperty(self, key, value)
 
 
     def getProperty(self, key):
-        """getProperty(CSpaceInterface self, char const * key) -> char const *"""
+        """
+        Args:
+            key (str)
+        Returns:
+            (str):
+        """
         return _motionplanning.CSpaceInterface_getProperty(self, key)
 
 
     def isFeasible(self, q):
         """
-        isFeasible(CSpaceInterface self, PyObject * q) -> bool
+        Queries whether a given configuration is feasible.  
 
-
-
-        Queries whether a given configuration is feasible.
-
-        queries 
+        Args:
+            q (:obj:`object`)
+        Returns:
+            (bool):
         """
         return _motionplanning.CSpaceInterface_isFeasible(self, q)
 
 
     def isVisible(self, a, b):
         """
-        isVisible(CSpaceInterface self, PyObject * a, PyObject * b) -> bool
+        Queries whether two configurations are visible.  
 
-
-
-        Queries whether two configurations are visible. 
+        Args:
+            a (:obj:`object`)
+            b (:obj:`object`)
+        Returns:
+            (bool):
         """
         return _motionplanning.CSpaceInterface_isVisible(self, a, b)
 
 
     def testFeasibility(self, name, q):
         """
-        testFeasibility(CSpaceInterface self, char const * name, PyObject * q) -> bool
+        Queries whether a given configuration is feasible with respect to a given
+        constraint.  
 
-
-
-        Queries whether a given configuration is feasible with respect to a
-        given constraint. 
+        Args:
+            name (str)
+            q (:obj:`object`)
+        Returns:
+            (bool):
         """
         return _motionplanning.CSpaceInterface_testFeasibility(self, name, q)
 
 
     def testVisibility(self, name, a, b):
         """
-        testVisibility(CSpaceInterface self, char const * name, PyObject * a, PyObject * b) -> bool
-
-
-
         Queries whether two configurations are visible with respect to a given
-        constraint. 
+        constraint.  
+
+        Args:
+            name (str)
+            a (:obj:`object`)
+            b (:obj:`object`)
+        Returns:
+            (bool):
         """
         return _motionplanning.CSpaceInterface_testVisibility(self, name, a, b)
 
 
     def feasibilityFailures(self, q):
         """
-        feasibilityFailures(CSpaceInterface self, PyObject * q) -> PyObject *
+        Returns a list of all failed feasibility constraints.  
 
-
-
-        Returns a list of all failed feasibility constraints. 
+        Args:
+            q (:obj:`object`)
+        Returns:
+            (:obj:`object`):
         """
         return _motionplanning.CSpaceInterface_feasibilityFailures(self, q)
 
 
     def visibilityFailures(self, a, b):
         """
-        visibilityFailures(CSpaceInterface self, PyObject * a, PyObject * b) -> PyObject *
+        Returns a list of all failed visibility constraints.  
 
-
-
-        Returns a list of all failed visibility constraints. 
+        Args:
+            a (:obj:`object`)
+            b (:obj:`object`)
+        Returns:
+            (:obj:`object`):
         """
         return _motionplanning.CSpaceInterface_visibilityFailures(self, a, b)
 
 
     def sample(self):
         """
-        sample(CSpaceInterface self) -> PyObject *
+        Samples a configuration.  
 
-
-
-        Samples a configuration. 
+        Returns:
+            (:obj:`object`):
         """
         return _motionplanning.CSpaceInterface_sample(self)
 
 
     def distance(self, a, b):
         """
-        distance(CSpaceInterface self, PyObject * a, PyObject * b) -> double
+        Returns the distance between two configurations.  
 
-
-
-        Returns the distance between two configurations. 
+        Args:
+            a (:obj:`object`)
+            b (:obj:`object`)
+        Returns:
+            (float):
         """
         return _motionplanning.CSpaceInterface_distance(self, a, b)
 
 
     def interpolate(self, a, b, u):
         """
-        interpolate(CSpaceInterface self, PyObject * a, PyObject * b, double u) -> PyObject *
+        Interpolates between two configurations.  
 
-
-
-        Interpolates between two configurations. 
+        Args:
+            a (:obj:`object`)
+            b (:obj:`object`)
+            u (float)
+        Returns:
+            (:obj:`object`):
         """
         return _motionplanning.CSpaceInterface_interpolate(self, a, b, u)
 
 
     def adaptiveQueriesEnabled(self):
         """
-        adaptiveQueriesEnabled(CSpaceInterface self) -> bool
+        optional: adaptive queries can be used to automatically minimize the total cost
+        of testing feasibility / visibility using empirical estimates. Off by default.  
 
-
-
-        optional: adaptive queries can be used to automatically minimize the
-        total cost of testing feasibility / visibility using empirical
-        estimates. Off by default. 
+        Returns:
+            (bool):
         """
         return _motionplanning.CSpaceInterface_adaptiveQueriesEnabled(self)
 
 
     def enableAdaptiveQueries(self, enabled=True):
         """
-        enableAdaptiveQueries(CSpaceInterface self, bool enabled=True)
-        enableAdaptiveQueries(CSpaceInterface self)
+        Call this to enable adaptive queries. (It has a small overhead.)  
+
+        enableAdaptiveQueries (enabled=True)
+
+        enableAdaptiveQueries ()
 
 
-
-        Call this to enable adaptive queries. (It has a small overhead.) 
+        Args:
+            enabled (bool, optional): default value True
         """
         return _motionplanning.CSpaceInterface_enableAdaptiveQueries(self, enabled)
 
 
     def optimizeQueryOrder(self):
         """
-        optimizeQueryOrder(CSpaceInterface self)
+        Call this to optimize the feasibility / visibility testing order.  
 
-
-
-        Call this to optimize the feasibility / visibility testing order. 
         """
         return _motionplanning.CSpaceInterface_optimizeQueryOrder(self)
 
 
     def setFeasibilityDependency(self, name, precedingTest):
         """
-        setFeasibilityDependency(CSpaceInterface self, char const * name, char const * precedingTest)
+        Marks that a certain feasibility test must be performed before another.  
 
-
-
-        Marks that a certain feasibility test must be performed before
-        another. 
+        Args:
+            name (str)
+            precedingTest (str)
         """
         return _motionplanning.CSpaceInterface_setFeasibilityDependency(self, name, precedingTest)
 
 
     def setFeasibilityPrior(self, name, costPrior=0.0, feasibilityProbability=0.0, evidenceStrength=1.0):
         """
-        setFeasibilityPrior(CSpaceInterface self, char const * name, double costPrior=0.0, double feasibilityProbability=0.0, double evidenceStrength=1.0)
-        setFeasibilityPrior(CSpaceInterface self, char const * name, double costPrior=0.0, double feasibilityProbability=0.0)
-        setFeasibilityPrior(CSpaceInterface self, char const * name, double costPrior=0.0)
-        setFeasibilityPrior(CSpaceInterface self, char const * name)
+        Resets the data for a certain feasibility test. Default values give a data-
+        gathering behavior.  
+
+        setFeasibilityPrior (name,costPrior=0.0,feasibilityProbability=0.0,evidenceStrength=1.0)
+
+        setFeasibilityPrior (name,costPrior=0.0,feasibilityProbability=0.0)
+
+        setFeasibilityPrior (name,costPrior=0.0)
+
+        setFeasibilityPrior (name)
 
 
-
-        Resets the data for a certain feasibility test. Default values give a
-        data-gathering behavior. 
+        Args:
+            name (str): 
+            costPrior (float, optional): default value 0.0
+            feasibilityProbability (float, optional): default value 0.0
+            evidenceStrength (float, optional): default value 1.0
         """
         return _motionplanning.CSpaceInterface_setFeasibilityPrior(self, name, costPrior, feasibilityProbability, evidenceStrength)
 
 
     def setVisibilityDependency(self, name, precedingTest):
         """
-        setVisibilityDependency(CSpaceInterface self, char const * name, char const * precedingTest)
+        Marks that a certain feasibility test must be performed before another.  
 
-
-
-        Marks that a certain feasibility test must be performed before
-        another. 
+        Args:
+            name (str)
+            precedingTest (str)
         """
         return _motionplanning.CSpaceInterface_setVisibilityDependency(self, name, precedingTest)
 
 
     def setVisibilityPrior(self, name, costPrior=0.0, visibilityProbability=0.0, evidenceStrength=1.0):
         """
-        setVisibilityPrior(CSpaceInterface self, char const * name, double costPrior=0.0, double visibilityProbability=0.0, double evidenceStrength=1.0)
-        setVisibilityPrior(CSpaceInterface self, char const * name, double costPrior=0.0, double visibilityProbability=0.0)
-        setVisibilityPrior(CSpaceInterface self, char const * name, double costPrior=0.0)
-        setVisibilityPrior(CSpaceInterface self, char const * name)
+        Resets the data for a certain visibility test. Default values give a data-
+        gathering behavior.  
+
+        setVisibilityPrior (name,costPrior=0.0,visibilityProbability=0.0,evidenceStrength=1.0)
+
+        setVisibilityPrior (name,costPrior=0.0,visibilityProbability=0.0)
+
+        setVisibilityPrior (name,costPrior=0.0)
+
+        setVisibilityPrior (name)
 
 
-
-        Resets the data for a certain visibility test. Default values give a
-        data-gathering behavior. 
+        Args:
+            name (str): 
+            costPrior (float, optional): default value 0.0
+            visibilityProbability (float, optional): default value 0.0
+            evidenceStrength (float, optional): default value 1.0
         """
         return _motionplanning.CSpaceInterface_setVisibilityPrior(self, name, costPrior, visibilityProbability, evidenceStrength)
 
 
     def feasibilityCost(self, name):
         """
-        feasibilityCost(CSpaceInterface self, char const * name) -> double
+        Retrieves the empirical average cost of a given feasibility test.  
 
-
-
-        Retrieves the empirical average cost of a given feasibility test. 
+        Args:
+            name (str)
+        Returns:
+            (float):
         """
         return _motionplanning.CSpaceInterface_feasibilityCost(self, name)
 
 
     def feasibilityProbability(self, name):
         """
-        feasibilityProbability(CSpaceInterface self, char const * name) -> double
+        Retrieves the empirical average success rate of a given feasibility test.  
 
-
-
-        Retrieves the empirical average success rate of a given feasibility
-        test. 
+        Args:
+            name (str)
+        Returns:
+            (float):
         """
         return _motionplanning.CSpaceInterface_feasibilityProbability(self, name)
 
 
     def visibilityCost(self, name):
         """
-        visibilityCost(CSpaceInterface self, char const * name) -> double
+        Retrieves the empirical average cost of a given visibility test.  
 
-
-
-        Retrieves the empirical average cost of a given visibility test. 
+        Args:
+            name (str)
+        Returns:
+            (float):
         """
         return _motionplanning.CSpaceInterface_visibilityCost(self, name)
 
 
     def visibilityProbability(self, name):
         """
-        visibilityProbability(CSpaceInterface self, char const * name) -> double
+        Retrieves the empirical average success rate of a given visibility test.  
 
-
-
-        Retrieves the empirical average success rate of a given visibility
-        test. 
+        Args:
+            name (str)
+        Returns:
+            (float):
         """
         return _motionplanning.CSpaceInterface_visibilityProbability(self, name)
 
 
     def feasibilityQueryOrder(self):
         """
-        feasibilityQueryOrder(CSpaceInterface self) -> PyObject *
+        Retrieves the current order of feasibility tests.  
 
-
-
-        Retrieves the current order of feasibility tests. 
+        Returns:
+            (:obj:`object`):
         """
         return _motionplanning.CSpaceInterface_feasibilityQueryOrder(self)
 
 
     def visibilityQueryOrder(self):
         """
-        visibilityQueryOrder(CSpaceInterface self) -> PyObject *
+        Retrieves the current order of visibility tests.  
 
-
-
-        Retrieves the current order of visibility tests. 
+        Returns:
+            (:obj:`object`):
         """
         return _motionplanning.CSpaceInterface_visibilityQueryOrder(self)
 
 
     def getStats(self):
         """
-        getStats(CSpaceInterface self) -> PyObject *
+        Returns constraint testing statistics. If adaptive queries are enabled, this
+        returns the stats on each constraint.  
 
-
-
-        Returns constraint testing statistics. If adaptive queries are
-        enabled, this returns the stats on each constraint. 
+        Returns:
+            (:obj:`object`):
         """
         return _motionplanning.CSpaceInterface_getStats(self)
 
@@ -604,41 +651,41 @@ class PlannerInterface(_object):
     """
 
 
-    An interface for a motion planner. The MotionPlanner interface in
-    cspace.py is somewhat easier to use.
+    An interface for a motion planner. The :class:`MotionPlan` interface in
+    cspace.py is somewhat easier to use.  
 
-    On construction, uses the planner type specified by setPlanType and
-    the settings currently specified by calls to setPlanSetting.
+    On construction, uses the planner type specified by setPlanType and the settings
+    currently specified by calls to setPlanSetting.  
 
-    Point-to-point planning is enabled by sending two configurations to
-    the setEndpoints method. This is mandatory for RRT and SBL-style
-    planners. The start and end milestones are given by indices 0 and 1,
-    respectively
+    Point-to-point planning is enabled by sending two configurations to the
+    setEndpoints method. This is mandatory for RRT and SBL-style planners. The start
+    and end milestones are given by indices 0 and 1, respectively  
 
-    Point-to-set planning is enabled by sending a goal test as the second
-    argument to the setEndpoints method. It is possible also to send a
-    special goal sampler by providing a pair of functions as the second
-    argument consisting of the two functions (goaltest,goalsample). The
-    first in this pair tests whether a configuration is a goal, and the
-    second returns a sampled configuration in a superset of the goal.
-    Ideally the goal sampler generates as many goals as possible.
+    Point-to-set planning is enabled by sending a *goal test* as the second argument
+    to the setEndpoints method. It is possible also to send a special goal sampler
+    by providing a *pair of functions* as the second argument consisting of the two
+    functions (goaltest,goalsample). The first in this pair tests whether a
+    configuration is a goal, and the second returns a sampled configuration in a
+    superset of the goal. Ideally the goal sampler generates as many goals as
+    possible.  
 
-    PRM can be used in either point-to-point or multi-query mode. In
-    multi-query mode, you may call addMilestone(q) to add a new milestone.
-    addMilestone() returns the index of that milestone, which can be used
-    in later calls to getPath().
+    PRM can be used in either point-to-point or multi-query mode. In multi-query
+    mode, you may call addMilestone(q) to add a new milestone. addMilestone()
+    returns the index of that milestone, which can be used in later calls to
+    getPath().  
 
-    To plan, call planMore(iters) until getPath(0,1) returns non-NULL. The
-    return value is a list of configurations.
+    To plan, call planMore(iters) until getPath(0,1) returns non-NULL. The return
+    value is a list of configurations.  
 
-    To get a roadmap (V,E), call getRoadmap(). V is a list of
-    configurations (each configuration is a Python list) and E is a list
-    of edges (each edge is a pair (i,j) indexing into V).
+    To get a roadmap (V,E), call getRoadmap(). V is a list of configurations (each
+    configuration is a Python list) and E is a list of edges (each edge is a pair
+    (i,j) indexing into V).  
 
-    To dump the roadmap to disk, call dump(fn). This saves to a Trivial
-    Graph Format (TGF) format.
+    To dump the roadmap to disk, call dump(fn). This saves to a Trivial Graph Format
+    (TGF) format.  
 
-    C++ includes: motionplanning.h 
+    C++ includes: motionplanning.h
+
     """
 
     __swig_setmethods__ = {}
@@ -648,7 +695,12 @@ class PlannerInterface(_object):
     __repr__ = _swig_repr
 
     def __init__(self, cspace):
-        """__init__(PlannerInterface self, CSpaceInterface cspace) -> PlannerInterface"""
+        """
+        Args:
+            cspace (:class:`~klampt.CSpaceInterface`)
+        Returns:
+            (:obj:`PlannerInterface`):
+        """
         this = _motionplanning.new_PlannerInterface(cspace)
         try:
             self.this.append(this)
@@ -658,60 +710,108 @@ class PlannerInterface(_object):
     __del__ = lambda self: None
 
     def destroy(self):
-        """destroy(PlannerInterface self)"""
+        """
+        """
         return _motionplanning.PlannerInterface_destroy(self)
 
 
     def setEndpoints(self, start, goal):
-        """setEndpoints(PlannerInterface self, PyObject * start, PyObject * goal) -> bool"""
+        """
+        Args:
+            start (:obj:`object`)
+            goal (:obj:`object`)
+        Returns:
+            (bool):
+        """
         return _motionplanning.PlannerInterface_setEndpoints(self, start, goal)
 
 
     def setEndpointSet(self, start, goal, goalSample=None):
         """
-        setEndpointSet(PlannerInterface self, PyObject * start, PyObject * goal, PyObject * goalSample=None) -> bool
-        setEndpointSet(PlannerInterface self, PyObject * start, PyObject * goal) -> bool
+        setEndpointSet (start,goal,goalSample=None): bool
+
+        setEndpointSet (start,goal): bool
+
+
+        Args:
+            start (:obj:`object`): 
+            goal (:obj:`object`): 
+            goalSample (:obj:`object`, optional): default value None
+
+        Returns:
+            (bool):
         """
         return _motionplanning.PlannerInterface_setEndpointSet(self, start, goal, goalSample)
 
 
     def addMilestone(self, milestone):
-        """addMilestone(PlannerInterface self, PyObject * milestone) -> int"""
+        """
+        Args:
+            milestone (:obj:`object`)
+        Returns:
+            (int):
+        """
         return _motionplanning.PlannerInterface_addMilestone(self, milestone)
 
 
     def planMore(self, iterations):
-        """planMore(PlannerInterface self, int iterations)"""
+        """
+        Args:
+            iterations (int)
+        """
         return _motionplanning.PlannerInterface_planMore(self, iterations)
 
 
     def getPathEndpoints(self):
-        """getPathEndpoints(PlannerInterface self) -> PyObject *"""
+        """
+        Returns:
+            (:obj:`object`):
+        """
         return _motionplanning.PlannerInterface_getPathEndpoints(self)
 
 
     def getPath(self, milestone1, milestone2):
-        """getPath(PlannerInterface self, int milestone1, int milestone2) -> PyObject *"""
+        """
+        Args:
+            milestone1 (int)
+            milestone2 (int)
+        Returns:
+            (:obj:`object`):
+        """
         return _motionplanning.PlannerInterface_getPath(self, milestone1, milestone2)
 
 
     def getData(self, setting):
-        """getData(PlannerInterface self, char const * setting) -> double"""
+        """
+        Args:
+            setting (str)
+        Returns:
+            (float):
+        """
         return _motionplanning.PlannerInterface_getData(self, setting)
 
 
     def getStats(self):
-        """getStats(PlannerInterface self) -> PyObject *"""
+        """
+        Returns:
+            (:obj:`object`):
+        """
         return _motionplanning.PlannerInterface_getStats(self)
 
 
     def getRoadmap(self):
-        """getRoadmap(PlannerInterface self) -> PyObject *"""
+        """
+        Returns:
+            (:obj:`object`):
+        """
         return _motionplanning.PlannerInterface_getRoadmap(self)
 
 
     def dump(self, fn):
-        """dump(PlannerInterface self, char const * fn)"""
+        """
+        Args:
+            fn (str)
+        """
         return _motionplanning.PlannerInterface_dump(self, fn)
 
     __swig_setmethods__["index"] = _motionplanning.PlannerInterface_index_set

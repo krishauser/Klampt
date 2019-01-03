@@ -1,13 +1,21 @@
-"""Use the get(), set(), and edit() functions to retrieve / store / edit
+"""Easy I/O with resources stored on disk and visual editing.
+
+Use the :meth:`~klampt.io.resource.get`,
+:meth:`~klampt.io.resource.set`, and
+:meth:`~klampt.io.resource.edit` functions to retrieve / store / edit
 resources dynamically.
 
-load() and save() launch a file browser (Qt only).
+:meth:`~klampt.io.resource.load` and :meth:`~klampt.io.resource.save` launch
+a file browser (available in Qt only).
 
-Use getDirectory() and setDirectory() to set the directory under which
-resources are stored.  Alternatively, the directory=[DIRNAME] keyword
-argument can be provided to get, set, and edit.
+By default, resources are stored in the ``resources/`` subdirectory of the
+current working directory.
+Use :meth:`~klampt.io.resource.getDirectory` and
+:meth:`~klampt.io.resource.setDirectory` to change where resources are
+stored  Alternatively, the ``directory=[DIRNAME]`` keyword
+argument can be provided to get, set, load, and save.
 
-Example usage can be seen in demos/resourcetest.py.
+Example usage can be seen in Klampt-examples/Python/demos/resourcetest.py.
 """
 
 from . import loader
@@ -141,37 +149,38 @@ def get(name,type='auto',directory=None,default=None,doedit='auto',description=N
     shown, and the result from the prompt will be saved to disk under the
     given name.
 
-    Arguments:
-        - name: the resource name.  If type='auto', this is assumed to have
-          a suffix of a file of the desired type.  The name can also be
-          nested of the form 'group/subgroup/name.type'.
-        - type: the resource type, or 'auto' to determine it automatically.
-        - directory: the search directory.  If None, uses the current
-          resource directory.
-        - default: the default value if the resource does not exist on disk.
-          If None, some arbitrary default value will be inferred.
-        - doedit: if 'auto', if the resource does not exist on disk, an
-          edit prompt will be displayed.  If False, an RuntimeError will be
-          raised if the resource does not exist on disk.  If True, the
-          user will be given an edit prompt to optionally edit the resource
-          before this call returns.
-        - description: an optional text description of the resource, for use
-          in the edit prompt.
-        - editor: either 'visual' or 'console', determining whether to use the
-          visual OpenGL or console editor.
-        - world: for a visual editor, this world will be shown along with
-          the item to edit.  If this is a string it points to a file
-          that will be loaded for the world (e.g., a world XML file, or a
-          robot file).
-        - referenceObject: to give visual reference points, one or more RobotModels,
-          ObjectModels, Geometry3D's, or RobotModelLink's may be designated to follow
-          the edited object.  Currently works with Config's / Configs' / Trajectories /
-          rigid transforms / rotations / points.
-        - frame: for rigid transforms / rotations / points, the reference
+    Args:
+        name (str): the resource name.  If type='auto', this is assumed to have
+            a suffix of a file of the desired type.  The name can also be
+            nested of the form 'group/subgroup/name.type'.
+        type (str): the resource type, or 'auto' to determine it automatically.
+        directory (:obj:`str`, optional): the search directory.  If None, uses the current
+            resource directory.
+        default (optional): the default value if the resource does not exist on disk.
+            If None, some arbitrary default value will be inferred.
+        doedit: if 'auto', if the resource does not exist on disk, an
+            edit prompt will be displayed.  If False, an RuntimeError will be
+            raised if the resource does not exist on disk.  If True, the
+            user will be given an edit prompt to optionally edit the resource
+            before this call returns.
+        description (:obj:`str`, optional): an optional text description of the resource, for use
+            in the edit prompt.
+        editor (str): either 'visual' or 'console', determining whether to use the
+            visual OpenGL or console editor.
+        world (:obj:`WorldModel`, optional): for a visual editor, this world will be shown along with
+            the item to edit.  If this is a string it points to a file
+            that will be loaded for the world (e.g., a world XML file, or a
+            robot file).
+        referenceObject (optional): to give visual reference points, one or more RobotModels,
+            ObjectModels, Geometry3D's, or RobotModelLink's may be designated to follow
+            the edited object.  Currently works with Config's / Configs' / Trajectories /
+            rigid transforms / rotations / points.
+        frame (optional): for rigid transforms / rotations / points, the reference
           frame in which the quantity is represented.  This is an element of
           se3, or an ObjectModel, or a RobotModelLink, or a string indicating a
           named rigid element of the world.
-          """
+
+    """
     if name==None:
         if doedit==False:
             raise RuntimeError("Can't get() an anonymous resource without launching editor")
@@ -308,7 +317,10 @@ class FileGetter:
 
 def load(type=None,directory=None):
     """Asks the user to open a resource file of a given type.  If type is not given, all resource file types
-    are given as options.  Returns a (filename,value) pair, or None if the operation was canceled"""
+    are given as options.
+
+    Returns:
+        A (filename,value) pair, or None if the operation was canceled"""
     
     fg = FileGetter('Open resource')
     fg.directory = directory
@@ -343,7 +355,11 @@ def load(type=None,directory=None):
 
 def save(value,type='auto',directory=None):
     """Asks the user to save the given resource to a file of the correct type.  If type='auto', the type
-    is determined automatically.  Returns the selected filename or None on cancellation."""
+    is determined automatically. 
+
+    Returns:
+        The selected filename or None on cancellation.
+    """
     fg = FileGetter('Save resource')
     fg.directory = directory
     if directory==None:
@@ -410,10 +426,15 @@ class _ThumbnailPlugin(vis.VisualizationPlugin):
         return True
 
 def thumbnail(value,size,type='auto',world=None,frame=None):
-    """Retrieves an image of the given item, resized to the given size.  Return value is a PIL Image if
-    PIL is available, or just a raw RGBA memory buffer otherwise.
+    """Retrieves an image of the given item, resized to the given size.
 
-    Tip: can just take a snapshot of a world too."""
+    Note: 
+        This can just take a snapshot of a world too.
+
+    Returns:
+        A PIL Image if PIL is available, or just a raw RGBA memory buffer otherwise.
+
+    """
     global _thumbnail_window
     world = _get_world(world)
     if isinstance(value,WorldModel):
@@ -543,27 +564,41 @@ def console_edit(name,value,type,description=None,world=None,frame=None):
 
 
 def edit(name,value,type='auto',description=None,editor='visual',world=None,referenceObject=None,frame=None):
-    """Launches an editor for the given value.  Returns a pair (save,result)
-    where save indicates what the user wanted to do with the edited value
-    and result is the edited value.
+    """Launches an editor for the given value.
 
-    Arguments:
-    - name: the displayed name of the edited value. Can be None, in which case 'Anonymous' is displayed
-    - value: the value to be edited.  Can be None, in which case 'type' must be specified and a default value
-      is created.
-    - type: the type string of the value to be edited.  Usually can be auto-detected from value.
-    - description: a descriptive string, displayed to the person editing.
-    - editor: either 'visual' or 'console'.  If 'visual', will display a GUI for visually editing the item.
-      If 'console', the user will have to type in the value.
-    - world: either a WorldModel instance or a string specifying a world file. This is necessary for visual
-      editing.
-    - referenceObject: a RobotModel or other object to which the value "refers to".  For configurations and
-      trajectories, this is the object that will be moved by the trajectory.  In the case of a
-      RigidTransform value, this can be an object or a list of objects that will be transformed by the
-      transform.  
-    - frame: for Vector3, Matrix3, Point, Rotation, and RigidTransform types, the returned value will be
-      given relative to this reference frame.  The reference frame can be either an element of se3, an
-      ObjectModel, a RobotModelLink, or a string indicating a named rigid element of the world.
+    Args:
+        name (str): the displayed name of the edited value. Can be None, in
+            which case 'Anonymous' is displayed.
+        value: the value to be edited.  Can be None, in which case 'type'
+            must be specified and a default value is created.
+        type (str): the type string of the value to be edited.  Usually can be
+            auto-detected from value.
+        description (:obj:`str`, optional): a descriptive string, displayed to
+            the person editing.
+        editor (str): either 'visual' or 'console'.  If 'visual', will display
+            a GUI for visually editing the item.
+            If 'console', the user will have to type in the value.
+        world (:obj:`WorldModel` or :obj:`str`, optional): either a WorldModel
+            instance or a string specifying a world file. This is necessary
+            for visual editing.
+        referenceObject (optional): a RobotModel or other object to which the
+            value "refers to".  For configurations and trajectories, this is
+            the object that will be moved by the trajectory.  In the case of a
+            RigidTransform value, this can be an object or a list of objects
+            that will be transformed by the transform.  
+        frame (optional): for Vector3, Matrix3, Point, Rotation, and
+            RigidTransform types, the returned value will be given relative to
+            this reference frame.  The reference frame can be either an element
+            of se3, an ObjectModel, a RobotModelLink, or a string indicating a
+            named rigid element of the world.
+
+    Returns:
+        save, result (tuple):
+
+            * save (bool): True if the user pressed OK, False if Cancel or the
+                close box where chosen.
+            * result: the edited value.
+
     """
     if name == None and type=='auto':
         raise RuntimeError("Cannot do an anonymous edit without the 'type' argument specified")

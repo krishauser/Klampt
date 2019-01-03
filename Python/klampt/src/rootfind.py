@@ -7,7 +7,7 @@
 
 
 
-"""Python interface to KrisLibrary nonlinear, multidimensional root finding routines"""
+"""Python interface to C++ nonlinear, multidimensional root finding routines"""
 
 
 from sys import version_info
@@ -99,7 +99,8 @@ def setFTolerance(tolf):
 
 
 
-    Sets the termination threshold for the change in f. 
+    Sets the termination threshold for the change in f.  
+
     """
     return _rootfind.setFTolerance(tolf)
 
@@ -109,7 +110,8 @@ def setXTolerance(tolx):
 
 
 
-    Sets the termination threshold for the change in x. 
+    Sets the termination threshold for the change in x.  
+
     """
     return _rootfind.setXTolerance(tolx)
 
@@ -119,9 +121,15 @@ def setVectorField(pVFObj):
 
 
 
-    Sets the vector field object, returns 0 if pVFObj = NULL, 1 otherwise.
-    See vectorfield.py for an abstract base class that can be overridden
-    to produce one of these objects. 
+    Sets the vector field object.  
+
+    Returns:  
+
+        status (int): 0 if pVFObj = NULL, 1 otherwise.  
+
+    See vectorfield.py for an abstract base class that can be overridden to produce
+    one of these objects.  
+
     """
     return _rootfind.setVectorField(pVFObj)
 
@@ -131,19 +139,22 @@ def findRoots(startVals, iter):
 
 
 
-    Performs unconstrained root finding for up to iter iterations Return
-    values is a tuple indicating: (0,x,n) : convergence reached in x
+    Performs unconstrained root finding for up to iter iterations  
 
-    (1,x,n) : convergence reached in f
+    Returns:  
 
-    (2,x,n) : divergence
+        status,x,n (tuple of int, list of floats, int): where status indicates
+            the return code, as follows:
 
-    (3,x,n) : degeneration of gradient (local extremum or saddle point)
+                - 0: convergence reached in x
+                - 1: convergence reached in f
+                - 2: divergence
+                - 3: degeneration of gradient (local extremum or saddle point)
+                - 4: maximum iterations reached
+                - 5: numerical error occurred
 
-    (4,x,n) : maximum iterations reached
+            and x is the final point and n is the number of iterations used  
 
-    (5,x,n) : numerical error occurred where x is the final point and n is
-    the number of iterations used 
     """
     return _rootfind.findRoots(startVals, iter)
 
@@ -153,7 +164,8 @@ def findRootsBounded(startVals, boundVals, iter):
 
 
 
-    Same as findRoots, but with given bounds (xmin,xmax) 
+    Same as findRoots, but with given bounds (xmin,xmax)  
+
     """
     return _rootfind.findRootsBounded(startVals, boundVals, iter)
 
@@ -163,9 +175,8 @@ def destroy():
 
 
 
-    destroys internal data structures
+    destroys internal data structures  
 
-    destroys internal data structures 
     """
     return _rootfind.destroy()
 # This file is compatible with both classic and new-style classes.
