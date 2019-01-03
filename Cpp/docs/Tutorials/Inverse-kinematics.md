@@ -8,7 +8,7 @@ Difficulty: intermediate
 
 Time: 15-30 minutes
 
-This tutorial assumes you have already completed the C++  [simulation tutorial](Documentation/Tutorials/Run-a-simulation-Cpp.md)  and know how to compile a new project that includes Klamp't.
+This tutorial assumes you have already completed the C++  [simulation tutorial](Run-a-simulation-Cpp.md)  and know how to compile a new project that includes Klamp't.
 
 An IK problem is specified as an array of IKGoal structures, which define a constraint for the robot in Cartesian space. Given a problem, you will then run a solver to hopefully find a constraint-solving configuration. This functionality is in the IK.h and IKFunctions.h files in the KrisLibrary/robotics package, and it would be helpful to keep them open for reference during this tutorial.
 
@@ -68,18 +68,25 @@ Compile and run the program, and after some setup code you should get a printout
   printf("Final position: %g %g %g\n",wp.x,wp.y,wp.z);
   printf("Final error: %g\n",RobotIKError(robot,goal));
 ```
+
 If you compile again, you'll get some printouts giving the progress of the solver and the Newton-Raphson root finder.
 ```
-SolveIK(tol=0.001000,iters=100): NewtonRoot::GlobalSolve(): Reached convergence on f, new distance 0.000426152 Succeeded! 0.001658 seconds Success solving IK problem, 7 iterations used Final configuration: 7 0 -0.0424954 0.877663 -0.855769 0.106637 0.149797 0 Final position: 1.09957 1.55775e-05 0.699731 Final error: 0.000426152
+SolveIK(tol=0.001000,iters=100):
+NewtonRoot::GlobalSolve(): Reached convergence on f, new distance 0.000426152
+Succeeded! 0.001658 seconds
+Success solving IK problem, 7 iterations used
+Final configuration: 7 0 -0.0424954 0.877663 -0.855769 0.106637 0.149797 0
+Final position: 1.09957 1.55775e-05 0.699731
+Final error: 0.000426152
 ```
+
 The Final configuration item gives you the robot's configuration that meets the constraints. If you copy this line, starting with the 7, to a file with the .config extension, say "ik.config" it can be loaded into the RobotPose app to visually examine the result:
 ```
 ./RobotPose data/robots/tx90ball.rob [MY_APP_PATH]/ik.config
 ```
-<p align="center">
-<img src="http://motion.pratt.duke.edu/klampt/tutorials/ik1.jpg"
-width="75%" height="75%">
-</p>
+
+![The IK goal is reached](images/ik1.jpg)
+
 Let's now return to your program source code. You can play with the parameters tolerance, iters, and verbose, which control the behavior of the solver. The tolerance parameter defines how closely the constraint must be met before termination, and you can try setting this to a smaller value, say 1e-6. The iterations parameter defines the maximum number of iterations used before the solver quits with failure, and you can try setting this to something like 5. You can also try setting verbose=0 so that no output is generated inside the solver.
 ### Fixed rotation constraints
 
@@ -103,20 +110,26 @@ We'll start with a simple example that tries to keep the end effector link in th
 ```
 If you recompile and run, you'll see output like the following:
 ```
-Initial position: 0.0257 0.05 1.6682 Initial error: 1.0743 NewtonRoot::GlobalSolve(): Max iters reached, distance was decreased to 0.0251648 Failed solving IK problem Final configuration: 7 0 -0.0446806 1.49406 0.00197358 -0.000634665 1.4891 0.0436836 Final position: 1.07484 0.000976157 0.698171 Final error: 0.0251648
+Initial position: 0.0257 0.05 1.6682
+Initial error: 1.0743
+NewtonRoot::GlobalSolve(): Max iters reached, distance was decreased to 0.0251648
+Failed solving IK problem
+Final configuration: 7 0 -0.0446806 1.49406 0.00197358 -0.000634665 1.4891 0.0436836
+Final position: 1.07484 0.000976157 0.698171
+Final error: 0.0251648
 ```
+
 It looks like the robot is unable to satisfy the constraint! If we inspect the configuration using RobotPose:
 ```
-./RobotPose data/robots/tx90ball.rob [MY_APP_PATH]/ik.config
+bin/RobotPose data/robots/tx90ball.rob [MY_APP_PATH]/ik.config
 ```
 we see that the ball at the end of the robot's arm is upright, which is what the orientation constraint is trying to achieve. However, it looks like the target position is just a tad out of the robot's reach.
-<p align="center">
-<img src="http://motion.pratt.duke.edu/klampt/tutorials/ik2.jpg"
-width="75%" height="75%">
-</p>
+
+![The IK goal is out of reach](images/ik2.jpg)
+
 Now if we change the endPosition variable to be (1.0,0,0.7) and re-run the program, you'll see that the IK solver is successful. We'll talk a bit about this in the next section
 
-_Aside:_If you do not express orientation constraints in 3x3 matrix form, then you'll be happy to know that Klamp't has robust routines for converting all major rotation representations to and from 3x3 matrices. The file KrisLibrary/math3d/rotation.h contains definitions for  [Euler angle](http://motion.pratt.duke.edu/klampt/krislibrary_docs/classMath3D_1_1EulerAngleRotation.html),  [quaternions](http://motion.pratt.duke.edu/klampt/krislibrary_docs/classMath3D_1_1QuaternionRotation.html),  [axis-angle](http://motion.pratt.duke.edu/klampt/krislibrary_docs/classMath3D_1_1AngleAxisRotation.html), and  [moment](http://motion.pratt.duke.edu/klampt/krislibrary_docs/classMath3D_1_1MomentRotation.html)  (a.k.a. exponential map) representations. Each of these classes can be converted quickly to and from 3x3 matrices using the getMatrix and setMatrix methods.
+_Aside:_ If you do not express orientation constraints in 3x3 matrix form, then you'll be happy to know that Klamp't has robust routines for converting all major rotation representations to and from 3x3 matrices. The file KrisLibrary/math3d/rotation.h contains definitions for  [Euler angle](http://klampt.org/krislibrary_docs/classMath3D_1_1EulerAngleRotation.html),  [quaternions](http://klampt.org/krislibrary_docs/classMath3D_1_1QuaternionRotation.html),  [axis-angle](http://klampt.org/krislibrary_docs/classMath3D_1_1AngleAxisRotation.html), and  [moment](http://klampt.org/krislibrary_docs/classMath3D_1_1MomentRotation.html)  (a.k.a. exponential map) representations. Each of these classes can be converted quickly to and from 3x3 matrices using the getMatrix and setMatrix methods.
 
 ### Failures and global optimization
 
@@ -154,7 +167,7 @@ An important note is that the order of points matters, because localpos[0] will 
 
 ### More...
 
-This just scratches the surface of what you can do with IK constraints. You can constrain a link to another link using the "target" index, set up sliding constraints, and axial rotation constraints. You can also constrain the robot's center of mass to lie at or above a certain point. For help with these items please consult the API documentation for  [IKGoal](http://motion.pratt.duke.edu/klampt/krislibrary_docs/structIKGoal.html)  and  [RobotIKFunction](http://motion.pratt.duke.edu/klampt/krislibrary_docs/structRobotIKFunction.html).
+This just scratches the surface of what you can do with IK constraints. You can constrain a link to another link using the "target" index, set up sliding constraints, and axial rotation constraints. You can also constrain the robot's center of mass to lie at or above a certain point. For help with these items please consult the API documentation for  [IKGoal](http://klampt.org/krislibrary_docs/structIKGoal.html)  and  [RobotIKFunction](http://klampt.org/krislibrary_docs/structRobotIKFunction.html).
 
 
 

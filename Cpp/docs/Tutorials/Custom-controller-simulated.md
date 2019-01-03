@@ -1,8 +1,6 @@
-
-
 # Klamp't Tutorial: Implement a custom controller for a simulated robot in C++
 
-In this tutorial we learn how to connect a user-defined controller to a Klamp't simulation. C++, and [Python controller](Documentation/Tutorials/Custom-controller-simulated-Python.md) support low-level PID commands or torques sent to the robot's motors. The C++ and Python APIs also support point-to-point motions and joint trajectories.
+In this tutorial we learn how to connect a user-defined controller to a Klamp't simulation. Simulated Klampt robots supports low-level PID commands or torques sent to the robot's motors, as well as point-to-point motions and joint trajectories.
 
 Difficulty: intermediate
 
@@ -119,8 +117,7 @@ Next, navigate to the main Klampt directory and recompile Klamp't and SimTest vi
 make SimTest
 ```
 This will also build the Klamp't library and will make your controller available for use in any programs that use Klamp't.
-<p align="center">
-<img src="https://raw.githubusercontent.com/ShihaoWang/Figures/master/Custom-controller-Cpp1.JPG"
-width="75%" height="75%">
-</p>
+
+![Example of C++ controller in simulation](custom_controller.jpg)
+
 This is only the beginning; there are an infinite number of ways to implement a controller, ranging from simple to highly complex behaviors. For example, for point-to-point motions or motions through multiple keyframes, you may subclass the PolynomialPathController class and use its motion queuing functionality. You are only limited by your imagination!

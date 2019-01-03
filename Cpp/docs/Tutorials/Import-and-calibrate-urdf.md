@@ -19,10 +19,9 @@ We can try loading this file using:
 ```
 ./RobotTest ../baxter_common/baxter_description/urdf/baxter.urdf
 ```
-<p align="center">
-<img src="http://motion.pratt.duke.edu/klampt/tutorials/import1.jpg"
-width="75%" height="75%">
-</p>
+
+![Image](images/import1.jpg)
+
 First, let's look at the output of the importer on the command line. You should see some lines similar to
 
 ```
@@ -34,32 +33,29 @@ This is because the URDF is referring to files in ROS packages in the "package:/
   <klampt package_root="../.." />
 ```
 Running RobotTest again, we get the following result:
-<p align="center">
-<img src="http://motion.pratt.duke.edu/klampt/tutorials/import2.jpg"
-width="75%" height="75%">
-</p>
+
+![Image](images/import2.jpg)
+
 Yuck! Something strange happened to the robot's meshes. This is relatively common due to a flipping in the Y-Z coordinates, since some modeling packages consider Y to be up, while others consider Z to be up. We can fix this by enabling the flip_yz XML attribute to the klampt tag:
 ```
   <klampt package_root="../.." flip_yz="1"/>
 ```
-<p align="center">
-<img src="http://motion.pratt.duke.edu/klampt/tutorials/import3.jpg"
-width="75%" height="75%">
-</p>
+
+![Image](images/import3.jpg)
+
 Much better! However, rather than seeing the real geometry of the robot, we just see some floating cylinders and spheres. This is because Klamp't is only loading the  _collision geometry_of the URDF file. Klamp't does not distinguish between collision and visualization geometry, so you will have to pick which type of geometry you wish to use. To switch to visualization geometry, we'll enable the use_vis_geom attribute in the klampt XML tag
 ```
   <klampt package_root="../.." flip_yz="1" use_vis_geom="1"  />
 ```
-<p align="center">
-<img src="http://motion.pratt.duke.edu/klampt/tutorials/import4.jpg"
-width="75%" height="75%">
-</p>
+
+![Image](images/import4.jpg)
+
 Very nice!
 
 ### Simulation and Non-Physical Links
 Now if we were to simulate this robot in SimTest, we'd find that the robot goes unstable almost instantly. Try:
 ```
-./SimTest ../baxter_common/baxter_description/urdf/baxter.urdf
+bin/SimTest ../baxter_common/baxter_description/urdf/baxter.urdf
 ```
 and watch it blow up!
 This problem occurs primarily because the URDF file contains many non-physical links with very small mass, which are unstable when connecting larger links (in particular, the X_arm_mount links are the culprit here). You should set these to non-physical links (or set their masses to 0) so that they are not simulated.
@@ -138,9 +134,9 @@ Let's place our Baxter robot on a floor so that it stands up rather than falling
   <robot name="Baxter" file="../baxter_common/baxter_description/urdf/baxter.urdf" translation="0 0 0.94"/>
   <terrain file="terrains/plane.tri" />
 ```
-Now try simulating a path. We'll use one that comes with Klamp't:
+Now try simulating a path. We'll use one that comes with Klampt-examples:
 ```
-./SimTest baxter_plane.xml -path Examples/MotorCalibrateBaxter/baxter-ref.path
+bin/SimTest baxter_plane.xml -path Klampt-examples/Cpp/MotorCalibrateBaxter/baxter-ref.path
 ```
 Turn off the Poser checkbox and check the Desired checkbox. Run the simulation, and notice that the arms are rather floppy and do not track the desired configuration very well. This is because the default values of the robot's PID controller (kP=100, kI=0, kD=10) and the friction characteristics of the joints (dryFriction=0, viscousFriction=0) are not tuned.
 
@@ -152,7 +148,7 @@ Manual tuning can be done by changing these constants by hand under the klampt U
 
 An easier method is to use the MotorCalibrate program. This program gives the ability to calibrate the robot's motor parameters given a dataset of commanded and sensed joint-space motions on the physical robot. Here we'll tune Baxter using some motions already included with Klamp't.
 
-First, examine the motions in Klampt/Examples/MotorCalibrateBaxter. Run:
+First, examine the motions in Klampt-examples/Cpp/MotorCalibrateBaxter. Run:
 ```
 ./RobotPose ../baxter_common/baxter_description/urdf/baxter.urdf Examples/MotorCalibrateBaxter/*.path
 ```
@@ -163,25 +159,21 @@ Let's start calibrating. Run:
 ./MotorCalibrate
 ```
 and you'll see the following dialog box.
-<p align="center">
-<img src="http://motion.pratt.duke.edu/klampt/tutorials/import5.jpg"
-width="50%" height="50%">
-</p>
+
+![Image](images/import5.jpg)
+
 Click on the "Load" button at the top right, and select the baxter.urdf file. The links and drivers lists will be populated with the items in the robot file.
-<p align="center">
-<img src="http://motion.pratt.duke.edu/klampt/tutorials/import6.jpg"
-width="50%" height="50%">
-</p>
+
+![Image](images/import6.jpg)
+
 Since the robot is a floating-base robot, we'll need to indicate that the robot's base is actually securely fixed when executing those motions. Drag the "pedestal" item from the "Free Links" list over to the "Fixed Links" list. We'll also indicate which motors to calibrate. Drag all of the items except for "head" from the "Unestimated Drivers" to the "Estimated Drivers" list. Your screen should look like this:
-<p align="center">
-<img src="http://motion.pratt.duke.edu/klampt/tutorials/import7.jpg"
-width="50%" height="50%">
-</p>
-Now we'll indicate the command-sensed path pair which the calibrator will try to match. Click "Add" and navigate to the  _commanded path_, Klampt/Examples/MotorCalibrateBaxter/baxter-ref.path. A new dialog will pop up, prompting to select the corresponding sensed path. Navigate to Klampt/Examples/MotorCalibrateBaxter/baxter-sensed.path. Your final screen should look like this:
-<p align="center">
-<img src="http://motion.pratt.duke.edu/klampt/tutorials/import8.jpg"
-width="50%" height="50%">
-</p>
+
+![Image](images/import7.jpg)
+
+Now we'll indicate the command-sensed path pair which the calibrator will try to match. Click "Add" and navigate to the  _commanded path_, Klampt-examples/Cpp/MotorCalibrateBaxter/baxter-ref.path. A new dialog will pop up, prompting to select the corresponding sensed path. Navigate to Klampt-examples/Cpp/MotorCalibrateBaxter/baxter-sensed.path. Your final screen should look like this:
+
+![Image](images/import8.jpg)
+
 Now click "Calibrate" and wait for a few minutes (about 10 minutes). When calibration is complete, you can examine the printout for the final root-mean-squared distance (RMSD) between the simulated execution and the sensed path (in radians). You will also get a set of XML lines that should be copied and pasted under the <klampt> element in the URDF file. Copy those lines to baxter.urdf now.
 
 Try simulating again with the new
@@ -193,12 +185,12 @@ _Note_: To do this for your own robot, you will need to gather both the commande
 ## Conversion to .rob files
 You can also convert the URDF file to a native Klamp't .rob file using the URDFtoRob utility. This avoids the verbose output of the URDF converter when loading a robot file. Running
 ```
-./URDFtoRob
+bin/URDFtoRob
 ```
 will prompt you to set up the file for importing and exporting. By default, the .rob file and link geometries will be exported to .tri files in the same directory as the URDF file.
 
 You can also simply run:
 ```
-./URDFtoRob ../baxter_common/baxter_description/urdf/baxter.urdf
+bin/URDFtoRob ../baxter_common/baxter_description/urdf/baxter.urdf
 ```
 To change the command-line importer settings, you can then move urdftorob_default.settings to urdftorob.settings and edit the values therein as needed.

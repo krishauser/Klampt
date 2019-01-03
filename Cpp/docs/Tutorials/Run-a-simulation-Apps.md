@@ -1,5 +1,6 @@
 # Klamp't Tutorial: Run a simulation with Apps
-In this tutorial we learn how to run a simulation, interact with the simulated robot via the poser, and to simulate paths and trajectories. It is assumed that you have already successfully Install Klampt ([Linux](https://github.com/krishauser/Klampt/blob/master/Documentation/Tutorials/Install-Linux.md),  [Windows](https://github.com/krishauser/Klampt/blob/master/Documentation/Tutorials/Install-Windows.md),  [Mac](https://github.com/krishauser/Klampt/blob/master/Documentation/Tutorials/Install-Mac.md))
+
+In this tutorial we learn how to run a simulation, interact with the simulated robot via the poser, and to simulate paths and trajectories. It is assumed that you have already successfully installed Klampt.
 
 Difficulty: easy
 
@@ -17,62 +18,53 @@ Here data/athlete_plane.xml is an example of a  _world file_. World files are si
 You can also just run SimTest and it will prompt you to choose a world file (unless you compiled without Qt support).
 
 If all goes well you should see a screen like this:
-<p align="center">
-<img src="http://motion.pratt.duke.edu/klampt/tutorials/simulation1.jpg"
-width="75%" height="75%">
-</p>
+
+![Image](images/simulation1.jpg)
+
 Click and drag on the world with the left mouse button, and observe the view rotating:
-<p align="center">
-<img src="http://motion.pratt.duke.edu/klampt/tutorials/simulation2.jpg"
-width="75%" height="75%">
-</p>
+
+![Image](images/simulation2.jpg)
+
 Now hold the Shift key and drag up and down with the left mouse button. The view zooms:
-<p align="center">
-<img src="http://motion.pratt.duke.edu/klampt/tutorials/simulation3.jpg"
-width="75%" height="75%">
-</p>
+
+![Image](images/simulation3.jpg)
+
 Now click on the Play button (green arrow). As the robot hits the ground you should see the orange arrows at the feet briefly extend sharply upward, and then quickly settle into a stable distribution:
-<p align="center">
-<img src="http://motion.pratt.duke.edu/klampt/tutorials/simulation4.jpg"
-width="75%" height="75%">
-</p>
+
+![Image](images/simulation4.jpg)
+
 
 ### Using the poser
 
 Go ahead and navigate around the simulation, holding Shift to zoom and Control to pan. Zoom in on one of the legs of the robot, and click and drag it up and down with the  _right_  mouse button. You will see a ghosted yellow robot move its leg to another pose. This is the  _poser_. The grey robot doesn't move... yet.
-<p align="center">
-<img src="http://motion.pratt.duke.edu/klampt/tutorials/simulation6.jpg"
-width="75%" height="75%">
-</p>
+
+![Image](images/simulation6.jpg)
+
 Now click on the red spring icon to turn on  _force application mode_. Right click and drag on the free limb, and watch the robot get pulled around:
-<p align="center">
-<img src="http://motion.pratt.duke.edu/klampt/tutorials/simulation7.jpg"
-width="75%" height="75%">
-</p>
+
+![Image](images/simulation7.jpg)
+
 Let the robot settle down, and then pause the simulation with the Pause button (the two grey vertical bars). Switch back to the hand icon, and try right-clicking the center of the 3D posing widget and dragging it around. Note that the poser configuration moves around freely in space.
-<p align="center">
-<img src="http://motion.pratt.duke.edu/klampt/tutorials/simulation8.jpg"
-width="75%" height="75%">
-</p>
+
+![Image](images/simulation8.jpg)
+
 What happens when you start simulating again?
 
 Nothing! This is because a legged robot is unable to freely move its base without properly applying forces to the environment. This needs to be done via a coordinated motion of all the legs. Let's try this now.
 
 Navigate so that all five legs in contact are in view. Then, click the IK button to bring up Inverse Kinematics Posing Mode. Click on the circle with the cross in the middle, and then right click on all of the legs on the ground. This will freeze the poser's legs in place as the rest of the body is moved.
-<p align="center">
-<img src="http://motion.pratt.duke.edu/klampt/tutorials/simulation9.jpg"
-width="75%" height="75%">
-</p>
+
+![Image](images/simulation9.jpg)
+
 Now switch to the plain cross, and right-drag on the free limb. This adds a point constraint to the free limb and you can see the body of the robot move to try and maintain the fixed feet constraints.
-<p align="center">
-<img src="http://motion.pratt.duke.edu/klampt/tutorials/simulation10.jpg"
-width="75%" height="75%">
-</p>
+
+![Image](images/simulation10.jpg)
+
 Press "Goto" and watch the robot move to the desired configuration.
-<p align="center">
-<img src="http://motion.pratt.duke.edu/klampt/tutorials/simulation11.jpg"
-width="75%" height="75%">
-</p>[Note: you may delete previously added IK constraints by choosing the red X and right-clicking on the constraints you wish to discard.]
+
+![Image](images/simulation11.jpg)
+
+[Note: you may delete previously added IK constraints by choosing the red X and right-clicking on the constraints you wish to discard.]
 
 You're all done! You may continue to play with the poser or continue to the tutorial below on simulating paths.
 
@@ -110,10 +102,9 @@ Now run the following command:
 ./SimTest data/athlete_plane.xml -milestones data/motions/athlete_flex.milestones
 ```
 Using the Display checkboxes, uncheck Poser and check Desired. Now press play. You will see a transparent green robot, which shows the commanded configuration. It almost entirely overlaps the grey robot, but not entirely. Watch the motion play with a smooth interpolation between the milestones.
-<p align="center">
-<img src="http://motion.pratt.duke.edu/klampt/tutorials/simulation12.jpg"
-width="75%" height="75%">
-</p>
+
+![Image](images/simulation12.jpg)
+
 Now we'll run a time-parameterized trajectory. Run the following command
 
 ```
@@ -133,16 +124,18 @@ Note that although we made the path faster, it's certainly not as smooth as the 
 
 _Important note: no blending is performed between the robot's start configuration and the start of a linear path._So if the path does not start at the robot's start configuration, then the commanded configuration will jump at the beginning of execution. In summary,  _linear paths assume that you know what you're doing_.
 
-If you are only interested in fixed-base robots or working with robots' arms, feel free to stop here or move on to the  [Trajectory Tutorial](Documentation/Trajectory_keyframes.md)  to learn about how you can generate and optimize trajectories. However, if you are interested in legged robots or dexterous manipulation, be sure to read on...
+If you are only interested in fixed-base robots or working with robots' arms, feel free to stop here or move on to the  [Trajectory Tutorial](Trajectory_keyframes.md)  to learn about how you can generate and optimize trajectories. However, if you are interested in legged robots or dexterous manipulation, be sure to read on...
+
+
+
 ### Paths and trajectories with contact
 
 In both of the prior examples, observe that although the start, middle, and end milestones have the same feet positions, the feet move in and out while the robot interpolates between those configurations. This is because the milestones are interpolated in configuration space, without knowing that the feet are supposed stay still. This is quite bad! Not only is the contact being broken, but the robot needs to exert strong forces to maintain the desired configurations (Observe that during simulation, the friction forces point inward and outward to resist the sliding.)
 
 We have provided an example joint space trajectory that has been generated at a finer resolution. Load the simulation with the file data/motions/athlete_flex_opt.path. Although the motion is still interpolated in configuration space, the finer resolution keeps the feet more stationary, which causes less strain on the robot, as seen here.
-<p align="center">
-<img src="http://motion.pratt.duke.edu/klampt/tutorials/simulation13.jpg"
-width="75%" height="75%">
-</p>
+
+![Image](images/simulation13.jpg)
+
 
 SimTest can also generate such trajectories automatically with a third motion type: is a  _Multi Path_. A MultiPath specifies the constraints on a robot, and can even specify motions that make and break contact. Open up data/motions/athlete_flex.xml in a text editor. You will see an XML file that contains a set of `<ikgoal>` elements. These are the foot positioning constraints. (Disregard exactly what the text means for now; it's easier to edit these in a GUI.) You will also see a list of milestones, which have a time and a configuration. So essentially, this encodes a linear path plus foot constraints.
 
@@ -150,4 +143,6 @@ If you now load data/motions/athlete_flex.xml, you will now see a bunch of lines
 
 Simulate the path and observe that the foot constraints are indeed kept fixed.
 
-That's it! If you would like to know more about paths, trajectories, and trajectory optimization, you may want to complete the  [Trajectory Tutorial](Documentation/Trajectory_keyframes.md). You can also play around with the SimTest logging facilities to analyze the results of your motion. Or, proceed to the following sections to learn how to execute simulations programmatically using the Klamp't API.
+That's it! If you would like to know more about paths, trajectories, and trajectory optimization, you may want to complete the  [Trajectory Tutorial](Trajectory_keyframes.md). You can also play around with the SimTest logging facilities to analyze the results of your motion. Or, proceed to the following sections 
+to learn how to execute simulations programmatically using the Klamp't API.
+

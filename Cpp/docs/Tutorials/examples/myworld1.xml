@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?> 
+<world> 
+    <!-- the robot --> 
+    <robot name="TX90L-pr2" file="../../../../Klampt-examples/data/robots/tx90pr2.rob" /> 
+    <!-- the ground plane --> 
+    <terrain file="../../../../Klampt-examples/data/terrains/block.off" /> 
+</world>
