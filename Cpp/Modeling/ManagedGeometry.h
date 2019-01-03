@@ -28,6 +28,11 @@ class GeometryManager;
  * Note: geometries are not shared, but rather cached-and-copied.  Appearances
  * on the other hand are by default shared. To make an object have its own
  * custom appearance, call SetUniqueAppearance().
+ *
+ * Note: the Load / LoadNoCache functions can also accept strings of the form
+ * "ros://[ROS_TOPIC]" or "ros:PointCloud2//[ROS_TOPIC]" to load dynamic 
+ * point clouds from ROS topics.  Only PointCloud2 messages are accepted for
+ * now.
  */
 class ManagedGeometry
 {
