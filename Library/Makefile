@@ -27,11 +27,16 @@ dep-KrisLibrary:
 dep-tinyxml:
 	cd tinyxml; make lib
 
+ifeq ($(UNAME), Darwin)
+dep-glew:
+	echo "skipping glew for Mac build"
+else
 dep-glew:
 	cd glew-2.0.0; make
 	cd glew-2.0.0; sudo make install
 	echo "/usr/lib64" | sudo tee /etc/ld.so.conf.d/GLEW.conf
 	sudo ldconfig
+endif
 
 ifeq ($(UNAME), Darwin)
 dep-glui:
